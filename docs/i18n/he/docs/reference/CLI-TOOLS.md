@@ -10,8 +10,8 @@ OmniRoute משתלב עם שלוש קטגוריות של כלי CLI, הפרוס�
 
 | דף            | נתיב                    | עיקרון                                                              | כמות      |
 | ------------- | ----------------------- | ------------------------------------------------------------------- | --------- |
-| **קוד CLI**   | `/dashboard/cli-code`   | כלי פיתוח שמופנים אל OmniRoute (לקוח ← CLI ← OmniRoute ← ספק)       | 26        |
-| **סוכני CLI** | `/dashboard/cli-agents` | סוכנים אוטונומיים שמופנים אל OmniRoute (אותה זרימה, היקף רחב יותר)  | 10        |
+| **קוד CLI**   | `/dashboard/cli-code`   | כלי פיתוח שמופנים אל OmniRoute (לקוח ← CLI ← OmniRoute ← ספק)       | 27        |
+| **סוכני CLI** | `/dashboard/cli-agents` | סוכנים אוטונומיים שמופנים אל OmniRoute (אותה זרימה, היקף רחב יותר)  | 11        |
 | **סוכני ACP** | `/dashboard/acp-agents` | כלי CLI ש-OmniRoute מפעיל כצד אחורי באמצעות stdio/ACP (זרימה הפוכה) | ראו רישום |
 
 נתיבים ישנים מופנים מחדש באמצעות 308: `/dashboard/cli-tools` ← `/dashboard/cli-code`,‏ `/dashboard/agents` ← `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 כל אחת מהפקודות מקבלת את `--remote <url> --api-key <key>` (להגדרת כלי מקומי מול
 OmniRoute מרוחק), את `--dry-run` (תצוגה מקדימה ללא כתיבה) ואת `--port`. כלים
-ללא גילוי אוטומטי של מודלים (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) מקבלים
+ללא גילוי אוטומטי של מודלים (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) מקבלים
 את `--model <id>` (וכן `--yes` להרצות לא־אינטראקטיביות). הפקודה `setup-5dive` היא
 המתכון היחיד שאינו כותב תחת `$HOME`: היא מגדירה מערך סוכני 5dive באמצעות
 כתיבת פרופיל אימות בבעלות root במארח המערך, ולכן היא מפעילה את עצמה מחדש דרך `sudo`
 ואין לה מצב מרוחק משלה. כדי להפעיל CLI עם משתני הסביבה
 המתאימים מוזרקים, מבלי לכתוב תצורה כלל, השתמשו במפעיל הכללי
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — היעדים והכינויים מגיעים מ־`bin/cli/cli-manifest.mjs`); המפעילים
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — היעדים והכינויים מגיעים מ־`bin/cli/cli-manifest.mjs`); המפעילים
 הוותיקים הייעודיים לכל כלי, `omniroute launch` (Claude Code) ו־`omniroute launch-codex`
 (Codex), עדיין זמינים. Gemini CLI זמין להפעלה בלבד: הוא יעד של `omniroute run`,
 אך אין לו מתכון `setup-*`/`configure`.
@@ -182,7 +183,7 @@ kilo, continue)—גם `hostSetupCommand` (לדוגמה, `omniroute setup-openco
 כלים עם `baseUrlSupport: "partial"` מציגים תג "⚠ כתובת URL בסיסית חלקית" בכרטיס שבלוח הבקרה.
 ---
 
-## 2. קטלוג סוכני CLI (10 כלים)
+## 2. קטלוג סוכני CLI (11 כלים)
 
 סוכנים אוטונומיים המופיעים ב-`/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ kilo, continue)—גם `hostSetupCommand` (לדוגמה, `omniroute setup-openco
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

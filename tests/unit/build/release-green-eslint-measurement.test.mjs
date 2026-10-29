@@ -16,6 +16,8 @@ import { load as parseYaml } from "js-yaml";
 
 const root = fileURLToPath(new URL("../../../", import.meta.url));
 const report = [{ filePath: "/repo/source.ts", errorCount: 0, warningCount: 2 }];
+const sha = "1".repeat(40);
+const baseSha = "2".repeat(40);
 
 function fixture(run) {
   mkdirSync(join(root, "_artifacts"), { recursive: true });
@@ -24,6 +26,8 @@ function fixture(run) {
     for (const path of [
       "config/quality",
       "scripts/quality",
+      "scripts/i18n",
+      "scripts/check",
       "bin",
       ".artifacts",
       "node_modules/.bin",
@@ -38,6 +42,13 @@ function fixture(run) {
     ]) {
       const source = join(root, "scripts/quality", name);
       if (existsSync(source)) copyFileSync(source, join(dir, "scripts/quality", name));
+    }
+    // The real static-profile module imports this two-file comparison closure.
+    for (const path of [
+      "scripts/i18n/resolve-ui-diff-base.mjs",
+      "scripts/check/openapiBaseline.mjs",
+    ]) {
+      copyFileSync(join(root, path), join(dir, path));
     }
     const lookup = join(root, "scripts/i18n/message-lookup.mjs");
     if (existsSync(lookup)) {
@@ -193,7 +204,10 @@ function observe(lintOutput, lintCode = 0, collectionCode = 0) {
     );
     const stalePath = join(dir, ".artifacts/eslint-results.json");
     writeFileSync(stalePath, JSON.stringify([{ ...report[0], warningCount: 999 }]));
-    executable("bin/git", `console.log("${"1".repeat(40)}");`);
+    executable(
+      "bin/git",
+      `console.log(process.argv.at(-1) === "${baseSha}^{commit}" ? "${baseSha}" : "${sha}");`
+    );
     executable("bin/npx", `console.log(${JSON.stringify(lintOutput)}); process.exit(${lintCode});`);
     executable(
       "bin/npm",
@@ -217,6 +231,12 @@ function observe(lintOutput, lintCode = 0, collectionCode = 0) {
     const result = execute("validate-release-green.mjs", ["--quick", "--full-ci", "--json"], {
       PATH: join(dir, "bin"),
       ESLINT_RESULTS_JSON: stalePath,
+      // Pin a valid synthetic comparison; ambient Actions events are unrelated to this fixture.
+      I18N_BASE_SHA: baseSha,
+      I18N_BASE_TIP_SHA: baseSha,
+      I18N_CANDIDATE_SHA: sha,
+      I18N_COMPARISON_SOURCE: "fixture:eslint-measurement",
+      I18N_COMPARISON_SCOPE: "candidate",
     });
     assert.equal(result.error, undefined);
     return {

@@ -664,6 +664,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **الترقيات:** توقّع انقطاع كل جلسة. أخلِ العملاء إن استطعت؛ لا يتوفر تحديث متدرج مع SQLite الافتراضية. كما أن إعداد Compose بالقيمة `restart: unless-stopped` مع `HEALTHCHECK` في Docker سيستبدل العملية الوحيدة عندما تصبح الحاوية Unhealthy — وبنطاق التأثير نفسه.
 
+تتوفر ملفات بيان جاهزة ومخطط Helm في `deploy/kubernetes/` و`deploy/helm/omniroute/` — راجع [دليل النشر على Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 مقتطف Kubernetes خاص **بنسخة واحدة** (يلزم استخدام Recreate؛ لا ترفع قيمة `replicas` مع ملف SQLite واحد):
 
 ```yaml

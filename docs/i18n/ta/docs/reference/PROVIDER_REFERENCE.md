@@ -8,7 +8,7 @@
 > இதைப் பயன்படுத்தி மீண்டும் உருவாக்கவும்: `npm run gen:provider-reference`
 > **கடைசியாக உருவாக்கப்பட்டது:** 2026-10-27
 
-மொத்த வழங்குநர்கள்: **376**. கீழே உள்ள வகைப் பிரிப்பைக் காண்க.
+மொத்த வழங்குநர்கள்: **377**. கீழே உள்ள வகைப் பிரிப்பைக் காண்க.
 
 ## வகைகள்
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`        | vLLM                | உள்ளூர், சுயமாக ஹோஸ்ட் செய்யப்பட்டது | [இணைப்பு](https://github.com/vllm-project/vllm)                    | API விசை விருப்பத்திற்குரியது. உள்ளூர் vLLM OpenAI-இணக்கமான அடிப்படை URL-ஐ உள்ளமைக்கவும் (இயல்புநிலை: http://localhost:8000/v1).                                                                                                                                                                                                                            |
 | `xinference`          | `xinference`  | XInference          | உள்ளூர், சுயமாக ஹோஸ்ட் செய்யப்பட்டது | [இணைப்பு](https://inference.readthedocs.io)                        | API விசை விருப்பத்திற்குரியது. உள்ளூர் XInference OpenAI-இணக்கமான அடிப்படை URL-ஐ உள்ளமைக்கவும் (இயல்புநிலை: http://localhost:9997/v1).                                                                                                                                                                                                                      |
 
-## தேடல் வழங்குநர்கள் (18)
+## தேடல் வழங்குநர்கள் (19)
 
 | ID                  | மாற்றுப்பெயர்   | பெயர்                      | குறிச்சொற்கள் | இணையதளம்                                                           | குறிப்புகள்                                                                                                                                          |
 | ------------------- | --------------- | -------------------------- | ------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                 | தேடல்         | [இணைப்பு](https://exa.ai)                                          | dashboard.exa.ai இலிருந்து API விசை                                                                                                                  |
 | `firecrawl`         | `fc`            | Firecrawl                  | தேடல்         | [இணைப்பு](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys இலிருந்து API விசை (அல்லது நீங்களே ஹோஸ்ட் செய்த Firecrawl அடிப்படை URL-ஐ அமைக்கவும்)                                      |
 | `google-pse-search` | `google-pse`    | Google Programmable Search | தேடல்         | [இணைப்பு](https://developers.google.com/custom-search/v1/overview) | Google API விசையும் உங்கள் Programmable Search Engine ID-யும் (cx) தேவை                                                                              |
+| `kimi-search`       | `kimi-search`   | Kimi Search                | தேடல்         | [இணைப்பு](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai-இலிருந்து Moonshot AI API விசை (MOONSHOT_API_KEY)                                                                                   |
 | `linkup-search`     | `linkup`        | Linkup Search              | தேடல்         | [இணைப்பு](https://docs.linkup.so)                                  | Linkup கட்டுப்பாட்டுப் பலகையிலிருந்து Bearer API விசை                                                                                                |
 | `nimble-search`     | `nimble`        | Nimble Search              | தேடல்         | [இணைப்பு](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble கட்டுப்பாட்டுப் பலகையிலிருந்து Bearer API விசை                                                                                                |
 | `ollama-search`     | `ollama-search` | Ollama Search              | தேடல்         | [இணைப்பு](https://ollama.com/settings/keys)                        | Ollama Cloud-இல் பயன்படுத்தப்படும் அதே API விசை (ollama.com/settings/keys இலிருந்து)                                                                 |

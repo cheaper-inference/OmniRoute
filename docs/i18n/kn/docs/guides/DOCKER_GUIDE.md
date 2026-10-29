@@ -640,6 +640,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **ಅಪ್ಗ್ರೇಡ್ಗಳು:** ಪ್ರತಿಯೊಂದು ಸೆಷನ್ನ ಸಂಪರ್ಕ ಕಡಿತಗೊಳ್ಳುತ್ತದೆ ಎಂದು ನಿರೀಕ್ಷಿಸಿ. ಸಾಧ್ಯವಾದರೆ ಕ್ಲೈಂಟ್ಗಳನ್ನು drain ಮಾಡಿ; ಡೀಫಾಲ್ಟ್ SQLite ನಲ್ಲಿ rolling update ಇಲ್ಲ. Compose `restart: unless-stopped` ಜೊತೆಗೆ Docker `HEALTHCHECK` ಸಹ ಕಂಟೇನರ್ Unhealthy ಆದಾಗ ಏಕೈಕ ಪ್ರಕ್ರಿಯೆಯನ್ನು ಬದಲಾಯಿಸುತ್ತದೆ — ಪರಿಣಾಮದ ವ್ಯಾಪ್ತಿಯೂ ಅದೇ ಆಗಿರುತ್ತದೆ.
 
+ಸಿದ್ಧ ಬಳಕೆಯ ಮ್ಯಾನಿಫೆಸ್ಟ್ಗಳು ಮತ್ತು Helm ಚಾರ್ಟ್ `deploy/kubernetes/` ಹಾಗೂ `deploy/helm/omniroute/` ನಲ್ಲಿ ಲಭ್ಯವಿವೆ — [Kubernetes ನಿಯೋಜನೆ ಮಾರ್ಗದರ್ಶಿ](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) ನೋಡಿ.
+
 **ಏಕ ರೆಪ್ಲಿಕಾ**ಗಾಗಿ Kubernetes ಸ್ನಿಪೆಟ್ (Recreate ಅಗತ್ಯವಿದೆ; ಒಂದೇ SQLite ಫೈಲ್ ವಿರುದ್ಧ `replicas` ಅನ್ನು ಹೆಚ್ಚಿಸಬೇಡಿ):
 
 ```yaml

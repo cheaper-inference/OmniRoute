@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Gateway-ul AI gratuit
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nu te opri niciodată din programare. Orice instrument AI → 376 de furnizori — peste 150 gratuiți — printr-un singur endpoint. Claude Code, Codex, Cursor, Cline, Copilot și Antigravity conectate la Claude / GPT / Gemini GRATUIT, cu fallback automat. Compresia combinată RTK + Caveman economisește 15–95% din tokenuri (~89% în medie) — nu mai atingi niciodată limitele. 376 de furnizori AI · peste 150 de niveluri gratuite · ~1,62 mld. de tokenuri gratuite/lună · 20 de strategii de rutare · cost inițial de 0 USD."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nu te opri niciodată din programare. Orice instrument AI → 377 de furnizori — peste 150 gratuiți — printr-un singur endpoint. Claude Code, Codex, Cursor, Cline, Copilot și Antigravity conectate la Claude / GPT / Gemini GRATUIT, cu fallback automat. Compresia combinată RTK + Caveman economisește 15–95% din tokenuri (~89% în medie) — nu mai atingi niciodată limitele. 377 de furnizori AI · peste 150 de niveluri gratuite · ~1,62 mld. de tokenuri gratuite/lună · 20 de strategii de rutare · cost inițial de 0 USD."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                                      |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------------ | :------------------------: | :---------: | :-------------------: |
-| 🌐 Furnizori                         |            352             |   **358**   |          376          |
+| 🌐 Furnizori                         |            352             |   **358**   |          377          |
 | 🧠 ID-uri unice de modele de chat    |            1320            |  **1374**   |         1475          |
 | 🖼️ Punte de modalități               | 🆕 viziune + audio + video |      ✓      |           ✓           |
 | 📡 Catalog Radar gratuit             |  🆕 participare opțională  |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Funcționalități</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combinații</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Furnizori</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Furnizori</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI și MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Promisiunea — Un singur endpoint și 376 de furnizori. Mecanismul automat de rezervă menține rutarea atât timp cât este disponibilă o altă destinație funcțională. Șase piloni: comutare rezilientă între 376 de furnizori · economii de până la 95% la tokenuri pentru sarcinile de lucru eligibile · cost inițial de 0 USD, cu peste 150 de niveluri gratuite și 52 de furnizori recurenți/fără cheie, gratuiți permanent · 37 de integrări CLI/agent printr-o singură configurație · compatibilitate cu API-urile OpenAI, Claude, Gemini și Responses la /v1 · mecanisme de control pentru producție, inclusiv întrerupătoare de circuit, disimulare TLS, MCP cu 110 instrumente, A2A, memorie, mecanisme de protecție, evaluări și peste 56.000 de declarații de testare statică în peste 7.800 de fișiere de testare urmărite."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Promisiunea — Un singur endpoint și 377 de furnizori. Mecanismul automat de rezervă menține rutarea atât timp cât este disponibilă o altă destinație funcțională. Șase piloni: comutare rezilientă între 377 de furnizori · economii de până la 95% la tokenuri pentru sarcinile de lucru eligibile · cost inițial de 0 USD, cu peste 150 de niveluri gratuite și 52 de furnizori recurenți/fără cheie, gratuiți permanent · 37 de integrări CLI/agent printr-o singură configurație · compatibilitate cu API-urile OpenAI, Claude, Gemini și Responses la /v1 · mecanisme de control pentru producție, inclusiv întrerupătoare de circuit, disimulare TLS, MCP cu 110 instrumente, A2A, memorie, mecanisme de protecție, evaluări și peste 56.000 de declarații de testare statică în peste 7.800 de fișiere de testare urmărite."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Toate cele **20** de strategii — combină-le după preferință pentru fiecare
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ce diferențiază OmniRoute — o comparație punctuală a funcționalităților cu 9router, OpenRouter, CLIProxyAPI și LiteLLM, bazată pe 13 capabilități. OmniRoute: 376 de furnizori, peste 150 de niveluri gratuite integrate, 20 de strategii de rutare, compresie a tokenurilor cu 12 motoare, server MCP integrat cu 110 instrumente, protocol A2A pentru agenți, memorie persistentă, mecanisme de protecție, agenți cloud, disimularea amprentei TLS, Desktop/Termux/PWA și interfață disponibilă în 67 de limbi. OmniRoute este licențiat sub MIT și poate fi găzduit local. Capabilitățile și valorile aferente concurenților se pot schimba; consultați metodologia indicată prin link."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ce diferențiază OmniRoute — o comparație punctuală a funcționalităților cu 9router, OpenRouter, CLIProxyAPI și LiteLLM, bazată pe 13 capabilități. OmniRoute: 377 de furnizori, peste 150 de niveluri gratuite integrate, 20 de strategii de rutare, compresie a tokenurilor cu 12 motoare, server MCP integrat cu 110 instrumente, protocol A2A pentru agenți, memorie persistentă, mecanisme de protecție, agenți cloud, disimularea amprentei TLS, Desktop/Termux/PWA și interfață disponibilă în 67 de limbi. OmniRoute este licențiat sub MIT și poate fi găzduit local. Capabilitățile și valorile aferente concurenților se pot schimba; consultați metodologia indicată prin link."/>
 
 <sub>📊 Metodologia completă și detalii pentru fiecare funcționalitate, în comparație cu 9router, OpenRouter, CLIProxyAPI și LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -611,7 +611,7 @@ catalogul actual la **[radar.omniroute.online/planos](https://radar.omniroute.on
 - **🖼️ Endpointuri noi** — `/v1/ocr` (Mistral OCR) și `/v1/audio/translations` (în stil Whisper) completează funcționalitățile media. → [Referință API](docs/reference/API_REFERENCE.md)
 - **🎨 Generare de imagini / videoclipuri / conținut audio** — un singur API pentru conținut media: xAI Grok Imagine și videoclipuri Novita AI, ComfyUI, Magnific, Adobe Firefly, Segmind și furnizori de servicii vocale precum ElevenLabs. → [Referință API](docs/reference/API_REFERENCE.md)
 - **🌍 Implementare și operațiuni** — `basePath` pentru proxy invers, detectarea automată a limbii browserului, urmărirea dispozitivelor pentru fiecare cheie, încredere MITM fără acces root, localizare zh-TW. → [Mediu](docs/reference/ENVIRONMENT.md)
-- **🤝 Mai mulți furnizori și agenți** — agenți cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) cu browser + autentificare OAuth, card dedicat Ollama, Claude Opus 5 și Sonnet 5, parteneriat oficial Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… și un **catalog cu 376 de furnizori** actualizat. → [Furnizori](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Mai mulți furnizori și agenți** — agenți cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) cu browser + autentificare OAuth, card dedicat Ollama, Claude Opus 5 și Sonnet 5, parteneriat oficial Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… și un **catalog cu 377 de furnizori** actualizat. → [Furnizori](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparența rutării** — fiecare răspuns include un antet `X-OmniRoute-Decision` care indică strategia/furnizorul/latența utilizată, o nouă strategie combinată `cache-optimized` + factorul Auto-Combo `cacheAffinity` redirecționează solicitările repetate către conexiunea care deține prefixul din cache, iar un endpoint doar pentru citire `/v1/auto-combo/{channel}/candidates` expune grupul activ de candidați al unui canal `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Performanță și infrastructură locală** — Redis local cu un singur clic, instrumente de implementare a releelor Cloudflare Workers / Deno Deploy, Bifrost și Mux ca servicii încorporate supravegheate. → [Servicii încorporate](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Incluse și acestea** — framework pentru pluginuri + marketplace, frameworkuri de abilități Omni/Agent/GitHub, integrarea seifului Obsidian (22 de instrumente MCP), API-uri Batch & Files compatibile cu OpenAI, cache semantic pentru răspunsuri, gamificare cu clasamente, descoperirea agenților ACP (15 agenți integrați), export programat al jurnalelor în BigQuery, distribuire paralelă către mai multe modele `auto/chaos`, o punte pentru boți Telegram, un manager de versiuni în aplicație și clasamente LMArena-ELO pentru furnizorii gratuiți. → [Documentație](docs/README.md)
@@ -665,7 +665,7 @@ catalogul actual la **[radar.omniroute.online/planos](https://radar.omniroute.on
 <b>＋ funcționează și cu</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>orice instrument compatibil cu OpenAI</b>
 </div>
 
-<sub>📖 Configurare specifică pentru toate cele 37 de instrumente (27 CLI Code + 10 agenți CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Plugin OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Configurare specifică pentru toate cele 38 de instrumente (27 CLI Code + 11 agenți CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Plugin OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -695,11 +695,11 @@ istoricului shell-ului. → [Integrări CLI](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🌐 376 de furnizori AI — 153 marcați în catalog ca fiind gratuiți
+## 🌐 377 de furnizori AI — 153 marcați în catalog ca fiind gratuiți
 
 </div>
 
-> **376 de furnizori înregistrați** în colecțiile canonice de chat, media, căutare, locale, de agenți cloud și de sistem, dintre care **153 au metadatele de descoperire `hasFree: true`**. Registrul modelelor de chat acoperă **239 de furnizori / 3.059 de perechi distincte furnizor-model / 1.475 de ID-uri brute de modele**; catalogul separat pentru bugete gratuite are **484 de rânduri per model**, **34 de fonduri recurente** și **52 de furnizori recurenți/fără cheie, gratuiți pentru totdeauna**. Acestea au numitori diferiți în mod intenționat; definițiile și calculele cu eliminarea duplicatelor la nivel de fond se găsesc în [Referința furnizorilor](docs/reference/PROVIDER_REFERENCE.md) și [Nivelurile gratuite](docs/reference/FREE_TIERS.md).
+> **377 de furnizori înregistrați** în colecțiile canonice de chat, media, căutare, locale, de agenți cloud și de sistem, dintre care **153 au metadatele de descoperire `hasFree: true`**. Registrul modelelor de chat acoperă **239 de furnizori / 3.059 de perechi distincte furnizor-model / 1.475 de ID-uri brute de modele**; catalogul separat pentru bugete gratuite are **484 de rânduri per model**, **34 de fonduri recurente** și **52 de furnizori recurenți/fără cheie, gratuiți pentru totdeauna**. Acestea au numitori diferiți în mod intenționat; definițiile și calculele cu eliminarea duplicatelor la nivel de fond se găsesc în [Referința furnizorilor](docs/reference/PROVIDER_REFERENCE.md) și [Nivelurile gratuite](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -773,6 +773,7 @@ istoricului shell-ului. → [Integrări CLI](docs/guides/CLI-INTEGRATIONS.md)
 <table>
   <tr><th align="left">Platformă</th><th align="left">Instalare</th><th align="left">Avantaje</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (global)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">O singură comandă, orice sistem de operare</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Compatibilitate în regim „best-effort”, fără garanții de asistență; Node.js este mediul de execuție acceptat oficial.</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Multi-arhitectură <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Fereastră nativă + zonă de notificare — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Bară de meniu (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Monitorizează și actualizează automat serverul — <b>macOS</b></td></tr>
@@ -1315,7 +1316,7 @@ Metrici canonice la 2026-10-18: **1.976 de videoclipuri unice** · **20.220.289 
   <tr><td nowrap><b>Mediu de execuție</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Limbaj</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> în <code>src/</code> și <code>open-sse/</code> (zero <code>any</code> în nucleu începând cu v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bază de date</b></td><td>better-sqlite3 (SQLite, jurnalizare WAL) + LowDB (JSON moștenit) — 147 de module de domeniu, 211 migrări</td></tr>
+  <tr><td nowrap><b>Bază de date</b></td><td>better-sqlite3 (SQLite, jurnalizare WAL) + LowDB (JSON moștenit) — 147 de module de domeniu, 213 migrări</td></tr>
   <tr><td nowrap><b>Memorie</b></td><td>Căutare full-text SQLite FTS5 + reprezentări vectoriale cuantizate int8, degradare tipizată</td></tr>
   <tr><td nowrap><b>Scheme</b></td><td>Zod 4 — validarea intrărilor/ieșirilor instrumentelor MCP + contracte API</td></tr>
   <tr><td nowrap><b>Protocoale</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

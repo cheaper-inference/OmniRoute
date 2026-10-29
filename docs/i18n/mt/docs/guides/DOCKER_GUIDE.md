@@ -665,6 +665,8 @@ OmniRoute standard fuq Docker / Kubernetes huwa **proċess Node wieħed + writer
 
 **Aġġornamenti:** stenna li kull sessjoni tinqata'. Neħħi gradwalment il-klijenti jekk tista'; m'hemm l-ebda rolling update bl-SQLite predefinit. Compose `restart: unless-stopped` flimkien ma' Docker `HEALTHCHECK` ukoll jissostitwixxu l-uniku proċess meta l-container ikun Unhealthy — bl-istess firxa ta' impatt.
 
+Manifests lesti għall-użu u chart ta' Helm jinsabu f'`deploy/kubernetes/` u `deploy/helm/omniroute/` — ara l-[gwida għall-iskjerament ta' Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Snippet ta' Kubernetes għal **replika waħda** (Recreate huwa meħtieġ; iżżidx `replicas` ma' fajl SQLite wieħed):
 
 ```yaml

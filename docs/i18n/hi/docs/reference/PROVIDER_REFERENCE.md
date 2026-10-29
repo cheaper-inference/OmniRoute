@@ -8,7 +8,7 @@
 > पुनः जनरेट करने के लिए: `npm run gen:provider-reference`
 > **अंतिम बार जनरेट किया गया:** 2026-10-27
 
-कुल प्रदाता: **376**। नीचे श्रेणीवार विवरण देखें।
+कुल प्रदाता: **377**। नीचे श्रेणीवार विवरण देखें।
 
 ## श्रेणियाँ
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | स्थानीय, स्व-होस्टेड | [लिंक](https://github.com/vllm-project/vllm)                    | API कुंजी वैकल्पिक है। स्थानीय vLLM का OpenAI-संगत बेस URL कॉन्फ़िगर करें (डिफ़ॉल्ट: http://localhost:8000/v1)।                                                                                                                                                                                                        |
 | `xinference`          | `xinference` | XInference          | स्थानीय, स्व-होस्टेड | [लिंक](https://inference.readthedocs.io)                        | API कुंजी वैकल्पिक है। स्थानीय XInference का OpenAI-संगत बेस URL कॉन्फ़िगर करें (डिफ़ॉल्ट: http://localhost:9997/v1)।                                                                                                                                                                                                  |
 
-## खोज प्रदाता (18)
+## खोज प्रदाता (19)
 
 | ID                  | उपनाम           | नाम                            | टैग | वेबसाइट                                                         | टिप्पणियाँ                                                                                                                          |
 | ------------------- | --------------- | ------------------------------ | --- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                     | खोज | [लिंक](https://exa.ai)                                          | dashboard.exa.ai से API कुंजी                                                                                                       |
 | `firecrawl`         | `fc`            | Firecrawl                      | खोज | [लिंक](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys से API कुंजी (या अपना स्वयं-होस्टेड Firecrawl बेस URL सेट करें)                                          |
 | `google-pse-search` | `google-pse`    | Google Programmable Search     | खोज | [लिंक](https://developers.google.com/custom-search/v1/overview) | Google API कुंजी और आपकी Programmable Search Engine ID (cx) आवश्यक हैं                                                              |
+| `kimi-search`       | `kimi-search`   | Kimi Search                    | खोज | [लिंक](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai से Moonshot AI API कुंजी (MOONSHOT_API_KEY)                                                                        |
 | `linkup-search`     | `linkup`        | Linkup Search                  | खोज | [लिंक](https://docs.linkup.so)                                  | Linkup डैशबोर्ड से Bearer API कुंजी                                                                                                 |
 | `nimble-search`     | `nimble`        | Nimble Search                  | खोज | [लिंक](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble डैशबोर्ड से Bearer API कुंजी                                                                                                 |
 | `ollama-search`     | `ollama-search` | Ollama Search                  | खोज | [लिंक](https://ollama.com/settings/keys)                        | Ollama Cloud वाली ही API कुंजी (ollama.com/settings/keys से)                                                                        |

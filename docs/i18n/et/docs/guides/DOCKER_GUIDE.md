@@ -668,6 +668,8 @@ Dockeris/Kubernetesis kasutatav standardne OmniRoute on **üks Node’i protsess
 
 **Uuendused:** arvestage, et kõik seansid katkevad. Võimaluse korral suunake kliendid eelnevalt kõrvale; vaikimisi SQLite’i puhul pole jooksvat uuendamist. Compose’i `restart: unless-stopped` koos Dockeri `HEALTHCHECK`-iga asendab ka ainsa protsessi, kui konteineri olek on Unhealthy — mõju ulatus on sama.
 
+Valmiskujul manifestid ja Helmi diagramm asuvad kataloogides `deploy/kubernetes/` ja `deploy/helm/omniroute/` — vaadake [Kubernetese juurutusjuhendit](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kubernetesi näide **ühe replikaadi** jaoks (Recreate on nõutav; ärge suurendage ühe SQLite’i faili puhul väärtust `replicas`):
 
 ```yaml

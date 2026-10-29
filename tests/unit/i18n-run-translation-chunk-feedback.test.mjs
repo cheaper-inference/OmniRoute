@@ -51,6 +51,7 @@ for (const correctOnFeedback of [true, false]) {
       apiUrl: "https://translation-fixture.invalid",
       apiKey: "fixture-only",
       model: "fixture",
+      googleFallback: false, // This fixture verifies the LLM-only corrective retry contract.
       timeoutMs: 5000,
     };
     const locale = { code: "pt-BR", english: "Portuguese", native: "Português" };

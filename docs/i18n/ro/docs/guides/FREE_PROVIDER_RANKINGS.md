@@ -13,7 +13,7 @@
 
 ## Ce este
 
-OmniRoute înregistrează 376 de furnizori, inclusiv 155 de intrări de catalog marcate **gratuit/fără autentificare** (fără autentificare, OAuth cu nivel gratuit sau cheie API cu nivel gratuit — consultați [Ghidul nivelurilor gratuite](../getting-started/FREE-TIERS-GUIDE.md) și [directorul complet al nivelurilor gratuite](../reference/FREE_TIERS.md)). Problema: furnizorii gratuiți variază enorm în ceea ce privește calitatea modelelor. Un furnizor fără autentificare care oferă un model de vârf este mult mai util decât unul care oferă un model vechi, de mici dimensiuni.
+OmniRoute înregistrează 377 de furnizori, inclusiv 155 de intrări de catalog marcate **gratuit/fără autentificare** (fără autentificare, OAuth cu nivel gratuit sau cheie API cu nivel gratuit — consultați [Ghidul nivelurilor gratuite](../getting-started/FREE-TIERS-GUIDE.md) și [directorul complet al nivelurilor gratuite](../reference/FREE_TIERS.md)). Problema: furnizorii gratuiți variază enorm în ceea ce privește calitatea modelelor. Un furnizor fără autentificare care oferă un model de vârf este mult mai util decât unul care oferă un model vechi, de mici dimensiuni.
 
 **Clasamentul furnizorilor gratuiți** răspunde la întrebarea **„care furnizor gratuit îmi oferă cel mai bun model?”** corelând catalogul fiecărui furnizor gratuit cu **scoruri de calitate obținute din contribuția comunității** din **clasamentul Arena AI** (ELO bazat pe preferințele umane, aceeași idee care stă la baza arenei de chatboturi LMArena). Furnizorii sunt apoi clasați în funcție de puterea **celui mai bun model gratuit** al lor.
 

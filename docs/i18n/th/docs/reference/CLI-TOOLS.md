@@ -10,8 +10,8 @@ OmniRoute ผสานรวมกับเครื่องมือ CLI ส�
 
 | หน้า           | เส้นทาง                 | แนวคิด                                                                                          | จำนวน      |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
-| **CLI Code's** | `/dashboard/cli-code`   | เครื่องมือเขียนโค้ดที่คุณเชื่อมต่อเข้ากับ OmniRoute (ไคลเอนต์ → CLI → OmniRoute → ผู้ให้บริการ) | 26         |
-| **CLI Agents** | `/dashboard/cli-agents` | เอเจนต์อัตโนมัติที่คุณเชื่อมต่อเข้ากับ OmniRoute (โฟลว์เดียวกัน แต่มีขอบเขตกว้างกว่า)           | 10         |
+| **CLI Code's** | `/dashboard/cli-code`   | เครื่องมือเขียนโค้ดที่คุณเชื่อมต่อเข้ากับ OmniRoute (ไคลเอนต์ → CLI → OmniRoute → ผู้ให้บริการ) | 27         |
+| **CLI Agents** | `/dashboard/cli-agents` | เอเจนต์อัตโนมัติที่คุณเชื่อมต่อเข้ากับ OmniRoute (โฟลว์เดียวกัน แต่มีขอบเขตกว้างกว่า)           | 11         |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI ที่ OmniRoute เรียกใช้เป็นแบ็กเอนด์ผ่าน stdio/ACP (โฟลว์ย้อนกลับ)                           | ดูรีจิสทรี |
 
 เส้นทางเดิมจะเปลี่ยนเส้นทางผ่าน 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 แต่ละคำสั่งรองรับ `--remote <url> --api-key <key>` (กำหนดค่าเครื่องมือในเครื่องให้ใช้งานกับ
 OmniRoute ระยะไกล), `--dry-run` (แสดงตัวอย่างโดยไม่เขียนข้อมูล) และ `--port` เครื่องมือ
-ที่ไม่มีการค้นหาโมเดลอัตโนมัติ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) รองรับ
+ที่ไม่มีการค้นหาโมเดลอัตโนมัติ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) รองรับ
 `--model <id>` (และ `--yes` สำหรับการทำงานแบบไม่โต้ตอบ) `setup-5dive` เป็นสูตรเดียว
 ที่ไม่ได้เขียนข้อมูลไว้ภายใต้ `$HOME`: คำสั่งนี้กำหนดค่ากลุ่มเอเจนต์ 5dive โดยเขียน
 โปรไฟล์การยืนยันตัวตนที่ root เป็นเจ้าของไว้บนโฮสต์ของกลุ่ม จึงเรียกตัวเองใหม่ผ่าน `sudo`
 และไม่มีโหมดระยะไกลของตนเอง หากต้องการเรียกใช้ CLI โดยแทรก env
 ที่ถูกต้องและไม่เขียนการกำหนดค่าใดๆ เลย ให้ใช้ตัวเรียกใช้งานทั่วไป
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — เป้าหมายและนามแฝงมาจาก `bin/cli/cli-manifest.mjs`); ตัวเรียกใช้งานเดิม
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — เป้าหมายและนามแฝงมาจาก `bin/cli/cli-manifest.mjs`); ตัวเรียกใช้งานเดิม
 สำหรับแต่ละเครื่องมือ ได้แก่ `omniroute launch` (Claude Code) และ `omniroute launch-codex`
 (Codex) ยังคงใช้งานได้ Gemini CLI รองรับเฉพาะการเรียกใช้งานเท่านั้น: เป็นเป้าหมายของ `omniroute run`
 แต่ไม่มีสูตร `setup-*`/`configure`
@@ -182,7 +183,7 @@ CLI โดย `run`, `configure` และตัวสร้าง shell complet
 เครื่องมือที่มี `baseUrlSupport: "partial"` จะแสดงป้าย "⚠ รองรับ URL ฐานบางส่วน" บนการ์ดแดชบอร์ด
 ---
 
-## 2. แค็ตตาล็อกเอเจนต์ CLI (10 เครื่องมือ)
+## 2. แค็ตตาล็อกเอเจนต์ CLI (11 เครื่องมือ)
 
 เอเจนต์อัตโนมัติที่ปรากฏใน `/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ CLI โดย `run`, `configure` และตัวสร้าง shell complet
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

@@ -488,7 +488,7 @@ Ten spracováva:
 
 | Súbor                         | Účel                                                        |
 | ----------------------------- | ----------------------------------------------------------- |
-| `providerRegistry.ts`         | Register chatovacích modelov pre katalóg 376 poskytovateľov |
+| `providerRegistry.ts`         | Register chatovacích modelov pre katalóg 377 poskytovateľov |
 | `providerModels.ts`           | Aliasy modelov, mapovanie formátov                          |
 | `constants.ts`                | Časové limity, obmedzenia, stavové kódy                     |
 | `defaultThinkingSignature.ts` | Predvolený podpis premýšľania Claude                        |

@@ -616,6 +616,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **Թարմացումներ․** ակնկալեք, որ յուրաքանչյուր աշխատաշրջան կընդհատվի։ Հնարավորության դեպքում նախ ավարտեք հաճախորդների սպասարկումը․ լռելյայն SQLite-ի դեպքում սահուն թարմացում չկա։ Compose-ի `restart: unless-stopped`-ը Docker-ի `HEALTHCHECK`-ի հետ միասին նույնպես կփոխարինի միակ գործընթացը, երբ կոնտեյները դառնա Unhealthy՝ նույն ազդեցության շառավղով։
 
+Պատրաստի մանիֆեստները և Helm chart-ը գտնվում են `deploy/kubernetes/` և `deploy/helm/omniroute/` ուղիներում․ տե՛ս [Kubernetes-ի տեղակայման ուղեցույցը](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md)։
+
 Kubernetes-ի հատված՝ **մեկ կրկնօրինակի** համար (Recreate-ը պարտադիր է․ մեկ SQLite ֆայլ օգտագործելիս մի՛ ավելացրեք `replicas`-ը)․
 
 ```yaml

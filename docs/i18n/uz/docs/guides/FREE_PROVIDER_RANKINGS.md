@@ -14,7 +14,7 @@
 
 ## Bu nima
 
-OmniRoute 376 ta provayderni ro'yxatga oladi, shu jumladan **free/no-auth** deb belgilangan 155 ta katalog yozuvi (autentifikatsiyasiz, bepul tarifli OAuth yoki bepul tarifli API kaliti — [Bepul tariflar qo'llanmasi](../getting-started/FREE-TIERS-GUIDE.md) va to'liq [Bepul tariflar katalogi](../reference/FREE_TIERS.md)ga qarang). Ammo qiyin tomoni shundaki: bepul provayderlarning model sifati juda katta farq qiladi. Ilg'or modelni taqdim etuvchi autentifikatsiyasiz provayder kichik, eskirgan modelni taqdim etuvchi provayderdan ancha foydaliroq.
+OmniRoute 377 ta provayderni ro'yxatga oladi, shu jumladan **free/no-auth** deb belgilangan 155 ta katalog yozuvi (autentifikatsiyasiz, bepul tarifli OAuth yoki bepul tarifli API kaliti — [Bepul tariflar qo'llanmasi](../getting-started/FREE-TIERS-GUIDE.md) va to'liq [Bepul tariflar katalogi](../reference/FREE_TIERS.md)ga qarang). Ammo qiyin tomoni shundaki: bepul provayderlarning model sifati juda katta farq qiladi. Ilg'or modelni taqdim etuvchi autentifikatsiyasiz provayder kichik, eskirgan modelni taqdim etuvchi provayderdan ancha foydaliroq.
 
 **Free Provider Rankings** har bir bepul provayderning katalogini **Arena AI leaderboard** dagi **omma tomonidan yig'ilgan sifat ballari** (inson afzalliklariga asoslangan ELO — LMArena chatbot arenasining asosidagi g'oya bilan bir xil) bilan birlashtirish orqali "**qaysi bepul provayder menga eng yaxshi modelni beradi?**" savoliga javob beradi. Keyin provayderlar o'zlarining **eng yaxshi bepul modeli** kuchiga ko'ra reytinglanadi.
 

@@ -163,7 +163,7 @@ OmniRoute menyediakan 6 skill A2A yang dihubungkan dalam `src/lib/a2a/taskExecut
 | Laporan Kesehatan | `health-report`      | Mengagregasi status circuit breaker, cooldown, dan lockout per penyedia                                                                                              | kesehatan, ketahanan     | "Tampilkan status kesehatan semua penyedia" |
 | Daftar Kemampuan  | `list-capabilities`  | Mengembalikan katalog lengkap Agent Skills berisi 45 entri (23 API + 21 CLI + 1 konfigurasi) sebagai tabel markdown dengan URL mentah SKILL.md untuk injeksi konteks | katalog, penemuan, skill | "Tampilkan semua kemampuan OmniRoute"       |
 
-> Agent Card harus tetap diselaraskan dengan katalog aktif yang berisi 376 penyedia; jumlah penyedia serta metadata gratis/tanpa autentikasi bersumber dari registry runtime.
+> Agent Card harus tetap diselaraskan dengan katalog aktif yang berisi 377 penyedia; jumlah penyedia serta metadata gratis/tanpa autentikasi bersumber dari registry runtime.
 
 ### Detail Skill `list-capabilities`
 

@@ -665,6 +665,8 @@ OmniRoute ya kawaida ya Docker / Kubernetes ni **mchakato mmoja wa Node + mwandi
 
 **Masasisho:** tarajia kila kipindi kukatika. Ondoa wateja taratibu ukiweza; hakuna rolling update kwenye SQLite ya chaguo-msingi. Compose `restart: unless-stopped` pamoja na Docker `HEALTHCHECK` pia vitabadilisha mchakato pekee kontena linapokuwa Unhealthy — athari zake ni zilezile.
 
+Manifesti zilizo tayari kutumika na chati ya Helm zinapatikana katika `deploy/kubernetes/` na `deploy/helm/omniroute/` — angalia [mwongozo wa upelekaji wa Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kijisehemu cha Kubernetes kwa **replica moja** (Recreate inahitajika; usiongeze `replicas` dhidi ya faili moja ya SQLite):
 
 ```yaml

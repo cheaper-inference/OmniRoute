@@ -14,7 +14,7 @@
 
 ## Mi ez?
 
-Az OmniRoute 376 szolgáltatót regisztrál, köztük 155 **ingyenes / hitelesítés nélküli**
+Az OmniRoute 377 szolgáltatót regisztrál, köztük 155 **ingyenes / hitelesítés nélküli**
 ként megjelölt katalógusbejegyzést
 (hitelesítés nélküli, ingyenes csomagú OAuth vagy ingyenes csomagú API-kulcs — lásd az
 [Ingyenes csomagok útmutatóját](../getting-started/FREE-TIERS-GUIDE.md) és a teljes

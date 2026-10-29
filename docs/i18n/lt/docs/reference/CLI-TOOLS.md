@@ -10,8 +10,8 @@ Paskutinį kartą atnaujinta: 2026-08-23
 
 | Puslapis        | Maršrutas               | Koncepcija                                                                                 | Skaičius     |
 | --------------- | ----------------------- | ------------------------------------------------------------------------------------------ | ------------ |
-| **CLI kodai**   | `/dashboard/cli-code`   | Programavimo įrankiai, nukreipiami į „OmniRoute“ (klientas → CLI → „OmniRoute“ → teikėjas) | 26           |
-| **CLI agentai** | `/dashboard/cli-agents` | Autonominiai agentai, nukreipiami į „OmniRoute“ (tokia pati eiga, platesnė aprėptis)       | 10           |
+| **CLI kodai**   | `/dashboard/cli-code`   | Programavimo įrankiai, nukreipiami į „OmniRoute“ (klientas → CLI → „OmniRoute“ → teikėjas) | 27           |
+| **CLI agentai** | `/dashboard/cli-agents` | Autonominiai agentai, nukreipiami į „OmniRoute“ (tokia pati eiga, platesnė aprėptis)       | 11           |
 | **ACP agentai** | `/dashboard/acp-agents` | CLI, kuriuos „OmniRoute“ paleidžia kaip vidinę sistemą per stdio/ACP (atvirkštinė eiga)    | žr. registrą |
 
 Seni maršrutai peradresuojami naudojant 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Kiekviena jų priima `--remote <url> --api-key <key>` (vietiniam įrankiui sukonfigūruoti naudoti
 nuotolinį OmniRoute), `--dry-run` (peržiūrai nieko neįrašant) ir `--port`. Įrankiams,
-kurie modelių neaptinka automatiškai (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive), reikia
+kurie modelių neaptinka automatiškai (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes), reikia
 `--model <id>` (ir `--yes`, kai komandos vykdomos neinteraktyviai). `setup-5dive` yra vienintelis
 receptas, kuris nerašo į `$HOME`: jis sukonfigūruoja 5dive agentų parką
 parko pagrindiniame kompiuteryje įrašydamas root priklausantį autentifikavimo profilį, todėl iš naujo paleidžia save per `sudo`
 ir neturi atskiro nuotolinio režimo. Norėdami paleisti CLI su
 įterptais tinkamais aplinkos kintamaisiais ir visiškai neįrašyti konfigūracijos, naudokite bendrąją
-`omniroute run <target>` paleidyklę (claude, codex, aider, goose, opencode, qwen,
-gemini — paskirties elementai ir alternatyvūs pavadinimai paimami iš `bin/cli/cli-manifest.mjs`); senosios
+`omniroute run <target>` paleidyklę (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — paskirties elementai ir alternatyvūs pavadinimai paimami iš `bin/cli/cli-manifest.mjs`); senosios
 atskiriems įrankiams skirtos paleidyklės `omniroute launch` (Claude Code) ir `omniroute launch-codex`
 (Codex) tebėra prieinamos. Gemini CLI galima tik paleisti: tai yra `omniroute run`
 paskirties elementas, tačiau jam nėra `setup-*`/`configure` recepto.
@@ -181,7 +182,7 @@ Visi įrankiai, rodomi `/dashboard/cli-code`. Įrankiai, kurių `baseUrlSupport:
 Įrankių, kurių `baseUrlSupport: "partial"`, informacijos suvestinės kortelėje rodoma žyma „⚠ Dalinis bazinis URL“.
 ---
 
-## 2. CLI agentų katalogas (10 įrankių)
+## 2. CLI agentų katalogas (11 įrankių)
 
 Autonominiai agentai, rodomi `/dashboard/cli-agents`:
 
@@ -197,6 +198,7 @@ Autonominiai agentai, rodomi `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full               | false                   |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                   |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                   |
+| whycodes     | WhyCodes         | Why Corporation          | full               | false                   |
 
 ---
 

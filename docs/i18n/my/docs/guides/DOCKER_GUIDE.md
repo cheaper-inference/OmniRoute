@@ -604,6 +604,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **အဆင့်မြှင့်တင်မှုများ-** session တိုင်း ပြတ်တောက်မည်ဟု မျှော်မှန်းထားပါ။ ဖြစ်နိုင်ပါက client များကို ကြိုတင်ရွှေ့ပြောင်းပါ။ မူလ SQLite တွင် rolling update မရှိပါ။ Compose `restart: unless-stopped` နှင့် Docker `HEALTHCHECK` တို့သည် container က Unhealthy ဖြစ်သည့်အခါ တစ်ခုတည်းသော process ကိုလည်း အစားထိုးမည်ဖြစ်ပြီး သက်ရောက်မှု အတိုင်းအတာမှာ အတူတူပင်ဖြစ်သည်။
 
+အသင့်သုံးနိုင်သော manifests များနှင့် Helm chart တစ်ခုသည် `deploy/kubernetes/` နှင့် `deploy/helm/omniroute/` တို့တွင် ရှိသည် — [Kubernetes ဖြန့်ကျက်မှုလမ်းညွှန်](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) ကို ကြည့်ပါ။
+
 **Replica တစ်ခုတည်း** အတွက် Kubernetes snippet (`Recreate` လိုအပ်သည်။ SQLite ဖိုင်တစ်ခုတည်းကို အသုံးပြုနေစဉ် `replicas` ကို မတိုးပါနှင့်)-
 
 ```yaml

@@ -8,7 +8,7 @@
 > Újragenerálás: `npm run gen:provider-reference`
 > **Legutóbb generálva:** 2026-10-27
 
-Szolgáltatók száma összesen: **376**. Lásd alább a kategóriák szerinti bontást.
+Szolgáltatók száma összesen: **377**. Lásd alább a kategóriák szerinti bontást.
 
 ## Kategóriák
 
@@ -397,7 +397,7 @@ Az egyes szolgáltatók engedélyezéséhez, konfigurálásához és tesztelés�
 | `vllm`                | `vllm`       | vLLM                | Helyi, saját üzemeltetésű | [hivatkozás](https://github.com/vllm-project/vllm)                    | Az API-kulcs opcionális. Állítsa be a helyi vLLM OpenAI-kompatibilis alap-URL-jét (alapértelmezett: http://localhost:8000/v1).                                                                                                                                                                                                                                      |
 | `xinference`          | `xinference` | XInference          | Helyi, saját üzemeltetésű | [hivatkozás](https://inference.readthedocs.io)                        | Az API-kulcs opcionális. Állítsa be a helyi XInference OpenAI-kompatibilis alap-URL-jét (alapértelmezett: http://localhost:9997/v1).                                                                                                                                                                                                                                |
 
-## Keresési szolgáltatók (18)
+## Keresési szolgáltatók (19)
 
 | ID                  | Alias           | Név                             | Címkék  | Webhely                                                         | Megjegyzések                                                                                                                                          |
 | ------------------- | --------------- | ------------------------------- | ------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Az egyes szolgáltatók engedélyezéséhez, konfigurálásához és tesztelés�
 | `exa-search`        | `exa-search`    | Exa Search                      | Keresés | [link](https://exa.ai)                                          | API-kulcs a dashboard.exa.ai webhelyről                                                                                                               |
 | `firecrawl`         | `fc`            | Firecrawl                       | Keresés | [link](https://firecrawl.dev)                                   | API-kulcs a firecrawl.dev/app/api-keys webhelyről (vagy állítsa be a saját üzemeltetésű Firecrawl alap-URL-jét)                                       |
 | `google-pse-search` | `google-pse`    | Google Programmable Search      | Keresés | [link](https://developers.google.com/custom-search/v1/overview) | Google API-kulcsot és a Programmable Search Engine azonosítóját (cx) igényli                                                                          |
+| `kimi-search`       | `kimi-search`   | Kimi Search                     | Keresés | [link](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API-kulcs (MOONSHOT_API_KEY) a platform.kimi.ai webhelyről                                                                                |
 | `linkup-search`     | `linkup`        | Linkup Search                   | Keresés | [link](https://docs.linkup.so)                                  | Bearer API-kulcs a Linkup irányítópultjáról                                                                                                           |
 | `nimble-search`     | `nimble`        | Nimble Search                   | Keresés | [link](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API-kulcs a Nimble irányítópultjáról                                                                                                           |
 | `ollama-search`     | `ollama-search` | Ollama Search                   | Keresés | [link](https://ollama.com/settings/keys)                        | Ugyanaz az API-kulcs, mint az Ollama Cloud esetében (az ollama.com/settings/keys webhelyről)                                                          |

@@ -52,6 +52,7 @@ test("CLI_TOOLS registry contains all expected tools including rebuilt Qwen Code
     "prime-agent",
     "5dive",
     "zed",
+    "whycodes",
   ];
   for (const id of expected) {
     assert.ok(id in CLI_TOOLS, `Missing tool: ${id}`);

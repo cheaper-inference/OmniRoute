@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Lango la AI Lisilolipishwa
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Usiache kamwe kuandika msimbo. Kila zana ya AI → watoa huduma 376 — 150+ bila malipo — kupitia sehemu moja ya ufikiaji. Claude Code, Codex, Cursor, Cline, Copilot na Antigravity katika Claude / GPT / Gemini BILA MALIPO zikiwa na uhamishaji wa kiotomatiki pale huduma inaposhindwa. Mfinyazo wa tabaka wa RTK + Caveman huokoa 15–95% ya tokeni (~89% kwa wastani) — usifikie vikomo kamwe. Watoa huduma 376 wa AI · viwango 150+ visivyolipishwa · ~tokeni bilioni 1.62 bila malipo kwa mwezi · mikakati 20 ya uelekezaji · $0 kuanza."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Usiache kamwe kuandika msimbo. Kila zana ya AI → watoa huduma 377 — 150+ bila malipo — kupitia sehemu moja ya ufikiaji. Claude Code, Codex, Cursor, Cline, Copilot na Antigravity katika Claude / GPT / Gemini BILA MALIPO zikiwa na uhamishaji wa kiotomatiki pale huduma inaposhindwa. Mfinyazo wa tabaka wa RTK + Caveman huokoa 15–95% ya tokeni (~89% kwa wastani) — usifikie vikomo kamwe. Watoa huduma 377 wa AI · viwango 150+ visivyolipishwa · ~tokeni bilioni 1.62 bila malipo kwa mwezi · mikakati 20 ya uelekezaji · $0 kuanza."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                                                 |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Watoa huduma                                 |           352            |   **358**   |          376          |
+| 🌐 Watoa huduma                                 |           352            |   **358**   |          377          |
 | 🧠 Vitambulisho vya kipekee vya modeli za gumzo |           1320           |  **1374**   |         1475          |
 | 🖼️ Daraja la modali                             | 🆕 picha + sauti + video |      ✓      |           ✓           |
 | 📡 Katalogi isiyolipishwa ya Radar              |       🆕 kwa hiari       |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Vipengele</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Michanganyiko</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Watoa huduma</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Watoa huduma</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ahadi — Sehemu moja ya ufikiaji na watoa huduma 376. Uhamisho wa kiotomatiki huendeleza uelekezaji mradi lengo jingine lenye afya linapatikana. Nguzo sita: uhamisho thabiti kati ya watoa huduma 376 · hadi 95% ya uokoaji wa tokeni kwenye mizigo ya kazi inayostahiki · $0 kuanza kwa kutumia viwango 150+ vya bila malipo na watoa huduma 52 wa kudumu bila malipo wanaojirudia/wasiohitaji ufunguo · miunganisho 37 ya CLI/ajenti kupitia usanidi mmoja · uoanifu wa OpenAI, Claude, Gemini na Responses API katika /v1 · vidhibiti vya uzalishaji vikiwemo circuit breakers, ufichaji wa TLS, zana 110 za MCP, A2A, kumbukumbu, vizuizi vya usalama, tathmini na zaidi ya matamko 56,000 ya majaribio tuli katika zaidi ya faili 7,800 za majaribio yanayofuatiliwa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ahadi — Sehemu moja ya ufikiaji na watoa huduma 377. Uhamisho wa kiotomatiki huendeleza uelekezaji mradi lengo jingine lenye afya linapatikana. Nguzo sita: uhamisho thabiti kati ya watoa huduma 377 · hadi 95% ya uokoaji wa tokeni kwenye mizigo ya kazi inayostahiki · $0 kuanza kwa kutumia viwango 150+ vya bila malipo na watoa huduma 52 wa kudumu bila malipo wanaojirudia/wasiohitaji ufunguo · miunganisho 37 ya CLI/ajenti kupitia usanidi mmoja · uoanifu wa OpenAI, Claude, Gemini na Responses API katika /v1 · vidhibiti vya uzalishaji vikiwemo circuit breakers, ufichaji wa TLS, zana 110 za MCP, A2A, kumbukumbu, vizuizi vya usalama, tathmini na zaidi ya matamko 56,000 ya majaribio tuli katika zaidi ya faili 7,800 za majaribio yanayofuatiliwa."/>
 
 <br/>
 <br/>
@@ -441,7 +441,7 @@ Mikakati yote **20** — changanya na kulinganisha kwa kila hatua ya combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kinachoitofautisha OmniRoute — muhtasari wa vipengele kwa wakati maalumu ukilinganisha na 9router, OpenRouter, CLIProxyAPI na LiteLLM katika uwezo 13. OmniRoute: watoa huduma 376, viwango 150+ vya bure vilivyojumuishwa, mikakati 20 ya uelekezaji, ubanaji wa tokeni wenye injini 12, seva ya MCP iliyojumuishwa yenye zana 110, itifaki ya mawakala ya A2A, kumbukumbu endelevu, vizuizi vya usalama, mawakala wa wingu, ufichaji wa alama za utambulisho za TLS, Desktop/Termux/PWA na lugha 67 za kiolesura cha i18n. OmniRoute ina leseni ya MIT na inaweza kupangishwa kwenye seva binafsi. Uwezo na idadi za washindani zinaweza kubadilika; tazama mbinu iliyounganishwa."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kinachoitofautisha OmniRoute — muhtasari wa vipengele kwa wakati maalumu ukilinganisha na 9router, OpenRouter, CLIProxyAPI na LiteLLM katika uwezo 13. OmniRoute: watoa huduma 377, viwango 150+ vya bure vilivyojumuishwa, mikakati 20 ya uelekezaji, ubanaji wa tokeni wenye injini 12, seva ya MCP iliyojumuishwa yenye zana 110, itifaki ya mawakala ya A2A, kumbukumbu endelevu, vizuizi vya usalama, mawakala wa wingu, ufichaji wa alama za utambulisho za TLS, Desktop/Termux/PWA na lugha 67 za kiolesura cha i18n. OmniRoute ina leseni ya MIT na inaweza kupangishwa kwenye seva binafsi. Uwezo na idadi za washindani zinaweza kubadilika; tazama mbinu iliyounganishwa."/>
 
 <sub>📊 Mbinu kamili &amp; maelezo ya kila kipengele yakilinganishwa na 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -536,7 +536,7 @@ Radar ni ya kujiunga kwa hiari na hutumia GET pekee. Kiteja cha OmniRoute hakipa
 - **🖼️ Ncha mpya** — `/v1/ocr` (Mistral OCR) na `/v1/audio/translations` (mtindo wa Whisper) hukamilisha huduma za midia. → [Marejeleo ya API](docs/reference/API_REFERENCE.md)
 - **🎨 Uzalishaji wa picha / video / sauti** — API moja kwa midia: xAI Grok Imagine na video ya Novita AI, ComfyUI, Magnific, Adobe Firefly, Segmind, na watoa huduma za sauti kama ElevenLabs. → [Marejeleo ya API](docs/reference/API_REFERENCE.md)
 - **🌍 Utekelezaji na uendeshaji** — `basePath` ya proksi ya kinyume, utambuzi otomatiki wa lugha ya kivinjari, ufuatiliaji wa kifaa kwa kila ufunguo, uaminifu wa MITM usiohitaji root, na ujanibishaji wa zh-TW. → [Mazingira](docs/reference/ENVIRONMENT.md)
-- **🤝 Watoa huduma na mawakala zaidi** — mawakala wa wingu (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) yenye kivinjari + uingiaji wa OAuth, kadi kamili ya Ollama, Claude Opus 5 na Sonnet 5, ushirikiano rasmi wa Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… pamoja na **katalogi ya watoa huduma 376** iliyosasishwa. → [Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Watoa huduma na mawakala zaidi** — mawakala wa wingu (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) yenye kivinjari + uingiaji wa OAuth, kadi kamili ya Ollama, Claude Opus 5 na Sonnet 5, ushirikiano rasmi wa Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… pamoja na **katalogi ya watoa huduma 377** iliyosasishwa. → [Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Uwazi wa uelekezaji** — kila jibu hubeba kichwa cha `X-OmniRoute-Decision` kinachotaja mkakati/mtoa huduma/ucheleweshaji uliolihudumia, mkakati mpya wa mseto wa `cache-optimized` pamoja na kipengele cha Auto-Combo cha `cacheAffinity` huelekeza maombi yanayorudiwa kwenye muunganisho unaoshikilia kiambishi awali kilichohifadhiwa kwenye cache, na ncha ya kusoma pekee ya `/v1/auto-combo/{channel}/candidates` huonyesha kundi hai la wagombea la kituo cha `auto/*`. → [Mseto Otomatiki](docs/routing/AUTO-COMBO.md)
 - **⚡ Utendaji na miundombinu ya ndani** — Redis ya ndani kwa mbofyo mmoja, zana za kupeleka relay za Cloudflare Workers / Deno Deploy, pamoja na Bifrost na Mux kama huduma zilizopachikwa na kusimamiwa. → [Huduma Zilizopachikwa](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Pia imejumuishwa** — mfumo wa programu-jalizi + soko lake, mifumo ya ujuzi ya Omni/Agent/GitHub, ujumuishaji wa hifadhi ya Obsidian (zana 22 za MCP), API za Batch na Files zinazooana na OpenAI, akiba ya kisemantiki ya majibu, uchezeshaji wenye bao za wanaoongoza, ugunduzi wa mawakala wa ACP (mawakala 15 waliojengewa ndani), uhamishaji ulioratibiwa wa kumbukumbu kwenda BigQuery, usambazaji sambamba kwa modeli nyingi wa `auto/chaos`, daraja la boti ya Telegram, kidhibiti cha matoleo ndani ya programu na viwango vya watoa huduma bila malipo vya LMArena-ELO. → [Nyaraka](docs/README.md)
@@ -590,7 +590,7 @@ Radar ni ya kujiunga kwa hiari na hutumia GET pekee. Kiteja cha OmniRoute hakipa
 <b>＋ pia hufanya kazi na</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>zana yoyote inayooana na OpenAI</b>
 </div>
 
-<sub>📖 Usanidi wa kila zana kwa zana zote 37 (CLI Code 27 + CLI Agents 10) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Programu-jalizi ya OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Usanidi wa kila zana kwa zana zote 38 (CLI Code 27 + CLI Agents 11) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Programu-jalizi ya OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -620,11 +620,11 @@ kuhifadhiwa katika historia ya shell yako. → [Miunganisho ya CLI](docs/guides/
 
 <div align="center">
 
-## 🌐 Watoa Huduma 376 wa AI — 153 Waliowekwa Alama kuwa Bila Malipo kwenye Katalogi
+## 🌐 Watoa Huduma 377 wa AI — 153 Waliowekwa Alama kuwa Bila Malipo kwenye Katalogi
 
 </div>
 
-> **Watoa huduma 376 waliosajiliwa** katika mikusanyo sanifu ya gumzo, midia, utafutaji, ya ndani, mawakala wa wingu na mfumo, wakiwemo **153 wenye metadata ya ugunduzi ya `hasFree: true`**. Sajili ya modeli za gumzo inajumuisha **watoa huduma 239 / jozi 3,059 tofauti za mtoa huduma na modeli / vitambulisho ghafi 1,475 vya modeli**; katalogi tofauti ya bajeti zisizolipishwa ina **safu 484 kwa kila modeli**, **makundi 34 yanayojirudia** na **watoa huduma 52 wa kudumu bila malipo wenye mgao unaojirudia/wasiohitaji ufunguo**. Hivi ni vigawanyio tofauti kimakusudi; ufafanuzi na hesabu zilizoondolewa marudio ya makundi zinapatikana katika [Rejea ya Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md) na [Viwango vya Bila Malipo](docs/reference/FREE_TIERS.md).
+> **Watoa huduma 377 waliosajiliwa** katika mikusanyo sanifu ya gumzo, midia, utafutaji, ya ndani, mawakala wa wingu na mfumo, wakiwemo **153 wenye metadata ya ugunduzi ya `hasFree: true`**. Sajili ya modeli za gumzo inajumuisha **watoa huduma 239 / jozi 3,059 tofauti za mtoa huduma na modeli / vitambulisho ghafi 1,475 vya modeli**; katalogi tofauti ya bajeti zisizolipishwa ina **safu 484 kwa kila modeli**, **makundi 34 yanayojirudia** na **watoa huduma 52 wa kudumu bila malipo wenye mgao unaojirudia/wasiohitaji ufunguo**. Hivi ni vigawanyio tofauti kimakusudi; ufafanuzi na hesabu zilizoondolewa marudio ya makundi zinapatikana katika [Rejea ya Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md) na [Viwango vya Bila Malipo](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -698,6 +698,7 @@ kuhifadhiwa katika historia ya shell yako. → [Miunganisho ya CLI](docs/guides/
 <table>
   <tr><th align="left">Jukwaa</th><th align="left">Usakinishaji</th><th align="left">Vipengele muhimu</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (kimataifa)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Amri moja, mfumo wowote wa uendeshaji</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (kimataifa)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Upatanifu wa kadiri inavyowezekana bila hakikisho la usaidizi; Node.js ndiyo mazingira ya utekelezaji yanayotumika rasmi.</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Miundio mingi <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Kompyuta ya mezani (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Dirisha asilia + trei ya mfumo — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Upau wa menyu (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Husimamia &amp; kusasisha seva kiotomatiki — <b>macOS</b></td></tr>
@@ -1240,7 +1241,7 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
   <tr><td nowrap><b>Mazingira ya utekelezaji</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lugha</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> katika <code>src/</code> na <code>open-sse/</code> (hakuna <code>any</code> katika msingi tangu v2.0)</td></tr>
   <tr><td nowrap><b>Mfumo</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa kumbukumbu wa WAL) + LowDB (urithi wa JSON) — moduli 147 za kikoa, uhamishaji 211</td></tr>
+  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa kumbukumbu wa WAL) + LowDB (urithi wa JSON) — moduli 147 za kikoa, uhamishaji 213</td></tr>
   <tr><td nowrap><b>Kumbukumbu</b></td><td>Utafutaji wa maandishi kamili wa SQLite FTS5 + upachikaji wa vekta uliokadiriwa kwa int8, ufifishaji wenye aina</td></tr>
   <tr><td nowrap><b>Skima</b></td><td>Zod 4 — uthibitishaji wa ingizo/tokeo la zana za MCP + mikataba ya API</td></tr>
   <tr><td nowrap><b>Itifaki</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

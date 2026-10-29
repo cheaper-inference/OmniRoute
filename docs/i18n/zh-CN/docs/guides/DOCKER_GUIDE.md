@@ -602,6 +602,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **升级：**请预期所有会话都会断开。如果可以，请先排空客户端；默认 SQLite 不支持滚动更新。Compose 的 `restart: unless-stopped` 加上 Docker `HEALTHCHECK` 也会在容器处于 Unhealthy 状态时替换唯一的进程——影响范围相同。
 
+现成的清单和 Helm chart 位于 `deploy/kubernetes/` 和 `deploy/helm/omniroute/` 中——请参阅 [Kubernetes 部署指南](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md)。
+
 用于**单副本**的 Kubernetes 代码片段（必须使用 Recreate；不要针对单个 SQLite 文件增加 `replicas`）：
 
 ```yaml

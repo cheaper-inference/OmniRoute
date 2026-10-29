@@ -8,7 +8,7 @@
 > สร้างใหม่ด้วย: `npm run gen:provider-reference`
 > **สร้างล่าสุด:** 2026-10-27
 
-ผู้ให้บริการทั้งหมด: **376** ราย ดูรายละเอียดแยกตามหมวดหมู่ด้านล่าง
+ผู้ให้บริการทั้งหมด: **377** ราย ดูรายละเอียดแยกตามหมวดหมู่ด้านล่าง
 
 ## หมวดหมู่
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | ภายในเครื่อง, โฮสต์ด้วยตนเอง | [ลิงก์](https://github.com/vllm-project/vllm)                    | คีย์ API เป็นทางเลือก กำหนดค่า URL ฐานของ vLLM ภายในเครื่องที่เข้ากันได้กับ OpenAI (ค่าเริ่มต้น: http://localhost:8000/v1)                                                                                                                                                                                     |
 | `xinference`          | `xinference` | XInference          | ภายในเครื่อง, โฮสต์ด้วยตนเอง | [ลิงก์](https://inference.readthedocs.io)                        | คีย์ API เป็นทางเลือก กำหนดค่า URL ฐานของ XInference ภายในเครื่องที่เข้ากันได้กับ OpenAI (ค่าเริ่มต้น: http://localhost:9997/v1)                                                                                                                                                                               |
 
-## ผู้ให้บริการค้นหา (18)
+## ผู้ให้บริการค้นหา (19)
 
 | ID                  | นามแฝง          | ชื่อ                       | แท็ก  | เว็บไซต์                                                         | หมายเหตุ                                                                                                                               |
 | ------------------- | --------------- | -------------------------- | ----- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                 | ค้นหา | [ลิงก์](https://exa.ai)                                          | คีย์ API จาก dashboard.exa.ai                                                                                                          |
 | `firecrawl`         | `fc`            | Firecrawl                  | ค้นหา | [ลิงก์](https://firecrawl.dev)                                   | คีย์ API จาก firecrawl.dev/app/api-keys (หรือตั้งค่า URL ฐานของ Firecrawl ที่โฮสต์ด้วยตนเอง)                                           |
 | `google-pse-search` | `google-pse`    | Google Programmable Search | ค้นหา | [ลิงก์](https://developers.google.com/custom-search/v1/overview) | ต้องใช้คีย์ Google API และ ID ของ Programmable Search Engine (cx) ของคุณ                                                               |
+| `kimi-search`       | `kimi-search`   | Kimi Search                | ค้นหา | [ลิงก์](https://platform.kimi.ai/docs/api/tools-search)          | คีย์ API ของ Moonshot AI (MOONSHOT_API_KEY) จาก platform.kimi.ai                                                                       |
 | `linkup-search`     | `linkup`        | Linkup Search              | ค้นหา | [ลิงก์](https://docs.linkup.so)                                  | คีย์ Bearer API จากแดชบอร์ด Linkup                                                                                                     |
 | `nimble-search`     | `nimble`        | Nimble Search              | ค้นหา | [ลิงก์](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | คีย์ Bearer API จากแดชบอร์ด Nimble                                                                                                     |
 | `ollama-search`     | `ollama-search` | Ollama Search              | ค้นหา | [ลิงก์](https://ollama.com/settings/keys)                        | ใช้คีย์ API เดียวกับ Ollama Cloud (จาก ollama.com/settings/keys)                                                                       |

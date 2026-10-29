@@ -10,8 +10,8 @@ OmniRoute, üç özel pano sayfasına dağıtılmış üç CLI aracı kategorisi
 
 | Sayfa             | Rota                    | Kavram                                                                                | Sayı                  |
 | ----------------- | ----------------------- | ------------------------------------------------------------------------------------- | --------------------- |
-| **CLI Kodları**   | `/dashboard/cli-code`   | OmniRoute'a yönlendirdiğiniz kodlama araçları (İstemci → CLI → OmniRoute → Sağlayıcı) | 26                    |
-| **CLI Aracıları** | `/dashboard/cli-agents` | OmniRoute'a yönlendirdiğiniz otonom aracılar (aynı akış, daha geniş kapsam)           | 10                    |
+| **CLI Kodları**   | `/dashboard/cli-code`   | OmniRoute'a yönlendirdiğiniz kodlama araçları (İstemci → CLI → OmniRoute → Sağlayıcı) | 27                    |
+| **CLI Aracıları** | `/dashboard/cli-agents` | OmniRoute'a yönlendirdiğiniz otonom aracılar (aynı akış, daha geniş kapsam)           | 11                    |
 | **ACP Aracıları** | `/dashboard/acp-agents` | OmniRoute'un stdio/ACP aracılığıyla arka uç olarak başlattığı CLI'lar (ters akış)     | kayıt defterine bakın |
 
 Eski rotalar 308 aracılığıyla yönlendirilir: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Her biri `--remote <url> --api-key <key>` (yerel bir aracı uzak bir OmniRoute'a göre yapılandırır), `--dry-run` (yazmadan önizleme yapar) ve `--port` seçeneklerini kabul eder. Otomatik model keşfi olmayan araçlar (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive), `--model <id>` seçeneğini (ve etkileşimsiz çalıştırmalar için `--yes` seçeneğini) alır. `setup-5dive`, `$HOME` altına yazmayan tek reçetedir: filo ana makinesine root sahipliğinde bir kimlik doğrulama profili yazarak bir 5dive ajan filosunu yapılandırır; bu nedenle `sudo` üzerinden kendisini yeniden çalıştırır ve kendine ait bir uzak modu yoktur. Bir CLI'ı doğru ortam değişkenleri enjekte edilmiş şekilde ve hiçbir yapılandırma yazmadan başlatmak için genel `omniroute run <target>` başlatıcısını kullanın (claude, codex, aider, goose, opencode, qwen, gemini — hedefler ve takma adlar `bin/cli/cli-manifest.mjs` dosyasından gelir); araç başına eski başlatıcılar olan `omniroute launch` (Claude Code) ve `omniroute launch-codex` (Codex) kullanılabilir olmaya devam eder. Gemini CLI yalnızca başlatma amaçlıdır: bir `omniroute run` hedefidir ancak `setup-*`/`configure` reçetesi yoktur.
+Her biri `--remote <url> --api-key <key>` (yerel bir aracı uzak bir OmniRoute'a göre yapılandırır), `--dry-run` (yazmadan önizleme yapar) ve `--port` seçeneklerini kabul eder. Otomatik model keşfi olmayan araçlar (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes), `--model <id>` seçeneğini (ve etkileşimsiz çalıştırmalar için `--yes` seçeneğini) alır. `setup-5dive`, `$HOME` altına yazmayan tek reçetedir: filo ana makinesine root sahipliğinde bir kimlik doğrulama profili yazarak bir 5dive ajan filosunu yapılandırır; bu nedenle `sudo` üzerinden kendisini yeniden çalıştırır ve kendine ait bir uzak modu yoktur. Bir CLI'ı doğru ortam değişkenleri enjekte edilmiş şekilde ve hiçbir yapılandırma yazmadan başlatmak için genel `omniroute run <target>` başlatıcısını kullanın (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — hedefler ve takma adlar `bin/cli/cli-manifest.mjs` dosyasından gelir); araç başına eski başlatıcılar olan `omniroute launch` (Claude Code) ve `omniroute launch-codex` (Codex) kullanılabilir olmaya devam eder. Gemini CLI yalnızca başlatma amaçlıdır: bir `omniroute run` hedefidir ancak `setup-*`/`configure` reçetesi yoktur.
 
 > **Tam referans:** her komutun ne yazdığını, tüm seçenekleri, yerel ve uzak kullanım farklarını ve hangi araçların `/v1` son ekini gerektirdiğini gösteren ana tablo
 > **[CLI Entegrasyonları](../guides/CLI-INTEGRATIONS.md)** belgesinde yer alır.
@@ -146,7 +147,7 @@ yüzeye eklenip diğerlerine eklenmeyen bir hedef, sessizce sapmaya yol açmak y
 `baseUrlSupport: "partial"` olan araçların kontrol paneli kartında "⚠ Kısmi Temel URL" rozeti gösterilir.
 ---
 
-## 2. CLI Aracıları Kataloğu (10 araç)
+## 2. CLI Aracıları Kataloğu (11 araç)
 
 `/dashboard/cli-agents` sayfasında görünen otonom aracılar:
 
@@ -162,6 +163,7 @@ yüzeye eklenip diğerlerine eklenmeyen bir hedef, sessizce sapmaya yol açmak y
 | letta        | Letta CLI        | Letta                    | full            | false                  |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full            | false                  |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full            | false                  |
+| whycodes     | WhyCodes         | Why Corporation          | full            | false                  |
 
 ---
 

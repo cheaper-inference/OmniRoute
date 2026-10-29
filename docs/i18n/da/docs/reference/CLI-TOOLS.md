@@ -10,8 +10,8 @@ OmniRoute integrerer med tre kategorier af CLI-værktøjer fordelt på tre dedik
 
 | Side           | Rute                    | Koncept                                                                        | Antal         |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------ | ------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Kodeværktøjer, du forbinder til OmniRoute (Klient → CLI → OmniRoute → Udbyder) | 26            |
-| **CLI Agents** | `/dashboard/cli-agents` | Autonome agenter, du forbinder til OmniRoute (samme flow, bredere omfang)      | 10            |
+| **CLI Code's** | `/dashboard/cli-code`   | Kodeværktøjer, du forbinder til OmniRoute (Klient → CLI → OmniRoute → Udbyder) | 27            |
+| **CLI Agents** | `/dashboard/cli-agents` | Autonome agenter, du forbinder til OmniRoute (samme flow, bredere omfang)      | 11            |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI'er, som OmniRoute starter som backend via stdio/ACP (omvendt flow)         | se registeret |
 
 Ældre ruter omdirigerer via 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-De accepterer alle `--remote <url> --api-key <key>` (konfigurer et lokalt værktøj til en ekstern OmniRoute-instans), `--dry-run` (vis en forhåndsvisning uden at skrive) og `--port`. Værktøjer uden automatisk modelregistrering (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) bruger `--model <id>` (og `--yes` til ikke-interaktive kørsler). `setup-5dive` er den eneste opskrift, der ikke skriver under `$HOME`: Den konfigurerer en flåde af 5dive-agenter ved at skrive en root-ejet godkendelsesprofil på flådeværten, så den genstarter sig selv gennem `sudo` og har ikke sin egen eksterne tilstand. Hvis du vil starte en CLI med de korrekte miljøvariabler indsat og helt uden at skrive nogen konfiguration, skal du bruge den generiske starter `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — mål og aliasser kommer fra `bin/cli/cli-manifest.mjs`); de ældre værktøjsspecifikke startere `omniroute launch` (Claude Code) og `omniroute launch-codex` (Codex) er fortsat tilgængelige. Gemini CLI kan kun startes: Den er et mål for `omniroute run`, men har ingen `setup-*`/`configure`-opskrift.
+De accepterer alle `--remote <url> --api-key <key>` (konfigurer et lokalt værktøj til en ekstern OmniRoute-instans), `--dry-run` (vis en forhåndsvisning uden at skrive) og `--port`. Værktøjer uden automatisk modelregistrering (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) bruger `--model <id>` (og `--yes` til ikke-interaktive kørsler). `setup-5dive` er den eneste opskrift, der ikke skriver under `$HOME`: Den konfigurerer en flåde af 5dive-agenter ved at skrive en root-ejet godkendelsesprofil på flådeværten, så den genstarter sig selv gennem `sudo` og har ikke sin egen eksterne tilstand. Hvis du vil starte en CLI med de korrekte miljøvariabler indsat og helt uden at skrive nogen konfiguration, skal du bruge den generiske starter `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — mål og aliasser kommer fra `bin/cli/cli-manifest.mjs`); de ældre værktøjsspecifikke startere `omniroute launch` (Claude Code) og `omniroute launch-codex` (Codex) er fortsat tilgængelige. Gemini CLI kan kun startes: Den er et mål for `omniroute run`, men har ingen `setup-*`/`configure`-opskrift.
 
 > **Fuldstændig reference:** Hovedtabellen — hvad hver kommando skriver, alle flag,
 > lokal kontra ekstern, og hvilke værktøjer der kræver suffikset `/v1` — findes i
@@ -146,7 +147,7 @@ Alle værktøjer, der vises i `/dashboard/cli-code`. Værktøjer med `baseUrlSup
 Værktøjer med `baseUrlSupport: "partial"` viser mærket "⚠ Delvis base-URL" på dashboardkortet.
 ---
 
-## 2. Katalog over CLI-agenter (10 værktøjer)
+## 2. Katalog over CLI-agenter (11 værktøjer)
 
 Autonome agenter, der vises i `/dashboard/cli-agents`:
 
@@ -162,6 +163,7 @@ Autonome agenter, der vises i `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full                   | false               |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full                   | false               |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full                   | false               |
+| whycodes     | WhyCodes         | Why Corporation          | full                   | false               |
 
 ---
 

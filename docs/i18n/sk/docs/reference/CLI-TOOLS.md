@@ -10,8 +10,8 @@ OmniRoute sa integruje s tromi kategóriami nástrojov CLI, ktoré sú rozdelen�
 
 | Stránka        | Trasa                   | Koncept                                                                                 | Počet          |
 | -------------- | ----------------------- | --------------------------------------------------------------------------------------- | -------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Programovacie nástroje smerované na OmniRoute (Klient → CLI → OmniRoute → Poskytovateľ) | 26             |
-| **CLI Agents** | `/dashboard/cli-agents` | Autonómni agenti smerovaní na OmniRoute (rovnaký tok, širší rozsah)                     | 10             |
+| **CLI Code's** | `/dashboard/cli-code`   | Programovacie nástroje smerované na OmniRoute (Klient → CLI → OmniRoute → Poskytovateľ) | 27             |
+| **CLI Agents** | `/dashboard/cli-agents` | Autonómni agenti smerovaní na OmniRoute (rovnaký tok, širší rozsah)                     | 11             |
 | **ACP Agents** | `/dashboard/acp-agents` | Nástroje CLI, ktoré OmniRoute spúšťa ako backend cez stdio/ACP (opačný tok)             | pozri register |
 
 Staršie trasy sa presmerujú prostredníctvom 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Každý z nich podporuje `--remote <url> --api-key <key>` (konfigurácia lokálneho nástroja
 pre vzdialenú inštanciu OmniRoute), `--dry-run` (ukážka bez zápisu) a `--port`. Nástroje
-bez automatického zisťovania modelov (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) používajú
+bez automatického zisťovania modelov (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) používajú
 `--model <id>` (a `--yes` pri neinteraktívnom spustení). `setup-5dive` je jediný
 postup, ktorý nezapisuje do `$HOME`: konfiguruje flotilu agentov 5dive
 zapísaním koreňovým používateľom vlastneného autentifikačného profilu na hostiteľovi flotily, takže sa znova spustí prostredníctvom `sudo`
 a nemá vlastný vzdialený režim. Ak chcete spustiť CLI so
 správne vloženými premennými prostredia bez akéhokoľvek zápisu konfigurácie, použite všeobecný
-spúšťač `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — ciele a aliasy pochádzajú zo súboru `bin/cli/cli-manifest.mjs`); staršie
+spúšťač `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — ciele a aliasy pochádzajú zo súboru `bin/cli/cli-manifest.mjs`); staršie
 spúšťače pre jednotlivé nástroje `omniroute launch` (Claude Code) a `omniroute launch-codex`
 (Codex) zostávajú dostupné. Gemini CLI možno iba spúšťať: je cieľom príkazu `omniroute run`,
 ale nemá postup `setup-*`/`configure`.
@@ -182,7 +183,7 @@ Všetky nástroje, ktoré sa zobrazujú v `/dashboard/cli-code`. Nástroje s hod
 Nástroje s hodnotou `baseUrlSupport: "partial"` zobrazujú na karte ovládacieho panela odznak „⚠ Čiastočná základná URL“.
 ---
 
-## 2. Katalóg CLI agentov (10 nástrojov)
+## 2. Katalóg CLI agentov (11 nástrojov)
 
 Autonómni agenti, ktorí sa zobrazujú v `/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ Autonómni agenti, ktorí sa zobrazujú v `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full            | false               |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full            | false               |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full            | false               |
+| whycodes     | WhyCodes         | Why Corporation          | full            | false               |
 
 ---
 

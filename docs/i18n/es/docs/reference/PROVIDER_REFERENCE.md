@@ -8,7 +8,7 @@
 > Volver a generar con: `npm run gen:provider-reference`
 > **Última generación:** 2026-10-27
 
-Total de proveedores: **376**. Consulte el desglose por categorías a continuación.
+Total de proveedores: **377**. Consulte el desglose por categorías a continuación.
 
 ## Categorías
 
@@ -397,7 +397,7 @@ Usa el panel en `/dashboard/providers` para habilitar, configurar y probar cada 
 | `vllm`                | `vllm`       | vLLM                | Local, autoalojado | [link](https://github.com/vllm-project/vllm)                    | Clave API opcional. Configure la URL base compatible con OpenAI de vLLM local (predeterminado: http://localhost:8000/v1).                                                                                                                                                                                     |
 | `xinference`          | `xinference` | XInference          | Local, autoalojado | [link](https://inference.readthedocs.io)                        | Clave API opcional. Configure la URL base compatible con OpenAI de XInference local (predeterminado: http://localhost:9997/v1).                                                                                                                                                                               |
 
-## Proveedores de búsqueda (18)
+## Proveedores de búsqueda (19)
 
 | ID                  | Alias           | Nombre                                  | Etiquetas | Sitio web                                                         | Notas                                                                                                                                            |
 | ------------------- | --------------- | --------------------------------------- | --------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -407,6 +407,7 @@ Usa el panel en `/dashboard/providers` para habilitar, configurar y probar cada 
 | `exa-search`        | `exa-search`    | Exa Search                              | Búsqueda  | [enlace](https://exa.ai)                                          | Clave de API de dashboard.exa.ai                                                                                                                 |
 | `firecrawl`         | `fc`            | Firecrawl                               | Búsqueda  | [enlace](https://firecrawl.dev)                                   | Clave de API de firecrawl.dev/app/api-keys (o establezca la URL base de su instancia autoalojada de Firecrawl)                                   |
 | `google-pse-search` | `google-pse`    | Google Programmable Search              | Búsqueda  | [enlace](https://developers.google.com/custom-search/v1/overview) | Requiere una clave de API de Google y el ID de su motor de búsqueda programable (cx)                                                             |
+| `kimi-search`       | `kimi-search`   | Kimi Search                             | Búsqueda  | [enlace](https://platform.kimi.ai/docs/api/tools-search)          | Clave de API de Moonshot AI (MOONSHOT_API_KEY) de platform.kimi.ai                                                                               |
 | `linkup-search`     | `linkup`        | Linkup Search                           | Búsqueda  | [enlace](https://docs.linkup.so)                                  | Clave de API Bearer del panel de Linkup                                                                                                          |
 | `nimble-search`     | `nimble`        | Nimble Search                           | Búsqueda  | [enlace](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Clave de API Bearer del panel de Nimble                                                                                                          |
 | `ollama-search`     | `ollama-search` | Ollama Search                           | Búsqueda  | [enlace](https://ollama.com/settings/keys)                        | La misma clave de API que Ollama Cloud (de ollama.com/settings/keys)                                                                             |

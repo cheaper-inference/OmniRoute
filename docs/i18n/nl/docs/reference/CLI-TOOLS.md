@@ -10,8 +10,8 @@ OmniRoute integreert met drie categorieën CLI-tools, verdeeld over drie specifi
 
 | Pagina         | Route                   | Concept                                                                              | Aantal       |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------ | ------------ |
-| **CLI Code's** | `/dashboard/cli-code`   | Programmeertools die u naar OmniRoute verwijst (Client → CLI → OmniRoute → Provider) | 26           |
-| **CLI Agents** | `/dashboard/cli-agents` | Autonome agents die u naar OmniRoute verwijst (dezelfde stroom, breder bereik)       | 10           |
+| **CLI Code's** | `/dashboard/cli-code`   | Programmeertools die u naar OmniRoute verwijst (Client → CLI → OmniRoute → Provider) | 27           |
+| **CLI Agents** | `/dashboard/cli-agents` | Autonome agents die u naar OmniRoute verwijst (dezelfde stroom, breder bereik)       | 11           |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI's die OmniRoute via stdio/ACP als backend start (omgekeerde stroom)              | zie register |
 
 Verouderde routes worden omgeleid via 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Elke opdracht accepteert `--remote <url> --api-key <key>` (om een lokaal hulpmiddel voor een externe OmniRoute te configureren), `--dry-run` (voorvertoning zonder te schrijven) en `--port`. Hulpmiddelen zonder automatische modeldetectie (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) accepteren `--model <id>` (en `--yes` voor niet-interactieve uitvoeringen). `setup-5dive` is de enige configuratieprocedure die niet onder `$HOME` schrijft: deze configureert een vloot van 5dive-agents door een auth-profiel dat eigendom is van root op de vloothost te schrijven, voert zichzelf daarom opnieuw uit via `sudo` en heeft geen eigen externe modus. Als u een CLI wilt starten met de juiste geïnjecteerde omgevingsvariabelen zonder enige configuratie te schrijven, gebruikt u de generieke launcher `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — doelen en aliassen zijn afkomstig uit `bin/cli/cli-manifest.mjs`); de verouderde launchers per hulpmiddel, `omniroute launch` (Claude Code) en `omniroute launch-codex` (Codex), blijven beschikbaar. Gemini CLI kan alleen worden gestart: het is een doel voor `omniroute run`, maar heeft geen `setup-*`-/`configure`-configuratieprocedure.
+Elke opdracht accepteert `--remote <url> --api-key <key>` (om een lokaal hulpmiddel voor een externe OmniRoute te configureren), `--dry-run` (voorvertoning zonder te schrijven) en `--port`. Hulpmiddelen zonder automatische modeldetectie (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) accepteren `--model <id>` (en `--yes` voor niet-interactieve uitvoeringen). `setup-5dive` is de enige configuratieprocedure die niet onder `$HOME` schrijft: deze configureert een vloot van 5dive-agents door een auth-profiel dat eigendom is van root op de vloothost te schrijven, voert zichzelf daarom opnieuw uit via `sudo` en heeft geen eigen externe modus. Als u een CLI wilt starten met de juiste geïnjecteerde omgevingsvariabelen zonder enige configuratie te schrijven, gebruikt u de generieke launcher `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — doelen en aliassen zijn afkomstig uit `bin/cli/cli-manifest.mjs`); de verouderde launchers per hulpmiddel, `omniroute launch` (Claude Code) en `omniroute launch-codex` (Codex), blijven beschikbaar. Gemini CLI kan alleen worden gestart: het is een doel voor `omniroute run`, maar heeft geen `setup-*`-/`configure`-configuratieprocedure.
 
 > **Volledige referentie:** de hoofdtabel — wat elke opdracht schrijft, alle vlaggen,
 > lokaal versus extern en welke hulpmiddelen een `/v1`-achtervoegsel vereisen — staat in
@@ -150,7 +151,7 @@ Alle tools die worden weergegeven in `/dashboard/cli-code`. Tools met `baseUrlSu
 Tools met `baseUrlSupport: "partial"` tonen de badge "⚠ Gedeeltelijke basis-URL" op de dashboardkaart.
 ---
 
-## 2. Catalogus van CLI-agents (10 tools)
+## 2. Catalogus van CLI-agents (11 tools)
 
 Autonome agents die worden weergegeven in `/dashboard/cli-agents`:
 
@@ -166,6 +167,7 @@ Autonome agents die worden weergegeven in `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

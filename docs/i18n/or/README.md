@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — ମାଗଣା AI ଗେଟୱେ
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — କୋଡିଂ କରିବା କେବେବି ବନ୍ଦ କରନ୍ତୁ ନାହିଁ। ପ୍ରତ୍ୟେକ AI ଟୁଲ୍ → 376 ପ୍ରଦାନକାରୀ — 150+ ମାଗଣା — ଗୋଟିଏ ଏଣ୍ଡପଏଣ୍ଟ ମାଧ୍ୟମରେ। Claude Code, Codex, Cursor, Cline, Copilot ଏବଂ Antigravityକୁ ସ୍ୱୟଂଚାଳିତ ଫଲ୍ବ୍ୟାକ୍ ସହିତ ମାଗଣା Claude / GPT / Geminiରେ ସଂଯୋଗ କରନ୍ତୁ। RTK + Caveman ଷ୍ଟାକ୍ଡ କମ୍ପ୍ରେସନ୍ 15–95% ଟୋକେନ୍ (~89% ହାରାହାରି) ସଞ୍ଚୟ କରେ — କେବେବି ସୀମାରେ ପହଞ୍ଚନ୍ତୁ ନାହିଁ। 376 AI ପ୍ରଦାନକାରୀ · 150+ ମାଗଣା ସ୍ତର · ~1.62B ମାଗଣା ଟୋକେନ୍/ମାସ · 20 ରାଉଟିଂ କୌଶଳ · ଆରମ୍ଭ କରିବାକୁ $0।"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — କୋଡିଂ କରିବା କେବେବି ବନ୍ଦ କରନ୍ତୁ ନାହିଁ। ପ୍ରତ୍ୟେକ AI ଟୁଲ୍ → 377 ପ୍ରଦାନକାରୀ — 150+ ମାଗଣା — ଗୋଟିଏ ଏଣ୍ଡପଏଣ୍ଟ ମାଧ୍ୟମରେ। Claude Code, Codex, Cursor, Cline, Copilot ଏବଂ Antigravityକୁ ସ୍ୱୟଂଚାଳିତ ଫଲ୍ବ୍ୟାକ୍ ସହିତ ମାଗଣା Claude / GPT / Geminiରେ ସଂଯୋଗ କରନ୍ତୁ। RTK + Caveman ଷ୍ଟାକ୍ଡ କମ୍ପ୍ରେସନ୍ 15–95% ଟୋକେନ୍ (~89% ହାରାହାରି) ସଞ୍ଚୟ କରେ — କେବେବି ସୀମାରେ ପହଞ୍ଚନ୍ତୁ ନାହିଁ। 377 AI ପ୍ରଦାନକାରୀ · 150+ ମାଗଣା ସ୍ତର · ~1.62B ମାଗଣା ଟୋକେନ୍/ମାସ · 20 ରାଉଟିଂ କୌଶଳ · ଆରମ୍ଭ କରିବାକୁ $0।"/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                          |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------ | :---------------------: | :---------: | :-------------------: |
-| 🌐 ପ୍ରଦାନକାରୀ            |           352           |   **358**   |          376          |
+| 🌐 ପ୍ରଦାନକାରୀ            |           352           |   **358**   |          377          |
 | 🧠 ଅନନ୍ୟ ଚାଟ୍ ମଡେଲ୍ ID   |          1320           |  **1374**   |         1475          |
 | 🖼️ ମୋଡାଲିଟି ବ୍ରିଜ୍       | 🆕 ଭିଜନ୍ + ଅଡିଓ + ଭିଡିଓ |      ✓      |           ✓           |
 | 📡 Radar ମାଗଣା କ୍ୟାଟାଲଗ୍ |       🆕 ଇଚ୍ଛାଧୀନ       |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ ବୈଶିଷ୍ଟ୍ୟଗୁଡ଼ିକ</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 କମ୍ବୋଗୁଡ଼ିକ</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 ପ୍ରଦାନକାରୀମାନେ</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 ପ୍ରଦାନକାରୀମାନେ</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ପ୍ରତିଶ୍ରୁତି — ଗୋଟିଏ ଏଣ୍ଡପଏଣ୍ଟ ଏବଂ 376 ପ୍ରଦାନକାରୀ। ଅନ୍ୟ ଏକ ସୁସ୍ଥ ଟାର୍ଗେଟ୍ ଉପଲବ୍ଧ ଥିବା ପର୍ଯ୍ୟନ୍ତ ସ୍ୱୟଂଚାଳିତ ଫଲ୍ବ୍ୟାକ୍ ରାଉଟିଂ ଜାରି ରଖେ। ଛଅଟି ସ୍ତମ୍ଭ: 376 ପ୍ରଦାନକାରୀଙ୍କ ମଧ୍ୟରେ ସହନଶୀଳ ଫଲ୍ବ୍ୟାକ୍ · ଯୋଗ୍ୟ ୱାର୍କଲୋଡ୍ରେ 95% ପର୍ଯ୍ୟନ୍ତ ଟୋକନ୍ ସଞ୍ଚୟ · 150+ ମାଗଣା ଟିୟର୍ ଏବଂ 52ଟି ପୁନରାବୃତ୍ତିଶୀଳ/କୀ-ବିହୀନ ସବୁଦିନ ପାଇଁ ମାଗଣା ପ୍ରଦାନକାରୀ ସହିତ ଆରମ୍ଭ କରିବାକୁ $0 · ଗୋଟିଏ କନ୍ଫିଗ୍ ମାଧ୍ୟମରେ 37ଟି CLI/ଏଜେଣ୍ଟ ଇଣ୍ଟିଗ୍ରେସନ୍ · /v1 ରେ OpenAI, Claude, Gemini ଏବଂ Responses API ସୁସଙ୍ଗତତା · ସର୍କିଟ୍ ବ୍ରେକର୍, TLS ଷ୍ଟେଲ୍ଥ, MCPର 110ଟି ଟୁଲ୍, A2A, ମେମୋରି, ଗାର୍ଡରେଲ୍, ଇଭାଲ୍ ଏବଂ 7,800+ ଟ୍ରାକ୍ କରାଯାଇଥିବା ଟେଷ୍ଟ ଫାଇଲ୍ରେ 56,000+ ସ୍ଥିର ଟେଷ୍ଟ ଘୋଷଣା ସମେତ ପ୍ରଡକ୍ସନ୍ କଣ୍ଟ୍ରୋଲ୍।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ପ୍ରତିଶ୍ରୁତି — ଗୋଟିଏ ଏଣ୍ଡପଏଣ୍ଟ ଏବଂ 377 ପ୍ରଦାନକାରୀ। ଅନ୍ୟ ଏକ ସୁସ୍ଥ ଟାର୍ଗେଟ୍ ଉପଲବ୍ଧ ଥିବା ପର୍ଯ୍ୟନ୍ତ ସ୍ୱୟଂଚାଳିତ ଫଲ୍ବ୍ୟାକ୍ ରାଉଟିଂ ଜାରି ରଖେ। ଛଅଟି ସ୍ତମ୍ଭ: 377 ପ୍ରଦାନକାରୀଙ୍କ ମଧ୍ୟରେ ସହନଶୀଳ ଫଲ୍ବ୍ୟାକ୍ · ଯୋଗ୍ୟ ୱାର୍କଲୋଡ୍ରେ 95% ପର୍ଯ୍ୟନ୍ତ ଟୋକନ୍ ସଞ୍ଚୟ · 150+ ମାଗଣା ଟିୟର୍ ଏବଂ 52ଟି ପୁନରାବୃତ୍ତିଶୀଳ/କୀ-ବିହୀନ ସବୁଦିନ ପାଇଁ ମାଗଣା ପ୍ରଦାନକାରୀ ସହିତ ଆରମ୍ଭ କରିବାକୁ $0 · ଗୋଟିଏ କନ୍ଫିଗ୍ ମାଧ୍ୟମରେ 37ଟି CLI/ଏଜେଣ୍ଟ ଇଣ୍ଟିଗ୍ରେସନ୍ · /v1 ରେ OpenAI, Claude, Gemini ଏବଂ Responses API ସୁସଙ୍ଗତତା · ସର୍କିଟ୍ ବ୍ରେକର୍, TLS ଷ୍ଟେଲ୍ଥ, MCPର 110ଟି ଟୁଲ୍, A2A, ମେମୋରି, ଗାର୍ଡରେଲ୍, ଇଭାଲ୍ ଏବଂ 7,800+ ଟ୍ରାକ୍ କରାଯାଇଥିବା ଟେଷ୍ଟ ଫାଇଲ୍ରେ 56,000+ ସ୍ଥିର ଟେଷ୍ଟ ଘୋଷଣା ସମେତ ପ୍ରଡକ୍ସନ୍ କଣ୍ଟ୍ରୋଲ୍।"/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRouteକୁ କ’ଣ ସ୍ୱତନ୍ତ୍ର କରେ — 13ଟି କ୍ଷମତାରେ 9router, OpenRouter, CLIProxyAPI ଏବଂ LiteLLM ସହିତ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ ତାରିଖର ବୈଶିଷ୍ଟ୍ୟ ତୁଳନା। OmniRoute: 376ଟି ପ୍ରଦାତା, 150+ଟି ଅନ୍ତର୍ନିର୍ମିତ ମାଗଣା ସ୍ତର, 20ଟି ରାଉଟିଂ କୌଶଳ, 12-ଇଞ୍ଜିନ୍ ଟୋକନ୍ ସଙ୍କୋଚନ, 110ଟି ଟୁଲ୍ ସହିତ ଅନ୍ତର୍ନିର୍ମିତ MCP ସର୍ଭର, A2A ଏଜେଣ୍ଟ ପ୍ରୋଟୋକଲ୍, ସ୍ଥାୟୀ ମେମୋରି, ସୁରକ୍ଷା ନିୟମାବଳୀ, କ୍ଲାଉଡ୍ ଏଜେଣ୍ଟ, TLS ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଗୋପନୀୟତା, Desktop/Termux/PWA ଏବଂ 67ଟି i18n UI ଲୋକେଲ୍। OmniRoute MIT-ଲାଇସେନ୍ସପ୍ରାପ୍ତ ଏବଂ ସ୍ୱୟଂ-ହୋଷ୍ଟ କରାଯାଇପାରେ। ପ୍ରତିଯୋଗୀଙ୍କ କ୍ଷମତା ଏବଂ ସଂଖ୍ୟା ପରିବର୍ତ୍ତିତ ହୋଇପାରେ; ଲିଙ୍କ୍ ହୋଇଥିବା ପଦ୍ଧତି ଦେଖନ୍ତୁ।"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRouteକୁ କ’ଣ ସ୍ୱତନ୍ତ୍ର କରେ — 13ଟି କ୍ଷମତାରେ 9router, OpenRouter, CLIProxyAPI ଏବଂ LiteLLM ସହିତ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ ତାରିଖର ବୈଶିଷ୍ଟ୍ୟ ତୁଳନା। OmniRoute: 377ଟି ପ୍ରଦାତା, 150+ଟି ଅନ୍ତର୍ନିର୍ମିତ ମାଗଣା ସ୍ତର, 20ଟି ରାଉଟିଂ କୌଶଳ, 12-ଇଞ୍ଜିନ୍ ଟୋକନ୍ ସଙ୍କୋଚନ, 110ଟି ଟୁଲ୍ ସହିତ ଅନ୍ତର୍ନିର୍ମିତ MCP ସର୍ଭର, A2A ଏଜେଣ୍ଟ ପ୍ରୋଟୋକଲ୍, ସ୍ଥାୟୀ ମେମୋରି, ସୁରକ୍ଷା ନିୟମାବଳୀ, କ୍ଲାଉଡ୍ ଏଜେଣ୍ଟ, TLS ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଗୋପନୀୟତା, Desktop/Termux/PWA ଏବଂ 67ଟି i18n UI ଲୋକେଲ୍। OmniRoute MIT-ଲାଇସେନ୍ସପ୍ରାପ୍ତ ଏବଂ ସ୍ୱୟଂ-ହୋଷ୍ଟ କରାଯାଇପାରେ। ପ୍ରତିଯୋଗୀଙ୍କ କ୍ଷମତା ଏବଂ ସଂଖ୍ୟା ପରିବର୍ତ୍ତିତ ହୋଇପାରେ; ଲିଙ୍କ୍ ହୋଇଥିବା ପଦ୍ଧତି ଦେଖନ୍ତୁ।"/>
 
 <sub>📊 ସମ୍ପୂର୍ଣ୍ଣ ପଦ୍ଧତି &amp; 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM ସହିତ ପ୍ରତ୍ୟେକ ବୈଶିଷ୍ଟ୍ୟର ବିସ୍ତୃତ ତୁଳନା → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar ଇଚ୍ଛାଧୀନ ଏବଂ କେବଳ GET ପାଇଁ ଉଦ୍
 - **🖼️ ନୂଆ ଏଣ୍ଡପଏଣ୍ଟଗୁଡ଼ିକ** — `/v1/ocr` (Mistral OCR) ଏବଂ `/v1/audio/translations` (Whisper-ଶୈଳୀ) ମିଡିଆ ସୁବିଧାଗୁଡ଼ିକୁ ସମ୍ପୂର୍ଣ୍ଣ କରେ। → [API ସନ୍ଦର୍ଭ](docs/reference/API_REFERENCE.md)
 - **🎨 ଛବି / ଭିଡିଓ / ଅଡିଓ ଜେନେରେସନ୍** — ମିଡିଆ ପାଇଁ ଗୋଟିଏ API: xAI Grok Imagine ଏବଂ Novita AI ଭିଡିଓ, ComfyUI, Magnific, Adobe Firefly, Segmind, ଏବଂ ElevenLabs ପରି ସ୍ପିଚ୍ ପ୍ରଦାନକାରୀ। → [API ସନ୍ଦର୍ଭ](docs/reference/API_REFERENCE.md)
 - **🌍 ଡିପ୍ଲୟମେଣ୍ଟ ଏବଂ ପରିଚାଳନା** — ରିଭର୍ସ-ପ୍ରକ୍ସି `basePath`, ବ୍ରାଉଜର୍-ଭାଷାର ସ୍ୱୟଂଚାଳିତ ଚିହ୍ନଟ, ପ୍ରତ୍ୟେକ କୀ ପାଇଁ ଡିଭାଇସ୍ ଟ୍ରାକିଂ, ରୁଟ୍-ବିହୀନ MITM ଟ୍ରଷ୍ଟ, zh-TW ସ୍ଥାନୀୟକରଣ। → [ପରିବେଶ](docs/reference/ENVIRONMENT.md)
-- **🤝 ଅଧିକ ପ୍ରଦାନକାରୀ ଏବଂ ଏଜେଣ୍ଟ** — କ୍ଲାଉଡ୍ ଏଜେଣ୍ଟ (Codex Cloud, Cursor, Devin, Jules), ବ୍ରାଉଜର୍ + OAuth ଲଗ୍ଇନ୍ ସହିତ Grok Build (xAI), Ollama ପାଇଁ ପ୍ରଥମ-ଶ୍ରେଣୀର କାର୍ଡ, Claude Opus 5 ଏବଂ Sonnet 5, Kimiର ଆଧିକାରିକ ସହଭାଗିତା (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ଏବଂ ଏକ ନବୀକୃତ **376-ପ୍ରଦାନକାରୀ କ୍ୟାଟାଲଗ୍**। → [ପ୍ରଦାନକାରୀମାନେ](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 ଅଧିକ ପ୍ରଦାନକାରୀ ଏବଂ ଏଜେଣ୍ଟ** — କ୍ଲାଉଡ୍ ଏଜେଣ୍ଟ (Codex Cloud, Cursor, Devin, Jules), ବ୍ରାଉଜର୍ + OAuth ଲଗ୍ଇନ୍ ସହିତ Grok Build (xAI), Ollama ପାଇଁ ପ୍ରଥମ-ଶ୍ରେଣୀର କାର୍ଡ, Claude Opus 5 ଏବଂ Sonnet 5, Kimiର ଆଧିକାରିକ ସହଭାଗିତା (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ଏବଂ ଏକ ନବୀକୃତ **377-ପ୍ରଦାନକାରୀ କ୍ୟାଟାଲଗ୍**। → [ପ୍ରଦାନକାରୀମାନେ](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 ରାଉଟିଂ ସ୍ୱଚ୍ଛତା** — ପ୍ରତ୍ୟେକ ପ୍ରତିକ୍ରିୟାରେ ତାହାକୁ ସେବା ଦେଇଥିବା କୌଶଳ/ପ୍ରଦାନକାରୀ/ଲେଟେନ୍ସିର ନାମ ସହିତ ଏକ `X-OmniRoute-Decision` ହେଡର୍ ଥାଏ; ଏକ ନୂଆ `cache-optimized` କମ୍ବୋ କୌଶଳ + ଅଟୋ-କମ୍ବୋ `cacheAffinity` ଫ୍ୟାକ୍ଟର୍ ପୁନରାବୃତ୍ତି ଅନୁରୋଧଗୁଡ଼ିକୁ କ୍ୟାଶ୍ ହୋଇଥିବା ପ୍ରିଫିକ୍ସ ଧାରଣ କରୁଥିବା କନେକ୍ସନ୍କୁ ପୁଣି ରୁଟ୍ କରେ, ଏବଂ ଏକ କେବଳ-ପଠନୀୟ `/v1/auto-combo/{channel}/candidates` ଏଣ୍ଡପଏଣ୍ଟ ଗୋଟିଏ `auto/*` ଚ୍ୟାନେଲ୍ର ସଜୀବ ପ୍ରାର୍ଥୀ ପୁଲ୍ ପ୍ରକାଶ କରେ। → [ଅଟୋ-କମ୍ବୋ](docs/routing/AUTO-COMBO.md)
 - **⚡ ସ୍ଥାନୀୟ କାର୍ଯ୍ୟଦକ୍ଷତା ଓ ଅବସଂରଚନା** — ଏକ-କ୍ଲିକ୍ ସ୍ଥାନୀୟ Redis, Cloudflare Workers / Deno Deploy ରିଲେ ଡିପ୍ଲୟର୍, ଏବଂ ପର୍ଯ୍ୟବେକ୍ଷିତ ଏମ୍ବେଡେଡ୍ ସେବା ଭାବେ Bifrost ଓ Mux। → [ଏମ୍ବେଡେଡ୍ ସେବାଗୁଡ଼ିକ](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 ବକ୍ସରେ ଆହୁରି ମଧ୍ୟ ଅଛି** — ପ୍ଲଗଇନ୍ ଫ୍ରେମୱାର୍କ + ମାର୍କେଟପ୍ଲେସ୍, Omni/Agent/GitHub ସ୍କିଲ୍ ଫ୍ରେମୱାର୍କଗୁଡ଼ିକ, Obsidian ଭଲ୍ଟ ଇଣ୍ଟିଗ୍ରେସନ୍ (22ଟି MCP ଟୁଲ୍), OpenAI-ସୁସଙ୍ଗତ Batch ଓ Files APIଗୁଡ଼ିକ, ସିମାଣ୍ଟିକ୍ ରେସ୍ପନ୍ସ କ୍ୟାଶ୍, ଲିଡର୍ବୋର୍ଡ ସହିତ ଗେମିଫିକେସନ୍, ACP ଏଜେଣ୍ଟ ଡିସକଭରି (15ଟି ବିଲ୍ଟ-ଇନ୍ ଏଜେଣ୍ଟ), BigQueryକୁ ନିର୍ଦ୍ଧାରିତ ସମୟରେ ଲଗ୍ ଏକ୍ସପୋର୍ଟ, `auto/chaos` ସମାନ୍ତରାଳ ମଲ୍ଟି-ମଡେଲ୍ ଫ୍ୟାନ୍-ଆଉଟ୍, ଏକ Telegram ବଟ୍ ବ୍ରିଜ୍, ଏକ ଇନ୍-ଆପ୍ ଭର୍ସନ୍ ମ୍ୟାନେଜର୍ ଏବଂ LMArena-ELO ମାଗଣା-ପ୍ରଦାନକାରୀ ର୍ୟାଙ୍କିଙ୍ଗ୍। → [ଡକ୍ୟୁମେଣ୍ଟେସନ୍](docs/README.md)
@@ -657,7 +657,7 @@ Radar ଇଚ୍ଛାଧୀନ ଏବଂ କେବଳ GET ପାଇଁ ଉଦ୍
 <b>＋ ଏଗୁଡ଼ିକ ସହିତ ମଧ୍ୟ କାମ କରେ</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>ଯେକୌଣସି OpenAI-ସୁସଙ୍ଗତ ଟୁଲ୍</b>
 </div>
 
-<sub>📖 ସମସ୍ତ 37ଟି ଟୁଲ୍ (27ଟି CLI Code + 10ଟି CLI Agent) ପାଇଁ ପ୍ରତି-ଟୁଲ୍ ସେଟ୍ଅପ୍ → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode ପ୍ଲଗ୍ଇନ୍ → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 ସମସ୍ତ 38ଟି ଟୁଲ୍ (27ଟି CLI Code + 11ଟି CLI Agent) ପାଇଁ ପ୍ରତି-ଟୁଲ୍ ସେଟ୍ଅପ୍ → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode ପ୍ଲଗ୍ଇନ୍ → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ omniroute configure codex          # ଏଗୁଡ଼ିକ ମଧ୍ୟ: claude 
 
 <div align="center">
 
-## 🌐 376 AI ପ୍ରଦାନକାରୀ — 153ଟି କ୍ୟାଟାଲଗ୍ରେ ମାଗଣା ଭାବେ ଚିହ୍ନିତ
+## 🌐 377 AI ପ୍ରଦାନକାରୀ — 153ଟି କ୍ୟାଟାଲଗ୍ରେ ମାଗଣା ଭାବେ ଚିହ୍ନିତ
 
 </div>
 
-> କ୍ୟାନୋନିକାଲ୍ ଚାଟ୍, ମିଡିଆ, ସର୍ଚ୍ଚ, ଲୋକାଲ୍, କ୍ଲାଉଡ୍-ଏଜେଣ୍ଟ ଏବଂ ସିଷ୍ଟମ୍ ସଂଗ୍ରହଗୁଡ଼ିକରେ **376 ପଞ୍ଜୀକୃତ ପ୍ରଦାନକାରୀ** ଅଛନ୍ତି, ଯେଉଁଥିରୁ **153ଟିରେ `hasFree: true` ଡିସ୍କଭରି ମେଟାଡାଟା ରହିଛି**। ଚାଟ୍ ମଡେଲ୍ ରେଜିଷ୍ଟ୍ରିରେ **239 ପ୍ରଦାନକାରୀ / 3,059ଟି ସ୍ୱତନ୍ତ୍ର ପ୍ରଦାନକାରୀ-ମଡେଲ୍ ଯୁଗଳ / 1,475ଟି କଞ୍ଚା ମଡେଲ୍ ID** ଅନ୍ତର୍ଭୁକ୍ତ; ପୃଥକ ମାଗଣା-ବଜେଟ୍ କ୍ୟାଟାଲଗ୍ରେ **484ଟି ପ୍ରତି-ମଡେଲ୍ ଧାଡ଼ି**, **34ଟି ପୁନରାବୃତ୍ତ ପୁଲ୍** ଏବଂ **52ଟି ପୁନରାବୃତ୍ତ/କୀଲେସ୍ ସର୍ବଦା-ମାଗଣା ପ୍ରଦାନକାରୀ** ଅଛନ୍ତି। ଡିଜାଇନ୍ ଅନୁଯାୟୀ ଏଗୁଡ଼ିକ ଭିନ୍ନ ହର; ସଂଜ୍ଞା ଏବଂ ପୁଲ୍-ଡିଡୁପ୍ଲିକେଟେଡ୍ ଗଣନାଗୁଡ଼ିକ [ପ୍ରଦାନକାରୀ ସନ୍ଦର୍ଭ](docs/reference/PROVIDER_REFERENCE.md) ଏବଂ [ମାଗଣା ସ୍ତର](docs/reference/FREE_TIERS.md)ରେ ଉପଲବ୍ଧ।
+> କ୍ୟାନୋନିକାଲ୍ ଚାଟ୍, ମିଡିଆ, ସର୍ଚ୍ଚ, ଲୋକାଲ୍, କ୍ଲାଉଡ୍-ଏଜେଣ୍ଟ ଏବଂ ସିଷ୍ଟମ୍ ସଂଗ୍ରହଗୁଡ଼ିକରେ **377 ପଞ୍ଜୀକୃତ ପ୍ରଦାନକାରୀ** ଅଛନ୍ତି, ଯେଉଁଥିରୁ **153ଟିରେ `hasFree: true` ଡିସ୍କଭରି ମେଟାଡାଟା ରହିଛି**। ଚାଟ୍ ମଡେଲ୍ ରେଜିଷ୍ଟ୍ରିରେ **239 ପ୍ରଦାନକାରୀ / 3,059ଟି ସ୍ୱତନ୍ତ୍ର ପ୍ରଦାନକାରୀ-ମଡେଲ୍ ଯୁଗଳ / 1,475ଟି କଞ୍ଚା ମଡେଲ୍ ID** ଅନ୍ତର୍ଭୁକ୍ତ; ପୃଥକ ମାଗଣା-ବଜେଟ୍ କ୍ୟାଟାଲଗ୍ରେ **484ଟି ପ୍ରତି-ମଡେଲ୍ ଧାଡ଼ି**, **34ଟି ପୁନରାବୃତ୍ତ ପୁଲ୍** ଏବଂ **52ଟି ପୁନରାବୃତ୍ତ/କୀଲେସ୍ ସର୍ବଦା-ମାଗଣା ପ୍ରଦାନକାରୀ** ଅଛନ୍ତି। ଡିଜାଇନ୍ ଅନୁଯାୟୀ ଏଗୁଡ଼ିକ ଭିନ୍ନ ହର; ସଂଜ୍ଞା ଏବଂ ପୁଲ୍-ଡିଡୁପ୍ଲିକେଟେଡ୍ ଗଣନାଗୁଡ଼ିକ [ପ୍ରଦାନକାରୀ ସନ୍ଦର୍ଭ](docs/reference/PROVIDER_REFERENCE.md) ଏବଂ [ମାଗଣା ସ୍ତର](docs/reference/FREE_TIERS.md)ରେ ଉପଲବ୍ଧ।
 
 <div align="center">
 
@@ -765,6 +765,7 @@ omniroute configure codex          # ଏଗୁଡ଼ିକ ମଧ୍ୟ: claude 
 <table>
   <tr><th align="left">ପ୍ଲାଟଫର୍ମ</th><th align="left">ଇନଷ୍ଟଲ୍</th><th align="left">ବିଶେଷତା</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (ଗ୍ଲୋବାଲ୍)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">ଗୋଟିଏ କମାଣ୍ଡ, ଯେକୌଣସି OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (ଗ୍ଲୋବାଲ୍)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">ସମର୍ଥନ ଗ୍ୟାରେଣ୍ଟି ବିନା ସର୍ବୋତ୍ତମ-ପ୍ରୟାସ ଆଧାରିତ ସୁସଙ୍ଗତତା; Node.js ହେଉଛି ସମର୍ଥିତ ରନ୍ଟାଇମ୍।</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">ମଲ୍ଟି-ଆର୍କ <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>ଡେସ୍କଟପ୍ (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">ନେଟିଭ୍ ୱିଣ୍ଡୋ + ସିଷ୍ଟମ୍ ଟ୍ରେ — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>ମେନୁ-ବାର୍ (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">ସର୍ଭର୍‌ର ତଦାରଖ ଓ ସ୍ୱୟଂଚାଳିତ ଅପଡେଟ୍ କରେ — <b>macOS</b></td></tr>
@@ -1307,7 +1308,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
   <tr><td nowrap><b>ରନ୍ଟାଇମ୍</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ଭାଷା</b></td><td>TypeScript 6.0 — <code>src/</code> ଏବଂ <code>open-sse/</code> ସାରା <b>100% TypeScript</b> (v2.0 ପରଠାରୁ କୋର୍ରେ ଶୂନ୍ୟ <code>any</code>)</td></tr>
   <tr><td nowrap><b>ଫ୍ରେମ୍ୱର୍କ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ଡାଟାବେସ୍</b></td><td>better-sqlite3 (SQLite, WAL ଜର୍ନାଲିଂ) + LowDB (JSON ଲିଗେସି) — 147ଟି ଡୋମେନ୍ ମଡ୍ୟୁଲ୍, 211ଟି ମାଇଗ୍ରେସନ୍</td></tr>
+  <tr><td nowrap><b>ଡାଟାବେସ୍</b></td><td>better-sqlite3 (SQLite, WAL ଜର୍ନାଲିଂ) + LowDB (JSON ଲିଗେସି) — 147ଟି ଡୋମେନ୍ ମଡ୍ୟୁଲ୍, 213ଟି ମାଇଗ୍ରେସନ୍</td></tr>
   <tr><td nowrap><b>ମେମୋରି</b></td><td>SQLite FTS5 ପୂର୍ଣ୍ଣ-ପାଠ୍ୟ + int8-କ୍ୱାଣ୍ଟାଇଜ୍ଡ ଭେକ୍ଟର୍ ଏମ୍ବେଡିଂ, ଟାଇପ୍ଡ ଡିକେ</td></tr>
   <tr><td nowrap><b>ସ୍କିମା</b></td><td>Zod 4 — MCP ଟୁଲ୍ I/O ବୈଧତା ଯାଞ୍ଚ + API ଚୁକ୍ତି</td></tr>
   <tr><td nowrap><b>ପ୍ରୋଟୋକଲ୍</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

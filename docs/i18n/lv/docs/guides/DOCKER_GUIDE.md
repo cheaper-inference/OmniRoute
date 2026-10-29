@@ -666,6 +666,8 @@ Standarta Docker/Kubernetes OmniRoute konfigurācija ir **viens Node process + v
 
 **Jaunināšana:** sagaidiet, ka katra sesija tiks pārtraukta. Ja iespējams, pakāpeniski atvienojiet klientus; ar noklusējuma SQLite nav pieejama nepārtraukta atjaunināšana. Compose `restart: unless-stopped` kopā ar Docker `HEALTHCHECK` aizstās arī vienīgo procesu, kad konteinera statuss būs Unhealthy — ar tikpat plašām sekām.
 
+Gatavi manifesti un Helm diagramma atrodas mapēs `deploy/kubernetes/` un `deploy/helm/omniroute/` — skatiet [Kubernetes izvietošanas rokasgrāmatu](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kubernetes fragments **vienai replikai** (nepieciešama Recreate stratēģija; nepalieliniet `replicas`, ja tiek izmantots viens SQLite fails):
 
 ```yaml

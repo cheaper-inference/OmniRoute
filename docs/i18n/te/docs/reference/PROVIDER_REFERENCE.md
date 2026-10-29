@@ -8,7 +8,7 @@
 > దీనితో మళ్లీ రూపొందించండి: `npm run gen:provider-reference`
 > **చివరిగా రూపొందించబడిన తేదీ:** 2026-10-27
 
-మొత్తం ప్రొవైడర్లు: **376**. దిగువన వర్గాల వారీ విభజనను చూడండి.
+మొత్తం ప్రొవైడర్లు: **377**. దిగువన వర్గాల వారీ విభజనను చూడండి.
 
 ## వర్గాలు
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | స్థానిక, స్వీయ-హోస్ట్ చేయబడినది | [link](https://github.com/vllm-project/vllm)                    | API కీ ఐచ్ఛికం. స్థానిక vLLM OpenAI-అనుకూల బేస్ URLని కాన్ఫిగర్ చేయండి (డిఫాల్ట్: http://localhost:8000/v1).                                                                                                                                                                                                           |
 | `xinference`          | `xinference` | XInference          | స్థానిక, స్వీయ-హోస్ట్ చేయబడినది | [link](https://inference.readthedocs.io)                        | API కీ ఐచ్ఛికం. స్థానిక XInference OpenAI-అనుకూల బేస్ URLని కాన్ఫిగర్ చేయండి (డిఫాల్ట్: http://localhost:9997/v1).                                                                                                                                                                                                     |
 
-## శోధన ప్రొవైడర్లు (18)
+## శోధన ప్రొవైడర్లు (19)
 
 | ID                  | మారుపేరు        | పేరు                              | ట్యాగ్లు | వెబ్సైట్                                                         | గమనికలు                                                                                                               |
 | ------------------- | --------------- | --------------------------------- | -------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                        | శోధన     | [లింక్](https://exa.ai)                                          | dashboard.exa.ai నుండి API కీ                                                                                         |
 | `firecrawl`         | `fc`            | Firecrawl                         | శోధన     | [లింక్](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys నుండి API కీ (లేదా మీరు స్వయంగా హోస్ట్ చేసిన Firecrawl బేస్ URLను సెట్ చేయండి)             |
 | `google-pse-search` | `google-pse`    | Google Programmable Search        | శోధన     | [లింక్](https://developers.google.com/custom-search/v1/overview) | Google API కీ మరియు మీ Programmable Search Engine ID (cx) అవసరం                                                       |
+| `kimi-search`       | `kimi-search`   | Kimi Search                       | శోధన     | [లింక్](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai నుండి Moonshot AI API కీ (MOONSHOT_API_KEY)                                                          |
 | `linkup-search`     | `linkup`        | Linkup Search                     | శోధన     | [లింక్](https://docs.linkup.so)                                  | Linkup డ్యాష్బోర్డ్ నుండి బేరర్ API కీ                                                                                |
 | `nimble-search`     | `nimble`        | Nimble Search                     | శోధన     | [లింక్](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble డ్యాష్బోర్డ్ నుండి బేరర్ API కీ                                                                                |
 | `ollama-search`     | `ollama-search` | Ollama Search                     | శోధన     | [లింక్](https://ollama.com/settings/keys)                        | Ollama Cloudకు ఉపయోగించే అదే API కీ (ollama.com/settings/keys నుండి)                                                  |

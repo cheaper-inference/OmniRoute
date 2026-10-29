@@ -163,7 +163,7 @@ Nochtann OmniRoute 6 scil A2A atá sreangaithe in `src/lib/a2a/taskExecution.ts:
 | Tuairisc Sláinte    | `health-report`      | Comhiomlánaíonn staid an scoradáin chiorcaid, an tsuaimhnithe agus an fhrithdhúnta do gach soláthraí                                                                  | sláinte, athléimneacht     | "Taispeáin stádas sláinte gach soláthraí"      |
 | Liostaigh Cumais    | `list-capabilities`  | Filleann catalóg iomlán 45 iontráil Scileanna Gníomhaire (23 API + 21 CLI + 1 chumraíocht) mar thábla markdown le URLanna amha SKILL.md chun comhthéacs a instealladh | catalóg, aimsiú, scileanna | "Liostaigh cumais uile OmniRoute"              |
 
-> Ba cheart Cárta an Ghníomhaire a choinneáil ailínithe leis an gcatalóg bheo de 376 soláthraí; faightear líon na soláthraithe agus na meiteashonraí saor in aisce/gan fíordheimhniú ón gclárlann am rite.
+> Ba cheart Cárta an Ghníomhaire a choinneáil ailínithe leis an gcatalóg bheo de 377 soláthraí; faightear líon na soláthraithe agus na meiteashonraí saor in aisce/gan fíordheimhniú ón gclárlann am rite.
 
 ### Sonraí na Scile `list-capabilities`
 

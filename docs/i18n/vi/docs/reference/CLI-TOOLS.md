@@ -10,8 +10,8 @@ OmniRoute tích hợp với ba loại công cụ CLI, được phân bổ trên 
 
 | Trang          | Tuyến                   | Khái niệm                                                                                | Số lượng     |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------------------- | ------------ |
-| **CLI Code's** | `/dashboard/cli-code`   | Các công cụ lập trình mà bạn trỏ đến OmniRoute (Client → CLI → OmniRoute → Nhà cung cấp) | 26           |
-| **CLI Agents** | `/dashboard/cli-agents` | Các tác nhân tự động mà bạn trỏ đến OmniRoute (cùng luồng, phạm vi rộng hơn)             | 10           |
+| **CLI Code's** | `/dashboard/cli-code`   | Các công cụ lập trình mà bạn trỏ đến OmniRoute (Client → CLI → OmniRoute → Nhà cung cấp) | 27           |
+| **CLI Agents** | `/dashboard/cli-agents` | Các tác nhân tự động mà bạn trỏ đến OmniRoute (cùng luồng, phạm vi rộng hơn)             | 11           |
 | **ACP Agents** | `/dashboard/acp-agents` | Các CLI được OmniRoute khởi chạy làm backend qua stdio/ACP (luồng ngược)                 | xem registry |
 
 Các tuyến cũ chuyển hướng bằng mã 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Mỗi lệnh đều chấp nhận `--remote <url> --api-key <key>` (cấu hình một công cụ cục bộ để kết nối với
 OmniRoute từ xa), `--dry-run` (xem trước mà không ghi) và `--port`. Các công cụ
-không hỗ trợ tự động phát hiện mô hình (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) nhận
+không hỗ trợ tự động phát hiện mô hình (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) nhận
 `--model <id>` (và `--yes` cho các lần chạy không tương tác). `setup-5dive` là công thức duy nhất
 không ghi vào `$HOME`: nó cấu hình một cụm tác nhân 5dive bằng cách
 ghi hồ sơ xác thực thuộc sở hữu của root trên máy chủ của cụm, vì vậy nó tự thực thi lại thông qua `sudo`
 và không có chế độ từ xa riêng. Để khởi chạy một CLI với
 các biến môi trường phù hợp được chèn vào mà hoàn toàn không ghi cấu hình, hãy dùng trình khởi chạy chung
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — các đích và bí danh đến từ `bin/cli/cli-manifest.mjs`); các trình khởi chạy
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — các đích và bí danh đến từ `bin/cli/cli-manifest.mjs`); các trình khởi chạy
 riêng cho từng công cụ kiểu cũ là `omniroute launch` (Claude Code) và `omniroute launch-codex`
 (Codex) vẫn khả dụng. Gemini CLI chỉ hỗ trợ khởi chạy: đây là một đích của `omniroute run`
 nhưng không có công thức `setup-*`/`configure`.
@@ -182,7 +183,7 @@ Tất cả các công cụ xuất hiện trong `/dashboard/cli-code`. Những c�
 Các công cụ có `baseUrlSupport: "partial"` hiển thị huy hiệu "⚠ URL cơ sở được hỗ trợ một phần" trong thẻ trên bảng điều khiển.
 ---
 
-## 2. Danh mục CLI Agent (10 công cụ)
+## 2. Danh mục CLI Agent (11 công cụ)
 
 Các agent tự trị xuất hiện trong `/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ Các agent tự trị xuất hiện trong `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full            | false                    |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full            | false                    |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full            | false                    |
+| whycodes     | WhyCodes         | Why Corporation          | full            | false                    |
 
 ---
 

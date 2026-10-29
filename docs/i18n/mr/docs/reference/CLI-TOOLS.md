@@ -10,8 +10,8 @@ OmniRoute तीन स्वतंत्र डॅशबोर्ड पृष�
 
 | पृष्ठ          | मार्ग                   | संकल्पना                                                                                 | संख्या        |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------------------- | ------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | तुम्ही OmniRoute कडे निर्देशित केलेली कोडिंग साधने (क्लायंट → CLI → OmniRoute → प्रदाता) | 26            |
-| **CLI Agents** | `/dashboard/cli-agents` | तुम्ही OmniRoute कडे निर्देशित केलेले स्वायत्त एजंट (समान प्रवाह, व्यापक कार्यक्षेत्र)   | 10            |
+| **CLI Code's** | `/dashboard/cli-code`   | तुम्ही OmniRoute कडे निर्देशित केलेली कोडिंग साधने (क्लायंट → CLI → OmniRoute → प्रदाता) | 27            |
+| **CLI Agents** | `/dashboard/cli-agents` | तुम्ही OmniRoute कडे निर्देशित केलेले स्वायत्त एजंट (समान प्रवाह, व्यापक कार्यक्षेत्र)   | 11            |
 | **ACP Agents** | `/dashboard/acp-agents` | stdio/ACP द्वारे OmniRoute जी CLI बॅकएंड म्हणून सुरू करते (उलट प्रवाह)                   | रजिस्ट्री पहा |
 
 जुने मार्ग 308 द्वारे पुनर्निर्देशित होतात: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-प्रत्येक कमांड `--remote <url> --api-key <key>` (स्थानिक साधनाला रिमोट OmniRoute सोबत कॉन्फिगर करणे), `--dry-run` (काहीही न लिहिता पूर्वावलोकन करणे) आणि `--port` स्वीकारते. मॉडेलचे स्वयंचलित शोधकार्य नसलेली साधने (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) `--model <id>` (आणि नॉन-इंटरॅक्टिव्ह रनसाठी `--yes`) स्वीकारतात. `$HOME` अंतर्गत न लिहिणारी एकमेव रेसिपी म्हणजे `setup-5dive`: ती फ्लीट होस्टवर root-मालकीचे प्रमाणीकरण प्रोफाइल लिहून 5dive एजंट फ्लीट कॉन्फिगर करते, त्यामुळे ती `sudo` द्वारे स्वतःला पुन्हा कार्यान्वित करते आणि तिचा स्वतःचा रिमोट मोड नाही. योग्य env अंतर्भूत करून आणि कोणतेही कॉन्फिगरेशन अजिबात न लिहिता CLI सुरू करण्यासाठी, सर्वसाधारण `omniroute run <target>` लाँचर वापरा (claude, codex, aider, goose, opencode, qwen, gemini — लक्ष्ये आणि उपनावे `bin/cli/cli-manifest.mjs` मधून येतात); जुने प्रत्येक-साधनासाठीचे लाँचर `omniroute launch` (Claude Code) आणि `omniroute launch-codex` (Codex) अद्याप उपलब्ध आहेत. Gemini CLI केवळ लाँच करण्यासाठी आहे: ते `omniroute run` लक्ष्य आहे, परंतु त्यासाठी कोणतीही `setup-*`/`configure` रेसिपी नाही.
+प्रत्येक कमांड `--remote <url> --api-key <key>` (स्थानिक साधनाला रिमोट OmniRoute सोबत कॉन्फिगर करणे), `--dry-run` (काहीही न लिहिता पूर्वावलोकन करणे) आणि `--port` स्वीकारते. मॉडेलचे स्वयंचलित शोधकार्य नसलेली साधने (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) `--model <id>` (आणि नॉन-इंटरॅक्टिव्ह रनसाठी `--yes`) स्वीकारतात. `$HOME` अंतर्गत न लिहिणारी एकमेव रेसिपी म्हणजे `setup-5dive`: ती फ्लीट होस्टवर root-मालकीचे प्रमाणीकरण प्रोफाइल लिहून 5dive एजंट फ्लीट कॉन्फिगर करते, त्यामुळे ती `sudo` द्वारे स्वतःला पुन्हा कार्यान्वित करते आणि तिचा स्वतःचा रिमोट मोड नाही. योग्य env अंतर्भूत करून आणि कोणतेही कॉन्फिगरेशन अजिबात न लिहिता CLI सुरू करण्यासाठी, सर्वसाधारण `omniroute run <target>` लाँचर वापरा (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — लक्ष्ये आणि उपनावे `bin/cli/cli-manifest.mjs` मधून येतात); जुने प्रत्येक-साधनासाठीचे लाँचर `omniroute launch` (Claude Code) आणि `omniroute launch-codex` (Codex) अद्याप उपलब्ध आहेत. Gemini CLI केवळ लाँच करण्यासाठी आहे: ते `omniroute run` लक्ष्य आहे, परंतु त्यासाठी कोणतीही `setup-*`/`configure` रेसिपी नाही.
 
 > **संपूर्ण संदर्भ:** मुख्य तक्ता — प्रत्येक कमांड काय लिहिते, प्रत्येक फ्लॅग,
 > स्थानिक विरुद्ध रिमोट, आणि कोणत्या साधनांना `/v1` प्रत्यय आवश्यक आहे —
@@ -146,7 +147,7 @@ OmniRoute कंटेनरमध्ये कार्यान्वित �
 `baseUrlSupport: "partial"` असलेली साधने डॅशबोर्ड कार्डवर "⚠ आंशिक बेस URL" हा बॅज दाखवतात.
 ---
 
-## 2. CLI एजंट्सची सूची (10 साधने)
+## 2. CLI एजंट्सची सूची (11 साधने)
 
 `/dashboard/cli-agents` मध्ये दिसणारे स्वायत्त एजंट्स:
 
@@ -162,6 +163,7 @@ OmniRoute कंटेनरमध्ये कार्यान्वित �
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

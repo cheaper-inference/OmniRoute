@@ -488,7 +488,7 @@ Dan jittratta:
 
 | Fajl                           | Għan                                                          |
 | ------------------------------ | ------------------------------------------------------------- |
-| `providerRegistry.ts`          | Reġistru tal-mudelli taċ-chat fuq il-katalgu ta’ 376 fornitur |
+| `providerRegistry.ts`          | Reġistru tal-mudelli taċ-chat fuq il-katalgu ta’ 377 fornitur |
 | `providerModels.ts`            | Psewdonimi tal-mudelli, immappjar tal-format                  |
 | `constants.ts`                 | Limiti ta’ żmien, limiti, kodiċijiet tal-istatus              |
 | `defaultThinkingSignature.ts`  | Firma predefinita tal-ħsieb ta’ Claude                        |

@@ -8,7 +8,7 @@
 > Buat ulang dengan: `npm run gen:provider-reference`
 > **Terakhir dibuat:** 2026-10-27
 
-Total penyedia: **376**. Lihat perincian kategori di bawah ini.
+Total penyedia: **377**. Lihat perincian kategori di bawah ini.
 
 ## Kategori
 
@@ -397,7 +397,7 @@ Gunakan dasbor di `/dashboard/providers` untuk mengaktifkan, mengonfigurasi, dan
 | `vllm`                | `vllm`       | vLLM                | Lokal, dihosting sendiri | [tautan](https://github.com/vllm-project/vllm)                    | Kunci API bersifat opsional. Konfigurasikan URL dasar vLLM lokal yang kompatibel dengan OpenAI (default: http://localhost:8000/v1).                                                                                                                                                                                                              |
 | `xinference`          | `xinference` | XInference          | Lokal, dihosting sendiri | [tautan](https://inference.readthedocs.io)                        | Kunci API bersifat opsional. Konfigurasikan URL dasar XInference lokal yang kompatibel dengan OpenAI (default: http://localhost:9997/v1).                                                                                                                                                                                                        |
 
-## Penyedia Pencarian (18)
+## Penyedia Pencarian (19)
 
 | ID                  | Alias           | Nama                           | Tag       | Situs Web                                                         | Catatan                                                                                                                                 |
 | ------------------- | --------------- | ------------------------------ | --------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Gunakan dasbor di `/dashboard/providers` untuk mengaktifkan, mengonfigurasi, dan
 | `exa-search`        | `exa-search`    | Exa Search                     | Pencarian | [tautan](https://exa.ai)                                          | Kunci API dari dashboard.exa.ai                                                                                                         |
 | `firecrawl`         | `fc`            | Firecrawl                      | Pencarian | [tautan](https://firecrawl.dev)                                   | Kunci API dari firecrawl.dev/app/api-keys (atau tetapkan URL dasar Firecrawl yang Anda hosting sendiri)                                 |
 | `google-pse-search` | `google-pse`    | Google Programmable Search     | Pencarian | [tautan](https://developers.google.com/custom-search/v1/overview) | Memerlukan kunci Google API dan ID Programmable Search Engine Anda (cx)                                                                 |
+| `kimi-search`       | `kimi-search`   | Kimi Search                    | Pencarian | [tautan](https://platform.kimi.ai/docs/api/tools-search)          | Kunci API Moonshot AI (MOONSHOT_API_KEY) dari platform.kimi.ai                                                                          |
 | `linkup-search`     | `linkup`        | Linkup Search                  | Pencarian | [tautan](https://docs.linkup.so)                                  | Kunci API Bearer dari dasbor Linkup                                                                                                     |
 | `nimble-search`     | `nimble`        | Nimble Search                  | Pencarian | [tautan](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Kunci API Bearer dari dasbor Nimble                                                                                                     |
 | `ollama-search`     | `ollama-search` | Ollama Search                  | Pencarian | [tautan](https://ollama.com/settings/keys)                        | Kunci API yang sama dengan Ollama Cloud (dari ollama.com/settings/keys)                                                                 |

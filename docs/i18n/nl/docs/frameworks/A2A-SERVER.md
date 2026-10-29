@@ -163,7 +163,7 @@ OmniRoute biedt 6 A2A-skills die zijn gekoppeld in `src/lib/a2a/taskExecution.ts
 | Statusrapport           | `health-report`      | Aggregeert de status van stroomonderbrekers, afkoelperiodes en blokkeringen per provider                                                                                  | status, veerkracht          | "Toon de status van alle providers"       |
 | Mogelijkheden weergeven | `list-capabilities`  | Retourneert de volledige Agent Skills-catalogus met 45 items (23 API + 21 CLI + 1 configuratie) als een markdown-tabel met onbewerkte SKILL.md-URL's voor contextinjectie | catalogus, detectie, skills | "Geef alle OmniRoute-mogelijkheden weer"  |
 
-> De Agent Card moet synchroon worden gehouden met de actuele catalogus van 376 providers; aantallen providers en metadata over gratis/zonder authenticatie worden opgehaald uit het runtimeregister.
+> De Agent Card moet synchroon worden gehouden met de actuele catalogus van 377 providers; aantallen providers en metadata over gratis/zonder authenticatie worden opgehaald uit het runtimeregister.
 
 ### Details van de skill `list-capabilities`
 

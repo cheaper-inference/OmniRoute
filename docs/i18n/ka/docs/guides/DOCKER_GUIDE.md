@@ -668,6 +668,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **განახლებები:** ყველა სესიის გათიშვას მოელოდეთ. თუ შეგიძლიათ, კლიენტების ტრაფიკი წინასწარ შეწყვიტეთ; ნაგულისხმევ SQLite-ზე rolling update არ არსებობს. Compose-ის `restart: unless-stopped` და Docker-ის `HEALTHCHECK` ასევე ჩაანაცვლებს ერთადერთ პროცესს, როდესაც container Unhealthy მდგომარეობაში გადავა — ზემოქმედების არეალი იგივეა.
 
+მზა მანიფესტები და Helm-ის ჩარტი განთავსებულია `deploy/kubernetes/`-სა და `deploy/helm/omniroute/`-ში — იხილეთ [Kubernetes-ის განთავსების სახელმძღვანელო](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kubernetes-ის ფრაგმენტი **ერთი replica-სთვის** (Recreate აუცილებელია; ერთი SQLite ფაილის გამოყენებისას `replicas` არ გაზარდოთ):
 
 ```yaml

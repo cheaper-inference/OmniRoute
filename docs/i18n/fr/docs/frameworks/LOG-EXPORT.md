@@ -266,7 +266,218 @@ Les lots sont découpés en fonction **à la fois** du nombre de lignes et du no
 
 ---
 
-## 5. Ajout d’une destination
+## 5. Destination des traces OTLP/HTTP
+
+La configuration utilise `type: "otlp-http"`. Il s’agit d’un export planifié des journaux
+d’appels persistés, avec suivi par curseur, et non du récepteur d’événements de routage
+en direct fonctionnant au mieux dans
+`open-sse/services/routing/otel.ts`. Il ne lit ni ne modifie les variables d’environnement,
+les temporisateurs ou les tampons de ce récepteur. Activer les deux peut produire deux types de spans indépendants ;
+utilisez la portée d’instrumentation `omniroute.log-export` pour distinguer ces spans de journaux d’appels.
+
+| Clé                      | Valeur par défaut / rôle                                                                |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| `endpoint`               | URL HTTP(S) complète des traces obligatoire ; aucun suffixe `/v1/traces` n’est ajouté   |
+| `headers`                | Lignes `Name: value` ou objet JSON de chaînes facultatifs ; chiffrés                    |
+| `requestHeaderAllowlist` | Vide (désactivé) ; noms/préfixes des en-têtes client à capturer comme attributs de span |
+| `serviceName`            | `omniroute` ; attribut de ressource `service.name`                                      |
+| `langfuseMapping`        | `false` ; ajoute les attributs Langfuse de génération/session/utilisateur               |
+| `identity`               | `pseudonymous`, `keyName` ou `none`                                                     |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                 |
+| `timeoutMs`              | `30000` par tentative HTTP                                                              |
+| `environment`            | Non défini ; `langfuse.environment` facultatif                                          |
+
+Le tableau de bord générique affiche ces champs. `paths` accepte un tableau via l’API ou une zone de texte
+contenant des chemins exacts séparés par des sauts de ligne ou des virgules. Les chemins d’embeddings, de reclassement et les autres chemins sont
+ignorés sauf autorisation explicite. Les lignes ignorées font tout de même avancer le curseur ; les compteurs
+`exported`/`exportedTotal` du processus d’exécution existant comptent les lignes source traitées, y compris les lignes filtrées,
+plutôt que les spans acceptés. Le filtrage est effectué dans le processus enfant, sans modifier son
+contrat IPC/curseur.
+
+La validation des URL utilise la fonction utilitaire `parseAndValidateNonMetadataUrl`, sans accès à la base de données, de
+`src/shared/network/outboundUrlGuard.ts` : la politique `block-metadata`. Elle applique les mêmes
+vérifications inconditionnelles des métadonnées, du protocole et des identifiants intégrés que le validateur de webhooks avec
+les URL privées autorisées, mais autorise délibérément les cibles localhost/LAN sans dérogation globale
+par indicateur de fonctionnalité. Cela permet d’utiliser des points de terminaison Langfuse, Phoenix, Tempo et Collector
+auto-hébergés, y compris des points de terminaison HTTP privés. Les hôtes de métadonnées cloud sont toujours bloqués.
+Les redirections ne sont pas suivies : un collecteur ne peut donc pas rediriger les identifiants vers un autre hôte.
+Comme le mécanisme existant de contrôle lexical des URL, ce mécanisme ne fige pas la résolution DNS ; ne configurez que
+des hôtes contrôlés par l’opérateur. Privilégiez HTTPS dès lors que le point de terminaison ne se trouve pas sur un réseau de confiance.
+
+### Charge utile et livraison
+
+Le format JSON OTLP/HTTP (`ExportTraceServiceRequest`, `Content-Type: application/json`) transporte un
+span CLIENT par ligne autorisée, nommé d’après le chemin exact de sa requête. Ce nommage par chemin distingue
+Chat Completions, Responses et Messages sans intégrer de données de modèle ou d’identité dans le
+nom du span. Les attributs de ressource comprennent `service.name` et le `service.version` du package.
+
+Le mécanisme habituel de journalisation des tentatives de chat (`open-sse/handlers/chatCore/attemptLogging.ts`) écrit
+`duration = Date.now() - startTime` à la fin et ne fournit pas d’horodatage ;
+`saveCallLogOperation` dans `src/lib/usage/callLogs.ts` utilise par défaut l’heure d’écriture
+(de fin) comme horodatage. L’export définit donc la fin comme l’horodatage de la ligne et le début comme la fin moins la durée
+(en millisecondes, converties en nanosecondes décimales). Les horodatages historiques fournis par
+l’appelant sont également conservés comme heure de fin ; aucun indicateur de début/fin n’existe au niveau des lignes.
+Une durée nulle devient zéro. Les horodatages invalides ou absents font échouer le lot plutôt que de créer
+des spans non déterministes. `ttftMs` est nullable et correspond à `omniroute.ttft_ms`.
+
+Les attributs comprennent `gen_ai.operation.name="chat"`, le fournisseur, le modèle demandé et le modèle de réponse,
+les tokens d’entrée/sortie, les tokens facultatifs de lecture du cache/de création du cache/de raisonnement, le statut HTTP,
+le combo, la source du cache, le tag de session et l’identifiant de corrélation. Les valeurs OTLP entières et les horodatages
+sont des chaînes décimales ; les chaînes, les booléens et les nombres fractionnaires utilisent leurs variantes natives de valeurs
+OTLP. Les spans d’erreur ont le statut ERROR et un message de statut expurgé. L’enregistrement
+canonique ne contient aucune URL d’hôte amont ; `server.address` est donc omis plutôt que de désigner à tort
+le collecteur comme serveur du modèle. Le coût n’est pas exporté.
+
+Seul `includeBodies=true` charge le contenu. Avec `langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` transportent le JSON expurgé du corps de la requête/réponse
+tel qu’il est stocké par OmniRoute (canonisé lorsqu’il peut être analysé), et non un tableau
+de messages restructuré selon les conventions sémantiques. Les corps tronqués ou non JSON restent du texte brut. Avec `langfuseMapping=true`,
+les corps sont émis uniquement dans `langfuse.observation.input` / `langfuse.observation.output` ;
+les attributs `gen_ai.*.messages` sont omis afin que chaque corps ne soit envoyé qu’une seule fois. Les deux modes
+héritent de `maxBodyBytes` du mécanisme de chargement existant ;
+`omniroute.bodies_truncated=true` signale une troncature.
+Cette destination n’ajoute aucun instantané supplémentaire du pipeline ni aucune lecture d’artefact non expurgé ;
+la capture facultative des en-têtes de requête utilise l’instantané client chargé existant décrit ci-dessous.
+Utilisez une cadence de quelques minutes, telle que `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, lors de l’export
+des corps, plutôt que de laisser les données s’accumuler pendant une heure.
+
+### En-têtes facultatifs des requêtes client
+
+La capture des en-têtes est **désactivée par défaut**. Définissez `requestHeaderAllowlist` dans la configuration de la destination
+et activez **Exporter les prompts et les réponses** (`includeBodies: true` sur la destination).
+La liste d’autorisation accepte un tableau via l’API ou une zone de texte contenant des noms séparés par des sauts de ligne ou des virgules :
+
+```json
+{
+  "requestHeaderAllowlist": ["User-Agent", "X-Project", "X-OmniRoute-Meta-*"]
+}
+```
+
+Les noms correspondent exactement et sans tenir compte de la casse, sauf lorsqu’un unique `*` final sélectionne un préfixe
+de nom d’en-tête non vide. Un `*` seul, les caractères génériques intégrés et les noms d’en-têtes HTTP invalides sont rejetés.
+Il peut y avoir au maximum 64 sélecteurs, chacun ayant un nom/préfixe de 256 octets ASCII au maximum.
+Ce paramètre est distinct de `headers`, qui authentifie l’exportateur auprès du collecteur.
+
+La capture lit uniquement `pipeline_client_request`, alimenté à partir de
+`clientRawRequest` (ou de l’ancien `clientRequest`) du pipeline détaillé enregistré. Elle ne se rabat jamais sur les en-têtes de requête du fournisseur.
+La journalisation détaillée du pipeline doit avoir été activée au moment de l’enregistrement de la requête. Si
+`includeBodies` est désactivé, ou si le JSON de l’instantané client est absent, corrompu ou tronqué, aucun attribut
+d’en-tête n’est émis. Augmenter `maxBodyBytes` peut éviter la troncature de l’instantané au moment de l’exportation ;
+cela ne peut pas restaurer des détails qui n’ont jamais été enregistrés. Un instantané dépassant 1 Mio ou contenant plus de
+256 entrées d’en-tête est ignoré. L’exportation existante des prompts/réponses reste activée parallèlement à
+la capture des en-têtes ; la liste d’autorisation ne propose pas de mode d’hydratation limité aux en-têtes.
+
+Les valeurs sélectionnées deviennent des tableaux de chaînes OTLP `http.request.header.<full lowercase header name>`,
+même pour une chaîne unique. Par exemple, `X-OmniRoute-Meta-Team: example-team` devient
+`http.request.header.x-omniroute-meta-team` avec
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
+Le préfixe complet est conservé : il s’agit d’en-têtes ordinaires, sans analyse de champs métier ni
+conversion en métadonnées `omniroute.metadata.*` / Langfuse. `langfuseMapping` ne modifie pas la sémantique
+des en-têtes. Un en-tête `User-Agent` sélectionné à valeur unique définit également le scalaire standard
+`user_agent.original`. Les virgules au sein d’une valeur ne servent pas de séparateurs. Les variantes de casse sont fusionnées dans l’ordre
+des entrées enregistrées ; toute variante invalide entraîne l’omission de l’en-tête entier. Les attributs sont triés par nom en minuscules.
+
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, les en-têtes de clé d’API, les noms contenant
+des marqueurs auth/token/secret/password/credential et les identifiants internes de la passerelle sont toujours
+exclus, même s’ils sont sélectionnés ou partiellement masqués dans le stockage. Les motifs d’identifiants connus réutilisent
+le détecteur d’identifiants partagé ; les marqueurs de masquage sont omis, et non exportés comme des valeurs sûres.
+Seuls les chaînes et les tableaux de chaînes non vides sont acceptés ; aucun nombre ni objet n’est converti.
+Les noms invalides, les clés de prototype, les caractères de contrôle (sauf la tabulation horizontale) et les séquences Unicode mal formées
+sont ignorés sans faire échouer le lot ni reproduire leur contenu dans les erreurs.
+
+Chaque span capture au maximum 32 en-têtes, 16 valeurs par en-tête, 4096 octets UTF-8 par valeur
+et 16384 octets UTF-8 au total pour les noms et valeurs des en-têtes capturés. Les en-têtes trop volumineux ou invalides
+sont omis intégralement, et non tronqués. La sélection relève d’une décision de l’opérateur en matière de confidentialité : des noms apparemment sûrs
+peuvent tout de même contenir des données personnelles, et ces limites/détecteurs ne constituent pas un outil général de suppression des données personnelles.
+
+### Limites de livraison
+
+Les requêtes sont limitées à 500 spans et à 4 Mio de JSON UTF-8, enveloppe comprise.
+La taille de chaque span autorisé est vérifiée avant la première requête d’un lot du curseur. Si un
+span dépasse à lui seul la limite, aucune partie de ce lot n’est envoyée et l’opération échoue en recommandant de réduire
+`maxBodyBytes` ; le span n’est pas supprimé silencieusement. La vérification préalable ne conserve que les références des enregistrements et
+les nombres d’octets, en supprimant chaque span/JSON temporaire ; les spans sont reconstruits pour des blocs de taille limitée
+plutôt que de conserver une seconde copie sérialisée du lot. Les réponses HTTP 408/429/5xx, les défaillances réseau et les délais d’attente dépassés font l’objet d’au maximum
+trois tentatives, avec un délai exponentiel de 250/500 ms entre les tentatives. Les secondes ou les dates HTTP de `Retry-After`
+peuvent prolonger ce délai jusqu’à 5 secondes. Les autres statuts entraînent un échec immédiat. Un rejet partiel OTLP 2xx déclenche également une exception au lieu
+d’acquitter un span perdu ; les accusés de réception vides ou au format JSON valide sont acceptés, avec une
+limite de lecture de réponse de 64 Kio.
+
+Les erreurs contiennent uniquement des informations propres à l’exportateur : statut HTTP, catégorie de nouvelle tentative, nombre de tentatives et de spans
+envoyés, ou formulations fixes relatives aux échecs d’accusé de réception/réseau. Les corps de réponse du collecteur,
+les décomptes de réussite partielle et les en-têtes de réponse ne sont jamais copiés dans les erreurs, les journaux ni le
+tableau de bord. Un lot en échec ou partiellement accepté n’est pas acquitté : la destination affiche
+un état d’échec avec ce statut, le curseur reste au dernier lot acquitté et l’exécution suivante
+renvoie les mêmes lignes. Les statuts permanents continuent de provoquer des échecs jusqu’à ce que le collecteur ou la configuration
+soit corrigé. Consultez les journaux du collecteur pour obtenir les détails des réponses. Les résumés d’erreurs du journal des appels conservent
+leur propre mécanisme de masquage.
+`prepare()` ne provisionne rien ; le test envoie exactement `{"resourceSpans":[]}` par POST et indique
+le statut HTTP sans écrire de spans du journal des appels.
+
+Les identifiants de trace et de span correspondent aux 32/16 premiers chiffres hexadécimaux du SHA-256 de
+`"omniroute.trace\0" + callLogId` et de `"omniroute.span\0" + callLogId`. Les renvois portent
+des identifiants identiques. Cela ne garantit pas la déduplication : certains backends, notamment l’ingestion de Langfuse
+v4, ne dédupliquent pas les spans ayant le même identifiant. Un plantage ou un échec partiel de bloc peut
+entraîner le renvoi d’au maximum un lot du curseur non acquitté ; ce lot entier peut être dupliqué,
+et pas seulement son dernier bloc HTTP. Choisissez la taille des lots du curseur en tenant compte de ce compromis.
+
+### Exemple Langfuse
+
+Configurez ces champs pour une instance Langfuse auto-hébergée :
+
+```json
+{
+  "endpoint": "https://langfuse.example.com/api/public/otel/v1/traces",
+  "headers": "Authorization: Basic <base64-of-public-key:secret-key>",
+  "serviceName": "omniroute",
+  "langfuseMapping": true,
+  "identity": "pseudonymous",
+  "environment": "production"
+}
+```
+
+Construisez localement la valeur Authorization en encodant en Base64 la chaîne littérale `public-key:secret-key`
+(par exemple avec `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Ne collez pas de véritables identifiants dans les journaux, les captures d’écran ou les tickets. Le mappage définit automatiquement
+`x-langfuse-ingestion-version: 4` ; Authorization reste fourni dans `headers`.
+Les en-têtes et le sel d’identité généré utilisent tous deux le mécanisme existant de champs secrets chiffrés
+et les valeurs de substitution de l’API ; `STORAGE_ENCRYPTION_KEY` est requis.
+
+Le mappage ajoute le type/modèle de génération, les détails d’utilisation au format JSON (entrée/sortie/total et les
+clés de cache disponibles), les instantanés JSON des entrées/sorties, le niveau ERROR/DEFAULT, un message d’état assaini,
+le nom de la trace, l’identifiant de session, un environnement facultatif et des attributs filtrables
+`langfuse.observation.metadata.<key>` pour le fournisseur, le modèle demandé, le chemin, la combinaison, la
+source du cache et l’état. `langfuse.observation.completion_start_time` est au format ISO 8601 et correspond à
+l’heure de début + TTFT, uniquement lorsque le TTFT est connu et compris dans la durée. Aucun attribut de coût n’est envoyé.
+
+Les modes d’identité s’appliquent à `langfuse.user.id` :
+
+- `pseudonymous` (par défaut) : HMAC-SHA256 de l’identifiant interne de la clé API avec un sel aléatoire
+  de 32 octets propre à chaque destination. Le sel est généré à la création s’il est absent, chiffré
+  sous `identitySalt`, jamais renvoyé et conservé lors des modifications. Les identifiants bruts des clés ne sont jamais
+  placés dans les attributs des spans. La recréation ou la rotation du sel d’une destination modifie les identités.
+- `keyName` : le nom configuré de la clé API, qui révèle délibérément ce libellé défini par l’opérateur.
+- `none` : aucun identifiant utilisateur. Les balises de session sont toujours exportées lorsqu’elles sont présentes ; ces modes
+  n’anonymisent pas le contenu arbitraire des prompts ni les libellés de session/corrélation fournis par l’opérateur.
+
+### Démarrer sans reprise de l’historique
+
+À la création uniquement, activez **Démarrer à partir de la position actuelle (ignorer les journaux existants)** ou transmettez
+`startFromCurrentPosition: true` au niveau supérieur du corps de la requête API de création. Cela initialise
+`cursor_row_id` avec le rowid maximal actuel des journaux d’appels conservés à l’aide des fonctions utilitaires de curseur
+existantes, sans migration. La valeur par défaut est false (curseur à 0 et reprise de l’historique conservé).
+Ce paramètre ne permet pas de réinitialiser le curseur lors d’une mise à jour.
+
+L’ajout partagé de `ttftMs` ajoute également une colonne `ttft_ms` acceptant les valeurs nulles au mappeur BigQuery
+et au schéma des nouvelles tables : son test de schéma exige que chaque champ d’enregistrement canonique ait une
+colonne. Les tables existantes continuent d’être exportées sans changement : `prepare()` lit le schéma de la table et
+omet uniquement `ttft_ms` lorsque cette colonne est absente. Ajoutez la colonne INT64 acceptant les valeurs nulles pour obtenir le TTFT
+à la prochaine exécution, ou utilisez une nouvelle table. Aucune requête PATCH, modification automatique du schéma ou autorisation
+supplémentaire n’est nécessaire ; tous les autres champs des lignes restent soumis à une vérification stricte du schéma.
+
+---
+
+## 6. Ajout d’une destination
 
 1. Créez `src/lib/logExport/destinations/<name>.ts` exportant un `LogExportDestinationType` :
    un `configSchema` Zod, un tableau de descripteurs `fields` pour l’interface utilisateur, des
@@ -288,7 +499,7 @@ Deux règles s’appliquent à une nouvelle destination :
 
 ---
 
-## 6. Exploitation
+## 7. Exploitation
 
 - **Tableau de bord** : Intégrations → Exportation des journaux. Ajoutez une destination, exécutez
   **Tester** pour vérifier les identifiants sans écrire de lignes, puis activez-la.

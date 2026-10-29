@@ -10,8 +10,8 @@ OmniRoute, කැපවූ dashboard පිටු තුනක් පුරා �
 
 | පිටුව          | Route                   | සංකල්පය                                                                           | ගණන            |
 | -------------- | ----------------------- | --------------------------------------------------------------------------------- | -------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | ඔබ OmniRoute වෙත යොමු කරන කේතකරණ මෙවලම් (Client → CLI → OmniRoute → Provider)     | 26             |
-| **CLI Agents** | `/dashboard/cli-agents` | ඔබ OmniRoute වෙත යොමු කරන ස්වයංක්රීය agents (එකම ප්රවාහය, පුළුල් විෂය පථයක්)      | 10             |
+| **CLI Code's** | `/dashboard/cli-code`   | ඔබ OmniRoute වෙත යොමු කරන කේතකරණ මෙවලම් (Client → CLI → OmniRoute → Provider)     | 27             |
+| **CLI Agents** | `/dashboard/cli-agents` | ඔබ OmniRoute වෙත යොමු කරන ස්වයංක්රීය agents (එකම ප්රවාහය, පුළුල් විෂය පථයක්)      | 11             |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute විසින් stdio/ACP හරහා backend ලෙස ආරම්භ කරන CLIs (ප්රතිවිරුද්ධ ප්රවාහය) | registry බලන්න |
 
 පැරණි routes 308 හරහා redirect වේ: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -56,19 +56,20 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 සෑම එකක්ම `--remote <url> --api-key <key>` (දේශීය මෙවලමක් දුරස්ථ OmniRoute
 එකකට එරෙහිව වින්යාස කරන්න), `--dry-run` (කිසිවක් නොලියා පෙරදසුනක් බලන්න), සහ
 `--port` පිළිගනී. ආකෘති ස්වයං-සොයාගැනීම නොමැති මෙවලම් (Cline, Kilo, Roo,
-Goose, Aider, Qwen, 5dive) `--model <id>` (සහ අන්තර්ක්රියාකාරී නොවන
+Goose, Aider, Qwen, 5dive, WhyCodes) `--model <id>` (සහ අන්තර්ක්රියාකාරී නොවන
 ධාවනයන් සඳහා `--yes`) ලබා ගනී. `$HOME` යටතේ නොලියන එකම ක්රමවේදය
 `setup-5dive` වේ: එය සමූහ සත්කාරකය මත root සතු සත්යාපන පැතිකඩක් ලිවීමෙන්
 5dive නියෝජිත සමූහයක් වින්යාස කරන බැවින්, එය `sudo` හරහා නැවත ක්රියාත්මක වන
 අතර එයට තමන්ගේම දුරස්ථ ප්රකාරයක් නොමැත. නිවැරදි පරිසර විචල්ය ඇතුළත් කර,
 කිසිදු වින්යාසයක් නොලියා CLI එකක් දියත් කිරීමට, පොදු
 `omniroute run <target>` දියත්කාරකය භාවිත කරන්න (claude, codex, aider, goose,
-opencode, qwen, gemini — ඉලක්ක සහ අන්වර්ථ `bin/cli/cli-manifest.mjs` වෙතින්
+opencode, qwen, gemini, whycodes — ඉලක්ක සහ අන්වර්ථ `bin/cli/cli-manifest.mjs` වෙතින්
 ලැබේ); පැරණි එක් එක් මෙවලමට විශේෂිත `omniroute launch` (Claude Code) සහ
 `omniroute launch-codex` (Codex) දියත්කාරක තවමත් පවතී. Gemini CLI දියත් කිරීමට
 පමණක් සීමා වේ: එය `omniroute run` ඉලක්කයක් වුවද, එයට `setup-*`/`configure`
@@ -188,7 +189,7 @@ OmniRoute බහාලුම තුළ ක්රියාත්මක කළ `se
 `baseUrlSupport: "partial"` සහිත මෙවලම් උපකරණ පුවරු කාඩ්පතෙහි "⚠ අර්ධ මූලික URL" ලාංඡනයක් පෙන්වයි.
 ---
 
-## 2. CLI නියෝජිත නාමාවලිය (මෙවලම් 10ක්)
+## 2. CLI නියෝජිත නාමාවලිය (මෙවලම් 11ක්)
 
 `/dashboard/cli-agents` තුළ දිස්වන ස්වයංක්රීය නියෝජිතයන්:
 
@@ -204,6 +205,7 @@ OmniRoute බහාලුම තුළ ක්රියාත්මක කළ `se
 | letta        | Letta CLI        | Letta                    | full         | false                    |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full         | false                    |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full         | false                    |
+| whycodes     | WhyCodes         | Why Corporation          | full         | false                    |
 
 ---
 

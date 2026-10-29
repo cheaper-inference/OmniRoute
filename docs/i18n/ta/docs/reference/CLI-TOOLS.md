@@ -10,8 +10,8 @@ OmniRoute, மூன்று பிரத்யேக டாஷ்போர்�
 
 | பக்கம்         | வழித்தடம்               | கருத்து                                                                                        | எண்ணிக்கை               |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------------------------- | ----------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute-ஐ நோக்கி நீங்கள் அமைக்கும் குறியீட்டு கருவிகள் (Client → CLI → OmniRoute → Provider) | 26                      |
-| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute-ஐ நோக்கி நீங்கள் அமைக்கும் தன்னாட்சி முகவர்கள் (அதே ஓட்டம், பரந்த நோக்கம்)           | 10                      |
+| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute-ஐ நோக்கி நீங்கள் அமைக்கும் குறியீட்டு கருவிகள் (Client → CLI → OmniRoute → Provider) | 27                      |
+| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute-ஐ நோக்கி நீங்கள் அமைக்கும் தன்னாட்சி முகவர்கள் (அதே ஓட்டம், பரந்த நோக்கம்)           | 11                      |
 | **ACP Agents** | `/dashboard/acp-agents` | stdio/ACP வழியாகப் பின்தளமாக OmniRoute தொடங்கும் CLI-கள் (தலைகீழ் ஓட்டம்)                      | பதிவேட்டைப் பார்க்கவும் |
 
 பழைய வழித்தடங்கள் 308 வழியாகத் திருப்பிவிடப்படுகின்றன: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-ஒவ்வொன்றும் `--remote <url> --api-key <key>` (ஒரு தொலைநிலை OmniRoute-க்கு எதிராக உள்ளகக் கருவியை உள்ளமைக்க), `--dry-run` (எழுதாமல் முன்னோட்டமிட), மற்றும் `--port` ஆகியவற்றை ஏற்கிறது. மாதிரியைத் தானாகக் கண்டறியும் வசதி இல்லாத கருவிகள் (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) `--model <id>`-ஐ (மற்றும் ஊடாடாத இயக்கங்களுக்கு `--yes`-ஐ) ஏற்கின்றன. `$HOME`-இன் கீழ் எழுதாத ஒரே செயல்முறை `setup-5dive` ஆகும்: அது fleet host-இல் root உரிமையுள்ள அங்கீகாரச் சுயவிவரத்தை எழுதி ஒரு 5dive agent fleet-ஐ உள்ளமைக்கிறது; எனவே அது `sudo` மூலம் தன்னை மீண்டும் இயக்குகிறது, மேலும் அதற்கென தொலைநிலைப் பயன்முறை இல்லை. சரியான சூழல் மாறிகள் செலுத்தப்பட்டு, எந்த உள்ளமைவும் எழுதப்படாமல் ஒரு CLI-ஐத் தொடங்க, பொதுவான `omniroute run <target>` தொடக்கியைப் பயன்படுத்தவும் (claude, codex, aider, goose, opencode, qwen, gemini — இலக்குகளும் மாற்றுப்பெயர்களும் `bin/cli/cli-manifest.mjs`-இலிருந்து வருகின்றன); பழைய தனித்தனி கருவித் தொடக்கிகளான `omniroute launch` (Claude Code) மற்றும் `omniroute launch-codex` (Codex) ஆகியவையும் தொடர்ந்து கிடைக்கின்றன. Gemini CLI தொடங்குவதற்கு மட்டுமே பயன்படும்: அது ஓர் `omniroute run` இலக்கு, ஆனால் அதற்கு `setup-*`/`configure` செயல்முறை இல்லை.
+ஒவ்வொன்றும் `--remote <url> --api-key <key>` (ஒரு தொலைநிலை OmniRoute-க்கு எதிராக உள்ளகக் கருவியை உள்ளமைக்க), `--dry-run` (எழுதாமல் முன்னோட்டமிட), மற்றும் `--port` ஆகியவற்றை ஏற்கிறது. மாதிரியைத் தானாகக் கண்டறியும் வசதி இல்லாத கருவிகள் (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) `--model <id>`-ஐ (மற்றும் ஊடாடாத இயக்கங்களுக்கு `--yes`-ஐ) ஏற்கின்றன. `$HOME`-இன் கீழ் எழுதாத ஒரே செயல்முறை `setup-5dive` ஆகும்: அது fleet host-இல் root உரிமையுள்ள அங்கீகாரச் சுயவிவரத்தை எழுதி ஒரு 5dive agent fleet-ஐ உள்ளமைக்கிறது; எனவே அது `sudo` மூலம் தன்னை மீண்டும் இயக்குகிறது, மேலும் அதற்கென தொலைநிலைப் பயன்முறை இல்லை. சரியான சூழல் மாறிகள் செலுத்தப்பட்டு, எந்த உள்ளமைவும் எழுதப்படாமல் ஒரு CLI-ஐத் தொடங்க, பொதுவான `omniroute run <target>` தொடக்கியைப் பயன்படுத்தவும் (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — இலக்குகளும் மாற்றுப்பெயர்களும் `bin/cli/cli-manifest.mjs`-இலிருந்து வருகின்றன); பழைய தனித்தனி கருவித் தொடக்கிகளான `omniroute launch` (Claude Code) மற்றும் `omniroute launch-codex` (Codex) ஆகியவையும் தொடர்ந்து கிடைக்கின்றன. Gemini CLI தொடங்குவதற்கு மட்டுமே பயன்படும்: அது ஓர் `omniroute run` இலக்கு, ஆனால் அதற்கு `setup-*`/`configure` செயல்முறை இல்லை.
 
 > **முழுமையான மேற்கோள்:** ஒவ்வொரு கட்டளையும் எதை எழுதுகிறது, அனைத்து கொடிகளும்,
 > உள்ளகம் மற்றும் தொலைநிலைக்கு இடையிலான வேறுபாடும், எந்தக் கருவிகளுக்கு `/v1` பின்னொட்டு தேவை என்பதையும் கொண்ட முதன்மை அட்டவணை
@@ -140,7 +141,7 @@ Dashboard-இன் **பயன்படுத்தும் endpoint** (`POST 
 `baseUrlSupport: "partial"` கொண்ட கருவிகளின் டாஷ்போர்டு அட்டையில் "⚠ பகுதியளவு அடிப்படை URL" என்ற பதக்கம் காட்டப்படும்.
 ---
 
-## 2. CLI முகவர்களின் பட்டியல் (10 கருவிகள்)
+## 2. CLI முகவர்களின் பட்டியல் (11 கருவிகள்)
 
 `/dashboard/cli-agents`-இல் தோன்றும் தன்னாட்சி முகவர்கள்:
 
@@ -156,6 +157,7 @@ Dashboard-இன் **பயன்படுத்தும் endpoint** (`POST 
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

@@ -8,7 +8,7 @@
 > Taasgenereerimiseks: `npm run gen:provider-reference`
 > **Viimati genereeritud:** 2026-10-27
 
-Pakkujaid kokku: **376**. Kategooriate jaotust vaadake allpool.
+Pakkujaid kokku: **377**. Kategooriate jaotust vaadake allpool.
 
 ## Kategooriad
 
@@ -397,7 +397,7 @@ Kasuta töölauda aadressil `/dashboard/providers`, et lubada, seadistada ja tes
 | `vllm`                | `vllm`       | vLLM                | Kohalik, ise majutatud | [link](https://github.com/vllm-project/vllm)                    | API-võti valikuline. Konfigureerige kohaliku vLLM-i OpenAI-ühilduv baas-URL (vaikimisi: http://localhost:8000/v1).                                                                                                                                                                                          |
 | `xinference`          | `xinference` | XInference          | Kohalik, ise majutatud | [link](https://inference.readthedocs.io)                        | API-võti valikuline. Konfigureerige kohaliku XInference'i OpenAI-ühilduv baas-URL (vaikimisi: http://localhost:9997/v1).                                                                                                                                                                                    |
 
-## Otsinguteenuse pakkujad (18)
+## Otsinguteenuse pakkujad (19)
 
 | ID                  | Alias           | Nimi                               | Sildid | Veebisait                                                       | Märkused                                                                                                                           |
 | ------------------- | --------------- | ---------------------------------- | ------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Kasuta töölauda aadressil `/dashboard/providers`, et lubada, seadistada ja tes
 | `exa-search`        | `exa-search`    | Exa Search                         | Otsing | [link](https://exa.ai)                                          | API-võti saidi dashboard.exa.ai juhtpaneelilt                                                                                      |
 | `firecrawl`         | `fc`            | Firecrawl                          | Otsing | [link](https://firecrawl.dev)                                   | API-võti aadressilt firecrawl.dev/app/api-keys (või määrake oma majutatud Firecrawli baas-URL)                                     |
 | `google-pse-search` | `google-pse`    | Google Programmable Search         | Otsing | [link](https://developers.google.com/custom-search/v1/overview) | Nõuab Google'i API-võtit ja teie Programmable Search Engine'i ID-d (cx)                                                            |
+| `kimi-search`       | `kimi-search`   | Kimi Search                        | Otsing | [link](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API võti (MOONSHOT_API_KEY) saidilt platform.kimi.ai                                                                   |
 | `linkup-search`     | `linkup`        | Linkup Search                      | Otsing | [link](https://docs.linkup.so)                                  | Bearer API-võti Linkupi juhtpaneelilt                                                                                              |
 | `nimble-search`     | `nimble`        | Nimble Search                      | Otsing | [link](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API-võti Nimble'i juhtpaneelilt                                                                                             |
 | `ollama-search`     | `ollama-search` | Ollama Search                      | Otsing | [link](https://ollama.com/settings/keys)                        | Sama API-võti nagu Ollama Cloudi puhul (aadressilt ollama.com/settings/keys)                                                       |

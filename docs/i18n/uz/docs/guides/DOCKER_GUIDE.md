@@ -668,6 +668,8 @@ Standart Docker / Kubernetes OmniRoute topologiyasi — **bitta Node jarayoni + 
 
 **Yangilashlar:** har bir seans uzilishini kuting. Imkon boʻlsa, mijozlarni bosqichma-bosqich uzing; standart SQLite bilan rolling update mavjud emas. Composeʼdagi `restart: unless-stopped` va Docker `HEALTHCHECK` ham konteyner Unhealthy holatiga oʻtganda yagona jarayonni almashtiradi — taʼsir koʻlami bir xil.
 
+Tayyor manifestlar va Helm charti `deploy/kubernetes/` hamda `deploy/helm/omniroute/` ichida joylashgan — [Kubernetesʼga joylashtirish qoʻllanmasi](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md)ga qarang.
+
 **Bitta replika** uchun Kubernetes parchasi (Recreate talab qilinadi; bitta SQLite fayli bilan `replicas` sonini oshirmang):
 
 ```yaml

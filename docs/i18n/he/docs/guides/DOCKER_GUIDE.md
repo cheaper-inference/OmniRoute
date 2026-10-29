@@ -665,6 +665,8 @@ OmniRoute הסטנדרטי ב-Docker / Kubernetes הוא **תהליך Node אח�
 
 **שדרוגים:** צפו שכל הפעלה תנותק. נקזו לקוחות אם ניתן; אין עדכון מתגלגל עם SQLite המוגדר כברירת מחדל. גם Compose עם `restart: unless-stopped` ו-Docker `HEALTHCHECK` יחליף את התהליך היחיד כאשר מצב הקונטיינר הוא Unhealthy — עם אותו היקף פגיעה.
 
+מניפסטים מוכנים מראש ותרשים Helm נמצאים ב־`deploy/kubernetes/` וב־`deploy/helm/omniroute/` — ראו את [מדריך הפריסה ב־Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 קטע תצורה של Kubernetes עבור **רפליקה יחידה** (נדרש Recreate; אין להגדיל את `replicas` מול קובץ SQLite יחיד):
 
 ```yaml

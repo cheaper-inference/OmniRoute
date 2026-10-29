@@ -488,7 +488,7 @@ On obrađuje:
 
 | Datoteka                      | Svrha                                                 |
 | ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | Registar modela za chat iz kataloga od 376 pružatelja |
+| `providerRegistry.ts`         | Registar modela za chat iz kataloga od 377 pružatelja |
 | `providerModels.ts`           | Aliasi modela, mapiranje formata                      |
 | `constants.ts`                | Vremenska ograničenja, limiti, statusni kodovi        |
 | `defaultThinkingSignature.ts` | Zadani Claudeov potpis razmišljanja                   |

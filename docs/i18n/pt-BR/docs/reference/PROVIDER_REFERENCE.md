@@ -8,7 +8,7 @@
 > Gere novamente com: `npm run gen:provider-reference`
 > **Última geração:** 2026-10-27
 
-Total de provedores: **376**. Veja abaixo a divisão por categoria.
+Total de provedores: **377**. Veja abaixo a divisão por categoria.
 
 ## Categorias
 
@@ -397,7 +397,7 @@ Use o painel em `/dashboard/providers` para habilitar, configurar e testar cada 
 | `vllm`                | `vllm`       | vLLM                | Local, auto-hospedado | [link](https://github.com/vllm-project/vllm)                    | Chave de API opcional. Configure a URL base local compatível com OpenAI do vLLM (padrão: http://localhost:8000/v1).                                                                                                                                                                                                         |
 | `xinference`          | `xinference` | XInference          | Local, auto-hospedado | [link](https://inference.readthedocs.io)                        | Chave de API opcional. Configure a URL base local compatível com OpenAI do XInference (padrão: http://localhost:9997/v1).                                                                                                                                                                                                   |
 
-## Provedores de pesquisa (18)
+## Provedores de pesquisa (19)
 
 | ID                  | Alias           | Nome                                   | Tags     | Site                                                            | Observações                                                                                                                   |
 | ------------------- | --------------- | -------------------------------------- | -------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Use o painel em `/dashboard/providers` para habilitar, configurar e testar cada 
 | `exa-search`        | `exa-search`    | Exa Search                             | Pesquisa | [link](https://exa.ai)                                          | Chave de API de dashboard.exa.ai                                                                                              |
 | `firecrawl`         | `fc`            | Firecrawl                              | Pesquisa | [link](https://firecrawl.dev)                                   | Chave de API de firecrawl.dev/app/api-keys (ou defina a URL base da sua instância auto-hospedada do Firecrawl)                |
 | `google-pse-search` | `google-pse`    | Google Programmable Search             | Pesquisa | [link](https://developers.google.com/custom-search/v1/overview) | Requer uma chave de API do Google e o ID do seu mecanismo de pesquisa programável (cx)                                        |
+| `kimi-search`       | `kimi-search`   | Kimi Search                            | Pesquisa | [link](https://platform.kimi.ai/docs/api/tools-search)          | Chave da API da Moonshot AI (MOONSHOT_API_KEY) obtida em platform.kimi.ai                                                     |
 | `linkup-search`     | `linkup`        | Linkup Search                          | Pesquisa | [link](https://docs.linkup.so)                                  | Chave de API Bearer do painel do Linkup                                                                                       |
 | `nimble-search`     | `nimble`        | Nimble Search                          | Pesquisa | [link](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Chave de API Bearer do painel da Nimble                                                                                       |
 | `ollama-search`     | `ollama-search` | Ollama Search                          | Pesquisa | [link](https://ollama.com/settings/keys)                        | A mesma chave de API do Ollama Cloud (de ollama.com/settings/keys)                                                            |

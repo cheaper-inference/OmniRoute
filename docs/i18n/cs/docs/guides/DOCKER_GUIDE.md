@@ -664,6 +664,8 @@ Standardní nasazení OmniRoute v Dockeru / Kubernetes tvoří **jeden proces No
 
 **Aktualizace:** počítejte s ukončením každé relace. Pokud můžete, předem odpojte klienty; s výchozím SQLite není postupná aktualizace možná. Nastavení Compose `restart: unless-stopped` spolu s Docker `HEALTHCHECK` také nahradí jediný proces, když kontejner přejde do stavu Unhealthy — se stejně rozsáhlými dopady.
 
+Hotové manifesty a Helm chart se nacházejí v `deploy/kubernetes/` a `deploy/helm/omniroute/` — viz [průvodce nasazením v Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Ukázka konfigurace Kubernetes pro **jedinou repliku** (strategie Recreate je povinná; nezvyšujte `replicas` nad jedním souborem SQLite):
 
 ```yaml

@@ -8,7 +8,7 @@
 > Sake samar da shi da: `npm run gen:provider-reference`
 > **Lokacin samarwa na ƙarshe:** 2026-10-27
 
-Jimillar masu samarwa: **376**. Duba rarrabuwar rukuni a ƙasa.
+Jimillar masu samarwa: **377**. Duba rarrabuwar rukuni a ƙasa.
 
 ## Rukunoni
 
@@ -397,7 +397,7 @@ Yi amfani da dashboard da ke `/dashboard/providers` don kunna, saita, da gwada k
 | `vllm`                | `vllm`       | vLLM                | Na cikin gida, mai masaukin kansa | [hanya](https://github.com/vllm-project/vllm)                    | Maɓallin API na zaɓi ne. Saita URL na asali na vLLM na cikin gida mai dacewa da OpenAI (na asali: http://localhost:8000/v1).                                                                                                                                                                                                             |
 | `xinference`          | `xinference` | XInference          | Na cikin gida, mai masaukin kansa | [hanya](https://inference.readthedocs.io)                        | Maɓallin API na zaɓi ne. Saita URL na asali na XInference na cikin gida mai dacewa da OpenAI (na asali: http://localhost:9997/v1).                                                                                                                                                                                                       |
 
-## Masu Samar da Bincike (18)
+## Masu Samar da Bincike (19)
 
 | ID                  | Laƙabi          | Suna                             | Alamomi | Shafin Yanar Gizo                                                 | Bayanan Kula                                                                                                                                  |
 | ------------------- | --------------- | -------------------------------- | ------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Yi amfani da dashboard da ke `/dashboard/providers` don kunna, saita, da gwada k
 | `exa-search`        | `exa-search`    | Exa Search                       | Bincike | [mahaɗi](https://exa.ai)                                          | Maɓallin API daga dashboard.exa.ai                                                                                                            |
 | `firecrawl`         | `fc`            | Firecrawl                        | Bincike | [mahaɗi](https://firecrawl.dev)                                   | Maɓallin API daga firecrawl.dev/app/api-keys (ko saita URL na asalin Firecrawl da ka karɓi bakuncinsa da kanka)                               |
 | `google-pse-search` | `google-pse`    | Google Programmable Search       | Bincike | [mahaɗi](https://developers.google.com/custom-search/v1/overview) | Yana buƙatar maɓallin Google API da ID ɗin Programmable Search Engine naka (cx)                                                               |
+| `kimi-search`       | `kimi-search`   | Kimi Search                      | Bincike | [mahaɗi](https://platform.kimi.ai/docs/api/tools-search)          | Maɓallin API na Moonshot AI (MOONSHOT_API_KEY) daga platform.kimi.ai                                                                          |
 | `linkup-search`     | `linkup`        | Linkup Search                    | Bincike | [mahaɗi](https://docs.linkup.so)                                  | Maɓallin Bearer API daga dashboard na Linkup                                                                                                  |
 | `nimble-search`     | `nimble`        | Nimble Search                    | Bincike | [mahaɗi](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Maɓallin Bearer API daga dashboard na Nimble                                                                                                  |
 | `ollama-search`     | `ollama-search` | Ollama Search                    | Bincike | [mahaɗi](https://ollama.com/settings/keys)                        | Maɓallin API iri ɗaya da na Ollama Cloud (daga ollama.com/settings/keys)                                                                      |

@@ -10,8 +10,8 @@ OmniRoute በሦስት ልዩ የዳሽቦርድ ገጾች ላይ ከተከፋ�
 
 | ገጽ             | መስመር                    | ጽንሰ-ሐሳብ                                                                      | ብዛት             |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------- | --------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | ወደ OmniRoute የሚያመለክቷቸው የኮድ መጻፊያ መሣሪያዎች (Client → CLI → OmniRoute → Provider) | 26              |
-| **CLI Agents** | `/dashboard/cli-agents` | ወደ OmniRoute የሚያመለክቷቸው ራስ-ገዝ ወኪሎች (ተመሳሳይ ፍሰት፣ ሰፋ ያለ ወሰን)                     | 10              |
+| **CLI Code's** | `/dashboard/cli-code`   | ወደ OmniRoute የሚያመለክቷቸው የኮድ መጻፊያ መሣሪያዎች (Client → CLI → OmniRoute → Provider) | 27              |
+| **CLI Agents** | `/dashboard/cli-agents` | ወደ OmniRoute የሚያመለክቷቸው ራስ-ገዝ ወኪሎች (ተመሳሳይ ፍሰት፣ ሰፋ ያለ ወሰን)                     | 11              |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute በstdio/ACP በኩል እንደ backend የሚያስነሳቸው CLIs (ተቃራኒ ፍሰት)                | registryን ይመልከቱ |
 
 የቆዩ መስመሮች በ308 ይዛወራሉ፦ `/dashboard/cli-tools` → `/dashboard/cli-code`፣ `/dashboard/agents` → `/dashboard/acp-agents`።
@@ -55,12 +55,13 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-እያንዳንዱ `--remote <url> --api-key <key>` (አካባቢያዊ መሣሪያን ከርቀት OmniRoute ጋር ማዋቀር)፣ `--dry-run` (ሳይጽፉ ቅድመ-ዕይታ ማየት) እና `--port`ን ይቀበላል። ራስ-ሰር የሞዴል ማግኘት ባህሪ የሌላቸው መሣሪያዎች (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)
+እያንዳንዱ `--remote <url> --api-key <key>` (አካባቢያዊ መሣሪያን ከርቀት OmniRoute ጋር ማዋቀር)፣ `--dry-run` (ሳይጽፉ ቅድመ-ዕይታ ማየት) እና `--port`ን ይቀበላል። ራስ-ሰር የሞዴል ማግኘት ባህሪ የሌላቸው መሣሪያዎች (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes)
 `--model <id>`ን (እንዲሁም መስተጋብራዊ ላልሆኑ አሂዶች `--yes`ን) ይቀበላሉ። `setup-5dive` በ`$HOME` ስር የማይጽፍ ብቸኛው የማዋቀሪያ ዘዴ ነው፦ በፍሊቱ አስተናጋጅ ላይ በroot ባለቤትነት የሚያዝ የማረጋገጫ መገለጫ በመጻፍ የ5dive ወኪሎች ፍሊትን ያዋቅራል፤ ስለዚህ ራሱን በ`sudo` በኩል እንደገና ያስፈጽማል እና የራሱ የርቀት ሁነታ የለውም። ትክክለኛው env ተጨምሮለት እና ምንም ውቅር ሳይጻፍ CLIን ለማስጀመር፣ አጠቃላዩን
-`omniroute run <target>` ማስጀመሪያ ይጠቀሙ (claude, codex, aider, goose, opencode, qwen,
-gemini — ዒላማዎች እና ተለዋጭ ስሞች ከ`bin/cli/cli-manifest.mjs` ይመጣሉ)፤ ነባሮቹ
+`omniroute run <target>` ማስጀመሪያ ይጠቀሙ (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — ዒላማዎች እና ተለዋጭ ስሞች ከ`bin/cli/cli-manifest.mjs` ይመጣሉ)፤ ነባሮቹ
 የየመሣሪያው ማስጀመሪያዎች `omniroute launch` (Claude Code) እና `omniroute launch-codex`
 (Codex) አሁንም ይገኛሉ። Gemini CLI ለማስጀመር ብቻ ነው፦ የ`omniroute run`
 ዒላማ ነው፣ ነገር ግን የ`setup-*`/`configure` ማዋቀሪያ ዘዴ የለውም።
@@ -154,7 +155,7 @@ kilo, continue) — በምትኩ በአስተናጋጁ ላይ የሚሰራ `host
 `baseUrlSupport: "partial"` ያላቸው መሣሪያዎች በዳሽቦርድ ካርዱ ላይ "⚠ ከፊል Base URL" የሚል ባጅ ያሳያሉ።
 ---
 
-## 2. የCLI ኤጀንቶች ካታሎግ (10 መሣሪያዎች)
+## 2. የCLI ኤጀንቶች ካታሎግ (11 መሣሪያዎች)
 
 በ`/dashboard/cli-agents` ውስጥ የሚታዩ ራስ-ሰር ኤጀንቶች፦
 
@@ -170,6 +171,7 @@ kilo, continue) — በምትኩ በአስተናጋጁ ላይ የሚሰራ `host
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

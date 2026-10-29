@@ -8,7 +8,7 @@
 > Yenidən yaratmaq üçün: `npm run gen:provider-reference`
 > **Son yaradılma tarixi:** 2026-10-27
 
-Ümumi provayder sayı: **376**. Aşağıdakı kateqoriyalar üzrə bölgüyə baxın.
+Ümumi provayder sayı: **377**. Aşağıdakı kateqoriyalar üzrə bölgüyə baxın.
 
 ## Kateqoriyalar
 
@@ -397,7 +397,7 @@ Hər bir provayderi aktivləşdirmək, konfiqurasiya etmək və sınaqdan keçir
 | `vllm`                | `vllm`       | vLLM                | Lokal, öz serverində yerləşdirilən | [keçid](https://github.com/vllm-project/vllm)                    | API açarı ixtiyaridir. Lokal vLLM üçün OpenAI ilə uyğun baza URL-ni konfiqurasiya edin (standart: http://localhost:8000/v1).                                                                                                                                                                                                                         |
 | `xinference`          | `xinference` | XInference          | Lokal, öz serverində yerləşdirilən | [keçid](https://inference.readthedocs.io)                        | API açarı ixtiyaridir. Lokal XInference üçün OpenAI ilə uyğun baza URL-ni konfiqurasiya edin (standart: http://localhost:9997/v1).                                                                                                                                                                                                                   |
 
-## Axtarış Provayderləri (18)
+## Axtarış Provayderləri (19)
 
 | ID                  | Ləqəb           | Ad                             | Teqlər  | Veb-sayt                                                         | Qeydlər                                                                                                                           |
 | ------------------- | --------------- | ------------------------------ | ------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Hər bir provayderi aktivləşdirmək, konfiqurasiya etmək və sınaqdan keçir
 | `exa-search`        | `exa-search`    | Exa Search                     | Axtarış | [keçid](https://exa.ai)                                          | dashboard.exa.ai saytından API açarı                                                                                              |
 | `firecrawl`         | `fc`            | Firecrawl                      | Axtarış | [keçid](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys ünvanından API açarı (və ya özünüzün yerləşdirdiyi Firecrawl əsas URL-ni təyin edin)                   |
 | `google-pse-search` | `google-pse`    | Google Programmable Search     | Axtarış | [keçid](https://developers.google.com/custom-search/v1/overview) | Google API açarı və Programmable Search Engine ID-niz (cx) tələb olunur                                                           |
+| `kimi-search`       | `kimi-search`   | Kimi Search                    | Axtarış | [keçid](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai saytından Moonshot AI API açarı (MOONSHOT_API_KEY)                                                               |
 | `linkup-search`     | `linkup`        | Linkup Search                  | Axtarış | [keçid](https://docs.linkup.so)                                  | Linkup idarəetmə panelindən Bearer API açarı                                                                                      |
 | `nimble-search`     | `nimble`        | Nimble Search                  | Axtarış | [keçid](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble idarəetmə panelindən Bearer API açarı                                                                                      |
 | `ollama-search`     | `ollama-search` | Ollama Search                  | Axtarış | [keçid](https://ollama.com/settings/keys)                        | Ollama Cloud ilə eyni API açarı (ollama.com/settings/keys ünvanından)                                                             |

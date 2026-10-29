@@ -8,7 +8,7 @@
 > ଏହା ସହିତ ପୁନଃ ସୃଷ୍ଟି କରନ୍ତୁ: `npm run gen:provider-reference`
 > **ଶେଷ ଥର ସୃଷ୍ଟି କରାଯାଇଛି:** 2026-10-27
 
-ମୋଟ ପ୍ରଦାନକାରୀ: **376**। ନିମ୍ନରେ ବର୍ଗ ଅନୁଯାୟୀ ବିବରଣୀ ଦେଖନ୍ତୁ।
+ମୋଟ ପ୍ରଦାନକାରୀ: **377**। ନିମ୍ନରେ ବର୍ଗ ଅନୁଯାୟୀ ବିବରଣୀ ଦେଖନ୍ତୁ।
 
 ## ବର୍ଗଗୁଡ଼ିକ
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | Local, self-hosted | [link](https://github.com/vllm-project/vllm)                    | API କି' ଐଚ୍ଛିକ। ସ୍ଥାନୀୟ vLLM OpenAI-କମ୍ପାଟିବଲ୍ ବେସ୍ URL କନଫିଗର୍ କରନ୍ତୁ (ଡିଫଲ୍ଟ: http://localhost:8000/v1)।                                                                                                                                                                                                                   |
 | `xinference`          | `xinference` | XInference          | Local, self-hosted | [link](https://inference.readthedocs.io)                        | API କି' ଐଚ୍ଛିକ। ସ୍ଥାନୀୟ XInference OpenAI-କମ୍ପାଟିବଲ୍ ବେସ୍ URL କନଫିଗର୍ କରନ୍ତୁ (ଡିଫଲ୍ଟ: http://localhost:9997/v1)।                                                                                                                                                                                                             |
 
-## ସନ୍ଧାନ ପ୍ରଦାନକାରୀ (18)
+## ସନ୍ଧାନ ପ୍ରଦାନକାରୀ (19)
 
 | ID                  | ଉପନାମ           | ନାମ                                 | ଟ୍ୟାଗ୍ଗୁଡ଼ିକ | ୱେବସାଇଟ୍                                                          | ଟିପ୍ପଣୀ                                                                                                            |
 | ------------------- | --------------- | ----------------------------------- | ------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                          | ସନ୍ଧାନ       | [ଲିଙ୍କ୍](https://exa.ai)                                          | dashboard.exa.aiରୁ API କୀ                                                                                          |
 | `firecrawl`         | `fc`            | Firecrawl                           | ସନ୍ଧାନ       | [ଲିଙ୍କ୍](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keysରୁ API କୀ (କିମ୍ବା ଆପଣଙ୍କ ସ୍ୱୟଂ-ହୋଷ୍ଟ କରାଯାଇଥିବା Firecrawl ମୂଳ URL ସେଟ୍ କରନ୍ତୁ)           |
 | `google-pse-search` | `google-pse`    | Google Programmable Search          | ସନ୍ଧାନ       | [ଲିଙ୍କ୍](https://developers.google.com/custom-search/v1/overview) | ଏକ Google API କୀ ଏବଂ ଆପଣଙ୍କ Programmable Search Engine ID (cx) ଆବଶ୍ୟକ                                              |
+| `kimi-search`       | `kimi-search`   | Kimi Search                         | ସନ୍ଧାନ       | [ଲିଙ୍କ୍](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.aiରୁ Moonshot AI API କୀ (MOONSHOT_API_KEY)                                                           |
 | `linkup-search`     | `linkup`        | Linkup Search                       | ସନ୍ଧାନ       | [ଲିଙ୍କ୍](https://docs.linkup.so)                                  | Linkup ଡ୍ୟାସ୍ବୋର୍ଡରୁ Bearer API କୀ                                                                                 |
 | `nimble-search`     | `nimble`        | Nimble Search                       | ସନ୍ଧାନ       | [ଲିଙ୍କ୍](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble ଡ୍ୟାସ୍ବୋର୍ଡରୁ Bearer API କୀ                                                                                 |
 | `ollama-search`     | `ollama-search` | Ollama Search                       | ସନ୍ଧାନ       | [ଲିଙ୍କ୍](https://ollama.com/settings/keys)                        | Ollama Cloud ସହିତ ସମାନ API କୀ (ollama.com/settings/keysରୁ)                                                         |

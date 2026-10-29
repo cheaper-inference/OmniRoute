@@ -10,8 +10,8 @@ OmniRoute integreerub kolme kategooria CLI-tööriistadega, mis on jaotatud kolm
 
 | Leht            | Marsruut                | Põhimõte                                                                             | Arv          |
 | --------------- | ----------------------- | ------------------------------------------------------------------------------------ | ------------ |
-| **CLI-koodid**  | `/dashboard/cli-code`   | Kodeerimistööriistad, mille suunate OmniRoute'i (klient → CLI → OmniRoute → pakkuja) | 26           |
-| **CLI-agendid** | `/dashboard/cli-agents` | Autonoomsed agendid, mille suunate OmniRoute'i (sama voog, laiem ulatus)             | 10           |
+| **CLI-koodid**  | `/dashboard/cli-code`   | Kodeerimistööriistad, mille suunate OmniRoute'i (klient → CLI → OmniRoute → pakkuja) | 27           |
+| **CLI-agendid** | `/dashboard/cli-agents` | Autonoomsed agendid, mille suunate OmniRoute'i (sama voog, laiem ulatus)             | 11           |
 | **ACP-agendid** | `/dashboard/acp-agents` | CLI-d, mille OmniRoute käivitab stdio/ACP kaudu taustsüsteemina (vastupidine voog)   | vt registrit |
 
 Pärandmarsruudid suunatakse 308 kaudu ümber: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Kõik käsud aktsepteerivad suvandeid `--remote <url> --api-key <key>` (kohaliku tööriista seadistamiseks kaug-OmniRoute’iga), `--dry-run` (eelvaade ilma kirjutamiseta) ja `--port`. Mudelite automaatse tuvastamiseta tööriistad (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) võtavad suvandi `--model <id>` (ja mitteinteraktiivsete käivituste jaoks `--yes`). `setup-5dive` on ainus retsept, mis ei kirjuta asukohta `$HOME`: see seadistab 5dive’i agentide parve, kirjutades parve hosti juurkasutajale kuuluva autentimisprofiili, mistõttu käivitab see end uuesti käsu `sudo` kaudu ja sellel puudub oma kaugrežiim. CLI käivitamiseks õigesti sisestatud keskkonnamuutujatega ja ilma konfiguratsiooni kirjutamata kasutage üldist käivitajat `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — sihtmärgid ja aliased pärinevad failist `bin/cli/cli-manifest.mjs`); pärandkäivitajad `omniroute launch` (Claude Code) ja `omniroute launch-codex` (Codex) on endiselt saadaval. Gemini CLI-d saab ainult käivitada: see on käsu `omniroute run` sihtmärk, kuid sellel puudub `setup-*`/`configure`-retsept.
+Kõik käsud aktsepteerivad suvandeid `--remote <url> --api-key <key>` (kohaliku tööriista seadistamiseks kaug-OmniRoute’iga), `--dry-run` (eelvaade ilma kirjutamiseta) ja `--port`. Mudelite automaatse tuvastamiseta tööriistad (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) võtavad suvandi `--model <id>` (ja mitteinteraktiivsete käivituste jaoks `--yes`). `setup-5dive` on ainus retsept, mis ei kirjuta asukohta `$HOME`: see seadistab 5dive’i agentide parve, kirjutades parve hosti juurkasutajale kuuluva autentimisprofiili, mistõttu käivitab see end uuesti käsu `sudo` kaudu ja sellel puudub oma kaugrežiim. CLI käivitamiseks õigesti sisestatud keskkonnamuutujatega ja ilma konfiguratsiooni kirjutamata kasutage üldist käivitajat `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — sihtmärgid ja aliased pärinevad failist `bin/cli/cli-manifest.mjs`); pärandkäivitajad `omniroute launch` (Claude Code) ja `omniroute launch-codex` (Codex) on endiselt saadaval. Gemini CLI-d saab ainult käivitada: see on käsu `omniroute run` sihtmärk, kuid sellel puudub `setup-*`/`configure`-retsept.
 
 > **Täielik viide:** põhitabel — mida iga käsk kirjutab, kõik lipud, kohalik ja kaugrežiim ning millised tööriistad vajavad järelliidet `/v1` — asub jaotises
 > **[CLI integratsioonid](../guides/CLI-INTEGRATIONS.md)**.
@@ -143,7 +144,7 @@ Kõik tööriistad, mis kuvatakse jaotises `/dashboard/cli-code`. Tööriistad, 
 Tööriistade puhul, millel on `baseUrlSupport: "partial"`, kuvatakse töölaua kaardil märk „⚠ Osaline baas-URL”.
 ---
 
-## 2. CLI-agentide kataloog (10 tööriista)
+## 2. CLI-agentide kataloog (11 tööriista)
 
 Autonoomsed agendid, mis kuvatakse asukohas `/dashboard/cli-agents`:
 
@@ -159,6 +160,7 @@ Autonoomsed agendid, mis kuvatakse asukohas `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

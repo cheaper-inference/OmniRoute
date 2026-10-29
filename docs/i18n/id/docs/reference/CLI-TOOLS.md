@@ -10,8 +10,8 @@ OmniRoute terintegrasi dengan tiga kategori alat CLI yang tersebar di tiga halam
 
 | Halaman        | Rute                    | Konsep                                                                             | Jumlah         |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------------- | -------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Alat pengodean yang Anda arahkan ke OmniRoute (Klien → CLI → OmniRoute → Penyedia) | 26             |
-| **CLI Agents** | `/dashboard/cli-agents` | Agen otonom yang Anda arahkan ke OmniRoute (alur sama, cakupan lebih luas)         | 10             |
+| **CLI Code's** | `/dashboard/cli-code`   | Alat pengodean yang Anda arahkan ke OmniRoute (Klien → CLI → OmniRoute → Penyedia) | 27             |
+| **CLI Agents** | `/dashboard/cli-agents` | Agen otonom yang Anda arahkan ke OmniRoute (alur sama, cakupan lebih luas)         | 11             |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI yang dijalankan OmniRoute sebagai backend melalui stdio/ACP (alur terbalik)    | lihat registri |
 
 Rute lama dialihkan melalui 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Setiap perintah menerima `--remote <url> --api-key <key>` (mengonfigurasi alat lokal untuk menggunakan
 OmniRoute jarak jauh), `--dry-run` (meninjau tanpa menulis), dan `--port`. Alat
-tanpa penemuan model otomatis (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) menerima
+tanpa penemuan model otomatis (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) menerima
 `--model <id>` (serta `--yes` untuk eksekusi noninteraktif). `setup-5dive` adalah satu-satunya
 prosedur yang tidak menulis di bawah `$HOME`: perintah ini mengonfigurasi armada agen 5dive dengan
 menulis profil autentikasi milik root pada host armada, sehingga mengeksekusi ulang melalui `sudo`
 dan tidak memiliki mode jarak jauh sendiri. Untuk menjalankan CLI dengan variabel lingkungan
 yang tepat disuntikkan tanpa menulis konfigurasi sama sekali, gunakan peluncur generik
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — target dan alias berasal dari `bin/cli/cli-manifest.mjs`); peluncur lama
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — target dan alias berasal dari `bin/cli/cli-manifest.mjs`); peluncur lama
 per alat `omniroute launch` (Claude Code) dan `omniroute launch-codex`
 (Codex) tetap tersedia. Gemini CLI hanya dapat diluncurkan: Gemini CLI merupakan target `omniroute run`,
 tetapi tidak memiliki prosedur `setup-*`/`configure`.
@@ -182,7 +183,7 @@ Semua alat yang muncul di `/dashboard/cli-code`. Alat dengan `baseUrlSupport: no
 Alat dengan `baseUrlSupport: "partial"` menampilkan lencana "⚠ URL Dasar sebagian" pada kartu dasbor.
 ---
 
-## 2. Katalog Agen CLI (10 alat)
+## 2. Katalog Agen CLI (11 alat)
 
 Agen otonom yang ditampilkan di `/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ Agen otonom yang ditampilkan di `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full             | false                    |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full             | false                    |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full             | false                    |
+| whycodes     | WhyCodes         | Why Corporation          | full             | false                    |
 
 ---
 

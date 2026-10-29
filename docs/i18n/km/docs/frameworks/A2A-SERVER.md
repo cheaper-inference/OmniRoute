@@ -156,7 +156,7 @@ OmniRoute ផ្តល់ជំនាញ A2A ចំនួន 6 ដែលបា�
 | របាយការណ៍សុខភាព      | `health-report`      | ប្រមូលផ្ដុំស្ថានភាព circuit breaker, cooldown និង lockout តាម provider                                                                         | សុខភាព, ភាពធន់             | "បង្ហាញស្ថានភាពសុខភាពរបស់ providers ទាំងអស់" |
 | រាយបញ្ជីសមត្ថភាព     | `list-capabilities`  | ត្រឡប់កាតាឡុក Agent Skills ពេញលេញដែលមាន 45 ធាតុ (23 API + 21 CLI + 1 config) ជាតារាង markdown ជាមួយ URL ដើមរបស់ SKILL.md សម្រាប់ការបញ្ចូលបរិបទ | កាតាឡុក, ការស្វែងរក, ជំនាញ | "រាយបញ្ជីសមត្ថភាព OmniRoute ទាំងអស់"         |
 
-> Agent Card គួរតែត្រូវបានរក្សាឱ្យស្របគ្នាជាមួយកាតាឡុកសកម្មដែលមាន 376 providers; ចំនួន provider និង metadata អំពីការឥតគិតថ្លៃ/មិនត្រូវការការផ្ទៀងផ្ទាត់ ត្រូវបានយកមកពី runtime registry។
+> Agent Card គួរតែត្រូវបានរក្សាឱ្យស្របគ្នាជាមួយកាតាឡុកសកម្មដែលមាន 377 providers; ចំនួន provider និង metadata អំពីការឥតគិតថ្លៃ/មិនត្រូវការការផ្ទៀងផ្ទាត់ ត្រូវបានយកមកពី runtime registry។
 
 ### ព័ត៌មានលម្អិតអំពីជំនាញ `list-capabilities`
 

@@ -13,7 +13,7 @@
 
 ## Qué es
 
-OmniRoute registra 376 proveedores, incluidas 155 entradas de catálogo marcadas como **gratuitas/sin autenticación**
+OmniRoute registra 377 proveedores, incluidas 155 entradas de catálogo marcadas como **gratuitas/sin autenticación**
 (sin autenticación, OAuth de nivel gratuito o clave de API de nivel gratuito — consulta la
 [Guía de niveles gratuitos](../getting-started/FREE-TIERS-GUIDE.md) y el
 [directorio completo de niveles gratuitos](../reference/FREE_TIERS.md)). El problema: los proveedores gratuitos varían

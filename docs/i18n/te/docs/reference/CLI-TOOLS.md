@@ -10,8 +10,8 @@ OmniRoute మూడు ప్రత్యేక డ్యాష్బోర్�
 
 | పేజీ           | రూట్                    | భావన                                                                                  | సంఖ్య               |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------- | ------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | మీరు OmniRoute వైపు మళ్లించే కోడింగ్ సాధనాలు (క్లయింట్ → CLI → OmniRoute → ప్రొవైడర్) | 26                  |
-| **CLI Agents** | `/dashboard/cli-agents` | మీరు OmniRoute వైపు మళ్లించే స్వయంప్రతిపత్తి గల ఏజెంట్లు (అదే ప్రవాహం, విస్తృత పరిధి) | 10                  |
+| **CLI Code's** | `/dashboard/cli-code`   | మీరు OmniRoute వైపు మళ్లించే కోడింగ్ సాధనాలు (క్లయింట్ → CLI → OmniRoute → ప్రొవైడర్) | 27                  |
+| **CLI Agents** | `/dashboard/cli-agents` | మీరు OmniRoute వైపు మళ్లించే స్వయంప్రతిపత్తి గల ఏజెంట్లు (అదే ప్రవాహం, విస్తృత పరిధి) | 11                  |
 | **ACP Agents** | `/dashboard/acp-agents` | stdio/ACP ద్వారా OmniRoute బ్యాకెండ్గా ప్రారంభించే CLIలు (రివర్స్ ప్రవాహం)            | రిజిస్ట్రీని చూడండి |
 
 లెగసీ రూట్లు 308 ద్వారా దారి మళ్లిస్తాయి: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -56,18 +56,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 ప్రతి కమాండ్ `--remote <url> --api-key <key>` (రిమోట్ OmniRouteకు అనుగుణంగా స్థానిక
 సాధనాన్ని కాన్ఫిగర్ చేయడం), `--dry-run` (వ్రాయకుండానే ప్రివ్యూ చూడడం), మరియు `--port`ను
 ఆమోదిస్తుంది. మోడల్ స్వయంచాలక గుర్తింపు లేని సాధనాలు (Cline, Kilo, Roo, Goose, Aider,
-Qwen, 5dive) `--model <id>`ను (మరియు ఇంటరాక్టివ్ కాని అమలుల కోసం `--yes`ను)
+Qwen, 5dive, WhyCodes) `--model <id>`ను (మరియు ఇంటరాక్టివ్ కాని అమలుల కోసం `--yes`ను)
 తీసుకుంటాయి. `$HOME` కింద వ్రాయని ఏకైక రెసిపీ `setup-5dive`: ఇది ఫ్లీట్ హోస్ట్లో
 root యాజమాన్యంలోని auth ప్రొఫైల్ను వ్రాయడం ద్వారా 5dive ఏజెంట్ ఫ్లీట్ను కాన్ఫిగర్
 చేస్తుంది, కాబట్టి ఇది `sudo` ద్వారా మళ్లీ అమలవుతుంది మరియు దీనికి స్వంత రిమోట్ మోడ్
 లేదు. సరైన envను ఇంజెక్ట్ చేసి, ఎలాంటి కాన్ఫిగరేషన్నూ వ్రాయకుండా CLIని ప్రారంభించడానికి,
 సాధారణ `omniroute run <target>` లాంచర్ను ఉపయోగించండి (claude, codex, aider, goose,
-opencode, qwen, gemini — టార్గెట్లు మరియు అలియాస్లు `bin/cli/cli-manifest.mjs` నుండి
+opencode, qwen, gemini, whycodes — టార్గెట్లు మరియు అలియాస్లు `bin/cli/cli-manifest.mjs` నుండి
 వస్తాయి); పాత, ఒక్కో సాధనానికి ప్రత్యేకమైన `omniroute launch` (Claude Code) మరియు
 `omniroute launch-codex` (Codex) లాంచర్లు ఇప్పటికీ అందుబాటులో ఉన్నాయి. Gemini CLI
 ప్రారంభించడానికి మాత్రమే ఉద్దేశించబడింది: ఇది `omniroute run` టార్గెట్, కానీ దీనికి
@@ -185,7 +186,7 @@ opencode, cline, kilo, continue), బదులుగా హోస్ట్లో
 `baseUrlSupport: "partial"` ఉన్న సాధనాల డ్యాష్బోర్డ్ కార్డ్లో "⚠ పాక్షిక Base URL" బ్యాడ్జ్ కనిపిస్తుంది.
 ---
 
-## 2. CLI ఏజెంట్ల కేటలాగ్ (10 సాధనాలు)
+## 2. CLI ఏజెంట్ల కేటలాగ్ (11 సాధనాలు)
 
 `/dashboard/cli-agents`లో కనిపించే స్వయంప్రతిపత్తి గల ఏజెంట్లు:
 
@@ -201,6 +202,7 @@ opencode, cline, kilo, continue), బదులుగా హోస్ట్లో
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

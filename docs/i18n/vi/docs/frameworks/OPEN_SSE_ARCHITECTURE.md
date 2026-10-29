@@ -488,7 +488,7 @@ Bộ biến đổi này xử lý:
 
 | Tệp                              | Mục đích                                                    |
 | -------------------------------- | ----------------------------------------------------------- |
-| `providerRegistry.ts`            | Sổ đăng ký mô hình trò chuyện cho danh mục 376 nhà cung cấp |
+| `providerRegistry.ts`            | Sổ đăng ký mô hình trò chuyện cho danh mục 377 nhà cung cấp |
 | `providerModels.ts`              | Bí danh mô hình, ánh xạ định dạng                           |
 | `constants.ts`                   | Thời gian chờ, giới hạn, mã trạng thái                      |
 | `defaultThinkingSignature.ts`    | Chữ ký suy luận mặc định của Claude                         |

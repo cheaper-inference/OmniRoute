@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Bezpłatna brama AI
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Koduj bez przerw. Każde narzędzie AI → 376 dostawców — ponad 150 bezpłatnych — za pośrednictwem jednego punktu końcowego. Claude Code, Codex, Cursor, Cline, Copilot i Antigravity z BEZPŁATNYM dostępem do Claude / GPT / Gemini oraz automatycznym przełączaniem awaryjnym. Łączona kompresja RTK + Caveman oszczędza 15–95% tokenów (średnio ~89%) — koniec z przekraczaniem limitów. 376 dostawców AI · ponad 150 bezpłatnych planów · ~1,62 mld bezpłatnych tokenów/mies. · 20 strategii routingu · koszt początkowy: 0 USD."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Koduj bez przerw. Każde narzędzie AI → 377 dostawców — ponad 150 bezpłatnych — za pośrednictwem jednego punktu końcowego. Claude Code, Codex, Cursor, Cline, Copilot i Antigravity z BEZPŁATNYM dostępem do Claude / GPT / Gemini oraz automatycznym przełączaniem awaryjnym. Łączona kompresja RTK + Caveman oszczędza 15–95% tokenów (średnio ~89%) — koniec z przekraczaniem limitów. 377 dostawców AI · ponad 150 bezpłatnych planów · ~1,62 mld bezpłatnych tokenów/mies. · 20 strategii routingu · koszt początkowy: 0 USD."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                                         |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Dostawcy                             |            352            |   **358**   |          376          |
+| 🌐 Dostawcy                             |            352            |   **358**   |          377          |
 | 🧠 Unikalne identyfikatory modeli czatu |           1320            |  **1374**   |         1475          |
 | 🖼️ Most modalności                      | 🆕 obraz + dźwięk + wideo |      ✓      |           ✓           |
 | 📡 Bezpłatny katalog Radar              |       🆕 opcjonalny       |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Funkcje</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinacje</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Dostawcy</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Dostawcy</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obietnica — jeden punkt końcowy i 376 dostawców. Automatyczny mechanizm awaryjny utrzymuje trasowanie, dopóki dostępne jest inne prawidłowo działające miejsce docelowe. Sześć filarów: odporne przełączanie awaryjne między 376 dostawcami · do 95% oszczędności tokenów w kwalifikujących się obciążeniach · start za $0 dzięki ponad 150 bezpłatnym planom oraz 52 cyklicznym lub niewymagającym klucza dostawcom bezpłatnym na zawsze · 37 integracji CLI/agentów za pomocą jednej konfiguracji · zgodność z OpenAI, Claude, Gemini i Responses API pod adresem /v1 · mechanizmy produkcyjne, w tym wyłączniki automatyczne, maskowanie TLS, 110 narzędzi MCP, A2A, pamięć, zabezpieczenia, ewaluacje oraz ponad 56 000 statycznych deklaracji testów w ponad 7 800 śledzonych plikach testowych."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obietnica — jeden punkt końcowy i 377 dostawców. Automatyczny mechanizm awaryjny utrzymuje trasowanie, dopóki dostępne jest inne prawidłowo działające miejsce docelowe. Sześć filarów: odporne przełączanie awaryjne między 377 dostawcami · do 95% oszczędności tokenów w kwalifikujących się obciążeniach · start za $0 dzięki ponad 150 bezpłatnym planom oraz 52 cyklicznym lub niewymagającym klucza dostawcom bezpłatnym na zawsze · 37 integracji CLI/agentów za pomocą jednej konfiguracji · zgodność z OpenAI, Claude, Gemini i Responses API pod adresem /v1 · mechanizmy produkcyjne, w tym wyłączniki automatyczne, maskowanie TLS, 110 narzędzi MCP, A2A, pamięć, zabezpieczenia, ewaluacje oraz ponad 56 000 statycznych deklaracji testów w ponad 7 800 śledzonych plikach testowych."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Wszystkie **20** strategii — łącz je dowolnie na poszczególnych etapach kom
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Co wyróżnia OmniRoute — datowany przegląd funkcji w porównaniu z 9router, OpenRouter, CLIProxyAPI i LiteLLM w zakresie 13 możliwości. OmniRoute: 376 dostawców, ponad 150 wbudowanych darmowych planów, 20 strategii routingu, 12-silnikowa kompresja tokenów, wbudowany serwer MCP ze 110 narzędziami, protokół agentów A2A, trwała pamięć, zabezpieczenia, agenci chmurowi, maskowanie odcisku palca TLS, Desktop/Termux/PWA oraz 67 lokalizacji interfejsu użytkownika. OmniRoute jest udostępniany na licencji MIT i może być hostowany samodzielnie. Możliwości i dane liczbowe konkurencyjnych rozwiązań mogą ulec zmianie; zobacz podlinkowaną metodologię."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Co wyróżnia OmniRoute — datowany przegląd funkcji w porównaniu z 9router, OpenRouter, CLIProxyAPI i LiteLLM w zakresie 13 możliwości. OmniRoute: 377 dostawców, ponad 150 wbudowanych darmowych planów, 20 strategii routingu, 12-silnikowa kompresja tokenów, wbudowany serwer MCP ze 110 narzędziami, protokół agentów A2A, trwała pamięć, zabezpieczenia, agenci chmurowi, maskowanie odcisku palca TLS, Desktop/Termux/PWA oraz 67 lokalizacji interfejsu użytkownika. OmniRoute jest udostępniany na licencji MIT i może być hostowany samodzielnie. Możliwości i dane liczbowe konkurencyjnych rozwiązań mogą ulec zmianie; zobacz podlinkowaną metodologię."/>
 
 <sub>📊 Pełna metodologia i szczegóły poszczególnych funkcji w porównaniu z 9router, OpenRouter, CLIProxyAPI i LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -612,7 +612,7 @@ aktualnym katalogu znajdziesz na stronie **[radar.omniroute.online/planos](https
 - **🖼️ Nowe punkty końcowe** — `/v1/ocr` (Mistral OCR) i `/v1/audio/translations` (w stylu Whisper) uzupełniają obsługę multimediów. → [Dokumentacja API](docs/reference/API_REFERENCE.md)
 - **🎨 Generowanie obrazów, wideo i dźwięku** — jedno API do multimediów: xAI Grok Imagine i Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind oraz dostawcy syntezy mowy, tacy jak ElevenLabs. → [Dokumentacja API](docs/reference/API_REFERENCE.md)
 - **🌍 Wdrażanie i eksploatacja** — `basePath` dla odwrotnego proxy, automatyczne wykrywanie języka przeglądarki, śledzenie urządzeń dla poszczególnych kluczy, zaufanie MITM bez uprawnień roota i lokalizacja zh-TW. → [Środowisko](docs/reference/ENVIRONMENT.md)
-- **🤝 Więcej dostawców i agentów** — agenci chmurowi (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) z przeglądarką i logowaniem OAuth, pełnoprawna karta Ollama, Claude Opus 5 i Sonnet 5, oficjalne partnerstwo z Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… oraz odświeżony **katalog 376 dostawców**. → [Dostawcy](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Więcej dostawców i agentów** — agenci chmurowi (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) z przeglądarką i logowaniem OAuth, pełnoprawna karta Ollama, Claude Opus 5 i Sonnet 5, oficjalne partnerstwo z Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… oraz odświeżony **katalog 377 dostawców**. → [Dostawcy](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Przejrzystość routingu** — każda odpowiedź zawiera nagłówek `X-OmniRoute-Decision` wskazujący strategię, dostawcę i opóźnienie obsługującego ją połączenia; nowa strategia combo `cache-optimized` wraz ze współczynnikiem Auto-Combo `cacheAffinity` kieruje powtarzające się żądania z powrotem do połączenia przechowującego prefiks w pamięci podręcznej, a punkt końcowy tylko do odczytu `/v1/auto-combo/{channel}/candidates` udostępnia aktywną pulę kandydatów kanału `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokalna wydajność i infrastruktura** — lokalny Redis uruchamiany jednym kliknięciem, narzędzia wdrożeniowe przekaźników Cloudflare Workers / Deno Deploy oraz Bifrost i Mux jako nadzorowane usługi wbudowane. → [Usługi wbudowane](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Ponadto w zestawie** — framework wtyczek i marketplace, frameworki umiejętności Omni/Agent/GitHub, integracja z repozytorium Obsidian (22 narzędzia MCP), zgodne z OpenAI interfejsy API Batch i Files, semantyczna pamięć podręczna odpowiedzi, grywalizacja z rankingami, wykrywanie agentów ACP (15 wbudowanych agentów), zaplanowany eksport logów do BigQuery, równoległe rozsyłanie zapytań do wielu modeli `auto/chaos`, mostek do bota Telegram, wbudowany w aplikację menedżer wersji oraz rankingi bezpłatnych dostawców LMArena-ELO. → [Dokumentacja](docs/README.md)
@@ -666,7 +666,7 @@ aktualnym katalogu znajdziesz na stronie **[radar.omniroute.online/planos](https
 <b>＋ działa również z</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>dowolnym narzędziem zgodnym z OpenAI</b>
 </div>
 
-<sub>📖 Konfiguracja każdego z 37 narzędzi (27 narzędzi CLI do kodowania + 10 agentów CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Wtyczka OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Konfiguracja każdego z 38 narzędzi (27 narzędzi CLI do kodowania + 11 agentów CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Wtyczka OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -696,11 +696,11 @@ zapisywaniu sekretów w historii powłoki. → [Integracje CLI](docs/guides/CLI-
 
 <div align="center">
 
-## 🌐 376 dostawców AI — 153 oznaczonych w katalogu jako bezpłatni
+## 🌐 377 dostawców AI — 153 oznaczonych w katalogu jako bezpłatni
 
 </div>
 
-> **376 zarejestrowanych dostawców** w kanonicznych kolekcjach czatu, multimediów, wyszukiwania, usług lokalnych, agentów chmurowych i systemowych, w tym **153 z metadanymi wykrywania `hasFree: true`**. Rejestr modeli czatu obejmuje **239 dostawców / 3 059 unikatowych par dostawca-model / 1 475 nieprzetworzonych identyfikatorów modeli**; osobny katalog bezpłatnych limitów zawiera **484 wpisów dla poszczególnych modeli**, **34 pule odnawialne** oraz **52 dostawców oferujących odnawialny lub niewymagający klucza bezpłatny dostęp bezterminowy**. Są to celowo różne mianowniki; definicje i obliczenia z deduplikacją pul znajdują się w dokumentach [Informacje o dostawcach](docs/reference/PROVIDER_REFERENCE.md) oraz [Bezpłatne poziomy](docs/reference/FREE_TIERS.md).
+> **377 zarejestrowanych dostawców** w kanonicznych kolekcjach czatu, multimediów, wyszukiwania, usług lokalnych, agentów chmurowych i systemowych, w tym **153 z metadanymi wykrywania `hasFree: true`**. Rejestr modeli czatu obejmuje **239 dostawców / 3 059 unikatowych par dostawca-model / 1 475 nieprzetworzonych identyfikatorów modeli**; osobny katalog bezpłatnych limitów zawiera **484 wpisów dla poszczególnych modeli**, **34 pule odnawialne** oraz **52 dostawców oferujących odnawialny lub niewymagający klucza bezpłatny dostęp bezterminowy**. Są to celowo różne mianowniki; definicje i obliczenia z deduplikacją pul znajdują się w dokumentach [Informacje o dostawcach](docs/reference/PROVIDER_REFERENCE.md) oraz [Bezpłatne poziomy](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -774,6 +774,7 @@ zapisywaniu sekretów w historii powłoki. → [Integracje CLI](docs/guides/CLI-
 <table>
   <tr><th align="left">Platforma</th><th align="left">Instalacja</th><th align="left">Najważniejsze cechy</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (globalnie)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Jedno polecenie, dowolny system operacyjny</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (globalnie)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Kompatybilność zapewniana w miarę możliwości, bez gwarancji wsparcia; obsługiwanym środowiskiem uruchomieniowym jest Node.js.</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Wiele architektur: <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Aplikacja desktopowa (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Natywne okno + zasobnik systemowy — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Pasek menu (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Nadzoruje i automatycznie aktualizuje serwer — <b>macOS</b></td></tr>
@@ -1315,7 +1316,7 @@ Dane kanoniczne na 2026-10-18: **1.976 unikalnych filmów** · **20.220.289 znan
   <tr><td nowrap><b>Środowisko uruchomieniowe</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Język</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> w <code>src/</code> i <code>open-sse/</code> (zero <code>any</code> w rdzeniu od wersji v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Baza danych</b></td><td>better-sqlite3 (SQLite, rejestrowanie WAL) + LowDB (starszy format JSON) — 147 modułów domenowych, 211 migracji</td></tr>
+  <tr><td nowrap><b>Baza danych</b></td><td>better-sqlite3 (SQLite, rejestrowanie WAL) + LowDB (starszy format JSON) — 147 modułów domenowych, 213 migracji</td></tr>
   <tr><td nowrap><b>Pamięć</b></td><td>Wyszukiwanie pełnotekstowe SQLite FTS5 + osadzenia wektorowe kwantyzowane do int8, typowany zanik</td></tr>
   <tr><td nowrap><b>Schematy</b></td><td>Zod 4 — walidacja wejścia/wyjścia narzędzi MCP + kontrakty API</td></tr>
   <tr><td nowrap><b>Protokoły</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

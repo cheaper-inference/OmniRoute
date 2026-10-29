@@ -8,7 +8,7 @@
 > Для повторной генерации выполните: `npm run gen:provider-reference`
 > **Дата последней генерации:** 2026-10-27
 
-Всего провайдеров: **376**. Распределение по категориям приведено ниже.
+Всего провайдеров: **377**. Распределение по категориям приведено ниже.
 
 ## Категории
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | Локальный, самостоятельно размещаемый | [ссылка](https://github.com/vllm-project/vllm)                    | Ключ API необязателен. Настройте базовый URL локального vLLM, совместимый с OpenAI (по умолчанию: http://localhost:8000/v1).                                                                                                                                                                                                           |
 | `xinference`          | `xinference` | XInference          | Локальный, самостоятельно размещаемый | [ссылка](https://inference.readthedocs.io)                        | Ключ API необязателен. Настройте базовый URL локального XInference, совместимый с OpenAI (по умолчанию: http://localhost:9997/v1).                                                                                                                                                                                                     |
 
-## Поисковые провайдеры (18)
+## Поисковые провайдеры (19)
 
 | ID                  | Псевдоним       | Название                          | Теги  | Веб-сайт                                                          | Примечания                                                                                                                                    |
 | ------------------- | --------------- | --------------------------------- | ----- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                        | Поиск | [ссылка](https://exa.ai)                                          | API-ключ из dashboard.exa.ai                                                                                                                  |
 | `firecrawl`         | `fc`            | Firecrawl                         | Поиск | [ссылка](https://firecrawl.dev)                                   | API-ключ с firecrawl.dev/app/api-keys (или укажите базовый URL собственного экземпляра Firecrawl)                                             |
 | `google-pse-search` | `google-pse`    | Google Programmable Search        | Поиск | [ссылка](https://developers.google.com/custom-search/v1/overview) | Требуются API-ключ Google и ID вашей программируемой поисковой системы (cx)                                                                   |
+| `kimi-search`       | `kimi-search`   | Kimi Search                       | Поиск | [ссылка](https://platform.kimi.ai/docs/api/tools-search)          | Ключ API Moonshot AI (MOONSHOT_API_KEY) с platform.kimi.ai                                                                                    |
 | `linkup-search`     | `linkup`        | Linkup Search                     | Поиск | [ссылка](https://docs.linkup.so)                                  | Bearer API-ключ из панели управления Linkup                                                                                                   |
 | `nimble-search`     | `nimble`        | Nimble Search                     | Поиск | [ссылка](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API-ключ из панели управления Nimble                                                                                                   |
 | `ollama-search`     | `ollama-search` | Ollama Search                     | Поиск | [ссылка](https://ollama.com/settings/keys)                        | Тот же API-ключ, что и для Ollama Cloud (с ollama.com/settings/keys)                                                                          |

@@ -488,7 +488,7 @@ Ini mengendalikan:
 
 | Fail                                 | Tujuan                                             |
 | ------------------------------------ | -------------------------------------------------- |
-| `providerRegistry.ts`                | Daftar model sembang merentas katalog 376 penyedia |
+| `providerRegistry.ts`                | Daftar model sembang merentas katalog 377 penyedia |
 | `providerModels.ts`                  | Alias model, pemetaan format                       |
 | `constants.ts`                       | Tamat masa, had, kod status                        |
 | `defaultThinkingSignature.ts`        | Tandatangan pemikiran Claude lalai                 |

@@ -671,6 +671,8 @@ Dockerin tai Kubernetesin OmniRoute-vakiokokoonpano on **yksi Node-prosessi + yk
 
 **Päivitykset:** varaudu siihen, että jokainen istunto katkeaa. Ohjaa asiakkaat hallitusti pois, jos mahdollista; oletusarvoisella SQLite-kokoonpanolla ei voi tehdä vaiheittaista päivitystä. Composen `restart: unless-stopped` yhdessä Dockerin `HEALTHCHECK`-tarkistuksen kanssa korvaa myös ainoan prosessin, kun kontin tila on Unhealthy — vaikutusalue on sama.
 
+Valmiit manifestit ja Helm-kaavio sijaitsevat hakemistoissa `deploy/kubernetes/` ja `deploy/helm/omniroute/` — katso [Kubernetes-käyttöönotto-opas](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kubernetes-katkelma **yhdelle replikalle** (Recreate vaaditaan; älä kasvata `replicas`-arvoa yhtä SQLite-tiedostoa käytettäessä):
 
 ```yaml

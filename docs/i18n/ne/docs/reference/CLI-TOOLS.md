@@ -10,8 +10,8 @@ OmniRoute तीनवटा समर्पित ड्यासबोर्�
 
 | पृष्ठ          | रुट                     | अवधारणा                                                                                        | सङ्ख्या              |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------------------------- | -------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | तपाईंले OmniRoute तर्फ निर्देशित गर्ने कोडिङ उपकरणहरू (क्लाइन्ट → CLI → OmniRoute → प्रदायक)   | 26                   |
-| **CLI Agents** | `/dashboard/cli-agents` | तपाईंले OmniRoute तर्फ निर्देशित गर्ने स्वायत्त एजेन्टहरू (उही प्रवाह, अझ व्यापक कार्यक्षेत्र) | 10                   |
+| **CLI Code's** | `/dashboard/cli-code`   | तपाईंले OmniRoute तर्फ निर्देशित गर्ने कोडिङ उपकरणहरू (क्लाइन्ट → CLI → OmniRoute → प्रदायक)   | 27                   |
+| **CLI Agents** | `/dashboard/cli-agents` | तपाईंले OmniRoute तर्फ निर्देशित गर्ने स्वायत्त एजेन्टहरू (उही प्रवाह, अझ व्यापक कार्यक्षेत्र) | 11                   |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute ले stdio/ACP मार्फत ब्याकएन्डका रूपमा सुरु गर्ने CLI हरू (उल्टो प्रवाह)              | रजिस्ट्री हेर्नुहोस् |
 
 पुराना रुटहरू 308 मार्फत रिडाइरेक्ट हुन्छन्: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`।
@@ -55,17 +55,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 प्रत्येकले `--remote <url> --api-key <key>` (रिमोट OmniRoute विरुद्ध स्थानीय उपकरण कन्फिगर गर्न),
 `--dry-run` (नलेखी पूर्वावलोकन गर्न), र `--port` स्वीकार गर्छ। मोडेल स्वतः-पत्ता लगाउने सुविधा नभएका
-उपकरणहरू (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) ले `--model <id>` (र अन्तर्क्रियारहित
+उपकरणहरू (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) ले `--model <id>` (र अन्तर्क्रियारहित
 रनहरूका लागि `--yes`) लिन्छन्। `setup-5dive` नै `$HOME` अन्तर्गत नलेख्ने एकमात्र रेसिपी हो:
 यसले फ्लीट होस्टमा root-स्वामित्व भएको प्रमाणीकरण प्रोफाइल लेखेर 5dive एजेन्ट फ्लीट कन्फिगर गर्छ,
 त्यसैले यो `sudo` मार्फत पुनः कार्यान्वयन हुन्छ र यसको आफ्नै रिमोट मोड हुँदैन। सही env इन्जेक्ट गरेर
 र कुनै पनि कन्फिगरेसन नलेखी CLI सुरु गर्न, सामान्य
-`omniroute run <target>` लन्चर प्रयोग गर्नुहोस् (claude, codex, aider, goose, opencode, qwen,
-gemini — लक्ष्यहरू र उपनामहरू `bin/cli/cli-manifest.mjs` बाट आउँछन्); पुराना प्रति-उपकरण
+`omniroute run <target>` लन्चर प्रयोग गर्नुहोस् (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — लक्ष्यहरू र उपनामहरू `bin/cli/cli-manifest.mjs` बाट आउँछन्); पुराना प्रति-उपकरण
 लन्चरहरू `omniroute launch` (Claude Code) र `omniroute launch-codex`
 (Codex) अझै उपलब्ध छन्। Gemini CLI लन्च-मात्र हो: यो `omniroute run`
 को लक्ष्य हो तर यसमा `setup-*`/`configure` रेसिपी छैन।
@@ -179,7 +180,7 @@ guard हटाएर `422` लाई कहिल्यै "ठीक" नग�
 `baseUrlSupport: "partial"` भएका उपकरणहरूले ड्यासबोर्ड कार्डमा "⚠ आंशिक Base URL" ब्याज देखाउँछन्।
 ---
 
-## 2. CLI एजेन्टहरूको सूची (१० उपकरण)
+## 2. CLI एजेन्टहरूको सूची (११ उपकरण)
 
 `/dashboard/cli-agents` मा देखिने स्वायत्त एजेन्टहरू:
 
@@ -195,6 +196,7 @@ guard हटाएर `422` लाई कहिल्यै "ठीक" नग�
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

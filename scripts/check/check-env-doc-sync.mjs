@@ -31,12 +31,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 
 // ─── Allowlists ────────────────────────────────────────────────────────────
+// Host-provided home-directory context, not application .env settings. Docs
+// may mention these names when explaining a configuration-path fallback.
+const OS_HOME_CONTEXT_VARS = new Set(["HOME", "USERPROFILE"]);
+
 // Env vars referenced in code that should NOT trigger documentation drift.
 // These are usually system/process vars or harness-only knobs.
 const IGNORE_FROM_CODE = new Set([
+  ...OS_HOME_CONTEXT_VARS,
   "NODE_ENV",
   "PATH",
-  "HOME",
   "USER",
   "LOGNAME",
   "XDG_CURRENT_DESKTOP",
@@ -80,7 +84,6 @@ const IGNORE_FROM_CODE = new Set([
   // XDG Base Directory cache root — read (never defined by OmniRoute) so the
   // Android/Termux serve path can honor an operator-set cache location (#8519).
   "XDG_CACHE_HOME",
-  "USERPROFILE",
   "PREFIX",
   // X11 display server — set by the OS/session manager, not OmniRoute config.
   "DISPLAY",
@@ -470,7 +473,9 @@ export function runEnvDocSync(options = {}) {
 
   const codeMissingEnv = diff(codeVars, envVars);
   const envMissingDoc = diff(envVars, docVars).filter((v) => !envOnly.has(v));
-  const docMissingEnv = diff(docVars, envVars).filter((v) => !docOnly.has(v));
+  const docMissingEnv = diff(docVars, envVars).filter(
+    (v) => !docOnly.has(v) && !OS_HOME_CONTEXT_VARS.has(v)
+  );
 
   const ok =
     codeMissingEnv.length === 0 && envMissingDoc.length === 0 && docMissingEnv.length === 0;

@@ -488,7 +488,7 @@ Nasa `open-sse/config/` ang configuration layer:
 
 | File                          | Layunin                                                    |
 | ----------------------------- | ---------------------------------------------------------- |
-| `providerRegistry.ts`         | Registry ng chat model para sa catalog na may 376 provider |
+| `providerRegistry.ts`         | Registry ng chat model para sa catalog na may 377 provider |
 | `providerModels.ts`           | Mga alias ng model, pagmamapa ng format                    |
 | `constants.ts`                | Mga timeout, limit, at status code                         |
 | `defaultThinkingSignature.ts` | Default na thinking signature ng Claude                    |

@@ -13,7 +13,7 @@
 
 ## Kaj je to
 
-OmniRoute registrira 376 ponudnikov, med katerimi je 155 vnosov v katalogu označenih kot **brezplačno/brez avtentikacije**
+OmniRoute registrira 377 ponudnikov, med katerimi je 155 vnosov v katalogu označenih kot **brezplačno/brez avtentikacije**
 (brez avtentikacije, OAuth z brezplačno ravnjo ali API ključ z brezplačno ravnjo — glejte
 [Vodnik po brezplačnih ravneh](../getting-started/FREE-TIERS-GUIDE.md) in celoten
 [imenik brezplačnih ravni](../reference/FREE_TIERS.md)). Zanka pa je v tem: kakovost modelov

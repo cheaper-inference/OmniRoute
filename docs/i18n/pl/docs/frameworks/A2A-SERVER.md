@@ -163,7 +163,7 @@ OmniRoute udostępnia 6 umiejętności A2A połączonych w `src/lib/a2a/taskExec
 | Raport o stanie         | `health-report`      | Agreguje stan mechanizmu circuit breaker, okresu wyciszenia i blokady dla każdego dostawcy                                                                                                    | stan, odporność                   | „Pokaż stan wszystkich dostawców”          |
 | Lista możliwości        | `list-capabilities`  | Zwraca pełny, zawierający 45 pozycji katalog Agent Skills (23 API + 21 CLI + 1 konfiguracja) jako tabelę markdown z nieprzetworzonymi adresami URL plików SKILL.md do wstrzykiwania kontekstu | katalog, wykrywanie, umiejętności | „Wyświetl wszystkie możliwości OmniRoute”  |
 
-> Agent Card powinien być zgodny z aktualnym katalogiem 376 dostawców; liczba dostawców oraz metadane dotyczące bezpłatnego dostępu i braku konieczności uwierzytelniania pochodzą z rejestru środowiska uruchomieniowego.
+> Agent Card powinien być zgodny z aktualnym katalogiem 377 dostawców; liczba dostawców oraz metadane dotyczące bezpłatnego dostępu i braku konieczności uwierzytelniania pochodzą z rejestru środowiska uruchomieniowego.
 
 ### Szczegóły umiejętności `list-capabilities`
 

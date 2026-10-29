@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — निःशुल्क AI गेटवे
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — कोडिङ कहिल्यै नरोक्नुहोस्। प्रत्येक AI उपकरण → 376 प्रदायक — 150+ निःशुल्क — एउटै एन्डपोइन्टमार्फत। Claude Code, Codex, Cursor, Cline, Copilot र Antigravity लाई स्वतः-फल्ब्याकसहित निःशुल्क Claude / GPT / Gemini मा जोड्नुहोस्। RTK + Caveman को संयुक्त कम्प्रेसनले 15–95% टोकन (~89% औसत) बचत गर्छ — कहिल्यै सीमा नाघ्नु पर्दैन। 376 AI प्रदायक · 150+ निःशुल्क टियर · ~1.62B निःशुल्क टोकन/महिना · 20 राउटिङ रणनीति · सुरु गर्न $0।"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — कोडिङ कहिल्यै नरोक्नुहोस्। प्रत्येक AI उपकरण → 377 प्रदायक — 150+ निःशुल्क — एउटै एन्डपोइन्टमार्फत। Claude Code, Codex, Cursor, Cline, Copilot र Antigravity लाई स्वतः-फल्ब्याकसहित निःशुल्क Claude / GPT / Gemini मा जोड्नुहोस्। RTK + Caveman को संयुक्त कम्प्रेसनले 15–95% टोकन (~89% औसत) बचत गर्छ — कहिल्यै सीमा नाघ्नु पर्दैन। 377 AI प्रदायक · 150+ निःशुल्क टियर · ~1.62B निःशुल्क टोकन/महिना · 20 राउटिङ रणनीति · सुरु गर्न $0।"/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                                |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------ | :------------------------: | :---------: | :-------------------: |
-| 🌐 प्रदायकहरू                  |            352             |   **358**   |          376          |
+| 🌐 प्रदायकहरू                  |            352             |   **358**   |          377          |
 | 🧠 अद्वितीय च्याट मोडेल ID हरू |            1320            |  **1374**   |         1475          |
 | 🖼️ मोडालिटी ब्रिज              | 🆕 दृष्टि + अडियो + भिडियो |      ✓      |           ✓           |
 | 📡 राडार निःशुल्क क्याटलग      |         🆕 ऐच्छिक          |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ सुविधाहरू</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 कम्बोहरू</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 प्रदायकहरू</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 प्रदायकहरू</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI र MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="प्रतिबद्धता — एउटा एन्डपोइन्ट र 376 प्रदायकहरू। अर्को स्वस्थ लक्ष्य उपलब्ध हुँदासम्म स्वचालित फलब्याकले रुटिङ जारी राख्छ। छवटा आधारस्तम्भ: 376 प्रदायकहरूमा भरपर्दो फलब्याक · योग्य कार्यभारहरूमा 95% सम्म टोकन बचत · 150+ निःशुल्क टियर र 52 आवर्ती/कुञ्जीरहित सदाका लागि निःशुल्क प्रदायकहरूसहित $0 बाट सुरु · एउटै कन्फिगमार्फत 37 CLI/एजेन्ट एकीकरणहरू · /v1 मा OpenAI, Claude, Gemini र Responses API अनुकूलता · सर्किट ब्रेकरहरू, TLS स्टेल्थ, MCP का 110 उपकरणहरू, A2A, मेमोरी, गार्डरेलहरू, इभालहरू र ट्र्याक गरिएका 7,800+ परीक्षण फाइलहरूमा 56,000+ स्थिर परीक्षण घोषणाहरू सहितका उत्पादन नियन्त्रणहरू।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="प्रतिबद्धता — एउटा एन्डपोइन्ट र 377 प्रदायकहरू। अर्को स्वस्थ लक्ष्य उपलब्ध हुँदासम्म स्वचालित फलब्याकले रुटिङ जारी राख्छ। छवटा आधारस्तम्भ: 377 प्रदायकहरूमा भरपर्दो फलब्याक · योग्य कार्यभारहरूमा 95% सम्म टोकन बचत · 150+ निःशुल्क टियर र 52 आवर्ती/कुञ्जीरहित सदाका लागि निःशुल्क प्रदायकहरूसहित $0 बाट सुरु · एउटै कन्फिगमार्फत 37 CLI/एजेन्ट एकीकरणहरू · /v1 मा OpenAI, Claude, Gemini र Responses API अनुकूलता · सर्किट ब्रेकरहरू, TLS स्टेल्थ, MCP का 110 उपकरणहरू, A2A, मेमोरी, गार्डरेलहरू, इभालहरू र ट्र्याक गरिएका 7,800+ परीक्षण फाइलहरूमा 56,000+ स्थिर परीक्षण घोषणाहरू सहितका उत्पादन नियन्त्रणहरू।"/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute लाई विशिष्ट बनाउने विशेषताहरू — 13 क्षमताहरूमा 9router, OpenRouter, CLIProxyAPI र LiteLLM सँग तुलना गरिएको निश्चित मितिको सुविधासम्बन्धी झलक। OmniRoute: 376 प्रदायकहरू, अन्तर्निर्मित 150+ निःशुल्क टियरहरू, 20 राउटिङ रणनीतिहरू, 12-इन्जिन टोकन कम्प्रेसन, 110 उपकरणसहितको अन्तर्निर्मित MCP सर्भर, A2A एजेन्ट प्रोटोकल, स्थायी मेमोरी, सुरक्षात्मक सीमाहरू, क्लाउड एजेन्टहरू, TLS फिङ्गरप्रिन्ट गोपनीयता, Desktop/Termux/PWA र 67 i18n UI लोकेलहरू। OmniRoute MIT इजाजतपत्रप्राप्त र स्व-होस्ट गर्न मिल्ने छ। प्रतिस्पर्धीका क्षमता र सङ्ख्याहरू परिवर्तन हुन सक्छन्; लिङ्क गरिएको कार्यविधि हेर्नुहोस्।"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute लाई विशिष्ट बनाउने विशेषताहरू — 13 क्षमताहरूमा 9router, OpenRouter, CLIProxyAPI र LiteLLM सँग तुलना गरिएको निश्चित मितिको सुविधासम्बन्धी झलक। OmniRoute: 377 प्रदायकहरू, अन्तर्निर्मित 150+ निःशुल्क टियरहरू, 20 राउटिङ रणनीतिहरू, 12-इन्जिन टोकन कम्प्रेसन, 110 उपकरणसहितको अन्तर्निर्मित MCP सर्भर, A2A एजेन्ट प्रोटोकल, स्थायी मेमोरी, सुरक्षात्मक सीमाहरू, क्लाउड एजेन्टहरू, TLS फिङ्गरप्रिन्ट गोपनीयता, Desktop/Termux/PWA र 67 i18n UI लोकेलहरू। OmniRoute MIT इजाजतपत्रप्राप्त र स्व-होस्ट गर्न मिल्ने छ। प्रतिस्पर्धीका क्षमता र सङ्ख्याहरू परिवर्तन हुन सक्छन्; लिङ्क गरिएको कार्यविधि हेर्नुहोस्।"/>
 
 <sub>📊 9router, OpenRouter, CLIProxyAPI र LiteLLM सँगको पूर्ण कार्यविधि तथा प्रत्येक सुविधाको विस्तृत तुलना → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -611,7 +611,7 @@ Radar वैकल्पिक रूपमा सक्रिय गर्न �
 - **🖼️ नयाँ एन्डपोइन्टहरू** — `/v1/ocr` (Mistral OCR) र `/v1/audio/translations` (Whisper-शैली) ले मिडिया सुविधाहरूलाई पूर्ण बनाउँछन्। → [API सन्दर्भ](docs/reference/API_REFERENCE.md)
 - **🎨 छवि / भिडियो / अडियो उत्पादन** — मिडियाका लागि एउटै API: xAI Grok Imagine र Novita AI भिडियो, ComfyUI, Magnific, Adobe Firefly, Segmind, तथा ElevenLabs जस्ता स्पिच प्रदायकहरू। → [API सन्दर्भ](docs/reference/API_REFERENCE.md)
 - **🌍 डिप्लोयमेन्ट र सञ्चालन** — रिभर्स-प्रोक्सी `basePath`, ब्राउजर भाषाको स्वतः पहिचान, प्रत्येक कुञ्जीअनुसार डिभाइस ट्र्याकिङ, रुट-विहीन MITM ट्रस्ट, र zh-TW स्थानीयकरण। → [वातावरण](docs/reference/ENVIRONMENT.md)
-- **🤝 थप प्रदायक र एजेन्टहरू** — क्लाउड एजेन्टहरू (Codex Cloud, Cursor, Devin, Jules), ब्राउजर + OAuth लगइनसहित Grok Build (xAI), Ollama को प्रथम-श्रेणी कार्ड, Claude Opus 5 र Sonnet 5, Kimi को आधिकारिक साझेदारी (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… र अद्यावधिक गरिएको **३७६-प्रदायक क्याटलग**। → [प्रदायकहरू](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 थप प्रदायक र एजेन्टहरू** — क्लाउड एजेन्टहरू (Codex Cloud, Cursor, Devin, Jules), ब्राउजर + OAuth लगइनसहित Grok Build (xAI), Ollama को प्रथम-श्रेणी कार्ड, Claude Opus 5 र Sonnet 5, Kimi को आधिकारिक साझेदारी (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… र अद्यावधिक गरिएको **३७७-प्रदायक क्याटलग**। → [प्रदायकहरू](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 राउटिङ पारदर्शिता** — प्रत्येक प्रतिक्रियामा त्यसलाई सेवा दिने रणनीति/प्रदायक/लेटेन्सीको नामसहितको `X-OmniRoute-Decision` हेडर हुन्छ; नयाँ `cache-optimized` कम्बो रणनीति + Auto-Combo `cacheAffinity` कारकले दोहोरिएका अनुरोधहरूलाई क्यास गरिएको प्रिफिक्स राख्ने कनेक्सनमा पुनः रुट गर्छ; र पढ्न-मात्र मिल्ने `/v1/auto-combo/{channel}/candidates` एन्डपोइन्टले `auto/*` च्यानलको प्रत्यक्ष उम्मेदवार पूल देखाउँछ। → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ स्थानीय कार्यसम्पादन र पूर्वाधार** — एक-क्लिक स्थानीय Redis, Cloudflare Workers / Deno Deploy रिले डिप्लोयरहरू, पर्यवेक्षित एम्बेडेड सेवाहरूका रूपमा Bifrost र Mux। → [एम्बेडेड सेवाहरू](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 साथै प्याकेजमै समावेश** — प्लगइन फ्रेमवर्क + मार्केटप्लेस, Omni/Agent/GitHub स्किल्स फ्रेमवर्कहरू, Obsidian भल्ट एकीकरण (22 MCP उपकरणहरू), OpenAI-सङ्गत Batch र Files APIs, सिमान्टिक प्रतिक्रिया क्यास, लिडरबोर्डसहितको गेमिफिकेसन, ACP एजेन्ट खोज (15 बिल्ट-इन एजेन्टहरू), BigQuery मा निर्धारित लग निर्यात, `auto/chaos` समानान्तर बहु-मोडेल फ्यान-आउट, Telegram बट ब्रिज, इन-एप संस्करण प्रबन्धक र LMArena-ELO निःशुल्क-प्रदायक र्याङ्किङहरू। → [कागजातहरू](docs/README.md)
@@ -665,7 +665,7 @@ Radar वैकल्पिक रूपमा सक्रिय गर्न �
 <b>＋ यीसँग पनि काम गर्छ</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>कुनै पनि OpenAI-अनुकूल उपकरण</b>
 </div>
 
-<sub>📖 सबै 37 उपकरणहरूका लागि प्रति-उपकरण सेटअप (27 CLI Code + 10 CLI Agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode प्लगइन → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 सबै 38 उपकरणहरूका लागि प्रति-उपकरण सेटअप (27 CLI Code + 11 CLI Agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode प्लगइन → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -695,11 +695,11 @@ omniroute configure codex          # यी पनि: claude opencode qwen aide
 
 <div align="center">
 
-## 🌐 376 AI प्रदायकहरू — 153 क्याटलगमा निःशुल्कका रूपमा चिन्हित
+## 🌐 377 AI प्रदायकहरू — 153 क्याटलगमा निःशुल्कका रूपमा चिन्हित
 
 </div>
 
-> **376 दर्ता भएका प्रदायकहरू** क्यानोनिकल च्याट, मिडिया, खोज, स्थानीय, क्लाउड-एजेन्ट र प्रणाली सङ्ग्रहहरूमा उपलब्ध छन्, जसमध्ये **153 मा `hasFree: true` अन्वेषण मेटाडेटा छ**। च्याट मोडेल रजिस्ट्रीले **239 प्रदायकहरू / 3,059 फरक प्रदायक-मोडेल जोडीहरू / 1,475 कच्चा मोडेल ID हरू** समेट्छ; छुट्टै निःशुल्क-बजेट क्याटलगमा **प्रति-मोडेल 484 पङ्क्तिहरू**, **34 आवर्ती पूलहरू** र **52 आवर्ती/कुञ्जीरहित सधैँ-निःशुल्क प्रदायकहरू** छन्। यी डिजाइनअनुसार फरक हरहरू हुन्; परिभाषाहरू र पूल-डिडुप्लिकेट गरिएका गणनाहरू [प्रदायक सन्दर्भ](docs/reference/PROVIDER_REFERENCE.md) र [निःशुल्क तहहरू](docs/reference/FREE_TIERS.md) मा उपलब्ध छन्।
+> **377 दर्ता भएका प्रदायकहरू** क्यानोनिकल च्याट, मिडिया, खोज, स्थानीय, क्लाउड-एजेन्ट र प्रणाली सङ्ग्रहहरूमा उपलब्ध छन्, जसमध्ये **153 मा `hasFree: true` अन्वेषण मेटाडेटा छ**। च्याट मोडेल रजिस्ट्रीले **239 प्रदायकहरू / 3,059 फरक प्रदायक-मोडेल जोडीहरू / 1,475 कच्चा मोडेल ID हरू** समेट्छ; छुट्टै निःशुल्क-बजेट क्याटलगमा **प्रति-मोडेल 484 पङ्क्तिहरू**, **34 आवर्ती पूलहरू** र **52 आवर्ती/कुञ्जीरहित सधैँ-निःशुल्क प्रदायकहरू** छन्। यी डिजाइनअनुसार फरक हरहरू हुन्; परिभाषाहरू र पूल-डिडुप्लिकेट गरिएका गणनाहरू [प्रदायक सन्दर्भ](docs/reference/PROVIDER_REFERENCE.md) र [निःशुल्क तहहरू](docs/reference/FREE_TIERS.md) मा उपलब्ध छन्।
 
 <div align="center">
 
@@ -773,6 +773,7 @@ omniroute configure codex          # यी पनि: claude opencode qwen aide
 <table>
   <tr><th align="left">प्लेटफर्म</th><th align="left">इन्स्टल</th><th align="left">मुख्य विशेषताहरू</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (ग्लोबल)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">एउटै कमान्ड, जुनसुकै OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (ग्लोबल)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">समर्थनको प्रत्याभूतिबिनाको सम्भव भएसम्मको अनुकूलता; Node.js समर्थित रनटाइम हो।</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">मल्टी-आर्क <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>डेस्कटप (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">नेटिभ विन्डो + सिस्टम ट्रे — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>मेनु-बार (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">सर्भरको सुपरिवेक्षण र स्वतः अपडेट गर्छ — <b>macOS</b></td></tr>
@@ -1315,7 +1316,7 @@ port मा सेवा गरिन्छन्, त्यसैले हा�
   <tr><td nowrap><b>रनटाइम</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>भाषा</b></td><td>TypeScript 6.0 — <code>src/</code> र <code>open-sse/</code> भरि <b>100% TypeScript</b> (v2.0 देखि कोरमा शून्य <code>any</code>)</td></tr>
   <tr><td nowrap><b>फ्रेमवर्क</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिङ) + LowDB (पुरानो JSON) — 147 डोमेन मोड्युल, 211 माइग्रेसन</td></tr>
+  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिङ) + LowDB (पुरानो JSON) — 147 डोमेन मोड्युल, 213 माइग्रेसन</td></tr>
   <tr><td nowrap><b>मेमोरी</b></td><td>SQLite FTS5 पूर्ण-पाठ + int8-क्वान्टाइज्ड भेक्टर इम्बेडिङहरू, टाइप गरिएको डिके</td></tr>
   <tr><td nowrap><b>स्किमा</b></td><td>Zod 4 — MCP उपकरण I/O प्रमाणीकरण + API सम्झौताहरू</td></tr>
   <tr><td nowrap><b>प्रोटोकल</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

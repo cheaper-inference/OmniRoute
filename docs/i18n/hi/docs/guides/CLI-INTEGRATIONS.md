@@ -16,11 +16,11 @@ CLI (Codex, Claude Code, OpenCode, Cline, …) को OmniRoute को अपन
 जो कमांड टूल-स्थानीय environment file को स्थायी रूप से सहेजते हैं, उनका उल्लेख नीचे किया गया है।
 
 एक सामान्य launcher भी उपलब्ध है — `omniroute run <target>` — जो
-सही env inject करके `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` या `gemini`
+सही env inject करके `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` या `whycodes`
 को शुरू करता है, और कोई config लिखता ही नहीं है। Targets और उनके
 aliases canonical manifest `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`) से आते हैं, और `omniroute completion` वही
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`) से आते हैं, और `omniroute completion` वही
 manifest-व्युत्पन्न target शब्द प्रदान करता है। पुराने प्रति-टूल launchers —
 `omniroute launch` (Claude Code) और `omniroute launch-codex` (Codex) — अब भी
 उपलब्ध हैं।
@@ -83,7 +83,8 @@ CLI को दिए गए management endpoint, context या management crede
 | `omniroute setup-aider`    | Aider                  | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + एनवायरनमेंट विधि प्रिंट करता है                                                                                  | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | दोनों              |
 | `omniroute setup-qwen`     | Qwen Code              | `~/.qwen/settings.json` — V4 `modelProviders.openai` ऐरे + `~/.qwen/.env` में `OMNIROUTE_API_KEY`                                                                                 | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | दोनों              |
 | `omniroute setup-5dive`    | 5dive (एजेंट फ़्लीट)   | `$HOME` के अंतर्गत कुछ नहीं — `5dive agent auth set` के माध्यम से एक 5dive **ऑथ प्रोफ़ाइल** (`/var/lib/5dive/auth-profiles/<name>/`) लिखता है; केवल root, फ़्लीट होस्ट पर चलता है | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | दोनों              |
-| `omniroute run <target>`   | रनटाइम लॉन्च (सामान्य) | कुछ नहीं — सही env और args के साथ `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` शुरू करता है; Qwen और Gemini एक अस्थायी पृथक home का उपयोग करते हैं                 | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | दोनों              |
+| `omniroute setup-whycodes` | WhyCodes               | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); पथ `$WHYCODES_HOME/config.toml` या `~/.whycodes/config.toml` है                                             | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | दोनों              |
+| `omniroute run <target>`   | रनटाइम लॉन्च (सामान्य) | कुछ नहीं — सही env और args के साथ `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` शुरू करता है; Qwen और Gemini एक अस्थायी पृथक home का उपयोग करते हैं      | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | दोनों              |
 | `omniroute launch`         | Claude Code            | कुछ नहीं — `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` इंजेक्ट करके `claude` शुरू करता है                                                                                         | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | दोनों              |
 | `omniroute launch-codex`   | OpenAI Codex CLI       | कुछ नहीं — `-c` फ़्लैग के माध्यम से `omniroute` प्रोवाइडर इंजेक्ट करके `codex` शुरू करता है                                                                                       | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | दोनों              |
 
@@ -99,14 +100,15 @@ CLI को दिए गए management endpoint, context या management crede
   `setup-cursor` को **छोड़कर** प्रत्येक `setup-*` कमांड पर उपलब्ध
   (जो कभी कोई फ़ाइल नहीं लिखता)।
 - `--model <id>` — उन टूल्स के लिए आवश्यक (या इंटरैक्टिव रूप से चुना जाता है) जिनमें
-  मॉडल ऑटो-डिस्कवरी नहीं है: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive। ये टूल्स
+  मॉडल ऑटो-डिस्कवरी नहीं है: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes। ये टूल्स
   गैर-इंटरैक्टिव रन के लिए `--yes` भी स्वीकार करते हैं (जिसमें फिर `--model` आवश्यक होता है)।
   `setup-opencode` डिफ़ॉल्ट टॉप-लेवल मॉडल सेट करने के लिए `--model` लेता है।
 - `omniroute run` पर `--model <id>` मैनिफ़ेस्ट की प्रति-टार्गेट वायरिंग का अनुसरण करता है
   (`bin/cli/cli-manifest.mjs`): **aider** को `--model openai/<id>` और
   **opencode** को `--model omniroute/<id>` मिलता है (प्रिफ़िक्स केवल तभी जोड़ा जाता है जब id में
   वह पहले से न हो); **qwen** और **gemini** को id ज्यों-का-त्यों मिलता है;
-  **claude** को यह `ANTHROPIC_MODEL` के माध्यम से, **goose** को `GOOSE_MODEL` के माध्यम से, और
+  **claude** को यह `ANTHROPIC_MODEL` के माध्यम से, **goose** को `GOOSE_MODEL` के माध्यम से,
+  **whycodes** को `-P omniroute -m <id>` के माध्यम से, और
   **codex** को `-c model_providers.omniroute.*` args के माध्यम से मिलता है। **Qwen एकमात्र run
   टार्गेट है जिसके लिए `--model` अनिवार्य है** — इसके बिना `omniroute run qwen`
   एक स्पष्ट त्रुटि के साथ `2` पर एग्ज़िट करता है।
@@ -257,18 +259,19 @@ OmniRoute, OpenAI इंटरफ़ेस को `/v1` पर, Anthropic इं
 और मूल Gemini इंटरफ़ेस को `/v1beta` पर उपलब्ध कराता है। प्रत्येक इंटीग्रेशन को उस प्रारूप के अनुसार कॉन्फ़िगर किया गया है
 जिसकी उसका टूल अपेक्षा करता है (कमांड स्रोत में सत्यापित):
 
-| इंटीग्रेशन                                                                 | लिखा गया बेस URL | `/v1`?                                          |
-| -------------------------------------------------------------------------- | ---------------- | ----------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | रूट              | नहीं — Cline `/v1/chat/completions` जोड़ता है   |
-| `setup-goose` (`OPENAI_HOST`)                                              | रूट              | नहीं — Goose पाथ जोड़ता है                      |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | रूट              | नहीं — LiteLLM `/v1/chat/completions` जोड़ता है |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1` सहित       | हाँ                                             |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1` सहित       | हाँ                                             |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | रूट              | नहीं — Claude Code `/v1/messages` जोड़ता है     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1` सहित       | हाँ                                             |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1` सहित       | हाँ                                             |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | रूट              | नहीं — SDK `/v1beta/models/…` जोड़ता है         |
-| `setup-5dive` (प्रमाणीकरण प्रोफ़ाइल में `ANTHROPIC_BASE_URL`)              | रूट              | नहीं — Claude Code `/v1/messages` जोड़ता है     |
+| इंटीग्रेशन                                                                 | लिखा गया बेस URL | `/v1`?                                              |
+| -------------------------------------------------------------------------- | ---------------- | --------------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | रूट              | नहीं — Cline `/v1/chat/completions` जोड़ता है       |
+| `setup-goose` (`OPENAI_HOST`)                                              | रूट              | नहीं — Goose पाथ जोड़ता है                          |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | रूट              | नहीं — LiteLLM `/v1/chat/completions` जोड़ता है     |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1` सहित       | हाँ                                                 |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1` सहित       | हाँ                                                 |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | रूट              | नहीं — Claude Code `/v1/messages` जोड़ता है         |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1` सहित       | हाँ                                                 |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1` सहित       | हाँ                                                 |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | रूट              | नहीं — SDK `/v1beta/models/…` जोड़ता है             |
+| `setup-5dive` (प्रमाणीकरण प्रोफ़ाइल में `ANTHROPIC_BASE_URL`)              | रूट              | नहीं — Claude Code `/v1/messages` जोड़ता है         |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | `/v1` सहित       | हाँ — WhyCodes `/chat/completions` पर पोस्ट करता है |
 
 ---
 

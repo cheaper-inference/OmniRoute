@@ -8,7 +8,7 @@
 > Znova ustvarite z: `npm run gen:provider-reference`
 > **Nazadnje ustvarjeno:** 2026-10-27
 
-Skupno število ponudnikov: **376**. Spodaj si oglejte razčlenitev po kategorijah.
+Skupno število ponudnikov: **377**. Spodaj si oglejte razčlenitev po kategorijah.
 
 ## Kategorije
 
@@ -397,7 +397,7 @@ Za omogočanje, nastavljanje in preizkušanje posameznih ponudnikov uporabite na
 | `vllm`                | `vllm`       | vLLM                | Lokalno, samostojno gostovanje | [povezava](https://github.com/vllm-project/vllm)                    | API ključ je neobvezen. Konfigurirajte lokalni osnovni URL vLLM, združljiv z OpenAI (privzeto: http://localhost:8000/v1).                                                                                                                                                                                      |
 | `xinference`          | `xinference` | XInference          | Lokalno, samostojno gostovanje | [povezava](https://inference.readthedocs.io)                        | API ključ je neobvezen. Konfigurirajte lokalni osnovni URL XInference, združljiv z OpenAI (privzeto: http://localhost:9997/v1).                                                                                                                                                                                |
 
-## Ponudniki iskanja (18)
+## Ponudniki iskanja (19)
 
 | ID                  | Vzdevek         | Ime                               | Oznake  | Spletno mesto                                                       | Opombe                                                                                                                    |
 | ------------------- | --------------- | --------------------------------- | ------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Za omogočanje, nastavljanje in preizkušanje posameznih ponudnikov uporabite na
 | `exa-search`        | `exa-search`    | Exa Search                        | Iskanje | [povezava](https://exa.ai)                                          | Ključ API z nadzorne plošče dashboard.exa.ai                                                                              |
 | `firecrawl`         | `fc`            | Firecrawl                         | Iskanje | [povezava](https://firecrawl.dev)                                   | Ključ API s firecrawl.dev/app/api-keys (ali nastavite osnovni URL lastnega gostovanja Firecrawl)                          |
 | `google-pse-search` | `google-pse`    | Google Programmable Search        | Iskanje | [povezava](https://developers.google.com/custom-search/v1/overview) | Zahteva ključ Google API in ID vašega programirljivega iskalnika (cx)                                                     |
+| `kimi-search`       | `kimi-search`   | Kimi Search                       | Iskanje | [povezava](https://platform.kimi.ai/docs/api/tools-search)          | Ključ API za Moonshot AI (MOONSHOT_API_KEY) s platform.kimi.ai                                                            |
 | `linkup-search`     | `linkup`        | Linkup Search                     | Iskanje | [povezava](https://docs.linkup.so)                                  | Nosilni ključ API z nadzorne plošče Linkup                                                                                |
 | `nimble-search`     | `nimble`        | Nimble Search                     | Iskanje | [povezava](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nosilni ključ API z nadzorne plošče Nimble                                                                                |
 | `ollama-search`     | `ollama-search` | Ollama Search                     | Iskanje | [povezava](https://ollama.com/settings/keys)                        | Enak ključ API kot za Ollama Cloud (z ollama.com/settings/keys)                                                           |

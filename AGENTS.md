@@ -29,7 +29,7 @@ Running tests: see [Testing](#testing) below (run the most focused test for chan
 
 ## Project at a Glance
 
-**OmniRoute** — unified AI proxy/router. One endpoint, 376 LLM providers, auto-fallback.
+**OmniRoute** — unified AI proxy/router. One endpoint, 377 LLM providers, auto-fallback.
 
 - API Routes — `src/app/api/v1/` (Next.js App Router entry points)
 - Handlers — `open-sse/handlers/` (request processing: chat, embeddings, etc)
@@ -37,7 +37,7 @@ Running tests: see [Testing](#testing) below (run the most focused test for chan
 - Translators — `open-sse/translator/` (format conversion OpenAI↔Claude↔Gemini)
 - Transformer — `open-sse/transformer/` (Responses API ↔ Chat Completions)
 - Services — `open-sse/services/` (combo routing, rate limits, caching, etc)
-- Database — `src/lib/db/` (SQLite domain modules, 211 migrations)
+- Database — `src/lib/db/` (SQLite domain modules, 213 migrations)
 - Domain/Policy — `src/domain/` (policy engine, cost rules, fallback logic)
 - MCP Server — `open-sse/mcp-server/` (110 tools: 45 canonical + memory/skill/GitHub/pool/gamification/plugin/Notion/Obsidian/local-corpus/RTK modules; 3 transports: stdio / SSE / Streamable HTTP; 33 scopes)
 - A2A Server — `src/lib/a2a/` (JSON-RPC 2.0 agent protocol)
@@ -341,7 +341,7 @@ This checkout is the canonical `cheaper-inference/OmniRoute` repository (formerl
 ## Environment
 
 - **Runtime**: Node.js ≥22.22.2 <23 || ≥24.0.0 <27, ES Modules — the **only supported** runtime for the published `omniroute` CLI, the server, and the test suites (`node:test` + vitest); `engines.node` is authoritative and end users never need Bun. A **best-effort `bun:sqlite` compatibility path** exists so a global Bun install (`bun install -g omniroute`) can start without `better-sqlite3` (driver adapter + Bun-aware process spawning); it is **not** a supported runtime — no support guarantees — and every Bun-specific runtime change MUST preserve the Node driver/fallback chain and ship a Bun test (`test:bun:db`) or an explicit reason why the path is Node-only.
-- **Bun (build/dev script runner + compatibility smoke only)**: Bun `1.4.2` is pinned as an **exact devDependency** (provisioned through the existing `npm ci` via the lockfile's `@oven/bun-*` platform binaries — no `setup-bun`/ad-hoc install). It executes **only** an allow-listed set of TypeScript gate/generator scripts (replacing `node --import tsx` for startup speed): the CI checks `check:provider-consistency`, `check:compression-budget`, `check:known-symbols`; the non-CI `gen:provider-reference`, `bench:compression`; plus the `test:bun:db` compatibility smoke suite. **Do NOT widen Bun to `npm install`, the build (`build:cli*`), `check:pack-artifact`, the supported published runtime, or the main test runners** — those stay on Node. Any new Bun-invoking script must be validated byte-identical against its `node --import tsx` output first. Bun failing (`bun: not found`, or the skipped-`postinstall` placeholder binary): `docs/ops/BUILD_WARNINGS.md` → "Bun script-runner failures".
+- **Bun (allow-listed script runner, compatibility smoke, experimental packaging)**: Bun `1.4.2` is pinned as an **exact devDependency** (provisioned through the existing `npm ci` via the lockfile's `@oven/bun-*` platform binaries — no `setup-bun`/ad-hoc install). Its gate/generator use is limited to the following TypeScript scripts (replacing `node --import tsx` for startup speed): the CI checks `check:provider-consistency`, `check:compression-budget`, `check:known-symbols`; the non-CI `gen:provider-reference`, `bench:compression`; plus the `test:bun:db` compatibility smoke suite. The additional **opt-in experimental packaging** command `npm run bun:release` runs `scripts/release/bun-pack.mjs`: it launches the existing Node/npm `build:release` script and packages its output with `bun pm pack --ignore-scripts`; `--pm npm` selects npm for the launcher and packer. The wrapper's tarball sanity checks are only a subset of `check:pack-artifact`. It does not replace CI, release admission, or the supported Node runtime, and its presence does not certify Bun/npm artifact parity. **Do NOT widen Bun to `npm install`, the build (`build:cli*`), `check:pack-artifact`, the supported published runtime, or the main test runners** — those stay on Node. Any new Bun-invoking script must be validated byte-identical against its `node --import tsx` output first. Bun failing (`bun: not found`, or the skipped-`postinstall` placeholder binary): `docs/ops/BUILD_WARNINGS.md` → "Bun script-runner failures".
 - **TypeScript**: 6.0+, target ES2022, module esnext, resolution bundler
 - **Path aliases**: `@/*` → `src/`, `@omniroute/open-sse` → `open-sse/`, `@omniroute/open-sse/*` → `open-sse/*`
 - **Default port**: 20128 (API + dashboard on same port)

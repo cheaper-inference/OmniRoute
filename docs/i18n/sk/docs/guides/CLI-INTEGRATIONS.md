@@ -8,7 +8,7 @@ Informácie o zdieľanom manifeste spustiteľných súborov, obmedzených prostr
 
 OmniRoute poskytuje rodinu príkazov `setup-*`, ktoré nakonfigurujú programátorské CLI (Codex, Claude Code, OpenCode, Cline, …) tak, aby používalo OmniRoute ako svoj backend — nástroj tak komunikuje s **jedným** koncovým bodom a OmniRoute smeruje požiadavky k správnemu poskytovateľovi s automatickým záložným prepnutím. Každý príkaz načíta **aktuálny** katalóg modelov zo spustenej inštancie OmniRoute (lokálnej alebo vzdialenej) a zapíše konfiguračný súbor daného nástroja na **vašom** počítači. Kľúč API sa všade, kde to nástroj podporuje, odkazuje prostredníctvom premennej prostredia. Príkazy, ktoré trvalo ukladajú lokálny súbor prostredia nástroja, sú uvedené nižšie.
 
-K dispozícii je aj všeobecný spúšťač — `omniroute run <target>` — ktorý spustí `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` alebo `gemini` so správne nastaveným prostredím bez zapisovania akejkoľvek konfigurácie. Ciele a ich aliasy pochádzajú z kanonického manifestu `bin/cli/cli-manifest.mjs` (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`) a `omniroute completion` ponúka rovnaké názvy cieľov odvodené z manifestu. Staršie spúšťače pre jednotlivé nástroje — `omniroute launch` (Claude Code) a `omniroute launch-codex` (Codex) — zostávajú dostupné.
+K dispozícii je aj všeobecný spúšťač — `omniroute run <target>` — ktorý spustí `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` alebo `whycodes` so správne nastaveným prostredím bez zapisovania akejkoľvek konfigurácie. Ciele a ich aliasy pochádzajú z kanonického manifestu `bin/cli/cli-manifest.mjs` (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`) a `omniroute completion` ponúka rovnaké názvy cieľov odvodené z manifestu. Staršie spúšťače pre jednotlivé nástroje — `omniroute launch` (Claude Code) a `omniroute launch-codex` (Codex) — zostávajú dostupné.
 
 Pridávanie poskytovateľov je dostupné z rovnakého lokálneho alebo vzdialeného kontextu. Nižšie uvedené príkazy orientované primárne na API udržiavajú overenie totožnosti pre správu oddelené od prihlasovacích údajov poskytovateľov a nikdy nevypisujú prihlasovacie údaje v štruktúrovanom výstupe:
 
@@ -58,7 +58,8 @@ servera a konfigurácia sa zapíše lokálne.
 | `omniroute setup-aider`    | Aider                            | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + vypíše postup nastavenia prostredia                                                                                               | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Oboje                   |
 | `omniroute setup-qwen`     | Qwen Code                        | `~/.qwen/settings.json` — pole V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` v `~/.qwen/.env`                                                                                                   | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Oboje                   |
 | `omniroute setup-5dive`    | 5dive (flotila agentov)          | Nič v `$HOME` — zapíše **autentifikačný profil** 5dive (`/var/lib/5dive/auth-profiles/<name>/`) prostredníctvom `5dive agent auth set`; len pre používateľa root, spúšťa sa na hostiteľovi flotily | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Obe                     |
-| `omniroute run <target>`   | Spustenie za behu (všeobecné)    | Nič — spustí `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` so správnym prostredím a argumentmi; Qwen a Gemini používajú dočasný izolovaný domovský adresár                           | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Obe                     |
+| `omniroute setup-whycodes` | WhyCodes                         | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); cesta je `$WHYCODES_HOME/config.toml` alebo `~/.whycodes/config.toml`                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Oboje                   |
+| `omniroute run <target>`   | Spustenie za behu (všeobecné)    | Nič — spustí `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` so správnym prostredím a argumentmi; Qwen a Gemini používajú dočasný izolovaný domovský adresár                | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Obe                     |
 | `omniroute launch`         | Claude Code                      | Nič — spustí `claude` s vloženými premennými `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                                                           | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Obe                     |
 | `omniroute launch-codex`   | OpenAI Codex CLI                 | Nič — spustí `codex` s poskytovateľom `omniroute` vloženým prostredníctvom príznakov `-c`                                                                                                          | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Obe                     |
 
@@ -74,14 +75,15 @@ Poznámky k príznakom (overené v zdrojovom kóde príkazu):
   súborovom systéme. K dispozícii pri každom príkaze `setup-*` **okrem** `setup-cursor`
   (ktorý nikdy nezapisuje súbor).
 - `--model <id>` — povinné (alebo vybrané interaktívne) pre nástroje, ktoré nemajú
-  automatické zisťovanie modelov: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Tieto nástroje
+  automatické zisťovanie modelov: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. Tieto nástroje
   tiež prijímajú `--yes` pre neinteraktívne spustenia (ktoré potom vyžadujú `--model`).
   `setup-opencode` prijíma `--model` na nastavenie predvoleného modelu najvyššej úrovne.
 - `--model <id>` pri `omniroute run` sa riadi zapojením jednotlivých cieľov v manifeste
   (`bin/cli/cli-manifest.mjs`): **aider** dostane `--model openai/<id>` a
   **opencode** `--model omniroute/<id>` (predpona sa pridá iba vtedy, keď ju ID
   ešte neobsahuje); **qwen** a **gemini** dostanú ID bez zmeny;
-  **claude** ho dostane prostredníctvom `ANTHROPIC_MODEL`, **goose** prostredníctvom `GOOSE_MODEL` a
+  **claude** ho dostane prostredníctvom `ANTHROPIC_MODEL`, **goose** prostredníctvom `GOOSE_MODEL`,
+  **whycodes** prostredníctvom `-P omniroute -m <id>` a
   **codex** prostredníctvom argumentov `-c model_providers.omniroute.*`. **Qwen je jediný cieľ príkazu run,
   ktorý striktne vyžaduje `--model`** — `omniroute run qwen` bez neho skončí
   s kódom `2` a explicitnou chybou.
@@ -252,18 +254,19 @@ OmniRoute sprístupňuje rozhranie OpenAI na `/v1`, rozhranie Anthropic v koreň
 a natívne rozhranie Gemini na `/v1beta`. Každá integrácia je nastavená do podoby, ktorú
 jej nástroj očakáva (overené v zdrojovom kóde príkazu):
 
-| Integrácia                                                                 | Zapísaná základná URL | `/v1`?                                       |
-| -------------------------------------------------------------------------- | --------------------- | -------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | koreňová cesta        | Nie — Cline pripája `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | koreňová cesta        | Nie — Goose pripája cestu                    |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | koreňová cesta        | Nie — LiteLLM pripája `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | s `/v1`               | Áno                                          |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | s `/v1`               | Áno                                          |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | koreňová cesta        | Nie — Claude Code pripája `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | s `/v1`               | Áno                                          |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | s `/v1`               | Áno                                          |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | koreňová cesta        | Nie — SDK pripája `/v1beta/models/…`         |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` v profile overenia totožnosti)         | koreňová cesta        | Nie — Claude Code pripája `/v1/messages`     |
+| Integrácia                                                                 | Zapísaná základná URL | `/v1`?                                                         |
+| -------------------------------------------------------------------------- | --------------------- | -------------------------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | koreňová cesta        | Nie — Cline pripája `/v1/chat/completions`                     |
+| `setup-goose` (`OPENAI_HOST`)                                              | koreňová cesta        | Nie — Goose pripája cestu                                      |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | koreňová cesta        | Nie — LiteLLM pripája `/v1/chat/completions`                   |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | s `/v1`               | Áno                                                            |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | s `/v1`               | Áno                                                            |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | koreňová cesta        | Nie — Claude Code pripája `/v1/messages`                       |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | s `/v1`               | Áno                                                            |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | s `/v1`               | Áno                                                            |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | koreňová cesta        | Nie — SDK pripája `/v1beta/models/…`                           |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` v profile overenia totožnosti)         | koreňová cesta        | Nie — Claude Code pripája `/v1/messages`                       |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | s `/v1`               | Áno — WhyCodes odosiela požiadavky POST na `/chat/completions` |
 
 ---
 

@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — เกตเวย์ AI ฟรี
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — เขียนโค้ดได้อย่างต่อเนื่องไม่มีสะดุด เครื่องมือ AI ทุกตัว → ผู้ให้บริการ 376 ราย — ฟรีกว่า 150 ราย — ผ่านเอนด์พอยต์เดียว เชื่อม Claude Code, Codex, Cursor, Cline, Copilot และ Antigravity เข้ากับ Claude / GPT / Gemini ฟรี พร้อมระบบสลับสำรองอัตโนมัติ การบีบอัดแบบซ้อน RTK + Caveman ช่วยประหยัดโทเค็น 15–95% (เฉลี่ย ~89%) — ไม่ต้องเผชิญขีดจำกัดอีกต่อไป ผู้ให้บริการ AI 376 ราย · แพ็กเกจฟรีกว่า 150 รายการ · โทเค็นฟรี ~1.62B รายการ/เดือน · กลยุทธ์การกำหนดเส้นทาง 20 แบบ · เริ่มต้นที่ $0"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — เขียนโค้ดได้อย่างต่อเนื่องไม่มีสะดุด เครื่องมือ AI ทุกตัว → ผู้ให้บริการ 377 ราย — ฟรีกว่า 150 ราย — ผ่านเอนด์พอยต์เดียว เชื่อม Claude Code, Codex, Cursor, Cline, Copilot และ Antigravity เข้ากับ Claude / GPT / Gemini ฟรี พร้อมระบบสลับสำรองอัตโนมัติ การบีบอัดแบบซ้อน RTK + Caveman ช่วยประหยัดโทเค็น 15–95% (เฉลี่ย ~89%) — ไม่ต้องเผชิญขีดจำกัดอีกต่อไป ผู้ให้บริการ AI 377 ราย · แพ็กเกจฟรีกว่า 150 รายการ · โทเค็นฟรี ~1.62B รายการ/เดือน · กลยุทธ์การกำหนดเส้นทาง 20 แบบ · เริ่มต้นที่ $0"/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                                |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------ | :---------------------: | :---------: | :-------------------: |
-| 🌐 ผู้ให้บริการ                |           352           |   **358**   |          376          |
+| 🌐 ผู้ให้บริการ                |           352           |   **358**   |          377          |
 | 🧠 ID โมเดลแชตที่ไม่ซ้ำกัน     |          1320           |  **1374**   |         1475          |
 | 🖼️ บริดจ์ระหว่างโมดาลิตี       | 🆕 ภาพ + เสียง + วิดีโอ |      ✓      |           ✓           |
 | 📡 แค็ตตาล็อก Radar ฟรี        |    🆕 เลือกเข้าร่วม     |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ คุณสมบัติ</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 คอมโบ</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 ผู้ให้บริการ</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 ผู้ให้บริการ</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="คำมั่นสัญญา — เอนด์พอยต์เดียวและผู้ให้บริการ 376 ราย ระบบสำรองอัตโนมัติช่วยให้กำหนดเส้นทางต่อไปได้ตราบใดที่ยังมีปลายทางอื่นที่พร้อมใช้งาน เสาหลักหกประการ: ระบบสำรองที่ยืดหยุ่นครอบคลุมผู้ให้บริการ 376 ราย · ประหยัดโทเค็นสูงสุด 95% สำหรับเวิร์กโหลดที่เข้าเกณฑ์ · เริ่มต้นที่ $0 ด้วยแพ็กเกจฟรีกว่า 150 รายการ และผู้ให้บริการฟรีตลอดไปแบบต่ออายุซ้ำ/ไม่ใช้คีย์ 52 ราย · การผสานรวม CLI/เอเจนต์ 37 รายการผ่านการกำหนดค่าเดียว · รองรับ OpenAI, Claude, Gemini และ Responses API ที่ /v1 · การควบคุมระดับโปรดักชัน รวมถึง circuit breakers, TLS stealth, MCP พร้อมเครื่องมือ 110 รายการ, A2A, หน่วยความจำ, guardrails, evals และข้อกำหนดการทดสอบแบบสแตติกกว่า 56,000 รายการในไฟล์ทดสอบที่ติดตามกว่า 7,800 ไฟล์"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="คำมั่นสัญญา — เอนด์พอยต์เดียวและผู้ให้บริการ 377 ราย ระบบสำรองอัตโนมัติช่วยให้กำหนดเส้นทางต่อไปได้ตราบใดที่ยังมีปลายทางอื่นที่พร้อมใช้งาน เสาหลักหกประการ: ระบบสำรองที่ยืดหยุ่นครอบคลุมผู้ให้บริการ 377 ราย · ประหยัดโทเค็นสูงสุด 95% สำหรับเวิร์กโหลดที่เข้าเกณฑ์ · เริ่มต้นที่ $0 ด้วยแพ็กเกจฟรีกว่า 150 รายการ และผู้ให้บริการฟรีตลอดไปแบบต่ออายุซ้ำ/ไม่ใช้คีย์ 52 ราย · การผสานรวม CLI/เอเจนต์ 37 รายการผ่านการกำหนดค่าเดียว · รองรับ OpenAI, Claude, Gemini และ Responses API ที่ /v1 · การควบคุมระดับโปรดักชัน รวมถึง circuit breakers, TLS stealth, MCP พร้อมเครื่องมือ 110 รายการ, A2A, หน่วยความจำ, guardrails, evals และข้อกำหนดการทดสอบแบบสแตติกกว่า 56,000 รายการในไฟล์ทดสอบที่ติดตามกว่า 7,800 ไฟล์"/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="สิ่งที่ทำให้ OmniRoute แตกต่าง — ภาพรวมฟีเจอร์ตามช่วงเวลาเมื่อเทียบกับ 9router, OpenRouter, CLIProxyAPI และ LiteLLM ใน 13 ความสามารถ OmniRoute: ผู้ให้บริการ 376 ราย, ระดับใช้งานฟรีในตัวมากกว่า 150 รายการ, กลยุทธ์การกำหนดเส้นทาง 20 แบบ, การบีบอัดโทเค็นด้วยเอนจิน 12 ตัว, เซิร์ฟเวอร์ MCP ในตัวพร้อมเครื่องมือ 110 รายการ, โปรโตคอลเอเจนต์ A2A, หน่วยความจำถาวร, มาตรการป้องกัน, เอเจนต์บนคลาวด์, การพรางลายนิ้วมือ TLS, Desktop/Termux/PWA และภาษาท้องถิ่นสำหรับ UI 67 ภาษา OmniRoute ใช้สัญญาอนุญาต MIT และสามารถโฮสต์ได้ด้วยตนเอง ความสามารถและจำนวนของคู่แข่งอาจเปลี่ยนแปลงได้ โปรดดูระเบียบวิธีตามลิงก์ที่ให้ไว้"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="สิ่งที่ทำให้ OmniRoute แตกต่าง — ภาพรวมฟีเจอร์ตามช่วงเวลาเมื่อเทียบกับ 9router, OpenRouter, CLIProxyAPI และ LiteLLM ใน 13 ความสามารถ OmniRoute: ผู้ให้บริการ 377 ราย, ระดับใช้งานฟรีในตัวมากกว่า 150 รายการ, กลยุทธ์การกำหนดเส้นทาง 20 แบบ, การบีบอัดโทเค็นด้วยเอนจิน 12 ตัว, เซิร์ฟเวอร์ MCP ในตัวพร้อมเครื่องมือ 110 รายการ, โปรโตคอลเอเจนต์ A2A, หน่วยความจำถาวร, มาตรการป้องกัน, เอเจนต์บนคลาวด์, การพรางลายนิ้วมือ TLS, Desktop/Termux/PWA และภาษาท้องถิ่นสำหรับ UI 67 ภาษา OmniRoute ใช้สัญญาอนุญาต MIT และสามารถโฮสต์ได้ด้วยตนเอง ความสามารถและจำนวนของคู่แข่งอาจเปลี่ยนแปลงได้ โปรดดูระเบียบวิธีตามลิงก์ที่ให้ไว้"/>
 
 <sub>📊 ระเบียบวิธีฉบับเต็มและรายละเอียดแยกตามฟีเจอร์เมื่อเทียบกับ 9router, OpenRouter, CLIProxyAPI และ LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar เป็นฟีเจอร์ที่ต้องเลือกเ�
 - **🖼️ Endpoint ใหม่** — `/v1/ocr` (Mistral OCR) และ `/v1/audio/translations` (รูปแบบ Whisper) เติมเต็มความสามารถด้านสื่อ → [เอกสารอ้างอิง API](docs/reference/API_REFERENCE.md)
 - **🎨 การสร้างรูปภาพ / วิดีโอ / เสียง** — API เดียวสำหรับสื่อ: วิดีโอจาก xAI Grok Imagine และ Novita AI, ComfyUI, Magnific, Adobe Firefly, Segmind และผู้ให้บริการเสียงพูด เช่น ElevenLabs → [เอกสารอ้างอิง API](docs/reference/API_REFERENCE.md)
 - **🌍 การปรับใช้และการปฏิบัติการ** — `basePath` สำหรับ reverse proxy, การตรวจหาภาษาของเบราว์เซอร์อัตโนมัติ, การติดตามอุปกรณ์แยกตามคีย์, ความเชื่อถือ MITM แบบไม่ต้องใช้ root และการแปลเป็นภาษาท้องถิ่น zh-TW → [สภาพแวดล้อม](docs/reference/ENVIRONMENT.md)
-- **🤝 ผู้ให้บริการและเอเจนต์เพิ่มเติม** — เอเจนต์ระบบคลาวด์ (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) พร้อมเบราว์เซอร์ + การเข้าสู่ระบบ OAuth, การ์ดระดับเฟิร์สคลาสสำหรับ Ollama, Claude Opus 5 และ Sonnet 5, ความร่วมมืออย่างเป็นทางการกับ Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… และ **แค็ตตาล็อกผู้ให้บริการ 376 ราย** ที่ได้รับการปรับปรุงใหม่ → [ผู้ให้บริการ](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 ผู้ให้บริการและเอเจนต์เพิ่มเติม** — เอเจนต์ระบบคลาวด์ (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) พร้อมเบราว์เซอร์ + การเข้าสู่ระบบ OAuth, การ์ดระดับเฟิร์สคลาสสำหรับ Ollama, Claude Opus 5 และ Sonnet 5, ความร่วมมืออย่างเป็นทางการกับ Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… และ **แค็ตตาล็อกผู้ให้บริการ 377 ราย** ที่ได้รับการปรับปรุงใหม่ → [ผู้ให้บริการ](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 ความโปร่งใสในการกำหนดเส้นทาง** — ทุกการตอบกลับมีส่วนหัว `X-OmniRoute-Decision` ซึ่งระบุกลยุทธ์/ผู้ให้บริการ/เวลาแฝงที่ให้บริการคำขอนั้น กลยุทธ์คอมโบ `cache-optimized` ใหม่ + ปัจจัย `cacheAffinity` ของ Auto-Combo จะกำหนดเส้นทางคำขอซ้ำกลับไปยังการเชื่อมต่อที่เก็บคำนำหน้าไว้ในแคช และ endpoint แบบอ่านอย่างเดียว `/v1/auto-combo/{channel}/candidates` จะแสดงพูลตัวเลือกปัจจุบันของช่อง `auto/*` → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ ประสิทธิภาพและโครงสร้างพื้นฐานภายในเครื่อง** — Redis ภายในเครื่องแบบคลิกเดียว, ตัวช่วยปรับใช้รีเลย์สำหรับ Cloudflare Workers / Deno Deploy รวมถึง Bifrost และ Mux ในฐานะบริการแบบฝังตัวที่มีการควบคุมดูแล → [บริการแบบฝังตัว](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 สิ่งอื่นที่รวมมาให้ด้วย** — เฟรมเวิร์กปลั๊กอิน + มาร์เก็ตเพลส, เฟรมเวิร์กทักษะ Omni/Agent/GitHub, การผสานรวมคลัง Obsidian (เครื่องมือ MCP 22 รายการ), Batch & Files APIs ที่เข้ากันได้กับ OpenAI, แคชการตอบกลับเชิงความหมาย, ระบบเกมมิฟิเคชันพร้อมกระดานผู้นำ, การค้นหาเอเจนต์ ACP (เอเจนต์ในตัว 15 รายการ), การส่งออกบันทึกตามกำหนดเวลาไปยัง BigQuery, การกระจายงานแบบขนานไปยังหลายโมเดลด้วย `auto/chaos`, บริดจ์บอต Telegram, ตัวจัดการเวอร์ชันภายในแอป และการจัดอันดับผู้ให้บริการฟรีแบบ LMArena-ELO → [เอกสาร](docs/README.md)
@@ -657,7 +657,7 @@ Radar เป็นฟีเจอร์ที่ต้องเลือกเ�
 <b>＋ และยังใช้งานร่วมกับ</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>เครื่องมือใด ๆ ที่เข้ากันได้กับ OpenAI</b>
 </div>
 
-<sub>📖 การตั้งค่าเฉพาะเครื่องมือสำหรับเครื่องมือทั้ง 37 รายการ (CLI Code 27 รายการ + CLI Agents 10 รายการ) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 ปลั๊กอิน OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 การตั้งค่าเฉพาะเครื่องมือสำหรับเครื่องมือทั้ง 38 รายการ (CLI Code 27 รายการ + CLI Agents 11 รายการ) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 ปลั๊กอิน OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ omniroute configure codex          # รองรับด้วย: claude open
 
 <div align="center">
 
-## 🌐 ผู้ให้บริการ AI 376 ราย — 153 รายถูกทำเครื่องหมายว่าฟรีในแค็ตตาล็อก
+## 🌐 ผู้ให้บริการ AI 377 ราย — 153 รายถูกทำเครื่องหมายว่าฟรีในแค็ตตาล็อก
 
 </div>
 
-> **ผู้ให้บริการที่ลงทะเบียนแล้ว 376 ราย** ครอบคลุมคอลเลกชันมาตรฐานด้านแชต สื่อ การค้นหา การทำงานภายในเครื่อง เอเจนต์บนคลาวด์ และระบบ โดยในจำนวนนี้ **153 รายมีข้อมูลเมตาสำหรับการค้นพบ `hasFree: true`** รีจิสทรีโมเดลแชตครอบคลุม **ผู้ให้บริการ 239 ราย / คู่ผู้ให้บริการ-โมเดลที่ไม่ซ้ำกัน 3,059 คู่ / ID โมเดลดิบ 1,475 รายการ** ส่วนแค็ตตาล็อกงบประมาณฟรีที่แยกต่างหากมี **รายการต่อโมเดล 484 รายการ**, **พูลแบบเกิดซ้ำ 34 พูล** และ **ผู้ให้บริการที่ให้ใช้ฟรีถาวรแบบเกิดซ้ำ/ไม่ต้องใช้คีย์ 52 ราย** ตัวหารเหล่านี้แตกต่างกันโดยเจตนา โปรดดูคำจำกัดความและการคำนวณที่ตัดพูลซ้ำแล้วใน [เอกสารอ้างอิงผู้ให้บริการ](docs/reference/PROVIDER_REFERENCE.md) และ [ระดับการใช้งานฟรี](docs/reference/FREE_TIERS.md)
+> **ผู้ให้บริการที่ลงทะเบียนแล้ว 377 ราย** ครอบคลุมคอลเลกชันมาตรฐานด้านแชต สื่อ การค้นหา การทำงานภายในเครื่อง เอเจนต์บนคลาวด์ และระบบ โดยในจำนวนนี้ **153 รายมีข้อมูลเมตาสำหรับการค้นพบ `hasFree: true`** รีจิสทรีโมเดลแชตครอบคลุม **ผู้ให้บริการ 239 ราย / คู่ผู้ให้บริการ-โมเดลที่ไม่ซ้ำกัน 3,059 คู่ / ID โมเดลดิบ 1,475 รายการ** ส่วนแค็ตตาล็อกงบประมาณฟรีที่แยกต่างหากมี **รายการต่อโมเดล 484 รายการ**, **พูลแบบเกิดซ้ำ 34 พูล** และ **ผู้ให้บริการที่ให้ใช้ฟรีถาวรแบบเกิดซ้ำ/ไม่ต้องใช้คีย์ 52 ราย** ตัวหารเหล่านี้แตกต่างกันโดยเจตนา โปรดดูคำจำกัดความและการคำนวณที่ตัดพูลซ้ำแล้วใน [เอกสารอ้างอิงผู้ให้บริการ](docs/reference/PROVIDER_REFERENCE.md) และ [ระดับการใช้งานฟรี](docs/reference/FREE_TIERS.md)
 
 <div align="center">
 
@@ -765,6 +765,7 @@ omniroute configure codex          # รองรับด้วย: claude open
 <table>
   <tr><th align="left">แพลตฟอร์ม</th><th align="left">การติดตั้ง</th><th align="left">จุดเด่น</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (global)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">คำสั่งเดียว ใช้ได้กับทุกระบบปฏิบัติการ</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">ความเข้ากันได้แบบพยายามรองรับอย่างเต็มที่โดยไม่มีการรับประกันการสนับสนุน โดยรันไทม์ที่รองรับคือ Node.js</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">รองรับหลายสถาปัตยกรรม <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>เดสก์ท็อป (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">หน้าต่างแบบเนทีฟ + ถาดระบบ — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>แถบเมนู (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">ดูแลและอัปเดตเซิร์ฟเวอร์อัตโนมัติ — <b>macOS</b></td></tr>
@@ -1304,7 +1305,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ก็จะข�
   <tr><td nowrap><b>รันไทม์</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ภาษา</b></td><td>TypeScript 6.0 — ใช้ <b>TypeScript 100%</b> ทั่วทั้ง <code>src/</code> และ <code>open-sse/</code> (ไม่มี <code>any</code> ในแกนหลักนับตั้งแต่ v2.0)</td></tr>
   <tr><td nowrap><b>เฟรมเวิร์ก</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ฐานข้อมูล</b></td><td>better-sqlite3 (SQLite, การบันทึกแบบ WAL) + LowDB (JSON แบบเดิม) — โมดูลโดเมน 147 โมดูล, การย้ายข้อมูล 211 รายการ</td></tr>
+  <tr><td nowrap><b>ฐานข้อมูล</b></td><td>better-sqlite3 (SQLite, การบันทึกแบบ WAL) + LowDB (JSON แบบเดิม) — โมดูลโดเมน 147 โมดูล, การย้ายข้อมูล 213 รายการ</td></tr>
   <tr><td nowrap><b>หน่วยความจำ</b></td><td>การค้นหาข้อความแบบเต็มด้วย SQLite FTS5 + เวกเตอร์เอ็มเบดดิงที่ควอนไทซ์แบบ int8, การลดทอนแบบมีชนิดข้อมูล</td></tr>
   <tr><td nowrap><b>สคีมา</b></td><td>Zod 4 — การตรวจสอบ I/O ของเครื่องมือ MCP + สัญญา API</td></tr>
   <tr><td nowrap><b>โพรโทคอล</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

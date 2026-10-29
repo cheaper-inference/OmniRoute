@@ -46,6 +46,8 @@ function observe(
   try {
     for (const path of [
       "scripts/quality",
+      "scripts/i18n",
+      "scripts/check",
       "scripts/ci",
       "config/quality",
       ".github/workflows",
@@ -62,6 +64,13 @@ function observe(
       "release-green-static-profile.mjs",
     ])
       copyFileSync(join(root, "scripts/quality", file), join(dir, "scripts/quality", file));
+    // The real static-profile module imports this two-file comparison closure.
+    for (const path of [
+      "scripts/i18n/resolve-ui-diff-base.mjs",
+      "scripts/check/openapiBaseline.mjs",
+    ]) {
+      copyFileSync(join(root, path), join(dir, path));
+    }
     writeFileSync(
       join(dir, "config/quality/quality-baseline.json"),
       JSON.stringify({

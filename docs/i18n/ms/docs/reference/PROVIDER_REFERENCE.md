@@ -8,7 +8,7 @@
 > Jana semula dengan: `npm run gen:provider-reference`
 > **Kali terakhir dijana:** 2026-10-27
 
-Jumlah penyedia: **376**. Lihat pecahan kategori di bawah.
+Jumlah penyedia: **377**. Lihat pecahan kategori di bawah.
 
 ## Kategori
 
@@ -397,7 +397,7 @@ Gunakan papan pemuka di `/dashboard/providers` untuk mendayakan, mengkonfigurasi
 | `vllm`                | `vllm`       | vLLM                | Setempat, dihoskan sendiri | [pautan](https://github.com/vllm-project/vllm)                    | Kunci API adalah pilihan. Konfigurasikan URL asas serasi OpenAI bagi vLLM setempat (lalai: http://localhost:8000/v1).                                                                                                                                                                                                                   |
 | `xinference`          | `xinference` | XInference          | Setempat, dihoskan sendiri | [pautan](https://inference.readthedocs.io)                        | Kunci API adalah pilihan. Konfigurasikan URL asas serasi OpenAI bagi XInference setempat (lalai: http://localhost:9997/v1).                                                                                                                                                                                                             |
 
-## Penyedia Carian (18)
+## Penyedia Carian (19)
 
 | ID                  | Alias           | Nama                           | Tag    | Laman Web                                                         | Catatan                                                                                                                         |
 | ------------------- | --------------- | ------------------------------ | ------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Gunakan papan pemuka di `/dashboard/providers` untuk mendayakan, mengkonfigurasi
 | `exa-search`        | `exa-search`    | Exa Search                     | Carian | [pautan](https://exa.ai)                                          | Kunci API daripada dashboard.exa.ai                                                                                             |
 | `firecrawl`         | `fc`            | Firecrawl                      | Carian | [pautan](https://firecrawl.dev)                                   | Kunci API daripada firecrawl.dev/app/api-keys (atau tetapkan URL asas Firecrawl yang dihoskan sendiri)                          |
 | `google-pse-search` | `google-pse`    | Google Programmable Search     | Carian | [pautan](https://developers.google.com/custom-search/v1/overview) | Memerlukan kunci Google API dan ID Programmable Search Engine (cx) anda                                                         |
+| `kimi-search`       | `kimi-search`   | Kimi Search                    | Carian | [pautan](https://platform.kimi.ai/docs/api/tools-search)          | Kunci API Moonshot AI (MOONSHOT_API_KEY) daripada platform.kimi.ai                                                              |
 | `linkup-search`     | `linkup`        | Linkup Search                  | Carian | [pautan](https://docs.linkup.so)                                  | Kunci API Bearer daripada papan pemuka Linkup                                                                                   |
 | `nimble-search`     | `nimble`        | Nimble Search                  | Carian | [pautan](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Kunci API Bearer daripada papan pemuka Nimble                                                                                   |
 | `ollama-search`     | `ollama-search` | Ollama Search                  | Carian | [pautan](https://ollama.com/settings/keys)                        | Kunci API yang sama seperti Ollama Cloud (daripada ollama.com/settings/keys)                                                    |

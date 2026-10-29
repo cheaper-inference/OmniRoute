@@ -8,7 +8,7 @@
 > Iġġenerah mill-ġdid bi: `npm run gen:provider-reference`
 > **Iġġenerat l-aħħar:** 2026-10-27
 
-Total ta’ fornituri: **376**. Ara t-tqassim skont il-kategorija hawn taħt.
+Total ta’ fornituri: **377**. Ara t-tqassim skont il-kategorija hawn taħt.
 
 ## Kategoriji
 
@@ -397,7 +397,7 @@ Uża d-dashboard f’`/dashboard/providers` biex tattiva, tikkonfigura u tittest
 | `vllm`                | `vllm`       | vLLM                | Lokali, awtoospitat | [ħolqa](https://github.com/vllm-project/vllm)                    | Iċ-ċavetta tal-API hija fakultattiva. Ikkonfigura l-URL bażi lokali ta' vLLM kompatibbli ma' OpenAI (predefinit: http://localhost:8000/v1).                                                                                                                                                                                           |
 | `xinference`          | `xinference` | XInference          | Lokali, awtoospitat | [ħolqa](https://inference.readthedocs.io)                        | Iċ-ċavetta tal-API hija fakultattiva. Ikkonfigura l-URL bażi lokali ta' XInference kompatibbli ma' OpenAI (predefinit: http://localhost:9997/v1).                                                                                                                                                                                     |
 
-## Fornituri tat-Tiftix (18)
+## Fornituri tat-Tiftix (19)
 
 | ID                  | Alias           | Isem                                     | Tikketti | Sit web                                                         | Noti                                                                                                                               |
 | ------------------- | --------------- | ---------------------------------------- | -------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Uża d-dashboard f’`/dashboard/providers` biex tattiva, tikkonfigura u tittest
 | `exa-search`        | `exa-search`    | Exa Search                               | Tiftix   | [link](https://exa.ai)                                          | Ċavetta API minn dashboard.exa.ai                                                                                                  |
 | `firecrawl`         | `fc`            | Firecrawl                                | Tiftix   | [link](https://firecrawl.dev)                                   | Ċavetta API minn firecrawl.dev/app/api-keys (jew issettja l-URL bażi tal-Firecrawl self-hosted tiegħek)                            |
 | `google-pse-search` | `google-pse`    | Google Programmable Search               | Tiftix   | [link](https://developers.google.com/custom-search/v1/overview) | Jeħtieġ ċavetta API ta’ Google u l-ID tal-Programmable Search Engine tiegħek (cx)                                                  |
+| `kimi-search`       | `kimi-search`   | Kimi Search                              | Tiftix   | [link](https://platform.kimi.ai/docs/api/tools-search)          | Ċavetta tal-API ta' Moonshot AI (MOONSHOT_API_KEY) minn platform.kimi.ai                                                           |
 | `linkup-search`     | `linkup`        | Linkup Search                            | Tiftix   | [link](https://docs.linkup.so)                                  | Ċavetta API Bearer mid-dashboard ta’ Linkup                                                                                        |
 | `nimble-search`     | `nimble`        | Nimble Search                            | Tiftix   | [link](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Ċavetta API Bearer mid-dashboard ta’ Nimble                                                                                        |
 | `ollama-search`     | `ollama-search` | Ollama Search                            | Tiftix   | [link](https://ollama.com/settings/keys)                        | L-istess ċavetta API bħal Ollama Cloud (minn ollama.com/settings/keys)                                                             |

@@ -674,6 +674,8 @@ Standart Docker / Kubernetes OmniRoute, **bir Node işlemi + bir SQLite yazıcı
 
 **Yükseltmeler:** tüm oturumların kesilmesini bekleyin. Mümkünse istemcileri tahliye edin; varsayılan SQLite üzerinde sıralı güncelleme yoktur. Compose `restart: unless-stopped` ile Docker `HEALTHCHECK` birlikte, container Unhealthy olduğunda tek işlemi de değiştirir; etki alanı aynıdır.
 
+Kullanıma hazır manifestler ve bir Helm şeması `deploy/kubernetes/` ve `deploy/helm/omniroute/` dizinlerinde bulunur — [Kubernetes dağıtım kılavuzuna](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) bakın.
+
 **Tek replika** için Kubernetes parçacığı (Recreate gereklidir; tek bir SQLite dosyasına karşı `replicas` değerini artırmayın):
 
 ```yaml

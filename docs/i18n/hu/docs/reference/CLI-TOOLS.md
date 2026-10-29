@@ -10,8 +10,8 @@ Az OmniRoute a CLI-eszközök három kategóriájával integrálódik, amelyek h
 
 | Oldal          | Útvonal                 | Koncepció                                                                                              | Darabszám             |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------------------------ | --------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Az OmniRoute-ra irányított kódolási eszközök (Kliens → CLI → OmniRoute → Szolgáltató)                  | 26                    |
-| **CLI Agents** | `/dashboard/cli-agents` | Az OmniRoute-ra irányított autonóm ügynökök (azonos folyamat, tágabb hatókör)                          | 10                    |
+| **CLI Code's** | `/dashboard/cli-code`   | Az OmniRoute-ra irányított kódolási eszközök (Kliens → CLI → OmniRoute → Szolgáltató)                  | 27                    |
+| **CLI Agents** | `/dashboard/cli-agents` | Az OmniRoute-ra irányított autonóm ügynökök (azonos folyamat, tágabb hatókör)                          | 11                    |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI-k, amelyeket az OmniRoute háttérrendszerként indít el stdio/ACP használatával (fordított folyamat) | lásd a nyilvántartást |
 
 A régi útvonalak 308-as átirányítást használnak: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Mindegyik elfogadja a `--remote <url> --api-key <key>` kapcsolókat (egy helyi eszköz konfigurálása egy
 távoli OmniRoute használatára), a `--dry-run` kapcsolót (előnézet írás nélkül), valamint a `--port` kapcsolót. Azok az eszközök,
-amelyek nem támogatják a modellek automatikus felderítését (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive), elfogadják
+amelyek nem támogatják a modellek automatikus felderítését (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes), elfogadják
 a `--model <id>` kapcsolót (nem interaktív futtatáshoz pedig a `--yes` kapcsolót is). A `setup-5dive` az egyetlen olyan
 konfigurációs eljárás, amely nem a `$HOME` alatt végez írást: egy 5dive-ügynökflottát konfigurál úgy, hogy
 root tulajdonú hitelesítési profilt ír a flottagazdagépre, ezért újraindítja magát a `sudo`
 használatával, és nem rendelkezik saját távoli móddal. Ha egy CLI-t a megfelelő
 környezeti változókkal, de bármilyen konfiguráció kiírása nélkül szeretne elindítani, használja az általános
-`omniroute run <target>` indítót (claude, codex, aider, goose, opencode, qwen,
-gemini — a célok és álnevek a `bin/cli/cli-manifest.mjs` fájlból származnak); a korábbi,
+`omniroute run <target>` indítót (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — a célok és álnevek a `bin/cli/cli-manifest.mjs` fájlból származnak); a korábbi,
 eszközspecifikus `omniroute launch` (Claude Code) és `omniroute launch-codex`
 (Codex) indítók továbbra is elérhetők. A Gemini CLI csak indítható: az `omniroute run`
 egyik célja, de nem rendelkezik `setup-*`/`configure` konfigurációs eljárással.
@@ -182,7 +183,7 @@ A `/dashboard/cli-code` oldalon megjelenő összes eszköz. A `baseUrlSupport: n
 A `baseUrlSupport: "partial"` értékkel rendelkező eszközök kártyáján a „⚠ Részleges alap-URL” jelvény jelenik meg.
 ---
 
-## 2. CLI-ügynökök katalógusa (10 eszköz)
+## 2. CLI-ügynökök katalógusa (11 eszköz)
 
 A `/dashboard/cli-agents` oldalon megjelenő autonóm ügynökök:
 
@@ -198,6 +199,7 @@ A `/dashboard/cli-agents` oldalon megjelenő autonóm ügynökök:
 | letta        | Letta CLI        | Letta                    | full              | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full              | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full              | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full              | false        |
 
 ---
 

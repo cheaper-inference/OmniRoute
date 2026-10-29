@@ -13,7 +13,7 @@
 
 ## Co to je
 
-OmniRoute registruje 376 poskytovatelů, včetně 155 položek katalogu označených **free/no-auth**
+OmniRoute registruje 377 poskytovatelů, včetně 155 položek katalogu označených **free/no-auth**
 (bez autentizace, OAuth s bezplatnou úrovní nebo API klíč s bezplatnou úrovní — viz
 [Průvodce bezplatnými úrovněmi](../getting-started/FREE-TIERS-GUIDE.md) a kompletní
 [adresář bezplatných úrovní](../reference/FREE_TIERS.md)). Háček spočívá v tom, že bezplatní

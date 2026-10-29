@@ -8,7 +8,7 @@
 > Znova vygenerujte pomocou: `npm run gen:provider-reference`
 > **Naposledy vygenerované:** 2026-10-27
 
-Celkový počet poskytovateľov: **376**. Pozrite si rozdelenie podľa kategórií nižšie.
+Celkový počet poskytovateľov: **377**. Pozrite si rozdelenie podľa kategórií nižšie.
 
 ## Kategórie
 
@@ -397,7 +397,7 @@ Na povolenie, konfiguráciu a testovanie jednotlivých poskytovateľov použite 
 | `vllm`                | `vllm`       | vLLM                | Lokálny, hosťovaný vo vlastnej réžii | [odkaz](https://github.com/vllm-project/vllm)                    | Kľúč API je voliteľný. Nakonfigurujte lokálnu základnú URL adresu služby vLLM kompatibilnú s OpenAI (predvolená: http://localhost:8000/v1).                                                                                                                                                                                               |
 | `xinference`          | `xinference` | XInference          | Lokálny, hosťovaný vo vlastnej réžii | [odkaz](https://inference.readthedocs.io)                        | Kľúč API je voliteľný. Nakonfigurujte lokálnu základnú URL adresu služby XInference kompatibilnú s OpenAI (predvolená: http://localhost:9997/v1).                                                                                                                                                                                         |
 
-## Poskytovatelia vyhľadávania (18)
+## Poskytovatelia vyhľadávania (19)
 
 | ID                  | Alias           | Názov                           | Značky       | Webová lokalita                                                  | Poznámky                                                                                                                                 |
 | ------------------- | --------------- | ------------------------------- | ------------ | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Na povolenie, konfiguráciu a testovanie jednotlivých poskytovateľov použite 
 | `exa-search`        | `exa-search`    | Exa Search                      | Vyhľadávanie | [odkaz](https://exa.ai)                                          | API kľúč z dashboard.exa.ai                                                                                                              |
 | `firecrawl`         | `fc`            | Firecrawl                       | Vyhľadávanie | [odkaz](https://firecrawl.dev)                                   | API kľúč z firecrawl.dev/app/api-keys (alebo nastavte základnú URL adresu vlastnej inštancie Firecrawl)                                  |
 | `google-pse-search` | `google-pse`    | Google Programmable Search      | Vyhľadávanie | [odkaz](https://developers.google.com/custom-search/v1/overview) | Vyžaduje Google API kľúč a ID vášho programovateľného vyhľadávača (cx)                                                                   |
+| `kimi-search`       | `kimi-search`   | Kimi Search                     | Vyhľadávanie | [odkaz](https://platform.kimi.ai/docs/api/tools-search)          | Kľúč API Moonshot AI (MOONSHOT_API_KEY) z platform.kimi.ai                                                                               |
 | `linkup-search`     | `linkup`        | Linkup Search                   | Vyhľadávanie | [odkaz](https://docs.linkup.so)                                  | Bearer API kľúč z ovládacieho panela Linkup                                                                                              |
 | `nimble-search`     | `nimble`        | Nimble Search                   | Vyhľadávanie | [odkaz](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API kľúč z ovládacieho panela Nimble                                                                                              |
 | `ollama-search`     | `ollama-search` | Ollama Search                   | Vyhľadávanie | [odkaz](https://ollama.com/settings/keys)                        | Rovnaký API kľúč ako pre Ollama Cloud (z ollama.com/settings/keys)                                                                       |

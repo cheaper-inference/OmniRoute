@@ -667,6 +667,8 @@ Standardowa konfiguracja OmniRoute dla Dockera / Kubernetesa to **jeden proces N
 
 **Aktualizacje:** należy oczekiwać przerwania każdej sesji. Jeśli to możliwe, stopniowo odłącz klientów; w domyślnej konfiguracji SQLite aktualizacja krocząca nie jest dostępna. Ustawienie Compose `restart: unless-stopped` wraz z Dockerowym `HEALTHCHECK` również zastąpi jedyny proces, gdy stan kontenera zmieni się na Unhealthy — z takim samym zakresem skutków.
 
+Gotowe manifesty i pakiet Helm znajdują się w `deploy/kubernetes/` oraz `deploy/helm/omniroute/` — zobacz [przewodnik wdrażania w Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Fragment konfiguracji Kubernetesa dla **jednej repliki** (strategia Recreate jest wymagana; nie zwiększaj wartości `replicas`, gdy repliki korzystają z jednego pliku SQLite):
 
 ```yaml

@@ -8,7 +8,7 @@
 > Ģenerējiet atkārtoti ar: `npm run gen:provider-reference`
 > **Pēdējoreiz ģenerēts:** 2026-10-27
 
-Kopējais pakalpojumu sniedzēju skaits: **376**. Kategoriju sadalījumu skatiet tālāk.
+Kopējais pakalpojumu sniedzēju skaits: **377**. Kategoriju sadalījumu skatiet tālāk.
 
 ## Kategorijas
 
@@ -397,7 +397,7 @@ Izmantojiet informācijas paneli `/dashboard/providers`, lai iespējotu, konfigu
 | `vllm`                | `vllm`       | vLLM                | Lokāls, pašmitināts | [saite](https://github.com/vllm-project/vllm)                    | API atslēga nav obligāta. Konfigurējiet lokālā vLLM ar OpenAI saderīgo bāzes URL (noklusējums: http://localhost:8000/v1).                                                                                                                                                                                                |
 | `xinference`          | `xinference` | XInference          | Lokāls, pašmitināts | [saite](https://inference.readthedocs.io)                        | API atslēga nav obligāta. Konfigurējiet lokālā XInference ar OpenAI saderīgo bāzes URL (noklusējums: http://localhost:9997/v1).                                                                                                                                                                                          |
 
-## Meklēšanas nodrošinātāji (18)
+## Meklēšanas nodrošinātāji (19)
 
 | ID                  | Aizstājvārds    | Nosaukums                            | Tagi      | Tīmekļa vietne                                                   | Piezīmes                                                                                                                               |
 | ------------------- | --------------- | ------------------------------------ | --------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Izmantojiet informācijas paneli `/dashboard/providers`, lai iespējotu, konfigu
 | `exa-search`        | `exa-search`    | Exa Search                           | Meklēšana | [saite](https://exa.ai)                                          | API atslēga no dashboard.exa.ai                                                                                                        |
 | `firecrawl`         | `fc`            | Firecrawl                            | Meklēšana | [saite](https://firecrawl.dev)                                   | API atslēga no firecrawl.dev/app/api-keys (vai iestatiet savu pašmitinātās Firecrawl instances bāzes URL)                              |
 | `google-pse-search` | `google-pse`    | Google Programmable Search           | Meklēšana | [saite](https://developers.google.com/custom-search/v1/overview) | Nepieciešama Google API atslēga un jūsu Programmable Search Engine ID (cx)                                                             |
+| `kimi-search`       | `kimi-search`   | Kimi Search                          | Meklēšana | [saite](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API atslēga (MOONSHOT_API_KEY) no platform.kimi.ai                                                                         |
 | `linkup-search`     | `linkup`        | Linkup Search                        | Meklēšana | [saite](https://docs.linkup.so)                                  | Bearer API atslēga no Linkup informācijas paneļa                                                                                       |
 | `nimble-search`     | `nimble`        | Nimble Search                        | Meklēšana | [saite](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API atslēga no Nimble informācijas paneļa                                                                                       |
 | `ollama-search`     | `ollama-search` | Ollama Search                        | Meklēšana | [saite](https://ollama.com/settings/keys)                        | Tā pati API atslēga, kas paredzēta Ollama Cloud (no ollama.com/settings/keys)                                                          |

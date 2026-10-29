@@ -10,8 +10,8 @@ OmniRoute-ը ինտեգրվում է CLI գործիքների երեք կատե�
 
 | Էջ             | Ուղի                    | Հայեցակարգ                                                                                        | Քանակ       |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------------------- | ----------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Կոդավորման գործիքներ, որոնք ուղղորդում եք դեպի OmniRoute (Հաճախորդ → CLI → OmniRoute → Մատակարար) | 26          |
-| **CLI Agents** | `/dashboard/cli-agents` | Ինքնավար գործակալներ, որոնք ուղղորդում եք դեպի OmniRoute (նույն հոսքը, ավելի լայն շրջանակ)        | 10          |
+| **CLI Code's** | `/dashboard/cli-code`   | Կոդավորման գործիքներ, որոնք ուղղորդում եք դեպի OmniRoute (Հաճախորդ → CLI → OmniRoute → Մատակարար) | 27          |
+| **CLI Agents** | `/dashboard/cli-agents` | Ինքնավար գործակալներ, որոնք ուղղորդում եք դեպի OmniRoute (նույն հոսքը, ավելի լայն շրջանակ)        | 11          |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI-ներ, որոնք OmniRoute-ը գործարկում է որպես հետնամաս՝ stdio/ACP-ի միջոցով (հակադարձ հոսք)       | տես ռեեստրը |
 
 Հին ուղիները վերահղվում են 308-ի միջոցով՝ `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`։
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Յուրաքանչյուրն ընդունում է `--remote <url> --api-key <key>` (տեղային գործիքը հեռավար OmniRoute-ի հետ աշխատելու համար կազմաձևելու նպատակով), `--dry-run` (առանց գրելու նախադիտելու համար) և `--port`։ Մոդելների ինքնահայտնաբերում չունեցող գործիքներն (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) ընդունում են `--model <id>` (ինչպես նաև `--yes`՝ ոչ ինտերակտիվ գործարկումների համար)։ `setup-5dive`-ը միակ բաղադրատոմսն է, որը `$HOME`-ի ներքո չի գրում․ այն կազմաձևում է 5dive գործակալների խումբը՝ խմբի հոսթում գրելով `root`-ին պատկանող նույնականացման պրոֆիլ, ուստի վերագործարկվում է `sudo`-ի միջոցով և չունի սեփական հեռավար ռեժիմ։ CLI-ն անհրաժեշտ միջավայրային փոփոխականներով և ընդհանրապես առանց որևէ կազմաձևում գրելու գործարկելու համար օգտագործեք ընդհանուր `omniroute run <target>` գործարկիչը (claude, codex, aider, goose, opencode, qwen, gemini․ թիրախներն ու այլանունները վերցվում են `bin/cli/cli-manifest.mjs`-ից)։ Յուրաքանչյուր գործիքի համար նախատեսված հին գործարկիչները՝ `omniroute launch` (Claude Code) և `omniroute launch-codex` (Codex), շարունակում են հասանելի մնալ։ Gemini CLI-ն նախատեսված է միայն գործարկման համար․ այն `omniroute run`-ի թիրախ է, սակայն չունի `setup-*`/`configure` բաղադրատոմս։
+Յուրաքանչյուրն ընդունում է `--remote <url> --api-key <key>` (տեղային գործիքը հեռավար OmniRoute-ի հետ աշխատելու համար կազմաձևելու նպատակով), `--dry-run` (առանց գրելու նախադիտելու համար) և `--port`։ Մոդելների ինքնահայտնաբերում չունեցող գործիքներն (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) ընդունում են `--model <id>` (ինչպես նաև `--yes`՝ ոչ ինտերակտիվ գործարկումների համար)։ `setup-5dive`-ը միակ բաղադրատոմսն է, որը `$HOME`-ի ներքո չի գրում․ այն կազմաձևում է 5dive գործակալների խումբը՝ խմբի հոսթում գրելով `root`-ին պատկանող նույնականացման պրոֆիլ, ուստի վերագործարկվում է `sudo`-ի միջոցով և չունի սեփական հեռավար ռեժիմ։ CLI-ն անհրաժեշտ միջավայրային փոփոխականներով և ընդհանրապես առանց որևէ կազմաձևում գրելու գործարկելու համար օգտագործեք ընդհանուր `omniroute run <target>` գործարկիչը (claude, codex, aider, goose, opencode, qwen, gemini, whycodes․ թիրախներն ու այլանունները վերցվում են `bin/cli/cli-manifest.mjs`-ից)։ Յուրաքանչյուր գործիքի համար նախատեսված հին գործարկիչները՝ `omniroute launch` (Claude Code) և `omniroute launch-codex` (Codex), շարունակում են հասանելի մնալ։ Gemini CLI-ն նախատեսված է միայն գործարկման համար․ այն `omniroute run`-ի թիրախ է, սակայն չունի `setup-*`/`configure` բաղադրատոմս։
 
 > **Ամբողջական տեղեկատու․** գլխավոր աղյուսակը՝ ինչ է գրում յուրաքանչյուր հրաման, բոլոր դրոշակները, տեղային և հեռավար ռեժիմների տարբերությունները, ինչպես նաև այն, թե որ գործիքներն են պահանջում `/v1` վերջածանց, գտնվում է
 > **[CLI ինտեգրումներ](../guides/CLI-INTEGRATIONS.md)** էջում։
@@ -139,7 +140,7 @@ OmniRoute-ի կոնտեյների ներսում կատարված `setup-*` հր
 `baseUrlSupport: "partial"` ունեցող գործիքների վահանակային քարտում ցուցադրվում է «⚠ Մասնակի Base URL» նշանը։
 ---
 
-## 2. CLI գործակալների կատալոգ (10 գործիք)
+## 2. CLI գործակալների կատալոգ (11 գործիք)
 
 Ինքնավար գործակալներ, որոնք ցուցադրվում են `/dashboard/cli-agents`-ում․
 
@@ -155,6 +156,7 @@ OmniRoute-ի կոնտեյների ներսում կատարված `setup-*` հր
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

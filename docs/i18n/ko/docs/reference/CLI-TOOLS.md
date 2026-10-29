@@ -10,8 +10,8 @@ OmniRoute는 전용 대시보드 페이지 세 곳에 분산된 세 가지 범�
 
 | 페이지         | 경로                    | 개념                                                                           | 개수            |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------ | --------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute를 가리키도록 설정하는 코딩 도구(Client → CLI → OmniRoute → Provider) | 26              |
-| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute를 가리키도록 설정하는 자율 에이전트(동일한 흐름, 더 넓은 범위)       | 10              |
+| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute를 가리키도록 설정하는 코딩 도구(Client → CLI → OmniRoute → Provider) | 27              |
+| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute를 가리키도록 설정하는 자율 에이전트(동일한 흐름, 더 넓은 범위)       | 11              |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute가 stdio/ACP를 통해 백엔드로 실행하는 CLI(역방향 흐름)                | 레지스트리 참조 |
 
 레거시 경로는 308을 통해 리디렉션됩니다: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,17 +55,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 각 명령은 `--remote <url> --api-key <key>`(로컬 도구가 원격 OmniRoute를 사용하도록 구성),
 `--dry-run`(작성하지 않고 미리 보기), `--port`를 지원합니다. 모델 자동 검색을 지원하지 않는
-도구(Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)는 `--model <id>`를 사용하며, 비대화형
+도구(Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes)는 `--model <id>`를 사용하며, 비대화형
 실행에는 `--yes`도 사용합니다. `setup-5dive`는 `$HOME` 아래에 작성하지 않는 유일한
 구성 방식입니다. 이 명령은 플릿 호스트에 root 소유의 인증 프로필을 작성하여 5dive 에이전트
 플릿을 구성하므로 `sudo`를 통해 자신을 다시 실행하며, 자체적인 원격 모드는 없습니다. 올바른
 환경 변수를 주입한 상태로 구성을 전혀 작성하지 않고 CLI를 실행하려면 범용
-`omniroute run <target>` 실행기를 사용하세요(claude, codex, aider, goose, opencode, qwen,
-gemini — 대상과 별칭은 `bin/cli/cli-manifest.mjs`에서 가져옴). 기존의 도구별 실행기인
+`omniroute run <target>` 실행기를 사용하세요(claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — 대상과 별칭은 `bin/cli/cli-manifest.mjs`에서 가져옴). 기존의 도구별 실행기인
 `omniroute launch`(Claude Code)와 `omniroute launch-codex`(Codex)도 계속 사용할 수
 있습니다. Gemini CLI는 실행 전용입니다. 즉, `omniroute run` 대상이지만
 `setup-*`/`configure` 구성 방식은 없습니다.
@@ -173,7 +174,7 @@ OmniRoute는 이를 감지하고 작성하는 대신 안내와 함께 종료 코
 `baseUrlSupport: "partial"`인 도구의 대시보드 카드에는 "⚠ 부분적 Base URL" 배지가 표시됩니다.
 ---
 
-## 2. CLI 에이전트 카탈로그(도구 10개)
+## 2. CLI 에이전트 카탈로그(도구 11개)
 
 `/dashboard/cli-agents`에 표시되는 자율 에이전트:
 
@@ -189,6 +190,7 @@ OmniRoute는 이를 감지하고 작성하는 대신 안내와 함께 종료 코
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

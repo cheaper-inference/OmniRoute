@@ -8,7 +8,7 @@
 > Ponovno generirajte pomoću: `npm run gen:provider-reference`
 > **Posljednje generiranje:** 2026-10-27
 
-Ukupan broj pružatelja usluga: **376**. U nastavku pogledajte raspodjelu po kategorijama.
+Ukupan broj pružatelja usluga: **377**. U nastavku pogledajte raspodjelu po kategorijama.
 
 ## Kategorije
 
@@ -397,7 +397,7 @@ Upotrijebite nadzornu ploču na `/dashboard/providers` kako biste omogućili, ko
 | `vllm`                | `vllm`       | vLLM                | Lokalno, samostalno hostirano | [poveznica](https://github.com/vllm-project/vllm)                    | API ključ opcionalan. Konfigurirajte lokalni vLLM OpenAI-kompatibilni osnovni URL (zadano: http://localhost:8000/v1).                                                                                                                                                                                              |
 | `xinference`          | `xinference` | XInference          | Lokalno, samostalno hostirano | [poveznica](https://inference.readthedocs.io)                        | API ključ opcionalan. Konfigurirajte lokalni XInference OpenAI-kompatibilni osnovni URL (zadano: http://localhost:9997/v1).                                                                                                                                                                                        |
 
-## Pružatelji pretraživanja (18)
+## Pružatelji pretraživanja (19)
 
 | ID                  | Alias           | Naziv                               | Oznake        | Web-mjesto                                                           | Napomene                                                                                                                         |
 | ------------------- | --------------- | ----------------------------------- | ------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Upotrijebite nadzornu ploču na `/dashboard/providers` kako biste omogućili, ko
 | `exa-search`        | `exa-search`    | Exa Search                          | Pretraživanje | [poveznica](https://exa.ai)                                          | API ključ s dashboard.exa.ai                                                                                                     |
 | `firecrawl`         | `fc`            | Firecrawl                           | Pretraživanje | [poveznica](https://firecrawl.dev)                                   | API ključ s firecrawl.dev/app/api-keys (ili postavite osnovni URL vlastite instance Firecrawla)                                  |
 | `google-pse-search` | `google-pse`    | Google Programmable Search          | Pretraživanje | [poveznica](https://developers.google.com/custom-search/v1/overview) | Zahtijeva Google API ključ i ID vašeg programibilnog pretraživača (cx)                                                           |
+| `kimi-search`       | `kimi-search`   | Kimi Search                         | Pretraživanje | [poveznica](https://platform.kimi.ai/docs/api/tools-search)          | API ključ za Moonshot AI (MOONSHOT_API_KEY) s platform.kimi.ai                                                                   |
 | `linkup-search`     | `linkup`        | Linkup Search                       | Pretraživanje | [poveznica](https://docs.linkup.so)                                  | Bearer API ključ s nadzorne ploče Linkupa                                                                                        |
 | `nimble-search`     | `nimble`        | Nimble Search                       | Pretraživanje | [poveznica](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API ključ s nadzorne ploče Nimblea                                                                                        |
 | `ollama-search`     | `ollama-search` | Ollama Search                       | Pretraživanje | [poveznica](https://ollama.com/settings/keys)                        | Isti API ključ kao za Ollama Cloud (s ollama.com/settings/keys)                                                                  |

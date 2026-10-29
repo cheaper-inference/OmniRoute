@@ -488,7 +488,7 @@ Deze verwerkt:
 
 | Bestand                       | Doel                                                          |
 | ----------------------------- | ------------------------------------------------------------- |
-| `providerRegistry.ts`         | Register van chatmodellen voor de catalogus met 376 providers |
+| `providerRegistry.ts`         | Register van chatmodellen voor de catalogus met 377 providers |
 | `providerModels.ts`           | Modelaliassen, formaattoewijzing                              |
 | `constants.ts`                | Time-outs, limieten, statuscodes                              |
 | `defaultThinkingSignature.ts` | Standaard-denksignatuur van Claude                            |

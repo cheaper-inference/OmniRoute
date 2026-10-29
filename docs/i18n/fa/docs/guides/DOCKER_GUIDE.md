@@ -641,6 +641,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **ارتقاها:** انتظار داشته باشید اتصال همهٔ نشستها قطع شود. در صورت امکان، کلاینتها را تخلیه کنید؛ روی SQLite پیشفرض rolling update وجود ندارد. تنظیم Compose با `restart: unless-stopped` بههمراه `HEALTHCHECK` در Docker نیز وقتی کانتینر Unhealthy شود، تنها فرایند را جایگزین خواهد کرد — با همان دامنهٔ اثر.
 
+مانیفستهای آماده و یک نمودار Helm در `deploy/kubernetes/` و `deploy/helm/omniroute/` قرار دارند — [راهنمای استقرار Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) را ببینید.
+
 قطعهپیکربندی Kubernetes برای یک **replica منفرد** (`Recreate` الزامی است؛ مقدار `replicas` را برای یک فایل SQLite افزایش ندهید):
 
 ```yaml

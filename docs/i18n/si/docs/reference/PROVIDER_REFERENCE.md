@@ -8,7 +8,7 @@
 > මෙය භාවිතයෙන් නැවත ජනනය කරන්න: `npm run gen:provider-reference`
 > **අවසන් වරට ජනනය කළේ:** 2026-10-27
 
-මුළු සැපයුම්කරුවන් ගණන: **376**. පහත ප්රවර්ග අනුව වෙන් කිරීම බලන්න.
+මුළු සැපයුම්කරුවන් ගණන: **377**. පහත ප්රවර්ග අනුව වෙන් කිරීම බලන්න.
 
 ## ප්රවර්ග
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | දේශීය, ස්වයං-සත්කාරක | [සබැඳිය](https://github.com/vllm-project/vllm)                    | API යතුර විකල්පයකි. දේශීය vLLM OpenAI-අනුකූල මූලික URL එක වින්යාස කරන්න (පෙරනිමිය: http://localhost:8000/v1).                                                                                                                                                                                                   |
 | `xinference`          | `xinference` | XInference          | දේශීය, ස්වයං-සත්කාරක | [සබැඳිය](https://inference.readthedocs.io)                        | API යතුර විකල්පයකි. දේශීය XInference OpenAI-අනුකූල මූලික URL එක වින්යාස කරන්න (පෙරනිමිය: http://localhost:9997/v1).                                                                                                                                                                                             |
 
-## සෙවුම් සපයන්නන් (18)
+## සෙවුම් සපයන්නන් (19)
 
 | ID                  | අන්වර්ථ නාමය    | නම                          | ටැග   | වෙබ් අඩවිය                                                        | සටහන්                                                                                                                      |
 | ------------------- | --------------- | --------------------------- | ----- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                  | සෙවීම | [සබැඳිය](https://exa.ai)                                          | dashboard.exa.ai වෙතින් API යතුරක්                                                                                         |
 | `firecrawl`         | `fc`            | Firecrawl                   | සෙවීම | [සබැඳිය](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys වෙතින් API යතුරක් (නැතහොත් ඔබ විසින් සත්කාරකත්වය සපයන Firecrawl මූලික URL එක සකසන්න)            |
 | `google-pse-search` | `google-pse`    | Google Programmable Search  | සෙවීම | [සබැඳිය](https://developers.google.com/custom-search/v1/overview) | Google API යතුරක් සහ ඔබේ Programmable Search Engine ID (`cx`) අවශ්ය වේ                                                     |
+| `kimi-search`       | `kimi-search`   | Kimi Search                 | සෙවීම | [සබැඳිය](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai වෙතින් Moonshot AI API යතුර (MOONSHOT_API_KEY)                                                            |
 | `linkup-search`     | `linkup`        | Linkup Search               | සෙවීම | [සබැඳිය](https://docs.linkup.so)                                  | Linkup උපකරණ පුවරුවෙන් Bearer API යතුරක්                                                                                   |
 | `nimble-search`     | `nimble`        | Nimble Search               | සෙවීම | [සබැඳිය](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble උපකරණ පුවරුවෙන් Bearer API යතුරක්                                                                                   |
 | `ollama-search`     | `ollama-search` | Ollama Search               | සෙවීම | [සබැඳිය](https://ollama.com/settings/keys)                        | Ollama Cloud සඳහා භාවිත කරන API යතුරම (ollama.com/settings/keys වෙතින්)                                                    |

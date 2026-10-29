@@ -10,8 +10,8 @@ OmniRoute s’intègre à trois catégories d’outils CLI réparties sur trois 
 
 | Page            | Route                   | Concept                                                                                 | Nombre        |
 | --------------- | ----------------------- | --------------------------------------------------------------------------------------- | ------------- |
-| **CLI de code** | `/dashboard/cli-code`   | Outils de développement dirigés vers OmniRoute (Client → CLI → OmniRoute → Fournisseur) | 26            |
-| **Agents CLI**  | `/dashboard/cli-agents` | Agents autonomes dirigés vers OmniRoute (même flux, périmètre plus large)               | 10            |
+| **CLI de code** | `/dashboard/cli-code`   | Outils de développement dirigés vers OmniRoute (Client → CLI → OmniRoute → Fournisseur) | 27            |
+| **Agents CLI**  | `/dashboard/cli-agents` | Agents autonomes dirigés vers OmniRoute (même flux, périmètre plus large)               | 11            |
 | **Agents ACP**  | `/dashboard/acp-agents` | CLI lancées par OmniRoute comme backends via stdio/ACP (flux inverse)                   | voir registre |
 
 Les anciennes routes effectuent une redirection 308 : `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Chacune accepte `--remote <url> --api-key <key>` (pour configurer un outil local afin qu’il utilise une instance
 OmniRoute distante), `--dry-run` (pour prévisualiser sans écrire) et `--port`. Les outils
-sans détection automatique des modèles (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) acceptent
+sans détection automatique des modèles (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) acceptent
 `--model <id>` (ainsi que `--yes` pour les exécutions non interactives). `setup-5dive` est la seule
 procédure qui n’écrit pas sous `$HOME` : elle configure une flotte d’agents 5dive en
 écrivant un profil d’authentification appartenant à l’utilisateur root sur l’hôte de la flotte ; elle se réexécute donc via `sudo`
 et ne dispose d’aucun mode distant propre. Pour lancer un CLI avec les
 variables d’environnement appropriées injectées et sans écrire la moindre configuration, utilisez le lanceur générique
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — les cibles et les alias proviennent de `bin/cli/cli-manifest.mjs`) ; les anciens
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — les cibles et les alias proviennent de `bin/cli/cli-manifest.mjs`) ; les anciens
 lanceurs propres à chaque outil, `omniroute launch` (Claude Code) et `omniroute launch-codex`
 (Codex), restent disponibles. Gemini CLI est uniquement disponible au lancement : il s’agit d’une cible `omniroute run`,
 mais il ne possède aucune procédure `setup-*`/`configure`.
@@ -175,7 +176,7 @@ Tous les outils qui apparaissent dans `/dashboard/cli-code`. Ceux avec `baseUrlS
 Les outils avec `baseUrlSupport: "partial"` affichent un badge « ⚠ URL de base partielle » dans la carte du tableau de bord.
 ---
 
-## 2. Catalogue des agents CLI (10 outils)
+## 2. Catalogue des agents CLI (11 outils)
 
 Agents autonomes qui apparaissent dans `/dashboard/cli-agents` :
 
@@ -191,6 +192,7 @@ Agents autonomes qui apparaissent dans `/dashboard/cli-agents` :
 | letta        | Letta CLI        | Letta                    | full                       | false            |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full                       | false            |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full                       | false            |
+| whycodes     | WhyCodes         | Why Corporation          | full                       | false            |
 
 ---
 

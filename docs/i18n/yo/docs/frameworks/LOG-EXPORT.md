@@ -254,7 +254,217 @@ máa ń kọ ìbéèrè tó ju 10 MB lọ. Àwọn chunk máa ń dópin ní àw�
 
 ---
 
-## 5. Fífi ibi ìránṣẹ́ kún un
+## 5. Ibi ìrìnàjò àwọn trace OTLP/HTTP
+
+Ìṣètò ń lo `type: "otlp-http"`. Èyí jẹ́ fífi àwọn àkọsílẹ̀ ìpè tí a ti tọ́jú ránṣẹ́ ní àkókò tí a ṣètò, pẹ̀lú cursor,
+kì í ṣe ibi gbígba ìṣẹ̀lẹ̀ routing láàyè tó ń ṣiṣẹ́ bí agbára bá ṣe tó ní
+`open-sse/services/routing/otel.ts`. Kò ka tàbí yí àwọn oníyípadà àyíká,
+aago tàbí buffer ibi gbígba yẹn padà. Mímú àwọn méjèèjì ṣiṣẹ́ lè dá irú span méjì tí kò gbára lé ara wọn sílẹ̀;
+lo ààlà instrumentation `omniroute.log-export` láti fi àwọn span àkọsílẹ̀ ìpè wọ̀nyí yàtọ̀.
+
+| Kọ́kọ́rọ́                   | Àiyípadà / ète                                                                             |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `endpoint`               | URL trace HTTP(S) kíkún tí a nílò; a kì í fi àfikún `/v1/traces` kún un                    |
+| `headers`                | Àwọn ìlà `Name: value` tàbí ohun JSON ti àwọn okun ọ̀rọ̀ tí kì í ṣe dandan; a fi ìkọ̀kọ̀ pa mọ́ |
+| `requestHeaderAllowlist` | Òfo (pípa); àwọn orúkọ/ìpele ìbẹ̀rẹ̀ header oníbàárà láti mú gẹ́gẹ́ bí ànímọ́ span              |
+| `serviceName`            | `omniroute`; resource `service.name`                                                       |
+| `langfuseMapping`        | `false`; ń fi àwọn ànímọ́ generation/session/user Langfuse kún un                           |
+| `identity`               | `pseudonymous`, `keyName`, tàbí `none`                                                     |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                    |
+| `timeoutMs`              | `30000` fún ìgbìyànjú HTTP kọ̀ọ̀kan                                                          |
+| `environment`            | A kò ṣètò rẹ̀; `langfuse.environment` kì í ṣe dandan                                        |
+
+Dashboard gbogbogbò ń ṣàfihàn àwọn pápá wọ̀nyí. `paths` ń gba àkójọpọ̀ API tàbí àgbègbè ọ̀rọ̀
+tí ó ní àwọn ọ̀nà pàtó tí ìlà tuntun/àmì kọ́mà pín sọ́tọ̀. A ń fo embeddings, rerank àti àwọn ọ̀nà mìíràn
+àfi tí a bá fàyè gba wọn ní kedere. Àwọn ìlà tí a fò ṣì ń mú cursor lọ síwájú; àwọn olùkà
+`exported`/`exportedTotal` ti runner tó wà tẹ́lẹ̀ ń ka àwọn ìlà orísun tí a ti ṣe ìṣàkóso wọn, pẹ̀lú àwọn ìlà
+tí a yọ nípasẹ̀ àlẹ̀mọ́, dípò àwọn span tí a gbà. Ìṣàyẹ̀wò àlẹ̀mọ́ ń wáyé nínú ìlànà ọmọ, láì yí
+àdéhùn IPC/cursor rẹ̀ padà.
+
+Ìfìdímúlẹ̀ URL ń lo olùrànlọ́wọ́ `parseAndValidateNonMetadataUrl` tí kò nílò DB láti
+`src/shared/network/outboundUrlGuard.ts`: ìlànà `block-metadata`. Ó ní àwọn àyẹ̀wò
+metadata/protocol/ìwé-ẹ̀rí tí a fi sínú URL tí kò ní àyọkúrò, bí olùfìdímúlẹ̀ webhook pẹ̀lú
+àwọn URL aládàáni tí a fàyè gba, ṣùgbọ́n ó mọ̀ọ́mọ̀ fàyè gba àwọn ibi localhost/LAN láìsí
+ìfagilé àgbáyé nípasẹ̀ àsíá ẹ̀yà. Èyí ń fàyè gba àwọn endpoint Langfuse, Phoenix, Tempo àti Collector
+tí a gbàlejò fúnra wa, títí kan àwọn endpoint HTTP aládàáni. A máa ń dènà àwọn host metadata àwọsánmà nígbà gbogbo.
+A kì í tẹ̀lé ìdarí sí ibòmíràn, nítorí náà collector kò lè darí àwọn ìwé-ẹ̀rí sí host mìíràn.
+Bí ààbò URL tó dá lórí àyẹ̀wò ọ̀rọ̀ tó wà tẹ́lẹ̀, èyí kò so ìpinnu DNS mọ́lẹ̀; ṣètò
+àwọn host tí olùṣàkóso ń darí nìkan. Yan HTTPS nígbàkigbà tí endpoint kò bá sí lórí nẹ́tíwọ́ọ̀kì tí a fọkàn tán.
+
+### Ẹrù dátà àti fífiránṣẹ́
+
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) ń gbé span
+CLIENT kan fún ìlà kọ̀ọ̀kan tí a fàyè gba, tí orúkọ rẹ̀ sì jẹ́ ọ̀nà ìbéèrè rẹ̀ gan-an. Lílo ọ̀nà gẹ́gẹ́ bí orúkọ ń fi
+Chat Completions, Responses àti Messages yàtọ̀ láì fi dátà àwòṣe tàbí ìdánimọ̀ sínú
+orúkọ span. Àwọn ànímọ́ resource ní `service.name` àti `service.version` ti package nínú.
+
+Olùkọ àkọsílẹ̀ ìgbìyànjú chat déédéé (`open-sse/handlers/chatCore/attemptLogging.ts`) ń kọ
+`duration = Date.now() - startTime` nígbà ìparí, kò sì pèsè àmì àkókò;
+`saveCallLogOperation` nínú `src/lib/usage/callLogs.ts` ń lo àkókò ìkọ̀wé
+(ìparí) gẹ́gẹ́ bí àmì àkókò àiyípadà. Nítorí náà, fífiránṣẹ́ ń ṣètò ìparí = àmì àkókò ìlà àti ìbẹ̀rẹ̀ = ìparí − iye àkókò
+(milliseconds, tí a yí padà sí nanoseconds eleemewa). A tún ń pa àwọn àmì àkókò ìtàn
+tí olùpè pèsè mọ́ gẹ́gẹ́ bí àkókò ìparí; kò sí àmì ìyàtọ̀ ìbẹ̀rẹ̀/ìparí fún ìlà kọ̀ọ̀kan.
+Iye àkókò null di òdo. Àwọn àmì àkókò tí kò tọ́/tí kò sí ń mú kí àkójọpọ̀ náà kùnà dípò kí a dá
+àwọn span tí kò ṣeé sọ tẹ́lẹ̀ sílẹ̀. `ttftMs` lè jẹ́ null, a sì ń so ó mọ́ `omniroute.ttft_ms`.
+
+Àwọn ànímọ́ ní `gen_ai.operation.name="chat"`, olùpèsè, àwòṣe tí a béèrè/ti ìdáhùn,
+àwọn token ìwọlé/ìjáde, àwọn token kíkà cache/ṣíṣẹ̀dá cache/ìrònú tí kì í ṣe dandan, ipò HTTP,
+combo, orísun cache, àmì session àti id ìbáṣepọ̀. Àwọn iye odidi OTLP àti àwọn àmì àkókò
+jẹ́ àwọn okun ọ̀rọ̀ eleemewa; àwọn okun ọ̀rọ̀, boolean àti nọ́ńbà oníìdá ń lo àwọn irú iye OTLP
+abinibi wọn. Àwọn span àṣìṣe ní ipò ERROR àti ìfiránṣẹ́ ipò tí a ti sọ di mímọ́. Àkọsílẹ̀
+àṣẹ kò ní URL host upstream, nítorí náà a yọ `server.address` kúrò dípò kí a fi àṣìṣe
+ṣe ìdánimọ̀ collector gẹ́gẹ́ bí olupin àwòṣe. A kì í fi iye owó ránṣẹ́.
+
+`includeBodies=true` nìkan ló ń kó àkóónú wá. Pẹ̀lú `langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` ń gbé JSON ara ìbéèrè/ìdáhùn
+tí a ti sọ di mímọ́ bí OmniRoute ṣe tọ́jú rẹ̀ (tí a mú bá ìlànà àṣẹ mu nígbà tí ó bá ṣeé túmọ̀), kì í ṣe àkójọpọ̀
+messages semconv tí a tún ṣe ìrísí rẹ̀. Àwọn ara tí a gé/tí kì í ṣe JSON ń dúró gẹ́gẹ́ bí ọ̀rọ̀ àìyípadà. Pẹ̀lú `langfuseMapping=true`,
+a ń fi àwọn ara jáde nìkan gẹ́gẹ́ bí `langfuse.observation.input` / `langfuse.observation.output`;
+a yọ àwọn ànímọ́ `gen_ai.*.messages` kúrò kí a lè fi ara kọ̀ọ̀kan ránṣẹ́ lẹ́ẹ̀kan ṣoṣo. Ọ̀nà méjèèjì
+jogún `maxBodyBytes` láti ọ̀nà kíkó àkóónú tó wà tẹ́lẹ̀;
+`omniroute.bodies_truncated=true` ń tọ́ka sí gígé.
+Ibi ìrìnàjò yìí kò fi àwòrán ipò pipeline àfikún tàbí kíkà artifact tí a kò sọ di mímọ́ kún un;
+gbígba header ìbéèrè tí kì í ṣe dandan ń lo àwòrán ipò oníbàárà tí a ti kó wá tó wà tẹ́lẹ̀ tí a ṣàpèjúwe nísàlẹ̀.
+Lo àtúntò ní ìpele ìṣẹ́jú bí `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` nígbà fífi
+àwọn ara ránṣẹ́, dípò kíkó iṣẹ́ tí kò tíì ṣe jọ fún wákàtí kan.
+
+### Àwọn header ìbéèrè oníbàárà tí kì í ṣe dandan
+
+Gbígba header jẹ́ **pípa ní àiyípadà**. Ṣètò `requestHeaderAllowlist` nínú ìṣètò ibi ìrìnàjò
+kí o sì mú **Fi àwọn ìtọ́ni àti ìdáhùn ránṣẹ́** ṣiṣẹ́ (`includeBodies: true` lórí ibi ìrìnàjò).
+Àtòjọ àyègbà ń gba àkójọpọ̀ API tàbí àgbègbè ọ̀rọ̀ pẹ̀lú àwọn orúkọ tí ìlà tuntun/àmì kọ́mà pín sọ́tọ̀:
+
+```json
+{
+  "requestHeaderAllowlist": ["User-Agent", "X-Project", "X-OmniRoute-Meta-*"]
+}
+```
+
+Àwọn orúkọ máa ń báramu ní pípé láìka bóyá lẹ́tà ńlá tàbí kékeré ni, àyàfi tí `*` kan ṣoṣo ní ìparí bá yan
+ìbẹ̀rẹ̀ orúkọ àkọlé tí kò ṣófo. A kọ `*` tó dá dúró, àwọn àmì àṣàyàn tó wà láàárín orúkọ àti àwọn orúkọ àkọlé HTTP tí kò bófin mu sílẹ̀.
+Àwọn aṣàyàn kò lè ju 64 lọ, tí orúkọ/ìbẹ̀rẹ̀ kọ̀ọ̀kan kò sì lè ju báìtì ASCII 256 lọ.
+Ètò yìí yàtọ̀ sí `headers`, èyí tó ń jẹ́rìí ìdánimọ̀ olùfiranṣẹ́ sí olùgbà.
+
+Gbígbà máa ń ka `pipeline_client_request` nìkan, tí a kún láti inú `clientRawRequest`
+(tàbí `clientRequest` àtijọ́) ti pipeline alálàyé tí a ti fipamọ́. Kò lo àwọn àkọlé ìbéèrè olùpèsè gẹ́gẹ́ bí àfidípò rárá.
+Ìkọsílẹ̀ pipeline alálàyé gbọ́dọ̀ ti wà ní ṣíṣí nígbà tí a ṣe àkọsílẹ̀ ìbéèrè náà. Tí
+`includeBodies` bá wà ní pípa, tàbí tí JSON àwòrán-ipò oníbàárà bá sọnù, bàjẹ́ tàbí gé kúrú, kò sí ànímọ́
+àkọlé tí a ó fi jáde. Jíjẹ́ kí `maxBodyBytes` tóbi sí i lè dènà gígé àwòrán-ipò kúrú nígbà ìfiranṣẹ́;
+kò lè mú àlàyé tí a kò fipamọ́ rí padà. A kọ àwòrán-ipò tó ju 1 MiB lọ tàbí tó ní ju
+àkọsílẹ̀ àkọlé 256 lọ sílẹ̀. Ìfiranṣẹ́ ìtọ́ni/èsì tó wà tẹ́lẹ̀ ṣì wà ní ṣíṣí pẹ̀lú
+gbígbà àkọlé; àkójọ ìyọ̀nda kò pèsè ipò fífi dátà kún fún àwọn àkọlé nìkan.
+
+Àwọn iye tí a yàn di àwọn àkójọpọ̀ okun OTLP `http.request.header.<full lowercase header name>`,
+kódà fún okun kan ṣoṣo. Fún àpẹẹrẹ, `X-OmniRoute-Meta-Team: example-team` di
+`http.request.header.x-omniroute-meta-team` pẹ̀lú
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
+Gbogbo ìbẹ̀rẹ̀ orúkọ náà ni a pa mọ́: àwọn wọ̀nyí jẹ́ àkọlé lásán, láìsí ìtúpalẹ̀ pápá ìṣòwò tàbí
+ìyípadà sí `omniroute.metadata.*` / metadata Langfuse. `langfuseMapping` kì í yí ìtumọ̀
+àwọn àkọlé padà. `User-Agent` oníye kan ṣoṣo tí a yàn tún máa ń ṣètò iye-ẹyọ boṣewa
+`user_agent.original`. A kì í fi kọ́mà tó wà nínú iye kan pín in. Àwọn ẹ̀yà lẹ́tà ńlá/kékeré máa ń darapọ̀ ní
+ìtòlẹ́sẹẹsẹ àkọsílẹ̀ tí a fipamọ́; ẹ̀yà èyíkéyìí tí kò bófin mu máa ń mú kí a yọ gbogbo àkọlé náà sílẹ̀. A ṣètò àwọn ànímọ́ ní ìtòlẹ́sẹẹsẹ orúkọ lẹ́tà kékeré.
+
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, àwọn àkọlé API-key, àwọn orúkọ tó ní
+àmì auth/token/secret/password/credential, àti àwọn ẹ̀rí ìwọlé ẹnu-ọ̀nà inú ni a máa ń
+yọ sílẹ̀ nígbà gbogbo, kódà tí a bá yàn wọ́n tàbí tí a bo apá kan wọn ní ibi ìpamọ́. Àwọn àpẹẹrẹ ẹ̀rí ìwọlé tí a mọ̀ tún ń lo
+olùṣàwárí ẹ̀rí ìwọlé àjọpín; a yọ àwọn àmì ìbòmọ́lẹ̀ sílẹ̀, a kì í fi wọ́n jáde bí iye tó ní ààbò.
+Okun àti àkójọpọ̀ okun tí kò ṣófo nìkan ni a gbà; a kì í fipá yí nọ́ńbà tàbí ohun èlò padà.
+A kọ àwọn orúkọ tí kò bófin mu, kọ́kọ́rọ́ prototype, àwọn ohun kikọ ìṣàkóso (yàtọ̀ sí tábù oníbùú) àti Unicode tí kò tọ́
+sílẹ̀ láìsọ ìdìpọ̀ náà di kíkùnà tàbí fífi àkóónú wọn hàn nínú àṣìṣe.
+
+Span kọ̀ọ̀kan máa ń gba àkọlé 32, iye 16 fún àkọlé kọ̀ọ̀kan, báìtì UTF-8 4096 fún iye kọ̀ọ̀kan,
+àti àpapọ̀ báìtì UTF-8 16384 fún àwọn orúkọ àti iye àkọlé tí a gbà gẹ́gẹ́ bí òpin.
+A yọ odindi àwọn àkọlé tó tóbi jù/tí kò bófin mu sílẹ̀, a kì í gé wọn kúrú. Yíyan jẹ́ ìpinnu àṣírí ti olùṣàkóso: àwọn orúkọ tó dà bí ẹni pé wọ́n ní ààbò
+ṣì lè ní dátà ara ẹni, àwọn òpin/olùṣàwárí wọ̀nyí kì í sì í ṣe ohun èlò gbogbogbò fún mímú PII kúrò.
+
+### Àwọn òpin ìfijiṣẹ́
+
+A fi òpin span 500 àti 4 MiB JSON UTF-8 sí àwọn ìbéèrè, pẹ̀lú àpò ìfiranṣẹ́.
+A ṣàyẹ̀wò ìwọ̀n gbogbo span tí a yọ̀ǹda kí ìbéèrè àkọ́kọ́ ìdìpọ̀ kọ́sọ̀ tó lọ. Span kan ṣoṣo
+tó tóbi ju òpin lọ kì í fi apá kankan ìdìpọ̀ náà ránṣẹ́, ó sì máa ń kùnà pẹ̀lú ìtọ́nisọ́nà láti dín
+`maxBodyBytes` kù; a kì í sọ ọ́ nù ní ìdákẹ́jẹ́. Àyẹ̀wò ṣáájú máa ń pa àwọn ìtọ́kasí àkọsílẹ̀ àti
+iye báìtì nìkan mọ́, ó sì ń sọ span/JSON ìgbà díẹ̀ kọ̀ọ̀kan nù; a tún ń kọ àwọn span fún àwọn ìpín tó ní òpin
+dípò pípa ẹ̀dà kejì ìdìpọ̀ tí a ti yí sí ọ̀wọ́ dátà mọ́. HTTP 408/429/5xx, ìkùnà nẹ́tíwọ́ọ̀kì àti ìparí àkókò máa ń gba ìgbìyànjú
+mẹ́ta péré, pẹ̀lú ìdádúró tó ń pọ̀ sí i ní 250/500 ms. Ìṣẹ́jú-àáyá tàbí ọjọ́ HTTP `Retry-After`
+lè fa ìdádúró gùn sí ìṣẹ́jú-àáyá 5. Àwọn ipò mìíràn máa ń kùnà lẹ́sẹ̀kẹsẹ̀. Kíkọ apá kan sílẹ̀ ní OTLP 2xx tún máa ń ju àṣìṣe jáde dípò
+jíjẹ́rìí span tó sọnù; a gba ìjẹ́rìí tó ṣófo tàbí JSON tó tọ́, pẹ̀lú
+òpin 64 KiB fún kíka èsì.
+
+Àwọn àṣìṣe ní àwọn òtítọ́ tó jẹ́ ti olùfiranṣẹ́ nìkan: ipò HTTP, ẹ̀ka àtúngbìyànjú, iye ìgbìyànjú àti iye span
+tí a ránṣẹ́, tàbí ọ̀rọ̀ ìkùnà ìjẹ́rìí/nẹ́tíwọ́ọ̀kì tí a ti pàṣẹ tẹ́lẹ̀. A kì í da ara èsì olùgbà,
+iye àṣeyọrí apá kan àti àwọn àkọlé èsì sí àwọn àṣìṣe, àkọsílẹ̀ tàbí
+pátákó ìṣàkóso rárá. A kì í jẹ́rìí ìdìpọ̀ tó kùnà tàbí tí a gba apá kan: ibi ìrìnàjò máa ń fi
+Ìkùnà hàn pẹ̀lú ipò yẹn, kọ́sọ̀ á dúró sí ìdìpọ̀ tí a jẹ́rìí gbẹ̀yìn, ìṣiṣẹ́ tó kàn
+á sì tún àwọn ìlà kan náà ránṣẹ́. Àwọn ipò pípẹ́ máa ń kùnà títí tí a ó fi tún olùgbà tàbí ètò
+ṣe. Lo àkọsílẹ̀ olùgbà fúnra rẹ̀ fún àlàyé èsì. Àwọn àkótán àṣìṣe àkọsílẹ̀ ìpè ń pa
+ìbòmọ́lẹ̀ lọ́tọ̀ wọn mọ́.
+`prepare()` kì í pèsè ohunkóhun; Ìdánwò máa ń fi `{"resourceSpans":[]}` ránṣẹ́ gan-an, ó sì ń ròyìn
+ipò HTTP láìkọ àwọn span àkọsílẹ̀ ìpè.
+
+Àwọn id trace àti id span ni nọ́ńbà hex 32/16 àkọ́kọ́ ti SHA-256 lórí
+`"omniroute.trace\0" + callLogId` àti `"omniroute.span\0" + callLogId`. Àwọn àtúnfiránṣẹ́ ń gbé
+id kan náà. Èyí kì í ṣe ìdánilójú yíyọ àdàkọ: àwọn backend kan, pẹ̀lú gbígba Langfuse
+v4, kì í yọ àwọn span id-kan-náà tó tún wà kúrò. Ìṣubú ètò tàbí ìkùnà apá ìpín kan lè
+tún ìdìpọ̀ kọ́sọ̀ kan ṣoṣo tí a kò tíì jẹ́rìí ránṣẹ́; gbogbo ìdìpọ̀ náà lè di àdàkọ,
+kì í ṣe ìpín HTTP tó gbẹ̀yìn nìkan. Yan ìwọ̀n ìdìpọ̀ kọ́sọ̀ pẹ̀lú àbájáde yìí lọ́kàn.
+
+### Àpẹẹrẹ Langfuse
+
+Ṣètò àwọn pápá wọ̀nyí fún àpẹẹrẹ Langfuse tí o gbàlejò fúnra rẹ:
+
+```json
+{
+  "endpoint": "https://langfuse.example.com/api/public/otel/v1/traces",
+  "headers": "Authorization: Basic <base64-of-public-key:secret-key>",
+  "serviceName": "omniroute",
+  "langfuseMapping": true,
+  "identity": "pseudonymous",
+  "environment": "production"
+}
+```
+
+Kọ iye Authorization ní agbègbè rẹ gẹ́gẹ́ bí Base64 ti okun gangan `public-key:secret-key`
+(fún àpẹẹrẹ pẹ̀lú `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Má ṣe lẹ àwọn ẹ̀rí ìwọlé gidi mọ́ àwọn àkọsílẹ̀, àwòrán ojú-ìbòjú tàbí àwọn ìròyìn ìṣòro. Ìbámu náà máa ń
+ṣètò `x-langfuse-ingestion-version: 4` fúnra rẹ̀; a ṣì ń pèsè Authorization nínú `headers`.
+Àwọn àkọlé àti iyọ̀ ìdánimọ̀ tí a dá sílẹ̀ méjèèjì ń lo ọ̀nà pápá àṣírí tí a ti fi ẹ̀nọ́ kọ́
+àti àwọn àrọ́pò API tó wà tẹ́lẹ̀; a nílò `STORAGE_ENCRYPTION_KEY`.
+
+Ìbámu máápù ń ṣàfikún irú àgbéjáde/àwòṣe, àwọn àlàyé lílo JSON (ìwọlé/ìjáde/àpapọ̀ àti àwọn
+kọ́kọ́rọ́ káàṣì tó wà), àwọn àwòrán ipò ìwọlé/ìjáde JSON, ìpele ERROR/DEFAULT, ìfiranṣẹ́ ipò tí a ti sọ di mímọ́,
+orúkọ ìtọpinpin, id sáà, àyíká àṣàyàn àti
+`langfuse.observation.metadata.<key>` tí a lè ṣe àlẹ̀mọ́ fún olùpèsè, àwòṣe tí a béèrè, ọ̀nà, àkójọpọ̀, orísun
+káàṣì àti ipò. `langfuse.observation.completion_start_time` jẹ́ ISO 8601 ní
+ìbẹ̀rẹ̀ + TTFT kìkì nígbà tí TTFT bá jẹ́ mímọ̀ tí ó sì wà láàárín àkókò náà. A kì í fi àwọn àbùdá iye owó ránṣẹ́.
+
+Àwọn ọ̀nà ìdánimọ̀ kan `langfuse.user.id`:
+
+- `pseudonymous` (àiyipada): HMAC-SHA256 ti id inú kọ́kọ́rọ́ API pẹ̀lú salt aláìlétò
+  32-byte fún ibi-ìrìnàjò kọ̀ọ̀kan. A ń dá salt náà sílẹ̀ nígbà ìṣẹ̀dá bí kò bá sí, a ń pa á mọ́ ní ìkọ̀kọ̀
+  gẹ́gẹ́ bí `identitySalt`, a kì í dá a padà láé, a sì ń pa á mọ́ nígbà àtúnṣe. A kì í
+  fi àwọn id kọ́kọ́rọ́ àìṣe àtúnṣe sínú àwọn àbùdá span láé. Títún salt ibi-ìrìnàjò kan dá tàbí yíyí i padà ń yí àwọn ìdánimọ̀ padà.
+- `keyName`: orúkọ kọ́kọ́rọ́ API tí a ṣètò, tí ó ń fi àmì olùṣàkóso yẹn hàn ní ète.
+- `none`: kò sí id olùlò. A ṣì ń gbé àwọn àmì sáà jáde nígbà tí wọ́n bá wà; àwọn ọ̀nà wọ̀nyí kì í
+  sọ àkóónú prompt èyíkéyìí tàbí àwọn àmì sáà/ìbáṣepọ̀ tí olùṣàkóso pèsè di aláìlórúkọ.
+
+### Bíbẹ̀rẹ̀ láì kún dátà àtijọ́
+
+Nígbà ìṣẹ̀dá nìkan, mú **Bẹ̀rẹ̀ láti ipò lọ́wọ́lọ́wọ́ (fo àwọn àkọsílẹ̀ tó wà sílẹ̀)** ṣiṣẹ́ tàbí fi
+`startFromCurrentPosition: true` sí ìpele òkè ti ẹrù ìbéèrè API ìṣẹ̀dá. Ó ń ṣètò
+`cursor_row_id` sí rowid àkọsílẹ̀ ìpè tó ga jù lọ tí a ṣì pa mọ́ lọ́wọ́lọ́wọ́ nípa lílo àwọn olùrànlọ́wọ́ cursor tó wà,
+láìsí ìṣípòpadà dátà. Àiyipada jẹ́ false (cursor 0 àti kíkún dátà láti inú ìtàn tí a pa mọ́).
+Kì í ṣe ètò àtúntò cursor nígbà ìmúdójúìwọ̀n.
+
+Àfikún `ttftMs` tí a pín tún ń ṣàfikún ọ̀wọ̀n `ttft_ms` tí ó lè jẹ́ null sí olùṣe ìbámu máápù BigQuery
+àti ètò tábìlì tuntun: ìdánwò ètò rẹ̀ béèrè pé gbogbo pápá àkọsílẹ̀ àfọwọ́sí gbọ́dọ̀ ní
+ọ̀wọ̀n kan. Àwọn tábìlì tó wà ń tẹ̀síwájú láti gbé dátà jáde láìyípadà: `prepare()` ń ka ètò tábìlì ó sì
+yọ `ttft_ms` nìkan kúrò nígbà tí ọ̀wọ̀n yẹn kò bá sí. Ṣàfikún ọ̀wọ̀n INT64 tí ó lè jẹ́ null láti gba TTFT
+ní ìṣiṣẹ́ tó kàn, tàbí lo tábìlì tuntun. Kò sí ìbéèrè fún PATCH, àtúnṣe ètò aládàáṣiṣẹ́ tàbí àwọn
+ìyọ̀ǹda àfikún; gbogbo àwọn pápá ìlà yòókù ń pa àyẹ̀wò ètò tó muna mọ́.
+
+---
+
+## 6. Fífi ibi ìránṣẹ́ kún un
 
 1. Ṣẹ̀dá `src/lib/logExport/destinations/<name>.ts` tí yóò ṣe export `LogExportDestinationType` kan:
    `configSchema` Zod kan, àkójọpọ̀ alápejúwe `fields` fún UI, `secretFields`, àti
@@ -275,7 +485,7 @@ fọ́ọ̀mù dashboard, gbogbo wọn ló ń ka registry náà.
 
 ---
 
-## 6. Ṣíṣe àbójútó rẹ̀
+## 7. Ṣíṣe àbójútó rẹ̀
 
 - **Dashboard**: Integrations → Log export. Ṣàfikún ibi ìránṣẹ́ kan, ṣiṣẹ́ **Test** láti ṣàyẹ̀wò àwọn ẹ̀rí ìdánimọ̀
   láìkọ àwọn ìlà, lẹ́yìn náà muu ṣiṣẹ́.

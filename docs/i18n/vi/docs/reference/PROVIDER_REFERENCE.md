@@ -8,7 +8,7 @@
 > Tạo lại bằng: `npm run gen:provider-reference`
 > **Lần tạo gần nhất:** 2026-10-27
 
-Tổng số nhà cung cấp: **376**. Xem phân loại theo danh mục bên dưới.
+Tổng số nhà cung cấp: **377**. Xem phân loại theo danh mục bên dưới.
 
 ## Danh mục
 
@@ -397,7 +397,7 @@ Sử dụng bảng điều khiển tại `/dashboard/providers` để bật, c�
 | `vllm`                | `vllm`       | vLLM                | Cục bộ, tự lưu trữ | [liên kết](https://github.com/vllm-project/vllm)                    | Khóa API là tùy chọn. Cấu hình URL cơ sở tương thích với OpenAI của vLLM cục bộ (mặc định: http://localhost:8000/v1).                                                                                                                                                                                                   |
 | `xinference`          | `xinference` | XInference          | Cục bộ, tự lưu trữ | [liên kết](https://inference.readthedocs.io)                        | Khóa API là tùy chọn. Cấu hình URL cơ sở tương thích với OpenAI của XInference cục bộ (mặc định: http://localhost:9997/v1).                                                                                                                                                                                             |
 
-## Nhà cung cấp tìm kiếm (18)
+## Nhà cung cấp tìm kiếm (19)
 
 | ID                  | Bí danh         | Tên                          | Thẻ      | Trang web                                                           | Ghi chú                                                                                                               |
 | ------------------- | --------------- | ---------------------------- | -------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Sử dụng bảng điều khiển tại `/dashboard/providers` để bật, c�
 | `exa-search`        | `exa-search`    | Exa Search                   | Tìm kiếm | [liên kết](https://exa.ai)                                          | Khóa API từ dashboard.exa.ai                                                                                          |
 | `firecrawl`         | `fc`            | Firecrawl                    | Tìm kiếm | [liên kết](https://firecrawl.dev)                                   | Khóa API từ firecrawl.dev/app/api-keys (hoặc đặt URL cơ sở Firecrawl tự lưu trữ của bạn)                              |
 | `google-pse-search` | `google-pse`    | Google Programmable Search   | Tìm kiếm | [liên kết](https://developers.google.com/custom-search/v1/overview) | Yêu cầu khóa Google API và ID Công cụ Tìm kiếm Có thể Lập trình (cx) của bạn                                          |
+| `kimi-search`       | `kimi-search`   | Kimi Search                  | Tìm kiếm | [liên kết](https://platform.kimi.ai/docs/api/tools-search)          | Khóa API Moonshot AI (MOONSHOT_API_KEY) từ platform.kimi.ai                                                           |
 | `linkup-search`     | `linkup`        | Linkup Search                | Tìm kiếm | [liên kết](https://docs.linkup.so)                                  | Khóa API Bearer từ bảng điều khiển Linkup                                                                             |
 | `nimble-search`     | `nimble`        | Nimble Search                | Tìm kiếm | [liên kết](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Khóa API Bearer từ bảng điều khiển Nimble                                                                             |
 | `ollama-search`     | `ollama-search` | Ollama Search                | Tìm kiếm | [liên kết](https://ollama.com/settings/keys)                        | Cùng khóa API với Ollama Cloud (từ ollama.com/settings/keys)                                                          |

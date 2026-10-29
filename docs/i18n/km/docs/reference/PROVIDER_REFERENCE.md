@@ -8,7 +8,7 @@
 > បង្កើតឡើងវិញដោយ៖ `npm run gen:provider-reference`
 > **បានបង្កើតចុងក្រោយ៖** 2026-10-27
 
-ចំនួនអ្នកផ្តល់សេវាសរុប៖ **376**។ សូមមើលការបែងចែកតាមប្រភេទខាងក្រោម។
+ចំនួនអ្នកផ្តល់សេវាសរុប៖ **377**។ សូមមើលការបែងចែកតាមប្រភេទខាងក្រោម។
 
 ## ប្រភេទ
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | មូលដ្ឋាន, បង្ហោះដោយខ្លួនឯង | [តំណ](https://github.com/vllm-project/vllm)                    | API key ជាជម្រើស។ កំណត់រចនាសម្ព័ន្ធ URL មូលដ្ឋានដែលត្រូវគ្នាជាមួយ OpenAI របស់ vLLM ក្នុងមូលដ្ឋាន (លំនាំដើម៖ http://localhost:8000/v1)។                                                                                                                                                                     |
 | `xinference`          | `xinference` | XInference          | មូលដ្ឋាន, បង្ហោះដោយខ្លួនឯង | [តំណ](https://inference.readthedocs.io)                        | API key ជាជម្រើស។ កំណត់រចនាសម្ព័ន្ធ URL មូលដ្ឋានដែលត្រូវគ្នាជាមួយ OpenAI របស់ XInference ក្នុងមូលដ្ឋាន (លំនាំដើម៖ http://localhost:9997/v1)។                                                                                                                                                               |
 
-## ក្រុមហ៊ុនផ្ដល់សេវាស្វែងរក (18)
+## ក្រុមហ៊ុនផ្ដល់សេវាស្វែងរក (19)
 
 | ID                  | ឈ្មោះក្លែងកាត់  | ឈ្មោះ                      | ស្លាក   | គេហទំព័រ                                                       | កំណត់សម្គាល់                                                                                                                            |
 | ------------------- | --------------- | -------------------------- | ------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                 | ស្វែងរក | [តំណ](https://exa.ai)                                          | API key ពី dashboard.exa.ai                                                                                                             |
 | `firecrawl`         | `fc`            | Firecrawl                  | ស្វែងរក | [តំណ](https://firecrawl.dev)                                   | API key ពី firecrawl.dev/app/api-keys (ឬកំណត់ URL មូលដ្ឋាន Firecrawl ដែលបង្ហោះដោយខ្លួនឯង)                                               |
 | `google-pse-search` | `google-pse`    | Google Programmable Search | ស្វែងរក | [តំណ](https://developers.google.com/custom-search/v1/overview) | តម្រូវឱ្យមាន Google API key និង ID ម៉ាស៊ីនស្វែងរកដែលអាចកំណត់កម្មវិធីបាន (cx) របស់អ្នក                                                   |
+| `kimi-search`       | `kimi-search`   | Kimi Search                | ស្វែងរក | [តំណ](https://platform.kimi.ai/docs/api/tools-search)          | API key របស់ Moonshot AI (MOONSHOT_API_KEY) ពី platform.kimi.ai                                                                         |
 | `linkup-search`     | `linkup`        | Linkup Search              | ស្វែងរក | [តំណ](https://docs.linkup.so)                                  | Bearer API key ពីផ្ទាំងគ្រប់គ្រង Linkup                                                                                                 |
 | `nimble-search`     | `nimble`        | Nimble Search              | ស្វែងរក | [តំណ](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API key ពីផ្ទាំងគ្រប់គ្រង Nimble                                                                                                 |
 | `ollama-search`     | `ollama-search` | Ollama Search              | ស្វែងរក | [តំណ](https://ollama.com/settings/keys)                        | API key ដូចគ្នានឹង Ollama Cloud (ពី ollama.com/settings/keys)                                                                           |

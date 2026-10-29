@@ -156,7 +156,7 @@ OmniRoute nodrošina 6 A2A prasmes, kas piesaistītas `src/lib/a2a/taskExecution
 | Darbspējas pārskats     | `health-report`      | Apkopo ķēdes pārtraucēja, nogaidīšanas perioda un bloķēšanas stāvokli katram nodrošinātājam                                                                  | darbspēja, noturība          | "Parādīt visu nodrošinātāju darbspējas statusu" |
 | Iespēju saraksts        | `list-capabilities`  | Atgriež pilnu 45 ierakstu Agent Skills katalogu (23 API + 21 CLI + 1 konfigurācija) kā Markdown tabulu ar neapstrādātiem SKILL.md URL konteksta ievietošanai | katalogs, atklāšana, prasmes | "Uzskaitīt visas OmniRoute iespējas"            |
 
-> Agent Card jāuztur saskaņots ar aktuālo 376 nodrošinātāju katalogu; nodrošinātāju skaits un bezmaksas/bez autentifikācijas metadati tiek iegūti no izpildlaika reģistra.
+> Agent Card jāuztur saskaņots ar aktuālo 377 nodrošinātāju katalogu; nodrošinātāju skaits un bezmaksas/bez autentifikācijas metadati tiek iegūti no izpildlaika reģistra.
 
 ### Prasmes `list-capabilities` detalizēts apraksts
 

@@ -666,6 +666,8 @@ Standard Docker-/Kubernetes-oppsett for OmniRoute består av **én Node-prosess 
 
 **Oppgraderinger:** Forvent at hver økt blir avbrutt. Tøm klienttilkoblinger hvis du kan; rullerende oppdatering er ikke mulig med standard SQLite. Compose `restart: unless-stopped` sammen med Docker `HEALTHCHECK` vil også erstatte den eneste prosessen når containeren er Unhealthy – med samme konsekvensomfang.
 
+Ferdige manifester og et Helm-diagram finnes i `deploy/kubernetes/` og `deploy/helm/omniroute/` – se [veiledningen for Kubernetes-distribusjon](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kubernetes-utdrag for **én replika** (Recreate er påkrevd; ikke øk `replicas` mot én SQLite-fil):
 
 ```yaml

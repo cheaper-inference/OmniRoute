@@ -8,7 +8,7 @@
 > Neu generieren mit: `npm run gen:provider-reference`
 > **Zuletzt generiert:** 2026-10-27
 
-Anbieter insgesamt: **376**. Siehe Aufschlüsselung nach Kategorie unten.
+Anbieter insgesamt: **377**. Siehe Aufschlüsselung nach Kategorie unten.
 
 ## Kategorien
 
@@ -397,7 +397,7 @@ Verwenden Sie das Dashboard unter `/dashboard/providers`, um die einzelnen Anbie
 | `vllm`                | `vllm`       | vLLM                | Lokal, selbst gehostet | [Link](https://github.com/vllm-project/vllm)                    | API-Schlüssel optional. Konfigurieren Sie die lokale OpenAI-kompatible Basis-URL von vLLM (Standard: http://localhost:8000/v1).                                                                                                                                                                                                                                  |
 | `xinference`          | `xinference` | XInference          | Lokal, selbst gehostet | [Link](https://inference.readthedocs.io)                        | API-Schlüssel optional. Konfigurieren Sie die lokale OpenAI-kompatible Basis-URL von XInference (Standard: http://localhost:9997/v1).                                                                                                                                                                                                                            |
 
-## Suchanbieter (18)
+## Suchanbieter (19)
 
 | ID                  | Alias           | Name                                | Tags  | Website                                                         | Hinweise                                                                                                                                           |
 | ------------------- | --------------- | ----------------------------------- | ----- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Verwenden Sie das Dashboard unter `/dashboard/providers`, um die einzelnen Anbie
 | `exa-search`        | `exa-search`    | Exa Search                          | Suche | [Link](https://exa.ai)                                          | API-Schlüssel von dashboard.exa.ai                                                                                                                 |
 | `firecrawl`         | `fc`            | Firecrawl                           | Suche | [Link](https://firecrawl.dev)                                   | API-Schlüssel von firecrawl.dev/app/api-keys (oder legen Sie die Basis-URL Ihrer selbst gehosteten Firecrawl-Instanz fest)                         |
 | `google-pse-search` | `google-pse`    | Google Programmable Search          | Suche | [Link](https://developers.google.com/custom-search/v1/overview) | Erfordert einen Google-API-Schlüssel und die ID Ihrer programmierbaren Suchmaschine (cx)                                                           |
+| `kimi-search`       | `kimi-search`   | Kimi Search                         | Suche | [Link](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI-API-Schlüssel (MOONSHOT_API_KEY) von platform.kimi.ai                                                                                  |
 | `linkup-search`     | `linkup`        | Linkup Search                       | Suche | [Link](https://docs.linkup.so)                                  | Bearer-API-Schlüssel aus dem Linkup-Dashboard                                                                                                      |
 | `nimble-search`     | `nimble`        | Nimble Search                       | Suche | [Link](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer-API-Schlüssel aus dem Nimble-Dashboard                                                                                                      |
 | `ollama-search`     | `ollama-search` | Ollama Search                       | Suche | [Link](https://ollama.com/settings/keys)                        | Derselbe API-Schlüssel wie für Ollama Cloud (von ollama.com/settings/keys)                                                                         |

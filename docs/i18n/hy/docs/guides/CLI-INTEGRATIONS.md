@@ -8,7 +8,7 @@
 
 OmniRoute-ը տրամադրում է `setup-*` հրամանների մի ամբողջ շարք, որոնք կոդավորման CLI-ն (Codex, Claude Code, OpenCode, Cline, …) կարգավորում են՝ OmniRoute-ը որպես հետնամաս օգտագործելու համար․ այդպիսով գործիքը հաղորդակցվում է **մեկ** վերջնակետի հետ, իսկ OmniRoute-ը հարցումն ուղղորդում է համապատասխան մատակարարին՝ ավտոմատ պահուստային անցումով։ Յուրաքանչյուր հրաման աշխատող OmniRoute-ից (տեղային կամ հեռակա) կարդում է մոդելների **ընթացիկ** կատալոգը և գործիքի սեփական կազմաձևման ֆայլը գրում **ձեր** համակարգչում։ Այն դեպքերում, երբ գործիքն աջակցում է դրան, API բանալուն հղում է արվում միջավայրի փոփոխականի միջոցով։ Գործիքի տեղային միջավայրի ֆայլը մշտապես պահպանող հրամանները նշված են ստորև։
 
-Կա նաև ընդհանրական գործարկիչ՝ `omniroute run <target>`, որը գործարկում է `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` կամ `gemini`՝ ներարկելով համապատասխան միջավայրի փոփոխականները և ընդհանրապես որևէ կազմաձևում չգրելով։ Թիրախները և դրանց այլանունները վերցվում են կանոնական `bin/cli/cli-manifest.mjs` մանիֆեստից (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`), իսկ `omniroute completion`-ը տրամադրում է մանիֆեստից ստացված նույն թիրախային բառերը։ Յուրաքանչյուր գործիքի համար նախատեսված հին գործարկիչները՝ `omniroute launch` (Claude Code) և `omniroute launch-codex` (Codex), շարունակում են հասանելի մնալ։
+Կա նաև ընդհանրական գործարկիչ՝ `omniroute run <target>`, որը գործարկում է `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` կամ `whycodes`՝ ներարկելով համապատասխան միջավայրի փոփոխականները և ընդհանրապես որևէ կազմաձևում չգրելով։ Թիրախները և դրանց այլանունները վերցվում են կանոնական `bin/cli/cli-manifest.mjs` մանիֆեստից (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), իսկ `omniroute completion`-ը տրամադրում է մանիֆեստից ստացված նույն թիրախային բառերը։ Յուրաքանչյուր գործիքի համար նախատեսված հին գործարկիչները՝ `omniroute launch` (Claude Code) և `omniroute launch-codex` (Codex), շարունակում են հասանելի մնալ։
 
 Մատակարարների սկզբնական կարգավորումը հասանելի է նույն տեղային/հեռակա համատեքստից։ Ստորև ներկայացված՝ API-ն առաջնահերթ օգտագործող հրամանները կառավարման նույնականացումը պահում են մատակարարի հավատարմագրերից առանձին և երբեք կառուցվածքային արտածման մեջ հավատարմագիր չեն ցուցադրում․
 
@@ -58,7 +58,8 @@ omniroute providers remove <connection-id> --yes
 | `omniroute setup-aider`    | Aider                                   | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + տպում է միջավայրի կազմաձևման հրահանգները                                                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Երկուսն էլ        |
 | `omniroute setup-qwen`     | Qwen Code                               | `~/.qwen/settings.json` — V4 `modelProviders.openai` զանգված + `OMNIROUTE_API_KEY`՝ `~/.qwen/.env`-ում                                                                                                         | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Երկուսն էլ        |
 | `omniroute setup-5dive`    | 5dive (գործակալների խումբ)              | Ոչինչ `$HOME`-ի տակ — `5dive agent auth set`-ի միջոցով գրում է 5dive-ի **նույնականացման պրոֆիլ** (`/var/lib/5dive/auth-profiles/<name>/`), պահանջում է root իրավունքներ և աշխատում է գործակալների խմբի հոսթում | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Երկուսն էլ        |
-| `omniroute run <target>`   | Գործարկում կատարման ժամանակ (ընդհանուր) | Ոչինչ — գործարկում է `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`՝ ճիշտ միջավայրով և արգումենտներով․ Qwen-ը և Gemini-ն օգտագործում են ժամանակավոր մեկուսացված home                              | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Երկուսն էլ        |
+| `omniroute setup-whycodes` | WhyCodes                                | WhyCodes-ի `config.toml` (`[providers.omniroute]` + `[default_model]`)․ ուղին է՝ `$WHYCODES_HOME/config.toml` կամ `~/.whycodes/config.toml`                                                                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Երկուսն էլ        |
+| `omniroute run <target>`   | Գործարկում կատարման ժամանակ (ընդհանուր) | Ոչինչ — գործարկում է `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes`՝ ճիշտ միջավայրով և արգումենտներով․ Qwen-ը և Gemini-ն օգտագործում են ժամանակավոր մեկուսացված home                   | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Երկուսն էլ        |
 | `omniroute launch`         | Claude Code                             | Ոչինչ — գործարկում է `claude`՝ ներարկված `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` արժեքներով                                                                                                                | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Երկուսն էլ        |
 | `omniroute launch-codex`   | OpenAI Codex CLI                        | Ոչինչ — գործարկում է `codex`՝ `omniroute` մատակարարիչը ներարկելով `-c` դրոշների միջոցով                                                                                                                        | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Երկուսն էլ        |
 
@@ -74,14 +75,15 @@ omniroute providers remove <connection-id> --yes
   Հասանելի է յուրաքանչյուր `setup-*` հրամանի համար՝ **բացառությամբ** `setup-cursor`-ի
   (որը երբեք ֆայլ չի գրում)։
 - `--model <id>` — պարտադիր է (կամ ընտրվում է ինտերակտիվ եղանակով) այն գործիքների համար, որոնք չունեն
-  մոդելների ինքնաբերական հայտնաբերում՝ Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive։ Այդ գործիքները
+  մոդելների ինքնաբերական հայտնաբերում՝ Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes։ Այդ գործիքները
   նաև ընդունում են `--yes`՝ ոչ ինտերակտիվ գործարկումների համար (որի դեպքում պահանջվում է `--model`)։
   `setup-opencode`-ը ընդունում է `--model`՝ վերին մակարդակի լռելյայն մոդելը սահմանելու համար։
 - `omniroute run`-ում `--model <id>`-ը հետևում է manifest-ի՝ ըստ թիրախի կապակցման
   կանոններին (`bin/cli/cli-manifest.mjs`)․ **aider**-ը ստանում է `--model openai/<id>`, իսկ
   **opencode**-ը՝ `--model omniroute/<id>` (նախածանցն ավելացվում է միայն այն դեպքում, երբ id-ն
   արդեն այն չի պարունակում), **qwen**-ը և **gemini**-ն ստանում են id-ն անփոփոխ,
-  **claude**-ը՝ `ANTHROPIC_MODEL`-ի միջոցով, **goose**-ը՝ `GOOSE_MODEL`-ի միջոցով, իսկ
+  **claude**-ը՝ `ANTHROPIC_MODEL`-ի միջոցով, **goose**-ը՝ `GOOSE_MODEL`-ի միջոցով,
+  **whycodes**-ը՝ `-P omniroute -m <id>`-ի միջոցով, իսկ
   **codex**-ը՝ `-c model_providers.omniroute.*` արգումենտների միջոցով։ **Qwen-ը գործարկման միակ
   թիրախն է, որի համար `--model`-ը խիստ պարտադիր է**․ առանց դրա `omniroute run qwen`-ն ավարտվում է
   `2` կոդով և հստակ սխալի հաղորդագրությամբ։
@@ -232,18 +234,19 @@ OmniRoute-ը OpenAI-ի ինտերֆեյսը տրամադրում է `/v1` հաս
 իսկ Gemini-ի բնիկ ինտերֆեյսը՝ `/v1beta` հասցեում։ Յուրաքանչյուր ինտեգրում կարգավորված է այն ձևաչափով, որն ակնկալում է համապատասխան
 գործիքը (ստուգված է հրամանի սկզբնաղբյուրում)․
 
-| Ինտեգրում                                                                  | Գրվող հիմնական URL | `/v1`՞                                        |
-| -------------------------------------------------------------------------- | ------------------ | --------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | արմատային          | Ոչ — Cline-ը կցում է `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | արմատային          | Ոչ — Goose-ը կցում է ուղին                    |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | արմատային          | Ոչ — LiteLLM-ը կցում է `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1`-ով           | Այո                                           |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1`-ով           | Այո                                           |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | արմատային          | Ոչ — Claude Code-ը կցում է `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1`-ով           | Այո                                           |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1`-ով           | Այո                                           |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | արմատային          | Ոչ — SDK-ն կցում է `/v1beta/models/…`         |
-| `setup-5dive` (նույնականացման պրոֆիլում՝ `ANTHROPIC_BASE_URL`)             | արմատային          | Ոչ — Claude Code-ը կցում է `/v1/messages`     |
+| Ինտեգրում                                                                  | Գրվող հիմնական URL | `/v1`՞                                                                |
+| -------------------------------------------------------------------------- | ------------------ | --------------------------------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | արմատային          | Ոչ — Cline-ը կցում է `/v1/chat/completions`                           |
+| `setup-goose` (`OPENAI_HOST`)                                              | արմատային          | Ոչ — Goose-ը կցում է ուղին                                            |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | արմատային          | Ոչ — LiteLLM-ը կցում է `/v1/chat/completions`                         |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1`-ով           | Այո                                                                   |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1`-ով           | Այո                                                                   |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | արմատային          | Ոչ — Claude Code-ը կցում է `/v1/messages`                             |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1`-ով           | Այո                                                                   |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1`-ով           | Այո                                                                   |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | արմատային          | Ոչ — SDK-ն կցում է `/v1beta/models/…`                                 |
+| `setup-5dive` (նույնականացման պրոֆիլում՝ `ANTHROPIC_BASE_URL`)             | արմատային          | Ոչ — Claude Code-ը կցում է `/v1/messages`                             |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | `/v1`-ով           | Այո — WhyCodes-ը POST հարցում է ուղարկում `/chat/completions` հասցեին |
 
 ---
 

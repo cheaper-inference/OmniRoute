@@ -611,6 +611,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **மேம்படுத்தல்கள்:** ஒவ்வொரு session-உம் துண்டிக்கப்படும் என எதிர்பார்க்கவும். முடிந்தால் client-களை drain செய்யவும்; இயல்புநிலை SQLite-இல் rolling update இல்லை. Compose `restart: unless-stopped` மற்றும் Docker `HEALTHCHECK` ஆகியவையும் container Unhealthy ஆகும்போது ஒரே process-ஐ மாற்றிவிடும் — அதே பாதிப்பு வீச்சுடன்.
 
+பயன்படுத்தத் தயாரான manifests மற்றும் ஒரு Helm chart ஆகியவை `deploy/kubernetes/` மற்றும் `deploy/helm/omniroute/` ஆகியவற்றில் உள்ளன — [Kubernetes நிறுவல் வழிகாட்டியை](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) பார்க்கவும்.
+
 **ஒற்றை replica**-வுக்கான Kubernetes துணுக்கு (Recreate அவசியம்; ஒரே SQLite file-க்கு எதிராக `replicas` எண்ணிக்கையை அதிகரிக்க வேண்டாம்):
 
 ```yaml

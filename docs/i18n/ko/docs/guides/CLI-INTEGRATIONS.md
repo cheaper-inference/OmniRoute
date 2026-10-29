@@ -17,10 +17,10 @@ OmniRoute는 코딩 CLI(Codex, Claude Code, OpenCode, Cline, …)가 OmniRoute�
 
 또한 범용 실행기인 `omniroute run <target>`도 있습니다. 이 명령어는 구성 파일을
 전혀 작성하지 않고 올바른 환경 변수를 주입하여 `claude`, `codex`, `aider`,
-`goose`, `opencode`, `qwen` 또는 `gemini`를 실행합니다. 대상과 해당 별칭은
+`goose`, `opencode`, `qwen`, `gemini` 또는 `whycodes`를 실행합니다. 대상과 해당 별칭은
 표준 매니페스트 `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`)에서 가져오며, `omniroute completion`도
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`)에서 가져오며, `omniroute completion`도
 동일하게 매니페스트에서 파생된 대상 단어를 제공합니다. 기존의 도구별 실행기인
 `omniroute launch`(Claude Code)와 `omniroute launch-codex`(Codex)도 계속
 사용할 수 있습니다.
@@ -80,7 +80,8 @@ omniroute providers remove <connection-id> --yes
 | `omniroute setup-aider`    | Aider                 | `~/.aider.conf.yml`(`openai-api-base` + `model: openai/<id>`) + 환경 변수 설정 예시 출력                                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 모두         |
 | `omniroute setup-qwen`     | Qwen Code             | `~/.qwen/settings.json` — V4 `modelProviders.openai` 배열 + `~/.qwen/.env`의 `OMNIROUTE_API_KEY`                                                                               | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | 모두         |
 | `omniroute setup-5dive`    | 5dive(에이전트 플릿)  | `$HOME` 아래에는 아무것도 쓰지 않음 — `5dive agent auth set`을 통해 5dive **인증 프로필**(`/var/lib/5dive/auth-profiles/<name>/`)을 작성함. 루트 전용이며 플릿 호스트에서 실행 | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | 둘 다        |
-| `omniroute run <target>`   | 런타임 실행(일반)     | 아무것도 쓰지 않음 — 적절한 환경 변수와 인수로 `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`를 실행함. Qwen과 Gemini는 임시 격리 홈을 사용                       | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | 둘 다        |
+| `omniroute setup-whycodes` | WhyCodes              | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); 경로는 `$WHYCODES_HOME/config.toml` 또는 `~/.whycodes/config.toml`입니다.                                | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 모두         |
+| `omniroute run <target>`   | 런타임 실행(일반)     | 아무것도 쓰지 않음 — 적절한 환경 변수와 인수로 `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes`를 실행함. Qwen과 Gemini는 임시 격리 홈을 사용            | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | 둘 다        |
 | `omniroute launch`         | Claude Code           | 아무것도 쓰지 않음 — `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`을 주입하여 `claude`를 실행함                                                                                  | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | 둘 다        |
 | `omniroute launch-codex`   | OpenAI Codex CLI      | 아무것도 쓰지 않음 — `-c` 플래그를 통해 `omniroute` 프로바이더를 주입하여 `codex`를 실행함                                                                                     | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | 둘 다        |
 
@@ -96,7 +97,7 @@ omniroute providers remove <connection-id> --yes
   `setup-cursor`(파일을 작성하지 않음)를 **제외한** 모든 `setup-*` 명령에서
   사용할 수 있습니다.
 - `--model <id>` — 모델 자동 탐색 기능이 없는 도구인 Cline, Kilo, Roo,
-  Goose, Qwen, Aider, 5dive에서 필수입니다(또는 대화형으로 선택).
+  Goose, Qwen, Aider, 5dive, WhyCodes에서 필수입니다(또는 대화형으로 선택).
   이러한 도구들은 비대화형 실행을 위한 `--yes`도 지원하며, 이 경우 `--model`이
   필요합니다. `setup-opencode`는 최상위 기본 모델을 설정하기 위해 `--model`을 사용합니다.
 - `omniroute run`의 `--model <id>`은 매니페스트의 대상별 연결 방식
@@ -104,6 +105,7 @@ omniroute providers remove <connection-id> --yes
   **opencode**에는 `--model omniroute/<id>`를 전달합니다(해당 ID에 접두사가
   아직 없는 경우에만 추가됨). **qwen**과 **gemini**에는 ID를 그대로 전달하고,
   **claude**에는 `ANTHROPIC_MODEL`을 통해, **goose**에는 `GOOSE_MODEL`을 통해,
+  **whycodes**에는 `-P omniroute -m <id>`를 통해,
   **codex**에는 `-c model_providers.omniroute.*` 인수를 통해 전달합니다.
   **Qwen은 `--model`을 반드시 요구하는 유일한 실행 대상입니다** —
   이 옵션 없이 `omniroute run qwen`을 실행하면 명시적인 오류와 함께 종료 코드
@@ -253,18 +255,19 @@ OmniRoute는 `/v1`에서 OpenAI 인터페이스를, 루트에서 Anthropic 인�
 `/v1beta`에서 네이티브 Gemini 인터페이스를 제공합니다. 각 통합은 해당 도구가
 기대하는 형식에 맞게 구성됩니다(명령 소스에서 확인됨).
 
-| 통합                                                                       | 작성되는 기본 URL | `/v1`?                                           |
-| -------------------------------------------------------------------------- | ----------------- | ------------------------------------------------ |
-| `setup-cline` (`openAiBaseUrl`)                                            | 루트              | 아니요 — Cline이 `/v1/chat/completions`를 추가   |
-| `setup-goose` (`OPENAI_HOST`)                                              | 루트              | 아니요 — Goose가 경로를 추가                     |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | 루트              | 아니요 — LiteLLM이 `/v1/chat/completions`를 추가 |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1` 포함        | 예                                               |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1` 포함        | 예                                               |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | 루트              | 아니요 — Claude Code가 `/v1/messages`를 추가     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1` 포함        | 예                                               |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1` 포함        | 예                                               |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | 루트              | 아니요 — SDK가 `/v1beta/models/…`를 추가         |
-| `setup-5dive` (인증 프로필의 `ANTHROPIC_BASE_URL`)                         | 루트              | 아니요 — Claude Code가 `/v1/messages`를 추가     |
+| 통합                                                                       | 작성되는 기본 URL | `/v1`?                                                      |
+| -------------------------------------------------------------------------- | ----------------- | ----------------------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | 루트              | 아니요 — Cline이 `/v1/chat/completions`를 추가              |
+| `setup-goose` (`OPENAI_HOST`)                                              | 루트              | 아니요 — Goose가 경로를 추가                                |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | 루트              | 아니요 — LiteLLM이 `/v1/chat/completions`를 추가            |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1` 포함        | 예                                                          |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1` 포함        | 예                                                          |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | 루트              | 아니요 — Claude Code가 `/v1/messages`를 추가                |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1` 포함        | 예                                                          |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1` 포함        | 예                                                          |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | 루트              | 아니요 — SDK가 `/v1beta/models/…`를 추가                    |
+| `setup-5dive` (인증 프로필의 `ANTHROPIC_BASE_URL`)                         | 루트              | 아니요 — Claude Code가 `/v1/messages`를 추가                |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | `/v1` 포함        | 예 — WhyCodes는 `/chat/completions`에 POST 요청을 보냅니다. |
 
 ---
 

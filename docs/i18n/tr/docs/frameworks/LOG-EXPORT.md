@@ -263,7 +263,217 @@ Toplu işlemler **hem** satır sayısına hem de serileştirilmiş bayt miktarı
 
 ---
 
-## 5. Hedef ekleme
+## 5. OTLP/HTTP iz hedefi
+
+Yapılandırma `type: "otlp-http"` kullanır. Bu, kalıcı olarak saklanan çağrı günlüklerinin zamanlanmış, imleç tabanlı bir dışa aktarımıdır;
+`open-sse/services/routing/otel.ts` içindeki en iyi çaba esaslı canlı yönlendirme olayı alıcısı değildir.
+Bu alıcının ortam değişkenlerini, zamanlayıcılarını veya arabelleklerini okumaz ya da değiştirmez.
+Her ikisinin etkinleştirilmesi, birbirinden bağımsız iki tür span üretebilir;
+bu çağrı günlüğü span'lerini ayırt etmek için `omniroute.log-export` enstrümantasyon kapsamını kullanın.
+
+| Anahtar                  | Varsayılan / amaç                                                                      |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `endpoint`               | Gerekli tam HTTP(S) iz URL'si; sonuna `/v1/traces` eklenmez                            |
+| `headers`                | İsteğe bağlı `Name: value` satırları veya dizelerden oluşan JSON nesnesi; şifrelenir   |
+| `requestHeaderAllowlist` | Boş (kapalı); span öznitelikleri olarak yakalanacak istemci üstbilgisi adları/önekleri |
+| `serviceName`            | `omniroute`; kaynak `service.name`                                                     |
+| `langfuseMapping`        | `false`; Langfuse üretim/oturum/kullanıcı özniteliklerini ekler                        |
+| `identity`               | `pseudonymous`, `keyName` veya `none`                                                  |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                |
+| `timeoutMs`              | HTTP denemesi başına `30000`                                                           |
+| `environment`            | Ayarlanmamış; isteğe bağlı `langfuse.environment`                                      |
+
+Genel gösterge paneli bu alanları görüntüler. `paths`, bir API dizisini veya tam yolların
+yeni satırlarla/virgüllerle ayrıldığı bir metin alanını kabul eder. Gömme, yeniden sıralama ve diğer yollar,
+açıkça izin verilmedikçe atlanır. Atlanan satırlar da imleci ilerletir; mevcut
+çalıştırıcının `exported`/`exportedTotal` sayaçları, kabul edilen span'ler yerine filtrelenen
+satırlar dahil işlenen kaynak satırlarını sayar. Filtreleme, alt süreçte,
+IPC/imleç sözleşmesi değiştirilmeden yapılır.
+
+URL doğrulaması, `src/shared/network/outboundUrlGuard.ts` içindeki veritabanı gerektirmeyen
+`parseAndValidateNonMetadataUrl` yardımcı işlevini kullanır: `block-metadata` ilkesi. Özel URL'lere
+izin verilmiş webhook doğrulayıcısıyla aynı koşulsuz meta veri/protokol/gömülü kimlik bilgisi denetimlerini
+uygular, ancak genel bir özellik bayrağı geçersiz kılmasına gerek olmadan localhost/LAN hedeflerine
+bilinçli olarak izin verir. Bu, özel HTTP uç noktaları dahil, kendi sunucunuzda barındırılan
+Langfuse, Phoenix, Tempo ve Collector uç noktalarını kullanmayı mümkün kılar. Bulut meta verisi sunucuları her zaman engellenir.
+Yönlendirmeler izlenmez; dolayısıyla bir toplayıcı, kimlik bilgilerini farklı bir sunucuya yönlendiremez.
+Mevcut sözcüksel URL koruması gibi bu da DNS çözümlemesini sabitlemez; yalnızca
+operatörün denetimindeki sunucuları yapılandırın. Uç nokta güvenilir bir ağda değilse HTTPS'yi tercih edin.
+
+### Yük ve teslimat
+
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`), izin verilen
+her satır için, tam istek yolu ile adlandırılmış bir CLIENT span taşır. Yola göre adlandırma,
+span adına model veya kimlik verileri eklemeden Chat Completions, Responses ve Messages'ı
+birbirinden ayırır. Kaynak öznitelikleri `service.name` ve paketin `service.version` değerini içerir.
+
+Normal sohbet denemesi günlükleyicisi (`open-sse/handlers/chatCore/attemptLogging.ts`), tamamlandığında
+`duration = Date.now() - startTime` yazar ve zaman damgası sağlamaz;
+`src/lib/usage/callLogs.ts` içindeki `saveCallLogOperation`, zaman damgasını varsayılan olarak yazma
+(tamamlanma) zamanına ayarlar. Bu nedenle dışa aktarım, bitiş = satır zaman damgası ve başlangıç = bitiş − süre
+(milisaniye, ondalık nanosaniyeye dönüştürülür) olarak ayarlanır. Çağıran tarafından sağlanan geçmiş zaman damgaları da
+bitiş zamanı olarak korunur; satır bazında başlangıç/tamamlanma ayrımı yoktur.
+Null süre sıfır olur. Geçersiz/eksik zaman damgaları, belirlenimci olmayan span'ler oluşturmak yerine
+toplu işlemin başarısız olmasına neden olur. `ttftMs` null olabilir ve `omniroute.ttft_ms` ile eşlenir.
+
+Öznitelikler; `gen_ai.operation.name="chat"`, sağlayıcı, istenen/yanıt modeli,
+girdi/çıktı token'ları, isteğe bağlı önbellek okuma/önbellek oluşturma/akıl yürütme token'ları, HTTP durumu,
+combo, önbellek kaynağı, oturum etiketi ve korelasyon kimliğini içerir. Tamsayı OTLP değerleri ve zaman damgaları
+ondalık dizelerdir; dizeler, boole değerleri ve kesirli sayılar, kendilerine özgü OTLP değer
+türlerini kullanır. Hata span'leri ERROR durumuna ve hassas bilgilerden arındırılmış bir durum iletisine sahiptir. Standart
+kayıt, üst hizmetin sunucu URL'sini içermez; bu nedenle toplayıcıyı yanlışlıkla model sunucusu olarak
+tanımlamak yerine `server.address` atlanır. Maliyet dışa aktarılmaz.
+
+İçeriği yalnızca `includeBodies=true` yükler. `langfuseMapping=false` olduğunda,
+`gen_ai.input.messages` / `gen_ai.output.messages`, yeniden şekillendirilmiş bir semconv
+mesaj dizisini değil, OmniRoute tarafından saklandığı biçimiyle hassas bilgilerden arındırılmış istek/yanıt
+gövdesi JSON'unu (ayrıştırılabiliyorsa standartlaştırılmış olarak) taşır. Kırpılmış/JSON olmayan gövdeler ham metin olarak kalır. `langfuseMapping=true` olduğunda,
+gövdeler yalnızca `langfuse.observation.input` / `langfuse.observation.output` olarak gönderilir;
+her gövdenin bir kez gönderilmesi için `gen_ai.*.messages` öznitelikleri atlanır. Her iki mod da
+`maxBodyBytes` değerini mevcut içerik yükleme yolundan devralır;
+`omniroute.bodies_truncated=true` kırpılmayı belirtir.
+Bu hedef, ek işlem hattı anlık görüntüleri veya hassas bilgilerden arındırılmamış artefakt okumaları eklemez;
+isteğe bağlı istek üstbilgisi yakalama, aşağıda açıklanan mevcut yüklenmiş istemci anlık görüntüsünü kullanır.
+Gövdeleri dışa aktarırken saatlik bir birikim oluşturmak yerine
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` gibi dakika düzeyinde bir sıklık kullanın.
+
+### İsteğe bağlı istemci istek üstbilgileri
+
+Üstbilgi yakalama **varsayılan olarak kapalıdır**. Hedef yapılandırmasında `requestHeaderAllowlist` değerini ayarlayın
+ve **İstemleri ve yanıtları dışa aktar** seçeneğini etkinleştirin (hedefte `includeBodies: true`).
+İzin listesi, bir API dizisini veya adların yeni satırlarla/virgüllerle ayrıldığı bir metin alanını kabul eder:
+
+```json
+{
+  "requestHeaderAllowlist": ["User-Agent", "X-Project", "X-OmniRoute-Meta-*"]
+}
+```
+
+Adlar, sondaki tek bir `*` boş olmayan bir başlık adı öneki seçmediği sürece, büyük/küçük harfe duyarsız ve tam olarak eşleşir.
+Tek başına `*`, araya yerleştirilmiş joker karakterler ve geçersiz HTTP başlık adları reddedilir.
+En fazla 64 seçici olabilir; her birinin adı/öneki en fazla 256 ASCII baytı olabilir.
+Bu ayar, dışa aktarıcının toplayıcıya karşı kimliğini doğrulayan `headers` ayarından ayrıdır.
+
+Yakalama yalnızca, kaydedilmiş ayrıntılı işlem hattının
+`clientRawRequest` (veya eski `clientRequest`) alanından doldurulan `pipeline_client_request` alanını okur. Hiçbir zaman sağlayıcı istek başlıklarına geri dönmez.
+İstek kaydedildiğinde ayrıntılı işlem hattı günlüklemesinin etkinleştirilmiş olması gerekir.
+`includeBodies` devre dışıysa veya istemci anlık görüntüsü JSON'u eksik, bozuk ya da kırpılmışsa hiçbir başlık
+özniteliği üretilmez. `maxBodyBytes` değerini artırmak, dışa aktarma sırasında anlık görüntünün kırpılmasını önleyebilir;
+hiç kaydedilmemiş ayrıntıları geri getiremez. 1 MiB'ı aşan veya
+256'dan fazla başlık girdisi içeren bir anlık görüntü yok sayılır. Mevcut istem/yanıt dışa aktarımı, başlık yakalamayla
+birlikte etkin kalır; izin listesi, yalnızca başlıkları yükleyen bir mod sağlamaz.
+
+Seçilen değerler, tek bir dize için bile `http.request.header.<full lowercase header name>` OTLP dize dizilerine dönüşür.
+Örneğin, `X-OmniRoute-Meta-Team: example-team`,
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}` değerine sahip
+`http.request.header.x-omniroute-meta-team` özniteliğine dönüşür.
+Önekin tamamı korunur: bunlar sıradan başlıklardır; iş alanı ayrıştırması veya
+`omniroute.metadata.*` / Langfuse meta verisi dönüşümü yapılmaz. `langfuseMapping`, başlık
+anlamını değiştirmez. Seçilen tek değerli bir `User-Agent`, standart skaler
+`user_agent.original` özniteliğini de ayarlar. Tek bir değerin içindeki virgüllere göre bölme yapılmaz. Büyük/küçük harf varyantları, kaydedilmiş
+girdi sırasına göre birleştirilir; herhangi bir geçersiz varyant, başlığın tamamının atlanmasına neden olur. Öznitelikler küçük harfli ada göre sıralanır.
+
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, API anahtarı başlıkları, adlarında
+auth/token/secret/password/credential belirteçleri bulunan başlıklar ve dahili ağ geçidi kimlik bilgileri,
+seçilmiş veya depolamada kısmen maskelenmiş olsalar bile her zaman hariç tutulur. Bilinen kimlik bilgisi örüntüleri için
+ortak kimlik bilgisi algılayıcısı yeniden kullanılır; sansürleme işaretleri atlanır, güvenli değerler olarak dışa aktarılmaz.
+Yalnızca dizeler ve boş olmayan dize dizileri kabul edilir; sayılar veya nesneler zorla dönüştürülmez.
+Geçersiz adlar, prototip anahtarları, kontrol karakterleri (yatay sekme hariç) ve hatalı Unicode,
+toplu işlemin başarısız olmasına neden olmadan veya içerikleri hatalara yansıtılmadan yok sayılır.
+
+Her span en fazla 32 başlık, başlık başına 16 değer, değer başına 4096 UTF-8 baytı
+ve yakalanan başlık adları ile değerlerinin tamamında toplam 16384 UTF-8 baytı yakalar. Boyutu aşan/geçersiz başlıklar
+bütünüyle atlanır, kırpılmaz. Seçim, operatörün gizlilik kararıdır: güvenli görünen adlar
+yine de kişisel veriler içerebilir ve bu sınırlar/algılayıcılar genel amaçlı bir kişisel veri temizleyicisi değildir.
+
+### Teslimat sınırları
+
+İstekler, zarf dahil 500 span ve 4 MiB UTF-8 JSON ile sınırlıdır.
+İzin verilen her span, bir imleç grubunun ilk isteğinden önce boyut denetiminden geçirilir. Tek bir
+span sınırı aşarsa grubun hiçbir bölümü gönderilmez ve `maxBodyBytes` değerinin düşürülmesini
+öneren bir hatayla işlem başarısız olur; span sessizce atılmaz. Ön kontrol yalnızca kayıt referanslarını ve
+bayt sayılarını tutar, her geçici span/JSON'u atar; grubun serileştirilmiş ikinci bir kopyasını
+tutmak yerine span'ler, boyutu sınırlı parçalar için yeniden oluşturulur. HTTP 408/429/5xx, ağ hataları ve zaman aşımları için
+250/500 ms üstel geri çekilmeyle en fazla üç deneme yapılır. `Retry-After` saniyeleri veya HTTP tarihleri,
+gecikmeyi en fazla 5 saniyeye uzatabilir. Diğer durumlarda işlem hemen başarısız olur. OTLP 2xx kısmi reddi de
+kaybolan bir span'i onaylamak yerine hata fırlatır; boş veya geçerli JSON onayları,
+64 KiB yanıt okuma sınırıyla kabul edilir.
+
+Hatalar yalnızca dışa aktarıcıya ait olguları içerir: HTTP durumu, yeniden deneme sınıfı, deneme sayısı ve gönderilen span
+sayısı ya da sabit onay/ağ hatası ifadeleri. Toplayıcı yanıt gövdeleri,
+kısmi başarı sayıları ve yanıt başlıkları hiçbir zaman hatalara, günlüklere veya
+panoya kopyalanmaz. Başarısız olan veya kısmen kabul edilen bir grup onaylanmaz: hedef,
+ilgili durumla Başarısız olarak görünür, imleç son onaylanan grupta kalır ve sonraki çalıştırma
+aynı satırları yeniden gönderir. Kalıcı durumlarda, toplayıcı veya yapılandırma
+düzeltilene kadar işlem başarısız olmaya devam eder. Yanıt ayrıntıları için toplayıcının kendi günlüklerini kullanın. Çağrı günlüğü hata özetleri,
+ayrı sansürleme işlemlerini korur.
+`prepare()` hiçbir kaynak sağlamaz; Test tam olarak `{"resourceSpans":[]}` gönderir ve
+çağrı günlüğü span'lerini yazmadan HTTP durumunu bildirir.
+
+İz kimlikleri ve span kimlikleri, sırasıyla
+`"omniroute.trace\0" + callLogId` ve `"omniroute.span\0" + callLogId` üzerinde hesaplanan SHA-256 değerinin ilk 32/16 onaltılık basamağıdır. Yeniden gönderimler
+aynı kimlikleri taşır. Bu, yinelenen kayıtların ayıklanacağını garanti etmez: Langfuse
+v4 veri alımı dahil bazı arka uçlar, aynı kimliğe sahip span'leri tekilleştirmez. Bir çökme veya parçanın kısmen başarısız olması,
+en fazla onaylanmamış tek imleç grubunun yeniden gönderilmesine neden olabilir; yalnızca son HTTP parçası değil,
+grubun tamamı yinelenebilir. İmleç grubu boyutunu bu ödünleşimi göz önünde bulundurarak seçin.
+
+### Langfuse örneği
+
+Kendi barındırdığınız bir Langfuse örneği için şu alanları yapılandırın:
+
+```json
+{
+  "endpoint": "https://langfuse.example.com/api/public/otel/v1/traces",
+  "headers": "Authorization: Basic <base64-of-public-key:secret-key>",
+  "serviceName": "omniroute",
+  "langfuseMapping": true,
+  "identity": "pseudonymous",
+  "environment": "production"
+}
+```
+
+Authorization değerini, `public-key:secret-key` sabit dizesinin Base64 kodlaması olarak yerel ortamda oluşturun
+(örneğin `Buffer.from(publicKey + ":" + secretKey).toString("base64")` ile).
+Gerçek kimlik bilgilerini günlüklere, ekran görüntülerine veya sorun bildirimlerine yapıştırmayın. Eşleme,
+`x-langfuse-ingestion-version: 4` başlığını otomatik olarak ayarlar; Authorization yine `headers` içinde sağlanır.
+Hem başlıklar hem de oluşturulan kimlik tuzu, mevcut şifrelenmiş gizli alan
+mekanizmasını ve API yer tutucularını kullanır; `STORAGE_ENCRYPTION_KEY` gereklidir.
+
+Eşleme; üretim türünü/modelini, JSON kullanım ayrıntılarını (girdi/çıktı/toplam ve mevcut
+önbellek anahtarları), JSON girdi/çıktı anlık görüntülerini, ERROR/DEFAULT düzeyini, temizlenmiş durum mesajını,
+iz adını, oturum kimliğini, isteğe bağlı ortamı ve sağlayıcı, istenen model, yol, kombinasyon, önbellek
+kaynağı ve durum için filtrelenebilir `langfuse.observation.metadata.<key>` alanını ekler.
+`langfuse.observation.completion_start_time`, yalnızca TTFT biliniyorsa ve süre sınırları içindeyse
+başlangıç + TTFT zamanını ISO 8601 biçiminde içerir. Hiçbir maliyet özniteliği gönderilmez.
+
+Kimlik modları `langfuse.user.id` için geçerlidir:
+
+- `pseudonymous` (varsayılan): API anahtarının dahili kimliğinin, her hedef için rastgele oluşturulan
+  32 baytlık bir salt ile hesaplanan HMAC-SHA256 değeri. Salt yoksa oluşturma sırasında üretilir,
+  `identitySalt` olarak şifrelenir, hiçbir zaman döndürülmez ve düzenlemeler sırasında korunur. Ham anahtar kimlikleri
+  hiçbir zaman span özniteliklerine konulmaz. Bir hedefin salt değerinin yeniden oluşturulması/döndürülmesi kimlikleri değiştirir.
+- `keyName`: yapılandırılmış API anahtarı adı; bu operatör etiketini kasıtlı olarak açığa çıkarır.
+- `none`: kullanıcı kimliği yoktur. Oturum etiketleri mevcut olduğunda yine dışa aktarılır; bu modlar
+  rastgele istem içeriğini veya operatörün sağladığı oturum/korelasyon etiketlerini anonimleştirmez.
+
+### Geçmiş verileri aktarmadan başlatma
+
+Yalnızca oluşturma sırasında **Geçerli konumdan başlat (mevcut günlükleri atla)** seçeneğini etkinleştirin veya
+oluşturma API'si yükünün en üst düzeyinde `startFromCurrentPosition: true` iletin. Bu işlem,
+mevcut imleç yardımcılarını kullanarak, bir geçiş gerektirmeden `cursor_row_id` değerini tutulan çağrı günlüğündeki
+en yüksek mevcut rowid değerine ayarlar. Varsayılan değer false'tur (imleç 0 ve tutulan geçmişin geriye dönük aktarımı).
+Bu, güncelleme sırasında imleci sıfırlamaya yönelik bir ayar değildir.
+
+Paylaşılan `ttftMs` eklemesi, BigQuery eşleyicisine ve yeni tablo şemasına null değer alabilen bir `ttft_ms`
+sütunu da ekler: şema testi, her kanonik kayıt alanının bir sütuna sahip olmasını gerektirir.
+Mevcut tablolar değişmeden dışa aktarılmaya devam eder: `prepare()` tablo şemasını okur ve
+yalnızca `ttft_ms` sütunu yoksa bu alanı hariç tutar. Bir sonraki çalıştırmada TTFT verisini almak için
+null değer alabilen INT64 sütununu ekleyin veya yeni bir tablo kullanın. PATCH, otomatik şema değişikliği veya ek
+izin gerekmez; diğer tüm satır alanlarında katı şema denetimi uygulanmaya devam eder.
+
+---
+
+## 6. Hedef ekleme
 
 1. Bir `LogExportDestinationType` dışa aktaran `src/lib/logExport/destinations/<name>.ts` dosyasını oluşturun:
    UI için bir Zod `configSchema`, bir `fields` tanımlayıcı dizisi, `secretFields` ve
@@ -284,7 +494,7 @@ Yeni bir hedef için iki kural vardır:
 
 ---
 
-## 6. İşletim
+## 7. İşletim
 
 - **Dashboard**: Integrations → Log export. Bir hedef ekleyin, satır yazmadan kimlik bilgilerini
   kontrol etmek için **Test** işlemini çalıştırın ve ardından hedefi etkinleştirin.

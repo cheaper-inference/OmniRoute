@@ -163,7 +163,7 @@ OmniRoute na-ekpughe nka A2A 6 e jikọtara na `src/lib/a2a/taskExecution.ts::A2
 | Akụkọ Ọnọdụ Ahụike       | `health-report`      | Na-achịkọta ọnọdụ circuit breaker, cooldown, na lockout maka onye na-enye ọrụ ọ bụla                                                                            | ahụike, nkwụsi ike         | "Gosi ọnọdụ ahụike nke ndị na-enye ọrụ niile" |
 | Depụta Ikike             | `list-capabilities`  | Na-eweghachi katalọgụ Agent Skills zuru ezu nwere ndenye 45 (API 23 + CLI 21 + nhazi 1) dịka tebụl markdown nwere URL SKILL.md raw maka itinye ọnọdụ gburugburu | katalọgụ, nchọpụta, nka    | "Depụta ikike OmniRoute niile"                |
 
-> E kwesịrị idowe Agent Card ka ọ kwekọọ na katalọgụ dị ndụ nke ndị na-enye ọrụ 376; a na-enweta ọnụọgụ ndị na-enye ọrụ na metadata efu/na-achọghị-njirimara site na runtime registry.
+> E kwesịrị idowe Agent Card ka ọ kwekọọ na katalọgụ dị ndụ nke ndị na-enye ọrụ 377; a na-enweta ọnụọgụ ndị na-enye ọrụ na metadata efu/na-achọghị-njirimara site na runtime registry.
 
 ### Nkọwa Nka `list-capabilities`
 

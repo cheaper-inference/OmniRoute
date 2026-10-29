@@ -254,7 +254,217 @@ odrzuca żądania przekraczające 10 MB. Fragmenty są zamykane po osiągnięciu
 
 ---
 
-## 5. Dodawanie miejsca docelowego
+## 5. Miejsce docelowe śladów OTLP/HTTP
+
+Konfiguracja używa `type: "otlp-http"`. Jest to zaplanowany eksport zapisanych
+dzienników wywołań, oparty na kursorze, a nie mechanizm wysyłania zdarzeń routingu na żywo działający na zasadzie best effort w
+`open-sse/services/routing/otel.ts`. Nie odczytuje ani nie zmienia zmiennych
+środowiskowych, liczników czasu ani buforów tego mechanizmu. Włączenie obu może generować dwa niezależne rodzaje spanów;
+do rozróżniania spanów dziennika wywołań używaj zakresu instrumentacji `omniroute.log-export`.
+
+| Klucz                    | Wartość domyślna / przeznaczenie                                                         |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| `endpoint`               | Wymagany pełny adres URL śladów HTTP(S); sufiks `/v1/traces` nie jest dopisywany         |
+| `headers`                | Opcjonalne wiersze `Name: value` lub obiekt JSON z wartościami tekstowymi; szyfrowane    |
+| `requestHeaderAllowlist` | Pusta (wyłączona); nazwy/prefiksy nagłówków klienta przechwytywanych jako atrybuty spanu |
+| `serviceName`            | `omniroute`; atrybut zasobu `service.name`                                               |
+| `langfuseMapping`        | `false`; dodaje atrybuty generowania/sesji/użytkownika Langfuse                          |
+| `identity`               | `pseudonymous`, `keyName` lub `none`                                                     |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                  |
+| `timeoutMs`              | `30000` na każdą próbę HTTP                                                              |
+| `environment`            | Nieustawione; opcjonalne `langfuse.environment`                                          |
+
+Ogólny panel wyświetla te pola. `paths` przyjmuje tablicę przez API lub pole tekstowe
+z dokładnymi ścieżkami rozdzielonymi znakami nowego wiersza/przecinkami. Ścieżki embeddings, rerank i inne są
+pomijane, chyba że zostaną jawnie dozwolone. Pominięte wiersze również przesuwają kursor; istniejące
+liczniki `exported`/`exportedTotal` procesu wykonawczego zliczają przetworzone wiersze źródłowe, w tym wiersze odfiltrowane,
+a nie zaakceptowane spany. Filtrowanie odbywa się w procesie potomnym, bez zmiany jego
+kontraktu IPC/kursora.
+
+Walidacja adresu URL używa funkcji pomocniczej `parseAndValidateNonMetadataUrl`, niewymagającej dostępu do bazy danych, z
+`src/shared/network/outboundUrlGuard.ts`: zasady `block-metadata`. Stosuje ona te same
+bezwarunkowe kontrole metadanych/protokołu/osadzonych danych uwierzytelniających co walidator webhooków z
+włączoną obsługą prywatnych adresów URL, ale celowo zezwala na cele localhost/LAN bez globalnego
+nadpisania flagi funkcji. Umożliwia to korzystanie z samodzielnie hostowanych endpointów Langfuse, Phoenix, Tempo i Collector,
+w tym prywatnych endpointów HTTP. Hosty metadanych chmurowych są zawsze blokowane.
+Przekierowania nie są obsługiwane, więc kolektor nie może przekierować danych uwierzytelniających do innego hosta.
+Podobnie jak istniejący leksykalny mechanizm ochrony adresów URL, nie przypina to wyniku rozwiązywania DNS; konfiguruj wyłącznie
+hosty kontrolowane przez operatora. Preferuj HTTPS, gdy endpoint nie znajduje się w zaufanej sieci.
+
+### Dane i dostarczanie
+
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) przesyła jeden
+span CLIENT na każdy dozwolony wiersz, nazwany zgodnie z dokładną ścieżką żądania. Nazewnictwo oparte na ścieżkach rozróżnia
+Chat Completions, Responses i Messages bez umieszczania danych modelu ani tożsamości w
+nazwie spanu. Atrybuty zasobu obejmują `service.name` i `service.version` pakietu.
+
+Standardowy mechanizm rejestrowania prób czatu (`open-sse/handlers/chatCore/attemptLogging.ts`) zapisuje
+`duration = Date.now() - startTime` po zakończeniu i nie podaje znacznika czasu;
+`saveCallLogOperation` w `src/lib/usage/callLogs.ts` domyślnie ustawia znacznik czasu na moment zapisu
+(zakończenia). Eksport ustawia więc koniec = znacznik czasu wiersza, a początek = koniec − czas trwania
+(milisekundy przeliczone na nanosekundy w zapisie dziesiętnym). Historyczne znaczniki czasu dostarczone przez wywołującego
+również są zachowywane jako czas zakończenia; nie ma znacznika rozróżniającego początek i zakończenie dla poszczególnych wierszy.
+Czas trwania o wartości null staje się zerem. Nieprawidłowe lub brakujące znaczniki czasu powodują niepowodzenie całej partii zamiast tworzenia
+niedeterministycznych spanów. `ttftMs` dopuszcza wartość null i jest mapowane na `omniroute.ttft_ms`.
+
+Atrybuty obejmują `gen_ai.operation.name="chat"`, dostawcę, żądany/zwrócony model,
+tokeny wejściowe/wyjściowe, opcjonalne tokeny odczytu z pamięci podręcznej/tworzenia pamięci podręcznej/rozumowania, status HTTP,
+combo, źródło pamięci podręcznej, tag sesji i identyfikator korelacji. Całkowite wartości OTLP i znaczniki czasu
+są ciągami znaków w zapisie dziesiętnym; ciągi znaków, wartości logiczne i liczby ułamkowe używają swoich natywnych wariantów wartości OTLP.
+Spany błędów mają status ERROR i oczyszczony komunikat statusu. Rekord kanoniczny
+nie zawiera adresu URL hosta nadrzędnego, więc `server.address` jest pomijany, zamiast błędnie
+identyfikować kolektor jako serwer modelu. Koszt nie jest eksportowany.
+
+Tylko `includeBodies=true` powoduje dołączenie treści. Przy `langfuseMapping=false`
+`gen_ai.input.messages` / `gen_ai.output.messages` przenoszą oczyszczoną treść JSON żądania/odpowiedzi
+w postaci zapisanej przez OmniRoute (kanonizowanej, gdy można ją sparsować), a nie przekształconą tablicę
+wiadomości zgodną z konwencjami semantycznymi. Obcięte treści i treści inne niż JSON pozostają surowym tekstem. Przy `langfuseMapping=true`
+treści są emitowane wyłącznie jako `langfuse.observation.input` / `langfuse.observation.output`;
+atrybuty `gen_ai.*.messages` są pomijane, aby każda treść była wysyłana tylko raz. Oba tryby
+dziedziczą `maxBodyBytes` z istniejącej ścieżki dołączania treści;
+`omniroute.bodies_truncated=true` oznacza obcięcie.
+To miejsce docelowe nie dodaje żadnych dodatkowych migawek potoku ani odczytów nieoczyszczonych artefaktów;
+opcjonalne przechwytywanie nagłówków żądania korzysta z istniejącej, uzupełnionej migawki klienta opisanej poniżej.
+Podczas eksportowania treści używaj harmonogramu o częstotliwości minutowej, takiego jak `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`,
+zamiast gromadzić godzinne zaległości.
+
+### Opcjonalne nagłówki żądań klienta
+
+Przechwytywanie nagłówków jest **domyślnie wyłączone**. Ustaw `requestHeaderAllowlist` w konfiguracji miejsca docelowego
+i włącz **Eksportuj prompty i odpowiedzi** (`includeBodies: true` w miejscu docelowym).
+Lista dozwolonych nagłówków przyjmuje tablicę przez API lub pole tekstowe z nazwami rozdzielonymi znakami nowego wiersza/przecinkami:
+
+```json
+{
+  "requestHeaderAllowlist": ["User-Agent", "X-Project", "X-OmniRoute-Meta-*"]
+}
+```
+
+Nazwy są dopasowywane dokładnie, bez uwzględniania wielkości liter, chyba że pojedynczy końcowy `*` wskazuje niepusty
+prefiks nazwy nagłówka. Samotny `*`, symbole wieloznaczne wewnątrz nazwy oraz nieprawidłowe nazwy nagłówków HTTP są odrzucane.
+Dozwolone są maksymalnie 64 selektory, każdy z nazwą lub prefiksem o długości najwyżej 256 bajtów ASCII.
+To ustawienie jest niezależne od `headers`, które służy do uwierzytelniania eksportera w kolektorze.
+
+Przechwytywanie odczytuje wyłącznie `pipeline_client_request`, wypełniane na podstawie
+`clientRawRequest` (lub starszego `clientRequest`) z zapisanego szczegółowego potoku. Nigdy nie korzysta zastępczo z nagłówków żądania do dostawcy.
+Szczegółowe rejestrowanie potoku musiało być włączone w momencie zapisywania żądania. Gdy
+`includeBodies` jest wyłączone lub gdy brakuje pliku JSON migawki klienta albo jest on uszkodzony lub obcięty, żadne atrybuty
+nagłówków nie są emitowane. Zwiększenie `maxBodyBytes` może zapobiec obcinaniu migawki podczas eksportu;
+nie przywróci jednak szczegółów, które nigdy nie zostały zapisane. Migawka większa niż 1 MiB lub zawierająca ponad
+256 wpisów nagłówków jest ignorowana. Dotychczasowy eksport promptów i odpowiedzi pozostaje włączony równolegle
+z przechwytywaniem nagłówków; lista dozwolonych nagłówków nie udostępnia trybu odtwarzania wyłącznie nagłówków.
+
+Wybrane wartości stają się tablicami ciągów znaków OTLP `http.request.header.<full lowercase header name>`,
+nawet w przypadku pojedynczego ciągu. Na przykład `X-OmniRoute-Meta-Team: example-team` staje się
+`http.request.header.x-omniroute-meta-team` z wartością
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
+Pełny prefiks zostaje zachowany: są to zwykłe nagłówki, bez parsowania pól biznesowych ani
+konwersji na metadane `omniroute.metadata.*` / Langfuse. `langfuseMapping` nie zmienia semantyki
+nagłówków. Wybrany nagłówek `User-Agent` z pojedynczą wartością ustawia również standardowy atrybut skalarny
+`user_agent.original`. Przecinki wewnątrz jednej wartości nie powodują jej podziału. Warianty różniące się wielkością liter są scalane w kolejności
+zapisanych wpisów; każdy nieprawidłowy wariant powoduje pominięcie całego nagłówka. Atrybuty są uporządkowane według nazw zapisanych małymi literami.
+
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, nagłówki kluczy API, nazwy zawierające
+znaczniki auth/token/secret/password/credential oraz wewnętrzne dane uwierzytelniające bramy są zawsze
+wykluczane, nawet jeśli zostały wybrane lub częściowo zamaskowane w pamięci trwałej. Rozpoznawanie znanych wzorców danych uwierzytelniających wykorzystuje
+wspólny detektor danych uwierzytelniających; znaczniki maskowania są pomijane, a nie eksportowane jako bezpieczne wartości.
+Akceptowane są wyłącznie ciągi znaków i niepuste tablice ciągów znaków; liczby ani obiekty nie są konwertowane.
+Nieprawidłowe nazwy, klucze prototypu, znaki sterujące (z wyjątkiem tabulatora poziomego) i nieprawidłowe sekwencje Unicode
+są ignorowane bez przerywania przetwarzania partii ani ujawniania ich zawartości w błędach.
+
+Każdy span przechwytuje najwyżej 32 nagłówki, 16 wartości na nagłówek, 4096 bajtów UTF-8 na wartość
+oraz łącznie 16384 bajty UTF-8 we wszystkich przechwyconych nazwach i wartościach nagłówków. Zbyt duże lub nieprawidłowe nagłówki
+są pomijane w całości, a nie obcinane. Wybór nagłówków jest decyzją operatora dotyczącą prywatności: nazwy wyglądające na bezpieczne
+nadal mogą zawierać dane osobowe, a te limity i detektory nie są uniwersalnym narzędziem do usuwania danych umożliwiających identyfikację osób.
+
+### Limity dostarczania
+
+Żądania są ograniczone do 500 spanów i 4 MiB danych JSON w UTF-8, łącznie z otoczką.
+Rozmiar każdego dozwolonego spanu jest sprawdzany przed pierwszym żądaniem w partii kursora. Pojedynczy
+span przekraczający limit powoduje, że żadna część tej partii nie zostaje wysłana, a operacja kończy się błędem z zaleceniem zmniejszenia
+`maxBodyBytes`; span nie jest po cichu pomijany. Kontrola wstępna zachowuje tylko odwołania do rekordów i
+liczby bajtów, odrzucając każdy tymczasowy span i JSON; spany są odtwarzane dla fragmentów o ograniczonym rozmiarze
+zamiast przechowywania drugiej zserializowanej kopii partii. W przypadku HTTP 408/429/5xx, błędów sieciowych i przekroczeń limitu czasu podejmowane są najwyżej
+trzy próby, z wykładniczo rosnącym opóźnieniem 250/500 ms. Wartości `Retry-After` podane w sekundach lub jako daty HTTP
+mogą wydłużyć opóźnienie do 5 sekund. Inne statusy powodują natychmiastowe niepowodzenie. Częściowe odrzucenie OTLP przy statusie 2xx również powoduje zgłoszenie wyjątku zamiast
+potwierdzenia utraconego spanu; akceptowane są potwierdzenia puste lub zawierające prawidłowy JSON, przy
+limicie odczytu odpowiedzi wynoszącym 64 KiB.
+
+Błędy zawierają wyłącznie informacje pochodzące z eksportera: status HTTP, kategorię ponawiania, liczbę prób i liczbę wysłanych
+spanów albo stałe komunikaty o błędzie potwierdzenia lub sieci. Treści odpowiedzi kolektora,
+liczniki częściowego powodzenia i nagłówki odpowiedzi nigdy nie są kopiowane do błędów, dzienników ani
+panelu. Partia zakończona niepowodzeniem lub zaakceptowana częściowo nie jest potwierdzana: miejsce docelowe pokazuje
+stan niepowodzenia z danym statusem, kursor pozostaje na ostatniej potwierdzonej partii, a następne uruchomienie
+ponownie wysyła te same wiersze. Trwałe statusy błędów powodują kolejne niepowodzenia do czasu naprawienia kolektora lub
+konfiguracji. Szczegóły odpowiedzi można znaleźć w dziennikach samego kolektora. Podsumowania błędów w dzienniku wywołań zachowują
+odrębny mechanizm maskowania.
+`prepare()` nie tworzy żadnych zasobów; funkcja testowania wysyła metodą POST dokładnie `{"resourceSpans":[]}` i zgłasza
+status HTTP bez zapisywania spanów dziennika wywołań.
+
+Identyfikatory śladów i spanów to pierwsze 32/16 cyfr szesnastkowych skrótu SHA-256 obliczonego dla
+`"omniroute.trace\0" + callLogId` oraz `"omniroute.span\0" + callLogId`. Ponowne wysyłki zawierają
+identyczne identyfikatory. Nie gwarantuje to deduplikacji: niektóre systemy zaplecza, w tym mechanizm przyjmowania danych Langfuse
+v4, nie deduplikują spanów o tym samym identyfikatorze. Awaria lub częściowe niepowodzenie wysyłania fragmentu może
+spowodować ponowne wysłanie najwyżej jednej niepotwierdzonej partii kursora; zduplikowana może zostać cała ta partia,
+a nie tylko jej ostatni fragment HTTP. Wybierając rozmiar partii kursora, należy uwzględnić ten kompromis.
+
+### Przykład dla Langfuse
+
+Skonfiguruj poniższe pola dla samodzielnie hostowanej instancji Langfuse:
+
+```json
+{
+  "endpoint": "https://langfuse.example.com/api/public/otel/v1/traces",
+  "headers": "Authorization: Basic <base64-of-public-key:secret-key>",
+  "serviceName": "omniroute",
+  "langfuseMapping": true,
+  "identity": "pseudonymous",
+  "environment": "production"
+}
+```
+
+Utwórz lokalnie wartość Authorization jako zakodowany w Base64 dosłowny ciąg `public-key:secret-key`
+(na przykład za pomocą `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Nie wklejaj rzeczywistych danych uwierzytelniających do dzienników, zrzutów ekranu ani zgłoszeń. Mapowanie automatycznie
+ustawia `x-langfuse-ingestion-version: 4`; Authorization nadal jest podawane w `headers`.
+Zarówno nagłówki, jak i wygenerowana sól tożsamości korzystają z istniejącego mechanizmu szyfrowanych pól tajnych
+oraz symboli zastępczych API; wymagane jest `STORAGE_ENCRYPTION_KEY`.
+
+Mapowanie dodaje typ/model generowania, szczegóły użycia w formacie JSON (wejście/wyjście/suma oraz dostępne
+klucze pamięci podręcznej), migawki wejścia/wyjścia w formacie JSON, poziom ERROR/DEFAULT, oczyszczony komunikat o stanie,
+nazwę śladu, identyfikator sesji, opcjonalne środowisko oraz umożliwiające filtrowanie
+`langfuse.observation.metadata.<key>` dla dostawcy, żądanego modelu, ścieżki, kombinacji, źródła pamięci
+podręcznej i stanu. `langfuse.observation.completion_start_time` ma format ISO 8601 i jest wyznaczany jako
+czas rozpoczęcia + TTFT tylko wtedy, gdy TTFT jest znany i mieści się w czasie trwania. Atrybuty kosztów nie są wysyłane.
+
+Tryby tożsamości dotyczą `langfuse.user.id`:
+
+- `pseudonymous` (domyślny): HMAC-SHA256 wewnętrznego identyfikatora klucza API z losową,
+  32-bajtową solą przypisaną do miejsca docelowego. Jeśli sól nie istnieje, jest generowana podczas tworzenia, szyfrowana
+  jako `identitySalt`, nigdy nie jest zwracana i zostaje zachowana podczas edycji. Surowe identyfikatory kluczy nigdy nie
+  trafiają do atrybutów spanów. Ponowne utworzenie lub rotacja soli miejsca docelowego zmienia tożsamości.
+- `keyName`: skonfigurowana nazwa klucza API, celowo ujawniająca tę etykietę nadaną przez operatora.
+- `none`: brak identyfikatora użytkownika. Tagi sesji nadal są eksportowane, jeśli występują; te tryby nie
+  anonimizują dowolnej treści promptów ani etykiet sesji/korelacji podanych przez operatora.
+
+### Rozpoczęcie bez uzupełniania danych historycznych
+
+Wyłącznie podczas tworzenia włącz **Rozpocznij od bieżącej pozycji (pomiń istniejące logi)** lub przekaż
+`startFromCurrentPosition: true` na najwyższym poziomie danych żądania API tworzącego zasób. Powoduje to ustawienie
+`cursor_row_id` na bieżący maksymalny rowid w zachowanych logach wywołań przy użyciu istniejących funkcji pomocniczych
+kursora, bez migracji. Wartość domyślna to false (kursor 0 i uzupełnianie zachowanej historii).
+Nie jest to ustawienie resetujące kursor podczas aktualizacji.
+
+Wspólne rozszerzenie o `ttftMs` dodaje również kolumnę `ttft_ms` dopuszczającą wartość null do mappera BigQuery
+i schematu nowych tabel: test schematu wymaga, aby każde pole rekordu kanonicznego miało odpowiadającą mu
+kolumnę. Eksport do istniejących tabel pozostaje bez zmian: `prepare()` odczytuje schemat tabeli i
+pomija wyłącznie `ttft_ms`, gdy ta kolumna nie istnieje. Dodaj kolumnę typu INT64 dopuszczającą wartość null, aby uzyskać TTFT
+przy następnym uruchomieniu, lub użyj nowej tabeli. Nie są wymagane żądania PATCH, automatyczne zmiany schematu ani dodatkowe
+uprawnienia; wszystkie pozostałe pola wiersza nadal podlegają ścisłej kontroli zgodności ze schematem.
+
+---
+
+## 6. Dodawanie miejsca docelowego
 
 1. Utwórz plik `src/lib/logExport/destinations/<name>.ts` eksportujący typ `LogExportDestinationType`:
    schemat Zod `configSchema`, tablicę deskryptorów `fields` dla interfejsu użytkownika, `secretFields` oraz
@@ -275,7 +485,7 @@ Dwie zasady dotyczące nowego miejsca docelowego:
 
 ---
 
-## 6. Obsługa
+## 7. Obsługa
 
 - **Panel administracyjny**: Integracje → Eksport logów. Dodaj miejsce docelowe, uruchom **Test**, aby sprawdzić dane uwierzytelniające
   bez zapisywania wierszy, a następnie je włącz.

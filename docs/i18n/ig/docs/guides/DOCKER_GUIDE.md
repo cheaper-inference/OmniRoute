@@ -664,6 +664,8 @@ Docker / Kubernetes OmniRoute ndabara bụ **otu usoro Node + otu onye na-ede SQ
 
 **Nkwalite:** tụọ anya na session ọ bụla ga-akwụsị. Mee ka ndị ahịa kwụsị nke ọma ma ọ bụrụ na ị nwere ike; enweghị rolling update na SQLite ndabara. Compose `restart: unless-stopped` tinyere Docker `HEALTHCHECK` ga-edochikwa naanị usoro ahụ mgbe container ghọrọ Unhealthy — otu oke mmetụta ahụ.
 
+Manifest ndị dị njikere na chaatị Helm dị na `deploy/kubernetes/` na `deploy/helm/omniroute/` — lee [ntuziaka ntinye Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Iberibe Kubernetes maka **otu replica** (Recreate dị mkpa; amụbawanye `replicas` megide otu faịlụ SQLite):
 
 ```yaml

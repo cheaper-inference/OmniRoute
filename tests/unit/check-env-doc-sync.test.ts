@@ -272,3 +272,79 @@ test("CLI entry actually runs the gate when spawned directly", () => {
     `expected the sync report banner in stdout, got: ${JSON.stringify(res.stdout.slice(0, 200))}`
   );
 });
+
+const homeFallbackDoc =
+  "| `WHYCODES_HOME` | unset | Resolve under `HOME`, then `USERPROFILE`, then `os.homedir()`. |";
+
+test("OS home-directory fallback context does not require app .env entries", () => {
+  const result = runEnvDocSync({
+    envExampleText: "WHYCODES_HOME=\n",
+    envDocText: homeFallbackDoc,
+    codeVars: new Set(["WHYCODES_HOME", "HOME", "USERPROFILE"]),
+    docOnlyAllowlist: new Set(),
+    envOnlyAllowlist: new Set(),
+  });
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.problems, { codeMissingEnv: [], envMissingDoc: [], docMissingEnv: [] });
+  assert.deepEqual([...parseEnvDocVars(homeFallbackDoc)].sort(), [
+    "HOME",
+    "USERPROFILE",
+    "WHYCODES_HOME",
+  ]);
+});
+
+test("a missing product home override still fails beside OS fallback context", () => {
+  const result = runEnvDocSync({
+    envExampleText: "",
+    envDocText: homeFallbackDoc,
+    codeVars: new Set(["WHYCODES_HOME", "HOME", "USERPROFILE"]),
+    docOnlyAllowlist: new Set(),
+    envOnlyAllowlist: new Set(),
+  });
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.problems.codeMissingEnv, ["WHYCODES_HOME"]);
+  assert.deepEqual(result.problems.docMissingEnv, ["WHYCODES_HOME"]);
+});
+
+test("code-ignore entries do not become general documentation exemptions", () => {
+  const result = runEnvDocSync({
+    envExampleText: "",
+    envDocText: "References `BOT_TOKEN`, `GITHUB_OUTPUT`, `PATH`, and `XDG_CONFIG_HOME`.",
+    codeVars: new Set(["BOT_TOKEN", "GITHUB_OUTPUT", "PATH", "XDG_CONFIG_HOME"]),
+    docOnlyAllowlist: new Set(),
+    envOnlyAllowlist: new Set(),
+  });
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.problems.codeMissingEnv, []);
+  assert.deepEqual(result.problems.docMissingEnv, [
+    "BOT_TOKEN",
+    "GITHUB_OUTPUT",
+    "PATH",
+    "XDG_CONFIG_HOME",
+  ]);
+});
+
+test("OS home context names are exact and do not exempt application variants", () => {
+  const result = runEnvDocSync({
+    envExampleText: "",
+    envDocText: "Configure `HOME_OVERRIDE` and `USERPROFILE_DIR`.",
+    codeVars: new Set(["HOME_OVERRIDE", "USERPROFILE_DIR"]),
+    docOnlyAllowlist: new Set(),
+    envOnlyAllowlist: new Set(),
+  });
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.problems.codeMissingEnv, ["HOME_OVERRIDE", "USERPROFILE_DIR"]);
+  assert.deepEqual(result.problems.docMissingEnv, ["HOME_OVERRIDE", "USERPROFILE_DIR"]);
+});
+
+test("an explicit template entry still requires documentation even for OS context", () => {
+  const result = runEnvDocSync({
+    envExampleText: "HOME=/example\nUSERPROFILE=/example\n",
+    envDocText: "",
+    codeVars: new Set(),
+    docOnlyAllowlist: new Set(),
+    envOnlyAllowlist: new Set(),
+  });
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.problems.envMissingDoc, ["HOME", "USERPROFILE"]);
+});

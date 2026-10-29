@@ -161,7 +161,7 @@ OmniRoute는 `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`에 연결된 6�
 | 상태 보고서    | `health-report`      | 제공자별 회로 차단기, 쿨다운, 잠금 상태를 집계합니다                                                                                            | 상태, 복원력         | "모든 제공자의 상태를 보여 줘"            |
 | 기능 목록 조회 | `list-capabilities`  | 전체 45개 항목의 Agent Skills 카탈로그(23개 API + 21개 CLI + 1개 구성)를 컨텍스트 주입을 위한 원본 SKILL.md URL과 함께 마크다운 표로 반환합니다 | 카탈로그, 검색, 스킬 | "모든 OmniRoute 기능을 나열해 줘"         |
 
-> Agent Card는 실제 376개 제공자 카탈로그와 일치하도록 유지해야 합니다. 제공자 수와 무료/무인증 메타데이터는 런타임 레지스트리에서 가져옵니다.
+> Agent Card는 실제 377개 제공자 카탈로그와 일치하도록 유지해야 합니다. 제공자 수와 무료/무인증 메타데이터는 런타임 레지스트리에서 가져옵니다.
 
 ### `list-capabilities` 스킬 세부 정보
 

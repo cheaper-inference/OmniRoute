@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — ఉచిత AI గేట్వే
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — కోడింగ్ను ఎప్పుడూ ఆపవద్దు. ప్రతి AI సాధనం → 376 ప్రొవైడర్లు — 150+ ఉచితం — ఒకే ఎండ్పాయింట్ ద్వారా. Claude Code, Codex, Cursor, Cline, Copilot & Antigravityలను ఆటో-ఫాల్బ్యాక్తో ఉచిత Claude / GPT / Geminiలోకి అనుసంధానించండి. RTK + Caveman స్టాక్డ్ కంప్రెషన్ 15–95% టోకెన్లను ఆదా చేస్తుంది (సగటున ~89%) — పరిమితులను ఎప్పుడూ చేరుకోకండి. 376 AI ప్రొవైడర్లు · 150+ ఉచిత టియర్లు · నెలకు ~1.62B ఉచిత టోకెన్లు · 20 రౌటింగ్ వ్యూహాలు · ప్రారంభించడానికి $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — కోడింగ్ను ఎప్పుడూ ఆపవద్దు. ప్రతి AI సాధనం → 377 ప్రొవైడర్లు — 150+ ఉచితం — ఒకే ఎండ్పాయింట్ ద్వారా. Claude Code, Codex, Cursor, Cline, Copilot & Antigravityలను ఆటో-ఫాల్బ్యాక్తో ఉచిత Claude / GPT / Geminiలోకి అనుసంధానించండి. RTK + Caveman స్టాక్డ్ కంప్రెషన్ 15–95% టోకెన్లను ఆదా చేస్తుంది (సగటున ~89%) — పరిమితులను ఎప్పుడూ చేరుకోకండి. 377 AI ప్రొవైడర్లు · 150+ ఉచిత టియర్లు · నెలకు ~1.62B ఉచిత టోకెన్లు · 20 రౌటింగ్ వ్యూహాలు · ప్రారంభించడానికి $0."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                             |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 ప్రొవైడర్లు              |            352            |   **358**   |          376          |
+| 🌐 ప్రొవైడర్లు              |            352            |   **358**   |          377          |
 | 🧠 ప్రత్యేక చాట్ మోడల్ IDలు |           1320            |  **1374**   |         1475          |
 | 🖼️ మోడాలిటీ బ్రిడ్జ్        | 🆕 విజన్ + ఆడియో + వీడియో |      ✓      |           ✓           |
 | 📡 రాడార్ ఉచిత కేటలాగ్      |   🆕 ఎంపిక చేసుకోవచ్చు    |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ ఫీచర్లు</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 కాంబోలు</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 ప్రొవైడర్లు</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 ప్రొవైడర్లు</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="వాగ్దానం — ఒకే ఎండ్పాయింట్ మరియు 376 ప్రొవైడర్లు. మరొక ఆరోగ్యకరమైన లక్ష్యం అందుబాటులో ఉన్నంతవరకు ఆటోమేటిక్ ఫాల్బ్యాక్ రూటింగ్ను కొనసాగిస్తుంది. ఆరు మూలస్తంభాలు: 376 ప్రొవైడర్లలో స్థితిస్థాపక ఫాల్బ్యాక్ · అర్హతగల వర్క్లోడ్లపై గరిష్ఠంగా 95% టోకెన్ ఆదా · 150+ ఉచిత టియర్లు మరియు 52 పునరావృత/కీ-రహిత శాశ్వత ఉచిత ప్రొవైడర్లతో ప్రారంభించడానికి $0 · ఒకే కాన్ఫిగ్ ద్వారా 37 CLI/ఏజెంట్ ఇంటిగ్రేషన్లు · /v1 వద్ద OpenAI, Claude, Gemini మరియు Responses API అనుకూలత · సర్క్యూట్ బ్రేకర్లు, TLS స్టెల్త్, MCP 110 సాధనాలు, A2A, మెమరీ, గార్డ్రైల్లు, ఇవాల్యుయేషన్లు మరియు ట్రాక్ చేయబడిన 7,800+ టెస్ట్ ఫైల్లలో 56,000+ స్టాటిక్ టెస్ట్ డిక్లరేషన్లతో సహా ప్రొడక్షన్ నియంత్రణలు."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="వాగ్దానం — ఒకే ఎండ్పాయింట్ మరియు 377 ప్రొవైడర్లు. మరొక ఆరోగ్యకరమైన లక్ష్యం అందుబాటులో ఉన్నంతవరకు ఆటోమేటిక్ ఫాల్బ్యాక్ రూటింగ్ను కొనసాగిస్తుంది. ఆరు మూలస్తంభాలు: 377 ప్రొవైడర్లలో స్థితిస్థాపక ఫాల్బ్యాక్ · అర్హతగల వర్క్లోడ్లపై గరిష్ఠంగా 95% టోకెన్ ఆదా · 150+ ఉచిత టియర్లు మరియు 52 పునరావృత/కీ-రహిత శాశ్వత ఉచిత ప్రొవైడర్లతో ప్రారంభించడానికి $0 · ఒకే కాన్ఫిగ్ ద్వారా 37 CLI/ఏజెంట్ ఇంటిగ్రేషన్లు · /v1 వద్ద OpenAI, Claude, Gemini మరియు Responses API అనుకూలత · సర్క్యూట్ బ్రేకర్లు, TLS స్టెల్త్, MCP 110 సాధనాలు, A2A, మెమరీ, గార్డ్రైల్లు, ఇవాల్యుయేషన్లు మరియు ట్రాక్ చేయబడిన 7,800+ టెస్ట్ ఫైల్లలో 56,000+ స్టాటిక్ టెస్ట్ డిక్లరేషన్లతో సహా ప్రొడక్షన్ నియంత్రణలు."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="13 సామర్థ్యాల్లో 9router, OpenRouter, CLIProxyAPI మరియు LiteLLMతో పోల్చినప్పుడు OmniRouteను ప్రత్యేకంగా నిలబెట్టే అంశాలు — నిర్దిష్ట తేదీ నాటికి ఫీచర్ల సమీక్ష. OmniRoute: 376 ప్రొవైడర్లు, అంతర్నిర్మితంగా 150+ ఉచిత టియర్లు, 20 రూటింగ్ వ్యూహాలు, 12-ఇంజిన్ టోకెన్ కంప్రెషన్, 110 సాధనాలతో అంతర్నిర్మిత MCP సర్వర్, A2A ఏజెంట్ ప్రోటోకాల్, నిరంతర మెమరీ, రక్షణ నియమాలు, క్లౌడ్ ఏజెంట్లు, TLS ఫింగర్ప్రింట్ గోప్యత, Desktop/Termux/PWA మరియు 67 i18n UI భాషా ప్రాంతాలు. OmniRoute MIT లైసెన్స్తో అందుబాటులో ఉంది మరియు స్వయంగా హోస్ట్ చేసుకోవచ్చు. పోటీదారుల సామర్థ్యాలు మరియు సంఖ్యలు మారవచ్చు; లింక్ చేసిన పద్ధతిని చూడండి."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="13 సామర్థ్యాల్లో 9router, OpenRouter, CLIProxyAPI మరియు LiteLLMతో పోల్చినప్పుడు OmniRouteను ప్రత్యేకంగా నిలబెట్టే అంశాలు — నిర్దిష్ట తేదీ నాటికి ఫీచర్ల సమీక్ష. OmniRoute: 377 ప్రొవైడర్లు, అంతర్నిర్మితంగా 150+ ఉచిత టియర్లు, 20 రూటింగ్ వ్యూహాలు, 12-ఇంజిన్ టోకెన్ కంప్రెషన్, 110 సాధనాలతో అంతర్నిర్మిత MCP సర్వర్, A2A ఏజెంట్ ప్రోటోకాల్, నిరంతర మెమరీ, రక్షణ నియమాలు, క్లౌడ్ ఏజెంట్లు, TLS ఫింగర్ప్రింట్ గోప్యత, Desktop/Termux/PWA మరియు 67 i18n UI భాషా ప్రాంతాలు. OmniRoute MIT లైసెన్స్తో అందుబాటులో ఉంది మరియు స్వయంగా హోస్ట్ చేసుకోవచ్చు. పోటీదారుల సామర్థ్యాలు మరియు సంఖ్యలు మారవచ్చు; లింక్ చేసిన పద్ధతిని చూడండి."/>
 
 <sub>📊 పూర్తి పద్ధతి &amp; 9router, OpenRouter, CLIProxyAPI &amp; LiteLLMతో ప్రతి ఫీచర్కు సంబంధించిన వివరణాత్మక పోలిక → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar ఐచ్ఛికం మరియు GET-మాత్రమే. OmniRoute
 - **🖼️ కొత్త ఎండ్పాయింట్లు** — `/v1/ocr` (Mistral OCR) మరియు `/v1/audio/translations` (Whisper-శైలి) మీడియా సామర్థ్యాలను సంపూర్ణం చేస్తాయి. → [API సూచన](docs/reference/API_REFERENCE.md)
 - **🎨 ఇమేజ్ / వీడియో / ఆడియో జనరేషన్** — మీడియా కోసం ఒకే API: xAI Grok Imagine & Novita AI వీడియో, ComfyUI, Magnific, Adobe Firefly, Segmind మరియు ElevenLabs వంటి స్పీచ్ ప్రొవైడర్లు. → [API సూచన](docs/reference/API_REFERENCE.md)
 - **🌍 డిప్లాయ్మెంట్ & ఆపరేషన్స్** — రివర్స్-ప్రాక్సీ `basePath`, బ్రౌజర్ భాషను స్వయంచాలకంగా గుర్తించడం, ప్రతి కీకి పరికర ట్రాకింగ్, రూట్ అవసరం లేని MITM ట్రస్ట్, zh-TW స్థానికీకరణ. → [ఎన్విరాన్మెంట్](docs/reference/ENVIRONMENT.md)
-- **🤝 మరిన్ని ప్రొవైడర్లు & ఏజెంట్లు** — క్లౌడ్ ఏజెంట్లు (Codex Cloud, Cursor, Devin, Jules), బ్రౌజర్ + OAuth లాగిన్తో Grok Build (xAI), ప్రథమ-శ్రేణి Ollama కార్డ్, Claude Opus 5 & Sonnet 5, Kimi అధికారిక భాగస్వామ్యం (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… మరియు నవీకరించిన **376-ప్రొవైడర్ కేటలాగ్**. → [ప్రొవైడర్లు](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 మరిన్ని ప్రొవైడర్లు & ఏజెంట్లు** — క్లౌడ్ ఏజెంట్లు (Codex Cloud, Cursor, Devin, Jules), బ్రౌజర్ + OAuth లాగిన్తో Grok Build (xAI), ప్రథమ-శ్రేణి Ollama కార్డ్, Claude Opus 5 & Sonnet 5, Kimi అధికారిక భాగస్వామ్యం (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… మరియు నవీకరించిన **377-ప్రొవైడర్ కేటలాగ్**. → [ప్రొవైడర్లు](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 రూటింగ్ పారదర్శకత** — ప్రతి ప్రతిస్పందనలో దాన్ని అందించిన వ్యూహం/ప్రొవైడర్/లేటెన్సీని పేర్కొనే `X-OmniRoute-Decision` హెడర్ ఉంటుంది; కొత్త `cache-optimized` కాంబో వ్యూహం + Auto-Combo `cacheAffinity` కారకం పునరావృత అభ్యర్థనలను క్యాష్ చేసిన ప్రిఫిక్స్ను కలిగి ఉన్న కనెక్షన్కు తిరిగి రూట్ చేస్తాయి; అలాగే రీడ్-ఓన్లీ `/v1/auto-combo/{channel}/candidates` ఎండ్పాయింట్ ఒక `auto/*` ఛానల్కు చెందిన ప్రత్యక్ష అభ్యర్థుల పూల్ను బహిర్గతం చేస్తుంది. → [ఆటో-కాంబో](docs/routing/AUTO-COMBO.md)
 - **⚡ స్థానిక పనితీరు & మౌలిక సదుపాయాలు** — ఒకే క్లిక్తో స్థానిక Redis, Cloudflare Workers / Deno Deploy రిలే డిప్లాయర్లు, పర్యవేక్షిత ఎంబెడెడ్ సేవలుగా Bifrost & Mux. → [ఎంబెడెడ్ సేవలు](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 వీటితో పాటు** — ప్లగిన్ ఫ్రేమ్వర్క్ + మార్కెట్ప్లేస్, Omni/Agent/GitHub నైపుణ్యాల ఫ్రేమ్వర్క్లు, Obsidian వాల్ట్ ఇంటిగ్రేషన్ (22 MCP సాధనాలు), OpenAI-అనుకూల Batch & Files APIలు, సెమాంటిక్ ప్రతిస్పందన క్యాష్, లీడర్బోర్డ్లతో గేమిఫికేషన్, ACP ఏజెంట్ డిస్కవరీ (అంతర్నిర్మితంగా 15 ఏజెంట్లు), BigQueryకి షెడ్యూల్ చేసిన లాగ్ ఎగుమతి, `auto/chaos` సమాంతర మల్టీ-మోడల్ ఫ్యాన్-అవుట్, Telegram బాట్ బ్రిడ్జ్, యాప్లోనే వెర్షన్ మేనేజర్ మరియు LMArena-ELO ఉచిత-ప్రొవైడర్ ర్యాంకింగ్లు. → [డాక్యుమెంటేషన్](docs/README.md)
@@ -657,7 +657,7 @@ Radar ఐచ్ఛికం మరియు GET-మాత్రమే. OmniRoute
 <b>＋ వీటితో కూడా పనిచేస్తుంది</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>ఏదైనా OpenAI-అనుకూల సాధనం</b>
 </div>
 
-<sub>📖 మొత్తం 37 సాధనాలకు (27 CLI Codeలు + 10 CLI Agentలు) సాధనం-వారీ సెటప్ → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode ప్లగిన్ → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 మొత్తం 38 సాధనాలకు (27 CLI Codeలు + 11 CLI Agentలు) సాధనం-వారీ సెటప్ → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode ప్లగిన్ → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ omniroute configure codex          # ఇవి కూడా: claude opencode qwe
 
 <div align="center">
 
-## 🌐 376 AI ప్రొవైడర్లు — 153 ఉచితంగా కేటలాగ్లో గుర్తించబడినవి
+## 🌐 377 AI ప్రొవైడర్లు — 153 ఉచితంగా కేటలాగ్లో గుర్తించబడినవి
 
 </div>
 
-> కానానికల్ చాట్, మీడియా, సెర్చ్, లోకల్, క్లౌడ్-ఏజెంట్ మరియు సిస్టమ్ కలెక్షన్లలో **376 నమోదిత ప్రొవైడర్లు** ఉన్నాయి; వీటిలో **153 ప్రొవైడర్లు `hasFree: true` డిస్కవరీ మెటాడేటాను కలిగి ఉన్నాయి**. చాట్ మోడల్ రిజిస్ట్రీలో **239 ప్రొవైడర్లు / 3,059 విభిన్న ప్రొవైడర్-మోడల్ జంటలు / 1,475 ముడి మోడల్ IDలు** ఉన్నాయి; ప్రత్యేక ఉచిత-బడ్జెట్ కేటలాగ్లో **మోడల్కు ఒక్కటి చొప్పున 484 వరుసలు**, **34 పునరావృత పూల్లు** మరియు **52 పునరావృత/కీ అవసరం లేని ఎల్లప్పుడూ-ఉచిత ప్రొవైడర్లు** ఉన్నాయి. ఇవి ఉద్దేశపూర్వకంగానే వేర్వేరు హారాలను ఉపయోగిస్తాయి; నిర్వచనాలు మరియు పూల్-డీడూప్లికేట్ చేసిన లెక్కలు [ప్రొవైడర్ రిఫరెన్స్](docs/reference/PROVIDER_REFERENCE.md) మరియు [ఉచిత టియర్లు](docs/reference/FREE_TIERS.md)లో ఉన్నాయి.
+> కానానికల్ చాట్, మీడియా, సెర్చ్, లోకల్, క్లౌడ్-ఏజెంట్ మరియు సిస్టమ్ కలెక్షన్లలో **377 నమోదిత ప్రొవైడర్లు** ఉన్నాయి; వీటిలో **153 ప్రొవైడర్లు `hasFree: true` డిస్కవరీ మెటాడేటాను కలిగి ఉన్నాయి**. చాట్ మోడల్ రిజిస్ట్రీలో **239 ప్రొవైడర్లు / 3,059 విభిన్న ప్రొవైడర్-మోడల్ జంటలు / 1,475 ముడి మోడల్ IDలు** ఉన్నాయి; ప్రత్యేక ఉచిత-బడ్జెట్ కేటలాగ్లో **మోడల్కు ఒక్కటి చొప్పున 484 వరుసలు**, **34 పునరావృత పూల్లు** మరియు **52 పునరావృత/కీ అవసరం లేని ఎల్లప్పుడూ-ఉచిత ప్రొవైడర్లు** ఉన్నాయి. ఇవి ఉద్దేశపూర్వకంగానే వేర్వేరు హారాలను ఉపయోగిస్తాయి; నిర్వచనాలు మరియు పూల్-డీడూప్లికేట్ చేసిన లెక్కలు [ప్రొవైడర్ రిఫరెన్స్](docs/reference/PROVIDER_REFERENCE.md) మరియు [ఉచిత టియర్లు](docs/reference/FREE_TIERS.md)లో ఉన్నాయి.
 
 <div align="center">
 
@@ -765,6 +765,7 @@ omniroute configure codex          # ఇవి కూడా: claude opencode qwe
 <table>
   <tr><th align="left">ప్లాట్ఫారమ్</th><th align="left">ఇన్స్టాల్</th><th align="left">ముఖ్యాంశాలు</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (గ్లోబల్)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">ఒకే కమాండ్, ఏ OS అయినా</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (గ్లోబల్)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">మద్దతు హామీలు లేకుండా సాధ్యమైనంతవరకు అనుకూలత; Node.js మద్దతు ఉన్న రన్టైమ్.</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">మల్టీ-ఆర్క్ <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>డెస్క్టాప్ (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">నేటివ్ విండో + సిస్టమ్ ట్రే — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>మెనూ-బార్ (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">సర్వర్ను పర్యవేక్షించి, స్వయంచాలకంగా అప్డేట్ చేస్తుంది — <b>macOS</b></td></tr>
@@ -1307,7 +1308,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 కూడా ద�
   <tr><td nowrap><b>రన్టైమ్</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>భాష</b></td><td>TypeScript 6.0 — <code>src/</code> మరియు <code>open-sse/</code> అంతటా <b>100% TypeScript</b> (v2.0 నుండి కోర్లో <code>any</code> సున్నా)</td></tr>
   <tr><td nowrap><b>ఫ్రేమ్వర్క్</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>డేటాబేస్</b></td><td>better-sqlite3 (SQLite, WAL జర్నలింగ్) + LowDB (JSON లెగసీ) — 147 డొమైన్ మాడ్యూళ్లు, 211 మైగ్రేషన్లు</td></tr>
+  <tr><td nowrap><b>డేటాబేస్</b></td><td>better-sqlite3 (SQLite, WAL జర్నలింగ్) + LowDB (JSON లెగసీ) — 147 డొమైన్ మాడ్యూళ్లు, 213 మైగ్రేషన్లు</td></tr>
   <tr><td nowrap><b>మెమరీ</b></td><td>SQLite FTS5 పూర్తి-టెక్స్ట్ + int8-క్వాంటైజ్డ్ వెక్టర్ ఎంబెడింగ్లు, టైప్డ్ డికే</td></tr>
   <tr><td nowrap><b>స్కీమాలు</b></td><td>Zod 4 — MCP సాధన I/O ధ్రువీకరణ + API కాంట్రాక్ట్లు</td></tr>
   <tr><td nowrap><b>ప్రోటోకాల్లు</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

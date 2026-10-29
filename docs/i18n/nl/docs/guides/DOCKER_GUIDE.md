@@ -664,6 +664,8 @@ De standaard Docker-/Kubernetes-configuratie van OmniRoute bestaat uit **één N
 
 **Upgrades:** verwacht dat elke sessie wordt verbroken. Laat clients indien mogelijk hun verbindingen afbouwen; met standaard-SQLite is er geen rolling update mogelijk. Compose `restart: unless-stopped` in combinatie met Docker `HEALTHCHECK` vervangt ook het enige proces wanneer de container Unhealthy is — met dezelfde impact.
 
+Kant-en-klare manifesten en een Helm-chart bevinden zich in `deploy/kubernetes/` en `deploy/helm/omniroute/` — zie de [Kubernetes-implementatiehandleiding](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kubernetes-fragment voor **één replica** (Recreate is vereist; verhoog `replicas` niet bij gebruik van één SQLite-bestand):
 
 ```yaml

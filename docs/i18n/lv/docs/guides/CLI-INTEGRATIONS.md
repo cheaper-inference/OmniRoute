@@ -16,11 +16,11 @@ datorā. API atslēge tiek norādīta, izmantojot vides mainīgo, ja vien rīks
 to atbalsta. Komandas, kas saglabā rīka lokālo vides failu, ir norādītas tālāk.
 
 Ir pieejams arī vispārīgs palaidējs — `omniroute run <target>` —, kas palaiž
-`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` vai `gemini` ar
+`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` vai `whycodes` ar
 ievadītiem atbilstošajiem vides mainīgajiem, vispār neierakstot konfigurāciju. Mērķi un to
 aizstājvārdi tiek iegūti no kanoniskā manifesta `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), un `omniroute completion` piedāvā
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), un `omniroute completion` piedāvā
 tos pašus no manifesta atvasinātos mērķu vārdus. Mantotie katram rīkam paredzētie palaidēji —
 `omniroute launch` (Claude Code) un `omniroute launch-codex` (Codex) — joprojām ir
 pieejami.
@@ -83,7 +83,8 @@ servera, un konfigurācija tiek saglabāta lokāli.
 | `omniroute setup-aider`    | Aider                             | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + izvada vides konfigurēšanas norādījumus                                                                                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Abi                   |
 | `omniroute setup-qwen`     | Qwen Code                         | `~/.qwen/settings.json` — V4 `modelProviders.openai` masīvs + `OMNIROUTE_API_KEY` failā `~/.qwen/.env`                                                                                                | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Abi                   |
 | `omniroute setup-5dive`    | 5dive (aģentu parks)              | Nekas zem `$HOME` — izveido 5dive **autentifikācijas profilu** (`/var/lib/5dive/auth-profiles/<name>/`), izmantojot `5dive agent auth set`; tikai root lietotājam, darbojas aģentu parka resursdatorā | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Abi                   |
-| `omniroute run <target>`   | Izpildlaika palaišana (vispārīga) | Nekas — palaiž `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` ar pareizo vidi un argumentiem; Qwen un Gemini izmanto pagaidu izolētu mājas direktoriju                                   | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Abi                   |
+| `omniroute setup-whycodes` | WhyCodes                          | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); ceļš ir `$WHYCODES_HOME/config.toml` vai `~/.whycodes/config.toml`                                                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Abi                   |
+| `omniroute run <target>`   | Izpildlaika palaišana (vispārīga) | Nekas — palaiž `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` ar pareizo vidi un argumentiem; Qwen un Gemini izmanto pagaidu izolētu mājas direktoriju                        | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Abi                   |
 | `omniroute launch`         | Claude Code                       | Nekas — palaiž `claude`, ievadot `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                                                                          | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Abi                   |
 | `omniroute launch-codex`   | OpenAI Codex CLI                  | Nekas — palaiž `codex`, ievadot `omniroute` nodrošinātāju ar `-c` karodziņiem                                                                                                                         | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Abi                   |
 
@@ -99,14 +100,15 @@ Piezīmes par karodziņiem (pārbaudīts komandu pirmkodā):
   failu sistēmu. Pieejams visām `setup-*` komandām, **izņemot** `setup-cursor`
   (kas nekad neraksta failā).
 - `--model <id>` — obligāts (vai tiek izvēlēts interaktīvi) rīkiem, kuriem nav
-  automātiskas modeļu atrašanas: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Šie rīki
+  automātiskas modeļu atrašanas: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. Šie rīki
   pieņem arī `--yes` neinteraktīvai izpildei (tādā gadījumā ir nepieciešams `--model`).
   `setup-opencode` pieņem `--model`, lai iestatītu noklusējuma augstākā līmeņa modeli.
 - `--model <id>` komandā `omniroute run` ievēro manifesta katram mērķim noteikto sasaisti
   (`bin/cli/cli-manifest.mjs`): **aider** saņem `--model openai/<id>`, bet
   **opencode** — `--model omniroute/<id>` (prefikss tiek pievienots tikai tad, ja ID
   to vēl nesatur); **qwen** un **gemini** saņem ID nemainītā veidā;
-  **claude** to saņem ar `ANTHROPIC_MODEL`, **goose** ar `GOOSE_MODEL`, bet
+  **claude** to saņem ar `ANTHROPIC_MODEL`, **goose** ar `GOOSE_MODEL`,
+  **whycodes**, izmantojot `-P omniroute -m <id>`, bet
   **codex** ar `-c model_providers.omniroute.*` argumentiem. **Qwen ir vienīgais
   palaišanas mērķis, kam `--model` ir obligāts** — `omniroute run qwen` bez tā beidz
   darbu ar kodu `2` un nepārprotamu kļūdas ziņojumu.
@@ -284,18 +286,19 @@ OmniRoute nodrošina OpenAI saskarni ceļā `/v1`, Anthropic saskarni saknes ce�
 un vietējo Gemini saskarni ceļā `/v1beta`. Katra integrācija ir konfigurēta atbilstoši formai, ko
 sagaida tās rīks (pārbaudīts komandas pirmkodā):
 
-| Integrācija                                                                | Norādītais bāzes URL | `/v1`?                                       |
-| -------------------------------------------------------------------------- | -------------------- | -------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | sakne                | Nē — Cline pievieno `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | sakne                | Nē — Goose pievieno ceļu                     |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | sakne                | Nē — LiteLLM pievieno `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | ar `/v1`             | Jā                                           |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | ar `/v1`             | Jā                                           |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | sakne                | Nē — Claude Code pievieno `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | ar `/v1`             | Jā                                           |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | ar `/v1`             | Jā                                           |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | sakne                | Nē — SDK pievieno `/v1beta/models/…`         |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` autentifikācijas profilā)              | sakne                | Nē — Claude Code pievieno `/v1/messages`     |
+| Integrācija                                                                | Norādītais bāzes URL | `/v1`?                                                         |
+| -------------------------------------------------------------------------- | -------------------- | -------------------------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | sakne                | Nē — Cline pievieno `/v1/chat/completions`                     |
+| `setup-goose` (`OPENAI_HOST`)                                              | sakne                | Nē — Goose pievieno ceļu                                       |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | sakne                | Nē — LiteLLM pievieno `/v1/chat/completions`                   |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | ar `/v1`             | Jā                                                             |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | ar `/v1`             | Jā                                                             |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | sakne                | Nē — Claude Code pievieno `/v1/messages`                       |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | ar `/v1`             | Jā                                                             |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | ar `/v1`             | Jā                                                             |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | sakne                | Nē — SDK pievieno `/v1beta/models/…`                           |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` autentifikācijas profilā)              | sakne                | Nē — Claude Code pievieno `/v1/messages`                       |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | ar `/v1`             | Jā — WhyCodes nosūta POST pieprasījumus uz `/chat/completions` |
 
 ---
 

@@ -163,7 +163,7 @@ O OmniRoute expõe 6 skills A2A conectadas em `src/lib/a2a/taskExecution.ts::A2A
 | Relatório de integridade | `health-report`      | Agrega o estado do disjuntor, do período de espera e do bloqueio por provedor                                                                                                        | integridade, resiliência     | "Mostre o status de integridade de todos os provedores" |
 | Listar recursos          | `list-capabilities`  | Retorna o catálogo completo de 45 entradas de Agent Skills (23 de API + 21 de CLI + 1 de configuração) como uma tabela markdown com URLs brutas de SKILL.md para injeção de contexto | catálogo, descoberta, skills | "Liste todos os recursos do OmniRoute"                  |
 
-> O Agent Card deve ser mantido alinhado ao catálogo ativo de 376 provedores; as contagens de provedores e os metadados de gratuidade/sem autenticação são obtidos do registro em tempo de execução.
+> O Agent Card deve ser mantido alinhado ao catálogo ativo de 377 provedores; as contagens de provedores e os metadados de gratuidade/sem autenticação são obtidos do registro em tempo de execução.
 
 ### Detalhes da skill `list-capabilities`
 

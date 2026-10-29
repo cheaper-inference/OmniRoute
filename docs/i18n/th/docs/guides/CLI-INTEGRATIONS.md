@@ -16,11 +16,11 @@ OmniRoute มาพร้อมชุดคำสั่ง `setup-*` สำห�
 คำสั่งที่บันทึกไฟล์สภาพแวดล้อมเฉพาะเครื่องมือแบบถาวรจะมีหมายเหตุไว้ด้านล่าง
 
 นอกจากนี้ยังมีตัวเรียกใช้งานอเนกประสงค์ — `omniroute run <target>` — ซึ่งเรียกใช้
-`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` หรือ `gemini` พร้อมแทรก
+`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` หรือ `whycodes` พร้อมแทรก
 ตัวแปรสภาพแวดล้อมที่เหมาะสม โดยไม่เขียนการกำหนดค่าใด ๆ เลย เป้าหมายและ
 นามแฝงของเป้าหมายมาจากแมนิเฟสต์มาตรฐาน `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`) และ `omniroute completion` จะเสนอคำเป้าหมาย
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`) และ `omniroute completion` จะเสนอคำเป้าหมาย
 ที่ได้มาจากแมนิเฟสต์เดียวกัน ตัวเรียกใช้งานแยกสำหรับแต่ละเครื่องมือแบบเดิม —
 `omniroute launch` (Claude Code) และ `omniroute launch-codex` (Codex) — ยังคง
 ใช้งานได้
@@ -83,7 +83,8 @@ ID การเชื่อมต่อแบบเต็มเมื่อม�
 | `omniroute setup-aider`    | Aider                           | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + แสดงสูตรการตั้งค่าตัวแปรสภาพแวดล้อม                                                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | ทั้งสองแบบ                  |
 | `omniroute setup-qwen`     | Qwen Code                       | `~/.qwen/settings.json` — อาร์เรย์ V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` ใน `~/.qwen/.env`                                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | ทั้งสองแบบ                  |
 | `omniroute setup-5dive`    | 5dive (กลุ่มเอเจนต์)            | ไม่มีสิ่งใดภายใต้ `$HOME` — เขียน **โปรไฟล์การยืนยันตัวตน** ของ 5dive (`/var/lib/5dive/auth-profiles/<name>/`) ผ่าน `5dive agent auth set`; ใช้ได้เฉพาะ root และทำงานบนโฮสต์ของกลุ่มเอเจนต์ | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | ทั้งสอง                     |
-| `omniroute run <target>`   | เริ่มต้นรันไทม์ (ทั่วไป)        | ไม่มี — เรียกใช้ `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` พร้อม env และอาร์กิวเมนต์ที่ถูกต้อง; Qwen และ Gemini ใช้ home แยกชั่วคราว                                      | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | ทั้งสอง                     |
+| `omniroute setup-whycodes` | WhyCodes                        | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); พาธคือ `$WHYCODES_HOME/config.toml` หรือ `~/.whycodes/config.toml`                                                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | ทั้งสองแบบ                  |
+| `omniroute run <target>`   | เริ่มต้นรันไทม์ (ทั่วไป)        | ไม่มี — เรียกใช้ `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` พร้อม env และอาร์กิวเมนต์ที่ถูกต้อง; Qwen และ Gemini ใช้ home แยกชั่วคราว                           | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | ทั้งสอง                     |
 | `omniroute launch`         | Claude Code                     | ไม่มี — เรียกใช้ `claude` โดยแทรก `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                                                               | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | ทั้งสอง                     |
 | `omniroute launch-codex`   | OpenAI Codex CLI                | ไม่มี — เรียกใช้ `codex` โดยแทรกผู้ให้บริการ `omniroute` ผ่านแฟล็ก `-c`                                                                                                                     | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | ทั้งสอง                     |
 
@@ -99,14 +100,15 @@ ID การเชื่อมต่อแบบเต็มเมื่อม�
   ระบบไฟล์ ใช้ได้กับทุกคำสั่ง `setup-*` **ยกเว้น** `setup-cursor`
   (ซึ่งไม่เคยเขียนไฟล์)
 - `--model <id>` — จำเป็นต้องระบุ (หรือเลือกแบบโต้ตอบ) สำหรับเครื่องมือที่ไม่มี
-  การค้นหาโมเดลอัตโนมัติ: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive เครื่องมือเหล่านี้
+  การค้นหาโมเดลอัตโนมัติ: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes เครื่องมือเหล่านี้
   ยังรองรับ `--yes` สำหรับการรันแบบไม่โต้ตอบ (ซึ่งในกรณีนั้นจำเป็นต้องระบุ `--model`)
   `setup-opencode` รับ `--model` เพื่อตั้งค่าโมเดลระดับบนสุดเริ่มต้น
 - `--model <id>` บน `omniroute run` ทำงานตามการเชื่อมต่อเฉพาะของแต่ละเป้าหมายในแมนิเฟสต์
   (`bin/cli/cli-manifest.mjs`): **aider** จะได้รับ `--model openai/<id>` และ
   **opencode** จะได้รับ `--model omniroute/<id>` (ระบบจะเพิ่มคำนำหน้าเฉพาะเมื่อ ID
   ยังไม่มีคำนำหน้านั้น); **qwen** และ **gemini** จะได้รับ ID ตามที่ระบุทุกประการ;
-  **claude** จะได้รับผ่าน `ANTHROPIC_MODEL`, **goose** ผ่าน `GOOSE_MODEL` และ
+  **claude** จะได้รับผ่าน `ANTHROPIC_MODEL`, **goose** ผ่าน `GOOSE_MODEL`,
+  **whycodes** ผ่าน `-P omniroute -m <id>` และ
   **codex** ผ่านอาร์กิวเมนต์ `-c model_providers.omniroute.*` **Qwen เป็นเป้าหมายเดียวของคำสั่ง run
   ที่บังคับให้ต้องระบุ `--model`** — `omniroute run qwen` ที่ไม่มีแฟล็กนี้จะจบการทำงาน
   ด้วยรหัส `2` พร้อมข้อผิดพลาดที่ระบุไว้อย่างชัดเจน
@@ -277,18 +279,19 @@ OmniRoute เปิดให้ใช้งานอินเทอร์เฟ�
 และอินเทอร์เฟซ Gemini แบบเนทีฟที่ `/v1beta` การผสานรวมแต่ละรายการได้รับการกำหนดค่าให้ตรงกับรูปแบบที่
 เครื่องมือนั้นคาดหวัง (ตรวจสอบแล้วจากซอร์สของคำสั่ง):
 
-| การผสานรวม                                                                 | Base URL ที่เขียน | `/v1`?                                       |
-| -------------------------------------------------------------------------- | ----------------- | -------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | รูท               | ไม่ — Cline ต่อท้าย `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | รูท               | ไม่ — Goose ต่อท้ายพาธ                       |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | รูท               | ไม่ — LiteLLM ต่อท้าย `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | พร้อม `/v1`       | ใช่                                          |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | พร้อม `/v1`       | ใช่                                          |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | รูท               | ไม่ — Claude Code ต่อท้าย `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | พร้อม `/v1`       | ใช่                                          |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | พร้อม `/v1`       | ใช่                                          |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | รูท               | ไม่ — SDK ต่อท้าย `/v1beta/models/…`         |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` ในโปรไฟล์การยืนยันตัวตน)               | รูท               | ไม่ — Claude Code ต่อท้าย `/v1/messages`     |
+| การผสานรวม                                                                 | Base URL ที่เขียน | `/v1`?                                                |
+| -------------------------------------------------------------------------- | ----------------- | ----------------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | รูท               | ไม่ — Cline ต่อท้าย `/v1/chat/completions`            |
+| `setup-goose` (`OPENAI_HOST`)                                              | รูท               | ไม่ — Goose ต่อท้ายพาธ                                |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | รูท               | ไม่ — LiteLLM ต่อท้าย `/v1/chat/completions`          |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | พร้อม `/v1`       | ใช่                                                   |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | พร้อม `/v1`       | ใช่                                                   |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | รูท               | ไม่ — Claude Code ต่อท้าย `/v1/messages`              |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | พร้อม `/v1`       | ใช่                                                   |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | พร้อม `/v1`       | ใช่                                                   |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | รูท               | ไม่ — SDK ต่อท้าย `/v1beta/models/…`                  |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` ในโปรไฟล์การยืนยันตัวตน)               | รูท               | ไม่ — Claude Code ต่อท้าย `/v1/messages`              |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | พร้อม `/v1`       | ใช่ — WhyCodes ส่งคำขอ POST ไปยัง `/chat/completions` |
 
 ---
 

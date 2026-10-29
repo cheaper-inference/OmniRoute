@@ -488,7 +488,7 @@ Acesta gestionează:
 
 | Fișier                        | Scop                                                          |
 | ----------------------------- | ------------------------------------------------------------- |
-| `providerRegistry.ts`         | Registrul modelelor de chat din catalogul cu 376 de furnizori |
+| `providerRegistry.ts`         | Registrul modelelor de chat din catalogul cu 377 de furnizori |
 | `providerModels.ts`           | Aliasuri de modele, maparea formatelor                        |
 | `constants.ts`                | Expirări, limite, coduri de stare                             |
 | `defaultThinkingSignature.ts` | Semnătura implicită de gândire Claude                         |

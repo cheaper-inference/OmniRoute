@@ -8,7 +8,7 @@
 > Opnieuw genereren met: `npm run gen:provider-reference`
 > **Laatst gegenereerd:** 2026-10-27
 
-Totaal aantal providers: **376**. Zie hieronder de uitsplitsing per categorie.
+Totaal aantal providers: **377**. Zie hieronder de uitsplitsing per categorie.
 
 ## Categorieën
 
@@ -397,7 +397,7 @@ Gebruik het dashboard op `/dashboard/providers` om elke provider in te schakelen
 | `vllm`                | `vllm`       | vLLM                | Lokaal, zelfgehost | [link](https://github.com/vllm-project/vllm)                    | API-sleutel optioneel. Configureer de lokale OpenAI-compatibele basis-URL van vLLM (standaard: http://localhost:8000/v1).                                                                                                                                                                                                                |
 | `xinference`          | `xinference` | XInference          | Lokaal, zelfgehost | [link](https://inference.readthedocs.io)                        | API-sleutel optioneel. Configureer de lokale OpenAI-compatibele basis-URL van XInference (standaard: http://localhost:9997/v1).                                                                                                                                                                                                          |
 
-## Zoekproviders (18)
+## Zoekproviders (19)
 
 | ID                  | Alias           | Naam                               | Tags   | Website                                                         | Opmerkingen                                                                                                                              |
 | ------------------- | --------------- | ---------------------------------- | ------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Gebruik het dashboard op `/dashboard/providers` om elke provider in te schakelen
 | `exa-search`        | `exa-search`    | Exa Search                         | Zoeken | [link](https://exa.ai)                                          | API-sleutel van dashboard.exa.ai                                                                                                         |
 | `firecrawl`         | `fc`            | Firecrawl                          | Zoeken | [link](https://firecrawl.dev)                                   | API-sleutel van firecrawl.dev/app/api-keys (of stel de basis-URL van uw zelfgehoste Firecrawl in)                                        |
 | `google-pse-search` | `google-pse`    | Google Programmable Search         | Zoeken | [link](https://developers.google.com/custom-search/v1/overview) | Vereist een Google API-sleutel en de ID van uw Programmable Search Engine (cx)                                                           |
+| `kimi-search`       | `kimi-search`   | Kimi Search                        | Zoeken | [link](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API-sleutel (MOONSHOT_API_KEY) van platform.kimi.ai                                                                          |
 | `linkup-search`     | `linkup`        | Linkup Search                      | Zoeken | [link](https://docs.linkup.so)                                  | Bearer-API-sleutel uit het Linkup-dashboard                                                                                              |
 | `nimble-search`     | `nimble`        | Nimble Search                      | Zoeken | [link](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer-API-sleutel uit het Nimble-dashboard                                                                                              |
 | `ollama-search`     | `ollama-search` | Ollama Search                      | Zoeken | [link](https://ollama.com/settings/keys)                        | Dezelfde API-sleutel als Ollama Cloud (van ollama.com/settings/keys)                                                                     |

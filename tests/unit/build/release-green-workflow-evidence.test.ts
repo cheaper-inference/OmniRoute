@@ -9,6 +9,7 @@ import test from "node:test";
 const root = new URL("../../../", import.meta.url);
 const verifier = fileURLToPath(new URL("scripts/ci/release-green-result.mjs", root));
 const sha = "1".repeat(40);
+const baseSha = "2".repeat(40);
 
 function verify(check: Record<string, unknown>) {
   const dir = mkdtempSync(join(tmpdir(), "omni-green-evidence-"));
@@ -81,7 +82,14 @@ function observe({
         scripts: { "check:workflows": "node scripts/check/check-workflows.mjs" },
       })
     );
-    for (const path of ["scripts/quality", "config/quality", ".github/workflows", "bin"]) {
+    for (const path of [
+      "scripts/quality",
+      "scripts/i18n",
+      "scripts/check",
+      "config/quality",
+      ".github/workflows",
+      "bin",
+    ]) {
       mkdirSync(join(dir, path), { recursive: true });
     }
     for (const name of [
@@ -91,6 +99,13 @@ function observe({
       "release-green-static-profile.mjs",
     ]) {
       cpSync(new URL(`scripts/quality/${name}`, root), join(dir, "scripts/quality", name));
+    }
+    // The real static-profile module imports this two-file comparison closure.
+    for (const path of [
+      "scripts/i18n/resolve-ui-diff-base.mjs",
+      "scripts/check/openapiBaseline.mjs",
+    ]) {
+      cpSync(new URL(path, root), join(dir, path));
     }
     writeFileSync(
       join(dir, "config/quality/release-green-static-profile.json"),
@@ -158,15 +173,29 @@ function observe({
       `#!${process.execPath}\nconsole.log(JSON.stringify([{ filePath: "fixture.ts", errorCount: 0, warningCount: 0 }]));\n`,
       { mode: 0o755 }
     );
-    writeFileSync(join(bin, "git"), `#!${process.execPath}\nconsole.log("${sha}");\n`, {
-      mode: 0o755,
-    });
+    writeFileSync(
+      join(bin, "git"),
+      `#!${process.execPath}\nconsole.log(process.argv.at(-1) === "${baseSha}^{commit}" ? "${baseSha}" : "${sha}");\n`,
+      {
+        mode: 0o755,
+      }
+    );
     const result = spawnSync(
       process.execPath,
       [join(dir, "scripts/quality/validate-release-green.mjs"), "--quick", "--full-ci", "--json"],
       {
         cwd: dir,
-        env: { ...process.env, PATH: bin, GITHUB_OUTPUT: "" },
+        env: {
+          ...process.env,
+          PATH: bin,
+          GITHUB_OUTPUT: "",
+          // Pin a valid synthetic comparison; ambient Actions events are unrelated to this fixture.
+          I18N_BASE_SHA: baseSha,
+          I18N_BASE_TIP_SHA: baseSha,
+          I18N_CANDIDATE_SHA: sha,
+          I18N_COMPARISON_SOURCE: "fixture:workflow-evidence",
+          I18N_COMPARISON_SCOPE: "candidate",
+        },
         encoding: "utf8",
         timeout: 20_000,
       }

@@ -10,8 +10,8 @@ OmniRoute na-ejikọta ya na ụdị ngwa CLI atọ e kesara n’ofe ibe dashboa
 
 | Ibe                     | Ụzọ                     | Echiche                                                                                         | Ọnụọgụ       |
 | ----------------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ------------ |
-| **Koodu CLI**           | `/dashboard/cli-code`   | Ngwa ide koodu ị na-atụnye na OmniRoute (Client → CLI → OmniRoute → Provider)                   | 26           |
-| **Ndị nnọchi anya CLI** | `/dashboard/cli-agents` | Ndị nnọchi anya kwụụrụ onwe ha ị na-atụnye na OmniRoute (otu usoro ahụ, mana oke ya sara mbara) | 10           |
+| **Koodu CLI**           | `/dashboard/cli-code`   | Ngwa ide koodu ị na-atụnye na OmniRoute (Client → CLI → OmniRoute → Provider)                   | 27           |
+| **Ndị nnọchi anya CLI** | `/dashboard/cli-agents` | Ndị nnọchi anya kwụụrụ onwe ha ị na-atụnye na OmniRoute (otu usoro ahụ, mana oke ya sara mbara) | 11           |
 | **Ndị nnọchi anya ACP** | `/dashboard/acp-agents` | CLI ndị OmniRoute na-ebido dị ka backend site na stdio/ACP (usoro ntụgharị azụ)                 | lee registry |
 
 Ụzọ ochie na-eji 308 atụgharị: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -56,19 +56,20 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Nke ọ bụla na-anabata `--remote <url> --api-key <key>` (iji hazie ngwaọrụ mpaghara
 ka ọ rụọ ọrụ megide OmniRoute dị anya), `--dry-run` (iji hụ ihe ga-eme n'ebughị ụzọ
 dee ya), na `--port`. Ngwaọrụ ndị na-enweghị nchọpụta model na-akpaghị aka (Cline,
-Kilo, Roo, Goose, Aider, Qwen, 5dive) na-anabata `--model <id>` (yana `--yes` maka
+Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) na-anabata `--model <id>` (yana `--yes` maka
 ọrụ ndị anaghị achọ mmekọrịta onye ọrụ). `setup-5dive` bụ naanị usoro nhazi nke
 na-adịghị ede n'okpuru `$HOME`: ọ na-ahazi ìgwè agent 5dive site n'ide profaịlụ
 njirimara nke root nwe n'elu host nke ìgwè ahụ, ya mere ọ na-eji `sudo` malite onwe
 ya ọzọ, ọ nweghịkwa ọnọdụ nke ya maka ọrụ dị anya. Iji malite CLI nke etinyere env
 kwesịrị ekwesị n'edeghị nhazi ọ bụla ma ọlị, jiri ihe mmalite izugbe
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — target na aha nnọchi ha sitere na `bin/cli/cli-manifest.mjs`); ihe
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — target na aha nnọchi ha sitere na `bin/cli/cli-manifest.mjs`); ihe
 mmalite ochie pụrụ iche maka ngwaọrụ ọ bụla, `omniroute launch` (Claude Code) na
 `omniroute launch-codex` (Codex), ka dịkwa. Gemini CLI bụ naanị maka mmalite: ọ bụ
 target nke `omniroute run` mana o nweghị usoro `setup-*`/`configure`.
@@ -185,7 +186,7 @@ Ngwaọrụ niile pụtara na `/dashboard/cli-code`. A na-ejikọta ndị nwere 
 Ngwaọrụ nwere `baseUrlSupport: "partial"` na-egosi baajị "⚠ URL ntọala ezughị ezu" na kaadị dashboard.
 ---
 
-## 2. Katalọgụ Ndị Ọrụ CLI (ngwaọrụ 10)
+## 2. Katalọgụ Ndị Ọrụ CLI (ngwaọrụ 11)
 
 Ndị ọrụ nọọrọ onwe ha na-apụta na `/dashboard/cli-agents`:
 
@@ -201,6 +202,7 @@ Ndị ọrụ nọọrọ onwe ha na-apụta na `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

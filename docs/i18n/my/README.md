@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — အခမဲ့ AI ဂိတ်ဝေး
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ကုဒ်ရေးသားမှုကို ဘယ်တော့မှ မရပ်တန့်ပါနှင့်။ AI ကိရိယာတိုင်း → ဝန်ဆောင်မှုပေးသူ 376 ခု — အခမဲ့ 150+ ခု — endpoint တစ်ခုတည်းမှတစ်ဆင့်။ Claude Code၊ Codex၊ Cursor၊ Cline၊ Copilot နှင့် Antigravity တို့ကို အခမဲ့ Claude / GPT / Gemini များနှင့် အလိုအလျောက် အရန်ပြောင်းလဲမှုဖြင့် ချိတ်ဆက်ပါ။ RTK + Caveman အဆင့်ဆင့် ဖိသိပ်မှုက token 15–95% (~89% ပျမ်းမျှ) ကို ချွေတာပေးသောကြောင့် ကန့်သတ်ချက်များကို ဘယ်တော့မှ မထိပါ။ AI ဝန်ဆောင်မှုပေးသူ 376 ခု · အခမဲ့အဆင့် 150+ ခု · တစ်လလျှင် အခမဲ့ token ~1.62B · လမ်းကြောင်းရွေးချယ်မှု နည်းဗျူဟာ 20 ခု · စတင်ရန် $0။"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ကုဒ်ရေးသားမှုကို ဘယ်တော့မှ မရပ်တန့်ပါနှင့်။ AI ကိရိယာတိုင်း → ဝန်ဆောင်မှုပေးသူ 377 ခု — အခမဲ့ 150+ ခု — endpoint တစ်ခုတည်းမှတစ်ဆင့်။ Claude Code၊ Codex၊ Cursor၊ Cline၊ Copilot နှင့် Antigravity တို့ကို အခမဲ့ Claude / GPT / Gemini များနှင့် အလိုအလျောက် အရန်ပြောင်းလဲမှုဖြင့် ချိတ်ဆက်ပါ။ RTK + Caveman အဆင့်ဆင့် ဖိသိပ်မှုက token 15–95% (~89% ပျမ်းမျှ) ကို ချွေတာပေးသောကြောင့် ကန့်သတ်ချက်များကို ဘယ်တော့မှ မထိပါ။ AI ဝန်ဆောင်မှုပေးသူ 377 ခု · အခမဲ့အဆင့် 150+ ခု · တစ်လလျှင် အခမဲ့ token ~1.62B · လမ်းကြောင်းရွေးချယ်မှု နည်းဗျူဟာ 20 ခု · စတင်ရန် $0။"/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                               |          v3.8.50          | **v3.8.51** |         `v3.8.53+`          |
 | ----------------------------- | :-----------------------: | :---------: | :-------------------------: |
-| 🌐 ပံ့ပိုးသူများ              |            352            |   **358**   |             376             |
+| 🌐 ပံ့ပိုးသူများ              |            352            |   **358**   |             377             |
 | 🧠 သီးခြား chat model ID များ |           1320            |  **1374**   |            1475             |
 | 🖼️ Modality Bridge            | 🆕 vision + audio + video |      ✓      |              ✓              |
 | 📡 Radar အခမဲ့ catalog        |     🆕 မိမိဆန္ဒဖြင့်      |      ✓      |              ✓              |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ လုပ်ဆောင်ချက်များ</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 ပေါင်းစပ်မှုများ</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 ပံ့ပိုးသူများ</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 ပံ့ပိုးသူများ</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI နှင့် MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ကတိကဝတ် — endpoint တစ်ခုနှင့် ဝန်ဆောင်မှုပေးသူ 376 ခု။ အခြား ကျန်းမာကောင်းမွန်သော target တစ်ခု ရရှိနိုင်သရွေ့ အလိုအလျောက် fallback က လမ်းကြောင်းသတ်မှတ်မှုကို ဆက်လက်လုပ်ဆောင်စေပါသည်။ မဏ္ဍိုင်ခြောက်ခု — ဝန်ဆောင်မှုပေးသူ 376 ခုတစ်လျှောက် ခံနိုင်ရည်ရှိသော fallback · သတ်မှတ်ချက်ပြည့်မီသော workload များတွင် token ကို 95% အထိ ချွေတာနိုင်ခြင်း · အခမဲ့အဆင့် 150+ နှင့် ထပ်တလဲလဲရရှိနိုင်သော/keyless ထာဝရအခမဲ့ ဝန်ဆောင်မှုပေးသူ 52 ခုဖြင့် $0 မှ စတင်နိုင်ခြင်း · config တစ်ခုမှတစ်ဆင့် CLI/agent ပေါင်းစည်းမှု 37 ခု · /v1 တွင် OpenAI၊ Claude၊ Gemini နှင့် Responses API တို့နှင့် တွဲဖက်အသုံးပြုနိုင်ခြင်း · circuit breaker များ၊ TLS stealth၊ MCP ကိရိယာ 110 ခု၊ A2A၊ memory၊ guardrail များ၊ eval များနှင့် ခြေရာခံထားသော test file 7,800+ တစ်လျှောက် static test declaration 56,000+ အပါအဝင် production control များ။"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ကတိကဝတ် — endpoint တစ်ခုနှင့် ဝန်ဆောင်မှုပေးသူ 377 ခု။ အခြား ကျန်းမာကောင်းမွန်သော target တစ်ခု ရရှိနိုင်သရွေ့ အလိုအလျောက် fallback က လမ်းကြောင်းသတ်မှတ်မှုကို ဆက်လက်လုပ်ဆောင်စေပါသည်။ မဏ္ဍိုင်ခြောက်ခု — ဝန်ဆောင်မှုပေးသူ 377 ခုတစ်လျှောက် ခံနိုင်ရည်ရှိသော fallback · သတ်မှတ်ချက်ပြည့်မီသော workload များတွင် token ကို 95% အထိ ချွေတာနိုင်ခြင်း · အခမဲ့အဆင့် 150+ နှင့် ထပ်တလဲလဲရရှိနိုင်သော/keyless ထာဝရအခမဲ့ ဝန်ဆောင်မှုပေးသူ 52 ခုဖြင့် $0 မှ စတင်နိုင်ခြင်း · config တစ်ခုမှတစ်ဆင့် CLI/agent ပေါင်းစည်းမှု 37 ခု · /v1 တွင် OpenAI၊ Claude၊ Gemini နှင့် Responses API တို့နှင့် တွဲဖက်အသုံးပြုနိုင်ခြင်း · circuit breaker များ၊ TLS stealth၊ MCP ကိရိယာ 110 ခု၊ A2A၊ memory၊ guardrail များ၊ eval များနှင့် ခြေရာခံထားသော test file 7,800+ တစ်လျှောက် static test declaration 56,000+ အပါအဝင် production control များ။"/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ strategy **20** ခုလုံးကို ကွန်ဘိုအဆင့်
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute ကို ထူးခြားစေသည့်အချက်များ — စွမ်းဆောင်ရည် 13 မျိုးအရ 9router၊ OpenRouter၊ CLIProxyAPI နှင့် LiteLLM တို့နှင့် ရက်စွဲအလိုက် မှတ်တမ်းတင်ထားသော လုပ်ဆောင်ချက် နှိုင်းယှဉ်ချက်။ OmniRoute တွင် ပံ့ပိုးသူ 376 ခု၊ အသင့်ထည့်သွင်းထားသော အခမဲ့အဆင့် 150+ ခု၊ လမ်းကြောင်းရွေးချယ်မှု နည်းဗျူဟာ 20 ခု၊ အင်ဂျင် 12 ခုသုံး token compression၊ tool 110 ခုပါဝင်သည့် အသင့်ထည့်သွင်းထားသော MCP server၊ A2A agent protocol၊ အမြဲတမ်းသိမ်းဆည်းထားသော memory၊ guardrail များ၊ cloud agent များ၊ TLS fingerprint ကို ဖုံးကွယ်နိုင်မှု၊ Desktop/Termux/PWA နှင့် i18n UI ဘာသာစကားဒေသ 67 ခုတို့ ပါဝင်သည်။ OmniRoute သည် MIT လိုင်စင်ဖြင့် ထုတ်ဝေထားပြီး မိမိကိုယ်ပိုင် server တွင် လက်ခံအသုံးပြုနိုင်သည်။ ပြိုင်ဘက်များ၏ စွမ်းဆောင်ရည်နှင့် အရေအတွက်များသည် ပြောင်းလဲနိုင်သဖြင့် ချိတ်ဆက်ထားသော နည်းစနစ်ကို ကြည့်ပါ။"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute ကို ထူးခြားစေသည့်အချက်များ — စွမ်းဆောင်ရည် 13 မျိုးအရ 9router၊ OpenRouter၊ CLIProxyAPI နှင့် LiteLLM တို့နှင့် ရက်စွဲအလိုက် မှတ်တမ်းတင်ထားသော လုပ်ဆောင်ချက် နှိုင်းယှဉ်ချက်။ OmniRoute တွင် ပံ့ပိုးသူ 377 ခု၊ အသင့်ထည့်သွင်းထားသော အခမဲ့အဆင့် 150+ ခု၊ လမ်းကြောင်းရွေးချယ်မှု နည်းဗျူဟာ 20 ခု၊ အင်ဂျင် 12 ခုသုံး token compression၊ tool 110 ခုပါဝင်သည့် အသင့်ထည့်သွင်းထားသော MCP server၊ A2A agent protocol၊ အမြဲတမ်းသိမ်းဆည်းထားသော memory၊ guardrail များ၊ cloud agent များ၊ TLS fingerprint ကို ဖုံးကွယ်နိုင်မှု၊ Desktop/Termux/PWA နှင့် i18n UI ဘာသာစကားဒေသ 67 ခုတို့ ပါဝင်သည်။ OmniRoute သည် MIT လိုင်စင်ဖြင့် ထုတ်ဝေထားပြီး မိမိကိုယ်ပိုင် server တွင် လက်ခံအသုံးပြုနိုင်သည်။ ပြိုင်ဘက်များ၏ စွမ်းဆောင်ရည်နှင့် အရေအတွက်များသည် ပြောင်းလဲနိုင်သဖြင့် ချိတ်ဆက်ထားသော နည်းစနစ်ကို ကြည့်ပါ။"/>
 
 <sub>📊 နည်းစနစ်အပြည့်အစုံနှင့် 9router၊ OpenRouter၊ CLIProxyAPI နှင့် LiteLLM တို့နှင့် လုပ်ဆောင်ချက်တစ်ခုချင်းအလိုက် အသေးစိတ်နှိုင်းယှဉ်ချက် → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar သည် opt-in ဖြစ်ပြီး GET-only ဖြစ်ပါသ�
 - **🖼️ Endpoint အသစ်များ** — `/v1/ocr` (Mistral OCR) နှင့် `/v1/audio/translations` (Whisper-style) တို့က media ဆိုင်ရာ လုပ်ဆောင်ချက်များကို ပြည့်စုံစေသည်။ → [API ကိုးကားချက်](docs/reference/API_REFERENCE.md)
 - **🎨 ရုပ်ပုံ / ဗီဒီယို / အသံ ဖန်တီးမှု** — media အတွက် API တစ်ခုတည်းဖြင့် xAI Grok Imagine & Novita AI video၊ ComfyUI၊ Magnific၊ Adobe Firefly၊ Segmind နှင့် ElevenLabs ကဲ့သို့သော အသံ provider များကို ပံ့ပိုးသည်။ → [API ကိုးကားချက်](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment နှင့် လည်ပတ်မှု** — reverse-proxy `basePath`၊ browser ဘာသာစကား အလိုအလျောက်ရှာဖွေမှု၊ key တစ်ခုချင်းအလိုက် device ခြေရာခံမှု၊ root မလိုသော MITM trust နှင့် zh-TW ဒေသသုံးဘာသာပြန်ဆိုမှု။ → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Provider နှင့် agent များ ပိုမိုတိုးချဲ့မှု** — cloud agent များ (Codex Cloud, Cursor, Devin, Jules)၊ browser + OAuth login ပါဝင်သော Grok Build (xAI)၊ ပထမတန်းစား Ollama card၊ Claude Opus 5 & Sonnet 5၊ Kimi တရားဝင်ပူးပေါင်းမှု (Code/Web/Moonshot)၊ Zed၊ Requesty၊ SenseNova၊ Yuanbao၊ Agnes AI… နှင့် အသစ်ပြန်လည်မွမ်းမံထားသော **provider ၃၇၆ ခုပါ catalog**။ → [Provider များ](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Provider နှင့် agent များ ပိုမိုတိုးချဲ့မှု** — cloud agent များ (Codex Cloud, Cursor, Devin, Jules)၊ browser + OAuth login ပါဝင်သော Grok Build (xAI)၊ ပထမတန်းစား Ollama card၊ Claude Opus 5 & Sonnet 5၊ Kimi တရားဝင်ပူးပေါင်းမှု (Code/Web/Moonshot)၊ Zed၊ Requesty၊ SenseNova၊ Yuanbao၊ Agnes AI… နှင့် အသစ်ပြန်လည်မွမ်းမံထားသော **provider ၃၇၇ ခုပါ catalog**။ → [Provider များ](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 လမ်းကြောင်းရွေးချယ်မှု ပွင့်လင်းမြင်သာမှု** — response တိုင်းတွင် ၎င်းကို ဆောင်ရွက်ပေးခဲ့သော strategy/provider/latency ကို ဖော်ပြသည့် `X-OmniRoute-Decision` header ပါဝင်သည်။ `cache-optimized` combo strategy အသစ်နှင့် Auto-Combo `cacheAffinity` factor တို့သည် ထပ်တလဲလဲ request များကို cached prefix ကို ကိုင်ထားသော connection ထံ ပြန်လည်ပို့ဆောင်ပြီး read-only `/v1/auto-combo/{channel}/candidates` endpoint သည် `auto/*` channel ၏ လက်ရှိ candidate pool ကို ဖော်ပြပေးသည်။ → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ စက်တွင်း စွမ်းဆောင်ရည်နှင့် အခြေခံအဆောက်အအုံ** — တစ်ချက်နှိပ်ရုံဖြင့် အသုံးပြုနိုင်သော စက်တွင်း Redis၊ Cloudflare Workers / Deno Deploy relay ဖြန့်ကျက်ရေးကိရိယာများ၊ ကြီးကြပ်စီမံထားသော ထည့်သွင်းပါဝင်သည့် ဝန်ဆောင်မှုများအဖြစ် Bifrost နှင့် Mux။ → [ထည့်သွင်းပါဝင်သည့် ဝန်ဆောင်မှုများ](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 တစ်ပါတည်း ပါဝင်သည့် အရာများ** — plugin framework + marketplace၊ Omni/Agent/GitHub skills frameworks၊ Obsidian vault ချိတ်ဆက်ပေါင်းစည်းမှု (MCP ကိရိယာ 22 ခု)၊ OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော Batch & Files APIs၊ semantic response cache၊ အဆင့်ဇယားများပါဝင်သည့် gamification၊ ACP agent ရှာဖွေဖော်ထုတ်မှု (အသင့်ထည့်သွင်းထားသော agent 15 ခု)၊ BigQuery သို့ အချိန်ဇယားဖြင့် log export ပြုလုပ်ခြင်း၊ `auto/chaos` အပြိုင် multi-model fan-out၊ Telegram bot bridge၊ အက်ပ်အတွင်း version manager နှင့် LMArena-ELO အခမဲ့ provider အဆင့်သတ်မှတ်ချက်များ။ → [စာရွက်စာတမ်းများ](docs/README.md)
@@ -659,7 +659,7 @@ Radar သည် opt-in ဖြစ်ပြီး GET-only ဖြစ်ပါသ�
 <b>＋ အောက်ပါတို့နှင့်လည်း အလုပ်လုပ်သည်</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော မည်သည့်ကိရိယာမဆို</b>
 </div>
 
-<sub>📖 ကိရိယာ 37 ခုစလုံးအတွက် ကိရိယာတစ်ခုချင်းစီအလိုက် စနစ်ထည့်သွင်းမှု (CLI Code 27 ခု + CLI Agent 10 ခု) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode ပလပ်အင် → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 ကိရိယာ 38 ခုစလုံးအတွက် ကိရိယာတစ်ခုချင်းစီအလိုက် စနစ်ထည့်သွင်းမှု (CLI Code 27 ခု + CLI Agent 11 ခု) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode ပလပ်အင် → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -689,11 +689,11 @@ command တိုင်းသည် လက်ရှိအသုံးပြု�
 
 <div align="center">
 
-## 🌐 AI ပံ့ပိုးသူ 376 ခု — ကတ်တလောက်တွင် အခမဲ့ဟု သတ်မှတ်ထားသည့် 153 ခု
+## 🌐 AI ပံ့ပိုးသူ 377 ခု — ကတ်တလောက်တွင် အခမဲ့ဟု သတ်မှတ်ထားသည့် 153 ခု
 
 </div>
 
-> ပုံမှန်သတ်မှတ်ထားသော chat၊ media၊ search၊ local၊ cloud-agent နှင့် system စုစည်းမှုများတစ်လျှောက် **မှတ်ပုံတင်ထားသော ပံ့ပိုးသူ 376 ခု** ရှိပြီး၊ ၎င်းတို့အနက် **153 ခုတွင် `hasFree: true` ရှာဖွေတွေ့ရှိရေး မက်တာဒေတာ ပါရှိသည်**။ Chat မော်ဒယ် registry တွင် **ပံ့ပိုးသူ 239 ခု / သီးခြား provider-model အတွဲ 3,059 ခု / မူရင်း model ID 1,475 ခု** ပါဝင်ပြီး၊ သီးခြား အခမဲ့ဘတ်ဂျက် ကတ်တလောက်တွင် **မော်ဒယ်အလိုက် စာရင်း 484 ခု**၊ **ထပ်တလဲလဲရရှိသော pool 34 ခု** နှင့် **ထပ်တလဲလဲရရှိသော/keyless အမြဲတမ်းအခမဲ့ ပံ့ပိုးသူ 52 ခု** ပါရှိသည်။ ဒီဇိုင်းအရ ၎င်းတို့၏ စုစုပေါင်းအခြေခံအရေအတွက်များသည် မတူညီကြပါသည်။ အဓိပ္ပာယ်သတ်မှတ်ချက်များနှင့် pool ထပ်နေမှုဖယ်ရှားပြီး တွက်ချက်မှုများကို [ပံ့ပိုးသူ အကိုးအကား](docs/reference/PROVIDER_REFERENCE.md) နှင့် [အခမဲ့အဆင့်များ](docs/reference/FREE_TIERS.md) တွင် ကြည့်ရှုနိုင်သည်။
+> ပုံမှန်သတ်မှတ်ထားသော chat၊ media၊ search၊ local၊ cloud-agent နှင့် system စုစည်းမှုများတစ်လျှောက် **မှတ်ပုံတင်ထားသော ပံ့ပိုးသူ 377 ခု** ရှိပြီး၊ ၎င်းတို့အနက် **153 ခုတွင် `hasFree: true` ရှာဖွေတွေ့ရှိရေး မက်တာဒေတာ ပါရှိသည်**။ Chat မော်ဒယ် registry တွင် **ပံ့ပိုးသူ 239 ခု / သီးခြား provider-model အတွဲ 3,059 ခု / မူရင်း model ID 1,475 ခု** ပါဝင်ပြီး၊ သီးခြား အခမဲ့ဘတ်ဂျက် ကတ်တလောက်တွင် **မော်ဒယ်အလိုက် စာရင်း 484 ခု**၊ **ထပ်တလဲလဲရရှိသော pool 34 ခု** နှင့် **ထပ်တလဲလဲရရှိသော/keyless အမြဲတမ်းအခမဲ့ ပံ့ပိုးသူ 52 ခု** ပါရှိသည်။ ဒီဇိုင်းအရ ၎င်းတို့၏ စုစုပေါင်းအခြေခံအရေအတွက်များသည် မတူညီကြပါသည်။ အဓိပ္ပာယ်သတ်မှတ်ချက်များနှင့် pool ထပ်နေမှုဖယ်ရှားပြီး တွက်ချက်မှုများကို [ပံ့ပိုးသူ အကိုးအကား](docs/reference/PROVIDER_REFERENCE.md) နှင့် [အခမဲ့အဆင့်များ](docs/reference/FREE_TIERS.md) တွင် ကြည့်ရှုနိုင်သည်။
 
 <div align="center">
 
@@ -767,6 +767,7 @@ command တိုင်းသည် လက်ရှိအသုံးပြု�
 <table>
   <tr><th align="left">ပလက်ဖောင်း</th><th align="left">ထည့်သွင်းမှု</th><th align="left">အဓိကအချက်များ</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (ကမ္ဘာလုံးဆိုင်ရာ)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">command တစ်ခုတည်းဖြင့် မည်သည့် OS တွင်မဆို</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (ကမ္ဘာလုံးဆိုင်ရာ)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">ပံ့ပိုးမှုအာမခံချက်မရှိဘဲ အတတ်နိုင်ဆုံး ကိုက်ညီမှုရှိစေသည်၊ Node.js သည် ပံ့ပိုးထားသော runtime ဖြစ်သည်။</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">ဗိသုကာမျိုးစုံသုံး <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">မူရင်း window + system tray — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Menu-bar (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">ဆာဗာကို ကြီးကြပ်ပြီး အလိုအလျောက်အပ်ဒိတ်လုပ်ပေးသည် — <b>macOS</b></td></tr>
@@ -1306,7 +1307,7 @@ Dashboard မပါသော headless runtime အတွက် Docker `base` prof
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ဘာသာစကား</b></td><td>TypeScript 6.0 — <code>src/</code> နှင့် <code>open-sse/</code> တစ်လျှောက်လုံး <b>100% TypeScript</b> (v2.0 မှစ၍ core တွင် <code>any</code> လုံးဝမရှိ)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ဒေတာဘေ့စ်</b></td><td>better-sqlite3 (SQLite၊ WAL journaling) + LowDB (JSON legacy) — domain module 147 ခု၊ migration 211 ခု</td></tr>
+  <tr><td nowrap><b>ဒေတာဘေ့စ်</b></td><td>better-sqlite3 (SQLite၊ WAL journaling) + LowDB (JSON legacy) — domain module 147 ခု၊ migration 213 ခု</td></tr>
   <tr><td nowrap><b>မှတ်ဉာဏ်</b></td><td>SQLite FTS5 full-text + int8-quantized vector embeddings၊ typed decay</td></tr>
   <tr><td nowrap><b>Schema များ</b></td><td>Zod 4 — MCP tool I/O validation + API contract များ</td></tr>
   <tr><td nowrap><b>Protocol များ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

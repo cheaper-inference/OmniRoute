@@ -8,7 +8,7 @@
 > Athghin le: `npm run gen:provider-reference`
 > **Gineadh go deireanach:** 2026-10-27
 
-Líon iomlán soláthraithe: **376**. Féach an miondealú de réir catagóire thíos.
+Líon iomlán soláthraithe: **377**. Féach an miondealú de réir catagóire thíos.
 
 ## Catagóirí
 
@@ -397,7 +397,7 @@ Clibeanna breise: `image`, `video`, `aggregator`, `enterprise`, `embed/rerank`, 
 | `vllm`                | `vllm`       | vLLM                | Áitiúil, féinóstáilte | [nasc](https://github.com/vllm-project/vllm)                    | Tá eochair API roghnach. Cumraigh URL bonn áitiúil vLLM atá comhoiriúnach le OpenAI (réamhshocrú: http://localhost:8000/v1).                                                                                                                                                                                                    |
 | `xinference`          | `xinference` | XInference          | Áitiúil, féinóstáilte | [nasc](https://inference.readthedocs.io)                        | Tá eochair API roghnach. Cumraigh URL bonn áitiúil XInference atá comhoiriúnach le OpenAI (réamhshocrú: http://localhost:9997/v1).                                                                                                                                                                                              |
 
-## Soláthraithe Cuardaigh (18)
+## Soláthraithe Cuardaigh (19)
 
 | ID                  | Ailias          | Ainm                               | Clibeanna | Suíomh Gréasáin                                                 | Nótaí                                                                                                                                           |
 | ------------------- | --------------- | ---------------------------------- | --------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Clibeanna breise: `image`, `video`, `aggregator`, `enterprise`, `embed/rerank`, 
 | `exa-search`        | `exa-search`    | Exa Search                         | Cuardach  | [nasc](https://exa.ai)                                          | Eochair API ó dashboard.exa.ai                                                                                                                  |
 | `firecrawl`         | `fc`            | Firecrawl                          | Cuardach  | [nasc](https://firecrawl.dev)                                   | Eochair API ó firecrawl.dev/app/api-keys (nó socraigh bun-URL Firecrawl atá féinóstáilte agat)                                                  |
 | `google-pse-search` | `google-pse`    | Google Programmable Search         | Cuardach  | [nasc](https://developers.google.com/custom-search/v1/overview) | Teastaíonn eochair Google API agus ID d’Innill Chuardaigh In-ríomhchláraithe (cx)                                                               |
+| `kimi-search`       | `kimi-search`   | Kimi Search                        | Cuardach  | [nasc](https://platform.kimi.ai/docs/api/tools-search)          | Eochair API Moonshot AI (MOONSHOT_API_KEY) ó platform.kimi.ai                                                                                   |
 | `linkup-search`     | `linkup`        | Linkup Search                      | Cuardach  | [nasc](https://docs.linkup.so)                                  | Eochair API Bearer ó dheais Linkup                                                                                                              |
 | `nimble-search`     | `nimble`        | Nimble Search                      | Cuardach  | [nasc](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Eochair API Bearer ó dheais Nimble                                                                                                              |
 | `ollama-search`     | `ollama-search` | Ollama Search                      | Cuardach  | [nasc](https://ollama.com/settings/keys)                        | An eochair API chéanna le Ollama Cloud (ó ollama.com/settings/keys)                                                                             |

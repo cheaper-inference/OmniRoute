@@ -10,8 +10,8 @@ OmniRoute 集成了三类 CLI 工具，分别位于三个专用的仪表板页�
 
 | 页面           | 路由                    | 概念                                                           | 数量       |
 | -------------- | ----------------------- | -------------------------------------------------------------- | ---------- |
-| **CLI 代码**   | `/dashboard/cli-code`   | 指向 OmniRoute 的编码工具（客户端 → CLI → OmniRoute → 提供者） | 26         |
-| **CLI 智能体** | `/dashboard/cli-agents` | 指向 OmniRoute 的自主智能体（流程相同，但范围更广）            | 10         |
+| **CLI 代码**   | `/dashboard/cli-code`   | 指向 OmniRoute 的编码工具（客户端 → CLI → OmniRoute → 提供者） | 27         |
+| **CLI 智能体** | `/dashboard/cli-agents` | 指向 OmniRoute 的自主智能体（流程相同，但范围更广）            | 11         |
 | **ACP 智能体** | `/dashboard/acp-agents` | OmniRoute 通过 stdio/ACP 生成并作为后端使用的 CLI（反向流程）  | 参见注册表 |
 
 旧版路由通过 308 重定向：`/dashboard/cli-tools` → `/dashboard/cli-code`，`/dashboard/agents` → `/dashboard/acp-agents`。
@@ -54,9 +54,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-每个命令都接受 `--remote <url> --api-key <key>`（将本地工具配置为连接远程 OmniRoute）、`--dry-run`（仅预览而不写入）和 `--port`。不支持自动发现模型的工具（Cline、Kilo、Roo、Goose、Aider、Qwen、5dive）还接受 `--model <id>`（非交互式运行时还可使用 `--yes`）。`setup-5dive` 是唯一不在 `$HOME` 下写入内容的配置方案：它通过在集群主机上写入由 root 拥有的身份验证配置文件来配置 5dive 代理集群，因此会通过 `sudo` 重新执行，并且本身不支持远程模式。要在完全不写入任何配置的情况下，通过注入正确的环境变量来启动 CLI，请使用通用的 `omniroute run <target>` 启动器（claude、codex、aider、goose、opencode、qwen、gemini——目标及其别名来自 `bin/cli/cli-manifest.mjs`）；旧版的按工具划分的启动器 `omniroute launch`（Claude Code）和 `omniroute launch-codex`（Codex）仍然可用。Gemini CLI 仅支持启动：它是一个 `omniroute run` 目标，但没有 `setup-*`/`configure` 配置方案。
+每个命令都接受 `--remote <url> --api-key <key>`（将本地工具配置为连接远程 OmniRoute）、`--dry-run`（仅预览而不写入）和 `--port`。不支持自动发现模型的工具（Cline、Kilo、Roo、Goose、Aider、Qwen、5dive、WhyCodes）还接受 `--model <id>`（非交互式运行时还可使用 `--yes`）。`setup-5dive` 是唯一不在 `$HOME` 下写入内容的配置方案：它通过在集群主机上写入由 root 拥有的身份验证配置文件来配置 5dive 代理集群，因此会通过 `sudo` 重新执行，并且本身不支持远程模式。要在完全不写入任何配置的情况下，通过注入正确的环境变量来启动 CLI，请使用通用的 `omniroute run <target>` 启动器（claude、codex、aider、goose、opencode、qwen、gemini、whycodes——目标及其别名来自 `bin/cli/cli-manifest.mjs`）；旧版的按工具划分的启动器 `omniroute launch`（Claude Code）和 `omniroute launch-codex`（Codex）仍然可用。Gemini CLI 仅支持启动：它是一个 `omniroute run` 目标，但没有 `setup-*`/`configure` 配置方案。
 
 > **完整参考：**主表——包括每个命令写入的内容、所有标志、本地与远程模式，以及哪些工具要求使用 `/v1` 后缀——位于
 > **[CLI 集成](../guides/CLI-INTEGRATIONS.md)**。
@@ -147,7 +148,7 @@ omniroute setup-5dive        omniroute setup-zed
 `baseUrlSupport: "partial"` 的工具会在仪表板卡片中显示“⚠ 部分支持基础 URL”徽章。
 ---
 
-## 2. CLI 智能体目录（10 个工具）
+## 2. CLI 智能体目录（11 个工具）
 
 显示在 `/dashboard/cli-agents` 中的自主智能体：
 
@@ -163,6 +164,7 @@ omniroute setup-5dive        omniroute setup-zed
 | letta        | Letta CLI        | Letta                    | full          | false           |
 | prime-agent  | Prime Agent      | Prime Intellect（开源）  | full          | false           |
 | 5dive        | 5dive            | 开源（5dive-ai）         | full          | false           |
+| whycodes     | WhyCodes         | Why Corporation          | full          | false           |
 
 ---
 

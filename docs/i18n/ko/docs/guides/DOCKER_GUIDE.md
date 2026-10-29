@@ -652,6 +652,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **업그레이드:** 모든 세션의 연결이 끊어질 것으로 예상하십시오. 가능하다면 클라이언트의 요청을 드레이닝하십시오. 기본 SQLite에서는 롤링 업데이트를 사용할 수 없습니다. Compose의 `restart: unless-stopped`와 Docker `HEALTHCHECK`를 함께 사용하면 컨테이너가 Unhealthy 상태일 때 유일한 프로세스도 교체됩니다. 이 경우에도 장애 영향 범위는 동일합니다.
 
+바로 사용할 수 있는 매니페스트와 Helm 차트는 `deploy/kubernetes/` 및 `deploy/helm/omniroute/`에 있습니다. 자세한 내용은 [Kubernetes 배포 가이드](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md)를 참조하세요.
+
 **단일 복제본**용 Kubernetes 스니펫(Recreate가 필요하며, 하나의 SQLite 파일에 대해 `replicas`를 늘리지 마십시오):
 
 ```yaml

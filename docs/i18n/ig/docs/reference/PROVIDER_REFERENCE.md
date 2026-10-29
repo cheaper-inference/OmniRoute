@@ -8,7 +8,7 @@
 > Mepụta ya ọzọ site na: `npm run gen:provider-reference`
 > **Oge ikpeazụ e mepụtara ya:** 2026-10-27
 
-Ngụkọta ndị na-eweta ọrụ: **376**. Lee nkewa dịka otu dị n'okpuru.
+Ngụkọta ndị na-eweta ọrụ: **377**. Lee nkewa dịka otu dị n'okpuru.
 
 ## Otu dị iche iche
 
@@ -397,7 +397,7 @@ Jiri dashboard dị na `/dashboard/providers` iji mee ka onye na-eweta ọrụ �
 | `vllm`                | `vllm`       | vLLM                | Mpaghara, nke a na-akwado n'onwe | [njikọ](https://github.com/vllm-project/vllm)                    | Igodo API abụghị iwu. Hazie URL ntọala vLLM mpaghara nke dakọtara na OpenAI (ndabara: http://localhost:8000/v1).                                                                                                                                                                                   |
 | `xinference`          | `xinference` | XInference          | Mpaghara, nke a na-akwado n'onwe | [njikọ](https://inference.readthedocs.io)                        | Igodo API abụghị iwu. Hazie URL ntọala XInference mpaghara nke dakọtara na OpenAI (ndabara: http://localhost:9997/v1).                                                                                                                                                                             |
 
-## Ndị Na-enye Ọrụ Ọchụchọ (18)
+## Ndị Na-enye Ọrụ Ọchụchọ (19)
 
 | ID                  | Aha ọzọ         | Aha                        | Mkpado  | Weebụsaịtị                                                       | Nkọwa                                                                                                                      |
 | ------------------- | --------------- | -------------------------- | ------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Jiri dashboard dị na `/dashboard/providers` iji mee ka onye na-eweta ọrụ �
 | `exa-search`        | `exa-search`    | Exa Search                 | Ọchụchọ | [njikọ](https://exa.ai)                                          | Igodo API sitere na dashboard.exa.ai                                                                                       |
 | `firecrawl`         | `fc`            | Firecrawl                  | Ọchụchọ | [njikọ](https://firecrawl.dev)                                   | Igodo API sitere na firecrawl.dev/app/api-keys (ma ọ bụ tọọ URL ntọala Firecrawl nke ị na-akwado n'onwe gị)                |
 | `google-pse-search` | `google-pse`    | Google Programmable Search | Ọchụchọ | [njikọ](https://developers.google.com/custom-search/v1/overview) | Ọ chọrọ igodo Google API na ID Programmable Search Engine gị (cx)                                                          |
+| `kimi-search`       | `kimi-search`   | Kimi Search                | Ọchụchọ | [njikọ](https://platform.kimi.ai/docs/api/tools-search)          | Igodo Moonshot AI API (MOONSHOT_API_KEY) sitere na platform.kimi.ai                                                        |
 | `linkup-search`     | `linkup`        | Linkup Search              | Ọchụchọ | [njikọ](https://docs.linkup.so)                                  | Igodo Bearer API sitere na dashboard Linkup                                                                                |
 | `nimble-search`     | `nimble`        | Nimble Search              | Ọchụchọ | [njikọ](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Igodo Bearer API sitere na dashboard Nimble                                                                                |
 | `ollama-search`     | `ollama-search` | Ollama Search              | Ọchụchọ | [njikọ](https://ollama.com/settings/keys)                        | Otu igodo API ahụ dị ka Ollama Cloud (sitere na ollama.com/settings/keys)                                                  |

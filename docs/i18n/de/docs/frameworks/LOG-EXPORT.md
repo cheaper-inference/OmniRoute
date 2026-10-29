@@ -268,7 +268,217 @@ Batches werden sowohl nach **Zeilenanzahl** als auch nach serialisierter Größe
 
 ---
 
-## 5. Hinzufügen eines Ziels
+## 5. OTLP/HTTP-Ziel für Traces
+
+Die Konfiguration verwendet `type: "otlp-http"`. Dies ist ein zeitgesteuerter, cursorbasierter Export persistierter
+Aufrufprotokolle, nicht die nach dem Best-Effort-Prinzip arbeitende Senke für Live-Routing-Ereignisse in
+`open-sse/services/routing/otel.ts`. Die Umgebungsvariablen, Timer oder Puffer dieser Senke werden weder gelesen
+noch geändert. Wenn beide aktiviert sind, können zwei unabhängige Arten von Spans entstehen;
+verwenden Sie den Instrumentierungsbereich `omniroute.log-export`, um diese Aufrufprotokoll-Spans zu unterscheiden.
+
+| Schlüssel                | Standardwert / Zweck                                                                            |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `endpoint`               | Erforderliche vollständige HTTP(S)-URL für Traces; das Suffix `/v1/traces` wird nicht angehängt |
+| `headers`                | Optionale Zeilen im Format `Name: value` oder JSON-Objekt mit Zeichenfolgen; verschlüsselt      |
+| `requestHeaderAllowlist` | Leer (aus); Namen/Präfixe von Client-Headern, die als Span-Attribute erfasst werden sollen      |
+| `serviceName`            | `omniroute`; Ressourcenattribut `service.name`                                                  |
+| `langfuseMapping`        | `false`; fügt Langfuse-Attribute für Generierung/Sitzung/Benutzer hinzu                         |
+| `identity`               | `pseudonymous`, `keyName` oder `none`                                                           |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                         |
+| `timeoutMs`              | `30000` pro HTTP-Versuch                                                                        |
+| `environment`            | Nicht gesetzt; optionales `langfuse.environment`                                                |
+
+Das generische Dashboard stellt diese Felder dar. `paths` akzeptiert ein API-Array oder ein Textfeld
+mit exakten Pfaden, die durch Zeilenumbrüche/Kommas getrennt sind. Embeddings, Rerank und andere Pfade werden
+übersprungen, sofern sie nicht ausdrücklich zugelassen sind. Auch übersprungene Zeilen setzen den Cursor weiter;
+die Zähler `exported`/`exportedTotal` des bestehenden Runners zählen verarbeitete Quellzeilen, einschließlich herausgefilterter
+Zeilen, statt akzeptierter Spans. Die Filterung erfolgt im untergeordneten Prozess, ohne dessen
+IPC-/Cursor-Vertrag zu ändern.
+
+Die URL-Validierung verwendet die ohne Datenbankzugriff arbeitende Hilfsfunktion `parseAndValidateNonMetadataUrl` aus
+`src/shared/network/outboundUrlGuard.ts`: die Richtlinie `block-metadata`. Sie führt dieselben
+bedingungslosen Prüfungen auf Metadaten, Protokolle und eingebettete Anmeldedaten durch wie der Webhook-Validator bei
+zugelassenen privaten URLs, erlaubt jedoch bewusst localhost-/LAN-Ziele ohne eine globale
+Feature-Flag-Überschreibung. Dies ermöglicht selbst gehostete Langfuse-, Phoenix-, Tempo- und Collector-
+Endpunkte, einschließlich privater HTTP-Endpunkte. Cloud-Metadaten-Hosts werden immer blockiert.
+Weiterleitungen werden nicht verfolgt, sodass ein Collector Anmeldedaten nicht an einen anderen Host weiterleiten kann.
+Wie die bestehende lexikalische URL-Prüfung fixiert auch diese die DNS-Auflösung nicht; konfigurieren Sie nur
+Hosts unter der Kontrolle des Betreibers. Bevorzugen Sie HTTPS, wenn sich der Endpunkt nicht in einem vertrauenswürdigen Netzwerk befindet.
+
+### Nutzdaten und Zustellung
+
+OTLP/HTTP-JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) überträgt pro zugelassener
+Zeile einen CLIENT-Span, der nach ihrem exakten Anfragepfad benannt ist. Die Benennung nach Pfad unterscheidet
+Chat Completions, Responses und Messages, ohne Modell- oder Identitätsdaten in den
+Span-Namen einzubetten. Ressourcenattribute umfassen `service.name` und die `service.version` des Pakets.
+
+Der reguläre Logger für Chat-Versuche (`open-sse/handlers/chatCore/attemptLogging.ts`) schreibt
+`duration = Date.now() - startTime` beim Abschluss und liefert keinen Zeitstempel;
+`saveCallLogOperation` in `src/lib/usage/callLogs.ts` setzt den Zeitstempel standardmäßig auf den Schreibzeitpunkt
+(Abschlusszeitpunkt). Der Export setzt daher Ende = Zeilenzeitstempel und Start = Ende − Dauer
+(Millisekunden, umgerechnet in dezimale Nanosekunden). Vom Aufrufer bereitgestellte historische Zeitstempel
+werden ebenfalls als Endzeit beibehalten; es gibt keine Unterscheidung zwischen Start und Abschluss pro Zeile.
+Eine Dauer mit dem Wert null wird zu null. Ungültige/fehlende Zeitstempel lassen den Batch fehlschlagen, statt
+nichtdeterministische Spans zu erzeugen. `ttftMs` kann null sein und wird auf `omniroute.ttft_ms` abgebildet.
+
+Zu den Attributen gehören `gen_ai.operation.name="chat"`, Anbieter, angefordertes/zurückgegebenes Modell,
+Eingabe-/Ausgabe-Token, optionale Token für Cache-Lesen/Cache-Erstellung/Reasoning, HTTP-Status,
+Combo, Cache-Quelle, Sitzungs-Tag und Korrelations-ID. Ganzzahlige OTLP-Werte und Zeitstempel
+sind dezimale Zeichenfolgen; Zeichenfolgen, boolesche Werte und Bruchzahlen verwenden ihre nativen OTLP-
+Wertvarianten. Fehler-Spans haben den Status ERROR und eine bereinigte Statusmeldung. Der kanonische
+Datensatz enthält keine URL des vorgelagerten Hosts, daher wird `server.address` weggelassen, statt
+den Collector fälschlich als Modellserver zu identifizieren. Kosten werden nicht exportiert.
+
+Nur `includeBodies=true` lädt Inhalte nach. Bei `langfuseMapping=false`
+enthalten `gen_ai.input.messages` / `gen_ai.output.messages` das bereinigte JSON des Anfrage-/Antwort-
+Bodys in der von OmniRoute gespeicherten Form (kanonisiert, sofern parsbar), kein umgeformtes semconv-
+Nachrichtenarray. Gekürzte/Nicht-JSON-Bodys bleiben Rohtext. Bei `langfuseMapping=true`
+werden Bodys nur als `langfuse.observation.input` / `langfuse.observation.output` ausgegeben;
+die Attribute `gen_ai.*.messages` werden weggelassen, sodass jeder Body einmal gesendet wird. Beide Modi
+übernehmen `maxBodyBytes` aus dem bestehenden Nachladepfad;
+`omniroute.bodies_truncated=true` kennzeichnet Kürzungen.
+Dieses Ziel fügt keine zusätzlichen Pipeline-Snapshots oder Lesezugriffe auf unbereinigte Artefakte hinzu;
+die optionale Erfassung von Anfrage-Headern verwendet den unten beschriebenen bestehenden nachgeladenen Client-Snapshot.
+Verwenden Sie beim Exportieren von Bodys einen Takt im Minutenbereich, etwa `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`,
+statt einen stündlichen Rückstau anzusammeln.
+
+### Optionale Client-Anfrage-Header
+
+Die Header-Erfassung ist **standardmäßig deaktiviert**. Setzen Sie `requestHeaderAllowlist` in der Zielkonfiguration
+und aktivieren Sie **Prompts und Antworten exportieren** (`includeBodies: true` am Ziel).
+Die Positivliste akzeptiert ein API-Array oder ein Textfeld mit durch Zeilenumbrüche/Kommas getrennten Namen:
+
+```json
+{
+  "requestHeaderAllowlist": ["User-Agent", "X-Project", "X-OmniRoute-Meta-*"]
+}
+```
+
+Namen werden ohne Berücksichtigung der Groß-/Kleinschreibung exakt abgeglichen, es sei denn, ein einzelnes abschließendes `*` wählt ein nicht leeres
+Präfix eines Header-Namens aus. Ein alleinstehendes `*`, eingebettete Platzhalter und ungültige HTTP-Header-Namen werden abgelehnt.
+Es sind höchstens 64 Selektoren zulässig, jeweils mit einem Namen/Präfix von höchstens 256 ASCII-Bytes.
+Diese Einstellung ist unabhängig von `headers`, womit sich der Exporter gegenüber dem Collector authentifiziert.
+
+Die Erfassung liest ausschließlich `pipeline_client_request`, das aus dem `clientRawRequest` (oder dem älteren `clientRequest`) der gespeicherten detaillierten Pipeline
+befüllt wird. Sie greift niemals ersatzweise auf Request-Header des Providers zurück.
+Die detaillierte Pipeline-Protokollierung muss zum Zeitpunkt der Aufzeichnung der Anfrage aktiviert gewesen sein. Bei
+deaktiviertem `includeBodies` oder bei fehlendem, beschädigtem oder abgeschnittenem Client-Snapshot-JSON werden keine Header-
+Attribute ausgegeben. Eine Erhöhung von `maxBodyBytes` kann das Abschneiden von Snapshots beim Export verhindern;
+sie kann keine Details wiederherstellen, die nie gespeichert wurden. Ein Snapshot mit mehr als 1 MiB oder mehr als
+256 Header-Einträgen wird ignoriert. Der bestehende Prompt-/Antwort-Export bleibt parallel zur
+Header-Erfassung aktiviert; die Positivliste bietet keinen Hydrierungsmodus ausschließlich für Header.
+
+Ausgewählte Werte werden zu OTLP-String-Arrays unter `http.request.header.<full lowercase header name>`,
+auch bei einer einzelnen Zeichenfolge. Beispielsweise wird `X-OmniRoute-Meta-Team: example-team` zu
+`http.request.header.x-omniroute-meta-team` mit
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
+Das vollständige Präfix bleibt erhalten: Es handelt sich um gewöhnliche Header, ohne Analyse geschäftsspezifischer Felder oder
+Konvertierung in `omniroute.metadata.*` / Langfuse-Metadaten. `langfuseMapping` ändert die Header-
+Semantik nicht. Ein ausgewählter einwertiger `User-Agent` setzt außerdem den standardmäßigen Skalarwert
+`user_agent.original`. Kommas innerhalb eines Werts werden nicht als Trennzeichen behandelt. Varianten mit unterschiedlicher Groß-/Kleinschreibung werden in der gespeicherten
+Eintragsreihenfolge zusammengeführt; jede ungültige Variante führt dazu, dass der gesamte Header ausgelassen wird. Attribute werden nach dem kleingeschriebenen Namen sortiert.
+
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-Key-Header, Namen mit
+auth/token/secret/password/credential-Markierungen und interne Gateway-Zugangsdaten werden immer
+ausgeschlossen, auch wenn sie ausgewählt oder im Speicher teilweise maskiert sind. Bekannte Zugangsdatenmuster verwenden
+die gemeinsame Zugangsdaten-Erkennung; Schwärzungsmarkierungen werden ausgelassen und nicht als sichere Werte exportiert.
+Es werden nur Zeichenfolgen und nicht leere String-Arrays akzeptiert; Zahlen oder Objekte werden nicht konvertiert.
+Ungültige Namen, Prototypschlüssel, Steuerzeichen (außer horizontalen Tabulatoren) und fehlerhaftes Unicode
+werden ignoriert, ohne den Batch fehlschlagen zu lassen oder ihren Inhalt in Fehlermeldungen wiederzugeben.
+
+Jeder Span erfasst höchstens 32 Header, 16 Werte pro Header, 4096 UTF-8-Bytes pro Wert
+und insgesamt 16384 UTF-8-Bytes für die erfassten Header-Namen und -Werte. Zu große/ungültige Header
+werden vollständig ausgelassen, nicht abgeschnitten. Die Auswahl ist eine Datenschutzentscheidung des Betreibers: Unbedenklich wirkende Namen
+können dennoch personenbezogene Daten enthalten, und diese Grenzen/Erkennungsmechanismen sind kein allgemeiner Filter zur Bereinigung personenbezogener Daten.
+
+### Übertragungsgrenzen
+
+Anfragen sind auf 500 Spans und 4 MiB UTF-8-JSON einschließlich der Hüllstruktur begrenzt.
+Jeder zulässige Span wird vor der ersten Anfrage eines Cursor-Batches auf seine Größe geprüft. Ein einzelner
+Span, der das Limit überschreitet, verhindert das Senden jeglicher Teile dieses Batches und führt zu einem Fehler mit dem Hinweis, `maxBodyBytes`
+zu reduzieren; er wird nicht stillschweigend verworfen. Die Vorabprüfung behält nur Datensatzreferenzen und
+Byte-Anzahlen bei und verwirft jeden temporären Span samt JSON; Spans werden für größenbegrenzte Teilstücke neu erstellt,
+anstatt eine zweite serialisierte Kopie des Batches vorzuhalten. Bei HTTP 408/429/5xx, Netzwerkfehlern und Zeitüberschreitungen erfolgen höchstens
+drei Versuche mit exponentieller Wartezeit von 250/500 ms. `Retry-After`-Angaben in Sekunden oder als HTTP-Datum
+können eine Wartezeit auf bis zu 5 Sekunden verlängern. Andere Statuscodes führen sofort zum Fehlschlag. Auch eine teilweise Ablehnung bei OTLP 2xx löst einen Fehler aus, anstatt
+einen verlorenen Span zu bestätigen; leere Bestätigungen oder solche mit gültigem JSON werden akzeptiert, wobei beim
+Lesen der Antwort eine Obergrenze von 64 KiB gilt.
+
+Fehlermeldungen enthalten nur Fakten aus dem Verantwortungsbereich des Exporters: HTTP-Status, Wiederholungsklasse, Anzahl der Versuche und gesendeten
+Spans oder fest vorgegebene Formulierungen für Bestätigungs-/Netzwerkfehler. Antwortinhalte des Collectors,
+Anzahlen bei Teilerfolgen und Antwort-Header werden niemals in Fehlermeldungen, Protokolle oder das
+Dashboard übernommen. Ein fehlgeschlagener oder teilweise akzeptierter Batch wird nicht bestätigt: Das Ziel zeigt
+„Fehlerhaft“ mit diesem Status an, der Cursor bleibt beim zuletzt bestätigten Batch, und der nächste Lauf
+sendet dieselben Zeilen erneut. Permanente Statusfehler führen weiterhin zu Fehlschlägen, bis der Collector oder die Konfiguration
+korrigiert wurde. Verwenden Sie die eigenen Protokolle des Collectors für Antwortdetails. Fehlerzusammenfassungen im Aufrufprotokoll behalten
+ihre separate Schwärzung bei.
+`prepare()` stellt nichts bereit; der Test sendet exakt `{"resourceSpans":[]}` per POST und meldet den
+HTTP-Status, ohne Spans aus dem Aufrufprotokoll zu schreiben.
+
+Trace-IDs und Span-IDs sind die ersten 32/16 Hexadezimalziffern des SHA-256-Hashs von
+`"omniroute.trace\0" + callLogId` bzw. `"omniroute.span\0" + callLogId`. Erneute Sendungen enthalten
+identische IDs. Dies ist keine Garantie für eine Deduplizierung: Einige Backends, darunter die Langfuse-
+v4-Ingestion, deduplizieren Spans mit identischer ID nicht. Ein Absturz oder das Fehlschlagen eines Teilstücks kann dazu führen, dass
+höchstens der eine unbestätigte Cursor-Batch erneut gesendet wird; dabei kann der gesamte Batch dupliziert werden,
+nicht nur sein letztes HTTP-Teilstück. Berücksichtigen Sie diesen Zielkonflikt bei der Wahl der Cursor-Batch-Größe.
+
+### Langfuse-Beispiel
+
+Konfigurieren Sie diese Felder für eine selbst gehostete Langfuse-Instanz:
+
+```json
+{
+  "endpoint": "https://langfuse.example.com/api/public/otel/v1/traces",
+  "headers": "Authorization: Basic <base64-of-public-key:secret-key>",
+  "serviceName": "omniroute",
+  "langfuseMapping": true,
+  "identity": "pseudonymous",
+  "environment": "production"
+}
+```
+
+Erstellen Sie den Authorization-Wert lokal als Base64-Kodierung der literalen Zeichenfolge `public-key:secret-key`
+(zum Beispiel mit `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Fügen Sie keine echten Zugangsdaten in Protokolle, Screenshots oder Issues ein. Die Zuordnung setzt automatisch
+`x-langfuse-ingestion-version: 4`; Authorization wird weiterhin über `headers` angegeben.
+Sowohl die Header als auch der generierte Salt für die Identität verwenden den bestehenden Mechanismus für verschlüsselte Geheimnisfelder
+und API-Platzhalter; `STORAGE_ENCRYPTION_KEY` ist erforderlich.
+
+Das Mapping ergänzt Generierungstyp/-modell, JSON-Nutzungsdetails (Eingabe/Ausgabe/Gesamtzahl und verfügbare
+Cache-Schlüssel), JSON-Snapshots von Ein- und Ausgabe, die Stufe ERROR/DEFAULT, eine bereinigte Statusmeldung,
+den Trace-Namen, die Sitzungs-ID, eine optionale Umgebung sowie filterbare
+`langfuse.observation.metadata.<key>` für Anbieter, angefordertes Modell, Pfad, Kombination, Cache-
+Quelle und Status. `langfuse.observation.completion_start_time` wird im ISO-8601-Format als
+Startzeit + TTFT angegeben, jedoch nur, wenn TTFT bekannt ist und innerhalb der Dauer liegt. Es werden keine Kostenattribute gesendet.
+
+Identitätsmodi gelten für `langfuse.user.id`:
+
+- `pseudonymous` (Standard): HMAC-SHA256 der internen ID des API-Schlüssels mit einem zufälligen,
+  zielspezifischen 32-Byte-Salt. Der Salt wird beim Erstellen generiert, falls er fehlt, verschlüsselt
+  als `identitySalt` gespeichert, niemals zurückgegeben und bei Bearbeitungen beibehalten. Unverarbeitete Schlüssel-IDs werden niemals
+  in Span-Attribute aufgenommen. Das Neuerstellen/Rotieren des Salts eines Ziels ändert die Identitäten.
+- `keyName`: der konfigurierte Name des API-Schlüssels, der diese vom Betreiber vergebene Bezeichnung absichtlich offenlegt.
+- `none`: keine Benutzer-ID. Sitzungs-Tags werden weiterhin exportiert, sofern vorhanden; diese Modi
+  anonymisieren keine beliebigen Prompt-Inhalte oder vom Betreiber bereitgestellten Sitzungs-/Korrelationsbezeichnungen.
+
+### Ohne rückwirkende Übernahme starten
+
+Aktivieren Sie ausschließlich beim Erstellen **Ab aktueller Position starten (vorhandene Protokolle überspringen)** oder übergeben Sie
+`startFromCurrentPosition: true` auf der obersten Ebene der API-Nutzdaten für die Erstellung. Dadurch wird
+`cursor_row_id` mithilfe der vorhandenen Cursor-Hilfsfunktionen auf die aktuelle maximale rowid der aufbewahrten Aufrufprotokolle
+initialisiert, ohne Migration. Der Standardwert ist false (Cursor 0 und rückwirkende Übernahme des aufbewahrten Verlaufs).
+Dies ist keine Einstellung zum Zurücksetzen des Cursors bei einer Aktualisierung.
+
+Die gemeinsame Ergänzung `ttftMs` fügt außerdem dem BigQuery-Mapper
+und dem Schema für neue Tabellen eine nullable Spalte `ttft_ms` hinzu: Der zugehörige Schematest verlangt für jedes kanonische Datensatzfeld eine
+Spalte. Bestehende Tabellen werden unverändert weiter exportiert: `prepare()` liest das Tabellenschema und
+lässt nur `ttft_ms` weg, wenn diese Spalte fehlt. Fügen Sie die nullable INT64-Spalte hinzu, um TTFT
+beim nächsten Durchlauf zu erhalten, oder verwenden Sie eine neue Tabelle. Weder PATCH noch eine automatische Schemaänderung oder zusätzliche
+Berechtigungen sind erforderlich; für alle anderen Zeilenfelder bleibt die strikte Schemaprüfung bestehen.
+
+---
+
+## 6. Hinzufügen eines Ziels
 
 1. Erstellen Sie `src/lib/logExport/destinations/<name>.ts`, das einen `LogExportDestinationType` exportiert:
    ein Zod-`configSchema`, ein `fields`-Deskriptor-Array für die Benutzeroberfläche, `secretFields` sowie eine
@@ -289,7 +499,7 @@ Für ein neues Ziel gelten zwei Regeln:
 
 ---
 
-## 6. Betrieb
+## 7. Betrieb
 
 - **Dashboard**: Integrationen → Logexport. Fügen Sie ein Ziel hinzu, führen Sie **Testen** aus, um die Anmeldedaten
   zu prüfen, ohne Zeilen zu schreiben, und aktivieren Sie es anschließend.

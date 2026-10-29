@@ -163,7 +163,7 @@ OmniRoute cung cấp 6 kỹ năng A2A được kết nối trong `src/lib/a2a/ta
 | Báo cáo tình trạng    | `health-report`      | Tổng hợp trạng thái circuit breaker, thời gian chờ và khóa truy cập theo từng nhà cung cấp                                                    | tình trạng, khả năng phục hồi | "Hiển thị tình trạng của tất cả nhà cung cấp" |
 | Liệt kê khả năng      | `list-capabilities`  | Trả về toàn bộ danh mục 45 mục Agent Skills (23 API + 21 CLI + 1 cấu hình) dưới dạng bảng markdown cùng các URL SKILL.md thô để chèn ngữ cảnh | danh mục, khám phá, kỹ năng   | "Liệt kê tất cả khả năng của OmniRoute"       |
 
-> Agent Card cần được giữ đồng bộ với danh mục trực tiếp gồm 376 nhà cung cấp; số lượng nhà cung cấp và siêu dữ liệu miễn phí/không cần xác thực được lấy từ registry tại thời điểm chạy.
+> Agent Card cần được giữ đồng bộ với danh mục trực tiếp gồm 377 nhà cung cấp; số lượng nhà cung cấp và siêu dữ liệu miễn phí/không cần xác thực được lấy từ registry tại thời điểm chạy.
 
 ### Chi tiết kỹ năng `list-capabilities`
 

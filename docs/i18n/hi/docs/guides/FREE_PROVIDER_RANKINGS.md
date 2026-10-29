@@ -13,7 +13,7 @@
 
 ## यह क्या है
 
-OmniRoute 376 प्रोवाइडर रजिस्टर करता है, जिनमें 155 कैटलॉग एंट्री **free/no-auth** के रूप में चिह्नित हैं
+OmniRoute 377 प्रोवाइडर रजिस्टर करता है, जिनमें 155 कैटलॉग एंट्री **free/no-auth** के रूप में चिह्नित हैं
 (no-auth,
 free-tier OAuth, या free-tier API key — देखें
 [फ़्री टियर गाइड](../getting-started/FREE-TIERS-GUIDE.md) और पूरी

@@ -252,7 +252,218 @@ respinge o solicitare de peste 10 MB. Loturile sunt închise la 500 de rânduri 
 
 ---
 
-## 5. Adăugarea unei destinații
+## 5. Destinație pentru urme OTLP/HTTP
+
+Configurația folosește `type: "otlp-http"`. Acesta este un export programat al jurnalelor de
+apeluri persistate, bazat pe un cursor, nu destinația de colectare în timp real, fără garanția livrării,
+a evenimentelor de rutare din
+`open-sse/services/routing/otel.ts`. Nu citește și nu modifică variabilele de mediu,
+temporizatoarele sau bufferele acelei destinații. Activarea ambelor poate produce două tipuri independente de spanuri;
+folosiți domeniul de instrumentare `omniroute.log-export` pentru a distinge aceste spanuri ale jurnalelor de apeluri.
+
+| Cheie                    | Valoare implicită / scop                                                                |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| `endpoint`               | URL HTTP(S) complet obligatoriu pentru urme; nu se adaugă sufixul `/v1/traces`          |
+| `headers`                | Linii opționale `Name: value` sau obiect JSON cu șiruri; criptate                       |
+| `requestHeaderAllowlist` | Goală (dezactivată); nume/prefixe de antete client de capturat ca atribute ale spanului |
+| `serviceName`            | `omniroute`; atributul de resursă `service.name`                                        |
+| `langfuseMapping`        | `false`; adaugă atribute Langfuse pentru generare/sesiune/utilizator                    |
+| `identity`               | `pseudonymous`, `keyName` sau `none`                                                    |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                 |
+| `timeoutMs`              | `30000` pentru fiecare încercare HTTP                                                   |
+| `environment`            | Nesetat; `langfuse.environment` opțional                                                |
+
+Panoul de control generic afișează aceste câmpuri. `paths` acceptă un tablou prin API sau o zonă de text
+cu căi exacte separate prin linii noi/virgule. Căile pentru embeddings, rerank și alte operațiuni sunt
+omise dacă nu sunt permise explicit. Rândurile omise avansează totuși cursorul; contoarele
+`exported`/`exportedTotal` ale executantului existent numără rândurile sursă procesate, inclusiv rândurile
+filtrate, nu spanurile acceptate. Filtrarea se face în procesul copil, fără a-i modifica
+contractul IPC/cursor.
+
+Validarea URL-urilor folosește funcția auxiliară `parseAndValidateNonMetadataUrl`, care nu depinde de baza de date, din
+`src/shared/network/outboundUrlGuard.ts`: politica `block-metadata`. Aceasta aplică aceleași
+verificări necondiționate pentru metadate/protocol/credențiale încorporate ca validatorul webhook cu
+URL-urile private permise, dar permite în mod deliberat destinații localhost/LAN fără o suprascriere
+globală printr-un indicator de funcționalitate. Astfel sunt permise endpointuri Langfuse, Phoenix, Tempo și Collector
+găzduite pe infrastructura proprie, inclusiv endpointuri HTTP private. Gazdele de metadate cloud sunt întotdeauna blocate.
+Redirecționările nu sunt urmate, astfel încât un colector nu poate redirecționa credențialele către o altă gazdă.
+La fel ca mecanismul existent de protecție lexicală a URL-urilor, acesta nu fixează rezoluția DNS; configurați numai
+gazde controlate de operator. Preferați HTTPS ori de câte ori endpointul nu se află într-o rețea de încredere.
+
+### Date transmise și livrare
+
+JSON-ul OTLP/HTTP (`ExportTraceServiceRequest`, `Content-Type: application/json`) transportă un
+span CLIENT pentru fiecare rând permis, denumit după calea exactă a cererii. Denumirea după cale distinge
+Chat Completions, Responses și Messages fără a încorpora date despre model sau identitate în
+numele spanului. Atributele resursei includ `service.name` și `service.version` al pachetului.
+
+Componenta obișnuită de jurnalizare a încercărilor de chat (`open-sse/handlers/chatCore/attemptLogging.ts`) scrie
+`duration = Date.now() - startTime` la finalizare și nu furnizează un marcaj temporal;
+`saveCallLogOperation` din `src/lib/usage/callLogs.ts` setează implicit marcajul temporal la momentul
+scrierii (finalizării). Prin urmare, exportul setează sfârșitul = marcajul temporal al rândului și începutul = sfârșitul − durata
+(milisecunde, convertite în nanosecunde zecimale). Marcajele temporale istorice furnizate de apelant
+sunt de asemenea păstrate ca moment de sfârșit; nu există un discriminator de început/finalizare pentru fiecare rând.
+O durată nulă devine zero. Marcajele temporale invalide/lipsă provoacă eșecul lotului, în loc să creeze
+spanuri nedeterministe. `ttftMs` poate fi nul și este mapat la `omniroute.ttft_ms`.
+
+Atributele includ `gen_ai.operation.name="chat"`, furnizorul, modelul solicitat/modelul din răspuns,
+tokenurile de intrare/ieșire, opțional tokenurile de citire din cache/creare a cache-ului/raționament, starea HTTP,
+combo, sursa cache-ului, eticheta sesiunii și identificatorul de corelare. Valorile întregi OTLP și marcajele temporale
+sunt șiruri zecimale; șirurile, valorile booleene și numerele fracționare folosesc variantele lor native de valori OTLP.
+Spanurile de eroare au starea ERROR și un mesaj de stare curățat. Înregistrarea
+canonică nu conține URL-ul gazdei din amonte, astfel încât `server.address` este omis, în loc să
+identifice incorect colectorul drept serverul modelului. Costul nu este exportat.
+
+Numai `includeBodies=true` încarcă conținutul. Cu `langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` transportă JSON-ul curățat al corpului cererii/răspunsului,
+așa cum este stocat de OmniRoute (adus la forma canonică atunci când poate fi parsată), nu un tablou de mesaje
+restructurat conform convențiilor semantice. Corpurile trunchiate/non-JSON rămân text brut. Cu `langfuseMapping=true`,
+corpurile sunt emise numai ca `langfuse.observation.input` / `langfuse.observation.output`;
+atributele `gen_ai.*.messages` sunt omise, astfel încât fiecare corp este trimis o singură dată. Ambele moduri
+moștenesc `maxBodyBytes` din fluxul existent de încărcare a conținutului;
+`omniroute.bodies_truncated=true` marchează trunchierea.
+Această destinație nu adaugă instantanee suplimentare ale fluxului de procesare și nici citiri de artefacte necurățate;
+capturarea opțională a antetelor cererii folosește instantaneul clientului deja încărcat, descris mai jos.
+Folosiți o frecvență de ordinul minutelor, precum `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, când exportați
+corpuri, în loc să acumulați date în așteptare timp de o oră.
+
+### Antete opționale ale cererii clientului
+
+Capturarea antetelor este **dezactivată implicit**. Setați `requestHeaderAllowlist` în configurația destinației
+și activați **Exportă prompturile și răspunsurile** (`includeBodies: true` pentru destinație).
+Lista de permisiuni acceptă un tablou prin API sau o zonă de text cu nume separate prin linii noi/virgule:
+
+```json
+{
+  "requestHeaderAllowlist": ["User-Agent", "X-Project", "X-OmniRoute-Meta-*"]
+}
+```
+
+Numele se potrivesc exact, fără a ține cont de majuscule și minuscule, cu excepția cazului în care un singur `*` final selectează un prefix nevid
+al numelui antetului. Un `*` izolat, metacaracterele încorporate și numele de antete HTTP nevalide sunt respinse.
+Sunt permise cel mult 64 de selectoare, fiecare cu un nume/prefix de cel mult 256 de octeți ASCII.
+Această setare este separată de `headers`, care autentifică exportatorul la colector.
+
+Capturarea citește doar `pipeline_client_request`, populat din
+`clientRawRequest` (sau vechiul `clientRequest`) al pipeline-ului detaliat salvat. Nu recurge niciodată la antetele cererii către furnizor.
+Jurnalizarea detaliată a pipeline-ului trebuie să fi fost activată când a fost înregistrată cererea. Dacă
+`includeBodies` este dezactivat sau dacă JSON-ul instantaneului clientului lipsește, este corupt ori trunchiat, nu sunt emise
+atribute de antet. Creșterea valorii `maxBodyBytes` poate evita trunchierea instantaneului la export;
+nu poate recupera detalii care nu au fost salvate niciodată. Un instantaneu mai mare de 1 MiB sau care conține mai mult de
+256 de intrări de antet este ignorat. Exportul existent al prompturilor/răspunsurilor rămâne activ alături de
+capturarea antetelor; lista de permisiuni nu oferă un mod de hidratare exclusiv pentru antete.
+
+Valorile selectate devin tablouri de șiruri OTLP `http.request.header.<full lowercase header name>`,
+chiar și pentru un singur șir. De exemplu, `X-OmniRoute-Meta-Team: example-team` devine
+`http.request.header.x-omniroute-meta-team` cu
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
+Prefixul complet este păstrat: acestea sunt antete obișnuite, fără parsarea câmpurilor de business sau
+conversie în metadate `omniroute.metadata.*` / Langfuse. `langfuseMapping` nu modifică semantica
+antetelor. Un antet `User-Agent` selectat, cu o singură valoare, setează și atributul scalar standard
+`user_agent.original`. Virgulele din interiorul unei valori nu sunt folosite pentru separare. Variantele care diferă prin majuscule și minuscule sunt îmbinate în ordinea
+intrărilor salvate; orice variantă nevalidă duce la omiterea întregului antet. Atributele sunt ordonate după numele cu litere mici.
+
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, antetele pentru chei API, numele care conțin
+marcatori auth/token/secret/password/credential și credențialele interne ale gateway-ului sunt întotdeauna
+excluse, chiar dacă sunt selectate sau mascate parțial în stocare. Tiparele cunoscute de credențiale reutilizează
+detectorul comun de credențiale; marcatorii de redactare sunt omiși, nu exportați ca valori sigure.
+Sunt acceptate doar șiruri și tablouri nevide de șiruri; numerele sau obiectele nu sunt convertite implicit.
+Numele nevalide, cheile de prototip, caracterele de control (cu excepția tabulatorului orizontal) și secvențele Unicode incorecte
+sunt ignorate fără a provoca eșecul lotului sau a reproduce conținutul lor în erori.
+
+Fiecare span capturează cel mult 32 de antete, 16 valori per antet, 4096 de octeți UTF-8 per valoare
+și un total de 16384 de octeți UTF-8 pentru numele și valorile antetelor capturate. Antetele prea mari/nevalide
+sunt omise integral, nu trunchiate. Selecția este o decizie a operatorului privind confidențialitatea: numele aparent sigure
+pot conține totuși date personale, iar aceste limite/detectoare nu reprezintă un mecanism general de eliminare a datelor cu caracter personal.
+
+### Limite de livrare
+
+Cererile sunt limitate la 500 de span-uri și 4 MiB de JSON UTF-8, inclusiv anvelopa.
+Dimensiunea fiecărui span permis este verificată înainte de prima cerere a unui lot al cursorului. Un singur
+span mai mare decât limita împiedică trimiterea oricărei părți a acelui lot și provoacă un eșec cu îndrumarea de a reduce
+`maxBodyBytes`; nu este eliminat în mod silențios. Verificarea preliminară păstrează doar referințele la înregistrări și
+numărul de octeți, eliminând fiecare span/JSON temporar; span-urile sunt reconstruite pentru segmente cu dimensiune limitată,
+în loc să fie păstrată o a doua copie serializată a lotului. Pentru HTTP 408/429/5xx, erori de rețea și expirări ale timpului de așteptare se fac cel mult
+trei încercări, cu temporizare exponențială de 250/500 ms. Valorile în secunde sau datele HTTP din `Retry-After`
+pot prelungi o întârziere până la 5 secunde. Celelalte coduri de stare provoacă imediat eșecul. Respingerea parțială OTLP 2xx declanșează, de asemenea, o excepție în loc să
+confirme un span pierdut; sunt acceptate confirmările goale sau în format JSON valid, cu o
+limită de 64 KiB pentru citirea răspunsului.
+
+Erorile conțin doar informații proprii exportatorului: codul de stare HTTP, categoria de reîncercare, numărul de încercări și numărul de span-uri
+trimise sau formulări fixe pentru erori de confirmare/rețea. Corpurile răspunsurilor colectorului,
+numerele de elemente acceptate parțial și antetele răspunsurilor nu sunt niciodată copiate în erori, jurnale sau
+panoul de control. Un lot eșuat sau acceptat parțial nu este confirmat: destinația afișează
+starea de eșec cu acel cod de stare, cursorul rămâne la ultimul lot confirmat, iar următoarea execuție
+retrimite aceleași rânduri. Codurile de stare permanente continuă să provoace eșecuri până când colectorul sau configurația
+este remediată. Folosiți jurnalele colectorului pentru detalii despre răspuns. Rezumatele erorilor din jurnalul apelurilor își păstrează
+redactarea separată.
+`prepare()` nu configurează nicio resursă; Test trimite prin POST exact `{"resourceSpans":[]}` și raportează
+codul de stare HTTP fără a scrie span-uri în jurnalul apelurilor.
+
+Identificatorii de trasare și identificatorii de span sunt primele 32/16 cifre hexazecimale ale SHA-256 calculat pentru
+`"omniroute.trace\0" + callLogId` și `"omniroute.span\0" + callLogId`. Retrimiterile folosesc
+identificatori identici. Aceasta nu este o garanție de deduplicare: unele backenduri, inclusiv ingestia Langfuse
+v4, nu deduplică span-urile cu același identificator. O cădere sau un eșec parțial al unui segment poate
+duce la retrimiterea a cel mult unui singur lot neconfirmat al cursorului; întregul lot poate fi duplicat,
+nu doar ultimul său segment HTTP. Alegeți dimensiunea lotului cursorului ținând cont de acest compromis.
+
+### Exemplu Langfuse
+
+Configurați aceste câmpuri pentru o instanță Langfuse găzduită pe infrastructura proprie:
+
+```json
+{
+  "endpoint": "https://langfuse.example.com/api/public/otel/v1/traces",
+  "headers": "Authorization: Basic <base64-of-public-key:secret-key>",
+  "serviceName": "omniroute",
+  "langfuseMapping": true,
+  "identity": "pseudonymous",
+  "environment": "production"
+}
+```
+
+Construiți local valoarea Authorization prin codificarea Base64 a șirului literal `public-key:secret-key`
+(de exemplu cu `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Nu copiați credențiale reale în jurnale, capturi de ecran sau sesizări. Maparea
+setează automat `x-langfuse-ingestion-version: 4`; Authorization este furnizat în continuare în `headers`.
+Atât antetele, cât și valoarea salt generată pentru identitate folosesc mecanismul existent de câmpuri secrete criptate
+și substituenții API; `STORAGE_ENCRYPTION_KEY` este obligatorie.
+
+Maparea adaugă tipul/modelul generării, detalii de utilizare în JSON (intrare/ieșire/total și cheile
+de cache disponibile), instantanee JSON ale intrării/ieșirii, nivelul ERROR/DEFAULT, mesajul de stare igienizat,
+numele trasei, ID-ul sesiunii, mediul opțional și atributul filtrabil
+`langfuse.observation.metadata.<key>` pentru furnizor, modelul solicitat, cale, combinație, sursa
+cache-ului și stare. `langfuse.observation.completion_start_time` este în format ISO 8601, la
+momentul de început + TTFT, numai când TTFT este cunoscut și se încadrează în durată. Nu se trimit atribute de cost.
+
+Modurile de identitate se aplică pentru `langfuse.user.id`:
+
+- `pseudonymous` (implicit): HMAC-SHA256 al ID-ului intern al cheii API, cu o valoare salt aleatorie
+  de 32 de octeți pentru fiecare destinație. Valoarea salt este generată la creare dacă lipsește, este criptată
+  ca `identitySalt`, nu este returnată niciodată și este păstrată în timpul editărilor. ID-urile brute ale cheilor nu sunt
+  introduse niciodată în atributele span-urilor. Recrearea/rotirea valorii salt a unei destinații modifică identitățile.
+- `keyName`: numele configurat al cheii API, care dezvăluie în mod intenționat eticheta respectivă a operatorului.
+- `none`: fără ID de utilizator. Etichetele de sesiune sunt exportate în continuare atunci când sunt prezente; aceste moduri nu
+  anonimizează conținutul arbitrar al prompturilor sau etichetele de sesiune/corelare furnizate de operator.
+
+### Pornirea fără completarea retroactivă a datelor
+
+Doar la creare, activați **Pornește de la poziția curentă (omite jurnalele existente)** sau transmiteți
+`startFromCurrentPosition: true` la nivelul superior al corpului cererii API de creare. Această opțiune inițializează
+`cursor_row_id` la valoarea maximă curentă a rowid-ului din jurnalul de apeluri păstrat, folosind funcțiile auxiliare
+existente pentru cursor, fără migrare. Valoarea implicită este false (cursor 0 și completare retroactivă din istoricul păstrat).
+Nu este o setare de resetare a cursorului la actualizare.
+
+Adăugarea câmpului comun `ttftMs` adaugă și o coloană `ttft_ms` care permite valori nule în componenta de mapare BigQuery
+și în schema tabelelor noi: testul schemei impune ca fiecare câmp canonic al înregistrării să aibă o
+coloană. Tabelele existente continuă să fie exportate fără modificări: `prepare()` citește schema tabelului și
+omite doar `ttft_ms` atunci când coloana respectivă lipsește. Adăugați coloana INT64 care permite valori nule pentru a obține TTFT
+la următoarea rulare sau folosiți un tabel nou. Nu sunt necesare PATCH, modificarea automată a schemei sau permisiuni
+suplimentare; toate celelalte câmpuri ale rândurilor păstrează verificarea strictă a schemei.
+
+---
+
+## 6. Adăugarea unei destinații
 
 1. Creați `src/lib/logExport/destinations/<name>.ts`, exportând un `LogExportDestinationType`:
    o `configSchema` Zod, o matrice descriptivă `fields` pentru interfața cu utilizatorul, `secretFields` și o
@@ -273,7 +484,7 @@ Două reguli pentru o destinație nouă:
 
 ---
 
-## 6. Operare
+## 7. Operare
 
 - **Tablou de bord**: Integrări → Exportul jurnalelor. Adăugați o destinație, rulați **Testare** pentru a verifica acreditările
   fără a scrie rânduri, apoi activați-o.

@@ -163,7 +163,7 @@ OmniRoute izlaže 6 A2A vještina povezanih u `src/lib/a2a/taskExecution.ts::A2A
 | Izvještaj o stanju    | `health-report`      | Objedinjuje stanje zaštitnog prekidača, perioda mirovanja i blokade za svakog pružatelja                                                                       | stanje, otpornost             | "Prikaži stanje svih pružatelja"           |
 | Popis mogućnosti      | `list-capabilities`  | Vraća potpuni katalog Agent Skills s 45 stavki (23 API + 21 CLI + 1 konfiguracijska) kao markdown tabelu sa sirovim SKILL.md URL-ovima za ubacivanje konteksta | katalog, otkrivanje, vještine | "Navedi sve mogućnosti OmniRoutea"         |
 
-> Agent Card treba održavati usklađenom s aktivnim katalogom od 376 pružatelja; broj pružatelja i metapodaci o besplatnom pristupu/pristupu bez autentifikacije preuzimaju se iz registra tokom izvršavanja.
+> Agent Card treba održavati usklađenom s aktivnim katalogom od 377 pružatelja; broj pružatelja i metapodaci o besplatnom pristupu/pristupu bez autentifikacije preuzimaju se iz registra tokom izvršavanja.
 
 ### Detalji vještine `list-capabilities`
 

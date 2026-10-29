@@ -8,7 +8,7 @@
 > Luo uudelleen komennolla: `npm run gen:provider-reference`
 > **Luotu viimeksi:** 2026-10-27
 
-Palveluntarjoajia yhteensä: **376**. Katso alla oleva luokkakohtainen erittely.
+Palveluntarjoajia yhteensä: **377**. Katso alla oleva luokkakohtainen erittely.
 
 ## Luokat
 
@@ -397,7 +397,7 @@ Ota kukin palveluntarjoaja käyttöön, määritä sen asetukset ja testaa sitä
 | `vllm`                | `vllm`       | vLLM                | Local, self-hosted | [link](https://github.com/vllm-project/vllm)                    | API-avain valinnainen. Määritä paikallisen vLLM:n OpenAI-yhteensopiva perus-URL (oletus: http://localhost:8000/v1).                                                                                                                                                                                   |
 | `xinference`          | `xinference` | XInference          | Local, self-hosted | [link](https://inference.readthedocs.io)                        | API-avain valinnainen. Määritä paikallisen XInference-palvelimen OpenAI-yhteensopiva perus-URL (oletus: http://localhost:9997/v1).                                                                                                                                                                    |
 
-## Hakupalvelut (18)
+## Hakupalvelut (19)
 
 | ID                  | Alias           | Nimi                               | Tunnisteet | Verkkosivusto                                                   | Huomautukset                                                                                                                                 |
 | ------------------- | --------------- | ---------------------------------- | ---------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Ota kukin palveluntarjoaja käyttöön, määritä sen asetukset ja testaa sitä
 | `exa-search`        | `exa-search`    | Exa Search                         | Haku       | [link](https://exa.ai)                                          | API-avain dashboard.exa.ai-hallintapaneelista                                                                                                |
 | `firecrawl`         | `fc`            | Firecrawl                          | Haku       | [link](https://firecrawl.dev)                                   | API-avain osoitteesta firecrawl.dev/app/api-keys (tai määritä itse ylläpidetyn Firecrawl-palvelun perus-URL-osoite)                          |
 | `google-pse-search` | `google-pse`    | Google Programmable Search         | Haku       | [link](https://developers.google.com/custom-search/v1/overview) | Edellyttää Google API -avainta ja Programmable Search Engine -tunnustasi (cx)                                                                |
+| `kimi-search`       | `kimi-search`   | Kimi Search                        | Haku       | [link](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API -avain (MOONSHOT_API_KEY) osoitteesta platform.kimi.ai                                                                       |
 | `linkup-search`     | `linkup`        | Linkup Search                      | Haku       | [link](https://docs.linkup.so)                                  | Bearer-API-avain Linkup-hallintapaneelista                                                                                                   |
 | `nimble-search`     | `nimble`        | Nimble Search                      | Haku       | [link](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer-API-avain Nimble-hallintapaneelista                                                                                                   |
 | `ollama-search`     | `ollama-search` | Ollama Search                      | Haku       | [link](https://ollama.com/settings/keys)                        | Sama API-avain kuin Ollama Cloudissa (osoitteesta ollama.com/settings/keys)                                                                  |

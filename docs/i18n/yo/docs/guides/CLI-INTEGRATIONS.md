@@ -17,11 +17,11 @@ ibikíbi tí irinṣẹ́ náà bá ti ṣe àtìlẹ́yìn fún un. Àwọn à�
 ti irinṣẹ́ náà fúnra rẹ̀ ní ìbẹ̀rẹ̀ ni a ti ṣàkíyèsí ní ìsàlẹ̀.
 
 Launcher gbogbogbò kan tún wà — `omniroute run <target>` — tí ń ṣe ìfilọ́lẹ̀
-`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` tàbí `gemini` pẹ̀lú
+`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` tàbí `whycodes` pẹ̀lú
 env tó yẹ tí a ti fi sínú rẹ̀, láì kọ config kankan rárá. Àwọn target àti
 aliases wọn wá láti inú àtòjọ ìṣàfihàn àṣẹ `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), `omniroute completion` sì ń pèsè
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), `omniroute completion` sì ń pèsè
 àwọn ọ̀rọ̀ target kan náà tí a mú jáde láti inú àtòjọ ìṣàfihàn náà. Àwọn launcher
 ọwọ́kọ̀ọ̀kan ti àtijọ́ — `omniroute launch` (Claude Code) àti
 `omniroute launch-codex` (Codex) — ṣì wà fún lílò.
@@ -85,7 +85,8 @@ server yẹn, yóò sì kọ àtúnṣe náà sí agbègbè.
 | `omniroute setup-aider`    | Aider                              | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + ó tẹ ìlànà env jáde                                                                                                               | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Méjèèjì            |
 | `omniroute setup-qwen`     | Qwen Code                          | `~/.qwen/settings.json` — àkójọpọ̀ V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` nínú `~/.qwen/.env`                                                                                             | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Méjèèjì            |
 | `omniroute setup-5dive`    | 5dive (ọ̀wọ́ àwọn aṣojú)             | Kò sí ohunkóhun lábẹ́ `$HOME` — ó máa kọ **prófáìlì ìfàṣẹ̀sí** 5dive kan (`/var/lib/5dive/auth-profiles/<name>/`) nípasẹ̀ `5dive agent auth set`; fún root nìkan, ó sì ń ṣiṣẹ́ lórí olùgbàlejò ọ̀wọ́ náà | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Méjèèjì            |
-| `omniroute run <target>`   | Ìfilọ́lẹ̀ ní àkókò ìṣiṣẹ́ (gbogbogbò) | Kò sí ohunkóhun — ó máa dá `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` sílẹ̀ pẹ̀lú env àti args tó tọ́; Qwen àti Gemini ń lo home àdádó fún ìgbà díẹ̀                                  | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Méjèèjì            |
+| `omniroute setup-whycodes` | WhyCodes                           | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); path náà ni `$WHYCODES_HOME/config.toml` tàbí `~/.whycodes/config.toml`                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Méjèèjì            |
+| `omniroute run <target>`   | Ìfilọ́lẹ̀ ní àkókò ìṣiṣẹ́ (gbogbogbò) | Kò sí ohunkóhun — ó máa dá `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` sílẹ̀ pẹ̀lú env àti args tó tọ́; Qwen àti Gemini ń lo home àdádó fún ìgbà díẹ̀                       | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Méjèèjì            |
 | `omniroute launch`         | Claude Code                        | Kò sí ohunkóhun — ó máa dá `claude` sílẹ̀ pẹ̀lú `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` tí a fi sínú rẹ̀                                                                                          | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Méjèèjì            |
 | `omniroute launch-codex`   | OpenAI Codex CLI                   | Kò sí ohunkóhun — ó máa dá `codex` sílẹ̀ pẹ̀lú olùpèsè `omniroute` tí a fi sínú rẹ̀ nípasẹ̀ àwọn àsìá `-c`                                                                                             | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Méjèèjì            |
 
@@ -101,14 +102,15 @@ server yẹn, yóò sì kọ àtúnṣe náà sí agbègbè.
   filesystem. Ó wà lórí gbogbo àṣẹ `setup-*` **àyàfi** `setup-cursor`
   (èyí tí kì í kọ fáìlì rárá).
 - `--model <id>` — a nílò rẹ̀ (tàbí kí a yàn án ní ìbánisọ̀rọ̀) fún àwọn irinṣẹ́ tí kò ní
-  ìṣàwárí model aládàáṣe: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Àwọn irinṣẹ́ wọ̀nyẹn
+  ìṣàwárí model aládàáṣe: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. Àwọn irinṣẹ́ wọ̀nyẹn
   tún gba `--yes` fún àwọn ìṣiṣẹ́ tí kì í ṣe ti ìbánisọ̀rọ̀ (èyí tí yóò sì nílò `--model`).
   `setup-opencode` gba `--model` láti ṣètò model ìpele-òkè àìpéye.
 - `--model <id>` lórí `omniroute run` ń tẹ̀lé ìsopọ̀ tó jẹ́ ti target kọ̀ọ̀kan nínú manifest
   (`bin/cli/cli-manifest.mjs`): **aider** gba `--model openai/<id>` àti
   **opencode** gba `--model omniroute/<id>` (a ó fi prefix náà kún un nìkan bí id náà
   kò bá ti ní i tẹ́lẹ̀); **qwen** àti **gemini** gba id náà bí ó ṣe rí;
-  **claude** gba a nípasẹ̀ `ANTHROPIC_MODEL`, **goose** nípasẹ̀ `GOOSE_MODEL`, àti
+  **claude** gba a nípasẹ̀ `ANTHROPIC_MODEL`, **goose** nípasẹ̀ `GOOSE_MODEL`,
+  **whycodes** nípasẹ̀ `-P omniroute -m <id>`, àti
   **codex** nípasẹ̀ àwọn args `-c model_providers.omniroute.*`. **Qwen nìkan ni target ìṣiṣẹ́
   tó pọn dandan pé kí `--model` wà** — `omniroute run qwen` láìsí i máa jáde
   pẹ̀lú `2` àti àṣìṣe tó ṣe kedere.
@@ -280,18 +282,19 @@ OmniRoute ń pèsè ojú-ọ̀nà OpenAI ní `/v1`, ojú-ọ̀nà Anthropic ní 
 àti ojú-ọ̀nà Gemini àbínibí ní `/v1beta`. A ti so ìṣọ̀kan kọ̀ọ̀kan pọ̀ mọ́ ìrísí tí
 irinṣẹ́ rẹ̀ ń retí (a ti fìdí rẹ̀ múlẹ̀ nínú kóòdù àṣẹ):
 
-| Ìṣọ̀kan                                                                     | Base URL tí a kọ | `/v1`?                                                |
-| -------------------------------------------------------------------------- | ---------------- | ----------------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | gbòǹgbò          | Rárá — Cline máa ń fi `/v1/chat/completions` kún un   |
-| `setup-goose` (`OPENAI_HOST`)                                              | gbòǹgbò          | Rárá — Goose máa ń fi ipa-ọ̀nà náà kún un              |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | gbòǹgbò          | Rárá — LiteLLM máa ń fi `/v1/chat/completions` kún un |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | pẹ̀lú `/v1`       | Bẹ́ẹ̀ ni                                                |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | pẹ̀lú `/v1`       | Bẹ́ẹ̀ ni                                                |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | gbòǹgbò          | Rárá — Claude Code máa ń fi `/v1/messages` kún un     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | pẹ̀lú `/v1`       | Bẹ́ẹ̀ ni                                                |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | pẹ̀lú `/v1`       | Bẹ́ẹ̀ ni                                                |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | gbòǹgbò          | Rárá — SDK náà máa ń fi `/v1beta/models/…` kún un     |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` nínú prófáìlì ìfàṣẹsí)                 | gbòǹgbò          | Rárá — Claude Code máa ń fi `/v1/messages` kún un     |
+| Ìṣọ̀kan                                                                     | Base URL tí a kọ | `/v1`?                                                       |
+| -------------------------------------------------------------------------- | ---------------- | ------------------------------------------------------------ |
+| `setup-cline` (`openAiBaseUrl`)                                            | gbòǹgbò          | Rárá — Cline máa ń fi `/v1/chat/completions` kún un          |
+| `setup-goose` (`OPENAI_HOST`)                                              | gbòǹgbò          | Rárá — Goose máa ń fi ipa-ọ̀nà náà kún un                     |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | gbòǹgbò          | Rárá — LiteLLM máa ń fi `/v1/chat/completions` kún un        |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | pẹ̀lú `/v1`       | Bẹ́ẹ̀ ni                                                       |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | pẹ̀lú `/v1`       | Bẹ́ẹ̀ ni                                                       |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | gbòǹgbò          | Rárá — Claude Code máa ń fi `/v1/messages` kún un            |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | pẹ̀lú `/v1`       | Bẹ́ẹ̀ ni                                                       |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | pẹ̀lú `/v1`       | Bẹ́ẹ̀ ni                                                       |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | gbòǹgbò          | Rárá — SDK náà máa ń fi `/v1beta/models/…` kún un            |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` nínú prófáìlì ìfàṣẹsí)                 | gbòǹgbò          | Rárá — Claude Code máa ń fi `/v1/messages` kún un            |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | pẹ̀lú `/v1`       | Bẹ́ẹ̀ ni — WhyCodes máa ń fi POST ránṣẹ́ sí `/chat/completions` |
 
 ---
 

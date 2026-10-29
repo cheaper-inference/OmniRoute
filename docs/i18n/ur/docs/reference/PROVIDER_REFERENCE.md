@@ -8,7 +8,7 @@
 > دوبارہ تیار کرنے کے لیے: `npm run gen:provider-reference`
 > **آخری بار تیار کیا گیا:** 2026-10-27
 
-فراہم کنندگان کی کل تعداد: **376**۔ ذیل میں زمرہ وار تفصیل دیکھیں۔
+فراہم کنندگان کی کل تعداد: **377**۔ ذیل میں زمرہ وار تفصیل دیکھیں۔
 
 ## زمرے
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | مقامی، خود میزبانی شدہ | [لنک](https://github.com/vllm-project/vllm)                    | API کلید اختیاری ہے۔ مقامی vLLM کے OpenAI سے ہم آہنگ بیس URL کو ترتیب دیں (پہلے سے طے شدہ: http://localhost:8000/v1)۔                                                                                                                                                                                                       |
 | `xinference`          | `xinference` | XInference          | مقامی، خود میزبانی شدہ | [لنک](https://inference.readthedocs.io)                        | API کلید اختیاری ہے۔ مقامی XInference کے OpenAI سے ہم آہنگ بیس URL کو ترتیب دیں (پہلے سے طے شدہ: http://localhost:9997/v1)۔                                                                                                                                                                                                 |
 
-## تلاش فراہم کنندگان (18)
+## تلاش فراہم کنندگان (19)
 
 | ID                  | عرف             | نام                           | ٹیگز | ویب سائٹ                                                       | نوٹس                                                                                                                     |
 | ------------------- | --------------- | ----------------------------- | ---- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                    | تلاش | [لنک](https://exa.ai)                                          | dashboard.exa.ai سے API کلید                                                                                             |
 | `firecrawl`         | `fc`            | Firecrawl                     | تلاش | [لنک](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys سے API کلید (یا اپنے سیلف ہوسٹڈ Firecrawl کا بنیادی URL سیٹ کریں)                             |
 | `google-pse-search` | `google-pse`    | Google Programmable Search    | تلاش | [لنک](https://developers.google.com/custom-search/v1/overview) | ایک Google API کلید اور آپ کے Programmable Search Engine کی ID (cx) درکار ہے                                             |
+| `kimi-search`       | `kimi-search`   | Kimi Search                   | تلاش | [لنک](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai سے Moonshot AI API کلید (MOONSHOT_API_KEY)                                                              |
 | `linkup-search`     | `linkup`        | Linkup Search                 | تلاش | [لنک](https://docs.linkup.so)                                  | Linkup ڈیش بورڈ سے Bearer API کلید                                                                                       |
 | `nimble-search`     | `nimble`        | Nimble Search                 | تلاش | [لنک](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble ڈیش بورڈ سے Bearer API کلید                                                                                       |
 | `ollama-search`     | `ollama-search` | Ollama Search                 | تلاش | [لنک](https://ollama.com/settings/keys)                        | وہی API کلید جو Ollama Cloud کے لیے ہے (ollama.com/settings/keys سے)                                                     |

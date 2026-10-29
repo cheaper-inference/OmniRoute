@@ -8,7 +8,7 @@
 > እንደገና ለማመንጨት፦ `npm run gen:provider-reference`
 > **ለመጨረሻ ጊዜ የተመነጨው፦** 2026-10-27
 
-ጠቅላላ አቅራቢዎች፦ **376**። የምድቦችን ዝርዝር ከታች ይመልከቱ።
+ጠቅላላ አቅራቢዎች፦ **377**። የምድቦችን ዝርዝር ከታች ይመልከቱ።
 
 ## ምድቦች
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | አካባቢያዊ፣ በራስ የሚስተናገድ | [አገናኝ](https://github.com/vllm-project/vllm)                    | የAPI ቁልፍ አማራጭ ነው። የአካባቢያዊውን vLLM ከOpenAI ጋር ተኳሃኝ የሆነ መሠረታዊ URL ያዋቅሩ (ነባሪ፦ http://localhost:8000/v1)።                                                                                                                                          |
 | `xinference`          | `xinference` | XInference          | አካባቢያዊ፣ በራስ የሚስተናገድ | [አገናኝ](https://inference.readthedocs.io)                        | የAPI ቁልፍ አማራጭ ነው። የአካባቢያዊውን XInference ከOpenAI ጋር ተኳሃኝ የሆነ መሠረታዊ URL ያዋቅሩ (ነባሪ፦ http://localhost:9997/v1)።                                                                                                                                    |
 
-## የፍለጋ አቅራቢዎች (18)
+## የፍለጋ አቅራቢዎች (19)
 
 | ID                  | ተለዋጭ ስም         | ስም                         | መለያዎች | ድረ ገጽ                                                           | ማስታወሻዎች                                                                                         |
 | ------------------- | --------------- | -------------------------- | ----- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                 | ፍለጋ   | [አገናኝ](https://exa.ai)                                          | ከ-dashboard.exa.ai የሚገኝ API ቁልፍ                                                                 |
 | `firecrawl`         | `fc`            | Firecrawl                  | ፍለጋ   | [አገናኝ](https://firecrawl.dev)                                   | ከ-firecrawl.dev/app/api-keys የሚገኝ API ቁልፍ (ወይም በራስዎ የሚስተናገደውን Firecrawl መሠረታዊ URL ያዘጋጁ)         |
 | `google-pse-search` | `google-pse`    | Google Programmable Search | ፍለጋ   | [አገናኝ](https://developers.google.com/custom-search/v1/overview) | የ-Google API ቁልፍ እና የእርስዎን Programmable Search Engine ID (cx) ይፈልጋል                             |
+| `kimi-search`       | `kimi-search`   | Kimi Search                | ፍለጋ   | [አገናኝ](https://platform.kimi.ai/docs/api/tools-search)          | ከplatform.kimi.ai የሚገኝ የMoonshot AI API ቁልፍ (MOONSHOT_API_KEY)                                  |
 | `linkup-search`     | `linkup`        | Linkup Search              | ፍለጋ   | [አገናኝ](https://docs.linkup.so)                                  | ከ-Linkup ዳሽቦርድ የሚገኝ Bearer API ቁልፍ                                                              |
 | `nimble-search`     | `nimble`        | Nimble Search              | ፍለጋ   | [አገናኝ](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | ከ-Nimble ዳሽቦርድ የሚገኝ Bearer API ቁልፍ                                                              |
 | `ollama-search`     | `ollama-search` | Ollama Search              | ፍለጋ   | [አገናኝ](https://ollama.com/settings/keys)                        | ከ-Ollama Cloud ጋር ተመሳሳይ API ቁልፍ (ከ-ollama.com/settings/keys)                                    |

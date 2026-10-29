@@ -8,7 +8,7 @@
 > Muling buuin gamit ang: `npm run gen:provider-reference`
 > **Huling nabuo:** 2026-10-27
 
-Kabuuang bilang ng mga provider: **376**. Tingnan ang pagkakahati ayon sa kategorya sa ibaba.
+Kabuuang bilang ng mga provider: **377**. Tingnan ang pagkakahati ayon sa kategorya sa ibaba.
 
 ## Mga Kategorya
 
@@ -397,7 +397,7 @@ Gamitin ang dashboard sa `/dashboard/providers` upang i-enable, i-configure, at 
 | `vllm`                | `vllm`       | vLLM                | Lokal, self-hosted | [link](https://github.com/vllm-project/vllm)                    | Opsyonal ang API key. I-configure ang lokal na OpenAI-compatible base URL ng vLLM (default: http://localhost:8000/v1).                                                                                                                                                                                                                 |
 | `xinference`          | `xinference` | XInference          | Lokal, self-hosted | [link](https://inference.readthedocs.io)                        | Opsyonal ang API key. I-configure ang lokal na OpenAI-compatible base URL ng XInference (default: http://localhost:9997/v1).                                                                                                                                                                                                           |
 
-## Mga Search Provider (18)
+## Mga Search Provider (19)
 
 | ID                  | Alias           | Pangalan                            | Mga Tag    | Website                                                         | Mga Tala                                                                                                                            |
 | ------------------- | --------------- | ----------------------------------- | ---------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Gamitin ang dashboard sa `/dashboard/providers` upang i-enable, i-configure, at 
 | `exa-search`        | `exa-search`    | Exa Search                          | Paghahanap | [link](https://exa.ai)                                          | API key mula sa dashboard.exa.ai                                                                                                    |
 | `firecrawl`         | `fc`            | Firecrawl                           | Paghahanap | [link](https://firecrawl.dev)                                   | API key mula sa firecrawl.dev/app/api-keys (o itakda ang iyong self-hosted na Firecrawl base URL)                                   |
 | `google-pse-search` | `google-pse`    | Google Programmable Search          | Paghahanap | [link](https://developers.google.com/custom-search/v1/overview) | Nangangailangan ng Google API key at ng iyong Programmable Search Engine ID (cx)                                                    |
+| `kimi-search`       | `kimi-search`   | Kimi Search                         | Paghahanap | [link](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API key (MOONSHOT_API_KEY) mula sa platform.kimi.ai                                                                     |
 | `linkup-search`     | `linkup`        | Linkup Search                       | Paghahanap | [link](https://docs.linkup.so)                                  | Bearer API key mula sa dashboard ng Linkup                                                                                          |
 | `nimble-search`     | `nimble`        | Nimble Search                       | Paghahanap | [link](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API key mula sa dashboard ng Nimble                                                                                          |
 | `ollama-search`     | `ollama-search` | Ollama Search                       | Paghahanap | [link](https://ollama.com/settings/keys)                        | Kaparehong API key ng Ollama Cloud (mula sa ollama.com/settings/keys)                                                               |

@@ -159,6 +159,22 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     cacheTTLMs: 5 * 60 * 1000,
   },
 
+  "kimi-search": {
+    id: "kimi-search",
+    name: "Kimi Search",
+    baseUrl: "https://api.moonshot.ai/v1/tools/search",
+    method: "POST",
+    authType: "apikey",
+    authHeader: "bearer",
+    costPerQuery: 0.005, // $0.005 per successful non-empty call — platform.kimi.ai/docs/pricing/tools
+    freeMonthlyQuota: 0,
+    searchTypes: ["web"],
+    defaultMaxResults: 5,
+    maxMaxResults: 20,
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+  },
+
   firecrawl: {
     id: "firecrawl",
     name: "Firecrawl",
@@ -490,6 +506,8 @@ export const SEARCH_PROVIDER_ALIASES: Record<string, string> = {
   x: "x-search",
   xquik: "xquik-search",
   xquik_search: "xquik-search",
+  kimi: "kimi-search",
+  moonshot: "kimi-search",
   anysearch: "anysearch-search",
   anysearch_search: "anysearch-search",
   parallel: "parallel-search",

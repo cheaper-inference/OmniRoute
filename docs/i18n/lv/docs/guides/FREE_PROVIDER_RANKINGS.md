@@ -12,7 +12,7 @@
 
 ## Kas tas ir
 
-OmniRoute ir reģistrēti 376 pakalpojumu sniedzēji, tostarp 155 kataloga ieraksti ar atzīmi **free/no-auth** (no-auth, bezmaksas līmeņa OAuth vai bezmaksas līmeņa API atslēga — skatiet [Bezmaksas līmeņu ceļvedi](../getting-started/FREE-TIERS-GUIDE.md) un pilno [Bezmaksas līmeņu direktoriju](../reference/FREE_TIERS.md)). Bet ir viens "bet": bezmaksas pakalpojumu sniedzēju modeļu kvalitāte krasi atšķiras. No-auth pakalpojumu sniedzējs, kas piedāvā vadošo (frontier) modeli, ir daudz noderīgāks nekā tāds, kas piedāvā mazu, novecojušu modeli.
+OmniRoute ir reģistrēti 377 pakalpojumu sniedzēji, tostarp 155 kataloga ieraksti ar atzīmi **free/no-auth** (no-auth, bezmaksas līmeņa OAuth vai bezmaksas līmeņa API atslēga — skatiet [Bezmaksas līmeņu ceļvedi](../getting-started/FREE-TIERS-GUIDE.md) un pilno [Bezmaksas līmeņu direktoriju](../reference/FREE_TIERS.md)). Bet ir viens "bet": bezmaksas pakalpojumu sniedzēju modeļu kvalitāte krasi atšķiras. No-auth pakalpojumu sniedzējs, kas piedāvā vadošo (frontier) modeli, ir daudz noderīgāks nekā tāds, kas piedāvā mazu, novecojušu modeli.
 
 **Bezmaksas pakalpojumu sniedzēju reitings** atbild uz jautājumu "**kurš bezmaksas pakalpojumu sniedzējs man dod labāko modeli?**", apvienojot katra bezmaksas pakalpojumu sniedzēja katalogu ar **kopienas iesniegtiem kvalitātes vērtējumiem** no **Arena AI leaderboard** (uz cilvēku vēlmēm balstīts ELO — tā pati ideja, kas ir LMArena čatbotu arēnas pamatā). Pēc tam pakalpojumu sniedzēji tiek sarindoti atbilstoši sava **labākā bezmaksas modeļa** stiprumam.
 

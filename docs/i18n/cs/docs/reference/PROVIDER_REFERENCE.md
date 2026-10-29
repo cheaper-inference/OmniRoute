@@ -8,7 +8,7 @@
 > Znovu vygenerujte pomocí: `npm run gen:provider-reference`
 > **Naposledy vygenerováno:** 2026-10-27
 
-Celkový počet poskytovatelů: **376**. Rozdělení podle kategorií najdete níže.
+Celkový počet poskytovatelů: **377**. Rozdělení podle kategorií najdete níže.
 
 ## Kategorie
 
@@ -397,7 +397,7 @@ Pomocí řídicího panelu na adrese `/dashboard/providers` můžete jednotlivé
 | `vllm`                | `vllm`       | vLLM                | Místní, hostovaný ve vlastní režii | [odkaz](https://github.com/vllm-project/vllm)                    | Klíč API je volitelný. Nakonfigurujte místní základní URL vLLM kompatibilní s OpenAI (výchozí: http://localhost:8000/v1).                                                                                                                                                                                                                |
 | `xinference`          | `xinference` | XInference          | Místní, hostovaný ve vlastní režii | [odkaz](https://inference.readthedocs.io)                        | Klíč API je volitelný. Nakonfigurujte místní základní URL XInference kompatibilní s OpenAI (výchozí: http://localhost:9997/v1).                                                                                                                                                                                                          |
 
-## Poskytovatelé vyhledávání (18)
+## Poskytovatelé vyhledávání (19)
 
 | ID                  | Alias           | Název                           | Štítky      | Web                                                              | Poznámky                                                                                                                      |
 | ------------------- | --------------- | ------------------------------- | ----------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Pomocí řídicího panelu na adrese `/dashboard/providers` můžete jednotlivé
 | `exa-search`        | `exa-search`    | Exa Search                      | Vyhledávání | [odkaz](https://exa.ai)                                          | API klíč z dashboard.exa.ai                                                                                                   |
 | `firecrawl`         | `fc`            | Firecrawl                       | Vyhledávání | [odkaz](https://firecrawl.dev)                                   | API klíč z firecrawl.dev/app/api-keys (nebo nastavte základní URL vlastní instance Firecrawl)                                 |
 | `google-pse-search` | `google-pse`    | Google Programmable Search      | Vyhledávání | [odkaz](https://developers.google.com/custom-search/v1/overview) | Vyžaduje API klíč Google a ID vašeho programovatelného vyhledávače (cx)                                                       |
+| `kimi-search`       | `kimi-search`   | Kimi Search                     | Vyhledávání | [odkaz](https://platform.kimi.ai/docs/api/tools-search)          | Klíč API Moonshot AI (MOONSHOT_API_KEY) z platform.kimi.ai                                                                    |
 | `linkup-search`     | `linkup`        | Linkup Search                   | Vyhledávání | [odkaz](https://docs.linkup.so)                                  | Bearer API klíč z řídicího panelu Linkup                                                                                      |
 | `nimble-search`     | `nimble`        | Nimble Search                   | Vyhledávání | [odkaz](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API klíč z řídicího panelu Nimble                                                                                      |
 | `ollama-search`     | `ollama-search` | Ollama Search                   | Vyhledávání | [odkaz](https://ollama.com/settings/keys)                        | Stejný API klíč jako pro Ollama Cloud (z ollama.com/settings/keys)                                                            |

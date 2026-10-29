@@ -10,8 +10,8 @@ OmniRoute se integrira s tremi kategorijami orodij CLI, razporejenimi po treh na
 
 | Stran          | Pot                     | Koncept                                                                                 | Število         |
 | -------------- | ----------------------- | --------------------------------------------------------------------------------------- | --------------- |
-| **Kode CLI**   | `/dashboard/cli-code`   | Orodja za programiranje, usmerjena v OmniRoute (odjemalec → CLI → OmniRoute → ponudnik) | 26              |
-| **Agenti CLI** | `/dashboard/cli-agents` | Avtonomni agenti, usmerjeni v OmniRoute (enak potek, širši obseg)                       | 10              |
+| **Kode CLI**   | `/dashboard/cli-code`   | Orodja za programiranje, usmerjena v OmniRoute (odjemalec → CLI → OmniRoute → ponudnik) | 27              |
+| **Agenti CLI** | `/dashboard/cli-agents` | Avtonomni agenti, usmerjeni v OmniRoute (enak potek, širši obseg)                       | 11              |
 | **Agenti ACP** | `/dashboard/acp-agents` | Orodja CLI, ki jih OmniRoute zažene kot zaledje prek stdio/ACP (obraten potek)          | glejte register |
 
 Podedovane poti so preusmerjene s kodo 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Vsak sprejema `--remote <url> --api-key <key>` (konfiguracija lokalnega orodja za
 oddaljeni OmniRoute), `--dry-run` (predogled brez zapisovanja) in `--port`. Orodja
-brez samodejnega odkrivanja modelov (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) sprejemajo
+brez samodejnega odkrivanja modelov (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) sprejemajo
 `--model <id>` (in `--yes` za neinteraktivne zagone). `setup-5dive` je edini
 postopek, ki ne zapisuje pod `$HOME`: skupino agentov 5dive konfigurira tako, da
 na gostitelju skupine zapiše korenskemu uporabniku pripadajoč profil za preverjanje pristnosti, zato se znova izvede prek `sudo`
 in nima lastnega oddaljenega načina. Za zagon CLI-ja z
 vstavljenimi ustreznimi spremenljivkami okolja in povsem brez zapisovanja konfiguracije uporabite splošni
-zaganjalnik `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — cilji in vzdevki izvirajo iz `bin/cli/cli-manifest.mjs`); starejša
+zaganjalnik `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — cilji in vzdevki izvirajo iz `bin/cli/cli-manifest.mjs`); starejša
 zaganjalnika za posamezna orodja `omniroute launch` (Claude Code) in `omniroute launch-codex`
 (Codex) ostajata na voljo. Gemini CLI podpira samo zagon: je cilj za `omniroute run`,
 vendar nima postopka `setup-*`/`configure`.
@@ -182,7 +183,7 @@ Vsa orodja, ki so prikazana v `/dashboard/cli-code`. Orodja z `baseUrlSupport: n
 Orodja z `baseUrlSupport: "partial"` na kartici nadzorne plošče prikazujejo značko »⚠ Delna podpora za osnovni URL«.
 ---
 
-## 2. Katalog agentov CLI (10 orodij)
+## 2. Katalog agentov CLI (11 orodij)
 
 Avtonomni agenti, ki so prikazani na `/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ Avtonomni agenti, ki so prikazani na `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full               | false                   |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                   |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                   |
+| whycodes     | WhyCodes         | Why Corporation          | full               | false                   |
 
 ---
 

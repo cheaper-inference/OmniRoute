@@ -16,11 +16,11 @@ sistema OmniRoute (lokalnega ali oddaljenega) in zapiše lastno konfiguracijsko 
 to podpira. Ukazi, ki trajno shranijo lokalno datoteko okolja za orodje, so navedeni spodaj.
 
 Na voljo je tudi splošni zaganjalnik — `omniroute run <target>` — ki zažene
-`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` ali `gemini` z
+`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` ali `whycodes` z
 vstavljenimi ustreznimi spremenljivkami okolja, ne da bi sploh zapisal konfiguracijo. Cilji in njihovi
 vzdevki izvirajo iz kanoničnega manifesta `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), ukaz `omniroute completion` pa ponuja
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), ukaz `omniroute completion` pa ponuja
 iste ciljne besede, izpeljane iz manifesta. Starejša zaganjalnika za posamezni orodji —
 `omniroute launch` (Claude Code) in `omniroute launch-codex` (Codex) — ostajata
 na voljo.
@@ -83,7 +83,8 @@ strežnika in konfiguracijo zapiše lokalno.
 | `omniroute setup-aider`    | Aider                          | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + izpiše recept za okoljske spremenljivke                                                                                             | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Oboje                 |
 | `omniroute setup-qwen`     | Qwen Code                      | `~/.qwen/settings.json` — polje V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` v `~/.qwen/.env`                                                                                                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Oboje                 |
 | `omniroute setup-5dive`    | 5dive (flota agentov)          | Ničesar pod `$HOME` — prek `5dive agent auth set` zapiše **profil za preverjanje pristnosti** 5dive (`/var/lib/5dive/auth-profiles/<name>/`); samo za uporabnika root, izvaja se na gostitelju flote | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Oboje                 |
-| `omniroute run <target>`   | Zagon med izvajanjem (splošno) | Ničesar — zažene `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` z ustreznim okoljem in argumenti; Qwen in Gemini uporabljata začasen izoliran domači imenik                             | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Oboje                 |
+| `omniroute setup-whycodes` | WhyCodes                       | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); pot je `$WHYCODES_HOME/config.toml` ali `~/.whycodes/config.toml`                                                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Oboje                 |
+| `omniroute run <target>`   | Zagon med izvajanjem (splošno) | Ničesar — zažene `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` z ustreznim okoljem in argumenti; Qwen in Gemini uporabljata začasen izoliran domači imenik                  | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Oboje                 |
 | `omniroute launch`         | Claude Code                    | Ničesar — zažene `claude` z vstavljenima spremenljivkama `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                                                 | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Oboje                 |
 | `omniroute launch-codex`   | OpenAI Codex CLI               | Ničesar — zažene `codex` s ponudnikom `omniroute`, vstavljenim prek zastavic `-c`                                                                                                                    | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Oboje                 |
 
@@ -99,14 +100,15 @@ Opombe o zastavicah (preverjeno v izvorni kodi ukazov):
   datotečni sistem. Na voljo pri vsakem ukazu `setup-*` **razen** `setup-cursor`
   (ki nikoli ne zapiše datoteke).
 - `--model <id>` — obvezno (ali izbrano interaktivno) za orodja brez
-  samodejnega odkrivanja modelov: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Ta orodja
+  samodejnega odkrivanja modelov: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. Ta orodja
   sprejemajo tudi `--yes` za neinteraktivne zagone (pri katerih je nato zahtevan `--model`).
   `setup-opencode` sprejme `--model` za nastavitev privzetega modela najvišje ravni.
 - `--model <id>` pri `omniroute run` sledi povezovanju za posamezen cilj iz manifesta
   (`bin/cli/cli-manifest.mjs`): **aider** prejme `--model openai/<id>`,
   **opencode** pa `--model omniroute/<id>` (predpona se doda samo, če je ID
   še nima); **qwen** in **gemini** prejmeta ID nespremenjen;
-  **claude** ga prejme prek `ANTHROPIC_MODEL`, **goose** prek `GOOSE_MODEL`, **codex**
+  **claude** ga prejme prek `ANTHROPIC_MODEL`, **goose** prek `GOOSE_MODEL`,
+  **whycodes** prek `-P omniroute -m <id>`, **codex**
   pa prek argumentov `-c model_providers.omniroute.*`. **Qwen je edini cilj ukaza run,
   ki brezpogojno zahteva `--model`** — `omniroute run qwen` brez njega se konča
   s kodo `2` in izrecnim sporočilom o napaki.
@@ -278,18 +280,19 @@ OmniRoute ponuja vmesnik OpenAI na `/v1`, vmesnik Anthropic v korenu
 in izvorni vmesnik Gemini na `/v1beta`. Vsaka integracija je nastavljena v obliki, ki jo
 pričakuje njeno orodje (preverjeno v izvorni kodi ukaza):
 
-| Integracija                                                                | Zapisan osnovni URL | `/v1`?                                   |
-| -------------------------------------------------------------------------- | ------------------- | ---------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | koren               | Ne — Cline doda `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | koren               | Ne — Goose doda pot                      |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | koren               | Ne — LiteLLM doda `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | z `/v1`             | Da                                       |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | z `/v1`             | Da                                       |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | koren               | Ne — Claude Code doda `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | z `/v1`             | Da                                       |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | z `/v1`             | Da                                       |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | koren               | Ne — SDK doda `/v1beta/models/…`         |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` v profilu za preverjanje pristnosti)   | koren               | Ne — Claude Code doda `/v1/messages`     |
+| Integracija                                                                | Zapisan osnovni URL | `/v1`?                                                    |
+| -------------------------------------------------------------------------- | ------------------- | --------------------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | koren               | Ne — Cline doda `/v1/chat/completions`                    |
+| `setup-goose` (`OPENAI_HOST`)                                              | koren               | Ne — Goose doda pot                                       |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | koren               | Ne — LiteLLM doda `/v1/chat/completions`                  |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | z `/v1`             | Da                                                        |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | z `/v1`             | Da                                                        |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | koren               | Ne — Claude Code doda `/v1/messages`                      |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | z `/v1`             | Da                                                        |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | z `/v1`             | Da                                                        |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | koren               | Ne — SDK doda `/v1beta/models/…`                          |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` v profilu za preverjanje pristnosti)   | koren               | Ne — Claude Code doda `/v1/messages`                      |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | z `/v1`             | Da — WhyCodes pošilja zahteve POST na `/chat/completions` |
 
 ---
 

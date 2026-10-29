@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ဖိုင်                             | ရည်ရွယ်ချက်                                                        |
 | --------------------------------- | ------------------------------------------------------------------ |
-| `providerRegistry.ts`             | ဝန်ဆောင်မှုပေးသူ 376 ခုပါ ကတ်တလောက်အတွက် Chat-model မှတ်ပုံတင်စနစ် |
+| `providerRegistry.ts`             | ဝန်ဆောင်မှုပေးသူ 377 ခုပါ ကတ်တလောက်အတွက် Chat-model မှတ်ပုံတင်စနစ် |
 | `providerModels.ts`               | Model အမည်ကွဲများ၊ format ချိတ်ဆက်သတ်မှတ်မှု                       |
 | `constants.ts`                    | အချိန်ကုန်ဆုံးမှုများ၊ ကန့်သတ်ချက်များ၊ အခြေအနေကုဒ်များ            |
 | `defaultThinkingSignature.ts`     | မူလ Claude thinking signature                                      |

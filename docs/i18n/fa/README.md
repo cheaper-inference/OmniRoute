@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — درگاه رایگان هوش مصنوعی
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — هرگز برنامهنویسی را متوقف نکنید. هر ابزار هوش مصنوعی ← ۳۷۶ ارائهدهنده — بیش از ۱۵۰ مورد رایگان — از طریق یک نقطه پایانی. Claude Code، Codex، Cursor، Cline، Copilot و Antigravity را با قابلیت جایگزینی خودکار به Claude / GPT / Gemini رایگان متصل کنید. فشردهسازی ترکیبی RTK + Caveman بین ۱۵ تا ۹۵٪ در مصرف توکن صرفهجویی میکند (میانگین حدود ۸۹٪) — هرگز به محدودیتها نرسید. ۳۷۶ ارائهدهنده هوش مصنوعی · بیش از ۱۵۰ سطح رایگان · حدود ۱٫۶۲ میلیارد توکن رایگان در ماه · ۲۰ راهبرد مسیریابی · شروع با ۰ دلار."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — هرگز برنامهنویسی را متوقف نکنید. هر ابزار هوش مصنوعی ← ۳۷۷ ارائهدهنده — بیش از ۱۵۰ مورد رایگان — از طریق یک نقطه پایانی. Claude Code، Codex، Cursor، Cline، Copilot و Antigravity را با قابلیت جایگزینی خودکار به Claude / GPT / Gemini رایگان متصل کنید. فشردهسازی ترکیبی RTK + Caveman بین ۱۵ تا ۹۵٪ در مصرف توکن صرفهجویی میکند (میانگین حدود ۸۹٪) — هرگز به محدودیتها نرسید. ۳۷۷ ارائهدهنده هوش مصنوعی · بیش از ۱۵۰ سطح رایگان · حدود ۱٫۶۲ میلیارد توکن رایگان در ماه · ۲۰ راهبرد مسیریابی · شروع با ۰ دلار."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                               |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 ارائهدهندگان               |           352           |   **358**   |          376          |
+| 🌐 ارائهدهندگان               |           352           |   **358**   |          377          |
 | 🧠 شناسههای منحصربهفرد مدل چت |          1320           |  **1374**   |         1475          |
 | 🖼️ پل چندوجهی                 | 🆕 بینایی + صوت + ویدئو |      ✓      |           ✓           |
 | 📡 کاتالوگ رایگان رادار       |       🆕 اختیاری        |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ قابلیتها</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 ترکیبها</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 ارائهدهندگان</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 ارائهدهندگان</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI و MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="وعده ما — یک نقطه پایانی و 376 ارائهدهنده. تا زمانی که مقصد سالم دیگری در دسترس باشد، جایگزینی خودکار مسیریابی را ادامه میدهد. شش ستون: جایگزینی تابآور میان 376 ارائهدهنده · تا 95٪ صرفهجویی در توکن برای بارهای کاری واجد شرایط · شروع با هزینه 0 دلار، همراه با بیش از 150 سطح رایگان و 52 ارائهدهنده رایگانِ دائمیِ دورهای/بدون کلید · 37 یکپارچهسازی CLI/عامل از طریق یک پیکربندی · سازگاری با OpenAI، Claude، Gemini و Responses API در /v1 · کنترلهای عملیاتی شامل مدارشکنها، استتار TLS، تعداد 110 ابزار MCP، ‏A2A، حافظه، حفاظها، ارزیابیها و بیش از 56,000 اعلان آزمون ایستا در بیش از 7,800 فایل آزمون ردیابیشده."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="وعده ما — یک نقطه پایانی و 377 ارائهدهنده. تا زمانی که مقصد سالم دیگری در دسترس باشد، جایگزینی خودکار مسیریابی را ادامه میدهد. شش ستون: جایگزینی تابآور میان 377 ارائهدهنده · تا 95٪ صرفهجویی در توکن برای بارهای کاری واجد شرایط · شروع با هزینه 0 دلار، همراه با بیش از 150 سطح رایگان و 52 ارائهدهنده رایگانِ دائمیِ دورهای/بدون کلید · 37 یکپارچهسازی CLI/عامل از طریق یک پیکربندی · سازگاری با OpenAI، Claude، Gemini و Responses API در /v1 · کنترلهای عملیاتی شامل مدارشکنها، استتار TLS، تعداد 110 ابزار MCP، ‏A2A، حافظه، حفاظها، ارزیابیها و بیش از 56,000 اعلان آزمون ایستا در بیش از 7,800 فایل آزمون ردیابیشده."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="آنچه OmniRoute را متمایز میکند — تصویری زماندار از مقایسهٔ قابلیتها با 9router، OpenRouter، CLIProxyAPI و LiteLLM در ۱۳ قابلیت. OmniRoute: دارای ۳۷۶ ارائهدهنده، بیش از ۱۵۰ سطح رایگان داخلی، ۲۰ راهبرد مسیریابی، فشردهسازی توکن با ۱۲ موتور، سرور داخلی MCP با ۱۱۰ ابزار، پروتکل عامل A2A، حافظهٔ پایدار، محافظها، عاملهای ابری، پنهانسازی اثر انگشت TLS، نسخههای Desktop/Termux/PWA و رابط کاربری با ۶۷ زبان بومیسازیشده. OmniRoute تحت مجوز MIT منتشر شده و قابلیت میزبانی شخصی دارد. قابلیتها و تعدادهای رقبا ممکن است تغییر کنند؛ روششناسی پیوندشده را ببینید."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="آنچه OmniRoute را متمایز میکند — تصویری زماندار از مقایسهٔ قابلیتها با 9router، OpenRouter، CLIProxyAPI و LiteLLM در ۱۳ قابلیت. OmniRoute: دارای ۳۷۷ ارائهدهنده، بیش از ۱۵۰ سطح رایگان داخلی، ۲۰ راهبرد مسیریابی، فشردهسازی توکن با ۱۲ موتور، سرور داخلی MCP با ۱۱۰ ابزار، پروتکل عامل A2A، حافظهٔ پایدار، محافظها، عاملهای ابری، پنهانسازی اثر انگشت TLS، نسخههای Desktop/Termux/PWA و رابط کاربری با ۶۷ زبان بومیسازیشده. OmniRoute تحت مجوز MIT منتشر شده و قابلیت میزبانی شخصی دارد. قابلیتها و تعدادهای رقبا ممکن است تغییر کنند؛ روششناسی پیوندشده را ببینید."/>
 
 <sub>📊 روششناسی کامل و جزئیات هر قابلیت در مقایسه با 9router، OpenRouter، CLIProxyAPI و LiteLLM ← [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ OmniRoute دارای مجوز MIT است و بهصورت عمومی نگهدار
 - **🖼️ نقاط پایانی جدید** — `/v1/ocr` ‏(Mistral OCR) و `/v1/audio/translations` ‏(به سبک Whisper) مجموعهٔ قابلیتهای رسانهای را کامل میکنند. ← [مرجع API](docs/reference/API_REFERENCE.md)
 - **🎨 تولید تصویر / ویدئو / صدا** — یک API واحد برای رسانه: ویدئوی xAI Grok Imagine و Novita AI،‏ ComfyUI،‏ Magnific،‏ Adobe Firefly،‏ Segmind و ارائهدهندگان گفتار مانند ElevenLabs. ← [مرجع API](docs/reference/API_REFERENCE.md)
 - **🌍 استقرار و عملیات** — `basePath` برای پراکسی معکوس، تشخیص خودکار زبان مرورگر، ردیابی دستگاه بهازای هر کلید، اعتماد MITM بدون نیاز به root و بومیسازی zh-TW. ← [محیط](docs/reference/ENVIRONMENT.md)
-- **🤝 ارائهدهندگان و عاملهای بیشتر** — عاملهای ابری (Codex Cloud، Cursor، Devin، Jules)،‏ Grok Build ‏(xAI) با مرورگر + ورود OAuth، کارت درجهیک Ollama،‏ Claude Opus 5 و Sonnet 5، همکاری رسمی Kimi ‏(Code/Web/Moonshot)،‏ Zed،‏ Requesty،‏ SenseNova،‏ Yuanbao،‏ Agnes AI… و **کاتالوگ ۳۷۶ ارائهدهندهای** بهروزشده. ← [ارائهدهندگان](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 ارائهدهندگان و عاملهای بیشتر** — عاملهای ابری (Codex Cloud، Cursor، Devin، Jules)،‏ Grok Build ‏(xAI) با مرورگر + ورود OAuth، کارت درجهیک Ollama،‏ Claude Opus 5 و Sonnet 5، همکاری رسمی Kimi ‏(Code/Web/Moonshot)،‏ Zed،‏ Requesty،‏ SenseNova،‏ Yuanbao،‏ Agnes AI… و **کاتالوگ ۳۷۷ ارائهدهندهای** بهروزشده. ← [ارائهدهندگان](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 شفافیت مسیریابی** — هر پاسخ دارای سرآیند `X-OmniRoute-Decision` است که راهبرد/ارائهدهنده/تأخیر سرویسدهی را مشخص میکند؛ راهبرد ترکیبی جدید `cache-optimized` بههمراه عامل `cacheAffinity` در Auto-Combo، درخواستهای تکراری را به اتصالی بازمیگرداند که پیشوند کششده را نگه میدارد؛ و نقطهٔ پایانی فقطخواندنی `/v1/auto-combo/{channel}/candidates`، مجموعهٔ زندهٔ نامزدهای یک کانال `auto/*` را نمایش میدهد. ← [ترکیب خودکار](docs/routing/AUTO-COMBO.md)
 - **⚡ عملکرد و زیرساخت محلی** — راهاندازی Redis محلی با یک کلیک، استقراردهندههای رله Cloudflare Workers / Deno Deploy و Bifrost و Mux بهعنوان سرویسهای تعبیهشده تحت نظارت. → [سرویسهای تعبیهشده](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 امکانات دیگر موجود در بسته** — چارچوب افزونه + بازارچه، چارچوبهای مهارت Omni/Agent/GitHub، یکپارچهسازی خزانه Obsidian (۲۲ ابزار MCP)، APIهای Batch و Files سازگار با OpenAI، کش معنایی پاسخ، بازیوارسازی همراه با جدولهای رتبهبندی، کشف عامل ACP (۱۵ عامل داخلی)، خروجیگیری زمانبندیشده گزارشها به BigQuery، توزیع موازی چندمدلی `auto/chaos`، پل ربات Telegram، مدیر نسخه درونبرنامهای و رتبهبندی ارائهدهندگان رایگان LMArena-ELO. → [مستندات](docs/README.md)
@@ -657,7 +657,7 @@ OmniRoute دارای مجوز MIT است و بهصورت عمومی نگهدار
 <b>＋ همچنین با این موارد کار میکند</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>هر ابزار سازگار با OpenAI</b>
 </div>
 
-<sub>📖 راهاندازی اختصاصی هر ابزار برای هر 37 ابزار (27 ابزار CLI کدنویسی + 10 عامل CLI) ← [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 افزونه OpenCode ← [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 راهاندازی اختصاصی هر ابزار برای هر 38 ابزار (27 ابزار CLI کدنویسی + 11 عامل CLI) ← [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 افزونه OpenCode ← [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ omniroute configure codex          # همچنین: claude opencode qwen aider go
 
 <div align="center">
 
-## 🌐 376 ارائهدهنده هوش مصنوعی — 153 مورد با برچسب رایگان در کاتالوگ
+## 🌐 377 ارائهدهنده هوش مصنوعی — 153 مورد با برچسب رایگان در کاتالوگ
 
 </div>
 
-> **376 ارائهدهنده ثبتشده** در مجموعههای مرجع چت، رسانه، جستوجو، محلی، عامل ابری و سیستمی، شامل **153 ارائهدهنده دارای فراداده اکتشافی `hasFree: true`**. رجیستری مدلهای چت شامل **239 ارائهدهنده / 3,059 جفت متمایز ارائهدهنده-مدل / 1,475 شناسه خام مدل** است؛ کاتالوگ جداگانه سهمیه رایگان نیز **484 ردیف بهازای هر مدل**، **34 مخزن تکرارشونده** و **52 ارائهدهنده رایگان همیشگیِ تکرارشونده/بدون کلید** دارد. این مخرجها عمداً متفاوتاند؛ تعاریف و محاسبات پس از حذف موارد تکراری مخزن در [مرجع ارائهدهندگان](docs/reference/PROVIDER_REFERENCE.md) و [سطوح رایگان](docs/reference/FREE_TIERS.md) موجودند.
+> **377 ارائهدهنده ثبتشده** در مجموعههای مرجع چت، رسانه، جستوجو، محلی، عامل ابری و سیستمی، شامل **153 ارائهدهنده دارای فراداده اکتشافی `hasFree: true`**. رجیستری مدلهای چت شامل **239 ارائهدهنده / 3,059 جفت متمایز ارائهدهنده-مدل / 1,475 شناسه خام مدل** است؛ کاتالوگ جداگانه سهمیه رایگان نیز **484 ردیف بهازای هر مدل**، **34 مخزن تکرارشونده** و **52 ارائهدهنده رایگان همیشگیِ تکرارشونده/بدون کلید** دارد. این مخرجها عمداً متفاوتاند؛ تعاریف و محاسبات پس از حذف موارد تکراری مخزن در [مرجع ارائهدهندگان](docs/reference/PROVIDER_REFERENCE.md) و [سطوح رایگان](docs/reference/FREE_TIERS.md) موجودند.
 
 <div align="center">
 
@@ -765,6 +765,7 @@ omniroute configure codex          # همچنین: claude opencode qwen aider go
 <table>
   <tr><th align="left">پلتفرم</th><th align="left">نصب</th><th align="left">ویژگیهای برجسته</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (سراسری)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">یک فرمان، روی هر سیستمعامل</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (سراسری)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">سازگاری در حد توان، بدون تضمین پشتیبانی؛ Node.js محیط اجرای پشتیبانیشده است.</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">چندمعماری <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>دسکتاپ (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">پنجره بومی + سینی سیستم — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>نوار منو (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">نظارت بر سرور و بهروزرسانی خودکار آن — <b>macOS</b></td></tr>
@@ -1304,7 +1305,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # مقدار CI=1 نیز
   <tr><td nowrap><b>محیط اجرا</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <b>۱۰۰٪ TypeScript</b> در سراسر <code>src/</code> و <code>open-sse/</code> (از نسخه v2.0 بدون هیچ <code>any</code> در هسته)</td></tr>
   <tr><td nowrap><b>چارچوب</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite، ثبت وقایع WAL) + LowDB (JSON قدیمی) — ۱۴۷ ماژول دامنه، ۲۱۱ مهاجرت</td></tr>
+  <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite، ثبت وقایع WAL) + LowDB (JSON قدیمی) — ۱۴۷ ماژول دامنه، ۲۱۳ مهاجرت</td></tr>
   <tr><td nowrap><b>حافظه</b></td><td>جستوجوی تماممتن SQLite FTS5 + تعبیههای برداری کوانتیزهشده int8، زوال نوعدار</td></tr>
   <tr><td nowrap><b>طرحوارهها</b></td><td>Zod 4 — اعتبارسنجی ورودی/خروجی ابزار MCP + قراردادهای API</td></tr>
   <tr><td nowrap><b>پروتکلها</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

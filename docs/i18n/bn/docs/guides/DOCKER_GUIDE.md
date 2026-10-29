@@ -643,6 +643,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **আপগ্রেড:** প্রতিটি সেশন বিচ্ছিন্ন হবে বলে ধরে নিন। সম্ভব হলে ক্লায়েন্টগুলো ড্রেইন করুন; ডিফল্ট SQLite-এ কোনো রোলিং আপডেট নেই। Compose-এর `restart: unless-stopped` এবং Docker-এর `HEALTHCHECK`-ও কনটেইনার Unhealthy হলে একমাত্র প্রসেসটি প্রতিস্থাপন করবে—একই বিস্তৃত প্রভাবসহ।
 
+প্রস্তুত ম্যানিফেস্ট এবং একটি Helm চার্ট `deploy/kubernetes/` ও `deploy/helm/omniroute/`-এ রয়েছে — [Kubernetes ডিপ্লয়মেন্ট নির্দেশিকা](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) দেখুন।
+
 একটি **একক রেপ্লিকার** জন্য Kubernetes স্নিপেট (Recreate আবশ্যক; একটি SQLite ফাইলের বিপরীতে `replicas` বাড়াবেন না):
 
 ```yaml

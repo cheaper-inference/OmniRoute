@@ -10,8 +10,8 @@ OmniRoute si integra con tre categorie di strumenti CLI distribuite su tre pagin
 
 | Pagina         | Route                   | Concetto                                                                                  | Numero        |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------- | ------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Strumenti di programmazione indirizzati a OmniRoute (Client → CLI → OmniRoute → Provider) | 26            |
-| **CLI Agents** | `/dashboard/cli-agents` | Agenti autonomi indirizzati a OmniRoute (stesso flusso, ambito più ampio)                 | 10            |
+| **CLI Code's** | `/dashboard/cli-code`   | Strumenti di programmazione indirizzati a OmniRoute (Client → CLI → OmniRoute → Provider) | 27            |
+| **CLI Agents** | `/dashboard/cli-agents` | Agenti autonomi indirizzati a OmniRoute (stesso flusso, ambito più ampio)                 | 11            |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI che OmniRoute avvia come backend tramite stdio/ACP (flusso inverso)                   | vedi registro |
 
 Le route legacy vengono reindirizzate tramite 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Ognuno accetta `--remote <url> --api-key <key>` (per configurare uno strumento locale affinché utilizzi
 un'istanza OmniRoute remota), `--dry-run` (per visualizzare un'anteprima senza scrivere) e `--port`. Gli strumenti
-senza rilevamento automatico dei modelli (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) accettano
+senza rilevamento automatico dei modelli (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) accettano
 `--model <id>` (e `--yes` per le esecuzioni non interattive). `setup-5dive` è l'unica
 procedura che non scrive in `$HOME`: configura un parco di agenti 5dive
 scrivendo un profilo di autenticazione di proprietà di root sull'host del parco, quindi viene rieseguito tramite `sudo`
 e non dispone di una propria modalità remota. Per avviare una CLI con le
 variabili d'ambiente corrette già inserite e senza scrivere alcuna configurazione, utilizza il launcher generico
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — i target e gli alias provengono da `bin/cli/cli-manifest.mjs`); i launcher precedenti
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — i target e gli alias provengono da `bin/cli/cli-manifest.mjs`); i launcher precedenti
 specifici per strumento `omniroute launch` (Claude Code) e `omniroute launch-codex`
 (Codex) rimangono disponibili. Gemini CLI può essere soltanto avviata: è un target di `omniroute run`
 ma non dispone di alcuna procedura `setup-*`/`configure`.
@@ -182,7 +183,7 @@ Tutti gli strumenti visualizzati in `/dashboard/cli-code`. Quelli con `baseUrlSu
 Gli strumenti con `baseUrlSupport: "partial"` mostrano il badge "⚠ URL di base parziale" nella scheda della dashboard.
 ---
 
-## 2. Catalogo degli agenti CLI (10 strumenti)
+## 2. Catalogo degli agenti CLI (11 strumenti)
 
 Agenti autonomi visualizzati in `/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ Agenti autonomi visualizzati in `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full             | false                 |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full             | false                 |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full             | false                 |
+| whycodes     | WhyCodes         | Why Corporation          | full             | false                 |
 
 ---
 

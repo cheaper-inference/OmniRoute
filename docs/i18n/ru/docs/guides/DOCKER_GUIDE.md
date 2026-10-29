@@ -645,6 +645,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **Обновления:** ожидайте завершения всех сеансов. По возможности предварительно отключите клиентов; при использовании SQLite по умолчанию поэтапное обновление невозможно. Compose с `restart: unless-stopped` и Docker `HEALTHCHECK` также заменит единственный процесс, когда контейнер перейдёт в состояние Unhealthy, — с тем же масштабом последствий.
 
+Готовые манифесты и Helm-чарт находятся в `deploy/kubernetes/` и `deploy/helm/omniroute/` — см. [руководство по развертыванию в Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Фрагмент конфигурации Kubernetes для **одной реплики** (требуется Recreate; не увеличивайте `replicas` при использовании одного файла SQLite):
 
 ```yaml

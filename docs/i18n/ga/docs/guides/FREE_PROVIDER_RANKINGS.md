@@ -13,7 +13,7 @@
 
 ## Cad é atá Ann
 
-Cláraíonn OmniRoute 376 soláthraí, lena n-áirítear 155 iontráil catalóige atá marcáilte **saor in aisce/gan údarú**
+Cláraíonn OmniRoute 377 soláthraí, lena n-áirítear 155 iontráil catalóige atá marcáilte **saor in aisce/gan údarú**
 (gan údarú,
 OAuth saorchise, nó eochair API saorchise — féach an
 [Treoir maidir le Sraitheanna Saor in Aisce](../getting-started/FREE-TIERS-GUIDE.md) agus an t-eolaire iomlán

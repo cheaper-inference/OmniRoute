@@ -14,7 +14,7 @@
 
 ## Bu Nədir
 
-OmniRoute 376 provayderi qeydiyyata alır, o cümlədən **pulsuz/avtorizasiyasız** kimi
+OmniRoute 377 provayderi qeydiyyata alır, o cümlədən **pulsuz/avtorizasiyasız** kimi
 işarələnmiş 155 kataloq qeydi (avtorizasiyasız, pulsuz səviyyəli OAuth və ya pulsuz
 səviyyəli API açarı — bax: [Pulsuz Səviyyələr Bələdçisi](../getting-started/FREE-TIERS-GUIDE.md)
 və tam [Pulsuz Səviyyələr kataloqu](../reference/FREE_TIERS.md)). Ancaq bir məqam var:

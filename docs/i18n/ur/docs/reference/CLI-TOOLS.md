@@ -10,8 +10,8 @@ OmniRoute تین زمروں کے CLI ٹولز کے ساتھ انضمام کرت�
 
 | صفحہ           | روٹ                     | تصور                                                                                     | تعداد         |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------------------- | ------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | کوڈنگ ٹولز جنہیں آپ OmniRoute کی طرف بھیجتے ہیں (کلائنٹ → CLI → OmniRoute → فراہم کنندہ) | 26            |
-| **CLI Agents** | `/dashboard/cli-agents` | خود مختار ایجنٹس جنہیں آپ OmniRoute کی طرف بھیجتے ہیں (وہی بہاؤ، وسیع تر دائرۂ کار)      | 10            |
+| **CLI Code's** | `/dashboard/cli-code`   | کوڈنگ ٹولز جنہیں آپ OmniRoute کی طرف بھیجتے ہیں (کلائنٹ → CLI → OmniRoute → فراہم کنندہ) | 27            |
+| **CLI Agents** | `/dashboard/cli-agents` | خود مختار ایجنٹس جنہیں آپ OmniRoute کی طرف بھیجتے ہیں (وہی بہاؤ، وسیع تر دائرۂ کار)      | 11            |
 | **ACP Agents** | `/dashboard/acp-agents` | وہ CLIs جنہیں OmniRoute پسِ منظر کے طور پر stdio/ACP کے ذریعے چلاتا ہے (معکوس بہاؤ)      | رجسٹری دیکھیں |
 
 پرانی روٹس 308 کے ذریعے ری ڈائریکٹ ہوتی ہیں: `/dashboard/cli-tools` → `/dashboard/cli-code`، `/dashboard/agents` → `/dashboard/acp-agents`۔
@@ -55,17 +55,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 ہر کمانڈ `--remote <url> --api-key <key>` (کسی مقامی ٹول کو ریموٹ OmniRoute کے لیے کنفیگر کرنے کی خاطر)،
 `--dry-run` (لکھے بغیر پیش منظر دیکھنے کے لیے)، اور `--port` قبول کرتی ہے۔ خودکار ماڈل دریافت
-نہ رکھنے والے ٹولز (Cline، Kilo، Roo، Goose، Aider، Qwen، 5dive) کے لیے
+نہ رکھنے والے ٹولز (Cline، Kilo، Roo، Goose، Aider، Qwen، 5dive، WhyCodes) کے لیے
 `--model <id>` (اور غیر تعاملی اجرا کے لیے `--yes`) درکار ہوتا ہے۔ `setup-5dive` واحد
 طریقۂ کار ہے جو `$HOME` کے تحت نہیں لکھتا: یہ فلیٹ ہوسٹ پر root کی ملکیت والا تصدیقی پروفائل
 لکھ کر 5dive ایجنٹ فلیٹ کو کنفیگر کرتا ہے، اس لیے یہ `sudo` کے ذریعے خود کو دوبارہ چلاتا ہے
 اور اس کا اپنا کوئی ریموٹ موڈ نہیں ہے۔ کسی CLI کو درست env فراہم کرتے ہوئے، اور کوئی کنفیگریشن
 لکھے بغیر چلانے کے لیے، عمومی `omniroute run <target>` لانچر استعمال کریں (claude، codex، aider،
-goose، opencode، qwen، gemini — اہداف اور عرف `bin/cli/cli-manifest.mjs` سے آتے ہیں)؛ سابقہ
+goose، opencode، qwen، gemini، whycodes — اہداف اور عرف `bin/cli/cli-manifest.mjs` سے آتے ہیں)؛ سابقہ
 فی ٹول لانچرز `omniroute launch` (Claude Code) اور `omniroute launch-codex`
 (Codex) اب بھی دستیاب ہیں۔ Gemini CLI صرف لانچ کے لیے ہے: یہ `omniroute run`
 کا ہدف ہے، مگر اس کے لیے کوئی `setup-*`/`configure` طریقۂ کار موجود نہیں۔
@@ -178,7 +179,7 @@ OmniRoute کنٹینر کے اندر چلائی گئی `setup-*` کمانڈ کن
 `baseUrlSupport: "partial"` والے ٹولز ڈیش بورڈ کارڈ میں "⚠ جزوی Base URL" بیج دکھاتے ہیں۔
 ---
 
-## 2. CLI ایجنٹس کی فہرست (10 ٹولز)
+## 2. CLI ایجنٹس کی فہرست (11 ٹولز)
 
 خودمختار ایجنٹس جو `/dashboard/cli-agents` میں نظر آتے ہیں:
 
@@ -194,6 +195,7 @@ OmniRoute کنٹینر کے اندر چلائی گئی `setup-*` کمانڈ کن
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

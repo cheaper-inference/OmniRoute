@@ -604,6 +604,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **アップグレード：** すべてのセッションが切断されることを想定してください。可能であればクライアントをドレインしてください。デフォルトの SQLite ではローリングアップデートを利用できません。Compose の `restart: unless-stopped` と Docker の `HEALTHCHECK` の組み合わせでも、コンテナが Unhealthy になると唯一のプロセスが置き換えられます。影響範囲は同じです。
 
+すぐに使用できるマニフェストと Helm チャートは `deploy/kubernetes/` と `deploy/helm/omniroute/` にあります。詳細は [Kubernetes デプロイガイド](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) を参照してください。
+
 **単一レプリカ**用の Kubernetes スニペット（Recreate が必要です。1 つの SQLite ファイルに対して `replicas` を増やさないでください）：
 
 ```yaml

@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — 無料のAIゲートウェイ
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — コーディングを止める必要はありません。すべてのAIツール → 376のプロバイダー — 150以上が無料 — を1つのエンドポイントから利用。Claude Code、Codex、Cursor、Cline、Copilot、Antigravityを無料のClaude / GPT / Geminiに接続し、自動フォールバックに対応。RTK + Cavemanの多層圧縮によりトークンを15～95%（平均約89%）削減 — 上限到達を回避。376のAIプロバイダー · 150以上の無料プラン · 月間約16.2億無料トークン · 20のルーティング戦略 · $0から開始。"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — コーディングを止める必要はありません。すべてのAIツール → 377のプロバイダー — 150以上が無料 — を1つのエンドポイントから利用。Claude Code、Codex、Cursor、Cline、Copilot、Antigravityを無料のClaude / GPT / Geminiに接続し、自動フォールバックに対応。RTK + Cavemanの多層圧縮によりトークンを15～95%（平均約89%）削減 — 上限到達を回避。377のAIプロバイダー · 150以上の無料プラン · 月間約16.2億無料トークン · 20のルーティング戦略 · $0から開始。"/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                                 |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 プロバイダー                 |            352            |   **358**   |          376          |
+| 🌐 プロバイダー                 |            352            |   **358**   |          377          |
 | 🧠 一意のチャットモデル ID      |           1320            |  **1374**   |         1475          |
 | 🖼️ モダリティブリッジ           | 🆕 ビジョン + 音声 + 動画 |      ✓      |           ✓           |
 | 📡 Radar 無料カタログ           |       🆕 オプトイン       |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ 機能</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 コンボ</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 プロバイダー</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 プロバイダー</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="お約束 — 1つのエンドポイントと376のプロバイダー。別の正常な接続先が利用可能な間は、自動フォールバックによってルーティングが継続されます。6つの柱：376のプロバイダーにまたがる堅牢なフォールバック · 対象ワークロードで最大95%のトークン節約 · 150以上の無料枠と、定期更新型またはキーレスで永久無料の52プロバイダーにより$0から開始 · 1つの設定で37のCLI／エージェント統合 · /v1でOpenAI、Claude、Gemini、Responses APIとの互換性 · サーキットブレーカー、TLSステルス、MCPの110ツール、A2A、メモリ、ガードレール、評価、および追跡対象の7,800以上のテストファイルに含まれる56,000以上の静的テスト宣言など、本番環境向けの制御機能。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="お約束 — 1つのエンドポイントと377のプロバイダー。別の正常な接続先が利用可能な間は、自動フォールバックによってルーティングが継続されます。6つの柱：377のプロバイダーにまたがる堅牢なフォールバック · 対象ワークロードで最大95%のトークン節約 · 150以上の無料枠と、定期更新型またはキーレスで永久無料の52プロバイダーにより$0から開始 · 1つの設定で37のCLI／エージェント統合 · /v1でOpenAI、Claude、Gemini、Responses APIとの互換性 · サーキットブレーカー、TLSステルス、MCPの110ツール、A2A、メモリ、ガードレール、評価、および追跡対象の7,800以上のテストファイルに含まれる56,000以上の静的テスト宣言など、本番環境向けの制御機能。"/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute が他と一線を画す理由 — 13の機能について、9router、OpenRouter、CLIProxyAPI、LiteLLM と比較した特定時点の機能スナップショット。OmniRoute：376のプロバイダー、150以上の組み込み無料枠、20種類のルーティング戦略、12エンジンによるトークン圧縮、110個のツールを備えた組み込みMCPサーバー、A2Aエージェントプロトコル、永続メモリ、ガードレール、クラウドエージェント、TLSフィンガープリント秘匿、Desktop/Termux/PWA、67の国際化UIロケール。OmniRoute はMITライセンスで提供され、セルフホスティングが可能です。競合製品の機能や数値は変更される場合があります。リンク先の調査方法をご覧ください。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute が他と一線を画す理由 — 13の機能について、9router、OpenRouter、CLIProxyAPI、LiteLLM と比較した特定時点の機能スナップショット。OmniRoute：377のプロバイダー、150以上の組み込み無料枠、20種類のルーティング戦略、12エンジンによるトークン圧縮、110個のツールを備えた組み込みMCPサーバー、A2Aエージェントプロトコル、永続メモリ、ガードレール、クラウドエージェント、TLSフィンガープリント秘匿、Desktop/Termux/PWA、67の国際化UIロケール。OmniRoute はMITライセンスで提供され、セルフホスティングが可能です。競合製品の機能や数値は変更される場合があります。リンク先の調査方法をご覧ください。"/>
 
 <sub>📊 9router、OpenRouter、CLIProxyAPI、LiteLLM との比較に関する完全な調査方法と機能別の詳細 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radarはオプトイン方式で、GETリクエストのみを使用します。
 - **🖼️ 新しいエンドポイント** — `/v1/ocr`（Mistral OCR）と `/v1/audio/translations`（Whisper形式）により、メディア機能がさらに充実しました。→ [APIリファレンス](docs/reference/API_REFERENCE.md)
 - **🎨 画像／動画／音声生成** — メディア向けの統一APIとして、xAI Grok Imagine、Novita AI動画、ComfyUI、Magnific、Adobe Firefly、Segmind、およびElevenLabsなどの音声プロバイダーをサポートします。→ [APIリファレンス](docs/reference/API_REFERENCE.md)
 - **🌍 デプロイと運用** — リバースプロキシの `basePath`、ブラウザー言語の自動検出、キーごとのデバイス追跡、root不要のMITM信頼設定、zh-TWローカライズに対応しました。→ [環境](docs/reference/ENVIRONMENT.md)
-- **🤝 プロバイダーとエージェントの拡充** — クラウドエージェント（Codex Cloud、Cursor、Devin、Jules）、ブラウザー＋OAuthログイン対応のGrok Build（xAI）、正式対応のOllamaカード、Claude Opus 5およびSonnet 5、Kimi公式パートナーシップ（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AIなどを追加し、**376プロバイダーのカタログ**を刷新しました。→ [プロバイダー](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 プロバイダーとエージェントの拡充** — クラウドエージェント（Codex Cloud、Cursor、Devin、Jules）、ブラウザー＋OAuthログイン対応のGrok Build（xAI）、正式対応のOllamaカード、Claude Opus 5およびSonnet 5、Kimi公式パートナーシップ（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AIなどを追加し、**377プロバイダーのカタログ**を刷新しました。→ [プロバイダー](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 ルーティングの透明性** — すべてのレスポンスに、処理を担当した戦略／プロバイダー／レイテンシーを示す `X-OmniRoute-Decision` ヘッダーが含まれます。新しい `cache-optimized` コンボ戦略とAuto-Comboの `cacheAffinity` 要素により、繰り返しリクエストをキャッシュ済みプレフィックスを保持する接続へ戻します。また、読み取り専用の `/v1/auto-combo/{channel}/candidates` エンドポイントでは、`auto/*` チャネルの現在の候補プールを確認できます。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ ローカルパフォーマンスとインフラ** — ワンクリックのローカル Redis、Cloudflare Workers / Deno Deploy リレーデプロイヤー、監視付き組み込みサービスとしての Bifrost と Mux。→ [組み込みサービス](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 そのほかの同梱機能** — プラグインフレームワークとマーケットプレイス、Omni/Agent/GitHub スキルフレームワーク、Obsidian Vault 統合（22 個の MCP ツール）、OpenAI 互換の Batch & Files API、セマンティックレスポンスキャッシュ、リーダーボードを備えたゲーミフィケーション、ACP エージェント検出（15 個の組み込みエージェント）、BigQuery へのスケジュール済みログエクスポート、`auto/chaos` による並列マルチモデルファンアウト、Telegram ボットブリッジ、アプリ内バージョンマネージャー、LMArena-ELO の無料プロバイダーランキング。→ [ドキュメント](docs/README.md)
@@ -657,7 +657,7 @@ Radarはオプトイン方式で、GETリクエストのみを使用します。
 <b>＋ 以下にも対応</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>あらゆるOpenAI互換ツール</b>
 </div>
 
-<sub>📖 全37ツール（27個のCLIコードツール + 10個のCLIエージェント）のツール別セットアップ → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCodeプラグイン → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 全38ツール（27個のCLIコードツール + 11個のCLIエージェント）のツール別セットアップ → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCodeプラグイン → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ omniroute configure codex          # 次も利用可能：claude opencode qwen a
 
 <div align="center">
 
-## 🌐 376 の AI プロバイダー — 153 がカタログ上で無料と明記
+## 🌐 377 の AI プロバイダー — 153 がカタログ上で無料と明記
 
 </div>
 
-> 正規のチャット、メディア、検索、ローカル、クラウドエージェント、システムの各コレクション全体で **376 の登録済みプロバイダー**があり、そのうち **153 に `hasFree: true` の検出メタデータが付与されています**。チャットモデルレジストリには **239 プロバイダー / 3,059 の異なるプロバイダー・モデルペア / 1,475 の未加工モデル ID** が含まれています。また、個別の無料枠カタログには、**モデルごとの行が 484 件**、**継続利用可能なプールが 34 件**、および**継続利用可能またはキー不要の永久無料プロバイダーが 52 件**あります。これらの分母は設計上異なります。定義とプールの重複を除いた計算については、[プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md)および[無料枠](docs/reference/FREE_TIERS.md)を参照してください。
+> 正規のチャット、メディア、検索、ローカル、クラウドエージェント、システムの各コレクション全体で **377 の登録済みプロバイダー**があり、そのうち **153 に `hasFree: true` の検出メタデータが付与されています**。チャットモデルレジストリには **239 プロバイダー / 3,059 の異なるプロバイダー・モデルペア / 1,475 の未加工モデル ID** が含まれています。また、個別の無料枠カタログには、**モデルごとの行が 484 件**、**継続利用可能なプールが 34 件**、および**継続利用可能またはキー不要の永久無料プロバイダーが 52 件**あります。これらの分母は設計上異なります。定義とプールの重複を除いた計算については、[プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md)および[無料枠](docs/reference/FREE_TIERS.md)を参照してください。
 
 <div align="center">
 
@@ -765,6 +765,7 @@ omniroute configure codex          # 次も利用可能：claude opencode qwen a
 <table>
   <tr><th align="left">プラットフォーム</th><th align="left">インストール</th><th align="left">特長</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm（グローバル）</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">1つのコマンドで、あらゆる OS に対応</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun（グローバル）</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">サポート保証のないベストエフォートの互換性です。サポート対象のランタイムは Node.js です。</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">マルチアーキテクチャ対応：<b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>デスクトップ（Electron）</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">ネイティブウィンドウ + システムトレイ — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>メニューバー（OmniRouteTray）</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">サーバーの監視と自動更新 — <b>macOS</b></td></tr>
@@ -1308,7 +1309,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
   <tr><td nowrap><b>ランタイム</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>言語</b></td><td>TypeScript 6.0 — <code>src/</code>と<code>open-sse/</code>の全体で<b>100% TypeScript</b>（v2.0以降、コアでの<code>any</code>使用はゼロ）</td></tr>
   <tr><td nowrap><b>フレームワーク</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>データベース</b></td><td>better-sqlite3（SQLite、WALジャーナリング）+ LowDB（レガシーJSON）— 147個のドメインモジュール、211件のマイグレーション</td></tr>
+  <tr><td nowrap><b>データベース</b></td><td>better-sqlite3（SQLite、WALジャーナリング）+ LowDB（レガシーJSON）— 147個のドメインモジュール、213件のマイグレーション</td></tr>
   <tr><td nowrap><b>メモリ</b></td><td>SQLite FTS5全文検索 + int8量子化ベクトル埋め込み、型付き減衰</td></tr>
   <tr><td nowrap><b>スキーマ</b></td><td>Zod 4 — MCPツールの入出力検証 + APIコントラクト</td></tr>
   <tr><td nowrap><b>プロトコル</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>

@@ -8,7 +8,7 @@
 > Ponovo generišite pomoću: `npm run gen:provider-reference`
 > **Posljednje generisanje:** 2026-10-27
 
-Ukupan broj pružalaca usluga: **376**. U nastavku pogledajte pregled po kategorijama.
+Ukupan broj pružalaca usluga: **377**. U nastavku pogledajte pregled po kategorijama.
 
 ## Kategorije
 
@@ -397,7 +397,7 @@ Koristite dashboard na `/dashboard/providers` da omogućite, konfigurišete i te
 | `vllm`                | `vllm`       | vLLM                | Lokalno, self-hosted | [link](https://github.com/vllm-project/vllm)                    | API ključ je opcionalan. Konfigurišite lokalni vLLM OpenAI-kompatibilni osnovni URL (podrazumijevano: http://localhost:8000/v1).                                                                                                                                                                                                        |
 | `xinference`          | `xinference` | XInference          | Lokalno, self-hosted | [link](https://inference.readthedocs.io)                        | API ključ je opcionalan. Konfigurišite lokalni XInference OpenAI-kompatibilni osnovni URL (podrazumijevano: http://localhost:9997/v1).                                                                                                                                                                                                  |
 
-## Pružatelji pretrage (18)
+## Pružatelji pretrage (19)
 
 | ID                  | Alias           | Naziv                               | Oznake   | Web-stranica                                                    | Napomene                                                                                                                       |
 | ------------------- | --------------- | ----------------------------------- | -------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -407,6 +407,7 @@ Koristite dashboard na `/dashboard/providers` da omogućite, konfigurišete i te
 | `exa-search`        | `exa-search`    | Exa Search                          | Pretraga | [link](https://exa.ai)                                          | API ključ iz kontrolne ploče dashboard.exa.ai                                                                                  |
 | `firecrawl`         | `fc`            | Firecrawl                           | Pretraga | [link](https://firecrawl.dev)                                   | API ključ sa stranice firecrawl.dev/app/api-keys (ili postavite osnovni URL vlastite Firecrawl instance)                       |
 | `google-pse-search` | `google-pse`    | Google Programmable Search          | Pretraga | [link](https://developers.google.com/custom-search/v1/overview) | Zahtijeva Google API ključ i ID vašeg programabilnog pretraživača (cx)                                                         |
+| `kimi-search`       | `kimi-search`   | Kimi Search                         | Pretraga | [link](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API ključ (MOONSHOT_API_KEY) s platform.kimi.ai                                                                    |
 | `linkup-search`     | `linkup`        | Linkup Search                       | Pretraga | [link](https://docs.linkup.so)                                  | Bearer API ključ iz kontrolne ploče Linkup                                                                                     |
 | `nimble-search`     | `nimble`        | Nimble Search                       | Pretraga | [link](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API ključ iz kontrolne ploče Nimble                                                                                     |
 | `ollama-search`     | `ollama-search` | Ollama Search                       | Pretraga | [link](https://ollama.com/settings/keys)                        | Isti API ključ kao za Ollama Cloud (sa stranice ollama.com/settings/keys)                                                      |

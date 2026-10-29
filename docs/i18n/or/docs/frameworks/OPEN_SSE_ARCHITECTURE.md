@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ଫାଇଲ୍                          | ଉଦ୍ଦେଶ୍ୟ                                            |
 | ------------------------------ | --------------------------------------------------- |
-| `providerRegistry.ts`          | 376-ପ୍ରଦାନକାରୀ କ୍ୟାଟାଲଗ୍ ଉପରେ ଚାଟ୍-ମଡେଲ୍ ରେଜିଷ୍ଟ୍ରି |
+| `providerRegistry.ts`          | 377-ପ୍ରଦାନକାରୀ କ୍ୟାଟାଲଗ୍ ଉପରେ ଚାଟ୍-ମଡେଲ୍ ରେଜିଷ୍ଟ୍ରି |
 | `providerModels.ts`            | ମଡେଲ୍ ଉପନାମ, ଫର୍ମାଟ୍ ମ୍ୟାପିଂ                        |
 | `constants.ts`                 | ସମୟସୀମା, ସୀମା, ସ୍ଥିତି କୋଡ୍                          |
 | `defaultThinkingSignature.ts`  | ଡିଫଲ୍ଟ Claude ଚିନ୍ତନ ସ୍ୱାକ୍ଷର                       |

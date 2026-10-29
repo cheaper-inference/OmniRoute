@@ -257,7 +257,217 @@ Paketlər **həm** sətir sayına, həm də seriallaşdırılmış baytların h�
 
 ---
 
-## 5. Təyinat yerinin əlavə edilməsi
+## 5. OTLP/HTTP izlərinin təyinatı
+
+Konfiqurasiya `type: "otlp-http"` istifadə edir. Bu, saxlanılmış çağırış jurnallarının
+planlaşdırılmış, kursor əsaslı ixracıdır; `open-sse/services/routing/otel.ts` daxilindəki
+canlı marşrutlaşdırma hadisələrini mümkün qədər çatdırmağa çalışan qəbuledici deyil. O, həmin qəbuledicinin mühit
+dəyişənlərini, taymerlərini və ya buferlərini oxumur və dəyişdirmir. Hər ikisinin aktivləşdirilməsi iki müstəqil növ span yarada bilər;
+bu çağırış jurnalı spanlarını fərqləndirmək üçün `omniroute.log-export` instrumentasiya əhatəsindən istifadə edin.
+
+| Açar                     | Standart dəyər / məqsəd                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `endpoint`               | Tam HTTP(S) iz URL-i tələb olunur; `/v1/traces` sonluğu əlavə edilmir                           |
+| `headers`                | İstəyə bağlı `Name: value` sətirləri və ya sətir dəyərlərindən ibarət JSON obyekti; şifrələnir  |
+| `requestHeaderAllowlist` | Boş (söndürülüb); span atributları kimi qeydə alınacaq müştəri başlıqlarının adları/prefiksləri |
+| `serviceName`            | `omniroute`; resursun `service.name` atributu                                                   |
+| `langfuseMapping`        | `false`; Langfuse generasiya/sessiya/istifadəçi atributları əlavə edir                          |
+| `identity`               | `pseudonymous`, `keyName` və ya `none`                                                          |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                         |
+| `timeoutMs`              | Hər HTTP cəhdi üçün `30000`                                                                     |
+| `environment`            | Təyin edilməyib; istəyə bağlı `langfuse.environment`                                            |
+
+Ümumi idarəetmə paneli bu sahələri göstərir. `paths` API massivi və ya dəqiq yolların
+yeni sətirlər/vergüllərlə ayrıldığı mətn sahəsi qəbul edir. Embeddings, rerank və digər yollar
+açıq şəkildə icazə verilmədikcə ötürülür. Ötürülən sətirlər də kursoru irəlilədir; mövcud
+icraçının `exported`/`exportedTotal` sayğacları qəbul edilmiş spanları deyil, filtrlənmiş
+sətirlər də daxil olmaqla emal edilmiş mənbə sətirlərini sayır. Filtrləmə törəmə prosesdə, onun
+IPC/kursor müqaviləsini dəyişdirmədən həyata keçirilir.
+
+URL yoxlaması `src/shared/network/outboundUrlGuard.ts` daxilindəki verilənlər bazasından
+asılı olmayan `parseAndValidateNonMetadataUrl` köməkçisindən istifadə edir: `block-metadata` siyasəti. O,
+özəl URL-lərə icazə verilmiş webhook yoxlayıcısı ilə eyni şərtsiz metadata/protokol/URL-ə daxil edilmiş giriş məlumatları yoxlamalarını
+tətbiq edir, lakin qlobal funksiya bayrağını dəyişmədən localhost/LAN hədəflərinə qəsdən
+icazə verir. Bu, öz serverinizdə yerləşdirilən Langfuse, Phoenix, Tempo və Collector
+son nöqtələrindən, o cümlədən özəl HTTP son nöqtələrindən istifadə etməyə imkan verir. Bulud metadatası hostları həmişə bloklanır.
+Yönləndirmələr izlənilmir, buna görə kollektor giriş məlumatlarını başqa hosta yönləndirə bilməz.
+Mövcud leksik URL qoruyucusu kimi, bu da DNS həllini sabitləmir; yalnız
+operatorun nəzarətində olan hostları konfiqurasiya edin. Son nöqtə etibarlı şəbəkədə deyilsə, HTTPS-ə üstünlük verin.
+
+### Faydalı yük və çatdırılma
+
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) icazə verilmiş hər sətir üçün
+dəqiq sorğu yoluna uyğun adlandırılmış bir CLIENT spanı daşıyır. Yola əsaslanan adlandırma
+model və ya kimlik məlumatlarını span adına daxil etmədən Chat Completions, Responses və Messages-i
+fərqləndirir. Resurs atributlarına `service.name` və paketin `service.version` atributu daxildir.
+
+Adi çat cəhdi jurnalçısı (`open-sse/handlers/chatCore/attemptLogging.ts`) tamamlanma zamanı
+`duration = Date.now() - startTime` yazır və vaxt nişanı təqdim etmir;
+`src/lib/usage/callLogs.ts` daxilindəki `saveCallLogOperation` vaxt nişanını standart olaraq yazılma
+(tamamlanma) vaxtına təyin edir. Buna görə ixrac zamanı son = sətrin vaxt nişanı və başlanğıc = son − müddət
+(millisaniyə ilə, onluq nanosaniyələrə çevrilərək) təyin olunur. Çağıran tərəfin təqdim etdiyi keçmiş vaxt nişanları
+da son vaxt kimi saxlanılır; hər sətir üçün başlanğıc/tamamlanma fərqləndiricisi yoxdur.
+Null müddət sıfıra çevrilir. Yanlış/çatışmayan vaxt nişanları
+qeyri-deterministik spanlar yaratmaq əvəzinə paketin uğursuz olmasına səbəb olur. `ttftMs` null ola bilər və `omniroute.ttft_ms` atributuna uyğunlaşdırılır.
+
+Atributlara `gen_ai.operation.name="chat"`, provayder, sorğulanan/cavab modeli,
+giriş/çıxış tokenləri, istəyə bağlı keşdən oxuma/keş yaratma/mühakimə tokenləri, HTTP statusu,
+combo, keş mənbəyi, sessiya etiketi və korrelyasiya identifikatoru daxildir. Tam ədəd OTLP dəyərləri və vaxt nişanları
+onluq sətirlərdir; sətirlər, məntiqi dəyərlər və kəsr ədədləri öz doğma OTLP dəyər
+variantlarından istifadə edir. Xəta spanları ERROR statusuna və təmizlənmiş status mesajına malikdir. Kanonik
+qeyddə yuxarı axın hostunun URL-i yoxdur, buna görə kollektoru yanlışlıqla
+model serveri kimi göstərmək əvəzinə `server.address` buraxılır. Xərc ixrac edilmir.
+
+Yalnız `includeBodies=true` məzmunu yükləyib tamamlayır. `langfuseMapping=false` olduqda,
+`gen_ai.input.messages` / `gen_ai.output.messages` yenidən formalaşdırılmış semconv
+mesajlar massivini deyil, OmniRoute tərəfindən saxlanılmış təmizlənmiş sorğu/cavab
+gövdəsinin JSON-unu (təhlil edilə bildikdə kanonikləşdirilmiş şəkildə) daşıyır. Kəsilmiş/JSON olmayan gövdələr xam mətn olaraq qalır. `langfuseMapping=true` olduqda,
+gövdələr yalnız `langfuse.observation.input` / `langfuse.observation.output` kimi göndərilir;
+hər gövdənin bir dəfə göndərilməsi üçün `gen_ai.*.messages` atributları buraxılır. Hər iki rejim
+`maxBodyBytes` dəyərini mövcud məzmun yükləmə yolundan götürür;
+`omniroute.bodies_truncated=true` kəsilməni işarələyir.
+Bu təyinat əlavə emal xətti ani görüntüləri və ya təmizlənməmiş artefakt oxumaları əlavə etmir;
+istəyə bağlı sorğu başlıqlarının qeydə alınması aşağıda təsvir edilən, mövcud yüklənmiş müştəri ani görüntüsündən istifadə edir.
+Gövdələri ixrac edərkən saatlıq yığılma yaratmaq əvəzinə
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` kimi dəqiqə səviyyəli intervaldan istifadə edin.
+
+### İstəyə bağlı müştəri sorğusu başlıqları
+
+Başlıqların qeydə alınması **standart olaraq söndürülüb**. Təyinat konfiqurasiyasında `requestHeaderAllowlist` təyin edin
+və **Sorğuları və cavabları ixrac et** seçimini aktivləşdirin (təyinatda `includeBodies: true`).
+İcazə siyahısı API massivi və ya adların yeni sətir/vergüllə ayrıldığı mətn sahəsi qəbul edir:
+
+```json
+{
+  "requestHeaderAllowlist": ["User-Agent", "X-Project", "X-OmniRoute-Meta-*"]
+}
+```
+
+Adlar böyük-kiçik hərf fərqi nəzərə alınmadan və tam uyğunluqla müqayisə edilir; yalnız sonda yerləşən tək `*` boş olmayan
+başlıq adı prefiksini seçir. Tək `*`, adın daxilindəki əvəzedici simvollar və etibarsız HTTP başlıq adları rədd edilir.
+Ən çox 64 selektor ola bilər və hər birinin adı/prefiksi ən çox 256 ASCII baytı uzunluğunda ola bilər.
+Bu parametr eksporteri kollektorda autentifikasiya edən `headers` parametrindən ayrıdır.
+
+Başlıqların toplanması yalnız saxlanmış ətraflı konveyerin
+`clientRawRequest` (və ya köhnə `clientRequest`) sahəsindən doldurulan `pipeline_client_request` sahəsini oxuyur. Provayder sorğusunun başlıqlarına heç vaxt ehtiyat mənbə kimi müraciət edilmir.
+Sorğu qeydə alınarkən ətraflı konveyer jurnallaşdırması aktiv olmalı idi.
+`includeBodies` deaktivdirsə və ya müştəri vəziyyətinin anlıq görüntüsünün JSON-u yoxdursa, zədələnibsə və ya kəsilibsə, heç bir başlıq
+atributu yaradılmır. `maxBodyBytes` dəyərini artırmaq ixrac zamanı anlıq görüntünün kəsilməsinin qarşısını ala bilər;
+bu, heç vaxt saxlanmamış təfərrüatları bərpa edə bilməz. Ölçüsü 1 MiB-dan böyük olan və ya
+256-dan çox başlıq qeydi ehtiva edən anlıq görüntü nəzərə alınmır. Mövcud sorğu/cavab ixracı başlıqların toplanması ilə yanaşı
+aktiv qalır; icazə siyahısı yalnız başlıqların yüklənməsi rejimini təmin etmir.
+
+Seçilmiş dəyərlər, hətta tək sətir olduqda belə, `http.request.header.<full lowercase header name>` OTLP sətir massivlərinə çevrilir.
+Məsələn, `X-OmniRoute-Meta-Team: example-team`
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}` dəyəri ilə
+`http.request.header.x-omniroute-meta-team` atributuna çevrilir.
+Tam prefiks qorunur: bunlar biznes sahələrinin təhlili və ya
+`omniroute.metadata.*` / Langfuse metadatasına çevrilmə olmadan adi başlıqlardır. `langfuseMapping` başlıqların
+semantikasını dəyişmir. Seçilmiş təkdəyərli `User-Agent` həmçinin standart skalyar
+`user_agent.original` atributunu təyin edir. Bir dəyərin daxilindəki vergüllər üzrə bölünmə aparılmır. Böyük-kiçik hərf variantları saxlanmış
+qeydlərin ardıcıllığı ilə birləşdirilir; hər hansı etibarsız variant bütün başlığın buraxılmasına səbəb olur. Atributlar kiçik hərfli ada görə sıralanır.
+
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, API açarı başlıqları, adlarında
+auth/token/secret/password/credential işarələri olan başlıqlar və daxili şlüzün giriş məlumatları həmişə
+istisna edilir, hətta seçilmiş və ya saxlanmada qismən maskalanmış olsalar belə. Məlum giriş məlumatı nümunələri
+ortaq giriş məlumatı detektorundan istifadə edir; gizlətmə markerləri buraxılır, təhlükəsiz dəyərlər kimi ixrac edilmir.
+Yalnız sətirlər və boş olmayan sətir massivləri qəbul edilir; ədədlər və obyektlər məcburi çevrilmir.
+Etibarsız adlar, prototip açarları, idarəetmə simvolları (üfüqi tabulyasiya istisna olmaqla) və səhv formalaşmış Unicode
+paketin uğursuz olmasına və ya onların məzmununun xətalarda əks olunmasına səbəb olmadan nəzərə alınmır.
+
+Hər span ən çox 32 başlıq, hər başlıq üçün 16 dəyər, hər dəyər üçün 4096 UTF-8 baytı
+və toplanmış başlıq adları ilə dəyərləri üzrə cəmi 16384 UTF-8 baytı toplayır. Həddindən böyük/etibarsız başlıqlar
+kəsilmir, bütövlükdə buraxılır. Seçim operatorun məxfiliklə bağlı qərarıdır: təhlükəsiz görünən adlar
+yenə də şəxsi məlumat ehtiva edə bilər və bu məhdudiyyətlər/detektorlar ümumi təyinatlı fərdi identifikasiya məlumatı təmizləyicisi deyil.
+
+### Çatdırılma məhdudiyyətləri
+
+Sorğular zərf daxil olmaqla 500 span və 4 MiB UTF-8 JSON ilə məhdudlaşdırılır.
+İcazə verilən hər spanın ölçüsü kursor paketinin ilk sorğusundan əvvəl yoxlanılır. Ayrı-ayrı
+span limitdən böyükdürsə, həmin paketin heç bir hissəsi göndərilmir və `maxBodyBytes`
+dəyərini azaltmaq tövsiyəsi ilə xəta yaranır; span səssizcə atılmır. İlkin yoxlama yalnız qeyd istinadlarını və
+bayt saylarını saxlayır, hər müvəqqəti spanı/JSON-u atır; paketin ikinci seriallaşdırılmış nüsxəsini
+saxlamaq əvəzinə spanlar məhdud ölçülü hissələr üçün yenidən qurulur. HTTP 408/429/5xx, şəbəkə nasazlıqları və gözləmə vaxtının bitməsi zamanı
+250/500 ms eksponensial gözləmə ilə ən çox üç cəhd edilir. `Retry-After` saniyələri və ya HTTP tarixləri
+gözləməni 5 saniyəyə qədər uzada bilər. Digər statuslar dərhal uğursuzluq yaradır. OTLP 2xx qismən rədd cavabı da
+itirilmiş spanı təsdiqləmək əvəzinə xəta yaradır; boş və ya etibarlı JSON təsdiqləri
+64 KiB cavab oxuma limiti ilə qəbul edilir.
+
+Xətalar yalnız eksporterə aid faktları ehtiva edir: HTTP statusu, təkrar cəhd sinfi, cəhdlərin və göndərilmiş spanların
+sayı və ya təsdiq/şəbəkə nasazlığı haqqında sabit mətn. Kollektorun cavab gövdələri,
+qismən uğur sayları və cavab başlıqları heç vaxt xətalara, jurnallara və ya
+idarə panelinə köçürülmür. Uğursuz və ya qismən qəbul edilmiş paket təsdiqlənmir: təyinat həmin statusla
+uğursuzluq vəziyyətini göstərir, kursor son təsdiqlənmiş paketdə qalır və növbəti icra
+eyni sətirləri yenidən göndərir. Daimi statuslar kollektor və ya konfiqurasiya
+düzəldilənədək uğursuzluq yaratmağa davam edir. Cavab təfərrüatları üçün kollektorun öz jurnallarından istifadə edin. Çağırış jurnalı xəta xülasələrinin
+ayrıca gizlətmə mexanizmi saxlanılır.
+`prepare()` heç nə yaratmır; Test dəqiq olaraq `{"resourceSpans":[]}` göndərir və
+çağırış jurnalı spanlarını yazmadan HTTP statusunu bildirir.
+
+İz identifikatorları və span identifikatorları
+`"omniroute.trace\0" + callLogId` və `"omniroute.span\0" + callLogId` üzərində hesablanmış SHA-256-nın ilk 32/16 onaltılıq rəqəmidir. Təkrar göndərişlərdə
+eyni identifikatorlar istifadə olunur. Bu, dublikatların aradan qaldırılmasına zəmanət deyil: Langfuse
+v4 qəbulu da daxil olmaqla bəzi arxa sistemlər eyni identifikatorlu spanların dublikatlarını aradan qaldırmır. Qəza və ya hissənin qismən uğursuzluğu
+ən çox bir təsdiqlənməmiş kursor paketinin yenidən göndərilməsinə səbəb ola bilər; yalnız onun son HTTP hissəsi deyil,
+bütün paket təkrarlana bilər. Kursor paketinin ölçüsünü seçərkən bu kompromisi nəzərə alın.
+
+### Langfuse nümunəsi
+
+Öz serverinizdə yerləşdirilən Langfuse instansiyası üçün bu sahələri konfiqurasiya edin:
+
+```json
+{
+  "endpoint": "https://langfuse.example.com/api/public/otel/v1/traces",
+  "headers": "Authorization: Basic <base64-of-public-key:secret-key>",
+  "serviceName": "omniroute",
+  "langfuseMapping": true,
+  "identity": "pseudonymous",
+  "environment": "production"
+}
+```
+
+Authorization dəyərini lokal olaraq hərfi `public-key:secret-key`
+sətrinin Base64 kodlaşdırılması ilə yaradın (məsələn, `Buffer.from(publicKey + ":" + secretKey).toString("base64")` ilə).
+Həqiqi giriş məlumatlarını jurnallara, ekran görüntülərinə və ya problem bildirişlərinə yapışdırmayın. Uyğunlaşdırma avtomatik olaraq
+`x-langfuse-ingestion-version: 4` təyin edir; Authorization yenə də `headers` daxilində verilir.
+Həm başlıqlar, həm də yaradılmış identiklik duzu mövcud şifrələnmiş məxfi sahə
+mexanizmindən və API yer tutucularından istifadə edir; `STORAGE_ENCRYPTION_KEY` tələb olunur.
+
+Uyğunlaşdırma generasiya növünü/modelini, JSON istifadə təfərrüatlarını (giriş/çıxış/cəmi və mövcud
+keş açarları), JSON giriş/çıxış anlıq görüntülərini, ERROR/DEFAULT səviyyəsini, təmizlənmiş status mesajını,
+iz adını, sessiya identifikatorunu, istəyə bağlı mühiti və provayder, tələb olunan model, yol, kombinasiya, keş
+mənbəyi və status üçün filtrlənə bilən
+`langfuse.observation.metadata.<key>` atributunu əlavə edir. `langfuse.observation.completion_start_time` yalnız TTFT məlum olduqda və müddət daxilində olduqda
+başlanğıc + TTFT anını ISO 8601 formatında göstərir. Heç bir xərc atributu göndərilmir.
+
+Kimlik rejimləri `langfuse.user.id` atributuna tətbiq olunur:
+
+- `pseudonymous` (standart): API açarının daxili identifikatorunun hər təyinat üçün təsadüfi
+  32 baytlıq salt ilə HMAC-SHA256 heşi. Salt mövcud deyilsə, yaradılma zamanı generasiya olunur,
+  `identitySalt` kimi şifrələnir, heç vaxt qaytarılmır və redaktələr zamanı saxlanılır. Xam açar identifikatorları heç vaxt
+  span atributlarına daxil edilmir. Təyinatın salt dəyərinin yenidən yaradılması/dəyişdirilməsi kimlikləri dəyişir.
+- `keyName`: konfiqurasiya edilmiş API açarının adı; bu, operatorun verdiyi həmin etiketi qəsdən açıqlayır.
+- `none`: istifadəçi identifikatoru yoxdur. Sessiya teqləri mövcud olduqda yenə də ixrac edilir; bu rejimlər
+  ixtiyari prompt məzmununu və ya operatorun təqdim etdiyi sessiya/korrelyasiya etiketlərini anonimləşdirmir.
+
+### Tarixçəni geriyə dönük doldurmadan başlamaq
+
+Yalnız yaradılma zamanı **Cari mövqedən başla (mövcud jurnalları ötür)** seçimini aktivləşdirin və ya
+yaratma API sorğusunun məlumat yükünün üst səviyyəsində `startFromCurrentPosition: true` ötürün. Bu,
+miqrasiya aparmadan, mövcud kursor köməkçi funksiyalarından istifadə edərək `cursor_row_id` dəyərini hazırda saxlanılan çağırış jurnalı sətirlərinin maksimum rowid dəyərinə
+təyin edir. Standart dəyər false-dur (kursor 0 və saxlanılan tarixçənin geriyə dönük doldurulması).
+Bu, yeniləmə zamanı kursoru sıfırlamaq üçün parametr deyil.
+
+Paylaşılan `ttftMs` əlavəsi BigQuery uyğunlaşdırıcısına və yeni cədvəl sxeminə
+null qəbul edən `ttft_ms` sütununu da əlavə edir: onun sxem testi hər kanonik qeyd sahəsi üçün
+sütun olmasını tələb edir. Mövcud cədvəllər dəyişiklik olmadan ixrac edilməyə davam edir: `prepare()` cədvəl sxemini oxuyur və
+həmin sütun olmadıqda yalnız `ttft_ms` sahəsini buraxır. Növbəti işəsalmada TTFT əldə etmək üçün null qəbul edən INT64 sütununu
+əlavə edin və ya yeni cədvəldən istifadə edin. PATCH, avtomatik sxem dəyişikliyi və ya əlavə
+icazələr tələb olunmur; bütün digər sətir sahələri üçün ciddi sxem yoxlaması saxlanılır.
+
+---
+
+## 6. Təyinat yerinin əlavə edilməsi
 
 1. `LogExportDestinationType` ixrac edən `src/lib/logExport/destinations/<name>.ts` faylını yaradın:
    Zod `configSchema`, UI üçün `fields` deskriptor massivi, `secretFields` və
@@ -278,7 +488,7 @@ Yeni təyinat yeri üçün iki qayda:
 
 ---
 
-## 6. İstifadəsi
+## 7. İstifadəsi
 
 - **İdarə paneli**: İnteqrasiyalar → Jurnal ixracı. Təyinat yeri əlavə edin, sətir yazmadan giriş məlumatlarını
   yoxlamaq üçün **Test** düyməsini işə salın, sonra isə onu aktivləşdirin.

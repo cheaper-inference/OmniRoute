@@ -13,7 +13,7 @@
 
 ## Nó là gì
 
-OmniRoute đăng ký 376 provider, bao gồm 155 mục danh mục được đánh dấu **free/no-auth**
+OmniRoute đăng ký 377 provider, bao gồm 155 mục danh mục được đánh dấu **free/no-auth**
 (no-auth, OAuth free-tier, hoặc API key free-tier — xem
 [Hướng dẫn Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) và thư mục
 [Free Tiers](../reference/FREE_TIERS.md) đầy đủ). Điểm hạn chế là: chất lượng model của

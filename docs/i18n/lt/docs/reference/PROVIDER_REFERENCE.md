@@ -8,7 +8,7 @@
 > Sugeneruokite iš naujo naudodami: `npm run gen:provider-reference`
 > **Paskutinį kartą sugeneruota:** 2026-10-27
 
-Iš viso teikėjų: **376**. Toliau pateiktas suskirstymas pagal kategorijas.
+Iš viso teikėjų: **377**. Toliau pateiktas suskirstymas pagal kategorijas.
 
 ## Kategorijos
 
@@ -397,7 +397,7 @@ Norėdami įjungti, sukonfigūruoti ir išbandyti kiekvieną teikėją, naudokit
 | `vllm`                | `vllm`                     | vLLM                | Vietinis, savarankiškai priegloboje laikomas | [nuoroda](https://github.com/vllm-project/vllm)                    | API raktas neprivalomas. Sukonfigūruokite vietinį su OpenAI suderinamą bazinį vLLM URL (numatytasis: http://localhost:8000/v1).                                                                                                                                                                                                                        |
 | `xinference`          | `xinference`               | XInference          | Vietinis, savarankiškai priegloboje laikomas | [nuoroda](https://inference.readthedocs.io)                        | API raktas neprivalomas. Sukonfigūruokite vietinį su OpenAI suderinamą bazinį XInference URL (numatytasis: http://localhost:9997/v1).                                                                                                                                                                                                                  |
 
-## Paieškos teikėjai (18)
+## Paieškos teikėjai (19)
 
 | ID                  | Alternatyvus pavadinimas | Pavadinimas                          | Žymos   | Svetainė                                                           | Pastabos                                                                                                                              |
 | ------------------- | ------------------------ | ------------------------------------ | ------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Norėdami įjungti, sukonfigūruoti ir išbandyti kiekvieną teikėją, naudokit
 | `exa-search`        | `exa-search`             | Exa Search                           | Paieška | [nuoroda](https://exa.ai)                                          | API raktas iš dashboard.exa.ai                                                                                                        |
 | `firecrawl`         | `fc`                     | Firecrawl                            | Paieška | [nuoroda](https://firecrawl.dev)                                   | API raktas iš firecrawl.dev/app/api-keys (arba nustatykite savo savarankiškai priglobto Firecrawl bazinį URL)                         |
 | `google-pse-search` | `google-pse`             | Google Programmable Search           | Paieška | [nuoroda](https://developers.google.com/custom-search/v1/overview) | Reikalingas Google API raktas ir jūsų programuojamo paieškos variklio ID (cx)                                                         |
+| `kimi-search`       | `kimi-search`            | Kimi Search                          | Paieška | [nuoroda](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API raktas (MOONSHOT_API_KEY) iš platform.kimi.ai                                                                         |
 | `linkup-search`     | `linkup`                 | Linkup Search                        | Paieška | [nuoroda](https://docs.linkup.so)                                  | Bearer API raktas iš Linkup valdymo skydelio                                                                                          |
 | `nimble-search`     | `nimble`                 | Nimble Search                        | Paieška | [nuoroda](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API raktas iš Nimble valdymo skydelio                                                                                          |
 | `ollama-search`     | `ollama-search`          | Ollama Search                        | Paieška | [nuoroda](https://ollama.com/settings/keys)                        | Tas pats API raktas kaip ir Ollama Cloud (iš ollama.com/settings/keys)                                                                |

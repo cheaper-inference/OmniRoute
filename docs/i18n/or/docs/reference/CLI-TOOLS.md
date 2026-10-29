@@ -10,8 +10,8 @@ OmniRoute ତିନୋଟି ଉତ୍ସର୍ଗୀକୃତ ଡ୍ୟାଶ�
 
 | ପୃଷ୍ଠା                | ରୁଟ୍                    | ଧାରଣା                                                                                            | ସଂଖ୍ୟା             |
 | --------------------- | ----------------------- | ------------------------------------------------------------------------------------------------ | ------------------ |
-| **CLI କୋଡ୍ଗୁଡ଼ିକ**    | `/dashboard/cli-code`   | ଆପଣ OmniRoute ଆଡ଼କୁ ନିର୍ଦ୍ଦେଶ କରୁଥିବା କୋଡିଂ ଟୁଲ୍ଗୁଡ଼ିକ (କ୍ଲାଏଣ୍ଟ → CLI → OmniRoute → ପ୍ରଦାନକାରୀ) | 26                 |
-| **CLI ଏଜେଣ୍ଟ୍ଗୁଡ଼ିକ** | `/dashboard/cli-agents` | ଆପଣ OmniRoute ଆଡ଼କୁ ନିର୍ଦ୍ଦେଶ କରୁଥିବା ସ୍ୱୟଂଚାଳିତ ଏଜେଣ୍ଟ୍ଗୁଡ଼ିକ (ସମାନ ପ୍ରବାହ, ବ୍ୟାପକ ପରିସର)       | 10                 |
+| **CLI କୋଡ୍ଗୁଡ଼ିକ**    | `/dashboard/cli-code`   | ଆପଣ OmniRoute ଆଡ଼କୁ ନିର୍ଦ୍ଦେଶ କରୁଥିବା କୋଡିଂ ଟୁଲ୍ଗୁଡ଼ିକ (କ୍ଲାଏଣ୍ଟ → CLI → OmniRoute → ପ୍ରଦାନକାରୀ) | 27                 |
+| **CLI ଏଜେଣ୍ଟ୍ଗୁଡ଼ିକ** | `/dashboard/cli-agents` | ଆପଣ OmniRoute ଆଡ଼କୁ ନିର୍ଦ୍ଦେଶ କରୁଥିବା ସ୍ୱୟଂଚାଳିତ ଏଜେଣ୍ଟ୍ଗୁଡ଼ିକ (ସମାନ ପ୍ରବାହ, ବ୍ୟାପକ ପରିସର)       | 11                 |
 | **ACP ଏଜେଣ୍ଟ୍ଗୁଡ଼ିକ** | `/dashboard/acp-agents` | stdio/ACP ମାଧ୍ୟମରେ OmniRoute ବ୍ୟାକେଣ୍ଡ ଭାବେ ଆରମ୍ଭ କରୁଥିବା CLI-ଗୁଡ଼ିକ (ବିପରୀତ ପ୍ରବାହ)             | ରେଜିଷ୍ଟ୍ରି ଦେଖନ୍ତୁ |
 
 ପୁରୁଣା ରୁଟ୍ଗୁଡ଼ିକ 308 ମାଧ୍ୟମରେ ପୁନଃନିର୍ଦ୍ଦେଶିତ ହୁଅନ୍ତି: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`।
@@ -55,17 +55,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 ପ୍ରତ୍ୟେକ କମାଣ୍ଡ `--remote <url> --api-key <key>` (ଏକ ରିମୋଟ୍ OmniRoute ବିପକ୍ଷରେ ସ୍ଥାନୀୟ ଟୁଲ୍କୁ
 କନଫିଗର୍ କରିବା), `--dry-run` (କିଛି ନ ଲେଖି ପୂର୍ବାବଲୋକନ କରିବା), ଏବଂ `--port` ଗ୍ରହଣ କରେ। ମଡେଲ୍
-ସ୍ୱୟଂ-ଆବିଷ୍କାର ସୁବିଧା ନଥିବା ଟୁଲ୍ଗୁଡ଼ିକ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)
+ସ୍ୱୟଂ-ଆବିଷ୍କାର ସୁବିଧା ନଥିବା ଟୁଲ୍ଗୁଡ଼ିକ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes)
 `--model <id>` (ଏବଂ ଅଣ-ଇଣ୍ଟରାକ୍ଟିଭ୍ ରନ୍ ପାଇଁ `--yes`) ଗ୍ରହଣ କରେ। `setup-5dive` ହେଉଛି ଏକମାତ୍ର
 ରେସିପି, ଯାହା `$HOME` ଅଧୀନରେ ଲେଖେ ନାହିଁ: ଏହା ଫ୍ଲିଟ୍ ହୋଷ୍ଟରେ root-ମାଲିକାନାର ଏକ ଅଥ୍ ପ୍ରୋଫାଇଲ୍
 ଲେଖି 5dive ଏଜେଣ୍ଟ ଫ୍ଲିଟ୍କୁ କନଫିଗର୍ କରେ, ତେଣୁ ଏହା `sudo` ମାଧ୍ୟମରେ ନିଜକୁ ପୁନଃ-ନିଷ୍ପାଦନ କରେ
 ଏବଂ ଏହାର ନିଜସ୍ୱ କୌଣସି ରିମୋଟ୍ ମୋଡ୍ ନାହିଁ। ଉପଯୁକ୍ତ env ଇଞ୍ଜେକ୍ଟ କରି ଏବଂ ଆଦୌ କୌଣସି କନଫିଗ୍ ନ ଲେଖି ଏକ CLI
-ଚାଲୁ କରିବାକୁ, ସାଧାରଣ `omniroute run <target>` ଲଞ୍ଚର୍ ବ୍ୟବହାର କରନ୍ତୁ (claude, codex, aider, goose, opencode, qwen,
-gemini — ଟାର୍ଗେଟ୍ ଏବଂ ଉପନାମଗୁଡ଼ିକ `bin/cli/cli-manifest.mjs`ରୁ ଆସେ); ପୁରୁଣା
+ଚାଲୁ କରିବାକୁ, ସାଧାରଣ `omniroute run <target>` ଲଞ୍ଚର୍ ବ୍ୟବହାର କରନ୍ତୁ (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — ଟାର୍ଗେଟ୍ ଏବଂ ଉପନାମଗୁଡ଼ିକ `bin/cli/cli-manifest.mjs`ରୁ ଆସେ); ପୁରୁଣା
 ପ୍ରତି-ଟୁଲ୍ ଲଞ୍ଚର୍ `omniroute launch` (Claude Code) ଏବଂ `omniroute launch-codex`
 (Codex) ଏବେ ମଧ୍ୟ ଉପଲବ୍ଧ ଅଛି। Gemini CLI କେବଳ ଲଞ୍ଚ ପାଇଁ: ଏହା ଏକ `omniroute run`
 ଟାର୍ଗେଟ୍, କିନ୍ତୁ ଏହାର କୌଣସି `setup-*`/`configure` ରେସିପି ନାହିଁ।
@@ -180,7 +181,7 @@ CLI କମାଣ୍ଡ ସର୍ଫେସ୍ଗୁଡ଼ିକ ପାଇଁ `bin
 `baseUrlSupport: "partial"` ଥିବା ଟୁଲ୍ଗୁଡ଼ିକର ଡ୍ୟାସ୍ବୋର୍ଡ କାର୍ଡରେ "⚠ ଆଂଶିକ Base URL" ବ୍ୟାଜ୍ ଦେଖାଯାଏ।
 ---
 
-## 2. CLI ଏଜେଣ୍ଟ କ୍ୟାଟାଲଗ୍ (10ଟି ଟୁଲ୍)
+## 2. CLI ଏଜେଣ୍ଟ କ୍ୟାଟାଲଗ୍ (11ଟି ଟୁଲ୍)
 
 `/dashboard/cli-agents`ରେ ଦେଖାଯାଉଥିବା ସ୍ୱୟଂଚାଳିତ ଏଜେଣ୍ଟଗୁଡ଼ିକ:
 
@@ -196,6 +197,7 @@ CLI କମାଣ୍ଡ ସର୍ଫେସ୍ଗୁଡ଼ିକ ପାଇଁ `bin
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

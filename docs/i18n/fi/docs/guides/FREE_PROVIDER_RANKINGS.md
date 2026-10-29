@@ -12,7 +12,7 @@
 
 ## Mitä se on
 
-OmniRoute rekisteröi 376 palveluntarjoajaa, mukaan lukien 155 luettelomerkintää, jotka on merkitty **free/no-auth**
+OmniRoute rekisteröi 377 palveluntarjoajaa, mukaan lukien 155 luettelomerkintää, jotka on merkitty **free/no-auth**
 (ei todennusta,
 ilmaisen tason OAuth tai ilmaisen tason API-avain — katso
 [Free Tiers -opas](../getting-started/FREE-TIERS-GUIDE.md) ja täydellinen

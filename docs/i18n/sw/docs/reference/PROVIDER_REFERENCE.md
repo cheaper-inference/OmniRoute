@@ -8,7 +8,7 @@
 > Tengeneza upya kwa: `npm run gen:provider-reference`
 > **Mara ya mwisho kutengenezwa:** 2026-10-27
 
-Jumla ya watoa huduma: **376**. Tazama mgawanyo wa kategoria hapa chini.
+Jumla ya watoa huduma: **377**. Tazama mgawanyo wa kategoria hapa chini.
 
 ## Kategoria
 
@@ -397,7 +397,7 @@ Tumia dashibodi kwenye `/dashboard/providers` kuwezesha, kusanidi, na kujaribu k
 | `vllm`                | `vllm`       | vLLM                | Ndani, inayojihudumia | [link](https://github.com/vllm-project/vllm)                    | Ufunguo wa API si lazima. Sanidi URL ya msingi ya vLLM inayooana na OpenAI (chaguo-msingi: http://localhost:8000/v1).                                                                                                                                                                                                 |
 | `xinference`          | `xinference` | XInference          | Ndani, inayojihudumia | [link](https://inference.readthedocs.io)                        | Ufunguo wa API si lazima. Sanidi URL ya msingi ya XInference inayooana na OpenAI (chaguo-msingi: http://localhost:9997/v1).                                                                                                                                                                                           |
 
-## Watoa Huduma za Utafutaji (18)
+## Watoa Huduma za Utafutaji (19)
 
 | ID                  | Lakabu          | Jina                          | Lebo      | Tovuti                                                            | Maelezo                                                                                                                                                |
 | ------------------- | --------------- | ----------------------------- | --------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -407,6 +407,7 @@ Tumia dashibodi kwenye `/dashboard/providers` kuwezesha, kusanidi, na kujaribu k
 | `exa-search`        | `exa-search`    | Exa Search                    | Utafutaji | [kiungo](https://exa.ai)                                          | Ufunguo wa API kutoka dashboard.exa.ai                                                                                                                 |
 | `firecrawl`         | `fc`            | Firecrawl                     | Utafutaji | [kiungo](https://firecrawl.dev)                                   | Ufunguo wa API kutoka firecrawl.dev/app/api-keys (au weka URL msingi ya Firecrawl unayopangisha mwenyewe)                                              |
 | `google-pse-search` | `google-pse`    | Google Programmable Search    | Utafutaji | [kiungo](https://developers.google.com/custom-search/v1/overview) | Inahitaji ufunguo wa Google API na kitambulisho chako cha Programmable Search Engine (cx)                                                              |
+| `kimi-search`       | `kimi-search`   | Kimi Search                   | Utafutaji | [kiungo](https://platform.kimi.ai/docs/api/tools-search)          | Ufunguo wa API wa Moonshot AI (MOONSHOT_API_KEY) kutoka platform.kimi.ai                                                                               |
 | `linkup-search`     | `linkup`        | Linkup Search                 | Utafutaji | [kiungo](https://docs.linkup.so)                                  | Ufunguo wa Bearer API kutoka dashibodi ya Linkup                                                                                                       |
 | `nimble-search`     | `nimble`        | Nimble Search                 | Utafutaji | [kiungo](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Ufunguo wa Bearer API kutoka dashibodi ya Nimble                                                                                                       |
 | `ollama-search`     | `ollama-search` | Ollama Search                 | Utafutaji | [kiungo](https://ollama.com/settings/keys)                        | Ufunguo uleule wa API kama Ollama Cloud (kutoka ollama.com/settings/keys)                                                                              |

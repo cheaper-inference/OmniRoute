@@ -3,7 +3,7 @@
   "scope": "i18n-explicit-comparison-callers",
   "overlay": {
     "path": "skill-caller-overlays/i18n-explicit-base.patch",
-    "sha256": "3f9ddc0109557725650dc9376ff02a2328e11ba22e833fea37b7b99b6f936bf6"
+    "sha256": "8ce3c56344a0c8d41c42e328b33e010a6aa7b567581afbe3342c2cebc943bd3f"
   },
   "files": [
     {
@@ -19,7 +19,7 @@
     {
       "path": "implement-features/SKILL.md",
       "beforeSha256": "cee67075b0ba145e8d37867fccd43791d332bf73b89a7c82dcf25404e9de839d",
-      "afterSha256": "fb21d271e99b13007e6bb1fdd2bbe145b8f837e405104201a845e8ad1476cacc"
+      "afterSha256": "fa8634b801a0982b672f05835b8a4158cd06b76e17d102971ef8323520d87a11"
     },
     {
       "path": "uplift-prs/scripts/fill_missing_i18n.py",
@@ -29,7 +29,7 @@
     {
       "path": "generate-release/phases/phase-0-preflight.md",
       "beforeSha256": "b4883b200b2873c792752e1aa5c30bbf7ab6bdab8a54c237007f109d7192ebc4",
-      "afterSha256": "cd8826ebe9d12e9c95b81fd8fcbbb979902963a2105175346dff8aa4ac82cc6f"
+      "afterSha256": "47532d592d52380530315e99e979ae27a37575359100f388c08485754f625fc1"
     }
   ]
 }

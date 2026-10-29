@@ -672,6 +672,8 @@ A configuração padrão do OmniRoute no Docker/Kubernetes consiste em **um proc
 
 **Atualizações:** espere que todas as sessões sejam encerradas. Drene os clientes, se possível; não há atualização contínua com o SQLite padrão. A combinação de `restart: unless-stopped` no Compose com o `HEALTHCHECK` do Docker também substituirá o único processo quando o contêiner estiver Unhealthy — com o mesmo impacto.
 
+Manifestos prontos para uso e um chart do Helm estão disponíveis em `deploy/kubernetes/` e `deploy/helm/omniroute/` — consulte o [guia de implantação no Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Trecho do Kubernetes para uma **única réplica** (Recreate é obrigatório; não aumente `replicas` usando um único arquivo SQLite):
 
 ```yaml

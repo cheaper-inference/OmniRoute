@@ -10,8 +10,8 @@ OmniRoute រួមបញ្ចូលជាមួយឧបករណ៍ CLI ប�
 
 | ទំព័រ             | Route                   | គោលគំនិត                                                                               | ចំនួន        |
 | ----------------- | ----------------------- | -------------------------------------------------------------------------------------- | ------------ |
-| **កូដ CLI**       | `/dashboard/cli-code`   | ឧបករណ៍សរសេរកូដដែលអ្នកចង្អុលទៅ OmniRoute (Client → CLI → OmniRoute → Provider)          | 26           |
-| **ភ្នាក់ងារ CLI** | `/dashboard/cli-agents` | ភ្នាក់ងារស្វយ័តដែលអ្នកចង្អុលទៅ OmniRoute (លំហូរដូចគ្នា ប៉ុន្តែមានវិសាលភាពទូលំទូលាយជាង) | 10           |
+| **កូដ CLI**       | `/dashboard/cli-code`   | ឧបករណ៍សរសេរកូដដែលអ្នកចង្អុលទៅ OmniRoute (Client → CLI → OmniRoute → Provider)          | 27           |
+| **ភ្នាក់ងារ CLI** | `/dashboard/cli-agents` | ភ្នាក់ងារស្វយ័តដែលអ្នកចង្អុលទៅ OmniRoute (លំហូរដូចគ្នា ប៉ុន្តែមានវិសាលភាពទូលំទូលាយជាង) | 11           |
 | **ភ្នាក់ងារ ACP** | `/dashboard/acp-agents` | CLI ដែល OmniRoute បង្កើតជាប្រព័ន្ធខាងក្រោយតាមរយៈ stdio/ACP (លំហូរបញ្ច្រាស)             | មើល registry |
 
 Route ចាស់ៗបញ្ជូនបន្តតាមរយៈ 308៖ `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`។
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 ពាក្យបញ្ជានីមួយៗទទួលយក `--remote <url> --api-key <key>` (កំណត់រចនាសម្ព័ន្ធឧបករណ៍មូលដ្ឋានឱ្យប្រើជាមួយ
 OmniRoute ពីចម្ងាយ), `--dry-run` (មើលជាមុនដោយមិនសរសេរ) និង `--port`។ ឧបករណ៍
-ដែលគ្មានការរកឃើញម៉ូដែលដោយស្វ័យប្រវត្តិ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) ទទួលយក
+ដែលគ្មានការរកឃើញម៉ូដែលដោយស្វ័យប្រវត្តិ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) ទទួលយក
 `--model <id>` (និង `--yes` សម្រាប់ការដំណើរការដែលមិនមានអន្តរកម្ម)។ `setup-5dive` គឺជា
 រូបមន្តតែមួយគត់ដែលមិនសរសេរនៅក្រោម `$HOME`៖ វាកំណត់រចនាសម្ព័ន្ធក្រុម agent របស់ 5dive ដោយ
 សរសេរប្រវត្តិរូបផ្ទៀងផ្ទាត់ដែលគ្រប់គ្រងដោយ root នៅលើម៉ាស៊ីនក្រុម ដូច្នេះវាដំណើរការខ្លួនឡើងវិញតាមរយៈ `sudo`
 ហើយមិនមានរបៀបពីចម្ងាយផ្ទាល់ខ្លួនទេ។ ដើម្បីបើកដំណើរការ CLI ដោយបញ្ចូល env
 ត្រឹមត្រូវ ហើយមិនសរសេររចនាសម្ព័ន្ធកំណត់អ្វីទាំងអស់ សូមប្រើកម្មវិធីបើកដំណើរការទូទៅ
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — target និងឈ្មោះកាត់មកពី `bin/cli/cli-manifest.mjs`); កម្មវិធីបើកដំណើរការតាមឧបករណ៍ចាស់
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — target និងឈ្មោះកាត់មកពី `bin/cli/cli-manifest.mjs`); កម្មវិធីបើកដំណើរការតាមឧបករណ៍ចាស់
 `omniroute launch` (Claude Code) និង `omniroute launch-codex`
 (Codex) នៅតែអាចប្រើបាន។ Gemini CLI សម្រាប់តែការបើកដំណើរការប៉ុណ្ណោះ៖ វាជា target របស់ `omniroute run`
 ប៉ុន្តែមិនមានរូបមន្ត `setup-*`/`configure` ទេ។
@@ -175,7 +176,7 @@ kilo, continue) — `hostSetupCommand` (ឧ. `omniroute setup-opencode`) ដើ�
 ឧបករណ៍ដែលមាន `baseUrlSupport: "partial"` បង្ហាញផ្លាកសញ្ញា "⚠ URL មូលដ្ឋានគាំទ្រដោយផ្នែក" នៅលើកាតផ្ទាំងគ្រប់គ្រង។
 ---
 
-## 2. កាតាឡុកភ្នាក់ងារ CLI (ឧបករណ៍ 10)
+## 2. កាតាឡុកភ្នាក់ងារ CLI (ឧបករណ៍ 11)
 
 ភ្នាក់ងារស្វយ័តដែលបង្ហាញនៅក្នុង `/dashboard/cli-agents`៖
 
@@ -191,6 +192,7 @@ kilo, continue) — `hostSetupCommand` (ឧ. `omniroute setup-opencode`) ដើ�
 | letta        | Letta CLI        | Letta                    | full              | false            |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full              | false            |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full              | false            |
+| whycodes     | WhyCodes         | Why Corporation          | full              | false            |
 
 ---
 

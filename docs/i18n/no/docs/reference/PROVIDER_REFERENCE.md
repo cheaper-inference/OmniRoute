@@ -8,7 +8,7 @@
 > Generer på nytt med: `npm run gen:provider-reference`
 > **Sist generert:** 2026-10-27
 
-Totalt antall leverandører: **376**. Se kategorioversikten nedenfor.
+Totalt antall leverandører: **377**. Se kategorioversikten nedenfor.
 
 ## Kategorier
 
@@ -397,7 +397,7 @@ Bruk kontrollpanelet på `/dashboard/providers` for å aktivere, konfigurere og 
 | `vllm`                | `vllm`       | vLLM                | Lokal, selvdriftet | [lenke](https://github.com/vllm-project/vllm)                    | API-nøkkel er valgfri. Konfigurer den lokale OpenAI-kompatible basis-URL-en for vLLM (standard: http://localhost:8000/v1).                                                                                                                                                                                             |
 | `xinference`          | `xinference` | XInference          | Lokal, selvdriftet | [lenke](https://inference.readthedocs.io)                        | API-nøkkel er valgfri. Konfigurer den lokale OpenAI-kompatible basis-URL-en for XInference (standard: http://localhost:9997/v1).                                                                                                                                                                                       |
 
-## Søkeleverandører (18)
+## Søkeleverandører (19)
 
 | ID                  | Alias           | Navn                              | Tagger | Nettsted                                                         | Merknader                                                                                                                    |
 | ------------------- | --------------- | --------------------------------- | ------ | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Bruk kontrollpanelet på `/dashboard/providers` for å aktivere, konfigurere og 
 | `exa-search`        | `exa-search`    | Exa Search                        | Søk    | [lenke](https://exa.ai)                                          | API-nøkkel fra dashboard.exa.ai                                                                                              |
 | `firecrawl`         | `fc`            | Firecrawl                         | Søk    | [lenke](https://firecrawl.dev)                                   | API-nøkkel fra firecrawl.dev/app/api-keys (eller angi basis-URL-en til din egen Firecrawl-instans)                           |
 | `google-pse-search` | `google-pse`    | Google Programmable Search        | Søk    | [lenke](https://developers.google.com/custom-search/v1/overview) | Krever en Google API-nøkkel og ID-en (cx) til din programmerbare søkemotor                                                   |
+| `kimi-search`       | `kimi-search`   | Kimi Search                       | Søk    | [lenke](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API-nøkkel (MOONSHOT_API_KEY) fra platform.kimi.ai                                                               |
 | `linkup-search`     | `linkup`        | Linkup Search                     | Søk    | [lenke](https://docs.linkup.so)                                  | Bearer-API-nøkkel fra Linkup-kontrollpanelet                                                                                 |
 | `nimble-search`     | `nimble`        | Nimble Search                     | Søk    | [lenke](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer-API-nøkkel fra Nimble-kontrollpanelet                                                                                 |
 | `ollama-search`     | `ollama-search` | Ollama Search                     | Søk    | [lenke](https://ollama.com/settings/keys)                        | Samme API-nøkkel som for Ollama Cloud (fra ollama.com/settings/keys)                                                         |

@@ -667,6 +667,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **Надоградње:** очекујте прекид сваке сесије. Ако можете, сачекајте да клијенти заврше рад; са подразумеваним SQLite-ом нема постепеног ажурирања. Compose `restart: unless-stopped` заједно са Docker `HEALTHCHECK`-ом такође ће заменити једини процес када контејнер постане Unhealthy — са истим обимом последица.
 
+Готови манифести и Helm дијаграм налазе се у `deploy/kubernetes/` и `deploy/helm/omniroute/` — погледајте [водич за примену на Kubernetes-у](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kubernetes исечак за **једну реплику** (Recreate је обавезан; немојте повећавати `replicas` када се користи једна SQLite датотека):
 
 ```yaml

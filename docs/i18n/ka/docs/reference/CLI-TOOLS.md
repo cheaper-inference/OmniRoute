@@ -10,8 +10,8 @@ OmniRoute ინტეგრირებულია CLI ხელსაწყ�
 
 | გვერდი         | მარშრუტი                | კონცეფცია                                                                                        | რაოდენობა      |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------------------ | -------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | კოდირების ხელსაწყოები, რომლებსაც OmniRoute-ზე მიუთითებთ (კლიენტი → CLI → OmniRoute → პროვაიდერი) | 26             |
-| **CLI Agents** | `/dashboard/cli-agents` | ავტონომიური აგენტები, რომლებსაც OmniRoute-ზე მიუთითებთ (იგივე ნაკადი, უფრო ფართო არეალი)         | 10             |
+| **CLI Code's** | `/dashboard/cli-code`   | კოდირების ხელსაწყოები, რომლებსაც OmniRoute-ზე მიუთითებთ (კლიენტი → CLI → OmniRoute → პროვაიდერი) | 27             |
+| **CLI Agents** | `/dashboard/cli-agents` | ავტონომიური აგენტები, რომლებსაც OmniRoute-ზე მიუთითებთ (იგივე ნაკადი, უფრო ფართო არეალი)         | 11             |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI-ები, რომლებსაც OmniRoute stdio/ACP-ის საშუალებით ბექენდად უშვებს (შებრუნებული ნაკადი)        | იხილეთ რეესტრი |
 
 მოძველებული მარშრუტები 308-ის საშუალებით გადამისამართდება: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,16 +55,17 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-თითოეული მათგანი იღებს `--remote <url> --api-key <key>` პარამეტრებს (ლოკალური ხელსაწყოს დისტანციურ OmniRoute-თან კონფიგურაციისთვის), `--dry-run`-ს (ჩაწერის გარეშე წინასწარი ნახვისთვის) და `--port`-ს. მოდელების ავტომატური აღმოჩენის არმქონე ხელსაწყოები (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) იღებენ
+თითოეული მათგანი იღებს `--remote <url> --api-key <key>` პარამეტრებს (ლოკალური ხელსაწყოს დისტანციურ OmniRoute-თან კონფიგურაციისთვის), `--dry-run`-ს (ჩაწერის გარეშე წინასწარი ნახვისთვის) და `--port`-ს. მოდელების ავტომატური აღმოჩენის არმქონე ხელსაწყოები (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) იღებენ
 `--model <id>`-ს (და `--yes`-ს არაინტერაქტიული გაშვებებისთვის). `setup-5dive` ერთადერთი რეცეპტია, რომელიც
 `$HOME`-ის ქვეშ არ წერს: ის 5dive-ის აგენტების ფლოტს აკონფიგურირებს
 ფლოტის ჰოსტზე root-ის მფლობელობაში არსებული ავთენტიფიკაციის პროფილის ჩაწერით, ამიტომ ხელახლა ეშვება `sudo`-ს მეშვეობით
 და საკუთარი დისტანციური რეჟიმი არ აქვს. CLI-ის სწორი გარემოს ცვლადებით გასაშვებად ისე, რომ
 კონფიგურაცია საერთოდ არ ჩაიწეროს, გამოიყენეთ უნივერსალური გამშვები
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — სამიზნოების და ფსევდონიმების წყაროა `bin/cli/cli-manifest.mjs`); ძველი
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — სამიზნოების და ფსევდონიმების წყაროა `bin/cli/cli-manifest.mjs`); ძველი
 ცალკეული ხელსაწყოების გამშვებები `omniroute launch` (Claude Code) და `omniroute launch-codex`
 (Codex) კვლავ ხელმისაწვდომია. Gemini CLI მხოლოდ გაშვებას უჭერს მხარს: ის `omniroute run`-ის
 სამიზნეა, თუმცა `setup-*`/`configure` რეცეპტი არ აქვს.
@@ -173,7 +174,7 @@ kilo, continue) — `hostSetupCommand`-ით (მაგ., `omniroute setup-open
 ინსტრუმენტებისთვის, რომელთა `baseUrlSupport: "partial"`-ია, დაფის ბარათზე ნაჩვენებია სამკერდე ნიშანი „⚠ ნაწილობრივი Base URL“.
 ---
 
-## 2. CLI აგენტების კატალოგი (10 ხელსაწყო)
+## 2. CLI აგენტების კატალოგი (11 ხელსაწყო)
 
 ავტონომიური აგენტები, რომლებიც გამოჩნდება `/dashboard/cli-agents`-ში:
 
@@ -189,6 +190,7 @@ kilo, continue) — `hostSetupCommand`-ით (მაგ., `omniroute setup-open
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

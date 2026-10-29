@@ -629,6 +629,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **અપગ્રેડ્સ:** દરેક સેશનનું કનેક્શન તૂટશે તેવી અપેક્ષા રાખો. શક્ય હોય તો ક્લાયન્ટ્સને ડ્રેઇન કરો; ડિફૉલ્ટ SQLite પર કોઈ રોલિંગ અપડેટ નથી. Compose `restart: unless-stopped` તથા Docker `HEALTHCHECK` પણ કન્ટેનર Unhealthy થાય ત્યારે એકમાત્ર પ્રોસેસને બદલી દેશે — તેની અસરનો વ્યાપ પણ સમાન રહેશે.
 
+ઉપયોગ માટે તૈયાર મેનિફેસ્ટ્સ અને Helm ચાર્ટ `deploy/kubernetes/` અને `deploy/helm/omniroute/`માં ઉપલબ્ધ છે — [Kubernetes ડિપ્લોયમેન્ટ માર્ગદર્શિકા](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) જુઓ.
+
 **એક રેપ્લિકા** માટે Kubernetes સ્નિપેટ (Recreate આવશ્યક છે; એક SQLite ફાઇલ સામે `replicas` વધારશો નહીં):
 
 ```yaml

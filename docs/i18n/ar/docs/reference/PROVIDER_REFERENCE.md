@@ -8,7 +8,7 @@
 > أعد إنشاءه باستخدام: `npm run gen:provider-reference`
 > **آخر إنشاء:** 2026-10-27
 
-إجمالي موفّري الخدمة: **376**. راجع التصنيف حسب الفئات أدناه.
+إجمالي موفّري الخدمة: **377**. راجع التصنيف حسب الفئات أدناه.
 
 ## الفئات
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`         | vLLM                | محلي، مستضاف ذاتيًا | [رابط](https://github.com/vllm-project/vllm)                    | مفتاح API اختياري. اضبط عنوان URL الأساسي المحلي لـ vLLM المتوافق مع OpenAI (الافتراضي: http://localhost:8000/v1).                                                                                                                                                                    |
 | `xinference`          | `xinference`   | XInference          | محلي، مستضاف ذاتيًا | [رابط](https://inference.readthedocs.io)                        | مفتاح API اختياري. اضبط عنوان URL الأساسي المحلي لـ XInference المتوافق مع OpenAI (الافتراضي: http://localhost:9997/v1).                                                                                                                                                              |
 
-## موفرو البحث (18)
+## موفرو البحث (19)
 
 | المعرّف             | الاسم المستعار  | الاسم                      | الوسوم | الموقع الإلكتروني                                               | ملاحظات                                                                                                     |
 | ------------------- | --------------- | -------------------------- | ------ | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                 | بحث    | [رابط](https://exa.ai)                                          | مفتاح API من dashboard.exa.ai                                                                               |
 | `firecrawl`         | `fc`            | Firecrawl                  | بحث    | [رابط](https://firecrawl.dev)                                   | مفتاح API من firecrawl.dev/app/api-keys (أو عيّن عنوان URL الأساسي لنسخة Firecrawl المستضافة ذاتيًا)        |
 | `google-pse-search` | `google-pse`    | Google Programmable Search | بحث    | [رابط](https://developers.google.com/custom-search/v1/overview) | يتطلب مفتاح Google API ومعرّف محرك البحث القابل للبرمجة الخاص بك (cx)                                       |
+| `kimi-search`       | `kimi-search`   | Kimi Search                | بحث    | [رابط](https://platform.kimi.ai/docs/api/tools-search)          | مفتاح Moonshot AI API ‏(MOONSHOT_API_KEY) من platform.kimi.ai                                               |
 | `linkup-search`     | `linkup`        | Linkup Search              | بحث    | [رابط](https://docs.linkup.so)                                  | مفتاح Bearer API من لوحة معلومات Linkup                                                                     |
 | `nimble-search`     | `nimble`        | Nimble Search              | بحث    | [رابط](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | مفتاح Bearer API من لوحة معلومات Nimble                                                                     |
 | `ollama-search`     | `ollama-search` | Ollama Search              | بحث    | [رابط](https://ollama.com/settings/keys)                        | مفتاح API نفسه الخاص بـ Ollama Cloud (من ollama.com/settings/keys)                                          |

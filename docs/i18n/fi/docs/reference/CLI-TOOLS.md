@@ -10,8 +10,8 @@ OmniRoute integroituu kolmeen CLI-työkaluluokkaan, jotka on jaettu kolmelle eri
 
 | Sivu            | Reitti                  | Konsepti                                                                                     | Määrä           |
 | --------------- | ----------------------- | -------------------------------------------------------------------------------------------- | --------------- |
-| **CLI-koodit**  | `/dashboard/cli-code`   | Koodaustyökalut, jotka osoitat OmniRouteen (asiakas → CLI → OmniRoute → palveluntarjoaja)    | 26              |
-| **CLI-agentit** | `/dashboard/cli-agents` | Autonomiset agentit, jotka osoitat OmniRouteen (sama kulku, laajempi käyttöalue)             | 10              |
+| **CLI-koodit**  | `/dashboard/cli-code`   | Koodaustyökalut, jotka osoitat OmniRouteen (asiakas → CLI → OmniRoute → palveluntarjoaja)    | 27              |
+| **CLI-agentit** | `/dashboard/cli-agents` | Autonomiset agentit, jotka osoitat OmniRouteen (sama kulku, laajempi käyttöalue)             | 11              |
 | **ACP-agentit** | `/dashboard/acp-agents` | CLI:t, jotka OmniRoute käynnistää taustajärjestelmäksi stdio/ACP:n kautta (käänteinen kulku) | katso rekisteri |
 
 Vanhat reitit uudelleenohjataan 308-vastauksella: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Jokainen niistä hyväksyy valinnat `--remote <url> --api-key <key>` (paikallisen työkalun määrittäminen käyttämään etä-OmniRoutea), `--dry-run` (esikatselu kirjoittamatta) ja `--port`. Työkalut, joissa ei ole mallien automaattista tunnistusta (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive), käyttävät valintaa `--model <id>` (sekä valintaa `--yes` ei-interaktiivisissa suorituksissa). `setup-5dive` on ainoa määritys, joka ei kirjoita hakemiston `$HOME` alle: se määrittää 5dive-agenttijoukon kirjoittamalla pääkäyttäjän omistaman todennusprofiilin joukon isäntäkoneelle, joten se suorittaa itsensä uudelleen `sudo`-komennon kautta eikä sisällä omaa etätilaa. Voit käynnistää CLI:n niin, että oikeat ympäristömuuttujat syötetään eikä määrityksiä kirjoiteta lainkaan, käyttämällä yleistä `omniroute run <target>` -käynnistintä (claude, codex, aider, goose, opencode, qwen, gemini — kohteet ja aliakset tulevat tiedostosta `bin/cli/cli-manifest.mjs`); vanhat työkalukohtaiset käynnistimet `omniroute launch` (Claude Code) ja `omniroute launch-codex` (Codex) ovat edelleen käytettävissä. Gemini CLI voidaan vain käynnistää: se on `omniroute run` -kohde, mutta sille ei ole `setup-*`/`configure`-määritystä.
+Jokainen niistä hyväksyy valinnat `--remote <url> --api-key <key>` (paikallisen työkalun määrittäminen käyttämään etä-OmniRoutea), `--dry-run` (esikatselu kirjoittamatta) ja `--port`. Työkalut, joissa ei ole mallien automaattista tunnistusta (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes), käyttävät valintaa `--model <id>` (sekä valintaa `--yes` ei-interaktiivisissa suorituksissa). `setup-5dive` on ainoa määritys, joka ei kirjoita hakemiston `$HOME` alle: se määrittää 5dive-agenttijoukon kirjoittamalla pääkäyttäjän omistaman todennusprofiilin joukon isäntäkoneelle, joten se suorittaa itsensä uudelleen `sudo`-komennon kautta eikä sisällä omaa etätilaa. Voit käynnistää CLI:n niin, että oikeat ympäristömuuttujat syötetään eikä määrityksiä kirjoiteta lainkaan, käyttämällä yleistä `omniroute run <target>` -käynnistintä (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — kohteet ja aliakset tulevat tiedostosta `bin/cli/cli-manifest.mjs`); vanhat työkalukohtaiset käynnistimet `omniroute launch` (Claude Code) ja `omniroute launch-codex` (Codex) ovat edelleen käytettävissä. Gemini CLI voidaan vain käynnistää: se on `omniroute run` -kohde, mutta sille ei ole `setup-*`/`configure`-määritystä.
 
 > **Täydellinen viite:** päätaulukko — mitä kukin komento kirjoittaa, kaikki valinnat, paikallinen vs. etäkäyttö sekä mitkä työkalut tarvitsevat `/v1`-päätteen — löytyy sivulta
 > **[CLI-integraatiot](../guides/CLI-INTEGRATIONS.md)**.
@@ -146,7 +147,7 @@ Kaikki työkalut, jotka näkyvät näkymässä `/dashboard/cli-code`. Työkalut,
 Työkalujen, joiden `baseUrlSupport`-arvo on `"partial"`, hallintapaneelikortissa näkyy tunnus "⚠ Osittainen perus-URL".
 ---
 
-## 2. CLI-agenttiluettelo (10 työkalua)
+## 2. CLI-agenttiluettelo (11 työkalua)
 
 Autonomiset agentit, jotka näkyvät näkymässä `/dashboard/cli-agents`:
 
@@ -162,6 +163,7 @@ Autonomiset agentit, jotka näkyvät näkymässä `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full         | false              |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full         | false              |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full         | false              |
+| whycodes     | WhyCodes         | Why Corporation          | full         | false              |
 
 ---
 

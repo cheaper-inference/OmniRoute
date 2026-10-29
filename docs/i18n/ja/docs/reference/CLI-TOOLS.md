@@ -10,8 +10,8 @@ OmniRoute は、3 つの専用ダッシュボードページに分かれた 3 �
 
 | ページ         | ルート                  | 概念                                                                                                | 数               |
 | -------------- | ----------------------- | --------------------------------------------------------------------------------------------------- | ---------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute を接続先として使用するコーディングツール（クライアント → CLI → OmniRoute → プロバイダー） | 26               |
-| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute を接続先として使用する自律型エージェント（同じフロー、より広いスコープ）                  | 10               |
+| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute を接続先として使用するコーディングツール（クライアント → CLI → OmniRoute → プロバイダー） | 27               |
+| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute を接続先として使用する自律型エージェント（同じフロー、より広いスコープ）                  | 11               |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute が stdio/ACP 経由でバックエンドとして起動する CLI（逆方向のフロー）                       | レジストリを参照 |
 
 旧ルートは 308 でリダイレクトされます: `/dashboard/cli-tools` → `/dashboard/cli-code`、`/dashboard/agents` → `/dashboard/acp-agents`。
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-各コマンドでは、`--remote <url> --api-key <key>`（ローカルツールをリモートの OmniRoute に接続するよう設定）、`--dry-run`（書き込まずにプレビュー）、および `--port` を指定できます。モデルの自動検出機能を持たないツール（Cline、Kilo、Roo、Goose、Aider、Qwen、5dive）では、`--model <id>`（非対話実行の場合はさらに `--yes`）を指定します。`setup-5dive` は、`$HOME` 配下に書き込まない唯一の設定レシピです。フリートホスト上に root 所有の認証プロファイルを書き込むことで 5dive エージェントフリートを設定するため、`sudo` 経由で自身を再実行し、独自のリモートモードはありません。適切な環境変数を注入し、設定を一切書き込まずに CLI を起動するには、汎用の `omniroute run <target>` ランチャー（claude、codex、aider、goose、opencode、qwen、gemini — ターゲットとエイリアスは `bin/cli/cli-manifest.mjs` から取得）を使用します。従来のツール別ランチャーである `omniroute launch`（Claude Code）と `omniroute launch-codex`（Codex）も引き続き利用できます。Gemini CLI は起動専用です。`omniroute run` のターゲットですが、`setup-*`/`configure` レシピはありません。
+各コマンドでは、`--remote <url> --api-key <key>`（ローカルツールをリモートの OmniRoute に接続するよう設定）、`--dry-run`（書き込まずにプレビュー）、および `--port` を指定できます。モデルの自動検出機能を持たないツール（Cline、Kilo、Roo、Goose、Aider、Qwen、5dive、WhyCodes）では、`--model <id>`（非対話実行の場合はさらに `--yes`）を指定します。`setup-5dive` は、`$HOME` 配下に書き込まない唯一の設定レシピです。フリートホスト上に root 所有の認証プロファイルを書き込むことで 5dive エージェントフリートを設定するため、`sudo` 経由で自身を再実行し、独自のリモートモードはありません。適切な環境変数を注入し、設定を一切書き込まずに CLI を起動するには、汎用の `omniroute run <target>` ランチャー（claude、codex、aider、goose、opencode、qwen、gemini、whycodes — ターゲットとエイリアスは `bin/cli/cli-manifest.mjs` から取得）を使用します。従来のツール別ランチャーである `omniroute launch`（Claude Code）と `omniroute launch-codex`（Codex）も引き続き利用できます。Gemini CLI は起動専用です。`omniroute run` のターゲットですが、`setup-*`/`configure` レシピはありません。
 
 > **完全なリファレンス:** 各コマンドの書き込み先、すべてのフラグ、ローカルとリモートの違い、およびどのツールが `/v1` サフィックスを必要とするかをまとめたマスターテーブルは、
 > **[CLI インテグレーション](../guides/CLI-INTEGRATIONS.md)**にあります。
@@ -139,7 +140,7 @@ OmniRoute コンテナ内で実行された `setup-*` コマンドは、コン�
 `baseUrlSupport: "partial"` のツールでは、ダッシュボードカードに「⚠ 部分的なベース URL」というバッジが表示されます。
 ---
 
-## 2. CLI エージェントカタログ（10 ツール）
+## 2. CLI エージェントカタログ（11 ツール）
 
 `/dashboard/cli-agents` に表示される自律型エージェント：
 
@@ -155,6 +156,7 @@ OmniRoute コンテナ内で実行された `setup-*` コマンドは、コン�
 | letta        | Letta CLI        | Letta                    | full            | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full            | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full            | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full            | false        |
 
 ---
 

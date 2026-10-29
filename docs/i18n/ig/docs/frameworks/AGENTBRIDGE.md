@@ -20,7 +20,7 @@ Mgbe onye nnọchi anya IDE (dịka GitHub Copilot, Cursor, Claude Code) mere ok
 
 Nke a pụtara na ị nwere ike:
 
-- **Tụgharịa onye nnọchi anya ọ bụla gaa na onye na-eweta ọrụ ọ bụla**: Copilot na-akparịta ụka na OpenAI? Tụgharịa ya gaa na Anthropic Claude, Gemini, ma ọ bụ onye ọ bụla n'ime ndị na-eweta ọrụ 376 nke OmniRoute.
+- **Tụgharịa onye nnọchi anya ọ bụla gaa na onye na-eweta ọrụ ọ bụla**: Copilot na-akparịta ụka na OpenAI? Tụgharịa ya gaa na Anthropic Claude, Gemini, ma ọ bụ onye ọ bụla n'ime ndị na-eweta ọrụ 377 nke OmniRoute.
 - **Tinye njikọta ụdịdị**: `gemini-3-flash` → `claude-sonnet-4.7` n'ụzọ doro anya na ọkwa onye njikwa.
 - **Nyochaa okporo ụzọ niile nke ndị nnọchi anya**: a na-ebipụta arịrịọ ọ bụla e gbochiri na [Onye Nnyocha Okporo Ụzọ](./TRAFFIC_INSPECTOR.md).
 - **Tinye nkwụsi ike nke OmniRoute**: ntụgharị ngwakọta, ndị nkwụsị sekit, ụzọ ndabere, na nsuso ọnụ ahịa na-arụkwa ọrụ maka okporo ụzọ ndị nnọchi anya IDE.

@@ -10,8 +10,8 @@ OmniRoute yana haɗuwa da rukuni uku na kayan aikin CLI waɗanda aka rarraba a s
 
 | Shafi          | Route                   | Ma’ana                                                                                    | Adadi         |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------- | ------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Kayan aikin coding da kake haɗawa da OmniRoute (Client → CLI → OmniRoute → Provider)      | 26            |
-| **CLI Agents** | `/dashboard/cli-agents` | Wakilai masu cin gashin kansu da kake haɗawa da OmniRoute (tsari iri ɗaya, faɗaɗɗen aiki) | 10            |
+| **CLI Code's** | `/dashboard/cli-code`   | Kayan aikin coding da kake haɗawa da OmniRoute (Client → CLI → OmniRoute → Provider)      | 27            |
+| **CLI Agents** | `/dashboard/cli-agents` | Wakilai masu cin gashin kansu da kake haɗawa da OmniRoute (tsari iri ɗaya, faɗaɗɗen aiki) | 11            |
 | **ACP Agents** | `/dashboard/acp-agents` | CLIs da OmniRoute ke ƙaddamarwa a matsayin backend ta stdio/ACP (tsarin baya)             | duba registry |
 
 Tsofaffin routes suna karkatarwa ta 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Kowannensu yana karɓar `--remote <url> --api-key <key>` (don saita kayan aiki na gida ya yi aiki da
 OmniRoute na nesa), `--dry-run` (don duba abin da zai faru ba tare da rubutawa ba), da `--port`. Kayan aikin
-da ba su da gano samfurori ta atomatik (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) suna karɓar
+da ba su da gano samfurori ta atomatik (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) suna karɓar
 `--model <id>` (da kuma `--yes` don gudanarwa ba tare da mu'amala ba). `setup-5dive` shi ne tsarin
 saiti guda ɗaya da ba ya yin rubutu ƙarƙashin `$HOME`: yana saita rundunar wakilan 5dive ta hanyar
 rubuta bayanin tabbatar da izini mallakin root a kan na'urar rundunar, saboda haka yana sake aiwatar da kansa ta `sudo`
 kuma ba shi da yanayin nesa na kansa. Don ƙaddamar da CLI tare da shigar da
 madaidaitan env da suka dace ba tare da rubuta wani tsarin saiti ba, yi amfani da mai ƙaddamarwa na gama-gari
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — manufa da sunayen madadinsu suna fitowa daga `bin/cli/cli-manifest.mjs`); tsofaffin
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — manufa da sunayen madadinsu suna fitowa daga `bin/cli/cli-manifest.mjs`); tsofaffin
 masu ƙaddamarwa na kowane kayan aiki, `omniroute launch` (Claude Code) da `omniroute launch-codex`
 (Codex), har yanzu suna nan. Gemini CLI na ƙaddamarwa kawai ne: manufa ce ta `omniroute run`
 amma ba ta da tsarin `setup-*`/`configure`.
@@ -182,7 +183,7 @@ Dukkan kayan aikin da suke bayyana a cikin `/dashboard/cli-code`. Waɗanda ke da
 Kayan aikin da ke da `baseUrlSupport: "partial"` suna nuna alamar "⚠ URL na tushe na ɓangare" a cikin katin dashboard.
 ---
 
-## 2. Kundin Wakilan CLI (kayan aiki 10)
+## 2. Kundin Wakilan CLI (kayan aiki 11)
 
 Wakilai masu cin gashin kansu waɗanda suke bayyana a `/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ Wakilai masu cin gashin kansu waɗanda suke bayyana a `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full                | false                     |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full                | false                     |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full                | false                     |
+| whycodes     | WhyCodes         | Why Corporation          | full                | false                     |
 
 ---
 

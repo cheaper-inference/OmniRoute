@@ -163,7 +163,7 @@ OmniRoute expune 6 competențe A2A conectate în `src/lib/a2a/taskExecution.ts::
 | Raport de sănătate        | `health-report`      | Agregă starea mecanismului de întrerupere a circuitului, a perioadei de așteptare și a blocării pentru fiecare furnizor                                                             | sănătate, reziliență             | „Afișează starea de sănătate a tuturor furnizorilor” |
 | Listarea capabilităților  | `list-capabilities`  | Returnează catalogul complet cu 45 de intrări Agent Skills (23 API + 21 CLI + 1 configurare) sub forma unui tabel markdown, cu URL-uri SKILL.md brute pentru injectarea contextului | catalog, descoperire, competențe | „Listează toate capabilitățile OmniRoute”            |
 
-> Agent Card trebuie menținut aliniat cu catalogul activ de 376 de furnizori; numărul furnizorilor și metadatele privind accesul gratuit/fără autentificare provin din registrul de execuție.
+> Agent Card trebuie menținut aliniat cu catalogul activ de 377 de furnizori; numărul furnizorilor și metadatele privind accesul gratuit/fără autentificare provin din registrul de execuție.
 
 ### Detalii despre competența `list-capabilities`
 

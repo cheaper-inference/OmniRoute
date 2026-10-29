@@ -20,7 +20,7 @@ Meta aġent tal-IDE (eż., GitHub Copilot, Cursor, Claude Code) jagħmel sejħa 
 
 Dan ifisser li tista':
 
-- **Tidderieġi mill-ġdid kwalunkwe aġent lejn kwalunkwe fornitur**: Copilot qed jikkomunika ma' OpenAI? Idderieġih mill-ġdid lejn Anthropic Claude, Gemini, jew kwalunkwe wieħed mis-376 fornitur ta' OmniRoute.
+- **Tidderieġi mill-ġdid kwalunkwe aġent lejn kwalunkwe fornitur**: Copilot qed jikkomunika ma' OpenAI? Idderieġih mill-ġdid lejn Anthropic Claude, Gemini, jew kwalunkwe wieħed mis-377 fornitur ta' OmniRoute.
 - **Tapplika mmappjar tal-mudelli**: `gemini-3-flash` → `claude-sonnet-4.7` b'mod trasparenti fil-livell tal-handler.
 - **Tissorvelja t-traffiku kollu tal-aġenti**: kull talba interċettata tiġi ppubblikata fit-[Traffic Inspector](./TRAFFIC_INSPECTOR.md).
 - **Tapplika r-reżiljenza ta' OmniRoute**: ir-routing ikkombinat, is-circuit breakers, il-fallbacks, u t-traċċar tal-ispejjeż jaħdmu wkoll għat-traffiku tal-aġenti tal-IDE.

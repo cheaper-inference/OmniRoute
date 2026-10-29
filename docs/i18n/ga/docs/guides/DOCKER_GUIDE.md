@@ -667,6 +667,8 @@ Is éard atá i ngnáthleagan Docker / Kubernetes de OmniRoute ná **próiseas N
 
 **Uasghráduithe:** bí ag súil go ndícheanglófar gach seisiún. Taosc cliaint más féidir leat; níl aon nuashonrú céimneach ar SQLite réamhshocraithe. Cuirfidh `restart: unless-stopped` Compose agus `HEALTHCHECK` Docker an t-aon phróiseas amháin in ionad freisin nuair a bhíonn an coimeádán Míshláintiúil — an ga tionchair céanna.
 
+Tá comhaid manifest réamhdhéanta agus cairt Helm ar fáil in `deploy/kubernetes/` agus `deploy/helm/omniroute/` — féach ar an [treoir imlonnaithe Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Blúire Kubernetes do **mhacasamhail aonair** (tá Recreate riachtanach; ná méadaigh `replicas` in aghaidh aon chomhaid SQLite amháin):
 
 ```yaml

@@ -8,7 +8,7 @@
 > Поново генеришите помоћу: `npm run gen:provider-reference`
 > **Последњи пут генерисано:** 2026-10-27
 
-Укупан број провајдера: **376**. Погледајте расподелу по категоријама у наставку.
+Укупан број провајдера: **377**. Погледајте расподелу по категоријама у наставку.
 
 ## Категорије
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | Локално, самостално хостовано | [веза](https://github.com/vllm-project/vllm)                    | API кључ је опционалан. Подесите локални основни URL за vLLM компатибилан са OpenAI-јем (подразумевано: http://localhost:8000/v1).                                                                                                                                                                                                    |
 | `xinference`          | `xinference` | XInference          | Локално, самостално хостовано | [веза](https://inference.readthedocs.io)                        | API кључ је опционалан. Подесите локални основни URL за XInference компатибилан са OpenAI-јем (подразумевано: http://localhost:9997/v1).                                                                                                                                                                                              |
 
-## Добављачи претраге (18)
+## Добављачи претраге (19)
 
 | ID                  | Алијас          | Назив                               | Ознаке   | Веб-сајт                                                        | Напомене                                                                                                       |
 | ------------------- | --------------- | ----------------------------------- | -------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                          | Претрага | [веза](https://exa.ai)                                          | API кључ са dashboard.exa.ai                                                                                   |
 | `firecrawl`         | `fc`            | Firecrawl                           | Претрага | [веза](https://firecrawl.dev)                                   | API кључ са firecrawl.dev/app/api-keys (или подесите основни URL за Firecrawl који сами хостујете)             |
 | `google-pse-search` | `google-pse`    | Google Programmable Search          | Претрага | [веза](https://developers.google.com/custom-search/v1/overview) | Захтева Google API кључ и ID вашег програмабилног претраживача (cx)                                            |
+| `kimi-search`       | `kimi-search`   | Kimi Search                         | Претрага | [веза](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API кључ (MOONSHOT_API_KEY) са platform.kimi.ai                                                    |
 | `linkup-search`     | `linkup`        | Linkup Search                       | Претрага | [веза](https://docs.linkup.so)                                  | Bearer API кључ са Linkup контролне табле                                                                      |
 | `nimble-search`     | `nimble`        | Nimble Search                       | Претрага | [веза](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API кључ са Nimble контролне табле                                                                      |
 | `ollama-search`     | `ollama-search` | Ollama Search                       | Претрага | [веза](https://ollama.com/settings/keys)                        | Исти API кључ као за Ollama Cloud (са ollama.com/settings/keys)                                                |

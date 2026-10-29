@@ -10,8 +10,8 @@ OmniRoute üç xüsusi idarəetmə paneli səhifəsində yerləşən üç kateqo
 
 | Səhifə            | Marşrut                 | Konsepsiya                                                                                | Say            |
 | ----------------- | ----------------------- | ----------------------------------------------------------------------------------------- | -------------- |
-| **CLI Kodları**   | `/dashboard/cli-code`   | OmniRoute-a yönləndirdiyiniz kodlaşdırma alətləri (Müştəri → CLI → OmniRoute → Provayder) | 26             |
-| **CLI Agentləri** | `/dashboard/cli-agents` | OmniRoute-a yönləndirdiyiniz avtonom agentlər (eyni axın, daha geniş əhatə dairəsi)       | 10             |
+| **CLI Kodları**   | `/dashboard/cli-code`   | OmniRoute-a yönləndirdiyiniz kodlaşdırma alətləri (Müştəri → CLI → OmniRoute → Provayder) | 27             |
+| **CLI Agentləri** | `/dashboard/cli-agents` | OmniRoute-a yönləndirdiyiniz avtonom agentlər (eyni axın, daha geniş əhatə dairəsi)       | 11             |
 | **ACP Agentləri** | `/dashboard/acp-agents` | OmniRoute-un stdio/ACP vasitəsilə arxa xidmət kimi işə saldığı CLI-lər (əks axın)         | reyestrə baxın |
 
 Köhnə marşrutlar 308 vasitəsilə yönləndirilir: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,9 +55,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Hər biri `--remote <url> --api-key <key>` (lokal aləti uzaq OmniRoute ilə işləmək üçün konfiqurasiya edir), `--dry-run` (yazmadan önizləmə) və `--port` seçimlərini qəbul edir. Modelləri avtomatik aşkarlamayan alətlər (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) `--model <id>` (və interaktiv olmayan icralar üçün `--yes`) qəbul edir. `setup-5dive`, `$HOME` altında yazmayan yeganə reseptdir: o, donanma hostunda root-a məxsus autentifikasiya profili yazaraq 5dive agent donanmasını konfiqurasiya edir, buna görə `sudo` vasitəsilə özünü yenidən işə salır və öz uzaq rejimi yoxdur. Düzgün mühit dəyişənlərini ötürərək və heç bir konfiqurasiya yazmadan CLI-ni işə salmaq üçün ümumi `omniroute run <target>` başladıcısından istifadə edin (claude, codex, aider, goose, opencode, qwen, gemini — hədəflər və aliaslar `bin/cli/cli-manifest.mjs` faylından gəlir); əvvəlki hər-alət-üçün başladıcılar olan `omniroute launch` (Claude Code) və `omniroute launch-codex` (Codex) əlçatan olaraq qalır. Gemini CLI yalnız başladılma üçündür: o, `omniroute run` hədəfidir, lakin `setup-*`/`configure` resepti yoxdur.
+Hər biri `--remote <url> --api-key <key>` (lokal aləti uzaq OmniRoute ilə işləmək üçün konfiqurasiya edir), `--dry-run` (yazmadan önizləmə) və `--port` seçimlərini qəbul edir. Modelləri avtomatik aşkarlamayan alətlər (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) `--model <id>` (və interaktiv olmayan icralar üçün `--yes`) qəbul edir. `setup-5dive`, `$HOME` altında yazmayan yeganə reseptdir: o, donanma hostunda root-a məxsus autentifikasiya profili yazaraq 5dive agent donanmasını konfiqurasiya edir, buna görə `sudo` vasitəsilə özünü yenidən işə salır və öz uzaq rejimi yoxdur. Düzgün mühit dəyişənlərini ötürərək və heç bir konfiqurasiya yazmadan CLI-ni işə salmaq üçün ümumi `omniroute run <target>` başladıcısından istifadə edin (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — hədəflər və aliaslar `bin/cli/cli-manifest.mjs` faylından gəlir); əvvəlki hər-alət-üçün başladıcılar olan `omniroute launch` (Claude Code) və `omniroute launch-codex` (Codex) əlçatan olaraq qalır. Gemini CLI yalnız başladılma üçündür: o, `omniroute run` hədəfidir, lakin `setup-*`/`configure` resepti yoxdur.
 
 > **Tam istinad:** əsas cədvəl — hər əmrin nə yazdığı, bütün seçimlər,
 > lokal və uzaq rejimlər, həmçinin hansı alətlərin `/v1` suffiksi tələb etdiyi —
@@ -149,7 +150,7 @@ bir səthə əlavə edilən hədəf səssizcə uyğunsuzlaşmaq əvəzinə test 
 `baseUrlSupport: "partial"` olan alətlərin idarəetmə panelindəki kartında "⚠ Qismən baza URL-i" nişanı göstərilir.
 ---
 
-## 2. CLI Agentləri Kataloqu (10 alət)
+## 2. CLI Agentləri Kataloqu (11 alət)
 
 `/dashboard/cli-agents` səhifəsində görünən avtonom agentlər:
 
@@ -165,6 +166,7 @@ bir səthə əlavə edilən hədəf səssizcə uyğunsuzlaşmaq əvəzinə test 
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

@@ -13,7 +13,7 @@
 
 ## ምን እንደሆነ
 
-OmniRoute 376 አቅራቢዎችን ይመዘግባል፣ ከእነዚህም 155 የካታሎግ ግቤቶች **free/no-auth** የሚል ምልክት አለባቸው (no-auth፣ free-tier OAuth፣ ወይም free-tier API key — [የነጻ ደረጃዎች መመሪያ](../getting-started/FREE-TIERS-GUIDE.md) እና ሙሉውን [የነጻ ደረጃዎች ማውጫ](../reference/FREE_TIERS.md) ይመልከቱ)። ችግሩ ግን፦ ነጻ አቅራቢዎች በሞዴል ጥራት በከፍተኛ ሁኔታ ይለያያሉ። የfrontier ሞዴል የሚያቀርብ no-auth አቅራቢ ከትንሽ አሮጌ ሞዴል ከሚያቀርብ አቅራቢ በጣም ይበልጥ ጠቃሚ ነው።
+OmniRoute 377 አቅራቢዎችን ይመዘግባል፣ ከእነዚህም 155 የካታሎግ ግቤቶች **free/no-auth** የሚል ምልክት አለባቸው (no-auth፣ free-tier OAuth፣ ወይም free-tier API key — [የነጻ ደረጃዎች መመሪያ](../getting-started/FREE-TIERS-GUIDE.md) እና ሙሉውን [የነጻ ደረጃዎች ማውጫ](../reference/FREE_TIERS.md) ይመልከቱ)። ችግሩ ግን፦ ነጻ አቅራቢዎች በሞዴል ጥራት በከፍተኛ ሁኔታ ይለያያሉ። የfrontier ሞዴል የሚያቀርብ no-auth አቅራቢ ከትንሽ አሮጌ ሞዴል ከሚያቀርብ አቅራቢ በጣም ይበልጥ ጠቃሚ ነው።
 
 **የነጻ አቅራቢዎች ደረጃ አሰጣጥ** "**የትኛው ነጻ አቅራቢ ምርጡን ሞዴል ይሰጠኛል?**" የሚለውን ጥያቄ ይመልሳል፤ ይህም የእያንዳንዱን ነጻ አቅራቢ ካታሎግ ከ**Arena AI leaderboard** (በሰው ምርጫ ላይ የተመሰረተ ELO፣ ከLMArena chatbot arena ጀርባ ያለው ተመሳሳይ ሀሳብ) ከሚገኙ **በሕዝብ ተሳትፎ ከተሰበሰቡ የጥራት ነጥቦች** ጋር በማገናኘት ነው። ከዚያ አቅራቢዎች በ**ምርጥ ነጻ ሞዴላቸው** ጥንካሬ ደረጃ ይሰጣሉ።
 

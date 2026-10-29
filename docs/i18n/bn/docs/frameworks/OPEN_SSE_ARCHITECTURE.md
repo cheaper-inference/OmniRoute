@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ফাইল                           | উদ্দেশ্য                                             |
 | ------------------------------ | ---------------------------------------------------- |
-| `providerRegistry.ts`          | 376-প্রোভাইডার ক্যাটালগের জন্য চ্যাট-মডেল রেজিস্ট্রি |
+| `providerRegistry.ts`          | 377-প্রোভাইডার ক্যাটালগের জন্য চ্যাট-মডেল রেজিস্ট্রি |
 | `providerModels.ts`            | মডেল উপনাম, ফরম্যাট ম্যাপিং                          |
 | `constants.ts`                 | টাইমআউট, সীমা, স্ট্যাটাস কোড                         |
 | `defaultThinkingSignature.ts`  | ডিফল্ট Claude থিংকিং সিগনেচার                        |

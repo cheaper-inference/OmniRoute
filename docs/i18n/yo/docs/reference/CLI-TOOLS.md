@@ -10,8 +10,8 @@ OmniRoute ń ṣepọ̀ pẹ̀lú ẹ̀ka mẹ́ta ti àwọn irinṣẹ́ CLI t
 
 | Ojúewé             | Route                   | Èrò àkànṣe                                                                      | Iye         |
 | ------------------ | ----------------------- | ------------------------------------------------------------------------------- | ----------- |
-| **Àwọn CLI Code**  | `/dashboard/cli-code`   | Àwọn irinṣẹ́ kóòdù tí o tọ́ka sí OmniRoute (Client → CLI → OmniRoute → Provider)  | 26          |
-| **Àwọn CLI Agent** | `/dashboard/cli-agents` | Àwọn agent aládàáṣe tí o tọ́ka sí OmniRoute (ìṣàn kan náà, ààlà tó gbòòrò sí i)  | 10          |
+| **Àwọn CLI Code**  | `/dashboard/cli-code`   | Àwọn irinṣẹ́ kóòdù tí o tọ́ka sí OmniRoute (Client → CLI → OmniRoute → Provider)  | 27          |
+| **Àwọn CLI Agent** | `/dashboard/cli-agents` | Àwọn agent aládàáṣe tí o tọ́ka sí OmniRoute (ìṣàn kan náà, ààlà tó gbòòrò sí i)  | 11          |
 | **Àwọn ACP Agent** | `/dashboard/acp-agents` | Àwọn CLI tí OmniRoute ń dá sílẹ̀ gẹ́gẹ́ bí backend nípasẹ̀ stdio/ACP (ìṣàn òdìkejì) | wo registry |
 
 Àwọn route àtijọ́ ń ṣe àtúndarí nípasẹ̀ 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -56,18 +56,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Ọ̀kọ̀ọ̀kan gba `--remote <url> --api-key <key>` (láti ṣètò irinṣẹ́ agbègbè kan
 láti ṣiṣẹ́ pẹ̀lú OmniRoute jíjìn), `--dry-run` (láti ṣe àyẹ̀wò ṣáájú láìkọ nǹkan),
 àti `--port`. Àwọn irinṣẹ́ tí kò ní ìṣàwárí model aládàáṣiṣẹ́ (Cline, Kilo, Roo,
-Goose, Aider, Qwen, 5dive) gba `--model <id>` (àti `--yes` fún ìṣiṣẹ́ tí kò nílò
+Goose, Aider, Qwen, 5dive, WhyCodes) gba `--model <id>` (àti `--yes` fún ìṣiṣẹ́ tí kò nílò
 ìbáṣepọ̀). `setup-5dive` ni ìlànà kan ṣoṣo tí kì í kọ sábẹ́ `$HOME`: ó máa ń ṣètò
 ọ̀wọ́ àwọn agent 5dive nípa kíkọ profile ìfàṣẹ̀sí tí root ní sí orí host ọ̀wọ́ náà,
 nítorí náà ó tún máa ń ṣiṣẹ́ ara rẹ̀ nípasẹ̀ `sudo`, kò sì ní mode jíjìn tirẹ̀.
 Láti ṣe ìfilọ́lẹ̀ CLI kan pẹ̀lú env tó yẹ tí a fi sínú rẹ̀ láìkọ àtòjọ-ètò kankan
 rárá, lo olùfilọ́lẹ̀ gbogbogbò `omniroute run <target>` (claude, codex, aider,
-goose, opencode, qwen, gemini — àwọn target àti alias wá láti
+goose, opencode, qwen, gemini, whycodes — àwọn target àti alias wá láti
 `bin/cli/cli-manifest.mjs`); àwọn olùfilọ́lẹ̀ àtọwọ́dọ́wọ́ fún irinṣẹ́ kọ̀ọ̀kan,
 `omniroute launch` (Claude Code) àti `omniroute launch-codex` (Codex), ṣì wà.
 Gemini CLI jẹ́ ti ìfilọ́lẹ̀ nìkan: ó jẹ́ target `omniroute run`, ṣùgbọ́n kò ní
@@ -184,7 +185,7 @@ Gbogbo irinṣẹ́ tó hàn nínú `/dashboard/cli-code`. Àwọn tó ní `base
 Àwọn irinṣẹ́ tó ní `baseUrlSupport: "partial"` máa ńṣàfihàn báàjì "⚠ URL ìpìlẹ̀ apá kan" lórí káàdì dásíbọ́ọ̀dù náà.
 ---
 
-## 2. Àkójọ Àwọn Aṣojú CLI (irinṣẹ́ 10)
+## 2. Àkójọ Àwọn Aṣojú CLI (irinṣẹ́ 11)
 
 Àwọn aṣojú aládàáṣe tí ó hàn nínú `/dashboard/cli-agents`:
 
@@ -200,6 +201,7 @@ Gbogbo irinṣẹ́ tó hàn nínú `/dashboard/cli-code`. Àwọn tó ní `base
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

@@ -10,8 +10,8 @@ OmniRoute integriert drei Kategorien von CLI-Tools, die auf drei dedizierte Dash
 
 | Seite           | Route                   | Konzept                                                                           | Anzahl         |
 | --------------- | ----------------------- | --------------------------------------------------------------------------------- | -------------- |
-| **CLI-Codes**   | `/dashboard/cli-code`   | Coding-Tools, die auf OmniRoute verweisen (Client → CLI → OmniRoute → Anbieter)   | 26             |
-| **CLI-Agenten** | `/dashboard/cli-agents` | Autonome Agenten, die auf OmniRoute verweisen (gleicher Ablauf, breiterer Umfang) | 10             |
+| **CLI-Codes**   | `/dashboard/cli-code`   | Coding-Tools, die auf OmniRoute verweisen (Client → CLI → OmniRoute → Anbieter)   | 27             |
+| **CLI-Agenten** | `/dashboard/cli-agents` | Autonome Agenten, die auf OmniRoute verweisen (gleicher Ablauf, breiterer Umfang) | 11             |
 | **ACP-Agenten** | `/dashboard/acp-agents` | CLIs, die OmniRoute über stdio/ACP als Backend startet (umgekehrter Ablauf)       | siehe Registry |
 
 Veraltete Routen werden per 308 weitergeleitet: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Jeder Befehl akzeptiert `--remote <url> --api-key <key>` (um ein lokales Tool für eine entfernte OmniRoute-Instanz zu konfigurieren), `--dry-run` (Vorschau ohne Schreibvorgang) und `--port`. Tools ohne automatische Modellerkennung (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) akzeptieren `--model <id>` (und `--yes` für nicht interaktive Ausführungen). `setup-5dive` ist das einzige Rezept, das nicht unter `$HOME` schreibt: Es konfiguriert eine Flotte von 5dive-Agenten, indem es auf dem Flottenhost ein Authentifizierungsprofil im Besitz von root erstellt. Daher führt es sich über `sudo` erneut aus und verfügt über keinen eigenen Remote-Modus. Um eine CLI mit den korrekten injizierten Umgebungsvariablen zu starten, ohne überhaupt eine Konfiguration zu schreiben, verwenden Sie den generischen Starter `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — Ziele und Aliasse stammen aus `bin/cli/cli-manifest.mjs`); die älteren toolspezifischen Starter `omniroute launch` (Claude Code) und `omniroute launch-codex` (Codex) bleiben verfügbar. Gemini CLI kann nur gestartet werden: Es ist ein Ziel für `omniroute run`, verfügt jedoch über kein `setup-*`-/`configure`-Rezept.
+Jeder Befehl akzeptiert `--remote <url> --api-key <key>` (um ein lokales Tool für eine entfernte OmniRoute-Instanz zu konfigurieren), `--dry-run` (Vorschau ohne Schreibvorgang) und `--port`. Tools ohne automatische Modellerkennung (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) akzeptieren `--model <id>` (und `--yes` für nicht interaktive Ausführungen). `setup-5dive` ist das einzige Rezept, das nicht unter `$HOME` schreibt: Es konfiguriert eine Flotte von 5dive-Agenten, indem es auf dem Flottenhost ein Authentifizierungsprofil im Besitz von root erstellt. Daher führt es sich über `sudo` erneut aus und verfügt über keinen eigenen Remote-Modus. Um eine CLI mit den korrekten injizierten Umgebungsvariablen zu starten, ohne überhaupt eine Konfiguration zu schreiben, verwenden Sie den generischen Starter `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — Ziele und Aliasse stammen aus `bin/cli/cli-manifest.mjs`); die älteren toolspezifischen Starter `omniroute launch` (Claude Code) und `omniroute launch-codex` (Codex) bleiben verfügbar. Gemini CLI kann nur gestartet werden: Es ist ein Ziel für `omniroute run`, verfügt jedoch über kein `setup-*`-/`configure`-Rezept.
 
 > **Vollständige Referenz:** Die Haupttabelle — was die einzelnen Befehle schreiben, alle Flags, lokale gegenüber entfernter Verwendung und welche Tools ein `/v1`-Suffix benötigen — finden Sie unter **[CLI-Integrationen](../guides/CLI-INTEGRATIONS.md)**.
 
@@ -143,7 +144,7 @@ Alle Tools, die unter `/dashboard/cli-code` angezeigt werden. Tools mit `baseUrl
 Tools mit `baseUrlSupport: "partial"` zeigen auf der Dashboard-Karte das Badge „⚠ Partielle Basis-URL“ an.
 ---
 
-## 2. Katalog der CLI-Agenten (10 Tools)
+## 2. Katalog der CLI-Agenten (11 Tools)
 
 Autonome Agenten, die unter `/dashboard/cli-agents` angezeigt werden:
 
@@ -159,6 +160,7 @@ Autonome Agenten, die unter `/dashboard/cli-agents` angezeigt werden:
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

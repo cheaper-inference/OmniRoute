@@ -163,7 +163,7 @@ OmniRoute pakub 6 A2A-oskust, mis on ühendatud failis `src/lib/a2a/taskExecutio
 | Seisundiaruanne             | `health-report`      | Koondab iga teenusepakkuja kaitselüliti, ooteaja ja lukustusoleku                                                                                                    | seisund, töökindlus            | "Kuva kõigi teenusepakkujate seisund"    |
 | Võimekuste loetelu          | `list-capabilities`  | Tagastab täieliku 45 kirjega Agent Skillsi kataloogi (23 API + 21 CLI + 1 konfiguratsioon) markdown-tabelina koos töötlemata SKILL.md URL-idega konteksti lisamiseks | kataloog, avastamine, oskused  | "Loetle kõik OmniRoute'i võimekused"     |
 
-> Agent Cardi tuleb hoida kooskõlas jooksva 376 teenusepakkujaga kataloogiga; teenusepakkujate arv ning tasuta ja autentimist mittevajavad metaandmed pärinevad käitusaegsest registrist.
+> Agent Cardi tuleb hoida kooskõlas jooksva 377 teenusepakkujaga kataloogiga; teenusepakkujate arv ning tasuta ja autentimist mittevajavad metaandmed pärinevad käitusaegsest registrist.
 
 ### Oskuse `list-capabilities` üksikasjad
 

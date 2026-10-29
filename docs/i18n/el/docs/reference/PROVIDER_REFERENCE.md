@@ -8,7 +8,7 @@
 > Αναδημιουργία με: `npm run gen:provider-reference`
 > **Τελευταία δημιουργία:** 2026-10-27
 
-Σύνολο παρόχων: **376**. Δείτε παρακάτω την ανάλυση ανά κατηγορία.
+Σύνολο παρόχων: **377**. Δείτε παρακάτω την ανάλυση ανά κατηγορία.
 
 ## Κατηγορίες
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | Τοπικός, αυτοφιλοξενούμενος | [σύνδεσμος](https://github.com/vllm-project/vllm)                    | Το κλειδί API είναι προαιρετικό. Διαμορφώστε το τοπικό βασικό URL του vLLM που είναι συμβατό με το OpenAI (προεπιλογή: http://localhost:8000/v1).                                                                                                                                                                                                                              |
 | `xinference`          | `xinference` | XInference          | Τοπικός, αυτοφιλοξενούμενος | [σύνδεσμος](https://inference.readthedocs.io)                        | Το κλειδί API είναι προαιρετικό. Διαμορφώστε το τοπικό βασικό URL του XInference που είναι συμβατό με το OpenAI (προεπιλογή: http://localhost:9997/v1).                                                                                                                                                                                                                        |
 
-## Πάροχοι αναζήτησης (18)
+## Πάροχοι αναζήτησης (19)
 
 | Αναγνωριστικό       | Ψευδώνυμο       | Όνομα                             | Ετικέτες  | Ιστότοπος                                                            | Σημειώσεις                                                                                                                                                     |
 | ------------------- | --------------- | --------------------------------- | --------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                        | Αναζήτηση | [σύνδεσμος](https://exa.ai)                                          | Κλειδί API από το dashboard.exa.ai                                                                                                                             |
 | `firecrawl`         | `fc`            | Firecrawl                         | Αναζήτηση | [σύνδεσμος](https://firecrawl.dev)                                   | Κλειδί API από το firecrawl.dev/app/api-keys (ή ορίστε τη βασική διεύθυνση URL του αυτοφιλοξενούμενου Firecrawl σας)                                           |
 | `google-pse-search` | `google-pse`    | Google Programmable Search        | Αναζήτηση | [σύνδεσμος](https://developers.google.com/custom-search/v1/overview) | Απαιτεί κλειδί Google API και το αναγνωριστικό της Προγραμματιζόμενης Μηχανής Αναζήτησής σας (cx)                                                              |
+| `kimi-search`       | `kimi-search`   | Kimi Search                       | Αναζήτηση | [σύνδεσμος](https://platform.kimi.ai/docs/api/tools-search)          | Κλειδί API του Moonshot AI (MOONSHOT_API_KEY) από το platform.kimi.ai                                                                                          |
 | `linkup-search`     | `linkup`        | Linkup Search                     | Αναζήτηση | [σύνδεσμος](https://docs.linkup.so)                                  | Κλειδί API τύπου Bearer από τον πίνακα ελέγχου του Linkup                                                                                                      |
 | `nimble-search`     | `nimble`        | Nimble Search                     | Αναζήτηση | [σύνδεσμος](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Κλειδί API τύπου Bearer από τον πίνακα ελέγχου του Nimble                                                                                                      |
 | `ollama-search`     | `ollama-search` | Ollama Search                     | Αναζήτηση | [σύνδεσμος](https://ollama.com/settings/keys)                        | Το ίδιο κλειδί API με το Ollama Cloud (από το ollama.com/settings/keys)                                                                                        |

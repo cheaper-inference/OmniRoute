@@ -8,7 +8,7 @@
 > 다음 명령으로 다시 생성: `npm run gen:provider-reference`
 > **마지막 생성일:** 2026-10-27
 
-총 제공업체 수: **376**. 아래에서 카테고리별 분석을 확인하세요.
+총 제공업체 수: **377**. 아래에서 카테고리별 분석을 확인하세요.
 
 ## 카테고리
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | 로컬, 자체 호스팅 | [링크](https://github.com/vllm-project/vllm)                    | API 키는 선택 사항입니다. 로컬 vLLM의 OpenAI 호환 기본 URL을 구성하세요(기본값: http://localhost:8000/v1).                                                                                                                                                                              |
 | `xinference`          | `xinference` | XInference          | 로컬, 자체 호스팅 | [링크](https://inference.readthedocs.io)                        | API 키는 선택 사항입니다. 로컬 XInference의 OpenAI 호환 기본 URL을 구성하세요(기본값: http://localhost:9997/v1).                                                                                                                                                                        |
 
-## 검색 제공자 (18)
+## 검색 제공자 (19)
 
 | ID                  | 별칭            | 이름                       | 태그 | 웹사이트                                                        | 참고 사항                                                                                                    |
 | ------------------- | --------------- | -------------------------- | ---- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                 | 검색 | [링크](https://exa.ai)                                          | dashboard.exa.ai에서 발급받은 API 키                                                                         |
 | `firecrawl`         | `fc`            | Firecrawl                  | 검색 | [링크](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys에서 발급받은 API 키(또는 자체 호스팅된 Firecrawl 기본 URL 설정)                   |
 | `google-pse-search` | `google-pse`    | Google Programmable Search | 검색 | [링크](https://developers.google.com/custom-search/v1/overview) | Google API 키와 Programmable Search Engine ID(cx)가 필요함                                                   |
+| `kimi-search`       | `kimi-search`   | Kimi Search                | 검색 | [링크](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai에서 발급받은 Moonshot AI API 키(MOONSHOT_API_KEY)                                           |
 | `linkup-search`     | `linkup`        | Linkup Search              | 검색 | [링크](https://docs.linkup.so)                                  | Linkup 대시보드에서 발급받은 Bearer API 키                                                                   |
 | `nimble-search`     | `nimble`        | Nimble Search              | 검색 | [링크](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble 대시보드에서 발급받은 Bearer API 키                                                                   |
 | `ollama-search`     | `ollama-search` | Ollama Search              | 검색 | [링크](https://ollama.com/settings/keys)                        | Ollama Cloud와 동일한 API 키(ollama.com/settings/keys에서 발급)                                              |

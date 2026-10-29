@@ -10,8 +10,8 @@ OmniRoute integrējas ar trīs kategoriju CLI rīkiem, kas sadalīti trīs īpa�
 
 | Lapa           | Maršruts                | Koncepcija                                                                                      | Skaits           |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ---------------- |
-| **CLI kodi**   | `/dashboard/cli-code`   | Kodēšanas rīki, kurus novirzāt uz OmniRoute (Klients → CLI → OmniRoute → Pakalpojuma sniedzējs) | 26               |
-| **CLI aģenti** | `/dashboard/cli-agents` | Autonomi aģenti, kurus novirzāt uz OmniRoute (tā pati plūsma, plašāks tvērums)                  | 10               |
+| **CLI kodi**   | `/dashboard/cli-code`   | Kodēšanas rīki, kurus novirzāt uz OmniRoute (Klients → CLI → OmniRoute → Pakalpojuma sniedzējs) | 27               |
+| **CLI aģenti** | `/dashboard/cli-agents` | Autonomi aģenti, kurus novirzāt uz OmniRoute (tā pati plūsma, plašāks tvērums)                  | 11               |
 | **ACP aģenti** | `/dashboard/acp-agents` | CLI, kurus OmniRoute palaiž kā aizmugursistēmas, izmantojot stdio/ACP (apgrieztā plūsma)        | skatiet reģistru |
 
 Novecojušie maršruti veic 308 novirzīšanu: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Katra komanda pieņem `--remote <url> --api-key <key>` (lokāla rīka konfigurēšanai darbam ar
 attālu OmniRoute), `--dry-run` (priekšskatīšanai bez ierakstīšanas) un `--port`. Rīkiem
-bez automātiskas modeļu atklāšanas (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) ir nepieciešams
+bez automātiskas modeļu atklāšanas (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) ir nepieciešams
 `--model <id>` (un `--yes` neinteraktīvai izpildei). `setup-5dive` ir vienīgā
 recepte, kas neveic ierakstīšanu zem `$HOME`: tā konfigurē 5dive aģentu kopu,
 kopas resursdatorā ierakstot `root` lietotājam piederošu autentifikācijas profilu, tāpēc tā atkārtoti izpilda sevi ar `sudo`
 un tai nav sava attālā režīma. Lai palaistu CLI ar
 ievadītiem pareizajiem vides mainīgajiem, vispār neierakstot konfigurāciju, izmantojiet vispārīgo
-`omniroute run <target>` palaidēju (claude, codex, aider, goose, opencode, qwen,
-gemini — mērķi un aizstājvārdi tiek iegūti no `bin/cli/cli-manifest.mjs`); joprojām ir pieejami arī mantotie
+`omniroute run <target>` palaidēju (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — mērķi un aizstājvārdi tiek iegūti no `bin/cli/cli-manifest.mjs`); joprojām ir pieejami arī mantotie
 atsevišķo rīku palaidēji `omniroute launch` (Claude Code) un `omniroute launch-codex`
 (Codex). Gemini CLI ir paredzēta tikai palaišanai: tā ir `omniroute run`
 mērķis, taču tai nav `setup-*`/`configure` receptes.
@@ -181,7 +182,7 @@ Visi rīki, kas redzami sadaļā `/dashboard/cli-code`. Rīki ar `baseUrlSupport
 Rīkiem ar `baseUrlSupport: "partial"` informācijas paneļa kartītē tiek rādīta emblēma „⚠ Daļējs bāzes URL atbalsts”.
 ---
 
-## 2. CLI aģentu katalogs (10 rīki)
+## 2. CLI aģentu katalogs (11 rīki)
 
 Autonomie aģenti, kas tiek rādīti sadaļā `/dashboard/cli-agents`:
 
@@ -197,6 +198,7 @@ Autonomie aģenti, kas tiek rādīti sadaļā `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

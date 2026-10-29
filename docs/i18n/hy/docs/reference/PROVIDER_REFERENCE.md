@@ -8,7 +8,7 @@
 > Կրկին գեներացնել հետևյալով՝ `npm run gen:provider-reference`
 > **Վերջին գեներացումը՝** 2026-10-27
 
-Պրովայդերների ընդհանուր քանակը՝ **376**։ Ստորև տե՛ս ըստ կատեգորիաների բաշխումը։
+Պրովայդերների ընդհանուր քանակը՝ **377**։ Ստորև տե՛ս ըստ կատեգորիաների բաշխումը։
 
 ## Կատեգորիաներ
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | Տեղային, սեփական սերվերում տեղակայված | [հղում](https://github.com/vllm-project/vllm)                    | API բանալին պարտադիր չէ։ Կարգավորեք OpenAI-ի հետ համատեղելի տեղային vLLM-ի բազային URL-ը (լռելյայն՝ http://localhost:8000/v1)։                                                                                                                                                                                                            |
 | `xinference`          | `xinference` | XInference          | Տեղային, սեփական սերվերում տեղակայված | [հղում](https://inference.readthedocs.io)                        | API բանալին պարտադիր չէ։ Կարգավորեք OpenAI-ի հետ համատեղելի տեղային XInference-ի բազային URL-ը (լռելյայն՝ http://localhost:9997/v1)։                                                                                                                                                                                                      |
 
-## Որոնման մատակարարներ (18)
+## Որոնման մատակարարներ (19)
 
 | ID                  | Այլանուն        | Անվանում                        | Պիտակներ | Կայք                                                             | Նշումներ                                                                                                                                        |
 | ------------------- | --------------- | ------------------------------- | -------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                      | Որոնում  | [հղում](https://exa.ai)                                          | API բանալի՝ dashboard.exa.ai-ից                                                                                                                 |
 | `firecrawl`         | `fc`            | Firecrawl                       | Որոնում  | [հղում](https://firecrawl.dev)                                   | API բանալի՝ firecrawl.dev/app/api-keys-ից (կամ սահմանեք ինքնուրույն հոսթինգով աշխատող Firecrawl-ի բազային URL-ը)                                |
 | `google-pse-search` | `google-pse`    | Google Programmable Search      | Որոնում  | [հղում](https://developers.google.com/custom-search/v1/overview) | Պահանջվում են Google API բանալի և ձեր Programmable Search Engine-ի ID-ն (cx)                                                                    |
+| `kimi-search`       | `kimi-search`   | Kimi Search                     | Որոնում  | [հղում](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API բանալի (MOONSHOT_API_KEY)՝ platform.kimi.ai-ից                                                                                  |
 | `linkup-search`     | `linkup`        | Linkup Search                   | Որոնում  | [հղում](https://docs.linkup.so)                                  | Bearer API բանալի՝ Linkup-ի կառավարման վահանակից                                                                                                |
 | `nimble-search`     | `nimble`        | Nimble Search                   | Որոնում  | [հղում](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API բանալի՝ Nimble-ի կառավարման վահանակից                                                                                                |
 | `ollama-search`     | `ollama-search` | Ollama Search                   | Որոնում  | [հղում](https://ollama.com/settings/keys)                        | Նույն API բանալին, ինչ Ollama Cloud-ի համար (ollama.com/settings/keys-ից)                                                                       |

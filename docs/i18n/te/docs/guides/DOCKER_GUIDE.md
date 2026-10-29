@@ -640,6 +640,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **అప్గ్రేడ్లు:** ప్రతి సెషన్ డిస్కనెక్ట్ అవుతుందని ఊహించండి. సాధ్యమైతే క్లయింట్లను drain చేయండి; డిఫాల్ట్ SQLiteపై rolling update లేదు. Compose `restart: unless-stopped`తో పాటు Docker `HEALTHCHECK` కూడా కంటైనర్ Unhealthyగా మారినప్పుడు ఏకైక ప్రాసెస్ను భర్తీ చేస్తుంది — ప్రభావ పరిధి అదే.
 
+సిద్ధంగా ఉన్న మానిఫెస్ట్లు మరియు Helm చార్ట్ `deploy/kubernetes/` మరియు `deploy/helm/omniroute/`లో ఉన్నాయి — [Kubernetes డిప్లాయ్మెంట్ గైడ్](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) చూడండి.
+
 **ఒకే రెప్లికా** కోసం Kubernetes స్నిపెట్ (Recreate అవసరం; ఒక SQLite ఫైల్పై `replicas`ను పెంచవద్దు):
 
 ```yaml

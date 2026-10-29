@@ -163,7 +163,7 @@ OmniRoute သည် `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` တွင
 | Health Report      | `health-report`      | Provider တစ်ခုချင်းစီ၏ circuit breaker၊ cooldown နှင့် lockout အခြေအနေတို့ကို စုစည်းဖော်ပြပေးသည်                                                                            | health, resilience         | "Providers အားလုံး၏ health status ကို ပြပါ"                 |
 | List Capabilities  | `list-capabilities`  | Context injection အတွက် raw SKILL.md URLs များပါဝင်သည့် ပြည့်စုံသော 45-entry Agent Skills catalog (API ၂၃ ခု + CLI ၂၁ ခု + config ၁ ခု) ကို markdown table အဖြစ် ပြန်ပေးသည် | catalog, discovery, skills | "OmniRoute capabilities အားလုံးကို စာရင်းပြုစုပေးပါ"        |
 
-> Agent Card ကို လက်ရှိအသုံးပြုနေသော provider ၃၇၆ ခုပါ catalog နှင့် ကိုက်ညီအောင် ထိန်းသိမ်းထားသင့်သည်။ Provider အရေအတွက်များနှင့် free/no-auth metadata ကို runtime registry မှ ရယူထားသည်။
+> Agent Card ကို လက်ရှိအသုံးပြုနေသော provider ၃၇၇ ခုပါ catalog နှင့် ကိုက်ညီအောင် ထိန်းသိမ်းထားသင့်သည်။ Provider အရေအတွက်များနှင့် free/no-auth metadata ကို runtime registry မှ ရယူထားသည်။
 
 ### `list-capabilities` Skill အသေးစိတ်
 

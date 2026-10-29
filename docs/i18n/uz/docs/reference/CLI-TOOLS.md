@@ -10,8 +10,8 @@ OmniRoute uchta alohida boshqaruv paneli sahifasida joylashgan CLI vositalarinin
 
 | Sahifa         | Yoʻnalish               | Tushuncha                                                                                  | Soni             |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------------ | ---------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute’ga yoʻnaltiriladigan dasturlash vositalari (Mijoz → CLI → OmniRoute → Provayder) | 26               |
-| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute’ga yoʻnaltiriladigan avtonom agentlar (xuddi shu oqim, kengroq qamrov)           | 10               |
+| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute’ga yoʻnaltiriladigan dasturlash vositalari (Mijoz → CLI → OmniRoute → Provayder) | 27               |
+| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute’ga yoʻnaltiriladigan avtonom agentlar (xuddi shu oqim, kengroq qamrov)           | 11               |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute stdio/ACP orqali backend sifatida ishga tushiradigan CLI’lar (teskari oqim)      | reyestrga qarang |
 
 Eski yoʻnalishlar 308 orqali qayta yoʻnaltiriladi: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Har biri `--remote <url> --api-key <key>` (mahalliy vositani masofaviy OmniRoute bilan ishlashga sozlash), `--dry-run` (yozmasdan oldindan koʻrish) va `--port` parametrlarini qabul qiladi. Modellarni avtomatik aniqlash imkoniyati boʻlmagan vositalar (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) `--model <id>` parametrini (interaktiv boʻlmagan ishga tushirishlar uchun esa `--yes` parametrini ham) qabul qiladi. `setup-5dive` — `$HOME` ichiga yozmaydigan yagona retsept: u flot xostida root egasiga tegishli autentifikatsiya profilini yozish orqali 5dive agentlar flotini sozlaydi, shuning uchun `sudo` orqali oʻzini qayta ishga tushiradi va oʻzining masofaviy rejimiga ega emas. Toʻgʻri muhit oʻzgaruvchilari kiritilgan holda va umuman hech qanday konfiguratsiya yozmasdan CLIʼni ishga tushirish uchun umumiy `omniroute run <target>` ishga tushirgichidan foydalaning (claude, codex, aider, goose, opencode, qwen, gemini — nishonlar va taxalluslar `bin/cli/cli-manifest.mjs` faylidan olinadi); har bir vosita uchun eski `omniroute launch` (Claude Code) va `omniroute launch-codex` (Codex) ishga tushirgichlari hamon mavjud. Gemini CLI faqat ishga tushirish uchun moʻljallangan: u `omniroute run` nishoni, ammo `setup-*`/`configure` retseptiga ega emas.
+Har biri `--remote <url> --api-key <key>` (mahalliy vositani masofaviy OmniRoute bilan ishlashga sozlash), `--dry-run` (yozmasdan oldindan koʻrish) va `--port` parametrlarini qabul qiladi. Modellarni avtomatik aniqlash imkoniyati boʻlmagan vositalar (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) `--model <id>` parametrini (interaktiv boʻlmagan ishga tushirishlar uchun esa `--yes` parametrini ham) qabul qiladi. `setup-5dive` — `$HOME` ichiga yozmaydigan yagona retsept: u flot xostida root egasiga tegishli autentifikatsiya profilini yozish orqali 5dive agentlar flotini sozlaydi, shuning uchun `sudo` orqali oʻzini qayta ishga tushiradi va oʻzining masofaviy rejimiga ega emas. Toʻgʻri muhit oʻzgaruvchilari kiritilgan holda va umuman hech qanday konfiguratsiya yozmasdan CLIʼni ishga tushirish uchun umumiy `omniroute run <target>` ishga tushirgichidan foydalaning (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — nishonlar va taxalluslar `bin/cli/cli-manifest.mjs` faylidan olinadi); har bir vosita uchun eski `omniroute launch` (Claude Code) va `omniroute launch-codex` (Codex) ishga tushirgichlari hamon mavjud. Gemini CLI faqat ishga tushirish uchun moʻljallangan: u `omniroute run` nishoni, ammo `setup-*`/`configure` retseptiga ega emas.
 
 > **Toʻliq maʼlumotnoma:** asosiy jadval — har bir buyruq nimalarni yozishi, barcha parametrlar,
 > mahalliy va masofaviy rejimlar oʻrtasidagi farqlar hamda qaysi vositalar `/v1` suffiksini talab qilishi —
@@ -138,7 +139,7 @@ Kataloglangan vositalarning hammasini ham aniqlash, sozlash yoki ishga tushirish
 `baseUrlSupport: "partial"` qiymatiga ega vositalarning boshqaruv panelidagi kartasida «⚠ Qisman Base URL» nishoni ko‘rsatiladi.
 ---
 
-## 2. CLI agentlari katalogi (10 ta vosita)
+## 2. CLI agentlari katalogi (11 ta vosita)
 
 `/dashboard/cli-agents` sahifasida ko‘rinadigan avtonom agentlar:
 
@@ -154,6 +155,7 @@ Kataloglangan vositalarning hammasini ham aniqlash, sozlash yoki ishga tushirish
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

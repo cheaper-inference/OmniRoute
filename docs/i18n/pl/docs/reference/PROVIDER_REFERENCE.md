@@ -8,7 +8,7 @@
 > Wygeneruj ponownie za pomocą: `npm run gen:provider-reference`
 > **Ostatnio wygenerowano:** 2026-10-27
 
-Łączna liczba dostawców: **376**. Poniżej znajduje się podział według kategorii.
+Łączna liczba dostawców: **377**. Poniżej znajduje się podział według kategorii.
 
 ## Kategorie
 
@@ -397,7 +397,7 @@ Aby włączyć, skonfigurować i przetestować każdego dostawcę, użyj panelu 
 | `vllm`                | `vllm`       | vLLM                | Lokalny, hostowany samodzielnie | [link](https://github.com/vllm-project/vllm)                    | Klucz API jest opcjonalny. Skonfiguruj lokalny, zgodny z OpenAI bazowy adres URL vLLM (domyślnie: http://localhost:8000/v1).                                                                                                                                                                                              |
 | `xinference`          | `xinference` | XInference          | Lokalny, hostowany samodzielnie | [link](https://inference.readthedocs.io)                        | Klucz API jest opcjonalny. Skonfiguruj lokalny, zgodny z OpenAI bazowy adres URL XInference (domyślnie: http://localhost:9997/v1).                                                                                                                                                                                        |
 
-## Dostawcy wyszukiwania (18)
+## Dostawcy wyszukiwania (19)
 
 | ID                  | Alias           | Nazwa                             | Tagi         | Witryna                                                         | Uwagi                                                                                                                                        |
 | ------------------- | --------------- | --------------------------------- | ------------ | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Aby włączyć, skonfigurować i przetestować każdego dostawcę, użyj panelu 
 | `exa-search`        | `exa-search`    | Exa Search                        | Wyszukiwanie | [link](https://exa.ai)                                          | Klucz API z dashboard.exa.ai                                                                                                                 |
 | `firecrawl`         | `fc`            | Firecrawl                         | Wyszukiwanie | [link](https://firecrawl.dev)                                   | Klucz API z firecrawl.dev/app/api-keys (lub ustaw bazowy adres URL samodzielnie hostowanej instancji Firecrawl)                              |
 | `google-pse-search` | `google-pse`    | Google Programmable Search        | Wyszukiwanie | [link](https://developers.google.com/custom-search/v1/overview) | Wymaga klucza Google API oraz identyfikatora Programmable Search Engine (`cx`)                                                               |
+| `kimi-search`       | `kimi-search`   | Kimi Search                       | Wyszukiwanie | [link](https://platform.kimi.ai/docs/api/tools-search)          | Klucz API Moonshot AI (MOONSHOT_API_KEY) z platform.kimi.ai                                                                                  |
 | `linkup-search`     | `linkup`        | Linkup Search                     | Wyszukiwanie | [link](https://docs.linkup.so)                                  | Klucz Bearer API z panelu Linkup                                                                                                             |
 | `nimble-search`     | `nimble`        | Nimble Search                     | Wyszukiwanie | [link](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Klucz Bearer API z panelu Nimble                                                                                                             |
 | `ollama-search`     | `ollama-search` | Ollama Search                     | Wyszukiwanie | [link](https://ollama.com/settings/keys)                        | Ten sam klucz API co dla Ollama Cloud (z ollama.com/settings/keys)                                                                           |

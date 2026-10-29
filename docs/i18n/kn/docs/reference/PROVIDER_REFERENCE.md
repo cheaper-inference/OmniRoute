@@ -8,7 +8,7 @@
 > ಇದರೊಂದಿಗೆ ಮರುರಚಿಸಿ: `npm run gen:provider-reference`
 > **ಕೊನೆಯದಾಗಿ ರಚಿಸಿದ್ದು:** 2026-10-27
 
-ಒಟ್ಟು ಪೂರೈಕೆದಾರರು: **376**. ಕೆಳಗೆ ವರ್ಗವಾರು ವಿವರವನ್ನು ನೋಡಿ.
+ಒಟ್ಟು ಪೂರೈಕೆದಾರರು: **377**. ಕೆಳಗೆ ವರ್ಗವಾರು ವಿವರವನ್ನು ನೋಡಿ.
 
 ## ವರ್ಗಗಳು
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | ಸ್ಥಳೀಯ, ಸ್ವಯಂ-ಹೋಸ್ಟ್ ಮಾಡಿದ | [ಲಿಂಕ್](https://github.com/vllm-project/vllm)                    | API ಕೀ ಐಚ್ಛಿಕ. ಸ್ಥಳೀಯ vLLM OpenAI-ಹೊಂದಾಣಿಕೆಯ ಮೂಲ URL ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ (ಡೀಫಾಲ್ಟ್: http://localhost:8000/v1).                                                                                                                                                                                                             |
 | `xinference`          | `xinference` | XInference          | ಸ್ಥಳೀಯ, ಸ್ವಯಂ-ಹೋಸ್ಟ್ ಮಾಡಿದ | [ಲಿಂಕ್](https://inference.readthedocs.io)                        | API ಕೀ ಐಚ್ಛಿಕ. ಸ್ಥಳೀಯ XInference OpenAI-ಹೊಂದಾಣಿಕೆಯ ಮೂಲ URL ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ (ಡೀಫಾಲ್ಟ್: http://localhost:9997/v1).                                                                                                                                                                                                       |
 
-## ಹುಡುಕಾಟ ಪೂರೈಕೆದಾರರು (18)
+## ಹುಡುಕಾಟ ಪೂರೈಕೆದಾರರು (19)
 
 | ID                  | ಅಲಿಯಾಸ್         | ಹೆಸರು                             | ಟ್ಯಾಗ್ಗಳು | ವೆಬ್ಸೈಟ್                                                         | ಟಿಪ್ಪಣಿಗಳು                                                                                                                       |
 | ------------------- | --------------- | --------------------------------- | --------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                        | ಹುಡುಕಾಟ   | [ಲಿಂಕ್](https://exa.ai)                                          | dashboard.exa.ai ನಿಂದ API ಕೀ                                                                                                     |
 | `firecrawl`         | `fc`            | Firecrawl                         | ಹುಡುಕಾಟ   | [ಲಿಂಕ್](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys ನಿಂದ API ಕೀ (ಅಥವಾ ಸ್ವಯಂ ಹೋಸ್ಟ್ ಮಾಡಿದ ನಿಮ್ಮ Firecrawl ಮೂಲ URL ಅನ್ನು ಹೊಂದಿಸಿ)                           |
 | `google-pse-search` | `google-pse`    | Google Programmable Search        | ಹುಡುಕಾಟ   | [ಲಿಂಕ್](https://developers.google.com/custom-search/v1/overview) | Google API ಕೀ ಮತ್ತು ನಿಮ್ಮ Programmable Search Engine ID (cx) ಅಗತ್ಯವಿದೆ                                                           |
+| `kimi-search`       | `kimi-search`   | Kimi Search                       | ಹುಡುಕಾಟ   | [ಲಿಂಕ್](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai ನಿಂದ Moonshot AI API ಕೀ (MOONSHOT_API_KEY)                                                                      |
 | `linkup-search`     | `linkup`        | Linkup Search                     | ಹುಡುಕಾಟ   | [ಲಿಂಕ್](https://docs.linkup.so)                                  | Linkup ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಿಂದ Bearer API ಕೀ                                                                                            |
 | `nimble-search`     | `nimble`        | Nimble Search                     | ಹುಡುಕಾಟ   | [ಲಿಂಕ್](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಿಂದ Bearer API ಕೀ                                                                                            |
 | `ollama-search`     | `ollama-search` | Ollama Search                     | ಹುಡುಕಾಟ   | [ಲಿಂಕ್](https://ollama.com/settings/keys)                        | Ollama Cloud ನಲ್ಲಿರುವ ಅದೇ API ಕೀ (ollama.com/settings/keys ನಿಂದ)                                                                 |

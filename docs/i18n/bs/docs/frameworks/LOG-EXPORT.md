@@ -226,7 +226,217 @@ Serije se segmentiraju prema **oba** kriterijuma: broju redova i serijalizovanim
 
 ---
 
-## 5. Dodavanje odredišta
+## 5. Odredište za OTLP/HTTP tragove
+
+Konfiguracija koristi `type: "otlp-http"`. Ovo je zakazani izvoz trajno pohranjenih
+zapisa poziva koji koristi kursor, a ne odredište za prijem događaja usmjeravanja uživo po principu najboljeg napora u
+`open-sse/services/routing/otel.ts`. Ne čita niti mijenja varijable okruženja,
+tajmere ili međuspremnike tog odredišta. Omogućavanje oba može proizvesti dvije nezavisne vrste raspona;
+koristite opseg instrumentacije `omniroute.log-export` da biste razlikovali ove raspone zapisa poziva.
+
+| Ključ                    | Zadana vrijednost / namjena                                                                   |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| `endpoint`               | Obavezan puni HTTP(S) URL za tragove; sufiks `/v1/traces` se ne dodaje                        |
+| `headers`                | Opcionalni redovi `Name: value` ili JSON objekt stringova; šifrirano                          |
+| `requestHeaderAllowlist` | Prazno (isključeno); nazivi/prefiksi klijentskih zaglavlja za bilježenje kao atributi raspona |
+| `serviceName`            | `omniroute`; resurs `service.name`                                                            |
+| `langfuseMapping`        | `false`; dodaje Langfuse atribute generisanja/sesije/korisnika                                |
+| `identity`               | `pseudonymous`, `keyName` ili `none`                                                          |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                       |
+| `timeoutMs`              | `30000` po HTTP pokušaju                                                                      |
+| `environment`            | Nije postavljeno; opcionalni `langfuse.environment`                                           |
+
+Generička kontrolna ploča prikazuje ova polja. `paths` prihvata API niz ili tekstualno područje
+s tačnim putanjama odvojenim novim redovima/zarezima. Putanje za ugradnje, ponovno rangiranje i ostale putanje
+preskaču se osim ako nisu izričito dozvoljene. Preskočeni redovi i dalje pomjeraju kursor; brojači
+`exported`/`exportedTotal` postojećeg izvršavača broje obrađene izvorne redove, uključujući filtrirane
+redove, umjesto prihvaćenih raspona. Filtriranje se obavlja u podređenom procesu, bez promjene njegovog
+IPC/kursor ugovora.
+
+Validacija URL-a koristi pomoćnu funkciju `parseAndValidateNonMetadataUrl`, koja ne koristi bazu podataka, iz
+`src/shared/network/outboundUrlGuard.ts`: pravilo `block-metadata`. Ima iste
+bezuslovne provjere metapodataka/protokola/ugrađenih pristupnih podataka kao validator webhookova s
+dozvoljenim privatnim URL-ovima, ali namjerno dopušta localhost/LAN odredišta bez globalnog
+nadjačavanja zastavice funkcionalnosti. To omogućava samostalno hostovane Langfuse, Phoenix, Tempo i Collector
+krajnje tačke, uključujući privatne HTTP krajnje tačke. Hostovi metapodataka u oblaku uvijek su blokirani.
+Preusmjeravanja se ne prate, pa kolektor ne može preusmjeriti pristupne podatke na drugi host.
+Kao i postojeća leksička zaštita URL-ova, ovo ne fiksira DNS razrješavanje; konfigurirajte samo
+hostove pod kontrolom operatera. Dajte prednost HTTPS-u kad god krajnja tačka nije na pouzdanoj mreži.
+
+### Sadržaj i isporuka
+
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) prenosi jedan
+CLIENT raspon po dozvoljenom redu, nazvan prema njegovoj tačnoj putanji zahtjeva. Imenovanje prema putanji razlikuje
+Chat Completions, Responses i Messages bez uključivanja podataka o modelu ili identitetu u
+naziv raspona. Atributi resursa uključuju `service.name` i `service.version` paketa.
+
+Uobičajeni zapisivač pokušaja razgovora (`open-sse/handlers/chatCore/attemptLogging.ts`) zapisuje
+`duration = Date.now() - startTime` po završetku i ne dostavlja vremensku oznaku;
+`saveCallLogOperation` u `src/lib/usage/callLogs.ts` podrazumijevano postavlja vremensku oznaku na vrijeme upisa
+(završetka). Izvoz stoga postavlja kraj = vremenska oznaka reda i početak = kraj − trajanje
+(milisekunde, pretvorene u decimalne nanosekunde). Historijske vremenske oznake koje dostavi pozivalac
+također se čuvaju kao vrijeme završetka; ne postoji oznaka po redu koja razlikuje početak od završetka.
+Trajanje null postaje nula. Nevažeće/nedostajuće vremenske oznake uzrokuju neuspjeh paketa umjesto stvaranja
+nedeterminističkih raspona. `ttftMs` može biti null i mapira se na `omniroute.ttft_ms`.
+
+Atributi uključuju `gen_ai.operation.name="chat"`, pružaoca usluge, traženi model/model odgovora,
+ulazne/izlazne tokene, opcionalne tokene čitanja keša/kreiranja keša/rezonovanja, HTTP status,
+kombinaciju, izvor keša, oznaku sesije i korelacijski identifikator. Cjelobrojne OTLP vrijednosti i vremenske oznake
+su decimalni stringovi; stringovi, logičke vrijednosti i razlomljeni brojevi koriste svoje izvorne OTLP
+varijante vrijednosti. Rasponi grešaka imaju status ERROR i sanitiziranu statusnu poruku. Kanonski
+zapis nema URL uzvodnog hosta, pa se `server.address` izostavlja umjesto da se
+kolektor pogrešno identificira kao server modela. Trošak se ne izvozi.
+
+Samo `includeBodies=true` učitava sadržaj. Uz `langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` prenose sanitizirani JSON tijela
+zahtjeva/odgovora onako kako ga pohranjuje OmniRoute (kanoniziran kada se može parsirati), a ne preoblikovani semconv
+niz poruka. Skraćena tijela/tijela koja nisu JSON ostaju sirovi tekst. Uz `langfuseMapping=true`,
+tijela se šalju samo kao `langfuse.observation.input` / `langfuse.observation.output`;
+atributi `gen_ai.*.messages` se izostavljaju tako da se svako tijelo šalje jednom. Oba načina
+nasljeđuju `maxBodyBytes` iz postojećeg postupka učitavanja;
+`omniroute.bodies_truncated=true` označava skraćivanje.
+Ovo odredište ne dodaje dodatne snimke stanja cjevovoda niti čitanja nesanitiziranih artefakata;
+opcionalno bilježenje zaglavlja zahtjeva koristi postojeći učitani snimak klijenta opisan u nastavku.
+Koristite interval u minutama, kao što je `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, pri izvozu
+tijela, umjesto nakupljanja zaostalih podataka tokom jednog sata.
+
+### Opcionalna zaglavlja klijentskih zahtjeva
+
+Bilježenje zaglavlja je **podrazumijevano isključeno**. Postavite `requestHeaderAllowlist` u konfiguraciji odredišta
+i omogućite **Izvoz upita i odgovora** (`includeBodies: true` na odredištu).
+Lista dozvoljenih vrijednosti prihvata API niz ili tekstualno područje s nazivima odvojenim novim redovima/zarezima:
+
+```json
+{
+  "requestHeaderAllowlist": ["User-Agent", "X-Project", "X-OmniRoute-Meta-*"]
+}
+```
+
+Nazivi se podudaraju tačno i bez razlikovanja velikih i malih slova, osim ako jedan završni `*` odabire neprazan
+prefiks naziva zaglavlja. Samostalni `*`, ugrađeni zamjenski znakovi i nevažeći nazivi HTTP zaglavlja se odbacuju.
+Dozvoljena su najviše 64 selektora, svaki s nazivom/prefiksom od najviše 256 ASCII bajtova.
+Ova postavka je odvojena od `headers`, koji autentificira izvoznik kod kolektora.
+
+Hvatanje čita samo `pipeline_client_request`, popunjen iz `clientRawRequest` sačuvanog detaljnog toka obrade
+(ili naslijeđenog `clientRequest`). Nikada se ne koristi rezervno čitanje zaglavlja zahtjeva prema pružaocu usluge.
+Detaljno evidentiranje toka obrade moralo je biti omogućeno kada je zahtjev zabilježen. Kada je
+`includeBodies` onemogućen ili kada JSON snimka stanja klijenta nedostaje, oštećen je ili skraćen, ne emituju se
+atributi zaglavlja. Povećanje `maxBodyBytes` može spriječiti skraćivanje snimka stanja prilikom izvoza;
+ne može vratiti detalje koji nikada nisu sačuvani. Snimak stanja veći od 1 MiB ili koji sadrži više od
+256 unosa zaglavlja se zanemaruje. Postojeći izvoz upita/odgovora ostaje omogućen uz
+hvatanje zaglavlja; lista dozvoljenih stavki ne pruža režim učitavanja samo zaglavlja.
+
+Odabrane vrijednosti postaju OTLP nizovi stringova `http.request.header.<full lowercase header name>`,
+čak i za jedan string. Naprimjer, `X-OmniRoute-Meta-Team: example-team` postaje
+`http.request.header.x-omniroute-meta-team` s
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
+Puni prefiks se zadržava: ovo su obična zaglavlja, bez parsiranja poslovnih polja ili
+pretvaranja u `omniroute.metadata.*` / Langfuse metapodatke. `langfuseMapping` ne mijenja semantiku
+zaglavlja. Odabrani `User-Agent` s jednom vrijednošću također postavlja standardni skalarni atribut
+`user_agent.original`. Zarezi unutar jedne vrijednosti ne služe za razdvajanje. Varijante velikih i malih slova spajaju se prema sačuvanom
+redoslijedu unosa; bilo koja nevažeća varijanta dovodi do izostavljanja cijelog tog zaglavlja. Atributi su poredani prema nazivu malim slovima.
+
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, zaglavlja API ključeva, nazivi koji sadrže
+oznake auth/token/secret/password/credential i interne pristupne vjerodajnice mrežnog prolaza uvijek se
+isključuju, čak i ako su odabrani ili djelimično maskirani u pohrani. Poznati obrasci vjerodajnica koriste
+zajednički detektor vjerodajnica; oznake redakcije se izostavljaju, a ne izvoze kao sigurne vrijednosti.
+Prihvataju se samo stringovi i neprazni nizovi stringova; brojevi i objekti se ne pretvaraju.
+Nevažeći nazivi, ključevi prototipa, kontrolni znakovi (osim horizontalnog tabulatora) i neispravan Unicode
+zanemaruju se bez izazivanja neuspjeha grupe ili prikazivanja njihovog sadržaja u greškama.
+
+Svaki raspon hvata najviše 32 zaglavlja, 16 vrijednosti po zaglavlju, 4096 UTF-8 bajtova po vrijednosti
+i ukupno 16384 UTF-8 bajta u nazivima i vrijednostima uhvaćenih zaglavlja. Prevelika/nevažeća zaglavlja
+izostavljaju se u cijelosti, ne skraćuju se. Odabir je odluka operatera u vezi s privatnošću: nazivi koji djeluju sigurno
+i dalje mogu sadržavati lične podatke, a ova ograničenja/detektori nisu opći alat za uklanjanje ličnih podataka.
+
+### Ograničenja isporuke
+
+Zahtjevi su ograničeni na 500 raspona i 4 MiB UTF-8 JSON-a, uključujući omotnicu.
+Veličina svakog dozvoljenog raspona provjerava se prije prvog zahtjeva grupe kursora. Pojedinačni
+raspon veći od ograničenja sprečava slanje bilo kojeg dijela te grupe i uzrokuje grešku s uputom da se smanji
+`maxBodyBytes`; ne odbacuje se neprimjetno. Prethodna provjera zadržava samo reference na zapise i
+brojeve bajtova, odbacujući svaki privremeni raspon/JSON; rasponi se ponovo grade za dijelove ograničene veličine
+umjesto zadržavanja druge serijalizirane kopije grupe. HTTP 408/429/5xx, mrežni kvarovi i isteci vremena imaju najviše
+tri pokušaja, s eksponencijalnim odgodama od 250/500 ms. `Retry-After` u sekundama ili HTTP datumima
+može produžiti odgodu do 5 sekundi. Ostali statusi odmah uzrokuju neuspjeh. Djelimično odbijanje uz OTLP 2xx također izaziva grešku umjesto
+potvrđivanja izgubljenog raspona; prihvataju se prazne potvrde ili potvrde u važećem JSON formatu, uz
+ograničenje čitanja odgovora od 64 KiB.
+
+Greške sadrže samo činjenice koje pripadaju izvozniku: HTTP status, kategoriju ponovnog pokušaja, broj pokušaja i broj poslanih
+raspona ili fiksne poruke o neuspjehu potvrde/mreže. Tijela odgovora kolektora,
+brojevi djelimičnih uspjeha i zaglavlja odgovora nikada se ne kopiraju u greške, dnevnike ili
+kontrolnu ploču. Neuspješna ili djelimično prihvaćena grupa ne potvrđuje se: odredište prikazuje
+status neuspjeha s tim statusom, kursor ostaje na posljednjoj potvrđenoj grupi, a sljedeće pokretanje
+ponovo šalje iste redove. Trajni statusi nastavljaju uzrokovati neuspjeh dok se kolektor ili konfiguracija
+ne isprave. Za detalje odgovora koristite vlastite dnevnike kolektora. Sažeci grešaka u dnevniku poziva zadržavaju
+svoju zasebnu redakciju.
+`prepare()` ne priprema nikakve resurse; Test šalje tačno `{"resourceSpans":[]}` i prijavljuje
+HTTP status bez upisivanja raspona u dnevnik poziva.
+
+Identifikatori tragova i raspona su prvih 32/16 heksadecimalnih cifara SHA-256 vrijednosti izračunate nad
+`"omniroute.trace\0" + callLogId` i `"omniroute.span\0" + callLogId`. Ponovna slanja nose
+identične identifikatore. Ovo nije garancija deduplikacije: neki pozadinski sistemi, uključujući Langfuse
+v4 prijem podataka, ne uklanjaju duplikate raspona s istim identifikatorom. Pad sistema ili djelimični neuspjeh dijela može
+ponovo poslati najviše jednu nepotvrđenu grupu kursora; cijela ta grupa može biti duplicirana,
+a ne samo njen posljednji HTTP dio. Odaberite veličinu grupe kursora imajući ovaj kompromis na umu.
+
+### Primjer za Langfuse
+
+Konfigurirajte ova polja za samostalno hostovanu Langfuse instancu:
+
+```json
+{
+  "endpoint": "https://langfuse.example.com/api/public/otel/v1/traces",
+  "headers": "Authorization: Basic <base64-of-public-key:secret-key>",
+  "serviceName": "omniroute",
+  "langfuseMapping": true,
+  "identity": "pseudonymous",
+  "environment": "production"
+}
+```
+
+Lokalno izradite vrijednost Authorization kao Base64 kodiranje doslovnog stringa `public-key:secret-key`
+(naprimjer pomoću `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Ne lijepite stvarne vjerodajnice u dnevnike, snimke ekrana ili prijave problema. Mapiranje automatski
+postavlja `x-langfuse-ingestion-version: 4`; Authorization se i dalje navodi u `headers`.
+I zaglavlja i generirana sol za identitet koriste postojeći mehanizam šifriranih tajnih polja
+i API zamjenske vrijednosti; potreban je `STORAGE_ENCRYPTION_KEY`.
+
+Mapiranje dodaje tip/model generisanja, JSON detalje o korištenju (ulaz/izlaz/ukupno i dostupne
+ključeve predmemorije), JSON snimke ulaza/izlaza, nivo ERROR/DEFAULT, pročišćenu statusnu poruku,
+naziv traga, ID sesije, opcionalno okruženje i
+`langfuse.observation.metadata.<key>` koji se može filtrirati za pružaoca usluge, traženi model, putanju, kombinaciju, izvor
+predmemorije i status. `langfuse.observation.completion_start_time` je u formatu ISO 8601 i izračunava se kao
+početak + TTFT samo kada je TTFT poznat i unutar trajanja. Atributi troškova se ne šalju.
+
+Režimi identiteta primjenjuju se na `langfuse.user.id`:
+
+- `pseudonymous` (zadano): HMAC-SHA256 internog ID-a API ključa s nasumičnom
+  32-bajtnom soli za svako odredište. Sol se generiše pri kreiranju ako nije prisutna, šifrira
+  kao `identitySalt`, nikada se ne vraća i zadržava se tokom izmjena. Neobrađeni ID-ovi ključeva nikada
+  se ne stavljaju u atribute raspona. Ponovno kreiranje/rotacija soli odredišta mijenja identitete.
+- `keyName`: konfigurisani naziv API ključa, koji namjerno otkriva tu oznaku operatera.
+- `none`: nema ID-a korisnika. Oznake sesije i dalje se izvoze kada su prisutne; ovi režimi ne
+  anonimiziraju proizvoljan sadržaj upita niti oznake sesije/korelacije koje je unio operater.
+
+### Pokretanje bez naknadnog učitavanja historije
+
+Samo pri kreiranju omogućite **Počni od trenutne pozicije (preskoči postojeće zapise)** ili proslijedite
+`startFromCurrentPosition: true` na najvišem nivou tijela zahtjeva API-ja za kreiranje. Time se inicijalizira
+`cursor_row_id` na trenutni najveći zadržani rowid dnevnika poziva pomoću postojećih pomoćnih funkcija
+za kursor, bez migracije. Zadana vrijednost je false (kursor 0 i naknadno učitavanje zadržane historije).
+Ovo nije postavka za resetovanje kursora prilikom ažuriranja.
+
+Zajednički dodatak `ttftMs` također dodaje kolonu `ttft_ms` koja dopušta null vrijednosti u BigQuery mapper
+i shemu nove tabele: test sheme zahtijeva da svako polje kanonskog zapisa ima
+kolonu. Postojeće tabele nastavljaju izvoz bez promjena: `prepare()` čita shemu tabele i
+izostavlja samo `ttft_ms` kada ta kolona nedostaje. Dodajte kolonu tipa INT64 koja dopušta null vrijednosti da biste dobili TTFT
+pri sljedećem pokretanju ili koristite novu tabelu. Nisu potrebni PATCH, automatska izmjena sheme niti dodatne
+dozvole; sva ostala polja reda zadržavaju strogu provjeru sheme.
+
+---
+
+## 6. Dodavanje odredišta
 
 1. Kreirajte `src/lib/logExport/destinations/<name>.ts` koji eksportuje `LogExportDestinationType`:
    Zod `configSchema`, niz `fields` deskriptora za UI, `secretFields`, i `createClient(config)` koji vraća `test()` / `prepare()` / `send(records)`.
@@ -242,7 +452,7 @@ Dva pravila za novo odredište:
 
 ---
 
-## 6. Upravljanje
+## 7. Upravljanje
 
 - **Dashboard**: Integrations → Log export. Dodajte odredište, pokrenite **Test** da provjerite akreditive bez upisivanja redova, a zatim ga omogućite.
 - **Backlog**: svaka kartica odredišta prikazuje redove na čekanju i kursor; `GET /api/log-export/status` vraća iste podatke plus posljednjih 20 pokretanja poslova.

@@ -156,7 +156,7 @@ Az OmniRoute 6 A2A-készséget tesz elérhetővé, amelyek a `src/lib/a2a/taskEx
 | Állapotjelentés          | `health-report`      | Szolgáltatónként összesíti a megszakító, a várakozási idő és a kizárás állapotát                                                                                        | állapot, ellenálló képesség      | "Mutasd az összes szolgáltató állapotát"         |
 | Képességek listázása     | `list-capabilities`  | Egy markdown-táblázatként visszaadja a teljes, 45 elemű Agent Skills-katalógust (23 API + 21 CLI + 1 konfiguráció), nyers SKILL.md URL-ekkel a kontextusba illesztéshez | katalógus, felderítés, készségek | "Sorold fel az OmniRoute összes képességét"      |
 
-> Az ügynökkártyát összhangban kell tartani az aktuális, 376 szolgáltatót tartalmazó katalógussal; a szolgáltatók száma, valamint az ingyenességre és a hitelesítés nélküli használatra vonatkozó metaadatok a futásidejű nyilvántartásból származnak.
+> Az ügynökkártyát összhangban kell tartani az aktuális, 377 szolgáltatót tartalmazó katalógussal; a szolgáltatók száma, valamint az ingyenességre és a hitelesítés nélküli használatra vonatkozó metaadatok a futásidejű nyilvántartásból származnak.
 
 ### A `list-capabilities` készség részletei
 

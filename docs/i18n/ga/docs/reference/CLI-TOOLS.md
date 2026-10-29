@@ -10,8 +10,8 @@ Comhtháthaíonn OmniRoute le trí chatagóir d’uirlisí CLI atá scaipthe tha
 
 | Leathanach     | Bealach                 | Coincheap                                                                                   | Líon               |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------------- | ------------------ |
-| **CLI Code's** | `/dashboard/cli-code`   | Uirlisí códaithe a dhíríonn tú ar OmniRoute (Cliant → CLI → OmniRoute → Soláthraí)          | 26                 |
-| **CLI Agents** | `/dashboard/cli-agents` | Gníomhairí uathrialacha a dhíríonn tú ar OmniRoute (an sreabhadh céanna, raon níos leithne) | 10                 |
+| **CLI Code's** | `/dashboard/cli-code`   | Uirlisí códaithe a dhíríonn tú ar OmniRoute (Cliant → CLI → OmniRoute → Soláthraí)          | 27                 |
+| **CLI Agents** | `/dashboard/cli-agents` | Gníomhairí uathrialacha a dhíríonn tú ar OmniRoute (an sreabhadh céanna, raon níos leithne) | 11                 |
 | **ACP Agents** | `/dashboard/acp-agents` | CLIanna a sheolann OmniRoute mar inneall cúil trí stdio/ACP (sreabhadh droim ar ais)        | féach an chlárlann |
 
 Atreoraítear bealaí oidhreachta trí 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -56,20 +56,21 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Glacann gach ceann acu le `--remote <url> --api-key <key>` (chun uirlis áitiúil
 a chumrú in aghaidh OmniRoute chianda), `--dry-run` (réamhamharc gan scríobh),
 agus `--port`. Glacann uirlisí nach bhfuil uathfhionnachtain samhlacha acu
-(Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) le `--model <id>` (agus `--yes`
+(Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) le `--model <id>` (agus `--yes`
 le haghaidh rite neamh-idirghníomhacha). Is é `setup-5dive` an t-aon oideas
 nach scríobhann faoi `$HOME`: cumraíonn sé flít gníomhairí 5dive trí phróifíl
 fhíordheimhnithe faoi úinéireacht root a scríobh ar óstríomhaire an fhlít, mar
 sin déanann sé é féin a atosú trí `sudo` agus níl mód cianda dá chuid féin aige.
 Chun CLI a sheoladh leis an timpeallacht cheart insteallta agus gan aon
 chumraíocht a scríobh ar chor ar bith, úsáid an lainseálaí cineálach
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — tagann spriocanna agus ailiasanna ó `bin/cli/cli-manifest.mjs`);
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — tagann spriocanna agus ailiasanna ó `bin/cli/cli-manifest.mjs`);
 tá na lainseálaithe oidhreachta do gach uirlis, `omniroute launch` (Claude Code)
 agus `omniroute launch-codex` (Codex), fós ar fáil. Is le haghaidh seolta amháin
 é Gemini CLI: is sprioc `omniroute run` é ach níl aon oideas
@@ -185,7 +186,7 @@ Na huirlisí go léir atá le feiceáil in `/dashboard/cli-code`. Déantar iad s
 Taispeánann uirlisí a bhfuil `baseUrlSupport: "partial"` acu suaitheantas "⚠ URL bonn páirteach" ar chárta an deais.
 ---
 
-## 2. Catalóg Gníomhairí CLI (10 n-uirlis)
+## 2. Catalóg Gníomhairí CLI (11 n-uirlis)
 
 Gníomhairí uathrialacha atá le feiceáil in `/dashboard/cli-agents`:
 
@@ -201,6 +202,7 @@ Gníomhairí uathrialacha atá le feiceáil in `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

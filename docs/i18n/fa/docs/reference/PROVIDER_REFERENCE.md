@@ -8,7 +8,7 @@
 > بازتولید با: `npm run gen:provider-reference`
 > **آخرین تولید:** 2026-10-27
 
-تعداد کل ارائهدهندگان: **376**. تفکیک بر اساس دستهبندی را در ادامه ببینید.
+تعداد کل ارائهدهندگان: **377**. تفکیک بر اساس دستهبندی را در ادامه ببینید.
 
 ## دستهبندیها
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | محلی، خودمیزبان | [پیوند](https://github.com/vllm-project/vllm)                    | کلید API اختیاری است. URL پایهٔ سازگار با OpenAI برای vLLM محلی را پیکربندی کنید (پیشفرض: http://localhost:8000/v1).                                                                                                                                                                                                     |
 | `xinference`          | `xinference` | XInference          | محلی، خودمیزبان | [پیوند](https://inference.readthedocs.io)                        | کلید API اختیاری است. URL پایهٔ سازگار با OpenAI برای XInference محلی را پیکربندی کنید (پیشفرض: http://localhost:9997/v1).                                                                                                                                                                                               |
 
-## ارائهدهندگان جستوجو (18)
+## ارائهدهندگان جستوجو (19)
 
 | شناسه               | نام مستعار      | نام                         | برچسبها | وبسایت                                                           | توضیحات                                                                                                                      |
 | ------------------- | --------------- | --------------------------- | ------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                  | جستوجو  | [پیوند](https://exa.ai)                                          | کلید API از dashboard.exa.ai                                                                                                 |
 | `firecrawl`         | `fc`            | Firecrawl                   | جستوجو  | [پیوند](https://firecrawl.dev)                                   | کلید API از firecrawl.dev/app/api-keys (یا URL پایه Firecrawl خودمیزبان خود را تنظیم کنید)                                   |
 | `google-pse-search` | `google-pse`    | Google Programmable Search  | جستوجو  | [پیوند](https://developers.google.com/custom-search/v1/overview) | به کلید Google API و شناسه موتور جستوجوی قابلبرنامهریزی شما (cx) نیاز دارد                                                   |
+| `kimi-search`       | `kimi-search`   | Kimi Search                 | جستوجو  | [پیوند](https://platform.kimi.ai/docs/api/tools-search)          | کلید API سرویس Moonshot AI ‏(MOONSHOT_API_KEY) از platform.kimi.ai                                                           |
 | `linkup-search`     | `linkup`        | Linkup Search               | جستوجو  | [پیوند](https://docs.linkup.so)                                  | کلید Bearer API از داشبورد Linkup                                                                                            |
 | `nimble-search`     | `nimble`        | Nimble Search               | جستوجو  | [پیوند](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | کلید Bearer API از داشبورد Nimble                                                                                            |
 | `ollama-search`     | `ollama-search` | Ollama Search               | جستوجو  | [پیوند](https://ollama.com/settings/keys)                        | همان کلید API مربوط به Ollama Cloud (از ollama.com/settings/keys)                                                            |

@@ -10,8 +10,8 @@ OmniRoute інтегрується з трьома категоріями CLI-і
 
 | Сторінка       | Маршрут                 | Концепція                                                                                 | Кількість   |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------- | ----------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Інструменти програмування, спрямовані на OmniRoute (Клієнт → CLI → OmniRoute → Провайдер) | 26          |
-| **CLI Agents** | `/dashboard/cli-agents` | Автономні агенти, спрямовані на OmniRoute (той самий потік, ширша сфера застосування)     | 10          |
+| **CLI Code's** | `/dashboard/cli-code`   | Інструменти програмування, спрямовані на OmniRoute (Клієнт → CLI → OmniRoute → Провайдер) | 27          |
+| **CLI Agents** | `/dashboard/cli-agents` | Автономні агенти, спрямовані на OmniRoute (той самий потік, ширша сфера застосування)     | 11          |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI, які OmniRoute запускає як бекенд через stdio/ACP (зворотний потік)                   | див. реєстр |
 
 Застарілі маршрути перенаправляються через 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Кожна команда приймає `--remote <url> --api-key <key>` (налаштувати локальний інструмент для роботи з
 віддаленим OmniRoute), `--dry-run` (попередній перегляд без запису) і `--port`. Інструменти
-без автоматичного виявлення моделей (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) приймають
+без автоматичного виявлення моделей (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) приймають
 `--model <id>` (а також `--yes` для неінтерактивного запуску). `setup-5dive` — єдиний
 сценарій, який не виконує запис у `$HOME`: він налаштовує парк агентів 5dive,
 записуючи профіль автентифікації, що належить root, на хості парку, тому повторно запускає себе через `sudo`
 і не має власного віддаленого режиму. Щоб запустити CLI з
 підставленими належними змінними середовища й узагалі не записувати конфігурацію, скористайтеся універсальним
-засобом запуску `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — цільові інструменти та псевдоніми визначаються у `bin/cli/cli-manifest.mjs`); застарілі
+засобом запуску `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — цільові інструменти та псевдоніми визначаються у `bin/cli/cli-manifest.mjs`); застарілі
 засоби запуску для окремих інструментів `omniroute launch` (Claude Code) і `omniroute launch-codex`
 (Codex) залишаються доступними. Gemini CLI можна лише запускати: він є цільовим інструментом `omniroute run`,
 але не має сценарію `setup-*`/`configure`.
@@ -182,7 +183,7 @@ kilo, continue), — командою `hostSetupCommand` (наприклад, `o
 Для інструментів із `baseUrlSupport: "partial"` на картці інформаційної панелі відображається значок "⚠ Часткова підтримка базової URL-адреси".
 ---
 
-## 2. Каталог CLI-агентів (10 інструментів)
+## 2. Каталог CLI-агентів (11 інструментів)
 
 Автономні агенти, які відображаються в `/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ kilo, continue), — командою `hostSetupCommand` (наприклад, `o
 | letta        | Letta CLI        | Letta                    | full              | false            |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full              | false            |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full              | false            |
+| whycodes     | WhyCodes         | Why Corporation          | full              | false            |
 
 ---
 

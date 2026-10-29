@@ -8,7 +8,7 @@
 > यसद्वारा पुनः उत्पन्न गर्नुहोस्: `npm run gen:provider-reference`
 > **पछिल्लो पटक उत्पन्न गरिएको:** 2026-10-27
 
-कुल प्रदायकहरू: **376**। तल श्रेणीगत विवरण हेर्नुहोस्।
+कुल प्रदायकहरू: **377**। तल श्रेणीगत विवरण हेर्नुहोस्।
 
 ## श्रेणीहरू
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | स्थानीय, स्व-होस्टेड | [link](https://github.com/vllm-project/vllm)                    | API कुञ्जी वैकल्पिक। स्थानीय vLLM OpenAI-कम्प्याटिबल आधार URL कन्फिगर गर्नुहोस् (पूर्वनिर्धारित: http://localhost:8000/v1)।                                                                                                                                                                                                                     |
 | `xinference`          | `xinference` | XInference          | स्थानीय, स्व-होस्टेड | [link](https://inference.readthedocs.io)                        | API कुञ्जी वैकल्पिक। स्थानीय XInference OpenAI-कम्प्याटिबल आधार URL कन्फिगर गर्नुहोस् (पूर्वनिर्धारित: http://localhost:9997/v1)।                                                                                                                                                                                                               |
 
-## खोज प्रदायकहरू (18)
+## खोज प्रदायकहरू (19)
 
 | ID                  | उपनाम           | नाम                            | ट्यागहरू | वेबसाइट                                                          | टिप्पणीहरू                                                                                                                          |
 | ------------------- | --------------- | ------------------------------ | -------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                     | खोज      | [लिङ्क](https://exa.ai)                                          | dashboard.exa.ai बाट API कुञ्जी                                                                                                     |
 | `firecrawl`         | `fc`            | Firecrawl                      | खोज      | [लिङ्क](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys बाट API कुञ्जी (वा आफ्नो स्व-होस्ट गरिएको Firecrawl आधार URL सेट गर्नुहोस्)                              |
 | `google-pse-search` | `google-pse`    | Google Programmable Search     | खोज      | [लिङ्क](https://developers.google.com/custom-search/v1/overview) | Google API कुञ्जी र तपाईंको Programmable Search Engine ID (cx) आवश्यक पर्छ                                                          |
+| `kimi-search`       | `kimi-search`   | Kimi Search                    | खोज      | [लिङ्क](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai बाट Moonshot AI API कुञ्जी (MOONSHOT_API_KEY)                                                                      |
 | `linkup-search`     | `linkup`        | Linkup Search                  | खोज      | [लिङ्क](https://docs.linkup.so)                                  | Linkup ड्यासबोर्डबाट Bearer API कुञ्जी                                                                                              |
 | `nimble-search`     | `nimble`        | Nimble Search                  | खोज      | [लिङ्क](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble ड्यासबोर्डबाट Bearer API कुञ्जी                                                                                              |
 | `ollama-search`     | `ollama-search` | Ollama Search                  | खोज      | [लिङ्क](https://ollama.com/settings/keys)                        | Ollama Cloud कै API कुञ्जी (ollama.com/settings/keys बाट)                                                                           |

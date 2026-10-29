@@ -8,7 +8,7 @@
 > ხელახლა გენერირება: `npm run gen:provider-reference`
 > **ბოლო გენერირება:** 2026-10-27
 
-პროვაიდერების საერთო რაოდენობა: **376**. იხილეთ ქვემოთ კატეგორიების მიხედვით დაყოფა.
+პროვაიდერების საერთო რაოდენობა: **377**. იხილეთ ქვემოთ კატეგორიების მიხედვით დაყოფა.
 
 ## კატეგორიები
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | ლოკალური, საკუთარ სერვერზე განთავსებული | [ბმული](https://github.com/vllm-project/vllm)                    | API გასაღები არასავალდებულოა. დააკონფიგურირეთ ლოკალური vLLM-ის OpenAI-თან თავსებადი საბაზისო URL (ნაგულისხმევი: http://localhost:8000/v1).                                                                                                                                                                                                    |
 | `xinference`          | `xinference` | XInference          | ლოკალური, საკუთარ სერვერზე განთავსებული | [ბმული](https://inference.readthedocs.io)                        | API გასაღები არასავალდებულოა. დააკონფიგურირეთ ლოკალური XInference-ის OpenAI-თან თავსებადი საბაზისო URL (ნაგულისხმევი: http://localhost:9997/v1).                                                                                                                                                                                              |
 
-## ძიების პროვაიდერები (18)
+## ძიების პროვაიდერები (19)
 
 | ID                  | ფსევდონიმი      | სახელი                              | ტეგები | ვებსაიტი                                                         | შენიშვნები                                                                                                                                |
 | ------------------- | --------------- | ----------------------------------- | ------ | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                          | ძიება  | [ბმული](https://exa.ai)                                          | API გასაღები dashboard.exa.ai-დან                                                                                                         |
 | `firecrawl`         | `fc`            | Firecrawl                           | ძიება  | [ბმული](https://firecrawl.dev)                                   | API გასაღები firecrawl.dev/app/api-keys-დან (ან მიუთითეთ თქვენს სერვერზე განთავსებული Firecrawl-ის საბაზისო URL)                          |
 | `google-pse-search` | `google-pse`    | Google Programmable Search          | ძიება  | [ბმული](https://developers.google.com/custom-search/v1/overview) | საჭიროებს Google API გასაღებს და თქვენი Programmable Search Engine-ის ID-ს (cx)                                                           |
+| `kimi-search`       | `kimi-search`   | Kimi Search                         | ძიება  | [ბმული](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API-ის გასაღები (MOONSHOT_API_KEY) platform.kimi.ai-დან                                                                       |
 | `linkup-search`     | `linkup`        | Linkup Search                       | ძიება  | [ბმული](https://docs.linkup.so)                                  | Bearer API გასაღები Linkup-ის მართვის პანელიდან                                                                                           |
 | `nimble-search`     | `nimble`        | Nimble Search                       | ძიება  | [ბმული](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API გასაღები Nimble-ის მართვის პანელიდან                                                                                           |
 | `ollama-search`     | `ollama-search` | Ollama Search                       | ძიება  | [ბმული](https://ollama.com/settings/keys)                        | იგივე API გასაღები, რაც Ollama Cloud-ისთვის (ollama.com/settings/keys-დან)                                                                |

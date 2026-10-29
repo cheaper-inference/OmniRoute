@@ -268,7 +268,217 @@ avvisar en begäran som överstiger 10 MB. Delbatchar avslutas vid 500 rader ell
 
 ---
 
-## 5. Lägga till en destination
+## 5. Destination för OTLP/HTTP-spår
+
+Konfigurationen använder `type: "otlp-http"`. Detta är en schemalagd, markörbaserad export av beständigt lagrade
+anropsloggar, inte den live-mottagare för routningshändelser utan leveransgaranti som finns i
+`open-sse/services/routing/otel.ts`. Den varken läser eller ändrar den mottagarens miljövariabler,
+tidtagare eller buffertar. Om båda aktiveras kan två oberoende typer av spann skapas;
+använd instrumenteringsomfånget `omniroute.log-export` för att särskilja dessa anropsloggspann.
+
+| Nyckel                   | Standardvärde / syfte                                                               |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| `endpoint`               | Obligatorisk fullständig HTTP(S)-URL för spår; inget `/v1/traces`-suffix läggs till |
+| `headers`                | Valfria `Name: value`-rader eller JSON-objekt med strängar; krypteras               |
+| `requestHeaderAllowlist` | Tom (av); klientheadernamn/prefix som ska fångas som spannattribut                  |
+| `serviceName`            | `omniroute`; resursens `service.name`                                               |
+| `langfuseMapping`        | `false`; lägger till Langfuse-attribut för generering/session/användare             |
+| `identity`               | `pseudonymous`, `keyName` eller `none`                                              |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                             |
+| `timeoutMs`              | `30000` per HTTP-försök                                                             |
+| `environment`            | Ej angivet; valfritt `langfuse.environment`                                         |
+
+Den generiska instrumentpanelen visar dessa fält. `paths` accepterar en API-array eller ett textområde
+med exakta sökvägar separerade med radbrytningar/kommatecken. Embeddings, rerank och andra sökvägar
+hoppas över om de inte uttryckligen tillåts. Överhoppade rader flyttar ändå fram markören; den befintliga
+körarens räknare `exported`/`exportedTotal` räknar bearbetade källrader, inklusive filtrerade
+rader, snarare än accepterade spann. Filtreringen sker i underprocessen utan att ändra dess
+IPC-/markörkontrakt.
+
+URL-valideringen använder den databasoberoende hjälpfunktionen `parseAndValidateNonMetadataUrl` från
+`src/shared/network/outboundUrlGuard.ts`: policyn `block-metadata`. Den har samma
+ovillkorliga kontroller av metadata/protokoll/inbäddade autentiseringsuppgifter som webhook-validatorn med
+privata URL:er tillåtna, men tillåter avsiktligt localhost-/LAN-mål utan någon global
+åsidosättning via funktionsflagga. Detta möjliggör självhostade Langfuse-, Phoenix-, Tempo- och Collector-
+ändpunkter, inklusive privata HTTP-ändpunkter. Värdar för molnmetadata blockeras alltid.
+Omdirigeringar följs inte, så en collector kan inte omdirigera autentiseringsuppgifter till en annan värd.
+Liksom det befintliga lexikala URL-skyddet låser detta inte DNS-upplösningen; konfigurera endast
+värdar som operatören kontrollerar. Föredra HTTPS när ändpunkten inte finns i ett betrott nätverk.
+
+### Nyttolast och leverans
+
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) innehåller ett
+CLIENT-spann per tillåten rad, namngivet efter dess exakta begärandesökväg. Sökvägsbaserad namngivning särskiljer
+Chat Completions, Responses och Messages utan att bädda in modell- eller identitetsdata i
+spannets namn. Resursattributen omfattar `service.name` och paketets `service.version`.
+
+Den vanliga loggaren för chattförsök (`open-sse/handlers/chatCore/attemptLogging.ts`) skriver
+`duration = Date.now() - startTime` vid slutförandet och anger ingen tidsstämpel;
+`saveCallLogOperation` i `src/lib/usage/callLogs.ts` sätter som standard tidsstämpeln till skrivtiden
+(slutförandetiden). Exporten sätter därför slut = radens tidsstämpel och start = slut − varaktighet
+(millisekunder, konverterade till decimala nanosekunder). Historiska tidsstämplar som anroparen anger
+bevaras också som sluttid; det finns ingen markör per rad som skiljer start från slutförande.
+En null-varaktighet blir noll. Ogiltiga/saknade tidsstämplar gör att batchen misslyckas i stället för att skapa
+icke-deterministiska spann. `ttftMs` kan vara null och mappas till `omniroute.ttft_ms`.
+
+Attributen omfattar `gen_ai.operation.name="chat"`, leverantör, begärd modell/svarsmodell,
+indata-/utdatatoken, valfria token för cacheläsning/cacheskapande/resonemang, HTTP-status,
+combo, cachekälla, sessionstagg och korrelations-id. OTLP-heltalsvärden och tidsstämplar
+är decimalsträngar; strängar, booleska värden och icke-heltal använder sina inbyggda OTLP-värdevarianter.
+Felspann har statusen ERROR och ett sanerat statusmeddelande. Den kanoniska
+posten saknar URL till uppströmsvärden, så `server.address` utelämnas i stället för att felaktigt
+identifiera collectorn som modellservern. Kostnad exporteras inte.
+
+Endast `includeBodies=true` läser in innehåll. Med `langfuseMapping=false`
+innehåller `gen_ai.input.messages` / `gen_ai.output.messages` den sanerade begärande-/svarskroppen
+som JSON lagrad av OmniRoute (kanoniserad när den går att parsa), inte en omformad semconv-
+meddelandearray. Avklippta kroppar/kroppar som inte är JSON förblir råtext. Med `langfuseMapping=true`
+skickas kropparna endast som `langfuse.observation.input` / `langfuse.observation.output`;
+attributen `gen_ai.*.messages` utelämnas så att varje kropp skickas en gång. Båda lägena
+ärver `maxBodyBytes` från den befintliga inläsningsrutinen;
+`omniroute.bodies_truncated=true` markerar avklippning.
+Den här destinationen lägger inte till några extra pipelineögonblicksbilder eller läsningar av osanerade artefakter;
+valfri insamling av begärandeheaders använder den befintliga inlästa klientögonblicksbilden som beskrivs nedan.
+Använd ett intervall på minutnivå, till exempel `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, vid export av
+kroppar i stället för att samla på dig en timmes eftersläpning.
+
+### Valfria headers från klientbegäran
+
+Insamling av headers är **av som standard**. Ange `requestHeaderAllowlist` i destinationskonfigurationen
+och aktivera **Exportera promptar och svar** (`includeBodies: true` på destinationen).
+Tillåtelselistan accepterar en API-array eller ett textområde med namn separerade med radbrytningar/kommatecken:
+
+```json
+{
+  "requestHeaderAllowlist": ["User-Agent", "X-Project", "X-OmniRoute-Meta-*"]
+}
+```
+
+Namn matchas exakt utan hänsyn till skiftläge, om inte en enda avslutande `*` väljer ett icke-tomt
+prefix för ett headernamn. En ensam `*`, inbäddade jokertecken och ogiltiga HTTP-headernamn avvisas.
+Det får finnas högst 64 selektorer, var och en med ett namn/prefix på högst 256 ASCII-byte.
+Den här inställningen är separat från `headers`, som autentiserar exportören mot insamlaren.
+
+Insamlingen läser endast `pipeline_client_request`, som fylls från den sparade detaljerade pipelinens
+`clientRawRequest` (eller äldre `clientRequest`). Den faller aldrig tillbaka på leverantörens begärandeheaders.
+Detaljerad pipelineloggning måste ha varit aktiverad när begäran registrerades. När
+`includeBodies` är inaktiverat, eller om klientögonblicksbildens JSON saknas, är skadad eller har trunkerats, genereras inga
+headerattribut. Ett högre värde för `maxBodyBytes` kan förhindra att ögonblicksbilder trunkeras vid export;
+det kan inte återställa detaljer som aldrig sparades. En ögonblicksbild på över 1 MiB eller med fler än
+256 headerposter ignoreras. Den befintliga exporten av promptar/svar förblir aktiverad parallellt med
+headerinsamlingen; tillåtelselistan ger inget hydreringsläge för enbart headers.
+
+Valda värden blir OTLP-strängarrayer med namnet `http.request.header.<full lowercase header name>`,
+även för en enda sträng. Till exempel blir `X-OmniRoute-Meta-Team: example-team`
+`http.request.header.x-omniroute-meta-team` med
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
+Hela prefixet bevaras: detta är vanliga headers, utan parsning av verksamhetsfält eller
+konvertering till `omniroute.metadata.*` / Langfuse-metadata. `langfuseMapping` ändrar inte headersemantiken.
+En vald `User-Agent` med ett enda värde sätter även det skalära standardattributet
+`user_agent.original`. Kommatecken inom ett värde delas inte upp. Varianter med olika skiftläge slås samman i den sparade
+postordningen; om någon variant är ogiltig utelämnas hela headern. Attribut sorteras efter namnet med gemener.
+
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-nyckelheaders, namn som innehåller
+markörer för auth/token/secret/password/credential samt interna gatewayautentiseringsuppgifter
+utesluts alltid, även om de har valts eller delvis maskerats i lagringen. Kända mönster för autentiseringsuppgifter återanvänder
+den gemensamma detektorn för autentiseringsuppgifter; maskeringsmarkörer utelämnas och exporteras inte som säkra värden.
+Endast strängar och icke-tomma strängarrayer accepteras; inga tal eller objekt typkonverteras.
+Ogiltiga namn, prototypnycklar, kontrolltecken (utom horisontell tabulator) och felaktig Unicode
+ignoreras utan att batchen misslyckas eller deras innehåll återges i felmeddelanden.
+
+Varje spann samlar in högst 32 headers, 16 värden per header, 4096 UTF-8-byte per värde
+och totalt 16384 UTF-8-byte för insamlade headernamn och värden. För stora eller ogiltiga headers
+utelämnas helt och trunkeras inte. Urvalet är ett integritetsbeslut som operatören fattar: till synes säkra namn
+kan fortfarande innehålla personuppgifter, och dessa gränser/detektorer är ingen generell sanerare av personuppgifter.
+
+### Leveransgränser
+
+Begäranden begränsas till 500 spann och 4 MiB UTF-8-JSON, inklusive omslutningen.
+Storleken på varje tillåtet spann kontrolleras före den första begäran i en markörbatch. Om ett enskilt
+spann överskrider gränsen skickas ingen del av batchen, och exporten misslyckas med en uppmaning att sänka
+`maxBodyBytes`; spannet släpps inte tyst. Förkontrollen behåller endast postreferenser och
+byteantal och kasserar varje tillfälligt spann/JSON; spann återskapas för storleksbegränsade delar
+i stället för att en andra serialiserad kopia av batchen hålls i minnet. HTTP 408/429/5xx, nätverksfel och tidsgränsöverskridanden får högst
+tre försök, med exponentiell väntetid på 250/500 ms. `Retry-After` i sekunder eller som HTTP-datum
+kan förlänga väntetiden upp till 5 sekunder. Andra statuskoder leder till omedelbart misslyckande. Partiell avvisning i OTLP 2xx utlöser också ett undantag i stället för
+att kvittera ett förlorat spann; tomma kvittenser eller kvittenser med giltig JSON accepteras, med en
+läsgräns på 64 KiB för svaret.
+
+Fel innehåller endast exportörens egna uppgifter: HTTP-status, återförsöksklass, antal försök och antal skickade
+spann, eller fasta formuleringar för kvittens-/nätverksfel. Insamlarens svarskroppar,
+antal för partiell framgång och svarsheaders kopieras aldrig till fel, loggar eller
+instrumentpanelen. En misslyckad eller delvis accepterad batch kvitteras inte: destinationen visar
+Misslyckas med den statusen, markören stannar vid den senast kvitterade batchen och nästa körning
+skickar samma rader igen. Permanenta statuskoder fortsätter att orsaka misslyckanden tills insamlaren eller konfigurationen
+har åtgärdats. Använd insamlarens egna loggar för svarsdetaljer. Felsammanfattningar i anropsloggen behåller
+sin separata maskering.
+`prepare()` tillhandahåller inga resurser; Test skickar exakt `{"resourceSpans":[]}` och rapporterar
+HTTP-status utan att skriva spann till anropsloggen.
+
+Spår-id:n och spann-id:n är de första 32/16 hexadecimala siffrorna i SHA-256 av
+`"omniroute.trace\0" + callLogId` respektive `"omniroute.span\0" + callLogId`. Omsändningar har
+identiska id:n. Detta är ingen garanti för deduplicering: vissa backend-system, inklusive Langfuse
+v4-inmatning, deduplicerar inte spann med samma id. En krasch eller ett fel i en del av en batch kan
+leda till att högst den enda okvitterade markörbatchen skickas igen; hela den batchen kan dupliceras,
+inte bara dess sista HTTP-del. Välj storleken på markörbatchen med den avvägningen i åtanke.
+
+### Langfuse-exempel
+
+Konfigurera dessa fält för en egenhostad Langfuse-instans:
+
+```json
+{
+  "endpoint": "https://langfuse.example.com/api/public/otel/v1/traces",
+  "headers": "Authorization: Basic <base64-of-public-key:secret-key>",
+  "serviceName": "omniroute",
+  "langfuseMapping": true,
+  "identity": "pseudonymous",
+  "environment": "production"
+}
+```
+
+Skapa Authorization-värdet lokalt som Base64 av den bokstavliga strängen `public-key:secret-key`
+(till exempel med `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Klistra inte in riktiga autentiseringsuppgifter i loggar, skärmbilder eller ärenden. Mappningen anger automatiskt
+`x-langfuse-ingestion-version: 4`; Authorization anges fortfarande i `headers`.
+Både headers och det genererade identitetssaltet använder den befintliga mekanismen för krypterade hemliga fält
+och API-platshållare; `STORAGE_ENCRYPTION_KEY` krävs.
+
+Mappningen lägger till genereringstyp/modell, användningsdetaljer i JSON (indata/utdata/totalt och tillgängliga
+cachenycklar), ögonblicksbilder av indata/utdata i JSON, nivån ERROR/DEFAULT, sanerat statusmeddelande,
+spårnamn, sessions-id, valfri miljö och filtrerbara
+`langfuse.observation.metadata.<key>` för leverantör, begärd modell, sökväg, kombination, cachekälla
+och status. `langfuse.observation.completion_start_time` anges i ISO 8601 som
+start + TTFT endast när TTFT är känt och ryms inom varaktigheten. Inga kostnadsattribut skickas.
+
+Identitetslägen gäller för `langfuse.user.id`:
+
+- `pseudonymous` (standard): HMAC-SHA256 av API-nyckelns interna id med ett slumpmässigt
+  salt på 32 byte per destination. Saltet genereras vid skapandet om det saknas, krypteras
+  som `identitySalt`, returneras aldrig och behålls vid redigeringar. Nyckel-id:n i klartext
+  läggs aldrig i span-attribut. Om en destinations salt återskapas eller roteras ändras identiteterna.
+- `keyName`: det konfigurerade API-nyckelnamnet, vilket avsiktligt exponerar den operatörsangivna etiketten.
+- `none`: inget användar-id. Sessionstaggar exporteras fortfarande när de finns; dessa lägen
+  anonymiserar inte godtyckligt promptinnehåll eller operatörsangivna sessions-/korrelationsetiketter.
+
+### Starta utan historisk återfyllning
+
+Endast vid skapandet kan du aktivera **Starta från aktuell position (hoppa över befintliga loggar)** eller ange
+`startFromCurrentPosition: true` på den översta nivån i nyttolasten för API-anropet som skapar destinationen. Detta initierar
+`cursor_row_id` till det högsta aktuella rowid-värdet bland bevarade anropsloggar med hjälp av de befintliga
+markörhjälpfunktionerna, utan migrering. Standardvärdet är false (markör 0 och återfyllning av bevarad historik).
+Det är inte en inställning för att återställa markören vid uppdatering.
+
+Det gemensamma tillägget `ttftMs` lägger även till en nullbar kolumn, `ttft_ms`, i BigQuery-mapparen
+och schemat för nya tabeller: dess schematest kräver att varje fält i den kanoniska posten har en
+kolumn. Befintliga tabeller fortsätter att exporteras utan ändringar: `prepare()` läser tabellschemat och
+utelämnar endast `ttft_ms` när den kolumnen saknas. Lägg till den nullbara INT64-kolumnen för att få TTFT
+vid nästa körning, eller använd en ny tabell. Ingen PATCH, automatisk schemaändring eller ytterligare
+behörighet krävs; alla andra radfält behåller strikt schemakontroll.
+
+---
+
+## 6. Lägga till en destination
 
 1. Skapa `src/lib/logExport/destinations/<name>.ts` som exporterar en `LogExportDestinationType`:
    ett Zod-`configSchema`, en `fields`-beskrivningsarray för användargränssnittet, `secretFields` och en
@@ -289,7 +499,7 @@ Två regler för en ny destination:
 
 ---
 
-## 6. Drift
+## 7. Drift
 
 - **Instrumentpanel**: Integrationer → Loggexport. Lägg till en destination, kör **Testa** för att kontrollera autentiseringsuppgifterna
   utan att skriva rader och aktivera den sedan.

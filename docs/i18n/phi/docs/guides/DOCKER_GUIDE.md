@@ -662,6 +662,8 @@ Ang karaniwang Docker / Kubernetes OmniRoute ay **isang Node process + isang SQL
 
 **Mga upgrade:** asahang madidiskonekta ang bawat session. I-drain ang mga client kung kaya mo; walang rolling update sa default na SQLite. Papalitan din ng Compose `restart: unless-stopped` kasama ng Docker `HEALTHCHECK` ang nag-iisang process kapag Unhealthy ang container — pareho ang lawak ng epekto.
 
+Makikita ang mga handa nang gamiting manifest at isang Helm chart sa `deploy/kubernetes/` at `deploy/helm/omniroute/` — tingnan ang [gabay sa pag-deploy sa Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Snippet ng Kubernetes para sa **iisang replica** (kinakailangan ang Recreate; huwag taasan ang `replicas` gamit ang iisang SQLite file):
 
 ```yaml

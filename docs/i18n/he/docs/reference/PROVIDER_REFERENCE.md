@@ -8,7 +8,7 @@
 > ליצירה מחדש, יש להריץ: `npm run gen:provider-reference`
 > **נוצר לאחרונה:** 2026-10-27
 
-סך כל הספקים: **376**. להלן פירוט לפי קטגוריות.
+סך כל הספקים: **377**. להלן פירוט לפי קטגוריות.
 
 ## קטגוריות
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | מקומי, באירוח עצמי | [קישור](https://github.com/vllm-project/vllm)                    | מפתח API אופציונלי. הגדר את כתובת ה-URL הבסיסית התואמת ל-OpenAI של vLLM המקומי (ברירת מחדל: http://localhost:8000/v1).                                                                                                                                                           |
 | `xinference`          | `xinference` | XInference          | מקומי, באירוח עצמי | [קישור](https://inference.readthedocs.io)                        | מפתח API אופציונלי. הגדר את כתובת ה-URL הבסיסית התואמת ל-OpenAI של XInference המקומי (ברירת מחדל: http://localhost:9997/v1).                                                                                                                                                     |
 
-## ספקי חיפוש (18)
+## ספקי חיפוש (19)
 
 | מזהה                | כינוי           | שם                         | תגיות | אתר אינטרנט                                                      | הערות                                                                                                                   |
 | ------------------- | --------------- | -------------------------- | ----- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                 | חיפוש | [קישור](https://exa.ai)                                          | מפתח API מ-dashboard.exa.ai                                                                                             |
 | `firecrawl`         | `fc`            | Firecrawl                  | חיפוש | [קישור](https://firecrawl.dev)                                   | מפתח API מ-firecrawl.dev/app/api-keys (או הגדירו את כתובת ה-URL הבסיסית של מופע Firecrawl באירוח עצמי)                  |
 | `google-pse-search` | `google-pse`    | Google Programmable Search | חיפוש | [קישור](https://developers.google.com/custom-search/v1/overview) | נדרשים מפתח Google API ומזהה מנוע החיפוש הניתן לתכנות שלכם (cx)                                                         |
+| `kimi-search`       | `kimi-search`   | Kimi Search                | חיפוש | [קישור](https://platform.kimi.ai/docs/api/tools-search)          | מפתח API של Moonshot AI‏ (MOONSHOT_API_KEY) מ־platform.kimi.ai                                                          |
 | `linkup-search`     | `linkup`        | Linkup Search              | חיפוש | [קישור](https://docs.linkup.so)                                  | מפתח API מסוג Bearer מלוח הבקרה של Linkup                                                                               |
 | `nimble-search`     | `nimble`        | Nimble Search              | חיפוש | [קישור](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | מפתח API מסוג Bearer מלוח הבקרה של Nimble                                                                               |
 | `ollama-search`     | `ollama-search` | Ollama Search              | חיפוש | [קישור](https://ollama.com/settings/keys)                        | אותו מפתח API כמו Ollama Cloud (מ-ollama.com/settings/keys)                                                             |

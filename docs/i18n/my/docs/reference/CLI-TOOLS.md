@@ -10,8 +10,8 @@ OmniRoute သည် သီးခြား dashboard စာမျက်နှာ 
 
 | စာမျက်နှာ      | Route                   | သဘောတရား                                                                                                    | အရေအတွက်             |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------- | -------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute သို့ ညွှန်ထားသော coding ကိရိယာများ (Client → CLI → OmniRoute → Provider)                          | 26                   |
-| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute သို့ ညွှန်ထားသော အလိုအလျောက် agent များ (စီးဆင်းပုံတူညီပြီး လုပ်ဆောင်နိုင်သည့် နယ်ပယ် ပိုကျယ်သည်) | 10                   |
+| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute သို့ ညွှန်ထားသော coding ကိရိယာများ (Client → CLI → OmniRoute → Provider)                          | 27                   |
+| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute သို့ ညွှန်ထားသော အလိုအလျောက် agent များ (စီးဆင်းပုံတူညီပြီး လုပ်ဆောင်နိုင်သည့် နယ်ပယ် ပိုကျယ်သည်) | 11                   |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute က stdio/ACP မှတစ်ဆင့် backend အဖြစ် စတင်ပေးသော CLI များ (ပြောင်းပြန်စီးဆင်းမှု)                   | registry ကို ကြည့်ပါ |
 
 Legacy route များကို 308 ဖြင့် redirect လုပ်သည်- `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`။
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-တစ်ခုချင်းစီသည် `--remote <url> --api-key <key>` (local tool တစ်ခုကို remote OmniRoute နှင့် အသုံးပြုရန် စီစဉ်သတ်မှတ်ခြင်း)၊ `--dry-run` (မရေးသားဘဲ အစမ်းကြည့်ရှုခြင်း) နှင့် `--port` တို့ကို လက်ခံသည်။ Model အလိုအလျောက်ရှာဖွေမှု မရှိသည့် tool များ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) သည် `--model <id>` (နှင့် အပြန်အလှန်တုံ့ပြန်မှုမရှိဘဲ လုပ်ဆောင်ရန် `--yes`) ကို လက်ခံသည်။ `setup-5dive` သည် `$HOME` အောက်တွင် မရေးသားသည့် တစ်ခုတည်းသော recipe ဖြစ်သည်။ ၎င်းသည် fleet host ပေါ်တွင် root ပိုင် auth profile တစ်ခုကို ရေးသားခြင်းဖြင့် 5dive agent fleet ကို စီစဉ်သတ်မှတ်သောကြောင့် `sudo` မှတစ်ဆင့် ပြန်လည် execute လုပ်ပြီး ၎င်းကိုယ်တိုင်အတွက် remote mode မရှိပါ။ မှန်ကန်သော env ကို ထည့်သွင်းပေးထားပြီး မည်သည့် config ကိုမျှ မရေးသားဘဲ CLI တစ်ခုကို စတင်ရန် ယေဘုယျ `omniroute run <target>` launcher (claude, codex, aider, goose, opencode, qwen, gemini — target များနှင့် alias များသည် `bin/cli/cli-manifest.mjs` မှ လာသည်) ကို အသုံးပြုပါ။ ယခင် tool အလိုက် launcher များဖြစ်သည့် `omniroute launch` (Claude Code) နှင့် `omniroute launch-codex` (Codex) တို့ကိုလည်း ဆက်လက်အသုံးပြုနိုင်သည်။ Gemini CLI ကို စတင်ရန်သာ အသုံးပြုနိုင်သည်။ ၎င်းသည် `omniroute run` target တစ်ခုဖြစ်သော်လည်း `setup-*`/`configure` recipe မရှိပါ။
+တစ်ခုချင်းစီသည် `--remote <url> --api-key <key>` (local tool တစ်ခုကို remote OmniRoute နှင့် အသုံးပြုရန် စီစဉ်သတ်မှတ်ခြင်း)၊ `--dry-run` (မရေးသားဘဲ အစမ်းကြည့်ရှုခြင်း) နှင့် `--port` တို့ကို လက်ခံသည်။ Model အလိုအလျောက်ရှာဖွေမှု မရှိသည့် tool များ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) သည် `--model <id>` (နှင့် အပြန်အလှန်တုံ့ပြန်မှုမရှိဘဲ လုပ်ဆောင်ရန် `--yes`) ကို လက်ခံသည်။ `setup-5dive` သည် `$HOME` အောက်တွင် မရေးသားသည့် တစ်ခုတည်းသော recipe ဖြစ်သည်။ ၎င်းသည် fleet host ပေါ်တွင် root ပိုင် auth profile တစ်ခုကို ရေးသားခြင်းဖြင့် 5dive agent fleet ကို စီစဉ်သတ်မှတ်သောကြောင့် `sudo` မှတစ်ဆင့် ပြန်လည် execute လုပ်ပြီး ၎င်းကိုယ်တိုင်အတွက် remote mode မရှိပါ။ မှန်ကန်သော env ကို ထည့်သွင်းပေးထားပြီး မည်သည့် config ကိုမျှ မရေးသားဘဲ CLI တစ်ခုကို စတင်ရန် ယေဘုယျ `omniroute run <target>` launcher (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — target များနှင့် alias များသည် `bin/cli/cli-manifest.mjs` မှ လာသည်) ကို အသုံးပြုပါ။ ယခင် tool အလိုက် launcher များဖြစ်သည့် `omniroute launch` (Claude Code) နှင့် `omniroute launch-codex` (Codex) တို့ကိုလည်း ဆက်လက်အသုံးပြုနိုင်သည်။ Gemini CLI ကို စတင်ရန်သာ အသုံးပြုနိုင်သည်။ ၎င်းသည် `omniroute run` target တစ်ခုဖြစ်သော်လည်း `setup-*`/`configure` recipe မရှိပါ။
 
 > **အပြည့်အစုံ ကိုးကားချက်-** command တစ်ခုချင်းစီက ရေးသားသည့်အရာ၊ flag အားလုံး၊ local နှင့် remote ကွာခြားချက်၊ မည်သည့် tool များက `/v1` suffix လိုအပ်သည် စသည်တို့ပါဝင်သော ပင်မဇယားကို
 > **[CLI ပေါင်းစည်းမှုများ](../guides/CLI-INTEGRATIONS.md)** တွင် ကြည့်ရှုနိုင်သည်။
@@ -146,7 +147,7 @@ catalog၊ UI catalog နှင့် consumer မျက်နှာပြင်
 `baseUrlSupport: "partial"` ဖြစ်သော ကိရိယာများ၏ dashboard ကတ်တွင် "⚠ တစ်စိတ်တစ်ပိုင်း Base URL" badge ကို ပြသသည်။
 ---
 
-## 2. CLI Agent များစာရင်း (ကိရိယာ 10 ခု)
+## 2. CLI Agent များစာရင်း (ကိရိယာ 11 ခု)
 
 `/dashboard/cli-agents` တွင် ပေါ်လာသော အလိုအလျောက်လုပ်ဆောင်နိုင်သည့် agent များ-
 
@@ -162,6 +163,7 @@ catalog၊ UI catalog နှင့် consumer မျက်နှာပြင်
 | letta        | Letta CLI        | Letta                    | full               | false                  |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                  |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                  |
+| whycodes     | WhyCodes         | Why Corporation          | full               | false                  |
 
 ---
 

@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — বিনামূল্যের AI গেটওয়ে
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — কখনও কোডিং থামাবেন না। প্রতিটি AI টুল → 376টি প্রদানকারী — 150টিরও বেশি বিনামূল্যে — একটি এন্ডপয়েন্টের মাধ্যমে। Claude Code, Codex, Cursor, Cline, Copilot ও Antigravity-কে স্বয়ংক্রিয় ফলব্যাকসহ বিনামূল্যের Claude / GPT / Gemini-এর সঙ্গে যুক্ত করুন। RTK + Caveman-এর স্তরযুক্ত কম্প্রেশন 15–95% টোকেন সাশ্রয় করে (গড়ে ~89%) — কখনও সীমায় পৌঁছাবেন না। 376টি AI প্রদানকারী · 150টিরও বেশি বিনামূল্যের টিয়ার · প্রতি মাসে ~1.62B বিনামূল্যের টোকেন · 20টি রাউটিং কৌশল · শুরু করতে $0।"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — কখনও কোডিং থামাবেন না। প্রতিটি AI টুল → 377টি প্রদানকারী — 150টিরও বেশি বিনামূল্যে — একটি এন্ডপয়েন্টের মাধ্যমে। Claude Code, Codex, Cursor, Cline, Copilot ও Antigravity-কে স্বয়ংক্রিয় ফলব্যাকসহ বিনামূল্যের Claude / GPT / Gemini-এর সঙ্গে যুক্ত করুন। RTK + Caveman-এর স্তরযুক্ত কম্প্রেশন 15–95% টোকেন সাশ্রয় করে (গড়ে ~89%) — কখনও সীমায় পৌঁছাবেন না। 377টি AI প্রদানকারী · 150টিরও বেশি বিনামূল্যের টিয়ার · প্রতি মাসে ~1.62B বিনামূল্যের টোকেন · 20টি রাউটিং কৌশল · শুরু করতে $0।"/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                               |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------- | :--------------------: | :---------: | :-------------------: |
-| 🌐 প্রোভাইডার                 |          352           |   **358**   |          376          |
+| 🌐 প্রোভাইডার                 |          352           |   **358**   |          377          |
 | 🧠 অনন্য চ্যাট মডেল ID        |          1320          |  **1374**   |         1475          |
 | 🖼️ মোডালিটি ব্রিজ             | 🆕 ভিশন + অডিও + ভিডিও |      ✓      |           ✓           |
 | 📡 Radar বিনামূল্যের ক্যাটালগ |       🆕 অপ্ট-ইন       |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ ফিচারসমূহ</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 কম্বোসমূহ</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 প্রোভাইডারসমূহ</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 প্রোভাইডারসমূহ</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ও MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="প্রতিশ্রুতি — একটি এন্ডপয়েন্ট ও 376টি প্রোভাইডার। অন্য একটি সুস্থ টার্গেট উপলভ্য থাকলে স্বয়ংক্রিয় ফলব্যাক রাউটিং চালু রাখে। ছয়টি স্তম্ভ: 376টি প্রোভাইডারজুড়ে স্থিতিস্থাপক ফলব্যাক · যোগ্য ওয়ার্কলোডে সর্বোচ্চ 95% টোকেন সাশ্রয় · 150টির বেশি বিনামূল্যের টিয়ার এবং 52টি পুনরাবৃত্ত/কী-বিহীন চিরকাল-বিনামূল্যের প্রোভাইডারসহ $0 খরচে শুরু · একটি কনফিগের মাধ্যমে 37টি CLI/এজেন্ট ইন্টিগ্রেশন · /v1-এ OpenAI, Claude, Gemini ও Responses API সামঞ্জস্য · সার্কিট ব্রেকার, TLS স্টেলথ, MCP-এর 110টি টুল, A2A, মেমরি, গার্ডরেইল, ইভ্যাল এবং ট্র্যাক করা 7,800টির বেশি টেস্ট ফাইলজুড়ে 56,000টির বেশি স্ট্যাটিক টেস্ট ডিক্লারেশনসহ প্রোডাকশন কন্ট্রোল।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="প্রতিশ্রুতি — একটি এন্ডপয়েন্ট ও 377টি প্রোভাইডার। অন্য একটি সুস্থ টার্গেট উপলভ্য থাকলে স্বয়ংক্রিয় ফলব্যাক রাউটিং চালু রাখে। ছয়টি স্তম্ভ: 377টি প্রোভাইডারজুড়ে স্থিতিস্থাপক ফলব্যাক · যোগ্য ওয়ার্কলোডে সর্বোচ্চ 95% টোকেন সাশ্রয় · 150টির বেশি বিনামূল্যের টিয়ার এবং 52টি পুনরাবৃত্ত/কী-বিহীন চিরকাল-বিনামূল্যের প্রোভাইডারসহ $0 খরচে শুরু · একটি কনফিগের মাধ্যমে 37টি CLI/এজেন্ট ইন্টিগ্রেশন · /v1-এ OpenAI, Claude, Gemini ও Responses API সামঞ্জস্য · সার্কিট ব্রেকার, TLS স্টেলথ, MCP-এর 110টি টুল, A2A, মেমরি, গার্ডরেইল, ইভ্যাল এবং ট্র্যাক করা 7,800টির বেশি টেস্ট ফাইলজুড়ে 56,000টির বেশি স্ট্যাটিক টেস্ট ডিক্লারেশনসহ প্রোডাকশন কন্ট্রোল।"/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-কে যা অনন্য করে — ১৩টি সক্ষমতা জুড়ে 9router, OpenRouter, CLIProxyAPI এবং LiteLLM-এর সঙ্গে একটি নির্দিষ্ট সময়ের বৈশিষ্ট্য-তুলনা। OmniRoute: ৩৭৬টি প্রোভাইডার, বিল্ট-ইন ১৫০টিরও বেশি ফ্রি টিয়ার, ২০টি রাউটিং কৌশল, ১২-ইঞ্জিনের টোকেন কম্প্রেশন, ১১০টি টুলসহ বিল্ট-ইন MCP সার্ভার, A2A এজেন্ট প্রোটোকল, স্থায়ী মেমরি, গার্ডরেইল, ক্লাউড এজেন্ট, TLS ফিঙ্গারপ্রিন্ট স্টেলথ, Desktop/Termux/PWA এবং ৬৭টি i18n UI লোকেল। OmniRoute MIT লাইসেন্সপ্রাপ্ত এবং স্ব-হোস্টযোগ্য। প্রতিযোগীদের সক্ষমতা ও সংখ্যা পরিবর্তিত হতে পারে; লিঙ্ক করা পদ্ধতি দেখুন।"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-কে যা অনন্য করে — ১৩টি সক্ষমতা জুড়ে 9router, OpenRouter, CLIProxyAPI এবং LiteLLM-এর সঙ্গে একটি নির্দিষ্ট সময়ের বৈশিষ্ট্য-তুলনা। OmniRoute: ৩৭৭টি প্রোভাইডার, বিল্ট-ইন ১৫০টিরও বেশি ফ্রি টিয়ার, ২০টি রাউটিং কৌশল, ১২-ইঞ্জিনের টোকেন কম্প্রেশন, ১১০টি টুলসহ বিল্ট-ইন MCP সার্ভার, A2A এজেন্ট প্রোটোকল, স্থায়ী মেমরি, গার্ডরেইল, ক্লাউড এজেন্ট, TLS ফিঙ্গারপ্রিন্ট স্টেলথ, Desktop/Termux/PWA এবং ৬৭টি i18n UI লোকেল। OmniRoute MIT লাইসেন্সপ্রাপ্ত এবং স্ব-হোস্টযোগ্য। প্রতিযোগীদের সক্ষমতা ও সংখ্যা পরিবর্তিত হতে পারে; লিঙ্ক করা পদ্ধতি দেখুন।"/>
 
 <sub>📊 9router, OpenRouter, CLIProxyAPI ও LiteLLM-এর সঙ্গে তুলনার সম্পূর্ণ পদ্ধতি ও প্রতিটি বৈশিষ্ট্যের বিস্তারিত → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar ব্যবহার ঐচ্ছিক এবং এটি কেবল 
 - **🖼️ নতুন এন্ডপয়েন্ট** — `/v1/ocr` (Mistral OCR) এবং `/v1/audio/translations` (Whisper-ধাঁচের) মিডিয়া সক্ষমতাকে পূর্ণাঙ্গ করে। → [API রেফারেন্স](docs/reference/API_REFERENCE.md)
 - **🎨 ছবি / ভিডিও / অডিও জেনারেশন** — মিডিয়ার জন্য একটি API: xAI Grok Imagine ও Novita AI ভিডিও, ComfyUI, Magnific, Adobe Firefly, Segmind এবং ElevenLabs-এর মতো স্পিচ প্রোভাইডার। → [API রেফারেন্স](docs/reference/API_REFERENCE.md)
 - **🌍 ডিপ্লয়মেন্ট ও অপারেশন** — রিভার্স-প্রক্সি `basePath`, ব্রাউজারের ভাষা স্বয়ংক্রিয় শনাক্তকরণ, প্রতি-কী ডিভাইস ট্র্যাকিং, রুটবিহীন MITM ট্রাস্ট এবং zh-TW লোকালাইজেশন। → [এনভায়রনমেন্ট](docs/reference/ENVIRONMENT.md)
-- **🤝 আরও প্রোভাইডার ও এজেন্ট** — ক্লাউড এজেন্ট (Codex Cloud, Cursor, Devin, Jules), ব্রাউজার + OAuth লগইনসহ Grok Build (xAI), Ollama-র প্রথম-শ্রেণির কার্ড, Claude Opus 5 ও Sonnet 5, Kimi-র আনুষ্ঠানিক অংশীদারত্ব (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… এবং হালনাগাদ **৩৭৬-প্রোভাইডারের ক্যাটালগ**। → [প্রোভাইডার](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 আরও প্রোভাইডার ও এজেন্ট** — ক্লাউড এজেন্ট (Codex Cloud, Cursor, Devin, Jules), ব্রাউজার + OAuth লগইনসহ Grok Build (xAI), Ollama-র প্রথম-শ্রেণির কার্ড, Claude Opus 5 ও Sonnet 5, Kimi-র আনুষ্ঠানিক অংশীদারত্ব (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… এবং হালনাগাদ **৩৭৭-প্রোভাইডারের ক্যাটালগ**। → [প্রোভাইডার](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 রাউটিং স্বচ্ছতা** — প্রতিটি রেসপন্সে একটি `X-OmniRoute-Decision` হেডার থাকে, যা ব্যবহৃত কৌশল/প্রোভাইডার/ল্যাটেন্সির নাম জানায়; একটি নতুন `cache-optimized` কম্বো কৌশল + Auto-Combo `cacheAffinity` ফ্যাক্টর পুনরাবৃত্ত অনুরোধকে ক্যাশ করা প্রিফিক্সধারী সংযোগে ফেরত পাঠায়; এবং একটি রিড-অনলি `/v1/auto-combo/{channel}/candidates` এন্ডপয়েন্ট কোনো `auto/*` চ্যানেলের লাইভ ক্যান্ডিডেট পুল প্রকাশ করে। → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ স্থানীয় পারফরম্যান্স ও অবকাঠামো** — এক-ক্লিকে স্থানীয় Redis, Cloudflare Workers / Deno Deploy রিলে ডিপ্লয়ার, তত্ত্বাবধানে পরিচালিত এমবেডেড পরিষেবা হিসেবে Bifrost ও Mux। → [এমবেডেড পরিষেবা](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 সঙ্গে আরও যা রয়েছে** — প্লাগইন ফ্রেমওয়ার্ক + মার্কেটপ্লেস, Omni/Agent/GitHub স্কিল ফ্রেমওয়ার্ক, Obsidian ভল্ট ইন্টিগ্রেশন (২২টি MCP টুল), OpenAI-সামঞ্জস্যপূর্ণ Batch ও Files API, সেমান্টিক রেসপন্স ক্যাশ, লিডারবোর্ডসহ গেমিফিকেশন, ACP এজেন্ট আবিষ্কার (১৫টি বিল্ট-ইন এজেন্ট), BigQuery-তে নির্ধারিত সময়ে লগ এক্সপোর্ট, `auto/chaos` সমান্তরাল মাল্টি-মডেল ফ্যান-আউট, একটি Telegram বট ব্রিজ, একটি ইন-অ্যাপ ভার্সন ম্যানেজার এবং LMArena-ELO ফ্রি-প্রোভাইডার র্যাঙ্কিং। → [ডকুমেন্টেশন](docs/README.md)
@@ -657,7 +657,7 @@ Radar ব্যবহার ঐচ্ছিক এবং এটি কেবল 
 <b>＋ এগুলোর সঙ্গেও কাজ করে</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>যেকোনো OpenAI-সামঞ্জস্যপূর্ণ টুল</b>
 </div>
 
-<sub>📖 সব 37টি টুলের জন্য পৃথক সেটআপ (27টি CLI Code + 10টি CLI Agent) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode প্লাগইন → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 সব 38টি টুলের জন্য পৃথক সেটআপ (27টি CLI Code + 11টি CLI Agent) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode প্লাগইন → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ omniroute configure codex          # আরও আছে: claude opencode qwen a
 
 <div align="center">
 
-## 🌐 376টি AI প্রদানকারী — 153টি ক্যাটালগে বিনামূল্যের হিসেবে চিহ্নিত
+## 🌐 377টি AI প্রদানকারী — 153টি ক্যাটালগে বিনামূল্যের হিসেবে চিহ্নিত
 
 </div>
 
-> ক্যানোনিক্যাল চ্যাট, মিডিয়া, সার্চ, লোকাল, ক্লাউড-এজেন্ট এবং সিস্টেম সংগ্রহজুড়ে **376টি নিবন্ধিত প্রদানকারী**, যার মধ্যে **153টির ডিসকভারি মেটাডেটায় `hasFree: true` রয়েছে**। চ্যাট মডেল রেজিস্ট্রিতে রয়েছে **239টি প্রদানকারী / 3,059টি স্বতন্ত্র প্রদানকারী-মডেল জোড়া / 1,475টি কাঁচা মডেল ID**; পৃথক বিনামূল্যের-বাজেট ক্যাটালগে রয়েছে **প্রতি-মডেলের 484টি সারি**, **34টি পুনরাবৃত্ত পুল** এবং **52টি পুনরাবৃত্ত/কিলেস চিরকাল-বিনামূল্যের প্রদানকারী**। নকশাগতভাবেই এগুলোর হর ভিন্ন; সংজ্ঞা এবং পুল-ডিডুপ্লিকেট করা হিসাব [প্রদানকারী রেফারেন্স](docs/reference/PROVIDER_REFERENCE.md) ও [বিনামূল্যের স্তরসমূহ](docs/reference/FREE_TIERS.md)-এ রয়েছে।
+> ক্যানোনিক্যাল চ্যাট, মিডিয়া, সার্চ, লোকাল, ক্লাউড-এজেন্ট এবং সিস্টেম সংগ্রহজুড়ে **377টি নিবন্ধিত প্রদানকারী**, যার মধ্যে **153টির ডিসকভারি মেটাডেটায় `hasFree: true` রয়েছে**। চ্যাট মডেল রেজিস্ট্রিতে রয়েছে **239টি প্রদানকারী / 3,059টি স্বতন্ত্র প্রদানকারী-মডেল জোড়া / 1,475টি কাঁচা মডেল ID**; পৃথক বিনামূল্যের-বাজেট ক্যাটালগে রয়েছে **প্রতি-মডেলের 484টি সারি**, **34টি পুনরাবৃত্ত পুল** এবং **52টি পুনরাবৃত্ত/কিলেস চিরকাল-বিনামূল্যের প্রদানকারী**। নকশাগতভাবেই এগুলোর হর ভিন্ন; সংজ্ঞা এবং পুল-ডিডুপ্লিকেট করা হিসাব [প্রদানকারী রেফারেন্স](docs/reference/PROVIDER_REFERENCE.md) ও [বিনামূল্যের স্তরসমূহ](docs/reference/FREE_TIERS.md)-এ রয়েছে।
 
 <div align="center">
 
@@ -765,6 +765,7 @@ omniroute configure codex          # আরও আছে: claude opencode qwen a
 <table>
   <tr><th align="left">প্ল্যাটফর্ম</th><th align="left">ইনস্টল</th><th align="left">বিশেষত্ব</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (গ্লোবাল)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">একটি কমান্ড, যেকোনো OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (গ্লোবাল)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">সহায়তার নিশ্চয়তা ছাড়াই সর্বোত্তম-প্রচেষ্টাভিত্তিক সামঞ্জস্য; Node.js হলো সমর্থিত রানটাইম।</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">মাল্টি-আর্ক <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>ডেস্কটপ (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">নেটিভ উইন্ডো + সিস্টেম ট্রে — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>মেনু-বার (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">সার্ভার তত্ত্বাবধান ও স্বয়ংক্রিয়ভাবে আপডেট করে — <b>macOS</b></td></tr>
@@ -1304,7 +1305,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 এটিও এ�
   <tr><td nowrap><b>রানটাইম</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ভাষা</b></td><td>TypeScript 6.0 — <code>src/</code> এবং <code>open-sse/</code> জুড়ে <b>100% TypeScript</b> (v2.0 থেকে মূল অংশে কোনো <code>any</code> নেই)</td></tr>
   <tr><td nowrap><b>ফ্রেমওয়ার্ক</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ডেটাবেস</b></td><td>better-sqlite3 (SQLite, WAL জার্নালিং) + LowDB (লিগ্যাসি JSON) — 147টি ডোমেইন মডিউল, 211টি মাইগ্রেশন</td></tr>
+  <tr><td nowrap><b>ডেটাবেস</b></td><td>better-sqlite3 (SQLite, WAL জার্নালিং) + LowDB (লিগ্যাসি JSON) — 147টি ডোমেইন মডিউল, 213টি মাইগ্রেশন</td></tr>
   <tr><td nowrap><b>মেমরি</b></td><td>SQLite FTS5 পূর্ণ-পাঠ অনুসন্ধান + int8-কোয়ান্টাইজড ভেক্টর এমবেডিং, টাইপড ডিকে</td></tr>
   <tr><td nowrap><b>স্কিমা</b></td><td>Zod 4 — MCP টুলের ইনপুট/আউটপুট যাচাইকরণ + API চুক্তি</td></tr>
   <tr><td nowrap><b>প্রোটোকল</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

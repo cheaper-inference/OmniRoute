@@ -8,7 +8,7 @@
 > Генерирайте отново с: `npm run gen:provider-reference`
 > **Последно генериране:** 2026-10-27
 
-Общ брой доставчици: **376**. Вижте разбивката по категории по-долу.
+Общ брой доставчици: **377**. Вижте разбивката по категории по-долу.
 
 ## Категории
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | Локален, самостоятелно хостван | [връзка](https://github.com/vllm-project/vllm)                    | API ключът не е задължителен. Конфигурирайте локалния, съвместим с OpenAI, основен URL адрес на vLLM (по подразбиране: http://localhost:8000/v1).                                                                                                                                                                                                                  |
 | `xinference`          | `xinference` | XInference          | Локален, самостоятелно хостван | [връзка](https://inference.readthedocs.io)                        | API ключът не е задължителен. Конфигурирайте локалния, съвместим с OpenAI, основен URL адрес на XInference (по подразбиране: http://localhost:9997/v1).                                                                                                                                                                                                            |
 
-## Доставчици на търсене (18)
+## Доставчици на търсене (19)
 
 | ID                  | Псевдоним       | Име                                   | Етикети | Уебсайт                                                           | Бележки                                                                                                                                         |
 | ------------------- | --------------- | ------------------------------------- | ------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                            | Търсене | [връзка](https://exa.ai)                                          | API ключ от dashboard.exa.ai                                                                                                                    |
 | `firecrawl`         | `fc`            | Firecrawl                             | Търсене | [връзка](https://firecrawl.dev)                                   | API ключ от firecrawl.dev/app/api-keys (или задайте базовия URL адрес на вашата собствено хоствана инстанция на Firecrawl)                      |
 | `google-pse-search` | `google-pse`    | Google Programmable Search            | Търсене | [връзка](https://developers.google.com/custom-search/v1/overview) | Изисква Google API ключ и ID на вашата Programmable Search Engine (cx)                                                                          |
+| `kimi-search`       | `kimi-search`   | Kimi Search                           | Търсене | [връзка](https://platform.kimi.ai/docs/api/tools-search)          | API ключ за Moonshot AI (MOONSHOT_API_KEY) от platform.kimi.ai                                                                                  |
 | `linkup-search`     | `linkup`        | Linkup Search                         | Търсене | [връзка](https://docs.linkup.so)                                  | Bearer API ключ от таблото за управление на Linkup                                                                                              |
 | `nimble-search`     | `nimble`        | Nimble Search                         | Търсене | [връзка](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Bearer API ключ от таблото за управление на Nimble                                                                                              |
 | `ollama-search`     | `ollama-search` | Ollama Search                         | Търсене | [връзка](https://ollama.com/settings/keys)                        | Същият API ключ като за Ollama Cloud (от ollama.com/settings/keys)                                                                              |

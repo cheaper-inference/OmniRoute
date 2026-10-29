@@ -8,7 +8,7 @@
 > Повторно згенеруйте за допомогою: `npm run gen:provider-reference`
 > **Дата останнього генерування:** 2026-10-27
 
-Загальна кількість провайдерів: **376**. Нижче наведено розподіл за категоріями.
+Загальна кількість провайдерів: **377**. Нижче наведено розподіл за категоріями.
 
 ## Категорії
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | Локальний, самостійно розміщений | [посилання](https://github.com/vllm-project/vllm)                    | Ключ API необов’язковий. Налаштуйте локальну OpenAI-сумісну базову URL-адресу vLLM (за замовчуванням: http://localhost:8000/v1).                                                                                                                                                                                                                             |
 | `xinference`          | `xinference` | XInference          | Локальний, самостійно розміщений | [посилання](https://inference.readthedocs.io)                        | Ключ API необов’язковий. Налаштуйте локальну OpenAI-сумісну базову URL-адресу XInference (за замовчуванням: http://localhost:9997/v1).                                                                                                                                                                                                                       |
 
-## Постачальники пошуку (18)
+## Постачальники пошуку (19)
 
 | ID                  | Псевдонім       | Назва                             | Теги  | Вебсайт                                                              | Примітки                                                                                                                              |
 | ------------------- | --------------- | --------------------------------- | ----- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                        | Пошук | [посилання](https://exa.ai)                                          | Ключ API з dashboard.exa.ai                                                                                                           |
 | `firecrawl`         | `fc`            | Firecrawl                         | Пошук | [посилання](https://firecrawl.dev)                                   | Ключ API із firecrawl.dev/app/api-keys (або вкажіть базову URL-адресу власного розгорнутого екземпляра Firecrawl)                     |
 | `google-pse-search` | `google-pse`    | Google Programmable Search        | Пошук | [посилання](https://developers.google.com/custom-search/v1/overview) | Потрібні ключ Google API та ідентифікатор вашої програмованої пошукової системи (cx)                                                  |
+| `kimi-search`       | `kimi-search`   | Kimi Search                       | Пошук | [посилання](https://platform.kimi.ai/docs/api/tools-search)          | Ключ API Moonshot AI (MOONSHOT_API_KEY) із platform.kimi.ai                                                                           |
 | `linkup-search`     | `linkup`        | Linkup Search                     | Пошук | [посилання](https://docs.linkup.so)                                  | Ключ Bearer API з панелі керування Linkup                                                                                             |
 | `nimble-search`     | `nimble`        | Nimble Search                     | Пошук | [посилання](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Ключ Bearer API з панелі керування Nimble                                                                                             |
 | `ollama-search`     | `ollama-search` | Ollama Search                     | Пошук | [посилання](https://ollama.com/settings/keys)                        | Той самий ключ API, що й для Ollama Cloud (з ollama.com/settings/keys)                                                                |

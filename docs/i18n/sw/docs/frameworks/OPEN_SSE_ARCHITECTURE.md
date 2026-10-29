@@ -488,7 +488,7 @@ Hiki hushughulikia:
 
 | Faili                           | Madhumuni                                                     |
 | ------------------------------- | ------------------------------------------------------------- |
-| `providerRegistry.ts`           | Sajili ya modeli za gumzo katika katalogi ya watoa huduma 376 |
+| `providerRegistry.ts`           | Sajili ya modeli za gumzo katika katalogi ya watoa huduma 377 |
 | `providerModels.ts`             | Majina mbadala ya modeli, ulinganishaji wa miundo             |
 | `constants.ts`                  | Vipindi vya kuisha, vikomo, misimbo ya hali                   |
 | `defaultThinkingSignature.ts`   | Sahihi chaguomsingi ya kufikiri ya Claude                     |

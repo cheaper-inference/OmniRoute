@@ -162,7 +162,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ichida ulangan 6 ta
 | Holat hisoboti             | `health-report`      | Har bir provayder bo‘yicha avtomatik uzgich, kutish davri va bloklanish holatini umumlashtiradi                                                                                                                      | holat, barqarorlik             | "Barcha provayderlarning holatini ko‘rsating"      |
 | Imkoniyatlarni ro‘yxatlash | `list-capabilities`  | To‘liq 45 ta elementdan iborat Agent Skills katalogini (23 ta API + 21 ta CLI + 1 ta konfiguratsiya) kontekst kiritish uchun SKILL.md fayllarining bevosita URL manzillari bilan markdown jadvali sifatida qaytaradi | katalog, aniqlash, ko‘nikmalar | "Barcha OmniRoute imkoniyatlarini ro‘yxatlang"     |
 
-> Agent Card amaldagi 376 ta provayderdan iborat katalog bilan muvofiqlashtirilgan holda saqlanishi kerak; provayderlar soni hamda bepul/autentifikatsiyasiz foydalanish metama’lumotlari bajarilish vaqtidagi reyestrdan olinadi.
+> Agent Card amaldagi 377 ta provayderdan iborat katalog bilan muvofiqlashtirilgan holda saqlanishi kerak; provayderlar soni hamda bepul/autentifikatsiyasiz foydalanish metama’lumotlari bajarilish vaqtidagi reyestrdan olinadi.
 
 ### `list-capabilities` ko‘nikmasi tafsilotlari
 

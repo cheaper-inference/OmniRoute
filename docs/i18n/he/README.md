@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — שער ה-AI החינמי
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — לעולם אל תפסיקו לתכנת. כל כלי AI ← 376 ספקים — יותר מ-150 בחינם — דרך נקודת קצה אחת. Claude Code, Codex, Cursor, Cline, Copilot ו-Antigravity אל Claude / GPT / Gemini בחינם, עם מעבר אוטומטי לחלופה. דחיסה משולבת של RTK + Caveman חוסכת 15–95% מהטוקנים (כ-89% בממוצע) — לעולם אל תגיעו למגבלות. 376 ספקי AI · יותר מ-150 מסלולים חינמיים · כ-1.62 מיליארד טוקנים חינמיים בחודש · 20 אסטרטגיות ניתוב · $0 להתחלה."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — לעולם אל תפסיקו לתכנת. כל כלי AI ← 377 ספקים — יותר מ-150 בחינם — דרך נקודת קצה אחת. Claude Code, Codex, Cursor, Cline, Copilot ו-Antigravity אל Claude / GPT / Gemini בחינם, עם מעבר אוטומטי לחלופה. דחיסה משולבת של RTK + Caveman חוסכת 15–95% מהטוקנים (כ-89% בממוצע) — לעולם אל תגיעו למגבלות. 377 ספקי AI · יותר מ-150 מסלולים חינמיים · כ-1.62 מיליארד טוקנים חינמיים בחודש · 20 אסטרטגיות ניתוב · $0 להתחלה."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                             |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------- | :--------------------: | :---------: | :-------------------: |
-| 🌐 ספקים                    |          352           |   **358**   |          376          |
+| 🌐 ספקים                    |          352           |   **358**   |          377          |
 | 🧠 מזהי מודלי צ'אט ייחודיים |          1320          |  **1374**   |         1475          |
 | 🖼️ גשר מודאליוּת            | 🆕 ראייה + שמע + וידאו |      ✓      |           ✓           |
 | 📡 קטלוג Radar חינמי        |    🆕 הצטרפות יזומה    |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ תכונות</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 שילובים</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 ספקים</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 ספקים</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ו-MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ההבטחה — נקודת קצה אחת ו-376 ספקים. מעבר אוטומטי לגיבוי שומר על הניתוב כל עוד זמין יעד תקין אחר. שישה עמודי תווך: מעבר עמיד לגיבוי בין 376 ספקים · חיסכון של עד 95% בטוקנים בעומסי עבודה מתאימים · התחלה בעלות של $0 עם יותר מ-150 מסלולים חינמיים ו-52 ספקים חינמיים לתמיד, מחזוריים או ללא מפתח · 37 שילובי CLI/סוכנים באמצעות תצורה אחת · תאימות ל-OpenAI, Claude, Gemini ול-Responses API ב-/v1 · בקרות לסביבת ייצור, כולל מפסקי זרם, הסוואת TLS,‏ 110 כלי MCP,‏ A2A, זיכרון, מנגנוני הגנה, הערכות ויותר מ-56,000 הצהרות בדיקה סטטיות ביותר מ-7,800 קובצי בדיקה במעקב."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ההבטחה — נקודת קצה אחת ו-377 ספקים. מעבר אוטומטי לגיבוי שומר על הניתוב כל עוד זמין יעד תקין אחר. שישה עמודי תווך: מעבר עמיד לגיבוי בין 377 ספקים · חיסכון של עד 95% בטוקנים בעומסי עבודה מתאימים · התחלה בעלות של $0 עם יותר מ-150 מסלולים חינמיים ו-52 ספקים חינמיים לתמיד, מחזוריים או ללא מפתח · 37 שילובי CLI/סוכנים באמצעות תצורה אחת · תאימות ל-OpenAI, Claude, Gemini ול-Responses API ב-/v1 · בקרות לסביבת ייצור, כולל מפסקי זרם, הסוואת TLS,‏ 110 כלי MCP,‏ A2A, זיכרון, מנגנוני הגנה, הערכות ויותר מ-56,000 הצהרות בדיקה סטטיות ביותר מ-7,800 קובצי בדיקה במעקב."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="מה מייחד את OmniRoute — תמונת מצב מתוארכת של תכונות בהשוואה ל-9router, ל-OpenRouter, ל-CLIProxyAPI ול-LiteLLM על פני 13 יכולות. OmniRoute:‏ 376 ספקים, יותר מ-150 מסלולים חינמיים מובנים, 20 אסטרטגיות ניתוב, דחיסת טוקנים באמצעות 12 מנועים, שרת MCP מובנה עם 110 כלים, פרוטוקול סוכנים A2A, זיכרון מתמשך, מנגנוני הגנה, סוכני ענן, הסוואת טביעת אצבע של TLS, תמיכה ב-Desktop/Termux/PWA ו-67 שפות ממשק משתמש. OmniRoute מופץ ברישיון MIT וניתן לאירוח עצמי. היכולות והכמויות של המתחרים עשויות להשתנות; עיינו במתודולוגיה המקושרת."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="מה מייחד את OmniRoute — תמונת מצב מתוארכת של תכונות בהשוואה ל-9router, ל-OpenRouter, ל-CLIProxyAPI ול-LiteLLM על פני 13 יכולות. OmniRoute:‏ 377 ספקים, יותר מ-150 מסלולים חינמיים מובנים, 20 אסטרטגיות ניתוב, דחיסת טוקנים באמצעות 12 מנועים, שרת MCP מובנה עם 110 כלים, פרוטוקול סוכנים A2A, זיכרון מתמשך, מנגנוני הגנה, סוכני ענן, הסוואת טביעת אצבע של TLS, תמיכה ב-Desktop/Termux/PWA ו-67 שפות ממשק משתמש. OmniRoute מופץ ברישיון MIT וניתן לאירוח עצמי. היכולות והכמויות של המתחרים עשויות להשתנות; עיינו במתודולוגיה המקושרת."/>
 
 <sub>📊 המתודולוגיה המלאה ופרטים על כל תכונה בהשוואה ל-9router, ל-OpenRouter, ל-CLIProxyAPI ול-LiteLLM‏ → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar הוא שירות אופציונלי המבוסס על GET בלבד. לק�
 - **🖼️ נקודות קצה חדשות** — `/v1/ocr` (Mistral OCR) ו-`/v1/audio/translations` (בסגנון Whisper) משלימות את מעטפת המדיה. ← [חומר עזר ל-API](docs/reference/API_REFERENCE.md)
 - **🎨 יצירת תמונות / וידאו / אודיו** — API אחד למדיה: xAI Grok Imagine וסרטוני Novita AI,‏ ComfyUI,‏ Magnific,‏ Adobe Firefly,‏ Segmind וספקי דיבור כגון ElevenLabs. ← [חומר עזר ל-API](docs/reference/API_REFERENCE.md)
 - **🌍 פריסה ותפעול** — `basePath` ל-Reverse Proxy, זיהוי אוטומטי של שפת הדפדפן, מעקב אחר מכשירים לכל מפתח, אמון MITM ללא הרשאות root ולוקליזציה ל-zh-TW. ← [סביבה](docs/reference/ENVIRONMENT.md)
-- **🤝 ספקים וסוכנים נוספים** — סוכני ענן (Codex Cloud, Cursor, Devin, Jules),‏ Grok Build ‏(xAI) עם דפדפן + התחברות OAuth, כרטיס ייעודי של Ollama,‏ Claude Opus 5 ו-Sonnet 5, שותפות רשמית עם Kimi‏ (Code/Web/Moonshot),‏ Zed,‏ Requesty,‏ SenseNova,‏ Yuanbao,‏ Agnes AI… וכן **קטלוג מרוענן הכולל 376 ספקים**. ← [ספקים](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 ספקים וסוכנים נוספים** — סוכני ענן (Codex Cloud, Cursor, Devin, Jules),‏ Grok Build ‏(xAI) עם דפדפן + התחברות OAuth, כרטיס ייעודי של Ollama,‏ Claude Opus 5 ו-Sonnet 5, שותפות רשמית עם Kimi‏ (Code/Web/Moonshot),‏ Zed,‏ Requesty,‏ SenseNova,‏ Yuanbao,‏ Agnes AI… וכן **קטלוג מרוענן הכולל 377 ספקים**. ← [ספקים](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 שקיפות ניתוב** — כל תגובה כוללת כותרת `X-OmniRoute-Decision` המציינת את האסטרטגיה/הספק/ההשהיה ששירתו אותה; אסטרטגיית שילוב חדשה בשם `cache-optimized` יחד עם גורם Auto-Combo בשם `cacheAffinity` מנתבים בקשות חוזרות בחזרה לחיבור המחזיק בקידומת שבמטמון; ונקודת קצה לקריאה בלבד בשם `/v1/auto-combo/{channel}/candidates` חושפת את מאגר המועמדים החי של ערוץ `auto/*`. ← [שילוב אוטומטי](docs/routing/AUTO-COMBO.md)
 - **⚡ ביצועים ותשתיות מקומיים** — Redis מקומי בלחיצה אחת, כלי פריסה לממסרים של Cloudflare Workers / Deno Deploy, ו־Bifrost ו־Mux כשירותים מוטמעים ומפוקחים. ← [שירותים מוטמעים](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 כלול גם בחבילה** — מסגרת תוספים + זירת מסחר, מסגרות מיומנויות ל־Omni/Agent/GitHub, שילוב כספת Obsidian (‏22 כלי MCP), ממשקי API תואמי OpenAI עבור Batch ו־Files, מטמון תגובות סמנטי, משחוק עם טבלאות מובילים, גילוי סוכני ACP (‏15 סוכנים מובנים), ייצוא מתוזמן של יומנים אל BigQuery, פיצול מקבילי למספר מודלים במצב `auto/chaos`, גשר לבוט Telegram, מנהל גרסאות בתוך היישום ודירוגי ספקים חינמיים של LMArena-ELO. ← [תיעוד](docs/README.md)
@@ -657,7 +657,7 @@ Radar הוא שירות אופציונלי המבוסס על GET בלבד. לק�
 <b>＋ פועל גם עם</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>כל כלי תואם OpenAI</b>
 </div>
 
-<sub>📖 הגדרה נפרדת לכל אחד מ-37 הכלים (27 כלי קוד CLI ו-10 סוכני CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 תוסף OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 הגדרה נפרדת לכל אחד מ-38 הכלים (27 כלי קוד CLI ו-11 סוכני CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 תוסף OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ omniroute configure codex          # זמינים גם: claude opencode qwen aid
 
 <div align="center">
 
-## 🌐 376 ספקי AI —‏ 153 מסומנים בקטלוג כחינמיים
+## 🌐 377 ספקי AI —‏ 153 מסומנים בקטלוג כחינמיים
 
 </div>
 
-> **376 ספקים רשומים** באוספים הקנוניים של צ'אט, מדיה, חיפוש, הפעלה מקומית, סוכני ענן ומערכת, ובהם **153 שנושאים מטא-נתוני גילוי מסוג `hasFree: true`**. מרשם מודלי הצ'אט כולל **239 ספקים / 3,059 צמדים ייחודיים של ספק ומודל / 1,475 מזהי מודל גולמיים**; קטלוג התקציבים החינמיים הנפרד כולל **484 שורות לפי מודל**, **34 מאגרים מתחדשים** ו-**52 ספקים חינמיים לתמיד, מתחדשים או ללא צורך במפתח**. המכנים הללו שונים במכוון; ההגדרות והחישובים לאחר הסרת כפילויות בין מאגרים מופיעים ב[מדריך הספקים](docs/reference/PROVIDER_REFERENCE.md) וב[מסלולים החינמיים](docs/reference/FREE_TIERS.md).
+> **377 ספקים רשומים** באוספים הקנוניים של צ'אט, מדיה, חיפוש, הפעלה מקומית, סוכני ענן ומערכת, ובהם **153 שנושאים מטא-נתוני גילוי מסוג `hasFree: true`**. מרשם מודלי הצ'אט כולל **239 ספקים / 3,059 צמדים ייחודיים של ספק ומודל / 1,475 מזהי מודל גולמיים**; קטלוג התקציבים החינמיים הנפרד כולל **484 שורות לפי מודל**, **34 מאגרים מתחדשים** ו-**52 ספקים חינמיים לתמיד, מתחדשים או ללא צורך במפתח**. המכנים הללו שונים במכוון; ההגדרות והחישובים לאחר הסרת כפילויות בין מאגרים מופיעים ב[מדריך הספקים](docs/reference/PROVIDER_REFERENCE.md) וב[מסלולים החינמיים](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -765,6 +765,7 @@ omniroute configure codex          # זמינים גם: claude opencode qwen aid
 <table>
   <tr><th align="left">פלטפורמה</th><th align="left">התקנה</th><th align="left">יתרונות בולטים</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (גלובלי)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">פקודה אחת, בכל מערכת הפעלה</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (גלובלי)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">תאימות במאמץ מיטבי ללא התחייבות לתמיכה; Node.js היא סביבת זמן הריצה הנתמכת.</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">תמיכה בריבוי ארכיטקטורות <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>שולחן עבודה (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">חלון מקורי + מגש מערכת — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>שורת תפריטים (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">מפקח על השרת ומעדכן אותו אוטומטית — <b>macOS</b></td></tr>
@@ -1296,7 +1297,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 גורם ל�
   <tr><td nowrap><b>סביבת הרצה</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>שפה</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> בכל <code>src/</code> ו-<code>open-sse/</code> (ללא <code>any</code> בליבה מאז v2.0)</td></tr>
   <tr><td nowrap><b>מסגרת עבודה</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, רישום ביומן WAL) + LowDB (מורשת JSON) — 147 מודולי תחום, 211 מיגרציות</td></tr>
+  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, רישום ביומן WAL) + LowDB (מורשת JSON) — 147 מודולי תחום, 213 מיגרציות</td></tr>
   <tr><td nowrap><b>זיכרון</b></td><td>חיפוש טקסט מלא באמצעות SQLite FTS5 + שיכוני וקטורים בכימות int8, דעיכה מטיפוס מוגדר</td></tr>
   <tr><td nowrap><b>סכמות</b></td><td>Zod 4 — אימות קלט/פלט של כלי MCP + חוזי API</td></tr>
   <tr><td nowrap><b>פרוטוקולים</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

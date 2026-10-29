@@ -488,7 +488,7 @@ Tas apstrādā:
 
 | Fails                          | Nolūks                                                 |
 | ------------------------------ | ------------------------------------------------------ |
-| `providerRegistry.ts`          | Tērzēšanas modeļu reģistrs 376 nodrošinātāju katalogam |
+| `providerRegistry.ts`          | Tērzēšanas modeļu reģistrs 377 nodrošinātāju katalogam |
 | `providerModels.ts`            | Modeļu aizstājvārdi, formātu kartēšana                 |
 | `constants.ts`                 | Taimauti, ierobežojumi, statusa kodi                   |
 | `defaultThinkingSignature.ts`  | Noklusējuma Claude domāšanas paraksts                  |

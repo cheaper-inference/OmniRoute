@@ -665,6 +665,8 @@ Docker / Kubernetes OmniRoute na yau da kullum yana da **Node process guda ɗaya
 
 **Upgrades:** sa ran kowane session zai katse. Ka fitar da clients a hankali idan za ka iya; babu rolling update a kan SQLite na asali. Compose `restart: unless-stopped` tare da Docker `HEALTHCHECK` su ma za su maye gurbin process ɗaya tilo idan container ya zama Unhealthy — tasirin lalacewa iri ɗaya ne.
 
+Manifests da aka riga aka shirya da kuma Helm chart suna cikin `deploy/kubernetes/` da `deploy/helm/omniroute/` — duba [jagorar turawa ta Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Snippet na Kubernetes don **replica guda ɗaya** (ana buƙatar Recreate; kada a ƙara `replicas` a kan fayil ɗin SQLite guda ɗaya):
 
 ```yaml

@@ -20,7 +20,7 @@ lastUpdated: 2026-06-28
 
 ## Co to jest
 
-OmniRoute rejestruje 376 dostawców, w tym 155 wpisów katalogu oznaczonych jako **free/no-auth**
+OmniRoute rejestruje 377 dostawców, w tym 155 wpisów katalogu oznaczonych jako **free/no-auth**
 (no-auth, OAuth z darmowym poziomem lub klucz API z darmowym poziomem — zobacz
 [Przewodnik po darmowych poziomach](../getting-started/FREE-TIERS-GUIDE.md) oraz pełny
 [katalog darmowych poziomów](../reference/FREE_TIERS.md)). Haczek polega na tym, że darmowi

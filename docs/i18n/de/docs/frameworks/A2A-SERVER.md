@@ -163,7 +163,7 @@ OmniRoute stellt 6 A2A-Skills bereit, die in `src/lib/a2a/taskExecution.ts::A2A_
 | Zustandsbericht       | `health-report`      | Aggregiert den Status von Circuit Breaker, Abklingzeiten und Sperrungen pro Anbieter                                                                                               | Zustand, Resilienz         | "Zustand aller Anbieter anzeigen"            |
 | Funktionen auflisten  | `list-capabilities`  | Gibt den vollständigen Agent-Skills-Katalog mit 45 Einträgen (23 API + 21 CLI + 1 Konfiguration) als Markdown-Tabelle mit unformatierten SKILL.md-URLs zur Kontextinjektion zurück | Katalog, Erkennung, Skills | "Alle Funktionen von OmniRoute auflisten"    |
 
-> Die Agentenkarte sollte mit dem aktuellen Katalog mit 376 Anbietern synchron gehalten werden; die Anzahl der Anbieter sowie Metadaten zu kostenlosen bzw. ohne Authentifizierung nutzbaren Angeboten stammen aus der Laufzeitregistrierung.
+> Die Agentenkarte sollte mit dem aktuellen Katalog mit 377 Anbietern synchron gehalten werden; die Anzahl der Anbieter sowie Metadaten zu kostenlosen bzw. ohne Authentifizierung nutzbaren Angeboten stammen aus der Laufzeitregistrierung.
 
 ### Details zum Skill `list-capabilities`
 

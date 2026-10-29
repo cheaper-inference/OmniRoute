@@ -13,7 +13,7 @@
 
 ## ते काय आहे
 
-OmniRoute 376 प्रोव्हायडर्स नोंदवतो, यामध्ये 155 कॅटलॉग नोंदी **free/no-auth** म्हणून चिन्हांकित आहेत
+OmniRoute 377 प्रोव्हायडर्स नोंदवतो, यामध्ये 155 कॅटलॉग नोंदी **free/no-auth** म्हणून चिन्हांकित आहेत
 (no-auth,
 free-tier OAuth, किंवा free-tier API key — याबद्दल
 [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) आणि संपूर्ण

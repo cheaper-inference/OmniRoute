@@ -10,8 +10,8 @@ OmniRoute se integrează cu trei categorii de instrumente CLI, distribuite în t
 
 | Pagină         | Rută                    | Concept                                                                                      | Număr          |
 | -------------- | ----------------------- | -------------------------------------------------------------------------------------------- | -------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Instrumente de programare direcționate către OmniRoute (Client → CLI → OmniRoute → Furnizor) | 26             |
-| **CLI Agents** | `/dashboard/cli-agents` | Agenți autonomi direcționați către OmniRoute (același flux, domeniu mai larg)                | 10             |
+| **CLI Code's** | `/dashboard/cli-code`   | Instrumente de programare direcționate către OmniRoute (Client → CLI → OmniRoute → Furnizor) | 27             |
+| **CLI Agents** | `/dashboard/cli-agents` | Agenți autonomi direcționați către OmniRoute (același flux, domeniu mai larg)                | 11             |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI-uri lansate de OmniRoute ca backend prin stdio/ACP (flux invers)                         | vezi registrul |
 
 Rutele vechi redirecționează prin 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Fiecare acceptă `--remote <url> --api-key <key>` (configurează un instrument local pentru o
 instanță OmniRoute la distanță), `--dry-run` (previzualizare fără scriere) și `--port`. Instrumentele
-fără detectare automată a modelelor (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) acceptă
+fără detectare automată a modelelor (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) acceptă
 `--model <id>` (și `--yes` pentru execuții neinteractive). `setup-5dive` este singura
 procedură care nu scrie sub `$HOME`: aceasta configurează o flotă de agenți 5dive prin
 scrierea unui profil de autentificare deținut de root pe gazda flotei, astfel că se execută din nou prin `sudo`
 și nu are un mod propriu pentru acces la distanță. Pentru a lansa un CLI cu
 variabilele de mediu corecte injectate și fără a scrie nicio configurație, utilizați lansatorul generic
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — țintele și aliasurile provin din `bin/cli/cli-manifest.mjs`); lansatoarele
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — țintele și aliasurile provin din `bin/cli/cli-manifest.mjs`); lansatoarele
 vechi, specifice fiecărui instrument, `omniroute launch` (Claude Code) și `omniroute launch-codex`
 (Codex), rămân disponibile. Gemini CLI poate fi doar lansat: este o țintă `omniroute run`,
 dar nu are nicio procedură `setup-*`/`configure`.
@@ -183,7 +184,7 @@ Toate instrumentele care apar în `/dashboard/cli-code`. Cele cu `baseUrlSupport
 Instrumentele cu `baseUrlSupport: "partial"` afișează insigna „⚠ URL de bază parțial” pe cardul din panoul de control.
 ---
 
-## 2. Catalogul agenților CLI (10 instrumente)
+## 2. Catalogul agenților CLI (11 instrumente)
 
 Agenți autonomi care apar în `/dashboard/cli-agents`:
 
@@ -199,6 +200,7 @@ Agenți autonomi care apar în `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full           | false                    |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false                    |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false                    |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false                    |
 
 ---
 

@@ -163,7 +163,7 @@ OmniRoute jesponi 6 ħiliet A2A marbuta f’`src/lib/a2a/taskExecution.ts::A2A_S
 | Rapport tas-Saħħa      | `health-report`      | Jaggreġa l-istat tas-circuit breaker, tal-cooldown u tal-lockout għal kull fornitur                                                                                                               | saħħa, reżiljenza         | "Uri l-istat tas-saħħa tal-fornituri kollha" |
 | Elenka l-Kapaċitajiet  | `list-capabilities`  | Jirritorna l-katalgu sħiħ ta’ 45 entrata tal-Ħiliet tal-Aġent (23 API + 21 CLI + konfigurazzjoni waħda) bħala tabella markdown b’URLs mhux ipproċessati ta’ SKILL.md għall-injezzjoni tal-kuntest | katalgu, skoperta, ħiliet | "Elenka l-kapaċitajiet kollha ta’ OmniRoute" |
 
-> Il-Karta tal-Aġent għandha tinżamm allinjata mal-katalgu attiv ta’ 376 fornitur; l-għadd tal-fornituri u l-metadata dwar aċċess bla ħlas/mingħajr awtentikazzjoni jittieħdu mir-reġistru waqt it-tħaddim.
+> Il-Karta tal-Aġent għandha tinżamm allinjata mal-katalgu attiv ta’ 377 fornitur; l-għadd tal-fornituri u l-metadata dwar aċċess bla ħlas/mingħajr awtentikazzjoni jittieħdu mir-reġistru waqt it-tħaddim.
 
 ### Dettalji tal-Ħila `list-capabilities`
 

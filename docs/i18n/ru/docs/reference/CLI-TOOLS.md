@@ -10,8 +10,8 @@ OmniRoute интегрируется с тремя категориями CLI-и
 
 | Страница       | Маршрут                 | Концепция                                                                               | Количество |
 | -------------- | ----------------------- | --------------------------------------------------------------------------------------- | ---------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Инструменты разработки, направляемые в OmniRoute (Клиент → CLI → OmniRoute → Провайдер) | 26         |
-| **CLI Agents** | `/dashboard/cli-agents` | Автономные агенты, направляемые в OmniRoute (тот же поток, более широкая область задач) | 10         |
+| **CLI Code's** | `/dashboard/cli-code`   | Инструменты разработки, направляемые в OmniRoute (Клиент → CLI → OmniRoute → Провайдер) | 27         |
+| **CLI Agents** | `/dashboard/cli-agents` | Автономные агенты, направляемые в OmniRoute (тот же поток, более широкая область задач) | 11         |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI, которые OmniRoute запускает как бэкенд через stdio/ACP (обратный поток)            | см. реестр |
 
 Устаревшие маршруты перенаправляются с кодом 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Каждая команда принимает `--remote <url> --api-key <key>` (настройка локального инструмента для работы с удалённым OmniRoute), `--dry-run` (предварительный просмотр без записи) и `--port`. Для инструментов без автоматического обнаружения моделей (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) используется `--model <id>` (а для неинтерактивного запуска — также `--yes`). `setup-5dive` — единственный сценарий, который не записывает данные в `$HOME`: он настраивает парк агентов 5dive, записывая на узле парка принадлежащий пользователю root профиль аутентификации, поэтому повторно запускается через `sudo` и не имеет собственного удалённого режима. Чтобы запустить CLI с подставленными нужными переменными окружения, вообще не записывая конфигурацию, используйте универсальный запускатель `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — цели и псевдонимы определяются в `bin/cli/cli-manifest.mjs`); устаревшие запускатели для отдельных инструментов `omniroute launch` (Claude Code) и `omniroute launch-codex` (Codex) по-прежнему доступны. Gemini CLI поддерживает только запуск: он является целью `omniroute run`, но для него нет сценария `setup-*`/`configure`.
+Каждая команда принимает `--remote <url> --api-key <key>` (настройка локального инструмента для работы с удалённым OmniRoute), `--dry-run` (предварительный просмотр без записи) и `--port`. Для инструментов без автоматического обнаружения моделей (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) используется `--model <id>` (а для неинтерактивного запуска — также `--yes`). `setup-5dive` — единственный сценарий, который не записывает данные в `$HOME`: он настраивает парк агентов 5dive, записывая на узле парка принадлежащий пользователю root профиль аутентификации, поэтому повторно запускается через `sudo` и не имеет собственного удалённого режима. Чтобы запустить CLI с подставленными нужными переменными окружения, вообще не записывая конфигурацию, используйте универсальный запускатель `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — цели и псевдонимы определяются в `bin/cli/cli-manifest.mjs`); устаревшие запускатели для отдельных инструментов `omniroute launch` (Claude Code) и `omniroute launch-codex` (Codex) по-прежнему доступны. Gemini CLI поддерживает только запуск: он является целью `omniroute run`, но для него нет сценария `setup-*`/`configure`.
 
 > **Полная справочная информация:** основная таблица — что записывает каждая команда, все флаги, локальный и удалённый режимы, а также инструменты, которым требуется суффикс `/v1`, — находится в разделе
 > **[Интеграции CLI](../guides/CLI-INTEGRATIONS.md)**.
@@ -145,7 +146,7 @@ omniroute setup-5dive        omniroute setup-zed
 Для инструментов с `baseUrlSupport: "partial"` на карточке в панели управления отображается значок «⚠ Частичная поддержка базового URL».
 ---
 
-## 2. Каталог CLI-агентов (10 инструментов)
+## 2. Каталог CLI-агентов (11 инструментов)
 
 Автономные агенты, представленные в `/dashboard/cli-agents`:
 
@@ -161,6 +162,7 @@ omniroute setup-5dive        omniroute setup-zed
 | letta        | Letta CLI        | Letta                    | full               | false            |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false            |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full               | false            |
+| whycodes     | WhyCodes         | Why Corporation          | full               | false            |
 
 ---
 

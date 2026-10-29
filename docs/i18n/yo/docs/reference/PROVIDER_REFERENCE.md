@@ -8,7 +8,7 @@
 > Ṣẹ̀dá rẹ̀ padà pẹ̀lú: `npm run gen:provider-reference`
 > **Ìgbà tí a ṣẹ̀ṣẹ̀ dá a:** 2026-10-27
 
-Àpapọ̀ àwọn olupèsè: **376**. Wo ìpín sí ẹ̀ka ní ìsàlẹ̀.
+Àpapọ̀ àwọn olupèsè: **377**. Wo ìpín sí ẹ̀ka ní ìsàlẹ̀.
 
 ## Awọn ẹka
 
@@ -397,7 +397,7 @@ Lo dasibodu ni `/dashboard/providers` lati mu ṣiṣẹ, tunto, ati idanwo olup
 | `vllm`                | `vllm`       | vLLM                | Agbegbe, ti ara ẹni | [ọna asopọ](https://github.com/vllm-project/vllm)                    | Bọtini API jẹ aṣayan. Ṣeto URL ipilẹ vLLM OpenAI-ibaramu agbegbe (aiyipada: http://localhost:8000/v1).                                                                                                                                                                                         |
 | `xinference`          | `xinference` | XInference          | Agbegbe, ti ara ẹni | [ọna asopọ](https://inference.readthedocs.io)                        | Bọtini API jẹ aṣayan. Ṣeto URL ipilẹ XInference OpenAI-ibaramu agbegbe (aiyipada: http://localhost:9997/v1).                                                                                                                                                                                   |
 
-## Àwọn Olùpèsè Ìṣàwárí (18)
+## Àwọn Olùpèsè Ìṣàwárí (19)
 
 | ID                  | Orúkọ ìnagijẹ   | Orúkọ                           | Àwọn àmì | Ojú-òpó wẹ́ẹ̀bù                                                        | Àwọn àkíyèsí                                                                                                         |
 | ------------------- | --------------- | ------------------------------- | -------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Lo dasibodu ni `/dashboard/providers` lati mu ṣiṣẹ, tunto, ati idanwo olup
 | `exa-search`        | `exa-search`    | Exa Search                      | Ìṣàwárí  | [ọ̀nà asopọ̀](https://exa.ai)                                          | Kọ́kọ́rọ́ API láti dashboard.exa.ai                                                                                     |
 | `firecrawl`         | `fc`            | Firecrawl                       | Ìṣàwárí  | [ọ̀nà asopọ̀](https://firecrawl.dev)                                   | Kọ́kọ́rọ́ API láti firecrawl.dev/app/api-keys (tàbí ṣètò URL ìpìlẹ̀ Firecrawl tí o gbàlejò fúnra rẹ)                     |
 | `google-pse-search` | `google-pse`    | Google Programmable Search      | Ìṣàwárí  | [ọ̀nà asopọ̀](https://developers.google.com/custom-search/v1/overview) | Ó nílò kọ́kọ́rọ́ Google API àti ID Ẹ̀rọ Ìṣàwárí Tí A Ṣètò rẹ (cx)                                                        |
+| `kimi-search`       | `kimi-search`   | Kimi Search                     | Ìṣàwárí  | [ọ̀nà asopọ̀](https://platform.kimi.ai/docs/api/tools-search)          | Kọ́kọ́rọ́ API Moonshot AI (MOONSHOT_API_KEY) láti platform.kimi.ai                                                      |
 | `linkup-search`     | `linkup`        | Linkup Search                   | Ìṣàwárí  | [ọ̀nà asopọ̀](https://docs.linkup.so)                                  | Kọ́kọ́rọ́ Bearer API láti pátákó ìṣàkóso Linkup                                                                         |
 | `nimble-search`     | `nimble`        | Nimble Search                   | Ìṣàwárí  | [ọ̀nà asopọ̀](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Kọ́kọ́rọ́ Bearer API láti pátákó ìṣàkóso Nimble                                                                         |
 | `ollama-search`     | `ollama-search` | Ollama Search                   | Ìṣàwárí  | [ọ̀nà asopọ̀](https://ollama.com/settings/keys)                        | Kọ́kọ́rọ́ API kan náà pẹ̀lú Ollama Cloud (láti ollama.com/settings/keys)                                                 |

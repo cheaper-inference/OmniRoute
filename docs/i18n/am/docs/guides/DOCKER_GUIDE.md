@@ -653,6 +653,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **ዝማኔዎች፦** እያንዳንዱ session እንደሚቋረጥ ይጠብቁ። ከቻሉ clients-ን drain ያድርጉ፤ በነባሪው SQLite ላይ rolling update የለም። Compose `restart: unless-stopped` ከDocker `HEALTHCHECK` ጋር container-ው Unhealthy ሲሆን ብቸኛውን process ይተካል — የተጽዕኖው ስፋትም ተመሳሳይ ነው።
 
+ዝግጁ የሆኑ manifests እና የHelm chart በ`deploy/kubernetes/` እና `deploy/helm/omniroute/` ውስጥ ይገኛሉ — [የKubernetes ማሰማሪያ መመሪያውን](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) ይመልከቱ።
+
 ለ**አንድ replica** የKubernetes snippet (Recreate ያስፈልጋል፤ በአንድ SQLite file ላይ `replicas`ን አይጨምሩ)፦
 
 ```yaml

@@ -665,6 +665,8 @@ OmniRoute Docker / Kubernetes àkọ́kọ́ ní **process Node kan + writer SQL
 
 **Àwọn ìgbéga:** retí pé gbogbo session yóò já. Yọ àwọn client kúrò díẹ̀díẹ̀ bí o bá lè ṣe bẹ́ẹ̀; kò sí ìmúdójúìwọ̀n rolling lórí SQLite àkọ́kọ́bẹ̀rẹ̀. Compose `restart: unless-stopped` pẹ̀lú Docker `HEALTHCHECK` yóò tún rọ́pò process kan ṣoṣo náà nígbà tí container bá jẹ́ Unhealthy — agbègbè ìpalára kan náà.
 
+Àwọn manifest tí a ti pèsè tán àti Helm chart kan wà nínú `deploy/kubernetes/` àti `deploy/helm/omniroute/` — wo [ìtọ́sọ́nà ìmúṣiṣẹ́ Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Àpẹẹrẹ kóòdù Kubernetes fún **replica kan ṣoṣo** (Recreate jẹ́ dandan; má ṣe gbé `replicas` ga lórí fáìlì SQLite kan):
 
 ```yaml

@@ -10,8 +10,8 @@ OmniRoute se integrira s trima kategorijama CLI alata raspoređenima na tri namj
 
 | Stranica                   | Ruta                    | Koncept                                                                                   | Broj          |
 | -------------------------- | ----------------------- | ----------------------------------------------------------------------------------------- | ------------- |
-| **CLI alati za kodiranje** | `/dashboard/cli-code`   | Alati za kodiranje koje usmjeravate na OmniRoute (Klijent → CLI → OmniRoute → Pružatelj)  | 26            |
-| **CLI agenti**             | `/dashboard/cli-agents` | Autonomni agenti koje usmjeravate na OmniRoute (isti tijek, širi opseg)                   | 10            |
+| **CLI alati za kodiranje** | `/dashboard/cli-code`   | Alati za kodiranje koje usmjeravate na OmniRoute (Klijent → CLI → OmniRoute → Pružatelj)  | 27            |
+| **CLI agenti**             | `/dashboard/cli-agents` | Autonomni agenti koje usmjeravate na OmniRoute (isti tijek, širi opseg)                   | 11            |
 | **ACP agenti**             | `/dashboard/acp-agents` | CLI alati koje OmniRoute pokreće kao pozadinske sustave putem stdio/ACP-a (obrnuti tijek) | vidi registar |
 
 Naslijeđene rute preusmjeravaju putem statusa 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Svaka prihvaća `--remote <url> --api-key <key>` (konfiguriranje lokalnog alata za udaljeni OmniRoute), `--dry-run` (pretpregled bez zapisivanja) i `--port`. Alati bez automatskog otkrivanja modela (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) prihvaćaju `--model <id>` (i `--yes` za neinteraktivna pokretanja). `setup-5dive` jedini je postupak koji ne zapisuje unutar `$HOME`: konfigurira skup 5dive agenata zapisivanjem autentifikacijskog profila u vlasništvu korisnika root na glavnom računalu skupa, stoga se ponovno izvršava putem `sudo` i nema vlastiti udaljeni način rada. Za pokretanje CLI-ja s umetnutim odgovarajućim varijablama okruženja i bez ikakvog zapisivanja konfiguracije upotrijebite generički pokretač `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — ciljevi i aliasi dolaze iz `bin/cli/cli-manifest.mjs`); stari pokretači za pojedinačne alate `omniroute launch` (Claude Code) i `omniroute launch-codex` (Codex) i dalje su dostupni. Gemini CLI može se samo pokretati: cilj je naredbe `omniroute run`, ali nema postupak `setup-*`/`configure`.
+Svaka prihvaća `--remote <url> --api-key <key>` (konfiguriranje lokalnog alata za udaljeni OmniRoute), `--dry-run` (pretpregled bez zapisivanja) i `--port`. Alati bez automatskog otkrivanja modela (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) prihvaćaju `--model <id>` (i `--yes` za neinteraktivna pokretanja). `setup-5dive` jedini je postupak koji ne zapisuje unutar `$HOME`: konfigurira skup 5dive agenata zapisivanjem autentifikacijskog profila u vlasništvu korisnika root na glavnom računalu skupa, stoga se ponovno izvršava putem `sudo` i nema vlastiti udaljeni način rada. Za pokretanje CLI-ja s umetnutim odgovarajućim varijablama okruženja i bez ikakvog zapisivanja konfiguracije upotrijebite generički pokretač `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — ciljevi i aliasi dolaze iz `bin/cli/cli-manifest.mjs`); stari pokretači za pojedinačne alate `omniroute launch` (Claude Code) i `omniroute launch-codex` (Codex) i dalje su dostupni. Gemini CLI može se samo pokretati: cilj je naredbe `omniroute run`, ali nema postupak `setup-*`/`configure`.
 
 > **Potpuna referenca:** glavna tablica — što svaka naredba zapisuje, sve zastavice,
 > lokalni naspram udaljenog načina rada i koji alati zahtijevaju sufiks `/v1` — nalazi se u
@@ -147,7 +148,7 @@ Svi alati koji se pojavljuju u `/dashboard/cli-code`. Oni s postavkom `baseUrlSu
 Alati s postavkom `baseUrlSupport: "partial"` na kartici nadzorne ploče prikazuju značku „⚠ Djelomični osnovni URL”.
 ---
 
-## 2. Katalog CLI agenata (10 alata)
+## 2. Katalog CLI agenata (11 alata)
 
 Autonomni agenti koji se prikazuju na `/dashboard/cli-agents`:
 
@@ -163,6 +164,7 @@ Autonomni agenti koji se prikazuju na `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full               | false                         |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                         |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                         |
+| whycodes     | WhyCodes         | Why Corporation          | full               | false                         |
 
 ---
 

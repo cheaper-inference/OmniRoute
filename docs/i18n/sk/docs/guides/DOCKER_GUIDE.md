@@ -665,6 +665,8 @@ Služba odstráni požiadavku pred stiahnutím obrazu, aby sa neúspešné spust
 
 **Aktualizácie:** počítajte s ukončením každej relácie. Ak môžete, odpojte klientov riadeným spôsobom; s predvolenou databázou SQLite nie je priebežná aktualizácia možná. Nastavenie Compose `restart: unless-stopped` spolu s Docker `HEALTHCHECK` tiež nahradí jediný proces, keď kontajner prejde do stavu Unhealthy — s rovnakým rozsahom dopadu.
 
+Hotové manifesty a Helm chart sa nachádzajú v `deploy/kubernetes/` a `deploy/helm/omniroute/` — pozrite si [sprievodcu nasadením v Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Úryvok konfigurácie Kubernetes pre **jednu repliku** (vyžaduje sa Recreate; nezvyšujte hodnotu `replicas` pre jeden súbor SQLite):
 
 ```yaml

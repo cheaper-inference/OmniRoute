@@ -10,8 +10,8 @@ OmniRoute huunganishwa na makundi matatu ya zana za CLI yaliyosambazwa katika ku
 
 | Ukurasa             | Njia                    | Dhana                                                                                           | Idadi          |
 | ------------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | -------------- |
-| **Misimbo ya CLI**  | `/dashboard/cli-code`   | Zana za uandishi wa msimbo unazozielekeza kwa OmniRoute (Mteja → CLI → OmniRoute → Mtoa huduma) | 26             |
-| **Mawakala wa CLI** | `/dashboard/cli-agents` | Mawakala wanaojiendesha unaowaelekeza kwa OmniRoute (mtiririko uleule, wigo mpana zaidi)        | 10             |
+| **Misimbo ya CLI**  | `/dashboard/cli-code`   | Zana za uandishi wa msimbo unazozielekeza kwa OmniRoute (Mteja → CLI → OmniRoute → Mtoa huduma) | 27             |
+| **Mawakala wa CLI** | `/dashboard/cli-agents` | Mawakala wanaojiendesha unaowaelekeza kwa OmniRoute (mtiririko uleule, wigo mpana zaidi)        | 11             |
 | **Mawakala wa ACP** | `/dashboard/acp-agents` | CLI ambazo OmniRoute huanzisha kama backend kupitia stdio/ACP (mtiririko wa kinyume)            | angalia sajili |
 
 Njia za zamani huelekeza kwingine kupitia 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Kila moja hukubali `--remote <url> --api-key <key>` (kusandi zana ya ndani dhidi ya
 OmniRoute ya mbali), `--dry-run` (kuhakiki bila kuandika), na `--port`. Zana
-zisizo na ugunduzi wa modeli kiotomatiki (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) hutumia
+zisizo na ugunduzi wa modeli kiotomatiki (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) hutumia
 `--model <id>` (na `--yes` kwa utekelezaji usiohitaji mwingiliano). `setup-5dive` ndiyo
 utaratibu pekee ambao hauandiki chini ya `$HOME`: husanidi kundi la mawakala wa 5dive kwa
 kuandika wasifu wa uthibitishaji unaomilikiwa na root kwenye seva ya kundi, kwa hivyo hujitekeleza upya kupitia `sudo`
 na haina hali yake yenyewe ya mbali. Ili kuzindua CLI huku
 vigezo sahihi vya mazingira vikiingizwa na bila kuandika usanidi wowote, tumia kizinduzi cha jumla
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — shabaha na lakabu hutoka `bin/cli/cli-manifest.mjs`); vizinduzi vya zamani
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — shabaha na lakabu hutoka `bin/cli/cli-manifest.mjs`); vizinduzi vya zamani
 vya kila zana `omniroute launch` (Claude Code) na `omniroute launch-codex`
 (Codex) bado vinapatikana. Gemini CLI ni ya kuzindua pekee: ni shabaha ya `omniroute run`
 lakini haina utaratibu wa `setup-*`/`configure`.
@@ -182,7 +183,7 @@ Zana zote zinazoonekana katika `/dashboard/cli-code`. Zile zenye `baseUrlSupport
 Zana zenye `baseUrlSupport: "partial"` huonyesha beji ya "⚠ URL ya Msingi kiasi" kwenye kadi ya dashibodi.
 ---
 
-## 2. Katalogi ya Mawakala wa CLI (zana 10)
+## 2. Katalogi ya Mawakala wa CLI (zana 11)
 
 Mawakala huru wanaoonekana katika `/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ Mawakala huru wanaoonekana katika `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

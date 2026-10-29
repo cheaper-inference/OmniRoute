@@ -8,7 +8,7 @@
 > Regenerați cu: `npm run gen:provider-reference`
 > **Ultima generare:** 2026-10-27
 
-Număr total de furnizori: **376**. Consultați mai jos defalcarea pe categorii.
+Număr total de furnizori: **377**. Consultați mai jos defalcarea pe categorii.
 
 ## Categorii
 
@@ -397,7 +397,7 @@ Utilizați panoul de control de la `/dashboard/providers` pentru a activa, confi
 | `vllm`                | `vllm`       | vLLM                | Local, auto-găzduit | [link](https://github.com/vllm-project/vllm)                    | Cheie API opțională. Configurați URL-ul de bază local vLLM compatibil OpenAI (implicit: http://localhost:8000/v1).                                                                                                                                                                                                         |
 | `xinference`          | `xinference` | XInference          | Local, auto-găzduit | [link](https://inference.readthedocs.io)                        | Cheie API opțională. Configurați URL-ul de bază local XInference compatibil OpenAI (implicit: http://localhost:9997/v1).                                                                                                                                                                                                   |
 
-## Furnizori de căutare (18)
+## Furnizori de căutare (19)
 
 | ID                  | Alias           | Nume                                | Etichete | Site web                                                        | Note                                                                                                                                |
 | ------------------- | --------------- | ----------------------------------- | -------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Utilizați panoul de control de la `/dashboard/providers` pentru a activa, confi
 | `exa-search`        | `exa-search`    | Exa Search                          | Căutare  | [link](https://exa.ai)                                          | Cheie API din dashboard.exa.ai                                                                                                      |
 | `firecrawl`         | `fc`            | Firecrawl                           | Căutare  | [link](https://firecrawl.dev)                                   | Cheie API de la firecrawl.dev/app/api-keys (sau configurați URL-ul de bază al instanței Firecrawl găzduite de dvs.)                 |
 | `google-pse-search` | `google-pse`    | Google Programmable Search          | Căutare  | [link](https://developers.google.com/custom-search/v1/overview) | Necesită o cheie API Google și ID-ul motorului dvs. de căutare programabil (cx)                                                     |
+| `kimi-search`       | `kimi-search`   | Kimi Search                         | Căutare  | [link](https://platform.kimi.ai/docs/api/tools-search)          | Cheia API Moonshot AI (MOONSHOT_API_KEY) de la platform.kimi.ai                                                                     |
 | `linkup-search`     | `linkup`        | Linkup Search                       | Căutare  | [link](https://docs.linkup.so)                                  | Cheie API Bearer din panoul de control Linkup                                                                                       |
 | `nimble-search`     | `nimble`        | Nimble Search                       | Căutare  | [link](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Cheie API Bearer din panoul de control Nimble                                                                                       |
 | `ollama-search`     | `ollama-search` | Ollama Search                       | Căutare  | [link](https://ollama.com/settings/keys)                        | Aceeași cheie API ca pentru Ollama Cloud (de la ollama.com/settings/keys)                                                           |

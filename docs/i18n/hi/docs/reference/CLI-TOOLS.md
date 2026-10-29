@@ -10,8 +10,8 @@ OmniRoute तीन समर्पित डैशबोर्ड पेजो�
 
 | पेज            | रूट                     | अवधारणा                                                                                        | संख्या          |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------------------------- | --------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | कोडिंग टूल्स जिन्हें आप OmniRoute की ओर इंगित करते हैं (क्लाइंट → CLI → OmniRoute → प्रदाता)   | 26              |
-| **CLI Agents** | `/dashboard/cli-agents` | स्वायत्त एजेंट जिन्हें आप OmniRoute की ओर इंगित करते हैं (समान प्रवाह, व्यापक दायरा)           | 10              |
+| **CLI Code's** | `/dashboard/cli-code`   | कोडिंग टूल्स जिन्हें आप OmniRoute की ओर इंगित करते हैं (क्लाइंट → CLI → OmniRoute → प्रदाता)   | 27              |
+| **CLI Agents** | `/dashboard/cli-agents` | स्वायत्त एजेंट जिन्हें आप OmniRoute की ओर इंगित करते हैं (समान प्रवाह, व्यापक दायरा)           | 11              |
 | **ACP Agents** | `/dashboard/acp-agents` | वे CLI जिन्हें OmniRoute stdio/ACP के माध्यम से बैकएंड के रूप में शुरू करता है (विपरीत प्रवाह) | रजिस्ट्री देखें |
 
 पुराने रूट 308 के माध्यम से रीडायरेक्ट होते हैं: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`।
@@ -55,15 +55,16 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-प्रत्येक कमांड `--remote <url> --api-key <key>` (किसी स्थानीय टूल को रिमोट OmniRoute के लिए कॉन्फ़िगर करें), `--dry-run` (बिना लिखे पूर्वावलोकन करें), और `--port` स्वीकार करता है। जिन टूल में मॉडल का स्वतः पता लगाने की सुविधा नहीं है (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive), वे
+प्रत्येक कमांड `--remote <url> --api-key <key>` (किसी स्थानीय टूल को रिमोट OmniRoute के लिए कॉन्फ़िगर करें), `--dry-run` (बिना लिखे पूर्वावलोकन करें), और `--port` स्वीकार करता है। जिन टूल में मॉडल का स्वतः पता लगाने की सुविधा नहीं है (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes), वे
 `--model <id>` (और गैर-इंटरैक्टिव रन के लिए `--yes`) लेते हैं। `setup-5dive` एकमात्र
 रेसिपी है जो `$HOME` के अंतर्गत नहीं लिखती: यह फ़्लीट होस्ट पर root के स्वामित्व वाली ऑथ प्रोफ़ाइल लिखकर
 5dive एजेंट फ़्लीट को कॉन्फ़िगर करती है, इसलिए यह `sudo` के माध्यम से स्वयं को फिर से निष्पादित करती है
 और इसका अपना कोई रिमोट मोड नहीं है। सही env इंजेक्ट करके और बिना कोई कॉन्फ़िगरेशन लिखे
-CLI लॉन्च करने के लिए, सामान्य `omniroute run <target>` लॉन्चर का उपयोग करें (claude, codex, aider, goose, opencode, qwen,
-gemini — टार्गेट और उपनाम `bin/cli/cli-manifest.mjs` से आते हैं); पुराने
+CLI लॉन्च करने के लिए, सामान्य `omniroute run <target>` लॉन्चर का उपयोग करें (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — टार्गेट और उपनाम `bin/cli/cli-manifest.mjs` से आते हैं); पुराने
 प्रति-टूल लॉन्चर `omniroute launch` (Claude Code) और `omniroute launch-codex`
 (Codex) अब भी उपलब्ध हैं। Gemini CLI केवल लॉन्च के लिए है: यह एक `omniroute run`
 टार्गेट है, लेकिन इसकी कोई `setup-*`/`configure` रेसिपी नहीं है।
@@ -177,7 +178,7 @@ OmniRoute इसका पता लगाता है और लिखने �
 `baseUrlSupport: "partial"` वाले टूल के डैशबोर्ड कार्ड पर "⚠ आंशिक बेस URL" बैज दिखाई देता है।
 ---
 
-## 2. CLI एजेंट कैटलॉग (10 टूल)
+## 2. CLI एजेंट कैटलॉग (11 टूल)
 
 स्वायत्त एजेंट जो `/dashboard/cli-agents` में दिखाई देते हैं:
 
@@ -193,6 +194,7 @@ OmniRoute इसका पता लगाता है और लिखने �
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

@@ -8,7 +8,7 @@
 > ပြန်လည်ဖန်တီးရန်: `npm run gen:provider-reference`
 > **နောက်ဆုံး ဖန်တီးခဲ့သည့်ရက်:** 2026-10-27
 
-ဝန်ဆောင်မှုပေးသူ စုစုပေါင်း: **376**။ အောက်တွင် အမျိုးအစားအလိုက် ခွဲခြားဖော်ပြချက်ကို ကြည့်ပါ။
+ဝန်ဆောင်မှုပေးသူ စုစုပေါင်း: **377**။ အောက်တွင် အမျိုးအစားအလိုက် ခွဲခြားဖော်ပြချက်ကို ကြည့်ပါ။
 
 ## အမျိုးအစားများ
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | စက်တွင်း၊ ကိုယ်တိုင်လက်ခံဝန်ဆောင်မှုပေးထားသော | [လင့်ခ်](https://github.com/vllm-project/vllm)                    | API key ကို မဖြစ်မနေထည့်ရန်မလိုပါ။ စက်တွင်း vLLM ၏ OpenAI နှင့် ကိုက်ညီသော base URL ကို သတ်မှတ်ပါ (ပုံသေ: http://localhost:8000/v1)။                                                                                                                                                                                                                                                    |
 | `xinference`          | `xinference` | XInference          | စက်တွင်း၊ ကိုယ်တိုင်လက်ခံဝန်ဆောင်မှုပေးထားသော | [လင့်ခ်](https://inference.readthedocs.io)                        | API key ကို မဖြစ်မနေထည့်ရန်မလိုပါ။ စက်တွင်း XInference ၏ OpenAI နှင့် ကိုက်ညီသော base URL ကို သတ်မှတ်ပါ (ပုံသေ: http://localhost:9997/v1)။                                                                                                                                                                                                                                              |
 
-## ရှာဖွေရေး ဝန်ဆောင်မှုပေးသူများ (18)
+## ရှာဖွေရေး ဝန်ဆောင်မှုပေးသူများ (19)
 
 | ID                  | အမည်လွှဲ        | အမည်                                 | တဂ်များ     | ဝဘ်ဆိုက်                                                          | မှတ်ချက်များ                                                                                                                                            |
 | ------------------- | --------------- | ------------------------------------ | ----------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                           | ရှာဖွေခြင်း | [လင့်ခ်](https://exa.ai)                                          | dashboard.exa.ai မှ API key                                                                                                                             |
 | `firecrawl`         | `fc`            | Firecrawl                            | ရှာဖွေခြင်း | [လင့်ခ်](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys မှ API key (သို့မဟုတ် ကိုယ်တိုင်လက်ခံဆောင်ရွက်ထားသော Firecrawl အခြေခံ URL ကို သတ်မှတ်ပါ)                                     |
 | `google-pse-search` | `google-pse`    | Google Programmable Search           | ရှာဖွေခြင်း | [လင့်ခ်](https://developers.google.com/custom-search/v1/overview) | Google API key နှင့် သင့် Programmable Search Engine ID (cx) လိုအပ်သည်                                                                                  |
+| `kimi-search`       | `kimi-search`   | Kimi Search                          | ရှာဖွေခြင်း | [လင့်ခ်](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai မှ Moonshot AI API key (MOONSHOT_API_KEY)                                                                                              |
 | `linkup-search`     | `linkup`        | Linkup Search                        | ရှာဖွေခြင်း | [လင့်ခ်](https://docs.linkup.so)                                  | Linkup ဒက်ရှ်ဘုတ်မှ Bearer API key                                                                                                                      |
 | `nimble-search`     | `nimble`        | Nimble Search                        | ရှာဖွေခြင်း | [လင့်ခ်](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble ဒက်ရှ်ဘုတ်မှ Bearer API key                                                                                                                      |
 | `ollama-search`     | `ollama-search` | Ollama Search                        | ရှာဖွေခြင်း | [လင့်ခ်](https://ollama.com/settings/keys)                        | Ollama Cloud နှင့် တူညီသော API key (ollama.com/settings/keys မှ)                                                                                        |

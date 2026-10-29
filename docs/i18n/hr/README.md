@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Besplatni AI pristupnik
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikada ne prestajte programirati. Svaki AI alat → 376 pružatelja — više od 150 besplatnih — putem jedne krajnje točke. Claude Code, Codex, Cursor, Cline, Copilot i Antigravity uz BESPLATNE Claude / GPT / Gemini modele s automatskim prebacivanjem u slučaju nedostupnosti. Kombinirana kompresija RTK + Caveman štedi 15–95 % tokena (~89 % u prosjeku) — nikada ne dosegnite ograničenja. 376 AI pružatelja · više od 150 besplatnih razina · ~1,62 mlrd. besplatnih tokena mjesečno · 20 strategija usmjeravanja · početak za 0 USD."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikada ne prestajte programirati. Svaki AI alat → 377 pružatelja — više od 150 besplatnih — putem jedne krajnje točke. Claude Code, Codex, Cursor, Cline, Copilot i Antigravity uz BESPLATNE Claude / GPT / Gemini modele s automatskim prebacivanjem u slučaju nedostupnosti. Kombinirana kompresija RTK + Caveman štedi 15–95 % tokena (~89 % u prosjeku) — nikada ne dosegnite ograničenja. 377 AI pružatelja · više od 150 besplatnih razina · ~1,62 mlrd. besplatnih tokena mjesečno · 20 strategija usmjeravanja · početak za 0 USD."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                                            |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------------------ | :-------------------: | :---------: | :-------------------: |
-| 🌐 Pružatelji                              |          352          |   **358**   |          376          |
+| 🌐 Pružatelji                              |          352          |   **358**   |          377          |
 | 🧠 Jedinstveni ID-ovi modela za čavrljanje |         1320          |  **1374**   |         1475          |
 | 🖼️ Most modaliteta                         | 🆕 vid + zvuk + video |      ✓      |           ✓           |
 | 📡 Besplatni katalog Radara                |     🆕 uz prijavu     |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Značajke</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinacije</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Pružatelji usluga</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Pružatelji usluga</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — jedna krajnja točka i 376 pružatelja usluga. Automatski pričuvni odabir održava usmjeravanje sve dok je dostupno drugo ispravno odredište. Šest stupova: otporno prebacivanje između 376 pružatelja usluga · do 95 % uštede tokena za podržana radna opterećenja · početak uz 0 USD sa 150+ besplatnih razina i 52 periodična pružatelja usluga ili pružatelja bez ključa koji su zauvijek besplatni · 37 integracija CLI-ja/agenta putem jedne konfiguracije · kompatibilnost s OpenAI, Claude, Gemini i Responses API na /v1 · produkcijske kontrole koje uključuju prekidače strujnog kruga, TLS prikrivanje, MCP sa 110 alata, A2A, memoriju, zaštitne mehanizme, evaluacije i 56.000+ statičkih deklaracija testova u 7.800+ praćenih testnih datoteka."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — jedna krajnja točka i 377 pružatelja usluga. Automatski pričuvni odabir održava usmjeravanje sve dok je dostupno drugo ispravno odredište. Šest stupova: otporno prebacivanje između 377 pružatelja usluga · do 95 % uštede tokena za podržana radna opterećenja · početak uz 0 USD sa 150+ besplatnih razina i 52 periodična pružatelja usluga ili pružatelja bez ključa koji su zauvijek besplatni · 37 integracija CLI-ja/agenta putem jedne konfiguracije · kompatibilnost s OpenAI, Claude, Gemini i Responses API na /v1 · produkcijske kontrole koje uključuju prekidače strujnog kruga, TLS prikrivanje, MCP sa 110 alata, A2A, memoriju, zaštitne mehanizme, evaluacije i 56.000+ statičkih deklaracija testova u 7.800+ praćenih testnih datoteka."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Svih **20** strategija — kombinirajte ih po koraku kombinacije:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Po čemu se OmniRoute ističe — vremenski označen pregled značajki u usporedbi s 9routerom, OpenRouterom, CLIProxyAPI-jem i LiteLLM-om kroz 13 mogućnosti. OmniRoute: 376 pružatelja usluga, više od 150 ugrađenih besplatnih razina, 20 strategija usmjeravanja, kompresija tokena s 12 mehanizama, ugrađeni MCP poslužitelj sa 110 alata, A2A protokol za agente, trajna memorija, zaštitne mjere, agenti u oblaku, prikrivanje TLS otiska, Desktop/Termux/PWA i 67 lokalizacija korisničkog sučelja. OmniRoute ima licencu MIT i može se samostalno hostati. Mogućnosti i brojke konkurenata mogu se promijeniti; pogledajte povezanu metodologiju."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Po čemu se OmniRoute ističe — vremenski označen pregled značajki u usporedbi s 9routerom, OpenRouterom, CLIProxyAPI-jem i LiteLLM-om kroz 13 mogućnosti. OmniRoute: 377 pružatelja usluga, više od 150 ugrađenih besplatnih razina, 20 strategija usmjeravanja, kompresija tokena s 12 mehanizama, ugrađeni MCP poslužitelj sa 110 alata, A2A protokol za agente, trajna memorija, zaštitne mjere, agenti u oblaku, prikrivanje TLS otiska, Desktop/Termux/PWA i 67 lokalizacija korisničkog sučelja. OmniRoute ima licencu MIT i može se samostalno hostati. Mogućnosti i brojke konkurenata mogu se promijeniti; pogledajte povezanu metodologiju."/>
 
 <sub>📊 Potpuna metodologija &amp; pojedinosti po značajkama u usporedbi s 9routerom, OpenRouterom, CLIProxyAPI-jem &amp; LiteLLM-om → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -611,7 +611,7 @@ trenutačnom katalogu na **[radar.omniroute.online/planos](https://radar.omnirou
 - **🖼️ Nove krajnje točke** — `/v1/ocr` (Mistral OCR) i `/v1/audio/translations` (u stilu Whispera) zaokružuju podršku za medije. → [Referenca API-ja](docs/reference/API_REFERENCE.md)
 - **🎨 Generiranje slika / videozapisa / zvuka** — jedan API za medije: xAI Grok Imagine i Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind te pružatelji govora poput ElevenLabsa. → [Referenca API-ja](docs/reference/API_REFERENCE.md)
 - **🌍 Implementacija i operacije** — `basePath` za obrnuti proxy, automatsko otkrivanje jezika preglednika, praćenje uređaja po ključu, MITM pouzdanost bez administratorskih ovlasti i lokalizacija zh-TW. → [Okruženje](docs/reference/ENVIRONMENT.md)
-- **🤝 Više pružatelja i agenata** — agenti u oblaku (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) s preglednikom + OAuth prijavom, punopravna kartica za Ollamu, Claude Opus 5 i Sonnet 5, službeno partnerstvo s Kimijem (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… te osvježeni **katalog s 376 pružatelja**. → [Pružatelji](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Više pružatelja i agenata** — agenti u oblaku (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) s preglednikom + OAuth prijavom, punopravna kartica za Ollamu, Claude Opus 5 i Sonnet 5, službeno partnerstvo s Kimijem (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… te osvježeni **katalog s 377 pružatelja**. → [Pružatelji](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparentnost usmjeravanja** — svaki odgovor sadrži zaglavlje `X-OmniRoute-Decision` koje navodi strategiju/pružatelja/latenciju odgovornu za njega, nova kombinirana strategija `cache-optimized` + čimbenik Auto-Combo `cacheAffinity` usmjeravaju ponovljene zahtjeve natrag prema vezi koja drži predmemorirani prefiks, a krajnja točka samo za čitanje `/v1/auto-combo/{channel}/candidates` izlaže trenutačni skup kandidata kanala `auto/*`. → [Automatske kombinacije](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokalne performanse i infrastruktura** — lokalni Redis jednim klikom, alati za implementaciju releja na Cloudflare Workers / Deno Deploy te Bifrost i Mux kao nadzirane ugrađene usluge. → [Ugrađene usluge](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Također uključeno** — okvir za dodatke + trgovina, okviri vještina Omni/Agent/GitHub, integracija s Obsidian trezorom (22 MCP alata), API-ji Batch i Files kompatibilni s OpenAI-jem, semantička predmemorija odgovora, gamifikacija s ljestvicama najboljih, otkrivanje ACP agenata (15 ugrađenih agenata), zakazani izvoz zapisnika u BigQuery, paralelno prosljeđivanje prema više modela u načinu `auto/chaos`, poveznica s Telegram botom, upravitelj verzija unutar aplikacije i LMArena-ELO ljestvice besplatnih pružatelja usluga. → [Dokumentacija](docs/README.md)
@@ -665,7 +665,7 @@ trenutačnom katalogu na **[radar.omniroute.online/planos](https://radar.omnirou
 <b>＋ također radi s</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>bilo kojim alatom kompatibilnim s OpenAI-jem</b>
 </div>
 
-<sub>📖 Postavljanje po alatu za svih 37 alata (27 CLI alata za kodiranje + 10 CLI agenata) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Dodatak za OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Postavljanje po alatu za svih 38 alata (27 CLI alata za kodiranje + 11 CLI agenata) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Dodatak za OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -695,11 +695,11 @@ pohranjivanje tajni u povijest ljuske. → [CLI integracije](docs/guides/CLI-INT
 
 <div align="center">
 
-## 🌐 376 pružatelja AI usluga — 153 označena u katalogu kao besplatna
+## 🌐 377 pružatelja AI usluga — 153 označena u katalogu kao besplatna
 
 </div>
 
-> **376 registriranih pružatelja usluga** u kanonskim kolekcijama za razgovor, medije, pretraživanje, lokalne modele, agente u oblaku i sustave, uključujući **153 pružatelja s metapodacima za otkrivanje `hasFree: true`**. Registar modela za razgovor obuhvaća **239 pružatelja / 3.059 različitih parova pružatelj-model / 1.475 neobrađenih ID-jeva modela**; zasebni katalog besplatnih kvota sadrži **484 redak po modelu**, **34 obnavljajuća skupa kvota** i **52 trajno besplatna pružatelja s obnavljajućim kvotama ili bez potrebe za ključem**. Ti nazivnici namjerno se razlikuju; definicije i izračuni s dedupliciranim skupovima nalaze se u dokumentima [Referenca pružatelja](docs/reference/PROVIDER_REFERENCE.md) i [Besplatne razine](docs/reference/FREE_TIERS.md).
+> **377 registriranih pružatelja usluga** u kanonskim kolekcijama za razgovor, medije, pretraživanje, lokalne modele, agente u oblaku i sustave, uključujući **153 pružatelja s metapodacima za otkrivanje `hasFree: true`**. Registar modela za razgovor obuhvaća **239 pružatelja / 3.059 različitih parova pružatelj-model / 1.475 neobrađenih ID-jeva modela**; zasebni katalog besplatnih kvota sadrži **484 redak po modelu**, **34 obnavljajuća skupa kvota** i **52 trajno besplatna pružatelja s obnavljajućim kvotama ili bez potrebe za ključem**. Ti nazivnici namjerno se razlikuju; definicije i izračuni s dedupliciranim skupovima nalaze se u dokumentima [Referenca pružatelja](docs/reference/PROVIDER_REFERENCE.md) i [Besplatne razine](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -773,6 +773,7 @@ pohranjivanje tajni u povijest ljuske. → [CLI integracije](docs/guides/CLI-INT
 <table>
   <tr><th align="left">Platforma</th><th align="left">Instalacija</th><th align="left">Glavne značajke</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (globalno)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Jedna naredba, bilo koji OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (globalno)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Kompatibilnost prema načelu najboljeg mogućeg ishoda bez jamstava podrške; Node.js je podržano izvršno okruženje.</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Više arhitektura: <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Radna površina (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Izvorni prozor + sistemska traka — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Traka izbornika (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Nadzire i automatski ažurira poslužitelj — <b>macOS</b></td></tr>
@@ -1315,7 +1316,7 @@ Kanonske metrike na dan 2026-10-18: **1.976 jedinstvenih videozapisa** · **20.2
   <tr><td nowrap><b>Izvršno okruženje</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> u <code>src/</code> i <code>open-sse/</code> (bez ijednog <code>any</code> u jezgri od v2.0)</td></tr>
   <tr><td nowrap><b>Razvojni okvir</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Baza podataka</b></td><td>better-sqlite3 (SQLite, vođenje dnevnika u načinu WAL) + LowDB (naslijeđeni JSON) — 147 domenskih modula, 211 migracija</td></tr>
+  <tr><td nowrap><b>Baza podataka</b></td><td>better-sqlite3 (SQLite, vođenje dnevnika u načinu WAL) + LowDB (naslijeđeni JSON) — 147 domenskih modula, 213 migracija</td></tr>
   <tr><td nowrap><b>Memorija</b></td><td>SQLite FTS5 pretraživanje cijelog teksta + vektorske reprezentacije kvantizirane na int8, tipizirano opadanje</td></tr>
   <tr><td nowrap><b>Sheme</b></td><td>Zod 4 — provjera valjanosti ulaza/izlaza MCP alata + API ugovori</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

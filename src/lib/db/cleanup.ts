@@ -820,6 +820,7 @@ const RESET_USAGE_HISTORY_PERIOD_MS: Record<TimedResetUsageHistoryPeriod, number
 export interface ResetUsageHistoryResult extends CleanupResult {
   deletedUsageHistory: number;
   deletedDailySummary: number;
+  deletedDailyTeamSummary: number;
   deletedHourlySummary: number;
   deletedCallLogs: number;
   deletedCallLogArtifacts: number;
@@ -868,6 +869,12 @@ const RESET_TARGETS: Array<
     column: "date",
     cutoff: "date",
     resultKey: "deletedDailySummary",
+  },
+  {
+    table: "daily_team_usage_summary",
+    column: "date",
+    cutoff: "date",
+    resultKey: "deletedDailyTeamSummary",
   },
   {
     table: "hourly_usage_summary",
@@ -946,6 +953,7 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     deleted: 0,
     deletedUsageHistory: 0,
     deletedDailySummary: 0,
+    deletedDailyTeamSummary: 0,
     deletedHourlySummary: 0,
     deletedCallLogs: 0,
     deletedCallLogArtifacts: 0,

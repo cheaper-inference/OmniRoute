@@ -32,6 +32,7 @@ import {
 import { resolveQuotaKeyScope } from "@/lib/quota/quotaKey";
 import { isQuotaModelName, parseQuotaModelName } from "@/lib/quota/quotaModelNaming";
 import { buildApiKeyUsageLimitPolicyRejection } from "@/lib/usage/apiKeyUsageLimits";
+import { buildTeamUsageLimitPolicyRejection } from "@/lib/usage/teamUsageLimits";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { hasApiKeyModelRestrictions } from "./resolvedModelAccess";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
@@ -443,6 +444,9 @@ export interface ApiKeyPolicyResult {
   rejection: Response | null;
 }
 
+type PolicyValidationStage =
+  "validateEndpointAccess" | "validateTeamUsage" | "validateQuotaAccess" | "validateModelAccess";
+
 export interface EnforceApiKeyPolicyOptions {
   /**
    * Where the metered dollar budget is enforced for this request.
@@ -460,6 +464,8 @@ export interface EnforceApiKeyPolicyOptions {
    * entirely. Every other check on this path is unaffected.
    */
   meteredBudget?: "enforce" | "defer-to-candidate";
+  /** Test/diagnostic observer; it cannot alter policy outcomes. */
+  validationObserver?: (stage: PolicyValidationStage) => void;
 }
 
 /**
@@ -552,6 +558,15 @@ async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Resp
   } catch (error) {
     log.error("API_POLICY", "API key USD usage limit check failed. Request blocked.", { error });
     return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "API key usage limit unavailable");
+  }
+}
+
+async function validateTeamUsage(context: PolicyContext): Promise<Response | null> {
+  try {
+    return await buildTeamUsageLimitPolicyRejection(context.request, context.apiKeyInfo.id);
+  } catch (error) {
+    log.error("API_POLICY", "Team shared usage limit check failed. Request blocked.", { error });
+    return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "Team usage limit unavailable");
   }
 }
 
@@ -969,6 +984,28 @@ function unresolvedScopedKeyRejection(selfLoopScope: SelfLoopScope): Response | 
 }
 
 /**
+ * Endpoint, Team usage, quota and model access checks, in this fixed order (endpoint
+ * authorization must precede any Team budget lookup). The first rejection wins.
+ */
+async function runAccessValidators(
+  context: PolicyContext,
+  options?: EnforceApiKeyPolicyOptions
+): Promise<Response | null> {
+  const stages: Array<[PolicyValidationStage, () => Response | null | Promise<Response | null>]> = [
+    ["validateEndpointAccess", () => validateEndpointAccess(context)],
+    ["validateTeamUsage", () => validateTeamUsage(context)],
+    ["validateQuotaAccess", () => validateQuotaAccess(context)],
+    ["validateModelAccess", () => validateModelAccess(context)],
+  ];
+  for (const [stage, validate] of stages) {
+    options?.validationObserver?.(stage);
+    const rejection = await validate();
+    if (rejection) return rejection;
+  }
+  return null;
+}
+
+/**
  * Internal sub-request of a parent request that already passed the full policy
  * (schedule, budget, limits): re-check authorization only, so the key's
  * allowances are not charged twice.
@@ -1021,13 +1058,8 @@ export async function enforceApiKeyPolicy(
   }
   const scheduleRejection = await validateKeyScheduleAndUsage(context);
   if (scheduleRejection) return { apiKey, apiKeyInfo, rejection: scheduleRejection };
-  const endpointRejection = validateEndpointAccess(context);
-  if (endpointRejection) return { apiKey, apiKeyInfo, rejection: endpointRejection };
-
-  const quotaRejection = await validateQuotaAccess(context);
-  if (quotaRejection) return { apiKey, apiKeyInfo, rejection: quotaRejection };
-  const modelRejection = await validateModelAccess(context);
-  if (modelRejection) return { apiKey, apiKeyInfo, rejection: modelRejection };
+  const accessRejection = await runAccessValidators(context, options);
+  if (accessRejection) return { apiKey, apiKeyInfo, rejection: accessRejection };
 
   const budgetRejection = validateBudgetUnlessDeferred(context, options);
   if (budgetRejection) return { apiKey, apiKeyInfo, rejection: budgetRejection };

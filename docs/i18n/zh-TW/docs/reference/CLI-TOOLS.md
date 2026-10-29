@@ -10,8 +10,8 @@ OmniRoute 整合了三類 CLI 工具，分布於三個專屬的儀表板頁面�
 
 | 頁面             | 路由                    | 概念                                                               | 數量         |
 | ---------------- | ----------------------- | ------------------------------------------------------------------ | ------------ |
-| **CLI 程式碼**   | `/dashboard/cli-code`   | 指向 OmniRoute 的程式設計工具（用戶端 → CLI → OmniRoute → 提供者） | 26           |
-| **CLI 代理程式** | `/dashboard/cli-agents` | 指向 OmniRoute 的自主代理程式（流程相同，但範圍更廣）              | 10           |
+| **CLI 程式碼**   | `/dashboard/cli-code`   | 指向 OmniRoute 的程式設計工具（用戶端 → CLI → OmniRoute → 提供者） | 27           |
+| **CLI 代理程式** | `/dashboard/cli-agents` | 指向 OmniRoute 的自主代理程式（流程相同，但範圍更廣）              | 11           |
 | **ACP 代理程式** | `/dashboard/acp-agents` | OmniRoute 透過 stdio/ACP 產生並作為後端使用的 CLI（反向流程）      | 請參閱登錄表 |
 
 舊版路由會透過 308 重新導向：`/dashboard/cli-tools` → `/dashboard/cli-code`、`/dashboard/agents` → `/dashboard/acp-agents`。
@@ -54,15 +54,16 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 每個命令都接受 `--remote <url> --api-key <key>`（設定本機工具以連線至遠端
-OmniRoute）、`--dry-run`（只預覽而不寫入）及 `--port`。不支援自動探索模型的工具（Cline、Kilo、Roo、Goose、Aider、Qwen、5dive）接受
+OmniRoute）、`--dry-run`（只預覽而不寫入）及 `--port`。不支援自動探索模型的工具（Cline、Kilo、Roo、Goose、Aider、Qwen、5dive、WhyCodes）接受
 `--model <id>`（非互動式執行時也可使用 `--yes`）。`setup-5dive` 是唯一不會在
 `$HOME` 下寫入內容的設定流程：它會在機群主機上寫入由 root 擁有的驗證設定檔，以設定 5dive 代理程式機群，因此會透過 `sudo`
 重新執行，而且本身不支援遠端模式。若要啟動 CLI、注入正確的環境變數且完全不寫入任何設定，請使用通用的
-`omniroute run <target>` 啟動器（claude、codex、aider、goose、opencode、qwen、
-gemini——目標及別名來自 `bin/cli/cli-manifest.mjs`）；舊版的各工具專用啟動器 `omniroute launch`（Claude Code）及 `omniroute launch-codex`
+`omniroute run <target>` 啟動器（claude、codex、aider、goose、opencode、qwen、gemini、
+whycodes——目標及別名來自 `bin/cli/cli-manifest.mjs`）；舊版的各工具專用啟動器 `omniroute launch`（Claude Code）及 `omniroute launch-codex`
 （Codex）仍可使用。Gemini CLI 僅支援啟動：它是 `omniroute run`
 的目標，但沒有 `setup-*`/`configure` 設定流程。
 
@@ -163,7 +164,7 @@ kilo、continue）——一個可改在主機上執行的 `hostSetupCommand`（�
 `baseUrlSupport: "partial"` 的工具會在儀表板卡片中顯示「⚠ 部分支援基礎 URL」徽章。
 ---
 
-## 2. CLI 代理程式目錄（10 項工具）
+## 2. CLI 代理程式目錄（11 項工具）
 
 顯示於 `/dashboard/cli-agents` 中的自主代理程式：
 
@@ -179,6 +180,7 @@ kilo、continue）——一個可改在主機上執行的 `hostSetupCommand`（�
 | letta        | Letta CLI        | Letta                    | full          | false         |
 | prime-agent  | Prime Agent      | Prime Intellect（OSS）   | full          | false         |
 | 5dive        | 5dive            | OSS（5dive-ai）          | full          | false         |
+| whycodes     | WhyCodes         | Why Corporation          | full          | false         |
 
 ---
 

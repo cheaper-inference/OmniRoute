@@ -8,7 +8,7 @@
 > 再生成コマンド: `npm run gen:provider-reference`
 > **最終生成日:** 2026-10-27
 
-プロバイダー総数: **376**。以下のカテゴリ別内訳を参照してください。
+プロバイダー総数: **377**。以下のカテゴリ別内訳を参照してください。
 
 ## カテゴリ
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | Local, self-hosted | [link](https://github.com/vllm-project/vllm)                    | APIキーはオプションです。ローカルのvLLMのOpenAI互換ベースURLを設定してください (デフォルト: http://localhost:8000/v1)。                                                                                                                                                                                               |
 | `xinference`          | `xinference` | XInference          | Local, self-hosted | [link](https://inference.readthedocs.io)                        | APIキーはオプションです。ローカルのXInferenceのOpenAI互換ベースURLを設定してください (デフォルト: http://localhost:9997/v1)。                                                                                                                                                                                         |
 
-## 検索プロバイダー（18）
+## 検索プロバイダー（19）
 
 | ID                  | エイリアス      | 名前                               | タグ | ウェブサイト                                                      | 注記                                                                                                                                    |
 | ------------------- | --------------- | ---------------------------------- | ---- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                         | 検索 | [リンク](https://exa.ai)                                          | dashboard.exa.ai から取得する API キー                                                                                                  |
 | `firecrawl`         | `fc`            | Firecrawl                          | 検索 | [リンク](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys から取得する API キー（またはセルフホストした Firecrawl のベース URL を設定）                                |
 | `google-pse-search` | `google-pse`    | Google Programmable Search         | 検索 | [リンク](https://developers.google.com/custom-search/v1/overview) | Google API キーと Programmable Search Engine ID（cx）が必要です                                                                         |
+| `kimi-search`       | `kimi-search`   | Kimi Search                        | 検索 | [リンク](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai から取得した Moonshot AI API キー（MOONSHOT_API_KEY）                                                                  |
 | `linkup-search`     | `linkup`        | Linkup Search                      | 検索 | [リンク](https://docs.linkup.so)                                  | Linkup ダッシュボードから取得する Bearer API キー                                                                                       |
 | `nimble-search`     | `nimble`        | Nimble Search                      | 検索 | [リンク](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble ダッシュボードから取得する Bearer API キー                                                                                       |
 | `ollama-search`     | `ollama-search` | Ollama Search                      | 検索 | [リンク](https://ollama.com/settings/keys)                        | Ollama Cloud と同じ API キー（ollama.com/settings/keys から取得）                                                                       |

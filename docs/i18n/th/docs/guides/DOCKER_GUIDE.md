@@ -664,6 +664,8 @@ OmniRoute มาตรฐานบน Docker / Kubernetes ประกอบด�
 
 **การอัปเกรด:** ให้คาดว่าเซสชันทั้งหมดจะหลุด ให้ระบายไคลเอนต์ออกหากทำได้ เนื่องจากไม่มีการอัปเดตแบบ rolling บน SQLite เริ่มต้น `restart: unless-stopped` ของ Compose ร่วมกับ `HEALTHCHECK` ของ Docker จะเปลี่ยนโปรเซสเพียงตัวเดียวเมื่อคอนเทนเนอร์อยู่ในสถานะ Unhealthy เช่นกัน — โดยมีขอบเขตผลกระทบเท่ากัน
 
+แมนิเฟสต์พร้อมใช้และแผนภูมิ Helm อยู่ใน `deploy/kubernetes/` และ `deploy/helm/omniroute/` — โปรดดู[คู่มือการปรับใช้ Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md)
+
 ตัวอย่าง Kubernetes สำหรับ **เรพลิกาเดียว** (จำเป็นต้องใช้ Recreate และห้ามเพิ่ม `replicas` สำหรับไฟล์ SQLite เดียว):
 
 ```yaml

@@ -488,7 +488,7 @@ Obsługuje:
 
 | Plik                          | Przeznaczenie                                         |
 | ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | Rejestr modeli czatu obejmujący katalog 376 dostawców |
+| `providerRegistry.ts`         | Rejestr modeli czatu obejmujący katalog 377 dostawców |
 | `providerModels.ts`           | Aliasy modeli, mapowanie formatów                     |
 | `constants.ts`                | Limity czasu, ograniczenia, kody stanu                |
 | `defaultThinkingSignature.ts` | Domyślna sygnatura myślenia Claude                    |

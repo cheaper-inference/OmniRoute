@@ -673,6 +673,8 @@ Az alapértelmezett Docker-/Kubernetes-alapú OmniRoute **egy Node-folyamatból 
 
 **Frissítések:** számítson minden munkamenet megszakadására. Ha lehetséges, ürítse ki a klienseket; az alapértelmezett SQLite használatakor nincs gördülő frissítés. A Compose `restart: unless-stopped` beállítása és a Docker `HEALTHCHECK` szintén lecseréli az egyetlen folyamatot, amikor a konténer Unhealthy állapotba kerül — ugyanazzal a hatókörű kieséssel.
 
+Kész manifesztek és egy Helm chart található a `deploy/kubernetes/` és a `deploy/helm/omniroute/` könyvtárban — lásd a [Kubernetes telepítési útmutatóját](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kubernetes-részlet **egyetlen replikához** (a Recreate kötelező; ne növelje a `replicas` értékét egyetlen SQLite-fájl használata mellett):
 
 ```yaml

@@ -13,7 +13,7 @@
 
 ## Ihe Ọ Bụ
 
-OmniRoute na-edebanye ndị na-enye ọrụ 376, gụnyere ndepụta katalog 155 e nyere akara **free/no-auth**
+OmniRoute na-edebanye ndị na-enye ọrụ 377, gụnyere ndepụta katalog 155 e nyere akara **free/no-auth**
 (no-auth,
 free-tier OAuth, ma ọ bụ free-tier API key — lee
 [Ntuziaka Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) na

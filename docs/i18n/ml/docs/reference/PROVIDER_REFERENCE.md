@@ -8,7 +8,7 @@
 > വീണ്ടും സൃഷ്ടിക്കാൻ: `npm run gen:provider-reference`
 > **അവസാനം സൃഷ്ടിച്ചത്:** 2026-10-27
 
-ആകെ പ്രൊവൈഡർമാർ: **376**. താഴെയുള്ള വിഭാഗം തിരിച്ചുള്ള കണക്ക് കാണുക.
+ആകെ പ്രൊവൈഡർമാർ: **377**. താഴെയുള്ള വിഭാഗം തിരിച്ചുള്ള കണക്ക് കാണുക.
 
 ## വിഭാഗങ്ങൾ
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | ലോക്കൽ, സ്വയം ഹോസ്റ്റ് ചെയ്തത് | [ലിങ്ക്](https://github.com/vllm-project/vllm)                    | API കീ ഐച്ഛികമാണ്. ലോക്കൽ vLLM-ന്റെ OpenAI-അനുയോജ്യമായ ബേസ് URL കോൺഫിഗർ ചെയ്യുക (ഡിഫോൾട്ട്: http://localhost:8000/v1).                                                                                                                                                                                                                                                |
 | `xinference`          | `xinference` | XInference          | ലോക്കൽ, സ്വയം ഹോസ്റ്റ് ചെയ്തത് | [ലിങ്ക്](https://inference.readthedocs.io)                        | API കീ ഐച്ഛികമാണ്. ലോക്കൽ XInference-ന്റെ OpenAI-അനുയോജ്യമായ ബേസ് URL കോൺഫിഗർ ചെയ്യുക (ഡിഫോൾട്ട്: http://localhost:9997/v1).                                                                                                                                                                                                                                          |
 
-## തിരയൽ ദാതാക്കൾ (18)
+## തിരയൽ ദാതാക്കൾ (19)
 
 | ID                  | അപരനാമം         | പേര്                              | ടാഗുകൾ | വെബ്സൈറ്റ്                                                        | കുറിപ്പുകൾ                                                                                                                                           |
 | ------------------- | --------------- | --------------------------------- | ------ | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                        | തിരയൽ  | [ലിങ്ക്](https://exa.ai)                                          | dashboard.exa.ai-ൽ നിന്നുള്ള API കീ                                                                                                                  |
 | `firecrawl`         | `fc`            | Firecrawl                         | തിരയൽ  | [ലിങ്ക്](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys-ൽ നിന്നുള്ള API കീ (അല്ലെങ്കിൽ സ്വയം ഹോസ്റ്റ് ചെയ്ത Firecrawl ബേസ് URL സജ്ജമാക്കുക)                                       |
 | `google-pse-search` | `google-pse`    | Google Programmable Search        | തിരയൽ  | [ലിങ്ക്](https://developers.google.com/custom-search/v1/overview) | ഒരു Google API കീയും നിങ്ങളുടെ Programmable Search Engine ID-യും (cx) ആവശ്യമാണ്                                                                      |
+| `kimi-search`       | `kimi-search`   | Kimi Search                       | തിരയൽ  | [ലിങ്ക്](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai-ൽ നിന്നുള്ള Moonshot AI API കീ (MOONSHOT_API_KEY)                                                                                   |
 | `linkup-search`     | `linkup`        | Linkup Search                     | തിരയൽ  | [ലിങ്ക്](https://docs.linkup.so)                                  | Linkup ഡാഷ്ബോർഡിൽ നിന്നുള്ള Bearer API കീ                                                                                                            |
 | `nimble-search`     | `nimble`        | Nimble Search                     | തിരയൽ  | [ലിങ്ക്](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble ഡാഷ്ബോർഡിൽ നിന്നുള്ള Bearer API കീ                                                                                                            |
 | `ollama-search`     | `ollama-search` | Ollama Search                     | തിരയൽ  | [ലിങ്ക്](https://ollama.com/settings/keys)                        | Ollama Cloud-ലേതിന് സമാനമായ API കീ (ollama.com/settings/keys-ൽ നിന്ന്)                                                                               |

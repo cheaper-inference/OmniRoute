@@ -667,6 +667,8 @@ Konfigurasi standar Docker/Kubernetes OmniRoute terdiri atas **satu proses Node 
 
 **Peningkatan versi:** perkirakan setiap sesi akan terputus. Alihkan klien jika memungkinkan; tidak ada rolling update pada SQLite default. Compose `restart: unless-stopped` beserta Docker `HEALTHCHECK` juga akan mengganti satu-satunya proses ketika container berstatus Unhealthy — dengan dampak yang sama luasnya.
 
+Manifes siap pakai dan chart Helm tersedia di `deploy/kubernetes/` dan `deploy/helm/omniroute/` — lihat [panduan deployment Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Cuplikan Kubernetes untuk **satu replika** (Recreate wajib digunakan; jangan tingkatkan `replicas` untuk satu file SQLite):
 
 ```yaml

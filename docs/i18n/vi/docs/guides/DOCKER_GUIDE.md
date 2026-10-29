@@ -660,6 +660,8 @@ Cấu hình Docker / Kubernetes OmniRoute tiêu chuẩn là **một tiến trìn
 
 **Nâng cấp:** mọi phiên đều sẽ bị ngắt. Hãy ngừng tiếp nhận máy khách nếu có thể; không có cập nhật cuốn chiếu trên SQLite mặc định. Compose `restart: unless-stopped` kết hợp với Docker `HEALTHCHECK` cũng sẽ thay thế tiến trình duy nhất khi container ở trạng thái Unhealthy — phạm vi ảnh hưởng là như nhau.
 
+Các manifest dựng sẵn và một biểu đồ Helm nằm trong `deploy/kubernetes/` và `deploy/helm/omniroute/` — xem [hướng dẫn triển khai Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Đoạn cấu hình Kubernetes cho **một replica** (bắt buộc sử dụng Recreate; không tăng `replicas` khi chỉ dùng một tệp SQLite):
 
 ```yaml

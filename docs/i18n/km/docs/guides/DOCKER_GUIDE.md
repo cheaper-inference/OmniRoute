@@ -640,6 +640,8 @@ OmniRoute ស្តង់ដារសម្រាប់ Docker / Kubernetes គ�
 
 **ការអាប់ដេតកំណែ៖** រំពឹងថា session ទាំងអស់នឹងផ្តាច់។ បង្ហូរ client ចេញសិន ប្រសិនបើអ្នកអាចធ្វើបាន។ មិនមាន rolling update លើ SQLite លំនាំដើមទេ។ Compose `restart: unless-stopped` រួមជាមួយ Docker `HEALTHCHECK` ក៏នឹងជំនួស process តែមួយគត់ផងដែរ នៅពេលកុងតឺន័រស្ថិតក្នុងស្ថានភាព Unhealthy — មានវិសាលភាពផលប៉ះពាល់ដូចគ្នា។
 
+manifest ដែលត្រៀមប្រើរួច និង Helm chart ស្ថិតនៅក្នុង `deploy/kubernetes/` និង `deploy/helm/omniroute/` — សូមមើល [មគ្គុទ្ទេសក៍ដាក់ពង្រាយ Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md)។
+
 ឃ្លាកូដ Kubernetes សម្រាប់ **replica តែមួយ** (តម្រូវឱ្យប្រើ Recreate។ កុំបង្កើន `replicas` សម្រាប់ឯកសារ SQLite តែមួយ)៖
 
 ```yaml

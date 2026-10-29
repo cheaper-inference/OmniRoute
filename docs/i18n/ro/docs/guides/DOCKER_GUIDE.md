@@ -665,6 +665,8 @@ Configurația Docker / Kubernetes standard a OmniRoute este **un proces Node + u
 
 **Upgrade-uri:** așteptați-vă ca fiecare sesiune să fie întreruptă. Redirecționați gradual clienții, dacă este posibil; nu există actualizare continuă cu configurația SQLite implicită. Opțiunea Compose `restart: unless-stopped`, împreună cu `HEALTHCHECK` din Docker, va înlocui, de asemenea, singurul proces atunci când containerul devine Unhealthy — cu aceeași rază de impact.
 
+Manifestele gata de utilizare și o diagramă Helm se află în `deploy/kubernetes/` și `deploy/helm/omniroute/` — consultați [ghidul de implementare Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Fragment Kubernetes pentru o **singură replică** (Recreate este obligatoriu; nu măriți `replicas` pentru un singur fișier SQLite):
 
 ```yaml

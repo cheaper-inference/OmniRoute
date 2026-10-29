@@ -488,7 +488,7 @@ Jis apdoroja:
 
 | Failas                        | Paskirtis                                                  |
 | ----------------------------- | ---------------------------------------------------------- |
-| `providerRegistry.ts`         | Pokalbių modelių registras, apimantis 376 teikėjų katalogą |
+| `providerRegistry.ts`         | Pokalbių modelių registras, apimantis 377 teikėjų katalogą |
 | `providerModels.ts`           | Modelių alternatyvūs pavadinimai, formatų susiejimas       |
 | `constants.ts`                | Skirtojo laiko reikšmės, apribojimai, būsenos kodai        |
 | `defaultThinkingSignature.ts` | Numatytasis Claude mąstymo parašas                         |

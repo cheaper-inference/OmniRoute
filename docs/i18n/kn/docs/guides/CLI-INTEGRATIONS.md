@@ -17,11 +17,11 @@ API ಕೀಯನ್ನು ಎನ್ವಿರಾನ್ಮೆಂಟ್ ವೇರ�
 ಎನ್ವಿರಾನ್ಮೆಂಟ್ ಫೈಲ್ ಅನ್ನು ಶಾಶ್ವತವಾಗಿ ಉಳಿಸುವ ಕಮಾಂಡ್ಗಳನ್ನು ಕೆಳಗೆ ಸೂಚಿಸಲಾಗಿದೆ.
 
 ಯಾವುದೇ ಕಾನ್ಫಿಗ್ ಬರೆಯದೆ, ಸರಿಯಾದ env ಅನ್ನು ಇಂಜೆಕ್ಟ್ ಮಾಡಿ `claude`, `codex`, `aider`,
-`goose`, `opencode`, `qwen` ಅಥವಾ `gemini` ಅನ್ನು ಪ್ರಾರಂಭಿಸುವ ಸಾಮಾನ್ಯ ಲಾಂಚರ್ ಕೂಡ ಇದೆ —
+`goose`, `opencode`, `qwen`, `gemini` ಅಥವಾ `whycodes` ಅನ್ನು ಪ್ರಾರಂಭಿಸುವ ಸಾಮಾನ್ಯ ಲಾಂಚರ್ ಕೂಡ ಇದೆ —
 `omniroute run <target>`. ಟಾರ್ಗೆಟ್ಗಳು ಮತ್ತು ಅವುಗಳ ಅಲಿಯಾಸ್ಗಳು ಕ್ಯಾನಾನಿಕಲ್ ಮ್ಯಾನಿಫೆಸ್ಟ್
 `bin/cli/cli-manifest.mjs` ನಿಂದ ಬರುತ್ತವೆ
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), ಮತ್ತು `omniroute completion` ಅದೇ
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), ಮತ್ತು `omniroute completion` ಅದೇ
 ಮ್ಯಾನಿಫೆಸ್ಟ್ನಿಂದ ಪಡೆದ ಟಾರ್ಗೆಟ್ ಪದಗಳನ್ನು ಒದಗಿಸುತ್ತದೆ. ಹಳೆಯ ಪ್ರತಿ-ಉಪಕರಣ ಲಾಂಚರ್ಗಳು —
 `omniroute launch` (Claude Code) ಮತ್ತು `omniroute launch-codex` (Codex) — ಇನ್ನೂ
 ಲಭ್ಯವಿವೆ.
@@ -83,7 +83,8 @@ omniroute providers remove <connection-id> --yes
 | `omniroute setup-aider`    | Aider                        | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + env ಸೂತ್ರವನ್ನು ಮುದ್ರಿಸುತ್ತದೆ                                                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | ಎರಡೂ             |
 | `omniroute setup-qwen`     | Qwen Code                    | `~/.qwen/settings.json` — V4 `modelProviders.openai` ಅರೆ + `~/.qwen/.env` ನಲ್ಲಿ `OMNIROUTE_API_KEY`                                                                                                 | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | ಎರಡೂ             |
 | `omniroute setup-5dive`    | 5dive (ಏಜೆಂಟ್ ಸಮೂಹ)          | `$HOME` ಅಡಿಯಲ್ಲಿ ಏನೂ ಇಲ್ಲ — `5dive agent auth set` ಮೂಲಕ 5dive **ದೃಢೀಕರಣ ಪ್ರೊಫೈಲ್** (`/var/lib/5dive/auth-profiles/<name>/`) ಅನ್ನು ಬರೆಯುತ್ತದೆ; root ಬಳಕೆದಾರರಿಗೆ ಮಾತ್ರ, ಸಮೂಹ ಹೋಸ್ಟ್ನಲ್ಲಿ ರನ್ ಆಗುತ್ತದೆ | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | ಎರಡೂ             |
-| `omniroute run <target>`   | ರನ್ಟೈಮ್ ಪ್ರಾರಂಭ (ಸಾಮಾನ್ಯ)    | ಏನೂ ಇಲ್ಲ — ಸರಿಯಾದ env ಮತ್ತು args ಜೊತೆಗೆ `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` ಅನ್ನು ಪ್ರಾರಂಭಿಸುತ್ತದೆ; Qwen ಮತ್ತು Gemini ತಾತ್ಕಾಲಿಕ ಪ್ರತ್ಯೇಕಿತ ಹೋಮ್ ಅನ್ನು ಬಳಸುತ್ತವೆ              | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | ಎರಡೂ             |
+| `omniroute setup-whycodes` | WhyCodes                     | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); ಪಥವು `$WHYCODES_HOME/config.toml` ಅಥವಾ `~/.whycodes/config.toml` ಆಗಿದೆ                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | ಎರಡೂ             |
+| `omniroute run <target>`   | ರನ್ಟೈಮ್ ಪ್ರಾರಂಭ (ಸಾಮಾನ್ಯ)    | ಏನೂ ಇಲ್ಲ — ಸರಿಯಾದ env ಮತ್ತು args ಜೊತೆಗೆ `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` ಅನ್ನು ಪ್ರಾರಂಭಿಸುತ್ತದೆ; Qwen ಮತ್ತು Gemini ತಾತ್ಕಾಲಿಕ ಪ್ರತ್ಯೇಕಿತ ಹೋಮ್ ಅನ್ನು ಬಳಸುತ್ತವೆ   | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | ಎರಡೂ             |
 | `omniroute launch`         | Claude Code                  | ಏನೂ ಇಲ್ಲ — `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` ಅನ್ನು ಸೇರಿಸಿ `claude` ಅನ್ನು ಪ್ರಾರಂಭಿಸುತ್ತದೆ                                                                                                  | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | ಎರಡೂ             |
 | `omniroute launch-codex`   | OpenAI Codex CLI             | ಏನೂ ಇಲ್ಲ — `-c` ಫ್ಲ್ಯಾಗ್ಗಳ ಮೂಲಕ `omniroute` ಪೂರೈಕೆದಾರವನ್ನು ಸೇರಿಸಿ `codex` ಅನ್ನು ಪ್ರಾರಂಭಿಸುತ್ತದೆ                                                                                                     | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | ಎರಡೂ             |
 
@@ -99,14 +100,15 @@ omniroute providers remove <connection-id> --yes
   ಮುದ್ರಿಸುತ್ತದೆ. `setup-cursor` ಅನ್ನು **ಹೊರತುಪಡಿಸಿ** ಪ್ರತಿಯೊಂದು `setup-*` ಕಮಾಂಡ್ನಲ್ಲಿ ಲಭ್ಯವಿದೆ
   (ಅದು ಎಂದಿಗೂ ಫೈಲ್ ಬರೆಯುವುದಿಲ್ಲ).
 - `--model <id>` — ಮಾದರಿ ಸ್ವಯಂ-ಪತ್ತೆ ಇಲ್ಲದ ಪರಿಕರಗಳಿಗೆ ಅಗತ್ಯವಿದೆ (ಅಥವಾ ಸಂವಾದಾತ್ಮಕವಾಗಿ
-  ಆಯ್ಕೆಮಾಡಲಾಗುತ್ತದೆ): Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. ಆ ಪರಿಕರಗಳು
+  ಆಯ್ಕೆಮಾಡಲಾಗುತ್ತದೆ): Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. ಆ ಪರಿಕರಗಳು
   ಸಂವಾದಾತ್ಮಕವಲ್ಲದ ರನ್ಗಳಿಗಾಗಿ `--yes` ಅನ್ನು ಸಹ ಸ್ವೀಕರಿಸುತ್ತವೆ (ಆಗ `--model` ಅಗತ್ಯವಿರುತ್ತದೆ).
   ಡೀಫಾಲ್ಟ್ ಉನ್ನತ-ಹಂತದ ಮಾದರಿಯನ್ನು ಹೊಂದಿಸಲು `setup-opencode` `--model` ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ.
 - `omniroute run` ನಲ್ಲಿನ `--model <id>` ಮ್ಯಾನಿಫೆಸ್ಟ್ನ ಪ್ರತಿ-ಗುರಿ ಜೋಡಣೆಯನ್ನು
   (`bin/cli/cli-manifest.mjs`) ಅನುಸರಿಸುತ್ತದೆ: **aider** `--model openai/<id>` ಅನ್ನು ಮತ್ತು
   **opencode** `--model omniroute/<id>` ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ (id ಈಗಾಗಲೇ ಅದನ್ನು
   ಹೊಂದಿರದಿದ್ದಾಗ ಮಾತ್ರ ಪೂರ್ವಪ್ರತ್ಯಯವನ್ನು ಸೇರಿಸಲಾಗುತ್ತದೆ); **qwen** ಮತ್ತು **gemini** id ಅನ್ನು ಯಥಾವತ್ತಾಗಿ ಸ್ವೀಕರಿಸುತ್ತವೆ;
-  **claude** ಅದನ್ನು `ANTHROPIC_MODEL` ಮೂಲಕ, **goose** `GOOSE_MODEL` ಮೂಲಕ ಮತ್ತು
+  **claude** ಅದನ್ನು `ANTHROPIC_MODEL` ಮೂಲಕ, **goose** `GOOSE_MODEL` ಮೂಲಕ,
+  **whycodes** `-P omniroute -m <id>` ಮೂಲಕ ಮತ್ತು
   **codex** `-c model_providers.omniroute.*` args ಮೂಲಕ ಪಡೆಯುತ್ತವೆ. **Qwen ಮಾತ್ರ
   `--model` ಅನ್ನು ಕಡ್ಡಾಯವಾಗಿ ಅಗತ್ಯಪಡಿಸುವ run ಗುರಿಯಾಗಿದೆ** — ಅದಿಲ್ಲದೆ `omniroute run qwen`
   ಸ್ಪಷ್ಟ ದೋಷದೊಂದಿಗೆ `2` ಸ್ಥಿತಿಯಲ್ಲಿ ನಿರ್ಗಮಿಸುತ್ತದೆ.
@@ -289,6 +291,7 @@ OmniRoute, OpenAI ಇಂಟರ್ಫೇಸ್ ಅನ್ನು `/v1` ನಲ್ಲ
 | `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1` ಜೊತೆಗೆ    | ಹೌದು                                                    |
 | `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | ಮೂಲ             | ಇಲ್ಲ — SDK `/v1beta/models/…` ಅನ್ನು ಸೇರಿಸುತ್ತದೆ         |
 | `setup-5dive` (ದೃಢೀಕರಣ ಪ್ರೊಫೈಲ್ನಲ್ಲಿನ `ANTHROPIC_BASE_URL`)                | ಮೂಲ             | ಇಲ್ಲ — Claude Code `/v1/messages` ಅನ್ನು ಸೇರಿಸುತ್ತದೆ     |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | `/v1` ಜೊತೆಗೆ    | ಹೌದು — WhyCodes `/chat/completions` ಗೆ ಪೋಸ್ಟ್ ಮಾಡುತ್ತದೆ |
 
 ---
 

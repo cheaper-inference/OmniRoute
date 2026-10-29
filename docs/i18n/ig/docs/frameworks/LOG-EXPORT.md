@@ -257,7 +257,217 @@ na-ajụ arịrịọ karịrị 10 MB. Chunks na-emechi ma ha ruo ahịrị 500
 
 ---
 
-## 5. Ịgbakwunye ebe mbupu
+## 5. Ebe a na-eziga traces OTLP/HTTP
+
+Nhazi na-eji `type: "otlp-http"`. Nke a bụ mbupụ ndekọ oku echekwara nke a haziri oge ya,
+nke cursor na-akwado, ọ bụghị ebe nnata ihe omume routing ozugbo nke na-agbalị ike ya niile dị na
+`open-sse/services/routing/otel.ts`. Ọ naghị agụ ma ọ bụ gbanwee mgbanwe gburugburu,
+ngụ oge ma ọ bụ buffers nke ebe nnata ahụ. Ịgbanye ha abụọ nwere ike imepụta ụdị spans abụọ nọọrọ onwe ha;
+jiri mpaghara instrumentation `omniroute.log-export` mata spans ndekọ oku ndị a.
+
+| Igodo                    | Ndabara / ebumnuche                                                                    |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `endpoint`               | URL HTTP(S) traces zuru ezu achọrọ; anaghị etinye mgbakwunye `/v1/traces`              |
+| `headers`                | Ahịrị `Name: value` ma ọ bụ JSON object nke strings, ma ọ bụrụ na achọrọ; ezoro ya ezo |
+| `requestHeaderAllowlist` | Ihe efu (agbanyụghị); aha/nganiihu nkụnye ozi onye ahịa a ga-ejide dị ka àgwà span     |
+| `serviceName`            | `omniroute`; àgwà resource `service.name`                                              |
+| `langfuseMapping`        | `false`; na-agbakwunye àgwà generation/session/user nke Langfuse                       |
+| `identity`               | `pseudonymous`, `keyName`, ma ọ bụ `none`                                              |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                |
+| `timeoutMs`              | `30000` maka mbọ HTTP ọ bụla                                                           |
+| `environment`            | Edebeghị ya; `langfuse.environment` ma ọ bụrụ na achọrọ                                |
+
+Dashboard izugbe na-egosipụta oghere ndị a. `paths` na-anabata array API ma ọ bụ textarea
+nwere ụzọ kpọmkwem nke ahịrị ọhụrụ/rikoma kewara. A na-awụfe embeddings, rerank na ụzọ ndị ọzọ
+ọ gwụla ma e nyere ha ikike n'ụzọ doro anya. Ahịrị ndị a wụfere ka na-eme ka cursor gaa n'ihu; ngụgụ
+`exported`/`exportedTotal` nke runner dị ugbu a na-agụ ahịrị isi mmalite a haziri, gụnyere ahịrị
+e wepụrụ site na nzacha, kama spans a nabatara. A na-eme nzacha n'ime usoro nwa, na-enweghị ịgbanwe
+nkwekọrịta IPC/cursor ya.
+
+Nkwado URL na-eji ihe enyemaka `parseAndValidateNonMetadataUrl` nke na-adịghị eji DB sitere na
+`src/shared/network/outboundUrlGuard.ts`: iwu `block-metadata`. O nwere otu
+nyocha metadata/protocol/nzere agbakwunyere ndị a na-eme n'enweghị ọnọdụ dị ka ihe nkwado webhook
+mgbe a nabatara URL nzuzo, mana ọ na-ekwe ka ebe localhost/LAN n'ebumnuche, na-enweghị
+mgbanwe feature-flag zuru ụwa ọnụ. Nke a na-enye ohere maka endpoints Langfuse, Phoenix, Tempo na Collector
+nke mmadụ na-akwado n'onwe ya, gụnyere endpoints HTTP nzuzo. A na-egbochi hosts cloud-metadata mgbe niile.
+A naghị eso redirects, ya mere collector enweghị ike ibugharị nzere gaa na host ọzọ.
+Dị ka ihe nche URL lexical dị ugbu a, nke a anaghị ekedo mkpebi DNS; hazie naanị
+hosts nke onye ọrụ nchịkwa na-achịkwa. Họrọ HTTPS mgbe ọ bụla endpoint na-anọghị na netwọkụ a tụkwasịrị obi.
+
+### Payload na nnyefe
+
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) na-ebu otu
+span CLIENT maka ahịrị ọ bụla e nyere ikike, nke aha ya bụ ụzọ arịrịọ ya kpọmkwem. Ịkpọ aha site na ụzọ na-ekewa
+Chat Completions, Responses na Messages n'enweghị itinye data model ma ọ bụ njirimara n'ime
+aha span. Àgwà resource gụnyere `service.name` na `service.version` nke package ahụ.
+
+Ihe ndekọ mbọ nkata nkịtị (`open-sse/handlers/chatCore/attemptLogging.ts`) na-ede
+`duration = Date.now() - startTime` mgbe e mechara ma ọ naghị enye akara oge;
+`saveCallLogOperation` na `src/lib/usage/callLogs.ts` na-eme ka akara oge bụrụ oge ide
+(nrụcha) na ndabara. Ya mere mbupụ na-edobe njedebe = akara oge ahịrị, na mmalite = njedebe − oge o were
+(milliseconds, a gbanwere ka ọ bụrụ nanoseconds desimal). A na-echekwa akara oge akụkọ ihe mere eme
+nke onye na-akpọ nyere dị ka oge njedebe kwa; enweghị ihe na-ekewa mmalite/nrụcha maka ahịrị ọ bụla.
+Oge null na-aghọ efu. Akara oge na-ezighi ezi/efu na-eme ka otu mbupụ daa kama ịmepụta
+spans na-adịghị agbanwe agbanwe n'ụzọ a pụrụ ịtụ anya ya. `ttftMs` nwere ike ịbụ null ma na-adaba na `omniroute.ttft_ms`.
+
+Àgwà gụnyere `gen_ai.operation.name="chat"`, onye na-eweta ọrụ, model a rịọrọ/model nzaghachi,
+tokens ntinye/mmepụta, tokens cache-read/cache-creation/reasoning ma ọ bụrụ na ha dị, ọnọdụ HTTP,
+combo, isi mmalite cache, akara session na id njikọ. Uru integer OTLP na akara oge
+bụ strings desimal; strings, booleans na ọnụọgụ nwere akụkụ irighiri na-eji ụdị uru OTLP
+nke ha. Spans njehie nwere ọnọdụ ERROR na ozi ọnọdụ e wepụrụ ozi dị nro na ya. Ndekọ canonical
+enweghị URL host upstream, ya mere a naghị etinye `server.address` kama ịkọwa collector n'ụzọ na-ezighi ezi
+dị ka sava model. A naghị ebupụ ọnụ ahịa.
+
+Naanị `includeBodies=true` na-ebubata ọdịnaya. Mgbe `langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` na-ebu JSON ahụ arịrịọ/nzaghachi
+e wepụrụ ozi dị nro na ya dịka OmniRoute si chekwaa ya (e mere ka ọ bụrụ canonical mgbe enwere ike ịtụgharị ya), ọ bụghị array
+ozi semconv a gbanwere ọdịdị ya. Ahụ e bepụrụ/na-abụghị JSON na-anọgide ederede nkịtị. Mgbe `langfuseMapping=true`,
+a na-ewepụta ahụ naanị dị ka `langfuse.observation.input` / `langfuse.observation.output`;
+a naghị etinye àgwà `gen_ai.*.messages` ka e wee ziga ahụ ọ bụla otu ugboro. Ụdị abụọ ahụ
+na-eketa `maxBodyBytes` site n'ụzọ mbubata ọdịnaya dị ugbu a;
+`omniroute.bodies_truncated=true` na-egosi mbepụ.
+Ebe a na-eziga adịghị agbakwunye snapshots pipeline ọzọ ma ọ bụ ịgụ artifacts a na-ewepụbeghị ozi dị nro na ha;
+njide nkụnye ozi arịrịọ nke nhọrọ na-eji snapshot onye ahịa e bubatara dị ugbu a akọwara n'okpuru.
+Jiri usoro oge dị n'ọkwa nkeji dịka `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` mgbe ị na-ebupụ
+ahụ, kama ikpokọta ọrụ fọdụrụ kwa elekere.
+
+### Nkụnye ozi arịrịọ onye ahịa nke nhọrọ
+
+Njide nkụnye ozi **anaghị agbanye na ndabara**. Debe `requestHeaderAllowlist` na nhazi ebe a na-eziga
+ma gbanye **Bupụ prompts na nzaghachi** (`includeBodies: true` n'ebe a na-eziga).
+Ndepụta ikike na-anabata array API ma ọ bụ textarea nwere aha ahịrị ọhụrụ/rikoma kewara:
+
+```json
+{
+  "requestHeaderAllowlist": ["User-Agent", "X-Project", "X-OmniRoute-Meta-*"]
+}
+```
+
+Aha na-adakọ kpọmkwem n’agbanyeghị ma mkpụrụedemede hà bụ nnukwu ma ọ bụ obere, belụsọ mgbe otu `*` dị na njedebe na-ahọrọ nganiihu
+aha nkụnye nke na-adịghị efu. A na-ajụ `*` naanị ya, akara nnọchi dị n’etiti aha na aha nkụnye HTTP na-adịghị irè.
+E nwere ihe nhọpụta 64 karịa, nke ọ bụla nwere aha/nganiihu na-erughị ma ọ bụ hà ka baịtị ASCII 256.
+Ntọala a dị iche na `headers`, nke na-enyocha njirimara onye mbupụ nye onye nchịkọta.
+
+Njide na-agụ naanị `pipeline_client_request`, nke a na-ejupụta site na `clientRawRequest`
+(ma ọ bụ `clientRequest` nke ochie) nke pipeline zuru ezu echekwara. Ọ naghị eji nkụnye arịrịọ onye na-eweta dochie ya ma ọlị.
+Ọ ga-abụrịrị na agbanyere ndekọ pipeline zuru ezu mgbe e dekọrọ arịrịọ ahụ. Ọ bụrụ na
+agbanyụghị `includeBodies`, ma ọ bụ JSON nke nseta ọnọdụ onye ahịa adịghị, mebiri emebi ma ọ bụ ebipụrụ, a naghị ewepụta
+njirimara nkụnye ọ bụla. Ịbawanye `maxBodyBytes` nwere ike igbochi ibipụ nseta ọnọdụ n’oge mbupụ;
+ọ pụghị iweghachi nkọwa a na-echekwaghị mbụ. A na-eleghara nseta ọnọdụ karịrị 1 MiB ma ọ bụ nke nwere ihe karịrị
+ndenye nkụnye 256 anya. Mbupụ prompt/nzaghachi dị ugbu a ka na-arụ ọrụ tinyere
+njide nkụnye; ndepụta nkwenye anaghị enye ọnọdụ njuputa nke naanị nkụnye.
+
+Uru ndị ahọpụtara na-aghọ usoro eriri OTLP `http.request.header.<full lowercase header name>`,
+ọbụna maka otu eriri. Dịka ọmụmaatụ, `X-OmniRoute-Meta-Team: example-team` na-aghọ
+`http.request.header.x-omniroute-meta-team` nwere
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
+A na-edobe nganiihu ahụ dum: ndị a bụ nkụnye nkịtị, na-enweghị nyocha ngalaba azụmahịa ma ọ bụ
+ntụgharị metadata `omniroute.metadata.*` / Langfuse. `langfuseMapping` anaghị agbanwe ihe
+nkụnye pụtara. `User-Agent` ahọpụtara nke nwere otu uru na-atọkwa uru scalar ọkọlọtọ
+`user_agent.original`. A naghị ekewa uru n’ihi rikọm dị n’ime ya. Ụdị aha dị iche n’ibu mkpụrụedemede na-ejikọta n’usoro
+ndenye echekwara; ụdị ọ bụla na-adịghị irè na-eme ka a hapụ nkụnye ahụ dum. A na-ahazi njirimara n’usoro aha mkpụrụedemede nta.
+
+A na-ewepụ Authorization, Proxy-Authorization, Cookie, Set-Cookie, nkụnye igodo API, aha nwere
+akara auth/token/secret/password/credential, na nzere ọnụ ụzọ ámá dị n’ime mgbe niile,
+ọbụna ma a họpụtara ha ma ọ bụ kpuchie akụkụ ha na nchekwa. Usoro nzere amaara ama na-ejikwa
+ihe nchọpụta nzere a na-ekekọrịta; a na-ahapụ akara nzuzo, ọ bụghị ibupụ ha dị ka uru dị nchebe.
+A na-anabata naanị eriri na usoro eriri na-adịghị efu; a naghị amanye ọnụọgụ ma ọ bụ ihe ka ha ghọọ eriri.
+A na-eleghara aha na-adịghị irè, igodo prototype, mkpụrụedemede njikwa (ma e wezụga tab kwụ ọtọ) na Unicode na-adịghị n’usoro
+anya n’emeghị ka ogbe ahụ daa ma ọ bụ gosi ọdịnaya ha na njehie.
+
+Span ọ bụla na-ejide nkụnye 32 karịa, uru 16 kwa nkụnye, baịtị UTF-8 4096 kwa uru,
+na ngụkọta baịtị UTF-8 16384 maka aha na uru nkụnye ejidere. A na-ahapụ nkụnye buru oke ibu/na-adịghị irè
+kpamkpam, ọ bụghị ibipụ ha. Nhọpụta bụ mkpebi nzuzo nke onye ọrụ njikwa: aha ndị yiri ka ha dị nchebe
+ka nwere ike ịnwe data nkeonwe, ma ókè/ihe nchọpụta ndị a abụghị ihe nhicha PII zuru ụwa ọnụ.
+
+### Ókè nnyefe
+
+Arịrịọ nwere ókè span 500 na 4 MiB nke JSON UTF-8, gụnyere ihe mkpuchi ya.
+A na-enyocha nha span ọ bụla a na-ekwe tupu arịrịọ mbụ nke ogbe cursor. Otu
+span karịrị ókè ahụ na-egbochi iziga akụkụ ọ bụla nke ogbe ahụ wee daa, na ndụmọdụ ka e belata
+`maxBodyBytes`; a naghị atụfu ya na nzuzo. Nnyocha tupu iziga na-edobe naanị ntụaka ndekọ na
+ọnụọgụ baịtị, na-atụfu span/JSON nwa oge ọ bụla; a na-ewughachi span maka iberibe nwere ókè
+kama ijide oyiri nke abụọ nke ogbe ahụ agbanwere ka ọ bụrụ eriri. HTTP 408/429/5xx, ọdịda netwọkụ na ngafe oge na-enweta nnwale
+atọ karịa, na nkwụsị exponential 250/500 ms. Sekọnd `Retry-After` ma ọ bụ ụbọchị HTTP
+nwere ike ịgbatị nkwụsị ruo sekọnd 5. Ọnọdụ ndị ọzọ na-ada ozugbo. Ọjụjụ akụkụ OTLP 2xx na-ebutekwa njehie kama
+ịkwado nnata span furu efu; a na-anabata nkwenye nnata efu ma ọ bụ JSON dị irè, na
+ókè ọgụgụ nzaghachi 64 KiB.
+
+Njehie nwere naanị eziokwu onye mbupụ nwere: ọnọdụ HTTP, ụdị nnwale ọzọ, ọnụọgụ nnwale na span
+ezigara, ma ọ bụ okwu akọwapụtara maka nkwenye nnata/ọdịda netwọkụ. A naghị edetuo ahụ nzaghachi onye nchịkọta,
+ọnụọgụ ihe ịga nke ọma akụkụ na nkụnye nzaghachi n’ime njehie, ndekọ ma ọ bụ
+dashboard. A naghị akwado nnata ogbe dara ma ọ bụ nke a nabatara akụkụ ya: ebe a na-eziga na-egosi
+Na-ada na ọnọdụ ahụ, cursor na-anọ n’ogbe ikpeazụ akwadoro nnata ya, ma ọsọ ọzọ
+na-ezighachi otu ahịrị ndị ahụ. Ọnọdụ na-adịgide adịgide na-aga n’ihu ịda ruo mgbe edoziri onye nchịkọta ma ọ bụ nhazi.
+Jiri ndekọ onye nchịkọta n’onwe ya maka nkọwa nzaghachi. Nchịkọta njehie ndekọ oku na-edobe
+usoro izochi ozi nke ha iche.
+`prepare()` anaghị akwadebe ihe ọ bụla; Nnwale na-eziga kpọmkwem `{"resourceSpans":[]}` wee kọọ
+ọnọdụ HTTP n’edeghị span ndekọ oku.
+
+ID trace na ID span bụ mkpụrụọnụọgụ hex 32/16 mbụ nke SHA-256 n’elu
+`"omniroute.trace\0" + callLogId` na `"omniroute.span\0" + callLogId`. Nzipụgharị na-ebu
+otu ID ahụ. Nke a abụghị nkwa iwepụ ihe oyiri: ụfọdụ backend, gụnyere nnabata Langfuse
+v4, anaghị ewepụ span nwere otu ID. Ọdịda mberede ma ọ bụ ọdịda akụkụ iberibe nwere ike
+ime ka e zighachi otu ogbe cursor a na-akwadobeghị nnata ya karịa; ogbe ahụ dum nwere ike inwe oyiri,
+ọ bụghị naanị iberibe HTTP ikpeazụ ya. Họrọ nha ogbe cursor na-eburu mgbanwe uru na ọghọm ahụ n’uche.
+
+### Ihe atụ Langfuse
+
+Hazie ngalaba ndị a maka Langfuse ị na-akwado n’onwe gị:
+
+```json
+{
+  "endpoint": "https://langfuse.example.com/api/public/otel/v1/traces",
+  "headers": "Authorization: Basic <base64-of-public-key:secret-key>",
+  "serviceName": "omniroute",
+  "langfuseMapping": true,
+  "identity": "pseudonymous",
+  "environment": "production"
+}
+```
+
+Wuo uru Authorization n’ime igwe gị dị ka Base64 nke eriri kpọmkwem `public-key:secret-key`
+(dịka ọmụmaatụ site na `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Etinyela ezigbo nzere n’ime ndekọ, onyonyo ihuenyo ma ọ bụ akụkọ nsogbu. Ntụgharị ahụ na-atọ
+`x-langfuse-ingestion-version: 4` na-akpaghị aka; a ka na-enye Authorization n’ime `headers`.
+Ma nkụnye ma nnu njirimara emepụtara na-eji usoro ngalaba nzuzo ezoro ezo dị ugbu a
+na ihe nnọchi API; a chọrọ `STORAGE_ENCRYPTION_KEY`.
+
+Ntụnyere ahụ na-agbakwunye ụdị/model nke mmepụta, nkọwa ojiji JSON (ntinye/mmepụta/mkpokọta na igodo
+cache ndị dị), onyonyo JSON nke ntinye/mmepụta n'otu oge, ọkwa ERROR/DEFAULT, ozi ọnọdụ e wepụchara ozi nzuzo na ya,
+aha trace, id nnọkọ, environment nke nhọrọ na
+`langfuse.observation.metadata.<key>` enwere ike iji nzacha họrọ maka onye na-eweta ọrụ, model a rịọrọ, path, combo, ebe cache
+si na ọnọdụ. `langfuse.observation.completion_start_time` bụ ISO 8601 na
+oge mmalite + TTFT naanị mgbe a maara TTFT ma ọ dị n'ime ogologo oge ahụ. A naghị eziga njirimara ọnụ ahịa ọ bụla.
+
+Ụdị njirimara na-emetụta `langfuse.user.id`:
+
+- `pseudonymous` (nke ndabara): HMAC-SHA256 nke id ime nke igodo API yana salt 32-byte a họọrọ na mberede
+  maka ebe nnata ọ bụla. A na-emepụta salt ahụ mgbe a na-eke ya ma ọ bụrụ na ọ dịghị, na-ezobe ya site na nzuzo
+  dị ka `identitySalt`, a naghị eweghachi ya mgbe ọ bụla, a na-edobekwa ya mgbe a na-edezi. A naghị etinye id igodo mbụ
+  na njirimara span mgbe ọ bụla. Ịmepụta ọzọ/ịgbanwe salt nke ebe nnata na-agbanwe njirimara.
+- `keyName`: aha igodo API ahaziri, nke na-ekpughe akara onye njikwa ahụ n'ebumnobi.
+- `none`: enweghị id onye ọrụ. A ka na-ebupụ mkpado nnọkọ mgbe ha dị; ụdị ndị a anaghị
+  eme ka ọdịnaya prompt ọ bụla ma ọ bụ akara nnọkọ/njikọta onye njikwa nyere bụrụ ihe a na-apụghị ịmata onye nwe ya.
+
+### Ịmalite n'enweghị imeju data ochie
+
+Naanị mgbe a na-eke ya, gbanye **Malite site na ọnọdụ ugbu a (gafee ndekọ ndị dị adị)** ma ọ bụ nyefee
+`startFromCurrentPosition: true` n'ọkwa kachasị elu nke payload API maka imepụta. Ọ na-atọ ntọala
+`cursor_row_id` ka ọ bụrụ rowid kachasị elu ugbu a nke ndekọ oku a ka debere site n'iji ọrụ enyemaka cursor ndị dị adị,
+n'enweghị mbufe data. Ndabara bụ false (cursor 0 na imeju akụkọ ihe mere eme a ka debere).
+Ọ bụghị ntọala iji tọgharịa cursor mgbe a na-emelite.
+
+Mgbakwunye `ttftMs` a na-ekekọrịta na-agbakwụnyekwa kọlụm `ttft_ms` nke nwere ike ịbụ null na mapper BigQuery
+na schema tebụl ọhụrụ: ule schema ya chọrọ ka mpaghara ọ bụla nke ndekọ ọkọlọtọ nwee
+kọlụm. Tebụl ndị dị adị na-aga n'ihu na-ebupụ data n'enweghị mgbanwe: `prepare()` na-agụ schema tebụl ma
+hapụ naanị `ttft_ms` mgbe kọlụm ahụ adịghị. Tinye kọlụm INT64 nke nwere ike ịbụ null iji nweta TTFT
+mgbe ọzọ a ga-agba ya, ma ọ bụ jiri tebụl ọhụrụ. Achọghị PATCH, mgbanwe schema akpaka ma ọ bụ ikike
+ọzọ; mpaghara ahịrị ndị ọzọ niile na-anọgide na-enweta nyocha schema siri ike.
+
+---
+
+## 6. Ịgbakwunye ebe mbupu
 
 1. Mepụta `src/lib/logExport/destinations/<name>.ts` nke na-ebupụ `LogExportDestinationType`:
    Zod `configSchema`, ndepụta nkọwa `fields` maka UI, `secretFields`, yana
@@ -278,7 +488,7 @@ Iwu abụọ maka ebe mbupu ọhụrụ:
 
 ---
 
-## 6. Iji ya arụ ọrụ
+## 7. Iji ya arụ ọrụ
 
 - **Dashboard**: Integrations → Log export. Tinye ebe mbupu, mee **Test** iji nyochaa credentials
   n'edeghị ahịrị, wee gbanye ya.

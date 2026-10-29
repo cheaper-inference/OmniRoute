@@ -247,6 +247,25 @@
 +`.py` com `python3 -I` a partir da raiz da worktree.
 --- a/.agents/skills/implement-features/SKILL.md
 +++ b/.agents/skills/implement-features/SKILL.md
+@@ -99,7 +99,7 @@
+-
++
+ ```bash
+ git branch --show-current                                                                # must be release/vX.Y.Z, not main
+-gh issue list --repo diegosouzapw/OmniRoute --state open --json title,labels --limit 100 --jq '[.[] | select([.labels[].name] | index("release-freeze"))][0].title // empty'   # label filtered LOCALLY — server-side --label has confirmed index lag
++gh issue list --repo cheaper-inference/OmniRoute --state open --json title,labels --limit 100 --jq '[.[] | select([.labels[].name] | index("release-freeze"))][0].title // empty'   # label filtered LOCALLY — server-side --label has confirmed index lag
+ git ls-remote --heads origin 'release/v*' | sed 's#.*refs/heads/##' | sort -V | tail -1   # $ACTIVE (highest release/v*)
+ git worktree list                                                                        # note OTHER sessions' worktrees — off-limits
+ ```
+@@ -227,7 +227,7 @@
+ ```bash
+ git fetch origin "$RELEASE_BRANCH"
+ # base-green (../_shared/base-green.md) — 1 API call, do NOT run local suites to rediscover it:
+-BASE_RED_ISSUE=$(gh issue list --repo diegosouzapw/OmniRoute --state open \
++BASE_RED_ISSUE=$(gh issue list --repo cheaper-inference/OmniRoute --state open \
+   --search "Release branch not green: $RELEASE_BRANCH in:title" --json number,title,body \
+   --jq '.[0] // empty')
+ git worktree add "<main>/.claude/worktrees/feat-<NUMBER>" -b "feat/<NUMBER>-<slug>" "origin/$RELEASE_BRANCH"
 @@ -368,7 +368,7 @@
  
  If any item fails, **fix root cause** before committing. Do NOT bypass with `--no-verify` (hard rule #10).
@@ -256,6 +275,15 @@
  
  ### 3.3 Commit + open a PR (one feature = one branch = one PR — immediately)
  
+@@ -475,7 +475,7 @@
+ >
+ > ```bash
+ > # label filtered LOCALLY — server-side --label has confirmed index lag
+-> FREEZE_TITLE=$(gh issue list --repo diegosouzapw/OmniRoute --state open --json title,labels --limit 100 --jq '[.[] | select([.labels[].name] | index("release-freeze"))][0].title // empty')
++> FREEZE_TITLE=$(gh issue list --repo cheaper-inference/OmniRoute --state open --json title,labels --limit 100 --jq '[.[] | select([.labels[].name] | index("release-freeze"))][0].title // empty')
+ > ACTIVE=$(git ls-remote --heads origin 'release/v*' | sed 's#.*refs/heads/##' | sort -V | tail -1)
+ > if [ -n "$FREEZE_TITLE" ]; then
+ >   FROZEN="release/v$(echo "$FREEZE_TITLE" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
 --- a/.agents/skills/uplift-prs/scripts/fill_missing_i18n.py
 +++ b/.agents/skills/uplift-prs/scripts/fill_missing_i18n.py
 @@ -1,42 +1,86 @@
@@ -754,3 +782,90 @@
  
  > **🔴 A partial unit run is NOT a clean unit run — verify the `EXIT=` marker (v3.8.46, 2026-07-07).**
  > The full `node --test` sweep can be killed / stall / never finish (esp. under the self-inflicted
+@@ -249,3 +259,84 @@
+-
++
+ ---
+-
++
++
++### 0.v 🧪 Additional build pre-flight recipe (2026-10-20)
++
++These recipes supplement the mandatory order above: 0a.0 → 0a.0b → this phase
++on the recorded candidate. Before selecting any command in 0.v–0.x, verify its
++script, supported flags and workflow behavior in that candidate; these tools
++are not present on every base. An absent tool is NOT AVAILABLE for this recipe,
++not PASS and not permission to omit an applicable gate. Select the candidate’s
++actual versioned profile and record the remaining evidence.
++
++Admit dependency, test, coverage and build work through
++`../../_shared/validation-gate.md`, one heavy phase at a time. Inspect any remote
++operation and confirm it is already within the authorized scope before running
++the wrapper. Capture each real exit and terminal receipt. These examples do not
++replace the release candidate’s required hosted checks.
++
++```bash
++scripts/release/preflight-build.sh            # full: claims + lockfiles + vitest + build:cli + pack-boot + bun apt smoke
++scripts/release/preflight-build.sh --no-build # when the frozen tip's CI next-build artifact is already proven
++scripts/release/preflight-build.sh --quick    # ~20 s: claims + the two lockfiles (mid-cycle sanity)
++```
++
++It bundles 0.x/0.y/0.z below plus the packaging path `npm-publish.yml` runs and the Bun
++`runner-web` apt smoke (`scripts/release/preflight-bun-apt-smoke.sh`, builds the apt block
++alone on the Bun base image over ssh on the .113 — the stage is `continue-on-error` in CI, so
++a dead package never fails a PR, only the release manifest: #17223/#17236). One table, one
++log per check under `_artifacts/preflight/`, exit 1 after running everything. The unit shards
++remain separate CI evidence under the current workflow matrix; read its shard count
++and timeouts rather than reusing historical estimates. Record the table in the
++benchmark folder. Repair a FAIL in the authorized owned worktree, refresh the
++candidate binding and repeat affected evidence before admission; keep the
++mandatory freeze/reconciliation order above.
++
++### 0.z 🔒 Desktop lockfile pre-flight (10 s — v3.8.51 AND v3.8.52 shipped a tag that failed here)
++
++`electron-release.yml` installs with `npm ci`, while `ci.yml`'s Electron smoke uses `npm install`
++(which silently repairs a stale lock) — so a lock that drifted from `electron/package.json` is
++invisible to every PR and only explodes on the tag (#15157, #17212: the same 195 missing lines of
++the `electron-builder-squirrel-windows` / `postject` subtree, twice). Prove it before the push:
++
++```bash
++(cd electron && npm ci --dry-run --ignore-scripts)   # must print "added N packages" — EUSAGE = fix now
++npm ci --dry-run --ignore-scripts                     # root lock too
++```
++
++On EUSAGE: `(cd electron && npm install --package-lock-only --ignore-scripts)` from the unchanged
++`package.json` (expect +N/-0, no version changes), re-run the dry-run, commit on the release branch
++(we are before the freeze's squash, so it ships in the tag). Also check `scripts/release/sync-next-cycle.mjs`
++did not resolve the lock as "ours" in the last sync-back (phase-5 §20).
++
++### 0.y 📛 Version-claim pre-flight (1 s)
++
++```bash
++node scripts/release/bump-version-claims.mjs --check --to "$(node -p "require('./package.json').version")"
++```
++
++Every "current version" claim in README.md / llm.txt (footer, `` `vX+` `` floor, `**vA → vX**` range,
++"Current version:", headings) must already equal package.json — the same detector Docs sync strict runs.
++A stale claim here may indicate a missed cycle update (as in v3.8.53). On a candidate
++that provides this tool, inspect its supported repair mode and reviewed source/mirror
++scope before using `--from <stale> --to <version>`. Preserve the mandatory phase order
++and refresh candidate evidence after the change.
++
++Other **measured numbers** the gate reports as `[soft]` drift (executors count, A2A skills, cloud agents…)
++are fixed the same mechanical way — never by hand in the English file alone, which creates 66 stale
++mirrors: `node scripts/release/bump-version-claims.mjs --near '<literal anchor>' --old '<token>' --new '<token>'
++--files <doc>` rewrites the whole token found within 80 chars after the anchor, in the source and in
++every mirror that still carries it (mirrors translate the prose but keep the digits next to the
++anchor), and refreshes `.i18n-state.json` only when the source was in sync (v3.8.52 close:
++`--near 375 --old 154 --new 156` for ARCHITECTURE.md, `--near executors/ --old 150 --new 156` for
++CODEBASE_DOCUMENTATION.md). Literal on purpose — no RegExp built from an argument (CodeQL).
++
++### 0.x 🌐 Translation drift: what is yours and what is inherited
++
++`Docs Sync (Strict)` is **PR-scoped since 2026-10-20**: on a pull request `check-translation-drift.mjs
++--base-report` fails only on drift the PR introduces; drift the base already carried is printed as
++inherited. The push run and the nightly Release-Green keep the full strict verdict, so a red
++`release/vX+1` tip for translation drift is the **i18n wave's** debt (`/i18n-waves`), not something a
++release fix PR or the sync-back may "repair" by adopting hashes. Before the freeze, read the nightly's
++drift list and ask the owner for the wave (or the backend credentials/balance it needs) — do not carry
++14 drifted sources into the release expecting the squash to clear them (v3.8.52 shipped that way).

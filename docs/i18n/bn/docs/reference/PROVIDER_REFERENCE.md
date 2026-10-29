@@ -8,7 +8,7 @@
 > পুনরায় তৈরি করুন: `npm run gen:provider-reference`
 > **সর্বশেষ তৈরি:** 2026-10-27
 
-মোট প্রোভাইডার: **376**। নিচে বিভাগভিত্তিক বিবরণ দেখুন।
+মোট প্রোভাইডার: **377**। নিচে বিভাগভিত্তিক বিবরণ দেখুন।
 
 ## বিভাগসমূহ
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | লোকাল, স্ব-হোস্টেড | [লিঙ্ক](https://github.com/vllm-project/vllm)                    | API key ঐচ্ছিক। লোকাল vLLM-এর OpenAI-সামঞ্জস্যপূর্ণ base URL কনফিগার করুন (ডিফল্ট: http://localhost:8000/v1)।                                                                                                                                                                                     |
 | `xinference`          | `xinference` | XInference          | লোকাল, স্ব-হোস্টেড | [লিঙ্ক](https://inference.readthedocs.io)                        | API key ঐচ্ছিক। লোকাল XInference-এর OpenAI-সামঞ্জস্যপূর্ণ base URL কনফিগার করুন (ডিফল্ট: http://localhost:9997/v1)।                                                                                                                                                                               |
 
-## সার্চ প্রদানকারী (18)
+## সার্চ প্রদানকারী (19)
 
 | ID                  | উপনাম           | নাম                              | ট্যাগ | ওয়েবসাইট                                                        | নোট                                                                                                                                   |
 | ------------------- | --------------- | -------------------------------- | ----- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                       | সার্চ | [লিঙ্ক](https://exa.ai)                                          | dashboard.exa.ai থেকে API কী                                                                                                          |
 | `firecrawl`         | `fc`            | Firecrawl                        | সার্চ | [লিঙ্ক](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys থেকে API কী (অথবা আপনার স্ব-হোস্ট করা Firecrawl বেস URL সেট করুন)                                          |
 | `google-pse-search` | `google-pse`    | Google Programmable Search       | সার্চ | [লিঙ্ক](https://developers.google.com/custom-search/v1/overview) | একটি Google API কী এবং আপনার Programmable Search Engine ID (cx) প্রয়োজন                                                              |
+| `kimi-search`       | `kimi-search`   | Kimi Search                      | সার্চ | [লিঙ্ক](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai থেকে Moonshot AI API কী (MOONSHOT_API_KEY)                                                                           |
 | `linkup-search`     | `linkup`        | Linkup Search                    | সার্চ | [লিঙ্ক](https://docs.linkup.so)                                  | Linkup ড্যাশবোর্ড থেকে Bearer API কী                                                                                                  |
 | `nimble-search`     | `nimble`        | Nimble Search                    | সার্চ | [লিঙ্ক](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble ড্যাশবোর্ড থেকে Bearer API কী                                                                                                  |
 | `ollama-search`     | `ollama-search` | Ollama Search                    | সার্চ | [লিঙ্ক](https://ollama.com/settings/keys)                        | Ollama Cloud-এর মতো একই API কী (ollama.com/settings/keys থেকে)                                                                        |

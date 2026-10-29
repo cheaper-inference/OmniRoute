@@ -672,6 +672,8 @@ Standardna Docker/Kubernetes instalacija OmniRoutea sastoji se od **jednog Node 
 
 **Nadogradnje:** očekujte prekid svake sesije. Ako možete, postepeno odspojite klijente; kod zadanog SQLitea nema postupnog ažuriranja. Compose `restart: unless-stopped` zajedno s Docker `HEALTHCHECK` provjerom također će zamijeniti jedini proces kada kontejner postane nezdrav — uz isti opseg posljedica.
 
+Gotovi manifesti i Helm grafikon nalaze se u `deploy/kubernetes/` i `deploy/helm/omniroute/` — pogledajte [vodič za implementaciju na Kubernetesu](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kubernetes isječak za **jednu repliku** (`Recreate` je obavezan; nemojte povećavati `replicas` nad jednom SQLite datotekom):
 
 ```yaml

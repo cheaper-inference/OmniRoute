@@ -627,6 +627,8 @@ Standart Docker / Kubernetes OmniRoute konfiqurasiyası **bir Node prosesi + bir
 
 **Yeniləmələr:** bütün sessiyaların kəsiləcəyini nəzərə alın. Mümkündürsə, müştəri trafikini əvvəlcədən dayandırın; standart SQLite ilə mərhələli yeniləmə yoxdur. Compose `restart: unless-stopped` və Docker `HEALTHCHECK` birlikdə konteyner Unhealthy vəziyyətinə düşdükdə yeganə prosesi də əvəz edəcək — təsir dairəsi eynidir.
 
+Hazır manifestlər və Helm diaqramı `deploy/kubernetes/` və `deploy/helm/omniroute/` qovluqlarında yerləşir — [Kubernetes yerləşdirmə təlimatına](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) baxın.
+
 **Tək replika** üçün Kubernetes fraqmenti (Recreate tələb olunur; bir SQLite faylı ilə `replicas` sayını artırmayın):
 
 ```yaml

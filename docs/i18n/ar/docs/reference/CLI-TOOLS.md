@@ -10,8 +10,8 @@
 
 | الصفحة                 | المسار                  | المفهوم                                                               | العدد      |
 | ---------------------- | ----------------------- | --------------------------------------------------------------------- | ---------- |
-| **أدوات CLI البرمجية** | `/dashboard/cli-code`   | أدوات برمجة توجهها إلى OmniRoute (العميل ← CLI ← OmniRoute ← المزوّد) | 26         |
-| **وكلاء CLI**          | `/dashboard/cli-agents` | وكلاء مستقلون توجههم إلى OmniRoute (التدفق نفسه، بنطاق أوسع)          | 10         |
+| **أدوات CLI البرمجية** | `/dashboard/cli-code`   | أدوات برمجة توجهها إلى OmniRoute (العميل ← CLI ← OmniRoute ← المزوّد) | 27         |
+| **وكلاء CLI**          | `/dashboard/cli-agents` | وكلاء مستقلون توجههم إلى OmniRoute (التدفق نفسه، بنطاق أوسع)          | 11         |
 | **وكلاء ACP**          | `/dashboard/acp-agents` | أدوات CLI يشغّلها OmniRoute كواجهة خلفية عبر stdio/ACP (تدفق عكسي)    | راجع السجل |
 
 تُعاد توجيه المسارات القديمة باستخدام 308:‏ `/dashboard/cli-tools` ← `/dashboard/cli-code`، و`/dashboard/agents` ← `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 يقبل كل أمر `--remote <url> --api-key <key>` (لتهيئة أداة محلية للعمل مع
 OmniRoute بعيد)، و`--dry-run` (للمعاينة دون كتابة)، و`--port`. أما الأدوات
-التي لا تدعم الاكتشاف التلقائي للنماذج (Cline وKilo وRoo وGoose وAider وQwen و5dive)، فتقبل
+التي لا تدعم الاكتشاف التلقائي للنماذج (Cline وKilo وRoo وGoose وAider وQwen و5dive وWhyCodes)، فتقبل
 `--model <id>` (وكذلك `--yes` للتشغيل غير التفاعلي). تُعد `setup-5dive` الوصفة
 الوحيدة التي لا تكتب ضمن `$HOME`: فهي تهيّئ مجموعة وكلاء 5dive عبر
 كتابة ملف تعريف مصادقة مملوك للمستخدم الجذر على مضيف المجموعة، ولذلك تعيد تنفيذ نفسها من خلال `sudo`
 ولا تملك وضعًا بعيدًا خاصًا بها. لتشغيل CLI مع
 حقن متغيرات البيئة الصحيحة ومن دون كتابة أي إعدادات على الإطلاق، استخدم مشغّل التشغيل العام
-`omniroute run <target>` (claude وcodex وaider وgoose وopencode وqwen
-وgemini — تأتي الأهداف والأسماء البديلة من `bin/cli/cli-manifest.mjs`)؛ وتظل
+`omniroute run <target>` (claude وcodex وaider وgoose وopencode وqwen وgemini
+وwhycodes — تأتي الأهداف والأسماء البديلة من `bin/cli/cli-manifest.mjs`)؛ وتظل
 مشغّلات التشغيل القديمة المخصصة لكل أداة، وهي `omniroute launch` ‏(Claude Code) و`omniroute launch-codex`
 ‏(Codex)، متاحة. يدعم Gemini CLI التشغيل فقط: فهو هدف لـ `omniroute run`
 ولكن لا توجد له وصفة `setup-*`/`configure`.
@@ -182,7 +183,7 @@ OmniRoute بعيد)، و`--dry-run` (للمعاينة دون كتابة)، و`--
 تُظهر الأدوات التي تحمل `baseUrlSupport: "partial"` شارة "⚠ عنوان URL الأساسي جزئي" في بطاقة لوحة المعلومات.
 ---
 
-## 2. كتالوج وكلاء CLI (10 أدوات)
+## 2. كتالوج وكلاء CLI (11 أدوات)
 
 الوكلاء المستقلون الذين يظهرون في `/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ OmniRoute بعيد)، و`--dry-run` (للمعاينة دون كتابة)، و`--
 | letta        | Letta CLI        | Letta                    | full        | false                |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full        | false                |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full        | false                |
+| whycodes     | WhyCodes         | Why Corporation          | full        | false                |
 
 ---
 

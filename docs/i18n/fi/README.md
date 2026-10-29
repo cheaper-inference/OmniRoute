@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Ilmainen tekoäly-yhdyskäytävä
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Älä koskaan lopeta koodaamista. Kaikki tekoälytyökalut → 376 palveluntarjoajaa — yli 150 ilmaista — yhden päätepisteen kautta. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity ILMAISEEN Claudeen / GPT:hen / Geminiin automaattisella varajärjestelyllä. RTK:n ja Cavemanin pinottu pakkaus säästää 15–95 % tokeneista (keskimäärin ~89 %) — rajat eivät koskaan tule vastaan. 376 tekoälypalveluntarjoajaa · yli 150 ilmaistasoa · ~1,62 mrd. ilmaista tokenia/kk · 20 reititysstrategiaa · aloitusmaksu 0 $."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Älä koskaan lopeta koodaamista. Kaikki tekoälytyökalut → 377 palveluntarjoajaa — yli 150 ilmaista — yhden päätepisteen kautta. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity ILMAISEEN Claudeen / GPT:hen / Geminiin automaattisella varajärjestelyllä. RTK:n ja Cavemanin pinottu pakkaus säästää 15–95 % tokeneista (keskimäärin ~89 %) — rajat eivät koskaan tule vastaan. 377 tekoälypalveluntarjoajaa · yli 150 ilmaistasoa · ~1,62 mrd. ilmaista tokenia/kk · 20 reititysstrategiaa · aloitusmaksu 0 $."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                                             |           v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------------------- | :-------------------------: | :---------: | :-------------------: |
-| 🌐 Palveluntarjoajat                        |             352             |   **358**   |          376          |
+| 🌐 Palveluntarjoajat                        |             352             |   **358**   |          377          |
 | 🧠 Yksilölliset keskustelumallien tunnukset |            1320             |  **1374**   |         1475          |
 | 🖼️ Modaliteettisilta                        |   🆕 kuva + ääni + video    |      ✓      |           ✓           |
 | 📡 Radarin ilmainen luettelo                | 🆕 valinnainen käyttöönotto |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Ominaisuudet</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Yhdistelmät</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Palveluntarjoajat</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Palveluntarjoajat</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ja MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus — yksi päätepiste ja 376 palveluntarjoajaa. Automaattinen varareititys pitää reitityksen toiminnassa niin kauan kuin toinen toimintakuntoinen kohde on käytettävissä. Kuusi peruspilaria: vikasietoinen varareititys 376 palveluntarjoajan välillä · jopa 95 %:n säästö tunnisteissa soveltuvissa työkuormissa · aloittaminen maksutta yli 150 ilmaistasolla ja 52 toistuvasti ilmaisella tai avaimettomalla, pysyvästi ilmaisella palveluntarjoajalla · 37 CLI-/agentti-integraatiota yhdellä määrityksellä · OpenAI-, Claude-, Gemini- ja Responses API -yhteensopivuus päätepisteessä /v1 · tuotantokäytön hallintaominaisuudet, kuten katkaisijat, huomaamaton TLS, MCP:n 110 työkalua, A2A, muisti, suojakaiteet, arvioinnit ja yli 56 000 staattista testimääritystä yli 7 800 seuratussa testitiedostossa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus — yksi päätepiste ja 377 palveluntarjoajaa. Automaattinen varareititys pitää reitityksen toiminnassa niin kauan kuin toinen toimintakuntoinen kohde on käytettävissä. Kuusi peruspilaria: vikasietoinen varareititys 377 palveluntarjoajan välillä · jopa 95 %:n säästö tunnisteissa soveltuvissa työkuormissa · aloittaminen maksutta yli 150 ilmaistasolla ja 52 toistuvasti ilmaisella tai avaimettomalla, pysyvästi ilmaisella palveluntarjoajalla · 37 CLI-/agentti-integraatiota yhdellä määrityksellä · OpenAI-, Claude-, Gemini- ja Responses API -yhteensopivuus päätepisteessä /v1 · tuotantokäytön hallintaominaisuudet, kuten katkaisijat, huomaamaton TLS, MCP:n 110 työkalua, A2A, muisti, suojakaiteet, arvioinnit ja yli 56 000 staattista testimääritystä yli 7 800 seuratussa testitiedostossa."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Kaikki **20** strategiaa — yhdistele vapaasti yhdistelmän jokaisessa vaiheess
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mikä erottaa OmniRouten muista — päivätty ominaisuuksien tilannekuva, jossa OmniRoutea verrataan 9routeriin, OpenRouteriin, CLIProxyAPI:in ja LiteLLM:ään 13 ominaisuuden osalta. OmniRoute: 376 palveluntarjoajaa, yli 150 sisäänrakennettua ilmaistasoa, 20 reititysstrategiaa, 12 moottorin token-pakkaus, sisäänrakennettu MCP-palvelin 110 työkalulla, A2A-agenttiprotokolla, pysyvä muisti, suojaukset, pilviagentit, TLS-sormenjäljen häivytys, Desktop/Termux/PWA ja 67 käyttöliittymän lokalisointia. OmniRoute on MIT-lisensoitu ja itse ylläpidettävissä. Kilpailijoiden ominaisuudet ja määrät voivat muuttua; katso linkitetty menetelmäkuvaus."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mikä erottaa OmniRouten muista — päivätty ominaisuuksien tilannekuva, jossa OmniRoutea verrataan 9routeriin, OpenRouteriin, CLIProxyAPI:in ja LiteLLM:ään 13 ominaisuuden osalta. OmniRoute: 377 palveluntarjoajaa, yli 150 sisäänrakennettua ilmaistasoa, 20 reititysstrategiaa, 12 moottorin token-pakkaus, sisäänrakennettu MCP-palvelin 110 työkalulla, A2A-agenttiprotokolla, pysyvä muisti, suojaukset, pilviagentit, TLS-sormenjäljen häivytys, Desktop/Termux/PWA ja 67 käyttöliittymän lokalisointia. OmniRoute on MIT-lisensoitu ja itse ylläpidettävissä. Kilpailijoiden ominaisuudet ja määrät voivat muuttua; katso linkitetty menetelmäkuvaus."/>
 
 <sub>📊 Täydellinen menetelmäkuvaus &amp; ominaisuuskohtaiset tiedot verrattuna 9routeriin, OpenRouteriin, CLIProxyAPI:in &amp; LiteLLM:ään → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -612,7 +612,7 @@ nykyisestä luettelosta on osoitteessa **[radar.omniroute.online/planos](https:/
 - **🖼️ Uudet päätepisteet** — `/v1/ocr` (Mistral OCR) ja `/v1/audio/translations` (Whisper-tyylinen) täydentävät mediatoiminnot. → [API-viite](docs/reference/API_REFERENCE.md)
 - **🎨 Kuvien, videoiden ja äänen generointi** — yksi API medialle: xAI Grok Imagine ja Novita AI -video, ComfyUI, Magnific, Adobe Firefly, Segmind sekä puhepalveluntarjoajat, kuten ElevenLabs. → [API-viite](docs/reference/API_REFERENCE.md)
 - **🌍 Käyttöönotto ja operointi** — käänteisen välityspalvelimen `basePath`, selaimen kielen automaattinen tunnistus, avainkohtainen laitteiden seuranta, pääkäyttäjätön MITM-luottamus ja zh-TW-lokalisointi. → [Ympäristö](docs/reference/ENVIRONMENT.md)
-- **🤝 Lisää palveluntarjoajia ja agentteja** — pilviagentit (Codex Cloud, Cursor, Devin, Jules), selain- ja OAuth-kirjautumisen sisältävä Grok Build (xAI), Ollaman ensiluokkainen kortti, Claude Opus 5 ja Sonnet 5, virallinen Kimi-kumppanuus (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… sekä uudistettu **376 palveluntarjoajan luettelo**. → [Palveluntarjoajat](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Lisää palveluntarjoajia ja agentteja** — pilviagentit (Codex Cloud, Cursor, Devin, Jules), selain- ja OAuth-kirjautumisen sisältävä Grok Build (xAI), Ollaman ensiluokkainen kortti, Claude Opus 5 ja Sonnet 5, virallinen Kimi-kumppanuus (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… sekä uudistettu **377 palveluntarjoajan luettelo**. → [Palveluntarjoajat](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Reitityksen läpinäkyvyys** — jokainen vastaus sisältää `X-OmniRoute-Decision`-otsakkeen, joka nimeää vastauksen toimittaneen strategian, palveluntarjoajan ja viiveen; uusi `cache-optimized`-yhdistelmästrategia ja Auto-Combon `cacheAffinity`-tekijä reitittävät toistuvat pyynnöt takaisin yhteydelle, jolla välimuistiin tallennettu etuliite on, ja vain luku -muotoinen `/v1/auto-combo/{channel}/candidates`-päätepiste näyttää `auto/*`-kanavan reaaliaikaisen ehdokasjoukon. → [Automaattinen yhdistelmä](docs/routing/AUTO-COMBO.md)
 - **⚡ Paikallinen suorituskyky ja infrastruktuuri** — yhdellä napsautuksella käyttöön otettava paikallinen Redis, Cloudflare Workers- / Deno Deploy -välityspalvelimien käyttöönottotyökalut sekä Bifrost ja Mux valvottuina upotettuina palveluina. → [Upotetut palvelut](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Mukana myös** — liitännäiskehys ja markkinapaikka, Omni-/Agent-/GitHub-taitokehykset, Obsidian-holvin integrointi (22 MCP-työkalua), OpenAI-yhteensopivat Batch- ja Files-APIt, semanttinen vastausvälimuisti, pelillistäminen tulostauluineen, ACP-agenttien haku (15 sisäänrakennettua agenttia), ajastettu lokien vienti BigQueryyn, rinnakkainen usean mallin `auto/chaos`-hajautus, Telegram-bottisilta, sovelluksen sisäinen versionhallinta sekä LMArena-ELO-pohjaiset ilmaisten palveluntarjoajien sijoitukset. → [Dokumentaatio](docs/README.md)
@@ -666,7 +666,7 @@ nykyisestä luettelosta on osoitteessa **[radar.omniroute.online/planos](https:/
 <b>＋ toimii myös näiden kanssa</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>mikä tahansa OpenAI-yhteensopiva työkalu</b>
 </div>
 
-<sub>📖 Työkalukohtaiset määritysohjeet kaikille 37 työkalulle (27 CLI-koodaustyökalua + 10 CLI-agenttia) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode-laajennus → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Työkalukohtaiset määritysohjeet kaikille 38 työkalulle (27 CLI-koodaustyökalua + 11 CLI-agenttia) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode-laajennus → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -696,11 +696,11 @@ komentotulkkisi historiasta. → [CLI-integraatiot](docs/guides/CLI-INTEGRATIONS
 
 <div align="center">
 
-## 🌐 376 tekoälypalveluntarjoajaa — 153 merkitty luettelossa ilmaisiksi
+## 🌐 377 tekoälypalveluntarjoajaa — 153 merkitty luettelossa ilmaisiksi
 
 </div>
 
-> **376 rekisteröityä palveluntarjoajaa** ensisijaisissa keskustelu-, media-, haku-, paikallis-, pilviagentti- ja järjestelmäkokoelmissa, joista **153 sisältää `hasFree: true` -hakumetatiedon**. Keskustelumallien rekisteri kattaa **239 palveluntarjoajaa / 3 059 erillistä palveluntarjoajan ja mallin yhdistelmää / 1 475 käsittelemätöntä mallitunnusta**. Erillisessä ilmaiskäyttökiintiöiden luettelossa on **484 mallikohtaista riviä**, **34 uusiutuvaa resurssipoolia** ja **52 uusiutuvan tai avaimettoman maksuttoman käytön pysyvästi tarjoavaa palveluntarjoajaa**. Näissä käytetään tarkoituksella eri nimittäjiä; määritelmät ja resurssipoolien päällekkäisyydet poistavat laskelmat löytyvät [palveluntarjoajien viitteestä](docs/reference/PROVIDER_REFERENCE.md) ja [ilmaiskäyttötasoista](docs/reference/FREE_TIERS.md).
+> **377 rekisteröityä palveluntarjoajaa** ensisijaisissa keskustelu-, media-, haku-, paikallis-, pilviagentti- ja järjestelmäkokoelmissa, joista **153 sisältää `hasFree: true` -hakumetatiedon**. Keskustelumallien rekisteri kattaa **239 palveluntarjoajaa / 3 059 erillistä palveluntarjoajan ja mallin yhdistelmää / 1 475 käsittelemätöntä mallitunnusta**. Erillisessä ilmaiskäyttökiintiöiden luettelossa on **484 mallikohtaista riviä**, **34 uusiutuvaa resurssipoolia** ja **52 uusiutuvan tai avaimettoman maksuttoman käytön pysyvästi tarjoavaa palveluntarjoajaa**. Näissä käytetään tarkoituksella eri nimittäjiä; määritelmät ja resurssipoolien päällekkäisyydet poistavat laskelmat löytyvät [palveluntarjoajien viitteestä](docs/reference/PROVIDER_REFERENCE.md) ja [ilmaiskäyttötasoista](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -774,6 +774,7 @@ komentotulkkisi historiasta. → [CLI-integraatiot](docs/guides/CLI-INTEGRATIONS
 <table>
   <tr><th align="left">Alusta</th><th align="left">Asennus</th><th align="left">Kohokohdat</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (globaali)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Yksi komento, mikä tahansa käyttöjärjestelmä</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (globaali)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Parhaan mahdollisen yhteensopivuuden tarjoaminen ilman tukitakuita; Node.js on tuettu suoritusympäristö.</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Useita arkkitehtuureja: <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Työpöytäsovellus (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Natiivi ikkuna + ilmaisinalue — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Valikkorivi (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Valvoo palvelinta ja päivittää sen automaattisesti — <b>macOS</b></td></tr>
@@ -1313,7 +1314,7 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
   <tr><td nowrap><b>Suoritusympäristö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Kieli</b></td><td>TypeScript 6.0 — <b>100 % TypeScriptiä</b> hakemistoissa <code>src/</code> ja <code>open-sse/</code> (ytimessä ei yhtään <code>any</code>-tyyppiä versiosta v2.0 lähtien)</td></tr>
   <tr><td nowrap><b>Sovelluskehys</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-lokikirjaus) + LowDB (vanha JSON-ratkaisu) — 147 toimialuemoduulia, 211 migraatiota</td></tr>
+  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-lokikirjaus) + LowDB (vanha JSON-ratkaisu) — 147 toimialuemoduulia, 213 migraatiota</td></tr>
   <tr><td nowrap><b>Muisti</b></td><td>SQLite FTS5 -kokotekstihaku + int8-kvantisoidut vektoriupotukset, tyypitetty vaimeneminen</td></tr>
   <tr><td nowrap><b>Skeemat</b></td><td>Zod 4 — MCP-työkalujen syötteiden ja tulosteiden validointi + API-sopimukset</td></tr>
   <tr><td nowrap><b>Protokollat</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

@@ -10,8 +10,8 @@ OmniRoute با سه دسته از ابزارهای CLI که در سه صفحه �
 
 | صفحه           | مسیر                    | مفهوم                                                                                      | تعداد             |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------------ | ----------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | ابزارهای کدنویسی که به OmniRoute متصل میکنید (Client → CLI → OmniRoute → Provider)         | 26                |
-| **CLI Agents** | `/dashboard/cli-agents` | عاملهای خودمختاری که به OmniRoute متصل میکنید (همان جریان، با دامنه گستردهتر)              | 10                |
+| **CLI Code's** | `/dashboard/cli-code`   | ابزارهای کدنویسی که به OmniRoute متصل میکنید (Client → CLI → OmniRoute → Provider)         | 27                |
+| **CLI Agents** | `/dashboard/cli-agents` | عاملهای خودمختاری که به OmniRoute متصل میکنید (همان جریان، با دامنه گستردهتر)              | 11                |
 | **ACP Agents** | `/dashboard/acp-agents` | ابزارهای CLI که OmniRoute آنها را از طریق stdio/ACP بهعنوان بکاند اجرا میکند (جریان معکوس) | رجیستری را ببینید |
 
 مسیرهای قدیمی از طریق 308 هدایت میشوند: `/dashboard/cli-tools` → `/dashboard/cli-code`، `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-هرکدام از آنها گزینههای `--remote <url> --api-key <key>` (برای پیکربندی یک ابزار محلی جهت استفاده از OmniRoute راهدور)، `--dry-run` (پیشنمایش بدون نوشتن) و `--port` را میپذیرند. ابزارهایی که قابلیت کشف خودکار مدل را ندارند (Cline، Kilo، Roo، Goose، Aider، Qwen، 5dive)، گزینه `--model <id>` را دریافت میکنند (و برای اجراهای غیرتعاملی نیز `--yes`). `setup-5dive` تنها روشی است که چیزی را زیر `$HOME` نمینویسد: این فرمان با نوشتن یک پروفایل احراز هویت متعلق به root روی میزبان ناوگان، مجموعهای از عاملهای 5dive را پیکربندی میکند؛ بنابراین از طریق `sudo` خود را دوباره اجرا میکند و حالت راهدور مستقلی ندارد. برای اجرای یک CLI با متغیرهای محیطی صحیح و بدون نوشتن هیچگونه پیکربندی، از راهانداز عمومی `omniroute run <target>` استفاده کنید (claude، codex، aider، goose، opencode، qwen، gemini — مقصدها و نامهای مستعار از `bin/cli/cli-manifest.mjs` میآیند)؛ راهاندازهای قدیمی مختص هر ابزار، یعنی `omniroute launch` (Claude Code) و `omniroute launch-codex` (Codex)، همچنان در دسترس هستند. Gemini CLI فقط قابلیت راهاندازی دارد: یک مقصد برای `omniroute run` است، اما هیچ دستور `setup-*`/`configure` ندارد.
+هرکدام از آنها گزینههای `--remote <url> --api-key <key>` (برای پیکربندی یک ابزار محلی جهت استفاده از OmniRoute راهدور)، `--dry-run` (پیشنمایش بدون نوشتن) و `--port` را میپذیرند. ابزارهایی که قابلیت کشف خودکار مدل را ندارند (Cline، Kilo، Roo، Goose، Aider، Qwen، 5dive، WhyCodes)، گزینه `--model <id>` را دریافت میکنند (و برای اجراهای غیرتعاملی نیز `--yes`). `setup-5dive` تنها روشی است که چیزی را زیر `$HOME` نمینویسد: این فرمان با نوشتن یک پروفایل احراز هویت متعلق به root روی میزبان ناوگان، مجموعهای از عاملهای 5dive را پیکربندی میکند؛ بنابراین از طریق `sudo` خود را دوباره اجرا میکند و حالت راهدور مستقلی ندارد. برای اجرای یک CLI با متغیرهای محیطی صحیح و بدون نوشتن هیچگونه پیکربندی، از راهانداز عمومی `omniroute run <target>` استفاده کنید (claude، codex، aider، goose، opencode، qwen، gemini، whycodes — مقصدها و نامهای مستعار از `bin/cli/cli-manifest.mjs` میآیند)؛ راهاندازهای قدیمی مختص هر ابزار، یعنی `omniroute launch` (Claude Code) و `omniroute launch-codex` (Codex)، همچنان در دسترس هستند. Gemini CLI فقط قابلیت راهاندازی دارد: یک مقصد برای `omniroute run` است، اما هیچ دستور `setup-*`/`configure` ندارد.
 
 > **مرجع کامل:** جدول اصلی — شامل اینکه هر فرمان چه چیزی مینویسد، تمام گزینهها، حالت محلی در برابر راهدور، و اینکه کدام ابزارها به پسوند `/v1` نیاز دارند — در
 > **[یکپارچهسازیهای CLI](../guides/CLI-INTEGRATIONS.md)** قرار دارد.
@@ -146,7 +147,7 @@ omniroute setup-5dive        omniroute setup-zed
 ابزارهایی با `baseUrlSupport: "partial"` نشان «⚠ پشتیبانی جزئی از URL پایه» را در کارت داشبورد نمایش میدهند.
 ---
 
-## ۲. فهرست عاملهای CLI (۱۰ ابزار)
+## ۲. فهرست عاملهای CLI (۱۱ ابزار)
 
 عاملهای خودکاری که در `/dashboard/cli-agents` نمایش داده میشوند:
 
@@ -162,6 +163,7 @@ omniroute setup-5dive        omniroute setup-zed
 | letta        | Letta CLI        | Letta                    | full                | false              |
 | prime-agent  | Prime Agent      | Prime Intellect (متنباز) | full                | false              |
 | 5dive        | 5dive            | متنباز (5dive-ai)        | full                | false              |
+| whycodes     | WhyCodes         | Why Corporation          | full                | false              |
 
 ---
 

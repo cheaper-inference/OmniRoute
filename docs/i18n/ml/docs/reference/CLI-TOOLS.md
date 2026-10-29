@@ -10,8 +10,8 @@
 
 | പേജ്           | റൂട്ട്                  | ആശയം                                                                                                  | എണ്ണം           |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------------------- | --------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute-ലേക്ക് നിങ്ങൾ ചൂണ്ടിക്കാണിക്കുന്ന കോഡിംഗ് ടൂളുകൾ (ക്ലയന്റ് → CLI → OmniRoute → പ്രൊവൈഡർ)    | 26              |
-| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute-ലേക്ക് നിങ്ങൾ ചൂണ്ടിക്കാണിക്കുന്ന സ്വയംഭരണ ഏജന്റുകൾ (അതേ പ്രവാഹം, കൂടുതൽ വിപുലമായ വ്യാപ്തി) | 10              |
+| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute-ലേക്ക് നിങ്ങൾ ചൂണ്ടിക്കാണിക്കുന്ന കോഡിംഗ് ടൂളുകൾ (ക്ലയന്റ് → CLI → OmniRoute → പ്രൊവൈഡർ)    | 27              |
+| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute-ലേക്ക് നിങ്ങൾ ചൂണ്ടിക്കാണിക്കുന്ന സ്വയംഭരണ ഏജന്റുകൾ (അതേ പ്രവാഹം, കൂടുതൽ വിപുലമായ വ്യാപ്തി) | 11              |
 | **ACP Agents** | `/dashboard/acp-agents` | stdio/ACP വഴി OmniRoute ബാക്കെൻഡായി സ്പോൺ ചെയ്യുന്ന CLI-കൾ (വിപരീത പ്രവാഹം)                           | രജിസ്ട്രി കാണുക |
 
 പഴയ റൂട്ടുകൾ 308 വഴി റീഡയറക്ട് ചെയ്യുന്നു: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -56,12 +56,13 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 ഓരോന്നും `--remote <url> --api-key <key>` (ഒരു റിമോട്ട് OmniRoute-ന് എതിരായി ഒരു
 ലോക്കൽ ടൂൾ കോൺഫിഗർ ചെയ്യാൻ), `--dry-run` (എഴുതാതെ പ്രിവ്യൂ ചെയ്യാൻ), `--port`
 എന്നിവ സ്വീകരിക്കുന്നു. മോഡൽ സ്വയമേവ കണ്ടെത്താനുള്ള സൗകര്യമില്ലാത്ത ടൂളുകൾ
-(Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) `--model <id>` സ്വീകരിക്കുന്നു
+(Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) `--model <id>` സ്വീകരിക്കുന്നു
 (കൂടാതെ ഇന്ററാക്ടീവ് അല്ലാത്ത റണ്ണുകൾക്കായി `--yes`). `$HOME`-ന് കീഴിൽ എഴുതാത്ത
 ഒരേയൊരു റെസിപ്പിയാണ് `setup-5dive`: ഫ്ലീറ്റ് ഹോസ്റ്റിൽ root ഉടമസ്ഥതയിലുള്ള ഒരു
 ഓത്ത് പ്രൊഫൈൽ എഴുതിക്കൊണ്ട് ഇത് 5dive ഏജന്റ് ഫ്ലീറ്റിനെ കോൺഫിഗർ ചെയ്യുന്നു;
@@ -69,7 +70,7 @@ omniroute setup-5dive        omniroute setup-zed
 ഇല്ലാതിരിക്കുകയും ചെയ്യുന്നു. ശരിയായ env ഇൻജക്റ്റ് ചെയ്തുകൊണ്ടും യാതൊരു
 കോൺഫിഗറേഷനും എഴുതാതെയും ഒരു CLI ലോഞ്ച് ചെയ്യാൻ, പൊതുവായ
 `omniroute run <target>` ലോഞ്ചർ ഉപയോഗിക്കുക (claude, codex, aider, goose,
-opencode, qwen, gemini — ടാർഗറ്റുകളും അപരനാമങ്ങളും
+opencode, qwen, gemini, whycodes — ടാർഗറ്റുകളും അപരനാമങ്ങളും
 `bin/cli/cli-manifest.mjs`-ൽനിന്നാണ് വരുന്നത്); ഓരോ ടൂളിനുമുള്ള പഴയ ലോഞ്ചറുകളായ
 `omniroute launch` (Claude Code), `omniroute launch-codex` (Codex) എന്നിവ
 തുടർന്നും ലഭ്യമാണ്. Gemini CLI ലോഞ്ച് ചെയ്യാൻ മാത്രമുള്ളതാണ്: അത് ഒരു
@@ -184,7 +185,7 @@ CLI കമാൻഡ് സർഫേസുകൾക്കുള്ള ആധി�
 `baseUrlSupport: "partial"` ഉള്ള ടൂളുകളുടെ ഡാഷ്ബോർഡ് കാർഡിൽ "⚠ ഭാഗിക Base URL" എന്ന ബാഡ്ജ് ദൃശ്യമാകും.
 ---
 
-## 2. CLI ഏജന്റുകളുടെ കാറ്റലോഗ് (10 ടൂളുകൾ)
+## 2. CLI ഏജന്റുകളുടെ കാറ്റലോഗ് (11 ടൂളുകൾ)
 
 `/dashboard/cli-agents`-ൽ ദൃശ്യമാകുന്ന സ്വയംഭരണ ഏജന്റുകൾ:
 
@@ -200,6 +201,7 @@ CLI കമാൻഡ് സർഫേസുകൾക്കുള്ള ആധി�
 | letta        | Letta CLI        | Letta                    | full           | false        |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| whycodes     | WhyCodes         | Why Corporation          | full           | false        |
 
 ---
 

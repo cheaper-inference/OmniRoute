@@ -8,7 +8,7 @@
 > Şununla yeniden oluşturun: `npm run gen:provider-reference`
 > **Son oluşturulma tarihi:** 2026-10-27
 
-Toplam sağlayıcı sayısı: **376**. Aşağıdaki kategori dökümüne bakın.
+Toplam sağlayıcı sayısı: **377**. Aşağıdaki kategori dökümüne bakın.
 
 ## Kategoriler
 
@@ -397,7 +397,7 @@ Her sağlayıcıyı etkinleştirmek, yapılandırmak ve test etmek için `/dashb
 | `vllm`                | `vllm`       | vLLM                | Yerel, kendi sunucunuzda barındırılan | [bağlantı](https://github.com/vllm-project/vllm)                    | API anahtarı isteğe bağlıdır. Yerel vLLM OpenAI uyumlu temel URL'sini yapılandırın (varsayılan: http://localhost:8000/v1).                                                                                                                                                                                                                                            |
 | `xinference`          | `xinference` | XInference          | Yerel, kendi sunucunuzda barındırılan | [bağlantı](https://inference.readthedocs.io)                        | API anahtarı isteğe bağlıdır. Yerel XInference OpenAI uyumlu temel URL'sini yapılandırın (varsayılan: http://localhost:9997/v1).                                                                                                                                                                                                                                      |
 
-## Arama Sağlayıcıları (18)
+## Arama Sağlayıcıları (19)
 
 | ID                  | Takma Ad        | Ad                             | Etiketler | Web Sitesi                                                          | Notlar                                                                                                                                         |
 | ------------------- | --------------- | ------------------------------ | --------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Her sağlayıcıyı etkinleştirmek, yapılandırmak ve test etmek için `/dashb
 | `exa-search`        | `exa-search`    | Exa Search                     | Arama     | [bağlantı](https://exa.ai)                                          | dashboard.exa.ai adresinden API anahtarı                                                                                                       |
 | `firecrawl`         | `fc`            | Firecrawl                      | Arama     | [bağlantı](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys adresinden API anahtarı (veya kendi barındırdığınız Firecrawl temel URL'sini ayarlayın)                             |
 | `google-pse-search` | `google-pse`    | Google Programmable Search     | Arama     | [bağlantı](https://developers.google.com/custom-search/v1/overview) | Bir Google API anahtarı ve Programmable Search Engine kimliğiniz (cx) gerekir                                                                  |
+| `kimi-search`       | `kimi-search`   | Kimi Search                    | Arama     | [bağlantı](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai üzerinden Moonshot AI API anahtarı (MOONSHOT_API_KEY)                                                                         |
 | `linkup-search`     | `linkup`        | Linkup Search                  | Arama     | [bağlantı](https://docs.linkup.so)                                  | Linkup panosundan Bearer API anahtarı                                                                                                          |
 | `nimble-search`     | `nimble`        | Nimble Search                  | Arama     | [bağlantı](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble panosundan Bearer API anahtarı                                                                                                          |
 | `ollama-search`     | `ollama-search` | Ollama Search                  | Arama     | [bağlantı](https://ollama.com/settings/keys)                        | Ollama Cloud ile aynı API anahtarı (ollama.com/settings/keys adresinden)                                                                       |

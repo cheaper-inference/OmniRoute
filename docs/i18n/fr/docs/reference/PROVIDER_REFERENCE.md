@@ -8,7 +8,7 @@
 > Régénérer avec : `npm run gen:provider-reference`
 > **Dernière génération :** 2026-10-27
 
-Nombre total de fournisseurs : **376**. Consultez la répartition par catégorie ci-dessous.
+Nombre total de fournisseurs : **377**. Consultez la répartition par catégorie ci-dessous.
 
 ## Catégories
 
@@ -397,7 +397,7 @@ Utilisez le tableau de bord à l’adresse `/dashboard/providers` pour activer, 
 | `vllm`                | `vllm`       | vLLM                | Local, auto-hébergé | [lien](https://github.com/vllm-project/vllm)                    | Clé API facultative. Configurez l’URL de base compatible avec OpenAI de l’instance locale de vLLM (par défaut : http://localhost:8000/v1).                                                                                                                                                                                                        |
 | `xinference`          | `xinference` | XInference          | Local, auto-hébergé | [lien](https://inference.readthedocs.io)                        | Clé API facultative. Configurez l’URL de base compatible avec OpenAI de l’instance locale de XInference (par défaut : http://localhost:9997/v1).                                                                                                                                                                                                  |
 
-## Fournisseurs de recherche (18)
+## Fournisseurs de recherche (19)
 
 | ID                  | Alias           | Nom                                        | Étiquettes | Site web                                                        | Remarques                                                                                                                                              |
 | ------------------- | --------------- | ------------------------------------------ | ---------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -407,6 +407,7 @@ Utilisez le tableau de bord à l’adresse `/dashboard/providers` pour activer, 
 | `exa-search`        | `exa-search`    | Exa Search                                 | Recherche  | [lien](https://exa.ai)                                          | Clé API disponible sur dashboard.exa.ai                                                                                                                |
 | `firecrawl`         | `fc`            | Firecrawl                                  | Recherche  | [lien](https://firecrawl.dev)                                   | Clé API disponible sur firecrawl.dev/app/api-keys (ou définissez l’URL de base de votre instance Firecrawl auto-hébergée)                              |
 | `google-pse-search` | `google-pse`    | Google Programmable Search                 | Recherche  | [lien](https://developers.google.com/custom-search/v1/overview) | Nécessite une clé API Google et l’ID de votre moteur de recherche programmable (cx)                                                                    |
+| `kimi-search`       | `kimi-search`   | Kimi Search                                | Recherche  | [lien](https://platform.kimi.ai/docs/api/tools-search)          | Clé API Moonshot AI (MOONSHOT_API_KEY) provenant de platform.kimi.ai                                                                                   |
 | `linkup-search`     | `linkup`        | Linkup Search                              | Recherche  | [lien](https://docs.linkup.so)                                  | Clé API Bearer disponible dans le tableau de bord Linkup                                                                                               |
 | `nimble-search`     | `nimble`        | Nimble Search                              | Recherche  | [lien](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Clé API Bearer disponible dans le tableau de bord Nimble                                                                                               |
 | `ollama-search`     | `ollama-search` | Ollama Search                              | Recherche  | [lien](https://ollama.com/settings/keys)                        | Même clé API qu’Ollama Cloud (disponible sur ollama.com/settings/keys)                                                                                 |

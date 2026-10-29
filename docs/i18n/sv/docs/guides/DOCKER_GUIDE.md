@@ -668,6 +668,8 @@ Standardkonfigurationen för OmniRoute i Docker/Kubernetes är **en Node-process
 
 **Uppgraderingar:** räkna med att varje session kopplas från. Töm klientanslutningarna om du kan; det finns ingen rullande uppdatering med SQLite-standardkonfigurationen. Compose-inställningen `restart: unless-stopped` tillsammans med Docker `HEALTHCHECK` ersätter också den enda processen när containern har statusen Unhealthy — med samma konsekvenser.
 
+Färdiga manifest och ett Helm-diagram finns i `deploy/kubernetes/` och `deploy/helm/omniroute/` — se [distributionsguiden för Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kubernetes-exempel för en **enda replik** (Recreate krävs; öka inte `replicas` mot en enda SQLite-fil):
 
 ```yaml

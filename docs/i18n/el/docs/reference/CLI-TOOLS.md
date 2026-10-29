@@ -10,8 +10,8 @@
 
 | Σελίδα         | Διαδρομή                | Έννοια                                                                                       | Πλήθος     |
 | -------------- | ----------------------- | -------------------------------------------------------------------------------------------- | ---------- |
-| **CLI Κώδικα** | `/dashboard/cli-code`   | Εργαλεία προγραμματισμού που κατευθύνετε στο OmniRoute (Πελάτης → CLI → OmniRoute → Πάροχος) | 26         |
-| **CLI Agents** | `/dashboard/cli-agents` | Αυτόνομοι agents που κατευθύνετε στο OmniRoute (ίδια ροή, ευρύτερο πεδίο εφαρμογής)          | 10         |
+| **CLI Κώδικα** | `/dashboard/cli-code`   | Εργαλεία προγραμματισμού που κατευθύνετε στο OmniRoute (Πελάτης → CLI → OmniRoute → Πάροχος) | 27         |
+| **CLI Agents** | `/dashboard/cli-agents` | Αυτόνομοι agents που κατευθύνετε στο OmniRoute (ίδια ροή, ευρύτερο πεδίο εφαρμογής)          | 11         |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI που εκκινεί το OmniRoute ως backend μέσω stdio/ACP (αντίστροφη ροή)                      | βλ. μητρώο |
 
 Οι παλαιότερες διαδρομές ανακατευθύνουν μέσω 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Καθεμία δέχεται `--remote <url> --api-key <key>` (ρύθμιση ενός τοπικού εργαλείου για χρήση με ένα
 απομακρυσμένο OmniRoute), `--dry-run` (προεπισκόπηση χωρίς εγγραφή) και `--port`. Τα εργαλεία
-χωρίς αυτόματη ανακάλυψη μοντέλων (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) δέχονται
+χωρίς αυτόματη ανακάλυψη μοντέλων (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) δέχονται
 `--model <id>` (και `--yes` για μη διαδραστικές εκτελέσεις). Το `setup-5dive` είναι η μόνη
 διαδικασία που δεν γράφει κάτω από το `$HOME`: ρυθμίζει έναν στόλο πρακτόρων 5dive
 γράφοντας ένα προφίλ ελέγχου ταυτότητας που ανήκει στον root στον κεντρικό υπολογιστή του στόλου, επομένως επανεκτελείται μέσω `sudo`
 και δεν διαθέτει δική του απομακρυσμένη λειτουργία. Για να εκκινήσετε ένα CLI με τις
 σωστές μεταβλητές περιβάλλοντος και χωρίς να γραφτεί καμία ρύθμιση, χρησιμοποιήστε το γενικό
-πρόγραμμα εκκίνησης `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — οι στόχοι και τα ψευδώνυμα προέρχονται από το `bin/cli/cli-manifest.mjs`)· τα παλαιότερα
+πρόγραμμα εκκίνησης `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — οι στόχοι και τα ψευδώνυμα προέρχονται από το `bin/cli/cli-manifest.mjs`)· τα παλαιότερα
 προγράμματα εκκίνησης ανά εργαλείο `omniroute launch` (Claude Code) και `omniroute launch-codex`
 (Codex) παραμένουν διαθέσιμα. Το Gemini CLI υποστηρίζει μόνο εκκίνηση: είναι στόχος του `omniroute run`,
 αλλά δεν διαθέτει διαδικασία `setup-*`/`configure`.
@@ -182,7 +183,7 @@ runtime, ο κατάλογος UI και κάθε επιφάνεια καταν�
 Τα εργαλεία με `baseUrlSupport: "partial"` εμφανίζουν ένα σήμα "⚠ Μερικό βασικό URL" στην κάρτα του πίνακα ελέγχου.
 ---
 
-## 2. Κατάλογος πρακτόρων CLI (10 εργαλεία)
+## 2. Κατάλογος πρακτόρων CLI (11 εργαλεία)
 
 Αυτόνομοι πράκτορες που εμφανίζονται στο `/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ runtime, ο κατάλογος UI και κάθε επιφάνεια καταν�
 | letta        | Letta CLI        | Letta                    | full               | false                         |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                         |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                         |
+| whycodes     | WhyCodes         | Why Corporation          | full               | false                         |
 
 ---
 

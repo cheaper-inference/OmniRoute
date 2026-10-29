@@ -665,6 +665,8 @@ sudo systemctl enable --now omniroute-update.path
 
 **Αναβαθμίσεις:** αναμένετε ότι κάθε συνεδρία θα διακοπεί. Αποσυνδέστε σταδιακά τους clients, αν μπορείτε· δεν υπάρχει rolling update με το προεπιλεγμένο SQLite. Το `restart: unless-stopped` του Compose μαζί με το `HEALTHCHECK` του Docker θα αντικαταστήσει επίσης τη μοναδική διεργασία όταν το container γίνει Unhealthy — με την ίδια έκταση επιπτώσεων.
 
+Έτοιμα προς χρήση manifests και ένα γράφημα Helm βρίσκονται στα `deploy/kubernetes/` και `deploy/helm/omniroute/` — ανατρέξτε στον [οδηγό ανάπτυξης Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Απόσπασμα Kubernetes για **ένα μόνο replica** (απαιτείται Recreate· μην αυξήσετε το `replicas` για ένα μόνο αρχείο SQLite):
 
 ```yaml

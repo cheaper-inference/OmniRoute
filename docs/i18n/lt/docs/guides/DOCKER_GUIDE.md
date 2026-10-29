@@ -669,6 +669,8 @@ Standartinėje Docker / Kubernetes OmniRoute konfigūracijoje veikia **vienas No
 
 **Naujinimai:** tikėkitės, kad kiekviena sesija nutrūks. Jei galite, prieš naujindami užbaikite klientų aptarnavimą; naudojant numatytąją SQLite konfigūraciją slenkamasis naujinimas negalimas. Compose `restart: unless-stopped` kartu su Docker `HEALTHCHECK` taip pat pakeis vienintelį procesą, kai konteinerio būsena taps Unhealthy – poveikio mastas bus toks pats.
 
+Paruošti naudoti manifestai ir Helm diagrama yra aplankuose `deploy/kubernetes/` ir `deploy/helm/omniroute/` — žr. [Kubernetes diegimo vadovą](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kubernetes fragmentas, skirtas **vienai replikai** (būtina naudoti Recreate; nedidinkite `replicas`, kai naudojamas vienas SQLite failas):
 
 ```yaml

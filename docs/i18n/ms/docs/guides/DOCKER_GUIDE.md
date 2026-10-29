@@ -668,6 +668,8 @@ Docker / Kubernetes OmniRoute standard ialah **satu proses Node + satu penulis S
 
 **Naik taraf:** jangkakan setiap sesi akan terputus. Salirkan klien jika boleh; tiada kemas kini berperingkat pada SQLite lalai. Compose `restart: unless-stopped` bersama Docker `HEALTHCHECK` juga akan menggantikan satu-satunya proses apabila bekas berstatus Unhealthy — dengan skop kesan yang sama.
 
+Manifes siap guna dan carta Helm tersedia dalam `deploy/kubernetes/` dan `deploy/helm/omniroute/` — lihat [panduan penggunaan Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Petikan Kubernetes untuk **replika tunggal** (Recreate diperlukan; jangan tingkatkan `replicas` terhadap satu fail SQLite):
 
 ```yaml

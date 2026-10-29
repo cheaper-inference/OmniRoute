@@ -8,7 +8,7 @@
 > 使用以下命令重新生成：`npm run gen:provider-reference`
 > **最后生成时间：** 2026-10-27
 
-提供者总数：**376**。请参阅下面的类别明细。
+提供者总数：**377**。请参阅下面的类别明细。
 
 ## 类别
 
@@ -397,7 +397,7 @@
 | `vllm`                | `vllm`       | vLLM                | 本地、自托管 | [链接](https://github.com/vllm-project/vllm)                    | API 密钥可选。配置本地 vLLM 的 OpenAI 兼容基础 URL（默认值：http://localhost:8000/v1）。                                                                                                                                         |
 | `xinference`          | `xinference` | XInference          | 本地、自托管 | [链接](https://inference.readthedocs.io)                        | API 密钥可选。配置本地 XInference 的 OpenAI 兼容基础 URL（默认值：http://localhost:9997/v1）。                                                                                                                                   |
 
-## 搜索提供者 (18)
+## 搜索提供者 (19)
 
 | ID                  | 别名            | 名称                       | 标签 | 网站                                                            | 备注                                                                                         |
 | ------------------- | --------------- | -------------------------- | ---- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@
 | `exa-search`        | `exa-search`    | Exa Search                 | 搜索 | [链接](https://exa.ai)                                          | 来自 dashboard.exa.ai 的 API 密钥                                                            |
 | `firecrawl`         | `fc`            | Firecrawl                  | 搜索 | [链接](https://firecrawl.dev)                                   | 来自 firecrawl.dev/app/api-keys 的 API 密钥（或设置自托管 Firecrawl 的基础 URL）             |
 | `google-pse-search` | `google-pse`    | Google Programmable Search | 搜索 | [链接](https://developers.google.com/custom-search/v1/overview) | 需要 Google API 密钥和您的 Programmable Search Engine ID (cx)                                |
+| `kimi-search`       | `kimi-search`   | Kimi Search                | 搜索 | [链接](https://platform.kimi.ai/docs/api/tools-search)          | 来自 platform.kimi.ai 的 Moonshot AI API 密钥 (MOONSHOT_API_KEY)                             |
 | `linkup-search`     | `linkup`        | Linkup Search              | 搜索 | [链接](https://docs.linkup.so)                                  | 来自 Linkup 控制面板的 Bearer API 密钥                                                       |
 | `nimble-search`     | `nimble`        | Nimble Search              | 搜索 | [链接](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | 来自 Nimble 控制面板的 Bearer API 密钥                                                       |
 | `ollama-search`     | `ollama-search` | Ollama Search              | 搜索 | [链接](https://ollama.com/settings/keys)                        | 与 Ollama Cloud 使用相同的 API 密钥（来自 ollama.com/settings/keys）                         |

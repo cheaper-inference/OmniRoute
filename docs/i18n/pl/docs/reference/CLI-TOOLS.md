@@ -10,8 +10,8 @@ OmniRoute integruje się z trzema kategoriami narzędzi CLI rozmieszczonymi na t
 
 | Strona         | Ścieżka                 | Koncepcja                                                                                  | Liczba         |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------------ | -------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Narzędzia programistyczne kierowane do OmniRoute (Klient → CLI → OmniRoute → Dostawca)     | 26             |
-| **CLI Agents** | `/dashboard/cli-agents` | Autonomiczni agenci kierowani do OmniRoute (ten sam przepływ, szerszy zakres)              | 10             |
+| **CLI Code's** | `/dashboard/cli-code`   | Narzędzia programistyczne kierowane do OmniRoute (Klient → CLI → OmniRoute → Dostawca)     | 27             |
+| **CLI Agents** | `/dashboard/cli-agents` | Autonomiczni agenci kierowani do OmniRoute (ten sam przepływ, szerszy zakres)              | 11             |
 | **ACP Agents** | `/dashboard/acp-agents` | Narzędzia CLI uruchamiane przez OmniRoute jako backend przez stdio/ACP (przepływ odwrotny) | zobacz rejestr |
 
 Starsze ścieżki wykonują przekierowanie 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -53,9 +53,10 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Każde z nich obsługuje `--remote <url> --api-key <key>` (konfiguracja lokalnego narzędzia do pracy ze zdalną instancją OmniRoute), `--dry-run` (podgląd bez zapisywania) oraz `--port`. Narzędzia bez automatycznego wykrywania modeli (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) przyjmują `--model <id>` (oraz `--yes` w przypadku uruchomień nieinteraktywnych). `setup-5dive` to jedyna procedura, która nie zapisuje danych w `$HOME`: konfiguruje flotę agentów 5dive, zapisując profil uwierzytelniania należący do użytkownika root na hoście floty, dlatego uruchamia się ponownie przez `sudo` i nie ma własnego trybu zdalnego. Aby uruchomić CLI z odpowiednimi zmiennymi środowiskowymi, bez zapisywania jakiejkolwiek konfiguracji, użyj ogólnego programu uruchamiającego `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — cele i aliasy pochodzą z `bin/cli/cli-manifest.mjs`); starsze programy uruchamiające dla poszczególnych narzędzi, `omniroute launch` (Claude Code) i `omniroute launch-codex` (Codex), pozostają dostępne. Gemini CLI można tylko uruchamiać: jest celem `omniroute run`, ale nie ma procedury `setup-*`/`configure`.
+Każde z nich obsługuje `--remote <url> --api-key <key>` (konfiguracja lokalnego narzędzia do pracy ze zdalną instancją OmniRoute), `--dry-run` (podgląd bez zapisywania) oraz `--port`. Narzędzia bez automatycznego wykrywania modeli (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) przyjmują `--model <id>` (oraz `--yes` w przypadku uruchomień nieinteraktywnych). `setup-5dive` to jedyna procedura, która nie zapisuje danych w `$HOME`: konfiguruje flotę agentów 5dive, zapisując profil uwierzytelniania należący do użytkownika root na hoście floty, dlatego uruchamia się ponownie przez `sudo` i nie ma własnego trybu zdalnego. Aby uruchomić CLI z odpowiednimi zmiennymi środowiskowymi, bez zapisywania jakiejkolwiek konfiguracji, użyj ogólnego programu uruchamiającego `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — cele i aliasy pochodzą z `bin/cli/cli-manifest.mjs`); starsze programy uruchamiające dla poszczególnych narzędzi, `omniroute launch` (Claude Code) i `omniroute launch-codex` (Codex), pozostają dostępne. Gemini CLI można tylko uruchamiać: jest celem `omniroute run`, ale nie ma procedury `setup-*`/`configure`.
 
 > **Pełna dokumentacja:** główna tabela — co zapisuje każde polecenie, wszystkie flagi,
 > tryb lokalny i zdalny oraz informacje o tym, które narzędzia wymagają sufiksu `/v1` — znajduje się w
@@ -146,7 +147,7 @@ Wszystkie narzędzia widoczne w `/dashboard/cli-code`. Te z `baseUrlSupport: non
 Narzędzia z `baseUrlSupport: "partial"` wyświetlają na karcie panelu plakietkę „⚠ Częściowa obsługa bazowego adresu URL”.
 ---
 
-## 2. Katalog agentów CLI (10 narzędzi)
+## 2. Katalog agentów CLI (11 narzędzi)
 
 Autonomiczni agenci dostępni w `/dashboard/cli-agents`:
 
@@ -162,6 +163,7 @@ Autonomiczni agenci dostępni w `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full            | false                            |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full            | false                            |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full            | false                            |
+| whycodes     | WhyCodes         | Why Corporation          | full            | false                            |
 
 ---
 

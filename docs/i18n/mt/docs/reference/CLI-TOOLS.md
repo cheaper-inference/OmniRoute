@@ -10,8 +10,8 @@ OmniRoute jintegra ma’ tliet kategoriji ta’ għodod CLI mifruxa fuq tliet pa
 
 | Paġna          | Rotta                   | Kunċett                                                                                   | Għadd          |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------- | -------------- |
-| **Kodiċi CLI** | `/dashboard/cli-code`   | Għodod tal-ipprogrammar li tipponta lejn OmniRoute (Klijent → CLI → OmniRoute → Fornitur) | 26             |
-| **Aġenti CLI** | `/dashboard/cli-agents` | Aġenti awtonomi li tipponta lejn OmniRoute (l-istess fluss, ambitu usa’)                  | 10             |
+| **Kodiċi CLI** | `/dashboard/cli-code`   | Għodod tal-ipprogrammar li tipponta lejn OmniRoute (Klijent → CLI → OmniRoute → Fornitur) | 27             |
+| **Aġenti CLI** | `/dashboard/cli-agents` | Aġenti awtonomi li tipponta lejn OmniRoute (l-istess fluss, ambitu usa’)                  | 11             |
 | **Aġenti ACP** | `/dashboard/acp-agents` | CLIs li OmniRoute iniedi bħala backend permezz ta’ stdio/ACP (fluss bil-maqlub)           | ara r-reġistru |
 
 Ir-rotot preċedenti jagħmlu redirect permezz ta’ 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -55,18 +55,19 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Kull wieħed jaċċetta `--remote <url> --api-key <key>` (biex tikkonfigura għodda lokali ma’
 OmniRoute remot), `--dry-run` (biex tara minn qabel mingħajr ma tikteb), u `--port`. Għodod
-mingħajr skoperta awtomatika tal-mudelli (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) jieħdu
+mingħajr skoperta awtomatika tal-mudelli (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) jieħdu
 `--model <id>` (u `--yes` għal eżekuzzjonijiet mhux interattivi). `setup-5dive` huwa l-unika
 riċetta li ma tiktebx taħt `$HOME`: din tikkonfigura flotta ta’ aġenti 5dive billi
 tikteb profil tal-awtentikazzjoni li huwa proprjetà ta’ root fuq il-host tal-flotta, għalhekk terġa’ teżegwixxi lilha nfisha permezz ta’ `sudo`
 u m’għandhiex modalità remota tagħha stess. Biex tniedi CLI bl-ambjent
 korrett injettat u mingħajr ma tinkiteb ebda konfigurazzjoni, uża l-lanċjatur ġeneriku
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — il-miri u l-aliases jiġu minn `bin/cli/cli-manifest.mjs`); il-lanċjaturi
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — il-miri u l-aliases jiġu minn `bin/cli/cli-manifest.mjs`); il-lanċjaturi
 preċedenti speċifiċi għall-għodda `omniroute launch` (Claude Code) u `omniroute launch-codex`
 (Codex) għadhom disponibbli. Gemini CLI jista’ jitnieda biss: huwa mira ta’ `omniroute run`
 iżda m’għandux riċetta `setup-*`/`configure`.
@@ -182,7 +183,7 @@ L-għodod kollha li jidhru f’`/dashboard/cli-code`. Dawk b’`baseUrlSupport: 
 L-għodod b’`baseUrlSupport: "partial"` juru badge "⚠ URL bażi parzjali" fil-kard tad-dashboard.
 ---
 
-## 2. Katalgu tal-Aġenti CLI (10 għodod)
+## 2. Katalgu tal-Aġenti CLI (11 għodod)
 
 Aġenti awtonomi li jidhru f’`/dashboard/cli-agents`:
 
@@ -198,6 +199,7 @@ Aġenti awtonomi li jidhru f’`/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full                | false                  |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full                | false                  |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full                | false                  |
+| whycodes     | WhyCodes         | Why Corporation          | full                | false                  |
 
 ---
 

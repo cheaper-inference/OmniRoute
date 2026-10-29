@@ -655,6 +655,8 @@ Standardna namestitev OmniRoute v Dockerju/Kubernetesu je **en proces Node + en 
 
 **Nadgradnje:** pričakujte prekinitev vsake seje. Če je mogoče, postopoma odklopite odjemalce; pri privzetem SQLite ni tekoče posodobitve. Nastavitev Compose `restart: unless-stopped` skupaj z Dockerjevim `HEALTHCHECK` prav tako zamenja edini proces, ko vsebnik postane Unhealthy — z enakim obsegom posledic.
 
+Pripravljeni manifesti in diagram Helm so v `deploy/kubernetes/` in `deploy/helm/omniroute/` — glejte [vodnik za uvajanje v Kubernetes](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Izsek konfiguracije Kubernetes za **eno repliko** (zahtevan je Recreate; ne povečujte vrednosti `replicas` za eno datoteko SQLite):
 
 ```yaml

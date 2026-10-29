@@ -163,7 +163,7 @@ OmniRoute zpřístupňuje 6 dovedností A2A propojených v `src/lib/a2a/taskExec
 | Zpráva o stavu           | `health-report`      | Agreguje stav jističe, dobu čekání a stav uzamčení pro jednotlivé poskytovatele                                                                                   | stav, odolnost                  | „Zobraz stav všech poskytovatelů“       |
 | Seznam funkcí            | `list-capabilities`  | Vrací úplný katalog 45 dovedností agenta (23 API + 21 CLI + 1 konfigurace) jako markdownovou tabulku s přímými adresami URL souborů SKILL.md pro vložení kontextu | katalog, zjišťování, dovednosti | „Vypiš všechny funkce OmniRoute“        |
 
-> Karta agenta by měla být udržována v souladu s aktuálním katalogem 376 poskytovatelů; počty poskytovatelů a metadata o bezplatném přístupu bez ověření pocházejí z registru za běhu.
+> Karta agenta by měla být udržována v souladu s aktuálním katalogem 377 poskytovatelů; počty poskytovatelů a metadata o bezplatném přístupu bez ověření pocházejí z registru za běhu.
 
 ### Podrobnosti o dovednosti `list-capabilities`
 

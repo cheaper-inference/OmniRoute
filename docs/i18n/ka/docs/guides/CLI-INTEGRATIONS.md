@@ -16,11 +16,11 @@ OmniRoute-იდან (ლოკალური ან დისტანცი
 ბრძანებები, რომლებიც ინსტრუმენტისთვის ლოკალურ გარემოს ფაილს მუდმივად ინახავენ, ქვემოთ არის აღნიშნული.
 
 ასევე ხელმისაწვდომია ზოგადი გამშვები — `omniroute run <target>` — რომელიც
-`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` ან `gemini`-ს
+`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` ან `whycodes`-ს
 სწორად ჩასმული გარემოს ცვლადებით უშვებს, ყოველგვარი კონფიგურაციის ჩაწერის გარეშე. სამიზნეები და მათი
 ალიასები აღებულია კანონიკური მანიფესტიდან `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), ხოლო `omniroute completion` იმავე
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), ხოლო `omniroute completion` იმავე
 მანიფესტიდან მიღებულ სამიზნე სიტყვებს გთავაზობთ. თითოეული ინსტრუმენტისთვის განკუთვნილი ძველი გამშვებები —
 `omniroute launch` (Claude Code) და `omniroute launch-codex` (Codex) — კვლავ
 ხელმისაწვდომია.
@@ -84,7 +84,8 @@ CLI-სთვის მიწოდებული მართვის სა�
 | `omniroute setup-aider`    | Aider                            | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + გამოიტანს გარემოს დაყენების ინსტრუქციას                                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | ორივე                   |
 | `omniroute setup-qwen`     | Qwen Code                        | `~/.qwen/settings.json` — V4 `modelProviders.openai` მასივი + `OMNIROUTE_API_KEY` ფაილში `~/.qwen/.env`                                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | ორივე                   |
 | `omniroute setup-5dive`    | 5dive (აგენტების ფლოტი)          | `$HOME`-ის ქვეშ არაფერი — `5dive agent auth set`-ის მეშვეობით წერს 5dive-ის **ავთენტიფიკაციის პროფილს** (`/var/lib/5dive/auth-profiles/<name>/`); მხოლოდ root-ისთვის, სრულდება ფლოტის ჰოსტზე | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | ორივე                   |
-| `omniroute run <target>`   | შესრულების გაშვება (ზოგადი)      | არაფერი — უშვებს `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`-ს შესაბამისი გარემოთი და არგუმენტებით; Qwen და Gemini იყენებენ დროებით იზოლირებულ მთავარ კატალოგს               | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | ორივე                   |
+| `omniroute setup-whycodes` | WhyCodes                         | WhyCodes-ის `config.toml` (`[providers.omniroute]` + `[default_model]`); ბილიკია `$WHYCODES_HOME/config.toml` ან `~/.whycodes/config.toml`                                                   | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | ორივე                   |
+| `omniroute run <target>`   | შესრულების გაშვება (ზოგადი)      | არაფერი — უშვებს `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes`-ს შესაბამისი გარემოთი და არგუმენტებით; Qwen და Gemini იყენებენ დროებით იზოლირებულ მთავარ კატალოგს    | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | ორივე                   |
 | `omniroute launch`         | Claude Code                      | არაფერი — უშვებს `claude`-ს ჩასმული `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`-ით                                                                                                           | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | ორივე                   |
 | `omniroute launch-codex`   | OpenAI Codex CLI                 | არაფერი — უშვებს `codex`-ს `omniroute` პროვაიდერის `-c` ალმების მეშვეობით ჩასმით                                                                                                             | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | ორივე                   |
 
@@ -103,7 +104,7 @@ CLI-სთვის მიწოდებული მართვის სა�
   (რომელიც ფაილს არასდროს წერს).
 - `--model <id>` — სავალდებულოა (ან ინტერაქტიულად აირჩევა) იმ ხელსაწყოებისთვის,
   რომლებსაც მოდელების ავტომატური აღმოჩენა არ აქვთ: Cline, Kilo, Roo, Goose, Qwen,
-  Aider, 5dive. ეს ხელსაწყოები არაინტერაქტიული გაშვებისთვის ასევე იღებენ `--yes`-ს
+  Aider, 5dive, WhyCodes. ეს ხელსაწყოები არაინტერაქტიული გაშვებისთვის ასევე იღებენ `--yes`-ს
   (რაც ამ შემთხვევაში `--model`-ს მოითხოვს). `setup-opencode` იღებს `--model`-ს
   ზედა დონის ნაგულისხმევი მოდელის დასაყენებლად.
 - `omniroute run`-ზე `--model <id>` მანიფესტში თითოეული სამიზნისთვის განსაზღვრულ
@@ -111,7 +112,8 @@ CLI-სთვის მიწოდებული მართვის სა�
   `--model openai/<id>`-ს, ხოლო **opencode** — `--model omniroute/<id>`-ს
   (პრეფიქსი ემატება მხოლოდ მაშინ, როცა ID მას უკვე არ შეიცავს); **qwen** და
   **gemini** ID-ს უცვლელად იღებენ; **claude** მას `ANTHROPIC_MODEL`-ის მეშვეობით
-  იღებს, **goose** — `GOOSE_MODEL`-ის მეშვეობით, ხოლო **codex** —
+  იღებს, **goose** — `GOOSE_MODEL`-ის მეშვეობით,
+  **whycodes** `-P omniroute -m <id>`-ის მეშვეობით, ხოლო **codex** —
   `-c model_providers.omniroute.*` არგუმენტების მეშვეობით. **Qwen ერთადერთი
   გაშვების სამიზნეა, რომელიც `--model`-ს მკაცრად მოითხოვს** — მის გარეშე
   `omniroute run qwen` სრულდება კოდით `2` და აშკარა შეცდომის შეტყობინებით.
@@ -284,18 +286,19 @@ OmniRoute OpenAI-ის ინტერფეისს `/v1` მისამა�
 ხოლო Gemini-ის ნატიურ ინტერფეისს `/v1beta` მისამართზე უზრუნველყოფს. თითოეული ინტეგრაცია მორგებულია იმ ფორმატზე,
 რომელსაც შესაბამისი ხელსაწყო მოელის (დადასტურებულია ბრძანების წყაროში):
 
-| ინტეგრაცია                                                                 | ჩაწერილი საბაზო URL | `/v1`?                                       |
-| -------------------------------------------------------------------------- | ------------------- | -------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | ძირეული             | არა — Cline ამატებს `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | ძირეული             | არა — Goose ამატებს ბილიკს                   |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | ძირეული             | არა — LiteLLM ამატებს `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1`-ით            | დიახ                                         |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1`-ით            | დიახ                                         |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | ძირეული             | არა — Claude Code ამატებს `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1`-ით            | დიახ                                         |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1`-ით            | დიახ                                         |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | ძირეული             | არა — SDK ამატებს `/v1beta/models/…`         |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` ავტორიზაციის პროფილში)                 | ძირეული             | არა — Claude Code ამატებს `/v1/messages`     |
+| ინტეგრაცია                                                                 | ჩაწერილი საბაზო URL | `/v1`?                                                                  |
+| -------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | ძირეული             | არა — Cline ამატებს `/v1/chat/completions`                              |
+| `setup-goose` (`OPENAI_HOST`)                                              | ძირეული             | არა — Goose ამატებს ბილიკს                                              |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | ძირეული             | არა — LiteLLM ამატებს `/v1/chat/completions`                            |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1`-ით            | დიახ                                                                    |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1`-ით            | დიახ                                                                    |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | ძირეული             | არა — Claude Code ამატებს `/v1/messages`                                |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1`-ით            | დიახ                                                                    |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1`-ით            | დიახ                                                                    |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | ძირეული             | არა — SDK ამატებს `/v1beta/models/…`                                    |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` ავტორიზაციის პროფილში)                 | ძირეული             | არა — Claude Code ამატებს `/v1/messages`                                |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | `/v1`-ით            | დიახ — WhyCodes აგზავნის POST მოთხოვნებს მისამართზე `/chat/completions` |
 
 ---
 

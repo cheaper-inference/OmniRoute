@@ -10,8 +10,8 @@ Sumasama ang OmniRoute sa tatlong kategorya ng mga CLI tool na nakalatag sa tatl
 
 | Page           | Route                   | Konsepto                                                                                           | Bilang               |
 | -------------- | ----------------------- | -------------------------------------------------------------------------------------------------- | -------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Mga coding tool na itinuturo mo sa OmniRoute (Client → CLI → OmniRoute → Provider)                 | 26                   |
-| **CLI Agents** | `/dashboard/cli-agents` | Mga autonomous agent na itinuturo mo sa OmniRoute (parehong daloy, mas malawak na saklaw)          | 10                   |
+| **CLI Code's** | `/dashboard/cli-code`   | Mga coding tool na itinuturo mo sa OmniRoute (Client → CLI → OmniRoute → Provider)                 | 27                   |
+| **CLI Agents** | `/dashboard/cli-agents` | Mga autonomous agent na itinuturo mo sa OmniRoute (parehong daloy, mas malawak na saklaw)          | 11                   |
 | **ACP Agents** | `/dashboard/acp-agents` | Mga CLI na pinapatakbo ng OmniRoute bilang backend sa pamamagitan ng stdio/ACP (baligtad na daloy) | tingnan ang registry |
 
 Nagre-redirect ang mga legacy route sa pamamagitan ng 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -56,19 +56,21 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
 Tinatanggap ng bawat isa ang `--remote <url> --api-key <key>` (i-configure ang isang lokal
 na tool laban sa isang remote na OmniRoute), `--dry-run` (i-preview nang walang pagsusulat),
 at `--port`. Ang mga tool na walang awtomatikong pagtuklas ng modelo (Cline, Kilo, Roo,
-Goose, Aider, Qwen, 5dive) ay tumatanggap ng `--model <id>` (at `--yes` para sa mga
+Goose, Aider, Qwen, 5dive, WhyCodes) ay tumatanggap ng `--model <id>` (at `--yes` para sa mga
 non-interactive na pagpapatakbo). Ang `setup-5dive` lamang ang recipe na hindi nagsusulat
 sa ilalim ng `$HOME`: kino-configure nito ang isang fleet ng 5dive agent sa pamamagitan
 ng pagsusulat ng root-owned na auth profile sa fleet host, kaya muli nitong isinasagawa
 ang sarili sa pamamagitan ng `sudo` at wala itong sariling remote mode. Upang maglunsad
 ng CLI na may wastong env na naka-inject at walang anumang isinusulat na config, gamitin
 ang generic na launcher na `omniroute run <target>` (claude, codex, aider, goose, opencode,
-qwen, gemini — nagmumula ang mga target at alias sa `bin/cli/cli-manifest.mjs`); nananatiling
+qwen,
+gemini, whycodes — nagmumula ang mga target at alias sa `bin/cli/cli-manifest.mjs`); nananatiling
 available ang mga legacy na launcher para sa bawat tool na `omniroute launch` (Claude Code)
 at `omniroute launch-codex` (Codex). Launch-only ang Gemini CLI: isa itong target ng
 `omniroute run` ngunit wala itong `setup-*`/`configure` recipe.
@@ -183,7 +185,7 @@ Lahat ng tool na lumalabas sa `/dashboard/cli-code`. Ang mga may `baseUrlSupport
 Ang mga tool na may `baseUrlSupport: "partial"` ay nagpapakita ng badge na "⚠ Bahagyang Base URL" sa card ng dashboard.
 ---
 
-## 2. Katalogo ng mga CLI Agent (10 tool)
+## 2. Katalogo ng mga CLI Agent (11 tool)
 
 Mga autonomous agent na makikita sa `/dashboard/cli-agents`:
 
@@ -199,6 +201,7 @@ Mga autonomous agent na makikita sa `/dashboard/cli-agents`:
 | letta        | Letta CLI        | Letta                    | full               | false                   |
 | prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                   |
 | 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                   |
+| whycodes     | WhyCodes         | Why Corporation          | full               | false                   |
 
 ---
 

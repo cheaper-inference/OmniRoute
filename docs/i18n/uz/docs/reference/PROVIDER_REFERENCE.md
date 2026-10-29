@@ -8,7 +8,7 @@
 > Qayta yaratish uchun: `npm run gen:provider-reference`
 > **Oxirgi marta yaratilgan:** 2026-10-27
 
-Jami provayderlar: **376**. Quyidagi toifalar boʻyicha taqsimotni koʻring.
+Jami provayderlar: **377**. Quyidagi toifalar boʻyicha taqsimotni koʻring.
 
 ## Toifalar
 
@@ -397,7 +397,7 @@ Har bir provayderni yoqish, sozlash va sinash uchun `/dashboard/providers` manzi
 | `vllm`                | `vllm`       | vLLM                | Mahalliy, mustaqil joylashtirilgan | [havola](https://github.com/vllm-project/vllm)                    | API kaliti ixtiyoriy. Mahalliy vLLM xizmatining OpenAI bilan mos asosiy URL manzilini sozlang (standart: http://localhost:8000/v1).                                                                                                                                                                                                                                             |
 | `xinference`          | `xinference` | XInference          | Mahalliy, mustaqil joylashtirilgan | [havola](https://inference.readthedocs.io)                        | API kaliti ixtiyoriy. Mahalliy XInference xizmatining OpenAI bilan mos asosiy URL manzilini sozlang (standart: http://localhost:9997/v1).                                                                                                                                                                                                                                       |
 
-## Qidiruv provayderlari (18)
+## Qidiruv provayderlari (19)
 
 | ID                  | Taxallus        | Nomi                            | Teglar  | Veb-sayt                                                          | Izohlar                                                                                                                                     |
 | ------------------- | --------------- | ------------------------------- | ------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,6 +407,7 @@ Har bir provayderni yoqish, sozlash va sinash uchun `/dashboard/providers` manzi
 | `exa-search`        | `exa-search`    | Exa Search                      | Qidiruv | [havola](https://exa.ai)                                          | dashboard.exa.ai boshqaruv panelidan API kaliti                                                                                             |
 | `firecrawl`         | `fc`            | Firecrawl                       | Qidiruv | [havola](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys sahifasidan API kaliti (yoki mustaqil joylashtirilgan Firecrawl asosiy URL manzilini belgilang)                  |
 | `google-pse-search` | `google-pse`    | Google Programmable Search      | Qidiruv | [havola](https://developers.google.com/custom-search/v1/overview) | Google API kaliti va Programmable Search Engine ID (`cx`) identifikatoringiz talab qilinadi                                                 |
+| `kimi-search`       | `kimi-search`   | Kimi Search                     | Qidiruv | [havola](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai saytidan olingan Moonshot AI API kaliti (MOONSHOT_API_KEY)                                                                 |
 | `linkup-search`     | `linkup`        | Linkup Search                   | Qidiruv | [havola](https://docs.linkup.so)                                  | Linkup boshqaruv panelidan Bearer API kaliti                                                                                                |
 | `nimble-search`     | `nimble`        | Nimble Search                   | Qidiruv | [havola](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble boshqaruv panelidan Bearer API kaliti                                                                                                |
 | `ollama-search`     | `ollama-search` | Ollama Search                   | Qidiruv | [havola](https://ollama.com/settings/keys)                        | Ollama Cloud bilan bir xil API kaliti (ollama.com/settings/keys sahifasidan)                                                                |

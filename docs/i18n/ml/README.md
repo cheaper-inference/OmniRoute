@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — സൗജന്യ AI ഗേറ്റ്വേ
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — കോഡിങ് ഒരിക്കലും നിർത്തേണ്ടതില്ല. എല്ലാ AI ടൂളുകളും → 376 ദാതാക്കൾ — 150+ സൗജന്യം — ഒരൊറ്റ എൻഡ്പോയിന്റിലൂടെ. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity എന്നിവയെ ഓട്ടോ-ഫാൾബാക്കോടെ സൗജന്യ Claude / GPT / Gemini-യിലേക്ക് ബന്ധിപ്പിക്കുന്നു. RTK + Caveman സ്റ്റാക്ക്ഡ് കംപ്രഷൻ 15–95% ടോക്കണുകൾ ലാഭിക്കുന്നു (ശരാശരി ~89%) — ഒരിക്കലും പരിധിയിലെത്തില്ല. 376 AI ദാതാക്കൾ · 150+ സൗജന്യ ടയറുകൾ · പ്രതിമാസം ~1.62B സൗജന്യ ടോക്കണുകൾ · 20 റൂട്ടിങ് തന്ത്രങ്ങൾ · തുടങ്ങാൻ $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — കോഡിങ് ഒരിക്കലും നിർത്തേണ്ടതില്ല. എല്ലാ AI ടൂളുകളും → 377 ദാതാക്കൾ — 150+ സൗജന്യം — ഒരൊറ്റ എൻഡ്പോയിന്റിലൂടെ. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity എന്നിവയെ ഓട്ടോ-ഫാൾബാക്കോടെ സൗജന്യ Claude / GPT / Gemini-യിലേക്ക് ബന്ധിപ്പിക്കുന്നു. RTK + Caveman സ്റ്റാക്ക്ഡ് കംപ്രഷൻ 15–95% ടോക്കണുകൾ ലാഭിക്കുന്നു (ശരാശരി ~89%) — ഒരിക്കലും പരിധിയിലെത്തില്ല. 377 AI ദാതാക്കൾ · 150+ സൗജന്യ ടയറുകൾ · പ്രതിമാസം ~1.62B സൗജന്യ ടോക്കണുകൾ · 20 റൂട്ടിങ് തന്ത്രങ്ങൾ · തുടങ്ങാൻ $0."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                                  |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 ദാതാക്കൾ                      |           352            |   **358**   |          376          |
+| 🌐 ദാതാക്കൾ                      |           352            |   **358**   |          377          |
 | 🧠 തനത് ചാറ്റ് മോഡൽ ID-കൾ        |           1320           |  **1374**   |         1475          |
 | 🖼️ മോഡാലിറ്റി ബ്രിഡ്ജ്           | 🆕 വിഷൻ + ഓഡിയോ + വീഡിയോ |      ✓      |           ✓           |
 | 📡 Radar സൗജന്യ കാറ്റലോഗ്        |      🆕 ഓപ്റ്റ്-ഇൻ       |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ സവിശേഷതകൾ</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 കോംബോകൾ</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 പ്രൊവൈഡർമാർ</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 പ്രൊവൈഡർമാർ</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="വാഗ്ദാനം — ഒരൊറ്റ എൻഡ്പോയിന്റും 376 പ്രൊവൈഡർമാരും. ആരോഗ്യകരമായ മറ്റൊരു ലക്ഷ്യം ലഭ്യമായിരിക്കുന്നിടത്തോളം ഓട്ടോമാറ്റിക് ഫാൾബാക്ക് റൂട്ടിംഗ് തുടരുന്നു. ആറ് തൂണുകൾ: 376 പ്രൊവൈഡർമാരിലുടനീളമുള്ള പ്രതിരോധശേഷിയുള്ള ഫാൾബാക്ക് · യോഗ്യമായ വർക്ക്ലോഡുകളിൽ 95% വരെ ടോക്കൺ ലാഭം · 150+ സൗജന്യ ടിയറുകളും ആവർത്തിത/കീലെസ് ഫ്രീ-ഫോർഎവർ പ്രൊവൈഡർമാരായ 52 എണ്ണവും ഉപയോഗിച്ച് $0-ന് ആരംഭിക്കാം · ഒരൊറ്റ കോൺഫിഗിലൂടെ 37 CLI/ഏജന്റ് ഇന്റഗ്രേഷനുകൾ · /v1-ൽ OpenAI, Claude, Gemini, Responses API എന്നിവയുമായുള്ള അനുയോജ്യത · സർക്യൂട്ട് ബ്രേക്കറുകൾ, TLS സ്റ്റെൽത്ത്, MCP 110 ടൂളുകൾ, A2A, മെമ്മറി, ഗാർഡ്റെയിലുകൾ, ഇവാലുകൾ, ട്രാക്ക് ചെയ്യുന്ന 7,800+ ടെസ്റ്റ് ഫയലുകളിലായി 56,000+ സ്റ്റാറ്റിക് ടെസ്റ്റ് ഡിക്ലറേഷനുകൾ എന്നിവ ഉൾപ്പെടുന്ന പ്രൊഡക്ഷൻ നിയന്ത്രണങ്ങൾ."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="വാഗ്ദാനം — ഒരൊറ്റ എൻഡ്പോയിന്റും 377 പ്രൊവൈഡർമാരും. ആരോഗ്യകരമായ മറ്റൊരു ലക്ഷ്യം ലഭ്യമായിരിക്കുന്നിടത്തോളം ഓട്ടോമാറ്റിക് ഫാൾബാക്ക് റൂട്ടിംഗ് തുടരുന്നു. ആറ് തൂണുകൾ: 377 പ്രൊവൈഡർമാരിലുടനീളമുള്ള പ്രതിരോധശേഷിയുള്ള ഫാൾബാക്ക് · യോഗ്യമായ വർക്ക്ലോഡുകളിൽ 95% വരെ ടോക്കൺ ലാഭം · 150+ സൗജന്യ ടിയറുകളും ആവർത്തിത/കീലെസ് ഫ്രീ-ഫോർഎവർ പ്രൊവൈഡർമാരായ 52 എണ്ണവും ഉപയോഗിച്ച് $0-ന് ആരംഭിക്കാം · ഒരൊറ്റ കോൺഫിഗിലൂടെ 37 CLI/ഏജന്റ് ഇന്റഗ്രേഷനുകൾ · /v1-ൽ OpenAI, Claude, Gemini, Responses API എന്നിവയുമായുള്ള അനുയോജ്യത · സർക്യൂട്ട് ബ്രേക്കറുകൾ, TLS സ്റ്റെൽത്ത്, MCP 110 ടൂളുകൾ, A2A, മെമ്മറി, ഗാർഡ്റെയിലുകൾ, ഇവാലുകൾ, ട്രാക്ക് ചെയ്യുന്ന 7,800+ ടെസ്റ്റ് ഫയലുകളിലായി 56,000+ സ്റ്റാറ്റിക് ടെസ്റ്റ് ഡിക്ലറേഷനുകൾ എന്നിവ ഉൾപ്പെടുന്ന പ്രൊഡക്ഷൻ നിയന്ത്രണങ്ങൾ."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-നെ വേറിട്ടുനിർത്തുന്നത് — 13 ശേഷികളിലായി 9router, OpenRouter, CLIProxyAPI, LiteLLM എന്നിവയുമായുള്ള തീയതി രേഖപ്പെടുത്തിയ ഫീച്ചർ താരതമ്യം. OmniRoute: 376 പ്രൊവൈഡർമാർ, അന്തർനിർമ്മിതമായ 150+ സൗജന്യ ടയറുകൾ, 20 റൂട്ടിംഗ് തന്ത്രങ്ങൾ, 12-എഞ്ചിൻ ടോക്കൺ കംപ്രഷൻ, 110 ടൂളുകളുള്ള അന്തർനിർമ്മിത MCP സെർവർ, A2A ഏജന്റ് പ്രോട്ടോക്കോൾ, സ്ഥിരമായ മെമ്മറി, ഗാർഡ്റെയിലുകൾ, ക്ലൗഡ് ഏജന്റുകൾ, TLS ഫിംഗർപ്രിന്റ് സ്റ്റെൽത്ത്, Desktop/Termux/PWA, 67 i18n UI ലോക്കേലുകൾ. OmniRoute MIT ലൈസൻസുള്ളതും സ്വയം ഹോസ്റ്റ് ചെയ്യാവുന്നതുമാണ്. മത്സരാർത്ഥികളുടെ ശേഷികളും എണ്ണവും മാറിയേക്കാം; ലിങ്ക് ചെയ്തിരിക്കുന്ന രീതിശാസ്ത്രം കാണുക."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-നെ വേറിട്ടുനിർത്തുന്നത് — 13 ശേഷികളിലായി 9router, OpenRouter, CLIProxyAPI, LiteLLM എന്നിവയുമായുള്ള തീയതി രേഖപ്പെടുത്തിയ ഫീച്ചർ താരതമ്യം. OmniRoute: 377 പ്രൊവൈഡർമാർ, അന്തർനിർമ്മിതമായ 150+ സൗജന്യ ടയറുകൾ, 20 റൂട്ടിംഗ് തന്ത്രങ്ങൾ, 12-എഞ്ചിൻ ടോക്കൺ കംപ്രഷൻ, 110 ടൂളുകളുള്ള അന്തർനിർമ്മിത MCP സെർവർ, A2A ഏജന്റ് പ്രോട്ടോക്കോൾ, സ്ഥിരമായ മെമ്മറി, ഗാർഡ്റെയിലുകൾ, ക്ലൗഡ് ഏജന്റുകൾ, TLS ഫിംഗർപ്രിന്റ് സ്റ്റെൽത്ത്, Desktop/Termux/PWA, 67 i18n UI ലോക്കേലുകൾ. OmniRoute MIT ലൈസൻസുള്ളതും സ്വയം ഹോസ്റ്റ് ചെയ്യാവുന്നതുമാണ്. മത്സരാർത്ഥികളുടെ ശേഷികളും എണ്ണവും മാറിയേക്കാം; ലിങ്ക് ചെയ്തിരിക്കുന്ന രീതിശാസ്ത്രം കാണുക."/>
 
 <sub>📊 സമ്പൂർണ്ണ രീതിശാസ്ത്രവും 9router, OpenRouter, CLIProxyAPI, LiteLLM എന്നിവയുമായുള്ള ഓരോ ഫീച്ചറിന്റെയും വിശദമായ താരതമ്യവും → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar തിരഞ്ഞെടുക്കുന്നവർക്ക് മാ�
 - **🖼️ പുതിയ എൻഡ്പോയിന്റുകൾ** — `/v1/ocr` (Mistral OCR), `/v1/audio/translations` (Whisper-ശൈലി) എന്നിവ മീഡിയാ സൗകര്യങ്ങളെ സമ്പൂർണ്ണമാക്കുന്നു. → [API റഫറൻസ്](docs/reference/API_REFERENCE.md)
 - **🎨 ഇമേജ് / വീഡിയോ / ഓഡിയോ ജനറേഷൻ** — മീഡിയയ്ക്കായി ഒരൊറ്റ API: xAI Grok Imagine & Novita AI വീഡിയോ, ComfyUI, Magnific, Adobe Firefly, Segmind, കൂടാതെ ElevenLabs പോലുള്ള സ്പീച്ച് പ്രൊവൈഡർമാർ. → [API റഫറൻസ്](docs/reference/API_REFERENCE.md)
 - **🌍 ഡിപ്ലോയ്മെന്റും ഓപ്പറേഷനുകളും** — റിവേഴ്സ്-പ്രോക്സി `basePath`, ബ്രൗസർ-ഭാഷ സ്വയമേവ കണ്ടെത്തൽ, ഓരോ കീയ്ക്കുമുള്ള ഉപകരണ ട്രാക്കിംഗ്, റൂട്ട് ആവശ്യമില്ലാത്ത MITM ട്രസ്റ്റ്, zh-TW ലോക്കലൈസേഷൻ. → [എൻവയോൺമെന്റ്](docs/reference/ENVIRONMENT.md)
-- **🤝 കൂടുതൽ പ്രൊവൈഡർമാരും ഏജന്റുമാരും** — ക്ലൗഡ് ഏജന്റുമാർ (Codex Cloud, Cursor, Devin, Jules), ബ്രൗസർ + OAuth ലോഗിനോടുകൂടിയ Grok Build (xAI), ഫസ്റ്റ്-ക്ലാസ് Ollama കാർഡ്, Claude Opus 5 & Sonnet 5, Kimi ഔദ്യോഗിക പങ്കാളിത്തം (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… കൂടാതെ പുതുക്കിയ **376-പ്രൊവൈഡർ കാറ്റലോഗ്**. → [പ്രൊവൈഡർമാർ](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 കൂടുതൽ പ്രൊവൈഡർമാരും ഏജന്റുമാരും** — ക്ലൗഡ് ഏജന്റുമാർ (Codex Cloud, Cursor, Devin, Jules), ബ്രൗസർ + OAuth ലോഗിനോടുകൂടിയ Grok Build (xAI), ഫസ്റ്റ്-ക്ലാസ് Ollama കാർഡ്, Claude Opus 5 & Sonnet 5, Kimi ഔദ്യോഗിക പങ്കാളിത്തം (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… കൂടാതെ പുതുക്കിയ **377-പ്രൊവൈഡർ കാറ്റലോഗ്**. → [പ്രൊവൈഡർമാർ](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 റൂട്ടിംഗ് സുതാര്യത** — ഓരോ പ്രതികരണത്തിലും അത് നൽകിയ സ്ട്രാറ്റജി/പ്രൊവൈഡർ/ലേറ്റൻസി വ്യക്തമാക്കുന്ന `X-OmniRoute-Decision` ഹെഡർ ഉൾപ്പെടുന്നു; പുതിയ `cache-optimized` കോംബോ സ്ട്രാറ്റജിയും Auto-Combo `cacheAffinity` ഘടകവും ആവർത്തിച്ചുള്ള അഭ്യർത്ഥനകളെ കാഷ് ചെയ്ത പ്രിഫിക്സ് കൈവശമുള്ള കണക്ഷനിലേക്ക് തിരിച്ചുവിടുന്നു; റീഡ്-ഒൺലി `/v1/auto-combo/{channel}/candidates` എൻഡ്പോയിന്റ് ഒരു `auto/*` ചാനലിന്റെ തത്സമയ കാൻഡിഡേറ്റ് പൂൾ ലഭ്യമാക്കുന്നു. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ ലോക്കൽ പ്രകടനവും ഇൻഫ്രയും** — ഒറ്റ ക്ലിക്കിൽ ലോക്കൽ Redis, Cloudflare Workers / Deno Deploy റിലേ ഡിപ്ലോയർമാർ, മേൽനോട്ടത്തിലുള്ള എംബെഡഡ് സേവനങ്ങളായി Bifrost & Mux. → [എംബെഡഡ് സേവനങ്ങൾ](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 ഇതോടൊപ്പം ലഭിക്കുന്നവ** — പ്ലഗിൻ ഫ്രെയിംവർക്കും മാർക്കറ്റ്പ്ലേസും, Omni/Agent/GitHub സ്കിൽസ് ഫ്രെയിംവർക്കുകൾ, Obsidian വോൾട്ട് ഇന്റഗ്രേഷൻ (22 MCP ടൂളുകൾ), OpenAI-അനുയോജ്യമായ Batch & Files API-കൾ, സെമാന്റിക് റെസ്പോൺസ് കാഷ്, ലീഡർബോർഡുകളോടുകൂടിയ ഗെയിമിഫിക്കേഷൻ, ACP ഏജന്റ് കണ്ടെത്തൽ (അന്തർനിർമ്മിതമായ 15 ഏജന്റുകൾ), BigQuery-യിലേക്കുള്ള ഷെഡ്യൂൾ ചെയ്ത ലോഗ് എക്സ്പോർട്ട്, `auto/chaos` സമാന്തര മൾട്ടി-മോഡൽ ഫാൻ-ഔട്ട്, ഒരു Telegram ബോട്ട് ബ്രിഡ്ജ്, ഇൻ-ആപ്പ് വേർഷൻ മാനേജർ, LMArena-ELO സൗജന്യ-പ്രൊവൈഡർ റാങ്കിങ്ങുകൾ. → [ഡോക്യുമെന്റേഷൻ](docs/README.md)
@@ -657,7 +657,7 @@ Radar തിരഞ്ഞെടുക്കുന്നവർക്ക് മാ�
 <b>＋ ഇവയുമായും പ്രവർത്തിക്കുന്നു</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>OpenAI-യുമായി അനുയോജ്യമായ ഏത് ഉപകരണവും</b>
 </div>
 
-<sub>📖 എല്ലാ 37 ടൂളുകൾക്കുമുള്ള ഓരോ-ടൂൾ സജ്ജീകരണം (27 CLI Code-കൾ + 10 CLI Agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode പ്ലഗിൻ → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 എല്ലാ 38 ടൂളുകൾക്കുമുള്ള ഓരോ-ടൂൾ സജ്ജീകരണം (27 CLI Code-കൾ + 11 CLI Agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode പ്ലഗിൻ → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ omniroute configure codex          # ഇവയും: claude opencode qwen aider
 
 <div align="center">
 
-## 🌐 376 AI ദാതാക്കൾ — കാറ്റലോഗിൽ അടയാളപ്പെടുത്തിയ 153 സൗജന്യ ദാതാക്കൾ
+## 🌐 377 AI ദാതാക്കൾ — കാറ്റലോഗിൽ അടയാളപ്പെടുത്തിയ 153 സൗജന്യ ദാതാക്കൾ
 
 </div>
 
-> കാനോണിക്കൽ ചാറ്റ്, മീഡിയ, തിരയൽ, ലോക്കൽ, ക്ലൗഡ്-ഏജന്റ്, സിസ്റ്റം ശേഖരങ്ങളിലായി **രജിസ്റ്റർ ചെയ്ത 376 ദാതാക്കൾ**, അതിൽ **153 എണ്ണം `hasFree: true` ഡിസ്കവറി മെറ്റാഡാറ്റ വഹിക്കുന്നു**. ചാറ്റ് മോഡൽ രജിസ്ട്രിയിൽ **239 ദാതാക്കൾ / 3,059 വ്യത്യസ്ത ദാതാവ്-മോഡൽ ജോടികൾ / 1,475 റോ മോഡൽ ID-കൾ** ഉൾപ്പെടുന്നു; പ്രത്യേക സൗജന്യ-ബജറ്റ് കാറ്റലോഗിൽ **ഓരോ മോഡലിനുമായി 484 വരികൾ**, **ആവർത്തിക്കുന്ന 34 പൂളുകൾ**, **ആവർത്തിക്കുന്ന/കീ ആവശ്യമില്ലാത്ത 52 എന്നേക്കും സൗജന്യമായ ദാതാക്കൾ** എന്നിവയുണ്ട്. രൂപകൽപ്പനപ്രകാരം ഇവയുടെ ഡിനോമിനേറ്ററുകൾ വ്യത്യസ്തമാണ്; നിർവചനങ്ങളും പൂൾ-ഡീഡ്യൂപ്ലിക്കേറ്റ് ചെയ്ത കണക്കുകൂട്ടലുകളും [ദാതാക്കളുടെ റഫറൻസിലും](docs/reference/PROVIDER_REFERENCE.md) [സൗജന്യ ടയറുകളിലും](docs/reference/FREE_TIERS.md) ലഭ്യമാണ്.
+> കാനോണിക്കൽ ചാറ്റ്, മീഡിയ, തിരയൽ, ലോക്കൽ, ക്ലൗഡ്-ഏജന്റ്, സിസ്റ്റം ശേഖരങ്ങളിലായി **രജിസ്റ്റർ ചെയ്ത 377 ദാതാക്കൾ**, അതിൽ **153 എണ്ണം `hasFree: true` ഡിസ്കവറി മെറ്റാഡാറ്റ വഹിക്കുന്നു**. ചാറ്റ് മോഡൽ രജിസ്ട്രിയിൽ **239 ദാതാക്കൾ / 3,059 വ്യത്യസ്ത ദാതാവ്-മോഡൽ ജോടികൾ / 1,475 റോ മോഡൽ ID-കൾ** ഉൾപ്പെടുന്നു; പ്രത്യേക സൗജന്യ-ബജറ്റ് കാറ്റലോഗിൽ **ഓരോ മോഡലിനുമായി 484 വരികൾ**, **ആവർത്തിക്കുന്ന 34 പൂളുകൾ**, **ആവർത്തിക്കുന്ന/കീ ആവശ്യമില്ലാത്ത 52 എന്നേക്കും സൗജന്യമായ ദാതാക്കൾ** എന്നിവയുണ്ട്. രൂപകൽപ്പനപ്രകാരം ഇവയുടെ ഡിനോമിനേറ്ററുകൾ വ്യത്യസ്തമാണ്; നിർവചനങ്ങളും പൂൾ-ഡീഡ്യൂപ്ലിക്കേറ്റ് ചെയ്ത കണക്കുകൂട്ടലുകളും [ദാതാക്കളുടെ റഫറൻസിലും](docs/reference/PROVIDER_REFERENCE.md) [സൗജന്യ ടയറുകളിലും](docs/reference/FREE_TIERS.md) ലഭ്യമാണ്.
 
 <div align="center">
 
@@ -765,6 +765,7 @@ omniroute configure codex          # ഇവയും: claude opencode qwen aider
 <table>
   <tr><th align="left">പ്ലാറ്റ്ഫോം</th><th align="left">ഇൻസ്റ്റാൾ</th><th align="left">പ്രധാന സവിശേഷതകൾ</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (ആഗോളം)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">ഒരൊറ്റ കമാൻഡ്, ഏത് OS-ലും</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (ആഗോളം)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">പിന്തുണാ ഉറപ്പുകളില്ലാത്ത, സാധ്യമായത്ര മികച്ച അനുയോജ്യത; പിന്തുണയ്ക്കുന്ന റൺടൈം Node.js ആണ്.</td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">മൾട്ടി-ആർക്ക് <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>ഡെസ്ക്ടോപ്പ് (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">നേറ്റീവ് വിൻഡോ + സിസ്റ്റം ട്രേ — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>മെനു-ബാർ (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">സെർവറിനെ നിരീക്ഷിക്കുകയും സ്വയം അപ്ഡേറ്റ് ചെയ്യുകയും ചെയ്യുന്നു — <b>macOS</b></td></tr>
@@ -1307,7 +1308,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ഉം ഇത് 
   <tr><td nowrap><b>റൺടൈം</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ഭാഷ</b></td><td>TypeScript 6.0 — <code>src/</code>, <code>open-sse/</code> എന്നിവയിലുടനീളം <b>100% TypeScript</b> (v2.0 മുതൽ കോറിൽ <code>any</code> ഒന്നുമില്ല)</td></tr>
   <tr><td nowrap><b>ഫ്രെയിംവർക്ക്</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL ജേണലിംഗ്) + LowDB (JSON ലെഗസി) — 147 ഡൊമെയ്ൻ മൊഡ്യൂളുകൾ, 211 മൈഗ്രേഷനുകൾ</td></tr>
+  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL ജേണലിംഗ്) + LowDB (JSON ലെഗസി) — 147 ഡൊമെയ്ൻ മൊഡ്യൂളുകൾ, 213 മൈഗ്രേഷനുകൾ</td></tr>
   <tr><td nowrap><b>മെമ്മറി</b></td><td>SQLite FTS5 ഫുൾ-ടെക്സ്റ്റ് + int8-ക്വാണ്ടൈസ്ഡ് വെക്റ്റർ എംബെഡ്ഡിങ്ങുകൾ, ടൈപ്പ് ചെയ്ത ഡികേ</td></tr>
   <tr><td nowrap><b>സ്കീമകൾ</b></td><td>Zod 4 — MCP ടൂൾ I/O സാധൂകരണം + API കരാറുകൾ</td></tr>
   <tr><td nowrap><b>പ്രോട്ടോക്കോളുകൾ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
