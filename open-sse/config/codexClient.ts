@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { SafeOutboundFetchOptions } from "@/shared/network/safeOutboundFetch";
+import { canStartBackgroundRefresh } from "@/shared/utils/backgroundRefresh";
 import {
   CODEX_CLI_RS_ORIGINATOR,
   DEFAULT_CODEX_CLIENT_VERSION,
@@ -53,6 +54,10 @@ type FetchLike = typeof fetch;
 
 let versionCache: CodexVersionCache | null = null;
 let versionInFlight: Promise<string> | null = null;
+// A failed lookup caches nothing, so without this every hot-path call would retry it —
+// against an anonymous GitHub API budget of 60 requests/hour per IP.
+let versionLookupFailedAt = 0;
+export const CODEX_VERSION_RETRY_AFTER_FAILURE_MS = 15 * 60 * 1000;
 
 function describeError(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -156,6 +161,9 @@ export function resolveCodexClientVersion(fetchImpl: FetchLike = fetch): Promise
     const version = pickCodexVersionAtLeastPin(fetched ?? versionCache?.version ?? null);
     if (fetched) {
       versionCache = { fetchedAt: Date.now(), version };
+      versionLookupFailedAt = 0;
+    } else {
+      versionLookupFailedAt = Date.now();
     }
     return version;
   })();
@@ -179,6 +187,7 @@ export function seedCodexClientVersionCache(version: string, fetchedAt = Date.no
 export function clearCodexClientVersionCache(): void {
   versionCache = null;
   versionInFlight = null;
+  versionLookupFailedAt = 0;
 }
 
 export function getCodexClientVersion(): string {
@@ -191,7 +200,13 @@ export function getCodexClientVersion(): string {
   ) {
     return cachedCodexVersion;
   }
-  if (!process.env.NODE_TEST_CONTEXT && !versionCache && !versionInFlight) {
+  if (
+    canStartBackgroundRefresh() &&
+    !process.env.NODE_TEST_CONTEXT &&
+    !versionCache &&
+    !versionInFlight &&
+    Date.now() - versionLookupFailedAt >= CODEX_VERSION_RETRY_AFTER_FAILURE_MS
+  ) {
     void resolveCodexClientVersion();
   }
   return getCachedCodexClientVersion();

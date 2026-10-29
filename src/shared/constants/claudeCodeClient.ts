@@ -12,6 +12,8 @@
  * uses that version when it is newer than the pin. The env override wins over
  * both. The lookup is fire-and-forget; a cold or failed fetch stays on the pin.
  */
+import { canStartBackgroundRefresh } from "../utils/backgroundRefresh";
+
 export const CLAUDE_CODE_CLIENT_VERSION = "2.1.280";
 export const CLAUDE_CODE_CLIENT_BUILD_REVISION = "1e2";
 export const CLAUDE_CODE_CLIENT_BILLING_VERSION = `${CLAUDE_CODE_CLIENT_VERSION}.${CLAUDE_CODE_CLIENT_BUILD_REVISION}`;
@@ -74,7 +76,7 @@ function readFreshCache(): string | null {
 }
 
 function shouldAutoRefreshClaudeCodeVersion(): boolean {
-  if (typeof process === "undefined") return false;
+  if (!canStartBackgroundRefresh()) return false;
   return !process.env.NODE_TEST_CONTEXT && !process.env.VITEST && process.env.NODE_ENV !== "test";
 }
 
