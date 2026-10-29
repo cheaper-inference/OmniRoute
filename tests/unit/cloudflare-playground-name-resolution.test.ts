@@ -529,18 +529,19 @@ test("D4: markup that is not a recoverable call is left alone", () => {
 
 // ── D8: the contract must not prime a real tool name ─────────────────────────
 
-test("D8: the contract shows complete worked examples, not a bare tag", () => {
+test("D8: the contract shows complete worked examples, not a bare envelope", () => {
   const prompt = serializeCfToolPrompt(OPENCODE_OPENAI);
-  // The original defect was a real tag paired with a body that did not belong to
-  // it (`<edit>{"arg": "read"}`). The contract now leads with JSON examples, so
-  // what must hold is that every example arrives carrying this request's nonce —
-  // a copy of it is then a complete, bindable call rather than a bare envelope.
+  // The original defect was a real tool name paired with a body that did not
+  // belong to it (`<edit>{"arg": "read"}`). The contract now leads with JSON
+  // examples, so what must hold is that every example arrives carrying this
+  // request's nonce — a copy of it is then a complete, bindable call.
   const nonce = prompt.match(/"_nonce": "([a-z0-9]+)"/)?.[1];
   assert.ok(nonce, "the contract must carry the request nonce");
-  // The tag shape is named as a mistake, not as the format.
-  assert.match(prompt, /XML Tags \(the old format\)/);
-  // The envelope names the tool in a field; nothing relies on a tag any more.
-  assert.match(prompt, /`name` is the exact tool name from the list below\./);
+  // The template is a placeholder; the worked example spells a real name.
+  assert.match(prompt, /"name": "<tool_name>"/);
+  assert.match(prompt, /"name": "read", "arguments": \{"path": "package\.json"\}/);
+  // Nothing relies on a tag any more.
+  assert.ok(!prompt.includes("<edit>"), "the contract must not show the first tool as a tag");
 });
 
 test("D8: the reminder repeats the placeholder, not the caller's first tool", () => {

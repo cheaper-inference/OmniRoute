@@ -171,60 +171,62 @@ export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
   const nonce = getToolNonce(tools);
   const call = (name: string, args: string) =>
     `{"name": "${name}", "arguments": ${args}, "_nonce": "${nonce}"}`;
-  const lines = [
+  const prompt = [
     "# Tool Calling Instructions",
-    "To invoke a tool, reply with ONLY a JSON object — no XML tags, no prose, no code fences:",
+    "",
+    "## Response Format",
+    "To use a tool, reply with raw JSON. The entire reply is the JSON value: an object `{...}` for one call, or an array `[{...}, {...}]` for several calls.",
+    "",
+    "Each call has these keys:",
+    "- `name` (string, required): the exact tool name from the Tools list below.",
+    "- `arguments` (object, required): the tool's declared argument keys with their values.",
+    `- \`_nonce\` (string, required): the fixed value \`"${nonce}"\`, copied verbatim into every call.`,
+    "",
+    "Template:",
     call("<tool_name>", `{"arg": value}`),
-    "- `name` is the exact tool name from the list below.",
-    "- `arguments` is one JSON object holding that tool's declared argument keys.",
-    `- \`_nonce\` must be copied verbatim: \`"_nonce": "${nonce}"\`.`,
+    "",
     "## Rules",
-    "- **JSON Only:** One JSON object, or a JSON array of them when several calls are needed. Nothing before or after it.",
-    "- **Parameter Match:** Argument names must precisely match the tool's declared schema.",
-    '- **Multiple Calls:** Put every call in one array: [{"name": ...}, {"name": ...}].',
-    "- **No Call Needed:** Answer normally in prose and emit no JSON object.",
+    "- **One call:** reply with a single JSON object.",
+    "- **Several calls:** reply with one JSON array containing every call.",
+    "- **Argument names:** use the keys from the tool's declared schema, spelled exactly.",
+    "- **Nonce:** every call, including each item inside an array, carries `_nonce`.",
+    "- **No tool needed:** answer in plain prose.",
     "",
-    "## Examples & Common Mistakes",
+    "## Examples",
     "",
-    "### ✅ Correct Example",
+    "### One call",
+    "User: Show me package.json.",
+    `Assistant: ${call("read", '{"path": "package.json"}')}`,
+    "",
+    "### Several calls",
     "User: Check the contents of package.json and run the build script.",
-    `Assistant: [${call("read", '{"path": "package.json"}')},`,
-    `${call("shell", '{"command": "npm run build"}')}]`,
+    `Assistant: [${call("read", '{"path": "package.json"}')}, ${call("shell", '{"command": "npm run build"}')}]`,
     "",
-    "### ❌ Incorrect Formats and How to Fix Them",
-    "",
-    "1. **XML Tags (the old format):**",
-    `   ❌ WRONG: <read>{"path": "package.json", "_nonce": "${nonce}"}</read>`,
-    `   ✅ CORRECT: ${call("read", '{"path": "package.json"}')}`,
-    "",
-    "2. **Markdown Code Fences:**",
-    `   ❌ WRONG: \`\`\`json\n${call("read", '{"path": "package.json"}')}\n\`\`\``,
-    `   ✅ CORRECT: ${call("read", '{"path": "package.json"}')}`,
-    "",
-    "3. **Missing Security Nonce:**",
-    '   ❌ WRONG: {"name": "read", "arguments": {"path": "package.json"}}',
-    `   ✅ CORRECT: ${call("read", '{"path": "package.json"}')}`,
+    "### No tool needed",
+    "User: Thanks, that's all I needed!",
+    "Assistant: You're welcome! Let me know if anything else comes up.",
     "",
     "Tools:",
-  ];
+  ].join("\n");
 
+  const toolLines: string[] = [];
   for (const tool of tools) {
     const fn = tool.function;
     const signature = renderCompactSchema(fn.parameters);
     const description = (fn.description ?? "").replace(/\s+/g, " ").trim().slice(0, 160);
-    lines.push(`- ${fn.name}(${signature})${description ? ` — ${description}` : ""}`);
+    toolLines.push(`- ${fn.name}(${signature})${description ? ` — ${description}` : ""}`);
   }
 
-  return lines.join("\n");
+  return [prompt, ...toolLines].join("\n");
 }
 /**
  * Render the short reminder that re-states the tool contract near the end of the
  * conversation (see `CF_TOOL_REMINDER_DEPTH`).
  *
  * Deliberately much shorter than the contract: it repeats only what a model
- * drifts on — the tag shape, the nonce, the escaping rule for long bodies — and
- * leaves the per-tool signatures to the contract at the top. Its length stays
- * bounded no matter how many tools the caller declares.
+ * drifts on — the JSON envelope, the nonce, the escaping rule for long bodies —
+ * and leaves the per-tool signatures to the contract at the top. Its length
+ * stays bounded no matter how many tools the caller declares.
  */
 export function buildCfToolReminder(tools: ChatCompletionTool[]): string {
   if (!tools || tools.length === 0) return "";
@@ -236,18 +238,20 @@ export function buildCfToolReminder(tools: ChatCompletionTool[]): string {
 
   return [
     "# Tool Call Reminder",
-    "To call a tool, reply ONLY with a JSON object:",
+    "To call a tool, reply with raw JSON. The entire reply is the JSON value: an object `{...}` for one call, or an array `[{...}, {...}]` for several calls.",
+    "",
+    "## Call Format",
     `{"name": "<tool>", "arguments": {"arg": value}, "_nonce": "${nonce}"}`,
     "",
-    "## Quick Example",
+    "## Example",
     `{"name": "read", "arguments": {"path": "src/index.js"}, "_nonce": "${nonce}"}`,
     "",
     "## Rules",
-    `- **Allowed Tools:** Only these names are read: ${shown.join(", ")}${more}.`,
-    "- **JSON Only:** Put the tool name in `name`, its arguments in `arguments`, and emit no XML tags, code fences or prose around the object.",
-    ' - **JSON Escaping:** Inside the JSON, escape every double quote as \\" and every newline as \\n.',
-    `- **Nonce:** Always include \`"_nonce": "${nonce}"\` inside the object.`,
-    "- **Fallback:** If no tool call is needed, answer normally without any JSON object.",
+    `- **Available tools:** ${shown.join(", ")}${more}.`,
+    "- **Keys:** `name` holds the tool name, and `arguments` holds that tool's declared argument keys.",
+    `- **Nonce:** every call carries \`"_nonce": "${nonce}"\`, including each item inside an array.`,
+    '- **JSON escaping:** inside string values, write each double quote as \\" and each line break as \\n.',
+    "- **No tool needed:** answer in plain prose.",
   ].join("\n");
 }
 /**

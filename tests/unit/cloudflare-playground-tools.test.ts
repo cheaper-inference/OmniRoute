@@ -75,34 +75,44 @@ test("serializeCfToolPrompt generates a compact contract block", () => {
   assert.ok(prompt.includes("# Tool Calling Instructions"));
   assert.ok(prompt.includes("bash"));
   assert.ok(prompt.includes("read_file"));
-  // The worked example is a JSON envelope: name, arguments, nonce.
+  // The worked example is the JSON envelope: name, arguments, nonce.
   assert.match(
     prompt,
     /\{"name": "read", "arguments": \{"path": "package\.json"\}, "_nonce": "[a-z0-9]+"\}/
   );
-  // The old tag shape is shown as a mistake, not as the format.
-  assert.ok(prompt.includes("❌ WRONG: <read>"));
+  // Several calls are shown as one array, which is the shape the reply is held to.
+  assert.match(prompt, /Assistant: \[\{"name": "read"/);
+  // Nothing in the contract asks for markup any more.
+  assert.ok(!prompt.includes("<read>"), "the contract must not show a tool tag");
+  assert.ok(!prompt.includes("</"), "the contract must not show a closing tag");
   assert.ok(prompt.includes("command: string"));
   assert.ok(prompt.includes("path: string"));
   // Compact one-line signatures instead of pretty-printed JSON
   assert.ok(!prompt.includes('"type": "object"'));
-  // The worked + negative examples dominate the fixed preamble (~2.0k for two
-  // tools, ~2.8k for OpenCode's twelve), so the bound tracks the preamble, not
-  // the tool count.
+  // The examples dominate the fixed preamble, so the bound tracks the preamble,
+  // not the tool count.
   assert.ok(prompt.length < 2400, `contract should stay small, got ${prompt.length}`);
 });
 
-test("serializeCfToolPrompt states the JSON envelope and forbids the tag shape", () => {
+test("serializeCfToolPrompt states the envelope keys and the reply shape", () => {
   const prompt = serializeCfToolPrompt(TEST_TOOLS_OPENAI);
-  // The rule that makes the name a field rather than a tag.
-  assert.ok(prompt.includes("`name` is the exact tool name from the list below."));
-  assert.ok(prompt.includes("`arguments` is one JSON object"));
-  // The tag format the contract used to ask for is now an explicit mistake.
-  assert.ok(prompt.includes("XML Tags (the old format)"));
-  // Requirement is stated twice: once in the example, once as a rule.
+  // The reply is raw JSON: one object, or one array of them.
+  assert.ok(prompt.includes("reply with raw JSON"));
+  assert.ok(prompt.includes("an object `{...}` for one call"));
+  assert.ok(prompt.includes("an array `[{...}, {...}]` for several calls"));
+  assert.ok(prompt.includes("reply with one JSON array containing every call"));
+  // Every envelope key is spelled out, so the model is not guessing field names.
+  assert.ok(prompt.includes("`name` (string, required): the exact tool name"));
+  assert.ok(prompt.includes("`arguments` (object, required): the tool's declared argument keys"));
+  // Requirement is stated twice: in the key list, and as a rule.
   const nonce = prompt.match(/"_nonce": "([a-z0-9]+)"/)?.[1];
   assert.ok(nonce, "contract should carry a nonce");
-  assert.ok(prompt.includes(`\`_nonce\` must be copied verbatim: \`"_nonce": "${nonce}"\`.`));
+  assert.ok(prompt.includes(`the fixed value \`"${nonce}"\`, copied verbatim into every call`));
+  assert.ok(
+    prompt.includes(
+      "- **Nonce:** every call, including each item inside an array, carries `_nonce`."
+    )
+  );
 });
 
 test("serializeCfToolPrompt is stable for one tool set", () => {
@@ -1101,20 +1111,20 @@ test("buildCfToolReminder restates the contract with this request's nonce", () =
   const nonce = cfToolNonce(TEST_TOOLS_OPENAI);
 
   assert.ok(reminder.includes("# Tool Call Reminder"));
-  // Shape line plus a concrete quick example the model can copy.
+  // Shape line plus a concrete example the model can copy.
   assert.ok(
     reminder.includes(`{"name": "<tool>", "arguments": {"arg": value}, "_nonce": "${nonce}"}`)
   );
-  assert.ok(reminder.includes("Put the tool name in `name`"));
+  assert.ok(reminder.includes("`name` holds the tool name"));
   assert.ok(!reminder.includes('{"name": "bash"'), "the reminder must not prime the first tool");
   // The binding is the one the caller validated against, not a fresh one.
   assert.ok(reminder.includes(`"_nonce": "${nonce}"`));
   // Escaping guidance for large bodies — the failure the reminder exists for.
-  assert.ok(reminder.includes('escape every double quote as \\" and every newline as \\n'));
+  assert.ok(reminder.includes('write each double quote as \\" and each line break as \\n'));
   // Declared names are listed so an invented one is not the obvious choice.
   assert.ok(reminder.includes("bash, read_file"));
   // The no-tool escape hatch must survive, or the model calls a tool regardless.
-  assert.ok(reminder.includes("If no tool call is needed"));
+  assert.ok(reminder.includes("No tool needed"));
 });
 
 test("buildCfToolReminder stays bounded however many tools are declared", () => {
