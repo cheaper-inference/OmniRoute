@@ -113,6 +113,7 @@ const HEADER_DESCRIPTIONS: Partial<
   // Agents & AI sub-pages
   "batch-files": "batchFilesDescription",
   // Analytics sub-pages
+  "analytics-team-reports": "analyticsTeamReportsDescription",
   "analytics-evals": "analyticsEvalsDescription",
   "analytics-search": "analyticsSearchDescription",
   "analytics-utilization": "analyticsUtilizationDescription",

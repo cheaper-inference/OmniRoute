@@ -15,8 +15,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import DatabaseSync from "better-sqlite3";
 
-import { SELF_ACCOUNT_QUOTA_SCOPE, SELF_USAGE_SCOPE } from "../../src/shared/constants/selfServiceScopes.ts";
+import {
+  SELF_ACCOUNT_QUOTA_SCOPE,
+  SELF_USAGE_SCOPE,
+} from "../../src/shared/constants/selfServiceScopes.ts";
 import { buildApiKeySelfServiceStatus } from "../../src/lib/usage/apiKeySelfService.ts";
+import { createQuotaRefreshTracker } from "../../src/lib/usage/apiKeySelfServiceAccounts.ts";
+import { createListPriceCache } from "../../src/lib/usage/apiKeySelfServiceListPrice.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const migrationPath = path.join(
@@ -57,10 +62,7 @@ test("self-service scope migration backfills own usage once and preserves explic
   assert.deepEqual(scopesById.get("legacy-empty"), [SELF_USAGE_SCOPE]);
   assert.deepEqual(scopesById.get("legacy-null"), [SELF_USAGE_SCOPE]);
   assert.deepEqual(scopesById.get("custom"), ["custom:scope", SELF_USAGE_SCOPE]);
-  assert.deepEqual(scopesById.get("quota-opt-in"), [
-    SELF_ACCOUNT_QUOTA_SCOPE,
-    SELF_USAGE_SCOPE,
-  ]);
+  assert.deepEqual(scopesById.get("quota-opt-in"), [SELF_ACCOUNT_QUOTA_SCOPE, SELF_USAGE_SCOPE]);
   assert.deepEqual(scopesById.get("already-disabled-after-migration"), ["custom:scope"]);
 });
 
@@ -105,6 +107,28 @@ function makeDeps(overrides: Record<string, unknown> = {}) {
       fetchAndPersistProviderLimits: async () => {
         throw new Error("unexpected quota fetch");
       },
+      getProviderLimitsCache: () => null,
+      quotaRefreshTracker: createQuotaRefreshTracker(),
+      getBudgetWindowTotal: () => 0,
+      getApiKeyUsageLimitStatus: async () => {
+        throw new Error("unexpected usage limit read");
+      },
+      listTokenLimits: () => [],
+      getWindowUsage: () => 0,
+      resetWindowIfElapsed: () => ({ periodStartAt: 0, nextResetAt: 0 }),
+      getKeyQuotaStatus: () => ({
+        enabled: false,
+        limits: { tpmLimit: null, rpmLimit: null, monthlyAmountUsd: null },
+        counters: { tpmUsed: 0, rpmUsed: 0, monthlyAmountUsd: 0 },
+        tpmExceeded: false,
+        rpmExceeded: false,
+        monthlyExceeded: false,
+        windowResetAtIso: "2026-05-29T12:01:00.000Z",
+      }),
+      listApiKeyUsageSlices: () => [],
+      calculateCostDetailed: async () => ({ costUsd: 0, priced: true }),
+      getPricingTable: async () => ({}),
+      listPriceCache: createListPriceCache(),
       ...overrides,
     },
   };
@@ -220,7 +244,7 @@ test("self-service status reports all explicitly allowed provider account quotas
           usage: {
             plan: "ChatGPT Plus",
             quotas: {
-              session: { used: 1, remaining: 99, resetAt: "2026-05-29T18:11:44.000Z" },
+              session: { used: 1, total: 100, remaining: 99, resetAt: "2026-05-29T18:11:44.000Z" },
             },
           },
           cache: { quotas: null, plan: null, message: null, fetchedAt: "" },
@@ -231,7 +255,11 @@ test("self-service status reports all explicitly allowed provider account quotas
         usage: {
           plan: "Claude Max",
           quotas: {
-            daily: { usedPercentage: 35, remainingPercentage: 65, resetAt: "2026-05-30T00:00:00.000Z" },
+            daily: {
+              usedPercentage: 35,
+              remainingPercentage: 65,
+              resetAt: "2026-05-30T00:00:00.000Z",
+            },
           },
         },
         cache: { quotas: null, plan: null, message: null, fetchedAt: "" },
@@ -268,11 +296,14 @@ test("self-service status reports all active provider account quotas for unrestr
       { id: "conn-disabled", provider: "claude", isActive: false },
     ],
     fetchAndPersistProviderLimits: async (connectionId: string) => ({
-      connection: { id: connectionId, provider: connectionId === "conn-codex" ? "codex" : "cursor" },
+      connection: {
+        id: connectionId,
+        provider: connectionId === "conn-codex" ? "codex" : "cursor",
+      },
       usage: {
         plan: connectionId === "conn-codex" ? "ChatGPT Plus" : "Cursor Pro",
         quotas: {
-          monthly: { used: 25, remaining: 75, resetAt: "2026-06-01T00:00:00.000Z" },
+          monthly: { used: 25, total: 100, remaining: 75, resetAt: "2026-06-01T00:00:00.000Z" },
         },
       },
       cache: { quotas: null, plan: null, message: null, fetchedAt: "" },
@@ -308,7 +339,7 @@ test("self-service status isolates provider account quota fetch failures per con
         connection: { id: connectionId, provider: "codex" },
         usage: {
           quotas: {
-            weekly: { used: 40, remaining: 60, resetAt: "2026-06-01T00:00:00.000Z" },
+            weekly: { used: 40, total: 100, remaining: 60, resetAt: "2026-06-01T00:00:00.000Z" },
           },
         },
         cache: { quotas: null, plan: null, message: null, fetchedAt: "" },
@@ -323,9 +354,11 @@ test("self-service status isolates provider account quota fetch failures per con
   assert.deepEqual(status.accountQuotas[1], {
     provider: "cursor",
     connectionId: "conn-cursor",
+    label: "Account #conn-c",
     shared: true,
     available: false,
     reason: "fetch_failed",
+    fetchedAt: null,
   });
 });
 
@@ -349,7 +382,7 @@ test("self-service status isolates explicit provider connection lookup failures"
       connection: { id: connectionId, provider: "codex" },
       usage: {
         quotas: {
-          weekly: { used: 40, remaining: 60, resetAt: "2026-06-01T00:00:00.000Z" },
+          weekly: { used: 40, total: 100, remaining: 60, resetAt: "2026-06-01T00:00:00.000Z" },
         },
       },
       cache: { quotas: null, plan: null, message: null, fetchedAt: "" },
@@ -363,9 +396,11 @@ test("self-service status isolates explicit provider connection lookup failures"
   assert.deepEqual(status.accountQuotas[1], {
     provider: "unknown",
     connectionId: "conn-missing",
+    label: "Account #conn-m",
     shared: true,
     available: false,
     reason: "connection_lookup_failed",
+    fetchedAt: null,
   });
 });
 
@@ -405,8 +440,8 @@ test("self-service status normalizes Codex account quota for one explicit connec
       connection: { id: "conn-codex", provider: "codex" },
       usage: {
         quotas: {
-          session: { used: 1, remaining: 99, resetAt: "2026-05-29T18:11:44.000Z" },
-          weekly: { used: 97, remaining: 3, resetAt: "2026-05-31T01:23:38.000Z" },
+          session: { used: 1, total: 100, remaining: 99, resetAt: "2026-05-29T18:11:44.000Z" },
+          weekly: { used: 97, total: 100, remaining: 3, resetAt: "2026-05-31T01:23:38.000Z" },
         },
       },
       cache: { quotas: null, plan: null, message: null, fetchedAt: "" },
@@ -420,7 +455,10 @@ test("self-service status normalizes Codex account quota for one explicit connec
   assert.deepEqual(status.accountQuota, {
     provider: "codex",
     connectionId: "conn-codex",
+    label: "Account #conn-c",
     shared: true,
+    // The stub's cache.fetchedAt is empty, so the live fetch reports its own time.
+    fetchedAt: "2026-05-29T12:00:00.000Z",
     quotas: {
       session: {
         usedPercentage: 1,
@@ -454,11 +492,19 @@ test("self-service fetches Moonshot custom-node quota via providerSpecificData h
     fetchAndPersistProviderLimits: async (connectionId: string) => {
       fetches.push(connectionId);
       return {
-        connection: { id: connectionId, provider: "openai-compatible-chat-e2971611-bc02-4c37-8fc5-39b8e3906fdf" },
+        connection: {
+          id: connectionId,
+          provider: "openai-compatible-chat-e2971611-bc02-4c37-8fc5-39b8e3906fdf",
+        },
         usage: {
           plan: "Kimi 开放平台（国内）",
           quotas: {
-            available: { remaining: 15, remainingPercentage: 100, unlimited: true, currency: "CNY" },
+            available: {
+              remaining: 15,
+              remainingPercentage: 100,
+              unlimited: true,
+              currency: "CNY",
+            },
           },
         },
         cache: { quotas: null, plan: null, message: null, fetchedAt: "" },
