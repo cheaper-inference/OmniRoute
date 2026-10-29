@@ -51,6 +51,16 @@ export const opencode_goProvider: RegistryEntry = {
     // #8353: Kimi K3 base + max-effort alias from the OpenCode Go registry.
     { id: "kimi-k3", name: "Kimi K3", supportsReasoning: true, supportedThinkingEfforts: ["max"] },
     { id: "kimi-k3-max", name: "Kimi K3 (max effort)", supportsReasoning: true },
+    // Kimi K3.1 Pro — chat-completions lane only, always-on Kimi thinking (OpenCode Go
+    // docs 2026-10-23). No effort aliases: Go lists none for this id.
+    {
+      id: "kimi-k3.1-pro",
+      name: "Kimi K3.1 Pro",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+      supportsReasoning: true,
+      supportsVision: true,
+    },
     // MiMo-V2.5 — base model + effort-tier aliases (#6922).
     { id: "mimo-v2.5-pro", name: "MiMo-V2.5-Pro", supportsReasoning: true },
     {

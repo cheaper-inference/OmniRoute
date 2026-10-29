@@ -148,24 +148,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## 사용 가능한 스킬
+## 사용 가능한 기술
 
-OmniRoute는 `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`에 연결된 6개의 A2A 스킬을 제공합니다. 각 스킬 모듈은 `src/lib/a2a/skills/`에 위치합니다.
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` 에 연결된 6개의 A2A 기술을 노출합니다. 각 기술 모듈은 `src/lib/a2a/skills/` 에 있습니다.
 
-| 스킬          | ID                   | 설명                                                                                                                                                    | 태그                       | 예시                                   |
-| :------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :------------------------------------- |
-| 스마트 라우팅 | `smart-routing`      | OmniRoute의 콤보 엔진과 스코어링을 사용해 프롬프트를 최적의 제공자/콤보로 라우팅합니다                                                                  | routing, providers         | "Route this prompt via the best model" |
-| 쿼터 관리     | `quota-management`   | 제공자별 쿼터 상태를 보고하고, 호출자가 언제 스로틀링하거나 전환할지 결정할 수 있도록 돕습니다                                                          | quota, providers           | "Check quota for anthropic"            |
-| 제공자 검색   | `provider-discovery` | 설치된 제공자를 기능, 프리 티어 여부, OAuth 상태와 함께 나열합니다                                                                                      | providers, discovery       | "What providers are available?"        |
-| 비용 분석     | `cost-analysis`      | 카탈로그와 최근 사용량을 기반으로 요청/대화의 비용을 추정합니다                                                                                         | cost, usage                | "Estimate cost for this conversation"  |
-| 상태 리포트   | `health-report`      | 제공자별 서킷 브레이커, 쿨다운, 잠금 상태를 집계합니다                                                                                                  | health, resilience         | "Show health status of all providers"  |
-| 기능 목록     | `list-capabilities`  | 전체 45개 항목의 Agent Skills 카탈로그(23개 API + 21개 CLI + 1개 config)를 컨텍스트 주입을 위한 원본 SKILL.md URL이 포함된 마크다운 테이블로 반환합니다 | catalog, discovery, skills | "List all OmniRoute capabilities"      |
+| 기능          | ID                   | 설명                                                                                                                                             | 태그                 | 예                                               |
+| :------------ | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- | :------------------- | :----------------------------------------------- |
+| 스마트 라우팅 | `smart-routing`      | OmniRoute 의 콤보 엔진 + 점수를 사용하여 최적의 provider/combo 통해 프롬프트를 라우팅합니다.                                                     | 라우팅, 공급자       | "최고의 모델을 통해 이 프롬프트를 라우팅하세요." |
+| 할당량 관리   | `quota-management`   | 공급자별 할당량 상태를 보고하여 호출자가 언제 throttle/switch 수행할지 결정하는 데 도움이 됩니다.                                                | 할당량, 공급자       | "인류 할당량을 확인하세요"                       |
+| 공급자 검색   | `provider-discovery` | 기능, 무료 계층 플래그, OAuth 상태와 함께 설치된 공급자를 나열합니다.                                                                            | 공급자, 검색         | "어떤 제공업체를 이용할 수 있나요?"              |
+| 비용 분석     | `cost-analysis`      | 카탈로그 + 최근 사용량을 고려하여 request/conversation 의 비용을 추정합니다.                                                                     | 비용, 사용량         | "이 대화에 대한 예상 비용"                       |
+| 건강 보고서   | `health-report`      | 공급자별로 회로 차단기, 쿨다운, 잠금 상태를 집계합니다.                                                                                          | 건강, 회복력         | "모든 공급자의 상태 표시"                        |
+| 목록 기능     | `list-capabilities`  | 전체 45개 항목 에이전트 기술 카탈로그(23 API + 21 CLI + 1 config)를 컨텍스트 삽입을 위한 원시 SKILL.md URLs 포함된 마크다운 테이블로 반환합니다. | 카탈로그, 발견, 기술 | "모든 OmniRoute 기능 나열"                       |
 
-> Agent Card는 실시간 375개 제공자 카탈로그와 일치하도록 유지되어야 하며, 제공자 수와 무료/인증 불필요 메타데이터는 런타임 레지스트리에서 가져옵니다.
+> 에이전트 카드는 실시간 377 제공업체 카탈로그와 일치하도록 유지되어야 합니다. 공급자 수와 free/no-auth 메타데이터는 런타임 레지스트리에서 제공됩니다.
 
 ### `list-capabilities` 스킬 상세
 
-`list-capabilities` 스킬은 API 호출을 보내기 전에 OmniRoute가 제공하는 기능을 파악해야 하는 외부 에이전트에게 특히 유용합니다. 구조화된 마크다운 테이블 아티팩트를 반환합니다:
+`list-capabilities` 기술은 API 호출을 보내기 전에 OmniRoute 노출하는 내용을 검색해야 하는 외부 에이전트에 특히 유용합니다. 구조화된 마크다운 테이블 아티팩트를 반환합니다.
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -174,7 +174,7 @@ OmniRoute는 `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`에 연결된 6�
 ...
 ```
 
-각 행에는 `rawUrl` 열이 포함되어 있어 에이전트가 전체 SKILL.md를 즉시 가져올 수 있습니다. `metadata.totalSkills` 필드는 카탈로그 크기(현재 45)를 반영합니다. 구현 위치: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md)도 참조하세요.
+각 행에는 `rawUrl` 열이 포함되어 있으므로 에이전트는 즉시 전체 SKILL.md 가져올 수 있습니다. `metadata.totalSkills` 필드는 카탈로그 크기(현재 45)를 반영합니다. 구현: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md) 도 참조하세요.
 
 ---
 
@@ -264,9 +264,9 @@ JSON-RPC 엔드포인트 `/a2a`는 표준 A2A 진입점입니다. 아래 REST �
 
 ---
 
-## 통합 예제
+## 통합 예
 
-### Python (requests)
+### Python(요청)
 
 ```python
 import requests
@@ -285,7 +285,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (가져오기)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

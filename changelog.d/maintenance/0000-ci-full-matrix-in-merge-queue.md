@@ -1,0 +1,1 @@
+- **ci:** ordinary pull requests now run the fast CI lane (lint, build, unit, vitest, coverage, security, docs/i18n); E2E, Electron, package, integration, ecosystem, protocol-client and Bun lanes run in the Mergify merge queue, on push/dispatch, or on demand with `gh workflow run ci.yml --ref <branch>`.

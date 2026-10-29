@@ -58,6 +58,8 @@ tags:
       background scheduler tick.
   - name: API Keys
     description: API key management
+  - name: Teams
+    description: Billing cost-center, temporal assignment, soft-budget, and usage management
   - name: Session Leases
     description: Client-neutral exclusive managed session connection leases
   - name: Combos
@@ -13727,6 +13729,11 @@ paths:
                     type: string
                     description: Latest published version, or "unavailable" when every lookup failed.
                   updateAvailable: { type: boolean }
+                  updateCheckDisabled:
+                    type: boolean
+                    description: >-
+                      True when OMNIROUTE_NO_UPDATE_NOTIFIER is set. No npm, GitHub or news lookup
+                      runs, `latest` is "unavailable" and `updateAvailable` is false.
                   channel:
                     type: string
                     enum: [npm, source, docker-compose]
@@ -15111,6 +15118,188 @@ paths:
         "200":
           description: OK
 
+  # --- Team billing cost centers ---------------------------------------------
+
+  /api/teams:
+    get:
+      tags: [Teams]
+      summary: List billing Teams
+      security:
+        - ManagementSessionAuth: []
+      parameters:
+        - in: query
+          name: includeArchived
+          schema: { type: boolean, default: false }
+        - in: query
+          name: includeKeyOptions
+          description: Include all existing API-key id/name choices and active billing team id/name; no credential fields.
+          schema: { type: boolean, default: false }
+      responses:
+        "200":
+          description: Team list; keyOptions is omitted unless requested.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  teams: { type: array, items: { type: object } }
+                  keyOptions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        name: { type: string, nullable: true }
+                        teamId: { type: string, nullable: true }
+                        teamName: { type: string, nullable: true }
+        "401": { description: Unauthorized }
+    post:
+      tags: [Teams]
+      summary: Create a billing Team with an optional soft shared budget
+      security:
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamCreate"
+      responses:
+        "201": { description: Team created }
+        "400": { description: Invalid request }
+        "401": { description: Unauthorized }
+        "409": { description: Team name already exists }
+
+  /api/teams/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [Teams]
+      summary: Get a billing Team and its active API-key assignments
+      security:
+        - ManagementSessionAuth: []
+      responses:
+        "200":
+          description: Team and members plus authoritative current successful-usage budgetStatus; null for unlimited or archived teams. Backend errors return 500.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  team: { type: object }
+                  members: { type: array, items: { type: object } }
+                  budgetStatus:
+                    $ref: "#/components/schemas/TeamBudgetStatus"
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+    patch:
+      tags: [Teams]
+      summary: Update a billing Team
+      security:
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamUpdate"
+      responses:
+        "200": { description: Team updated }
+        "400": { description: Invalid request }
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+        "409": { description: Team name already exists or the Team is archived }
+    delete:
+      tags: [Teams]
+      summary: Archive a billing Team and close its active key assignments
+      security:
+        - ManagementSessionAuth: []
+      responses:
+        "200": { description: Team archived }
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+
+  /api/teams/{id}/members:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [Teams]
+      summary: List active API-key billing assignments
+      security:
+        - ManagementSessionAuth: []
+      responses:
+        "200": { description: Active assignments }
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+    put:
+      tags: [Teams]
+      summary: Assign an API key to this billing Team
+      security:
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamMemberAssignment"
+      responses:
+        "200": { description: Assignment created }
+        "400": { description: Invalid request }
+        "401": { description: Unauthorized }
+        "404": { description: Team or API key not found }
+        "409": { description: Assignment timestamp conflict }
+    delete:
+      tags: [Teams]
+      summary: Close an API-key billing assignment
+      security:
+        - ManagementSessionAuth: []
+      parameters:
+        - in: query
+          name: apiKeyId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Assignment closed }
+        "400": { description: Invalid request }
+        "401": { description: Unauthorized }
+        "404": { description: Assignment not found }
+
+  /api/teams/{id}/usage:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string, format: uuid }
+      - in: query
+        name: startDate
+        schema: { type: string, format: date-time }
+      - in: query
+        name: endDate
+        schema: { type: string, format: date-time }
+    get:
+      tags: [Teams]
+      summary: Get immutable Team usage attribution with per-key drill-down
+      description: >-
+        Attribution is resolved when each terminal usage row is persisted and
+        is immutable thereafter. Estimated list cost comes from the local model
+        catalog; actual provider cost, subscription quota, and compression
+        savings are null when unavailable. The budget is a soft committed-usage
+        check and can overshoot under concurrency. Retained daily data is included
+        only for complete UTC days inside the requested range.
+      security:
+        - ManagementSessionAuth: []
+      responses:
+        "200": { description: Team usage report }
+        "400": { description: Invalid range }
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+
 components:
   securitySchemes:
     BearerAuth:
@@ -15211,6 +15400,64 @@ components:
             requestId: 0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
 
   schemas:
+    TeamCreate:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, maxLength: 2000 }
+        maxBudgetUsd: { type: number, exclusiveMinimum: 0, nullable: true }
+        budgetDuration: { type: string, enum: [1d, 7d, 30d], nullable: true }
+      description: maxBudgetUsd and budgetDuration must be configured or cleared together.
+
+    TeamUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, maxLength: 2000 }
+        maxBudgetUsd: { type: number, exclusiveMinimum: 0, nullable: true }
+        budgetDuration: { type: string, enum: [1d, 7d, 30d], nullable: true }
+      description: >-
+        Either budget field may be edited while the other retains its current
+        value; send both as null to clear the budget. Edits preserve the
+        established rolling-window reset cadence.
+
+    TeamMemberAssignment:
+      type: object
+      additionalProperties: false
+      required: [apiKeyId]
+      properties:
+        apiKeyId: { type: string, format: uuid }
+        expectedTeamId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Optional expected current billing team, or null for unassigned. A mismatch returns 409 without changing history. Omission retains legacy behavior.
+
+    TeamBudgetStatus:
+      type: object
+      nullable: true
+      properties:
+        teamId: { type: string }
+        teamName: { type: string }
+        enforcementMode: { type: string, enum: [soft_committed_usage] }
+        maxBudgetUsd: { type: number }
+        budgetDuration: { type: string, enum: [1d, 7d, 30d] }
+        windowStartIso: { type: string, format: date-time }
+        resetAtIso: { type: string, format: date-time }
+        estimatedListCostUsd: { type: number }
+        hasUnpricedUsage: { type: boolean }
+        hasPartialRetainedUsage:
+          type: boolean
+          description: Retained daily buckets overlap a rolling-window boundary. Displayed spend is incomplete; the existing soft-budget enforcement policy is unchanged.
+        exceeded: { type: boolean }
+        actualProviderCostUsd: { nullable: true }
+        subscriptionQuotaUsed: { nullable: true }
+        compressionSavingsUsd: { nullable: true }
+
     ElevenLabsSoundGeneration:
       type: object
       additionalProperties: true

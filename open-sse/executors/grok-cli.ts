@@ -361,7 +361,7 @@ export class GrokCliExecutor extends BaseExecutor {
     const base = super.transformRequest(model, body, stream, _credentials);
     const transformed = asRequestRecord(base);
     if (!transformed.model) {
-      transformed.model = model || "grok-composer-2.5-fast";
+      transformed.model = model || "grok-4.7";
     }
     transformed.stream = !!stream;
 

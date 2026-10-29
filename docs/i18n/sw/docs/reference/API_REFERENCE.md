@@ -846,47 +846,40 @@ mwombaji asiye wa kipindi (kupata, kufuta, kughairi, na ukaguzi wa `input_file_i
 
 ---
 
-## API ya Utafutaji
+## Tafuta API
 
-Tabaka la kuficha utofauti wa watoa huduma za wavuti/utafutaji (Tavily, Brave, Exa, Serper, n.k.).
+uondoaji wa mtoaji wa Web/search (Tavily, Jasiri, Exa, Serper, nk).
 
-| Mbinu | Njia                   | Maelezo                                                                                                  |
-| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Orodhesha watoa huduma za utafutaji waliosanidiwa pamoja na uwezo wao                                    |
-| POST  | `/v1/search`           | Tekeleza hoja ya utafutaji — mwili unathibitishwa na `v1SearchSchema`, inasaidia uakibishaji/ujumuishaji |
-| GET   | `/v1/search/analytics` | Takwimu za matokeo/ukawivu/akiba kwa kila mtoa huduma                                                    |
+| Mbinu | Njia                   | Maelezo                                                                                             |
+| ----- | ---------------------- | --------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Orodhesha uwezo wa watoa huduma wa utafutaji +                                                      |
+| POST  | `/v1/search`           | Endesha hoja ya utafutaji — body iliyothibitishwa na `v1SearchSchema`, inasaidia caching/coalescing |
+| GET   | `/v1/search/analytics` | Takwimu hit/latency/cache kwa kila mtoa huduma                                                      |
 
-**Uthibitishaji:** Ufunguo wa API wa Bearer (`extractApiKey` + `isValidApiKey`). Sera ya utafutaji inatekelezwa kupitia `enforceApiKeyPolicy`.
+**Uthibitishaji:** Mbeba API ufunguo (`extractApiKey` + `isValidApiKey`). Sera ya utafutaji inatekelezwa kupitia `enforceApiKeyPolicy`.
 
-### `provider_options` za Exa na Tavily
+### Exa na Tavily `provider_options`
 
-Exa na Tavily husoma sehemu mahususi za mtoa huduma kutoka kwenye mkusanyiko wenye nafasi ya majina:
-`provider_options.exa` (au `provider_options["exa-search"]`) na `provider_options.tavily`
-(au `provider_options["tavily-search"]`). Ni funguo zilizo hapa chini pekee zinazopitishwa. Kila moja
-hukaguliwa dhidi ya schema yake ya Zod katika `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-na ufunguo wenye aina isiyo sahihi huondolewa. Ufunguo mwingine wowote hupuuzwa, ikiwa ni pamoja na uthibitishaji, URL ya msingi,
-`stream` na `outputSchema`. Funguo tambarare zinazotumiwa na watoa huduma wengine (`cx`, `depth`, ...) hufanya kazi
-kama hapo awali.
+Exa na Tavily walisoma sehemu mahususi za mtoa huduma kutoka kwa mfuko ulio na nafasi ya majina: `provider_options.exa` (au `provider_options["exa-search"]`) na `provider_options.tavily` (au `provider_options["tavily-search"]`). Funguo zilizo hapa chini pekee ndizo zinazosambazwa. Kila moja inaangaliwa dhidi ya schema yake Zod ndani `open-sse/handlers/search/providerOptionsPassthrough.ts`, na ufunguo ulio na aina mbaya hudondoshwa. Kitufe kingine chochote kimepuuzwa, ikijumuisha auth, base URL, `stream` na `outputSchema`. Vifunguo bapa vinavyotumiwa na watoa huduma wengine (`cx`, `depth`, ...) hufanya kazi kama hapo awali.
 
-| Mtoa huduma | Sehemu za kiwango cha juu                                                                                                                                                                                                                                                                                                                                                 | Zilizopachikwa                                                                                                                                                                |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (thamani msingi tambarare), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                     | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` zinaunganishwa juu ya chaguo-msingi `{ text: true, highlights: true }` |
-| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                             |
+| Mtoa huduma | Viwanja vya hali ya juu                                                                                                                                                                                                                                                                                                                                                   | Nested                                                                                                                                              |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mfano       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` iliunganishwa juu ya `{ text: true, highlights: true }` chaguo-msingi |
+| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                   |
 
-Sehemu za jumla hupewa kipaumbele kila wakati: `query`, `max_results`, `filters` (vikoa), `country` na
-mada inayotokana na `search_type`. Kwenye Exa, `search_type: "news"` hudumisha `category: "news"`.
-Tavily pia inakubali `search_type: "finance"` (`topic: "finance"`).
+Sehemu za jumla hushinda kila wakati: `query`, `max_results`, `filters` (vikoa), `country` na mada inayotokana na `search_type`. Kwenye Exa, `search_type: "news"` huweka `category: "news"`. Tavily pia anakubali `search_type: "finance"` (`topic: "finance"`).
 
-`time_range` ya jumla sasa huwafikia watoa huduma wote wawili: Exa hupokea `startPublishedDate` (muhuri wa muda wa ISO)
-na Tavily hupokea `start_date` (`YYYY-MM-DD`). Tarehe iliyobainishwa moja kwa moja katika `provider_options`
-hubatilisha ile iliyolinganishwa.
+Gharama ya utafutaji ya Firecrawl inarekodiwa kwa kila block iliyoanza ya matokeo 10 yaliyorejeshwa, kwa $0.002 (salio 2) block na angalau block moja kwa kila simu ( [Billing Firecrawl](https://docs.firecrawl.dev/billing) ): Matokeo 11 yanagharimu $0.004.
 
-Matokeo ya Exa hudumisha `id`, `highlight_scores`, `summary`, `subpages`, `entities` na `extras` katika
-`provider_raw`. Matokeo ya Tavily hudumisha `images` na `favicon`.
+`time_range` ya jumla sasa inawafikia watoa huduma wote wawili: Exa anapata `startPublishedDate` (muhuri wa muda wa ISO ) na Tavily anapata `start_date` (`YYYY-MM-DD`). Tarehe ya wazi katika `provider_options` inabatilisha ile iliyochorwa.
 
-Uhasibu wa gharama bado ni rejista tambarare ya `costPerQuery`. Tavily hutoza
-`search_depth: "advanced"` kwa salio zaidi kwa kila ombi, na tofauti hiyo haionyeshwi katika
-`usage.search_cost_usd`.
+Matokeo ya Exa huweka `id`, `highlight_scores`, `summary`, `subpages`, `entities` na `extras` katika `provider_raw`. Matokeo ya Tavily huweka `images` na `favicon`.
+
+Gharama ya utafutaji ya kiunganishi imerekodiwa kuwa $0.005 kwa `depth` `fast` na `standard` na $0.05 kwa `deep` ( [Bei ya kiunganishi](https://docs.linkup.so/pages/documentation/development/pricing) ), iwe `depth` inatoka `provider_options` au mipangilio ya muunganisho.
+
+Exa `type: "lite"` (Exa 3.0) inakubali seti ndogo ya sehemu na kukataa ombi zima wakati uga mwingine wowote umewekwa. Kwa lite, `additionalQueries`, `systemPrompt` na kila kitufe cha `contents` isipokuwa `text` na `highlights` hudondoshwa kabla ya simu. `subpages`, `subpageTarget`, `highlights.numSentences` na `highlights.highlightsPerUrl` zilizoacha kutumika hazisambazwi tena.
+
+Uhasibu wa gharama ni sajili bapa `costPerQuery`, isipokuwa Exa, ambayo inafuata bei ya Exa mwenyewe: $0.007 kwa simu kwa `auto` (na legacy `fast`) au $0.004 kwa `lite` (na urithi `instant`), inayojumuisha matokeo 10; $0.001 kwa kila matokeo zaidi; na $0.001 kwa kila tokeo lililorejeshwa wakati `contents.summary` imewekwa. Tavily imerekodiwa kwa salio 1 ($0.008) kwa `search_depth` `basic`, `fast` na `ultra-fast`, na salio 2 ($0.016) kwa `advanced` ( [mikopo ya Tavily API](https://docs.tavily.com/documentation/api-credits) ). Simu iliyo na `auto_parameters: true` ambayo Tavily inaboresha hadi ya hali ya juu bado inarekodiwa kwa mkopo 1.
 
 ---
 

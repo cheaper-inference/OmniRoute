@@ -1,30 +1,38 @@
 @import "tailwindcss" source(none);
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
-/* Keak type ramp — self-hosted (no CDN: Google Fonts is unreachable in some regions, #3695). Inter is the
-   UI family (tracking 0), Instrument Serif only for sparse large headings, IBM Plex Mono for code.
-   Static weights on purpose: the variable Inter package registers the family "Inter Variable",
-   which the kit's `--ci-font-ui: "Inter", …` never matches (spike finding). Mirrors the kit's
-   own Storybook preview. */
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/inter/700.css";
-@import "@fontsource/instrument-serif/400.css";
-@import "@fontsource/instrument-serif/400-italic.css";
-@import "@fontsource/ibm-plex-mono/400.css";
-@import "@fontsource/ibm-plex-mono/500.css";
-@import "@fontsource/ibm-plex-mono/600.css";
-@import "@fontsource/ibm-plex-mono/700.css";
+/* Keak type ramp: the vendored kit self-hosts Switzer (packages/ui-kit/src/ci-fonts.css, imported by
+   ci-tokens.css) for UI, display and code text. No CDN (Google Fonts is unreachable in some regions,
+   #3695). */
 /* CI UI Kit — vendored snapshot (packages/ui-kit, see UPSTREAM.md). Declares the same
    `@layer theme, base, components, utilities` order as Tailwind v4, so Tailwind utilities on
    legacy screens keep winning over kit components, and the kit's `@layer base` (.ci-theme)
    wins over the preflight because of selector specificity. */
 @import "../../packages/ui-kit/src/ci-ui.css";
+/* Script fallback for Switzer, which ships Latin only (no Cyrillic, Greek or Vietnamese glyphs,
+   no "ə"): fontsource declares one Inter @font-face per subset with a unicode-range, so a browser
+   fetches an Inter subset only for a glyph Switzer lacks and Latin text keeps Switzer. */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
 /* react18-json-view (request/response JSON tree in RequestLoggerDetail) — imported here
    instead of in the component so node:test / esbuild never see a .css import. */
 @import "react18-json-view/src/style.css";
 @import "react18-json-view/src/dark.css";
+
+:root,
+.ci-theme {
+  /* Switzer first; Inter only for the scripts Switzer lacks (see the @import above) */
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  /* Code, keys, IDs, JSON and logs need a real monospace face: kit 0.0.66 points --ci-font-mono at
+     Switzer, and upstream 0.0.76 adds --ci-font-code for exactly this, so the name is reused and
+     the next kit sync makes this line redundant instead of conflicting. */
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  /* the kit also exposes --font-mono at runtime (ci-tokens.css): keep raw var() users monospace */
+  --font-mono: var(--ci-font-code);
+}
 @source "../../node_modules/fumadocs-ui/css/generated/*.css";
 
 /* Keep Tailwind v4 from scanning the entire repository. The UI lives in the
@@ -86,6 +94,10 @@
   --color-bg-primary: var(--ci-color-background);
   --color-bg-subtle: var(--ci-color-surface-subtle);
   --color-surface: var(--ci-color-surface);
+  /* Secondary/muted panel tints (`bg-surface-secondary/30`, `bg-muted/50`): kit subtle and
+     muted surfaces — the kit flips both under data-theme="dark". */
+  --color-surface-secondary: var(--ci-color-surface-subtle);
+  --color-muted: var(--ci-color-surface-muted);
   --color-card: var(--ci-color-surface);
   --color-sidebar: var(--ci-color-surface);
   --surface-2: var(--ci-color-surface-muted);
@@ -186,8 +198,14 @@
   /* Auto-switch colors (use CSS variables from :root/.dark) */
   --color-bg: var(--color-bg);
   --color-bg-primary: var(--color-bg-primary);
+  /* bg-alt / muted / surface-secondary had a :root value but no @theme entry, so their
+     utilities (41× bg-bg-alt, bg-muted/50, bg-surface-secondary/30) generated nothing
+     (KEA-7886 P4 — tests/unit/design-kit-bridge.test.ts pins these three). */
+  --color-bg-alt: var(--color-bg-alt);
   --color-bg-subtle: var(--color-bg-subtle);
   --color-surface: var(--color-surface);
+  --color-surface-secondary: var(--color-surface-secondary);
+  --color-muted: var(--color-muted);
   --color-card: var(--color-card);
   --color-sidebar: var(--color-sidebar);
   --color-border: var(--color-border);
@@ -200,9 +218,9 @@
   --shadow-warm: var(--shadow-warm);
   --shadow-elevated: var(--shadow-elevated);
 
-  /* Keak type ramp (kit tokens): Inter / IBM Plex Mono / Instrument Serif (font-display) */
+  /* Keak type ramp (kit tokens): Switzer for sans and display; a monospace stack for code */
   --font-sans: var(--ci-font-ui);
-  --font-mono: var(--ci-font-mono);
+  --font-mono: var(--ci-font-code);
   --font-display: var(--ci-font-display);
 
   /* Nested surface (enables bg-surface-2) */
