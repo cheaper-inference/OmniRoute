@@ -1,6 +1,6 @@
 // Earlier #14833 builds shipped agent_sessions / usage_history.agent_session_id as 190/191,
 // 197/198, 198/199, 208/209 and 214/215 — slots upstream assigns to its own migrations. A
-// database that ran one of those builds must move its rows to 219/220, keep its sessions, and still receive
+// database that ran one of those builds must move its rows to 230/231, keep its sessions, and still receive
 // the upstream migrations of those slots (the runner treats a version as applied by number).
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -113,20 +113,20 @@ const HISTORICAL_BUILDS = [
 ];
 
 for (const build of HISTORICAL_BUILDS) {
-  test(`agent-session migrations ${build.sessions}/${build.usage} move to 219/220 and free the slots for ${build.upstream.join(" + ")}`, () => {
+  test(`agent-session migrations ${build.sessions}/${build.usage} move to 230/231 and free the slots for ${build.upstream.join(" + ")}`, () => {
     const db = core.getDbInstance();
     const now = new Date().toISOString();
     db.prepare(
       "INSERT INTO agent_sessions (id, api_key_id, first_seen_at, last_seen_at, request_count) VALUES (?, ?, ?, ?, 3)"
     ).run("kept-session", "key-1", now, now);
     // Rewind the ledger to what that build left behind: its own names in the upstream slots,
-    // which never ran there, and nothing at 219/220.
+    // which never ran there, and nothing at 230/231.
     db.exec(`
       DELETE FROM _omniroute_migrations WHERE version IN ('${build.sessions}', '${build.usage}');
       UPDATE _omniroute_migrations SET version = '${build.sessions}'
-        WHERE version = '219' AND name = 'agent_sessions';
+        WHERE version = '230' AND name = 'agent_sessions';
       UPDATE _omniroute_migrations SET version = '${build.usage}'
-        WHERE version = '220' AND name = 'usage_history_agent_session_id';
+        WHERE version = '231' AND name = 'usage_history_agent_session_id';
       ${build.undo}
     `);
     assert.equal(build.restored(db), false);
@@ -135,14 +135,14 @@ for (const build of HISTORICAL_BUILDS) {
 
     const ledger = db
       .prepare(
-        "SELECT version, name FROM _omniroute_migrations WHERE version IN (?, ?, '219', '220') ORDER BY version"
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN (?, ?, '230', '231') ORDER BY version"
       )
       .all(build.sessions, build.usage);
     assert.deepEqual(ledger, [
       { version: build.sessions, name: build.upstream[0] },
       { version: build.usage, name: build.upstream[1] },
-      { version: "219", name: "agent_sessions" },
-      { version: "220", name: "usage_history_agent_session_id" },
+      { version: "230", name: "agent_sessions" },
+      { version: "231", name: "usage_history_agent_session_id" },
     ]);
     assert.equal(build.restored(db), true);
     assert.ok(columns(db, "usage_history").includes("agent_session_id"));

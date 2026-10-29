@@ -1100,3 +1100,150 @@ test("Claude non-quota failure scopes and Anthropic API-key behavior follow prov
   assert.equal(fallback.isModelLocked("anthropic", anthropic.id, "claude-fable-5-1"), false);
   assert.notEqual(updated.testStatus, "active");
 });
+
+const MODEL_CREDIT_ENTITLEMENT_ERROR = "[429]: Usage credits are required for this model.";
+
+test("#18058: Claude model-credit entitlement scopes a cold or stale quota snapshot", () => {
+  const connectionId = "claude-model-credit-cold-cache";
+  const now = Date.now();
+  const decide = (
+    overrides: Partial<{
+      provider: string;
+      status: number;
+      model: string;
+      errorText: string;
+      nowMs: number;
+    }> = {}
+  ) =>
+    quotaCache.getCachedClaudeQuotaScopeDecision({
+      connectionId,
+      provider: "claude",
+      status: 429,
+      model: "claude-fable-5-1",
+      errorText: MODEL_CREDIT_ENTITLEMENT_ERROR,
+      nowMs: now,
+      ...overrides,
+    });
+
+  const modelFallback = {
+    scope: "model",
+    evidence: "blocking",
+    resetAt: null,
+    cooldownMs: 60 * 60 * 1000,
+  };
+  assert.deepEqual(decide(), modelFallback);
+  assert.deepEqual(decide({ provider: "cc" }), modelFallback);
+  assert.equal(decide({ provider: "anthropic" }).scope, "connection");
+  assert.equal(decide({ status: 400 }).scope, "connection");
+  assert.equal(decide({ model: "" }).scope, "connection");
+  assert.equal(
+    decide({ errorText: "rate_limit_error: 50 requests per minute" }).scope,
+    "connection"
+  );
+
+  const futureReset = new Date(now + 120_000).toISOString();
+  quotaCache.setQuotaCache(
+    connectionId,
+    "claude",
+    {},
+    { "weekly Fable (7d)": scopedQuota(futureReset) }
+  );
+  assert.deepEqual(decide(), {
+    scope: "model",
+    evidence: "blocking",
+    resetAt: futureReset,
+    cooldownMs: 120_000,
+  });
+  assert.deepEqual(decide({ nowMs: now + 6 * 60_000 }), modelFallback);
+
+  // A fresh blocking window for this same model WITHOUT a usable reset is
+  // still a model-only entitlement failure, never a connection-wide park.
+  quotaCache.setQuotaCache(
+    connectionId,
+    "claude",
+    {},
+    { "weekly Fable (7d)": { ...scopedQuota(futureReset), resetAt: null } }
+  );
+  assert.deepEqual(decide(), modelFallback);
+});
+
+test("#18058: unrelated model quota cannot override entitlement, but a global blocker can", () => {
+  const connectionId = "claude-model-credit-unrelated-scope";
+  const now = Date.now();
+  const resetAt = new Date(now + 120_000).toISOString();
+  const decide = () =>
+    quotaCache.getCachedClaudeQuotaScopeDecision({
+      connectionId,
+      provider: "claude",
+      status: 429,
+      model: "claude-fable-5-1",
+      errorText: MODEL_CREDIT_ENTITLEMENT_ERROR,
+      nowMs: now,
+    });
+  quotaCache.setQuotaCache(
+    connectionId,
+    "claude",
+    {},
+    { "weekly Opus (7d)": scopedQuota(resetAt, "claude-opus-5") }
+  );
+  assert.deepEqual(decide(), {
+    scope: "model",
+    evidence: "blocking",
+    resetAt: null,
+    cooldownMs: 60 * 60 * 1000,
+  });
+
+  quotaCache.setQuotaCache(connectionId, "claude", {
+    "session (5h)": {
+      remainingPercentage: 0,
+      resetAt,
+      claudeQuota: {
+        kind: "session",
+        active: true,
+        severity: "critical",
+        scopeKey: null,
+        modelId: null,
+        modelDisplayName: null,
+      },
+    },
+  });
+  assert.deepEqual(decide(), {
+    scope: "connection",
+    evidence: "blocking",
+    resetAt,
+    cooldownMs: 120_000,
+  });
+});
+
+test("#18058: native Claude credit entitlement locks only the failed model, not its account", async () => {
+  const failedModel = "claude-fable-5-1";
+  const siblingModel = "claude-opus-5";
+  const connection = await seedConnection("claude", {
+    name: "claude-18058-model-entitlement",
+    authType: "oauth",
+    accessToken: "claude-18058-access",
+    refreshToken: "claude-18058-refresh",
+  });
+  const result = await auth.markAccountUnavailable(
+    connection.id,
+    429,
+    MODEL_CREDIT_ENTITLEMENT_ERROR,
+    "claude",
+    failedModel
+  );
+  await flushWrites();
+  const updated = await providersDb.getProviderConnectionById(connection.id);
+
+  assert.equal(result.shouldFallback, true);
+  assert.ok(result.cooldownMs >= 5 * 60_000);
+  assert.equal(updated.isActive, true);
+  assert.equal(updated.testStatus, "active");
+  assert.equal(updated.rateLimitedUntil, undefined);
+  assert.equal(fallback.isModelLocked("claude", connection.id, failedModel), true);
+  assert.equal(fallback.isModelLocked("claude", connection.id, siblingModel), false);
+  const blocked = await auth.getProviderCredentials("claude", null, null, failedModel);
+  const sibling = await auth.getProviderCredentials("claude", null, null, siblingModel);
+  assert.equal(blocked.allRateLimited, true);
+  assert.equal(blocked.cooldownScope, "model");
+  assert.equal(sibling.connectionId, connection.id);
+});

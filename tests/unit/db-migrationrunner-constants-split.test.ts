@@ -177,19 +177,19 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-15), {
       fromVersion: "194",
       fromName: "api_key_self_service_settings",
-      toVersion: "218",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-14), {
       fromVersion: "197",
       fromName: "api_key_self_service_settings",
-      toVersion: "218",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-13), {
       fromVersion: "207",
       fromName: "api_key_self_service_settings",
-      toVersion: "218",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-12), {
@@ -201,25 +201,25 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-11), {
       fromVersion: "213",
       fromName: "api_key_self_service_settings",
-      toVersion: "218",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
-    // #14833 agent-session builds (190/191 through 214/215) now live at 219/220
+    // #14833 agent-session builds (190/191 through 214/215) now live at 230/231
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.slice(-10).map(
         (e) => `${e.fromVersion}_${e.fromName}->${e.toVersion}_${e.toName}`
       ),
       [
-        "190_agent_sessions->219_agent_sessions",
-        "191_usage_history_agent_session_id->220_usage_history_agent_session_id",
-        "197_agent_sessions->219_agent_sessions",
-        "198_usage_history_agent_session_id->220_usage_history_agent_session_id",
-        "198_agent_sessions->219_agent_sessions",
-        "199_usage_history_agent_session_id->220_usage_history_agent_session_id",
-        "208_agent_sessions->219_agent_sessions",
-        "209_usage_history_agent_session_id->220_usage_history_agent_session_id",
-        "214_agent_sessions->219_agent_sessions",
-        "215_usage_history_agent_session_id->220_usage_history_agent_session_id",
+        "190_agent_sessions->230_agent_sessions",
+        "191_usage_history_agent_session_id->231_usage_history_agent_session_id",
+        "197_agent_sessions->230_agent_sessions",
+        "198_usage_history_agent_session_id->231_usage_history_agent_session_id",
+        "198_agent_sessions->230_agent_sessions",
+        "199_usage_history_agent_session_id->231_usage_history_agent_session_id",
+        "208_agent_sessions->230_agent_sessions",
+        "209_usage_history_agent_session_id->231_usage_history_agent_session_id",
+        "214_agent_sessions->230_agent_sessions",
+        "215_usage_history_agent_session_id->231_usage_history_agent_session_id",
       ]
     );
   });

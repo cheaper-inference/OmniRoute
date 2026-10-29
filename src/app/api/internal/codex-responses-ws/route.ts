@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { newestChromeProfile } from "@omniroute/open-sse/utils/browserProfiles.ts";
 import {
   applyApiKeyCodexServiceMode,
   withApiKeyCodexServiceMode,
@@ -660,6 +661,9 @@ async function resolveCodexProxy(
 }
 
 async function prepare(body: JsonRecord) {
+  // Resolve the fingerprint profile before anything below can acquire a WS
+  // lease: a fail-loud throw here must not strand the account semaphore.
+  const browser = newestChromeProfile();
   const context = await resolveCodexRequestContext(body);
   if ("error" in context) return context.error;
   const combo = await getComboByName(context.requestedModel).catch(() => null);
@@ -795,11 +799,7 @@ async function prepare(body: JsonRecord) {
   return NextResponse.json({
     ok: true,
     upstreamUrl: CODEX_RESPONSES_WS_URL,
-    // #5591: chrome_149 does not exist in wreq-js 2.3.1 (max chrome_147) → the
-    // native layer yields a degenerate TLS fingerprint and ChatGPT rejects the
-    // upgrade ("Invalid JSON body"). chrome_142 is the profile that shipped in
-    // v3.8.39 and is confirmed working against this upstream.
-    browser: "chrome_142",
+    browser,
     os: "windows",
     connectionId: refreshedCredentials.connectionId,
     leaseId,

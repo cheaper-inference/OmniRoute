@@ -215,21 +215,21 @@ Punkt końcowy JSON-RPC `/a2a` jest kanonicznym punktem wejścia A2A. Poniższe 
    };
    ```
 
-3. **Udostępnij na Karcie agenta:** w pliku `src/app/.well-known/agent.json/route.ts` dołącz wpis do tablicy `skills`:
+3. **Udostępnij w karcie agenta:** w pliku `src/lib/a2a/agentCardMetadata.ts` (współdzielonym przez `/.well-known/agent.json` i `/.well-known/agent-card.json`) dodaj element do tablicy `skills`:
 
    ```json
    {
      "id": "your-skill",
      "name": "Twoja umiejętność",
-     "description": "Krótki opis skoncentrowany na przeznaczeniu",
+     "description": "Krótki opis skoncentrowany na intencji",
      "tags": ["routing", "quota"],
      "examples": ["Przykładowe wywołanie w języku naturalnym"]
    }
    ```
 
-4. **Napisz testy:** `tests/unit/a2a-<your-skill>.test.ts`. Uwzględnij poprawny przebieg i ścieżkę błędu.
+4. **Napisz testy:** `tests/unit/a2a-<your-skill>.test.ts`. Uwzględnij ścieżkę poprawnego działania i ścieżkę błędu.
 
-5. **Udokumentuj** nową umiejętność w tabeli `Dostępne umiejętności` w tym pliku.
+5. **Udokumentuj** nową umiejętność w tabeli `Available Skills` w tym pliku.
 
 ---
 

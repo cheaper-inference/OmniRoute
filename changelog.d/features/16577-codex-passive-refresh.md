@@ -1,0 +1,1 @@
+- Added opt-in passive Codex token refresh for replicas via `OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex` (alias `cx`): reread synchronized tokens without rotation or terminal refresh failures, preserve normal upstream authentication cooldowns, store imports without a token exchange, and report a clear error for manual refresh.
