@@ -421,3 +421,48 @@ test("strategy updates take effect for later requests on the same combo name", a
   }
   assert.deepEqual(seenProviders, ["openai", "openai", "openai", "openai", "claude"]);
 });
+
+for (const tier of [undefined, "flex"]) {
+  test(`combo forwards ${tier ?? "default"} tier to every OpenAI upstream attempt`, async () => {
+    await seedConnection("openai", { apiKey: "sk-openai-tier-test" });
+    const comboName = tier ? "tier-flex" : "tier-default";
+    await combosDb.createCombo({
+      name: comboName,
+      strategy: "priority",
+      config: { maxRetries: 0, retryDelayMs: 0, ...(tier ? { service_tier: tier } : {}) },
+      models: ["openai/gpt-4o-mini", "openai/gpt-4o"],
+    });
+    const attempts: Array<Record<string, unknown>> = [];
+    globalThis.fetch = async (_url, init = {}) => {
+      const payload = JSON.parse(String(init.body)) as Record<string, unknown>;
+      attempts.push(payload);
+      if (attempts.length === 1) {
+        // A missing model is model-scoped; a provider 503 intentionally skips
+        // the same connection's remaining targets rather than retrying it.
+        return new Response(
+          JSON.stringify({ error: { code: "model_not_found", message: "model not found" } }),
+          {
+            status: 404,
+            headers: { "content-type": "application/json" },
+          }
+        );
+      }
+      return buildOpenAIResponse("Tier fallback answered");
+    };
+    const body = buildOpenAIChatBody(comboName);
+    const response = await handleChat(buildRequest({ body }));
+    const json = (await response.json()) as { choices: Array<{ message: { content: string } }> };
+    assert.equal(response.status, 200);
+    assert.equal(json.choices[0].message.content, "Tier fallback answered");
+    assert.deepEqual(
+      attempts.map((payload) => payload.model),
+      ["gpt-4o-mini", "gpt-4o"]
+    );
+    for (const payload of attempts) {
+      assert.equal(payload.service_tier, tier);
+      assert.equal(Object.hasOwn(payload, "service_tier"), tier !== undefined);
+      assert.equal(payload.stream, false);
+    }
+    assert.equal(Object.hasOwn(body, "service_tier"), false);
+  });
+}
