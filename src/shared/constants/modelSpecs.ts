@@ -635,6 +635,17 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     aliases: ["k3"],
   },
 
+  // ── Kimi K3.1 Pro (OpenCode Go — 1M context, 131K output, native vision) ──
+  // Separate from kimi-k3: K3.1 Pro caps output at 131072, not 1M.
+  "kimi-k3.1-pro": {
+    maxOutputTokens: 131072,
+    contextWindow: 1048576,
+    thinkingBudgetCap: 32768,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+  },
+
   // ── Kimi K2.6 (Moonshot API — 262K native) ──────────────────────
   "kimi-k2.6": {
     maxOutputTokens: 262144,

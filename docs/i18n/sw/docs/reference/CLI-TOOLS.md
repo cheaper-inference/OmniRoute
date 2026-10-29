@@ -6,15 +6,15 @@
 
 Ilisasishwa mwisho: 2026-08-23
 
-OmniRoute huunganishwa na makundi matatu ya zana za CLI yaliyosambazwa katika kurasa tatu mahususi za dashibodi:
+OmniRoute inaunganishwa na aina tatu za zana za CLI zilizoenea katika kurasa tatu maalum za dashibodi:
 
-| Ukurasa             | Njia                    | Dhana                                                                                           | Idadi          |
-| ------------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | -------------- |
-| **Misimbo ya CLI**  | `/dashboard/cli-code`   | Zana za uandishi wa msimbo unazozielekeza kwa OmniRoute (Mteja → CLI → OmniRoute → Mtoa huduma) | 26             |
-| **Mawakala wa CLI** | `/dashboard/cli-agents` | Mawakala wanaojiendesha unaowaelekeza kwa OmniRoute (mtiririko uleule, wigo mpana zaidi)        | 10             |
-| **Mawakala wa ACP** | `/dashboard/acp-agents` | CLI ambazo OmniRoute huanzisha kama backend kupitia stdio/ACP (mtiririko wa kinyume)            | angalia sajili |
+| Ukurasa           | Njia                    | Dhana                                                                                  | Hesabu         |
+| ----------------- | ----------------------- | -------------------------------------------------------------------------------------- | -------------- |
+| **Kanuni za CLI** | `/dashboard/cli-code`   | Zana za kusimba unazoelekeza kwenye OmniRoute (Mteja → CLI → OmniRoute → Mtoa Huduma)  | 26             |
+| **CLI Mawakala**  | `/dashboard/cli-agents` | Mawakala wanaojitegemea unaowaelekezea OmniRoute (mtiririko sawa, wigo mpana)          | 11             |
+| **ACP Mawakala**  | `/dashboard/acp-agents` | CLIs ambayo OmniRoute hutoka kama njia ya nyuma kupitia stdio/ACP (mtiririko wa nyuma) | tazama Usajili |
 
-Njia za zamani huelekeza kwingine kupitia 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Njia za urithi zimeelekezwa kwingine kupitia 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,11 +43,9 @@ Mawakala wa ACP (mtiririko wa uanzishaji wa kinyume):
 
 ---
 
-## Sanidi kiotomatiki kwa `setup-*`
+## Sanidi kiotomatiki na `setup-*`
 
-Huhitaji kuandika usanidi wa kila zana wewe mwenyewe. OmniRoute huja na amri ya `setup-*`
-kwa kila CLI inayotumika, ambayo husoma katalogi **inayotumika sasa** ya modeli kutoka
-OmniRoute inayoendeshwa (ya ndani au ya mbali) na kuandika usanidi wa zana hiyo kwenye mashine yako:
+Sio lazima uandike usanidi wa kila chombo kwa mkono. OmniRoute husafirisha amri `setup-*` kwa kila CLI inayoungwa mkono ambayo inasoma faili ya** kuishi** orodha ya mfano kutoka kwa OmniRoute inayoendesha (ya ndani au ya mbali) na huandika usanidi wa chombo kwenye mashine yako:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,54 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Kila moja hukubali `--remote <url> --api-key <key>` (kusandi zana ya ndani dhidi ya
-OmniRoute ya mbali), `--dry-run` (kuhakiki bila kuandika), na `--port`. Zana
-zisizo na ugunduzi wa modeli kiotomatiki (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) hutumia
-`--model <id>` (na `--yes` kwa utekelezaji usiohitaji mwingiliano). `setup-5dive` ndiyo
-utaratibu pekee ambao hauandiki chini ya `$HOME`: husanidi kundi la mawakala wa 5dive kwa
-kuandika wasifu wa uthibitishaji unaomilikiwa na root kwenye seva ya kundi, kwa hivyo hujitekeleza upya kupitia `sudo`
-na haina hali yake yenyewe ya mbali. Ili kuzindua CLI huku
-vigezo sahihi vya mazingira vikiingizwa na bila kuandika usanidi wowote, tumia kizinduzi cha jumla
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — shabaha na lakabu hutoka `bin/cli/cli-manifest.mjs`); vizinduzi vya zamani
-vya kila zana `omniroute launch` (Claude Code) na `omniroute launch-codex`
-(Codex) bado vinapatikana. Gemini CLI ni ya kuzindua pekee: ni shabaha ya `omniroute run`
-lakini haina utaratibu wa `setup-*`/`configure`.
+Kila mmoja anakubali `--remote <url> --api-key <key>` (sanidi zana ya ndani dhidi ya OmniRoute ya mbali ), `--dry-run` (hakiki bila kuandika), na `--port`. Zana zisizo na muundo wa ugunduzi otomatiki (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) huchukua `--model <id>` (na `--yes` kwa mikimbio zisizoingiliana). `setup-5dive` ndio kichocheo kimoja ambacho hakiandiki chini ya `$HOME`: inasanidi kundi la wakala wa 5dive kwa kuandika wasifu wa uthibitisho unaomilikiwa na mizizi kwenye seva pangishi ya meli, kwa hivyo inatekeleza tena `sudo` na haina hali yake ya mbali. Ili kuzindua CLI na env sahihi iliyochomwa na hakuna usanidi ulioandikwa hata kidogo, tumia kizindua `omniroute run <target>` cha kawaida (claude, codex, aider, goose, opencode, qwen, gemini, whycodes - shabaha na lakabu hutoka kwa `bin/cli/cli-manifest.mjs`); vizindua vya urithi kwa kila chombo `omniroute launch` ( Msimbo wa Claude ) na `omniroute launch-codex` (Codex) vinaendelea kupatikana. Gemini CLI ni ya uzinduzi pekee: ni shabaha `omniroute run` lakini haina kichocheo cha `setup-*`/`configure`.
 
-> **Rejeleo kamili:** jedwali kuu — kile ambacho kila amri huandika, kila bendera,
-> hali ya ndani dhidi ya mbali, na zana zipi zinahitaji kiambishi cha `/v1` — linapatikana katika
-> **[Miunganisho ya CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **Rejea kamili:** jedwali kuu - kile ambacho kila amri inaandika, kila bendera, ya ndani dhidi ya kijijini, na ni zana zipi zinazotaka kiambishi tamati `/v1` - huishi ndani** [Ushirikiano wa CLI](../guides/CLI-INTEGRATIONS.md)** .
 
-### Kuendesha hizi ndani ya kontena
+### Kuendesha hizi ndani ya chombo
 
-Amri ya `setup-*` inayotekelezwa ndani ya kontena la OmniRoute huandika kwenye
-saraka ya nyumbani ya kontena lenyewe, ambayo haisomwi na CLI yoyote ya seva mwenyeji na ambayo hupotea pamoja na
-kontena. OmniRoute hutambua hilo na hutoka kwa msimbo `2` ikiwa na maagizo badala ya
-kuandika. Kuna njia mbili zinazotumika za kuendelea — sakinisha CLI kwenye seva mwenyeji na
-utumie `omniroute connect` kuunganisha kwenye kontena, au unganisha saraka za usanidi kwa bind-mount na uweke
-`CLI_CONFIG_HOME` (wasifu wa compose wa `host`). Kila amri ya `setup-*`, pamoja na
-`omniroute configure` na `omniroute config set`, hukubali
-`--allow-container-write` ikiwa kusanidi CLI za kontena lenyewe ndicho
-ulichokusudia; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` hufanya vivyo hivyo kwa
-seva. Tazama
-[Mwongozo wa Docker → Kusanidi zana za CLI za seva mwenyeji](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Amri `setup-*` iliyotekelezwa ndani ya kontena OmniRoute huandika kwenye nyumba ya kontena yenyewe, ambayo hakuna mwenyeji CLI anayesoma na ambayo hutoweka na kontena. OmniRoute hugundua hilo na kutoka `2` na maagizo badala ya kuandika. Njia mbili zinazotumika mbele - sakinisha CLI kwenye seva pangishi na `omniroute connect` kwenye kontena, au funga dirs za usanidi na uweke `CLI_CONFIG_HOME` (wasifu `host` ). Kila amri ya `setup-*`, pamoja na `omniroute configure` na `omniroute config set`, inakubali `--allow-container-write` wakati wa kusanidi CLIs ya chombo ndicho ulichomaanisha; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` hufanya vivyo hivyo kwa seva. Tazama [Mwongozo wa Docker → Inasanidi zana za CLI za mwenyeji](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**Endpoint ya utekelezaji** ya dashibodi (`POST /api/cli-tools/apply`) hutekeleza
-ulinzi huohuo: ndani ya kontena, jaribio la kuandika ambalo shabaha yake haijaunganishwa kwa bind-mount kutoka
-kwa seva mwenyeji hujibu kwa **`422`** ikiwa na `containerEphemeralTarget: true`, maandishi salama ya
-hitilafu na — kwa zana zenye utaratibu wa seva mwenyeji (claude, codex, opencode, cline,
-kilo, continue) — `hostSetupCommand` (kwa mfano `omniroute setup-opencode`) ya kutekelezwa
-kwenye seva mwenyeji badala yake; hakuna kinachoandikwa. `dryRun: true` huendelea kufanya kazi katika hali ya kontena
-na hurudisha hakikisho lililofichwa taarifa nyeti + njia ya shabaha bila kugusa diski. Maudhui ya
-hakikisho si usanidi wenye taarifa za uthibitishaji wa kunakili au kuingiza. Tekeleza kwa kutumia
-zana/URL msingi/ufunguo wa API/modeli za awali kwenye seva mwenyeji, au tumia amri iliyoonyeshwa
-ya usanidi kwenye seva mwenyeji. Tazama [Usalama wa usanidi wa CLI](../security/CLI-CONFIGURATION.md)
-kwa kichwa cha hakikisho na mkataba wa ombi. Tabia hii
-imekusudiwa na inalindwa dhidi ya hitilafu za kurudia na
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — kamwe “usirekebishe” 422
-kwa kuondoa ulinzi.
+Dashibodi ya** tumia mwisho** (`POST /api/cli-tools/apply`) hutekeleza mlinzi sawa: kwenye chombo, maandishi ambayo lengo lake halijafungwa kutoka kwa majibu ya mwenyeji.**`422`** na `containerEphemeralTarget: true`, maandishi ya hitilafu salama na - kwa zana zilizo na kichocheo cha mwenyeji (claude, codex, opencode, cline, kilo, endelea) - `hostSetupCommand` (km `omniroute setup-opencode`) ili kuendeshwa kwa seva pangishi badala yake; hakuna kilichoandikwa. `dryRun: true` huendelea kufanya kazi katika modi ya kontena na hurejesha onyesho la kukagua + njia inayolengwa bila kugusa diski. Onyesho la kukagua maudhui sio usanidi unaobeba kitambulisho ili kunakili au kuleta. Omba na ingizo asilia tool/base URL/API key/model kwenye seva pangishi, au tumia amri iliyoonyeshwa ya usanidi wa upande wa mpangishi. Tazama [usalama wa usanidi wa CLI](../security/CLI-CONFIGURATION.md) kwa kichwa cha onyesho la kukagua na ombi la mkataba. Tabia hii ni ya kimakusudi na imelindwa na `tests/unit/api/cli-tools/apply-container-guard.test.ts` - kamwe "usirekebishe" 422 kwa kuondoa mlinzi.
 
 ---
 
@@ -147,57 +109,58 @@ sehemu moja bila nyingine husababisha mkusanyiko wa majaribio kushindwa badala y
 
 ## 1. Katalogi ya Msimbo wa CLI (zana 27)
 
-Zana zote zinazoonekana katika `/dashboard/cli-code`. Zile zenye `baseUrlSupport: none` zimeunganishwa kupitia MITM au mwongozo wa usanidi wa mikono badala ya URL maalum ya msingi:
+Zana zote zinazoonekana katika `/dashboard/cli-code`. Zile zilizo na `baseUrlSupport: none` zimeunganishwa kupitia MITM au mwongozo wa mwongozo badala ya msingi maalum URL:
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| kitambulisho | jina                                | mchuuzi                 | msingiUrlSupport | configType    | acpSpawnable |
+| ------------ | ----------------------------------- | ----------------------- | ---------------- | ------------- | ------------ |
+| claude       | nambari Claude                      | Anthropic               | kamili           | env           | kweli        |
+| kodeksi      | OpenAI Codex CLI                    | OpenAI                  | kamili           | desturi       | kweli        |
+| zcode        | ZCode ( Mpango wa Usimbaji wa GLM ) | Z.ai                    | hakuna           | desturi       | uongo        |
+| cline        | Cline                               | OSS (zamani Claude Dev) | kamili           | desturi       | kweli        |
+| kilo         | Msimbo wa Kilo                      | Kilo-Org                | kamili           | desturi       | uongo        |
+| roo          | Msimbo wa Roo                       | Roo (OSS)               | kamili           | mwongozo      | uongo        |
+| endelea      | Endelea                             | endelea.dev             | kamili           | mwongozo      | uongo        |
+| msaidizi     | Msaidizi                            | OSS (P. Gauthier)       | kamili           | mwongozo      | kweli        |
+| ghushi       | ForgeCode                           | Antinomy HQ             | kamili           | desturi       | kweli        |
+| jcode        | jcode                               | 1 jehuang (OSS)         | kamili           | desturi       | uongo        |
+| deepseek-tui | DeepSeek TUI                        | Hunter Bown (OSS)       | kamili           | desturi       | uongo        |
+| codewhale    | CodeWhale                           | Hmbown (OSS)            | kamili           | desturi       | uongo        |
+| msimbo wazi  | OpenCode                            | Ajabu (zamani SST)      | kamili           | mwongozo      | kweli        |
+| droid        | Kiwanda cha Droid                   | Kiwanda AI              | sehemu           | mwongozo      | uongo        |
+| rubani       | GitHub Copilot CLI                  | GitHub/MS               | kamili           | desturi       | uongo        |
+| mshale-cli   | Cursor CLI                          | Mazingira yoyote        | sehemu           | mwongozo      | kweli        |
+| kunusa       | Smelt                               | leonardcser (OSS)       | kamili           | desturi       | uongo        |
+| pi           | Pi (pi-coding-wakala)               | M. Zechner (OSS)        | kamili           | desturi       | uongo        |
+| grok-kujenga | Grok Kujenga                        | xAI                     | kamili           | desturi       | uongo        |
+| kuponda      | Ponda                               | OSS (Habari)            | kamili           | desturi       | uongo        |
+| qwen         | nambari Qwen                        | Alibaba                 | kamili           | mwongozo      | kweli        |
+| zed          | Zed                                 | Zed Viwanda             | kamili           | mwongozo      | uongo        |
+| mshale       | Cursor                              | Mazingira yoyote        | hakuna           | mwongozo      | uongo        |
+| antigravity  | Antigravity                         | Google                  | hakuna           | mitm          | uongo        |
+| hermes       | Hermes                              | Utafiti wetu            | hakuna           | mwongozo      | uongo        |
+| kiro         | Kiro AI                             | Amazon                  | hakuna           | mitm          | uongo        |
+| desturi      | CLI maalum                          | —                       | kamili           | mjenzi maalum | uongo        |
 
-Zana zenye `baseUrlSupport: "partial"` huonyesha beji ya "⚠ URL ya Msingi kiasi" kwenye kadi ya dashibodi.
+Zana zilizo na `baseUrlSupport: "partial"` zinaonyesha beji "⚠ Base URL parcial" kwenye kadi ya dashibodi.
 ---
 
-## 2. Katalogi ya Mawakala wa CLI (zana 10)
+## 2. Katalogi ya Mawakala wa CLI (zana 11)
 
-Mawakala huru wanaoonekana katika `/dashboard/cli-agents`:
+Ajenti zinazojitegemea zinazoonekana katika `/dashboard/cli-agents`:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| kitambulisho     | jina             | mchuuzi                  | msingiUrlSupport | acpSpawnable |
+| ---------------- | ---------------- | ------------------------ | ---------------- | ------------ |
+| wakala wa hermes | Wakala wa Hermes | Utafiti wetu             | kamili           | uongo        |
+| ukucha wazi      | OpenClaw         | OSS (P. Steinberger)     | kamili           | kweli        |
+| goose            | Goose            | Block / Linux Foundation | kamili           | kweli        |
+| mkalimani        | Fungua Mkalimani | OSS                      | kamili           | kweli        |
+| vita             | Warp AI          | Warp Inc.                | sehemu           | kweli        |
+| wakala-staha     | Sitaha ya wakala | asheshgoplani (OSS)      | kamili           | uongo        |
+| omp              | Oh Pi yangu      | OSS                      | kamili           | kweli        |
+| leta             | Letta CLI        | Letta                    | kamili           | uongo        |
+| wakala mkuu      | Wakala Mkuu      | Akili Mkuu (OSS)         | kamili           | uongo        |
+| 5 kupiga mbizi   | 5 kupiga mbizi   | OSS (5 dive-ai)          | kamili           | uongo        |
+| kwa nini misimbo | WhyCodes         | Kwa nini Shirika         | kamili           | uongo        |
 
 ---
 

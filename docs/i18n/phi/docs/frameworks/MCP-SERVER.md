@@ -66,6 +66,16 @@ curl -i \
 
 Ang key na walang `manage` scope (o walang Bearer) ay nagbabalik ng `403 LOCAL_ONLY`. Sadyang HINDI maaaring i-bypass ang sibling prefix na `/api/cli-tools/runtime/*` — tingnan ang [Mga Tier ng Route Guard — Eksepsyon para sa manage scope](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Pagpapatunay ng Origin
+
+Pagkatapos ng authentication, bawat request sa `/api/mcp/*` — ang mga transport at mga management route gaya ng `status`, `tools`, `audit`, `restart` — ay sinusuri ang `Origin` header, sinuman ang tumatawag (API key, CLI token, dashboard session, o anonymous loopback kapag naka-off ang login). Ito ang proteksyon laban sa DNS rebinding na hinihingi ng MCP Streamable HTTP spec.
+
+- **Walang `Origin` header** → pinapayagan. Hindi ito ipinapadala ng OmniRoute CLI, SDK at mga IDE client.
+- **Pinapayagang `Origin`** → `localhost` / `127.0.0.1` / `[::1]` sa anumang port, o ang sariling public origin ng OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, ang origin na ipinasa ng pinagkakatiwalaang reverse proxy (`OMNIROUTE_TRUST_PROXY`, kapag walang nakatakdang base URL lamang), o isang direktang ina-access na loopback/LAN IP host. Ang `Host` header lamang ay hindi kailanman nagpapagawang pinagkakatiwalaan ang isang origin.
+- **Anumang ibang `Origin`, kasama ang `null`** → `403` na may JSON-RPC error body: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Tinatanggap pa rin ang dashboard session na may valid na CSRF token, gaya ng ibang dashboard write.
+
+Ang browser MCP client na nakalagay sa likod ng reverse proxy ay nangangailangan ng `OMNIROUTE_PUBLIC_BASE_URL`; walang allow-list para sa ibang origin. Hindi sinusuri ang Origin sa CORS preflight (`OPTIONS`); sinusuri ang kasunod na request.
+
 ## Configuration ng IDE
 
 Tingnan ang [Configuration ng MCP Client](../guides/SETUP_GUIDE.md#mcp-client-configuration) para sa pag-setup ng Claude Desktop,

@@ -1,0 +1,293 @@
+name: i18n mirror refresh
+
+# Post-merge refresh of the translated docs mirrors (docs/i18n/<locale>/…). Since #18420 the
+# docs drift gate is advisory on PRs and the merge train, so drifted mirrors pile up on the
+# release branch until somebody runs `npm run i18n:run` by hand. This workflow does that run
+# on a schedule and turns the result into ONE pull request:
+#
+#   1. target = the highest release/v* branch (or the `base` input); skipped with a notice while
+#      an open `release-freeze` issue names that branch (Hard Rule #21);
+#   2. drifted sources = `check-translation-drift.mjs --json --warn` (drifted, missing,
+#      hand-edited and stale mirrors);
+#   3. translate them: the LLM chain first when the backend secrets are configured (model, then
+#      OMNIROUTE_TRANSLATION_FALLBACK_MODELS, then a re-split, then Google as the last resort),
+#      otherwise the structure-safe Google engine alone;
+#   4. `npm run check:docs-all` + the drift check must both pass; then the mirrors are committed
+#      to the fixed branch `chore/i18n-mirror-refresh` (force-reset from the target every run)
+#      and one PR is opened, or the open one is updated by the force-push;
+#   5. any translation or check failure opens NO PR and fails the job with a step summary that
+#      lists the failing files / locales.
+#
+# PRs opened with the default GITHUB_TOKEN do not trigger other workflows (no CI on the refresh
+# PR). Set the `I18N_REFRESH_TOKEN` secret (fine-grained PAT or App token with contents +
+# pull-requests write) so CI runs on it, the same pattern as FORWARD_PORT_TOKEN in
+# forward-port.yml. With GITHUB_TOKEN the repo setting "Allow GitHub Actions to create and
+# approve pull requests" must be on for `gh pr create` to work.
+#
+# Operator configuration (all optional; without the LLM ones the Google engine is used):
+#   secrets.OMNIROUTE_TRANSLATION_API_KEY        LLM backend bearer token
+#   secrets/vars.OMNIROUTE_TRANSLATION_API_URL   OpenAI-compatible base URL (…/v1)
+#   vars.OMNIROUTE_TRANSLATION_MODEL             first model of the chain
+#   vars.OMNIROUTE_TRANSLATION_FALLBACK_MODELS   comma-separated fallback chain
+#   secrets.OMNIROUTE_TRANSLATION_GOOGLE_API_KEY official Cloud Translation v2 instead of the
+#                                                keyless web endpoint
+#   secrets.I18N_REFRESH_TOKEN                   token that opens the PR (see above)
+#
+# Secrets only ever reach the scripts through `env:`; no `${{ }}` expression is interpolated into
+# a `run:` script.
+
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      base:
+        description: "Branch to refresh (default: the highest release/v* branch)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: i18n-mirror-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Refresh drifted docs mirrors
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
+    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
+    timeout-minutes: 330
+    permissions:
+      contents: write # push chore/i18n-mirror-refresh
+      pull-requests: write # open / retarget the refresh PR
+    env:
+      REFRESH_BRANCH: chore/i18n-mirror-refresh
+      PR_TITLE: "docs(i18n): refresh drifted mirrors (scheduled)"
+    steps:
+      - name: Resolve the target branch and the release freeze
+        id: target
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          INPUT_BASE: ${{ inputs.base }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_BASE:-}" ]; then
+            if ! printf '%s' "$INPUT_BASE" | grep -qE '^[A-Za-z0-9._/-]+$'; then
+              echo "::error::refusing base input with unexpected characters" >&2
+              exit 1
+            fi
+            BASE="$INPUT_BASE"
+          else
+            BASE=$(gh api --paginate "repos/$REPO/git/matching-refs/heads/release/v" --jq '.[].ref' \
+              | sed 's#^refs/heads/##' | grep -E '^release/v[0-9]+\.[0-9]+\.[0-9]+$' \
+              | sort -V | tail -1)
+          fi
+          if [ -z "$BASE" ]; then
+            echo "::error::could not resolve the target branch" >&2
+            exit 1
+          fi
+          echo "base=$BASE" >> "$GITHUB_OUTPUT"
+
+          # Hard Rule #21: never refresh a frozen release branch. A freeze issue is titled
+          # "🔒 release-freeze: vX.Y.Z in progress"; one that names no version freezes everything.
+          VER="${BASE#release/}"
+          VER_RE=$(printf '%s' "$VER" | sed 's/\./\\./g')
+          FROZEN=""
+          while IFS=$'\t' read -r NUM TITLE; do
+            [ -n "$NUM" ] || continue
+            if printf '%s' "$TITLE" | grep -qE "(^|[^0-9.])${VER_RE}([^0-9]|$)" \
+              || ! printf '%s' "$TITLE" | grep -qE 'v[0-9]+\.[0-9]+\.[0-9]+'; then
+              FROZEN="#$NUM"
+            fi
+          done < <(gh issue list --repo "$REPO" --label release-freeze --state open \
+            --json number,title --jq '.[] | "\(.number)\t\(.title)"')
+          if [ -n "$FROZEN" ]; then
+            echo "::notice::$BASE is under release-freeze ($FROZEN) — skipping the mirror refresh."
+            echo "Skipped: \`$BASE\` is under release-freeze ($FROZEN)." >> "$GITHUB_STEP_SUMMARY"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "Target branch: \`$BASE\`" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Checkout the target branch
+        if: steps.target.outputs.skip == 'false'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.target.outputs.base }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Find the drifted sources
+        id: drift
+        if: steps.target.outputs.skip == 'false'
+        run: |
+          set -euo pipefail
+          node scripts/i18n/check-translation-drift.mjs --json --warn > "$RUNNER_TEMP/drift-before.json"
+          # every source with a drifted / missing / hand-edited / stale mirror, as repo-relative paths
+          FILES=$(DRIFT_JSON="$RUNNER_TEMP/drift-before.json" node -e '
+            const r = JSON.parse(require("fs").readFileSync(process.env.DRIFT_JSON, "utf8"));
+            const keys = ["driftedSources", "missingTargets", "driftedTargets", "staleTargets"];
+            const rels = keys.flatMap((k) => r[k] ?? [])
+              .map((x) => x.rel).filter(Boolean);
+            process.stdout.write([...new Set(rels)].sort().join(","));
+          ')
+          if [ -z "$FILES" ]; then
+            echo "No drifted mirrors — nothing to refresh." >> "$GITHUB_STEP_SUMMARY"
+            echo "files=" >> "$GITHUB_OUTPUT"
+          else
+            echo "Drifted sources: \`${FILES//,/\`, \`}\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "files=$FILES" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: steps.drift.outputs.files != ''
+        with:
+          package-manager-cache: false
+          node-version: "24"
+
+      - uses: ./.github/actions/npm-ci-retry
+        if: steps.drift.outputs.files != ''
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
+
+      - name: Translate the drifted mirrors
+        id: translate
+        if: steps.drift.outputs.files != ''
+        env:
+          FILES: ${{ steps.drift.outputs.files }}
+          OMNIROUTE_TRANSLATION_API_KEY: ${{ secrets.OMNIROUTE_TRANSLATION_API_KEY }}
+          OMNIROUTE_TRANSLATION_API_URL: ${{ secrets.OMNIROUTE_TRANSLATION_API_URL || vars.OMNIROUTE_TRANSLATION_API_URL }}
+          OMNIROUTE_TRANSLATION_MODEL: ${{ vars.OMNIROUTE_TRANSLATION_MODEL }}
+          OMNIROUTE_TRANSLATION_FALLBACK_MODELS: ${{ vars.OMNIROUTE_TRANSLATION_FALLBACK_MODELS }}
+          OMNIROUTE_TRANSLATION_GOOGLE_API_KEY: ${{ secrets.OMNIROUTE_TRANSLATION_GOOGLE_API_KEY }}
+        run: |
+          set -uo pipefail
+          if [ -n "$OMNIROUTE_TRANSLATION_API_KEY" ] && [ -n "$OMNIROUTE_TRANSLATION_API_URL" ] \
+            && [ -n "$OMNIROUTE_TRANSLATION_MODEL" ]; then
+            ENGINE=llm
+          else
+            ENGINE=google
+            if [ -n "$OMNIROUTE_TRANSLATION_API_KEY" ] || [ -n "$OMNIROUTE_TRANSLATION_API_URL" ]; then
+              echo "::warning::LLM backend partially configured (API key, API URL and vars.OMNIROUTE_TRANSLATION_MODEL are all required) — using Google."
+            fi
+          fi
+          export OMNIROUTE_TRANSLATION_ENGINE="$ENGINE"
+          export OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK=1
+          echo "engine=$ENGINE" >> "$GITHUB_OUTPUT"
+          echo "Engine: \`$ENGINE\`" >> "$GITHUB_STEP_SUMMARY"
+          node scripts/i18n/run-translation.mjs --files="$FILES" 2>&1 | tee "$RUNNER_TEMP/translate.log"
+          RC=${PIPESTATUS[0]}
+          if [ "$RC" -ne 0 ]; then
+            {
+              echo "### Translation failed (exit $RC) — no PR opened"
+              echo
+              echo '```'
+              grep -E '^  - .+ \[[^]]+\]: ' "$RUNNER_TEMP/translate.log" | head -100 || true
+              grep -E 'summary: translated=' "$RUNNER_TEMP/translate.log" | tail -1 || true
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit "$RC"
+          fi
+
+      - name: Check the refreshed mirrors
+        if: steps.drift.outputs.files != ''
+        run: |
+          set -uo pipefail
+          FAILED=0
+          npm run check:docs-all 2>&1 | tee "$RUNNER_TEMP/docs-all.log"
+          DOCS_RC=${PIPESTATUS[0]}
+          node scripts/i18n/check-translation-drift.mjs --json --warn > "$RUNNER_TEMP/drift-after.json"
+          DRIFT_OK=$(DRIFT_JSON="$RUNNER_TEMP/drift-after.json" node -e '
+            const r = JSON.parse(require("fs").readFileSync(process.env.DRIFT_JSON, "utf8"));
+            process.stdout.write(String(r.ok === true));
+          ')
+          if [ "$DOCS_RC" -ne 0 ]; then
+            FAILED=1
+            {
+              echo "### \`npm run check:docs-all\` failed (exit $DOCS_RC) — no PR opened"
+              echo
+              echo '```'
+              grep -E 'docs/i18n/|FAIL|✗|✖|ERROR' "$RUNNER_TEMP/docs-all.log" | head -100 || true
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ "$DRIFT_OK" != "true" ]; then
+            FAILED=1
+            {
+              echo "### Drift check still reports drift — no PR opened"
+              echo
+              echo '```'
+              DRIFT_JSON="$RUNNER_TEMP/drift-after.json" node -e '
+                const r = JSON.parse(require("fs").readFileSync(process.env.DRIFT_JSON, "utf8"));
+                for (const k of ["driftedSources", "missingTargets", "driftedTargets"])
+                  for (const x of r[k] ?? []) console.log(k + ": " + x.rel + (x.locale ? " [" + x.locale + "]" : ""));
+              ' | head -100
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit "$FAILED"
+
+      - name: Commit and open or update the refresh PR
+        if: steps.drift.outputs.files != ''
+        env:
+          GH_TOKEN: ${{ secrets.I18N_REFRESH_TOKEN || github.token }}
+          REPO: ${{ github.repository }}
+          BASE: ${{ steps.target.outputs.base }}
+          ENGINE: ${{ steps.translate.outputs.engine }}
+          FILES: ${{ steps.drift.outputs.files }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          git add -A docs/i18n .i18n-state.json
+          if git diff --cached --quiet; then
+            echo "Translation produced no change — nothing to commit." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          COUNT=$(git diff --cached --name-only -- docs/i18n | wc -l | tr -d ' ')
+          # CI bot commit: the bot identity is the author, no Co-Authored-By trailer.
+          git -c user.name="github-actions[bot]" \
+            -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit --quiet -m "$PR_TITLE" \
+            -m "Engine: ${ENGINE}. Sources: ${FILES//,/, }. ${COUNT} mirror file(s)." \
+            -m "Run: ${RUN_URL}"
+          gh auth setup-git
+          # Fixed branch, reset from the target on every run: the open PR always shows exactly
+          # one refresh commit on top of the current target.
+          git push --force --quiet origin "HEAD:refs/heads/${REFRESH_BRANCH}"
+
+          {
+            echo "Automatic refresh of the translated docs mirrors, opened by the \`i18n-mirror-refresh\` workflow (${RUN_URL})."
+            echo
+            echo "- Target: \`${BASE}\`"
+            echo "- Engine: \`${ENGINE}\` (LLM chain first, Google as the last resort; \`google\` when no LLM backend is configured)"
+            echo "- Drifted sources: \`${FILES//,/\`, \`}\`"
+            echo "- Mirror files changed: ${COUNT}"
+            echo
+            echo "\`npm run check:docs-all\` and \`check-translation-drift.mjs\` passed on the refreshed tree before this PR was opened."
+            echo
+            echo "The branch \`${REFRESH_BRANCH}\` is force-reset from the target on every run, so a later run replaces this commit."
+            echo "PRs opened with the default \`GITHUB_TOKEN\` do not trigger other workflows; set the \`I18N_REFRESH_TOKEN\` secret so CI runs here."
+          } > "$RUNNER_TEMP/pr-body.md"
+
+          PR=$(gh pr list --repo "$REPO" --head "$REFRESH_BRANCH" --state open \
+            --json number,baseRefName --jq '.[0] | select(.) | "\(.number) \(.baseRefName)"')
+          if [ -z "$PR" ]; then
+            URL=$(gh pr create --repo "$REPO" --base "$BASE" --head "$REFRESH_BRANCH" \
+              --title "$PR_TITLE" --body-file "$RUNNER_TEMP/pr-body.md")
+            echo "Opened $URL" >> "$GITHUB_STEP_SUMMARY"
+          else
+            NUM="${PR%% *}"
+            OLD_BASE="${PR#* }"
+            if [ "$OLD_BASE" != "$BASE" ]; then
+              gh pr edit "$NUM" --repo "$REPO" --base "$BASE"
+              NEW_BASE=$(gh pr view "$NUM" --repo "$REPO" --json baseRefName --jq .baseRefName)
+              [ "$NEW_BASE" = "$BASE" ] || { echo "::error::retarget of #$NUM to $BASE did not apply"; exit 1; }
+            fi
+            # The force-push already updated the PR; a comment (not a body edit) records the run.
+            gh pr comment "$NUM" --repo "$REPO" --body-file "$RUNNER_TEMP/pr-body.md"
+            echo "Updated #$NUM" >> "$GITHUB_STEP_SUMMARY"
+          fi
