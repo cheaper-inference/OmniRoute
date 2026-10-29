@@ -490,7 +490,7 @@ open-sse/
 
 `antigravity` و `azure-openai` و zqc و `blackbox-web` و `cliproxyapi` و `chatgpt-web-codex` و `cloudflare-ai` و `codex` و `commandCode` و `cursor` و `default` `devin-cli` `muse-spark-web` و `nlpcloud` و `opencode` `perplexity-web` و `petals` `pollinations` `qoder` و `vertex` و `devin-desktop` بالإضافة إلى `claudeIdentity.ts` (مساعد الهوية المشتركة) و `index.ts` (التسجيل).
 
-> ملاحظة: يتم تقديم الخدمات للموفرين غير المدرجين هنا بواسطة `default.ts` باستخدام المنفذ العام المتوافق مع OpenAI. يوجد كتالوج المزودين الكامل (377 مزودًا) في `src/shared/constants/providers.ts`.
+> ملاحظة: يتم تقديم الخدمات للموفرين غير المدرجين هنا بواسطة `default.ts` باستخدام المنفذ العام المتوافق مع OpenAI. يوجد كتالوج المزودين الكامل (378 مزودًا) في `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

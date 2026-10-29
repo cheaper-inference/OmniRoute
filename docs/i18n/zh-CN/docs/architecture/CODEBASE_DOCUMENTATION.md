@@ -479,7 +479,7 @@ open-sse/
 
 `antigravity`、 `azure-openai`、 `blackbox-web`、 `cliproxyapi`、 `chatgpt-web-codex`、 `cloudflare-ai`、 `codex`、 `commandCode`、 `cursor`、 `default`、 `devin-cli`、 `muse-spark-web`、 `nlpcloud`、 `opencode`、 `perplexity-web`、 `petals`、 `pollinations`、 `qoder`、 `vertex`、 `devin-desktop`，加上`claudeIdentity.ts` （共享身份助手）和`index.ts` （注册表）。
 
-> 注意：此处未列出的提供者由`default.ts`使用通用 OpenAI 兼容执行器提供服务。完整的提供者目录（377 个提供者）位于`src/shared/constants/providers.ts`中。
+> 注意：此处未列出的提供者由`default.ts`使用通用 OpenAI 兼容执行器提供服务。完整的提供者目录（378 个提供者）位于`src/shared/constants/providers.ts`中。
 
 ### 4.3 `open-sse/translator/`
 

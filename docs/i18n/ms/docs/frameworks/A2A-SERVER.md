@@ -163,7 +163,7 @@ OmniRoute mendedahkan 6 kemahiran A2A berwayar dalam `src/lib/a2a/taskExecution.
 | Laporan Kesihatan    | `health-report`      | Agregat pemutus litar, cooldown, keadaan kunci keluar bagi setiap pembekal                                                                                                   | kesihatan, daya tahan        | "Tunjukkan status kesihatan semua pembekal" |
 | Senaraikan Keupayaan | `list-capabilities`  | Mengembalikan katalog Kemahiran Ejen 45 penyertaan penuh (23 API + 21 CLI + 1 konfigurasi) sebagai jadual penurunan harga dengan SKILL.md URLs mentah untuk suntikan konteks | katalog, penemuan, kemahiran | "Senaraikan semua keupayaan OmniRoute "     |
 
-> Kad Ejen hendaklah sentiasa sejajar dengan katalog 377-pembekal langsung; kiraan pembekal dan metadata free/no-auth diperoleh daripada pendaftaran masa jalan.
+> Kad Ejen hendaklah sentiasa sejajar dengan katalog 378-pembekal langsung; kiraan pembekal dan metadata free/no-auth diperoleh daripada pendaftaran masa jalan.
 
 ### `list-capabilities` Butiran Kemahiran
 

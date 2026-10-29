@@ -39,7 +39,7 @@ Objektív funkcióösszehasonlítás népszerű nyílt forráskódú AI-routerek
 
 ## Mikor válasszuk OmniRoute
 
-- Ön házigazda és akar** maximális szolgáltatói lefedettség** (377 szolgáltató, 155 free/no-auth katalógusbejegyzés)
+- Ön házigazda és akar** maximális szolgáltatói lefedettség** (378 szolgáltató, 155 free/no-auth katalógusbejegyzés)
 - Szükséged van a** beépített MCP szerver** (LLM eszközök, memória, eszközként feltárt készségek)
 - Neked kell**A2A protokoll** ügynök-ügynök munkafolyamatokhoz
 - Azt akarod** ujjlenyomat-lopás** (JA3/JA4), hogy elkerülje az upstream CAPTCHAs észlelését

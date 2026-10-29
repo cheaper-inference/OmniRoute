@@ -39,7 +39,7 @@ Popüler açık kaynak AI yönlendiricileriyle tarafsız özellik karşılaştı
 
 ## OmniRoute ne zaman seçilmeli?
 
-- Kendini barındırıyorsun ve istiyorsun** maksimum sağlayıcı kapsamı** (377 sağlayıcı, 155 free/no-auth katalog girişi)
+- Kendini barındırıyorsun ve istiyorsun** maksimum sağlayıcı kapsamı** (378 sağlayıcı, 155 free/no-auth katalog girişi)
 - ihtiyacın var** yerleşik MCP sunucusu** (LLM araçları, hafıza, araç olarak ortaya çıkan beceriler)
 - ihtiyacın var**A2A protokolü** temsilciden temsilciye iş akışları için
 - Sen istiyorsun** parmak izi gizliliği** (JA3/JA4) yukarı akışlı CAPTCHAs tarafından tespit edilmekten kaçınmak için

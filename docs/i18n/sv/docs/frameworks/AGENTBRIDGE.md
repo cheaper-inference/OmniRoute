@@ -20,7 +20,7 @@ När en IDE agent (t.ex. GitHub Copilot, Cursor, Claude Code) ringer ett API sam
 
 Det betyder att du kan:
 
-- **Omdirigera vilken agent som helst till vilken leverantör som helst** : Copilot pratar med OpenAI? Omdirigera den till Anthropic Claude, Gemini, eller någon av OmniRoute 377 leverantörer.
+- **Omdirigera vilken agent som helst till vilken leverantör som helst** : Copilot pratar med OpenAI? Omdirigera den till Anthropic Claude, Gemini, eller någon av OmniRoute 378 leverantörer.
 - **Tillämpa modellmappningar** : `gemini-3-flash` → `claude-sonnet-4.7` transparent på hanterarnivå.
 - **Observera all agenttrafik** : varje avlyssnad begäran publiceras till [Trafikinspektören](./TRAFFIC_INSPECTOR.md).
 - **Applicera OmniRoute resilience** : kombinerad routing, strömbrytare, fallbacks och kostnadsspårningsarbete för IDE agenttrafik också.

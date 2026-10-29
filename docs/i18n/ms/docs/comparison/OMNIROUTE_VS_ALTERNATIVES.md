@@ -39,7 +39,7 @@ Perbandingan ciri objektif berbanding penghala AI sumber terbuka popular.
 
 ## Bila nak pilih OmniRoute
 
-- Anda menjadi hos sendiri dan mahu** liputan pembekal maksimum** (377 pembekal, 155 entri katalog free/no-auth )
+- Anda menjadi hos sendiri dan mahu** liputan pembekal maksimum** (378 pembekal, 155 entri katalog free/no-auth )
 - Anda memerlukan a** pelayan MCP terbina dalam** ( alatan LLM, ingatan, kemahiran didedahkan sebagai alatan)
 - Awak perlukan** protokol A2A** untuk aliran kerja ejen-ke-ejen
 - awak nak** siluman cap jari** (JA3/JA4) untuk mengelakkan pengesanan oleh CAPTCHAs hulu

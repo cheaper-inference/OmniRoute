@@ -490,7 +490,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `vertex`, plus `devin-desktop`(msaidizi `qoder` utambulisho ulioshirikiwa) na `claudeIdentity.ts` (usajili) `index.ts`
 
-> Kumbuka: watoa huduma ambao hawajaorodheshwa hapa wanahudumiwa na `default.ts` kwa kutumia kitekelezaji kinachoendana na OpenAI. Katalogi kamili ya watoa huduma (watoa huduma 377) wanaishi `src/shared/constants/providers.ts`.
+> Kumbuka: watoa huduma ambao hawajaorodheshwa hapa wanahudumiwa na `default.ts` kwa kutumia kitekelezaji kinachoendana na OpenAI. Katalogi kamili ya watoa huduma (watoa huduma 378) wanaishi `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

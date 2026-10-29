@@ -13,7 +13,7 @@
 
 ## Kaj je
 
-OmniRoute registrira 377 ponudnikov, vključno z označenimi 155 kataloškimi vpisi**free/no-auth** (ključ brez avtorizacije, brezplačne ravni OAuth ali brezplačne API ključ — glejte [Vodnik po brezplačnih stopnjah](../getting-started/FREE-TIERS-GUIDE.md) in celoten [imenik brezplačnih stopenj](../reference/FREE_TIERS.md) ). Ulov: brezplačni ponudniki se zelo razlikujejo glede kakovosti modelov. Ponudnik brez avtorizacije, ki služi mejnemu modelu, je veliko bolj uporaben kot tisti, ki služi majhnemu starejšemu modelu.
+OmniRoute registrira 378 ponudnikov, vključno z označenimi 155 kataloškimi vpisi**free/no-auth** (ključ brez avtorizacije, brezplačne ravni OAuth ali brezplačne API ključ — glejte [Vodnik po brezplačnih stopnjah](../getting-started/FREE-TIERS-GUIDE.md) in celoten [imenik brezplačnih stopenj](../reference/FREE_TIERS.md) ). Ulov: brezplačni ponudniki se zelo razlikujejo glede kakovosti modelov. Ponudnik brez avtorizacije, ki služi mejnemu modelu, je veliko bolj uporaben kot tisti, ki služi majhnemu starejšemu modelu.
 
 **Brezplačne lestvice ponudnikov** odgovori "** kateri brezplačni ponudnik mi ponudi najboljši model?** " z včlanitvijo v katalog vsakega brezplačnega ponudnika s** ocene kakovosti, pridobljene iz množice** od** Arena AI lestvica najboljših** (human-preference ELO, ista ideja za LMArena chatbot areno). Ponudniki so nato razvrščeni glede na moč svojih** najboljši brezplačni model** .
 

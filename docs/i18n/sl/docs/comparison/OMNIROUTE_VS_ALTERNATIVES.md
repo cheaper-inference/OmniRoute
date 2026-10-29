@@ -39,7 +39,7 @@ Objektivna primerjava lastnosti v primerjavi s priljubljenimi odprtokodnimi usme
 
 ## Kdaj izbrati OmniRoute
 
-- Sami gostite in želite** največja pokritost ponudnika** (377 ponudnikov, 155 kataloških vnosov free/no-auth )
+- Sami gostite in želite** največja pokritost ponudnika** (378 ponudnikov, 155 kataloških vnosov free/no-auth )
 - Potrebujete a** vgrajen strežnik MCP** (LLM orodja, spomin, spretnosti, izpostavljene kot orodja)
 - Potrebujete** protokol A2A** za poteke dela od agenta do agenta
 - hočeš** prikriti prstni odtis** (JA3/JA4), da bi se izognili odkrivanju z zgornjim CAPTCHAs

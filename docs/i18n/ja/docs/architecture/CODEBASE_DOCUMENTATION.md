@@ -491,7 +491,7 @@ open-sse/
 
 `antigravity`、 `azure-openai`、 `blackbox-web`、 `cliproxyapi`、 `chatgpt-web-codex`、 `cloudflare-ai`、 `codex`、 `commandCode`、 `cursor`、 `default`、 `devin-cli`、 `muse-spark-web`、 `nlpcloud`、 `opencode`、 `perplexity-web`、 `petals`、 `pollinations`、 `qoder`、 `vertex`、 `devin-desktop`、さらに`claudeIdentity.ts` (共有 ID ヘルパー) と`index.ts` (レジストリ)。
 
-> 注: ここにリストされていないプロバイダーは、汎用の OpenAI 互換エグゼキューターを使用して`default.ts`によって提供されます。完全なプロバイダー カタログ (377 プロバイダー) は`src/shared/constants/providers.ts`にあります。
+> 注: ここにリストされていないプロバイダーは、汎用の OpenAI 互換エグゼキューターを使用して`default.ts`によって提供されます。完全なプロバイダー カタログ (378 プロバイダー) は`src/shared/constants/providers.ts`にあります。
 
 ### 4.3 `open-sse/translator/`
 

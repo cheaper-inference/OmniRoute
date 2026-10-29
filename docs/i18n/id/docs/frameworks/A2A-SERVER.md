@@ -163,7 +163,7 @@ OmniRoute memperlihatkan 6 keterampilan A2A yang dihubungkan ke `src/lib/a2a/tas
 | Laporan Kesehatan | `health-report`      | Agregat pemutus sirkuit, cooldown, status penguncian per penyedia                                                                                                 | kesehatan, ketahanan            | "Tampilkan status kesehatan semua penyedia"    |
 | Daftar Kemampuan  | `list-capabilities`  | Mengembalikan katalog Keahlian Agen 45 entri lengkap (23 API + 21 CLI + 1 config) sebagai tabel penurunan harga dengan SKILL.md URLs mentah untuk injeksi konteks | katalog, penemuan, keterampilan | "Daftar semua kemampuan OmniRoute "            |
 
-> Kartu Agen harus tetap selaras dengan katalog penyedia 377 langsung; jumlah penyedia dan metadata free/no-auth bersumber dari registri runtime.
+> Kartu Agen harus tetap selaras dengan katalog penyedia 378 langsung; jumlah penyedia dan metadata free/no-auth bersumber dari registri runtime.
 
 ### `list-capabilities` Detail Keterampilan
 

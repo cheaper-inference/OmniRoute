@@ -39,7 +39,7 @@ Objektyvus funkcijų palyginimas su populiariausiais atvirojo kodo AI maršrutiz
 
 ## Kada rinktis OmniRoute
 
-- Savarankiškai priimate ir norite** maksimali teikėjo aprėptis** (377 teikėjai, 155 free/no-auth įrašai kataloge)
+- Savarankiškai priimate ir norite** maksimali teikėjo aprėptis** (378 teikėjai, 155 free/no-auth įrašai kataloge)
 - Jums reikia a** įmontuotas MCP serveris** (LLM įrankiai, atmintis, įgūdžiai rodomi kaip įrankiai)
 - Tau reikia**A2A protokolas** tarp agentų darbo eigoms
 - Tu nori** pirštų atspaudų slėpimas** (JA3/JA4), kad būtų išvengta aptikimo prieš srovę CAPTCHAs

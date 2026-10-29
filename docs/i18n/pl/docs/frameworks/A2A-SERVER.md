@@ -163,7 +163,7 @@ OmniRoute ujawnia 6 umiejętności A2A podłączonych do `src/lib/a2a/taskExecut
 | Raport o stanie zdrowia       | `health-report`      | Łączy wyłącznik automatyczny, czas odnowienia i stan blokady według dostawcy                                                                                                  | zdrowie, odporność              | „Pokaż stan zdrowia wszystkich dostawców”    |
 | Lista możliwości              | `list-capabilities`  | Zwraca pełny katalog umiejętności agenta składający się z 45 wpisów (23 API + 21 CLI + 1 konfiguracja) jako tabelę przecen z surowym SKILL.md URLs do wstrzykiwania kontekstu | katalog, odkrycie, umiejętności | „Wyświetl wszystkie możliwości OmniRoute ”   |
 
-> Karta agenta powinna być zgodna z aktualnym katalogiem dostawców 377; liczba dostawców i metadane free/no-auth pochodzą z rejestru wykonawczego.
+> Karta agenta powinna być zgodna z aktualnym katalogiem dostawców 378; liczba dostawców i metadane free/no-auth pochodzą z rejestru wykonawczego.
 
 ### `list-capabilities` Szczegóły umiejętności
 

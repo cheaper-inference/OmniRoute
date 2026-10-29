@@ -488,7 +488,7 @@ On obrađuje:
 
 | File                          | Svrha                                               |
 | ----------------------------- | --------------------------------------------------- |
-| `providerRegistry.ts`         | Chat-model registar preko kataloga 377 provajdera   |
+| `providerRegistry.ts`         | Chat-model registar preko kataloga 378 provajdera   |
 | `providerModels.ts`           | Alijasi modela, mapiranje formata                   |
 | `constants.ts`                | Vremenska ograničenja, ograničenja, statusni kodovi |
 | `defaultThinkingSignature.ts` | Zadani Claude thinking potpis                       |

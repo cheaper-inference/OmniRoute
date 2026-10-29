@@ -21,7 +21,7 @@ OmniRoute to lokalna brama routingowa i pulpit nawigacyjny AI zbudowane na Next.
 
 Podstawowe możliwości:
 
-- Powierzchnia API kompatybilna z OpenAI dla CLI/tools (377 dostawców, 156 modułów wykonawczych)
+- Powierzchnia API kompatybilna z OpenAI dla CLI/tools (378 dostawców, 156 modułów wykonawczych)
 - Tłumaczenie Request/response w różnych formatach dostawców
 - Zastępczy zestaw modeli (sekwencja obejmująca wiele modeli)
 - Ustrukturyzowane kroki kombi (`provider + model + connection`) z porządkowaniem czasu wykonania przez `compositeTiers`

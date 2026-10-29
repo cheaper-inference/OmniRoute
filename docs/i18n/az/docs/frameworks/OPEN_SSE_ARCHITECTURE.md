@@ -488,7 +488,7 @@ Bu, aşağıdakıları emal edir:
 
 | Fayl                          | Məqsəd                                              |
 | ----------------------------- | --------------------------------------------------- |
-| `providerRegistry.ts`         | 377 provayder kataloqu üzərində chat-model reyestri |
+| `providerRegistry.ts`         | 378 provayder kataloqu üzərində chat-model reyestri |
 | `providerModels.ts`           | Model ləqəbləri, formatın xəritəsi                  |
 | `constants.ts`                | Taymoutlar, limitlər, status kodları                |
 | `defaultThinkingSignature.ts` | Defolt Claude düşüncə imzası                        |

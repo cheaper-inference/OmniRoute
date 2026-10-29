@@ -20,7 +20,7 @@ Wenn ein IDE Agent (z. B. GitHub, Copilot, Cursor, Claude -Code) einen API -Aufr
 
 Das bedeutet, dass Sie:
 
-- **Leiten Sie jeden Agenten an einen beliebigen Anbieter um** : Copilot redet mit OpenAI? Leiten Sie es an Anthropic Claude, Gemini oder einen der 377 Anbieter von OmniRoute weiter.
+- **Leiten Sie jeden Agenten an einen beliebigen Anbieter um** : Copilot redet mit OpenAI? Leiten Sie es an Anthropic Claude, Gemini oder einen der 378 Anbieter von OmniRoute weiter.
 - **Modellzuordnungen anwenden** : `gemini-3-flash` → `claude-sonnet-4.7` transparent auf Handlerebene.
 - **Beobachten Sie den gesamten Agentenverkehr** : Jede abgefangene Anfrage wird an den [Verkehrsinspektor](./TRAFFIC_INSPECTOR.md) veröffentlicht.
 - **Wenden Sie OmniRoute Resilienz an** : Combo-Routing, Leistungsschalter, Fallbacks und Kostenverfolgung funktionieren auch für IDE -Agentenverkehr.

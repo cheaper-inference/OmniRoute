@@ -39,7 +39,7 @@ So sánh tính năng khách quan với các bộ định tuyến AI mã nguồn 
 
 ## Khi nào nên chọn OmniRoute
 
-- Bạn tự chủ và muốn** phạm vi bảo hiểm tối đa của nhà cung cấp** (377 nhà cung cấp, 155 mục danh mục free/no-auth )
+- Bạn tự chủ và muốn** phạm vi bảo hiểm tối đa của nhà cung cấp** (378 nhà cung cấp, 155 mục danh mục free/no-auth )
 - Bạn cần một** máy chủ MCP tích hợp** (công cụ LLM, bộ nhớ, kỹ năng được hiển thị dưới dạng công cụ)
 - Bạn cần** giao thức A2A** dành cho quy trình làm việc giữa các đại lý
 - Bạn muốn** dấu vân tay tàng hình** (JA3/JA4) để tránh bị CAPTCHAs ngược dòng phát hiện

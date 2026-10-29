@@ -497,7 +497,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (pomocnik tożsamości współdzielonej) i `index.ts` (rejestr).
 
-> Uwaga: dostawcy niewymienieni tutaj są obsługiwani przez `default.ts` przy użyciu ogólnego modułu wykonującego kompatybilnego z OpenAI. Pełny katalog dostawców (377 dostawców) znajduje się w `src/shared/constants/providers.ts`.
+> Uwaga: dostawcy niewymienieni tutaj są obsługiwani przez `default.ts` przy użyciu ogólnego modułu wykonującego kompatybilnego z OpenAI. Pełny katalog dostawców (378 dostawców) znajduje się w `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

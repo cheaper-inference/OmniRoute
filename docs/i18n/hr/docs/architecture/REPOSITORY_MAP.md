@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponenta nadzorne ploče API: adapteri preko `packages/ui-kit` — vidi `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nazivi ikona koje koriste zasloni → Lucide komponente (`<Icon>`)                                |
-| `constants/providers.ts`         | **377 pružatelja usluga** sa Zod validacijom (izvor istine)                                                 |
+| `constants/providers.ts`         | **378 pružatelja usluga** sa Zod validacijom (izvor istine)                                                 |
 | `constants/cliTools.ts`          | Vanjski registar CLI alata                                                                                  |
 | `constants/routingStrategies.ts` | **20 strategija usmjeravanja** s prioritetima                                                               |
 | `constants/publicApiRoutes.ts`   | Rute koje zahtijevaju autorizaciju nositelja (nasuprot upravljanju).                                        |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Vanjske CLI integracije + Interne OmniRoute CLI                                          |
 | `I18N.md`                   | i18n arhitektura, dodavanje jezika, 67 jezika                                            |
 | `UNINSTALL.md`              | Čisti koraci deinstalacije                                                               |
-| `PROVIDER_REFERENCE.md`     | **Automatski generirano** katalog 377 ponuđača (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatski generirano** katalog 378 ponuđača (regen: `npm run gen:provider-reference`) |
 
 ### Podsustav dubokog ronjenja
 

@@ -13,7 +13,7 @@
 
 ## Qu'est-ce que c'est
 
-OmniRoute enregistre 377 fournisseurs, dont 155 entrées de catalogue marquées**free/no-auth** (sans authentification, clé OAuth de niveau gratuit ou clé API de niveau gratuit — voir le [Guide des niveaux gratuits](../getting-started/FREE-TIERS-GUIDE.md) et le [répertoire complet des niveaux gratuits](../reference/FREE_TIERS.md) ). Le hic : les fournisseurs gratuits varient énormément en termes de qualité de modèle. Un fournisseur sans authentification servant un modèle frontière est bien plus utile qu'un fournisseur servant un petit modèle existant.
+OmniRoute enregistre 378 fournisseurs, dont 155 entrées de catalogue marquées**free/no-auth** (sans authentification, clé OAuth de niveau gratuit ou clé API de niveau gratuit — voir le [Guide des niveaux gratuits](../getting-started/FREE-TIERS-GUIDE.md) et le [répertoire complet des niveaux gratuits](../reference/FREE_TIERS.md) ). Le hic : les fournisseurs gratuits varient énormément en termes de qualité de modèle. Un fournisseur sans authentification servant un modèle frontière est bien plus utile qu'un fournisseur servant un petit modèle existant.
 
 **Classement des fournisseurs gratuits** réponses "** quel fournisseur gratuit me propose le meilleur modèle ?** " en rejoignant le catalogue de chaque fournisseur gratuit avec** scores de qualité issus du crowdsourcing** de la** Classement Arena AI** (préférence humaine ELO, la même idée derrière l'arène des chatbots LMArena). Les prestataires sont ensuite classés en fonction de la force de leur** meilleur modèle gratuit** .
 

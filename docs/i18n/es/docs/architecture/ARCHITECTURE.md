@@ -14,7 +14,7 @@ OmniRoute es una puerta de enlace de enrutamiento AI local y un panel de control
 
 Capacidades principales:
 
-- Superficie API compatible con OpenAI para CLI/tools (377 proveedores, 156 módulos ejecutores)
+- Superficie API compatible con OpenAI para CLI/tools (378 proveedores, 156 módulos ejecutores)
 - Traducción Request/response entre formatos de proveedores.
 - Respaldo combinado de modelos (secuencia multimodelo)
 - Pasos combinados estructurados (`provider + model + connection`) con orden en tiempo de ejecución por `compositeTiers`

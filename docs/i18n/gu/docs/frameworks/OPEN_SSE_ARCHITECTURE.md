@@ -486,7 +486,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ફાઈલ                          | હેતુ                                      |
 | ----------------------------- | ----------------------------------------- |
-| `providerRegistry.ts`         | 377-પ્રદાતા કૅટેલોગ પર ચેટ-મોડલ રજિસ્ટ્રી |
+| `providerRegistry.ts`         | 378-પ્રદાતા કૅટેલોગ પર ચેટ-મોડલ રજિસ્ટ્રી |
 | `providerModels.ts`           | મોડલ ઉપનામો, ફોર્મેટ મેપિંગ               |
 | `constants.ts`                | સમયસમાપ્તિ, મર્યાદા, સ્થિતિ કોડ           |
 | `defaultThinkingSignature.ts` | ડિફોલ્ટ Claude વિચારી સહી                 |

@@ -20,7 +20,7 @@ Quando un agente IDE (ad esempio GitHub Copilot, Cursor, Claude Code) effettua u
 
 Ciò significa che puoi:
 
-- **Reindirizzare qualsiasi agente a qualsiasi fornitore** : Copilot parlando con OpenAI? Reindirizzalo a Anthropic Claude, Gemini o a uno qualsiasi dei 377 provider di OmniRoute.
+- **Reindirizzare qualsiasi agente a qualsiasi fornitore** : Copilot parlando con OpenAI? Reindirizzalo a Anthropic Claude, Gemini o a uno qualsiasi dei 378 provider di OmniRoute.
 - **Applicare mappature del modello** : `gemini-3-flash` → `claude-sonnet-4.7` in modo trasparente a livello di gestore.
 - **Osserva tutto il traffico degli agenti** : ogni richiesta intercettata viene pubblicata [all'ispettore del traffico](./TRAFFIC_INSPECTOR.md).
 - **Applicare la resilienza OmniRoute** : il routing combinato, gli interruttori automatici, i fallback e il monitoraggio dei costi funzionano anche per il traffico degli agenti IDE.

@@ -13,7 +13,7 @@
 
 ## Što je to
 
-OmniRoute registrira 377 ponuđača, uključujući 155 označenih kataloških zapisa**free/no-auth** (no-auth, free-tier OAuth ili free-tier API ključ — pogledajte [Vodič za besplatne razine](../getting-started/FREE-TIERS-GUIDE.md) i cijeli [imenik besplatnih razina](../reference/FREE_TIERS.md) ). Kvaka: besplatni pružatelji jako variraju u kvaliteti modela. Davatelj bez autentifikacije koji poslužuje granični model mnogo je korisniji od onog koji služi malom naslijeđenom modelu.
+OmniRoute registrira 378 ponuđača, uključujući 155 označenih kataloških zapisa**free/no-auth** (no-auth, free-tier OAuth ili free-tier API ključ — pogledajte [Vodič za besplatne razine](../getting-started/FREE-TIERS-GUIDE.md) i cijeli [imenik besplatnih razina](../reference/FREE_TIERS.md) ). Kvaka: besplatni pružatelji jako variraju u kvaliteti modela. Davatelj bez autentifikacije koji poslužuje granični model mnogo je korisniji od onog koji služi malom naslijeđenom modelu.
 
 **Rangiranje besplatnih pružatelja usluga** odgovori "** koji mi besplatni pružatelj nudi najbolji model?** " pridruživanjem katalogu svakog besplatnog pružatelja usluge** ocjene kvalitete dobivene iz mnoštva** iz** Arena AI ljestvica** (human-preference ELO, ista ideja iza LMArena chatbot arene). Pružatelji se zatim rangiraju prema snazi svojih** najbolji besplatni model** .
 

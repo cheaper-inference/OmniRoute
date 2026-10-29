@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | `components/`                    | 儀表板組件API： `packages/ui-kit`上的轉接器 — 請參閱`docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`：螢幕使用的圖示名稱→ Lucide 元件 (`<Icon>`)                                   |
-| `constants/providers.ts`         | **377 提供者**透過Zod驗證（事實來源）                                                    |
+| `constants/providers.ts`         | **378 提供者**透過Zod驗證（事實來源）                                                    |
 | `constants/cliTools.ts`          | 外部CLI工具註冊表                                                                        |
 | `constants/routingStrategies.ts` | **20種路由策略**有優先事項                                                               |
 | `constants/publicApiRoutes.ts`   | 需要承載（與管理）身份驗證的路由                                                         |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 外部CLI整合+內部OmniRoute CLI                                              |
 | `I18N.md`                   | i18n 架構，新增語言，67 語言環境                                           |
 | `UNINSTALL.md`              | 乾淨卸載步驟                                                               |
-| `PROVIDER_REFERENCE.md`     | **自動生成**377 個提供者的目錄（regen： `npm run gen:provider-reference`） |
+| `PROVIDER_REFERENCE.md`     | **自動生成**378 個提供者的目錄（regen： `npm run gen:provider-reference`） |
 
 ### 子系統深入研究
 

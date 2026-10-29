@@ -14,7 +14,7 @@ OmniRoute ir vietējā AI maršrutēšanas vārteja un informācijas panelis, ka
 
 Galvenās iespējas:
 
-- Ar OpenAI saderīga API virsma priekš CLI/tools (377 nodrošinātāji, 156 izpildītāja moduļi)
+- Ar OpenAI saderīga API virsma priekš CLI/tools (378 nodrošinātāji, 156 izpildītāja moduļi)
 - Request/response tulkojums starp pakalpojumu sniedzēju formātiem
 - Modeļa kombinācijas atkāpšanās (vairāku modeļu secība)
 - Strukturētas kombinētās darbības (`provider + model + connection`) ar izpildlaika secību pēc `compositeTiers`

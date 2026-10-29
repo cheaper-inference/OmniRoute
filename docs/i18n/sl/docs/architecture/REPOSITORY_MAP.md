@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponenta nadzorne plošče API: adapterji prek `packages/ui-kit` — glejte `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: imena ikon, ki jih uporabljajo komponente → Lucide (`<Icon>`)                                      |
-| `constants/providers.ts`         | **377 ponudnikov** z Zod validacijo (vir resnice)                                                              |
+| `constants/providers.ts`         | **378 ponudnikov** z Zod validacijo (vir resnice)                                                              |
 | `constants/cliTools.ts`          | Zunanji register orodja CLI                                                                                    |
 | `constants/routingStrategies.ts` | **20 strategij usmerjanja** s prioritetami                                                                     |
 | `constants/publicApiRoutes.ts`   | Poti, ki zahtevajo overitev nosilca (v primerjavi z upravljanjem).                                             |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Zunanje integracije CLI + Notranji OmniRoute CLI                                          |
 | `I18N.md`                   | arhitektura i18n, dodajanje jezika, 67 krajev                                             |
 | `UNINSTALL.md`              | Koraki čiste odstranitve                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Samodejno ustvarjeno** katalog 377 ponudnikov (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Samodejno ustvarjeno** katalog 378 ponudnikov (regen: `npm run gen:provider-reference`) |
 
 ### Podsistem globokih potopov
 

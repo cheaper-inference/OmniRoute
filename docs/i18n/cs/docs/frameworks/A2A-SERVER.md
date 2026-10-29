@@ -163,7 +163,7 @@ OmniRoute odhaluje 6 dovedností A2A zapojených v `src/lib/a2a/taskExecution.ts
 | Zpráva o zdraví          | `health-report`      | Jistič agregátů, cooldown, stav uzamčení podle poskytovatele                                                                                                      | zdraví, odolnost           | "Zobrazit zdravotní stav všech poskytovatelů" |
 | Seznam schopností        | `list-capabilities`  | Vrátí úplný katalog dovedností agenta se 45 položkami (konfigurace 23 API + 21 CLI + 1) jako tabulku markdown s nezpracovaným SKILL.md URLs pro vkládání kontextu | katalog, objev, dovednosti | "Seznam všech schopností OmniRoute "          |
 
-> Karta agenta by měla být zarovnána s aktuálním katalogem poskytovatelů 377; počty poskytovatelů a metadata free/no-auth jsou získávány z runtime registru.
+> Karta agenta by měla být zarovnána s aktuálním katalogem poskytovatelů 378; počty poskytovatelů a metadata free/no-auth jsou získávány z runtime registru.
 
 ### Detail dovednosti `list-capabilities`
 

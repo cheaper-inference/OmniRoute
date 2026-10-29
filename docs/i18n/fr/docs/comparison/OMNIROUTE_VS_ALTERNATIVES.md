@@ -39,7 +39,7 @@ Comparaison objective des fonctionnalités avec les routeurs IA open source popu
 
 ## Quand choisir OmniRoute
 
-- Vous vous auto-hébergez et souhaitez** couverture maximale du fournisseur** (377 fournisseurs, 155 entrées catalogue free/no-auth )
+- Vous vous auto-hébergez et souhaitez** couverture maximale du fournisseur** (378 fournisseurs, 155 entrées catalogue free/no-auth )
 - Vous avez besoin d'un** serveur MCP intégré** (outils LLM, mémoire, compétences exposées comme outils)
 - Vous avez besoin** protocole A2A** pour les flux de travail d'agent à agent
 - Tu veux** furtivité des empreintes digitales** (JA3/JA4) pour éviter la détection par CAPTCHAs en amont

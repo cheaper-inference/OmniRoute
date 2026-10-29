@@ -39,7 +39,7 @@
 
 ## Nigbati lati yan OmniRoute
 
-- O ara-ogun ati ki o fẹ** o pọju agbegbe olupese** (awọn olupese 377, awọn titẹ sii katalogi 155 free/no-auth )
+- O ara-ogun ati ki o fẹ** o pọju agbegbe olupese** (awọn olupese 378, awọn titẹ sii katalogi 155 free/no-auth )
 - O nilo a** olupin MCP ti a ṣe sinu** (awọn irinṣẹ LLM, iranti, awọn ọgbọn ti a fi han bi awọn irinṣẹ)
 - O nilo**A2A Ilana** fun aṣoju-si-aṣoju workflows
 - O fẹ** lilọ ni ifura ika** (JA3/JA4) lati yago fun wiwa nipasẹ CAPTCHAs oke

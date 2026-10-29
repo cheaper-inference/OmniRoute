@@ -163,7 +163,7 @@ OmniRoute expune 6 abilități A2A conectate în `src/lib/a2a/taskExecution.ts::
 | Raport de sănătate        | `health-report`      | Agregă întrerupător, răcire, stare de blocare per furnizor                                                                                                                  | sănătate, rezistență             | „Afișați starea de sănătate a tuturor furnizorilor” |
 | Lista de capabilități     | `list-capabilities`  | Returnează întregul catalog de abilități de agent cu 45 de intrări (23 API + 21 CLI + 1 config) ca un tabel de reducere cu SKILL.md URLs brut pentru injectarea contextului | catalog, descoperire, aptitudini | „Enumeră toate capabilitățile OmniRoute ”           |
 
-> Cardul de agent trebuie menținut aliniat cu catalogul live 377 de furnizori; Numărul furnizorilor și metadatele free/no-auth provin din registrul de rulare.
+> Cardul de agent trebuie menținut aliniat cu catalogul live 378 de furnizori; Numărul furnizorilor și metadatele free/no-auth provin din registrul de rulare.
 
 ### `list-capabilities` Detaliu abilitate
 

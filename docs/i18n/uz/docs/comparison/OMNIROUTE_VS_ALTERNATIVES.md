@@ -39,7 +39,7 @@ Ommabop ochiq kodli AI routerlarga nisbatan obyektiv xususiyatlar taqqoslanishi.
 
 ## Qachon OmniRoute tanlash kerak
 
-- Siz o'zingizni mezbonlik qilasiz va xohlaysiz** maksimal provayder qamrovi** (377 ta provayder, 155 free/no-auth katalog yozuvlari)
+- Siz o'zingizni mezbonlik qilasiz va xohlaysiz** maksimal provayder qamrovi** (378 ta provayder, 155 free/no-auth katalog yozuvlari)
 - Sizga kerak a** o'rnatilgan MCP serveri** (LLM vositalari, xotira, asboblar sifatida ko'rsatilgan ko'nikmalar)
 - Sizga kerak**A2A protokoli** agentdan agentga ish oqimlari uchun
 - Siz xohlaysiz** barmoq izlari yashirin** (JA3/JA4) yuqori oqim CAPTCHAs tomonidan aniqlanmaslik uchun

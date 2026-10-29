@@ -14,7 +14,7 @@ OmniRoute je lokalni AI gateway i nadzorna ploča izgrađena na Next.js. Pruža 
 
 Osnovne mogućnosti:
 
-- OpenAI kompatibilna API površina za CLI/tools (377 provajdera, 156 izvršnih modula)
+- OpenAI kompatibilna API površina za CLI/tools (378 provajdera, 156 izvršnih modula)
 - Request/response prijevod preko formata provajdera
 - Kombinirani model (slijed više modela)
 - Strukturirani kombinovani koraci (`provider + model + connection`) sa poredanjem vremena izvođenja po `compositeTiers`

@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Comhpháirt painéal API: cuibheoirí thar `packages/ui-kit` — féach `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ainmneacha deilbhín a úsáideann na scáileáin → Comhpháirteanna Lucide (`<Icon>`)           |
-| `constants/providers.ts`         | **377 soláthraí** le bailíochtú Zod (foinse na fírinne)                                                |
+| `constants/providers.ts`         | **378 soláthraí** le bailíochtú Zod (foinse na fírinne)                                                |
 | `constants/cliTools.ts`          | Clár seachtrach CLI uirlisí                                                                            |
 | `constants/routingStrategies.ts` | **20 straitéis ródaithe** le tosaíochtaí                                                               |
 | `constants/publicApiRoutes.ts`   | Bealaí óna dteastaíonn údar Iompróra (vs bainistíocht).                                                |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Comhtháthú CLI + Inmheánach OmniRoute CLI                                          |
 | `I18N.md`                   | i18n ailtireacht, ag cur teanga leis, 67 logán                                     |
 | `UNINSTALL.md`              | Glan na céimeanna díshuiteála                                                      |
-| `PROVIDER_REFERENCE.md`     | **Uathghinte** catalóg de 377 soláthraí (regen: `npm run gen:provider-reference`)  |
+| `PROVIDER_REFERENCE.md`     | **Uathghinte** catalóg de 378 soláthraí (regen: `npm run gen:provider-reference`)  |
 
 ### Tumadh domhain fochóras
 

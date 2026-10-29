@@ -490,7 +490,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode` `cursor` `default` `devin-cli` `muse-spark-web` `nlpcloud` `opencode` `perplexity-web` `petals` `pollinations` `qoder` `devin-desktop` `claudeIdentity.ts` ) `index.ts`
 
-> Megjegyzés: az itt fel nem sorolt szolgáltatókat `default.ts` az általános OpenAI-kompatibilis végrehajtóval szolgálja ki. A teljes szolgáltatókatalógus (377 szolgáltató) `src/shared/constants/providers.ts` ben található.
+> Megjegyzés: az itt fel nem sorolt szolgáltatókat `default.ts` az általános OpenAI-kompatibilis végrehajtóval szolgálja ki. A teljes szolgáltatókatalógus (378 szolgáltató) `src/shared/constants/providers.ts` ben található.
 
 ### 4.3 `open-sse/translator/`
 

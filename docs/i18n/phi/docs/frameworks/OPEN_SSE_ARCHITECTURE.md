@@ -488,7 +488,7 @@ hawak `open-sse/config/` ang layer ng pagsasaayos:
 
 | file                              | Layunin                                               |
 | --------------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`             | Registry ng modelo ng chat sa catalog ng 377 provider |
+| `providerRegistry.ts`             | Registry ng modelo ng chat sa catalog ng 378 provider |
 | `providerModels.ts`               | Mga alias ng modelo, pagmamapa ng format              |
 | `constants.ts`                    | Mga timeout, limitasyon, status code                  |
 | `defaultThinkingSignature.ts`     | Default Claude thinking signature                     |

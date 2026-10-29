@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Componente del dashboard API: adattatori su `packages/ui-kit` : vedere `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nomi delle icone utilizzate dalle schermate → Componenti Lucide (`<Icon>`)                      |
-| `constants/providers.ts`         | **377 fornitori** con convalida Zod (fonte di verità)                                                       |
+| `constants/providers.ts`         | **378 fornitori** con convalida Zod (fonte di verità)                                                       |
 | `constants/cliTools.ts`          | Registro degli strumenti CLI esterno                                                                        |
 | `constants/routingStrategies.ts` | **20 strategie di routing** con priorità                                                                    |
 | `constants/publicApiRoutes.ts`   | Percorsi che richiedono l'autenticazione del portatore (rispetto alla gestione).                            |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrazioni CLI esterne + OmniRoute interne CLI                                                 |
 | `I18N.md`                   | Architettura i18n, aggiunta di una lingua, 67 localizzazioni                                     |
 | `UNINSTALL.md`              | Passaggi di disinstallazione puliti                                                              |
-| `PROVIDER_REFERENCE.md`     | **Generato automaticamente** catalogo di 377 fornitori (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Generato automaticamente** catalogo di 378 fornitori (regen: `npm run gen:provider-reference`) |
 
 ### Approfondimenti sul sottosistema
 

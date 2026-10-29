@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | फाईल                          | उद्देश                                |
 | ----------------------------- | ------------------------------------- |
-| `providerRegistry.ts`         | 377-प्रदाता कॅटलॉगवर चॅट-मॉडेल नोंदणी |
+| `providerRegistry.ts`         | 378-प्रदाता कॅटलॉगवर चॅट-मॉडेल नोंदणी |
 | `providerModels.ts`           | मॉडेल उपनाम, स्वरूप मॅपिंग            |
 | `constants.ts`                | कालबाह्यता, मर्यादा, स्थिती कोड       |
 | `defaultThinkingSignature.ts` | डीफॉल्ट Claude विचार स्वाक्षरी        |

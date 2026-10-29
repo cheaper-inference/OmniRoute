@@ -14,7 +14,7 @@ OmniRoute là cổng định tuyến và bảng điều khiển AI cục bộ đ
 
 Khả năng cốt lõi:
 
-- Bề mặt API tương thích OpenAI cho CLI/tools (377 nhà cung cấp, 156 mô-đun thực thi)
+- Bề mặt API tương thích OpenAI cho CLI/tools (378 nhà cung cấp, 156 mô-đun thực thi)
 - dịch Request/response trên các định dạng của nhà cung cấp
 - Dự phòng kết hợp mô hình (trình tự nhiều mô hình)
 - Các bước kết hợp có cấu trúc (`provider + model + connection`) với thứ tự thời gian chạy theo `compositeTiers`

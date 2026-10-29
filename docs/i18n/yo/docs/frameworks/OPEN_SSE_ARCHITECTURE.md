@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | Faili                           | Idi                                                  |
 | ------------------------------- | ---------------------------------------------------- |
-| `providerRegistry.ts`           | Iforukọsilẹ-awoṣe iwiregbe lori katalogi olupese 377 |
+| `providerRegistry.ts`           | Iforukọsilẹ-awoṣe iwiregbe lori katalogi olupese 378 |
 | `providerModels.ts`             | Awọn inagijẹ awoṣe, aworan atọka                     |
 | `constants.ts`                  | Awọn akoko ipari, awọn opin, awọn koodu ipo          |
 | `defaultThinkingSignature.ts`   | Ibuwọlu ero aiyipada Claude                          |

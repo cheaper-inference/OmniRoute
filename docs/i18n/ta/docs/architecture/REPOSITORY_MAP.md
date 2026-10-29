@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | டாஷ்போர்டு கூறு API: `packages/ui-kit` மீது அடாப்டர்கள் — `docs/architecture/DESIGN_SYSTEM.md` பார்க்கவும் |
 | `constants/iconMap.ts`           | `ICON_MAP`: திரைகளால் பயன்படுத்தப்படும் ஐகான் பெயர்கள் → Lucide கூறுகள் (`<Icon>`)                         |
-| `constants/providers.ts`         | **377 வழங்குநர்கள்** Zod சரிபார்ப்புடன் (உண்மையின் ஆதாரம்)                                                 |
+| `constants/providers.ts`         | **378 வழங்குநர்கள்** Zod சரிபார்ப்புடன் (உண்மையின் ஆதாரம்)                                                 |
 | `constants/cliTools.ts`          | வெளிப்புற CLI கருவிப் பதிவு                                                                                |
 | `constants/routingStrategies.ts` | **20 ரூட்டிங் உத்திகள்** முன்னுரிமைகளுடன்                                                                  |
 | `constants/publicApiRoutes.ts`   | Bearer (vs management) அங்கீகாரம் தேவைப்படும் வழிகள்                                                       |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | வெளிப்புற CLI ஒருங்கிணைப்புகள் + உள் OmniRoute CLI                                              |
 | `I18N.md`                   | i18n கட்டிடக்கலை, ஒரு மொழியைச் சேர்த்தல், 67 இடங்கள்                                            |
 | `UNINSTALL.md`              | நிறுவல் நீக்குதல் படிகளை சுத்தம் செய்யவும்                                                      |
-| `PROVIDER_REFERENCE.md`     | **தானாக உருவாக்கப்படும்** 377 வழங்குநர்களின் பட்டியல் (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **தானாக உருவாக்கப்படும்** 378 வழங்குநர்களின் பட்டியல் (regen: `npm run gen:provider-reference`) |
 
 ### துணை அமைப்பு ஆழமான டைவ்ஸ்
 

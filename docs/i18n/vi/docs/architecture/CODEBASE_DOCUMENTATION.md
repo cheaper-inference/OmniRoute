@@ -490,7 +490,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi` `chatgpt-web-codex` `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, zqn , `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, cộng với `claudeIdentity.ts` (người trợ `devin-desktop` nhận dạng chung) và `index.ts` (đăng ký).
 
-> Lưu ý: các nhà cung cấp không được liệt kê ở đây được `default.ts` phục vụ bằng cách sử dụng trình thực thi chung tương thích với OpenAI. Danh mục nhà cung cấp đầy đủ (377 nhà cung cấp) có trong `src/shared/constants/providers.ts`.
+> Lưu ý: các nhà cung cấp không được liệt kê ở đây được `default.ts` phục vụ bằng cách sử dụng trình thực thi chung tương thích với OpenAI. Danh mục nhà cung cấp đầy đủ (378 nhà cung cấp) có trong `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

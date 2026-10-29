@@ -13,7 +13,7 @@
 
 ## Ihe Ọ Bụ
 
-OmniRoute debanyere ndị na-eweta 377, gụnyere ndenye katalọgụ 155 akara**free/no-auth** (enweghị-auth, free-tier OAuth, ma ọ bụ free-tier API igodo - lee [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) and Full [Free Tiers directory](../reference/FREE_TIERS.md) ). Ihe nwude: ndị na-enye n'efu na-adịgasị iche n'ịdị mma ụdị. Onye na-eweta enweghị akwụkwọ ikike na-eje ozi n'ụdị oke ọnụ ahịa bara uru karịa nke na-enye obere ụdị ihe nketa.
+OmniRoute debanyere ndị na-eweta 378, gụnyere ndenye katalọgụ 155 akara**free/no-auth** (enweghị-auth, free-tier OAuth, ma ọ bụ free-tier API igodo - lee [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) and Full [Free Tiers directory](../reference/FREE_TIERS.md) ). Ihe nwude: ndị na-enye n'efu na-adịgasị iche n'ịdị mma ụdị. Onye na-eweta enweghị akwụkwọ ikike na-eje ozi n'ụdị oke ọnụ ahịa bara uru karịa nke na-enye obere ụdị ihe nketa.
 
 **Ọkwa ndị na-eweta n'efu** zaa"** Kedu onye na-eweta n'efu na-enye m ihe nlereanya kacha mma?** " site na ijikọ na katalọgụ onye na-eweta n'efu** akara mma nke igwe mmadụ nwetara** site na** Arena AI leaderboard** (mmadụ-mmadụ ELO, otu echiche n'azụ LMArena chatbot arena). A na-ahọpụta ndị na-enye ihe site na ike nke ha** kacha mma free nlereanya** .
 

@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `components/`                    | ଡ୍ୟାସବୋର୍ଡ ଉପାଦାନ API: `packages/ui-kit` ଉପରେ ଆଡାପ୍ଟର - `docs/architecture/DESIGN_SYSTEM.md` ଦେଖନ୍ତୁ \| |
 | `constants/iconMap.ts`           | `ICON_MAP`: ସ୍କ୍ରିନ୍ ଦ୍ୱାରା ବ୍ୟବହୃତ ଆଇକନ୍ ନାମ → ଲୁସିଡ୍ ଉପାଦାନଗୁଡିକ (`<Icon>`)                           |
-| `constants/providers.ts`         | **377 ପ୍ରଦାନକାରୀ \|** Zod valid ଧତା ସହିତ (ସତ୍ୟର ଉତ୍ସ)                                                   |
+| `constants/providers.ts`         | **378 ପ୍ରଦାନକାରୀ \|** Zod valid ଧତା ସହିତ (ସତ୍ୟର ଉତ୍ସ)                                                   |
 | `constants/cliTools.ts`          | ବାହ୍ୟ CLI ଉପକରଣ ରେଜିଷ୍ଟ୍ରି \|                                                                           |
 | `constants/routingStrategies.ts` | **20 ରାଉଟିଙ୍ଗ୍ ରଣନୀତି \|** ପ୍ରାଥମିକତା ସହିତ \|                                                           |
 | `constants/publicApiRoutes.ts`   | ମାର୍ଗଗୁଡିକ ଯାହା ବିୟର (ବନାମ ପରିଚାଳନା) auth ଆବଶ୍ୟକ କରେ \|                                                 |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ବାହ୍ୟ CLI ସଂଯୋଗ + ଆଭ୍ୟନ୍ତରୀଣ OmniRoute CLI                                             |
 | `I18N.md`                   | i18n ସ୍ଥାପତ୍ୟ, ଏକ ଭାଷା ଯୋଡି, 67 ଲୋକାଲ୍ \|                                              |
 | `UNINSTALL.md`              | ଅଣସଂସ୍ଥାପନ ପଦକ୍ଷେପଗୁଡିକ ସଫା କରନ୍ତୁ \|                                                  |
-| `PROVIDER_REFERENCE.md`     | **ଅଟୋ-ଜେନେରେଟ୍ \|** 377 ପ୍ରଦାନକାରୀଙ୍କ ତାଲିକା (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **ଅଟୋ-ଜେନେରେଟ୍ \|** 378 ପ୍ରଦାନକାରୀଙ୍କ ତାଲିକା (regen: `npm run gen:provider-reference`) |
 
 ### ସବ୍ ସିଷ୍ଟମ୍ ଗଭୀର-ଡାଇଭ୍ \|
 

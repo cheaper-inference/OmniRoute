@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Kojelaudan komponentti API: sovittimet `packages/ui-kit` :n yli – katso `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: näyttöjen käyttämät kuvakkeiden nimet → Lucide - komponentit (`<Icon>`)                          |
-| `constants/providers.ts`         | **377 palveluntarjoajaa** Zod -validaatiolla (totuuden lähde)                                                |
+| `constants/providers.ts`         | **378 palveluntarjoajaa** Zod -validaatiolla (totuuden lähde)                                                |
 | `constants/cliTools.ts`          | Ulkoinen CLI -työkalurekisteri                                                                               |
 | `constants/routingStrategies.ts` | **20 reititysstrategiaa** prioriteettien kanssa                                                              |
 | `constants/publicApiRoutes.ts`   | Reitit, jotka vaativat siirtotietodennuksen (vs. hallinta).                                                  |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Ulkoiset CLI -integraatiot + Sisäiset OmniRoute CLI                                                |
 | `I18N.md`                   | i18n-arkkitehtuuri, kielen lisääminen, 67 aluetta                                                  |
 | `UNINSTALL.md`              | Puhdista asennuksen poistovaiheet                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Luotu automaattisesti** 377 palveluntarjoajan luettelo (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Luotu automaattisesti** 378 palveluntarjoajan luettelo (regen: `npm run gen:provider-reference`) |
 
 ### Alajärjestelmän syväsukellukset
 

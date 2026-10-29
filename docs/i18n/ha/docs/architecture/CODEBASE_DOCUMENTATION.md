@@ -490,7 +490,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, zqr , zqs , `claudeIdentity.ts` ( help `index.ts` ) .
 
-> Lura: Masu samar da ba a jera su anan ana yin su ta hanyar `default.ts` ta amfani da babban mai aiwatarwa na OpenAI mai jituwa. Cikakken kundin mai bada (masu samarwa 377) yana zaune a cikin `src/shared/constants/providers.ts`.
+> Lura: Masu samar da ba a jera su anan ana yin su ta hanyar `default.ts` ta amfani da babban mai aiwatarwa na OpenAI mai jituwa. Cikakken kundin mai bada (masu samarwa 378) yana zaune a cikin `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

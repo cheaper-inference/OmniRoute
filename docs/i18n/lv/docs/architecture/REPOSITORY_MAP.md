@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Informācijas paneļa komponents API: adapteri, izmantojot `packages/ui-kit` — skatiet `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonu nosaukumi , ko izmanto ekrāni → Lucide komponenti (`<Icon>`)                                            |
-| `constants/providers.ts`         | **377 pakalpojumu sniedzēji** ar Zod apstiprinājumu (patiesības avots)                                                    |
+| `constants/providers.ts`         | **378 pakalpojumu sniedzēji** ar Zod apstiprinājumu (patiesības avots)                                                    |
 | `constants/cliTools.ts`          | Ārējais CLI rīku reģistrs                                                                                                 |
 | `constants/routingStrategies.ts` | **20 maršrutēšanas stratēģijas** ar prioritātēm                                                                           |
 | `constants/publicApiRoutes.ts`   | Maršruti, kuriem nepieciešama nesēja (pret vadību) autentifikācija                                                        |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Ārējās CLI integrācijas + Iekšējās OmniRoute CLI                                                      |
 | `I18N.md`                   | i18n arhitektūra, pievienojot valodu, 67 lokalizācijas                                                |
 | `UNINSTALL.md`              | Notīriet atinstalēšanas darbības                                                                      |
-| `PROVIDER_REFERENCE.md`     | **Automātiski ģenerēts** 377 pakalpojumu sniedzēju katalogs (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automātiski ģenerēts** 378 pakalpojumu sniedzēju katalogs (regen: `npm run gen:provider-reference`) |
 
 ### Apakšsistēmas dziļi niršana
 

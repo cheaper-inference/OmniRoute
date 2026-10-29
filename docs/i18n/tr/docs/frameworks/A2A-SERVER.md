@@ -165,7 +165,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ile bağlantılı 6
 | Sağlık Raporu       | `health-report`      | Sağlayıcı başına devre kesiciyi, bekleme süresini ve kilitleme durumunu toplar                                                                             | sağlık, dayanıklılık      | "Tüm sağlayıcıların sağlık durumunu göster"     |
 | Yetenekleri Listele | `list-capabilities`  | 45 girişli tam Ajan Becerileri kataloğunu (23 API + 21 CLI + 1 config), bağlam ekleme için ham SKILL.md URLs içeren bir işaretleme tablosu olarak döndürür | katalog, keşif, beceriler | "Tüm OmniRoute yeteneklerini listele"           |
 
-> Temsilci Kartı, canlı 377 sağlayıcı kataloğuyla uyumlu tutulmalıdır; sağlayıcı sayıları ve free/no-auth meta verileri çalışma zamanı kayıt defterinden alınır.
+> Temsilci Kartı, canlı 378 sağlayıcı kataloğuyla uyumlu tutulmalıdır; sağlayıcı sayıları ve free/no-auth meta verileri çalışma zamanı kayıt defterinden alınır.
 
 ### `list-capabilities` Beceri Detayı
 

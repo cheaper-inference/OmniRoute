@@ -13,7 +13,7 @@
 
 ## Apa Itu
 
-OmniRoute mendaftarkan 377 penyedia, termasuk 155 entri katalog yang ditandai**free/no-auth** (tanpa autentikasi, OAuth tingkat gratis, atau kunci API tingkat gratis — lihat [Panduan Tingkatan Gratis](../getting-started/FREE-TIERS-GUIDE.md) dan [direktori Tingkatan Gratis](../reference/FREE_TIERS.md) selengkapnya). Hasil tangkapannya: penyedia gratis sangat bervariasi dalam kualitas model. Penyedia tanpa autentikasi yang melayani model frontier jauh lebih berguna daripada penyedia yang melayani model lama yang kecil.
+OmniRoute mendaftarkan 378 penyedia, termasuk 155 entri katalog yang ditandai**free/no-auth** (tanpa autentikasi, OAuth tingkat gratis, atau kunci API tingkat gratis — lihat [Panduan Tingkatan Gratis](../getting-started/FREE-TIERS-GUIDE.md) dan [direktori Tingkatan Gratis](../reference/FREE_TIERS.md) selengkapnya). Hasil tangkapannya: penyedia gratis sangat bervariasi dalam kualitas model. Penyedia tanpa autentikasi yang melayani model frontier jauh lebih berguna daripada penyedia yang melayani model lama yang kecil.
 
 **Peringkat Penyedia Gratis** jawaban "** penyedia gratis mana yang memberi saya model terbaik?** " dengan bergabung dalam katalog masing-masing penyedia gratis** skor kualitas yang bersumber dari banyak orang** dari** Papan peringkat arena AI** (preferensi manusia ELO, ide yang sama di balik arena chatbot LMArena). Penyedia kemudian diberi peringkat berdasarkan kekuatan mereka** model gratis terbaik** .
 

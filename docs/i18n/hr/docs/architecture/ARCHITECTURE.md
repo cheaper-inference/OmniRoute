@@ -16,7 +16,7 @@ OmniRoute je lokalni AI pristupnik za usmjeravanje i nadzorna ploča izgrađena 
 
 Osnovne mogućnosti:
 
-- OpenAI-kompatibilna API površina za CLI/tools (377 pružatelja usluga, 156 izvršnih modula)
+- OpenAI-kompatibilna API površina za CLI/tools (378 pružatelja usluga, 156 izvršnih modula)
 - Request/response prijevod preko formata pružatelja usluga
 - Rezervni kombinirani model (slijed više modela)
 - Strukturirani kombinirani koraci (`provider + model + connection`) s redoslijedom vremena izvođenja prema `compositeTiers`

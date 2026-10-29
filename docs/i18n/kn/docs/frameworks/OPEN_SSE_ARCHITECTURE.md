@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ಫೈಲ್                          | ಉದ್ದೇಶ                                           |
 | ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | 377-ಪ್ರೊವೈಡರ್ ಕ್ಯಾಟಲಾಗ್ನಲ್ಲಿ ಚಾಟ್-ಮಾದರಿ ನೋಂದಾವಣೆ |
+| `providerRegistry.ts`         | 378-ಪ್ರೊವೈಡರ್ ಕ್ಯಾಟಲಾಗ್ನಲ್ಲಿ ಚಾಟ್-ಮಾದರಿ ನೋಂದಾವಣೆ |
 | `providerModels.ts`           | ಮಾದರಿ ಅಲಿಯಾಸ್, ಫಾರ್ಮ್ಯಾಟ್ ಮ್ಯಾಪಿಂಗ್              |
 | `constants.ts`                | ಸಮಯಾವಧಿಗಳು, ಮಿತಿಗಳು, ಸ್ಥಿತಿ ಕೋಡ್ಗಳು              |
 | `defaultThinkingSignature.ts` | ಡಿಫಾಲ್ಟ್ Claude ಚಿಂತನೆಯ ಸಹಿ                      |

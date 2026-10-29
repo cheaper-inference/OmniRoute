@@ -20,7 +20,7 @@ Ketika agen IDE (misalnya, GitHub Copilot, Cursor, Claude Code) membuat panggila
 
 Ini berarti Anda dapat:
 
-- **Rutekan ulang agen mana pun ke penyedia mana pun** : Copilot berbicara dengan OpenAI? Alihkan ke Anthropic Claude, Gemini, atau salah satu dari 377 penyedia OmniRoute.
+- **Rutekan ulang agen mana pun ke penyedia mana pun** : Copilot berbicara dengan OpenAI? Alihkan ke Anthropic Claude, Gemini, atau salah satu dari 378 penyedia OmniRoute.
 - **Terapkan pemetaan model** : `gemini-3-flash` → `claude-sonnet-4.7` secara transparan di tingkat handler.
 - **Amati semua lalu lintas agen** : setiap permintaan yang disadap dipublikasikan ke [Inspektur Lalu Lintas](./TRAFFIC_INSPECTOR.md).
 - **Terapkan ketahanan OmniRoute** : perutean kombo, pemutus sirkuit, fallback, dan pelacakan biaya juga berfungsi untuk lalu lintas agen IDE.

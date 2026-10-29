@@ -14,7 +14,7 @@ OmniRoute è un gateway di routing AI locale e un dashboard basato su Next.js. F
 
 Funzionalità principali:
 
-- Superficie API compatibile con OpenAI per CLI/tools (377 provider, 156 moduli esecutori)
+- Superficie API compatibile con OpenAI per CLI/tools (378 provider, 156 moduli esecutori)
 - Traduzione Request/response tra i formati dei fornitori
 - Fallback combinato di modelli (sequenza multi-modello)
 - Passaggi combinati strutturati (`provider + model + connection`) con ordinamento di runtime tramite `compositeTiers`

@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | فائل                          | مقصد                                      |
 | ----------------------------- | ----------------------------------------- |
-| `providerRegistry.ts`         | 377 فراہم کنندہ کیٹلاگ پر چیٹ ماڈل رجسٹری |
+| `providerRegistry.ts`         | 378 فراہم کنندہ کیٹلاگ پر چیٹ ماڈل رجسٹری |
 | `providerModels.ts`           | ماڈل عرفی نام، فارمیٹ میپنگ               |
 | `constants.ts`                | ٹائم آؤٹ، حدود، اسٹیٹس کوڈز               |
 | `defaultThinkingSignature.ts` | پہلے سے طے شدہ Claude سوچ کا دستخط        |

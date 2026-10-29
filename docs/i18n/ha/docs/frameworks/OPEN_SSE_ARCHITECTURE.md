@@ -488,7 +488,7 @@ Wannan yana sarrafa:
 
 | Fayil                         | Manufar                                          |
 | ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | Rijista-samfurin taɗi akan kundin masu ba da 377 |
+| `providerRegistry.ts`         | Rijista-samfurin taɗi akan kundin masu ba da 378 |
 | `providerModels.ts`           | Laƙabin ƙira, tsara taswira                      |
 | `constants.ts`                | Ƙayyadaddun lokaci, iyaka, lambobin matsayi      |
 | `defaultThinkingSignature.ts` | Claude hannu na tunani na asali                  |

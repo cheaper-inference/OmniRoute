@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------- |
 | `components/`                    | डॅशबोर्ड घटक API: `packages/ui-kit` वर अडॅप्टर — `docs/architecture/DESIGN_SYSTEM.md` पहा |
 | `constants/iconMap.ts`           | `ICON_MAP`: स्क्रीनद्वारे वापरलेली चिन्हांची नावे → Lucide घटक (`<Icon>`)                 |
-| `constants/providers.ts`         | **377 प्रदाता** Zod प्रमाणीकरणासह (सत्याचा स्रोत)                                         |
+| `constants/providers.ts`         | **378 प्रदाता** Zod प्रमाणीकरणासह (सत्याचा स्रोत)                                         |
 | `constants/cliTools.ts`          | बाह्य CLI साधन नोंदणी                                                                     |
 | `constants/routingStrategies.ts` | **20 राउटिंग धोरणे** प्राधान्यक्रमांसह                                                    |
 | `constants/publicApiRoutes.ts`   | वाहक (वि व्यवस्थापन) प्रमाणीकरण आवश्यक असलेले मार्ग                                       |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | बाह्य CLI एकत्रीकरण + अंतर्गत OmniRoute CLI                                            |
 | `I18N.md`                   | i18n आर्किटेक्चर, एक भाषा जोडणे, 67 लोकॅल्स                                            |
 | `UNINSTALL.md`              | विस्थापित चरण साफ करा                                                                  |
-| `PROVIDER_REFERENCE.md`     | **स्वयं व्युत्पन्न** 377 प्रदात्यांचे कॅटलॉग (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **स्वयं व्युत्पन्न** 378 प्रदात्यांचे कॅटलॉग (regen: `npm run gen:provider-reference`) |
 
 ### उपप्रणाली खोल-डाव
 

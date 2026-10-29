@@ -39,7 +39,7 @@ Perbandingan fitur objektif dengan router AI open-source populer.
 
 ## Kapan harus memilih OmniRoute
 
-- Anda menghosting sendiri dan menginginkannya** cakupan penyedia maksimum** (377 penyedia, 155 entri katalog free/no-auth )
+- Anda menghosting sendiri dan menginginkannya** cakupan penyedia maksimum** (378 penyedia, 155 entri katalog free/no-auth )
 - Anda membutuhkan sebuah** server MCP bawaan** (alat LLM, memori, keterampilan diekspos sebagai alat)
 - Anda membutuhkan** protokol A2A** untuk alur kerja agen-ke-agen
 - Anda ingin** siluman sidik jari** (JA3/JA4) untuk menghindari deteksi oleh CAPTCHAs hulu

@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Akụkụ dashboard API: ihe nkwụnye n'elu `packages/ui-kit` - lee `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: akara ngosi aha nke ihuenyo na-eji → Lucide components (`<Icon>`)                       |
-| `constants/providers.ts`         | **377 ndị na-enye** ya na nkwado Zod (isi iyi nke eziokwu)                                          |
+| `constants/providers.ts`         | **378 ndị na-enye** ya na nkwado Zod (isi iyi nke eziokwu)                                          |
 | `constants/cliTools.ts`          | Ndekọ akụrụngwa CLI mpụga                                                                           |
 | `constants/routingStrategies.ts` | **20 ụzọ aghụghọ** na ihe ndị ka mkpa                                                               |
 | `constants/publicApiRoutes.ts`   | Ụzọ chọrọ auth bearer (vs njikwa).                                                                  |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Mwekota CLI mpụga + OmniRoute CLI                                                             |
 | `I18N.md`                   | i18n architecture, na-agbakwunye asụsụ, mpaghara 67                                           |
 | `UNINSTALL.md`              | Hichaa usoro iwepụ                                                                            |
-| `PROVIDER_REFERENCE.md`     | **Emepụtara onwe ya** Katalọgụ nke ndị na-eweta 377 (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Emepụtara onwe ya** Katalọgụ nke ndị na-eweta 378 (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem miri-mikpu
 

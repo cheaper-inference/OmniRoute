@@ -14,7 +14,7 @@
 
 ## Mi az
 
-OmniRoute 377 szolgáltatót regisztrál, köztük 155 katalógus bejegyzést megjelölve**free/no-auth** (no-auth, free-tier OAuth vagy free-tier API key – lásd a [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) és a teljes [Free Tiers könyvtárat](../reference/FREE_TIERS.md) ). A fogás: az ingyenes szolgáltatók vad modellminőségben különböznek egymástól. A határmenti modellt kiszolgáló hitelesítés nélküli szolgáltató sokkal hasznosabb, mint egy kis örökölt modellt kiszolgáló.
+OmniRoute 378 szolgáltatót regisztrál, köztük 155 katalógus bejegyzést megjelölve**free/no-auth** (no-auth, free-tier OAuth vagy free-tier API key – lásd a [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) és a teljes [Free Tiers könyvtárat](../reference/FREE_TIERS.md) ). A fogás: az ingyenes szolgáltatók vad modellminőségben különböznek egymástól. A határmenti modellt kiszolgáló hitelesítés nélküli szolgáltató sokkal hasznosabb, mint egy kis örökölt modellt kiszolgáló.
 
 **Ingyenes szolgáltatói rangsor** válaszok"** melyik ingyenes szolgáltató adja a legjobb modellt?** ", ha csatlakozik az egyes ingyenes szolgáltatók katalógusához** tömegből származó minőségi pontszámok** a** Arena AI ranglista** (human-preference ELO, ugyanaz az ötlet az LMArena chatbot arénája mögött). A szolgáltatókat ezután az erősségük alapján rangsorolják** legjobb ingyenes modell** .
 

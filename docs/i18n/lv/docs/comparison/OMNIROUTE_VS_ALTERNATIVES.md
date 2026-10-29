@@ -39,7 +39,7 @@ Objektīvs funkciju salīdzinājums ar populāriem atvērtā pirmkoda AI maršru
 
 ## Kad izvēlēties OmniRoute
 
-- Jūs pats saimniekojat un vēlaties** maksimālais pakalpojumu sniedzēja pārklājums** (377 pakalpojumu sniedzēji, 155 free/no-auth ieraksti katalogā)
+- Jūs pats saimniekojat un vēlaties** maksimālais pakalpojumu sniedzēja pārklājums** (378 pakalpojumu sniedzēji, 155 free/no-auth ieraksti katalogā)
 - Jums ir nepieciešams a** iebūvēts MCP serveris** (LLM rīki, atmiņa, prasmes, kas parādītas kā rīki)
 - Tev vajag**A2A protokols** aģents-aģents darbplūsmām
 - Jūs vēlaties** pirkstu nospiedumu slēpšana** (JA3/JA4), lai izvairītos no atklāšanas ar augšpus CAPTCHAs

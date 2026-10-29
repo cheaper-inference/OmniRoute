@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Komponenta kontrolne table API: adapteri preko `packages/ui-kit` — vidi `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nazivi ikona koje koriste ekrani → Lucide komponente (`<Icon>`)                                  |
-| `constants/providers.ts`         | **377 provajdera** sa Zod validacijom (izvor istine)                                                         |
+| `constants/providers.ts`         | **378 provajdera** sa Zod validacijom (izvor istine)                                                         |
 | `constants/cliTools.ts`          | Eksterni registar CLI alata                                                                                  |
 | `constants/routingStrategies.ts` | **20 strategija rutiranja** sa prioritetima                                                                  |
 | `constants/publicApiRoutes.ts`   | Rute koje zahtijevaju nositelj (u odnosu na upravljanje) auth                                                |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Eksterne CLI integracije + Interne OmniRoute CLI                                           |
 | `I18N.md`                   | i18n arhitektura, dodavanje jezika, 67 lokaliteta                                          |
 | `UNINSTALL.md`              | Čisti koraci deinstaliranja                                                                |
-| `PROVIDER_REFERENCE.md`     | **Automatski generirano** katalog 377 provajdera (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatski generirano** katalog 378 provajdera (regen: `npm run gen:provider-reference`) |
 
 ### Dubinski zaroni podsistema
 

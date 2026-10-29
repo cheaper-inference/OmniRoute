@@ -14,7 +14,7 @@ OmniRouteは、ローカルAIルーティング ゲートウェイおよびNext.
 
 コア機能:
 
-- OpenAI 互換のCLI/tools用API surface (377 プロバイダー、156 エクゼキューター モジュール)
+- OpenAI 互換のCLI/tools用API surface (378 プロバイダー、156 エクゼキューター モジュール)
 - プロバイダ形式間のRequest/response変換
 - モデル コンボ フォールバック (マルチモデル シーケンス)
 - `compositeTiers`によるランタイム順序付けを備えた構造化コンボ ステップ (`provider + model + connection`)

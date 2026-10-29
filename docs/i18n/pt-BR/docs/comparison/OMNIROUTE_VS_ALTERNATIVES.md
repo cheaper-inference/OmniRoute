@@ -39,7 +39,7 @@ Comparação objetiva de recursos vs roteadores de IA de código aberto populare
 
 ## Quando escolher OmniRoute
 
-- Você se auto-hospeda e quer** cobertura máxima do provedor** (377 fornecedores, 155 entradas de catálogo free/no-auth )
+- Você se auto-hospeda e quer** cobertura máxima do provedor** (378 fornecedores, 155 entradas de catálogo free/no-auth )
 - Você precisa de um** servidor MCP integrado** (ferramentas LLM, memória, habilidades expostas como ferramentas)
 - Você precisa** protocolo A2A** para fluxos de trabalho entre agentes
 - Você quer** furtividade de impressão digital** (JA3/JA4) para evitar a detecção pelo CAPTCHAs upstream

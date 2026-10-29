@@ -6,7 +6,7 @@
 
 > **自动生成**来自`src/shared/constants/providers.ts` — 不要手动编辑。重新生成： `npm run gen:provider-reference`**最后生成：** 2026-10-28
 
-提供者总数：**第377章**。请参阅下面的类别细分。
+提供者总数：**第378章**。请参阅下面的类别细分。
 
 ## 类别
 
@@ -44,7 +44,7 @@
 | `veoaifree-web`         | `veo-free` | Veo AI Free               | 免认证、视频 | [link](https://veoaifree.com)                           | 无需认证。每个 IP 限流为 6 次请求/小时。                                                                                                                                           | —        |
 | `zcode`                 | `zc`       | ZCode (GLM Coding Plan)   | 免认证       | [link](https://zcode.z.ai)                              | OmniRoute 不存储 API 密钥。本地 ZCode app-server 使用现有的 builtin:zai-coding-plan 登录。                                                                                         | —        |
 
-## OAuth 提供者 (27)
+## OAuth 提供者 (28)
 
 | ID               | 别名          | 名称                      | 标签  | 网站                                                                      | 备注                                                                                                                                                                                                                                                                                                                                                           |
 | ---------------- | ------------- | ------------------------- | ----- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -67,6 +67,7 @@
 | `kilocode`       | `kc`          | Kilo Code                 | OAuth | —                                                                         | 使用你的 Kilo Code 账户登录（设备代码 OAuth），或粘贴来自 app.kilo.ai → 设置 → API Keys 的直接 API 密钥。支持多个 API 密钥并会自动轮换——请将每个密钥添加为单独的连接。在没有任何连接的情况下，可通过 anonymousFallback 使用免费的匿名模型。                                                                                                                    |
 | `kimi-coding`    | `kmc`         | Kimi Code CLI             | OAuth | [链接](https://www.kimi.ai/code?aff=omniroute)                            | 使用与 Kimi Code CLI 相同的 Kimi 账户登录。OmniRoute 使用 CLI OAuth 流程和 Kimi Coding Plan 端点。                                                                                                                                                                                                                                                             |
 | `kiro`           | `kr`          | Kiro AI                   | OAuth | —                                                                         | 免费套餐：每月 50 个额度（约 25K–100K 个令牌）。⚠️ Kiro 服务条款禁止使用第三方代理/工具框架。                                                                                                                                                                                                                                                                  |
+| `megabrain`      | `mb`          | MegaBrain                 | OAuth | [关联](https://getmegabrain.com)                                          | 使用您的 MegaBrain 账户登录（设备代码），或粘贴以 `mb-v1-…` 开头的 MegaBrain API 密钥（将每个密钥作为单独的连接添加以进行轮询）。付费计划涵盖其会话和每周限制内的包含模型（Auto, GLM, Kimi, MiniMax, Grok, DeepSeek, Qwen）；Claude, GPT 和 Gemini 则从账户余额中扣费（需 Pro 计划或开启 Extra Usage）。模型地址请使用 `mb/<model>` 或 `megabrain/<model>`。   |
 | `muse-code`      | `mc`          | Muse Code (Meta)          | OAuth | [链接](https://ai.developer.meta.com/docs/muse-code/auth)                 | 使用 Muse Code 设备流程（与 `muse login` / CLIProxyAPI `-meta-login` 相同）登录以使用 Muse 订阅，或粘贴 META_API_KEY。设备登录会保留长期有效的 dca 令牌并生成推理密钥；遇到 401 时会重新生成该密钥。传输格式为 OpenAI Responses（POST /responses）。                                                                                                           |
 | `openference`    | `of`          | Openference               | OAuth | [链接](https://openference.com)                                           | 使用你的 Openference 账户登录，通过 api.openference.com 路由请求。包括对 Qwen3.8 27b 和 Llama 3.2 3B 的免费套餐访问权限——当前套餐条款请参阅 openference.com/pricing。                                                                                                                                                                                          |
 | `qoder`          | `if`          | Qoder                     | OAuth | —                                                                         | PAT (pt-)：需要本地 qodercli；仅支持纯聊天，不支持调用方工具，采用缓冲式流传输，且聊天限制为 45 秒。HTTP 密钥使用 DashScope；浏览器 OAuth 需要管理员配置。                                                                                                                                                                                                     |

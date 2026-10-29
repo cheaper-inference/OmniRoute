@@ -20,7 +20,7 @@ Keď agent IDE (napr. GitHub Copilot, Cursor, Claude Code) uskutoční volanie A
 
 To znamená, že môžete:
 
-- **Presmerujte akéhokoľvek agenta k akémukoľvek poskytovateľovi** : Copilot hovorí s OpenAI? Presmerujte ho na Anthropic Claude, Gemini alebo ktoréhokoľvek z 377 poskytovateľov OmniRoute.
+- **Presmerujte akéhokoľvek agenta k akémukoľvek poskytovateľovi** : Copilot hovorí s OpenAI? Presmerujte ho na Anthropic Claude, Gemini alebo ktoréhokoľvek z 378 poskytovateľov OmniRoute.
 - **Použiť modelové mapovania** : `gemini-3-flash` → `claude-sonnet-4.7` transparentne na úrovni obsluhy.
 - **Sledujte všetku návštevnosť agentov** : každá zachytená žiadosť je zverejnená [dopravnému inšpektorovi](./TRAFFIC_INSPECTOR.md).
 - **Použiť odolnosť OmniRoute** : kombinované smerovanie, ističe, núdzové riešenia a sledovanie nákladov fungujú aj pre prevádzku agentov IDE.

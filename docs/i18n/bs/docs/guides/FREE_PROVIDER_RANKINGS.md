@@ -12,7 +12,7 @@
 
 ## Šta je to
 
-OmniRoute registruje 377 provajdera, uključujući 155 označenih kataloških zapisa**free/no-auth** (no-auth, free-tier OAuth ili free-tier API ključ — pogledajte [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) i puni [direktorij Free Tiers](../reference/FREE_TIERS.md) ). Kvaka: besplatni provajderi se jako razlikuju po kvaliteti modela. Ne-auth provajder koji opslužuje granični model je daleko korisniji od onog koji opslužuje mali naslijeđeni model.
+OmniRoute registruje 378 provajdera, uključujući 155 označenih kataloških zapisa**free/no-auth** (no-auth, free-tier OAuth ili free-tier API ključ — pogledajte [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) i puni [direktorij Free Tiers](../reference/FREE_TIERS.md) ). Kvaka: besplatni provajderi se jako razlikuju po kvaliteti modela. Ne-auth provajder koji opslužuje granični model je daleko korisniji od onog koji opslužuje mali naslijeđeni model.
 
 **Free Provider Rankings** odgovori "** koji besplatni provajder mi daje najbolji model?** " pridruživanjem katalogu svakog besplatnog provajdera sa** ocjene kvaliteta prikupljene od strane publike** od** Arena AI rang lista** (ljudske preferencije ELO, ista ideja iza LMArena chatbot arene). Ponuđači se zatim rangiraju prema njihovoj snazi** najbolji besplatni model** .
 

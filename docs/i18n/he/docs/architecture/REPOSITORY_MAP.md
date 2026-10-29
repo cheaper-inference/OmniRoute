@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `components/`                    | רכיב לוח המחוונים API: מתאמים מעל `packages/ui-kit` - ראה `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: שמות סמלים המשמשים את המסכים רכיבי → Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **377 ספקים** עם אימות Zod (מקור האמת)                                                         |
+| `constants/providers.ts`         | **378 ספקים** עם אימות Zod (מקור האמת)                                                         |
 | `constants/cliTools.ts`          | רישום כלי CLI חיצוני                                                                           |
 | `constants/routingStrategies.ts` | **20 אסטרטגיות ניתוב** עם סדרי עדיפויות                                                        |
 | `constants/publicApiRoutes.ts`   | מסלולים הדורשים אישור נושאת (לעומת ניהול).                                                     |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | שילובי CLI חיצוניים + פנימי OmniRoute CLI                                      |
 | `I18N.md`                   | ארכיטקטורת i18n, הוספת שפה, 67 מקומות                                          |
 | `UNINSTALL.md`              | נקה את שלבי הסרת ההתקנה                                                        |
-| `PROVIDER_REFERENCE.md`     | **נוצר אוטומטית** קטלוג של 377 ספקים (Regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **נוצר אוטומטית** קטלוג של 378 ספקים (Regen: `npm run gen:provider-reference`) |
 
 ### צלילות עמוקות של תת-מערכת
 

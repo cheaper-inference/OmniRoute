@@ -163,7 +163,7 @@ OmniRoute ṣafihan awọn ọgbọn A2A 6 ti a firanṣẹ ni `src/lib/a2a/task
 | Iroyin Ilera      | `health-report`      | Aggregates Circuit fifọ, cooldown, lockout ipinle fun olupese                                                                     | ilera, resilience      | "Fi ipo ilera han gbogbo awọn olupese"   |
 | Awọn agbara Akojọ | `list-capabilities`  | Pada ni kikun 45-iwọle Agent Skills katalogi (23 API + 21 CLI + 1 atunto) bi tabili isamisi pẹlu SKILL.md URLs aise fun abẹrẹ ọrọ | katalogi, Awari, ogbon | "Akojọ gbogbo awọn agbara OmniRoute "    |
 
-> Kaadi Aṣoju yẹ ki o wa ni ibamu pẹlu katalogi Olupese 377 laaye; Awọn iṣiro olupese ati awọn metadata free/no-auth jẹ orisun lati iforukọsilẹ akoko asiko.
+> Kaadi Aṣoju yẹ ki o wa ni ibamu pẹlu katalogi Olupese 378 laaye; Awọn iṣiro olupese ati awọn metadata free/no-auth jẹ orisun lati iforukọsilẹ akoko asiko.
 
 ### `list-capabilities` Skill Apejuwe
 

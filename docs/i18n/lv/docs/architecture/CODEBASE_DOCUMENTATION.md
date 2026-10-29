@@ -490,7 +490,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder` `vertex`, kā arī `devin-desktop`(koplietotās identitātes palīgs) un `claudeIdentity.ts` ( `index.ts` ).
 
-> Piezīme: pakalpojumu sniedzējus, kas šeit nav norādīti, apkalpo `default.ts`, izmantojot vispārējo ar OpenAI saderīgu izpildītāju. Pilns pakalpojumu sniedzēju katalogs (377 pakalpojumu sniedzēji) atrodas `src/shared/constants/providers.ts`.
+> Piezīme: pakalpojumu sniedzējus, kas šeit nav norādīti, apkalpo `default.ts`, izmantojot vispārējo ar OpenAI saderīgu izpildītāju. Pilns pakalpojumu sniedzēju katalogs (378 pakalpojumu sniedzēji) atrodas `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

@@ -491,7 +491,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (paylaşılan kimlik yardımcısı) ve `index.ts` (kayıt defteri).
 
-> Not: Burada listelenmeyen sağlayıcılar, genel OpenAI uyumlu yürütücü kullanılarak `default.ts` tarafından sunulur. Sağlayıcı kataloğunun tamamı (377 sağlayıcı) `src/shared/constants/providers.ts` bulunmaktadır.
+> Not: Burada listelenmeyen sağlayıcılar, genel OpenAI uyumlu yürütücü kullanılarak `default.ts` tarafından sunulur. Sağlayıcı kataloğunun tamamı (378 sağlayıcı) `src/shared/constants/providers.ts` bulunmaktadır.
 
 ### 4.3 `open-sse/translator/`
 

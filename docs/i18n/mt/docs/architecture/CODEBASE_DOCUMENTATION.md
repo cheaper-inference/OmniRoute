@@ -490,7 +490,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `opencode`, `nlpcloud`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` flimkien ma `claudeIdentity.ts` (helper ta’ identità kondiviża) u `index.ts` (reġistru).
 
-> Nota: fornituri mhux elenkati hawn huma moqdija minn `default.ts` bl-użu tal-eżekutur ġeneriku kompatibbli mal-OpenAI. Il-katalgu sħiħ tal-fornituri (377 fornitur) jgħix fi `src/shared/constants/providers.ts`.
+> Nota: fornituri mhux elenkati hawn huma moqdija minn `default.ts` bl-użu tal-eżekutur ġeneriku kompatibbli mal-OpenAI. Il-katalgu sħiħ tal-fornituri (378 fornitur) jgħix fi `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

@@ -13,7 +13,7 @@
 
 ## Nó là gì
 
-OmniRoute đăng ký 377 nhà cung cấp, bao gồm 155 mục danh mục được đánh dấu**free/no-auth** (khóa không xác thực, OAuth bậc miễn phí hoặc khóa API bậc miễn phí — xem [Hướng dẫn về bậc miễn phí](../getting-started/FREE-TIERS-GUIDE.md) và [thư mục Bậc miễn phí](../reference/FREE_TIERS.md) đầy đủ ). Điều đáng chú ý: các nhà cung cấp miễn phí rất khác nhau về chất lượng mô hình. Một nhà cung cấp không xác thực phục vụ mô hình biên giới sẽ hữu ích hơn nhiều so với một nhà cung cấp mô hình kế thừa nhỏ.
+OmniRoute đăng ký 378 nhà cung cấp, bao gồm 155 mục danh mục được đánh dấu**free/no-auth** (khóa không xác thực, OAuth bậc miễn phí hoặc khóa API bậc miễn phí — xem [Hướng dẫn về bậc miễn phí](../getting-started/FREE-TIERS-GUIDE.md) và [thư mục Bậc miễn phí](../reference/FREE_TIERS.md) đầy đủ ). Điều đáng chú ý: các nhà cung cấp miễn phí rất khác nhau về chất lượng mô hình. Một nhà cung cấp không xác thực phục vụ mô hình biên giới sẽ hữu ích hơn nhiều so với một nhà cung cấp mô hình kế thừa nhỏ.
 
 **Xếp hạng nhà cung cấp miễn phí** câu trả lời"** nhà cung cấp miễn phí nào cung cấp cho tôi mô hình tốt nhất?** " bằng cách tham gia danh mục của mỗi nhà cung cấp miễn phí với** điểm chất lượng có nguồn gốc từ đám đông** từ** Bảng xếp hạng Arena AI** ( ELO sở thích của con người, ý tưởng tương tự đằng sau đấu trường chatbot LMArena). Các nhà cung cấp sau đó được xếp hạng theo sức mạnh của họ** mô hình miễn phí tốt nhất** .
 

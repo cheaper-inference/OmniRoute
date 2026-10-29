@@ -163,7 +163,7 @@ OmniRoute bộc lộ 6 kỹ năng A2A có trong `src/lib/a2a/taskExecution.ts::A
 | Báo cáo sức khỏe      | `health-report`      | Tổng hợp bộ ngắt mạch, thời gian hồi chiêu, trạng thái khóa cho mỗi nhà cung cấp                                                             | sức khỏe, khả năng phục hồi | "Hiển thị tình trạng sức khỏe của tất cả các nhà cung cấp" |
 | Liệt kê khả năng      | `list-capabilities`  | Trả về danh mục Kỹ năng đặc vụ gồm 45 mục đầy đủ (23 API + 21 CLI + 1 config) dưới dạng bảng đánh dấu với SKILL.md URLs thô để chèn ngữ cảnh | danh mục, khám phá, kỹ năng | "Liệt kê tất cả các khả năng OmniRoute "                   |
 
-> Thẻ Đại lý phải được giữ phù hợp với danh mục nhà cung cấp trực tiếp của 377; số lượng nhà cung cấp và siêu dữ liệu free/no-auth có nguồn gốc từ sổ đăng ký thời gian chạy.
+> Thẻ Đại lý phải được giữ phù hợp với danh mục nhà cung cấp trực tiếp của 378; số lượng nhà cung cấp và siêu dữ liệu free/no-auth có nguồn gốc từ sổ đăng ký thời gian chạy.
 
 ### Chi tiết kỹ năng `list-capabilities`
 

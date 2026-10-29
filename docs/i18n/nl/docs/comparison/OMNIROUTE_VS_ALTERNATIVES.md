@@ -39,7 +39,7 @@ Objectieve functievergelijking versus populaire open-source AI-routers.
 
 ## Wanneer moet u voor OmniRoute kiezen?
 
-- Je host zelf en wilt** maximale providerdekking** (377 aanbieders, 155 free/no-auth -catalogusvermeldingen)
+- Je host zelf en wilt** maximale providerdekking** (378 aanbieders, 155 free/no-auth -catalogusvermeldingen)
 - Je hebt een nodig** ingebouwde MCP server** (LLM tools, geheugen, vaardigheden blootgesteld als tools)
 - Je hebt nodig**A2A -protocol** voor agent-tot-agent-workflows
 - Jij wilt** vingerafdruk stealth** (JA3/JA4) om detectie door stroomopwaartse CAPTCHAs te voorkomen

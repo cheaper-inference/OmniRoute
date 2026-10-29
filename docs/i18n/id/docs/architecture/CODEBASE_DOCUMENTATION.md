@@ -491,7 +491,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (pembantu identitas bersama) dan `index.ts` (registrasi).
 
-> Catatan: penyedia yang tidak tercantum di sini dilayani oleh `default.ts` menggunakan pelaksana generik yang kompatibel dengan OpenAI. Katalog penyedia lengkap (377 penyedia) ada di `src/shared/constants/providers.ts`.
+> Catatan: penyedia yang tidak tercantum di sini dilayani oleh `default.ts` menggunakan pelaksana generik yang kompatibel dengan OpenAI. Katalog penyedia lengkap (378 penyedia) ada di `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

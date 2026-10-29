@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Dashboard component API: mga adapter sa ibabaw ng `packages/ui-kit` — tingnan `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: mga pangalan ng icon na ginagamit ng mga screen → Lucide component (`<Icon>`)                          |
-| `constants/providers.ts`         | **377 provider** may Zod validation (pinagmulan ng katotohanan)                                                    |
+| `constants/providers.ts`         | **378 provider** may Zod validation (pinagmulan ng katotohanan)                                                    |
 | `constants/cliTools.ts`          | Panlabas na CLI tool registry                                                                                      |
 | `constants/routingStrategies.ts` | **20 mga diskarte sa pagruruta** may mga priyoridad                                                                |
 | `constants/publicApiRoutes.ts`   | Mga ruta na nangangailangan ng Bearer (vs management) auth                                                         |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Panlabas CLI integrations + Panloob OmniRoute CLI                                         |
 | `I18N.md`                   | i18n architecture, pagdaragdag ng isang wika, 67 locale                                   |
 | `UNINSTALL.md`              | Linisin ang mga hakbang sa pag-uninstall                                                  |
-| `PROVIDER_REFERENCE.md`     | **Awtomatikong nabuo** catalog ng 377 providers (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Awtomatikong nabuo** catalog ng 378 providers (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem deep-dive
 

@@ -490,7 +490,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, अधिक `devin-desktop`(शेअर आयडेंटिटी हेल्पर) आणि `claudeIdentity.ts` ( `index.ts` ).
 
-> टीप: येथे सूचीबद्ध नसलेले प्रदाते जेनेरिक OpenAI- सुसंगत एक्झिक्युटर वापरून `default.ts` द्वारे सर्व्ह केले जातात. संपूर्ण प्रदाता कॅटलॉग (377 प्रदाता) `src/shared/constants/providers.ts` मध्ये राहतात.
+> टीप: येथे सूचीबद्ध नसलेले प्रदाते जेनेरिक OpenAI- सुसंगत एक्झिक्युटर वापरून `default.ts` द्वारे सर्व्ह केले जातात. संपूर्ण प्रदाता कॅटलॉग (378 प्रदाता) `src/shared/constants/providers.ts` मध्ये राहतात.
 
 ### 4.3 `open-sse/translator/`
 
