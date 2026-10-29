@@ -333,3 +333,40 @@ test("transient Codex capacity cannot clear an earlier genuine scoped quota cool
     .codexScopeRateLimitedUntil as Record<string, unknown>;
   assert.equal(scoped.codex, previousUntil, "known quota reset must not be cleared");
 });
+
+test("Codex capacity 429 keeps genuine percent and token exhaustion protected", async () => {
+  const { isTransientCodexCapacity429 } =
+    await import("../../open-sse/services/codexAccount/capacity429.ts");
+  const capacity = "Codex is at capacity, please try again later";
+  const exhaustedHeaders = [
+    { "x-codex-primary-used-percent": "100" },
+    { "x-codex-secondary-used-percent": "100" },
+    { "x-ratelimit-remaining": "-1" },
+    { "x-ratelimit-remaining-requests": "-2" },
+    { "x-ratelimit-remaining-tokens": "0" },
+    { "x-ratelimit-remaining": ["0"] },
+  ];
+  for (const headers of exhaustedHeaders) {
+    assert.equal(
+      isTransientCodexCapacity429(429, capacity, headers),
+      false,
+      JSON.stringify(headers)
+    );
+  }
+  assert.equal(
+    isTransientCodexCapacity429(429, "Codex is at capacity\\nYour quota\\nis exhausted", {}),
+    false
+  );
+  for (const headers of [
+    { "x-codex-primary-used-percent": "99.9" },
+    { "x-codex-secondary-used-percent": "0" },
+    { "x-ratelimit-remaining-tokens": "11" },
+    { "x-ratelimit-remaining-requests": "NaN" },
+  ]) {
+    assert.equal(
+      isTransientCodexCapacity429(429, capacity, headers),
+      true,
+      JSON.stringify(headers)
+    );
+  }
+});

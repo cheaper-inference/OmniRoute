@@ -4,7 +4,7 @@
  */
 const CAPACITY_MESSAGE = /\bcodex is at capacity\b/i;
 const QUOTA_EXHAUSTED_MESSAGE =
-  /\b(?:quota|credits?|balance|usage|billing)\b.{0,50}\b(?:exhausted|depleted|reached|exceeded|insufficient|used up)\b|\b(?:exhausted|insufficient|out of)\b.{0,50}\b(?:quota|credits?|balance)\b/i;
+  /\b(?:quota|credits?|balance|usage|billing)\b.{0,50}\b(?:exhausted|depleted|reached|exceeded|insufficient|used up)\b|\b(?:exhausted|insufficient|out of)\b.{0,50}\b(?:quota|credits?|balance)\b/is;
 
 function headerValue(headers: unknown, name: string): string | null {
   if (!headers || typeof headers !== "object") return null;
@@ -15,7 +15,9 @@ function headerValue(headers: unknown, name: string): string | null {
       return typeof value === "string" ? value : null;
     }
     const entry = Object.entries(headers).find(([key]) => key.toLowerCase() === name);
-    return typeof entry?.[1] === "string" ? entry[1] : null;
+    const value = entry?.[1];
+    if (typeof value === "string") return value;
+    return Array.isArray(value) && typeof value[0] === "string" ? value[0] : null;
   } catch {
     // Untrusted or malformed header objects cannot crash error handling.
     return null;
@@ -33,9 +35,21 @@ function hasExhaustedQuotaEvidence(headers: unknown): boolean {
       return true;
     }
   }
-  for (const name of ["x-ratelimit-remaining", "x-ratelimit-remaining-requests"]) {
+  for (const windowName of ["primary", "secondary"]) {
+    const raw = headerValue(headers, `x-codex-${windowName}-used-percent`);
+    if (!raw?.trim()) continue;
+    const usedPercent = Number(raw);
+    if (Number.isFinite(usedPercent) && usedPercent >= 100) return true;
+  }
+  for (const name of [
+    "x-ratelimit-remaining",
+    "x-ratelimit-remaining-requests",
+    "x-ratelimit-remaining-tokens",
+  ]) {
     const raw = headerValue(headers, name);
-    if (raw?.trim() && Number(raw) === 0) return true;
+    if (!raw?.trim()) continue;
+    const remaining = Number(raw);
+    if (Number.isFinite(remaining) && remaining <= 0) return true;
   }
   return false;
 }
