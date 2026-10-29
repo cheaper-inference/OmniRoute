@@ -442,6 +442,32 @@ test("resolveKimiUsageUrl enforces secure HTTPS and does not carry credentials o
   );
 });
 
+test("resolveKimiUsageUrl normalizes trailing slash and bare /coding, and keeps the .com default (#18180)", () => {
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.ai/coding/v1/" }),
+    "https://api.kimi.ai/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.com/coding" }),
+    "https://api.kimi.com/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.ai:8443/coding/v1" }),
+    "https://api.kimi.ai/coding/v1/usages"
+  );
+  assert.equal(resolveKimiUsageUrl(), "https://api.kimi.com/coding/v1/usages");
+  assert.equal(resolveKimiUsageUrl({}), "https://api.kimi.com/coding/v1/usages");
+  assert.equal(resolveKimiUsageUrl({ baseUrl: "   " }), "https://api.kimi.com/coding/v1/usages");
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "not a url" }),
+    "https://api.kimi.com/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://evil.example.com/coding/v1" }),
+    "https://api.kimi.com/coding/v1/usages"
+  );
+});
+
 test("getKimiUsage sends requests to canonical regional HTTPS /usages even with full request URLs or HTTP override (#18180)", async () => {
   const calls: string[] = [];
   globalThis.fetch = (async (url: unknown) => {
