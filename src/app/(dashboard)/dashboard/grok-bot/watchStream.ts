@@ -111,7 +111,7 @@ export function watchStream(input: {
                 {
                   agentId: input.agentId,
                   sessionId: "",
-                  generation: 0,
+                  generation: input.generation,
                   afterUpdatedSeq: input.after,
                 },
               ],
