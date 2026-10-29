@@ -9017,7 +9017,7 @@
         "usa": "SAD",
         "full": "Potpuni",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (South Africa)"
+        "popia": "POPIA (južna Afrika)"
       },
       "builtinTypes": "Ugrađeni tipovi",
       "types": {
@@ -9032,18 +9032,18 @@
         "ipv6_address": "IPv6 adrese",
         "aws_key": "AWS pristupni ključevi",
         "api_key_generic": "API ključevi i tokeni",
-        "iban": "IBAN bank account numbers",
-        "eu_vat": "EU VAT numbers",
-        "es_dni_nie": "Spanish DNI / NIE",
-        "it_codice_fiscale": "Italian Codice Fiscale",
-        "pl_pesel": "Polish PESEL",
-        "nl_bsn": "Dutch BSN",
-        "de_steuer_id": "German Steuer-ID",
+        "iban": "IBAN brojevi bankovnih računa",
+        "eu_vat": "EU VAT brojevi",
+        "es_dni_nie": "španjolski DNI / NIE",
+        "it_codice_fiscale": "Italijanski kodeks Fiscale",
+        "pl_pesel": "Poljski PESEL",
+        "nl_bsn": "holandski BSN",
+        "de_steuer_id": "njemački Steuer-ID",
         "se_personnummer": "Swedish personnummer",
-        "za_id": "South African ID numbers",
-        "za_phone": "South African phone numbers",
-        "za_vat": "South African VAT numbers",
-        "za_tax_ref": "South African tax references"
+        "za_id": "Južnoafrički ID brojevi",
+        "za_phone": "Južnoafrički brojevi telefona",
+        "za_vat": "Južnoafrički VAT brojevi",
+        "za_tax_ref": "Južnoafričke porezne reference"
       },
       "customPatterns": "Prilagođeni uzorci",
       "customPatternsDesc": "Podudaranja se zamjenjuju sa [CUSTOM_REDACTED]. Najviše {max} uzoraka. Uzorci s rizikom od katastrofalnog vraćanja se odbijaju.",

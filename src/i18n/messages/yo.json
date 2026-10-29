@@ -8940,7 +8940,7 @@
         "usa": "Amẹ́ríkà",
         "full": "Kíkún",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (South Africa)"
+        "popia": "POPIA (Súúsù Áfíríkà)"
       },
       "builtinTypes": "Àwọn irú tí a kọ́ sínú",
       "types": {
@@ -8955,18 +8955,18 @@
         "ipv6_address": "Àwọn àdírẹ́sì IPv6",
         "aws_key": "Àwọn kọ́kọ́rọ́ ìwọlé AWS",
         "api_key_generic": "Àwọn kọ́kọ́rọ́ API àti tókìnì",
-        "iban": "IBAN bank account numbers",
-        "eu_vat": "EU VAT numbers",
-        "es_dni_nie": "Spanish DNI / NIE",
-        "it_codice_fiscale": "Italian Codice Fiscale",
+        "iban": "IBAN ifowo iroyin awọn nọmba",
+        "eu_vat": "EU VAT awọn nọmba",
+        "es_dni_nie": "Spani DNI / NIE",
+        "it_codice_fiscale": "Italian Codece Fiscale",
         "pl_pesel": "Polish PESEL",
         "nl_bsn": "Dutch BSN",
         "de_steuer_id": "German Steuer-ID",
         "se_personnummer": "Swedish personnummer",
-        "za_id": "South African ID numbers",
-        "za_phone": "South African phone numbers",
-        "za_vat": "South African VAT numbers",
-        "za_tax_ref": "South African tax references"
+        "za_id": "South African ID awọn nọmba",
+        "za_phone": "Awọn nọmba foonu South Africa",
+        "za_vat": "South African VAT awọn nọmba",
+        "za_tax_ref": "South African-ori to jo"
       },
       "customPatterns": "Àwọn àpẹẹrẹ àdáni",
       "customPatternsDesc": "A ó fi [CUSTOM_REDACTED] rọ́pò àwọn tí ó bá mu. Títí dé àpẹẹrẹ {max}. A ó kọ àwọn àpẹẹrẹ tí ó ní ewu ìpadàsẹ́yìn burúkú.",

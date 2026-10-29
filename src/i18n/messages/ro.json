@@ -8940,7 +8940,7 @@
         "usa": "SUA",
         "full": "Complet",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (South Africa)"
+        "popia": "POPIA (Africa de Sud)"
       },
       "builtinTypes": "Tipuri încorporate",
       "types": {
@@ -8955,18 +8955,18 @@
         "ipv6_address": "Adrese IPv6",
         "aws_key": "Chei de acces AWS",
         "api_key_generic": "Chei API și tokenuri",
-        "iban": "IBAN bank account numbers",
-        "eu_vat": "EU VAT numbers",
-        "es_dni_nie": "Spanish DNI / NIE",
-        "it_codice_fiscale": "Italian Codice Fiscale",
-        "pl_pesel": "Polish PESEL",
-        "nl_bsn": "Dutch BSN",
+        "iban": "IBAN numere de cont bancar",
+        "eu_vat": "EU VAT numere",
+        "es_dni_nie": "Spaniolă DNI / NIE",
+        "it_codice_fiscale": "Codice Fiscale italian",
+        "pl_pesel": "PESEL polonez",
+        "nl_bsn": "BSN olandez",
         "de_steuer_id": "German Steuer-ID",
-        "se_personnummer": "Swedish personnummer",
-        "za_id": "South African ID numbers",
-        "za_phone": "South African phone numbers",
-        "za_vat": "South African VAT numbers",
-        "za_tax_ref": "South African tax references"
+        "se_personnummer": "personnummer suedez",
+        "za_id": "Numerele ID din Africa de Sud",
+        "za_phone": "numere de telefon din Africa de Sud",
+        "za_vat": "Numerele VAT din Africa de Sud",
+        "za_tax_ref": "Referințe fiscale din Africa de Sud"
       },
       "customPatterns": "Modele personalizate",
       "customPatternsDesc": "Potrivirile sunt înlocuite cu [CUSTOM_REDACTED]. Până la {max} modele. Modelele cu risc de backtracking catastrofal sunt refuzate.",
