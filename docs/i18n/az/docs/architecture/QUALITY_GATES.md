@@ -21,14 +21,12 @@ CI və Quality Gates iş axınlarının hər biri sabit bir hökm yaradır: `Gat
 məcburi və ya tövsiyə xarakterli kimi sadalayır. Tətbiq olunan məcburi iş uğurla
 tamamlanmalıdır: mövcud olmayan, ləğv edilmiş, ötürülmüş, gözləyən və naməlum nəticələr
 PASS statusunu müəyyən edə bilməz. Etibarlı yalnız sənədlər və ya yalnız kataloq
-təsnifatı kod xəttini tətbiqedilməz edə bilər; qaralama PR qəbul edilmiş namizəd deyil.
+təsnifatı kod xəttini tətbiqedilməz edə bilər; adi qaralama PR qəbul edilmiş namizəd deyil.
 `hotfix` etiketi sübut tələbini aradan qaldırmır.
 
 Hər iki iş axını main/release budaqlarına yönələn PR-ləri, `main` budağına push-ları, əl ilə işə
 salmanı və merge-group hadisələrini əhatə edir. Push, dispatch və merge-group tam seçimi işə salır.
-`release/**` budaqlarına push-lar onları başlatmır (2026-10-18): hər dəyişiklik artıq öz PR-ində
-matrisi icra edib və birləşdirilmiş kombinasiyanın yoxlanması Release-Green-in işidir
-(`docs/ops/RUNNER_BOX.md` → Hosted xətti). Fork-lar və merge group-lar, əks halda self-hosted
+Etibarlı Mergify növbə qaralaması da tətbiq olunan `full-code`/`full-code-e2e` işlərini icra edir; adi PR-lər onları ötürür. Əl ilə birləşdirmədən əvvəl məhz həmin namizəd üçün tam dispatch başladın. `release/**` budaqlarına push-lar bu iş axınlarını başlatmır; Release-Green birləşdirilmiş bazanı ayrıca müşahidə edir (`docs/ops/RUNNER_BOX.md` → Hosted xətti). Fork-lar və merge group-lar, əks halda self-hosted
 runner-ləri seçəcək işlər üçün hosted runner-lərdən istifadə edir; tətbiqdən əvvəl kifayət qədər
 hosted tutumun mövcudluğu yoxlanılmalıdır.
 
@@ -86,8 +84,7 @@ qalır. Yalnız metadatadan ibarət ayrıca qəbz hər bir faylın başlanmasın
 yalnız icazə siyahısına daxil edilmiş icra metadatasını qeydə alır; test təsvirləri, çıxış məlumatları, xəta mətnləri və tam
 mühit seriallaşdırılmır.
 
-CI və Quality JSONL fayllarını `unit-progress-ci-<run>-<attempt>-<shard>` və
-`unit-progress-quality-<run>-<attempt>-<shard>` kimi saxlayır. Tapşırığın vaxt limitini aşması sonrakı yükləmənin qarşısını ala bilər;
+CI JSONL fayllarını `unit-progress-ci-<run>-<attempt>-<shard>` adı ilə saxlayır. Tapşırığın vaxt limitini aşması sonrakı yükləmənin qarşısını ala bilər;
 artıq göndərilmiş ürək döyüntüləri diaqnostik sübut olaraq qalır. Ürək döyüntülərinin olmaması həmçinin
 icraçı prosesin bloklandığını və ya dayandırıldığını göstərə bilər. Bu qəbzlər mövcud test seçimini,
 paralelliyi, son müddətləri və çıxış statusunu qoruyur; onlar namizədin qəbuluna dair qərar deyil.
@@ -143,8 +140,6 @@ deaktiv edilmiş təkrarlanan qurma prosesi silinib; faktiki qurma/paketləmə/i
 | `Docs Gates (fast-path)`                         | Sənəd/kod PR-ləri; API sənədlərinin istinadları və bütün sənədlər                                                                                                                                                                             | Bəli                   |
 | `Fast Quality Gates`                             | Kod PR-ləri; statik yoxlamalar, tip yoxlaması, idarəetmə panelinin tip yoxlaması, təsirə məruz qalan modul testləri                                                                                                                           | Bəli                   |
 | `Forgotten sibling tests`                        | Kod PR-ləri; dəyişdirilmiş modullardan statik istehlakçılara və namizəd qonşu testlərə qədər izləmə; barrel və dinamik idxal yolları icazə siyahısındakı istinad edilmiş istisnalarla birlikdə tövsiyə xarakterli diaqnostika kimi bildirilir | **Tövsiyə xarakterli** |
-| `Vitest (fast-path)`                             | Kod PR-ləri; sürətli vitest dəsti                                                                                                                                                                                                             | Bəli                   |
-| `Unit Tests fast-path`                           | Kod PR-ləri; 4 hissəli modul testləri dəsti                                                                                                                                                                                                   | Bəli                   |
 | `No new ESLint warnings`                         | Kod PR-ləri; istisnaları nəzərə alan lint nəzarəti                                                                                                                                                                                            | Bəli, fork-lar daxil   |
 | `Merge integrity (changelog + generated skills)` | Qaralama olmayan PR-lər; dəyişiklik jurnalı və yaradılmış bacarıqların sinxronizasiyası                                                                                                                                                       | Bəli, fork-lar daxil   |
 

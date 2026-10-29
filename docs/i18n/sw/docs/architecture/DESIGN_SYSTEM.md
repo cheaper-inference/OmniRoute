@@ -7,11 +7,7 @@
 > **Hali:** dashibodi imejengwa juu ya **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), iliyojazwa ndani
 > kama workspace ya `packages/ui-kit` (`@omniroute/ui-kit`; picha ya upstream imewekwa imara katika
 > `packages/ui-kit/UPSTREAM.md` na kulindwa na `npm run check:ui-kit-snapshot`). Mandhari ya mwanga ndiyo
-> halisi; mapendeleo chaguomsingi ni `system`. Rangi ya msisitizo ni Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) ndiyo familia ya UI, Instrument Serif kwa maandishi makubwa
-> yasiyojaa ya kuonyesha pekee (`.ci-dashboard-display`), IBM Plex Mono kwa msimbo — zote zimewekwa ndani
-> (self-hosted) kupitia uingizaji wa `@fontsource/*` juu ya `src/app/globals.css`. Kila ikoni ni gelfu ya
-> Lucide.
+> halisi; mapendeleo chaguomsingi ni `system`. Rangi ya msisitizo ni Keak lime (`--ci-color-accent`). Switzer ni familia moja ya UI, onyesho na maandishi ya msimbo (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` suluhisha kwake), inayojiendesha yenyewe na kit yenyewe (`packages/ui-kit/src/ci-fonts.css`, iliyoagizwa na `ci-tokens.css`). Kila ikoni ni glyph ya Lucide.
 
 ## 1. Mahali vitu vilipo
 
@@ -95,7 +91,7 @@
 2. Kamwe usibadilishe `packages/ui-kit/src` mwenyewe: sawazisha kwa kutumia `scripts/dev/sync-ui-kit.sh <commit>`; kizuizi cha kabla ya commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) hushindwa ikiwa baiti yoyote inatofautiana na commit ya upstream iliyobandikwa (hurukwa kwa onyo wakati kloni ya upstream, `UI_KIT_CLONE` au `_references/cheaper-inference-ui-kit`, haipo). Wakati kit haina kitu fulani, tumia suluhisho mbadala kwenye adapta au skrini na ukiombe kutoka upstream.
 3. Chaguomsingi za maandishi ya kit ni Kiingereza (`label = "Loading"`, `loadingLabel = "Loading table"`…) — pitisha mifuatano iliyotafsiriwa kutoka `useTranslations(...)` kila wakati kijenzi cha kit kinapoonyesha maandishi.
 4. Huduma za Tailwind zina kipaumbele dhidi ya class za vijenzi vya kit (kit hutangaza `@layer theme, base, components, utilities` na kanuni zake ziko kwenye `components`) — tumia huduma kwa nafasi na mpangilio, si kubadilisha rangi za vijenzi vya kit.
-5. Vichwa: `.ci-heading` (Inter, bila nafasi ya ziada kati ya herufi) kwa mada za ukurasa na sehemu; `.ci-dashboard-display` (Instrument Serif) kwa maandishi makubwa na machache pekee, kama vile msimbo wa hali wa ukurasa wa hitilafu.
+5. Vichwa: `.ci-heading` kwa vichwa vya kurasa na sehemu; `.ci-dashboard-display` kwa maandishi makubwa na machache tu ya onyesho kama vile msimbo wa hali ya ukurasa wa hitilafu. Wote hutumia Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` hulinda matumizi ya kit: kusiwe na span ya ligature ya Material chini ya `src/app` au `src/shared/components`; katika mti wa dashibodi (`src/app/(dashboard)` na `src/shared/components`) kusiwe na `<select>`, `<textarea>` au `<table>` ghafi, wala `role="dialog"` iliyoundwa mwenyewe nje ya vighairi vilivyoorodheshwa (tawi asilia la adapta ya `Select`, `RequestLoggerDetail`); kila `<button>` au `<input>` ghafi hapo inahitaji maoni yenye `kit-exception:` (pamoja na sababu) yanayoishia si zaidi ya mistari 3 juu yake; rangi za paleti na vibadala vya `dark:` viruhusiwe tu katika faili zilizoorodheshwa na jaribio.
 7. Thibitisha mandhari zote mbili na eneo la kutazama la px 390 kabla ya PR (picha za skrini); `tests/e2e/a11y.spec.ts` huendesha axe.
 
@@ -142,7 +138,7 @@ fungua PR ukiambatanisha changelog ya upstream.
 
 Michoro kumi na miwili iliyopachikwa kwenye `README.md` ya mzizi (`docs/diagrams/*.svg`) hutumia kit katika picha tuli. Inazalishwa, haichorwi kwa mkono: faili 13 za jenereta katika `scripts/docs/gen-readme-*.mjs` (michoro kumi na miwili pamoja na kiendeshi `gen-readme-diagrams.mjs`) na majaribio 12 ya kupitwa na wakati katika `tests/unit/docs/readme-*-svg.test.ts`, moja kwa kila mchoro. Kila jaribio hulinganisha faili iliyowekwa kwenye commit na matokeo ya jenereta yake baiti kwa baiti (kazi `test-unit`).
 
-- **Tokeni.** `scripts/docs/readme-diagram-theme.mjs` hunakili paleti kutoka `packages/ui-kit/src/ci-tokens.css` (ulinganifu na faili hiyo unathibitishwa na `tests/unit/docs/readme-diagram-theme.test.ts`) na kufafanua majukumu ya maandishi kwa fonti za kit: Instrument Serif kwa maandishi ya kuangazia, Inter kwa kiolesura, IBM Plex Mono kwa namba na msimbo. Hizi ni pakiti zilezile za `@fontsource` ambazo `src/app/globals.css` hupakia kwa dashibodi. Thamani angavu ziko kwenye `:root` na nyeusi chini ya `prefers-color-scheme: dark` ndani ya faili; hivyo kila picha hufuata mpangilio wa rangi wa msomaji kwenye GitHub.
+- **Ishara.** `scripts/docs/readme-diagram-theme.mjs` kunakili ubao kutoka `packages/ui-kit/src/ci-tokens.css` (imebandikwa dhidi ya faili hiyo na `tests/unit/docs/readme-diagram-theme.test.ts`) na kufafanua majukumu ya maandishi kwenye nyuso za awali za kifaa - Ala Serif kwa ajili ya kuonyesha, Inter kwa maandishi UI, IBM Plex Mono kwa takwimu na msimbo - kutoka kwa vifurushi vya `@fontsource` (dashibodi yenyewe hutumia Switzer ya kit kuanzia toleo la kit 0.0.66). Thamani nyepesi hukaa kwenye `:root`, thamani nyeusi nyuma ya `prefers-color-scheme: dark`, ndani ya faili, kwa hivyo kila picha ifuate mpango wa mtazamaji kwenye GitHub.
 
 - **Fonti.** `scripts/docs/readme-fonts.mjs` hupunguza faili hizo za woff2 hadi glifu zinazochorwa na kila mchoro na kuzipachika kupitia `@font-face` kama URI za `data:`. Hivyo fonti za kit hubaki ndani ya SVG. Jaribio la ndani la picha ya README hukagua kwamba uonyeshaji hautumi maombi ya fonti za nje. Vikundi vidogo vina herufi za Kilatini pekee; glifu za alama zinazotegemea fonti za mfumo kama mbadala huruhusiwa moja moja katika `SYMBOL_FALLBACKS`. Glifu nyingine yoyote isiyojumuishwa husababisha hitilafu.
 

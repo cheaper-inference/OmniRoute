@@ -7,10 +7,7 @@
 > **স্থিতি:** ড্যাশবোর্ডটি **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)-এর উপর নির্মিত, যা
 > `packages/ui-kit` ওয়ার্কস্পেস হিসেবে ভেন্ডর করা (`@omniroute/ui-kit`; আপস্ট্রিম স্ন্যাপশটটি
 > `packages/ui-kit/UPSTREAM.md`-এ পিন করা এবং `npm run check:ui-kit-snapshot` দ্বারা সুরক্ষিত)। Light হলো ক্যানোনিক্যাল
-> থিম; ডিফল্ট পছন্দ হলো `system`। অ্যাকসেন্ট হলো Keak lime (`--ci-color-accent`)। Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) হলো UI ফন্ট ফ্যামিলি, Instrument Serif শুধুমাত্র বড় বিক্ষিপ্ত
-> ডিসপ্লে টেক্সটের জন্য (`.ci-dashboard-display`), IBM Plex Mono কোডের জন্য — সবই `src/app/globals.css`-এর
-> শুরুতে থাকা `@fontsource/*` ইমপোর্টের মাধ্যমে সেল্ফ-হোস্টেড। প্রতিটি আইকন একটি Lucide গ্লিফ।
+> থিম; ডিফল্ট পছন্দ হলো `system`। অ্যাকসেন্ট হলো Keak lime (`--ci-color-accent`)। সুইজার হল UI, ডিসপ্লে এবং কোড টেক্সটের জন্য একক পরিবার (`--ci-font-ui`; `--ci-font-display` এবং `--ci-font-mono` এর সমাধান), কিট নিজেই দ্বারা স্ব-হোস্ট করা (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` দ্বারা আমদানি করা)। প্রতিটি আইকন একটি লুসাইড গ্লিফ।
 
 ## ১. জিনিসগুলো কোথায় থাকে
 
@@ -100,8 +97,7 @@
 4. Tailwind ইউটিলিটিগুলো কিট কম্পোনেন্টের ক্লাসের ওপর অগ্রাধিকার পায় (কিটটি
    `@layer theme, base, components, utilities` ঘোষণা করে এবং এর নিয়মগুলো `components`-এ থাকে) — স্পেসিং ও
    লেআউটের জন্য ইউটিলিটি ব্যবহার করুন, কিট কম্পোনেন্টের রং পরিবর্তনের জন্য নয়।
-5. শিরোনাম: পেজ ও সেকশন শিরোনামের জন্য `.ci-heading` (Inter, কোনো ট্র্যাকিং নয়); `.ci-dashboard-display`
-   (Instrument Serif) শুধু বড়, বিরল ডিসপ্লে টেক্সটের জন্য, যেমন এরর-পেজের স্ট্যাটাস কোড।
+5. শিরোনাম: পৃষ্ঠা এবং বিভাগের শিরোনামের জন্য `.ci-heading` ; `.ci-dashboard-display` শুধুমাত্র বড়, স্পার্স ডিসপ্লে টেক্সট যেমন ত্রুটি-পৃষ্ঠা স্ট্যাটাস কোডের জন্য। দুজনেই সুইজার ব্যবহার করেন।
 6. `tests/unit/dashboard-kit-sweep.test.ts` কিট গ্রহণের নিয়মগুলো নিশ্চিত করে: `src/app` বা
    `src/shared/components`-এর অধীনে কোনো Material লিগেচার span নয়; ড্যাশবোর্ড ট্রিতে (`src/app/(dashboard)` এবং
    `src/shared/components`) কোনো সরাসরি `<select>`, `<textarea>` বা `<table>` নয় এবং তালিকাভুক্ত
@@ -155,7 +151,7 @@ PR খুলুন।
 
 মূল `README.md`-তে যুক্ত বারোটি চিত্র (`docs/diagrams/*.svg`) স্থির ছবিতে কিটটি প্রয়োগ করে। এগুলো জেনারেট করা হয়, হাতে আঁকা হয় না: `scripts/docs/gen-readme-*.mjs`-তে 13টি জেনারেটর ফাইল (বারোটি চিত্র ও নিয়ন্ত্রক `gen-readme-diagrams.mjs`), এবং `tests/unit/docs/readme-*-svg.test.ts`-তে 12টি পুরোনো হয়ে যাওয়া যাচাইয়ের টেস্ট আছে, প্রতিটি চিত্রের জন্য একটি। প্রতিটি টেস্ট commit করা ফাইলকে তার জেনারেটরের আউটপুটের সঙ্গে বাইট ধরে তুলনা করে (জব `test-unit`)।
 
-- **টোকেন।** `scripts/docs/readme-diagram-theme.mjs` প্যালেটটি `packages/ui-kit/src/ci-tokens.css` থেকে কপি করে (সেই ফাইলের সঙ্গে মিল `tests/unit/docs/readme-diagram-theme.test.ts` নিশ্চিত করে) এবং কিটের ফন্ট দিয়ে লেখার ভূমিকা নির্ধারণ করে: প্রদর্শনমূলক লেখায় Instrument Serif, ইন্টারফেসে Inter, সংখ্যা ও কোডে IBM Plex Mono। এগুলো সেই একই `@fontsource` প্যাকেজ, যা `src/app/globals.css` ড্যাশবোর্ডের জন্য লোড করে। ফাইলের মধ্যে হালকা মান `:root`-এ এবং গাঢ় মান `prefers-color-scheme: dark` শর্তের অধীনে থাকে, তাই প্রতিটি ছবি GitHub পাঠকের রঙের ধরন অনুসরণ করে।
+- **টোকেন।** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` থেকে প্যালেটটি অনুলিপি করে ( `tests/unit/docs/readme-diagram-theme.test.ts` দ্বারা সেই ফাইলের বিরুদ্ধে পিন করা) এবং কিটের আগের মুখগুলিতে পাঠ্য ভূমিকাগুলিকে সংজ্ঞায়িত করে — প্রদর্শনের জন্য ইন্সট্রুমেন্ট Serif, UI পাঠ্যের জন্য ইন্টার, চিত্র এবং কোডের জন্য IBM Plex Mono — `@fontsource` প্যাকেজগুলি থেকে (ড্যাশবোর্ড নিজেই kit 0.0.66 থেকে kit-এর Switzer ব্যবহার করে)। হালকা মান `:root` এ বসে, অন্ধকার মান `prefers-color-scheme: dark` পিছনে, ফাইলের ভিতরে, তাই প্রতিটি ছবি GitHub তে দর্শকের স্কিম অনুসরণ করে।
 
 - **ফন্ট।** `scripts/docs/readme-fonts.mjs` ওই woff2 ফাইলগুলোকে প্রতিটি চিত্রে আঁকা গ্লিফের উপসেটে সীমিত করে এবং `@font-face` দিয়ে `data:` URI হিসেবে যুক্ত করে। এতে কিটের ফন্টগুলো SVG-এর ভেতরেই থাকে। README ছবির স্থানীয় পরীক্ষা যাচাই করে যে রেন্ডারিং কোনো বাইরের ফন্টের অনুরোধ করে না। উপসেটগুলোতে শুধু লাতিন অক্ষর থাকে; সিস্টেম ফন্টে ফিরে যাওয়া প্রতীকের গ্লিফগুলো `SYMBOL_FALLBACKS`-এ একে একে অনুমোদিত হয়। অন্য কোনো অসমর্থিত গ্লিফ ত্রুটি ঘটায়।
 

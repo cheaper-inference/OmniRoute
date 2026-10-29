@@ -24,14 +24,12 @@ Usoro ọrụ CI na Quality Gates na-ewepụta mkpebi kwụsiri ike nke ọ bụ
 dị ka nke achọrọ ma ọ bụ nke ndụmọdụ. Ọrụ achọrọ nke metụtara ọnọdụ ahụ ga-aga nke ọma:
 nsonaazụ na-efu efu, nke akagbuuru, nke awụfere, nke ka na-echere na nke amaghị enweghị
 ike igosi PASS. Nkewa docs-only ma ọ bụ catalog-only ziri ezi nwere ike ime ka code lane
-ghara ịdị mkpa; a naghị anabata draft PR dị ka onye ndoro-ndoro. Label `hotfix` anaghị
+ghara ịdị mkpa; a naghị anabata draft PR nkịtị dị ka onye ndoro-ndoro. Label `hotfix` anaghị
 ewepụ mkpa ihe akaebe.
 
 Usoro ọrụ abụọ ahụ na-ekpuchi PR ndị na-abanye na alaka main/release, push gaa na `main`,
 mmalite aka na merge-group events. Push, dispatch na merge-group na-eme nhọrọ zuru ezu.
-Push ndị na-aga `release/**` anaghị ebido ha (2026-10-18): mgbanwe ọ bụla emelarị matrix
-na PR ya, ebe njikọta nke ihe ndị e merge bụ ọrụ Release-Green
-(`docs/ops/RUNNER_BOX.md` → Hosted lane). Fork na merge group na-eji hosted runners
+Draft a tụkwasịrị obi n'ahịrị Mergify na-arụkwa ọrụ `full-code`/`full-code-e2e` ndị metụtara ya; PR nkịtị na-awụfe ha. Tupu ijikọta ihe na aka, mee dispatch zuru ezu n'elu kpọmkwem onye ndoro-ndoro ahụ. Push gaa na `release/**` anaghị amalite usoro ọrụ ndị a; Release-Green na-enyocha ntọala ejikọtara ọnụ iche (`docs/ops/RUNNER_BOX.md` → Hosted lane). Fork na merge group na-eji hosted runners
 maka ọrụ ndị gaara ahọrọ self-hosted runners; a ga-enyocha na ikike hosted zuru oke
 tupu rollout.
 
@@ -90,8 +88,7 @@ ebe mgbama obi nke sekọnd 30 na-edepụta faịlụ ndị ka na-arụ ọrụ 
 naanị metadata mmezu dị na ndepụta nkwenye; anaghị echekwa nkọwa ule, mmepụta, ọdịnaya njehie na
 gburugburụ gburugburu dị ka data ahaziri ahazi.
 
-CI na Quality na-edobe faịlụ JSONL dịka `unit-progress-ci-<run>-<attempt>-<shard>` na
-`unit-progress-quality-<run>-<attempt>-<shard>`. Oge ngwụcha job nwere ike igbochi mbulite ga-eme emechaa;
+CI na-echekwa faịlụ JSONL n’aha `unit-progress-ci-<run>-<attempt>-<shard>`. Oge ngwụcha job nwere ike igbochi mbulite ga-eme emechaa;
 mgbama obi ndị e zipụlarị ka bụ ihe akaebe maka nchọpụta nsogbu. Enweghị mgbama obi nwekwara ike igosi
 usoro runner egbochiri ma ọ bụ kwụsịrị. Ndekọ nnata ndị a na-echekwa nhọrọ ule,
 concurrency, oge ngwụcha na exit status ndị dị ugbu a; ha abụghị mkpebi nnabata candidate.
@@ -159,8 +156,6 @@ e gbanyụrụ kpamkpam; ezigbo nyocha build/package/boot ka dị na CI.
 | `Docs Gates (fast-path)`                         | PR docs/koodu; ntụaka docs API na docs-all                                                                                                                                                                   | Ee                |
 | `Fast Quality Gates`                             | PR koodu; nyocha static, typecheck, typecheck dashboard, unit tests ndị mgbanwe metụtara                                                                                                                     | Ee                |
 | `Forgotten sibling tests`                        | PR koodu; a na-esochi modules ndị gbanwere ruo na static consumers na candidate sibling tests; a na-akọ ụzọ barrel na dynamic-import dịka diagnostics ndụmọdụ, tinyere exceptions allowlist e zoro aka na ha | **Ndụmọdụ**       |
-| `Vitest (fast-path)`                             | PR koodu; suite vitest ngwa ngwa                                                                                                                                                                             | Ee                |
-| `Unit Tests fast-path`                           | PR koodu; suite unit nwere shard 4                                                                                                                                                                           | Ee                |
 | `No new ESLint warnings`                         | PR koodu; lint guard maara suppressions                                                                                                                                                                      | Ee, gụnyere forks |
 | `Merge integrity (changelog + generated skills)` | PR ndị na-abụghị draft; mmekọrịta changelog na generated skill                                                                                                                                               | Ee, gụnyere forks |
 

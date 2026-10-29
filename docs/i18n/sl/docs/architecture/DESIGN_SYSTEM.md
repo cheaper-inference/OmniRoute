@@ -7,10 +7,7 @@
 > **Stanje:** nadzorna plošča je zgrajena na **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), priložen (vendored)
 > kot delovni prostor `packages/ui-kit` (`@omniroute/ui-kit`; posnetek izvornega toka je pripet v
 > `packages/ui-kit/UPSTREAM.md` in varovan z `npm run check:ui-kit-snapshot`). Svetla je kanonična
-> tema; privzeta nastavitev je `system`. Poudarkovna barva je Keak limeta (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) je pisava uporabniškega vmesnika, Instrument Serif samo
-> za velike, redke prikazne tekste (`.ci-dashboard-display`), IBM Plex Mono za kodo — vse samogostujoče
-> prek uvozov `@fontsource/*` na vrhu datoteke `src/app/globals.css`. Vsaka ikona je glif Lucide.
+> tema; privzeta nastavitev je `system`. Poudarkovna barva je Keak limeta (`--ci-color-accent`). Switzer je ena sama družina za UI, zaslonsko in kodno besedilo (`--ci-font-ui`; `--ci-font-display` in `--ci-font-mono` ga razrešita), ki ga samostojno gosti sam komplet (`packages/ui-kit/src/ci-fonts.css`, uvozil `ci-tokens.css`). Vsaka ikona je glif Lucide.
 
 ## 1. Kje se stvari nahajajo
 
@@ -95,7 +92,7 @@
 2. Nikoli ročno ne spreminjajte `packages/ui-kit/src`: sinhronizirajte ga z `scripts/dev/sync-ui-kit.sh <commit>`; preverjanje pred potrditvijo `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ne uspe pri nobenem bajtu, ki se razlikuje od pripete izvorne potrditve (preverjanje se preskoči z opozorilom, kadar izvorni klon, `UI_KIT_CLONE` ali `_references/cheaper-inference-ui-kit`, ni prisoten). Ko v kompletu nekaj manjka, to zaobidite v adapterju ali na zaslonu in za ustrezno funkcionalnost zaprosite skrbnike izvornega projekta.
 3. Privzeta besedila kompleta so v angleščini (`label = "Loading"`, `loadingLabel = "Loading table"` …) — kadar komponenta kompleta izrisuje besedilo, ji posredujte prevedene nize iz `useTranslations(...)`.
 4. Pripomočki Tailwind imajo prednost pred razredi komponent kompleta (komplet deklarira `@layer theme, base, components, utilities`, njegova pravila pa so v plasti `components`) — pripomočke uporabljajte za razmike in postavitev, ne za spreminjanje barv komponent kompleta.
-5. Naslovi: `.ci-heading` (Inter, brez prilagajanja razmika med črkami) za naslove strani in razdelkov; `.ci-dashboard-display` (Instrument Serif) samo za veliko, redko prikazno besedilo, kot je koda stanja na strani z napako.
+5. Naslovi: `.ci-heading` za naslove strani in razdelkov; `.ci-dashboard-display` samo za veliko, redko prikazano besedilo, kot je statusna koda strani z napako. Oba uporabljata Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` nadzoruje uporabo kompleta: brez razpona z ligaturami Material pod `src/app` ali `src/shared/components`; v drevesu nadzorne plošče (`src/app/(dashboard)` in `src/shared/components`) brez neobdelanih elementov `<select>`, `<textarea>` ali `<table>` ter brez lastnoročno izdelanega `role="dialog"` zunaj navedenih izjem (izvorna veja adapterja `Select`, `RequestLoggerDetail`); vsak neobdelan `<button>` ali `<input>` tam potrebuje komentar, ki vsebuje `kit-exception:` (z razlogom) in se konča največ 3 vrstice nad njim; odtenki palete in različice `dark:` so dovoljeni samo v datotekah, ki jih navaja test.
 7. Pred zahtevkom za združitev preverite obe temi in prikazno polje širine 390 px (s posnetki zaslona); `tests/e2e/a11y.spec.ts` izvaja axe.
 
@@ -144,7 +141,7 @@ ter odprite PR z upstream dnevnikom sprememb.
 
 Dvanajst diagramov, vdelanih v korenski `README.md` (`docs/diagrams/*.svg`), uporablja komplet za statične slike. So ustvarjeni z generatorji, ne ročno narisani: 13 generatorskih datotek v `scripts/docs/gen-readme-*.mjs` (dvanajst diagramov in gonilnik `gen-readme-diagrams.mjs`) ter 12 testov zastarelosti v `tests/unit/docs/readme-*-svg.test.ts`, po eden na diagram. Vsak test bajt za bajtom primerja datoteko v commitu z izhodom generatorja (opravilo `test-unit`).
 
-- **Žetoni.** `scripts/docs/readme-diagram-theme.mjs` kopira paleto iz `packages/ui-kit/src/ci-tokens.css` (ujemanje s to datoteko zagotavlja `tests/unit/docs/readme-diagram-theme.test.ts`) in določa vloge besedila s pisavami kompleta: Instrument Serif za poudarjeno besedilo, Inter za besedilo vmesnika in IBM Plex Mono za števila ter kodo. To so isti paketi `@fontsource`, ki jih `src/app/globals.css` nalaga za nadzorno ploščo. Svetle vrednosti so v `:root`, temne pod pogojem `prefers-color-scheme: dark` v datoteki, zato vsaka slika sledi bralčevi barvni shemi na GitHubu.
+- **Žetoni.** `scripts/docs/readme-diagram-theme.mjs` kopira paleto iz `packages/ui-kit/src/ci-tokens.css` ( `tests/unit/docs/readme-diagram-theme.test.ts` jo je na to datoteko pripel) in definira besedilne vloge na prejšnjih obrazih kompleta — Instrument Serif za zaslon, Inter za besedilo UI, IBM Plex Mono za številke in kodo — iz paketov `@fontsource` (sama nadzorna plošča uporablja Switzer kompleta od kompleta 0.0.66). Svetle vrednosti sedijo na `:root`, temne vrednosti za `prefers-color-scheme: dark`, znotraj datoteke, tako da vsaka slika sledi pregledovalčevi shemi na GitHub.
 
 - **Pisave.** `scripts/docs/readme-fonts.mjs` omeji te datoteke woff2 na glife, ki jih izriše posamezen diagram, in jih vdela prek `@font-face` kot URI-je `data:`. Tako pisave kompleta ostanejo znotraj SVG. Lokalni preizkus slik README preverja, da izris ne pošilja zunanjih zahtev za pisave. Podmnožice so samo latinične; simbolni glifi, ki uporabijo sistemske pisave kot nadomestilo, so posamično dovoljeni v `SYMBOL_FALLBACKS`. Vsak drug nepokrit glif sproži napako.
 

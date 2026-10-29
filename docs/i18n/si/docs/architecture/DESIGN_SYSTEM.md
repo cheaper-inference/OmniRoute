@@ -4,7 +4,7 @@
 
 ---
 
-> **තත්ත්වය:** උපකරණ පුවරුව ගොඩනගා ඇත්තේ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) මත වන අතර, එය workspace එකක් ලෙස `packages/ui-kit` ලෙස vendor කර ඇත (`@omniroute/ui-kit`; upstream snapshot එක `packages/ui-kit/UPSTREAM.md` හි pin කර ඇති අතර `npm run check:ui-kit-snapshot` මඟින් ආරක්ෂා කර ඇත). Light යනු නිල (canonical) theme එකයි; පෙරනිමි preference එක `system` වේ. Accent වර්ණය Keak lime (`--ci-color-accent`) වේ. Inter (letter-spacing 0, `--ci-letter-spacing-ui`) යනු UI font පවුල වන අතර, Instrument Serif භාවිතා වන්නේ විශාල විරල display පෙළ සඳහා පමණි (`.ci-dashboard-display`), කේත සඳහා IBM Plex Mono වේ — සියල්ලම `src/app/globals.css` හි ඉහළින් ඇති `@fontsource/*` imports හරහා self-host කර ඇත. සෑම icon එකක්ම Lucide glyph එකකි.
+> **තත්ත්වය:** උපකරණ පුවරුව ගොඩනගා ඇත්තේ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) මත වන අතර, එය workspace එකක් ලෙස `packages/ui-kit` ලෙස vendor කර ඇත (`@omniroute/ui-kit`; upstream snapshot එක `packages/ui-kit/UPSTREAM.md` හි pin කර ඇති අතර `npm run check:ui-kit-snapshot` මඟින් ආරක්ෂා කර ඇත). Light යනු නිල (canonical) theme එකයි; පෙරනිමි preference එක `system` වේ. Accent වර්ණය Keak lime (`--ci-color-accent`) වේ. Switzer යනු UI, සංදර්ශකය සහ කේත පෙළ (`--ci-font-ui`; `--ci-font-display` සහ `--ci-font-mono` එයට නිරාකරණය කිරීම), කට්ටලය විසින්ම ස්වයං-සත්කාරක (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` විසින් ආනයනය කරන ලද) සඳහා තනි පවුලකි. සෑම නිරූපකයක්ම Lucide glyph වේ.
 
 ## 1. දේවල් තිබෙන තැන
 
@@ -93,8 +93,7 @@
 4. Tailwind utilities, kit component classes අභිබවා ක්රියා කරයි (kit එක
    `@layer theme, base, components, utilities` ප්රකාශ කරන අතර එහි rules `components` තුළ පවතී) — kit components නැවත වර්ණ ගැන්වීමට නොව,
    spacing සහ layout සඳහා utilities භාවිත කරන්න.
-5. ශීර්ෂ: page සහ section titles සඳහා `.ci-heading` (Inter, tracking නොමැතිව); error-page status code වැනි විශාල, විරල display text සඳහා පමණක් `.ci-dashboard-display`
-   (Instrument Serif) භාවිත කරන්න.
+5. ශීර්ෂයන්: පිටු සහ කොටස් මාතෘකා සඳහා `.ci-heading` ; `.ci-dashboard-display` දෝෂ පිටු තත්ව කේතය වැනි විශාල, විරල සංදර්ශක පෙළ සඳහා පමණි. දෙදෙනාම ස්විට්සර් භාවිතා කරයි.
 6. `tests/unit/dashboard-kit-sweep.test.ts` මඟින් kit adoption එක ආරක්ෂා කරයි: `src/app` හෝ `src/shared/components` යටතේ
    Material ligature span නොතිබිය යුතුය; dashboard tree එකේ (`src/app/(dashboard)` සහ
    `src/shared/components`) raw `<select>`, `<textarea>` හෝ `<table>` නොතිබිය යුතු අතර, ලැයිස්තුගත ව්යතිරේකවලින් (`Select` adapter එකේ native branch එක,
@@ -146,7 +145,7 @@ upstream changelog එක සමඟ PR එක විවෘත කරන්න.
 
 මූලික `README.md` තුළ ඇතුළත් රූපසටහන් දොළහ (`docs/diagrams/*.svg`) කට්ටලය ස්ථිතික රූපවලට යොදයි. ඒවා අතින් අඳින්නේ නැතිව ජනනය කෙරේ: `scripts/docs/gen-readme-*.mjs` තුළ ජනක ගොනු 13ක් (රූපසටහන් දොළහ සහ පාලක `gen-readme-diagrams.mjs`), `tests/unit/docs/readme-*-svg.test.ts` තුළ එක් රූපසටහනකට එක බැගින් යල්පැනීම පරීක්ෂා කරන පරීක්ෂණ 12ක් ඇත. සෑම පරීක්ෂණයක්ම commit කළ ගොනුව එහි ජනක ප්‍රතිදානය සමඟ බයිට් අනුව සසඳයි (කාර්යය `test-unit`).
 
-- **ටෝකන.** `scripts/docs/readme-diagram-theme.mjs` වර්ණ පුවරුව `packages/ui-kit/src/ci-tokens.css` වෙතින් පිටපත් කරයි (එම ගොනුවට ගැළපීම `tests/unit/docs/readme-diagram-theme.test.ts` සහතික කරයි), කට්ටලයේ අකුරු මෝස්තරවලින් පෙළ භූමිකා නියම කරයි: ප්‍රමුඛ දර්ශන පෙළට Instrument Serif, අතුරුමුහුණතට Inter, සංඛ්‍යා සහ කේතයට IBM Plex Mono. මේවා `src/app/globals.css` උපකරණ පුවරුව සඳහා පටවන එම `@fontsource` පැකේජමය. ගොනුව තුළ ලා අගයන් `:root` මතත් අඳුරු අගයන් `prefers-color-scheme: dark` කොන්දේසිය යටතේත් ඇත; එබැවින් සෑම රූපයක්ම GitHub පාඨකයාගේ වර්ණ සැලැස්ම අනුගමනය කරයි.
+- **ටෝකන.** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` වෙතින් palette පිටපත් කරයි (එම ගොනුවට එරෙහිව `tests/unit/docs/readme-diagram-theme.test.ts` මගින් පින් කර ඇත) සහ කට්ටලයේ පෙර මුහුණුවල ඇති පෙළ භූමිකාවන් නිර්වචනය කරයි - ප්‍රදර්ශනය සඳහා Instrument Serif, UI පෙළ සඳහා Inter, IBM Plex Mono සඳහා සංඛ්‍යා සහ කේතය - `@fontsource` පැකේජ වලින් (උපකරණ පුවරුව kit අනුවාදය 0.0.66 සිට kit හි Switzer භාවිතා කරයි). ආලෝක අගයන් `:root` මත, අඳුරු අගයන් `prefers-color-scheme: dark` පිටුපස , ගොනුව තුළ පිහිටා ඇත, එබැවින් සෑම රූපයක්ම GitHub හි නරඹන්නන්ගේ යෝජනා ක්‍රමය අනුගමනය කරයි.
 
 - **අකුරු මෝස්තර.** `scripts/docs/readme-fonts.mjs` එම woff2 ගොනු එක් එක් රූපසටහන අඳින ග්ලිෆ්වලට සීමා කර `@font-face` හරහා `data:` URI ලෙස ඇතුළත් කරයි. එමඟින් කට්ටලයේ අකුරු මෝස්තර SVG තුළම පවතී. README රූපයේ දේශීය පරීක්ෂාව නිරූපණයේදී බාහිර අකුරු මෝස්තර ඉල්ලීම් නොකරන බව පරීක්ෂා කරයි. උපකුලකවල ඇත්තේ ලතින් අක්ෂර පමණි; පද්ධති අකුරු මෝස්තර විකල්ප ලෙස භාවිත කරන සංකේත ග්ලිෆ්වලට `SYMBOL_FALLBACKS` තුළ එකින් එක අවසර ලැබේ. වෙනත් ඕනෑම ආවරණය නොවූ ග්ලිෆ් එකක් දෝෂයක් ඇති කරයි.
 

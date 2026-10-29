@@ -7,10 +7,7 @@
 > **Status:** id-dashboard hi mibnija fuq il-**Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
 > bħala l-workspace `packages/ui-kit` (`@omniroute/ui-kit`; is-snapshot tal-upstream huwa ffissat f'
 > `packages/ui-kit/UPSTREAM.md` u mħares minn `npm run check:ui-kit-snapshot`). Light hi t-tema kanonika;
-> il-preferenza default hija `system`. L-aċċent huwa Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) hi l-familja tal-UI, Instrument Serif biss għal test display
-> kbir u spars (`.ci-dashboard-display`), IBM Plex Mono għall-kodiċi — kollha self-hosted permezz tal-
-> imports `@fontsource/*` fil-bidu ta' `src/app/globals.css`. Kull ikona hija glif Lucide.
+> il-preferenza default hija `system`. L-aċċent huwa Keak lime (`--ci-color-accent`). Switzer hija l-familja waħda għal UI, wiri u test tal-kodiċi (`--ci-font-ui`; `--ci-font-display` u `--ci-font-mono` jirrisolvu għaliha), ospitat waħdu mill-kit innifsu (`packages/ui-kit/src/ci-fonts.css`, importat minn `ci-tokens.css`). Kull ikona hija glifa Lucide.
 
 ## 1. Fejn jinsabu l-affarijiet
 
@@ -35,7 +32,7 @@
 2. Qatt timmodifika `packages/ui-kit/src` manwalment: issinkronizza ma’ `scripts/dev/sync-ui-kit.sh <commit>`; il-kontroll ta’ qabel il-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ifalli għal kwalunkwe byte li jkun differenti mill-commit upstream iffissat (jinqabeż bi twissija meta l-klonu upstream, `UI_KIT_CLONE` jew `_references/cheaper-inference-ui-kit`, ikun nieqes). Meta l-kit ma jkollux xi ħaġa, sib soluzzjoni alternattiva fl-adapter jew fl-iskrin u itlobha upstream.
 3. Il-valuri predefiniti tat-test tal-kit huma bl-Ingliż (`label = "Loading"`, `loadingLabel = "Loading table"`…) — għaddi strings tradotti minn `useTranslations(...)` kull meta komponent tal-kit jirrendi test.
 4. L-utilitajiet ta’ Tailwind jieħdu preċedenza fuq il-klassijiet tal-komponenti tal-kit (il-kit jiddikjara `@layer theme, base, components, utilities` u r-regoli tiegħu jinsabu f’`components`) — uża utilitajiet għall-ispazjar u t-tqassim, mhux biex tibdel il-kulur tal-komponenti tal-kit.
-5. Intestaturi: `.ci-heading` (Inter, mingħajr tracking) għat-titli tal-paġni u tas-sezzjonijiet; `.ci-dashboard-display` (Instrument Serif) biss għal test tal-wiri kbir u mhux dens, bħall-kodiċi tal-istatus tal-paġna tal-iżball.
+5. Intestaturi: `.ci-heading` għat-titli tal-paġni u tat-taqsimiet; `.ci-dashboard-display` biss għal test tal-wiri kbir u skars bħall-kodiċi tal-istatus tal-paġna tal-iżball. It-tnejn jużaw Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` jiżgura l-adozzjoni tal-kit: l-ebda span tal-ligaturi ta’ Material taħt `src/app` jew `src/shared/components`; fis-siġra tad-dashboard (`src/app/(dashboard)` u `src/shared/components`) l-ebda `<select>`, `<textarea>` jew `<table>` mhux ipproċessat u l-ebda `role="dialog"` magħmul manwalment barra mill-eċċezzjonijiet elenkati (il-fergħa nattiva tal-adapter `Select`, `RequestLoggerDetail`); kull `<button>` jew `<input>` mhux ipproċessat hemmhekk jeħtieġ kumment li jkun fih `kit-exception:` (bir-raġuni) li jintemm mhux aktar minn 3 linji qablu; tonalitajiet tal-paletta u varjanti `dark:` biss fil-fajls elenkati mit-test.
 7. Ivverifika ż-żewġ temi u l-viewport ta’ 390 px qabel PR (screenshots); `tests/e2e/a11y.spec.ts` iħaddem axe.
 
@@ -84,7 +81,7 @@ iftaħ il-PR bil-changelog upstream.
 
 It-tnax-il dijagramma inkorporati fil-`README.md` tal-għerq (`docs/diagrams/*.svg`) japplikaw il-kit għal stampi statiċi. Huma ġġenerati, mhux imfassla bl-idejn: 13-il fajl ta' ġeneraturi f'`scripts/docs/gen-readme-*.mjs` (tnax-il dijagramma u s-sewwieq `gen-readme-diagrams.mjs`) u 12-il test tal-aġġornament f'`tests/unit/docs/readme-*-svg.test.ts`, wieħed għal kull dijagramma. Kull test iqabbel il-fajl fil-commit mal-output tal-ġeneratur tiegħu byte b'byte (xogħol `test-unit`).
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` jikkopja l-paletta minn `packages/ui-kit/src/ci-tokens.css` (il-konformità ma' dak il-fajl hija żgurata minn `tests/unit/docs/readme-diagram-theme.test.ts`) u jiddefinixxi r-rwoli tat-test bil-fonts tal-kit: Instrument Serif għal test prominenti, Inter għat-test tal-interfaċċa u IBM Plex Mono għan-numri u l-kodiċi. Dawn huma l-istess pakketti `@fontsource` li `src/app/globals.css` jgħabbi għad-dashboard. Il-valuri ċari huma f'`:root` u dawk skuri taħt `prefers-color-scheme: dark` fil-fajl, biex kull stampa ssegwi l-iskema tal-qarrej fuq GitHub.
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` tikkopja l-paletta minn `packages/ui-kit/src/ci-tokens.css` (imqabbad ma dak il-fajl minn `tests/unit/docs/readme-diagram-theme.test.ts`) u jiddefinixxi r-rwoli tat-test fuq l-uċuħ preċedenti tal-kit — Instrument Serif għall-wiri, Inter għat-test UI, IBM Plex Mono għall-figuri u l-kodiċi — mill-pakketti `@fontsource` (id-dashboard innifsu juża s-Switzer tal-kit.660.0.66). Valuri ħfief ipoġġu fuq `:root`, valuri skuri wara `prefers-color-scheme: dark`, ġewwa l-fajl, għalhekk kull immaġni ssegwi l-iskema tat-telespettatur fuq GitHub.
 
 - **Fonts.** `scripts/docs/readme-fonts.mjs` inaqqas dawk il-fajls woff2 għall-glifi li tiġbed kull dijagramma u jinkorporahom permezz ta' `@font-face` bħala URI `data:`. B'hekk il-fonts tal-kit jibqgħu ġewwa l-SVG. Il-prova lokali tal-istampi README tiċċekkja li r-rendering ma jagħmilx talbiet esterni għall-fonts. Is-sottogruppi fihom biss karattri Latini; il-glifi tas-simboli li jirrikorru għall-fonts tas-sistema huma permessi wieħed wieħed f'`SYMBOL_FALLBACKS`. Kull glifu ieħor mhux kopert iqajjem żball.
 

@@ -7,10 +7,7 @@
 > **Holat:** boshqaruv paneli **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) asosida qurilgan bo‘lib,
 > u `packages/ui-kit` workspace’i sifatida kiritilgan (`@omniroute/ui-kit`; yuqori oqim (upstream) snapshot’i
 > `packages/ui-kit/UPSTREAM.md` faylida mahkamlangan va `npm run check:ui-kit-snapshot` bilan himoyalangan). Yorug‘ (Light) mavzu kanonik
-> mavzu hisoblanadi; standart tanlov — `system`. Aktsent rangi — Keak lime (`--ci-color-accent`). Inter
-> (harflar oralig‘i 0, `--ci-letter-spacing-ui`) UI shrift oilasi, Instrument Serif faqat katta, siyrak
-> displey matnlari uchun (`.ci-dashboard-display`), IBM Plex Mono esa kod uchun ishlatiladi — barchasi
-> `src/app/globals.css` fayli boshidagi `@fontsource/*` importlari orqali o‘z serverida joylashtirilgan. Har bir piktogramma Lucide glifidir.
+> mavzu hisoblanadi; standart tanlov — `system`. Aktsent rangi — Keak lime (`--ci-color-accent`). Switzer UI, displey va kod matni (`--ci-font-ui`; `--ci-font-display` va `--ci-font-mono` to'g'ridan-to'g'ri) uchun yagona oila bo'lib, to'plamning o'zi (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tomonidan import qilingan) tomonidan o'z-o'zidan joylashtirilgan. Har bir belgi Lucid glifidir.
 
 ## 1. Narsalar qayerda joylashgani
 
@@ -94,8 +91,7 @@
 4. Tailwind utilitalari kit komponenti klasslaridan ustun turadi (kit
    `@layer theme, base, components, utilities` ni eʼlon qiladi va uning qoidalari `components` ichida joylashgan) — kit komponentlari rangini
    oʻzgartirish uchun emas, oraliqlar va maket uchun utilitalardan foydalaning.
-5. Sarlavhalar: sahifa va boʻlim sarlavhalari uchun `.ci-heading` (Inter, harflar oraligʻisiz); `.ci-dashboard-display`
-   (Instrument Serif) faqat xatolik sahifasidagi holat kodi kabi katta va siyrak joylashtirilgan namoyish matni uchun.
+5. Sarlavhalar: sahifa va bo'lim sarlavhalari uchun `.ci-heading` ; `.ci-dashboard-display` faqat xato sahifasi holati kodi kabi katta, siyrak ekran matni uchun. Ikkalasi ham Switzer shriftidan foydalanadi.
 6. `tests/unit/dashboard-kit-sweep.test.ts` kitning joriy etilishini nazorat qiladi: `src/app` yoki
    `src/shared/components` ostida Material ligatura span elementi boʻlmasligi kerak; dashboard daraxtida (`src/app/(dashboard)` va
    `src/shared/components`) xom `<select>`, `<textarea>` yoki `<table>` hamda sanab oʻtilgan istisnolardan (`Select` adapterining mahalliy tarmogʻi,
@@ -148,7 +144,7 @@ sahifalarini har ikkala mavzuda vizual ko'zdan kechiring, `npm run check:ui-kit-
 
 Ildizdagi `README.md` fayliga joylangan o'n ikkita diagramma (`docs/diagrams/*.svg`) to'plamni statik rasmlarga qo'llaydi. Ular qo'lda chizilmaydi, generatsiya qilinadi: `scripts/docs/gen-readme-*.mjs` ichida 13 ta generator fayli (o'n ikkita diagramma va `gen-readme-diagrams.mjs` boshqaruvchisi), `tests/unit/docs/readme-*-svg.test.ts` ichida esa har diagramma uchun bittadan 12 ta eskirish testi bor. Har bir test commit qilingan faylni generator chiqishi bilan baytma-bayt solishtiradi (`test-unit` vazifasi).
 
-- **Tokenlar.** `scripts/docs/readme-diagram-theme.mjs` palitrani `packages/ui-kit/src/ci-tokens.css` faylidan nusxalaydi (shu faylga moslikni `tests/unit/docs/readme-diagram-theme.test.ts` ta'minlaydi) va to'plam shriftlari bilan matn rollarini belgilaydi: ajratilgan matn uchun Instrument Serif, interfeys uchun Inter, raqamlar va kod uchun IBM Plex Mono. Bular `src/app/globals.css` boshqaruv paneli uchun yuklaydigan ayni `@fontsource` paketlaridir. Ochiq qiymatlar faylda `:root` ichida, to'q qiymatlar `prefers-color-scheme: dark` sharti ostida turadi; har rasm GitHub o'quvchisining rang sxemasiga moslashadi.
+- **Tokenlar.** `scripts/docs/readme-diagram-theme.mjs` palitrani `packages/ui-kit/src/ci-tokens.css` dan nusxa ko‘chiradi ( `tests/unit/docs/readme-diagram-theme.test.ts` tomonidan ushbu faylga mahkamlangan) va to‘plamning oldingi yuzlaridagi matn rollarini belgilaydi — displey uchun Instrument Serif, UI matni uchun Inter, raqamlar va kodlar uchun IBM Plex Mono — `@fontsource` paketlaridan (boshqaruv paneli o‘zi kitning 0.0.66 versiyasidan boshlab kitning Switzer shriftidan foydalanadi). Yorug'lik qiymatlari `:root` ga, qorong'i qiymatlar `prefers-color-scheme: dark` orqasiga, fayl ichida o'tiradi, shuning uchun har bir tasvir GitHub dagi tomoshabin sxemasiga amal qiladi.
 
 - **Shriftlar.** `scripts/docs/readme-fonts.mjs` shu woff2 fayllarini har diagramma chizadigan gliflargacha qisqartiradi va `@font-face` orqali `data:` URI ko'rinishida joylaydi. Shunday qilib, to'plam shriftlari SVG ichida qoladi. Mahalliy README rasm sinovi renderlash tashqi shrift so'rovlarini yubormasligini tekshiradi. Qism to'plamlar faqat lotin belgilarini qamraydi; tizim shriftlariga qaytadigan ramz gliflariga `SYMBOL_FALLBACKS` da bittalab ruxsat beriladi. Qamralmagan boshqa har qanday glif xatoga sabab bo'ladi.
 

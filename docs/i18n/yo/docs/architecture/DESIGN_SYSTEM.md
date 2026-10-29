@@ -8,10 +8,7 @@
 > gẹ́gẹ́ bí workspace `packages/ui-kit` (`@omniroute/ui-kit`; a fi snapshot upstream dúró nínú
 > `packages/ui-kit/UPSTREAM.md`, àti pé `npm run check:ui-kit-snapshot` ló ń dáàbò bo rẹ̀). Ìmọ́lẹ̀ ni
 > àkójọ àkọ́kọ́ (canonical theme); ìfẹ́ràn àtòpìnwáà ni `system`. Àwọ̀ accent ni Keak lime
-> (`--ci-color-accent`). Inter (letter-spacing 0, `--ci-letter-spacing-ui`) ni ẹbí font fún UI, Instrument
-> Serif nìkan fún ọ̀rọ̀ àfihàn ńlá díẹ̀ (`.ci-dashboard-display`), IBM Plex Mono fún kóòdù — gbogbo
-> wọn ni a ṣe self-hosted nípasẹ̀ àwọn ìkópọ̀ `@fontsource/*` ní òkè `src/app/globals.css`. Gbogbo àmì
-> jẹ́ Lucide glyph.
+> (`--ci-color-accent`). Switzer jẹ ẹbi ẹyọkan fun UI, ifihan ati ọrọ koodu (`--ci-font-ui`; `--ci-font-display` ati `--ci-font-mono` pinnu si rẹ), ti gbalejo nipasẹ ohun elo funrararẹ (`packages/ui-kit/src/ci-fonts.css`, gbe wọle nipasẹ `ci-tokens.css`). Gbogbo aami jẹ glyph Lucide kan.
 
 ## 1. Ibi tí àwọn ohun wà
 
@@ -92,7 +89,7 @@
 2. Má ṣe ṣàtúnṣe `packages/ui-kit/src` pẹ̀lú ọwọ́ láéláé: mú un bá a mu pẹ̀lú `scripts/dev/sync-ui-kit.sh <commit>`; ẹnu-ọ̀nà pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) yóò kùnà lórí byte èyíkéyìí tó yàtọ̀ sí upstream commit tí a ti so mọ́lẹ̀ (ó máa fò ó kọjá pẹ̀lú ìkìlọ̀ nígbà tí upstream clone, `UI_KIT_CLONE` tàbí `_references/cheaper-inference-ui-kit`, kò bá sí). Nígbà tí ohun kan kò bá sí nínú kit, ṣe ọ̀nà àbáyọ ní adapter tàbí screen, kí o sì béèrè rẹ̀ lọ́wọ́ upstream.
 3. Àwọn àiyípadà àkọ́kọ́ fún ọ̀rọ̀ inú kit jẹ́ Gẹ̀ẹ́sì (`label = "Loading"`, `loadingLabel = "Loading table"`…) — fi àwọn ọ̀rọ̀ tí a túmọ̀ láti inú `useTranslations(...)` ránṣẹ́ ní gbogbo ìgbà tí component kit bá ń render ọ̀rọ̀.
 4. Àwọn utility Tailwind máa ń borí àwọn class component kit (kit náà ń kéde `@layer theme, base, components, utilities`, àwọn òfin rẹ̀ sì wà nínú `components`) — lo àwọn utility fún spacing àti layout, kì í ṣe láti tún àwọ̀ àwọn component kit ṣe.
-5. Àwọn àkọlé: `.ci-heading` (Inter, láìsí tracking) fún àwọn àkọlé ojú-ewé àti abala; `.ci-dashboard-display` (Instrument Serif) fún ọ̀rọ̀ display ńlá tí kò pọ̀ nìkan, bíi status code ojú-ewé àṣìṣe.
+5. Awọn akọle: `.ci-heading` fun oju-iwe ati awọn akọle apakan; `.ci-dashboard-display` nikan fun titobi nla, ọrọ ifihan fọnka gẹgẹbi koodu ipo oju-iwe aṣiṣe. Mejeeji lo Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` ń ṣọ́ ìlò kit: kò gbọ́dọ̀ sí span ligature Material lábẹ́ `src/app` tàbí `src/shared/components`; nínú igi dashboard (`src/app/(dashboard)` àti `src/shared/components`), kò gbọ́dọ̀ sí `<select>`, `<textarea>` tàbí `<table>` raw, bẹ́ẹ̀ ni kò gbọ́dọ̀ sí `role="dialog"` tí a fi ọwọ́ kọ lẹ́yìn àwọn ìyàsọ́tọ̀ tí a tò sílẹ̀ (ẹ̀ka native ti adapter `Select`, `RequestLoggerDetail`); gbogbo `<button>` tàbí `<input>` raw níbẹ̀ gbọ́dọ̀ ní àlàyé tó ní `kit-exception:` (pẹ̀lú ìdí náà), tí yóò sì parí ní ìlà mẹ́ta tàbí kéré sí i lókè rẹ̀; àwọn hue palette àti àwọn variant `dark:` gbọ́dọ̀ wà nínú àwọn fáìlì tí test náà tò sílẹ̀ nìkan.
 7. Ṣàyẹ̀wò theme méjèèjì àti viewport 390 px ṣáájú PR (pẹ̀lú àwọn screenshot); `tests/e2e/a11y.spec.ts` ń ṣiṣẹ́ axe.
 
@@ -132,7 +129,7 @@
 
 Àwọn àwòrán méjìlá tí a fi sínú `README.md` ní gbòǹgbò (`docs/diagrams/*.svg`) ń lo kit fún àwòrán aláìrìn. A ń dá wọn sílẹ̀, a kì í fi ọwọ́ yà wọn: fáìlì amújáde 13 ní `scripts/docs/gen-readme-*.mjs` (àwòrán méjìlá àti olùdarí `gen-readme-diagrams.mjs`) àti ìdánwò 12 fún ohun tó ti di àtijọ́ ní `tests/unit/docs/readme-*-svg.test.ts`, ọ̀kan fún àwòrán kọ̀ọ̀kan. Ìdánwò kọ̀ọ̀kan ń fi fáìlì inú commit wé àbájáde amújáde rẹ̀ byte kọ̀ọ̀kan (iṣẹ́ `test-unit`).
 
-- **Token.** `scripts/docs/readme-diagram-theme.mjs` ń da àkójọpọ̀ àwọ̀ láti `packages/ui-kit/src/ci-tokens.css` (ìdánwò `tests/unit/docs/readme-diagram-theme.test.ts` ń mú kí ó bá fáìlì yẹn mu) ó sì ń ṣàlàyé ipa ọ̀rọ̀ pẹ̀lú font kit: Instrument Serif fún ọ̀rọ̀ àfihàn, Inter fún ọ̀rọ̀ ojú ìbánisọ̀rọ̀, IBM Plex Mono fún nọ́mbà àti kóòdù. Àwọn ni package `@fontsource` kan náà tí `src/app/globals.css` ń kó wọlé fún dashboard. Iye ìmọ́lẹ̀ wà lórí `:root`, ti òkùnkùn wà lábẹ́ `prefers-color-scheme: dark` nínú fáìlì, kí àwòrán kọ̀ọ̀kan lè tẹ̀lé ètò àwọ̀ olùkà lórí GitHub.
+- **Awọn ami-ami.** `scripts/docs/readme-diagram-theme.mjs` daakọ paleti lati `packages/ui-kit/src/ci-tokens.css` (ti a pin si faili yẹn nipasẹ `tests/unit/docs/readme-diagram-theme.test.ts`) ati asọye awọn ipa ọrọ lori awọn oju kit iṣaaju - Irinṣẹ Serif fun ifihan, Inter fun ọrọ UI, IBM Plex Mono fun awọn isiro ati koodu — lati awọn idii `@fontsource` (dasibodu funrararẹ nlo Switzer kit lati kit 0.0.66). Awọn iye ina joko lori `:root`, awọn iye dudu lẹhin `prefers-color-scheme: dark`, inu faili naa, nitorinaa aworan kọọkan tẹle ero oluwo lori GitHub.
 
 - **Font.** `scripts/docs/readme-fonts.mjs` ń dín àwọn fáìlì woff2 yẹn kù sí glyph tí àwòrán kọ̀ọ̀kan ń yà, ó sì ń fi wọ́n sínú `@font-face` gẹ́gẹ́ bí URI `data:`. Èyí ń pa font kit mọ́ nínú SVG. Ìdánwò àwòrán README lórí ẹ̀rọ ń ṣàyẹ̀wò pé fífi àwòrán hàn kò ṣe ìbéèrè font láti òde. Àwọn àkójọpọ̀ kékeré náà ní lẹ́tà Latin nìkan; glyph àmì tó ń lo font ètò kọ̀ǹpútà gẹ́gẹ́ bí àfidípò ni a ń gba láyè lọ́kọ̀ọ̀kan nínú `SYMBOL_FALLBACKS`. Glyph míràn tí kò sí nínú àkójọpọ̀ ń fa àṣìṣe.
 

@@ -7,10 +7,7 @@
 > **Status:** dashboardet er bygget på **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
 > som workspace-pakken `packages/ui-kit` (`@omniroute/ui-kit`; upstream-snapshotet er fastlåst i
 > `packages/ui-kit/UPSTREAM.md` og beskyttet af `npm run check:ui-kit-snapshot`). Lys er det kanoniske
-> tema; standardindstillingen er `system`. Accentfarven er Keak-lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) er UI-skriftfamilien, Instrument Serif kun til stor,
-> sparsomt anvendt displaytekst (`.ci-dashboard-display`), IBM Plex Mono til kode — alle selv-hostede
-> via `@fontsource/*`-importerne øverst i `src/app/globals.css`. Hvert ikon er en Lucide-glyf.
+> tema; standardindstillingen er `system`. Accentfarven er Keak-lime (`--ci-color-accent`). Switzer er den enkelte familie for UI, display og kodetekst (`--ci-font-ui`; `--ci-font-display` og `--ci-font-mono` løses til det), selv-hostet af selve sættet (`packages/ui-kit/src/ci-fonts.css`, importeret af `ci-tokens.css`). Hvert ikon er en Lucide-glyph.
 
 ## 1. Hvor tingene ligger
 
@@ -101,8 +98,7 @@
 4. Tailwind-hjælpeklasser har forrang over sættets komponentklasser (sættet erklærer
    `@layer theme, base, components, utilities`, og dets regler findes i `components`) — brug hjælpeklasser til
    afstand og layout, ikke til at ændre farven på sættets komponenter.
-5. Overskrifter: `.ci-heading` (Inter, ingen tegnafstand) til side- og sektionsoverskrifter; `.ci-dashboard-display`
-   (Instrument Serif) kun til stor, sparsom displaytekst såsom statuskoden på fejlsiden.
+5. Overskrifter: `.ci-heading` for side- og afsnitstitler; `.ci-dashboard-display` kun for stor, sparsom displaytekst, såsom fejlsidens statuskode. Begge bruger Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` sikrer anvendelsen af sættet: ingen Material-ligaturspan under
    `src/app` eller `src/shared/components`; i dashboard-træet (`src/app/(dashboard)` og
    `src/shared/components`) må der ikke være rå `<select>`, `<textarea>` eller `<table>` og ingen hjemmelavet
@@ -157,7 +153,7 @@ indstillinger, kombinationer, forbrug og endpoint i begge temaer, kør `npm run 
 
 De tolv diagrammer i rodens `README.md` (`docs/diagrams/*.svg`) anvender kittet på statiske billeder. De genereres, ikke tegnes i hånden: 13 generatorfiler under `scripts/docs/gen-readme-*.mjs` (tolv diagrammer plus driveren `gen-readme-diagrams.mjs`) og 12 aktualitetstests under `tests/unit/docs/readme-*-svg.test.ts`, én pr. diagram. Hver test sammenligner den committede fil byte for byte med generatorens output (job `test-unit`).
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopierer paletten fra `packages/ui-kit/src/ci-tokens.css` (overensstemmelsen med filen fastholdes af `tests/unit/docs/readme-diagram-theme.test.ts`) og definerer tekstroller med kittets skrifter: Instrument Serif til fremhævet displaytekst, Inter til brugerfladetekst og IBM Plex Mono til tal og kode. Det er de samme `@fontsource`-pakker, som `src/app/globals.css` indlæser til dashboardet. Lyse værdier ligger på `:root` og mørke under `prefers-color-scheme: dark` i filen, så hvert billede følger læserens farveskema på GitHub.
+- **Poletter.** `scripts/docs/readme-diagram-theme.mjs` kopierer paletten fra `packages/ui-kit/src/ci-tokens.css` (fastgjort til den fil af `tests/unit/docs/readme-diagram-theme.test.ts`) og definerer tekstrollerne på sættets tidligere ansigter - Instrument Serif til visning, Inter for UI tekst, IBM Plex Mono for figurer og kode - fra `@fontsource` pakkerne (selve dashboardet bruger sættets Switzer siden kit 0.0.66). Lyse værdier sidder på `:root`, mørke værdier bag `prefers-color-scheme: dark`, inde i filen, så hvert billede følger seerens skema på GitHub.
 
 - **Skrifter.** `scripts/docs/readme-fonts.mjs` begrænser disse woff2-filer til de glyffer, hvert diagram tegner, og indlejrer dem via `@font-face` som `data:`-URI'er. Dermed forbliver kittets skrifter inde i SVG-filen. Den lokale README-billedtest kontrollerer, at rendering ikke foretager eksterne skriftanmodninger. Delmængderne indeholder kun latinske tegn; symbolglyffer, som falder tilbage til systemskrifterne, tillades enkeltvis i `SYMBOL_FALLBACKS`. Enhver anden udækket glyf udløser en fejl.
 

@@ -24,12 +24,10 @@ Os workflows CI e Quality Gates emitem, cada um, um veredito estável: `Gate / C
 como obrigatório ou consultivo. Um job obrigatório aplicável deve ser bem-sucedido:
 resultados ausentes, cancelados, ignorados, pendentes e desconhecidos não podem estabelecer PASS. Uma
 classificação válida somente de documentação ou somente de catálogo pode tornar uma trilha de código não aplicável;
-um PR em rascunho não é um candidato aceito. Um rótulo `hotfix` não dispensa evidências.
+um PR comum em rascunho não é um candidato aceito. Um rótulo `hotfix` não dispensa evidências.
 
 Ambos os workflows abrangem PRs destinados às branches main/release, pushes para `main`, acionamento
-manual e eventos de grupo de merge. Push, acionamento e grupo de merge executam a seleção completa. Pushes para
-`release/**` não os iniciam (2026-10-18): cada alteração já executou a matriz em seu PR,
-e a combinação mesclada é responsabilidade do Release-Green (`docs/ops/RUNNER_BOX.md` → Trilha hospedada). Forks
+manual e eventos de grupo de merge. Push, acionamento e grupo de merge executam a seleção completa. Um rascunho confiável da fila Mergify também executa os jobs `full-code`/`full-code-e2e` aplicáveis; os PRs comuns os ignoram. Antes de um merge manual, execute um dispatch completo no candidato exato. Pushes para `release/**` não iniciam esses workflows; o Release-Green observa separadamente a base mesclada (`docs/ops/RUNNER_BOX.md` → Trilha hospedada). Forks
 e grupos de merge usam runners hospedados para jobs que, de outra forma, selecionariam runners
 auto-hospedados; é necessário verificar se há capacidade hospedada suficiente antes da implantação.
 
@@ -95,8 +93,7 @@ de cada arquivo, e um sinal de atividade a cada 30 segundos lista os arquivos qu
 ativos e o tempo decorrido. Ele registra apenas metadados de execução incluídos na lista de
 permissões; descrições de testes, saída, conteúdo de erros e o ambiente completo não são serializados.
 
-CI e Quality retêm os arquivos JSONL como `unit-progress-ci-<run>-<attempt>-<shard>` e
-`unit-progress-quality-<run>-<attempt>-<shard>`. Um tempo limite do job pode impedir o upload
+O CI mantém os arquivos JSONL como `unit-progress-ci-<run>-<attempt>-<shard>`. Um tempo limite do job pode impedir o upload
 posterior; os sinais de atividade já emitidos permanecem como evidência para diagnóstico.
 A ausência de sinais de atividade também pode indicar um processo do runner bloqueado ou
 encerrado. Esses recibos preservam a seleção de testes, a simultaneidade, os prazos e o status
@@ -152,8 +149,6 @@ duplicada permanentemente desabilitada foi removida; as verificações reais de 
 | `Docs Gates (fast-path)`                         | PRs de documentação/código; referências da documentação da API e docs-all                                                                                                                                                                           | Sim                  |
 | `Fast Quality Gates`                             | PRs de código; verificações estáticas, verificação de tipos, verificação de tipos do dashboard, testes unitários afetados                                                                                                                           | Sim                  |
 | `Forgotten sibling tests`                        | PRs de código; módulos alterados rastreados até consumidores estáticos e possíveis testes relacionados; caminhos de barrel e de importação dinâmica são relatados como diagnósticos informativos, com exceções referenciadas da lista de permissões | **Informativo**      |
-| `Vitest (fast-path)`                             | PRs de código; suíte rápida do vitest                                                                                                                                                                                                               | Sim                  |
-| `Unit Tests fast-path`                           | PRs de código; suíte unitária com 4 shards                                                                                                                                                                                                          | Sim                  |
 | `No new ESLint warnings`                         | PRs de código; proteção de lint ciente de supressões                                                                                                                                                                                                | Sim, incluindo forks |
 | `Merge integrity (changelog + generated skills)` | PRs que não sejam rascunhos; sincronização do changelog e das skills geradas                                                                                                                                                                        | Sim, incluindo forks |
 

@@ -24,12 +24,10 @@ De workflows CI en Quality Gates geven elk een stabiel oordeel af: `Gate / CI` e
 op als vereist of adviserend. Een toepasselijke vereiste job moet slagen: ontbrekende,
 geannuleerde, overgeslagen, in behandeling zijnde en onbekende resultaten kunnen geen PASS aantonen. Een geldige
 classificatie als uitsluitend documentatie of uitsluitend catalogus kan een codetraject niet-toepasselijk maken;
-een concept-PR is geen geaccepteerde kandidaat. Een `hotfix`-label stelt bewijs niet buiten werking.
+een gewone concept-PR is geen geaccepteerde kandidaat. Een `hotfix`-label stelt bewijs niet buiten werking.
 
 Beide workflows gelden voor PR's naar main-/release-branches, pushes naar `main`, handmatige activering
-en merge-group-events. Pushes, handmatige activering en merge-groups voeren de volledige selectie uit. Pushes naar
-`release/**` starten ze niet (2026-10-18): elke wijziging heeft de matrix al uitgevoerd voor de bijbehorende PR
-en de samengevoegde combinatie valt onder Release-Green (`docs/ops/RUNNER_BOX.md` → Hosted traject). Forks
+en merge-group-events. Pushes, handmatige activering en merge-groups voeren de volledige selectie uit. Een vertrouwd concept in de Mergify-wachtrij voert ook de toepasselijke `full-code`/`full-code-e2e`-jobs uit; gewone PR's slaan die over. Start vóór een handmatige merge een volledige dispatch op de exacte kandidaat. Pushes naar `release/**` starten deze workflows niet; Release-Green observeert de samengevoegde basis afzonderlijk (`docs/ops/RUNNER_BOX.md` → Hosted traject). Forks
 en merge-groups gebruiken gehoste runners voor jobs die anders zelfgehoste
 runners selecteren; vóór de uitrol moet worden gecontroleerd of er voldoende gehoste capaciteit is.
 
@@ -95,8 +93,7 @@ van elk bestand vast, en een heartbeat van 30 seconden vermeldt de bestanden die
 zijn en hun verstreken tijd. Alleen uitvoeringsmetadata op de allowlist wordt geregistreerd;
 testbeschrijvingen, uitvoer, foutdetails en de volledige omgeving worden niet geserialiseerd.
 
-CI en Quality bewaren de JSONL-bestanden als `unit-progress-ci-<run>-<attempt>-<shard>` en
-`unit-progress-quality-<run>-<attempt>-<shard>`. Een time-out van een job kan de latere upload
+CI bewaart de JSONL-bestanden als `unit-progress-ci-<run>-<attempt>-<shard>`. Een time-out van een job kan de latere upload
 verhinderen; reeds verzonden heartbeats blijven bruikbaar als diagnostisch bewijs. Ontbrekende
 heartbeats kunnen ook wijzen op een geblokkeerd of beëindigd runnerproces. Deze registraties
 behouden de bestaande testselectie, gelijktijdigheid, deadlines en afsluitstatus; het zijn
@@ -165,8 +162,6 @@ uitgeschakelde dubbele build is verwijderd; de echte controles voor build, packa
 | `Docs Gates (fast-path)`                         | Documentatie-/code-PR's; verwijzingen in API-documentatie en docs-all                                                                                                                                                                      | Ja                  |
 | `Fast Quality Gates`                             | Code-PR's; statische controles, typecheck, typecheck van dashboard, beïnvloede unittests                                                                                                                                                   | Ja                  |
 | `Forgotten sibling tests`                        | Code-PR's; gewijzigde modules getraceerd naar statische consumers en kandidaat-siblingtests; barrel- en dynamic-import-paden worden gerapporteerd als adviserende diagnostiek, met uitzonderingen uit de allowlist waarnaar wordt verwezen | **Adviserend**      |
-| `Vitest (fast-path)`                             | Code-PR's; snelle vitest-suite                                                                                                                                                                                                             | Ja                  |
-| `Unit Tests fast-path`                           | Code-PR's; unitsuite met 4 shards                                                                                                                                                                                                          | Ja                  |
 | `No new ESLint warnings`                         | Code-PR's; onderdrukkingsbewuste lint-beveiliging                                                                                                                                                                                          | Ja, inclusief forks |
 | `Merge integrity (changelog + generated skills)` | Niet-concept-PR's; synchronisatie van changelog en gegenereerde skills                                                                                                                                                                     | Ja, inclusief forks |
 

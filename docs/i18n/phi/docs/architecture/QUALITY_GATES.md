@@ -24,12 +24,10 @@ Ang mga workflow na CI at Quality Gates ay parehong naglalabas ng matatag na hat
 bilang kinakailangan o advisory. Dapat magtagumpay ang naaangkop na kinakailangang job: hindi
 makapagtatatag ng PASS ang mga resultang nawawala, kinansela, nilaktawan, nakabinbin, at hindi alam. Maaaring
 gawing hindi naaangkop ang isang code lane ng wastong klasipikasyong docs-only o catalog-only;
-hindi tinatanggap na kandidato ang isang draft na PR. Hindi inaalis ng label na `hotfix` ang pangangailangan sa ebidensya.
+hindi tinatanggap na kandidato ang isang karaniwang draft na PR. Hindi inaalis ng label na `hotfix` ang pangangailangan sa ebidensya.
 
 Saklaw ng dalawang workflow ang mga PR patungo sa mga branch na main/release, mga push sa `main`, manual dispatch,
-at mga event ng merge-group. Pinapatakbo ng push, dispatch, at merge-group ang buong seleksyon. Ang mga push sa
-`release/**` ay hindi nagpapasimula sa mga ito (2026-10-18): napatakbo na ng bawat pagbabago ang matrix sa PR nito
-at responsibilidad ng Release-Green ang pinagsamang na-merge na bersyon (`docs/ops/RUNNER_BOX.md` → Hosted lane). Gumagamit
+at mga event ng merge-group. Pinapatakbo ng push, dispatch, at merge-group ang buong seleksyon. Pinapatakbo rin ng pinagkakatiwalaang draft sa pila ng Mergify ang mga naaangkop na job na `full-code`/`full-code-e2e`; nilalaktawan ang mga ito ng mga karaniwang PR. Bago ang manu-manong merge, magpatakbo ng buong dispatch sa eksaktong kandidato. Hindi sinisimulan ng mga push sa `release/**` ang mga workflow na ito; hiwalay na inoobserbahan ng Release-Green ang na-merge na base (`docs/ops/RUNNER_BOX.md` → Hosted lane). Gumagamit
 ang mga fork at merge group ng mga hosted runner para sa mga job na karaniwang pumipili ng mga self-hosted
 runner; dapat tiyaking sapat ang hosted capacity bago ang rollout.
 
@@ -95,8 +93,7 @@ at inililista ng 30-segundong heartbeat ang mga file na aktibo pa rin at ang lum
 ang allowlisted na metadata ng pagpapatupad ang itinatala nito; hindi sine-serialize ang mga paglalarawan ng pagsubok,
 output, nilalaman ng error, at ang buong environment.
 
-Pinapanatili ng CI at Quality ang mga JSONL file bilang `unit-progress-ci-<run>-<attempt>-<shard>` at
-`unit-progress-quality-<run>-<attempt>-<shard>`. Maaaring pigilan ng timeout ng job ang kasunod na pag-upload;
+Pinananatili ng CI ang mga JSONL file sa pangalang `unit-progress-ci-<run>-<attempt>-<shard>`. Maaaring pigilan ng timeout ng job ang kasunod na pag-upload;
 nananatiling ebidensiyang diagnostic ang mga heartbeat na naipadala na. Maaari ding mangahulugan ang mga nawawalang heartbeat
 na na-block o itinigil ang proseso ng runner. Pinapanatili ng mga talang ito ang kasalukuyang pagpili ng pagsubok,
 concurrency, mga deadline, at exit status; hindi ito mga pasya sa pagtanggap ng kandidato.
@@ -164,8 +161,6 @@ ang permanenteng naka-disable na dobleng build; nananatili sa CI ang mga aktuwal
 | `Docs Gates (fast-path)`                         | Mga PR ng docs/code; mga reference sa API docs at docs-all                                                                                                                                                                                             | Oo                        |
 | `Fast Quality Gates`                             | Mga PR ng code; mga static na pagsusuri, typecheck, dashboard typecheck, at mga apektadong unit test                                                                                                                                                   | Oo                        |
 | `Forgotten sibling tests`                        | Mga PR ng code; sinusubaybayan ang mga binagong module hanggang sa mga static consumer at posibleng sibling test; iniuulat ang mga path ng barrel at dynamic-import bilang mga diagnostic na payo, kasama ang mga binanggit na pagbubukod sa allowlist | **Payo lamang**           |
-| `Vitest (fast-path)`                             | Mga PR ng code; mabilis na vitest suite                                                                                                                                                                                                                | Oo                        |
-| `Unit Tests fast-path`                           | Mga PR ng code; 4-shard na unit suite                                                                                                                                                                                                                  | Oo                        |
 | `No new ESLint warnings`                         | Mga PR ng code; suppression-aware na lint guard                                                                                                                                                                                                        | Oo, kabilang ang mga fork |
 | `Merge integrity (changelog + generated skills)` | Mga PR na hindi draft; pag-sync ng changelog at mga nabuong skill                                                                                                                                                                                      | Oo, kabilang ang mga fork |
 

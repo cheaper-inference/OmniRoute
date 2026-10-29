@@ -24,12 +24,10 @@ Workflow CI dan Quality masing-masing menghasilkan keputusan yang stabil: `Gate 
 sebagai wajib atau bersifat advisori. Job wajib yang berlaku harus berhasil: hasil yang
 hilang, dibatalkan, dilewati, tertunda, dan tidak diketahui tidak dapat menetapkan PASS. Klasifikasi
 khusus dokumentasi atau khusus katalog yang valid dapat membuat lane kode tidak berlaku;
-PR draf bukan kandidat yang diterima. Label `hotfix` tidak menggugurkan persyaratan bukti.
+PR draf biasa bukan kandidat yang diterima. Label `hotfix` tidak menggugurkan persyaratan bukti.
 
 Kedua workflow mencakup PR ke branch main/release, push ke `main`, dispatch manual,
-dan peristiwa merge-group. Push, dispatch, dan merge-group menjalankan seleksi lengkap. Push ke
-`release/**` tidak memulainya (2026-10-18): setiap perubahan sudah menjalankan matriks pada PR-nya
-dan kombinasi hasil merge merupakan tugas Release-Green (`docs/ops/RUNNER_BOX.md` → Lane yang di-hosting). Fork
+dan peristiwa merge-group. Push, dispatch, dan merge-group menjalankan seleksi lengkap. Draf antrean Mergify yang tepercaya juga menjalankan job `full-code`/`full-code-e2e` yang berlaku; PR biasa melewatinya. Sebelum merge manual, jalankan dispatch lengkap pada kandidat yang persis akan digabungkan. Push ke `release/**` tidak memulai workflow ini; Release-Green mengamati basis hasil merge secara terpisah (`docs/ops/RUNNER_BOX.md` → Lane yang di-hosting). Fork
 dan merge group menggunakan runner yang di-hosting untuk job yang seharusnya memilih runner
 yang di-hosting sendiri; kapasitas hosting yang memadai harus diverifikasi sebelum peluncuran.
 
@@ -95,8 +93,7 @@ dan heartbeat setiap 30 detik mencantumkan file yang masih aktif beserta waktu b
 hanya mencatat metadata eksekusi yang ada dalam daftar izin; deskripsi pengujian, output, isi kesalahan, dan keseluruhan
 environment tidak diserialisasi.
 
-CI dan Quality menyimpan file JSONL sebagai `unit-progress-ci-<run>-<attempt>-<shard>` dan
-`unit-progress-quality-<run>-<attempt>-<shard>`. Timeout job dapat mencegah upload berikutnya;
+CI menyimpan file JSONL sebagai `unit-progress-ci-<run>-<attempt>-<shard>`. Timeout job dapat mencegah upload berikutnya;
 heartbeat yang telah dikirim tetap menjadi bukti diagnostik. Tidak adanya heartbeat juga dapat menunjukkan
 proses runner yang terblokir atau dihentikan. Tanda terima ini mempertahankan pemilihan pengujian,
 konkurensi, tenggat waktu, dan status keluar yang ada; tanda terima ini bukan keputusan penerimaan kandidat.
@@ -166,8 +163,6 @@ yang dinonaktifkan secara permanen telah dihapus; pemeriksaan build/package/boot
 | `Docs Gates (fast-path)`                         | PR dokumentasi/kode; referensi dokumentasi API dan docs-all                                                                                                                                                  | Ya                |
 | `Fast Quality Gates`                             | PR kode; pemeriksaan statis, typecheck, typecheck dashboard, unit test yang terdampak                                                                                                                        | Ya                |
 | `Forgotten sibling tests`                        | PR kode; modul yang diubah ditelusuri ke konsumen statis dan kandidat sibling test; path barrel dan dynamic-import dilaporkan sebagai diagnostik advisori, dengan pengecualian allowlist yang direferensikan | **Advisori**      |
-| `Vitest (fast-path)`                             | PR kode; suite vitest cepat                                                                                                                                                                                  | Ya                |
-| `Unit Tests fast-path`                           | PR kode; suite unit 4-shard                                                                                                                                                                                  | Ya                |
 | `No new ESLint warnings`                         | PR kode; guard lint yang mempertimbangkan suppression                                                                                                                                                        | Ya, termasuk fork |
 | `Merge integrity (changelog + generated skills)` | PR non-draf; sinkronisasi changelog dan skill yang dihasilkan                                                                                                                                                | Ya, termasuk fork |
 

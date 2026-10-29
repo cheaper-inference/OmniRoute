@@ -24,14 +24,12 @@ Die Workflows für CI und Quality Gates geben jeweils ein stabiles Urteil aus: `
 als erforderlich oder beratend auf. Ein zutreffender erforderlicher Job muss erfolgreich sein:
 Fehlende, abgebrochene, übersprungene, ausstehende und unbekannte Ergebnisse können keinen PASS
 begründen. Eine gültige Klassifizierung als ausschließlich dokumentations- oder katalogbezogene
-Änderung kann einen Code-Ausführungspfad unzutreffend machen; ein PR-Entwurf wird nicht als Kandidat
+Änderung kann einen Code-Ausführungspfad unzutreffend machen; ein gewöhnlicher PR-Entwurf wird nicht als Kandidat
 akzeptiert. Ein `hotfix`-Label hebt die Nachweispflicht nicht auf.
 
 Beide Workflows decken PRs in Main-/Release-Branches, Pushes auf `main`, manuelle Ausführungen
 und Merge-Group-Ereignisse ab. Bei Pushes, manuellen Ausführungen und Merge Groups wird die
-vollständige Auswahl ausgeführt. Pushes auf `release/**` starten sie nicht (2026-10-18): Jede
-Änderung hat die Matrix bereits in ihrem PR durchlaufen, und die zusammengeführte Kombination
-ist Aufgabe von Release-Green (`docs/ops/RUNNER_BOX.md` → gehosteter Ausführungspfad). Forks
+vollständige Auswahl ausgeführt. Ein vertrauenswürdiger Entwurf in der Mergify-Warteschlange führt ebenfalls die zutreffenden `full-code`/`full-code-e2e`-Jobs aus; gewöhnliche PRs überspringen sie. Starten Sie vor einem manuellen Merge einen vollständigen Dispatch für genau den Kandidaten. Pushes auf `release/**` starten diese Workflows nicht; Release-Green beobachtet die zusammengeführte Basis separat (`docs/ops/RUNNER_BOX.md` → gehosteter Ausführungspfad). Forks
 und Merge Groups verwenden für Jobs, die andernfalls selbst gehostete Runner auswählen,
 gehostete Runner; vor dem Rollout muss eine ausreichende gehostete Kapazität überprüft werden.
 
@@ -94,8 +92,7 @@ und ein 30-Sekunden-Heartbeat listet die noch aktiven Dateien und ihre verstrich
 nur Ausführungsmetadaten aus einer Positivliste; Testbeschreibungen, Ausgaben, Fehlerdetails und die vollständige
 Umgebung werden nicht serialisiert.
 
-CI und Quality bewahren die JSONL-Dateien als `unit-progress-ci-<run>-<attempt>-<shard>` und
-`unit-progress-quality-<run>-<attempt>-<shard>` auf. Ein Job-Timeout kann den späteren Upload verhindern;
+CI bewahrt die JSONL-Dateien als `unit-progress-ci-<run>-<attempt>-<shard>` auf. Ein Job-Timeout kann den späteren Upload verhindern;
 bereits ausgegebene Heartbeats bleiben als Diagnoseinformationen erhalten. Fehlende Heartbeats können auch auf
 einen blockierten oder beendeten Runner-Prozess hindeuten. Diese Belege behalten die bestehende Testauswahl,
 Parallelität, Fristen und den Exit-Status bei; sie stellen keine Entscheidungen über die Zulassung von Kandidaten dar.
@@ -168,8 +165,6 @@ deaktivierte doppelte Build wurde entfernt; die eigentlichen Build-/Paketierungs
 | `Docs Gates (fast-path)`                         | Dokumentations-/Code-PRs; API-Dokumentationsreferenzen und docs-all                                                                                                                                                                        | Ja                       |
 | `Fast Quality Gates`                             | Code-PRs; statische Prüfungen, Typprüfung, Dashboard-Typprüfung, betroffene Unit-Tests                                                                                                                                                     | Ja                       |
 | `Forgotten sibling tests`                        | Code-PRs; geänderte Module werden zu statischen Konsumenten und möglichen verwandten Tests zurückverfolgt; Barrel- und Dynamic-Import-Pfade werden als informative Diagnose gemeldet, mit referenzierten Ausnahmen aus der Zulassungsliste | **Informativ**           |
-| `Vitest (fast-path)`                             | Code-PRs; schnelle Vitest-Suite                                                                                                                                                                                                            | Ja                       |
-| `Unit Tests fast-path`                           | Code-PRs; Unit-Test-Suite mit 4 Shards                                                                                                                                                                                                     | Ja                       |
 | `No new ESLint warnings`                         | Code-PRs; unterdrückungsbewusste Lint-Schutzprüfung                                                                                                                                                                                        | Ja, einschließlich Forks |
 | `Merge integrity (changelog + generated skills)` | PRs, die keine Entwürfe sind; Synchronisierung von Changelog und generierten Skills                                                                                                                                                        | Ja, einschließlich Forks |
 

@@ -171,7 +171,7 @@ for (const profile of ["ci", "quality"]) {
     }
   });
 
-  test(`${profile}: ready and trusted queue candidates retain every required lane`, () => {
+  test(`${profile}: ready and trusted queue candidates retain every applicable required lane`, () => {
     assert.ok(workflow.on.pull_request.types.includes("ready_for_review"));
     assert.ok(workflow.on.pull_request.types.includes("edited"));
     const retarget = {
@@ -185,8 +185,15 @@ for (const profile of ["ci", "quality"]) {
         { "github.event.action": "edited", "github.event.changes.base": retarget },
       ]) {
         const values = valuesFor({ ...context, ...patch });
-        for (const [id] of required)
-          assert.equal(scheduled(workflow, id, values), true, `${id}: ${JSON.stringify(patch)}`);
+        for (const [id, rule] of required) {
+          const fullLane = rule.when.startsWith("full-");
+          const applicable = !fullLane || values["needs.changes.outputs.queueCandidate"] === "true";
+          assert.equal(
+            scheduled(workflow, id, values),
+            applicable,
+            `${id}: ${JSON.stringify(patch)}`
+          );
+        }
         assert.equal(expression(admission.if, values), true);
         assert.equal(render(admission.name, values), checkName);
         assert.equal(

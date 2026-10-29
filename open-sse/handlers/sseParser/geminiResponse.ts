@@ -3,6 +3,7 @@
 // state, following the handlers submodule pattern (chatCore/, responseSanitizer/).
 import { normalizeOpenAICompatibleFinishReasonString } from "../../utils/finishReason.ts";
 import { stripObfuscationZeroWidth } from "../../utils/zeroWidth.ts";
+import { TRUNCATED_STREAM_FINISH_REASON, hasSseDoneMarker } from "./truncation.ts";
 
 type AccumulatedToolCall = {
   id: string;
@@ -15,6 +16,7 @@ type AccumulatedToolCall = {
 type GeminiSSEAccumulator = {
   textContent: string;
   finishReason: string;
+  sawFinishReason: boolean;
   usage: Record<string, unknown> | null;
   sawContent: boolean;
   toolCalls: AccumulatedToolCall[];
@@ -120,6 +122,7 @@ function applyFinishReason(
   acc: GeminiSSEAccumulator
 ): void {
   if (!candidate?.finishReason) return;
+  acc.sawFinishReason = true;
   acc.finishReason = normalizeOpenAICompatibleFinishReasonString(
     String(candidate.finishReason).toLowerCase()
   );
@@ -284,6 +287,7 @@ export function parseSSEToGeminiResponse(
   const acc: GeminiSSEAccumulator = {
     textContent: "",
     finishReason: "stop",
+    sawFinishReason: false,
     usage: null,
     sawContent: false,
     toolCalls: [],
@@ -299,6 +303,11 @@ export function parseSSEToGeminiResponse(
   }
 
   if (!acc.sawContent && acc.toolCalls.length === 0) return null;
+
+  // #18432 — content but no candidate finishReason (nor [DONE]): the stream was cut.
+  if (!acc.sawFinishReason && acc.sawContent && !hasSseDoneMarker(rawSSE)) {
+    acc.finishReason = TRUNCATED_STREAM_FINISH_REASON;
+  }
 
   return buildChatCompletionFromAccumulator(acc, fallbackModel);
 }

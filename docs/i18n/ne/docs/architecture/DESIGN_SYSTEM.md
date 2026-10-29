@@ -7,10 +7,7 @@
 > **स्थिति:** ड्यासबोर्ड **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) मा निर्माण गरिएको छ, र यसलाई
 > workspace `packages/ui-kit` (`@omniroute/ui-kit`) को रूपमा vendor गरिएको छ; upstream snapshot
 > `packages/ui-kit/UPSTREAM.md` मा pin गरिएको छ र `npm run check:ui-kit-snapshot` द्वारा जाँच गरिन्छ। Light
-> नै canonical theme हो; default प्राथमिकता भनेको `system` हो। Accent रङ Keak lime (`--ci-color-accent`) हो। Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) UI font परिवार हो, Instrument Serif केवल ठूला विरल display
-> पाठ (`.ci-dashboard-display`) का लागि प्रयोग हुन्छ, IBM Plex Mono कोडका लागि — सबै `src/app/globals.css`
-> को सुरुमा रहेका `@fontsource/*` imports मार्फत self-hosted छन्। हरेक icon Lucide glyph हो।
+> नै canonical theme हो; default प्राथमिकता भनेको `system` हो। Accent रङ Keak lime (`--ci-color-accent`) हो। स्विट्जर UI, डिस्प्ले र कोड टेक्स्ट (`--ci-font-ui`; `--ci-font-display` र `--ci-font-mono` रिजोल्युसन) को लागि एकल परिवार हो, किट आफैंद्वारा स्व-होस्ट गरिएको (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` द्वारा आयात गरिएको)। प्रत्येक प्रतिमा लुसाइड ग्लाइफ हो।
 
 ## १. चीजहरू कहाँ रहेका छन्
 
@@ -41,8 +38,7 @@
 4. Tailwind युटिलिटीहरूले किट कम्पोनेन्टका क्लासहरूलाई प्राथमिकतामा उछिन्छन् (किटले
    `@layer theme, base, components, utilities` घोषणा गर्छ र यसका नियमहरू `components` मा रहन्छन्) — स्पेसिङ र लेआउटका लागि युटिलिटीहरू
    प्रयोग गर्नुहोस्, किट कम्पोनेन्टहरूलाई पुनः रङ दिनका लागि होइन।
-5. हेडिङहरू: पृष्ठ र खण्डका शीर्षकहरूका लागि `.ci-heading` (Inter, ट्र्याकिङविना); `.ci-dashboard-display`
-   (Instrument Serif) केवल त्रुटि-पृष्ठको स्थिति कोडजस्ता ठूला र विरल डिस्प्ले पाठका लागि।
+5. शीर्षकहरू: पृष्ठ र खण्ड शीर्षकहरूको लागि `.ci-heading` ; `.ci-dashboard-display` मात्र ठूलो, विरल प्रदर्शन पाठ जस्तै त्रुटि-पृष्ठ स्थिति कोडको लागि। दुबै स्विट्जर प्रयोग गर्छन्।
 6. `tests/unit/dashboard-kit-sweep.test.ts` ले किट प्रयोगको निगरानी गर्छ: `src/app` वा
    `src/shared/components` अन्तर्गत Material लिगेचर स्प्यान हुनु हुँदैन; ड्यासबोर्ड ट्री (`src/app/(dashboard)` र
    `src/shared/components`) मा कच्चा `<select>`, `<textarea>` वा `<table>` हुनु हुँदैन र सूचीबद्ध
@@ -77,7 +73,7 @@
 
 मूल `README.md` मा राखिएका बाह्र रेखाचित्रहरू (`docs/diagrams/*.svg`) ले किटलाई स्थिर चित्रमा लागू गर्छन्। तिनलाई हातले कोरिँदैन, जनरेट गरिन्छ: `scripts/docs/gen-readme-*.mjs` मा 13 जनरेटर फाइलहरू (बाह्र रेखाचित्र र सञ्चालक `gen-readme-diagrams.mjs`), अनि `tests/unit/docs/readme-*-svg.test.ts` मा प्रत्येक रेखाचित्रका लागि एउटा गरी 12 पुरानो भएको जाँच्ने परीक्षणहरू छन्। हरेक परीक्षणले commit गरिएको फाइललाई त्यसको जनरेटरको आउटपुटसँग बाइट-बाइट तुलना गर्छ (कार्य `test-unit`)।
 
-- **टोकनहरू।** `scripts/docs/readme-diagram-theme.mjs` ले रङ-प्यालेट `packages/ui-kit/src/ci-tokens.css` बाट प्रतिलिपि गर्छ (त्यो फाइलसँगको मेल `tests/unit/docs/readme-diagram-theme.test.ts` ले सुनिश्चित गर्छ) र किटका फन्टबाट पाठका भूमिका निर्धारण गर्छ: प्रमुख प्रदर्शन पाठका लागि Instrument Serif, इन्टरफेसका लागि Inter, सङ्ख्या र कोडका लागि IBM Plex Mono। यी `src/app/globals.css` ले ड्यासबोर्डका लागि लोड गर्ने उही `@fontsource` प्याकेजहरू हुन्। फाइलभित्र उज्याला मान `:root` मा र गाढा मान `prefers-color-scheme: dark` सर्तअन्तर्गत छन्, त्यसैले हरेक चित्रले GitHub मा पाठकको रङ-योजना पछ्याउँछ।
+- **टोकनहरू।** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` बाट प्यालेट प्रतिलिपि गर्दछ ( `tests/unit/docs/readme-diagram-theme.test.ts` द्वारा त्यो फाइल विरुद्ध पिन गरिएको) र किटको अघिल्लो अनुहारहरूमा पाठ भूमिकाहरू परिभाषित गर्दछ — प्रदर्शनको लागि उपकरण सेरिफ, UI पाठको लागि Inter, अंक र कोडको लागि IBM Plex Mono — `@fontsource` प्याकेजहरूबाट (ड्यासबोर्ड आफैले kit 0.0.66 देखि kit को Switzer प्रयोग गर्दछ)। हल्का मानहरू `:root` मा बस्छन्, गाढा मानहरू `prefers-color-scheme: dark` पछाडि, फाइल भित्र, त्यसैले प्रत्येक छविले GitHub मा दर्शकको योजनालाई पछ्याउँछ।
 
 - **फन्टहरू।** `scripts/docs/readme-fonts.mjs` ले ती woff2 फाइलहरूलाई प्रत्येक रेखाचित्रले कोर्ने ग्लिफमा सीमित गर्छ र `@font-face` मार्फत `data:` URI का रूपमा समावेश गर्छ। यसले किटका फन्टहरू SVG भित्रै राख्छ। README चित्रको स्थानीय परीक्षणले रेन्डर गर्दा बाहिरी फन्ट अनुरोध नहुने जाँच गर्छ। उपसमूहहरूमा ल्याटिन अक्षर मात्र हुन्छन्; प्रणालीका फन्टमा फर्किने प्रतीक-ग्लिफहरू `SYMBOL_FALLBACKS` मा एक-एक गरी अनुमति दिइन्छन्। अरू कुनै नसमेटिएको ग्लिफले त्रुटि उत्पन्न गर्छ।
 

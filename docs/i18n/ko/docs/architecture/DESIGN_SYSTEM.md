@@ -7,10 +7,7 @@
 > **상태:** 대시보드는 **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)을 기반으로 구축되었으며,
 > 워크스페이스 `packages/ui-kit` (`@omniroute/ui-kit`)로 벤더링되어 있습니다 (업스트림 스냅샷은
 > `packages/ui-kit/UPSTREAM.md`에 고정되어 있으며 `npm run check:ui-kit-snapshot`으로 검증됩니다). Light가 표준
-> 테마이며, 기본 설정은 `system`입니다. 강조색은 Keak lime (`--ci-color-accent`)입니다. Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`)가 UI 패밀리이고, Instrument Serif는 크고 드물게 사용되는
-> 디스플레이 텍스트 (`.ci-dashboard-display`)에만 사용되며, IBM Plex Mono는 코드용입니다 — 모두
-> `src/app/globals.css` 상단의 `@fontsource/*` 임포트를 통해 셀프 호스팅됩니다. 모든 아이콘은 Lucide 글리프입니다.
+> 테마이며, 기본 설정은 `system`입니다. 강조색은 Keak lime (`--ci-color-accent`)입니다. Switzer는 UI, 디스플레이 및 코드 텍스트(`--ci-font-ui`, `--ci-font-display` 및 `--ci-font-mono` 이를 해결함)에 대한 단일 제품군이며 키트 자체(`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` 에서 가져옴)에 의해 자체 호스팅됩니다. 모든 아이콘은 Lucide 문자 모양입니다.
 
 ## 1. 각 요소의 위치
 
@@ -34,7 +31,7 @@
 2. `packages/ui-kit/src`를 직접 수정하지 마세요. `scripts/dev/sync-ui-kit.sh <commit>`으로 동기화해야 합니다. pre-commit 게이트인 `npm run check:ui-kit-snapshot`(`.husky/pre-commit`)은 고정된 업스트림 커밋과 단 하나의 바이트라도 다르면 실패합니다. 업스트림 클론인 `UI_KIT_CLONE` 또는 `_references/cheaper-inference-ui-kit`이 없으면 경고와 함께 검사를 건너뜁니다. 키트에 필요한 기능이 없으면 어댑터나 화면에서 우회하여 구현하고 업스트림에 요청하세요.
 3. 키트 텍스트의 기본값은 영어입니다(`label = "Loading"`, `loadingLabel = "Loading table"`…). 키트 컴포넌트가 텍스트를 렌더링할 때마다 `useTranslations(...)`에서 번역된 문자열을 전달하세요.
 4. Tailwind 유틸리티는 키트 컴포넌트 클래스보다 우선합니다. 키트는 `@layer theme, base, components, utilities`를 선언하고 해당 규칙은 `components`에 있기 때문입니다. 간격과 레이아웃에는 유틸리티를 사용하되, 키트 컴포넌트의 색상을 다시 지정하는 데는 사용하지 마세요.
-5. 제목: 페이지 및 섹션 제목에는 `.ci-heading`(Inter, 자간 없음)을 사용하고, 오류 페이지의 상태 코드처럼 크고 드문드문 사용되는 디스플레이 텍스트에만 `.ci-dashboard-display`(Instrument Serif)를 사용하세요.
+5. 제목: 페이지 및 섹션 제목의 경우 `.ci-heading` ; 오류 페이지 상태 코드와 같은 크고 희박한 표시 텍스트에만 `.ci-dashboard-display` 사용합니다. 둘 다 Switzer를 사용합니다.
 6. `tests/unit/dashboard-kit-sweep.test.ts`는 키트 도입을 검증합니다. `src/app` 또는 `src/shared/components` 아래에는 Material 리거처 span이 없어야 합니다. 대시보드 트리(`src/app/(dashboard)` 및 `src/shared/components`)에는 원시 `<select>`, `<textarea>`, `<table>`이 없어야 하며, 명시된 예외(`Select` 어댑터의 네이티브 분기, `RequestLoggerDetail`) 외에는 직접 구현한 `role="dialog"`가 없어야 합니다. 해당 위치의 모든 원시 `<button>` 또는 `<input>`에는 최대 3줄 위에서 끝나며 사유와 함께 `kit-exception:`을 포함하는 주석이 필요합니다. 팔레트 색조와 `dark:` 변형은 테스트에 명시된 파일에서만 사용할 수 있습니다.
 7. PR 전에 두 테마와 390 px 뷰포트를 모두 확인하고 스크린샷을 촬영하세요. `tests/e2e/a11y.spec.ts`는 axe를 실행합니다.
 
@@ -81,7 +78,7 @@ usage 및 endpoint를 시각적으로 점검하고, `npm run check:ui-kit-snapsh
 
 루트 `README.md`에 포함된 열두 다이어그램(`docs/diagrams/*.svg`)은 키트를 정적 이미지에 적용한 것입니다. 손으로 그리지 않고 생성합니다. `scripts/docs/gen-readme-*.mjs`에 13개 생성기 파일(열두 다이어그램과 드라이버 `gen-readme-diagrams.mjs`), `tests/unit/docs/readme-*-svg.test.ts`에 다이어그램당 하나씩 12개 최신성 테스트가 있으며, 각 테스트는 커밋된 파일과 생성기 출력을 바이트 단위로 비교합니다(작업 `test-unit`).
 
-- **토큰.** `scripts/docs/readme-diagram-theme.mjs`는 `packages/ui-kit/src/ci-tokens.css`에서 팔레트를 복사하고(`tests/unit/docs/readme-diagram-theme.test.ts`로 해당 파일과의 일치를 고정), 키트의 서체로 텍스트 역할을 정의합니다. 강조 표시용으로 Instrument Serif, UI 텍스트에 Inter, 숫자와 코드에 IBM Plex Mono를 사용합니다. 이는 `src/app/globals.css`가 대시보드에 로드하는 것과 동일한 `@fontsource` 패키지입니다. 파일 내부의 `:root`에 밝은 값이, `prefers-color-scheme: dark` 조건 아래에 어두운 값이 있어 각 이미지가 GitHub 독자의 색상 설정을 따릅니다.
+- **토큰.** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` 에서 팔레트를 복사하고( `tests/unit/docs/readme-diagram-theme.test.ts` 에 의해 해당 파일에 고정됨) `@fontsource` 패키지에서 키트의 이전 표면(디스플레이용 Instrument Serif, UI 텍스트용 Inter, 그림 및 코드용 IBM Plex Mono)에 대한 텍스트 역할을 정의합니다(대시보드 자체는 키트 0.0.66부터 키트의 Switzer를 사용합니다). 파일 내에서 밝은 값은 `:root` 에 있고 어두운 값은 `prefers-color-scheme: dark` 뒤에 있으므로 각 이미지는 GitHub 에서 보는 사람의 구성표를 따릅니다.
 
 - **글꼴.** `scripts/docs/readme-fonts.mjs`는 각 다이어그램이 그리는 글리프만 남도록 해당 woff2 파일을 부분 집합으로 만들고, `@font-face`의 `data:` URI로 삽입합니다. 이렇게 키트의 글꼴을 SVG 안에 유지합니다. 로컬 README 이미지 프로브는 렌더링이 외부 글꼴 요청을 보내지 않는지 확인합니다. 부분 집합에는 라틴 문자만 있으며, 시스템 글꼴 스택으로 대체되는 기호 글리프는 `SYMBOL_FALLBACKS`에서 하나씩 허용됩니다. 그 밖의 지원되지 않는 글리프는 오류를 발생시킵니다.
 

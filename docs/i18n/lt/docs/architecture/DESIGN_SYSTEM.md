@@ -4,7 +4,7 @@
 
 ---
 
-> **Būsena:** informacinė suvestinė sukurta naudojant **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), perkeltą į projektą kaip darbo srities paketą `packages/ui-kit` (`@omniroute/ui-kit`; pirminis (upstream) momentinis vaizdas prisegtas `packages/ui-kit/UPSTREAM.md` ir saugomas `npm run check:ui-kit-snapshot`). Šviesi tema yra kanoninė; numatytoji nuostata yra `system`. Akcentinė spalva yra Keak laimo (`--ci-color-accent`). Inter (raidžių tarpai 0, `--ci-letter-spacing-ui`) yra sąsajos šriftas, Instrument Serif naudojamas tik dideliam retam antraštiniam tekstui (`.ci-dashboard-display`), IBM Plex Mono — kodui; visi šriftai talpinami pačių projekto per `@fontsource/*` importus `src/app/globals.css` viršuje. Kiekviena piktograma yra Lucide glifas.
+> **Būsena:** informacinė suvestinė sukurta naudojant **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), perkeltą į projektą kaip darbo srities paketą `packages/ui-kit` (`@omniroute/ui-kit`; pirminis (upstream) momentinis vaizdas prisegtas `packages/ui-kit/UPSTREAM.md` ir saugomas `npm run check:ui-kit-snapshot`). Šviesi tema yra kanoninė; numatytoji nuostata yra `system`. Akcentinė spalva yra Keak laimo (`--ci-color-accent`). Switzer yra viena šeima, skirta UI, ekranui ir kodo tekstui (`--ci-font-ui`; `--ci-font-display` ir `--ci-font-mono` jį atitinka), savarankiškai priglobta paties rinkinio (`packages/ui-kit/src/ci-fonts.css`, importuota `ci-tokens.css`). Kiekviena piktograma yra Lucide glifas.
 
 ## 1. Kur kas saugoma
 
@@ -94,8 +94,7 @@
 4. Tailwind pagalbinės klasės turi pirmenybę prieš rinkinio komponentų klases (rinkinyje deklaruojama
    `@layer theme, base, components, utilities`, o jo taisyklės yra sluoksnyje `components`) — pagalbines klases naudokite
    tarpams ir išdėstymui, o ne rinkinio komponentų spalvoms keisti.
-5. Antraštės: `.ci-heading` (Inter, be tarpų tarp raidžių) puslapių ir skyrių pavadinimams; `.ci-dashboard-display`
-   (Instrument Serif) naudokite tik dideliam, retai rodomam tekstui, pavyzdžiui, klaidos puslapio būsenos kodui.
+5. Antraštės: `.ci-heading` puslapių ir skyrių pavadinimams; `.ci-dashboard-display` tik dideliam, retai rodomam tekstui, pvz., klaidos puslapio būsenos kodui. Abu naudoja Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` užtikrina rinkinio naudojimą: jokių Material ligatūrų `span` elementų
    po `src/app` ar `src/shared/components`; ataskaitų srities medyje (`src/app/(dashboard)` ir
    `src/shared/components`) negali būti tiesioginių `<select>`, `<textarea>` ar `<table>` elementų ir rankiniu būdu sukurtų
@@ -152,7 +151,7 @@ pirminės saugyklos (upstream) pakeitimų žurnalą.
 
 Dvylika diagramų, įterptų į šakninį `README.md` (`docs/diagrams/*.svg`), pritaiko rinkinį statiniams vaizdams. Jos generuojamos, o ne piešiamos ranka: `scripts/docs/gen-readme-*.mjs` yra 13 generatorių failų (dvylika diagramų ir valdiklis `gen-readme-diagrams.mjs`), o `tests/unit/docs/readme-*-svg.test.ts` yra 12 pasenimo testų, po vieną diagramai. Kiekvienas testas baitas po baito lygina į commit įtrauktą failą su jo generatoriaus išvestimi (užduotis `test-unit`).
 
-- **Žetonai.** `scripts/docs/readme-diagram-theme.mjs` kopijuoja paletę iš `packages/ui-kit/src/ci-tokens.css` (atitiktį šiam failui užtikrina `tests/unit/docs/readme-diagram-theme.test.ts`) ir apibrėžia teksto vaidmenis rinkinio šriftais: Instrument Serif išskirtiniam tekstui, Inter sąsajos tekstui, IBM Plex Mono skaičiams ir kodui. Tai tie patys `@fontsource` paketai, kuriuos `src/app/globals.css` įkelia valdymo skydeliui. Šviesios reikšmės yra failo `:root` dalyje, tamsios – po `prefers-color-scheme: dark` sąlyga, todėl kiekvienas vaizdas atitinka GitHub skaitytojo spalvų schemą.
+- **Žetonai.** `scripts/docs/readme-diagram-theme.mjs` nukopijuoja paletę iš `packages/ui-kit/src/ci-tokens.css` (prie to failo prisegė `tests/unit/docs/readme-diagram-theme.test.ts`) ir apibrėžia teksto vaidmenis ankstesniuose rinkinio paviršiuose – Instrument Serif rodymui, Inter – UI tekstui, IBM Plex Mono – figūroms ir kodui – iš `@fontsource` paketų (pati prietaisų skydelis naudoja rinkinio Switzer šriftą nuo rinkinio versijos 0.0.66). Šviesos reikšmės yra ant `:root`, tamsios reikšmės už `prefers-color-scheme: dark`, failo viduje, todėl kiekvienas vaizdas atitinka žiūrinčiojo schemą GitHub.
 
 - **Šriftai.** `scripts/docs/readme-fonts.mjs` apriboja šiuos woff2 failus kiekvienoje diagramoje piešiamais glifais ir įterpia juos per `@font-face` kaip `data:` URI. Taip rinkinio šriftai lieka SVG viduje. Vietinis README vaizdų bandymas tikrina, kad atvaizduojant nebūtų išorinių šriftų užklausų. Poaibiai apima tik lotyniškus ženklus; simbolių glifai, naudojantys sistemos šriftus kaip atsarginį variantą, leidžiami po vieną sąraše `SYMBOL_FALLBACKS`. Bet kuris kitas neapimtas glifas sukelia klaidą.
 

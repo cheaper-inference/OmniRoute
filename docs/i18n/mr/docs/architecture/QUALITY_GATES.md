@@ -24,13 +24,11 @@ CI आणि Quality Gates वर्कफ्लो प्रत्येकी 
 सल्लात्मक म्हणून नोंद करते. लागू असलेला आवश्यक जॉब यशस्वी झालाच पाहिजे: अनुपस्थित,
 रद्द केलेले, वगळलेले, प्रलंबित आणि अज्ञात निकाल PASS सिद्ध करू शकत नाहीत. वैध
 केवळ-दस्तऐवज किंवा केवळ-कॅटलॉग वर्गीकरणामुळे एखादी कोड लेन लागू नसलेली ठरू शकते;
-मसुदा PR हा स्वीकारलेला उमेदवार नाही. `hotfix` लेबलामुळे पुराव्याची आवश्यकता माफ होत नाही.
+सामान्य मसुदा PR हा स्वीकारलेला उमेदवार नाही. `hotfix` लेबलामुळे पुराव्याची आवश्यकता माफ होत नाही.
 
 दोन्ही वर्कफ्लो main/release शाखांमधील PR, `main` वरचे pushes, manual dispatch
 आणि merge-group इव्हेंट्स समाविष्ट करतात. Push, dispatch आणि merge-group संपूर्ण निवड चालवतात.
-`release/**` वरील pushes त्यांना सुरू करत नाहीत (2026-10-18): प्रत्येक बदलाने त्याच्या PR वर
-matrix आधीच चालवलेले असते आणि विलीन केलेले संयोजन हे Release-Green चे काम आहे
-(`docs/ops/RUNNER_BOX.md` → Hosted lane). Forks आणि merge groups अशा जॉबसाठी hosted runners
+विश्वसनीय Mergify रांगेतील मसुदाही लागू असलेले `full-code`/`full-code-e2e` जॉब चालवतो; सामान्य PR ते वगळतात. मॅन्युअल मर्ज करण्यापूर्वी नेमक्या त्या उमेदवारावर पूर्ण dispatch चालवा. `release/**` वरील pushes हे वर्कफ्लो सुरू करत नाहीत; Release-Green मर्ज झालेल्या बेसचे स्वतंत्रपणे निरीक्षण करते (`docs/ops/RUNNER_BOX.md` → Hosted lane). Forks आणि merge groups अशा जॉबसाठी hosted runners
 वापरतात जे अन्यथा self-hosted runners निवडतात; rollout पूर्वी पुरेशी hosted क्षमता
 सत्यापित करणे आवश्यक आहे.
 
@@ -89,8 +87,7 @@ reporters आणि विद्यमान coverage thresholds चालवत
 केवळ अनुमत-सूचीतील अंमलबजावणी मेटाडेटा नोंदवते; चाचणी वर्णने, आउटपुट, त्रुटींचा मजकूर आणि संपूर्ण
 वातावरण क्रमबद्ध केले जात नाही.
 
-CI आणि Quality JSONL फाइल्स `unit-progress-ci-<run>-<attempt>-<shard>` आणि
-`unit-progress-quality-<run>-<attempt>-<shard>` म्हणून राखून ठेवतात. जॉब टाइमआउटमुळे नंतरचे अपलोड रोखले जाऊ शकते;
+CI JSONL फायली `unit-progress-ci-<run>-<attempt>-<shard>` या नावाने जतन करते. जॉब टाइमआउटमुळे नंतरचे अपलोड रोखले जाऊ शकते;
 आधीच पाठवलेल्या हार्टबीट्स निदानात्मक पुरावा म्हणून उपलब्ध राहतात. हार्टबीट्स नसणे हे
 अवरोधित किंवा समाप्त झालेल्या रनर प्रक्रियेचेही निदर्शक असू शकते. या नोंदी विद्यमान चाचणी निवड,
 समवर्ती अंमलबजावणी, अंतिम मुदती आणि निर्गमन स्थिती जतन करतात; त्या उमेदवार-स्वीकृतीचे निर्णय नाहीत.
@@ -143,8 +140,6 @@ CI चा अधिकृत स्रोत `.github/workflows/ci.yml` आह�
 | `Docs Gates (fast-path)`                         | Docs/code PRs; API docs संदर्भ आणि docs-all                                                                                                                                                           | होय           |
 | `Fast Quality Gates`                             | Code PRs; static तपासण्या, typecheck, dashboard typecheck, प्रभावित unit tests                                                                                                                        | होय           |
 | `Forgotten sibling tests`                        | Code PRs; बदललेल्या modules पासून static consumers आणि संभाव्य sibling tests पर्यंत मागोवा; barrel आणि dynamic-import paths हे allowlist मधील संदर्भित अपवादांसह सल्लात्मक निदान म्हणून नोंदवले जातात | **सल्लात्मक** |
-| `Vitest (fast-path)`                             | Code PRs; जलद vitest suite                                                                                                                                                                            | होय           |
-| `Unit Tests fast-path`                           | Code PRs; 4-shard unit suite                                                                                                                                                                          | होय           |
 | `No new ESLint warnings`                         | Code PRs; suppressions ची जाणीव असलेला lint guard                                                                                                                                                     | होय, forks सह |
 | `Merge integrity (changelog + generated skills)` | Non-draft PRs; changelog आणि generated skill समक्रमण                                                                                                                                                  | होय, forks सह |
 

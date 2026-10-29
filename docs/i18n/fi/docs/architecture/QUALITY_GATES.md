@@ -24,14 +24,11 @@ CI- ja Quality Gates -työnkulut tuottavat kumpikin vakaan tuloksen: `Gate / CI`
 pakolliseksi tai neuvoa-antavaksi. Soveltuvan pakollisen työn on onnistuttava: puuttuva,
 peruutettu, ohitettu, odottava tai tuntematon tulos ei voi osoittaa PASS-tilaa. Kelvollinen
 vain dokumentaatiota tai vain luetteloa koskeva luokitus voi tehdä koodilinjasta soveltumattoman;
-PR-luonnos ei ole hyväksyttävä ehdokas. `hotfix`-tunniste ei poista näyttövaatimuksia.
+tavallinen PR-luonnos ei ole hyväksyttävä ehdokas. `hotfix`-tunniste ei poista näyttövaatimuksia.
 
 Molemmat työnkulut kattavat main/release-haaroihin kohdistuvat PR:t, `main`-haaraan tehtävät
 push-tapahtumat, manuaalisen käynnistyksen ja yhdistämisryhmätapahtumat. Push-tapahtumat,
-manuaaliset käynnistykset ja yhdistämisryhmät suorittavat koko valikoiman. `release/**`-haaroihin
-tehtävät push-tapahtumat eivät käynnistä niitä (2026-10-18): jokainen muutos on jo suorittanut
-matriisin omassa PR:ssään, ja yhdistetty kokonaisuus kuuluu Release-Greenille
-(`docs/ops/RUNNER_BOX.md` → Isännöity linja). Forkit ja yhdistämisryhmät käyttävät isännöityjä
+manuaaliset käynnistykset ja yhdistämisryhmät suorittavat koko valikoiman. Luotettu Mergify-jonon luonnos suorittaa myös soveltuvat `full-code`/`full-code-e2e`-työt; tavalliset PR:t ohittavat ne. Käynnistä ennen manuaalista yhdistämistä täydellinen dispatch täsmälleen kyseiselle ehdokkaalle. `release/**`-haaroihin tehtävät push-tapahtumat eivät käynnistä näitä työnkulkuja; Release-Green tarkkailee yhdistettyä pohjaa erikseen (`docs/ops/RUNNER_BOX.md` → Isännöity linja). Forkit ja yhdistämisryhmät käyttävät isännöityjä
 suorittimia töissä, jotka muutoin valitsisivat itse isännöidyt suorittimet; isännöidyn kapasiteetin
 riittävyys on varmistettava ennen käyttöönottoa.
 
@@ -87,7 +84,7 @@ raakakattavuustiedot erikseen; niitä ei voi sisällyttää lopulliseen yhdistä
 
 Jaettu `test:unit:ci:shard`-komento kirjaa `primary`-, `dashboard`- ja `serial`-vaiheet `scripts/ci/unit-progress-reporter.mjs`-skriptin avulla. Normaali testiraportti on edelleen saatavilla. Erillinen, vain metatietoja sisältävä kuitti kirjaa kunkin tiedoston suorituksen alkamisen ja valmistumisen, ja 30 sekunnin välein lähetettävä tilapäivitys luettelee yhä aktiiviset tiedostot ja niiden kuluneen suoritusajan. Se kirjaa vain sallittujen tietojen luetteloon sisältyvät suorituksen metatiedot; testien kuvauksia, tulosteita, virheiden sisältöjä ja koko ympäristöä ei serialisoida.
 
-CI ja Quality säilyttävät JSONL-tiedostot nimillä `unit-progress-ci-<run>-<attempt>-<shard>` ja `unit-progress-quality-<run>-<attempt>-<shard>`. Työn aikakatkaisu voi estää myöhemmän latauksen; jo lähetetyt tilapäivitykset säilyvät diagnostisena aineistona. Puuttuvat tilapäivitykset voivat myös viitata estyneeseen tai keskeytettyyn suorittajaprosessiin. Nämä kuitit säilyttävät nykyisen testivalinnan, rinnakkaisuuden, määräajat ja poistumistilan; ne eivät ole päätöksiä ehdokkaan hyväksymisestä.
+CI säilyttää JSONL-tiedostot nimellä `unit-progress-ci-<run>-<attempt>-<shard>`. Työn aikakatkaisu voi estää myöhemmän latauksen; jo lähetetyt tilapäivitykset säilyvät diagnostisena aineistona. Puuttuvat tilapäivitykset voivat myös viitata estyneeseen tai keskeytettyyn suorittajaprosessiin. Nämä kuitit säilyttävät nykyisen testivalinnan, rinnakkaisuuden, määräajat ja poistumistilan; ne eivät ole päätöksiä ehdokkaan hyväksymisestä.
 
 ### Staattisten tarkistusten luettelo
 
@@ -154,8 +151,6 @@ käynnistystarkistukset säilyvät CI:ssä.
 | `Docs Gates (fast-path)`                         | Dokumentaatio-/koodi-PR:t; API-dokumentaation viittaukset ja docs-all                                                                                                                                                               | Kyllä                 |
 | `Fast Quality Gates`                             | Koodi-PR:t; staattiset tarkistukset, tyyppitarkistus, hallintapaneelin tyyppitarkistus ja muutosten vaikutuspiirissä olevat yksikkötestit                                                                                           | Kyllä                 |
 | `Forgotten sibling tests`                        | Koodi-PR:t; muuttuneista moduuleista staattisiin käyttäjiin ja mahdollisiin rinnakkaistesteihin johdetut ketjut; barrel- ja dynaamisten tuontien polut raportoidaan neuvoa-antavina diagnostiikkoina sallittujen poikkeusten kanssa | **Neuvoa-antava**     |
-| `Vitest (fast-path)`                             | Koodi-PR:t; nopea vitest-testikokonaisuus                                                                                                                                                                                           | Kyllä                 |
-| `Unit Tests fast-path`                           | Koodi-PR:t; neljään osaan jaettu yksikkötestikokonaisuus                                                                                                                                                                            | Kyllä                 |
 | `No new ESLint warnings`                         | Koodi-PR:t; vaimennukset huomioiva lint-tarkistus                                                                                                                                                                                   | Kyllä, myös forkeissa |
 | `Merge integrity (changelog + generated skills)` | Muut kuin luonnos-PR:t; muutoslokin ja generoitujen taitojen synkronointi                                                                                                                                                           | Kyllä, myös forkeissa |
 

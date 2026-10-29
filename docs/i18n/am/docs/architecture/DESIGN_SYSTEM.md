@@ -7,10 +7,7 @@
 > **ሁኔታ:** ዳሽቦርዱ በ**Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ላይ የተገነባ ነው፣
 > እንደ workspace `packages/ui-kit` (`@omniroute/ui-kit`፤ የupstream snapshot በ`packages/ui-kit/UPSTREAM.md`
 > ውስጥ ተሰክቶ ተቆልፏል እና በ`npm run check:ui-kit-snapshot` ይጠበቃል) vendored ተደርጓል። Light
-> የመደበኛው (canonical) ገለጻ ነው፤ ነባሪ ምርጫው `system` ነው። አጽናኝ ቀለሙ Keak lime (`--ci-color-accent`) ነው።
-> Inter (letter-spacing 0፣ `--ci-letter-spacing-ui`) የUI ቅርጸ-ቁምፊ ቤተሰብ ነው፣ Instrument Serif ለትልቅ የተበተነ
-> የማሳያ ጽሑፍ ብቻ (`.ci-dashboard-display`)፣ IBM Plex Mono ደግሞ ለኮድ — ሁሉም በ`src/app/globals.css`
-> መጀመሪያ ላይ ባሉት `@fontsource/*` imports በራስ-አገልግሎት (self-hosted) ናቸው። እያንዳንዱ አዶ Lucide glyph ነው።
+> የመደበኛው (canonical) ገለጻ ነው፤ ነባሪ ምርጫው `system` ነው። አጽናኝ ቀለሙ Keak lime (`--ci-color-accent`) ነው። ስዊዘርዘር ለ UI፣ የማሳያ እና ኮድ ጽሑፍ (`--ci-font-ui`፣ `--ci-font-display` እና `--ci-font-mono` መፍታት ያለበት) ነጠላ ቤተሰብ ነው፣ በራሱ በራሱ የሚስተናገደው (`packages/ui-kit/src/ci-fonts.css`፣ በ `ci-tokens.css` የመጣ)። እያንዳንዱ አዶ የሉሲድ ግሊፍ ነው።
 
 ## 1. ነገሮች የሚገኙበት ቦታ
 
@@ -35,8 +32,7 @@
 4. የTailwind utilities ከkit component classes ይቀድማሉ (kit
    `@layer theme, base, components, utilities` ያውጃል እና rulesዎቹ በ`components` ውስጥ ይገኛሉ) — utilitiesን ለ
    spacing እና layout ይጠቀሙ፣ የkit componentsን ቀለም እንደገና ለመቀየር አይጠቀሙባቸው።
-5. ርዕሶች፦ `.ci-heading` (Inter፣ tracking የሌለው) ለpage እና section titles፤ `.ci-dashboard-display`
-   (Instrument Serif) እንደ error-page status code ላሉ ትልቅና ክፍት ቦታ ላላቸው display textዎች ብቻ።
+5. ርዕሶች: `.ci-heading` ለገጽ እና ክፍል ርዕሶች; `.ci-dashboard-display` ለትልቅ፣ ትንሽ የማሳያ ጽሑፍ እንደ የስህተት ገጽ ሁኔታ ኮድ። ሁለቱም Switzerን ይጠቀማሉ።
 6. `tests/unit/dashboard-kit-sweep.test.ts` የkit adoptionን ይጠብቃል፦ በ
    `src/app` ወይም `src/shared/components` ስር Material ligature span አይኖርም፤ በdashboard tree (`src/app/(dashboard)` እና
    `src/shared/components`) ውስጥ ጥሬ `<select>`፣ `<textarea>` ወይም `<table>` እንዲሁም በዝርዝሩ ከተጠቀሱት ልዩ ሁኔታዎች ውጭ በእጅ የተሠራ
@@ -91,7 +87,7 @@
 
 በሥር ማውጫው `README.md` ውስጥ የተካተቱት አሥራ ሁለት ዲያግራሞች (`docs/diagrams/*.svg`) ኪቱን በማይንቀሳቀሱ ምስሎች ላይ ይተገብራሉ። በፕሮግራም ይፈጠራሉ እንጂ በእጅ አይሳሉም፦ በ`scripts/docs/gen-readme-*.mjs` ውስጥ 13 የማመንጫ ፋይሎች (አሥራ ሁለት ዲያግራሞችና መቆጣጠሪያው `gen-readme-diagrams.mjs`)፣ በ`tests/unit/docs/readme-*-svg.test.ts` ውስጥ ደግሞ ለእያንዳንዱ ዲያግራም አንድ በድምሩ 12 የእርጅና ፈተናዎች አሉ። እያንዳንዱ ፈተና በcommit የተቀመጠውን ፋይል ከማመንጫው ውጤት ጋር ባይት በባይት ያነጻጽራል (ሥራው `test-unit`)።
 
-- **ቶከኖች።** `scripts/docs/readme-diagram-theme.mjs` የቀለም ስብስቡን ከ`packages/ui-kit/src/ci-tokens.css` ይቀዳል (ከዚያ ፋይል ጋር መጣጣሙን `tests/unit/docs/readme-diagram-theme.test.ts` ያረጋግጣል)፣ የጽሑፍ ሚናዎችንም በኪቱ ቅርጸ ፊደሎች ይወስናል፦ Instrument Serif ለጎልቶ የሚታይ ጽሑፍ፣ Inter ለበይነገጽ ጽሑፍ፣ IBM Plex Mono ለቁጥሮችና ኮድ። እነዚህ `src/app/globals.css` ለዳሽቦርዱ የሚጭናቸው ተመሳሳይ የ`@fontsource` ፓኬጆች ናቸው። ብርሃን እሴቶች በ`:root`፣ ጨለማ እሴቶች ደግሞ በ`prefers-color-scheme: dark` ሁኔታ ሥር በፋይሉ ውስጥ አሉ፤ ስለዚህ እያንዳንዱ ምስል በGitHub የአንባቢውን የቀለም ስርዓት ይከተላል።
+- **ማስመሰያዎች** `scripts/docs/readme-diagram-theme.mjs` ቤተ-ስዕሉን ከ `packages/ui-kit/src/ci-tokens.css` ይገለብጣል (በዚያ ፋይል ላይ በ `tests/unit/docs/readme-diagram-theme.test.ts` የተሰካ) እና የጽሑፍ ሚናዎች በመሳሪያው ቀደምት ፊቶች ላይ - Instrument Serif for display, Inter for UI text, IBM Plex Mono ለሥዕሎች እና ኮድ - ከ `@fontsource` ጥቅሎች (ዳሽቦርዱ ራሱ የኪት ስዊዘርን ከኪት 0.0.66 ጀምሮ ይጠቀማል)። የብርሃን እሴቶች በ `:root` ላይ ይቀመጣሉ፣ ጨለማ እሴቶች ከ `prefers-color-scheme: dark` ጀርባ፣ በፋይሉ ውስጥ፣ ስለዚህ እያንዳንዱ ምስል በ GitHub ላይ የተመልካቹን እቅድ ይከተላል።
 
 - **ቅርጸ ፊደሎች።** `scripts/docs/readme-fonts.mjs` እነዚያን የwoff2 ፋይሎች እያንዳንዱ ዲያግራም ወደሚስላቸው ግሊፎች ብቻ ያሳንሳል፣ በ`@font-face` በኩልም እንደ `data:` URI ያካትታቸዋል። ይህ የኪቱን ቅርጸ ፊደሎች በSVG ውስጥ ያቆያል። የREADME ምስል አካባቢያዊ ሙከራ ምስሉ ሲታይ ውጫዊ የቅርጸ ፊደል ጥያቄዎች እንዳይደረጉ ይፈትሻል። ንዑስ ስብስቦቹ የላቲን ምልክቶችን ብቻ ይይዛሉ፤ ወደ ስርዓቱ ቅርጸ ፊደሎች የሚመለሱ የምልክት ግሊፎች በ`SYMBOL_FALLBACKS` አንድ በአንድ ይፈቀዳሉ። ሌላ ያልተካተተ ግሊፍ ሁሉ ስህተት ያስነሳል።
 

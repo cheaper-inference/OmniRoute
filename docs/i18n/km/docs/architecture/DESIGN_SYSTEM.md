@@ -7,10 +7,7 @@
 > **ស្ថានភាព:** ផ្ទាំងគ្រប់គ្រងត្រូវបានបង្កើតឡើងលើ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)
 > ដែលត្រូវបាន vendored ជា workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot នៃ upstream ត្រូវបាន pin
 > នៅក្នុង `packages/ui-kit/UPSTREAM.md` ហើយត្រូវបានការពារដោយ `npm run check:ui-kit-snapshot`)។ Light គឺជា
-> theme ផ្លូវការ; ចំណូលចិត្តលំនាំដើមគឺ `system`។ ពណ៌ accent គឺ Keak lime (`--ci-color-accent`)។ Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) គឺជាគ្រួសារពុម្ពអក្សរ UI, Instrument Serif សម្រាប់តែអត្ថបទ
-> display ទំហំធំ ដែលមានធាតុរៀងឆ្ងាយៗ (`.ci-dashboard-display`), IBM Plex Mono សម្រាប់កូដ — ទាំងអស់ត្រូវបាន
-> self-hosted តាមរយៈ `@fontsource/*` imports នៅផ្នែកខាងលើនៃ `src/app/globals.css`។ រាល់រូបតំណាងទាំងអស់គឺជា Lucide glyph។
+> theme ផ្លូវការ; ចំណូលចិត្តលំនាំដើមគឺ `system`។ ពណ៌ accent គឺ Keak lime (`--ci-color-accent`) ។ Switzer គឺជាគ្រួសារតែមួយសម្រាប់ UI ការបង្ហាញ និងអត្ថបទកូដ (`--ci-font-ui`; `--ci-font-display` និង `--ci-font-mono` ដោះស្រាយវា) រៀបចំដោយខ្លួនឯងដោយឧបករណ៍ខ្លួនវា (`packages/ui-kit/src/ci-fonts.css` នាំចូលដោយ `ci-tokens.css`) ។ រូបតំណាងនីមួយៗគឺ Lucide glyph ។
 
 ## 1. កន្លែងដែលអ្វីៗស្ថិតនៅ
 
@@ -98,8 +95,7 @@
 4. utility របស់ Tailwind មានអាទិភាពលើ class របស់ component ក្នុង kit (kit ប្រកាស
    `@layer theme, base, components, utilities` ហើយ rule របស់វាស្ថិតនៅក្នុង `components`) — ប្រើ utility សម្រាប់
    spacing និង layout មិនមែនសម្រាប់ប្ដូរពណ៌ component របស់ kit ទេ។
-5. Heading៖ `.ci-heading` (Inter, គ្មាន tracking) សម្រាប់ចំណងជើងទំព័រ និងផ្នែក; `.ci-dashboard-display`
-   (Instrument Serif) សម្រាប់តែអត្ថបទបង្ហាញធំៗ និងមិនសូវញឹកញាប់ ដូចជា status code នៅលើទំព័រកំហុស។
+5. ចំណងជើង៖ `.ci-heading` សម្រាប់ចំណងជើងទំព័រ និងផ្នែក; `.ci-dashboard-display` សម្រាប់តែអត្ថបទបង្ហាញធំៗ និងមិនសូវញឹកញាប់ ដូចជាលេខកូដស្ថានភាពទំព័រកំហុស។ ទាំងពីរប្រើSwitzer។
 6. `tests/unit/dashboard-kit-sweep.test.ts` ការពារការប្រើប្រាស់ kit៖ មិនអនុញ្ញាតឱ្យមាន span ជា Material ligature នៅក្រោម
    `src/app` ឬ `src/shared/components`; នៅក្នុង dashboard tree (`src/app/(dashboard)` និង
    `src/shared/components`) មិនអនុញ្ញាតឱ្យមាន `<select>`, `<textarea>` ឬ `<table>` ដើម និងមិនអនុញ្ញាតឱ្យបង្កើត
@@ -142,7 +138,7 @@ usage និង endpoint ក្នុង theme ទាំងពីរ ដំណ�
 
 ដ្យាក្រាមទាំងដប់ពីរដែលបញ្ចូលក្នុង `README.md` នៅថតឫស (`docs/diagrams/*.svg`) អនុវត្ត kit លើរូបភាពឋិតិវន្ត។ វាត្រូវបានបង្កើតដោយកម្មវិធី មិនមែនគូរដោយដៃទេ: មានឯកសារបង្កើត 13 នៅ `scripts/docs/gen-readme-*.mjs` (ដ្យាក្រាមដប់ពីរ និងកម្មវិធីបញ្ជា `gen-readme-diagrams.mjs`) និងតេស្តភាពហួសសម័យ 12 នៅ `tests/unit/docs/readme-*-svg.test.ts` មួយសម្រាប់ដ្យាក្រាមនីមួយៗ។ តេស្តនីមួយៗប្រៀបធៀបឯកសារដែលបាន commit ជាមួយលទ្ធផលកម្មវិធីបង្កើតរបស់វា បៃត៍ម្តងមួយ (ការងារ `test-unit`)។
 
-- **Token។** `scripts/docs/readme-diagram-theme.mjs` ចម្លងក្ដារពណ៌ពី `packages/ui-kit/src/ci-tokens.css` (ភាពត្រូវគ្នាជាមួយឯកសារនោះត្រូវបានធានាដោយ `tests/unit/docs/readme-diagram-theme.test.ts`) ហើយកំណត់តួនាទីអត្ថបទដោយពុម្ពអក្សររបស់ kit: Instrument Serif សម្រាប់អត្ថបទបង្ហាញលេចធ្លោ, Inter សម្រាប់ផ្ទៃប្រើប្រាស់ និង IBM Plex Mono សម្រាប់លេខនិងកូដ។ ទាំងនេះជាកញ្ចប់ `@fontsource` ដូចគ្នាដែល `src/app/globals.css` ផ្ទុកសម្រាប់ផ្ទាំងគ្រប់គ្រង។ តម្លៃភ្លឺស្ថិតនៅ `:root` ហើយតម្លៃងងឹតនៅក្រោមលក្ខខណ្ឌ `prefers-color-scheme: dark` ក្នុងឯកសារ ដូច្នេះរូបភាពនីមួយៗតាមគ្រោងពណ៌របស់អ្នកអាននៅ GitHub។
+- **ថូខឹន។** `scripts/docs/readme-diagram-theme.mjs` ចម្លងក្ដារលាយពី `packages/ui-kit/src/ci-tokens.css` (ខ្ទាស់ប្រឆាំងនឹងឯកសារនោះដោយ `tests/unit/docs/readme-diagram-theme.test.ts`) និងកំណត់តួនាទីអត្ថបទនៅលើមុខមុនរបស់ឧបករណ៍ — ឧបករណ៍ Serif សម្រាប់បង្ហាញ, Inter សម្រាប់អត្ថបទ UI, IBM Plex Mono សម្រាប់តួលេខ និងកូដ — ពីកញ្ចប់ `@fontsource` (ផ្ទាំងគ្រប់គ្រងដោយខ្លួនវាប្រើ Switzer របស់ឧបករណ៍ចាប់ពី ឧបករណ៍កំណែ 0.0.66)។ តម្លៃពន្លឺស្ថិតនៅលើ `:root` តម្លៃងងឹតនៅពីក្រោយ `prefers-color-scheme: dark` នៅខាងក្នុងឯកសារ ដូច្នេះរូបភាពនីមួយៗធ្វើតាមគ្រោងការណ៍របស់អ្នកមើលនៅលើ GitHub។
 
 - **ពុម្ពអក្សរ។** `scripts/docs/readme-fonts.mjs` បង្រួមឯកសារ woff2 ទាំងនោះឱ្យនៅតែ glyph ដែលដ្យាក្រាមនីមួយៗគូរ ហើយបង្កប់វាតាម `@font-face` ជា URI `data:`។ ដូច្នេះពុម្ពអក្សររបស់ kit នៅក្នុង SVG។ ការសាកល្បងរូបភាព README ក្នុងម៉ាស៊ីនពិនិត្យថាការបង្ហាញមិនធ្វើសំណើពុម្ពអក្សរទៅខាងក្រៅ។ សំណុំរងមានតែតួអក្សរឡាតាំង; glyph និមិត្តសញ្ញាដែលប្រើពុម្ពអក្សរប្រព័ន្ធជាជម្រើសជំនួស ត្រូវបានអនុញ្ញាតម្តងមួយនៅ `SYMBOL_FALLBACKS`។ glyph ផ្សេងទៀតដែលមិនបានគ្របដណ្តប់បង្កឱ្យមានកំហុស។
 

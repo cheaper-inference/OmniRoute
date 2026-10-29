@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "Lahat ng mga modelo ay nai-import na",
     "noNewModelsToImport": "Walang bagong modelo na i-import — lahat ng mga modelo ay nasa registry o custom na listahan na",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Nabigo ang pagtuklas ng modelo {time}",
     "skippingExistingModels": "Pinapalampas ang {count} na umiiral na mga modelo",
     "autoSync": "Awtomatikong Pag-sync",
     "autoSyncShort": "I-sync",

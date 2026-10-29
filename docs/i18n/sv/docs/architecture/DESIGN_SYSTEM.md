@@ -7,10 +7,7 @@
 > **Status:** instrumentpanelen är byggd på **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendord
 > som workspacet `packages/ui-kit` (`@omniroute/ui-kit`; uppströmsögonblicksbilden är låst i
 > `packages/ui-kit/UPSTREAM.md` och skyddas av `npm run check:ui-kit-snapshot`). Ljust är det kanoniska
-> temat; standardinställningen är `system`. Accentfärgen är Keak-lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) är gränssnittets typsnittsfamilj, Instrument Serif endast för stor, gles
-> displaytext (`.ci-dashboard-display`), IBM Plex Mono för kod — alla självhostade via
-> `@fontsource/*`-importerna högst upp i `src/app/globals.css`. Varje ikon är en Lucide-glyf.
+> temat; standardinställningen är `system`. Accentfärgen är Keak-lime (`--ci-color-accent`). Switzer är den enda familjen för UI, display och kodtext (`--ci-font-ui`; `--ci-font-display` och `--ci-font-mono` löser sig till det), som värd för själva kitet (`packages/ui-kit/src/ci-fonts.css`, importerat av `ci-tokens.css`). Varje ikon är en Lucide-glyph.
 
 ## 1. Var saker finns
 
@@ -100,9 +97,7 @@
 4. Tailwind-verktygsklasser har företräde framför kitkomponenternas klasser (kitet deklarerar
    `@layer theme, base, components, utilities` och dess regler finns i `components`) — använd
    verktygsklasser för avstånd och layout, inte för att ändra färg på kitkomponenter.
-5. Rubriker: `.ci-heading` (Inter, utan teckenavstånd) för sid- och avsnittsrubriker;
-   `.ci-dashboard-display` (Instrument Serif) endast för stor, luftig visningstext, exempelvis
-   statuskoden på felsidan.
+5. Rubriker: `.ci-heading` för sid- och avsnittsrubriker; `.ci-dashboard-display` endast för stor, gles visningstext som statuskoden för felsidan. Båda använder Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` säkerställer att kitet används: inga Material-ligaturspann
    under `src/app` eller `src/shared/components`; i dashboardträdet (`src/app/(dashboard)` och
    `src/shared/components`) får det inte finnas några råa `<select>`, `<textarea>` eller `<table>` och
@@ -158,7 +153,7 @@ settings, combos, usage och endpoint i båda temana, kör `npm run check:ui-kit-
 
 De tolv diagrammen i rotens `README.md` (`docs/diagrams/*.svg`) tillämpar kittet på statiska bilder. De genereras, inte ritas för hand: 13 generatorfiler under `scripts/docs/gen-readme-*.mjs` (tolv diagram plus drivaren `gen-readme-diagrams.mjs`) och 12 aktualitetstester under `tests/unit/docs/readme-*-svg.test.ts`, ett per diagram. Varje test jämför den committade filen byte för byte med generatorns utdata (jobb `test-unit`).
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopierar paletten från `packages/ui-kit/src/ci-tokens.css` (överensstämmelsen med filen säkras av `tests/unit/docs/readme-diagram-theme.test.ts`) och definierar textroller med kittets typsnitt: Instrument Serif för framträdande displaytext, Inter för gränssnittstext och IBM Plex Mono för siffror och kod. Det är samma `@fontsource`-paket som `src/app/globals.css` läser in för instrumentpanelen. Ljusa värden ligger på `:root` och mörka under `prefers-color-scheme: dark` inne i filen, så varje bild följer läsarens färgschema på GitHub.
+- **Polletter.** `scripts/docs/readme-diagram-theme.mjs` kopierar paletten från `packages/ui-kit/src/ci-tokens.css` (fäst mot den filen av `tests/unit/docs/readme-diagram-theme.test.ts`) och definierar textrollerna på satsens tidigare ansikten — Instrument Serif för visning, Inter för UI text, IBM Plex Mono för siffror och kod — från `@fontsource` paketen (instrumentpanelen själv använder satsens Switzer sedan kit 0.0.66). Ljusa värden sitter på `:root`, mörka värden bakom `prefers-color-scheme: dark`, inuti filen, så varje bild följer tittarens schema på GitHub.
 
 - **Typsnitt.** `scripts/docs/readme-fonts.mjs` begränsar dessa woff2-filer till de glyfer som varje diagram ritar och bäddar in dem via `@font-face` som `data:`-URI:er. Därmed stannar kittets typsnitt inne i SVG-filen. Det lokala README-bildtestet kontrollerar att renderingen inte skickar externa typsnittsanrop. Delmängderna innehåller bara latinska tecken; symbolglyfer som faller tillbaka på systemtypsnitten tillåts var för sig i `SYMBOL_FALLBACKS`. Varje annan glyf som inte täcks utlöser ett fel.
 

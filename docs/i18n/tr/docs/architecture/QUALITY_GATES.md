@@ -24,14 +24,12 @@ CI ve Quality Gates iş akışlarının her biri kararlı bir karar üretir: `Ga
 zorunlu veya tavsiye niteliğinde olarak listeler. Geçerli bir zorunlu iş başarıyla
 tamamlanmalıdır: eksik, iptal edilmiş, atlanmış, beklemede olan ve bilinmeyen sonuçlar
 PASS durumunu tesis edemez. Geçerli bir yalnızca dokümantasyon veya yalnızca katalog
-sınıflandırması, bir kod hattını uygulanamaz hâle getirebilir; taslak PR kabul edilmiş
+sınıflandırması, bir kod hattını uygulanamaz hâle getirebilir; sıradan bir taslak PR kabul edilmiş
 bir aday değildir. Bir `hotfix` etiketi kanıt gerekliliğini ortadan kaldırmaz.
 
 Her iki iş akışı da main/release dallarına yönelik PR'leri, `main` dalına yapılan
 push işlemlerini, manuel tetiklemeyi ve merge-group olaylarını kapsar. Push, tetikleme
-ve merge-group tam seçimi çalıştırır. `release/**` dallarına yapılan push işlemleri
-bunları başlatmaz (2026-10-18): her değişiklik matrisi zaten kendi PR'inde çalıştırmıştır
-ve birleştirilmiş kombinasyon Release-Green'in işidir (`docs/ops/RUNNER_BOX.md` → Barındırılan hat).
+ve merge-group tam seçimi çalıştırır. Güvenilir bir Mergify kuyruğu taslağı, geçerli `full-code`/`full-code-e2e` işlerini de çalıştırır; sıradan PR'ler bunları atlar. Manuel birleştirmeden önce tam olarak ilgili aday üzerinde tam bir dispatch çalıştırın. `release/**` dallarına yapılan push işlemleri bu iş akışlarını başlatmaz; Release-Green birleştirilmiş tabanı ayrı olarak gözlemler (`docs/ops/RUNNER_BOX.md` → Barındırılan hat).
 Fork'lar ve merge group'lar, aksi durumda kendi kendine barındırılan çalıştırıcıları
 seçecek işler için barındırılan çalıştırıcıları kullanır; kullanıma sunmadan önce yeterli
 barındırılan kapasite doğrulanmalıdır.
@@ -87,7 +85,7 @@ tanılama kapsamını ayrı olarak saklar; bu kapsam nihai birleştirmeye gireme
 
 Paylaşılan `test:unit:ci:shard` komutu, `primary`, `dashboard` ve `serial` aşamalarını `scripts/ci/unit-progress-reporter.mjs` aracılığıyla kaydeder. Normal test raporu kullanılabilir olmaya devam eder. Yalnızca meta veri içeren ayrı bir kayıt, her dosyanın başlangıcını ve tamamlanmasını kaydeder; 30 saniyelik düzenli durum bildirimi ise hâlâ etkin olan dosyaları ve geçen sürelerini listeler. Yalnızca izin verilen yürütme meta verileri kaydedilir; test açıklamaları, çıktılar, hata içerikleri ve ortamın tamamı serileştirilmez.
 
-CI ve Quality, JSONL dosyalarını `unit-progress-ci-<run>-<attempt>-<shard>` ve `unit-progress-quality-<run>-<attempt>-<shard>` olarak saklar. Bir iş zaman aşımı, sonraki yüklemeyi engelleyebilir; önceden gönderilmiş düzenli durum bildirimleri tanılama kanıtı olarak kalır. Eksik düzenli durum bildirimleri, engellenmiş veya sonlandırılmış bir çalıştırıcı sürecine de işaret edebilir. Bu kayıtlar mevcut test seçimini, eşzamanlılığı, son tarihleri ve çıkış durumunu korur; aday kabulüyle ilgili kararlar değildir.
+CI, JSONL dosyalarını `unit-progress-ci-<run>-<attempt>-<shard>` olarak saklar. Bir iş zaman aşımı, sonraki yüklemeyi engelleyebilir; önceden gönderilmiş düzenli durum bildirimleri tanılama kanıtı olarak kalır. Eksik düzenli durum bildirimleri, engellenmiş veya sonlandırılmış bir çalıştırıcı sürecine de işaret edebilir. Bu kayıtlar mevcut test seçimini, eşzamanlılığı, son tarihleri ve çıkış durumunu korur; aday kabulüyle ilgili kararlar değildir.
 
 ### Statik tarama envanteri
 
@@ -154,8 +152,6 @@ ayrı kalır. Başarılı bir yükleme, başarısız bir durum sonucunu PASS'e d
 | `Docs Gates (fast-path)`                         | Dokümantasyon/kod PR'ları; API dokümantasyonu referansları ve docs-all                                                                                                                                                                      | Evet                    |
 | `Fast Quality Gates`                             | Kod PR'ları; statik kontroller, tür kontrolü, dashboard tür kontrolü, etkilenen birim testleri                                                                                                                                              | Evet                    |
 | `Forgotten sibling tests`                        | Kod PR'ları; değiştirilen modüllerden statik tüketicilere ve aday kardeş testlere kadar izleme; barrel ve dinamik içe aktarma yolları, referans verilen izin listesi istisnalarıyla birlikte tavsiye niteliğinde tanılama olarak raporlanır | **Tavsiye niteliğinde** |
-| `Vitest (fast-path)`                             | Kod PR'ları; hızlı vitest paketi                                                                                                                                                                                                            | Evet                    |
-| `Unit Tests fast-path`                           | Kod PR'ları; 4 parçalı birim testi paketi                                                                                                                                                                                                   | Evet                    |
 | `No new ESLint warnings`                         | Kod PR'ları; bastırmaları dikkate alan lint koruması                                                                                                                                                                                        | Evet, fork'lar dahil    |
 | `Merge integrity (changelog + generated skills)` | Taslak olmayan PR'lar; değişiklik günlüğü ve oluşturulan skill'lerin senkronizasyonu                                                                                                                                                        | Evet, fork'lar dahil    |
 

@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "Toate modelele sunt deja importate",
     "noNewModelsToImport": "Niciun model nou de importat — toate modelele sunt deja în registru sau în lista de modele personalizate",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Descoperirea modelului a eșuat {time}",
     "skippingExistingModels": "Se omit {count} modele existente",
     "autoSync": "Sincronizare automată",
     "autoSyncShort": "Sincronizează",

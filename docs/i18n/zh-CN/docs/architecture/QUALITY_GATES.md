@@ -19,13 +19,11 @@
 CI 和 Quality Gates 工作流各自都会生成一个稳定的判定结果：`Gate / CI` 和
 `Gate / Quality`。它们的版本化准入策略将每个上游作业列为必需或建议。
 适用的必需作业必须成功：缺失、已取消、已跳过、待处理和未知结果都无法确立
-PASS。有效的仅文档或仅目录分类可使代码通道不适用；草稿 PR 不属于可接受的
+PASS。有效的仅文档或仅目录分类可使代码通道不适用；普通草稿 PR 不属于可接受的
 候选版本。`hotfix` 标签不能免除证据要求。
 
 这两个工作流均涵盖以 main/release 分支为目标的 PR、向 `main` 的推送、手动触发
-和合并组事件。推送、手动触发和合并组会运行完整选择。向 `release/**` 的推送
-不会启动这些工作流（2026-10-18）：每项变更都已在其 PR 上运行过矩阵，而合并后
-的组合由 Release-Green 负责（`docs/ops/RUNNER_BOX.md` → 托管通道）。对于原本会
+和合并组事件。推送、手动触发和合并组会运行完整选择。受信任的 Mergify 队列草稿也会运行适用的 `full-code`/`full-code-e2e` 作业；普通 PR 会跳过这些作业。手动合并前，请对确切的候选版本执行完整的 dispatch。向 `release/**` 的推送不会启动这些工作流；Release-Green 会单独观察合并后的基线（`docs/ops/RUNNER_BOX.md` → 托管通道）。对于原本会
 选择自托管运行器的作业，来自 fork 的 PR 和合并组会使用托管运行器；在推出前
 必须验证是否具备足够的托管容量。
 
@@ -76,7 +74,7 @@ Istanbul 报告。最终的 Coverage 作业会根据候选版本 SHA、运行时
 
 共享的 `test:unit:ci:shard` 命令通过 `scripts/ci/unit-progress-reporter.mjs` 记录 `primary`、`dashboard` 和 `serial` 阶段。常规测试报告仍然可用。另有一份仅包含元数据的回执，用于记录每个文件的开始和完成情况；每 30 秒发送一次的心跳会列出仍处于活动状态的文件及其已运行时间。它仅记录允许列表中的执行元数据；测试描述、输出、错误正文和完整环境均不会被序列化。
 
-CI 和 Quality 将 JSONL 文件分别保留为 `unit-progress-ci-<run>-<attempt>-<shard>` 和 `unit-progress-quality-<run>-<attempt>-<shard>`。作业超时可能会阻止后续上传；已经发出的心跳仍可作为诊断依据。心跳缺失也可能表示运行器进程已阻塞或终止。这些回执会保留现有的测试选择、并发设置、截止时间和退出状态；它们并非候选项准入判定。
+CI 将 JSONL 文件保留为 `unit-progress-ci-<run>-<attempt>-<shard>`。作业超时可能会阻止后续上传；已经发出的心跳仍可作为诊断依据。心跳缺失也可能表示运行器进程已阻塞或终止。这些回执会保留现有的测试选择、并发设置、截止时间和退出状态；它们并非候选项准入判定。
 
 ### 静态扫描清单
 
@@ -126,8 +124,6 @@ CI 的事实来源是 `.github/workflows/ci.yml`。
 | `Docs Gates (fast-path)`                         | 文档/代码 PR；API 文档引用和全部文档检查                                                                          | 是            |
 | `Fast Quality Gates`                             | 代码 PR；静态检查、类型检查、仪表板类型检查、受影响的单元测试                                                     | 是            |
 | `Forgotten sibling tests`                        | 代码 PR；追踪已更改模块的静态使用方和候选同级测试；桶文件和动态导入路径仅作为建议性诊断报告，并支持引用白名单例外 | **建议性**    |
-| `Vitest (fast-path)`                             | 代码 PR；快速 vitest 测试套件                                                                                     | 是            |
-| `Unit Tests fast-path`                           | 代码 PR；4 分片单元测试套件                                                                                       | 是            |
 | `No new ESLint warnings`                         | 代码 PR；可识别抑制项的 lint 防护                                                                                 | 是，包括 fork |
 | `Merge integrity (changelog + generated skills)` | 非草稿 PR；变更日志和生成的技能同步                                                                               | 是，包括 fork |
 

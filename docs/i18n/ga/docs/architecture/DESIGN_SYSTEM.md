@@ -8,10 +8,7 @@
 > curtha san áireamh go díreach (vendored) mar spás oibre `packages/ui-kit` (`@omniroute/ui-kit`; tá
 > snapsháil an tsrutha uachtaraigh greamaithe i `packages/ui-kit/UPSTREAM.md` agus é á chosaint ag
 > `npm run check:ui-kit-snapshot`). Is é an téama Éadrom an téama canónta; is í `system` an rogha
-> réamhshocraithe. Is é lime Keak an t-aicsean (`--ci-color-accent`). Is í Inter (spásáil litreach 0,
-> `--ci-letter-spacing-ui`) clann an UI, Instrument Serif le haghaidh téacs taispeána mór gann amháin
-> (`.ci-dashboard-display`), IBM Plex Mono don chód — féin-óstáilte go léir trí na h-allmhairí
-> `@fontsource/*` ag barr `src/app/globals.css`. Is glif Lucide gach deilbhín.
+> réamhshocraithe. Is é lime Keak an t-aicsean (`--ci-color-accent`). Is é Switzer an teaghlach aonair le haghaidh UI, taispeáint agus cód téacs (`--ci-font-ui`; `--ci-font-display` agus `--ci-font-mono` réiteach dó ), féin-óstáil ag an trealamh féin (`packages/ui-kit/src/ci-fonts.css`, allmhairithe ag `ci-tokens.css`). Is glyph Lucide gach íocón.
 
 ## 1. Cá bhfuil rudaí suite
 
@@ -36,7 +33,7 @@
 2. Ná paisteáil `packages/ui-kit/src` de láimh riamh: sioncronaigh le `scripts/dev/sync-ui-kit.sh <commit>`; teipeann ar an ngeata réamh-churtha `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) má tá aon bheart difriúil ón tiomantas réamhtheachtach pionnáilte (scipeálann sé le rabhadh nuair atá an clón réamhtheachtach, `UI_KIT_CLONE` nó `_references/cheaper-inference-ui-kit`, ar iarraidh). Nuair nach bhfuil rud éigin sa trealamh, téigh timpeall air san oiriúntóir nó sa scáileán agus iarr é ón bhfoireann réamhtheachtach.
 3. Is i mBéarla atá réamhshocruithe téacs an trealaimh (`label = "Loading"`, `loadingLabel = "Loading table"`…) — tabhair teaghráin aistrithe ó `useTranslations(...)` gach uair a rindreálann comhpháirt trealaimh téacs.
 4. Bíonn forlámhas ag fóntais Tailwind ar aicmí comhpháirteanna an trealaimh (dearbhaíonn an trealamh `@layer theme, base, components, utilities` agus tá a rialacha in `components`) — úsáid fóntais le haghaidh spásála agus leagain amach, ní chun dath eile a chur ar chomhpháirteanna an trealaimh.
-5. Ceannteidil: `.ci-heading` (Inter, gan spásáil idir litreacha) le haghaidh teidil leathanaigh agus rannóige; `.ci-dashboard-display` (Instrument Serif) le haghaidh téacs mór taispeána nach bhfuil dlúth ach amháin, amhail cód stádais an leathanaigh earráide.
+5. Ceannteidil: `.ci-heading` do theidil leathanaigh agus rannáin; `.ci-dashboard-display` ach amháin le haghaidh téacs taispeántais mór tanaí, mar shampla an cód stádais earráid-leathanaigh. Úsáideann an bheirt acu Switzer.
 6. Cosnaíonn `tests/unit/dashboard-kit-sweep.test.ts` glacadh an trealaimh: gan aon réise ligature Material faoi `src/app` ná `src/shared/components`; i gcrann an deais (`src/app/(dashboard)` agus `src/shared/components`), gan aon `<select>`, `<textarea>` ná `<table>` amh, agus gan aon `role="dialog"` lámhdhéanta lasmuigh de na heisceachtaí liostaithe (brainse dúchasach an oiriúntóra `Select`, `RequestLoggerDetail`); teastaíonn nóta tráchta ina bhfuil `kit-exception:` (mar aon leis an gcúis) ó gach `<button>` nó `<input>` amh ansin, agus ní mór don nóta críochnú 3 líne ar a mhéad os a chionn; ní cheadaítear líonna pailéid ná malairtí `dark:` ach amháin sna comhaid atá liostaithe sa tástáil.
 7. Fíoraigh an dá théama agus an t-amharcphort 390 px roimh PR (gabhálacha scáileáin); ritheann `tests/e2e/a11y.spec.ts` axe.
 
@@ -84,7 +81,7 @@ oscail an PR leis an loga athruithe uasabhraí.
 
 Cuireann an dá léaráid déag atá leabaithe sa `README.md` fréimhe (`docs/diagrams/*.svg`) an trealamh i bhfeidhm ar íomhánna statacha. Gintear iad, ní tharraingítear de láimh iad: 13 chomhad gineadóra in `scripts/docs/gen-readme-*.mjs` (dhá léaráid déag agus an tiománaí `gen-readme-diagrams.mjs`) agus 12 thástáil seandátaithe in `tests/unit/docs/readme-*-svg.test.ts`, ceann do gach léaráid. Déanann gach tástáil comparáid beart ar bheart idir an comhad sa commit agus aschur a ghineadóra (jab `test-unit`).
 
-- **Comharthaí.** Cóipeálann `scripts/docs/readme-diagram-theme.mjs` an pailéad ó `packages/ui-kit/src/ci-tokens.css` (coinníonn `tests/unit/docs/readme-diagram-theme.test.ts` é ar aon dul leis an gcomhad sin) agus sainíonn sé róil téacs le clófhoirne an trealaimh: Instrument Serif do théacs taispeána, Inter don chomhéadan agus IBM Plex Mono d'uimhreacha agus cód. Is iad na pacáistí `@fontsource` céanna iad a lódálann `src/app/globals.css` don deais. Tá na luachanna geala ar `:root` agus na cinn dhorcha faoi `prefers-color-scheme: dark` sa chomhad, ionas go leanann gach íomhá scéim dathanna an léitheora ar GitHub.
+- **Comharthaí.** Déanann `scripts/docs/readme-diagram-theme.mjs` an pailéad a chóipeáil ó `packages/ui-kit/src/ci-tokens.css` (pinned in aghaidh an chomhaid sin ag `tests/unit/docs/readme-diagram-theme.test.ts`) agus sainmhíníonn sé na róil téacs ar aghaidheanna níos luaithe an feiste - Serif Ionstraim le taispeáint, Inter le haghaidh téacs UI, IBM Plex Mono le haghaidh figiúirí agus cód - ó na pacáistí `@fontsource` (úsáideann an painéal féin Switzer an trealamh ó threalamh 0.0.66). Suíonn luachanna solais ar `:root`, luachanna dorcha taobh thiar `prefers-color-scheme: dark`, taobh istigh den chomhad, mar sin leanann gach íomhá scéim an lucht féachana ar GitHub.
 
 - **Clófhoirne.** Laghdaíonn `scripts/docs/readme-fonts.mjs` na comhaid woff2 sin go dtí na glifí a tharraingíonn gach léaráid agus leabaíonn sé iad trí `@font-face` mar URIanna `data:`. Coinníonn sé seo clófhoirne an trealaimh laistigh den SVG. Seiceálann an triail áitiúil d'íomhánna README nach ndéanann an rindreáil aon iarratas seachtrach ar chlófhoirne. Níl ach carachtair Laidine sna fo-thacair; ceadaítear glifí siombailí a úsáideann clófhoirne an chórais mar chúltaca ceann ar cheann in `SYMBOL_FALLBACKS`. Cruthaíonn aon ghlif eile nach bhfuil clúdaithe earráid.
 

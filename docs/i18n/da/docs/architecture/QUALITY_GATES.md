@@ -24,12 +24,10 @@ CI- og Quality Gates-workflowene udsender hver en stabil afgørelse: `Gate / CI`
 som påkrævet eller vejledende. Et relevant påkrævet job skal lykkes: manglende,
 annullerede, oversprungne, afventende og ukendte resultater kan ikke fastslå PASS. En gyldig
 klassifikation som kun dokumentation eller kun katalog kan gøre et kodespor irrelevant;
-en PR-kladde er ikke en accepteret kandidat. En `hotfix`-etiket fritager ikke for dokumentation.
+en almindelig PR-kladde er ikke en accepteret kandidat. En `hotfix`-etiket fritager ikke for dokumentation.
 
 Begge workflows dækker PR'er til main-/release-grene, pushes til `main`, manuel aktivering
-og merge group-hændelser. Push, aktivering og merge group kører det fulde udvalg. Pushes til
-`release/**` starter dem ikke (2026-10-18): hver ændring har allerede kørt matricen på sin PR,
-og den flettede kombination er Release-Greens opgave (`docs/ops/RUNNER_BOX.md` → Hosted-spor). Forks
+og merge group-hændelser. Push, aktivering og merge group kører det fulde udvalg. En betroet kladde i Mergify-køen kører også de relevante `full-code`/`full-code-e2e`-jobs; almindelige PR'er springer dem over. Før en manuel fletning skal du starte en fuld dispatch på den præcise kandidat. Pushes til `release/**` starter ikke disse workflows; Release-Green overvåger den flettede base separat (`docs/ops/RUNNER_BOX.md` → Hosted-spor). Forks
 og merge groups bruger hostede runners til jobs, der ellers vælger selvhostede
 runners; tilstrækkelig hostet kapacitet skal verificeres før udrulning.
 
@@ -95,8 +93,7 @@ for hver fil, og et heartbeat hvert 30. sekund viser de filer, der stadig er akt
 kun godkendte eksekveringsmetadata; testbeskrivelser, output, fejlindhold og det komplette
 miljø serialiseres ikke.
 
-CI og Quality opbevarer JSONL-filerne som `unit-progress-ci-<run>-<attempt>-<shard>` og
-`unit-progress-quality-<run>-<attempt>-<shard>`. En timeout for et job kan forhindre den efterfølgende upload;
+CI gemmer JSONL-filerne som `unit-progress-ci-<run>-<attempt>-<shard>`. En timeout for et job kan forhindre den efterfølgende upload;
 allerede udsendte heartbeats forbliver diagnostisk dokumentation. Manglende heartbeats kan også skyldes
 en blokeret eller afsluttet runner-proces. Disse kvitteringer bevarer den eksisterende testudvælgelse,
 samtidighed, tidsfrister og afslutningsstatus; de er ikke afgørelser om godkendelse af kandidater.
@@ -166,8 +163,6 @@ deaktiverede duplikerede build blev fjernet; de egentlige build-/pakke-/opstarts
 | `Docs Gates (fast-path)`                         | Dokumentations-/kode-PR'er; API-dokumentationsreferencer og docs-all                                                                                                                                   | Ja                  |
 | `Fast Quality Gates`                             | Kode-PR'er; statiske kontroller, typekontrol, typekontrol af dashboard, berørte enhedstests                                                                                                            | Ja                  |
 | `Forgotten sibling tests`                        | Kode-PR'er; ændrede moduler spores til statiske forbrugere og mulige relaterede tests; barrel- og dynamic-import-stier rapporteres som vejledende diagnostik med refererede undtagelser på allowlisten | **Vejledende**      |
-| `Vitest (fast-path)`                             | Kode-PR'er; hurtig vitest-suite                                                                                                                                                                        | Ja                  |
-| `Unit Tests fast-path`                           | Kode-PR'er; enhedstestsuite med 4 shards                                                                                                                                                               | Ja                  |
 | `No new ESLint warnings`                         | Kode-PR'er; lint-kontrol, der tager højde for undertrykkelser                                                                                                                                          | Ja, inklusive forks |
 | `Merge integrity (changelog + generated skills)` | PR'er, der ikke er kladder; synkronisering af changelog og genererede skills                                                                                                                           | Ja, inklusive forks |
 

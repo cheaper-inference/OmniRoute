@@ -24,12 +24,10 @@ Svaki od CI i Quality Gates radnih tokova daje stabilan rezultat: `Gate / CI` i
 kao obavezan ili savjetodavan. Primjenjivi obavezni posao mora uspjeti: nedostajući,
 otkazani, preskočeni, rezultati na čekanju i nepoznati rezultati ne mogu uspostaviti PASS. Važeća
 klasifikacija samo za dokumentaciju ili samo za katalog može učiniti programsku granu neprimjenjivom;
-nacrt PR-a nije prihvaćen kandidat. Oznaka `hotfix` ne ukida zahtjev za dokazima.
+obični nacrt PR-a nije prihvaćen kandidat. Oznaka `hotfix` ne ukida zahtjev za dokazima.
 
 Oba radna toka obuhvataju PR-ove prema glavnim/izdanjskim granama, slanja na `main`, ručno pokretanje
-i događaje grupe spajanja. Slanje, ručno pokretanje i grupa spajanja izvršavaju puni odabir. Slanja na
-`release/**` ih ne pokreću (2026-10-18): svaka promjena je već izvršila matricu u svom PR-u,
-a spojena kombinacija je zadatak sistema Release-Green (`docs/ops/RUNNER_BOX.md` → Hostovana grana). Forkovi
+i događaje grupe spajanja. Slanje, ručno pokretanje i grupa spajanja izvršavaju puni odabir. Pouzdani nacrt u Mergify redu također izvršava primjenjive poslove `full-code`/`full-code-e2e`; obični PR-ovi ih preskaču. Prije ručnog spajanja pokrenite puni dispatch za tačno tog kandidata. Slanja na `release/**` ne pokreću ove radne tokove; Release-Green zasebno nadzire spojenu bazu (`docs/ops/RUNNER_BOX.md` → Hostovana grana). Forkovi
 i grupe spajanja koriste hostovane izvršioce za poslove koji bi inače odabrali samostalno hostovane
 izvršioce; prije uvođenja mora se provjeriti dovoljan hostovani kapacitet.
 
@@ -95,8 +93,7 @@ dok 30-sekundni signal aktivnosti navodi datoteke koje su još uvijek aktivne i 
 samo metapodaci o izvršavanju s liste dozvoljenih stavki; opisi testova, izlazni podaci, sadržaji grešaka i cjelokupno
 okruženje ne serijaliziraju se.
 
-CI i Quality čuvaju JSONL datoteke kao `unit-progress-ci-<run>-<attempt>-<shard>` i
-`unit-progress-quality-<run>-<attempt>-<shard>`. Istek vremena zadatka može spriječiti kasnije otpremanje;
+CI čuva JSONL datoteke pod nazivom `unit-progress-ci-<run>-<attempt>-<shard>`. Istek vremena zadatka može spriječiti kasnije otpremanje;
 već emitirani signali aktivnosti ostaju dijagnostički dokaz. Nedostatak signala aktivnosti također može ukazivati
 na blokiran ili prekinut proces izvršavača. Ove potvrde zadržavaju postojeći odabir testova,
 konkurentnost, rokove i izlazni status; one nisu odluke o prihvatanju kandidata.
@@ -164,8 +161,6 @@ onemogućena duplicirana izgradnja je uklonjena; stvarne provjere izgradnje/pako
 | `Docs Gates (fast-path)`                         | PR-ovi dokumentacije/koda; reference API dokumentacije i docs-all                                                                                                                                                                  | Da                      |
 | `Fast Quality Gates`                             | PR-ovi koda; statičke provjere, provjera tipova, provjera tipova kontrolne ploče, pogođeni jedinični testovi                                                                                                                       | Da                      |
 | `Forgotten sibling tests`                        | PR-ovi koda; promijenjeni moduli prate se do statičkih potrošača i mogućih srodnih testova; putanje barrel modula i dinamičkog uvoza prijavljuju se kao savjetodavna dijagnostika, uz navedene izuzetke s liste dozvoljenih stavki | **Savjetodavno**        |
-| `Vitest (fast-path)`                             | PR-ovi koda; brzi vitest skup                                                                                                                                                                                                      | Da                      |
-| `Unit Tests fast-path`                           | PR-ovi koda; skup jediničnih testova podijeljen u 4 particije                                                                                                                                                                      | Da                      |
 | `No new ESLint warnings`                         | PR-ovi koda; zaštita lintanja koja uzima u obzir potiskivanja                                                                                                                                                                      | Da, uključujući forkove |
 | `Merge integrity (changelog + generated skills)` | PR-ovi koji nisu nacrti; sinhronizacija dnevnika promjena i generiranih vještina                                                                                                                                                   | Da, uključujući forkove |
 

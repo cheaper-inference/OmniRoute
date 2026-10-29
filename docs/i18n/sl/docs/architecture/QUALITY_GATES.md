@@ -24,12 +24,10 @@ Poteka dela CI in Quality Gates vsak izdata stabilno odločitev: `Gate / CI` in
 kot obvezno ali svetovalno. Veljavno obvezno opravilo mora uspeti: manjkajoči,
 preklicani, preskočeni, čakajoči in neznani rezultati ne morejo potrditi stanja PASS. Veljavna
 razvrstitev samo za dokumentacijo ali samo za katalog lahko naredi programsko vejo neveljavno;
-osnutek PR-ja ni sprejet kandidat. Oznaka `hotfix` ne odpravlja zahteve po dokazilih.
+običajen osnutek PR-ja ni sprejet kandidat. Oznaka `hotfix` ne odpravlja zahteve po dokazilih.
 
 Oba poteka dela zajemata PR-je v glavne/izdajne veje, potiske v `main`, ročni zagon
-in dogodke skupine združevanja. Potiski, ročni zagoni in skupine združevanja izvedejo celoten izbor. Potiski v
-`release/**` ju ne sprožijo (2026-10-18): vsaka sprememba je matriko že izvedla v svojem PR-ju,
-združena kombinacija pa je naloga Release-Green (`docs/ops/RUNNER_BOX.md` → Gostovana veja). Razcepi
+in dogodke skupine združevanja. Potiski, ročni zagoni in skupine združevanja izvedejo celoten izbor. Zaupanja vreden osnutek iz čakalne vrste Mergify izvede tudi veljavna opravila `full-code`/`full-code-e2e`; običajni PR-ji jih preskočijo. Pred ročnim združevanjem izvedite celoten dispatch na točno določenem kandidatu. Potiski v `release/**` ne sprožijo teh potekov dela; Release-Green ločeno spremlja združeno osnovo (`docs/ops/RUNNER_BOX.md` → Gostovana veja). Razcepi
 in skupine združevanja uporabljajo gostovane izvajalnike za opravila, ki bi sicer izbrala samogostovane
 izvajalnike; pred uvedbo je treba preveriti zadostno gostovano zmogljivost.
 
@@ -95,8 +93,7 @@ datoteke, 30-sekundni signal aktivnosti pa navaja datoteke, ki so še vedno akti
 njihovega izvajanja. Beleži samo metapodatke o izvajanju z dovoljenega seznama; opisi testov,
 izhodni podatki, vsebina napak in celotno okolje se ne serializirajo.
 
-CI in Quality shranita datoteke JSONL kot `unit-progress-ci-<run>-<attempt>-<shard>` in
-`unit-progress-quality-<run>-<attempt>-<shard>`. Časovna omejitev opravila lahko prepreči
+CI hrani datoteke JSONL kot `unit-progress-ci-<run>-<attempt>-<shard>`. Časovna omejitev opravila lahko prepreči
 poznejše nalaganje; že oddani signali aktivnosti ostanejo diagnostični dokaz. Manjkajoči
 signali aktivnosti lahko pomenijo tudi, da je proces izvajalnika blokiran ali končan.
 Ta potrdila ohranjajo obstoječi izbor testov, sočasnost, roke in izhodno stanje; ne pomenijo
@@ -152,8 +149,6 @@ onemogočena podvojena gradnja je bila odstranjena; dejanska preverjanja gradnje
 | `Docs Gates (fast-path)`                         | PR-ji dokumentacije/kode; reference dokumentacije API-ja in docs-all                                                                                                                                                              | Da                          |
 | `Fast Quality Gates`                             | PR-ji kode; statična preverjanja, preverjanje tipov, preverjanje tipov nadzorne plošče, zadevni testi enot                                                                                                                        | Da                          |
 | `Forgotten sibling tests`                        | PR-ji kode; spremenjeni moduli, povezani s statičnimi porabniki in kandidati za sorodne teste; poti prek zbirnih modulov in dinamičnih uvozov so navedene kot svetovalna diagnostika, z navedenimi izjemami na seznamu dovoljenih | **Svetovalno**              |
-| `Vitest (fast-path)`                             | PR-ji kode; hitri nabor Vitest                                                                                                                                                                                                    | Da                          |
-| `Unit Tests fast-path`                           | PR-ji kode; nabor testov enot v 4 delih                                                                                                                                                                                           | Da                          |
 | `No new ESLint warnings`                         | PR-ji kode; zaščita lintanja, ki upošteva izključitve                                                                                                                                                                             | Da, vključno z razvejitvami |
 | `Merge integrity (changelog + generated skills)` | PR-ji, ki niso osnutki; sinhronizacija dnevnika sprememb in ustvarjenih veščin                                                                                                                                                    | Da, vključno z razvejitvami |
 

@@ -7,10 +7,7 @@
 > **Status:** Das Dashboard basiert auf dem **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), eingebettet (vendored)
 > als Workspace `packages/ui-kit` (`@omniroute/ui-kit`; der Upstream-Snapshot ist in
 > `packages/ui-kit/UPSTREAM.md` festgehalten und durch `npm run check:ui-kit-snapshot` abgesichert). Light ist das
-> maßgebliche Theme; die Standardeinstellung ist `system`. Die Akzentfarbe ist Keak-Lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) ist die UI-Schriftfamilie, Instrument Serif nur für großen, spärlich
-> gesetzten Display-Text (`.ci-dashboard-display`), IBM Plex Mono für Code — alle selbst gehostet über die
-> `@fontsource/*`-Imports am Anfang von `src/app/globals.css`. Jedes Icon ist eine Lucide-Glyphe.
+> maßgebliche Theme; die Standardeinstellung ist `system`. Die Akzentfarbe ist Keak-Lime (`--ci-color-accent`). Switzer ist die einzelne Familie für UI, Anzeige- und Codetext (`--ci-font-ui`; `--ci-font-display` und `--ci-font-mono` lösen sich darauf auf), die vom Kit selbst selbst gehostet wird (`packages/ui-kit/src/ci-fonts.css`, importiert von `ci-tokens.css`). Jedes Symbol ist eine Lucide-Glyphe.
 
 ## 1. Wo sich alles befindet
 
@@ -99,8 +96,7 @@
 4. Tailwind-Dienstprogramme haben Vorrang vor den Komponentenklassen des Kits (das Kit deklariert
    `@layer theme, base, components, utilities`, und seine Regeln befinden sich in `components`) — Dienstprogramme für
    Abstände und Layout verwenden, nicht zum Umfärben von Kit-Komponenten.
-5. Überschriften: `.ci-heading` (Inter, ohne Zeichenabstand) für Seiten- und Abschnittstitel; `.ci-dashboard-display`
-   (Instrument Serif) nur für große, sparsam eingesetzte Anzeigetexte wie den Statuscode auf der Fehlerseite.
+5. Überschriften: `.ci-heading` für Seiten- und Abschnittstitel; `.ci-dashboard-display` nur für großen, spärlichen Anzeigetext wie den Statuscode der Fehlerseite. Beide nutzen Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` stellt die Kit-Nutzung sicher: keine Material-Ligatur-Spans unter
    `src/app` oder `src/shared/components`; im Dashboard-Baum (`src/app/(dashboard)` und
    `src/shared/components`) keine unverarbeiteten `<select>`-, `<textarea>`- oder `<table>`-Elemente und keine selbst
@@ -157,7 +153,7 @@ Settings, Combos, Usage und Endpoint in beiden Themes durchführen, `npm run che
 
 Die zwölf Diagramme im `README.md` des Stammverzeichnisses (`docs/diagrams/*.svg`) wenden das Kit auf statische Bilder an. Sie werden erzeugt, nicht von Hand gezeichnet: 13 Generatordateien unter `scripts/docs/gen-readme-*.mjs` (zwölf Diagramme plus der Treiber `gen-readme-diagrams.mjs`) und 12 Aktualitätstests unter `tests/unit/docs/readme-*-svg.test.ts`, einer je Diagramm. Jeder Test vergleicht die eingecheckte Datei byteweise mit der Ausgabe ihres Generators (Job `test-unit`).
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopiert die Palette aus `packages/ui-kit/src/ci-tokens.css` (durch `tests/unit/docs/readme-diagram-theme.test.ts` gegen diese Datei abgesichert) und definiert die Textrollen mit den Schriften des Kits: Instrument Serif für Display-Text, Inter für UI-Text und IBM Plex Mono für Zahlen und Code. Es sind dieselben `@fontsource`-Pakete, die `src/app/globals.css` für das Dashboard lädt. Helle Werte stehen in `:root`, dunkle unter `prefers-color-scheme: dark` innerhalb der Datei; dadurch folgt jedes Bild dem Farbschema des Betrachters auf GitHub.
+- **Token.** `scripts/docs/readme-diagram-theme.mjs` kopiert die Palette von `packages/ui-kit/src/ci-tokens.css` (von `tests/unit/docs/readme-diagram-theme.test.ts` an diese Datei angeheftet) und definiert die Textrollen auf den früheren Flächen des Kits – Instrument Serif für die Anzeige, Inter für UI Text, IBM Plex Mono für Figuren und Code – aus den `@fontsource` Paketen (das Dashboard selbst verwendet seit Kit 0.0.66 die Switzer des Kits). Helle Werte befinden sich auf `:root`, dunkle Werte hinter `prefers-color-scheme: dark` in der Datei, sodass jedes Bild dem Schema des Betrachters auf GitHub folgt.
 
 - **Schriften.** `scripts/docs/readme-fonts.mjs` reduziert diese woff2-Dateien auf die im jeweiligen Diagramm gezeichneten Glyphen und bettet sie als `@font-face` mit `data:`-URIs ein. So bleiben die Schriften des Kits im SVG. Der lokale README-Bildtest prüft, dass beim Rendern keine externen Schriftanfragen entstehen. Die Teilmengen enthalten nur lateinische Zeichen; Symbolglyphen, die auf die Systemschriften zurückfallen, werden einzeln in `SYMBOL_FALLBACKS` zugelassen. Jede andere nicht abgedeckte Glyphe löst einen Fehler aus.
 

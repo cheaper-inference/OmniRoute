@@ -24,14 +24,12 @@ I workflow CI e Quality Gates emettono ciascuno un verdetto stabile: `Gate / CI`
 come obbligatorio o consultivo. Un job obbligatorio applicabile deve riuscire: risultati
 mancanti, annullati, ignorati, in sospeso e sconosciuti non possono determinare un PASS. Una
 classificazione valida come solo documentazione o solo catalogo può rendere non applicabile una
-lane del codice; una PR in bozza non è un candidato accettato. Un'etichetta `hotfix` non esonera
+lane del codice; una normale PR in bozza non è un candidato accettato. Un'etichetta `hotfix` non esonera
 dalla presentazione delle evidenze.
 
 Entrambi i workflow coprono le PR verso i branch main/release, i push su `main`, l'avvio manuale
 e gli eventi dei merge group. Push, avvio manuale e merge group eseguono la selezione completa.
-I push su `release/**` non li avviano (2026-10-18): ogni modifica ha già eseguito la matrice nella
-propria PR e la combinazione risultante dal merge è compito di Release-Green
-(`docs/ops/RUNNER_BOX.md` → Lane ospitata). I fork e i merge group utilizzano runner ospitati per
+Anche una bozza attendibile nella coda Mergify esegue i job applicabili `full-code`/`full-code-e2e`; le PR normali li saltano. Prima di un merge manuale, avvia un dispatch completo sul candidato esatto. I push su `release/**` non avviano questi workflow; Release-Green osserva separatamente la base risultante dal merge (`docs/ops/RUNNER_BOX.md` → Lane ospitata). I fork e i merge group utilizzano runner ospitati per
 i job che altrimenti selezionerebbero runner self-hosted; prima del rollout deve essere verificata
 una capacità ospitata sufficiente.
 
@@ -102,8 +100,7 @@ di ciascun file, mentre un heartbeat ogni 30 secondi elenca i file ancora attivi
 solo i metadati di esecuzione inclusi nell'elenco consentito; le descrizioni dei test, l'output, il corpo degli errori e l'ambiente
 completo non vengono serializzati.
 
-CI e Quality conservano i file JSONL come `unit-progress-ci-<run>-<attempt>-<shard>` e
-`unit-progress-quality-<run>-<attempt>-<shard>`. Un timeout del job può impedire il successivo caricamento;
+CI conserva i file JSONL come `unit-progress-ci-<run>-<attempt>-<shard>`. Un timeout del job può impedire il successivo caricamento;
 gli heartbeat già emessi rimangono evidenze diagnostiche. L'assenza di heartbeat può anche indicare
 un processo del runner bloccato o terminato. Queste ricevute preservano la selezione dei test,
 la concorrenza, le scadenze e lo stato di uscita esistenti; non costituiscono verdetti di ammissione dei candidati.
@@ -172,8 +169,6 @@ disabilitata in modo permanente, è stata rimossa; i controlli effettivi di buil
 | `Docs Gates (fast-path)`                         | PR di documentazione/codice; riferimenti alla documentazione API e docs-all                                                                                                                                                               | Sì                 |
 | `Fast Quality Gates`                             | PR di codice; controlli statici, controllo dei tipi, controllo dei tipi della dashboard, test unitari interessati                                                                                                                         | Sì                 |
 | `Forgotten sibling tests`                        | PR di codice; moduli modificati ricondotti ai consumer statici e ai possibili test correlati; i percorsi con barrel e importazioni dinamiche sono segnalati come diagnostica consultiva, con le eccezioni indicate nella lista consentita | **Consultivo**     |
-| `Vitest (fast-path)`                             | PR di codice; suite vitest rapida                                                                                                                                                                                                         | Sì                 |
-| `Unit Tests fast-path`                           | PR di codice; suite di test unitari suddivisa in 4 shard                                                                                                                                                                                  | Sì                 |
 | `No new ESLint warnings`                         | PR di codice; controllo lint che tiene conto delle soppressioni                                                                                                                                                                           | Sì, inclusi i fork |
 | `Merge integrity (changelog + generated skills)` | PR non in bozza; sincronizzazione del changelog e delle skill generate                                                                                                                                                                    | Sì, inclusi i fork |
 

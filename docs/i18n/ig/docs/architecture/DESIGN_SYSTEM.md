@@ -7,10 +7,7 @@
 > **Ọnọdụ:** e wuru dashboard ahụ n'elu **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), nke e debere
 > dị ka workspace `packages/ui-kit` (`@omniroute/ui-kit`; e gbochiri snapshot upstream na
 > `packages/ui-kit/UPSTREAM.md`, ma `npm run check:ui-kit-snapshot` na-echekwa ya). Light bụ isiokwu
-> nkịtị a na-anabata; nhọrọ ndabara bụ `system`. Accent ahụ bụ Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) bụ ezinụlọ ederede UI, Instrument Serif naanị maka ederede
-> ngosi buru ibu nke gbasachara (`.ci-dashboard-display`), IBM Plex Mono maka koodu — ha niile na-anabata
-> onwe ha site na mbubata `@fontsource/*` dị n'elu `src/app/globals.css`. Akara ngosi ọ bụla bụ Lucide glyph.
+> nkịtị a na-anabata; nhọrọ ndabara bụ `system`. Accent ahụ bụ Keak lime (`--ci-color-accent`). Switzer bụ otu ezinụlọ maka UI, ngosi na ederede koodu (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` kpebisiri ike na ya), nke ngwa ahụ n'onwe ya kwadoro (`packages/ui-kit/src/ci-fonts.css`, nke `ci-tokens.css` bubata). Akara ngosi ọ bụla bụ Lucide glyph.
 
 ## 1. Ebe ihe ndị a dị
 
@@ -98,8 +95,7 @@
 4. Tailwind utilities na-emeri classes component kit (kit na-ekwupụta
    `@layer theme, base, components, utilities`, iwu ya dịkwa na `components`) — jiri utilities maka
    oghere na nhazi, ọ bụghị iji nye components kit agba ọzọ.
-5. Isiokwu: `.ci-heading` (Inter, enweghị tracking) maka aha peeji na ngalaba; `.ci-dashboard-display`
-   (Instrument Serif) naanị maka nnukwu ederede ngosi na-adịghị ukwuu, dịka status code dị na peeji njehie.
+5. Isi okwu: `.ci-heading` maka aha ibe na ngalaba; `.ci-dashboard-display` naanị maka nnukwu ederede ngosi dị obere dị ka koodu ọnọdụ ibe mperi. Ha abụọ na-eji Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` na-echekwa nnabata kit: enweghị Material ligature span n'okpuru
    `src/app` ma ọ bụ `src/shared/components`; n'ime osisi dashboard (`src/app/(dashboard)` na
    `src/shared/components`), enweghị `<select>`, `<textarea>` ma ọ bụ `<table>` raw, nakwa enweghị
@@ -134,7 +130,7 @@
 
 Eserese iri na abụọ etinyere na `README.md` dị na mgbọrọgwụ (`docs/diagrams/*.svg`) na-etinye kit n'ihe oyiyi na-adịghị agagharị. A na-emepụta ha, a naghị eji aka ese ha: faịlụ generator 13 na `scripts/docs/gen-readme-*.mjs` (eserese iri na abụọ na onye njikwa `gen-readme-diagrams.mjs`) na ule 12 maka faịlụ ochie na `tests/unit/docs/readme-*-svg.test.ts`, otu maka eserese ọ bụla. Ule ọ bụla na-atụnyere faịlụ e debere na commit na mmepụta generator ya byte n'otu byte (ọrụ `test-unit`).
 
-- **Token.** `scripts/docs/readme-diagram-theme.mjs` na-edepụta palette si na `packages/ui-kit/src/ci-tokens.css` (ule `tests/unit/docs/readme-diagram-theme.test.ts` na-eme ka ọ kwekọọ na faịlụ ahụ) ma kọwaa ọrụ ederede site na font kit: Instrument Serif maka ederede ngosi, Inter maka ederede interface, IBM Plex Mono maka ọnụọgụ na koodu. Ha bụ otu ngwugwu `@fontsource` nke `src/app/globals.css` na-ebunye maka dashboard. Uru ọkụ dị na `:root`, nke gbara ọchịchịrị nọ n'okpuru `prefers-color-scheme: dark` n'ime faịlụ, ka ihe oyiyi ọ bụla soro atụmatụ agba onye na-agụ na GitHub.
+- **Token.** `scripts/docs/readme-diagram-theme.mjs` na-ebipụta palette ahụ site na `packages/ui-kit/src/ci-tokens.css` (na-ejikọta ya na faịlụ ahụ site na `tests/unit/docs/readme-diagram-theme.test.ts`) ma kọwaa ọrụ ederede na ihu mbụ nke kit - Instrument Serif maka ngosi, Inter maka UI ederede, IBM Plex Mono maka ọnụ ọgụgụ na koodu - site na ngwugwu `@fontsource` (dashboard n'onwe ya na-eji Switzer kit kemgbe kit 0.0.66). Ụkpụrụ ọkụ na-anọdụ na `:root`, ụkpụrụ gbara ọchịchịrị n'azụ `prefers-color-scheme: dark`, n'ime faịlụ ahụ, ya mere oyiyi ọ bụla na-agbaso atụmatụ onye na-ekiri na GitHub.
 
 - **Font.** `scripts/docs/readme-fonts.mjs` na-ebelata faịlụ woff2 ndị ahụ ka ha nwee naanị glyph eserese ọ bụla na-ese, wee tinye ha site na `@font-face` dịka URI `data:`. Nke a na-edobe font kit n'ime SVG. Nnwale ihe oyiyi README nke mpaghara na-enyocha na igosi ihe oyiyi anaghị eziga arịrịọ font n'èzí. Obere nchịkọta ndị ahụ nwere naanị mkpụrụedemede Latin; glyph akara ndị na-eji font sistemụ dịka ndabere ka a na-ekwe otu otu na `SYMBOL_FALLBACKS`. Glyph ọ bụla ọzọ a na-ekpuchighị na-ebute njehie.
 

@@ -24,12 +24,10 @@
 као обавезан или саветодаван. Сваки примењиви обавезни посао мора бити успешан:
 недостајући, отказани, прескочени, недовршени и непознати резултати не могу да утврде PASS. Важећа
 класификација само за документацију или само за каталог може учинити програмску грану непримењивом;
-нацрт PR-а није прихваћен кандидат. Ознака `hotfix` не укида захтев за доказима.
+обичан нацрт PR-а није прихваћен кандидат. Ознака `hotfix` не укида захтев за доказима.
 
 Оба тока рада обухватају PR-ове ка главним/издавачким гранама, слања на `main`, ручно покретање
-и догађаје групе спајања. Слање, ручно покретање и група спајања извршавају пун избор. Слања на
-`release/**` их не покрећу (2026-10-18): свака измена је већ прошла матрицу у свом PR-у,
-а спојена комбинација је задатак система Release-Green (`docs/ops/RUNNER_BOX.md` → хостована грана). Форкови
+и догађаје групе спајања. Слање, ручно покретање и група спајања извршавају пун избор. Поуздан нацрт из Mergify реда такође покреће примењиве послове `full-code`/`full-code-e2e`; обични PR-ови их прескачу. Пре ручног спајања покрените пун dispatch на тачно одређеном кандидату. Слања на `release/**` не покрећу ове токове рада; Release-Green засебно прати спојену основу (`docs/ops/RUNNER_BOX.md` → хостована грана). Форкови
 и групе спајања користе хостоване извршиоце за послове који би иначе изабрали
 самостално хостоване извршиоце; пре увођења мора се потврдити довољан хостовани капацитет.
 
@@ -95,8 +93,7 @@ SHA кандидата, извршно окружење, корени дирек
 се само изричито дозвољени метаподаци о извршавању; описи тестова, излаз, тела грешака и целокупно
 окружење не серијализују се.
 
-CI и Quality чувају JSONL датотеке као `unit-progress-ci-<run>-<attempt>-<shard>` и
-`unit-progress-quality-<run>-<attempt>-<shard>`. Истек временског ограничења посла може спречити касније отпремање;
+CI чува JSONL датотеке као `unit-progress-ci-<run>-<attempt>-<shard>`. Истек временског ограничења посла може спречити касније отпремање;
 већ емитовани сигнали активности остају дијагностички доказ. Недостајући сигнали активности такође могу указивати
 на блокиран или прекинут процес извршиоца. Ове потврде задржавају постојећи избор тестова,
 конкурентност, рокове и излазни статус; оне не представљају одлуке о прихватању кандидата.
@@ -164,8 +161,6 @@ onemogućena duplirana izgradnja je uklonjena; stvarne provere izgradnje/pakovan
 | `Docs Gates (fast-path)`                         | PR-ovi za dokumentaciju/kôd; reference API dokumentacije i docs-all                                                                                                                                                                      | Da                      |
 | `Fast Quality Gates`                             | PR-ovi za kôd; statičke provere, provera tipova, provera tipova kontrolne table, obuhvaćeni jedinični testovi                                                                                                                            | Da                      |
 | `Forgotten sibling tests`                        | PR-ovi za kôd; praćenje izmenjenih modula do statičkih potrošača i potencijalnih srodnih testova; putanje preko zbirnih modula i dinamičkih uvoza prijavljuju se kao savetodavna dijagnostika, uz navedene izuzetke sa liste dozvoljenih | **Savetodavno**         |
-| `Vitest (fast-path)`                             | PR-ovi za kôd; brzi vitest skup                                                                                                                                                                                                          | Da                      |
-| `Unit Tests fast-path`                           | PR-ovi za kôd; skup jediničnih testova podeljen u 4 dela                                                                                                                                                                                 | Da                      |
 | `No new ESLint warnings`                         | PR-ovi za kôd; zaštitna provera lintovanja koja uzima u obzir potiskivanja                                                                                                                                                               | Da, uključujući forkove |
 | `Merge integrity (changelog + generated skills)` | PR-ovi koji nisu nacrti; sinhronizacija dnevnika izmena i generisanih veština                                                                                                                                                            | Da, uključujući forkove |
 

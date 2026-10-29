@@ -7,10 +7,7 @@
 > **Tila:** hallintapaneeli on rakennettu **Keak CI UI Kit** -kirjaston (`@keak/cheaper-inference-ui-kit`) päälle, vendoituna
 > workspace-pakettina `packages/ui-kit` (`@omniroute/ui-kit`; upstream-otos on kiinnitetty tiedostossa
 > `packages/ui-kit/UPSTREAM.md` ja sitä valvoo `npm run check:ui-kit-snapshot`). Vaalea on kanoninen
-> teema; oletusvalinta on `system`. Korostusvärinä on Keak-lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) on käyttöliittymän kirjasinperhe, Instrument Serif vain suurille
-> harvoille näyttöteksteille (`.ci-dashboard-display`), IBM Plex Mono koodille — kaikki itse isännöityinä
-> tiedoston `src/app/globals.css` alussa olevien `@fontsource/*`-tuontien kautta. Jokainen kuvake on Lucide-glyyfi.
+> teema; oletusvalinta on `system`. Korostusvärinä on Keak-lime (`--ci-color-accent`). Switzer on yksi UI, näyttö- ja kooditekstiperhe (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` ratkaisevat sen), itse isännöi itse sarja (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css`:n tuoma). Jokainen kuvake on Luciden merkki.
 
 ## 1. Missä asiat sijaitsevat
 
@@ -102,8 +99,7 @@ variant="primary"` on kitin `default`-nappi (`--ci-button-primary-*`: kääntein
 4. Tailwind-apuluokat ohittavat kitin komponenttiluokat (kit määrittää
    `@layer theme, base, components, utilities`, ja sen säännöt sijaitsevat `components`-kerroksessa) — käytä apuluokkia
    välistykseen ja asetteluun, älä kitin komponenttien värien muuttamiseen.
-5. Otsikot: `.ci-heading` (Inter, ei merkkivälistystä) sivujen ja osioiden otsikoihin; `.ci-dashboard-display`
-   (Instrument Serif) vain suuriin, väljiin näyttöteksteihin, kuten virhesivun tilakoodiin.
+5. Otsikot: `.ci-heading` sivujen ja osien otsikoille; `.ci-dashboard-display` vain suurelle, harvoille näyttöteksteille, kuten virhesivun tilakoodille. Molemmat käyttävät Switzeriä.
 6. `tests/unit/dashboard-kit-sweep.test.ts` valvoo kitin käyttöönottoa: ei Material-ligatuurin span-elementtiä
    `src/app`- tai `src/shared/components`-hakemistoissa; dashboard-puussa (`src/app/(dashboard)` ja
    `src/shared/components`) ei raakoja `<select>`-, `<textarea>`- tai `<table>`-elementtejä eikä itse toteutettua
@@ -148,7 +144,7 @@ variant="primary"` on kitin `default`-nappi (`--ci-button-primary-*`: kääntein
 
 Juurihakemiston `README.md`-tiedostoon upotetut kaksitoista kaaviota (`docs/diagrams/*.svg`) soveltavat kittiä staattisiin kuviin. Ne tuotetaan generaattoreilla, ei piirretä käsin: `scripts/docs/gen-readme-*.mjs` sisältää 13 generaattoritiedostoa (kaksitoista kaaviota ja ohjain `gen-readme-diagrams.mjs`), ja `tests/unit/docs/readme-*-svg.test.ts` sisältää 12 vanhentumista tarkistavaa testiä, yhden kutakin kaaviota kohti. Kukin testi vertaa commitoitua tiedostoa generaattorin tulokseen tavu tavulta (työ `test-unit`).
 
-- **Tokenit.** `scripts/docs/readme-diagram-theme.mjs` kopioi paletin tiedostosta `packages/ui-kit/src/ci-tokens.css` (vastaavuuden varmistaa `tests/unit/docs/readme-diagram-theme.test.ts`) ja määrittää tekstiroolit kitin kirjasimilla: Instrument Serif näyttäville otsikoille, Inter käyttöliittymätekstille ja IBM Plex Mono luvuille ja koodille. Nämä ovat samat `@fontsource`-paketit, jotka `src/app/globals.css` lataa hallintapaneelia varten. Vaaleat arvot ovat tiedoston `:root`-osassa ja tummat `prefers-color-scheme: dark`-ehdon takana, joten jokainen kuva seuraa GitHub-lukijan väriteemaa.
+- **Tokenit.** `scripts/docs/readme-diagram-theme.mjs` kopioi paletin `packages/ui-kit/src/ci-tokens.css` stä (kiinnitetty kyseiseen tiedostoon `tests/unit/docs/readme-diagram-theme.test.ts`:llä) ja määrittää tekstiroolit sarjan aikaisemmille pinnoille — Instrument Serif näytölle, Inter UI -tekstille, IBM Plex Mono kuvioille ja koodille — `@fontsource` -paketeista (itse kojelauta käyttää sarjan Switzer-fonttia sarjan versiosta 0.0.66 lähtien). Vaaleat arvot sijaitsevat tiedoston sisällä `:root` ssä, tummat arvot `prefers-color-scheme: dark` takana, joten jokainen kuva noudattaa katsojan kaavaa GitHub:ssä.
 
 - **Kirjasimet.** `scripts/docs/readme-fonts.mjs` rajaa nämä woff2-tiedostot kunkin kaavion piirtämiin glyyfeihin ja upottaa ne `@font-face`-määrityksinä `data:`-URI-osoitteiden avulla. Näin kitin kirjasimet pysyvät SVG:n sisällä. Paikallinen README-kuvatesti tarkistaa, ettei renderöinti tee ulkoisia kirjasinpyyntöjä. Osajoukot sisältävät vain latinalaisia merkkejä; järjestelmän kirjasinvalikoimaan turvautuvat symboliglyyfit sallitaan yksitellen kohdassa `SYMBOL_FALLBACKS`. Jokainen muu puuttuva glyyfi aiheuttaa virheen.
 

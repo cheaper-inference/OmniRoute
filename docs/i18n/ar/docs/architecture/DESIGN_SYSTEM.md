@@ -7,10 +7,7 @@
 > **الحالة:** لوحة التحكم مبنية على **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)، وهي مدمجة ضمن المستودع
 > كمساحة عمل `packages/ui-kit` (`@omniroute/ui-kit`؛ واللقطة المرجعية للمصدر الأصلي مثبّتة في
 > `packages/ui-kit/UPSTREAM.md` ومحمية عبر `npm run check:ui-kit-snapshot`). السمة الفاتحة هي السمة
-> القياسية؛ والتفضيل الافتراضي هو `system`. لون التمييز هو Keak lime (`--ci-color-accent`). خط Inter
-> (letter-spacing 0، `--ci-letter-spacing-ui`) هو عائلة خطوط الواجهة، وخط Instrument Serif مخصص فقط لنصوص
-> العرض الكبيرة المتفرقة (`.ci-dashboard-display`)، وخط IBM Plex Mono للشيفرة — وجميعها مستضافة ذاتيًا من خلال
-> عمليات استيراد `@fontsource/*` في أعلى `src/app/globals.css`. كل أيقونة هي رمز رسومي من Lucide.
+> القياسية؛ والتفضيل الافتراضي هو `system`. لون التمييز هو Keak lime (`--ci-color-accent`). Switzer هي عائلة واحدة لـ UI ونص العرض والرمز (`--ci-font-ui`; `--ci-font-display` و `--ci-font-mono` مصممان عليه)، تتم استضافتها ذاتيًا بواسطة المجموعة نفسها (`packages/ui-kit/src/ci-fonts.css`، المستوردة بواسطة `ci-tokens.css`). كل أيقونة عبارة عن حرف رسومي من Lucide.
 
 ## 1. أين توجد الأشياء
 
@@ -93,7 +90,7 @@
 2. لا تعدّل `packages/ui-kit/src` يدويًا مطلقًا: زامنه باستخدام `scripts/dev/sync-ui-kit.sh <commit>`؛ تفشل بوابة ما قبل الالتزام `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) عند اختلاف أي بايت عن الالتزام المثبّت في المصدر الرئيسي (وتتخطى الفحص مع تحذير عند غياب نسخة المصدر الرئيسي، `UI_KIT_CLONE` أو `_references/cheaper-inference-ui-kit`). عندما تفتقر العُدّة إلى شيء ما، تحايل على ذلك في المهايئ أو الشاشة واطلب إضافته من المصدر الرئيسي.
 3. القيم الافتراضية لنصوص العُدّة باللغة الإنجليزية (`label = "Loading"`، `loadingLabel = "Loading table"`…) — مرّر سلاسل نصية مترجمة من `useTranslations(...)` كلما عرض أحد مكوّنات العُدّة نصًا.
 4. تتغلب أدوات Tailwind على فئات مكوّنات العُدّة (تعلن العُدّة عن `@layer theme, base, components, utilities` وتوجد قواعدها ضمن `components`) — استخدم الأدوات للتباعد والتخطيط، وليس لإعادة تلوين مكوّنات العُدّة.
-5. العناوين: استخدم `.ci-heading` (خط Inter، من دون تباعد بين الأحرف) لعناوين الصفحات والأقسام؛ واستخدم `.ci-dashboard-display` (خط Instrument Serif) فقط لنصوص العرض الكبيرة والمتباعدة، مثل رمز الحالة في صفحة الخطأ.
+5. العناوين: `.ci-heading` لعناوين الصفحات والأقسام؛ `.ci-dashboard-display` فقط لنص العرض الكبير والمتفرق مثل رمز حالة صفحة الخطأ. كلاهما يستخدم سويتزر.
 6. يحمي `tests/unit/dashboard-kit-sweep.test.ts` اعتماد العُدّة: يُمنع وجود عنصر span لوصلات Material ضمن `src/app` أو `src/shared/components`؛ وفي شجرة لوحة المعلومات (`src/app/(dashboard)` و`src/shared/components`) يُمنع استخدام `<select>` أو `<textarea>` أو `<table>` مباشرةً، كما يُمنع إنشاء `role="dialog"` يدويًا خارج الاستثناءات المدرجة (الفرع الأصلي للمهايئ `Select`، و`RequestLoggerDetail`)؛ وكل `<button>` أو `<input>` مستخدم مباشرةً هناك يحتاج إلى تعليق يتضمن `kit-exception:` (مع السبب) وينتهي على بُعد لا يزيد عن 3 أسطر فوقه؛ ولا يُسمح بدرجات ألوان لوحة الألوان ومتغيرات `dark:` إلا في الملفات التي يسردها الاختبار.
 7. تحقّق من كلا النسقين ومن إطار العرض بعرض 390 بكسل قبل طلب دمج (باستخدام لقطات شاشة)؛ يشغّل `tests/e2e/a11y.spec.ts` أداة axe.
 
@@ -124,7 +121,7 @@
 
 تطبّق المخططات الاثنا عشر المضمّنة في `README.md` الجذري (`docs/diagrams/*.svg`) الحزمة على صور ثابتة. تُولَّد هذه المخططات ولا تُرسم يدويًا: يوجد 13 ملف توليد في `scripts/docs/gen-readme-*.mjs` (اثنا عشر مخططًا مع المشغّل `gen-readme-diagrams.mjs`)، و12 اختبارًا لكشف التقادم في `tests/unit/docs/readme-*-svg.test.ts`، واحد لكل مخطط. يقارن كل اختبار الملف المثبّت في commit بمخرجات مولّده بايتًا ببايت (المهمة `test-unit`).
 
-- **الرموز التصميمية.** ينسخ `scripts/docs/readme-diagram-theme.mjs` لوحة الألوان من `packages/ui-kit/src/ci-tokens.css` (ويثبّت `tests/unit/docs/readme-diagram-theme.test.ts` تطابقها مع ذلك الملف)، ويحدّد أدوار النص بخطوط الحزمة: Instrument Serif للنصوص البارزة، وInter لنص الواجهة، وIBM Plex Mono للأرقام والكود. وهي حزم `@fontsource` نفسها التي يحمّلها `src/app/globals.css` للوحة التحكم. تقع القيم الفاتحة على `:root` والداكنة خلف الشرط `prefers-color-scheme: dark` داخل الملف، فتتبع كل صورة نظام ألوان القارئ على GitHub.
+- **الرموز.** يقوم `scripts/docs/readme-diagram-theme.mjs` بنسخ اللوحة من `packages/ui-kit/src/ci-tokens.css` (المثبتة على هذا الملف بواسطة `tests/unit/docs/readme-diagram-theme.test.ts`) ويحدد أدوار النص على الوجوه السابقة للمجموعة - Instrument Serif للعرض، وInter للنص UI ، و IBM Plex Mono للأشكال والرموز - من حزم `@fontsource` (تستخدم لوحة المعلومات نفسها Switzer الخاص بالمجموعة منذ الإصدار 0.0.66). توجد القيم الفاتحة على `:root`، والقيم الداكنة خلف `prefers-color-scheme: dark`، داخل الملف، بحيث تتبع كل صورة مخطط المشاهد على GitHub.
 
 - **الخطوط.** يقلّص `scripts/docs/readme-fonts.mjs` ملفات woff2 تلك إلى المحارف الرسومية التي يرسمها كل مخطط، ويضمّنها عبر `@font-face` بصيغة عناوين URI من نوع `data:`. وبذلك تبقى خطوط الحزمة داخل SVG. يتحقق فحص صور README المحلي من أن العرض لا يرسل أي طلبات خطوط خارجية. تقتصر المجموعات الفرعية على المحارف اللاتينية؛ وتُسمح المحارف الرسومية للرموز التي ترجع إلى خطوط النظام واحدًا واحدًا في `SYMBOL_FALLBACKS`. وأي محرف رسومي آخر غير مغطّى يسبّب خطأ.
 

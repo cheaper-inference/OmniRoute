@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "همه مدلها قبلاً وارد شدهاند",
     "noNewModelsToImport": "مدل جدیدی برای وارد کردن وجود ندارد — همه مدلها از قبل در رجیستری یا فهرست مدلهای سفارشی هستند",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "شکست در کشف مدل {time}",
     "skippingExistingModels": "از {count} مدل موجود صرفنظر میشود",
     "autoSync": "همگامسازی خودکار",
     "autoSyncShort": "همگامسازی",

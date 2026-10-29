@@ -7,10 +7,7 @@
 > **Stav:** dashboard je postavený na **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendorovaný
 > ako workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream snapshot je pripnutý v
 > `packages/ui-kit/UPSTREAM.md` a kontrolovaný príkazom `npm run check:ui-kit-snapshot`). Svetlá je kanonická
-> téma; predvolená preferencia je `system`. Akcentom je Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) je písmo UI, Instrument Serif len pre veľké riedke
-> displejové texty (`.ci-dashboard-display`), IBM Plex Mono pre kód — všetky self-hostované prostredníctvom
-> importov `@fontsource/*` na začiatku `src/app/globals.css`. Každá ikona je glyf Lucide.
+> téma; predvolená preferencia je `system`. Akcentom je Keak lime (`--ci-color-accent`). Switzer je jediná rodina pre UI, displej a kódový text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` sa naň rozlíšia), ktorý je hostený samotnou súpravou (`packages/ui-kit/src/ci-fonts.css`, importované `ci-tokens.css`). Každá ikona je symbolom Lucide.
 
 ## 1. Kde sa čo nachádza
 
@@ -95,8 +92,7 @@
 4. Utility Tailwind majú prednosť pred triedami komponentov sady (sada deklaruje
    `@layer theme, base, components, utilities` a jej pravidlá sa nachádzajú vo vrstve `components`) — utility používajte na
    rozostupy a rozloženie, nie na prefarbovanie komponentov sady.
-5. Nadpisy: `.ci-heading` (Inter, bez prestrkávania) pre názvy stránok a sekcií; `.ci-dashboard-display`
-   (Instrument Serif) iba pre veľký, úsporne použitý výrazný text, napríklad stavový kód na chybovej stránke.
+5. Nadpisy: `.ci-heading` pre názvy strán a sekcií; `.ci-dashboard-display` len pre veľký, riedky zobrazený text, ako je napríklad stavový kód chybovej stránky. Obaja používajú Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` kontroluje používanie sady: žiadny span s ligatúrou Material pod
    `src/app` ani `src/shared/components`; v strome dashboardu (`src/app/(dashboard)` a
    `src/shared/components`) žiadny nespracovaný `<select>`, `<textarea>` ani `<table>` a žiadny ručne vytvorený
@@ -150,7 +146,7 @@ otvorte PR s upstreamovým changelogom.
 
 Dvanásť diagramov vložených do koreňového `README.md` (`docs/diagrams/*.svg`) používa súpravu v statických obrázkoch. Sú generované, nie kreslené ručne: 13 súborov generátorov v `scripts/docs/gen-readme-*.mjs` (dvanásť diagramov a riadiaci program `gen-readme-diagrams.mjs`) a 12 testov aktuálnosti v `tests/unit/docs/readme-*-svg.test.ts`, jeden na diagram. Každý test porovnáva po bajtoch súbor v commite s výstupom jeho generátora (úloha `test-unit`).
 
-- **Tokeny.** `scripts/docs/readme-diagram-theme.mjs` kopíruje paletu z `packages/ui-kit/src/ci-tokens.css` (zhodu s týmto súborom zaisťuje `tests/unit/docs/readme-diagram-theme.test.ts`) a definuje úlohy textu písmami súpravy: Instrument Serif pre výrazný text, Inter pre text rozhrania a IBM Plex Mono pre čísla a kód. Sú to rovnaké balíčky `@fontsource`, ktoré `src/app/globals.css` načítava pre dashboard. Svetlé hodnoty sú v `:root`, tmavé pod podmienkou `prefers-color-scheme: dark` vnútri súboru; každý obrázok tak sleduje schému čitateľa na GitHube.
+- **Tokeny.** `scripts/docs/readme-diagram-theme.mjs` skopíruje paletu z `packages/ui-kit/src/ci-tokens.css` (pripnutú k tomuto súboru pomocou `tests/unit/docs/readme-diagram-theme.test.ts`) a definuje textové roly na skorších stranách súpravy – Instrument Serif pre zobrazenie, Inter pre text UI, IBM Plex Mono pre obrázky a kód – z balíkov `@fontsource` (samotná palubná doska používa Switzer súpravy od súpravy 0.0.66). Svetlé hodnoty sa nachádzajú na `:root`, tmavé hodnoty za `prefers-color-scheme: dark`, vo vnútri súboru, takže každý obrázok sleduje schému diváka na GitHub.
 
 - **Písma.** `scripts/docs/readme-fonts.mjs` zúži tieto súbory woff2 na glyfy vykresľované daným diagramom a vloží ich cez `@font-face` ako URI `data:`. Písma súpravy tak zostávajú vnútri SVG. Lokálny test obrázkov README kontroluje, že vykresľovanie neposiela externé požiadavky na písma. Podmnožiny obsahujú len latinku; glyfy symbolov používajúce systémové písma ako náhradu sa povoľujú jednotlivo v `SYMBOL_FALLBACKS`. Každý ďalší nepokrytý glyf vyvolá chybu.
 

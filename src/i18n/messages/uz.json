@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "Barcha modellar allaqachon import qilingan",
     "noNewModelsToImport": "Import qilinadigan yangi modellar yo‘q — barcha modellar allaqachon reyestrda yoki maxsus modellar ro‘yxatida mavjud",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Modelni aniqlash muvaffaqiyatsiz bo'ldi {time}",
     "skippingExistingModels": "Mavjud {count} ta model o‘tkazib yuborilmoqda",
     "autoSync": "Avtomatik sinxronlash",
     "autoSyncShort": "Sinxronlash",

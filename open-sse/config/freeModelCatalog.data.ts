@@ -255,6 +255,9 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "kilo-gateway", modelId: "tencent/hy3:free", displayName: "Tencent Hy3 (free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "kilo-gateway-free", tos: "caution", trainsOnPrompts: true },
   { provider: "kilo-gateway", modelId: "stepfun/step-3.7-flash:free", displayName: "StepFun Step 3.7 Flash (free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "kilo-gateway-free", tos: "caution", trainsOnPrompts: true },
   { provider: "kilo-gateway", modelId: "openrouter/free", displayName: "OpenRouter Free Models Router", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "kilo-gateway-free", tos: "caution", trainsOnPrompts: true },
+  // Poolside announced its direct-platform shutdown for 2026-10-31 (platform.poolside.ai,
+  // verified 2026-10-20, #17318). These are Kilo-hosted listings, not direct Poolside
+  // records; the announcement alone does not establish their retirement.
   { provider: "kilo-gateway", modelId: "poolside/laguna-xs-2.1:free", displayName: "Poolside Laguna XS 2.1 (free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "kilo-gateway-free", tos: "caution", trainsOnPrompts: true },
   { provider: "kilo-gateway", modelId: "poolside/laguna-m.1:free", displayName: "Poolside Laguna M.1 (free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "kilo-gateway-free", tos: "caution", trainsOnPrompts: true },
   { provider: "kilo-gateway", modelId: "cohere/north-mini-code:free", displayName: "Cohere North Mini Code (free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "kilo-gateway-free", tos: "caution", trainsOnPrompts: true },

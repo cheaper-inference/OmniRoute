@@ -7,10 +7,7 @@
 > **Status:** tabloul de bord este construit pe baza **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), preluat local (vendored)
 > ca workspace-ul `packages/ui-kit` (`@omniroute/ui-kit`; snapshot-ul upstream este fixat în
 > `packages/ui-kit/UPSTREAM.md` și verificat prin `npm run check:ui-kit-snapshot`). Light este tema
-> canonică; preferința implicită este `system`. Culoarea de accent este Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) este familia de fonturi a interfeței, Instrument Serif doar pentru
-> text de afișare mare și rar (`.ci-dashboard-display`), IBM Plex Mono pentru cod — toate auto-găzduite prin
-> importurile `@fontsource/*` din partea de sus a fișierului `src/app/globals.css`. Fiecare pictogramă este un glif Lucide.
+> canonică; preferința implicită este `system`. Culoarea de accent este Keak lime (`--ci-color-accent`). Switzer este familia unică pentru UI, afișare și text de cod (`--ci-font-ui`; `--ci-font-display` și `--ci-font-mono` se rezolvă la acesta), auto-găzduit de kit în sine (`packages/ui-kit/src/ci-fonts.css`, importat de `ci-tokens.css`). Fiecare pictogramă este un glif Lucide.
 
 ## 1. Unde se află lucrurile
 
@@ -100,8 +97,7 @@
 4. Utilitarele Tailwind au prioritate față de clasele componentelor kitului (kitul declară
    `@layer theme, base, components, utilities`, iar regulile sale se află în `components`) — folosiți utilitare pentru
    spațiere și dispunere, nu pentru a recolora componentele kitului.
-5. Titluri: `.ci-heading` (Inter, fără spațiere între litere) pentru titlurile paginilor și secțiunilor; `.ci-dashboard-display`
-   (Instrument Serif) numai pentru texte de afișare mari și rarefiate, precum codul de stare de pe pagina de eroare.
+5. Titluri: `.ci-heading` pentru titlurile paginilor și secțiunilor; `.ci-dashboard-display` numai pentru textul de afișare mare și rar, cum ar fi codul de stare a paginii de eroare. Ambele folosesc Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` protejează adoptarea kitului: niciun element span cu ligatură Material în
    `src/app` sau `src/shared/components`; în arborele panoului de control (`src/app/(dashboard)` și
    `src/shared/components`), niciun `<select>`, `<textarea>` sau `<table>` brut și niciun
@@ -154,7 +150,7 @@ deschide PR-ul cu changelog-ul din upstream.
 
 Cele douăsprezece diagrame incluse în `README.md` din rădăcină (`docs/diagrams/*.svg`) aplică kitul unor imagini statice. Sunt generate, nu desenate manual: 13 fișiere generatoare în `scripts/docs/gen-readme-*.mjs` (douăsprezece diagrame și coordonatorul `gen-readme-diagrams.mjs`) și 12 teste de actualitate în `tests/unit/docs/readme-*-svg.test.ts`, câte unul pentru fiecare diagramă. Fiecare compară octet cu octet fișierul din commit cu ieșirea generatorului său (job `test-unit`).
 
-- **Tokenuri.** `scripts/docs/readme-diagram-theme.mjs` copiază paleta din `packages/ui-kit/src/ci-tokens.css` (corespondența cu acel fișier este fixată prin `tests/unit/docs/readme-diagram-theme.test.ts`) și definește rolurile textului folosind fonturile kitului: Instrument Serif pentru text de prezentare, Inter pentru interfață și IBM Plex Mono pentru numere și cod. Sunt aceleași pachete `@fontsource` pe care `src/app/globals.css` le încarcă pentru panou. Valorile deschise sunt în `:root`, cele închise sub condiția `prefers-color-scheme: dark` în fișier, astfel încât fiecare imagine urmează schema cititorului pe GitHub.
+- **Jetoane.** `scripts/docs/readme-diagram-theme.mjs` copie paleta din `packages/ui-kit/src/ci-tokens.css` (fixat pe acel fișier de `tests/unit/docs/readme-diagram-theme.test.ts`) și definește rolurile text pe fețele anterioare ale kitului — Instrument Serif pentru afișare, Inter pentru text UI, IBM Plex Mono pentru cifre și cod — din pachetele `@fontsource` (tabloul de bord în sine folosește Switzer-ul kit-ului începând cu versiunea 0.0.66 a kit-ului). Valorile luminoase stau pe `:root`, valorile întunecate în spatele `prefers-color-scheme: dark`, în interiorul fișierului, astfel încât fiecare imagine urmează schema privitorului pe GitHub.
 
 - **Fonturi.** `scripts/docs/readme-fonts.mjs` restrânge aceste fișiere woff2 la glifele desenate de fiecare diagramă și le încorporează prin `@font-face` ca URI-uri `data:`. Astfel, fonturile kitului rămân în interiorul SVG-ului. Proba locală a imaginilor README verifică faptul că redarea nu efectuează solicitări externe de fonturi. Subseturile conțin numai caractere latine; glifele simbolurilor care folosesc fonturile sistemului ca rezervă sunt permise individual în `SYMBOL_FALLBACKS`. Orice altă glifă neacoperită produce o eroare.
 

@@ -24,15 +24,13 @@ Gan CI, gan Quality Gates darbplūsma izdod stabilu spriedumu: `Gate / CI` un
 kā obligātu vai konsultatīvu. Piemērojamam obligātam uzdevumam jābūt veiksmīgam:
 trūkstoši, atcelti, izlaisti, gaidoši un nezināmi rezultāti nevar apstiprināt PASS.
 Derīga klasifikācija „tikai dokumentācija” vai „tikai katalogs” var padarīt koda
-izpildes zaru nepiemērojamu; PR melnraksts netiek uzskatīts par pieņemtu kandidātu.
+izpildes zaru nepiemērojamu; parasts PR melnraksts netiek uzskatīts par pieņemtu kandidātu.
 Etiķete `hotfix` neatceļ pierādījumu prasību.
 
 Abas darbplūsmas aptver PR uz galvenajiem/laidiena zariem, izmaiņu nosūtīšanu uz
 `main`, manuālu palaišanu un sapludināšanas grupas notikumus. Izmaiņu nosūtīšanas,
 manuālās palaišanas un sapludināšanas grupas gadījumā tiek izpildīta pilnā atlase.
-Izmaiņu nosūtīšana uz `release/**` tās nepalaiž (2026-10-18): katrai izmaiņai matrica
-jau tika izpildīta tās PR, savukārt sapludinātās kombinācijas pārbaude ir Release-Green
-uzdevums (`docs/ops/RUNNER_BOX.md` → mitinātais izpildes zars). Atzarojumi un
+Uzticams Mergify rindas melnraksts arī izpilda piemērojamos `full-code`/`full-code-e2e` uzdevumus; parastie PR tos izlaiž. Pirms manuālas sapludināšanas palaidiet pilnu dispatch tieši konkrētajam kandidātam. Izmaiņu nosūtīšana uz `release/**` nesāk šīs darbplūsmas; Release-Green atsevišķi novēro sapludināto bāzi (`docs/ops/RUNNER_BOX.md` → mitinātais izpildes zars). Atzarojumi un
 sapludināšanas grupas izmanto mitinātos izpildītājus uzdevumiem, kuri citādi izvēlētos
 pašmitinātos izpildītājus; pirms ieviešanas jāpārbauda pietiekamas mitinātās jaudas
 pieejamība.
@@ -96,8 +94,7 @@ savukārt 30 sekunžu sirdspuksta ziņojumā ir uzskaitīti joprojām aktīvie f
 tikai atļaušanas sarakstā iekļautie izpildes metadati; testu apraksti, izvade, kļūdu saturs un pilnā
 vide netiek serializēta.
 
-CI un Quality saglabā JSONL failus kā `unit-progress-ci-<run>-<attempt>-<shard>` un
-`unit-progress-quality-<run>-<attempt>-<shard>`. Darba noildze var nepieļaut vēlāko augšupielādi;
+CI saglabā JSONL failus ar nosaukumu `unit-progress-ci-<run>-<attempt>-<shard>`. Darba noildze var nepieļaut vēlāko augšupielādi;
 jau nosūtītie sirdspuksta ziņojumi paliek kā diagnostikas pierādījumi. Trūkstoši sirdspuksta ziņojumi var liecināt arī par
 bloķētu vai pārtrauktu izpildītāja procesu. Šie ieraksti saglabā esošo testu atlasi,
 paralēlismu, termiņus un izejas statusu; tie nav spriedumi par kandidātu pielaidi.
@@ -168,8 +165,6 @@ atspējotā dublētā būvēšana tika noņemta; faktiskās būvēšanas/pakoša
 | `Docs Gates (fast-path)`                         | Dokumentācijas/koda PR; API dokumentācijas atsauces un visa dokumentācija                                                                                                                                                     | Jā                       |
 | `Fast Quality Gates`                             | Koda PR; statiskās pārbaudes, tipu pārbaude, informācijas paneļa tipu pārbaude, ietekmētie vienībtesti                                                                                                                        | Jā                       |
 | `Forgotten sibling tests`                        | Koda PR; mainītie moduļi tiek izsekoti līdz statiskajiem patērētājiem un saistīto testu kandidātiem; apkopojošo moduļu un dinamiskā importa ceļi tiek ziņoti kā konsultatīva diagnostika ar atsauču atļauto izņēmumu sarakstu | **Konsultatīvs**         |
-| `Vitest (fast-path)`                             | Koda PR; ātrais vitest komplekts                                                                                                                                                                                              | Jā                       |
-| `Unit Tests fast-path`                           | Koda PR; 4 daļās sadalīts vienībtestu komplekts                                                                                                                                                                               | Jā                       |
 | `No new ESLint warnings`                         | Koda PR; uz apspiešanas nosacījumiem balstīta lintēšanas aizsardzība                                                                                                                                                          | Jā, tostarp atzarojumiem |
 | `Merge integrity (changelog + generated skills)` | PR, kas nav melnraksti; izmaiņu žurnāla un ģenerēto prasmju sinhronizācija                                                                                                                                                    | Jā, tostarp atzarojumiem |
 

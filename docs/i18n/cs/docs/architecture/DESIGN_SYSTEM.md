@@ -8,10 +8,7 @@
 > do repozitáře začleněn (vendored) jako workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream
 > snapshot je připnut v `packages/ui-kit/UPSTREAM.md` a střežen příkazem
 > `npm run check:ui-kit-snapshot`). Kanonickým motivem je světlý; výchozí preference je `system`.
-> Akcentem je Keak lime (`--ci-color-accent`). Inter (letter-spacing 0, `--ci-letter-spacing-ui`) je
-> rodina písem pro UI, Instrument Serif pouze pro velké, řídce používané zobrazovací texty
-> (`.ci-dashboard-display`), IBM Plex Mono pro kód — vše je self-hostováno prostřednictvím importů
-> `@fontsource/*` v horní části souboru `src/app/globals.css`. Každá ikona je glyf Lucide.
+> Akcentem je Keak lime (`--ci-color-accent`). Switzer je jediná rodina pro UI, displej a kódový text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` se na něj rozlišují), kterou vlastní sada (`packages/ui-kit/src/ci-fonts.css`, importováno `ci-tokens.css`). Každá ikona je lucidní glyf.
 
 ## 1. Kde co je
 
@@ -92,7 +89,7 @@
 2. Nikdy ručně neupravujte `packages/ui-kit/src`: synchronizujte pomocí `scripts/dev/sync-ui-kit.sh <commit>`; kontrola před commitem `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) selže při jakémkoli bajtu, který se liší od připnutého upstream commitu (pokud upstream klon, `UI_KIT_CLONE` nebo `_references/cheaper-inference-ui-kit`, chybí, kontrola se přeskočí s varováním). Pokud v kitu něco chybí, vyřešte to v adaptéru nebo na obrazovce a požádejte upstream o doplnění.
 3. Výchozí texty kitu jsou v angličtině (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kdykoli komponenta kitu vykresluje text, předejte jí přeložené řetězce z `useTranslations(...)`.
 4. Utility Tailwindu mají přednost před třídami komponent kitu (kit deklaruje `@layer theme, base, components, utilities` a jeho pravidla jsou ve vrstvě `components`) — utility používejte pro rozestupy a rozvržení, nikoli k přebarvování komponent kitu.
-5. Nadpisy: `.ci-heading` (Inter, bez prostrkání) pro názvy stránek a sekcí; `.ci-dashboard-display` (Instrument Serif) pouze pro velký, řídce používaný výrazný text, například stavový kód na chybové stránce.
+5. Nadpisy: `.ci-heading` pro názvy stránek a oddílů; `.ci-dashboard-display` pouze pro velký, řídce zobrazený text, jako je stavový kód chybové stránky. Oba používají Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` hlídá používání kitu: žádný element span s ligaturou Material pod `src/app` ani `src/shared/components`; ve stromu dashboardu (`src/app/(dashboard)` a `src/shared/components`) žádné nezpracované `<select>`, `<textarea>` ani `<table>` a žádné vlastní implementace `role="dialog"` mimo uvedené výjimky (nativní větev adaptéru `Select`, `RequestLoggerDetail`); každý nezpracovaný `<button>` nebo `<input>` v této oblasti vyžaduje komentář obsahující `kit-exception:` (s důvodem), který končí nejvýše 3 řádky nad ním; odstíny palety a varianty `dark:` jsou povoleny pouze v souborech uvedených v testu.
 7. Před PR ověřte obě témata a viewport o šířce 390 px (pomocí snímků obrazovky); `tests/e2e/a11y.spec.ts` spouští axe.
 
@@ -139,7 +136,7 @@ otevřete PR s upstreamovým changelogem.
 
 Dvanáct diagramů vložených do kořenového `README.md` (`docs/diagrams/*.svg`) používá sadu ve statických obrázcích. Jsou generované, nikoli kreslené ručně: 13 souborů generátorů v `scripts/docs/gen-readme-*.mjs` (dvanáct diagramů a řídicí program `gen-readme-diagrams.mjs`) a 12 testů aktuálnosti v `tests/unit/docs/readme-*-svg.test.ts`, jeden pro každý diagram. Každý test porovnává po bajtech soubor v commitu s výstupem jeho generátoru (úloha `test-unit`).
 
-- **Tokeny.** `scripts/docs/readme-diagram-theme.mjs` kopíruje paletu z `packages/ui-kit/src/ci-tokens.css` (shodu s tímto souborem zajišťuje `tests/unit/docs/readme-diagram-theme.test.ts`) a definuje role textu pomocí písem sady: Instrument Serif pro výrazný text, Inter pro text rozhraní a IBM Plex Mono pro čísla a kód. Jde o stejné balíčky `@fontsource`, které `src/app/globals.css` načítá pro dashboard. Světlé hodnoty jsou v `:root`, tmavé pod podmínkou `prefers-color-scheme: dark` uvnitř souboru; každý obrázek tak sleduje schéma čtenáře na GitHubu.
+- **Tokeny.** `scripts/docs/readme-diagram-theme.mjs` zkopíruje paletu z `packages/ui-kit/src/ci-tokens.css` (připnuto k tomuto souboru pomocí `tests/unit/docs/readme-diagram-theme.test.ts`) a definuje textové role na dřívějších plochách sady — Instrument Serif pro zobrazení, Inter pro text UI, IBM Plex Mono pro obrázky a kód — z balíčků `@fontsource` (samotná řídicí deska používá Switzer sady od sady 0.0.66). Světlé hodnoty sedí na `:root`, tmavé hodnoty za `prefers-color-scheme: dark`, uvnitř souboru, takže každý obrázek sleduje schéma diváka na GitHub.
 
 - **Písma.** `scripts/docs/readme-fonts.mjs` zúží tyto soubory woff2 na glyfy vykreslované daným diagramem a vloží je přes `@font-face` jako URI `data:`. Písma sady tak zůstávají uvnitř SVG. Místní test obrázků README kontroluje, že vykreslování nevyvolává externí požadavky na písma. Podmnožiny obsahují pouze latinku; glyfy symbolů používající systémová písma jako náhradu jsou povoleny jednotlivě v `SYMBOL_FALLBACKS`. Jakýkoli jiný nepokrytý glyf vyvolá chybu.
 

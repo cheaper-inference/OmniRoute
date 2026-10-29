@@ -24,14 +24,12 @@ Pracovné postupy CI a Quality Gates vydávajú stabilný verdikt: `Gate / CI` a
 ako povinnú alebo poradnú. Príslušná povinná úloha musí byť úspešná: chýbajúce,
 zrušené, preskočené, čakajúce a neznáme výsledky nemôžu preukázať PASS. Platná
 klasifikácia iba pre dokumentáciu alebo iba pre katalóg môže spôsobiť, že vetva
-pre kód nebude použiteľná; koncept PR nie je prijateľným kandidátom. Označenie
+pre kód nebude použiteľná; bežný koncept PR nie je prijateľným kandidátom. Označenie
 `hotfix` neruší požiadavky na dôkazy.
 
 Oba pracovné postupy pokrývajú PR smerujúce do vetiev main/release, pushnutia do
 `main`, manuálne spustenie a udalosti skupiny zlúčenia. Pushnutie, manuálne spustenie
-a skupina zlúčenia vykonávajú úplný výber. Pushnutia do `release/**` ich nespúšťajú
-(2026-10-18): každá zmena už prešla maticou vo svojom PR a zlúčená kombinácia je úlohou
-Release-Green (`docs/ops/RUNNER_BOX.md` → Hostovaná vetva). Forky a skupiny zlúčenia
+a skupina zlúčenia vykonávajú úplný výber. Dôveryhodný koncept z frontu Mergify tiež spúšťa príslušné úlohy `full-code`/`full-code-e2e`; bežné PR ich preskakujú. Pred manuálnym zlúčením spustite úplný dispatch na presnom kandidátovi. Pushnutia do `release/**` tieto pracovné postupy nespúšťajú; Release-Green osobitne sleduje zlúčenú základňu (`docs/ops/RUNNER_BOX.md` → Hostovaná vetva). Forky a skupiny zlúčenia
 používajú hostované runnery pre úlohy, ktoré by inak vybrali runnery s vlastným
 hostingom; pred zavedením sa musí overiť dostatočná hostovaná kapacita.
 
@@ -103,8 +101,7 @@ každého súboru a 30-sekundový signál heartbeat uvádza súbory, ktoré sú 
 s časom ich vykonávania. Zaznamenávajú sa iba povolené metadáta vykonávania; popisy testov,
 výstup, obsah chýb ani úplné prostredie sa neserializujú.
 
-CI a Quality uchovávajú súbory JSONL ako `unit-progress-ci-<run>-<attempt>-<shard>` a
-`unit-progress-quality-<run>-<attempt>-<shard>`. Časový limit úlohy môže zabrániť neskoršiemu
+CI uchováva súbory JSONL ako `unit-progress-ci-<run>-<attempt>-<shard>`. Časový limit úlohy môže zabrániť neskoršiemu
 nahratiu; už odoslané signály heartbeat zostávajú diagnostickým dôkazom. Chýbajúce signály
 heartbeat môžu tiež znamenať zablokovaný alebo ukončený proces runnera. Tieto potvrdenia
 zachovávajú existujúci výber testov, súbežnosť, časové limity a návratový stav; nejde
@@ -174,8 +171,6 @@ zakázané duplicitné zostavenie bolo odstránené; skutočné kontroly zostave
 | `Docs Gates (fast-path)`                         | PR dokumentácie/kódu; referencie dokumentácie API a docs-all                                                                                                                                                                            | Áno                 |
 | `Fast Quality Gates`                             | PR kódu; statické kontroly, kontrola typov, kontrola typov dashboardu, ovplyvnené jednotkové testy                                                                                                                                      | Áno                 |
 | `Forgotten sibling tests`                        | PR kódu; zmenené moduly sledované až k statickým konzumentom a kandidátskym súrodeneckým testom; cesty cez barrel exporty a dynamické importy sa hlásia ako informatívna diagnostika spolu s odkazovanými výnimkami zo zoznamu povolení | **Informatívna**    |
-| `Vitest (fast-path)`                             | PR kódu; rýchla sada testov vitest                                                                                                                                                                                                      | Áno                 |
-| `Unit Tests fast-path`                           | PR kódu; sada jednotkových testov rozdelená na 4 časti                                                                                                                                                                                  | Áno                 |
 | `No new ESLint warnings`                         | PR kódu; lint kontrola zohľadňujúca potlačenia                                                                                                                                                                                          | Áno, vrátane forkov |
 | `Merge integrity (changelog + generated skills)` | PR, ktoré nie sú konceptmi; synchronizácia changelogu a generovaných zručností                                                                                                                                                          | Áno, vrátane forkov |
 

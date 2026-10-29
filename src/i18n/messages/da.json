@@ -5666,6 +5666,7 @@
     "allModelsAlreadyImported": "Alle modeller er allerede importeret",
     "noNewModelsToImport": "Ingen nye modeller at importere — alle modeller findes allerede i registreret eller brugerdefineret liste",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Modelopdagelse mislykkedes {time}",
     "skippingExistingModels": "Springer {count} eksisterende modeller over",
     "autoSync": "Auto-synkronisering",
     "autoSyncShort": "Synkronisering",

@@ -1,6 +1,6 @@
 {
   "name": "@omniroute/ui-kit",
-  "version": "0.0.48",
+  "version": "0.0.66",
   "private": true,
   "license": "UNLICENSED",
   "description": "Vendored snapshot of @keak/cheaper-inference-ui-kit (see UPSTREAM.md). Source is consumed directly; no build.",

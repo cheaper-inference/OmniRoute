@@ -23,12 +23,10 @@ CI 與 Quality Gates 工作流程各自產生一個穩定的判定結果：`Gate
 `Gate / Quality`。其版本化准入政策會將每個上游作業列舉為必要或建議。
 每個適用的必要作業都必須成功：缺少、已取消、已略過、待處理及未知的結果
 都無法確立 PASS。有效的僅文件或僅目錄分類可使程式碼執行通道不適用；
-草稿 PR 不會被接受為候選版本。`hotfix` 標籤不會免除證據要求。
+一般草稿 PR 不會被接受為候選版本。`hotfix` 標籤不會免除證據要求。
 
 這兩個工作流程涵蓋以 main/release 分支為目標的 PR、推送至 `main`、手動分派
-及合併群組事件。推送、分派及合併群組會執行完整選項。推送至
-`release/**` 不會啟動這些流程（2026-10-18）：每項變更都已在其 PR 上執行過矩陣，
-而合併後的組合則屬於 Release-Green 的工作（`docs/ops/RUNNER_BOX.md` → 託管執行通道）。分支
+及合併群組事件。推送、分派及合併群組會執行完整選項。受信任的 Mergify 佇列草稿也會執行適用的 `full-code`/`full-code-e2e` 作業；一般 PR 會略過這些作業。手動合併前，請對確切的候選版本執行完整的 dispatch。推送至 `release/**` 不會啟動這些工作流程；Release-Green 會另外觀察合併後的基底（`docs/ops/RUNNER_BOX.md` → 託管執行通道）。分支
 與合併群組會針對原本選用自架執行器的作業改用託管執行器；
 推出前必須確認託管容量充足。
 
@@ -80,7 +78,7 @@ MCP/autoCombo Vitest 測試套件。必要作業的結果涵蓋每個矩陣項�
 
 共用的 `test:unit:ci:shard` 命令會透過 `scripts/ci/unit-progress-reporter.mjs` 記錄 `primary`、`dashboard` 和 `serial` 階段。一般測試報告仍可使用。另一份僅包含中繼資料的收據會記錄每個檔案的開始與完成狀態，而每 30 秒一次的心跳會列出仍在執行中的檔案及其經過時間。它只記錄允許清單中的執行中繼資料；不會序列化測試描述、輸出、錯誤內容及完整環境。
 
-CI 和 Quality 會將 JSONL 檔案保留為 `unit-progress-ci-<run>-<attempt>-<shard>` 和 `unit-progress-quality-<run>-<attempt>-<shard>`。作業逾時可能會導致後續上傳無法進行；已發出的心跳仍可作為診斷依據。心跳缺失也可能表示執行器程序遭到阻塞或終止。這些收據會保留現有的測試選擇、並行設定、截止時間及結束狀態；它們並非候選項目准入的判定結果。
+CI 將 JSONL 檔案保留為 `unit-progress-ci-<run>-<attempt>-<shard>`。作業逾時可能會導致後續上傳無法進行；已發出的心跳仍可作為診斷依據。心跳缺失也可能表示執行器程序遭到阻塞或終止。這些收據會保留現有的測試選擇、並行設定、截止時間及結束狀態；它們並非候選項目准入的判定結果。
 
 ### 靜態掃描清單
 
@@ -131,8 +129,6 @@ CI 的單一真實來源為 `.github/workflows/ci.yml`。
 | `Docs Gates (fast-path)`                         | 文件／程式碼 PR；API 文件參照與 docs-all                                                                                  | 是               |
 | `Fast Quality Gates`                             | 程式碼 PR；靜態檢查、類型檢查、儀表板類型檢查、受影響的單元測試                                                           | 是               |
 | `Forgotten sibling tests`                        | 程式碼 PR；追蹤已變更模組的靜態使用端與候選同層測試；桶狀匯出與動態匯入路徑會回報為建議性診斷，並套用所參照的允許清單例外 | **建議性**       |
-| `Vitest (fast-path)`                             | 程式碼 PR；快速 vitest 測試套件                                                                                           | 是               |
-| `Unit Tests fast-path`                           | 程式碼 PR；分成 4 個分片的單元測試套件                                                                                    | 是               |
 | `No new ESLint warnings`                         | 程式碼 PR；可辨識抑制設定的 lint 防護                                                                                     | 是，包括分支專案 |
 | `Merge integrity (changelog + generated skills)` | 非草稿 PR；變更日誌與產生的 skill 同步                                                                                    | 是，包括分支專案 |
 

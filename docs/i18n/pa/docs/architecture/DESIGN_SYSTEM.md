@@ -6,10 +6,7 @@
 
 > **ਸਥਿਤੀ:** ਡੈਸ਼ਬੋਰਡ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) 'ਤੇ ਬਣਾਇਆ ਗਿਆ ਹੈ, ਜਿਸਨੂੰ ਵਰਕਸਪੇਸ `packages/ui-kit` (`@omniroute/ui-kit`) ਵਜੋਂ ਵੈਂਡਰ ਕੀਤਾ ਗਿਆ ਹੈ; ਅੱਪਸਟਰੀਮ ਸਨੈਪਸ਼ੌਟ
 > `packages/ui-kit/UPSTREAM.md` ਵਿੱਚ ਪਿੰਨ ਕੀਤਾ ਗਿਆ ਹੈ ਅਤੇ `npm run check:ui-kit-snapshot` ਦੁਆਰਾ ਸੁਰੱਖਿਅਤ ਹੈ। Light ਕੈਨੋਨੀਕਲ
-> ਥੀਮ ਹੈ; ਡਿਫੌਲਟ ਤਰਜੀਹ `system` ਹੈ। ਐਕਸੈਂਟ Keak lime (`--ci-color-accent`) ਹੈ। Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) UI ਫੋਂਟ ਪਰਿਵਾਰ ਹੈ, Instrument Serif ਸਿਰਫ਼ ਵੱਡੇ ਵਿਰਲੇ
-> ਡਿਸਪਲੇ ਟੈਕਸਟ ਲਈ (`.ci-dashboard-display`), IBM Plex Mono ਕੋਡ ਲਈ — ਸਾਰੇ
-> `src/app/globals.css` ਦੇ ਸਿਖਰ 'ਤੇ `@fontsource/*` ਇੰਪੋਰਟਸ ਰਾਹੀਂ ਸਵੈ-ਹੋਸਟ ਕੀਤੇ ਗਏ ਹਨ। ਹਰ ਆਈਕਨ ਇੱਕ Lucide ਗਲਿਫ਼ ਹੈ।
+> ਥੀਮ ਹੈ; ਡਿਫੌਲਟ ਤਰਜੀਹ `system` ਹੈ। ਐਕਸੈਂਟ Keak lime (`--ci-color-accent`) ਹੈ। ਸਵਿਟਜ਼ਰ UI, ਡਿਸਪਲੇਅ ਅਤੇ ਕੋਡ ਟੈਕਸਟ (`--ci-font-ui`; `--ci-font-display` ਅਤੇ `--ci-font-mono` ਇਸ ਨੂੰ ਹੱਲ ਕਰਦਾ ਹੈ), ਕਿੱਟ ਦੁਆਰਾ ਸਵੈ-ਮੇਜ਼ਬਾਨੀ (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ਦੁਆਰਾ ਆਯਾਤ ਕੀਤਾ ਗਿਆ) ਲਈ ਇੱਕਲਾ ਪਰਿਵਾਰ ਹੈ। ਹਰ ਆਈਕਨ ਇੱਕ ਲੂਸਾਈਡ ਗਲਾਈਫ ਹੈ।
 
 ## 1. ਚੀਜ਼ਾਂ ਕਿੱਥੇ ਹਨ
 
@@ -101,8 +98,7 @@
 4. Tailwind ਯੂਟਿਲਿਟੀਆਂ ਕਿੱਟ ਕੰਪੋਨੈਂਟ ਕਲਾਸਾਂ ਤੋਂ ਪਹਿਲ ਲੈਂਦੀਆਂ ਹਨ (ਕਿੱਟ
    `@layer theme, base, components, utilities` ਘੋਸ਼ਿਤ ਕਰਦੀ ਹੈ ਅਤੇ ਇਸਦੇ ਨਿਯਮ `components` ਵਿੱਚ ਹੁੰਦੇ ਹਨ) — ਕਿੱਟ ਕੰਪੋਨੈਂਟਾਂ ਦੇ ਰੰਗ ਬਦਲਣ ਲਈ ਨਹੀਂ,
    ਸਗੋਂ ਸਪੇਸਿੰਗ ਅਤੇ ਲੇਆਉਟ ਲਈ ਯੂਟਿਲਿਟੀਆਂ ਵਰਤੋ।
-5. ਸਿਰਲੇਖ: ਪੇਜ ਅਤੇ ਸੈਕਸ਼ਨ ਸਿਰਲੇਖਾਂ ਲਈ `.ci-heading` (Inter, ਕੋਈ ਟ੍ਰੈਕਿੰਗ ਨਹੀਂ); `.ci-dashboard-display`
-   (Instrument Serif) ਸਿਰਫ਼ ਵੱਡੇ, ਵਿਰਲੇ ਡਿਸਪਲੇ ਟੈਕਸਟ ਲਈ, ਜਿਵੇਂ ਕਿ ਗਲਤੀ ਪੇਜ ਦਾ ਸਥਿਤੀ ਕੋਡ।
+5. ਸਿਰਲੇਖ: ਪੰਨੇ ਅਤੇ ਭਾਗ ਸਿਰਲੇਖਾਂ ਲਈ `.ci-heading` ; `.ci-dashboard-display` ਸਿਰਫ਼ ਵੱਡੇ, ਸਪਾਰਸ ਡਿਸਪਲੇ ਟੈਕਸਟ ਲਈ ਜਿਵੇਂ ਕਿ ਗਲਤੀ-ਪੰਨਾ ਸਥਿਤੀ ਕੋਡ। ਦੋਵੇਂ ਸਵਿਟਜ਼ਰ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ।
 6. `tests/unit/dashboard-kit-sweep.test.ts` ਕਿੱਟ ਅਪਣਾਉਣ ਦੀ ਨਿਗਰਾਨੀ ਕਰਦਾ ਹੈ: `src/app` ਜਾਂ
    `src/shared/components` ਦੇ ਅਧੀਨ ਕੋਈ Material ਲਿਗੇਚਰ span ਨਹੀਂ; ਡੈਸ਼ਬੋਰਡ ਟ੍ਰੀ (`src/app/(dashboard)` ਅਤੇ
    `src/shared/components`) ਵਿੱਚ ਕੋਈ ਕੱਚਾ `<select>`, `<textarea>` ਜਾਂ `<table>` ਨਹੀਂ ਅਤੇ ਸੂਚੀਬੱਧ ਅਪਵਾਦਾਂ (`Select` ਅਡੈਪਟਰ ਦੀ ਨੇਟਿਵ ਬ੍ਰਾਂਚ,
@@ -155,7 +151,7 @@ usage ਅਤੇ endpoint ਦੀ ਵਿਜ਼ੂਅਲ ਜਾਂਚ ਕਰੋ, `n
 
 ਮੂਲ `README.md` ਵਿੱਚ ਸ਼ਾਮਲ ਬਾਰਾਂ ਚਿੱਤਰ (`docs/diagrams/*.svg`) ਕਿੱਟ ਨੂੰ ਸਥਿਰ ਤਸਵੀਰਾਂ ਉੱਤੇ ਲਾਗੂ ਕਰਦੇ ਹਨ। ਇਹ ਜਨਰੇਟ ਹੁੰਦੇ ਹਨ, ਹੱਥ ਨਾਲ ਨਹੀਂ ਬਣਾਏ ਜਾਂਦੇ: `scripts/docs/gen-readme-*.mjs` ਵਿੱਚ 13 ਜਨਰੇਟਰ ਫਾਈਲਾਂ (ਬਾਰਾਂ ਚਿੱਤਰ ਅਤੇ ਕੰਟਰੋਲਰ `gen-readme-diagrams.mjs`), ਅਤੇ `tests/unit/docs/readme-*-svg.test.ts` ਵਿੱਚ ਪੁਰਾਣੇ ਹੋਣ ਦੀਆਂ 12 ਜਾਂਚਾਂ ਹਨ, ਹਰੇਕ ਚਿੱਤਰ ਲਈ ਇੱਕ। ਹਰ ਜਾਂਚ commit ਕੀਤੀ ਫਾਈਲ ਨੂੰ ਉਸ ਦੇ ਜਨਰੇਟਰ ਦੇ ਆਉਟਪੁੱਟ ਨਾਲ ਬਾਈਟ-ਦਰ-ਬਾਈਟ ਮਿਲਾਉਂਦੀ ਹੈ (ਜੌਬ `test-unit`)।
 
-- **ਟੋਕਨ।** `scripts/docs/readme-diagram-theme.mjs` ਰੰਗ-ਪੈਲਟ `packages/ui-kit/src/ci-tokens.css` ਤੋਂ ਨਕਲ ਕਰਦਾ ਹੈ (ਉਸ ਫਾਈਲ ਨਾਲ ਮੇਲ `tests/unit/docs/readme-diagram-theme.test.ts` ਯਕੀਨੀ ਬਣਾਉਂਦਾ ਹੈ) ਅਤੇ ਕਿੱਟ ਦੇ ਫੌਂਟਾਂ ਨਾਲ ਲਿਖਤ ਦੀਆਂ ਭੂਮਿਕਾਵਾਂ ਨਿਰਧਾਰਤ ਕਰਦਾ ਹੈ: ਉਭਰੀ ਪ੍ਰਦਰਸ਼ਨੀ ਲਿਖਤ ਲਈ Instrument Serif, ਇੰਟਰਫੇਸ ਲਈ Inter, ਅੰਕਾਂ ਅਤੇ ਕੋਡ ਲਈ IBM Plex Mono। ਇਹ ਉਹੀ `@fontsource` ਪੈਕੇਜ ਹਨ ਜੋ `src/app/globals.css` ਡੈਸ਼ਬੋਰਡ ਲਈ ਲੋਡ ਕਰਦਾ ਹੈ। ਫਾਈਲ ਵਿੱਚ ਹਲਕੇ ਮੁੱਲ `:root` ਉੱਤੇ ਅਤੇ ਗੂੜ੍ਹੇ ਮੁੱਲ `prefers-color-scheme: dark` ਦੀ ਸ਼ਰਤ ਹੇਠ ਹਨ, ਇਸ ਲਈ ਹਰ ਤਸਵੀਰ GitHub ਪਾਠਕ ਦੀ ਰੰਗ-ਯੋਜਨਾ ਦੀ ਪਾਲਣਾ ਕਰਦੀ ਹੈ।
+- **ਟੋਕਨ।** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` ( `tests/unit/docs/readme-diagram-theme.test.ts` ਦੁਆਰਾ ਉਸ ਫਾਈਲ ਦੇ ਵਿਰੁੱਧ ਪਿੰਨ ਕੀਤਾ ਗਿਆ) ਤੋਂ ਪੈਲੇਟ ਦੀ ਨਕਲ ਕਰਦਾ ਹੈ ਅਤੇ ਕਿੱਟ ਦੇ ਪੁਰਾਣੇ ਚਿਹਰਿਆਂ 'ਤੇ ਟੈਕਸਟ ਭੂਮਿਕਾਵਾਂ ਨੂੰ ਪਰਿਭਾਸ਼ਿਤ ਕਰਦਾ ਹੈ — ਡਿਸਪਲੇ ਲਈ ਇੰਸਟਰੂਮੈਂਟ ਸੇਰੀਫ, UI ਟੈਕਸਟ ਲਈ ਇੰਟਰ, ਅੰਕੜਿਆਂ ਅਤੇ ਕੋਡ ਲਈ IBM ਪਲੇਕਸ ਮੋਨੋ — `@fontsource` ਪੈਕੇਜਾਂ ਤੋਂ (ਡੈਸ਼ਬੋਰਡ ਖੁਦ kit 0.0.66 ਤੋਂ kit ਦੇ Switzer ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ)। ਹਲਕੇ ਮੁੱਲ `:root`'ਤੇ ਬੈਠਦੇ ਹਨ, `prefers-color-scheme: dark` ਦੇ ਪਿੱਛੇ ਹਨੇਰੇ ਮੁੱਲ, ਫਾਈਲ ਦੇ ਅੰਦਰ, ਇਸ ਲਈ ਹਰੇਕ ਚਿੱਤਰ GitHub ਤੇ ਦਰਸ਼ਕ ਦੀ ਸਕੀਮ ਦਾ ਅਨੁਸਰਣ ਕਰਦਾ ਹੈ।
 
 - **ਫੌਂਟ।** `scripts/docs/readme-fonts.mjs` ਉਹਨਾਂ woff2 ਫਾਈਲਾਂ ਨੂੰ ਹਰ ਚਿੱਤਰ ਵਿੱਚ ਬਣਨ ਵਾਲੇ ਗਲਿਫਾਂ ਤੱਕ ਸੀਮਿਤ ਕਰਦਾ ਹੈ ਅਤੇ `@font-face` ਰਾਹੀਂ `data:` URI ਵਜੋਂ ਸ਼ਾਮਲ ਕਰਦਾ ਹੈ। ਇਸ ਨਾਲ ਕਿੱਟ ਦੇ ਫੌਂਟ SVG ਦੇ ਅੰਦਰ ਰਹਿੰਦੇ ਹਨ। README ਤਸਵੀਰ ਦੀ ਸਥਾਨਕ ਜਾਂਚ ਵੇਖਦੀ ਹੈ ਕਿ ਰੈਂਡਰਿੰਗ ਕੋਈ ਬਾਹਰੀ ਫੌਂਟ ਬੇਨਤੀ ਨਾ ਕਰੇ। ਉਪਸਮੂਹਾਂ ਵਿੱਚ ਸਿਰਫ਼ ਲਾਤੀਨੀ ਅੱਖਰ ਹਨ; ਸਿਸਟਮ ਫੌਂਟਾਂ ਵੱਲ ਮੁੜਦੇ ਚਿੰਨ੍ਹ-ਗਲਿਫਾਂ ਨੂੰ `SYMBOL_FALLBACKS` ਵਿੱਚ ਇੱਕ-ਇੱਕ ਕਰਕੇ ਮਨਜ਼ੂਰੀ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਹੋਰ ਕੋਈ ਅਣਕਵਰ ਕੀਤਾ ਗਲਿਫ ਗਲਤੀ ਪੈਦਾ ਕਰਦਾ ਹੈ।
 

@@ -24,12 +24,10 @@ A CI és a Quality Gates munkafolyamat egyaránt stabil döntést bocsát ki: `G
 kötelezőként vagy tanácsadó jellegűként sorol fel. Egy alkalmazandó kötelező feladatnak sikeresen
 kell lefutnia: a hiányzó, megszakított, kihagyott, függőben lévő és ismeretlen eredmények nem igazolhatnak PASS állapotot. Egy érvényes,
 csak dokumentációra vagy csak katalógusra vonatkozó besorolás alkalmazhatatlanná tehet egy kódsávot;
-egy vázlatos PR nem elfogadott jelölt. A `hotfix` címke nem mentesít a bizonyítékok követelménye alól.
+egy szokványos vázlatos PR nem elfogadott jelölt. A `hotfix` címke nem mentesít a bizonyítékok követelménye alól.
 
 Mindkét munkafolyamat lefedi a main/release ágakba irányuló PR-eket, a `main` ágba történő pushokat, a kézi indítást
-és a merge-group eseményeket. A push, az indítás és a merge-group a teljes kiválasztást futtatja. A
-`release/**` ágakba történő pushok nem indítják el ezeket (2026-10-18): minden módosítás már lefuttatta a mátrixot a saját PR-jében,
-az egyesített kombináció pedig a Release-Green feladata (`docs/ops/RUNNER_BOX.md` → Hosted sáv). A forkok
+és a merge-group eseményeket. A push, az indítás és a merge-group a teljes kiválasztást futtatja. Egy megbízható Mergify-sorbeli vázlat az alkalmazandó `full-code`/`full-code-e2e` feladatokat is futtatja; a szokványos PR-ek kihagyják őket. Kézi összeolvasztás előtt indítson teljes dispatch-futtatást a pontos jelöltön. A `release/**` ágakba történő pushok nem indítják el ezeket a munkafolyamatokat; a Release-Green külön figyeli az összeolvasztott alapot (`docs/ops/RUNNER_BOX.md` → Hosted sáv). A forkok
 és a merge groupok hosztolt futtatókat használnak azokhoz a feladatokhoz, amelyek egyébként saját üzemeltetésű
 futtatókat választanának; a bevezetés előtt ellenőrizni kell az elegendő hosztolt kapacitást.
 
@@ -86,8 +84,7 @@ egy 30 másodpercenkénti állapotjelzés pedig felsorolja a még aktív fájlok
 csak az engedélyezési listán szereplő végrehajtási metaadatokat rögzíti; a tesztleírásokat, a kimenetet, a hibák törzsét és a teljes
 környezetet nem szerializálja.
 
-A CI és a Quality a JSONL-fájlokat `unit-progress-ci-<run>-<attempt>-<shard>`, illetve
-`unit-progress-quality-<run>-<attempt>-<shard>` néven őrzi meg. A feladat időtúllépése megakadályozhatja a későbbi feltöltést;
+A CI `unit-progress-ci-<run>-<attempt>-<shard>` néven őrzi meg a JSONL-fájlokat. A feladat időtúllépése megakadályozhatja a későbbi feltöltést;
 a már kibocsátott állapotjelzések továbbra is diagnosztikai bizonyítékként szolgálnak. Az állapotjelzések hiánya
 blokkolt vagy leállított futtatófolyamatra is utalhat. Ezek a nyugták megőrzik a meglévő tesztkiválasztást,
 párhuzamosságot, határidőket és kilépési állapotot; nem minősülnek a jelöltek elfogadásáról szóló döntésnek.
@@ -140,8 +137,6 @@ A `.github/workflows/quality.yml` kiegészíti a CI-t a main/release PR-ek, a `m
 | `Docs Gates (fast-path)`                         | Dokumentációs/kódmódosítási PR-ek; API-dokumentációs hivatkozások és docs-all                                                                                                                                                                                    | Igen                    |
 | `Fast Quality Gates`                             | Kódmódosítási PR-ek; statikus ellenőrzések, típusellenőrzés, az irányítópult típusellenőrzése, érintett egységtesztek                                                                                                                                            | Igen                    |
 | `Forgotten sibling tests`                        | Kódmódosítási PR-ek; a módosított modulok nyomon követése statikus fogyasztókig és lehetséges kapcsolódó tesztekig; a barrel- és dinamikus importálási útvonalak tájékoztató jellegű diagnosztikaként jelennek meg, a hivatkozott engedélyezőlistás kivételekkel | **Tájékoztató jellegű** |
-| `Vitest (fast-path)`                             | Kódmódosítási PR-ek; gyors vitest tesztcsomag                                                                                                                                                                                                                    | Igen                    |
-| `Unit Tests fast-path`                           | Kódmódosítási PR-ek; 4 részre osztott egységtesztcsomag                                                                                                                                                                                                          | Igen                    |
 | `No new ESLint warnings`                         | Kódmódosítási PR-ek; elnyomásokat figyelembe vevő lintelési védőellenőrzés                                                                                                                                                                                       | Igen, forkok esetén is  |
 | `Merge integrity (changelog + generated skills)` | Nem piszkozat PR-ek; a változásnapló és a generált készségek szinkronizálása                                                                                                                                                                                     | Igen, forkok esetén is  |
 

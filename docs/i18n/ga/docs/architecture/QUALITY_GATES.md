@@ -24,14 +24,12 @@ Astaíonn sreafaí oibre CI agus Quality Gates fíorasc cobhsaí araon: `Gate / 
 mar jab riachtanach nó comhairleach. Ní mór do jab riachtanach infheidhme éirí leis: ní
 féidir le torthaí atá ar iarraidh, cealaithe, scipeáilte, ar feitheamh nó anaithnid PASS
 a bhunú. Féadfaidh aicmiú bailí do dhoiciméid amháin nó don chatalóg amháin lána cóid
-a dhéanamh neamh-infheidhme; ní iarrthóir inghlactha é dréacht-PR. Ní chuireann lipéad
+a dhéanamh neamh-infheidhme; ní iarrthóir inghlactha é gnáthdhréacht-PR. Ní chuireann lipéad
 `hotfix` an riachtanas fianaise ar ceal.
 
 Clúdaíonn an dá shreabhadh oibre PRanna isteach i mbrainsí main/release, brúnna chuig
 `main`, seoladh láimhe agus teagmhais grúpa cumaisc. Ritheann brú, seoladh agus grúpa
-cumaisc an roghnúchán iomlán. Ní chuireann brúnna chuig `release/**` tús leo
-(2026-10-18): rith gach athrú an mhaitrís ar a PR cheana féin agus is é cúram
-Release-Green an teaglaim chumaiscthe (`docs/ops/RUNNER_BOX.md` → Lána óstáilte). Úsáideann
+cumaisc an roghnúchán iomlán. Ritheann dréacht iontaofa i scuaine Mergify na jabanna infheidhme `full-code`/`full-code-e2e` freisin; scipeálann gnáth-PRanna iad. Roimh chumasc láimhe, cuir dispatch iomlán ar siúl ar an iarrthóir beacht. Ní chuireann brúnna chuig `release/**` tús leis na sreafaí oibre seo; déanann Release-Green faire ar an mbonn cumaiscthe ar leithligh (`docs/ops/RUNNER_BOX.md` → Lána óstáilte). Úsáideann
 forcanna agus grúpaí cumaisc riteoirí óstáilte do jabanna a roghnódh riteoirí féinóstáilte
 murach sin; ní mór dóthain acmhainne óstáilte a fhíorú roimh an rolladh amach.
 
@@ -103,8 +101,7 @@ agus liostaíonn comhartha beatha gach 30 soicind na comhaid atá fós gníomhac
 ach meiteashonraí forghníomhaithe atá ar an liosta ceadaithe; ní dhéantar cur síos ar thástálacha, aschur, coirp earráide ná an
 timpeallacht iomlán a shrathú.
 
-Coinníonn CI agus Cáilíocht na comhaid JSONL mar `unit-progress-ci-<run>-<attempt>-<shard>` agus
-`unit-progress-quality-<run>-<attempt>-<shard>`. D’fhéadfadh teorainn ama poist cosc a chur ar an uaslódáil níos déanaí;
+Coinníonn CI na comhaid JSONL faoin ainm `unit-progress-ci-<run>-<attempt>-<shard>`. D’fhéadfadh teorainn ama poist cosc a chur ar an uaslódáil níos déanaí;
 fanann comharthaí beatha a astaíodh cheana mar fhianaise dhiagnóiseach. D’fhéadfadh sé freisin go léireodh
 comharthaí beatha atá ar iarraidh próiseas riteora atá blocáilte nó foirceanta. Caomhnaíonn na hadmhálacha seo an roghnú tástálacha,
 an chomhreomhaireacht, na sprioc-amanna agus an stádas scortha atá ann cheana; ní breithiúnais iad maidir le hiarrthóirí a ligean isteach.
@@ -163,8 +160,6 @@ an tógáil dhúblach a bhí díchumasaithe go buan; fanann na fíorsheiceálach
 | `Docs Gates (fast-path)`                         | PRanna doiciméadúcháin/cóid; tagairtí doiciméad API agus docs-all                                                                                                                                                                           | Tá                       |
 | `Fast Quality Gates`                             | PRanna cóid; seiceálacha statacha, seiceáil cineálacha, seiceáil cineálacha an deais, tástálacha aonaid lena mbaineann                                                                                                                      | Tá                       |
 | `Forgotten sibling tests`                        | PRanna cóid; modúil athraithe rianaithe chuig tomhaltóirí statacha agus tástálacha siblín iarrthacha; tuairiscítear conairí bairille agus iompórtála dinimiciúla mar dhiagnóisic chomhairleach, le heisceachtaí ceada-liosta dá dtagraítear | **Comhairleach**         |
-| `Vitest (fast-path)`                             | PRanna cóid; sraith thapa vitest                                                                                                                                                                                                            | Tá                       |
-| `Unit Tests fast-path`                           | PRanna cóid; sraith tástálacha aonaid ina 4 sharda                                                                                                                                                                                          | Tá                       |
 | `No new ESLint warnings`                         | PRanna cóid; garda lint atá feasach ar shochtadh                                                                                                                                                                                            | Tá, forcanna san áireamh |
 | `Merge integrity (changelog + generated skills)` | PRanna nach dréachtaí iad; sioncrónú an changelog agus na scileanna ginte                                                                                                                                                                   | Tá, forcanna san áireamh |
 

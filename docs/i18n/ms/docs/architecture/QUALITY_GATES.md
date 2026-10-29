@@ -24,12 +24,10 @@ Aliran kerja CI dan Quality Gates masing-masing menghasilkan keputusan stabil: `
 sebagai wajib atau nasihat. Tugas wajib yang berkenaan mesti berjaya: hasil yang tiada,
 dibatalkan, dilangkau, belum selesai dan tidak diketahui tidak boleh menetapkan PASS. Pengelasan
 docs-only atau catalog-only yang sah boleh menjadikan laluan kod tidak berkenaan;
-PR draf bukan calon yang diterima. Label `hotfix` tidak mengecualikan keperluan bukti.
+PR draf biasa bukan calon yang diterima. Label `hotfix` tidak mengecualikan keperluan bukti.
 
 Kedua-dua aliran kerja meliputi PR ke dalam cabang main/release, tolakan ke `main`, pencetusan manual
-dan peristiwa merge-group. Tolakan, pencetusan dan merge-group menjalankan pemilihan penuh. Tolakan ke
-`release/**` tidak memulakannya (2026-10-18): setiap perubahan telah menjalankan matriks pada PR masing-masing
-dan gabungan yang telah dicantumkan ialah tugas Release-Green (`docs/ops/RUNNER_BOX.md` → Laluan dihoskan). Fork
+dan peristiwa merge-group. Tolakan, pencetusan dan merge-group menjalankan pemilihan penuh. Draf baris gilir Mergify yang dipercayai turut menjalankan tugas `full-code`/`full-code-e2e` yang berkenaan; PR biasa melangkaunya. Sebelum cantuman manual, jalankan dispatch penuh pada calon yang tepat. Tolakan ke `release/**` tidak memulakan aliran kerja ini; Release-Green memerhatikan asas yang dicantumkan secara berasingan (`docs/ops/RUNNER_BOX.md` → Laluan dihoskan). Fork
 dan merge group menggunakan pelaksana dihoskan untuk tugas yang sebaliknya memilih pelaksana
 dihoskan sendiri; kapasiti dihoskan yang mencukupi mesti disahkan sebelum pelancaran.
 
@@ -95,8 +93,7 @@ setiap fail, manakala denyutan jantung 30 saat menyenaraikan fail yang masih akt
 Ia hanya merekodkan metadata pelaksanaan yang disenaraibenarkan; perihalan ujian, output, kandungan ralat
 dan persekitaran penuh tidak disirikan.
 
-CI dan Quality mengekalkan fail JSONL sebagai `unit-progress-ci-<run>-<attempt>-<shard>` dan
-`unit-progress-quality-<run>-<attempt>-<shard>`. Tamat masa kerja boleh menghalang muat naik kemudian;
+CI menyimpan fail JSONL sebagai `unit-progress-ci-<run>-<attempt>-<shard>`. Tamat masa kerja boleh menghalang muat naik kemudian;
 denyutan jantung yang telah dipancarkan kekal sebagai bukti diagnostik. Ketiadaan denyutan jantung juga
 boleh menunjukkan proses pelaksana yang tersekat atau ditamatkan. Resit ini mengekalkan pemilihan ujian,
 keserentakan, tarikh akhir dan status keluar sedia ada; resit ini bukan keputusan penerimaan calon.
@@ -165,8 +162,6 @@ dilumpuhkan secara kekal telah dialih keluar; semakan binaan/pakej/boot sebenar 
 | `Docs Gates (fast-path)`                         | PR dokumentasi/kod; rujukan dokumentasi API dan docs-all                                                                                                                                                      | Ya                |
 | `Fast Quality Gates`                             | PR kod; semakan statik, semakan jenis, semakan jenis papan pemuka, ujian unit yang terjejas                                                                                                                   | Ya                |
 | `Forgotten sibling tests`                        | PR kod; modul yang diubah dijejaki kepada pengguna statik dan ujian setara calon; laluan barrel dan import dinamik dilaporkan sebagai diagnostik nasihat, dengan pengecualian senarai dibenarkan yang dirujuk | **Nasihat**       |
-| `Vitest (fast-path)`                             | PR kod; suite vitest pantas                                                                                                                                                                                   | Ya                |
-| `Unit Tests fast-path`                           | PR kod; suite unit 4 serpihan                                                                                                                                                                                 | Ya                |
 | `No new ESLint warnings`                         | PR kod; pengadang lint yang mengambil kira penindasan                                                                                                                                                         | Ya, termasuk fork |
 | `Merge integrity (changelog + generated skills)` | PR bukan draf; penyegerakan log perubahan dan kemahiran yang dijana                                                                                                                                           | Ya, termasuk fork |
 

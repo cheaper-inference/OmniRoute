@@ -7,10 +7,7 @@
 > **حیثیت:** ڈیش بورڈ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) پر بنایا گیا ہے، جسے
 > ورک اسپیس `packages/ui-kit` (`@omniroute/ui-kit`) کے طور پر شامل (vendored) کیا گیا ہے؛ اپ اسٹریم سنیپ شاٹ
 > `packages/ui-kit/UPSTREAM.md` میں مقرر (pinned) ہے اور `npm run check:ui-kit-snapshot` کے ذریعے محفوظ ہے۔ Light
-> معیاری تھیم ہے؛ ڈیفالٹ ترجیح `system` ہے۔ نمایاں رنگ (accent) Keak lime (`--ci-color-accent`) ہے۔ Inter
-> (letter-spacing 0، `--ci-letter-spacing-ui`) UI کی فونٹ فیملی ہے، Instrument Serif صرف بڑے اور کھلے (sparse)
-> ڈسپلے ٹیکسٹ (`.ci-dashboard-display`) کے لیے، IBM Plex Mono کوڈ کے لیے — یہ سب `@fontsource/*`
-> امپورٹس کے ذریعے `src/app/globals.css` کے آغاز میں خود میزبانی (self-hosted) کیے گئے ہیں۔ ہر آئیکن ایک Lucide glyph ہے۔
+> معیاری تھیم ہے؛ ڈیفالٹ ترجیح `system` ہے۔ نمایاں رنگ (accent) Keak lime (`--ci-color-accent`) ہے۔ سوئٹزر UI، ڈسپلے اور کوڈ ٹیکسٹ کے لیے واحد خاندان ہے (`--ci-font-ui`؛ `--ci-font-display` اور `--ci-font-mono` اسے حل کرتا ہے)، خود کٹ کے ذریعے میزبانی کرتا ہے (`packages/ui-kit/src/ci-fonts.css`، درآمد شدہ بذریعہ `ci-tokens.css`)۔ ہر آئیکن ایک لوسائیڈ گلیف ہے۔
 
 ## 1. چیزیں کہاں موجود ہیں
 
@@ -41,8 +38,7 @@
 4. Tailwind یوٹیلیٹیز کو کِٹ کمپوننٹ کلاسز پر ترجیح حاصل ہے (کِٹ
    `@layer theme, base, components, utilities` کا اعلان کرتی ہے اور اس کے قواعد `components` میں موجود ہیں) — اسپیسنگ اور لے آؤٹ کے لیے یوٹیلیٹیز استعمال کریں،
    کِٹ کمپوننٹس کے رنگ تبدیل کرنے کے لیے نہیں۔
-5. سرخیاں: صفحے اور سیکشن کے عنوانات کے لیے `.ci-heading` (Inter، بغیر ٹریکنگ)؛ `.ci-dashboard-display`
-   (Instrument Serif) صرف بڑے اور کم کثافت والے نمایشی متن کے لیے، جیسے ایرر صفحے کا اسٹیٹس کوڈ۔
+5. عنوانات: صفحہ اور سیکشن کے عنوانات کے لیے `.ci-heading` ؛ `.ci-dashboard-display` صرف بڑے، ویرل ڈسپلے ٹیکسٹ جیسے ایرر پیج اسٹیٹس کوڈ کے لیے۔ دونوں سوئٹزر استعمال کرتے ہیں۔
 6. `tests/unit/dashboard-kit-sweep.test.ts` کِٹ کو اپنانے کی نگرانی کرتا ہے: `src/app` یا `src/shared/components` کے تحت
    کوئی Material ligature span نہیں؛ ڈیش بورڈ ٹری (`src/app/(dashboard)` اور
    `src/shared/components`) میں کوئی خام `<select>`، `<textarea>` یا `<table>` نہیں، اور درج شدہ مستثنیات (`Select` اڈاپٹر کی نیٹو برانچ،
@@ -86,7 +82,7 @@
 
 روٹ `README.md` میں شامل بارہ خاکے (`docs/diagrams/*.svg`) کِٹ کو ساکن تصویروں پر لاگو کرتے ہیں۔ یہ خودکار طور پر بنائے جاتے ہیں، ہاتھ سے نہیں کھینچے جاتے: `scripts/docs/gen-readme-*.mjs` میں 13 جنریٹر فائلیں (بارہ خاکے اور ڈرائیور `gen-readme-diagrams.mjs`)، اور `tests/unit/docs/readme-*-svg.test.ts` میں 12 پرانا ہونے کی جانچیں، ہر خاکے کے لیے ایک، موجود ہیں۔ ہر جانچ commit میں محفوظ فائل کو اس کے جنریٹر کے نتیجے سے بائٹ بہ بائٹ ملاتی ہے (جاب `test-unit`)۔
 
-- **ٹوکن۔** `scripts/docs/readme-diagram-theme.mjs` رنگوں کی پیلیٹ `packages/ui-kit/src/ci-tokens.css` سے نقل کرتا ہے (اس فائل سے مطابقت `tests/unit/docs/readme-diagram-theme.test.ts` کے ذریعے طے رہتی ہے) اور کِٹ کے فونٹس سے متن کے کردار متعین کرتا ہے: نمایاں متن کے لیے Instrument Serif، انٹرفیس کے لیے Inter، اور اعداد و کوڈ کے لیے IBM Plex Mono۔ یہ وہی `@fontsource` پیکیج ہیں جو `src/app/globals.css` ڈیش بورڈ کے لیے لوڈ کرتا ہے۔ فائل کے اندر روشن قدریں `:root` پر اور تاریک قدریں `prefers-color-scheme: dark` کی شرط کے تحت ہوتی ہیں، لہٰذا ہر تصویر GitHub پر قاری کی رنگوں کی ترتیب کے مطابق ہوتی ہے۔
+- **ٹوکنز۔** `scripts/docs/readme-diagram-theme.mjs` پیلیٹ کو `packages/ui-kit/src/ci-tokens.css` سے کاپی کرتا ہے ( `tests/unit/docs/readme-diagram-theme.test.ts` کے ذریعے اس فائل کے خلاف پن کیا گیا) اور کٹ کے پہلے چہروں پر ٹیکسٹ رولز کی وضاحت کرتا ہے — ڈسپلے کے لیے انسٹرومنٹ سیرف، UI ٹیکسٹ کے لیے انٹر، فگرز اور کوڈ کے لیے IBM Plex Mono — `@fontsource` پیکجز سے (ڈیش بورڈ خود kit کے ورژن 0.0.66 سے kit کے Switzer کا استعمال کرتا ہے)۔ ہلکی قدریں `:root` پر، تاریک قدریں `prefers-color-scheme: dark` کے پیچھے، فائل کے اندر ہوتی ہیں، اس لیے ہر تصویر GitHub پر ناظرین کی اسکیم کی پیروی کرتی ہے۔
 
 - **فونٹس۔** `scripts/docs/readme-fonts.mjs` ان woff2 فائلوں کو ہر خاکے میں بننے والے گلفس تک محدود کرتا ہے اور انہیں `@font-face` کے ذریعے `data:` URI کی شکل میں شامل کرتا ہے۔ اس طرح کِٹ کے فونٹس SVG کے اندر رہتے ہیں۔ README تصویر کا مقامی پروب جانچتا ہے کہ رینڈرنگ کوئی بیرونی فونٹ درخواست نہ کرے۔ ذیلی مجموعوں میں صرف لاطینی حروف ہوتے ہیں؛ علامتوں کے وہ گلفس جو متبادل کے طور پر سسٹم فونٹس استعمال کرتے ہیں، `SYMBOL_FALLBACKS` میں ایک ایک کرکے منظور ہوتے ہیں۔ اس کے علاوہ کوئی بھی غیر محیط گلف خرابی پیدا کرتا ہے۔
 

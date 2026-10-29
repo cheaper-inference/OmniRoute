@@ -7,10 +7,7 @@
 > **Staatus:** armatuurlaud on ehitatud **Keak CI UI Kit**-i (`@keak/cheaper-inference-ui-kit`) peale ning
 > vendoreitud tööruumis `packages/ui-kit` (`@omniroute/ui-kit`; ülemvoo hetktõmmis on fikseeritud failis
 > `packages/ui-kit/UPSTREAM.md` ja seda valvab `npm run check:ui-kit-snapshot`). Hele on kanooniline
-> teema; vaikeeelistus on `system`. Aktsentvärv on Keaki laim (`--ci-color-accent`). Inter
-> (tähevahe 0, `--ci-letter-spacing-ui`) on kasutajaliidese fondiperekond, Instrument Serif ainult suure
-> hõreda kuvateksti jaoks (`.ci-dashboard-display`), IBM Plex Mono koodi jaoks — kõik isemajutatud
-> `@fontsource/*` importide kaudu faili `src/app/globals.css` alguses. Iga ikoon on Lucide'i glüüf.
+> teema; vaikeeelistus on `system`. Aktsentvärv on Keaki laim (`--ci-color-accent`). Switzer on UI, kuva- ja kooditeksti (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` lahendavad selle) üksikperekond, mida ise hostib komplekt ise (`packages/ui-kit/src/ci-fonts.css`, impordib `ci-tokens.css`). Iga ikoon on Lucide'i glüüf.
 
 ## 1. Kus asjad asuvad
 
@@ -42,9 +39,7 @@
 4. Tailwindi utiliidid alistavad komplekti komponentide klassid (komplekt deklareerib
    `@layer theme, base, components, utilities` ja selle reeglid asuvad kihis `components`) — kasutage utiliite
    vahede ja paigutuse jaoks, mitte komplekti komponentide värvide muutmiseks.
-5. Pealkirjad: `.ci-heading` (Inter, ilma tähesammu muutmiseta) lehe- ja jaotispealkirjade jaoks;
-   `.ci-dashboard-display` (Instrument Serif) ainult suure ja hõreda esiletõstuteksti jaoks, näiteks
-   vealehe olekukood.
+5. Pealkirjad: `.ci-heading` lehtede ja jaotiste pealkirjade jaoks; `.ci-dashboard-display` ainult suure ja hõreda kuvatava teksti jaoks, näiteks vealehe olekukood. Mõlemad kasutavad Switzerit.
 6. `tests/unit/dashboard-kit-sweep.test.ts` kontrollib komplekti kasutuselevõttu: kataloogides
    `src/app` ega `src/shared/components` ei tohi olla Materiali ligatuuriga elementi span; töölauapuus
    (`src/app/(dashboard)` ja `src/shared/components`) ei tohi olla tooreid elemente `<select>`,
@@ -91,7 +86,7 @@
 
 Juurkausta `README.md` faili lisatud kaksteist diagrammi (`docs/diagrams/*.svg`) rakendavad komplekti staatilistele piltidele. Need genereeritakse, mitte ei joonistata käsitsi: 13 generaatorifaili asukohas `scripts/docs/gen-readme-*.mjs` (kaksteist diagrammi ja juhtfail `gen-readme-diagrams.mjs`) ning 12 ajakohasustesti asukohas `tests/unit/docs/readme-*-svg.test.ts`, üks iga diagrammi kohta. Iga test võrdleb commit'itud faili bait baidi haaval generaatori väljundiga (töö `test-unit`).
 
-- **Tokenid.** `scripts/docs/readme-diagram-theme.mjs` kopeerib paleti failist `packages/ui-kit/src/ci-tokens.css` (vastavust sellele failile tagab `tests/unit/docs/readme-diagram-theme.test.ts`) ning määrab tekstirollid komplekti fontidega: Instrument Serif esiletõstetud tekstile, Inter kasutajaliidese tekstile ja IBM Plex Mono arvudele ning koodile. Need on samad `@fontsource` paketid, mille `src/app/globals.css` laadib juhtpaneelile. Heledad väärtused on failis `:root` all ja tumedad `prefers-color-scheme: dark` tingimuse taga, nii et iga pilt järgib GitHubi lugeja värviskeemi.
+- **Tokenid.** `scripts/docs/readme-diagram-theme.mjs` kopeerib paleti `packages/ui-kit/src/ci-tokens.css` -st (selle faili külge kinnitas `tests/unit/docs/readme-diagram-theme.test.ts`) ja määratleb tekstirollid komplekti varasematel külgedel – Instrument Serif kuvamiseks, Inter UI teksti jaoks, IBM Plex Mono jooniste ja koodi jaoks – `@fontsource` pakettidest (armatuurlaud ise kasutab komplekti Switzerit alates komplekti versioonist 0.0.66). Heledad väärtused asuvad failis `:root`, tumedad väärtused `prefers-color-scheme: dark` taga, nii et iga pilt järgib vaataja skeemi GitHub.
 
 - **Fondid.** `scripts/docs/readme-fonts.mjs` vähendab need woff2-failid iga diagrammi joonistatud glüüfideni ning põimib need `@font-face` määrangutena `data:` URI-de kaudu. Nii jäävad komplekti fondid SVG sisse. Kohalik README pilditest kontrollib, et renderdamine ei teeks väliseid fondipäringuid. Alamkomplektid sisaldavad ainult ladina märke; süsteemifontidele toetuvad sümboliglüüfid lubatakse ükshaaval loendis `SYMBOL_FALLBACKS`. Iga muu katmata glüüf põhjustab vea.
 

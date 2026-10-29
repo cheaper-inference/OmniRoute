@@ -7,10 +7,7 @@
 > **Status:** dashbordet er bygget på **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
 > som arbeidsområdet `packages/ui-kit` (`@omniroute/ui-kit`; oppstrøms-øyeblikksbildet er festet i
 > `packages/ui-kit/UPSTREAM.md` og beskyttet av `npm run check:ui-kit-snapshot`). Lyst tema er det kanoniske
-> temaet; standardpreferansen er `system`. Aksentfargen er Keak-lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) er UI-skriftfamilien, Instrument Serif kun for stor,
-> sparsom visningstekst (`.ci-dashboard-display`), IBM Plex Mono for kode — alt selvhostet via
-> `@fontsource/*`-importene øverst i `src/app/globals.css`. Hvert ikon er en Lucide-glyf.
+> temaet; standardpreferansen er `system`. Aksentfargen er Keak-lime (`--ci-color-accent`). Switzer er enkeltfamilien for UI, visning og kodetekst (`--ci-font-ui`; `--ci-font-display` og `--ci-font-mono` løser seg etter det), selvvertert av selve settet (`packages/ui-kit/src/ci-fonts.css`, importert av `ci-tokens.css`). Hvert ikon er en Lucide-glyph.
 
 ## 1. Hvor ting ligger
 
@@ -103,8 +100,7 @@
 4. Tailwind-verktøyklasser overstyrer kit-komponentklassene (kitet deklarerer
    `@layer theme, base, components, utilities`, og reglene ligger i `components`) — bruk verktøyklasser for
    avstand og layout, ikke for å endre fargene på kit-komponenter.
-5. Overskrifter: `.ci-heading` (Inter, uten tegnavstand) for side- og seksjonstitler; `.ci-dashboard-display`
-   (Instrument Serif) bare for stor, sparsom visningstekst, for eksempel statuskoden på feilsiden.
+5. Overskrifter: `.ci-heading` for side- og seksjonstitler; `.ci-dashboard-display` kun for stor, sparsom visningstekst, for eksempel feilsidestatuskoden. Begge bruker Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` sikrer bruken av kitet: ingen Material-ligaturspenn under
    `src/app` eller `src/shared/components`; i dashbordtreet (`src/app/(dashboard)` og
    `src/shared/components`) skal det ikke finnes rå `<select>`, `<textarea>` eller `<table>`, og ingen håndlagde
@@ -158,7 +154,7 @@ innstillinger, kombinasjoner, bruk og endepunkt i begge temaene, kjør `npm run 
 
 De tolv diagrammene i rotens `README.md` (`docs/diagrams/*.svg`) bruker kittet i statiske bilder. De genereres, ikke tegnes for hånd: 13 generatorfiler under `scripts/docs/gen-readme-*.mjs` (tolv diagrammer pluss driveren `gen-readme-diagrams.mjs`) og 12 tester for utdaterte filer under `tests/unit/docs/readme-*-svg.test.ts`, én per diagram. Hver test sammenligner den committede filen byte for byte med generatorens utdata (jobb `test-unit`).
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopierer paletten fra `packages/ui-kit/src/ci-tokens.css` (samsvaret med denne filen sikres av `tests/unit/docs/readme-diagram-theme.test.ts`) og definerer tekstrollene med kittets skrifter: Instrument Serif til fremhevet displaytekst, Inter til grensesnittekst og IBM Plex Mono til tall og kode. Dette er de samme `@fontsource`-pakkene som `src/app/globals.css` laster for dashbordet. Lyse verdier ligger på `:root` og mørke under `prefers-color-scheme: dark` inne i filen, slik at hvert bilde følger leserens fargeskjema på GitHub.
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopierer paletten fra `packages/ui-kit/src/ci-tokens.css` (festet mot den filen av `tests/unit/docs/readme-diagram-theme.test.ts`) og definerer tekstrollene på settets tidligere ansikter – Instrument Serif for display, Inter for UI text, IBM Plex Mono for figurer og kode – fra `@fontsource` pakkene (dashbordet i seg selv bruker settets Switzer siden kit 0.0.66). Lyse verdier sitter på `:root`, mørke verdier bak `prefers-color-scheme: dark`, inne i filen, så hvert bilde følger seerens skjema på GitHub.
 
 - **Skrifter.** `scripts/docs/readme-fonts.mjs` begrenser disse woff2-filene til glyffene hvert diagram tegner, og bygger dem inn via `@font-face` som `data:`-URI-er. Dermed forblir kittets skrifter inne i SVG-filen. Den lokale README-bildetesten kontrollerer at rendering ikke sender eksterne skriftforespørsler. Delmengdene inneholder bare latinske tegn; symbolglyffer som faller tilbake til systemskriftene, tillates enkeltvis i `SYMBOL_FALLBACKS`. Enhver annen glyff som ikke dekkes, utløser en feil.
 

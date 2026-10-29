@@ -19,6 +19,10 @@ import { pathToFileURL } from "node:url";
 
 const ENV_KEYS = ["REDIS_URL", "NODE_ENV", "DISABLE_SQLITE_AUTO_BACKUP"] as const;
 
+// Compare both requests within one fixed window even when Redis retries cross a
+// real minute boundary. Mock only Date; connection and retry timers stay real.
+const FIXED_WINDOW_NOW = Date.UTC(2026, 0, 1, 0, 0, 30);
+
 async function twoRequestsAgainstLimitOne(env: Partial<Record<(typeof ENV_KEYS)[number], string>>) {
   const saved = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
   for (const key of ENV_KEYS) {
@@ -52,7 +56,8 @@ async function twoRequestsAgainstLimitOne(env: Partial<Record<(typeof ENV_KEYS)[
   }
 }
 
-test("DISABLE_SQLITE_AUTO_BACKUP=true does not move a Redis deployment to the in-memory store", async () => {
+test("DISABLE_SQLITE_AUTO_BACKUP=true does not move a Redis deployment to the in-memory store", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: FIXED_WINDOW_NOW });
   const { results, tookRedisPath } = await twoRequestsAgainstLimitOne({
     REDIS_URL: "redis://127.0.0.1:1",
     NODE_ENV: "production",
@@ -64,7 +69,8 @@ test("DISABLE_SQLITE_AUTO_BACKUP=true does not move a Redis deployment to the in
   assert.equal(results[1].allowed, false);
 });
 
-test("NODE_ENV=test still keeps the limiter in memory even with REDIS_URL set", async () => {
+test("NODE_ENV=test still keeps the limiter in memory even with REDIS_URL set", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: FIXED_WINDOW_NOW });
   const { results, tookRedisPath } = await twoRequestsAgainstLimitOne({
     REDIS_URL: "redis://127.0.0.1:1",
     NODE_ENV: "test",

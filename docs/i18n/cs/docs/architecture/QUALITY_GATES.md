@@ -24,12 +24,10 @@ Workflowy CI a Quality Gates poskytují stabilní verdikt: `Gate / CI` a
 jako povinnou nebo doporučenou. Příslušná povinná úloha musí být úspěšná: chybějící,
 zrušené, přeskočené, čekající a neznámé výsledky nemohou prokázat PASS. Platná
 klasifikace pouze pro dokumentaci nebo pouze pro katalog může způsobit, že větev pro kód nebude relevantní;
-koncept PR není akceptovaným kandidátem. Štítek `hotfix` neruší požadavek na důkazy.
+běžný koncept PR není akceptovaným kandidátem. Štítek `hotfix` neruší požadavek na důkazy.
 
 Oba workflowy pokrývají PR do větví main/release, push do `main`, ruční spuštění
-a události skupin sloučení. Push, ruční spuštění a skupina sloučení spouštějí úplný výběr. Push
-do `release/**` je nespouští (2026-10-18): každá změna již absolvovala matici ve svém PR
-a sloučená kombinace je úlohou Release-Green (`docs/ops/RUNNER_BOX.md` → Hostovaná větev). Forky
+a události skupin sloučení. Push, ruční spuštění a skupina sloučení spouštějí úplný výběr. Důvěryhodný koncept ve frontě Mergify také spouští příslušné úlohy `full-code`/`full-code-e2e`; běžné PR je přeskakují. Před ručním sloučením spusťte úplný dispatch pro přesně daného kandidáta. Push do `release/**` tyto workflowy nespouští; Release-Green sleduje sloučený základ samostatně (`docs/ops/RUNNER_BOX.md` → Hostovaná větev). Forky
 a skupiny sloučení používají hostované runnery pro úlohy, které by jinak vybraly self-hostované
 runnery; před zavedením musí být ověřena dostatečná hostovaná kapacita.
 
@@ -97,8 +95,7 @@ každého souboru a 30sekundový prezenční signál uvádí soubory, které jso
 a dobu jejich běhu. Zaznamenává pouze metadata spuštění uvedená na seznamu povolených položek;
 popisy testů, výstup, těla chyb ani celé prostředí se neserializují.
 
-CI a Quality uchovávají soubory JSONL jako `unit-progress-ci-<run>-<attempt>-<shard>` a
-`unit-progress-quality-<run>-<attempt>-<shard>`. Vypršení časového limitu úlohy může zabránit
+CI uchovává soubory JSONL pod názvem `unit-progress-ci-<run>-<attempt>-<shard>`. Vypršení časového limitu úlohy může zabránit
 pozdějšímu nahrání; již odeslané prezenční signály zůstávají diagnostickým důkazem. Chybějící
 prezenční signály mohou také znamenat zablokovaný nebo ukončený proces runneru. Tyto záznamy
 zachovávají stávající výběr testů, souběžnost, časové limity a návratový stav; nepředstavují
@@ -168,8 +165,6 @@ zakázané duplicitní sestavení bylo odstraněno; skutečné kontroly sestaven
 | `Docs Gates (fast-path)`                         | PR dokumentace/kódu; odkazy v dokumentaci API a docs-all                                                                                                                                                        | Ano               |
 | `Fast Quality Gates`                             | PR kódu; statické kontroly, kontrola typů, kontrola typů dashboardu, ovlivněné jednotkové testy                                                                                                                 | Ano               |
 | `Forgotten sibling tests`                        | PR kódu; změněné moduly dohledané ke statickým konzumentům a kandidátním souvisejícím testům; cesty přes barrel a dynamické importy jsou hlášeny jako poradní diagnostika s odkazovanými výjimkami v allowlistu | **Poradní**       |
-| `Vitest (fast-path)`                             | PR kódu; rychlá sada vitest                                                                                                                                                                                     | Ano               |
-| `Unit Tests fast-path`                           | PR kódu; sada jednotkových testů rozdělená do 4 shardů                                                                                                                                                          | Ano               |
 | `No new ESLint warnings`                         | PR kódu; kontrola lintování zohledňující potlačení                                                                                                                                                              | Ano, včetně forků |
 | `Merge integrity (changelog + generated skills)` | PR, které nejsou koncepty; synchronizace changelogu a generovaných dovedností                                                                                                                                   | Ano, včetně forků |
 

@@ -24,15 +24,12 @@ Fluxurile de lucru CI și Quality emit fiecare câte un verdict stabil: `Gate / 
 ca obligatoriu sau consultativ. Un job obligatoriu aplicabil trebuie să reușească:
 rezultatele lipsă, anulate, omise, în așteptare și necunoscute nu pot stabili PASS. O
 clasificare validă exclusiv pentru documentație sau exclusiv pentru catalog poate face ca
-o pistă de cod să fie neaplicabilă; un PR în stadiu de ciornă nu este un candidat acceptat.
+o pistă de cod să fie neaplicabilă; un PR obișnuit în stadiu de ciornă nu este un candidat acceptat.
 O etichetă `hotfix` nu elimină obligația de a furniza dovezi.
 
 Ambele fluxuri de lucru acoperă PR-urile către ramurile main/release, push-urile către
 `main`, declanșarea manuală și evenimentele de tip merge-group. Push-urile, declanșările
-manuale și merge-group execută selecția completă. Push-urile către `release/**` nu le
-pornesc (2026-10-18): fiecare modificare a executat deja matricea în PR-ul său, iar
-combinația rezultată în urma îmbinării este responsabilitatea Release-Green
-(`docs/ops/RUNNER_BOX.md` → Pista găzduită). Fork-urile și grupurile de îmbinare utilizează
+manuale și merge-group execută selecția completă. Un PR de încredere în stadiu de ciornă din coada Mergify execută și joburile `full-code`/`full-code-e2e` aplicabile; PR-urile obișnuite le omit. Înainte de o îmbinare manuală, executați un dispatch complet pe candidatul exact. Push-urile către `release/**` nu pornesc aceste fluxuri de lucru; Release-Green observă separat baza îmbinată (`docs/ops/RUNNER_BOX.md` → Pista găzduită). Fork-urile și grupurile de îmbinare utilizează
 runner-e găzduite pentru joburile care altfel ar selecta runner-e autogăzduite;
 capacitatea găzduită suficientă trebuie verificată înainte de lansare.
 
@@ -105,8 +102,7 @@ iar un semnal periodic la 30 de secunde enumeră fișierele încă active și ti
 numai metadatele de execuție incluse în lista de permisiuni; descrierile testelor, rezultatele, corpurile erorilor și mediul
 complet nu sunt serializate.
 
-CI și Quality păstrează fișierele JSONL ca `unit-progress-ci-<run>-<attempt>-<shard>` și
-`unit-progress-quality-<run>-<attempt>-<shard>`. Expirarea timpului alocat unei sarcini poate împiedica încărcarea ulterioară;
+CI păstrează fișierele JSONL ca `unit-progress-ci-<run>-<attempt>-<shard>`. Expirarea timpului alocat unei sarcini poate împiedica încărcarea ulterioară;
 semnalele periodice deja emise rămân dovezi pentru diagnosticare. Absența semnalelor periodice poate indica, de asemenea,
 un proces runner blocat sau oprit. Aceste confirmări păstrează selecția existentă a testelor,
 nivelul de concurență, termenele-limită și starea de ieșire; ele nu reprezintă verdicte privind admiterea candidaților.
@@ -178,8 +174,6 @@ dezactivată permanent a fost eliminată; verificările reale de compilare/împa
 | `Docs Gates (fast-path)`                         | PR-uri pentru documentație/cod; referințe ale documentației API și docs-all                                                                                                                                                                                | Da                           |
 | `Fast Quality Gates`                             | PR-uri de cod; verificări statice, verificarea tipurilor, verificarea tipurilor pentru dashboard, teste unitare afectate                                                                                                                                   | Da                           |
 | `Forgotten sibling tests`                        | PR-uri de cod; modulele modificate sunt urmărite până la consumatorii statici și testele asociate candidate; căile de tip barrel și import dinamic sunt raportate ca diagnostice informative, cu excepții din lista de permisiuni la care se face referire | **Informativă**              |
-| `Vitest (fast-path)`                             | PR-uri de cod; suita rapidă vitest                                                                                                                                                                                                                         | Da                           |
-| `Unit Tests fast-path`                           | PR-uri de cod; suită de teste unitare cu 4 shard-uri                                                                                                                                                                                                       | Da                           |
 | `No new ESLint warnings`                         | PR-uri de cod; mecanism de protecție lint care ține cont de suprimări                                                                                                                                                                                      | Da, inclusiv pentru fork-uri |
 | `Merge integrity (changelog + generated skills)` | PR-uri care nu sunt ciorne; sincronizarea jurnalului de modificări și a skill-urilor generate                                                                                                                                                              | Da, inclusiv pentru fork-uri |
 

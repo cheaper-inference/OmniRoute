@@ -5666,6 +5666,7 @@
     "allModelsAlreadyImported": "Il-mudelli kollha diġà ġew importati",
     "noNewModelsToImport": "M’hemmx mudelli ġodda x’timporta — il-mudelli kollha diġà jinsabu fir-reġistru jew fil-lista tal-mudelli personalizzati",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Skoperta tal-mudell falliet {time}",
     "skippingExistingModels": "Qed jinqabżu {count} mudelli eżistenti",
     "autoSync": "Sinkronizzazzjoni Awtomatika",
     "autoSyncShort": "Issinkronizza",

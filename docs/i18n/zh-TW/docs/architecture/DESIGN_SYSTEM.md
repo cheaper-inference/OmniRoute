@@ -4,7 +4,7 @@
 
 ---
 
-> **狀態：** 儀表板建構於 **Keak CI UI Kit**（`@keak/cheaper-inference-ui-kit`）之上，以 vendor 方式納入為工作區中的 `packages/ui-kit`（`@omniroute/ui-kit`；上游快照固定於 `packages/ui-kit/UPSTREAM.md`，並由 `npm run check:ui-kit-snapshot` 把關）。亮色（Light）為標準主題；預設偏好為 `system`。強調色為 Keak 萊姆綠（`--ci-color-accent`）。Inter（letter-spacing 0，`--ci-letter-spacing-ui`）為 UI 字體家族，Instrument Serif 僅用於大型而稀疏的展示文字（`.ci-dashboard-display`），IBM Plex Mono 用於程式碼——以上皆透過 `src/app/globals.css` 頂部的 `@fontsource/*` 匯入自行託管。每個圖示均為 Lucide 字形。
+> **狀態：** 儀表板建構於 **Keak CI UI Kit**（`@keak/cheaper-inference-ui-kit`）之上，以 vendor 方式納入為工作區中的 `packages/ui-kit`（`@omniroute/ui-kit`；上游快照固定於 `packages/ui-kit/UPSTREAM.md`，並由 `npm run check:ui-kit-snapshot` 把關）。亮色（Light）為標準主題；預設偏好為 `system`。強調色為 Keak 萊姆綠（`--ci-color-accent`)。 Switzer 是UI、顯示和程式碼文字（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析為它）的單一系列，由套件本身自託管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`導入）。每個圖示都是 Lucide 字形。
 
 ## 1. 各項內容的所在位置
 
@@ -83,7 +83,7 @@
 2. 絕不可手動修改 `packages/ui-kit/src`：請使用 `scripts/dev/sync-ui-kit.sh <commit>` 同步；若有任何位元組與鎖定的上游提交不同，預先提交閘門 `npm run check:ui-kit-snapshot`（`.husky/pre-commit`）便會失敗（若缺少上游複製版本 `UI_KIT_CLONE` 或 `_references/cheaper-inference-ui-kit`，則會顯示警告並略過）。若套件缺少某項功能，請在轉接器或畫面中採取替代做法，並向上游提出需求。
 3. 套件文字的預設值為英文（`label = "Loading"`、`loadingLabel = "Loading table"`……）——只要套件元件會呈現文字，就應從 `useTranslations(...)` 傳入翻譯後的字串。
 4. Tailwind 工具類別的優先順序高於套件元件類別（套件宣告了 `@layer theme, base, components, utilities`，且其規則位於 `components`）——請使用工具類別處理間距與版面配置，不要用來重新設定套件元件的顏色。
-5. 標題：頁面與區段標題使用 `.ci-heading`（Inter，不使用字距）；只有錯誤頁面狀態碼這類大型、疏朗的展示文字才使用 `.ci-dashboard-display`（Instrument Serif）。
+5. 標題： `.ci-heading`用於頁面和章節標題； `.ci-dashboard-display`僅適用於大而稀疏的顯示文本，例如錯誤頁面狀態代碼。兩者都使用Switzer。
 6. `tests/unit/dashboard-kit-sweep.test.ts` 負責確保套件的採用情況：`src/app` 或 `src/shared/components` 下不得有 Material 連字 span；儀表板目錄樹（`src/app/(dashboard)` 和 `src/shared/components`）中不得有原始 `<select>`、`<textarea>` 或 `<table>`，且除列出的例外（`Select` 轉接器的原生分支、`RequestLoggerDetail`）外，不得有自行實作的 `role="dialog"`；該處每個原始 `<button>` 或 `<input>` 上方最多 3 行內都必須有包含 `kit-exception:`（並附上原因）的註解；調色盤色相與 `dark:` 變體只能出現在測試所列出的檔案中。
 7. 提交 PR 前，請透過螢幕截圖驗證兩種主題與 390 px 的視窗寬度；`tests/e2e/a11y.spec.ts` 會執行 axe。
 
@@ -121,7 +121,7 @@
 
 根目錄 `README.md` 中嵌入的十二張圖（`docs/diagrams/*.svg`）將套件應用於靜態影像。這些圖由程式產生，而非手工繪製：`scripts/docs/gen-readme-*.mjs` 下有 13 個產生器檔案（十二張圖加上驅動程式 `gen-readme-diagrams.mjs`），`tests/unit/docs/readme-*-svg.test.ts` 下有 12 項時效性測試，每張圖一項，逐位元組比較已提交檔案與產生器輸出（工作 `test-unit`）。
 
-- **權杖。** `scripts/docs/readme-diagram-theme.mjs` 從 `packages/ui-kit/src/ci-tokens.css` 複製調色盤（由 `tests/unit/docs/readme-diagram-theme.test.ts` 鎖定與該檔案的一致性），並使用套件字型定義文字角色：Instrument Serif 用於展示文字，Inter 用於介面文字，IBM Plex Mono 用於數字和程式碼。這些是 `src/app/globals.css` 為儀表板載入的同一組 `@fontsource` 套件。檔案內的亮色值位於 `:root`，暗色值位於 `prefers-color-scheme: dark` 條件下，因此每張圖都會跟隨 GitHub 閱讀者的配色設定。
+- **代幣。** `scripts/docs/readme-diagram-theme.mjs`從`packages/ui-kit/src/ci-tokens.css`複製調色板（透過`tests/unit/docs/readme-diagram-theme.test.ts`固定在該檔案上），並在`@fontsource`套件中定義套件早期介面上的文字角色 - 用於顯示的 Instrument Serif、用於UI文字的 Inter、用於圖形和程式碼的IBM Plex Mono（儀表板本身從套件 0.0.66 開始使用套件的 Switzer）。檔案內的亮值位於`:root`上，暗值位於`prefers-color-scheme: dark`後面，因此每個影像都遵循檢視者在GitHub上的方案。
 
 - **字型。** `scripts/docs/readme-fonts.mjs` 將這些 woff2 檔案裁切為各圖實際繪製的字形，並透過 `@font-face` 以 `data:` URI 嵌入。 這樣可將套件字型保留在 SVG 內。README 影像的本機探測會檢查渲染過程不發出外部字型請求。 子集僅包含拉丁字元；退回使用系統字型堆疊的符號字形會在 `SYMBOL_FALLBACKS` 中逐一獲准，任何其他未涵蓋字形都會擲出錯誤。
 

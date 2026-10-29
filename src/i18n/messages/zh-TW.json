@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "所有模型已匯入",
     "noNewModelsToImport": "沒有新模型可匯入 — 所有模型已在登錄檔或自定義模型列表中",
     "localCatalogFallbackStatus": "無法取得提供者的模型清單——正在顯示內建目錄",
+    "discoveryDegradedStatus": "模型探索失敗 {time}",
     "skippingExistingModels": "跳過 {count} 個已有模型",
     "autoSync": "自動同步",
     "autoSyncShort": "同步",

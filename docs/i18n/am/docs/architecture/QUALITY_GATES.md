@@ -24,12 +24,10 @@
 እንደ አስፈላጊ ወይም አማካሪ ይዘረዝራል። ተፈጻሚ የሆነ አስፈላጊ ስራ መሳካት አለበት፦ የጠፋ፣
 የተሰረዘ፣ የተዘለለ፣ በመጠባበቅ ላይ ያለ እና ያልታወቀ ውጤት PASSን ማረጋገጥ አይችሉም። ትክክለኛ
 docs-only ወይም catalog-only ምደባ አንድን የኮድ መስመር ተፈጻሚ እንዳይሆን ሊያደርግ ይችላል፤
-ረቂቅ PR እንደ ተቀባይነት ያገኘ እጩ አይቆጠርም። የ`hotfix` መለያ የማስረጃ መስፈርቱን አያስቀርም።
+መደበኛ ረቂቅ PR እንደ ተቀባይነት ያገኘ እጩ አይቆጠርም። የ`hotfix` መለያ የማስረጃ መስፈርቱን አያስቀርም።
 
 ሁለቱም የስራ ፍሰቶች ወደ main/release ቅርንጫፎች የሚገቡ PRዎችን፣ ወደ `main` የሚደረጉ pushesን፣ manual dispatchን
-እና merge-group ክስተቶችን ይሸፍናሉ። Push፣ dispatch እና merge-group ሙሉውን ምርጫ ያስኬዳሉ። ወደ
-`release/**` የሚደረጉ Pushes እነሱን አያስጀምሩም (2026-10-18)፦ እያንዳንዱ ለውጥ ማትሪክሱን አስቀድሞ በPRው
-ላይ አስኪዷል፣ እና የተዋሃደው ጥምረት የRelease-Green ስራ ነው (`docs/ops/RUNNER_BOX.md` → Hosted lane)። Forks
+እና merge-group ክስተቶችን ይሸፍናሉ። Push፣ dispatch እና merge-group ሙሉውን ምርጫ ያስኬዳሉ። በታመነው የMergify ውህደት ወረፋ ውስጥ ያለ ረቂቅም ተፈጻሚ የሆኑ `full-code`/`full-code-e2e` ስራዎችን ያስኬዳል፤ መደበኛ PRዎች እነሱን ይዘላሉ። በእጅ ከማዋሃድ በፊት በትክክለኛው ዕጩ ላይ ሙሉ ማስኬድን በdispatch ያስጀምሩ። ወደ `release/**` የሚደረጉ pushዎች እነዚህን የስራ ፍሰቶች አያስጀምሩም፤ Release-Green የተዋሃደውን መሠረት በተናጠል ይከታተላል (`docs/ops/RUNNER_BOX.md` → Hosted lane)። Forks
 እና merge groups፣ አለበለዚያ self-hosted runnersን ለሚመርጡ ስራዎች hosted runnersን ይጠቀማሉ፤ ከመዘርጋቱ
 በፊት በቂ hosted አቅም መኖሩ መረጋገጥ አለበት።
 
@@ -93,8 +91,7 @@ shard መካከለኛ Istanbul report ሳያመነጭ የመጀመሪያዎቹ�
 በፈቃድ ዝርዝር ውስጥ ያለውን የአፈጻጸም ሜታዳታ ብቻ ይመዘግባል፤ የፈተና መግለጫዎች፣ ውጤቶች፣ የስህተት ይዘቶች እና ሙሉው
 አካባቢ ወደ ተከታታይ ቅርጽ አይቀየሩም።
 
-CI እና Quality የJSONL ፋይሎቹን እንደ `unit-progress-ci-<run>-<attempt>-<shard>` እና
-`unit-progress-quality-<run>-<attempt>-<shard>` ያቆያሉ። የሥራ ጊዜ ማብቂያ በኋላ የሚከናወነውን ሰቀላ ሊያግድ ይችላል፤
+CI የJSONL ፋይሎቹን በ`unit-progress-ci-<run>-<attempt>-<shard>` ስም ያቆያል። የሥራ ጊዜ ማብቂያ በኋላ የሚከናወነውን ሰቀላ ሊያግድ ይችላል፤
 አስቀድመው የተላኩ የልብ ምት ምልክቶች እንደ የምርመራ ማስረጃ ይቀራሉ። የጎደሉ የልብ ምት ምልክቶች የታገደ ወይም
 የተቋረጠ የማስኬጃ ሂደትንም ሊያመለክቱ ይችላሉ። እነዚህ ደረሰኞች ነባሩን የፈተና ምርጫ፣
 በአንድ ጊዜ መከናወን፣ የጊዜ ገደቦች እና የመውጫ ሁኔታ እንዳሉ ይጠብቃሉ፤ የዕጩ ተቀባይነት ውሳኔዎች አይደሉም።
@@ -161,8 +158,6 @@ dispatch እና merge groups ላይ CIን ያሟላል። PRs በpath-filtered �
 | `Docs Gates (fast-path)`                         | Docs/code PRs፤ API docs refs እና docs-all                                                                                                                                      | አዎ             |
 | `Fast Quality Gates`                             | Code PRs፤ static checks፣ typecheck፣ dashboard typecheck፣ ተጽዕኖ ያረፈባቸው unit tests                                                                                               | አዎ             |
 | `Forgotten sibling tests`                        | Code PRs፤ የተቀየሩ modules ወደ static consumers እና candidate sibling tests ይከታተላሉ፤ barrel እና dynamic-import paths እንደ አማካሪ diagnostics ሪፖርት ይደረጋሉ፣ ከተጠቀሱት allowlist exceptions ጋር | **አማካሪ**       |
-| `Vitest (fast-path)`                             | Code PRs፤ ፈጣን vitest suite                                                                                                                                                    | አዎ             |
-| `Unit Tests fast-path`                           | Code PRs፤ ባለ4-shard unit suite                                                                                                                                                | አዎ             |
 | `No new ESLint warnings`                         | Code PRs፤ suppressions-aware lint guard                                                                                                                                       | አዎ፣ forksን ጨምሮ |
 | `Merge integrity (changelog + generated skills)` | Non-draft PRs፤ changelog እና generated skill sync                                                                                                                              | አዎ፣ forksን ጨምሮ |
 

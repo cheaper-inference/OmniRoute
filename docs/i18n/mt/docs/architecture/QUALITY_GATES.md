@@ -24,12 +24,10 @@ Il-workflows taċ-CI u tal-Quality Gates kull wieħed joħroġ verdett stabbli: 
 bħala meħtieġ jew konsultattiv. Job meħtieġ applikabbli jrid jirnexxi: riżultati neqsin,
 ikkanċellati, maqbuża, pendenti u mhux magħrufa ma jistgħux jistabbilixxu PASS. Klassifikazzjoni valida
 ta’ docs-only jew catalog-only tista’ tagħmel lane tal-kodiċi mhux applikabbli;
-draft PR mhuwiex kandidat aċċettat. Tikketta `hotfix` ma tneħħix ir-rekwiżit għall-evidenza.
+draft PR ordinarju mhuwiex kandidat aċċettat. Tikketta `hotfix` ma tneħħix ir-rekwiżit għall-evidenza.
 
 Iż-żewġ workflows ikopru PRs lejn il-fergħat main/release, pushes lejn `main`, dispatch manwali
-u avvenimenti ta’ merge-group. Push, dispatch u merge-group iħaddmu l-għażla sħiħa. Pushes lejn
-`release/**` ma jibdewhomx (2026-10-18): kull bidla tkun diġà ħaddmet il-matriċi fuq il-PR tagħha
-u l-kombinazzjoni magħquda hija xogħol Release-Green (`docs/ops/RUNNER_BOX.md` → Hosted lane). Forks
+u avvenimenti ta’ merge-group. Push, dispatch u merge-group iħaddmu l-għażla sħiħa. Draft affidabbli fil-kju ta’ Mergify jħaddem ukoll il-jobs applikabbli `full-code`/`full-code-e2e`; PRs ordinarji jaqbżuhom. Qabel merge manwali, ħaddem dispatch sħiħ fuq il-kandidat eżatt. Pushes lejn `release/**` ma jibdewx dawn il-workflows; Release-Green josserva l-bażi magħquda separatament (`docs/ops/RUNNER_BOX.md` → Hosted lane). Forks
 u merge groups jużaw runners ospitati għal jobs li kieku jagħżlu runners self-hosted;
 qabel ir-rollout trid tiġi vverifikata kapaċità ospitata suffiċjenti.
 
@@ -88,8 +86,7 @@ li jkun għadda għalihom. Din tirreġistra biss metadata tal-eżekuzzjoni mil-l
 id-deskrizzjonijiet tat-testijiet, l-output, il-kontenut tal-iżbalji u l-ambjent sħiħ ma jiġux
 serializzati.
 
-CI u Quality iżommu l-fajls JSONL bħala `unit-progress-ci-<run>-<attempt>-<shard>` u
-`unit-progress-quality-<run>-<attempt>-<shard>`. Skadenza tal-ħin tal-biċċa xogħol tista’
+CI jżomm il-fajls JSONL bl-isem `unit-progress-ci-<run>-<attempt>-<shard>`. Skadenza tal-ħin tal-biċċa xogħol tista’
 tipprevjeni t-tlugħ sussegwenti; is-sinjali ta’ attività li jkunu diġà ntbagħtu jibqgħu
 evidenza dijanjostika. In-nuqqas ta’ sinjali ta’ attività jista’ jindika wkoll proċess
 runner imblukkat jew mitmum. Dawn l-irċevuti jippreservaw l-għażla eżistenti tat-testijiet,
@@ -159,8 +156,6 @@ li kien diżattivat b'mod permanenti tneħħa; il-verifiki reali tal-build/packa
 | `Docs Gates (fast-path)`                         | PRs tad-dokumentazzjoni/kodiċi; referenzi tad-dokumentazzjoni tal-API u docs-all                                                                                                                                                       | Iva                  |
 | `Fast Quality Gates`                             | PRs tal-kodiċi; verifiki statiċi, typecheck, typecheck tad-dashboard, u testijiet tal-unità affettwati                                                                                                                                 | Iva                  |
 | `Forgotten sibling tests`                        | PRs tal-kodiċi; moduli mibdula traċċati sal-konsumaturi statiċi u testijiet relatati kandidati; il-paths tal-barrel u tad-dynamic-import jiġu rrappurtati bħala dijanjostiċi konsultattivi, b'eċċezzjonijiet referenzjati fl-allowlist | **Konsultattiv**     |
-| `Vitest (fast-path)`                             | PRs tal-kodiċi; sett veloċi ta' testijiet vitest                                                                                                                                                                                       | Iva                  |
-| `Unit Tests fast-path`                           | PRs tal-kodiċi; sett ta' testijiet tal-unità b'4 shards                                                                                                                                                                                | Iva                  |
 | `No new ESLint warnings`                         | PRs tal-kodiċi; kontroll tal-lint li jqis is-suppressions                                                                                                                                                                              | Iva, inklużi l-forks |
 | `Merge integrity (changelog + generated skills)` | PRs li mhumiex drafts; sinkronizzazzjoni tal-changelog u tal-ħiliet iġġenerati                                                                                                                                                         | Iva, inklużi l-forks |
 

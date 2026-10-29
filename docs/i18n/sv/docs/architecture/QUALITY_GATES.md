@@ -24,14 +24,12 @@ Arbetsflödena CI och Quality Gates genererar var sin stabil bedömning: `Gate /
 som obligatoriskt eller rådgivande. Ett tillämpligt obligatoriskt jobb måste lyckas:
 saknade, avbrutna, överhoppade, väntande och okända resultat kan inte fastställa PASS. En
 giltig klassificering som endast dokumentation eller endast katalog kan göra en kodfil
-icke tillämplig; ett PR-utkast är inte en godkänd kandidat. En `hotfix`-etikett medför
+icke tillämplig; ett vanligt PR-utkast är inte en godkänd kandidat. En `hotfix`-etikett medför
 inte undantag från evidenskraven.
 
 Båda arbetsflödena omfattar PR:er till huvud-/releasegrenar, pushar till `main`, manuell
 start och merge-group-händelser. Push, manuell start och merge-group kör hela urvalet.
-Pushar till `release/**` startar dem inte (2026-10-18): varje ändring har redan kört
-matrisen i sin PR och den sammanslagna kombinationen är Release-Greens uppgift
-(`docs/ops/RUNNER_BOX.md` → Hosted lane). Förgreningar och merge groups använder hostade
+Ett betrott utkast i Mergify-kön kör också tillämpliga `full-code`/`full-code-e2e`-jobb; vanliga PR:er hoppar över dem. Före en manuell sammanslagning ska en fullständig dispatch köras på den exakta kandidaten. Pushar till `release/**` startar inte dessa arbetsflöden; Release-Green observerar den sammanslagna basen separat (`docs/ops/RUNNER_BOX.md` → Hosted lane). Förgreningar och merge groups använder hostade
 körare för jobb som annars väljer självhostade körare; tillräcklig hostad kapacitet måste
 verifieras före utrullning.
 
@@ -103,8 +101,7 @@ och ett 30-sekunders pulsslag listar de filer som fortfarande är aktiva samt de
 endast exekveringsmetadata som finns i tillåtelselistan; testbeskrivningar, utdata, felmeddelanden och den fullständiga
 miljön serialiseras inte.
 
-CI och Quality behåller JSONL-filerna som `unit-progress-ci-<run>-<attempt>-<shard>` och
-`unit-progress-quality-<run>-<attempt>-<shard>`. En tidsgräns för jobbet kan förhindra den senare uppladdningen;
+CI behåller JSONL-filerna som `unit-progress-ci-<run>-<attempt>-<shard>`. En tidsgräns för jobbet kan förhindra den senare uppladdningen;
 redan utsända pulsslag finns kvar som diagnostiskt underlag. Saknade pulsslag kan även tyda på
 en blockerad eller avslutad runner-process. Dessa kvittenser bevarar det befintliga testurvalet,
 parallelliteten, tidsgränserna och slutstatusen; de utgör inte beslut om godkännande av kandidater.
@@ -175,8 +172,6 @@ inaktiverade duplicerade bygget har tagits bort; de faktiska kontrollerna för b
 | `Docs Gates (fast-path)`                         | Dokumentations-/kod-PR:er; referenser för API-dokumentation och docs-all                                                                                                                                                   | Ja                  |
 | `Fast Quality Gates`                             | Kod-PR:er; statiska kontroller, typkontroll, typkontroll av kontrollpanelen, berörda enhetstester                                                                                                                          | Ja                  |
 | `Forgotten sibling tests`                        | Kod-PR:er; ändrade moduler spåras till statiska konsumenter och möjliga relaterade tester; sökvägar för barrel-filer och dynamisk import rapporteras som rådgivande diagnostik, med refererade undantag i tillåtelselistan | **Rådgivande**      |
-| `Vitest (fast-path)`                             | Kod-PR:er; snabb Vitest-svit                                                                                                                                                                                               | Ja                  |
-| `Unit Tests fast-path`                           | Kod-PR:er; enhetstestsvit med 4 shardar                                                                                                                                                                                    | Ja                  |
 | `No new ESLint warnings`                         | Kod-PR:er; spärr för lintning som tar hänsyn till undertryckningar                                                                                                                                                         | Ja, inklusive forks |
 | `Merge integrity (changelog + generated skills)` | Icke-utkast-PR:er; synkronisering av ändringslogg och genererade färdigheter                                                                                                                                               | Ja, inklusive forks |
 

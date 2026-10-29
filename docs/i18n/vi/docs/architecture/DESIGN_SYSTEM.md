@@ -7,10 +7,7 @@
 > **Trạng thái:** dashboard được xây dựng trên **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), được đưa vào (vendor)
 > dưới dạng workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream được ghim trong
 > `packages/ui-kit/UPSTREAM.md` và được bảo vệ bởi `npm run check:ui-kit-snapshot`). Light là theme chuẩn;
-> tùy chọn mặc định là `system`. Màu nhấn là Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) là họ font chữ của UI, Instrument Serif chỉ dùng cho văn bản hiển thị lớn, thưa
-> (`.ci-dashboard-display`), IBM Plex Mono cho code — tất cả đều tự lưu trữ thông qua các import
-> `@fontsource/*` ở đầu file `src/app/globals.css`. Mọi biểu tượng đều là một glyph của Lucide.
+> tùy chọn mặc định là `system`. Màu nhấn là Keak lime (`--ci-color-accent`). Switzer là họ duy nhất cho UI, văn bản hiển thị và mã (`--ci-font-ui`; `--ci-font-display` và `--ci-font-mono` giải quyết nó), được chính bộ công cụ tự lưu trữ (`packages/ui-kit/src/ci-fonts.css`, được nhập bởi `ci-tokens.css`). Mỗi biểu tượng là một hình tượng Lucide.
 
 ## 1. Mọi thứ nằm ở đâu
 
@@ -93,7 +90,7 @@
 2. Không bao giờ sửa thủ công `packages/ui-kit/src`: hãy đồng bộ bằng `scripts/dev/sync-ui-kit.sh <commit>`; bước kiểm tra pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) sẽ thất bại nếu có bất kỳ byte nào khác với commit upstream đã ghim (bước này sẽ được bỏ qua kèm cảnh báo khi không có bản clone upstream, `UI_KIT_CLONE` hoặc `_references/cheaper-inference-ui-kit`). Khi kit thiếu nội dung nào đó, hãy xử lý tạm trong adapter hoặc màn hình và yêu cầu upstream bổ sung.
 3. Văn bản mặc định của kit là tiếng Anh (`label = "Loading"`, `loadingLabel = "Loading table"`…) — hãy truyền các chuỗi đã dịch từ `useTranslations(...)` bất cứ khi nào một thành phần kit hiển thị văn bản.
 4. Các utility của Tailwind được ưu tiên hơn các lớp thành phần của kit (kit khai báo `@layer theme, base, components, utilities` và các quy tắc của nó nằm trong `components`) — hãy dùng utility cho khoảng cách và bố cục, không dùng chúng để đổi màu các thành phần kit.
-5. Tiêu đề: `.ci-heading` (Inter, không giãn cách ký tự) dành cho tiêu đề trang và phần; `.ci-dashboard-display` (Instrument Serif) chỉ dành cho văn bản hiển thị lớn, thưa, chẳng hạn như mã trạng thái trên trang lỗi.
+5. Tiêu đề: `.ci-heading` cho tiêu đề trang và phần; `.ci-dashboard-display` chỉ dành cho văn bản hiển thị lớn, thưa thớt, chẳng hạn như mã trạng thái trang lỗi. Cả hai đều sử dụng Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` kiểm soát việc áp dụng kit: không có span ligature Material trong `src/app` hoặc `src/shared/components`; trong cây dashboard (`src/app/(dashboard)` và `src/shared/components`), không có `<select>`, `<textarea>` hoặc `<table>` thô và không có `role="dialog"` tự triển khai ngoài các ngoại lệ đã liệt kê (nhánh native của adapter `Select`, `RequestLoggerDetail`); mỗi `<button>` hoặc `<input>` thô tại đó đều cần một chú thích chứa `kit-exception:` (kèm lý do), kết thúc cách phần tử đó không quá 3 dòng phía trên; các sắc độ của bảng màu và biến thể `dark:` chỉ được phép xuất hiện trong các tệp mà bài kiểm thử liệt kê.
 7. Xác minh cả hai giao diện và viewport 390 px trước khi tạo PR (kèm ảnh chụp màn hình); `tests/e2e/a11y.spec.ts` chạy axe.
 
@@ -139,7 +136,7 @@ rồi mở PR kèm theo changelog của upstream.
 
 Mười hai sơ đồ được nhúng trong `README.md` ở thư mục gốc (`docs/diagrams/*.svg`) áp dụng bộ giao diện vào ảnh tĩnh. Chúng được sinh tự động, không vẽ tay: 13 tệp trình sinh tại `scripts/docs/gen-readme-*.mjs` (mười hai sơ đồ và trình điều khiển `gen-readme-diagrams.mjs`), cùng 12 kiểm thử độ cập nhật tại `tests/unit/docs/readme-*-svg.test.ts`, mỗi sơ đồ một kiểm thử. Mỗi kiểm thử so sánh từng byte của tệp đã commit với đầu ra trình sinh tương ứng (job `test-unit`).
 
-- **Token.** `scripts/docs/readme-diagram-theme.mjs` sao chép bảng màu từ `packages/ui-kit/src/ci-tokens.css` (được `tests/unit/docs/readme-diagram-theme.test.ts` ràng buộc khớp với tệp đó) và định nghĩa vai trò văn bản bằng phông của bộ giao diện: Instrument Serif cho chữ trình bày nổi bật, Inter cho giao diện, IBM Plex Mono cho số liệu và mã. Đây cũng là các gói `@fontsource` mà `src/app/globals.css` tải cho bảng điều khiển. Giá trị sáng nằm ở `:root`, giá trị tối dưới điều kiện `prefers-color-scheme: dark` ngay trong tệp, nên mỗi ảnh theo chế độ màu của người đọc trên GitHub.
+- **Mã thông báo.** `scripts/docs/readme-diagram-theme.mjs` sao chép bảng màu từ `packages/ui-kit/src/ci-tokens.css` (được ghim vào tệp đó bởi `tests/unit/docs/readme-diagram-theme.test.ts`) và xác định vai trò văn bản trên các mặt trước đó của bộ công cụ — Instrument Serif để hiển thị, Inter cho văn bản UI, IBM Plex Mono cho số liệu và mã — từ các gói `@fontsource` (bản thân bảng điều khiển sử dụng Switzer của bộ công cụ kể từ bộ công cụ 0.0.66). Các giá trị sáng nằm trên `:root`, các giá trị tối nằm phía sau `prefers-color-scheme: dark`, bên trong tệp, vì vậy mỗi hình ảnh đều tuân theo sơ đồ của người xem trên GitHub.
 
 - **Phông chữ.** `scripts/docs/readme-fonts.mjs` thu gọn các tệp woff2 đó xuống những glyph mà mỗi sơ đồ vẽ và nhúng chúng qua `@font-face` dưới dạng URI `data:`. Nhờ vậy, phông của bộ giao diện nằm ngay trong SVG. Phép thử ảnh README cục bộ kiểm tra rằng quá trình kết xuất không gửi yêu cầu phông ra bên ngoài. Các tập con chỉ gồm ký tự Latin; glyph ký hiệu dùng phông hệ thống làm dự phòng được cho phép từng mục trong `SYMBOL_FALLBACKS`. Bất kỳ glyph nào khác không được bao phủ đều gây lỗi.
 

@@ -24,12 +24,10 @@ CI এবং Quality Gates ওয়ার্কফ্লো—প্রতি�
 আবশ্যিক বা পরামর্শমূলক হিসেবে তালিকাভুক্ত করা হয়। প্রযোজ্য কোনো আবশ্যিক জব অবশ্যই সফল হতে হবে:
 অনুপস্থিত, বাতিল, এড়িয়ে যাওয়া, অপেক্ষমাণ এবং অজানা ফলাফল PASS প্রতিষ্ঠা করতে পারে না। বৈধ
 শুধু-ডকস বা শুধু-ক্যাটালগ শ্রেণিবিন্যাস একটি কোড লেনকে অপ্রযোজ্য করতে পারে;
-কোনো খসড়া PR গ্রহণযোগ্য প্রার্থী নয়। একটি `hotfix` লেবেল প্রমাণের আবশ্যকতা মওকুফ করে না।
+সাধারণ কোনো খসড়া PR গ্রহণযোগ্য প্রার্থী নয়। একটি `hotfix` লেবেল প্রমাণের আবশ্যকতা মওকুফ করে না।
 
 উভয় ওয়ার্কফ্লোই main/release ব্রাঞ্চে আসা PR, `main`-এ push, ম্যানুয়াল dispatch
-এবং merge-group ইভেন্ট কভার করে। Push, dispatch এবং merge-group পূর্ণ নির্বাচন চালায়। `release/**`-এ
-push এগুলো শুরু করে না (2026-10-18): প্রতিটি পরিবর্তন ইতিমধ্যেই তার PR-এ ম্যাট্রিক্স চালিয়েছে
-এবং মার্জ করা সমন্বয়টি Release-Green-এর দায়িত্ব (`docs/ops/RUNNER_BOX.md` → হোস্টেড লেন)। Fork
+এবং merge-group ইভেন্ট কভার করে। Push, dispatch এবং merge-group পূর্ণ নির্বাচন চালায়। Mergify-এর বিশ্বস্ত কিউয়ের খসড়াও প্রযোজ্য `full-code`/`full-code-e2e` জব চালায়; সাধারণ PR এগুলো এড়িয়ে যায়। হাতে মার্জ করার আগে ঠিক সেই প্রার্থীর ওপর একটি পূর্ণ dispatch চালান। `release/**`-এ push এই ওয়ার্কফ্লোগুলো শুরু করে না; Release-Green মার্জ করা বেস আলাদাভাবে পর্যবেক্ষণ করে (`docs/ops/RUNNER_BOX.md` → হোস্টেড লেন)। Fork
 এবং merge group এমন জবের জন্য হোস্টেড runner ব্যবহার করে, যেগুলো অন্যথায় self-hosted
 runner নির্বাচন করে; রোলআউটের আগে পর্যাপ্ত হোস্টেড সক্ষমতা যাচাই করতে হবে।
 
@@ -86,8 +84,7 @@ source root এবং data hash-এর বিপরীতে বারোটি 
 শুধু অনুমোদিত এক্সিকিউশন মেটাডেটা রেকর্ড করে; টেস্টের বিবরণ, আউটপুট, ত্রুটির মূল অংশ এবং সম্পূর্ণ
 এনভায়রনমেন্ট সিরিয়ালাইজ করা হয় না।
 
-CI ও Quality JSONL ফাইলগুলোকে `unit-progress-ci-<run>-<attempt>-<shard>` এবং
-`unit-progress-quality-<run>-<attempt>-<shard>` হিসেবে সংরক্ষণ করে। কোনো জব টাইমআউট পরবর্তী আপলোডটি বাধাগ্রস্ত করতে পারে;
+CI JSONL ফাইলগুলি `unit-progress-ci-<run>-<attempt>-<shard>` নামে সংরক্ষণ করে। কোনো জব টাইমআউট পরবর্তী আপলোডটি বাধাগ্রস্ত করতে পারে;
 ইতিমধ্যে নির্গত হার্টবিটগুলো ডায়াগনস্টিক প্রমাণ হিসেবে থেকে যায়। হার্টবিট অনুপস্থিত থাকলে তা
 ব্লক হওয়া বা সমাপ্ত করে দেওয়া রানার প্রসেসকেও নির্দেশ করতে পারে। এই রসিদগুলো বিদ্যমান টেস্ট নির্বাচন,
 কনকারেন্সি, সময়সীমা এবং এক্সিট স্ট্যাটাস অপরিবর্তিত রাখে; এগুলো প্রার্থী-গ্রহণসংক্রান্ত সিদ্ধান্ত নয়।
@@ -155,8 +152,6 @@ dispatch এবং merge group-এ CI-এর পরিপূরক হিসে�
 | `Docs Gates (fast-path)`                         | Docs/code PR; API docs ref এবং docs-all                                                                                                                                                                           | হ্যাঁ           |
 | `Fast Quality Gates`                             | Code PR; static check, typecheck, dashboard typecheck, প্রভাবিত unit test                                                                                                                                         | হ্যাঁ           |
 | `Forgotten sibling tests`                        | Code PR; পরিবর্তিত module থেকে static consumer এবং সম্ভাব্য sibling test পর্যন্ত trace করা হয়; barrel এবং dynamic-import path-গুলো advisory diagnostic হিসেবে report করা হয়, সঙ্গে উল্লেখিত allowlist exception | **পরামর্শমূলক** |
-| `Vitest (fast-path)`                             | Code PR; দ্রুত vitest suite                                                                                                                                                                                       | হ্যাঁ           |
-| `Unit Tests fast-path`                           | Code PR; 4-shard unit suite                                                                                                                                                                                       | হ্যাঁ           |
 | `No new ESLint warnings`                         | Code PR; suppression-aware lint guard                                                                                                                                                                             | হ্যাঁ, fork-সহ  |
 | `Merge integrity (changelog + generated skills)` | Non-draft PR; changelog এবং generated skill sync                                                                                                                                                                  | হ্যাঁ, fork-সহ  |
 

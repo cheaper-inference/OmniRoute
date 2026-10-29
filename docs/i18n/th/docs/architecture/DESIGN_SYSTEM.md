@@ -7,10 +7,7 @@
 > **สถานะ:** แดชบอร์ดสร้างขึ้นบน **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ซึ่งถูกนำมา vendor
 > ไว้เป็น workspace `packages/ui-kit` (`@omniroute/ui-kit`; สแนปชอตจาก upstream ถูกปักหมุดไว้ใน
 > `packages/ui-kit/UPSTREAM.md` และมีการตรวจสอบโดย `npm run check:ui-kit-snapshot`) ธีม Light คือธีม
-> มาตรฐาน ค่า preference เริ่มต้นคือ `system` สี accent คือ Keak lime (`--ci-color-accent`) ฟอนต์ Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) คือฟอนต์หลักของ UI ส่วน Instrument Serif ใช้เฉพาะข้อความ
-> display ขนาดใหญ่ที่เบาบาง (`.ci-dashboard-display`) และ IBM Plex Mono สำหรับโค้ด — ทั้งหมด self-host
-> ผ่าน `@fontsource/*` imports ที่ด้านบนของ `src/app/globals.css` ทุกไอคอนเป็น glyph ของ Lucide
+> มาตรฐาน ค่า preference เริ่มต้นคือ `system` สี accent คือ Keak lime (`--ci-color-accent`) Switzer เป็นตระกูลเดี่ยวสำหรับ UI ที่แสดงและข้อความโค้ด (`--ci-font-ui`; `--ci-font-display` และ `--ci-font-mono` แก้ไขได้) ซึ่งโฮสต์เองโดยชุดอุปกรณ์เอง (`packages/ui-kit/src/ci-fonts.css` นำเข้าโดย `ci-tokens.css`) ทุกไอคอนเป็นสัญลักษณ์ลูซิด
 
 ## 1. ตำแหน่งที่อยู่ของสิ่งต่างๆ
 
@@ -91,7 +88,7 @@
 2. ห้ามแก้ไข `packages/ui-kit/src` ด้วยตนเอง: ให้ซิงค์ด้วย `scripts/dev/sync-ui-kit.sh <commit>`; จุดตรวจสอบก่อนคอมมิต `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) จะล้มเหลวหากมีไบต์ใดแตกต่างจากคอมมิตต้นทางที่ปักหมุดไว้ (ระบบจะข้ามพร้อมคำเตือนเมื่อไม่มีโคลนต้นทาง `UI_KIT_CLONE` หรือ `_references/cheaper-inference-ui-kit`) เมื่อชุด UI ไม่มีสิ่งที่ต้องการ ให้แก้ปัญหาเฉพาะหน้าในอะแดปเตอร์หรือหน้าจอ และส่งคำขอไปยังต้นทาง
 3. ข้อความเริ่มต้นของชุด UI เป็นภาษาอังกฤษ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ให้ส่งสตริงที่แปลแล้วจาก `useTranslations(...)` ทุกครั้งที่คอมโพเนนต์ของชุด UI แสดงข้อความ
 4. ยูทิลิตี Tailwind มีลำดับความสำคัญเหนือคลาสของคอมโพเนนต์ในชุด UI (ชุด UI ประกาศ `@layer theme, base, components, utilities` และกฎของชุดอยู่ใน `components`) — ใช้ยูทิลิตีสำหรับระยะห่างและเลย์เอาต์ ไม่ใช่เพื่อเปลี่ยนสีคอมโพเนนต์ของชุด UI
-5. หัวเรื่อง: ใช้ `.ci-heading` (Inter, ไม่มีระยะห่างตัวอักษร) สำหรับชื่อหน้าและชื่อส่วน; ใช้ `.ci-dashboard-display` (Instrument Serif) เฉพาะข้อความแสดงผลขนาดใหญ่ที่มีองค์ประกอบไม่หนาแน่น เช่น รหัสสถานะในหน้าข้อผิดพลาด
+5. ส่วนหัว: `.ci-heading` สำหรับชื่อหน้าและส่วน; `.ci-dashboard-display` สำหรับข้อความที่แสดงขนาดใหญ่และกระจัดกระจาย เช่น รหัสสถานะหน้าข้อผิดพลาด ใช้สวิตเซอร์ทั้งคู่
 6. `tests/unit/dashboard-kit-sweep.test.ts` ทำหน้าที่กำกับการนำชุด UI มาใช้: ห้ามมี span ลิเกเจอร์ของ Material ภายใต้ `src/app` หรือ `src/shared/components`; ในโครงสร้างแดชบอร์ด (`src/app/(dashboard)` และ `src/shared/components`) ห้ามใช้ `<select>`, `<textarea>` หรือ `<table>` แบบดิบ และห้ามสร้าง `role="dialog"` เองนอกเหนือจากข้อยกเว้นที่ระบุไว้ (สาขาเนทีฟของอะแดปเตอร์ `Select`, `RequestLoggerDetail`); `<button>` หรือ `<input>` แบบดิบทุกรายการในบริเวณดังกล่าวต้องมีความคิดเห็นที่มี `kit-exception:` (พร้อมเหตุผล) โดยสิ้นสุดไม่เกิน 3 บรรทัดเหนือองค์ประกอบนั้น; อนุญาตให้ใช้เฉดสีของพาเลตและตัวแปร `dark:` ได้เฉพาะในไฟล์ที่การทดสอบระบุไว้เท่านั้น
 7. ตรวจสอบทั้งสองธีมและวิวพอร์ตขนาด 390 px ก่อนสร้าง PR (พร้อมภาพหน้าจอ); `tests/e2e/a11y.spec.ts` เรียกใช้ axe
 
@@ -130,7 +127,7 @@
 
 แผนภาพสิบสองภาพที่ฝังใน `README.md` ระดับราก (`docs/diagrams/*.svg`) นำชุด UI มาใช้กับภาพนิ่ง โดยสร้างจากโปรแกรม ไม่ได้วาดด้วยมือ: มีไฟล์ตัวสร้าง 13 ไฟล์ใน `scripts/docs/gen-readme-*.mjs` (สิบสองแผนภาพและตัวควบคุม `gen-readme-diagrams.mjs`) และการทดสอบความล้าสมัย 12 รายการใน `tests/unit/docs/readme-*-svg.test.ts` หนึ่งรายการต่อแผนภาพ แต่ละการทดสอบเปรียบเทียบไฟล์ที่ commit แล้วกับผลลัพธ์ของตัวสร้างแบบไบต์ต่อไบต์ (งาน `test-unit`).
 
-- **โทเค็น.** `scripts/docs/readme-diagram-theme.mjs` คัดลอกชุดสีจาก `packages/ui-kit/src/ci-tokens.css` (ยืนยันความตรงกันกับไฟล์นั้นด้วย `tests/unit/docs/readme-diagram-theme.test.ts`) และกำหนดบทบาทข้อความด้วยฟอนต์ของชุด UI: Instrument Serif สำหรับข้อความแสดงผลเด่น, Inter สำหรับข้อความ UI และ IBM Plex Mono สำหรับตัวเลขกับโค้ด เป็นแพ็กเกจ `@fontsource` เดียวกับที่ `src/app/globals.css` โหลดให้แดชบอร์ด ค่าสีอ่อนอยู่บน `:root` และค่าสีเข้มอยู่ภายใต้ `prefers-color-scheme: dark` ภายในไฟล์ ทำให้แต่ละภาพตามรูปแบบสีของผู้อ่านบน GitHub.
+- **โทเค็น** `scripts/docs/readme-diagram-theme.mjs` คัดลอกจานสีจาก `packages/ui-kit/src/ci-tokens.css` (ปักหมุดไว้กับไฟล์นั้นโดย `tests/unit/docs/readme-diagram-theme.test.ts`) และกำหนดบทบาทข้อความบนใบหน้าก่อนหน้าของ kit — Instrument Serif สำหรับการแสดงผล, Inter สำหรับข้อความ UI, IBM Plex Mono สำหรับตัวเลขและโค้ด — จากแพ็คเกจ `@fontsource` (แดชบอร์ดเองใช้ Switzer ของ kit ตั้งแต่ kit 0.0.66) ค่าแสงอยู่บน `:root` ค่ามืดอยู่ด้านหลัง `prefers-color-scheme: dark` ภายในไฟล์ ดังนั้นแต่ละภาพจึงเป็นไปตามโครงร่างของผู้ดูบน GitHub
 
 - **ฟอนต์.** `scripts/docs/readme-fonts.mjs` ลดไฟล์ woff2 เหล่านั้นให้เหลือเฉพาะไกลฟ์ที่แต่ละแผนภาพวาด แล้วฝังผ่าน `@font-face` เป็น URI แบบ `data:`. วิธีนี้เก็บฟอนต์ของชุด UI ไว้ภายใน SVG การทดสอบภาพ README ภายในเครื่องตรวจสอบว่าการเรนเดอร์ไม่ส่งคำขอฟอนต์ภายนอก. ชุดย่อยมีเฉพาะอักษรละติน โดยไกลฟ์สัญลักษณ์ที่ใช้ฟอนต์ระบบเป็นทางเลือกสำรองได้รับอนุญาตทีละรายการใน `SYMBOL_FALLBACKS` ส่วนไกลฟ์อื่นที่ไม่ครอบคลุมจะทำให้เกิดข้อผิดพลาด.
 

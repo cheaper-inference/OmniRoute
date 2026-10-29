@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "すべてのモデルは既にインポート済みです",
     "noNewModelsToImport": "インポートする新しいモデルはありません — すべてのモデルは既にレジストリまたはカスタムモデルリストにあります",
     "localCatalogFallbackStatus": "プロバイダーのモデル一覧を取得できませんでした — 組み込みカタログを表示しています",
+    "discoveryDegradedStatus": "モデル検出に失敗しました {time}",
     "skippingExistingModels": "{count}件の既存モデルをスキップ",
     "autoSync": "自動同期",
     "autoSyncShort": "同期",

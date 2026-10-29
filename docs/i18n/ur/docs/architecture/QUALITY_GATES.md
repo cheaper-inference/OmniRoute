@@ -24,12 +24,11 @@ CI اور Quality Gates ورک فلوز میں سے ہر ایک ایک مستح�
 لازمی یا مشاورتی کے طور پر درج کرتی ہے۔ کسی قابل اطلاق لازمی جاب کا کامیاب ہونا ضروری ہے:
 غائب، منسوخ، چھوڑے گئے، زیر التوا اور نامعلوم نتائج PASS ثابت نہیں کر سکتے۔ صرف دستاویزات
 یا صرف کیٹلاگ کی درست درجہ بندی کسی کوڈ لین کو ناقابل اطلاق بنا سکتی ہے؛
-ڈرافٹ PR منظور شدہ امیدوار نہیں ہے۔ `hotfix` لیبل ثبوت کی شرط ختم نہیں کرتا۔
+عام ڈرافٹ PR منظور شدہ امیدوار نہیں ہے۔ `hotfix` لیبل ثبوت کی شرط ختم نہیں کرتا۔
 
 دونوں ورک فلوز main/release برانچز میں آنے والے PRs، `main` پر پُشز، دستی dispatch
 اور merge-group ایونٹس کا احاطہ کرتے ہیں۔ Push، dispatch اور merge-group مکمل انتخاب چلاتے ہیں۔
-`release/**` پر پُشز انہیں شروع نہیں کرتیں (2026-10-18): ہر تبدیلی اپنے PR پر پہلے ہی میٹرکس چلا چکی ہوتی ہے
-اور ضم شدہ امتزاج Release-Green کی ذمہ داری ہے (`docs/ops/RUNNER_BOX.md` → Hosted لین)۔ Forks
+Mergify کی قطار کا قابل اعتماد ڈرافٹ بھی قابل اطلاق `full-code`/`full-code-e2e` جابز چلاتا ہے؛ عام PRs انہیں چھوڑ دیتے ہیں۔ دستی merge سے پہلے، امیدوار کے عین اسی ورژن پر مکمل dispatch چلائیں۔ `release/**` پر پُشز ان ورک فلوز کو شروع نہیں کرتیں؛ Release-Green ضم شدہ بیس کی الگ سے نگرانی کرتا ہے (`docs/ops/RUNNER_BOX.md` → Hosted لین)۔ Forks
 اور merge groups ان جابز کے لیے hosted runners استعمال کرتے ہیں جو بصورت دیگر self-hosted
 runners منتخب کرتی ہیں؛ رول آؤٹ سے پہلے hosted کی کافی گنجائش کی تصدیق ضروری ہے۔
 
@@ -81,7 +80,7 @@ source root اور data hashes کے مقابل تمام بارہ manifests کی 
 
 مشترکہ `test:unit:ci:shard` کمانڈ `scripts/ci/unit-progress-reporter.mjs` کے ذریعے `primary`، `dashboard` اور `serial` مراحل کو ریکارڈ کرتی ہے۔ معمول کی ٹیسٹ رپورٹ بدستور دستیاب رہتی ہے۔ صرف میٹا ڈیٹا پر مشتمل ایک علیحدہ رسید ہر فائل کے آغاز اور تکمیل کو ریکارڈ کرتی ہے، جبکہ 30 سیکنڈ کا ہارٹ بیٹ ان فائلوں اور ان کے گزرے ہوئے وقت کی فہرست دیتا ہے جو اب بھی فعال ہیں۔ یہ صرف اجازت یافتہ عمل درآمد میٹا ڈیٹا ریکارڈ کرتی ہے؛ ٹیسٹ کی تفصیلات، آؤٹ پٹ، خرابیوں کا متن اور مکمل ماحول سیریلائز نہیں کیے جاتے۔
 
-CI اور Quality، JSONL فائلوں کو `unit-progress-ci-<run>-<attempt>-<shard>` اور `unit-progress-quality-<run>-<attempt>-<shard>` کے طور پر محفوظ رکھتے ہیں۔ جاب کا ٹائم آؤٹ بعد میں ہونے والے اپ لوڈ کو روک سکتا ہے؛ پہلے سے خارج کیے گئے ہارٹ بیٹس تشخیصی ثبوت کے طور پر باقی رہتے ہیں۔ ہارٹ بیٹس کی عدم موجودگی کسی مسدود یا ختم شدہ رنر پراسیس کی عکاسی بھی کر سکتی ہے۔ یہ رسیدیں موجودہ ٹیسٹ انتخاب، ہم وقتی اجرا، آخری مهلتوں اور اخراجی اسٹیٹس کو برقرار رکھتی ہیں؛ یہ امیدوار کی منظوری کے فیصلے نہیں ہیں۔
+CI، JSONL فائلوں کو `unit-progress-ci-<run>-<attempt>-<shard>` کے نام سے محفوظ رکھتا ہے۔ جاب کا ٹائم آؤٹ بعد میں ہونے والے اپ لوڈ کو روک سکتا ہے؛ پہلے سے خارج کیے گئے ہارٹ بیٹس تشخیصی ثبوت کے طور پر باقی رہتے ہیں۔ ہارٹ بیٹس کی عدم موجودگی کسی مسدود یا ختم شدہ رنر پراسیس کی عکاسی بھی کر سکتی ہے۔ یہ رسیدیں موجودہ ٹیسٹ انتخاب، ہم وقتی اجرا، آخری مهلتوں اور اخراجی اسٹیٹس کو برقرار رکھتی ہیں؛ یہ امیدوار کی منظوری کے فیصلے نہیں ہیں۔
 
 ### جامد اسکین کی فہرست
 
@@ -131,8 +130,6 @@ CI کے لیے حتمی ماخذ `.github/workflows/ci.yml` ہے۔
 | `Docs Gates (fast-path)`                         | Docs/code PRs؛ API docs refs اور docs-all                                                                                                                                                                                    | ہاں             |
 | `Fast Quality Gates`                             | Code PRs؛ static checks، typecheck، dashboard typecheck، متاثرہ unit tests                                                                                                                                                   | ہاں             |
 | `Forgotten sibling tests`                        | Code PRs؛ تبدیل شدہ modules کو static consumers اور ممکنہ sibling tests سے منسلک کیا جاتا ہے؛ barrel اور dynamic-import paths کو مشاورتی diagnostics کے طور پر رپورٹ کیا جاتا ہے، ساتھ ہی حوالہ شدہ allowlist exceptions بھی | **مشاورتی**     |
-| `Vitest (fast-path)`                             | Code PRs؛ تیز رفتار vitest suite                                                                                                                                                                                             | ہاں             |
-| `Unit Tests fast-path`                           | Code PRs؛ 4-shard unit suite                                                                                                                                                                                                 | ہاں             |
 | `No new ESLint warnings`                         | Code PRs؛ suppressions سے آگاہ lint guard                                                                                                                                                                                    | ہاں، forks سمیت |
 | `Merge integrity (changelog + generated skills)` | غیر draft PRs؛ changelog اور generated skill کی ہم آہنگی                                                                                                                                                                     | ہاں، forks سمیت |
 

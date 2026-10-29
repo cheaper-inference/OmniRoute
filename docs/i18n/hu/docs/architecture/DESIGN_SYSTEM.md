@@ -4,7 +4,7 @@
 
 ---
 
-> **Állapot:** az irányítópult a **Keak CI UI Kit**-re (`@keak/cheaper-inference-ui-kit`) épül, amely a `packages/ui-kit` workspace-csomagként van beágyazva (`@omniroute/ui-kit`; az upstream pillanatkép a `packages/ui-kit/UPSTREAM.md` fájlban van rögzítve, és az `npm run check:ui-kit-snapshot` védi). A világos téma a kanonikus téma; az alapértelmezett beállítás a `system`. A kiemelőszín a Keak lime (`--ci-color-accent`). Az Inter (letter-spacing 0, `--ci-letter-spacing-ui`) a felhasználói felület betűcsaládja, az Instrument Serif kizárólag nagy méretű, ritkás megjelenítésű szövegekhez (`.ci-dashboard-display`), az IBM Plex Mono pedig a kódhoz használatos — mindegyik saját tárhelyről, a `src/app/globals.css` elején található `@fontsource/*` importokon keresztül töltődik be. Minden ikon egy Lucide-glifa.
+> **Állapot:** az irányítópult a **Keak CI UI Kit**-re (`@keak/cheaper-inference-ui-kit`) épül, amely a `packages/ui-kit` workspace-csomagként van beágyazva (`@omniroute/ui-kit`; az upstream pillanatkép a `packages/ui-kit/UPSTREAM.md` fájlban van rögzítve, és az `npm run check:ui-kit-snapshot` védi). A világos téma a kanonikus téma; az alapértelmezett beállítás a `system`. A kiemelőszín a Keak lime (`--ci-color-accent`). A Switzer az egyetlen család UI hoz, a kijelzőhöz és a kódszöveghez (`--ci-font-ui`; `--ci-font-display` és `--ci-font-mono` ezt oldja meg), amelyet maga a készlet tárol (`packages/ui-kit/src/ci-fonts.css`, importálta `ci-tokens.css`). Minden ikon egy Lucide jelkép.
 
 ## 1. Hol mi található
 
@@ -106,8 +106,7 @@
 4. A Tailwind segédosztályai elsőbbséget élveznek a készlet komponensosztályaival szemben (a készlet deklarálja az
    `@layer theme, base, components, utilities` rétegeket, szabályai pedig a `components` rétegben találhatók) — a segédosztályokat
    térközök és elrendezés kialakítására használd, ne a készletkomponensek átszínezésére.
-5. Címsorok: `.ci-heading` (Inter, betűköz nélkül) az oldal- és szakaszcímekhez; `.ci-dashboard-display`
-   (Instrument Serif) csak nagyméretű, ritkásan elhelyezett megjelenítési szövegekhez, például a hibaoldal állapotkódjához.
+5. Címsorok: `.ci-heading` az oldal- és szakaszcímekhez; `.ci-dashboard-display` csak a nagy, ritka kijelzőszövegekhez, például a hibaoldal állapotkódjához. Mindkettő Switzert használ.
 6. A `tests/unit/dashboard-kit-sweep.test.ts` felügyeli a készlet alkalmazását: nem lehet Material ligatúrát tartalmazó span a
    `src/app` vagy a `src/shared/components` alatt; az irányítópult fában (`src/app/(dashboard)` és
    `src/shared/components`) nem lehet nyers `<select>`, `<textarea>` vagy `<table>`, illetve kézzel készített
@@ -164,7 +163,7 @@ changeloggal.
 
 A gyökérkönyvtár `README.md` fájljába ágyazott tizenkét diagram (`docs/diagrams/*.svg`) statikus képeken alkalmazza a készletet. Generáltak, nem kézzel rajzoltak: 13 generátorfájl található itt: `scripts/docs/gen-readme-*.mjs` (tizenkét diagram és a `gen-readme-diagrams.mjs` vezérlő), valamint 12 elavulást vizsgáló teszt itt: `tests/unit/docs/readme-*-svg.test.ts`, diagramonként egy. Mindegyik bájtról bájtra hasonlítja össze a commitban lévő fájlt a generátor kimenetével (`test-unit` feladat).
 
-- **Tokenek.** A `scripts/docs/readme-diagram-theme.mjs` a `packages/ui-kit/src/ci-tokens.css` palettáját másolja (az egyezést a `tests/unit/docs/readme-diagram-theme.test.ts` rögzíti), és a készlet betűtípusaival határozza meg a szövegszerepeket: Instrument Serif a kiemelt szöveghez, Inter a felülethez, IBM Plex Mono a számokhoz és a kódhoz. Ugyanazokról a `@fontsource` csomagokról van szó, amelyeket a `src/app/globals.css` tölt be a vezérlőpulthoz. A világos értékek a `:root` alatt, a sötétek a `prefers-color-scheme: dark` feltétel mögött vannak a fájlban, így minden kép követi a GitHub-olvasó színsémáját.
+- **Tokenek.** `scripts/docs/readme-diagram-theme.mjs` átmásolja a palettát `packages/ui-kit/src/ci-tokens.css` ből ( `tests/unit/docs/readme-diagram-theme.test.ts` rögzíti ehhez a fájlhoz), és meghatározza a szövegszerepeket a készlet korábbi felületein – Instrument Serif a megjelenítéshez, Inter UI szöveghez, IBM Plex Mono a számokhoz és kódhoz – a `@fontsource` csomagokból (maga a műszerfal a készlet Switzer betűtípusát használja a készlet 0.0.66-os verziója óta). A világos értékek `:root`, a sötét értékek `prefers-color-scheme: dark` mögött, a fájlon belül helyezkednek el, így minden kép követi a GitHub lévő néző sémáját.
 
 - **Betűtípusok.** A `scripts/docs/readme-fonts.mjs` ezeket a woff2 fájlokat az egyes diagramok által kirajzolt karakterképekre szűkíti, és `@font-face` szabályokkal, `data:` URI-ként ágyazza be. Így a készlet betűtípusai az SVG-n belül maradnak. A helyi README-képteszt ellenőrzi, hogy a renderelés nem küld külső betűtípus-kéréseket. A részhalmazok csak latin karaktereket tartalmaznak; a rendszer betűkészletére visszaeső szimbólumok egyenként engedélyezettek a `SYMBOL_FALLBACKS` listában. Minden más hiányzó karakterkép hibát vált ki.
 

@@ -24,12 +24,10 @@ Mitiririko ya kazi ya CI na Quality Gates kila mmoja hutoa uamuzi thabiti: `Gate
 kama ya lazima au ya ushauri. Kazi inayotumika na iliyo ya lazima lazima ifanikiwe: matokeo
 yanayokosekana, yaliyoghairiwa, yaliyorukwa, yanayosubiri na yasiyojulikana hayawezi kuthibitisha PASS. Uainishaji halali
 wa docs-only au catalog-only unaweza kufanya mkondo wa msimbo usitumike;
-PR ya rasimu si mgombea anayekubalika. Lebo ya `hotfix` haiondoi hitaji la ushahidi.
+PR ya kawaida iliyo rasimu si mgombea anayekubalika. Lebo ya `hotfix` haiondoi hitaji la ushahidi.
 
 Mitiririko yote miwili ya kazi inashughulikia PR zinazoingia katika matawi ya main/release, push kwenda `main`, utekelezaji
-wa kuanzishwa mwenyewe na matukio ya merge-group. Push, dispatch na merge-group hutekeleza uteuzi kamili. Push kwenda
-`release/**` hazianzishi mitiririko hiyo (2026-10-18): kila badiliko tayari lilitekeleza matrix kwenye PR yake
-na mchanganyiko uliounganishwa ni jukumu la Release-Green (`docs/ops/RUNNER_BOX.md` → Mkondo wa hosted). Fork
+wa kuanzishwa mwenyewe na matukio ya merge-group. Push, dispatch na merge-group hutekeleza uteuzi kamili. Rasimu inayoaminika ya foleni ya Mergify pia hutekeleza kazi za `full-code`/`full-code-e2e` zinazotumika; PR za kawaida huziruka. Kabla ya kuunganisha mwenyewe, endesha dispatch kamili kwenye mgombea huyo hasa. Push kwenda `release/**` hazianzishi mitiririko hii ya kazi; Release-Green hufuatilia msingi uliounganishwa kando (`docs/ops/RUNNER_BOX.md` → Mkondo wa hosted). Fork
 na merge group hutumia runner zinazohostiwa kwa kazi ambazo vinginevyo zingechagua runner
 zinazohostiwa binafsi; uwezo wa kutosha wa hosted lazima uthibitishwe kabla ya usambazaji.
 
@@ -96,8 +94,7 @@ na mapigo ya moyo ya kila sekunde 30 huorodhesha faili ambazo bado zinaendelea p
 uliopita. Hurekodi metadata ya utekelezaji iliyo kwenye orodha ya ruhusa pekee; maelezo ya
 majaribio, matokeo, maudhui ya hitilafu na mazingira kamili hayahifadhiwi katika muundo wa mfululizo.
 
-CI na Quality huhifadhi faili za JSONL kama `unit-progress-ci-<run>-<attempt>-<shard>` na
-`unit-progress-quality-<run>-<attempt>-<shard>`. Kuisha kwa muda wa kazi kunaweza kuzuia
+CI huhifadhi faili za JSONL kama `unit-progress-ci-<run>-<attempt>-<shard>`. Kuisha kwa muda wa kazi kunaweza kuzuia
 upakiaji unaofuata; mapigo ya moyo ambayo tayari yametolewa hubaki kuwa ushahidi wa uchunguzi.
 Kutokuwepo kwa mapigo ya moyo kunaweza pia kuashiria mchakato wa runner uliozuiwa au kusitishwa.
 Risiti hizi huhifadhi uteuzi uliopo wa majaribio, utekelezaji sawia, makataa na hali ya kuondoka;
@@ -166,8 +163,6 @@ iliyokuwa imezimwa kabisa iliondolewa; ukaguzi halisi wa build/package/boot unab
 | `Docs Gates (fast-path)`                         | PR za nyaraka/msimbo; marejeleo ya nyaraka za API na docs-all                                                                                                                                                                              | Ndiyo                    |
 | `Fast Quality Gates`                             | PR za msimbo; ukaguzi tuli, typecheck, typecheck ya dashboard, majaribio ya unit yaliyoathiriwa                                                                                                                                            | Ndiyo                    |
 | `Forgotten sibling tests`                        | PR za msimbo; moduli zilizobadilishwa hufuatiliwa hadi kwa watumiaji tuli na majaribio yanayoweza kuwa ya sibling; njia za barrel na dynamic-import huripotiwa kama uchunguzi wa ushauri, pamoja na vighairi vya allowlist vilivyorejelewa | **Ushauri**              |
-| `Vitest (fast-path)`                             | PR za msimbo; mkusanyiko wa haraka wa vitest                                                                                                                                                                                               | Ndiyo                    |
-| `Unit Tests fast-path`                           | PR za msimbo; mkusanyiko wa majaribio ya unit wenye shard 4                                                                                                                                                                                | Ndiyo                    |
 | `No new ESLint warnings`                         | PR za msimbo; ulinzi wa lint unaozingatia suppressions                                                                                                                                                                                     | Ndiyo, ikijumuisha forks |
 | `Merge integrity (changelog + generated skills)` | PR zisizo rasimu; ulandanishaji wa changelog na skills zilizozalishwa                                                                                                                                                                      | Ndiyo, ikijumuisha forks |
 

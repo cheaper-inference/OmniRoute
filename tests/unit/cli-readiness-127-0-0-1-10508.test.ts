@@ -28,10 +28,10 @@ for (const readyHost of ["127.0.0.1", "[::1]"]) {
       await waitForServer(port, 500, { onOutcome: (outcome: string) => outcomes.push(outcome) }),
       true
     );
-    assert.deepEqual(requested.sort(), [
-      `http://127.0.0.1:${port}/api/monitoring/health`,
-      `http://[::1]:${port}/api/monitoring/health`,
-    ]);
+    const [ipv4Request, ipv6Request, ...unexpectedRequests] = requested.sort();
+    assert.equal(ipv4Request, `http://127.0.0.1:${port}/api/monitoring/health`);
+    assert.equal(ipv6Request, `http://[::1]:${port}/api/monitoring/health`);
+    assert.deepEqual(unexpectedRequests, [], "readiness must probe each loopback exactly once");
     assert.deepEqual(outcomes, ["ready"], "either loopback must succeed without TCP fallback");
   });
 }

@@ -24,12 +24,10 @@ Arbeidsflytene CI og Quality Gates avgir hver sin stabile konklusjon: `Gate / CI
 som påkrevd eller rådgivende. En aktuell påkrevd jobb må lykkes: manglende,
 avbrutte, hoppede, ventende og ukjente resultater kan ikke fastslå PASS. En gyldig
 klassifisering som bare dokumentasjon eller bare katalog kan gjøre et kodespor uaktuelt;
-en PR som er et utkast, er ikke en godkjent kandidat. En `hotfix`-etikett fritar ikke fra dokumentasjonskrav.
+en vanlig PR som er et utkast, er ikke en godkjent kandidat. En `hotfix`-etikett fritar ikke fra dokumentasjonskrav.
 
 Begge arbeidsflytene dekker PR-er til main-/release-grener, push til `main`, manuell kjøring
-og merge-group-hendelser. Push, manuell kjøring og merge-group kjører hele utvalget. Push til
-`release/**` starter dem ikke (2026-10-18): hver endring har allerede kjørt matrisen i sin PR,
-og den sammenslåtte kombinasjonen er Release-Greens ansvar (`docs/ops/RUNNER_BOX.md` → driftet spor). Forker
+og merge-group-hendelser. Push, manuell kjøring og merge-group kjører hele utvalget. Et betrodd utkast i Mergify-køen kjører også de aktuelle `full-code`/`full-code-e2e`-jobbene; vanlige PR-er hopper over dem. Før en manuell fletting må du starte en full dispatch på den nøyaktige kandidaten. Push til `release/**` starter ikke disse arbeidsflytene; Release-Green observerer den sammenslåtte basen separat (`docs/ops/RUNNER_BOX.md` → driftet spor). Forker
 og merge groups bruker driftede kjørere for jobber som ellers velger selvdriftede
 kjørere; tilstrekkelig driftet kapasitet må verifiseres før utrulling.
 
@@ -95,8 +93,7 @@ av hver fil, og et livstegn hvert 30. sekund viser filene som fortsatt er aktive
 kun kjøringsmetadata som står på tillatelseslisten. Testbeskrivelser, utdata, feilmeldinger og hele
 miljøet serialiseres ikke.
 
-CI og Quality beholder JSONL-filene som `unit-progress-ci-<run>-<attempt>-<shard>` og
-`unit-progress-quality-<run>-<attempt>-<shard>`. Et tidsavbrudd for en jobb kan forhindre den senere opplastingen.
+CI lagrer JSONL-filene som `unit-progress-ci-<run>-<attempt>-<shard>`. Et tidsavbrudd for en jobb kan forhindre den senere opplastingen.
 Livstegn som allerede er sendt, forblir diagnostisk dokumentasjon. Manglende livstegn kan også skyldes
 en blokkert eller avsluttet kjøreprosess. Disse kvitteringene bevarer eksisterende testutvalg,
 samtidighet, tidsfrister og avslutningsstatus. De er ikke avgjørelser om godkjenning av kandidater.
@@ -166,8 +163,6 @@ deaktiverte dupliserte byggingen ble fjernet; de reelle kontrollene for bygging/
 | `Docs Gates (fast-path)`                         | Dokumentasjons-/kode-PR-er; API-dokumentasjonsreferanser og docs-all                                                                                                                                  | Ja                   |
 | `Fast Quality Gates`                             | Kode-PR-er; statiske kontroller, typekontroll, typekontroll av kontrollpanelet, berørte enhetstester                                                                                                  | Ja                   |
 | `Forgotten sibling tests`                        | Kode-PR-er; endrede moduler spores til statiske konsumenter og mulige søskentester; barrel- og dynamiske importstier rapporteres som veiledende diagnostikk, med refererte unntak i tillatelseslisten | **Veiledende**       |
-| `Vitest (fast-path)`                             | Kode-PR-er; rask vitest-testserie                                                                                                                                                                     | Ja                   |
-| `Unit Tests fast-path`                           | Kode-PR-er; enhetstestserie fordelt på fire shards                                                                                                                                                    | Ja                   |
 | `No new ESLint warnings`                         | Kode-PR-er; undertrykkelsesbevisst lint-vakt                                                                                                                                                          | Ja, inkludert forker |
 | `Merge integrity (changelog + generated skills)` | PR-er som ikke er utkast; synkronisering av endringslogg og genererte ferdigheter                                                                                                                     | Ja, inkludert forker |
 

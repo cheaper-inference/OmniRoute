@@ -24,12 +24,10 @@ CI နှင့် Quality Gates workflow များသည် တည်ငြ�
 လိုအပ်သော သို့မဟုတ် အကြံပြုအဆင့်အဖြစ် စာရင်းပြုစုထားသည်။ သက်ဆိုင်သော required job တစ်ခုသည် အောင်မြင်ရမည်- ပျောက်ဆုံးနေခြင်း၊
 ပယ်ဖျက်ထားခြင်း၊ ကျော်ထားခြင်း၊ ဆိုင်းငံ့ထားခြင်းနှင့် အမည်မသိရလဒ်များဖြင့် PASS ကို သတ်မှတ်နိုင်ခြင်းမရှိပါ။ မှန်ကန်သော
 docs-only သို့မဟုတ် catalog-only အမျိုးအစားခွဲခြားမှုကြောင့် code lane တစ်ခုကို အသုံးမဝင်အဖြစ် သတ်မှတ်နိုင်သည်၊
-draft PR တစ်ခုကို လက်ခံထားသော candidate အဖြစ် မသတ်မှတ်ပါ။ `hotfix` label တစ်ခုကြောင့် အထောက်အထားလိုအပ်ချက်ကို ပယ်ဖျက်မပေးပါ။
+သာမန် draft PR တစ်ခုကို လက်ခံထားသော candidate အဖြစ် မသတ်မှတ်ပါ။ `hotfix` label တစ်ခုကြောင့် အထောက်အထားလိုအပ်ချက်ကို ပယ်ဖျက်မပေးပါ။
 
 Workflow နှစ်ခုစလုံးသည် main/release branch များသို့ ဝင်ရောက်မည့် PR များ၊ `main` သို့ push များ၊ manual dispatch
-နှင့် merge-group event များကို လွှမ်းခြုံသည်။ Push၊ dispatch နှင့် merge-group တို့သည် ရွေးချယ်မှုအပြည့်အစုံကို လုပ်ဆောင်သည်။ `release/**`
-သို့ push များသည် ၎င်းတို့ကို မစတင်ပါ (2026-10-18)- ပြောင်းလဲမှုတစ်ခုစီသည် ၎င်း၏ PR တွင် matrix ကို လုပ်ဆောင်ပြီးဖြစ်ကာ
-ပေါင်းစည်းထားသော အစုသည် Release-Green ၏ အလုပ်ဖြစ်သည် (`docs/ops/RUNNER_BOX.md` → Hosted lane)။ Fork များ
+နှင့် merge-group event များကို လွှမ်းခြုံသည်။ Push၊ dispatch နှင့် merge-group တို့သည် ရွေးချယ်မှုအပြည့်အစုံကို လုပ်ဆောင်သည်။ ယုံကြည်ရသော Mergify queue draft သည် သက်ဆိုင်ရာ `full-code`/`full-code-e2e` job များကိုလည်း လုပ်ဆောင်ပြီး သာမန် PR များက ၎င်းတို့ကို ကျော်သွားသည်။ လက်ဖြင့် merge မလုပ်မီ အတိအကျရွေးထားသော candidate ပေါ်တွင် dispatch အပြည့်အစုံကို လုပ်ဆောင်ပါ။ `release/**` သို့ push များသည် ဤ workflow များကို မစတင်ပါ။ Release-Green သည် merge ပြီးသော base ကို သီးခြားစောင့်ကြည့်သည် (`docs/ops/RUNNER_BOX.md` → Hosted lane)။ Fork များ
 နှင့် merge group များသည် ပုံမှန်အားဖြင့် self-hosted runner များကို ရွေးချယ်မည့် job များအတွက် hosted runner များကို အသုံးပြုသည်၊
 rollout မလုပ်မီ လုံလောက်သော hosted capacity ရှိကြောင်း အတည်ပြုရမည်။
 
@@ -82,7 +80,7 @@ function/block coverage အတွက် shard တစ်ခုချင်းစ�
 
 မျှဝေအသုံးပြုသည့် `test:unit:ci:shard` command သည် `scripts/ci/unit-progress-reporter.mjs` မှတစ်ဆင့် `primary`, `dashboard` နှင့် `serial` အဆင့်များကို မှတ်တမ်းတင်သည်။ ပုံမှန်စမ်းသပ်မှုအစီရင်ခံစာကို ဆက်လက်ရရှိနိုင်သည်။ မက်တာဒေတာသီးသန့် မှတ်တမ်းတစ်ခုက ဖိုင်တစ်ခုစီ၏ စတင်ချိန်နှင့် ပြီးဆုံးချိန်ကို မှတ်တမ်းတင်ပြီး၊ 30 စက္ကန့်တစ်ကြိမ် heartbeat က လက်ရှိလုပ်ဆောင်နေဆဲဖိုင်များနှင့် ၎င်းတို့၏ ကြာမြင့်ချိန်ကို စာရင်းပြုစုသည်။ ခွင့်ပြုစာရင်းတွင် ပါဝင်သော လုပ်ဆောင်မှုမက်တာဒေတာကိုသာ မှတ်တမ်းတင်ပြီး စမ်းသပ်မှုဖော်ပြချက်များ၊ output၊ error body များနှင့် environment အပြည့်အစုံကို serialize မပြုလုပ်ပါ။
 
-CI နှင့် Quality တို့သည် JSONL ဖိုင်များကို `unit-progress-ci-<run>-<attempt>-<shard>` နှင့် `unit-progress-quality-<run>-<attempt>-<shard>` အဖြစ် ထိန်းသိမ်းထားသည်။ Job timeout ဖြစ်ပါက နောက်ပိုင်း upload ပြုလုပ်မှုကို တားဆီးနိုင်သော်လည်း ထုတ်လွှတ်ပြီးသား heartbeat များသည် ပြဿနာရှာဖွေရေးအထောက်အထားအဖြစ် ကျန်ရှိနေမည်ဖြစ်သည်။ Heartbeat များ ပျောက်ဆုံးနေခြင်းသည် runner process ပိတ်ဆို့နေခြင်း သို့မဟုတ် ရပ်စဲသွားခြင်းကိုလည်း ညွှန်ပြနိုင်သည်။ ဤမှတ်တမ်းများသည် လက်ရှိစမ်းသပ်မှုရွေးချယ်ခြင်း၊ တစ်ပြိုင်နက်လုပ်ဆောင်မှု၊ သတ်မှတ်ပြီးဆုံးချိန်များနှင့် exit status တို့ကို မပြောင်းလဲဘဲ ထိန်းသိမ်းထားသည်။ ၎င်းတို့သည် candidate ကို လက်ခံရန် ဆုံးဖြတ်ချက်များမဟုတ်ပါ။
+CI သည် JSONL ဖိုင်များကို `unit-progress-ci-<run>-<attempt>-<shard>` အမည်ဖြင့် သိမ်းဆည်းထားသည်။ Job timeout ဖြစ်ပါက နောက်ပိုင်း upload ပြုလုပ်မှုကို တားဆီးနိုင်သော်လည်း ထုတ်လွှတ်ပြီးသား heartbeat များသည် ပြဿနာရှာဖွေရေးအထောက်အထားအဖြစ် ကျန်ရှိနေမည်ဖြစ်သည်။ Heartbeat များ ပျောက်ဆုံးနေခြင်းသည် runner process ပိတ်ဆို့နေခြင်း သို့မဟုတ် ရပ်စဲသွားခြင်းကိုလည်း ညွှန်ပြနိုင်သည်။ ဤမှတ်တမ်းများသည် လက်ရှိစမ်းသပ်မှုရွေးချယ်ခြင်း၊ တစ်ပြိုင်နက်လုပ်ဆောင်မှု၊ သတ်မှတ်ပြီးဆုံးချိန်များနှင့် exit status တို့ကို မပြောင်းလဲဘဲ ထိန်းသိမ်းထားသည်။ ၎င်းတို့သည် candidate ကို လက်ခံရန် ဆုံးဖြတ်ချက်များမဟုတ်ပါ။
 
 ### Static scan စာရင်း
 
@@ -134,8 +132,6 @@ dispatch နှင့် merge group များတွင် CI ကို ဖ�
 | `Docs Gates (fast-path)`                         | Docs/code PR များ၊ API docs refs နှင့် docs-all                                                                                                                                                                                                        | ဟုတ်သည်                   |
 | `Fast Quality Gates`                             | Code PR များ၊ static စစ်ဆေးမှုများ၊ typecheck၊ dashboard typecheck၊ သက်ရောက်မှုရှိသော unit test များ                                                                                                                                                   | ဟုတ်သည်                   |
 | `Forgotten sibling tests`                        | Code PR များ၊ ပြောင်းလဲထားသော module များမှ static consumer များနှင့် ဖြစ်နိုင်ခြေရှိသော sibling test များအထိ ခြေရာခံသည်။ barrel နှင့် dynamic-import path များကို allowlist ခြွင်းချက်များကို ကိုးကားထားသည့် အကြံပြု diagnostic များအဖြစ် အစီရင်ခံသည် | **အကြံပြုချက်သာ**         |
-| `Vitest (fast-path)`                             | Code PR များ၊ လျင်မြန်သော vitest suite                                                                                                                                                                                                                 | ဟုတ်သည်                   |
-| `Unit Tests fast-path`                           | Code PR များ၊ shard ၄ ခုပါ unit suite                                                                                                                                                                                                                  | ဟုတ်သည်                   |
 | `No new ESLint warnings`                         | Code PR များ၊ suppression များကို ထည့်သွင်းစဉ်းစားသော lint guard                                                                                                                                                                                       | ဟုတ်သည်၊ fork များအပါအဝင် |
 | `Merge integrity (changelog + generated skills)` | Draft မဟုတ်သော PR များ၊ changelog နှင့် ထုတ်လုပ်ထားသော skill များ၏ sync                                                                                                                                                                                | ဟုတ်သည်၊ fork များအပါအဝင် |
 

@@ -8,10 +8,7 @@
 > workspace içinde `packages/ui-kit` (`@omniroute/ui-kit`) olarak vendorlanmıştır (upstream anlık görüntüsü
 > `packages/ui-kit/UPSTREAM.md` dosyasında sabitlenmiştir ve `npm run check:ui-kit-snapshot` ile korunmaktadır).
 > Açık (Light) tema kanonik temadır; varsayılan tercih `system`'dir. Vurgu rengi Keak lime'dır
-> (`--ci-color-accent`). Inter (letter-spacing 0, `--ci-letter-spacing-ui`) UI yazı tipi ailesidir; Instrument
-> Serif yalnızca büyük, seyrek display metinleri için (`.ci-dashboard-display`), IBM Plex Mono ise kod için
-> kullanılır — hepsi `src/app/globals.css` dosyasının başındaki `@fontsource/*` importları aracılığıyla
-> self-hosted edilir. Her simge bir Lucide glifidir.
+> (`--ci-color-accent`). Switzer, kitin kendisi tarafından barındırılan (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tarafından içe aktarılan) UI, görüntüleme ve kod metni (`--ci-font-ui`; `--ci-font-display` ve `--ci-font-mono` buna çözümlenir) için tek bir ailedir. Her simge bir Lucide glifidir.
 
 ## 1. Nerede ne bulunur
 
@@ -106,8 +103,7 @@
 4. Tailwind yardımcı sınıfları, kit bileşeni sınıflarına göre önceliklidir (kit,
    `@layer theme, base, components, utilities` tanımlar ve kuralları `components` içinde yer alır) — yardımcı sınıfları
    aralık ve yerleşim için kullanın, kit bileşenlerini yeniden renklendirmek için değil.
-5. Başlıklar: sayfa ve bölüm başlıkları için `.ci-heading` (Inter, harf aralığı yok); `.ci-dashboard-display`
-   (Instrument Serif) yalnızca hata sayfasındaki durum kodu gibi büyük ve seyrek görüntüleme metinleri için kullanılmalıdır.
+5. Başlıklar: sayfa ve bölüm başlıkları için `.ci-heading` ; `.ci-dashboard-display` yalnızca hata sayfası durum kodu gibi büyük, seyrek ekran metinleri için. Her ikisi de Switzer kullanıyor.
 6. `tests/unit/dashboard-kit-sweep.test.ts`, kitin benimsenmesini denetler: `src/app` veya
    `src/shared/components` altında Material ligatür span'i olmamalıdır; dashboard ağacında (`src/app/(dashboard)` ve
    `src/shared/components`) ham `<select>`, `<textarea>` veya `<table>` bulunmamalı ve listelenen istisnalar (`Select`
@@ -155,7 +151,7 @@
 
 Kökteki `README.md` dosyasına gömülen on iki diyagram (`docs/diagrams/*.svg`), kiti statik görsellere uygular. Elle çizilmez, üretilirler: `scripts/docs/gen-readme-*.mjs` altında 13 üretici dosyası (on iki diyagram ve `gen-readme-diagrams.mjs` sürücüsü), `tests/unit/docs/readme-*-svg.test.ts` altında da diyagram başına bir tane olmak üzere 12 güncellik testi vardır. Her test, commit edilmiş dosyayı üreticisinin çıktısıyla bayt bayt karşılaştırır (`test-unit` işi).
 
-- **Tokenlar.** `scripts/docs/readme-diagram-theme.mjs`, paleti `packages/ui-kit/src/ci-tokens.css` dosyasından kopyalar (bu dosyayla eşleşme `tests/unit/docs/readme-diagram-theme.test.ts` ile sabitlenir) ve kitin yazı tipleriyle metin rollerini tanımlar: vurgu metni için Instrument Serif, arayüz için Inter, sayılar ve kod için IBM Plex Mono. Bunlar `src/app/globals.css` dosyasının pano için yüklediği aynı `@fontsource` paketleridir. Açık değerler dosyada `:root` üzerinde, koyu değerler `prefers-color-scheme: dark` koşulu altında bulunur; böylece her görsel GitHub okuyucusunun renk düzenini izler.
+- **Jetonlar.** `scripts/docs/readme-diagram-theme.mjs` paleti `packages/ui-kit/src/ci-tokens.css` kopyalar (bu dosyaya `tests/unit/docs/readme-diagram-theme.test.ts` ile sabitlenmiştir) ve `@fontsource` paketlerinden kitin önceki yüzlerindeki metin rollerini tanımlar - görüntüleme için Instrument Serif, UI metni için Inter, şekiller ve kod için IBM Plex Mono - (kontrol panelinin kendisi kit 0.0.66'dan beri kitin Switzer'ını kullanır). Açık değerler dosyanın içinde `:root` üzerinde, koyu değerler ise `prefers-color-scheme: dark` arkasında yer alır, böylece her görüntü izleyicinin GitHub şemasını takip eder.
 
 - **Yazı tipleri.** `scripts/docs/readme-fonts.mjs`, bu woff2 dosyalarını her diyagramın çizdiği gliflerle sınırlar ve `@font-face` aracılığıyla `data:` URI'leri olarak gömer. Böylece kitin yazı tipleri SVG içinde kalır. Yerel README görsel denemesi, işlemenin dış yazı tipi isteği yapmadığını kontrol eder. Alt kümeler yalnızca Latin karakterlerini içerir; sistem yazı tiplerine geri düşen simge gliflerine `SYMBOL_FALLBACKS` içinde tek tek izin verilir. Kapsanmayan diğer tüm glifler hata üretir.
 

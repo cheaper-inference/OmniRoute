@@ -24,12 +24,10 @@ Mỗi workflow CI và Quality Gates đều đưa ra một kết luận ổn đ�
 là bắt buộc hoặc mang tính tư vấn. Một job bắt buộc áp dụng được phải thành công: các kết quả
 thiếu, bị hủy, bị bỏ qua, đang chờ xử lý và không xác định không thể xác lập PASS. Một phân loại
 hợp lệ chỉ có tài liệu hoặc chỉ có danh mục có thể khiến một lane mã không áp dụng;
-PR nháp không phải là ứng viên được chấp nhận. Nhãn `hotfix` không miễn trừ yêu cầu bằng chứng.
+PR nháp thông thường không phải là ứng viên được chấp nhận. Nhãn `hotfix` không miễn trừ yêu cầu bằng chứng.
 
 Cả hai workflow đều bao phủ các PR vào nhánh main/release, các lượt push lên `main`, kích hoạt thủ công
-và các sự kiện merge-group. Push, dispatch và merge-group chạy toàn bộ lựa chọn. Các lượt push lên
-`release/**` không khởi chạy chúng (2026-10-18): mỗi thay đổi đã chạy ma trận trên PR tương ứng
-và tổ hợp sau khi merge là nhiệm vụ của Release-Green (`docs/ops/RUNNER_BOX.md` → Lane được lưu trữ). Các fork
+và các sự kiện merge-group. Push, dispatch và merge-group chạy toàn bộ lựa chọn. Một bản nháp hàng đợi Mergify đáng tin cậy cũng chạy các job `full-code`/`full-code-e2e` áp dụng được; các PR thông thường bỏ qua chúng. Trước khi merge thủ công, hãy chạy dispatch đầy đủ trên đúng phiên bản ứng viên. Các lượt push lên `release/**` không khởi chạy những workflow này; Release-Green quan sát riêng nền sau khi merge (`docs/ops/RUNNER_BOX.md` → Lane được lưu trữ). Các fork
 và merge group sử dụng runner được lưu trữ cho những job vốn sẽ chọn runner tự lưu trữ;
 phải xác minh đủ dung lượng được lưu trữ trước khi triển khai.
 
@@ -96,8 +94,7 @@ của từng tệp, đồng thời một tín hiệu nhịp tim mỗi 30 giây s
 và thời gian đã trôi qua của chúng. Biên nhận chỉ ghi lại siêu dữ liệu thực thi có trong danh sách
 cho phép; mô tả kiểm thử, đầu ra, nội dung lỗi và toàn bộ môi trường không được tuần tự hóa.
 
-CI và Quality lưu giữ các tệp JSONL dưới dạng `unit-progress-ci-<run>-<attempt>-<shard>` và
-`unit-progress-quality-<run>-<attempt>-<shard>`. Việc hết thời gian chờ của một tác vụ có thể
+CI giữ lại các tệp JSONL dưới tên `unit-progress-ci-<run>-<attempt>-<shard>`. Việc hết thời gian chờ của một tác vụ có thể
 ngăn quá trình tải lên sau đó; các tín hiệu nhịp tim đã được phát vẫn là bằng chứng chẩn đoán.
 Việc thiếu tín hiệu nhịp tim cũng có thể phản ánh một tiến trình runner bị chặn hoặc chấm dứt.
 Các biên nhận này duy trì nguyên trạng cách lựa chọn kiểm thử, mức độ đồng thời, thời hạn và
@@ -166,8 +163,6 @@ vô hiệu hóa vĩnh viễn đã được loại bỏ; các bước kiểm tra 
 | `Docs Gates (fast-path)`                         | PR tài liệu/mã nguồn; tham chiếu tài liệu API và docs-all                                                                                                                                                                                       | Có              |
 | `Fast Quality Gates`                             | PR mã nguồn; kiểm tra tĩnh, kiểm tra kiểu, kiểm tra kiểu dashboard, các bài kiểm thử đơn vị chịu ảnh hưởng                                                                                                                                      | Có              |
 | `Forgotten sibling tests`                        | PR mã nguồn; truy vết các mô-đun đã thay đổi đến các thành phần sử dụng tĩnh và bài kiểm thử sibling tiềm năng; các đường dẫn barrel và nhập động được báo cáo dưới dạng chẩn đoán khuyến nghị, cùng với các ngoại lệ allowlist được tham chiếu | **Khuyến nghị** |
-| `Vitest (fast-path)`                             | PR mã nguồn; bộ kiểm thử vitest nhanh                                                                                                                                                                                                           | Có              |
-| `Unit Tests fast-path`                           | PR mã nguồn; bộ kiểm thử đơn vị gồm 4 shard                                                                                                                                                                                                     | Có              |
 | `No new ESLint warnings`                         | PR mã nguồn; hàng rào lint có nhận biết các mục vô hiệu hóa                                                                                                                                                                                     | Có, kể cả fork  |
 | `Merge integrity (changelog + generated skills)` | PR không phải bản nháp; đồng bộ changelog và skill được tạo                                                                                                                                                                                     | Có, kể cả fork  |
 

@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "ସମସ୍ତ ମଡେଲ୍ ପୂର୍ବରୁ ଇମ୍ପୋର୍ଟ ହୋଇସାରିଛି",
     "noNewModelsToImport": "ଇମ୍ପୋର୍ଟ କରିବାକୁ କୌଣସି ନୂଆ ମଡେଲ୍ ନାହିଁ — ସମସ୍ତ ମଡେଲ୍ ପୂର୍ବରୁ ରେଜିଷ୍ଟ୍ରି କିମ୍ବା କଷ୍ଟମ୍ ମଡେଲ୍ ତାଲିକାରେ ଅଛି",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "ମଡେଲ୍ ଡିସ୍କଭରୀ ବିଫଲ୍ {time}",
     "skippingExistingModels": "ପୂର୍ବରୁ ଥିବା {count}ଟି ମଡେଲ୍କୁ ଛାଡ଼ି ଦିଆଯାଉଛି",
     "autoSync": "ସ୍ୱୟଂ-ସିଙ୍କ୍",
     "autoSyncShort": "ସିଙ୍କ୍ କରନ୍ତୁ",

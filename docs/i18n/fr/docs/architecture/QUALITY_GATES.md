@@ -24,15 +24,12 @@ Les workflows CI et Quality Gates émettent chacun un verdict stable : `Gate / C
 comme obligatoire ou consultatif. Un job obligatoire applicable doit réussir : les
 résultats manquants, annulés, ignorés, en attente ou inconnus ne peuvent pas établir un
 PASS. Une classification valide limitée à la documentation ou au catalogue peut rendre
-une lane de code inapplicable ; une PR en brouillon n’est pas un candidat accepté. Un
+une lane de code inapplicable ; une PR ordinaire en brouillon n’est pas un candidat accepté. Un
 label `hotfix` ne dispense pas de fournir des preuves.
 
 Les deux workflows couvrent les PR vers les branches main/release, les pushs vers `main`,
 les déclenchements manuels et les événements de groupe de fusion. Les pushs, les
-déclenchements et les groupes de fusion exécutent la sélection complète. Les pushs vers
-`release/**` ne les démarrent pas (2026-10-18) : chaque modification a déjà exécuté la
-matrice sur sa PR et la combinaison fusionnée relève de Release-Green
-(`docs/ops/RUNNER_BOX.md` → lane hébergée). Les forks et les groupes de fusion utilisent
+déclenchements et les groupes de fusion exécutent la sélection complète. Un brouillon de confiance dans la file Mergify exécute aussi les jobs applicables `full-code`/`full-code-e2e` ; les PR ordinaires les ignorent. Avant une fusion manuelle, lancez une exécution complète par dispatch sur le candidat exact. Les pushs vers `release/**` ne démarrent pas ces workflows ; Release-Green observe séparément la base fusionnée (`docs/ops/RUNNER_BOX.md` → lane hébergée). Les forks et les groupes de fusion utilisent
 des runners hébergés pour les jobs qui sélectionnent normalement des runners
 auto-hébergés ; une capacité hébergée suffisante doit être vérifiée avant le déploiement.
 
@@ -97,8 +94,7 @@ et un signal périodique toutes les 30 secondes répertorie les fichiers toujour
 uniquement les métadonnées d’exécution autorisées ; les descriptions des tests, les sorties, le contenu des erreurs et l’environnement
 complet ne sont pas sérialisés.
 
-CI et Quality conservent les fichiers JSONL sous les noms `unit-progress-ci-<run>-<attempt>-<shard>` et
-`unit-progress-quality-<run>-<attempt>-<shard>`. L’expiration du délai d’une tâche peut empêcher le téléversement ultérieur ;
+CI conserve les fichiers JSONL sous le nom `unit-progress-ci-<run>-<attempt>-<shard>`. L’expiration du délai d’une tâche peut empêcher le téléversement ultérieur ;
 les signaux périodiques déjà émis restent des éléments de diagnostic. L’absence de signaux périodiques peut également indiquer
 un processus d’exécution bloqué ou arrêté. Ces reçus préservent la sélection des tests,
 la concurrence, les échéances et le statut de sortie existants ; ils ne constituent pas des décisions d’admission des candidats.
@@ -171,8 +167,6 @@ les déclenchements manuels et les groupes de fusion. Les PR utilisent des véri
 | `Docs Gates (fast-path)`                         | PR de documentation/code ; références de documentation d’API et docs-all                                                                                                                                                                                | Oui               |
 | `Fast Quality Gates`                             | PR de code ; vérifications statiques, vérification des types, vérification des types du tableau de bord, tests unitaires affectés                                                                                                                       | Oui               |
 | `Forgotten sibling tests`                        | PR de code ; modules modifiés reliés aux consommateurs statiques et aux tests frères candidats ; les chemins de barils et d’imports dynamiques sont signalés comme diagnostics consultatifs, avec les exceptions référencées de la liste d’autorisation | **Consultative**  |
-| `Vitest (fast-path)`                             | PR de code ; suite vitest rapide                                                                                                                                                                                                                        | Oui               |
-| `Unit Tests fast-path`                           | PR de code ; suite de tests unitaires répartie sur 4 shards                                                                                                                                                                                             | Oui               |
 | `No new ESLint warnings`                         | PR de code ; garde de lint tenant compte des suppressions                                                                                                                                                                                               | Oui, forks inclus |
 | `Merge integrity (changelog + generated skills)` | PR non brouillons ; synchronisation du changelog et des compétences générées                                                                                                                                                                            | Oui, forks inclus |
 

@@ -7,10 +7,7 @@
 > **સ્થિતિ:** ડેશબોર્ડ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) પર બનાવવામાં આવ્યું છે, જે
 > વર્કસ્પેસ `packages/ui-kit` (`@omniroute/ui-kit`; અપસ્ટ્રીમ સ્નેપશોટ `packages/ui-kit/UPSTREAM.md` માં
 > પિન કરેલું છે અને `npm run check:ui-kit-snapshot` દ્વારા સુરક્ષિત છે) તરીકે વેન્ડર કરવામાં આવ્યું છે. Light કેનોનિકલ
-> થીમ છે; ડિફોલ્ટ પસંદગી `system` છે. એક્સેન્ટ Keak lime (`--ci-color-accent`) છે. Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) UI ફોન્ટ ફેમિલી છે, Instrument Serif ફક્ત મોટા વિરળ
-> ડિસ્પ્લે ટેક્સ્ટ (`.ci-dashboard-display`) માટે, IBM Plex Mono કોડ માટે — આ બધા
-> `src/app/globals.css` ની ટોચ પરના `@fontsource/*` ઈમ્પોર્ટ્સ દ્વારા સેલ્ફ-હોસ્ટેડ છે. દરેક આયકન Lucide ગ્લિફ છે.
+> થીમ છે; ડિફોલ્ટ પસંદગી `system` છે. એક્સેન્ટ Keak lime (`--ci-color-accent`) છે. સ્વિટ્ઝર એ UI, ડિસ્પ્લે અને કોડ ટેક્સ્ટ (`--ci-font-ui`; `--ci-font-display` અને `--ci-font-mono` રિઝોલ્યુશન) માટેનું એકલ કુટુંબ છે, જે કીટ દ્વારા જ સ્વ-હોસ્ટ કરવામાં આવે છે (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` દ્વારા આયાત કરેલું). દરેક ચિહ્ન એ લ્યુસાઇડ ગ્લિફ છે.
 
 ## 1. વસ્તુઓ ક્યાં રહેલી છે
 
@@ -41,8 +38,7 @@
 4. Tailwind યુટિલિટીઝને કિટ કમ્પોનન્ટ ક્લાસિસ કરતાં અગ્રતા મળે છે (કિટ
    `@layer theme, base, components, utilities` જાહેર કરે છે અને તેના નિયમો `components`માં રહે છે) — સ્પેસિંગ અને
    લેઆઉટ માટે યુટિલિટીઝનો ઉપયોગ કરો, કિટ કમ્પોનન્ટ્સને ફરી રંગ આપવા માટે નહીં.
-5. હેડિંગ્સ: પેજ અને સેક્શન ટાઇટલ્સ માટે `.ci-heading` (Inter, ટ્રૅકિંગ વિના); `.ci-dashboard-display`
-   (Instrument Serif)નો ઉપયોગ માત્ર મોટા, વિરલ ડિસ્પ્લે ટેક્સ્ટ માટે કરો, જેમ કે એરર-પેજ સ્ટેટસ કોડ.
+5. શીર્ષકો: પૃષ્ઠ અને વિભાગના શીર્ષકો માટે `.ci-heading` ; `.ci-dashboard-display` માત્ર મોટા, છૂટાછવાયા ડિસ્પ્લે ટેક્સ્ટ માટે જેમ કે એરર-પેજ સ્ટેટસ કોડ. બંને સ્વિત્ઝરનો ઉપયોગ કરે છે.
 6. `tests/unit/dashboard-kit-sweep.test.ts` કિટ અપનાવવાની પ્રક્રિયાને સુરક્ષિત રાખે છે: `src/app` અથવા
    `src/shared/components` હેઠળ કોઈ Material લિગેચર સ્પાન નહીં; ડૅશબોર્ડ ટ્રીમાં (`src/app/(dashboard)` અને
    `src/shared/components`) કોઈ રૉ `<select>`, `<textarea>` અથવા `<table>` નહીં અને સૂચિબદ્ધ અપવાદો
@@ -94,7 +90,7 @@
 
 મૂળ `README.md` માં સમાવાયેલા બાર આલેખો (`docs/diagrams/*.svg`) કિટને સ્થિર ચિત્રો પર લાગુ કરે છે. તેઓ જનરેટ થાય છે, હાથથી દોરાતા નથી: `scripts/docs/gen-readme-*.mjs` માં 13 જનરેટર ફાઇલો (બાર આલેખો અને નિયંત્રક `gen-readme-diagrams.mjs`), અને `tests/unit/docs/readme-*-svg.test.ts` માં 12 જૂનાપણાની કસોટીઓ છે, દરેક આલેખ માટે એક. દરેક કસોટી commit કરેલી ફાઇલને તેના જનરેટરના આઉટપુટ સાથે બાઇટ પ્રમાણે સરખાવે છે (જોબ `test-unit`).
 
-- **ટોકન.** `scripts/docs/readme-diagram-theme.mjs` રંગપટ્ટી `packages/ui-kit/src/ci-tokens.css` માંથી નકલ કરે છે (તે ફાઇલ સાથેની સમાનતા `tests/unit/docs/readme-diagram-theme.test.ts` સુનિશ્ચિત કરે છે) અને કિટના ફોન્ટ વડે લખાણની ભૂમિકાઓ નક્કી કરે છે: મુખ્ય પ્રદર્શન લખાણ માટે Instrument Serif, ઇન્ટરફેસ માટે Inter, આંકડા અને કોડ માટે IBM Plex Mono. આ એ જ `@fontsource` પેકેજ છે જે `src/app/globals.css` ડેશબોર્ડ માટે લોડ કરે છે. ફાઇલમાં હળવા મૂલ્યો `:root` પર અને ઘેરા મૂલ્યો `prefers-color-scheme: dark` શરત હેઠળ છે, જેથી દરેક ચિત્ર GitHub વાચકની રંગયોજના અનુસરે છે.
+- **ટોકન્સ.** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` ( `tests/unit/docs/readme-diagram-theme.test.ts` દ્વારા તે ફાઇલ સામે પિન કરેલ) માંથી પેલેટની નકલ કરે છે અને કીટના પહેલાના ચહેરા પર ટેક્સ્ટની ભૂમિકાઓ વ્યાખ્યાયિત કરે છે - ડિસ્પ્લે માટે ઇન્સ્ટ્રુમેન્ટ સેરીફ, UI ટેક્સ્ટ માટે ઇન્ટર, ફિગર અને કોડ માટે IBM Plex Mono — `@fontsource` પેકેજોમાંથી (ડેશબોર્ડ પોતે kit 0.0.66 થી kit ના Switzer નો ઉપયોગ કરે છે). પ્રકાશ મૂલ્યો `:root` પર બેસે છે, `prefers-color-scheme: dark` પાછળ શ્યામ મૂલ્યો, ફાઇલની અંદર, તેથી દરેક છબી GitHub પર દર્શકની યોજનાને અનુસરે છે.
 
 - **ફોન્ટ.** `scripts/docs/readme-fonts.mjs` તે woff2 ફાઇલોને દરેક આલેખમાં દોરાતા ગ્લિફ સુધી મર્યાદિત કરે છે અને તેમને `@font-face` દ્વારા `data:` URI તરીકે સમાવે છે. આથી કિટના ફોન્ટ SVGની અંદર જ રહે છે. README ચિત્રની સ્થાનિક તપાસ ચકાસે છે કે રેન્ડરિંગ કોઈ બાહ્ય ફોન્ટ વિનંતી કરતું નથી. ઉપસમૂહોમાં માત્ર લેટિન અક્ષરો છે; સિસ્ટમના ફોન્ટ પર પાછા જતાં પ્રતીક-ગ્લિફને `SYMBOL_FALLBACKS` માં એક-એક કરીને મંજૂરી મળે છે. બીજા કોઈ પણ ન આવરાયેલા ગ્લિફથી ભૂલ થાય છે.
 

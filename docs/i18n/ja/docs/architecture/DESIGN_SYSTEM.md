@@ -8,10 +8,7 @@
 > ワークスペースの `packages/ui-kit`（`@omniroute/ui-kit`、上流スナップショットは
 > `packages/ui-kit/UPSTREAM.md` に固定され、`npm run check:ui-kit-snapshot` で保護されている）として
 > ベンダー化されている。Light が標準テーマであり、デフォルトの設定は `system`。アクセントカラーは Keak ライム
-> （`--ci-color-accent`）。Inter（letter-spacing 0、`--ci-letter-spacing-ui`）が UI フォントファミリーで、
-> Instrument Serif は大きく余白の多いディスプレイテキスト（`.ci-dashboard-display`）専用、IBM Plex Mono は
-> コード用 — すべて `src/app/globals.css` 先頭の `@fontsource/*` インポートを通じてセルフホストされている。
-> すべてのアイコンは Lucide グリフである。
+> （`--ci-color-accent`）です。 Switzer は、 UI、表示およびコード テキスト (`--ci-font-ui`; `--ci-font-display`および`--ci-font-mono`これに解決されます) の単一ファミリーであり、キット自体 (`packages/ui-kit/src/ci-fonts.css`、 `ci-tokens.css`によってインポート) によって自己ホストされます。すべてのアイコンは Lucide グリフです。
 
 ## 1. どこに何があるか
 
@@ -42,8 +39,7 @@
 4. Tailwind ユーティリティはキットコンポーネントのクラスより優先されます（キットは
    `@layer theme, base, components, utilities` を宣言し、そのルールは `components` にあります）。ユーティリティは
    余白やレイアウトに使用し、キットコンポーネントの色変更には使用しないでください。
-5. 見出し：ページおよびセクションのタイトルには `.ci-heading`（Inter、字間調整なし）を使用します。`.ci-dashboard-display`
-   （Instrument Serif）は、エラーページのステータスコードのような、大きく余白の多いディスプレイテキストにのみ使用します。
+5. 見出し: ページとセクションのタイトルの`.ci-heading` 。 `.ci-dashboard-display` 、エラー ページのステータス コードなど、大きくてまばらな表示テキストにのみ使用します。どちらもSwitzerを使用しています。
 6. `tests/unit/dashboard-kit-sweep.test.ts` はキットの採用状況をチェックします。`src/app` または `src/shared/components` 配下では
    Material のリガチャ用 span を禁止します。ダッシュボードツリー（`src/app/(dashboard)` および
    `src/shared/components`）では、生の `<select>`、`<textarea>`、`<table>`、および列挙された例外（`Select` アダプターのネイティブ分岐、
@@ -99,7 +95,7 @@ usage、endpoint を両テーマで目視確認し、`npm run check:ui-kit-snaps
 
 ルートの `README.md` に埋め込まれた12枚の図（`docs/diagrams/*.svg`）は、キットを静的画像に適用したものです。手描きではなく生成されます。`scripts/docs/gen-readme-*.mjs` に13個の生成ファイル（12枚の図とドライバー `gen-readme-diagrams.mjs`）、`tests/unit/docs/readme-*-svg.test.ts` に図ごとに1つ、計12個の鮮度テストがあり、コミット済みファイルと生成結果をバイト単位で比較します（ジョブ `test-unit`）。
 
-- **トークン。** `scripts/docs/readme-diagram-theme.mjs` は `packages/ui-kit/src/ci-tokens.css` からパレットをコピーし（そのファイルとの一致を `tests/unit/docs/readme-diagram-theme.test.ts` で固定）、キットの書体でテキストの役割を定義します。見出しなどのディスプレイ用に Instrument Serif、UI テキストに Inter、数値とコードに IBM Plex Mono を使います。いずれも `src/app/globals.css` がダッシュボード用に読み込むものと同じ `@fontsource` パッケージです。ファイル内の `:root` に明色の値、`prefers-color-scheme: dark` の条件下に暗色の値があり、各画像は GitHub の閲覧者の配色設定に従います。
+- **トークン。** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` ( `tests/unit/docs/readme-diagram-theme.test.ts`によってそのファイルに対して固定) からパレットをコピーし、キットの以前の面のテキストの役割 (表示用の Instrument Serif、 UIテキスト用の Inter、図とコード用のIBM Plex Mono) を`@fontsource`パッケージから定義します (ダッシュボード自体はキット 0.0.66 以降、キットの Switzer を使用します)。ファイル内の明るい値は`:root`に、暗い値は`prefers-color-scheme: dark`後ろにあるため、各画像はGitHub上のビューアのスキームに従います。
 
 - **フォント。** `scripts/docs/readme-fonts.mjs` は各図が描くグリフだけをこれらの woff2 ファイルから抽出し、`@font-face` の `data:` URI として埋め込みます。 これにより、キットのフォントは SVG 内に保持されます。ローカルの README 画像プローブは、描画時に外部フォント要求が発生しないことを確認します。 サブセットはラテン文字のみで、システムのフォントスタックにフォールバックする記号グリフは `SYMBOL_FALLBACKS` で個別に許可されます。それ以外の未対応グリフはエラーになります。
 

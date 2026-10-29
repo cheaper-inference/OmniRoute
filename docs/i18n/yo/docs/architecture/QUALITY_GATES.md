@@ -24,12 +24,10 @@ tí kò sinmi lé irinṣẹ́ kan pàtó fún ètò kan náà, wo
 gẹ́gẹ́ bí ohun tó jẹ́ dandan tàbí ìmọ̀ràn. Iṣẹ́ dandan tó bá kan ọ̀ràn náà gbọ́dọ̀ ṣàṣeyọrí:
 àbájáde tí kò sí, tí a fagilé, tí a fo, tí ó ṣì ń dúró tàbí tí a kò mọ̀ kò lè fi ìdí PASS múlẹ̀.
 Ìsọ̀rí docs-only tàbí catalog-only tó fẹsẹ̀ múlẹ̀ lè mú kí ọ̀nà kóòdù kan má ṣe kan ọ̀ràn náà;
-PR àkọ́kọ́ tí kò tíì parí kì í ṣe olùdíje tí a gbà. Àmì `hotfix` kì í yọ ẹ̀rí kúrò.
+PR lasan tí ó ṣì jẹ́ àkọ́kọ́ tí kò tíì parí kì í ṣe olùdíje tí a gbà. Àmì `hotfix` kì í yọ ẹ̀rí kúrò.
 
 Àwọn ìṣàn iṣẹ́ méjèèjì bo àwọn PR sínú ẹ̀ka main/release, àwọn push sí `main`, ìfiránṣẹ́ afọwọ́ṣe
-àti àwọn ìṣẹ̀lẹ̀ merge-group. Push, dispatch àti merge-group máa ń ṣiṣẹ́ àṣàyàn kíkún. Àwọn push sí
-`release/**` kì í bẹ̀rẹ̀ wọn (2026-10-18): gbogbo ìyípadà ti ṣiṣẹ́ matrix náà lórí PR rẹ̀ tẹ́lẹ̀,
-àti àkópọ̀ tí a merge jẹ́ iṣẹ́ Release-Green (`docs/ops/RUNNER_BOX.md` → Ọ̀nà Hosted). Àwọn fork
+àti àwọn ìṣẹ̀lẹ̀ merge-group. Push, dispatch àti merge-group máa ń ṣiṣẹ́ àṣàyàn kíkún. Àkọ́kọ́ tí kò tíì parí nínú ìlà Mergify tí a gbẹ́kẹ̀ lé tún ń ṣiṣẹ́ àwọn iṣẹ́ `full-code`/`full-code-e2e` tí ó kan ọ̀ràn náà; àwọn PR lasan máa ń fo wọn. Kí o tó merge pẹ̀lú ọwọ́, ṣiṣẹ́ dispatch kíkún lórí ẹ̀yà olùdíje náà gan-an. Àwọn push sí `release/**` kì í bẹ̀rẹ̀ àwọn ìṣàn iṣẹ́ wọ̀nyí; Release-Green ń ṣàkíyèsí ìpìlẹ̀ tí a ti merge lọ́tọ̀ (`docs/ops/RUNNER_BOX.md` → Ọ̀nà Hosted). Àwọn fork
 àti merge group máa ń lo àwọn runner tí a gbalejo fún àwọn iṣẹ́ tí yóò máa yan àwọn runner
 tí a gbalejo fúnra wa ní ipò míì; a gbọ́dọ̀ ṣàyẹ̀wò pé agbára ìgbalejo tó pọ̀ tó wà kí rollout tó bẹ̀rẹ̀.
 
@@ -96,8 +94,7 @@ heartbeat ọlọ́gbọ̀n-àáyá sì ń ṣe àkójọ àwọn fáìlì tí �
 metadata ìṣiṣẹ́ tí a fọwọ́ sí nìkan; a kì í serialize àwọn àpèjúwe ìdánwò, àbájáde, àkóónú àṣìṣe àti gbogbo
 environment náà.
 
-CI àti Quality ń tọ́jú àwọn fáìlì JSONL gẹ́gẹ́ bí `unit-progress-ci-<run>-<attempt>-<shard>` àti
-`unit-progress-quality-<run>-<attempt>-<shard>`. Timeout job kan lè dí upload tí ó yẹ kí ó wáyé lẹ́yìn;
+CI ń pa àwọn fáìlì JSONL mọ́ gẹ́gẹ́ bí `unit-progress-ci-<run>-<attempt>-<shard>`. Timeout job kan lè dí upload tí ó yẹ kí ó wáyé lẹ́yìn;
 àwọn heartbeat tí a ti fi jáde ṣì jẹ́ ẹ̀rí fún ìwádìí ìṣòro. Àìsí heartbeat tún lè túmọ̀ sí
 pé process runner kan ti di tàbí pé a ti dá a dúró. Àwọn àkọsílẹ̀ wọ̀nyí ń pa yíyan ìdánwò,
 concurrency, àwọn deadline àti exit status tó wà tẹ́lẹ̀ mọ́; wọn kì í ṣe àwọn ìdájọ́ candidate-admission.
@@ -151,8 +148,6 @@ dispatch àti àwọn ẹgbẹ́ merge. Àwọn PR máa ń lo àwọn àyẹ̀w�
 | `Docs Gates (fast-path)`                         | Àwọn PR docs/code; àwọn ìtọ́kasí API docs àti docs-all                                                                                                                                                                               | Bẹ́ẹ̀ ni                 |
 | `Fast Quality Gates`                             | Àwọn PR code; àwọn àyẹ̀wò static, typecheck, dashboard typecheck, àwọn unit test tí ìyípadà kan                                                                                                                                      | Bẹ́ẹ̀ ni                 |
 | `Forgotten sibling tests`                        | Àwọn PR code; a tọpinpin àwọn module tí ó yí padà dé ọ̀dọ̀ àwọn static consumer àti àwọn candidate sibling test; a máa ń jọ̀wọ́ àwọn path barrel àti dynamic-import gẹ́gẹ́ bí àwọn àyẹ̀wò ìmọ̀ràn, pẹ̀lú àwọn ìyọkúrò allowlist tí a tọ́ka sí | **Ìmọ̀ràn**             |
-| `Vitest (fast-path)`                             | Àwọn PR code; àkójọpọ̀ vitest yíyára                                                                                                                                                                                                 | Bẹ́ẹ̀ ni                 |
-| `Unit Tests fast-path`                           | Àwọn PR code; àkójọpọ̀ unit aláápá mẹ́rin                                                                                                                                                                                             | Bẹ́ẹ̀ ni                 |
 | `No new ESLint warnings`                         | Àwọn PR code; lint guard tó mọ̀ nípa àwọn suppression                                                                                                                                                                                | Bẹ́ẹ̀ ni, pẹ̀lú àwọn fork |
 | `Merge integrity (changelog + generated skills)` | Àwọn PR tí kì í ṣe draft; ìbámuṣiṣẹ́pọ̀ changelog àti skill tí a ṣẹ̀dá                                                                                                                                                                 | Bẹ́ẹ̀ ni, pẹ̀lú àwọn fork |
 

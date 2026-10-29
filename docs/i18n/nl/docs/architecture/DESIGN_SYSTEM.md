@@ -7,10 +7,7 @@
 > **Status:** het dashboard is gebouwd op de **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), die als vendored kopie
 > is opgenomen in de workspace `packages/ui-kit` (`@omniroute/ui-kit`; de upstream-snapshot is vastgezet in
 > `packages/ui-kit/UPSTREAM.md` en wordt bewaakt door `npm run check:ui-kit-snapshot`). Light is het canonieke
-> thema; de standaardvoorkeur is `system`. Het accent is Keak-limoen (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) is de UI-familie, Instrument Serif alleen voor grote, spaarzaam
-> gebruikte displaytekst (`.ci-dashboard-display`), IBM Plex Mono voor code — allemaal zelf gehost via de
-> `@fontsource/*`-imports bovenaan `src/app/globals.css`. Elk icoon is een Lucide-glyph.
+> thema; de standaardvoorkeur is `system`. Het accent is Keak-limoen (`--ci-color-accent`). Switzer is de enige familie voor UI, display- en codetekst (`--ci-font-ui`; `--ci-font-display` en `--ci-font-mono` lossen dit op), zelf gehost door de kit zelf (`packages/ui-kit/src/ci-fonts.css`, geïmporteerd door `ci-tokens.css`). Elk pictogram is een Lucide-glyph.
 
 ## 1. Waar alles staat
 
@@ -99,8 +96,7 @@
 4. Tailwind-hulpprogramma's hebben voorrang op kitcomponentklassen (de kit declareert
    `@layer theme, base, components, utilities` en de regels ervan bevinden zich in `components`) — gebruik hulpprogramma's voor
    witruimte en lay-out, niet om kitcomponenten opnieuw in te kleuren.
-5. Koppen: `.ci-heading` (Inter, zonder letterspatiëring) voor pagina- en sectietitels; `.ci-dashboard-display`
-   (Instrument Serif) alleen voor grote, spaarzaam gebruikte weergavetekst, zoals de statuscode op de foutpagina.
+5. Koppen: `.ci-heading` voor pagina- en sectietitels; `.ci-dashboard-display` alleen voor grote, schaarse weergavetekst, zoals de statuscode van de foutpagina. Beide gebruiken Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` bewaakt de toepassing van de kit: geen Material-ligatuurspan onder
    `src/app` of `src/shared/components`; in de dashboardstructuur (`src/app/(dashboard)` en
    `src/shared/components`) geen onbewerkte `<select>`, `<textarea>` of `<table>` en geen zelfgemaakte
@@ -155,7 +151,7 @@ open de PR met de upstream-changelog.
 
 De twaalf diagrammen in het `README.md` in de hoofdmap (`docs/diagrams/*.svg`) passen de kit toe op statische afbeeldingen. Ze worden gegenereerd, niet met de hand getekend: 13 generatorbestanden onder `scripts/docs/gen-readme-*.mjs` (twaalf diagrammen plus de driver `gen-readme-diagrams.mjs`) en 12 verouderingstests onder `tests/unit/docs/readme-*-svg.test.ts`, één per diagram. Elke test vergelijkt het gecommitte bestand byte voor byte met de uitvoer van de generator (job `test-unit`).
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopieert het palet uit `packages/ui-kit/src/ci-tokens.css` (de overeenkomst met dat bestand wordt vastgelegd door `tests/unit/docs/readme-diagram-theme.test.ts`) en definieert de tekstrollen met de lettertypen van de kit: Instrument Serif voor displaytekst, Inter voor UI-tekst en IBM Plex Mono voor cijfers en code. Dit zijn dezelfde `@fontsource`-pakketten die `src/app/globals.css` voor het dashboard laadt. Lichte waarden staan op `:root` en donkere onder `prefers-color-scheme: dark` in het bestand; zo volgt elke afbeelding het kleurenschema van de lezer op GitHub.
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopieert het palet van `packages/ui-kit/src/ci-tokens.css` (vastgezet tegen dat bestand door `tests/unit/docs/readme-diagram-theme.test.ts`) en definieert de tekstrollen op de eerdere gezichten van de kit - Instrument Serif voor weergave, Inter voor UI tekst, IBM Plex Mono voor cijfers en code - van de `@fontsource` pakketten (het dashboard zelf gebruikt de Switzer van de kit sinds kit 0.0.66). Lichte waarden bevinden zich op `:root` en donkere waarden achter `prefers-color-scheme: dark` in het bestand, dus elke afbeelding volgt het schema van de kijker op GitHub.
 
 - **Lettertypen.** `scripts/docs/readme-fonts.mjs` beperkt die woff2-bestanden tot de glyphs die elk diagram tekent en sluit ze via `@font-face` in als `data:`-URI's. Zo blijven de lettertypen van de kit in de SVG. De lokale README-afbeeldingsproef controleert dat het renderen geen externe lettertypeverzoeken doet. De subsets bevatten alleen Latijnse tekens; symboolglyphs die terugvallen op systeemlettertypen worden afzonderlijk toegestaan in `SYMBOL_FALLBACKS`. Elke andere ontbrekende glyph veroorzaakt een fout.
 

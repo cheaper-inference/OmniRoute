@@ -24,12 +24,10 @@ CI र Quality Gates कार्यप्रवाहहरू प्रत्�
 आवश्यक वा परामर्शात्मकका रूपमा सूचीबद्ध गर्छ। लागू हुने आवश्यक कार्य सफल हुनैपर्छ:
 हराएको, रद्द भएको, छोडिएको, विचाराधीन र अज्ञात परिणामहरूले PASS स्थापित गर्न सक्दैनन्। एउटा मान्य
 कागजात-मात्र वा क्याटलग-मात्र वर्गीकरणले कोड लेनलाई लागू नहुने बनाउन सक्छ;
-मस्यौदा PR स्वीकृत उम्मेदवार होइन। `hotfix` लेबलले प्रमाणको आवश्यकता हटाउँदैन।
+सामान्य मस्यौदा PR स्वीकृत उम्मेदवार होइन। `hotfix` लेबलले प्रमाणको आवश्यकता हटाउँदैन।
 
 दुवै कार्यप्रवाहले main/release शाखाहरूमा जाने PRहरू, `main` मा हुने push, म्यानुअल dispatch
-र merge-group घटनाहरू समेट्छन्। Push, dispatch र merge-group ले पूर्ण चयन चलाउँछन्। `release/**`
-मा हुने push ले तिनलाई सुरु गर्दैनन् (2026-10-18): प्रत्येक परिवर्तनले पहिले नै आफ्नो PR मा म्याट्रिक्स
-चलाइसकेको हुन्छ र मर्ज गरिएको संयोजन Release-Green को जिम्मेवारी हो (`docs/ops/RUNNER_BOX.md` → होस्टेड लेन)। Fork
+र merge-group घटनाहरू समेट्छन्। Push, dispatch र merge-group ले पूर्ण चयन चलाउँछन्। विश्वसनीय Mergify लामको मस्यौदाले पनि लागू हुने `full-code`/`full-code-e2e` कार्यहरू चलाउँछ; सामान्य PRहरूले तिनलाई छोड्छन्। म्यानुअल मर्ज गर्नुअघि ठ्याक्कै त्यही उम्मेदवारमा पूर्ण dispatch चलाउनुहोस्। `release/**` मा हुने push ले यी कार्यप्रवाह सुरु गर्दैनन्; Release-Green ले मर्ज गरिएको बेसलाई छुट्टै अवलोकन गर्छ (`docs/ops/RUNNER_BOX.md` → होस्टेड लेन)। Fork
 र merge group हरूले अन्यथा self-hosted runner चयन गर्ने कार्यहरूका लागि होस्टेड runner प्रयोग गर्छन्;
 रोलआउटअघि पर्याप्त होस्टेड क्षमता प्रमाणित गर्नुपर्छ।
 
@@ -96,8 +94,7 @@ runtime, source root र data hash विरुद्ध सबै बाह्�
 अनुमति-सूचीमा भएका कार्यान्वयन मेटाडेटा मात्र अभिलेख गर्छ; परीक्षण विवरण, आउटपुट, त्रुटिका मुख्य भाग र पूर्ण
 वातावरणलाई क्रमबद्ध गरिँदैन।
 
-CI र Quality ले JSONL फाइलहरूलाई `unit-progress-ci-<run>-<attempt>-<shard>` र
-`unit-progress-quality-<run>-<attempt>-<shard>` का रूपमा सुरक्षित राख्छन्। कार्यको समयसीमाका कारण पछिको अपलोड रोकिन सक्छ;
+CI ले JSONL फाइलहरू `unit-progress-ci-<run>-<attempt>-<shard>` नाममा राख्छ। कार्यको समयसीमाका कारण पछिको अपलोड रोकिन सक्छ;
 पहिले नै उत्सर्जित हार्टबिटहरू निदानात्मक प्रमाणका रूपमा रहन्छन्। हार्टबिटहरू नहुनुले
 अवरुद्ध वा समाप्त गरिएको रनर प्रक्रियालाई पनि जनाउन सक्छ। यी रसिदहरूले विद्यमान परीक्षण छनोट,
 समवर्तीता, समयसीमा र निकास स्थिति सुरक्षित राख्छन्; यी उम्मेदवार-स्वीकृतिसम्बन्धी निर्णयहरू होइनन्।
@@ -165,8 +162,6 @@ dispatch र merge group हरूमा CI लाई पूरक बनाउ�
 | `Docs Gates (fast-path)`                         | Docs/code PR हरू; API docs सन्दर्भहरू र docs-all                                                                                                                                                                  | हो             |
 | `Fast Quality Gates`                             | Code PR हरू; स्थिर जाँचहरू, typecheck, dashboard typecheck, प्रभावित unit tests                                                                                                                                   | हो             |
 | `Forgotten sibling tests`                        | Code PR हरू; परिवर्तन गरिएका modules बाट static consumers र सम्भावित sibling tests सम्म ट्रेस गरिन्छ; barrel र dynamic-import paths लाई सल्लाहकारी निदानका रूपमा रिपोर्ट गरिन्छ, सन्दर्भित allowlist अपवादहरूसहित | **सल्लाहकारी** |
-| `Vitest (fast-path)`                             | Code PR हरू; द्रुत vitest suite                                                                                                                                                                                   | हो             |
-| `Unit Tests fast-path`                           | Code PR हरू; 4-shard unit suite                                                                                                                                                                                   | हो             |
 | `No new ESLint warnings`                         | Code PR हरू; suppressions-aware lint guard                                                                                                                                                                        | हो, forks सहित |
 | `Merge integrity (changelog + generated skills)` | Non-draft PR हरू; changelog र generated skill sync                                                                                                                                                                | हो, forks सहित |
 

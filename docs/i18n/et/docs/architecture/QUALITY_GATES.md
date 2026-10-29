@@ -24,12 +24,10 @@ CI ja Quality Gates töövood väljastavad kumbki stabiilse otsuse: `Gate / CI` 
 kohustuslike või soovituslikena. Kohaldatav kohustuslik töö peab õnnestuma: puuduv,
 tühistatud, vahele jäetud, ootel või tundmatu tulemus ei saa kinnitada olekut PASS. Kehtiv
 ainult dokumentatsiooni või ainult kataloogi muudatuse klassifikatsioon võib muuta koodiraja mittekohaldatavaks;
-mustand-PR ei ole vastuvõetav kandidaat. Silt `hotfix` ei kõrvalda tõendite nõuet.
+tavaline mustand-PR ei ole vastuvõetav kandidaat. Silt `hotfix` ei kõrvalda tõendite nõuet.
 
 Mõlemad töövood hõlmavad PR-e põhi-/väljalaskeharudesse, tõukeid harusse `main`, käsitsi käivitamist
-ja liitmisrühma sündmusi. Tõuke, käsitsi käivitamise ja liitmisrühma korral tehakse täielik valik. Tõuked
-harudesse `release/**` neid ei käivita (2026-10-18): iga muudatus läbis maatriksi juba oma PR-is
-ja liidetud kombinatsiooni eest vastutab Release-Green (`docs/ops/RUNNER_BOX.md` → majutatud rada). Forkid
+ja liitmisrühma sündmusi. Tõuke, käsitsi käivitamise ja liitmisrühma korral tehakse täielik valik. Usaldusväärne Mergify järjekorra mustand käivitab samuti kohaldatavad `full-code`/`full-code-e2e` tööd; tavalised PR-id jätavad need vahele. Enne käsitsi liitmist käivitage täielik dispatch täpselt selle kandidaadi jaoks. Tõuked harudesse `release/**` neid töövooge ei käivita; Release-Green jälgib liidetud baasi eraldi (`docs/ops/RUNNER_BOX.md` → majutatud rada). Forkid
 ja liitmisrühmad kasutavad majutatud käitajaid tööde jaoks, mis muidu valiksid isemajutatud
 käitajad; enne juurutamist tuleb kontrollida piisava majutatud võimsuse olemasolu.
 
@@ -86,8 +84,7 @@ ning 30-sekundilise intervalliga südamelöök loetleb endiselt aktiivsed failid
 ainult lubatud täitmise metaandmed; testide kirjeldusi, väljundit, vigade sisu ega täielikku
 keskkonda ei serialiseerita.
 
-CI ja Quality säilitavad JSONL-failid nimedega `unit-progress-ci-<run>-<attempt>-<shard>` ja
-`unit-progress-quality-<run>-<attempt>-<shard>`. Töö ajalõpp võib takistada hilisemat üleslaadimist;
+CI säilitab JSONL-failid nimega `unit-progress-ci-<run>-<attempt>-<shard>`. Töö ajalõpp võib takistada hilisemat üleslaadimist;
 juba väljastatud südamelöögid jäävad diagnostiliseks tõendusmaterjaliks. Puuduvad südamelöögid võivad viidata ka
 blokeeritud või lõpetatud käitusprotsessile. Need kviitungid säilitavad olemasoleva testivaliku,
 rööpsuse, tähtajad ja väljumisoleku; need ei ole kandidaatide vastuvõtmise otsused.
@@ -155,8 +152,6 @@ keelatud dubleeriv koostamine eemaldati; tegelikud koostamise, pakendamise ja k�
 | `Docs Gates (fast-path)`                         | Dokumentatsiooni/koodi PR-id; API dokumentatsiooni viited ja kogu dokumentatsioon                                                                                                                               | Jah                      |
 | `Fast Quality Gates`                             | Koodi PR-id; staatilised kontrollid, tüübikontroll, töölaua tüübikontroll, mõjutatud üksustestid                                                                                                                | Jah                      |
 | `Forgotten sibling tests`                        | Koodi PR-id; muudetud moodulite seostamine staatiliste tarbijate ja võimalike sõsar-testidega; koondmoodulite ja dünaamiliste importide teed esitatakse nõuandva diagnostikana koos viidatud lubatud eranditega | **Nõuandev**             |
-| `Vitest (fast-path)`                             | Koodi PR-id; kiire Vitesti testikomplekt                                                                                                                                                                        | Jah                      |
-| `Unit Tests fast-path`                           | Koodi PR-id; neljaks jaotatud üksustestide komplekt                                                                                                                                                             | Jah                      |
 | `No new ESLint warnings`                         | Koodi PR-id; eranditeadlik lintimise kaitsekontroll                                                                                                                                                             | Jah, sealhulgas forkides |
 | `Merge integrity (changelog + generated skills)` | PR-id, mis pole mustandid; muudatuste logi ja genereeritud oskuste sünkroonsus                                                                                                                                  | Jah, sealhulgas forkides |
 

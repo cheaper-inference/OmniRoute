@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "Semua model sudah diimpor",
     "noNewModelsToImport": "Tidak ada model baru untuk diimpor — semua model sudah ada di registri atau daftar model kustom",
     "localCatalogFallbackStatus": "Tidak dapat menjangkau daftar model penyedia — menampilkan katalog bawaan",
+    "discoveryDegradedStatus": "Penemuan model gagal {time}",
     "skippingExistingModels": "Melewatkan {count} model yang sudah ada",
     "autoSync": "Sinkronisasi Otomatis",
     "autoSyncShort": "Sinkronkan",

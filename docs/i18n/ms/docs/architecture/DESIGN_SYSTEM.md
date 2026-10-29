@@ -7,10 +7,7 @@
 > **Status:** papan pemuka ini dibina di atas **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), divendorkan
 > sebagai workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream dipinkan dalam
 > `packages/ui-kit/UPSTREAM.md` dan dijaga oleh `npm run check:ui-kit-snapshot`). Light ialah tema
-> kanonik; keutamaan lalai ialah `system`. Aksennya ialah Keak lime (`--ci-color-accent`). Inter
-> (jarak huruf 0, `--ci-letter-spacing-ui`) ialah famili UI, Instrument Serif hanya untuk teks paparan
-> besar yang jarang (`.ci-dashboard-display`), IBM Plex Mono untuk kod — semuanya dihoskan sendiri melalui
-> import `@fontsource/*` di bahagian atas `src/app/globals.css`. Setiap ikon ialah glif Lucide.
+> kanonik; keutamaan lalai ialah `system`. Aksennya ialah Keak lime (`--ci-color-accent`). Switzer ialah keluarga tunggal untuk UI, paparan dan teks kod (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` menyelesaikannya), dihoskan sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimport oleh `ci-tokens.css`). Setiap ikon ialah glif Lucide.
 
 ## 1. Di mana semuanya berada
 
@@ -93,7 +90,7 @@
 2. Jangan sesekali tampal `packages/ui-kit/src` secara manual: segerakkan dengan `scripts/dev/sync-ui-kit.sh <commit>`; get pra-komit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) akan gagal jika terdapat sebarang bait yang berbeza daripada komit huluan yang telah ditetapkan (ia dilangkau dengan amaran apabila klon huluan, `UI_KIT_CLONE` atau `_references/cheaper-inference-ui-kit`, tiada). Apabila kit tidak menyediakan sesuatu, gunakan penyelesaian alternatif dalam penyesuai atau skrin dan minta penambahbaikan tersebut daripada pihak huluan.
 3. Teks lalai kit adalah dalam bahasa Inggeris (`label = "Loading"`, `loadingLabel = "Loading table"`…) — berikan rentetan terjemahan daripada `useTranslations(...)` apabila komponen kit memaparkan teks.
 4. Utiliti Tailwind mengatasi kelas komponen kit (kit mengisytiharkan `@layer theme, base, components, utilities` dan peraturannya terletak dalam `components`) — gunakan utiliti untuk jarak dan reka letak, bukan untuk mewarnakan semula komponen kit.
-5. Tajuk: `.ci-heading` (Inter, tanpa penjarakan huruf) untuk tajuk halaman dan seksyen; `.ci-dashboard-display` (Instrument Serif) hanya untuk teks paparan yang besar dan jarang digunakan, seperti kod status halaman ralat.
+5. Tajuk: `.ci-heading` untuk tajuk halaman dan bahagian; `.ci-dashboard-display` hanya untuk teks paparan yang besar dan jarang seperti kod status halaman ralat. Kedua-duanya menggunakan Switzerland.
 6. `tests/unit/dashboard-kit-sweep.test.ts` mengawal penggunaan kit: tiada span ligatur Material di bawah `src/app` atau `src/shared/components`; dalam pepohon papan pemuka (`src/app/(dashboard)` dan `src/shared/components`), tiada `<select>`, `<textarea>` atau `<table>` mentah dan tiada `role="dialog"` buatan sendiri di luar pengecualian yang disenaraikan (cabang asli penyesuai `Select`, `RequestLoggerDetail`); setiap `<button>` atau `<input>` mentah di situ memerlukan komen yang mengandungi `kit-exception:` (berserta sebabnya) dan berakhir paling banyak 3 baris di atasnya; rona palet dan varian `dark:` hanya dibenarkan dalam fail yang disenaraikan oleh ujian tersebut.
 7. Sahkan kedua-dua tema dan ruang pandang 390 px sebelum PR (tangkapan skrin); `tests/e2e/a11y.spec.ts` menjalankan axe.
 
@@ -140,7 +137,7 @@ tetapan, kombo, penggunaan dan endpoint dalam kedua-dua tema, jalankan `npm run 
 
 Dua belas rajah yang dibenamkan dalam `README.md` akar (`docs/diagrams/*.svg`) menggunakan kit pada imej statik. Rajah ini dijana, bukan dilukis dengan tangan: 13 fail penjana di `scripts/docs/gen-readme-*.mjs` (dua belas rajah dan pengawal `gen-readme-diagrams.mjs`), serta 12 ujian keusangan di `tests/unit/docs/readme-*-svg.test.ts`, satu bagi setiap rajah. Setiap ujian membandingkan fail yang dikomit dengan output penjananya bait demi bait (tugas `test-unit`).
 
-- **Token.** `scripts/docs/readme-diagram-theme.mjs` menyalin palet daripada `packages/ui-kit/src/ci-tokens.css` (kesepadanan dengan fail itu dikunci oleh `tests/unit/docs/readme-diagram-theme.test.ts`) dan mentakrifkan peranan teks dengan fon kit: Instrument Serif untuk teks paparan, Inter untuk antara muka, IBM Plex Mono untuk angka dan kod. Ini pakej `@fontsource` yang sama yang dimuatkan oleh `src/app/globals.css` bagi papan pemuka. Nilai cerah berada pada `:root` dan nilai gelap di bawah `prefers-color-scheme: dark` dalam fail, supaya setiap imej mengikuti skema pembaca di GitHub.
+- **Token.** `scripts/docs/readme-diagram-theme.mjs` menyalin palet daripada `packages/ui-kit/src/ci-tokens.css` (disematkan pada fail itu oleh `tests/unit/docs/readme-diagram-theme.test.ts`) dan mentakrifkan peranan teks pada muka awal kit — Serif Instrumen untuk paparan, Inter untuk teks UI, IBM Plex Mono untuk angka dan kod — daripada pakej `@fontsource` (papan pemuka itu sendiri menggunakan Switzer kit sejak kit 0.0.66). Nilai cahaya terletak pada `:root`, nilai gelap di belakang `prefers-color-scheme: dark`, di dalam fail, jadi setiap imej mengikut skema penonton pada GitHub.
 
 - **Fon.** `scripts/docs/readme-fonts.mjs` mengehadkan fail woff2 tersebut kepada glif yang dilukis oleh setiap rajah dan membenamkannya melalui `@font-face` sebagai URI `data:`. Dengan itu, fon kit kekal di dalam SVG. Ujian imej README setempat memeriksa bahawa perenderan tidak membuat permintaan fon luaran. Subset hanya mengandungi aksara Latin; glif simbol yang beralih kepada fon sistem sebagai sandaran dibenarkan satu demi satu dalam `SYMBOL_FALLBACKS`. Glif lain yang tidak diliputi mencetuskan ralat.
 

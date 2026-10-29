@@ -7,10 +7,7 @@
 > **Status:** o dashboard é construído com o **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), incorporado
 > como o workspace `packages/ui-kit` (`@omniroute/ui-kit`; o snapshot upstream está fixado em
 > `packages/ui-kit/UPSTREAM.md` e protegido por `npm run check:ui-kit-snapshot`). O tema claro é o canônico;
-> a preferência padrão é `system`. A cor de destaque é o Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) é a família da interface, Instrument Serif apenas para textos
-> de exibição grandes e esparsos (`.ci-dashboard-display`), IBM Plex Mono para código — todas auto-hospedadas por meio dos
-> imports `@fontsource/*` no topo de `src/app/globals.css`. Todos os ícones são glifos Lucide.
+> a preferência padrão é `system`. A cor de destaque é o Keak lime (`--ci-color-accent`). Switzer é a única família para UI, display e texto de código (`--ci-font-ui`; `--ci-font-display` e `--ci-font-mono` resolvem isso), auto-hospedado pelo próprio kit (`packages/ui-kit/src/ci-fonts.css`, importado por `ci-tokens.css`). Cada ícone é um glifo Lucide.
 
 ## 1. Onde as coisas ficam
 
@@ -94,7 +91,7 @@
 2. Nunca altere `packages/ui-kit/src` manualmente: sincronize com `scripts/dev/sync-ui-kit.sh <commit>`; a verificação de pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) falha se qualquer byte diferir do commit upstream fixado (ela é ignorada com um aviso quando o clone upstream, `UI_KIT_CLONE` ou `_references/cheaper-inference-ui-kit`, está ausente). Quando faltar algo no kit, contorne a limitação no adaptador ou na tela e solicite a implementação ao upstream.
 3. Os textos padrão do kit estão em inglês (`label = "Loading"`, `loadingLabel = "Loading table"`…) — passe strings traduzidas de `useTranslations(...)` sempre que um componente do kit renderizar texto.
 4. Os utilitários do Tailwind prevalecem sobre as classes dos componentes do kit (o kit declara `@layer theme, base, components, utilities` e suas regras ficam em `components`) — use utilitários para espaçamento e layout, não para alterar as cores dos componentes do kit.
-5. Títulos: `.ci-heading` (Inter, sem espaçamento entre letras) para títulos de páginas e seções; `.ci-dashboard-display` (Instrument Serif) somente para textos de exibição grandes e esparsos, como o código de status da página de erro.
+5. Cabeçalhos: `.ci-heading` para títulos de páginas e seções; `.ci-dashboard-display` apenas para texto de exibição grande e esparso, como o código de status da página de erro. Ambos usam o Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` garante a adoção do kit: nenhum span de ligatura do Material em `src/app` ou `src/shared/components`; na árvore do dashboard (`src/app/(dashboard)` e `src/shared/components`), nenhum `<select>`, `<textarea>` ou `<table>` puro e nenhum `role="dialog"` implementado manualmente fora das exceções listadas (a ramificação nativa do adaptador `Select`, `RequestLoggerDetail`); cada `<button>` ou `<input>` puro nessa árvore precisa de um comentário contendo `kit-exception:` (com o motivo), terminando no máximo 3 linhas acima dele; matizes da paleta e variantes `dark:` somente nos arquivos listados pelo teste.
 7. Verifique ambos os temas e o viewport de 390 px antes de um PR (capturas de tela); `tests/e2e/a11y.spec.ts` executa o axe.
 
@@ -142,7 +139,7 @@ abra o PR com o changelog do upstream.
 
 Os doze diagramas incorporados no `README.md` da raiz (`docs/diagrams/*.svg`) aplicam o kit a uma imagem estática. São gerados, não desenhados à mão: há 13 arquivos geradores em `scripts/docs/gen-readme-*.mjs` (doze diagramas mais o controlador `gen-readme-diagrams.mjs`) e 12 testes de desatualização em `tests/unit/docs/readme-*-svg.test.ts`, um por diagrama. Cada teste compara, byte a byte, o arquivo commitado com a saída do gerador (job `test-unit`).
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` copia a paleta de `packages/ui-kit/src/ci-tokens.css` (a correspondência com esse arquivo é garantida por `tests/unit/docs/readme-diagram-theme.test.ts`) e define os papéis de texto com as fontes do kit: Instrument Serif para destaque, Inter para texto de interface e IBM Plex Mono para números e código. São os mesmos pacotes `@fontsource` que `src/app/globals.css` carrega para o dashboard. Os valores claros ficam em `:root` e os escuros em `prefers-color-scheme: dark`, dentro do arquivo; assim, cada imagem acompanha o esquema do leitor no GitHub.
+- **Fichas.** `scripts/docs/readme-diagram-theme.mjs` copia a paleta de `packages/ui-kit/src/ci-tokens.css` (fixada nesse arquivo por `tests/unit/docs/readme-diagram-theme.test.ts`) e define as funções de texto nas faces anteriores do kit - Instrument Serif para exibição, Inter para texto UI, IBM Plex Mono para figuras e código - dos pacotes `@fontsource` (o próprio painel usa o Switzer do kit desde o kit 0.0.66). Os valores claros ficam em `:root`, os valores escuros atrás de `prefers-color-scheme: dark`, dentro do arquivo, de modo que cada imagem segue o esquema do visualizador em GitHub.
 
 - **Fontes.** `scripts/docs/readme-fonts.mjs` extrai desses arquivos woff2 subconjuntos com os glifos usados por cada diagrama e os incorpora como URIs `data:` em `@font-face`. Isso mantém as fontes do kit dentro do SVG. O probe local de imagens do README verifica que a renderização não faz solicitações externas de fontes. Os subconjuntos contêm apenas caracteres latinos; os glifos de símbolos que recorrem à pilha de fontes do sistema são permitidos individualmente em `SYMBOL_FALLBACKS`. Qualquer outro glifo sem cobertura gera erro.
 

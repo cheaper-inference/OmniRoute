@@ -60,7 +60,7 @@ test("Codecov uploads only the merged LCOV report and remains bounded/advisory",
 
   assert.ok(upload, "Coverage must keep the informational Codecov step");
   assert.equal(upload.uses, "codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5");
-  assert.equal(upload.if, "always()");
+  assert.equal(upload.if, "${{ always() && github.event_name != 'pull_request' }}");
   assert.equal(upload["timeout-minutes"], 5);
   assert.equal(upload["continue-on-error"], true);
   assert.equal(upload.with?.files, "coverage/lcov.info");

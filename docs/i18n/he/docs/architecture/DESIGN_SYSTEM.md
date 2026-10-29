@@ -7,10 +7,7 @@
 > **סטטוס:** לוח הבקרה בנוי על **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), המוטמע (vendored)
 > כ-workspace בשם `packages/ui-kit` (`@omniroute/ui-kit`; ה-snapshot של ה-upstream מוצמד ב-
 > `packages/ui-kit/UPSTREAM.md` ומוגן באמצעות `npm run check:ui-kit-snapshot`). ערכת הנושא הקנונית
-> היא בהירה (Light); ברירת המחדל של ההעדפה היא `system`. צבע ההדגשה הוא Keak lime (`--ci-color-accent`).
-> הגופן Inter (ריווח אותיות 0, `--ci-letter-spacing-ui`) הוא גופן ממשק המשתמש, Instrument Serif משמש רק
-> לטקסט תצוגה גדול ודליל (`.ci-dashboard-display`), ו-IBM Plex Mono משמש לקוד — כולם מתארחים עצמאית
-> (self-hosted) דרך הייבואים של `@fontsource/*` בראש הקובץ `src/app/globals.css`. כל אייקון הוא גליף של Lucide.
+> היא בהירה (Light); ברירת המחדל של ההעדפה היא `system`. צבע ההדגשה הוא Keak lime (`--ci-color-accent`). Switzer היא המשפחה היחידה עבור UI, תצוגה וטקסט קוד (`--ci-font-ui`; `--ci-font-display` ו- `--ci-font-mono` פותרים את זה), מתארחת בעצמה על ידי הערכה עצמה (`packages/ui-kit/src/ci-fonts.css`, מיובא על ידי `ci-tokens.css`). כל אייקון הוא גליף Lucide.
 
 ## 1. איפה דברים נמצאים
 
@@ -34,7 +31,7 @@
 2. לעולם אין לשנות ידנית את `packages/ui-kit/src`: יש לסנכרן באמצעות `scripts/dev/sync-ui-kit.sh <commit>`; שער ה-pre-commit‏ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) נכשל אם בית כלשהו שונה מה-commit המקובע במקור (הוא מדלג עם אזהרה כאשר עותק המקור, `UI_KIT_CLONE` או `_references/cheaper-inference-ui-kit`, אינו קיים). כאשר חסר משהו בערכה, יש לעקוף זאת במתאם או במסך ולבקש אותו מצוות המקור.
 3. ברירות המחדל לטקסט בערכה הן באנגלית (`label = "Loading"`, `loadingLabel = "Loading table"`…) — יש להעביר מחרוזות מתורגמות מ-`useTranslations(...)` בכל פעם שרכיב ערכה מציג טקסט.
 4. כלי העזר של Tailwind גוברים על מחלקות רכיבי הערכה (הערכה מצהירה על `@layer theme, base, components, utilities` והכללים שלה נמצאים ב-`components`) — יש להשתמש בכלי עזר למרווחים ולפריסה, ולא כדי לשנות את צבעי רכיבי הערכה.
-5. כותרות: `.ci-heading` ‏(Inter, ללא ריווח אותיות) לכותרות עמודים ומקטעים; `.ci-dashboard-display` ‏(Instrument Serif) רק לטקסט תצוגה גדול ודליל, כגון קוד הסטטוס בעמוד השגיאה.
+5. כותרות: `.ci-heading` לכותרות עמודים ומדורים; `.ci-dashboard-display` רק עבור טקסט תצוגה גדול ודליל כגון קוד המצב של דף השגיאה. שניהם משתמשים ב-Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` מגן על אימוץ הערכה: אין span של ליגטורות Material תחת `src/app` או `src/shared/components`; בעץ לוח המחוונים (`src/app/(dashboard)` ו-`src/shared/components`) אין `<select>`,‏ `<textarea>` או `<table>` גולמיים, ואין `role="dialog"` שנבנה ידנית מחוץ לחריגים הרשומים (הענף המקורי של מתאם `Select`,‏ `RequestLoggerDetail`); לכל `<button>` או `<input>` גולמי שם נדרשת הערה המכילה `kit-exception:` (עם הסיבה), שמסתיימת לכל היותר 3 שורות מעליו; גוני פלטה וגרסאות `dark:` מותרים רק בקבצים שהבדיקה מפרטת.
 7. יש לאמת את שתי ערכות הנושא ואת אזור התצוגה ברוחב 390 פיקסלים לפני PR (צילומי מסך); `tests/e2e/a11y.spec.ts` מריץ את axe.
 
@@ -64,7 +61,7 @@
 
 שנים־עשר התרשימים המוטמעים ב־`README.md` שבשורש (`docs/diagrams/*.svg`) מיישמים את הערכה בתמונות סטטיות. הם נוצרים באמצעות מחוללים, ואינם מצוירים ביד: 13 קובצי מחוללים תחת `scripts/docs/gen-readme-*.mjs` (שנים־עשר תרשימים ותוכנית ההפעלה `gen-readme-diagrams.mjs`), ו־12 בדיקות התיישנות תחת `tests/unit/docs/readme-*-svg.test.ts`, אחת לכל תרשים. כל בדיקה משווה בית אחר בית את הקובץ שב־commit לפלט המחולל שלו (המשימה `test-unit`).
 
-- **טוקנים.** `scripts/docs/readme-diagram-theme.mjs` מעתיק את פלטת הצבעים מ־`packages/ui-kit/src/ci-tokens.css` (ההתאמה לקובץ הזה מעוגנת באמצעות `tests/unit/docs/readme-diagram-theme.test.ts`) ומגדיר את תפקידי הטקסט בגופני הערכה: Instrument Serif לטקסט תצוגה מודגש, Inter לטקסט ממשק ו־IBM Plex Mono למספרים ולקוד. אלה אותן חבילות `@fontsource` ש־`src/app/globals.css` טוען עבור לוח הבקרה. הערכים הבהירים נמצאים ב־`:root` והכהים תחת התנאי `prefers-color-scheme: dark` בתוך הקובץ, כך שכל תמונה עוקבת אחר ערכת הצבעים של הקורא ב־GitHub.
+- **אסימונים.** `scripts/docs/readme-diagram-theme.mjs` מעתיקה את הפלטה מ- `packages/ui-kit/src/ci-tokens.css` (מוצמדת לקובץ על-ידי `tests/unit/docs/readme-diagram-theme.test.ts`) ומגדירה את תפקידי הטקסט על הפנים המוקדמות של הערכה - Instrument Serif לתצוגה, Inter לטקסט UI, IBM Plex Mono לדמויות וקוד - מחבילות `@fontsource` (לוח המחוונים עצמו משתמש ב-Switzer של הערכה מאז ערכה 0.0.66). ערכי אור יושבים על `:root`, ערכים כהים מאחורי `prefers-color-scheme: dark`, בתוך הקובץ, כך שכל תמונה עוקבת אחר סכימת הצופה ב- GitHub.
 
 - **גופנים.** `scripts/docs/readme-fonts.mjs` מצמצם את קובצי ה־woff2 האלה לגליפים שכל תרשים מצייר, ומטמיע אותם באמצעות `@font-face` ככתובות URI מסוג `data:`. כך גופני הערכה נשארים בתוך ה־SVG. בדיקת תמונות README המקומית בודקת שהרינדור אינו שולח בקשות לגופנים חיצוניים. תתי־הקבוצות כוללות תווים לטיניים בלבד; גליפים של סמלים שנעזרים בגופני המערכת כחלופה מותרים אחד־אחד ב־`SYMBOL_FALLBACKS`. כל גליף אחר שאינו מכוסה גורם לשגיאה.
 

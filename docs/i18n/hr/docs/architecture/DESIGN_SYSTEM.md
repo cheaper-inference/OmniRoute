@@ -7,10 +7,7 @@
 > **Status:** nadzorna ploča izgrađena je na **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
 > kao workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream snimka fiksirana je u
 > `packages/ui-kit/UPSTREAM.md` i zaštićena naredbom `npm run check:ui-kit-snapshot`). Svijetla tema je kanonska;
-> zadana preferencija je `system`. Akcentna boja je Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) je obitelj fontova korisničkog sučelja, Instrument Serif samo za veliki
-> prozračan prikazni tekst (`.ci-dashboard-display`), IBM Plex Mono za kod — svi su samostalno hostirani putem
-> `@fontsource/*` uvoza na vrhu datoteke `src/app/globals.css`. Svaka ikona je Lucide glif.
+> zadana preferencija je `system`. Akcentna boja je Keak lime (`--ci-color-accent`). Switzer je jedinstvena obitelj za UI, prikaz i tekst koda (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` rješavaju to), koju sam hostira sam kit (`packages/ui-kit/src/ci-fonts.css`, uvozi `ci-tokens.css`). Svaka ikona je Lucide glif.
 
 ## 1. Gdje se što nalazi
 
@@ -102,8 +99,7 @@
 4. Tailwind pomoćne klase imaju prednost pred klasama komponenti kompleta (komplet deklarira
    `@layer theme, base, components, utilities`, a njegova se pravila nalaze u sloju `components`) — koristite pomoćne klase za
    razmake i raspored, a ne za promjenu boja komponenti kompleta.
-5. Naslovi: `.ci-heading` (Inter, bez razmaka među slovima) za naslove stranica i odjeljaka; `.ci-dashboard-display`
-   (Instrument Serif) samo za velik, rijetko raspoređen prikazni tekst, poput statusnog koda na stranici pogreške.
+5. Naslovi: `.ci-heading` za naslove stranica i odjeljaka; `.ci-dashboard-display` samo za veliki, rijetki prikazni tekst kao što je kod statusa stranice pogreške. Oba koriste Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` nadzire usvajanje kompleta: nema Material raspona ligatura unutar
    `src/app` ili `src/shared/components`; u stablu nadzorne ploče (`src/app/(dashboard)` i
    `src/shared/components`) nema neobrađenih elemenata `<select>`, `<textarea>` ili `<table>` ni ručno izrađenog
@@ -158,7 +154,7 @@ postavke, kombinacije, korištenje i krajnju točku u obje teme, pokrenite `npm 
 
 Dvanaest dijagrama ugrađenih u korijenski `README.md` (`docs/diagrams/*.svg`) primjenjuje komplet na statične slike. Generirani su, a ne ručno nacrtani: 13 generatorskih datoteka u `scripts/docs/gen-readme-*.mjs` (dvanaest dijagrama i upravljački program `gen-readme-diagrams.mjs`) te 12 testova zastarjelosti u `tests/unit/docs/readme-*-svg.test.ts`, po jedan za svaki dijagram. Svaki test uspoređuje datoteku spremljenu u commitu s izlazom generatora bajt po bajt (posao `test-unit`).
 
-- **Tokeni.** `scripts/docs/readme-diagram-theme.mjs` kopira paletu iz `packages/ui-kit/src/ci-tokens.css` (usklađenost s tom datotekom osigurava `tests/unit/docs/readme-diagram-theme.test.ts`) i određuje uloge teksta fontovima kompleta: Instrument Serif za istaknuti tekst, Inter za tekst sučelja i IBM Plex Mono za brojke i kod. To su isti paketi `@fontsource` koje `src/app/globals.css` učitava za nadzornu ploču. Svijetle vrijednosti su u `:root`, a tamne iza uvjeta `prefers-color-scheme: dark` unutar datoteke, pa svaka slika prati shemu čitatelja na GitHubu.
+- **Tokeni.** `scripts/docs/readme-diagram-theme.mjs` kopira paletu iz `packages/ui-kit/src/ci-tokens.css` (koju je uz tu datoteku prikvačio `tests/unit/docs/readme-diagram-theme.test.ts`) i definira uloge teksta na ranijim licima kompleta — Instrument Serif za prikaz, Inter za UI tekst, IBM Plex Mono za brojke i kod — iz `@fontsource` paketa (sama nadzorna ploča koristi Switzer kompleta od kompleta 0.0.66). Svijetle vrijednosti nalaze se na `:root`, tamne vrijednosti iza `prefers-color-scheme: dark`, unutar datoteke, tako da svaka slika slijedi shemu gledatelja na GitHub.
 
 - **Fontovi.** `scripts/docs/readme-fonts.mjs` sužava te woff2 datoteke na glifove koje crta pojedini dijagram i ugrađuje ih putem `@font-face` kao URI-je `data:`. Time fontovi kompleta ostaju unutar SVG-a. Lokalna provjera slika README provjerava da renderiranje ne šalje vanjske zahtjeve za fontovima. Podskupovi sadrže samo latinične znakove; glifovi simbola koji koriste sistemske fontove kao zamjenu dopuštaju se pojedinačno u `SYMBOL_FALLBACKS`. Svaki drugi nepokriveni glif izaziva pogrešku.
 

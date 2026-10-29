@@ -24,12 +24,10 @@ Workflow របស់ CI និង Quality Gates នីមួយៗបញ្ច�
 ថាជា required ឬ advisory។ job required ដែលអនុវត្តបានត្រូវតែជោគជ័យ៖ លទ្ធផលដែលបាត់
 ត្រូវបានលុបចោល ត្រូវបានរំលង កំពុងរង់ចាំ និងមិនស្គាល់ មិនអាចបញ្ជាក់ PASS បានទេ។ ការចាត់ថ្នាក់
 docs-only ឬ catalog-only ដែលមានសុពលភាព អាចធ្វើឱ្យ code lane មួយមិនអាចអនុវត្តបាន;
-PR ដែលជា draft មិនមែនជាបេក្ខភាពដែលត្រូវបានទទួលយកទេ។ ស្លាក `hotfix` មិនលើកលែងតម្រូវការភស្តុតាងទេ។
+PR ធម្មតាដែលជា draft មិនមែនជាបេក្ខភាពដែលត្រូវបានទទួលយកទេ។ ស្លាក `hotfix` មិនលើកលែងតម្រូវការភស្តុតាងទេ។
 
 Workflow ទាំងពីរគ្របដណ្ដប់លើ PR ដែលចូលទៅក្នុង branch main/release, push ទៅកាន់ `main`, manual dispatch
-និងព្រឹត្តិការណ៍ merge-group។ Push, dispatch និង merge-group ដំណើរការជម្រើសពេញលេញ។ Push ទៅកាន់
-`release/**` មិនចាប់ផ្ដើមពួកវាទេ (2026-10-18)៖ រាល់ការផ្លាស់ប្ដូរបានដំណើរការ matrix លើ PR របស់វារួចហើយ
-ហើយការរួមបញ្ចូលដែលបាន merge គឺជាការងាររបស់ Release-Green (`docs/ops/RUNNER_BOX.md` → Hosted lane)។ Fork
+និងព្រឹត្តិការណ៍ merge-group។ Push, dispatch និង merge-group ដំណើរការជម្រើសពេញលេញ។ draft ដែលទុកចិត្តបានក្នុងជួរ Mergify ក៏ដំណើរការ job `full-code`/`full-code-e2e` ដែលអនុវត្តបានដែរ; PR ធម្មតារំលង job ទាំងនោះ។ មុនពេល merge ដោយដៃ សូមដំណើរការ dispatch ពេញលេញលើបេក្ខភាពជាក់លាក់នោះ។ Push ទៅកាន់ `release/**` មិនចាប់ផ្ដើម workflow ទាំងនេះទេ; Release-Green តាមដាន base ដែលបាន merge ដោយឡែក (`docs/ops/RUNNER_BOX.md` → Hosted lane)។ Fork
 និង merge group ប្រើ hosted runner សម្រាប់ job ដែលបើមិនដូច្នោះទេនឹងជ្រើសរើស self-hosted
 runner; ត្រូវតែផ្ទៀងផ្ទាត់ថាមានសមត្ថភាព hosted គ្រប់គ្រាន់ មុនពេលដាក់ឱ្យប្រើប្រាស់។
 
@@ -96,8 +94,7 @@ SHA របស់បេក្ខភាព, runtime, source root និង data ha
 តែទិន្នន័យមេតានៃការប្រតិបត្តិដែលស្ថិតក្នុងបញ្ជីអនុញ្ញាតប៉ុណ្ណោះ។ សេចក្តីពិពណ៌នាអំពីតេស្ត លទ្ធផល បណ្តុំកំហុស និង
 បរិស្ថានទាំងមូល មិនត្រូវបានធ្វើសៀរៀលកម្មទេ។
 
-CI និង Quality រក្សាទុកឯកសារ JSONL ជា `unit-progress-ci-<run>-<attempt>-<shard>` និង
-`unit-progress-quality-<run>-<attempt>-<shard>`។ ការអស់ពេលកំណត់របស់ការងារអាចរារាំងការផ្ទុកឡើងនៅពេលក្រោយ។
+CI រក្សាទុកឯកសារ JSONL ក្រោមឈ្មោះ `unit-progress-ci-<run>-<attempt>-<shard>`។ ការអស់ពេលកំណត់របស់ការងារអាចរារាំងការផ្ទុកឡើងនៅពេលក្រោយ។
 សញ្ញាបេះដូងដែលបានបញ្ចេញរួចហើយ នៅតែជាភស្តុតាងសម្រាប់ការធ្វើរោគវិនិច្ឆ័យ។ ការបាត់សញ្ញាបេះដូងក៏អាចបង្ហាញថា
 ដំណើរការរបស់ runner ត្រូវបានរាំងខ្ទប់ ឬបញ្ចប់ផងដែរ។ បង្កាន់ដៃទាំងនេះរក្សាទុកការជ្រើសរើសតេស្ត
 ភាពស្របគ្នានៃការប្រតិបត្តិ ពេលកំណត់ និងស្ថានភាពចាកចេញដែលមានស្រាប់។ វាមិនមែនជាសេចក្តីសម្រេចអំពីការទទួលយកបេក្ខភាពទេ។
@@ -165,8 +162,6 @@ dispatch និងក្រុម merge។ PR ប្រើការត្រួ�
 | `Docs Gates (fast-path)`                         | PR ឯកសារ/កូដ; ឯកសារយោង API និង docs-all                                                                                                                                                                                    | បាទ                |
 | `Fast Quality Gates`                             | PR កូដ; ការត្រួតពិនិត្យ static, typecheck, dashboard typecheck និង unit test ដែលរងផលប៉ះពាល់                                                                                                                                | បាទ                |
 | `Forgotten sibling tests`                        | PR កូដ; modules ដែលបានផ្លាស់ប្តូរត្រូវបានតាមដានទៅកាន់ static consumers និង candidate sibling tests; paths នៃ barrel និង dynamic-import ត្រូវបានរាយការណ៍ជាវិនិច្ឆ័យផ្តល់ដំបូន្មាន ដោយមានករណីលើកលែងក្នុង allowlist ដែលបានយោង | **ផ្តល់ដំបូន្មាន** |
-| `Vitest (fast-path)`                             | PR កូដ; សំណុំតេស្ត vitest រហ័ស                                                                                                                                                                                             | បាទ                |
-| `Unit Tests fast-path`                           | PR កូដ; សំណុំ unit test ដែលមាន 4-shard                                                                                                                                                                                     | បាទ                |
 | `No new ESLint warnings`                         | PR កូដ; lint guard ដែលយល់ដឹងអំពីការទប់ស្កាត់                                                                                                                                                                               | បាទ រួមទាំង forks  |
 | `Merge integrity (changelog + generated skills)` | PR ដែលមិនមែនជា draft; ការធ្វើសមកាលកម្ម changelog និង skills ដែលបានបង្កើត                                                                                                                                                   | បាទ រួមទាំង forks  |
 

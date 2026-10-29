@@ -25,15 +25,12 @@ CI va Quality Gates ish jarayonlarining har biri barqaror yakuniy xulosa chiqara
 majburiy yoki tavsiyaviy sifatida roʻyxatlaydi. Qoʻllaniladigan majburiy vazifa muvaffaqiyatli
 yakunlanishi kerak: mavjud boʻlmagan, bekor qilingan, oʻtkazib yuborilgan, kutilayotgan va nomaʼlum
 natijalar PASS holatini tasdiqlay olmaydi. Faqat hujjatlar yoki faqat katalogga tegishli haqiqiy
-tasnif kod yoʻnalishini qoʻllanilmaydigan qilishi mumkin; qoralama PR qabul qilingan nomzod
+tasnif kod yoʻnalishini qoʻllanilmaydigan qilishi mumkin; oddiy qoralama PR qabul qilingan nomzod
 hisoblanmaydi. `hotfix` yorligʻi dalillar talabini bekor qilmaydi.
 
 Har ikkala ish jarayoni ham main/release shoxlariga yoʻnaltirilgan PRlarni, `main` shoxiga
 pushlarni, qoʻlda ishga tushirishni va merge-group hodisalarini qamrab oladi. Push, qoʻlda ishga
-tushirish va merge-group toʻliq tanlovni bajaradi. `release/**` shoxlariga pushlar ularni ishga
-tushirmaydi (2026-10-18): har bir oʻzgarish allaqachon oʻz PRida matritsadan oʻtgan boʻladi,
-birlashtirilgan kombinatsiyani tekshirish esa Release-Green vazifasidir
-(`docs/ops/RUNNER_BOX.md` → Hosted lane). Forklar va merge-grouplar boshqa holatlarda
+tushirish va merge-group toʻliq tanlovni bajaradi. Mergify navbatining ishonchli qoralamasi ham qoʻllaniladigan `full-code`/`full-code-e2e` vazifalarini bajaradi; oddiy PRlar ularni oʻtkazib yuboradi. Qoʻlda birlashtirishdan oldin aynan shu nomzod ustida toʻliq dispatch ishga tushiring. `release/**` shoxlariga pushlar bu ish jarayonlarini boshlamaydi; Release-Green birlashtirilgan bazani alohida kuzatadi (`docs/ops/RUNNER_BOX.md` → Hosted lane). Forklar va merge-grouplar boshqa holatlarda
 self-hosted runnerlarni tanlaydigan vazifalar uchun hosted runnerlardan foydalanadi; joriy
 etishdan oldin yetarli hosted sigʻim mavjudligi tekshirilishi kerak.
 
@@ -94,8 +91,7 @@ qayd etadi, 30 soniyalik yurak urishi signali esa hali ham faol fayllar va ularn
 faqat ruxsat etilgan bajarilish metamaʼlumotlari qayd etiladi; test tavsiflari, chiqish maʼlumotlari, xatolik tafsilotlari va toʻliq
 muhit serializatsiya qilinmaydi.
 
-CI va Quality JSONL fayllarini `unit-progress-ci-<run>-<attempt>-<shard>` va
-`unit-progress-quality-<run>-<attempt>-<shard>` sifatida saqlaydi. Vazifa vaqtining tugashi keyingi yuklashga toʻsqinlik qilishi mumkin;
+CI JSONL fayllarini `unit-progress-ci-<run>-<attempt>-<shard>` nomi bilan saqlaydi. Vazifa vaqtining tugashi keyingi yuklashga toʻsqinlik qilishi mumkin;
 allaqachon yuborilgan yurak urishi signallari diagnostik dalil boʻlib qoladi. Yurak urishi signallarining yoʻqligi
 bloklangan yoki toʻxtatilgan runner jarayonini ham anglatishi mumkin. Bu qaydlar mavjud test tanlovi,
 parallellik, muddatlar va chiqish holatini saqlab qoladi; ular nomzodni qabul qilish haqidagi hukmlar emas.
@@ -153,8 +149,6 @@ oʻchirib qoʻyilgan takroriy build olib tashlandi; haqiqiy build/package/boot t
 | `Docs Gates (fast-path)`                         | Hujjatlar/kod PRlari; API hujjatlari havolalari va docs-all                                                                                                                                                                                                          | Ha                     |
 | `Fast Quality Gates`                             | Kod PRlari; statik tekshiruvlar, typecheck, dashboard typecheck, taʼsirlangan unit testlar                                                                                                                                                                           | Ha                     |
 | `Forgotten sibling tests`                        | Kod PRlari; oʻzgartirilgan modullar statik isteʼmolchilar va ehtimoliy sibling testlargacha kuzatiladi; barrel va dynamic-import yoʻllari tavsiyaviy diagnostika sifatida hisobot qilinadi, bunda havola qilingan ruxsat etilgan roʻyxat istisnolari hisobga olinadi | **Tavsiyaviy**         |
-| `Vitest (fast-path)`                             | Kod PRlari; tezkor vitest toʻplami                                                                                                                                                                                                                                   | Ha                     |
-| `Unit Tests fast-path`                           | Kod PRlari; 4-shard unit toʻplami                                                                                                                                                                                                                                    | Ha                     |
 | `No new ESLint warnings`                         | Kod PRlari; suppressions hisobga olinadigan lint himoyasi                                                                                                                                                                                                            | Ha, forklar ham kiradi |
 | `Merge integrity (changelog + generated skills)` | Draft boʻlmagan PRlar; changelog va generatsiya qilingan skill sinxronizatsiyasi                                                                                                                                                                                     | Ha, forklar ham kiradi |
 

@@ -35,9 +35,9 @@ test("a failed refresh is reported through the logger instead of being swallowed
   assert.equal(warnings.length, 1, "a failed refresh must emit exactly one warning");
   assert.match(warnings[0], /codex/i);
   assert.match(warnings[0], /registry blocked/);
-  assert.match(
-    warnings[0],
-    new RegExp(codexClient.DEFAULT_CODEX_CLIENT_VERSION.replace(/\./g, "\\."))
+  assert.ok(
+    warnings[0].includes(codexClient.DEFAULT_CODEX_CLIENT_VERSION),
+    "the warning must name the fallback version"
   );
 });
 

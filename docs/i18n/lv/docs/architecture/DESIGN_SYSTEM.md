@@ -5,9 +5,7 @@
 ---
 
 > **Statuss:** panelis ir veidots uz **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) bāzes, kas iekļauts krātuvē (vendored) kā darbvietas `packages/ui-kit` (`@omniroute/ui-kit`; upstream momentuzņēmums ir nofiksēts
-> `packages/ui-kit/UPSTREAM.md` un to uzrauga `npm run check:ui-kit-snapshot`). Kanoniskā tēma ir gaišā (Light); noklusējuma iestatījums ir `system`. Akcenta krāsa ir Keak laima zaļā (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) ir UI fontu saime, Instrument Serif tiek lietots tikai lieliem, retiem attēlošanas tekstiem (`.ci-dashboard-display`), IBM Plex Mono — kodam; visi fonti ir pašmitēti, izmantojot
-> `@fontsource/*` importus `src/app/globals.css` faila sākumā. Katra ikona ir Lucide glifs.
+> `packages/ui-kit/UPSTREAM.md` un to uzrauga `npm run check:ui-kit-snapshot`). Kanoniskā tēma ir gaišā (Light); noklusējuma iestatījums ir `system`. Akcenta krāsa ir Keak laima zaļā (`--ci-color-accent`). Switzer ir viena saime UI, displeja un koda tekstam (`--ci-font-ui`; `--ci-font-display` un `--ci-font-mono` to atrisina), ko pats mitina pats komplekts (`packages/ui-kit/src/ci-fonts.css`, importēts `ci-tokens.css`). Katra ikona ir Lucide glifs.
 
 ## 1. Kur kas atrodas
 
@@ -94,8 +92,7 @@ gen:icon-map` izdrukā lietotos nosaukumus, kuru kartē nav (`tests/unit/icon-ma
 4. Tailwind utilītklases ir prioritārākas par komplekta komponentu klasēm (komplekts deklarē
    `@layer theme, base, components, utilities`, un tā kārtulas atrodas slānī `components`) — izmantojiet utilītklases
    atstarpēm un izkārtojumam, nevis komplekta komponentu krāsu maiņai.
-5. Virsraksti: `.ci-heading` (Inter, bez burtu retinājuma) lapu un sadaļu virsrakstiem; `.ci-dashboard-display`
-   (Instrument Serif) tikai lielam, reti izmantotam displeja tekstam, piemēram, kļūdas lapas statusa kodam.
+5. Virsraksti: `.ci-heading` lapu un sadaļu nosaukumiem; `.ci-dashboard-display` tikai lielam, retam displeja tekstam, piemēram, kļūdas lapas statusa kodam. Abi izmanto Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` uzrauga komplekta ieviešanu: nedrīkst būt Material ligatūru `span` zem
    `src/app` vai `src/shared/components`; informācijas paneļa kokā (`src/app/(dashboard)` un
    `src/shared/components`) nedrīkst būt neapstrādātu `<select>`, `<textarea>` vai `<table>`, kā arī pašrocīgi veidotu
@@ -141,7 +138,7 @@ gen:icon-map` izdrukā lietotos nosaukumus, kuru kartē nav (`tests/unit/icon-ma
 
 Divpadsmit diagrammas, kas iekļautas saknes `README.md` (`docs/diagrams/*.svg`), pielieto komplektu statiskiem attēliem. Tās tiek ģenerētas, nevis zīmētas ar roku: `scripts/docs/gen-readme-*.mjs` ir 13 ģeneratoru faili (divpadsmit diagrammas un vadītājs `gen-readme-diagrams.mjs`), bet `tests/unit/docs/readme-*-svg.test.ts` ir 12 novecošanas testi, pa vienam katrai diagrammai. Katrs tests pa baitam salīdzina komitā saglabāto failu ar ģeneratora izvadi (darbs `test-unit`).
 
-- **Tokeni.** `scripts/docs/readme-diagram-theme.mjs` kopē paleti no `packages/ui-kit/src/ci-tokens.css` (atbilstību šim failam nodrošina `tests/unit/docs/readme-diagram-theme.test.ts`) un nosaka teksta lomas ar komplekta fontiem: Instrument Serif izceltam tekstam, Inter saskarnes tekstam, IBM Plex Mono skaitļiem un kodam. Tās ir tās pašas `@fontsource` pakotnes, kuras `src/app/globals.css` ielādē panelim. Gaišās vērtības atrodas faila `:root` daļā, tumšās – aiz `prefers-color-scheme: dark` nosacījuma, tāpēc katrs attēls seko GitHub lasītāja krāsu shēmai.
+- **Žetoni.** `scripts/docs/readme-diagram-theme.mjs` kopē paleti no `packages/ui-kit/src/ci-tokens.css` (piesprausta šim failam, izmantojot `tests/unit/docs/readme-diagram-theme.test.ts`) un definē teksta lomas komplekta iepriekšējās virsmās — Instrument Serif displejam, Inter UI tekstam, IBM Plex Mono skaitļiem un kodam — no `@fontsource` pakotnēm (pats informācijas panelis izmanto komplekta Switzer fontu kopš komplekta versijas 0.0.66). Gaismas vērtības atrodas faila iekšpusē uz `:root`, tumšās vērtības aiz `prefers-color-scheme: dark`, tāpēc katrs attēls atbilst skatītāja shēmai uz GitHub.
 
 - **Fonti.** `scripts/docs/readme-fonts.mjs` samazina šos woff2 failus līdz katras diagrammas izmantotajiem glifiem un iegulst tos ar `@font-face` kā `data:` URI. Tādējādi komplekta fonti paliek SVG iekšienē. Vietējā README attēlu pārbaude pārliecinās, ka renderēšana neveic ārējus fontu pieprasījumus. Apakškopās ir tikai latīņu rakstzīmes; simbolu glifi, kuri izmanto sistēmas fontus kā rezerves variantu, tiek atļauti atsevišķi `SYMBOL_FALLBACKS` sarakstā. Jebkurš cits neaptverts glifs izraisa kļūdu.
 

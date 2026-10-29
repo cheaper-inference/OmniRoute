@@ -22,10 +22,20 @@ export interface WizardProps {
   loadingIntro?: boolean;
   error?: string;
   onBack: () => void;
+  /** Show Back. Disable when earlier setup can no longer change, such as after payment. Defaults to true. */
+  allowBack?: boolean;
   onNext: () => void;
-  onSkip: () => void;
-  onExit: () => void;
+  onSkip?: () => void;
+  /** Show the skip action when a handler is provided. Disable for required steps. Defaults to true. */
+  allowSkip?: boolean;
+  onExit?: () => void;
+  /** Show save-and-exit when a handler is provided. Defaults to true. The app owns route guards. */
+  allowExit?: boolean;
   nextLabel?: string;
+  /** Hide Next while an external action is required; errors remain visible. Defaults to true. */
+  showNext?: boolean;
+  /** Compact progress keeps the current step/count without the full step list. */
+  progressDisplay?: "steps" | "compact";
   /** Incomplete steps stay focusable so activation can explain what is missing. */
   nextBlocked?: boolean;
   onNextBlocked?: () => void;
@@ -54,10 +64,15 @@ export function Wizard({
   loadingIntro = false,
   error,
   onBack,
+  allowBack = true,
   onNext,
   onSkip,
+  allowSkip = true,
   onExit,
+  allowExit = true,
   nextLabel,
+  showNext = true,
+  progressDisplay = "steps",
   nextBlocked,
   onNextBlocked,
   onStepSelect,
@@ -85,22 +100,22 @@ export function Wizard({
       <CardContent className="ci-wizard__content">
         <div className="ci-wizard__top">
           <span>
-            Step {activeStep + 1} of {steps.length}
+            Step {activeStep + 1} of {steps.length}{progressDisplay === "compact" && <> · {steps[activeStep]?.title}</>}
           </span>
-          {variant === "onboarding" ? <Tooltip><TooltipTrigger asChild>
+          {allowExit && onExit && (variant === "onboarding" ? <Tooltip><TooltipTrigger asChild>
             <Button variant="ghost" size="icon-sm" disabled={unavailable} onClick={onExit} aria-label="Save and close"><X aria-hidden /></Button>
           </TooltipTrigger><TooltipContent side="bottom" align="end">Save and close</TooltipContent></Tooltip> : <Button variant="ghost" disabled={unavailable} onClick={onExit}>
             <LogOut aria-hidden />
             Save and exit
-          </Button>}
+          </Button>)}
         </div>
-        <ol aria-label="Setup progress" className="ci-wizard__steps">
+        {progressDisplay === "steps" && <ol aria-label="Setup progress" className="ci-wizard__steps">
           {steps.map((s, i) => (
             <li key={s.id} aria-current={i === activeStep ? "step" : undefined} data-complete={completedSteps.includes(s.id) || undefined}>
               {(i < activeStep || stepNavigation === "all") && onStepSelect ? (
                 <button
                   type="button"
-                  className="ci-wizard__step-link"
+                  className="ci-wizard__step-link ci-wizard__step-content"
                   disabled={unavailable}
                   onClick={() => onStepSelect(i)}
                 >
@@ -109,13 +124,13 @@ export function Wizard({
                   {completedSteps.includes(s.id) && <span className="ci-sr-only">, completed</span>}
                 </button>
               ) : (
-                <>
+                <span className="ci-wizard__step-content">
                   <span className="ci-wizard__number" aria-hidden>{completedSteps.includes(s.id) && i !== activeStep ? <Check /> : i + 1}</span> {s.icon} <StepTitle step={s} />
-                </>
+                </span>
               )}
             </li>
           ))}
-        </ol>
+        </ol>}
         <div className="ci-wizard__viewport" data-loading={loading || undefined}>
         <div ref={scrollArea} className="ci-wizard__scroll" inert={loading || undefined} aria-hidden={loading || undefined}>
         <h1 ref={heading} tabIndex={-1} id={id} className="ci-wizard__title">
@@ -134,26 +149,26 @@ export function Wizard({
           <BrandLoader variant={loadingVariant ?? (variant === "onboarding" ? "pulse" : "axis")} intro={loadingIntro} size={280} label={loadingLabel} />
         </div>}
         </div>
-        <footer className="ci-wizard__footer">
+        {(showNext || allowBack || (allowSkip && onSkip) || error) && <footer className="ci-wizard__footer">
           {error && (
             <p className="ci-wizard__error" role="alert">
               {error}
             </p>
           )}
-          <div className="ci-wizard__actions">
-            <Button
+          {(showNext || allowBack || (allowSkip && onSkip)) && <div className="ci-wizard__actions">
+            {allowBack && <Button
               variant="outline"
               onClick={onBack}
               disabled={unavailable || activeStep === 0}
             >
               <ArrowLeft aria-hidden />
               Back
-            </Button>
+            </Button>}
             <div>
-              <Button variant="ghost" onClick={onSkip} disabled={unavailable}>
+              {allowSkip && onSkip && <Button variant="ghost" onClick={onSkip} disabled={unavailable}>
                 Skip for now
-              </Button>
-              <Button
+              </Button>}
+              {showNext && <Button
                 onClick={nextBlocked ? onNextBlocked : onNext}
                 disabled={unavailable}
                 aria-disabled={nextBlocked || undefined}
@@ -161,10 +176,10 @@ export function Wizard({
               >
                 {unavailable ? "Saving…" : nextLabel || "Continue"}
                 <ArrowRight aria-hidden />
-              </Button>
+              </Button>}
             </div>
-          </div>
-        </footer>
+          </div>}
+        </footer>}
       </CardContent>
     </Card>
   );

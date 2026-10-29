@@ -24,13 +24,11 @@ Los workflows CI y Quality emiten cada uno un veredicto estable: `Gate / CI` y
 como obligatorio o consultivo. Un job obligatorio aplicable debe completarse correctamente:
 los resultados ausentes, cancelados, omitidos, pendientes y desconocidos no pueden establecer
 PASS. Una clasificación válida que solo incluya documentación o catálogo puede hacer que un
-carril de código no sea aplicable; un PR en borrador no es un candidato aceptado. Una etiqueta
+carril de código no sea aplicable; un PR común en borrador no es un candidato aceptado. Una etiqueta
 `hotfix` no exime de aportar evidencias.
 
 Ambos workflows abarcan los PR dirigidos a las ramas main/release, los pushes a `main`, la ejecución manual
-y los eventos de merge group. Los pushes, las ejecuciones manuales y los merge groups ejecutan la selección completa. Los pushes a
-`release/**` no los inician (2026-10-18): cada cambio ya ejecutó la matriz en su PR
-y la combinación fusionada es responsabilidad de Release-Green (`docs/ops/RUNNER_BOX.md` → Carril alojado). Los forks
+y los eventos de merge group. Los pushes, las ejecuciones manuales y los merge groups ejecutan la selección completa. Un borrador confiable de la cola de Mergify también ejecuta los jobs aplicables `full-code`/`full-code-e2e`; los PR comunes los omiten. Antes de una fusión manual, inicia una ejecución completa mediante dispatch sobre el candidato exacto. Los pushes a `release/**` no inician estos workflows; Release-Green observa la base fusionada por separado (`docs/ops/RUNNER_BOX.md` → Carril alojado). Los forks
 y los merge groups utilizan runners alojados para los jobs que, de otro modo, seleccionarían runners
 autoalojados; debe verificarse que haya suficiente capacidad alojada antes del despliegue.
 
@@ -96,8 +94,7 @@ y un latido cada 30 segundos enumera los archivos que siguen activos y su tiempo
 metadatos de ejecución incluidos en la lista de permitidos; las descripciones de las pruebas, la salida, los cuerpos de los errores y el entorno
 completo no se serializan.
 
-CI y Quality conservan los archivos JSONL como `unit-progress-ci-<run>-<attempt>-<shard>` y
-`unit-progress-quality-<run>-<attempt>-<shard>`. El tiempo de espera de un trabajo puede impedir la carga posterior;
+CI conserva los archivos JSONL como `unit-progress-ci-<run>-<attempt>-<shard>`. El tiempo de espera de un trabajo puede impedir la carga posterior;
 los latidos ya emitidos siguen constituyendo evidencia de diagnóstico. La ausencia de latidos también puede indicar
 que un proceso del ejecutor está bloqueado o ha finalizado. Estos recibos mantienen la selección de pruebas,
 la concurrencia, los plazos y el estado de salida existentes; no son veredictos de admisión de candidatos.
@@ -165,8 +162,6 @@ la compilación duplicada deshabilitada permanentemente; las comprobaciones real
 | `Docs Gates (fast-path)`                         | PR de documentación/código; referencias de la documentación de la API y docs-all                                                                                                                                                                              | Sí                      |
 | `Fast Quality Gates`                             | PR de código; comprobaciones estáticas, comprobación de tipos, comprobación de tipos del panel, pruebas unitarias afectadas                                                                                                                                   | Sí                      |
 | `Forgotten sibling tests`                        | PR de código; módulos modificados rastreados hasta consumidores estáticos y pruebas hermanas candidatas; las rutas de barriles e importaciones dinámicas se notifican como diagnósticos informativos, con excepciones referenciadas de la lista de permitidos | **Informativo**         |
-| `Vitest (fast-path)`                             | PR de código; suite rápida de vitest                                                                                                                                                                                                                          | Sí                      |
-| `Unit Tests fast-path`                           | PR de código; suite unitaria de 4 fragmentos                                                                                                                                                                                                                  | Sí                      |
 | `No new ESLint warnings`                         | PR de código; protección de lint con reconocimiento de supresiones                                                                                                                                                                                            | Sí, incluidos los forks |
 | `Merge integrity (changelog + generated skills)` | PR que no sean borradores; sincronización del registro de cambios y las habilidades generadas                                                                                                                                                                 | Sí, incluidos los forks |
 

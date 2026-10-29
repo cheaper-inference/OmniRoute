@@ -25,14 +25,12 @@ Przepływy pracy CI i Quality Gates generują stabilne werdykty: `Gate / CI` ora
 jako wymagane lub doradcze. Mające zastosowanie wymagane zadanie musi zakończyć się powodzeniem:
 brakujące, anulowane, pominięte, oczekujące i nieznane wyniki nie mogą ustanowić PASS. Prawidłowa
 klasyfikacja wyłącznie jako dokumentacja lub wyłącznie jako katalog może sprawić, że ścieżka kodu
-nie będzie miała zastosowania; wersja robocza PR nie jest akceptowanym kandydatem. Etykieta `hotfix`
+nie będzie miała zastosowania; zwykła wersja robocza PR nie jest akceptowanym kandydatem. Etykieta `hotfix`
 nie zwalnia z obowiązku przedstawienia dowodów.
 
 Oba przepływy pracy obejmują PR-y kierowane do gałęzi main/release, wypchnięcia do `main`, ręczne
 uruchomienia i zdarzenia grup scalania. Wypchnięcia, ręczne uruchomienia i grupy scalania wykonują
-pełny wybór. Wypchnięcia do `release/**` ich nie uruchamiają (2026-10-18): każda zmiana przeszła
-już macierz w swoim PR, a scalona kombinacja należy do zadań Release-Green
-(`docs/ops/RUNNER_BOX.md` → ścieżka hostowana). Forki i grupy scalania używają hostowanych runnerów
+pełny wybór. Zaufany roboczy PR kolejki Mergify również uruchamia mające zastosowanie zadania `full-code`/`full-code-e2e`; zwykłe PR-y je pomijają. Przed ręcznym scaleniem wykonaj pełne uruchomienie dispatch na dokładnie tym kandydacie. Wypchnięcia do `release/**` nie uruchamiają tych przepływów pracy; Release-Green osobno obserwuje scaloną bazę (`docs/ops/RUNNER_BOX.md` → ścieżka hostowana). Forki i grupy scalania używają hostowanych runnerów
 dla zadań, które w innym przypadku wybierają samodzielnie hostowane runnery; przed wdrożeniem należy
 zweryfikować wystarczającą pojemność środowiska hostowanego.
 
@@ -93,8 +91,7 @@ każdego pliku, a 30-sekundowy sygnał aktywności wskazuje pliki, które nadal 
 wykonywania. Rejestrowane są wyłącznie metadane wykonania znajdujące się na liście dozwolonych danych;
 opisy testów, dane wyjściowe, treści błędów ani pełne środowisko nie są serializowane.
 
-Procesy CI i Quality przechowują pliki JSONL jako `unit-progress-ci-<run>-<attempt>-<shard>` oraz
-`unit-progress-quality-<run>-<attempt>-<shard>`. Przekroczenie limitu czasu zadania może uniemożliwić
+CI zachowuje pliki JSONL jako `unit-progress-ci-<run>-<attempt>-<shard>`. Przekroczenie limitu czasu zadania może uniemożliwić
 późniejsze przesłanie plików; wyemitowane wcześniej sygnały aktywności pozostają materiałem
 diagnostycznym. Brak sygnałów aktywności może również wskazywać na zablokowany lub zakończony proces
 modułu wykonawczego. Te potwierdzenia zachowują dotychczasowy wybór testów, współbieżność, limity czasu
@@ -163,8 +160,6 @@ wyłączona, zduplikowana kompilacja została usunięta; rzeczywiste kontrole ko
 | `Docs Gates (fast-path)`                         | PR-y dokumentacji/kodu; odwołania do dokumentacji API i pełna dokumentacja                                                                                                                                                                        | Tak                   |
 | `Fast Quality Gates`                             | PR-y kodu; kontrole statyczne, kontrola typów, kontrola typów panelu, testy jednostkowe, na które zmiany mają wpływ                                                                                                                               | Tak                   |
 | `Forgotten sibling tests`                        | PR-y kodu; śledzenie zmienionych modułów do statycznych konsumentów i potencjalnych testów siostrzanych; ścieżki plików zbiorczych i importów dynamicznych są raportowane jako diagnostyka doradcza z uwzględnieniem wyjątków z listy dozwolonych | **Doradcze**          |
-| `Vitest (fast-path)`                             | PR-y kodu; szybki zestaw testów vitest                                                                                                                                                                                                            | Tak                   |
-| `Unit Tests fast-path`                           | PR-y kodu; zestaw testów jednostkowych podzielony na 4 fragmenty                                                                                                                                                                                  | Tak                   |
 | `No new ESLint warnings`                         | PR-y kodu; kontrola lintowania uwzględniająca wyciszenia                                                                                                                                                                                          | Tak, w tym dla forków |
 | `Merge integrity (changelog + generated skills)` | PR-y niebędące wersjami roboczymi; synchronizacja dziennika zmian i wygenerowanych umiejętności                                                                                                                                                   | Tak, w tym dla forków |
 

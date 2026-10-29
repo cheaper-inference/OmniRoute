@@ -4,7 +4,7 @@
 
 ---
 
-> **အခြေအနေ:** dashboard ကို **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) အပေါ်တွင် တည်ဆောက်ထားပြီး၊ workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream snapshot ကို `packages/ui-kit/UPSTREAM.md` တွင် pin ထားကာ `npm run check:ui-kit-snapshot` ဖြင့် စောင့်ကြပ်ထားသည်) အဖြစ် vendored လုပ်ထားသည်။ Light သည် canonical theme ဖြစ်ပြီး မူလ preference မှာ `system` ဖြစ်သည်။ Accent မှာ Keak lime (`--ci-color-accent`) ဖြစ်သည်။ Inter (letter-spacing 0, `--ci-letter-spacing-ui`) သည် UI font family ဖြစ်ပြီး၊ Instrument Serif ကို စာသားရှားပါးသော အကြီးစား display text (`.ci-dashboard-display`) အတွက်သာ၊ IBM Plex Mono ကို code အတွက် အသုံးပြုသည် — အားလုံးကို `src/app/globals.css` ၏ ထိပ်ဆုံးရှိ `@fontsource/*` imports များမှတစ်ဆင့် self-hosted လုပ်ထားသည်။ Icon တိုင်းသည် Lucide glyph ဖြစ်သည်။
+> **အခြေအနေ:** dashboard ကို **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) အပေါ်တွင် တည်ဆောက်ထားပြီး၊ workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream snapshot ကို `packages/ui-kit/UPSTREAM.md` တွင် pin ထားကာ `npm run check:ui-kit-snapshot` ဖြင့် စောင့်ကြပ်ထားသည်) အဖြစ် vendored လုပ်ထားသည်။ Light သည် canonical theme ဖြစ်ပြီး မူလ preference မှာ `system` ဖြစ်သည်။ Accent မှာ Keak lime (`--ci-color-accent`) ဖြစ်သည်။ Switzer သည် UI၊ display နှင့် code စာသား (`--ci-font-ui`; `--ci-font-display` နှင့် `--ci-font-mono` တို့ကိုဖြေရှင်းရန်) အတွက် တစ်ခုတည်းသော မိသားစုဖြစ်ပြီး kit ကိုယ်တိုင် (`packages/ui-kit/src/ci-fonts.css`၊ `ci-tokens.css` မှ တင်သွင်းသည် ) ။ အိုင်ကွန်တိုင်းသည် Lucide ဂရပ်ဖစ်ဖြစ်သည်။
 
 ## ၁. အရာများ တည်ရှိရာနေရာ
 
@@ -29,8 +29,7 @@
 4. Tailwind utility များသည် kit component class များထက် ဦးစားပေးအလုပ်လုပ်သည် (kit က
    `@layer theme, base, components, utilities` ဟု ကြေညာထားပြီး ၎င်း၏ rule များသည် `components` တွင်ရှိသည်) — spacing နှင့် layout အတွက် utility များကို
    အသုံးပြုပါ၊ kit component များ၏ အရောင်ကို ပြန်ပြောင်းရန် မသုံးပါနှင့်။
-5. Heading များအတွက် page နှင့် section title များတွင် `.ci-heading` (Inter၊ tracking မပါ) ကို အသုံးပြုပါ။ `.ci-dashboard-display`
-   (Instrument Serif) ကို error page status code ကဲ့သို့ ကြီးမားပြီး နေရာကျယ်ကျယ်ခြားထားသော display text များအတွက်သာ အသုံးပြုပါ။
+5. ခေါင်းစဉ်များ- စာမျက်နှာနှင့် ကဏ္ဍခေါင်းစဉ်များအတွက် `.ci-heading` ; `.ci-dashboard-display` error-page status code ကဲ့သို့သော ကြီးမားပြီး ကျဲကျဲသော display စာသားအတွက်သာ။ Switzer ကိုသုံးပါတယ်။
 6. `tests/unit/dashboard-kit-sweep.test.ts` သည် kit အသုံးပြုမှုကို စောင့်ကြည့်ကာကွယ်သည်။ `src/app` သို့မဟုတ် `src/shared/components` အောက်တွင်
    Material ligature span မရှိရပါ။ dashboard tree (`src/app/(dashboard)` နှင့်
    `src/shared/components`) အတွင်း raw `<select>`, `<textarea>` သို့မဟုတ် `<table>` မရှိရသကဲ့သို့ စာရင်းပြုစုထားသော ခြွင်းချက်များ (`Select` adapter ၏ native branch,
@@ -67,7 +66,7 @@
 
 အမြစ်ရှိ `README.md` တွင် ထည့်သွင်းထားသော ပုံကြမ်းဆယ့်နှစ်ခု (`docs/diagrams/*.svg`) သည် kit ကို မလှုပ်ရှားသောပုံများတွင် အသုံးချထားခြင်းဖြစ်သည်။ လက်ဖြင့်ဆွဲထားခြင်းမဟုတ်ဘဲ ထုတ်လုပ်ထားခြင်းဖြစ်သည်: `scripts/docs/gen-readme-*.mjs` တွင် generator ဖိုင် 13 ခု (ပုံကြမ်းဆယ့်နှစ်ခုနှင့် ထိန်းချုပ်သူ `gen-readme-diagrams.mjs`)၊ `tests/unit/docs/readme-*-svg.test.ts` တွင် ပုံကြမ်းတစ်ခုလျှင်တစ်ခုစီ ခေတ်မမီတော့မှုစစ်ဆေးချက် 12 ခု ရှိသည်။ စစ်ဆေးချက်တိုင်းသည် commit ထားသောဖိုင်ကို ၎င်း၏ generator ရလဒ်နှင့် byte တစ်ခုချင်း နှိုင်းယှဉ်သည် (အလုပ် `test-unit`)။
 
-- **တိုကင်များ။** `scripts/docs/readme-diagram-theme.mjs` သည် အရောင်စုံကို `packages/ui-kit/src/ci-tokens.css` မှ ကူးယူပြီး (ထိုဖိုင်နှင့် ကိုက်ညီမှုကို `tests/unit/docs/readme-diagram-theme.test.ts` က အတည်ပြုသည်) kit ၏ ဖောင့်များဖြင့် စာသားအခန်းကဏ္ဍများကို သတ်မှတ်သည်: အထင်ရှားပြစာသားအတွက် Instrument Serif၊ UI စာသားအတွက် Inter၊ ကိန်းဂဏန်းနှင့် ကုဒ်အတွက် IBM Plex Mono။ ၎င်းတို့သည် `src/app/globals.css` က dashboard အတွက် တင်သည့် တူညီသော `@fontsource` package များဖြစ်သည်။ ဖိုင်အတွင်း အလင်းတန်ဖိုးများသည် `:root` တွင်၊ အမှောင်တန်ဖိုးများသည် `prefers-color-scheme: dark` အခြေအနေအောက်တွင် ရှိသဖြင့် ပုံတိုင်းသည် GitHub ဖတ်သူ၏ အရောင်စနစ်ကို လိုက်နာသည်။
+- **တိုကင်များ။** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` မှ ပျဉ်ချပ်ကို မိတ္တူကူးသည် (ထိုဖိုင်နှင့် `tests/unit/docs/readme-diagram-theme.test.ts` ဖြင့် ပင်ထိုးထားသည်) နှင့် kit ၏ အစောပိုင်း မျက်နှာများတွင် စာသားကဏ္ဍများကို သတ်မှတ်သည် — Instrument Serif for display, Inter for UI text, IBM Plex Mono for figs and code — `@fontsource` packages (ဒက်ရှ်ဘုတ် ကိုယ်တိုင်က Kit's Switzer ကို kit ဗားရှင်း 0.0.66 မှစ၍ အသုံးပြုသည်)။ အလင်းတန်ဖိုးများသည် `:root`၊ `prefers-color-scheme: dark` နောက်ကွယ်ရှိ အမှောင်တန်ဖိုးများ ၊ ဖိုင်အတွင်းတွင် ရှိနေသည်၊ ထို့ကြောင့် ပုံတစ်ပုံချင်းစီသည် GitHub ရှိ ကြည့်ရှုသူ၏ အစီအစဉ်ကို လိုက်နာသည်။
 
 - **ဖောင့်များ။** `scripts/docs/readme-fonts.mjs` သည် ထို woff2 ဖိုင်များကို ပုံကြမ်းတစ်ခုချင်းဆွဲသည့် glyph များအထိ လျှော့ချပြီး `@font-face` မှတစ်ဆင့် `data:` URI များအဖြစ် ထည့်သွင်းသည်။ ထို့ကြောင့် kit ၏ ဖောင့်များသည် SVG အတွင်း၌ ရှိနေသည်။ စက်အတွင်း README ပုံစမ်းသပ်မှုက ပြသချိန်တွင် ပြင်ပဖောင့်တောင်းဆိုမှုများ မရှိကြောင်း စစ်ဆေးသည်။ အစုငယ်များတွင် လက်တင်အက္ခရာများသာ ပါဝင်ပြီး စနစ်ဖောင့်များကို အစားထိုးအသုံးပြုသည့် သင်္ကေတ glyph များကို `SYMBOL_FALLBACKS` တွင် တစ်ခုချင်း ခွင့်ပြုထားသည်။ အခြား မလွှမ်းခြုံသော glyph တစ်ခုခုသည် အမှားဖြစ်စေသည်။
 

@@ -7,10 +7,7 @@
 > **Status:** kontrolna tabla je izgrađena na **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ugrađena (vendored)
 > kao workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream snimak je zakačen u
 > `packages/ui-kit/UPSTREAM.md` i čuvan pomoću `npm run check:ui-kit-snapshot`). Svetla je kanonična
-> tema; podrazumevano podešavanje je `system`. Akcenat je Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) je UI familija fontova, Instrument Serif samo za veliki, retki
-> prikazni tekst (`.ci-dashboard-display`), IBM Plex Mono za kod — sve je self-hosted kroz
-> `@fontsource/*` uvoz na vrhu `src/app/globals.css`. Svaka ikona je Lucide glif.
+> tema; podrazumevano podešavanje je `system`. Akcenat je Keak lime (`--ci-color-accent`). Свитзер је јединствена породица за UI, приказ и текст кода (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` га решавају), који сам хостује сам комплет (`packages/ui-kit/src/ci-fonts.css`, увезен од `ci-tokens.css`). Свака икона је Луциде глиф.
 
 ## 1. Gde se šta nalazi
 
@@ -96,8 +93,7 @@
 4. Tailwind услужне класе имају предност над класама компоненти комплета (комплет декларише
    `@layer theme, base, components, utilities`, а његова правила се налазе у `components`) — користите услужне класе за
    размаке и распоред, а не за промену боја компоненти комплета.
-5. Наслови: `.ci-heading` (Inter, без размака између слова) за наслове страница и одељака; `.ci-dashboard-display`
-   (Instrument Serif) само за велики, издвојени приказни текст, као што је статусни код на страници грешке.
+5. Наслови: `.ci-heading` за наслове страница и одељака; `.ci-dashboard-display` само за велики, ретки текст на екрану, као што је статусни код странице са грешком. Обојица користе Свитзер.
 6. `tests/unit/dashboard-kit-sweep.test.ts` контролише усвајање комплета: нема Material span елемената са лигатурама у
    `src/app` или `src/shared/components`; у стаблу контролне табле (`src/app/(dashboard)` и
    `src/shared/components`) нема необрађених `<select>`, `<textarea>` или `<table>` елемената, нити ручно направљеног
@@ -153,7 +149,7 @@ podešavanja, kombinacije, potrošnju i endpoint u obe teme, pokrenite `npm run 
 
 Дванаест дијаграма уграђених у коренски `README.md` (`docs/diagrams/*.svg`) примењује комплет на статичне слике. Генеришу се, не цртају ручно: 13 генераторских датотека у `scripts/docs/gen-readme-*.mjs` (дванаест дијаграма и управљачки програм `gen-readme-diagrams.mjs`) и 12 тестова застарелости у `tests/unit/docs/readme-*-svg.test.ts`, по један за сваки дијаграм. Сваки тест пореди датотеку сачувану у комиту са излазом генератора бајт по бајт (посао `test-unit`).
 
-- **Токени.** `scripts/docs/readme-diagram-theme.mjs` копира палету из `packages/ui-kit/src/ci-tokens.css` (усклађеност са том датотеком обезбеђује `tests/unit/docs/readme-diagram-theme.test.ts`) и одређује улоге текста фонтовима комплета: Instrument Serif за истакнути текст, Inter за текст интерфејса и IBM Plex Mono за бројеве и код. То су исти пакети `@fontsource` које `src/app/globals.css` учитава за контролну таблу. Светле вредности су у `:root`, а тамне иза услова `prefers-color-scheme: dark` унутар датотеке, па свака слика прати шему читаоца на GitHub-у.
+- **Токенс.** `scripts/docs/readme-diagram-theme.mjs` копира палету из `packages/ui-kit/src/ci-tokens.css` (коју је закачио `tests/unit/docs/readme-diagram-theme.test.ts` на ту датотеку) и дефинише улоге текста на ранијим странама комплета — Инструмент Сериф за приказ, Интер за UI текст, IBM Плек Моно за фигуре и код — из `@fontsource` пакета (сама контролна табла користи Свитзер из комплета од верзије 0.0.66). Светле вредности се налазе на `:root`, тамне вредности иза `prefers-color-scheme: dark`, унутар датотеке, тако да свака слика прати шему гледаоца на GitHub.
 
 - **Фонтови.** `scripts/docs/readme-fonts.mjs` сужава те woff2 датотеке на глифове које црта сваки дијаграм и уграђује их преко `@font-face` као URI-је `data:`. Тако фонтови комплета остају унутар SVG-а. Локална провера слика README проверава да рендеровање не шаље спољне захтеве за фонтовима. Подскупови садрже само латиничне знакове; глифови симбола који користе системске фонтове као замену дозвољавају се појединачно у `SYMBOL_FALLBACKS`. Сваки други непокривени глиф изазива грешку.
 

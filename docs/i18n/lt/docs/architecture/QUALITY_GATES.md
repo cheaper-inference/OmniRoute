@@ -24,15 +24,12 @@ CI ir kokybės patikrų darbo eigos pateikia po stabilų verdiktą: `Gate / CI` 
 nurodoma kaip privaloma arba rekomendacinė. Taikoma privaloma užduotis turi būti
 sėkminga: trūkstami, atšaukti, praleisti, laukiantys ir nežinomi rezultatai negali
 patvirtinti PASS. Galiojanti tik dokumentų arba tik katalogo pakeitimų klasifikacija
-gali padaryti kodo vykdymo šaką netaikomą; juodraštinis PR nėra priimamas kandidatas.
+gali padaryti kodo vykdymo šaką netaikomą; įprastas juodraštinis PR nėra priimamas kandidatas.
 Žyma `hotfix` neatleidžia nuo įrodymų pateikimo.
 
 Abi darbo eigos apima PR į main/release šakas, pakeitimų siuntimą į `main`, rankinį
 paleidimą ir merge-group įvykius. Pakeitimų siuntimo, rankinio paleidimo ir merge-group
-atvejais vykdomas visas pasirinktas rinkinys. Pakeitimų siuntimas į `release/**` jų
-nepaleidžia (2026-10-18): kiekvienam pakeitimui matrica jau buvo vykdyta jo PR metu,
-o sujungto derinio tikrinimas yra Release-Green užduotis
-(`docs/ops/RUNNER_BOX.md` → Hosted lane). Forkai ir merge-group naudoja prieglobos
+atvejais vykdomas visas pasirinktas rinkinys. Patikimas Mergify eilės juodraštis taip pat vykdo taikomas `full-code`/`full-code-e2e` užduotis; įprasti PR jas praleidžia. Prieš sujungdami rankiniu būdu paleiskite visą dispatch tiksliai tam kandidatui. Pakeitimų siuntimas į `release/**` šių darbo eigų nepaleidžia; Release-Green sujungtą bazę stebi atskirai (`docs/ops/RUNNER_BOX.md` → Hosted lane). Forkai ir merge-group naudoja prieglobos
 vykdykles užduotims, kurios kitais atvejais pasirinktų savarankiškai valdomas
 vykdykles; prieš diegimą būtina patikrinti, ar prieglobos pajėgumų pakanka.
 
@@ -94,8 +91,7 @@ o kas 30 sekundžių siunčiamame aktyvumo signale išvardijami vis dar aktyvūs
 tik į leidžiamųjų sąrašą įtraukti vykdymo metaduomenys; testų aprašai, išvestis, klaidų turinys ir visa
 aplinka nėra serializuojami.
 
-CI ir kokybės procesai išsaugo JSONL failus kaip `unit-progress-ci-<run>-<attempt>-<shard>` ir
-`unit-progress-quality-<run>-<attempt>-<shard>`. Pasibaigus užduočiai skirtam laikui, vėlesnis įkėlimas gali neįvykti;
+CI išsaugo JSONL failus pavadinimu `unit-progress-ci-<run>-<attempt>-<shard>`. Pasibaigus užduočiai skirtam laikui, vėlesnis įkėlimas gali neįvykti;
 jau išsiųsti aktyvumo signalai išlieka diagnostiniais įrodymais. Aktyvumo signalų nebuvimas taip pat gali reikšti,
 kad vykdyklės procesas buvo užblokuotas arba nutrauktas. Šie patvirtinimai išsaugo esamą testų parinkimą,
 lygiagretumą, terminus ir baigties būseną; jie nėra sprendimai dėl kandidato priėmimo.
@@ -167,8 +163,6 @@ išjungta pasikartojanti kompiliavimo užduotis buvo pašalinta; tikrosios kompi
 | `Docs Gates (fast-path)`                         | Dokumentacijos / kodo PR; API dokumentacijos nuorodos ir docs-all                                                                                                                                                            | Taip                    |
 | `Fast Quality Gates`                             | Kodo PR; statinės patikros, tipų patikra, valdymo skydelio tipų patikra, paveikti vienetų testai                                                                                                                             | Taip                    |
 | `Forgotten sibling tests`                        | Kodo PR; pakeistų modulių sąsajos su statiniais naudotojais ir galimais gretutiniais testais; barrel ir dinaminio importavimo keliai pateikiami kaip rekomendacinė diagnostika, taikant nurodytas leidžiamojo sąrašo išimtis | **Rekomendacinė**       |
-| `Vitest (fast-path)`                             | Kodo PR; spartusis vitest testų rinkinys                                                                                                                                                                                     | Taip                    |
-| `Unit Tests fast-path`                           | Kodo PR; į 4 dalis suskaidytas vienetų testų rinkinys                                                                                                                                                                        | Taip                    |
 | `No new ESLint warnings`                         | Kodo PR; išimtis įvertinanti lint apsauga                                                                                                                                                                                    | Taip, įskaitant fork'us |
 | `Merge integrity (changelog + generated skills)` | Ne juodraštiniai PR; pakeitimų žurnalo ir sugeneruotų įgūdžių sinchronizavimas                                                                                                                                               | Taip, įskaitant fork'us |
 

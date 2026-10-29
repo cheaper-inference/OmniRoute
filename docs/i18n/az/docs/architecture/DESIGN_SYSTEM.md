@@ -7,10 +7,7 @@
 > **Vəziyyət:** panel **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) üzərində qurulub və
 > `packages/ui-kit` iş sahəsi kimi daxil edilib (`@omniroute/ui-kit`; yuxarı axın snapshot-ı
 > `packages/ui-kit/UPSTREAM.md` faylında sabitlənib və `npm run check:ui-kit-snapshot` ilə qorunur). İşıqlı (Light) mövzu kanonik
-> mövzudur; standart seçim `system`-dir. Vurğu rəngi Keak lime-dır (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) UI şrift ailəsidir, Instrument Serif yalnız böyük, seyrək
-> displey mətnləri üçün (`.ci-dashboard-display`), IBM Plex Mono isə kod üçündür — hamısı
-> `src/app/globals.css` faylının əvvəlindəki `@fontsource/*` importları vasitəsilə öz hostingində yerləşdirilir. Hər bir ikon Lucide qlifidir.
+> mövzudur; standart seçim `system`-dir. Vurğu rəngi Keak lime-dır (`--ci-color-accent`). Switzer UI, displey və kod mətni (`--ci-font-ui`; `--ci-font-display` və `--ci-font-mono` həll etmək üçün ) üçün vahid ailədir , dəstin özü tərəfindən (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tərəfindən idxal olunur ). Hər ikona Lucide qlifidir.
 
 ## 1. Hər şey harada yerləşir
 
@@ -42,8 +39,7 @@
 4. Tailwind utilitləri kit komponentinin siniflərini üstələyir (kit
    `@layer theme, base, components, utilities` elan edir və onun qaydaları `components` qatında yerləşir) — kit komponentlərinin
    rəngini dəyişmək üçün deyil, aralıqlar və tərtibat üçün utilitlərdən istifadə edin.
-5. Başlıqlar: səhifə və bölmə başlıqları üçün `.ci-heading` (Inter, hərf aralığı olmadan); `.ci-dashboard-display`
-   (Instrument Serif) yalnız xəta səhifəsinin status kodu kimi böyük və seyrək təqdimat mətnləri üçün istifadə edilməlidir.
+5. Başlıqlar: səhifə və bölmə başlıqları üçün `.ci-heading` ; `.ci-dashboard-display` yalnız səhv səhifəsi status kodu kimi böyük, seyrək ekran mətni üçün. Hər ikisi Switzer istifadə edir.
 6. `tests/unit/dashboard-kit-sweep.test.ts` kitin tətbiqinə nəzarət edir: `src/app` və ya `src/shared/components` altında
    Material liqaturalı span olmamalıdır; idarəetmə paneli ağacında (`src/app/(dashboard)` və
    `src/shared/components`) xam `<select>`, `<textarea>` və ya `<table>`, həmçinin sadalanmış istisnalar xaricində
@@ -88,7 +84,7 @@
 
 Kökdəki `README.md` faylına daxil edilən on iki diaqram (`docs/diagrams/*.svg`) dəsti statik şəkillərə tətbiq edir. Onlar əl ilə çəkilmir, yaradılır: `scripts/docs/gen-readme-*.mjs` daxilində 13 generator faylı (on iki diaqram və `gen-readme-diagrams.mjs` idarəedicisi), `tests/unit/docs/readme-*-svg.test.ts` daxilində isə hər diaqrama bir olmaqla 12 aktuallıq testi var. Hər test commit edilmiş faylı generatorun çıxışı ilə bayt-bayt müqayisə edir (`test-unit` işi).
 
-- **Tokenlər.** `scripts/docs/readme-diagram-theme.mjs` palitranı `packages/ui-kit/src/ci-tokens.css` faylından köçürür (bu faylla uyğunluğu `tests/unit/docs/readme-diagram-theme.test.ts` təmin edir) və dəstin şriftləri ilə mətn rollarını müəyyənləşdirir: vurğulu mətn üçün Instrument Serif, interfeys üçün Inter, rəqəmlər və kod üçün IBM Plex Mono. Bunlar `src/app/globals.css` faylının idarəetmə paneli üçün yüklədiyi eyni `@fontsource` paketləridir. Açıq dəyərlər faylda `:root` daxilində, tünd dəyərlər `prefers-color-scheme: dark` şərti altında yerləşir; hər şəkil GitHub oxucusunun rəng sxeminə uyğunlaşır.
+- **Tokenlər.** `scripts/docs/readme-diagram-theme.mjs` palitranı `packages/ui-kit/src/ci-tokens.css` -dən kopyalayır ( `tests/unit/docs/readme-diagram-theme.test.ts` tərəfindən həmin fayla qarşı bərkidilir) və dəstin əvvəlki üzlərindəki mətn rollarını müəyyən edir — Ekran üçün Alət Serif, UI mətni üçün Inter, rəqəmlər və kodlar üçün IBM Plex Mono — `@fontsource` paketlərindən (baxış paneli özü kitin Switzer şriftindən kitin 0.0.66 versiyasından etibarən istifadə edir). İşıq dəyərləri `:root` üzərində, qaranlıq dəyərlər isə `prefers-color-scheme: dark` arxasında, faylın içərisində yerləşir, beləliklə, hər bir şəkil GitHub də izləyicinin sxemini izləyir.
 
 - **Şriftlər.** `scripts/docs/readme-fonts.mjs` həmin woff2 fayllarını hər diaqramın çəkdiyi qliflərlə məhdudlaşdırır və onları `@font-face` vasitəsilə `data:` URI-ləri kimi yerləşdirir. Beləliklə, dəstin şriftləri SVG daxilində qalır. Yerli README şəkil sınağı təsvir zamanı xarici şrift sorğularının olmadığını yoxlayır. Alt çoxluqlar yalnız latın simvollarını əhatə edir; sistem şriftlərinə keçən simvol qliflərinə `SYMBOL_FALLBACKS` daxilində ayrı-ayrılıqda icazə verilir. Əhatə olunmayan hər başqa qlif xəta yaradır.
 

@@ -7,10 +7,7 @@
 > **Status:** panel jest zbudowany na **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), dołączonym do repozytorium (vendored)
 > jako workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream jest przypięty w
 > `packages/ui-kit/UPSTREAM.md` i pilnowany przez `npm run check:ui-kit-snapshot`). Kanonicznym motywem
-> jest jasny; domyślna preferencja to `system`. Kolorem akcentu jest Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) jest krojem interfejsu, Instrument Serif — tylko dla dużych,
-> oszczędnych tekstów display (`.ci-dashboard-display`), a IBM Plex Mono — dla kodu; wszystkie hostowane
-> lokalnie poprzez importy `@fontsource/*` na początku pliku `src/app/globals.css`. Każda ikona to glif Lucide.
+> jest jasny; domyślna preferencja to `system`. Kolorem akcentu jest Keak lime (`--ci-color-accent`). Switzer to pojedyncza rodzina dla UI, wyświetlacza i tekstu kodu (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` na to odpowiadają), hostowana przez sam zestaw (`packages/ui-kit/src/ci-fonts.css`, importowany przez `ci-tokens.css`). Każda ikona jest glifem Lucide.
 
 ## 1. Gdzie co się znajduje
 
@@ -93,7 +90,7 @@
 2. Nigdy nie modyfikuj ręcznie `packages/ui-kit/src`: synchronizuj za pomocą `scripts/dev/sync-ui-kit.sh <commit>`; kontrola pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) kończy się niepowodzeniem w przypadku każdego bajtu różniącego się od przypiętego commitu upstream (jest pomijana z ostrzeżeniem, gdy brakuje klonu upstream, `UI_KIT_CLONE` lub `_references/cheaper-inference-ui-kit`). Gdy w zestawie czegoś brakuje, zastosuj obejście w adapterze lub na ekranie i poproś upstream o dodanie tej funkcji.
 3. Domyślne teksty zestawu są po angielsku (`label = "Loading"`, `loadingLabel = "Loading table"`…) — przekazuj przetłumaczone ciągi z `useTranslations(...)` za każdym razem, gdy komponent zestawu renderuje tekst.
 4. Narzędzia Tailwind mają pierwszeństwo przed klasami komponentów zestawu (zestaw deklaruje `@layer theme, base, components, utilities`, a jego reguły znajdują się w `components`) — używaj narzędzi do odstępów i układu, a nie do zmiany kolorów komponentów zestawu.
-5. Nagłówki: `.ci-heading` (Inter, bez dodatkowego odstępu między literami) dla tytułów stron i sekcji; `.ci-dashboard-display` (Instrument Serif) tylko dla dużego, oszczędnego tekstu ekspozycyjnego, takiego jak kod statusu na stronie błędu.
+5. Nagłówki: `.ci-heading` dla tytułów stron i sekcji; `.ci-dashboard-display` tylko dla dużego, rzadkiego tekstu wyświetlanego, takiego jak kod stanu strony błędu. Obaj korzystają z kroju Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` kontroluje stosowanie zestawu: brak spanów z ligaturami Material w `src/app` lub `src/shared/components`; w drzewie panelu (`src/app/(dashboard)` i `src/shared/components`) nie mogą występować surowe elementy `<select>`, `<textarea>` ani `<table>`, ani ręcznie tworzone `role="dialog"` poza wymienionymi wyjątkami (natywna gałąź adaptera `Select`, `RequestLoggerDetail`); każdy surowy element `<button>` lub `<input>` musi mieć komentarz zawierający `kit-exception:` (wraz z powodem), kończący się nie więcej niż 3 wiersze nad nim; odcienie palety i warianty `dark:` są dozwolone tylko w plikach wymienionych przez test.
 7. Przed utworzeniem PR zweryfikuj oba motywy oraz widok o szerokości 390 px (zrzuty ekranu); `tests/e2e/a11y.spec.ts` uruchamia axe.
 
@@ -141,7 +138,7 @@ ustawień, kombinacji, użycia i endpointu w obu motywach, uruchom `npm run chec
 
 Dwanaście diagramów osadzonych w głównym `README.md` (`docs/diagrams/*.svg`) stosuje zestaw do statycznych obrazów. Są generowane, a nie rysowane ręcznie: 13 plików generatorów w `scripts/docs/gen-readme-*.mjs` (dwanaście diagramów i sterownik `gen-readme-diagrams.mjs`) oraz 12 testów aktualności w `tests/unit/docs/readme-*-svg.test.ts`, po jednym na diagram. Każdy porównuje bajt po bajcie plik zapisany w commicie z wynikiem generatora (zadanie `test-unit`).
 
-- **Tokeny.** `scripts/docs/readme-diagram-theme.mjs` kopiuje paletę z `packages/ui-kit/src/ci-tokens.css` (zgodność z tym plikiem zabezpiecza `tests/unit/docs/readme-diagram-theme.test.ts`) i definiuje role tekstu czcionkami zestawu: Instrument Serif dla tekstu ekspozycyjnego, Inter dla interfejsu oraz IBM Plex Mono dla liczb i kodu. To te same pakiety `@fontsource`, które `src/app/globals.css` ładuje dla panelu. Jasne wartości są w `:root`, a ciemne pod warunkiem `prefers-color-scheme: dark` wewnątrz pliku, więc każdy obraz podąża za schematem czytelnika na GitHubie.
+- **Żetony.** `scripts/docs/readme-diagram-theme.mjs` kopiuje paletę z `packages/ui-kit/src/ci-tokens.css` (przypiętą do tego pliku przez `tests/unit/docs/readme-diagram-theme.test.ts`) i definiuje role tekstowe na wcześniejszych twarzach zestawu — Instrument Serif do wyświetlania, Inter dla tekstu UI, IBM Plex Mono dla rysunków i kodu — z pakietów `@fontsource` (sam dashboard używa Switzer zestawu od wersji 0.0.66). Jasne wartości znajdują się w `:root`, ciemne wartości za `prefers-color-scheme: dark` w pliku, więc każdy obraz jest zgodny ze schematem widza na GitHub.
 
 - **Czcionki.** `scripts/docs/readme-fonts.mjs` ogranicza te pliki woff2 do glifów rysowanych przez dany diagram i osadza je przez `@font-face` jako URI `data:`. Dzięki temu czcionki zestawu pozostają wewnątrz SVG. Lokalna próba obrazu README sprawdza, czy renderowanie nie wysyła zewnętrznych żądań czcionek. Podzbiory zawierają wyłącznie znaki łacińskie; glify symboli korzystające awaryjnie z czcionek systemowych są dopuszczane pojedynczo w `SYMBOL_FALLBACKS`. Każdy inny nieobsługiwany glif powoduje błąd.
 

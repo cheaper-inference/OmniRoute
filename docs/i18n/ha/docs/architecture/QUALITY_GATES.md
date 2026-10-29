@@ -24,12 +24,10 @@ Tsarukan aiki na CI da Quality Gates kowannensu yana fitar da tabbataccen hukunc
 a matsayin wajibi ko na shawara. Dole ne aikin da ya dace kuma yake wajibi ya yi nasara: sakamakon da
 ya ɓace, aka soke, aka tsallake, yake jiran kammalawa ko ba a sani ba ba zai iya tabbatar da PASS ba. Ingantacciyar
 rarrabuwar docs-only ko catalog-only na iya sa wani layin lamba bai dace ba;
-ba a karɓar daftarin PR a matsayin ɗan takara. Alamar `hotfix` ba ta kawar da buƙatar hujja.
+ba a karɓar daftarin PR na yau da kullum a matsayin ɗan takara. Alamar `hotfix` ba ta kawar da buƙatar hujja.
 
 Dukkan tsarukan aikin suna rufe PRs zuwa rassan main/release, pushes zuwa `main`, ƙaddamarwa da hannu
-da kuma abubuwan merge-group. Push, dispatch da merge-group suna gudanar da cikakken zaɓi. Pushes zuwa
-`release/**` ba sa fara su (2026-10-18): kowane canji ya riga ya gudanar da matrix a PR ɗinsa
-kuma haɗaɗɗen sakamakon aikin Release-Green ne (`docs/ops/RUNNER_BOX.md` → Hosted lane). Forks
+da kuma abubuwan merge-group. Push, dispatch da merge-group suna gudanar da cikakken zaɓi. Amintaccen daftari a jerin jiran Mergify yana gudanar da ayyukan `full-code`/`full-code-e2e` da suka dace; PRs na yau da kullum suna tsallake su. Kafin haɗawa da hannu, gudanar da cikakken dispatch a kan ainihin ɗan takarar. Pushes zuwa `release/**` ba sa fara waɗannan tsarukan aiki; Release-Green yana lura da tushen da aka haɗa dabam (`docs/ops/RUNNER_BOX.md` → Hosted lane). Forks
 da merge groups suna amfani da hosted runners don ayyukan da in ba haka ba za su zaɓi self-hosted
 runners; dole ne a tabbatar da isasshen ƙarfin hosted kafin fara amfani da shi.
 
@@ -95,8 +93,7 @@ kuma siginar heartbeat ta kowane daƙiƙa 30 tana jera fayilolin da har yanzu su
 metadata na gudanarwa da ke cikin jerin waɗanda aka amince da su kawai; ba a mayar da bayanin gwaje-gwaje, sakamakon da aka fitar, cikakkun bayanan kurakurai da dukan
 environment zuwa tsari na serialized.
 
-CI da Quality suna adana fayilolin JSONL a matsayin `unit-progress-ci-<run>-<attempt>-<shard>` da
-`unit-progress-quality-<run>-<attempt>-<shard>`. Ƙarewar lokacin job na iya hana upload na gaba;
+CI yana adana fayilolin JSONL da sunan `unit-progress-ci-<run>-<attempt>-<shard>`. Ƙarewar lokacin job na iya hana upload na gaba;
 sigogin heartbeat da aka riga aka fitar suna nan a matsayin hujjar gano matsala. Rashin sigogin heartbeat na iya kuma nuna
 cewa an toshe ko an dakatar da tsarin runner. Waɗannan bayanan shaida suna kiyaye zaɓin gwaji,
 concurrency, wa'adin ƙarshe da exit status da suke akwai; ba hukuncin amincewa da candidate ba ne.
@@ -164,8 +161,6 @@ kashe na dindindin; ainihin binciken build/package/boot suna nan a CI.
 | `Docs Gates (fast-path)`                         | PR na docs/code; nassoshin API docs da docs-all                                                                                                                                                                                     | E               |
 | `Fast Quality Gates`                             | PR na code; binciken static, typecheck, dashboard typecheck, da impacted unit tests                                                                                                                                                 | E               |
 | `Forgotten sibling tests`                        | PR na code; ana bin diddigin modules da aka canza zuwa static consumers da candidate sibling tests; ana bayar da rahoton hanyoyin barrel da dynamic-import a matsayin advisory diagnostics, tare da referenced allowlist exceptions | **Na shawara**  |
-| `Vitest (fast-path)`                             | PR na code; fast vitest suite                                                                                                                                                                                                       | E               |
-| `Unit Tests fast-path`                           | PR na code; 4-shard unit suite                                                                                                                                                                                                      | E               |
 | `No new ESLint warnings`                         | PR na code; suppressions-aware lint guard                                                                                                                                                                                           | E, har da forks |
 | `Merge integrity (changelog + generated skills)` | PR marasa draft; daidaitawar changelog da generated skill                                                                                                                                                                           | E, har da forks |
 

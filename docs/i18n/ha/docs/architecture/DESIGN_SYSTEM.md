@@ -7,11 +7,7 @@
 > **Matsayi:** an gina dashboard a kan **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), an saka shi
 > a matsayin workspace `packages/ui-kit` (`@omniroute/ui-kit`; an tsare kwafin upstream a cikin
 > `packages/ui-kit/UPSTREAM.md` kuma `npm run check:ui-kit-snapshot` yana kare shi). Light shi ne
-> jigon hukuma; zaɓin tsoho shi ne `system`. Launin jaddadawa shi ne Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) ita ce iyalin rubutun UI, Instrument Serif kawai don manyan
-> rubutu na nuni marasa yawa (`.ci-dashboard-display`), IBM Plex Mono don code — duk ana masaukin su da
-> kansu ta hanyar shigo da kayan `@fontsource/*` a saman `src/app/globals.css`. Kowace alama tambarin
-> Lucide ce.
+> jigon hukuma; zaɓin tsoho shi ne `system`. Launin jaddadawa shi ne Keak lime (`--ci-color-accent`). Switzer shine iyali guda don UI, nuni da rubutu na lamba (`--ci-font-ui`; `--ci-font-display` da `--ci-font-mono` sun yanke shawara zuwa gare shi), kayan aikin da kanta suka shirya (`packages/ui-kit/src/ci-fonts.css`, shigo da `ci-tokens.css`). Kowane gunki shine Lucide glyph.
 
 ## 1. Inda abubuwa ke zaune
 
@@ -101,8 +97,7 @@
 4. Tailwind utilities suna rinjayar classes na kit component (kit ɗin yana ayyana
    `@layer theme, base, components, utilities` kuma dokokinsa suna cikin `components`) — yi amfani da utilities don
    spacing da layout, ba don sake canza launin kit components ba.
-5. Headings: `.ci-heading` (Inter, babu tracking) don page da section titles; `.ci-dashboard-display`
-   (Instrument Serif) kawai don manyan display text marasa yawa kamar status code na error-page.
+5. Kanun labarai: `.ci-heading` don taken shafi da sashe; `.ci-dashboard-display` kawai don babba, rubutun nuni mara ƙarfi kamar lambar matsayi na shafin kuskure. Dukansu suna amfani da Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` yana tabbatar da rungumar kit ɗin: babu Material ligature span a ƙarƙashin
    `src/app` ko `src/shared/components`; a cikin dashboard tree (`src/app/(dashboard)` da
    `src/shared/components`) babu raw `<select>`, `<textarea>` ko `<table>`, kuma babu `role="dialog"` da aka ƙirƙira da hannu
@@ -151,7 +146,7 @@ buɗe PR tare da changelog na upstream.
 
 Zane-zane goma sha biyu da aka saka a `README.md` na tushe (`docs/diagrams/*.svg`) suna amfani da kit a hotuna marasa motsi. Ana samar da su, ba zana su da hannu ba: fayilolin janareta 13 a `scripts/docs/gen-readme-*.mjs` (zane-zane goma sha biyu da mai sarrafawa `gen-readme-diagrams.mjs`) da gwaje-gwajen tsufa 12 a `tests/unit/docs/readme-*-svg.test.ts`, ɗaya ga kowane zane. Kowane gwaji yana kwatanta fayil ɗin da aka commit da fitowar janaretansa byte bayan byte (aiki `test-unit`).
 
-- **Token.** `scripts/docs/readme-diagram-theme.mjs` yana kwafin palet daga `packages/ui-kit/src/ci-tokens.css` (gwajin `tests/unit/docs/readme-diagram-theme.test.ts` yana tabbatar da dacewa da wannan fayil) kuma yana bayyana ayyukan rubutu da font ɗin kit: Instrument Serif don rubutun nuni, Inter don rubutun mu'amala, IBM Plex Mono don lambobi da lamba ta shiri. Waɗannan su ne fakitin `@fontsource` da `src/app/globals.css` yake ɗorawa don dashboard. Ƙimomin haske suna kan `:root`, na duhu suna ƙarƙashin `prefers-color-scheme: dark` cikin fayil, don haka kowane hoto yana bin tsarin launin mai karatu a GitHub.
+- **Alamu.** `scripts/docs/readme-diagram-theme.mjs` yana kwafin palette daga `packages/ui-kit/src/ci-tokens.css` (wanda aka rataya shi da wancan fayil ta `tests/unit/docs/readme-diagram-theme.test.ts`) kuma yana bayyana ayyukan rubutu akan fuskokin kayan aikin farko - Instrument Serif don nunawa, Inter don rubutu UI, IBM Plex Mono don adadi da lambar - daga fakitin `@fontsource` (dashboard kanta yana amfani da Switzer na kit tun daga kit 0.0.66). Ƙimar haske suna zaune akan `:root`, darajoji masu duhu a bayan `prefers-color-scheme: dark`, cikin fayil ɗin, don haka kowane hoto yana bin tsarin mai kallo akan GitHub.
 
 - **Font.** `scripts/docs/readme-fonts.mjs` yana rage waɗannan fayilolin woff2 zuwa glyph ɗin da kowane zane ke zana, sannan ya saka su ta `@font-face` a matsayin URI na `data:`. Hakan yana ajiye font na kit a cikin SVG. Gwajin hoton README na gida yana tabbatar da cewa nuna hoton ba ya aika buƙatun font zuwa waje. Ƙananan rukunin suna da haruffan Latin kawai; glyph na alamomi da suka koma ga font na tsarin kwamfuta a matsayin madadi ana ba su izini ɗaya bayan ɗaya a `SYMBOL_FALLBACKS`. Duk wani glyph da ba a rufe ba yana haifar da kuskure.
 
