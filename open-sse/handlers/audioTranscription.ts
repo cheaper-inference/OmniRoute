@@ -28,6 +28,13 @@ import { errorResponse } from "../utils/error.ts";
 import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
 import { isJsonObject } from "../utils/kieTask.ts";
 import { handleOpenRouterTranscription } from "./openrouterTranscription.ts";
+import {
+  buildCloudflareTranscriptionUrl,
+  cloudflareNova3ToVerboseJson,
+  readCloudflareEnvelopeError,
+  readCloudflareTranscript,
+  resolveCloudflareAccountId,
+} from "./cloudflareWorkersAiTranscription.ts";
 import { handleSyntxTranscription } from "./syntxAudio.ts";
 import {
   hasTranscriptionInput,
@@ -38,6 +45,9 @@ import {
 type TranscriptionCredentials = {
   apiKey?: string;
   accessToken?: string;
+  /** Account-scoped providers (Cloudflare Workers AI) read their account id here. */
+  accountId?: string;
+  providerSpecificData?: Record<string, unknown> | null;
 };
 
 /**
@@ -306,6 +316,61 @@ async function handleDeepgramTranscription(
     );
   }
   return Response.json({ text: text ?? "", noSpeechDetected }, { headers: { ...CORS_HEADERS } });
+}
+
+/**
+ * Handle Cloudflare Workers AI transcription (`@cf/deepgram/nova-3`): raw binary audio
+ * POSTed to the connection's account, Deepgram options as query params. The response
+ * mapping lives in cloudflareWorkersAiTranscription.ts.
+ */
+async function handleCloudflareWorkersAiTranscription(
+  providerConfig: AudioProvider,
+  file: Blob & { name?: unknown },
+  modelId: string,
+  token: string,
+  formData: FormData,
+  credentials?: TranscriptionCredentials | null
+) {
+  const accountId = resolveCloudflareAccountId(credentials);
+  if (!accountId) {
+    return audioErrorResponse(
+      400,
+      "Cloudflare Workers AI transcription requires an Account ID on the connection"
+    );
+  }
+
+  const url = buildCloudflareTranscriptionUrl(providerConfig.baseUrl, accountId, modelId);
+  url.searchParams.set("punctuate", "true");
+  const diarize = readDiarizationFlag(formData);
+  if (diarize) url.searchParams.set("diarize", "true");
+  const language = readFormString(formData, "language");
+  if (language) url.searchParams.set("language", language);
+
+  const res = await fetch(url.toString(), {
+    method: "POST",
+    headers: {
+      ...buildAuthHeaders(providerConfig, token),
+      "Content-Type": resolveAudioContentType(file),
+    },
+    body: await file.arrayBuffer(),
+  });
+  if (!res.ok) {
+    return upstreamErrorResponse(res, await res.text());
+  }
+
+  const data: unknown = await res.json();
+  const envelopeError = readCloudflareEnvelopeError(data);
+  if (envelopeError) {
+    const code = envelopeError.code === null ? "" : ` (code ${envelopeError.code})`;
+    return audioErrorResponse(502, `Cloudflare Workers AI transcription failed${code}`);
+  }
+
+  const verbose =
+    diarize || readFormString(formData, "response_format").toLowerCase() === "verbose_json";
+  const body = verbose
+    ? cloudflareNova3ToVerboseJson(data, language)
+    : { text: readCloudflareTranscript(data) };
+  return Response.json(body, { headers: { ...CORS_HEADERS } });
 }
 
 /**
@@ -1054,6 +1119,17 @@ export async function handleAudioTranscription({
 
   if (providerConfig.format === "deepgram") {
     return handleDeepgramTranscription(providerConfig, file, modelId, token, formData);
+  }
+
+  if (providerConfig.format === "cloudflare-workers-ai") {
+    return handleCloudflareWorkersAiTranscription(
+      providerConfig,
+      file,
+      modelId as string,
+      token as string,
+      formData,
+      credentials
+    );
   }
 
   if (providerConfig.format === "assemblyai") {
