@@ -26,10 +26,9 @@ import { readCodexPeekChunk, buildCodexTimeoutSafePassthroughBody } from "./code
 import { stripCodexPassthroughRejectedParams } from "./codex/stripPassthroughRejectedParams.ts";
 import {
   CODEX_CLI_RS_ORIGINATOR,
-  getCodexClientVersion,
-  getCodexClientVersionFromHeaders,
   getCodexUserAgent,
   normalizeCodexSessionId,
+  resolveCodexAdvertisedVersion,
 } from "../config/codexClient.ts";
 import type { KeyHealth } from "../services/apiKeyRotator.ts";
 import {
@@ -330,7 +329,9 @@ function normalizeEffortValue(value: unknown): string | undefined {
   return normalized || undefined;
 }
 
-function ensureCodexReasoningSummary(body: Record<string, unknown>): void {
+function ensureCodexReasoningSummary(body: Record<string, unknown>, skipDefaults = false): void {
+  // #18124: a Chat-translated request for a safety-block model stays effort-only.
+  if (skipDefaults) return;
   const reasoning =
     body.reasoning && typeof body.reasoning === "object" && !Array.isArray(body.reasoning)
       ? (body.reasoning as Record<string, unknown>)
@@ -349,6 +350,13 @@ function ensureCodexReasoningSummary(body: Record<string, unknown>): void {
   if (!body.include.includes(CODEX_REASONING_ENCRYPTED_CONTENT_INCLUDE)) {
     body.include = [...body.include, CODEX_REASONING_ENCRYPTED_CONTENT_INCLUDE];
   }
+}
+
+// Set by the Chat -> Responses translator (#18124); see REASONING_SUMMARY_OPT_OUT_MARKER.
+function consumeReasoningSummaryOptOutMarker(body: Record<string, unknown>): boolean {
+  const marker = body._omnirouteSkipReasoningSummaryDefault;
+  delete body._omnirouteSkipReasoningSummaryDefault;
+  return marker === true;
 }
 
 function consumeResponsesStoreMarker(body: Record<string, unknown>): unknown {
@@ -1204,8 +1212,8 @@ export class CodexExecutor extends BaseExecutor {
     // version (e.g. "The 'gpt-6-astra' model requires a newer version of Codex"),
     // so a hardcoded value silently rots whenever the user upgrades their CLI.
     // Falls back to the configured/default version when the caller sends none.
-    const clientVersion = getCodexClientVersionFromHeaders(clientHeaders);
-    headers.Version = clientVersion ?? getCodexClientVersion();
+    const clientVersion = resolveCodexAdvertisedVersion(clientHeaders);
+    headers.Version = clientVersion;
     setUserAgentHeader(headers, getCodexUserAgent(clientVersion));
 
     // Add workspace binding header if workspaceId is persisted
@@ -1332,6 +1340,7 @@ export class CodexExecutor extends BaseExecutor {
     const thinkingBudgetConfig = getThinkingBudgetConfig();
     const allowConnectionReasoningDefaults = thinkingBudgetConfig.mode === ThinkingMode.PASSTHROUGH;
     consumeResponsesStoreMarker(body);
+    const skipReasoningSummaryDefaults = consumeReasoningSummaryOptOutMarker(body);
 
     // Codex /responses rejects stream=false, but /responses/compact rejects the stream field entirely.
     if (isCompactRequest) {
@@ -1487,7 +1496,7 @@ export class CodexExecutor extends BaseExecutor {
       allowConnectionReasoningDefaults,
       getForcedReasoningEffort(credentials)
     );
-    ensureCodexReasoningSummary(body);
+    ensureCodexReasoningSummary(body, skipReasoningSummaryDefaults);
     if (isCompactRequest) {
       delete body.include;
     }

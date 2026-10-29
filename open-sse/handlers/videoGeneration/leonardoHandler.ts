@@ -7,10 +7,7 @@
  */
 
 import { saveCallLog } from "@/lib/usageDb";
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import { abortedVideoResult, POLL_ABORTED, pollJsonAfter } from "./abort.ts";
 
 export async function handleLeonardoVideoGeneration({
   model,
@@ -19,6 +16,7 @@ export async function handleLeonardoVideoGeneration({
   body,
   credentials,
   log,
+  signal = null,
 }) {
   const startTime = Date.now();
   const token = credentials?.apiKey || "";
@@ -62,11 +60,14 @@ export async function handleLeonardoVideoGeneration({
   }
   const deadline = Date.now() + 300000;
   while (Date.now() < deadline) {
-    await sleep(5000);
-    const statusRes = await fetch(`${providerConfig.baseUrl}/${genId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const status = await statusRes.json();
+    const status = await pollJsonAfter(
+      5000,
+
+      `${providerConfig.baseUrl}/${genId}`,
+      { Authorization: `Bearer ${token}` },
+      signal
+    );
+    if (status === POLL_ABORTED) return abortedVideoResult();
     const gen = status.generations_by_pk || status;
     if (gen.status === "COMPLETE") {
       const imgUrl = gen.generated_images?.[0]?.url;
