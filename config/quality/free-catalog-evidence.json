@@ -61,6 +61,30 @@
   ],
   "evidence": [
     {
+      "provider": "tokenharbor",
+      "modelId": "deepseek-v4.1-flash:free",
+      "catalogHash": "8fb6456c60000aedd34cbe5ae8971cda61bce8111a6ee8ca3f177f756aea8d90",
+      "sourceType": "public-page",
+      "sourceUrl": "https://tokenharbor.ai/models?category=free",
+      "checkedAt": "2026-10-29",
+      "claim": "recurring-free-access",
+      "verifiedBy": "Petrusreno (delegated public-source audit)",
+      "summary": "The official Free catalog lists this exact model ID as Free. Official billing documentation at https://tokenharbor.ai/docs/billing/cashback#free-model-access describes explicit :free routes with a personal rolling 7-day allowance and no wallet charges.",
+      "limitations": "Requires an eligible account and enabling free routes. Allowance is shared and measured by list-price value; no fixed token quantity is published. Model availability and limits may change. Free-route conversations may be retained and read by staff or serving providers after opt-in. Paid base IDs remain paid. Public-source review only; no authenticated API or inference was tested, and this record does not guarantee unlimited capacity."
+    },
+    {
+      "provider": "tokenharbor",
+      "modelId": "mimo-v2.6-flash:free",
+      "catalogHash": "8fb6456c60000aedd34cbe5ae8971cda61bce8111a6ee8ca3f177f756aea8d90",
+      "sourceType": "public-page",
+      "sourceUrl": "https://tokenharbor.ai/models?category=free",
+      "checkedAt": "2026-10-29",
+      "claim": "recurring-free-access",
+      "verifiedBy": "Petrusreno (delegated public-source audit)",
+      "summary": "The official Free catalog lists this exact model ID as Free. Official billing documentation at https://tokenharbor.ai/docs/billing/cashback#free-model-access describes explicit :free routes with a personal rolling 7-day allowance and no wallet charges.",
+      "limitations": "Requires an eligible account and enabling free routes. Allowance is shared and measured by list-price value; no fixed token quantity is published. Model availability and limits may change. Free-route conversations may be retained and read by staff or serving providers after opt-in. Paid base IDs remain paid. Public-source review only; no authenticated API or inference was tested, and this record does not guarantee unlimited capacity."
+    },
+    {
       "provider": "glm-cn",
       "modelId": "glm-4.7-flash",
       "catalogHash": "c234f5fc2562aae4cd897acf65423ffd0a179364f8d7054b6d01505823e88156",
