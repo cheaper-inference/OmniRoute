@@ -20,6 +20,7 @@ import "./usage/migrations";
 // Re-export everything for backward compatibility
 export {
   trackPendingRequest,
+  capturePendingRequestOwner,
   updatePendingRequest,
   updatePendingRequestStreamChunks,
   finalizePendingRequest,
@@ -30,6 +31,7 @@ export {
   appendRequestLog,
   getRecentLogs,
 } from "./usage/usageHistory";
+export type { PendingRequestIdentity, PendingRequestOwner } from "./usage/usageHistory";
 export { getConnectionSpeedStats } from "./usage/connectionSpeedStats";
 
 export { calculateCost } from "./usage/costCalculator";

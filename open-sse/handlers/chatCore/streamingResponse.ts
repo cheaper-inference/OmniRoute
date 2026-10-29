@@ -367,7 +367,14 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       // fail-open: saturation signal is best-effort
     }
   } catch (error) {
-    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    trackPendingRequest(
+      model,
+      provider,
+      pendingConnId,
+      false,
+      undefined,
+      pendingScope.owner ?? pendingRequestId
+    );
     const errorMetadata = getSafeErrorMetadata(error);
     const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
     if (managedLeaseFenceCode)
@@ -802,7 +809,14 @@ export async function runStreamingResponse(deps: StreamingDeps) {
 
   // Check provider response - return error info for fallback handling
   providerFailure: if (!providerResponse.ok) {
-    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    trackPendingRequest(
+      model,
+      provider,
+      pendingConnId,
+      false,
+      undefined,
+      pendingScope.owner ?? pendingRequestId
+    );
 
     let statusCode = providerResponse.status;
     let message = "";

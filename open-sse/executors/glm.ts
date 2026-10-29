@@ -232,8 +232,8 @@ export function translateSseResponse(
   // GLM is a high-throughput provider: a 64 KB queue budget keeps provider ->
   // client pacing ahead of the model's emission rate. #12179 asked for this by
   // passing a 16th positional the helper did not take (a TS2554 that never
-  // reached the TransformStream); the helper now accepts it as its last
-  // parameter, so the request finally takes effect (#12925).
+  // reached the TransformStream); the helper now accepts it in slot 18
+  // (#12925). The outer request owns pending cleanup; this adapter only translates.
   const transform = createSSETransformStreamWithLogger(
     FORMATS.CLAUDE,
     FORMATS.OPENAI,
@@ -252,7 +252,8 @@ export function translateSseResponse(
     undefined,
     undefined,
     null,
-    streamBufferBytes
+    streamBufferBytes,
+    false
   );
   const headers = cloneHeaders(response.headers);
   headers.set("content-type", "text/event-stream");

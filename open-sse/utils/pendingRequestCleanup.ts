@@ -1,10 +1,13 @@
 import { trackPendingRequest } from "@/lib/usageDb";
+import type { PendingRequestIdentity } from "@/lib/usageDb";
+
+export type { PendingRequestIdentity, PendingRequestOwner } from "@/lib/usageDb";
 
 export type PendingCleanup = {
   model: string | null;
   provider: string | null;
   connectionId: string | null;
-  pendingRequestId?: string | null;
+  pendingRequestId?: PendingRequestIdentity | null;
 };
 
 export function clearPendingRequestOnce(seen: { done: boolean }, c: PendingCleanup): void {
