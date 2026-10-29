@@ -23,6 +23,7 @@ import {
 import { estimateSizeFast } from "../../utils/estimateSize.ts";
 import { jsonLength } from "../../utils/jsonSize.ts";
 import { COMBO_FAILURE_THRESHOLD, recordComboFailure } from "./failureTracker.ts";
+import { COMBO_HEDGE_CANCELLED_REASON } from "./comboAbortReasons.ts";
 import {
   buildAllTargetsCoolingDownResponse,
   buildNoUpstreamResponseDiagnostics,
@@ -415,14 +416,19 @@ export async function dispatchWithCooldownRetry(opts: {
                 anySuccess = true;
                 globalResolve!(res.response!);
                 for (const [idx, ac] of state.abortControllers.entries()) {
-                  if (idx !== i) ac.abort();
+                  // Reasoned abort: a superseded sibling must be distinguishable
+                  // from a client disconnect downstream (fetch rejection, stream
+                  // teardown, attempt logging) — a bare abort reads as "client
+                  // closed the request" and pollutes 499 metrics with hedge
+                  // cancellations the client never made.
+                  if (idx !== i) ac.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
                 }
               } else if (res.response) {
                 // Fatal error, abort combo
                 anySuccess = true;
                 globalResolve!(res.response);
                 for (const [idx, ac] of state.abortControllers.entries()) {
-                  if (idx !== i) ac.abort();
+                  if (idx !== i) ac.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
                 }
               }
             }
