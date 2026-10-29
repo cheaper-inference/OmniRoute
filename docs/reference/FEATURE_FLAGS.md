@@ -46,23 +46,24 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-112 flags across 6 categories. **Default** is the definition default — the value
+113 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
-### Security (10)
+### Security (11)
 
-| Key                                     | Type    | Default  | Description                                                                                                                                                                                                                                                    |
-| --------------------------------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `REQUIRE_API_KEY`                       | boolean | `false`  | Require an API key for all incoming requests.                                                                                                                                                                                                                  |
-| `INPUT_SANITIZER_ENABLED`               | boolean | `true`   | Enable input sanitization for all requests.                                                                                                                                                                                                                    |
-| `INJECTION_GUARD_MODE`                  | enum    | `off`    | Prompt injection guard mode. Values: `off`, `warn`, `block`, `redact`.                                                                                                                                                                                         |
-| `PII_REDACTION_ENABLED`                 | boolean | `false`  | Redact PII from requests (independent of `INPUT_SANITIZER_MODE`).                                                                                                                                                                                              |
-| `PII_RESPONSE_SANITIZATION`             | boolean | `false`  | Sanitize PII from provider responses.                                                                                                                                                                                                                          |
-| `PII_RESPONSE_SANITIZATION_MODE`        | enum    | `redact` | Mode for PII response sanitization. Values: `redact`, `warn`, `block`, `off`.                                                                                                                                                                                  |
-| `OUTBOUND_SSRF_GUARD_ENABLED`           | boolean | `true`   | Legacy alias: a value saved on this flag's dashboard toggle is read before the environment; `false`, `0`, `no`, or `off` in either turns the outbound URL guard's host checks off like `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`.                                |
-| `ALLOW_API_KEY_REVEAL`                  | boolean | `false`  | Allow authenticated dashboard users to reveal stored API keys instead of only seeing masked values.                                                                                                                                                            |
-| `AUTH_LOG_INCLUDE_ACCOUNT_ID`           | boolean | `false`  | Include account prefix in AUTH log lines (e.g. "Using <provider> account: abc12345..."). Disabled by default so account identifiers are redacted from shared/multi-tenant process logs. Independent from Debug Mode; flipping Debug Mode does not reveal this. |
-| `OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN` | boolean | `false`  | When OIDC is enabled, disable password login so users can only authenticate via OIDC Single Sign-On. When disabled (default), both password login and OIDC are available.                                                                                      |
+| Key                                     | Type    | Default  | Description                                                                                                                                                                                                                                                                   |
+| --------------------------------------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `REQUIRE_API_KEY`                       | boolean | `false`  | Require an API key for all incoming requests.                                                                                                                                                                                                                                 |
+| `INPUT_SANITIZER_ENABLED`               | boolean | `true`   | Enable input sanitization for all requests.                                                                                                                                                                                                                                   |
+| `INJECTION_GUARD_MODE`                  | enum    | `off`    | Prompt injection guard mode. Values: `off`, `warn`, `block`, `redact`.                                                                                                                                                                                                        |
+| `PII_REDACTION_ENABLED`                 | boolean | `false`  | Redact PII from requests (independent of `INPUT_SANITIZER_MODE`).                                                                                                                                                                                                             |
+| `PII_RESPONSE_SANITIZATION`             | boolean | `false`  | Sanitize PII from provider responses.                                                                                                                                                                                                                                         |
+| `PII_RESPONSE_SANITIZATION_MODE`        | enum    | `redact` | Mode for PII response sanitization. Values: `redact`, `warn`, `block`, `off`.                                                                                                                                                                                                 |
+| `OUTBOUND_SSRF_GUARD_ENABLED`           | boolean | `true`   | Legacy alias: a value saved on this flag's dashboard toggle is read before the environment; `false`, `0`, `no`, or `off` in either turns the outbound URL guard's host checks off like `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`.                                               |
+| `ALLOW_API_KEY_REVEAL`                  | boolean | `false`  | Allow authenticated dashboard users to reveal stored API keys instead of only seeing masked values.                                                                                                                                                                           |
+| `AUTH_LOG_INCLUDE_ACCOUNT_ID`           | boolean | `false`  | Include account prefix in AUTH log lines (e.g. "Using <provider> account: abc12345..."). Disabled by default so account identifiers are redacted from shared/multi-tenant process logs. Independent from Debug Mode; flipping Debug Mode does not reveal this.                |
+| `OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN` | boolean | `false`  | When OIDC is enabled, disable password login so users can only authenticate via OIDC Single Sign-On. When disabled (default), both password login and OIDC are available.                                                                                                     |
+| `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED`  | boolean | `false`  | Record the caller's IP address and user-agent on the `api_key.auth.touch` audit-log rows written for successful API-key metadata and discovery reads (#17982). Off by default: those rows still record which key was used, when, and on which path, without IP or user-agent. |
 
 ### Network (29)
 
@@ -256,7 +257,7 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 112 flags
+    // ... all 113 flags
   ],
   "summary": {
     "total": 56,

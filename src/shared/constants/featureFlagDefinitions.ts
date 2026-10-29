@@ -48,6 +48,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "info",
   },
   {
+    key: "API_KEY_AUDIT_CLIENT_DETAILS_ENABLED",
+    label: "API Key Audit: Record Client IP and User-Agent",
+    description:
+      "Record the caller's IP address and user-agent on the audit-log rows written for successful API-key metadata and discovery reads (action api_key.auth.touch). Off by default: those rows still record which key was used, when, and on which path, without IP or user-agent.",
+    descriptionI18nKey: "featureFlagApiKeyAuditClientDetailsEnabledDescription",
+    category: "security",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "PII_REDACTION_ENABLED",
     label: "PII Redaction",
     description: "Redact personally identifiable information from requests",
