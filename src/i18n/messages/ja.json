@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "接続（各アカウントにはそれぞれのブレーカーがあります）",
     "resilienceTokenRefreshThreshold": "一時停止までの失敗回数",
     "resilienceTokenRefreshCooldown": "トリップ後の一時停止",
+    "mfaTitle": "二要素認証",
+    "mfaDesc": "ダッシュボードへのサインインや CLI の接続に、パスワードに加えて認証アプリのコードを必須にします。",
+    "mfaScanQr": "この QR コードを認証アプリでスキャンし(またはセットアップキーを手動で入力し)、表示された 6 桁のコードを入力してください。",
+    "mfaManualKey": "セットアップキー",
+    "mfaCodeLabel": "確認コード",
+    "mfaBackupCodesTitle": "リカバリーコードを保存してください",
+    "mfaBackupCodesDesc": "認証アプリにアクセスできなくなった場合、各コードで 1 回サインインできます。再表示されません。",
+    "mfaBackupCodesRemaining": "残りのリカバリーコード: {count}",
+    "mfaDisableDesc": "二要素認証をオフにするには、パスワードと現在のコード(またはリカバリーコード)を入力してください。",
+    "mfaRecoveryHint": "デバイス紛失時の復旧: OMNIROUTE_DISABLE_MFA=true でサーバーを起動し、ホスト自体からサインインしてください。",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA が設定されています: このホストからのサインインでは第 2 要素が省略されます。アクセスを回復したら解除してください。",
     "piiMasking": {
       "title": "個人情報のマスキング",
       "description": "マスクする個人データの種類を選び、独自のパターンを追加します。下に表示されている機能フラグを有効にするまで、マスキングはオフのままです。",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "削除",
     "settingsJson": "settings.json",
     "fromDataDir": "データディレクトリから",
-    "relaunchApp": "OmniRoute デスクトップアプリを再起動します"
+    "relaunchApp": "OmniRoute デスクトップアプリを再起動します",
+    "mfaPrompt": "認証アプリに表示されたコードを入力してください",
+    "mfaCodeLabel": "確認コード",
+    "mfaCodePlaceholder": "6 桁のコードまたはリカバリーコード",
+    "mfaBackupCodeHint": "デバイスを紛失しましたか?代わりにリカバリーコードのいずれかを入力してください。"
   },
   "landing": {
     "brandName": "オムニルート",

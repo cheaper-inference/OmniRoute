@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Muunganisho (kila akaunti ina kipochi chake cha kuzima)",
     "resilienceTokenRefreshThreshold": "Kushindwa kabla ya kusimamisha",
     "resilienceTokenRefreshCooldown": "Mapumziko baada ya kuamilishwa",
+    "mfaTitle": "Uthibitishaji wa hatua mbili",
+    "mfaDesc": "Hitaji msimbo kutoka kwenye programu ya uthibitishaji, pamoja na nenosiri, ili kuingia kwenye dashibodi au kuunganisha CLI.",
+    "mfaScanQr": "Changanua msimbo huu wa QR kwa programu yako ya uthibitishaji (au weka ufunguo wa kusanidi wewe mwenyewe), kisha andika msimbo wa tarakimu 6 unaoonyeshwa.",
+    "mfaManualKey": "Ufunguo wa kusanidi",
+    "mfaCodeLabel": "Msimbo wa uthibitisho",
+    "mfaBackupCodesTitle": "Hifadhi misimbo yako ya urejeshaji",
+    "mfaBackupCodesDesc": "Kila msimbo unakuingiza mara moja ukipoteza ufikiaji wa programu yako ya uthibitishaji. Haitaonyeshwa tena.",
+    "mfaBackupCodesRemaining": "Misimbo ya urejeshaji iliyobaki: {count}",
+    "mfaDisableDesc": "Weka nenosiri lako na msimbo wa sasa (au msimbo wa urejeshaji) ili kuzima uthibitishaji wa hatua mbili.",
+    "mfaRecoveryHint": "Urejeshaji wa kifaa kilichopotea: anzisha seva ukiwa na OMNIROUTE_DISABLE_MFA=true kisha uingie kutoka kwenye seva pangishi yenyewe.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA imewekwa: kuingia kutoka kwenye seva pangishi hii kunaruka hatua ya pili. Iondoe mara utakapoingia tena.",
     "piiMasking": {
       "title": "Kuficha data binafsi",
       "description": "Chagua aina zipi za data binafsi zifichwe na uongeze ruwaza zako mwenyewe. Kuficha kunabaki kumezimwa hadi uwashe bendera za vipengele zilizoonyeshwa hapa chini.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Futa",
     "settingsJson": "settings.json",
     "fromDataDir": "kutoka kwenye saraka ya data",
-    "relaunchApp": "Anzisha upya programu ya desktop ya OmniRoute"
+    "relaunchApp": "Anzisha upya programu ya desktop ya OmniRoute",
+    "mfaPrompt": "Weka msimbo kutoka kwenye programu yako ya uthibitishaji",
+    "mfaCodeLabel": "Msimbo wa uthibitisho",
+    "mfaCodePlaceholder": "Msimbo wa tarakimu 6 au msimbo wa urejeshaji",
+    "mfaBackupCodeHint": "Umepoteza kifaa chako? Badala yake weka mojawapo ya misimbo yako ya urejeshaji."
   },
   "landing": {
     "brandName": "OmniRoute",

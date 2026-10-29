@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Muhuji (kowane asusu na da na'sa na musu)",
     "resilienceTokenRefreshThreshold": "Kuskuren kafin tsayawa",
     "resilienceTokenRefreshCooldown": "Huta bayan kuskuro",
+    "mfaTitle": "Tantancewa ta mataki biyu",
+    "mfaDesc": "Bukaci lamba daga manhajar tantancewa, ban da kalmar sirri, don shiga dashboard ko haɗa CLI.",
+    "mfaScanQr": "Duba wannan lambar QR da manhajar tantancewarka (ko shigar da maɓallin saitawa da hannu), sannan rubuta lambar mai lambobi 6 da ta nuna.",
+    "mfaManualKey": "Maɓallin saitawa",
+    "mfaCodeLabel": "Lambar tabbatarwa",
+    "mfaBackupCodesTitle": "Ajiye lambobin dawowarka",
+    "mfaBackupCodesDesc": "Kowace lamba tana shigar da kai sau ɗaya idan ka rasa damar shiga manhajar tantancewarka. Ba za a sake nuna su ba.",
+    "mfaBackupCodesRemaining": "Lambobin dawowa da suka rage: {count}",
+    "mfaDisableDesc": "Shigar da kalmar sirrinka da lamba ta yanzu (ko lambar dawowa) don kashe tantancewa ta mataki biyu.",
+    "mfaRecoveryHint": "Dawo da na'urar da aka rasa: fara sabar da OMNIROUTE_DISABLE_MFA=true kuma ka shiga daga mai masaukin kansa.",
+    "mfaRecoverySwitchActive": "An saita OMNIROUTE_DISABLE_MFA: shiga daga wannan mai masaukin yana tsallake mataki na biyu. Cire shi da zarar ka sake samun damar shiga.",
     "piiMasking": {
       "title": "Ɓoye bayanan sirri",
       "description": "Zaɓi irin bayanan sirri da za a ɓoye kuma ka ƙara naka tsarin. Ɓoyewa za ta kasance a kashe har sai ka kunna tutocin fasali da aka nuna a ƙasa.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Share",
     "settingsJson": "settings.json",
     "fromDataDir": "daga kundin bayanai",
-    "relaunchApp": "Sake ƙaddamar da manhajar tebur ta OmniRoute"
+    "relaunchApp": "Sake ƙaddamar da manhajar tebur ta OmniRoute",
+    "mfaPrompt": "Shigar da lambar daga manhajar tantancewarka",
+    "mfaCodeLabel": "Lambar tabbatarwa",
+    "mfaCodePlaceholder": "Lamba mai lambobi 6 ko lambar dawowa",
+    "mfaBackupCodeHint": "Ka rasa na'urarka? Shigar da ɗaya daga cikin lambobin dawowarka maimakon haka."
   },
   "landing": {
     "brandName": "OmniRoute",

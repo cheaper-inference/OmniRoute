@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "연결(각 계정마다 고유한 차단기가 있습니다)",
     "resilienceTokenRefreshThreshold": "일시 중지 전 실패 횟수",
     "resilienceTokenRefreshCooldown": "작동 후 일시 중지",
+    "mfaTitle": "2단계 인증",
+    "mfaDesc": "대시보드에 로그인하거나 CLI를 연결할 때 비밀번호와 함께 인증 앱의 코드를 요구합니다.",
+    "mfaScanQr": "인증 앱으로 이 QR 코드를 스캔하거나(또는 설정 키를 직접 입력한 뒤) 표시된 6자리 코드를 입력하세요.",
+    "mfaManualKey": "설정 키",
+    "mfaCodeLabel": "인증 코드",
+    "mfaBackupCodesTitle": "복구 코드를 저장하세요",
+    "mfaBackupCodesDesc": "인증 앱에 접근할 수 없게 되면 각 코드로 한 번 로그인할 수 있습니다. 다시 표시되지 않습니다.",
+    "mfaBackupCodesRemaining": "남은 복구 코드: {count}",
+    "mfaDisableDesc": "2단계 인증을 끄려면 비밀번호와 현재 코드(또는 복구 코드)를 입력하세요.",
+    "mfaRecoveryHint": "기기 분실 시 복구: OMNIROUTE_DISABLE_MFA=true로 서버를 시작하고 호스트에서 직접 로그인하세요.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA가 설정되어 있습니다: 이 호스트에서의 로그인은 두 번째 단계를 건너뜁니다. 다시 접근한 뒤에는 해제하세요.",
     "piiMasking": {
       "title": "개인정보 마스킹",
       "description": "마스킹할 개인 데이터 유형을 선택하고 직접 패턴을 추가하세요. 아래 표시된 기능 플래그를 켜기 전까지 마스킹은 꺼져 있습니다.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "삭제",
     "settingsJson": "settings.json",
     "fromDataDir": "데이터 디렉토리에서",
-    "relaunchApp": "OmniRoute 데스크탑 앱을 다시 시작하세요."
+    "relaunchApp": "OmniRoute 데스크탑 앱을 다시 시작하세요.",
+    "mfaPrompt": "인증 앱에 표시된 코드를 입력하세요",
+    "mfaCodeLabel": "인증 코드",
+    "mfaCodePlaceholder": "6자리 코드 또는 복구 코드",
+    "mfaBackupCodeHint": "기기를 분실하셨나요? 대신 복구 코드 중 하나를 입력하세요."
   },
   "landing": {
     "brandName": "OmniRoute",

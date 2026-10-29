@@ -1,0 +1,1 @@
+- **feat(auth):** opt-in TOTP two-factor authentication with single-use recovery codes for dashboard login; while it is on, `/api/cli/connect` also requires the code (`omniroute connect --totp`), and `OMNIROUTE_DISABLE_MFA=true` gives a host-only recovery path ([#16619](https://github.com/diegosouzapw/OmniRoute/pull/16619)) — thanks @tugrultamerc

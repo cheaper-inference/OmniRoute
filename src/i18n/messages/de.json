@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Verbindung (jedes Konto hat eigenen Schutzschalter)",
     "resilienceTokenRefreshThreshold": "Fehler vor der Pause",
     "resilienceTokenRefreshCooldown": "Pause nach Auslösung",
+    "mfaTitle": "Zwei-Faktor-Authentifizierung",
+    "mfaDesc": "Zusätzlich zum Passwort einen Code aus einer Authenticator-App verlangen, um sich am Dashboard anzumelden oder die CLI zu verbinden.",
+    "mfaScanQr": "Scannen Sie diesen QR-Code mit Ihrer Authenticator-App (oder geben Sie den Einrichtungsschlüssel manuell ein) und tippen Sie dann den angezeigten 6-stelligen Code ein.",
+    "mfaManualKey": "Einrichtungsschlüssel",
+    "mfaCodeLabel": "Bestätigungscode",
+    "mfaBackupCodesTitle": "Speichern Sie Ihre Wiederherstellungscodes",
+    "mfaBackupCodesDesc": "Jeder Code ermöglicht eine einmalige Anmeldung, falls Sie den Zugriff auf Ihren Authenticator verlieren. Sie werden nicht erneut angezeigt.",
+    "mfaBackupCodesRemaining": "Verbleibende Wiederherstellungscodes: {count}",
+    "mfaDisableDesc": "Geben Sie Ihr Passwort und einen aktuellen Code (oder einen Wiederherstellungscode) ein, um die Zwei-Faktor-Authentifizierung zu deaktivieren.",
+    "mfaRecoveryHint": "Wiederherstellung bei verlorenem Gerät: Starten Sie den Server mit OMNIROUTE_DISABLE_MFA=true und melden Sie sich direkt am Host an.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA ist gesetzt: Anmeldungen von diesem Host überspringen den zweiten Faktor. Entfernen Sie die Variable, sobald Sie wieder Zugriff haben.",
     "piiMasking": {
       "title": "PII-Maskierung",
       "description": "Wählen Sie, welche Arten personenbezogener Daten maskiert werden, und fügen Sie eigene Muster hinzu. Die Maskierung bleibt aus, bis Sie die unten angezeigten Feature-Flags aktivieren.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Löschen",
     "settingsJson": "settings.json",
     "fromDataDir": "aus dem Datenverzeichnis",
-    "relaunchApp": "Starten Sie die OmniRoute-Desktopanwendung neu"
+    "relaunchApp": "Starten Sie die OmniRoute-Desktopanwendung neu",
+    "mfaPrompt": "Geben Sie den Code aus Ihrer Authenticator-App ein",
+    "mfaCodeLabel": "Bestätigungscode",
+    "mfaCodePlaceholder": "6-stelliger Code oder Wiederherstellungscode",
+    "mfaBackupCodeHint": "Gerät verloren? Geben Sie stattdessen einen Ihrer Wiederherstellungscodes ein."
   },
   "landing": {
     "brandName": "OmniRoute",

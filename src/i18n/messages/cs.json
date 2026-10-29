@@ -9143,6 +9143,17 @@
     "resilienceTokenRefreshScopeConnection": "Připojení (každý účet má vlastní jistič)",
     "resilienceTokenRefreshThreshold": "Neúspěchy před pozastavením",
     "resilienceTokenRefreshCooldown": "Pauza po spuštění",
+    "mfaTitle": "Dvoufázové ověření",
+    "mfaDesc": "Vyžadovat kromě hesla také kód z ověřovací aplikace pro přihlášení do panelu nebo připojení CLI.",
+    "mfaScanQr": "Naskenujte tento QR kód ověřovací aplikací (nebo zadejte instalační klíč ručně) a poté napište zobrazený šestimístný kód.",
+    "mfaManualKey": "Instalační klíč",
+    "mfaCodeLabel": "Ověřovací kód",
+    "mfaBackupCodesTitle": "Uložte si kódy pro obnovení",
+    "mfaBackupCodesDesc": "Každý kód vás jednou přihlásí, pokud ztratíte přístup k ověřovací aplikaci. Znovu se již nezobrazí.",
+    "mfaBackupCodesRemaining": "Zbývající kódy pro obnovení: {count}",
+    "mfaDisableDesc": "Zadejte heslo a aktuální kód (nebo kód pro obnovení) pro vypnutí dvoufázového ověření.",
+    "mfaRecoveryHint": "Obnovení ztraceného zařízení: spusťte server s OMNIROUTE_DISABLE_MFA=true a přihlaste se přímo z hostitele.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA je nastaveno: přihlášení z tohoto hostitele přeskakují druhý faktor. Po obnovení přístupu jej zrušte.",
     "piiMasking": {
       "title": "Maskování osobních údajů",
       "description": "Vyberte, které druhy osobních údajů se maskují, a přidejte vlastní vzory. Maskování zůstává vypnuté, dokud nezapnete níže zobrazené příznaky funkcí.",
@@ -10827,7 +10838,11 @@
     "deleteAndRelaunch": "Smazat",
     "settingsJson": "settings.json",
     "fromDataDir": "z datového adresáře",
-    "relaunchApp": "Znovu spusťte desktopovou aplikaci OmniRoute"
+    "relaunchApp": "Znovu spusťte desktopovou aplikaci OmniRoute",
+    "mfaPrompt": "Zadejte kód z ověřovací aplikace",
+    "mfaCodeLabel": "Ověřovací kód",
+    "mfaCodePlaceholder": "Šestimístný kód nebo kód pro obnovení",
+    "mfaBackupCodeHint": "Ztratili jste zařízení? Zadejte místo toho jeden z kódů pro obnovení."
   },
   "landing": {
     "brandName": "OmniRoute",

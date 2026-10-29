@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Yhteys (jokaisella tilillä on oma katkaisija)",
     "resilienceTokenRefreshThreshold": "Virheitä ennen tauottamista",
     "resilienceTokenRefreshCooldown": "Tauko laukeamisen jälkeen",
+    "mfaTitle": "Kaksivaiheinen tunnistautuminen",
+    "mfaDesc": "Vaadi salasanan lisäksi todennussovelluksen koodi kojelautaan kirjautumiseen tai CLI:n yhdistämiseen.",
+    "mfaScanQr": "Skannaa tämä QR-koodi todennussovelluksella (tai syötä asetusavain käsin) ja kirjoita sitten sen näyttämä 6-numeroinen koodi.",
+    "mfaManualKey": "Asetusavain",
+    "mfaCodeLabel": "Vahvistuskoodi",
+    "mfaBackupCodesTitle": "Tallenna palautuskoodisi",
+    "mfaBackupCodesDesc": "Kukin koodi kirjaa sinut sisään kerran, jos menetät pääsyn todennussovellukseen. Niitä ei näytetä uudelleen.",
+    "mfaBackupCodesRemaining": "Palautuskoodeja jäljellä: {count}",
+    "mfaDisableDesc": "Poista kaksivaiheinen tunnistautuminen käytöstä antamalla salasanasi ja voimassa oleva koodi (tai palautuskoodi).",
+    "mfaRecoveryHint": "Kadonneen laitteen palautus: käynnistä palvelin asetuksella OMNIROUTE_DISABLE_MFA=true ja kirjaudu sisään suoraan isäntäkoneelta.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA on asetettu: tältä isäntäkoneelta kirjautuminen ohittaa toisen vaiheen. Poista se, kun pääsy on palautunut.",
     "piiMasking": {
       "title": "Henkilötietojen peittäminen",
       "description": "Valitse, minkä tyyppiset henkilötiedot peitetään, ja lisää omia malleja. Peittäminen on pois päältä, kunnes otat käyttöön alla näkyvät ominaisuusliput.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Poista",
     "settingsJson": "settings.json",
     "fromDataDir": "data-hakemistosta",
-    "relaunchApp": "Käynnistä OmniRoute-työpöytäsovellus uudelleen"
+    "relaunchApp": "Käynnistä OmniRoute-työpöytäsovellus uudelleen",
+    "mfaPrompt": "Anna todennussovelluksen näyttämä koodi",
+    "mfaCodeLabel": "Vahvistuskoodi",
+    "mfaCodePlaceholder": "6-numeroinen koodi tai palautuskoodi",
+    "mfaBackupCodeHint": "Kadotitko laitteesi? Anna sen sijaan jokin palautuskoodeistasi."
   },
   "landing": {
     "brandName": "OmniRoute",

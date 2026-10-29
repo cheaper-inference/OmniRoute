@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Sambungan (setiap akaun mempunyai pemutus litar sendiri)",
     "resilienceTokenRefreshThreshold": "Kegagalan sebelum menjeda",
     "resilienceTokenRefreshCooldown": "Jeda selepas terpicu",
+    "mfaTitle": "Pengesahan dua faktor",
+    "mfaDesc": "Wajibkan kod daripada aplikasi pengesah, selain kata laluan, untuk log masuk ke papan pemuka atau menyambungkan CLI.",
+    "mfaScanQr": "Imbas kod QR ini dengan aplikasi pengesah anda (atau masukkan kunci persediaan secara manual), kemudian taip kod 6 digit yang dipaparkan.",
+    "mfaManualKey": "Kunci persediaan",
+    "mfaCodeLabel": "Kod pengesahan",
+    "mfaBackupCodesTitle": "Simpan kod pemulihan anda",
+    "mfaBackupCodesDesc": "Setiap kod membolehkan anda log masuk sekali jika anda kehilangan akses kepada pengesah. Kod ini tidak akan dipaparkan lagi.",
+    "mfaBackupCodesRemaining": "Baki kod pemulihan: {count}",
+    "mfaDisableDesc": "Masukkan kata laluan dan kod semasa (atau kod pemulihan) untuk mematikan pengesahan dua faktor.",
+    "mfaRecoveryHint": "Pemulihan peranti hilang: mulakan pelayan dengan OMNIROUTE_DISABLE_MFA=true dan log masuk dari hos itu sendiri.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA ditetapkan: log masuk dari hos ini melangkau faktor kedua. Buangkannya sebaik sahaja anda dapat masuk semula.",
     "piiMasking": {
       "title": "Penyamaran data peribadi",
       "description": "Pilih jenis data peribadi yang disamarkan dan tambah corak anda sendiri. Penyamaran kekal dimatikan sehingga anda menghidupkan bendera ciri yang dipaparkan di bawah.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Padam",
     "settingsJson": "settings.json",
     "fromDataDir": "dari direktori data",
-    "relaunchApp": "Lancar semula aplikasi desktop OmniRoute"
+    "relaunchApp": "Lancar semula aplikasi desktop OmniRoute",
+    "mfaPrompt": "Masukkan kod daripada aplikasi pengesah anda",
+    "mfaCodeLabel": "Kod pengesahan",
+    "mfaCodePlaceholder": "Kod 6 digit atau kod pemulihan",
+    "mfaBackupCodeHint": "Kehilangan peranti? Masukkan salah satu kod pemulihan anda sebagai ganti."
   },
   "landing": {
     "brandName": "OmniRoute",

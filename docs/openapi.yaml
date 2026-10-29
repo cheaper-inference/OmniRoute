@@ -4751,11 +4751,18 @@ paths:
                 name: { type: string }
                 scope: { type: string, enum: [read, write, admin] }
                 expiresInDays: { type: integer, minimum: 1, maximum: 3650 }
+                totp:
+                  type: string
+                  description: >
+                    Required while dashboard two-factor authentication is enabled — a
+                    6-digit TOTP code or a single-use recovery code.
       responses:
         "200":
           description: Token minted (token returned once)
         "401":
-          description: Invalid password
+          description: >
+            Invalid password, or two-factor authentication is enabled and `totp` is
+            missing or wrong (body carries `mfaRequired: true`)
         "429":
           description: Too many failed attempts
 
@@ -6918,13 +6925,132 @@ paths:
                   minLength: 1
       responses:
         "200":
-          description: JWT token returned
+          description: >
+            Session cookie set. When two-factor authentication is enabled the body is
+            `{ success: false, mfaRequired: true }` instead and only a short-lived
+            MFA-pending cookie is set; finish with `POST /api/auth/mfa/verify`.
         "400":
           description: Invalid login request
         "401":
           description: Invalid password
         "403":
           description: Password setup required
+        "429":
+          description: Too many failed attempts
+
+  /api/auth/mfa/verify:
+    post:
+      tags: [System]
+      summary: Complete a two-factor sign-in
+      description: >
+        Login step 2 (public). Trades the MFA-pending cookie set by `/api/auth/login`
+        plus a TOTP or recovery code for the dashboard session cookie. Shares the
+        login brute-force lockout; a TOTP step and a recovery code are each accepted once.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, minLength: 1, maxLength: 64 }
+      responses:
+        "200":
+          description: Session cookie set (`method` is `totp` or `backup_code`)
+        "400":
+          description: Invalid request body
+        "401":
+          description: Invalid code, or the pending sign-in expired (`mfaExpired`)
+        "429":
+          description: Too many failed attempts
+
+  /api/auth/mfa/status:
+    get:
+      tags: [System]
+      summary: Two-factor authentication status
+      responses:
+        "200":
+          description: "`enabled`, `backupCodesRemaining`, `enabledAt`, `recoverySwitchSet`"
+        "401":
+          description: Authentication required
+
+  /api/auth/mfa/setup:
+    post:
+      tags: [System]
+      summary: Start two-factor enrollment
+      description: >
+        Re-authenticates with the current password and returns a candidate TOTP secret,
+        its `otpauth://` URI and a QR code (PNG data URI). Nothing is persisted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string, minLength: 1 }
+      responses:
+        "200":
+          description: Enrollment secret, otpauth URI and QR code
+        "401":
+          description: Invalid password
+        "409":
+          description: Two-factor authentication is already enabled
+        "429":
+          description: Too many failed attempts
+
+  /api/auth/mfa/enable:
+    post:
+      tags: [System]
+      summary: Finish two-factor enrollment
+      description: >
+        Persists the secret (encrypted at rest) once the current password and a code
+        generated from it both verify. Returns ten single-use recovery codes, shown once.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password, secret, code]
+              properties:
+                password: { type: string, minLength: 1 }
+                secret: { type: string, description: Base32 secret from /api/auth/mfa/setup }
+                code: { type: string }
+      responses:
+        "200":
+          description: Enabled; `backupCodes` returned once
+        "401":
+          description: Invalid password or code
+        "409":
+          description: Two-factor authentication is already enabled
+        "429":
+          description: Too many failed attempts
+
+  /api/auth/mfa/disable:
+    post:
+      tags: [System]
+      summary: Turn two-factor authentication off
+      description: Requires the current password and a live TOTP or recovery code.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password, code]
+              properties:
+                password: { type: string, minLength: 1 }
+                code: { type: string }
+      responses:
+        "200":
+          description: Disabled; secret and recovery codes removed
+        "401":
+          description: Invalid password or code
+        "409":
+          description: Two-factor authentication is not enabled
         "429":
           description: Too many failed attempts
 

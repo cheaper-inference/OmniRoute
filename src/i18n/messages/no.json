@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Tilkobling (hver konto har sin egen breaker)",
     "resilienceTokenRefreshThreshold": "Feil før pausing",
     "resilienceTokenRefreshCooldown": "Pause etter utløsning",
+    "mfaTitle": "Tofaktorautentisering",
+    "mfaDesc": "Krev en kode fra en autentiseringsapp, i tillegg til passordet, for å logge inn på dashbordet eller koble til CLI-en.",
+    "mfaScanQr": "Skann denne QR-koden med autentiseringsappen din (eller skriv inn oppsettnøkkelen manuelt), og skriv deretter inn den 6-sifrede koden som vises.",
+    "mfaManualKey": "Oppsettnøkkel",
+    "mfaCodeLabel": "Bekreftelseskode",
+    "mfaBackupCodesTitle": "Lagre gjenopprettingskodene dine",
+    "mfaBackupCodesDesc": "Hver kode logger deg inn én gang hvis du mister tilgangen til autentiseringsappen. De vises ikke igjen.",
+    "mfaBackupCodesRemaining": "Gjenværende gjenopprettingskoder: {count}",
+    "mfaDisableDesc": "Skriv inn passordet ditt og en gjeldende kode (eller en gjenopprettingskode) for å slå av tofaktorautentisering.",
+    "mfaRecoveryHint": "Gjenoppretting ved mistet enhet: start serveren med OMNIROUTE_DISABLE_MFA=true og logg inn fra selve verten.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA er satt: pålogginger fra denne verten hopper over den andre faktoren. Fjern den når du er inne igjen.",
     "piiMasking": {
       "title": "PII-maskering",
       "description": "Velg hvilke typer personopplysninger som maskeres, og legg til egne mønstre. Maskeringen er av til du slår på funksjonsflaggene som vises nedenfor.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Slett",
     "settingsJson": "settings.json",
     "fromDataDir": "fra datakatalogen",
-    "relaunchApp": "Start på nytt OmniRoute skrivebordsapp'en"
+    "relaunchApp": "Start på nytt OmniRoute skrivebordsapp'en",
+    "mfaPrompt": "Skriv inn koden fra autentiseringsappen din",
+    "mfaCodeLabel": "Bekreftelseskode",
+    "mfaCodePlaceholder": "6-sifret kode eller gjenopprettingskode",
+    "mfaBackupCodeHint": "Mistet enheten? Skriv inn en av gjenopprettingskodene dine i stedet."
   },
   "landing": {
     "brandName": "OmniRoute",

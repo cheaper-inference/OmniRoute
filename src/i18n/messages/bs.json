@@ -9143,6 +9143,17 @@
     "resilienceTokenRefreshScopeConnection": "Veza (svaki nalog ima vlastiti prekidač)",
     "resilienceTokenRefreshThreshold": "Neuspjesi prije pauze",
     "resilienceTokenRefreshCooldown": "Pauza nakon aktiviranja",
+    "mfaTitle": "Dvofaktorska autentifikacija",
+    "mfaDesc": "Zahtijevajte kod iz aplikacije za autentifikaciju, uz lozinku, za prijavu na kontrolnu tablu ili povezivanje CLI-ja.",
+    "mfaScanQr": "Skenirajte ovaj QR kod aplikacijom za autentifikaciju (ili ručno unesite ključ za postavljanje), zatim upišite prikazani šestocifreni kod.",
+    "mfaManualKey": "Ključ za postavljanje",
+    "mfaCodeLabel": "Verifikacijski kod",
+    "mfaBackupCodesTitle": "Sačuvajte kodove za oporavak",
+    "mfaBackupCodesDesc": "Svaki kod vas jednom prijavljuje ako izgubite pristup aplikaciji za autentifikaciju. Neće biti ponovo prikazani.",
+    "mfaBackupCodesRemaining": "Preostali kodovi za oporavak: {count}",
+    "mfaDisableDesc": "Unesite lozinku i trenutni kod (ili kod za oporavak) da isključite dvofaktorsku autentifikaciju.",
+    "mfaRecoveryHint": "Oporavak izgubljenog uređaja: pokrenite server sa OMNIROUTE_DISABLE_MFA=true i prijavite se sa samog hosta.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA je postavljen: prijave s ovog hosta preskaču drugi faktor. Uklonite ga kada ponovo dobijete pristup.",
     "piiMasking": {
       "title": "Maskiranje ličnih podataka",
       "description": "Odaberite koje se vrste ličnih podataka maskiraju i dodajte vlastite uzorke. Maskiranje ostaje isključeno dok ne uključite zastavice funkcija prikazane ispod.",
@@ -10827,7 +10838,11 @@
     "deleteAndRelaunch": "Obriši",
     "settingsJson": "settings.json",
     "fromDataDir": "iz direktorijuma podataka",
-    "relaunchApp": "Ponovo pokreni OmniRoute desktop aplikaciju"
+    "relaunchApp": "Ponovo pokreni OmniRoute desktop aplikaciju",
+    "mfaPrompt": "Unesite kod iz aplikacije za autentifikaciju",
+    "mfaCodeLabel": "Verifikacijski kod",
+    "mfaCodePlaceholder": "Šestocifreni kod ili kod za oporavak",
+    "mfaBackupCodeHint": "Izgubili ste uređaj? Umjesto toga unesite jedan od kodova za oporavak."
   },
   "landing": {
     "brandName": "OmniRoute",

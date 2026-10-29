@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Bağlantı (her hesabın kendi kesici devresi vardır)",
     "resilienceTokenRefreshThreshold": "Duraklatmadan önceki hatalar",
     "resilienceTokenRefreshCooldown": "Tetiklendikten sonra duraklat",
+    "mfaTitle": "İki faktörlü kimlik doğrulama",
+    "mfaDesc": "Panoya giriş yapmak veya CLI'yi bağlamak için parolaya ek olarak bir kimlik doğrulama uygulamasından kod iste.",
+    "mfaScanQr": "Bu QR kodunu kimlik doğrulama uygulamanızla tarayın (veya kurulum anahtarını elle girin), ardından gösterilen 6 haneli kodu yazın.",
+    "mfaManualKey": "Kurulum anahtarı",
+    "mfaCodeLabel": "Doğrulama kodu",
+    "mfaBackupCodesTitle": "Kurtarma kodlarınızı kaydedin",
+    "mfaBackupCodesDesc": "Kimlik doğrulama uygulamanıza erişiminizi kaybederseniz her kod bir kez giriş yapmanızı sağlar. Bir daha gösterilmeyecekler.",
+    "mfaBackupCodesRemaining": "Kalan kurtarma kodları: {count}",
+    "mfaDisableDesc": "İki faktörlü kimlik doğrulamayı kapatmak için parolanızı ve geçerli bir kodu (veya bir kurtarma kodunu) girin.",
+    "mfaRecoveryHint": "Kayıp cihaz kurtarma: sunucuyu OMNIROUTE_DISABLE_MFA=true ile başlatın ve doğrudan ana makineden giriş yapın.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA ayarlı: bu ana makineden yapılan girişler ikinci faktörü atlar. Erişimi geri kazandığınızda kaldırın.",
     "piiMasking": {
       "title": "Kişisel veri maskeleme",
       "description": "Hangi kişisel veri türlerinin maskeleneceğini seçin ve kendi desenlerinizi ekleyin. Aşağıda gösterilen özellik bayraklarını açana kadar maskeleme kapalı kalır.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Sil",
     "settingsJson": "settings.json",
     "fromDataDir": "veri dizininden",
-    "relaunchApp": "OmniRoute masaüstü uygulamasını yeniden başlatın"
+    "relaunchApp": "OmniRoute masaüstü uygulamasını yeniden başlatın",
+    "mfaPrompt": "Kimlik doğrulama uygulamanızdaki kodu girin",
+    "mfaCodeLabel": "Doğrulama kodu",
+    "mfaCodePlaceholder": "6 haneli kod veya kurtarma kodu",
+    "mfaBackupCodeHint": "Cihazınızı mı kaybettiniz? Bunun yerine kurtarma kodlarınızdan birini girin."
   },
   "landing": {
     "brandName": "OmniRoute",

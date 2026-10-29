@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Ulanish (har bir hisobning o'z uzgichi bor)",
     "resilienceTokenRefreshThreshold": "To'xtatishdan oldingi xatolar",
     "resilienceTokenRefreshCooldown": "Ishga tushgach pauza",
+    "mfaTitle": "Ikki bosqichli autentifikatsiya",
+    "mfaDesc": "Boshqaruv paneliga kirish yoki CLI’ni ulash uchun paroldan tashqari autentifikator ilovasidagi kodni talab qilish.",
+    "mfaScanQr": "Ushbu QR kodni autentifikator ilovangiz bilan skanerlang (yoki sozlash kalitini qo‘lda kiriting), so‘ng ko‘rsatilgan 6 xonali kodni yozing.",
+    "mfaManualKey": "Sozlash kaliti",
+    "mfaCodeLabel": "Tasdiqlash kodi",
+    "mfaBackupCodesTitle": "Tiklash kodlaringizni saqlang",
+    "mfaBackupCodesDesc": "Autentifikatorga kirish imkonini yo‘qotsangiz, har bir kod sizni bir marta tizimga kiritadi. Ular qayta ko‘rsatilmaydi.",
+    "mfaBackupCodesRemaining": "Qolgan tiklash kodlari: {count}",
+    "mfaDisableDesc": "Ikki bosqichli autentifikatsiyani o‘chirish uchun parolingiz va joriy kodni (yoki tiklash kodini) kiriting.",
+    "mfaRecoveryHint": "Yo‘qolgan qurilmani tiklash: serverni OMNIROUTE_DISABLE_MFA=true bilan ishga tushiring va to‘g‘ridan-to‘g‘ri xostdan kiring.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA o‘rnatilgan: bu xostdan kirishlar ikkinchi bosqichni o‘tkazib yuboradi. Qayta kirganingizdan so‘ng uni olib tashlang.",
     "piiMasking": {
       "title": "Shaxsiy ma'lumotlarni niqoblash",
       "description": "Qaysi turdagi shaxsiy ma'lumotlar niqoblanishini tanlang va o'z andozalaringizni qo'shing. Quyida ko'rsatilgan funksiya bayroqlarini yoqmaguningizcha niqoblash o'chiq turadi.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "O‘chirish",
     "settingsJson": "settings.json",
     "fromDataDir": "ma’lumotlar katalogidan",
-    "relaunchApp": "OmniRoute ish stoli ilovasini qayta ishga tushiring"
+    "relaunchApp": "OmniRoute ish stoli ilovasini qayta ishga tushiring",
+    "mfaPrompt": "Autentifikator ilovangizdagi kodni kiriting",
+    "mfaCodeLabel": "Tasdiqlash kodi",
+    "mfaCodePlaceholder": "6 xonali kod yoki tiklash kodi",
+    "mfaBackupCodeHint": "Qurilmangizni yo‘qotdingizmi? O‘rniga tiklash kodlaringizdan birini kiriting."
   },
   "landing": {
     "brandName": "OmniRoute",

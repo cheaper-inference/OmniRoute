@@ -9143,6 +9143,17 @@
     "resilienceTokenRefreshScopeConnection": "Bağlantı (hər hesabın öz açarı var)",
     "resilienceTokenRefreshThreshold": "Fasilə verilmədən əvvəl uğursuzluqlar",
     "resilienceTokenRefreshCooldown": "İşə düşdükdən sonra fasilə",
+    "mfaTitle": "İki faktorlu autentifikasiya",
+    "mfaDesc": "İdarə panelinə daxil olmaq və ya CLI-ni qoşmaq üçün paroldan əlavə autentifikator tətbiqindən kod tələb edin.",
+    "mfaScanQr": "Bu QR kodu autentifikator tətbiqinizlə skan edin (və ya quraşdırma açarını əl ilə daxil edin), sonra göstərilən 6 rəqəmli kodu yazın.",
+    "mfaManualKey": "Quraşdırma açarı",
+    "mfaCodeLabel": "Təsdiq kodu",
+    "mfaBackupCodesTitle": "Bərpa kodlarınızı saxlayın",
+    "mfaBackupCodesDesc": "Autentifikatorunuza girişi itirsəniz, hər kod sizi bir dəfə daxil edir. Onlar yenidən göstərilməyəcək.",
+    "mfaBackupCodesRemaining": "Qalan bərpa kodları: {count}",
+    "mfaDisableDesc": "İki faktorlu autentifikasiyanı söndürmək üçün parolunuzu və cari kodu (və ya bərpa kodunu) daxil edin.",
+    "mfaRecoveryHint": "İtirilmiş cihazın bərpası: serveri OMNIROUTE_DISABLE_MFA=true ilə başladın və hostun özündən daxil olun.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA təyin edilib: bu hostdan girişlər ikinci faktoru keçir. Geri qayıtdıqdan sonra onu silin.",
     "piiMasking": {
       "title": "Şəxsi məlumatların maskalanması",
       "description": "Hansı növ şəxsi məlumatların maskalanacağını seçin və öz nümunələrinizi əlavə edin. Aşağıda göstərilən funksiya bayraqlarını yandırana qədər maskalama söndürülmüş qalır.",
@@ -10827,7 +10838,11 @@
     "deleteAndRelaunch": "Silin",
     "settingsJson": "settings.json",
     "fromDataDir": "məlumat qovluğundan",
-    "relaunchApp": "OmniRoute masaüstü tətbiqini yenidən işə salın"
+    "relaunchApp": "OmniRoute masaüstü tətbiqini yenidən işə salın",
+    "mfaPrompt": "Autentifikator tətbiqinizdəki kodu daxil edin",
+    "mfaCodeLabel": "Təsdiq kodu",
+    "mfaCodePlaceholder": "6 rəqəmli kod və ya bərpa kodu",
+    "mfaBackupCodeHint": "Cihazınızı itirmisiniz? Əvəzində bərpa kodlarınızdan birini daxil edin."
   },
   "landing": {
     "brandName": "OmniRoute",

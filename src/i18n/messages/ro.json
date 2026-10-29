@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Conexiune (fiecare cont are propriul său întrerupător)",
     "resilienceTokenRefreshThreshold": "Eșecuri înainte de pauză",
     "resilienceTokenRefreshCooldown": "Pauză după declanșare",
+    "mfaTitle": "Autentificare în doi pași",
+    "mfaDesc": "Solicitați, pe lângă parolă, un cod dintr-o aplicație de autentificare pentru conectarea la panou sau pentru conectarea CLI.",
+    "mfaScanQr": "Scanați acest cod QR cu aplicația de autentificare (sau introduceți manual cheia de configurare), apoi tastați codul din 6 cifre afișat.",
+    "mfaManualKey": "Cheie de configurare",
+    "mfaCodeLabel": "Cod de verificare",
+    "mfaBackupCodesTitle": "Salvați codurile de recuperare",
+    "mfaBackupCodesDesc": "Fiecare cod vă conectează o singură dată dacă pierdeți accesul la aplicația de autentificare. Nu vor mai fi afișate.",
+    "mfaBackupCodesRemaining": "Coduri de recuperare rămase: {count}",
+    "mfaDisableDesc": "Introduceți parola și un cod curent (sau un cod de recuperare) pentru a dezactiva autentificarea în doi pași.",
+    "mfaRecoveryHint": "Recuperare dispozitiv pierdut: porniți serverul cu OMNIROUTE_DISABLE_MFA=true și conectați-vă direct de pe gazdă.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA este setat: conectările de pe această gazdă omit al doilea factor. Eliminați-l după ce vă recăpătați accesul.",
     "piiMasking": {
       "title": "Mascarea datelor personale",
       "description": "Alegeți ce tipuri de date personale sunt mascate și adăugați propriile modele. Mascarea rămâne dezactivată până când activați feature flag-urile afișate mai jos.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Șterge",
     "settingsJson": "settings.json",
     "fromDataDir": "din directorul de date",
-    "relaunchApp": "Relansează aplicația desktop OmniRoute"
+    "relaunchApp": "Relansează aplicația desktop OmniRoute",
+    "mfaPrompt": "Introduceți codul din aplicația de autentificare",
+    "mfaCodeLabel": "Cod de verificare",
+    "mfaCodePlaceholder": "Cod din 6 cifre sau cod de recuperare",
+    "mfaBackupCodeHint": "Ați pierdut dispozitivul? Introduceți în schimb unul dintre codurile de recuperare."
   },
   "landing": {
     "brandName": "OmniRoute",

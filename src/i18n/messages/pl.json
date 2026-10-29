@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Połączenie (każde konto ma własny wyłącznik)",
     "resilienceTokenRefreshThreshold": "Liczba błędów przed wstrzymaniem",
     "resilienceTokenRefreshCooldown": "Pauza po wyzwoleniu",
+    "mfaTitle": "Uwierzytelnianie dwuskładnikowe",
+    "mfaDesc": "Wymagaj, oprócz hasła, kodu z aplikacji uwierzytelniającej przy logowaniu do panelu lub łączeniu CLI.",
+    "mfaScanQr": "Zeskanuj ten kod QR aplikacją uwierzytelniającą (lub wprowadź ręcznie klucz konfiguracji), a następnie wpisz wyświetlony 6-cyfrowy kod.",
+    "mfaManualKey": "Klucz konfiguracji",
+    "mfaCodeLabel": "Kod weryfikacyjny",
+    "mfaBackupCodesTitle": "Zapisz kody odzyskiwania",
+    "mfaBackupCodesDesc": "Każdy kod pozwala zalogować się jeden raz, jeśli stracisz dostęp do aplikacji uwierzytelniającej. Nie zostaną wyświetlone ponownie.",
+    "mfaBackupCodesRemaining": "Pozostałe kody odzyskiwania: {count}",
+    "mfaDisableDesc": "Wprowadź hasło i bieżący kod (lub kod odzyskiwania), aby wyłączyć uwierzytelnianie dwuskładnikowe.",
+    "mfaRecoveryHint": "Odzyskiwanie po utracie urządzenia: uruchom serwer z OMNIROUTE_DISABLE_MFA=true i zaloguj się bezpośrednio z hosta.",
+    "mfaRecoverySwitchActive": "Ustawiono OMNIROUTE_DISABLE_MFA: logowania z tego hosta pomijają drugi składnik. Usuń tę zmienną po odzyskaniu dostępu.",
     "piiMasking": {
       "title": "Maskowanie danych osobowych",
       "description": "Wybierz, które rodzaje danych osobowych mają być maskowane, i dodaj własne wzorce. Maskowanie pozostaje wyłączone, dopóki nie włączysz flag funkcji pokazanych poniżej.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Usuń",
     "settingsJson": "settings.json",
     "fromDataDir": "z katalogu danych",
-    "relaunchApp": "Uruchom ponownie aplikację desktopową OmniRoute"
+    "relaunchApp": "Uruchom ponownie aplikację desktopową OmniRoute",
+    "mfaPrompt": "Wprowadź kod z aplikacji uwierzytelniającej",
+    "mfaCodeLabel": "Kod weryfikacyjny",
+    "mfaCodePlaceholder": "6-cyfrowy kod lub kod odzyskiwania",
+    "mfaBackupCodeHint": "Zgubiłeś urządzenie? Wprowadź zamiast tego jeden z kodów odzyskiwania."
   },
   "landing": {
     "brandName": "OmniRoute",

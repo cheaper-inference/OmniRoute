@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Njikọ (ọ bụrụ na ngwaọrụ ọ bụla nwere ya nke ya)",
     "resilienceTokenRefreshThreshold": "Njefọ n'ihu ka a ga-egbu oge",
     "resilienceTokenRefreshCooldown": "Egwu mgbe e tinyere",
+    "mfaTitle": "Nkwenye nzọụkwụ abụọ",
+    "mfaDesc": "Chọọ koodu sitere na ngwa nkwenye, na mgbakwunye na okwuntughe, iji banye na dashboard ma ọ bụ jikọọ CLI.",
+    "mfaScanQr": "Nyochaa koodu QR a na ngwa nkwenye gị (ma ọ bụ tinye igodo ntọala n'aka), wee pịnye koodu ọnụọgụ 6 ọ na-egosi.",
+    "mfaManualKey": "Igodo ntọala",
+    "mfaCodeLabel": "Koodu nkwenye",
+    "mfaBackupCodesTitle": "Chekwaa koodu mgbake gị",
+    "mfaBackupCodesDesc": "Koodu ọ bụla na-abanye gị otu ugboro ma ọ bụrụ na ị tụfuru ohere na ngwa nkwenye gị. A gaghị egosi ha ọzọ.",
+    "mfaBackupCodesRemaining": "Koodu mgbake fọdụrụ: {count}",
+    "mfaDisableDesc": "Tinye okwuntughe gị na koodu dị ugbu a (ma ọ bụ koodu mgbake) iji gbanyụọ nkwenye nzọụkwụ abụọ.",
+    "mfaRecoveryHint": "Mgbake ngwaọrụ furu efu: malite sava ahụ na OMNIROUTE_DISABLE_MFA=true wee banye site na onye nnabata n'onwe ya.",
+    "mfaRecoverySwitchActive": "Edobere OMNIROUTE_DISABLE_MFA: mbanye site na onye nnabata a na-awụfe nzọụkwụ nke abụọ. Wepụ ya ozugbo ị laghachiri.",
     "piiMasking": {
       "title": "Nzuzo data onwe",
       "description": "Họrọ ụdị data onwe a ga-ezo ma tinye usoro nke gị. Nzuzo na-anọgide na-agbanyụ ruo mgbe ị gbanwụrụ ọkọlọtọ atụmatụ e gosiri n'okpuru.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Hichapụ",
     "settingsJson": "settings.json",
     "fromDataDir": "site na ndekọ data",
-    "relaunchApp": "Malitegharịa ngwa desktọpụ OmniRoute"
+    "relaunchApp": "Malitegharịa ngwa desktọpụ OmniRoute",
+    "mfaPrompt": "Tinye koodu sitere na ngwa nkwenye gị",
+    "mfaCodeLabel": "Koodu nkwenye",
+    "mfaCodePlaceholder": "Koodu nwere ọnụọgụ 6 ma ọ bụ koodu mgbake",
+    "mfaBackupCodeHint": "Ị tụfuru ngwaọrụ gị? Tinye otu n'ime koodu mgbake gị kama."
   },
   "landing": {
     "brandName": "OmniRoute",

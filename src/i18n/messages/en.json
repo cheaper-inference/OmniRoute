@@ -9143,6 +9143,17 @@
     "resilienceTokenRefreshScopeConnection": "Connection (each account has its own breaker)",
     "resilienceTokenRefreshThreshold": "Failures before pausing",
     "resilienceTokenRefreshCooldown": "Pause after tripping",
+    "mfaTitle": "Two-factor authentication",
+    "mfaDesc": "Require a code from an authenticator app, in addition to the password, to sign in to the dashboard or connect the CLI.",
+    "mfaScanQr": "Scan this QR code with your authenticator app (or enter the setup key manually), then type the 6-digit code it shows.",
+    "mfaManualKey": "Setup key",
+    "mfaCodeLabel": "Verification code",
+    "mfaBackupCodesTitle": "Save your recovery codes",
+    "mfaBackupCodesDesc": "Each code signs you in once if you lose access to your authenticator. They will not be shown again.",
+    "mfaBackupCodesRemaining": "Recovery codes left: {count}",
+    "mfaDisableDesc": "Enter your password and a current code (or a recovery code) to turn two-factor authentication off.",
+    "mfaRecoveryHint": "Lost-device recovery: start the server with OMNIROUTE_DISABLE_MFA=true and sign in from the host itself.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA is set: sign-ins from this host skip the second factor. Unset it once you are back in.",
     "piiMasking": {
       "title": "PII masking",
       "description": "Choose which kinds of personal data are masked and add your own patterns. Masking stays off until you turn on the feature flags shown below.",
@@ -10827,7 +10838,11 @@
     "deleteAndRelaunch": "Delete",
     "settingsJson": "settings.json",
     "fromDataDir": "from the data directory",
-    "relaunchApp": "Relaunch the OmniRoute desktop app"
+    "relaunchApp": "Relaunch the OmniRoute desktop app",
+    "mfaPrompt": "Enter the code from your authenticator app",
+    "mfaCodeLabel": "Verification code",
+    "mfaCodePlaceholder": "6-digit code or recovery code",
+    "mfaBackupCodeHint": "Lost your device? Enter one of your recovery codes instead."
   },
   "landing": {
     "brandName": "OmniRoute",

@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Koneksyon (bawat account ay may sariling breaker)",
     "resilienceTokenRefreshThreshold": "Mga kabiguan bago magpahinto",
     "resilienceTokenRefreshCooldown": "Magpahinga pagkatapos ma-trigger",
+    "mfaTitle": "Two-factor na pagpapatotoo",
+    "mfaDesc": "Mangailangan ng code mula sa authenticator app, bukod sa password, para mag-sign in sa dashboard o ikonekta ang CLI.",
+    "mfaScanQr": "I-scan ang QR code na ito gamit ang iyong authenticator app (o ilagay nang mano-mano ang setup key), pagkatapos ay i-type ang 6-digit na code na ipinapakita nito.",
+    "mfaManualKey": "Setup key",
+    "mfaCodeLabel": "Code sa pag-verify",
+    "mfaBackupCodesTitle": "I-save ang iyong mga recovery code",
+    "mfaBackupCodesDesc": "Bawat code ay magpapa-sign in sa iyo nang isang beses kung mawalan ka ng access sa iyong authenticator. Hindi na muling ipapakita ang mga ito.",
+    "mfaBackupCodesRemaining": "Natitirang recovery code: {count}",
+    "mfaDisableDesc": "Ilagay ang iyong password at kasalukuyang code (o recovery code) para i-off ang two-factor na pagpapatotoo.",
+    "mfaRecoveryHint": "Pagbawi kapag nawala ang device: simulan ang server gamit ang OMNIROUTE_DISABLE_MFA=true at mag-sign in mula mismo sa host.",
+    "mfaRecoverySwitchActive": "Naka-set ang OMNIROUTE_DISABLE_MFA: nilalaktawan ng mga sign-in mula sa host na ito ang pangalawang factor. Alisin ito kapag nakapasok ka na ulit.",
     "piiMasking": {
       "title": "Pagtatakip ng personal na datos",
       "description": "Piliin kung aling uri ng personal na datos ang tatakpan at magdagdag ng sarili mong mga pattern. Mananatiling naka-off ang pagtatakip hangga't hindi mo ini-on ang mga feature flag na nakikita sa ibaba.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Tanggalin",
     "settingsJson": "settings.json",
     "fromDataDir": "mula sa direktoryo ng data",
-    "relaunchApp": "I-relaunch ang OmniRoute desktop app"
+    "relaunchApp": "I-relaunch ang OmniRoute desktop app",
+    "mfaPrompt": "Ilagay ang code mula sa iyong authenticator app",
+    "mfaCodeLabel": "Code sa pag-verify",
+    "mfaCodePlaceholder": "6-digit na code o recovery code",
+    "mfaBackupCodeHint": "Nawala ang iyong device? Ilagay na lang ang isa sa iyong mga recovery code."
   },
   "landing": {
     "brandName": "OmniRoute",

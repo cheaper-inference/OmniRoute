@@ -9143,6 +9143,17 @@
     "resilienceTokenRefreshScopeConnection": "Connessione (ogni account ha il proprio circuit breaker)",
     "resilienceTokenRefreshThreshold": "Fallimenti prima della pausa",
     "resilienceTokenRefreshCooldown": "Pausa dopo l'attivazione",
+    "mfaTitle": "Autenticazione a due fattori",
+    "mfaDesc": "Richiedi un codice da un'app di autenticazione, oltre alla password, per accedere alla dashboard o collegare la CLI.",
+    "mfaScanQr": "Scansiona questo codice QR con la tua app di autenticazione (o inserisci manualmente la chiave di configurazione), quindi digita il codice a 6 cifre mostrato.",
+    "mfaManualKey": "Chiave di configurazione",
+    "mfaCodeLabel": "Codice di verifica",
+    "mfaBackupCodesTitle": "Salva i tuoi codici di recupero",
+    "mfaBackupCodesDesc": "Ogni codice consente un solo accesso se perdi l'accesso al tuo autenticatore. Non verranno mostrati di nuovo.",
+    "mfaBackupCodesRemaining": "Codici di recupero rimanenti: {count}",
+    "mfaDisableDesc": "Inserisci la password e un codice attuale (o un codice di recupero) per disattivare l'autenticazione a due fattori.",
+    "mfaRecoveryHint": "Recupero in caso di dispositivo perso: avvia il server con OMNIROUTE_DISABLE_MFA=true e accedi dall'host stesso.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA è impostata: gli accessi da questo host saltano il secondo fattore. Rimuovila una volta rientrato.",
     "piiMasking": {
       "title": "Mascheramento PII",
       "description": "Scegli quali tipi di dati personali mascherare e aggiungi i tuoi pattern. Il mascheramento resta disattivato finché non attivi i feature flag mostrati qui sotto.",
@@ -10827,7 +10838,11 @@
     "deleteAndRelaunch": "Elimina",
     "settingsJson": "settings.json",
     "fromDataDir": "dalla directory dei dati",
-    "relaunchApp": "Rilancia l'app desktop OmniRoute"
+    "relaunchApp": "Rilancia l'app desktop OmniRoute",
+    "mfaPrompt": "Inserisci il codice dalla tua app di autenticazione",
+    "mfaCodeLabel": "Codice di verifica",
+    "mfaCodePlaceholder": "Codice a 6 cifre o codice di recupero",
+    "mfaBackupCodeHint": "Hai perso il dispositivo? Inserisci invece uno dei tuoi codici di recupero."
   },
   "landing": {
     "brandName": "OmniRoute",

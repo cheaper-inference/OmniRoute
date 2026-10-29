@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Ceangal (tá meitneoir féin ag gach cuntas)",
     "resilienceTokenRefreshThreshold": "Teipimhí roimh an sos",
     "resilienceTokenRefreshCooldown": "Sos tar éis an rith a thosú",
+    "mfaTitle": "Fíordheimhniú dhá fhachtóir",
+    "mfaDesc": "Éiligh cód ó aip fíordheimhnithe, i dteannta an phasfhocail, chun síniú isteach sa phainéal nó an CLI a nascadh.",
+    "mfaScanQr": "Scan an cód QR seo le d'aip fíordheimhnithe (nó cuir an eochair socraithe isteach de láimh), ansin clóscríobh an cód 6 dhigit a thaispeánann sé.",
+    "mfaManualKey": "Eochair socraithe",
+    "mfaCodeLabel": "Cód fíoraithe",
+    "mfaBackupCodesTitle": "Sábháil do chóid aisghabhála",
+    "mfaBackupCodesDesc": "Síneoidh gach cód isteach thú uair amháin má chailleann tú rochtain ar d'fhíordheimhnitheoir. Ní thaispeánfar arís iad.",
+    "mfaBackupCodesRemaining": "Cóid aisghabhála fágtha: {count}",
+    "mfaDisableDesc": "Cuir isteach do phasfhocal agus cód reatha (nó cód aisghabhála) chun fíordheimhniú dhá fhachtóir a mhúchadh.",
+    "mfaRecoveryHint": "Aisghabháil gléis caillte: tosaigh an freastalaí le OMNIROUTE_DISABLE_MFA=true agus sínigh isteach ón óstach féin.",
+    "mfaRecoverySwitchActive": "Tá OMNIROUTE_DISABLE_MFA socraithe: ní iarrtar an dara fachtóir ar shínithe isteach ón óstach seo. Bain é nuair a bheidh tú istigh arís.",
     "piiMasking": {
       "title": "Folú sonraí pearsanta",
       "description": "Roghnaigh na cineálacha sonraí pearsanta a fholófar agus cuir do phatrúin féin leis. Fanann an folú múchta go dtí go gcasann tú air na bratacha gné a thaispeántar thíos.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Scrios",
     "settingsJson": "settings.json",
     "fromDataDir": "ón eolaire sonraí",
-    "relaunchApp": "Atosaigh aip deisce OmniRoute"
+    "relaunchApp": "Atosaigh aip deisce OmniRoute",
+    "mfaPrompt": "Cuir isteach an cód ó d'aip fíordheimhnithe",
+    "mfaCodeLabel": "Cód fíoraithe",
+    "mfaCodePlaceholder": "Cód 6 dhigit nó cód aisghabhála",
+    "mfaBackupCodeHint": "Ar chaill tú do ghléas? Cuir isteach ceann de do chóid aisghabhála ina ionad."
   },
   "landing": {
     "brandName": "OmniRoute",

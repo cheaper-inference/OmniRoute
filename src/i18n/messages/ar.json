@@ -9143,6 +9143,17 @@
     "resilienceTokenRefreshScopeConnection": "الاتصال (لكل حساب قاطع خاص به)",
     "resilienceTokenRefreshThreshold": "عدد الفشل قبل الإيقاف",
     "resilienceTokenRefreshCooldown": "الوقفة بعد التفعيل",
+    "mfaTitle": "المصادقة الثنائية",
+    "mfaDesc": "اطلب رمزًا من تطبيق مصادقة، بالإضافة إلى كلمة المرور، لتسجيل الدخول إلى لوحة التحكم أو ربط واجهة سطر الأوامر (CLI).",
+    "mfaScanQr": "امسح رمز QR هذا باستخدام تطبيق المصادقة (أو أدخل مفتاح الإعداد يدويًا)، ثم اكتب الرمز المكوّن من 6 أرقام الذي يظهره.",
+    "mfaManualKey": "مفتاح الإعداد",
+    "mfaCodeLabel": "رمز التحقق",
+    "mfaBackupCodesTitle": "احفظ رموز الاسترداد",
+    "mfaBackupCodesDesc": "كل رمز يتيح لك تسجيل الدخول مرة واحدة إذا فقدت الوصول إلى تطبيق المصادقة. لن تُعرض مرة أخرى.",
+    "mfaBackupCodesRemaining": "رموز الاسترداد المتبقية: {count}",
+    "mfaDisableDesc": "أدخل كلمة المرور ورمزًا حاليًا (أو رمز استرداد) لإيقاف المصادقة الثنائية.",
+    "mfaRecoveryHint": "استرداد الجهاز المفقود: شغّل الخادم مع OMNIROUTE_DISABLE_MFA=true وسجّل الدخول من المضيف نفسه.",
+    "mfaRecoverySwitchActive": "تم تعيين OMNIROUTE_DISABLE_MFA: عمليات تسجيل الدخول من هذا المضيف تتخطى العامل الثاني. ألغِ تعيينه بعد استعادة الوصول.",
     "piiMasking": {
       "title": "إخفاء البيانات الشخصية",
       "description": "اختر أنواع البيانات الشخصية التي يتم إخفاؤها وأضف أنماطك الخاصة. يبقى الإخفاء متوقفًا حتى تفعّل علامات الميزات الظاهرة أدناه.",
@@ -10827,7 +10838,11 @@
     "deleteAndRelaunch": "حذف",
     "settingsJson": "settings.json",
     "fromDataDir": "من دليل البيانات",
-    "relaunchApp": "أعد تشغيل تطبيق OmniRoute لسطح المكتب"
+    "relaunchApp": "أعد تشغيل تطبيق OmniRoute لسطح المكتب",
+    "mfaPrompt": "أدخل الرمز من تطبيق المصادقة",
+    "mfaCodeLabel": "رمز التحقق",
+    "mfaCodePlaceholder": "رمز من 6 أرقام أو رمز استرداد",
+    "mfaBackupCodeHint": "فقدت جهازك؟ أدخل أحد رموز الاسترداد بدلاً من ذلك."
   },
   "landing": {
     "brandName": "OmniRoute",

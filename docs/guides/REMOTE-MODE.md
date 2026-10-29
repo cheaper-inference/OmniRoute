@@ -67,6 +67,11 @@ Options: `--port <p>` (when the host has none), `--name <ctx>` (context name),
 `--scope read|write|admin`. A full URL is honoured as-is:
 `omniroute connect https://omni.example.com`.
 
+When the server has dashboard two-factor authentication enabled (Settings →
+Security), the password alone is refused: the CLI then asks for the code from the
+authenticator app (or a recovery code). Pass it up front with `--totp <code>` for
+non-interactive use.
+
 ### With a pre-generated token
 
 Generate a scoped token in the dashboard (or with `omniroute tokens create`) and
@@ -475,7 +480,7 @@ omniroute contexts remove 192-168-0-15 --yes   # drop the local context (even if
 
 | Method | Route                 | Auth                | Scope                      |
 | ------ | --------------------- | ------------------- | -------------------------- |
-| POST   | `/api/cli/connect`    | management password | — (public, password-gated) |
+| POST   | `/api/cli/connect`    | password; 2FA if on | — (public, password-gated) |
 | GET    | `/api/cli/whoami`     | access token        | read                       |
 | GET    | `/api/cli/tokens`     | access token        | admin                      |
 | POST   | `/api/cli/tokens`     | access token        | admin                      |

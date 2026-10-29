@@ -9143,6 +9143,17 @@
     "resilienceTokenRefreshScopeConnection": "Konnessjoni (kull kont għandu l-breaker tiegħu)",
     "resilienceTokenRefreshThreshold": "Fallimenti qabel ma jieqaf",
     "resilienceTokenRefreshCooldown": "Waqqaf wara li tinstab",
+    "mfaTitle": "Awtentikazzjoni b'żewġ fatturi",
+    "mfaDesc": "Itlob kodiċi minn app tal-awtentikazzjoni, flimkien mal-password, biex tidħol fid-dashboard jew tqabbad is-CLI.",
+    "mfaScanQr": "Skennja dan il-kodiċi QR bl-app tal-awtentikazzjoni tiegħek (jew daħħal iċ-ċavetta tas-setup manwalment), imbagħad ikteb il-kodiċi ta' 6 ċifri li turi.",
+    "mfaManualKey": "Ċavetta tas-setup",
+    "mfaCodeLabel": "Kodiċi ta' verifika",
+    "mfaBackupCodesTitle": "Issejvja l-kodiċijiet ta' rkupru tiegħek",
+    "mfaBackupCodesDesc": "Kull kodiċi jdaħħlek darba waħda jekk titlef l-aċċess għall-awtentikatur tiegħek. Mhumiex se jintwerew mill-ġdid.",
+    "mfaBackupCodesRemaining": "Kodiċijiet ta' rkupru li fadal: {count}",
+    "mfaDisableDesc": "Daħħal il-password tiegħek u kodiċi kurrenti (jew kodiċi ta' rkupru) biex titfi l-awtentikazzjoni b'żewġ fatturi.",
+    "mfaRecoveryHint": "Irkupru ta' apparat mitluf: ibda s-server b'OMNIROUTE_DISABLE_MFA=true u idħol mill-host innifsu.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA huwa ssettjat: id-dħul minn dan il-host jaqbeż it-tieni fattur. Neħħih ladarba terġa' tidħol.",
     "piiMasking": {
       "title": "Mascherament tad-data personali",
       "description": "Agħżel liema tipi ta' data personali jiġu mgħottija u żid il-mudelli tiegħek. Il-mascherament jibqa' mitfi sakemm tixgħel il-feature flags murija hawn taħt.",
@@ -10827,7 +10838,11 @@
     "deleteAndRelaunch": "Ħassar",
     "settingsJson": "settings.json",
     "fromDataDir": "mid-direttorju tad-data",
-    "relaunchApp": "Erġa’ niedi l-app tad-desktop OmniRoute"
+    "relaunchApp": "Erġa’ niedi l-app tad-desktop OmniRoute",
+    "mfaPrompt": "Daħħal il-kodiċi mill-app tal-awtentikazzjoni tiegħek",
+    "mfaCodeLabel": "Kodiċi ta' verifika",
+    "mfaCodePlaceholder": "Kodiċi ta' 6 ċifri jew kodiċi ta' rkupru",
+    "mfaBackupCodeHint": "Tlift l-apparat tiegħek? Minflok daħħal wieħed mill-kodiċijiet ta' rkupru tiegħek."
   },
   "landing": {
     "brandName": "OmniRoute",

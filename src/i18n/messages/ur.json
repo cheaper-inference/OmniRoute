@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "کنکشن (ہر اکاؤنٹ کا اپنا بریکر ہوتا ہے)",
     "resilienceTokenRefreshThreshold": "روکنے سے پہلے ناکامیاں",
     "resilienceTokenRefreshCooldown": "ٹرپ ہونے کے بعد وقفہ",
+    "mfaTitle": "دو مرحلہ تصدیق",
+    "mfaDesc": "ڈیش بورڈ میں سائن ان کرنے یا CLI منسلک کرنے کے لیے پاس ورڈ کے علاوہ تصدیقی ایپ کا کوڈ لازمی کریں۔",
+    "mfaScanQr": "اس QR کوڈ کو اپنی تصدیقی ایپ سے اسکین کریں (یا سیٹ اپ کلید دستی طور پر درج کریں)، پھر دکھایا گیا 6 ہندسوں کا کوڈ ٹائپ کریں۔",
+    "mfaManualKey": "سیٹ اپ کلید",
+    "mfaCodeLabel": "تصدیقی کوڈ",
+    "mfaBackupCodesTitle": "اپنے ریکوری کوڈز محفوظ کریں",
+    "mfaBackupCodesDesc": "تصدیقی ایپ تک رسائی کھونے کی صورت میں ہر کوڈ آپ کو ایک بار سائن ان کرواتا ہے۔ یہ دوبارہ نہیں دکھائے جائیں گے۔",
+    "mfaBackupCodesRemaining": "باقی ریکوری کوڈز: {count}",
+    "mfaDisableDesc": "دو مرحلہ تصدیق بند کرنے کے لیے اپنا پاس ورڈ اور موجودہ کوڈ (یا ریکوری کوڈ) درج کریں۔",
+    "mfaRecoveryHint": "کھوئے ہوئے آلے کی بحالی: سرور کو OMNIROUTE_DISABLE_MFA=true کے ساتھ شروع کریں اور خود ہوسٹ سے سائن ان کریں۔",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA سیٹ ہے: اس ہوسٹ سے سائن ان دوسرا مرحلہ چھوڑ دیتے ہیں۔ دوبارہ رسائی ملنے کے بعد اسے ہٹا دیں۔",
     "piiMasking": {
       "title": "ذاتی ڈیٹا کی پردہ پوشی",
       "description": "منتخب کریں کہ کس قسم کا ذاتی ڈیٹا چھپایا جائے اور اپنے پیٹرن شامل کریں۔ پردہ پوشی تب تک بند رہتی ہے جب تک آپ نیچے دکھائے گئے فیچر فلیگز آن نہ کریں۔",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "حذف کریں",
     "settingsJson": "settings.json",
     "fromDataDir": "ڈیٹا ڈائریکٹری سے",
-    "relaunchApp": "OmniRoute ڈیسک ٹاپ ایپ کو دوبارہ شروع کریں"
+    "relaunchApp": "OmniRoute ڈیسک ٹاپ ایپ کو دوبارہ شروع کریں",
+    "mfaPrompt": "اپنی تصدیقی ایپ سے کوڈ درج کریں",
+    "mfaCodeLabel": "تصدیقی کوڈ",
+    "mfaCodePlaceholder": "6 ہندسوں کا کوڈ یا ریکوری کوڈ",
+    "mfaBackupCodeHint": "آلہ کھو گیا؟ اس کے بجائے اپنے ریکوری کوڈز میں سے ایک درج کریں۔"
   },
   "landing": {
     "brandName": "OmniRoute",

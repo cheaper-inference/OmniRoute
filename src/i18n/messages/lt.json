@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Ryšys (kiekviena paskyra turi savo pertraukiklį)",
     "resilienceTokenRefreshThreshold": "Nesėkmės prieš pristabdant",
     "resilienceTokenRefreshCooldown": "Pauzė po suveikimo",
+    "mfaTitle": "Dviejų veiksnių autentifikavimas",
+    "mfaDesc": "Be slaptažodžio reikalauti autentifikavimo programėlės kodo norint prisijungti prie skydelio ar prijungti CLI.",
+    "mfaScanQr": "Nuskaitykite šį QR kodą autentifikavimo programėle (arba įveskite sąrankos raktą rankiniu būdu), tada įrašykite rodomą 6 skaitmenų kodą.",
+    "mfaManualKey": "Sąrankos raktas",
+    "mfaCodeLabel": "Patvirtinimo kodas",
+    "mfaBackupCodesTitle": "Išsaugokite atkūrimo kodus",
+    "mfaBackupCodesDesc": "Kiekvienas kodas leidžia prisijungti vieną kartą, jei prarasite prieigą prie autentifikavimo programėlės. Jie daugiau nebus rodomi.",
+    "mfaBackupCodesRemaining": "Likę atkūrimo kodai: {count}",
+    "mfaDisableDesc": "Įveskite slaptažodį ir dabartinį kodą (arba atkūrimo kodą), kad išjungtumėte dviejų veiksnių autentifikavimą.",
+    "mfaRecoveryHint": "Pamesto įrenginio atkūrimas: paleiskite serverį su OMNIROUTE_DISABLE_MFA=true ir prisijunkite tiesiai iš pagrindinio kompiuterio.",
+    "mfaRecoverySwitchActive": "Nustatytas OMNIROUTE_DISABLE_MFA: prisijungimai iš šio pagrindinio kompiuterio praleidžia antrąjį veiksnį. Pašalinkite jį, kai vėl prisijungsite.",
     "piiMasking": {
       "title": "Asmens duomenų maskavimas",
       "description": "Pasirinkite, kokių tipų asmens duomenys maskuojami, ir pridėkite savo šablonų. Maskavimas išjungtas, kol neįjungsite toliau rodomų funkcijų vėliavėlių.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Ištrinkite",
     "settingsJson": "settings.json",
     "fromDataDir": "iš duomenų katalogo",
-    "relaunchApp": "Iš naujo paleiskite OmniRoute darbalaukio programą"
+    "relaunchApp": "Iš naujo paleiskite OmniRoute darbalaukio programą",
+    "mfaPrompt": "Įveskite kodą iš autentifikavimo programėlės",
+    "mfaCodeLabel": "Patvirtinimo kodas",
+    "mfaCodePlaceholder": "6 skaitmenų kodas arba atkūrimo kodas",
+    "mfaBackupCodeHint": "Pametėte įrenginį? Vietoj to įveskite vieną iš atkūrimo kodų."
   },
   "landing": {
     "brandName": "OmniRoute",

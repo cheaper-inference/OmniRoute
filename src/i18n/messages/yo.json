@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Isopọ (ọ̀kọ̀ọ̀kọ̀ àkàǹtì ní breaker ti ara rẹ̀)",
     "resilienceTokenRefreshThreshold": "Àìṣẹ́ ṣáájì kí a dúró dẹ́",
     "resilienceTokenRefreshCooldown": "Duro nigba to ba din",
+    "mfaTitle": "Ìfìdímúlẹ̀ oní-ìpele méjì",
+    "mfaDesc": "Béèrè koodu láti inú ohun elo ìfìdímúlẹ̀, ní àfikún sí ọ̀rọ̀ aṣínà, láti wọlé sí dashboard tàbí láti so CLI pọ̀.",
+    "mfaScanQr": "Ṣàyẹ̀wò koodu QR yìí pẹ̀lú ohun elo ìfìdímúlẹ̀ rẹ (tàbí tẹ kọ́kọ́rọ́ ìṣètò sílẹ̀ fúnra rẹ), lẹ́yìn náà tẹ koodu oní-nọ́mbà 6 tí ó fi hàn.",
+    "mfaManualKey": "Kọ́kọ́rọ́ ìṣètò",
+    "mfaCodeLabel": "Koodu ìjẹ́rìísí",
+    "mfaBackupCodesTitle": "Fi àwọn koodu ìmúpadà rẹ pamọ́",
+    "mfaBackupCodesDesc": "Koodu kọ̀ọ̀kan yóò mú ọ wọlé lẹ́ẹ̀kan tí o bá pàdánù ìwọlé sí ohun elo ìfìdímúlẹ̀ rẹ. A kò ní fi wọ́n hàn mọ́.",
+    "mfaBackupCodesRemaining": "Àwọn koodu ìmúpadà tó kù: {count}",
+    "mfaDisableDesc": "Tẹ ọ̀rọ̀ aṣínà rẹ àti koodu lọ́wọ́lọ́wọ́ (tàbí koodu ìmúpadà) láti pa ìfìdímúlẹ̀ oní-ìpele méjì.",
+    "mfaRecoveryHint": "Ìmúpadà ẹ̀rọ tó sọnù: bẹ̀rẹ̀ olùpèsè pẹ̀lú OMNIROUTE_DISABLE_MFA=true kí o sì wọlé láti orí agbàlejò fúnra rẹ̀.",
+    "mfaRecoverySwitchActive": "A ti ṣètò OMNIROUTE_DISABLE_MFA: ìwọlé láti orí agbàlejò yìí ń fo ìpele kejì. Yọ ọ́ kúrò ní kété tí o bá tún wọlé.",
     "piiMasking": {
       "title": "Bíbo dátà ti ara ẹni",
       "description": "Yan irú dátà ti ara ẹni tí a ó bò, kí o sì ṣàfikún àwọn àpẹẹrẹ tìrẹ. Bíbò yóò wà ní pípa títí tí o fi tan àwọn àsíá ẹ̀yà tí a fihàn ní ìsàlẹ̀.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Pa á rẹ́",
     "settingsJson": "settings.json",
     "fromDataDir": "kúrò nínú àkójọpọ̀ dátà",
-    "relaunchApp": "Tún ìṣàfilọ́lẹ̀ OmniRoute ti orí kọ̀ǹpútà bẹ̀rẹ̀"
+    "relaunchApp": "Tún ìṣàfilọ́lẹ̀ OmniRoute ti orí kọ̀ǹpútà bẹ̀rẹ̀",
+    "mfaPrompt": "Tẹ koodu lati inu ohun elo ìfìdímúlẹ̀ rẹ",
+    "mfaCodeLabel": "Koodu ìjẹ́rìísí",
+    "mfaCodePlaceholder": "Koodu oní-nọ́mbà 6 tàbí koodu ìmúpadà",
+    "mfaBackupCodeHint": "Ṣé o sọ ẹ̀rọ rẹ nù? Tẹ ọ̀kan nínú àwọn koodu ìmúpadà rẹ dípò rẹ̀."
   },
   "landing": {
     "brandName": "OmniRoute",

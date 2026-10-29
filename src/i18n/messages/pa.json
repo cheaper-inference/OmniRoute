@@ -9143,6 +9143,17 @@
     "resilienceTokenRefreshScopeConnection": "ਕਨੈਕਸ਼ਨ (ਹਰ ਖਾਤੇ ਦਾ ਆਪਣਾ ਬ੍ਰੇਕਰ ਹੈ)",
     "resilienceTokenRefreshThreshold": "ਰੋਕਣ ਤੋਂ ਪਹਿਲਾਂ ਅਸਫਲਤਾਵਾਂ",
     "resilienceTokenRefreshCooldown": "ਟ੍ਰਿੱਪ ਹੋਣ ਤੋਂ ਬਾਅਦ ਵਿਰਾਮ ਦਿਓ",
+    "mfaTitle": "ਦੋ-ਪੜਾਅ ਪ੍ਰਮਾਣੀਕਰਨ",
+    "mfaDesc": "ਡੈਸ਼ਬੋਰਡ ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰਨ ਜਾਂ CLI ਜੋੜਨ ਲਈ ਪਾਸਵਰਡ ਤੋਂ ਇਲਾਵਾ ਪ੍ਰਮਾਣਕ ਐਪ ਦਾ ਕੋਡ ਲਾਜ਼ਮੀ ਕਰੋ।",
+    "mfaScanQr": "ਇਸ QR ਕੋਡ ਨੂੰ ਆਪਣੀ ਪ੍ਰਮਾਣਕ ਐਪ ਨਾਲ ਸਕੈਨ ਕਰੋ (ਜਾਂ ਸੈੱਟਅੱਪ ਕੁੰਜੀ ਹੱਥੀਂ ਦਰਜ ਕਰੋ), ਫਿਰ ਦਿਖਾਇਆ ਗਿਆ 6-ਅੰਕਾਂ ਦਾ ਕੋਡ ਟਾਈਪ ਕਰੋ।",
+    "mfaManualKey": "ਸੈੱਟਅੱਪ ਕੁੰਜੀ",
+    "mfaCodeLabel": "ਪੁਸ਼ਟੀਕਰਨ ਕੋਡ",
+    "mfaBackupCodesTitle": "ਆਪਣੇ ਰਿਕਵਰੀ ਕੋਡ ਸੰਭਾਲੋ",
+    "mfaBackupCodesDesc": "ਜੇ ਤੁਸੀਂ ਪ੍ਰਮਾਣਕ ਤੱਕ ਪਹੁੰਚ ਗੁਆ ਦਿੰਦੇ ਹੋ ਤਾਂ ਹਰ ਕੋਡ ਤੁਹਾਨੂੰ ਇੱਕ ਵਾਰ ਸਾਈਨ ਇਨ ਕਰਵਾਉਂਦਾ ਹੈ। ਇਹ ਦੁਬਾਰਾ ਨਹੀਂ ਦਿਖਾਏ ਜਾਣਗੇ।",
+    "mfaBackupCodesRemaining": "ਬਾਕੀ ਰਿਕਵਰੀ ਕੋਡ: {count}",
+    "mfaDisableDesc": "ਦੋ-ਪੜਾਅ ਪ੍ਰਮਾਣੀਕਰਨ ਬੰਦ ਕਰਨ ਲਈ ਆਪਣਾ ਪਾਸਵਰਡ ਅਤੇ ਮੌਜੂਦਾ ਕੋਡ (ਜਾਂ ਰਿਕਵਰੀ ਕੋਡ) ਦਰਜ ਕਰੋ।",
+    "mfaRecoveryHint": "ਗੁੰਮ ਹੋਏ ਡਿਵਾਈਸ ਦੀ ਰਿਕਵਰੀ: ਸਰਵਰ ਨੂੰ OMNIROUTE_DISABLE_MFA=true ਨਾਲ ਸ਼ੁਰੂ ਕਰੋ ਅਤੇ ਹੋਸਟ ਤੋਂ ਹੀ ਸਾਈਨ ਇਨ ਕਰੋ।",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA ਸੈੱਟ ਹੈ: ਇਸ ਹੋਸਟ ਤੋਂ ਸਾਈਨ-ਇਨ ਦੂਜਾ ਪੜਾਅ ਛੱਡ ਦਿੰਦੇ ਹਨ। ਦੁਬਾਰਾ ਪਹੁੰਚ ਮਿਲਣ ਤੋਂ ਬਾਅਦ ਇਸਨੂੰ ਹਟਾ ਦਿਓ।",
     "piiMasking": {
       "title": "ਨਿੱਜੀ ਡਾਟਾ ਮਾਸਕਿੰਗ",
       "description": "ਚੁਣੋ ਕਿ ਕਿਹੜੀ ਕਿਸਮ ਦਾ ਨਿੱਜੀ ਡਾਟਾ ਮਾਸਕ ਕੀਤਾ ਜਾਵੇ ਅਤੇ ਆਪਣੇ ਪੈਟਰਨ ਸ਼ਾਮਲ ਕਰੋ। ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਹੇਠਾਂ ਦਿਖਾਏ ਫੀਚਰ ਫਲੈਗ ਚਾਲੂ ਨਹੀਂ ਕਰਦੇ, ਮਾਸਕਿੰਗ ਬੰਦ ਰਹਿੰਦੀ ਹੈ।",
@@ -10827,7 +10838,11 @@
     "deleteAndRelaunch": "ਮਿਟਾਓ",
     "settingsJson": "settings.json",
     "fromDataDir": "ਡਾਟਾ ਡਾਇਰੈਕਟਰੀ ਵਿੱਚੋਂ",
-    "relaunchApp": "OmniRoute ਡੈਸਕਟਾਪ ਐਪ ਨੂੰ ਮੁੜ ਚਲਾਓ"
+    "relaunchApp": "OmniRoute ਡੈਸਕਟਾਪ ਐਪ ਨੂੰ ਮੁੜ ਚਲਾਓ",
+    "mfaPrompt": "ਆਪਣੀ ਪ੍ਰਮਾਣਕ ਐਪ ਤੋਂ ਕੋਡ ਦਰਜ ਕਰੋ",
+    "mfaCodeLabel": "ਪੁਸ਼ਟੀਕਰਨ ਕੋਡ",
+    "mfaCodePlaceholder": "6-ਅੰਕਾਂ ਦਾ ਕੋਡ ਜਾਂ ਰਿਕਵਰੀ ਕੋਡ",
+    "mfaBackupCodeHint": "ਡਿਵਾਈਸ ਗੁੰਮ ਗਿਆ? ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਰਿਕਵਰੀ ਕੋਡਾਂ ਵਿੱਚੋਂ ਇੱਕ ਦਰਜ ਕਰੋ।"
   },
   "landing": {
     "brandName": "OmniRoute",

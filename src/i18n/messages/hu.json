@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Kapcsolat (minden fióknak saját megszakítója van)",
     "resilienceTokenRefreshThreshold": "Sikertelen próbálkozások a szüneteltetés előtt",
     "resilienceTokenRefreshCooldown": "Szünet a kioldás után",
+    "mfaTitle": "Kétlépcsős azonosítás",
+    "mfaDesc": "A jelszó mellett egy hitelesítő alkalmazás kódjának megkövetelése az irányítópultra való bejelentkezéshez vagy a CLI csatlakoztatásához.",
+    "mfaScanQr": "Olvassa be ezt a QR-kódot a hitelesítő alkalmazással (vagy adja meg kézzel a beállítási kulcsot), majd írja be a megjelenő 6 jegyű kódot.",
+    "mfaManualKey": "Beállítási kulcs",
+    "mfaCodeLabel": "Ellenőrző kód",
+    "mfaBackupCodesTitle": "Mentse el a helyreállító kódjait",
+    "mfaBackupCodesDesc": "Mindegyik kód egyszer jelentkezteti be, ha elveszíti a hozzáférést a hitelesítőhöz. Többé nem jelennek meg.",
+    "mfaBackupCodesRemaining": "Hátralévő helyreállító kódok: {count}",
+    "mfaDisableDesc": "A kétlépcsős azonosítás kikapcsolásához adja meg a jelszavát és egy aktuális kódot (vagy egy helyreállító kódot).",
+    "mfaRecoveryHint": "Elveszett eszköz helyreállítása: indítsa a szervert OMNIROUTE_DISABLE_MFA=true beállítással, és jelentkezzen be magáról a gazdagépről.",
+    "mfaRecoverySwitchActive": "Az OMNIROUTE_DISABLE_MFA be van állítva: az erről a gazdagépről történő bejelentkezések kihagyják a második lépést. Törölje, miután újra hozzáfér.",
     "piiMasking": {
       "title": "Személyes adatok maszkolása",
       "description": "Válassza ki, mely személyesadat-típusokat maszkolja a rendszer, és adjon hozzá saját mintákat. A maszkolás kikapcsolva marad, amíg be nem kapcsolja az alább látható funkciójelzőket.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Törlés",
     "settingsJson": "settings.json",
     "fromDataDir": "az adatkönyvtárból",
-    "relaunchApp": "Indítsa újra az OmniRoute asztali alkalmazást"
+    "relaunchApp": "Indítsa újra az OmniRoute asztali alkalmazást",
+    "mfaPrompt": "Adja meg a hitelesítő alkalmazásban látható kódot",
+    "mfaCodeLabel": "Ellenőrző kód",
+    "mfaCodePlaceholder": "6 jegyű kód vagy helyreállító kód",
+    "mfaBackupCodeHint": "Elvesztette az eszközét? Adja meg inkább az egyik helyreállító kódját."
   },
   "landing": {
     "brandName": "OmniRoute",

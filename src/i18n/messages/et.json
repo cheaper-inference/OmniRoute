@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Ühendus (igal kontol on oma katkesti)",
     "resilienceTokenRefreshThreshold": "Tõrgete arv enne peatamist",
     "resilienceTokenRefreshCooldown": "Paus pärast käivitumist",
+    "mfaTitle": "Kaheastmeline autentimine",
+    "mfaDesc": "Nõua lisaks paroolile autentimisrakenduse koodi, et logida armatuurlauale sisse või ühendada CLI.",
+    "mfaScanQr": "Skannige see QR-kood oma autentimisrakendusega (või sisestage seadistusvõti käsitsi) ja tippige seejärel kuvatav 6-kohaline kood.",
+    "mfaManualKey": "Seadistusvõti",
+    "mfaCodeLabel": "Kinnituskood",
+    "mfaBackupCodesTitle": "Salvestage oma taastekoodid",
+    "mfaBackupCodesDesc": "Iga kood logib teid ühe korra sisse, kui kaotate juurdepääsu autentimisrakendusele. Neid ei kuvata uuesti.",
+    "mfaBackupCodesRemaining": "Järelejäänud taastekoodid: {count}",
+    "mfaDisableDesc": "Kaheastmelise autentimise väljalülitamiseks sisestage oma parool ja kehtiv kood (või taastekood).",
+    "mfaRecoveryHint": "Kaotatud seadme taastamine: käivitage server sättega OMNIROUTE_DISABLE_MFA=true ja logige sisse otse hostist.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA on määratud: sellest hostist sisselogimised jätavad teise teguri vahele. Eemaldage see, kui olete taas sees.",
     "piiMasking": {
       "title": "Isikuandmete maskeerimine",
       "description": "Valige, milliseid isikuandmeid maskeeritakse, ja lisage oma mustrid. Maskeerimine on välja lülitatud, kuni lülitate sisse allpool näidatud funktsioonilipud.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Kustutage",
     "settingsJson": "settings.json",
     "fromDataDir": "andmekataloogist",
-    "relaunchApp": "Käivitage OmniRoute’i töölauarakendus uuesti"
+    "relaunchApp": "Käivitage OmniRoute’i töölauarakendus uuesti",
+    "mfaPrompt": "Sisestage kood oma autentimisrakendusest",
+    "mfaCodeLabel": "Kinnituskood",
+    "mfaCodePlaceholder": "6-kohaline kood või taastekood",
+    "mfaBackupCodeHint": "Kaotasite seadme? Sisestage selle asemel üks oma taastekoodidest."
   },
   "landing": {
     "brandName": "OmniRoute",

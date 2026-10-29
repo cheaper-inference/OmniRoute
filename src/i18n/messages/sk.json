@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Pripojenie (každý účet má vlastný vypínač)",
     "resilienceTokenRefreshThreshold": "Zlyhania pred pozastavením",
     "resilienceTokenRefreshCooldown": "Pauza po spustení",
+    "mfaTitle": "Dvojfaktorové overenie",
+    "mfaDesc": "Okrem hesla vyžadovať kód z overovacej aplikácie na prihlásenie do panela alebo pripojenie CLI.",
+    "mfaScanQr": "Naskenujte tento QR kód overovacou aplikáciou (alebo zadajte inštalačný kľúč ručne) a potom napíšte zobrazený 6-miestny kód.",
+    "mfaManualKey": "Inštalačný kľúč",
+    "mfaCodeLabel": "Overovací kód",
+    "mfaBackupCodesTitle": "Uložte si kódy na obnovenie",
+    "mfaBackupCodesDesc": "Každý kód vás raz prihlási, ak stratíte prístup k overovacej aplikácii. Znova sa nezobrazia.",
+    "mfaBackupCodesRemaining": "Zostávajúce kódy na obnovenie: {count}",
+    "mfaDisableDesc": "Zadajte heslo a aktuálny kód (alebo kód na obnovenie) na vypnutie dvojfaktorového overenia.",
+    "mfaRecoveryHint": "Obnovenie strateného zariadenia: spustite server s OMNIROUTE_DISABLE_MFA=true a prihláste sa priamo z hostiteľa.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA je nastavené: prihlásenia z tohto hostiteľa preskakujú druhý faktor. Po obnovení prístupu ho zrušte.",
     "piiMasking": {
       "title": "Maskovanie osobných údajov",
       "description": "Vyberte, ktoré druhy osobných údajov sa maskujú, a pridajte vlastné vzory. Maskovanie zostáva vypnuté, kým nezapnete príznaky funkcií zobrazené nižšie.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Vymazať",
     "settingsJson": "settings.json",
     "fromDataDir": "z adresára s údajmi",
-    "relaunchApp": "Znovu spustite desktopovú aplikáciu OmniRoute"
+    "relaunchApp": "Znovu spustite desktopovú aplikáciu OmniRoute",
+    "mfaPrompt": "Zadajte kód z overovacej aplikácie",
+    "mfaCodeLabel": "Overovací kód",
+    "mfaCodePlaceholder": "6-miestny kód alebo kód na obnovenie",
+    "mfaBackupCodeHint": "Stratili ste zariadenie? Zadajte namiesto toho jeden z kódov na obnovenie."
   },
   "landing": {
     "brandName": "OmniRoute",

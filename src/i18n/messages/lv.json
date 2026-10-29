@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Savienojums (katram kontam ir sava pārtraucēja)",
     "resilienceTokenRefreshThreshold": "Neveiksmes pirms pauzes",
     "resilienceTokenRefreshCooldown": "Pauze pēc darbības sākšanas",
+    "mfaTitle": "Divu faktoru autentifikācija",
+    "mfaDesc": "Papildus parolei pieprasīt kodu no autentifikatora lietotnes, lai pieteiktos vadības panelī vai savienotu CLI.",
+    "mfaScanQr": "Noskenējiet šo QR kodu ar autentifikatora lietotni (vai ievadiet iestatīšanas atslēgu manuāli), pēc tam ierakstiet parādīto 6 ciparu kodu.",
+    "mfaManualKey": "Iestatīšanas atslēga",
+    "mfaCodeLabel": "Verifikācijas kods",
+    "mfaBackupCodesTitle": "Saglabājiet atkopšanas kodus",
+    "mfaBackupCodesDesc": "Katrs kods ļauj pieteikties vienu reizi, ja zaudējat piekļuvi autentifikatoram. Tie vairs netiks parādīti.",
+    "mfaBackupCodesRemaining": "Atlikušie atkopšanas kodi: {count}",
+    "mfaDisableDesc": "Lai izslēgtu divu faktoru autentifikāciju, ievadiet paroli un pašreizējo kodu (vai atkopšanas kodu).",
+    "mfaRecoveryHint": "Pazaudētas ierīces atkopšana: palaidiet serveri ar OMNIROUTE_DISABLE_MFA=true un piesakieties tieši no resursdatora.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA ir iestatīts: pieteikšanās no šī resursdatora izlaiž otro faktoru. Noņemiet to, kad atkal esat iekšā.",
     "piiMasking": {
       "title": "Personas datu maskēšana",
       "description": "Izvēlieties, kurus personas datu veidus maskēt, un pievienojiet savus šablonus. Maskēšana ir izslēgta, līdz ieslēdzat zemāk redzamos funkciju karogus.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Dzēst",
     "settingsJson": "settings.json",
     "fromDataDir": "no datu direktorija",
-    "relaunchApp": "Palaidiet OmniRoute darbvirsmas lietotni no jauna"
+    "relaunchApp": "Palaidiet OmniRoute darbvirsmas lietotni no jauna",
+    "mfaPrompt": "Ievadiet kodu no autentifikatora lietotnes",
+    "mfaCodeLabel": "Verifikācijas kods",
+    "mfaCodePlaceholder": "6 ciparu kods vai atkopšanas kods",
+    "mfaBackupCodeHint": "Pazaudējāt ierīci? Tā vietā ievadiet kādu no atkopšanas kodiem."
   },
   "landing": {
     "brandName": "OmniRoute",

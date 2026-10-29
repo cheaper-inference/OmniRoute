@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "חיבור (לכל חשבון יש מפסיק משלו)",
     "resilienceTokenRefreshThreshold": "כשלים לפני השהיה",
     "resilienceTokenRefreshCooldown": "השהיה לאחר הפעלה",
+    "mfaTitle": "אימות דו-שלבי",
+    "mfaDesc": "דרוש קוד מאפליקציית אימות, בנוסף לסיסמה, כדי להתחבר ללוח הבקרה או לחבר את ה-CLI.",
+    "mfaScanQr": "סרוק את קוד ה-QR הזה באפליקציית האימות (או הזן את מפתח ההגדרה ידנית), ואז הקלד את הקוד בן 6 הספרות שהיא מציגה.",
+    "mfaManualKey": "מפתח הגדרה",
+    "mfaCodeLabel": "קוד אימות",
+    "mfaBackupCodesTitle": "שמור את קודי השחזור שלך",
+    "mfaBackupCodesDesc": "כל קוד מאפשר כניסה אחת אם תאבד גישה לאפליקציית האימות. הם לא יוצגו שוב.",
+    "mfaBackupCodesRemaining": "קודי שחזור שנותרו: {count}",
+    "mfaDisableDesc": "הזן את הסיסמה וקוד נוכחי (או קוד שחזור) כדי לכבות את האימות הדו-שלבי.",
+    "mfaRecoveryHint": "שחזור מכשיר שאבד: הפעל את השרת עם OMNIROUTE_DISABLE_MFA=true והתחבר מהמארח עצמו.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA מוגדר: כניסות מהמארח הזה מדלגות על הגורם השני. הסר אותו לאחר שתחזור לחשבון.",
     "piiMasking": {
       "title": "הסתרת מידע אישי",
       "description": "בחרו אילו סוגי מידע אישי יוסתרו והוסיפו תבניות משלכם. ההסתרה נשארת כבויה עד שתפעילו את דגלי התכונות המוצגים למטה.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "מחק",
     "settingsJson": "settings.json",
     "fromDataDir": "מתיקיית הנתונים",
-    "relaunchApp": "שוב השקת את אפליקציית OmniRoute לשולחן העבודה"
+    "relaunchApp": "שוב השקת את אפליקציית OmniRoute לשולחן העבודה",
+    "mfaPrompt": "הזן את הקוד מאפליקציית האימות",
+    "mfaCodeLabel": "קוד אימות",
+    "mfaCodePlaceholder": "קוד בן 6 ספרות או קוד שחזור",
+    "mfaBackupCodeHint": "איבדת את המכשיר? הזן במקום זאת אחד מקודי השחזור שלך."
   },
   "landing": {
     "brandName": "OmniRoute",

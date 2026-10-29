@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Verbinding (elk account heeft zijn eigen breaker)",
     "resilienceTokenRefreshThreshold": "Mislukkingen vóór pauzeren",
     "resilienceTokenRefreshCooldown": "Pauzeer na het uitschakelen",
+    "mfaTitle": "Tweestapsverificatie",
+    "mfaDesc": "Vereis naast het wachtwoord een code uit een authenticator-app om in te loggen op het dashboard of de CLI te verbinden.",
+    "mfaScanQr": "Scan deze QR-code met je authenticator-app (of voer de installatiesleutel handmatig in) en typ daarna de getoonde 6-cijferige code.",
+    "mfaManualKey": "Installatiesleutel",
+    "mfaCodeLabel": "Verificatiecode",
+    "mfaBackupCodesTitle": "Bewaar je herstelcodes",
+    "mfaBackupCodesDesc": "Elke code laat je één keer inloggen als je de toegang tot je authenticator kwijtraakt. Ze worden niet opnieuw getoond.",
+    "mfaBackupCodesRemaining": "Resterende herstelcodes: {count}",
+    "mfaDisableDesc": "Voer je wachtwoord en een actuele code (of een herstelcode) in om tweestapsverificatie uit te schakelen.",
+    "mfaRecoveryHint": "Herstel bij verloren apparaat: start de server met OMNIROUTE_DISABLE_MFA=true en log in vanaf de host zelf.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA is ingesteld: aanmeldingen vanaf deze host slaan de tweede factor over. Verwijder het zodra je weer toegang hebt.",
     "piiMasking": {
       "title": "PII-maskering",
       "description": "Kies welke soorten persoonsgegevens worden gemaskeerd en voeg je eigen patronen toe. Maskering blijft uit totdat je de hieronder getoonde feature flags inschakelt.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Verwijderen",
     "settingsJson": "settings.json",
     "fromDataDir": "van de datamap",
-    "relaunchApp": "Herstart de OmniRoute desktop-app"
+    "relaunchApp": "Herstart de OmniRoute desktop-app",
+    "mfaPrompt": "Voer de code uit je authenticator-app in",
+    "mfaCodeLabel": "Verificatiecode",
+    "mfaCodePlaceholder": "6-cijferige code of herstelcode",
+    "mfaBackupCodeHint": "Apparaat kwijt? Voer in plaats daarvan een van je herstelcodes in."
   },
   "landing": {
     "brandName": "OmniRoute",

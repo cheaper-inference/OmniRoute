@@ -9143,6 +9143,17 @@
     "resilienceTokenRefreshScopeConnection": "连接（每个账户都有自己的熔断器）",
     "resilienceTokenRefreshThreshold": "暂停前的失败次数",
     "resilienceTokenRefreshCooldown": "触发后暂停",
+    "mfaTitle": "双重身份验证",
+    "mfaDesc": "登录仪表盘或连接 CLI 时,除密码外还需要身份验证器应用中的验证码。",
+    "mfaScanQr": "使用身份验证器应用扫描此二维码(或手动输入设置密钥),然后输入其显示的 6 位验证码。",
+    "mfaManualKey": "设置密钥",
+    "mfaCodeLabel": "验证码",
+    "mfaBackupCodesTitle": "保存您的恢复码",
+    "mfaBackupCodesDesc": "如果无法使用身份验证器,每个恢复码可登录一次。它们不会再次显示。",
+    "mfaBackupCodesRemaining": "剩余恢复码:{count}",
+    "mfaDisableDesc": "输入您的密码和当前验证码(或恢复码)以关闭双重身份验证。",
+    "mfaRecoveryHint": "设备丢失时的恢复:使用 OMNIROUTE_DISABLE_MFA=true 启动服务器,并直接在主机本机上登录。",
+    "mfaRecoverySwitchActive": "已设置 OMNIROUTE_DISABLE_MFA:从此主机登录会跳过第二重验证。恢复访问后请取消该设置。",
     "piiMasking": {
       "title": "个人信息脱敏",
       "description": "选择要脱敏的个人数据类型，并添加你自己的模式。在你开启下方显示的功能开关之前，脱敏保持关闭。",
@@ -10827,7 +10838,11 @@
     "deleteAndRelaunch": "删除",
     "settingsJson": "settings.json",
     "fromDataDir": "从数据文件夹",
-    "relaunchApp": "重新启动 OmniRoute 桌面应用程序"
+    "relaunchApp": "重新启动 OmniRoute 桌面应用程序",
+    "mfaPrompt": "输入身份验证器应用中的验证码",
+    "mfaCodeLabel": "验证码",
+    "mfaCodePlaceholder": "6 位验证码或恢复码",
+    "mfaBackupCodeHint": "设备丢失了?请改为输入一个恢复码。"
   },
   "landing": {
     "brandName": "OmniRoute",

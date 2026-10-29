@@ -9066,6 +9066,17 @@
     "resilienceTokenRefreshScopeConnection": "Kết nối (mỗi tài khoản có cầu chì riêng)",
     "resilienceTokenRefreshThreshold": "Lỗi trước khi tạm dừng",
     "resilienceTokenRefreshCooldown": "Tạm dừng sau khi kích hoạt",
+    "mfaTitle": "Xác thực hai yếu tố",
+    "mfaDesc": "Yêu cầu mã từ ứng dụng xác thực, ngoài mật khẩu, để đăng nhập bảng điều khiển hoặc kết nối CLI.",
+    "mfaScanQr": "Quét mã QR này bằng ứng dụng xác thực (hoặc nhập khóa thiết lập thủ công), sau đó nhập mã 6 chữ số được hiển thị.",
+    "mfaManualKey": "Khóa thiết lập",
+    "mfaCodeLabel": "Mã xác minh",
+    "mfaBackupCodesTitle": "Lưu các mã khôi phục của bạn",
+    "mfaBackupCodesDesc": "Mỗi mã cho phép đăng nhập một lần nếu bạn mất quyền truy cập vào ứng dụng xác thực. Các mã sẽ không được hiển thị lại.",
+    "mfaBackupCodesRemaining": "Số mã khôi phục còn lại: {count}",
+    "mfaDisableDesc": "Nhập mật khẩu và một mã hiện tại (hoặc mã khôi phục) để tắt xác thực hai yếu tố.",
+    "mfaRecoveryHint": "Khôi phục khi mất thiết bị: khởi động máy chủ với OMNIROUTE_DISABLE_MFA=true và đăng nhập từ chính máy chủ đó.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA đang được đặt: các lần đăng nhập từ máy chủ này bỏ qua yếu tố thứ hai. Hãy bỏ đặt sau khi bạn truy cập lại được.",
     "piiMasking": {
       "title": "Che giấu dữ liệu cá nhân",
       "description": "Chọn loại dữ liệu cá nhân nào sẽ được che giấu và thêm mẫu của riêng bạn. Việc che giấu vẫn tắt cho đến khi bạn bật các cờ tính năng hiển thị bên dưới.",
@@ -10750,7 +10761,11 @@
     "deleteAndRelaunch": "Xóa",
     "settingsJson": "settings.json",
     "fromDataDir": "từ thư mục dữ liệu",
-    "relaunchApp": "Khởi động lại ứng dụng máy tính để bàn OmniRoute"
+    "relaunchApp": "Khởi động lại ứng dụng máy tính để bàn OmniRoute",
+    "mfaPrompt": "Nhập mã từ ứng dụng xác thực của bạn",
+    "mfaCodeLabel": "Mã xác minh",
+    "mfaCodePlaceholder": "Mã 6 chữ số hoặc mã khôi phục",
+    "mfaBackupCodeHint": "Mất thiết bị? Hãy nhập một trong các mã khôi phục của bạn."
   },
   "landing": {
     "brandName": "OmniRoute",

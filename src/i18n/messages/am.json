@@ -9143,6 +9143,17 @@
     "resilienceTokenRefreshScopeConnection": "አገናኝ (እያንዳንዱ መለያ የራሱ መበረታቸው አለው)",
     "resilienceTokenRefreshThreshold": "ማቆሚያዎ ከመጠበቅ በፊት የሚደረጉ መሳሮች",
     "resilienceTokenRefreshCooldown": "ከመዘጋት በኋላ ይታቀኑ",
+    "mfaTitle": "ባለሁለት ደረጃ ማረጋገጫ",
+    "mfaDesc": "ወደ ዳሽቦርዱ ለመግባት ወይም CLI ን ለማገናኘት ከይለፍ ቃሉ በተጨማሪ ከማረጋገጫ መተግበሪያ የሚመጣ ኮድ ይጠይቁ።",
+    "mfaScanQr": "ይህን QR ኮድ በማረጋገጫ መተግበሪያዎ ይቃኙ (ወይም የማዋቀሪያ ቁልፉን በእጅ ያስገቡ)፣ ከዚያ የሚያሳየውን ባለ 6 አሃዝ ኮድ ይተይቡ።",
+    "mfaManualKey": "የማዋቀሪያ ቁልፍ",
+    "mfaCodeLabel": "የማረጋገጫ ኮድ",
+    "mfaBackupCodesTitle": "የመልሶ ማግኛ ኮዶችዎን ያስቀምጡ",
+    "mfaBackupCodesDesc": "የማረጋገጫ መተግበሪያዎን መድረስ ካልቻሉ እያንዳንዱ ኮድ አንድ ጊዜ ያስገባዎታል። ዳግም አይታዩም።",
+    "mfaBackupCodesRemaining": "የቀሩ የመልሶ ማግኛ ኮዶች፦ {count}",
+    "mfaDisableDesc": "ባለሁለት ደረጃ ማረጋገጫን ለማጥፋት የይለፍ ቃልዎን እና የአሁኑን ኮድ (ወይም የመልሶ ማግኛ ኮድ) ያስገቡ።",
+    "mfaRecoveryHint": "የጠፋ መሣሪያ መልሶ ማግኛ፦ አገልጋዩን በ OMNIROUTE_DISABLE_MFA=true ያስጀምሩ እና ከራሱ አስተናጋጅ ይግቡ።",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA ተቀናብሯል፦ ከዚህ አስተናጋጅ የሚደረጉ መግቢያዎች ሁለተኛውን ደረጃ ይዘላሉ። ተመልሰው ከገቡ በኋላ ያስወግዱት።",
     "piiMasking": {
       "title": "የግል መረጃ መደበቅ",
       "description": "የትኞቹ የግል መረጃ ዓይነቶች እንደሚደበቁ ይምረጡ እና የራስዎን ቅጦች ያክሉ። ከታች የሚታዩትን የባህሪ ባንዲራዎች እስኪያበሩ ድረስ መደበቁ ጠፍቶ ይቆያል።",
@@ -10827,7 +10838,11 @@
     "deleteAndRelaunch": "ይሰርዙ",
     "settingsJson": "settings.json",
     "fromDataDir": "ከውሂብ ማውጫው",
-    "relaunchApp": "የOmniRoute ዴስክቶፕ መተግበሪያን እንደገና ያስጀምሩ"
+    "relaunchApp": "የOmniRoute ዴስክቶፕ መተግበሪያን እንደገና ያስጀምሩ",
+    "mfaPrompt": "ከማረጋገጫ መተግበሪያዎ ያለውን ኮድ ያስገቡ",
+    "mfaCodeLabel": "የማረጋገጫ ኮድ",
+    "mfaCodePlaceholder": "ባለ 6 አሃዝ ኮድ ወይም የመልሶ ማግኛ ኮድ",
+    "mfaBackupCodeHint": "መሣሪያዎን አጥተዋል? በምትኩ ከመልሶ ማግኛ ኮዶችዎ አንዱን ያስገቡ።"
   },
   "landing": {
     "brandName": "OmniRoute",

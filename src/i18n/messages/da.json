@@ -9143,6 +9143,17 @@
     "resilienceTokenRefreshScopeConnection": "Forbindelse (hver konto har sin egen afbryder)",
     "resilienceTokenRefreshThreshold": "Fejl før pause",
     "resilienceTokenRefreshCooldown": "Pause efter udløsning",
+    "mfaTitle": "Totrinsgodkendelse",
+    "mfaDesc": "Kræv en kode fra en godkendelsesapp, ud over adgangskoden, for at logge ind på dashboardet eller forbinde CLI'en.",
+    "mfaScanQr": "Scan denne QR-kode med din godkendelsesapp (eller indtast opsætningsnøglen manuelt), og skriv derefter den viste 6-cifrede kode.",
+    "mfaManualKey": "Opsætningsnøgle",
+    "mfaCodeLabel": "Bekræftelseskode",
+    "mfaBackupCodesTitle": "Gem dine gendannelseskoder",
+    "mfaBackupCodesDesc": "Hver kode logger dig ind én gang, hvis du mister adgangen til din godkendelsesapp. De vises ikke igen.",
+    "mfaBackupCodesRemaining": "Resterende gendannelseskoder: {count}",
+    "mfaDisableDesc": "Indtast din adgangskode og en aktuel kode (eller en gendannelseskode) for at slå totrinsgodkendelse fra.",
+    "mfaRecoveryHint": "Gendannelse ved mistet enhed: start serveren med OMNIROUTE_DISABLE_MFA=true, og log ind fra selve værten.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA er sat: logins fra denne vært springer det andet trin over. Fjern den, når du er inde igen.",
     "piiMasking": {
       "title": "PII-maskering",
       "description": "Vælg, hvilke typer personoplysninger der maskeres, og tilføj dine egne mønstre. Maskeringen er slået fra, indtil du aktiverer de funktionsflag, der vises nedenfor.",
@@ -10827,7 +10838,11 @@
     "deleteAndRelaunch": "Slet",
     "settingsJson": "settings.json",
     "fromDataDir": "fra datakataloget",
-    "relaunchApp": "Genstart OmniRoute skrivebordsapp'en"
+    "relaunchApp": "Genstart OmniRoute skrivebordsapp'en",
+    "mfaPrompt": "Indtast koden fra din godkendelsesapp",
+    "mfaCodeLabel": "Bekræftelseskode",
+    "mfaCodePlaceholder": "6-cifret kode eller gendannelseskode",
+    "mfaBackupCodeHint": "Mistet din enhed? Indtast i stedet en af dine gendannelseskoder."
   },
   "landing": {
     "brandName": "OmniRoute",

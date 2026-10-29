@@ -40,6 +40,11 @@ const PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
+  // Login step 2 for opt-in TOTP two-factor: no session exists yet. The handler only
+  // acts on a valid short-lived MFA-pending cookie and shares the login brute-force guard.
+  // EXACT: the sibling enrollment routes (/api/auth/mfa/setup|enable|disable|status) are
+  // management routes.
+  "/api/auth/mfa/verify",
   "/api/init",
   "/api/sync/bundle",
   // Remote-mode bootstrap: exchange the management password for a scoped CLI
