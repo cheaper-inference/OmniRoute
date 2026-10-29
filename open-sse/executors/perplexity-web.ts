@@ -25,7 +25,7 @@ import { buildSessionCookieHeader, mergeRefreshedCookie } from "../utils/nextAut
 import { formatTranslatedStreamError } from "../utils/streamErrorFormat.ts";
 import {
   PPLX_SSE_ENDPOINT,
-  PPLX_USER_AGENT,
+  pplxUserAgent,
   PPLX_STREAM_EOF_SYMBOL,
   MODEL_MAP,
   THINKING_MAP,
@@ -541,7 +541,7 @@ export class PerplexityWebExecutor extends BaseExecutor {
       Accept: "text/event-stream",
       Origin: "https://www.perplexity.ai",
       Referer: "https://www.perplexity.ai/",
-      "User-Agent": PPLX_USER_AGENT,
+      "User-Agent": pplxUserAgent(),
       // Current app request headers (replaced the stale X-App-ApiVersion/X-App-ApiClient pair,
       // which the new endpoint no longer expects and which contributed to HTTP 400).
       "x-perplexity-request-endpoint": PPLX_SSE_ENDPOINT,

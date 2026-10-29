@@ -119,13 +119,11 @@
 4. Dodajte ili ažurirajte `tests/unit/ui/adapters/<name>.test.tsx`. Za adapter s mnogo pozivatelja usporedite
    renderirani markup prije i nakon promjene — promjene paddinga ili omotača šire se na svaki zaslon.
 
-## 5. Ažuriranje kita
+## 5. Ažuriranje kompleta
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopira upstream `src/` na tom commitu u
-`packages/ui-kit/src` i primjenjuje jedinu dopuštenu transformaciju (uklanja sufiks `.js` s
-relativnih importa). Zatim: pregledajte `git diff packages/ui-kit`, napravite vizualni prolaz kroz pružatelje,
-postavke, kombinacije, korištenje i krajnju točku u obje teme, pokrenite `npm run check:ui-kit-snapshot` i
-`npm run test:vitest:ui` te otvorite PR s upstream changelogom.
+`npm run check:ui-kit-upstream` uspoređuje verziju prikvačenu u `packages/ui-kit/UPSTREAM.md` s najnovijom `v*` oznakom uzvodnog repoa i ispisuje naredbu sinkronizacije kada izdanje izađe. Tjedni tijek rada `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) pokreće istu provjeru i drži jedan problem praćenja otvorenim dok je pin iza; uzvodni repo je privatan, tako da tijek rada treba token samo za čitanje u `UI_KIT_READ_TOKEN` tajni i ostaje inertan bez njega.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopira uzvodni `src/` pri tom predanju (`latest` = najnovija `v*` oznaka) u `packages/ui-kit/src`, primjenjuje jednu dopuštenu transformaciju (ispušta `.js` sufiks iz relativnog uvoza) i postavlja verziju radnog prostora u `packages/ui-kit/package.json` i `package-lock.json` na uzvodni. Zatim: pregledajte `git diff packages/ui-kit`, vizualno prođite kroz pružatelje, postavke, kombinacije, upotrebu i krajnju točku u obje teme, pokrenite `npm run check:ui-kit-snapshot` i `npm run test:vitest:ui` i otvorite PR s uzvodnim dnevnikom promjena.
 
 ## 6. README dijagrami
 

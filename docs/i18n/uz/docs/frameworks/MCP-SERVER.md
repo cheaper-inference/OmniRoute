@@ -300,113 +300,86 @@ Sozlamalarda MCP serveri yoqilmaguncha (`mcpEnabled`) va tegishli `mcpTransport`
 
 ---
 
-## Autentifikatsiya va ruxsat doiralari
+## Autentifikatsiya va ruqsatlar
 
-MCP vosita chaqiruvlari ruxsat doirasi satrlarini chaqiruvchidan o‘qiydi. Bu tekshiruv uchta mustaqil nomlar fazosidan biridir. Bitta tekshiruvchidan o‘tish boshqalaridan ham o‘tishni anglatmaydi. Qoidalar [Uchta ruxsat doirasi nomlar fazosi](#three-scope-namespaces) bo‘limida keltirilgan.
-Vositalar katalogi [MCP vositalarining ruxsat doiralari](#mcp-tool-scopes) bo‘limida keltirilgan.
+MCP vosita qoʻngʻiruvlari chaqiruvchidan ruqsat satrlarini oladi. Bu tekshiruv uchta mustaqil namespakning biri. Bitta tekshiruvchidan oʻtganlik boshqa tekshiruvchilar uchun oʻtganlikni bildirmaydi. Qoidalar [Uchta ruqsat namespaksi](#three-scope-namespaces) boʻlimida. Vosita katalogi esa [MCP vosita ruqsatlari](#mcp-tool-scopes) boʻlimida.
 
-### Uchta ruxsat doirasi nomlar fazosi
+### Uchta ruqsat namespaksi
 
-API kalitidagi `manage`, MCP vositasidagi `read:compression` va
-`oma_live_…` kirish tokenidagi `read` — uchta turli ruxsatdir. O‘zgartiruvchi boshqaruv marshrutiga `read`
-kirish tokenini yuborgan chaqiruvchilar HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-xatosini oladi. Bu daraja `scopeSatisfies` orqali tekshiriladi. U MCP jadvaliga murojaat qilmaydi, MCP
-moslashtiruvchisi ham unga murojaat qilmaydi.
+API kalitidagi `manage`, MCP vositasidagi `read:compression` va `oma_live_…` kirish tokenidagi `read` — bular uchta turli ruxsat. `read` kirish tokenini oʻzgartiruvchi boshqaruv marshrutiga yuborgan chaqiruvchilar HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` javobini oladi. Bu daraja `scopeSatisfies` bilan aniqlanadi. U MCP jadvaliga murojaat qilmaydi, MCP moslashtiruvchisi ham unga murojaat qilmaydi.
 
-| Nomlar fazosi                     | Hisob ma’lumoti                                                       | Tekshiruvchi                        | Tekshiruvdan o‘tish nimaga ruxsat beradi                         |
-| :-------------------------------- | :-------------------------------------------------------------------- | :---------------------------------- | :--------------------------------------------------------------- |
-| API kalitini boshqarish           | `api_keys.scopes`                                                     | `hasManageScope`                    | Shu Bearer kaliti uchun boshqaruv REST interfeysi                |
-| API kalitining qo‘shimcha ruxsati | o‘sha massiv, bitta aniq satr                                         | quyida nomlangan yordamchi funksiya | Faqat o‘sha imkoniyat                                            |
-| MCP vositasi ruxsat doiralari     | o‘sha massiv, aks holda MCP `_meta`, aks holda `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                      | Majburiy tekshiruv yoqilgach, o‘sha vosita                       |
-| Kirish tokeni                     | `oma_live_…`                                                          | `scopeSatisfies`                    | Metodi va yo‘li shu darajani talab qiladigan boshqaruv marshruti |
+| Namespak                | Hisob maʼlumoti                                                                            | Tekshiruvchi               | Oʻtishga ruxsat beradi                                           |
+| :---------------------- | :----------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------------------------- |
+| API kaliti boshqaruvi   | `api_keys.scopes`                                                                          | `hasManageScope`           | Ushbu Bearer kalit uchun boshqaruv REST soʻrovlari               |
+| API kaliti qoʻshimchasi | Xuddi shu massiv, bitta aniq satr                                                          | Pastda nomlangan yordamchi | Faqat o'sha bitta imkoniyat                                      |
+| MCP vosita ruqsatlari   | Xuddi shu massiv, aks holda MCP `_meta` (faqat HTTP/SSE), aks holda `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | Majburlash yoqilgan paytdan boshlab o'sha vosita                 |
+| Kirish tokeni           | `oma_live_…`                                                                               | `scopeSatisfies`           | Metodi va yoʻli shu darajani talab qiladigan boshqaruv marshruti |
 
-Har bir hisob ma’lumotini yaratish
-[Boshqaruv autentifikatsiyasi](../guides/MANAGEMENT-AUTH.md) bo‘limida yoritilgan.
+Har bir hisob maʼlumotini yaratish jarayoni
+[Management Authentication](../guides/MANAGEMENT-AUTH.md) boʻlimida qamrab olingan.
 
-#### API kaliti ruxsat doiralari
+#### API kaliti ruqsatlari
 
-Bitta `api_keys.scopes` massivi ikkita vazifani bajaradi. Ular turli funksiyalardan foydalanadi.
+Bitta `api_keys.scopes` massivi ikki vazifaga xizmat qiladi. Ular turli funksiyalardan foydalanadi.
 
-**Boshqaruv REST interfeysi.** `manage` va `admin`
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) a’zolaridir.
-`hasManageScope` shu kalit uchun boshqaruv marshrutlariga ruxsat beradi. `admin` bu
-marshrutlarda boshqaruv imkoniyatiga ega. Bu yerdagi `admin` so‘zi
-kirish tokeni darajasi emas va u MCP vositasi ruxsat doiralariga kengaymaydi.
+**Boshqaruv REST.** `manage` va `admin` — bular `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) aʼzolari. `hasManageScope` aynan shu kalit uchun boshqaruv marshrutlariga vakolat beradi. `admin` o'sha marshrutlarda boshqaruvga qodir. Bu yerda `admin` soʻzi kirish tokeni darajasi emas va u MCP vosita ruqsatlariga kengaymaydi.
 
-**Qo‘shimcha satrlar.** Har biri a’zolikning aniq tekshiruvidir va har biri
-`MANAGEMENT_API_KEY_SCOPES` tarkibidan tashqarida qoladi.
+**Qoʻshimcha satrlar.** Har biri aniq aʼmoliy tekshiruv va har biri `MANAGEMENT_API_KEY_SCOPES` dan tashqarida qoladi.
 
-| Ruxsat doirasi                 | Tekshiruvdan o‘tish nimaga ruxsat beradi                                                                                                                                               |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Faqat loopback bo‘lmagan `/api/mcp/` uchun LOCAL_ONLY istisnosi (`hasMcpConnectOrManageScope`). `manage` yoki `admin` ruxsatiga ega kalit ham bu istisnodan o‘tadi.                    |
-| `self:usage`                   | Shu kalit uchun `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` yaratish vaqtida bu ruxsat doirasini qo‘shadi (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Shu holat javobi ichidagi yuqori oqim hisobi kvotalari (`src/lib/usage/apiKeySelfService.ts`). Holat marshruti baribir `self:usage` ruxsatini talab qiladi.                            |
-| `policy:bypass-provider-quota` | Bu kalitning inferensiya chaqiruvlari provayder kvotasi siyosatini chetlab o‘tadi (`src/sse/handlers/chat.ts` ichidagi `hasProviderQuotaBypassScope`).                                 |
+| Ruqsat                         | Oʻtishga ruxsat beradi                                                                                                                                                     |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Faqat loopback boʻlmagan `/api/mcp/` LOCAL_ONLY istisnasi (`hasMcpConnectOrManageScope`). `manage` yoki `admin` ga ega kalit ham o'sha istisnodan oʻtadi.                  |
+| `self:usage`                   | Ushbu kalit uchun `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` yaratishda bu ruqsatni qoʻshadi (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | O'sha status yukidagi upstream hisob kvotalari (`src/lib/usage/apiKeySelfService.ts`). Status marshruti baribir `self:usage` ni talab qiladi.                              |
+| `policy:bypass-provider-quota` | Ushbu kalitning inference chaqiruvlari provayder kvota siyosatidan oʻtadi (`hasProviderQuotaBypassScope`, `src/sse/handlers/chat.ts` da).                                  |
 
 #### Moslashtirish
 
-Katalog [MCP vositalarining ruxsat doiralari](#mcp-tool-scopes) ostidagi jadvaldir.
-`src/shared/constants/mcpScopes.ts` ichidagi `MCP_SCOPE_LIST`ni shu katalog deb
-hisoblamang: u dastlabki tiplashtirilgan qism to‘plamidir. Keyinroq qo‘shilgan vositalar uning yonida
-qo‘shimcha ruxsat doiralarini e’lon qiladi (`read:notion`, `read:skills`, `read:local-corpus` va jadvalning qolgan qismi).
+Katalog — [MCP vosita ruqsatlari](#mcp-tool-scopes) boʻlimidagi jadval. `src/shared/constants/mcpScopes.ts` dagi `MCP_SCOPE_LIST` ni o'sha katalog deb hisoblamang: u dastlabki tiplangan toʻplam. Keyingi vositalar uning yonida qoʻshimcha ruqsatlar eʼlon qiladi (`read:notion`, `read:skills`, `read:local-corpus` va jadvalning qolgan qismi).
 
-`open-sse/mcp-server/scopeEnforcement.ts` ichidagi `evaluateToolScopes` barcha
-talab qilinadigan ruxsat doiralari berilgan ruxsat doiralaridan biriga mos kelganda chaqiruvga ruxsat beradi:
+`open-sse/mcp-server/scopeEnforcement.ts` dagi `evaluateToolScopes` har bir talab qilingan ruqsat berilgan biror ruqsatga mos kelsa, chaqiruvga ruxsat beradi:
 
-- `*` barcha talab qilinadigan ruxsat doiralariga mos keladi.
-- Oxiri `*` bilan tugaydigan berilgan ruxsat doirasi yulduzchadan oldingi
-  prefiks bilan boshlanadigan talab qilinadigan ruxsat doirasiga mos keladi. `read:*` `read:compression`ga mos keladi.
-- Boshqa har qanday berilgan ruxsat doirasi faqat aynan bir xil talab qilinadigan satrga mos keladi.
+- `*` har bir talab qilingan ruqsatga mos keladi.
+- `*` bilan tugaydigan berilgan ruqsat, yulduzcha oldidagi prefiks bilan boshlanadigan talab qilingan ruqsatga mos keladi. `read:*` — `read:compression` ga mos keladi.
+- Boshqa barcha berilgan ruqsatlar faqat oʻxshash talab qilingan satrga mos keladi.
 
-Ruxsat doiralari `["manage"]` bo‘lgan kalit `read:compression` uchun `scopeMatches`
-tekshiruvidan o‘tmaydi. Agar faqat shu satrlar berilgan bo‘lsa, ayni chaqiruv `admin`, `mcp:connect`, `read` va `write` uchun ham muvaffaqiyatsiz tugaydi. MCP vositasi ruxsat doiralari orasida
-oxiridagi `*`dan tashqari hech qanday ierarxiya yo‘q.
+Ruqsatlari `["manage"]` boʻlgan kalit `read:compression` uchun `scopeMatches` dan oʻtmaydi. Xuddi shu chaqiruv `admin`, `mcp:connect`, `read` va `write` uchun ham oʻtmaydi, agar berilgan yagona satrlar shular boʻlsa. MCP vosita ruqsatlari orasida oxiridagi `*` dan tashqari ierarxiya yoʻq.
 
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` bo‘lmasa, majburiy tekshiruv o‘chiq bo‘ladi (standart qiymat
-`false`). U o‘chiq bo‘lganida, `evaluateToolScopes` chaqiruvga ruxsat beradi va
-katalogni tekshirmaydi. U yoqilganida, HTTP Bearer kalitining `api_keys.scopes` qiymatidan
-`authInfo` sifatida foydalanadi ([Har bir kalit uchun HTTP ruxsat doirasini bog‘lash](#per-key-http-scope-binding-7895) bo‘limiga qarang).
-Hech qanday kalit ruxsat doirasi aniqlanmasa, berilgan ruxsatlar to‘plami avval MCP `_meta`ga, keyin
-`OMNIROUTE_MCP_SCOPES`ga o‘tadi.
+Majburlash `OMNIROUTE_MCP_ENFORCE_SCOPES=true` boʻlmaguncha oʻchiq (sukut boʻyicha `false`). U oʻchiq boʻlsa, `evaluateToolScopes` chaqiruvga ruxsat beradi va katalogni oʻtkazib yuboradi. U yoniq boʻlsa, HTTP Bearer kalitning `api_keys.scopes` ini `authInfo` sifatida ishlatadi ([Kalitga bogʻliq HTTP ruqsat bogʻlanishi](#per-key-http-scope-binding-7895) boʻlimini koʻring). Hech qanday kalit ruqsati aniqlanmasa, berilgan toʻplam MCP `_meta` ga (faqat HTTP/SSE chaqiruvchilari uchun, HTTP autentifikatsiya konteksti ichida qabul qilinadi; stdio chaqiruvchining `_meta` si eʼtibordan chetda qoldiriladi, chunki uni mijoz boshqaradi va u har bir chaqiruvchiga xos identifikator olib yurmaydi), soʻng `OMNIROUTE_MCP_SCOPES` ga oʻtadi.
 
-#### Kirish tokeni ruxsat doiralari
+#### Kirish tokeni ruqsatlari
 
-`oma_live_…` tokenlari (`src/lib/accessTokens/scopes.ts`) `read`, `write`
-yoki `admin` ruxsatlarini o‘z ichiga oladi. `scopeSatisfies` darajalar tizimidir: `admin` `write` va `read`ni,
-`write` esa `read`ni qamrab oladi. Noma’lum ruxsat doiralari hech narsani qamrab olmaydi.
+`oma_live_…` tokenlari (`src/lib/accessTokens/scopes.ts`) `read`, `write` yoki `admin` ni olib yuradi. `scopeSatisfies` — bu daraja: `admin` `write` va `read` ni qamrab oladi, `write` esa `read` ni. Nomaʼlum ruqsatlar hech narsani qamrab olmaydi.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) bu darajani
-`inferRequiredScope` (`src/server/authz/accessScopes.ts`) bilan taqqoslaydi:
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) o'sha darajani `inferRequiredScope` (`src/server/authz/accessScopes.ts`) bilan solishtiradi:
 
-- `GET`, `HEAD` va `OPTIONS` `read` ruxsatini talab qiladi.
-- Boshqa barcha metodlar `write` ruxsatini talab qiladi.
-- `ADMIN_SCOPE_PREFIXES` ichidagi yo‘llar har bir metod uchun `admin` ruxsatini talab qiladi. `/api/mcp`
-  shu ro‘yxatda, shuning uchun `write` kirish tokeni hali ham MCP HTTP
-  interfeysini chaqira olmaydi.
-- `ADMIN_MUTATION_PREFIXES` ichidagi yo‘llar faqat o‘zgartirishlar uchun `admin` ruxsatini talab qiladi.
-- `ADMIN_MUTATION_EXACT_PATHS` ichidagi yo‘llar (`/api/settings`,
-  `/api/settings/require-login`) faqat o‘zgartirishlar va faqat aynan
-  shu yo‘l uchun `admin` ruxsatini talab qiladi — boshqa `/api/settings/*` quyi marshrutlari uchun `write` yetarli bo‘lib qoladi.
+- `GET`, `HEAD` va `OPTIONS` uchun `read` talab qilinadi.
+- Boshqa barcha metodlar uchun `write` talab qilinadi.
+- `ADMIN_SCOPE_PREFIXES` dagi yo'llar uchun har bir metod bo'yicha `admin` talab qilinadi. `/api/mcp`
+  shu ro'yxatda turgani uchun `write` access token ham MCP HTTP
+  interfeysiga murojaat qila olmaydi.
+- `ADMIN_MUTATION_PREFIXES` dagi yo'llar uchun `admin` faqat o'zgartirish (mutation) amallari uchun talab qilinadi.
+- `ADMIN_MUTATION_EXACT_PATHS` dagi yo'llar (`/api/settings`,
+  `/api/settings/require-login`) uchun `admin` faqat o'zgartirish amallari uchun va faqat ana shu aniq
+  yo'l uchun talab qilinadi — boshqa `/api/settings/*` sub-yollari `write` ni saqlaydi.
 
-`PATCH /api/keys/{id}` mutatsiya hisoblanadi va ushbu administrator roʻyxatlarida mavjud emas, shuning uchun
-`read` tokeni 403 javobini oladi:
+`PATCH /api/keys/{id}` — bu o'zgartirish amali va u o'sha admin ro'yxatlarida yo'q, shuning uchun
+`read` token 403 ni oladi:
 `Access token scope 'read' is insufficient; 'write' required.`
-`write` yoki `admin` kirish tokeni ushbu marshrut talabini qondiradi. Boshqaruv paneli JWT tokeni,
-loopback CLI machine-id tokeni va `manage` yoki `admin` huquqiga ega API kaliti
-boshqa tarmoqlardan oʻtadi va bu daraja bilan cheklanmaydi.
+`write` yoki `admin` access token bu yo'l talablarini qanoatlantiradi. Dashboard JWT, loopback CLI
+machine-id token hamda `manage` yoki `admin` ga ega API kaliti boshqa tarmoqlardan o'tadi va bu
+daraja bilan cheklanmaydi.
 
-`/api/mcp` uchun `scopeSatisfies` tekshiruvidan oʻtgan kirish tokeni faqat
-boshqaruv shlyuzidan oʻtgan boʻladi. Vosita chaqiruvlari API kaliti
-doiralariga nisbatan hali ham `scopeMatches` tekshiruvini bajaradi.
-Kirish tokenining darajasi `scopeMatches` uchun kirish parametri emas.
+`/api/mcp` uchun `scopeSatisfies` dan o'tgan access token faqat boshqaruv darazasini o'tdi.
+Vosita chaqiruvlari API kalitlari scope'lari bo'yicha `scopeMatches` ni hali ham bajaradi. Access token
+darajasi `scopeMatches` ga kiritilmaydi.
 
-### MCP vositalari doiralari
+### MCP vositalari scope'lari
 
-Doiralarni majburiy tekshirish `open-sse/mcp-server/scopeEnforcement.ts` faylida markazlashtirilgan.
-Har bir vosita muayyan doiralarni talab qiladi:
+Scope nazorati `open-sse/mcp-server/scopeEnforcement.ts` faylida markazlashgan.
+Har bir vosita aniq scope'larni talab qiladi:
 
-| Qamrov                | Vositalar                                                                                                                                                                            |
+| Soha                  | Vositalar                                                                                                                                                                            |
 | :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                    |
 | `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                            |
@@ -442,54 +415,18 @@ Har bir vosita muayyan doiralarni talab qiladi:
 | `write:obsidian`      | 9 ta yozish vositasi — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                    |
 
-Joker belgili ruxsat doiralari qoʻllab-quvvatlanadi: `read:*` barcha oʻqish doiralariga, `*` esa toʻliq kirish huquqini beradi.
+Wildcard diapazonlar qoʻllab-quvvatlanadi: `read:*` barcha oʻqish diapazonlarini beradi, `*` esa toʻliq kirishni taqdim etadi.
 
-### `mcp:connect` — tor doiradagi marshrut imkoniyati (#7895)
+### `mcp:connect` — tor yoʻl imkoniyati (#7895)
 
-HTTP/SSE MCP transportiga (`/api/mcp/*`) loopback boʻlmagan manzildan murojaat qilish uchun
-`/api/mcp/` LOCAL_ONLY istisnosi talab etiladi (`docs/security/ROUTE_GUARD_TIERS.md` fayliga qarang). Ilgari
-bu istisno faqat toʻliq `manage`/`admin` doirasiga ega API kalitini qabul qilardi — bu faqat
-MCP bilan muloqot qilishi kerak boʻlgan chaqiruvchi uchun haddan tashqari keng edi. Endi
-`src/shared/constants/managementScopes.ts` fayli `MCP_CONNECT_SCOPE = "mcp:connect"` ni
-eksport qiladi: bu qoʻshimcha, tor doiradagi ruxsat (`SELF_USAGE_SCOPE` bilan bir xil yondashuv) boʻlib,
-`src/server/authz/policies/management.ts` ichidagi FAQAT `/api/mcp/` chetlab oʻtishiga ruxsat beradi
-— u boshqa boshqaruv marshrutlariga hech qanday kirish huquqini bermaydi va ataylab
-`MANAGEMENT_API_KEY_SCOPES` tarkibiga KIRITILMAGAN. `manage`/`admin` ga ega kalit
-istisnodan avvalgidek oʻtadi; `mcp:connect` esa faqat masofaviy MCP chaqiruvchilari uchun
-kamroq imtiyozli muqobil boʻlib, `hasMcpConnectOrManageScope()` orqali tekshiriladi.
+HTTP/SSE MCP transportiga (`/api/mcp/*`) loopback boʻlmagan manbadan kirish uchun `/api/mcp/` LOCAL_ONLY istisnasi talab qilinadi (`docs/security/ROUTE_GUARD_TIERS.md` faylini koʻring). Tarixda bu istisna faqat toʻliq `manage`/`admin` diapazoniga ega API kalitini qabul qilardi — bu faqat MCP bilan muloqot qilishsi kerak boʻlgan chaqiruvchi uchun juda keng. `src/shared/constants/managementScopes.ts` endi `MCP_CONNECT_SCOPE = "mcp:connect"` ni eksport qiladi: qoʻshimcha, tor diapazon (`SELF_USAGE_SCOPE` bilan bir xil precedent) boʻlib, `src/server/authz/policies/management.ts` dagi faqat `/api/mcp/` bypass ini vakolatlaydi — u boshqa hech qanday boshqaruv yoʻli kirishini bermaydi va atlab `MANAGEMENT_API_KEY_SCOPES` dan tashqarida saqlanadi. `manage`/`admin` ga ega kalit istisnadan oʻzgarmagan holda oʻtadi; `mcp:connect` esa faqat masofaviy MCP chaqiruvchilari uchun pastroq imtiyozli alternativa boʻlib, `hasMcpConnectOrManageScope()` orqali tekshiriladi.
 
-### Har bir kalit uchun HTTP doirasini bogʻlash (#7895)
+### Kalit darajasidagi HTTP diapazon bogʻlanishi (#7895)
 
-HTTP/SSE orqali `open-sse/mcp-server/httpTransport.ts` endi chaqiruvchining haqiqiy
-`api_keys.scopes` qiymatini `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-orqali aniqlaydi va uni MCP SDK dagi `transport.handleRequest(req, { authInfo })` ga uzatadi, shunda
-har bir vosita chaqiruviga yetib boradigan `extra.authInfo.scopes` Bearer kalitining oʻz doiralarini
-aks ettiradi. `scopeEnforcement.ts` ichidagi `resolveCallerScopeContext()` allaqachon
-`authInfo` ni `_meta` va `OMNIROUTE_MCP_SCOPES` muhit oʻzgaruvchisiga asoslangan zaxira variantdan
-ustun qoʻyardi — bu oʻzgarish faqat HTTP orqali avval toʻldirilmagan birinchi, eng yuqori
-ustuvorlikdagi manbani toʻldiradi. Hech qanday API kaliti aniqlanmasa
-(sarlavha yoʻq yoki kalit yaroqsiz boʻlsa), `authInfo` `undefined` holida qoladi va aniqlash jarayoni
-avvalgidek mavjud `meta`/muhit zanjiriga oʻtadi. stdio har bir chaqiruvchi uchun alohida identifikatsiyaga
-ega emas (`mcpCallerIdentity.ts` fayliga qarang) va bundan taʼsirlanmaydi — u `_meta`/muhit zaxira
-zanjirida qoladi.
+HTTP/SSE orqali `open-sse/mcp-server/httpTransport.ts` endi chaqiruvchining haqiqiy `api_keys.scopes` ini `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) orqali aniqlaydi va uni MCP SDK ning `transport.handleRequest(req, { authInfo })` ga uzatadi, shuning uchun har bir asbob chaqiruviga yetib boradigan `extra.authInfo.scopes` Bearer kalitining oʻz diapazonlarini aks ettiradi. `scopeEnforcement.ts` ning `resolveCallerScopeContext()` allaqachon `authInfo` ni `_meta` va `OMNIROUTE_MCP_SCOPES` muhit zaxirasi ustidan afzal qilib joylashtirgan edi — bu faqat shu birinchi, eng yuqori ustuvorlikdagi manbani toʻldiradi, u avval HTTP orqali boʻsh qoldirilgan edi. Hech qanday API kalit aniqlanmasa (sarlavha yoʻq, kalit yaroqsiz), `authInfo` `undefined` boʻlib qoladi va aniqlash mavjud `meta`/muhit zanjiri oʻzgarmagan holda davom etadi. stdio da har bir chaqiruvchi identifikatsiyasi yoʻq (qarang: `mcpCallerIdentity.ts`) va kalit darajasidagi bogʻlanishdan taʼsirlanmaydi — u `_meta` qadamini oʻtkazib yuboradi (`_meta` faqat HTTP autentifikatsiya konteksti ichida hurmat qilinadi, #15159) va faqat `OMNIROUTE_MCP_SCOPES` muhit kalitidan aniqlanadi.
 
-**Tor doirali HTTP/SSE chaqiruvchilari uchun `OMNIROUTE_MCP_ENFORCE_SCOPES` qiymatidan qatʼi nazar,
-majburiy nazorat yoqiladi.** `OMNIROUTE_MCP_ENFORCE_SCOPES` ning standart qiymati `false` boʻlishi
-faqat mahalliy/stdio yagona operator oqimi uchun xavfsiz, chunki unda doira qoʻllash mumkin boʻlgan
-har bir chaqiruvchiga xos identifikatsiya mavjud emas.
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` har bir vosita uchun doira nazoratini
-(`scopeEnforcement.ts` ichidagi `shouldForceScopeEnforcement()`) `resolveCallerScopeContext()`
-`source === "authInfo"` ni aniqlaganida (yaʼni har bir kalitga xos haqiqiy HTTP Authorization sarlavhasi,
-faqat HTTP/SSE uchun) VA ushbu kalit toʻliq `manage`/`admin` doirasiga ega boʻlmaganida
-soʻzsiz yoqadi. Bu faqat tor doiradagi `mcp:connect` chetlab oʻtish doirasiga ega kalit —
-yuqorida faqat `/api/mcp/` LOCAL_ONLY istisnosiga ruxsat berishi hujjatlashtirilgan —
-aks holda operator masofaviy/loopback boʻlmagan MCP kirishini yoqqach, shunchaki
-`OMNIROUTE_MCP_ENFORCE_SCOPES` standart holatda `false` boʻlib taqdim etilgani sababli barcha MCP
-vositalarini chaqira olishi mumkin boʻlgan boʻshliqni yopadi. HTTP orqali toʻliq `manage`/`admin`
-kaliti hamda barcha stdio/mahalliy chaqiruvchilar uchun mavjud
-`OMNIROUTE_MCP_ENFORCE_SCOPES` bilan boshqariladigan xatti-harakat oʻzgarishsiz qoladi.
-
----
+**Tor diapazonli HTTP/SSE chaqiruvchilari uchun majburlash `OMNIROUTE_MCP_ENFORCE_SCOPES` dan qatʼi nazar yoqiladi.**
+`OMNIROUTE_MCP_ENFORCE_SCOPES` ning `false` boʻlishi standart qiymati faqat lokal/stdio bir operator oqimi uchun xavfsiz, chunki unda diapazon boʻyicha cheklash uchun chaqiruvchi identifikatsiyasi yoʻq. `open-sse/mcp-server/server.ts::withScopeEnforcement()` (`scopeEnforcement.ts` dagi `shouldForceScopeEnforcement()`) har bir asbob diapazonini majburlashni `resolveCallerScopeContext()` `source === "authInfo"` ni aniqlagan holda (yaʼni haqiqiy kalit darajasidagi HTTP Authorization sarlavhasi, faqat HTTP/SSE) va shu kalit toʻliq `manage`/`admin` diapazoniga ega boʻlmasa, shartsiz yoqadi. Bu `OMNIROUTE_MCP_ENFORCE_SCOPES` standart sifatida `false` boʻlib yuborilgani sababli, faqat tor `mcp:connect` bypass diapazoniga ega kalit — yuqorida faqat `/api/mcp/` LOCAL_ONLY istisnasiga vakolat beruvchi deb hujjatlashtirilgan — masofaviy/loopback boʻlmagan MCP kirishini operator yoqiq qilsa, aks holda barcha MCP asboblarini chaqira olishi mumkin boʻlgan boʻshliqni yopadi. HTTP orqali keladigan toʻliq `manage`/`admin` kaliti ham, har bir stdio/lokal chaqiruvchi ham mavjud `OMNIROUTE_MCP_ENFORCE_SCOPES` ga bogʻliq xatti-harakatni oʻzgarmagan holda saqlaydi.
 
 ## Muhit o‘zgaruvchilari
 

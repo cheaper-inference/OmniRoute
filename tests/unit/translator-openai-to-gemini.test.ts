@@ -464,7 +464,7 @@ test("OpenAI -> Gemini request sanitizes long MCP tool names and strips unsuppor
   assert.equal(longToolParameters.properties?.paths?.items?.["x-ui"], undefined);
 });
 
-test("OpenAI -> Gemini request gives googleSearch precedence over function tools", () => {
+test("OpenAI -> Gemini request keeps function tools when native web search is present", () => {
   const result = openaiToGeminiRequest(
     "gemini-2.5-pro",
     {
@@ -484,10 +484,89 @@ test("OpenAI -> Gemini request gives googleSearch precedence over function tools
     false
   );
 
-  assert.deepEqual((result as any).tools, [{ googleSearch: {} }]);
+  const declarations = result.tools?.flatMap((tool) => tool.functionDeclarations ?? []) ?? [];
+  assert.deepEqual(
+    declarations.map((tool) => tool.name),
+    ["weather"]
+  );
+  assert.ok(!result.tools?.some((tool) => "googleSearch" in tool));
 });
 
-test("OpenAI -> Antigravity keeps googleSearch without function calling config", () => {
+test("OpenAI -> Gemini warns when native web search is dropped in favour of function tools", () => {
+  const originalWarn = console.warn;
+  const warnings: string[] = [];
+  console.warn = (...args: unknown[]) => {
+    warnings.push(args.map(String).join(" "));
+  };
+  try {
+    openaiToGeminiRequest(
+      "gemini-2.5-pro",
+      {
+        messages: [{ role: "user", content: "Search the web" }],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "weather",
+              description: "Fetch weather",
+              parameters: { type: "object", properties: {} },
+            },
+          },
+          { type: "web_search" },
+        ],
+      },
+      false
+    );
+  } finally {
+    console.warn = originalWarn;
+  }
+
+  assert.ok(
+    warnings.some((line) => line.includes("native web search") && line.includes("function")),
+    `expected a dropped-web-search warning, got: ${JSON.stringify(warnings)}`
+  );
+});
+
+test("OpenAI -> Gemini does not warn when native web search is the only tool", () => {
+  const originalWarn = console.warn;
+  const warnings: string[] = [];
+  console.warn = (...args: unknown[]) => {
+    warnings.push(args.map(String).join(" "));
+  };
+  try {
+    openaiToGeminiRequest(
+      "gemini-2.5-pro",
+      {
+        messages: [{ role: "user", content: "Search the web" }],
+        tools: [{ type: "web_search" }],
+      },
+      false
+    );
+  } finally {
+    console.warn = originalWarn;
+  }
+
+  assert.deepEqual(
+    warnings.filter((line) => line.includes("native web search")),
+    []
+  );
+});
+
+test("OpenAI -> Gemini native web search omits function calling config without declarations", () => {
+  const result = openaiToGeminiRequest(
+    "gemini-2.5-pro",
+    {
+      messages: [{ role: "user", content: "Search the web" }],
+      tools: [{ type: "web_search" }],
+    },
+    false
+  );
+
+  assert.deepEqual(result.tools, [{ googleSearch: {} }]);
+  assert.equal(result.toolConfig, undefined);
+});
+
+test("OpenAI -> Antigravity keeps functions when native web search is present", () => {
   const result = openaiToAntigravityRequest(
     "gemini-2.5-pro",
     {
@@ -507,8 +586,16 @@ test("OpenAI -> Antigravity keeps googleSearch without function calling config",
     { projectId: "proj-search" } as any
   );
 
-  assert.deepEqual((result as any).request?.tools, [{ googleSearch: {} }]);
-  assert.equal(result.request.toolConfig, undefined);
+  const tools = result.request?.tools ?? [];
+  const declarations = tools.flatMap((tool) => tool.functionDeclarations ?? []);
+  assert.deepEqual(
+    declarations.map((tool) => tool.name),
+    ["weather"]
+  );
+  assert.ok(!tools.some((tool) => "googleSearch" in tool));
+  assert.deepEqual(result.request.toolConfig, {
+    functionCallingConfig: { mode: "VALIDATED" },
+  });
 });
 
 test("OpenAI -> Gemini helper IDs and JSON parsing stay in the expected format", () => {

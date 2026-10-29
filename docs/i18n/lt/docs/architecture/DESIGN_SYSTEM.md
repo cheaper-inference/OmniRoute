@@ -118,14 +118,11 @@
    palyginkite atvaizduotą žymėjimą prieš ir po pakeitimo — padding arba wrapper pakeitimai išsilieja į
    kiekvieną ekraną.
 
-## 5. Rinkinio atnaujinimas
+## 5. Komplekto atnaujinimas
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` nukopijuoja pirminės saugyklos `src/` katalogą ties tuo commit į
-`packages/ui-kit/src` ir pritaiko vienintelę leistiną transformaciją (iš santykinių importų pašalina `.js`
-galūnę). Tada: peržiūrėkite `git diff packages/ui-kit`, vizualiai patikrinkite teikėjų (providers),
-nustatymų (settings), derinių (combos), naudojimo (usage) ir galinio taško (endpoint) puslapius abiejose
-temose, paleiskite `npm run check:ui-kit-snapshot` ir `npm run test:vitest:ui` ir atidarykite PR, pridėdami
-pirminės saugyklos (upstream) pakeitimų žurnalą.
+`npm run check:ui-kit-upstream` lygina `packages/ui-kit/UPSTREAM.md` prisegtą versiją su naujausia `v*` žyma prieš srovę ir išspausdina sinchronizavimo komandą, kai išleidžiamas leidimas. Savaitinė `UI Kit upstream watch` darbo eiga (`.github/workflows/ui-kit-upstream-watch.yml`) atlieka tą patį patikrinimą ir palieka vieną sekimo problemą atidarytą, kol kaištis yra už nugaros; prieš srovę esantis atpirkimas yra privatus, todėl darbo eigai reikia tik skaitymo prieigos rakto `UI_KIT_READ_TOKEN` paslaptyje ir be jo ji lieka inertiška.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` nukopijuoja prieš srovę esantį `src/` to įpareigojimo metu (`latest` = naujausia `v*` žyma) į `packages/ui-kit/src`, taiko vieną leistiną transformaciją (atmeta `.js` priesagą iš santykinių importų) ir nustato darbo srities versiją `packages/ui-kit/package.json` ir `package-lock.json` į ankstesnę. Tada: peržiūrėkite `git diff packages/ui-kit`, atlikite abiejų temų teikėjų, nustatymų, kombinacijų, naudojimo ir galutinio taško vaizdinį perdavimą, paleiskite `npm run check:ui-kit-snapshot` ir `npm run test:vitest:ui` ir atidarykite PR naudodami išankstinį pakeitimų žurnalą.
 
 ## 6. README diagramos
 

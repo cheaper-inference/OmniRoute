@@ -199,9 +199,9 @@ Endpointi ya JSON-RPC `/a2a` ndiyo sehemu rasmi ya kuingilia ya A2A. Endpointi z
 
 ## Kuongeza Ujuzi Mpya
 
-1. **Unda faili la ujuzi:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Unda faili ya ujuzi:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Hamisha nje fungsi ya async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Fuata muundo wa ujuzi uliopo kama vile `smartRouting.ts`.
+   Hamisha nje fungsi asinkroni `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Fuata muundo wa ujuzi uliopo kama vile `smartRouting.ts`.
 
 2. **Sajili kishughulikiaji:** katika `src/lib/a2a/taskExecution.ts`, ongeza ingizo kwenye `A2A_SKILL_HANDLERS`:
 
@@ -215,7 +215,7 @@ Endpointi ya JSON-RPC `/a2a` ndiyo sehemu rasmi ya kuingilia ya A2A. Endpointi z
    };
    ```
 
-3. **Onyesha kwenye Kadi ya Wakala:** katika `src/app/.well-known/agent.json/route.ts`, ongeza kwenye mwisho wa safu ya `skills`:
+3. **Onyesha katika Kadi ya Ajenti:** katika `src/lib/a2a/agentCardMetadata.ts` (inayotumiwa kwa pamoja na `/.well-known/agent.json` na `/.well-known/agent-card.json`), ongeza kwenye mwisho wa safu ya `skills`:
 
    ```json
    {
@@ -227,9 +227,9 @@ Endpointi ya JSON-RPC `/a2a` ndiyo sehemu rasmi ya kuingilia ya A2A. Endpointi z
    }
    ```
 
-4. **Andika majaribio:** `tests/unit/a2a-<your-skill>.test.ts`. Jumuisha njia ya mafanikio + njia ya hitilafu.
+4. **Andika majaribio:** `tests/unit/a2a-<your-skill>.test.ts`. Jumuisha njia ya mafanikio pamoja na njia ya hitilafu.
 
-5. **Andika nyaraka** za ujuzi mpya katika jedwali la `Available Skills` la faili hili.
+5. **Andika nyaraka** za ujuzi mpya katika jedwali la `Available Skills` la faili hii.
 
 ---
 

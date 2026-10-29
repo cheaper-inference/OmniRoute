@@ -9,6 +9,7 @@ import { purgeCallLogArtifactDirectory } from "@/lib/usage/callLogArtifacts";
 
 import { getDbInstance } from "./core";
 import { getUserDatabaseSettings } from "./databaseSettings";
+import { maintainSqlitePlannerStats } from "./sqlitePlannerStats";
 import {
   describeReclaim,
   reclaimFreedPages,
@@ -1094,6 +1095,9 @@ export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Pr
   } catch (reclaimErr) {
     console.error(`[Cleanup] Space reclamation after ${phase} cleanup failed:`, reclaimErr);
   }
+
+  // Independent of retention settings; runs after migrations, never on a request path.
+  maintainSqlitePlannerStats();
 }
 /**
  * Start the background cleanup scheduler. Runs cleanup on startup and then

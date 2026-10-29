@@ -116,13 +116,11 @@
    wywołującymi porównaj wyrenderowany markup przed i po zmianie — zmiany paddingu lub wrappera rozchodzą
    się na każdy ekran.
 
-## 5. Aktualizacja kita
+## 5. Aktualizacja zestawu
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopiuje upstreamowe `src/` z danego commita do
-`packages/ui-kit/src` i stosuje jedyną dozwoloną transformację (usuwa sufiks `.js` ze względnych
-importów). Następnie: przejrzyj `git diff packages/ui-kit`, wykonaj wizualny przegląd ekranów dostawców,
-ustawień, kombinacji, użycia i endpointu w obu motywach, uruchom `npm run check:ui-kit-snapshot` oraz
-`npm run test:vitest:ui` i otwórz PR z upstreamowym changelogiem.
+`npm run check:ui-kit-upstream` porównuje wersję przypiętą w `packages/ui-kit/UPSTREAM.md` z najnowszym znacznikiem `v*` z repozytorium źródłowego i wypisuje polecenie synchronizacji, gdy wydanie zostanie wydane. Cotygodniowy przepływ pracy `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) przeprowadza tę samą kontrolę i utrzymuje jeden problem ze śledzeniem otwarty, gdy kod PIN jest opóźniony; repozytorium nadrzędne jest prywatne, więc przepływ pracy wymaga tokena tylko do odczytu w tajemnicy `UI_KIT_READ_TOKEN` i bez niego pozostaje obojętny.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopiuje nadrzędne `src/` w momencie zatwierdzenia (`latest` = najnowszy znacznik `v*` ) do `packages/ui-kit/src`, stosuje pojedynczą dozwoloną transformację (usuwa sufiks `.js` z względnego importu) i ustawia wersję obszaru roboczego w `packages/ui-kit/package.json` i `package-lock.json` na wersję nadrzędną. Następnie: przejrzyj `git diff packages/ui-kit`, wykonaj wizualny przegląd dostawców, ustawień, kombinacji, użycia i punktu końcowego w obu motywach, uruchom `npm run check:ui-kit-snapshot` i `npm run test:vitest:ui` i otwórz PR z wcześniejszym dziennikiem zmian.
 
 ## 6. diagramy README
 

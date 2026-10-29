@@ -5,6 +5,7 @@ import {
   evaluateToolScopes,
   resolveCallerScopeContext,
 } from "../../open-sse/mcp-server/scopeEnforcement.ts";
+import { withMcpHttpAuthContext } from "../../open-sse/mcp-server/httpAuthContext.ts";
 
 test("resolveCallerScopeContext prioritizes authInfo scopes", () => {
   const context = resolveCallerScopeContext(
@@ -24,7 +25,7 @@ test("resolveCallerScopeContext prioritizes authInfo scopes", () => {
   assert.deepEqual(context.scopes, ["read:health", "read:combos"]);
 });
 
-test("resolveCallerScopeContext falls back to _meta scopes", () => {
+test("resolveCallerScopeContext ignores _meta scopes without an HTTP auth context", () => {
   const context = resolveCallerScopeContext(
     {
       _meta: {
@@ -36,8 +37,46 @@ test("resolveCallerScopeContext falls back to _meta scopes", () => {
   );
 
   assert.equal(context.callerId, "session-meta");
+  assert.equal(context.source, "env");
+  assert.deepEqual(context.scopes, ["read:usage"]);
+});
+
+test("resolveCallerScopeContext denies a stdio caller that self-grants scopes via _meta", () => {
+  const context = resolveCallerScopeContext(
+    { _meta: { scopes: ["write:combos"] }, sessionId: "session-meta-write" },
+    []
+  );
+
+  assert.equal(context.source, "none");
+  assert.deepEqual(context.scopes, []);
+
+  const check = evaluateToolScopes("omniroute_switch_combo", context.scopes, true);
+  assert.equal(check.allowed, false);
+  assert.equal(check.reason, "missing_scopes");
+});
+
+test("resolveCallerScopeContext keeps the env fallback grant for a stdio caller", () => {
+  const context = resolveCallerScopeContext({ sessionId: "session-env-write" }, ["write:combos"]);
+
+  assert.equal(context.source, "env");
+  assert.deepEqual(context.scopes, ["write:combos"]);
+
+  const check = evaluateToolScopes("omniroute_switch_combo", context.scopes, true);
+  assert.equal(check.allowed, true);
+  assert.deepEqual(check.missing, []);
+});
+
+test("resolveCallerScopeContext honors _meta scopes inside an HTTP auth context", async () => {
+  const context = await withMcpHttpAuthContext(new Request("http://localhost/mcp"), async () =>
+    resolveCallerScopeContext({ _meta: { scopes: ["write:combos"] } }, [])
+  );
+
   assert.equal(context.source, "meta");
-  assert.deepEqual(context.scopes, ["read:quota", "read:models"]);
+  assert.deepEqual(context.scopes, ["write:combos"]);
+
+  const check = evaluateToolScopes("omniroute_switch_combo", context.scopes, true);
+  assert.equal(check.allowed, true);
+  assert.deepEqual(check.missing, []);
 });
 
 test("resolveCallerScopeContext uses env fallback when caller has no scopes", () => {

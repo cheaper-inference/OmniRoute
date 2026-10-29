@@ -122,13 +122,11 @@
 4. Añade o actualiza `tests/unit/ui/adapters/<name>.test.tsx`. Para un adaptador con muchos llamadores, compara el
    marcado renderizado antes y después del cambio: los cambios de padding o de wrapper se propagan a todas las pantallas.
 
-## 5. Actualizar el kit
+## 5. Actualización del kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` copia el `src/` de upstream en ese commit dentro de
-`packages/ui-kit/src` y aplica la única transformación permitida (quita el sufijo `.js` de las
-importaciones relativas). Después: revisa `git diff packages/ui-kit`, haz una pasada visual por providers, settings, combos,
-usage y endpoint en ambos temas, ejecuta `npm run check:ui-kit-snapshot` y `npm run test:vitest:ui`, y
-abre la PR con el changelog de upstream.
+`npm run check:ui-kit-upstream` compara la versión fijada en `packages/ui-kit/UPSTREAM.md` con la etiqueta `v*` más nueva del repositorio ascendente e imprime el comando de sincronización cuando sale una versión. El flujo de trabajo semanal `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) ejecuta la misma verificación y mantiene abierto un problema de seguimiento mientras el pin está detrás; el repositorio ascendente es privado, por lo que el flujo de trabajo necesita un token de solo lectura en el secreto `UI_KIT_READ_TOKEN` y permanece inerte sin él.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copia el `src/` ascendente en esa confirmación (`latest` = la etiqueta `v*` más nueva) en `packages/ui-kit/src`, aplica la única transformación permitida (elimina el sufijo `.js` de las importaciones relativas) y establece la versión del espacio de trabajo en `packages/ui-kit/package.json` y `package-lock.json` en la versión ascendente. Luego: revise `git diff packages/ui-kit`, haga un repaso visual de los proveedores, configuraciones, combinaciones, uso y punto final en ambos temas, ejecute `npm run check:ui-kit-snapshot` y `npm run test:vitest:ui`, y abra PR con el registro de cambios ascendente.
 
 ## 6. diagramas README
 

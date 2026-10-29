@@ -278,84 +278,73 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 
 ---
 
-## 身份验证与作用域
+# 鉴权与作用域
 
-MCP 工具调用从调用方读取作用域字符串。该检查属于三个彼此独立的命名空间之一。通过其中一个检查器并不意味着能通过其他检查器。相关规则请参阅[三个作用域命名空间](#three-scope-namespaces)。
-工具目录请参阅 [MCP 工具作用域](#mcp-tool-scopes)。
+MCP 工具调用会从调用方读取作用域字符串。该检查是三个相互独立的命名空间之一。某个检查器通过，并不代表其他检查器也通过。规则见[三个作用域命名空间](#three-scope-namespaces)。工具目录见[MCP 工具作用域](#mcp-tool-scopes)。
 
 ### 三个作用域命名空间
 
-API 密钥上的 `manage`、MCP 工具上的 `read:compression`，以及 `oma_live_…` 访问令牌上的 `read` 是三种不同的授权。调用方若将 `read` 访问令牌发送到会执行变更操作的管理路由，将收到 HTTP 403：
-`Access token scope 'read' is insufficient; 'write' required.`
-该等级由 `scopeSatisfies` 检查。它不会查询 MCP 表，而 MCP 匹配器也不会查询它。
+API 密钥上的 `manage`、MCP 工具上的 `read:compression` 与 `oma_live_…` 访问令牌上的 `read` 是三种不同的授权。向会修改状态的管理接口发送 `read` 访问令牌的调用方会收到 HTTP 403 `Access token scope 'read' is insufficient; 'write' required.`。该等级判定由 `scopeSatisfies` 完成。它不会查询 MCP 表，MCP 匹配器也不会查询它。
 
-| 命名空间           | 凭据                                                              | 检查器             | 通过后允许的操作                     |
-| :----------------- | :---------------------------------------------------------------- | :----------------- | :----------------------------------- |
-| API 密钥管理       | `api_keys.scopes`                                                 | `hasManageScope`   | 使用该 Bearer 密钥访问管理 REST 接口 |
-| API 密钥附加作用域 | 同一数组中的一个完全匹配字符串                                    | 下文所述的辅助函数 | 仅限该项能力                         |
-| MCP 工具作用域     | 同一数组，否则使用 MCP `_meta`，再否则使用 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 启用强制执行后，允许使用该工具       |
-| 访问令牌           | `oma_live_…`                                                      | `scopeSatisfies`   | 访问其方法和路径要求该等级的管理路由 |
+| 命名空间       | 凭据                                                                         | 检查器             | 通过后可访问                     |
+| :------------- | :--------------------------------------------------------------------------- | :----------------- | :------------------------------- |
+| API 密钥管理   | `api_keys.scopes`                                                            | `hasManageScope`   | 该 Bearer 密钥的管理类 REST 接口 |
+| API 密钥叠加项 | 同一数组中的单个精确字符串                                                   | 下文命名的辅助函数 | 仅该一项能力                     |
+| MCP 工具作用域 | 同一数组，否则用 MCP `_meta`（仅 HTTP/SSE），再否则用 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 开启强制执行后的该工具           |
+| 访问令牌       | `oma_live_…`                                                                 | `scopeSatisfies`   | 其方法与路径要求该等级的管理接口 |
 
-每种凭据的签发方式请参阅
-[管理身份验证](../guides/MANAGEMENT-AUTH.md)。
+每种凭据的签发方式见[管理端认证](../guides/MANAGEMENT-AUTH.md)。
 
 #### API 密钥作用域
 
-一个 `api_keys.scopes` 数组承担两项职责。它们使用不同的函数。
+同一个 `api_keys.scopes` 数组承担两项职责。它们使用不同的函数。
 
-**管理 REST。** `manage` 和 `admin` 是
-`MANAGEMENT_API_KEY_SCOPES`（`src/shared/constants/managementScopes.ts`）的成员。
-`hasManageScope` 用于授权该密钥访问管理路由。在这些路由上，`admin` 具备管理能力。此处的 `admin` 并非访问令牌等级，也不会展开为 MCP 工具作用域。
+**管理类 REST。** `manage` 与 `admin` 是 `MANAGEMENT_API_KEY_SCOPES`（`src/shared/constants/managementScopes.ts`）的成员。`hasManageScope` 负责为该密钥授权管理接口。`admin` 在这些接口上具备管理能力。这里的 `admin` 不是访问令牌等级，也不会扩展为 MCP 工具作用域。
 
-**附加字符串。** 每一项都进行完全匹配的成员资格测试，并且始终位于 `MANAGEMENT_API_KEY_SCOPES` 之外。
+**叠加字符串。** 每一项都是精确的成员检查，且每一项都保持在 `MANAGEMENT_API_KEY_SCOPES` 之外。
 
-| 作用域                         | 通过后允许的操作                                                                                                                                                  |
-| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | 仅允许非环回地址访问 `/api/mcp/` 的 LOCAL_ONLY 例外（`hasMcpConnectOrManageScope`）。具有 `manage` 或 `admin` 的密钥也仍可通过该例外检查。                        |
-| `self:usage`                   | 使用此密钥访问 `GET /api/v1/me/status`（`src/app/api/v1/me/status/route.ts`）。`POST /api/keys` 会在创建时添加此作用域（`normalizeSelfServiceScopesForCreate`）。 |
-| `self:account-quota`           | 在该状态载荷中包含上游账户配额（`src/lib/usage/apiKeySelfService.ts`）。状态路由仍要求 `self:usage`。                                                             |
-| `policy:bypass-provider-quota` | 此密钥的推理调用会跳过提供者配额策略（`src/sse/handlers/chat.ts` 中的 `hasProviderQuotaBypassScope`）。                                                           |
+| 作用域                         | 通过后可访问                                                                                                                                              |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | 仅非回环（non-loopback）的 `/api/mcp/` LOCAL_ONLY 豁免（`hasMcpConnectOrManageScope`）。拥有 `manage` 或 `admin` 的密钥仍可通过该豁免。                   |
+| `self:usage`                   | 此密钥的 `GET /api/v1/me/status`（`src/app/api/v1/me/status/route.ts`）。`POST /api/keys` 在创建时补充该作用域（`normalizeSelfServiceScopesForCreate`）。 |
+| `self:account-quota`           | 该状态载荷中的上游账户配额（`src/lib/usage/apiKeySelfService.ts`）。状态接口仍然要求 `self:usage`。                                                       |
+| `policy:bypass-provider-quota` | 此密钥的推理调用会跳过提供者配额策略（`src/sse/handlers/chat.ts` 中的 `hasProviderQuotaBypassScope`）。                                                   |
 
-#### 匹配规则
+#### 匹配
 
-目录是 [MCP 工具作用域](#mcp-tool-scopes)下的表格。不要将 `src/shared/constants/mcpScopes.ts` 中的 `MCP_SCOPE_LIST` 视为该目录：它是最初的类型化子集。后续工具在它之外声明了更多作用域（`read:notion`、`read:skills`、`read:local-corpus`，以及表格中的其余作用域）。
+目录是 [MCP 工具作用域](#mcp-tool-scopes) 下的表格。不要把 `src/shared/constants/mcpScopes.ts` 中的 `MCP_SCOPE_LIST` 当作该目录：它只是最初的有类型子集。后续工具在其旁边声明了更多作用域（`read:notion`、`read:skills`、`read:local-corpus`，以及表格中的其余各项）。
 
-当每个必需作用域都能与某个已授予作用域匹配时，`open-sse/mcp-server/scopeEnforcement.ts` 中的 `evaluateToolScopes` 会允许调用：
+`open-sse/mcp-server/scopeEnforcement.ts` 中的 `evaluateToolScopes` 在每个必需作用域都能匹配某个已授予作用域时允许该调用：
 
-- `*` 匹配所有必需作用域。
-- 以 `*` 结尾的已授予作用域，会匹配以星号前缀开头的必需作用域。`read:*` 匹配 `read:compression`。
-- 其他所有已授予作用域仅匹配完全相同的必需字符串。
+- `*` 匹配每一个必需作用域。
+- 以 `*` 结尾的已授予作用域，匹配以星号之前的前缀开头的必需作用域。`read:*` 匹配 `read:compression`。
+- 其他所有已授予作用域只匹配完全相同的必需字符串。
 
-作用域为 `["manage"]` 的密钥无法通过 `read:compression` 的 `scopeMatches` 检查。当 `admin`、`mcp:connect`、`read` 或 `write` 是唯一获授予的字符串时，同一调用也会失败。除末尾的 `*` 外，MCP 工具作用域之间不存在层级关系。
+作用域为 `["manage"]` 的密钥对 `read:compression` 无法通过 `scopeMatches`。当 `admin`、`mcp:connect`、`read` 和 `write` 是唯一被授予的字符串时，同一次调用同样失败。除末尾的 `*` 之外，MCP 工具作用域之间不存在任何层级关系。
 
-除非设置 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`，否则不会强制执行作用域检查（默认值为 `false`）。关闭时，`evaluateToolScopes` 会允许调用并跳过目录。开启时，HTTP 使用 Bearer 密钥的 `api_keys.scopes` 作为 `authInfo`（请参阅[按密钥绑定 HTTP 作用域](#per-key-http-scope-binding-7895)）。如果无法解析到任何密钥作用域，已授予作用域集将依次回退到 MCP `_meta`，然后是 `OMNIROUTE_MCP_SCOPES`。
+除非设置 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`（默认 `false`），否则强制执行处于关闭状态。关闭期间，`evaluateToolScopes` 允许该调用并跳过目录。开启期间，HTTP 使用该 Bearer 密钥的 `api_keys.scopes` 作为 `authInfo`（参见[按密钥的 HTTP 作用域绑定](#per-key-http-scope-binding-7895)）。当未能从密钥解析出作用域时，已授予集合会回退到 MCP `_meta`（仅对 HTTP/SSE 调用方有效，且必须处于 HTTP 认证上下文之中；stdio 调用方的 `_meta` 会被忽略，因为该元数据由客户端掌控，且不携带调用方身份），然后是 `OMNIROUTE_MCP_SCOPES`。
 
 #### 访问令牌作用域
 
-`oma_live_…` 令牌（`src/lib/accessTokens/scopes.ts`）携带 `read`、`write` 或 `admin`。`scopeSatisfies` 按等级判断：`admin` 涵盖 `write` 和 `read`，而 `write` 涵盖 `read`。未知作用域不涵盖任何权限。
+`oma_live_…` 令牌（`src/lib/accessTokens/scopes.ts`）携带 `read`、`write` 或 `admin`。`scopeSatisfies` 是等级判定：`admin` 涵盖 `write` 与 `read`，`write` 涵盖 `read`。未知作用域不涵盖任何内容。
 
-`evaluateAccessTokenAuth`（`src/server/authz/accessTokenAuth.ts`）会将该等级与 `inferRequiredScope`（`src/server/authz/accessScopes.ts`）进行比较：
+`evaluateAccessTokenAuth`（`src/server/authz/accessTokenAuth.ts`）将该等级与 `inferRequiredScope`（`src/server/authz/accessScopes.ts`）进行比较：
 
-- `GET`、`HEAD` 和 `OPTIONS` 要求 `read`。
-- 其他所有方法都要求 `write`。
-- `ADMIN_SCOPE_PREFIXES` 中的路径对所有方法都要求 `admin`。`/api/mcp` 位于该列表中，因此即使是 `write` 访问令牌，也仍无法调用 MCP HTTP 接口。
+- `GET`、`HEAD` 和 `OPTIONS` 需要 `read`。
+- 其他所有方法都需要 `write`。
+- `ADMIN_SCOPE_PREFIXES` 中的路径对每种方法都要求 `admin`。`/api/mcp` 在该列表中，因此即使是 `write` 访问令牌也无法调用 MCP HTTP 接口。
 - `ADMIN_MUTATION_PREFIXES` 中的路径仅在变更操作时要求 `admin`。
-- `ADMIN_MUTATION_EXACT_PATHS` 中的路径（`/api/settings`、`/api/settings/require-login`）仅在变更操作时要求 `admin`，且仅限完全匹配该路径——其他 `/api/settings/*` 子路由仍只要求 `write`。
+- `ADMIN_MUTATION_EXACT_PATHS`（`/api/settings`、`/api/settings/require-login`）中的路径仅在变更操作时要求 `admin`，且只限于该确切路径——其他 `/api/settings/*` 子路由仍保持 `write`。
 
-`PATCH /api/keys/{id}` 是一个变更操作，并且不在这些管理员列表中，因此
-`read` 令牌会收到 403：
+`PATCH /api/keys/{id}` 属于变更操作，且不在上述 admin 列表中，因此 `read` 令牌会收到 403
 `Access token scope 'read' is insufficient; 'write' required.`
-`write` 或 `admin` 访问令牌可以满足该路由的要求。控制面板 JWT、环回地址 CLI machine-id 令牌，以及具有 `manage` 或 `admin` 权限的 API 密钥会进入
-其他分支，不受此等级限制。
+`write` 或 `admin` 访问令牌即可满足该路由。Dashboard JWT、loopback CLI 机器 ID 令牌以及拥有 `manage` 或 `admin` 的 API key 走的是其他分支，不会被该等级收窄。
 
-通过 `/api/mcp` 的 `scopeSatisfies` 检查的访问令牌仅表示已通过
-管理权限门控。工具调用仍会针对 API 密钥作用域执行 `scopeMatches`。
-访问令牌等级不是 `scopeMatches` 的输入参数。
+通过 `/api/mcp` 的 `scopeSatisfies` 检查的访问令牌仅仅表明它已通过管理门禁。工具调用仍会针对 API key 的权限范围执行 `scopeMatches` 检查。访问令牌的等级并不是 `scopeMatches` 的输入。
 
-### MCP 工具作用域
+### MCP 工具权限范围
 
-作用域强制执行集中在 `open-sse/mcp-server/scopeEnforcement.ts` 中。
-每个工具都需要特定的作用域：
+权限范围的强制执行集中在 `open-sse/mcp-server/scopeEnforcement.ts` 中。每个工具都需要特定的权限范围：
 
 | 范围                  | 工具                                                                                                                                                                         |
 | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -393,48 +382,17 @@ API 密钥上的 `manage`、MCP 工具上的 `read:compression`，以及 `oma_li
 | `write:obsidian`      | 9 个写入工具 — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                            |
 
-支持通配符作用域：`read:*` 授予所有读取作用域，`*` 授予完整访问权限。
+支持通配符作用域：`read:*` 授予所有读取作用域，`*` 授予完全访问权限。
 
 ### `mcp:connect` — 窄范围路由能力 (#7895)
 
-从非环回地址访问 HTTP/SSE MCP 传输端点（`/api/mcp/*`）需要通过
-`/api/mcp/` 的 LOCAL_ONLY 例外规则（参见 `docs/security/ROUTE_GUARD_TIERS.md`）。过去，
-该例外规则仅接受具有完整 `manage`/`admin` 作用域的 API 密钥——对于仅需与 MCP
-通信的调用方而言，权限过于宽泛。`src/shared/constants/managementScopes.ts` 现在
-导出 `MCP_CONNECT_SCOPE = "mcp:connect"`：这是一个附加的窄范围作用域（遵循与
-`SELF_USAGE_SCOPE` 相同的先例），仅授权绕过
-`src/server/authz/policies/management.ts` 中的 `/api/mcp/` 限制——它不授予对任何其他管理路由的访问权限，
-并且被特意排除在 `MANAGEMENT_API_KEY_SCOPES` 之外。持有 `manage`/`admin`
-作用域的密钥仍可像以前一样通过该例外规则；对于仅通过远程方式调用 MCP 的调用方，
-`mcp:connect` 是一种权限更低的替代方案，通过 `hasMcpConnectOrManageScope()` 进行检查。
+从非回环地址访问 HTTP/SSE MCP 传输（`/api/mcp/*`）需要使用 `/api/mcp/` 的 LOCAL_ONLY 例外通道（参见 `docs/security/ROUTE_GUARD_TIERS.md`）。过去该例外通道只接受具备完整 `manage`/`admin` 作用域的 API 密钥——对于只需要与 MCP 通信的调用方而言范围过宽。`src/shared/constants/managementScopes.ts` 现导出 `MCP_CONNECT_SCOPE = "mcp:connect"`：这是一个附加的窄作用域（与 `SELF_USAGE_SCOPE` 相同的先例），仅授权 `src/server/authz/policies/management.ts` 中的 `/api/mcp/` 绕过逻辑——它不授予任何其他管理路由的访问权限，并且刻意不纳入 `MANAGEMENT_API_KEY_SCOPES`。持有 `manage`/`admin` 的密钥仍可照常通过该例外通道；`mcp:connect` 是面向仅需远程 MCP 的调用方的低权限替代方案，通过 `hasMcpConnectOrManageScope()` 进行检查。
 
-### 按密钥绑定 HTTP 作用域 (#7895)
+### 按密钥的 HTTP 作用域绑定 (#7895)
 
-在 HTTP/SSE 上，`open-sse/mcp-server/httpTransport.ts` 现在通过
-`resolveMcpCallerAuthInfo()`（`open-sse/mcp-server/httpAuthContext.ts`）
-解析调用方真实的 `api_keys.scopes`，并将其传递给 MCP SDK 的
-`transport.handleRequest(req, { authInfo })`，因此传递到每次工具调用的
-`extra.authInfo.scopes` 会反映 Bearer 密钥自身的作用域。
-`scopeEnforcement.ts` 中的 `resolveCallerScopeContext()` 已经优先使用 `authInfo`，
-而不是 `_meta` 和 `OMNIROUTE_MCP_SCOPES` 环境变量回退值——此更改只是填充了这个优先级最高、
-但此前在 HTTP 上从未被提供的数据源。如果无法解析出 API 密钥
-（无请求头或密钥无效），`authInfo` 将保持为 `undefined`，解析过程会继续回退到
-现有的 `meta`/环境变量链，行为不变。stdio 没有调用方级别的身份信息（参见
-`mcpCallerIdentity.ts`），因此不受影响——它仍使用 `_meta`/环境变量回退链。
+在 HTTP/SSE 下，`open-sse/mcp-server/httpTransport.ts` 现在通过 `resolveMcpCallerAuthInfo()`（`open-sse/mcp-server/httpAuthContext.ts`）解析调用方真实的 `api_keys.scopes`，并将其传递给 MCP SDK 的 `transport.handleRequest(req, { authInfo })`，因此到达每个工具调用的 `extra.authInfo.scopes` 将反映 Bearer 密钥自身的作用域。`scopeEnforcement.ts` 的 `resolveCallerScopeContext()` 本就优先采用 `authInfo`，其次才是 `_meta` 与 `OMNIROUTE_MCP_SCOPES` 环境变量兜底——此次改动只是为这个优先级最高的来源填充了数据，而此前在 HTTP 下它从未被填充。当未解析出任何 API 密钥时（无请求头、密钥无效），`authInfo` 保持 `undefined`，解析过程回退到现有的 `meta`/环境变量链，行为保持不变。stdio 没有按调用方区分的身份（参见 `mcpCallerIdentity.ts`），不受按密钥绑定的影响——它会跳过 `_meta` 步骤（`_meta` 仅在 HTTP 认证上下文中被采纳，#15159），仅依据 `OMNIROUTE_MCP_SCOPES` 环境变量进行解析。
 
-**对于使用窄范围作用域的 HTTP/SSE 调用方，无论
-`OMNIROUTE_MCP_ENFORCE_SCOPES` 的值为何，都会强制启用作用域检查。** `OMNIROUTE_MCP_ENFORCE_SCOPES`
-默认值为 `false`，仅对本地/stdio 单操作员流程是安全的，因为该流程没有可用于限定作用域的
-调用方级别身份信息。只要 `resolveCallerScopeContext()` 解析出的
-`source === "authInfo"`（即真实的按密钥 HTTP Authorization 请求头，仅限 HTTP/SSE），并且该
-密钥不具备完整的 `manage`/`admin` 作用域，
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` 就会通过
-`scopeEnforcement.ts` 中的 `shouldForceScopeEnforcement()` 无条件启用每个工具的作用域检查。
-这弥补了一个权限缺口：仅持有窄范围 `mcp:connect` 绕过作用域的密钥——如上所述，
-该作用域除允许绕过 `/api/mcp/` 的 LOCAL_ONLY 限制外，不授权任何其他操作——在操作员启用
-远程/非环回 MCP 访问后，原本可能仅仅因为 `OMNIROUTE_MCP_ENFORCE_SCOPES` 的默认值为
-`false`，就能够调用所有 MCP 工具。通过 HTTP 使用完整 `manage`/`admin` 密钥的调用方，
-以及所有 stdio/本地调用方，仍保持现有由 `OMNIROUTE_MCP_ENFORCE_SCOPES` 控制的行为不变。
+**无论 `OMNIROUTE_MCP_ENFORCE_SCOPES` 如何设置，作用域受限的 HTTP/SSE 调用方都会被强制开启强制检查。** `OMNIROUTE_MCP_ENFORCE_SCOPES` 默认为 `false` 仅在本地/stdio 单操作者流程中才是安全的，因为该流程没有可供划定作用域的按调用方身份。每当 `resolveCallerScopeContext()` 解析出 `source === "authInfo"`（即真实的按密钥 HTTP Authorization 请求头，仅限 HTTP/SSE）且该密钥并不持有完整的 `manage`/`admin` 作用域时，`open-sse/mcp-server/server.ts::withScopeEnforcement()` 就会无条件开启按工具的作用域强制检查（`scopeEnforcement.ts` 中的 `shouldForceScopeEnforcement()`）。这修补了一个漏洞：仅持有窄范围 `mcp:connect` 绕过作用域的密钥——如上文所述，它只授权 `/api/mcp/` 的 LOCAL_ONLY 例外通道——在运维人员开启远程/非回环 MCP 访问后，本可调用所有 MCP 工具，仅仅因为 `OMNIROUTE_MCP_ENFORCE_SCOPES` 出厂默认为 `false`。HTTP 下的完整 `manage`/`admin` 密钥，以及所有 stdio/本地调用方，则保持现有的由 `OMNIROUTE_MCP_ENFORCE_SCOPES` 控制的行为不变。
 
 ---
 
@@ -496,24 +454,22 @@ MCP_TOOL_ALLOW="omniroute_route_request,omniroute_check_quota" omniroute --mcp
 
 ## 运行时心跳
 
-stdio 传输每 5 秒将存活状态持久化到 `${DATA_DIR}/runtime/mcp-heartbeat.json`。仪表板 (`/api/mcp/status`) 读取此文件并结合 PID 存活状态来确定 `online`。HTTP 传输则改为通过进程内的 `getMcpHttpStatus()` 报告状态（不写入文件）。
+stdio 传输每 5 秒将存活状态持久化到 `${DATA_DIR}/runtime/mcp-heartbeat.json`。仪表板（`/api/mcp/status`）读取该文件以及 PID 存活状态，从而推导出 `online`。HTTP 传输则改为通过进程内的 `getMcpHttpStatus()` 报告状态（不写文件）。
 
 心跳快照包含：
 
 ```json
 {
-  "pid": 12345,
-  "startedAt": "2026-05-13T12:34:56.000Z",
-  "lastHeartbeatAt": "2026-05-13T12:35:01.000Z",
-  "version": "1.8.1",
-  "transport": "stdio",
-  "scopesEnforced": false,
-  "allowedScopes": [],
-  "toolCount": 110
+  \"pid\": 12345,
+  \"startedAt\": \"2026-05-13T12:34:56.000Z\",
+  \"lastHeartbeatAt\": \"2026-05-13T12:35:01.000Z\",
+  \"version\": \"1.8.1\",
+  \"transport\": \"stdio\",
+  \"scopesEnforced\": false,
+  \"allowedScopes\": [],
+  \"toolCount\": 110
 }
 ```
-
----
 
 ## 审计日志
 

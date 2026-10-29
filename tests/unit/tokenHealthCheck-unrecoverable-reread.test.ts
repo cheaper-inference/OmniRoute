@@ -7,7 +7,7 @@ const root = path.resolve(import.meta.dirname, "../..");
 const src = await readFile(path.join(root, "src/lib/tokenHealthCheck.ts"), "utf8");
 
 function unrecoverableSlice() {
-  const idx = src.indexOf("if (isUnrecoverableRefreshError(result))");
+  const idx = src.search(/if \((?:tokenRefresh\.)?isUnrecoverableRefreshError\(result\)\)/);
   assert.ok(idx >= 0, "unrecoverable refresh branch must exist");
   return src.slice(idx, idx + 3500);
 }

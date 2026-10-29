@@ -158,7 +158,7 @@ test("quotaSnapshots aggregation returns one row per bucket with the tightest wi
   assert.equal(byProvider.length, 2, "one row per bucket, not one per quota window");
   assert.deepEqual(
     byProvider.map((point) => point.timestamp),
-    ["2026-01-01 10:00:00", "2026-01-01 11:00:00"]
+    ["2026-01-01T10:00:00Z", "2026-01-01T11:00:00Z"]
   );
   // Window samples are still averaged inside a bucket (weekly: (20 + 0) / 2 = 10), then the tightest wins.
   assert.equal(byProvider[0].remainingPct, 10);

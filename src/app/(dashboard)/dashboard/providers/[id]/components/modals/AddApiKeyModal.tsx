@@ -240,7 +240,7 @@ export default function AddApiKeyModal({
       : isQoder
         ? t("qoderPatHint")
         : isFreebuff
-          ? "Freebuff uses an authentic CLI auth token obtained via codebuff CLI login."
+          ? "Freebuff uses the auth token from `freebuff login` (or use the Sign in button for the browser login)."
           : isWebSessionCredential
             ? getWebSessionCredentialHint(t, webSessionCredential, providerDisplayName, false)
             : isLocalSelfHostedProvider
