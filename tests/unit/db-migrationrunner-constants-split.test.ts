@@ -70,8 +70,17 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 39 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 39);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 45 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 45);
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "proxy_payload_traffic"),
+      ["206", "207", "213", "214", "215", "217"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "proxy_payload_traffic",
+        toVersion: "225",
+        toName: "proxy_payload_traffic",
+      }))
+    );
     for (const e of RENAMED_MIGRATION_COMPATIBILITY) {
       assert.equal(typeof e.fromVersion, "string");
       assert.equal(typeof e.fromName, "string");

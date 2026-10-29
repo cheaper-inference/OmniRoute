@@ -127,6 +127,12 @@ async function cleanup(): Promise<void> {
       );
     }
     await closeCallLogSaves();
+    try {
+      const { flushPayloadTraffic } = await import("@/lib/db/proxyTraffic");
+      flushPayloadTraffic();
+    } catch {
+      /* proxy traffic metering never blocks shutdown; it reports its own persistence gaps */
+    }
     if (closeAuditDb()) {
       console.log("[Shutdown] MCP audit database checkpointed and closed.");
     }

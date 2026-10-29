@@ -206,6 +206,43 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toName: "team_cost_centers",
   },
   {
+    // Earlier traffic candidates occupied slots now owned by release migrations.
+    fromVersion: "206",
+    fromName: "proxy_payload_traffic",
+    toVersion: "225",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "207",
+    fromName: "proxy_payload_traffic",
+    toVersion: "225",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "213",
+    fromName: "proxy_payload_traffic",
+    toVersion: "225",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "214",
+    fromName: "proxy_payload_traffic",
+    toVersion: "225",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "215",
+    fromName: "proxy_payload_traffic",
+    toVersion: "225",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "217",
+    fromName: "proxy_payload_traffic",
+    toVersion: "225",
+    toName: "proxy_payload_traffic",
+  },
+  {
     fromVersion: "134",
     fromName: "ccr_blocks",
     toVersion: "139",
