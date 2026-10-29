@@ -1,16 +1,18 @@
 "use client";
 
 import { createContext, useCallback, useContext, useId, useState } from "react";
-import type { ComponentProps, KeyboardEvent as ReactKeyboardEvent } from "react";
+import type { ComponentProps, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import { Check } from "lucide-react";
 import { cn } from "./lib/utils";
 
 export type TabsOrientation = "horizontal" | "vertical";
-export type TabsVariant = "pill" | "capsule" | "underline";
+export type TabsVariant = "pill" | "capsule" | "underline" | "card";
 
 interface TabsContextValue {
   value: string | undefined;
   setValue: (value: string) => void;
   orientation: TabsOrientation;
+  variant: TabsVariant;
   baseId: string;
 }
 
@@ -54,7 +56,7 @@ export function Tabs({
   );
 
   return (
-    <TabsContext.Provider value={{ value, setValue, orientation, baseId }}>
+    <TabsContext.Provider value={{ value, setValue, orientation, variant, baseId }}>
       <div
         data-slot="tabs"
         data-orientation={orientation}
@@ -100,11 +102,20 @@ function onTabKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, orientation:
   }
 }
 
-export interface TabsTriggerProps extends ComponentProps<"button"> { value: string; }
+export interface TabsTriggerProps extends ComponentProps<"button"> {
+  value: string;
+  /** Decorative icon shown by the card variant. */
+  icon?: ReactNode;
+  /** Supporting copy shown by the card variant, separate from the tab name. */
+  description?: ReactNode;
+}
 
-export function TabsTrigger({ className, value, disabled, onClick, onKeyDown, children, ...props }: TabsTriggerProps) {
+export function TabsTrigger({ className, value, icon, description, disabled, onClick, onKeyDown, children, ...props }: TabsTriggerProps) {
   const context = useTabsContext("TabsTrigger");
   const selected = context.value === value;
+  const isCard = context.variant === "card";
+  const titleId = `${context.baseId}-tab-${value}-title`;
+  const descriptionId = `${context.baseId}-tab-${value}-description`;
   return (
     <button
       type="button"
@@ -112,6 +123,8 @@ export function TabsTrigger({ className, value, disabled, onClick, onKeyDown, ch
       id={`${context.baseId}-tab-${value}`}
       aria-selected={selected}
       aria-controls={`${context.baseId}-panel-${value}`}
+      aria-labelledby={isCard && !props["aria-label"] ? titleId : undefined}
+      aria-describedby={isCard && description != null ? descriptionId : undefined}
       tabIndex={selected ? 0 : -1}
       disabled={disabled}
       data-slot="tabs-trigger"
@@ -127,7 +140,14 @@ export function TabsTrigger({ className, value, disabled, onClick, onKeyDown, ch
       }}
       {...props}
     >
-      {children}
+      {isCard ? <>
+        <span className="ci-tabs__card-heading">
+          {icon != null && <span className="ci-tabs__card-icon" aria-hidden="true">{icon}</span>}
+          <span id={titleId} className="ci-tabs__card-title">{children}</span>
+          <span className="ci-tabs__card-indicator" aria-hidden="true"><Check /></span>
+        </span>
+        {description != null && <span id={descriptionId} className="ci-tabs__card-description">{description}</span>}
+      </> : children}
     </button>
   );
 }
@@ -145,7 +165,7 @@ export function TabsContent({ className, value, forceMount, children, ...props }
     <div
       role="tabpanel"
       id={`${context.baseId}-panel-${value}`}
-      aria-labelledby={`${context.baseId}-tab-${value}`}
+      aria-labelledby={`${context.baseId}-tab-${value}${context.variant === "card" ? "-title" : ""}`}
       tabIndex={0}
       hidden={!selected}
       data-slot="tabs-content"

@@ -654,27 +654,29 @@ sudo systemctl enable --now omniroute-update.path
 O serviço remove o pedido antes de obter a imagem, para que uma execução falhada não entre num ciclo. Sem
 `DOCKER_UPDATE_TRIGGER_FILE`, o dashboard mantém o fluxo de comandos manual.
 
-## Disponibilidade: o SQLite predefinido tem uma única réplica
+## Disponibilidade: SQLite padrão é uma réplica única
 
-A configuração padrão do OmniRoute para Docker/Kubernetes consiste em **um processo Node + um processo de escrita SQLite**. A alta disponibilidade **não é suportada** nesta topologia.
+Stock Docker / Kubernetes OmniRoute é** um processo de nó + um gravador SQLite** . A alta disponibilidade é** não suportado** nesta topologia.
 
-| Restrição                                       | Consequência                                                                                                                                                                                                                                                                                                                                                                |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Um único processo de escrita                    | **Não** execute várias réplicas sobre o mesmo ficheiro SQLite. Isso corrompe a base de dados.                                                                                                                                                                                                                                                                               |
-| Recriação/reinício/encerramento por HEALTHCHECK | **Indisponibilidade total** de ligações SSE em curso, sessões do dashboard e estado em memória. Todos os clientes ligados são desligados. Os novos pedidos durante o período sem endpoints recebem do proxy inverso **`502 Bad Gateway: Unknown error`**, e não JSON do OmniRoute — os clientes não conseguem distinguir esta situação de uma falha do fornecedor (#11015). |
-| Mesmo ciclo de eventos que `/healthz`           | Uma operação demorada de catálogo ou compressão pode atrasar as sondagens; um tempo limite curto reinicia então a **única** réplica.                                                                                                                                                                                                                                        |
+| Restrição                            | Consequência                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Escritor único                       | Fazer** não** execute várias réplicas no mesmo ficheiro SQLite. Isso corrompe o DB.                                                                                                                                                                                                                                             |
+| Recriar/reiniciar/ HEALTHCHECK kill  | **Interrupção total** de SSE em curso, sessões de painel e estado na memória. Todo o cliente conectado cai. Novos pedidos durante a janela do terminal vazio obtêm um proxy reverso**`502 Bad Gateway: Unknown error`** , e não OmniRoute JSON — os clientes não conseguem distinguir isto de uma falha do fornecedor (#11015). |
+| Mesmo loop de eventos que `/healthz` | Um catálogo ocupado ou um tique de compressão podem atrasar as sondagens; um curto tempo limite e reinicia o** apenas** réplica.                                                                                                                                                                                                |
 
-**Matriz de sondagens** (consulte também [Recomendações para sondagens do Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Matriz de sonda** (ver também [recomendações do probe Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Sondagem          | Alvo                                                                    | Não utilizar                                                             |
-| ----------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Atividade         | TCP em `PORT` (predefinição: `20128`) ou HTTP não estrito em `/healthz` | `/api/monitoring/health`                                                 |
-| Disponibilidade   | HTTP `GET /healthz`                                                     | Tempos limite curtos que tratem um ciclo de eventos ocupado como inativo |
-| Detalhada/humanos | `/api/monitoring/health`                                                | Sondagem de atividade automatizada do kubelet                            |
+| Sondar             | Objetivo                                               | Não utilize                                                              |
+| ------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------ |
+| Vivacidade         | TCP em `PORT` (padrão `20128`) ou soft HTTP `/healthz` | `/api/monitoring/health`                                                 |
+| Prontidão          | HTTP `GET /healthz`                                    | Tempos limites apertados que tratam o loop de eventos ocupado como morto |
+| Profundo / humanos | `/api/monitoring/health`                               | Atividade automatizada do kubelet                                        |
 
-**Atualizações:** conte com a interrupção de todas as sessões. Drene os clientes, se possível; não existe atualização gradual com o SQLite predefinido. A opção `restart: unless-stopped` do Compose, juntamente com o `HEALTHCHECK` do Docker, também substitui o único processo quando o contentor está Unhealthy — com o mesmo raio de impacto.
+**Atualizações:** esperar que cada sessão caia. Drene os clientes, se puder; não há atualização contínua no SQLite padrão. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` também substituirá o único processo quando o contentor não estiver íntegro - mesmo raio de explosão.
 
-Excerto do Kubernetes para uma **única réplica** (Recreate é obrigatório; não aumente `replicas` para um único ficheiro SQLite):
+Manifestos prontos e um gráfico Helm disponíveis em `deploy/kubernetes/` e `deploy/helm/omniroute/` — consulte o [guia de implementação do Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Snippet do Kubernetes para um** réplica única** (É necessário recriar; não aumentar `replicas` num ficheiro SQLite ):
 
 ```yaml
 spec:
@@ -701,9 +703,9 @@ spec:
             periodSeconds: 20
 ```
 
-A espera de `preStop` permite ao kube remover os endpoints do Service antes do SIGTERM, para que o tráfego **novo** deixe de chegar ao processo que está a ser terminado. As ligações SSE `/v1/responses` em curso são escoadas durante, no máximo, `SHUTDOWN_TIMEOUT_MS` (30 s por predefinição), através de concessões de admissão heavyweight (#11015). Os novos pedidos que ainda chegam ao processo recebem `503` + `Retry-After: 5`. O intervalo sem endpoints provocado por Recreate, até o substituto estar Ready, continua a ser uma indisponibilidade total — isso deve-se à topologia SQLite, não a uma configuração incorreta das sondas.
+`preStop` sleep permite ao kube descartar os endpoints do serviço antes SIGTERM pelo que** novo** o tráfego deixa de atingir o processo de morte. `/v1/responses` SSE em voo é drenado até `SHUTDOWN_TIMEOUT_MS` (padrão 30s) através de concessões de admissão pesadas (#11015). Os novos pedidos que ainda chegam ao processo recebem `503` + `Retry-After: 5`. A lacuna Recriar ponto final vazio até que a substituição esteja pronta permanece uma interrupção grave — esta é a topologia SQLite, não uma configuração incorreta do probe.
 
-Postgres externo/HA multi-writer **não** é um método padrão documentado. Se precisar de HA, mantenha uma única réplica ou execute uma topologia que o projeto tenha testado e documentado separadamente. O trabalho relativo a Postgres/MySQL está em [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Até que seja disponibilizado, a única forma suportada de multiplicar a capacidade para pedidos `/v1/responses` **grandes** consiste em usar N processos independentes (secção seguinte), e não `replicas > 1` num único volume.
+Postgres externo/multi-gravador HA é** não** um caminho de stock documentado. Se precisar de HA, mantenha uma única réplica ou execute uma topologia que o projeto testou e documentou separadamente. O trabalho Postgres/MySQL reside em [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Até que seja enviado, a única forma suportada de multiplicar** grande** A capacidade `/v1/responses` é N processos independentes (secção seguinte), e não `replicas > 1` num volume.
 
 ## Escalabilidade horizontal: N processos independentes
 

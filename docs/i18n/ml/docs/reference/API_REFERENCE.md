@@ -802,48 +802,40 @@ OpenAI-അനുയോജ്യമായ ബാച്ച് പ്രോസസ�
 
 ---
 
-## തിരയൽ API
+## API തിരയുക
 
-വെബ്/തിരയൽ ദാതാക്കൾക്കായുള്ള അബ്സ്ട്രാക്ഷൻ (Tavily, Brave, Exa, Serper മുതലായവ).
+Web/search ദാതാവിൻ്റെ സംഗ്രഹം (തവിലി, ബ്രേവ്, എക്സാ, സെർപ്പർ മുതലായവ).
 
-| രീതി | പാത                    | വിവരണം                                                                                                                                     |
-| ---- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET  | `/v1/search`           | കോൺഫിഗർ ചെയ്ത തിരയൽ ദാതാക്കളും അവയുടെ ശേഷികളും പട്ടികപ്പെടുത്തുന്നു                                                                        |
-| POST | `/v1/search`           | ഒരു തിരയൽ ക്വറി പ്രവർത്തിപ്പിക്കുന്നു — അഭ്യർത്ഥനാ ബോഡി `v1SearchSchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു; കാഷിംഗും/കോയലസിംഗും പിന്തുണയ്ക്കുന്നു |
-| GET  | `/v1/search/analytics` | ഓരോ ദാതാവിനുമുള്ള ഹിറ്റ്/ലേറ്റൻസി/കാഷ് സ്ഥിതിവിവരക്കണക്കുകൾ                                                                                |
+| രീതി | പാത                    | വിവരണം                                                                                                         |
+| ---- | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | ക്രമീകരിച്ച തിരയൽ ദാതാക്കളുടെ + കഴിവുകൾ ലിസ്റ്റ് ചെയ്യുക                                                       |
+| POST | `/v1/search`           | `v1SearchSchema` സാധൂകരിച്ച ഒരു തിരയൽ അന്വേഷണം — ബോഡി പ്രവർത്തിപ്പിക്കുക, caching/coalescing പിന്തുണയ്ക്കുന്നു |
+| GET  | `/v1/search/analytics` | ഓരോ ദാതാവിൻ്റെയും hit/latency/cache സ്ഥിതിവിവരക്കണക്കുകൾ                                                       |
 
-**പ്രാമാണീകരണം:** Bearer API കീ (`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` വഴി തിരയൽ നയം നടപ്പിലാക്കുന്നു.
+**അംഗീകാരം:** ബെയറർ API കീ (`extractApiKey` + `isValidApiKey`). തിരയൽ നയം `enforceApiKeyPolicy` വഴി നടപ്പിലാക്കി.
 
-### Exa, Tavily `provider_options`
+### എക്സാ, താവിലി `provider_options`
 
-Exa, Tavily എന്നിവ നെയിംസ്പേസ് ചെയ്ത ഒരു ബാഗിൽനിന്ന് ദാതാവിന് മാത്രമായുള്ള ഫീൽഡുകൾ വായിക്കുന്നു:
-`provider_options.exa` (അല്ലെങ്കിൽ `provider_options["exa-search"]`) കൂടാതെ `provider_options.tavily`
-(അല്ലെങ്കിൽ `provider_options["tavily-search"]`). താഴെ നൽകിയിരിക്കുന്ന കീകൾ മാത്രമേ കൈമാറുകയുള്ളൂ. ഓരോന്നും
-`open-sse/handlers/search/providerOptionsPassthrough.ts` എന്നതിലുള്ള അതത് Zod സ്കീമയ്ക്കെതിരെ
-പരിശോധിക്കുന്നു; തെറ്റായ തരത്തിലുള്ള ഒരു കീ ഒഴിവാക്കപ്പെടും. പ്രാമാണീകരണം, അടിസ്ഥാന URL,
-`stream`, `outputSchema` എന്നിവ ഉൾപ്പെടെ മറ്റെല്ലാ കീകളും അവഗണിക്കപ്പെടും. മറ്റ് ദാതാക്കൾ ഉപയോഗിക്കുന്ന
-ഫ്ലാറ്റ് കീകൾ (`cx`, `depth`, ...) മുമ്പത്തെപ്പോലെ പ്രവർത്തിക്കും.
+Exa, Tavily ഒരു നെയിംസ്പെയ്സ്ഡ് ബാഗിൽ നിന്ന് പ്രൊവൈഡർ-നിർദ്ദിഷ്ട ഫീൽഡുകൾ വായിക്കുന്നു: `provider_options.exa` (അല്ലെങ്കിൽ `provider_options["exa-search"]`), `provider_options.tavily` (അല്ലെങ്കിൽ `provider_options["tavily-search"]`). താഴെയുള്ള കീകൾ മാത്രമാണ് ഫോർവേഡ് ചെയ്യുന്നത്. ഓരോന്നും `open-sse/handlers/search/providerOptionsPassthrough.ts` ൽ അതിൻ്റേതായ Zod സ്കീമയ്ക്കെതിരെ പരിശോധിക്കുന്നു, കൂടാതെ തെറ്റായ തരത്തിലുള്ള ഒരു കീ ഡ്രോപ്പ് ചെയ്യപ്പെടും. auth, ബേസ് URL, `stream`, `outputSchema` എന്നിവയുൾപ്പെടെ മറ്റേതെങ്കിലും കീ അവഗണിക്കപ്പെടും. മറ്റ് ദാതാക്കൾ ഉപയോഗിക്കുന്ന ഫ്ലാറ്റ് കീകൾ (`cx`, `depth`, ...) മുമ്പത്തെപ്പോലെ പ്രവർത്തിക്കുന്നു.
 
-| ദാതാവ് | ടോപ്പ്-ലെവൽ ഫീൽഡുകൾ                                                                                                                                                                                                                                                                                                                                                       | നെസ്റ്റഡ്                                                                                                                                                                                  |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa    | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ഫ്ലാറ്റ് പ്രിമിറ്റീവുകൾ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` എന്നത് ഡിഫോൾട്ട് `{ text: true, highlights: true }` എന്നതിനു മുകളിൽ ലയിപ്പിക്കുന്നു |
-| Tavily | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                                          |
+| ദാതാവ് | ഉയർന്ന തലത്തിലുള്ള ഫീൽഡുകൾ                                                                                                                                                                                                                                                                                                                                                | നെസ്റ്റഡ്                                                                                                                              |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| എക്സാ  | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ഫ്ലാറ്റ് പ്രിമിറ്റീവ്സ്), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` സ്ഥിരസ്ഥിതി `{ text: true, highlights: true }` ൽ ലയിച്ചു |
+| താവിലി | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                      |
 
-പൊതുവായ ഫീൽഡുകൾക്കാണ് എല്ലായ്പ്പോഴും മുൻഗണന: `query`, `max_results`, `filters` (ഡൊമെയ്നുകൾ), `country`,
-കൂടാതെ `search_type`-ൽനിന്ന് നിർണ്ണയിക്കുന്ന വിഷയം. Exa-യിൽ, `search_type: "news"` എന്നത്
-`category: "news"` നിലനിർത്തുന്നു. Tavily, `search_type: "finance"` (`topic: "finance"`) എന്നതും
-സ്വീകരിക്കുന്നു.
+പൊതുവായ ഫീൽഡുകൾ എല്ലായ്പ്പോഴും വിജയിക്കുന്നു: `query`, `max_results`, `filters` (ഡൊമെയ്നുകൾ), `country` കൂടാതെ `search_type` ൽ നിന്ന് ഉരുത്തിരിഞ്ഞ വിഷയവും. എക്സായിൽ, `search_type: "news"` `category: "news"` നിലനിർത്തുന്നു. താവിലിയും `search_type: "finance"` (`topic: "finance"`) സ്വീകരിക്കുന്നു.
 
-പൊതുവായ `time_range` ഇപ്പോൾ രണ്ട് ദാതാക്കളിലേക്കും എത്തുന്നു: Exa-യ്ക്ക് `startPublishedDate` (ISO
-ടൈംസ്റ്റാമ്പ്), Tavily-യ്ക്ക് `start_date` (`YYYY-MM-DD`) എന്നിവ ലഭിക്കുന്നു. `provider_options`-ൽ
-വ്യക്തമായി നൽകിയിരിക്കുന്ന തീയതി മാപ്പ് ചെയ്ത തീയതിയെ അസാധുവാക്കി പകരം ഉപയോഗിക്കും.
+ഫയർക്രാൾ തിരയൽ നിരക്ക് 10 റിട്ടേൺ ചെയ്ത ഫലങ്ങളുടെ ഓരോ ബ്ലോക്കിനും രേഖപ്പെടുത്തുന്നു, ഒരു ബ്ലോക്കിന് $0.002 (2 ക്രെഡിറ്റുകൾ), ഒരു കോളിന് ഒരു ബ്ലോക്കെങ്കിലും ( [ഫയർക്രാൾ ബില്ലിംഗ്](https://docs.firecrawl.dev/billing) ): 11 ഫലങ്ങളുടെ വില $0.004 ആണ്.
 
-Exa ഫലങ്ങൾ `id`, `highlight_scores`, `summary`, `subpages`, `entities`, `extras` എന്നിവ
-`provider_raw`-ൽ നിലനിർത്തുന്നു. Tavily ഫലങ്ങൾ `images`, `favicon` എന്നിവ നിലനിർത്തുന്നു.
+ജെനറിക് `time_range` ഇപ്പോൾ രണ്ട് ദാതാക്കളിലേക്കും എത്തുന്നു: Exa-യ്ക്ക് `startPublishedDate` (ISO ടൈംസ്റ്റാമ്പ്) ലഭിക്കുന്നു, Tavily-യ്ക്ക് `start_date` (`YYYY-MM-DD`) ലഭിക്കുന്നു. `provider_options` ൽ വ്യക്തമായ ഒരു തീയതി മാപ്പ് ചെയ്തതിനെ അസാധുവാക്കുന്നു.
 
-ചെലവ് കണക്കാക്കലിന് ഇപ്പോഴും ഫ്ലാറ്റ് രജിസ്ട്രിയായ `costPerQuery` ആണ് ഉപയോഗിക്കുന്നത്. Tavily,
-`search_depth: "advanced"` എന്നതിന് ഓരോ കോളിനും കൂടുതൽ ക്രെഡിറ്റുകൾ ഈടാക്കുന്നു; ആ വ്യത്യാസം
-`usage.search_cost_usd`-ൽ പ്രതിഫലിക്കുന്നില്ല.
+എക്സാ ഫലങ്ങൾ `id`, `highlight_scores`, `summary`, `subpages`, `entities`, `extras` എന്നിവ `provider_raw` ൽ നിലനിർത്തുന്നു. താവിലി ഫലങ്ങൾ `images`, `favicon` എന്നിവ നിലനിർത്തുന്നു.
+
+ലിങ്ക്അപ്പ് തിരയൽ ചെലവ് `depth` `fast`, `standard` എന്നിവയ്ക്ക് $0.005 ഉം `deep` ന് $0.05 ഉം ( [ലിങ്കപ്പ് വിലനിർണ്ണയം](https://docs.linkup.so/pages/documentation/development/pricing) ) രേഖപ്പെടുത്തുന്നു, `depth` `provider_options` ൽ നിന്നോ കണക്ഷൻ്റെ ക്രമീകരണങ്ങളിൽ നിന്നോ വന്നാലും.
+
+Exa `type: "lite"` (Exa 3.0) ഒരു ചെറിയ സെറ്റ് ഫീൽഡുകൾ സ്വീകരിക്കുകയും മറ്റേതെങ്കിലും ഫീൽഡ് സജ്ജമാക്കുമ്പോൾ മുഴുവൻ അഭ്യർത്ഥനയും നിരസിക്കുകയും ചെയ്യുന്നു. ലൈറ്റിനായി, `additionalQueries`, `systemPrompt` കൂടാതെ `text`, `highlights` എന്നിവ ഒഴികെയുള്ള എല്ലാ `contents` കീകളും കോളിന് മുമ്പ് ഡ്രോപ്പ് ചെയ്യപ്പെടും. ഒഴിവാക്കിയ `subpages`, `subpageTarget`, `highlights.numSentences`, `highlights.highlightsPerUrl` എന്നിവ ഇനി ഫോർവേഡ് ചെയ്യപ്പെടില്ല.
+
+എക്സായുടെ സ്വന്തം വിലനിർണ്ണയം പിന്തുടരുന്ന എക്സാ ഒഴികെയുള്ള ഫ്ലാറ്റ് രജിസ്ട്രി `costPerQuery` ആണ് കോസ്റ്റ് അക്കൗണ്ടിംഗ്: `auto` (ഒപ്പം ലെഗസി `fast`) ഓരോ കോളിനും $0.007 അല്ലെങ്കിൽ 10 ഫലങ്ങൾ ഉൾക്കൊള്ളുന്ന `lite` (ഒപ്പം ലെഗസി `instant`) ന് $0.004; ഓരോ തുടർന്നുള്ള ഫലത്തിനും $0.001; കൂടാതെ `contents.summary` സജ്ജീകരിക്കുമ്പോൾ ലഭിക്കുന്ന ഓരോ ഫലത്തിനും $0.001. `search_depth` `basic`, `fast`, `ultra-fast` എന്നിവയ്ക്ക് 1 ക്രെഡിറ്റിലും ($0.008) `advanced` ന് 2 ക്രെഡിറ്റുകളിലും ($0.016) Tavily രേഖപ്പെടുത്തിയിരിക്കുന്നു ( [Tavily API ക്രെഡിറ്റുകൾ](https://docs.tavily.com/documentation/api-credits) ). Tavily അഡ്വാൻസ്ഡിലേക്ക് അപ്ഗ്രേഡ് ചെയ്യുന്ന `auto_parameters: true` ഉള്ള ഒരു കോൾ ഇപ്പോഴും 1 ക്രെഡിറ്റിൽ റെക്കോർഡ് ചെയ്തിരിക്കുന്നു.
 
 ---
 

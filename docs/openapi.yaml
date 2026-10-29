@@ -58,6 +58,8 @@ tags:
       background scheduler tick.
   - name: API Keys
     description: API key management
+  - name: Teams
+    description: Billing cost-center, temporal assignment, soft-budget, and usage management
   - name: Session Leases
     description: Client-neutral exclusive managed session connection leases
   - name: Combos
@@ -2247,6 +2249,50 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /api/v1/models/health:
+    get:
+      tags: [Models]
+      summary: Per-model pause state for the caller's key
+      description: >-
+        Read-only liveness view over the in-memory model lockout store. `ok`
+        means no pause observed by this instance (not a health verdict);
+        connection-level pauses live outside the store read here. Additive:
+        leaves GET /v1/models and its cache untouched. `retry_after` carries
+        the shortest remaining lockout in seconds, rounded up, only when
+        `state` is `cooling`. One documented difference from the dispatch 429
+        `model_cooldown` rule: a model with one lockout-covered connection and
+        one connection-level cooldown still reads `cooling` here, while the
+        429 requires every connection to carry a model cooldown.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: ids
+          required: false
+          description: >-
+            Optional comma-separated model ids to look up. Ids in this
+            list that resolve to no visible model are returned with
+            `state: unknown` instead of being omitted.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Model health list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    example: list
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ModelHealth"
+        "401":
+          description: Authentication required
+
   /api/v1/providers/{provider}/models:
     get:
       tags: [Models]
@@ -3854,8 +3900,9 @@ paths:
                   type: string
                   nullable: true
                   description: >-
-                    Absolute adopted sing-box config path (lowercase .json).
-                    Empty means no generation; each sync writes
+                    Absolute adopted config path: lowercase `.json` renders
+                    sing-box, `.yaml`/`.yml` renders Mihomo. Empty means no
+                    generation; each sync writes
                     `<path>.generated` beside it, never into it.
                 coreBinaryPath:
                   type: string
@@ -6825,9 +6872,12 @@ paths:
       description: |
         Validates the `state` cookie, exchanges the authorization `code` for tokens,
         verifies the ID token against the issuer's JWKS (audience = client id), and
-        checks the token's `sub`/`email` against `oidcAllowedSubjects`, which must hold at
-        least one entry (an empty list ends in `not_configured`). On success it mints the same 30-day `auth_token` dashboard-session
-        JWT used by password login and redirects to `/dashboard`.
+        requires at least one dashboard admission policy: `oidcAllowedSubjects`
+        (matching `sub` or verified `email`) or `oidcAdmissionClaim` (matching a
+        configured array claim in the verified ID token). When both are present,
+        both must match. Without either policy the callback returns `not_configured`.
+        On success it mints the same 30-day `auth_token` dashboard-session JWT
+        used by password login and redirects to `/dashboard`.
       parameters:
         - name: code
           in: query
@@ -6843,7 +6893,7 @@ paths:
         "302":
           description: >-
             Redirect to `/dashboard` on success, or to
-            `/login?oidc_error={missing_code|invalid_state|not_configured|token_exchange|token_response|no_id_token|subject_not_allowed|id_token_invalid|server_misconfigured}`
+            `/login?oidc_error={missing_code|invalid_state|not_configured|token_exchange|token_response|no_id_token|subject_not_allowed|role_not_allowed|id_token_invalid|server_misconfigured}`
             on failure.
 
   /api/init:
@@ -7355,6 +7405,58 @@ paths:
       responses:
         "200":
           description: Health status
+
+  /api/monitoring/model-health:
+    get:
+      tags: [System]
+      summary: Get per-model health states
+      description: >-
+        Management-only report that classifies every synced model on every provider
+        connection as HEALTHY, DEGRADED, RATE_LIMITED, AUTH_FAILED, PROVIDER_DOWN,
+        CONNECTION_BLOCKED, MODEL_LOCKED or UNKNOWN, from the connection state, the
+        provider circuit breaker and the per-model lockout. Includes connection ids
+        and names, so it requires a management principal.
+      parameters:
+        - name: provider
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Only report this provider id
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              [
+                HEALTHY,
+                DEGRADED,
+                RATE_LIMITED,
+                AUTH_FAILED,
+                PROVIDER_DOWN,
+                CONNECTION_BLOCKED,
+                MODEL_LOCKED,
+                UNKNOWN,
+              ]
+          description: Only report models in this state
+        - name: unhealthy
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ["1"]
+          description: Set to `1` to omit HEALTHY models
+      responses:
+        "200":
+          description: >-
+            `{ timestamp, summary, providers }` — `summary` counts models per state;
+            `providers[]` carries `circuitBreakerState`, `canExecute`, optional
+            `retryAfterMs` and `connections[]` with their `models[]`
+        "401":
+          description: Not a management principal
+        "500":
+          description: Health report failed (sanitized message)
 
   /api/monitoring/compression:
     get:
@@ -13763,6 +13865,11 @@ paths:
                     type: string
                     description: Latest published version, or "unavailable" when every lookup failed.
                   updateAvailable: { type: boolean }
+                  updateCheckDisabled:
+                    type: boolean
+                    description: >-
+                      True when OMNIROUTE_NO_UPDATE_NOTIFIER is set. No npm, GitHub or news lookup
+                      runs, `latest` is "unavailable" and `updateAvailable` is false.
                   channel:
                     type: string
                     enum: [npm, source, docker-compose]
@@ -14634,6 +14741,55 @@ paths:
       responses:
         "200":
           description: OK
+  /api/v1/quota-recoveries/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+        description: Recovery ticket id returned in the `202` body of an opted-in request.
+    get:
+      tags:
+        - V1 Quota Recoveries
+      summary: Poll a quota recovery ticket
+      description: >-
+        Opt-in recovery of a non-streaming `POST /api/v1/chat/completions` or
+        `POST /api/v1/responses` turn that failed with a terminal quota error. A request
+        opts in with `x-omniroute-quota-recovery: auto`, `x-omniroute-session` and
+        `x-omniroute-recovery-turn` (each `[A-Za-z0-9._:-]{1,128}`); it must be
+        `stream: false`, carry no tools / tool history / `previous_response_id`, and not pin a
+        connection. Recovery needs `STORAGE_ENCRYPTION_KEY` (the request is stored encrypted for
+        up to 24 h). Instead of the quota error the caller then receives `202` with
+        `recovery.poll` pointing here. Tickets are visible only to the API key that created them.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: >-
+            Completed: the recovered upstream response body (header
+            `X-OmniRoute-Recovery-State: completed`). Other final states (`failed`,
+            `needs_confirmation`, `cancelled`, `expired`) return `{ recovery }`.
+        "202":
+          description: "Still `pending` or `running`; body is `{ recovery }`."
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: No ticket with this id for the calling API key.
+    delete:
+      tags:
+        - V1 Quota Recoveries
+      summary: Cancel a quota recovery ticket
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: 'Cancelled; body is `{ recovery: { id, state: "cancelled" } }`.'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: No ticket with this id for the calling API key.
+        "409":
+          description: "Only `pending` or `needs_confirmation` tickets can be cancelled."
   /api/v1/quotas/check:
     get:
       tags:
@@ -15147,6 +15303,188 @@ paths:
         "200":
           description: OK
 
+  # --- Team billing cost centers ---------------------------------------------
+
+  /api/teams:
+    get:
+      tags: [Teams]
+      summary: List billing Teams
+      security:
+        - ManagementSessionAuth: []
+      parameters:
+        - in: query
+          name: includeArchived
+          schema: { type: boolean, default: false }
+        - in: query
+          name: includeKeyOptions
+          description: Include all existing API-key id/name choices and active billing team id/name; no credential fields.
+          schema: { type: boolean, default: false }
+      responses:
+        "200":
+          description: Team list; keyOptions is omitted unless requested.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  teams: { type: array, items: { type: object } }
+                  keyOptions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        name: { type: string, nullable: true }
+                        teamId: { type: string, nullable: true }
+                        teamName: { type: string, nullable: true }
+        "401": { description: Unauthorized }
+    post:
+      tags: [Teams]
+      summary: Create a billing Team with an optional soft shared budget
+      security:
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamCreate"
+      responses:
+        "201": { description: Team created }
+        "400": { description: Invalid request }
+        "401": { description: Unauthorized }
+        "409": { description: Team name already exists }
+
+  /api/teams/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [Teams]
+      summary: Get a billing Team and its active API-key assignments
+      security:
+        - ManagementSessionAuth: []
+      responses:
+        "200":
+          description: Team and members plus authoritative current successful-usage budgetStatus; null for unlimited or archived teams. Backend errors return 500.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  team: { type: object }
+                  members: { type: array, items: { type: object } }
+                  budgetStatus:
+                    $ref: "#/components/schemas/TeamBudgetStatus"
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+    patch:
+      tags: [Teams]
+      summary: Update a billing Team
+      security:
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamUpdate"
+      responses:
+        "200": { description: Team updated }
+        "400": { description: Invalid request }
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+        "409": { description: Team name already exists or the Team is archived }
+    delete:
+      tags: [Teams]
+      summary: Archive a billing Team and close its active key assignments
+      security:
+        - ManagementSessionAuth: []
+      responses:
+        "200": { description: Team archived }
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+
+  /api/teams/{id}/members:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [Teams]
+      summary: List active API-key billing assignments
+      security:
+        - ManagementSessionAuth: []
+      responses:
+        "200": { description: Active assignments }
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+    put:
+      tags: [Teams]
+      summary: Assign an API key to this billing Team
+      security:
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamMemberAssignment"
+      responses:
+        "200": { description: Assignment created }
+        "400": { description: Invalid request }
+        "401": { description: Unauthorized }
+        "404": { description: Team or API key not found }
+        "409": { description: Assignment timestamp conflict }
+    delete:
+      tags: [Teams]
+      summary: Close an API-key billing assignment
+      security:
+        - ManagementSessionAuth: []
+      parameters:
+        - in: query
+          name: apiKeyId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Assignment closed }
+        "400": { description: Invalid request }
+        "401": { description: Unauthorized }
+        "404": { description: Assignment not found }
+
+  /api/teams/{id}/usage:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string, format: uuid }
+      - in: query
+        name: startDate
+        schema: { type: string, format: date-time }
+      - in: query
+        name: endDate
+        schema: { type: string, format: date-time }
+    get:
+      tags: [Teams]
+      summary: Get immutable Team usage attribution with per-key drill-down
+      description: >-
+        Attribution is resolved when each terminal usage row is persisted and
+        is immutable thereafter. Estimated list cost comes from the local model
+        catalog; actual provider cost, subscription quota, and compression
+        savings are null when unavailable. The budget is a soft committed-usage
+        check and can overshoot under concurrency. Retained daily data is included
+        only for complete UTC days inside the requested range.
+      security:
+        - ManagementSessionAuth: []
+      responses:
+        "200": { description: Team usage report }
+        "400": { description: Invalid range }
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+
 components:
   securitySchemes:
     BearerAuth:
@@ -15247,6 +15585,64 @@ components:
             requestId: 0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
 
   schemas:
+    TeamCreate:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, maxLength: 2000 }
+        maxBudgetUsd: { type: number, exclusiveMinimum: 0, nullable: true }
+        budgetDuration: { type: string, enum: [1d, 7d, 30d], nullable: true }
+      description: maxBudgetUsd and budgetDuration must be configured or cleared together.
+
+    TeamUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, maxLength: 2000 }
+        maxBudgetUsd: { type: number, exclusiveMinimum: 0, nullable: true }
+        budgetDuration: { type: string, enum: [1d, 7d, 30d], nullable: true }
+      description: >-
+        Either budget field may be edited while the other retains its current
+        value; send both as null to clear the budget. Edits preserve the
+        established rolling-window reset cadence.
+
+    TeamMemberAssignment:
+      type: object
+      additionalProperties: false
+      required: [apiKeyId]
+      properties:
+        apiKeyId: { type: string, format: uuid }
+        expectedTeamId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Optional expected current billing team, or null for unassigned. A mismatch returns 409 without changing history. Omission retains legacy behavior.
+
+    TeamBudgetStatus:
+      type: object
+      nullable: true
+      properties:
+        teamId: { type: string }
+        teamName: { type: string }
+        enforcementMode: { type: string, enum: [soft_committed_usage] }
+        maxBudgetUsd: { type: number }
+        budgetDuration: { type: string, enum: [1d, 7d, 30d] }
+        windowStartIso: { type: string, format: date-time }
+        resetAtIso: { type: string, format: date-time }
+        estimatedListCostUsd: { type: number }
+        hasUnpricedUsage: { type: boolean }
+        hasPartialRetainedUsage:
+          type: boolean
+          description: Retained daily buckets overlap a rolling-window boundary. Displayed spend is incomplete; the existing soft-budget enforcement policy is unchanged.
+        exceeded: { type: boolean }
+        actualProviderCostUsd: { nullable: true }
+        subscriptionQuotaUsed: { nullable: true }
+        compressionSavingsUsd: { nullable: true }
+
     ElevenLabsSoundGeneration:
       type: object
       additionalProperties: true
@@ -16638,6 +17034,38 @@ components:
         system:
           type: string
 
+    ModelHealth:
+      type: object
+      description: >-
+        Per-model pause state. `ok` means no pause observed by this instance;
+        `unknown` marks ids that resolve to no routable provider model.
+        `none_honored` reports whether reasoning_effort=none was honored in
+        the trailing call_logs window (`true` honored, `false` not honored,
+        `null` unknown when the sample is empty or too small).
+      properties:
+        id:
+          type: string
+        state:
+          type: string
+          enum: [ok, cooling, unknown]
+        retry_after:
+          type: integer
+          description: Shortest remaining lockout in seconds, rounded up; only when cooling.
+          nullable: true
+        observed_at:
+          type: string
+          format: date-time
+        none_honored:
+          type: boolean
+          nullable: true
+          description: Whether reasoning_effort=none was honored; null when unknown.
+        none_sample_size:
+          type: integer
+          description: Number of none requests counted in the window.
+        none_window_hours:
+          type: integer
+          description: Trailing window in hours backing none_honored.
+
     Model:
       type: object
       properties:
@@ -16736,8 +17164,9 @@ components:
           type: string
           nullable: true
           description: >-
-            Absolute adopted sing-box config path (lowercase .json).
-            Empty means no generation.
+            Absolute adopted config path: lowercase `.json` renders
+            sing-box, `.yaml`/`.yml` renders Mihomo. Empty means no
+            generation.
         coreBinaryPath:
           type: string
           nullable: true

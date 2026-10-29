@@ -175,11 +175,11 @@ npm run test:all
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # 변경 사항의 영향을 받는 단위 테스트만 실행(CI 게이트와 동일한 TIA 선택기, #8084)
-npm run test:scoped            # 마지막 커밋(또는 작업 트리)의 변경 사항
+npm run test:scoped            # 마지막 커밋의 변경 사항(또는 작업 트리)
 npm run test:scoped:staged     # 스테이징된 변경 사항만 — pre-commit 실행과 함께 사용하기 좋음
 npm run test:scoped:full       # 먼저 import-graph 맵을 다시 빌드(파일 추가/이동 후)
 # 종료 코드 1 + "전체 스위트를 실행하세요"는 허브 파일(tsconfig, package.json, …) 또는
-# 매핑되지 않은 소스가 변경되었음을 의미함 — 선택기는 안전하게 실패하며 절대로 조용히 건너뛰지 않음.
+# 매핑되지 않은 소스가 변경되었음을 의미함 — 선택기는 안전하게 실패하며 절대 조용히 건너뛰지 않음.
 
 # Vitest(MCP 서버, autoCombo, 캐시)
 npm run test:vitest
@@ -201,52 +201,53 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# 게이트가 적용된 실제 업스트림 콤보 스모크 테스트(VPS 접근 권한 + 실제 제공자 크레딧 필요)
-# 실제 제공자를 호출하므로 약간의 비용이 발생함. CI에서는 절대로 실행되지 않음. 게이트가 없으면 문제없이 건너뜀.
+# 게이트가 적용된 실제 업스트림 콤보 스모크 테스트(VPS 접근 권한 + 실제 공급자 크레딧 필요)
+# 실제 공급자를 호출하므로 약간의 비용이 발생함. CI에서는 절대 실행되지 않음. 게이트가 없으면 문제없이 건너뜀.
 # 필요 사항: ssh root@192.168.0.15 접근 권한(VPS에서 읽기 전용 DB 스냅샷을 가져옴).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
 # Phase-3 VPS 라이브 스모크 테스트 — 일반 Node ESM 스크립트로 라이브 .15 서버를 직접 호출함.
-# 필요 사항: ssh root@192.168.0.15 접근 권한(SSH sqlite를 통해 콤보를 생성/삭제함).
-# 실제 제공자를 호출함(소액의 비용 발생). __live_test__* 콤보만 생성/삭제함. CI에서는 절대로 실행되지 않음.
-# .15에서는 REQUIRE_API_KEY=false이므로 API 키가 필요하지 않지만, 설정된 경우 COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY를 따름.
-npm run test:combo:live:vps              # HTTP 시나리오 7개(priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # 실제 제공자 간 장애 조치 시나리오 추가(총 8개)
+# 필요 사항: ssh root@192.168.0.15 접근 권한(SSH sqlite를 통해 콤보 생성/삭제).
+# 실제 공급자를 호출함(소액의 비용). __live_test__* 콤보만 생성/삭제함. CI에서는 절대 실행되지 않음.
+# .15에서는 REQUIRE_API_KEY=false이므로 API 키가 필요하지 않지만, 설정된 경우 COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY를 사용함.
+npm run test:combo:live:vps              # HTTP 시나리오 7개(priority/round-robin/weighted/cost/fusion/auto + 상태 검사)
+npm run test:combo:live:vps:failover     # 실제 공급자 간 장애 조치 시나리오 추가(총 8개)
 ```
 
 커버리지 참고 사항:
 
-- `npm run test:coverage`는 기본 단위 테스트 스위트의 소스 커버리지를 측정하고, `tests/**`를 제외하며, `open-sse/**`를 포함합니다
-- 풀 리퀘스트는 구문/라인/함수/분기 커버리지 게이트를 **60%+**로 유지해야 합니다
-- PR에서 `src/`, `open-sse/`, `electron/` 또는 `bin/`의 프로덕션 코드를 변경하는 경우 동일한 PR에서 자동화된 테스트를 추가하거나 업데이트해야 합니다
-- `npm run coverage:report`는 가장 최근 커버리지 실행의 상세한 파일별 보고서를 출력합니다
-- `npm run test:coverage:legacy`는 과거 비교를 위해 이전 측정 지표를 유지합니다
+- `npm run test:coverage`는 기본 단위 테스트 스위트의 소스 커버리지를 측정하고 `tests/**`를 제외하며 `open-sse/**`를 포함합니다
+- 풀 리퀘스트는 구문/라인/함수/분기 기준 **60%+** 커버리지 게이트를 유지해야 합니다
+- PR에서 `src/`, `open-sse/`, `electron/` 또는 `bin/`의 프로덕션 코드를 변경하는 경우 동일한 PR에 자동화 테스트를 추가하거나 업데이트해야 합니다
+- `npm run coverage:report`는 가장 최근의 커버리지 실행 결과를 파일별로 자세히 출력합니다
+- `npm run test:coverage:legacy`는 과거 비교를 위해 이전 메트릭을 유지합니다
 - 단계별 커버리지 개선 로드맵은 `docs/ops/COVERAGE_PLAN.md`를 참조하세요
 
 ### 풀 리퀘스트 요구 사항
 
 PR을 열기 전에
-[기여 골든 패스](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)를 사용하여 변경한 항목에 맞는 집중 루프를
+[기여 골든 패스](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)를 사용하여 변경한 내용에 맞는 집중 루프를
 실행하세요. 전체 단위 테스트 스위트(CI 샤드 4개), Vitest, **60%+** 커버리지 게이트 및
-프로덕션 빌드는 CI가 담당합니다. 이를 로컬에서 실행해도 PR 검사가 이미 제공하는 것 이상의
-정보를 얻을 수 없으며, 사양이 낮은 머신에서는 호스트의 자원을 소진할 수 있습니다(#8084):
+프로덕션 빌드는 CI의 책임입니다. 이를 로컬에서 실행해도 PR 검사가 이미 제공하는 것 이상의
+정보를 얻을 수 없으며, 사양이 낮은 시스템에서는 호스트 리소스를 포화시킬 수 있습니다(#8084):
 
 - 변경 사항을 다루는 테스트 파일을 실행하세요: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint`를 실행하세요
-- 프로덕션 코드가 변경될 때마다 동일한 PR에 자동화된 테스트를 추가하거나 업데이트하세요
-- 프로덕션 코드가 변경된 경우 변경되거나 추가된 테스트 파일을 PR 설명에 포함하세요
+- 프로덕션 코드가 변경될 때마다 동일한 PR에 자동화 테스트를 추가하거나 업데이트하세요
+- `node:test` 파일에서는 모든 최상위 `await`(`await import(...)` 등)를 첫 번째 `test()` / `describe()` 앞에 배치하세요. `--test-force-exit`에서는 그 뒤에 등록된 테스트가 아무런 경고 없이 실행되지 않을 수 있습니다(#18045, `npm run check:test-tla-order`로 강제 적용)
+- 프로덕션 코드가 변경된 경우 변경하거나 추가한 테스트 파일을 PR 설명에 포함하세요
 - CI에 프로젝트 시크릿이 구성되어 있다면 PR에서 SonarQube 결과를 확인하세요
 
-현재 테스트 상태: 다음 항목을 다루는 **단위 테스트 파일 122개**:
+현재 테스트 상태: 다음 항목을 다루는 **122개의 단위 테스트 파일**:
 
-- 제공자 변환기 및 형식 변환
-- 속도 제한, 회로 차단기 및 복원력
+- 공급자 변환기 및 형식 변환
+- 속도 제한, 서킷 브레이커 및 복원력
 - 시맨틱 캐시, 멱등성, 진행 상황 추적
 - 데이터베이스 작업 및 스키마(DB 모듈 21개)
 - OAuth 흐름 및 인증
 - API 엔드포인트 검증(Zod v4)
 - MCP 서버 도구 및 범위 적용
-- 메모리 및 Skills 시스템
+- Memory 및 Skills 시스템
 
 ---
 

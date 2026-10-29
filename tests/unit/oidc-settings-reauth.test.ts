@@ -36,6 +36,7 @@ const OIDC_IDENTITY_CHANGES: Record<string, unknown> = {
   oidcIssuer: "https://attacker-idp.example",
   oidcClientId: "attacker-client",
   oidcAllowedSubjects: ["attacker@example.com"],
+  oidcAdmissionClaim: { path: "realm_access.roles", values: ["attacker"] },
   oidcRedirectPath: "@attacker.example/callback",
   oidcScopes: ["openid", "offline_access"],
 };
@@ -46,6 +47,7 @@ const SEEDED_OIDC = {
   oidcClientId: "operator-client",
   oidcClientSecret: "operator-client-secret",
   oidcAllowedSubjects: ["admin@example.com"],
+  oidcAdmissionClaim: { path: "realm_access.roles", values: ["admin"] },
   oidcRedirectPath: "/api/auth/oidc/callback",
   oidcScopes: ["openid", "profile", "email"],
 };

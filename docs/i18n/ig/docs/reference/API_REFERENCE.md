@@ -849,47 +849,40 @@ faịlụ: naanị key nke ya, session dashboard na-enweta instance ahụ dum, a
 
 ---
 
-## API Ọchụchọ
+## Chọọ API
 
-Nhazi mkpuchi maka ndị na-eweta ọrụ ọchụchọ webụ (Tavily, Brave, Exa, Serper, wdg.).
+onye na-enye Web/search abstraction (Tavily, Brave, Exa, Serper, wdg).
 
-| Usoro | Ụzọ                    | Nkọwa                                                                                 |
-| ----- | ---------------------- | ------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Depụta ndị na-eweta ọchụchọ ahaziri + ikike ha                                        |
-| POST  | `/v1/search`           | Mee ajụjụ ọchụchọ — `v1SearchSchema` na-enyocha body, ma na-akwado caching/coalescing |
-| GET   | `/v1/search/analytics` | Ọnụọgụ hit/latency/cache nke onye na-eweta ọ bụla                                     |
+| Usoro | Ụzọ                    | Nkọwa                                                                               |
+| ----- | ---------------------- | ----------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Ndepụta ahaziri ndị na-eweta ọchụchọ + ike                                          |
+| POST  | `/v1/search`           | Gbaa ajụjụ ọchụchọ — ahụ nke `v1SearchSchema` kwadoro, na-akwado caching/coalescing |
+| GET   | `/v1/search/analytics` | Onye na-eweta hit/latency/cache stats                                               |
 
-**Nyocha ikike:** Igodo API Bearer (`extractApiKey` + `isValidApiKey`). A na-amanye iwu ọchụchọ site na `enforceApiKeyPolicy`.
+**Nyocha:** Igodo API onye na-ebu (`extractApiKey` + `isValidApiKey`). Amụma ọchụchọ kwadoro site na `enforceApiKeyPolicy`.
 
-### `provider_options` nke Exa na Tavily
+### Exa na Tavily `provider_options`
 
-Exa na Tavily na-agụ field ndị akọwapụtara maka onye na-eweta ọrụ site na akpa nwere namespace:
-`provider_options.exa` (ma ọ bụ `provider_options["exa-search"]`) na `provider_options.tavily`
-(ma ọ bụ `provider_options["tavily-search"]`). Naanị key ndị dị n'okpuru ka a na-ebufe. A na-enyocha nke ọ bụla
-megide schema Zod nke ya n'ime `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-ma a na-ewepụ key nwere ụdị na-ezighi ezi. A na-eleghara key ọ bụla ọzọ anya, gụnyere auth, base URL,
-`stream` na `outputSchema`. Key ndị larịị nke ndị na-eweta ọrụ ndị ọzọ na-eji (`cx`, `depth`, ...) ka na-arụ ọrụ
-dị ka ọ dị na mbụ.
+Exa na Tavily na-agụ mpaghara ndị na-eweta-kpọmkwem site na akpa nwere aha: `provider_options.exa` (ma ọ bụ `provider_options["exa-search"]`) na `provider_options.tavily` (ma ọ bụ `provider_options["tavily-search"]`). Naanị igodo dị n'okpuru ka a na-ebugharị. A na-enyocha nke ọ bụla megide atụmatụ Zod nke ya na `open-sse/handlers/search/providerOptionsPassthrough.ts`, na-atụfu igodo nwere ụdị na-ezighi ezi. A na-eleghara igodo ọ bụla ọzọ anya, gụnyere auth, base URL, `stream` na `outputSchema`. Igodo dị larịị nke ndị na-enye ndị ọzọ na-eji (`cx`, `depth`, ...) na-arụ ọrụ dịka ọ dị na mbụ.
 
-| Onye na-eweta | Field ndị nọ n'ọkwa elu                                                                                                                                                                                                                                                                                                                                                   | Ndị akwuuru                                                                                                                                                           |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa           | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitive ndị larịị), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` nke ejikọtara n'elu ndabara `{ text: true, highlights: true }` |
-| Tavily        | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                     |
+| Onye na-enye | Ogige dị elu                                                                                                                                                                                                                                                                                                                                                              | Akwu                                                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` merged n'elu ndabara `{ text: true, highlights: true }` |
+| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
 
-Field izugbe na-ebute ụzọ mgbe niile: `query`, `max_results`, `filters` (domains), `country` na
-topic e si na `search_type` nweta. Na Exa, `search_type: "news"` na-edobe `category: "news"`.
-Tavily na-anabatakwa `search_type: "finance"` (`topic: "finance"`).
+Oghere ọnụọgụgụ mgbe niile na-emeri: `query`, `max_results`, `filters` (ngalaba), `country` na isiokwu sitere na `search_type`. Na Exa, `search_type: "news"` na-edobe `category: "news"`. Tavily na-anabatakwa `search_type: "finance"` (`topic: "finance"`).
 
-`time_range` izugbe na-erutezi ndị na-eweta ọrụ abụọ ahụ: Exa na-enweta `startPublishedDate` (timestamp ISO)
-ebe Tavily na-enweta `start_date` (`YYYY-MM-DD`). Ụbọchị akọwapụtara kpọmkwem na `provider_options`
-na-ebute ụzọ karịa nke e mapụtara.
+A na-edekọ ọnụ ahịa ọchụchọ Firecrawl n'otu ngọngọ mmalite nke rịzọlt 10 eweghachiri, na $0.002 (kredit 2) ngọngọ yana opekata mpe otu ngọngọ kwa oku ( [ịgba ụgwọ Firecrawl](https://docs.firecrawl.dev/billing) ): nsonaazụ 11 na-efu $0.004.
 
-Nsonaazụ Exa na-edobe `id`, `highlight_scores`, `summary`, `subpages`, `entities` na `extras` n'ime
-`provider_raw`. Nsonaazụ Tavily na-edobe `images` na `favicon`.
+Ngụkọta `time_range` ugbu a erutela ndị na-enye ha abụọ: Exa na-enweta `startPublishedDate` (ISO timestamp) na Tavily na-enweta `start_date` (`YYYY-MM-DD`). Ụbọchị doro anya na `provider_options` na-akagbu nke e sere ese.
 
-Ngụkọ ọnụ ahịa ka bụ ndekọ larịị `costPerQuery`. Tavily na-ana
-`search_depth: "advanced"` kredit ndị ọzọ n'otu oku, ma ọdịiche ahụ anaghị apụta na
-`usage.search_cost_usd`.
+Nsonaazụ ule dowe `id`, `highlight_scores`, `summary`, `subpages`, `entities` na `extras` na `provider_raw`. Nsonaazụ dị mma dowe `images` na `favicon`.
+
+A na-edekọ ọnụ ahịa ọchụchọ Linkup na $0.005 maka `depth` `fast` na `standard` na $0.05 maka `deep` ( [ọnụahịa Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), ma `depth` sitere na `provider_options` ma ọ bụ ntọala njikọ.
+
+Exa `type: "lite"` (Exa 3.0) na-anabata obere ogige ma jụ arịrịọ niile mgbe edobere ubi ọ bụla ọzọ. Maka lite, `additionalQueries`, `systemPrompt` na igodo `contents` ọ bụla ma e wezụga `text` na `highlights` a na-atụba tupu oku a. Agakwaghị ebugharị `subpages`, `subpageTarget`, `highlights.numSentences` na `highlights.highlightsPerUrl`.
+
+Ịkọ ọnụ ahịa ọnụ ahịa bụ ewepụghị ndekọ `costPerQuery`, ma e wezụga Exa, nke na-esote ọnụahịa nke Exa: $ 0.007 kwa oku maka `auto` (na ihe nketa `fast`) ma ọ bụ $ 0.004 maka `lite` (na ihe nketa `instant`), na-ekpuchi 10 nsonaazụ; $0.001 maka nsonaazụ ọ bụla ọzọ; yana $0.001 kwa rịzọlt weghachi mgbe edobere `contents.summary`. A na-edekọ Tavily na 1 kredit ($0.008) maka `search_depth` `basic`, `fast` na `ultra-fast`, yana kredit 2 ($0.016) maka `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). A ka na-edekọ oku nwere `auto_parameters: true` nke Tavily kwalitere na kredit 1.
 
 ---
 

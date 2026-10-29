@@ -4,6 +4,7 @@ import fs from "node:fs";
 import http from "node:http";
 import os from "node:os";
 import path from "node:path";
+import { createManagementSessionToken } from "../../../helpers/managementSession.ts";
 
 /**
  * Container-guard homologation for POST /api/cli-tools/apply.
@@ -22,6 +23,14 @@ const originalXdg = process.env.XDG_CONFIG_HOME;
 // tests exercise the guard, not the auth stack (covered elsewhere).
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.XDG_CONFIG_HOME = TEST_XDG_DIR;
+
+// These routes require a dashboard session in every mode (login enabled or not).
+const SESSION_COOKIE = `auth_token=${await createManagementSessionToken()}`;
+function authed(url: string, init: RequestInit = {}): Request {
+  const headers = new Headers(init.headers);
+  headers.set("cookie", SESSION_COOKIE);
+  return new Request(url, { ...init, headers });
+}
 
 const core = await import("../../../../src/lib/db/core.ts");
 const { POST } = await import("../../../../src/app/api/cli-tools/apply/route.ts");
@@ -60,7 +69,7 @@ function startCatalogServer(): Promise<string> {
 }
 
 function applyRequest(body: Record<string, unknown>): Request {
-  return new Request("http://localhost:3000/api/cli-tools/apply", {
+  return authed("http://localhost:3000/api/cli-tools/apply", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
@@ -179,7 +188,7 @@ describe("POST /api/cli-tools/apply — container guard", () => {
   it("redacts literal credentials from the config-generation endpoint", async () => {
     const credential = "sentinel-config-endpoint-secret";
     const res = await POST_CONFIG(
-      new Request("http://localhost:3000/api/cli-tools/config", {
+      authed("http://localhost:3000/api/cli-tools/config", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -198,7 +207,7 @@ describe("POST /api/cli-tools/apply — container guard", () => {
   it("redacts credentials after a generator escapes quotes and backslashes", async () => {
     const credential = 'sentinel"quoted\\slash';
     const res = await POST_CONFIG(
-      new Request("http://localhost:3000/api/cli-tools/config", {
+      authed("http://localhost:3000/api/cli-tools/config", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -222,7 +231,7 @@ describe("POST /api/cli-tools/apply — container guard", () => {
     url.searchParams.set("baseUrl", catalogBaseUrl);
     url.searchParams.set("apiKey", credential);
 
-    const res = await GET_CONFIG(new Request(url));
+    const res = await GET_CONFIG(authed(url));
 
     assert.strictEqual(res.status, 400);
     assert.strictEqual(res.headers.get("cache-control"), "no-store");
@@ -235,7 +244,7 @@ describe("POST /api/cli-tools/apply — container guard", () => {
     url.searchParams.set("baseUrl", catalogBaseUrl);
 
     const res = await GET_CONFIG(
-      new Request(url, {
+      authed(url, {
         headers: { "x-omniroute-config-api-key": credential },
       })
     );
@@ -252,7 +261,7 @@ describe("POST /api/cli-tools/apply — container guard", () => {
     url.searchParams.set("baseUrl", "not-an-http-url");
 
     const res = await GET_CONFIG(
-      new Request(url, {
+      authed(url, {
         headers: { "x-omniroute-config-api-key": "sentinel-invalid-url-secret" },
       })
     );
@@ -287,10 +296,40 @@ describe("POST /api/cli-tools/apply — container guard", () => {
     assert.ok(written.includes(catalogBaseUrl));
   });
 
+  it("refuses a WhyCodes write in container mode with hostSetupCommand setup-whycodes", async () => {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-whycodes-apply-"));
+    const originalHome = process.env.WHYCODES_HOME;
+    process.env.WHYCODES_HOME = home;
+    try {
+      const res = await withContainerMode("1", () =>
+        POST(
+          applyRequest({
+            toolId: "whycodes",
+            baseUrl: catalogBaseUrl,
+            apiKey: "sk-test-guard",
+            model: "glm/glm-5.2",
+          })
+        )
+      );
+      assert.strictEqual(res.status, 422);
+      const body = await res.json();
+      assert.ok(body.containerEphemeralTarget, "422 must be keyed as containerEphemeralTarget");
+      assert.strictEqual(body.hostSetupCommand, "omniroute setup-whycodes");
+      assert.ok(typeof body.error === "string" && body.error.length > 0);
+      assert.ok(!body.error.includes("at /"), "error must not leak a stack trace");
+      assert.ok(!body.error.includes("sk-test-guard"), "error must not leak the API key");
+      assert.strictEqual(fs.existsSync(path.join(home, "config.toml")), false);
+    } finally {
+      if (originalHome === undefined) delete process.env.WHYCODES_HOME;
+      else process.env.WHYCODES_HOME = originalHome;
+      fs.rmSync(home, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    }
+  });
+
   it("rejects malformed JSON and unknown write options without caching", async () => {
     for (const handler of [POST, POST_CONFIG]) {
       const invalidJson = await handler(
-        new Request("http://localhost/api/cli-tools/config", {
+        authed("http://localhost/api/cli-tools/config", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: "{",

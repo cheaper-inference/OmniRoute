@@ -1,4 +1,4 @@
-import { elevenLabsMusicSchema } from "@/shared/validation/schemas/elevenlabs";
+import { elevenLabsMusicSchema } from "./elevenLabsSchemas.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 interface ElevenLabsMusicArgs {

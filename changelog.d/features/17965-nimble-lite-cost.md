@@ -1,0 +1,1 @@
+- **feat(search):** Nimble search is recorded at the `lite` price it is sent at ($0.0011 per call) instead of $0.005 ([#17965](https://github.com/diegosouzapw/OmniRoute/pull/17965)) — thanks @yourspraveen

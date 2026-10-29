@@ -1,7 +1,9 @@
+import { ainetcafeGateway } from "./ainetcafe";
 import { onomeoGateway } from "./onomeo";
 import { unificallyGateway } from "./unifically";
 /** APIKEY provider catalog — gateways family. Pure data; merged by apikey/index.ts via spread. */
 export const APIKEY_PROVIDERS_GATEWAYS = {
+  ...ainetcafeGateway,
   ...onomeoGateway,
   ...unificallyGateway,
   // 1min.ai (https://docs.1min.ai) — multi-model chat aggregator with its own
@@ -37,22 +39,6 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://cheaperinference.com/?utm_source=omniroute",
     apiHint:
       "Create an API key at https://cheaperinference.com/?utm_source=omniroute (needs the `inference` scope), then paste the ir_live_… token here.",
-    passthroughModels: true,
-  },
-  freebuff: {
-    id: "freebuff",
-    alias: "freebuff",
-    name: "Freebuff",
-    icon: "terminal",
-    color: "#10B981",
-    textIcon: "FB",
-    website: "https://freebuff.com",
-    hasFree: true,
-    serviceKinds: ["llm"],
-    subscriptionRisk: true,
-    riskNoticeVariant: "official-client-only",
-    authHint: "Enter your Freebuff / Codebuff auth token from the CLI login.",
-    freeNote: "Free Freebuff models (official client only); paid API: freebuff.com/account/api.",
     passthroughModels: true,
   },
   "charm-hyper": {

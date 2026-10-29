@@ -1,0 +1,1 @@
+- **fix(sse):** a top-level camel-case reasoning effort is now folded into the canonical effort field and stripped from the body sent to OpenAI-compatible upstreams, so strict gateways no longer reject the request with an unsupported-argument error ([#18117](https://github.com/cheaper-inference/OmniRoute/pull/18117)) — thanks @maxmad64bis
