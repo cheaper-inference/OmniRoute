@@ -134,14 +134,19 @@ function isSyncedEffortSkippedProvider(providerId: string): boolean {
  * C1: effective tier set for suffix validation = learned ?? sync. The catalog
  * advertises variants from the learned set; validating the suffix against raw
  * synced metadata would strand learned-only tiers (dead-on-arrival ids).
+ * A candidate that declares no tiers is still worth consulting: its
+ * effective set may come from the learned store alone.
  */
-function effectiveKnownEfforts(
-  modelId: string,
-  syncedEfforts: readonly string[] | null | undefined
-): string[] {
-  const learned = getLearnedReasoningEffortForModel(modelId);
+function effectiveKnownEfforts(candidate: {
+  id?: unknown;
+  supportedThinkingEfforts?: unknown;
+}): string[] {
+  const id = typeof candidate?.id === "string" ? candidate.id : "";
+  const learned = id ? getLearnedReasoningEffortForModel(id) : null;
   if (learned) return [...learned];
-  return Array.isArray(syncedEfforts) ? [...syncedEfforts] : [];
+  return Array.isArray(candidate?.supportedThinkingEfforts)
+    ? [...(candidate.supportedThinkingEfforts as string[])]
+    : [];
 }
 
 /** Resolve a suffix against an explicitly tiered static registry model. */
@@ -158,11 +163,8 @@ function resolveRegistryModelIdAndEffort(
   }
 
   for (const candidate of registryModels) {
-    if (!Array.isArray(candidate?.supportedThinkingEfforts)) continue;
-    const attempt = splitSyncedEffortSuffix(
-      modelId,
-      effectiveKnownEfforts(candidate.id, candidate.supportedThinkingEfforts)
-    );
+    if (typeof candidate?.id !== "string" || !modelId.startsWith(candidate.id)) continue;
+    const attempt = splitSyncedEffortSuffix(modelId, effectiveKnownEfforts(candidate));
     if (attempt.effort && attempt.baseModel === candidate.id) {
       return { modelId: attempt.baseModel, effort: attempt.effort };
     }
@@ -229,13 +231,10 @@ export function resolveSyncedModelIdAndEffort(
     id?: unknown;
     supportedThinkingEfforts?: unknown;
   }>) {
-    if (typeof candidate?.id !== "string" || !Array.isArray(candidate.supportedThinkingEfforts)) {
+    if (typeof candidate?.id !== "string" || !modelId.startsWith(candidate.id)) {
       continue;
     }
-    const attempt = splitSyncedEffortSuffix(
-      modelId,
-      effectiveKnownEfforts(candidate.id, candidate.supportedThinkingEfforts as string[])
-    );
+    const attempt = splitSyncedEffortSuffix(modelId, effectiveKnownEfforts(candidate));
     if (attempt.effort && attempt.baseModel === candidate.id) {
       return { modelId: attempt.baseModel, effort: attempt.effort };
     }
@@ -773,7 +772,7 @@ async function getComboByClientNamespacedName(modelStr: unknown) {
     if (await isKnownProviderSegment(segment)) return null;
   }
 
-  let combo = await getComboByName(baseName);
+  let combo = await getCachedComboByName(baseName);
   if (!combo || !Array.isArray(combo.models) || combo.models.length === 0) {
     combo = await getComboByNameInsensitive(baseName);
   }

@@ -1925,7 +1925,14 @@
     "readinessStep3": "Kopeeri oma lõpp-punkt",
     "readinessStep4": "Saada testpäring",
     "readinessContinue": "Jätka seadistamist",
-    "readinessDismiss": "Jäta praegu vahele"
+    "readinessDismiss": "Jäta praegu vahele",
+    "unpricedUsageTitle": "{count, plural, one {# mudel} other {# mudelit}} millel on hiljutine kasutus, kuid hinnakirja pole seadistatud",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-võti, millel on kasutuslimiit} other {# API-võtit, millel on kasutuslimiit}} kasutasid neid mudeleid viimase 8 päeva jooksul. Kui see kasutus jääb võtme päevase või nädalase akna sisse, loetakse võti limiidi ületatuks ja selle päringud blokeeritakse (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "See kasutus arvestatakse per‑võtme kasutuslimiitide puhul kui $0 (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# päring} other {# päringut}}, {keys, plural, one {# piiratud võti} other {# piiratud võtit}}",
+    "unpricedUsageMore": "…ja veel {count}",
+    "unpricedUsageConfigure": "Määra hinnad",
+    "unpricedUsageDismiss": "Sulge"
   },
   "analytics": {
     "title": "Analüütika",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw – käsitsi seadistamine",
     "clineManualConfiguration": "Cline'i käsitsi seadistamine",
     "kiloManualConfiguration": "Kilo Code'i käsitsi seadistamine",
+    "piManualConfiguration": "Pi – käsitsi seadistamine",
+    "piConfigInvalidTitle": "Pi models.json on loetamatu",
+    "piOmnirouteConfigured": "OmniRoute on konfigureeritud Pi kohandatud pakkujana",
+    "piModelHelp": "Pi ei tuvasta kohandatud lõpp-punktide mudeleid automaatselt. — teie valitud mudel kirjutatakse models.json -sse selgesõnaliselt.",
+    "piManualConfigTitle": "Või muutke ~/.pi/agent/models.json käsitsi",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Seejärel käivitage Pi ja valige omniroute'i pakkuja. Seadistage PI_CODING_AGENT_DIR kogu agendikataloogi teisaldamiseks.",
+    "piUnownedNote": "See kirje lisati väljaspool OmniRoute (nt pi-gui kohandatud lõpp-punktid). Taotlemine võtab selle vastu; Reset eemaldab ainult OmniRoute kirjutatud kirjed.",
     "whenToUseLabel": "Millal kasutada",
     "openToolDocs": "Ava tööriista dokumentatsioon",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI programmeerimisagent kohandatud teenusepakkuja toega",
       "droid": "Factory Droid AI-assistent",
       "openclaw": "Open Claw AI-assistent",
+      "openclaude": "OpenClaude programmeerimisagendi CLI OpenAI-ühilduva teenusepakkuja toega",
       "cline": "Cline AI programmeerimisassistendi CLI",
       "kilo": "Kilo Code AI-assistendi CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3280,7 +3296,18 @@
     "cliproxyapiUpdate": "Värskenda",
     "cliproxyapiUpdateAvailable": "Saadaval on värskendus: v{current} → v{latest}",
     "cliproxyapiVersion": "Versioon",
-    "removeMapping": "Eemalda vastendus"
+    "piInstallTitle": "Installige Pi kodeerimisagent",
+    "piInstallInstructions": "Installige Pi CLI, seejärel naaske siia, et ühendada see OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Kasutage URL mis on kättesaadavad masinast, kus töötab Pi. OpenAI-ga ühilduv /v1 lõpp-punkt lisatakse automaatselt.",
+    "piManualMergeHint": "Ainult eelvaade. Ühendage see providers.omniroute kirje models.json -ga, nii et teie teised pakkujad ja seaded jäävad puutumata.",
+    "removeMapping": "Eemalda vastendus",
+    "customUrl": "Kohandatud URL",
+    "customEndpointAria": "Kohandatud lõpppunkt",
+    "useDefaultKey": "Kasuta OmniRoute vaikimisi võtit",
+    "mainModelAria": "Peamine mudel",
+    "manualConfigTitle": "Grok Build käsitsi seadistamine"
   },
   "modelCatalog": {
     "title": "Mudelid ja kombod",
@@ -3411,7 +3438,44 @@
     "httpError": "Päring ebaõnnestus HTTP-staatusega {status}",
     "testFailedNoDetail": "Test ebaõnnestus ilma veateateta",
     "additionalCapabilities": "Täiendavad võimekused: {list}",
-    "comboRefMember": "Kombinatsioon → {name}"
+    "comboRefMember": "Kombinatsioon → {name}",
+    "keyAccessButton": "API-võtme juurdepääs",
+    "allowedInKeys": "Lubatud: {count, plural, one {# võtmes} other {# võtmes}}",
+    "keysLoading": "API-võtmete laadimine…",
+    "keysRetry": "Proovi võtmete laadimist uuesti",
+    "accessViaPattern": "{pattern} kaudu",
+    "accessBlocked": "Blokeeritud mustriga {pattern}",
+    "editKeyAccess": "Muuda võtme juurdepääsu",
+    "toggleKeyAccess": "Luba {item} võtmel {name}",
+    "resultNetworkError": "Määramine ebaõnnestus",
+    "resultWouldEmptyModels": "Jätaks selle võtme ilma lubatud mudeliteta — muuda selle asemel võtme juurdepääsu",
+    "resultWouldEmptyCombos": "Jätaks selle võtme ilma lubatud kombodeta — muuda selle asemel võtme juurdepääsu",
+    "keyUpdatePending": "{name} on veel uuendamisel. Proovi hetke pärast uuesti.",
+    "assignToKeys": "Määra API-võtmetele…",
+    "assignApply": "Rakenda muudatused",
+    "assignComplete": "API-võtme juurdepääs uuendatud",
+    "assignFailed": "Mõne API-võtme uuendamine ebaõnnestus",
+    "assignNoChanges": "Ühtegi API-võtme juurdepääsu ei muudetud",
+    "selectedAccessItems": "Valitud üksusi: {count}",
+    "assignExcludedCombos": "{count, plural, one {# valitud komborida pole mudel ja jäetakse siin vahele} other {# valitud komborida pole mudelid ja jäetakse siin vahele}}. Määra kombod vahekaardilt Combos.",
+    "assignActionAdd": "Lisa",
+    "assignActionRemove": "Eemalda",
+    "searchKeys": "Otsi API-võtmeid",
+    "selectApiKey": "Vali API-võti {name}",
+    "allModelsAccess": "Kõik mudelid",
+    "allCombosAccess": "Kõik kombinatsioonid",
+    "modelAccessCount": "Mudelid: {count}",
+    "comboAccessCount": "Kombinatsioonid: {count}",
+    "keyInactive": "Mitteaktiivne",
+    "keyBanned": "Blokeeritud",
+    "keyRevoked": "Tühistatud",
+    "switchRestrictedConfirm": "Lülita see võti piiratud juurdepääsule: lubatakse ainult valitud üksused",
+    "removeNoChangeHint": "See võti lubab kõike; valitud üksuste eemaldamine ei muuda midagi",
+    "removeStaysAllowedHint": "Sellel võtmel endiselt lubatud mustrite {patterns} kaudu",
+    "resultChanged": "Muudetud",
+    "resultUnchanged": "Muutusi pole",
+    "resultSkipped": "Vahele jäetud",
+    "resultNeedsSwitch": "Vajab piiratud juurdepääsule lülitamist"
   },
   "combos": {
     "title": "Kombinatsioonid",
@@ -3465,6 +3529,12 @@
     "errorUpdating": "Viga kombinatsiooni värskendamisel",
     "errorDeleting": "Kombinatsiooni kustutamisel tekkis viga",
     "testFailed": "Testpäring ebaõnnestus",
+    "removeErrorModels": "Kustuta {count} ebaõnnestunud mudel(it)",
+    "removingErrorModels": "Eemaldamine…",
+    "errorModelsRemoved": "Kombinatsioonist eemaldati {count} ebaõnnestunud mudel(it)",
+    "noErrorModelsFound": "Selle kombinatsiooni enda sammude seas ei leitud ebaõnnestunud mudeleid",
+    "cannotRemoveAllModels": "Kombinatsioonist ei saa kõiki mudeleid eemaldada",
+    "removeErrorModelsConfirm": "Kas eemaldada {count} ebaõnnestunud mudel(it) kombinatsioonist „{name}“? Ajalõppe ja kiiruspiiranguid ei arvestata.",
     "failedToggle": "Kombinatsiooni oleku muutmine ebaõnnestus",
     "testResults": "Testitulemused — {name}",
     "resolvedBy": "Lahendaja:",
@@ -4816,7 +4886,15 @@
     },
     "totalEntries": "Kirjeid kokku",
     "type": "Tüüp",
-    "memoryEnabled": "Mälu lubatud"
+    "memoryEnabled": "Mälu lubatud",
+    "qdrantTutorialTitle": "Kiirõpetus: mälu Qdrantiga",
+    "qdrantTutorialIntro": "Qdrant salvestab vektorid ja metabandmed meeldetulemuste jaoks, et võimaldada asjakohase konteksti hankimist. See ei komprimeeri siltu otseselt; kokkuhoiud on kaudsed, kuna vältitakse päringuga seotud mitteasjakohase konteksti kasutamist.",
+    "qdrantTutorialStep1": "Kaitske serverit HTTPS-i ja API- Võtmega enne tootmisel kasutamist.",
+    "qdrantTutorialStep2": "Sisestage host, port, kollektsioon ja mudel formaadis pakkuja/mudel kasutades konfigureeritud krediiti.",
+    "qdrantTutorialStep3": "Kogumi dimensioon peab vastama mudeli genereeritavale dimensioonile. Olemasolev 2048-dimensiooniline kogum ei aktsepteeri 1536-dimensioonilisi sissevõtteid.",
+    "qdrantTutorialStep4": "Salvesta, testi ühendus ja käita otsitesti. Luba Qdrant alles seejärel.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Krediidi: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Oskused",
@@ -5354,6 +5432,27 @@
     "importFromFileDownloadTemplate": "Laadi alla CSV-mall",
     "importFromFileMoreErrors": "+{count} veel",
     "importFromFileSchemaHint": "CSV veerud on positsioonipõhised: provider, name, apiKey, baseUrl (valikuline), priority (valikuline). Veerg provider peab sisaldama olemasoleva hallatava teenusepakkuja ID-d või juba registreeritud OpenAI/Anthropic-ühilduva sõlme ID-d — see import ei loo uusi otspunktisõlmi.",
+    "importOAuthExport": "Impordi OAuth-eksport",
+    "oauthExportTitle": "Impordi kontohalduri eksport",
+    "oauthExportDescription": "Laadi üles kontohaldurist pärit lihttekstina eksport (nt Antigravity Manageri cloud-accounts eksport). Tokenid värskendatakse serveris ja igast kontost saab OAuth-ühendus — duplikaadid värskendatakse kohapeal.",
+    "oauthExportProviderLabel": "Teenusepakkuja",
+    "oauthExportChoose": "Vali fail",
+    "oauthExportFileAria": "Kontoekspordi JSON-fail",
+    "oauthExportSchemaHint": "Aktsepteeritakse: dokument \"accounts\" massiiviga, lihtne massiiv või üksik kirje. Tokenid võivad olla pesastatud token-objektis või otse kirjel.",
+    "oauthExportDetected": "Tuvastatud kontosid: {count}",
+    "oauthExportSelectAll": "Vali kõik kontod",
+    "oauthExportSelectAccount": "Vali konto {index}",
+    "oauthExportColEmail": "E-post",
+    "oauthExportColProvider": "Teenusepakkuja",
+    "oauthExportColRefresh": "Värskendustoken",
+    "oauthExportNoEmail": "(e-post puudub)",
+    "oauthExportYes": "jah",
+    "oauthExportNo": "ei",
+    "oauthExportImporting": "Importimine…",
+    "oauthExportImport": "Impordi kontod ({count})",
+    "oauthExportResult": "Imporditud {imported}/{total} — {failed} ebaõnnestus",
+    "oauthExportParseError": "Sellest failist ei õnnestunud ühtegi kontot lugeda.",
+    "oauthExportUnknownError": "tundmatu viga",
     "adaptaTutorial": {
       "title": "Adapta Webiga ühenduse loomine",
       "introPrefix": "Adapta kasutab autentimiseks teenust Clerk. Tõend",
@@ -5865,6 +5964,25 @@
     "ccAliasAddModelButton": "Lisa alistus",
     "ccAliasLoadError": "Tuvastusaliase seadete laadimine nurjus: {error}",
     "ccAliasSaveError": "Tuvastusaliase seadistuse salvestamine nurjus: {error}",
+    "cliVersionSectionTitle": "Reklaamitud CLI kliendiversioon",
+    "cliVersionEffectiveLabel": "Hetkel reklaamitud",
+    "cliVersionSourceLabel": "Lahendatud: {source}",
+    "cliVersionPinnedLabel": "Jäädvustatud vaikeseade: {pinned}",
+    "cliVersionSourceSettings": "armatuurlaua alistamine",
+    "cliVersionSourceEnv": "keskkonna muutuja",
+    "cliVersionSourceDiscovered": "automaatselt avastatud uusim väljalase",
+    "cliVersionSourceDefault": "jäädvustatud vaikeseade",
+    "cliVersionInputLabel": "Alista versioon",
+    "cliVersionInputPlaceholder": "Alista versioon; tühi tühjendab",
+    "cliVersionSaveButton": "Salvesta",
+    "cliVersionResetButton": "Lähtestage vaikeseadetele",
+    "cliVersionLoadError": "CLI versiooni seadete laadimine ebaõnnestus: {error}",
+    "cliVersionSaveError": "CLI versiooni salvestamine ebaõnnestus: {error}",
+    "cliVersionLoadFailed": "Praeguse CLI versiooni seadeid ei saanud laadida.",
+    "cliVersionHintClaude": "Anthropic loob uuemad Claude'i mudelid Claude Code'i kliendiversioonil, mida ta näeb. See on versioon, OmniRoute reklaamib iga inimtekkeliste päringutega.",
+    "cliVersionCaveatClaude": "Arvelduse hoiatus: arveldusversioon on '<version>'.'<build-revision>' ja järgu versioon on eraldi jäädvustatud konstant. Reklaam 2.1.260 teatab 2.1.260.1e2, mida päris 2.1.260 binaar ei saada.",
+    "cliVersionHintCodex": "OpenAI loob Codex kliendiversiooni uuemad mudelid, mida ta näeb, näiteks tõrketeade: 'gpt-6-astra' mudel nõuab Codex uuemat versiooni.",
+    "cliVersionCaveatCodex": "Järeldus hoiatus: teie enda helistaja teatatud versioon ületab endiselt CODEX_CLIENT_VERSION env var, kuid see alistamine ületab mõlemat, kuna see on operaatori selge eesmärk.",
     "compatUpstreamHeadersLabel": "Teenusepakkujale saadetavad lisapäised",
     "compatUpstreamHeadersHint": "Kõrgete õigustega seade — usaldustase on sama mis teenusepakkuja API-pääsuandmete muutmisel; seda tohivad kasutada ainult usaldusväärsed administraatorid. Liidetakse pärast seda, kui OmniRoute lisab teenusepakkuja API-võtme põhjal autentimisteabe. Kui kohandatud päisel on sama nimi mis olemasoleval päisel (nt Authorization), asendab teie väärtus automaatselt loodud päise täielikult (sh Bearer-loa) — teenusepakkuja näeb ainult teie sisestatud väärtust, mitte seadetes olevat võtit. Vale konfiguratsioon võib põhjustada 401-vea või rikkuda teenusepakkuja autentimise. Üks rida iga päise kohta (nt täiendav Authentication mõne lüüsi jaoks). Eelvaate kuvamiseks liigutage kursor väärtuse kohale või viige sellele fookus. Salvestatakse fookuse kaotamisel, paneelist väljaspool klõpsamisel või selle paneeli sulgemisel.",
     "compatUpstreamHeaderName": "Päise nimi",
@@ -6835,7 +6953,27 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Kasutusel {count} kombos: {combos}",
+    "openComboTooltip": "Ava Kombod — kasutab {combo}",
+    "claudeCodeRoutingTitle": "Ülesvoogu asuvate vahendite marsruutimine Claude Code liikluse jaoks",
+    "routingNative": "Natiivne",
+    "routingFallback": "Varulang",
+    "rerank": "Uuestindamine",
+    "video": "Video",
+    "markFreeTierTitle": "Märgi tasuta tasemeks (näidatakse isegi siis, kui maksmisemodellide peitmine on sisse lülitatud)",
+    "codexTunnelTitle": "Codex tööriista ühendus",
+    "codexTunnelDescription": "Sild jääksRange rangelt väljumisele. Kohalikud tööriistad käivitatakse endiselt ainult Codexi poolt, selle liivakasti ja heakspanga poliitika all.",
+    "tunnelIdLabel": "Sildi ID",
+    "tunnelRuntimeKeyLabel": "Sildi käibeaegne võti",
+    "tunnelRuntimeKeyPlaceholder": "Käibeaegne võti",
+    "tunnelRuntimeKeyHint": "Salvestatud krüpteeritult koos küpsisega ega kirjuta kunagi päevikutesse.",
+    "tunnelRuntimeKeyNewLabel": "Uus sildi käibeaegne võti",
+    "tunnelRuntimeKeyNewHint": "Sisesta ainult värskete küpsiste juures. Väärtus salvestatakse krüpteeritult.",
+    "chatgptConnectorLabel": "ChatGPT kohandatud ühendus",
+    "doctorChecking": "Kontrollitakse olekut…",
+    "doctorCheck": "Kontrolli arsti olekut",
+    "fallbackRetryBackendTitle": "Tagamiste katsetuste tagatagasi tugi"
   },
   "settings": {
     "title": "Seaded",
@@ -8819,6 +8957,8 @@
     "qdrantHost": "Host",
     "qdrantCollection": "Kogumik",
     "catalogVisibilityHint": "Peidetud mudelite ID-sid saab endiselt kutsuda samade juurdepääsuõigustega.",
+    "exposeCombosOnly": "Näita /v1/models loendis ainult kombinatsioone",
+    "exposeCombosOnlyDesc": "Kliendid, kes avastavad mudeleid automaatselt, näevad teie kombinatsioone (ja auto/*, kui need pole peidetud) toorete teenusepakkuja mudelite asemel. Selgesõnalised provider/model ID-d suunatakse endiselt edasi.",
     "catalogScopeTitle": "Models API loend",
     "catalogScopeDesc": "Mida GET /v1/models selle võtme kohta avaldab. Loendi kitsendamine ei muuda kunagi seda, milliseid mudeleid võti saab kutsuda.",
     "catalogScopeAll": "Mõlemad",
@@ -8938,7 +9078,9 @@
         "financial": "Finants",
         "brazilian": "Brasiilia",
         "usa": "USA",
-        "full": "Täielik"
+        "full": "Täielik",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Lõuna-Aafrika)"
       },
       "builtinTypes": "Sisseehitatud tüübid",
       "types": {
@@ -8952,7 +9094,19 @@
         "ip_address": "IPv4-aadressid",
         "ipv6_address": "IPv6-aadressid",
         "aws_key": "AWS-i juurdepääsuvõtmed",
-        "api_key_generic": "API-võtmed ja tokenid"
+        "api_key_generic": "API-võtmed ja tokenid",
+        "iban": "IBAN pangakonto numbrid",
+        "eu_vat": "EU VAT numbrid",
+        "es_dni_nie": "hispaania DNI / NIE",
+        "it_codice_fiscale": "Itaalia Codice Fiscale",
+        "pl_pesel": "Poola PESEL",
+        "nl_bsn": "Hollandi BSN",
+        "de_steuer_id": "Saksa Steuer-ID",
+        "se_personnummer": "Rootsi personalinumber",
+        "za_id": "Lõuna-Aafrika ID numbrid",
+        "za_phone": "Lõuna-Aafrika telefoninumbrid",
+        "za_vat": "Lõuna-Aafrika VAT numbrid",
+        "za_tax_ref": "Lõuna-Aafrika maksuviited"
       },
       "customPatterns": "Kohandatud mustrid",
       "customPatternsDesc": "Vasted asendatakse tekstiga [CUSTOM_REDACTED]. Kuni {max} mustrit. Katastroofilise tagasiotsingu ohuga mustrid lükatakse tagasi.",
@@ -11454,6 +11608,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth pole seadistatud. Registreerige OAuthi rakendus aadressil {applicationsUrl}, kasutades ümbersuunamise URI-d {redirectUri} ja ulatusi „{scopes}”, seejärel määrake {clientIdEnv} (ja soovi korral {clientSecretEnv}) ning taaskäivitage.",
     "gitlabDuoSetupDescription": "Kui rakendus on registreeritud ja selle OmniRoute’i eksemplari keskkonnamuutujad määratud, klõpsake OAuthiga sisselogimise alustamiseks nuppu Jätka.",
     "continue": "Jätka",
+    "copilotPolicyTitle": "Eksperimentaalne pakkuja: poliitika olek on mitmetähenduslik",
+    "copilotPolicyLine1": "OmniRoute loob ühenduse saidi api.githubcopilot.com kaudu, mida GitHub ei ole avaldanud üldise kolmanda osapoole järeldusena API. See integreerimine on eksperimentaalne ja võib muutuda ilma ette teatamata.",
+    "copilotPolicyLine2": "Ühendada võib ainult teie enda GitHub konto. Ärge kunagi jagage mandaate, ühendage kontosid ega proovige ületada oma plaani limiite.",
+    "copilotPolicyLine3": "Tasuta ja üliõpilaspaketi kasutajad saavad ainult automaatset mudelivalikut. Teie Copilot plaani tingimused ja kasutuspiirangud jäävad teie vastutusele.",
+    "copilotPolicyAcknowledge": "Ma saan aru, ühendage",
     "tabPasteSetupToken": "Seadistusluba",
     "claudeSetupTokenDescription": "Käivitage terminalis `claude setup-token` ja kleepige selle väljastatud luba. See kehtib ühe aasta ja sellel puudub värskendusluba. OmniRoute saadab enne salvestamist Anthropicule ühe testpäringu.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12163,7 +12322,11 @@
       "viewConversation": "Kuva vestlus",
       "openConversation": "Ava vestlus {id}"
     },
-    "tableLabel": "Päringulogid"
+    "tableLabel": "Päringulogid",
+    "throughputPostFirstToken": "Pärast esimest tokenit",
+    "throughputEndToEnd": "Otsast lõpuni",
+    "throughputRate": "{value} tokenit/sek",
+    "throughputExplanation": "Mõlemad kiirused kasutavad suuremat väljundi- ja arutlustokenite arvu. Esimese tokeni järgne kiirus jätab kehtiva TTFT välja; vastasel juhul kasutab see kogu kestust. Otsast-lõpuni kiirus kasutab alati kogu kestust. Puhverdatud vastusel võib olla kõrge puhanguline tarnimiskiirus, ilma et mudeli genereerimine oleks kiirem."
   },
   "proxyLogger": {
     "filterAll": "Kõik",
@@ -12806,7 +12969,8 @@
     "title": "Teenusepakkujate statistika",
     "description": "Liiklus, latentsus ja edukusmäärad teenusepakkujate ning mudelite kaupa",
     "combo": "Kombinatsioon",
-    "toggleModels": "Kuva teenusepakkuja {provider} mudelid"
+    "toggleModels": "Kuva teenusepakkuja {provider} mudelid",
+    "windowSince": "Alates {date}"
   },
   "relay": {
     "title": "Serverivabad releeproksid",
@@ -13083,7 +13247,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI-koodid",
     "pageSubtitle": "OmniRoute'ile suunatud kooditööriistad",
     "searchPlaceholder": "Otsi CLI-d…",
     "filterDetectionLabel": "Tuvastamine",
@@ -13093,7 +13256,8 @@
     "detectionNotFound": "Ei leitud",
     "baseUrlAll": "Kõik",
     "baseUrlFull": "Täielik",
-    "baseUrlPartial": "Osaline"
+    "baseUrlPartial": "Osaline",
+    "title": "KLI kood"
   },
   "cliAgents": {
     "pageTitle": "CLI-agendid",
@@ -13751,7 +13915,9 @@
       "disabled": "Keelatud",
       "dual": "Mõlemad",
       "alias": "Alias",
-      "canonical": "Kanooniline"
+      "canonical": "Kanooniline",
+      "fail_closed": "Blokeeri (fail_closed)",
+      "count_as_zero": "Arvesta $0‑ks (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13898,6 +14064,538 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Kaitstud prioriteediga taristu peatamised kui 502",
         "description": "Vasta 503 asemel 502-ga, kui ainult kvoodipõhise varuvariandiga prioriteetne sihtmärk peatab combo põhjusel, mis pole tõendatavalt kvoodiga seotud: teenusepakkuja avatud kaitselüliti või prognoosiv latentsuse tõttu vahelejätmine."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Logi konto ID-d",
+        "description": "Kaasa konto eesliide AUTH logirindadesse (nt \"Kasutatakse '<provider>' kontot: abc12345...\"). Vaikimisi keelustatud, et konto identifikaatorid jääks jagatud/mitme tenanti protsessilogidest varjatud. Sõltumatu Debug režiimist; Debug režiimi lülitamine seda ei avalda."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Keela parooliga sisselogimine OIDC puhul",
+        "description": "Kui OIDC on lubatud, keela parooliga sisselogimine, et kasutajad saaksid autentida ainult OIDC ühekordse sisselogimise (Single Sign-On) kaudu. Kui see on välja lülitatud (vaikimisi), on saadaval nii parooliga sisselogimine kui ka OIDC."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Audioteenuse pakkujate kaugsõlmed",
+        "description": "Luba marsruutidel /v1/audio/* kasutada OpenAI-ga ühilduvaid teenusepakkuja sõlmi, mida majutatakse väljaspool localhosti. Vaikimisi välja lülitatud — heli suunamine kaughosti muudab väljundidentiteeti ja peab olema operaatori selgesõnaline otsus. Loopback-sõlmed on alati lubatud ning see säte neid ei mõjuta."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Rerank-teenuse pakkujate kaugsõlmed",
+        "description": "Luba päringul POST /v1/rerank (ja mälumootori rerank-sammul, mis kutsub seda välja loopbacki kaudu) kasutada OpenAI-ga ühilduvaid teenusepakkuja sõlmi, mida majutatakse väljaspool localhosti — LAN-seadet või Tailscale'i partnerseadet (peer), kus töötab TEI, Infinity, vLLM jne. Vaikimisi välja lülitatud — suunamine kaughosti muudab väljundidentiteeti ja peab olema operaatori selgesõnaline otsus. Loopback-sõlmed on alati lubatud ning see säte neid ei mõjuta. Kaugsõlmed peavad vastama ka teenusepakkuja väljund-URL-i reeglitele."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Võrgurotatsiooni jagatud väljundi kaitse",
+        "description": "Kui mitme konto rotatsioonitäituri puhul ilmneb võrgutõrge (ajalõpp, ühendusest keeldumine/lähtestamine) ja tõrkunud kontol puudub eraldatud proksi, rakenda lühike jahtumisaeg ning jäta ülejäänud päringu vältel teised proksita kontod vahele, selle asemel et kõiki uuesti proovida. Vaikimisi sisse lülitatud (turvaline: väljund-IP ei muutu, vähendab vaid latentsust/jahtumisaja riski jagatud väljundiga kontodel). Lülita välja, et taastada kohene edasikandumine esimese proksita erandi ilmnemisel."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Jäta hiljuti tõrkunud proksid vahele",
+        "description": "Proksikogumid ja opencode'i kontopõhine rotatsioon peatavad äsja tõrkunud proksi uuesti pakkumise (tagasilükatud TCP-test või selle kaudu saadud 429) protsessipõhiseks perioodiks, mis kahekordistub iga kordusega kuni piirmäärani. Proksi olekut ei salvestata; iga kõrvalejäetud kandidaadi puhul jääb valik samaks. Vaikimisi sees: valikujärjekord on täpselt tavapärane rotatsioon ainult juhul, kui PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Jagatud väljundiaadressiga kogumi järjekord",
+        "description": "Teenusepakkujate puhul, kelle kvooti arvestatakse väljundiaadressi põhiselt, paigutatakse hiljuti tagasilükatud liikme täheldatud väljundiaadressi jagav kogumiliige vahetult tervete liikmete järele. Mõjutab ainult järjekorda, ei välistata kunagi. Vajab parameetrit PROXY_SKIP_RECENTLY_FAILED, mis tekitab loetava tagasilükkamissignaali. Vaikimisi väljas: valikujärjekord on täpselt tavapärane rotatsioon."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Rotatsiooni omistamise logimine",
+        "description": "Opencode'i rotatsioon salvestab, milline konto päringut teenindas või vahele jäeti (ainult maskeeritud ID-d, mitte kunagi täielikud konto ID-d) ning seob proksilogi kirjed vastava päringuga, võimaldades operaatoril eristada vahelejäänud kontosid kasutamata kontodest. Vaikimisi väljas: täiendavaid logiridu ega lisaveergusid ei kirjutata."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Proksikogumi väljundite vaatlus",
+        "description": "Kuvab juhtpaneelil proksikogumi all, mitu täheldatud väljund-IP-d selle liikmeid viimase 24 h jooksul teenindas, mitu ühendust neid kasutas ning milline oli suurim tuvastatud ühenduste arv ühe IP taga. Ainult loetav, arvutatakse proksilogist, ei kasutata kunagi marsruutimiseks. Vaikimisi väljas: kogumi redaktor on muutmata ja vaatlusmarsruut tagastab null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Proksioperaatori väljund",
+        "description": "Võtab vastu operaatori saadetud kuupäevastatud vaadeldud aadresse kogumiliikme kohta ja liidab need kuvamiseks ning kogumi järjestamiseks žurnaalist loetuga. Vaikimisi väljas: push-marsruut tagastab 404 ja kogumi lugemised toimivad täpselt nagu varem."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses seiskumisel roteerimine",
+        "description": "OpenCode'i täituri puhul jälgige voogesitatud Responses-vastuse keha esimest baiti (aken: RESPONSES_FIRST_BYTE_TIMEOUT_MS, vaikimisi 15000). 2xx Responses-voogu, mis jääb pärast selle akna möödumist vaikseks, käsitletakse seiskununa: kontole määratakse jahtumisaeg ja päring roteeritakse ühe korra järgmisele kontole; teine seiskumine ebaõnnestub kohe. Vaikimisi väljas: seiskunud vood säilitavad senise ootamise kuni voo valmisoleku aegumiseni."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked roteerimine",
+        "description": "OpenCode'i täituri puhul, kui ülemteenus vastab koodiga 403 või 451 koos user_blocked-keeldumisega (mitte geoblokeering ega Cloudflare'i sõrmejälje tagasilükkamine), määrake tagasilükatud kontole jahtumisaeg ja roteerige päringu kohta kuni üks kord järgmisele kontole; teine tagasilükkamine tagastatakse muutmata kujul ilma õnnestumismärgita. Vaikimisi väljas: ülemteenuse kasutajablokeeringust möödaroteerimine võib näida kõrvalehoidmisena ja levitada märgistust kogu kontopargis, mistõttu tagastatakse keeldumine muutmata kujul, välja arvatud juhul, kui operaator on seda eraldi lubanud."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode'i ajutise tõrkesiirde tagasitõmbumine",
+        "description": "OpenCode'i mitme konto roteerimisel tehke enne järgmisele kontole saatmist paus, kui kaks järjestikust katset ebaõnnestusid ülemteenuse ajutise veaga (5xx või tühi 400 tagasilükkamine). Paus algab 1,5 sekundist, kahekordistub iga järgmise järjestikuse ebaõnnestumise korral, on piiratud 6 sekundiga pausi kohta ja 10 sekundiga päringu kohta, jääb kliendi ühenduse katkemisel vahele ning ebaõnnestunud vastuse keha vabastatakse enne ootamist. Vaikimisi väljas: tõrkesiire toimub kohe."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Tühja vooru väljastamise korduskatse",
+        "description": "Tõlgitud voogedastusvoorudes, kui ülemteenuse voor ei sisalda kasutatavat sisu (ainult arutluskäigu lõpetus või null väärtuslikku tükki), tehke piiratud arv korduskatseid tavapärase mandaaditee kaudu (kuni `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`), enne kui kliendile midagi väljastatakse. Vaikimisi väljas: tühjad voorud säilitavad praeguse käitumise (tühi 200 või tühja sisuga 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Tühja voo sõsartaastamine",
+        "description": "Claude/Codexi voogedastus: pärast esimest elutsükli sündmust kontrollige lühidalt (kuni 1 s / 64 KiB) kasutatava väljundi olemasolu; voog, mis lõpeb ilma sisuta, muutub empty_content-tõrkeks, mis kulutab olemasoleva piiratud korduskatse teisel sobival ühendusel (ilma jahtumisaja ja mudeli lukustuseta), ning round-robin-kombod lõpetavad uuestiproovimise kohe, kui klient ühenduse katkestab. Samuti käsitleb kontrolli käigus olekuid refusal, pause_turn ja model_context_window_exceeded legitiimsete tühjade lõppolekutena. Vaikimisi väljas: valmisolek, tühja sisu käsitlemine ja kombode korduskatsed jäävad täpselt samaks nagu varem."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Voo hilise väljundi sond",
+        "description": "Voogesituse väljundi sond: pärast esimest 64 edastatud andmetükki jätka esimese nähtava väljundi tuvastamiseks proovivõttu sagedusega üks andmetükk 16-st, nii et hilja algav väljund märgib voo endiselt väljundit edastatuks. Üksik 5xx pärast seda punkti jääb seejärel päringupõhiseks, selle asemel et salvestada ainult mudeli lukustus, ja firstOutputMs tagasitäidetakse praeguse proovivõtuvahemiku esimese väljundtükiga. Vaikimisi väljas: kontrollitakse ainult esimesi 64 edastatud andmetükki, täpselt nagu varem."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode päringupiiranguga 429 varajane peatamine",
+        "description": "OpenCode'i mitme konto rotatsiooni puhul peata kontolaine esimese 429 juures, mis on klassifitseeritud tegelikuks päringupiiranguks (töödeldav Retry-After päis või päringukeha, mis nimetab kiiruse/kasutuse piirangut), ning tagasta see ülemvoo 429 muutmata kujul (olek, keha, Retry-After ja kvoodipäised), selle asemel et proovida kõiki ülejäänud kontosid. Klassifitseerimata 429-koodid jätkavad roteerumist. Vaikimisi väljas: tasuta paketil kehtib piirang väljuva IP kohta (#9611), seega iga 429 roteerub järgmisele kontole ning ammendunud laine tagastab viimase ülemvoo 429."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 parkimine ja jätkamine",
+        "description": "OpenCode'i mitme konto rotatsiooni puhul pargi päring pärast korduvaid ajutisi 429-vastuseid (või värsket kogumi ülekoormuse tähist) koos elutuksega, seejärel korda ühte piiratud etappi kuni 3 järjestikuse kontoga, selle asemel et levitada päringut korraga kogu kontopargile. Vaikimisi väljas: iga 429 roteerub järgmisele kontole täpselt nagu varem."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Voo valmisoleku seiskumise korduskatse",
+        "description": "Voogesitusega vestluspäringute puhul, kui esimene ülemvoo keha seiskub enne kasutatava sündmuse tekitamist, tee samal marsruutimisteel üks piiratud korduskatse sama valmisolekueelarvega ja ilma konto karistuseta. Vaikimisi väljas: seiskunud esimese keha korral nurjub päring ilma korduskatsmeta."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 kogumi uuestivalimine",
+        "description": "OpenCode'i mitme konto rotatsiooni puhul, kui saadi 429 väljundpõhiselt piiratud teenusepakkujalt ilma proksita kontol ümbritsevas kogumikontekstis, küsi ühenduste kogumilt järgmise katse jaoks teist liiget, selle asemel et proovida uuesti sama väljuvat aadressi. Järjestab, ei välista kunagi: ammendunud kogum säilitab praeguse käitumise. Vaikimisi väljas: iga 429 roteerub järgmisele kontole täpselt nagu varem."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 kliendi sõrmejälg",
+        "description": "Saada OpenCode v2 CLI kliendi sõrmejälg OpenCode Zen/Go päringutel (#16571): User-Agent opencode/latest/<2.x>/cli ja x-opencode-client cli, kliendi User-Agent säilitatakse ainult siis, kui tegemist on 2.x OpenCode kliendiga, piiratud tasuta taseme päringutel puudub x-opencode-request, seanss peegeldatakse päistesse x-opencode-session-id/x-session-affinity/x-session-id, lisatud kohatäitetööriistadel kasutatakse v2 CLI read/shell skeeme ning tool_choice väärtusega \"none\" eemaldatakse. Vaikimisi väljas: iga OpenCode päring säilitab praeguse identiteedi, päised ja keha bait-baidilt."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen egress-IP lukustus",
+        "description": "Lisa OpenCode Zen (opencode-zen) vaikimisi egress-IP lukustusperekonda, nii et 429 ühel Zen-ühendusel jahutab maha ka kõik sama egress-IP-d jagavad Zen-sõsarühendused. Vaikimisi väljas: Zen on võtmestatud ja iga ühendus jahtub eraldi, täpselt nagu varem. Sõnaselge OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS väärtus on alati selle lipu suhtes ülimuslik."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode'i täisteksti veareeglid",
+        "description": "Luba sisseehitatud OpenCode'i veareeglitel (opencode-zen, opencode-go, opencode-cli) sobituda ülemteenuse täieliku veatekstiga, nii et vastuse keha markerid nagu organization_quota_exceeded või \"monthly usage limit reached\" liigitavad 429 kvoodi ammendumiseks koos ühendusepõhise lukuga. Vaikimisi väljas: need reeglid näevad ainult struktureeritud veakoodi ja selline 429 jääb lühiajaliseks päringupiiranguks, täpselt nagu varem."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI täisteksti veareeglid",
+        "description": "Luba sisseehitatud Cloudflare Workers AI veareeglil sobituda ülemteenuse täieliku veatekstiga, nii et 429 \"daily free allocation\" keha liigitatakse kvoodi ammendumiseks, mitte lühiajaliseks päringupiiranguks. Vaikimisi väljas: reegel näeb ainult struktureeritud veakoodi, täpselt nagu varem."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Võimekuste filter",
+        "description": "Lükka päringud enne väljasaatmist tagasi, kui sihtmudelil puuduvad nõutavad võimekused (vision, tools, structured output, context window). Kaitseb otseseid ühe pakkuja päringuid, mis mööduvad combo-kihi ühilduvusfiltrist."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Eira hinnastamata kasutust USD kvootides",
+        "description": "Arvesta võtmepõhistes USD kasutuskvootides hinnata mudelite kasutust väärtusena $0 selle asemel, et käsitleda kvooti ületatuna. Vaikimisi välja lülitatud: hinnastamata mudel või marsruutimisalias võib varjata tegelikke kulusid, mistõttu kvoot tõrkub suletuks."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Luba OmniRoute Radari moodul (kataloogivoo vaated ja sünkroonimine). Vaikimisi välja lülitatud; lubamine avab vaid kasutajaliidese – andmete sünkroonimine jääb eraldi sisselülitatavaks."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Mudeli lõpp-punkti võimekuse lüüs",
+        "description": "Jõusta usaldusväärsed mudeli lõpp-punkti sildid (pakkuja kataloogi deklareeritud, spetsiaalsest mudeli ID-st tuletatud või administraatori määratud): lükka päring, mis on saadetud lõpp-punkti, mida mudel ei teeninda, enne väljasaatmist tagasi koodiga HTTP 400 otspunktides /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ja /v1/audio/*; peida otspunktist /v1/models mudelid, mille sildistatud lõpp-punktidel puudub OmniRoute adapter; ja vasta selliste mudelite puhul juhtpaneeli mudelitestile koodiga 422. Vaikimisi välja lülitatud: lõpp-punkti sildid jäävad informatiivseks ja päringud edastatakse täpselt nagu varem."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Universaalne konteksti üleandmine",
+        "description": "Genereeri ja lisa vestluse kokkuvõtteid, kui kombineeritud marsruutimine vahetab mudeleid. Keela, et käsitleda mudelivahetusi eraldiseisvalt ja vältida taustal toimuvaid üleandmispäringuid kõigi olemasolevate ja tulevaste kombinatsioonide puhul."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Arutluskäigu taasesitus",
+        "description": "Puhverda ja taasesita mudeli arutluskäiku mitmevoorulistes vestlustes. Keela, et peatada arutluskäigu salvestamine ja uuesti lisamine."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Serveri transport",
+        "description": "Luba Codexil kasutada kohalikku app-serveri WebSocket JSON-RPC transporti (codexTransport=app-server). Väljalülitatuna langevad app-serveri valinud ühendused tagasi Codexi muudele transpordiviisidele."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code avastusaliased",
+        "description": "Avaldada claude/'<provider>'/'<model>' peegli-ID-d /v1/models otsepinnas, et Claude Code värava mudelite avastus näitaks mitme-Claude mudeleid. Hoiatus: globaalselt lubamisel kaksikustab kataloogikandeid kõigi klientide jaoks."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "No-Thinking mudeliliased",
+        "description": "Pealülitus no-think/'<provider>'/'<model>' värava aliaste jaoks. Sisse (vaikimisi): /v1/models avaldab iga sobiva mõtlemisvõimega Claude mudeli jaoks variandi ilma mõtlemiseta, ja no-think/ ID, mis saadetakse taotluses, lahendatakse tagasi tegeliku mudelini, kust on mõtlemis välja lülitatud. Väljas: variante ei avaldata ja no-think/ ID käsitletakse nagu iganaine tundmatu mudeli ID. Iga mudeli individuaalne ModelSpec.noThinkingAlias lubamine/keelamine kehtib, kuni see on sisse."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Keela mõtlemistaseme variandid",
+        "description": "Keela mõtlemistaseme variantide (nt -low, -medium, -high) genereerimine kataloogis /v1/models."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Adaptiivsed virtuaalsed vastuvõturajad",
+        "description": "Luba rentnikupõhised adaptiivsed virtuaalsed vastuvõturajad teenusepakkuja edastusele (#9654): ühe rentniku koormuspuhang ei põhjusta enam teisele 503-viga. Keskkonnamuutuja OMNIROUTE_CHAT_VIRTUAL_LANES on selle juhtpaneeli alistuse suhtes ülimuslik; muudatused jõustuvad serveri taaskäivitamisel."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Funktsionaalsed värava peeglid",
+        "description": "Avaldada '<gateway-alias>'/'<model>' peegli-ID-d /v1/models otsepinnas mudelitele, kelle kanoniline omanik pole aktiivseid kredentiaale, kuid läbipääsu väravaga, kus on aktiivsed kredensiaalid, suunatakse. Hoiatus: globaalselt lubamisel lisab kataloogikandeid kõigi klientide jaoks."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API agregaatori saldo",
+        "description": "Luba saldo tuvastamine New-API / One-API / Sub2API agregaatoriga ühilduvate sõlmede jaoks. Kui see on lubatud, teatavad seatud agregaatorilipuga ühilduvad sõlmed oma saldost juhtpaneelil ja kvoodi eelkontrolli marsruutimisel."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Peida kustutatud otsinguühendused",
+        "description": "Otsingu statistikas ja hiljutistes otsingutes arvestatakse ainult teenusepakkujaid, kellel on endiselt aktiivne ühendus (võtmeta pakkujad, nagu duckduckgo-free, lähevad alati arvesse). Väljalülitatuna säilitatakse iga talletatud otsingurida koos pakkuja ID-ga."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Range Free-märgis",
+        "description": "Juhtpaneeli pakkujate lehed: kuva märgis „Free“ ainult signaalide puhul, mida pakkuja toetab — eirab kuvatava nime heuristikat, mitte-tõeväärtuslikke free-välju ja järelliiteid :free registreeritud pakkujatel, kellel puudub dokumenteeritud tasuta pakett. Väljalülitatuna säilib senine märgise reegel."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: tühi kogum vastab koodiga 503",
+        "description": "Kui auto combo kandidaatide kogum on enne tööriistakutsete eelfiltri käivitamist juba tühi (kõik sihtmärgid jäetakse jahtumisperioodide, lukustuste või ammendumise tõttu vahele), vastatakse 503 no_eligible_targets varasema 400 \"No target supports tool calling\" capability_mismatch asemel. Vaikimisi väljas: tühi kogum säilitab varasema 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral kahtlusrikas 401 pehme lukustus",
+        "description": "Tühi Mistral 401 ('{\"detail\":\"Unauthorized\"}', ilma selge autentimissignaalita) on bajtolidentne tühistatud võtmega ja kuormatud kvoodiga. Lubamisel jahutab selline 401 ühenduse asemel, et pakkuda seda aegunud, kuni 3 korda tunni jooksul; järgmine lukustab ikkagi aegununa, mistõttu tühistatud võti kontvergeerub. Vaikimisi väljas: iga tühi Mistral 401 lukustab ühenduse aegununa, nagu varem."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Pakettide ja failide automaatne puhastus",
+        "description": "Lubab automaatsel puhastusel kustutada lõppolekus (completed/failed/cancelled/expired) Batch API tööd, mis on vanemad kui OMNIROUTE_BATCH_RETENTION_DAYS, koos nende realepõhiste kontrollpunktidega ning tühjendada üleslaaditud failide BLOB-sisu pärast nende expires_at aega. Vaikimisi väljas: iga olemasolev paigaldus säilitab need andmed täpselt nagu varem, kuni operaator selle funktsiooni lubab. Operaatori käivitatud marsruuti DELETE /api/v1/batches/delete-completed see kummalgi juhul ei mõjuta – see on eraldiseisev, tingimusteta avalik API-leping."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity konto rent",
+        "description": "Reserveerib valitud Antigravity konto selle valinud päringu voogedastuse elutsükli ajaks, nii et samaaegne korduskatse või mandaatide üleandmine ei saaks uuesti valida kontot, mis on juba pooleliolevale voole määratud. Broneeringu ulatus on piiratud paariga (connection, callable upstream model), seega saab üks konto teenindada endiselt kahte erinevat mudelit korraga. Kui kõik sobilikud kontod on selle mudeli jaoks juba välja renditud, tagastab päring hõivatud kontole kuhjumise asemel struktureeritud vastuse 503 POOL_BUSY koos piiratud Retry-After päisega. Vaikimisi väljas: kontode valik jääb täpselt samaks nagu varem ja broneeringuid ei tehta."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Aegunud kombosammude automaatne kärpimine",
+        "description": "Pärast mudelite edukat sünkroonimist autoriteetse reaalajas kataloogiga eemaldab kombosammud, mis on seotud mudelitega, mida kataloog enam ei loetle, luues iga eemaldatud sammu kohta ühe auditikande. Ei kärbi kunagi ebaõnnestunud, halvenenud või ainult tasuta sünkroonimise korral ega tühjenda kombot kunagi täielikult. Vaikimisi väljas: aegunud sammud ainult märgistatakse."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuthi kokkuvõtlik mõtlemine",
+        "description": "Võimaldab Claude OAuthi päringul, mis küsib loetavat mõtlemist (thinking.display \"summarized\"), loobuda Anthropicu beetast redact-thinking-2026-02-12, mis muidu paneb Anthropicu tagastama tühje, ainult allkirjaga mõtlemisplokke. Vaikimisi väljas: see beeta on osa Claude Code'i OAuthi võrgutaseme sõrmejäljest (wire fingerprint), mistõttu OAuth-päringud jätavad selle muutmata. API-võtmega Claude'i päringud toetavad kokkuvõtlikku mõtlemist juba ilma selle liputa; OMNIROUTE_REDACT_THINKING=false jõuab OAuthi samuti ainult siis, kui see lipp on sees."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro tööriistakutse parandus",
+        "description": "Kui voogedastatav Kiro vastus väljastab enne mis tahes nähtavat väljundit vigase tool_call ümbrise (puudub input.name või input.arguments), suru see maha ja saada päring parandava juhisega uuesti, selle asemel et lõpetada voor veateatega invalid_kiro_tool_call. Uuestiproovimine maksab ühe täiendava Kiro päringu; teine nurjumine lõpetab vooru veateatega kiro_tool_call_repair_retry_failed. Vaikimisi sees. Määra väärtuseks false, et voor nurjuks kohe esimese vigase ümbrise korral."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev jõupingutustasemed",
+        "description": "Kasuta models.dev avaldatud arutlusjõupingutuse tasemeid (piiratud teadaoleva jõupingutuste sõnavaraga), kui ei operaatori ülekirjutus ega teenusepakkuja register neid ei deklareeri, ning käsitle deklareeritud tühja tasemete loendit väärtusena \"tasemeid pole\" /v1/models välja effort_tiers ja kombineeritud tasemete ühisosades. Vaikimisi väljas: effort_tiers ja lahendatud supportedThinkingEfforts jäävad täpselt samaks nagu varem."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena sünteesitud cx-telemeetria",
+        "description": "Lisa sünteesitud programmiline cx-kliendisuhtluse blob (väärtus, mille arena.ai ise saadab lehe puhul, kus suhtlust pole salvestatud) igale Arena (lmarena) create-evaluation päringule, millel puudub operaatori määratud providerSpecificData.cx. Vaikimisi väljas: väli cx on Arena automatiseerimisvastane signaal, mistõttu OmniRoute edastab ainult väärtuse, mille operaator hõivas tegelikust brauseriseansist (providerSpecificData.cx), ning vastasel juhul ei saada üldse cx-i. Teenusepakkuja poolel tõestamata kasu; luba ainult siis, kui Arena hakkab ilma cx-ita päringuid tagasi lükkama."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Natiivse Codexi reaktiivne tihendamine",
+        "description": "Luba reaktiivsetel (lävepõhistel) ja viimase abinõu konteksti tihendamise läbimistel kirjutada ümber ka natiivseid Codexi läbipääsuajalugusid (POST /v1/responses teenusepakkujale codex), kui need ületavad kontekstieelarve, kasutades Responses input[] adapterit. Vaikimisi väljas: natiivsed Codexi ajalood kuuluvad Codexi kliendile ja tihendamine ei kirjuta neid kunagi ümber; liiga suured päringud ei läbi kontekstieelarve kontrolli täpselt nagu varem. Nõuab, et globaalne tihendus oleks sisse lülitatud ja mudel poleks välistatud."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Kvoodiaken: arvesta piiratud parkimist",
+        "description": "Luba aknapõhisel kvoodireeglil (kontovalikul kasutatavad seansi-/nädalaläved) arvestada piiratud ammendumise parkimist: kui piiratud parkimise tähtaeg on möödas või vahemällu salvestatud kvoodivaatlus on vanem kui parkimise ülempiir, lõpetab aken konto välistamise kuni uue kvoodi hankimiseni. Vaikimisi väljas: vahemällu salvestatud aken blokeerib edasi oma viimati teatatud protsendi põhjal kuni oma lähtestusajani."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Piltide genereerimine: pikad tööd",
+        "description": "OpenAI-ühilduva piltide genereerimise puhul: kasuta ühenduse ajalõppu (providerSpecificData.timeoutMs), muidu keskset ülesvoolu toomise ajalõppu (FETCH_TIMEOUT_MS, seejärel REQUEST_TIMEOUT_MS, vaikimisi 600 s) fikseeritud 120 s pildieelarve asemel; lõpeta kutsuja tühistatud päring koodiga 499; ning luba Playgroundil võtta pikki pilditöid vastu SSE-voona koos keepalive-signaalidega. Vaikimisi väljas: rakendub fikseeritud eelarve ja kutsujapoolset tühistamist edasi ei kanta. Vastuse keha lugemist hõlmav tähtaeg on alati aktiivne."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Kataloogipeegelduste täiustused",
+        "description": "Täpsusta claude/ tuvastuse ja funktsionaalse lüüsi (functional-gateway) peegeldusi teekonnal /v1/models. Vaikimisi väljas: mõlemad peegelduskäigud käituvad täpselt nagu varem. Sees: claude/ tuvastuspeegeldused hõlmavad ka loetletud reasoning-effort variante (-low/-medium/-high/-xhigh), jätavad vahele sisseehitatud auto/* id-d, mida päringutee ei suuda materialiseerida, ja jätavad vahele juba loetletud aliase; funktsionaalse lüüsi peegeldused jätavad vahele kombinatsioonid ja OmniRoute'i sünteesitud id-d (claude/, no-think/), võtavad omaniku väljalt owned_by, ei kasuta kunagi omanikku tema enda lüüsina ning jätavad vahele loendis blockedProviders keelatud lüüsid ja mudelid väljaspool lüüsi autoriteetset reaalajas kataloogi."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Puhverserveri tervis: keeldumine lähtestab tõrkejada",
+        "description": "Puhverserveri tervisekontrollis lase sihtmärgi tagasilükatud kontrollpäringul (401/403/429: puhverserver edastas, sihtkoht lükkas selle väljuva IP tagasi) lähtestada puhverserveri järjestikuste tõrgete jada, sarnaselt vastatud kontrollpäringule. Vaikimisi väljas: keeldumine jääb neutraalseks ja säilitab jada (#10654). Kood 5xx jääb mõlemal juhul ebaselgeks ning keeldumine ei eemalda, keela ega taasaktiveeri puhverserverit kunagi."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Groki tellimuse pildid",
+        "description": "Registreeri xai-oauth (xao) ja grok-cli pildimarsruudid ning kaardista OpenAI kvaliteet high/hd väärtusele xAI medium. Vaikimisi väljas: API-võtmega xAI pilditee jääb olemasoleva OpenAI-ühilduva päringu juurde ja tellimusmarsruute ei registreerita."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth reaalajas mudelituvastus",
+        "description": "Hangi xai-oauth ühenduste jaoks reaalajas xAI mudelikataloog aadressilt https://api.x.ai/v1/models, kasutades OAuthi bearer-tokenit, mitte külmutatud staatilisi algandmeid. Vaikimisi sees. Määra lipu väärtuseks false, et jätkata staatiliste algandmete serveerimist. HTTP tõrgete korral pöördutakse tuvastusmarsruudil tagasi algandmete juurde; lipu hankija ise HTTP-päringuid ei tee."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-ühilduvad vestlussisesed süsteemivoorud",
+        "description": "Tavalistel anthropic-compatible-* releedel (claude → claude otseedastus) hoia vestlussisesed role:system voorud massiivis messages[], selle asemel et tõsta need ülataseme parameetrisse system, tagades vahemällu salvestatud viiba eesliite stabiilsuse üle voorude. Kehtib ainult siis, kui klient ise saatis parameetri mid-conversation-system-2026-04-07 anthropic-beta (edastatakse ülesvoolu muutmata kujul). Vaikimisi väljas: iga süsteemivoor tõstetakse ülatasemele täpselt nagu varem, kuna releed, mis beetat ei toeta, lükkavad role:system sõnumid tagasi veaga 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB tervisekontroll: lükka käivitusskannimine edasi",
+        "description": "Käivita andmebaasi käivitusaegne terviklikkuse/tervise kontroll pärast seda, kui server hakkab päringuid vastu võtma (funktsiooni setImmediate kaudu), selle asemel et blokeerida käivitumist kuni selle lõpuleviimiseni. Vaikimisi väljas: käivitumine blokeerub kontrolli ajaks täpselt nagu enne muudatust #13717, nii et rikutud andmebaas tuvastatakse ikkagi enne esimese päringu teenindamist. Sees: käivitumine naaseb kohe ning kontroll (nüüd piiratud/lehekülgedeks jaotatud ja tõelise failipõhise andmebaasi puhul eraldatud tühistatavasse alamprotsessi) käivitatakse vahetult pärast seda."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode'i avaldatud kataloogi marsruutimine",
+        "description": "Luba ilma selgesõnalise registri lõpp-punktita OpenCode Zen ja OpenCode Go mudelitel võtta oma päringupind (Responses paketile @ai-sdk/openai, Messages paketile @ai-sdk/anthropic) avaldatud models.opencode.ai kataloogist, mida loetakse taustal iga 6 tunni järel. Vaikimisi väljas: lõpp-punkt pärineb registri heuristikast täpselt nagu varem ja kataloogi ei pärita kunagi."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Automaatsed päringud: lahendatud võimekuste kaalud",
+        "description": "Luba auto/* päringutel (resolveModelOrError ja automaatse marsruutimise ümbris) koostada kandidaatide kogum koos lahendatud mudeli võimekustega (vision, reasoning, thinking) ja täheldatud kvaliteediskooridega, mida loetakse ühe hulgipäringuna nagu kataloogi /v1/models. Vaikimisi väljas: päringuaegsed hetktõmmise kaalud jäävad täpselt samaks nagu varem (võimekused lahendatakse nõudmisel ega mõjuta kaalusid). Sees: need signaalid toidavad hetktõmmise kaalusid, mistõttu kandidaatide kaalud ja seega ka valik võivad muutuda."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Võtmetu transpordi värav",
+        "description": "Hoidke võtmetuid (autentimata) pakkujaid, kelle transport vajab kohalikku brauserit (browserBacked) või kohalikult paigaldatud CLI-d (isLocalCli), auto/* kandidaatide kogust välja, et ripub oleku liige ei saaks auto taotlust per-target ajalimiidi (#17036) saamiseni seisma jätta. Väärtus on vaikimisi välja: iga autentimata pakkuja, kellel on emuleeritud tööriistade kõned, jääb kogusse täpselt varasema kujul. Otse '<alias>'/'<model>' kõned toimivad mõlemal juhul."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Sissepõhi mõtlemise korduslugemine",
+        "description": "Koodibuddy-cn mõttefunktsioonide mudelite puhul (DeepSeek-V4 / Kimi-K2 perekonnad, mis vajavad mõtlemise korduslugemist), sisestage iga korduslugemine assistendi reasoning_content nähtava '<thought>' plokkina sõnumisisu ette, et see jääks alles väravasse, mis eemaldab reasoning_content väli (#13632). Väärtus on vaikimisi välja: codebuddy-cn taotlused saadetakse muutmata; reasoning_content väli ise hoitakse alati alles."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Teenusepakkuja turvapeatused: lõplik",
+        "description": "Käsitle selgesõnalist teenusepakkuja turvapeatust (misalignment_policy_violation, content_policy_violation või täpne pärandkeeldumine 'blocked by our safety systems' sildiga provider_safety_rejection) lõpliku, päringupõhise keeldumisena: selle kood säilitatakse läbi HTTP, Responses, WebSocketi ja lõpuleviidud voo vigade ning kombo peatub selle juures teiste sihtmärkide uuesti proovimise asemel, tühistades lubatud paralleelsed päringud (#17049). Vaikimisi väljas: need vead säilitavad oma senise käsitluse ja kombo marsruutimist ei muudeta."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Mandaatide tervis: testi automaatselt väljalülitatud ühendusi uuesti",
+        "description": "Luba mandaatide tervisekontrollil testida uuesti ühendusi, mille lüüs ise välja lülitas (märgitud kui autoDisabledAt; maksimaalselt kord 6 h jooksul igaühe kohta ja 5 kontrolli kohta), ning lülitada ühendus uuesti sisse, kui selle kordustest õnnestub (#16190). Vaikimisi väljas: väljalülitatud ühendused jäävad väljalülitatuks, kuni operaator need uuesti lubab või uuesti testib, täpselt nagu varem. Operaatori keelatud ühendusi ja pärast püsivat blokeerimist väljalülitatud ühendusi ei testita kunagi uuesti."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Mandaatide värav: ainult autentimisdiagnostika",
+        "description": "Kitsenda kombo mandaatide väravat nii, et vahemällu salvestatud ebaõnnestunud mandaadikontroll blokeerib ühenduse ainult siis, kui selle diagnoos kinnitab vigaseid mandaate (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Määramatuid tõrkeid (aegumised, päringupiirangud, katkestused, toetamata kontrollid ja tüübita plaanuri vead) käsitletakse sellisel juhul teadmatutena ning ühendus jätkab liikluse vastuvõtmist. Vaikimisi väljas: mis tahes vahemällu salvestatud kontrolli viga blokeerib ühenduse vahemälu TTL-i ajaks (5 minutit)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Kombo: peatu sisupoliitika keeldumisel",
+        "description": "Kui kombo sihtmärk vastab täpse sisupoliitika keeldumisega (kood või tüüp cyber_policy / content_policy_violation), peata kombo ja tagasta see keeldumine isegi siis, kui ülejäänud sihtmärgid on erinevad mudelid, selle asemel et liikuda järgmise sihtmärgi juurde. Vaikimisi väljas: keeldumine ei vii kunagi kontot jahtumisperioodile ega rakenda teenusepakkuja kaitselülitit ning kombo liigub oma järgmise sihtmärgi juurde täpselt nagu varem."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Jahtumisaja korduskatse: jäta 403/410 keeldumised vahele",
+        "description": "Kui kõik kontod on jahtumisolekus ning esimesena lõppeva jahtumisaja põhjustas 403 (juurdepääsust keeldutud) või 410 (kadunud), tagasta see keeldumine kohe, selle asemel et jahtumisaeg ära oodata ja päring uuesti saata; uuenev agentrouter ühendusepõhise kvoodi 403 talletatakse seejärel koodiga errorCode 429, et see jääks uuesti proovitavaks. Vaikimisi väljas: ainult 401 jätab ootamise vahele ja iga keeldumine talletatakse staatusega, millega see saabus."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Hinnastamata kasutuse eelarvepoliitika",
+        "description": "Kuidas per‑võtme päevased või nädalased USD‑limiidid käsitlevad edukat kasutust, mille teenusepakkujal või mudelil puudub hinnakirje. fail_closed (vaikimisi) märgib akna ületatuks, nii et tundmatu kulu ei pääse kunagi kõva limiidi alt läbi. count_as_zero arvestab selle kasutuse $0‑ks ja jätkab hinnastatud kulude piirangute rakendamist. Hinnastamata mudelid kuvatakse igal juhul juhtpaneeli avalehel."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Logi konto ID-d",
+        "description": "Kaasa konto eesliide AUTH logirindadesse (nt \"Kasutatakse '<provider>' kontot: abc12345...\"). Vaikimisi keelustatud, et konto identifikaatorid jääks jagatud/mitme tenanti protsessilogidest varjatud. Sõltumatu Debug režiimist; Debug režiimi lülitamine seda ei avalda."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Keela parooliga sisselogimine OIDC puhul",
+        "description": "Kui OIDC on lubatud, keela parooliga sisselogimine, et kasutajad saaksid autentida ainult OIDC ühekordse sisselogimise (Single Sign-On) kaudu. Kui see on välja lülitatud (vaikimisi), on saadaval nii parooliga sisselogimine kui ka OIDC."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Audioteenuse pakkujate kaugsõlmed",
+        "description": "Luba marsruutidel /v1/audio/* kasutada OpenAI-ga ühilduvaid teenusepakkuja sõlmi, mida majutatakse väljaspool localhosti. Vaikimisi välja lülitatud — heli suunamine kaughosti muudab väljundidentiteeti ja peab olema operaatori selgesõnaline otsus. Loopback-sõlmed on alati lubatud ning see säte neid ei mõjuta."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Rerank-teenuse pakkujate kaugsõlmed",
+        "description": "Luba päringul POST /v1/rerank (ja mälumootori rerank-sammul, mis kutsub seda välja loopbacki kaudu) kasutada OpenAI-ga ühilduvaid teenusepakkuja sõlmi, mida majutatakse väljaspool localhosti — LAN-seadet või Tailscale'i partnerseadet (peer), kus töötab TEI, Infinity, vLLM jne. Vaikimisi välja lülitatud — suunamine kaughosti muudab väljundidentiteeti ja peab olema operaatori selgesõnaline otsus. Loopback-sõlmed on alati lubatud ning see säte neid ei mõjuta. Kaugsõlmed peavad vastama ka teenusepakkuja väljund-URL-i reeglitele."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Võrgurotatsiooni jagatud väljundi kaitse",
+        "description": "Kui mitme konto rotatsioonitäituri puhul ilmneb võrgutõrge (ajalõpp, ühendusest keeldumine/lähtestamine) ja tõrkunud kontol puudub eraldatud proksi, rakenda lühike jahtumisaeg ning jäta ülejäänud päringu vältel teised proksita kontod vahele, selle asemel et kõiki uuesti proovida. Vaikimisi sisse lülitatud (turvaline: väljund-IP ei muutu, vähendab vaid latentsust/jahtumisaja riski jagatud väljundiga kontodel). Lülita välja, et taastada kohene edasikandumine esimese proksita erandi ilmnemisel."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Jäta hiljuti tõrkunud proksid vahele",
+        "description": "Proksikogumid ja opencode'i kontopõhine rotatsioon peatavad äsja tõrkunud proksi uuesti pakkumise (tagasilükatud TCP-test või selle kaudu saadud 429) protsessipõhiseks perioodiks, mis kahekordistub iga kordusega kuni piirmäärani. Proksi olekut ei salvestata; iga kõrvalejäetud kandidaadi puhul jääb valik samaks. Vaikimisi sees: valikujärjekord on täpselt tavapärane rotatsioon ainult juhul, kui PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Jagatud väljundiaadressiga kogumi järjekord",
+        "description": "Teenusepakkujate puhul, kelle kvooti arvestatakse väljundiaadressi põhiselt, paigutatakse hiljuti tagasilükatud liikme täheldatud väljundiaadressi jagav kogumiliige vahetult tervete liikmete järele. Mõjutab ainult järjekorda, ei välistata kunagi. Vajab parameetrit PROXY_SKIP_RECENTLY_FAILED, mis tekitab loetava tagasilükkamissignaali. Vaikimisi väljas: valikujärjekord on täpselt tavapärane rotatsioon."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Rotatsiooni omistamise logimine",
+        "description": "Opencode'i rotatsioon salvestab, milline konto päringut teenindas või vahele jäeti (ainult maskeeritud ID-d, mitte kunagi täielikud konto ID-d) ning seob proksilogi kirjed vastava päringuga, võimaldades operaatoril eristada vahelejäänud kontosid kasutamata kontodest. Vaikimisi väljas: täiendavaid logiridu ega lisaveergusid ei kirjutata."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Proksikogumi väljundite vaatlus",
+        "description": "Kuvab juhtpaneelil proksikogumi all, mitu täheldatud väljund-IP-d selle liikmeid viimase 24 h jooksul teenindas, mitu ühendust neid kasutas ning milline oli suurim tuvastatud ühenduste arv ühe IP taga. Ainult loetav, arvutatakse proksilogist, ei kasutata kunagi marsruutimiseks. Vaikimisi väljas: kogumi redaktor on muutmata ja vaatlusmarsruut tagastab null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Proksioperaatori väljund",
+        "description": "Võtab vastu operaatori saadetud kuupäevastatud vaadeldud aadresse kogumiliikme kohta ja liidab need kuvamiseks ning kogumi järjestamiseks žurnaalist loetuga. Vaikimisi väljas: push-marsruut tagastab 404 ja kogumi lugemised toimivad täpselt nagu varem."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses seiskumisel roteerimine",
+        "description": "OpenCode'i täituri puhul jälgige voogesitatud Responses-vastuse keha esimest baiti (aken: RESPONSES_FIRST_BYTE_TIMEOUT_MS, vaikimisi 15000). 2xx Responses-voogu, mis jääb pärast selle akna möödumist vaikseks, käsitletakse seiskununa: kontole määratakse jahtumisaeg ja päring roteeritakse ühe korra järgmisele kontole; teine seiskumine ebaõnnestub kohe. Vaikimisi väljas: seiskunud vood säilitavad senise ootamise kuni voo valmisoleku aegumiseni."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked roteerimine",
+        "description": "OpenCode'i täituri puhul, kui ülemteenus vastab koodiga 403 või 451 koos user_blocked-keeldumisega (mitte geoblokeering ega Cloudflare'i sõrmejälje tagasilükkamine), määrake tagasilükatud kontole jahtumisaeg ja roteerige päringu kohta kuni üks kord järgmisele kontole; teine tagasilükkamine tagastatakse muutmata kujul ilma õnnestumismärgita. Vaikimisi väljas: ülemteenuse kasutajablokeeringust möödaroteerimine võib näida kõrvalehoidmisena ja levitada märgistust kogu kontopargis, mistõttu tagastatakse keeldumine muutmata kujul, välja arvatud juhul, kui operaator on seda eraldi lubanud."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode'i ajutise tõrkesiirde tagasitõmbumine",
+        "description": "OpenCode'i mitme konto roteerimisel tehke enne järgmisele kontole saatmist paus, kui kaks järjestikust katset ebaõnnestusid ülemteenuse ajutise veaga (5xx või tühi 400 tagasilükkamine). Paus algab 1,5 sekundist, kahekordistub iga järgmise järjestikuse ebaõnnestumise korral, on piiratud 6 sekundiga pausi kohta ja 10 sekundiga päringu kohta, jääb kliendi ühenduse katkemisel vahele ning ebaõnnestunud vastuse keha vabastatakse enne ootamist. Vaikimisi väljas: tõrkesiire toimub kohe."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Tühja vooru väljastamise korduskatse",
+        "description": "Tõlgitud voogedastusvoorudes, kui ülemteenuse voor ei sisalda kasutatavat sisu (ainult arutluskäigu lõpetus või null väärtuslikku tükki), tehke piiratud arv korduskatseid tavapärase mandaaditee kaudu (kuni `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`), enne kui kliendile midagi väljastatakse. Vaikimisi väljas: tühjad voorud säilitavad praeguse käitumise (tühi 200 või tühja sisuga 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Tühja voo sõsartaastamine",
+        "description": "Claude/Codexi voogedastus: pärast esimest elutsükli sündmust kontrollige lühidalt (kuni 1 s / 64 KiB) kasutatava väljundi olemasolu; voog, mis lõpeb ilma sisuta, muutub empty_content-tõrkeks, mis kulutab olemasoleva piiratud korduskatse teisel sobival ühendusel (ilma jahtumisaja ja mudeli lukustuseta), ning round-robin-kombod lõpetavad uuestiproovimise kohe, kui klient ühenduse katkestab. Samuti käsitleb kontrolli käigus olekuid refusal, pause_turn ja model_context_window_exceeded legitiimsete tühjade lõppolekutena. Vaikimisi väljas: valmisolek, tühja sisu käsitlemine ja kombode korduskatsed jäävad täpselt samaks nagu varem."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Voo hilise väljundi sond",
+        "description": "Voogesituse väljundi sond: pärast esimest 64 edastatud andmetükki jätka esimese nähtava väljundi tuvastamiseks proovivõttu sagedusega üks andmetükk 16-st, nii et hilja algav väljund märgib voo endiselt väljundit edastatuks. Üksik 5xx pärast seda punkti jääb seejärel päringupõhiseks, selle asemel et salvestada ainult mudeli lukustus, ja firstOutputMs tagasitäidetakse praeguse proovivõtuvahemiku esimese väljundtükiga. Vaikimisi väljas: kontrollitakse ainult esimesi 64 edastatud andmetükki, täpselt nagu varem."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode päringupiiranguga 429 varajane peatamine",
+        "description": "OpenCode'i mitme konto rotatsiooni puhul peata kontolaine esimese 429 juures, mis on klassifitseeritud tegelikuks päringupiiranguks (töödeldav Retry-After päis või päringukeha, mis nimetab kiiruse/kasutuse piirangut), ning tagasta see ülemvoo 429 muutmata kujul (olek, keha, Retry-After ja kvoodipäised), selle asemel et proovida kõiki ülejäänud kontosid. Klassifitseerimata 429-koodid jätkavad roteerumist. Vaikimisi väljas: tasuta paketil kehtib piirang väljuva IP kohta (#9611), seega iga 429 roteerub järgmisele kontole ning ammendunud laine tagastab viimase ülemvoo 429."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 parkimine ja jätkamine",
+        "description": "OpenCode'i mitme konto rotatsiooni puhul pargi päring pärast korduvaid ajutisi 429-vastuseid (või värsket kogumi ülekoormuse tähist) koos elutuksega, seejärel korda ühte piiratud etappi kuni 3 järjestikuse kontoga, selle asemel et levitada päringut korraga kogu kontopargile. Vaikimisi väljas: iga 429 roteerub järgmisele kontole täpselt nagu varem."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Voo valmisoleku seiskumise korduskatse",
+        "description": "Voogesitusega vestluspäringute puhul, kui esimene ülemvoo keha seiskub enne kasutatava sündmuse tekitamist, tee samal marsruutimisteel üks piiratud korduskatse sama valmisolekueelarvega ja ilma konto karistuseta. Vaikimisi väljas: seiskunud esimese keha korral nurjub päring ilma korduskatsmeta."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 kogumi uuestivalimine",
+        "description": "OpenCode'i mitme konto rotatsiooni puhul, kui saadi 429 väljundpõhiselt piiratud teenusepakkujalt ilma proksita kontol ümbritsevas kogumikontekstis, küsi ühenduste kogumilt järgmise katse jaoks teist liiget, selle asemel et proovida uuesti sama väljuvat aadressi. Järjestab, ei välista kunagi: ammendunud kogum säilitab praeguse käitumise. Vaikimisi väljas: iga 429 roteerub järgmisele kontole täpselt nagu varem."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 kliendi sõrmejälg",
+        "description": "Saada OpenCode v2 CLI kliendi sõrmejälg OpenCode Zen/Go päringutel (#16571): User-Agent opencode/latest/<2.x>/cli ja x-opencode-client cli, kliendi User-Agent säilitatakse ainult siis, kui tegemist on 2.x OpenCode kliendiga, piiratud tasuta taseme päringutel puudub x-opencode-request, seanss peegeldatakse päistesse x-opencode-session-id/x-session-affinity/x-session-id, lisatud kohatäitetööriistadel kasutatakse v2 CLI read/shell skeeme ning tool_choice väärtusega \"none\" eemaldatakse. Vaikimisi väljas: iga OpenCode päring säilitab praeguse identiteedi, päised ja keha bait-baidilt."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen egress-IP lukustus",
+        "description": "Lisa OpenCode Zen (opencode-zen) vaikimisi egress-IP lukustusperekonda, nii et 429 ühel Zen-ühendusel jahutab maha ka kõik sama egress-IP-d jagavad Zen-sõsarühendused. Vaikimisi väljas: Zen on võtmestatud ja iga ühendus jahtub eraldi, täpselt nagu varem. Sõnaselge OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS väärtus on alati selle lipu suhtes ülimuslik."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode'i täisteksti veareeglid",
+        "description": "Luba sisseehitatud OpenCode'i veareeglitel (opencode-zen, opencode-go, opencode-cli) sobituda ülemteenuse täieliku veatekstiga, nii et vastuse keha markerid nagu organization_quota_exceeded või \"monthly usage limit reached\" liigitavad 429 kvoodi ammendumiseks koos ühendusepõhise lukuga. Vaikimisi väljas: need reeglid näevad ainult struktureeritud veakoodi ja selline 429 jääb lühiajaliseks päringupiiranguks, täpselt nagu varem."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI täisteksti veareeglid",
+        "description": "Luba sisseehitatud Cloudflare Workers AI veareeglil sobituda ülemteenuse täieliku veatekstiga, nii et 429 \"daily free allocation\" keha liigitatakse kvoodi ammendumiseks, mitte lühiajaliseks päringupiiranguks. Vaikimisi väljas: reegel näeb ainult struktureeritud veakoodi, täpselt nagu varem."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Võimekuste filter",
+        "description": "Lükka päringud enne väljasaatmist tagasi, kui sihtmudelil puuduvad nõutavad võimekused (vision, tools, structured output, context window). Kaitseb otseseid ühe pakkuja päringuid, mis mööduvad combo-kihi ühilduvusfiltrist."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Eira hinnastamata kasutust USD kvootides",
+        "description": "Arvesta võtmepõhistes USD kasutuskvootides hinnata mudelite kasutust väärtusena $0 selle asemel, et käsitleda kvooti ületatuna. Vaikimisi välja lülitatud: hinnastamata mudel või marsruutimisalias võib varjata tegelikke kulusid, mistõttu kvoot tõrkub suletuks."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Luba OmniRoute Radari moodul (kataloogivoo vaated ja sünkroonimine). Vaikimisi välja lülitatud; lubamine avab vaid kasutajaliidese – andmete sünkroonimine jääb eraldi sisselülitatavaks."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Mudeli lõpp-punkti võimekuse lüüs",
+        "description": "Jõusta usaldusväärsed mudeli lõpp-punkti sildid (pakkuja kataloogi deklareeritud, spetsiaalsest mudeli ID-st tuletatud või administraatori määratud): lükka päring, mis on saadetud lõpp-punkti, mida mudel ei teeninda, enne väljasaatmist tagasi koodiga HTTP 400 otspunktides /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ja /v1/audio/*; peida otspunktist /v1/models mudelid, mille sildistatud lõpp-punktidel puudub OmniRoute adapter; ja vasta selliste mudelite puhul juhtpaneeli mudelitestile koodiga 422. Vaikimisi välja lülitatud: lõpp-punkti sildid jäävad informatiivseks ja päringud edastatakse täpselt nagu varem."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Universaalne konteksti üleandmine",
+        "description": "Genereeri ja lisa vestluse kokkuvõtteid, kui kombineeritud marsruutimine vahetab mudeleid. Keela, et käsitleda mudelivahetusi eraldiseisvalt ja vältida taustal toimuvaid üleandmispäringuid kõigi olemasolevate ja tulevaste kombinatsioonide puhul."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Arutluskäigu taasesitus",
+        "description": "Puhverda ja taasesita mudeli arutluskäiku mitmevoorulistes vestlustes. Keela, et peatada arutluskäigu salvestamine ja uuesti lisamine."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Serveri transport",
+        "description": "Luba Codexil kasutada kohalikku app-serveri WebSocket JSON-RPC transporti (codexTransport=app-server). Väljalülitatuna langevad app-serveri valinud ühendused tagasi Codexi muudele transpordiviisidele."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code avastusaliased",
+        "description": "Avaldada claude/'<provider>'/'<model>' peegli-ID-d /v1/models otsepinnas, et Claude Code värava mudelite avastus näitaks mitme-Claude mudeleid. Hoiatus: globaalselt lubamisel kaksikustab kataloogikandeid kõigi klientide jaoks."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "No-Thinking mudeliliased",
+        "description": "Pealülitus no-think/'<provider>'/'<model>' värava aliaste jaoks. Sisse (vaikimisi): /v1/models avaldab iga sobiva mõtlemisvõimega Claude mudeli jaoks variandi ilma mõtlemiseta, ja no-think/ ID, mis saadetakse taotluses, lahendatakse tagasi tegeliku mudelini, kust on mõtlemis välja lülitatud. Väljas: variante ei avaldata ja no-think/ ID käsitletakse nagu iganaine tundmatu mudeli ID. Iga mudeli individuaalne ModelSpec.noThinkingAlias lubamine/keelamine kehtib, kuni see on sisse."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Keela mõtlemistaseme variandid",
+        "description": "Keela mõtlemistaseme variantide (nt -low, -medium, -high) genereerimine kataloogis /v1/models."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Adaptiivsed virtuaalsed vastuvõturajad",
+        "description": "Luba rentnikupõhised adaptiivsed virtuaalsed vastuvõturajad teenusepakkuja edastusele (#9654): ühe rentniku koormuspuhang ei põhjusta enam teisele 503-viga. Keskkonnamuutuja OMNIROUTE_CHAT_VIRTUAL_LANES on selle juhtpaneeli alistuse suhtes ülimuslik; muudatused jõustuvad serveri taaskäivitamisel."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Funktsionaalsed värava peeglid",
+        "description": "Avaldada '<gateway-alias>'/'<model>' peegli-ID-d /v1/models otsepinnas mudelitele, kelle kanoniline omanik pole aktiivseid kredentiaale, kuid läbipääsu väravaga, kus on aktiivsed kredensiaalid, suunatakse. Hoiatus: globaalselt lubamisel lisab kataloogikandeid kõigi klientide jaoks."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API agregaatori saldo",
+        "description": "Luba saldo tuvastamine New-API / One-API / Sub2API agregaatoriga ühilduvate sõlmede jaoks. Kui see on lubatud, teatavad seatud agregaatorilipuga ühilduvad sõlmed oma saldost juhtpaneelil ja kvoodi eelkontrolli marsruutimisel."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Peida kustutatud otsinguühendused",
+        "description": "Otsingu statistikas ja hiljutistes otsingutes arvestatakse ainult teenusepakkujaid, kellel on endiselt aktiivne ühendus (võtmeta pakkujad, nagu duckduckgo-free, lähevad alati arvesse). Väljalülitatuna säilitatakse iga talletatud otsingurida koos pakkuja ID-ga."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Range Free-märgis",
+        "description": "Juhtpaneeli pakkujate lehed: kuva märgis „Free“ ainult signaalide puhul, mida pakkuja toetab — eirab kuvatava nime heuristikat, mitte-tõeväärtuslikke free-välju ja järelliiteid :free registreeritud pakkujatel, kellel puudub dokumenteeritud tasuta pakett. Väljalülitatuna säilib senine märgise reegel."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: tühi kogum vastab koodiga 503",
+        "description": "Kui auto combo kandidaatide kogum on enne tööriistakutsete eelfiltri käivitamist juba tühi (kõik sihtmärgid jäetakse jahtumisperioodide, lukustuste või ammendumise tõttu vahele), vastatakse 503 no_eligible_targets varasema 400 \"No target supports tool calling\" capability_mismatch asemel. Vaikimisi väljas: tühi kogum säilitab varasema 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral kahtlusrikas 401 pehme lukustus",
+        "description": "Tühi Mistral 401 ('{\"detail\":\"Unauthorized\"}', ilma selge autentimissignaalita) on bajtolidentne tühistatud võtmega ja kuormatud kvoodiga. Lubamisel jahutab selline 401 ühenduse asemel, et pakkuda seda aegunud, kuni 3 korda tunni jooksul; järgmine lukustab ikkagi aegununa, mistõttu tühistatud võti kontvergeerub. Vaikimisi väljas: iga tühi Mistral 401 lukustab ühenduse aegununa, nagu varem."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Pakettide ja failide automaatne puhastus",
+        "description": "Lubab automaatsel puhastusel kustutada lõppolekus (completed/failed/cancelled/expired) Batch API tööd, mis on vanemad kui OMNIROUTE_BATCH_RETENTION_DAYS, koos nende realepõhiste kontrollpunktidega ning tühjendada üleslaaditud failide BLOB-sisu pärast nende expires_at aega. Vaikimisi väljas: iga olemasolev paigaldus säilitab need andmed täpselt nagu varem, kuni operaator selle funktsiooni lubab. Operaatori käivitatud marsruuti DELETE /api/v1/batches/delete-completed see kummalgi juhul ei mõjuta – see on eraldiseisev, tingimusteta avalik API-leping."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity konto rent",
+        "description": "Reserveerib valitud Antigravity konto selle valinud päringu voogedastuse elutsükli ajaks, nii et samaaegne korduskatse või mandaatide üleandmine ei saaks uuesti valida kontot, mis on juba pooleliolevale voole määratud. Broneeringu ulatus on piiratud paariga (connection, callable upstream model), seega saab üks konto teenindada endiselt kahte erinevat mudelit korraga. Kui kõik sobilikud kontod on selle mudeli jaoks juba välja renditud, tagastab päring hõivatud kontole kuhjumise asemel struktureeritud vastuse 503 POOL_BUSY koos piiratud Retry-After päisega. Vaikimisi väljas: kontode valik jääb täpselt samaks nagu varem ja broneeringuid ei tehta."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Aegunud kombosammude automaatne kärpimine",
+        "description": "Pärast mudelite edukat sünkroonimist autoriteetse reaalajas kataloogiga eemaldab kombosammud, mis on seotud mudelitega, mida kataloog enam ei loetle, luues iga eemaldatud sammu kohta ühe auditikande. Ei kärbi kunagi ebaõnnestunud, halvenenud või ainult tasuta sünkroonimise korral ega tühjenda kombot kunagi täielikult. Vaikimisi väljas: aegunud sammud ainult märgistatakse."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuthi kokkuvõtlik mõtlemine",
+        "description": "Võimaldab Claude OAuthi päringul, mis küsib loetavat mõtlemist (thinking.display \"summarized\"), loobuda Anthropicu beetast redact-thinking-2026-02-12, mis muidu paneb Anthropicu tagastama tühje, ainult allkirjaga mõtlemisplokke. Vaikimisi väljas: see beeta on osa Claude Code'i OAuthi võrgutaseme sõrmejäljest (wire fingerprint), mistõttu OAuth-päringud jätavad selle muutmata. API-võtmega Claude'i päringud toetavad kokkuvõtlikku mõtlemist juba ilma selle liputa; OMNIROUTE_REDACT_THINKING=false jõuab OAuthi samuti ainult siis, kui see lipp on sees."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro tööriistakutse parandus",
+        "description": "Kui voogedastatav Kiro vastus väljastab enne mis tahes nähtavat väljundit vigase tool_call ümbrise (puudub input.name või input.arguments), suru see maha ja saada päring parandava juhisega uuesti, selle asemel et lõpetada voor veateatega invalid_kiro_tool_call. Uuestiproovimine maksab ühe täiendava Kiro päringu; teine nurjumine lõpetab vooru veateatega kiro_tool_call_repair_retry_failed. Vaikimisi sees. Määra väärtuseks false, et voor nurjuks kohe esimese vigase ümbrise korral."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev jõupingutustasemed",
+        "description": "Kasuta models.dev avaldatud arutlusjõupingutuse tasemeid (piiratud teadaoleva jõupingutuste sõnavaraga), kui ei operaatori ülekirjutus ega teenusepakkuja register neid ei deklareeri, ning käsitle deklareeritud tühja tasemete loendit väärtusena \"tasemeid pole\" /v1/models välja effort_tiers ja kombineeritud tasemete ühisosades. Vaikimisi väljas: effort_tiers ja lahendatud supportedThinkingEfforts jäävad täpselt samaks nagu varem."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena sünteesitud cx-telemeetria",
+        "description": "Lisa sünteesitud programmiline cx-kliendisuhtluse blob (väärtus, mille arena.ai ise saadab lehe puhul, kus suhtlust pole salvestatud) igale Arena (lmarena) create-evaluation päringule, millel puudub operaatori määratud providerSpecificData.cx. Vaikimisi väljas: väli cx on Arena automatiseerimisvastane signaal, mistõttu OmniRoute edastab ainult väärtuse, mille operaator hõivas tegelikust brauseriseansist (providerSpecificData.cx), ning vastasel juhul ei saada üldse cx-i. Teenusepakkuja poolel tõestamata kasu; luba ainult siis, kui Arena hakkab ilma cx-ita päringuid tagasi lükkama."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Natiivse Codexi reaktiivne tihendamine",
+        "description": "Luba reaktiivsetel (lävepõhistel) ja viimase abinõu konteksti tihendamise läbimistel kirjutada ümber ka natiivseid Codexi läbipääsuajalugusid (POST /v1/responses teenusepakkujale codex), kui need ületavad kontekstieelarve, kasutades Responses input[] adapterit. Vaikimisi väljas: natiivsed Codexi ajalood kuuluvad Codexi kliendile ja tihendamine ei kirjuta neid kunagi ümber; liiga suured päringud ei läbi kontekstieelarve kontrolli täpselt nagu varem. Nõuab, et globaalne tihendus oleks sisse lülitatud ja mudel poleks välistatud."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Kvoodiaken: arvesta piiratud parkimist",
+        "description": "Luba aknapõhisel kvoodireeglil (kontovalikul kasutatavad seansi-/nädalaläved) arvestada piiratud ammendumise parkimist: kui piiratud parkimise tähtaeg on möödas või vahemällu salvestatud kvoodivaatlus on vanem kui parkimise ülempiir, lõpetab aken konto välistamise kuni uue kvoodi hankimiseni. Vaikimisi väljas: vahemällu salvestatud aken blokeerib edasi oma viimati teatatud protsendi põhjal kuni oma lähtestusajani."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Piltide genereerimine: pikad tööd",
+        "description": "OpenAI-ühilduva piltide genereerimise puhul: kasuta ühenduse ajalõppu (providerSpecificData.timeoutMs), muidu keskset ülesvoolu toomise ajalõppu (FETCH_TIMEOUT_MS, seejärel REQUEST_TIMEOUT_MS, vaikimisi 600 s) fikseeritud 120 s pildieelarve asemel; lõpeta kutsuja tühistatud päring koodiga 499; ning luba Playgroundil võtta pikki pilditöid vastu SSE-voona koos keepalive-signaalidega. Vaikimisi väljas: rakendub fikseeritud eelarve ja kutsujapoolset tühistamist edasi ei kanta. Vastuse keha lugemist hõlmav tähtaeg on alati aktiivne."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Kataloogipeegelduste täiustused",
+        "description": "Täpsusta claude/ tuvastuse ja funktsionaalse lüüsi (functional-gateway) peegeldusi teekonnal /v1/models. Vaikimisi väljas: mõlemad peegelduskäigud käituvad täpselt nagu varem. Sees: claude/ tuvastuspeegeldused hõlmavad ka loetletud reasoning-effort variante (-low/-medium/-high/-xhigh), jätavad vahele sisseehitatud auto/* id-d, mida päringutee ei suuda materialiseerida, ja jätavad vahele juba loetletud aliase; funktsionaalse lüüsi peegeldused jätavad vahele kombinatsioonid ja OmniRoute'i sünteesitud id-d (claude/, no-think/), võtavad omaniku väljalt owned_by, ei kasuta kunagi omanikku tema enda lüüsina ning jätavad vahele loendis blockedProviders keelatud lüüsid ja mudelid väljaspool lüüsi autoriteetset reaalajas kataloogi."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Puhverserveri tervis: keeldumine lähtestab tõrkejada",
+        "description": "Puhverserveri tervisekontrollis lase sihtmärgi tagasilükatud kontrollpäringul (401/403/429: puhverserver edastas, sihtkoht lükkas selle väljuva IP tagasi) lähtestada puhverserveri järjestikuste tõrgete jada, sarnaselt vastatud kontrollpäringule. Vaikimisi väljas: keeldumine jääb neutraalseks ja säilitab jada (#10654). Kood 5xx jääb mõlemal juhul ebaselgeks ning keeldumine ei eemalda, keela ega taasaktiveeri puhverserverit kunagi."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Groki tellimuse pildid",
+        "description": "Registreeri xai-oauth (xao) ja grok-cli pildimarsruudid ning kaardista OpenAI kvaliteet high/hd väärtusele xAI medium. Vaikimisi väljas: API-võtmega xAI pilditee jääb olemasoleva OpenAI-ühilduva päringu juurde ja tellimusmarsruute ei registreerita."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth reaalajas mudelituvastus",
+        "description": "Hangi xai-oauth ühenduste jaoks reaalajas xAI mudelikataloog aadressilt https://api.x.ai/v1/models, kasutades OAuthi bearer-tokenit, mitte külmutatud staatilisi algandmeid. Vaikimisi sees. Määra lipu väärtuseks false, et jätkata staatiliste algandmete serveerimist. HTTP tõrgete korral pöördutakse tuvastusmarsruudil tagasi algandmete juurde; lipu hankija ise HTTP-päringuid ei tee."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-ühilduvad vestlussisesed süsteemivoorud",
+        "description": "Tavalistel anthropic-compatible-* releedel (claude → claude otseedastus) hoia vestlussisesed role:system voorud massiivis messages[], selle asemel et tõsta need ülataseme parameetrisse system, tagades vahemällu salvestatud viiba eesliite stabiilsuse üle voorude. Kehtib ainult siis, kui klient ise saatis parameetri mid-conversation-system-2026-04-07 anthropic-beta (edastatakse ülesvoolu muutmata kujul). Vaikimisi väljas: iga süsteemivoor tõstetakse ülatasemele täpselt nagu varem, kuna releed, mis beetat ei toeta, lükkavad role:system sõnumid tagasi veaga 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB tervisekontroll: lükka käivitusskannimine edasi",
+        "description": "Käivita andmebaasi käivitusaegne terviklikkuse/tervise kontroll pärast seda, kui server hakkab päringuid vastu võtma (funktsiooni setImmediate kaudu), selle asemel et blokeerida käivitumist kuni selle lõpuleviimiseni. Vaikimisi väljas: käivitumine blokeerub kontrolli ajaks täpselt nagu enne muudatust #13717, nii et rikutud andmebaas tuvastatakse ikkagi enne esimese päringu teenindamist. Sees: käivitumine naaseb kohe ning kontroll (nüüd piiratud/lehekülgedeks jaotatud ja tõelise failipõhise andmebaasi puhul eraldatud tühistatavasse alamprotsessi) käivitatakse vahetult pärast seda."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode'i avaldatud kataloogi marsruutimine",
+        "description": "Luba ilma selgesõnalise registri lõpp-punktita OpenCode Zen ja OpenCode Go mudelitel võtta oma päringupind (Responses paketile @ai-sdk/openai, Messages paketile @ai-sdk/anthropic) avaldatud models.opencode.ai kataloogist, mida loetakse taustal iga 6 tunni järel. Vaikimisi väljas: lõpp-punkt pärineb registri heuristikast täpselt nagu varem ja kataloogi ei pärita kunagi."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Automaatsed päringud: lahendatud võimekuste kaalud",
+        "description": "Luba auto/* päringutel (resolveModelOrError ja automaatse marsruutimise ümbris) koostada kandidaatide kogum koos lahendatud mudeli võimekustega (vision, reasoning, thinking) ja täheldatud kvaliteediskooridega, mida loetakse ühe hulgipäringuna nagu kataloogi /v1/models. Vaikimisi väljas: päringuaegsed hetktõmmise kaalud jäävad täpselt samaks nagu varem (võimekused lahendatakse nõudmisel ega mõjuta kaalusid). Sees: need signaalid toidavad hetktõmmise kaalusid, mistõttu kandidaatide kaalud ja seega ka valik võivad muutuda."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Võtmetu transpordi värav",
+        "description": "Hoidke võtmetuid (autentimata) pakkujaid, kelle transport vajab kohalikku brauserit (browserBacked) või kohalikult paigaldatud CLI-d (isLocalCli), auto/* kandidaatide kogust välja, et ripub oleku liige ei saaks auto taotlust per-target ajalimiidi (#17036) saamiseni seisma jätta. Väärtus on vaikimisi välja: iga autentimata pakkuja, kellel on emuleeritud tööriistade kõned, jääb kogusse täpselt varasema kujul. Otse '<alias>'/'<model>' kõned toimivad mõlemal juhul."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Sissepõhi mõtlemise korduslugemine",
+        "description": "Koodibuddy-cn mõttefunktsioonide mudelite puhul (DeepSeek-V4 / Kimi-K2 perekonnad, mis vajavad mõtlemise korduslugemist), sisestage iga korduslugemine assistendi reasoning_content nähtava '<thought>' plokkina sõnumisisu ette, et see jääks alles väravasse, mis eemaldab reasoning_content väli (#13632). Väärtus on vaikimisi välja: codebuddy-cn taotlused saadetakse muutmata; reasoning_content väli ise hoitakse alati alles."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Teenusepakkuja turvapeatused: lõplik",
+        "description": "Käsitle selgesõnalist teenusepakkuja turvapeatust (misalignment_policy_violation, content_policy_violation või täpne pärandkeeldumine 'blocked by our safety systems' sildiga provider_safety_rejection) lõpliku, päringupõhise keeldumisena: selle kood säilitatakse läbi HTTP, Responses, WebSocketi ja lõpuleviidud voo vigade ning kombo peatub selle juures teiste sihtmärkide uuesti proovimise asemel, tühistades lubatud paralleelsed päringud (#17049). Vaikimisi väljas: need vead säilitavad oma senise käsitluse ja kombo marsruutimist ei muudeta."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Mandaatide tervis: testi automaatselt väljalülitatud ühendusi uuesti",
+        "description": "Luba mandaatide tervisekontrollil testida uuesti ühendusi, mille lüüs ise välja lülitas (märgitud kui autoDisabledAt; maksimaalselt kord 6 h jooksul igaühe kohta ja 5 kontrolli kohta), ning lülitada ühendus uuesti sisse, kui selle kordustest õnnestub (#16190). Vaikimisi väljas: väljalülitatud ühendused jäävad väljalülitatuks, kuni operaator need uuesti lubab või uuesti testib, täpselt nagu varem. Operaatori keelatud ühendusi ja pärast püsivat blokeerimist väljalülitatud ühendusi ei testita kunagi uuesti."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Mandaatide värav: ainult autentimisdiagnostika",
+        "description": "Kitsenda kombo mandaatide väravat nii, et vahemällu salvestatud ebaõnnestunud mandaadikontroll blokeerib ühenduse ainult siis, kui selle diagnoos kinnitab vigaseid mandaate (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Määramatuid tõrkeid (aegumised, päringupiirangud, katkestused, toetamata kontrollid ja tüübita plaanuri vead) käsitletakse sellisel juhul teadmatutena ning ühendus jätkab liikluse vastuvõtmist. Vaikimisi väljas: mis tahes vahemällu salvestatud kontrolli viga blokeerib ühenduse vahemälu TTL-i ajaks (5 minutit)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Kombo: peatu sisupoliitika keeldumisel",
+        "description": "Kui kombo sihtmärk vastab täpse sisupoliitika keeldumisega (kood või tüüp cyber_policy / content_policy_violation), peata kombo ja tagasta see keeldumine isegi siis, kui ülejäänud sihtmärgid on erinevad mudelid, selle asemel et liikuda järgmise sihtmärgi juurde. Vaikimisi väljas: keeldumine ei vii kunagi kontot jahtumisperioodile ega rakenda teenusepakkuja kaitselülitit ning kombo liigub oma järgmise sihtmärgi juurde täpselt nagu varem."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Jahtumisaja korduskatse: jäta 403/410 keeldumised vahele",
+        "description": "Kui kõik kontod on jahtumisolekus ning esimesena lõppeva jahtumisaja põhjustas 403 (juurdepääsust keeldutud) või 410 (kadunud), tagasta see keeldumine kohe, selle asemel et jahtumisaeg ära oodata ja päring uuesti saata; uuenev agentrouter ühendusepõhise kvoodi 403 talletatakse seejärel koodiga errorCode 429, et see jääks uuesti proovitavaks. Vaikimisi väljas: ainult 401 jätab ootamise vahele ja iga keeldumine talletatakse staatusega, millega see saabus."
       }
     }
   },
@@ -14065,7 +14763,11 @@
       "ok": "Üldiselt lubavad tingimused"
     },
     "allProviders": "Kõik pakkujad",
-    "noApiKeyRequired": "API-võtit pole vaja"
+    "noApiKeyRequired": "API-võtit pole vaja",
+    "searchPlaceholder": "Otsi mudelit, pakkujat…",
+    "searchAria": "Otsi tasuta mudeleid",
+    "filterProviderAria": "Filtri pakkujate järgi",
+    "keylessOnly": "Vain võtmeta"
   },
   "providerHealthAutopilot": {
     "title": "Pakkujate töökindluse autopiloot",
@@ -15315,7 +16017,117 @@
     "importFailed": "Import ebaõnnestus.",
     "importSuccess": "Imporditi {connections} kontot ja {nodes} teenusepakkuja sõlme; vahele jäeti {skipped}."
   },
+  "conversations": {
+    "title": "Jutud",
+    "countSummary": "{total, plural, one {# jutud} other {# jutud}} 2 või rohkem käigu",
+    "autoRefreshTitle": "Kuidas sageli taastub see nimekiri serverilt.",
+    "autoRefresh": "Automaatne uuendamine",
+    "loading": "Jutude laadimine...",
+    "colConversation": "Vestlus",
+    "colTurns": "Voorad",
+    "colContinuation": "Jatkus",
+    "colLastModel": "Viimane mudel",
+    "colProvider": "Teenusepakkija",
+    "colStatus": "Staatus",
+    "colLastSeen": "Viimati nähtud",
+    "drawerTitle": "Vestlus",
+    "prevConversation": "Eelmine vestlus",
+    "nextConversation": "Järgmine vestlus",
+    "gotoLatestRequest": "Mine viimasele taotlusele",
+    "goToBottom": "Mine lõppu",
+    "statusInProgress": "Käib",
+    "continuationGenuineTitle": "Viimane käik kasutas previous_response_id-i ja see lahendati serveril",
+    "continuationBadge": "jätkamine",
+    "stalledTitle": "Viimane käik ei lõppnud peatusega ja midagi pole jätkunud 5+ minutit",
+    "stalledBadge": "seisaku olekus",
+    "noTurns": "Selle vestluse jaoks pole käike registreeritud."
+  },
   "logExport": {
-    "startFromCurrentPosition": "Alusta praegusest asukohast (jäta olemasolevad logid vahele)"
+    "startFromCurrentPosition": "Alusta praegusest asukohast (jäta olemasolevad logid vahele)",
+    "pageTitle": "Logi eksport",
+    "pageSubtitle": "Selle kaudu saadetakse Logid-sa ohtu kogu ajakiri pidevalt välise analüütika andmebaasi.",
+    "addDestination": "Lisa sihtkoht",
+    "scheduleTitle": "Aegloend",
+    "cronLabel": "Cron",
+    "notScheduled": "pole kavas",
+    "lastScheduledRun": "Viimane kavasolev täitumine",
+    "lastRunSummary": "{startedAt} — {status}, {rows} rida",
+    "never": "pole kunagi",
+    "highWaterMark": "Kogukonverentside andmekirja tase",
+    "rowPrefix": "rida {id}",
+    "noDestinations": "Ekspordi sihtkohti puudub",
+    "noDestinationsHint": "Lisa sihtkoht, et alustada kõnelogide saatmist iga tundine ajakava järgi.",
+    "errLoadStatus": "Ekspordi seisundi laadimine ebaõnnestus",
+    "errSaveDestination": "Sihtkoha salvestamine ebaõnnestus",
+    "msgDestinationSaved": "Sihtkoht on salvestatud.",
+    "errConnectionTest": "Ühenduse test ebaõnnestus",
+    "msgRunInFlight": "Selle sihtkoha käivitamine on juba käimas; mitmekordset saatmist ei toimunud.",
+    "errExportRun": "Ekspordi käivitamine ebaõnnestus",
+    "errUpdateDestination": "Sihtkoha uuendus ebaõnnestus",
+    "errDeleteDestination": "Sihtkoha kustutamine ebaõnnestus",
+    "deleteTitle": "Kustuta sihtkoht",
+    "deleteConfirm": "Kustutada \"{name}\"? Selle ekspordi kursor kustutatakse samuti, nii et selle uuesti lisamine algab vanimast salveeritud väljakutse logist.",
+    "statusDisabled": "Kehtetu",
+    "statusFailing": "Ebaõnnestuv",
+    "statusHealthy": "Terve",
+    "statusNotRunYet": "Pole veel käivitatud",
+    "typeNotInstalled": "Tüüp pole paigaldatud",
+    "metaLine": "Viimati käivitatud {lastRun} · eksportitud {exported} rida · {pending} ootel · kursor {cursor}",
+    "btnTest": "Test",
+    "btnRunNow": "Käivita kohe",
+    "btnDisable": "Keela sisse",
+    "btnEnable": "Luba",
+    "btnEdit": "Muuda",
+    "btnDelete": "Kustuta"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI kontod",
+    "cardSubtitle": "Lõpp-toiminguse seisund autentimise haldus API-st",
+    "btnRefresh": "Värskenda",
+    "listAria": "CLIProxyAPI konto seisund",
+    "noAccounts": "CLIProxyAPI kontosid ei leitud.",
+    "loading": "Kontode seisundit laaditakse…",
+    "stateReady": "Konto tervis",
+    "stateDisabled": "CLIProxyAPI pole installitud",
+    "stateMissingKey": "Haldavõtmis pole konfiguratsioneeritud",
+    "stateUnreachable": "Halday API ei ole saadaval",
+    "stateUnauthorized": "Haldavõti lühidati",
+    "stateUnsupported": "See CLIProxyAPI versioon ei paljasta konto tervist",
+    "stateInvalidResponse": "Halday API tagastas toetamata vastuse"
+  },
+  "darioPanel": {
+    "title": "Claude kontod",
+    "description": "Autentige Dario oma Claude Pro/Max tellimusega. Liiklus arvestatakse teie tellimuse poolga. Vähemalt üks konto on vajalik enne, kui Dario suudab taotlusi suunata (seni kuni /health raporteerib hägustatud olekut).",
+    "noAccounts": "Ühtegi kontot pole veel konfigurereitud.",
+    "importTitle": "Impordi OmniRoutest",
+    "importDescription": "Kasuta olemasoleva OmniRoute Claude-ühenduse OAuth-tokenisid uuesti selle asemel, et sisse logida — vahelejääb brauseri kinnitusetapp täielikult.",
+    "importPendingTooltip": "Olema aktiivne, kui OmniRoutest on olemas Claude-ühendus.",
+    "btnImport": "Impordi",
+    "btnImporting": "Importitakse…",
+    "aliasPlaceholder": "aliäsitus (valikuline)",
+    "btnStartLogin": "Käivita sisselogimine",
+    "btnStarting": "Käivitatakse…",
+    "btnCompleteLogin": "Lõpeta sisselogimine",
+    "btnCompleting": "Lõpetatakse…",
+    "codePlaceholder": "koodi#olek või tase kood",
+    "noticeImported": "Importitud konto kui \"{alias}\" — Dario taaskäivitas selle tuvastamiseks.",
+    "noticeAdded": "Konto \"{alias}\" lisatud.",
+    "expiresInHours": "kehtib ~{hours} tundi",
+    "expiresInMinutes": "kehtib ~{minutes} minutit",
+    "expiresAt": "aegub {date}",
+    "scopes": "{count, plural, one {# ala} other {# alad}}",
+    "btnRemove": "Eemalda",
+    "btnRefresh": "Värse",
+    "loginStep1": "1. Ava see URL brauseris ja luba ligipääs kontole <mono>{alias}</mono>:",
+    "pendingExpires": "Ootejärjekus olev sisselogimine aegub {time}",
+    "loginStep2": "2. Liimige kood, mille Anthropic kuvab:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini App",
+    "errTelegramOnly": "Selle lehe tuleb avada Telegrami Mini Appis.",
+    "greeting": "👋 Tere, {name}! Sada sõnumit OmniRoute värava kaudu vestlema.",
+    "greetingFallbackName": "sina",
+    "errNoReply": "⚠️ Väravalt ei ole vastust.",
+    "btnSend": "Saada"
   }
 }

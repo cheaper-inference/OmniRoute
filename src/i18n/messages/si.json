@@ -1925,7 +1925,14 @@
     "readinessStep3": "ඔබගේ අන්ත ලක්ෂ්යය පිටපත් කරන්න",
     "readinessStep4": "පරීක්ෂණ ඉල්ලීමක් යවන්න",
     "readinessContinue": "පිහිටුවීම දිගටම කරගෙන යන්න",
-    "readinessDismiss": "දැනට නොසලකා හරින්න"
+    "readinessDismiss": "දැනට නොසලකා හරින්න",
+    "unpricedUsageTitle": "{count, plural, one {# මොඩලයක්} other {# මොඩල}} මෑත භාවිතයක් තිබුණත් මිල සකස් කර නොමැත",
+    "unpricedUsageFailClosed": "{keys, plural, one {# භාවිත සීමාවක් ඇති API යතුරක්} other {# භාවිත සීමාවක් ඇති API යතුරු}} මේ මොඩල් අවසන් 8 දිනවල භාවිත කර ඇත. එම භාවිතය යතුරක දෛනික හෝ සතිපතා කවුළුවට අතුලු වන විට, යතුර කෝටාව ඉක්මවා ගොස් ඇති ලෙස සැලකෙයි සහ එහි ඉල්ලීම් අවහිර කෙරේ (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "මෙම භාවිතය යතුරු අනුව වන භාවිත සීමාවන්ට $0 ලෙස ගණනය වේ (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# ඉල්ලීම} other {# ඉල්ලීම්}}, {keys, plural, one {# සීමිත යතුරක්} other {# සීමිත යතුරු}}",
+    "unpricedUsageMore": "…සහ තව {count}ක්",
+    "unpricedUsageConfigure": "මිල සකස් කරන්න",
+    "unpricedUsageDismiss": "අවලංගු කරන්න"
   },
   "analytics": {
     "title": "විශ්ලේෂණ",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - අතින් වින්යාස කිරීම",
     "clineManualConfiguration": "Cline අතින් වින්යාස කිරීම",
     "kiloManualConfiguration": "Kilo Code අතින් වින්යාස කිරීම",
+    "piManualConfiguration": "Pi - අතින් වින්‍යාසය",
+    "piConfigInvalidTitle": "Pi models.json කියවිය නොහැක",
+    "piOmnirouteConfigured": "OmniRoute Pi අභිරුචි සැපයුම්කරුවෙකු ලෙස වින්‍යාස කර ඇත",
+    "piModelHelp": "ඔබ තෝරන මාදිලිය — models.json පැහැදිලිව ලියා ඇති අභිරුචි අන්ත ලක්ෂ්‍ය සඳහා Pi ස්වයංක්‍රීයව සොයා නොගනී.",
+    "piManualConfigTitle": "නැතහොත් ~/.pi/agent/models.json අතින් සංස්කරණය කරන්න",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "ඉන්පසු Pi ආරම්භ කර omniroute සපයන්නා තෝරන්න. සම්පූර්ණ නියෝජිත නාමාවලිය ගෙන යාමට PI_CODING_AGENT_DIR සකසන්න.",
+    "piUnownedNote": "මෙම ප්‍රවේශය OmniRoute පිටතින් එක් කරන ලදී (උදා: pi-gui හි අභිරුචි අන්ත ලක්ෂ්‍ය). අයදුම් කිරීම එය සම්මත කරනු ඇත; යළි පිහිටුවීම OmniRoute ලියා ඇති ඇතුළත් කිරීම් පමණක් ඉවත් කරයි.",
     "whenToUseLabel": "භාවිත කළ යුත්තේ කවදාද",
     "openToolDocs": "මෙවලම් ලේඛන විවෘත කරන්න",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "අභිරුචි සැපයුම්කරු සහාය සහිත xAI Grok Build TUI කේතකරණ නියෝජිතයා",
       "droid": "Factory Droid AI සහායකයා",
       "openclaw": "Open Claw AI සහායකයා",
+      "openclaude": "OpenAI-අනුකූල සැපයුම්කරු සහාය සහිත OpenClaude කේතකරණ නියෝජිත CLI",
       "cline": "Cline AI කේතකරණ සහායක CLI",
       "kilo": "Kilo Code AI සහායක CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3280,7 +3296,18 @@
     "cliproxyapiUpdate": "යාවත්කාලීන කරන්න",
     "cliproxyapiUpdateAvailable": "යාවත්කාලීනයක් ඇත: v{current} → v{latest}",
     "cliproxyapiVersion": "අනුවාදය",
-    "removeMapping": "සිතියම්ගත කිරීම ඉවත් කරන්න"
+    "piInstallTitle": "පයි කේතීකරණ නියෝජිතයා ස්ථාපනය කරන්න",
+    "piInstallInstructions": "Pi CLI ස්ථාපනය කරන්න, ඉන්පසු එය OmniRoute වෙත සම්බන්ධ කිරීමට මෙහි ආපසු එන්න.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi ධාවනය වන යන්ත්‍රයෙන් ළඟා විය හැකි URL භාවිතා කරන්න. OpenAI-අනුකූල /v1 අන්ත ලක්ෂ්‍යය ස්වයංක්‍රීයව එකතු වේ.",
+    "piManualMergeHint": "පෙරදසුන පමණි. මෙම providers.omniroute ප්‍රවේශය models.json වෙත ඒකාබද්ධ කරන්න එවිට ඔබේ අනෙකුත් සැපයුම්කරුවන් සහ සැකසීම් නොවෙනස්ව පවතී.",
+    "removeMapping": "සිතියම්ගත කිරීම ඉවත් කරන්න",
+    "customUrl": "අභිරුචි URL",
+    "customEndpointAria": "අභිමත endpoint",
+    "useDefaultKey": "OmniRoute ඉලක්කයේ මූලික key භාවිතා කරන්න",
+    "mainModelAria": "ප්‍රධාන ආකෘතිය",
+    "manualConfigTitle": "Grok Build කාර්මිකිතා සැකසුම්"
   },
   "modelCatalog": {
     "title": "මාදිලි සහ සංයෝජන",
@@ -3411,7 +3438,44 @@
     "httpError": "ඉල්ලීම HTTP {status} සමඟ අසාර්ථක විය",
     "testFailedNoDetail": "දෝෂ පණිවිඩයක් නොමැතිව පරීක්ෂණය අසාර්ථක විය",
     "additionalCapabilities": "අමතර හැකියාවන්: {list}",
-    "comboRefMember": "සංයෝජනය → {name}"
+    "comboRefMember": "සංයෝජනය → {name}",
+    "keyAccessButton": "API යතුරු ප්‍රවේශය",
+    "allowedInKeys": "අවසර දී ඇත්තේ: {count, plural, one {යතුරු # ක} other {යතුරු # ක}}",
+    "keysLoading": "API යතුරු පූරණය වෙමින් පවතී…",
+    "keysRetry": "යතුරු පූරණය නැවත උත්සාහ කරන්න",
+    "accessViaPattern": "{pattern} හරහා",
+    "accessBlocked": "{pattern} මඟින් අවහිර කර ඇත",
+    "editKeyAccess": "යතුරු ප්‍රවේශය සංස්කරණය කරන්න",
+    "toggleKeyAccess": "{name} මත {item} සඳහා ඉඩ දෙන්න",
+    "resultNetworkError": "පැවරීම අසාර්ථක විය",
+    "resultWouldEmptyModels": "මෙම යතුරට කිසිදු අවසර ලත් මොඩලයක් නොමැති තත්ත්වයක් ඇති වේ — ඒ වෙනුවට යතුරු ප්‍රවේශය සංස්කරණය කරන්න",
+    "resultWouldEmptyCombos": "මෙම යතුරට කිසිදු අවසර ලත් combo එකක් නොමැති තත්ත්වයක් ඇති වේ — ඒ වෙනුවට යතුරු ප්‍රවේශය සංස්කරණය කරන්න",
+    "keyUpdatePending": "{name} තවමත් යාවත්කාලීන වෙමින් පවතී. සුළු මොහොතකින් නැවත උත්සාහ කරන්න.",
+    "assignToKeys": "API යතුරු වෙත පවරන්න…",
+    "assignApply": "වෙනස්කම් ක්‍රියාත්මක කරන්න",
+    "assignComplete": "API යතුරු ප්‍රවේශය යාවත්කාලීන කරන ලදී",
+    "assignFailed": "සමහර API යතුරු යාවත්කාලීන කිරීම් අසාර්ථක විය",
+    "assignNoChanges": "කිසිදු API යතුරු ප්‍රවේශයක් වෙනස් නොවීය",
+    "selectedAccessItems": "තෝරාගත් අයිතම: {count}",
+    "assignExcludedCombos": "{count, plural, one {තෝරාගත් combo පේළි # මොඩලයක් නොවන අතර මෙහිදී මඟ හරිනු ලැබේ} other {තෝරාගත් combo පේළි # මොඩල නොවන අතර මෙහිදී මඟ හරිනු ලැබේ}}. Combos පටිත්තෙන් combo පවරන්න.",
+    "assignActionAdd": "එක් කරන්න",
+    "assignActionRemove": "ඉවත් කරන්න",
+    "searchKeys": "API යතුරු සොයන්න",
+    "selectApiKey": "{name} API යතුර තෝරන්න",
+    "allModelsAccess": "සියලු මාදිලි",
+    "allCombosAccess": "සියලු සංයෝජන",
+    "modelAccessCount": "මාදිලි: {count}",
+    "comboAccessCount": "සංයෝජන: {count}",
+    "keyInactive": "අක්‍රිය",
+    "keyBanned": "තහනම් කර ඇත",
+    "keyRevoked": "අවලංගු කරන ලදී",
+    "switchRestrictedConfirm": "මෙම යතුර සීමිත ප්‍රවේශයකට මාරු කරන්න: තෝරාගත් අයිතම සඳහා පමණක් ඉඩ දෙනු ලැබේ",
+    "removeNoChangeHint": "මෙම යතුර සියල්ල සඳහා ඉඩ දෙයි; තෝරාගත් අයිතම ඉවත් කිරීමෙන් කිසිදු වෙනසක් සිදු නොවේ",
+    "removeStaysAllowedHint": "{patterns} හරහා මෙම යතුර මත තවමත් අවසර ඇත",
+    "resultChanged": "වෙනස් කරන ලදී",
+    "resultUnchanged": "වෙනසක් නැත",
+    "resultSkipped": "මඟ හරින ලදී",
+    "resultNeedsSwitch": "සීමිත ප්‍රවේශයකට මාරු කිරීම අවශ්‍යයි"
   },
   "combos": {
     "title": "සංයෝජන",
@@ -3465,6 +3529,12 @@
     "errorUpdating": "සංයෝජනය යාවත්කාලීන කිරීමේදී දෝෂයක් ඇති විය",
     "errorDeleting": "සංයෝජනය මැකීමේදී දෝෂයක් ඇති විය",
     "testFailed": "පරීක්ෂණ ඉල්ලීම අසාර්ථක විය",
+    "removeErrorModels": "අසාර්ථක මාදිලි {count} මකන්න",
+    "removingErrorModels": "ඉවත් කරමින්…",
+    "errorModelsRemoved": "සංයෝජනයෙන් අසාර්ථක මාදිලි {count} ඉවත් කරන ලදී",
+    "noErrorModelsFound": "මෙම සංයෝජනයේම පියවර අතර අසාර්ථක මාදිලි හමු නොවීය",
+    "cannotRemoveAllModels": "සංයෝජනයෙන් සියලු මාදිලි ඉවත් කළ නොහැක",
+    "removeErrorModelsConfirm": "“{name}” වෙතින් අසාර්ථක මාදිලි {count} ඉවත් කරන්නද? කාල නිමාවීම් සහ අනුපාත සීමා ගණන් නොගැනේ.",
     "failedToggle": "සංයෝජනය සක්රිය/අක්රිය කිරීම අසාර්ථක විය",
     "testResults": "පරීක්ෂණ ප්රතිඵල — {name}",
     "resolvedBy": "විසඳන ලද්දේ:",
@@ -4816,7 +4886,15 @@
     },
     "totalEntries": "මුළු ඇතුළත් කිරීම්",
     "type": "වර්ගය",
-    "memoryEnabled": "මතකය සක්රියයි"
+    "memoryEnabled": "මතකය සක්රියයි",
+    "qdrantTutorialTitle": "විශාල අභ්‍යාසය: Qdrant සමඟ ඡායාරූප භාවිතා කරමින්",
+    "qdrantTutorialIntro": "Qdrant, වශයින් සහ ඡායාරූප සඳහා දත්ත ආකෘති ගබඩා කරයි, එබැවින් අදාළ සන්දර්ශය ලබා ගත හැකිය. එය ක්ෂණිකව දත්ත ඉලක්ක සංයෝජනය නොකරයි; ඉල්ලීම්වලට අදාළ නොවන සන්දර්ශය උත්සාහයෙන් ඉවත් කරමින්, ඉතිරි වීම් අනාවරකයා සාධනය කරයි.",
+    "qdrantTutorialStep1": "ජීවනීය භාවිතයට පෙර, සර්වරය HTTPS සහ API key මගින් ආරක්ෂිත කරන්න.",
+    "qdrantTutorialStep2": "ආවේග, අංක, එකතුව සහ provider/model ආකෘතියෙන් ආකෘතියක්, සැකසුම් කළ සහයෝගීතාවය සමඟ ඇතුළත් කරන්න.",
+    "qdrantTutorialStep3": "එකතුවේ මානය ආකෘතියෙන් භාවිතා කරන මානයට සමාන විය යුතුය. 2048-මාන එකතුවක් ඇති විට, 1536-මාන දත්ත ඉලක්කය පිළිගත නොහැක.",
+    "qdrantTutorialStep4": "සැකසුම් සුරකින්න, සම්බන්ධතාවය පරීක්ෂා කර, සොයායාම පරීක්ෂාව සිදු කරන්න. එවිට පමණක් Qdrant සක්‍රීය කරන්න.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "කර්තෘ: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "කුසලතා",
@@ -5354,6 +5432,27 @@
     "importFromFileDownloadTemplate": "CSV අච්චුව බාගන්න",
     "importFromFileMoreErrors": "තවත් +{count} ක්",
     "importFromFileSchemaHint": "CSV තීරු ස්ථානීය අනුපිළිවෙළකට ඇත: provider, name, apiKey, baseUrl (විකල්ප), priority (විකල්ප). provider තීරුවේ දැනට පවතින කළමනාකරණය කෙරෙන සපයන්නාගේ id එකක් හෝ දැනටමත් ලියාපදිංචි කර ඇති OpenAI/Anthropic-අනුකූල node id එකක් තිබිය යුතුය — මෙම ආයාත කිරීමෙන් නව endpoint nodes නිර්මාණය නොවේ.",
+    "importOAuthExport": "OAuth අපනයනය ආයාත කරන්න",
+    "oauthExportTitle": "ගිණුම් කළමනාකරු අපනයනය ආයාත කරන්න",
+    "oauthExportDescription": "ගිණුම් කළමනාකරුවෙකුගෙන් සරල පාඨ අපනයනයක් උඩුගත කරන්න (උදා. Antigravity Manager හි cloud-accounts අපනයනය). ටෝකන සේවාදායකයේ නැවුම් කරනු ලබන අතර සෑම ගිණුමක්ම OAuth සම්බන්ධතාවයක් බවට පත් වේ — අනුපිටපත් එම ස්ථානයේම නැවුම් වේ.",
+    "oauthExportProviderLabel": "සපයන්නා",
+    "oauthExportChoose": "ගොනුව තෝරන්න",
+    "oauthExportFileAria": "ගිණුම් අපනයන JSON ගොනුව",
+    "oauthExportSchemaHint": "පිළිගනු ලැබේ: \"accounts\" අරාවක් සහිත ලේඛනයක්, සරල අරාවක් හෝ තනි වාර්තාවක්. ටෝකන කූඩු කළ token වස්තුවක් තුළ හෝ සෘජුවම වාර්තාව මත තිබිය හැක.",
+    "oauthExportDetected": "ගිණුම් {count}ක් අනාවරණය විය",
+    "oauthExportSelectAll": "සියලු ගිණුම් තෝරන්න",
+    "oauthExportSelectAccount": "ගිණුම {index} තෝරන්න",
+    "oauthExportColEmail": "විද්‍යුත් තැපෑල",
+    "oauthExportColProvider": "සපයන්නා",
+    "oauthExportColRefresh": "නැවුම් කිරීමේ ටෝකනය",
+    "oauthExportNoEmail": "(විද්‍යුත් තැපෑලක් නැත)",
+    "oauthExportYes": "ඔව්",
+    "oauthExportNo": "නැත",
+    "oauthExportImporting": "ආයාත කරමින්…",
+    "oauthExportImport": "ගිණුම් {count}ක් ආයාත කරන්න",
+    "oauthExportResult": "{imported}/{total} ආයාත විය — {failed} අසාර්ථකයි",
+    "oauthExportParseError": "මෙම ගොනුවෙන් කිසිදු ගිණුමක් කියවිය නොහැකි විය.",
+    "oauthExportUnknownError": "නොදන්නා දෝෂය",
     "adaptaTutorial": {
       "title": "Adapta Web සම්බන්ධ කරන්නේ කෙසේද",
       "introPrefix": "Adapta, Clerk හරහා සත්යාපනය කරයි. token එක",
@@ -5865,6 +5964,25 @@
     "ccAliasAddModelButton": "අතික්රමණයක් එක් කරන්න",
     "ccAliasLoadError": "සොයාගැනීම්-අන්වර්ථ සැකසුම් පූරණය කිරීමට අසමත් විය: {error}",
     "ccAliasSaveError": "සොයාගැනීම්-අන්වර්ථ සැකසුම සුරැකීමට අසමත් විය: {error}",
+    "cliVersionSectionTitle": "ප්‍රචාරණය කරන ලද CLI සේවාදායක අනුවාදය",
+    "cliVersionEffectiveLabel": "දැනට ප්‍රචාරණය කර ඇත",
+    "cliVersionSourceLabel": "{source} වෙතින් විසඳා ඇත",
+    "cliVersionPinnedLabel": "අල්ලාගත් පෙරනිමිය: {pinned}",
+    "cliVersionSourceSettings": "උපකරණ පුවරුව අභිබවා යාම",
+    "cliVersionSourceEnv": "පරිසර විචල්යය",
+    "cliVersionSourceDiscovered": "ස්වයංක්‍රීයව සොයාගත් නවතම නිකුතුව",
+    "cliVersionSourceDefault": "අල්ලාගත් පෙරනිමිය",
+    "cliVersionInputLabel": "අභිබවා යන අනුවාදය",
+    "cliVersionInputPlaceholder": "අභිබවා යන අනුවාදය; හිස් හිස්",
+    "cliVersionSaveButton": "සුරකින්න",
+    "cliVersionResetButton": "පෙරනිමියට යළි පිහිටුවන්න",
+    "cliVersionLoadError": "CLI අනුවාද සැකසීම් පූරණය කිරීමට අසමත් විය: {error}",
+    "cliVersionSaveError": "CLI අනුවාදය සුරැකීමට අසමත් විය: {error}",
+    "cliVersionLoadFailed": "වත්මන් CLI අනුවාද සැකසීම් පූරණය කළ නොහැකි විය.",
+    "cliVersionHintClaude": "එය දකින ක්ලෝඩ් කෝඩ් ග්‍රාහක අනුවාදයේ නව ක්ලෝඩ් මාදිලියේ මානව ද්වාර. සෑම මානව-බැඳුම් ඉල්ලීමක් මතම OmniRoute ප්‍රචාරණය කරන අනුවාදය මෙයයි.",
+    "cliVersionCaveatClaude": "බිල්පත් අවවාදය: බිල්පත් අනුවාදය '<version>' වේ.'<build-revision>', සහ ගොඩනැගීමේ සංශෝධනය වෙනම අල්ලාගත් නියතයකි. ප්‍රචාරණය 2.1.260 2.1.260.1e2 වාර්තා කරයි, එය සැබෑ 2.1.260 ද්විමය එවන දේ නොවේ.",
+    "cliVersionHintCodex": "OpenAI එය දකින Codex සේවාදායක අනුවාදය මත නව මාදිලි ගේට් කරයි, උදාහරණයක් ලෙස දෝෂය: 'gpt-6-astra' ආකෘතියට Codex හි නව අනුවාදයක් අවශ්‍ය වේ.",
+    "cliVersionCaveatCodex": "අනුමාන අවවාදය: ඔබේම ඇමතුම්කරු වාර්තා කරන අනුවාදයක් තවමත් CODEX_CLIENT_VERSION env var පරදවයි, නමුත් මෙම දෙකම අභිබවා යයි, මන්ද එය පැහැදිලි ක්‍රියාකරුගේ අභිප්‍රාය වේ.",
     "compatUpstreamHeadersLabel": "අතිරේක upstream ශීර්ෂ",
     "compatUpstreamHeadersHint": "ඉහළ වරප්රසාද සහිත සැකසුමකි — provider API අක්තපත්ර සංස්කරණය කිරීමට සමාන විශ්වාස මට්ටමක් ඇත; මෙය භාවිත කළ යුත්තේ විශ්වාසදායක පරිපාලකයින් පමණි. OmniRoute විසින් provider API යතුරෙන් සත්යාපනය එක් කළ පසු මෙය ඒකාබද්ධ කෙරේ. අභිරුචි ශීර්ෂයක් පවතින ශීර්ෂයක නමම භාවිත කරන්නේ නම් (උදා. Authorization), ඔබේ අගය ස්වයංක්රීයව ජනනය කළ ශීර්ෂය සම්පූර්ණයෙන්ම ප්රතිස්ථාපනය කරයි (Bearer ටෝකනය ඇතුළුව) — upstream වෙත පෙනෙන්නේ ඔබ ටයිප් කළ දේ පමණක් වන අතර සැකසුම්වල ඇති යතුර නොපෙනේ. වැරදි වින්යාසය 401 දෝෂයකට හෝ upstream සත්යාපනය බිඳ වැටීමට හේතු විය හැක. එක් ශීර්ෂයකට එක් පේළියක් භාවිත කරන්න (උදා. සමහර gateways සඳහා අතිරේක Authentication). පෙරදසුන බැලීමට අගය මත මූසිකය රඳවන්න හෝ එයට නාභිගත කරන්න. නාභිගත වීම ඉවත් වූ විට, පිටත ක්ලික් කළ විට, හෝ මෙම පැනලය වැසූ විට සුරැකේ.",
     "compatUpstreamHeaderName": "ශීර්ෂ නාමය",
@@ -6835,7 +6953,27 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "සංයෝජන {count} ක භාවිත වේ: {combos}",
+    "openComboTooltip": "සංයෝජන විවෘත කරන්න — {combo} භාවිත කරයි",
+    "claudeCodeRoutingTitle": "Claude Code ත්‍රාෆික් සඳහා ඉහළ ටිමර් ප්‍රූරෝපය (upstream proxy routing)",
+    "routingNative": "Native",
+    "routingFallback": "Fallback",
+    "rerank": "Rerank",
+    "video": "වීඩියෝ",
+    "markFreeTierTitle": "මුදල නොදෙන තවර් (free-tier) ලෙස සලකුණු කරන්න (අයිසට් ආඛාර පවත්මිනි නැතුව පෙන්නවේ)",
+    "codexTunnelTitle": "Codex මෙවලම් සම්බන්ධනය",
+    "codexTunnelDescription": "තනලය සිදුවන්නේ පිටටමයි. දේශීය මෙහෙවර තවමත් Codex විසින්, එහි සැන්ඩබොක්ස් සහ අනුමැදිතා ප්‍රතිපත්ති පරිපූර්ණව ප්‍රතිදානය කෙරේ.",
+    "tunnelIdLabel": "තනල ID",
+    "tunnelRuntimeKeyLabel": "තනල runtime key",
+    "tunnelRuntimeKeyPlaceholder": "Runtime යතුර",
+    "tunnelRuntimeKeyHint": "කුකි එකටම සුපිරිව ඉතින් ලොග් ලියැවුම් නොවේ.",
+    "tunnelRuntimeKeyNewLabel": "නව තනල runtime key",
+    "tunnelRuntimeKeyNewHint": "නව කුකි එකටම පමණක් ඇතුල් කරන්න. අගය සුපිරිව ඉතින්.",
+    "chatgptConnectorLabel": "ChatGPT කුසලාන සම්බන්ධකය",
+    "doctorChecking": "අවස්ථාව පරීක්ෂා කරමින්...",
+    "doctorCheck": "දොකටර් අවස්ථාව පරීක්ෂා කරන්න",
+    "fallbackRetryBackendTitle": "පසුබැසීම පෙරහන් මුල් පද්‍ධතිය"
   },
   "settings": {
     "title": "සැකසුම්",
@@ -8819,6 +8957,8 @@
     "qdrantHost": "සත්කාරකය",
     "qdrantCollection": "එකතුව",
     "catalogVisibilityHint": "සඟවා ඇති මාදිලි ID එම ප්‍රවේශ අවසර සමඟ තවමත් ඇමතිය හැක.",
+    "exposeCombosOnly": "/v1/models හි සංයෝජන පමණක් ලැයිස්තුගත කරන්න",
+    "exposeCombosOnlyDesc": "ආකෘති ස්වයංක්‍රීයව සොයා ගන්නා සේවාලාභීන්ට අමු සැපයුම්කරු ආකෘති වෙනුවට ඔබගේ සංයෝජන (සහ සඟවා නොමැති නම් auto/*) පෙනේ. පැහැදිලි provider/model ID දිගටම මාර්ගගත වේ.",
     "catalogScopeTitle": "Models API ලැයිස්තුගත කිරීම",
     "catalogScopeDesc": "මෙම යතුර සඳහා GET /v1/models මඟින් ප්රචාරය කරන දේ. ලැයිස්තුව සීමා කිරීමෙන් යතුරට ඇමතිය හැකි දේ කිසිවිටෙක වෙනස් නොවේ.",
     "catalogScopeAll": "දෙකම",
@@ -8938,7 +9078,9 @@
         "financial": "මූල්‍ය",
         "brazilian": "බ්‍රසීල",
         "usa": "ඇමරිකාව",
-        "full": "සම්පූර්ණ"
+        "full": "සම්පූර්ණ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (දකුණු අප්‍රිකාව)"
       },
       "builtinTypes": "ගොඩනඟන ලද වර්ග",
       "types": {
@@ -8952,7 +9094,19 @@
         "ip_address": "IPv4 ලිපින",
         "ipv6_address": "IPv6 ලිපින",
         "aws_key": "AWS ප්‍රවේශ යතුරු",
-        "api_key_generic": "API යතුරු සහ ටෝකන"
+        "api_key_generic": "API යතුරු සහ ටෝකන",
+        "iban": "IBAN බැංකු ගිණුම් අංක",
+        "eu_vat": "EU VAT අංක",
+        "es_dni_nie": "ස්පාඤ්ඤ DNI / NIE",
+        "it_codice_fiscale": "ඉතාලි කෝඩිස් ෆිස්කේල්",
+        "pl_pesel": "පෝලන්ත PESEL",
+        "nl_bsn": "ලන්දේසි BSN",
+        "de_steuer_id": "ජර්මානු ස්ටීවර්-ID",
+        "se_personnummer": "ස්වීඩන් පුද්ගල අංකය",
+        "za_id": "දකුණු අප්‍රිකානු ID අංක",
+        "za_phone": "දකුණු අප්‍රිකානු දුරකථන අංක",
+        "za_vat": "දකුණු අප්‍රිකානු VAT අංක",
+        "za_tax_ref": "දකුණු අප්‍රිකානු බදු යොමු කිරීම්"
       },
       "customPatterns": "අභිරුචි රටා",
       "customPatternsDesc": "ගැළපීම් [CUSTOM_REDACTED] මගින් ප්‍රතිස්ථාපනය වේ. උපරිම රටා {max}. විනාශකාරී පසුගමන අවදානමක් ඇති රටා ප්‍රතික්ෂේප වේ.",
@@ -11454,6 +11608,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth වින්යාස කර නැත. {redirectUri} යළි-යොමු කිරීමේ URI එක සහ \"{scopes}\" විෂය පථ සමඟ {applicationsUrl} හි OAuth යෙදුමක් ලියාපදිංචි කර, පසුව {clientIdEnv} (සහ විකල්ප ලෙස {clientSecretEnv}) සකසා නැවත ආරම්භ කරන්න.",
     "gitlabDuoSetupDescription": "යෙදුම ලියාපදිංචි කර මෙම OmniRoute ස්ථාපනයේ පරිසර විචල්ය සකස් කළ පසු, OAuth පිවිසුම ආරම්භ කිරීමට ඉදිරියට යන්න ක්ලික් කරන්න.",
     "continue": "ඉදිරියට යන්න",
+    "copilotPolicyTitle": "පර්යේෂණාත්මක සැපයුම්කරු: ප්‍රතිපත්ති තත්ත්වය අපැහැදිලි ය",
+    "copilotPolicyLine1": "OmniRoute සම්බන්ධ වන්නේ api.githubcopilot.com හරහා වන අතර, එය GitHub සාමාන්‍ය තෙවන පාර්ශවීය අනුමානයක් ලෙස ප්‍රකාශයට පත් කර නැත API. මෙම ඒකාබද්ධ කිරීම පර්යේෂණාත්මක වන අතර දැනුම් දීමකින් තොරව වෙනස් විය හැක.",
+    "copilotPolicyLine2": "ඔබගේම GitHub ගිණුම පමණක් සම්බන්ධ විය හැක. කිසි විටෙකත් අක්තපත්‍ර බෙදා නොගන්න, ගිණුම් සංචිත කරන්න, හෝ ඔබේ සැලසුම් සීමාවන් ඉක්මවා යාමට උත්සාහ නොකරන්න.",
+    "copilotPolicyLine3": "නොමිලේ සහ ශිෂ්‍ය සැලසුම් පරිශීලකයින්ට ලැබෙන්නේ ස්වයංක්‍රීය මාදිලි තේරීම පමණි. ඔබේ Copilot සැලසුම් නියමයන් සහ ඕනෑම භාවිත සීමාවන් ඔබේ වගකීම ලෙස පවතී.",
+    "copilotPolicyAcknowledge": "මට තේරෙනවා, සම්බන්ධ කරන්න",
     "tabPasteSetupToken": "සැකසුම් ටෝකනය",
     "claudeSetupTokenDescription": "ටර්මිනලයක `claude setup-token` ධාවනය කර එය මුද්‍රණය කරන ටෝකනය අලවන්න. එය වසරක් සඳහා වලංගු වන අතර නැවුම් කිරීමේ ටෝකනයක් නැත. සුරැකීමට පෙර OmniRoute Anthropic වෙත එක් පරීක්ෂණ ඉල්ලීමක් යවයි.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12163,7 +12322,11 @@
       "viewConversation": "සංවාදය බලන්න",
       "openConversation": "{id} සංවාදය විවෘත කරන්න"
     },
-    "tableLabel": "ඉල්ලීම් ලොග්"
+    "tableLabel": "ඉල්ලීම් ලොග්",
+    "throughputPostFirstToken": "පළමු ටෝකනයෙන් පසු",
+    "throughputEndToEnd": "ආරම්භයේ සිට අවසානය දක්වා",
+    "throughputRate": "{value} ටෝකන/තත්පරය",
+    "throughputExplanation": "අනුපාත දෙකම ප්රතිදාන සහ අනුමාන ටෝකන ගණනින් වැඩි අගය භාවිතා කරයි. පළමු ටෝකනයෙන් පසු අනුපාතය වලංගු TTFT බැහැර කරයි; එසේ නොවේ නම් එය සම්පූර්ණ කාලය භාවිතා කරයි. ආරම්භයේ සිට අවසානය දක්වා අනුපාතය සැමවිටම සම්පූර්ණ කාලය භාවිතා කරයි. බෆර් කළ ප්රතිචාරයකට වේගවත් ආකෘති උත්පාදනයක් නොමැතිව ඉහළ බර්ස්ට් බෙදාහැරීමේ අනුපාතයක් තිබිය හැක."
   },
   "proxyLogger": {
     "filterAll": "සියල්ල",
@@ -12806,7 +12969,8 @@
     "title": "සැපයුම්කරුගේ සංඛ්යාලේඛන",
     "description": "එක් එක් සැපයුම්කරු සහ මාදිලිය අනුව ගමනාගමනය, ප්රමාදය සහ සාර්ථකත්ව අනුපාත",
     "combo": "සංයෝජනය",
-    "toggleModels": "{provider} සඳහා මාදිලි පෙන්වන්න"
+    "toggleModels": "{provider} සඳහා මාදිලි පෙන්වන්න",
+    "windowSince": "{date} සිට"
   },
   "relay": {
     "title": "සර්වර් රහිත රිලේ ප්රොක්සි",
@@ -13083,7 +13247,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI කේත",
     "pageSubtitle": "OmniRoute වෙත යොමු වන කේත මෙවලම්",
     "searchPlaceholder": "CLI සොයන්න…",
     "filterDetectionLabel": "හඳුනාගැනීම",
@@ -13093,7 +13256,8 @@
     "detectionNotFound": "හමු නොවීය",
     "baseUrlAll": "සියල්ල",
     "baseUrlFull": "සම්පූර්ණ",
-    "baseUrlPartial": "අර්ධ"
+    "baseUrlPartial": "අර්ධ",
+    "title": "CLI කෝඩ්"
   },
   "cliAgents": {
     "pageTitle": "CLI නියෝජිතයන්",
@@ -13751,7 +13915,9 @@
       "disabled": "අබල කර ඇත",
       "dual": "ද්විත්ව",
       "alias": "අන්වර්ථ නාමය",
-      "canonical": "සම්මත"
+      "canonical": "සම්මත",
+      "fail_closed": "අවහිර කරන්න (fail_closed)",
+      "count_as_zero": "$0 ලෙස ගණන් කරන්න (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13898,6 +14064,538 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "ආරක්ෂිත-ප්රමුඛතා යටිතල පහසුකම් නැවතුම් 502 ලෙස",
         "description": "කෝටා පමණක් භාවිත කරන fallback ප්රමුඛතා ඉලක්කයක්, කෝටාව නිසා නොවන බව නිශ්චිතව ඔප්පු කළ හැකි හේතුවක් මත combo එක නවත්වන විට 503 වෙනුවට 502 ලෙස පිළිතුරු දෙන්න: විවෘත සපයන්නාගේ circuit breaker එකක් හෝ පුරෝකථන ප්රමාද මඟහැරීමක්."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "ගිණුම් ID ලොග් කරන්න",
+        "description": "AUTH ලොග් පේළිවලට ගිණුම් උපසර්ගය ඇතුළත් කරන්න (උදා: \"'<provider>' ගිණුම භාවිතා කරයි: abc12345...\"). පෙරනිමියෙන් අක්‍රියයි, එබැවින් බෙදාගත්/බහු-කුලී ක්‍රියාවලි ලොග්වලින් ගිණුම් හඳුනාගැනීම් සැඟවේ. Debug Mode වලින් ස්වාධීනයි; Debug Mode මාරු කිරීමෙන් මෙය හෙළි නොවේ."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "OIDC සමඟ මාතෘකා ඇතුළත් කිරීම අක්‍රීය කරන්න",
+        "description": "OIDC සක්‍රීය වූ විට, පරිශ්‍යත්තයක් වලින් OIDC ඒකාබද්ධ සුදුසුකම් පරීක්ෂාව ඔව්වේ. අක්‍රීය (අර්ධම) විට, මාතෘකා ඇතුළත් කිරීම සහ OIDC දෙකම වඩා ඇත."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "දුරස්ථ ශබ්ද ආයතන සර්වර නෝඩ්",
+        "description": "/v1/audio/* මාර්ගවලට localhost වලින් පිටත පිහිටුවන ලද OpenAI-සමාන ආයතන සර්වර නෝඩ් භාවිතා කිරීමට ඉඩ දෙන්න. පෙරනිමියෙන් අක්‍රියයි — දුරස්ථ හෝස්ටයකට ශබ්දය යවනු ලැබීම egress හඳුනාගැනීම වෙනස් කරන අතර, එය පැමිණිලි කාර්මික අර්ධකාන්තයක් විය යුතුය. Loopback නෝඩ් දැන්වූ ලැබී ඇත සහ ප්‍රචලිත නොවේ."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "දුරස්ථ Rerank ආයතන සර්වර නෝඩ්",
+        "description": "POST /v1/rerank (සහ මතක ජිනේස්කේර්ගේ rerank පියවර, එය loopback මත ඇමතන) localhost වලින් පිටත පිහිටුවන ලද OpenAI-සමාන ආයතන සර්වර නෝඩ් භාවිතා කිරීමට ඉඩ දෙන්න — LAN box හෝ Tailscale peer ක්‍රියාත්මක TEI, Infinity, vLLM, ආදිය. පෙරනිමියෙන් අක්‍රියයි — දුරස්ථ හෝස්ටයකට යවනු ලැබීම egress හඳුනාගැනීම වෙනස් කරන අතර, එය පැමිණිලි කාර්මික අර්ධකාන්තයක් විය යුතුය. Loopback නෝඩ් දැන්වූ ලැබී ඇත සහ ප්‍රචලිත නොවේ. දුරස්ථ නෝඩ් ද ආයතන ප්‍රවේශ ඔස්ටි URL ප්‍රතිපතිය හරහා යාමේ."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "ජාල භ්‍රමණය Shared-Egress ආරක්ෂකය",
+        "description": "බහු-ආයතන භ්‍රමණ ඉදිකම්වයෙක සඳහා ජාල අසමතුලිතතාවක් (timeout, connection refused/reset) එක්ක, අසාර්ථක ආයතන ජාලයකට සිටින විට, කෙටි cooldown යෙදියි පාලු proxy-ඛාදය සහ සියල්ල ආයතන අනෙක් proxy-ඛාදය සඳහා ඉතිරි කළ වන්සින වෙනුවට ආයතන දෙකම. පෙරනිමියෙන් සක්‍රියයි (නිවැරදිය: egress IP වෙනස් නොවේ, සහ shared-egress ආයතනවලට latency/cooldown අනතුර අඩු කරයි). පළවන proxy-ඛාදය ඉවත් වූ විට සෘජු ප්‍රචලිතය නැවත ගෙන මෙය අක්‍රීය කරන්න."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "සීතල අසාර්ථක ක්‍රමීකරණය වැලඳීම",
+        "description": "ක්‍රමීකරණය පූජක හා ප්‍රායෝගික එක්කොඩ් එකේ ගිනුම් එකක් මත නැවත වරක් භාවිතා නොකිරීම නවතන විමානයේදී, ක්‍රමීකරණයන් වඩාත් ප්‍රබලයි. දුරකථන තහනම් හෝ 429 ලැබීම් සඳහා ප්‍රතිකර්මයන් නවතා දැමීම සඳහා ප්‍රතික්‍රියා කරයි. ක්‍රමීකරණ තත්ත්වය ලිපිනය ඔබ්බට ගනී; සියලුම උපාදම් පැහැර අස්වන අවස්ථාවේ තේරීම වෙනසක් නොවේ. පෙරනිමියෙන් සක්‍රියයි: තේරීමේ අනුපිළිවෙල වඩාත් ප්‍රබලයි, PROXY_SKIP_RECENTLY_FAILED=false නම්."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "මාර්ග ඉවත් වීමේ පිළිවෙල",
+        "description": "මාර්ග ඉවත් වීම් අනුව ඉක්මන් කළ සැපයුම්කරු සඳහා, ඉක්මන් කළ සාමාන්‍යයක් සමඟ නිරීක්ෂණය කරන ලද මාර්ග ඉවත් වීම් ලක්ෂ්‍යය හෙළි කරන සාමාන්‍යයක් උරමක් කිරීම ඉක්මන් කිරීම. අනුපිළිවෙල පමණි, ඉවත් කිරීමක් නොවේ. PROXY_SKIP_RECENTLY_FAILED අවශ්‍ය වේ, එය අනුපිළිවෙල පාලනය කරයි. පෙරනිමියෙන් අක්‍රියයි: තේරීමේ අනුපිළිවෙල වඩාත් ප්‍රබලයි."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "පිළිවෙල මාලිමා ලිපිනය",
+        "description": "ප්‍රායෝගික එකකෝඩ් එකේ පිළිවෙල තේරීමේ ගිනුම ලිපිනය කරයි (අඳුනුම් ලකුණු පමණි, සම්පූර්ණ ගිනුම් අඳුනුම් ලකුණු නොවේ) සහ ක්‍රමීකරණ ලිපිගතීන් ඉල්ලීම් වලට සම්බන්ධ කරයි, මෙමගින් මාලිම්පාලකයා වැලඳුණු ගිනුම් අසමාල ගිනුම්වලින් වෙනස් කළ හැකිය. පෙරනිමියෙන් අක්‍රියයි: අතිරේක ලිපිගතීන් නොමැත, අතිරේක තීරු ලිපිනය නොමැත."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "ක්‍රමීකරණය පූජක මාර්ග ඉවත් වීම් නිරීක්ෂණය",
+        "description": "ඩෑෂ්බෝර්ඩ් එකේ ක්‍රමීකරණය පූජකයක් යටින්, අවසාන පැය 24 වලදී එහි සාමාන්‍යයන් භාවිතා කළ නිරීක්ෂණය කරන ලද මාර්ග ඉවත් වීම් ආනතීන් කීයක්, ඒවා භාවිතා කළ සම්බන්ධතා කීයක් සහ එක IP මත පසුබට උන් කීයක් ද යන්න පෙන්වයි. කියවීම-තනි, ක්‍රමීකරණය ලිපිගතාංශයෙන් ගණනය කරන ලදී, මාර්ග ඉවත් වීම සඳහා භාවිතා නොකරයි. පෙරනිමියෙන් අක්‍රියයි: පූජක සංස්කාරකය වෙනස් නොවේ සහ නිරීක්ෂණය මාර්ගය null පිළිතුරු දේ."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "ක්‍රමීකරණය මාලිම්පාලකයා මාර්ග ඉවත් වීම්",
+        "description": "පූජක සාමාන්‍යයක් සඳහා මාලිම්පාලකයා එවන දින-පිහිටුවූ නිරීක්ෂණය කරන ලද ලක්ෂ්‍යයන් භාවිතා කර දර්ශනය සහ පූජක අනුපිළිවෙල සමඟ මුන්දුරා ගනී. පෙරනිමියෙන් අක්‍රියයි: පාරිභෝගික මාර්ගය 404 පිළිතුරු දේ සහ පූජක කියවීම් අගුල් වලට සියලුම පසුබට."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses Stall වර්තනය",
+        "description": "OpenCode විඥාපකය සඳහා, ප්‍රවාහගත Responses පිළිතුරක වෑග්නම පළමු byte නිරීක්ෂණය කරන්න (කවුන්ඩුව: RESPONSES_FIRST_BYTE_TIMEOUT_MS, default 15000). 2xx Responses ප්‍රවාහයක් එම කාලයට වඩා නිශ්ශබ්දව පැවතිය හොත්, එය stall ලෙස සලකනු ලැබේ: ගිණුමක් ශීත වැසීම් (cool down) කෙරේ සහ ඉල්ලුම එක් වරක් පමණක් ඊළඟ ගිණුම වෙත වර්තනය කරනු ලැබේ; දෙවන stall පරාජය වේ (fails fast). පෙරනිමියෙන් අක්‍රියයි: stalled ප්‍රවාහයන් stream readiness timeout දක්වා අද දින පියවර රැගෙන සිටියි."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked වර්තනය",
+        "description": "OpenCode විඥාපකය සඳහා, උඩතර ග්‍රාහකය (upstream) 403 හෝ 451 ඔප්පු කරන user_blocked ප්‍රතික්ෂේපනයක් (geo block නොව, Cloudflare fingerprint rejection නොව) ලත් විට, ප්‍රතික්ෂේපිත ගිණුම ශීත වැසීමකට පත් කර ඉල්ලුමකට වරක් පමණක් ඊළඟ ගිණුම වෙත වර්තනය කරන්න; දෙවන ප්‍රතික්ෂේපනය සාර්ථකතා ලකුණක් නොමැතිව විෂයමය වශයෙන් (as-is) ප්‍රතිස්ථාපනය කරනු ලැබේ. පෙරනිමියෙන් අක්‍රියයි: උඩතර user block එකක් වටා මාර්ග ආශ්‍රය කිරීම evasion මෙන් දිස් විය හැකි අතර, ගිණුම් රාජවංශය හරහා flag ප්‍රසාරණය කරයි, එබැවින් operator ස්වේච්ඡාවෙන් (opt in) නොකරන තුර ප්‍රතික්ෂේපනය නොවෙනස්ව ප්‍රතිස්ථාපනය කරනු ලැබේ."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode Transient Failover Backoff",
+        "description": "OpenCode බහු-ගිණුම් වර්තනය සඳහා, අනුදිග පොළඟා අත්හැරීම් දෙකක් transient උඩතර දෝෂයක් (5xx හෝ හිස් 400 ප්‍රතික්ෂේපනයක්) නිසා පරාජය වූ විට, ඊළඟ ගිණුම වෙත dispatch කිරීමට පෙර විරාමයක් ගන්න. විරාමය 1.5s වලින් අරඹන අතර, අනුදිග පරාජය ත්‍රිකෝණාකාර සෑම දිගු වීමකටම දෙගුණවේ, විරාමයකට වේදිකාව 6s සහ ඉල්ලුමකට 10s වන දක්වා සීමා වේ, client disconnect වූ විට ඉවත් කරනු ලැබේ, සහ රැඳී සිටීමට පෙර පරාජිත පිළිතුරු body release කරනු ලැබේ. පෙරනිමියෙන් අක්‍රියයි: failover තනි ස්කන්ධයක් ලෙස (immediate) පවතී."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Flush Empty Turn Retry",
+        "description": "පරිවර්තනය කළ streaming turns සඳහා, උඩතර turn එකක් භාවිතා කළ හැකි අන්තර්ගතයක් (usuable content) නොමැති විට (reasoning-only completion හෝ zero valuable chunks), client වෙත ඕනෑවක් ආවරණය කිරීමට පෙර සාමාන්‍ය credential path හරහා (up to `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) සීමා කළ retries ලබා දෙන්න. පෙරනිමියෙන් අක්‍රියයි: හිස් turns දැනට පවතින අභ්‍යාසය පවත්වා ගනී (හිස් 200 හෝ හිස්-අන්තර්ගත 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Empty Stream Sibling Recovery",
+        "description": "Claude/Codex streaming: පළමු lifecycle event එකෙන් පසු, භාවිතා කළ හැකි ප්‍රතිදානය සඳහා කෙටි කාලයක් තුල probe කිරීම (ඉහත 1s / 64 KiB); අන්තර්ගතය නොමැතිව අවසන් වන stream එකක් empty_content failure එකක් බවට පත්ව, උන්දුගත retry එකක් (cooldown නොමැති, model lockout නොමැති) වෙනත් පාත්‍රතා සම්බන්ධතාවයක් වලයේ, client disconnect වූ විට round-robin combos retries ඉවත් කරයි. Probe තුළ refusal, pause_turn සහ model_context_window_exceeded ස්‍වභාවික හිස් terminals ලෙස සලකනු ලැබේ. පෙරනිමියෙන් අක්‍රියයි: readiness, හිස්-අන්තර්ගත කළමනාකරණය සහ combo retries ඉඳිමුන මත්තේම පවතී."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "ස්‍රීම් ප්‍රාථමික ප්‍රතිදාන සන්දහනු",
+        "description": "ස්‍රීමින් ප්‍රතිදාන සන්දහනු: ප්‍රථම 64 ආරමිත ක්‍ෂුන්ට්ස් තාරුණා කළ පසු ප්‍රථම දෘශ්‍යමාන ප්‍රතිදානය සඳහා ක්‍ෂුන්ට් 16 කින් එකක් උපරිපාටර කරන්න, එවිට පසුව ආරම්භ වන ප්‍රතිදානයකුදුම ඉරිසම හා ප්‍රතිදාන සමපිටිය හැම සංඥා කරයි. එම අවස්ථාවෙන් පසු තනි 5xx එකක් ඉල්ලීම්-පරිද්ද සීමා වූයේ නම් මූලික වශයෙන් මාඩල-යට් ලොක්අවුට් එකක් ලියැවීම වෙනුවට ඉල්ලීම්-පරිද්ද සීමා කර තබාගන්න, සහ firstOutputMs වර්තමාන උපරිපාටර කාලසීමාවේ ප්‍රථම ප්‍රතිදාන ක්‍ෂුන්ට්සයට ප්‍රති-පුරවා ගන්න. පෙරනිමියෙන් අක්‍රියයි: ප්‍රථම 64 ආරමිත ක්‍ෂුන්ට්ස් තාරුණා කුණුම පරීක්ෂා කරනු ලැබේ, පෙර පරිද්දට සරිලි ප්‍රමාණයට."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode භාවිතා-සීමාවෙන් 429 ඉහල නඩත්ව",
+        "description": "OpenCode බහු-ගොඩනැගිල්ලේ භාවිතා-සීමාව හේතුවෙන්, ප්‍රථම 429 එකක් සැබෑ භාවිතා-සීමාවක් ලෙස වර්ගීකරණය වූ විට (විශ්ලේෂණය කළ හැකි Retry-After ශීර්ෂයක්, හෝ භාවිතා/භාවිතා සීමාවක් නම් කිරීමක් සහිත ශරීරයක්) ග්‍රහානා ලයිනප් ලාය තවදුරටත් නොයවනු ලැබේ, එහි ආරමිත 429 එක (ස්ථායුතිය, ශරීරය, Retry-After සහ කෝටා ශීර්ෂය) මාරිනා හැම වෙනස්වී නොවන පරිද්ද ආරමිත වේ. වර්ගීකරණය නොකළ 429 නොවන පරිද්ද මාර්ගා ගැනීමට පවතී. පෙරනිමියෙන් අක්‍රියයි: නොමිලේ පහත මට්ටම egress IP එකකට සීමා වේ (#9611), එබැවින් 429 සෑමක්ම පසු ගොඩනැගිල්ලකට මාරු වේ, සහ ආරම්භ කරන ලද ලයිනප් එක අවසාන ආරමිත 429 එක ආරමිත කරයි."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 ස්ථාපනය සහ පුනරාරම්භය",
+        "description": "OpenCode බහු-ගොඩනැගිල්ලේ භාවිතා-සීමාව හේතුවෙන්, අඛණ්ඩ අභ්‍යන්තර 429 නිසා (හෝ නව පූල්-අප්‍රමාණය සංකේතය නිසා) ඉල්ලීම heartbeat එකක් සමඟ ස්ථාපනය කරයි, ඉන්පසු මුළු සමූහයම විහිදුවීම වෙනුවට ගොඩනැගිල්ල 3ක් ජාංගිතව අවම කළ පාදයක් නැවත ඉල්ලා ගනී. පෙරනිමියෙන් අක්‍රියයි: 429 සෑමක්ම පෙර පරිද්දට සරිලි ප්‍රමාණයට පසු ගොඩනැගිල්ලකට මාරු වේ."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "ස්‍රීම් සූදානම් ප්‍රමාද පුනරාවකාශනය",
+        "description": "ස්‍රීමින් චාට් ඉල්ලීම් සඳහා, ප්‍රථම ආරමිත ශරීරය භාවිතා කළ හැකි ගිනුවක් ජනනය කිරීමට පෙර අක්‍රිය වූ විට, එම සූදානම් අයක්කුව සහ ගොඩනැගිල්ල දඬුවමකින් තොරව එම මාර්ගා ලයිනප් පාරට සීමා කළ දෙවැනි ඉල්ලීමක් කරයි. පෙරනිමියෙන් අක්‍රියයි: අක්‍රිය ප්‍රථම ශරීරය ඉල්ලීම අසාර්ථක වේ, පුනරාවකාශනයකින් තොරව."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 පූල් නැවත තේරීම",
+        "description": "OpenCode බහු-ගොඩනැගිල්ලේ භාවිතා-සීමාව හේතුවෙන්, proxy-less ගොඩනැගිල්ලක් යටතේ ambient පූල් සන්දර්භයක් යටතේ egress-bucketed provider එකකින් 429 නිසා, එම egress ලකුණා නැවත ඉල්ලා ගැනීම වෙනුවට ඊළඟ ඉල්ලීම සඳහා සම්බන්ධතා පූල් එකෙන් තවත් සාමාජිකයෙකු ඉල්ලා ගනී. අනුපිළිවෙල, ඉවත් නොකරයි: පූල් එක කෙළවර වූ විට වර්තමාන ව්‍යුහය පවත්වා ගනී. පෙරනිමියෙන් අක්‍රියයි: 429 සෑමක්ම පෙර පරිද්දට සරිලි ප්‍රමාණයට පසු ගොඩනැගිල්ලකට මාරු වේ."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 ප්‍රේර්ක මුද්‍රාව",
+        "description": "OpenCode Zen/Go ඉල්ලීම් සඳහා OpenCode v2 CLI ප්‍රේර්ක මුද්‍රාව යවන්න (#16571): User-Agent opencode/latest/<2.x>/cli සහ x-opencode-client cli, 2.x OpenCode ප්‍රේර්කක් වන විට පමණක් රඳවා ගන්නා ප්‍රේර්ක User-Agent, සහ බාධිත නොමිලේ-මට්ටම් ඉල්ලීම් සඳහා x-opencode-request නොමැත, වායුගුප්තය x-opencode-session-id/x-session-affinity/x-session-id වෙත පිහිටුවන ලදී, සහ v2 CLI පූර්ව-පූර්ව/ඇසුරුම් ව්‍යුහ ද ඉවත් කරන injected placeholder tools සහ \"none\" tool_choice. පෙරනිමියෙන් අක්‍රියයි: සෑම OpenCode ඉල්ලීමකම වර්තමාන හඳුනාගැනීම්, මුල් සහ ශරීරය පිටික්කමෙන්ම රඳවා ගනී."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen Egress-IP අවිරතකරණය",
+        "description": "OpenCode Zen (opencode-zen) නිර්දේශිත egress-IP අවිරතකරණය පවුලට එකතු කරන්න, එබැවින් එක් Zen සම්බන්ධතාවයක 429 දැක්වීම, එම egress IP බෙදා ගන්නා සහෝදර Zen සම්බන්ධතාව්‍ය සියල්ල සංසන්ත කරයි. පෙරනිමියෙන් අක්‍රියයි: Zen යතුරු දැමූ පරිදි සහ එක් එක් සම්බන්ධතාවය පටපිට පරිදි අවිරතකරණය වේ. විවේකිත OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS අගය හැම විටම මෙම ප්‍රමාණය වටහා ගනී."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode සම්පූර්ණ-පෙළ දෝෂ නීති",
+        "description": "සම්පූර්ණ වාහිනි දෝෂ පෙළ සමඟ සංයෝජනය වීමට නිර්මාණාත්මක OpenCode දෝෂ නීති (opencode-zen, opencode-go, opencode-cli) ඉඩ දීම, එබැවින් organization_quota_exceeded හෝ \"monthly usage limit reached\" වැනි ශරීර සලකුණු 429 ක් quota exhausted ලෙස සංයෝජනය කර සම්බන්ධතාව-ව්‍යාප්ත අවිරතකරණයක් සලසයි. පෙරනිමියෙන් අක්‍රියයි: එම නීති නිර්මාණාත්මක දෝෂ කේතය පමණක් දක්වයි සහ එවැනි 429 ක් ක්ෂණික හරස්-සීමාවක් ලෙස, පූර්ව පරිදි රඳවා ගනී."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI සම්පූර්ණ-පෙළ දෝෂ නීති",
+        "description": "සම්පූර්ණ වාහිනි දෝෂ පෙළ සමඟ සංයෝජනය වීමට නිර්මාණාත්මක Cloudflare Workers AI දෝෂ නීතිය ඉඩ දීම, එබැවින් 429 \"daily free allocation\" ශරීරය ක්ෂණික හරස්-සීමාවක් වෙනුවට quota exhausted ලෙස සංයෝජනය වේ. පෙරනිමියෙන් අක්‍රියයි: නීතිය නිර්මාණාත්මක දෝෂ කේතය පමණක් දක්වයි, පූර්ව පරිදි."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "සමත්තාව පූරණය",
+        "description": "රැඳීම් මොහොතේදී අවශ්‍ය සමත්තාව (වෛෂණික, මෙවලම්, ව්‍යුහිත ප්‍රතිදානය, අන්තර්ගත ජනාවකාශය) නොමැති විට ඉල්ලීම් ප්‍රතික්ෂේප කරන්න. Combo-layer අනුගෘහීත පූරණය ඉවත් කරන සෘජු එක-පාරාමීර්ෂ්ක ඉල්ලීම් ආරක්ෂා කරයි."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "USD කෝටාවලදී මිල නොමැති භාවිතය නොසලකන්න",
+        "description": "මිලක් නොමැති මාදිලිවල භාවිතය, කෝටාව ඉක්මවා ඇති ලෙස සැලකීම වෙනුවට, එක් එක් යතුරේ USD භාවිත කෝටාවලදී $0 ලෙස ගණන් කරන්න. පෙරනිමියෙන් අක්‍රියයි: මිලක් නොමැති මාදිලියක් හෝ routing alias එකක් සැබෑ වියදම සැඟවිය හැකි බැවින්, කෝටාව fail-closed ලෙස ක්‍රියා කරයි."
+      },
+      "RADAR_ENABLED": {
+        "label": "රේඩාර්",
+        "description": "OmniRoute Radar මොඩියුලය සක්‍රිය කරන්න (කැටලොග් ෆීඩ් තිර සහ සමමුහුර්තකරණය). පෙරනිමියෙන් අක්‍රියයි; සක්‍රිය කිරීමෙන් UI එක පමණක් විවෘත වේ — දත්ත සමමුහුර්තකරණය වෙනම opt-in එකක් ලෙස පවතී."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "මාදිලි endpoint හැකියා දොරටුව",
+        "description": "විශ්වාසනීය මාදිලි endpoint ටැග් බලාත්මක කරන්න (සැපයුම්කරු කැටලොගය මගින් ප්‍රකාශ කළ, විශේෂිත මාදිලි id එකකින් අනුමාන කළ, හෝ operator විසින් සකසන ලද): /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations සහ /v1/audio/* මත, මාදිලිය සේවා නොදක්වන endpoint එකකට යවන ඉල්ලීමක් dispatch කිරීමට පෙර HTTP 400 සමඟ ප්‍රතික්ෂේප කරන්න; ටැග් කළ endpoint සඳහා OmniRoute adapter එකක් නොමැති මාදිලි /v1/models වෙතින් සඟවන්න; සහ එවැනි මාදිලි සඳහා dashboard මාදිලි පරීක්ෂණයට 422 සමඟ පිළිතුරු දෙන්න. පෙරනිමියෙන් අක්‍රියයි: endpoint ටැග් තොරතුරු සඳහා පමණක් පවතින අතර ඉල්ලීම් පෙර පරිදිම dispatch කෙරේ."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "විශ්ව සන්දර්භ භාරදීම",
+        "description": "combo routing මාදිලි මාරු කරන විට සංවාද සාරාංශ ජනනය කර ඇතුළත් කරන්න. මාදිලි මාරු කිරීම් ස්වාධීනව සැලකීමට සහ පවතින හා අනාගත සියලුම combo සඳහා පසුබිම් භාරදීමේ ඉල්ලීම් වැළැක්වීමට අක්‍රිය කරන්න."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "තර්කන නැවත ධාවනය",
+        "description": "බහු-වාර සංවාද හරහා මාදිලි තර්කනය cache කර නැවත ධාවනය කරන්න. තර්කනය ගබඩා කිරීම සහ නැවත ඇතුළත් කිරීම නැවැත්වීමට අක්‍රිය කරන්න."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server Transport",
+        "description": "Codex ට දේශීය app-server WebSocket JSON-RPC transport (codexTransport=app-server) භාවිතා කිරීමට ඉඩ දෙන්න. ව්‍යංග්ගයක් වන විට, app-server සඳහා විෂාලන ලද සම්බන්ධතා Codex හි වෙනත් transports වෙත වෙනස් වේ."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code Discovery Aliases",
+        "description": "/v1/models හි claude/'<provider>'/'<model>' mirror ids දැන් වාගින් කරන්න, එමගින් Claude Code gateway model discovery නො-Claude models ලැයිස්තුගත කිරීම සිදු කරයි. නිවැරථිතය: විවෘතව ඔක්කොම ආකාරයෙන් සක්‍රීය වන විට සියලුම customers සඳහා catalog entries දෙගුණ වේ."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "No-Thinking Model Aliases",
+        "description": "no-think/'<provider>'/'<model>' gateway aliases සඳහා ප්‍රධාන මාර්ගය. සක්‍රිය (පෙරනිමි): /v1/models හි සෑම දුර්වල thinking-capable Claude model සඳහාම no-thinking variant එකක් දැන් වාගින් කරනු ලබන අතර, request එකක no-think/ id එකක් යවන විට එය reasoning අවලංගු කර real model වෙකට ව්‍යාප්ත වේ. අක්‍රිය: variants එකකුත් දැන් වාගින් නොකරන අතර no-think/ id එක අනුන්‍ය අනුන්‍ය model id එකක් ලෙස සැලකේ. මෙය සක්‍රිය වන විටද model විශේෂිත ModelSpec.noThinkingAlias opt-in/opt-out තවමත් අදාළ වේ."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Thinking Level Variants අවලංගු කිරීම",
+        "description": "/v1/models catalog හි thinking level variants (උදා: -low, -medium, -high) ජනනය අවලංගු කරන්න."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Adaptive Virtual Admission Lanes",
+        "description": "provider dispatch සඳහා tenant විශේෂිත adaptive virtual admission lanes සක්‍රීය කරන්න (#9654): tenant එකක burst තවත් tenant එකකට 503 ලබා දීම නතර කරයි. OMNIROUTE_CHAT_VIRTUAL_LANES env var මෙම dashboard override එකට ඉහළ ප්‍රමාණයකින් යුක්ත වන අතර, වෙනස්කම් server restart එකේදී ඵලදායී වේ."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "කර්මාන්තික ඝටන්තුව හෙළිකරවුම්",
+        "description": "canonical හිමිකරුට සක්‍රිය අක්තපත්‍රයක් නොමැති නමුත් සක්‍රිය අක්තපත්‍රයක් සහිත passthrough gateway එකක් මඟින් ඉල්ලීම් යොමු කරන මාදිලි සඳහා, /v1/models හි '<gateway-alias>'/'<model>' දර්පණ id ප්‍රසිද්ධ කරන්න. අවවාදයයි: ගෝලීයව සක්‍රිය කළ විට සියලු සේවාලාභීන් සඳහා catalog ඇතුළත් කිරීම් එක් කරයි."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API එකතුවක සමතුලිතතාව",
+        "description": "New-API / One-API / Sub2API එකතුකාරි (aggregator) අනුරූප නෝඩ්‌න් සඳහා සමතුලිතමය අනාවරණය සක්‍රීය කරන්න. සක්‍රීය වූ විට, එකතුකාරි අතියරය (aggregator flag) සැකසුණු අනුරූප නෝඩ්‌න්, ඉකුත්තුවේ (dashboard) සහ කූෝටා-ප්‍රියෝන (quota-preflight) මාර්ගසැලසුමේදී ඔවුන්ගේ තුරන්විලාව (balance) වාර්තා කරනු ඇත."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "මකා දැමූ සෙවීමේ සම්බන්ධතා concealing",
+        "description": "පරීක්ෂණ සංඛ්‍යා සහ පසුගිය පරීක්ෂණ අදහස් කරන්නේ තවම ජීවමාන සම්බන්ධතාවක් සතුව ඇති ප්‍රජායකයන් පමණි (duckduckgo-free වැනි යතුරක් නොමැති ප්‍රජායකයන් සැමවිට ස ගණනය වේ). Off හි තබා ඇති සෑම පරීක්ෂණ ත්‍රිකෝණයකටම ප්‍රජායක අනන්‍යතා අංකයක් ඇත."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "දැඩි නොමිලේ ලාංඡනය",
+        "description": "ඩැෂ්බෝඩ් පවිදාහක පිටු: පවිදාහකයා පිළිගන්නා සංඥා වලට පමණක් නොමිලේ බැජය පෙන්නන්න — ලියන ලද නම් ප්‍රායෝගික ක්‍රමය, අ-බූලියන් නොමිලේ අංශක සහ රූජිත පවිදාහකයින් සඳහා :free අන්තර්ගාමී ඉවත් කරයි, නොමිලේ තහඩුවක් තොරතුරුදායක ලෙස ලියැද නොමැති. Off පුරුදු බැජ නියමය තබා ගනී."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "තනි තර්ම: හිස් ඉරන් පුළුල් පිළිතුරු 503",
+        "description": "ටෂ්කර්-කරුණු පූව-පෙර උරණයක් (වාරාම, අත්අඩංගුව හෝ ඉක්මවීම නිසා හැම ඉලක්කයක්ම පසුහත් වී පිටුව හිස් වී ඇති අවස්ථාවේ) වෙලිඳුන් ස්වයං-කරුණු පූව-පෙර උරණයක් සාදන විට, පෙරවැඩි 400 \"ඉලක්කයක් කිසිවක් කාර්යක්ෂමතාවය සපාය නොගත\" capability_mismatch වෙනුවට 503 no_eligible_targets පිළිතුරු දෙන්න. පෙරනිමියෙන් අක්‍රියයි: හිස් පූව-පෙර උරණය පෙරවැඩි 400 තබාගනී."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral අර්ධ-නිශ්චිත 401 මෘදු අසාර්ථක",
+        "description": "නිග්‍රහ නොකළ Mistral 401 ('{\"detail\":\"Unauthorized\"}', විශේෂිත සත්‍යාපන සිංහාන නොමැතිව) පක්ෂාතාරණය වූ ක්‍රීයාවේ සහ ක්වාතෝට පිරී සිටින අවස්ථාවකදී සර්වඥය. සක්‍රීය කළ විට, එවැනි 401 සම්බන්ධතාවයක් අවසානයට පත් නොකර එය සිසිල් කිරීමට උදව් කරයි, පැයකට පාරිභෝගිකව 3 වරක්; ඊළඟ 401 තවමත් එය අවසානයට පත් කරයි, එබැවින් පක්ෂාතාරණය වූ ක්‍රීයාවක් සංවේගනය වේ. පෙරනිමියෙන් අක්‍රියයි: පෙරපරිදි, සෑම නිග්‍රහ නොකළ Mistral 401 එකක්ම සම්බන්ධතාවයක් අවසානයට පත් කරයි."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "බැටච් & පූර්ව විෂයක්ත ස්වයංක්‍රීය පිරිපාදනය",
+        "description": "OMNIROUTE_BATCH_RETENTION_DAYS ක්‍රියාකාරිණී බාධ්‍යම් වූ Batch API කාර්යයන් (සම්පූර්ණ/අපරාද/අවලංගු/කාලය තුඩු වූ) සහ ඒවායේ රෙකෝඩ වැදගුරු පරීක්ෂා කරන ලද පූර්ව වර්ගික දත්ත ඉවත් කිරීමට ස්වයංක්‍රීය පිරිපාදනයට ඉඩ දෙන්න, ඒවායේ BLOB අන්තය කාලය තුඩු වූ පසු මකා දැමීමට ද ඉඩ දෙන්න. පෙරනිමියෙන් අක්‍රියයි: සෑම පවතින ස්ථාපනයක්ම මෙම දත්ත පෙරපරිදිවම තබා ගනී, ක්‍රියාකාරීන්වරයා කැපී පෙනෙන තුරු. ක්‍රියාකාරීන්වරයා මගින් ආරම්භ කරන DELETE /api/v1/batches/delete-completed මාර්ගය බලපෑමක් නොවීය — එය වෙනම, අවිනිශ්චිත පොදු API ගිවිසුම් එකකි."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity ගිණුම් උරුවාතය",
+        "description": "මැදිසර තෝරාගත් Antigravity ගිණුම, එය තෝරාගත් ඉල්ලීමේ මාර්ගගත ජීවත් සඳහා අවසන් කරයි, එබැවින් සමාන්තර පෙරහැරුමක් හෝ සාක්ෂි හත්වරහනක් දැනටමත් ඇදුම්වූ මාර්ගගත ප්‍රවාහයකට ගැනුම් වූ ගිණුමක් නැවත තෝරා ගැනීමට නොහැකිවේ. උරුවාතය (සම්බන්ධතාවය, න්‍යායාත්මක උපරිම මොඩෙලය) ඉඩතුවයට සීමා වී ඇත, එබැවින් එක් ගිණුමක්ම ඒකවිධ මොඩෙල් දෙකකට එකවර සේවය කළ හැකියි. එම මොඩෙලය සඳහා පොළඟන ඕනෑම ගිණුමක් දැනටමත් උරුවාතය වී ඇත්නම්, ඉල්ලීම ඉතා මාර්ගදක 503 POOL_BUSY ආරූච්චික 503 සහ සීමා වූ Retry-After සමඟ ආරූච්චික 503 ලෙස ආරූච්චික 503 ගනී, දුර්වල ගිණුමක් මත ගොඩවී නොයයි. පෙරනිමියෙන් අක්‍රියයි: ගිණුම් තෝරාගැනීම පෙරපරිදිවම පවතී, උරුවාතයක් ගනු නොගනී."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "පරණ කොම්බෝ පියවර ස්වයංක්‍රීය ඉවත් කිරීම",
+        "description": "කර්මාන්තශාලා ප්‍රමාණවත් ජීවවේගී කැටලොගයට එකච්චි කළ ආරූච්චික සංවේගනයක් වූ පසු, කැටලොගය තවදුරටත් ලැයිස්තුගත නොකරන මොඩෙල්යන්ට පොඩිතා කළ කොම්බෝ පියවර ඉවත් කරන, ඉවත් කළ පියවරකට විනඩි ආකෘතියක් සහිතවයි. අපරාද, දුර්වල හෝ නොමිලේ-මැදිසර සංවේගනයකදී ඉවත් කිරීමකින් තොරවම ඉවත් නොකරයි, කොම්බෝවක් හිස් කරන්නද නොකරයි. පෙරනිමියෙන් අක්‍රියයි: පරණ පියවරන් ඉදිරිපත් කිරීම පමණි."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth සාරාංශ කළ සිතුවම් කිරීම",
+        "description": "Let a Claude OAuth request that asks for readable thinking (thinking.display \"summarized\") drop the redact-thinking-2026-02-12 Anthropic beta, which otherwise makes Anthropic return empty, signature-only thinking blocks. Off by default: that beta is part of the Claude Code OAuth wire fingerprint, so OAuth requests keep it unchanged. API-key Claude requests already honor summarized thinking without this flag; OMNIROUTE_REDACT_THINKING=false also reaches OAuth only when this flag is on."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro Tool Call අදාළ නිරව්හන සංස්කරණය",
+        "description": "දෘෂ්‍යමාන ප්‍රතිපලයක් ඉදිරියට පෙර, ප්‍රතිචාරයේ පෙළපුරාසිත tool_call ආවරණයක් (input.name හෝ input.arguments නොපැවතුම්) නිපන් වූ විට, එය නිවාරණය කර, අවලංගු invalid_kiro_tool_call එකක් මගින් පරිච්ඡේදය අවසන් කිරීම වෙනුවට, නිවාරක උපදෙස් එකක් සමඟ ඉල්තීම නැවත එවන්න. නැවත උත්සාහයක් සඳහා අමතර Kiro ඉල්තීම් එකක් වියදම් වේ; දෙවන අපරාජය සිදුවන්නේ kiro_tool_call_repair_retry_failed සමඟ පරිච්ඡේදය අවසන් වන විටය. පෙරනිමියෙන් සක්‍රියයි. අවලංගු ආවරණයේ පළමු අපරාජය මත පරිච්ඡේදය අපරාජනය වන පරිදි අඩුකිරීම සඳහා false ලෙස සැකසේ."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev උත්සාහ ප්‍රතිශ්‍රිත",
+        "description": "කර්මාන්තකර්මී ප්‍රතිදානයක් හෝ ක්‍රියාකාරි තොරතුරු සම්පිලියක් මගින් ප්‍රකාශය පිළිවෙළක් නොමැති විට, models.dev ප්‍රකාශයෙන් ලැබෙන (දන්නා උත්සාහ වචන මාලාවට අඩු කළ) සහයෝජිත උත්සාහ ප්‍රතිශ්‍රිත භාවිතා කරන්න, සහ /v1/models effort_tiers සහ කම්බෝ ප්‍රතිශ්‍රිත අතුර්ගතීන්හි ප්‍රකාශයේ හිස් ප්‍රතිශ්‍රිත ලැයිස්තුවක් \"ප්‍රතිශ්‍රිත නොමැත\" ලෙස සලකන්න. පෙරනිමියෙන් අක්‍රියයි. effort_tiers සහ විසඳුම් සහයෝජිත supportedThinkingEfforts පෙර පරිදිම තබා ගනී."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena Synthesized cx දුර්විමුහුර",
+        "description": "පිටපත් ප්‍රතිදානයක් කළ cx අපරාජක ප්‍රතිපලයක් (අපරාජක ප්‍රතිපලයක් අඩු පිටපත් වන පිටපත් සඳහා arena.ai ඉල්ලාදායනට එවන අගය) ඔපරේටර්-ප්‍රතිදානය providerSpecificData.cx අඩු සෑම Arena (lmarena) create-evaluation ඉල්තීම් සඳහාම අදාළව තබන්න. පෙරනිමියෙන් අක්‍රියයි: cx ක්ෂේත්‍රය Arena anti-automation අගයක් වන බැවින්, OmniRoute ට්‍රියුරු සහයෝජිත මිනිවලින් අලුතට ලැබුණු අගයක් (providerSpecificData.cx) පමණක් ඉදිරිපත් කර, නැතිනම් cx නොමැතිව ඉල්තීම් යොමු කරයි. ඉහළ නාලිකා ආයතනවල අපරාජක ප්‍රතිපලයක් ඔපරේටර්; Arena cx නොමැති ඉල්තීම් ප්‍රතික්ෂේප වීමේදී පමණක් සක්‍රීය කරන්න."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Native Codex Reactive Compaction",
+        "description": "Let the reactive (threshold) and last-resort context compaction passes also rewrite native Codex passthrough histories (POST /v1/responses to the codex provider) when they exceed the context budget, using the Responses input[] adapter. Off by default: native Codex histories are owned by the Codex client and are never rewritten by compaction; oversized requests keep failing the context budget check exactly as before. Requires global compression to be on and the model not to be excluded."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Quota Window: Honour Bounded Park",
+        "description": "Let the per-window quota policy (session/weekly thresholds used by account selection) honour the bounded exhaustion park: once the capped park deadline has passed, or the cached quota observation is older than the park cap, the window stops excluding the account until a fresh quota fetch. Off by default: a cached window keeps blocking on its last reported percentage until its own reset time."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "බිම් නිර්මාණය: දිගු වේලාවන්",
+        "description": "OpenAI-අනුකූල බිම් නිර්මාණය සඳහා: නියත 120 ස තත්‍යාක්ෂ මාස නොව, සම්බන්ධතාවයේ ඉතිරි වේලාව (providerSpecificData.timeoutMs) හෝ මධ්‍යම ඉහළ පසුගේ fetch ඉතිරි වේලාව (FETCH_TIMEOUT_MS, පසුව REQUEST_TIMEOUT_MS, default 600 ස) භාවිතා කරන්න; අයැත්තුවා විසින් අවලංගු කළ ඉල්ලුමක් 499 සමඟ අවසන් කරන්න; සහ Playground විසින් දිගු බිම් වේලාවන් SSE stream එකක් ලෙස, keepalive හෂ්ට්බීට් සමඟ ලබා ගන්න. පෙරනිමියෙන් අක්‍රියයි: නියත මාසය අලංකාරව අලංකාර වන අතර අයැත්තුවා විසින් අවලංගු කිරීම ප්‍රචාරණය නොවේ. ප්‍රතිචාර ශරීරය කියවීම ආවරණය කරන වාහන් තාතා දිග හැරීම සැම විටම ඇත."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "විශ්‍රාන්ති අර්භව නිරූපණය වැඩිදියුණු කිරීම්",
+        "description": "/v1/models සඳහා claude/ සොයා ගැනීම සහ functional-gateway නිරූපණ වැඩිදියුණු කරන්න. පෙරනිමියෙන් අක්‍රියයි: නිරූපණය දෙක පෙර ආකාරයටම හැසිරේ. සක්‍රිය විට: claude/ සොයා ගැනීම නිරූපණය සටහන් කර ඇති වැඩි දියුණු කාරක variant (-low/-medium/-high/-xhigh) ආවරණය කරයි, ඉල්ලුම් මාර්ගය materialize කළ නොහැකි built-in auto/* ids අමතක කර, දැනටමත් සටහන් කර ඇති alias එකක් අමතක කරයි; functional-gateway නිරූපණයන් combos සහ OmniRoute-synthesized ids (claude/, no-think/) අමතක කරයි, owner ඥයා owned_by වෙන් කර ගනු ලැබේ, owner එක තමන්ගේම gateway ලෙස කිසි විටෙක භාවිතා නොකරයි, blockedProviders හි අක්‍රිය කළ gateways සහ gateway එකේ ආධිපතික සජීව් ව්‍යාපෘති වී ඇත."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Proxy සෞඛ්‍යය: අපිව් ප්‍රතිපාදන අපහසු ශ්‍රේණිය නැවත සකසයි",
+        "description": "proxy සෞඛ්‍ය සඟය, target විසින් ප්‍රතිපාදනය කළ probe (401/403/429: proxy relayed, destination විසින් මෙම egress IP ප්‍රතිපාදනය කළා) proxy ජයග්‍රහී අපහසු ශ්‍රේණිය නැවත සකසන්න, probe එකක් ලෙස. පෙරනිමියෙන් අක්‍රියයි: ප්‍රතිපාදනය ඊතලයක් ලෙස ඉතිරි වී ශ්‍රේණිය පවත්වා ගනී (#10654). 5xx ආකාරයේ දී නිගමනයක් නොමැත, සහ ප්‍රතිපාදනය proxy එකක් ඉවත් කිරීමට, අක්‍රිය කිරීමට හෝ නැවත සජීවී කිරීමට ව්‍යාපෘති වී නොමැත."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok Subscription බිම්",
+        "description": "xai-oauth (xao) සහ grok-cli බිම් මාර්ගයන් ලියාපදිංචි කර OpenAI ආලේඛිත උස/hd xAI මධ්‍ය ලෙස ඡේදනය කරන්න. පෙරනිමියෙන් අක්‍රියයි: API-key xAI බිම් මාර්ගය පවතින OpenAI-අනුකූල ඉල්ලුම මත රඳා පවතී සහ subscription මාර්ගයන් ලියාපදිංචි නොවේ."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth Live Model සොයා ගැනීම",
+        "description": "xai-oauth සම්බන්ධතාවයන් සඳහා https://api.x.ai/v1/models භාවිතා කර xAI මෝදෙලය සජීව් ව්‍යාපෘති වී ඇත OAuth bearer token භාවිතා කර, ඖ්ෂණික අඛණ්ඩ විත්තනය වෙනුවට. පෙරනිමියෙන් සක්‍රියයි. සත්‍යාක්ෂය අනුක්‍රමිකව පවත්වා ගැනීමට flag false ලෙස සකසන්න. HTTP අපහසුතාන් discovery මාර්ගයේ විත්තනය වෙත fall back කරයි; flag getter එක ස්ථානගතවම HTTP නිකුත් නොකරයි."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-ආකෘතික මධ්‍ය-වාච්‍යකරණ Sys",
+        "description": "සරල anthropic-compatible-* ප්‍රේරණ මගින් (claude → claude පාර්‍ශ්වික), මධ්‍ය-වාච්‍යකරණ role:system පිවිසුම් messages[] තුළම රඳවා දමන ලදින්, ඒවා ඉහළ-ස්තර system පරාමිතියට වැසයන්න, එමඟින් cache වූ prompt පෙර-ආරම්භය සියලුම පිවිසුම් හරහා ස්ථාවරව රැකෙන්නේ නිසා. මෙය ක්‍රියාත්මක වන්නේ khách hàng බෙල්ලායේම mid-conversation-system-2026-04-07 anthropic-beta (ඉහළට නොවෙනස්ව යවන ලද) යවන විට පමණි. පෙරනිමියෙන් අක්‍රියයි: සෑම system පිවිසුමක්ම පෙර සමාකරම පරිදී ඉහළට වැසයි, ඒ ප්‍රේරණ beta ආයුක්ත නොසහතුපයක් 400 සමඟ role:system ක්‍රමය ඔස්සේ ප්‍රතිචාර දක්වයි."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB සෞඛ්‍ය පරීක්ෂාව: ආරම්භක පිපාහණය ප්‍රමාදය කිරීම",
+        "description": "වේදිකාව ඉල්ලීම් පිළිගැනීම ආරම්භ කිරීමෙන් පසු ආරම්භක DB අගය/සෞඛ්‍ය පරීක්ෂාව (setImmediate ඔස්සේ) ඉටු කරන්න, ඒ වෙනුවට ආරම්භය අවසානය දක්වා බලවත් වේදිකාව වැළඳ සිටීම වැළැක්වීම සඳහා. පෙරනිමියෙන් අක්‍රියයි: ආරම්භය #13717 පෙර සමාකරම පරිදී පරීක්ෂාව හමුවේ වැළඳී, එමඟින් දුර්වල database එක පළමු ඉල්ලීම සේවය කිරීමට පෙරම හඳුනාගැනේ. සක්‍රීය: ආරම්අම ක්ෂණිකව ප්‍රතිවර්තනය කර, පරීක්ෂාව (දැන් සීමා/පිටිත වන, සහ සැබෑ file-backed DB සඳහා අන්තර්ගාමනය කළ හැකි child process එකකට වෙන්වන) ඊට පසුම ඉටු කරයි."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode ප්‍රකාශිත මාලාව මාර්ගෝපදේශනය",
+        "description": "ප්‍රතිස්ථාපනය කළ registry endpoint එකක් නැති OpenCode Zen සහ OpenCode Go පද්‍ධති, ඒවායේ ඉල්ලීම පෘෂ්ඨය (Responses @ai-sdk/openai සඳහා, Messages @ai-sdk/anthropic සඳහා) published models.opencode.ai මාලාවෙන් ලබාගන්න, පසුබිනින් වේලාවකට 6 පැතුම් වෙන්වීම් මත කියවන ලද්දේ. පෙරනිමියෙන් අක්‍රියයි: endpoint එක registry heuristics වලින් පෙර සමාකරම ලැබේ, සහ මාලාව කිසිම විටෙක හඳුනාගනු නොලැබේ."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "ස්වයංචල ඉල්ලීම්: විසඳුම් ලැබුණු හැකියා බර",
+        "description": "ස්වයංචල/* ඉල්ලීම් (resolveModelOrError සහ ස්වයංචල-මාර්ගෝපදේශන wrapper) ලැබුණු පද්‍ධති හැකියා (vision, reasoning, thinking) සහ නිරීක්ෂිත ගුණාත්මක ලකුණු සමඟ සහකරු කුලු ඉදි කරන්න, /v1/models මාලාව වැනි ඉතා bulk කියවීමක මැයිතුව. පෙරනිමියෙන් අක්‍රියයි: ඉල්ලීම-කාලීන snapshot බර පෙර සමාකරම ඉතිරි වේ (හැකියා අවශ්‍යතාවයට විසඳෙන අතර ඒ බර දෙසට ව්‍යුහය නොකරයි). සක්‍රීය: එම ලකුණු snapshot බර දෙසට ඉම්පන, එමඟින් සහකරු බර, එසේම තෝරුම්, වෙනස් විය හැකියි."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "ස්වයංචල-ව්‍යුහ: Keyless ප්‍රවේශයේ ග්‍රීට් එක",
+        "description": "තැපෑල් (no-auth) පරිශ්‍රක වස්තු, ඒවායේ ප්‍රවේශයේ ලෝකාල් browser (browserBacked) හෝ ලෝකාල් ස්ථාපිත CLI (isLocalCli) අවශ්‍ය නම්, ස්වයංචල/* සහකරු කුලුවෙන් බැහැරව තබාගන්න, එමඟින් බැඳුණු අංගයක් ස්වයංචල ඉල්ලීමක් ප්‍රති-ලක්ෂ්‍ය timeout එක දක්වා ප්‍රමාද කිරීම (#17036) වැළැක්වේ. පෙරනිමියෙන් අක්‍රියයි: සිහසුනක් emulated tool calling සහිත සෑම no-auth පරිශ්‍රක වස්තුවක්ම පෙර සමාකරම කුලුවේ ඉතිරි වේ. සෘජු '<alias>'/'<model>' ක්‍රමය ඕනෑම අවස්ථාවක හෝ ක්‍රියාත්මක වේ."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Inline Reasoning Replay",
+        "description": "codebuddy-cn නිරීක්ෂක ආදර්ශ සඳහා (reasoning replay අවශ්‍ය වන DeepSeek-V4 / Kimi-K2 කුලවල), නැවත යන සහයාතික reasoning_content එක් එක් පණිවිඩ අන්තර්ගතයේ මුල් තනිකර නරකුම් '<thought>' ඝූතුවක් ලෙස තනිකරම ඇතුළත් කරන්න, ඉන්වෝඩ් එකක් reasoning_content ක්ෂේත්‍රය දැමෙන අවස්ථාවලට මෙය ආරක්ෂිත කරන සේවය ලැබේ (#13632). පෙරනිමියෙන් අක්‍රියයි: codebuddy-cn ඉල්ලීම් පෙර දායකයකින් බවට යන අතර, reasoning_content ක්ෂේත්‍රයම හැමවිටම තබා ගනු ලැබේ."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Provider Safety Stops: Terminal",
+        "description": "ප්‍රදායක සුරත ආරක්ෂක නවත්වුමක් (misalignment_policy_violation, content_policy_violation, හෝ 'blocked by our safety systems' යන ලේබල් එකට provider_safety_rejection ලෙස සලකන වර්ජනාත්මක පරණ ප්‍රතික්ෂේප්පයක්) තනිකර, ඉල්ලුම-ස්කෝප් ස්ත්‍රෝයාන ලෙස තබා ගන්න: එහි කෝඩ් HTTP, Responses, WebSocket සහ ඉවර ඓමාල ටිප්පරය වෙතින් ආරක්ෂිත වන අතර, combo එක වෙනත් ඉලක්කයන්ට නැවත උත්සාහ කිරීම වෙනුවට එහිම නවතින අතර, අවශ්‍ය තරම් එමට සහයදෙන අයන් අවලංගු කරයි (#17049). පෙරනිමියෙන් අක්‍රියයි: මෙම දෝෂ ගතියවලට පවතින හැසිරීම පවතින අතර, combo රාමුගතිය වෙනස් වේ."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Credential Health: Retest Auto-Disabled Connections",
+        "description": "ගේටවේ ඇති ගිනීමේ මතභා ඉන්විගේශනයේ ස්ට්‍රිංප්පවල් වැඩය වෙනුවට, එය මානයින් මාණ්ඩු කළ ඉන්විගේශන (autoDisabledAt ලෙස නම්කරන; එක් එක් කාලය සඳහා පැය 6 ක් වෙනුවට එකක් හරි නැත, ස්වභාවික 5) නැවත ඔත්තු කරන්න, එහි ඔත්තුව සාර්ථක වූ විට ඉන්විගේශනය නැවත තව කරන්න (#16190). පෙරනිමියෙන් අක්‍රියයි: මාණ්ඩු කළ ඉන්විගේශන එක්සේම මානාමානයන් ව්‍යාපෘතිකරන තෙක් මාණ්ඩු වන අතර, මීට පෙර පරිද්ථ ඉන්විගේශන සහ ස්ථිර බානින් මානාමානාන කළ ඉන්විගේශන කිසිවිටෙක නැවත ඔත්තු නොකරයි."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Credential Gate: Auth Diagnoses Only",
+        "description": "කැන්ට් කැෂ් කළ අසාර්ථක සාක්ෂි අනුප්‍රාප්තියක් ඉන්විගේශනයක් තවකරම සාක්ෂි වරදවු තහවුරු වන විට (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required) ඉන්විගේශනය තවකරම අවලංගු කරයි. භස්මාත්තක අසාර්ථකයන් (තාක්ෂණික ප්‍රතිපත්තීන්, සීමිකරණ ප්‍රතිපත්තීන්, විදාන, අසමනා ආපුණ්‍යන් සහ අනාර්ජික ෆීඩ් එරර් එරර්) නොදනු ලෙස සලකන අතර, ඉන්විගේශනයට ට්‍රාෆික් එක තවම ලැබේ. පෙරනිමියෙන් අක්‍රියයි: ඕනෑම කැෂ් කළ ආපුණ්‍ය දෝෂයක් කැෂ් TTL (මිනිත්තු 5) සඳහා ඉන්විගේශනය අවලංගු කරයි."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: අන්තර්ගත ප්‍රතිපත්ති ප්‍රතික්ෂේපයකදී නවත්වන්න",
+        "description": "combo ඉලක්කයක කතුවරයන් එකෙහි විවිධ ආදර්ශ ආරක්ෂක ක්‍රියාවකින් මතභා ස්‍රෝයානයක් (කෝඩ් හෝ විඳි cyber_policy / content_policy_violation) දැනුම් දෙන විට, ඉතිරි ඉලක්ක අලෙවියන් වෙනස් ආදර්ශ වුවත්, combo එක නවත්වන්න සහ එම මතභා ස්‍රෝයානය ආපතා කන්න, අනුප්‍රාප්තිවක් එවකරම ඊළඟ ඉලක්කයට යන අවස්ථාවට සරියටම තබා ගැනීම. පෙරනිමියෙන් අක්‍රියයි: මතභා ස්‍රෝයානය කිසිදා වරායකට උරුම නොකරන අතර, provider breaker එකක් ඉවැද්දර නොකරයි, සහ combo එක පෙර පරිද්ථ සේ ඊළඟ ඉලක්කයට යයි."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "සිසිලන කාලයේ නැවත උත්සාහය: 403/410 ප්‍රතික්ෂේප මඟ හරින්න",
+        "description": "සියලු ගිණුම්වලම කුල්ඩාඩ්වයන් පවතින අතර, මුලින්ම අවසන් වන කුල්ඩාඩ්වය 403 (ප්‍රවේශය නොකිවීම) හෝ 410 (ඉවත් වී ඇත) හේතුවෙන් සිදුවුනහොත්, ඉල්ලීම් නැවත යැවීමට ඉවසා බලන වෙනුවට එම උරට්ටම ක්ෂණිකව ආපසු ලබා දෙන්න; පසුව, renewing agentrouter connection-scoped quota 403 යනු 429 යන error code එක සහිතව සුරැකේ, එමගින් එය නැවත වටිනා තත්ත්වයේ පවතිනු ලැබේ. ඩිෆෝල්ට් ආකාරයෙන් අක්‍රීයයි: 401 පමණක් ඉවසීම ඉවත් කරන අතර, ඒකූර්ත හැම උරට්ටමක්ම එය ප්‍රතිස්ථාපිත වූ තත්ත්වය සමඟ සුරැකේ."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "මිල සකස් නොකළ භාවිත බජට් ප්‍රතිපත්තිය",
+        "description": "යතුරකට දෛනික/සाप्तාහික USD සීමා සපයන්නා/මොඩලය සඳහා මිල පේළියක් නොමැති වූ විට එම සීමා ඒ භාවිතය කෙසේ ප්‍රතිකාර කරන්නේද යන්න. fail_closed (පෙරනිමි) කවුළුව ඉක්මවා ගොස් ඇති ලෙස සලකයි, එනිසා අනතුරු ඇත්නම් වියදම් දැඩි සීමාවක් හරහා යා නොහැක. count_as_zero එම භාවිතය $0 ලෙස ගණනය කරමිල සකස් කළ වියදම ක්‍රියාත්මක තබයි. මිල සකස් නොකළ මොඩල් ඕනෑම අවස්ථාවකම ඩෑෂ්බෝර්ඩ් මුල් පිටුවේ ලැයිස්තුගත වේ."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "ගිණුම් ID ලොග් කරන්න",
+        "description": "AUTH ලොග් පේළිවලට ගිණුම් උපසර්ගය ඇතුළත් කරන්න (උදා: \"'<provider>' ගිණුම භාවිතා කරයි: abc12345...\"). පෙරනිමියෙන් අක්‍රියයි, එබැවින් බෙදාගත්/බහු-කුලී ක්‍රියාවලි ලොග්වලින් ගිණුම් හඳුනාගැනීම් සැඟවේ. Debug Mode වලින් ස්වාධීනයි; Debug Mode මාරු කිරීමෙන් මෙය හෙළි නොවේ."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "OIDC සමඟ මාතෘකා ඇතුළත් කිරීම අක්‍රීය කරන්න",
+        "description": "OIDC සක්‍රීය වූ විට, පරිශ්‍යත්තයක් වලින් OIDC ඒකාබද්ධ සුදුසුකම් පරීක්ෂාව ඔව්වේ. අක්‍රීය (අර්ධම) විට, මාතෘකා ඇතුළත් කිරීම සහ OIDC දෙකම වඩා ඇත."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "දුරස්ථ ශබ්ද ආයතන සර්වර නෝඩ්",
+        "description": "/v1/audio/* මාර්ගවලට localhost වලින් පිටත පිහිටුවන ලද OpenAI-සමාන ආයතන සර්වර නෝඩ් භාවිතා කිරීමට ඉඩ දෙන්න. පෙරනිමියෙන් අක්‍රියයි — දුරස්ථ හෝස්ටයකට ශබ්දය යවනු ලැබීම egress හඳුනාගැනීම වෙනස් කරන අතර, එය පැමිණිලි කාර්මික අර්ධකාන්තයක් විය යුතුය. Loopback නෝඩ් දැන්වූ ලැබී ඇත සහ ප්‍රචලිත නොවේ."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "දුරස්ථ Rerank ආයතන සර්වර නෝඩ්",
+        "description": "POST /v1/rerank (සහ මතක ජිනේස්කේර්ගේ rerank පියවර, එය loopback මත ඇමතන) localhost වලින් පිටත පිහිටුවන ලද OpenAI-සමාන ආයතන සර්වර නෝඩ් භාවිතා කිරීමට ඉඩ දෙන්න — LAN box හෝ Tailscale peer ක්‍රියාත්මක TEI, Infinity, vLLM, ආදිය. පෙරනිමියෙන් අක්‍රියයි — දුරස්ථ හෝස්ටයකට යවනු ලැබීම egress හඳුනාගැනීම වෙනස් කරන අතර, එය පැමිණිලි කාර්මික අර්ධකාන්තයක් විය යුතුය. Loopback නෝඩ් දැන්වූ ලැබී ඇත සහ ප්‍රචලිත නොවේ. දුරස්ථ නෝඩ් ද ආයතන ප්‍රවේශ ඔස්ටි URL ප්‍රතිපතිය හරහා යාමේ."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "ජාල භ්‍රමණය Shared-Egress ආරක්ෂකය",
+        "description": "බහු-ආයතන භ්‍රමණ ඉදිකම්වයෙක සඳහා ජාල අසමතුලිතතාවක් (timeout, connection refused/reset) එක්ක, අසාර්ථක ආයතන ජාලයකට සිටින විට, කෙටි cooldown යෙදියි පාලු proxy-ඛාදය සහ සියල්ල ආයතන අනෙක් proxy-ඛාදය සඳහා ඉතිරි කළ වන්සින වෙනුවට ආයතන දෙකම. පෙරනිමියෙන් සක්‍රියයි (නිවැරදිය: egress IP වෙනස් නොවේ, සහ shared-egress ආයතනවලට latency/cooldown අනතුර අඩු කරයි). පළවන proxy-ඛාදය ඉවත් වූ විට සෘජු ප්‍රචලිතය නැවත ගෙන මෙය අක්‍රීය කරන්න."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "සීතල අසාර්ථක ක්‍රමීකරණය වැලඳීම",
+        "description": "ක්‍රමීකරණය පූජක හා ප්‍රායෝගික එක්කොඩ් එකේ ගිනුම් එකක් මත නැවත වරක් භාවිතා නොකිරීම නවතන විමානයේදී, ක්‍රමීකරණයන් වඩාත් ප්‍රබලයි. දුරකථන තහනම් හෝ 429 ලැබීම් සඳහා ප්‍රතිකර්මයන් නවතා දැමීම සඳහා ප්‍රතික්‍රියා කරයි. ක්‍රමීකරණ තත්ත්වය ලිපිනය ඔබ්බට ගනී; සියලුම උපාදම් පැහැර අස්වන අවස්ථාවේ තේරීම වෙනසක් නොවේ. පෙරනිමියෙන් සක්‍රියයි: තේරීමේ අනුපිළිවෙල වඩාත් ප්‍රබලයි, PROXY_SKIP_RECENTLY_FAILED=false නම්."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "මාර්ග ඉවත් වීමේ පිළිවෙල",
+        "description": "මාර්ග ඉවත් වීම් අනුව ඉක්මන් කළ සැපයුම්කරු සඳහා, ඉක්මන් කළ සාමාන්‍යයක් සමඟ නිරීක්ෂණය කරන ලද මාර්ග ඉවත් වීම් ලක්ෂ්‍යය හෙළි කරන සාමාන්‍යයක් උරමක් කිරීම ඉක්මන් කිරීම. අනුපිළිවෙල පමණි, ඉවත් කිරීමක් නොවේ. PROXY_SKIP_RECENTLY_FAILED අවශ්‍ය වේ, එය අනුපිළිවෙල පාලනය කරයි. පෙරනිමියෙන් අක්‍රියයි: තේරීමේ අනුපිළිවෙල වඩාත් ප්‍රබලයි."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "පිළිවෙල මාලිමා ලිපිනය",
+        "description": "ප්‍රායෝගික එකකෝඩ් එකේ පිළිවෙල තේරීමේ ගිනුම ලිපිනය කරයි (අඳුනුම් ලකුණු පමණි, සම්පූර්ණ ගිනුම් අඳුනුම් ලකුණු නොවේ) සහ ක්‍රමීකරණ ලිපිගතීන් ඉල්ලීම් වලට සම්බන්ධ කරයි, මෙමගින් මාලිම්පාලකයා වැලඳුණු ගිනුම් අසමාල ගිනුම්වලින් වෙනස් කළ හැකිය. පෙරනිමියෙන් අක්‍රියයි: අතිරේක ලිපිගතීන් නොමැත, අතිරේක තීරු ලිපිනය නොමැත."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "ක්‍රමීකරණය පූජක මාර්ග ඉවත් වීම් නිරීක්ෂණය",
+        "description": "ඩෑෂ්බෝර්ඩ් එකේ ක්‍රමීකරණය පූජකයක් යටින්, අවසාන පැය 24 වලදී එහි සාමාන්‍යයන් භාවිතා කළ නිරීක්ෂණය කරන ලද මාර්ග ඉවත් වීම් ආනතීන් කීයක්, ඒවා භාවිතා කළ සම්බන්ධතා කීයක් සහ එක IP මත පසුබට උන් කීයක් ද යන්න පෙන්වයි. කියවීම-තනි, ක්‍රමීකරණය ලිපිගතාංශයෙන් ගණනය කරන ලදී, මාර්ග ඉවත් වීම සඳහා භාවිතා නොකරයි. පෙරනිමියෙන් අක්‍රියයි: පූජක සංස්කාරකය වෙනස් නොවේ සහ නිරීක්ෂණය මාර්ගය null පිළිතුරු දේ."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "ක්‍රමීකරණය මාලිම්පාලකයා මාර්ග ඉවත් වීම්",
+        "description": "පූජක සාමාන්‍යයක් සඳහා මාලිම්පාලකයා එවන දින-පිහිටුවූ නිරීක්ෂණය කරන ලද ලක්ෂ්‍යයන් භාවිතා කර දර්ශනය සහ පූජක අනුපිළිවෙල සමඟ මුන්දුරා ගනී. පෙරනිමියෙන් අක්‍රියයි: පාරිභෝගික මාර්ගය 404 පිළිතුරු දේ සහ පූජක කියවීම් අගුල් වලට සියලුම පසුබට."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses Stall වර්තනය",
+        "description": "OpenCode විඥාපකය සඳහා, ප්‍රවාහගත Responses පිළිතුරක වෑග්නම පළමු byte නිරීක්ෂණය කරන්න (කවුන්ඩුව: RESPONSES_FIRST_BYTE_TIMEOUT_MS, default 15000). 2xx Responses ප්‍රවාහයක් එම කාලයට වඩා නිශ්ශබ්දව පැවතිය හොත්, එය stall ලෙස සලකනු ලැබේ: ගිණුමක් ශීත වැසීම් (cool down) කෙරේ සහ ඉල්ලුම එක් වරක් පමණක් ඊළඟ ගිණුම වෙත වර්තනය කරනු ලැබේ; දෙවන stall පරාජය වේ (fails fast). පෙරනිමියෙන් අක්‍රියයි: stalled ප්‍රවාහයන් stream readiness timeout දක්වා අද දින පියවර රැගෙන සිටියි."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked වර්තනය",
+        "description": "OpenCode විඥාපකය සඳහා, උඩතර ග්‍රාහකය (upstream) 403 හෝ 451 ඔප්පු කරන user_blocked ප්‍රතික්ෂේපනයක් (geo block නොව, Cloudflare fingerprint rejection නොව) ලත් විට, ප්‍රතික්ෂේපිත ගිණුම ශීත වැසීමකට පත් කර ඉල්ලුමකට වරක් පමණක් ඊළඟ ගිණුම වෙත වර්තනය කරන්න; දෙවන ප්‍රතික්ෂේපනය සාර්ථකතා ලකුණක් නොමැතිව විෂයමය වශයෙන් (as-is) ප්‍රතිස්ථාපනය කරනු ලැබේ. පෙරනිමියෙන් අක්‍රියයි: උඩතර user block එකක් වටා මාර්ග ආශ්‍රය කිරීම evasion මෙන් දිස් විය හැකි අතර, ගිණුම් රාජවංශය හරහා flag ප්‍රසාරණය කරයි, එබැවින් operator ස්වේච්ඡාවෙන් (opt in) නොකරන තුර ප්‍රතික්ෂේපනය නොවෙනස්ව ප්‍රතිස්ථාපනය කරනු ලැබේ."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode Transient Failover Backoff",
+        "description": "OpenCode බහු-ගිණුම් වර්තනය සඳහා, අනුදිග පොළඟා අත්හැරීම් දෙකක් transient උඩතර දෝෂයක් (5xx හෝ හිස් 400 ප්‍රතික්ෂේපනයක්) නිසා පරාජය වූ විට, ඊළඟ ගිණුම වෙත dispatch කිරීමට පෙර විරාමයක් ගන්න. විරාමය 1.5s වලින් අරඹන අතර, අනුදිග පරාජය ත්‍රිකෝණාකාර සෑම දිගු වීමකටම දෙගුණවේ, විරාමයකට වේදිකාව 6s සහ ඉල්ලුමකට 10s වන දක්වා සීමා වේ, client disconnect වූ විට ඉවත් කරනු ලැබේ, සහ රැඳී සිටීමට පෙර පරාජිත පිළිතුරු body release කරනු ලැබේ. පෙරනිමියෙන් අක්‍රියයි: failover තනි ස්කන්ධයක් ලෙස (immediate) පවතී."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Flush Empty Turn Retry",
+        "description": "පරිවර්තනය කළ streaming turns සඳහා, උඩතර turn එකක් භාවිතා කළ හැකි අන්තර්ගතයක් (usuable content) නොමැති විට (reasoning-only completion හෝ zero valuable chunks), client වෙත ඕනෑවක් ආවරණය කිරීමට පෙර සාමාන්‍ය credential path හරහා (up to `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) සීමා කළ retries ලබා දෙන්න. පෙරනිමියෙන් අක්‍රියයි: හිස් turns දැනට පවතින අභ්‍යාසය පවත්වා ගනී (හිස් 200 හෝ හිස්-අන්තර්ගත 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Empty Stream Sibling Recovery",
+        "description": "Claude/Codex streaming: පළමු lifecycle event එකෙන් පසු, භාවිතා කළ හැකි ප්‍රතිදානය සඳහා කෙටි කාලයක් තුල probe කිරීම (ඉහත 1s / 64 KiB); අන්තර්ගතය නොමැතිව අවසන් වන stream එකක් empty_content failure එකක් බවට පත්ව, උන්දුගත retry එකක් (cooldown නොමැති, model lockout නොමැති) වෙනත් පාත්‍රතා සම්බන්ධතාවයක් වලයේ, client disconnect වූ විට round-robin combos retries ඉවත් කරයි. Probe තුළ refusal, pause_turn සහ model_context_window_exceeded ස්‍වභාවික හිස් terminals ලෙස සලකනු ලැබේ. පෙරනිමියෙන් අක්‍රියයි: readiness, හිස්-අන්තර්ගත කළමනාකරණය සහ combo retries ඉඳිමුන මත්තේම පවතී."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "ස්‍රීම් ප්‍රාථමික ප්‍රතිදාන සන්දහනු",
+        "description": "ස්‍රීමින් ප්‍රතිදාන සන්දහනු: ප්‍රථම 64 ආරමිත ක්‍ෂුන්ට්ස් තාරුණා කළ පසු ප්‍රථම දෘශ්‍යමාන ප්‍රතිදානය සඳහා ක්‍ෂුන්ට් 16 කින් එකක් උපරිපාටර කරන්න, එවිට පසුව ආරම්භ වන ප්‍රතිදානයකුදුම ඉරිසම හා ප්‍රතිදාන සමපිටිය හැම සංඥා කරයි. එම අවස්ථාවෙන් පසු තනි 5xx එකක් ඉල්ලීම්-පරිද්ද සීමා වූයේ නම් මූලික වශයෙන් මාඩල-යට් ලොක්අවුට් එකක් ලියැවීම වෙනුවට ඉල්ලීම්-පරිද්ද සීමා කර තබාගන්න, සහ firstOutputMs වර්තමාන උපරිපාටර කාලසීමාවේ ප්‍රථම ප්‍රතිදාන ක්‍ෂුන්ට්සයට ප්‍රති-පුරවා ගන්න. පෙරනිමියෙන් අක්‍රියයි: ප්‍රථම 64 ආරමිත ක්‍ෂුන්ට්ස් තාරුණා කුණුම පරීක්ෂා කරනු ලැබේ, පෙර පරිද්දට සරිලි ප්‍රමාණයට."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode භාවිතා-සීමාවෙන් 429 ඉහල නඩත්ව",
+        "description": "OpenCode බහු-ගොඩනැගිල්ලේ භාවිතා-සීමාව හේතුවෙන්, ප්‍රථම 429 එකක් සැබෑ භාවිතා-සීමාවක් ලෙස වර්ගීකරණය වූ විට (විශ්ලේෂණය කළ හැකි Retry-After ශීර්ෂයක්, හෝ භාවිතා/භාවිතා සීමාවක් නම් කිරීමක් සහිත ශරීරයක්) ග්‍රහානා ලයිනප් ලාය තවදුරටත් නොයවනු ලැබේ, එහි ආරමිත 429 එක (ස්ථායුතිය, ශරීරය, Retry-After සහ කෝටා ශීර්ෂය) මාරිනා හැම වෙනස්වී නොවන පරිද්ද ආරමිත වේ. වර්ගීකරණය නොකළ 429 නොවන පරිද්ද මාර්ගා ගැනීමට පවතී. පෙරනිමියෙන් අක්‍රියයි: නොමිලේ පහත මට්ටම egress IP එකකට සීමා වේ (#9611), එබැවින් 429 සෑමක්ම පසු ගොඩනැගිල්ලකට මාරු වේ, සහ ආරම්භ කරන ලද ලයිනප් එක අවසාන ආරමිත 429 එක ආරමිත කරයි."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 ස්ථාපනය සහ පුනරාරම්භය",
+        "description": "OpenCode බහු-ගොඩනැගිල්ලේ භාවිතා-සීමාව හේතුවෙන්, අඛණ්ඩ අභ්‍යන්තර 429 නිසා (හෝ නව පූල්-අප්‍රමාණය සංකේතය නිසා) ඉල්ලීම heartbeat එකක් සමඟ ස්ථාපනය කරයි, ඉන්පසු මුළු සමූහයම විහිදුවීම වෙනුවට ගොඩනැගිල්ල 3ක් ජාංගිතව අවම කළ පාදයක් නැවත ඉල්ලා ගනී. පෙරනිමියෙන් අක්‍රියයි: 429 සෑමක්ම පෙර පරිද්දට සරිලි ප්‍රමාණයට පසු ගොඩනැගිල්ලකට මාරු වේ."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "ස්‍රීම් සූදානම් ප්‍රමාද පුනරාවකාශනය",
+        "description": "ස්‍රීමින් චාට් ඉල්ලීම් සඳහා, ප්‍රථම ආරමිත ශරීරය භාවිතා කළ හැකි ගිනුවක් ජනනය කිරීමට පෙර අක්‍රිය වූ විට, එම සූදානම් අයක්කුව සහ ගොඩනැගිල්ල දඬුවමකින් තොරව එම මාර්ගා ලයිනප් පාරට සීමා කළ දෙවැනි ඉල්ලීමක් කරයි. පෙරනිමියෙන් අක්‍රියයි: අක්‍රිය ප්‍රථම ශරීරය ඉල්ලීම අසාර්ථක වේ, පුනරාවකාශනයකින් තොරව."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 පූල් නැවත තේරීම",
+        "description": "OpenCode බහු-ගොඩනැගිල්ලේ භාවිතා-සීමාව හේතුවෙන්, proxy-less ගොඩනැගිල්ලක් යටතේ ambient පූල් සන්දර්භයක් යටතේ egress-bucketed provider එකකින් 429 නිසා, එම egress ලකුණා නැවත ඉල්ලා ගැනීම වෙනුවට ඊළඟ ඉල්ලීම සඳහා සම්බන්ධතා පූල් එකෙන් තවත් සාමාජිකයෙකු ඉල්ලා ගනී. අනුපිළිවෙල, ඉවත් නොකරයි: පූල් එක කෙළවර වූ විට වර්තමාන ව්‍යුහය පවත්වා ගනී. පෙරනිමියෙන් අක්‍රියයි: 429 සෑමක්ම පෙර පරිද්දට සරිලි ප්‍රමාණයට පසු ගොඩනැගිල්ලකට මාරු වේ."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 ප්‍රේර්ක මුද්‍රාව",
+        "description": "OpenCode Zen/Go ඉල්ලීම් සඳහා OpenCode v2 CLI ප්‍රේර්ක මුද්‍රාව යවන්න (#16571): User-Agent opencode/latest/<2.x>/cli සහ x-opencode-client cli, 2.x OpenCode ප්‍රේර්කක් වන විට පමණක් රඳවා ගන්නා ප්‍රේර්ක User-Agent, සහ බාධිත නොමිලේ-මට්ටම් ඉල්ලීම් සඳහා x-opencode-request නොමැත, වායුගුප්තය x-opencode-session-id/x-session-affinity/x-session-id වෙත පිහිටුවන ලදී, සහ v2 CLI පූර්ව-පූර්ව/ඇසුරුම් ව්‍යුහ ද ඉවත් කරන injected placeholder tools සහ \"none\" tool_choice. පෙරනිමියෙන් අක්‍රියයි: සෑම OpenCode ඉල්ලීමකම වර්තමාන හඳුනාගැනීම්, මුල් සහ ශරීරය පිටික්කමෙන්ම රඳවා ගනී."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen Egress-IP අවිරතකරණය",
+        "description": "OpenCode Zen (opencode-zen) නිර්දේශිත egress-IP අවිරතකරණය පවුලට එකතු කරන්න, එබැවින් එක් Zen සම්බන්ධතාවයක 429 දැක්වීම, එම egress IP බෙදා ගන්නා සහෝදර Zen සම්බන්ධතාව්‍ය සියල්ල සංසන්ත කරයි. පෙරනිමියෙන් අක්‍රියයි: Zen යතුරු දැමූ පරිදි සහ එක් එක් සම්බන්ධතාවය පටපිට පරිදි අවිරතකරණය වේ. විවේකිත OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS අගය හැම විටම මෙම ප්‍රමාණය වටහා ගනී."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode සම්පූර්ණ-පෙළ දෝෂ නීති",
+        "description": "සම්පූර්ණ වාහිනි දෝෂ පෙළ සමඟ සංයෝජනය වීමට නිර්මාණාත්මක OpenCode දෝෂ නීති (opencode-zen, opencode-go, opencode-cli) ඉඩ දීම, එබැවින් organization_quota_exceeded හෝ \"monthly usage limit reached\" වැනි ශරීර සලකුණු 429 ක් quota exhausted ලෙස සංයෝජනය කර සම්බන්ධතාව-ව්‍යාප්ත අවිරතකරණයක් සලසයි. පෙරනිමියෙන් අක්‍රියයි: එම නීති නිර්මාණාත්මක දෝෂ කේතය පමණක් දක්වයි සහ එවැනි 429 ක් ක්ෂණික හරස්-සීමාවක් ලෙස, පූර්ව පරිදි රඳවා ගනී."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI සම්පූර්ණ-පෙළ දෝෂ නීති",
+        "description": "සම්පූර්ණ වාහිනි දෝෂ පෙළ සමඟ සංයෝජනය වීමට නිර්මාණාත්මක Cloudflare Workers AI දෝෂ නීතිය ඉඩ දීම, එබැවින් 429 \"daily free allocation\" ශරීරය ක්ෂණික හරස්-සීමාවක් වෙනුවට quota exhausted ලෙස සංයෝජනය වේ. පෙරනිමියෙන් අක්‍රියයි: නීතිය නිර්මාණාත්මක දෝෂ කේතය පමණක් දක්වයි, පූර්ව පරිදි."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "සමත්තාව පූරණය",
+        "description": "රැඳීම් මොහොතේදී අවශ්‍ය සමත්තාව (වෛෂණික, මෙවලම්, ව්‍යුහිත ප්‍රතිදානය, අන්තර්ගත ජනාවකාශය) නොමැති විට ඉල්ලීම් ප්‍රතික්ෂේප කරන්න. Combo-layer අනුගෘහීත පූරණය ඉවත් කරන සෘජු එක-පාරාමීර්ෂ්ක ඉල්ලීම් ආරක්ෂා කරයි."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "USD කෝටාවලදී මිල නොමැති භාවිතය නොසලකන්න",
+        "description": "මිලක් නොමැති මාදිලිවල භාවිතය, කෝටාව ඉක්මවා ඇති ලෙස සැලකීම වෙනුවට, එක් එක් යතුරේ USD භාවිත කෝටාවලදී $0 ලෙස ගණන් කරන්න. පෙරනිමියෙන් අක්‍රියයි: මිලක් නොමැති මාදිලියක් හෝ routing alias එකක් සැබෑ වියදම සැඟවිය හැකි බැවින්, කෝටාව fail-closed ලෙස ක්‍රියා කරයි."
+      },
+      "RADAR_ENABLED": {
+        "label": "රේඩාර්",
+        "description": "OmniRoute Radar මොඩියුලය සක්‍රිය කරන්න (කැටලොග් ෆීඩ් තිර සහ සමමුහුර්තකරණය). පෙරනිමියෙන් අක්‍රියයි; සක්‍රිය කිරීමෙන් UI එක පමණක් විවෘත වේ — දත්ත සමමුහුර්තකරණය වෙනම opt-in එකක් ලෙස පවතී."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "මාදිලි endpoint හැකියා දොරටුව",
+        "description": "විශ්වාසනීය මාදිලි endpoint ටැග් බලාත්මක කරන්න (සැපයුම්කරු කැටලොගය මගින් ප්‍රකාශ කළ, විශේෂිත මාදිලි id එකකින් අනුමාන කළ, හෝ operator විසින් සකසන ලද): /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations සහ /v1/audio/* මත, මාදිලිය සේවා නොදක්වන endpoint එකකට යවන ඉල්ලීමක් dispatch කිරීමට පෙර HTTP 400 සමඟ ප්‍රතික්ෂේප කරන්න; ටැග් කළ endpoint සඳහා OmniRoute adapter එකක් නොමැති මාදිලි /v1/models වෙතින් සඟවන්න; සහ එවැනි මාදිලි සඳහා dashboard මාදිලි පරීක්ෂණයට 422 සමඟ පිළිතුරු දෙන්න. පෙරනිමියෙන් අක්‍රියයි: endpoint ටැග් තොරතුරු සඳහා පමණක් පවතින අතර ඉල්ලීම් පෙර පරිදිම dispatch කෙරේ."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "විශ්ව සන්දර්භ භාරදීම",
+        "description": "combo routing මාදිලි මාරු කරන විට සංවාද සාරාංශ ජනනය කර ඇතුළත් කරන්න. මාදිලි මාරු කිරීම් ස්වාධීනව සැලකීමට සහ පවතින හා අනාගත සියලුම combo සඳහා පසුබිම් භාරදීමේ ඉල්ලීම් වැළැක්වීමට අක්‍රිය කරන්න."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "තර්කන නැවත ධාවනය",
+        "description": "බහු-වාර සංවාද හරහා මාදිලි තර්කනය cache කර නැවත ධාවනය කරන්න. තර්කනය ගබඩා කිරීම සහ නැවත ඇතුළත් කිරීම නැවැත්වීමට අක්‍රිය කරන්න."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server Transport",
+        "description": "Codex ට දේශීය app-server WebSocket JSON-RPC transport (codexTransport=app-server) භාවිතා කිරීමට ඉඩ දෙන්න. ව්‍යංග්ගයක් වන විට, app-server සඳහා විෂාලන ලද සම්බන්ධතා Codex හි වෙනත් transports වෙත වෙනස් වේ."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code Discovery Aliases",
+        "description": "/v1/models හි claude/'<provider>'/'<model>' mirror ids දැන් වාගින් කරන්න, එමගින් Claude Code gateway model discovery නො-Claude models ලැයිස්තුගත කිරීම සිදු කරයි. නිවැරථිතය: විවෘතව ඔක්කොම ආකාරයෙන් සක්‍රීය වන විට සියලුම customers සඳහා catalog entries දෙගුණ වේ."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "No-Thinking Model Aliases",
+        "description": "no-think/'<provider>'/'<model>' gateway aliases සඳහා ප්‍රධාන මාර්ගය. සක්‍රිය (පෙරනිමි): /v1/models හි සෑම දුර්වල thinking-capable Claude model සඳහාම no-thinking variant එකක් දැන් වාගින් කරනු ලබන අතර, request එකක no-think/ id එකක් යවන විට එය reasoning අවලංගු කර real model වෙකට ව්‍යාප්ත වේ. අක්‍රිය: variants එකකුත් දැන් වාගින් නොකරන අතර no-think/ id එක අනුන්‍ය අනුන්‍ය model id එකක් ලෙස සැලකේ. මෙය සක්‍රිය වන විටද model විශේෂිත ModelSpec.noThinkingAlias opt-in/opt-out තවමත් අදාළ වේ."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Thinking Level Variants අවලංගු කිරීම",
+        "description": "/v1/models catalog හි thinking level variants (උදා: -low, -medium, -high) ජනනය අවලංගු කරන්න."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Adaptive Virtual Admission Lanes",
+        "description": "provider dispatch සඳහා tenant විශේෂිත adaptive virtual admission lanes සක්‍රීය කරන්න (#9654): tenant එකක burst තවත් tenant එකකට 503 ලබා දීම නතර කරයි. OMNIROUTE_CHAT_VIRTUAL_LANES env var මෙම dashboard override එකට ඉහළ ප්‍රමාණයකින් යුක්ත වන අතර, වෙනස්කම් server restart එකේදී ඵලදායී වේ."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "කර්මාන්තික ඝටන්තුව හෙළිකරවුම්",
+        "description": "canonical හිමිකරුට සක්‍රිය අක්තපත්‍රයක් නොමැති නමුත් සක්‍රිය අක්තපත්‍රයක් සහිත passthrough gateway එකක් මඟින් ඉල්ලීම් යොමු කරන මාදිලි සඳහා, /v1/models හි '<gateway-alias>'/'<model>' දර්පණ id ප්‍රසිද්ධ කරන්න. අවවාදයයි: ගෝලීයව සක්‍රිය කළ විට සියලු සේවාලාභීන් සඳහා catalog ඇතුළත් කිරීම් එක් කරයි."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API එකතුවක සමතුලිතතාව",
+        "description": "New-API / One-API / Sub2API එකතුකාරි (aggregator) අනුරූප නෝඩ්‌න් සඳහා සමතුලිතමය අනාවරණය සක්‍රීය කරන්න. සක්‍රීය වූ විට, එකතුකාරි අතියරය (aggregator flag) සැකසුණු අනුරූප නෝඩ්‌න්, ඉකුත්තුවේ (dashboard) සහ කූෝටා-ප්‍රියෝන (quota-preflight) මාර්ගසැලසුමේදී ඔවුන්ගේ තුරන්විලාව (balance) වාර්තා කරනු ඇත."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "මකා දැමූ සෙවීමේ සම්බන්ධතා concealing",
+        "description": "පරීක්ෂණ සංඛ්‍යා සහ පසුගිය පරීක්ෂණ අදහස් කරන්නේ තවම ජීවමාන සම්බන්ධතාවක් සතුව ඇති ප්‍රජායකයන් පමණි (duckduckgo-free වැනි යතුරක් නොමැති ප්‍රජායකයන් සැමවිට ස ගණනය වේ). Off හි තබා ඇති සෑම පරීක්ෂණ ත්‍රිකෝණයකටම ප්‍රජායක අනන්‍යතා අංකයක් ඇත."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "දැඩි නොමිලේ ලාංඡනය",
+        "description": "ඩැෂ්බෝඩ් පවිදාහක පිටු: පවිදාහකයා පිළිගන්නා සංඥා වලට පමණක් නොමිලේ බැජය පෙන්නන්න — ලියන ලද නම් ප්‍රායෝගික ක්‍රමය, අ-බූලියන් නොමිලේ අංශක සහ රූජිත පවිදාහකයින් සඳහා :free අන්තර්ගාමී ඉවත් කරයි, නොමිලේ තහඩුවක් තොරතුරුදායක ලෙස ලියැද නොමැති. Off පුරුදු බැජ නියමය තබා ගනී."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "තනි තර්ම: හිස් ඉරන් පුළුල් පිළිතුරු 503",
+        "description": "ටෂ්කර්-කරුණු පූව-පෙර උරණයක් (වාරාම, අත්අඩංගුව හෝ ඉක්මවීම නිසා හැම ඉලක්කයක්ම පසුහත් වී පිටුව හිස් වී ඇති අවස්ථාවේ) වෙලිඳුන් ස්වයං-කරුණු පූව-පෙර උරණයක් සාදන විට, පෙරවැඩි 400 \"ඉලක්කයක් කිසිවක් කාර්යක්ෂමතාවය සපාය නොගත\" capability_mismatch වෙනුවට 503 no_eligible_targets පිළිතුරු දෙන්න. පෙරනිමියෙන් අක්‍රියයි: හිස් පූව-පෙර උරණය පෙරවැඩි 400 තබාගනී."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral අර්ධ-නිශ්චිත 401 මෘදු අසාර්ථක",
+        "description": "නිග්‍රහ නොකළ Mistral 401 ('{\"detail\":\"Unauthorized\"}', විශේෂිත සත්‍යාපන සිංහාන නොමැතිව) පක්ෂාතාරණය වූ ක්‍රීයාවේ සහ ක්වාතෝට පිරී සිටින අවස්ථාවකදී සර්වඥය. සක්‍රීය කළ විට, එවැනි 401 සම්බන්ධතාවයක් අවසානයට පත් නොකර එය සිසිල් කිරීමට උදව් කරයි, පැයකට පාරිභෝගිකව 3 වරක්; ඊළඟ 401 තවමත් එය අවසානයට පත් කරයි, එබැවින් පක්ෂාතාරණය වූ ක්‍රීයාවක් සංවේගනය වේ. පෙරනිමියෙන් අක්‍රියයි: පෙරපරිදි, සෑම නිග්‍රහ නොකළ Mistral 401 එකක්ම සම්බන්ධතාවයක් අවසානයට පත් කරයි."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "බැටච් & පූර්ව විෂයක්ත ස්වයංක්‍රීය පිරිපාදනය",
+        "description": "OMNIROUTE_BATCH_RETENTION_DAYS ක්‍රියාකාරිණී බාධ්‍යම් වූ Batch API කාර්යයන් (සම්පූර්ණ/අපරාද/අවලංගු/කාලය තුඩු වූ) සහ ඒවායේ රෙකෝඩ වැදගුරු පරීක්ෂා කරන ලද පූර්ව වර්ගික දත්ත ඉවත් කිරීමට ස්වයංක්‍රීය පිරිපාදනයට ඉඩ දෙන්න, ඒවායේ BLOB අන්තය කාලය තුඩු වූ පසු මකා දැමීමට ද ඉඩ දෙන්න. පෙරනිමියෙන් අක්‍රියයි: සෑම පවතින ස්ථාපනයක්ම මෙම දත්ත පෙරපරිදිවම තබා ගනී, ක්‍රියාකාරීන්වරයා කැපී පෙනෙන තුරු. ක්‍රියාකාරීන්වරයා මගින් ආරම්භ කරන DELETE /api/v1/batches/delete-completed මාර්ගය බලපෑමක් නොවීය — එය වෙනම, අවිනිශ්චිත පොදු API ගිවිසුම් එකකි."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity ගිණුම් උරුවාතය",
+        "description": "මැදිසර තෝරාගත් Antigravity ගිණුම, එය තෝරාගත් ඉල්ලීමේ මාර්ගගත ජීවත් සඳහා අවසන් කරයි, එබැවින් සමාන්තර පෙරහැරුමක් හෝ සාක්ෂි හත්වරහනක් දැනටමත් ඇදුම්වූ මාර්ගගත ප්‍රවාහයකට ගැනුම් වූ ගිණුමක් නැවත තෝරා ගැනීමට නොහැකිවේ. උරුවාතය (සම්බන්ධතාවය, න්‍යායාත්මක උපරිම මොඩෙලය) ඉඩතුවයට සීමා වී ඇත, එබැවින් එක් ගිණුමක්ම ඒකවිධ මොඩෙල් දෙකකට එකවර සේවය කළ හැකියි. එම මොඩෙලය සඳහා පොළඟන ඕනෑම ගිණුමක් දැනටමත් උරුවාතය වී ඇත්නම්, ඉල්ලීම ඉතා මාර්ගදක 503 POOL_BUSY ආරූච්චික 503 සහ සීමා වූ Retry-After සමඟ ආරූච්චික 503 ලෙස ආරූච්චික 503 ගනී, දුර්වල ගිණුමක් මත ගොඩවී නොයයි. පෙරනිමියෙන් අක්‍රියයි: ගිණුම් තෝරාගැනීම පෙරපරිදිවම පවතී, උරුවාතයක් ගනු නොගනී."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "පරණ කොම්බෝ පියවර ස්වයංක්‍රීය ඉවත් කිරීම",
+        "description": "කර්මාන්තශාලා ප්‍රමාණවත් ජීවවේගී කැටලොගයට එකච්චි කළ ආරූච්චික සංවේගනයක් වූ පසු, කැටලොගය තවදුරටත් ලැයිස්තුගත නොකරන මොඩෙල්යන්ට පොඩිතා කළ කොම්බෝ පියවර ඉවත් කරන, ඉවත් කළ පියවරකට විනඩි ආකෘතියක් සහිතවයි. අපරාද, දුර්වල හෝ නොමිලේ-මැදිසර සංවේගනයකදී ඉවත් කිරීමකින් තොරවම ඉවත් නොකරයි, කොම්බෝවක් හිස් කරන්නද නොකරයි. පෙරනිමියෙන් අක්‍රියයි: පරණ පියවරන් ඉදිරිපත් කිරීම පමණි."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth සාරාංශ කළ සිතුවම් කිරීම",
+        "description": "Let a Claude OAuth request that asks for readable thinking (thinking.display \"summarized\") drop the redact-thinking-2026-02-12 Anthropic beta, which otherwise makes Anthropic return empty, signature-only thinking blocks. Off by default: that beta is part of the Claude Code OAuth wire fingerprint, so OAuth requests keep it unchanged. API-key Claude requests already honor summarized thinking without this flag; OMNIROUTE_REDACT_THINKING=false also reaches OAuth only when this flag is on."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro Tool Call අදාළ නිරව්හන සංස්කරණය",
+        "description": "දෘෂ්‍යමාන ප්‍රතිපලයක් ඉදිරියට පෙර, ප්‍රතිචාරයේ පෙළපුරාසිත tool_call ආවරණයක් (input.name හෝ input.arguments නොපැවතුම්) නිපන් වූ විට, එය නිවාරණය කර, අවලංගු invalid_kiro_tool_call එකක් මගින් පරිච්ඡේදය අවසන් කිරීම වෙනුවට, නිවාරක උපදෙස් එකක් සමඟ ඉල්තීම නැවත එවන්න. නැවත උත්සාහයක් සඳහා අමතර Kiro ඉල්තීම් එකක් වියදම් වේ; දෙවන අපරාජය සිදුවන්නේ kiro_tool_call_repair_retry_failed සමඟ පරිච්ඡේදය අවසන් වන විටය. පෙරනිමියෙන් සක්‍රියයි. අවලංගු ආවරණයේ පළමු අපරාජය මත පරිච්ඡේදය අපරාජනය වන පරිදි අඩුකිරීම සඳහා false ලෙස සැකසේ."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev උත්සාහ ප්‍රතිශ්‍රිත",
+        "description": "කර්මාන්තකර්මී ප්‍රතිදානයක් හෝ ක්‍රියාකාරි තොරතුරු සම්පිලියක් මගින් ප්‍රකාශය පිළිවෙළක් නොමැති විට, models.dev ප්‍රකාශයෙන් ලැබෙන (දන්නා උත්සාහ වචන මාලාවට අඩු කළ) සහයෝජිත උත්සාහ ප්‍රතිශ්‍රිත භාවිතා කරන්න, සහ /v1/models effort_tiers සහ කම්බෝ ප්‍රතිශ්‍රිත අතුර්ගතීන්හි ප්‍රකාශයේ හිස් ප්‍රතිශ්‍රිත ලැයිස්තුවක් \"ප්‍රතිශ්‍රිත නොමැත\" ලෙස සලකන්න. පෙරනිමියෙන් අක්‍රියයි. effort_tiers සහ විසඳුම් සහයෝජිත supportedThinkingEfforts පෙර පරිදිම තබා ගනී."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena Synthesized cx දුර්විමුහුර",
+        "description": "පිටපත් ප්‍රතිදානයක් කළ cx අපරාජක ප්‍රතිපලයක් (අපරාජක ප්‍රතිපලයක් අඩු පිටපත් වන පිටපත් සඳහා arena.ai ඉල්ලාදායනට එවන අගය) ඔපරේටර්-ප්‍රතිදානය providerSpecificData.cx අඩු සෑම Arena (lmarena) create-evaluation ඉල්තීම් සඳහාම අදාළව තබන්න. පෙරනිමියෙන් අක්‍රියයි: cx ක්ෂේත්‍රය Arena anti-automation අගයක් වන බැවින්, OmniRoute ට්‍රියුරු සහයෝජිත මිනිවලින් අලුතට ලැබුණු අගයක් (providerSpecificData.cx) පමණක් ඉදිරිපත් කර, නැතිනම් cx නොමැතිව ඉල්තීම් යොමු කරයි. ඉහළ නාලිකා ආයතනවල අපරාජක ප්‍රතිපලයක් ඔපරේටර්; Arena cx නොමැති ඉල්තීම් ප්‍රතික්ෂේප වීමේදී පමණක් සක්‍රීය කරන්න."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Native Codex Reactive Compaction",
+        "description": "Let the reactive (threshold) and last-resort context compaction passes also rewrite native Codex passthrough histories (POST /v1/responses to the codex provider) when they exceed the context budget, using the Responses input[] adapter. Off by default: native Codex histories are owned by the Codex client and are never rewritten by compaction; oversized requests keep failing the context budget check exactly as before. Requires global compression to be on and the model not to be excluded."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Quota Window: Honour Bounded Park",
+        "description": "Let the per-window quota policy (session/weekly thresholds used by account selection) honour the bounded exhaustion park: once the capped park deadline has passed, or the cached quota observation is older than the park cap, the window stops excluding the account until a fresh quota fetch. Off by default: a cached window keeps blocking on its last reported percentage until its own reset time."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "බිම් නිර්මාණය: දිගු වේලාවන්",
+        "description": "OpenAI-අනුකූල බිම් නිර්මාණය සඳහා: නියත 120 ස තත්‍යාක්ෂ මාස නොව, සම්බන්ධතාවයේ ඉතිරි වේලාව (providerSpecificData.timeoutMs) හෝ මධ්‍යම ඉහළ පසුගේ fetch ඉතිරි වේලාව (FETCH_TIMEOUT_MS, පසුව REQUEST_TIMEOUT_MS, default 600 ස) භාවිතා කරන්න; අයැත්තුවා විසින් අවලංගු කළ ඉල්ලුමක් 499 සමඟ අවසන් කරන්න; සහ Playground විසින් දිගු බිම් වේලාවන් SSE stream එකක් ලෙස, keepalive හෂ්ට්බීට් සමඟ ලබා ගන්න. පෙරනිමියෙන් අක්‍රියයි: නියත මාසය අලංකාරව අලංකාර වන අතර අයැත්තුවා විසින් අවලංගු කිරීම ප්‍රචාරණය නොවේ. ප්‍රතිචාර ශරීරය කියවීම ආවරණය කරන වාහන් තාතා දිග හැරීම සැම විටම ඇත."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "විශ්‍රාන්ති අර්භව නිරූපණය වැඩිදියුණු කිරීම්",
+        "description": "/v1/models සඳහා claude/ සොයා ගැනීම සහ functional-gateway නිරූපණ වැඩිදියුණු කරන්න. පෙරනිමියෙන් අක්‍රියයි: නිරූපණය දෙක පෙර ආකාරයටම හැසිරේ. සක්‍රිය විට: claude/ සොයා ගැනීම නිරූපණය සටහන් කර ඇති වැඩි දියුණු කාරක variant (-low/-medium/-high/-xhigh) ආවරණය කරයි, ඉල්ලුම් මාර්ගය materialize කළ නොහැකි built-in auto/* ids අමතක කර, දැනටමත් සටහන් කර ඇති alias එකක් අමතක කරයි; functional-gateway නිරූපණයන් combos සහ OmniRoute-synthesized ids (claude/, no-think/) අමතක කරයි, owner ඥයා owned_by වෙන් කර ගනු ලැබේ, owner එක තමන්ගේම gateway ලෙස කිසි විටෙක භාවිතා නොකරයි, blockedProviders හි අක්‍රිය කළ gateways සහ gateway එකේ ආධිපතික සජීව් ව්‍යාපෘති වී ඇත."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Proxy සෞඛ්‍යය: අපිව් ප්‍රතිපාදන අපහසු ශ්‍රේණිය නැවත සකසයි",
+        "description": "proxy සෞඛ්‍ය සඟය, target විසින් ප්‍රතිපාදනය කළ probe (401/403/429: proxy relayed, destination විසින් මෙම egress IP ප්‍රතිපාදනය කළා) proxy ජයග්‍රහී අපහසු ශ්‍රේණිය නැවත සකසන්න, probe එකක් ලෙස. පෙරනිමියෙන් අක්‍රියයි: ප්‍රතිපාදනය ඊතලයක් ලෙස ඉතිරි වී ශ්‍රේණිය පවත්වා ගනී (#10654). 5xx ආකාරයේ දී නිගමනයක් නොමැත, සහ ප්‍රතිපාදනය proxy එකක් ඉවත් කිරීමට, අක්‍රිය කිරීමට හෝ නැවත සජීවී කිරීමට ව්‍යාපෘති වී නොමැත."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok Subscription බිම්",
+        "description": "xai-oauth (xao) සහ grok-cli බිම් මාර්ගයන් ලියාපදිංචි කර OpenAI ආලේඛිත උස/hd xAI මධ්‍ය ලෙස ඡේදනය කරන්න. පෙරනිමියෙන් අක්‍රියයි: API-key xAI බිම් මාර්ගය පවතින OpenAI-අනුකූල ඉල්ලුම මත රඳා පවතී සහ subscription මාර්ගයන් ලියාපදිංචි නොවේ."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth Live Model සොයා ගැනීම",
+        "description": "xai-oauth සම්බන්ධතාවයන් සඳහා https://api.x.ai/v1/models භාවිතා කර xAI මෝදෙලය සජීව් ව්‍යාපෘති වී ඇත OAuth bearer token භාවිතා කර, ඖ්ෂණික අඛණ්ඩ විත්තනය වෙනුවට. පෙරනිමියෙන් සක්‍රියයි. සත්‍යාක්ෂය අනුක්‍රමිකව පවත්වා ගැනීමට flag false ලෙස සකසන්න. HTTP අපහසුතාන් discovery මාර්ගයේ විත්තනය වෙත fall back කරයි; flag getter එක ස්ථානගතවම HTTP නිකුත් නොකරයි."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-ආකෘතික මධ්‍ය-වාච්‍යකරණ Sys",
+        "description": "සරල anthropic-compatible-* ප්‍රේරණ මගින් (claude → claude පාර්‍ශ්වික), මධ්‍ය-වාච්‍යකරණ role:system පිවිසුම් messages[] තුළම රඳවා දමන ලදින්, ඒවා ඉහළ-ස්තර system පරාමිතියට වැසයන්න, එමඟින් cache වූ prompt පෙර-ආරම්භය සියලුම පිවිසුම් හරහා ස්ථාවරව රැකෙන්නේ නිසා. මෙය ක්‍රියාත්මක වන්නේ khách hàng බෙල්ලායේම mid-conversation-system-2026-04-07 anthropic-beta (ඉහළට නොවෙනස්ව යවන ලද) යවන විට පමණි. පෙරනිමියෙන් අක්‍රියයි: සෑම system පිවිසුමක්ම පෙර සමාකරම පරිදී ඉහළට වැසයි, ඒ ප්‍රේරණ beta ආයුක්ත නොසහතුපයක් 400 සමඟ role:system ක්‍රමය ඔස්සේ ප්‍රතිචාර දක්වයි."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB සෞඛ්‍ය පරීක්ෂාව: ආරම්භක පිපාහණය ප්‍රමාදය කිරීම",
+        "description": "වේදිකාව ඉල්ලීම් පිළිගැනීම ආරම්භ කිරීමෙන් පසු ආරම්භක DB අගය/සෞඛ්‍ය පරීක්ෂාව (setImmediate ඔස්සේ) ඉටු කරන්න, ඒ වෙනුවට ආරම්භය අවසානය දක්වා බලවත් වේදිකාව වැළඳ සිටීම වැළැක්වීම සඳහා. පෙරනිමියෙන් අක්‍රියයි: ආරම්භය #13717 පෙර සමාකරම පරිදී පරීක්ෂාව හමුවේ වැළඳී, එමඟින් දුර්වල database එක පළමු ඉල්ලීම සේවය කිරීමට පෙරම හඳුනාගැනේ. සක්‍රීය: ආරම්අම ක්ෂණිකව ප්‍රතිවර්තනය කර, පරීක්ෂාව (දැන් සීමා/පිටිත වන, සහ සැබෑ file-backed DB සඳහා අන්තර්ගාමනය කළ හැකි child process එකකට වෙන්වන) ඊට පසුම ඉටු කරයි."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode ප්‍රකාශිත මාලාව මාර්ගෝපදේශනය",
+        "description": "ප්‍රතිස්ථාපනය කළ registry endpoint එකක් නැති OpenCode Zen සහ OpenCode Go පද්‍ධති, ඒවායේ ඉල්ලීම පෘෂ්ඨය (Responses @ai-sdk/openai සඳහා, Messages @ai-sdk/anthropic සඳහා) published models.opencode.ai මාලාවෙන් ලබාගන්න, පසුබිනින් වේලාවකට 6 පැතුම් වෙන්වීම් මත කියවන ලද්දේ. පෙරනිමියෙන් අක්‍රියයි: endpoint එක registry heuristics වලින් පෙර සමාකරම ලැබේ, සහ මාලාව කිසිම විටෙක හඳුනාගනු නොලැබේ."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "ස්වයංචල ඉල්ලීම්: විසඳුම් ලැබුණු හැකියා බර",
+        "description": "ස්වයංචල/* ඉල්ලීම් (resolveModelOrError සහ ස්වයංචල-මාර්ගෝපදේශන wrapper) ලැබුණු පද්‍ධති හැකියා (vision, reasoning, thinking) සහ නිරීක්ෂිත ගුණාත්මක ලකුණු සමඟ සහකරු කුලු ඉදි කරන්න, /v1/models මාලාව වැනි ඉතා bulk කියවීමක මැයිතුව. පෙරනිමියෙන් අක්‍රියයි: ඉල්ලීම-කාලීන snapshot බර පෙර සමාකරම ඉතිරි වේ (හැකියා අවශ්‍යතාවයට විසඳෙන අතර ඒ බර දෙසට ව්‍යුහය නොකරයි). සක්‍රීය: එම ලකුණු snapshot බර දෙසට ඉම්පන, එමඟින් සහකරු බර, එසේම තෝරුම්, වෙනස් විය හැකියි."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "ස්වයංචල-ව්‍යුහ: Keyless ප්‍රවේශයේ ග්‍රීට් එක",
+        "description": "තැපෑල් (no-auth) පරිශ්‍රක වස්තු, ඒවායේ ප්‍රවේශයේ ලෝකාල් browser (browserBacked) හෝ ලෝකාල් ස්ථාපිත CLI (isLocalCli) අවශ්‍ය නම්, ස්වයංචල/* සහකරු කුලුවෙන් බැහැරව තබාගන්න, එමඟින් බැඳුණු අංගයක් ස්වයංචල ඉල්ලීමක් ප්‍රති-ලක්ෂ්‍ය timeout එක දක්වා ප්‍රමාද කිරීම (#17036) වැළැක්වේ. පෙරනිමියෙන් අක්‍රියයි: සිහසුනක් emulated tool calling සහිත සෑම no-auth පරිශ්‍රක වස්තුවක්ම පෙර සමාකරම කුලුවේ ඉතිරි වේ. සෘජු '<alias>'/'<model>' ක්‍රමය ඕනෑම අවස්ථාවක හෝ ක්‍රියාත්මක වේ."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Inline Reasoning Replay",
+        "description": "codebuddy-cn නිරීක්ෂක ආදර්ශ සඳහා (reasoning replay අවශ්‍ය වන DeepSeek-V4 / Kimi-K2 කුලවල), නැවත යන සහයාතික reasoning_content එක් එක් පණිවිඩ අන්තර්ගතයේ මුල් තනිකර නරකුම් '<thought>' ඝූතුවක් ලෙස තනිකරම ඇතුළත් කරන්න, ඉන්වෝඩ් එකක් reasoning_content ක්ෂේත්‍රය දැමෙන අවස්ථාවලට මෙය ආරක්ෂිත කරන සේවය ලැබේ (#13632). පෙරනිමියෙන් අක්‍රියයි: codebuddy-cn ඉල්ලීම් පෙර දායකයකින් බවට යන අතර, reasoning_content ක්ෂේත්‍රයම හැමවිටම තබා ගනු ලැබේ."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Provider Safety Stops: Terminal",
+        "description": "ප්‍රදායක සුරත ආරක්ෂක නවත්වුමක් (misalignment_policy_violation, content_policy_violation, හෝ 'blocked by our safety systems' යන ලේබල් එකට provider_safety_rejection ලෙස සලකන වර්ජනාත්මක පරණ ප්‍රතික්ෂේප්පයක්) තනිකර, ඉල්ලුම-ස්කෝප් ස්ත්‍රෝයාන ලෙස තබා ගන්න: එහි කෝඩ් HTTP, Responses, WebSocket සහ ඉවර ඓමාල ටිප්පරය වෙතින් ආරක්ෂිත වන අතර, combo එක වෙනත් ඉලක්කයන්ට නැවත උත්සාහ කිරීම වෙනුවට එහිම නවතින අතර, අවශ්‍ය තරම් එමට සහයදෙන අයන් අවලංගු කරයි (#17049). පෙරනිමියෙන් අක්‍රියයි: මෙම දෝෂ ගතියවලට පවතින හැසිරීම පවතින අතර, combo රාමුගතිය වෙනස් වේ."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Credential Health: Retest Auto-Disabled Connections",
+        "description": "ගේටවේ ඇති ගිනීමේ මතභා ඉන්විගේශනයේ ස්ට්‍රිංප්පවල් වැඩය වෙනුවට, එය මානයින් මාණ්ඩු කළ ඉන්විගේශන (autoDisabledAt ලෙස නම්කරන; එක් එක් කාලය සඳහා පැය 6 ක් වෙනුවට එකක් හරි නැත, ස්වභාවික 5) නැවත ඔත්තු කරන්න, එහි ඔත්තුව සාර්ථක වූ විට ඉන්විගේශනය නැවත තව කරන්න (#16190). පෙරනිමියෙන් අක්‍රියයි: මාණ්ඩු කළ ඉන්විගේශන එක්සේම මානාමානයන් ව්‍යාපෘතිකරන තෙක් මාණ්ඩු වන අතර, මීට පෙර පරිද්ථ ඉන්විගේශන සහ ස්ථිර බානින් මානාමානාන කළ ඉන්විගේශන කිසිවිටෙක නැවත ඔත්තු නොකරයි."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Credential Gate: Auth Diagnoses Only",
+        "description": "කැන්ට් කැෂ් කළ අසාර්ථක සාක්ෂි අනුප්‍රාප්තියක් ඉන්විගේශනයක් තවකරම සාක්ෂි වරදවු තහවුරු වන විට (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required) ඉන්විගේශනය තවකරම අවලංගු කරයි. භස්මාත්තක අසාර්ථකයන් (තාක්ෂණික ප්‍රතිපත්තීන්, සීමිකරණ ප්‍රතිපත්තීන්, විදාන, අසමනා ආපුණ්‍යන් සහ අනාර්ජික ෆීඩ් එරර් එරර්) නොදනු ලෙස සලකන අතර, ඉන්විගේශනයට ට්‍රාෆික් එක තවම ලැබේ. පෙරනිමියෙන් අක්‍රියයි: ඕනෑම කැෂ් කළ ආපුණ්‍ය දෝෂයක් කැෂ් TTL (මිනිත්තු 5) සඳහා ඉන්විගේශනය අවලංගු කරයි."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: අන්තර්ගත ප්‍රතිපත්ති ප්‍රතික්ෂේපයකදී නවත්වන්න",
+        "description": "combo ඉලක්කයක කතුවරයන් එකෙහි විවිධ ආදර්ශ ආරක්ෂක ක්‍රියාවකින් මතභා ස්‍රෝයානයක් (කෝඩ් හෝ විඳි cyber_policy / content_policy_violation) දැනුම් දෙන විට, ඉතිරි ඉලක්ක අලෙවියන් වෙනස් ආදර්ශ වුවත්, combo එක නවත්වන්න සහ එම මතභා ස්‍රෝයානය ආපතා කන්න, අනුප්‍රාප්තිවක් එවකරම ඊළඟ ඉලක්කයට යන අවස්ථාවට සරියටම තබා ගැනීම. පෙරනිමියෙන් අක්‍රියයි: මතභා ස්‍රෝයානය කිසිදා වරායකට උරුම නොකරන අතර, provider breaker එකක් ඉවැද්දර නොකරයි, සහ combo එක පෙර පරිද්ථ සේ ඊළඟ ඉලක්කයට යයි."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "සිසිලන කාලයේ නැවත උත්සාහය: 403/410 ප්‍රතික්ෂේප මඟ හරින්න",
+        "description": "සියලු ගිණුම්වලම කුල්ඩාඩ්වයන් පවතින අතර, මුලින්ම අවසන් වන කුල්ඩාඩ්වය 403 (ප්‍රවේශය නොකිවීම) හෝ 410 (ඉවත් වී ඇත) හේතුවෙන් සිදුවුනහොත්, ඉල්ලීම් නැවත යැවීමට ඉවසා බලන වෙනුවට එම උරට්ටම ක්ෂණිකව ආපසු ලබා දෙන්න; පසුව, renewing agentrouter connection-scoped quota 403 යනු 429 යන error code එක සහිතව සුරැකේ, එමගින් එය නැවත වටිනා තත්ත්වයේ පවතිනු ලැබේ. ඩිෆෝල්ට් ආකාරයෙන් අක්‍රීයයි: 401 පමණක් ඉවසීම ඉවත් කරන අතර, ඒකූර්ත හැම උරට්ටමක්ම එය ප්‍රතිස්ථාපිත වූ තත්ත්වය සමඟ සුරැකේ."
       }
     }
   },
@@ -14065,7 +14763,11 @@
       "ok": "සාමාන්යයෙන් අවසරදායකයි"
     },
     "allProviders": "සියලු සපයන්නන්",
-    "noApiKeyRequired": "API යතුරක් අවශ්ය නොවේ"
+    "noApiKeyRequired": "API යතුරක් අවශ්ය නොවේ",
+    "searchPlaceholder": "මෝඩලය, සැපයුම්කරු සොයන්න…",
+    "searchAria": "නොමැකින මෝඩල සොයන්න",
+    "filterProviderAria": "සැපයුම්කරු අනුව හැරවීම",
+    "keylessOnly": "ඉත්තරයකින් තොරව පමණි"
   },
   "providerHealthAutopilot": {
     "title": "සපයන්නාගේ තත්ත්ව ස්වයංක්රීය නියමුවා",
@@ -15315,7 +16017,117 @@
     "importFailed": "ආයාතය අසාර්ථක විය.",
     "importSuccess": "ගිණුම් {connections}ක් සහ සපයන්නා නෝඩ් {nodes}ක් ආයාත කළා; {skipped}ක් මඟ හැරියා."
   },
+  "conversations": {
+    "title": "කතාවන්",
+    "countSummary": "{total, plural, one {කතාව #} other {කතාවන් #}} 2+ හවුල් එකවුත් ඇති",
+    "autoRefreshTitle": "මෙම ලැයිස්තුව සේවාදායකයෙන් නැවත ලබා ගන්නේ කොපොලයක් විදේදින.",
+    "autoRefresh": "වෙතුවලින් නැවත ලියවීම",
+    "loading": "කතාවන් පැඟෙවී ගතවනව්න්...",
+    "colConversation": "වාදය",
+    "colTurns": "පෙරළීම්",
+    "colContinuation": "දිගටම",
+    "colLastModel": "අවසන් ආකෘතිය",
+    "colProvider": "සපයන්නා",
+    "colStatus": "නිශ්චය",
+    "colLastSeen": "අවසන් දුර දැනෙන",
+    "drawerTitle": "වාදය",
+    "prevConversation": "පෙර වාදය",
+    "nextConversation": "ඊළඟ වාදය",
+    "gotoLatestRequest": "අවසන් ඉල්ලුමට යන්න",
+    "goToBottom": "තීරුපතට යන්න",
+    "statusInProgress": "ක්‍රියාත්මක වෙමින් පවතී",
+    "continuationGenuineTitle": "අවසන් පෙළ පෙළ previous_response_id භාවිතා කළ අතර එය සේවකයාගේ පැතිවල විසඳවන ලදී",
+    "continuationBadge": "අඛණ්ඩතාව",
+    "stalledTitle": "අවසන් පෙළ විවරණය වූවක් නොවන අතර මිනිත්තු 5+ ක් තුළ කිසිදු දමනයක් සිදුවී ඇත",
+    "stalledBadge": "දමනය වී ඇත",
+    "noTurns": "මෙම කතනාව සඳහා කිසිදු පෙළක් සටහනක් නොමැත."
+  },
   "logExport": {
-    "startFromCurrentPosition": "වත්මන් ස්ථානයෙන් ආරම්භ කරන්න (පවතින ලොග් මඟ හරින්න)"
+    "startFromCurrentPosition": "වත්මන් ස්ථානයෙන් ආරම්භ කරන්න (පවතින ලොග් මඟ හරින්න)",
+    "pageTitle": "දැක්ම අපනයනය",
+    "pageSubtitle": "Logs ටැබයේ ඇමතුම් ලොග, බාහිර විශ්ලේෂණ ගබඩාවකට අඛණ්ඩව යවන්න.",
+    "addDestination": "ගමනාන්තයක් එකතු කරන්න",
+    "scheduleTitle": "කාලසටහන",
+    "cronLabel": "Cron",
+    "notScheduled": "කාලසටහන්ගත කර නැත",
+    "lastScheduledRun": "අවසන් කාලසටහන්ගත ධාවනය",
+    "lastRunSummary": "{startedAt} — {status}, පේළි {rows}",
+    "never": "කිසිදා නැත",
+    "highWaterMark": "ඇමතුම් ලොග ඉහළම සලකුණ (high-water mark)",
+    "rowPrefix": "පේළිය {id}",
+    "noDestinations": "පුටුවන් ඉදිරිපත් කිරීමේ ස්ථාන නොමැත",
+    "noDestinationsHint": "පැයකට එක් වරක් කතා රිපෝට් යැවීම ආරම්භ කිරීමට ස්ථානයක් එකතු කරන්න.",
+    "errLoadStatus": "පුටුවන් ඉදිරිපත් කිරීමේ තත්ත්වය පූරණය කිරීම අපාරාද්ධයයි",
+    "errSaveDestination": "ස්ථානය සුරක්ෂිත කිරීම අපාරාද්ධයයි",
+    "msgDestinationSaved": "ස්ථානය සුරක්ෂිත කරන ලදී.",
+    "errConnectionTest": "සම්බන්ධතා පරීක්ෂණය අපාරාද්ධයයි",
+    "msgRunInFlight": "මෙම ස්ථානය සඳහා ඉදිරිපත් කිරීමක් දැනටමත් සිදුවෙයි; දෙවරක් යවනු නොලැබුණි.",
+    "errExportRun": "පුටුවන් ඉදිරිපත් කිරීම අපාරාද්ධයයි",
+    "errUpdateDestination": "ස්ථානය යාවත්කාලීන කිරීම අපාරාද්ධයයි",
+    "errDeleteDestination": "ස්ථානය ස්පර්ශ කිරීම අපාරාද්ධයයි",
+    "deleteTitle": "ගොඩනවා ඉලක්කය මකන්න",
+    "deleteConfirm": "\"{name}\" මකන්නද? එහි අපවත් වීම් සංචාලකයද ඉවත් වන නිසා, නැවත එය එකතු කිරීම පැරණිම අත්පත් කරගත් ක්‍රියාකාරී ඉතිහාසයකි.",
+    "statusDisabled": "අක්‍රිය",
+    "statusFailing": "නිසාරයේ",
+    "statusHealthy": "සාමාන්‍ය",
+    "statusNotRunYet": "ඉස්මින් අතටු නිසා",
+    "typeNotInstalled": "දර්ශනය සාදනවා",
+    "metaLine": "අවසාන ක්‍රියාකාරි {lastRun} · ඉතින් {exported} පේළි · {pending} රැකියා · සංචාලකය {cursor}",
+    "btnTest": "පරීක්ෂා",
+    "btnRunNow": "දැන් ක්‍රියාකාරී කරන්න",
+    "btnDisable": "අක්‍රීය කරන්න",
+    "btnEnable": "ක්‍රීය කරන්න",
+    "btnEdit": "සකස් කරන්න",
+    "btnDelete": "මකන්න"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI ගිනුම්",
+    "cardSubtitle": "සත්‍යාපිත කළ පාලන API වලින් පෘතිපාලක තත්ත්වය",
+    "btnRefresh": "අලුත්වැඩියා කරන්න",
+    "listAria": "CLIProxyAPI ගිනුම් තත්ත්වය",
+    "noAccounts": "CLIProxyAPI ගිනුම් හමු නොවේ.",
+    "loading": "ගිනුම් තත්ත්වය ඉබ්බේද…",
+    "stateReady": "ගින මූලද්‍රලාභය",
+    "stateDisabled": "CLIProxyAPI ස්ථාපිතව නොමැත",
+    "stateMissingKey": "පාලන යතුර වින්‍යාස කර නොමැත",
+    "stateUnreachable": "පාලන API ප්‍රවේශයක් නොමැත",
+    "stateUnauthorized": "පාලන යතුර ප්‍රතික්ෂේපිත විය",
+    "stateUnsupported": "මෙම CLIProxyAPI අනුවාර්තාව ගින මූලද්‍රලාභය නොප්‍රදර්ශනය කරයි",
+    "stateInvalidResponse": "පාලන API මගින් අධිකෘත ප්‍රතිදානයක් ආපසු ලබා දෙන ලදී"
+  },
+  "darioPanel": {
+    "title": "Claude ගින",
+    "description": "ඔබේ Claude Pro/Max සාදරණිය සමඟ Dario ආයුක්ත කරන්න. සායනය ඔබේ සාදරණිය ආයතනයට වට්ටු කෙරේ. Dario ඉල්ලීම් මාර්ගෝපදේශ කළ හැකි තුරින් (එයට පෙර /health දැඩි නොවන ආකාරයක් ලෙස වාර්තා කරයි), අවම වශයෙන් ගින එකක් අවශ්‍යය.",
+    "noAccounts": "දැනට ගින සැකසුම් කොවිලා නොමැත.",
+    "importTitle": "OmniRoute වෙතින් ආයත් කරන්න",
+    "importDescription": "නැවත පිවිසීම වෙනුවට, පවතින OmniRoute Claude සම්බන්ධතාවක OAuth ටෝකන නැවත භාවිත කරන්න — බ්‍රව්සර අනුමැති පියවර සම්පූර්ණයෙන්ම මඟ හැරේ.",
+    "importPendingTooltip": "OmniRoute හි Claude සම්බන්ධතාවයක් පැවතියොත් ක්‍රියාකාරී වේ.",
+    "btnImport": "ආයත් කරන්න",
+    "btnImporting": "ආයත් කරමින් පවතී…",
+    "aliasPlaceholder": "alias (විකල්පයි)",
+    "btnStartLogin": "පිවිසුම අරඹන්න",
+    "btnStarting": "අරඹමින් පවතී…",
+    "btnCompleteLogin": "පිවිසුම සම්පූර්ණ කරන්න",
+    "btnCompleting": "සම්පූර්ණ කරමින් පවතී…",
+    "codePlaceholder": "code#state හෝ code පමණක්",
+    "noticeImported": "\"{alias}\" ලෙස ගිණුම ආනයනය කරන ලදී — Dario ඒ එය ලබා ගැනීමට නැවත ආරම්භ කරන ලදී.",
+    "noticeAdded": "\"{alias}\" ගිණුම එකතු කරන ලදී.",
+    "expiresInHours": "~{hours}h පසු කල් ඉකුත් වේ",
+    "expiresInMinutes": "~{minutes}m පසු කල් ඉකුත් වේ",
+    "expiresAt": "{date} දින කල් ඉකුත් වේ",
+    "scopes": "{count, plural, one {පරාසය #} other {පරාස #}}",
+    "btnRemove": "ඉවත් කරන්න",
+    "btnRefresh": "අලුත් කරන්න",
+    "loginStep1": "1. ඔබේ බ්‍රවුසරයෙන් මෙම URL විවෘත කර <mono>{alias}</mono> ගිණුම සඳහා පිවිසුම සැපයීමේ අනුමැතිය ලබාගන්න:",
+    "pendingExpires": "පොඩ්දි ගිණුම් සංදර්ශනය {time} අවසන් වේ",
+    "loginStep2": "2. Anthropic පෙන්වන කෝඩය ඇඟපන්න:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini App",
+    "errTelegramOnly": "මෙම පිටුව Telegram Mini App එක තුළ විවෘත විය යුතුය.",
+    "greeting": "👋 හෙලෝ {name}! ඔබේ OmniRoute ගේට්වේ හරහා සංවාද කිරීමට පණිවිඩයක් යවන්න.",
+    "greetingFallbackName": "මිතුරා",
+    "errNoReply": "⚠️ ගේට්වේව් එකෙන් පිළිතුරක් නැත.",
+    "btnSend": "යවන්න"
   }
 }

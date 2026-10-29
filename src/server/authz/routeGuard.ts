@@ -257,6 +257,13 @@ export const ALWAYS_PROTECTED_API_PATHS: ReadonlyArray<string> = [
   "/api/log-export",
   // SIGTERMs the process, like its twin /api/shutdown above.
   "/api/restart",
+  // CLIProxyAPI management compatibility (also reached as /v0/management/* via the
+  // next.config.mjs rewrite and the classify.ts alias). api-call sends upstream requests
+  // with a connection's stored OAuth token, auth-files lists the OAuth accounts, and
+  // reset-quota lifts routing cooldowns: none of that is for an anonymous caller, so it
+  // stays authenticated under requireLogin=false. ALWAYS_PROTECTED rather than LOCAL_ONLY
+  // so a remote client holding a manage-scope key (the use case) keeps working.
+  "/api/v0/management",
 ];
 
 /**

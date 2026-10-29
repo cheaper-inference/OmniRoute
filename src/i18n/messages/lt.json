@@ -1925,7 +1925,14 @@
     "readinessStep3": "Nukopijuokite savo galinį tašką",
     "readinessStep4": "Išsiųskite testinę užklausą",
     "readinessContinue": "Tęsti sąranką",
-    "readinessDismiss": "Kol kas paslėpti"
+    "readinessDismiss": "Kol kas paslėpti",
+    "unpricedUsageTitle": "{count, plural, one {# modelis} few {# modeliai} many {# modelių} other {# modelių}} su nesenu naudojimu, bet be nustatytos kainos",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API raktas su naudojimo limitu} few {# API raktai su naudojimo limitu} many {# API raktų su naudojimo limitu} other {# API raktų su naudojimo limitu}} naudojo šiuos modelius per paskutines 8 dienas. Kol tas naudojimas patenka į rakto dieninio arba savaitinio lango ribas, raktas laikomas viršijus kvotą ir jo užklausos blokuojamos (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Šis naudojimas skaičiuojamas kaip $0 į kiekvieno rakto naudojimo limitus (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# užklausa} few {# užklausos} many {# užklausų} other {# užklausų}}, {keys, plural, one {# ribotas raktas} few {# riboti raktai} many {# ribotų raktų} other {# ribotų raktų}}",
+    "unpricedUsageMore": "…ir dar {count}",
+    "unpricedUsageConfigure": "Nustatyti kainodarą",
+    "unpricedUsageDismiss": "Atmesti"
   },
   "analytics": {
     "title": "Analitika",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw – rankinė konfigūracija",
     "clineManualConfiguration": "Cline rankinė konfigūracija",
     "kiloManualConfiguration": "Kilo Code rankinė konfigūracija",
+    "piManualConfiguration": "Pi – rankinis konfigūravimas",
+    "piConfigInvalidTitle": "Pi models.json yra neįskaitomas",
+    "piOmnirouteConfigured": "OmniRoute sukonfigūruotas kaip pasirinktinis Pi teikėjas",
+    "piModelHelp": "Pi automatiškai neatranda modelių, skirtų pasirinktiniams galutiniams taškams — jūsų pasirinktas modelis yra aiškiai įrašytas į models.json.",
+    "piManualConfigTitle": "Arba redaguokite ~/.pi/agent/models.json rankiniu būdu",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Tada paleiskite Pi ir pasirinkite omniroute teikėją. Nustatykite PI_CODING_AGENT_DIR, kad perkeltumėte visą agento katalogą.",
+    "piUnownedNote": "Šis įrašas buvo įtrauktas už OmniRoute ribų (pvz., Pi-gui pasirinktiniai galutiniai taškai). Prašymas jį priims; Reset pašalina tik įrašus, kuriuos parašė OmniRoute.",
     "whenToUseLabel": "Kada naudoti",
     "openToolDocs": "Atidaryti įrankio dokumentaciją",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI kodavimo agentas su pasirinktinio teikėjo palaikymu",
       "droid": "Factory Droid AI asistentas",
       "openclaw": "Open Claw AI asistentas",
+      "openclaude": "OpenClaude programavimo agento CLI su OpenAI suderinamo teikėjo palaikymu",
       "cline": "Cline AI kodavimo asistento CLI",
       "kilo": "Kilo Code AI asistento CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3280,7 +3296,18 @@
     "cliproxyapiUpdate": "Atnaujinti",
     "cliproxyapiUpdateAvailable": "Yra atnaujinimas: v{current} → v{latest}",
     "cliproxyapiVersion": "Versija",
-    "removeMapping": "Pašalinti susiejimą"
+    "piInstallTitle": "Įdiekite „Pi“ kodavimo agentą",
+    "piInstallInstructions": "Įdiekite Pi CLI, tada grįžkite čia, kad prijungtumėte jį prie OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Naudokite URL pasiekiamą iš mašinos, kurioje veikia Pi. Su OpenAI suderinamas /v1 galutinis taškas pridedamas automatiškai.",
+    "piManualMergeHint": "Tik peržiūra. Sujunkite šį providers.omniroute įrašą su models.json, kad kiti teikėjai ir nustatymai liktų nepakitę.",
+    "removeMapping": "Pašalinti susiejimą",
+    "customUrl": "Tinkintas URL",
+    "customEndpointAria": "Tinkintas pūkelis",
+    "useDefaultKey": "Naudokite numatytąjį OmniRoute raktą",
+    "mainModelAria": "Pagrindinė modelis",
+    "manualConfigTitle": "Grok rankinis sukūrimo konfigūracija"
   },
   "modelCatalog": {
     "title": "Modeliai ir deriniai",
@@ -3411,7 +3438,44 @@
     "httpError": "Užklausa nepavyko su HTTP {status}",
     "testFailedNoDetail": "Testas nepavyko be klaidos pranešimo",
     "additionalCapabilities": "Papildomos galimybės: {list}",
-    "comboRefMember": "Derinys → {name}"
+    "comboRefMember": "Derinys → {name}",
+    "keyAccessButton": "API rakto prieiga",
+    "allowedInKeys": "Leidžiama: {count, plural, one {# rakte} few {# raktuose} other {# raktų}}",
+    "keysLoading": "Įkeliami API raktai…",
+    "keysRetry": "Bandyti įkelti raktus iš naujo",
+    "accessViaPattern": "per {pattern}",
+    "accessBlocked": "Užblokuota pagal {pattern}",
+    "editKeyAccess": "Redaguoti rakto prieigą",
+    "toggleKeyAccess": "Leisti {item} ties {name}",
+    "resultNetworkError": "Priskyrimas nepavyko",
+    "resultWouldEmptyModels": "Šis raktas liktų be leidžiamų modelių – verčiau redaguokite rakto prieigą",
+    "resultWouldEmptyCombos": "Šis raktas liktų be leidžiamų kombinacijų – verčiau redaguokite rakto prieigą",
+    "keyUpdatePending": "{name} vis dar atnaujinamas. Bandykite dar kartą po akimirkos.",
+    "assignToKeys": "Priskirti API raktams…",
+    "assignApply": "Taikyti pakeitimus",
+    "assignComplete": "API rakto prieiga atnaujinta",
+    "assignFailed": "Kai kurių API raktų atnaujinti nepavyko",
+    "assignNoChanges": "API rakto prieiga nepakeista",
+    "selectedAccessItems": "Pasirinkti elementai: {count}",
+    "assignExcludedCombos": "{count, plural, one {# pasirinkta kombinacijos eilutė nėra modelis ir čia bus praleista} few {# pasirinktos kombinacijų eilutės nėra modeliai ir čia bus praleistos} other {# pasirinktų kombinacijų eilučių nėra modeliai ir čia bus praleista}}. Priskirkite kombinacijas skirtuke „Combos“.",
+    "assignActionAdd": "Pridėti",
+    "assignActionRemove": "Pašalinti",
+    "searchKeys": "Ieškoti API raktų",
+    "selectApiKey": "Pasirinkti API raktą {name}",
+    "allModelsAccess": "Visi modeliai",
+    "allCombosAccess": "Visi deriniai",
+    "modelAccessCount": "Modeliai: {count}",
+    "comboAccessCount": "Deriniai: {count}",
+    "keyInactive": "Neaktyvus",
+    "keyBanned": "Užblokuotas",
+    "keyRevoked": "Atšaukta",
+    "switchRestrictedConfirm": "Perjungti šį raktą į ribotą prieigą: bus leidžiami tik pasirinkti elementai",
+    "removeNoChangeHint": "Šis raktas leidžia viską; pašalinus pasirinktus elementus niekas nepasikeis",
+    "removeStaysAllowedHint": "Vis dar leidžiama šiam raktui per {patterns}",
+    "resultChanged": "Pakeista",
+    "resultUnchanged": "Be pakeitimų",
+    "resultSkipped": "Praleista",
+    "resultNeedsSwitch": "Reikia perjungti į ribotą"
   },
   "combos": {
     "title": "Kombinacijos",
@@ -3465,6 +3529,12 @@
     "errorUpdating": "Klaida atnaujinant kombinaciją",
     "errorDeleting": "Klaida šalinant kombinaciją",
     "testFailed": "Nepavyko įvykdyti testinės užklausos",
+    "removeErrorModels": "Ištrinti nepavykusius modelius ({count})",
+    "removingErrorModels": "Šalinama…",
+    "errorModelsRemoved": "Iš kombinacijos pašalinta nepavykusių modelių: {count}",
+    "noErrorModelsFound": "Tarp šios kombinacijos žingsnių nepavykusių modelių nerasta",
+    "cannotRemoveAllModels": "Negalima pašalinti visų modelių iš kombinacijos",
+    "removeErrorModelsConfirm": "Pašalinti nepavykusius modelius ({count}) iš „{name}“? Laiko viršijimai ir spartos apribojimai neskaičiuojami.",
     "failedToggle": "Nepavyko perjungti kombinacijos",
     "testResults": "Testavimo rezultatai — {name}",
     "resolvedBy": "Apdorojo:",
@@ -4816,7 +4886,15 @@
     },
     "totalEntries": "Iš viso įrašų",
     "type": "Tipas",
-    "memoryEnabled": "Atmintis įjungta"
+    "memoryEnabled": "Atmintis įjungta",
+    "qdrantTutorialTitle": "Greitas mokymasis: atmintis su Qdrant",
+    "qdrantTutorialIntro": "Qdrant saugo atminčių vektorių ir metaduomenų, kad būtų galima gauti susijusią kontekstą. Jis netiesiogiai nesumažina žetonų; sutaupymas yra netiesioginis, vengiant konteksto, nesantį susijusio su užklausa.",
+    "qdrantTutorialStep1": "Prieš naudojimą gamyboje, apsaugokite serverį naudojant HTTPS ir API raktą.",
+    "qdrantTutorialStep2": "Įveskite vietą, portą, kolekciją ir modelį „teikėjas/modelis“ formate su sukonfigūruotu įrodymu.",
+    "qdrantTutorialStep3": "Kolekcijos matmuo turi atitikti modelio sukurto matmuo. Egzistuojanti 2048 matmenų kolekcija nepriima 1536 matmenų įterpimų.",
+    "qdrantTutorialStep4": "Išsaugokite, išbandykite ryšį ir paleidkite paieškos testą. Tik tada įjunkite Qdrant.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Kūrybininkas: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Įgūdžiai",
@@ -5354,6 +5432,27 @@
     "importFromFileDownloadTemplate": "Atsisiųsti CSV šabloną",
     "importFromFileMoreErrors": "+ dar {count}",
     "importFromFileSchemaHint": "CSV stulpelių tvarka yra fiksuota: provider, name, apiKey, baseUrl (pasirinktinis), priority (pasirinktinis). Stulpelyje provider turi būti esamo valdomo teikėjo ID arba jau užregistruoto su OpenAI/Anthropic suderinamo mazgo ID — šis importavimas nekuria naujų galinių taškų mazgų.",
+    "importOAuthExport": "Importuoti OAuth eksportą",
+    "oauthExportTitle": "Importuoti paskyrų tvarkyklės eksportą",
+    "oauthExportDescription": "Įkelkite paskyrų tvarkyklės eksportą paprastu tekstu (pvz., Antigravity Manager cloud-accounts eksportą). Žetonai atnaujinami serveryje, o kiekviena paskyra tampa OAuth ryšiu — dublikatai atnaujinami vietoje.",
+    "oauthExportProviderLabel": "Teikėjas",
+    "oauthExportChoose": "Pasirinkti failą",
+    "oauthExportFileAria": "Paskyrų eksporto JSON failas",
+    "oauthExportSchemaHint": "Priimama: dokumentas su \"accounts\" masyvu, paprastas masyvas arba vienas įrašas. Žetonai gali būti įdėtame token objekte arba tiesiai įraše.",
+    "oauthExportDetected": "Aptikta paskyrų: {count}",
+    "oauthExportSelectAll": "Pažymėti visas paskyras",
+    "oauthExportSelectAccount": "Pažymėti paskyrą {index}",
+    "oauthExportColEmail": "El. paštas",
+    "oauthExportColProvider": "Teikėjas",
+    "oauthExportColRefresh": "Atnaujinimo žetonas",
+    "oauthExportNoEmail": "(nėra el. pašto)",
+    "oauthExportYes": "taip",
+    "oauthExportNo": "ne",
+    "oauthExportImporting": "Importuojama…",
+    "oauthExportImport": "Importuoti paskyras ({count})",
+    "oauthExportResult": "Importuota {imported}/{total} — nepavyko {failed}",
+    "oauthExportParseError": "Iš šio failo nepavyko nuskaityti nė vienos paskyros.",
+    "oauthExportUnknownError": "nežinoma klaida",
     "adaptaTutorial": {
       "title": "Kaip prisijungti prie Adapta Web",
       "introPrefix": "Adapta autentifikuojama per Clerk. Prieigos raktas",
@@ -5865,6 +5964,25 @@
     "ccAliasAddModelButton": "Pridėti perrašymą",
     "ccAliasLoadError": "Nepavyko įkelti aptikimo pseudonimų nuostatų: {error}",
     "ccAliasSaveError": "Nepavyko išsaugoti aptikimo pseudonimo nuostatos: {error}",
+    "cliVersionSectionTitle": "Reklamuojama CLI kliento versija",
+    "cliVersionEffectiveLabel": "Šiuo metu reklamuojamas",
+    "cliVersionSourceLabel": "Išspręsta iš: {source}",
+    "cliVersionPinnedLabel": "Numatytasis užfiksuotas: {pinned}",
+    "cliVersionSourceSettings": "prietaisų skydelio nepaisymas",
+    "cliVersionSourceEnv": "aplinkos kintamasis",
+    "cliVersionSourceDiscovered": "automatiškai atrastas naujausias leidimas",
+    "cliVersionSourceDefault": "užfiksuotas numatytasis",
+    "cliVersionInputLabel": "Nepaisyti versijos",
+    "cliVersionInputPlaceholder": "Nepaisyti versijos; tuščias išvalo",
+    "cliVersionSaveButton": "Išsaugoti",
+    "cliVersionResetButton": "Iš naujo nustatyti numatytuosius",
+    "cliVersionLoadError": "Nepavyko įkelti CLI versijos nustatymų: {error}",
+    "cliVersionSaveError": "Nepavyko išsaugoti CLI versijos: {error}",
+    "cliVersionLoadFailed": "Nepavyko įkelti dabartinių CLI versijos nustatymų.",
+    "cliVersionHintClaude": "„Anthropic“ pristato naujesnius „Claude“ modelius „Claude Code“ kliento versijoje, kurią mato. Tai yra versija, kurią OmniRoute reklamuoja kiekviename antropiniame užklausoje.",
+    "cliVersionCaveatClaude": "Atsiskaitymo įspėjimas: atsiskaitymo versija yra '<version>'.'<build-revision>', o versijos versija yra atskira užfiksuota konstanta. Reklama 2.1.260 praneša apie 2.1.260.1e2, o tai nėra tai, ką siunčia tikras dvejetainis 2.1.260.",
+    "cliVersionHintCodex": "OpenAI pateikia naujesnius Codex kliento versijos modelius, kuriuos mato, pavyzdžiui, klaidą: „gpt-6-astra“ modeliui reikalinga naujesnė Codex versija.",
+    "cliVersionCaveatCodex": "Išvados įspėjimas: jūsų skambinančiojo pranešta versija vis tiek pranoksta CODEX_CLIENT_VERSION env var, tačiau šis nepaisymas pranoksta abu, nes tai yra aiškus operatoriaus tikslas.",
     "compatUpstreamHeadersLabel": "Papildomos išorinės sistemos antraštės",
     "compatUpstreamHeadersHint": "Aukštų privilegijų nuostata — jai taikomas toks pats pasitikėjimo lygis kaip ir teikėjo API prisijungimo duomenų redagavimui; ją turėtų naudoti tik patikimi administratoriai. Sujungiama po to, kai OmniRoute prideda autentifikavimo duomenis iš teikėjo API rakto. Jei pasirinktinės antraštės pavadinimas sutampa su esamos antraštės pavadinimu (pvz., Authorization), jūsų reikšmė visiškai pakeičia automatiškai sugeneruotą antraštę (įskaitant Bearer prieigos raktą) — išorinė sistema matys tik jūsų įvestą reikšmę, o ne nuostatose esantį raktą. Dėl netinkamos konfigūracijos gali įvykti 401 klaida arba sutrikti išorinės sistemos autentifikavimas. Vienai antraštei skiriama viena eilutė (pvz., papildoma Authentication kai kuriems šliuzams). Užveskite žymeklį ant reikšmės arba perkelkite į ją įvesties vietą, kad ją peržiūrėtumėte. Išsaugoma praradus įvesties vietą, spustelėjus už skydelio ribų arba uždarius šį skydelį.",
     "compatUpstreamHeaderName": "Antraštės pavadinimas",
@@ -6835,7 +6953,27 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Naudojama {count} kombinacijose: {combos}",
+    "openComboTooltip": "Atidaryti Kombinacijas — naudoja {combo}",
+    "claudeCodeRoutingTitle": "Klaudės Kodo srauto priemonės prieigos proxy maršrutizavimas",
+    "routingNative": "Lietuvių",
+    "routingFallback": "Pakeitimas",
+    "rerank": "Iš naujo rizuoti",
+    "video": "Vaizdo įrašas",
+    "markFreeTierTitle": "Pažymėti kaip nemokamas planas (rodoma net kai slapinamos mokamos modelys)",
+    "codexTunnelTitle": "Codex įrankio ryšys",
+    "codexTunnelDescription": "Tunelis veikia tik išėjimo linkme. Vietiniai įrankiai vis tiek vykdomi tik Codex, laikantis jo izoliacijos ir patvirtinimo politikos.",
+    "tunnelIdLabel": "Tunelio ID",
+    "tunnelRuntimeKeyLabel": "Tunelio vykdytojo raktas",
+    "tunnelRuntimeKeyPlaceholder": "Vykdytojo raktas",
+    "tunnelRuntimeKeyHint": "Išsaugomas šifruotu kartu su slaptažyme ir niekada nesražuojamas į žurnalus.",
+    "tunnelRuntimeKeyNewLabel": "Naujas tunelio vykdytojo raktas",
+    "tunnelRuntimeKeyNewHint": "Įveskite tik kartu su nauja slaptažyme. Reikšmė išsaugoma šifruota.",
+    "chatgptConnectorLabel": "ChatGPT pasirinktinė jungtis",
+    "doctorChecking": "Tikrinamas būsena…",
+    "doctorCheck": "Patikrinti doctor būseną",
+    "fallbackRetryBackendTitle": "Atsarginis pakartojimo backendas"
   },
   "settings": {
     "title": "Nustatymai",
@@ -8819,6 +8957,8 @@
     "qdrantHost": "Pagrindinis kompiuteris",
     "qdrantCollection": "Rinkinys",
     "catalogVisibilityHint": "Paslėptus modelių ID ir toliau galima iškviesti turint tas pačias prieigos teises.",
+    "exposeCombosOnly": "/v1/models sąraše rodyti tik derinius",
+    "exposeCombosOnlyDesc": "Klientai, automatiškai aptinkantys modelius, matys jūsų derinius (ir auto/*, jei jie nepaslėpti), o ne neapdorotus tiekėjų modelius. Aiškiai nurodyti provider/model ID ir toliau nukreipiami.",
     "catalogScopeTitle": "Models API sąrašas",
     "catalogScopeDesc": "Ką GET /v1/models nurodo šiam raktui. Sąrašo susiaurinimas niekada nekeičia, ką raktas gali iškviesti.",
     "catalogScopeAll": "Abu",
@@ -8938,7 +9078,9 @@
         "financial": "Finansinis",
         "brazilian": "Brazilijos",
         "usa": "JAV",
-        "full": "Pilnas"
+        "full": "Pilnas",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Pietų Afrika)"
       },
       "builtinTypes": "Įtaisytieji tipai",
       "types": {
@@ -8952,7 +9094,19 @@
         "ip_address": "IPv4 adresai",
         "ipv6_address": "IPv6 adresai",
         "aws_key": "AWS prieigos raktai",
-        "api_key_generic": "API raktai ir žetonai"
+        "api_key_generic": "API raktai ir žetonai",
+        "iban": "IBAN banko sąskaitų numeriai",
+        "eu_vat": "EU VAT skaičiai",
+        "es_dni_nie": "ispanų DNI / NIE",
+        "it_codice_fiscale": "Itališkas Codice Fiscale",
+        "pl_pesel": "lenkiškas PESEL",
+        "nl_bsn": "olandų BSN",
+        "de_steuer_id": "Vokietijos Steuer-ID",
+        "se_personnummer": "Švedijos personalas",
+        "za_id": "Pietų Afrikos ID skaičiai",
+        "za_phone": "Pietų Afrikos telefonų numeriai",
+        "za_vat": "Pietų Afrikos VAT skaičiai",
+        "za_tax_ref": "Pietų Afrikos mokesčių nuorodos"
       },
       "customPatterns": "Pasirinktiniai šablonai",
       "customPatternsDesc": "Atitikmenys pakeičiami į [CUSTOM_REDACTED]. Iki {max} šablonų. Šablonai, keliantys katastrofinio grįžimo riziką, atmetami.",
@@ -11454,6 +11608,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth nesukonfigūruotas. Užregistruokite OAuth programą adresu {applicationsUrl}, nurodydami peradresavimo URI {redirectUri} ir aprėptis „{scopes}“, tada nustatykite {clientIdEnv} (ir pasirinktinai {clientSecretEnv}) bei paleiskite iš naujo.",
     "gitlabDuoSetupDescription": "Kai programa bus užregistruota ir šiame OmniRoute egzemplioriuje bus nustatyti aplinkos kintamieji, spustelėkite „Tęsti“, kad pradėtumėte OAuth prisijungimą.",
     "continue": "Tęsti",
+    "copilotPolicyTitle": "Eksperimentinis teikėjas: politikos būsena yra dviprasmiška",
+    "copilotPolicyLine1": "OmniRoute prisijungia per api.githubcopilot.com, kurio GitHub nepaskelbė kaip bendros trečiosios šalies išvados API. Ši integracija yra eksperimentinė ir gali keistis be įspėjimo.",
+    "copilotPolicyLine2": "Gali būti prijungta tik jūsų GitHub paskyra. Niekada nesidalykite kredencialais, nebendrinkite paskyrų ir nebandykite viršyti plano limitų.",
+    "copilotPolicyLine3": "Nemokamo ir Studento plano naudotojai gauna tik automatinį modelio pasirinkimą. Už Copilot plano sąlygas ir bet kokius naudojimo apribojimus atsakote jūs.",
+    "copilotPolicyAcknowledge": "Supratau, prisijunk",
     "tabPasteSetupToken": "Sąrankos žetonas",
     "claudeSetupTokenDescription": "Terminale paleiskite `claude setup-token` ir įklijuokite jo išspausdintą žetoną. Jis galioja vienerius metus ir neturi atnaujinimo žetono. Prieš išsaugodamas OmniRoute išsiunčia vieną bandomąją užklausą į Anthropic.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12163,7 +12322,11 @@
       "viewConversation": "Peržiūrėti pokalbį",
       "openConversation": "Atidaryti pokalbį {id}"
     },
-    "tableLabel": "Užklausų žurnalai"
+    "tableLabel": "Užklausų žurnalai",
+    "throughputPostFirstToken": "Po pirmojo tokeno",
+    "throughputEndToEnd": "Nuo pradžios iki pabaigos",
+    "throughputRate": "{value} tokenų/s",
+    "throughputExplanation": "Abi spartos apskaičiuojamos pagal didesnį iš išvesties ir samprotavimo tokenų skaičių. Skaičiuojant spartą po pirmojo tokeno, galiojanti TTFT neįtraukiama; kitu atveju naudojama visa trukmė. Skaičiuojant spartą nuo pradžios iki pabaigos, visada naudojama visa trukmė. Buferinis atsakas gali būti pateikiamas dideliu momentiniu greičiu, nors modelis nėra generuojamas greičiau."
   },
   "proxyLogger": {
     "filterAll": "Visi",
@@ -12806,7 +12969,8 @@
     "title": "Teikėjų statistika",
     "description": "Kiekvieno teikėjo ir modelio srautas, delsa bei sėkmės rodikliai",
     "combo": "Derinys",
-    "toggleModels": "Rodyti {provider} modelius"
+    "toggleModels": "Rodyti {provider} modelius",
+    "windowSince": "Nuo {date}"
   },
   "relay": {
     "title": "Be serverių veikiantys perdavimo tarpiniai serveriai",
@@ -13083,7 +13247,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI kodai",
     "pageSubtitle": "Programavimo įrankiai, nukreipti į OmniRoute",
     "searchPlaceholder": "Ieškoti CLI…",
     "filterDetectionLabel": "Aptikimas",
@@ -13093,7 +13256,8 @@
     "detectionNotFound": "Nerasta",
     "baseUrlAll": "Visi",
     "baseUrlFull": "Visas",
-    "baseUrlPartial": "Dalinis"
+    "baseUrlPartial": "Dalinis",
+    "title": "CLI kodas"
   },
   "cliAgents": {
     "pageTitle": "CLI agentai",
@@ -13751,7 +13915,9 @@
       "disabled": "Išjungta",
       "dual": "Dvigubas",
       "alias": "Pseudonimas",
-      "canonical": "Kanoninis"
+      "canonical": "Kanoninis",
+      "fail_closed": "Blokuoti (fail_closed)",
+      "count_as_zero": "Skaičiuoti kaip $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13898,6 +14064,538 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Apsaugoto prioriteto infrastruktūros sustabdymai pateikiami kaip 502",
         "description": "Grąžinti 502, o ne 503, kai prioritetinis tik atsarginiam perėjimui dėl kvotos skirtas tikslas sustabdo derinį dėl priežasties, kuri akivaizdžiai nesusijusi su kvota: atviro teikėjo grandinės pertraukiklio arba praleidimo dėl prognozuojamos delsos."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Įrašyti paskyros ID",
+        "description": "Įtraukti paskyros prefiksą į AUTENTIKAVIMO žurnalo eilutes (pvz., „Naudojamas „'<provider>'“ paskyros: abc12345...“). Numatyta, kad paskyrų identifikatoriai nėra rodomi bendra naudojamuose / daugelio nuomininkų procesų žurnaluose. Nepriklauso nuo atsekimo režimo; atsekimo režimo įjungimas to nepadaro."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Išjungti prisijungimą slaptažodžiu naudojant OIDC",
+        "description": "Kai OIDC yra įjungtas, išjungti prisijungimą slaptažodžiu, kad naudotojai galėtų autentifikuotis tik per OIDC vienkartinį prisijungimą („Single Sign-On“). Kai išjungta (numatytasis nustatymas), galimas ir prisijungimas slaptažodžiu, ir OIDC."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Nuotoliniai garso teikėjų mazgai",
+        "description": "Leisti /v1/audio/* maršrutams naudoti su „OpenAI“ suderinamus teikėjų mazgus, talpinamus ne „localhost“. Pagal numatytuosius nustatymus išjungta – garso nukreipimas į nuotolinį serverį pakeičia išvesties tapatybę ir turi būti aiškus operatoriaus sprendimas. Vidinės kilpos („loopback“) mazgai visada leidžiami ir lieka nepaveikti."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Nuotoliniai „Rerank“ teikėjų mazgai",
+        "description": "Leisti POST /v1/rerank (ir atminties variklio „rerank“ žingsniui, kuris jį iškviečia per vidinę kilpą („loopback“)) naudoti su „OpenAI“ suderinamus teikėjų mazgus, talpinamus ne „localhost“ – LAN įrenginį ar „Tailscale“ mazgą („peer“), kuriame veikia TEI, Infinity, vLLM ir kt. Pagal numatytuosius nustatymus išjungta – nukreipimas į nuotolinį serverį pakeičia išvesties tapatybę ir turi būti aiškus operatoriaus sprendimas. Vidinės kilpos („loopback“) mazgai visada leidžiami ir lieka nepaveikti. Nuotoliniai mazgai taip pat turi atitikti teikėjo siunčiamų URL („outbound URL“) politiką."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Tinklo rotacijos bendros išvesties apsauga",
+        "description": "Įvykus tinklo išimčiai (skirtasis laikas, ryšys atmestas / nustatytas iš naujo) kelių paskyrų rotacijos vykdyklėje, kai nesėkmingai veikianti paskyra neturi dedikuoto tarpinio serverio („proxy“), taikyti trumpą atvėsimo laikotarpį („cooldown“) ir praleisti kitas paskyras be tarpinio serverio likusiai užklausos daliai, užuot bandžius pakartotinai su kiekviena iš jų. Pagal numatytuosius nustatymus įjungta (saugu: nekeičia išvesties IP, tik sumažina delsą ir atvėsimo riziką bendros išvesties paskyrose). Išjunkite, jei norite atkurti tiesioginį klaidos perdavimą jau po pirmosios išimties be tarpinio serverio."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Praleisti neseniai sugedusius proxy",
+        "description": "Proxy telkiniai ir „opencode“ paskyros rotacija nustoja pakartotinai naudoti ką tik sugedusį proxy (atmestas TCP zondas arba per jį gautas 429) proceso lygio laikotarpiui, kuris dvigubėja sulig kiekvienu pakartojimu iki nustatytos ribos. Proxy būsena nėra įrašoma; atidėjus kiekvieną kandidatą pasirinkimas lieka nepakitęs. Pagal numatytuosius nustatymus įjungta: pasirinkimo tvarka yra visiškai tokia pati, kaip įprastos rotacijos, tik su PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Bendro išvesties telkinio tvarka",
+        "description": "Teikėjams, kurių kvota skirstoma pagal išvesties adresą, telkinio narį, turintį tą patį stebėtą išvesties adresą kaip ir neseniai atmestas narys, rikiuoti iškart po veikiančių narių. Tik rikiavimas, niekada neatmetama. Reikalingas PROXY_SKIP_RECENTLY_FAILED, kuris pateikia nuskaitomą atmetimo signalą. Pagal numatytuosius nustatymus išjungta: pasirinkimo tvarka yra visiškai tokia pati, kaip įprastos rotacijos."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Rotacijos priskyrimo žurnalizavimas",
+        "description": "„opencode“ rotacija fiksuoja, kuri paskyra aptarnavo užklausą arba buvo praleista (tik užmaskuoti ID, niekada ne pilni paskyrų ID), ir susieja proxy žurnalo įrašus su jų užklausa, kad operatorius galėtų atskirti praleistas paskyras nuo nenaudotų. Pagal numatytuosius nustatymus išjungta: papildomų žurnalo eilučių ar stulpelių nerašoma."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Proxy telkinio išvesties stebėjimas",
+        "description": "Valdymo skydelyje po proxy telkiniu rodyti, kiek stebėtų išvesties IP adresų aptarnavo jo narius per pastarąsias 24 h, kiek ryšių juos naudojo ir didžiausią kiekį, matytą už vieno IP. Tik skaitymui, apskaičiuojama iš proxy žurnalo, niekada nenaudojama maršrutizavimui. Pagal numatytuosius nustatymus išjungta: telkinio rengyklė lieka nepakitusi, o stebėjimo maršrutas grąžina null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Proxy operatoriaus išvestis",
+        "description": "Priimti operatoriaus atsiųstus datuotus stebėtus adresus kiekvienam telkinio nariui ir sujungti juos su žurnalo duomenimis atvaizdavimui bei telkinio rikiavimui. Pagal numatytuosius nustatymus išjungta: persiuntimo (push) maršrutas grąžina 404, o telkinio nuskaitymai veikia lygiai taip pat, kaip anksčiau."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "„OpenCode Responses“ užstrigimo rotacija",
+        "description": "„OpenCode“ vykdytojui: stebėti pirmąjį transliuojamo „Responses“ atsakymo turinio baitą (langas: RESPONSES_FIRST_BYTE_TIMEOUT_MS, numatytoji reikšmė – 15000). 2xx „Responses“ srautas, kuris pasibaigus šiam langui išlieka tylus, laikomas užstrigusiu: paskyrai taikomas atvėsinimas, o užklausa vieną kartą nukreipiama į kitą paskyrą; antras užstrigimas sukelia greitą nesėkmę. Pagal numatytuosius nustatymus išjungta: užstrigę srautai laukia kaip iki šiol – iki srauto parengties skirtojo laiko."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "„OpenCode user_blocked“ rotacija",
+        "description": "„OpenCode“ vykdytojui: kai pirminis teikėjas atsako 403 arba 451 kodu su „user_blocked“ atmetimu (ne geografinis blokavimas ir ne „Cloudflare“ pirštų atspaudų atmetimas), atvėsinkite atmestą paskyrą ir nukreipkite į kitą paskyrą ne daugiau kaip vieną kartą per užklausą; antras atmetimas grąžinamas toks, koks yra, be sėkmės žymos. Pagal numatytuosius nustatymus išjungta: pirminio teikėjo naudotojo blokavimo apėjimas gali atrodyti kaip vengimas ir išplatinti žymą visame paskyrų parke, todėl atmetimas grąžinamas nepakeistas, nebent operatorius pasirenka kitaip."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "„OpenCode“ trumpalaikių trikčių perjungimo delsa",
+        "description": "„OpenCode“ kelių paskyrų rotacijoje: padaryti pauzę prieš siunčiant užklausą kitai paskyrai, kai du bandymai iš eilės nepavyksta dėl trumpalaikės pirminio teikėjo klaidos (5xx arba tuščias 400 atmetimas). Pauzė prasideda nuo 1,5 s, dvigubėja sulig kiekviena tolesne nesėkme iš eilės, yra ribojama iki 6 s vienai pauzei ir 10 s vienai užklausai, praleidžiama klientui atsijungus, o nepavykusio atsakymo turinys atlaisvinamas prieš laukiant. Pagal numatytuosius nustatymus išjungta: perjungimas lieka momentinis."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Tuščio žingsnio pakartotinis bandymas (Flush)",
+        "description": "Transliuojamuose verstiniuose žingsniuose: kai pirminio teikėjo žingsnyje nėra tinkamo naudoti turinio (tik samprotavimo užbaigimas arba nulis vertingų fragmentų), atlikti ribotus pakartotinius bandymus įprastu kredencialų keliu (iki `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`), kol klientui dar nieko nepateikta. Pagal numatytuosius nustatymus išjungta: tuštiems žingsniams taikoma dabartinė elgsena (tuščias 200 arba 502 su tuščiu turiniu)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Tuščio srauto giminingas atkūrimas",
+        "description": "„Claude“ / „Codex“ srautinis perdavimas: po pirmojo gyvavimo ciklo įvykio trumpai patikrinti (iki 1 s / 64 KiB), ar gaunama tinkama naudoti išvestis; srautas, kuris baigiasi be turinio, tampa „empty_content“ klaida, kuri išnaudoja esamą ribotą pakartotinį bandymą su kitu tinkamu ryšiu (be atvėsinimo, be modelio blokavimo), o ciklinio paskirstymo („round-robin“) deriniai nustoja kartoti bandymus klientui atsijungus. Patikros metu „refusal“, „pause_turn“ ir „model_context_window_exceeded“ taip pat laikomi teisėtomis tuščiomis galutinėmis būsenomis. Pagal numatytuosius nustatymus išjungta: parengtis, tuščio turinio apdorojimas ir derinių pakartotiniai bandymai lieka visiškai tokie patys, kaip ir anksčiau."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Vėlyvos srauto išvesties zondas",
+        "description": "Srauto išvesties zondas: po pirmųjų 64 persiųstų fragmentų toliau atrenkamas vienas fragmentas iš 16 pirmajai matomai išvesčiai nustatyti, kad vėlai prasidėjusi išvestis vis tiek pažymėtų srautą kaip pateikusį išvestį. Pavienė 5xx klaida po šio momento lieka apribota užklausos lygiu, užuot užfiksavus tik modelio blokavimą, o firstOutputMs atgaline data priskiriamas dabartinio atrankos intervalo pirmajam išvesties fragmentui. Pagal numatytuosius nustatymus išjungta: zonduojami tik pirmieji 64 persiųsti fragmentai, lygiai kaip anksčiau."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode spartos ribojimo 429 ankstyvas sustabdymas",
+        "description": "„OpenCode“ kelių paskyrų rotacijai: sustabdyti paskyrų bangą ties pirmuoju 429, klasifikuojamu kaip tikras spartos ribojimas (išanalizuojama Retry-After antraštė arba tekstas, nurodantis spartos / naudojimo limitą), ir grąžinti tą upstream 429 nepakeistą (būseną, turinį, Retry-After ir kvotų antraštes), užuot bandžius kiekvieną likusią paskyrą. Neklasifikuoti 429 toliau rotuojami. Pagal numatytuosius nustatymus išjungta: nemokamas planas ribojamas pagal egress IP (#9611), todėl kiekvienas 429 perjungia į kitą paskyrą, o išsekus bangai grąžinamas paskutinis upstream 429."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 pristabdymas ir atnaujinimas",
+        "description": "„OpenCode“ kelių paskyrų rotacijai: pristabdyti užklausą po pasikartojančių laikinų 429 klaidų (arba naujos telkinio apkrovos žymos) su pulso signalu (heartbeat), tada pakartoti vieną apribotą etapą iki 3 nuoseklių paskyrų, užuot siuntus užklausas visam parkui. Pagal numatytuosius nustatymus išjungta: kiekvienas 429 perjungia į kitą paskyrą lygiai taip pat, kaip ir anksčiau."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Srauto parengties strigimo pakartotinis bandymas",
+        "description": "Srautinio pokalbio užklausoms: kai pirmasis upstream turinys užstringa prieš pateikdamas tinkamą įvykį, atlikti vieną apribotą antrąjį bandymą tuo pačiu maršruto keliu, naudojant tą patį parengties biudžetą ir netaikant nuobaudos paskyrai. Pagal numatytuosius nustatymus išjungta: užstrigus pirmajam turiniui, užklausai užfiksuojama nesėkmė be pakartotinio bandymo."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 telkinio pakartotinis pasirinkimas",
+        "description": "„OpenCode“ kelių paskyrų rotacijai: gavus 429 iš tiekėjo, ribojančio pagal egress srautą, paskyroje be tarpinio serverio (proxy-less) bendro telkinio kontekste, kitam bandymui paprašyti ryšių telkinio kito nario, užuot bandžius vėl su tuo pačiu egress adresu. Rūšiuoja, bet niekada neatmeta: išsekus telkiniui, išlaikomas dabartinis elgesys. Pagal numatytuosius nustatymus išjungta: kiekvienas 429 perjungia į kitą paskyrą lygiai taip pat, kaip ir anksčiau."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 kliento pirštų atspaudas",
+        "description": "Siųsti OpenCode v2 CLI kliento pirštų atspaudą OpenCode Zen/Go užklausose (#16571): User-Agent opencode/latest/<2.x>/cli ir x-opencode-client cli, kliento User-Agent paliekamas tik tada, kai tai yra 2.x OpenCode klientas, o ribotose nemokamo plano užklausose nesiunčiama x-opencode-request, sesija dubliuojama į x-opencode-session-id/x-session-affinity/x-session-id, v2 CLI read/shell schemos įterptuose vietos rezervavimo įrankiuose, o tool_choice reikšmė \"none\" pašalinama. Pagal numatytuosius nustatymus išjungta: kiekviena OpenCode užklausa baitas į baitą išlaiko esamą tapatybę, antraštes ir kūną."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen išeinančio IP blokavimas",
+        "description": "Pridėti OpenCode Zen (opencode-zen) prie numatytosios išeinančio IP blokavimo grupės, kad 429 klaida viename Zen ryšyje taip pat pristabdytų visus susijusius Zen ryšius, besidalijančius tuo pačiu išeinančiu IP. Pagal numatytuosius nustatymus išjungta: Zen yra nustatomas pagal raktą ir kiekvienas ryšys atvėsta atskirai, lygiai taip pat, kaip ir anksčiau. Aiškiai nurodyta OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS reikšmė visada turi pirmenybę prieš šią vėliavėlę."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode viso teksto klaidų taisyklės",
+        "description": "Leisti integruotoms OpenCode klaidų taisyklėms (opencode-zen, opencode-go, opencode-cli) tikrinti atitiktį pagal visą pirminį klaidos tekstą, kad kūno žymekliai, tokie kaip organization_quota_exceeded arba \"monthly usage limit reached\", 429 klaidą klasifikuotų kaip išnaudotą kvotą su ryšio lygmens blokavimu. Pagal numatytuosius nustatymus išjungta: šios taisyklės mato tik struktūrizuotą klaidos kodą, todėl tokia 429 klaida lieka trumpu užklausų ribojimu, lygiai taip pat, kaip ir anksčiau."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI viso teksto klaidų taisyklės",
+        "description": "Leisti integruotai Cloudflare Workers AI klaidos taisyklei tikrinti atitiktį pagal visą pirminį klaidos tekstą, kad 429 klaidos kūnas su \"daily free allocation\" būtų klasifikuojamas kaip išnaudota kvota, o ne kaip trumpas užklausų ribojimas. Pagal numatytuosius nustatymus išjungta: taisyklė mato tik struktūrizuotą klaidos kodą, lygiai taip pat, kaip ir anksčiau."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Galimybių filtras",
+        "description": "Atmesti užklausas prieš išsiuntimą, kai tiksliniam modeliui trūksta reikiamų galimybių (vision, tools, structured output, context window). Apsaugo tiesiogines vieno teikėjo užklausas, apeinančias combo lygmens suderinamumo filtrą."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Nepaisyti neįkainoto naudojimo USD kvotose",
+        "description": "Modelių, neturinčių nustatytos kainos, naudojimą kiekvieno rakto USD naudojimo kvotose skaičiuoti kaip 0 $, užuot laikius kvotą viršyta. Pagal numatytuosius nustatymus išjungta: neįkainotas modelis arba maršrutizavimo pseudonimas gali nuslėpti realias išlaidas, todėl saugumo sumetimais kvota blokuoja prieigą."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Įgalinti „OmniRoute Radar“ modulį (katalogo srauto ekranus ir sinchronizavimą). Pagal numatytuosius nustatymus išjungta; įgalinimas tik atrakina naudotojo sąsają – duomenų sinchronizavimas lieka atskiras pasirinkimas."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Modelio prieigos taško galimybių vartai",
+        "description": "Taikyti patikimas modelio prieigos taškų žymas (deklaruotas teikėjo kataloge, nustatytas pagal specializuoto modelio ID arba nurodytas operatoriaus): atmesti užklausą su HTTP 400, jei ji siunčiama į prieigos tašką, kurio modelis nepalaiko, prieš išsiunčiant į /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ir /v1/audio/*; paslėpti modelius, kurių pažymėti prieigos taškai neturi „OmniRoute“ adapterio, iš /v1/models; ir tokiems modeliams valdymo skydelio modelio teste grąžinti 422. Pagal numatytuosius nustatymus išjungta: prieigos taškų žymos lieka informacinės, o užklausos siunčiamos lygiai taip pat, kaip ir anksčiau."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Universalus konteksto perdavimas",
+        "description": "Generuoti ir įterpti pokalbio santraukas, kai kombinuotas maršrutizavimas perjungia modelius. Išjunkite, jei norite modelių perjungimus vertinti nepriklausomai ir užkirsti kelią foninėms perdavimo užklausoms visiems esamiems bei būsimiems deriniams."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Samprotavimo atkūrimas",
+        "description": "Išsaugoti talpykloje ir atkurti modelio samprotavimą kelių etapų pokalbiuose. Išjunkite, jei norite sustabdyti samprotavimo saugojimą ir pakartotinį įterpimą."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server transportas",
+        "description": "Leisti „Codex“ naudoti vietinį „app-server“ „WebSocket JSON-RPC“ transportą (codexTransport=app-server). Kai išjungta, ryšiai, pasirinkę „app-server“, persijungia į kitus „Codex“ transportus."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Klaidos kodo aptikimo aliased",
+        "description": "Reklamuoti „claude/'<provider>'/'<model>'“ veidrodinės ID per /v1/models, kad Klaidos kodų vartų modelio aptikimas sąraše įtrauktų ne-Klaidos kodų modelius. Įspėjimas: visuotiniu įjungimu dvigubai padidina sąrašo įrašus visiems klientams."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Be mąstymo modelio aliased",
+        "description": "Pagrindinis jungiklis „no-think/'<provider>'/'<model>'“ vartų aliasams. Įjungta (numatyta): /v1/models reklamuojama be mąstymo versija kiekvienam tinkamam mąstant Klaidos kodų modeliui, o „no-think/“ ID, perduota prašyme, atitinkamai grąžinama atgal į tikrąjį modelį su ribotu mąstymu. Išjungta: versijos nebuvalomos reklamuojamos, o „no-think/“ ID vertinamos kaip bet koks kitas nežinomas modelio ID. Kiekvienam modeliui priskirtas ModelSpec.noThinkingAlias pasirinktinis įjungimas/išjungimas ir toliau taikomas, kol šis jungiklis įjungtas."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Išjungti mąstymo lygio variantus",
+        "description": "Išjungti mąstymo lygio variantų (pvz., -low, -medium, -high) generavimą /v1/models kataloge."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Adaptyviosios virtualios priėmimo juostos",
+        "description": "Įjungti kiekvienam nuomininkui taikomas adaptyviąsias virtualias priėmimo juostas teikėjo paskirstymui (#9654): vieno nuomininko apkrovos šuolis nebesukels 503 klaidos kitam. Aplinkos kintamasis OMNIROUTE_CHAT_VIRTUAL_LANES turi pirmenybę prieš šį valdymo skydelio nustatymą; pakeitimai įsigalioja iš naujo paleidus serverį."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Funkciniai vartų veidrodiniai aiškia",
+        "description": "Reklamuoti „'<gateway-alias>'/'<model>'“ veidrodinės ID per /v1/models tiems modeliams, kurių kanoninis savinys neturi aktyvaus kredencialo, bet proangų vartai su aktyviu kredencialu juos nukreipia. Įspėjimas: visuotiniu įjungimu prideda sąrašo įrašus visiems klientams."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API agregatoriaus balansas",
+        "description": "Įgalinti balanso aptikimą mazgams, suderinamiems su New-API / One-API / Sub2API agregatoriais. Įgalinus, suderinami mazgai su nustatyta agregatoriaus vėliavėle praneš apie savo balansą valdymo skyde ir „quota-preflight“ maršrutizavime."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Slėpti ištrintas paieškos jungtis",
+        "description": "Paieškos statistikoje ir paskutinėse paieškose atsižvelgiama tik į teikėjus, vis dar turinčius veikiančią jungtį (teikėjai be rakto, pvz., duckduckgo-free, įskaičiuojami visada). Išjungus, išlaikoma kiekviena išsaugota paieškos eilutė su teikėjo ID."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Griežtas ženklelis „Free“",
+        "description": "Valdymo skydo teikėjų puslapiai: rodyti ženklelį „Free“ tik pagal signalus, kuriuos teikėjas palaiko — atmetama rodomo pavadinimo heuristika, ne loginiai „free“ laukai ir :free priesagos registruotiems teikėjams be dokumentuoto nemokamo lygio. Išjungus, taikoma ankstesnė ženklelio taisyklė."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: tuščias telkinys grąžina 503",
+        "description": "Kai „Auto Combo“ kandidatų telkinys yra tuščias dar prieš paleidžiant išankstinį įrankių iškvietimo (tool-calling) filtrą (visi taikiniai praleisti dėl atvėsimo periodų, blokavimų ar išsekimo), grąžinti 503 no_eligible_targets vietoj ankstesnio 400 \"No target supports tool calling\" capability_mismatch. Pagal numatytuosius nustatymus išjungta: esant tuščiam telkiniui grąžinamas ankstesnis 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral Neaiškus 401 Švelnus Blokavimas",
+        "description": "Grynasis Mistral 401 ('{\"detail\":\"Unauthorized\"}', be aiškaus autentifikavimo signalo) baitų lygiu yra identiškas tiek atšaukto rakto, tiek išnaudotos kvotos atveju. Kai įjungta, toks 401 atvėsina ryšį, užuot atidėjęs jį kaip nebegaliojantį, iki 3 kartų per valandą; kitas vis tiek atideda jį kaip nebegaliojantį, todėl atšauktas raktas konverguoja. Pagal numatytuosius nustatymus išjungta: kiekvienas grynasis Mistral 401 atideda ryšį kaip nebegaliojantį, kaip ir anksčiau."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Paketų & Failų Automatinis Valymas",
+        "description": "Leisti automatiniam valymo procesui ištrinti galutines (completed/failed/cancelled/expired) Batch API užduotis, senesnes nei OMNIROUTE_BATCH_RETENTION_DAYS, kartu su jų kiekvienos eilutės kontroliniais taškais, ir išvalyti įkeltų failų, kurių pačių expires_at jau praėjo, BLOB turinį. Pagal numatytuosius nustatymus išjungta: kiekvienas esamas diegimas saugo šiuos duomenis tiksliai taip, kaip ir anksčiau, kol operatorius to nepasirenka. Operatoriaus inicijuojamas DELETE /api/v1/batches/delete-completed maršrutas bet kuriuo atveju lieka nepaveiktas -- tai yra atskira, besąlyginė viešosios API sutartis."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity Paskyros Nuoma",
+        "description": "Rezervuoti pasirinktą Antigravity paskyrą ją pasirinkusios užklausos srautinio perdavimo gyvavimo ciklui, kad lygiagretus pakartotinis bandymas arba kredencialų perdavimas negalėtų iš naujo pasirinkti paskyros, kuri jau priskirta vykdomam srautui. Rezervacijos taikymo sritis yra (connection, callable upstream model), todėl viena paskyra vis tiek gali vienu metu aptarnauti du skirtingus modelius. Kai visos tinkamos paskyros tam modeliui jau yra išnuomotos, užklausa grąžina struktūrizuotą 503 POOL_BUSY su apribotu Retry-After, užuot apkrovusi užimtą paskyrą. Pagal numatytuosius nustatymus išjungta: paskyros pasirinkimas lieka toks pat kaip anksčiau ir jokia rezervacija neatliekama."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Automatiškai Apkarpyti Pasenusius Kombinacijų Žingsnius",
+        "description": "Po sėkmingo modelių sinchronizavimo su autoritetingu tiesioginiu katalogu pašalinti derinio žingsnius, prisegtus prie modelių, kurių nebėra katalogo sąraše, su vienu audito įrašu kiekvienam pašalintam žingsniui. Niekada neapkarpoma esant nesėkmingam, suprastėjusiam ar tik nemokamam sinchronizavimui ir niekada neištuštinamas derinys. Pagal numatytuosius nustatymus išjungta: pasenę žingsniai tik pažymimi."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth Apibendrintas Mąstymas",
+        "description": "Leisti Claude OAuth užklausai, kuri prašo įskaitomo mąstymo (thinking.display \"summarized\"), pašalinti redact-thinking-2026-02-12 Anthropic beta, dėl kurios priešingu atveju Anthropic grąžina tuščius, tik parašą turinčius mąstymo blokus. Pagal numatytuosius nustatymus išjungta: ši beta yra Claude Code OAuth tinklo atspaudo dalis, todėl OAuth užklausos palieka ją nepakeistą. Claude užklausos su API raktu jau palaiko apibendrintą mąstymą be šios vėliavėlės; OMNIROUTE_REDACT_THINKING=false taip pat pasiekia OAuth tik tada, kai ši vėliavėlė yra įjungta."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro įrankio iškvietimo taisymas",
+        "description": "Kai srautinis Kiro atsakymas prieš bet kokią matomą išvestį pateikia netinkamai suformuotą tool_call apvalkalą (trūksta input.name arba input.arguments), nuslopinti jį ir vieną kartą pakartotinai išsiųsti užklausą su taisomąja instrukcija, užuot užbaigus ėjimą su invalid_kiro_tool_call. Pakartotinis bandymas kainuoja vieną papildomą Kiro užklausą; antroji nesėkmė užbaigia ėjimą su kiro_tool_call_repair_retry_failed. Pagal numatytuosius nustatymus įjungta. Nustatykite reikšmę false, kad ėjimas būtų nutrauktas ties pirmuoju netinkamai suformuotu apvalkalu."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev pastangų lygiai",
+        "description": "Naudoti models.dev skelbiamus samprotavimo pastangų lygius (susiaurintus iki žinomo pastangų žodyno), kai jų nenurodo nei operatoriaus perrašymas, nei teikėjo registras, ir deklaruotą tuščią lygių sąrašą laikyti „nėra lygių“ /v1/models effort_tiers bei kombinuotų lygių sankirtose. Pagal numatytuosius nustatymus išjungta: effort_tiers ir nustatyti supportedThinkingEfforts lieka lygiai tokie patys, kaip anksčiau."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena sintetinė cx telemetrija",
+        "description": "Pridėti susintetintą programinį cx kliento sąveikos BLOB (reikšmę, kurią pati arena.ai siunčia puslapiui be užfiksuotos sąveikos) prie kiekvienos Arena (lmarena) create-evaluation užklausos, kurioje nėra operatoriaus pateikto providerSpecificData.cx. Pagal numatytuosius nustatymus išjungta: cx laukas yra Arena apsaugos nuo automatizavimo signalas, todėl OmniRoute persiunčia tik vertę, kurią operatorius užfiksavo iš realios naršyklės sesijos (providerSpecificData.cx), o priešingu atveju nesiunčia jokio cx. Neįrodyta nauda teikėjo pusėje; įjunkite tik tuo atveju, jei Arena pradės atmesti užklausas be cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Gimtasis Codex reaktyvusis sutankinimas",
+        "description": "Leisti reaktyviajam (slenkstiniam) ir kraštutinės priemonės konteksto sutankinimo etapams perrašyti ir gimtąsias Codex tiesioginio perdavimo istorijas (POST /v1/responses į codex teikėją), kai jos viršija konteksto biudžetą, naudojant Responses input[] adapterį. Pagal numatytuosius nustatymus išjungta: gimtosios Codex istorijos priklauso Codex klientui ir niekada nėra perrašomos sutankinant; per didelės užklausos ir toliau neįveikia konteksto biudžeto patikros lygiai taip pat, kaip anksčiau. Reikalauja, kad visuotinis glaudinimas būtų įjungtas, o modelis nebūtų išskirtas."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Kvotos langas: paisyti riboto pristabdymo",
+        "description": "Leisti kiekvieno lango kvotos politikai (seanso / savaitiniams slenksčiams, naudojamiems paskyrai pasirinkti) paisyti riboto išsėmimo pristabdymo: suėjus nustatytam pristabdymo terminui arba kai talpykloje esantis kvotos stebėjimas yra senesnis už pristabdymo ribą, langas nustoja šalinti paskyrą iki naujo kvotos gavimo. Pagal numatytuosius nustatymus išjungta: talpykloje esantis langas blokuoja pagal paskutinį praneštą procentą iki pat savo atstatymo laiko."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Vaizdų generavimas: ilgai trunkančios užduotys",
+        "description": "Su „OpenAI“ suderinamam vaizdų generavimui: naudoti ryšio skirtąjį laiką (providerSpecificData.timeoutMs), priešingu atveju – centrinį pirminio serverio („upstream“) gavimo skirtąjį laiką (FETCH_TIMEOUT_MS, vėliau REQUEST_TIMEOUT_MS, numatytoji reikšmė 600 s) vietoj fiksuoto 120 s vaizdų biudžeto; užbaigti kviečiančiojo atšauktą užklausą su 499 kodu; leisti „Playground“ gauti ilgas vaizdų užduotis kaip SSE srautą su palaikymo („keepalive“) signalais. Pagal numatytuosius nustatymus išjungta: taikomas fiksuotas biudžetas, o kviečiančiojo atšaukimas neperduodamas. Terminas, apimantis atsako turinio nuskaitymą, visada yra įjungtas."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Katalogo veidrodžių patobulinimai",
+        "description": "Patobulinti claude/ aptikimo ir „functional-gateway“ veidrodžius ties /v1/models. Pagal numatytuosius nustatymus išjungta: abu veidrodžių etapai veikia tiksliai taip, kaip anksčiau. Įjungta: claude/ aptikimo veidrodžiai taip pat apima išvardytus mąstymo pastangų („reasoning-effort“) variantus (-low/-medium/-high/-xhigh), praleidžia integruotus auto/* ID, kurių užklausos kelias negali realizuoti, ir praleidžia jau išvardytą pseudonimą; „functional-gateway“ veidrodžiai praleidžia kombinacijas ir „OmniRoute“ susintetintus ID (claude/, no-think/), paima savininką iš owned_by, niekada nenaudoja savininko kaip jo paties šliuzo, praleidžia šliuzus, išjungtus blockedProviders, ir modelius, nepriklausančius autoritetingam tiesioginiam šliuzo katalogui."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Tarpinio serverio būklė: atmetimas anuliuoja nesėkmių seriją",
+        "description": "Tarpinio serverio būklės patikroje leisti patikrai, kurią paskirties vieta atmetė (401/403/429: tarpinis serveris perdavė, o paskirties vieta atmetė šį išvesties IP), anuliuoti tarpinio serverio iš eilės patirtų nesėkmių seriją, kaip ir sėkmingai aptarnautos patikros atveju. Pagal numatytuosius nustatymus išjungta: atmetimas lieka neutralus ir išlaiko seriją (#10654). 5xx klaida bet kuriuo atveju lieka neapibrėžta, o atmetimas niekada nepašalina, neišjungia ir iš naujo nesuaktyvina tarpinio serverio."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "„Grok“ prenumeratos vaizdai",
+        "description": "Užregistruoti xai-oauth (xao) ir grok-cli vaizdų maršrutus bei susieti „OpenAI“ kokybės parinktis high/hd su „xAI“ medium. Pagal numatytuosius nustatymus išjungta: API rakto „xAI“ vaizdų kelias lieka esamoje su „OpenAI“ suderinamoje užklausoje, o prenumeratos maršrutai nėra registruojami."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "Tiesioginis „xAI OAuth“ modelių aptikimas",
+        "description": "Gauti tiesioginį „xAI“ modelių katalogą xai-oauth ryšiams iš https://api.x.ai/v1/models naudojant „OAuth“ „bearer“ prieigos raktą vietoj įšaldyto statinio pradinio rinkinio. Pagal numatytuosius nustatymus įjungta. Nustatykite vėliavėlę į „false“, kad ir toliau būtų teikiamas statinis pradinis rinkinys. HTTP klaidų atveju aptikimo maršrute grįžtama prie pradinio rinkinio; pati vėliavėlės gavimo funkcija („getter“) nesiunčia HTTP užklausų."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Su „Anthropic“ suderinami sistemos pranešimai pokalbio eigoje",
+        "description": "Paprastuose su „Anthropic“ suderinamuose anthropic-compatible-* retransliatoriuose (claude → claude passthrough) išlaikyti pokalbio eigos role:system pranešimus masyve messages[], užuot iškėlus juos į aukščiausio lygio parametrą system, kad podėlyje esantis užklausos priešdėlis išliktų stabilus tarp pranešimų. Taikoma tik tada, kai pats klientas atsiuntė mid-conversation-system-2026-04-07 anthropic-beta (persiunčiamą aukščiau be pakeitimų). Pagal numatytuosius nustatymus išjungta: kiekvienas sistemos pranešimas iškeliamas lygiai taip pat, kaip ir anksčiau, nes beta versijos nepalaikantys retransliatoriai atmeta role:system pranešimus su klaida 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB būklės patikra: atidėti paleidimo nuskaitymą",
+        "description": "Paleisti duomenų bazės vientisumo / būklės patikrą paleidimo metu po to, kai serveris pradeda priimti užklausas (naudojant setImmediate), užuot blokuojant paleidimą, kol ji bus baigta. Pagal numatytuosius nustatymus išjungta: paleidimas blokuojamas atliekant patikrą lygiai taip pat, kaip ir prieš #13717, todėl pažeista duomenų bazė vis tiek aptinkama prieš apdorojant pirmąją užklausą. Įjungta: paleidimas baigiamas iš karto, o patikra (dabar apribota / suskaidyta puslapiais ir, tikros failinės DB atveju, izoliuota atšaukiamame antriniame procese) paleidžiama iškart po to."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "„OpenCode“ paskelbto katalogo maršrutizavimas",
+        "description": "Leisti „OpenCode Zen“ ir „OpenCode Go“ modeliams be aiškaus registro galinio taško paimti savo užklausų sąsają (Responses, skirtą @ai-sdk/openai, Messages, skirtą @ai-sdk/anthropic) iš paskelbto models.opencode.ai katalogo, nuskaitomo fone kas 6 val. Pagal numatytuosius nustatymus išjungta: galinis taškas nustatomas pagal registro heuristiką lygiai taip pat, kaip ir anksčiau, o katalogas niekada neatsiunčiamas."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Automatinės užklausos: nustatytų galimybių svoriai",
+        "description": "Leisti auto/* užklausoms (resolveModelOrError ir automatinio maršrutizavimo apvalkalui) kurti kandidatų telkinį su nustatytomis modelio galimybėmis (vision, reasoning, thinking) ir stebimais kokybės įverčiais, nuskaitomais vienu masiniu praėjimu kaip /v1/models katalogas. Pagal numatytuosius nustatymus išjungta: užklausos laiko momentinės kopijos svoriai lieka lygiai tokie patys, kaip ir anksčiau (galimybės nustatomos pagal poreikį ir neįtakoja svorių). Įjungta: šie signalai papildo momentinės kopijos svorius, todėl kandidatų svoriai, o kartu ir pasirinkimas, gali pasikeisti."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-derinimas: klaviatūros be transporto vartai",
+        "description": "Laikyti klaviatūros be (be autentifikacijos) tiekėjus, kuriems transportui reikia vietinio naršyklės (browserBacked) arba vietai įdiegto CLI (isLocalCli), iš auto/* kandidatų grupės, kad užstrigęs narys nestumdys auto prašymo iki kas target laikymo išėjimo (#17036). Numatyta išjungta: visi be-autentifikacijos tiekėjai su emuliuotu įrankių paskambinimu lieka grupėje kaip anksčiau. Tiesioginiai „'<alias>'/'<model>'“ paskambinimai veikia abiem atvejais."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Vidinis loginčių pakartojimas",
+        "description": "KodBuddy CN loginčių modelių (DeepSeek-V4 / Kimi-K2 šeimos, kuriems reikia loginčių pakartojimo) atvejais kiekvieną pakartotą asistento reasoning_content lauką vidinį '<thought>' bloką pridedame prie žinutės turinio pradžioje, kad jis išliktų net jei vartinys (gateway) atmetžia reasoning_content lauką (#13632). Numatytai išjungta: CodeBuddy CN užklausos siunčomos nepakitusios; pats reasoning_content laukas visada išlieka."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Teikėjo saugos sustabdymai: galutiniai",
+        "description": "Išlaikyti aiškų teikėjo saugos sustabdymą (misalignment_policy_violation, content_policy_violation arba tikslų pasenusį „blocked by our safety systems“ atmetimą, pažymėtą kaip provider_safety_rejection) kaip galutinį, užklausos aprėpties atsisakymą: jo kodas išsaugomas per HTTP, Responses, WebSocket ir užbaigto srauto klaidas, o „combo“ ties juo sustoja, užuot bandžiusi kitus taikinius, atšaukdama priimtus gretutinius elementus (#17049). Pagal numatytuosius nustatymus išjungta: šios klaidos apdorojamos kaip įprasta, o „combo“ maršruto parinkimas lieka nepakeistas."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Prisijungimo duomenų būklė: pakartotinis automatiškai išjungtų ryšių tikrinimas",
+        "description": "Leisti prisijungimo duomenų būklės patikrai pakartotinai patikrinti ryšius, kuriuos šliuzas išjungė pats (pažymėtus autoDisabledAt; ne dažniau kaip kartą per 6 val. kiekvienam ir daugiausia po 5 per patikrą), bei vėl įjungti ryšį, kai jo pakartotinis patikrinimas yra sėkmingas (#16190). Pagal numatytuosius nustatymus išjungta: išjungti ryšiai lieka išjungti, kol operatorius juos vėl įgalina arba pakartotinai patikrina, lygiai taip pat, kaip anksčiau. Paties operatoriaus išjungti ryšiai ir ryšiai, išjungti po nuolatinio užblokavimo, niekada nėra pakartotinai tikrinami."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Prisijungimo duomenų vartai: tik autentifikavimo diagnozės",
+        "description": "Siaurinti „combo“ prisijungimo duomenų vartus, kad talpykloje esantis nesėkmingas prisijungimo duomenų zondas blokuotų ryšį tik tada, kai jo diagnozė patvirtina netinkamus prisijungimo duomenis (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Negalutinės nesėkmės (skirtojo laiko pabaiga, dažnio ribojimai, prastovos, nepalaikomi zondai ir netipuotos planuoklės klaidos) tokiu atveju laikomos nežinomomis, o ryšys toliau gauna srautą. Pagal numatytuosius nustatymus išjungta: bet kokia talpykloje esanti zondo klaida blokuoja ryšį talpyklos TTL laikotarpiui (5 minutėms)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: sustabdyti gavus turinio politikos atmetimą",
+        "description": "Kai „combo“ taikinys atsako tiksliu turinio politikos atmetimu (kodas arba tipas cyber_policy / content_policy_violation), sustabdyti „combo“ ir grąžinti tą atmetimą net tada, kai likę taikiniai yra kitokie modeliai, užuot pereinant prie kito taikinio. Pagal numatytuosius nustatymus išjungta: atmetimas niekada neatvėsina paskyros ir nesuaktyvina teikėjo grandinės pertraukiklio, o „combo“ pereina prie kito taikinio lygiai taip pat, kaip anksčiau."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Atvėsimo pakartotinis bandymas: praleisti 403/410 atmetimus",
+        "description": "Kai visos paskyros yra atvėsimo būsenoje ir anksčiausiai pasibaigiantis atvėsimas kilo dėl 403 (prieiga atmesta) arba 410 (nebeegzistuoja), iš karto grąžinti šį atmetimą, užuot laukus atvėsimo pabaigos ir iš naujo siuntus užklausą; atsinaujinantis agentrouter ryšio aprėpties kvotos 403 atsakymas tuomet išsaugomas su errorCode 429, kad išliktų kartojamas. Pagal numatytuosius nustatymus išjungta: tik 401 praleidžia laukimą, o kiekvienas atmetimas išsaugomas su ta būsena, su kuria buvo gautas."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Neįkainoto naudojimo biudžeto politika",
+        "description": "Kaip kiekvieno rakto dieniniai/savaitiniai USD limitai traktuoja sėkmingą naudojimą, kurio tiekėjas ar modelis neturi kainos įrašo. fail_closed (numatytasis) pažymi langą kaip viršytą, todėl nežinoma kaina niekada nepraslys per griežtą ribą. count_as_zero skaičiuoja tą naudojimą kaip $0 ir toliau taiko apribojimus pagal apibrėžtas kainas. Neįkainoti modeliai bet kuriuo atveju yra išvardyti pagrindiniame informacijos suvestinės puslapyje."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Įrašyti paskyros ID",
+        "description": "Įtraukti paskyros prefiksą į AUTENTIKAVIMO žurnalo eilutes (pvz., „Naudojamas „'<provider>'“ paskyros: abc12345...“). Numatyta, kad paskyrų identifikatoriai nėra rodomi bendra naudojamuose / daugelio nuomininkų procesų žurnaluose. Nepriklauso nuo atsekimo režimo; atsekimo režimo įjungimas to nepadaro."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Išjungti prisijungimą slaptažodžiu naudojant OIDC",
+        "description": "Kai OIDC yra įjungtas, išjungti prisijungimą slaptažodžiu, kad naudotojai galėtų autentifikuotis tik per OIDC vienkartinį prisijungimą („Single Sign-On“). Kai išjungta (numatytasis nustatymas), galimas ir prisijungimas slaptažodžiu, ir OIDC."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Nuotoliniai garso teikėjų mazgai",
+        "description": "Leisti /v1/audio/* maršrutams naudoti su „OpenAI“ suderinamus teikėjų mazgus, talpinamus ne „localhost“. Pagal numatytuosius nustatymus išjungta – garso nukreipimas į nuotolinį serverį pakeičia išvesties tapatybę ir turi būti aiškus operatoriaus sprendimas. Vidinės kilpos („loopback“) mazgai visada leidžiami ir lieka nepaveikti."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Nuotoliniai „Rerank“ teikėjų mazgai",
+        "description": "Leisti POST /v1/rerank (ir atminties variklio „rerank“ žingsniui, kuris jį iškviečia per vidinę kilpą („loopback“)) naudoti su „OpenAI“ suderinamus teikėjų mazgus, talpinamus ne „localhost“ – LAN įrenginį ar „Tailscale“ mazgą („peer“), kuriame veikia TEI, Infinity, vLLM ir kt. Pagal numatytuosius nustatymus išjungta – nukreipimas į nuotolinį serverį pakeičia išvesties tapatybę ir turi būti aiškus operatoriaus sprendimas. Vidinės kilpos („loopback“) mazgai visada leidžiami ir lieka nepaveikti. Nuotoliniai mazgai taip pat turi atitikti teikėjo siunčiamų URL („outbound URL“) politiką."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Tinklo rotacijos bendros išvesties apsauga",
+        "description": "Įvykus tinklo išimčiai (skirtasis laikas, ryšys atmestas / nustatytas iš naujo) kelių paskyrų rotacijos vykdyklėje, kai nesėkmingai veikianti paskyra neturi dedikuoto tarpinio serverio („proxy“), taikyti trumpą atvėsimo laikotarpį („cooldown“) ir praleisti kitas paskyras be tarpinio serverio likusiai užklausos daliai, užuot bandžius pakartotinai su kiekviena iš jų. Pagal numatytuosius nustatymus įjungta (saugu: nekeičia išvesties IP, tik sumažina delsą ir atvėsimo riziką bendros išvesties paskyrose). Išjunkite, jei norite atkurti tiesioginį klaidos perdavimą jau po pirmosios išimties be tarpinio serverio."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Praleisti neseniai sugedusius proxy",
+        "description": "Proxy telkiniai ir „opencode“ paskyros rotacija nustoja pakartotinai naudoti ką tik sugedusį proxy (atmestas TCP zondas arba per jį gautas 429) proceso lygio laikotarpiui, kuris dvigubėja sulig kiekvienu pakartojimu iki nustatytos ribos. Proxy būsena nėra įrašoma; atidėjus kiekvieną kandidatą pasirinkimas lieka nepakitęs. Pagal numatytuosius nustatymus įjungta: pasirinkimo tvarka yra visiškai tokia pati, kaip įprastos rotacijos, tik su PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Bendro išvesties telkinio tvarka",
+        "description": "Teikėjams, kurių kvota skirstoma pagal išvesties adresą, telkinio narį, turintį tą patį stebėtą išvesties adresą kaip ir neseniai atmestas narys, rikiuoti iškart po veikiančių narių. Tik rikiavimas, niekada neatmetama. Reikalingas PROXY_SKIP_RECENTLY_FAILED, kuris pateikia nuskaitomą atmetimo signalą. Pagal numatytuosius nustatymus išjungta: pasirinkimo tvarka yra visiškai tokia pati, kaip įprastos rotacijos."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Rotacijos priskyrimo žurnalizavimas",
+        "description": "„opencode“ rotacija fiksuoja, kuri paskyra aptarnavo užklausą arba buvo praleista (tik užmaskuoti ID, niekada ne pilni paskyrų ID), ir susieja proxy žurnalo įrašus su jų užklausa, kad operatorius galėtų atskirti praleistas paskyras nuo nenaudotų. Pagal numatytuosius nustatymus išjungta: papildomų žurnalo eilučių ar stulpelių nerašoma."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Proxy telkinio išvesties stebėjimas",
+        "description": "Valdymo skydelyje po proxy telkiniu rodyti, kiek stebėtų išvesties IP adresų aptarnavo jo narius per pastarąsias 24 h, kiek ryšių juos naudojo ir didžiausią kiekį, matytą už vieno IP. Tik skaitymui, apskaičiuojama iš proxy žurnalo, niekada nenaudojama maršrutizavimui. Pagal numatytuosius nustatymus išjungta: telkinio rengyklė lieka nepakitusi, o stebėjimo maršrutas grąžina null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Proxy operatoriaus išvestis",
+        "description": "Priimti operatoriaus atsiųstus datuotus stebėtus adresus kiekvienam telkinio nariui ir sujungti juos su žurnalo duomenimis atvaizdavimui bei telkinio rikiavimui. Pagal numatytuosius nustatymus išjungta: persiuntimo (push) maršrutas grąžina 404, o telkinio nuskaitymai veikia lygiai taip pat, kaip anksčiau."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "„OpenCode Responses“ užstrigimo rotacija",
+        "description": "„OpenCode“ vykdytojui: stebėti pirmąjį transliuojamo „Responses“ atsakymo turinio baitą (langas: RESPONSES_FIRST_BYTE_TIMEOUT_MS, numatytoji reikšmė – 15000). 2xx „Responses“ srautas, kuris pasibaigus šiam langui išlieka tylus, laikomas užstrigusiu: paskyrai taikomas atvėsinimas, o užklausa vieną kartą nukreipiama į kitą paskyrą; antras užstrigimas sukelia greitą nesėkmę. Pagal numatytuosius nustatymus išjungta: užstrigę srautai laukia kaip iki šiol – iki srauto parengties skirtojo laiko."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "„OpenCode user_blocked“ rotacija",
+        "description": "„OpenCode“ vykdytojui: kai pirminis teikėjas atsako 403 arba 451 kodu su „user_blocked“ atmetimu (ne geografinis blokavimas ir ne „Cloudflare“ pirštų atspaudų atmetimas), atvėsinkite atmestą paskyrą ir nukreipkite į kitą paskyrą ne daugiau kaip vieną kartą per užklausą; antras atmetimas grąžinamas toks, koks yra, be sėkmės žymos. Pagal numatytuosius nustatymus išjungta: pirminio teikėjo naudotojo blokavimo apėjimas gali atrodyti kaip vengimas ir išplatinti žymą visame paskyrų parke, todėl atmetimas grąžinamas nepakeistas, nebent operatorius pasirenka kitaip."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "„OpenCode“ trumpalaikių trikčių perjungimo delsa",
+        "description": "„OpenCode“ kelių paskyrų rotacijoje: padaryti pauzę prieš siunčiant užklausą kitai paskyrai, kai du bandymai iš eilės nepavyksta dėl trumpalaikės pirminio teikėjo klaidos (5xx arba tuščias 400 atmetimas). Pauzė prasideda nuo 1,5 s, dvigubėja sulig kiekviena tolesne nesėkme iš eilės, yra ribojama iki 6 s vienai pauzei ir 10 s vienai užklausai, praleidžiama klientui atsijungus, o nepavykusio atsakymo turinys atlaisvinamas prieš laukiant. Pagal numatytuosius nustatymus išjungta: perjungimas lieka momentinis."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Tuščio žingsnio pakartotinis bandymas (Flush)",
+        "description": "Transliuojamuose verstiniuose žingsniuose: kai pirminio teikėjo žingsnyje nėra tinkamo naudoti turinio (tik samprotavimo užbaigimas arba nulis vertingų fragmentų), atlikti ribotus pakartotinius bandymus įprastu kredencialų keliu (iki `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`), kol klientui dar nieko nepateikta. Pagal numatytuosius nustatymus išjungta: tuštiems žingsniams taikoma dabartinė elgsena (tuščias 200 arba 502 su tuščiu turiniu)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Tuščio srauto giminingas atkūrimas",
+        "description": "„Claude“ / „Codex“ srautinis perdavimas: po pirmojo gyvavimo ciklo įvykio trumpai patikrinti (iki 1 s / 64 KiB), ar gaunama tinkama naudoti išvestis; srautas, kuris baigiasi be turinio, tampa „empty_content“ klaida, kuri išnaudoja esamą ribotą pakartotinį bandymą su kitu tinkamu ryšiu (be atvėsinimo, be modelio blokavimo), o ciklinio paskirstymo („round-robin“) deriniai nustoja kartoti bandymus klientui atsijungus. Patikros metu „refusal“, „pause_turn“ ir „model_context_window_exceeded“ taip pat laikomi teisėtomis tuščiomis galutinėmis būsenomis. Pagal numatytuosius nustatymus išjungta: parengtis, tuščio turinio apdorojimas ir derinių pakartotiniai bandymai lieka visiškai tokie patys, kaip ir anksčiau."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Vėlyvos srauto išvesties zondas",
+        "description": "Srauto išvesties zondas: po pirmųjų 64 persiųstų fragmentų toliau atrenkamas vienas fragmentas iš 16 pirmajai matomai išvesčiai nustatyti, kad vėlai prasidėjusi išvestis vis tiek pažymėtų srautą kaip pateikusį išvestį. Pavienė 5xx klaida po šio momento lieka apribota užklausos lygiu, užuot užfiksavus tik modelio blokavimą, o firstOutputMs atgaline data priskiriamas dabartinio atrankos intervalo pirmajam išvesties fragmentui. Pagal numatytuosius nustatymus išjungta: zonduojami tik pirmieji 64 persiųsti fragmentai, lygiai kaip anksčiau."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode spartos ribojimo 429 ankstyvas sustabdymas",
+        "description": "„OpenCode“ kelių paskyrų rotacijai: sustabdyti paskyrų bangą ties pirmuoju 429, klasifikuojamu kaip tikras spartos ribojimas (išanalizuojama Retry-After antraštė arba tekstas, nurodantis spartos / naudojimo limitą), ir grąžinti tą upstream 429 nepakeistą (būseną, turinį, Retry-After ir kvotų antraštes), užuot bandžius kiekvieną likusią paskyrą. Neklasifikuoti 429 toliau rotuojami. Pagal numatytuosius nustatymus išjungta: nemokamas planas ribojamas pagal egress IP (#9611), todėl kiekvienas 429 perjungia į kitą paskyrą, o išsekus bangai grąžinamas paskutinis upstream 429."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 pristabdymas ir atnaujinimas",
+        "description": "„OpenCode“ kelių paskyrų rotacijai: pristabdyti užklausą po pasikartojančių laikinų 429 klaidų (arba naujos telkinio apkrovos žymos) su pulso signalu (heartbeat), tada pakartoti vieną apribotą etapą iki 3 nuoseklių paskyrų, užuot siuntus užklausas visam parkui. Pagal numatytuosius nustatymus išjungta: kiekvienas 429 perjungia į kitą paskyrą lygiai taip pat, kaip ir anksčiau."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Srauto parengties strigimo pakartotinis bandymas",
+        "description": "Srautinio pokalbio užklausoms: kai pirmasis upstream turinys užstringa prieš pateikdamas tinkamą įvykį, atlikti vieną apribotą antrąjį bandymą tuo pačiu maršruto keliu, naudojant tą patį parengties biudžetą ir netaikant nuobaudos paskyrai. Pagal numatytuosius nustatymus išjungta: užstrigus pirmajam turiniui, užklausai užfiksuojama nesėkmė be pakartotinio bandymo."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 telkinio pakartotinis pasirinkimas",
+        "description": "„OpenCode“ kelių paskyrų rotacijai: gavus 429 iš tiekėjo, ribojančio pagal egress srautą, paskyroje be tarpinio serverio (proxy-less) bendro telkinio kontekste, kitam bandymui paprašyti ryšių telkinio kito nario, užuot bandžius vėl su tuo pačiu egress adresu. Rūšiuoja, bet niekada neatmeta: išsekus telkiniui, išlaikomas dabartinis elgesys. Pagal numatytuosius nustatymus išjungta: kiekvienas 429 perjungia į kitą paskyrą lygiai taip pat, kaip ir anksčiau."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 kliento pirštų atspaudas",
+        "description": "Siųsti OpenCode v2 CLI kliento pirštų atspaudą OpenCode Zen/Go užklausose (#16571): User-Agent opencode/latest/<2.x>/cli ir x-opencode-client cli, kliento User-Agent paliekamas tik tada, kai tai yra 2.x OpenCode klientas, o ribotose nemokamo plano užklausose nesiunčiama x-opencode-request, sesija dubliuojama į x-opencode-session-id/x-session-affinity/x-session-id, v2 CLI read/shell schemos įterptuose vietos rezervavimo įrankiuose, o tool_choice reikšmė \"none\" pašalinama. Pagal numatytuosius nustatymus išjungta: kiekviena OpenCode užklausa baitas į baitą išlaiko esamą tapatybę, antraštes ir kūną."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen išeinančio IP blokavimas",
+        "description": "Pridėti OpenCode Zen (opencode-zen) prie numatytosios išeinančio IP blokavimo grupės, kad 429 klaida viename Zen ryšyje taip pat pristabdytų visus susijusius Zen ryšius, besidalijančius tuo pačiu išeinančiu IP. Pagal numatytuosius nustatymus išjungta: Zen yra nustatomas pagal raktą ir kiekvienas ryšys atvėsta atskirai, lygiai taip pat, kaip ir anksčiau. Aiškiai nurodyta OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS reikšmė visada turi pirmenybę prieš šią vėliavėlę."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode viso teksto klaidų taisyklės",
+        "description": "Leisti integruotoms OpenCode klaidų taisyklėms (opencode-zen, opencode-go, opencode-cli) tikrinti atitiktį pagal visą pirminį klaidos tekstą, kad kūno žymekliai, tokie kaip organization_quota_exceeded arba \"monthly usage limit reached\", 429 klaidą klasifikuotų kaip išnaudotą kvotą su ryšio lygmens blokavimu. Pagal numatytuosius nustatymus išjungta: šios taisyklės mato tik struktūrizuotą klaidos kodą, todėl tokia 429 klaida lieka trumpu užklausų ribojimu, lygiai taip pat, kaip ir anksčiau."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI viso teksto klaidų taisyklės",
+        "description": "Leisti integruotai Cloudflare Workers AI klaidos taisyklei tikrinti atitiktį pagal visą pirminį klaidos tekstą, kad 429 klaidos kūnas su \"daily free allocation\" būtų klasifikuojamas kaip išnaudota kvota, o ne kaip trumpas užklausų ribojimas. Pagal numatytuosius nustatymus išjungta: taisyklė mato tik struktūrizuotą klaidos kodą, lygiai taip pat, kaip ir anksčiau."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Galimybių filtras",
+        "description": "Atmesti užklausas prieš išsiuntimą, kai tiksliniam modeliui trūksta reikiamų galimybių (vision, tools, structured output, context window). Apsaugo tiesiogines vieno teikėjo užklausas, apeinančias combo lygmens suderinamumo filtrą."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Nepaisyti neįkainoto naudojimo USD kvotose",
+        "description": "Modelių, neturinčių nustatytos kainos, naudojimą kiekvieno rakto USD naudojimo kvotose skaičiuoti kaip 0 $, užuot laikius kvotą viršyta. Pagal numatytuosius nustatymus išjungta: neįkainotas modelis arba maršrutizavimo pseudonimas gali nuslėpti realias išlaidas, todėl saugumo sumetimais kvota blokuoja prieigą."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Įgalinti „OmniRoute Radar“ modulį (katalogo srauto ekranus ir sinchronizavimą). Pagal numatytuosius nustatymus išjungta; įgalinimas tik atrakina naudotojo sąsają – duomenų sinchronizavimas lieka atskiras pasirinkimas."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Modelio prieigos taško galimybių vartai",
+        "description": "Taikyti patikimas modelio prieigos taškų žymas (deklaruotas teikėjo kataloge, nustatytas pagal specializuoto modelio ID arba nurodytas operatoriaus): atmesti užklausą su HTTP 400, jei ji siunčiama į prieigos tašką, kurio modelis nepalaiko, prieš išsiunčiant į /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ir /v1/audio/*; paslėpti modelius, kurių pažymėti prieigos taškai neturi „OmniRoute“ adapterio, iš /v1/models; ir tokiems modeliams valdymo skydelio modelio teste grąžinti 422. Pagal numatytuosius nustatymus išjungta: prieigos taškų žymos lieka informacinės, o užklausos siunčiamos lygiai taip pat, kaip ir anksčiau."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Universalus konteksto perdavimas",
+        "description": "Generuoti ir įterpti pokalbio santraukas, kai kombinuotas maršrutizavimas perjungia modelius. Išjunkite, jei norite modelių perjungimus vertinti nepriklausomai ir užkirsti kelią foninėms perdavimo užklausoms visiems esamiems bei būsimiems deriniams."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Samprotavimo atkūrimas",
+        "description": "Išsaugoti talpykloje ir atkurti modelio samprotavimą kelių etapų pokalbiuose. Išjunkite, jei norite sustabdyti samprotavimo saugojimą ir pakartotinį įterpimą."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server transportas",
+        "description": "Leisti „Codex“ naudoti vietinį „app-server“ „WebSocket JSON-RPC“ transportą (codexTransport=app-server). Kai išjungta, ryšiai, pasirinkę „app-server“, persijungia į kitus „Codex“ transportus."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Klaidos kodo aptikimo aliased",
+        "description": "Reklamuoti „claude/'<provider>'/'<model>'“ veidrodinės ID per /v1/models, kad Klaidos kodų vartų modelio aptikimas sąraše įtrauktų ne-Klaidos kodų modelius. Įspėjimas: visuotiniu įjungimu dvigubai padidina sąrašo įrašus visiems klientams."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Be mąstymo modelio aliased",
+        "description": "Pagrindinis jungiklis „no-think/'<provider>'/'<model>'“ vartų aliasams. Įjungta (numatyta): /v1/models reklamuojama be mąstymo versija kiekvienam tinkamam mąstant Klaidos kodų modeliui, o „no-think/“ ID, perduota prašyme, atitinkamai grąžinama atgal į tikrąjį modelį su ribotu mąstymu. Išjungta: versijos nebuvalomos reklamuojamos, o „no-think/“ ID vertinamos kaip bet koks kitas nežinomas modelio ID. Kiekvienam modeliui priskirtas ModelSpec.noThinkingAlias pasirinktinis įjungimas/išjungimas ir toliau taikomas, kol šis jungiklis įjungtas."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Išjungti mąstymo lygio variantus",
+        "description": "Išjungti mąstymo lygio variantų (pvz., -low, -medium, -high) generavimą /v1/models kataloge."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Adaptyviosios virtualios priėmimo juostos",
+        "description": "Įjungti kiekvienam nuomininkui taikomas adaptyviąsias virtualias priėmimo juostas teikėjo paskirstymui (#9654): vieno nuomininko apkrovos šuolis nebesukels 503 klaidos kitam. Aplinkos kintamasis OMNIROUTE_CHAT_VIRTUAL_LANES turi pirmenybę prieš šį valdymo skydelio nustatymą; pakeitimai įsigalioja iš naujo paleidus serverį."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Funkciniai vartų veidrodiniai aiškia",
+        "description": "Reklamuoti „'<gateway-alias>'/'<model>'“ veidrodinės ID per /v1/models tiems modeliams, kurių kanoninis savinys neturi aktyvaus kredencialo, bet proangų vartai su aktyviu kredencialu juos nukreipia. Įspėjimas: visuotiniu įjungimu prideda sąrašo įrašus visiems klientams."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API agregatoriaus balansas",
+        "description": "Įgalinti balanso aptikimą mazgams, suderinamiems su New-API / One-API / Sub2API agregatoriais. Įgalinus, suderinami mazgai su nustatyta agregatoriaus vėliavėle praneš apie savo balansą valdymo skyde ir „quota-preflight“ maršrutizavime."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Slėpti ištrintas paieškos jungtis",
+        "description": "Paieškos statistikoje ir paskutinėse paieškose atsižvelgiama tik į teikėjus, vis dar turinčius veikiančią jungtį (teikėjai be rakto, pvz., duckduckgo-free, įskaičiuojami visada). Išjungus, išlaikoma kiekviena išsaugota paieškos eilutė su teikėjo ID."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Griežtas ženklelis „Free“",
+        "description": "Valdymo skydo teikėjų puslapiai: rodyti ženklelį „Free“ tik pagal signalus, kuriuos teikėjas palaiko — atmetama rodomo pavadinimo heuristika, ne loginiai „free“ laukai ir :free priesagos registruotiems teikėjams be dokumentuoto nemokamo lygio. Išjungus, taikoma ankstesnė ženklelio taisyklė."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: tuščias telkinys grąžina 503",
+        "description": "Kai „Auto Combo“ kandidatų telkinys yra tuščias dar prieš paleidžiant išankstinį įrankių iškvietimo (tool-calling) filtrą (visi taikiniai praleisti dėl atvėsimo periodų, blokavimų ar išsekimo), grąžinti 503 no_eligible_targets vietoj ankstesnio 400 \"No target supports tool calling\" capability_mismatch. Pagal numatytuosius nustatymus išjungta: esant tuščiam telkiniui grąžinamas ankstesnis 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral Neaiškus 401 Švelnus Blokavimas",
+        "description": "Grynasis Mistral 401 ('{\"detail\":\"Unauthorized\"}', be aiškaus autentifikavimo signalo) baitų lygiu yra identiškas tiek atšaukto rakto, tiek išnaudotos kvotos atveju. Kai įjungta, toks 401 atvėsina ryšį, užuot atidėjęs jį kaip nebegaliojantį, iki 3 kartų per valandą; kitas vis tiek atideda jį kaip nebegaliojantį, todėl atšauktas raktas konverguoja. Pagal numatytuosius nustatymus išjungta: kiekvienas grynasis Mistral 401 atideda ryšį kaip nebegaliojantį, kaip ir anksčiau."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Paketų & Failų Automatinis Valymas",
+        "description": "Leisti automatiniam valymo procesui ištrinti galutines (completed/failed/cancelled/expired) Batch API užduotis, senesnes nei OMNIROUTE_BATCH_RETENTION_DAYS, kartu su jų kiekvienos eilutės kontroliniais taškais, ir išvalyti įkeltų failų, kurių pačių expires_at jau praėjo, BLOB turinį. Pagal numatytuosius nustatymus išjungta: kiekvienas esamas diegimas saugo šiuos duomenis tiksliai taip, kaip ir anksčiau, kol operatorius to nepasirenka. Operatoriaus inicijuojamas DELETE /api/v1/batches/delete-completed maršrutas bet kuriuo atveju lieka nepaveiktas -- tai yra atskira, besąlyginė viešosios API sutartis."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity Paskyros Nuoma",
+        "description": "Rezervuoti pasirinktą Antigravity paskyrą ją pasirinkusios užklausos srautinio perdavimo gyvavimo ciklui, kad lygiagretus pakartotinis bandymas arba kredencialų perdavimas negalėtų iš naujo pasirinkti paskyros, kuri jau priskirta vykdomam srautui. Rezervacijos taikymo sritis yra (connection, callable upstream model), todėl viena paskyra vis tiek gali vienu metu aptarnauti du skirtingus modelius. Kai visos tinkamos paskyros tam modeliui jau yra išnuomotos, užklausa grąžina struktūrizuotą 503 POOL_BUSY su apribotu Retry-After, užuot apkrovusi užimtą paskyrą. Pagal numatytuosius nustatymus išjungta: paskyros pasirinkimas lieka toks pat kaip anksčiau ir jokia rezervacija neatliekama."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Automatiškai Apkarpyti Pasenusius Kombinacijų Žingsnius",
+        "description": "Po sėkmingo modelių sinchronizavimo su autoritetingu tiesioginiu katalogu pašalinti derinio žingsnius, prisegtus prie modelių, kurių nebėra katalogo sąraše, su vienu audito įrašu kiekvienam pašalintam žingsniui. Niekada neapkarpoma esant nesėkmingam, suprastėjusiam ar tik nemokamam sinchronizavimui ir niekada neištuštinamas derinys. Pagal numatytuosius nustatymus išjungta: pasenę žingsniai tik pažymimi."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth Apibendrintas Mąstymas",
+        "description": "Leisti Claude OAuth užklausai, kuri prašo įskaitomo mąstymo (thinking.display \"summarized\"), pašalinti redact-thinking-2026-02-12 Anthropic beta, dėl kurios priešingu atveju Anthropic grąžina tuščius, tik parašą turinčius mąstymo blokus. Pagal numatytuosius nustatymus išjungta: ši beta yra Claude Code OAuth tinklo atspaudo dalis, todėl OAuth užklausos palieka ją nepakeistą. Claude užklausos su API raktu jau palaiko apibendrintą mąstymą be šios vėliavėlės; OMNIROUTE_REDACT_THINKING=false taip pat pasiekia OAuth tik tada, kai ši vėliavėlė yra įjungta."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro įrankio iškvietimo taisymas",
+        "description": "Kai srautinis Kiro atsakymas prieš bet kokią matomą išvestį pateikia netinkamai suformuotą tool_call apvalkalą (trūksta input.name arba input.arguments), nuslopinti jį ir vieną kartą pakartotinai išsiųsti užklausą su taisomąja instrukcija, užuot užbaigus ėjimą su invalid_kiro_tool_call. Pakartotinis bandymas kainuoja vieną papildomą Kiro užklausą; antroji nesėkmė užbaigia ėjimą su kiro_tool_call_repair_retry_failed. Pagal numatytuosius nustatymus įjungta. Nustatykite reikšmę false, kad ėjimas būtų nutrauktas ties pirmuoju netinkamai suformuotu apvalkalu."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev pastangų lygiai",
+        "description": "Naudoti models.dev skelbiamus samprotavimo pastangų lygius (susiaurintus iki žinomo pastangų žodyno), kai jų nenurodo nei operatoriaus perrašymas, nei teikėjo registras, ir deklaruotą tuščią lygių sąrašą laikyti „nėra lygių“ /v1/models effort_tiers bei kombinuotų lygių sankirtose. Pagal numatytuosius nustatymus išjungta: effort_tiers ir nustatyti supportedThinkingEfforts lieka lygiai tokie patys, kaip anksčiau."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena sintetinė cx telemetrija",
+        "description": "Pridėti susintetintą programinį cx kliento sąveikos BLOB (reikšmę, kurią pati arena.ai siunčia puslapiui be užfiksuotos sąveikos) prie kiekvienos Arena (lmarena) create-evaluation užklausos, kurioje nėra operatoriaus pateikto providerSpecificData.cx. Pagal numatytuosius nustatymus išjungta: cx laukas yra Arena apsaugos nuo automatizavimo signalas, todėl OmniRoute persiunčia tik vertę, kurią operatorius užfiksavo iš realios naršyklės sesijos (providerSpecificData.cx), o priešingu atveju nesiunčia jokio cx. Neįrodyta nauda teikėjo pusėje; įjunkite tik tuo atveju, jei Arena pradės atmesti užklausas be cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Gimtasis Codex reaktyvusis sutankinimas",
+        "description": "Leisti reaktyviajam (slenkstiniam) ir kraštutinės priemonės konteksto sutankinimo etapams perrašyti ir gimtąsias Codex tiesioginio perdavimo istorijas (POST /v1/responses į codex teikėją), kai jos viršija konteksto biudžetą, naudojant Responses input[] adapterį. Pagal numatytuosius nustatymus išjungta: gimtosios Codex istorijos priklauso Codex klientui ir niekada nėra perrašomos sutankinant; per didelės užklausos ir toliau neįveikia konteksto biudžeto patikros lygiai taip pat, kaip anksčiau. Reikalauja, kad visuotinis glaudinimas būtų įjungtas, o modelis nebūtų išskirtas."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Kvotos langas: paisyti riboto pristabdymo",
+        "description": "Leisti kiekvieno lango kvotos politikai (seanso / savaitiniams slenksčiams, naudojamiems paskyrai pasirinkti) paisyti riboto išsėmimo pristabdymo: suėjus nustatytam pristabdymo terminui arba kai talpykloje esantis kvotos stebėjimas yra senesnis už pristabdymo ribą, langas nustoja šalinti paskyrą iki naujo kvotos gavimo. Pagal numatytuosius nustatymus išjungta: talpykloje esantis langas blokuoja pagal paskutinį praneštą procentą iki pat savo atstatymo laiko."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Vaizdų generavimas: ilgai trunkančios užduotys",
+        "description": "Su „OpenAI“ suderinamam vaizdų generavimui: naudoti ryšio skirtąjį laiką (providerSpecificData.timeoutMs), priešingu atveju – centrinį pirminio serverio („upstream“) gavimo skirtąjį laiką (FETCH_TIMEOUT_MS, vėliau REQUEST_TIMEOUT_MS, numatytoji reikšmė 600 s) vietoj fiksuoto 120 s vaizdų biudžeto; užbaigti kviečiančiojo atšauktą užklausą su 499 kodu; leisti „Playground“ gauti ilgas vaizdų užduotis kaip SSE srautą su palaikymo („keepalive“) signalais. Pagal numatytuosius nustatymus išjungta: taikomas fiksuotas biudžetas, o kviečiančiojo atšaukimas neperduodamas. Terminas, apimantis atsako turinio nuskaitymą, visada yra įjungtas."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Katalogo veidrodžių patobulinimai",
+        "description": "Patobulinti claude/ aptikimo ir „functional-gateway“ veidrodžius ties /v1/models. Pagal numatytuosius nustatymus išjungta: abu veidrodžių etapai veikia tiksliai taip, kaip anksčiau. Įjungta: claude/ aptikimo veidrodžiai taip pat apima išvardytus mąstymo pastangų („reasoning-effort“) variantus (-low/-medium/-high/-xhigh), praleidžia integruotus auto/* ID, kurių užklausos kelias negali realizuoti, ir praleidžia jau išvardytą pseudonimą; „functional-gateway“ veidrodžiai praleidžia kombinacijas ir „OmniRoute“ susintetintus ID (claude/, no-think/), paima savininką iš owned_by, niekada nenaudoja savininko kaip jo paties šliuzo, praleidžia šliuzus, išjungtus blockedProviders, ir modelius, nepriklausančius autoritetingam tiesioginiam šliuzo katalogui."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Tarpinio serverio būklė: atmetimas anuliuoja nesėkmių seriją",
+        "description": "Tarpinio serverio būklės patikroje leisti patikrai, kurią paskirties vieta atmetė (401/403/429: tarpinis serveris perdavė, o paskirties vieta atmetė šį išvesties IP), anuliuoti tarpinio serverio iš eilės patirtų nesėkmių seriją, kaip ir sėkmingai aptarnautos patikros atveju. Pagal numatytuosius nustatymus išjungta: atmetimas lieka neutralus ir išlaiko seriją (#10654). 5xx klaida bet kuriuo atveju lieka neapibrėžta, o atmetimas niekada nepašalina, neišjungia ir iš naujo nesuaktyvina tarpinio serverio."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "„Grok“ prenumeratos vaizdai",
+        "description": "Užregistruoti xai-oauth (xao) ir grok-cli vaizdų maršrutus bei susieti „OpenAI“ kokybės parinktis high/hd su „xAI“ medium. Pagal numatytuosius nustatymus išjungta: API rakto „xAI“ vaizdų kelias lieka esamoje su „OpenAI“ suderinamoje užklausoje, o prenumeratos maršrutai nėra registruojami."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "Tiesioginis „xAI OAuth“ modelių aptikimas",
+        "description": "Gauti tiesioginį „xAI“ modelių katalogą xai-oauth ryšiams iš https://api.x.ai/v1/models naudojant „OAuth“ „bearer“ prieigos raktą vietoj įšaldyto statinio pradinio rinkinio. Pagal numatytuosius nustatymus įjungta. Nustatykite vėliavėlę į „false“, kad ir toliau būtų teikiamas statinis pradinis rinkinys. HTTP klaidų atveju aptikimo maršrute grįžtama prie pradinio rinkinio; pati vėliavėlės gavimo funkcija („getter“) nesiunčia HTTP užklausų."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Su „Anthropic“ suderinami sistemos pranešimai pokalbio eigoje",
+        "description": "Paprastuose su „Anthropic“ suderinamuose anthropic-compatible-* retransliatoriuose (claude → claude passthrough) išlaikyti pokalbio eigos role:system pranešimus masyve messages[], užuot iškėlus juos į aukščiausio lygio parametrą system, kad podėlyje esantis užklausos priešdėlis išliktų stabilus tarp pranešimų. Taikoma tik tada, kai pats klientas atsiuntė mid-conversation-system-2026-04-07 anthropic-beta (persiunčiamą aukščiau be pakeitimų). Pagal numatytuosius nustatymus išjungta: kiekvienas sistemos pranešimas iškeliamas lygiai taip pat, kaip ir anksčiau, nes beta versijos nepalaikantys retransliatoriai atmeta role:system pranešimus su klaida 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB būklės patikra: atidėti paleidimo nuskaitymą",
+        "description": "Paleisti duomenų bazės vientisumo / būklės patikrą paleidimo metu po to, kai serveris pradeda priimti užklausas (naudojant setImmediate), užuot blokuojant paleidimą, kol ji bus baigta. Pagal numatytuosius nustatymus išjungta: paleidimas blokuojamas atliekant patikrą lygiai taip pat, kaip ir prieš #13717, todėl pažeista duomenų bazė vis tiek aptinkama prieš apdorojant pirmąją užklausą. Įjungta: paleidimas baigiamas iš karto, o patikra (dabar apribota / suskaidyta puslapiais ir, tikros failinės DB atveju, izoliuota atšaukiamame antriniame procese) paleidžiama iškart po to."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "„OpenCode“ paskelbto katalogo maršrutizavimas",
+        "description": "Leisti „OpenCode Zen“ ir „OpenCode Go“ modeliams be aiškaus registro galinio taško paimti savo užklausų sąsają (Responses, skirtą @ai-sdk/openai, Messages, skirtą @ai-sdk/anthropic) iš paskelbto models.opencode.ai katalogo, nuskaitomo fone kas 6 val. Pagal numatytuosius nustatymus išjungta: galinis taškas nustatomas pagal registro heuristiką lygiai taip pat, kaip ir anksčiau, o katalogas niekada neatsiunčiamas."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Automatinės užklausos: nustatytų galimybių svoriai",
+        "description": "Leisti auto/* užklausoms (resolveModelOrError ir automatinio maršrutizavimo apvalkalui) kurti kandidatų telkinį su nustatytomis modelio galimybėmis (vision, reasoning, thinking) ir stebimais kokybės įverčiais, nuskaitomais vienu masiniu praėjimu kaip /v1/models katalogas. Pagal numatytuosius nustatymus išjungta: užklausos laiko momentinės kopijos svoriai lieka lygiai tokie patys, kaip ir anksčiau (galimybės nustatomos pagal poreikį ir neįtakoja svorių). Įjungta: šie signalai papildo momentinės kopijos svorius, todėl kandidatų svoriai, o kartu ir pasirinkimas, gali pasikeisti."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-derinimas: klaviatūros be transporto vartai",
+        "description": "Laikyti klaviatūros be (be autentifikacijos) tiekėjus, kuriems transportui reikia vietinio naršyklės (browserBacked) arba vietai įdiegto CLI (isLocalCli), iš auto/* kandidatų grupės, kad užstrigęs narys nestumdys auto prašymo iki kas target laikymo išėjimo (#17036). Numatyta išjungta: visi be-autentifikacijos tiekėjai su emuliuotu įrankių paskambinimu lieka grupėje kaip anksčiau. Tiesioginiai „'<alias>'/'<model>'“ paskambinimai veikia abiem atvejais."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Vidinis loginčių pakartojimas",
+        "description": "KodBuddy CN loginčių modelių (DeepSeek-V4 / Kimi-K2 šeimos, kuriems reikia loginčių pakartojimo) atvejais kiekvieną pakartotą asistento reasoning_content lauką vidinį '<thought>' bloką pridedame prie žinutės turinio pradžioje, kad jis išliktų net jei vartinys (gateway) atmetžia reasoning_content lauką (#13632). Numatytai išjungta: CodeBuddy CN užklausos siunčomos nepakitusios; pats reasoning_content laukas visada išlieka."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Teikėjo saugos sustabdymai: galutiniai",
+        "description": "Išlaikyti aiškų teikėjo saugos sustabdymą (misalignment_policy_violation, content_policy_violation arba tikslų pasenusį „blocked by our safety systems“ atmetimą, pažymėtą kaip provider_safety_rejection) kaip galutinį, užklausos aprėpties atsisakymą: jo kodas išsaugomas per HTTP, Responses, WebSocket ir užbaigto srauto klaidas, o „combo“ ties juo sustoja, užuot bandžiusi kitus taikinius, atšaukdama priimtus gretutinius elementus (#17049). Pagal numatytuosius nustatymus išjungta: šios klaidos apdorojamos kaip įprasta, o „combo“ maršruto parinkimas lieka nepakeistas."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Prisijungimo duomenų būklė: pakartotinis automatiškai išjungtų ryšių tikrinimas",
+        "description": "Leisti prisijungimo duomenų būklės patikrai pakartotinai patikrinti ryšius, kuriuos šliuzas išjungė pats (pažymėtus autoDisabledAt; ne dažniau kaip kartą per 6 val. kiekvienam ir daugiausia po 5 per patikrą), bei vėl įjungti ryšį, kai jo pakartotinis patikrinimas yra sėkmingas (#16190). Pagal numatytuosius nustatymus išjungta: išjungti ryšiai lieka išjungti, kol operatorius juos vėl įgalina arba pakartotinai patikrina, lygiai taip pat, kaip anksčiau. Paties operatoriaus išjungti ryšiai ir ryšiai, išjungti po nuolatinio užblokavimo, niekada nėra pakartotinai tikrinami."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Prisijungimo duomenų vartai: tik autentifikavimo diagnozės",
+        "description": "Siaurinti „combo“ prisijungimo duomenų vartus, kad talpykloje esantis nesėkmingas prisijungimo duomenų zondas blokuotų ryšį tik tada, kai jo diagnozė patvirtina netinkamus prisijungimo duomenis (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Negalutinės nesėkmės (skirtojo laiko pabaiga, dažnio ribojimai, prastovos, nepalaikomi zondai ir netipuotos planuoklės klaidos) tokiu atveju laikomos nežinomomis, o ryšys toliau gauna srautą. Pagal numatytuosius nustatymus išjungta: bet kokia talpykloje esanti zondo klaida blokuoja ryšį talpyklos TTL laikotarpiui (5 minutėms)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: sustabdyti gavus turinio politikos atmetimą",
+        "description": "Kai „combo“ taikinys atsako tiksliu turinio politikos atmetimu (kodas arba tipas cyber_policy / content_policy_violation), sustabdyti „combo“ ir grąžinti tą atmetimą net tada, kai likę taikiniai yra kitokie modeliai, užuot pereinant prie kito taikinio. Pagal numatytuosius nustatymus išjungta: atmetimas niekada neatvėsina paskyros ir nesuaktyvina teikėjo grandinės pertraukiklio, o „combo“ pereina prie kito taikinio lygiai taip pat, kaip anksčiau."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Atvėsimo pakartotinis bandymas: praleisti 403/410 atmetimus",
+        "description": "Kai visos paskyros yra atvėsimo būsenoje ir anksčiausiai pasibaigiantis atvėsimas kilo dėl 403 (prieiga atmesta) arba 410 (nebeegzistuoja), iš karto grąžinti šį atmetimą, užuot laukus atvėsimo pabaigos ir iš naujo siuntus užklausą; atsinaujinantis agentrouter ryšio aprėpties kvotos 403 atsakymas tuomet išsaugomas su errorCode 429, kad išliktų kartojamas. Pagal numatytuosius nustatymus išjungta: tik 401 praleidžia laukimą, o kiekvienas atmetimas išsaugomas su ta būsena, su kuria buvo gautas."
       }
     }
   },
@@ -14065,7 +14763,11 @@
       "ok": "Paprastai leidžiama"
     },
     "allProviders": "Visi teikėjai",
-    "noApiKeyRequired": "API rakto nereikia"
+    "noApiKeyRequired": "API rakto nereikia",
+    "searchPlaceholder": "Ieškoti modelio, tiekėjo…",
+    "searchAria": "Ieškoti nemokamų modelių",
+    "filterProviderAria": "Filtruoti pagal tiekėją",
+    "keylessOnly": "Tik be raktelio"
   },
   "providerHealthAutopilot": {
     "title": "Teikėjų būklės autopilotas",
@@ -15315,7 +16017,117 @@
     "importFailed": "Importuoti nepavyko.",
     "importSuccess": "Importuota paskyrų: {connections}, teikėjų mazgų: {nodes}; praleista: {skipped}."
   },
+  "conversations": {
+    "title": "Konversacijos",
+    "countSummary": "{total, plural, one {# pokalbis} other {# pokalbiai}} su 2+ posūkiais",
+    "autoRefreshTitle": "Kiekvieną kartą šis sąrašas atnaujinamas iš serverio.",
+    "autoRefresh": "Automatinis atnaujinimas",
+    "loading": "Įkeliama pokalbių...",
+    "colConversation": "Pokalbis",
+    "colTurns": "Eilės",
+    "colContinuation": "Tęsimas",
+    "colLastModel": "Paskutinis modelis",
+    "colProvider": "Tiekėjas",
+    "colStatus": "Būsena",
+    "colLastSeen": "Paskartai matyta",
+    "drawerTitle": "Pokalbis",
+    "prevConversation": "Ankstesnis pokalbis",
+    "nextConversation": "Kitas pokalbis",
+    "gotoLatestRequest": "Eiti į naujausią užklausą",
+    "goToBottom": "Eiti žemyn",
+    "statusInProgress": "Vykdoma",
+    "continuationGenuineTitle": "Naujausias žingsnis naudojo previous_response_id ir jis buvo išspręstas serverio pusėje",
+    "continuationBadge": "tęsinys",
+    "stalledTitle": "Naujausias žingsnis baigėsi ne su stop ir niekas netęsė daugiau nei 5 minutes",
+    "stalledBadge": "stovi",
+    "noTurns": "Šiam pokalčiui įrašytų žingsnių nėra."
+  },
   "logExport": {
-    "startFromCurrentPosition": "Pradėti nuo dabartinės pozicijos (praleisti esamus žurnalus)"
+    "startFromCurrentPosition": "Pradėti nuo dabartinės pozicijos (praleisti esamus žurnalus)",
+    "pageTitle": "Žurnalo eksportas",
+    "pageSubtitle": "Nuolatos siųskite iš „Journal“ tipo žurnalų skirtuko iškvietimo žurnalus į išorinę analitikos saugyklos.",
+    "addDestination": "Pridėti paskirtį",
+    "scheduleTitle": "Suplanuoti",
+    "cronLabel": "Cron",
+    "notScheduled": "nepasuplanuota",
+    "lastScheduledRun": "Paskutinė suplanuota vykdymo",
+    "lastRunSummary": "{startedAt} — {status}, {rows} eilučių",
+    "never": "niekada",
+    "highWaterMark": "Iškvietimo žurnalų aukščiausias žymuo",
+    "rowPrefix": "eilutė {id}",
+    "noDestinations": "Eksportavimo paskirties vietų nėra",
+    "noDestinationsHint": "Pridėkite paskirties vietą, kad pradėtumėte siųsti skambučio žurnalus pagal valandinį grafiką.",
+    "errLoadStatus": "Nepavyko įkelti eksporto būsenos",
+    "errSaveDestination": "Nepavyko išsaugoti paskirties vietos",
+    "msgDestinationSaved": "Paskirties vieta išsaugota.",
+    "errConnectionTest": "Ryšio testas nepavyko",
+    "msgRunInFlight": "Šios paskirties vietos vykdymas jau vyksta; nieko nebuvo išsiųsta du kartus.",
+    "errExportRun": "Eksporto vykdymas nepavyko",
+    "errUpdateDestination": "Nepavyko atnaujinti paskirties vietos",
+    "errDeleteDestination": "Nepavyko pašalinti paskirties vietos",
+    "deleteTitle": "Ištrinti paskirtį",
+    "deleteConfirm": "Ištrinti „{name}\"? Jo eksportavimoursoris bus taip pat pašalintas, todėl, jei jį vėl pridėsite, eksportavimas prasidės nuo seniausiai išsaugoto skambutinio žurnalo įrašo.",
+    "statusDisabled": "Išjungta",
+    "statusFailing": "Nesėkminga",
+    "statusHealthy": "Sveika",
+    "statusNotRunYet": "Dar neatliekta",
+    "typeNotInstalled": "Tipas neįdiegtas",
+    "metaLine": "Paskutinis paleidimas {lastRun} · eksportuota {exported} eilučių · {pending} laukia · nurodykla {cursor}",
+    "btnTest": "Testas",
+    "btnRunNow": "Vykdyti dabar",
+    "btnDisable": "Išjungti",
+    "btnEnable": "Įjungti",
+    "btnEdit": "Redaguoti",
+    "btnDelete": "Ištrinti"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI paskyros",
+    "cardSubtitle": "Tik skaitymui skirta būsena iš pritarkto valdymo API",
+    "btnRefresh": "Atnaujinti",
+    "listAria": "CLIProxyAPI paskyrų būklė",
+    "noAccounts": "CLIProxyAPI paskyrų nerasta.",
+    "loading": "Paskyrų būsena kračiama…",
+    "stateReady": "Paskyros būsena",
+    "stateDisabled": "CLIProxyAPI neįdiegta",
+    "stateMissingKey": "Valdymo raktas nenustatytas",
+    "stateUnreachable": "Valdymo API nepasiekiamas",
+    "stateUnauthorized": "Valdymo raktas atmestas",
+    "stateUnsupported": "Ši CLIProxyAPI versija neatskleidžia paskyros būsenos",
+    "stateInvalidResponse": "Valdymo API grąžino nepalaikomą atsakymą"
+  },
+  "darioPanel": {
+    "title": "Claude paskyros",
+    "description": "Patvirtinkite Dario naudodami savo „Claude Pro/Max“ prenumeratą. Srautas apmokamas iš jūsų prenumeratos lėšų. Dario gali nukreipti užklausas tik, kai yra bent viena paskyra (iki to /health atskleidžia pablogėjusią būseną).",
+    "noAccounts": "Paskyros dar nenustatytos.",
+    "importTitle": "Importuoti iš OmniRoute",
+    "importDescription": "Iš naujo panaudoti esamos OmniRoute „Claude“ ryšio OAuth žetonus, vietoj to, kad prisijungtumėte iš naujo — visiškai praleidžia naršyklės patvirtinimo žingsnį.",
+    "importPendingTooltip": "Bus aktyvu, kai „OmniRoute“ sistemoje bus „Claude“ ryšys.",
+    "btnImport": "Importuoti",
+    "btnImporting": "Importuojama…",
+    "aliasPlaceholder": "alias (neprivalomas)",
+    "btnStartLogin": "Pradėti prisijungimą",
+    "btnStarting": "Pradedama…",
+    "btnCompleteLogin": "Užbaigti prisijungimą",
+    "btnCompleting": "Baigiamas…",
+    "codePlaceholder": "code#būseną arba „code“",
+    "noticeImported": "Importuota kaip paskyra „{alias}“ — Dario buvo paleistas iš naujo, kad tai įkeltų.",
+    "noticeAdded": "Paskyra „{alias}“ pridėta.",
+    "expiresInHours": "galiojimo laikas baigiasi per ~{hours} val.",
+    "expiresInMinutes": "galiojimo laikas baigiasi per ~{minutes} min.",
+    "expiresAt": "galiojimo laikas baigiasi {date}",
+    "scopes": "{count, plural, one {# diapazonas} other {# diapazonai}}",
+    "btnRemove": "Šalinti",
+    "btnRefresh": "Atnaujinti",
+    "loginStep1": "1. Atidarykite šį URL naršyklėje ir patvirtinkite prieigą paskyrai <mono>{alias}</mono>:",
+    "pendingExpires": "Nuskaitymas sustabdytas {time}",
+    "loginStep2": "2. Įklijuokite Anthropic rodomą kodą:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini App",
+    "errTelegramOnly": "Šis puslapis turi būti atidarytas Telegram Mini App viduje.",
+    "greeting": "👋 Labas, {name}! Siųskite žinutę per savo OmniRoute įėjimo punktą.",
+    "greetingFallbackName": "ten",
+    "errNoReply": "⚠️ Atsakymo iš įėjimo punkto nėra.",
+    "btnSend": "Siųsti"
   }
 }

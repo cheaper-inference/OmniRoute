@@ -119,6 +119,7 @@
   --ci-font-ui: "Switzer", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   --ci-font-display: var(--ci-font-ui);
   --ci-font-mono: var(--ci-font-ui);
+  --ci-font-code: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
 
   --ci-font-size-xs: 0.75rem;
   --ci-font-size-sm: 0.875rem;
@@ -249,6 +250,7 @@
   --ci-border-strong: 2px;
   --ci-icon-stroke-width: 2;
   --ci-icon-library: lucide;
+  --ci-ring-field-error: 0 0 0 3px color-mix(in srgb, var(--ci-color-danger) 15%, transparent), 0 0 14px color-mix(in srgb, var(--ci-color-danger) 12%, transparent);
   --ci-shadow-xs: 0 1px 2px rgb(4 13 16 / 0.06);
   --ci-shadow-sm:
     0 1px 2px rgb(4 13 16 / 0.05), 0 4px 12px rgb(4 13 16 / 0.05);

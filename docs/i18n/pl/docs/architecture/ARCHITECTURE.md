@@ -363,169 +363,124 @@ Warstwy architektury:
 
 Szczegóły: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## Główne podsystemy (v3.8.0)
+## Główne podsystemy (wersja 3.8.0)
 
 ### A. Silnik Auto Combo
 
-Auto Combo dynamicznie ocenia i wybiera cele routingu w momencie obsługi żądania, zamiast
-polegać na statycznej definicji combo. Obsługuje rodzinę prefiksów modeli `auto/*`.
+Funkcja Auto Combo dynamicznie ocenia i wybiera cele routingu w momencie żądania, zamiast polegać na statycznej definicji kombinacji. Obsługuje rodzinę przedrostków modeli `auto/*`.
 
-- Punkt wejścia silnika: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolver: `src/domain/comboResolver.ts` (automatyczne wykrywanie prefiksu `auto/`)
-- Panel: `/dashboard/auto-combo`
-- Telemetria: tabela SQLite `auto_combo_decisions`
+- Wpis silnika: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Resolver: `src/domain/comboResolver.ts` (automatyczne wykrywanie prefiksu `auto/` )
+- Deska rozdzielcza: `/dashboard/auto-combo`
+- Telemetria: tabela `auto_combo_decisions` SQLite
 
-Najważniejsze możliwości:
+Kluczowe możliwości:
 
-- **20 strategii routingu** (priorytetowa, ważona, najpierw wypełnianie, round-robin, P2C, losowa,
-  najmniej używana, optymalizowana kosztowo, uwzględniająca reset, okno resetu, rezerwa, ważona kwotą,
-  ściśle losowa, **auto**, lkgp, optymalizowana pod kątem kontekstu, optymalizowana pod kątem pamięci podręcznej, przekazywanie kontekstu, **fusion**,
-  potokowa) —
-  auto jest główną nowością w v3.8.0; `fusion` (równoległe kierowanie do panelu + synteza przez oceniającego,
-  `open-sse/services/fusion.ts`) jest nowością w v3.8.36.
-- **Ocena na podstawie 16 czynników**: kwota, kondycja, odwrotność kosztu, odwrotność opóźnienia, dopasowanie do zadania oraz
-  dziesięć innych. Kanoniczna tabela czynników i ich domyślnych wag znajduje się w
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ponowne przedstawienie jej tutaj
-  stworzyłoby drugie miejsce, w którym mogłaby się zdezaktualizować.
-- **Wirtualna fabryka** materializuje efemeryczne combo, gdy nie istnieje pasujące nazwane combo,
-  pobierając kandydatów ze sprawnych, aktywnych połączeń z dostawcami.
-- **Prefiksy auto**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — każdy oparty na dostrojonym profilu wag.
-- **6 pakietów trybów**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` oraz `chaos-mode` — wstępnie skonfigurowane zestawy wag dostępne z poziomu
-  panelu. (Nie należy ich mylić z powyższymi prefiksami `auto/*`, które są
-  wariantami używanymi w momencie obsługi żądania).
+- **20 strategii routingu** (priorytet, ważony, pierwsze wypełnienie, działanie okrężne, P2C, losowy, najrzadziej używany, zoptymalizowany pod względem kosztów, uwzględniający resetowanie, okno resetowania, zapas mocy, ważony przydziałem, ściśle losowy,** automatyczny** , lkgp, zoptymalizowany pod kątem kontekstu, zoptymalizowany pod kątem pamięci podręcznej, przekaźnik kontekstowy,** połączenie** , potok) — auto jest głównym dodatkiem w wersji 3.8.0; `fusion` (panelowa synteza + sędzia, `open-sse/services/fusion.ts`) jest nowością w wersji 3.8.36.
+- **Punktacja 16-czynnikowa** : limit, zdrowie, koszt odwrotny, opóźnienie odwrotne, dopasowanie zadań i dziesięć innych. Kanoniczna tabela czynników i ich domyślnych wag znajduje się w [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — Przekształcenie jej w tym miejscu dałoby jej drugie miejsce do utraty aktualności.
+- **Wirtualna fabryka** materializuje efemeryczne kombinacje, gdy nie istnieje żadna pasująca nazwana kombinacja, pozyskując kandydatów ze zdrowych, aktywnych połączeń dostawców.
+- **Automatyczne prefiksy** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — każdy wspierany przez dostrojony profil wagi.
+- **6 pakietów trybów** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` i `chaos-mode` — gotowe konfiguracje wag, które można wywołać z pulpitu nawigacyjnego. (Nie mylić z powyższymi przedrostkami `auto/*`, które są wariantami czasu żądania.)
 
-Pełne szczegóły algorytmiczne (wzory czynników, dostrajanie wag) znajdują się w
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Aby uzyskać pełne szczegóły algorytmiczne (wzory na czynniki, dostrajanie wagi), zobacz [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. Agenci chmurowi
+### B. Agenci w chmurze
 
-Agenci chmurowi udostępniają zewnętrzne, hostowane platformy agentów programistycznych (Codex Cloud, Devin,
-Jules) za jednolitym, opartym na bazie danych cyklem życia zadań. Wszystkie punkty końcowe
-tworzenia i inspekcji zadań wymagają uwierzytelnienia administracyjnego.
+Cloud Agents obejmuje platformy agentów kodu hostowanych przez strony trzecie (Codex Cloud, Devin, Jules) w ramach jednolitego cyklu życia zadań wspieranego przez bazę danych. Wszystkie punkty końcowe zadania creation/inspection wymagają uwierzytelniania zarządzania.
 
-- Katalog główny modułu: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts` oraz podkatalogi poszczególnych agentów w `agents/`)
-- Implementacje poszczególnych agentów: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Publiczne punkty końcowe: `/api/v1/agents/tasks/*` (wyświetlanie/tworzenie/pobieranie/anulowanie)
-- Administracyjne punkty końcowe: `/api/cloud/*` (aprowizacja, status, operacje wsadowe)
-- Panel: `/dashboard/cloud-agents`
-- Przechowywanie danych: tabela `cloud_agent_tasks`
+- Katalog główny modułu: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts` oraz podkatalogi poszczególnych agentów w `agents/`)
+- Implementacje dla poszczególnych agentów: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- Publiczne punkty końcowe: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- Punkty końcowe zarządzania: `/api/cloud/*` (wyposażenie, status, partia)
+- Deska rozdzielcza: `/dashboard/cloud-agents`
+- Przechowywanie: stół `cloud_agent_tasks`
 
-Szczegóły dotyczące aprowizacji i OAuth dla poszczególnych agentów znajdują się w
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+Aby zapoznać się ze specyfikacją obsługi poszczególnych agentów i specyfikacją OAuth, zobacz [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. Mechanizmy ochronne
+### C. Poręcze
 
-Moduł mechanizmów ochronnych to warstwa oprogramowania pośredniczącego obsługująca przeładowywanie bez przerywania pracy, która sprawdza żądania
-i odpowiedzi pod kątem danych osobowych, wstrzykiwania promptów oraz niebezpiecznych treści wizualnych. Naruszenia
-natychmiast przerywają żądanie, zwracając HTTP **503** wraz z ustrukturyzowanym kodem błędu, co umożliwia
-wywołującym niższego poziomu ponowienie próby lub rozgałęzienie logiki.
+Moduł Guardrails to warstwa oprogramowania pośredniego, którą można ponownie ładować na gorąco, która sprawdza żądania i odpowiedzi pod kątem PII, szybkiego wstrzykiwania i niebezpiecznej treści wizji. Naruszenia powodują zwarcie żądania z HTTP** 503** plus ustrukturyzowany kod błędu, umożliwiający podmiotom wywołującym ponowienie próby lub rozgałęzienie.
 
-- Katalog główny modułu: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Przeładowywanie bez przerywania pracy: rejestr monitoruje zmiany konfiguracji i przebudowuje łańcuch w miejscu
-- Punkty integracji: wejście procedury obsługi czatu, procedura obsługi generowania obrazów, mechanizm oczyszczania odpowiedzi
-- Kontrakt HTTP: naruszenia są zwracane jako `503` z `error.code = "GUARDRAIL_VIOLATION"`
+- Katalog główny modułu: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Gorące przeładowanie: rejestr obserwuje zmiany w konfiguracji i odbudowuje łańcuch na miejscu
+- Punkty podłączenia: wejście do modułu obsługi czatu, moduł obsługi generowania obrazu, oczyszczanie odpowiedzi
+- Umowa HTTP : naruszenia ujawniają się jako `503` w przypadku `error.code = "GUARDRAIL_VIOLATION"`
 
-Informacje o tworzeniu zestawów reguł i dostrajaniu progów znajdują się w
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+Informacje na temat tworzenia zestawu reguł i dostrajania progów można znaleźć w [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
-### D. Warstwa domenowa
+### D. Warstwa domeny
 
-Przestrzeń nazw `src/domain/` centralizuje decyzje dotyczące zasad, dzięki czemu procedury obsługi tras nie muszą
-samodzielnie składać logiki blokad, budżetów i mechanizmów rezerwowych.
+Przestrzeń nazw `src/domain/` centralizuje decyzje polityczne, dzięki czemu procedury obsługi tras nie muszą samodzielnie składać logiki lockout/budget/fallback.
 
-- Silnik zasad: `src/domain/policyEngine.ts` — pojedynczy punkt wejścia do
-  oceny przed wykonaniem (kolejność: blokada → budżet → mechanizm rezerwowy)
-- Reguły kosztów: `src/domain/costRules.ts`
-- Zasady mechanizmu rezerwowego: `src/domain/fallbackPolicy.ts`
-- Zasady blokad: `src/domain/lockoutPolicy.ts`
+- Silnik polityki: `src/domain/policyEngine.ts` — pojedynczy punkt wejścia do oceny przed wykonaniem (blokada → budżet → zamawianie awaryjne)
+- Zasady kosztów: `src/domain/costRules.ts`
+- Polityka awaryjna: `src/domain/fallbackPolicy.ts`
+- Polityka dotycząca blokad: `src/domain/lockoutPolicy.ts`
 - Routing oparty na tagach: `src/domain/tagRouter.ts`
-- Resolver combo: `src/domain/comboResolver.ts` — rozwiązuje nazwy combo, prefiksy auto/\*
-  oraz cele modeli z symbolami wieloznacznymi do konkretnych planów wykonania
-- Mechanizm łączenia reguł połączeń i modeli: `src/domain/connectionModelRules.ts`
-- Migawki dostępności modeli: `src/domain/modelAvailability.ts`
-- Śledzenie wygaśnięcia dostawców: `src/domain/providerExpiration.ts`
+- Narzędzie do rozpoznawania kombinacji: `src/domain/comboResolver.ts` — rozwiązuje nazwy kombinacji, prefiksy auto/\* i cele modeli wieloznacznych do konkretnych planów wykonania
+- łącznik reguł Connection/model : `src/domain/connectionModelRules.ts`
+- Migawki dostępności modelu: `src/domain/modelAvailability.ts`
+- Śledzenie wygaśnięcia dostawcy: `src/domain/providerExpiration.ts`
 - Pamięć podręczna kwot: `src/domain/quotaCache.ts`
 - Stan degradacji: `src/domain/degradation.ts`
 - Audyt konfiguracji: `src/domain/configAudit.ts`
-- Konstruktor metadanych odpowiedzi OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- Podsystem oceny: `src/domain/assessment/` — okresowe zadania oceniające
+- Kreator metadanych odpowiedzi OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- Podsystem oceny: `src/domain/assessment/` — zadania oceny okresowej
 
-### E. Potok autoryzacji
+### E. Rurociąg autoryzacji
 
-Potok autoryzacji klasyfikuje każde przychodzące żądanie i stosuje
-odpowiedni łańcuch zasad przed przekazaniem go do obsługi.
+Potok autoryzacji klasyfikuje każde przychodzące żądanie i przed wysłaniem stosuje odpowiedni łańcuch zasad.
 
-- Punkt wejścia potoku: `src/server/authz/pipeline.ts`
-- Klasyfikator żądań: `src/server/authz/classify.ts` — odróżnia publiczne
-  trasy zgodności od tras administracyjnych
-- Wykaz tras publicznych: `src/shared/constants/publicApiRoutes.ts`
-- Zasady: `src/server/authz/policies/` — predykaty możliwe do komponowania
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` itd.)
-- Narzędzia nagłówków: `src/server/authz/headers.ts`
-- Funkcja pomocnicza asercji: `src/server/authz/assertAuth.ts`
+- Wejście do rurociągu: `src/server/authz/pipeline.ts`
+- Klasyfikator żądań: `src/server/authz/classify.ts` — odróżnia publiczne trasy zgodności od tras zarządzania
+- Inwentarz dróg publicznych: `src/shared/constants/publicApiRoutes.ts`
+- Zasady: `src/server/authz/policies/` — predykaty komponowalne (`requireApiKey`, `requireManagement`, `requireFreshAuth` itp.)
+- Narzędzia nagłówka: `src/server/authz/headers.ts`
+- Pomocnik asercji: `src/server/authz/assertAuth.ts`
 - Kontekst żądania: `src/server/authz/context.ts`
 
-Trasy publiczne i administracyjne rozdziela ścisła granica: interfejsy API agentów/czasów karencji oraz
-modyfikacje dostawców wymagają uwierzytelnienia administracyjnego (HTTP 401 w przypadku jego braku).
+Trasy publiczne i zarządzane stanowią twardą granicę: agent/cooldown APIs i mutacje dostawców wymagają autoryzacji zarządzania (HTTP 401, jeśli jej brakuje).
 
-Pełne reguły klasyfikacji tras znajdują się w
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+Aby zapoznać się z pełnymi zasadami klasyfikacji tras, zobacz [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. Maszyna stanów przepływu pracy i router uwzględniający zadania
+### F. FSM przepływu pracy i router obsługujący zadania
 
-Router oparty na maszynie stanów, umieszczony nad mechanizmem wyboru combo, który kieruje
-ruch na podstawie wykrytego etapu przepływu pracy (planowanie, wykonanie,
-przegląd) oraz powiązania z zadaniami w tle.
+Router sterowany maszyną o skończonych stanach, warstwowy powyżej wyboru combo, aby kierować ruchem w oparciu o wykryty etap przepływu pracy (planowanie, wykonanie, przegląd) i powinowactwo zadań w tle.
 
-- FSM przepływu pracy: `open-sse/services/workflowFSM.ts`
-- Router uwzględniający zadania: `open-sse/services/taskAwareRouter.ts`
+- Przepływ pracy FSM: `open-sse/services/workflowFSM.ts`
+- Router świadomy zadań: `open-sse/services/taskAwareRouter.ts`
 - Detektor zadań w tle: `open-sse/services/backgroundTaskDetector.ts`
 - Klasyfikator intencji: `open-sse/services/intentClassifier.ts`
 
-Przejścia FSM wpływają na punktację Auto Combo, faworyzując tańsze modele
-dla zadań wykonywanych w tle/automatyzacji oraz bardziej zaawansowane modele dla interaktywnych
-etapów planowania/przeglądu.
+Przejścia FSM wpływają na punktację Auto Combo, kierując się w stronę tańszych modeli do zadań background/automation i w kierunku silniejszych modeli do interaktywnych zwrotów planning/review.
 
-### G. Odporność specyficzna dla dostawców
+### G. Odporność specyficzna dla dostawcy
 
-Kilku dostawców udostępnia dedykowane moduły odporności i ukrywania aktywności, które opierają się na
-globalnych warstwach wyłącznika automatycznego / okresu karencji połączenia / blokady modelu:
+Kilku dostawców dostarcza dedykowane moduły odporności i ukrywania, które łączą się z globalnymi warstwami wyłącznika/ochłodzenia połączenia/blokady modelu:
 
-- Mechanizm obsługi błędów 429 Antigravity: `open-sse/services/antigravity429Engine.ts` (rotuje
-  tożsamość, oczyszcza nagłówki odpowiedzi, obsługuje śledzenie kredytów/wersji za pośrednictwem
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- Zasady limitów ModelScope: `open-sse/services/modelscopePolicy.ts`
-- CCH Claude Code (uzgadnianie kanału zgodności): `open-sse/services/claudeCodeCCH.ts`,
-  a także `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Kształtowanie odcisku cyfrowego Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
-- Obfuskacja Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
+- silnik Antigravity 429: `open-sse/services/antigravity429Engine.ts` (obraca tożsamość, przegląda nagłówki odpowiedzi, steruje śledzeniem credits/version poprzez `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429guard: `open-sse/services/antigravity429Guard.ts` (budżet na żądanie 429 wysyłania na wszystkich hostach, `ANTIGRAVITY_MAX_429_ATTEMPTS`; na identyczne ponowne wysłanie odrzuconej treści odpowiada lokalnie; `src/sse/handlers/chat.ts` nie wznawia takiego żądania poprzez ponowną próbę uwzględniającą czas odnowienia)
+- polityka kwotowa ModelScope : `open-sse/services/modelscopePolicy.ts`
+- Kod Claude CCH uzgadnianie kanału zgodności): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Code kształtowanie odcisków palców: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Zaciemnianie kodu: `open-sse/services/claudeCodeObfuscation.ts`
 
-Pełny podręcznik ukrywania aktywności i wskazówki operacyjne znajdują się w
-`docs/security/STEALTH_GUIDE.md` (git; nie jest kompilowany do `/docs`).
+Aby zapoznać się z pełnym podręcznikiem dotyczącym ukrywania się i wskazówkami operacyjnymi, zobacz `docs/security/STEALTH_GUIDE.md` (git; nie skompilowany do `/docs`).
 
 ### H. Webhooki, pamięć podręczna rozumowania, pamięć podręczna odczytu
 
-- **Webhooki** — wysyłanie wychodzących powiadomień o zdarzeniach dostawców/kont/zadań.
+- **Haki internetowe** Wysyłka wychodząca — dla zdarzeń provider/account/task.
   - Dyspozytor: `src/lib/webhookDispatcher.ts`
-  - Magazyn: tabela SQLite `webhooks` (za pośrednictwem `src/lib/db/webhooks.ts`)
+  - Przechowywanie: stół `webhooks` SQLite (przez `src/lib/db/webhooks.ts`)
   - Panel: `/dashboard/webhooks` (subskrypcje, sekrety, historia ponownych prób)
-  - Taksonomię zdarzeń i semantykę ponownych prób opisano w dokumencie [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Pamięć podręczna rozumowania** — możliwe do ponownego odtworzenia bloki rozumowania dla dostawców, którzy generują
-  tokeny myślenia (Claude, GLMT itp.), dzięki czemu kolejne tury mogą pominąć ponowne rozumowanie.
-  - Warstwa bazy danych: `src/lib/db/reasoningCache.ts`
+  - Aby zapoznać się z taksonomią zdarzeń i semantyką ponawiania prób, zobacz [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Pamięć podręczna rozumowania** — odtwarzalne bloki rozumowania dla dostawców, które emitują tokeny myślenia (Claude, GLMT itp.), więc kolejne tury mogą pominąć ponowne przemyślenie.
+  - warstwa DB : `src/lib/db/reasoningCache.ts`
   - Warstwa usług: `open-sse/services/reasoningCache.ts`
-  - Semantykę odtwarzania opisano w dokumencie [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Pamięć podręczna odczytu** — krótkotrwała pamięć podręczna odpowiedzi, indeksowana według sygnatury i używana do
-  scalania identycznych ponownych prób pochodzących z wadliwych nadrzędnych pakietów SDK.
-  - Warstwa bazy danych: `src/lib/db/readCache.ts`
-  - Punkt końcowy statystyk: `GET /api/cache/stats`, panel pod adresem `/dashboard/cache`
+  - Aby poznać semantykę odtwarzania, zobacz [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Przeczytaj pamięć podręczną** — krótkotrwała pamięć podręczna odpowiedzi z kluczem według sygnatury i używana do zwijania identycznych ponownych prób z uszkodzonego nadrzędnego SDKs.
+  - warstwa DB : `src/lib/db/readCache.ts`
+  - Punkt końcowy statystyk: `GET /api/cache/stats`, dashboard w `/dashboard/cache`
 
 ## 3) Warstwa persystencji
 
