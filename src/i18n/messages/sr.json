@@ -1925,7 +1925,14 @@
     "readinessStep3": "Копирајте своју крајњу тачку",
     "readinessStep4": "Пошаљите тест захтев",
     "readinessContinue": "Наставите подешавање",
-    "readinessDismiss": "Занемарите за сада"
+    "readinessDismiss": "Занемарите за сада",
+    "unpricedUsageTitle": "{count, plural, one {# модел} few {# модела} other {# модела}} са недавном употребом али без конфигурисане цене",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API кључ са ограничењем употребе} few {# API кључа са ограничењем употребе} other {# API кључева са ограничењем употребе}} су користили ове моделе у последњих 8 дана. Док је та употреба унутар дневног или недељног прозора кључа, кључ се сматра прекораченим и његови захтеви се блокирају (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Ова употреба се рачуна као $0 према по-кључним ограничењима употребе (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# захтев} few {# захтева} other {# захтева}}, {keys, plural, one {# ограничен кључ} few {# ограничена кључа} other {# ограничених кључева}}",
+    "unpricedUsageMore": "…и још {count}",
+    "unpricedUsageConfigure": "Конфигуриши цене",
+    "unpricedUsageDismiss": "Одбаци"
   },
   "analytics": {
     "title": "Аналитика",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Ручна конфигурација",
     "clineManualConfiguration": "Ручна конфигурација за Cline",
     "kiloManualConfiguration": "Ручна конфигурација за Kilo Code",
+    "piManualConfiguration": "Пи - ручна конфигурација",
+    "piConfigInvalidTitle": "Пи models.json је нечитљива",
+    "piOmnirouteConfigured": "OmniRoute је конфигурисан као Пи прилагођени провајдер",
+    "piModelHelp": "Пи не открива аутоматски моделе за прилагођене крајње тачке — модел који изаберете је експлицитно уписан у models.json.",
+    "piManualConfigTitle": "Или уреди ~/.pi/agent/models.json ручно",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Затим покрените Пи и изаберите omniroute провајдера. Подесите PI_CODING_AGENT_DIR да помери цео директоријум агента.",
+    "piUnownedNote": "Овај унос је додат изван OmniRoute (нпр. прилагођене крајње тачке пи-гуија). Примена ће га усвојити; Ресетовање уклања само уносе које је OmniRoute написао.",
     "whenToUseLabel": "Када користити",
     "openToolDocs": "Отвори документацију алата",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "Ажурирај",
     "cliproxyapiUpdateAvailable": "Доступно ажурирање: v{current} → v{latest}",
     "cliproxyapiVersion": "Верзија",
+    "piInstallTitle": "Инсталирајте Пи Цодинг Агент",
+    "piInstallInstructions": "Инсталирајте Пи CLI, а затим се вратите овде да бисте га повезали са OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Користите URL доступну са машине на којој ради Пи. ОпенАИ-компатибилна /v1 крајња тачка се додаје аутоматски.",
+    "piManualMergeHint": "Само преглед. Спојите овај providers.omniroute унос у models.json тако да ваши други провајдери и подешавања остану нетакнути.",
     "removeMapping": "Уклони мапирање"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "Онемогућено",
       "dual": "Двоструко",
       "alias": "Алијас",
-      "canonical": "Канонско"
+      "canonical": "Канонско",
+      "fail_closed": "Блокирај (fail_closed)",
+      "count_as_zero": "Рачунај као $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Инфраструктурна заустављања заштићеног приоритета као 502",
         "description": "Одговори статусом 502 уместо 503 када приоритетно одредиште које користи резервну опцију само због квоте заустави комбинацију из разлога за који се може доказати да није повезан са квотом: отвореног прекидача кола провајдера или предиктивног прескакања због кашњења."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Политика буџета за непроцењену употребу",
+        "description": "Како дневна/недељна USD ограничења по кључу третирају успешну употребу чији провајдер/модел нема ред за цену. fail_closed (подразумевано) означава да је прозор прекорачен, тако да непозната цена никада не може проћи кроз тврд лимит. count_as_zero рачуна ту употребу као $0 и наставља да примењује ограничења за употребу која има цену. Непроцењени модели су у сваком случају наведени на почетној страници контролне табле."
       }
     }
   },

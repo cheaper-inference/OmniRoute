@@ -2002,7 +2002,14 @@
     "readinessStep3": "დააკოპირეთ თქვენი ენდპოინტი",
     "readinessStep4": "გაგზავნეთ სატესტო მოთხოვნა",
     "readinessContinue": "განაგრძეთ კონფიგურაცია",
-    "readinessDismiss": "ჯერჯერობით დახურვა"
+    "readinessDismiss": "ჯერჯერობით დახურვა",
+    "unpricedUsageTitle": "{count, plural, one {# მოდელი ახლახან გამოყენებულია და ფასის კონფიგურაცია არ აქვს} other {# მოდელები ახლახან გამოყენებულია და ფასის კონფიგურაცია არ აქვთ}}",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API კლავი, რომელსაც აქვს გამოყენების ლიმიტი} other {# API კლავები, რომლებსაც აქვთ გამოყენების ლიმიტი}} ბოლო 8 დღის განმავლობაში გამოიყენეს ეს მოდელები. როცა ეს გამოყენება ვარდება კლავის დღიურ ან კვირეულურ ფანჯარაში, კლავი ჩაითვლება კვოტის გადაჭარბებულად და მისი მოთხოვნები დაბლოკილია (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "ეს გამოყენება ითვლება $0-ად თითო კლავის გამოყენების ლიმიტების მიმართ (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# მოთხოვნა} other {# მოთხოვნები}}, {keys, plural, one {# შეზღუდული კლავი} other {# შეზღუდული კლავები}}",
+    "unpricedUsageMore": "…და კიდევ {count}",
+    "unpricedUsageConfigure": "ფასის კონფიგურაცია",
+    "unpricedUsageDismiss": "დახურვა"
   },
   "analytics": {
     "title": "ანალიტიკა",
@@ -3039,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw — ხელით კონფიგურაცია",
     "clineManualConfiguration": "Cline-ის ხელით კონფიგურაცია",
     "kiloManualConfiguration": "Kilo Code-ის ხელით კონფიგურაცია",
+    "piManualConfiguration": "Pi - მექანიკური კონფიგურაცია",
+    "piConfigInvalidTitle": "Pi models.json წაუკითხავია",
+    "piOmnirouteConfigured": "OmniRoute კონფიგურირებულია, როგორც Pi საბაჟო პროვაიდერი",
+    "piModelHelp": "Pi არ აღმოაჩენს მოდელებს — ბოლო models.json.",
+    "piManualConfigTitle": "ან დაარედაქტირე ~/.pi/agent/models.json ხელით",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "შემდეგ გაუშვით Pi და აირჩიეთ omniroute პროვაიდერი. დააყენეთ PI_CODING_AGENT_DIR აგენტის მთელი კატალოგის გადასატანად.",
+    "piUnownedNote": "ეს ჩანაწერი დაემატა OmniRoute გარეთ (მაგ. pi-gui-ის მორგებული ბოლო წერტილები). განაცხადი მიიღებს მას; გადატვირთვა შლის მხოლოდ OmniRoute დაწერილ ჩანაწერებს.",
     "whenToUseLabel": "როდის გამოვიყენოთ",
     "openToolDocs": "ინსტრუმენტის დოკუმენტაციის გახსნა",
     "toolUseCases": {
@@ -3358,6 +3373,12 @@
     "cliproxyapiUpdate": "განახლება",
     "cliproxyapiUpdateAvailable": "ხელმისაწვდომია განახლება: v{current} → v{latest}",
     "cliproxyapiVersion": "ვერსია",
+    "piInstallTitle": "დააინსტალირეთ Pi კოდირების აგენტი",
+    "piInstallInstructions": "დააინსტალირეთ Pi CLI, შემდეგ დაბრუნდით აქ, რომ დააკავშიროთ იგი OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "გამოიყენეთ URL, რომელიც ხელმისაწვდომია Pi მანქანიდან. OpenAI-თან თავსებადი /v1 საბოლოო წერტილი ავტომატურად ემატება.",
+    "piManualMergeHint": "მხოლოდ წინასწარი გადახედვა. შეაერთეთ ეს providers.omniroute ჩანაწერი models.json ში, რათა თქვენი სხვა პროვაიდერები და პარამეტრები ხელუხლებელი დარჩეს.",
     "removeMapping": "მაპინგის წაშლა"
   },
   "modelCatalog": {
@@ -13915,7 +13936,9 @@
       "disabled": "გათიშული",
       "dual": "ორმაგი",
       "alias": "ფსევდონიმი",
-      "canonical": "კანონიკური"
+      "canonical": "კანონიკური",
+      "fail_closed": "დაბლოკვა (fail_closed)",
+      "count_as_zero": "თვლის როგორც $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14062,6 +14085,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "დაცული პრიორიტეტის ინფრასტრუქტურული შეჩერებები — 502",
         "description": "უპასუხეთ 502-ით 503-ის ნაცვლად, როდესაც პრიორიტეტული სამიზნე, რომელიც სარეზერვო ვარიანტზე მხოლოდ კვოტის ამოწურვისას გადადის, combo-ს აჩერებს მიზეზით, რომელიც დადასტურებულად არ უკავშირდება კვოტას: პროვაიდერის ღია circuit breaker ან პროგნოზული დაყოვნების გამო გამოტოვება."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "ფასგარეშე გამოყენების ბიუჯეტის პოლიტიკა",
+        "description": "როგორ ექცევიან თითო-კლავის დღიური/კვირეული USD ლიმიტები წარმატებულ გამოყენებას, რომლის პროვაიდერს ან მოდელს არ აქვს ფასის ჩანაწერი. fail_closed (ნაგულისხმევი) ნიშნავს, რომ ფანჯარა ჩაითვლება გადაჭარბებულად — უცნობი ხარჯი არასოდეს გაივლის მკაცრ ზღვარს. count_as_zero ითვლის ასეთ გამოყენებას როგორც $0 და აგრძელებს ფასიან ხარჯებზე კონტროლის განხორციელებას. ფასგარეშე მოდელები ნებისმიერ შემთხვევაში ნაჩვენებია დეშბორდის მთავარ გვერდზე."
       }
     }
   },

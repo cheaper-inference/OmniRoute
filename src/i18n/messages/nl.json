@@ -1925,7 +1925,14 @@
     "readinessStep3": "Kopieer je eindpunt",
     "readinessStep4": "Verstuur een testverzoek",
     "readinessContinue": "Doorgaan met configureren",
-    "readinessDismiss": "Voorlopig sluiten"
+    "readinessDismiss": "Voorlopig sluiten",
+    "unpricedUsageTitle": "{count, plural, one {# model} other {# modellen}} met recent gebruik maar geen geconfigureerde prijs",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-sleutel met een gebruikslimiet heeft deze modellen in de afgelopen 8 dagen gebruikt. Terwijl dat gebruik binnen het dagelijkse of wekelijkse venster van de sleutel valt, wordt de sleutel als over quota behandeld en worden de verzoeken geblokkeerd (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).} other {# API-sleutels met een gebruikslimiet hebben deze modellen in de afgelopen 8 dagen gebruikt. Terwijl dat gebruik binnen het dagelijkse of wekelijkse venster van de sleutels valt, worden de sleutels als over quota behandeld en worden de verzoeken geblokkeerd (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).}}",
+    "unpricedUsageCountAsZero": "Dit gebruik telt als $0 mee voor de per-sleutel gebruikslimieten (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# verzoek} other {# verzoeken}}, {keys, plural, one {# beperkte API-sleutel} other {# beperkte API-sleutels}}",
+    "unpricedUsageMore": "…en nog {count} meer",
+    "unpricedUsageConfigure": "Prijzen configureren",
+    "unpricedUsageDismiss": "Sluiten"
   },
   "analytics": {
     "title": "Analyses",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Handmatige configuratie",
     "clineManualConfiguration": "Cline handmatige configuratie",
     "kiloManualConfiguration": "Kilocode handmatige configuratie",
+    "piManualConfiguration": "Pi - Handmatige configuratie",
+    "piConfigInvalidTitle": "Pi models.json is onleesbaar",
+    "piOmnirouteConfigured": "OmniRoute is geconfigureerd als een aangepaste Pi-provider",
+    "piModelHelp": "Pi ontdekt niet automatisch modellen voor aangepaste eindpunten. — Het model dat u kiest, wordt expliciet in models.json geschreven.",
+    "piManualConfigTitle": "Of bewerk ~/.pi/agent/models.json handmatig",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Start vervolgens Pi en selecteer de omniroute-provider. Stel PI_CODING_AGENT_DIR om de hele agentmap te verplaatsen.",
+    "piUnownedNote": "Deze invoer is buiten OmniRoute toegevoegd (bijvoorbeeld de aangepaste eindpunten van pi-gui). Door te solliciteren wordt het overgenomen; Reset verwijdert alleen de vermeldingen OmniRoute heeft geschreven.",
     "whenToUseLabel": "Wanneer te gebruiken",
     "openToolDocs": "Gereedschapsdocumentatie openen",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "Bijwerken",
     "cliproxyapiUpdateAvailable": "Update beschikbaar: v{current} → v{latest}",
     "cliproxyapiVersion": "Versie",
+    "piInstallTitle": "Installeer Pi-coderingsagent",
+    "piInstallInstructions": "Installeer de Pi CLI en keer dan hier terug om hem aan te sluiten op OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Gebruik de URL die bereikbaar is vanaf de machine waarop Pi draait. Het OpenAI-compatibele /v1-eindpunt wordt automatisch toegevoegd.",
+    "piManualMergeHint": "Alleen voorbeeld. Voeg deze providers.omniroute-vermelding samen in models.json, zodat uw andere providers en instellingen intact blijven.",
     "removeMapping": "Toewijzing verwijderen"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "Uitgeschakeld",
       "dual": "Dubbel",
       "alias": "Alias",
-      "canonical": "Canoniek"
+      "canonical": "Canoniek",
+      "fail_closed": "Blokkeren (fail_closed)",
+      "count_as_zero": "Tel als $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Infrastructuurstops met beschermde prioriteit als 502",
         "description": "Antwoord met 502 in plaats van 503 wanneer een prioriteitsdoel met uitsluitend quota als fallback de combo stopt vanwege een oorzaak waarvan aantoonbaar is dat die niet quotagerelateerd is: een open circuitbreaker van een provider of het overslaan vanwege voorspelde latentie."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Budgetbeleid voor ongeprijsd gebruik",
+        "description": "Hoe per-sleutel dagelijkse/wekelijkse USD-limieten succesvol gebruik behandelen waarvan de provider of het model geen prijsregel heeft. fail_closed (standaard) markeert het venster als overschreden, zodat een onbekende kost nooit langs een harde limiet kan glippen. count_as_zero telt dat gebruik als $0 en blijft de geprijsde uitgaven afdwingen. Ongeprijsde modellen worden in beide gevallen op de startpagina van het dashboard vermeld."
       }
     }
   },

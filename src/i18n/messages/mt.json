@@ -2002,7 +2002,14 @@
     "readinessStep3": "Ikkopja l-endpoint tiegħek",
     "readinessStep4": "Ibgħat talba ta’ prova",
     "readinessContinue": "Kompli l-konfigurazzjoni",
-    "readinessDismiss": "Agħlaq għalissa"
+    "readinessDismiss": "Agħlaq għalissa",
+    "unpricedUsageTitle": "{count, plural, one {# modell} other {# mudelli}} b’użu reċenti iżda mingħajr prezz kkonfigurat",
+    "unpricedUsageFailClosed": "{keys, plural, one {# ċavetta API b’limitu ta’ użu} other {# ċwievet API b’limitu ta’ użu}} użaw dawn il-mudelli fl-aħħar 8 ijiem. Waqt li dak l-użu huwa fil-perjodu ta’ kuljum jew ta’ kull ġimgħa tal-ċavetta, iċ-ċavetta titqies bħala mgħaddija mill-limitu u t-talbiet tagħha jiġu mblukkati (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Dak l-użu jinżel bħala $0 lejn il-limiti ta’ użu għal kull ċavetta (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# talba} other {# talbiet}}, {keys, plural, one {# ċavetta limitata} other {# ċwievet limitati}}",
+    "unpricedUsageMore": "…u {count} aktar",
+    "unpricedUsageConfigure": "Ikkonfigura prezzijiet",
+    "unpricedUsageDismiss": "Għalaq"
   },
   "analytics": {
     "title": "Analitika",
@@ -3039,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw - Konfigurazzjoni Manwali",
     "clineManualConfiguration": "Konfigurazzjoni Manwali ta’ Cline",
     "kiloManualConfiguration": "Konfigurazzjoni Manwali ta’ Kilo Code",
+    "piManualConfiguration": "Pi - Konfigurazzjoni Manwali",
+    "piConfigInvalidTitle": "Pi models.json ma tinqarax",
+    "piOmnirouteConfigured": "OmniRoute huwa kkonfigurat bħala fornitur tad-dwana Pi",
+    "piModelHelp": "Pi ma jiskoprix awtomatikament mudelli għal endpoints personalizzati — il-mudell li tagħżel huwa miktub models.json b'mod espliċitu.",
+    "piManualConfigTitle": "Jew edit ~/.pi/agent/models.json manwalment",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Imbagħad ibda Pi u agħżel il-fornitur omniroute. Issettja PI_CODING_AGENT_DIR biex iċċaqlaq id-direttorju kollu tal-aġent.",
+    "piUnownedNote": "Din l-entrata ġiet miżjuda barra OmniRoute (eż. l-endpoints Custom ta' pi-gui). L-applikazzjoni se tadottaha; Ir-reset tneħħi biss l-entrati li kiteb OmniRoute.",
     "whenToUseLabel": "Meta għandek tużah",
     "openToolDocs": "Iftaħ id-dokumentazzjoni tal-għodda",
     "toolUseCases": {
@@ -3358,6 +3373,12 @@
     "cliproxyapiUpdate": "Aġġorna",
     "cliproxyapiUpdateAvailable": "Aġġornament disponibbli: v{current} → v{latest}",
     "cliproxyapiVersion": "Verżjoni",
+    "piInstallTitle": "Installa Pi Coding Agent",
+    "piInstallInstructions": "Installa l-Pi CLI, imbagħad erġa' lura hawn biex tqabbadha ma' OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Uża l- URL li tintlaħaq mill-magna li taħdem Pi. L-endpoint /v1 kompatibbli mal-OpenAI huwa miżjud awtomatikament.",
+    "piManualMergeHint": "Preview biss. Għaqqad din id-dħul providers.omniroute models.json sabiex il-fornituri l-oħra tiegħek u s-settings jibqgħu intatti.",
     "removeMapping": "Neħħi l-immappjar"
   },
   "modelCatalog": {
@@ -6972,7 +6993,7 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
     "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "usedInComboTooltip": "Użat f'{count} kombinazzjoni/jiet: {combos}",
+    "usedInComboTooltip": "Użat f''{count} kombinazzjoni/jiet: {combos}",
     "openComboTooltip": "Iftaħ il-Kombinazzjonijiet — użat minn {combo}"
   },
   "settings": {
@@ -13915,7 +13936,9 @@
       "disabled": "Diżattivat",
       "dual": "Doppju",
       "alias": "Isem alternattiv",
-      "canonical": "Kanoniku"
+      "canonical": "Kanoniku",
+      "fail_closed": "Imblokka (fail_closed)",
+      "count_as_zero": "Ikkontabilizza bħala $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14062,6 +14085,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Waqfiet tal-Infrastruttura bi Prijorità Protetta bħala 502",
         "description": "Wieġeb b’502 minflok 503 meta mira ta’ prijorità b’fallback għall-kwota biss twaqqaf il-combo għal kawża li jista’ jiġi ppruvat li mhijiex relatata mal-kwota: circuit breaker miftuħ tal-fornitur jew qbiż predittiv minħabba l-latenza."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika tal-baġit għall-użu mingħajr prezz",
+        "description": "Kif il-limiti USD ta’ kuljum/ta’ kull ġimgħa għal kull ċavetta jitrattaw użu b’suċċess li l-fornitur/mudell tiegħu m’għandux riga ta’ prezz. fail_closed (predefinit) jimmarka l-perjodu bħala mgħaddija mill-limitu, sabiex spiża mhux magħrufa qatt ma tista’ tgħaddi mill-limitu strett. count_as_zero jikkontabilizza dak l-użu bħala $0 u jkompli jissalvagwardja l-ispejjeż b’prezz. Il-mudelli mingħajr prezz huma elenkati fil-paġna ewlenija tad-dashboard f’kull każ."
       }
     }
   },

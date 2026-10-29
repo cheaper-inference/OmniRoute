@@ -2002,7 +2002,14 @@
     "readinessStep3": "Zkopírujte svůj koncový bod",
     "readinessStep4": "Odešlete testovací požadavek",
     "readinessContinue": "Pokračovat v nastavení",
-    "readinessDismiss": "Prozatím skrýt"
+    "readinessDismiss": "Prozatím skrýt",
+    "unpricedUsageTitle": "{count, plural, one {# model} few {# modely} other {# modelů}} s nedávným použitím, ale bez nastavené ceny",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API klíč s limitem použití} few {# API klíče s limitem použití} other {# API klíčů s limitem použití}} použily tyto modely za posledních 8 dní. Pokud je toto použití v denním nebo týdenním okně klíče, je klíč považován za překročený a jeho požadavky jsou blokovány (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Toto použití se počítá jako $0 k limitům použití na klíč (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# požadavek} few {# požadavky} other {# požadavků}}, {keys, plural, one {# omezený klíč} few {# omezené klíče} other {# omezených klíčů}}",
+    "unpricedUsageMore": "…a dalších {count}",
+    "unpricedUsageConfigure": "Nastavit ceny",
+    "unpricedUsageDismiss": "Zavřít"
   },
   "analytics": {
     "title": "Analytika",
@@ -3039,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw - Ruční nastavení",
     "clineManualConfiguration": "Cline Ruční nastavení",
     "kiloManualConfiguration": "Kilo Code Ruční nastavení",
+    "piManualConfiguration": "Pi - Manuální konfigurace",
+    "piConfigInvalidTitle": "Pi models.json je nečitelný",
+    "piOmnirouteConfigured": "OmniRoute je nakonfigurován jako vlastní poskytovatel Pi",
+    "piModelHelp": "Pi automaticky neobjevuje modely pro vlastní koncové body — model, který vyberete, je zapsán do models.json explicitně.",
+    "piManualConfigTitle": "Nebo upravit ~/.pi/agent/models.json ručně",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Poté spusťte Pi a vyberte poskytovatele omniroute. Nastavením PI_CODING_AGENT_DIR přesunete celý adresář agenta.",
+    "piUnownedNote": "Tento záznam byl přidán mimo OmniRoute (např. vlastní koncové body pi-gui). Podání žádosti jej přijme; Obnovit pouze odstraní záznamy zapsané OmniRoute.",
     "whenToUseLabel": "Kdy použít",
     "openToolDocs": "Otevřít dokumentaci nástroje",
     "toolUseCases": {
@@ -3358,6 +3373,12 @@
     "cliproxyapiUpdate": "Aktualizovat",
     "cliproxyapiUpdateAvailable": "K dispozici je aktualizace: v{current} → v{latest}",
     "cliproxyapiVersion": "Verze",
+    "piInstallTitle": "Nainstalujte Pi Coding Agent",
+    "piInstallInstructions": "Nainstalujte Pi CLI a poté se vraťte sem a připojte jej k OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Použijte URL dosažitelné ze stroje, na kterém běží Pi. Koncový bod /v1 kompatibilní s OpenAI se přidá automaticky.",
+    "piManualMergeHint": "Pouze náhled. Sloučte tento záznam providers.omniroute do models.json, aby vaši ostatní poskytovatelé a nastavení zůstali nedotčeni.",
     "removeMapping": "Odebrat mapování"
   },
   "modelCatalog": {
@@ -13915,7 +13936,9 @@
       "disabled": "Zakázáno",
       "dual": "Duální",
       "alias": "Alias",
-      "canonical": "Kanonický"
+      "canonical": "Kanonický",
+      "fail_closed": "Blokovat (fail_closed)",
+      "count_as_zero": "Započítat jako $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14062,6 +14085,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Zastavení kvůli infrastruktuře u chráněné priority jako 502",
         "description": "Odpovědět stavem 502 namísto 503, když prioritní cíl s náhradním řešením pouze při vyčerpání kvóty zastaví kombinaci z důvodu, který prokazatelně nesouvisí s kvótou: rozpojený jistič poskytovatele nebo prediktivní přeskočení kvůli latenci."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Zásada rozpočtu pro nepřiřazené ceny",
+        "description": "Jak denní/týdenní USD limity na klíč zacházejí s úspěšným použitím, pro které poskytovatel/model nemá záznam o ceně. fail_closed (výchozí) označí okno jako překročené, takže neznámý náklad nikdy neprojde tvrdým limitem. count_as_zero započítá toto použití jako $0 a zachová vynucování oceněných výdajů. Modely bez ceny jsou tak či tak uvedeny na domovské stránce dashboardu."
       }
     }
   },

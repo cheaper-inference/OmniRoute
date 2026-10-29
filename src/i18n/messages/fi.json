@@ -1925,7 +1925,14 @@
     "readinessStep3": "Kopioi päätepisteesi",
     "readinessStep4": "Lähetä testipyyntö",
     "readinessContinue": "Jatka määritystä",
-    "readinessDismiss": "Ohita toistaiseksi"
+    "readinessDismiss": "Ohita toistaiseksi",
+    "unpricedUsageTitle": "{count, plural, one {# malli} other {# mallia}} joilla on viimeaikaista käyttöä mutta ei määritettyä hintaa",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-avain, jolla on käyttöraja} other {# API-avainta, joilla on käyttöraja}} käyttivät näitä malleja viimeisten 8 päivän aikana. Kun kyseinen käyttö on avaimen päivä- tai viikkokohtaisen ikkunan sisällä, avainta pidetään ylittäneenä ja sen pyynnöt estetään (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Tämä käyttö lasketaan $0:ksi avainkohtaisissa käyttörajoissa (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# pyyntö} other {# pyyntöä}}, {keys, plural, one {# rajoitettu API-avain} other {# rajoitettua API-avainta}}",
+    "unpricedUsageMore": "…ja {count} lisää",
+    "unpricedUsageConfigure": "Määritä hinnat",
+    "unpricedUsageDismiss": "Sulje"
   },
   "analytics": {
     "title": "Analytiikka",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Manuaalinen konfigurointi",
     "clineManualConfiguration": "Cline Manuaalinen konfigurointi",
     "kiloManualConfiguration": "Kilo Code Manuaalinen konfigurointi",
+    "piManualConfiguration": "Pi - Manuaalinen konfigurointi",
+    "piConfigInvalidTitle": "Pi models.json on lukukelvoton",
+    "piOmnirouteConfigured": "OmniRoute on määritetty mukautettuksi Pi-palveluntarjoajaksi",
+    "piModelHelp": "Pi ei löydä automaattisesti mukautettujen päätepisteiden malleja — valitsemasi malli on kirjoitettu models.json hen nimenomaisesti.",
+    "piManualConfigTitle": "Tai muokkaa ~/.pi/agent/models.json manuaalisesti",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Käynnistä sitten Pi ja valitse omniroute palveluntarjoaja. Aseta PI_CODING_AGENT_DIR siirtääksesi koko agenttihakemiston.",
+    "piUnownedNote": "Tämä merkintä lisättiin OmniRoute ulkopuolelle (esim. pi-guin mukautetut päätepisteet). Hakeminen hyväksyy sen; Reset poistaa vain OmniRoute kirjoittamat merkinnät.",
     "whenToUseLabel": "Milloin käyttää",
     "openToolDocs": "Avaa työkaludokumentit",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "Päivitä",
     "cliproxyapiUpdateAvailable": "Päivitys saatavilla: v{current} → v{latest}",
     "cliproxyapiVersion": "Versio",
+    "piInstallTitle": "Asenna Pi-koodausagentti",
+    "piInstallInstructions": "Asenna Pi CLI ja palaa sitten tänne yhdistääksesi se OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Käytä URL, joka on tavoitettavissa Pi:tä käyttävästä koneesta. OpenAI-yhteensopiva /v1-päätepiste lisätään automaattisesti.",
+    "piManualMergeHint": "Vain esikatselu. Yhdistä tämä providers.omniroute-merkintä models.json, jotta muut palveluntarjoajasi ja asetuksesi pysyvät ennallaan.",
     "removeMapping": "Poista määritys"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "Poistettu käytöstä",
       "dual": "Kaksois",
       "alias": "Alias",
-      "canonical": "Kanoninen"
+      "canonical": "Kanoninen",
+      "fail_closed": "Estä (fail_closed)",
+      "count_as_zero": "Laske $0:ksi (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Suojatun prioriteetin infrastruktuurikeskeytykset 502-virheinä",
         "description": "Palauta 502 koodin 503 sijaan, kun prioriteettikohde, jota käytetään varavaihtoehtona vain kiintiötilanteessa, pysäyttää yhdistelmän syystä, jonka voidaan varmasti osoittaa olevan muu kuin kiintiö: palveluntarjoajan avoin katkaisija tai ennakoituun viiveeseen perustuva ohitus."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Hinnoittelemattoman käytön budjettikäytäntö",
+        "description": "Miten avainkohtaiset päivä- ja viikkokohtaiset USD-rajoitukset käsittelevät onnistunutta käyttöä, jolla tarjoajalla tai mallilla ei ole hintariviä. fail_closed (oletus) merkitsee ikkunan ylittäneeksi, joten tuntematon kustannus ei voi koskaan päästä kiinteän ylärajan ohi. count_as_zero laskee käytön arvoksi $0 ja jatkaa hinnoitellun käytön valvontaa. Hinnoittelemattomat mallit listataan joka tapauksessa kojelaudan etusivulle."
       }
     }
   },

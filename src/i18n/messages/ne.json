@@ -1925,7 +1925,14 @@
     "readinessStep3": "आफ्नो एन्डपोइन्ट प्रतिलिपि गर्नुहोस्",
     "readinessStep4": "परीक्षण अनुरोध पठाउनुहोस्",
     "readinessContinue": "सेटअप जारी राख्नुहोस्",
-    "readinessDismiss": "अहिलेलाई हटाउनुहोस्"
+    "readinessDismiss": "अहिलेलाई हटाउनुहोस्",
+    "unpricedUsageTitle": "{count, plural, one {# मोडेल} other {# मोडेलहरू}} जसमा हालै प्रयोग भएको छ तर मूल्य कन्फिगर गरिएको छैन",
+    "unpricedUsageFailClosed": "{keys, plural, one {# प्रयोग सीमा भएको API कुञ्जी} other {# प्रयोग सीमा भएका API कुञ्जीहरू}} यी मोडेलहरूलाई पछिल्लो 8 दिनमा प्रयोग गरिएको छ। जब त्यो प्रयोग कुञ्जीको दैनिक वा साप्ताहिक विन्डो भित्र हुन्छ, कुञ्जीलाई कोटा नाघेको मानिन्छ र यसको अनुरोधहरू ब्लक गरिन्छ (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "यो प्रयोग प्रति-कुञ्जी प्रयोग सीमाहरूमा $0 को रूपमा गणना हुन्छ (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero)।",
+    "unpricedUsageModelStats": "{requests, plural, one {# अनुरोध} other {# अनुरोधहरू}}, {keys, plural, one {# सीमित कुञ्जी} other {# सीमित कुञ्जीहरू}}",
+    "unpricedUsageMore": "…र {count} थप",
+    "unpricedUsageConfigure": "मूल्य निर्धारण कन्फिगर गर्नुहोस्",
+    "unpricedUsageDismiss": "हटाउनुहोस्"
   },
   "analytics": {
     "title": "विश्लेषण",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - म्यानुअल कन्फिगरेसन",
     "clineManualConfiguration": "Cline म्यानुअल कन्फिगरेसन",
     "kiloManualConfiguration": "Kilo Code म्यानुअल कन्फिगरेसन",
+    "piManualConfiguration": "Pi - म्यानुअल कन्फिगरेसन",
+    "piConfigInvalidTitle": "Pi models.json अपठनीय छ",
+    "piOmnirouteConfigured": "OmniRoute Pi अनुकूलन प्रदायकको रूपमा कन्फिगर गरिएको छ",
+    "piModelHelp": "Pi ले आफू अनुकूल अन्तिम बिन्दुहरूका लागि मोडेलहरू स्वत: पत्ता लगाउँदैन — तपाईंले छनौट गर्नुभएको मोडेल models.json मा स्पष्ट रूपमा लेखिएको छ।",
+    "piManualConfigTitle": "वा ~/.pi/agent/models.json म्यानुअल रूपमा सम्पादन गर्नुहोस्",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "त्यसपछि Pi सुरु गर्नुहोस् र omniroute प्रदायक चयन गर्नुहोस्। सम्पूर्ण एजेन्ट डाइरेक्टरी सार्नको लागि PI_CODING_AGENT_DIR सेट गर्नुहोस्।",
+    "piUnownedNote": "यो प्रविष्टि OmniRoute बाहिर थपिएको थियो (जस्तै pi-gui को अनुकूलन अन्त बिन्दुहरू)। आवेदनले यसलाई अपनाउनेछ; रिसेट मात्र OmniRoute लेखिएको प्रविष्टिहरू हटाउँछ।",
     "whenToUseLabel": "कहिले प्रयोग गर्ने",
     "openToolDocs": "उपकरणका कागजातहरू खोल्नुहोस्",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "अपडेट गर्नुहोस्",
     "cliproxyapiUpdateAvailable": "अपडेट उपलब्ध छ: v{current} → v{latest}",
     "cliproxyapiVersion": "संस्करण",
+    "piInstallTitle": "Pi कोडिङ एजेन्ट स्थापना गर्नुहोस्",
+    "piInstallInstructions": "Pi CLI स्थापना गर्नुहोस्, त्यसपछि OmniRoute मा जडान गर्न यहाँ फर्कनुहोस्।",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi चलिरहेको मेसिनबाट पहुँचयोग्य URL प्रयोग गर्नुहोस्। OpenAI-compatible /v1 अन्त्य बिन्दु स्वतः थपिएको छ।",
+    "piManualMergeHint": "पूर्वावलोकन मात्र। यो providers.omniroute प्रविष्टिलाई models.json मा मर्ज गर्नुहोस् ताकि तपाईंका अन्य प्रदायकहरू र सेटिङहरू यथावत रहोस्।",
     "removeMapping": "म्यापिङ हटाउनुहोस्"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "निष्क्रिय",
       "dual": "दोहोरो",
       "alias": "उपनाम",
-      "canonical": "प्रामाणिक"
+      "canonical": "प्रामाणिक",
+      "fail_closed": "ब्लक गर्नुहोस् (fail_closed)",
+      "count_as_zero": "$0 को रूपमा गणना गर्नुहोस् (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "सुरक्षित-प्राथमिकताका पूर्वाधार रोकावटहरू 502 का रूपमा",
         "description": "कोटाका लागि मात्र फलब्याक हुने प्राथमिकता लक्ष्यले कोटासँग सम्बन्धित नभएको प्रमाणित कारणले कम्बो रोक्दा 503 को सट्टा 502 उत्तर दिनुहोस्: खुला प्रदायक सर्किट ब्रेकर वा पूर्वानुमानात्मक विलम्बता स्किप।"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "मूल्यविहीन प्रयोग बजेट नीति",
+        "description": "प्रति-कुञ्जी दैनिक/साप्ताहिक USD सीमाहरूले प्रोभाइडर/मोडेलको मूल्य पङ्क्ति नहुँदा सफल प्रयोगलाई कसरी व्यवहार गर्छन् भन्ने बारे। fail_closed (पूर्वनिर्धारित) ले विन्डोलाई नाघिएको मान्छ, त्यसैले अज्ञात लागतले कडा सीमा पार गर्न पाउँदैन। count_as_zero ले त्यो प्रयोगलाई $0 मान्छ र मूल्यिएको खर्चको लागूकरणलाई जारी राख्छ। मूल्य नभएका मोडेलहरू जे भए पनि ड्यासबोर्ड होम पृष्ठमा सूचीबद्ध हुन्छन्।"
       }
     }
   },

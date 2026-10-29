@@ -735,6 +735,29 @@ openclaude --provider openai
     acpSpawnable: false,
     baseUrlSupport: "full",
     defaultCommand: "pi",
+    // Pi loads custom providers from <agent-dir>/models.json; agent-dir defaults
+    // to ~/.pi/agent and moves wholesale with PI_CODING_AGENT_DIR. See
+    // src/shared/services/piConfig.ts.
+    settingsFile: "~/.pi/agent/models.json",
+    // Hand-edit fallback shown by the guided card's manual-configuration block.
+    codeBlock: {
+      title: "~/.pi/agent/models.json",
+      language: "json",
+      code: [
+        "{",
+        '  "providers": {',
+        '    "omniroute": {',
+        '      "baseUrl": "http://127.0.0.1:20128/v1",',
+        '      "api": "openai-completions",',
+        '      "apiKey": "sk_omniroute",',
+        '      "models": [',
+        '        { "id": "auto/best-coding", "name": "OmniRoute best-coding" }',
+        "      ]",
+        "    }",
+        "  }",
+        "}",
+      ].join("\n"),
+    },
   },
 
   /** Added — ported from upstream decolua/9router#1233 (dashboard catalog entry for Crush). */

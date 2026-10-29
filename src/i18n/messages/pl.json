@@ -1925,7 +1925,14 @@
     "readinessStep3": "Skopiuj punkt końcowy",
     "readinessStep4": "Wyślij żądanie testowe",
     "readinessContinue": "Kontynuuj konfigurację",
-    "readinessDismiss": "Na razie pomiń"
+    "readinessDismiss": "Na razie pomiń",
+    "unpricedUsageTitle": "{count, plural, one {# model} few {# modele} many {# modeli} other {# modeli}} z niedawnym użyciem, ale bez skonfigurowanej ceny",
+    "unpricedUsageFailClosed": "{keys, plural, one {# klucz API z limitem użycia} few {# klucze API z limitem użycia} many {# kluczy API z limitem użycia} other {# kluczy API z limitem użycia}} użyto tych modeli w ciągu ostatnich 8 dni. Gdy to użycie mieści się w dziennym lub tygodniowym oknie klucza, klucz jest traktowany jako przekraczający limit i jego żądania są blokowane (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "To użycie jest liczone jako $0 względem limitów użycia na klucz (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# żądanie} few {# żądania} many {# żądań} other {# żądań}}, {keys, plural, one {# klucz z limitem} few {# klucze z limitem} many {# kluczy z limitem} other {# kluczy z limitem}}",
+    "unpricedUsageMore": "…i jeszcze {count} więcej",
+    "unpricedUsageConfigure": "Skonfiguruj ceny",
+    "unpricedUsageDismiss": "Zamknij"
   },
   "analytics": {
     "title": "Analityka",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - konfiguracja ręczna",
     "clineManualConfiguration": "Cline - konfiguracja ręczna",
     "kiloManualConfiguration": "Kilo Code - konfiguracja ręczna",
+    "piManualConfiguration": "Pi – konfiguracja ręczna",
+    "piConfigInvalidTitle": "Pi models.json jest nieczytelna",
+    "piOmnirouteConfigured": "OmniRoute jest skonfigurowana jako niestandardowy dostawca Pi",
+    "piModelHelp": "Pi nie wykrywa automatycznie modeli dla niestandardowych punktów końcowych. — wybrany model jest jawnie zapisywany w models.json.",
+    "piManualConfigTitle": "Lub edytuj ~/.pi/agent/models.json ręcznie",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Następnie uruchom Pi i wybierz dostawcę omniroute. Ustaw PI_CODING_AGENT_DIR, aby przenieść cały katalog agenta.",
+    "piUnownedNote": "Ten wpis został dodany poza OmniRoute (np. niestandardowe punkty końcowe pi-gui). Złożenie wniosku zaadoptuje to; Resetuj usuwa tylko wpisy napisane OmniRoute.",
     "whenToUseLabel": "Kiedy używać",
     "openToolDocs": "Otwórz dokumentację narzędzia",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "Aktualizuj",
     "cliproxyapiUpdateAvailable": "Dostępna aktualizacja: v{current} → v{latest}",
     "cliproxyapiVersion": "Wersja",
+    "piInstallTitle": "Zainstaluj agenta kodującego Pi",
+    "piInstallInstructions": "Zainstaluj Pi CLI, a następnie wróć tutaj, aby podłączyć go do OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Użyj URL dostępnego z komputera z uruchomionym Pi. Punkt końcowy /v1 zgodny z OpenAI jest dodawany automatycznie.",
+    "piManualMergeHint": "Tylko podgląd. Połącz ten wpis providers.omniroute z models.json, aby inni dostawcy i ustawienia pozostały nienaruszone.",
     "removeMapping": "Usuń mapowanie"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "Wyłączone",
       "dual": "Podwójne",
       "alias": "Alias",
-      "canonical": "Kanoniczne"
+      "canonical": "Kanoniczne",
+      "fail_closed": "Zablokuj (fail_closed)",
+      "count_as_zero": "Liczyć jako $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Zatrzymania infrastruktury o chronionym priorytecie jako 502",
         "description": "Zwracaj 502 zamiast 503, gdy priorytetowy cel z mechanizmem rezerwowym wyłącznie na wypadek wyczerpania limitu zatrzymuje combo z przyczyny, która w sposób możliwy do udowodnienia nie jest związana z limitem: otwarty wyłącznik obwodu dostawcy lub predykcyjne pominięcie z powodu opóźnienia."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Polityka budżetu dla użycia bez ceny",
+        "description": "Jak dzienne/tygodniowe limity USD na klucz traktują udane użycie, dla którego dostawca/model nie ma wiersza cenowego. fail_closed (domyślnie) oznacza okno jako przekroczone, więc nieznany koszt nie może ominąć twardego limitu. count_as_zero liczy to użycie jako $0 i nadal egzekwuje wydatki wycenione. Modele bez ceny i tak są wymienione na stronie głównej panelu."
       }
     }
   },

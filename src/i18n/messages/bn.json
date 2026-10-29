@@ -2002,7 +2002,14 @@
     "readinessStep3": "আপনার এন্ডপয়েন্ট কপি করুন",
     "readinessStep4": "একটি টেস্ট রিকোয়েস্ট পাঠান",
     "readinessContinue": "সেটআপ চালিয়ে যান",
-    "readinessDismiss": "আপাতত সরিয়ে দিন"
+    "readinessDismiss": "আপাতত সরিয়ে দিন",
+    "unpricedUsageTitle": "{count, plural, one {#টি মডেল} other {#টি মডেল}} সাম্প্রতিক ব্যবহার আছে কিন্তু মূল্য কনফিগার করা নেই",
+    "unpricedUsageFailClosed": "{keys, plural, one {#টি API কী যার ব্যবহার সীমা আছে} other {#টি API কী যার ব্যবহার সীমা আছে}} গত 8 দিনে এই মডেলগুলো ব্যবহার করেছে। যখন সেই ব্যবহার কীটির দৈনিক বা সাপ্তাহিক উইন্ডোর ভেতরে থাকে, কীটিকে কোটা অতিক্রম করেছে বলে ধরা হয় এবং তার অনুরোধগুলো ব্লক করা হয় (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "এই ব্যবহার প্রতি কী-র ব্যবহার সীমায় $0 হিসেবে গণ্য হবে (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {#টি অনুরোধ} other {#টি অনুরোধ}}, {keys, plural, one {#টি সীমাবদ্ধ API কী} other {#টি সীমাবদ্ধ API কী}}",
+    "unpricedUsageMore": "…এবং আরও {count}",
+    "unpricedUsageConfigure": "মূল্য কনফিগার করুন",
+    "unpricedUsageDismiss": "বাতিল"
   },
   "analytics": {
     "title": "বিশ্লেষণ",
@@ -3039,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw - ম্যানুয়াল কনফিগারেশন",
     "clineManualConfiguration": "Cline ম্যানুয়াল কনফিগারেশন",
     "kiloManualConfiguration": "Kilo Code ম্যানুয়াল কনফিগারেশন",
+    "piManualConfiguration": "পাই - ম্যানুয়াল কনফিগারেশন",
+    "piConfigInvalidTitle": "Pi models.json অপঠনযোগ্য",
+    "piOmnirouteConfigured": "OmniRoute একটি Pi কাস্টম প্রদানকারী হিসাবে কনফিগার করা হয়েছে",
+    "piModelHelp": "Pi কাস্টম এন্ডপয়েন্টের জন্য মডেল স্বয়ংক্রিয়ভাবে খুঁজে পায় না — আপনি যে মডেলটি বেছে নেন সেটি সরাসরি models.json-এ লেখা হয়।",
+    "piManualConfigTitle": "অথবা ~/.pi/agent/models.json নিজে সম্পাদনা করুন",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "তারপরে Pi শুরু করুন এবং omniroute প্রদানকারী নির্বাচন করুন। পুরো এজেন্ট ডিরেক্টরি সরাতে PI_CODING_AGENT_DIR সেট করুন।",
+    "piUnownedNote": "এই এন্ট্রিটি OmniRoute এর বাইরে যোগ করা হয়েছে (যেমন pi-gui-এর কাস্টম এন্ডপয়েন্ট)। আবেদন করলে তা গ্রহণ করবে; রিসেট শুধুমাত্র OmniRoute লেখা এন্ট্রি মুছে দেয়।",
     "whenToUseLabel": "কখন ব্যবহার করবেন",
     "openToolDocs": "টুলের ডকুমেন্টেশন খুলুন",
     "toolUseCases": {
@@ -3358,6 +3373,12 @@
     "cliproxyapiUpdate": "আপডেট",
     "cliproxyapiUpdateAvailable": "আপডেট উপলব্ধ: v{current} → v{latest}",
     "cliproxyapiVersion": "সংস্করণ",
+    "piInstallTitle": "পাই কোডিং এজেন্ট ইনস্টল করুন",
+    "piInstallInstructions": "Pi CLI ইনস্টল করুন, তারপর OmniRoute এর সাথে সংযোগ করতে এখানে ফিরে আসুন।",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi চালিত মেশিন থেকে URL ব্যবহার করুন। OpenAI- সামঞ্জস্যপূর্ণ /v1 এন্ডপয়েন্ট স্বয়ংক্রিয়ভাবে যোগ করা হয়।",
+    "piManualMergeHint": "শুধুমাত্র পূর্বরূপ. এই providers.omniroute এন্ট্রিকে models.json তে মার্জ করুন যাতে আপনার অন্যান্য প্রদানকারী এবং সেটিংস অক্ষত থাকে।",
     "removeMapping": "ম্যাপিং সরান"
   },
   "modelCatalog": {
@@ -13915,7 +13936,9 @@
       "disabled": "নিষ্ক্রিয়",
       "dual": "দ্বৈত",
       "alias": "অ্যালিয়াস",
-      "canonical": "ক্যানোনিকাল"
+      "canonical": "ক্যানোনিকাল",
+      "fail_closed": "ব্লক (fail_closed)",
+      "count_as_zero": "$0 হিসেবে গণ্য করুন (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14062,6 +14085,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "সুরক্ষিত-অগ্রাধিকার অবকাঠামোগত স্টপের জন্য 502",
         "description": "শুধু-কোটা-ফলব্যাক অগ্রাধিকার টার্গেট যখন প্রমাণযোগ্যভাবে কোটা-সংক্রান্ত নয় এমন কোনো কারণে combo থামায়—যেমন খোলা provider circuit breaker বা predictive latency skip—তখন 503-এর পরিবর্তে 502 দিয়ে উত্তর দিন।"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "মূল্যবিহীন ব্যবহার বাজেট নীতি",
+        "description": "প্রতি-কী দৈনিক/সাপ্তাহিক USD সীমাগুলি সফল ব্যবহারগুলোকে কীভাবে বিবেচনা করে যখন সেই প্রোভাইডার/মডেলের কোনো মূল্য সারি নেই। fail_closed (ডিফল্ট) উইন্ডোকে অতিপার হিসেবে চিহ্নিত করে, যাতে অজানা খরচ কখনো কঠোর কেপ পেরিয়ে যেতে না পারে। count_as_zero সেই ব্যবহারকে $0 হিসেবে গণ্য করে এবং মূল্য নির্ধারিত ব্যয় প্রয়োগ চালু রাখে। মূল্যবিহীন মডেলগুলো যাই হোক ড্যাশবোর্ড হোম পেজে তালিকাভুক্ত থাকে।"
       }
     }
   },

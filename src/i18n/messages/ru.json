@@ -1925,7 +1925,14 @@
     "readinessStep3": "Скопируйте конечную точку",
     "readinessStep4": "Отправьте тестовый запрос",
     "readinessContinue": "Продолжить настройку",
-    "readinessDismiss": "Пока скрыть"
+    "readinessDismiss": "Пока скрыть",
+    "unpricedUsageTitle": "{count, plural, one {# модель} few {# модели} many {# моделей} other {# моделей}} с недавней активностью, но без настроенной цены",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-ключ с ограничением использования} few {# API-ключа с ограничением использования} many {# API-ключей с ограничением использования} other {# API-ключей с ограничением использования}} использовали эти модели за последние 8 дней. Пока это использование попадает в ежедневное или недельное окно ключа, ключ считается превышающим квоту и его запросы блокируются (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Это использование засчитывается как $0 в счёт лимитов использования по ключу (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# запрос} few {# запроса} many {# запросов} other {# запроса}}, {keys, plural, one {# ключ с лимитом} few {# ключа с лимитом} many {# ключей с лимитом} other {# ключей с лимитом}}",
+    "unpricedUsageMore": "…и ещё {count}",
+    "unpricedUsageConfigure": "Настроить цены",
+    "unpricedUsageDismiss": "Закрыть"
   },
   "analytics": {
     "title": "Аналитика",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Открытый коготь — ручная настройка",
     "clineManualConfiguration": "Ручная настройка Cline",
     "kiloManualConfiguration": "Ручная настройка кода Kilo",
+    "piManualConfiguration": "Пи — ручная настройка",
+    "piConfigInvalidTitle": "Пи models.json не читается",
+    "piOmnirouteConfigured": "OmniRoute настроен как пользовательский поставщик Pi",
+    "piModelHelp": "Pi не выполняет автоматическое обнаружение моделей для пользовательских конечных точек — выбранная вами модель явно записывается в models.json.",
+    "piManualConfigTitle": "Или отредактируйте ~/.pi/agent/models.json вручную",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Затем запустите Pi и выберите провайдера omniroute. Установите PI_CODING_AGENT_DIR для перемещения всего каталога агента.",
+    "piUnownedNote": "Эта запись была добавлена за пределами OmniRoute (например, пользовательские конечные точки pi-gui). Подача заявления примет его; Сброс удаляет только записи, записанные OmniRoute.",
     "whenToUseLabel": "Когда использовать",
     "openToolDocs": "Открыть документацию по инструменту",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "Обновить",
     "cliproxyapiUpdateAvailable": "Доступно обновление: v{current} → v{latest}",
     "cliproxyapiVersion": "Версия",
+    "piInstallTitle": "Установите агент Pi Coding",
+    "piInstallInstructions": "Установите Pi CLI, затем вернитесь сюда, чтобы подключить его к OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Используйте URL доступный с машины, на которой работает Pi. Конечная точка /v1, совместимая с OpenAI, добавляется автоматически.",
+    "piManualMergeHint": "Только предварительный просмотр. Объедините эту запись providers.omniroute с models.json, чтобы другие ваши провайдеры и настройки остались нетронутыми.",
     "removeMapping": "Удалить сопоставление"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "Отключено",
       "dual": "Двойной",
       "alias": "Псевдоним",
-      "canonical": "Канонический"
+      "canonical": "Канонический",
+      "fail_closed": "Блокировать (fail_closed)",
+      "count_as_zero": "Зачислять как $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Инфраструктурные остановки защищённого приоритета как 502",
         "description": "Отвечать кодом 502 вместо 503, когда приоритетная цель с резервным переключением только при исчерпании квоты останавливает комбинацию по причине, которая заведомо не связана с квотой: открытый автоматический выключатель провайдера или пропуск из-за прогнозируемой задержки."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Политика бюджета для использования без цены",
+        "description": "Как ежедневные/недельные USD‑лимиты по ключу обрабатывают успешное использование, для которого у провайдера/модели нет строки с ценой. fail_closed (по умолчанию) помечает окно как превышенное, поэтому неизвестная стоимость никогда не сможет пройти мимо жёсткого лимита. count_as_zero считает такое использование равным $0 и продолжает применять ограничения к расходам, для которых задана цена. Модели без цены в любом случае отображаются на главной странице панели управления."
       }
     }
   },

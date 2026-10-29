@@ -1925,7 +1925,14 @@
     "readinessStep3": "Detuo endpoint gị",
     "readinessStep4": "Zipụ arịrịọ nnwale",
     "readinessContinue": "Gaa n’ihu na nhazi",
-    "readinessDismiss": "Mechie maka ugbu a"
+    "readinessDismiss": "Mechie maka ugbu a",
+    "unpricedUsageTitle": "{count, plural, one {# nlereanya} other {# nlereanya}} nwere ojiji nso ma enweghị ọnụahịa edobere",
+    "unpricedUsageFailClosed": "{keys, plural, one {# igodo API nwere oke ojiji} other {# igodo API nwere oke ojiji}} ji nlereanya ndị a mee ihe n’ime ụbọchị 8 gara aga. Mgbe ojiji ahụ nọ n’ime oge kwa ụbọchị ma ọ bụ kwa izu nke igodo, a na-ewere igodo ahụ dịka gafere ókè, a na-egbochi arịrịọ ya (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "A na-atụle ojiji a dị ka $0 megide ókè ojiji nke igodo ọ bụla (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# arịrịọ} other {# arịrịọ}}, {keys, plural, one {# igodo nwere oke} other {# igodo nwere oke}}",
+    "unpricedUsageMore": "…na {count} ọzọ",
+    "unpricedUsageConfigure": "Tọọ ọnụahịa",
+    "unpricedUsageDismiss": "Mechie"
   },
   "analytics": {
     "title": "Nnyocha Data",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Nhazi Aka",
     "clineManualConfiguration": "Nhazi Aka nke Cline",
     "kiloManualConfiguration": "Nhazi Aka nke Kilo Code",
+    "piManualConfiguration": "Pi - Nhazi ntuziaka",
+    "piConfigInvalidTitle": "Pi models.json enweghị ike ịgụ ya",
+    "piOmnirouteConfigured": "Ahaziri OmniRoute ka ọ bụrụ onye na-eweta omenala Pi",
+    "piModelHelp": "Pi anaghị achọpụta onwe ya ụdị maka ngwụcha ngwụcha — ihe nlereanya ị na-ahọrọ ka edere ya na models.json nke ọma.",
+    "piManualConfigTitle": "Ma ọ bụ jiri aka dezie ~/.pi/agent/models.json",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Wee malite Pi wee họrọ onye na-eweta omniroute. Tọọ PI_CODING_AGENT_DIR ka ibugharịa ndekọ aha ndị ọrụ niile.",
+    "piUnownedNote": "Etinyere ndenye a na mpụga OmniRoute (dịka ngwụcha ngwụcha omenala pi-gui). Ntinye ga-anabata ya; Tọgharia naanị na-ewepụ ndenye OmniRoute dere.",
     "whenToUseLabel": "Mgbe a ga-eji ya",
     "openToolDocs": "Mepee akwụkwọ ntụaka nke ngwa",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "Melite",
     "cliproxyapiUpdateAvailable": "Mmelite dị: v{current} → v{latest}",
     "cliproxyapiVersion": "Ụdị",
+    "piInstallTitle": "Wụnye onye nnọchite koodu Pi",
+    "piInstallInstructions": "Wụnye Pi CLI, wee laghachi ebe a iji jikọọ ya na OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Jiri URL a na-enweta site na igwe na-agba Pi. A na-agbakwunye njedebe OpenAI-dakọtara /v1 na-akpaghị aka.",
+    "piManualMergeHint": "Nhụchalụ naanị. Jikọta ntinye providers.omniroute a na models.json ka ndị na-eweta gị na ntọala gị ndị ọzọ nọrọ na-adịghị.",
     "removeMapping": "Wepụ njikọ"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "Agbanyụrụ",
       "dual": "Abụọ",
       "alias": "Aha ọzọ",
-      "canonical": "Kanonikal"
+      "canonical": "Kanonikal",
+      "fail_closed": "Egbochi (fail_closed)",
+      "count_as_zero": "Tụlee dị ka $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Nkwụsị Akụrụngwa nke Prioriti Echedoro dịka 502",
         "description": "Zaghachi 502 kama 503 mgbe ebumnuche prioriti quota-only-fallback kwụsịrị combo n'ihi ihe e gosipụtara na ọ bụghị quota: provider circuit breaker mepere emepe ma ọ bụ predictive latency skip."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Atụgharị Mmefu Ojiji Na-enweghị Ọnụahịa",
+        "description": "Otu ókè USD kwa ụbọchị/kwa izu nke igodo si elee ojiji rụpụtara anya mgbe onye na-eweta ma ọ bụ nlereanya enweghị ahịrị ọnụahịa. fail_closed (ndabara) na-ama oge ahụ dịka gafere, yabụ na ọnụahịa amaghị agaghị agafe oke siri ike. count_as_zero na-atụle ojiji ahụ dị ka $0 ma na-aga n’ihu na-eme ka mmefu e nwere ọnụahịa ka na-arụ ọrụ. A na-edekọ nlereanya ndị enweghị ọnụahịa na ibe isi dashboard n’agbanyeghị."
       }
     }
   },

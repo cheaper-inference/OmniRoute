@@ -1925,7 +1925,14 @@
     "readinessStep3": "तुमचा एंडपॉइंट कॉपी करा",
     "readinessStep4": "चाचणी विनंती पाठवा",
     "readinessContinue": "सेटअप सुरू ठेवा",
-    "readinessDismiss": "सध्या बंद करा"
+    "readinessDismiss": "सध्या बंद करा",
+    "unpricedUsageTitle": "{count, plural, one {# मॉडेलला अलीकडील वापर आहे परंतु किंमत कॉन्फिगर केलेली नाही} other {# मॉडेलांना अलीकडील वापर आहे परंतु किंमत कॉन्फिगर केलेली नाही}}",
+    "unpricedUsageFailClosed": "{keys, plural, one {# मर्यादित वापर असलेली API की} other {# मर्यादित वापर असलेल्या API की}} गेल्या 8 दिवसांत या मॉडेलचा वापर झाला आहे. कीचा वापर तिच्या दैनंदिन किंवा साप्ताहिक विंडोच्या आत असताना ती की ओव्हर कोटा म्हणून वागवली जाते आणि तिच्या विनंत्या अवरुद्ध केल्या जातात (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "हा वापर प्रत्येक कीच्या वापर मर्यादेकडे $0 म्हणून गणला जातो (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# विनंती} other {# विनंत्या}}, {keys, plural, one {# मर्यादित की} other {# मर्यादित की}}",
+    "unpricedUsageMore": "…आणि {count} अधिक",
+    "unpricedUsageConfigure": "किंमत विन्यास करा",
+    "unpricedUsageDismiss": "रद्द करा"
   },
   "analytics": {
     "title": "विश्लेषण",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - मॅन्युअल कॉन्फिगरेशन",
     "clineManualConfiguration": "Cline मॅन्युअल कॉन्फिगरेशन",
     "kiloManualConfiguration": "Kilo Code मॅन्युअल कॉन्फिगरेशन",
+    "piManualConfiguration": "Pi - मॅन्युअल कॉन्फिगरेशन",
+    "piConfigInvalidTitle": "Pi models.json वाचनीय नाही",
+    "piOmnirouteConfigured": "OmniRoute हे Pi सानुकूल प्रदाता म्हणून कॉन्फिगर केले आहे",
+    "piModelHelp": "Pi सानुकूल एंडपॉइंट्ससाठी मॉडेल स्वयं-शोधत नाही — तुम्ही निवडलेले मॉडेल models.json मध्ये स्पष्टपणे लिहिलेले आहे.",
+    "piManualConfigTitle": "किंवा ~/.pi/agent/models.json स्वहस्ते संपादित करा",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "नंतर Pi सुरू करा आणि omniroute प्रदाता निवडा. संपूर्ण एजंट निर्देशिका हलविण्यासाठी PI_CODING_AGENT_DIR सेट करा.",
+    "piUnownedNote": "ही एंट्री OmniRoute बाहेर जोडली गेली (उदा. pi-gui चे कस्टम एंडपॉइंट). अर्ज केल्यास त्याचा अवलंब होईल; रीसेट केवळ OmniRoute लिहिलेल्या नोंदी काढून टाकते.",
     "whenToUseLabel": "केव्हा वापरावे",
     "openToolDocs": "टूलची कागदपत्रे उघडा",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "अद्यतन करा",
     "cliproxyapiUpdateAvailable": "उपलब्ध अद्यतन: v{current} → v{latest}",
     "cliproxyapiVersion": "आवृत्ती",
+    "piInstallTitle": "पाई कोडिंग एजंट स्थापित करा",
+    "piInstallInstructions": "Pi CLI स्थापित करा, नंतर OmniRoute शी कनेक्ट करण्यासाठी येथे परत या.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi चालणाऱ्या मशीनवरून पोहोचता येण्याजोगा URL वापरा. OpenAI-compatible /v1 एंडपॉइंट आपोआप जोडला जातो.",
+    "piManualMergeHint": "फक्त पूर्वावलोकन. ही providers.omniroute एंट्री models.json मध्ये विलीन करा जेणेकरून तुमचे इतर प्रदाते आणि सेटिंग्ज कायम राहतील.",
     "removeMapping": "मॅपिंग काढा"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "अक्षम केले",
       "dual": "दुहेरी",
       "alias": "एलिआस",
-      "canonical": "कॅनोनिकल"
+      "canonical": "कॅनोनिकल",
+      "fail_closed": "ब्लॉक करा (fail_closed)",
+      "count_as_zero": "याला $0 म्हणून मोजा (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "संरक्षित-प्राधान्य इन्फ्रा थांब्यांसाठी 502",
         "description": "केवळ-कोटा-फॉलबॅक प्राधान्य लक्ष्याने निश्चितपणे कोटाशी संबंधित नसलेल्या कारणामुळे कॉम्बो थांबवल्यास 503 ऐवजी 502 उत्तर द्या: उघडा प्रोव्हायडर सर्किट ब्रेकर किंवा पूर्वानुमानित विलंब वगळणे."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "किंमत नसलेल्या वापराचे बजेट धोरण",
+        "description": "प्रत्येक कीच्या दैनिक/साप्ताहिक USD मर्यादेत ते यशस्वी वापर कसे वागवले जाते ज्याच्या प्रदाता/मॉडेलसाठी किंमत रेकॉर्ड नाही. fail_closed (पूर्वनिर्धारित) विंडोला ओलांडलेले म्हणून चिन्हांकित करते, त्यामुळे अज्ञात खर्च कधीही हार्ड कॅपच्या पलिकडे जाऊ शकत नाही. count_as_zero त्या वापराला $0 म्हणून मोजते आणि प्राइस असलेल्या खर्चाची अंमलबजावणी चालू ठेवते. किंमत नसलेली मॉडेल्स डॅशबोर्डच्या मुखपृष्ठावर दोन्हीप्रकारे सूचीबद्ध केल्या जातात."
       }
     }
   },

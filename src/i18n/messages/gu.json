@@ -1925,7 +1925,14 @@
     "readinessStep3": "તમારો એન્ડપોઇન્ટ કૉપી કરો",
     "readinessStep4": "પરીક્ષણ વિનંતી મોકલો",
     "readinessContinue": "સેટઅપ ચાલુ રાખો",
-    "readinessDismiss": "હમણાં માટે અવગણો"
+    "readinessDismiss": "હમણાં માટે અવગણો",
+    "unpricedUsageTitle": "{count, plural, one {# મોડેલ} other {# મોડેલો}} જેમનો તાજેતરનો ઉપયોગ થયો છે પરંતુ કિંમત કન્ફિગર કરેલી નથી",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API કી જેમાં ઉપયોગ મર્યાદા હોય} other {# API કીઓમાં જેમાં ઉપયોગ મર્યાદા હોય}} છેલ્લા 8 દિવસમાં આ મોડેલોનો ઉપયોગ કર્યા. જ્યારે તે ઉપયોગ કીની દૈનિક અથવા સાપ્તાહિક અવધિમાં આવે છે, ત્યારે કીને ઓવર‑કોટે તરીકે ગણવામાં આવે છે અને તેની વિનંતિઓ અવારોધિત કરવામાં આવે છે (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "આ ઉપયોગ પ્રતિ‑કી ઉપયોગ મર્યાદાઓની દિશામાં $0 ગણાશે (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# વિનંતી} other {# વિનંતીઓ}}, {keys, plural, one {# મર્યાદિત કી} other {# મર્યાદિત કીઓ}}",
+    "unpricedUsageMore": "…અને {count} વધુ",
+    "unpricedUsageConfigure": "કિંમત સેટ કરો",
+    "unpricedUsageDismiss": "બંદ કરો"
   },
   "analytics": {
     "title": "વિશ્લેષણ",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - મેન્યુઅલ ગોઠવણી",
     "clineManualConfiguration": "Cline મેન્યુઅલ ગોઠવણી",
     "kiloManualConfiguration": "Kilo Code મેન્યુઅલ ગોઠવણી",
+    "piManualConfiguration": "Pi - મેન્યુઅલ રૂપરેખાંકન",
+    "piConfigInvalidTitle": "Pi models.json વાંચી ન શકાય તેવું છે",
+    "piOmnirouteConfigured": "OmniRoute એ Pi કસ્ટમ પ્રદાતા તરીકે ગોઠવેલ છે",
+    "piModelHelp": "Pi વૈવિધ્યપૂર્ણ એન્ડપોઇન્ટ્સ માટે મોડલને સ્વતઃ-શોધ કરતું નથી — તમે પસંદ કરો છો તે મોડેલ સ્પષ્ટપણે models.json માં લખાયેલું છે.",
+    "piManualConfigTitle": "અથવા ~/.pi/agent/models.json મેન્યુઅલી એડિટ કરો",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "પછી Pi શરૂ કરો અને omniroute પ્રદાતા પસંદ કરો. સમગ્ર એજન્ટ ડિરેક્ટરી ખસેડવા માટે PI_CODING_AGENT_DIR સેટ કરો.",
+    "piUnownedNote": "આ એન્ટ્રી OmniRoute (દા.ત. pi-gui ના કસ્ટમ એન્ડપોઇન્ટ્સ) ની બહાર ઉમેરવામાં આવી હતી. અરજી કરવાથી તે અપનાવશે; રીસેટ ફક્ત OmniRoute લખેલી એન્ટ્રીઓને દૂર કરે છે.",
     "whenToUseLabel": "ક્યારે ઉપયોગ કરવો",
     "openToolDocs": "ટૂલના દસ્તાવેજો ખોલો",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "અપડેટ કરો",
     "cliproxyapiUpdateAvailable": "અપડેટ ઉપલબ્ધ છે: v{current} → v{latest}",
     "cliproxyapiVersion": "આવૃત્તિ",
+    "piInstallTitle": "Pi કોડિંગ એજન્ટ ઇન્સ્ટોલ કરો",
+    "piInstallInstructions": "Pi CLI ઇન્સ્ટોલ કરો, પછી તેને OmniRoute સાથે કનેક્ટ કરવા માટે અહીં પાછા આવો.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi ચલાવતા મશીનથી પહોંચી શકાય તેવા URL ઉપયોગ કરો. OpenAI- સુસંગત /v1 એન્ડપોઇન્ટ આપમેળે ઉમેરવામાં આવે છે.",
+    "piManualMergeHint": "માત્ર પૂર્વાવલોકન. આ providers.omniroute એન્ટ્રીને models.json માં મર્જ કરો જેથી તમારા અન્ય પ્રદાતાઓ અને સેટિંગ્સ અકબંધ રહે.",
     "removeMapping": "મેપિંગ દૂર કરો"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "નિષ્ક્રિય કરેલ",
       "dual": "ડ્યુઅલ",
       "alias": "ઉપનામ",
-      "canonical": "કેનોનિકલ"
+      "canonical": "કેનોનિકલ",
+      "fail_closed": "અવરોધિત કરો (fail_closed)",
+      "count_as_zero": "$0 તરીકે ગણાવો (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Protected-Priority ઇન્ફ્રાસ્ટ્રક્ચર સ્ટોપ્સ માટે 502",
         "description": "જ્યારે quota-only-fallback priority target નિશ્ચિતપણે quota ન હોય એવા કારણસર comboને અટકાવે—ખુલ્લું provider circuit breaker અથવા predictive latency skip—ત્યારે 503ને બદલે 502નો જવાબ આપો."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "કિંમત વિનાનું ઉપયોગ બજેટ નીતિ",
+        "description": "દર-કી દૈનિક/સાપ્તાહિક USD મર્યાદાઓ તે સફળ ઉપયોગને કેવી રીતે હેન્ડલ કરે છે જેમાં પ્રદાતા/મોડેલ માટે કોઈ કિંમત પંક્તિ ન હોય. fail_closed (ડિફૉલ્ટ) વિન્ડોને અતિસીમા ગણાવે છે, જેથી અજ્ઞાત ખર્ચ ક્યારેય કડક મર્યાદા પાસ કરી ન શકે. count_as_zero તે ઉપયોગને $0 તરીકે ગણાવે છે અને મૂલ્ય ધરાવતો ખર્ચ પર અમલ જારી રાખે છે. કિંમત ન ધરાવતાં મોડેલ બન્ને પરિસ્થિતિમાં ડેશબોર્ડના હોમ પેજ પર સૂચિબદ્ધ થાય છે."
       }
     }
   },

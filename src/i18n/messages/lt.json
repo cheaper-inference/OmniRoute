@@ -1925,7 +1925,14 @@
     "readinessStep3": "Nukopijuokite savo galinį tašką",
     "readinessStep4": "Išsiųskite testinę užklausą",
     "readinessContinue": "Tęsti sąranką",
-    "readinessDismiss": "Kol kas paslėpti"
+    "readinessDismiss": "Kol kas paslėpti",
+    "unpricedUsageTitle": "{count, plural, one {# modelis} few {# modeliai} many {# modelių} other {# modelių}} su nesenu naudojimu, bet be nustatytos kainos",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API raktas su naudojimo limitu} few {# API raktai su naudojimo limitu} many {# API raktų su naudojimo limitu} other {# API raktų su naudojimo limitu}} naudojo šiuos modelius per paskutines 8 dienas. Kol tas naudojimas patenka į rakto dieninio arba savaitinio lango ribas, raktas laikomas viršijus kvotą ir jo užklausos blokuojamos (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Šis naudojimas skaičiuojamas kaip $0 į kiekvieno rakto naudojimo limitus (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# užklausa} few {# užklausos} many {# užklausų} other {# užklausų}}, {keys, plural, one {# ribotas raktas} few {# riboti raktai} many {# ribotų raktų} other {# ribotų raktų}}",
+    "unpricedUsageMore": "…ir dar {count}",
+    "unpricedUsageConfigure": "Nustatyti kainodarą",
+    "unpricedUsageDismiss": "Atmesti"
   },
   "analytics": {
     "title": "Analitika",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw – rankinė konfigūracija",
     "clineManualConfiguration": "Cline rankinė konfigūracija",
     "kiloManualConfiguration": "Kilo Code rankinė konfigūracija",
+    "piManualConfiguration": "Pi – rankinis konfigūravimas",
+    "piConfigInvalidTitle": "Pi models.json yra neįskaitomas",
+    "piOmnirouteConfigured": "OmniRoute sukonfigūruotas kaip pasirinktinis Pi teikėjas",
+    "piModelHelp": "Pi automatiškai neatranda modelių, skirtų pasirinktiniams galutiniams taškams — jūsų pasirinktas modelis yra aiškiai įrašytas į models.json.",
+    "piManualConfigTitle": "Arba redaguokite ~/.pi/agent/models.json rankiniu būdu",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Tada paleiskite Pi ir pasirinkite omniroute teikėją. Nustatykite PI_CODING_AGENT_DIR, kad perkeltumėte visą agento katalogą.",
+    "piUnownedNote": "Šis įrašas buvo įtrauktas už OmniRoute ribų (pvz., Pi-gui pasirinktiniai galutiniai taškai). Prašymas jį priims; Reset pašalina tik įrašus, kuriuos parašė OmniRoute.",
     "whenToUseLabel": "Kada naudoti",
     "openToolDocs": "Atidaryti įrankio dokumentaciją",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "Atnaujinti",
     "cliproxyapiUpdateAvailable": "Yra atnaujinimas: v{current} → v{latest}",
     "cliproxyapiVersion": "Versija",
+    "piInstallTitle": "Įdiekite „Pi“ kodavimo agentą",
+    "piInstallInstructions": "Įdiekite Pi CLI, tada grįžkite čia, kad prijungtumėte jį prie OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Naudokite URL pasiekiamą iš mašinos, kurioje veikia Pi. Su OpenAI suderinamas /v1 galutinis taškas pridedamas automatiškai.",
+    "piManualMergeHint": "Tik peržiūra. Sujunkite šį providers.omniroute įrašą su models.json, kad kiti teikėjai ir nustatymai liktų nepakitę.",
     "removeMapping": "Pašalinti susiejimą"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "Išjungta",
       "dual": "Dvigubas",
       "alias": "Pseudonimas",
-      "canonical": "Kanoninis"
+      "canonical": "Kanoninis",
+      "fail_closed": "Blokuoti (fail_closed)",
+      "count_as_zero": "Skaičiuoti kaip $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Apsaugoto prioriteto infrastruktūros sustabdymai pateikiami kaip 502",
         "description": "Grąžinti 502, o ne 503, kai prioritetinis tik atsarginiam perėjimui dėl kvotos skirtas tikslas sustabdo derinį dėl priežasties, kuri akivaizdžiai nesusijusi su kvota: atviro teikėjo grandinės pertraukiklio arba praleidimo dėl prognozuojamos delsos."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Neįkainoto naudojimo biudžeto politika",
+        "description": "Kaip kiekvieno rakto dieniniai/savaitiniai USD limitai traktuoja sėkmingą naudojimą, kurio tiekėjas ar modelis neturi kainos įrašo. fail_closed (numatytasis) pažymi langą kaip viršytą, todėl nežinoma kaina niekada nepraslys per griežtą ribą. count_as_zero skaičiuoja tą naudojimą kaip $0 ir toliau taiko apribojimus pagal apibrėžtas kainas. Neįkainoti modeliai bet kuriuo atveju yra išvardyti pagrindiniame informacijos suvestinės puslapyje."
       }
     }
   },

@@ -1925,7 +1925,14 @@
     "readinessStep3": "エンドポイントをコピー",
     "readinessStep4": "テストリクエストを送信",
     "readinessContinue": "セットアップを続ける",
-    "readinessDismiss": "今は閉じる"
+    "readinessDismiss": "今は閉じる",
+    "unpricedUsageTitle": "{count, plural, other {#個のモデルに最近の利用がありますが、価格が設定されていません}}",
+    "unpricedUsageFailClosed": "{keys, plural, other {利用上限が設定された API キー #個}}が、過去 8 日間にこれらのモデルを使用しました。その利用がキーの日次または週次の集計期間内にある間、そのキーはクォータ超過と見なされ、リクエストはブロックされます（UNPRICED_USAGE_BUDGET_POLICY=fail_closed）。",
+    "unpricedUsageCountAsZero": "この利用は、キーごとの利用上限に対して $0 として計上されます（UNPRICED_USAGE_BUDGET_POLICY=count_as_zero）。",
+    "unpricedUsageModelStats": "{requests, plural, other {#件のリクエスト}}、{keys, plural, other {上限付きキー #個}}",
+    "unpricedUsageMore": "…ほか {count} 件",
+    "unpricedUsageConfigure": "価格を設定",
+    "unpricedUsageDismiss": "閉じる"
   },
   "analytics": {
     "title": "分析",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "オープンクロー - 手動設定",
     "clineManualConfiguration": "クライン手動設定",
     "kiloManualConfiguration": "キロコードの手動設定",
+    "piManualConfiguration": "Pi - 手動構成",
+    "piConfigInvalidTitle": "Pi models.jsonが読めません",
+    "piOmnirouteConfigured": "OmniRouteは Pi カスタムプロバイダーとして構成されています",
+    "piModelHelp": "Pi はカスタム エンドポイント—のモデルを自動検出しません。選択したモデルはmodels.jsonに明示的に書き込まれます。",
+    "piManualConfigTitle": "または、 ~/.pi/agent/models.json手動で編集します",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "次に、Pi を起動し、 omnirouteプロバイダーを選択します。エージェント ディレクトリ全体を移動するようにPI_CODING_AGENT_DIRを設定します。",
+    "piUnownedNote": "このエントリはOmniRoute外部 (例: pi-gui のカスタム エンドポイント) に追加されました。申請すると採用されます。リセットでは、 OmniRouteが書き込んだエントリのみが削除されます。",
     "whenToUseLabel": "いつ使用するか",
     "openToolDocs": "ツールドキュメントを開く",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "更新",
     "cliproxyapiUpdateAvailable": "更新が利用可能です: v{current} → v{latest}",
     "cliproxyapiVersion": "バージョン",
+    "piInstallTitle": "Pi コーディング エージェントのインストール",
+    "piInstallInstructions": "Pi CLIをインストールし、ここに戻ってOmniRouteに接続します。",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi を実行しているマシンから到達可能なURL使用します。 OpenAI 互換の /v1 エンドポイントは自動的に追加されます。",
+    "piManualMergeHint": "プレビューのみ。このproviders.omnirouteエントリをmodels.jsonにマージすると、他のプロバイダーと設定はそのまま残ります。",
     "removeMapping": "マッピングを削除"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "無効",
       "dual": "デュアル",
       "alias": "エイリアス",
-      "canonical": "カノニカル"
+      "canonical": "カノニカル",
+      "fail_closed": "ブロック (fail_closed)",
+      "count_as_zero": "$0 として計上 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "保護優先度のインフラ停止を 502 として処理",
         "description": "クォータ枯渇時のみフォールバックする優先ターゲットが、クォータ以外であることが明確に証明できる原因（プロバイダーのサーキットブレーカーが開いている、または予測レイテンシによるスキップ）でコンボを停止した場合、503 ではなく 502 を返します。"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "価格未設定の利用に対する予算ポリシー",
+        "description": "プロバイダー/モデルに価格設定がない成功した利用を、キーごとの日次/週次 USD 上限でどう扱うかを決めます。fail_closed（既定）はその期間を上限超過として扱い、不明なコストがハード上限をすり抜けないようにします。count_as_zero はその利用を $0 として計上し、価格が設定された支出には引き続き上限を適用します。どちらの場合も、価格未設定のモデルはダッシュボードのホームに一覧表示されます。"
       }
     }
   },

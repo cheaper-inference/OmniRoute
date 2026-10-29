@@ -1925,7 +1925,14 @@
     "readinessStep3": "अपना एंडपॉइंट कॉपी करें",
     "readinessStep4": "एक परीक्षण अनुरोध भेजें",
     "readinessContinue": "सेटअप जारी रखें",
-    "readinessDismiss": "अभी के लिए बंद करें"
+    "readinessDismiss": "अभी के लिए बंद करें",
+    "unpricedUsageTitle": "{count, plural, one {# मॉडल} other {# मॉडल}} जिनका हाल ही में उपयोग हुआ लेकिन कोई निर्धारित कीमत कॉन्फ़िगर नहीं है",
+    "unpricedUsageFailClosed": "{keys, plural, one {# उपयोग सीमा वाली API कुंजी} other {# उपयोग सीमा वाली API कुंजियाँ}} ने पिछले 8 दिनों में इन मॉडलों का उपयोग किया। जब यह उपयोग किसी कुंजी की दैनिक या साप्ताहिक विंडो में आता है, तो कुंजी को कोटा से बाहर माना जाता है और उसके अनुरोध ब्लॉक कर दिए जाते हैं (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "यह उपयोग प्रति-कुंजी उपयोग सीमाओं के लिए $0 माना जाता है (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# अनुरोध} other {# अनुरोध}}, {keys, plural, one {# सीमित कुंजी} other {# सीमित कुंजियाँ}}",
+    "unpricedUsageMore": "…और {count} और",
+    "unpricedUsageConfigure": "मूल्य निर्धारण कॉन्फ़िगर करें",
+    "unpricedUsageDismiss": "खारिज करें"
   },
   "analytics": {
     "title": "विश्लेषिकी",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "खुला पंजा - मैनुअल कॉन्फ़िगरेशन",
     "clineManualConfiguration": "क्लाइन मैनुअल कॉन्फ़िगरेशन",
     "kiloManualConfiguration": "किलो कोड मैनुअल कॉन्फ़िगरेशन",
+    "piManualConfiguration": "पाई - मैनुअल कॉन्फ़िगरेशन",
+    "piConfigInvalidTitle": "Pi models.json अपठनीय है",
+    "piOmnirouteConfigured": "OmniRoute Pi कस्टम प्रदाता के रूप में कॉन्फ़िगर किया गया है",
+    "piModelHelp": "Pi कस्टम एंडपॉइंट्स — के लिए मॉडलों की स्वतः खोज नहीं करता है, आपके द्वारा चुना गया मॉडल स्पष्ट रूप से models.json में लिखा गया है।",
+    "piManualConfigTitle": "या ~/.pi/agent/models.json मैन्युअल रूप से संपादित करें",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "फिर Pi प्रारंभ करें और omniroute प्रदाता चुनें। संपूर्ण एजेंट निर्देशिका को स्थानांतरित करने के लिए PI_CODING_AGENT_DIR सेट करें।",
+    "piUnownedNote": "यह प्रविष्टि OmniRoute के बाहर जोड़ी गई थी (उदाहरण के लिए pi-gui के कस्टम एंडपॉइंट)। लगाओगे तो अपनाओगे; रीसेट केवल OmniRoute द्वारा लिखी गई प्रविष्टियों को हटाता है।",
     "whenToUseLabel": "कब उपयोग करें",
     "openToolDocs": "टूल दस्तावेज़ खोलें",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "अपडेट करें",
     "cliproxyapiUpdateAvailable": "अपडेट उपलब्ध: v{current} → v{latest}",
     "cliproxyapiVersion": "संस्करण",
+    "piInstallTitle": "पाई कोडिंग एजेंट स्थापित करें",
+    "piInstallInstructions": "Pi CLI इंस्टॉल करें, फिर इसे OmniRoute से कनेक्ट करने के लिए यहां लौटें।",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "पाई चलाने वाली मशीन से पहुंच योग्य URL उपयोग करें। OpenAI-संगत /v1 समापन बिंदु स्वचालित रूप से जोड़ा जाता है।",
+    "piManualMergeHint": "केवल पूर्वावलोकन करें. इस providers.omniroute प्रविष्टि को models.json में मर्ज करें ताकि आपके अन्य प्रदाता और सेटिंग्स बरकरार रहें।",
     "removeMapping": "मैपिंग हटाएँ"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "अक्षम",
       "dual": "दोहरा",
       "alias": "उपनाम",
-      "canonical": "कैनोनिकल"
+      "canonical": "कैनोनिकल",
+      "fail_closed": "ब्लॉक (fail_closed)",
+      "count_as_zero": "$0 के रूप में गिनें (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "संरक्षित-प्राथमिकता वाले इंफ्रा स्टॉप को 502 के रूप में दिखाएँ",
         "description": "जब केवल-कोटा-फ़ॉलबैक वाला प्राथमिकता लक्ष्य किसी ऐसे कारण से कॉम्बो को रोकता है जो प्रमाणित रूप से कोटा से संबंधित नहीं है—जैसे खुला प्रोवाइडर सर्किट ब्रेकर या पूर्वानुमानित विलंबता के कारण स्किप—तो 503 के बजाय 502 उत्तर दें।"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "बिना कीमत के उपयोग के लिए बजट नीति",
+        "description": "कैसे प्रति-कुंजी दैनिक/साप्ताहिक USD सीमाएँ उस सफल उपयोग को संभालती हैं जिसके प्रदाता/मॉडल के पास कोई मूल्य निर्धारण पंक्ति नहीं है। fail_closed (डिफ़ॉल्ट) विंडो को कोटा से अधिक माना जाता है, इसलिए अज्ञात लागत कभी भी हार्ड कैप पार नहीं कर सकती। count_as_zero उस उपयोग को $0 मानता है और मूल्य-निर्धारित खर्च को लागू रखना जारी रखता है। बिना कीमत वाले मॉडल किसी भी अवस्था में डैशबोर्ड होम पेज पर सूचीबद्ध होते हैं।"
       }
     }
   },

@@ -1925,7 +1925,14 @@
     "readinessStep3": "Skopírujte svoj koncový bod",
     "readinessStep4": "Odošlite testovaciu požiadavku",
     "readinessContinue": "Pokračovať v nastavení",
-    "readinessDismiss": "Zatiaľ zavrieť"
+    "readinessDismiss": "Zatiaľ zavrieť",
+    "unpricedUsageTitle": "{count, plural, one {# model} few {# modely} other {# modelov}} s nedávnym použitím, ale bez nakonfigurovanej ceny",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API kľúč s limitom používania} few {# API kľúče s limitom používania} other {# API kľúčov s limitom používania}} použili tieto modely za posledných 8 dní. Pokiaľ je toto použitie v rámci denného alebo týždenného okna kľúča, kľúč sa považuje za prekročený a jeho požiadavky sú zablokované (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Toto použitie sa započítava ako $0 do limitov používania na kľúč (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# požiadavka} few {# požiadavky} other {# požiadaviek}}, {keys, plural, one {# obmedzený kľúč} few {# obmedzené kľúče} other {# obmedzených kľúčov}}",
+    "unpricedUsageMore": "…a {count} ďalších",
+    "unpricedUsageConfigure": "Nastaviť ceny",
+    "unpricedUsageDismiss": "Zatvoriť"
   },
   "analytics": {
     "title": "Analytika",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Manuálna konfigurácia",
     "clineManualConfiguration": "Manuálna konfigurácia Cline",
     "kiloManualConfiguration": "Manuálna konfigurácia Kilo Code",
+    "piManualConfiguration": "Pi - Manuálna konfigurácia",
+    "piConfigInvalidTitle": "Pi models.json je nečitateľné",
+    "piOmnirouteConfigured": "OmniRoute je nakonfigurovaný ako vlastný poskytovateľ Pi",
+    "piModelHelp": "Pi automaticky neobjavuje modely pre vlastné koncové body — vybraný model je explicitne zapísaný do models.json.",
+    "piManualConfigTitle": "Alebo upravte ~/.pi/agent/models.json ručne",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Potom spustite Pi a vyberte poskytovateľa omniroute. Nastavte PI_CODING_AGENT_DIR na presun celého adresára agenta.",
+    "piUnownedNote": "Tento záznam bol pridaný mimo OmniRoute (napr. vlastné koncové body pi-gui). Žiadosť ju prijme; Obnoviť odstráni iba záznamy napísané OmniRoute.",
     "whenToUseLabel": "Kedy použiť",
     "openToolDocs": "Otvorte dokumentáciu nástroja",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "Aktualizovať",
     "cliproxyapiUpdateAvailable": "Aktualizácia je k dispozícii: v{current} → v{latest}",
     "cliproxyapiVersion": "Verzia",
+    "piInstallTitle": "Nainštalujte Pi Coding Agent",
+    "piInstallInstructions": "Nainštalujte Pi CLI a potom sa sem vráťte a pripojte ho k OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Použite URL dosiahnuteľnú zo stroja s Pi. Koncový bod /v1 kompatibilný s OpenAI sa pridá automaticky.",
+    "piManualMergeHint": "Iba ukážka. Zlúčte tento záznam providers.omniroute do models.json, aby vaši ostatní poskytovatelia a nastavenia zostali nedotknuté.",
     "removeMapping": "Odstrániť mapovanie"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "Zakázané",
       "dual": "Duálny",
       "alias": "Alias",
-      "canonical": "Kanonický"
+      "canonical": "Kanonický",
+      "fail_closed": "Zablokovať (fail_closed)",
+      "count_as_zero": "Počítať ako $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Infraštruktúrne zastavenia s chránenou prioritou ako 502",
         "description": "Odpovedať kódom 502 namiesto 503, keď prioritný cieľ so záložnou možnosťou iba pri vyčerpaní kvóty zastaví kombináciu z dôvodu, ktorý preukázateľne nesúvisí s kvótou: otvorený istič poskytovateľa alebo prediktívne preskočenie z dôvodu latencie."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika rozpočtu pre použitie bez ceny",
+        "description": "Ako denné/týždenné USD limity na kľúč zaobchádzajú s úspešným použitím, ktorého poskytovateľ/model nemá položku ceny. fail_closed (predvolené) označí okno za prekročené, takže neznáma cena nikdy nemôže obísť tvrdý limit. count_as_zero započítava takéto použitie ako $0 a naďalej vynucuje výdavky na modely s nastavenou cenou. Modely bez ceny sú v každom prípade uvedené na domovskej stránke panela."
       }
     }
   },

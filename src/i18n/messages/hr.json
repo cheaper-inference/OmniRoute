@@ -1925,7 +1925,14 @@
     "readinessStep3": "Kopirajte svoju krajnju točku",
     "readinessStep4": "Pošaljite testni zahtjev",
     "readinessContinue": "Nastavite s postavljanjem",
-    "readinessDismiss": "Odbacite za sada"
+    "readinessDismiss": "Odbacite za sada",
+    "unpricedUsageTitle": "{count, plural, one {# model} other {# modela}} s nedavnom upotrebom, ali bez konfigurirane cijene",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API ključ s ograničenjem upotrebe} other {# API ključevi s ograničenjem upotrebe}} koristili su ove modele u posljednjih 8 dana. Dok je ta upotreba unutar dnevnog ili tjednog prozora ključa, ključ se smatra prekoračenim i njegovi se zahtjevi blokiraju (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Ova upotreba računa se kao $0 prema ograničenjima upotrebe po ključu (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# zahtjev} other {# zahtjeva}}, {keys, plural, one {# ograničeni ključ} other {# ograničenih ključeva}}",
+    "unpricedUsageMore": "…i još {count}",
+    "unpricedUsageConfigure": "Konfiguriraj cijene",
+    "unpricedUsageDismiss": "Zatvori"
   },
   "analytics": {
     "title": "Analitika",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Ručna konfiguracija",
     "clineManualConfiguration": "Ručna konfiguracija Clinea",
     "kiloManualConfiguration": "Ručna konfiguracija Kilo Codea",
+    "piManualConfiguration": "Pi - Ručna konfiguracija",
+    "piConfigInvalidTitle": "Pi models.json je nečitljiv",
+    "piOmnirouteConfigured": "OmniRoute je konfiguriran kao Pi prilagođeni pružatelj usluga",
+    "piModelHelp": "Pi ne otkriva automatski modele za prilagođene krajnje točke — model koji odaberete je izričito zapisan u models.json.",
+    "piManualConfigTitle": "Ili uredite ~/.pi/agent/models.json ručno",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Zatim pokrenite Pi i odaberite omniroute providera. Postavite PI_CODING_AGENT_DIR da premjesti cijeli imenik agenta.",
+    "piUnownedNote": "Ovaj unos je dodan izvan OmniRoute (npr. prilagođene krajnje točke pi-guija). Primjena će ga usvojiti; Reset samo uklanja unose koje je OmniRoute napisao.",
     "whenToUseLabel": "Kada koristiti",
     "openToolDocs": "Otvori dokumentaciju alata",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "Ažuriraj",
     "cliproxyapiUpdateAvailable": "Dostupno ažuriranje: v{current} → v{latest}",
     "cliproxyapiVersion": "Verzija",
+    "piInstallTitle": "Instalirajte Pi Coding Agent",
+    "piInstallInstructions": "Instalirajte Pi CLI, a zatim se vratite ovdje da biste ga povezali sa OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Upotrijebite URL dostupan sa stroja koji pokreće Pi. OpenAI-kompatibilna /v1 krajnja točka dodaje se automatski.",
+    "piManualMergeHint": "Samo pregled. Spojite ovaj unos providers.omniroute u models.json kako bi ostali vaši pružatelji usluga i postavke ostali netaknuti.",
     "removeMapping": "Ukloni mapiranje"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "Onemogućeno",
       "dual": "Dvostruki",
       "alias": "Pseudonim",
-      "canonical": "Kanonski"
+      "canonical": "Kanonski",
+      "fail_closed": "Blokiraj (fail_closed)",
+      "count_as_zero": "Računaj kao $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Infrastrukturna zaustavljanja zaštićenog prioriteta kao 502",
         "description": "Odgovori kodom 502 umjesto 503 kada prioritetno odredište s pričuvnim rješenjem samo za kvotu zaustavi kombinaciju zbog uzroka koji dokazivo nije kvota: otvorenog prekidača strujnog kruga davatelja usluge ili prediktivnog preskakanja zbog latencije."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika budžeta za neprocijenjenu upotrebu",
+        "description": "Kako dnevna/tjedna USD ograničenja po ključu tretiraju uspješne upotrebe čiji pružatelj/model nema redak s cijenom. fail_closed (zadano) označava prozor kao prekoračen, tako da nepoznati trošak nikad ne može zaobići strogi limit. count_as_zero računa tu upotrebu kao $0 i nastavlja primjenjivati ograničenja na potrošnju s konfiguriranom cijenom. Neprocijenjeni modeli su ionako navedeni na početnoj stranici nadzorne ploče."
       }
     }
   },

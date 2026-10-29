@@ -1925,7 +1925,14 @@
     "readinessStep3": "Endpunkt kopieren",
     "readinessStep4": "Testanfrage senden",
     "readinessContinue": "Einrichtung fortsetzen",
-    "readinessDismiss": "Vorerst ausblenden"
+    "readinessDismiss": "Vorerst ausblenden",
+    "unpricedUsageTitle": "{count, plural, one {# Modell} other {# Modelle}} mit kürzlicher Nutzung, aber ohne konfigurierten Preis",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-Schlüssel mit Nutzungsbeschränkung hat diese Modelle in den letzten 8 Tagen verwendet. Während diese Nutzung im täglichen oder wöchentlichen Fenster des Schlüssels liegt, wird der Schlüssel als über dem Kontingent liegend behandelt und seine Anfragen werden blockiert (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).} other {# API-Schlüssel mit Nutzungsbeschränkung haben diese Modelle in den letzten 8 Tagen verwendet. Während diese Nutzung im täglichen oder wöchentlichen Fenster des Schlüssels liegt, wird der Schlüssel als über dem Kontingent liegend behandelt und seine Anfragen werden blockiert (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).}}",
+    "unpricedUsageCountAsZero": "Diese Nutzung wird für die pro-Schlüssel-Nutzungsgrenzen mit $0 angerechnet (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# Anfrage} other {# Anfragen}}, {keys, plural, one {# begrenzter Schlüssel} other {# begrenzte Schlüssel}}",
+    "unpricedUsageMore": "…und {count} weitere",
+    "unpricedUsageConfigure": "Preise konfigurieren",
+    "unpricedUsageDismiss": "Schließen"
   },
   "analytics": {
     "title": "Analytik",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw – Manuelle Konfiguration",
     "clineManualConfiguration": "Manuelle Cline-Konfiguration",
     "kiloManualConfiguration": "Manuelle Konfiguration des Kilo-Codes",
+    "piManualConfiguration": "Pi – Manuelle Konfiguration",
+    "piConfigInvalidTitle": "Pi models.json ist unlesbar",
+    "piOmnirouteConfigured": "OmniRoute ist als benutzerdefinierter Pi-Anbieter konfiguriert",
+    "piModelHelp": "Pi erkennt Modelle für benutzerdefinierte Endpunkte nicht automatisch — das von Ihnen ausgewählte Modell explizit in models.json geschrieben wird.",
+    "piManualConfigTitle": "Oder bearbeiten Sie ~/.pi/agent/models.json manuell",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Starten Sie dann Pi und wählen Sie den omniroute Anbieter aus. Stellen Sie PI_CODING_AGENT_DIR so ein, dass das gesamte Agentenverzeichnis verschoben wird.",
+    "piUnownedNote": "Dieser Eintrag wurde außerhalb von OmniRoute hinzugefügt (z. B. benutzerdefinierte Endpunkte von pi-gui). Wer sich bewirbt, wird es übernehmen; Beim Zurücksetzen werden nur Einträge entfernt, OmniRoute geschrieben hat.",
     "whenToUseLabel": "Wann zu verwenden",
     "openToolDocs": "Tool-Dokumente öffnen",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "Aktualisieren",
     "cliproxyapiUpdateAvailable": "Update verfügbar: v{current} → v{latest}",
     "cliproxyapiVersion": "Version",
+    "piInstallTitle": "Installieren Sie den Pi Coding Agent",
+    "piInstallInstructions": "Installieren Sie den Pi CLI und kehren Sie dann hierher zurück, um ihn mit OmniRoute zu verbinden.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Verwenden Sie den URL der von der Maschine aus erreichbar ist, auf der Pi ausgeführt wird. Der OpenAI-kompatible /v1-Endpunkt wird automatisch hinzugefügt.",
+    "piManualMergeHint": "Nur Vorschau. Führen Sie diesen providers.omniroute Eintrag in models.json zusammen, damit Ihre anderen Anbieter und Einstellungen erhalten bleiben.",
     "removeMapping": "Zuordnung entfernen"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "Deaktiviert",
       "dual": "Dual",
       "alias": "Alias",
-      "canonical": "Kanonisch"
+      "canonical": "Kanonisch",
+      "fail_closed": "Blockieren (fail_closed)",
+      "count_as_zero": "Als $0 anrechnen (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Infrastrukturbedingte Stopps mit geschützter Priorität als 502",
         "description": "Mit 502 statt 503 antworten, wenn ein Prioritätsziel mit ausschließlich kontingentbedingtem Fallback die Combo aus einem nachweislich nicht kontingentbedingten Grund stoppt: ein offener Circuit Breaker des Anbieters oder ein prädiktives Überspringen aufgrund der Latenz."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Richtlinie für nicht bepreiste Nutzung",
+        "description": "Wie sich USD-Limits pro Schlüssel (täglich/wöchentlich) gegenüber erfolgreicher Nutzung verhalten, deren Anbieter/Modell keine Preiszeile hat. fail_closed (Standard) markiert das Fenster als überschritten, sodass ein unbekannter Kostenpunkt niemals an einer festen Obergrenze vorbeigelangen kann. count_as_zero wertet diese Nutzung als $0 und setzt die Durchsetzung der bepreisten Ausgaben fort. Unpreisige Modelle werden in jedem Fall auf der Dashboard-Startseite aufgeführt."
       }
     }
   },

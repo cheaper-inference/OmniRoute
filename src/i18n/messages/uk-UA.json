@@ -1925,7 +1925,14 @@
     "readinessStep3": "Скопіюйте свою кінцеву точку",
     "readinessStep4": "Надішліть тестовий запит",
     "readinessContinue": "Продовжити налаштування",
-    "readinessDismiss": "Поки що закрити"
+    "readinessDismiss": "Поки що закрити",
+    "unpricedUsageTitle": "{count, plural, one {# модель} few {# моделі} many {# моделей} other {# моделей}} з нещодавнім використанням, але без налаштованої ціни",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-ключ із лімітом використання} few {# API-ключі із лімітом використання} many {# API-ключів із лімітом використання} other {# API-ключів із лімітом використання}} використовували ці моделі за останні 8 днів. Якщо це використання припадає на добове або тижневе вікно ключа, ключ вважається таким, що перевищив квоту, і його запити блокуються (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Це використання зараховується як $0 до лімітів використання по ключу (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# запит} few {# запити} many {# запитів} other {# запитів}}, {keys, plural, one {# ключ із лімітом} few {# ключі із лімітом} many {# ключів із лімітом} other {# ключів із лімітом}}",
+    "unpricedUsageMore": "…та ще {count}",
+    "unpricedUsageConfigure": "Налаштувати ціни",
+    "unpricedUsageDismiss": "Закрити"
   },
   "analytics": {
     "title": "Аналітика",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - налаштування вручну",
     "clineManualConfiguration": "Ручне налаштування Cline",
     "kiloManualConfiguration": "Налаштування коду кіло вручну",
+    "piManualConfiguration": "Pi - ручна конфігурація",
+    "piConfigInvalidTitle": "Pi models.json не читається",
+    "piOmnirouteConfigured": "OmniRoute налаштовано як власний постачальник Pi",
+    "piModelHelp": "Pi не виявляє автоматично моделі для користувацьких кінцевих точок — вибрана вами модель записується в models.json явно.",
+    "piManualConfigTitle": "Або відредагуйте ~/.pi/agent/models.json вручну",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Потім запустіть Pi і виберіть постачальника omniroute. Налаштуйте PI_CODING_AGENT_DIR для переміщення всього каталогу агента.",
+    "piUnownedNote": "Цей запис було додано поза OmniRoute (наприклад, призначені для користувача кінцеві точки pi-gui). Заявка прийме його; Скидання видаляє лише записи, написані OmniRoute.",
     "whenToUseLabel": "Коли використовувати",
     "openToolDocs": "Відкрийте документацію інструмента",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "Оновити",
     "cliproxyapiUpdateAvailable": "Доступне оновлення: v{current} → v{latest}",
     "cliproxyapiVersion": "Версія",
+    "piInstallTitle": "Встановіть Pi Coding Agent",
+    "piInstallInstructions": "Встановіть Pi CLI, потім поверніться сюди, щоб підключити його до OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Використовуйте URL доступний з машини, на якій працює Pi. Кінцева точка /v1, сумісна з OpenAI, додається автоматично.",
+    "piManualMergeHint": "Тільки попередній перегляд. Об’єднайте цей запис providers.omniroute у models.json, щоб ваші інші постачальники та налаштування залишилися без змін.",
     "removeMapping": "Видалити зіставлення"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "Вимкнено",
       "dual": "Подвійний",
       "alias": "Псевдонім",
-      "canonical": "Канонічний"
+      "canonical": "Канонічний",
+      "fail_closed": "Блокувати (fail_closed)",
+      "count_as_zero": "Зарахувати як $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Зупинки інфраструктури із захищеним пріоритетом як 502",
         "description": "Повертати відповідь 502 замість 503, коли пріоритетна ціль із резервним перемиканням лише в разі вичерпання квоти зупиняє комбінацію з причини, яка доведено не пов’язана з квотою: розімкнений автоматичний вимикач провайдера або пропуск через прогнозовану затримку."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Політика бюджету для використання без ціни",
+        "description": "Як добові/тижневі ліміти в USD для кожного ключа трактують успішні виклики, провайдер/модель яких не має запису про ціноутворення. fail_closed (за замовчуванням) позначає вікно як перевищене, тому невідома вартість ніколи не може обійти жорсткий ліміт. count_as_zero зараховує таке використання як $0 і продовжує застосовувати платне витрачання. Непрайсовані моделі в будь‑якому разі відображаються на головній сторінці панелі."
       }
     }
   },

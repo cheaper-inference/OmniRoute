@@ -1925,7 +1925,14 @@
     "readinessStep3": "Ṣe àdàkọ endpoint rẹ",
     "readinessStep4": "Fi ìbéèrè ìdánwò ránṣẹ́",
     "readinessContinue": "Tẹ̀ síwájú pẹ̀lú ìṣètò",
-    "readinessDismiss": "Pa á tì fún ìsinsìnyí"
+    "readinessDismiss": "Pa á tì fún ìsinsìnyí",
+    "unpricedUsageTitle": "{count, plural, one {# módelì} other {# módelì}} pẹ̀lú ìlò tuntun ṣùgbọ́n kò sí ìye owó tí a ṣètò",
+    "unpricedUsageFailClosed": "{keys, plural, one {# bọtini API tó ní ìdínà ìlò} other {# bọtini API tí ó ní ìdínà ìlò}} lo àwọn módelì wọ̀nyí ní ọjọ́ mẹjọ tó kọjá. Nígbà tí ìlò yẹn wà nínú àkókò ọjọ́ tàbí àkókò ọ̀sẹ̀ ti bọtini, a ka bọtini náà sí ìjàmbá ju ìwọn lọ, a sì dina ìbéèrè rẹ̀ (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Ìlò yìí kà sí $0 sí ìwọn ìlò fún bọtini kọọkan (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# ìbéèrè} other {# ìbéèrè}}, {keys, plural, one {# bọtini tí ó ní ìdínà} other {# bọtini tí ó ní ìdínà}}",
+    "unpricedUsageMore": "… àti {count} míì",
+    "unpricedUsageConfigure": "Ṣètò ìye",
+    "unpricedUsageDismiss": "Fagilé"
   },
   "analytics": {
     "title": "Ìtúpalẹ̀",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Ìṣètò aláfọwọ́ṣe",
     "clineManualConfiguration": "Ìṣètò aláfọwọ́ṣe Cline",
     "kiloManualConfiguration": "Ìṣètò aláfọwọ́ṣe Kilo Code",
+    "piManualConfiguration": "Pi - Afowoyi iṣeto ni",
+    "piConfigInvalidTitle": "Pi models.json ko ṣee ka",
+    "piOmnirouteConfigured": "OmniRoute jẹ atunto bi olupese aṣa Pi kan",
+    "piModelHelp": "Pi ko ṣe iwari awọn awoṣe adaṣe fun awọn aaye ipari aṣa — awoṣe ti o mu ni a kọ sinu models.json ni gbangba.",
+    "piManualConfigTitle": "Tabi ṣatunkọ ~/.pi/agent/models.json pẹlu ọwọ",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Lẹhinna bẹrẹ Pi ko si yan olupese omniroute. Ṣeto PI_CODING_AGENT_DIR lati gbe gbogbo itọsọna aṣoju lọ.",
+    "piUnownedNote": "Ti fikun titẹsi yii ni ita OmniRoute (fun apẹẹrẹ awọn aaye ipari Aṣa pi-gui). Nbere yoo gba o; Tunto nikan yọ awọn titẹ sii OmniRoute kowe kuro.",
     "whenToUseLabel": "Ìgbà tí o yẹ kí o lò ó",
     "openToolDocs": "Ṣí àwọn ìwé ìtọ́sọ́nà irinṣẹ́",
     "toolUseCases": {
@@ -3281,6 +3296,12 @@
     "cliproxyapiUpdate": "Ṣe ìmúdójúìwọ̀n",
     "cliproxyapiUpdateAvailable": "Ìmúdójúìwọ̀n wà: v{current} → v{latest}",
     "cliproxyapiVersion": "Ẹ̀yà",
+    "piInstallTitle": "Fi Aṣoju Ifaminsi Pi sori ẹrọ",
+    "piInstallInstructions": "Fi Pi CLI sori ẹrọ, lẹhinna pada si ibi lati so pọ mọ OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Lo URL arọwọto lati ẹrọ nṣiṣẹ Pi. Oju opo opin /v1 ti OpenAI-ibaramu ti wa ni afikun laifọwọyi.",
+    "piManualMergeHint": "Awotẹlẹ nikan. Darapọ iwọle providers.omniroute yii sinu models.json nitoribẹẹ awọn olupese ati eto rẹ miiran wa ni mimule.",
     "removeMapping": "Yọ ìbáṣepọ̀ náà kúrò"
   },
   "modelCatalog": {
@@ -13838,7 +13859,9 @@
       "disabled": "Ti pa",
       "dual": "Méjèèjì",
       "alias": "Orúkọ àfirọ́pò",
-      "canonical": "Àṣẹ̀dá"
+      "canonical": "Àṣẹ̀dá",
+      "fail_closed": "Dínà (fail_closed)",
+      "count_as_zero": "Kà sí $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13985,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Àwọn Ìdádúró Amáyédẹrùn Tó Ní Ààyò Ààbò Gẹ́gẹ́ Bí 502",
         "description": "Dáhùn pẹ̀lú 502 dípò 503 nígbà tí ibi-àfojúsùn tó ní ààyò, tí ìfàsẹ́yìn rẹ̀ jẹ́ fún quota nìkan, bá dá combo dúró nítorí ohun tí a lè fi ẹ̀rí hàn pé kì í ṣe quota: provider circuit breaker tó ṣí tàbí fífo nítorí ìdádúró àsọtẹ́lẹ̀."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Ilana Isuna Ìlò Aláìníye",
+        "description": "Bá ìwọn USD ọjọ́/ọ̀sẹ̀ fún bọtini kọọkan ṣe tọju ìlò tí ó ṣeyebíye tí olupese/módelì rẹ̀ kò ní ìkọ̀ọ́kan ìye. fail_closed (aìyipada) máa samisi àkókò náà gẹ́gẹ́ bí ti kọjá, nítorí náà iye tí a kò mọ̀ kò ní lè kọjá ẹ̀dá àgbára ìdínà. count_as_zero kà ìlò yẹn sí $0 kí ó sì tẹ̀síwájú ní mímú ìnáwó tí a ti ṣètò. Àwọn módelì aláìníye wà ní àtòkọ lórí ojú-ìwé ilé dasibọ́ọdu ní gbogbo ọ̀nà."
       }
     }
   },
