@@ -226,3 +226,71 @@ test("convertOpenAIResponseToGemini: surfaces upstream error bodies untouched", 
   const body = (await out.json()) as { error: { code: number } };
   assert.equal(body.error.code, 429);
 });
+
+test("convertOpenAIResponseToGemini: maps cached and reasoning tokens to cachedContentTokenCount / thoughtsTokenCount", async () => {
+  const upstream = Response.json({
+    choices: [{ message: { role: "assistant", content: "Hi" }, finish_reason: "stop" }],
+    usage: {
+      prompt_tokens: 100,
+      completion_tokens: 20,
+      total_tokens: 120,
+      prompt_tokens_details: { cached_tokens: 64 },
+      completion_tokens_details: { reasoning_tokens: 8 },
+    },
+  });
+  const out = await convertOpenAIResponseToGemini(upstream, "fallback");
+  const body = (await out.json()) as { usageMetadata?: Record<string, number> };
+  assert.deepEqual(body.usageMetadata, {
+    promptTokenCount: 100,
+    candidatesTokenCount: 20,
+    totalTokenCount: 120,
+    thoughtsTokenCount: 8,
+    cachedContentTokenCount: 64,
+  });
+});
+
+const USAGE_WITH_DETAILS =
+  '{"prompt_tokens":10,"completion_tokens":5,"total_tokens":15,"prompt_tokens_details":{"cached_tokens":3},"completion_tokens_details":{"reasoning_tokens":2}}';
+
+test("transformOpenAISSEToGeminiSSE: forwards a trailing usage-only chunk (choices: []) as usageMetadata", async () => {
+  const upstream = makeOpenAISSEResponse([
+    'data: {"choices":[{"delta":{"content":"Hi"},"finish_reason":null}]}',
+    'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}',
+    `data: {"choices":[],"usage":${USAGE_WITH_DETAILS},"model":"gpt-x"}`,
+    "data: [DONE]",
+  ]);
+
+  const events = await readGeminiSSE(transformOpenAISSEToGeminiSSE(upstream, "fallback"));
+  const withUsage = events.filter((e) => e.usageMetadata);
+  assert.equal(withUsage.length, 1);
+  assert.deepEqual(withUsage[0].usageMetadata, {
+    promptTokenCount: 10,
+    candidatesTokenCount: 5,
+    totalTokenCount: 15,
+    thoughtsTokenCount: 2,
+    cachedContentTokenCount: 3,
+  });
+  assert.equal(withUsage[0].modelVersion, "gpt-x");
+  // The usage chunk is the last event the client sees.
+  assert.equal(events[events.length - 1], withUsage[0]);
+});
+
+test("transformOpenAISSEToGeminiSSE: usage on the finish chunk carries cachedContentTokenCount and is not duplicated by a later usage-only chunk", async () => {
+  const upstream = makeOpenAISSEResponse([
+    'data: {"choices":[{"delta":{"content":"Hi"},"finish_reason":null}]}',
+    `data: {"choices":[{"delta":{},"finish_reason":"stop"}],"usage":${USAGE_WITH_DETAILS}}`,
+    `data: {"choices":[],"usage":${USAGE_WITH_DETAILS}}`,
+    "data: [DONE]",
+  ]);
+
+  const events = await readGeminiSSE(transformOpenAISSEToGeminiSSE(upstream, "fallback"));
+  const withUsage = events.filter((e) => e.usageMetadata);
+  assert.equal(withUsage.length, 1);
+  assert.deepEqual(withUsage[0].usageMetadata, {
+    promptTokenCount: 10,
+    candidatesTokenCount: 5,
+    totalTokenCount: 15,
+    thoughtsTokenCount: 2,
+    cachedContentTokenCount: 3,
+  });
+});

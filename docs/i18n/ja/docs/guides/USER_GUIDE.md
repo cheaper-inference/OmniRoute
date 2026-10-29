@@ -608,113 +608,133 @@ post_install() {
 ## 📊 利用可能なモデル
 
 <details>
-<summary><b>利用可能なすべてのモデルを表示</b></summary>
+<summary><b>利用可能な全モデルを表示</b></summary>
 
-> 以下の一覧は、v3.8.0 の `open-sse/config/providerRegistry.ts` から厳選されています。クラウドカタログ（Gemini、OpenRouter など）は動的に同期されます。最新の完全なカタログを確認するには、**ダッシュボード → プロバイダー → [provider] → 利用可能なモデル**を開くか、`GET /api/models/catalog` を呼び出してください。
+> 以下のリストは v3.8.0 時点の `open-sse/config/providerRegistry.ts` から厳選したものです。クラウドカタログ（Gemini、OpenRouter など）は動的に同期されます — 最新の完全なカタログは **Dashboard → Providers → [provider] → Available Models** を開くか、`GET /api/models/catalog` を呼び出してください。
 >
-> プロバイダーの組み込みリストが最新の状態と異なる場合は、そのページの **/models からインポート**を使用するか、**自動同期**を有効にして、最新のアップストリームカタログを取得してください。これは、LLM7.io（`gemini-3.1-flash-lite`）および UncloseAI（`solidrust/Hermes-3-Llama-3.1-8B-AWQ`）について v3.8.50 で検証済みです。同じテスト実施時点で、Pollinations の匿名アクセスには引き続きアップストリーム側の制限がありました。
+> プロバイダーの組み込みリストが古くなっている場合は、そのページの **Import from /models** を使用する（または **Auto-Sync** を有効にする）ことで、最新の上流カタログを取得できます。これは v3.8.50 で LLM7.io（`gemini-3.1-flash-lite`）および UncloseAI（`solidrust/Hermes-3-Llama-3.1-8B-AWQ`）について検証済みです。同じテスト工程で、Pollinations の匿名アクセスは上流側の制限により制約されたままでした。
 
-**Claude Code（`cc/`）** — Pro/Max OAuth：`cc/claude-opus-4-8`、`cc/claude-opus-4-7`、`cc/claude-opus-4-6`、`cc/claude-opus-4-5-20251101`、`cc/claude-sonnet-4-6`、`cc/claude-sonnet-4-5-20250929`、`cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`、`cc/claude-opus-4-7`、`cc/claude-opus-4-6`、`cc/claude-opus-4-5-20251101`、`cc/claude-sonnet-4-6`、`cc/claude-sonnet-4-5-20250929`、`cc/claude-haiku-4-5-20251001`
 
-**Codex（`cx/`）** — Plus/Pro OAuth：`cx/gpt-5.5`（+ 推論強度レベル：`gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`）、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5`（+ effort ティア: `gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`）、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot（`gh/`）** — OAuth：`gh/gpt-5.5`、`gh/gpt-5.4`、`gh/gpt-5.4-mini`、`gh/gpt-5-mini`、`gh/gpt-5.3-codex`、`gh/claude-opus-4.7`、`gh/claude-opus-4.6`、`gh/claude-opus-4-5-20251101`、`gh/claude-sonnet-4.6`、`gh/claude-sonnet-4.5`、`gh/claude-haiku-4.5`、`gh/gemini-3.1-pro-preview`、`gh/gemini-3-flash-preview`、`gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`、`gh/gpt-5.4`、`gh/gpt-5.4-mini`、`gh/gpt-5-mini`、`gh/gpt-5.3-codex`、`gh/claude-opus-4.7`、`gh/claude-opus-4.6`、`gh/claude-opus-4-5-20251101`、`gh/claude-sonnet-4.6`、`gh/claude-sonnet-4.5`、`gh/claude-haiku-4.5`、`gh/gemini-3.1-pro-preview`、`gh/gemini-3-flash-preview`、`gh/oswe-vscode-prime`
 
-**Kiro（`kr/`）** — 無料 OAuth：**ダッシュボード → プロバイダー → Kiro → 利用可能なモデル**に表示されるライブカタログを使用してください。利用可否はアカウントとプランによって異なります。
+**Kiro (`kr/`)** — 無料 OAuth: **Dashboard → Providers → Kiro → Available Models** に表示される最新カタログを使用してください。利用可能なモデルはアカウントとプランによって異なります。
 
-**Qoder（`if/`）** — 無料 OAuth：`if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
+**Qoder (`if/`)** — 無料 OAuth: `if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
 
-**GLM（`glm/`、`glm-cn/`、`zai/`、`glmt/`）** — $0.2～0.6/1M：`glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
+**GLM (`glm/`、`glm-cn/`、`zai/`、`glmt/`)** — $0.2〜0.6/1M: `glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
 
-**MiniMax（`minimax/`、`minimax-cn/`）** — $0.2/1M：`minimax/MiniMax-M2.7`、`minimax/MiniMax-M2.7-highspeed`、`minimax/MiniMax-M2.5`、`minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`、`minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`、`minimax/MiniMax-M2.7-highspeed`、`minimax/MiniMax-M2.5`、`minimax/MiniMax-M2.5-highspeed`
 
-**Kimi（`kimi/`、`kimi-coding/`、`kimi-coding-apikey/`）** — 月額 $9 の定額制または従量課金：`kimi/kimi-k2.6`、`kimi/kimi-k2.5`
+**Kimi (`kimi/`、`kimi-coding/`、`kimi-coding-apikey/`)** — 月額 $9 定額または従量課金: `kimi/kimi-k2.6`、`kimi/kimi-k2.5`
 
-**DeepSeek（`ds/`）** — API キー：`ds/deepseek-v4-pro`、`ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API キー: `ds/deepseek-v4-pro`、`ds/deepseek-v4-flash`
 
-**Groq（`groq/`）** — 超高速：`groq/llama-3.3-70b-versatile`、`groq/meta-llama/llama-4-maverick-17b-128e-instruct`、`groq/qwen/qwen3-32b`、`groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — 超高速: `groq/llama-3.3-70b-versatile`、`groq/meta-llama/llama-4-maverick-17b-128e-instruct`、`groq/qwen/qwen3-32b`、`groq/openai/gpt-oss-120b`
 
-**xAI（`xai/`）** — Grok ネイティブ：`xai/grok-4.3`、`xai/grok-4.20-multi-agent-0309`、`xai/grok-4.20-0309-reasoning`、`xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok ネイティブ: `xai/grok-4.3`、`xai/grok-4.20-multi-agent-0309`、`xai/grok-4.20-0309-reasoning`、`xai/grok-4.20-0309-non-reasoning`
 
-**Mistral（`mistral/`）** — EU 内ホスティング：`mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/devstral-latest`、`mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU ホスティング: `mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/devstral-latest`、`mistral/codestral-latest`
 
-**Perplexity（`pplx/`）** — 検索拡張：`pplx/sonar-deep-research`、`pplx/sonar-reasoning-pro`、`pplx/sonar-pro`、`pplx/sonar`
+**Perplexity (`pplx/`)** — 検索拡張: `pplx/sonar-deep-research`、`pplx/sonar-reasoning-pro`、`pplx/sonar-pro`、`pplx/sonar`
 
-**Together AI（`together/`）** — オープンソース：`together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free`（無料）、`together/meta-llama/Llama-Vision-Free`、`together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`、`together/deepseek-ai/DeepSeek-R1`、`together/Qwen/Qwen3-235B-A22B`、`together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — オープンソース: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free`（無料）、`together/meta-llama/Llama-Vision-Free`、`together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`、`together/deepseek-ai/DeepSeek-R1`、`together/Qwen/Qwen3-235B-A22B`、`together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI（`fireworks/`）** — 高速推論：`fireworks/accounts/fireworks/models/kimi-k2p6`、`fireworks/accounts/fireworks/models/minimax-m2p7`、`fireworks/accounts/fireworks/models/qwen3p6-plus`、`fireworks/accounts/fireworks/models/glm-5p1`、`fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — 高速推論: `fireworks/accounts/fireworks/models/kimi-k2p6`、`fireworks/accounts/fireworks/models/minimax-m2p7`、`fireworks/accounts/fireworks/models/qwen3p6-plus`、`fireworks/accounts/fireworks/models/glm-5p1`、`fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras（`cerebras/`）** — ウェハースケール：`cerebras/zai-glm-4.7`、`cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — ウェハースケール: `cerebras/zai-glm-4.7`、`cerebras/gpt-oss-120b`
 
-**Cohere（`cohere/`）** — RAG 重視：`cohere/command-a-reasoning-08-2025`、`cohere/command-a-vision-07-2025`、`cohere/command-a-03-2025`、`cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG 特化: `cohere/command-a-reasoning-08-2025`、`cohere/command-a-vision-07-2025`、`cohere/command-a-03-2025`、`cohere/command-r-08-2024`
 
-**NVIDIA NIM（`nvidia/`）** — エンタープライズ：`nvidia/z-ai/glm-5.1`、`nvidia/minimaxai/minimax-m2.7`、`nvidia/google/gemma-4-31b-it`、`nvidia/mistralai/mistral-small-4-119b-2603`、`nvidia/mistralai/mistral-large-3-675b-instruct-2512`、`nvidia/qwen/qwen3.5-397b-a17b`、`nvidia/deepseek-ai/deepseek-v4-pro`、`nvidia/openai/gpt-oss-120b`、`nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — エンタープライズ: `nvidia/z-ai/glm-5.1`、`nvidia/minimaxai/minimax-m2.7`、`nvidia/google/gemma-4-31b-it`、`nvidia/mistralai/mistral-small-4-119b-2603`、`nvidia/mistralai/mistral-large-3-675b-instruct-2512`、`nvidia/qwen/qwen3.5-397b-a17b`、`nvidia/deepseek-ai/deepseek-v4-pro`、`nvidia/openai/gpt-oss-120b`、`nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
-**Baidu Qianfan（`qianfan/`）** — ERNIE：`qianfan/ernie-5.1`、`qianfan/ernie-5.0-thinking-latest`、`qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`、`qianfan/ernie-5.0-thinking-latest`、`qianfan/ernie-x1.1`
 
-**Ollama Cloud（`ollama-cloud/`）**：`ollama-cloud/deepseek-v4-pro`、`ollama-cloud/deepseek-v4-flash`、`ollama-cloud/kimi-k2.6`、`ollama-cloud/glm-5.1`、`ollama-cloud/minimax-m2.7`、`ollama-cloud/gemma4:31b`、`ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`、`ollama-cloud/deepseek-v4-flash`、`ollama-cloud/kimi-k2.6`、`ollama-cloud/glm-5.1`、`ollama-cloud/minimax-m2.7`、`ollama-cloud/gemma4:31b`、`ollama-cloud/qwen3.5:397b`
 
-**Gemini（Google Cloud `gemini/`）**：Google から API キーごとにライブ同期されるため、静的リストはありません。**ダッシュボード → プロバイダー**でキーを接続し、**利用可能なモデル**を使用して現在のカタログをインポートしてください（例：`gemini/gemini-3-pro`、`gemini/gemini-3-flash`）。
+**Gemini (Google Cloud `gemini/`)**: API キーごとに Google からリアルタイムで同期されます — 静的なリストはありません。**Dashboard → Providers** でキーを接続し、**Available Models** を使って最新のカタログをインポートしてください（例: `gemini/gemini-3-pro`、`gemini/gemini-3-flash`）。
 
-**その他の互換プロバイダー**（一部）：`cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`（`aws-bedrock` 経由）、`azure-ai`、`openrouter`（パススルーカタログ）、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。各プロバイダーは `providerRegistry.ts` 内で独自のモデルリストを管理しており、プロバイダーが `/models` エンドポイントを公開している場合は自動同期できます。
+**その他の互換プロバイダー**（抜粋）: `cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`（`aws-bedrock` 経由）、`azure-ai`、`openrouter`（パススルーカタログ）、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。各プロバイダーは `providerRegistry.ts` 内で独自のモデルリストを管理しており、プロバイダーが `/models` エンドポイントを公開している場合は自動同期が可能です。
 
-**モデル ID に関する注意：** OmniRoute はプロバイダーネイティブの ID（`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`）を使用します。一部の ID にドット区切りのバージョンが含まれているのは、アップストリーム API がその形式を要求しているためです。モデルが上記に記載されていない場合は、`omniroute models --search <term>` を実行するか、`GET /api/models/catalog` にアクセスして利用可否を確認してください。
+**モデル ID に関する注意:** OmniRoute はプロバイダーネイティブの ID（`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`）を使用します。一部の ID にドット区切りのバージョンが含まれているのは、上流の API がその形式を要求するためです。上記に記載されていないモデルがある場合は、`omniroute models --search <term>` を実行するか、`GET /api/models/catalog` にアクセスして利用可否を確認してください。
 
 </details>
 
 ---
 
-## 🧩 高度な機能
+## 🧩高度な機能
 
 ### カスタムモデル
 
-アプリのアップデートを待たずに、任意のプロバイダーへ任意のモデル ID を追加できます。
+アプリの更新を待たずに、任意のモデルID任意のプロバイダーに追加します。
 
 ```bash
-# API 経由
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# 一覧表示: curl http://localhost:20128/api/provider-models?provider=openai
-# 削除: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-または、ダッシュボードの **Providers → [Provider] → Custom Models** を使用します。
+または、ダッシュボードを使用します。**プロバイダー→ [プロバイダー] →カスタム モデル**。
 
 注:
 
-- OpenRouter および OpenAI/Anthropic 互換プロバイダーは、**Available Models** からのみ管理します。手動追加、インポート、自動同期の結果はすべて同じ利用可能モデル一覧に追加されるため、これらのプロバイダーには独立した Custom Models セクションはありません。
-- **Custom Models** セクションは、管理された利用可能モデルのインポート機能を公開していないプロバイダーを対象としています。
+- OpenRouterおよびOpenAI/Anthropic-compatibleプロバイダーはから管理されます**利用可能なモデル**のみ。手動による追加、インポート、および自動同期はすべて同じ利用可能なモデルのリストに含まれるため、これらのプロバイダー用の個別のカスタム モデル セクションはありません。
+- の**カスタムモデル**このセクションは、管理された利用可能なモデルのインポートを公開しないプロバイダーを対象としています。
 
 ### カスタム OpenAI 互換プロバイダー
 
-OpenAI API に対応する任意のゲートウェイ（セルフホスト型プロキシ、vLLM、サードパーティー製アグリゲーター）を、独立したプロバイダーノードとして追加できます。
+OpenAI API (セルフホステッド プロキシ、vLLM、サードパーティ アグリゲータ) を話すゲートウェイは、独自のプロバイダー ノードとして追加できます。
 
-1. **Providers → Add OpenAI Compatible**。
-2. **Name**: ノードの表示ラベル。
-3. **Prefix**: ルーティング名。クライアントは `<prefix>/<model>` の形式でモデルを呼び出すため、プレフィックスが `mygw` のノードは `mygw/gpt-4o-mini` を提供します。必須です。文字制限はありません。
-4. **API Type**: ゲートウェイが提供するエンドポイントの種類（Chat Completions、Responses、Embeddings、音声、画像）。
-5. **Base URL**: `/v1` までを含む API ルート（例: `https://gateway.example.com/v1`）であり、完全な `/chat/completions` パスではありません。標準以外のパスを使用するゲートウェイでは、**Advanced Settings**（チャットパス、モデルパス）で設定します。
-6. **API Key (for Check)** フィールドは、接続テストにのみ使用されます。ノードを作成した後、そのノードを開き、**Add Connection** を使用して、リクエストで使用するキーを保存します。
+1. **プロバイダー→追加OpenAI互換**。
+2. **名前**: ノードの表示ラベル。
+3. **プレフィックス**: ルーティング名。クライアントはモデルを`<prefix>/<model>`として呼び出すため、プレフィックス`mygw`を持つノードは`mygw/gpt-4o-mini`を提供します。必須;文字制限はありません。
+4. **APIタイプ**: ゲートウェイがサービスを提供するエンドポイント ファミリ (チャット完了、応答、埋め込み、音声、画像)。
+5. **ベースURL** : 完全な`/chat/completions`パスではなく、 `/v1`までのAPIルート (たとえば`https://gateway.example.com/v1`)。非標準パスを持つゲートウェイは以下に設定します**詳細設定**(チャット パス、モデル パス)。
+6. の**APIキー（チェック用）**フィールドは接続のみをテストします。ノードを作成したら、それを開いて使用します**接続の追加**リクエストが使用するキーを保存します。
 
-ノードには `openai-compatible-<apiType>-<uuid>` 形式の内部 ID が割り当てられます。この ID を入力する必要はなく、プレフィックスが公開名になります。
+ノードは`openai-compatible-<apiType>-<uuid>`形式の内部 ID を取得します。プレフィックスはパブリック名です。入力する必要はありません。
 
 #### 予約済みプレフィックス
 
-プレフィックスには、組み込みプロバイダーの ID またはエイリアス（例: `openai`、`cf`）や、廃止されたプロバイダーの ID は使用できません。モデルリゾルバーはカスタムノードより先に組み込みの ID とエイリアスを確認するため、それらのプレフィックスを使用したノードがトラフィックを受信することはありません。`<prefix>/model` は代わりに組み込みプロバイダーへ送信されるか、そのプロバイダーが廃止されている場合はフェイルクローズします。このようなプレフィックスを使用してノードを作成または編集しようとすると、次のエラーで拒否されます。
+プレフィックスには、組み込みプロバイダーの ID やエイリアス (たとえば`openai`、 `cf`)、または廃止されたプロバイダーの ID を使用することはできません。モデル リゾルバーはカスタム ノードの前に組み込み ID とエイリアスをチェックするため、これらのプレフィックスのいずれかを使用するノードはトラフィックを受信しません。zqc `<prefix>/model`代わりに組み込みプロバイダーにアクセスするか、そのプロバイダーが廃止された場合はフェールクローズされます。このようなプレフィックスを持つノードの作成または編集は、次のように拒否されます。
 
 ```text
-prefix: "<prefix>" は予約済みのプロバイダープレフィックスです — 別のプレフィックスを選択してください（予約済みの ID/エイリアスはカスタムノードには使用できません。これは、<prefix>/model のようなリクエストが組み込みプロバイダーへルーティングされるか、そのプロバイダーが廃止されている場合にフェイルクローズするためです）
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-重複しないプレフィックス（`mygw`、`acme-proxy`）を選択してください。カスタムノードへのリクエストが、組み込みプロバイダーまたはその認証情報を示すエラーで失敗する場合は、ノードのプレフィックスが予約済みでないか確認してください。このルールが導入される前に保存されたノードは引き続き保存されていますが、そのプレフィックスは組み込みプロバイダーへルーティングされます。ノードを編集し、新しいプレフィックスを設定してください。
+個別のプレフィックス (`mygw`、 `acme-proxy`) を選択します。カスタム ノードへのリクエストが、組み込みプロバイダーまたはその資格情報を指定するエラーで失敗した場合は、ノードのプレフィックスが予約されているかどうかを確認してください。このルールが存在する前に保存されたノードは引き続き保存されますが、そのプレフィックスは組み込みプロバイダーにルーティングされます。ノードを編集し、新しいプレフィックスを付けます。
 
-### OmniRoute ピアのチェーン化
+#### 接続ごとのゲートウェイ オプション
 
-別の OmniRoute ゲートウェイを **Custom OpenAI-compatible** プロバイダーとして追加できます。そのピアの `/v1` ベース URL と、ピアによって発行された専用の最小権限 API キーを使用してください。
+これらのキーは接続の`providerSpecificData`に入力されます (たとえば、 `PUT /api/providers/{id}`経由)。
 
-相互チェーンまたはマルチホップチェーンの場合は、すべてのゲートウェイでオプトイン方式のループガードを有効にします。
+- `toolNameMaxLength` (整数、1 ～ 1024) — ゲートウェイが長いツール名を拒否するOpenAIチャット形式と互換性のある接続用。長い名前は短いエイリアスとして送信され、応答で復元されます。
+- `quotaEndpoint` — ゲートウェイのquota/creditsエンドポイント。ダッシュボード クォータ ストリップおよびクォータ対応ルーティング用に読み取ります。 OpenAI と Anthropic 互換の接続の両方で動作します。完全な形状は`open-sse/services/usage/openaiCompatible.ts`に文書化されています。
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### OmniRouteピアのチェーン化
+
+別のOmniRouteゲートウェイを**カスタムOpenAI互換**プロバイダー。ピアの`/v1`ベースURLと、そのピアによって発行された専用の最小特権APIキーを使用します。
+
+相互チェーンまたはマルチホップ チェーンの場合、すべてのゲートウェイでオプトイン ループ ガードを有効にします。
 
 ```bash
 # gateway-a
@@ -730,13 +750,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-明示的に許可リストへ登録されたピア URL に送信されるリクエストにのみ、`X-OmniRoute-Peer-Trace` ヘッダーが付与されます。ゲートウェイは、インスタンス ID の重複またはホップ上限の超過を検出すると、HTTP `508 Loop Detected` で拒否します。通常のアップストリームプロバイダーにはピアメタデータは送信されません。
+明示的にホワイトリストに登録されたピアURLに送信されたリクエストのみが`X-OmniRoute-Peer-Trace`ヘッダーを受け取ります。ゲートウェイは、繰り返されるインスタンスIDまたはホップ バジェットを使い果たした場合、 HTTP `508 Loop Detected`を拒否します。通常の上流プロバイダーはピアのメタデータを受け取りません。
 
-ピアチェーンは、データベースのレプリケーションやホストのフェイルオーバーではありません。各ゲートウェイは、独立した SQLite の状態、キャッシュ、レートカウンター、セッションを保持します。アクティブ／パッシブまたはアクティブ／アクティブ構成で可用性を確保するには、ヘルスチェック対応のリバースプロキシまたはクライアント側フェイルオーバーを使用してください。また、1 つの SQLite データベースを、実行中の複数の OmniRoute インスタンスへマウントしないでください。
+ピア チェーンはデータベース レプリケーションやホスト フェイルオーバーではありません。各ゲートウェイは、独立したSQLite状態、キャッシュ、レート カウンタ、およびセッションを保持します。 active/passiveまたはactive/active可用性を確保するには、ヘルスチェック済みのリバース プロキシまたはクライアント フェイルオーバーを使用し、1 つのSQLiteデータベースを複数の実行中のOmniRouteインスタンスにマウントしないでください。
 
-### プロバイダー専用ルート
+### 専用プロバイダールート
 
-モデル検証を行いながら、リクエストを特定のプロバイダーへ直接ルーティングします。
+モデル検証を使用してリクエストを特定のプロバイダーに直接ルーティングします。
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -744,140 +764,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-プロバイダーのプレフィックスがない場合は、自動的に追加されます。モデルが一致しない場合は `400` が返されます。
+プロバイダーのプレフィックスが存在しない場合は、自動的に追加されます。不一致のモデルは`400`を返します。
 
-### ネットワークプロキシの設定
+### ネットワークプロキシ構成
 
 ```bash
-# グローバルプロキシを設定
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# プロバイダーごとのプロキシ
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# プロキシをテスト
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**優先順位:** キー固有 → コンボ固有 → プロバイダー固有 → グローバル → 環境。
+**優先順位:**キー固有の→コンボ固有の→プロバイダー固有の→グローバル→環境。
 
-### モデルカタログ API
+### モデルカタログAPI
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-モデルをタイプ（`chat`、`embedding`、`image`）とともにプロバイダー別にグループ化して返します。
+タイプ (`chat`、 `embedding`、 `image`) を持つプロバイダーごとにグループ化されたモデルを返します。
 
 ### クラウド同期
 
-- プロバイダー、コンボ、設定をデバイス間で同期
-- タイムアウトとフェイルファストに対応した自動バックグラウンド同期
-- 本番環境ではサーバー側の `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` を優先
+- デバイス間でプロバイダー、コンボ、設定を同期する
+- タイムアウト付きの自動バックグラウンド同期+フェイルファスト
+- 本番環境ではサーバー側の`NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`を優先する
 
-### Cloudflare Quick Tunnel
+### Cloudflareクイック トンネル
 
-- Docker およびその他のセルフホスト型デプロイでは **Dashboard → Endpoints** から利用可能
-- 現在の OpenAI 互換 `/v1` エンドポイントに転送する一時的な `https://*.trycloudflare.com` URL を作成
-- 初回の有効化時に、必要な場合のみ `cloudflared` をインストール。それ以降の再起動では、同じ管理対象バイナリを再利用
-- Quick Tunnel は、OmniRoute またはコンテナの再起動後に自動復元されません。必要に応じてダッシュボードから再度有効にしてください
-- Tunnel URL は一時的なもので、トンネルを停止・起動するたびに変更されます
-- 管理対象の Quick Tunnel では、リソースが制限されたコンテナ内で大量の QUIC UDP バッファ警告が発生するのを避けるため、デフォルトで HTTP/2 トランスポートを使用
-- 管理対象トランスポートの選択を上書きする場合は、`CLOUDFLARED_PROTOCOL=quic` または `auto` を設定
-- 管理対象のダウンロードではなく、プリインストール済みの `cloudflared` バイナリを使用する場合は、`CLOUDFLARED_BIN` を設定
-- Cloudflare Quick Tunnel、Tailscale Funnel、ngrok Tunnel の各パネルは、**Settings → Appearance** で表示または非表示にできます。パネルを非表示にしても、実行中のトンネルは停止しません。
+- で利用可能**ダッシュボード→エンドポイント**Dockerおよびその他のセルフホスト型展開の場合
+- 現在の OpenAI 互換`/v1`エンドポイントに転送する一時的な`https://*.trycloudflare.com` URLを作成します
+- 最初に有効にすると、必要な場合にのみ`cloudflared`がインストールされます。後で再起動すると同じマネージドバイナリが再利用されます
+- クイック トンネルは、 OmniRouteまたはコンテナーの再起動後に自動復元されません。必要に応じてダッシュボードから再度有効化します
+- トンネルURLsは一時的であり、トンネルをstop/startたびに変更されます。
+- マネージド クイック トンネルは、制約されたコンテナ内でのノイズの多いQUIC UDPバッファ警告を回避するために、デフォルトでHTTP/2トランスポートになります。
+- マネージドトランスポートの選択をオーバーライドする場合は、 `CLOUDFLARED_PROTOCOL=quic`または`auto`を設定します。
+- 管理されたダウンロードの代わりにプレインストールされた`cloudflared`バイナリを使用したい場合は、 `CLOUDFLARED_BIN`を設定します。
+- Cloudflare Quick Tunnel、 Tailscale Funnel、およびngrok Tunnel パネルは、次の場所で表示または非表示にすることができます。**設定→外観**。パネルを非表示にしても、実行中のトンネルは停止されません。
 
-### LLM ゲートウェイインテリジェンス（フェーズ 9）
+### LLMゲートウェイ インテリジェンス (フェーズ 9)
 
-- **セマンティックキャッシュ** — 非ストリーミングかつ temperature=0 のレスポンスを自動的にキャッシュ（`X-OmniRoute-No-Cache: true` でバイパス）
-- **リクエストの冪等性** — `Idempotency-Key` または `X-Request-Id` ヘッダーを使用して、5 秒以内の重複リクエストを排除
-- **進捗追跡** — `X-OmniRoute-Progress: true` ヘッダーを使用して、SSE の `event: progress` イベントをオプトインで有効化
+- **セマンティックキャッシュ**— 非ストリーミング、温度= 0 応答を自動キャッシュします ( `X-OmniRoute-No-Cache: true`でバイパス)
+- **リクエストのべき等性**— `Idempotency-Key`または`X-Request-Id`ヘッダーを介して 5 秒以内にリクエストの重複を排除します
+- **進捗状況の追跡**— `X-OmniRoute-Progress: true`ヘッダーを介したSSE `event: progress`イベントのオプトイン
 
 ---
 
-### Translator プレイグラウンド
+### 翻訳者の遊び場
 
-**Dashboard → Translator** からアクセスできます。OmniRoute がプロバイダー間で API リクエストを変換する方法をデバッグし、可視化します。
+アクセス方法**ダッシュボード→トランスレータ**。 OmniRouteプロバイダー間でAPIリクエストをどのように変換するかをデバッグして視覚化します。
 
-| モード           | 目的                                                                                       |
-| ---------------- | ------------------------------------------------------------------------------------------ |
-| **Playground**   | 変換元・変換先の形式を選択してリクエストを貼り付け、変換後の出力を即座に確認               |
-| **Chat Tester**  | プロキシ経由でライブチャットメッセージを送信し、リクエストとレスポンスのサイクル全体を検査 |
-| **Test Bench**   | 複数の形式の組み合わせに対してバッチテストを実行し、変換の正確性を検証                     |
-| **Live Monitor** | リクエストがプロキシを通過する際の変換をリアルタイムで監視                                 |
+| モード               | 目的                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| **遊び場**           | source/target形式を選択し、リクエストを貼り付けると、翻訳された出力がすぐに表示されます     |
+| **チャットテスター** | プロキシ経由でライブ チャット メッセージを送信し、 request/responseサイクル全体を検査します |
+| **テストベンチ**     | 複数の形式の組み合わせに対してバッチ テストを実行して、翻訳の正確さを検証します             |
+| **ライブモニター**   | リクエストがプロキシを通過するときにリアルタイムの翻訳を監視します                          |
 
-**ユースケース:**
+**使用例:**
 
-- 特定のクライアントとプロバイダーの組み合わせが失敗する原因をデバッグ
-- thinking タグ、ツール呼び出し、システムプロンプトが正しく変換されることを確認
-- OpenAI、Claude、Gemini、Responses API の各形式の違いを比較
+- 特定のclient/provider組み合わせが失敗する理由をデバッグする
+- 思考タグ、ツール呼び出し、システム プロンプトが正しく翻訳されていることを確認する
+- OpenAI、 Claude、 Gemini、および応答API形式間の形式の違いを比較する
 
 ---
 
 ### ルーティング戦略
 
-**Dashboard → Settings → Routing** から設定します。ダッシュボードには、最もよく使用される 6 つの戦略が表示されます。コンボと自動ルーターは、内部的にはさらに幅広い戦略をサポートしています。
+経由で設定します**ダッシュボード→設定→ルーティング**。ダッシュボードには、最もよく使用される 6 つの戦略が表示されます。コンボと自動ルーターは、内部的により幅広いセットをサポートします。
 
-**ダッシュボードに表示される戦略（アカウントレベルのルーティング）:**
+**ダッシュボードに表示される戦略 (アカウントレベルのルーティング):**
 
-| 戦略                           | 説明                                                                                                              |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| **Fill First**                 | 優先順位に従ってアカウントを使用 — プライマリアカウントが利用できなくなるまで、すべてのリクエストを処理           |
-| **Round Robin**                | 設定可能なスティッキー上限に従って、すべてのアカウントを順番に使用（デフォルト: アカウントごとに 3 回の呼び出し） |
-| **P2C (Power of Two Choices)** | 2 つのアカウントをランダムに選び、より正常な方にルーティング — 正常性を考慮しながら負荷を分散                     |
-| **Random**                     | Fisher-Yates シャッフルを使用して、リクエストごとにアカウントをランダムに選択                                     |
-| **Least Used**                 | `lastUsedAt` タイムスタンプが最も古いアカウントにルーティングし、トラフィックを均等に分散                         |
-| **Cost Optimized**             | 優先度の値が最も低いアカウントにルーティングし、最も低コストのプロバイダーを優先                                  |
+| 戦略                         | 説明                                                                                                                         |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **最初に入力してください**   | 優先順位に従ってアカウントを使用します - プライマリ アカウントは利用できなくなるまですべてのリクエストを処理します           |
+| **ラウンドロビン**           | 構成可能なスティッキー制限を使用して、すべてのアカウントを循環します (デフォルト: アカウントごとに 3 コール)                 |
+| **P2C (2 つの選択肢の累乗)** | ランダムな 2 つのアカウントを選択し、より健全なアカウントにルーティングします — 健全性を意識しながら負荷のバランスをとります |
+| **ランダム**                 | Fisher-Yates シャッフルを使用してリクエストごとにアカウントをランダムに選択します                                            |
+| **最も使用されていない**     | 最も古い`lastUsedAt`タイムスタンプを持つアカウントにルーティングし、トラフィックを均等に分散します                           |
+| **コストの最適化**           | 最も低い優先順位の値を持つアカウントにルーティングし、最もコストの低いプロバイダーを最適化します。                           |
 
-**高度なコンボおよび自動戦略**（コンボごと、または `auto/*` プレフィックス経由で設定可能 — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) を参照）:
+**高度なコンボとオート戦略**(コンボごとまたは`auto/*`プレフィックス経由で構成可能 — [AUTO-COMBO.md](../routing/AUTO-COMBO.md)参照):
 
-- `priority` — 厳密な順序で処理し、ラウンドロビンは行わない
-- `weighted` — モデルごとの重みに基づいてトラフィックを比例配分
-- `fill-first` — 上限に達するまで最初のモデルを使用
+- `priority` — 厳密な順序、決してラウンドロビンではない
+- `weighted` — モデルごとの重みによって分割された比例トラフィック
+- `fill-first` — 制限に達するまで最初のモデルをドレインします
 - `round-robin` / `strict-random` / `random`
-- `p2c`（Power of Two Choices）
-- `least-used` および `cost-optimized`
-- `auto` — すべての候補をスコアに基づいて選択
-- `lkgp`（Last Known Good Provider）— 最後に成功したプロバイダーに固定し、その後ルールにフォールバック
-- `context-optimized` — 空きコンテキストウィンドウが最も大きいモデルを選択
-- `context-relay` — 後続ターン向けに長いコンテキストを持つモデルを連結
+- `p2c` (2 つの選択肢の累乗)
+- `least-used`と`cost-optimized`
+- `auto` — すべての候補者にわたるスコア主導型
+- `lkgp` (Last Known Good Provider) — 最後に成功したプロバイダーに固定し、ルールにフォールバックします。
+- `context-optimized` — 最大の自由コンテキスト ウィンドウを持つモデルを選択します
+- `context-relay` — フォローアップターンのためにロングコンテキストモデルを連鎖させる
 
 #### 外部スティッキーセッションヘッダー
 
-外部セッションアフィニティを使用する場合（たとえば、リバースプロキシの背後にある Claude Code/Codex エージェント）、次のヘッダーを送信します:
+外部セッション アフィニティ (たとえば、リバース プロキシの背後にあるClaude Code/Codexエージェント) の場合は、次を送信します。
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute は `x_session_id` も受け付け、有効なセッションキーを `X-OmniRoute-Session-Id` で返します。
+OmniRoute `x_session_id`も受け入れ、有効なセッション キーを`X-OmniRoute-Session-Id`に返します。
 
-Nginx を使用し、アンダースコア形式のヘッダーを送信する場合は、次を有効にします:
+Nginx を使用し、アンダースコア形式のヘッダーを送信する場合は、次を有効にします。
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### ワイルドカードモデルエイリアス
+#### ワイルドカードモデルのエイリアス
 
-モデル名を再マッピングするためのワイルドカードパターンを作成します:
+ワイルドカード パターンを作成してモデル名を再マッピングします。
 
 ```
-パターン: claude-sonnet-*     →  ターゲット: cc/claude-sonnet-4-6
-パターン: gpt-*               →  ターゲット: gh/gpt-5.3-codex
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-ワイルドカードでは、`*`（任意の文字列）と `?`（任意の 1 文字）を使用できます。
+ワイルドカードは、 `*` (任意の文字) および`?` (単一文字) をサポートします。
 
 #### フォールバックチェーン
 
-すべてのリクエストに適用されるグローバルなフォールバックチェーンを定義します:
+すべてのリクエストに適用されるグローバル フォールバック チェーンを定義します。
 
 ```
-チェーン: production-fallback
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -885,22 +905,22 @@ underscores_in_headers on;
 
 ---
 
-### 一般的なプロバイダーの組み合わせとルーティングパターン
+### 一般的なプロバイダーの組み合わせとルーティング パターン
 
-OmniRoute で複数のプロバイダーを組み合わせ、それらの間でルーティングするためのパターン例を次に示します:
+OmniRouteで複数のプロバイダーを組み合わせてそれらの間でルーティングするパターンの例を次に示します。
 
-#### 1. コーディングエージェントコンボ: 高度な推論とコスト・速度重視のフォールバック
+#### 1. コーディング エージェント コンボ: Cost/Speedフォールバックを使用したハイエンド推論
 
-コーディングエージェント（OpenCode、Claude Code、Cursor、Cline）に最適です。最初は最先端の推論モデルにルーティングし、クォータの枯渇時やエラー発生時には高速なコーディングモデルへフォールバックします。
+エージェントのコーディング (OpenCode、 Claude Code、 Cursor、 Cline) に最適です。最初はフロンティア推論モデルにルーティングされ、クォータの枯渇またはエラーが発生した場合は高速コーディング モデルにフォールバックします。
 
-- **Dashboard**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
+- **ダッシュボード**: コンボ→新しいコンボ→名前: `agent-coding` →戦略: `Priority`
 - **モデル**:
-  1. `claude/claude-sonnet-4-6`（プライマリコーディングエージェント）
-  2. `openai/gpt-4o`（大容量のセカンダリフォールバック）
-  3. `deepseek/deepseek-v4-flash`（高効率で費用対効果の高いフォールバック）
+  1. `claude/claude-sonnet-4-6` (プライマリコーディングエージェント)
+  2. `openai/gpt-4o` (セカンダリ大容量フォールバック)
+  3. `deepseek/deepseek-v4-flash` (高効率、コスト効率の高いフォールバック)
 
 ```bash
-# API経由の例
+# Example via API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -915,183 +935,179 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. 無料枠の自動フェイルオーバーコンボ
+#### 2. 無料階層自動フェイルオーバー コンボ
 
-複数の無料枠プロバイダーとAPIキー不要のプロバイダーを連結し、APIコストをかけずに稼働率を最大化します。
+複数の無料枠およびキーレスプロバイダーをチェーンして、 APIコストを発生させずに稼働時間を最大化します。
 
-- **戦略**: `Least Used`または`Round Robin`（複数のクォータに負荷を分散）
+- **戦略**: `Least Used`または`Round Robin` (クォータ間で負荷を分散します)
 - **モデル**:
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# CLI経由の例
+# Example via CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. マルチモーダル／ビジョン＆テキストパイプライン
+#### 3. マルチモーダル / ビジョン & テキスト パイプライン
 
-画像理解とコード生成を伴うワークフロー向けに、特化型ビジョンモデルと高速なテキスト生成を組み合わせます。
+特殊なビジョン モデルと高速テキスト生成を組み合わせて、画像の理解とコード生成を含むワークフローを実現します。
 
-- **パターン**: ビジョン対応モデルを先に、高スループットのテキスト／コードモデルを最後に配置する`Priority`コンボ。
+- **パターン**: ビジョン対応モデルを最初にリストし、高スループットtext/codeモデルを最後にリストする`Priority`コンボ。
 - **モデル**:
-  1. `gemini/gemini-2.5-pro`（強力な画像／マルチモーダル理解）
-  2. `openai/gpt-4o`（バランスの取れたビジョン機能とツール利用）
-  3. `deepseek/deepseek-v4-flash`（テキスト／コード生成）
+  1. `gemini/gemini-2.5-pro` (強力なimage/multimodal理解)
+  2. `openai/gpt-4o` (バランスの取れたビジョンとツールの使用法)
+  3. `deepseek/deepseek-v4-flash` (Text/code世代)
 
 ---
 
 ### レジリエンスとサーキットブレーカー
 
-**ダッシュボード → 設定 → レジリエンス**から設定します。
+経由で設定します**ダッシュボード→設定→レジリエンス**。
 
-OmniRouteは、5つのコンポーネントでプロバイダーレベルのレジリエンスを実現します。
+OmniRoute 、次の 5 つのコンポーネントでプロバイダー レベルの復元力を実装します。
 
-1. **リクエストキューとペーシング** — システムレベルのリクエスト制御:
-   - **1分あたりのリクエスト数（RPM）** — アカウントごとの1分あたりの最大リクエスト数
-   - **リクエスト間の最小時間** — リクエスト間の最小間隔（ミリ秒）
-   - **最大同時リクエスト数** — アカウントごとの同時リクエスト最大数
+1. **リクエストキューとペーシング**— システムレベルのリクエストシェーピング:
+   - **1 分あたりのリクエスト数 (RPM)** — アカウントごとの 1 分あたりの最大リクエスト
+   - **リクエスト間の最小時間**— リクエスト間の最小ギャップ（ミリ秒単位）
+   - **最大同時リクエスト数**— アカウントごとの最大同時リクエスト
 
-2. **接続クールダウン** — 再試行可能なエラー発生後における、単一接続向けの認証タイプ単位の設定:
-   - **基本クールダウン** — 再試行可能なアップストリーム障害に対するデフォルトのクールダウン期間
-   - **アップストリームの再試行ヒントを使用** — 提供されている場合、正式な`Retry-After`またはリセットヒントに従う
-   - **最大バックオフステップ数** — 障害が繰り返された場合の指数バックオフの最大レベル
+2. **接続クールダウン**— 再試行可能な失敗後の単一接続の認証タイプごとの構成:
+   - **基本クールダウン**— 再試行可能なアップストリーム障害に対するデフォルトのクールダウン ウィンドウ
+   - **アップストリームの再試行ヒントを使用する**— 権威ある`Retry-After`を尊重するか、提供されたヒントをリセットします
+   - **最大バックオフ ステップ**— 繰り返される障害に対する最大の指数バックオフ レベル
 
-3. **プロバイダーサーキットブレーカー** — プロバイダーのエンドツーエンドの障害を追跡し、設定された警告しきい値でプロバイダーを劣化状態としてマークし、設定された障害しきい値に達するとブレーカーを開きます:
-   - **劣化しきい値** — `DEGRADED`に移行するまでの連続したプロバイダー障害数
-   - **障害しきい値** — `OPEN`に移行するまでの連続したプロバイダー障害数
-   - **リセットタイムアウト** — プロバイダーを再度テストするまでの時間
-   - **CLOSED**（正常）— リクエストは通常どおり処理される
-   - **DEGRADED** — 障害の増加を追跡しながら、リクエストは引き続き処理される
-   - **OPEN** — 障害が繰り返された後、プロバイダーは一時的にブロックされる
-   - **HALF_OPEN** — プロバイダーが復旧したかどうかをテスト中
+3. **プロバイダーのサーキットブレーカー**— エンドツーエンドのプロバイダー障害を追跡し、設定された警告しきい値でプロバイダーに機能低下のマークを付け、設定された障害しきい値に達するとブレーカーを開きます。
+   - **劣化閾値**— `DEGRADED`に入る前にプロバイダーが連続して失敗する
+   - **失敗のしきい値**— `OPEN`に入る前にプロバイダーが連続して失敗する
+   - **リセットタイムアウト**— プロバイダーが再度テストされるまでの時間枠
+   - **CLOSED** (健全) — リクエストは正常に流れます
+   - **DEGRADED** — 重大な障害が追跡されている間もリクエストは引き続き送信されます
+   - **OPEN** — 失敗が繰り返された後、プロバイダーが一時的にブロックされる
+   - **HALF_OPEN** — プロバイダーが回復したかどうかをテストする
 
-   接続単位の`429`レート制限は**接続クールダウン**で処理され、プロバイダーブレーカーにはカウントされません。
+   接続スコープの`429`レート制限は維持されます**接続クールダウン**プロバイダー ブレーカーにはカウントされません。
 
-   プロバイダーブレーカーのランタイム状態は、**ダッシュボード → ヘルス**にのみ表示されます。
+   プロバイダー ブレーカーのランタイム状態は次のとおりです。**ダッシュボード→ヘルス**のみ。
 
-4. **クールダウンを待機** — 候補となるすべての接続がすでにクールダウン中の場合、OmniRouteは最も早く終了するクールダウンを待ち、同じクライアントリクエストを自動的に再試行できます。
+4. **クールダウンを待つ**— すべての接続候補がすでにクールダウンしている場合、 OmniRoute最も早いクールダウンを待って、同じクライアント要求を自動的に再試行できます。
 
-5. **レート制限の自動検出** — アップストリームプロバイダーが明示的な待機時間を返した場合、この設定が有効であれば、それらのヒントがローカル接続のクールダウンより優先されます。
+5. **レート制限の自動検出**— 上流プロバイダーが明示的な待機ウィンドウを返す場合、設定が有効になっている場合、それらのヒントはローカル接続のクールダウンをオーバーライドします。
 
-**プロのヒント:** 障害発生後に稼働中のプロバイダーブレーカーを確認してリセットするには、**ヘルス**ページを使用してください。レジリエンスページでは設定のみを変更できます。
+**プロのヒント:**を使用します。**健康**停止後にライブプロバイダーのブレーカーを検査してリセットするためのページ。 [Resilience] ページでは構成のみが変更されます。
 
 ---
 
-### データベースのエクスポート／インポート
+### データベースのエクスポート/インポート
 
-**ダッシュボード → 設定 → システムとストレージ**でデータベースのバックアップを管理します。
+データベースのバックアップを管理する**ダッシュボード→設定→システムとストレージ**。
 
-| 操作                              | 説明                                                                                                                                                               |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **データベースをエクスポート**    | 現在のSQLiteデータベースを`.sqlite`ファイルとしてダウンロードします                                                                                                |
-| **すべてエクスポート（.tar.gz）** | データベース、設定、コンボ、プロバイダー接続（認証情報なし）、APIキーメタデータを含む完全なバックアップアーカイブをダウンロードします                              |
-| **データベースをインポート**      | `.sqlite`ファイルをアップロードして現在のデータベースを置き換えます。`DISABLE_SQLITE_AUTO_BACKUP=true`でない限り、インポート前のバックアップが自動的に作成されます |
+| アクション                       | 説明                                                                                                                                                                    |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **データベースのエクスポート**   | 現在のSQLiteデータベースを`.sqlite`ファイルとしてダウンロードします                                                                                                     |
+| **すべてエクスポート (.tar.gz)** | データベース、設定、コンボ、プロバイダー接続 (資格情報なし)、 APIキー メタデータを含む完全バックアップ アーカイブをダウンロードします。                                 |
+| **データベースのインポート**     | `.sqlite`ファイルをアップロードして、現在のデータベースを置き換えます。 `DISABLE_SQLITE_AUTO_BACKUP=true`でない限り、インポート前のバックアップは自動的に作成されます。 |
 
 ```bash
-# API: データベースをエクスポート
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: すべてエクスポート（完全なアーカイブ）
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: データベースをインポート
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**インポートの検証:** インポートされたファイルは、整合性（SQLite pragmaチェック）、必須テーブル（`provider_connections`、`provider_nodes`、`combos`、`api_keys`）、およびサイズ（最大100MB）について検証されます。
+**インポートの検証:**インポートされたファイルは、整合性 (SQLiteプラグマ チェック)、必要なテーブル (`provider_connections`、 `provider_nodes`、 `combos`、 `api_keys`)、およびサイズ (最大 100MB) について検証されます。
 
-**ユースケース:**
+**使用例:**
 
-- OmniRouteを別のマシンに移行する
-- ディザスタリカバリ用の外部バックアップを作成する
-- チームメンバー間で設定を共有する（すべてエクスポート → アーカイブを共有）
+- マシン間でOmniRouteを移行する
+- 災害復旧のために外部バックアップを作成する
+- チームメンバー間で構成を共有する (すべての→共有アーカイブをエクスポート)
 
 ---
 
 ### 設定ダッシュボード
 
-設定ページは、簡単に移動できるように**7つのタブ**で構成されています:
+設定ページは次のように構成されています**7つのタブ**簡単にナビゲーションするには:
 
-| タブ             | 内容                                                                                                                                                                      |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **一般**         | システムストレージツール、デフォルトの動作、Endpoint トンネルの可視性                                                                                                     |
-| **外観**         | テーマ制御（ライト／ダーク／システム）、サイドバーの表示、Cloudflare／Tailscale／ngrok トンネルカードのパネル切り替え                                                     |
-| **AI**           | 思考バジェット（パススルー／自動除去／カスタム／適応型 — [THINKING_BUDGET.md](./THINKING_BUDGET.md) を参照）、グローバルシステムプロンプト、プロンプトキャッシュ統計      |
-| **セキュリティ** | ログイン／パスワード設定、IP アクセス制御、`/models` の API 認証、プロバイダーのブロック、プロンプトインジェクション対策                                                  |
-| **ルーティング** | グローバルルーティング戦略（優先充填／ラウンドロビン／P2C／ランダム／最少使用／コスト最適化）、ワイルドカードモデルエイリアス、フォールバックチェーン、コンボのデフォルト |
-| **耐障害性**     | リクエストキュー、接続クールダウン、プロバイダーブレーカー設定、クールダウン待機動作                                                                                      |
-| **詳細設定**     | グローバルプロキシ設定（HTTP／SOCKS5）、プロバイダーごとのプロキシオーバーライド                                                                                          |
+| タブ             | コンテンツ                                                                                                                                                                               |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **一般的な**     | システム ストレージ ツール、デフォルトの動作、エンドポイント トンネルの可視性                                                                                                            |
+| **外観**         | テーマ コントロール (light/dark/system)、サイドバーの可視性、 Cloudflare/Tailscale/ngrokトンネル カードのパネル切り替え                                                                  |
+| **AI**           | バジェットの考え方 (パススルー / 自動ストリップ / カスタム / アダプティブ — [THINKING_BUDGET.md](./THINKING_BUDGET.md)を参照)、グローバル システム プロンプト、プロンプト キャッシュ統計 |
+| **安全**         | Login/Password設定、 IPアクセス制御、 `/models`のAPI認証、プロバイダー ブロッキング、プロンプト インジェクション ガード                                                                  |
+| **ルーティング** | グローバル ルーティング戦略 (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized)、ワイルドカード モデル エイリアス、フォールバック チェーン、コンボ デフォルト        |
+| **回復力**       | リクエストキュー、接続クールダウン、プロバイダーブレーカー設定、およびクールダウン待機動作                                                                                               |
+| **高度な**       | グローバル プロキシ構成 (HTTP/SOCKS5)、プロバイダーごとのプロキシ オーバーライド                                                                                                         |
 
-「一般」には、読み取り専用のログおよびキャッシュに関する注記が重複して表示されなくなりました。データベースの保持期間と
-最適化設定は `/api/settings/database` を通じて永続化され、キャッシュの手動消去には
-`DELETE /api/cache` を使用します。リクエストログとプロキシログの行数上限は、
-`CALL_LOGS_TABLE_MAX_ROWS` と `PROXY_LOGS_TABLE_MAX_ROWS` で制御します。
+一般では、読み取り専用ログとキャッシュ メモが複製されなくなりました。データベースの保持と最適化の設定は、 `/api/settings/database`を通じて保持されます。手動キャッシュクリアには`DELETE /api/cache`を使用します。リクエストおよびプロキシ ログの行キャップは、 `CALL_LOGS_TABLE_MAX_ROWS`および`PROXY_LOGS_TABLE_MAX_ROWS`によって制御されます。
 
 ---
 
 ### コストと予算の管理
 
-**ダッシュボード → コスト**からアクセスします。
+アクセス方法**ダッシュボード→コスト**。
 
-| タブ     | 目的                                                                                                |
-| -------- | --------------------------------------------------------------------------------------------------- |
-| **予算** | API キーごとに日次／週次／月次の予算で支出上限を設定し、リアルタイムで追跡します                    |
-| **料金** | モデルの料金エントリ（プロバイダーごとの入力／出力 1,000 トークンあたりのコスト）を表示・編集します |
+| タブ         | 目的                                                                                         |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| **予算**     | daily/weekly/monthly予算とリアルタイム追跡を使用して、 APIキーごとに支出制限を設定します     |
+| **価格設定** | モデル価格エントリの表示と編集 - プロバイダーごとの 1,000 input/outputトークンあたりのコスト |
 
 ```bash
-# API: 予算を設定
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: 現在の予算状況を取得
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**コスト追跡:** すべてのリクエストについてトークン使用量を記録し、料金表を使用してコストを計算します。プロバイダー、モデル、API キーごとの内訳は、**ダッシュボード → 使用量**で確認できます。
+**コストの追跡:**すべてのリクエストはトークンの使用状況を記録し、価格表を使用してコストを計算します。内訳を表示**ダッシュボード→使用法**プロバイダー、モデル、およびAPIキーごとに。
 
 ---
 
 ### 音声文字起こし
 
-OmniRoute は、OpenAI 互換エンドポイントを介した音声文字起こしをサポートしています。
+OmniRoute OpenAI 互換エンドポイントを介した音声転写をサポートしています。
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# curl を使用した例
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` は Deepgram のネイティブルートであり、Deepgram API キーが必要です。
-OpenRouter のみが設定されている場合は、`openrouter/deepgram/nova-3` を使用してください。
+`deepgram/nova-3`はネイティブのディープグラム ルートであり、ディープグラムAPIキーが必要です。 OpenRouterのみが構成されている場合は、 `openrouter/deepgram/nova-3`を使用します。
 
-**音声テキスト変換（文字起こし）**のプロバイダー:
+**Speech-to-Text（文字起こし）**プロバイダー:
 
-- `openai/`（whisper 互換）
-- `groq/`（Groq Whisper Turbo）
-- `deepgram/`（Nova ファミリー）
+- `openai/` (ウィスパー互換)
+- `groq/` （Groqウィスパーターボ）
+- `deepgram/` (Nova ファミリー)
 - `assemblyai/`
-- `nvidia/`（Parakeet、Canary）
-- `huggingface/`（whisper バリアント）
+- `nvidia/` （インコ、カナリア）
+- `huggingface/` (ささやきのバリエーション)
 - `qwen/`
 
-**テキスト音声変換（`POST /v1/audio/speech`）**のプロバイダー:
+**テキスト読み上げ (`POST /v1/audio/speech`)**プロバイダー:
 
-- `openai/`（tts-1、tts-1-hd）
+- `openai/` (tts-1、tts-1-hd)
 - `hyperbolic/`
-- `deepgram/`（Aura）
-- `nvidia/`（Magpie TTS）
+- `deepgram/` （オーラ）
+- `nvidia/` (カササギTTS)
 - `elevenlabs/`
 - `huggingface/`
 - `inworld/`
@@ -1100,54 +1116,48 @@ OpenRouter のみが設定されている場合は、`openrouter/deepgram/nova-3
 - `kie/`
 - `aws-polly/`
 - `xiaomi-mimo/`
-- `coqui/`、`tortoise/`
+- `coqui/`, `tortoise/`
 - `qwen/`
 
-文字起こしでサポートされる音声形式: `mp3`、`wav`、`m4a`、`flac`、`ogg`、`webm`。TTS の出力形式はプロバイダーによって異なります（mp3、wav、opus、pcm、mulaw）。
+文字起こしでサポートされているオーディオ形式: `mp3`、 `wav`、 `m4a`、 `flac`、 `ogg`、 `webm`。 TTS出力形式はプロバイダー (mp3、wav、opus、pcm、mulaw) によって異なります。
 
 ---
 
-### コンボのバランシング戦略
+### コンボバランス戦略
 
-コンボごとのバランシングは、**ダッシュボード → コンボ → 作成／編集 → 戦略**で設定します。
+コンボごとのバランスを設定する**ダッシュボード→コンボ→ Create/Edit →戦略**。
 
-| 戦略               | 説明                                                                               |
-| ------------------ | ---------------------------------------------------------------------------------- |
-| **ラウンドロビン** | モデルを順番に切り替えます                                                         |
-| **優先度**         | 常に最初のモデルを試行し、エラー時のみフォールバックします                         |
-| **ランダム**       | リクエストごとにコンボからランダムなモデルを選択します                             |
-| **重み付き**       | モデルごとに割り当てられた重みに比例してルーティングします                         |
-| **最少使用**       | 直近のリクエスト数が最も少ないモデルにルーティングします（コンボメトリクスを使用） |
-| **コスト最適化**   | 利用可能な最も安価なモデルにルーティングします（料金表を使用）                     |
+| 戦略                       | 説明                                                                             |
+| -------------------------- | -------------------------------------------------------------------------------- |
+| **ラウンドロビン**         | モデルを順番に回転します                                                         |
+| **優先度**                 | 常に最初のモデルを試します。エラー時のみフォールバックする                       |
+| **ランダム**               | リクエストごとにコンボからランダムなモデルを選択します                           |
+| **加重**                   | モデルごとに割り当てられた重みに基づいて比例的にルーティングします。             |
+| **最も使用頻度の低いもの** | 最近のリクエストが最も少ないモデルにルーティングします (コンボ メトリックを使用) |
+| **コストの最適化**         | 利用可能な最も安価なモデルへのルーティング (価格表を使用)                        |
 
-コンボのグローバルデフォルトは、**ダッシュボード → 設定 → ルーティング → コンボのデフォルト**で設定できます。
-コンボターゲットのタイムアウトは、デフォルトで現在のリクエストタイムアウトを継承します。ターゲットごとの短い制限によって
-フォールバックをより早く発動させる必要がある場合に限り、コンボのデフォルトまたは個別のコンボで**ターゲットタイムアウト
-（秒）**を使用してください。
+グローバルコンボのデフォルトは以下で設定できます。**ダッシュボード→設定→ルーティング→コンボのデフォルト**。コンボ ターゲット タイムアウトは、デフォルトで現在のリクエスト タイムアウトを継承します。使用**ターゲットタイムアウト(秒)**ターゲットごとの制限を短くすることでより高速なフォールバックをトリガーする必要がある場合にのみ、コンボのデフォルトまたは個々のコンボで使用します。
 
-ゼロレイテンシーのコンボ最適化はオプトインです。これらのレイテンシー機能がフォールバックターゲットと競合したり、TTFT
-履歴に基づいてターゲットをスキップしたり、フォールバックリクエストを圧縮したりするのを防ぐには、**ゼロレイテンシー最適化**を
-無効のままにしてください。有効にすると、設定済みのヘッジング、予測的な TTFT スキップ、プロアクティブなフォールバック圧縮を使用し、
-ルーティング／リクエストの忠実性と引き換えにテールレイテンシーを低減できます。
+ゼロレイテンシのコンボ最適化はオプトインです。離れる**ゼロレイテンシーの最適化**これらのレイテンシ機能がフォールバック ターゲットと競合したり、 TTFT履歴に基づいてターゲットをスキップしたり、フォールバック リクエストを圧縮したりするのを防ぐために無効になります。これを有効にすると、構成されたヘッジ、予測TTFTスキップ、プロアクティブなフォールバック圧縮が可能になり、 routing/request忠実度を犠牲にしてテール レイテンシを低くすることができます。
 
-アップストリームプロバイダーで厳密な `max_tokens` / `maxOutputTokens` 制限が必要な場合は、**推論トークンバッファ**を無効にしてください。有効にすると、コンボルーティングでは、既知の出力上限があるモデルにのみ推論モデル用の余裕が追加され、安全なバッファ適用後の値がその上限を超える場合、クライアントのトークン制限は変更されません。クライアントの制限が既知の上限をすでに超えている場合、OmniRoute はアップストリームリクエストを送信する前に、その上限まで制限値を引き下げます。
+無効にする**推論トークンバッファ**上流プロバイダーが厳格な`max_tokens` / `maxOutputTokens`制限を必要とする場合。コンボ ルーティングを有効にすると、既知の出力上限を持つモデルに対して推論モデルのヘッドルームのみが追加され、安全なバッファー値がその上限を超える場合、クライアント トークンの制限は変更されません。クライアント制限がすでに既知の上限を超えている場合、 OmniRouteアップストリーム要求を送信する前に制限をその上限までクランプします。
 
 ---
 
 ### ヘルスダッシュボード
 
-**ダッシュボード → ヘルス**からアクセスできます。6つのカードでリアルタイムのシステム稼働状況を確認できます。
+アクセス方法**ダッシュボード→ヘルス**。 6 枚のカードによるリアルタイムのシステム状態の概要:
 
-| カード                   | 表示内容                                               |
-| ------------------------ | ------------------------------------------------------ |
-| **システムステータス**   | 稼働時間、バージョン、メモリ使用量、データディレクトリ |
-| **プロバイダーの状態**   | グローバルプロバイダーのサーキットブレーカー実行状態   |
-| **レート制限**           | アカウントごとの有効な接続クールダウンと残り時間       |
-| **有効なロックアウト**   | 有効なモデル単位のロックアウトと一時的な除外           |
-| **シグネチャキャッシュ** | 重複排除キャッシュの統計（有効なキー、ヒット率）       |
-| **レイテンシテレメトリ** | プロバイダーごとのp50/p95/p99レイテンシ集計            |
+| カード                       | それが示すもの                                             |
+| ---------------------------- | ---------------------------------------------------------- |
+| **システムステータス**       | 稼働時間、バージョン、メモリ使用量、データ ディレクトリ    |
+| **プロバイダーの健康状態**   | グローバルプロバイダーサーキットブレーカーのランタイム状態 |
+| **レート制限**               | アカウントごとのアクティブな接続のクールダウンと残り時間   |
+| **アクティブなロックアウト** | アクティブなモデル範囲のロックアウトと一時的な除外         |
+| **署名キャッシュ**           | 重複排除キャッシュの統計 (アクティブなキー、ヒット率)      |
+| **レイテンシーテレメトリー** | プロバイダーごとのp50/p95/p99レイテンシの集計              |
 
-**ヒント:** ヘルスページは10秒ごとに自動更新されます。サーキットブレーカーカードを使用して、問題が発生しているプロバイダーを特定できます。
+**プロのヒント:** [ヘルス] ページは 10 秒ごとに自動更新されます。サーキット ブレーカー カードを使用して、問題が発生しているプロバイダーを特定します。
 
 ---
 
@@ -1267,36 +1277,36 @@ OmniRoute はクラウドコーディングエージェント（**OpenAI Codex C
 
 ---
 
-## 🛠️ プログラムによる管理
+## 🛠️プログラマティック管理
 
-**`manage` スコープを持つBearerキー**を使用して、すべてのOmniRouteリソース（プロバイダー、コンボ、キー、設定）をHTTP経由で管理できます。
+すべてのOmniRouteリソース (プロバイダー、コンボ、キー、設定) をHTTP経由で管理できます。** `manage`スコープのベアラー キー**。
 
-**Dashboard → API Keys → New Key → Scope: manage**でキーを生成してから、次を実行します。
+でキーを生成します**ダッシュボード→ APIキー→新しいキー→スコープ: 管理**、 それから：
 
 ```bash
-# プロバイダーを一覧表示
+# List providers
 curl http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 
-# プロバイダー接続を追加
+# Add a provider connection
 curl -X POST http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
 
-# コンボを作成
+# Create a combo
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
 
-# APIキーを一覧表示／作成
+# List/create API keys
 curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-エンドポイントの完全なカタログとリクエスト／レスポンスのスキーマについては、[API_REFERENCE.md](../reference/API_REFERENCE.md)を参照してください。
+完全なエンドポイント カタログとrequest/responseスキーマについては、 [API_REFERENCE.md](../reference/API_REFERENCE.md)を参照してください。
 
 ---
 

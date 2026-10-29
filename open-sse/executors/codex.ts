@@ -1,4 +1,5 @@
 import { isResponsesTerminalLine, RESPONSES_TERMINAL_EVENT_TYPES } from "./opencodeMuseSpark.ts";
+import { newestChromeProfile } from "../utils/browserProfiles.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
 import { buildErrorBody } from "../utils/error.ts";
 import { getCodexRequestDefaults } from "@/lib/providers/requestDefaults";
@@ -1069,7 +1070,7 @@ export class CodexExecutor extends BaseExecutor {
 
         try {
           ws = await websocketFn(toWebSocketUrl(url), {
-            browser: "chrome_142",
+            browser: newestChromeProfile(),
             os: "windows",
             headers,
           });

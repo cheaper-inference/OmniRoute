@@ -4,7 +4,7 @@
  */
 
 import { NextResponse } from "next/server";
-import fs from "fs";
+import { access, readFile, stat } from "fs/promises";
 import path from "path";
 import * as yaml from "js-yaml";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
@@ -116,9 +116,12 @@ export async function GET() {
   try {
     let specPath = "";
     for (const p of OPENAPI_SPEC_CANDIDATES) {
-      if (fs.existsSync(p)) {
+      try {
+        await access(p);
         specPath = p;
         break;
+      } catch {
+        // Candidate missing — try the next one.
       }
     }
 
@@ -126,15 +129,15 @@ export async function GET() {
       return NextResponse.json({ error: "openapi.yaml not found" }, { status: 404 });
     }
 
-    const stat = fs.statSync(specPath);
-    const mtime = stat.mtimeMs;
+    const specStat = await stat(specPath);
+    const mtime = specStat.mtimeMs;
 
     // Use cache if file hasn't changed
     if (cachedSpec && cachedSpec.mtime === mtime) {
       return NextResponse.json(cachedSpec.data);
     }
 
-    const content = fs.readFileSync(specPath, "utf-8");
+    const content = await readFile(specPath, "utf-8");
     const raw: any = yaml.load(content);
 
     // Build a structured catalog

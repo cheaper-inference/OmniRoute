@@ -20,6 +20,7 @@ test("NVIDIA static catalog metadata excludes superseded model ids", () => {
     "deepseek-ai/deepseek-v4-pro",
     "deepseek-ai/deepseek-v4-flash",
     "minimaxai/minimax-m2.7",
+    "nvidia/nemotron-3-super-120b-a12b",
   ]) {
     assert.ok(!registryIds.has(modelId), `${modelId} must not remain in the NVIDIA registry`);
     assert.ok(

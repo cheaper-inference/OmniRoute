@@ -62,7 +62,8 @@ function getProjectHeaderValue(body: unknown): string | null {
   const project =
     body && typeof body === "object" ? (body as Record<string, unknown>).project : null;
   if (typeof project !== "string" || project.trim().length === 0) return null;
-  if (project === "test-project" || project === "project-id") return null;
+  if (project === "test-project" || project === "project-id" || project === "aicode-consumers")
+    return null;
   return project;
 }
 
@@ -83,7 +84,9 @@ export function applyAntigravityClientProfileHeaders(
 
   const project = getProjectHeaderValue(body);
   removeHeaderCaseInsensitive(headers, "x-goog-user-project");
-  if (project) {
+  // The native Go CLI (consumer auth) sends no quota-project header at all; only the IDE
+  // profile does. sendAntigravityRequest still retries once without it on a 403.
+  if (project && profile !== "cli") {
     headers["x-goog-user-project"] = project;
   }
 

@@ -48,6 +48,7 @@ export const deepseekProvider: RegistryEntry = {
     {
       id: "deepseek-flash",
       name: "DeepSeek V4.1 Flash",
+      aliases: ["deepseek-v4.1-flash", "deepseek-4.1-flash"],
       contextLength: 1_000_000,
       maxOutputTokens: 384_000,
       supportsReasoning: true,

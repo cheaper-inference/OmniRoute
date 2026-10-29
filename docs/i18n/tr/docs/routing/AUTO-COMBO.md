@@ -471,20 +471,20 @@ Bu, **`auto/*` etkinleştirilmiş yeni bir provider eklemenin aday havuzunu otom
 
 **Özel bir `POST /api/combos/auto` uç noktası yoktur** — Auto-Combo iki şekilde kullanılır:
 
-1. **Sıfır yapılandırma (önerilen):** `model: "auto"` veya `model: "auto/<variant>"` ile herhangi bir sohbet tamamlama isteği gönderin. Sanal fabrika, kombinasyonu her istek için oluşturur — kalıcılık veya API çağrısı gerekmez.
+1. **Sıfır yapılandırma (önerilen):** `model: "auto"` veya `model: "auto/<variant>"` ile herhangi bir sohbet tamamlama isteği gönderin. Sanal fabrika, her istek için combo'yu oluşturur — kalıcılık veya API çağrısı gerekmez.
 
-2. **`strategy: "auto"` içeren kalıcı kombinasyon:** `POST /api/combos` aracılığıyla normal bir kombinasyon oluşturun ve `strategy: "auto"` ile birlikte `config.auto.weights` / `config.auto.candidatePool` değerlerini ayarlayın. Aynı puanlama motoru kullanılır; kombinasyon `combos` içinde saklanır ve kimliğiyle yeniden kullanılabilir.
+2. **`strategy: "auto"` ile kalıcı combo:** `POST /api/combos` aracılığıyla normal bir combo oluşturun ve `strategy: "auto"` ile birlikte `config.auto.weights` / `config.auto.candidatePool` değerlerini ayarlayın. Aynı puanlama motoru kullanılır; combo `combos` içinde saklanır ve kimliğiyle yeniden kullanılabilir.
 
-Keşif amacıyla `GET /api/combos/auto`, çözümlenmiş aday havuzunun yanı sıra aday havuzundaki pencereler arasındaki MAKSİMUM değerler olan `context_length` / `max_output_tokens` bilgileriyle birlikte tüm varyantları listeler. İstemciler (ör. opencode eklentisi) `0` yerine bu değerleri bildirmelidir: sıfır bağlam, opencode'un otomatik sıkıştırma özelliğini tamamen devre dışı bırakır ve oturumların, ağ geçidinin geçmiş temizleme işlemi bağlamı yok edene kadar büyümesine izin verir. MAKSİMUM değeri bildirmek güvenlidir çünkü auto-combo bağlam ön filtresi, aşırı büyük istekleri geniş pencereli adaylara yönlendirir.
+Keşif amacıyla `GET /api/combos/auto`, her varyantı çözümlenmiş aday havuzuyla ve aday havuzundaki pencereler arasında MAKSİMUM olan `context_length` / `max_output_tokens` değerleriyle birlikte listeler. İstemciler (ör. opencode eklentisi), `0` yerine bu değerleri bildirmelidir: sıfır bağlam, opencode'un otomatik sıkıştırmasını tamamen devre dışı bırakır ve oturumların, ağ geçidinin geçmiş temizleme işlemi bağlamı yok edene kadar büyümesine izin verir. MAKSİMUM değerin bildirilmesi güvenlidir çünkü auto-combo bağlam ön filtresi, aşırı büyük istekleri geniş pencereli adaylara yönlendirir.
 
 ```bash
-# Sıfır yapılandırmalı kullanım (kombinasyon oluşturmadan)
+# Sıfır yapılandırmalı kullanım (combo oluşturulmaz)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Normal kombinasyonlar uç noktası aracılığıyla kalıcı otomatik kombinasyon
+# Normal combos uç noktası üzerinden kalıcı auto combo
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
@@ -492,8 +492,8 @@ curl -X POST http://localhost:20128/api/combos \
 
 ### Otomatik yönlendirici stratejileri
 
-Kalıcı `strategy: "auto"` kombinasyonları, `config.routerStrategy` (veya eski
-`config.auto.routerStrategy`) değerini şunlardan biri olarak ayarlayabilir:
+Kalıcı `strategy: "auto"` combo'ları, `config.routerStrategy` (veya eski
+`config.auto.routerStrategy`) değerini aşağıdakilerden biri olarak ayarlayabilir:
 
 - `rules` — varsayılan ağırlıklı puanlama
 - `score` — yapılandırılmış en yüksek ağırlıklı puanı seçer. Tam eşitliklerde yapılandırılmış
@@ -503,20 +503,20 @@ Kalıcı `strategy: "auto"` kombinasyonları, `config.routerStrategy` (veya eski
 - `sla-aware` / `sla` — p95 gecikmesi, hata oranı ve isteğe bağlı
   maliyet SLO'larını karşılayan adayları tercih eder
 - `lkgp` — önce bilinen son iyi sağlayıcı
-- `nadir` — istemin havuzdaki hangi modele ihtiyaç duyduğunu [Nadir](https://getnadir.com)'in karar API'sine
-  sorar; isteğe bağlıdır, hata durumunda `rules` stratejisine açık biçimde geri döner
+- `nadir` — istemin havuzdaki hangi modele ihtiyaç duyduğunu [Nadir](https://getnadir.com)'in karar API'sine sorar;
+  etkinleştirme isteğe bağlıdır, başarısızlık durumunda `rules` stratejisine açık şekilde geri döner
 
 ### Yönlendirici stratejilerinin ayrıntıları
 
 Auto-combo motoru, `config.routerStrategy` (veya eski `config.auto.routerStrategy`)
-aracılığıyla değiştirebileceğiniz 7 takılabilir **RouterStrategy** uygulaması sunar.
-Her strateji, bir `RoutingContext` (görev türü, araç/görüntü ipuçları, token tahmini, isteğe bağlı SLA politikası, isteğe bağlı
+aracılığıyla değiştirebileceğiniz 7 adet takılabilir **RouterStrategy** uygulaması sunar.
+Her strateji, bir `RoutingContext` (görev türü, araç/görüntü ipuçları, token tahmini, isteğe bağlı SLA ilkesi, isteğe bağlı
 bilinen son iyi sağlayıcı) verildiğinde aday havuzundan bir sağlayıcı seçer.
 
 #### 1. `rules` (varsayılan) — 16 faktörlü ağırlıklı puanlama
 
-Mevcut puanlama motorunu sarmalar. `OPEN` devre kesici durumundaki
-adayları filtreler, ardından mevcut görev türü ve `getTaskFitness()` ile `scorePool()` işlevini çalıştırarak
+Mevcut puanlama motorunu sarmalar. `OPEN` durumundaki devre kesici
+adaylarını filtreler, ardından mevcut görev türü ve `getTaskFitness()` ile `scorePool()` işlevini çalıştırarak
 en yüksek puanlı sağlayıcıyı seçer.
 
 ```ts
@@ -539,13 +539,13 @@ class RulesStrategyImpl implements RouterStrategy {
 
 **Ne zaman kullanılmalı**: Varsayılan olarak. Tüm sinyaller arasında dengeli bir ödünleşim istediğinizde kullanın.
 
-**Takma ad**: `rules` (takma adı yok)
+**Takma ad**: `rules` (takma adı yoktur)
 
 ---
 
 #### 2. `cost` / `eco` — en ucuz sağlıklı sağlayıcı
 
-Aday havuzunu `costPer1MTokens` değerine göre (artan sırada) sıralar ve en ucuz olanı seçer.
+Aday havuzunu `costPer1MTokens` değerine göre (artan sırada) sıralar ve en ucuzunu seçer.
 Önce `OPEN` durumundaki adayları filtreler.
 
 ```ts
@@ -561,7 +561,7 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Ne zaman kullanılmalı**: Maliyete duyarlı iş yükleri, toplu işleme veya arka plan işleri için.
+**Ne zaman kullanılmalı**: Maliyete duyarlı iş yükleri, toplu işleme veya arka plan işleri.
 
 **Takma adlar**: `cost`, `eco`
 
@@ -588,7 +588,7 @@ class LatencyStrategyImpl implements RouterStrategy {
 ```
 
 **Ne zaman kullanılmalı**: Gerçek zamanlı sohbet, otomatik tamamlama veya
-etkileşimli kodlama yardımcıları gibi gecikmeye duyarlı iş yükleri için.
+etkileşimli kodlama asistanları gibi gecikmeye duyarlı iş yükleri.
 
 **Takma adlar**: `latency`, `fast`
 
@@ -596,7 +596,7 @@ etkileşimli kodlama yardımcıları gibi gecikmeye duyarlı iş yükleri için.
 
 #### 4. `sla-aware` / `sla` — gecikme/hata/maliyet SLO uyumluluğu
 
-Her adayı, yapılandırılmış SLO politikasını ne ölçüde karşıladığına göre puanlar:
+Her adayı, yapılandırılmış SLO ilkesini ne ölçüde karşıladığına göre puanlar:
 
 | Faktör           | Ağırlık | Formül                                                  |
 | ---------------- | ------- | ------------------------------------------------------- |
@@ -607,8 +607,8 @@ Her adayı, yapılandırılmış SLO politikasını ne ölçüde karşıladığ�
 | Kararlılık puanı | 5%      | ters normalize edilmiş gecikme standart sapması         |
 
 `hardConstraints: true` olduğunda adaylar öncelikle **ihlal puanına**
-(herhangi bir SLO'yu ne kadar aştıklarına), ardından bileşik puana göre sıralanır. Aksi
-takdirde yalnızca bileşik puan kullanılır.
+(herhangi bir SLO'yu ne kadar aştıklarına), ardından bileşik puana göre sıralanır. Aksi takdirde
+yalnızca bileşik puan kullanılır.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -617,12 +617,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... her adayı politikaya göre puanlar: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... her adayı şu politikaya göre puanlar: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA alanları** (birleşik yapılandırmada ayarlanır):
+**SLA alanları** (combo yapılandırmasında ayarlanır):
 
 ```json
 {
@@ -637,7 +637,7 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Ne zaman kullanılmalı**: Sıkı gecikme, hata oranı veya maliyet bütçelerine sahip üretim iş yüklerinde.
+**Ne zaman kullanılmalı**: Katı gecikme, hata oranı veya maliyet bütçeleri olan üretim iş yüklerinde.
 
 **Takma adlar**: `sla-aware`, `sla`
 
@@ -674,21 +674,21 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Ne zaman kullanılmalı**: Takip isteklerini aynı sağlayıcının işlemesini istediğiniz
+**Ne zaman kullanılmalı**: Aynı sağlayıcının takip isteklerini işlemesini istediğiniz
 çok turlu konuşmalarda (ör. önbelleğe alma, bağlam sürekliliği veya fiyatlandırma tutarlılığı için).
 
 **Takma ad**: `lkgp` (takma adı yok)
 
 ---
 
-#### 6. `nadir` — Nadir aracılığıyla isteme duyarlı model seçimi
+#### 6. `nadir` — Nadir aracılığıyla istem duyarlı model seçimi
 
-Yukarıdaki her strateji adayları kendi telemetrilerine göre sıralar; hiçbiri
-isteği okumaz. `nadir`, son kullanıcı turunu ve havuzun model kimliklerini
+Yukarıdaki her strateji, adayları kendi telemetri verilerine göre sıralar; hiçbiri isteği
+okumaz. `nadir`, son kullanıcı turunu ve havuzdaki model kimliklerini
 [Nadir](https://getnadir.com)'in karar API'sine (`POST /v1/bucket`) gönderir ve Nadir'in
 bu menüden seçtiği modele yönlendirir (`simple` → yeterliliğe sahip en ucuz model, `complex` →
-öncü model). Bu modeli sunan bağlantı yine `rules` tarafından seçildiğinden kota,
-sağlık ve maliyet, hangi hesabın kullanılacağını belirlemeye devam eder.
+öncü model). Bu modeli sunan bağlantı yine `rules` tarafından seçilir; böylece kota,
+sağlık ve maliyet hangi hesabın kullanılacağına karar vermeye devam eder.
 
 ```json
 {
@@ -705,22 +705,25 @@ sağlık ve maliyet, hangi hesabın kullanılacağını belirlemeye devam eder.
 ```
 
 `OMNIROUTE_NADIR_API_KEY` ve `OMNIROUTE_NADIR_BASE_URL`, bu iki dize için ortam değişkeni
-geri dönüşleridir. `baseUrl` yalnızca kendi sunucunuzda barındırılan bir Nadir için gereklidir (sondaki `/v1` kabul edilir).
-Anahtarsız çağrılar, IP başına hız sınırı uygulanan Nadir'in anonim katmanına ulaşır.
+yedekleridir. `baseUrl` yalnızca kendi barındırdığınız bir Nadir için gereklidir (sondaki `/v1` kabul edilir).
+Anahtarsız çağrılar, IP başına hız sınırı uygulanan Nadir'in anonim katmanına yönlendirilir. Bir anahtar
+([bir tane oluşturun](https://app.getnadir.com/dashboard/api-keys)) kullanıldığında her karar
+Nadir kontrol panelinize kaydedilir. Tam kurulum ve doğrulama:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Sistemden çıkanlar: son kullanıcı mesajının metni (ilk 16 bin karakter), aday
+Sistem dışına gönderilenler: son kullanıcı mesajının metni (ilk 16 bin karakter), aday
 model kimlikleri ve bir `source: "omniroute"` kanal etiketi. Sistem istemi, geçmiş, araçlar veya
 üstbilgiler gönderilmez.
 
-Hata davranışı açık kalacak şekildedir: zaman aşımı (varsayılan 2000 ms), 2xx olmayan bir yanıt, erişilemeyen
-ana makine, hatalı biçimlendirilmiş yanıt veya havuz dışında bir seçim durumunda `rules`
-kararı uygulanır ve nedenin başına `NadirStrategy: fallback (…)` eklenir. Başarısız bir çağrıdan sonra
-strateji 30 saniye boyunca ağı atlar; böylece bir kesinti, istek başına bir zaman aşımı yerine
-30 saniyede bir zaman aşımına neden olur. Yönlendirme olayları yalnızca seçimi gerçekten Nadir
-yaptığında `strategy: "nadir"` bildirir.
+Hata durumundaki davranış açık hata modudur: zaman aşımı (varsayılan 2000 ms), 2xx dışı yanıt, erişilemeyen
+sunucu, hatalı biçimlendirilmiş yanıt veya havuz dışında bir seçim durumunda `rules`
+kararı kullanılır ve nedenin başına `NadirStrategy: fallback (…)` eklenir. Başarısız bir çağrıdan sonra
+strateji 30 saniye boyunca ağı kullanmaz; böylece bir kesinti, her istek için bir zaman aşımı yerine
+30 saniyede bir zaman aşımına neden olur. Yönlendirme olayları yalnızca seçimi gerçekten Nadir yaptığında
+`strategy: "nadir"` bildirir.
 
-**Ne zaman kullanılmalı**: Model katmanlarını kapsayan bir havuzdaki farklı zorluk seviyelerine sahip trafik için (küçük, orta
-ve öncü bir model); her zaman öncü modeli kullanmanın maliyetini azaltmak istediğinizde.
+**Ne zaman kullanılmalı**: Farklı model katmanlarını kapsayan bir havuzdaki (küçük, orta seviye
+ve öncü bir model) karışık zorluktaki trafikte, her zaman öncü modeli kullanmanın maliyetini azaltmak istediğinizde.
 
 **Takma ad**: `nadir` (takma adı yok)
 
@@ -756,7 +759,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Ardından kullanın:
+Ardından bunu kullanın:
 
 ```json
 {
@@ -771,16 +774,16 @@ Ardından kullanın:
 
 ### Yönlendirici stratejisi seçim kılavuzu
 
-| Kullanım alanı           | Strateji    | Neden                                      |
-| ------------------------ | ----------- | ------------------------------------------ |
-| Dengeli iş yükü          | `rules`     | Varsayılan — tüm faktörleri dikkate alır   |
-| Maliyeti en aza indirme  | `cost`      | Her zaman en ucuzu seçer                   |
-| Gecikmeyi en aza indirme | `latency`   | En hızlı, güvenilir sağlayıcıyı seçer      |
-| Sıkı SLO'lar             | `sla-aware` | p95/hata/maliyet eşiklerine göre filtreler |
-| Çok turlu sohbet         | `lkgp`      | Oturum bağlılığı                           |
-| Değişken zorluk          | `nadir`     | Her istem için model katmanını seçer       |
+| Kullanım durumu   | Strateji    | Neden                                      |
+| ----------------- | ----------- | ------------------------------------------ |
+| Dengeli iş yükü   | `rules`     | Varsayılan — tüm faktörleri dikkate alır   |
+| Maliyeti azaltma  | `cost`      | Her zaman en ucuz olanı seçer              |
+| Gecikmeyi azaltma | `latency`   | En hızlı ve güvenilir sağlayıcıyı seçer    |
+| Katı SLO'lar      | `sla-aware` | p95/hata/maliyet eşiklerine göre filtreler |
+| Çok turlu sohbet  | `lkgp`      | Oturum bağlılığı                           |
+| Değişken zorluk   | `nadir`     | Her istem için model katmanını seçer       |
 
-SLA'ya duyarlı alanlar:
+SLA uyumlu alanlar:
 
 ```json
 {

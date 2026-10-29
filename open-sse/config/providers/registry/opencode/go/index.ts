@@ -51,6 +51,16 @@ export const opencode_goProvider: RegistryEntry = {
     // #8353: Kimi K3 base + max-effort alias from the OpenCode Go registry.
     { id: "kimi-k3", name: "Kimi K3", supportsReasoning: true, supportedThinkingEfforts: ["max"] },
     { id: "kimi-k3-max", name: "Kimi K3 (max effort)", supportsReasoning: true },
+    // Kimi K3.1 Pro — chat-completions lane only, always-on Kimi thinking (OpenCode Go
+    // docs 2026-10-23). No effort aliases: Go lists none for this id.
+    {
+      id: "kimi-k3.1-pro",
+      name: "Kimi K3.1 Pro",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+      supportsReasoning: true,
+      supportsVision: true,
+    },
     // MiMo-V2.5 — base model + effort-tier aliases (#6922).
     { id: "mimo-v2.5-pro", name: "MiMo-V2.5-Pro", supportsReasoning: true },
     {
@@ -273,7 +283,9 @@ export const opencode_goProvider: RegistryEntry = {
     },
     // #12674: Muse Spark 1.3 Contributor — base + effort-tier aliases from the
     // OpenCode Go registry (`opencode models opencode-go --refresh --verbose`;
-    // exact suffix set: minimal/low/medium/high/xhigh, no max — same as 1.2).
+    // exact suffix set: minimal/low/medium/high/xhigh — same as 1.2). #12687 adds
+    // a `-max` variant: the executor sends `max` verbatim and retries once with
+    // `xhigh` only if upstream rejects it (dispatchWithMuseSparkMaxFallback).
     // Upstream serves Muse Spark only on the Responses API; without
     // targetFormat:"openai-responses" these fall through to /chat/completions
     // and the upstream returns 500 (same class as #12196).
@@ -336,6 +348,17 @@ export const opencode_goProvider: RegistryEntry = {
     {
       id: "muse-spark-1.3-contributor-xhigh",
       name: "Muse Spark 1.3 Contributor (xhigh effort)",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+      supportsReasoning: true,
+      supportsVision: true,
+      supportsAudio: true,
+      supportsVideo: true,
+      targetFormat: "openai-responses",
+    },
+    {
+      id: "muse-spark-1.3-contributor-max",
+      name: "Muse Spark 1.3 Contributor (max effort)",
       contextLength: 1048576,
       maxOutputTokens: 131072,
       supportsReasoning: true,

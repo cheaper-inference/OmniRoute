@@ -16,34 +16,34 @@ AgentBridge yra „OmniRoute“ MITM („Man-in-the-Middle“, tarpininko) tarpi
 
 ### Kas yra AgentBridge?
 
-Kai IDE agentas (pvz., GitHub Copilot, Cursor, Claude Code) atlieka API užklausą, jis jungiasi tiesiogiai prie pirminio AI teikėjo (OpenAI, Anthropic ir kt.). AgentBridge skaidriai perima šį ryšį TLS lygmenyje — nereikalaujant jokių agento konfigūracijos pakeitimų — ir perrašo užklausą per OmniRoute.
+Kai IDE agentas (pvz., GitHub Copilot, Cursor, Claude kodas) atlieka API skambutį, jis tiesiogiai prisijungia prie AI tiekėjo prieš srovę (OpenAI, Anthropic ir kt.). AgentBridge skaidriai perima tą ryšį TLS lygiu – nereikalaujant jokių agento konfigūracijos pakeitimų – ir perrašo užklausą per OmniRoute.
 
 Tai reiškia, kad galite:
 
-- **Peradresuoti bet kurį agentą bet kuriam teikėjui**: Copilot bendrauja su OpenAI? Nukreipkite jį į Anthropic Claude, Gemini ar bet kurį iš 375 OmniRoute teikėjų.
-- **Taikyti modelių susiejimus**: `gemini-3-flash` → `claude-sonnet-4.7` skaidriai apdorotojo (handler) lygmenyje.
-- **Stebėti visą agentų srautą**: kiekviena perimta užklausa publikuojama [Srauto inspektoriuje](./TRAFFIC_INSPECTOR.md).
-- **Pasinaudoti OmniRoute atsparumu**: kombinuotas maršrutizavimas, grandinės pertraukikliai, atsarginiai variantai ir sąnaudų stebėjimas veikia ir IDE agentų srautui.
+- **Peradresuokite bet kurį agentą bet kuriam teikėjui** : Copilot kalbi su OpenAI? Nukreipkite jį į Anthropic Claude, Gemini arba bet kurį iš OmniRoute 377 teikėjų.
+- **Taikykite modelių atvaizdus** : `gemini-3-flash` → `claude-sonnet-4.7` skaidriai prižiūrėtojo lygyje.
+- **Stebėkite visą agento srautą** : kiekvienas perimtas prašymas paskelbiamas [eismo inspektoriui](./TRAFFIC_INSPECTOR.md).
+- **Taikykite OmniRoute atsparumą** : kombinuotas maršruto parinkimas, grandinės pertraukikliai, atsarginės dalys ir išlaidų stebėjimo darbai, skirti IDE agentų srautui.
 
-### Pozicionavimas rinkos atžvilgiu
+### Padėties nustatymas prieš rinką
 
-| Funkcija                   | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| -------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot             |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                 |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex               |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                 |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries             |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                |    —    |    —     |        ✓        |             ✓             |
-| Open Code                  |    —    |    —     |        ✓        |             ✓             |
-| Trae                       |    —    |    —     |        —        |        🔍 Tiriama         |
-| Informacijos suvestinės UI |    ✓    |    ✗     |        ✗        |             ✓             |
-| Srauto inspektorius        |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute maršrutizavimas  |    ✗    |    ✗     |        ✗        |             ✓             |
-| Modelių susiejimo UI       |    ✗    |    ✗     |        ✗        |             ✓             |
-| Aplenkimo sąrašas          |    ✗    |    ✗     |        ✓        |             ✓             |
-| Pirminio CA sertifikatas   |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funkcija                       | 9 maršrutizatorius | anti-api | llm-perėmėjas | **OmniRoute AgentBridge** |
+| ------------------------------ | :----------------: | :------: | :-----------: | :-----------------------: |
+| Antigravity                    |         ✓          |    ✓     |       —       |             ✓             |
+| GitHub Copilot                 |         ✓          |    ✓     |       —       |             ✓             |
+| Kiro (AWS)                     |         ✓          |    ✓     |       —       |             ✓             |
+| OpenAI Codex                   |         —          |    ✓     |       —       |             ✓             |
+| Cursor IDE                     |         ✓          |    ✓     |       —       |             ✓             |
+| Zed Industries                 |         —          |    ✓     |       —       |             ✓             |
+| Claude kodas                   |         —          |    —     |       ✓       |             ✓             |
+| Atidaryti kodą                 |         —          |    —     |       ✓       |             ✓             |
+| Trae                           |         —          |    —     |       —       |        🔍 Tiriant         |
+| Prietaisų skydelis UI          |         ✓          |    ✗     |       ✗       |             ✓             |
+| Eismo inspektorius             |         ✗          |    ✗     |       ✓       |             ✓             |
+| OmniRoute maršrutizavimas      |         ✗          |    ✗     |       ✗       |             ✓             |
+| Modelio žemėlapių sudarymas UI |         ✗          |    ✗     |       ✗       |             ✓             |
+| Apėjimo sąrašas                |         ✗          |    ✗     |       ✓       |             ✓             |
+| Prieš srovę CA sertifikatas    |         ✗          |    ✗     |       ✓       |             ✓             |
 
 ---
 
