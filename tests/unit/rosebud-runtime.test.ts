@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, mkdir, writeFile, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { RosebudRuntime } from "../../open-sse/services/rosebud/runtime.ts";
@@ -159,6 +159,115 @@ test("concurrent identical requests never submit two paid jobs", async () => {
     assert.ok(results.some((result) => result.status === "fulfilled"));
     assert.equal(submissions, 1);
   } finally {
+    if (previous === undefined) delete process.env.ROSEBUD_DATA_DIR;
+    else process.env.ROSEBUD_DATA_DIR = previous;
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("separate route modules respect an active job owner's process lease", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "rosebud-routes-"));
+  const previous = process.env.ROSEBUD_DATA_DIR;
+  process.env.ROSEBUD_DATA_DIR = dir;
+  let release!: () => void, started!: () => void;
+  const waiting = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const entered = new Promise<void>((resolve) => {
+    started = resolve;
+  });
+  let submissions = 0;
+  const first = new RosebudRuntime(async (_profile, args) => {
+    if (args[1] === "models") return { models: [model] };
+    if (args[1] === "quote") {
+      started();
+      await waiting;
+      return { credits: 250 };
+    }
+    submissions++;
+    return { id: "first", status: "running" };
+  });
+  let pending: Promise<unknown> | undefined;
+  try {
+    const request = { model: model.id, input: { prompt: "x" }, idempotencyKey: "shared" };
+    pending = first.generate("one", request);
+    await entered;
+    const { createHash } = await import("node:crypto");
+    const id = createHash("sha256")
+      .update(JSON.stringify(["one", "shared"]))
+      .digest("hex");
+    // Exercise the pre-save crash window while the original owner remains alive.
+    await rm(join(dir, "jobs", id, "job.json"));
+    const other = (await import(
+      new URL("../../open-sse/services/rosebud/runtime.ts?separate-route", import.meta.url).href
+    )) as typeof import("../../open-sse/services/rosebud/runtime.ts");
+    const second = new other.RosebudRuntime(async (_profile, args) => {
+      if (args[1] === "models") return { models: [model] };
+      if (args[1] === "quote") return { credits: 250 };
+      submissions++;
+      return { id: "second", status: "running" };
+    });
+    await assert.rejects(second.generate("one", request), /job_busy/);
+    release();
+    await pending;
+    assert.equal(submissions, 1);
+  } finally {
+    release();
+    await pending?.catch(() => {});
+    if (previous === undefined) delete process.env.ROSEBUD_DATA_DIR;
+    else process.env.ROSEBUD_DATA_DIR = previous;
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("concurrent artifact readers never observe a partially downloaded file", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "rosebud-artifact-"));
+  const previous = process.env.ROSEBUD_DATA_DIR;
+  process.env.ROSEBUD_DATA_DIR = dir;
+  let release!: () => void, started!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const entered = new Promise<void>((resolve) => {
+    started = resolve;
+  });
+  const png = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 1, 2, 3, 4]);
+  const id = "a".repeat(64);
+  await mkdir(join(dir, "jobs", id), { recursive: true });
+  await writeFile(
+    join(dir, "jobs", id, "job.json"),
+    JSON.stringify({
+      id,
+      profile: "one",
+      model: "test-image",
+      category: "image",
+      status: "succeeded",
+      assetId: "asset",
+      upstreamId: "remote",
+      input: {},
+      fingerprint: "x",
+      updatedAt: new Date().toISOString(),
+    })
+  );
+  const runtime = new RosebudRuntime(async (_profile, args) => {
+    const out = args.at(-1)!;
+    await writeFile(out, png.subarray(0, 4));
+    started();
+    await gate;
+    await writeFile(out, png);
+    return {};
+  });
+  try {
+    const first = runtime.artifact("one", id);
+    await entered;
+    const second = runtime.artifact("one", id);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    release();
+    const results = await Promise.all([first, second]);
+    assert.ok(results.every((result) => result.data.equals(png)));
+    assert.ok((await readFile(join(dir, "jobs", id, "artifact"))).equals(png));
+  } finally {
+    release();
     if (previous === undefined) delete process.env.ROSEBUD_DATA_DIR;
     else process.env.ROSEBUD_DATA_DIR = previous;
     await rm(dir, { recursive: true, force: true });

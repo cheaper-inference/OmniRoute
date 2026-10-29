@@ -41,7 +41,9 @@ export type RosebudJob = {
   error?: string;
   updatedAt: string;
 };
-const processInstance = randomUUID();
+const PROCESS_INSTANCE = Symbol.for("omniroute.rosebud.processInstance");
+const processState = globalThis as typeof globalThis & { [PROCESS_INSTANCE]?: string };
+const processInstance = (processState[PROCESS_INSTANCE] ??= randomUUID());
 const ordered = (input: JsonObject) =>
   Object.fromEntries(Object.entries(input).sort(([a], [b]) => a.localeCompare(b)));
 const hash = (text: string) => createHash("sha256").update(text).digest("hex");
@@ -254,21 +256,55 @@ export class RosebudRuntime {
       await unlock();
     }
   }
-  async artifact(profile: string, id: string) {
-    const job = await this.refresh(profile, id);
-    if (job.status !== "succeeded" || !job.assetId) throw new RosebudError("asset_not_ready", 409);
-    const file = join(this.folder(id), "artifact");
+  private async download(profile: string, assetId: string, file: string, category: string) {
+    let exists = false;
     try {
-      await stat(file);
-    } catch {
-      await this.run(profile, ["assets", "download", job.assetId, "--out", file]);
+      exists = (await stat(file)).isFile();
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
+    if (!exists) {
+      const temporary = file + "." + randomUUID();
+      try {
+        await this.run(profile, ["assets", "download", assetId, "--out", temporary]);
+        const info = await stat(temporary);
+        if (!info.isFile() || info.size > 128 * 1024 * 1024)
+          throw new RosebudError("artifact_too_large", 413);
+        rosebudArtifactType(await readFile(temporary), category);
+        try {
+          await rename(temporary, file);
+        } catch (error) {
+          // Another downloader may have published this same completed asset on Windows.
+          if (!["EEXIST", "EPERM"].includes((error as NodeJS.ErrnoException).code || ""))
+            throw error;
+          await stat(file);
+        }
+      } finally {
+        await rm(temporary, { force: true });
+      }
     }
     const info = await stat(file);
     if (!info.isFile() || info.size > 128 * 1024 * 1024)
       throw new RosebudError("artifact_too_large", 413);
     const data = await readFile(file);
-    const mime = rosebudArtifactType(data, job.category);
-    return { data, job, mime, sha256: createHash("sha256").update(data).digest("hex") };
+    return {
+      data,
+      mime: rosebudArtifactType(data, category),
+      sha256: createHash("sha256").update(data).digest("hex"),
+    };
+  }
+  async artifact(profile: string, id: string) {
+    const job = await this.refresh(profile, id);
+    if (job.status !== "succeeded" || !job.assetId) throw new RosebudError("asset_not_ready", 409);
+    return {
+      ...(await this.download(
+        profile,
+        job.assetId,
+        join(this.folder(id), "artifact"),
+        job.category
+      )),
+      job,
+    };
   }
   async list(profile: string) {
     return this.run(profile, ["assets", "list"]);
@@ -277,21 +313,12 @@ export class RosebudRuntime {
     z.string().uuid().parse(assetId);
     const folder = join(rosebudRoot(), "downloads", profile, assetId);
     await mkdir(folder, { recursive: true, mode: 0o700 });
-    const file = join(folder, "artifact");
-    try {
-      await stat(file);
-    } catch {
-      await this.run(profile, ["assets", "download", assetId, "--out", file]);
-    }
-    const info = await stat(file);
-    if (!info.isFile() || info.size > 128 * 1024 * 1024)
-      throw new RosebudError("artifact_too_large", 413);
-    const data = await readFile(file);
+    const result = await this.download(profile, assetId, join(folder, "artifact"), "any");
     return {
       assetId,
-      b64_data: data.toString("base64"),
-      mime_type: rosebudArtifactType(data, "any"),
-      sha256: createHash("sha256").update(data).digest("hex"),
+      b64_data: result.data.toString("base64"),
+      mime_type: result.mime,
+      sha256: result.sha256,
     };
   }
 }
