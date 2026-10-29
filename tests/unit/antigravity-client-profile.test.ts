@@ -111,14 +111,16 @@ test("content header application emits IDE and CLI identities and strips fake he
 
   assert.match(ideHeaders["User-Agent"], /^antigravity\/ide\/2\.1\.1 /);
   assert.match(ideHeaders["User-Agent"], / darwin\/arm64$| windows\/amd64$| linux\/[^ ]+$/);
+  // 1.1.1 has no recorded changelist, so `cl=` is omitted rather than borrowed from 1.4.4.
   assert.match(
     cliHeaders["User-Agent"],
     /^antigravity\/cli\/1\.1\.1 \(aidev_client; os_type=.+; arch=.+; auth_method=consumer\)$/
   );
   assertIdentityHeadersAbsent(ideHeaders);
   assertIdentityHeadersAbsent(cliHeaders);
+  // The Go CLI (consumer auth) sends no quota-project header; only the IDE profile does.
   assert.equal(ideHeaders["x-goog-user-project"], "project-1");
-  assert.equal(cliHeaders["x-goog-user-project"], "project-1");
+  assert.equal(cliHeaders["x-goog-user-project"], undefined);
 });
 
 test("content headers omit x-goog-user-project for the aicode-consumers default project", () => {

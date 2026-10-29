@@ -194,9 +194,9 @@ JSON-RPC എൻഡ്പോയിന്റായ `/a2a` ആണ് ഔദ്യ�
 
 1. **സ്കിൽ ഫയൽ സൃഷ്ടിക്കുക:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` എന്ന async ഫങ്ഷൻ എക്സ്പോർട്ട് ചെയ്യുക. `smartRouting.ts` പോലുള്ള നിലവിലുള്ള സ്കില്ലുകളുടെ ഘടന പിന്തുടരുക.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` എന്ന async ഫംഗ്ഷൻ എക്സ്പോർട്ട് ചെയ്യുക. `smartRouting.ts` പോലുള്ള നിലവിലുള്ള സ്കില്ലുകളുടെ ഘടന പിന്തുടരുക.
 
-2. **ഹാൻഡ്ലർ രജിസ്റ്റർ ചെയ്യുക:** `src/lib/a2a/taskExecution.ts`-ലെ `A2A_SKILL_HANDLERS`-ലേക്ക് ഒരു എൻട്രി ചേർക്കുക:
+2. **ഹാൻഡ്ലർ രജിസ്റ്റർ ചെയ്യുക:** `src/lib/a2a/taskExecution.ts`-ൽ, `A2A_SKILL_HANDLERS`-ലേക്ക് ഒരു എൻട്രി ചേർക്കുക:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -208,7 +208,7 @@ JSON-RPC എൻഡ്പോയിന്റായ `/a2a` ആണ് ഔദ്യ�
    };
    ```
 
-3. **ഏജന്റ് കാർഡിൽ പ്രദർശിപ്പിക്കുക:** `src/app/.well-known/agent.json/route.ts`-ലെ `skills` അറേയിലേക്ക് ചേർക്കുക:
+3. **Agent Card-ൽ ലഭ്യമാക്കുക:** `src/lib/a2a/agentCardMetadata.ts`-ൽ (`/.well-known/agent.json`, `/.well-known/agent-card.json` എന്നിവ പങ്കിടുന്നത്), `skills` അറേയിലേക്ക് ഇനിപ്പറയുന്നത് ചേർക്കുക:
 
    ```json
    {
@@ -220,7 +220,7 @@ JSON-RPC എൻഡ്പോയിന്റായ `/a2a` ആണ് ഔദ്യ�
    }
    ```
 
-4. **ടെസ്റ്റുകൾ എഴുതുക:** `tests/unit/a2a-<your-skill>.test.ts`. വിജയപാതയും പിശക് പാതയും ഉൾപ്പെടുത്തുക.
+4. **ടെസ്റ്റുകൾ എഴുതുക:** `tests/unit/a2a-<your-skill>.test.ts`. വിജയകരമായ പാതയും പിശക് പാതയും ഉൾപ്പെടുത്തുക.
 
 5. ഈ ഫയലിലെ `Available Skills` പട്ടികയിൽ പുതിയ സ്കിൽ **രേഖപ്പെടുത്തുക**.
 

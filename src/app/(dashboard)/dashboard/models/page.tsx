@@ -54,6 +54,10 @@ import {
   restrictModelFiltersToOptions,
   type CatalogTab,
 } from "./catalogUrlState";
+import { useApiKeyAccessIndex } from "./useApiKeyAccessIndex";
+import CatalogKeyAssignDialog from "./CatalogKeyAssignDialog";
+import CatalogKeyAccessButton from "./CatalogKeyAccessButton";
+import { isKeyAssignableModel, type AssignItem } from "./keyAccessAssignUtils";
 import { useCatalogTestRunner } from "./useCatalogTestRunner";
 import { useCatalogVisibility } from "./useCatalogVisibility";
 
@@ -595,6 +599,40 @@ function useCatalogPageBulkActions(
 
   return { confirmPendingBulkRun, handleTestSelected, handleTestAllFiltered };
 }
+function useCatalogPageAssignment(state: ReturnType<typeof useCatalogPageState>) {
+  const keyIndex = useApiKeyAccessIndex();
+  const [assignKind, setAssignKind] = useState<CatalogTab | null>(null);
+  const openAssign = (kind: CatalogTab) => {
+    setAssignKind(kind);
+    void keyIndex.ensureLoaded();
+  };
+  const selectedModelRows = state.models.filter((m) =>
+    state.selectedModelIds.has(`${m.providerId}:${m.id}`)
+  );
+  const assignItems: AssignItem[] =
+    assignKind === "models"
+      ? selectedModelRows
+          .filter(isKeyAssignableModel)
+          .map((model) => ({ id: model.id, providerId: model.providerId }))
+      : state.combos
+          .filter((combo) => state.selectedComboIds.has(combo.id))
+          .map((combo) => ({ id: combo.name }));
+  const excludedAssignCount =
+    assignKind === "models" ? selectedModelRows.length - assignItems.length : 0;
+  return { keyIndex, assignKind, setAssignKind, openAssign, assignItems, excludedAssignCount };
+}
+function CatalogAssignmentDialog({ context }: { context: CatalogPageContext }) {
+  const { assignKind, assignItems, excludedAssignCount, keyIndex, setAssignKind } = context;
+  return assignKind ? (
+    <CatalogKeyAssignDialog
+      kind={assignKind}
+      items={assignItems}
+      excludedCount={excludedAssignCount}
+      index={keyIndex}
+      onClose={() => setAssignKind(null)}
+    />
+  ) : null;
+}
 /** Hide/show controls, offered once the catalog carries visibility data (`includeHidden`). */
 function useCatalogPageVisibility(
   state: ReturnType<typeof useCatalogPageState>,
@@ -629,8 +667,10 @@ function useCatalogPageContext() {
   const options = useCatalogPageOptions(state);
   const actions = useCatalogPageActions(state, options);
   const bulk = useCatalogPageBulkActions(state, actions);
+  const assignment = useCatalogPageAssignment(state);
   const visibility = useCatalogPageVisibility(state, loading, actions);
   return {
+    ...assignment,
     ...state,
     ...loading,
     ...options,
@@ -752,6 +792,7 @@ function CatalogModelsBulkActions({ context }: { context: CatalogPageContext }) 
     clearResults,
     visibilityActions,
   } = context;
+  const { openAssign } = context;
   return (
     <>
       <CatalogBulkActionBar
@@ -764,6 +805,7 @@ function CatalogModelsBulkActions({ context }: { context: CatalogPageContext }) 
         onTestFiltered={handleTestAllFiltered}
         onCancel={cancelTest}
         onClearResults={clearResults}
+        onAssign={() => openAssign("models")}
         visibilityActions={visibilityActions}
       />
     </>
@@ -832,6 +874,7 @@ function CatalogModelsResults({ context }: { context: CatalogPageContext }) {
     toggleModelVisibility,
     visibilityBusy,
   } = context;
+  const { keyIndex } = context;
   return (
     <ModelCatalogTable
       rows={modelPage.rows}
@@ -873,6 +916,16 @@ function CatalogModelsResults({ context }: { context: CatalogPageContext }) {
       onTestModel={testSingleModel}
       providerHealthMap={providerHealthMap}
       bulkRunning={running}
+      renderKeyAccess={(model) =>
+        isKeyAssignableModel(model) ? (
+          <CatalogKeyAccessButton
+            kind="models"
+            id={model.id}
+            providerId={model.providerId}
+            index={keyIndex}
+          />
+        ) : null
+      }
       onToggleVisibility={toggleModelVisibility}
       visibilityBusy={visibilityBusy}
     />
@@ -939,6 +992,7 @@ function CatalogCombosBulkActions({ context }: { context: CatalogPageContext }) 
     cancelTest,
     clearResults,
   } = context;
+  const { openAssign } = context;
   return (
     <>
       <CatalogBulkActionBar
@@ -951,6 +1005,7 @@ function CatalogCombosBulkActions({ context }: { context: CatalogPageContext }) 
         onTestFiltered={handleTestAllFiltered}
         onCancel={cancelTest}
         onClearResults={clearResults}
+        onAssign={() => openAssign("combos")}
       />
     </>
   );
@@ -1012,6 +1067,7 @@ function CatalogCombosResults({ context }: { context: CatalogPageContext }) {
     activeItemKeys,
     testSingleCombo,
   } = context;
+  const { keyIndex } = context;
   return (
     <ComboCatalogTable
       rows={comboPage.rows}
@@ -1039,6 +1095,7 @@ function CatalogCombosResults({ context }: { context: CatalogPageContext }) {
       onPrevious={() => setRequestedComboPage((c) => Math.max(0, c - 1))}
       onNext={() => setRequestedComboPage((c) => Math.min(comboPage.pageCount - 1, c + 1))}
       bulkRunning={running}
+      renderKeyAccess={(id) => <CatalogKeyAccessButton kind="combos" id={id} index={keyIndex} />}
     />
   );
 }
@@ -1070,6 +1127,7 @@ export default function ModelCatalogPage() {
       <CatalogHeader context={context} />
       <CatalogModelsPanel context={context} />
       <CatalogCombosPanel context={context} />
+      <CatalogAssignmentDialog context={context} />
       <CatalogBulkConfirmation context={context} />
     </div>
   );

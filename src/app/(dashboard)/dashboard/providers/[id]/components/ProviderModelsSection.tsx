@@ -247,7 +247,10 @@ export default function ProviderModelsSection({
     </>
   );
 
-  const clearAllButton = (modelMeta.customModels.length > 0 || providerAliasEntries.length > 0) && (
+  const clearAllButton = (modelMeta.customModels.length > 0 ||
+    providerAliasEntries.length > 0 ||
+    syncedAvailableModels.length > 0 ||
+    (modelMeta.modelCompatOverrides?.length ?? 0) > 0) && (
     <Button
       size="sm"
       variant="danger"
@@ -413,23 +416,27 @@ export default function ProviderModelsSection({
     );
   }
 
-  const importButton = allowModelImport ? (
-    <ActionBar align="start" className="mb-4">
-      <Button
-        size="sm"
-        variant="secondary"
-        icon="download"
-        onClick={handleImportModels}
-        disabled={!canImportModels || importingModels}
-      >
-        {importingModels ? t("importingModels") : t("importFromModels")}
-      </Button>
-      {modelDiscoveryControls}
-      {!canImportModels && (
-        <span className="text-xs text-text-muted">{t("addConnectionToImport")}</span>
-      )}
-    </ActionBar>
-  ) : null;
+  const importButton =
+    allowModelImport || clearAllButton ? (
+      <ActionBar align="start" className="mb-4">
+        {allowModelImport && (
+          <Button
+            size="sm"
+            variant="secondary"
+            icon="download"
+            onClick={handleImportModels}
+            disabled={!canImportModels || importingModels}
+          >
+            {importingModels ? t("importingModels") : t("importFromModels")}
+          </Button>
+        )}
+        {allowModelImport && modelDiscoveryControls}
+        {clearAllButton}
+        {allowModelImport && !canImportModels && (
+          <span className="text-xs text-text-muted">{t("addConnectionToImport")}</span>
+        )}
+      </ActionBar>
+    ) : null;
 
   if (models.length === 0) {
     return (
