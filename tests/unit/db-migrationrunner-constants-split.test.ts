@@ -70,8 +70,17 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 39 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 39);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 44 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 44);
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "daily_cached_input"),
+      ["206", "213", "214", "215", "217"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "daily_cached_input",
+        toVersion: "224",
+        toName: "daily_cached_input",
+      }))
+    );
     for (const e of RENAMED_MIGRATION_COMPATIBILITY) {
       assert.equal(typeof e.fromVersion, "string");
       assert.equal(typeof e.fromName, "string");

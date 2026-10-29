@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
-import { getProviderById } from "@/shared/constants/providers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { serveAnalyticsCached } from "@/lib/usage/analyticsResponseCache";
 import { getApiKeys } from "@/lib/db/apiKeys";
@@ -19,7 +18,6 @@ import {
   getAccountUsageRows,
   getApiKeyUsageRows,
   getApiKeyTotalsRows,
-  type ApiKeyTotalsRow,
   getServiceTierUsageRows,
   getApiKeyMetadataRows,
   getWeeklyPatternRows,
@@ -27,8 +25,23 @@ import {
 } from "@/lib/db/usageAnalytics";
 import { getFallbackStats, getErrorTypeBreakdown } from "@/lib/db/callLogStats";
 import { buildByProviderRows } from "@/lib/usage/providerDisplayNames";
-import { isFlatRateProvider } from "@/lib/usage/flatRateProviders";
-import { toNumber } from "@/shared/utils/numeric";
+import {
+  toStringValue,
+  roundCost,
+  normalizeServiceTier,
+  getServiceTierLabelId,
+  computeUsageRowCost,
+  computeUsageRowStandardCost,
+  computeUsageSavingsTokens,
+  type PricingResolutionContext,
+} from "@/lib/usage/analyticsPricing";
+import { getCachedInputAnalytics } from "@/lib/db/cachedInputAnalytics";
+import {
+  addApiKeyAlias,
+  buildApiKeyTotals,
+  buildApiKeyUsage,
+  makeApiKeyUsageGroup,
+} from "@/lib/usage/analyticsApiKeys";
 
 function getRangeStartIso(range: string): string | null {
   const end = new Date();
@@ -69,408 +82,8 @@ const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 type PricingByProvider = Record<string, Record<string, Record<string, unknown>>>;
 type UsageRows = Array<Record<string, unknown>>;
-type ComputeCostFromPricing = (
-  pricing: Record<string, unknown> | null | undefined,
-  tokens: Record<string, number | undefined> | null | undefined,
-  options?: Record<string, unknown>
-) => number;
-type GetCodexFastCostMultiplier = (
-  provider: string | null | undefined,
-  model: string | null | undefined,
-  serviceTier: string | null | undefined
-) => number;
-
-function toStringValue(value: unknown, fallback = ""): string {
-  return typeof value === "string" && value.trim().length > 0 ? value : fallback;
-}
-
-function roundCost(value: number): number {
-  return Math.round(value * 1_000_000) / 1_000_000;
-}
-
-function normalizeServiceTier(value: unknown): "standard" | "priority" | "flex" {
-  const tier = typeof value === "string" ? value.trim().toLowerCase() : "";
-  if (tier === "priority" || tier === "fast") return "priority";
-  if (tier === "flex") return "flex";
-  return "standard";
-}
-
-function getServiceTierLabelId(serviceTier: string): string {
-  return normalizeServiceTier(serviceTier);
-}
-
 function appendWhereCondition(whereClause: string, condition: string): string {
   return whereClause ? `${whereClause} AND (${condition})` : `WHERE (${condition})`;
-}
-
-function findKeyInsensitive(obj: Record<string, any> | undefined | null, key: string): any {
-  if (!obj || !key) return undefined;
-  return obj[key.toLowerCase()];
-}
-
-function uniqueValues(values: Array<string | null | undefined>): string[] {
-  const seen = new Set<string>();
-  const result: string[] = [];
-  for (const value of values) {
-    const normalized = typeof value === "string" ? value.trim().toLowerCase() : "";
-    if (!normalized || seen.has(normalized)) continue;
-    seen.add(normalized);
-    result.push(normalized);
-  }
-  return result;
-}
-
-function makeApiKeyUsageGroup(apiKeyId: string, fallbackName: string): string {
-  return apiKeyId ? `id:${apiKeyId}` : `name:${fallbackName}`;
-}
-
-function addApiKeyAlias(target: Set<string>, value: unknown): void {
-  if (typeof value !== "string") return;
-  const trimmed = value.trim();
-  if (trimmed) target.add(trimmed);
-}
-
-type ApiKeyTotals = {
-  apiKeyId: string;
-  apiKeyName: string;
-  requests: number;
-  cost: number;
-  lastUsed: string | null;
-};
-
-/**
- * Lifetime totals for each current API key. Rows recorded before per-key ids
- * existed carry only a key name: they count toward last use, matched by name,
- * but not toward requests or cost.
- */
-function buildApiKeyTotals(
-  rows: ApiKeyTotalsRow[],
-  apiKeys: Array<{ id?: unknown; name?: unknown }>,
-  rowCost: (row: ApiKeyTotalsRow) => number
-): ApiKeyTotals[] {
-  const totalsById = new Map<string, ApiKeyTotals>();
-  const totalsByName = new Map<string, ApiKeyTotals[]>();
-  for (const apiKey of apiKeys) {
-    if (typeof apiKey.id !== "string" || typeof apiKey.name !== "string") continue;
-    const totals: ApiKeyTotals = {
-      apiKeyId: apiKey.id,
-      apiKeyName: apiKey.name,
-      requests: 0,
-      cost: 0,
-      lastUsed: null,
-    };
-    totalsById.set(apiKey.id, totals);
-    totalsByName.set(apiKey.name, [...(totalsByName.get(apiKey.name) || []), totals]);
-  }
-
-  const noteLastUsed = (totals: ApiKeyTotals, lastUsed: string | null) => {
-    if (lastUsed && (!totals.lastUsed || lastUsed > totals.lastUsed)) totals.lastUsed = lastUsed;
-  };
-  for (const row of rows) {
-    if (!row.apiKeyId) {
-      for (const totals of totalsByName.get(row.apiKeyName || "") || []) {
-        noteLastUsed(totals, row.lastUsed);
-      }
-      continue;
-    }
-    const totals = totalsById.get(row.apiKeyId);
-    if (!totals) continue;
-    totals.requests += Number(row.requests) || 0;
-    totals.cost += rowCost(row);
-    noteLastUsed(totals, row.lastUsed);
-  }
-
-  return Array.from(totalsById.values(), (totals) => ({
-    ...totals,
-    cost: roundCost(totals.cost),
-  }));
-}
-
-function stripCodexEffortSuffix(model: string): string {
-  return model.replace(/-(?:xhigh|high|medium|low|none)$/i, "");
-}
-
-function getPricingModelCandidates(
-  model: string,
-  normalizeModelName: (model: string) => string
-): string[] {
-  const normalizedModel = normalizeModelName(model);
-  const lowerModel = model.toLowerCase();
-  const lowerNormalized = normalizedModel.toLowerCase();
-  const hyphenModel = lowerModel.replace(/\./g, "-");
-  const hyphenNormalized = lowerNormalized.replace(/\./g, "-");
-  const effortBaseModel = stripCodexEffortSuffix(lowerNormalized);
-
-  return uniqueValues([
-    lowerModel,
-    lowerNormalized,
-    hyphenModel,
-    hyphenNormalized,
-    effortBaseModel,
-    effortBaseModel.replace(/\./g, "-"),
-    lowerNormalized === "codex-auto-review" ? "gpt-5.5" : null,
-  ]);
-}
-
-type PricingResolutionContext = {
-  cache: Map<string, Record<string, unknown> | null>;
-  reverseAlias: Record<string, string>;
-  misses?: { count: number };
-};
-
-function buildPricingCacheKey(provider: string, model: string, serviceTier: string): string {
-  return `${provider}\n${model}\n${serviceTier}`;
-}
-
-function resolveModelPricingUncached(
-  pricingByProvider: PricingByProvider,
-  providerAliasMap: Record<string, string>,
-  providerRaw: string,
-  model: string,
-  normalizeModelName: (model: string) => string,
-  reverseAlias?: Record<string, string>
-): Record<string, unknown> | null {
-  const pLower = (providerRaw || "").toLowerCase();
-
-  let providerPricing = findKeyInsensitive(pricingByProvider, pLower);
-
-  if (!providerPricing) {
-    // providerAliasMap maps ID -> ALIAS. So if pLower is "codex", alias is "cx".
-    const alias = providerAliasMap[pLower];
-    if (alias) {
-      providerPricing = findKeyInsensitive(pricingByProvider, alias);
-    }
-  }
-
-  if (!providerPricing) {
-    const reverse = reverseAlias ?? providerAliasMap;
-    // In case pLower was ALIAS and we want to try the ID (reverse search values)
-    for (const [id, alias] of Object.entries(reverse)) {
-      if (alias.toLowerCase() === pLower) {
-        providerPricing = findKeyInsensitive(pricingByProvider, id);
-        if (providerPricing) break;
-      }
-    }
-  }
-
-  if (!providerPricing) {
-    const np = pLower.replace(/-cn$/, "");
-    if (np && np !== pLower) {
-      providerPricing = findKeyInsensitive(pricingByProvider, np);
-    }
-  }
-
-  // Hardcoded known fallbacks
-  if (!providerPricing) {
-    if (pLower === "antigravity") providerPricing = findKeyInsensitive(pricingByProvider, "ag");
-  }
-
-  const modelCandidates = getPricingModelCandidates(model, normalizeModelName);
-
-  const tryFind = (prov: Record<string, unknown> | null | undefined) => {
-    if (!prov || typeof prov !== "object") return null;
-    for (const candidate of modelCandidates) {
-      const pricing = findKeyInsensitive(prov as Record<string, unknown>, candidate);
-      if (pricing) return pricing;
-    }
-    return null;
-  };
-
-  let pricing = providerPricing ? tryFind(providerPricing) : null;
-
-  if (!pricing) {
-    // Global fallback: search all providers for this exact model (helps with aliases)
-    for (const prov of Object.values(pricingByProvider)) {
-      const found = tryFind(prov as Record<string, unknown>);
-      if (found) {
-        pricing = found;
-        break;
-      }
-    }
-  }
-
-  // Short-circuit :free models to $0 (they have no pricing entry → should not fall back to arbitrary rates)
-  if (!pricing && model.endsWith(":free")) {
-    return null;
-  }
-
-  // Last resort fallback for historical usage (e.g. "gpt-4" missing, matches "gpt-4.1")
-  if (!pricing && providerPricing && typeof providerPricing === "object") {
-    for (const [key, val] of Object.entries(providerPricing as Record<string, unknown>)) {
-      const lm = model.toLowerCase();
-      if (key.includes(lm) || lm.includes(key)) {
-        pricing = val;
-        break;
-      }
-    }
-  }
-
-  return pricing as Record<string, unknown> | null;
-}
-
-function resolvePricingWithContext(
-  pricingByProvider: PricingByProvider,
-  providerAliasMap: Record<string, string>,
-  providerRaw: string,
-  model: string,
-  serviceTier: string,
-  normalizeModelName: (model: string) => string,
-  context: PricingResolutionContext
-): Record<string, unknown> | null {
-  const key = buildPricingCacheKey(providerRaw, model, serviceTier);
-  if (context.cache.has(key)) return context.cache.get(key) ?? null;
-  const resolved = resolveModelPricingUncached(
-    pricingByProvider,
-    providerAliasMap,
-    providerRaw,
-    model,
-    normalizeModelName,
-    context.reverseAlias
-  );
-  context.cache.set(key, resolved);
-  if (context.misses) context.misses.count += 1;
-  return resolved;
-}
-
-function resolveModelPricing(
-  pricingByProvider: PricingByProvider,
-  providerAliasMap: Record<string, string>,
-  providerRaw: string,
-  model: string,
-  normalizeModelName: (model: string) => string,
-  serviceTier?: string,
-  context?: PricingResolutionContext
-): Record<string, unknown> | null {
-  if (!context) {
-    return resolveModelPricingUncached(
-      pricingByProvider,
-      providerAliasMap,
-      providerRaw,
-      model,
-      normalizeModelName
-    );
-  }
-  return resolvePricingWithContext(
-    pricingByProvider,
-    providerAliasMap,
-    providerRaw,
-    model,
-    serviceTier ?? "",
-    normalizeModelName,
-    context
-  );
-}
-
-function computeUsageRowCost(
-  row: Record<string, unknown>,
-  pricingByProvider: PricingByProvider,
-  providerAliasMap: Record<string, string>,
-  normalizeModelName: (model: string) => string,
-  computeCostFromPricing: ComputeCostFromPricing,
-  flatRateAsZero = true,
-  pricingContext?: PricingResolutionContext
-): number {
-  const provider = toStringValue(row.provider);
-  const model = toStringValue(row.model);
-  if (!provider || !model) return 0;
-  const serviceTier = normalizeServiceTier(row.serviceTier ?? row.service_tier);
-  const isAggregated = toNumber(row.isAggregated ?? row.is_aggregated) > 0;
-  const storedCost = toNumber(row.storedCost ?? row.stored_cost);
-
-  // Billed-cost views show flat-rate providers as $0, whatever was stored.
-  if (flatRateAsZero && isFlatRateProvider(provider)) return 0;
-  if (isAggregated) {
-    // New rollups preserve the exact API-equivalent value calculated before
-    // cache/reasoning token dimensions are discarded. Legacy zero-cost rows
-    // fall through to the best available input/output-token estimate.
-    if (storedCost > 0) return storedCost;
-  }
-
-  // Raw rows: `storedCost` is the provider-reported exact cost of the rows that
-  // carry one, and the `cost*Tokens` sums exclude those rows' tokens, so a
-  // request with a reported cost is never priced a second time from its tokens.
-  const rawStoredCost = isAggregated ? 0 : storedCost;
-  const pricing = resolveModelPricing(
-    pricingByProvider,
-    providerAliasMap,
-    provider,
-    model,
-    normalizeModelName,
-    serviceTier,
-    pricingContext
-  );
-  if (!pricing) return rawStoredCost;
-
-  return (
-    rawStoredCost +
-    computeCostFromPricing(
-      pricing,
-      {
-        input: toNumber(row.costPromptTokens ?? row.promptTokens),
-        output: toNumber(row.costCompletionTokens ?? row.completionTokens),
-        cacheRead: toNumber(row.costCacheReadTokens ?? row.cacheReadTokens),
-        cacheCreation: toNumber(row.costCacheCreationTokens ?? row.cacheCreationTokens),
-        reasoning: toNumber(row.costReasoningTokens ?? row.reasoningTokens),
-      },
-      {
-        provider,
-        model,
-        serviceTier,
-        flatRateAsZero,
-      }
-    )
-  );
-}
-
-function computeUsageRowStandardCost(
-  row: Record<string, unknown>,
-  pricingByProvider: PricingByProvider,
-  providerAliasMap: Record<string, string>,
-  normalizeModelName: (model: string) => string,
-  computeCostFromPricing: ComputeCostFromPricing,
-  flatRateAsZero = true,
-  pricingContext?: PricingResolutionContext
-): number {
-  // A raw row's provider-reported cost has no standard-tier alternative to compare
-  // against, so it counts the same on both sides and yields no savings. A rollup's
-  // stored cost is tier-specific and is re-priced from its tokens instead.
-  const keepsReportedCost = toNumber(row.isAggregated ?? row.is_aggregated) === 0;
-  const reportedCost = keepsReportedCost ? toNumber(row.storedCost ?? row.stored_cost) : 0;
-  return computeUsageRowCost(
-    {
-      ...row,
-      serviceTier: "standard",
-      service_tier: "standard",
-      storedCost: reportedCost,
-      stored_cost: reportedCost,
-      isAggregated: 0,
-      is_aggregated: 0,
-    },
-    pricingByProvider,
-    providerAliasMap,
-    normalizeModelName,
-    computeCostFromPricing,
-    flatRateAsZero,
-    pricingContext
-  );
-}
-
-function computeUsageSavingsTokens(
-  row: Record<string, unknown>,
-  serviceTier: string,
-  getCodexFastCostMultiplier: GetCodexFastCostMultiplier
-): number {
-  const provider = toStringValue(row.provider);
-  const model = toStringValue(row.model);
-  const totalTokens = toNumber(row.totalTokens);
-  if (!provider || !model || totalTokens <= 0) return 0;
-
-  const standardMultiplier = getCodexFastCostMultiplier(provider, model, "standard");
-  if (standardMultiplier <= 0) return 0;
-
-  const actualMultiplier = getCodexFastCostMultiplier(provider, model, serviceTier);
-  const savingsRatio = Math.max(0, (standardMultiplier - actualMultiplier) / standardMultiplier);
-  return totalTokens * savingsRatio;
 }
 
 function formatUtcDate(date: Date): string {
@@ -608,9 +221,6 @@ async function computeAnalyticsResponse(
       whereClause,
       "(api_key_id IS NOT NULL AND api_key_id != '') OR (api_key_name IS NOT NULL AND api_key_name != '')"
     );
-
-    // The API Manager key list needs only per-key totals. Skip the full report,
-    // whose queries hold the event loop for seconds on large usage_history tables.
     if (searchParams.get("view") === "apiKeys") {
       const byApiKey = buildApiKeyTotals(
         getApiKeyTotalsRows(apiKeyWhereClause, params),
@@ -695,7 +305,18 @@ async function computeAnalyticsResponse(
     const fallbackRow = getFallbackStats(whereClause, params) as Record<string, unknown>;
     const errorBreakdown = getErrorTypeBreakdown(whereClause, params);
 
+    const cachedInput = getCachedInputAnalytics(
+      {
+        sinceIso: sinceIso ?? null,
+        untilIso: untilIso ?? null,
+        rawCutoffDate,
+        apiKeyWhere,
+        apiKeyParams: apiKeyParamEntries,
+      },
+      normalizeModelName
+    );
     const summary = {
+      ...cachedInput.summary,
       totalRequests: Number(summaryRow?.totalRequests || 0),
       promptTokens: Number(summaryRow?.promptTokens || 0),
       completionTokens: Number(summaryRow?.completionTokens || 0),
@@ -844,6 +465,7 @@ async function computeAnalyticsResponse(
 
     const byModel = Array.from(modelMap.values())
       .map((row) => ({
+        ...cachedInput.byModel.find((item) => normalizeModelName(item.model) === row.model),
         model: row.model,
         provider: row.provider,
         rawModel: row.rawModel,
@@ -912,48 +534,8 @@ async function computeAnalyticsResponse(
       cost: roundCost(accountCostByAccount.get(toStringValue(row.accountKey, "unknown")) || 0),
     }));
 
-    const apiKeyMap = new Map<
-      string,
-      {
-        apiKey: string;
-        apiKeyId: string | null;
-        apiKeyName: string;
-        historicalApiKeyNames: string[];
-        requests: number;
-        promptTokens: number;
-        completionTokens: number;
-        totalTokens: number;
-        cost: number;
-      }
-    >();
-    for (const row of apiKeyRows) {
-      const apiKeyId = toStringValue(row.apiKeyId);
-      const apiKeyGroupKey = toStringValue(row.apiKeyGroupKey, "unknown");
-      const key = makeApiKeyUsageGroup(apiKeyId, apiKeyGroupKey);
-      const metadata = apiKeyMetadata.get(key);
-      const apiKeyName =
-        (apiKeyId ? currentApiKeyNames.get(apiKeyId) : undefined) ||
-        metadata?.latestName ||
-        apiKeyId ||
-        apiKeyGroupKey ||
-        "Unknown API key";
-      const existing = apiKeyMap.get(key) || {
-        apiKey: apiKeyId && apiKeyName !== apiKeyId ? `${apiKeyName} (${apiKeyId})` : apiKeyName,
-        apiKeyId: apiKeyId || null,
-        apiKeyName,
-        historicalApiKeyNames: Array.from(metadata?.aliases || []),
-        requests: 0,
-        promptTokens: 0,
-        completionTokens: 0,
-        totalTokens: 0,
-        cost: 0,
-      };
-
-      existing.requests += Number(row.requests);
-      existing.promptTokens += Number(row.promptTokens);
-      existing.completionTokens += Number(row.completionTokens);
-      existing.totalTokens += Number(row.totalTokens);
-      existing.cost += computeUsageRowCost(
+    const byApiKey = buildApiKeyUsage(apiKeyRows, apiKeyMetadata, currentApiKeyNames, (row) =>
+      computeUsageRowCost(
         row,
         pricingByProvider,
         PROVIDER_ID_TO_ALIAS,
@@ -961,12 +543,8 @@ async function computeAnalyticsResponse(
         computeCostFromPricing,
         !includeFlatRateEstimates,
         pricingContext
-      );
-      apiKeyMap.set(key, existing);
-    }
-    const byApiKey = Array.from(apiKeyMap.values())
-      .map((row) => ({ ...row, cost: roundCost(row.cost) }))
-      .sort((left, right) => right.cost - left.cost);
+      )
+    );
 
     const serviceTierMap = new Map<
       string,
