@@ -43,7 +43,7 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("paid-credit account passes exhausted subscription snapshots and still falls back on credit exhaustion", async () => {
+test("paid credits wait for sibling subscription quota and still fall back on credit exhaustion", async () => {
   const quotaCache = await import("../../src/domain/quotaCache.ts");
   const { registerQuotaFetcher } = await import("../../open-sse/services/quotaPreflight.ts");
   const paid = await seedCodexConnection({
@@ -63,10 +63,11 @@ test("paid-credit account passes exhausted subscription snapshots and still fall
     session: { used: 100, total: 100, remainingPercentage: 0, resetAt },
   });
   let available = true;
+  let siblingPercentUsed = 0.2;
   const calls: string[] = [];
   registerQuotaFetcher("codex", async (id) => {
     calls.push(id);
-    const percentUsed = id === paid.id ? 1 : 0.2;
+    const percentUsed = id === paid.id ? 1 : siblingPercentUsed;
     return {
       used: percentUsed * 100,
       total: 100,
@@ -85,6 +86,21 @@ test("paid-credit account passes exhausted subscription snapshots and still fall
     };
   });
   try {
+    const first = await auth.getProviderCredentialsWithQuotaPreflight(
+      "codex",
+      null,
+      null,
+      "gpt-5.5"
+    );
+    assert.equal(first.connectionId, sibling.id, "subscription quota is spent before paid credits");
+    assert.deepEqual(calls, [sibling.id]);
+    first.releaseOAuthSession?.();
+
+    siblingPercentUsed = 1;
+    quotaCache.setQuotaCache(sibling.id, "codex", {
+      session: { used: 100, total: 100, remainingPercentage: 0, resetAt },
+    });
+    calls.length = 0;
     const selected = await auth.getProviderCredentialsWithQuotaPreflight(
       "codex",
       null,
@@ -98,6 +114,7 @@ test("paid-credit account passes exhausted subscription snapshots and still fall
       "paid-credit consent requires fresh preflight despite legacy opt-out"
     );
     selected.releaseOAuthSession?.();
+
     available = false;
     calls.length = 0;
     const next = await auth.getProviderCredentialsWithQuotaPreflight(
@@ -106,9 +123,9 @@ test("paid-credit account passes exhausted subscription snapshots and still fall
       null,
       "gpt-5.5"
     );
-    assert.equal(next.connectionId, sibling.id);
-    assert.deepEqual(calls, [paid.id, sibling.id]);
-    next.releaseOAuthSession?.();
+    assert.notEqual(next?.connectionId, paid.id, "exhausted credits fall back");
+    assert.equal(next?.allRateLimited, true);
+    assert.deepEqual(calls, [paid.id]);
   } finally {
     quotaCache.__clearForTests();
   }

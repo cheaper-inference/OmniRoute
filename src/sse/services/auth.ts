@@ -58,6 +58,7 @@ import {
   getQuotaWindowStatus,
   hydrateCodexQuotaCacheForRequest,
   isQuotaExhaustedForRequest,
+  isCodexSubscriptionExhaustedForRequest,
   getClaudeQuotaPreflightResetAt,
   resolveClaudeQuotaCooldownMs as resolveClaudeCooldown,
 } from "@/domain/quotaCache";
@@ -73,6 +74,7 @@ import {
   isConfiguredCutoff,
 } from "./quotaPreflightPolicy";
 export { shouldApplyQuotaCutoff, resolveMinRemainingPercent } from "./quotaPreflightPolicy";
+import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
 import {
   getQuotaScopeLabelForProvider,
   isAntigravityQuotaProvider,
@@ -296,6 +298,31 @@ function isTerminalConnectionStatusForModel(
 }
 
 export { resolveQuotaLimitPolicy, evaluateQuotaLimitPolicy } from "./quotaLimitPolicy";
+/**
+ * Paid credits are the last resort: an account whose Codex subscription windows are spent
+ * and that would be served only from paid credits waits while any candidate still has
+ * subscription quota for this request.
+ */
+function holdBackCodexCreditOnlyAccounts<T extends ProviderConnectionView>(
+  provider: string,
+  connections: T[],
+  requestedModel: string | null
+): T[] {
+  if (provider !== "codex") return connections;
+  const creditOnly = connections.filter(
+    (connection) =>
+      isCodexPaidCreditsEnabled(provider, connection.providerSpecificData, requestedModel) &&
+      isCodexSubscriptionExhaustedForRequest(connection.id, requestedModel)
+  );
+  if (creditOnly.length === 0 || creditOnly.length === connections.length) return connections;
+  log.info(
+    "AUTH",
+    `${provider} | paid credits held back while ${connections.length - creditOnly.length} account(s) have subscription quota: ${creditOnly
+      .map((connection) => connection.id.slice(0, 8))
+      .join(", ")}`
+  );
+  return connections.filter((connection) => !creditOnly.includes(connection));
+}
 function parseFutureDateMs(value: string | null): number | null {
   if (!value) return null;
   // Tolerate numeric-epoch strings (e.g. "1781696905131.0") as well as ISO
@@ -1632,9 +1659,10 @@ export async function getProviderCredentials(
       };
     }
 
+    const subscriptionFirst = holdBackCodexCreditOnlyAccounts(provider, withQuota, requestedModel);
     const policyValidLeaseCandidates = options._leaseCandidateIds
-      ? withQuota.filter((candidate) => options._leaseCandidateIds!.includes(candidate.id))
-      : withQuota;
+      ? subscriptionFirst.filter((candidate) => options._leaseCandidateIds!.includes(candidate.id))
+      : subscriptionFirst;
     if (policyValidLeaseCandidates.length === 0) return null;
     const leasePolicy = await applyExclusiveConnectionLeasePolicy(
       policyValidLeaseCandidates,
