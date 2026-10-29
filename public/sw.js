@@ -1,13 +1,24 @@
 const CACHE_NAME = "omniroute-pwa-v3";
-const APP_SHELL = [
-  "/",
-  "/manifest.webmanifest",
-  "/icon-512.png",
-  "/apple-touch-icon.png",
+const APP_SHELL = ["/", "/manifest.webmanifest", "/icon-512.png", "/apple-touch-icon.png"];
+// Never cache API / proxy surfaces: client-API aliases (/v1, /v1beta, /models, /chat,
+// /responses, /codex) return per-key data, and dashboard/auth pages are session-bound.
+const EXCLUDED_PATH_PREFIXES = [
+  "/api/",
+  "/a2a",
+  "/dashboard",
+  "/v1",
+  "/v1beta",
+  "/models",
+  "/chat",
+  "/responses",
+  "/codex",
+  "/callback",
+  "/login",
 ];
-const EXCLUDED_PATH_PREFIXES = ["/api/", "/a2a", "/dashboard"];
 
-function pathIsExcluded(pathname) {
+function pathIsExcluded(rawPathname) {
+  // The server routes /V1/... like /v1/... (classify.ts lowercases), so match the same way.
+  const pathname = rawPathname.toLowerCase();
   return EXCLUDED_PATH_PREFIXES.some((prefix) => {
     const base = prefix.endsWith("/") ? prefix.slice(0, -1) : prefix;
     return pathname === base || pathname.startsWith(`${base}/`);

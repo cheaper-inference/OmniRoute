@@ -39,6 +39,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
+  /** Native form navigation must retain an enabled submitter until the browser serializes it. */
+  disableWhileLoading?: boolean;
   asChild?: boolean;
 }
 
@@ -57,6 +59,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     variant = "default",
     size = "default",
     loading = false,
+    disableWhileLoading = true,
     disabled,
     asChild = false,
     children,
@@ -65,11 +68,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   ref,
 ) {
   const classes = buttonVariants({ variant, size, className });
-  const inactive = disabled || loading;
+  const inactive = disabled || (loading && disableWhileLoading);
+  const iconOnly = size.startsWith("icon");
   const content = (
     <>
       {loading && <ButtonSpinner />}
-      {children}
+      {loading && iconOnly ? null : children}
     </>
   );
 
@@ -83,7 +87,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       children: loading ? (
         <>
           <ButtonSpinner />
-          {child.props.children as ReactNode}
+          {iconOnly ? null : child.props.children as ReactNode}
         </>
       ) : (
         (child.props.children as ReactNode)
