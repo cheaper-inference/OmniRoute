@@ -1,5 +1,6 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
+import type { Dirent } from "fs";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
@@ -295,187 +296,93 @@ export async function createConnectionFromAgyToken(
   return { connection, created: true };
 }
 
-/**
- * Return candidate SQLite database paths for Antigravity IDE across platforms.
- *
- * - macOS: ~/Library/Application Support/Antigravity{ IDE}/User/globalStorage/state.vscdb
- * - Windows: %APPDATA%/Antigravity{ IDE}/User/globalStorage/state.vscdb
- * - Linux: ${XDG_CONFIG_HOME:-~/.config}/Antigravity{ IDE}/User/globalStorage/state.vscdb
- */
-export function getAntigravityIdeDbCandidates(
-  platform: NodeJS.Platform = process.platform,
-  env: NodeJS.ProcessEnv = process.env,
-  home: string = os.homedir()
-): string[] {
-  const candidates: string[] = [];
-  const appNames = ["Antigravity", "Antigravity IDE"];
+type DetectedAgyToken = { raw: unknown; source: string };
 
-  if (platform === "darwin") {
-    const joiner = path.posix ? path.posix.join : path.join;
-    const base = joiner(home, "Library", "Application Support");
-    for (const app of appNames) {
-      candidates.push(joiner(base, app, "User", "globalStorage", "state.vscdb"));
-    }
-  } else if (platform === "win32") {
-    const joiner = path.win32 ? path.win32.join : path.join;
-    const appdata = env.APPDATA || joiner(home, "AppData", "Roaming");
-    for (const app of appNames) {
-      candidates.push(joiner(appdata, app, "User", "globalStorage", "state.vscdb"));
-    }
-  } else {
-    const joiner = path.posix ? path.posix.join : path.join;
-    const configHome = env.XDG_CONFIG_HOME || joiner(home, ".config");
-    for (const app of appNames) {
-      candidates.push(joiner(configHome, app, "User", "globalStorage", "state.vscdb"));
-    }
+const AGY_TOKEN_FILE_NAME = "antigravity-oauth-token";
+
+/** Read and parse a JSON token file; null when it is missing or not valid JSON. */
+async function readJsonFile(filePath: string): Promise<unknown> {
+  try {
+    return JSON.parse(await fs.readFile(filePath, "utf8"));
+  } catch {
+    return null;
   }
-  return candidates;
 }
 
-/**
- * Read the antigravityAuthStatus entry from an Antigravity IDE SQLite DB.
- * Prefers the OmniRoute bundled SQLite driver (better-sqlite3 / node:sqlite),
- * falling back gracefully to the sqlite3 CLI tool if present.
- */
-export async function readAntigravityAuthStatusFromDb(dbPath: string): Promise<string | null> {
-  // 1. Prefer OmniRoute's driverFactory (better-sqlite3 / node:sqlite)
-  try {
-    const { tryOpenSync } = await import("@/lib/db/adapters/driverFactory");
-    const db = tryOpenSync(dbPath, { readonly: true, fileMustExist: true, timeout: 2000 });
-    if (db) {
-      try {
-        const row = db
-          .prepare("SELECT value FROM ItemTable WHERE key = 'antigravityAuthStatus'")
-          .get() as { value?: unknown } | undefined;
-        if (typeof row?.value === "string" && row.value.trim()) {
-          return row.value.trim();
-        }
-        if (row?.value && Buffer.isBuffer(row.value)) {
-          const str = row.value.toString("utf8").trim();
-          if (str) return str;
-        }
-      } finally {
-        db.close();
-      }
-    }
-  } catch {
-    // Driver unavailable or busy, fall back to CLI if present
+async function detectFromFirstReadable(candidates: string[]): Promise<DetectedAgyToken | null> {
+  for (const candidate of candidates) {
+    const raw = await readJsonFile(candidate);
+    if (raw !== null) return { raw, source: candidate };
   }
-
-  // 2. Fallback to sqlite3 CLI tool (gracefully ignored if not installed on $PATH)
-  try {
-    const { stdout } = await execFileAsync(
-      "sqlite3",
-      [dbPath, "SELECT value FROM ItemTable WHERE key = 'antigravityAuthStatus';"],
-      { timeout: 3000 }
-    );
-    if (stdout && stdout.trim()) {
-      return stdout.trim();
-    }
-  } catch {
-    // sqlite3 CLI not installed (ENOENT) or query failed
-  }
-
   return null;
 }
 
+async function detectFromEnvOverride(): Promise<DetectedAgyToken | null> {
+  const override = process.env.AGY_TOKEN_FILE?.trim();
+  if (!override) return null;
+  const raw = await readJsonFile(override);
+  return raw === null ? null : { raw, source: "env:AGY_TOKEN_FILE" };
+}
+
+/** Linux Secret Service keyring entry, accepted only when it carries a refresh token. */
+async function detectFromSecretService(): Promise<DetectedAgyToken | null> {
+  if (process.platform !== "linux") return null;
+  try {
+    const { stdout } = await execFileAsync(
+      "secret-tool",
+      ["lookup", "service", "gemini", "username", "antigravity"],
+      { timeout: 3000 }
+    );
+    const parsed = toRecord(JSON.parse(stdout.trim()));
+    const hasRefresh = !!(toRecord(parsed.token).refresh_token || parsed.refresh_token);
+    return hasRefresh ? { raw: parsed, source: "secret-service" } : null;
+  } catch {
+    // secret-tool missing (ENOENT), no keyring entry, or a non-JSON secret.
+    return null;
+  }
+}
+
+async function detectFromAgentControlProfiles(home: string): Promise<DetectedAgyToken | null> {
+  const profilesDir = path.join(home, ".config", "agentcontrol", "profiles");
+  let entries: Dirent[];
+  try {
+    entries = await fs.readdir(profilesDir, { withFileTypes: true });
+  } catch {
+    return null;
+  }
+  const candidates = entries
+    .filter((ent) => ent.isDirectory())
+    .map((ent) =>
+      path.join(profilesDir, ent.name, ".gemini", "antigravity-cli", AGY_TOKEN_FILE_NAME)
+    );
+  return detectFromFirstReadable(candidates);
+}
+
 /**
- * Detect locally stored Antigravity credentials from:
- * 1. Linux Secret Service keyring (secret-tool)
- * 2. AGY_TOKEN_FILE environment variable override
+ * Detect locally stored Antigravity credentials, in order:
+ * 1. AGY_TOKEN_FILE environment variable override
+ * 2. Linux Secret Service keyring (secret-tool), only when it carries a refresh token
  * 3. Default CLI token files (~/.gemini/antigravity-cli/antigravity-oauth-token)
  * 4. Multi-profile token files (~/.config/agentcontrol/profiles/...)
- * 5. Antigravity IDE SQLite DB (~/.../Antigravity/User/globalStorage/state.vscdb)
+ *
+ * The Antigravity IDE `state.vscdb` store is deliberately not read: the shape of its
+ * `antigravityAuthStatus` entry is unverified and carries no confirmed OAuth refresh
+ * token, so importing it could store a connection that stops refreshing after ~1h.
  */
-export async function detectLocalAgyTokenRaw(): Promise<{ raw: unknown; source: string }> {
+export async function detectLocalAgyTokenRaw(): Promise<DetectedAgyToken> {
   const home = os.homedir();
-
-  // 1. Explicit env override
-  if (process.env.AGY_TOKEN_FILE && process.env.AGY_TOKEN_FILE.trim()) {
-    try {
-      const content = await fs.readFile(process.env.AGY_TOKEN_FILE.trim(), "utf8");
-      return { raw: JSON.parse(content), source: "env:AGY_TOKEN_FILE" };
-    } catch {}
-  }
-
-  // 2. Linux Secret Service / Keyring (secret-tool)
-  if (process.platform === "linux") {
-    try {
-      const { stdout } = await execFileAsync(
-        "secret-tool",
-        ["lookup", "service", "gemini", "username", "antigravity"],
-        { timeout: 3000 }
-      );
-      if (stdout && stdout.trim()) {
-        const parsed = JSON.parse(stdout.trim());
-        if (parsed.token?.refresh_token || parsed.refresh_token) {
-          return { raw: parsed, source: "secret-service" };
-        }
-      }
-    } catch {}
-  }
-
-  // 3. Default and legacy CLI token file locations
-  const fileCandidates = [
-    path.join(home, ".gemini", "antigravity-cli", "antigravity-oauth-token"),
-    path.join(home, ".gemini", "antigravity", "antigravity-oauth-token"),
-  ];
-
-  for (const candidate of fileCandidates) {
-    try {
-      const content = await fs.readFile(candidate, "utf8");
-      return { raw: JSON.parse(content), source: candidate };
-    } catch {}
-  }
-
-  // 4. AgentControl profile directories
-  const agentControlProfiles = path.join(home, ".config", "agentcontrol", "profiles");
-  try {
-    const entries = await fs.readdir(agentControlProfiles, { withFileTypes: true });
-    for (const ent of entries) {
-      if (ent.isDirectory()) {
-        const p = path.join(
-          agentControlProfiles,
-          ent.name,
-          ".gemini",
-          "antigravity-cli",
-          "antigravity-oauth-token"
-        );
-        try {
-          const content = await fs.readFile(p, "utf8");
-          return { raw: JSON.parse(content), source: p };
-        } catch {}
-      }
-    }
-  } catch {}
-
-  // 5. Antigravity IDE SQLite DB
-  const ideDbs = getAntigravityIdeDbCandidates();
-  for (const dbPath of ideDbs) {
-    try {
-      await fs.access(dbPath);
-      const authValue = await readAntigravityAuthStatusFromDb(dbPath);
-
-      if (authValue) {
-        const parsed = JSON.parse(authValue);
-        if (parsed.apiKey) {
-          return {
-            raw: {
-              token: {
-                access_token: parsed.apiKey,
-                refresh_token: parsed.apiKey,
-              },
-              id_token_email: parsed.email,
-            },
-            source: dbPath,
-          };
-        }
-      }
-    } catch {}
-  }
+  const detected =
+    (await detectFromEnvOverride()) ??
+    (await detectFromSecretService()) ??
+    (await detectFromFirstReadable([
+      path.join(home, ".gemini", "antigravity-cli", AGY_TOKEN_FILE_NAME),
+      path.join(home, ".gemini", "antigravity", AGY_TOKEN_FILE_NAME),
+    ])) ??
+    (await detectFromAgentControlProfiles(home));
+  if (detected) return detected;
 
   throw new AgyAuthFileError(
-    "No local Antigravity CLI or IDE login found. Run `agy`, sign in with Google, then try again.",
+    "No local Antigravity CLI login found. Run agy, sign in with Google, then try again.",
     404,
     "no_local_login"
   );
