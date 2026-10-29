@@ -1,4 +1,5 @@
 "use client";
+import RosebudPanel from "./components/RosebudPanel";
 
 // Issue #3501 strangler-fig decomposition — Phase 1t (final push)
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -876,6 +877,9 @@ export default function ProviderDetailPageClient() {
       {isSearchProvider && <SearchProviderCard providerId={providerId} t={t} />}
 
       {/* Playground + param filters — extracted to components/ProviderExtraPanels.tsx (#6649) */}
+      {providerId === "rosebud" && (
+        <RosebudPanel connections={connections} refresh={fetchConnections} />
+      )}
       <ProviderExtraPanels providerId={providerId} />
 
       <ProviderModalsPanel

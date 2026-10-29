@@ -1,3 +1,4 @@
+import { handleRosebudImageGeneration } from "./imageGeneration/providers/rosebud.ts";
 import { randomUUID } from "crypto";
 /** Image generation handler for POST /v1/images/generations (OpenAI-compatible). */
 
@@ -709,6 +710,9 @@ export async function handleImageGeneration({
     });
   }
 
+  if (providerConfig.format === "rosebud-assets") {
+    return handleRosebudImageGeneration({ body, credentials, peerLocality, signal });
+  }
   if (providerConfig.format === "cursor-agent-image") {
     return handleCursorAgentImageGeneration({
       model,

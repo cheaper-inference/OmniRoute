@@ -182,6 +182,17 @@ export const IMAGE_MODEL_ALIASES: Record<string, ImageModelAliasEntry> = {
 };
 
 export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
+  rosebud: {
+    id: "rosebud",
+    alias: "rosebud",
+    baseUrl: "rosebud://assets",
+    authType: "cli",
+    authHeader: "none",
+    format: "rosebud-assets",
+    models: [],
+    supportedSizes: [],
+  },
+
   zenmux: ZENMUX_IMAGE_PROVIDER,
   "muse-code": MUSE_CODE_IMAGE_PROVIDER,
   agnes: {
