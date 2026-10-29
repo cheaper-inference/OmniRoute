@@ -24,34 +24,45 @@ function headerValue(headers: unknown, name: string): string | null {
   }
 }
 
-function hasExhaustedQuotaEvidence(headers: unknown): boolean {
-  for (const window of ["5h", "7d"]) {
-    const usageRaw = headerValue(headers, `x-codex-${window}-usage`);
-    const limitRaw = headerValue(headers, `x-codex-${window}-limit`);
-    if (usageRaw === null || limitRaw === null || !usageRaw.trim() || !limitRaw.trim()) continue;
-    const usage = Number(usageRaw);
-    const limit = Number(limitRaw);
-    if (Number.isFinite(usage) && Number.isFinite(limit) && limit > 0 && usage >= limit) {
-      return true;
-    }
-  }
-  for (const windowName of ["primary", "secondary"]) {
-    const raw = headerValue(headers, `x-codex-${windowName}-used-percent`);
-    if (!raw?.trim()) continue;
-    const usedPercent = Number(raw);
-    if (Number.isFinite(usedPercent) && usedPercent >= 100) return true;
-  }
-  for (const name of [
+function readNonEmptyNumber(headers: unknown, name: string): number | null {
+  const raw = headerValue(headers, name);
+  if (!raw?.trim()) return null;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : null;
+}
+
+function hasExhaustedUsageWindow(headers: unknown): boolean {
+  return ["5h", "7d"].some((window) => {
+    const usage = readNonEmptyNumber(headers, `x-codex-${window}-usage`);
+    const limit = readNonEmptyNumber(headers, `x-codex-${window}-limit`);
+    return usage !== null && limit !== null && limit > 0 && usage >= limit;
+  });
+}
+
+function hasExhaustedUsedPercent(headers: unknown): boolean {
+  return ["primary", "secondary"].some((windowName) => {
+    const usedPercent = readNonEmptyNumber(headers, `x-codex-${windowName}-used-percent`);
+    return usedPercent !== null && usedPercent >= 100;
+  });
+}
+
+function hasZeroRateLimitRemaining(headers: unknown): boolean {
+  return [
     "x-ratelimit-remaining",
     "x-ratelimit-remaining-requests",
     "x-ratelimit-remaining-tokens",
-  ]) {
-    const raw = headerValue(headers, name);
-    if (!raw?.trim()) continue;
-    const remaining = Number(raw);
-    if (Number.isFinite(remaining) && remaining <= 0) return true;
-  }
-  return false;
+  ].some((name) => {
+    const remaining = readNonEmptyNumber(headers, name);
+    return remaining !== null && remaining <= 0;
+  });
+}
+
+function hasExhaustedQuotaEvidence(headers: unknown): boolean {
+  return (
+    hasExhaustedUsageWindow(headers) ||
+    hasExhaustedUsedPercent(headers) ||
+    hasZeroRateLimitRemaining(headers)
+  );
 }
 
 /** Unknown or mixed quota/capacity evidence remains under normal 429 protections. */
