@@ -2002,7 +2002,14 @@
     "readinessStep3": "ចម្លង endpoint របស់អ្នក",
     "readinessStep4": "ផ្ញើសំណើសាកល្បង",
     "readinessContinue": "បន្តការរៀបចំ",
-    "readinessDismiss": "រំលងសិន"
+    "readinessDismiss": "រំលងសិន",
+    "unpricedUsageTitle": "{count, plural, one {# ម៉ូឌែល} other {# ម៉ូឌែល}} ដែលមានការប្រើប្រាស់ថ្មីៗ ប៉ុន្តែមិនមានតម្លៃបានកំណត់",
+    "unpricedUsageFailClosed": "{keys, plural, one {# កូនសោ API ដែលមានដែនកំណត់ការប្រើ} other {# កូនសោ API ដែលមានដែនកំណត់ការប្រើ}} បានប្រើម៉ូឌែលទាំងនេះក្នុង 8 ថ្ងៃចុងក្រោយ។ ពេលការប្រើនោះនៅក្នុងរយៈពេលរៀងរាល់ថ្ងៃ ឬសប្តាហ៍របស់កូនសោនោះ កូនសោនឹងត្រូវបានចាត់ទុកថាបានលើសកម្រិត និងសំណើរបស់វាត្រូវបានរារាំង (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "ការប្រើនេះត្រូវបានគិតថាជា $0 លើដែនកំណត់ការប្រើ​តាមកូនសោ (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# សំណើ} other {# សំណើ}}, {keys, plural, one {# កូនសោដែលមានដែនកំណត់} other {# កូនសោដែលមានដែនកំណត់}}",
+    "unpricedUsageMore": "… និង {count} ផ្សេងទៀត",
+    "unpricedUsageConfigure": "កំណត់តម្លៃ",
+    "unpricedUsageDismiss": "បិទ"
   },
   "analytics": {
     "title": "ការវិភាគ",
@@ -3039,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw - ការកំណត់រចនាសម្ព័ន្ធដោយដៃ",
     "clineManualConfiguration": "ការកំណត់រចនាសម្ព័ន្ធ Cline ដោយដៃ",
     "kiloManualConfiguration": "ការកំណត់រចនាសម្ព័ន្ធ Kilo Code ដោយដៃ",
+    "piManualConfiguration": "Pi - ការកំណត់រចនាសម្ព័ន្ធដោយដៃ",
+    "piConfigInvalidTitle": "Pi models.json មិនអាចអានបានទេ។",
+    "piOmnirouteConfigured": "OmniRoute ត្រូវបានកំណត់រចនាសម្ព័ន្ធជាអ្នកផ្តល់សេវាផ្ទាល់ខ្លួន Pi",
+    "piModelHelp": "Pi មិនស្វែងរកគំរូដោយស្វ័យប្រវត្តិសម្រាប់ចំណុចបញ្ចប់ផ្ទាល់ខ្លួន — គំរូដែលអ្នកជ្រើសរើសត្រូវបានសរសេរទៅក្នុង models.json យ៉ាងច្បាស់លាស់។",
+    "piManualConfigTitle": "ឬកែសម្រួល ~/.pi/agent/models.json ដោយដៃ",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "បន្ទាប់មកចាប់ផ្តើម Pi ហើយជ្រើសរើសអ្នកផ្តល់សេវា omniroute ។ កំណត់ PI_CODING_AGENT_DIR ដើម្បីផ្លាស់ទីថតភ្នាក់ងារទាំងមូល។",
+    "piUnownedNote": "ធាតុនេះត្រូវបានបន្ថែមនៅខាងក្រៅ OmniRoute (ឧទាហរណ៍ ចំណុចបញ្ចប់ផ្ទាល់ខ្លួនរបស់ pi-gui) ។ ការដាក់ពាក្យនឹងទទួលយកវា; កំណត់ឡើងវិញបានតែលុបធាតុ OmniRoute បានសរសេរ។",
     "whenToUseLabel": "ពេលណាត្រូវប្រើ",
     "openToolDocs": "បើកឯកសារណែនាំរបស់ឧបករណ៍",
     "toolUseCases": {
@@ -3068,6 +3083,7 @@
       "grok-build": "ភ្នាក់ងារសរសេរកូដ xAI Grok Build TUI ដែលគាំទ្រអ្នកផ្តល់សេវាផ្ទាល់ខ្លួន",
       "droid": "ជំនួយការ AI Factory Droid",
       "openclaw": "ជំនួយការ AI Open Claw",
+      "openclaude": "CLI ភ្នាក់ងារសរសេរកូដ OpenClaude ដែលគាំទ្រអ្នកផ្តល់សេវាដែលត្រូវគ្នាជាមួយ OpenAI",
       "cline": "CLI ជំនួយការសរសេរកូដ AI Cline",
       "kilo": "CLI ជំនួយការ AI Kilo Code",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3357,6 +3373,12 @@
     "cliproxyapiUpdate": "ធ្វើបច្ចុប្បន្នភាព",
     "cliproxyapiUpdateAvailable": "មានបច្ចុប្បន្នភាព៖ v{current} → v{latest}",
     "cliproxyapiVersion": "កំណែ",
+    "piInstallTitle": "ដំឡើង Pi Coding Agent",
+    "piInstallInstructions": "ដំឡើង Pi CLI បន្ទាប់មកត្រឡប់មកទីនេះដើម្បីភ្ជាប់វាទៅ OmniRoute។",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "ប្រើ URL ដែលអាចទៅដល់បានពីម៉ាស៊ីនដែលកំពុងដំណើរការ Pi ។ ចំណុចបញ្ចប់ /v1 ដែលត្រូវគ្នានឹង OpenAI ត្រូវបានបន្ថែមដោយស្វ័យប្រវត្តិ។",
+    "piManualMergeHint": "មើលជាមុនតែប៉ុណ្ណោះ។ បញ្ចូលការបញ្ចូល providers.omniroute នេះទៅក្នុង models.json ដូច្នេះអ្នកផ្តល់សេវា និងការកំណត់ផ្សេងទៀតរបស់អ្នកនៅដដែល។",
     "removeMapping": "លុបការផ្គូផ្គង"
   },
   "modelCatalog": {
@@ -3488,7 +3510,44 @@
     "httpError": "សំណើបានបរាជ័យជាមួយ HTTP {status}",
     "testFailedNoDetail": "ការធ្វើតេស្តបានបរាជ័យដោយគ្មានសារកំហុស",
     "additionalCapabilities": "សមត្ថភាពបន្ថែម៖ {list}",
-    "comboRefMember": "បន្សំ → {name}"
+    "comboRefMember": "បន្សំ → {name}",
+    "keyAccessButton": "ការចូលប្រើ API key",
+    "allowedInKeys": "បានអនុញ្ញាតក្នុង៖ {count, plural, one {# កូនសោ} other {# កូនសោ}}",
+    "keysLoading": "កំពុងផ្ទុក API keys…",
+    "keysRetry": "ព្យាយាមផ្ទុកកូនសោឡើងវិញ",
+    "accessViaPattern": "តាមរយៈ {pattern}",
+    "accessBlocked": "ត្រូវបានរារាំងដោយ {pattern}",
+    "editKeyAccess": "កែសម្រួលការចូលប្រើកូនសោ",
+    "toggleKeyAccess": "អនុញ្ញាត {item} នៅលើ {name}",
+    "resultNetworkError": "ការចាត់តាំងបានបរាជ័យ",
+    "resultWouldEmptyModels": "នឹងធ្វើឱ្យកូនសោនេះគ្មានម៉ូឌែលដែលបានអនុញ្ញាត — សូមកែសម្រួលសិទ្ធិចូលប្រើកូនសោជំនួសវិញ",
+    "resultWouldEmptyCombos": "នឹងធ្វើឱ្យកូនសោនេះគ្មាន combo ដែលបានអនុញ្ញាត — សូមកែសម្រួលសិទ្ធិចូលប្រើកូនសោជំនួសវិញ",
+    "keyUpdatePending": "{name} កំពុងត្រូវបានធ្វើបច្ចុប្បន្នភាពនៅឡើយ។ សូមព្យាយាមម្តងទៀតក្នុងពេលបន្តិចទៀត។",
+    "assignToKeys": "ចាត់តាំងទៅកាន់ API keys…",
+    "assignApply": "អនុវត្តការផ្លាស់ប្ដូរ",
+    "assignComplete": "បានធ្វើបច្ចុប្បន្នភាពការចូលប្រើ API key",
+    "assignFailed": "ការធ្វើបច្ចុប្បន្នភាព API key មួយចំនួនបានបរាជ័យ",
+    "assignNoChanges": "មិនមានការផ្លាស់ប្តូរសិទ្ធិចូលប្រើ API key ទេ",
+    "selectedAccessItems": "ធាតុដែលបានជ្រើសរើស៖ {count}",
+    "assignExcludedCombos": "{count, plural, one {ជួរដេក combo ដែលបានជ្រើសរើសចំនួន # មិនមែនជាម៉ូឌែលទេ ហើយនឹងត្រូវបានរំលងនៅទីនេះ} other {ជួរដេក combo ដែលបានជ្រើសរើសចំនួន # មិនមែនជាម៉ូឌែលទេ ហើយនឹងត្រូវបានរំលងនៅទីនេះ}}។ ចាត់ចែង combo ពីផ្ទាំង Combos។",
+    "assignActionAdd": "បន្ថែម",
+    "assignActionRemove": "លុបចេញ",
+    "searchKeys": "ស្វែងរក API keys",
+    "selectApiKey": "ជ្រើសរើស API key {name}",
+    "allModelsAccess": "ម៉ូដែលទាំងអស់",
+    "allCombosAccess": "បន្សំទាំងអស់",
+    "modelAccessCount": "ម៉ូដែល៖ {count}",
+    "comboAccessCount": "បន្សំ៖ {count}",
+    "keyInactive": "អសកម្ម",
+    "keyBanned": "ត្រូវបានហាមឃាត់",
+    "keyRevoked": "បានដកហូត",
+    "switchRestrictedConfirm": "ប្ដូរកូនសោនេះទៅការចូលប្រើកម្រិតកំណត់៖ អនុញ្ញាតតែធាតុដែលបានជ្រើសរើសប៉ុណ្ណោះ",
+    "removeNoChangeHint": "កូនសោនេះអនុញ្ញាតទាំងអស់ ការលុបធាតុដែលបានជ្រើសរើសចេញនឹងមិនធ្វើឱ្យមានការផ្លាស់ប្ដូរទេ",
+    "removeStaysAllowedHint": "នៅតែត្រូវបានអនុញ្ញាតនៅលើកូនសោនេះតាមរយៈ {patterns}",
+    "resultChanged": "បានផ្លាស់ប្ដូរ",
+    "resultUnchanged": "គ្មានការផ្លាស់ប្ដូរ",
+    "resultSkipped": "បានរំលង",
+    "resultNeedsSwitch": "ត្រូវការប្ដូរទៅកម្រិតកំណត់"
   },
   "combos": {
     "title": "បន្សំ",
@@ -5431,6 +5490,27 @@
     "importFromFileDownloadTemplate": "ទាញយកគំរូ CSV",
     "importFromFileMoreErrors": "+{count} ទៀត",
     "importFromFileSchemaHint": "ជួរឈរ CSV ត្រូវបានកំណត់តាមលំដាប់៖ provider, name, apiKey, baseUrl (ជាជម្រើស), priority (ជាជម្រើស)។ ជួរឈរ provider ត្រូវតែជា id របស់អ្នកផ្តល់សេវាដែលបានគ្រប់គ្រង និងមានស្រាប់ ឬជា id របស់ node ដែលឆបគ្នាជាមួយ OpenAI/Anthropic និងបានចុះឈ្មោះរួចហើយ — ការនាំចូលនេះមិនបង្កើត endpoint node ថ្មីទេ។",
+    "importOAuthExport": "នាំចូលការនាំចេញ OAuth",
+    "oauthExportTitle": "នាំចូលការនាំចេញពីកម្មវិធីគ្រប់គ្រងគណនី",
+    "oauthExportDescription": "ផ្ទុកឡើងការនាំចេញជាអត្ថបទធម្មតាពីកម្មវិធីគ្រប់គ្រងគណនី (ឧ. ការនាំចេញ cloud-accounts របស់ Antigravity Manager)។ ថូខឹនត្រូវបានធ្វើឱ្យស្រស់នៅលើម៉ាស៊ីនមេ ហើយគណនីនីមួយៗក្លាយជាការតភ្ជាប់ OAuth — គណនីស្ទួនត្រូវបានធ្វើឱ្យស្រស់នៅនឹងកន្លែង។",
+    "oauthExportProviderLabel": "អ្នកផ្តល់សេវា",
+    "oauthExportChoose": "ជ្រើសរើសឯកសារ",
+    "oauthExportFileAria": "ឯកសារ JSON នៃការនាំចេញគណនី",
+    "oauthExportSchemaHint": "ទទួលយក៖ ឯកសារដែលមានអារេ \"accounts\" អារេសុទ្ធ ឬកំណត់ត្រាតែមួយ។ ថូខឹនអាចស្ថិតនៅក្នុងវត្ថុ token ដែលដាក់បញ្ចូល ឬនៅលើកំណត់ត្រាផ្ទាល់។",
+    "oauthExportDetected": "បានរកឃើញគណនី {count}",
+    "oauthExportSelectAll": "ជ្រើសរើសគណនីទាំងអស់",
+    "oauthExportSelectAccount": "ជ្រើសរើសគណនី {index}",
+    "oauthExportColEmail": "អ៊ីមែល",
+    "oauthExportColProvider": "អ្នកផ្តល់សេវា",
+    "oauthExportColRefresh": "ថូខឹនធ្វើឱ្យស្រស់",
+    "oauthExportNoEmail": "(គ្មានអ៊ីមែល)",
+    "oauthExportYes": "បាទ/ចាស",
+    "oauthExportNo": "ទេ",
+    "oauthExportImporting": "កំពុងនាំចូល…",
+    "oauthExportImport": "នាំចូលគណនី {count}",
+    "oauthExportResult": "បាននាំចូល {imported}/{total} — បរាជ័យ {failed}",
+    "oauthExportParseError": "មិនអាចអានគណនីណាមួយពីឯកសារនេះបានទេ។",
+    "oauthExportUnknownError": "កំហុសមិនស្គាល់",
     "adaptaTutorial": {
       "title": "របៀបភ្ជាប់ Adapta Web",
       "introPrefix": "Adapta ផ្ទៀងផ្ទាត់អត្តសញ្ញាណតាមរយៈ Clerk។ token",
@@ -8898,6 +8978,8 @@
     "qdrantHost": "ម៉ាស៊ីនមេ",
     "qdrantCollection": "បណ្តុំ",
     "catalogVisibilityHint": "លេខសម្គាល់ម៉ូដែលដែលបានលាក់នៅតែអាចហៅបានដោយប្រើសិទ្ធិចូលប្រើដដែល។",
+    "exposeCombosOnly": "បង្ហាញតែបន្សំនៅក្នុង /v1/models",
+    "exposeCombosOnlyDesc": "អតិថិជនដែលស្វែងរកម៉ូដែលដោយស្វ័យប្រវត្តិនឹងឃើញបន្សំរបស់អ្នក (និង auto/* លុះត្រាតែត្រូវបានលាក់) ជំនួសឱ្យម៉ូដែលដើមរបស់អ្នកផ្តល់សេវា។ លេខសម្គាល់ provider/model ច្បាស់លាស់នៅតែត្រូវបានបញ្ជូនបន្ត។",
     "catalogScopeTitle": "បញ្ជី Models API",
     "catalogScopeDesc": "អ្វីដែល GET /v1/models បង្ហាញសម្រាប់សោនេះ។ ការបង្រួមបញ្ជីមិនផ្លាស់ប្តូរអ្វីដែលសោនេះអាចហៅប្រើបានឡើយ។",
     "catalogScopeAll": "ទាំងពីរ",
@@ -12261,7 +12343,11 @@
       "viewConversation": "មើលការសន្ទនា",
       "openConversation": "បើកការសន្ទនា {id}"
     },
-    "tableLabel": "កំណត់ហេតុសំណើ"
+    "tableLabel": "កំណត់ហេតុសំណើ",
+    "throughputPostFirstToken": "ក្រោយតូខេនដំបូង",
+    "throughputEndToEnd": "ពីដើមដល់ចប់",
+    "throughputRate": "{value} តូខេន/វិនាទី",
+    "throughputExplanation": "អត្រាទាំងពីរប្រើចំនួនតូខេនធំជាងរវាងចំនួនតូខេនលទ្ធផល និងចំនួនតូខេនហេតុផល។ ក្រោយតូខេនដំបូងមិនរាប់បញ្ចូល TTFT ដែលត្រឹមត្រូវទេ; បើមិនដូច្នេះទេ វាប្រើរយៈពេលពេញលេញ។ ពីដើមដល់ចប់តែងតែប្រើរយៈពេលពេញលេញ។ ការឆ្លើយតបដែលបានស្តុកទុកអាចមានអត្រាបញ្ជូនផ្ទុះខ្ពស់ ដោយមិនមានការបង្កើតម៉ូដែលលឿនជាង។"
   },
   "proxyLogger": {
     "filterAll": "ទាំងអស់",
@@ -13850,7 +13936,9 @@
       "disabled": "បានបិទ",
       "dual": "ទ្វេ",
       "alias": "ឈ្មោះក្លែង",
-      "canonical": "ឈ្មោះផ្លូវការ"
+      "canonical": "ឈ្មោះផ្លូវការ",
+      "fail_closed": "រារាំង (fail_closed)",
+      "count_as_zero": "គិតជា $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14261,6 +14349,10 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: រំលងការបដិសេធ 403/410",
         "description": "នៅពេលគណនីទាំងអស់កំពុងស្ថិតក្នុងស្ថានភាព cooling down ហើយ cooldown ដែលបញ្ចប់មុនគេបង្អស់ត្រូវបានបង្កឡើងដោយ 403 (access refused) ឬ 410 (gone) នោះវានឹងបញ្ជូនការបដិសេធនោះត្រឡប់មកវិញភ្លាមៗ ជំនួសឱ្យការរង់ចាំឱ្យចប់ cooldown ហើយផ្ញើសំណើឡើងវិញ; បន្ទាប់មក កូដ 403 នៃកូតាកម្រិត connection របស់ agentrouter ដែលបន្តជាថ្មី នឹងត្រូវបានរក្សាទុកជាមួយ errorCode 429 ដើម្បីឱ្យវានៅតែអាចព្យាយាមឡើងវិញបាន។ បិទតាមលំនាំដើម៖ មានតែ 401 ប៉ុណ្ណោះដែលរំលងការរង់ចាំ ហើយរាល់ការបដិសេធត្រូវបានរក្សាទុកជាមួយស្ថានភាពដែលទទួលបានមក។"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "គោលនយោបាយថវិកាការប្រើគ្មានតម្លៃ",
+        "description": "របៀបដែលដែនកំណត់ជា USD រៀងរាល់ថ្ងៃ/សប្តាហ៍តាមកូនសោ ប្រកាសចំពោះការប្រើបានជោគជ័យដែលអ្នកផ្គត់ផ្គង់ ឬម៉ូឌែលមិនមានជួរតម្លៃ។ fail_closed (លំនាំដើម) ចាត់ទុកថារយៈពេលនោះបានលើស ដូច្នេះថ្លៃមិនស្គាល់មិនអាចរ្លេចកាត់កម្រិតផ្ដាច់មុខបានឡើយ។ count_as_zero គិតការប្រើនោះជា $0 ហើយបន្តអនុវត្តចំណាយដែលមានតម្លៃ។ ម៉ូឌែលគ្មានតម្លៃ ត្រូវបានរាយនៅលើទំព័រដើមផ្ទៃបញ្ជារ ទោះបីជាករណីណាក៏ដោយ។"
       }
     }
   },

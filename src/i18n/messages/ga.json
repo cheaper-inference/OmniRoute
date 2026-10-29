@@ -25,8 +25,10 @@
     "confirm": "An bhfuil tú cinnte?",
     "refresh": "Athnuaigh",
     "close": "Dún",
+    "dialogTitleFallback": "Dialóg",
     "previousPage": "Leathanach roimhe seo",
     "nextPage": "An chéad leathanach eile",
+    "pagination": "Uimhriú leathanach",
     "capsLockOn": "Tá Caps Lock ar siúl",
     "dismissNotification": "Dún fógra",
     "toggleColumns": "Scoránaigh colúin",
@@ -182,6 +184,7 @@
     "combos": "Comboanna",
     "noModelsFound": "Níor aimsíodh aon samhail",
     "clear": "Glan",
+    "clearFilters": "Glan na scagairí",
     "done": "Déanta",
     "selectAll": "Roghnaigh iad uile",
     "unselectAll": "Díroghnaigh iad uile",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Réamhamharc",
     "batchFilePreviewTruncated": "Ag taispeáint na chéad {shown} líne ({total} líne san iomlán)",
     "batchFileDownloadFull": "Íoslódáil Comhad Iomlán",
-    "dialogTitleFallback": "Dialóg",
-    "pagination": "Uimhriú leathanach",
-    "clearFilters": "Glan na scagairí",
     "tokensPageTitle": "Comharthaí",
     "tokensPageDescription": "Seol comharthaí idir eochracha API, roinn cóid chuiridh agus ceangail freastalaithe pobail.",
     "tokensServerUrlLabel": "URL an fhreastalaí"
@@ -1925,7 +1925,14 @@
     "readinessStep3": "Cóipeáil do chríochphointe",
     "readinessStep4": "Seol iarratas tástála",
     "readinessContinue": "Lean ar aghaidh leis an socrú",
-    "readinessDismiss": "Dún go fóill"
+    "readinessDismiss": "Dún go fóill",
+    "unpricedUsageTitle": "{count, plural, one {# múnla} other {# múnlaí}} le húsáid le déanaí ach gan praghas cumraithe",
+    "unpricedUsageFailClosed": "{keys, plural, one {# eochair API le teorainn úsáide} other {# eochracha API le teorainn úsáide}} d’úsáid na múnlaí seo le 8 lá anuas. Nuair a bhíonn an úsáid sin laistigh de fhuinneog laethúil nó seachtainiúil na heochrach, meastar go bhfuil an eochair thar an teorainn agus cuirtear bac ar a hiarratais (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Meastar an úsáid seo mar $0 i dtreo teorainneacha úsáide in aghaidh eochair (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# iarratas} other {# iarratais}}, {keys, plural, one {# eochair theoranta} other {# eochracha theoranta}}",
+    "unpricedUsageMore": "…agus {count} eile",
+    "unpricedUsageConfigure": "Cumraigh praghsáil",
+    "unpricedUsageDismiss": "Dún"
   },
   "analytics": {
     "title": "Anailísíocht",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Cumraíocht de Láimh",
     "clineManualConfiguration": "Cumraíocht de Láimh Cline",
     "kiloManualConfiguration": "Cumraíocht de Láimh Kilo Code",
+    "piManualConfiguration": "Pi - Cumraíocht Lámhleabhar",
+    "piConfigInvalidTitle": "Níl pi models.json inléite",
+    "piOmnirouteConfigured": "Tá OmniRoute cumraithe mar sholáthraí saincheaptha Pi",
+    "piModelHelp": "Ní aimsíonn Pi samhlacha le haghaidh críochphointí saincheaptha go huathoibríoch — tá an tsamhail a roghnaíonn tú scríofa go models.json go sainráite.",
+    "piManualConfigTitle": "Nó cuir in eagar ~/.pi/agent/models.json de láimh",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Ansin tosú Pi agus roghnaigh an soláthraí omniroute. Socraigh PI_CODING_AGENT_DIR chun an t-eolaire gníomhaire iomlán a bhogadh.",
+    "piUnownedNote": "Cuireadh an iontráil seo taobh amuigh de OmniRoute (m.sh. críochphointí Saincheaptha pi-gui). Ag cur isteach glacfaidh sé; Ní bhaineann athshocrú ach na hiontrálacha a scríobh OmniRoute.",
     "whenToUseLabel": "Cathain le húsáid",
     "openToolDocs": "Oscail doiciméadacht na huirlise",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "Gníomhaire códaithe TUI xAI Grok Build le tacaíocht do sholáthraithe saincheaptha",
       "droid": "Cúntóir AI Factory Droid",
       "openclaw": "Cúntóir AI Open Claw",
+      "openclaude": "CLI ghníomhaire códaithe OpenClaude le tacaíocht do sholáthraí atá comhoiriúnach le OpenAI",
       "cline": "CLI cúntóra códaithe AI Cline",
       "kilo": "CLI cúntóra AI Kilo Code",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Nuashonrú",
     "cliproxyapiUpdateAvailable": "Nuashonrú ar fáil: v{current} → v{latest}",
     "cliproxyapiVersion": "Leagan",
+    "piInstallTitle": "Suiteáil Pi Gníomhaire Códaithe",
+    "piInstallInstructions": "Suiteáil an Pi CLI, ansin ar ais anseo chun é a nascadh le OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Bain úsáid as an URL insroichte ón meaisín atá ag rith Pi. Cuirtear críochphointe /v1 OpenAI-comhoiriúnach leis go huathoibríoch.",
+    "piManualMergeHint": "Réamhamharc amháin. Cumaisc an iontráil providers.omniroute seo le models.json ionas go bhfanfaidh do sholáthraithe agus do shocruithe eile slán.",
     "removeMapping": "Bain an mhapáil"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "Theip ar an iarratas le HTTP {status}",
     "testFailedNoDetail": "Theip ar an tástáil gan teachtaireacht earráide",
     "additionalCapabilities": "Cumais bhreise: {list}",
-    "comboRefMember": "Teaglaim → {name}"
+    "comboRefMember": "Teaglaim → {name}",
+    "keyAccessButton": "Rochtain ar eochair API",
+    "allowedInKeys": "Ceadaithe i: {count, plural, one {# eochair} other {# eochracha}}",
+    "keysLoading": "Eochracha API á lódáil…",
+    "keysRetry": "Bain triail eile as eochracha a lódáil",
+    "accessViaPattern": "trí {pattern}",
+    "accessBlocked": "Blocáilte ag {pattern}",
+    "editKeyAccess": "Cuir rochtain eochrach in eagar",
+    "toggleKeyAccess": "Ceadaigh {item} ar {name}",
+    "resultNetworkError": "Theip ar an sannadh",
+    "resultWouldEmptyModels": "D'fhágfadh sé seo an eochair seo gan aon mhúnlaí ceadaithe — cuir rochtain na heochrach in eagar ina ionad sin",
+    "resultWouldEmptyCombos": "D'fhágfadh sé seo an eochair seo gan aon teaglamaí ceadaithe — cuir rochtain na heochrach in eagar ina ionad sin",
+    "keyUpdatePending": "Tá {name} á nuashonrú fós. Bain triail eile as i gceann nóiméid.",
+    "assignToKeys": "Sann d'eochracha API…",
+    "assignApply": "Cuir athruithe i bhfeidhm",
+    "assignComplete": "Rochtain ar eochair API nuashonraithe",
+    "assignFailed": "Theip ar roinnt nuashonruithe ar eochracha API",
+    "assignNoChanges": "Níor athraíodh aon rochtain ar eochair API",
+    "selectedAccessItems": "Míreanna roghnaithe: {count}",
+    "assignExcludedCombos": "{count, plural, one {Ní múnla é # ró teaglaim roghnaithe agus rachfar thairis anseo} other {Ní múnlaí iad # ró teaglaim roghnaithe agus rachfar tharstu anseo}}. Sann teaglamaí ón táb Combos.",
+    "assignActionAdd": "Cuir leis",
+    "assignActionRemove": "Bain",
+    "searchKeys": "Cuardaigh eochracha API",
+    "selectApiKey": "Roghnaigh eochair API {name}",
+    "allModelsAccess": "Gach múnla",
+    "allCombosAccess": "Gach teaglaim",
+    "modelAccessCount": "Múnlaí: {count}",
+    "comboAccessCount": "Teaglamaí: {count}",
+    "keyInactive": "Neamhghníomhach",
+    "keyBanned": "Toirmiscthe",
+    "keyRevoked": "Aisghairthe",
+    "switchRestrictedConfirm": "Athraigh an eochair seo go rochtain shrianta: ní bheidh ach na míreanna roghnaithe ceadaithe",
+    "removeNoChangeHint": "Ceadaíonn an eochair seo gach rud; ní dhéanfaidh baint na míreanna roghnaithe aon athrú",
+    "removeStaysAllowedHint": "Ceadaithe ar an eochair seo fós trí {patterns}",
+    "resultChanged": "Athraithe",
+    "resultUnchanged": "Gan athrú",
+    "resultSkipped": "Scipeáilte",
+    "resultNeedsSwitch": "Ní mór aistriú go srianta"
   },
   "combos": {
     "title": "Teaglamaí",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Íoslódáil teimpléad CSV",
     "importFromFileMoreErrors": "+{count} eile",
     "importFromFileSchemaHint": "Tá colúin CSV suite de réir oird: provider, name, apiKey, baseUrl (roghnach), priority (roghnach). Ní mór don cholún provider a bheith ina aitheantóir soláthraí bainistithe atá ann cheana nó ina aitheantóir nóid atá cláraithe cheana agus atá comhoiriúnach le OpenAI/Anthropic — ní chruthaíonn an t-iompórtáil seo nóid chríochphointe nua.",
+    "importOAuthExport": "Iompórtáil easpórtáil OAuth",
+    "oauthExportTitle": "Iompórtáil easpórtáil bainisteora cuntas",
+    "oauthExportDescription": "Uaslódáil easpórtáil gnáth-théacs ó bhainisteoir cuntas (m.sh. easpórtáil cloud-accounts Antigravity Manager). Athnuaitear na comharthaí ar an bhfreastalaí agus déantar nasc OAuth de gach cuntas — athnuaitear dúblaigh ina n-áit.",
+    "oauthExportProviderLabel": "Soláthraí",
+    "oauthExportChoose": "Roghnaigh comhad",
+    "oauthExportFileAria": "Comhad JSON easpórtála cuntas",
+    "oauthExportSchemaHint": "Glactar le: doiciméad le eagar \"accounts\", eagar lom, nó taifead aonair. Is féidir na comharthaí a bheith i réad token neadaithe nó go díreach ar an taifead.",
+    "oauthExportDetected": "{count} cuntas aimsithe",
+    "oauthExportSelectAll": "Roghnaigh gach cuntas",
+    "oauthExportSelectAccount": "Roghnaigh cuntas {index}",
+    "oauthExportColEmail": "Ríomhphost",
+    "oauthExportColProvider": "Soláthraí",
+    "oauthExportColRefresh": "Comhartha athnuachana",
+    "oauthExportNoEmail": "(gan ríomhphost)",
+    "oauthExportYes": "tá",
+    "oauthExportNo": "níl",
+    "oauthExportImporting": "Ag iompórtáil…",
+    "oauthExportImport": "Iompórtáil {count} cuntas",
+    "oauthExportResult": "Iompórtáladh {imported}/{total} — theip ar {failed}",
+    "oauthExportParseError": "Níorbh fhéidir aon chuntas a léamh ón gcomhad seo.",
+    "oauthExportUnknownError": "earráid anaithnid",
     "adaptaTutorial": {
       "title": "Conas Adapta Web a nascadh",
       "introPrefix": "Déanann Adapta fíordheimhniú trí Clerk. Is JWT fad-shaoil é an comhartha",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Óstach",
     "qdrantCollection": "Bailiúchán",
     "catalogVisibilityHint": "Is féidir aitheantóirí samhlacha folaithe a ghlaoch fós leis na ceadanna rochtana céanna.",
+    "exposeCombosOnly": "Ná liostaigh ach teaglamaí in /v1/models",
+    "exposeCombosOnlyDesc": "Feiceann cliaint a aimsíonn samhlacha go huathoibríoch do theaglamaí (agus auto/* mura bhfuil siad i bhfolach) in ionad samhlacha amha na soláthraithe. Leanann aitheantais shainráite provider/model ar aghaidh á ródú.",
     "catalogScopeTitle": "Liostú API na samhlacha",
     "catalogScopeDesc": "An méid a fhógraíonn GET /v1/models don eochair seo. Ní athraíonn cúngú an liosta na samhlacha ar féidir leis an eochair glaoch orthu.",
     "catalogScopeAll": "An dá cheann",
@@ -11550,6 +11632,7 @@
     "tableHealth": "Sláinte (24 uair an chloig)",
     "tableUsage": "Úsáid",
     "tableActions": "Gníomhartha",
+    "moreActions": "Tuilleadh gníomhartha",
     "test": "Tástáil",
     "edit": "Cuir in eagar",
     "delete": "Scrios",
@@ -11707,8 +11790,7 @@
     "notMeasured": "Gan tomhas",
     "upstream4xx": "{count} earráidí cliente ar an gceann chlé",
     "upstream5xx": "{count} earráidí seirbhís ar an gceann chlé",
-    "uniformEgressLine": "{affected} de {exits} éits bailiú le chéile ar {provider} (deis {hours}h) — níl ceist éit",
-    "moreActions": "Tuilleadh gníomhartha"
+    "uniformEgressLine": "{affected} de {exits} éits bailiú le chéile ar {provider} (deis {hours}h) — níl ceist éit"
   },
   "playground": {
     "title": "Clós Súgartha Múnlaí",
@@ -12184,7 +12266,11 @@
       "viewConversation": "féach ar an gcomhrá",
       "openConversation": "Oscail comhrá {id}"
     },
-    "tableLabel": "Logaí iarratais"
+    "tableLabel": "Logaí iarratais",
+    "throughputPostFirstToken": "Tar éis an chéad token",
+    "throughputEndToEnd": "Ó cheann go ceann",
+    "throughputRate": "{value} token in aghaidh an tsoicind",
+    "throughputExplanation": "Úsáideann an dá ráta an ceann is mó de líon na dtoken aschuir agus réasúnaíochta. Fágann an ráta tar éis an chéad token TTFT bailí as an áireamh; murach sin úsáideann sé an fhad iomlán. Úsáideann ó cheann go ceann an fhad iomlán i gcónaí. Is féidir le freagra maolánach ráta seachadta pléasctha ard a bheith aige gan giniúint samhail níos tapúla."
   },
   "proxyLogger": {
     "filterAll": "Go léir",
@@ -13773,7 +13859,9 @@
       "disabled": "Díchumasaithe",
       "dual": "Déach",
       "alias": "Ailias",
-      "canonical": "Canónta"
+      "canonical": "Canónta",
+      "fail_closed": "Blocáil (fail_closed)",
+      "count_as_zero": "Cuir san áireamh mar $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14184,6 +14272,10 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atriail Tréimhse Fuaraigh: Scipeáil Diúltuithe 403/410",
         "description": "Nuair a bhíonn gach cuntas i dtréimhse fhuaraigh agus gurbh é 403 (rochtain diúltaithe) nó 410 (imithe) ba chúis leis an tréimhse fhuaraigh a chríochnaíonn ar dtús, seol an diúltú sin ar ais láithreach in ionad fanacht go dtiocfaidh deireadh leis an tréimhse fhuaraigh agus an t-iarratas a athsheoladh; buanaítear cuóta 403 athnuachana le scóip cheangail agentrouter ansin le errorCode 429 ionas go bhfanfaidh sé in-atriallta. Múchta de réir réamhshocraithe: ní scipeálann ach 401 an feitheamh, agus buanaítear gach diúltú leis an stádas a tháinig leis."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Polasaí Buiséid Úsáide Gan Phraghas",
+        "description": "Conas a láimhseálann teorainneacha USD laethúla/seachtainiúla in aghaidh eochair úsáid rathúil nach bhfuil sraith phraghsála ag an soláthraí nó an múnla aige. fail_closed (réamhshocraithe) déanann sé an fhuinneog a mharcáil mar sroichte, mar sin ní rachaidh costas anaithnid riamh thart ar chaip dhian. count_as_zero cuireann an úsáid sin san áireamh mar $0 agus leanann sé ar aghaidh ag cur i bhfeidhm an chaitheamh phraghsáilte. Tá múnlaí gan phraghas liostaithe ar leathanach baile an phainéil i ngach cás."
       }
     }
   },
@@ -14220,6 +14312,7 @@
     "latency": "Aga folaigh",
     "quota": "Cuóta",
     "rangeWindow": "Fuinneog {range}",
+    "timeRange": "Raon ama",
     "runtimeHealthBlend": "meascán ama rite/sláinte",
     "averageResponseTime": "am freagartha meánach",
     "worstQuota": "An cuóta is measa",
@@ -14274,8 +14367,7 @@
     "unknown": "anaithnid",
     "unknownProvider": "soláthraí anaithnid",
     "unknownModel": "múnla anaithnid",
-    "resolvedTargetMetrics": "{requests} iarr. · {success} rathúil · {latency} · cuóta {quota}",
-    "timeRange": "Raon ama"
+    "resolvedTargetMetrics": "{requests} iarr. · {success} rathúil · {latency} · cuóta {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Cuóta úsáide USD",

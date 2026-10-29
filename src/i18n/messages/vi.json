@@ -1925,7 +1925,14 @@
     "readinessStep3": "Sao chép endpoint của bạn",
     "readinessStep4": "Gửi một yêu cầu thử nghiệm",
     "readinessContinue": "Tiếp tục thiết lập",
-    "readinessDismiss": "Bỏ qua lúc này"
+    "readinessDismiss": "Bỏ qua lúc này",
+    "unpricedUsageTitle": "{count, plural, one {# mô hình} other {# mô hình}} có hoạt động gần đây nhưng không có giá được cấu hình",
+    "unpricedUsageFailClosed": "{keys, plural, one {# khóa API có giới hạn sử dụng} other {# khóa API có giới hạn sử dụng}} đã sử dụng các mô hình này trong 8 ngày qua. Khi lượng sử dụng đó nằm trong cửa sổ hàng ngày hoặc hàng tuần của khóa, khóa được coi là vượt hạn mức và các yêu cầu của nó bị chặn (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Lượng sử dụng này được tính là $0 vào giới hạn sử dụng theo mỗi khóa (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# yêu cầu} other {# yêu cầu}}, {keys, plural, one {# khóa có giới hạn} other {# khóa có giới hạn}}",
+    "unpricedUsageMore": "…và {count} mục khác",
+    "unpricedUsageConfigure": "Cấu hình giá",
+    "unpricedUsageDismiss": "Bỏ qua"
   },
   "analytics": {
     "title": "Phân tích",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Cấu hình thủ công",
     "clineManualConfiguration": "Cấu hình thủ công Cline",
     "kiloManualConfiguration": "Cấu hình thủ công Kilo Code",
+    "piManualConfiguration": "Pi - Cấu hình thủ công",
+    "piConfigInvalidTitle": "Pi models.json không thể đọc được",
+    "piOmnirouteConfigured": "OmniRoute được định cấu hình làm nhà cung cấp tùy chỉnh Pi",
+    "piModelHelp": "Pi không tự động phát hiện các mô hình cho điểm cuối tùy chỉnh — mô hình bạn chọn được ghi rõ ràng vào models.json.",
+    "piManualConfigTitle": "Hoặc chỉnh sửa ~/.pi/agent/models.json theo cách thủ công",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Sau đó khởi động Pi và chọn nhà cung cấp omniroute. Đặt PI_CODING_AGENT_DIR để di chuyển toàn bộ thư mục tác nhân.",
+    "piUnownedNote": "Mục này đã được thêm bên ngoài OmniRoute (ví dụ: Điểm cuối tùy chỉnh của pi-gui). Áp dụng sẽ áp dụng nó; Đặt lại chỉ xóa các mục OmniRoute đã viết.",
     "whenToUseLabel": "Khi nào nên sử dụng",
     "openToolDocs": "Mở tài liệu công cụ",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "Tác nhân lập trình xAI Grok Build TUI hỗ trợ nhà cung cấp tùy chỉnh",
       "droid": "Trợ lý AI Factory Droid",
       "openclaw": "Trợ lý AI Open Claw",
+      "openclaude": "CLI tác nhân lập trình OpenClaude hỗ trợ nhà cung cấp tương thích OpenAI",
       "cline": "CLI trợ lý lập trình Cline AI",
       "kilo": "CLI trợ lý AI Kilo Code",
       "qwen": "CLI Qwen Code của Alibaba",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Cập nhật",
     "cliproxyapiUpdateAvailable": "Có bản cập nhật: v{current} → v{latest}",
     "cliproxyapiVersion": "Phiên bản",
+    "piInstallTitle": "Cài đặt tác nhân mã hóa Pi",
+    "piInstallInstructions": "Cài đặt Pi CLI, sau đó quay lại đây để kết nối với OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Sử dụng URL có thể truy cập được từ máy chạy Pi. Điểm cuối /v1 tương thích với OpenAI được thêm tự động.",
+    "piManualMergeHint": "Chỉ xem trước. Hợp nhất mục nhập providers.omniroute này vào models.json để các nhà cung cấp và cài đặt khác của bạn được giữ nguyên.",
     "removeMapping": "Xóa ánh xạ"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "Yêu cầu thất bại với mã HTTP {status}",
     "testFailedNoDetail": "Kiểm thử thất bại mà không có thông báo lỗi",
     "additionalCapabilities": "Khả năng bổ sung: {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "Quyền truy cập khóa API",
+    "allowedInKeys": "Được phép trong: {count, plural, one {# khóa} other {# khóa}}",
+    "keysLoading": "Đang tải các khóa API…",
+    "keysRetry": "Thử tải lại khóa",
+    "accessViaPattern": "qua {pattern}",
+    "accessBlocked": "Bị chặn bởi {pattern}",
+    "editKeyAccess": "Chỉnh sửa quyền truy cập khóa",
+    "toggleKeyAccess": "Cho phép {item} trên {name}",
+    "resultNetworkError": "Gán thất bại",
+    "resultWouldEmptyModels": "Sẽ khiến khóa này không có mô hình nào được phép — thay vào đó hãy chỉnh sửa quyền truy cập khóa",
+    "resultWouldEmptyCombos": "Sẽ khiến khóa này không có combo nào được phép — thay vào đó hãy chỉnh sửa quyền truy cập khóa",
+    "keyUpdatePending": "{name} vẫn đang được cập nhật. Vui lòng thử lại sau giây lát.",
+    "assignToKeys": "Gán cho các khóa API…",
+    "assignApply": "Áp dụng thay đổi",
+    "assignComplete": "Đã cập nhật quyền truy cập khóa API",
+    "assignFailed": "Một số cập nhật khóa API đã thất bại",
+    "assignNoChanges": "Không có quyền truy cập khóa API nào được thay đổi",
+    "selectedAccessItems": "Mục đã chọn: {count}",
+    "assignExcludedCombos": "{count, plural, one {# hàng combo được chọn không phải là mô hình và sẽ bị bỏ qua ở đây} other {# hàng combo được chọn không phải là mô hình và sẽ bị bỏ qua ở đây}}. Hãy gán combo từ tab Combos.",
+    "assignActionAdd": "Thêm",
+    "assignActionRemove": "Xóa",
+    "searchKeys": "Tìm kiếm khóa API",
+    "selectApiKey": "Chọn khóa API {name}",
+    "allModelsAccess": "Tất cả mô hình",
+    "allCombosAccess": "Tất cả combo",
+    "modelAccessCount": "Mô hình: {count}",
+    "comboAccessCount": "Combo: {count}",
+    "keyInactive": "Không hoạt động",
+    "keyBanned": "Bị cấm",
+    "keyRevoked": "Đã thu hồi",
+    "switchRestrictedConfirm": "Chuyển khóa này sang quyền truy cập bị hạn chế: chỉ các mục đã chọn mới được phép",
+    "removeNoChangeHint": "Khóa này cho phép tất cả; việc gỡ bỏ các mục đã chọn sẽ không có thay đổi nào",
+    "removeStaysAllowedHint": "Vẫn được phép trên khóa này thông qua {patterns}",
+    "resultChanged": "Đã thay đổi",
+    "resultUnchanged": "Không thay đổi",
+    "resultSkipped": "Đã bỏ qua",
+    "resultNeedsSwitch": "Cần chuyển sang chế độ hạn chế"
   },
   "combos": {
     "autoTosLoadError": "Không thể tải chính sách ToS. Hãy thử lại trước khi thay đổi.",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Tải mẫu CSV",
     "importFromFileMoreErrors": "+{count} nữa",
     "importFromFileSchemaHint": "Các cột CSV theo vị trí: provider, name, apiKey, baseUrl (tùy chọn), priority (tùy chọn). Cột provider phải là id nhà cung cấp được quản lý hiện có hoặc id nút tương thích OpenAI/Anthropic đã đăng ký — quá trình nhập này không tạo nút endpoint mới.",
+    "importOAuthExport": "Nhập bản xuất OAuth",
+    "oauthExportTitle": "Nhập bản xuất từ trình quản lý tài khoản",
+    "oauthExportDescription": "Tải lên bản xuất dạng văn bản thuần từ trình quản lý tài khoản (ví dụ bản xuất cloud-accounts của Antigravity Manager). Token được làm mới phía máy chủ và mỗi tài khoản trở thành một kết nối OAuth — các bản trùng lặp được làm mới tại chỗ.",
+    "oauthExportProviderLabel": "Nhà cung cấp",
+    "oauthExportChoose": "Chọn tệp",
+    "oauthExportFileAria": "Tệp JSON xuất tài khoản",
+    "oauthExportSchemaHint": "Chấp nhận: tài liệu có mảng \"accounts\", một mảng thuần hoặc một bản ghi đơn. Token có thể nằm trong đối tượng token lồng nhau hoặc trực tiếp trên bản ghi.",
+    "oauthExportDetected": "Đã phát hiện {count} tài khoản",
+    "oauthExportSelectAll": "Chọn tất cả tài khoản",
+    "oauthExportSelectAccount": "Chọn tài khoản {index}",
+    "oauthExportColEmail": "Thư điện tử",
+    "oauthExportColProvider": "Nhà cung cấp",
+    "oauthExportColRefresh": "Token làm mới",
+    "oauthExportNoEmail": "(không có email)",
+    "oauthExportYes": "có",
+    "oauthExportNo": "không",
+    "oauthExportImporting": "Đang nhập…",
+    "oauthExportImport": "Nhập {count} tài khoản",
+    "oauthExportResult": "Đã nhập {imported}/{total} — {failed} thất bại",
+    "oauthExportParseError": "Không thể đọc được tài khoản nào từ tệp này.",
+    "oauthExportUnknownError": "lỗi không xác định",
     "adaptaTutorial": {
       "title": "Cách kết nối Adapta Web",
       "introPrefix": "Adapta xác thực thông qua Clerk. Token",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Máy chủ",
     "qdrantCollection": "Bộ Sưu Tập",
     "catalogVisibilityHint": "Vẫn có thể gọi các ID mô hình bị ẩn bằng cùng quyền truy cập.",
+    "exposeCombosOnly": "Chỉ liệt kê combo trong /v1/models",
+    "exposeCombosOnlyDesc": "Các client tự động khám phá mô hình sẽ thấy các combo của bạn (và auto/* nếu không bị ẩn) thay vì mô hình gốc của nhà cung cấp. Các ID provider/model được chỉ định rõ vẫn tiếp tục được định tuyến.",
     "catalogScopeTitle": "Danh sách API mô hình",
     "catalogScopeDesc": "Những gì GET /v1/models hiển thị cho khóa này. Thu hẹp danh sách không làm thay đổi những gì khóa có thể gọi.",
     "catalogScopeAll": "Cả hai",
@@ -12048,10 +12130,10 @@
       "compressed": "Nén",
       "tps": "TPS",
       "duration": "Thời lượng",
-      "addedWait": "Thời gian chờ thêm",
       "time": "Thời gian",
       "conversation": "Cuộc trò chuyện",
-      "ttft": "TTFT"
+      "ttft": "TTFT",
+      "addedWait": "Thời gian chờ thêm"
     },
     "loadingLogs": "Đang tải nhật ký...",
     "noLogs": "Chưa có nhật ký nào. Hãy thực hiện một số cuộc gọi API để xem chúng ở đây.",
@@ -12184,7 +12266,11 @@
       "viewConversation": "xem hội thoại",
       "openConversation": "Mở hội thoại {id}"
     },
-    "tableLabel": "Nhật ký yêu cầu"
+    "tableLabel": "Nhật ký yêu cầu",
+    "throughputPostFirstToken": "Sau token đầu tiên",
+    "throughputEndToEnd": "Từ đầu đến cuối",
+    "throughputRate": "{value} token/giây",
+    "throughputExplanation": "Cả hai tốc độ đều dùng giá trị lớn hơn giữa số token đầu ra và số token suy luận. Sau token đầu tiên loại trừ TTFT hợp lệ; nếu không, nó dùng toàn bộ thời lượng. Từ đầu đến cuối luôn dùng toàn bộ thời lượng. Một phản hồi được đệm có thể có tốc độ gửi bùng nổ cao mà mô hình không tạo nhanh hơn."
   },
   "proxyLogger": {
     "filterAll": "Tất cả",
@@ -13773,7 +13859,9 @@
       "disabled": "Vô hiệu hóa",
       "dual": "Song song",
       "alias": "Bí danh",
-      "canonical": "Chính thức"
+      "canonical": "Chính thức",
+      "fail_closed": "Chặn (fail_closed)",
+      "count_as_zero": "Tính là $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14184,6 +14272,10 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Chờ thử lại: Bỏ qua các từ chối 403/410",
         "description": "Khi tất cả các tài khoản đều đang trong thời gian chờ và thời gian chờ kết thúc sớm nhất do một lỗi 403 (từ chối truy cập) hoặc 410 (không còn tồn tại), hệ thống sẽ trả về sự từ chối đó ngay lập tức thay vì chờ hết thời gian và gửi lại yêu cầu; một giới hạn (quota) theo phạm vi kết nối agentrouter được làm mới có mã lỗi 403 sau đó sẽ được lưu trữ với mã errorCode 429 để giữ khả năng thử lại. Tắt mặc định: chỉ có lỗi 401 mới bỏ qua bước chờ, và mọi sự từ chối đều được lưu trữ với mã trạng thái ban đầu khi nhận được."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Chính sách ngân sách cho sử dụng chưa định giá",
+        "description": "Cách giới hạn USD hàng ngày/hàng tuần theo mỗi khóa xử lý lượng sử dụng thành công khi nhà cung cấp/mô hình không có dòng giá. fail_closed (mặc định) đánh dấu cửa sổ là đã vượt, nên một chi phí không xác định sẽ không bao giờ vượt qua giới hạn cứng. count_as_zero tính lượng sử dụng đó là $0 và tiếp tục áp dụng chi tiêu đã định giá. Các mô hình chưa có giá vẫn được liệt kê trên trang chính của bảng điều khiển trong mọi trường hợp."
       }
     }
   },

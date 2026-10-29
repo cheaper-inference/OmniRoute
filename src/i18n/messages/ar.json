@@ -102,8 +102,10 @@
     "confirm": "هل أنت متأكد؟",
     "refresh": "تحديث",
     "close": "إغلاق",
+    "dialogTitleFallback": "مربع حوار",
     "previousPage": "الصفحة السابقة",
     "nextPage": "الصفحة التالية",
+    "pagination": "ترقيم الصفحات",
     "capsLockOn": "مفتاح Caps Lock قيد التشغيل",
     "dismissNotification": "تجاهل الإشعار",
     "toggleColumns": "تبديل الأعمدة",
@@ -259,6 +261,7 @@
     "combos": "المجموعات",
     "noModelsFound": "لم يتم العثور على نماذج",
     "clear": "مسح",
+    "clearFilters": "مسح عوامل التصفية",
     "done": "تم",
     "selectAll": "تحديد الكل",
     "unselectAll": "إلغاء تحديد الكل",
@@ -1076,9 +1079,6 @@
     "batchFilePreview": "معاينة",
     "batchFilePreviewTruncated": "عرض {shown} سطرًا أوليًا ({total} سطرًا إجماليًا)",
     "batchFileDownloadFull": "تحميل الملف الكامل",
-    "dialogTitleFallback": "مربع حوار",
-    "pagination": "ترقيم الصفحات",
-    "clearFilters": "مسح عوامل التصفية",
     "tokensPageTitle": "الرموز المميزة",
     "tokensPageDescription": "أرسل الرموز المميزة بين مفاتيح API، وشارك رموز الدعوة، واربط خوادم المجتمع.",
     "tokensServerUrlLabel": "عنوان URL للخادم"
@@ -2002,7 +2002,14 @@
     "readinessStep3": "نسخ نقطة النهاية",
     "readinessStep4": "إرسال طلب اختباري",
     "readinessContinue": "متابعة الإعداد",
-    "readinessDismiss": "تجاهل الآن"
+    "readinessDismiss": "تجاهل الآن",
+    "unpricedUsageTitle": "{count, plural, zero {# نماذج لها استخدام حديث ولكن بلا سعر مُعدّ} one {# نموذج له استخدام حديث ولكن بلا سعر مُعدّ} two {# نموذجان لهما استخدام حديث ولكن بلا سعر مُعدّ} few {# نماذج لها استخدام حديث ولكن بلا سعر مُعدّ} many {# نموذجًا لها استخدام حديث ولكن بلا سعر مُعدّ} other {# نموذج لها استخدام حديث ولكن بلا سعر مُعدّ}}",
+    "unpricedUsageFailClosed": "{keys, plural, zero {# مفاتيح API لها حد استخدام استخدمت هذه النماذج} one {# مفتاح API له حد استخدام استخدم هذه النماذج} two {# مفتاحا API لهما حد استخدام استخدما هذه النماذج} few {# مفاتيح API لها حد استخدام استخدمت هذه النماذج} many {# مفتاحًا API لها حد استخدام استخدمت هذه النماذج} other {# مفتاح API لها حد استخدام استخدمت هذه النماذج}} خلال آخر 8 أيام. طالما أن ذلك الاستخدام داخل نافذة الحد اليومي أو الأسبوعي للمفتاح، يُعتبر المفتاح متجاوزًا للحصة وتُحجب طلباته (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "يُحتسب هذا الاستخدام بمقدار $0 نحو حدود الاستخدام لكل مفتاح (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, zero {# طلبات} one {# طلب} two {# طلبان} few {# طلبات} many {# طلبًا} other {# طلب}}، {keys, plural, zero {# مفاتيح محدودة} one {# مفتاح محدود} two {# مفتاحان محدودان} few {# مفاتيح محدودة} many {# مفتاحًا محدودًا} other {# مفتاح محدود}}",
+    "unpricedUsageMore": "…و{count} أخرى",
+    "unpricedUsageConfigure": "تكوين الأسعار",
+    "unpricedUsageDismiss": "إغلاق"
   },
   "analytics": {
     "title": "التحليلات",
@@ -3039,6 +3046,14 @@
     "openClawManualConfiguration": "OpenClaw - التكوين اليدوي",
     "clineManualConfiguration": "التكوين اليدوي Cline",
     "kiloManualConfiguration": "التكوين اليدوي Kilo code",
+    "piManualConfiguration": "Pi - التكوين اليدوي",
+    "piConfigInvalidTitle": "Pi models.json غير قابل للقراءة",
+    "piOmnirouteConfigured": "تم تكوين OmniRoute كموفر Pi مخصص",
+    "piModelHelp": "لا يقوم Pi باكتشاف النماذج تلقائيًا لنقاط النهاية المخصصة — النموذج الذي تختاره مكتوب في models.json بشكل صريح.",
+    "piManualConfigTitle": "أو تحرير ~/.pi/agent/models.json يدويًا",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "ثم ابدأ Pi وحدد موفر omniroute. اضبط PI_CODING_AGENT_DIR لنقل دليل الوكيل بالكامل.",
+    "piUnownedNote": "تمت إضافة هذا الإدخال خارج OmniRoute (مثل نقاط النهاية المخصصة لـ pi-gui). سوف يعتمده التقديم؛ إعادة التعيين تؤدي فقط إلى إزالة الإدخالات التي كتبها OmniRoute.",
     "whenToUseLabel": "متى تستخدم",
     "openToolDocs": "افتح مستندات الأداة",
     "toolUseCases": {
@@ -3068,6 +3083,7 @@
       "grok-build": "عميل برمجة TUI من xAI Grok مع دعم موفر مخصص",
       "droid": "مساعد Factory Droid AI",
       "openclaw": "Openمساعد Claw AI",
+      "openclaude": "واجهة سطر أوامر لعميل البرمجة OpenClaude مع دعم موفّر متوافق مع OpenAI",
       "cline": "مساعد Cline للبرمجة بالذكاء الاصطناعي عبر سطر الأوامر",
       "kilo": "كيلو كود AI مساعد CLI",
       "qwen": "واجهة خط أوامر Qwen Code CLI",
@@ -3357,6 +3373,12 @@
     "cliproxyapiUpdate": "تحديث",
     "cliproxyapiUpdateAvailable": "تحديث متاح: v{current} → v{latest}",
     "cliproxyapiVersion": "الإصدار",
+    "piInstallTitle": "قم بتثبيت وكيل Pi Coding",
+    "piInstallInstructions": "قم بتثبيت Pi CLI، ثم ارجع إلى هنا لتوصيله بـ OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "استخدم URL الذي يمكن الوصول إليه من الجهاز الذي يقوم بتشغيل Pi. تتم إضافة نقطة النهاية /v1 المتوافقة مع OpenAI تلقائيًا.",
+    "piManualMergeHint": "معاينة فقط. قم بدمج إدخال providers.omniroute هذا في models.json حتى يظل مقدمو الخدمة والإعدادات الأخرى كما هي.",
     "removeMapping": "إزالة التعيين"
   },
   "modelCatalog": {
@@ -3488,7 +3510,44 @@
     "httpError": "فشل الطلب برمز HTTP {status}",
     "testFailedNoDetail": "فشل الاختبار بدون رسالة خطأ",
     "additionalCapabilities": "إمكانيات إضافية: {list}",
-    "comboRefMember": "تركيبة → {name}"
+    "comboRefMember": "تركيبة → {name}",
+    "keyAccessButton": "صلاحية وصول مفتاح API",
+    "allowedInKeys": "مسموح به في: {count, plural, one {# مفتاح} other {# مفاتيح}}",
+    "keysLoading": "جارٍ تحميل مفاتيح API…",
+    "keysRetry": "إعادة محاولة تحميل المفاتيح",
+    "accessViaPattern": "عبر {pattern}",
+    "accessBlocked": "محظور بواسطة {pattern}",
+    "editKeyAccess": "تعديل صلاحية وصول المفتاح",
+    "toggleKeyAccess": "السماح بـ {item} على {name}",
+    "resultNetworkError": "فشل التعيين",
+    "resultWouldEmptyModels": "سيترك هذا المفتاح بدون أي نماذج مسموح بها — عدّل صلاحيات وصول المفتاح بدلاً من ذلك",
+    "resultWouldEmptyCombos": "سيترك هذا المفتاح بدون أي تجميعات مسموح بها — عدّل صلاحيات وصول المفتاح بدلاً من ذلك",
+    "keyUpdatePending": "لا يزال {name} قيد التحديث. حاول مرة أخرى بعد لحظات.",
+    "assignToKeys": "التعيين لمفاتيح API…",
+    "assignApply": "تطبيق التغييرات",
+    "assignComplete": "تم تحديث صلاحية وصول مفتاح API",
+    "assignFailed": "فشل تحديث بعض مفاتيح API",
+    "assignNoChanges": "لم يتم تغيير صلاحيات وصول مفتاح API",
+    "selectedAccessItems": "العناصر المحددة: {count}",
+    "assignExcludedCombos": "{count, plural, one {# صف تجميعة محدد ليس نموذجاً وسيتم تخطيه هنا} other {# صفوف تجميعات محددة ليست نماذج وسيتم تخطيها هنا}}. قم بتعيين التجميعات من علامة التبويب Combos.",
+    "assignActionAdd": "إضافة",
+    "assignActionRemove": "إزالة",
+    "searchKeys": "البحث في مفاتيح API",
+    "selectApiKey": "تحديد مفتاح API {name}",
+    "allModelsAccess": "جميع النماذج",
+    "allCombosAccess": "جميع التوليفات",
+    "modelAccessCount": "النماذج: {count}",
+    "comboAccessCount": "التوليفات: {count}",
+    "keyInactive": "غير نشط",
+    "keyBanned": "محظور",
+    "keyRevoked": "تم الإبطال",
+    "switchRestrictedConfirm": "تحويل هذا المفتاح إلى وصول مقيد: سيتم السماح بالعناصر المحددة فقط",
+    "removeNoChangeHint": "يسمح هذا المفتاح بكل شيء؛ لن تُحدث إزالة العناصر المحددة أي تغيير",
+    "removeStaysAllowedHint": "لا يزال مسموحاً به على هذا المفتاح من خلال {patterns}",
+    "resultChanged": "تم التغيير",
+    "resultUnchanged": "دون تغيير",
+    "resultSkipped": "تم التخطي",
+    "resultNeedsSwitch": "يتطلب التحويل إلى مقيد"
   },
   "combos": {
     "title": "المجموعات",
@@ -5431,6 +5490,27 @@
     "importFromFileDownloadTemplate": "تنزيل قالب CSV",
     "importFromFileMoreErrors": "+{count} أخطاء أخرى",
     "importFromFileSchemaHint": "أعمدة CSV موضعية: provider، name، apiKey، baseUrl (اختياري)، priority (اختياري). يجب أن يكون عمود provider معرّف موفّر مُدار موجودًا أو معرّف عقدة مسجّلة مسبقًا ومتوافقة مع OpenAI/Anthropic — لا تؤدي عملية الاستيراد هذه إلى إنشاء عقد نقاط نهاية جديدة.",
+    "importOAuthExport": "استيراد تصدير OAuth",
+    "oauthExportTitle": "استيراد تصدير مدير الحسابات",
+    "oauthExportDescription": "ارفع ملف تصدير بنص عادي من مدير حسابات (مثل تصدير cloud-accounts من Antigravity Manager). يتم تحديث الرموز المميزة على الخادم ويصبح كل حساب اتصال OAuth — ويتم تحديث الحسابات المكررة في مكانها.",
+    "oauthExportProviderLabel": "مزود",
+    "oauthExportChoose": "اختيار ملف",
+    "oauthExportFileAria": "ملف JSON لتصدير الحسابات",
+    "oauthExportSchemaHint": "المقبول: مستند يحتوي على مصفوفة \"accounts\"، أو مصفوفة مجردة، أو سجل واحد. يمكن أن تكون الرموز المميزة داخل كائن token متداخل أو مباشرة في السجل.",
+    "oauthExportDetected": "تم اكتشاف {count} حساب(ات)",
+    "oauthExportSelectAll": "تحديد كل الحسابات",
+    "oauthExportSelectAccount": "تحديد الحساب {index}",
+    "oauthExportColEmail": "البريد الإلكتروني",
+    "oauthExportColProvider": "مزود",
+    "oauthExportColRefresh": "رمز التحديث",
+    "oauthExportNoEmail": "(لا يوجد بريد إلكتروني)",
+    "oauthExportYes": "نعم",
+    "oauthExportNo": "لا",
+    "oauthExportImporting": "جاري الاستيراد…",
+    "oauthExportImport": "استيراد {count} حساب(ات)",
+    "oauthExportResult": "تم استيراد {imported}/{total} — فشل {failed}",
+    "oauthExportParseError": "تعذرت قراءة أي حسابات من هذا الملف.",
+    "oauthExportUnknownError": "خطأ غير معروف",
     "adaptaTutorial": {
       "title": "كيفية الاتصال بـ Adapta Web",
       "introPrefix": "تتم مصادقة Adapta عبر Clerk. الرمز المميز",
@@ -8898,6 +8978,8 @@
     "qdrantHost": "مضيف",
     "qdrantCollection": "مجموعة",
     "catalogVisibilityHint": "تظل معرّفات النماذج المخفية قابلة للاستدعاء بصلاحيات الوصول نفسها.",
+    "exposeCombosOnly": "عرض التركيبات فقط في /v1/models",
+    "exposeCombosOnlyDesc": "يرى العملاء الذين يكتشفون النماذج تلقائيًا تركيباتك (و auto/* ما لم تكن مخفية) بدلًا من نماذج المزوّدين الخام. تستمر معرّفات provider/model الصريحة في التوجيه.",
     "catalogScopeTitle": "قائمة Models API",
     "catalogScopeDesc": "ما تعرضه GET /v1/models لهذا المفتاح. لا يؤدي تضييق القائمة مطلقًا إلى تغيير ما يمكن للمفتاح استدعاؤه.",
     "catalogScopeAll": "كلاهما",
@@ -11627,6 +11709,7 @@
     "tableHealth": "السلامة",
     "tableUsage": "الاستخدام",
     "tableActions": "الإجراءات",
+    "moreActions": "إجراءات إضافية",
     "test": "اختبار",
     "edit": "تحرير",
     "delete": "حذف",
@@ -11784,8 +11867,7 @@
     "notMeasured": "غير مقاس",
     "upstream4xx": "{count} أخطاء عميل من المصدر العلوي",
     "upstream5xx": "{count} أخطاء الخادم العلوي",
-    "uniformEgressLine": "فشل {affected} من {exits} مخرجًا معًا على {provider} (آخر {hours}h) — ليس مشكلة خروج",
-    "moreActions": "إجراءات إضافية"
+    "uniformEgressLine": "فشل {affected} من {exits} مخرجًا معًا على {provider} (آخر {hours}h) — ليس مشكلة خروج"
   },
   "playground": {
     "title": "العنوان",
@@ -12261,7 +12343,11 @@
       "viewConversation": "عرض المحادثة",
       "openConversation": "فتح المحادثة {id}"
     },
-    "tableLabel": "سجلات الطلبات"
+    "tableLabel": "سجلات الطلبات",
+    "throughputPostFirstToken": "ما بعد الرمز الأول",
+    "throughputEndToEnd": "من البداية إلى النهاية",
+    "throughputRate": "{value} رمز/ثانية",
+    "throughputExplanation": "يستخدم كلا المعدلين العدد الأكبر بين رموز الإخراج ورموز الاستدلال. يستثني معدل ما بعد الرمز الأول قيمة TTFT صالحة؛ وإلا فإنه يستخدم المدة الكاملة. أما معدل البداية إلى النهاية فيستخدم دائمًا المدة الكاملة. قد يحقق الرد المخزّن مؤقتًا معدل تسليم لحظيًا مرتفعًا دون أن يكون توليد النموذج أسرع."
   },
   "proxyLogger": {
     "filterAll": "الكل",
@@ -13850,7 +13936,9 @@
       "disabled": "معطّل",
       "dual": "مزدوج",
       "alias": "اسم مستعار",
-      "canonical": "معياري"
+      "canonical": "معياري",
+      "fail_closed": "حظر (fail_closed)",
+      "count_as_zero": "احتساب كـ $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14261,6 +14349,10 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "إعادة المحاولة أثناء التهدئة: تخطي حالات رفض 403/410",
         "description": "عندما تكون جميع الحسابات في فترة تهدئة وتكون فترة التهدئة التي تنتهي أولاً ناجمة عن خطأ 403 (تم رفض الوصول) أو 410 (لم يعد متاحًا)، يتم إرجاع هذا الرفض فورًا بدلاً من انتظار انتهاء التهدئة وإعادة إرسال الطلب؛ ويتم بعد ذلك حفظ خطأ 403 لحصة agentrouter المتجددة على مستوى الاتصال مع errorCode بقيمة 429 ليظل قابلاً لإعادة المحاولة. معطّل افتراضيًا: يتخطى الخطأ 401 فقط فترة الانتظار، ويتم حفظ كل رفض بنفس الحالة التي ورد بها."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "سياسة ميزانية الاستخدام غير المسعرة",
+        "description": "كيف تتعامل حدود USD اليومية/الأسبوعية لكل مفتاح مع الاستخدام الناجح الذي لا يوجد لموفّر/نموذج له صف تسعير. fail_closed (افتراضي) تعتبر النافذة متجاوزة، فلا يمكن لتكلفة غير معروفة أن تتجاوز الحد الصارم. count_as_zero يحتسب ذلك الاستخدام بمقدار $0 ويستمر في تطبيق الإنفاق الذي له سعر. تُدرج النماذج غير المسعّرة في الصفحة الرئيسية للوحة القيادة في كلتا الحالتين."
       }
     }
   },
@@ -14297,6 +14389,7 @@
     "latency": "زمن الانتقال",
     "quota": "الحصة",
     "rangeWindow": "نافذة {range}",
+    "timeRange": "النطاق الزمني",
     "runtimeHealthBlend": "مزيج وقت التشغيل/الحالة الصحية",
     "averageResponseTime": "متوسط وقت الاستجابة",
     "worstQuota": "أسوأ حصة",
@@ -14351,8 +14444,7 @@
     "unknown": "غير معروف",
     "unknownProvider": "مزود غير معروف",
     "unknownModel": "نموذج غير معروف",
-    "resolvedTargetMetrics": "{requests} طلب · {success} نجاح · {latency} · حصة {quota}",
-    "timeRange": "النطاق الزمني"
+    "resolvedTargetMetrics": "{requests} طلب · {success} نجاح · {latency} · حصة {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "حصة استخدام بالدولار الأمريكي",

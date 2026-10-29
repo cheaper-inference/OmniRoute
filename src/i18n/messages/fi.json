@@ -25,8 +25,10 @@
     "confirm": "Oletko varma?",
     "refresh": "Päivitä",
     "close": "Sulje",
+    "dialogTitleFallback": "Valintaikkuna",
     "previousPage": "Edellinen sivu",
     "nextPage": "Seuraava sivu",
+    "pagination": "Sivutus",
     "capsLockOn": "Caps Lock on päällä",
     "dismissNotification": "Hylkää ilmoitus",
     "toggleColumns": "Vaihda sarakkeita",
@@ -182,6 +184,7 @@
     "combos": "Yhdistelmät",
     "noModelsFound": "Malleja ei löytynyt",
     "clear": "Tyhjennä",
+    "clearFilters": "Tyhjennä suodattimet",
     "done": "Valmis",
     "selectAll": "Valitse kaikki",
     "unselectAll": "Poista valinnat",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Esikatselu",
     "batchFilePreviewTruncated": "Näytetään ensimmäiset {shown} riviä ({total} yhteensä riviä)",
     "batchFileDownloadFull": "Lataa Koko Tiedosto",
-    "dialogTitleFallback": "Valintaikkuna",
-    "pagination": "Sivutus",
-    "clearFilters": "Tyhjennä suodattimet",
     "tokensPageTitle": "Tokenit",
     "tokensPageDescription": "Lähetä tokeneita API-avainten välillä, jaa kutsukoodeja ja yhdistä yhteisöpalvelimia.",
     "tokensServerUrlLabel": "Palvelimen URL-osoite"
@@ -1925,7 +1925,14 @@
     "readinessStep3": "Kopioi päätepisteesi",
     "readinessStep4": "Lähetä testipyyntö",
     "readinessContinue": "Jatka määritystä",
-    "readinessDismiss": "Ohita toistaiseksi"
+    "readinessDismiss": "Ohita toistaiseksi",
+    "unpricedUsageTitle": "{count, plural, one {# malli} other {# mallia}} joilla on viimeaikaista käyttöä mutta ei määritettyä hintaa",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-avain, jolla on käyttöraja} other {# API-avainta, joilla on käyttöraja}} käyttivät näitä malleja viimeisten 8 päivän aikana. Kun kyseinen käyttö on avaimen päivä- tai viikkokohtaisen ikkunan sisällä, avainta pidetään ylittäneenä ja sen pyynnöt estetään (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Tämä käyttö lasketaan $0:ksi avainkohtaisissa käyttörajoissa (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# pyyntö} other {# pyyntöä}}, {keys, plural, one {# rajoitettu API-avain} other {# rajoitettua API-avainta}}",
+    "unpricedUsageMore": "…ja {count} lisää",
+    "unpricedUsageConfigure": "Määritä hinnat",
+    "unpricedUsageDismiss": "Sulje"
   },
   "analytics": {
     "title": "Analytiikka",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Manuaalinen konfigurointi",
     "clineManualConfiguration": "Cline Manuaalinen konfigurointi",
     "kiloManualConfiguration": "Kilo Code Manuaalinen konfigurointi",
+    "piManualConfiguration": "Pi - Manuaalinen konfigurointi",
+    "piConfigInvalidTitle": "Pi models.json on lukukelvoton",
+    "piOmnirouteConfigured": "OmniRoute on määritetty mukautettuksi Pi-palveluntarjoajaksi",
+    "piModelHelp": "Pi ei löydä automaattisesti mukautettujen päätepisteiden malleja — valitsemasi malli on kirjoitettu models.json hen nimenomaisesti.",
+    "piManualConfigTitle": "Tai muokkaa ~/.pi/agent/models.json manuaalisesti",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Käynnistä sitten Pi ja valitse omniroute palveluntarjoaja. Aseta PI_CODING_AGENT_DIR siirtääksesi koko agenttihakemiston.",
+    "piUnownedNote": "Tämä merkintä lisättiin OmniRoute ulkopuolelle (esim. pi-guin mukautetut päätepisteet). Hakeminen hyväksyy sen; Reset poistaa vain OmniRoute kirjoittamat merkinnät.",
     "whenToUseLabel": "Milloin käyttää",
     "openToolDocs": "Avaa työkaludokumentit",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI -koodausagentti mukautetun palveluntarjoajan tuella",
       "droid": "Tehdas Droid AI Assistant",
       "openclaw": "Avaa Claw AI Assistant",
+      "openclaude": "OpenClaude-koodausagentin CLI OpenAI-yhteensopivan palveluntarjoajan tuella",
       "cline": "Cline-tekoälykoodausavustajan CLI",
       "kilo": "Kilo Code -tekoälyavustajan CLI",
       "qwen": "Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Päivitä",
     "cliproxyapiUpdateAvailable": "Päivitys saatavilla: v{current} → v{latest}",
     "cliproxyapiVersion": "Versio",
+    "piInstallTitle": "Asenna Pi-koodausagentti",
+    "piInstallInstructions": "Asenna Pi CLI ja palaa sitten tänne yhdistääksesi se OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Käytä URL, joka on tavoitettavissa Pi:tä käyttävästä koneesta. OpenAI-yhteensopiva /v1-päätepiste lisätään automaattisesti.",
+    "piManualMergeHint": "Vain esikatselu. Yhdistä tämä providers.omniroute-merkintä models.json, jotta muut palveluntarjoajasi ja asetuksesi pysyvät ennallaan.",
     "removeMapping": "Poista määritys"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "Pyyntö epäonnistui: HTTP {status}",
     "testFailedNoDetail": "Testi epäonnistui ilman virheilmoitusta",
     "additionalCapabilities": "Lisäominaisuudet: {list}",
-    "comboRefMember": "Yhdistelmä → {name}"
+    "comboRefMember": "Yhdistelmä → {name}",
+    "keyAccessButton": "API-avainten käyttöoikeudet",
+    "allowedInKeys": "Sallittu kohteissa: {count, plural, one {# avain} other {# avainta}}",
+    "keysLoading": "Ladataan API-avaimia…",
+    "keysRetry": "Yritä ladata avaimet uudelleen",
+    "accessViaPattern": "kautta: {pattern}",
+    "accessBlocked": "Estetty kuviolla {pattern}",
+    "editKeyAccess": "Muokkaa avaimen käyttöoikeuksia",
+    "toggleKeyAccess": "Salli {item} kohteessa {name}",
+    "resultNetworkError": "Määritys epäonnistui",
+    "resultWouldEmptyModels": "Jättäisi tämän avaimen ilman sallittuja malleja — muokkaa sen sijaan avaimen käyttöoikeuksia",
+    "resultWouldEmptyCombos": "Jättäisi tämän avaimen ilman sallittuja comboja — muokkaa sen sijaan avaimen käyttöoikeuksia",
+    "keyUpdatePending": "Kohdetta {name} päivitetään vielä. Yritä hetken kuluttua uudelleen.",
+    "assignToKeys": "Määritä API-avaimille…",
+    "assignApply": "Ota muutokset käyttöön",
+    "assignComplete": "API-avaimen käyttöoikeudet päivitetty",
+    "assignFailed": "Joidenkin API-avainten päivitys epäonnistui",
+    "assignNoChanges": "API-avainten käyttöoikeuksia ei muutettu",
+    "selectedAccessItems": "Valitut kohteet: {count}",
+    "assignExcludedCombos": "{count, plural, one {# valittu combo-rivi ei ole malli ja se ohitetaan tässä} other {# valittua combo-riviä eivät ole malleja ja ne ohitetaan tässä}}. Määritä combot Combos-välilehdeltä.",
+    "assignActionAdd": "Lisää",
+    "assignActionRemove": "Poista",
+    "searchKeys": "Hae API-avaimia",
+    "selectApiKey": "Valitse API-avain {name}",
+    "allModelsAccess": "Kaikki mallit",
+    "allCombosAccess": "Kaikki yhdistelmät",
+    "modelAccessCount": "Mallit: {count}",
+    "comboAccessCount": "Yhdistelmät: {count}",
+    "keyInactive": "Ei-aktiivinen",
+    "keyBanned": "Estetty",
+    "keyRevoked": "Kumottu",
+    "switchRestrictedConfirm": "Vaihda tämä avain rajoitettuun pääsyyn: vain valitut kohteet sallitaan",
+    "removeNoChangeHint": "Tämä avain sallii kaiken; valittujen kohteiden poistaminen ei tee muutoksia",
+    "removeStaysAllowedHint": "Sallittu yhä tälle avaimelle kuvioiden {patterns} kautta",
+    "resultChanged": "Muutettu",
+    "resultUnchanged": "Ei muutosta",
+    "resultSkipped": "Ohitettu",
+    "resultNeedsSwitch": "Vaatii vaihtamisen rajoitettuun"
   },
   "combos": {
     "title": "Yhdistelmät",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Lataa CSV-malli",
     "importFromFileMoreErrors": "+{count} muuta",
     "importFromFileSchemaHint": "CSV-sarakkeiden järjestys on kiinteä: provider, name, apiKey, baseUrl (valinnainen), priority (valinnainen). provider-sarakkeen arvon on oltava olemassa olevan hallinnoidun palveluntarjoajan tunnus tai jo rekisteröidyn OpenAI/Anthropic-yhteensopivan solmun tunnus — tämä tuonti ei luo uusia päätepistesolmuja.",
+    "importOAuthExport": "Tuo OAuth-vienti",
+    "oauthExportTitle": "Tuo tilienhallinnan vienti",
+    "oauthExportDescription": "Lataa tilienhallintaohjelman selkokielinen vienti (esim. Antigravity Managerin cloud-accounts-vienti). Tunnukset päivitetään palvelimella ja jokaisesta tilistä tulee OAuth-yhteys — kaksoiskappaleet päivitetään paikallaan.",
+    "oauthExportProviderLabel": "Palveluntarjoaja",
+    "oauthExportChoose": "Valitse tiedosto",
+    "oauthExportFileAria": "Tilivienti-JSON-tiedosto",
+    "oauthExportSchemaHint": "Hyväksytään: asiakirja, jossa on \"accounts\"-taulukko, pelkkä taulukko tai yksittäinen tietue. Tunnukset voivat olla sisäkkäisessä token-objektissa tai suoraan tietueessa.",
+    "oauthExportDetected": "Havaittu {count} tiliä",
+    "oauthExportSelectAll": "Valitse kaikki tilit",
+    "oauthExportSelectAccount": "Valitse tili {index}",
+    "oauthExportColEmail": "Sähköposti",
+    "oauthExportColProvider": "Palveluntarjoaja",
+    "oauthExportColRefresh": "Päivitystunnus",
+    "oauthExportNoEmail": "(ei sähköpostia)",
+    "oauthExportYes": "kyllä",
+    "oauthExportNo": "ei",
+    "oauthExportImporting": "Tuodaan…",
+    "oauthExportImport": "Tuo {count} tiliä",
+    "oauthExportResult": "Tuotu {imported}/{total} — {failed} epäonnistui",
+    "oauthExportParseError": "Tästä tiedostosta ei voitu lukea yhtään tiliä.",
+    "oauthExportUnknownError": "tuntematon virhe",
     "adaptaTutorial": {
       "title": "Kuinka yhdistää Adapta Web",
       "introPrefix": "Adapta todennetaan Clerkin kautta. Tokeni",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Isäntä",
     "qdrantCollection": "Kokoelma",
     "catalogVisibilityHint": "Piilotettuja mallitunnuksia voi edelleen kutsua samoilla käyttöoikeuksilla.",
+    "exposeCombosOnly": "Listaa /v1/models-luettelossa vain yhdistelmät",
+    "exposeCombosOnlyDesc": "Mallit automaattisesti löytävät asiakkaat näkevät yhdistelmäsi (ja auto/*, ellei niitä ole piilotettu) palveluntarjoajien raakamallien sijaan. Eksplisiittiset provider/model-tunnisteet reititetään edelleen.",
     "catalogScopeTitle": "Models API -luettelo",
     "catalogScopeDesc": "Mitä GET /v1/models ilmoittaa tälle avaimelle. Luettelon rajaaminen ei koskaan muuta sitä, mitä avain voi kutsua.",
     "catalogScopeAll": "Molemmat",
@@ -11550,6 +11632,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Lisää toimintoja",
     "test": "Testaa",
     "edit": "Muokkaa",
     "delete": "Poista",
@@ -11707,8 +11790,7 @@
     "notMeasured": "Ei mitattu",
     "upstream4xx": "{count} ylävirta-asiakasvirheet",
     "upstream5xx": "{count} ylävirta-palvelinvirheet",
-    "uniformEgressLine": "{affected} kpl {exits} poistoa epäonnistuu yhdessä {provider} (viimeisen {hours}h) — ei ole poistoprobleema",
-    "moreActions": "Lisää toimintoja"
+    "uniformEgressLine": "{affected} kpl {exits} poistoa epäonnistuu yhdessä {provider} (viimeisen {hours}h) — ei ole poistoprobleema"
   },
   "playground": {
     "title": "Title",
@@ -12184,7 +12266,11 @@
       "viewConversation": "näytä keskustelu",
       "openConversation": "Avaa keskustelu {id}"
     },
-    "tableLabel": "Pyyntölokit"
+    "tableLabel": "Pyyntölokit",
+    "throughputPostFirstToken": "Ensimmäisen tokenin jälkeen",
+    "throughputEndToEnd": "Päästä päähän",
+    "throughputRate": "{value} tokenia/s",
+    "throughputExplanation": "Molemmat nopeudet käyttävät suurempaa tuloste- ja päättelytokenmäärää. Ensimmäisen tokenin jälkeinen nopeus jättää kelvollisen TTFT:n huomiotta; muuten se käyttää koko kestoa. Päästä päähän -nopeus käyttää aina koko kestoa. Puskuroidulla vastauksella voi olla korkea pursketoimitusnopeus ilman, että mallin generointi olisi nopeampaa."
   },
   "proxyLogger": {
     "filterAll": "Kaikki",
@@ -13773,7 +13859,9 @@
       "disabled": "Poistettu käytöstä",
       "dual": "Kaksois",
       "alias": "Alias",
-      "canonical": "Kanoninen"
+      "canonical": "Kanoninen",
+      "fail_closed": "Estä (fail_closed)",
+      "count_as_zero": "Laske $0:ksi (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14184,6 +14272,10 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Jäähtymisajan uudelleenyritys: Ohita 403/410-hylkäykset",
         "description": "Kun kaikki tilit ovat jäähtymässä ja ensimmäisenä päättyvän jäähtymisajan aiheutti 403 (pääsy evätty) tai 410 (poistunut), palauta kyseinen hylkäys heti sen sijaan, että odotettaisiin jäähtymisajan päättymistä ja lähetettäisiin pyyntö uudelleen; uusiutuva agentrouter-yhteyskohtainen kiintiö-403 tallennetaan tällöin koodilla errorCode 429, jotta se pysyy uudelleen yritettävissä. Oletuksena pois käytöstä: vain 401 ohittaa odotuksen, ja jokainen hylkäys tallennetaan sillä tilalla, jolla se saapui."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Hinnoittelemattoman käytön budjettikäytäntö",
+        "description": "Miten avainkohtaiset päivä- ja viikkokohtaiset USD-rajoitukset käsittelevät onnistunutta käyttöä, jolla tarjoajalla tai mallilla ei ole hintariviä. fail_closed (oletus) merkitsee ikkunan ylittäneeksi, joten tuntematon kustannus ei voi koskaan päästä kiinteän ylärajan ohi. count_as_zero laskee käytön arvoksi $0 ja jatkaa hinnoitellun käytön valvontaa. Hinnoittelemattomat mallit listataan joka tapauksessa kojelaudan etusivulle."
       }
     }
   },
@@ -14220,6 +14312,7 @@
     "latency": "Viive",
     "quota": "Kiintiö",
     "rangeWindow": "{range} -ikkuna",
+    "timeRange": "Aikaväli",
     "runtimeHealthBlend": "ajonaikainen/terveydentila-yhdistelmä",
     "averageResponseTime": "keskimääräinen vastausaika",
     "worstQuota": "Huonoin kiintiö",
@@ -14274,8 +14367,7 @@
     "unknown": "tuntematon",
     "unknownProvider": "tuntematon tarjoaja",
     "unknownModel": "tuntematon malli",
-    "resolvedTargetMetrics": "{requests} pyyntöä · {success} onnistunut · {latency} · kiintiö {quota}",
-    "timeRange": "Aikaväli"
+    "resolvedTargetMetrics": "{requests} pyyntöä · {success} onnistunut · {latency} · kiintiö {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD-käyttökiintiö",

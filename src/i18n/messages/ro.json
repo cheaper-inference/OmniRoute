@@ -25,8 +25,10 @@
     "confirm": "esti sigur?",
     "refresh": "Reîmprospătați",
     "close": "Închide",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Pagina anterioară",
     "nextPage": "Pagina următoare",
+    "pagination": "Paginare",
     "capsLockOn": "Caps Lock este activat",
     "dismissNotification": "Închide notificarea",
     "toggleColumns": "Comută coloanele",
@@ -182,6 +184,7 @@
     "combos": "Combinații",
     "noModelsFound": "Nu s-au găsit modele",
     "clear": "Șterge",
+    "clearFilters": "Șterge filtrele",
     "done": "Gata",
     "selectAll": "Selectează tot",
     "unselectAll": "Deselectează tot",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Previzualizare",
     "batchFilePreviewTruncated": "Afișare primele {shown} linii ({total} linii totale)",
     "batchFileDownloadFull": "Descarcă Fișierul Complet",
-    "dialogTitleFallback": "Dialog",
-    "pagination": "Paginare",
-    "clearFilters": "Șterge filtrele",
     "tokensPageTitle": "Tokenuri",
     "tokensPageDescription": "Trimite tokenuri între cheile API, distribuie coduri de invitație și conectează serverele comunității.",
     "tokensServerUrlLabel": "URL-ul serverului"
@@ -1925,7 +1925,14 @@
     "readinessStep3": "Copiază endpointul",
     "readinessStep4": "Trimite o solicitare de test",
     "readinessContinue": "Continuă configurarea",
-    "readinessDismiss": "Ascunde pentru moment"
+    "readinessDismiss": "Ascunde pentru moment",
+    "unpricedUsageTitle": "{count, plural, one {# model} other {# modele}} cu utilizare recentă dar fără preț configurat",
+    "unpricedUsageFailClosed": "{keys, plural, one {# cheie API cu o limită de utilizare} other {# chei API cu o limită de utilizare}} au folosit aceste modele în ultimele 8 zile. Când acea utilizare se încadrează în fereastra zilnică sau săptămânală a unei chei, cheia este considerată depășită de cotă și cererile sale sunt blocate (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Această utilizare este considerată $0 pentru limitele de utilizare pe cheie (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# cerere} other {# cereri}}, {keys, plural, one {# cheie limitată} other {# chei limitate}}",
+    "unpricedUsageMore": "…și încă {count}",
+    "unpricedUsageConfigure": "Configurează prețurile",
+    "unpricedUsageDismiss": "Închide"
   },
   "analytics": {
     "title": "Analiză",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Configurare manuală",
     "clineManualConfiguration": "Configurare manuală a liniei",
     "kiloManualConfiguration": "Configurare manuală a codului Kilo",
+    "piManualConfiguration": "Pi - Configurare manuală",
+    "piConfigInvalidTitle": "Pi models.json este ilizibil",
+    "piOmnirouteConfigured": "OmniRoute este configurat ca furnizor personalizat Pi",
+    "piModelHelp": "Pi nu descoperă automat modele pentru punctele finale personalizate — modelul pe care îl alegeți este scris în mod explicit în models.json.",
+    "piManualConfigTitle": "Sau editați ~/.pi/agent/models.json manual",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Apoi porniți Pi și selectați furnizorul omniroute. Setați PI_CODING_AGENT_DIR pentru a muta întregul director al agenților.",
+    "piUnownedNote": "Această intrare a fost adăugată în afara OmniRoute (de exemplu, punctele finale personalizate ale pi-gui). Aplicarea o va adopta; Resetarea elimină doar intrările scrise OmniRoute.",
     "whenToUseLabel": "Când să utilizați",
     "openToolDocs": "Deschideți documentele instrumentului",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "Agent de programare TUI xAI Grok Build cu suport pentru furnizori personalizați",
       "droid": "Asistentul AI Factory Droid",
       "openclaw": "Deschideți Asistentul Claw AI",
+      "openclaude": "CLI pentru agentul de programare OpenClaude cu suport pentru furnizori compatibili OpenAI",
       "cline": "CLI Cline AI Coding Assistant",
       "kilo": "CLI-ul asistentului AI Kilo Code",
       "qwen": "Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Actualizare",
     "cliproxyapiUpdateAvailable": "Actualizare disponibilă: v{current} → v{latest}",
     "cliproxyapiVersion": "Versiune",
+    "piInstallTitle": "Instalați Pi Coding Agent",
+    "piInstallInstructions": "Instalați Pi CLI, apoi reveniți aici pentru a-l conecta la OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Utilizați URL accesibil de la mașina care rulează Pi. Punctul final /v1 compatibil OpenAI este adăugat automat.",
+    "piManualMergeHint": "Doar previzualizare. Îmbinați această intrare providers.omniroute în models.json astfel încât ceilalți furnizori și setări să rămână intacte.",
     "removeMapping": "Elimină maparea"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "Cererea a eșuat cu HTTP {status}",
     "testFailedNoDetail": "Testul a eșuat fără un mesaj de eroare",
     "additionalCapabilities": "Capabilități suplimentare: {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "Acces cheie API",
+    "allowedInKeys": "Permis în: {count, plural, one {# cheie} other {# chei}}",
+    "keysLoading": "Se încarcă cheile API…",
+    "keysRetry": "Reîncearcă încărcarea cheilor",
+    "accessViaPattern": "prin {pattern}",
+    "accessBlocked": "Blocat de {pattern}",
+    "editKeyAccess": "Editează accesul cheii",
+    "toggleKeyAccess": "Permite {item} pe {name}",
+    "resultNetworkError": "Atribuirea a eșuat",
+    "resultWouldEmptyModels": "Ar lăsa această cheie fără modele permise — editați în schimb accesul la cheie",
+    "resultWouldEmptyCombos": "Ar lăsa această cheie fără combo-uri permise — editați în schimb accesul la cheie",
+    "keyUpdatePending": "{name} este încă în curs de actualizare. Încercați din nou într-o clipă.",
+    "assignToKeys": "Atribuie cheilor API…",
+    "assignApply": "Aplică modificările",
+    "assignComplete": "Accesul cheii API a fost actualizat",
+    "assignFailed": "Unele actualizări ale cheilor API au eșuat",
+    "assignNoChanges": "Niciun acces la cheia API nu a fost modificat",
+    "selectedAccessItems": "Elemente selectate: {count}",
+    "assignExcludedCombos": "{count, plural, one {# rând de combo selectat nu este un model și va fi omis aici} other {# rânduri de combo selectate nu sunt modele și vor fi omise aici}}. Atribuiți combo-uri din fila Combos.",
+    "assignActionAdd": "Adaugă",
+    "assignActionRemove": "Elimină",
+    "searchKeys": "Caută chei API",
+    "selectApiKey": "Selectează cheia API {name}",
+    "allModelsAccess": "Toate modelele",
+    "allCombosAccess": "Toate combinațiile",
+    "modelAccessCount": "Modele: {count}",
+    "comboAccessCount": "Combinații: {count}",
+    "keyInactive": "Inactiv",
+    "keyBanned": "Blocat",
+    "keyRevoked": "Revocat",
+    "switchRestrictedConfirm": "Comută această cheie la acces restricționat: doar elementele selectate vor fi permise",
+    "removeNoChangeHint": "Această cheie permite totul; eliminarea elementelor selectate nu va produce nicio modificare",
+    "removeStaysAllowedHint": "Încă permis pe această cheie prin {patterns}",
+    "resultChanged": "Modificat",
+    "resultUnchanged": "Nicio modificare",
+    "resultSkipped": "Omis",
+    "resultNeedsSwitch": "Necesită comutarea la restricționat"
   },
   "combos": {
     "title": "Combo-uri",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Descarcă șablonul CSV",
     "importFromFileMoreErrors": "+ încă {count}",
     "importFromFileSchemaHint": "Coloanele CSV sunt poziționale: provider, name, apiKey, baseUrl (opțional), priority (opțional). Coloana provider trebuie să conțină id-ul unui furnizor gestionat existent sau id-ul unui nod compatibil OpenAI/Anthropic deja înregistrat — acest import nu creează noduri endpoint noi.",
+    "importOAuthExport": "Importă export OAuth",
+    "oauthExportTitle": "Importă exportul managerului de conturi",
+    "oauthExportDescription": "Încarcă un export în text simplu dintr-un manager de conturi (de ex. exportul cloud-accounts din Antigravity Manager). Tokenurile sunt reîmprospătate pe server și fiecare cont devine o conexiune OAuth — duplicatele sunt reîmprospătate pe loc.",
+    "oauthExportProviderLabel": "Furnizor",
+    "oauthExportChoose": "Alege fișierul",
+    "oauthExportFileAria": "Fișier JSON cu exportul conturilor",
+    "oauthExportSchemaHint": "Acceptat: un document cu un tablou \"accounts\", un tablou simplu sau o singură înregistrare. Tokenurile pot fi într-un obiect token imbricat sau direct în înregistrare.",
+    "oauthExportDetected": "{count} cont(uri) detectat(e)",
+    "oauthExportSelectAll": "Selectează toate conturile",
+    "oauthExportSelectAccount": "Selectează contul {index}",
+    "oauthExportColEmail": "E-mail",
+    "oauthExportColProvider": "Furnizor",
+    "oauthExportColRefresh": "Token de reîmprospătare",
+    "oauthExportNoEmail": "(fără e-mail)",
+    "oauthExportYes": "da",
+    "oauthExportNo": "nu",
+    "oauthExportImporting": "Se importă…",
+    "oauthExportImport": "Importă {count} cont(uri)",
+    "oauthExportResult": "Importate {imported}/{total} — {failed} eșuate",
+    "oauthExportParseError": "Nu s-a putut citi niciun cont din acest fișier.",
+    "oauthExportUnknownError": "eroare necunoscută",
     "adaptaTutorial": {
       "title": "Cum se conectează Adapta Web",
       "introPrefix": "Adapta se autentifică prin Clerk. Tokenul",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Gazdă",
     "qdrantCollection": "Colecție",
     "catalogVisibilityHint": "ID-urile modelelor ascunse pot fi în continuare apelate cu aceleași permisiuni de acces.",
+    "exposeCombosOnly": "Listează doar combinațiile în /v1/models",
+    "exposeCombosOnlyDesc": "Clienții care descoperă automat modelele văd combinațiile tale (și auto/*, dacă nu sunt ascunse) în locul modelelor brute ale furnizorilor. ID-urile explicite provider/model sunt în continuare rutate.",
     "catalogScopeTitle": "Listarea API-ului de modele",
     "catalogScopeDesc": "Ce afișează GET /v1/models pentru această cheie. Restrângerea listei nu modifică niciodată ce poate apela cheia.",
     "catalogScopeAll": "Ambele",
@@ -11550,6 +11632,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Mai multe acțiuni",
     "test": "Testează",
     "edit": "Editează",
     "delete": "Șterge",
@@ -11707,8 +11790,7 @@
     "notMeasured": "Nemăsurat",
     "upstream4xx": "{count} erori de client upstream",
     "upstream5xx": "{count} erori de server upstream",
-    "uniformEgressLine": "{affected} din {exits} exit-uri eșuează împreună pe {provider} (ultimele {hours}h) — nu este o problemă de exit",
-    "moreActions": "Mai multe acțiuni"
+    "uniformEgressLine": "{affected} din {exits} exit-uri eșuează împreună pe {provider} (ultimele {hours}h) — nu este o problemă de exit"
   },
   "playground": {
     "title": "Title",
@@ -12184,7 +12266,11 @@
       "viewConversation": "vezi conversația",
       "openConversation": "Deschide conversația {id}"
     },
-    "tableLabel": "Jurnale de solicitări"
+    "tableLabel": "Jurnale de solicitări",
+    "throughputPostFirstToken": "După primul token",
+    "throughputEndToEnd": "De la un capăt la altul",
+    "throughputRate": "{value} tokeni/sec",
+    "throughputExplanation": "Ambele rate folosesc valoarea mai mare dintre numărul de tokeni de ieșire și cel de raționament. Rata după primul token exclude un TTFT valid; în caz contrar, folosește durata completă. Rata de la un capăt la altul folosește întotdeauna durata completă. Un răspuns tamponat poate avea o rată de livrare în rafală ridicată fără o generare mai rapidă a modelului."
   },
   "proxyLogger": {
     "filterAll": "Toate",
@@ -13773,7 +13859,9 @@
       "disabled": "Dezactivat",
       "dual": "Dublu",
       "alias": "Alias",
-      "canonical": "Canonic"
+      "canonical": "Canonic",
+      "fail_closed": "Blochează (fail_closed)",
+      "count_as_zero": "Contabilizează ca $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14184,6 +14272,10 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Reîncercare cooldown: Omite refuzurile 403/410",
         "description": "Când toate conturile sunt în cooldown, iar cooldown-ul care se termină primul a fost cauzat de un 403 (acces refuzat) sau un 410 (dispărut), returnează imediat acel refuz în loc să aștepți expirarea cooldown-ului și să retrimiți cererea; un 403 de cotă la nivel de conexiune agentrouter care se reînnoiește este apoi salvat cu errorCode 429, astfel încât să rămână reîncercabil. Dezactivat în mod prestabilit: doar un 401 omite așteptarea, iar fiecare refuz este salvat cu statusul cu care a sosit."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politica bugetului pentru utilizare fără preț",
+        "description": "Cum tratează limitele zilnice/săptămânale în USD pe cheie utilizarea reușită pentru care furnizorul/modelul nu are o linie de preț. fail_closed (implicit) marchează fereastra ca depășită, astfel încât un cost necunoscut să nu poată trece peste un plafon strict. count_as_zero contabilizează acea utilizare ca $0 și continuă să aplice cheltuielile cu preț. Modelele fără preț sunt listate oricum pe pagina principală a tabloului de bord."
       }
     }
   },
@@ -14220,6 +14312,7 @@
     "latency": "Latență",
     "quota": "Cotă",
     "rangeWindow": "Fereastră {range}",
+    "timeRange": "Interval de timp",
     "runtimeHealthBlend": "mix runtime/stare de funcționare",
     "averageResponseTime": "timp mediu de răspuns",
     "worstQuota": "Cea mai critică cotă",
@@ -14274,8 +14367,7 @@
     "unknown": "necunoscut",
     "unknownProvider": "furnizor necunoscut",
     "unknownModel": "model necunoscut",
-    "resolvedTargetMetrics": "{requests} req · {success} succes · {latency} · cotă {quota}",
-    "timeRange": "Interval de timp"
+    "resolvedTargetMetrics": "{requests} req · {success} succes · {latency} · cotă {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Cotă de utilizare USD",

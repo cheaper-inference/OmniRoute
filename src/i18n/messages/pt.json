@@ -102,8 +102,10 @@
     "confirm": "Você tem certeza?",
     "refresh": "Atualizar",
     "close": "Fechar",
+    "dialogTitleFallback": "Caixa de diálogo",
     "previousPage": "Página anterior",
     "nextPage": "Página seguinte",
+    "pagination": "Paginação",
     "capsLockOn": "O Caps Lock está ativado",
     "dismissNotification": "Dispensar notificação",
     "toggleColumns": "Alternar colunas",
@@ -259,6 +261,7 @@
     "combos": "Combinações",
     "noModelsFound": "Nenhum modelo encontrado",
     "clear": "Limpar",
+    "clearFilters": "Limpar filtros",
     "done": "Concluído",
     "selectAll": "Selecionar tudo",
     "unselectAll": "Desmarcar tudo",
@@ -1076,9 +1079,6 @@
     "batchFilePreview": "Pré-visualização",
     "batchFilePreviewTruncated": "A mostrar as primeiras {shown} linhas ({total} linhas no total)",
     "batchFileDownloadFull": "Transferir Ficheiro Completo",
-    "dialogTitleFallback": "Caixa de diálogo",
-    "pagination": "Paginação",
-    "clearFilters": "Limpar filtros",
     "tokensPageTitle": "Tokens",
     "tokensPageDescription": "Envie tokens entre chaves de API, partilhe códigos de convite e ligue servidores da comunidade.",
     "tokensServerUrlLabel": "URL do servidor"
@@ -2002,7 +2002,14 @@
     "readinessStep3": "Copie o seu endpoint",
     "readinessStep4": "Envie um pedido de teste",
     "readinessContinue": "Continuar a configuração",
-    "readinessDismiss": "Ignorar por agora"
+    "readinessDismiss": "Ignorar por agora",
+    "unpricedUsageTitle": "{count, plural, one {# modelo} other {# modelos}} com utilização recente mas sem preço configurado",
+    "unpricedUsageFailClosed": "{keys, plural, one {# chave API com limite de utilização} other {# chaves API com limite de utilização}} usaram estes modelos nos últimos 8 dias. Enquanto essa utilização estiver dentro da janela diária ou semanal da chave, a chave é considerada com a quota excedida e os seus pedidos são bloqueados (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Esta utilização conta como $0 para os limites de utilização por chave (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# pedido} other {# pedidos}}, {keys, plural, one {# chave limitada} other {# chaves limitadas}}",
+    "unpricedUsageMore": "…e mais {count}",
+    "unpricedUsageConfigure": "Configurar preços",
+    "unpricedUsageDismiss": "Fechar"
   },
   "analytics": {
     "title": "Análise",
@@ -3039,6 +3046,14 @@
     "openClawManualConfiguration": "Garra Aberta - Configuração Manual",
     "clineManualConfiguration": "Configuração Manual do Cline",
     "kiloManualConfiguration": "Configuração Manual do Código Kilo",
+    "piManualConfiguration": "Pi - Configuração Manual",
+    "piConfigInvalidTitle": "Pi models.json é ilegível",
+    "piOmnirouteConfigured": "OmniRoute está configurado como um fornecedor personalizado Pi",
+    "piModelHelp": "O Pi não descobre automaticamente modelos para endpoints personalizados — o modelo escolhido é gravado explicitamente em models.json.",
+    "piManualConfigTitle": "Ou edite ~/.pi/agent/models.json manualmente",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Em seguida, inicie o Pi e selecione o fornecedor omniroute. Configure PI_CODING_AGENT_DIR para mover todo o diretório do agente.",
+    "piUnownedNote": "Esta entrada foi adicionada fora do OmniRoute (por exemplo, endpoints personalizados do pi-gui). A inscrição irá adotá-lo; A reposição remove apenas as entradas OmniRoute escreveu.",
     "whenToUseLabel": "Quando usar",
     "openToolDocs": "Abrir documentos de ferramentas",
     "toolUseCases": {
@@ -3068,6 +3083,7 @@
       "grok-build": "Agente de programação TUI xAI Grok Build com suporte para fornecedor personalizado",
       "droid": "Assistente de IA Droid de fábrica",
       "openclaw": "Assistente de IA de garra aberta",
+      "openclaude": "CLI do agente de programação OpenClaude com suporte para fornecedor compatível com OpenAI",
       "cline": "CLI do assistente de codificação Cline AI",
       "kilo": "CLI do assistente de IA do Kilo Code",
       "qwen": "Qwen Code CLI",
@@ -3357,6 +3373,12 @@
     "cliproxyapiUpdate": "Atualizar",
     "cliproxyapiUpdateAvailable": "Atualização disponível: v{current} → v{latest}",
     "cliproxyapiVersion": "Versão",
+    "piInstallTitle": "Instale o agente de codificação Pi",
+    "piInstallInstructions": "Instale o Pi CLI e volte aqui para o ligar ao OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Utilize o URL acessível na máquina que executa o Pi. O endpoint /v1 compatível com OpenAI é adicionado automaticamente.",
+    "piManualMergeHint": "Apenas visualização. Mescle esta entrada providers.omniroute no models.json para que os seus outros providers e definições permaneçam intactos.",
     "removeMapping": "Remover mapeamento"
   },
   "modelCatalog": {
@@ -3488,7 +3510,44 @@
     "httpError": "O pedido falhou com HTTP {status}",
     "testFailedNoDetail": "O teste falhou sem mensagem de erro",
     "additionalCapabilities": "Capacidades adicionais: {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "Acesso à chave de API",
+    "allowedInKeys": "Permitido em: {count, plural, one {# chave} other {# chaves}}",
+    "keysLoading": "A carregar chaves de API…",
+    "keysRetry": "Tentar carregar as chaves novamente",
+    "accessViaPattern": "via {pattern}",
+    "accessBlocked": "Bloqueado por {pattern}",
+    "editKeyAccess": "Editar acesso da chave",
+    "toggleKeyAccess": "Permitir {item} em {name}",
+    "resultNetworkError": "A atribuição falhou",
+    "resultWouldEmptyModels": "Deixaria esta chave sem modelos permitidos — edite o acesso da chave em alternativa",
+    "resultWouldEmptyCombos": "Deixaria esta chave sem combos permitidos — edite o acesso da chave em alternativa",
+    "keyUpdatePending": "{name} ainda está a ser atualizado. Tente novamente dentro de momentos.",
+    "assignToKeys": "Atribuir a chaves de API…",
+    "assignApply": "Aplicar alterações",
+    "assignComplete": "Acesso da chave de API atualizado",
+    "assignFailed": "Falha na atualização de algumas chaves de API",
+    "assignNoChanges": "Nenhum acesso de chave de API alterado",
+    "selectedAccessItems": "Itens selecionados: {count}",
+    "assignExcludedCombos": "{count, plural, one {# linha de combo selecionada não é um modelo e será ignorada aqui} other {# linhas de combo selecionadas não são modelos e serão ignoradas aqui}}. Atribua combos a partir do separador Combos.",
+    "assignActionAdd": "Adicionar",
+    "assignActionRemove": "Remover",
+    "searchKeys": "Pesquisar chaves de API",
+    "selectApiKey": "Selecionar chave de API {name}",
+    "allModelsAccess": "Todos os modelos",
+    "allCombosAccess": "Todas as combinações",
+    "modelAccessCount": "Modelos: {count}",
+    "comboAccessCount": "Combinações: {count}",
+    "keyInactive": "Inativo",
+    "keyBanned": "Banido",
+    "keyRevoked": "Revogado",
+    "switchRestrictedConfirm": "Mudar esta chave para acesso restrito: apenas os itens selecionados serão permitidos",
+    "removeNoChangeHint": "Esta chave permite tudo; remover os itens selecionados não fará qualquer alteração",
+    "removeStaysAllowedHint": "Ainda permitido nesta chave através de {patterns}",
+    "resultChanged": "Alterado",
+    "resultUnchanged": "Sem alterações",
+    "resultSkipped": "Ignorado",
+    "resultNeedsSwitch": "Requer mudança para restrito"
   },
   "combos": {
     "title": "Combinações",
@@ -5431,6 +5490,27 @@
     "importFromFileDownloadTemplate": "Transferir modelo CSV",
     "importFromFileMoreErrors": "+{count} mais",
     "importFromFileSchemaHint": "As colunas do CSV são posicionais: provider, name, apiKey, baseUrl (opcional), priority (opcional). A coluna provider tem de conter o ID de um fornecedor gerido existente ou o ID de um nó compatível com OpenAI/Anthropic já registado — esta importação não cria novos nós de endpoint.",
+    "importOAuthExport": "Importar exportação OAuth",
+    "oauthExportTitle": "Importar exportação do gestor de contas",
+    "oauthExportDescription": "Carregue uma exportação em texto simples de um gestor de contas (p. ex., a exportação cloud-accounts do Antigravity Manager). Os tokens são renovados no servidor e cada conta torna-se uma ligação OAuth — as duplicadas são atualizadas no local.",
+    "oauthExportProviderLabel": "Fornecedor",
+    "oauthExportChoose": "Escolher ficheiro",
+    "oauthExportFileAria": "Ficheiro JSON de exportação de contas",
+    "oauthExportSchemaHint": "Aceite: um documento com uma matriz \"accounts\", uma matriz simples ou um único registo. Os tokens podem estar num objeto token aninhado ou diretamente no registo.",
+    "oauthExportDetected": "{count} conta(s) detetada(s)",
+    "oauthExportSelectAll": "Selecionar todas as contas",
+    "oauthExportSelectAccount": "Selecionar conta {index}",
+    "oauthExportColEmail": "E-mail",
+    "oauthExportColProvider": "Fornecedor",
+    "oauthExportColRefresh": "Token de atualização",
+    "oauthExportNoEmail": "(sem e-mail)",
+    "oauthExportYes": "sim",
+    "oauthExportNo": "não",
+    "oauthExportImporting": "A importar…",
+    "oauthExportImport": "Importar {count} conta(s)",
+    "oauthExportResult": "Importadas {imported}/{total} — {failed} falharam",
+    "oauthExportParseError": "Não foi possível ler nenhuma conta deste ficheiro.",
+    "oauthExportUnknownError": "erro desconhecido",
     "adaptaTutorial": {
       "title": "Como ligar o Adapta Web",
       "introPrefix": "O Adapta autentica-se através do Clerk. O token",
@@ -8898,6 +8978,8 @@
     "qdrantHost": "Anfitrião",
     "qdrantCollection": "Coleção",
     "catalogVisibilityHint": "Os IDs de modelos ocultos continuam a poder ser invocados com as mesmas permissões de acesso.",
+    "exposeCombosOnly": "Listar apenas combinações em /v1/models",
+    "exposeCombosOnlyDesc": "Os clientes que descobrem modelos automaticamente veem as suas combinações (e auto/*, salvo se estiverem ocultos) em vez dos modelos brutos dos fornecedores. Os IDs explícitos provider/model continuam a ser encaminhados.",
     "catalogScopeTitle": "Listagem da API de modelos",
     "catalogScopeDesc": "O que GET /v1/models anuncia para esta chave. Restringir a lista nunca altera o que a chave pode chamar.",
     "catalogScopeAll": "Ambos",
@@ -11627,6 +11709,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Mais ações",
     "test": "Testar",
     "edit": "Editar",
     "delete": "Eliminar",
@@ -11784,8 +11867,7 @@
     "notMeasured": "Não medido",
     "upstream4xx": "{count} erros de cliente upstream",
     "upstream5xx": "{count} erros de servidor upstream",
-    "uniformEgressLine": "{affected} de {exits} saídas falham em conjunto em {provider} (últimas {hours}h) — não é um problema de saída",
-    "moreActions": "Mais ações"
+    "uniformEgressLine": "{affected} de {exits} saídas falham em conjunto em {provider} (últimas {hours}h) — não é um problema de saída"
   },
   "playground": {
     "title": "Title",
@@ -12261,7 +12343,11 @@
       "viewConversation": "ver conversa",
       "openConversation": "Abrir conversa {id}"
     },
-    "tableLabel": "Registos de pedidos"
+    "tableLabel": "Registos de pedidos",
+    "throughputPostFirstToken": "Após o primeiro token",
+    "throughputEndToEnd": "Ponta a ponta",
+    "throughputRate": "{value} tokens/s",
+    "throughputExplanation": "Ambas as taxas utilizam o maior valor entre a contagem de tokens de saída e de raciocínio. A taxa após o primeiro token exclui um TTFT válido; caso contrário, utiliza a duração total. A taxa ponta a ponta utiliza sempre a duração total. Uma resposta em buffer pode ter uma taxa de entrega em rajada elevada sem que a geração do modelo seja mais rápida."
   },
   "proxyLogger": {
     "filterAll": "Todos",
@@ -13850,7 +13936,9 @@
       "disabled": "Desativado",
       "dual": "Duplo",
       "alias": "Nome alternativo",
-      "canonical": "Canónico"
+      "canonical": "Canónico",
+      "fail_closed": "Bloquear (fail_closed)",
+      "count_as_zero": "Contar como $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14261,6 +14349,10 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Nova tentativa em arrefecimento: ignorar recusas 403/410",
         "description": "Quando todas as contas estão em arrefecimento e o arrefecimento que termina primeiro foi causado por um 403 (acesso recusado) ou um 410 (removido), devolve essa recusa de imediato em vez de aguardar pelo fim do arrefecimento e reenviar o pedido; um 403 de quota com âmbito de ligação do agentrouter em renovação é então persistido com o errorCode 429 para permanecer passível de nova tentativa. Desativado por predefinição: apenas um 401 ignora a espera e cada recusa é persistida com o estado com que chegou."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Política de Orçamento de Utilização sem Preço",
+        "description": "Como os limites diários/semanais por chave em USD tratam utilização bem-sucedida cujo fornecedor/modelo não tem uma linha de preços. fail_closed (predefinido) marca a janela como excedida, de modo que um custo desconhecido nunca possa ultrapassar um limite rígido. count_as_zero conta essa utilização como $0 e continua a aplicar o gasto tarifado. Os modelos sem preço são listados na página inicial do painel de qualquer forma."
       }
     }
   },
@@ -14297,6 +14389,7 @@
     "latency": "Latência",
     "quota": "Quota",
     "rangeWindow": "Janela de {range}",
+    "timeRange": "Intervalo de tempo",
     "runtimeHealthBlend": "combinação de tempo de execução/estado",
     "averageResponseTime": "tempo médio de resposta",
     "worstQuota": "Pior quota",
@@ -14351,8 +14444,7 @@
     "unknown": "desconhecido",
     "unknownProvider": "fornecedor desconhecido",
     "unknownModel": "modelo desconhecido",
-    "resolvedTargetMetrics": "{requests} req · {success} sucesso · {latency} · quota {quota}",
-    "timeRange": "Intervalo de tempo"
+    "resolvedTargetMetrics": "{requests} req · {success} sucesso · {latency} · quota {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Quota de utilização em USD",

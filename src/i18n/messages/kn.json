@@ -1925,7 +1925,14 @@
     "readinessStep3": "ನಿಮ್ಮ ಎಂಡ್ಪಾಯಿಂಟ್ ಅನ್ನು ನಕಲಿಸಿ",
     "readinessStep4": "ಪರೀಕ್ಷಾ ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸಿ",
     "readinessContinue": "ಸೆಟಪ್ ಅನ್ನು ಮುಂದುವರಿಸಿ",
-    "readinessDismiss": "ಸದ್ಯಕ್ಕೆ ಮುಚ್ಚಿ"
+    "readinessDismiss": "ಸದ್ಯಕ್ಕೆ ಮುಚ್ಚಿ",
+    "unpricedUsageTitle": "{count, plural, one {# ಮಾದರಿ} other {# ಮಾದರಿಗಳು}} ಇತ್ತೀಚಿನ ಬಳಕೆ ಹೊಂದಿದ್ದು, ಬೆಲೆ ಸಂರಚನೆ ಇಲ್ಲ",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API ಕೀ ಬಳಕಾ ಮಿತಿ ಹೊಂದಿದೆ} other {# API ಕೀಗಳಿಗೆ ಬಳಕಾ ಮಿತಿ ಇದೆ}} ಕಳೆದ 8 ದಿನಗಳಲ್ಲಿ ಈ ಮಾದರಿಗಳನ್ನು ಬಳಸಲಾಗಿದೆ. ಆ ಬಳಕೆ ಆ ಕೀಗೆ ಸಂಬಂಧಿಸಿದ ದೈನಂದಿನ ಅಥವಾ ವಾರದ ಕಾಲಾವಧಿಯೊಳಗಿದ್ದಾಗ, ಆ ಕೀ ಅನ್ನು ಕೋಟಾ ಮೀರಿದಂತೆ ಪರಿಗಣಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಅದರ ವಿನಂತಿಗಳು ತಡೆಯಲಾಗುತ್ತವೆ (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "ಈ ಬಳಕೆ ಪ್ರತಿ ಕೀ ಬಳಕೆ ಮಿತಿಗಳ ಕಡೆಗೆ $0 ಎಂದು ಗಣನೆ ಮಾಡಲಾಗುತ್ತದೆ (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# ವಿನಂತಿ} other {# ವಿನಂತಿಗಳು}}, {keys, plural, one {# ಮಿತಿ ಇರುವ API ಕೀ} other {# ಮಿತಿ ಇರುವ API ಕೀಗಳು}}",
+    "unpricedUsageMore": "…ಮತ್ತು {count} ಇನ್ನಷ್ಟು",
+    "unpricedUsageConfigure": "ಬೆಲೆ ಸಂರಚಿಸಿ",
+    "unpricedUsageDismiss": "ರದ್ದು ಮಾಡಿ"
   },
   "analytics": {
     "title": "ವಿಶ್ಲೇಷಣೆ",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - ಹಸ್ತಚಾಲಿತ ಸಂರಚನೆ",
     "clineManualConfiguration": "Cline ಹಸ್ತಚಾಲಿತ ಸಂರಚನೆ",
     "kiloManualConfiguration": "Kilo Code ಹಸ್ತಚಾಲಿತ ಸಂರಚನೆ",
+    "piManualConfiguration": "ಪೈ - ಹಸ್ತಚಾಲಿತ ಸಂರಚನೆ",
+    "piConfigInvalidTitle": "Pi models.json ಓದಲಾಗುವುದಿಲ್ಲ",
+    "piOmnirouteConfigured": "OmniRoute ಅನ್ನು ಪೈ ಕಸ್ಟಮ್ ಪೂರೈಕೆದಾರರಾಗಿ ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ",
+    "piModelHelp": "ಕಸ್ಟಮ್ ಎಂಡ್ಪಾಯಿಂಟ್ಗಳಿಗಾಗಿ — ಮಾದರಿಗಳನ್ನು ಪೈ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಅನ್ವೇಷಿಸುವುದಿಲ್ಲ, ನೀವು ಆಯ್ಕೆಮಾಡಿದ ಮಾದರಿಯನ್ನು models.json ಗೆ ಸ್ಪಷ್ಟವಾಗಿ ಬರೆಯಲಾಗಿದೆ.",
+    "piManualConfigTitle": "ಅಥವಾ ~/.pi/agent/models.json ಹಸ್ತಚಾಲಿತವಾಗಿ ಸಂಪಾದಿಸಿ",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "ನಂತರ Pi ಅನ್ನು ಪ್ರಾರಂಭಿಸಿ ಮತ್ತು omniroute ಪೂರೈಕೆದಾರರನ್ನು ಆಯ್ಕೆಮಾಡಿ. ಸಂಪೂರ್ಣ ಏಜೆಂಟ್ ಡೈರೆಕ್ಟರಿಯನ್ನು ಸರಿಸಲು PI_CODING_AGENT_DIR ಹೊಂದಿಸಿ.",
+    "piUnownedNote": "ಈ ನಮೂದನ್ನು OmniRoute ಹೊರಗೆ ಸೇರಿಸಲಾಗಿದೆ (ಉದಾ pi-gui ನ ಕಸ್ಟಮ್ ಅಂತ್ಯಬಿಂದುಗಳು). ಅನ್ವಯಿಸುವುದರಿಂದ ಅದನ್ನು ಅಳವಡಿಸಿಕೊಳ್ಳುತ್ತದೆ; ಮರುಹೊಂದಿಸುವಿಕೆಯು OmniRoute ಬರೆದ ನಮೂದುಗಳನ್ನು ಮಾತ್ರ ತೆಗೆದುಹಾಕುತ್ತದೆ.",
     "whenToUseLabel": "ಯಾವಾಗ ಬಳಸಬೇಕು",
     "openToolDocs": "ಟೂಲ್ ಡಾಕ್ಸ್ ತೆರೆಯಿರಿ",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "ಕಸ್ಟಮ್ ಪ್ರೊವೈಡರ್ ಬೆಂಬಲದೊಂದಿಗೆ xAI Grok Build TUI ಕೋಡಿಂಗ್ ಏಜೆಂಟ್",
       "droid": "Factory Droid AI ಸಹಾಯಕ",
       "openclaw": "Open Claw AI ಸಹಾಯಕ",
+      "openclaude": "OpenAI-ಹೊಂದಾಣಿಕೆಯ ಪೂರೈಕೆದಾರ ಬೆಂಬಲದೊಂದಿಗೆ OpenClaude ಕೋಡಿಂಗ್ ಏಜೆಂಟ್ CLI",
       "cline": "Cline AI ಕೋಡಿಂಗ್ ಸಹಾಯಕ CLI",
       "kilo": "Kilo Code AI ಸಹಾಯಕ CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "ನವೀಕರಿಸಿ",
     "cliproxyapiUpdateAvailable": "ನವೀಕರಣ ಲಭ್ಯವಿದೆ: v{current} → v{latest}",
     "cliproxyapiVersion": "ಆವೃತ್ತಿ",
+    "piInstallTitle": "ಪೈ ಕೋಡಿಂಗ್ ಏಜೆಂಟ್ ಅನ್ನು ಸ್ಥಾಪಿಸಿ",
+    "piInstallInstructions": "Pi CLI ಅನ್ನು ಸ್ಥಾಪಿಸಿ, ನಂತರ ಅದನ್ನು OmniRoute ಗೆ ಸಂಪರ್ಕಿಸಲು ಇಲ್ಲಿಗೆ ಹಿಂತಿರುಗಿ.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "ಪೈ ಚಾಲನೆಯಲ್ಲಿರುವ ಯಂತ್ರದಿಂದ ತಲುಪಬಹುದಾದ URL ಬಳಸಿ. OpenAI-ಹೊಂದಾಣಿಕೆಯ /v1 ಅಂತ್ಯಬಿಂದುವನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸೇರಿಸಲಾಗುತ್ತದೆ.",
+    "piManualMergeHint": "ಪೂರ್ವವೀಕ್ಷಣೆ ಮಾತ್ರ. ಈ providers.omniroute ಪ್ರವೇಶವನ್ನು models.json ಗೆ ವಿಲೀನಗೊಳಿಸಿ ಇದರಿಂದ ನಿಮ್ಮ ಇತರ ಪೂರೈಕೆದಾರರು ಮತ್ತು ಸೆಟ್ಟಿಂಗ್ಗಳು ಹಾಗೇ ಇರುತ್ತವೆ.",
     "removeMapping": "ಮ್ಯಾಪಿಂಗ್ ತೆಗೆದುಹಾಕಿ"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "ವಿನಂತಿಯು HTTP {status} ನೊಂದಿಗೆ ವಿಫಲವಾಗಿದೆ",
     "testFailedNoDetail": "ಯಾವುದೇ ದೋಷ ಸಂದೇಶವಿಲ್ಲದೆ ಪರೀಕ್ಷೆ ವಿಫಲವಾಗಿದೆ",
     "additionalCapabilities": "ಹೆಚ್ಚುವರಿ ಸಾಮರ್ಥ್ಯಗಳು: {list}",
-    "comboRefMember": "ಕಾಂಬೊ → {name}"
+    "comboRefMember": "ಕಾಂಬೊ → {name}",
+    "keyAccessButton": "API ಕೀ ಪ್ರವೇಶ",
+    "allowedInKeys": "{count, plural, one {# ಕೀಯಲ್ಲಿ} other {# ಕೀಗಳಲ್ಲಿ}} ಅನುಮತಿಸಲಾಗಿದೆ",
+    "keysLoading": "API ಕೀಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "keysRetry": "ಕೀಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಮರುಪ್ರಯತ್ನಿಸಿ",
+    "accessViaPattern": "{pattern} ಮೂಲಕ",
+    "accessBlocked": "{pattern} ನಿಂದ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ",
+    "editKeyAccess": "ಕೀ ಪ್ರವೇಶವನ್ನು ಸಂಪಾದಿಸಿ",
+    "toggleKeyAccess": "{name} ನಲ್ಲಿ {item} ಅನ್ನು ಅನುಮತಿಸಿ",
+    "resultNetworkError": "ನಿಯೋಜನೆ ವಿಫಲವಾಗಿದೆ",
+    "resultWouldEmptyModels": "ಇದು ಈ ಕೀಯನ್ನು ಯಾವುದೇ ಅನುಮತಿಸಲಾದ ಮಾದರಿಗಳಿಲ್ಲದಂತೆ ಮಾಡುತ್ತದೆ — ಬದಲಿಗೆ ಕೀ ಪ್ರವೇಶವನ್ನು ಸಂಪಾದಿಸಿ",
+    "resultWouldEmptyCombos": "ಇದು ಈ ಕೀಯನ್ನು ಯಾವುದೇ ಅನುಮತಿಸಲಾದ ಕಾಂಬೋಗಳಿಲ್ಲದಂತೆ ಮಾಡುತ್ತದೆ — ಬದಲಿಗೆ ಕೀ ಪ್ರವೇಶವನ್ನು ಸಂಪಾದಿಸಿ",
+    "keyUpdatePending": "{name} ಅನ್ನು ಇನ್ನೂ ನವೀಕರಿಸಲಾಗುತ್ತಿದೆ. ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "assignToKeys": "API ಕೀಗಳಿಗೆ ನಿಯೋಜಿಸಿ…",
+    "assignApply": "ಬದಲಾವಣೆಗಳನ್ನು ಅನ್ವಯಿಸಿ",
+    "assignComplete": "API ಕೀ ಪ್ರವೇಶವನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ",
+    "assignFailed": "ಕೆಲವು API ಕೀ ಅಪ್‌ಡೇಟ್‌ಗಳು ವಿಫಲವಾಗಿವೆ",
+    "assignNoChanges": "ಯಾವುದೇ API ಕೀ ಪ್ರವೇಶವನ್ನು ಬದಲಾಯಿಸಲಾಗಿಲ್ಲ",
+    "selectedAccessItems": "ಆಯ್ಕೆಮಾಡಲಾದ ಐಟಂಗಳು: {count}",
+    "assignExcludedCombos": "{count, plural, one {ಆಯ್ಕೆಮಾಡಲಾದ # ಕಾಂಬೋ ಸಾಲು ಮಾದರಿಯಾಗಿಲ್ಲ ಮತ್ತು ಅದನ್ನು ಇಲ್ಲಿ ಬಿಟ್ಟುಬಿಡಲಾಗುತ್ತದೆ} other {ಆಯ್ಕೆಮಾಡಲಾದ # ಕಾಂಬೋ ಸಾಲುಗಳು ಮಾದರಿಗಳಾಗಿಲ್ಲ ಮತ್ತು ಅವುಗಳನ್ನು ಇಲ್ಲಿ ಬಿಟ್ಟುಬಿಡಲಾಗುತ್ತದೆ}}. Combos ಟ್ಯಾಬ್‌ನಿಂದ ಕಾಂಬೋಗಳನ್ನು ನಿಯೋಜಿಸಿ.",
+    "assignActionAdd": "ಸೇರಿಸಿ",
+    "assignActionRemove": "ತೆಗೆದುಹಾಕಿ",
+    "searchKeys": "API ಕೀಗಳನ್ನು ಹುಡುಕಿ",
+    "selectApiKey": "API ಕೀ {name} ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "allModelsAccess": "ಎಲ್ಲ ಮಾದರಿಗಳು",
+    "allCombosAccess": "ಎಲ್ಲ ಕಾಂಬೋಗಳು",
+    "modelAccessCount": "ಮಾದರಿಗಳು: {count}",
+    "comboAccessCount": "ಕಾಂಬೋಗಳು: {count}",
+    "keyInactive": "ನಿಷ್ಕ್ರಿಯ",
+    "keyBanned": "ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ",
+    "keyRevoked": "ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ",
+    "switchRestrictedConfirm": "ಈ ಕೀಯನ್ನು ನಿರ್ಬಂಧಿತ ಪ್ರವೇಶಕ್ಕೆ ಬದಲಾಯಿಸಿ: ಆಯ್ಕೆಮಾಡಿದ ಐಟಂಗಳಿಗೆ ಮಾತ್ರ ಅನುಮತಿಸಲಾಗುತ್ತದೆ",
+    "removeNoChangeHint": "ಈ ಕೀ ಎಲ್ಲವನ್ನೂ ಅನುಮತಿಸುತ್ತದೆ; ಆಯ್ಕೆಮಾಡಿದ ಐಟಂಗಳನ್ನು ತೆಗೆದುಹಾಕುವುದರಿಂದ ಯಾವುದೇ ಬದಲಾವಣೆಯಾಗುವುದಿಲ್ಲ",
+    "removeStaysAllowedHint": "{patterns} ಮೂಲಕ ಈ ಕೀಯಲ್ಲಿ ಇನ್ನೂ ಅನುಮತಿಸಲಾಗಿದೆ",
+    "resultChanged": "ಬದಲಾಯಿಸಲಾಗಿದೆ",
+    "resultUnchanged": "ಯಾವುದೇ ಬದಲಾವಣೆ ಇಲ್ಲ",
+    "resultSkipped": "ಬಿಟ್ಟುಬಿಡಲಾಗಿದೆ",
+    "resultNeedsSwitch": "ನಿರ್ಬಂಧಿತ ಸ್ಥಿತಿಗೆ ಬದಲಾಯಿಸುವ ಅಗತ್ಯವಿದೆ"
   },
   "combos": {
     "title": "ಸಂಯೋಜನೆಗಳು",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "CSV ಟೆಂಪ್ಲೇಟ್ ಡೌನ್ಲೋಡ್ ಮಾಡಿ",
     "importFromFileMoreErrors": "+{count} ಇನ್ನಷ್ಟು",
     "importFromFileSchemaHint": "CSV ಕಾಲಮ್ಗಳ ಸ್ಥಾನಕ್ರಮ: provider, name, apiKey, baseUrl (ಐಚ್ಛಿಕ), priority (ಐಚ್ಛಿಕ). provider ಕಾಲಮ್ನಲ್ಲಿ ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ನಿರ್ವಹಿತ ಪೂರೈಕೆದಾರ id ಅಥವಾ ಈಗಾಗಲೇ ನೋಂದಾಯಿಸಲಾದ OpenAI/Anthropic-ಹೊಂದಾಣಿಕೆಯ ನೋಡ್ id ಇರಬೇಕು — ಈ ಆಮದು ಹೊಸ ಎಂಡ್ಪಾಯಿಂಟ್ ನೋಡ್ಗಳನ್ನು ರಚಿಸುವುದಿಲ್ಲ.",
+    "importOAuthExport": "OAuth ರಫ್ತು ಆಮದು ಮಾಡಿ",
+    "oauthExportTitle": "ಖಾತೆ-ವ್ಯವಸ್ಥಾಪಕ ರಫ್ತು ಆಮದು ಮಾಡಿ",
+    "oauthExportDescription": "ಖಾತೆ ವ್ಯವಸ್ಥಾಪಕದಿಂದ ಸರಳ ಪಠ್ಯ ರಫ್ತನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ (ಉದಾ. Antigravity Manager ನ cloud-accounts ರಫ್ತು). ಟೋಕನ್‌ಗಳನ್ನು ಸರ್ವರ್‌ನಲ್ಲಿ ರಿಫ್ರೆಶ್ ಮಾಡಲಾಗುತ್ತದೆ ಮತ್ತು ಪ್ರತಿಯೊಂದು ಖಾತೆಯೂ OAuth ಸಂಪರ್ಕವಾಗುತ್ತದೆ — ನಕಲುಗಳು ಅದೇ ಸ್ಥಳದಲ್ಲಿ ರಿಫ್ರೆಶ್ ಆಗುತ್ತವೆ.",
+    "oauthExportProviderLabel": "ಪೂರೈಕೆದಾರ",
+    "oauthExportChoose": "ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ",
+    "oauthExportFileAria": "ಖಾತೆ ರಫ್ತಿನ JSON ಫೈಲ್",
+    "oauthExportSchemaHint": "ಸ್ವೀಕರಿಸಲಾಗುವುದು: \"accounts\" ಅರೇ ಹೊಂದಿರುವ ದಾಖಲೆ, ಸರಳ ಅರೇ ಅಥವಾ ಒಂದೇ ನಮೂದು. ಟೋಕನ್‌ಗಳು ನೆಸ್ಟೆಡ್ token ಆಬ್ಜೆಕ್ಟ್‌ನಲ್ಲಿ ಅಥವಾ ನೇರವಾಗಿ ನಮೂದಿನಲ್ಲಿ ಇರಬಹುದು.",
+    "oauthExportDetected": "{count} ಖಾತೆ(ಗಳು) ಪತ್ತೆಯಾಗಿವೆ",
+    "oauthExportSelectAll": "ಎಲ್ಲಾ ಖಾತೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "oauthExportSelectAccount": "ಖಾತೆ {index} ಆಯ್ಕೆಮಾಡಿ",
+    "oauthExportColEmail": "ಇಮೇಲ್",
+    "oauthExportColProvider": "ಪೂರೈಕೆದಾರ",
+    "oauthExportColRefresh": "ರಿಫ್ರೆಶ್ ಟೋಕನ್",
+    "oauthExportNoEmail": "(ಇಮೇಲ್ ಇಲ್ಲ)",
+    "oauthExportYes": "ಹೌದು",
+    "oauthExportNo": "ಇಲ್ಲ",
+    "oauthExportImporting": "ಆಮದು ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "oauthExportImport": "{count} ಖಾತೆ(ಗಳನ್ನು) ಆಮದು ಮಾಡಿ",
+    "oauthExportResult": "{imported}/{total} ಆಮದು ಆಗಿದೆ — {failed} ವಿಫಲ",
+    "oauthExportParseError": "ಈ ಫೈಲ್‌ನಿಂದ ಯಾವುದೇ ಖಾತೆಯನ್ನು ಓದಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
+    "oauthExportUnknownError": "ಅಜ್ಞಾತ ದೋಷ",
     "adaptaTutorial": {
       "title": "Adapta Web ಅನ್ನು ಸಂಪರ್ಕಿಸುವ ವಿಧಾನ",
       "introPrefix": "Adapta, Clerk ಮೂಲಕ ದೃಢೀಕರಣಗೊಳ್ಳುತ್ತದೆ. ಈ ಟೋಕನ್",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "ಹೋಸ್ಟ್",
     "qdrantCollection": "ಸಂಗ್ರಹ",
     "catalogVisibilityHint": "ಮರೆಮಾಡಿದ ಮಾದರಿ ID ಗಳನ್ನು ಅದೇ ಪ್ರವೇಶ ಅನುಮತಿಗಳೊಂದಿಗೆ ಇನ್ನೂ ಕರೆಯಬಹುದು.",
+    "exposeCombosOnly": "/v1/models ನಲ್ಲಿ ಕಾಂಬೊಗಳನ್ನು ಮಾತ್ರ ಪಟ್ಟಿ ಮಾಡಿ",
+    "exposeCombosOnlyDesc": "ಮಾದರಿಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಪತ್ತೆಹಚ್ಚುವ ಕ್ಲೈಂಟ್‌ಗಳು ಕಚ್ಚಾ ಪೂರೈಕೆದಾರ ಮಾದರಿಗಳ ಬದಲಿಗೆ ನಿಮ್ಮ ಕಾಂಬೊಗಳನ್ನು (ಮತ್ತು ಮರೆಮಾಡದಿದ್ದರೆ auto/*) ನೋಡುತ್ತಾರೆ. ಸ್ಪಷ್ಟ provider/model ID ಗಳು ರೂಟ್ ಆಗುತ್ತಲೇ ಇರುತ್ತವೆ.",
     "catalogScopeTitle": "Models API ಪಟ್ಟಿ",
     "catalogScopeDesc": "ಈ ಕೀಲಿಗಾಗಿ GET /v1/models ಏನನ್ನು ಪ್ರದರ್ಶಿಸುತ್ತದೆ. ಪಟ್ಟಿಯನ್ನು ಸೀಮಿತಗೊಳಿಸುವುದರಿಂದ ಕೀಲಿಯು ಯಾವುದನ್ನು ಕರೆ ಮಾಡಬಹುದು ಎಂಬುದು ಎಂದಿಗೂ ಬದಲಾಗುವುದಿಲ್ಲ.",
     "catalogScopeAll": "ಎರಡೂ",
@@ -12184,7 +12266,11 @@
       "viewConversation": "ಸಂಭಾಷಣೆಯನ್ನು ವೀಕ್ಷಿಸಿ",
       "openConversation": "ಸಂಭಾಷಣೆ {id} ತೆರೆಯಿರಿ"
     },
-    "tableLabel": "ವಿನಂತಿ ಲಾಗ್ಗಳು"
+    "tableLabel": "ವಿನಂತಿ ಲಾಗ್ಗಳು",
+    "throughputPostFirstToken": "ಮೊದಲ ಟೋಕನ್ ನಂತರ",
+    "throughputEndToEnd": "ಆರಂಭದಿಂದ ಅಂತ್ಯದವರೆಗೆ",
+    "throughputRate": "{value} ಟೋಕನ್/ಸೆಕೆಂಡ್",
+    "throughputExplanation": "ಎರಡೂ ದರಗಳು ಔಟ್ಪುಟ್ ಮತ್ತು ತಾರ್ಕಿಕ ಟೋಕನ್ ಎಣಿಕೆಗಳಲ್ಲಿ ದೊಡ್ಡದನ್ನು ಬಳಸುತ್ತವೆ. ಮೊದಲ ಟೋಕನ್ ನಂತರದ ದರವು ಮಾನ್ಯವಾದ TTFT ಅನ್ನು ಹೊರಗಿಡುತ್ತದೆ; ಇಲ್ಲದಿದ್ದರೆ ಅದು ಪೂರ್ಣ ಅವಧಿಯನ್ನು ಬಳಸುತ್ತದೆ. ಆರಂಭದಿಂದ ಅಂತ್ಯದವರೆಗಿನ ದರವು ಯಾವಾಗಲೂ ಪೂರ್ಣ ಅವಧಿಯನ್ನು ಬಳಸುತ್ತದೆ. ಬಫರ್ ಮಾಡಿದ ಪ್ರತಿಕ್ರಿಯೆಯು ವೇಗವಾದ ಮಾದರಿ ರಚನೆಯಿಲ್ಲದೆಯೇ ಹೆಚ್ಚಿನ ಬರ್ಸ್ಟ್ ವಿತರಣಾ ದರವನ್ನು ಹೊಂದಿರಬಹುದು."
   },
   "proxyLogger": {
     "filterAll": "ಎಲ್ಲಾ",
@@ -13773,7 +13859,9 @@
       "disabled": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
       "dual": "ದ್ವಂದ್ವ",
       "alias": "ಅಲಿಯಾಸ್",
-      "canonical": "ಕ್ಯಾನಾನಿಕಲ್"
+      "canonical": "ಕ್ಯಾನಾನಿಕಲ್",
+      "fail_closed": "ತಡೆ (fail_closed)",
+      "count_as_zero": "$0 ಎಂದು ಎಣಿಸಿ (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14184,6 +14272,10 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "ಕೂಲ್‌ಡೌನ್ ಮರುಪ್ರಯತ್ನ: 403/410 ನಿರಾಕರಣೆಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಿ",
         "description": "ಪ್ರತಿಯೊಂದು ಖಾತೆಯು ಕೂಲ್‌ಡೌನ್‌ನಲ್ಲಿದ್ದಾಗ ಮತ್ತು ಮೊದಲು ಮುಕ್ತಾಯಗೊಳ್ಳುವ ಕೂಲ್‌ಡೌನ್ 403 (access refused) ಅಥವಾ 410 (gone) ನಿಂದ ಉಂಟಾಗಿದ್ದರೆ, ಕೂಲ್‌ಡೌನ್ ಮುಗಿಯುವವರೆಗೆ ಕಾಯ್ದು ವಿನಂತಿಯನ್ನು ಮರುಕಳುಹಿಸುವ ಬದಲು ಆ ನಿರಾಕರಣೆಯನ್ನು ತಕ್ಷಣವೇ ಹಿಂತಿರುಗಿಸಿ; ನವೀಕರಣಗೊಳ್ಳುತ್ತಿರುವ agentrouter connection-scoped quota 403 ಅನ್ನು ನಂತರ errorCode 429 ನೊಂದಿಗೆ ಉಳಿಸಲಾಗುತ್ತದೆ, ಇದರಿಂದಾಗಿ ಅದು ಮರುಪ್ರಯತ್ನಿಸಬಹುದಾದ ಸ್ಥಿತಿಯಲ್ಲೇ ಉಳಿಯುತ್ತದೆ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಕೇವಲ 401 ಮಾತ್ರ ಕಾಯುವಿಕೆಯನ್ನು ಬಿಟ್ಟುಬಿಡುತ್ತದೆ, ಮತ್ತು ಪ್ರತಿಯೊಂದು ನಿರಾಕರಣೆಯನ್ನು ಅದು ಬಂದ ಸ್ಥಿತಿಯೊಂದಿಗೆ ಉಳಿಸಲಾಗುತ್ತದೆ."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "ಬೆಲೆರಹಿತ ಬಳಕೆ ಬಜೆಟ್ ನೀತಿ",
+        "description": "ಬೆಲೆ ಸಾಲು ಇಲ್ಲದ ಸೇವಾಪೂರೈಕೆದಾರ/ಮಾದರಿ ಇರುವ ಯಶಸ್ವಿ ಬಳಕೆಯನ್ನು ಪ್ರತಿ ಕೀಲಿಗೆ ದಿನ/ವಾರದ USD ಮಿತಿಗಳು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತವೆ. fail_closed (ಪೂರ್ವನಿರ್ಧಾರ) ಕಿಟಕಿಯನ್ನು ಮೀರಿದಂತೆ ಗುರುತಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ತಿಳಿಯದ ವೆಚ್ಚವು ಕಠಿಣ ಮಿತಿಯನ್ನು ತಪ್ಪಿಸಿಕೊಂಡು ಹೊರಹೋಗುವುದಿಲ್ಲ. count_as_zero ಆ ಬಳಕೆಯನ್ನು $0 ಎಂದು ಪರಿಗಣಿಸಿ, ಬೆಲೆಯಿರುವ ಖರ್ಚಿನ ಅನ್ವಯಣೆಯನ್ನು ಮುಂದುವರಿಸುತ್ತದೆ. ಎರಡೂ ಸಂದರ್ಭಗಳಲ್ಲೂ ಬೆಲೆ ಇಲ್ಲದ ಮಾದರಿಗಳು ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಮುಖಪುಟದಲ್ಲಿ ಪಟ್ಟಿಯಾಗುತ್ತವೆ."
       }
     }
   },

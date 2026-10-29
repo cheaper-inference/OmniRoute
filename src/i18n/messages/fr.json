@@ -25,8 +25,10 @@
     "confirm": "Etes-vous sûr ?",
     "refresh": "Actualiser",
     "close": "Fermer",
+    "dialogTitleFallback": "Boîte de dialogue",
     "previousPage": "Page précédente",
     "nextPage": "Page suivante",
+    "pagination": "Pagination",
     "capsLockOn": "Verr. Maj. est activé",
     "dismissNotification": "Ignorer la notification",
     "toggleColumns": "Afficher/masquer les colonnes",
@@ -182,6 +184,7 @@
     "combos": "Combinaisons",
     "noModelsFound": "Aucun modèle trouvé",
     "clear": "Effacer",
+    "clearFilters": "Effacer les filtres",
     "done": "Terminé",
     "selectAll": "Tout sélectionner",
     "unselectAll": "Tout désélectionner",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Aperçu",
     "batchFilePreviewTruncated": "Affichage des {shown} premières lignes ({total} lignes au total)",
     "batchFileDownloadFull": "Télécharger le fichier complet",
-    "dialogTitleFallback": "Boîte de dialogue",
-    "pagination": "Pagination",
-    "clearFilters": "Effacer les filtres",
     "tokensPageTitle": "Jetons",
     "tokensPageDescription": "Envoyez des jetons entre des clés API, partagez des codes d’invitation et connectez des serveurs communautaires.",
     "tokensServerUrlLabel": "URL du serveur"
@@ -1925,7 +1925,14 @@
     "readinessStep3": "Copiez votre point de terminaison",
     "readinessStep4": "Envoyez une requête de test",
     "readinessContinue": "Poursuivre la configuration",
-    "readinessDismiss": "Ignorer pour le moment"
+    "readinessDismiss": "Ignorer pour le moment",
+    "unpricedUsageTitle": "{count, plural, one {# modèle} other {# modèles}} avec une utilisation récente mais sans prix configuré",
+    "unpricedUsageFailClosed": "{keys, plural, one {# clé API avec une limite d’utilisation} other {# clés API avec une limite d’utilisation}} ont utilisé ces modèles au cours des 8 derniers jours. Tant que cette utilisation se situe dans la fenêtre quotidienne ou hebdomadaire de la clé, la clé est considérée comme hors quota et ses requêtes sont bloquées (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Cette utilisation compte pour $0 dans les limites d’utilisation par clé (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# requête} other {# requêtes}}, {keys, plural, one {# clé limitée} other {# clés limitées}}",
+    "unpricedUsageMore": "…et {count} de plus",
+    "unpricedUsageConfigure": "Configurer la tarification",
+    "unpricedUsageDismiss": "Fermer"
   },
   "analytics": {
     "title": "Analyse",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Griffe ouverte - Configuration manuelle",
     "clineManualConfiguration": "Configuration manuelle en ligne",
     "kiloManualConfiguration": "Configuration manuelle du code kilo",
+    "piManualConfiguration": "Pi - Configuration manuelle",
+    "piConfigInvalidTitle": "Pi models.json est illisible",
+    "piOmnirouteConfigured": "OmniRoute est configuré en tant que fournisseur personnalisé Pi",
+    "piModelHelp": "Pi ne découvre pas automatiquement les modèles pour les points de terminaison personnalisés — le modèle que vous choisissez est écrit explicitement dans models.json.",
+    "piManualConfigTitle": "Ou éditez ~/.pi/agent/models.json manuellement",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Ensuite, démarrez Pi et sélectionnez le fournisseur omniroute. Définissez PI_CODING_AGENT_DIR pour déplacer l'intégralité du répertoire de l'agent.",
+    "piUnownedNote": "Cette entrée a été ajoutée en dehors de OmniRoute (par exemple les points de terminaison personnalisés de pi-gui). La candidature l’adoptera ; La réinitialisation supprime uniquement les entrées écrites par OmniRoute.",
     "whenToUseLabel": "Quand utiliser",
     "openToolDocs": "Ouvrir la documentation de l'outil",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "Agent de codage TUI xAI Grok Build avec prise en charge de fournisseur personnalisé",
       "droid": "Assistant IA pour droïdes d'usine",
       "openclaw": "Assistant IA Open Claw",
+      "openclaude": "CLI de l'agent de codage OpenClaude avec prise en charge d'un fournisseur compatible OpenAI",
       "cline": "CLI de l'assistant de codage Cline AI",
       "kilo": "CLI de l'assistant IA Kilo Code",
       "qwen": "CLI Qwen Code",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Mettre à jour",
     "cliproxyapiUpdateAvailable": "Mise à jour disponible : v{current} → v{latest}",
     "cliproxyapiVersion": "Version",
+    "piInstallTitle": "Installer l'agent de codage Pi",
+    "piInstallInstructions": "Installez le Pi CLI, puis revenez ici pour le connecter à OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Utilisez le URL accessible depuis la machine exécutant Pi. Le point de terminaison /v1 compatible OpenAI est ajouté automatiquement.",
+    "piManualMergeHint": "Aperçu uniquement. Fusionnez cette entrée providers.omniroute dans models.json afin que vos autres fournisseurs et paramètres restent intacts.",
     "removeMapping": "Supprimer le mappage"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "La requête a échoué avec HTTP {status}",
     "testFailedNoDetail": "Le test a échoué sans message d'erreur",
     "additionalCapabilities": "Capacités supplémentaires : {list}",
-    "comboRefMember": "Combinaison → {name}"
+    "comboRefMember": "Combinaison → {name}",
+    "keyAccessButton": "Accès par clé API",
+    "allowedInKeys": "Autorisé dans : {count, plural, one {# clé} other {# clés}}",
+    "keysLoading": "Chargement des clés API…",
+    "keysRetry": "Réessayer le chargement des clés",
+    "accessViaPattern": "via {pattern}",
+    "accessBlocked": "Bloqué par {pattern}",
+    "editKeyAccess": "Modifier l'accès à la clé",
+    "toggleKeyAccess": "Autoriser {item} sur {name}",
+    "resultNetworkError": "Échec de l'attribution",
+    "resultWouldEmptyModels": "Laisserait cette clé sans aucun modèle autorisé — modifiez plutôt l'accès de la clé",
+    "resultWouldEmptyCombos": "Laisserait cette clé sans aucun combo autorisé — modifiez plutôt l'accès de la clé",
+    "keyUpdatePending": "{name} est toujours en cours de mise à jour. Réessayez dans un instant.",
+    "assignToKeys": "Attribuer aux clés API…",
+    "assignApply": "Appliquer les modifications",
+    "assignComplete": "Accès par clé API mis à jour",
+    "assignFailed": "Certaines mises à jour de clés API ont échoué",
+    "assignNoChanges": "Aucun accès de clé API modifié",
+    "selectedAccessItems": "Éléments sélectionnés : {count}",
+    "assignExcludedCombos": "{count, plural, one {# ligne de combo sélectionnée n'est pas un modèle et sera ignorée ici} other {# lignes de combo sélectionnées ne sont pas des modèles et seront ignorées ici}}. Attribuez les combos depuis l'onglet Combos.",
+    "assignActionAdd": "Ajouter",
+    "assignActionRemove": "Supprimer",
+    "searchKeys": "Rechercher des clés API",
+    "selectApiKey": "Sélectionner la clé API {name}",
+    "allModelsAccess": "Tous les modèles",
+    "allCombosAccess": "Tous les combos",
+    "modelAccessCount": "Modèles : {count}",
+    "comboAccessCount": "Combos : {count}",
+    "keyInactive": "Inactif",
+    "keyBanned": "Banni",
+    "keyRevoked": "Révoqué",
+    "switchRestrictedConfirm": "Passer cette clé en accès restreint : seuls les éléments sélectionnés seront autorisés",
+    "removeNoChangeHint": "Cette clé autorise tout ; supprimer les éléments sélectionnés ne changera rien",
+    "removeStaysAllowedHint": "Toujours autorisé sur cette clé via {patterns}",
+    "resultChanged": "Modifié",
+    "resultUnchanged": "Aucune modification",
+    "resultSkipped": "Ignoré",
+    "resultNeedsSwitch": "Nécessite le passage en accès restreint"
   },
   "combos": {
     "title": "Combinaisons",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Télécharger le modèle CSV",
     "importFromFileMoreErrors": "+{count} de plus",
     "importFromFileSchemaHint": "Les colonnes CSV sont positionnelles : provider, name, apiKey, baseUrl (facultatif), priority (facultatif). La colonne provider doit contenir l’identifiant d’un fournisseur géré existant ou l’identifiant d’un nœud compatible OpenAI/Anthropic déjà enregistré — cette importation ne crée pas de nouveaux nœuds de point de terminaison.",
+    "importOAuthExport": "Importer un export OAuth",
+    "oauthExportTitle": "Importer un export de gestionnaire de comptes",
+    "oauthExportDescription": "Téléversez un export en texte brut provenant d’un gestionnaire de comptes (par ex. l’export cloud-accounts d’Antigravity Manager). Les jetons sont actualisés côté serveur et chaque compte devient une connexion OAuth — les doublons sont actualisés sur place.",
+    "oauthExportProviderLabel": "Fournisseur",
+    "oauthExportChoose": "Choisir un fichier",
+    "oauthExportFileAria": "Fichier JSON d’export de comptes",
+    "oauthExportSchemaHint": "Acceptés : un document avec un tableau \"accounts\", un tableau simple ou un enregistrement unique. Les jetons peuvent se trouver dans un objet token imbriqué ou directement dans l’enregistrement.",
+    "oauthExportDetected": "{count} compte(s) détecté(s)",
+    "oauthExportSelectAll": "Sélectionner tous les comptes",
+    "oauthExportSelectAccount": "Sélectionner le compte {index}",
+    "oauthExportColEmail": "E-mail",
+    "oauthExportColProvider": "Fournisseur",
+    "oauthExportColRefresh": "Jeton d’actualisation",
+    "oauthExportNoEmail": "(aucun e-mail)",
+    "oauthExportYes": "oui",
+    "oauthExportNo": "non",
+    "oauthExportImporting": "Importation…",
+    "oauthExportImport": "Importer {count} compte(s)",
+    "oauthExportResult": "{imported}/{total} importé(s) — {failed} échec(s)",
+    "oauthExportParseError": "Impossible de lire un compte dans ce fichier.",
+    "oauthExportUnknownError": "erreur inconnue",
     "adaptaTutorial": {
       "title": "Comment connecter Adapta Web",
       "introPrefix": "Adapta s'authentifie via Clerk. Le jeton",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Hôte",
     "qdrantCollection": "Collection",
     "catalogVisibilityHint": "Les identifiants des modèles masqués restent utilisables avec les mêmes droits d’accès.",
+    "exposeCombosOnly": "Lister uniquement les combos dans /v1/models",
+    "exposeCombosOnlyDesc": "Les clients qui découvrent automatiquement les modèles voient vos combos (et auto/* sauf s’ils sont masqués) au lieu des modèles bruts des fournisseurs. Les identifiants provider/model explicites restent routés.",
     "catalogScopeTitle": "Liste de l’API Models",
     "catalogScopeDesc": "Ce que GET /v1/models annonce pour cette clé. Restreindre la liste ne modifie jamais ce que la clé peut appeler.",
     "catalogScopeAll": "Les deux",
@@ -11550,6 +11632,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Plus d’actions",
     "test": "Tester",
     "edit": "Modifier",
     "delete": "Supprimer",
@@ -11707,8 +11790,7 @@
     "notMeasured": "Non mesuré",
     "upstream4xx": "{count} erreurs client en amont",
     "upstream5xx": "{count} erreurs de serveur en amont",
-    "uniformEgressLine": "{affected} sur {exits} sorties échouent simultanément sur {provider} (dernières {hours}h) — pas un problème de sortie",
-    "moreActions": "Plus d’actions"
+    "uniformEgressLine": "{affected} sur {exits} sorties échouent simultanément sur {provider} (dernières {hours}h) — pas un problème de sortie"
   },
   "playground": {
     "title": "Title",
@@ -12184,7 +12266,11 @@
       "viewConversation": "afficher la conversation",
       "openConversation": "Ouvrir la conversation {id}"
     },
-    "tableLabel": "Journaux des requêtes"
+    "tableLabel": "Journaux des requêtes",
+    "throughputPostFirstToken": "Après le premier token",
+    "throughputEndToEnd": "Bout en bout",
+    "throughputRate": "{value} tokens/sec",
+    "throughputExplanation": "Les deux débits utilisent le plus grand des nombres de tokens de sortie et de raisonnement. Le débit après le premier token exclut un TTFT valide ; sinon, il utilise la durée totale. Le débit bout en bout utilise toujours la durée totale. Une réponse mise en mémoire tampon peut présenter un débit de livraison en rafale élevé sans génération de modèle plus rapide."
   },
   "proxyLogger": {
     "filterAll": "Tous",
@@ -13773,7 +13859,9 @@
       "disabled": "Désactivé",
       "dual": "Double",
       "alias": "Alias",
-      "canonical": "Canonique"
+      "canonical": "Canonique",
+      "fail_closed": "Bloquer (fail_closed)",
+      "count_as_zero": "Compter comme $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14184,6 +14272,10 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Réessai lors du cooldown : ignorer les refus 403/410",
         "description": "Lorsque tous les comptes sont en cooldown et que le cooldown qui se termine en premier a été causé par une erreur 403 (accès refusé) ou une erreur 410 (disparu), renvoie immédiatement ce refus au lieu d'attendre la fin du cooldown et de renvoyer la requête ; une erreur 403 de quota agentrouter à portée de connexion en cours de renouvellement est alors persistée avec errorCode 429 afin de rester réessayable. Désactivé par défaut : seule une erreur 401 évite l'attente, et chaque refus est persisté avec le statut avec lequel il est arrivé."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politique de budget pour utilisation non tarifée",
+        "description": "Comment les limites USD journalières/hebdomadaires par clé traitent l’utilisation réussie dont le fournisseur/le modèle n’a pas de ligne de tarification. fail_closed (par défaut) marque la fenêtre comme dépassée, empêchant ainsi qu’un coût inconnu dépasse un plafond strict. count_as_zero compte cette utilisation comme $0 et continue d’appliquer les dépenses tarifées. Les modèles sans prix sont listés sur la page d’accueil du tableau de bord dans les deux cas."
       }
     }
   },
@@ -14220,6 +14312,7 @@
     "latency": "Latence",
     "quota": "Quota",
     "rangeWindow": "Fenêtre de {range}",
+    "timeRange": "Période",
     "runtimeHealthBlend": "combinaison exécution/santé",
     "averageResponseTime": "temps de réponse moyen",
     "worstQuota": "Pire quota",
@@ -14274,8 +14367,7 @@
     "unknown": "inconnu",
     "unknownProvider": "fournisseur inconnu",
     "unknownModel": "modèle inconnu",
-    "resolvedTargetMetrics": "{requests} req · {success} succès · {latency} · quota {quota}",
-    "timeRange": "Période"
+    "resolvedTargetMetrics": "{requests} req · {success} succès · {latency} · quota {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Quota d'utilisation en USD",

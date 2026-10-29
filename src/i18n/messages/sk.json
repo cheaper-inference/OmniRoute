@@ -25,8 +25,10 @@
     "confirm": "si si istý?",
     "refresh": "Obnoviť",
     "close": "Zavrieť",
+    "dialogTitleFallback": "Dialóg",
     "previousPage": "Predchádzajúca stránka",
     "nextPage": "Nasledujúca stránka",
+    "pagination": "Stránkovanie",
     "capsLockOn": "Caps Lock je zapnutý",
     "dismissNotification": "Zatvoriť upozornenie",
     "toggleColumns": "Prepnúť stĺpce",
@@ -182,6 +184,7 @@
     "combos": "Kombinácie",
     "noModelsFound": "Nenašli sa žiadne modely",
     "clear": "Vymazať",
+    "clearFilters": "Vymazať filtre",
     "done": "Hotovo",
     "selectAll": "Vybrať všetko",
     "unselectAll": "Zrušiť výber",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Náhľad",
     "batchFilePreviewTruncated": "Zobrazenie prvých {shown} riadkov ({total} celkom riadkov)",
     "batchFileDownloadFull": "Stiahnuť celý súbor",
-    "dialogTitleFallback": "Dialóg",
-    "pagination": "Stránkovanie",
-    "clearFilters": "Vymazať filtre",
     "tokensPageTitle": "Tokeny",
     "tokensPageDescription": "Posielajte tokeny medzi kľúčmi API, zdieľajte pozývacie kódy a pripájajte komunitné servery.",
     "tokensServerUrlLabel": "URL servera"
@@ -1925,7 +1925,14 @@
     "readinessStep3": "Skopírujte svoj koncový bod",
     "readinessStep4": "Odošlite testovaciu požiadavku",
     "readinessContinue": "Pokračovať v nastavení",
-    "readinessDismiss": "Zatiaľ zavrieť"
+    "readinessDismiss": "Zatiaľ zavrieť",
+    "unpricedUsageTitle": "{count, plural, one {# model} few {# modely} other {# modelov}} s nedávnym použitím, ale bez nakonfigurovanej ceny",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API kľúč s limitom používania} few {# API kľúče s limitom používania} other {# API kľúčov s limitom používania}} použili tieto modely za posledných 8 dní. Pokiaľ je toto použitie v rámci denného alebo týždenného okna kľúča, kľúč sa považuje za prekročený a jeho požiadavky sú zablokované (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Toto použitie sa započítava ako $0 do limitov používania na kľúč (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# požiadavka} few {# požiadavky} other {# požiadaviek}}, {keys, plural, one {# obmedzený kľúč} few {# obmedzené kľúče} other {# obmedzených kľúčov}}",
+    "unpricedUsageMore": "…a {count} ďalších",
+    "unpricedUsageConfigure": "Nastaviť ceny",
+    "unpricedUsageDismiss": "Zatvoriť"
   },
   "analytics": {
     "title": "Analytika",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Manuálna konfigurácia",
     "clineManualConfiguration": "Manuálna konfigurácia Cline",
     "kiloManualConfiguration": "Manuálna konfigurácia Kilo Code",
+    "piManualConfiguration": "Pi - Manuálna konfigurácia",
+    "piConfigInvalidTitle": "Pi models.json je nečitateľné",
+    "piOmnirouteConfigured": "OmniRoute je nakonfigurovaný ako vlastný poskytovateľ Pi",
+    "piModelHelp": "Pi automaticky neobjavuje modely pre vlastné koncové body — vybraný model je explicitne zapísaný do models.json.",
+    "piManualConfigTitle": "Alebo upravte ~/.pi/agent/models.json ručne",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Potom spustite Pi a vyberte poskytovateľa omniroute. Nastavte PI_CODING_AGENT_DIR na presun celého adresára agenta.",
+    "piUnownedNote": "Tento záznam bol pridaný mimo OmniRoute (napr. vlastné koncové body pi-gui). Žiadosť ju prijme; Obnoviť odstráni iba záznamy napísané OmniRoute.",
     "whenToUseLabel": "Kedy použiť",
     "openToolDocs": "Otvorte dokumentáciu nástroja",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "TUI kódovací agent xAI Grok Build s podporou vlastného poskytovateľa",
       "droid": "AI asistent Factory Droid",
       "openclaw": "Otvorte asistenta Claw AI",
+      "openclaude": "CLI programovací agent OpenClaude s podporou poskytovateľa kompatibilného s OpenAI",
       "cline": "CLI asistenta Cline AI na programovanie",
       "kilo": "CLI AI asistenta Kilo Code",
       "qwen": "Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Aktualizovať",
     "cliproxyapiUpdateAvailable": "Aktualizácia je k dispozícii: v{current} → v{latest}",
     "cliproxyapiVersion": "Verzia",
+    "piInstallTitle": "Nainštalujte Pi Coding Agent",
+    "piInstallInstructions": "Nainštalujte Pi CLI a potom sa sem vráťte a pripojte ho k OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Použite URL dosiahnuteľnú zo stroja s Pi. Koncový bod /v1 kompatibilný s OpenAI sa pridá automaticky.",
+    "piManualMergeHint": "Iba ukážka. Zlúčte tento záznam providers.omniroute do models.json, aby vaši ostatní poskytovatelia a nastavenia zostali nedotknuté.",
     "removeMapping": "Odstrániť mapovanie"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "Požiadavka zlyhala s kódom HTTP {status}",
     "testFailedNoDetail": "Test zlyhal bez chybovej správy",
     "additionalCapabilities": "Ďalšie schopnosti: {list}",
-    "comboRefMember": "Kombinácia → {name}"
+    "comboRefMember": "Kombinácia → {name}",
+    "keyAccessButton": "Prístup k API kľúčom",
+    "allowedInKeys": "Povolené v: {count, plural, one {# kľúči} few {# kľúčoch} other {# kľúčoch}}",
+    "keysLoading": "Načítavajú sa API kľúče…",
+    "keysRetry": "Znova načítať kľúče",
+    "accessViaPattern": "cez {pattern}",
+    "accessBlocked": "Zablokované vzorom {pattern}",
+    "editKeyAccess": "Upraviť prístup ku kľúču",
+    "toggleKeyAccess": "Povoliť {item} na {name}",
+    "resultNetworkError": "Priradenie zlyhalo",
+    "resultWouldEmptyModels": "Tento kľúč by zostal bez povolených modelov – namiesto toho upravte prístup ku kľúču",
+    "resultWouldEmptyCombos": "Tento kľúč by zostal bez povolených kombinácií – namiesto toho upravte prístup ku kľúču",
+    "keyUpdatePending": "{name} sa stále aktualizuje. Skúste to znova o chvíľu.",
+    "assignToKeys": "Priradiť k API kľúčom…",
+    "assignApply": "Použiť zmeny",
+    "assignComplete": "Prístup k API kľúču bol aktualizovaný",
+    "assignFailed": "Niektoré aktualizácie API kľúčov zlyhali",
+    "assignNoChanges": "Prístup k API kľúčom sa nezmenil",
+    "selectedAccessItems": "Vybraté položky: {count}",
+    "assignExcludedCombos": "{count, plural, one {# vybratý riadok kombinácie nie je model a bude tu preskočený} few {# vybraté riadky kombinácií nie sú modely a budú tu preskočené} other {# vybratých riadkov kombinácií nie sú modely a budú tu preskočené}}. Kombinácie priraďte na karte Combos.",
+    "assignActionAdd": "Pridať",
+    "assignActionRemove": "Odstrániť",
+    "searchKeys": "Hľadať API kľúče",
+    "selectApiKey": "Vybrať API kľúč {name}",
+    "allModelsAccess": "Všetky modely",
+    "allCombosAccess": "Všetky kombinácie",
+    "modelAccessCount": "Modely: {count}",
+    "comboAccessCount": "Kombinácie: {count}",
+    "keyInactive": "Neaktívny",
+    "keyBanned": "Zablokovaný",
+    "keyRevoked": "Odvolané",
+    "switchRestrictedConfirm": "Prepnúť tento kľúč na obmedzený prístup: povolené budú iba vybraté položky",
+    "removeNoChangeHint": "Tento kľúč povoľuje všetko; odstránenie vybratých položiek nespôsobí žiadnu zmenu",
+    "removeStaysAllowedHint": "Na tomto kľúči naďalej povolené cez {patterns}",
+    "resultChanged": "Zmenené",
+    "resultUnchanged": "Bez zmeny",
+    "resultSkipped": "Preskočené",
+    "resultNeedsSwitch": "Vyžaduje prepnutie na obmedzený"
   },
   "combos": {
     "title": "kombá",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Stiahnuť šablónu CSV",
     "importFromFileMoreErrors": "+{count} ďalších",
     "importFromFileSchemaHint": "Stĺpce CSV sú pozičné: provider, name, apiKey, baseUrl (voliteľné), priority (voliteľné). Stĺpec provider musí obsahovať existujúce ID spravovaného poskytovateľa alebo ID už zaregistrovaného uzla kompatibilného s OpenAI/Anthropic — tento import nevytvára nové uzly koncových bodov.",
+    "importOAuthExport": "Importovať export OAuth",
+    "oauthExportTitle": "Importovať export zo správcu účtov",
+    "oauthExportDescription": "Nahrajte export v obyčajnom texte zo správcu účtov (napr. export cloud-accounts z Antigravity Manageru). Tokeny sa obnovia na serveri a z každého účtu sa stane pripojenie OAuth — duplikáty sa obnovia na mieste.",
+    "oauthExportProviderLabel": "Poskytovateľ",
+    "oauthExportChoose": "Vybrať súbor",
+    "oauthExportFileAria": "Súbor JSON s exportom účtov",
+    "oauthExportSchemaHint": "Akceptované: dokument s poľom \"accounts\", samotné pole alebo jeden záznam. Tokeny môžu byť vo vnorenom objekte token alebo priamo v zázname.",
+    "oauthExportDetected": "Zistené účty: {count}",
+    "oauthExportSelectAll": "Vybrať všetky účty",
+    "oauthExportSelectAccount": "Vybrať účet {index}",
+    "oauthExportColEmail": "E-mail",
+    "oauthExportColProvider": "Poskytovateľ",
+    "oauthExportColRefresh": "Obnovovací token",
+    "oauthExportNoEmail": "(bez e-mailu)",
+    "oauthExportYes": "áno",
+    "oauthExportNo": "nie",
+    "oauthExportImporting": "Importuje sa…",
+    "oauthExportImport": "Importovať účty ({count})",
+    "oauthExportResult": "Importované {imported}/{total} — zlyhalo {failed}",
+    "oauthExportParseError": "Z tohto súboru sa nepodarilo načítať žiadne účty.",
+    "oauthExportUnknownError": "neznáma chyba",
     "adaptaTutorial": {
       "title": "Ako pripojiť Adapta Web",
       "introPrefix": "Adapta sa autentifikuje cez Clerk. Token",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Hostiteľ",
     "qdrantCollection": "Zbierka",
     "catalogVisibilityHint": "Skryté identifikátory modelov je možné naďalej volať s rovnakými prístupovými oprávneniami.",
+    "exposeCombosOnly": "V /v1/models zobrazovať iba kombinácie",
+    "exposeCombosOnlyDesc": "Klienti, ktorí modely zisťujú automaticky, uvidia vaše kombinácie (a auto/*, ak nie sú skryté) namiesto surových modelov poskytovateľov. Explicitné ID provider/model sa naďalej smerujú.",
     "catalogScopeTitle": "Zoznam rozhrania Models API",
     "catalogScopeDesc": "Čo GET /v1/models uvádza pre tento kľúč. Zúženie zoznamu nikdy nemení, čo môže kľúč volať.",
     "catalogScopeAll": "Oboje",
@@ -11550,6 +11632,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Ďalšie akcie",
     "test": "Otestovať",
     "edit": "Upraviť",
     "delete": "Odstrániť",
@@ -11707,8 +11790,7 @@
     "notMeasured": "Nemerané",
     "upstream4xx": "{count} chyby klienta",
     "upstream5xx": "{count} chyby servera",
-    "uniformEgressLine": "{affected} z {exits} exitov zlyhávajú súčasne na {provider} (za posledných {hours} h) — nejde o problém exitu",
-    "moreActions": "Ďalšie akcie"
+    "uniformEgressLine": "{affected} z {exits} exitov zlyhávajú súčasne na {provider} (za posledných {hours} h) — nejde o problém exitu"
   },
   "playground": {
     "title": "Title",
@@ -12184,7 +12266,11 @@
       "viewConversation": "zobraziť konverzáciu",
       "openConversation": "Otvoriť konverzáciu {id}"
     },
-    "tableLabel": "Záznamy požiadaviek"
+    "tableLabel": "Záznamy požiadaviek",
+    "throughputPostFirstToken": "Po prvom tokene",
+    "throughputEndToEnd": "Od začiatku do konca",
+    "throughputRate": "{value} tokenov/s",
+    "throughputExplanation": "Obe rýchlosti používajú väčší z počtov výstupných tokenov a tokenov uvažovania. Hodnota Po prvom tokene nezahŕňa platný TTFT; inak používa celkové trvanie. Hodnota Od začiatku do konca vždy používa celkové trvanie. Odpoveď vo vyrovnávacej pamäti môže mať vysokú rýchlosť doručenia v dávke bez toho, aby model generoval rýchlejšie."
   },
   "proxyLogger": {
     "filterAll": "Všetko",
@@ -13773,7 +13859,9 @@
       "disabled": "Zakázané",
       "dual": "Duálny",
       "alias": "Alias",
-      "canonical": "Kanonický"
+      "canonical": "Kanonický",
+      "fail_closed": "Zablokovať (fail_closed)",
+      "count_as_zero": "Počítať ako $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -14184,6 +14272,10 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Skip 403/410 Odmietnutia",
         "description": "Keď sú všetky účty v chladiacom režime a najskôr končiace cooldown bol spôsobený 403 (prístup odmietnutý) alebo 410 (prejdené), vráť to odmietnutie ihneď namiesto čakania na koniec cooldownu a opätovného odosielania požiadavky; obnovovaný agentrouter spojené kvóty 403 sa potom zachovávajú s errorCode 429, aby zostali znova vykonateľné. Predvolene vypnuté: iba 401 preskočí čakanie a každý odmietnutý požiadavka sa uchováva so statusom, s ktorým prišla."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika rozpočtu pre použitie bez ceny",
+        "description": "Ako denné/týždenné USD limity na kľúč zaobchádzajú s úspešným použitím, ktorého poskytovateľ/model nemá položku ceny. fail_closed (predvolené) označí okno za prekročené, takže neznáma cena nikdy nemôže obísť tvrdý limit. count_as_zero započítava takéto použitie ako $0 a naďalej vynucuje výdavky na modely s nastavenou cenou. Modely bez ceny sú v každom prípade uvedené na domovskej stránke panela."
       }
     }
   },
@@ -14220,6 +14312,7 @@
     "latency": "Latencia",
     "quota": "Kvóta",
     "rangeWindow": "Okno {range}",
+    "timeRange": "Časový rozsah",
     "runtimeHealthBlend": "kombinácia runtime/stavu",
     "averageResponseTime": "priemerný čas odozvy",
     "worstQuota": "Najhoršia kvóta",
@@ -14274,8 +14367,7 @@
     "unknown": "neznámy",
     "unknownProvider": "neznámy poskytovateľ",
     "unknownModel": "neznámy model",
-    "resolvedTargetMetrics": "{requests} req · {success} úspešných · {latency} · kvóta {quota}",
-    "timeRange": "Časový rozsah"
+    "resolvedTargetMetrics": "{requests} req · {success} úspešných · {latency} · kvóta {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Kvóta využitia v USD",
