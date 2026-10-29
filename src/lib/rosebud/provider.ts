@@ -1,13 +1,18 @@
 import { randomUUID } from "node:crypto";
 import {
   getProviderConnectionById,
+  getProviderConnections,
   createProviderConnection,
   updateProviderConnection,
 } from "@/lib/db/providers";
-import { replaceCustomModels } from "@/lib/db/models";
+import { getCustomModels, replaceCustomModels } from "@/lib/db/models";
 import { saveRosebudCreditEvent, getRosebudCreditEvents } from "@/lib/db/rosebudCredits";
 import { rosebudRuntime, type RosebudJob } from "@omniroute/open-sse/services/rosebud/runtime.ts";
-import { RosebudError, runRosebud } from "@omniroute/open-sse/services/rosebud/cli.ts";
+import {
+  RosebudError,
+  runRosebud,
+  rosebudProfile,
+} from "@omniroute/open-sse/services/rosebud/cli.ts";
 import { rosebudCatalogEntry } from "@omniroute/open-sse/services/rosebud/catalog.ts";
 
 export async function rosebudConnection(id: string) {
@@ -17,6 +22,7 @@ export async function rosebudConnection(id: string) {
   const data = (connection.providerSpecificData || {}) as Record<string, unknown>;
   const profile = data.rosebudProfile;
   if (typeof profile !== "string") throw new RosebudError("profile_not_configured", 409);
+  await rosebudProfile(profile);
   return { connection, profile };
 }
 export async function connectRosebud(name: string) {
@@ -56,11 +62,32 @@ export async function rosebudAccount(id: string) {
 export async function discoverRosebud(id: string) {
   const { profile } = await rosebudConnection(id);
   const models = (await rosebudRuntime.models(profile)).map(rosebudCatalogEntry);
+  const connection = await getProviderConnectionById(id);
+  await updateProviderConnection(id, {
+    providerSpecificData: { ...(connection?.providerSpecificData || {}), rosebudModels: models },
+  });
+  const connections = await getProviderConnections({ provider: "rosebud" });
+  const merged = new Map(models.map((model) => [model.id, model]));
+  for (const item of connections) {
+    const cached = (item.providerSpecificData as Record<string, unknown> | undefined)
+      ?.rosebudModels;
+    if (item.id !== id && item.isActive && Array.isArray(cached))
+      for (const entry of cached)
+        if (
+          entry &&
+          typeof entry === "object" &&
+          typeof entry.id === "string" &&
+          entry.rosebud &&
+          Array.isArray(entry.rosebud.outputFormats)
+        )
+          merged.set(entry.id, entry);
+  }
+  const manual = (await getCustomModels("rosebud")).filter((model) => model.source !== "auto-sync");
   // Only images fit this catalog's contract. Other modalities remain discoverable
   // through the Rosebud API/MCP catalog; none are fabricated as chat models.
   await replaceCustomModels(
     "rosebud",
-    models
+    [...merged.values()]
       .filter(
         (model) =>
           model.type === "image" &&
@@ -74,6 +101,8 @@ export async function discoverRosebud(id: string) {
         apiFormat: "images-generations",
         supportedEndpoints: ["images"],
       }))
+      .filter((model) => !manual.some((item) => item.id === model.id))
+      .concat(manual)
   );
   return { provider: "rosebud", models, source: "rosebud-cli", creditUnit: "rosebud_credits" };
 }

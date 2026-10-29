@@ -159,3 +159,30 @@ between independently running servers is unsupported. A missing or malformed
 crashed-worker lease requires operator reconciliation rather than guessed retries.
 
 MCP artifact downloads place intact Base64 data in `structuredContent.b64_data`; the text block contains only metadata so accessibility text shortening cannot corrupt the artifact. HTTP downloads return their existing Base64 JSON field.
+
+## Retry and account permissions
+
+Image requests carrying an `Idempotency-Key` header (or `idempotency_key` field)
+are pinned durably to the original connection, scoped to the client API key.
+Retries cannot switch to another account, including when that account is unavailable.
+Reusing a key with changed inputs returns 409. Supply a stable key for retryable
+client requests; a request without a key represents a new generation.
+After submission, pending or artifact-failure responses include `rosebud_usage.job_id`
+and return 409 so clients can retrieve the original job instead of submitting again.
+Definitively unpaid transient failures may be retried with the same key.
+
+Every Rosebud HTTP operation requires authenticated management access even when
+ordinary dashboard login is disabled. Management API keys must also include the
+requested connection in their connection scope. HTTP MCP calls inherit that same
+check. Dashboard administrators retain their normal management authority. The
+upstream CLI independently enforces asset and game-publishing authorization scopes.
+
+After an uncertain publish, use `rosebud_game_status` to inspect the original game.
+Status remains available while its mutation lock is retained. Reconcile the official
+CLI project state before an operator removes a retained `operation.lock`; never
+remove it solely to retry a potentially successful publication.
+
+Deleting an OmniRoute connection does not erase retained jobs, artifacts, or the
+external CLI grant. Revoke the grant with the official `rosebud logout` command,
+using that connection's private `ROSEBUD_CREDENTIALS_DIR`, before removing its
+credential directory. Retain uncertain job evidence until it is reconciled.

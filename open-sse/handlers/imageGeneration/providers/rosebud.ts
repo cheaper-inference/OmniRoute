@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { rosebudConnection, recordRosebudJob, generateRosebud } from "@/lib/rosebud/provider";
-import { rosebudRuntime } from "../../../services/rosebud/runtime.ts";
+import { rosebudRuntime, type RosebudJob } from "../../../services/rosebud/runtime.ts";
 import { RosebudError } from "../../../services/rosebud/cli.ts";
 
 const imageRequest = z
@@ -27,7 +27,9 @@ export async function handleRosebudImageGeneration(options: {
       error: "Rosebud CLI requires a trusted local or LAN caller",
     };
   }
+  let job: RosebudJob | undefined;
   try {
+    if (options.signal?.aborted) throw new RosebudError("request_cancelled", 408);
     const body = imageRequest.parse(options.body);
     const id = options.credentials?.connectionId;
     if (!id) throw new RosebudError("connection_required", 401);
@@ -41,6 +43,13 @@ export async function handleRosebudImageGeneration(options: {
     const selected = catalog.find((model) => model.id === body.model.replace(/^rosebud\//, ""));
     if (!selected || selected.category !== "image")
       throw new RosebudError("not_an_image_model", 400);
+    const defaultFormat = selected.inputs?.find((field) => field.name === "output_format")?.default;
+    if (
+      typeof defaultFormat === "string" &&
+      !input.output_format &&
+      !["png", "jpg", "jpeg", "webp"].includes(defaultFormat)
+    )
+      throw new RosebudError("explicit_raster_format_required", 400);
     if (
       !selected.output_formats.some((format) => ["png", "jpg", "jpeg", "webp"].includes(format)) ||
       (typeof input.output_format === "string" &&
@@ -48,7 +57,8 @@ export async function handleRosebudImageGeneration(options: {
     ) {
       throw new RosebudError("use_asset_tool_for_non_raster_output", 400);
     }
-    let job = await generateRosebud(id, profile, {
+    if (options.signal?.aborted) throw new RosebudError("request_cancelled", 408);
+    job = await generateRosebud(id, profile, {
       model: body.model,
       input,
       idempotencyKey: body.idempotency_key,
@@ -56,10 +66,20 @@ export async function handleRosebudImageGeneration(options: {
     recordRosebudJob(id, job);
     const deadline = Date.now() + 600000;
     while (!["succeeded", "failed", "cancelled"].includes(job.status)) {
-      if (options.signal?.aborted || Date.now() > deadline) {
+      if (
+        options.signal?.aborted ||
+        Date.now() > deadline ||
+        ["submitting", "uncertain"].includes(job.status)
+      ) {
         return {
           success: false as const,
-          status: 504,
+          status: 409,
+          rosebudUsage: {
+            job_id: job.id,
+            status: job.status,
+            unit: "rosebud_credits",
+            consumed: job.actualCredits,
+          },
           error: `Rosebud job ${job.id} continues; retrieve it with rosebud_asset_status`,
         };
       }
@@ -94,8 +114,24 @@ export async function handleRosebudImageGeneration(options: {
     return {
       success: false as const,
       status:
-        error instanceof z.ZodError ? 400 : error instanceof RosebudError ? error.status : 502,
+        job && !(error instanceof z.ZodError)
+          ? 409
+          : error instanceof z.ZodError
+            ? 400
+            : error instanceof RosebudError
+              ? error.status
+              : 502,
       error: error instanceof RosebudError ? error.code : "Rosebud image request failed",
+      rosebudUsage: job
+        ? {
+            job_id: job.id,
+            status: job.status,
+            unit: "rosebud_credits",
+            consumed: job.actualCredits,
+          }
+        : error instanceof RosebudError && error.jobId
+          ? { job_id: error.jobId, unit: "rosebud_credits" }
+          : undefined,
     };
   }
 }

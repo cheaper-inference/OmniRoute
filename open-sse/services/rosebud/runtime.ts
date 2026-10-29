@@ -39,6 +39,7 @@ export type RosebudJob = {
   refundedCredits?: number;
   maxCredits?: number;
   error?: string;
+  unpaidFailure?: boolean;
   updatedAt: string;
 };
 const PROCESS_INSTANCE = Symbol.for("omniroute.rosebud.processInstance");
@@ -51,10 +52,13 @@ export class RosebudRuntime {
   constructor(private run: RosebudRunner = runRosebud) {}
   async models(profile: string): Promise<RosebudModel[]> {
     const result = await this.run(profile, ["assets", "models"]);
-    return z
-      .array(rosebudModel)
-      .parse(result.models)
-      .filter((model) => !model.status || model.status === "live");
+    if (!Array.isArray(result.models)) throw new RosebudError("invalid_model_catalog", 502);
+    return result.models.flatMap((entry) => {
+      const parsed = rosebudModel.safeParse(entry);
+      return parsed.success && (!parsed.data.status || parsed.data.status === "live")
+        ? [parsed.data]
+        : [];
+    });
   }
   async account(profile: string) {
     return this.run(profile, ["whoami"]);
@@ -163,7 +167,8 @@ export class RosebudRuntime {
     }
     if (existing && existing.fingerprint !== fingerprint)
       throw new RosebudError("idempotency_conflict", 409);
-    if (existing) return existing.upstreamId ? this.refresh(profile, id) : existing;
+    if (existing && !existing.unpaidFailure)
+      return existing.upstreamId ? this.refresh(profile, id) : existing;
     const unlock = await this.lock(id);
     const job: RosebudJob = {
       id,
@@ -176,20 +181,50 @@ export class RosebudRuntime {
       status: "submitting",
       updatedAt: new Date().toISOString(),
     };
+    let submitted = false;
+    let persist = false;
+    let claimed = false;
+    const claim = join(
+      rosebudRoot(),
+      "pending",
+      hash(JSON.stringify([profile, modelId, ordered(input)]))
+    );
     try {
+      try {
+        const latest = await this.read(profile, id);
+        if (latest.fingerprint !== fingerprint) throw new RosebudError("idempotency_conflict", 409);
+        if (!latest.unpaidFailure) return latest.upstreamId ? this.refresh(profile, id) : latest;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      }
+      persist = true;
       await this.save(job);
       const quote = await this.quote(profile, modelId, input);
       if (typeof quote.credits === "number") job.estimatedCredits = quote.credits;
       await writeFile(join(folder, "input.json"), JSON.stringify(input), { mode: 0o600 });
       await this.save(job);
+      await mkdir(join(rosebudRoot(), "pending"), { recursive: true, mode: 0o700 });
+      try {
+        await writeFile(claim, job.id, { flag: "wx", mode: 0o600 });
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+        if ((await readFile(claim, "utf8")) !== job.id)
+          throw new RosebudError("matching_request_requires_reconciliation", 409);
+      }
+      claimed = true;
+      submitted = true;
       return await this.submit(job, request.maxCredits);
     } catch (error) {
-      job.status = error instanceof RosebudError && error.uncertain ? "uncertain" : "failed";
+      if (!persist) throw error;
+      const uncertain = submitted && (!(error instanceof RosebudError) || error.uncertain);
+      job.unpaidFailure = !uncertain;
+      job.status = uncertain ? "uncertain" : "failed";
       job.error = error instanceof RosebudError ? error.code : "generation_failed";
       await this.save(job);
       if (error instanceof RosebudError) error.jobId = job.id;
       throw error;
     } finally {
+      if (claimed && (job.upstreamId || job.unpaidFailure)) await rm(claim, { force: true });
       await unlock();
     }
   }
@@ -227,7 +262,7 @@ export class RosebudRuntime {
   }
   /** Re-run only the identical CLI command; its durable pending state owns the upstream idempotency key. */
   async recover(profile: string, id: string) {
-    const job = await this.read(profile, id);
+    let job = await this.read(profile, id);
     if (job.upstreamId) return this.refresh(profile, id);
     if (!["uncertain", "submitting"].includes(job.status)) return job;
     const pendingFingerprint = hash(
@@ -242,16 +277,36 @@ export class RosebudRuntime {
     let durablePending = false;
     for (const name of await readdir(folder)) {
       if (!/^asset-[a-f0-9]+\.json$/.test(name)) continue;
-      const saved = JSON.parse(await readFile(join(folder, name), "utf8"));
-      if (saved.fingerprint === pendingFingerprint && typeof saved.idempotency_key === "string")
-        durablePending = true;
+      try {
+        const saved = JSON.parse(await readFile(join(folder, name), "utf8"));
+        if (saved.fingerprint === pendingFingerprint && typeof saved.idempotency_key === "string")
+          durablePending = true;
+      } catch {
+        /* malformed unrelated state cannot authorize another paid submission */
+      }
     }
     // The CLI may have acknowledged and removed its pending record before its
     // stdout was lost. Without a durable upstream key, never pay a second time.
-    if (!durablePending) throw new RosebudError("manual_reconciliation_required", 409, true);
+    const claim = join(
+      rosebudRoot(),
+      "pending",
+      hash(JSON.stringify([profile, job.model, ordered(job.input)]))
+    );
+    let owner: string | undefined;
+    try {
+      owner = await readFile(claim, "utf8");
+    } catch {
+      /* no provable ownership */
+    }
+    if (!durablePending || owner !== id)
+      throw new RosebudError("manual_reconciliation_required", 409, true);
     const unlock = await this.lock(id);
     try {
-      return await this.submit(job, job.maxCredits);
+      job = await this.read(profile, id);
+      if (job.upstreamId) return this.refresh(profile, id);
+      const result = await this.submit(job, job.maxCredits);
+      if (result.upstreamId) await rm(claim, { force: true });
+      return result;
     } finally {
       await unlock();
     }
@@ -310,6 +365,7 @@ export class RosebudRuntime {
     return this.run(profile, ["assets", "list"]);
   }
   async downloadAsset(profile: string, assetId: string) {
+    await rosebudProfile(profile);
     z.string().uuid().parse(assetId);
     const folder = join(rosebudRoot(), "downloads", profile, assetId);
     await mkdir(folder, { recursive: true, mode: 0o700 });

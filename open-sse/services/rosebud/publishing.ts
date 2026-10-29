@@ -1,7 +1,13 @@
 import { mkdir, writeFile, access, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { z } from "zod";
-import { runRosebud, rosebudRoot, RosebudError, type RosebudRunner } from "./cli.ts";
+import {
+  runRosebud,
+  rosebudRoot,
+  RosebudError,
+  rosebudProfile,
+  type RosebudRunner,
+} from "./cli.ts";
 
 export const rosebudPublishInput = z
   .object({
@@ -19,6 +25,7 @@ export async function rosebudPublish(
   raw: unknown,
   run: RosebudRunner = runRosebud
 ) {
+  await rosebudProfile(profile);
   const input = rosebudPublishInput.parse(raw);
   const gameId = input.gameId || "";
   if (!gameId) throw new RosebudError("game_id_required", 400);
@@ -26,6 +33,17 @@ export async function rosebudPublish(
   const state = join(folder, "project.json"),
     build = join(folder, "build");
   await mkdir(build, { recursive: true, mode: 0o700 });
+  if (action === "game_status") {
+    const result = await run(profile, ["status", "--state", state]);
+    return {
+      gameId,
+      status: result.status,
+      version: result.version,
+      play_url: result.play_url,
+      claimed: result.claimed,
+      requiresAuthorization: Boolean(result.approval_url || result.claim_url),
+    };
+  }
   const lock = join(folder, "operation.lock");
   try {
     await writeFile(lock, action, { flag: "wx", mode: 0o600 });
@@ -61,7 +79,7 @@ export async function rosebudPublish(
         await writeFile(file, content, { mode: 0o600 });
       }
     }
-    const args = [action === "game_status" ? "status" : action, "--state", state];
+    const args = [action, "--state", state];
     if (["publish", "update", "pull"].includes(action)) args.push("--directory", build);
     if (input.title) args.push("--title", input.title);
     if (input.description) args.push("--description", input.description);

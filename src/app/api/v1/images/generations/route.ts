@@ -1,3 +1,5 @@
+import { rosebudImageBinding } from "@omniroute/open-sse/services/rosebud/imageBinding.ts";
+import { RosebudError } from "@omniroute/open-sse/services/rosebud/cli.ts";
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -296,13 +298,33 @@ async function postHandler(request, context) {
   // Get credentials — skip for local providers (authType: "none")
   if (provider === "rosebud" && request.headers.has("idempotency-key"))
     body.idempotency_key = request.headers.get("idempotency-key");
+  let rosebudPinned: string | undefined;
+  const bindRosebud = (candidate?: string) =>
+    rosebudImageBinding(
+      policy.apiKeyInfo?.id || "dashboard",
+      body.idempotency_key,
+      body,
+      allowedConnections,
+      candidate
+    );
+  if (provider === "rosebud") {
+    try {
+      rosebudPinned = await bindRosebud();
+    } catch (error) {
+      return errorResponse(
+        error instanceof RosebudError ? error.status : 503,
+        error instanceof RosebudError ? error.code : "Rosebud retry binding unavailable"
+      );
+    }
+  }
   let credentials = null;
   if (providerConfig && providerConfig.authType !== "none") {
     credentials = await getProviderCredentialsWithQuotaPreflight(
       provider,
       null,
       allowedConnections,
-      requestedModel
+      requestedModel,
+      rosebudPinned ? { forcedConnectionId: rosebudPinned } : {}
     );
     if (!credentials) {
       return errorResponse(
@@ -367,6 +389,31 @@ async function postHandler(request, context) {
     const localCredentials = withoutKeyScopeBlocked(lookup);
     if (localCredentials && !isAllRateLimitedCredentials(localCredentials)) {
       credentials = localCredentials;
+    }
+  }
+
+  if (provider === "rosebud" && credentials?.connectionId) {
+    try {
+      const pinned = await bindRosebud(credentials.connectionId);
+      if (pinned && pinned !== credentials.connectionId) {
+        credentials = await getProviderCredentialsWithQuotaPreflight(
+          provider,
+          null,
+          allowedConnections,
+          requestedModel,
+          { forcedConnectionId: pinned }
+        );
+        if (!credentials || isKeyScopeBlockedCredentials(credentials) || credentials.allRateLimited)
+          return errorResponse(
+            409,
+            "Original Rosebud account is unavailable; the request will not switch accounts"
+          );
+      }
+    } catch (error) {
+      return errorResponse(
+        error instanceof RosebudError ? error.status : 503,
+        error instanceof RosebudError ? error.code : "Rosebud retry binding unavailable"
+      );
     }
   }
 
@@ -466,7 +513,16 @@ async function postHandler(request, context) {
     typeof errorPayload?.error?.message === "string"
       ? errorPayload.error.message
       : "Image generation provider error";
-  return errorResponse((result as any).status, message);
+  const response = errorResponse((result as any).status, message);
+  if (provider === "rosebud") {
+    const usage = (result as { rosebudUsage?: unknown }).rosebudUsage;
+    if (usage)
+      return Response.json(
+        { ...(await response.json()), rosebud_usage: usage },
+        { status: response.status }
+      );
+  }
+  return response;
 }
 
 const guardedPost = withInjectionGuard(postHandler);

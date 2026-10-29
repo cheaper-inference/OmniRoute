@@ -3,7 +3,7 @@ import {
   rosebudPublish,
 } from "@omniroute/open-sse/services/rosebud/publishing.ts";
 import { z } from "zod";
-import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import { requireRosebudAccess } from "@/lib/rosebud/authorization";
 import {
   connectRosebud,
   generateRosebud,
@@ -31,10 +31,10 @@ const requestSchema = z
   })
   .strict();
 export async function POST(request: Request, context: { params: Promise<{ action: string }> }) {
-  const denied = await requireManagementAuth(request);
-  if (denied) return denied;
   try {
     const args = requestSchema.parse(await request.json());
+    const denied = await requireRosebudAccess(request, args.connectionId);
+    if (denied) return denied;
     const { action } = await context.params;
     if (action === "connect")
       return Response.json(await connectRosebud(args.name || "OmniRoute Rosebud"));

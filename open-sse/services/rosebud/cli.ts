@@ -82,8 +82,8 @@ export const runRosebud: RosebudRunner = async (profile, args, timeoutMs = 12000
   const folder = await rosebudProfile(profile);
   const env: NodeJS.ProcessEnv = {
     PATH: process.env.PATH,
-    HOME: process.env.HOME,
-    USERPROFILE: process.env.USERPROFILE,
+    HOME: folder,
+    USERPROFILE: folder,
     SYSTEMROOT: process.env.SYSTEMROOT,
     TMPDIR: process.env.TMPDIR,
     TEMP: process.env.TEMP,
@@ -108,6 +108,8 @@ export const runRosebud: RosebudRunner = async (profile, args, timeoutMs = 12000
       cwd: folder,
       stdio: ["ignore", "pipe", "pipe"],
     });
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
     let stdout = "",
       stderr = "",
       exceeded = false;
@@ -116,7 +118,7 @@ export const runRosebud: RosebudRunner = async (profile, args, timeoutMs = 12000
       child.kill("SIGTERM");
       killTimer = setTimeout(() => child.kill("SIGKILL"), 5000);
     }, timeoutMs);
-    const collect = (chunk: Buffer, error: boolean) => {
+    const collect = (chunk: string, error: boolean) => {
       if (stdout.length + stderr.length + chunk.length > 8 * 1024 * 1024) {
         exceeded = true;
         child.kill("SIGTERM");
