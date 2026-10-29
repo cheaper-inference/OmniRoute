@@ -1,6 +1,7 @@
 // Pure Perplexity wire protocol: consts, types, SSE parsing, request/query building,
 // content extraction. Extracted verbatim from perplexity-web.ts. No host state/fetch/auth.
 import { randomUUID } from "crypto";
+import { buildSessionCookieHeader } from "../../utils/nextAuthCookie.ts";
 import { firefoxUserAgent, newestFirefoxVersion } from "../../utils/browserProfiles.ts";
 
 export const PPLX_SSE_ENDPOINT = "https://www.perplexity.ai/rest/sse/perplexity_ask";
@@ -51,6 +52,33 @@ export const PPLX_STREAM_EOF_SYMBOL = "event: end_of_stream";
 // A mismatched UA vs TLS fingerprint is itself a Cloudflare bot signal (issue #2459).
 export function pplxUserAgent(): string {
   return firefoxUserAgent("Macintosh; Intel Mac OS X 10.15", newestFirefoxVersion());
+}
+
+// Headers the web executor and the deep research tool both send. A bearer wins
+// over the session cookie, matching the executor's own choice.
+export function buildPplxHeaders(
+  requestId: string,
+  credentials: { accessToken?: string; apiKey?: string }
+): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "text/event-stream",
+    Origin: "https://www.perplexity.ai",
+    Referer: "https://www.perplexity.ai/",
+    "User-Agent": pplxUserAgent(),
+    // Current app request headers (replaced the stale X-App-ApiVersion/X-App-ApiClient pair,
+    // which the new endpoint no longer expects and which contributed to HTTP 400).
+    "x-perplexity-request-endpoint": PPLX_SSE_ENDPOINT,
+    "x-perplexity-request-reason": "ask-query-state-provider",
+    "x-perplexity-request-try-number": "1",
+    "x-request-id": requestId,
+  };
+  if (credentials.accessToken) {
+    headers["Authorization"] = `Bearer ${credentials.accessToken}`;
+  } else if (credentials.apiKey) {
+    headers["Cookie"] = buildSessionCookieHeader(credentials.apiKey);
+  }
+  return headers;
 }
 
 // mode / model_preference pairs — every entry posts mode:"copilot", like the live
