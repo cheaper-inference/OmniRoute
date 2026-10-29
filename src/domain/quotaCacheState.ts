@@ -13,6 +13,7 @@
  */
 
 import type { ClaudeQuotaMetadata } from "@omniroute/open-sse/services/usage/quota.ts";
+import type { QuotaBurnMetrics } from "./quotaBurnMetrics.ts";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -40,6 +41,7 @@ export interface QuotaCacheEntry {
   exhausted: boolean;
   nextResetAt: string | null;
   windowDurationMs?: number | null; // T08: optional rolling window duration
+  burnMetrics?: QuotaBurnMetrics;
   codexOwnerEpoch?: string; // opaque durable identity, never credential material
 }
 

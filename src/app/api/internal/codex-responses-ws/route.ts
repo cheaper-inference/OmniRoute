@@ -15,7 +15,8 @@ import { acquireCodexWsLease, releaseCodexWsLease } from "@/sse/services/codexWs
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import { checkAndRefreshToken } from "@/sse/services/tokenRefresh";
 import { resolveCodexWsModelInfo } from "./modelResolution";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
+import { buildHandshakeOriginRequest, isWebSocketOriginAllowed } from "@/server/origin/wsOrigin";
 import { formatMemoryContext } from "@/lib/memory/injection";
 import { retrieveMemories } from "@/lib/memory/retrieval";
 import {
@@ -111,6 +112,7 @@ const bridgePayloadSchema = z
     action: z.string().optional(),
     requestUrl: z.string().optional(),
     headers: z.record(z.string(), z.unknown()).optional(),
+    handshake: z.record(z.string(), z.unknown()).optional(),
     response: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();
@@ -335,15 +337,33 @@ function normalizeUpstreamHeaders(headers: Record<string, string>): Record<strin
   return result;
 }
 
-async function authenticate(body: JsonRecord) {
+function getHandshakeOriginRequest(body: JsonRecord, authRequest: Request): Request {
+  return buildHandshakeOriginRequest(body.handshake, authRequest.headers.get("origin"));
+}
+
+async function authenticate(body: JsonRecord, { checkOrigin = false } = {}) {
   const authRequest = getAuthRequest(body);
-  const auth = await authorizeWebSocketHandshake(authRequest);
+  // REQUIRE_API_KEY applies to this transport exactly as it does to HTTP /v1/responses.
+  const auth = await authorizeWebSocketHandshake(authRequest, {
+    requireAuth: isRequireApiKeyEnabled(),
+  });
   if (!auth.authorized) {
     return jsonError(
       auth.hasCredential ? 403 : 401,
       auth.hasCredential ? "ws_auth_invalid" : "ws_auth_required",
       auth.hasCredential ? "Invalid WebSocket credential" : "WebSocket auth required"
     );
+  }
+
+  // Browsers skip CORS for WebSocket, so a cross-site page must be stopped here. A valid
+  // API key is exempt, matching the HTTP CORS relaxation for token-authenticated calls:
+  // the page cannot know the key. A session cookie is not exempt (browsers attach it).
+  if (
+    checkOrigin &&
+    auth.authType !== "api_key" &&
+    !isWebSocketOriginAllowed(getHandshakeOriginRequest(body, authRequest))
+  ) {
+    return jsonError(403, "ws_origin_forbidden", "WebSocket origin not allowed");
   }
 
   return NextResponse.json({
@@ -813,7 +833,7 @@ export async function POST(request: Request) {
 
   const action = typeof body.action === "string" ? body.action : "";
   if (action === "authenticate") {
-    return authenticate(body);
+    return authenticate(body, { checkOrigin: true });
   }
   if (action === "prepare") {
     return prepare(body);

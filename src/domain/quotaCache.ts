@@ -64,6 +64,7 @@ import {
   isQuotaHealthy,
 } from "./quotaCacheState";
 import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
+import { updateQuotaBurnMetrics } from "./quotaBurnMetrics";
 
 // Keep markQuotaHealthy's public import path; the remaining leaf state stays internal.
 export { markQuotaHealthy } from "./quotaCacheState";
@@ -759,7 +760,7 @@ function setQuotaCacheInner(
   const exhausted = isExhausted(quotas);
   // #4438 — capture the prior entry BEFORE overwriting the cache so we can skip
   // redundant snapshot writes for idle connections whose quota didn't change.
-  const prior = getState().cache.get(connectionId);
+  const prior = getQuotaCache(connectionId);
   // A telemetry-only refresh is not evidence that a real upstream 429 has
   // recovered. Keep its original timestamp so it can still expire normally.
   if (
@@ -780,6 +781,13 @@ function setQuotaCacheInner(
     exhausted,
     // #14359 — cap the park; keep the prior deadline while the streak continues (monitor rewrites must not extend it).
     nextResetAt: exhausted ? preserveParkDeadline(earliestResetAt(quotas), prior) : null,
+    burnMetrics: updateQuotaBurnMetrics(
+      prior?.quotas,
+      prior?.fetchedAt,
+      prior?.burnMetrics,
+      quotas,
+      Date.now()
+    ),
   };
   const codexOwner = provider === "codex" ? readCodexQuotaOwner(connectionId) : null;
   if (codexOwner) entry.codexOwnerEpoch = codexOwner.epoch;

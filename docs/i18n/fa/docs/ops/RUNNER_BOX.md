@@ -28,7 +28,7 @@ runner در OmniRoute دارای **یک نقش**، یک label و بودجهٔ ح
 | swap      | 16 GB                        | `omniroute-113-5` با swap غیرفعال (`MemorySwapMax=0`) اجرا میشود تا یک build مهارنشده بهجای درگیرکردن swap کل سرور، هنگام رسیدن به سقف خود متوقف شود                                                                                                                                                                                                                                                                                                     |
 | `/tmp`    | **12 GB tmpfs = RAM**        | هر چیزی که در آن قرار گیرد، حافظه مصرف میکند؛ باقیماندهها پس از 3 ساعت پاکسازی میشوند                                                                                                                                                                                                                                                                                                                                                                    |
 | CPU       | بار 60 روی 32 هسته مشاهده شد | پیش از اعمال quotaها، یک build با Turbopack (حدود 1166 % CPU) بههمراه یک مجموعهتست coverage روی همان سرور، heartbeatهای listenerهای دیگر را از منابع محروم کرد (`The self-hosted runner lost communication`، #16853)                                                                                                                                                                                                                                     |
-| runnerها  | **6 listener**               | 4 مورد OmniRoute بهعلاوهٔ OmniHeuris و OmniMind؛ `omniroute-113-3/-4/-7/-8` غیرفعال هستند (`systemctl enable --now` یکی از آنها را دوباره فعال میکند)                                                                                                                                                                                                                                                                                                    |
+| runnerها  | **7 listener** (2026-10-28)  | 5 مورد OmniRoute به‌علاوهٔ OmniHeuris و OmniMind؛ `omniroute-113-7` برچسب `omni-build` را نیز دارد؛ `omniroute-113-3/-4/-8` از مخزن حذف شدند (2026-10-28)                                                                                                                                                                                                                                                                                                |
 
 محدودیتها در `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` مربوط به هر unit
 قرار دارند (مقادیر قبلی با نام `override.conf.bak-20261018` نگهداری شدهاند) و بهصورت زنده با
@@ -43,7 +43,7 @@ runner در OmniRoute دارای **یک نقش**، یک label و بودجهٔ ح
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): هر ۳۰ دقیقه، ثبت گزارش در /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 وجود `lsof` الزامی است: پاکساز پیش از حذف یک مسیر، با گرفتن یک اسنپشات از فایلهای
@@ -129,9 +129,10 @@ SIGKILL برای کل cgroup ارسال میشود. این تنظیم در را�
   2026-10-18 مقدار `MemoryHigh=4G` تنظیم شده بود — build مربوط به promptfoo بهمدت 54 دقیقه تحت بازیابی مداوم حافظه
   پیش رفت؛ 8 GB این throttling را برطرف میکند.
 - **تعداد کمتر listenerها عمدی است.** چهار unit مربوط به OmniRoute در 2026-08-29 غیرفعال
-  شدند — هر listener اضافی، مصرفکنندهٔ دیگری برای بودجهٔ حافظهٔ بالا است. سقف نظافتگر 6
-  است (`MAX_ACTIVE_RUNNERS=6` در cron): این مقدار همهٔ `Runner.Listener`های روی سیستم را
-  میشمارد و OmniHeuris + OmniMind نیز دو مورد به چهار مورد ما اضافه میکنند.
+  شدند — هر listener اضافی، مصرفکنندهٔ دیگری برای بودجهٔ حافظهٔ بالا است. سقف نظافتگر 8
+  است (`MAX_ACTIVE_RUNNERS=8` در cron): این مقدار همهٔ `Runner.Listener`های روی سیستم را
+  میشمارد و OmniHeuris + OmniMind نیز دو مورد به پنج مورد ما اضافه میکنند.
+- **کارهای Unit و Vitest میزبانی‌شده باقی می‌مانند.** `ci.yml` شاردهای unit و کار Vitest خود را فقط زمانی به `[self-hosted, omni-ci]` می‌فرستد که متغیر مخزن `vars.USE_VPS_TEST_RUNNER` برابر `true` باشد، و حتی در آن صورت فقط برای اجراهای `pull_request` از همان مخزن؛ forkها، `merge_group` و pushها روی `ubuntu-latest` می‌مانند (`tests/unit/vps-runner-variable-scope.test.ts`). این متغیر `false` است. در 2026-10-28 سه listener چهارهسته‌ای `omni-ci` برای `npm ci` بین 250 تا 270 ثانیه زمان گرفتند و هر شارد unit به سقف 30 دقیقه‌ای کار رسید، در حالی که یک شارد میزبانی‌شده حدود 634 ثانیه طول می‌کشد؛ بار سیستم در آن زمان 17 تا 24 بود. این listenerها حذف شدند. تا زمانی که listenerهایی متناسب با یک شارد unit وجود ندارد، این متغیر را دوباره روشن نکنید.
 - **هنگامی که هر runner مشغول است، هرگز `/tmp` یا `_work` را دستی پاک نکنید.** انجام
   بررسی و سپس حذف با فاصلهٔ زمانی میان این دو، باعث شد یک job فعال Build در 2026-08-27
   دایرکتوری `_work` خود را از دست بدهد. نظافتگر بررسی و حذف را در یک مرحله انجام میدهد؛
@@ -147,8 +148,7 @@ SIGKILL برای کل cgroup ارسال میشود. این تنظیم در را�
 
 ## مسیر میزبانیشده (اجراکنندههای میزبانیشده توسط GitHub)
 
-حساب روی طرح **Pro** است: **40 کار میزبانیشدهٔ همزمان** که میان همهٔ بررسیهای PR،
-همهٔ گردشکارهای فعالشده با push و پیکربندی پیشفرض CodeQL مشترکاند. طبق اندازهگیری در 2026-10-18 طی یک
+این مخزن متعلق به سازمان `cheaper-inference` و روی طرح **Team** است: **60 کار میزبانی‌شدهٔ همزمان** که میان همهٔ مخزن‌های سازمان، همهٔ بررسی‌های PR، همهٔ گردش‌کارهای فعال‌شده با push و پیکربندی پیش‌فرض CodeQL مشترک‌اند. ارقام زیر روی طرح **Pro** (40 کار میزبانی‌شدهٔ همزمان) اندازه‌گیری شده‌اند. طبق اندازهگیری در 2026-10-18 طی یک
 کارزار ادغام (~10 ادغام در ساعت روی `release/v3.8.52`): در مدت
 24 ساعت **2,500 اجرای گردشکار ایجاد شد**، طی 6 ساعت 44 بار push به شاخه انجام شد و درحالیکه بررسیهای PR
 ساعتها منتظر ماندند و PRها بدون آنها ادغام شدند، **106 کار میزبانیشده در صف قرار گرفت**. در هر push به این شاخه، نُه گردشکار اجرا میشد:

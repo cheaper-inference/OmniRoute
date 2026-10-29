@@ -140,12 +140,15 @@ export async function getUsageForProvider(
     return await getMoonshotOpenPlatformUsage(connection);
   }
 
-  // openai-compatible-* ids are generated per connection, so they can never
+  // openai-/anthropic-compatible-* ids are generated per connection, so they can never
   // appear in the switch below or in USAGE_FETCHER_PROVIDERS. The connection
   // itself declares where its quota lives (#13616); without that declaration
   // this returns a message and the sync treats it as "nothing to show", exactly
   // as it did before.
-  if (typeof provider === "string" && provider.startsWith("openai-compatible-")) {
+  if (
+    typeof provider === "string" &&
+    (provider.startsWith("openai-compatible-") || provider.startsWith("anthropic-compatible-"))
+  ) {
     return await getOpenAiCompatibleUsage(apiKey, providerSpecificData);
   }
 

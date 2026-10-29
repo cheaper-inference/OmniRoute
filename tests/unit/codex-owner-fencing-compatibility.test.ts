@@ -78,6 +78,37 @@ test("identical concurrent proactive-refresh waiters share one valid persisted t
   );
 });
 
+test("expiry-first burn metrics coexist with owner epochs and reset on account replacement", async (t) => {
+  let now = Date.now();
+  t.mock.method(Date, "now", () => now);
+  const connection = await seed();
+  const resetAt = new Date(now + 3_600_000).toISOString();
+  quota.setQuotaCache(connection.id, "codex", {
+    session: { used: 10, total: 100, resetAt },
+  });
+  const first = quota.getQuotaCache(connection.id);
+  assert.match(first?.codexOwnerEpoch ?? "", /^[a-f0-9]{32}$/);
+  assert.equal(first?.burnMetrics?.observations.session.remainingPercentage, 90);
+
+  now += 60_000;
+  quota.setQuotaCache(connection.id, "codex", {
+    session: { used: 20, total: 100, resetAt },
+  });
+  const measured = quota.getQuotaCache(connection.id);
+  assert.equal(measured?.codexOwnerEpoch, first?.codexOwnerEpoch);
+  assert.ok(measured?.burnMetrics?.rates.session.fractionPerHour > 0);
+
+  await providers.updateProviderConnection(connection.id, owner("b"));
+  // The first fresh write must invalidate the old metrics even without a prior cache read.
+  quota.setQuotaCache(connection.id, "codex", {
+    session: { used: 30, total: 100, resetAt },
+  });
+  const replacement = quota.getQuotaCache(connection.id);
+  assert.notEqual(replacement?.codexOwnerEpoch, first?.codexOwnerEpoch);
+  assert.equal(replacement?.burnMetrics?.observations.session.remainingPercentage, 70);
+  assert.equal(replacement?.burnMetrics?.rates.session, undefined);
+});
+
 for (const aba of [false, true]) {
   test(`routing cache and persisted snapshots cannot survive ${aba ? "A-to-B-to-A" : "A-to-B"} owner replacement`, async () => {
     const connection = await seed();

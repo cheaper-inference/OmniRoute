@@ -367,6 +367,16 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   webpack(config, { dev, webpack }) {
+    // Production webpack builds skip the persistent filesystem cache unless
+    // OMNIROUTE_WEBPACK_BUILD_CACHE=1. With the cache on, webpack keeps every
+    // module's build and codegen result in memory and then serializes the whole
+    // graph to .build/next/cache/webpack; measured on this repo that adds about
+    // 2.5 GB to peak build RSS at a 6144 MB heap cap. A clean CI or Docker build
+    // starts with an empty cache and never reads it back; only repeat builds on the
+    // same tree or BuildKit host do.
+    if (!dev && process.env.OMNIROUTE_WEBPACK_BUILD_CACHE !== "1") {
+      config.cache = false;
+    }
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
       isNextIntlExtractorDynamicImportWarning,
