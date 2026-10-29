@@ -1,5 +1,7 @@
 "use client";
 
+import { Button, Checkbox } from "@/shared/components";
+
 import { useState } from "react";
 import {
   normalizeModelSupportedEndpoints,
@@ -112,7 +114,7 @@ export default function ModelEndpointTagsEditor({
           }
           className={
             adapterStatuses[endpoint] === "unavailable"
-              ? "rounded bg-red-500/15 px-1 py-0.5 text-red-500"
+              ? "rounded bg-error/15 px-1 py-0.5 text-error"
               : "rounded bg-primary/10 px-1 py-0.5 text-primary"
           }
         >
@@ -123,65 +125,48 @@ export default function ModelEndpointTagsEditor({
       <span className="text-text-muted" title={t("supportedEndpointsLabel")}>
         {provenance}
       </span>
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        icon="edit"
         onClick={beginEdit}
         disabled={saving}
         title={t("endpointCapabilitiesEdit")}
         aria-label={t("endpointCapabilitiesEdit")}
-        className="rounded p-0.5 text-text-muted hover:text-primary disabled:opacity-50"
-      >
-        <span className="material-symbols-outlined text-sm">edit</span>
-      </button>
+        className="size-6 min-h-6 rounded text-text-muted"
+      />
       {editing && (
         <div className="flex w-full flex-wrap items-center gap-1 rounded border border-border p-1">
           <fieldset disabled={saving} className="flex flex-wrap gap-2">
             <legend className="text-text-muted">{t("supportedEndpointsLabel")}</legend>
             {OPTIONS.map((endpoint) => (
-              <label key={endpoint} className="inline-flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  checked={selection.includes(endpoint)}
-                  onChange={(event) =>
-                    setSelection((prev) =>
-                      event.target.checked
-                        ? [...prev, endpoint]
-                        : prev.filter((item) => item !== endpoint)
-                    )
-                  }
-                />
-                {endpoint}
-              </label>
+              <Checkbox
+                key={endpoint}
+                label={endpoint}
+                checked={selection.includes(endpoint)}
+                onChange={(event) =>
+                  setSelection((prev) =>
+                    event.target.checked
+                      ? [...prev, endpoint]
+                      : prev.filter((item) => item !== endpoint)
+                  )
+                }
+              />
             ))}
           </fieldset>
-          <button
-            type="button"
-            disabled={saving}
-            onClick={() => void submit(false)}
-            className="rounded border border-border p-1 text-primary"
-          >
+          <Button size="sm" disabled={saving} onClick={() => void submit(false)}>
             {t("endpointCapabilitiesSave")}
-          </button>
+          </Button>
           {resettable && (
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => void submit(true)}
-              className="rounded border border-border p-1 text-text-muted"
-            >
+            <Button size="sm" variant="outline" disabled={saving} onClick={() => void submit(true)}>
               {t("endpointCapabilitiesReset")}
-            </button>
+            </Button>
           )}
-          <button
-            type="button"
-            disabled={saving}
-            onClick={() => setEditing(false)}
-            className="rounded border border-border p-1"
-          >
+          <Button size="sm" variant="ghost" disabled={saving} onClick={() => setEditing(false)}>
             {t("cancel")}
-          </button>
+          </Button>
           {error && (
-            <span role="alert" className="text-red-500">
+            <span role="alert" className="text-error">
               {error}
             </span>
           )}

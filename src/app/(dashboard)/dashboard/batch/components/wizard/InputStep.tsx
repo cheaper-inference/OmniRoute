@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
+import SegmentedControl from "@/shared/components/SegmentedControl";
 import CsvMappingStep from "./CsvMappingStep";
 import type { WizardInput, WizardCsvMapping, WizardDestination } from "@/lib/batches/types";
 
@@ -25,6 +27,10 @@ async function readFileContent(file: File): Promise<string> {
   return headText + "\n[...sample only...]\n" + tailText;
 }
 
+function getSourceContent(input: WizardInput): string | null | undefined {
+  return input.kind === "csv" ? input.csvContent : input.rawContent;
+}
+
 interface InputStepProps {
   input: WizardInput;
   onChange: (input: WizardInput) => void;
@@ -39,14 +45,19 @@ export default function InputStep({ input, onChange, destination }: InputStepPro
   // B-2b — synchronous stale-proof guard for concurrent drops/picks in the same
   // event-loop tick (React state lags behind dispatches within a tick).
   const isReadingRef = useRef(false);
-  const [csvJsonl, setCsvJsonl] = useState<string | null>(null);
+  const inputRevisionRef = useRef(0);
 
   const isJsonl = input.kind === "jsonl";
   const isCsv = input.kind === "csv";
 
   function handleKindChange(kind: "jsonl" | "csv") {
-    onChange({ kind, fileName: null, rawContent: null, csvMapping: kind === "csv" ? {} : undefined });
-    setCsvJsonl(null);
+    inputRevisionRef.current += 1;
+    onChange({
+      kind,
+      fileName: null,
+      rawContent: null,
+      csvMapping: kind === "csv" ? {} : undefined,
+    });
   }
 
   async function processFile(file: File) {
@@ -55,17 +66,24 @@ export default function InputStep({ input, onChange, destination }: InputStepPro
     // cannot both pass. State mirror is for UI only.
     if (isReadingRef.current) return;
     isReadingRef.current = true;
+    const inputRevision = inputRevisionRef.current;
     const expectedExt = isJsonl ? ".jsonl" : ".csv";
     if (!file.name.toLowerCase().endsWith(expectedExt)) {
       // Soft warning — don't block, let validation catch it
     }
     setIsReading(true);
+    if (isCsv) onChange({ ...input, rawContent: null });
     try {
-      const content = await readFileContent(file);
+      // CSV conversion needs every row; JSONL keeps a bounded preview (D7).
+      const content = input.kind === "csv" ? await file.text() : await readFileContent(file);
+      // A format change invalidates the pending file without skipping read cleanup.
+      if (inputRevision !== inputRevisionRef.current) return;
       onChange({
         kind: input.kind,
         fileName: file.name,
-        rawContent: content,
+        rawContent: isCsv ? null : content,
+        csvContent: isCsv ? content : undefined,
+        originalFile: input.kind === "jsonl" ? file : undefined,
         csvMapping: input.kind === "csv" ? (input.csvMapping ?? {}) : undefined,
       });
     } catch (err) {
@@ -100,19 +118,18 @@ export default function InputStep({ input, onChange, destination }: InputStepPro
   }
 
   function handleCsvMappingChange(mapping: WizardCsvMapping) {
-    onChange({ ...input, csvMapping: mapping });
-    setCsvJsonl(null);
+    onChange({ ...input, rawContent: null, csvMapping: mapping });
   }
 
   function handleJsonlReady(jsonl: string, _rowsParsed: number, _rowsSkipped: number) {
-    setCsvJsonl(jsonl);
     // Replace rawContent with the converted JSONL so validation step gets it
     onChange({ ...input, rawContent: jsonl, csvMapping: input.csvMapping });
   }
 
-  const isLargeFile = input.rawContent != null && input.rawContent.includes("[...sample only...]");
-  const hasFile = input.fileName != null && input.rawContent != null;
-  const csvMappingReady = isCsv && csvJsonl != null;
+  const sourceContent = getSourceContent(input);
+  const isLargeFile = sourceContent != null && sourceContent.includes("[...sample only...]");
+  const hasFile = input.fileName != null && sourceContent != null;
+  const csvMappingReady = isCsv && input.rawContent != null;
 
   // For CSV: needs mapping complete + jsonl generated to be "ready"
   // rawContent will be updated by handleJsonlReady once mapping applied
@@ -122,22 +139,16 @@ export default function InputStep({ input, onChange, destination }: InputStepPro
   return (
     <div className="flex flex-col gap-6">
       {/* Kind toggle */}
-      <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden self-start">
-        <button
-          type="button"
-          onClick={() => handleKindChange("jsonl")}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${isJsonl ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}
-        >
-          {t("wizardInputKindJsonl")}
-        </button>
-        <button
-          type="button"
-          onClick={() => handleKindChange("csv")}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${isCsv ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}
-        >
-          {t("wizardInputKindCsv")}
-        </button>
-      </div>
+      <SegmentedControl
+        aria-label={t("wizardStep2Input")}
+        className="self-start"
+        value={isJsonl ? "jsonl" : "csv"}
+        onChange={(next) => handleKindChange(next as "jsonl" | "csv")}
+        options={[
+          { value: "jsonl", label: t("wizardInputKindJsonl") },
+          { value: "csv", label: t("wizardInputKindCsv") },
+        ]}
+      />
 
       {/* Drop zone — disabled while reading to prevent race (B-2) */}
       <div
@@ -154,23 +165,22 @@ export default function InputStep({ input, onChange, destination }: InputStepPro
         aria-disabled={isReading}
         className={`rounded-xl border-2 border-dashed p-8 flex flex-col items-center gap-3 transition-colors
           ${isReading ? "cursor-wait opacity-60 pointer-events-none" : "cursor-pointer"}
-          ${isDragging ? "border-[var(--color-accent)] bg-[var(--color-accent)]/5" : "border-[var(--color-border)] hover:border-[var(--color-accent)]/50"}`}
+          ${isDragging ? "border-accent bg-accent/10" : "border-border hover:border-accent/50"}`}
       >
-        <span className="material-symbols-outlined text-3xl text-[var(--color-text-muted)]">
-          upload_file
-        </span>
+        <Icon name="upload_file" size={30} className="text-text-muted" />
         {isReading ? (
-          <span className="text-sm text-[var(--color-text-muted)]">{t("wizardInputReading")}</span>
+          <span className="text-sm text-text-muted">{t("wizardInputReading")}</span>
         ) : hasFile ? (
           <div className="flex flex-col items-center gap-1">
-            <span className="text-sm text-[var(--color-text)] font-medium">{input.fileName}</span>
-            <span className="text-xs text-[var(--color-text-muted)]">
+            <span className="text-sm text-text-main font-medium">{input.fileName}</span>
+            <span className="text-xs text-text-muted">
               {isLargeFile ? t("wizardInputLargeFileLabel") : t("wizardInputReady")}
             </span>
           </div>
         ) : (
-          <span className="text-sm text-[var(--color-text-muted)]">{t("wizardDropOrPick")}</span>
+          <span className="text-sm text-text-muted">{t("wizardDropOrPick")}</span>
         )}
+        {/* kit-exception: Native file picker, hidden behind the drop zone (the adapters have no file input). */}
         <input
           ref={fileInputRef}
           type="file"
@@ -182,23 +192,23 @@ export default function InputStep({ input, onChange, destination }: InputStepPro
 
       {/* Large file warning */}
       {isLargeFile && (
-        <div className="rounded-lg border border-yellow-500/25 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-400">
+        <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-xs text-warning">
           {t("wizardInputLargeFileWarning")}
         </div>
       )}
 
       {/* CSV mapping (inline step 2.5) */}
-      {isCsv && hasFile && input.rawContent && (
-        <div className="rounded-xl border border-[var(--color-border)] p-4">
+      {isCsv && !isReading && hasFile && input.csvContent && (
+        <div className="rounded-xl border border-border p-4">
           <CsvMappingStep
-            csvContent={input.rawContent}
+            csvContent={input.csvContent}
             mapping={input.csvMapping ?? {}}
             onChange={handleCsvMappingChange}
             destination={destination}
             onJsonlReady={handleJsonlReady}
           />
           {csvMappingReady && (
-            <p className="mt-3 text-xs text-emerald-400">{t("wizardInputCsvJsonlReady")}</p>
+            <p className="mt-3 text-xs text-success">{t("wizardInputCsvJsonlReady")}</p>
           )}
         </div>
       )}

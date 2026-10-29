@@ -1,9 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useId } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@omniroute/ui-kit/dialog";
 import { cn } from "@/shared/utils/cn";
 import Button, { type ButtonVariant } from "./Button";
+import Icon from "./Icon";
 
 // #6265 — preset for content-heavy modals: caps height on the OUTERMOST dialog
 // wrapper only (single scroll owner) and keeps the inner body plain (no
@@ -22,9 +31,14 @@ interface ModalProps {
   size?: "sm" | "md" | "lg" | "xl" | "full";
   closeOnOverlay?: boolean;
   showCloseButton?: boolean;
+  /** Applied to the outermost dialog element (`role="dialog"`), so `TALL_MODAL_PROPS` lands there. */
   className?: string;
   bodyClassName?: string;
   compactHeader?: boolean;
+  /**
+   * Accepted for API compatibility. Only a CSS length (`"640px"`, `"calc(…)"`) is applied
+   * as an inline max-width; size names (`"lg"`, `"max-w-lg"`) stay inert as they always were.
+   */
   maxWidth?: string;
 }
 
@@ -40,6 +54,41 @@ interface ConfirmModalProps {
   loading?: boolean;
 }
 
+// The kit Toaster is portaled to body, outside the dialog: Radix would treat a click on a
+// toast (its close button, its action) as an outside interaction and dismiss the dialog.
+const TOASTER_SELECTOR = '[data-slot="toaster"]';
+const isFromToaster = (event: Event) =>
+  event.target instanceof Element && event.target.closest(TOASTER_SELECTOR) !== null;
+
+// Dialogs take ~70% of the viewport from the `sm` breakpoint up, so settings-style modals
+// (API key permissions, provider config, routing editors) stop cramming their forms into a
+// 28rem column. Below `sm` they keep the kit's `calc(100vw - 3rem)` width with its 30rem cap
+// lifted (`max-w-none`), i.e. full width minus the mobile gutter. Only `sm` keeps a fixed
+// narrow width — it is the confirm/alert dialog size.
+const WIDE = "max-w-none sm:w-[70vw] sm:max-w-[70vw]";
+const SIZES = {
+  sm: "max-w-sm",
+  md: WIDE,
+  lg: WIDE,
+  xl: WIDE,
+  full: WIDE,
+} as const;
+
+// The element focused right now, unless it is <body> (nothing to return to).
+function currentFocus(): HTMLElement | null {
+  if (typeof document === "undefined") return null;
+  const active = document.activeElement;
+  return active instanceof HTMLElement && active !== document.body ? active : null;
+}
+
+// Initial focus, the focus trap, Escape, body scroll lock and the aria-labelledby
+// wiring are Radix's (via the kit Dialog). Focus restoration is ours:
+// Radix's modal content restores focus to its own DialogTrigger, which a controlled
+// `isOpen` never uses, so we remember the opener and put focus back on it when the dialog
+// closes (nothing happens if it left the DOM). The opener is captured while rendering the
+// open transition, before the commit: a field with `autoFocus` takes focus during the commit,
+// and Radix's FocusScope then skips onOpenAutoFocus (focus is already inside), so capturing
+// there alone lost the opener and dropped focus on <body> (F1 checkpoint, "Create API Key").
 export default function Modal({
   isOpen,
   onClose,
@@ -52,198 +101,94 @@ export default function Modal({
   className,
   bodyClassName,
   compactHeader = false,
+  maxWidth,
 }: ModalProps) {
   const t = useTranslations("common");
-  const titleId = useId();
-  const dialogRef = useRef(null);
-  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
-
-  const sizes = {
-    sm: "max-w-sm",
-    md: "max-w-md",
-    lg: "max-w-lg",
-    xl: "max-w-xl",
-    full: "max-w-4xl",
-  };
-
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
-
-  // Handle escape key
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === "Escape" && isOpen) {
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen, onClose]);
-
-  // Return keyboard users to the control that opened the dialog.
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const activeElement = document.activeElement;
-    previouslyFocusedRef.current = activeElement instanceof HTMLElement ? activeElement : null;
-
-    return () => {
-      const previouslyFocused = previouslyFocusedRef.current;
-      previouslyFocusedRef.current = null;
-      if (previouslyFocused?.isConnected) {
-        previouslyFocused.focus();
-      }
-    };
-  }, [isOpen]);
-
-  // Focus trap
-  useEffect(() => {
-    if (!isOpen || !dialogRef.current) return;
-
-    const dialog = dialogRef.current;
-    const focusableSelector =
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-
-    // Focus first focusable element
-    const firstFocusable = dialog.querySelector(focusableSelector);
-    const focusTimer = firstFocusable
-      ? window.setTimeout(() => firstFocusable.focus(), 50)
-      : undefined;
-
-    const handleTab = (e) => {
-      if (e.key !== "Tab") return;
-
-      const focusable = [...dialog.querySelectorAll(focusableSelector)];
-      if (focusable.length === 0) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-
-    dialog.addEventListener("keydown", handleTab);
-    return () => {
-      if (focusTimer !== undefined) window.clearTimeout(focusTimer);
-      dialog.removeEventListener("keydown", handleTab);
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
+  const openerRef = useRef<HTMLElement | null>(null);
+  // "Adjust state while rendering" (react.dev): runs before the commit that mounts the content.
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  const [renderOpener, setRenderOpener] = useState<HTMLElement | null>(() =>
+    isOpen ? currentFocus() : null
+  );
+  // Kept (not cleared) on close: the closing render still feeds onCloseAutoFocus.
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
+    if (isOpen) setRenderOpener(currentFocus());
+  }
+  const inlineMaxWidth = maxWidth && /\d/.test(maxWidth) ? maxWidth : undefined;
+  // Resolved only when a string title is missing, so a locale catalog that has not
+  // received `common.dialogTitleFallback` yet is never asked for it needlessly.
+  const fallbackTitle = () => t("dialogTitleFallback");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
-        onClick={closeOnOverlay ? onClose : undefined}
-        aria-hidden="true"
-      />
-
-      {/* Modal content */}
-      <div
-        ref={dialogRef}
-        role="dialog"
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent
+        showCloseButton={false}
         aria-modal="true"
-        aria-labelledby={title ? titleId : undefined}
-        className={cn(
-          "relative w-full bg-surface",
-          "border border-black/10 dark:border-white/10",
-          "rounded-card shadow-2xl",
-          "animate-in fade-in zoom-in-95 duration-200",
-          sizes[size],
-          className
-        )}
+        // No generated description: repeating the title as one made screen readers announce
+        // it twice. An explicit undefined is Radix's documented opt-out of the warning.
+        aria-describedby={undefined}
+        // Box model (KEA-7886): the root keeps the kit's `calc(100vw - 3rem)` width (mobile
+        // gutter, so no `w-full`) and does not pad (`p-0`) — header, body and footer pad
+        // themselves as the legacy Modal did. Its cap sits above the default body cap, so the
+        // body is the only scroll owner; `TALL_MODAL_PROPS` swaps in `max-h-[90vh]` (twMerge)
+        // and a plain body, making the root the single scroll owner (#6265).
+        className={cn("p-0 max-h-[calc(100vh-3rem)]", SIZES[size], className)}
+        style={inlineMaxWidth ? { maxWidth: inlineMaxWidth } : undefined}
+        onOpenAutoFocus={() => {
+          const active = document.activeElement;
+          openerRef.current = renderOpener ?? (active instanceof HTMLElement ? active : null);
+        }}
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          const opener = openerRef.current ?? renderOpener;
+          openerRef.current = null;
+          if (opener?.isConnected) opener.focus();
+        }}
+        onPointerDownOutside={(e) => {
+          if (!closeOnOverlay || isFromToaster(e)) e.preventDefault();
+        }}
+        onInteractOutside={(e) => {
+          if (!closeOnOverlay || isFromToaster(e)) e.preventDefault();
+        }}
       >
-        {/* Header */}
-        {(title || showCloseButton) && (
-          <div
-            className={cn(
-              "flex items-center justify-between border-b border-black/5 dark:border-white/5",
-              compactHeader ? "px-4 py-2.5" : "p-6"
-            )}
+        <DialogHeader
+          className={cn(
+            "flex items-center justify-between gap-3",
+            compactHeader ? "px-4 py-2.5" : "px-6 pt-6",
+            // No visible title and no close button: keep the (sr-only) title for the
+            // accessible name without reserving header space.
+            !title && !showCloseButton && "ci-sr-only"
+          )}
+        >
+          <DialogTitle
+            className={cn("truncate min-w-0", !title && "ci-sr-only", compactHeader && "text-sm")}
           >
-            <div className="flex items-center min-w-0">
-              <div
-                className={cn(
-                  "flex items-center gap-1.5 mr-3 shrink-0",
-                  compactHeader ? "" : "gap-2 mr-4"
-                )}
-                aria-hidden="true"
-              >
-                <div
-                  className={cn(
-                    "rounded-full bg-[#FF5F56]",
-                    compactHeader ? "w-2.5 h-2.5" : "w-3 h-3"
-                  )}
-                />
-                <div
-                  className={cn(
-                    "rounded-full bg-[#FFBD2E]",
-                    compactHeader ? "w-2.5 h-2.5" : "w-3 h-3"
-                  )}
-                />
-                <div
-                  className={cn(
-                    "rounded-full bg-[#27C93F]",
-                    compactHeader ? "w-2.5 h-2.5" : "w-3 h-3"
-                  )}
-                />
-              </div>
-              {title && (
-                <h2
-                  id={titleId}
-                  className={cn(
-                    "font-semibold text-text-main truncate min-w-0",
-                    compactHeader ? "text-sm" : "text-lg"
-                  )}
-                >
-                  {title}
-                </h2>
-              )}
-            </div>
-            {showCloseButton && (
-              <button
-                onClick={onClose}
-                aria-label={t("close")}
-                className="p-1.5 rounded-lg text-text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors shrink-0"
-              >
-                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                  close
-                </span>
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Body */}
-        <div className={bodyClassName ?? "p-6 max-h-[calc(80vh-140px)] overflow-y-auto"}>
+            {title || fallbackTitle()}
+          </DialogTitle>
+          {showCloseButton && (
+            <DialogClose asChild>
+              {/* size="icon-sm" once track C's kit Button lands (F1 reconciles). */}
+              <Button variant="ghost" size="sm" aria-label={t("close")} className="!p-1 shrink-0">
+                <Icon name="close" size={18} />
+              </Button>
+            </DialogClose>
+          )}
+        </DialogHeader>
+        <div
+          data-slot="modal-body"
+          className={bodyClassName ?? "p-6 max-h-[calc(80vh-140px)] overflow-y-auto"}
+        >
           {children}
         </div>
-
-        {/* Footer */}
-        {footer && (
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-black/5 dark:border-white/5">
-            {footer}
-          </div>
-        )}
-      </div>
-    </div>
+        {footer && <DialogFooter className="mt-0 px-6 pb-6">{footer}</DialogFooter>}
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -260,23 +205,20 @@ export function ConfirmModal({
   loading = false,
 }: ConfirmModalProps) {
   const t = useTranslations("common");
-  const resolvedTitle = title ?? t("confirmTitle");
-  const resolvedConfirmText = confirmText ?? t("confirmAction");
-  const resolvedCancelText = cancelText ?? t("cancel");
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={resolvedTitle}
+      title={title ?? t("confirmTitle")}
       size="sm"
       footer={
         <>
           <Button variant="ghost" onClick={onClose} disabled={loading}>
-            {resolvedCancelText}
+            {cancelText ?? t("cancel")}
           </Button>
           <Button variant={variant} onClick={() => void onConfirm()} loading={loading}>
-            {resolvedConfirmText}
+            {confirmText ?? t("confirmAction")}
           </Button>
         </>
       }

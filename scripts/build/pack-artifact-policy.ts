@@ -220,6 +220,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   "dist/src/lib/usage/callLogArtifactWorker.js",
   "dist/src/lib/logExport/exportChild.js",
   "dist/src/lib/logExport/package.json",
+  // Unbundled destination helper also ships through package.json's src/lib/ prefix.
+  "src/lib/logExport/destinations/otlpRequestHeaders.ts",
   "dist/src/lib/db/healthCheckWorker.js",
   "dist/open-sse/vendor/codex-chatgpt-web/adapters/chatgpt-web/mcp-server.js",
   "dist/open-sse/services/compression/rules/en/filler.json",

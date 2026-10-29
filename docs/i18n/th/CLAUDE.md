@@ -11,17 +11,18 @@
 และบทเรียนเกี่ยวกับ PII) โปรดอ่านทั้งหมด และอย่าเพิ่มกฎของโปรเจกต์ซ้ำที่นี่ ทุกสิ่งด้านล่างนี้ใช้
 กับ Claude Code เท่านั้น — เป็นรายละเอียดเชิงปฏิบัติการเพิ่มเติมของกฎที่กำหนดไว้แล้วใน `AGENTS.md`
 
-## การแยก worktree — รายละเอียดเฉพาะสำหรับ Claude Code
+## การแยก Worktree — รายละเอียดเฉพาะของ Claude Code
 
-โพรโทคอล worktree ฉบับเต็มที่ต้องปฏิบัติตาม (การยืนยัน base branch, พาธมาตรฐาน
-`.claude/worktrees/`, `cp -al` node_modules, กฎการรื้อถอน) อยู่ใน `AGENTS.md` → Git Workflow → "Worktree
-isolation" ประเด็นเฉพาะสำหรับ Claude Code ได้แก่:
+โปรโตคอล worktree แบบบังคับฉบับสมบูรณ์ (การยืนยัน base branch, เส้นทางมาตรฐาน `.claude/worktrees/`,
+`cp -al` node_modules, กฎการ teardown) อยู่ที่
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (สรุปไว้ใน `AGENTS.md` →
+Git Workflow → "Worktree isolation") ประเด็นเฉพาะสำหรับ Claude Code:
 
-- ยืนยัน base branch กับผู้ดำเนินการผ่าน `AskUserQuestion` (กฎบังคับ #19) เว้นแต่พวกเขา
-  จะแจ้งไว้แล้ว
-- เลือกใช้เครื่องมือเนทีฟ `EnterWorktree` — เครื่องมือนี้สร้าง worktree ภายใต้
-  `.claude/worktrees/` (พาธมาตรฐาน) อยู่แล้ว ให้สร้าง worktree ด้วยคำสั่ง `git
-worktree add` ที่ระบุไว้ในเอกสาร จากนั้นเรียก `EnterWorktree` พร้อม `path` ของ worktree นั้น
+- ยืนยัน base branch กับผู้ใช้งานผ่าน `AskUserQuestion` (Hard Rule #19) เว้นแต่พวกเขาจะ
+  บอกคุณไว้แล้ว
+- แนะนำให้ใช้เครื่องมือ `EnterWorktree` ที่มีอยู่แล้วในระบบ — เครื่องมือนี้สร้าง worktree ไว้ใต้
+  `.claude/worktrees/` (เส้นทางมาตรฐาน) อยู่แล้ว ให้สร้าง worktree ด้วยคำสั่ง `git
+worktree add` ตามที่ระบุไว้ในเอกสาร จากนั้นเรียก `EnterWorktree` พร้อมกับ `path` ของมัน
 
 ## ความปลอดภัยข้ามเซสชัน — รายละเอียดเฉพาะสำหรับ Claude Code
 

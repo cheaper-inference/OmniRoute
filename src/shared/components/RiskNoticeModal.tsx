@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
 import { useTranslations } from "next-intl";
+import Icon from "./Icon";
+import Modal from "./Modal";
 import Button from "@/shared/components/Button";
 
 export interface RiskNoticeModalProps {
@@ -16,6 +17,9 @@ export interface RiskNoticeModalProps {
 /**
  * Generic risk notice modal (D16).
  * Persists "don't show again" preference to localStorage using `dontShowAgainKey`.
+ * Escape and the focus trap come from the Modal adapter (kit Dialog); Escape cancels, as the
+ * legacy Escape handler did. An overlay click does nothing (closeOnOverlay={false}): the legacy
+ * backdrop had no click handler, and a stray click outside must not count as a decision.
  */
 export function RiskNoticeModal({
   open,
@@ -26,15 +30,6 @@ export function RiskNoticeModal({
   onCancel,
 }: RiskNoticeModalProps) {
   const t = useTranslations("common");
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCancel();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [open, onCancel]);
 
   if (!open) return null;
 
@@ -48,34 +43,35 @@ export function RiskNoticeModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="risk-modal-title"
-    >
-      <div className="w-full max-w-md rounded-xl border border-amber-500/30 bg-card p-6 shadow-xl">
-        <div className="flex items-start gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500 shrink-0">
-            <span className="material-symbols-outlined text-[20px]">warning</span>
-          </div>
-          <h2 id="risk-modal-title" className="text-base font-semibold text-text-main pt-1">
+    <Modal
+      isOpen
+      onClose={onCancel}
+      size="md"
+      showCloseButton={false}
+      closeOnOverlay={false}
+      title={
+        <span className="flex items-center gap-3">
+          <span className="shrink-0 rounded-lg bg-warning/10 p-2 text-warning">
+            <Icon name="warning" size={20} />
+          </span>
+          <span className="min-w-0 whitespace-normal text-base font-semibold text-text-main">
             {title}
-          </h2>
-        </div>
-
-        <p className="text-sm text-text-muted mb-6 leading-relaxed">{body}</p>
-
-        <div className="flex gap-3 justify-end">
+          </span>
+        </span>
+      }
+      footer={
+        <>
           <Button variant="ghost" onClick={onCancel}>
             {t("cancel") || "Cancel"}
           </Button>
           <Button variant="primary" onClick={handleAccept}>
-            <span className="material-symbols-outlined text-[14px] mr-1">check</span>
+            <Icon name="check" size={14} className="mr-1" />
             {t("understand") || "I understand"}
           </Button>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <p className="text-sm leading-relaxed text-text-muted">{body}</p>
+    </Modal>
   );
 }

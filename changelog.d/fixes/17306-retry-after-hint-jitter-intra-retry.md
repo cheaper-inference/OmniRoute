@@ -1,0 +1,1 @@
+- **fix(sse):** the intra-URL retry now honors an upstream `Retry-After` hint inside the 4s retry window and adds equal jitter to the 429 and WAF-400 backoffs, so concurrent clients no longer retry in lockstep after a fixed 2s wait ([#17306](https://github.com/diegosouzapw/OmniRoute/pull/17306)) — thanks @mayankjaiswal1707-spec

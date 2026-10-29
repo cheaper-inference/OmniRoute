@@ -57,7 +57,6 @@ import { resolveUseUpstream429BreakerHints } from "../../shared/utils/providerHi
 import { resolveProviderId } from "../../shared/constants/providers";
 import { classifyProviderProbeResult } from "./providerProbeClassification";
 import { markProviderProbeResponse } from "../../shared/utils/providerProbeResult";
-import { inheritResponsePolicies } from "./chat/responsePolicies.ts";
 import {
   isAutoRequestResolvedCapabilitiesEnabled,
   isFeatureFlagEnabled,
@@ -68,6 +67,7 @@ import { logProxyJournal } from "./proxyJournal";
 import type { AttemptJournalEntry } from "./proxyJournal";
 import { logTranslationEvent } from "../../lib/translatorEvents";
 import { getRuntimeProviderProfile } from "@omniroute/open-sse/services/accountFallback.ts";
+import { recordConnectionOutcome } from "@omniroute/open-sse/services/connectionLatencyTracker.ts";
 import { describeConnectionRestriction } from "../services/credentialSelectionDiagnostics.ts";
 
 // #14960: circuit-open 503 that also names the breaker's classified failure kind.
@@ -466,6 +466,7 @@ export async function executeChatWithBreaker({
   reasoningTransportFallback = "drop",
   sessionAffinityKey = null,
   managedLease = null,
+  beforeUpstreamAttempt = undefined,
   // #12150 P1b: additive, optional video-bridge log/Memory shadow — undefined for every
   // non-video request. Passed straight through to handleChatCore; see its own destructure default.
   videoBridgeLog = undefined,
@@ -545,6 +546,7 @@ export async function executeChatWithBreaker({
             sessionAffinityKey,
             reasoningTransportFallback,
             managedLease,
+            beforeUpstreamAttempt,
             videoBridgeLog,
             previousResponseResumed,
             fallbackAttempts,
@@ -667,7 +669,8 @@ export async function executeChatWithBreaker({
     let wasProviderProbe = false;
     const probeOptions = {
       classifyResult: chatPathOwnsBreakerAccounting,
-      classifyProbeResult: classifyProviderProbeResult,
+      classifyProbeResult: (value: Parameters<typeof classifyProviderProbeResult>[0]) =>
+        classifyProviderProbeResult(value, provider),
       onProbeAcquired: () => (wasProviderProbe = true),
     };
     const tracked = await breaker.execute(
@@ -1149,6 +1152,8 @@ export async function safeLogEvents({
   } catch {
     // proxy selection feedback is best-effort; never break the request path
   }
+  // Rolling per-connection TTFB/outcome for the opt-in p2c latency term (never throws).
+  recordConnectionOutcome(credentials?.connectionId, model, proxyLatency, result?.success === true);
 
   try {
     await logProxyJournal({
@@ -1258,22 +1263,4 @@ export function withConversationId(response: Response, conversationId: string | 
   }
 }
 
-export function withSelectedConnectionHeader(
-  response: Response,
-  connectionId: string | null | undefined
-): Response {
-  if (!response || !connectionId) return response;
-  try {
-    response.headers.set("X-OmniRoute-Selected-Connection-Id", connectionId);
-    return response;
-  } catch {
-    const cloned = new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    });
-    cloned.headers.set("X-OmniRoute-Selected-Connection-Id", connectionId);
-    const trusted = inheritTrustedLocalRateLimitResponse(response, cloned);
-    return inheritResponsePolicies(response, trusted);
-  }
-}
+export { withSelectedConnectionHeader } from "./chat/selectedConnectionHeader.ts";

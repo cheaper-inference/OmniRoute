@@ -40,6 +40,7 @@ function execute(job: string, validatorExit: number, report: string, event = "sc
       ...process.env,
       EVENT_NAME: event,
       GITHUB_OUTPUT: outputs,
+      GITHUB_WORKFLOW_SHA: "3".repeat(40),
       FIXTURE_EXIT: String(validatorExit),
       FIXTURE_REPORT: report,
       VALIDATED_SHA: sha,

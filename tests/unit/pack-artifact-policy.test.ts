@@ -37,6 +37,14 @@ test("normalizeArtifactPath normalizes slashes and leading relative markers", ()
   );
 });
 
+test("OTLP request-header helper is required in the published source manifest", () => {
+  const helper = "src/lib/logExport/destinations/otlpRequestHeaders.ts";
+  assert.ok(PACK_ARTIFACT_REQUIRED_PATHS.includes(helper));
+  assert.ok(existsSync(new URL(`../../${helper}`, import.meta.url)));
+  const pkg = JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8"));
+  assert.ok(pkg.files.includes("src/lib/"));
+});
+
 test("parseJsonArrayOutput extracts the first valid array from mixed command output", () => {
   const output = [
     "notice [not-json]",
@@ -357,6 +365,7 @@ test("findMissingArtifactPaths flags missing root runtime files in the tarball",
     "scripts/build/wreqJsNative.mjs",
     "scripts/packs/optionalPackInstaller.mjs",
     "scripts/packs/optionalPackManifest.mjs",
+    "src/lib/logExport/destinations/otlpRequestHeaders.ts",
     "src/shared/utils/nodeRuntimeSupport.ts",
   ]);
 });

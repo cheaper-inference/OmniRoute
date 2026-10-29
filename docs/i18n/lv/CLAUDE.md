@@ -11,17 +11,18 @@ asistentam (arhitektūrai, konvencijām, testēšanai, kvalitātes vārtejām, g
 noteikumiem un PII atziņām). Izlasiet to pilnībā; nepievienojiet projekta noteikumus šeit atkārtoti. Viss tālāk
 minētais attiecas TIKAI uz Claude Code — tās ir jau `AGENTS.md` definēto noteikumu operatīvās precizēšanas.
 
-## Darba koka izolācija — Claude Code specifika
+## Worktree izolācija — Claude Code specifika
 
-Pilns obligātais darba koka protokols (bāzes zara apstiprināšana, `.claude/worktrees/` kanoniskais
-ceļš, `cp -al` node_modules, nojaukšanas noteikumi) ir aprakstīts `AGENTS.md` → Git darbplūsma → "Darba
-koka izolācija". Claude Code specifiskie punkti:
+Pilnais obligātais worktree protokols (bāzes zara apstiprināšana, `.claude/worktrees/` kanoniskais
+ceļš, `cp -al` node_modules, noņemšanas noteikumi) atrodas
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (apkopots `AGENTS.md` →
+Git darbplūsma → "Worktree izolācija"). Claude Code specifiskie punkti:
 
-- Apstipriniet bāzes zaru ar operatoru, izmantojot `AskUserQuestion` (stingrais noteikums Nr. 19), ja vien viņš
-  to jau nav norādījis.
-- Dodiet priekšroku vietējam `EnterWorktree` rīkam — tas jau izveido darba kokus zem
-  `.claude/worktrees/` (kanoniskais ceļš). Izveidojiet darba koku ar dokumentēto `git
-worktree add` komandu, pēc tam izsauciet `EnterWorktree`, norādot tā `path`.
+- Apstipriniet bāzes zaru ar operatoru, izmantojot `AskUserQuestion` (Stingrais noteikums Nr. 19),
+  ja vien operators to jau nav norādījis.
+- Dodiet priekšroku iebūvētajam `EnterWorktree` rīkam — tas jau izveido worktree mapē
+  `.claude/worktrees/` (kanoniskais ceļš). Izveidojiet worktree ar dokumentēto `git
+worktree add` komandu, pēc tam izsauciet `EnterWorktree` ar tā `path`.
 
 ## Drošība starp sesijām — Claude Code specifika
 

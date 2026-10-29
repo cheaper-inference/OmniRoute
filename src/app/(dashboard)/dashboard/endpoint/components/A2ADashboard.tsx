@@ -1,7 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Card, Button } from "@/shared/components";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Select from "@/shared/components/Select";
 import { useTranslations } from "next-intl";
 
 type A2ATaskState = "submitted" | "working" | "completed" | "failed" | "cancelled";
@@ -75,11 +85,11 @@ const TASK_STATES: Array<"all" | A2ATaskState> = [
 ];
 
 function stateClass(state: A2ATaskState) {
-  if (state === "completed") return "bg-green-500/15 text-green-500";
-  if (state === "failed") return "bg-red-500/15 text-red-500";
-  if (state === "working") return "bg-amber-500/15 text-amber-500";
-  if (state === "cancelled") return "bg-gray-500/15 text-gray-400";
-  return "bg-blue-500/15 text-blue-500";
+  if (state === "completed") return "bg-success/15 text-success";
+  if (state === "failed") return "bg-error/15 text-error";
+  if (state === "working") return "bg-warning/15 text-warning";
+  if (state === "cancelled") return "bg-surface-2 text-text-muted";
+  return "bg-info/15 text-info";
 }
 
 export default function A2ADashboardPage() {
@@ -395,8 +405,8 @@ export default function A2ADashboardPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <select
-              className="rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+            <Select
+              aria-label={t("tableState")}
               value={stateFilter}
               onChange={(event) => {
                 setOffset(0);
@@ -408,9 +418,9 @@ export default function A2ADashboardPage() {
                   {state === "all" ? t("allStates") : t(`state.${state}`)}
                 </option>
               ))}
-            </select>
-            <select
-              className="rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+            </Select>
+            <Select
+              aria-label={t("tableSkill")}
               value={skillFilter}
               onChange={(event) => {
                 setOffset(0);
@@ -423,7 +433,7 @@ export default function A2ADashboardPage() {
                   {skill}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
@@ -433,46 +443,46 @@ export default function A2ADashboardPage() {
           <p className="text-sm text-text-muted">{t("noTasksForFilters")}</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 pr-2">{t("tableTask")}</th>
-                  <th className="text-left py-2 pr-2">{t("tableSkill")}</th>
-                  <th className="text-left py-2 pr-2">{t("tableState")}</th>
-                  <th className="text-left py-2 pr-2">{t("tablePhase")}</th>
-                  <th className="text-left py-2 pr-2">{t("tableUpdated")}</th>
-                  <th className="text-left py-2">{t("tableActions")}</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table scrollbarLabel={t("taskManagement")}>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("tableTask")}</TableHead>
+                  <TableHead>{t("tableSkill")}</TableHead>
+                  <TableHead>{t("tableState")}</TableHead>
+                  <TableHead>{t("tablePhase")}</TableHead>
+                  <TableHead>{t("tableUpdated")}</TableHead>
+                  <TableHead>{t("tableActions")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {tasksData.tasks.map((task) => {
                   const fsmPhase =
                     task.metadata?.fsmPhase || (task.metadata?.workflowFSM as any)?.currentPhase;
-                  let fsmBadgeColor = "bg-gray-500/15 text-gray-500";
+                  let fsmBadgeColor = "bg-surface-2 text-text-muted";
                   if (fsmPhase === "plan" || fsmPhase === "plan_review")
-                    fsmBadgeColor = "bg-purple-500/15 text-purple-500";
-                  else if (fsmPhase === "execute") fsmBadgeColor = "bg-blue-500/15 text-blue-500";
+                    fsmBadgeColor = "bg-chart-3/15 text-chart-3";
+                  else if (fsmPhase === "execute") fsmBadgeColor = "bg-info/15 text-info";
                   else if (
                     ["code_review", "quality_review", "security", "test", "output_review"].includes(
                       fsmPhase
                     )
                   )
-                    fsmBadgeColor = "bg-amber-500/15 text-amber-500";
-                  else if (fsmPhase === "done") fsmBadgeColor = "bg-green-500/15 text-green-500";
-                  else if (fsmPhase === "failed") fsmBadgeColor = "bg-red-500/15 text-red-500";
+                    fsmBadgeColor = "bg-warning/15 text-warning";
+                  else if (fsmPhase === "done") fsmBadgeColor = "bg-success/15 text-success";
+                  else if (fsmPhase === "failed") fsmBadgeColor = "bg-error/15 text-error";
 
                   return (
-                    <tr key={task.id} className="border-b border-border/40">
-                      <td className="py-2 pr-2 font-mono text-xs">{task.id}</td>
-                      <td className="py-2 pr-2">{task.skill}</td>
-                      <td className="py-2 pr-2">
+                    <TableRow key={task.id}>
+                      <TableCell className="font-mono">{task.id}</TableCell>
+                      <TableCell>{task.skill}</TableCell>
+                      <TableCell>
                         <span
                           className={`text-xs px-2 py-1 rounded-full ${stateClass(task.state)}`}
                         >
                           {t(`state.${task.state}`)}
                         </span>
-                      </td>
-                      <td className="py-2 pr-2">
+                      </TableCell>
+                      <TableCell>
                         {fsmPhase ? (
                           <span
                             className={`text-xs px-2 py-1 rounded border border-current/20 font-medium ${fsmBadgeColor}`}
@@ -482,37 +492,37 @@ export default function A2ADashboardPage() {
                         ) : (
                           <span className="text-xs text-text-muted">—</span>
                         )}
-                      </td>
-                      <td className="py-2 pr-2 text-xs">
-                        {new Date(task.updatedAt).toLocaleString()}
-                      </td>
-                      <td className="py-2 flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => handleLoadTask(task.id)}
-                        >
-                          {t("view")}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => handleCancelTask(task.id)}
-                          disabled={
-                            task.state === "completed" ||
-                            task.state === "failed" ||
-                            task.state === "cancelled" ||
-                            actionBusy === "cancel"
-                          }
-                        >
-                          {t("cancel")}
-                        </Button>
-                      </td>
-                    </tr>
+                      </TableCell>
+                      <TableCell>{new Date(task.updatedAt).toLocaleString()}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleLoadTask(task.id)}
+                          >
+                            {t("view")}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleCancelTask(task.id)}
+                            disabled={
+                              task.state === "completed" ||
+                              task.state === "failed" ||
+                              task.state === "cancelled" ||
+                              actionBusy === "cancel"
+                            }
+                          >
+                            {t("cancel")}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
 

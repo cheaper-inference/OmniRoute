@@ -7,9 +7,12 @@
  * request rebuilt the whole candidate pool once per variant. On a real install that
  * made the endpoint take tens of seconds and hold the event loop the whole time.
  *
- * Pool preparation yields to the event loop (setImmediate) every few candidates and
+ * Pool preparation yields to the event loop (setImmediate) as it walks candidates and
  * nothing else on this path does, so counting setImmediate calls measures how much
- * preparation a request did. mock.module() is not usable under this tsx/ESM runner.
+ * preparation a request did. Preparation now yields on a wall-clock budget
+ * (cooperativeYield.ts), which is non-deterministic on its own, so the test pins the
+ * slice to 0 ms: every budget check yields, making the count proportional to the work
+ * done. mock.module() is not usable under this tsx/ESM runner.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -25,6 +28,7 @@ const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const virtualFactory = await import("../../open-sse/services/autoCombo/virtualFactory.ts");
+const cooperativeYield = await import("../../open-sse/services/autoCombo/cooperativeYield.ts");
 const combosAutoRoute = await import("../../src/app/api/combos/auto/route.ts");
 
 test.after(() => {
@@ -116,16 +120,27 @@ test("GET /api/combos/auto prepares the candidate pool once, not once per varian
     });
   }
 
-  const onePreparation = await countYields(() =>
-    virtualFactory.prepareVirtualAutoComboInputs({ includeResolvedCapabilities: true })
-  );
-  assert.ok(onePreparation > 0, "the seeded pool should be large enough to yield while preparing");
-
+  // Deterministic yield accounting: yield on every budget check (see the header comment).
+  cooperativeYield.__setCooperativeYieldSliceMsForTest(0);
+  let onePreparation = 0;
+  let routeYields = 0;
   let combos: Array<{ id: string }> = [];
-  const routeYields = await countYields(async () => {
-    const res = await combosAutoRoute.GET(new Request("http://localhost/api/combos/auto"));
-    combos = (await res.json()).combos;
-  });
+  try {
+    onePreparation = await countYields(() =>
+      virtualFactory.prepareVirtualAutoComboInputs({ includeResolvedCapabilities: true })
+    );
+    assert.ok(
+      onePreparation > 0,
+      "the seeded pool should be large enough to yield while preparing"
+    );
+
+    routeYields = await countYields(async () => {
+      const res = await combosAutoRoute.GET(new Request("http://localhost/api/combos/auto"));
+      combos = (await res.json()).combos;
+    });
+  } finally {
+    cooperativeYield.__setCooperativeYieldSliceMsForTest(null);
+  }
 
   assert.ok(combos.length > 1, "the route should list several auto variants");
   assert.equal(
