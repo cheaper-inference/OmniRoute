@@ -70,6 +70,7 @@ export async function handleRosebudImageGeneration(options: {
     );
     recordRosebudJob(id, job);
     const deadline = Date.now() + 600000;
+    let pollDelay = 1000;
     while (!["succeeded", "failed", "cancelled"].includes(job.status)) {
       if (
         options.signal?.aborted ||
@@ -88,7 +89,8 @@ export async function handleRosebudImageGeneration(options: {
           error: `Rosebud job ${job.id} continues; retrieve it with rosebud_asset_status`,
         };
       }
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, pollDelay));
+      pollDelay = Math.min(10000, Math.ceil(pollDelay * 1.5));
       job = await rosebudRuntime.refresh(profile, job.id);
       recordRosebudJob(id, job);
     }

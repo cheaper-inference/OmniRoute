@@ -20,3 +20,11 @@ export async function requireRosebudAccess(request: Request, connectionId?: stri
     return errorResponse(403, "Rosebud connection is outside this API key's scope");
   return null;
 }
+
+export async function rosebudCallerScope(request: Request): Promise<string> {
+  const key = extractApiKey(request, { allowUrl: false });
+  if (!key) return "dashboard";
+  const metadata = await getApiKeyMetadata(key);
+  if (!metadata) throw new Error("Authenticated key metadata unavailable");
+  return metadata.id;
+}

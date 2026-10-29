@@ -247,6 +247,7 @@ function readCodeFacts() {
     'import {notionTools} from "./open-sse/mcp-server/tools/notionTools.ts";',
     'import {obsidianTools} from "./open-sse/mcp-server/tools/obsidianTools.ts";',
     'import {localCorpusTools} from "./open-sse/mcp-server/tools/localCorpusTools.ts";',
+    'import {rosebudTools} from "./open-sse/mcp-server/tools/rosebudTools.ts";',
     'import {compressionTools} from "./open-sse/mcp-server/tools/compressionTools.ts";',
     // Live provider total — the SAME collections gen-provider-reference.ts unions, so the
     // doc-vs-live check below cannot drift from the generator's definition of "provider".
@@ -258,7 +259,7 @@ function readCodeFacts() {
     "const pids=new Set();",
     "for(const c of provCols)for(const p of Object.values(c||{}))if(p&&p.id)pids.add(p.id);",
     "const cols={MCP_TOOLS,memoryTools,skillTools,agentSkillTools,githubSkillTools,poolTools,",
-    "gamificationTools,pluginTools,notionTools,obsidianTools,localCorpusTools,compressionTools};",
+    "gamificationTools,pluginTools,notionTools,obsidianTools,localCorpusTools,compressionTools,rosebudTools};",
     "const sc=new Set();",
     "for(const col of Object.values(cols))for(const t of Object.values(col))",
     "for(const x of (t?.scopes||[]))sc.add(x);",

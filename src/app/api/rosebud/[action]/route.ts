@@ -1,9 +1,11 @@
+import { errorResponse, buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
+import { scopedRosebudKey } from "@omniroute/open-sse/services/rosebud/imageBinding.ts";
 import {
   rosebudPublishInput,
   rosebudPublish,
 } from "@omniroute/open-sse/services/rosebud/publishing.ts";
 import { z } from "zod";
-import { requireRosebudAccess } from "@/lib/rosebud/authorization";
+import { requireRosebudAccess, rosebudCallerScope } from "@/lib/rosebud/authorization";
 import {
   connectRosebud,
   generateRosebud,
@@ -38,8 +40,7 @@ export async function POST(request: Request, context: { params: Promise<{ action
     const { action } = await context.params;
     if (action === "connect")
       return Response.json(await connectRosebud(args.name || "OmniRoute Rosebud"));
-    if (!args.connectionId)
-      return Response.json({ error: "connectionId required" }, { status: 400 });
+    if (!args.connectionId) return errorResponse(400, "connectionId required");
     const { connection, profile } = await rosebudConnection(args.connectionId);
     if (action === "authorize") {
       const result = await runRosebud(profile, [
@@ -58,7 +59,7 @@ export async function POST(request: Request, context: { params: Promise<{ action
     if (action === "account") return Response.json(await rosebudAccount(args.connectionId));
     if (!connection.isActive) throw new RosebudError("account_not_active", 401);
     if (["publish", "update", "game_status", "pull"].includes(action)) {
-      if (!args.game) return Response.json({ error: "game request required" }, { status: 400 });
+      if (!args.game) return errorResponse(400, "game request required");
       return Response.json(
         await rosebudPublish(
           profile,
@@ -74,7 +75,13 @@ export async function POST(request: Request, context: { params: Promise<{ action
       );
     if (action === "list") return Response.json(await rosebudRuntime.list(profile));
     if (action === "generate" && args.request) {
-      const job = await generateRosebud(args.connectionId, profile, args.request);
+      const generation = { ...args.request };
+      if (generation.idempotencyKey)
+        generation.idempotencyKey = scopedRosebudKey(
+          await rosebudCallerScope(request),
+          generation.idempotencyKey
+        );
+      const job = await generateRosebud(args.connectionId, profile, generation);
       recordRosebudJob(args.connectionId, job);
       return Response.json(publicRosebudJob(job), {
         status: job.status === "succeeded" ? 200 : 202,
@@ -101,20 +108,21 @@ export async function POST(request: Request, context: { params: Promise<{ action
         sha256: result.sha256,
       });
     }
-    return Response.json({ error: "Unsupported Rosebud operation" }, { status: 400 });
+    return errorResponse(400, "Unsupported Rosebud operation");
   } catch (error) {
+    const status =
+      error instanceof z.ZodError ? 400 : error instanceof RosebudError ? error.status : 502;
     return Response.json(
       {
-        jobId: error instanceof RosebudError ? error.jobId : undefined,
-        error:
+        ...buildErrorBody(
+          status,
           error instanceof RosebudError
             ? error.code
-            : "Invalid Rosebud request or provider unavailable",
+            : "Invalid Rosebud request or provider unavailable"
+        ),
+        ...(error instanceof RosebudError && error.jobId ? { jobId: error.jobId } : {}),
       },
-      {
-        status:
-          error instanceof z.ZodError ? 400 : error instanceof RosebudError ? error.status : 502,
-      }
+      { status }
     );
   }
 }

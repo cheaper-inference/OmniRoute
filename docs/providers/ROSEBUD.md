@@ -186,3 +186,10 @@ Deleting an OmniRoute connection does not erase retained jobs, artifacts, or the
 external CLI grant. Revoke the grant with the official `rosebud logout` command,
 using that connection's private `ROSEBUD_CREDENTIALS_DIR`, before removing its
 credential directory. Retain uncertain job evidence until it is reconciled.
+
+Client idempotency keys are namespaced consistently across the image and tool APIs.
+Requests from different API keys cannot accidentally reuse each other's generation.
+Accounts are selected only from model-capable connections. A newly introduced
+artifact format without a supported signature is rejected before submission,
+not charged and discarded afterward. Retrying jobs made by pre-release versions
+without caller-scoped keys requires their original job IDs.

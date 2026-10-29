@@ -1,5 +1,9 @@
-import { findRosebudImageConnection } from "@/lib/rosebud/provider";
-import { rosebudImageBinding } from "@omniroute/open-sse/services/rosebud/imageBinding.ts";
+import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
+import { rosebudModelConnections } from "@/lib/rosebud/provider";
+import {
+  rosebudImageBinding,
+  scopedRosebudKey,
+} from "@omniroute/open-sse/services/rosebud/imageBinding.ts";
 import { RosebudError } from "@omniroute/open-sse/services/rosebud/cli.ts";
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
@@ -129,7 +133,7 @@ function publicBaseUrlHeaders(headers: Headers): Record<string, string> {
   return out;
 }
 
-async function postHandler(request, context) {
+async function postHandler(request, _context) {
   let rawBody;
   try {
     rawBody = await request.json();
@@ -297,6 +301,12 @@ async function postHandler(request, context) {
   }
 
   // Get credentials — skip for local providers (authType: "none")
+  if (
+    provider === "rosebud" &&
+    !policy.apiKeyInfo?.id &&
+    !(await isDashboardSessionAuthenticated(request))
+  )
+    return errorResponse(401, "Rosebud image generation requires authentication");
   if (provider === "rosebud" && request.headers.has("idempotency-key"))
     body.idempotency_key = request.headers.get("idempotency-key");
   let rosebudPinned: string | undefined;
@@ -311,10 +321,6 @@ async function postHandler(request, context) {
   if (provider === "rosebud") {
     try {
       rosebudPinned = await bindRosebud();
-      if (!rosebudPinned && typeof body.idempotency_key === "string") {
-        const legacy = await findRosebudImageConnection(body.idempotency_key, allowedConnections);
-        if (legacy) rosebudPinned = await bindRosebud(legacy);
-      }
     } catch (error) {
       return errorResponse(
         error instanceof RosebudError ? error.status : 503,
@@ -322,12 +328,26 @@ async function postHandler(request, context) {
       );
     }
   }
+  let rosebudEligible: string[] | null = null;
+  if (provider === "rosebud") {
+    try {
+      rosebudEligible = await rosebudModelConnections(body.model, allowedConnections);
+    } catch {
+      return errorResponse(503, "Rosebud model discovery unavailable");
+    }
+    if (!rosebudEligible.length)
+      return errorResponse(404, "No connected Rosebud account supports this model");
+    if (rosebudPinned && !rosebudEligible.includes(rosebudPinned))
+      return errorResponse(409, "Original Rosebud account is unavailable for this model");
+  }
   let credentials = null;
   if (providerConfig && providerConfig.authType !== "none") {
     credentials = await getProviderCredentialsWithQuotaPreflight(
       provider,
       null,
-      allowedConnections,
+      provider === "rosebud"
+        ? narrowConnectionScope(allowedConnections, rosebudEligible)
+        : allowedConnections,
       requestedModel,
       rosebudPinned ? { forcedConnectionId: rosebudPinned } : {}
     );
@@ -422,6 +442,11 @@ async function postHandler(request, context) {
     }
   }
 
+  if (provider === "rosebud" && typeof body.idempotency_key === "string")
+    body.idempotency_key = scopedRosebudKey(
+      policy.apiKeyInfo?.id || "dashboard",
+      body.idempotency_key
+    );
   const execution = await executeImageWithCredentialFallback({
     provider,
     requestedModel,
