@@ -131,7 +131,7 @@ test("cap at or above row count removes nothing", async () => {
 
 test("migration creates the expiry index idempotently and both range queries use it", () => {
   const migration = fs.readFileSync(
-    new URL("../../src/lib/db/migrations/217_semantic_cache_expires_at_index.sql", import.meta.url),
+    new URL("../../src/lib/db/migrations/219_semantic_cache_expires_at_index.sql", import.meta.url),
     "utf8"
   );
   db.exec("DROP INDEX IF EXISTS idx_semantic_cache_expires_at");
