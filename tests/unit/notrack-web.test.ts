@@ -631,7 +631,13 @@ test("notrack-web: upstreamExtraHeaders override same-named defaults", async () 
       upstreamExtraHeaders: { "user-agent": "MyBot/1.0", "x-custom": "yes" },
     });
     const h = mock.calls[0].headers;
-    assert.equal(h["user-agent"], "MyBot/1.0");
+    // setUserAgentHeader keeps ONE canonical "User-Agent" entry (#16445): the default
+    // lowercase key is replaced, not mirrored, so undici never comma-joins two UA values.
+    assert.deepEqual(
+      Object.keys(h).filter((k) => k.toLowerCase() === "user-agent"),
+      ["User-Agent"]
+    );
+    assert.equal(h["User-Agent"], "MyBot/1.0");
     assert.equal(h["x-custom"], "yes");
   } finally {
     mock.restore();

@@ -8,6 +8,7 @@
  */
 
 import { getDbInstance, rowToCamel } from "./core";
+import { bumpModelIntelligenceWriteGeneration } from "./modelIntelligenceGeneration";
 
 // ──────────────── Types ────────────────
 
@@ -83,6 +84,7 @@ export function getModelIntelligenceBySource(
 }
 
 export function upsertModelIntelligence(entry: Omit<ModelIntelligenceEntry, "syncedAt">): void {
+  bumpModelIntelligenceWriteGeneration();
   const db = getDbInstance();
 
   db.prepare(
@@ -101,6 +103,7 @@ export function upsertModelIntelligence(entry: Omit<ModelIntelligenceEntry, "syn
 }
 
 export function deleteModelIntelligence(model: string, source: string, category: string): boolean {
+  bumpModelIntelligenceWriteGeneration();
   const db = getDbInstance();
   const result = db
     .prepare(
@@ -112,6 +115,7 @@ export function deleteModelIntelligence(model: string, source: string, category:
 }
 
 export function deleteExpiredIntelligence(source?: string): number {
+  bumpModelIntelligenceWriteGeneration();
   const db = getDbInstance();
   const conditions = ["expires_at IS NOT NULL", "datetime(expires_at) < datetime('now')"];
   const params: unknown[] = [];
@@ -127,6 +131,7 @@ export function deleteExpiredIntelligence(source?: string): number {
 }
 
 export function deleteModelIntelligenceBySource(source: string): number {
+  bumpModelIntelligenceWriteGeneration();
   const db = getDbInstance();
   const result = db.prepare(`DELETE FROM model_intelligence WHERE source = ?`).run(source);
   return result.changes ?? 0;
@@ -160,6 +165,7 @@ export function listModelIntelligence(filters?: {
 export function bulkUpsertModelIntelligence(
   entries: Array<Omit<ModelIntelligenceEntry, "syncedAt">>
 ): number {
+  bumpModelIntelligenceWriteGeneration();
   if (entries.length === 0) return 0;
 
   const db = getDbInstance();
@@ -227,6 +233,7 @@ export function applyArenaEloRefresh(
   );
 
   const refresh = db.transaction(() => {
+    bumpModelIntelligenceWriteGeneration();
     let upserted = 0;
     for (const entry of entries) {
       upsertStmt.run(

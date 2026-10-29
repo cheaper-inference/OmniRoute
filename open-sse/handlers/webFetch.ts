@@ -3,7 +3,7 @@
  *
  * Handles POST /v1/web/fetch requests.
  * Dispatches to a web-fetch provider executor (Firecrawl, Jina Reader, Tavily, or TinyFish).
- * Also AnySearch extract for free public fetch.
+ * Also AnySearch extract for free public fetch, and Parallel Extract (markdown only).
  *
  * Request format:
  * {
@@ -24,6 +24,7 @@ import { tavilyFetch } from "../executors/tavily-fetch.ts";
 import { tinyfishFetch } from "../executors/tinyfish-fetch.ts";
 import { nimbleFetch } from "../executors/nimble-fetch.ts";
 import { anysearchFetch } from "../executors/anysearch-fetch.ts";
+import { parallelFetch } from "../executors/parallel-fetch.ts";
 
 export type WebFetchFormat = "markdown" | "html" | "links" | "screenshot";
 
@@ -36,7 +37,8 @@ export interface WebFetchRequest {
     | "tinyfish"
     | "context7"
     | "nimble-search"
-    | "anysearch-search";
+    | "anysearch-search"
+    | "parallel-search";
   format?: WebFetchFormat;
   depth?: 0 | 1 | 2;
   wait_for_selector?: string;
@@ -73,6 +75,7 @@ export const WEB_FETCH_PROVIDERS = Object.freeze([
   "anysearch-search",
   "context7",
   "nimble-search",
+  "parallel-search",
 ] as const);
 // Derived from the array — adding a provider to WEB_FETCH_PROVIDERS
 // automatically widens the union; they cannot drift apart.
@@ -160,6 +163,15 @@ export async function handleWebFetch(
 
       case "nimble-search":
         return await nimbleFetch({
+          url: req.url,
+          format,
+          includeMetadata,
+          credentials,
+        });
+
+      case "parallel-search":
+        // Parallel Extract is markdown-only; parallelFetch rejects other formats with 400.
+        return await parallelFetch({
           url: req.url,
           format,
           includeMetadata,

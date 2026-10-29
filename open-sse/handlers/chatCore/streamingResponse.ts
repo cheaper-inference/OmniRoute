@@ -63,6 +63,7 @@ import {
 
 import { HTTP_STATUS, ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE } from "../../config/constants.ts";
 import { applyStatusRestatement } from "../../config/upstreamStatusRestatement.ts";
+import { appendGoogleDailyQuotaViolation } from "../../services/googleDailyQuota.ts";
 
 import { updateProviderConnection, getProviderConnectionById } from "@/lib/db/providers";
 import { wasRefreshTokenRotated } from "@omniroute/open-sse/services/refreshSerializer.ts";
@@ -99,13 +100,11 @@ import { lockModel, recordCoreOwnedAntigravityQuotaState } from "../../services/
 
 import {
   isModelUnavailableError,
-  getNextFamilyFallback,
   isContextOverflowError,
-  findLargerContextModel,
-  getModelFamily,
 } from "../../services/modelFamilyFallback.ts";
 
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
+import { createRequestFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
 
@@ -185,9 +184,15 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     targetFormat,
     triedModels,
     trustedEffortContext,
+    toolDisclosure,
     upstreamStream,
     reportSignatureFailure,
   } = deps;
+  const familyFallback = createRequestFamilyFallback(provider, {
+    headers: clientRawRequest?.headers,
+    hasApiKeyMetadata: Boolean(apiKeyInfo),
+    connectionId: () => String(getCurrentConnectionId() || connectionId || ""),
+  });
 
   let claudePromptCacheLogMeta,
     currentModel,
@@ -213,6 +218,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
   let upstreamDiagnostic: Record<string, unknown> | undefined;
   try {
     const pipelineOutcome = await runProviderExecutionPipeline({
+      getNextFamilyFallback: familyFallback.getNext,
       policy: {
         allowAccountRotation: !managedLease && comboStrategy !== "context-relay",
         allowModelFallback: true,
@@ -236,10 +242,9 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         },
         onCredentialsRefreshed: handleCredentialsRefreshed,
         refreshCredentials: executeRefreshCredentials,
-        assertManagedLeaseFence: (id) => {
-          assertManagedLeaseFence(id);
-        },
+        assertManagedLeaseFence: (id) => assertManagedLeaseFence(id),
         getProviderCredentials,
+        allowedConnections: deps.allowedConnections ?? null,
       },
       wire: {
         body: translatedBody as Record<string, unknown>,
@@ -701,6 +706,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           isOpencodeClient,
           rawBody: body,
           clientRawRequest,
+          toolDisclosure,
         });
         assertManagedLeaseFence(getExecutionConnectionId(getExecutionCredentials()));
         const retryResult = normalizeExecutorResult(
@@ -815,7 +821,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     } else {
       const details = await parseUpstreamError(providerResponse, provider);
       statusCode = details.statusCode;
-      message = details.message;
+      message = appendGoogleDailyQuotaViolation(details.message, details.responseBody);
       retryAfterMs = details.retryAfterMs;
       upstreamErrorBody = details.responseBody;
       upstreamErrorCode = typeof details.errorCode === "string" ? details.errorCode : undefined;
@@ -1003,7 +1009,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     // from the same family. This keeps the request alive on the same account
     // instead of failing the entire combo.
     if (!pipelineRecovered && isModelUnavailableError(statusCode, message, provider)) {
-      const nextModel = getNextFamilyFallback(currentModel, triedModels, provider);
+      const nextModel = await familyFallback.getNext(currentModel, triedModels);
       if (nextModel) {
         triedModels.add(nextModel);
         currentModel = nextModel;
@@ -1126,12 +1132,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         };
       }
     } else if (isContextOverflowError(statusCode, message)) {
-      const familyCandidates = getModelFamily(currentModel, provider).filter(
-        (m) => m !== currentModel && !triedModels.has(m)
-      );
-      const nextModel =
-        findLargerContextModel(currentModel, familyCandidates, provider) ??
-        getNextFamilyFallback(currentModel, triedModels, provider);
+      const nextModel = await familyFallback.getForContextOverflow(currentModel, triedModels);
       if (nextModel) {
         triedModels.add(nextModel);
         currentModel = nextModel;

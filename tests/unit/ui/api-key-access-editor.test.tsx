@@ -420,6 +420,8 @@ describe("ApiKeyAccessEditorClient", () => {
       blockedModels: [],
       allowedCombos: [],
       allowedConnections: [],
+      // #13102: the ordered per-key connection preference is always part of the PATCH.
+      preferredConnections: [],
       noLog: false,
       autoResolve: false,
       isActive: true,
@@ -434,6 +436,7 @@ describe("ApiKeyAccessEditorClient", () => {
       streamDefaultMode: "legacy",
       compressionEnabled: true,
       allowAutoCombos: true,
+      allowCcDiscoveryAliases: true,
       catalogScope: "all",
       disableNonPublicModels: false,
       allowUsageCommand: false,
@@ -441,6 +444,7 @@ describe("ApiKeyAccessEditorClient", () => {
       dailyUsageLimitUsd: null,
       weeklyUsageLimitUsd: null,
       chaosModeEnabled: false,
+      forcedModel: null,
     });
   });
 

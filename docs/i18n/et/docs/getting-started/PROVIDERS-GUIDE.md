@@ -10,52 +10,45 @@
 
 ## Mis on teenusepakkuja?
 
-Mõelge teenusepakkujast kui **mobiilioperaatorist**. Nii nagu helistamiseks on vaja mobiilioperaatorit, on tehisintellektimudelite kasutamiseks vaja tehisintellektiteenuse pakkujat. OmniRoute on nagu telefon, mis töötab **kõigi operaatoritega** — saate nende vahel automaatselt ümber lülituda.
+Mõelge teenusepakkujast kui **mobiilioperaatorist**. Nii nagu vajate helistamiseks mobiilioperaatorit, vajate AI-mudelite kasutamiseks AI-teenusepakkujat. OmniRoute on nagu telefon, mis töötab **kõigi operaatoritega** — saate nende vahel automaatselt ümber lülituda.
 
 ### Teenusepakkujate tüübid
 
-| Tüüp            | Mis see on                   | Näited                            | Maksumus                 |
-| --------------- | ---------------------------- | --------------------------------- | ------------------------ |
-| **Tasuta**      | Makse pole vajalik           | Kiro, OpenCode Free, Pollinations | $0                       |
-| **API-võti**    | Vajate API-võtit             | OpenAI, Anthropic, Google         | Maksate kasutuse järgi   |
-| **OAuth**       | Logite sisse oma kontoga     | Claude Code, GitHub Copilot       | Tellimus                 |
-| **Veebiküpsis** | Kasutab teie brauseriseanssi | ChatGPT Web (Codex), Gemini Web   | $0 (kasutab teie kontot) |
+| Tüüp            | Kirjeldus                    | Näited                          | Maksumus                 |
+| --------------- | ---------------------------- | ------------------------------- | ------------------------ |
+| **Tasuta**      | Maksmine pole vajalik        | Kiro, Pollinations              | $0                       |
+| **API-võti**    | Vajate API-võtit             | OpenAI, Anthropic, Google       | Tasu kasutuse alusel     |
+| **OAuth**       | Logite sisse oma kontoga     | Claude Code, GitHub Copilot     | Tellimus                 |
+| **Veebiküpsis** | Kasutab teie brauseriseanssi | ChatGPT Web (Codex), Gemini Web | $0 (kasutab teie kontot) |
 
-### Veebiküpsiseid kasutavad teenusepakkujad
+### Veebiküpsistega teenusepakkujad
 
-Üldised seadistusjuhised, piirangud, tõrkeotsingu ja teenusepakkujapõhised autentimisjuhised leiate failist **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**.
+Üldised seadistusjuhised, piirangud, tõrkeotsingu ja teenusepakkujapõhised autentimisjuhised leiate dokumendist **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**.
 ---
 
-## Kiirjuhend: esimese teenusepakkuja ühendamine
+## Kiirjuhend: ühendage oma esimene teenusepakkuja
 
-### Valikuline tasuta teenusepakkujate seadistamine esmakordsel käivitamisel
+### Valikuline tasuta teenusepakkujate seadistamine esmakäivitusel
 
-Esmakordse käivitamise viisard pakub eraldi kaarti **Seadista tasuta teenusepakkujad**. See koostab praegu
-sobivate teenusepakkujate loendi OmniRoute'i autentimist mittevajavate teenusepakkujate registri põhjal ning võimaldab teil enne
-kinnitamist iga teenusepakkuja üle vaadata ja valiku tühistada. OmniRoute kuvab teenusepakkuja hoiatusmärkuse ja lingi selle veebisaidile,
-et saaksite esmalt tutvuda kolmanda poole tingimuste, privaatsuse, saadavuse ja kasutuspiirangutega.
+Esmakäivituse viisard pakub eraldi kaarti **Seadista tasuta teenusepakkujad**. See koostab OmniRoute'i autentimist mittevajavate teenusepakkujate registri põhjal praegu sobivate teenusepakkujate loendi ning võimaldab enne kinnitamist iga teenusepakkuja üle vaadata ja valiku tühistada. OmniRoute kuvab teenusepakkuja hoiatusmärkuse ja lingi tema veebisaidile, et saaksite esmalt tutvuda kolmanda osapoole tingimuste, privaatsuspõhimõtete, saadavuse ja päringulimiitidega.
 
-See toiming on valikuline: viisardi lõpuleviimisel ei looda tasuta teenusepakkujate ühendusi kunagi varjatult.
-See loob ainult veel puuduvad teenusepakkujad, jätab olemasolevad kohandatud ühendused
-puutumata ning esitab eraldi teabe loodud, juba seadistatud ja ebaõnnestunud teenusepakkujate kohta. Osalise tulemuse korral saate
-ohutult uuesti proovida ainult ebaõnnestunud teenusepakkujate ühendamist.
+See toiming on valikuline: viisardi lõpetamisel ei looda tasuta teenusepakkujatega ühendusi kunagi märkamatult. Luuakse ainult ühendused teenusepakkujatega, mis veel puuduvad, olemasolevad kohandatud ühendused jäetakse muutmata ning loodud, juba seadistatud ja ebaõnnestunud teenusepakkujad esitatakse eraldi. Osalise tulemuse korral võite turvaliselt uuesti proovida ainult ebaõnnestunud ühendusi.
 
-### Variant A: tasuta teenusepakkuja (krediitkaarti pole vaja)
+### Valik A: tasuta teenusepakkuja (krediitkaarti pole vaja)
 
 1. Avage juhtpaneel aadressil `http://localhost:20128`
-2. Valige **Teenusepakkujad** → **Lisa teenusepakkuja**
+2. Avage **Teenusepakkujad** → **Lisa teenusepakkuja**
 3. Valige üks järgmistest tasuta teenusepakkujatest:
    - **Kiro AI** — tasuta Claude'i mudelid (autentimist pole vaja)
-   - **OpenCode Free** — tasuta GPT mudelid (autentimist pole vaja)
-   - **Pollinations** — tasuta GPT-5, Claude, Gemini (võtit pole vaja)
-   - **LongCat** — 10M tasuta tokenit (ühekordne toetus, nõuab kontot ja KYC-d)
-   - **Cloudflare AI** — üle 50 mudeli, 10K neuronit päevas
-   - **MLX Gemma 26B** — kohalik Apple Siliconi mudel (~38.5 tokenit/s, ~15.9GB muutmälu)
-   - **MLX Qwen 3.8 27B** — kohalik Apple Siliconi mudel (~9.1 tokenit/s, ~13.1GB muutmälu)
+   - **Pollinations** — tasuta GPT-5, Claude ja Gemini (võtit pole vaja)
+   - **LongCat** — 10 miljonit tasuta tokenit (ühekordne toetus, nõuab kontot ja KYC-d)
+   - **Cloudflare AI** — üle 50 mudeli, 10 000 neuronit päevas
+   - **MLX Gemma 26B** — kohalik Apple Siliconi mudel (~38,5 tokenit/s, ~15,9 GB RAM-i)
+   - **MLX Qwen 3.8 27B** — kohalik Apple Siliconi mudel (~9,1 tokenit/s, ~13,1 GB RAM-i)
 4. Klõpsake nuppu **Ühenda**
-5. Valmis! Teil on nüüd tasuta juurdepääs tehisintellektile.
+5. Valmis! Nüüd on teil tasuta juurdepääs tehisintellektile.
 
-### Variant B: API-võtmega teenusepakkuja (tasuline)
+### Valik B: API-võtmega teenusepakkuja (tasuline)
 
 1. Hankige API-võti teenusepakkuja veebisaidilt:
    - **OpenAI**: https://platform.openai.com/api-keys
@@ -64,28 +57,28 @@ ohutult uuesti proovida ainult ebaõnnestunud teenusepakkujate ühendamist.
    - **DeepSeek**: https://platform.deepseek.com/
    - **Groq**: https://console.groq.com/
 2. Avage juhtpaneel aadressil `http://localhost:20128`
-3. Valige **Teenusepakkujad** → **Lisa teenusepakkuja**
+3. Avage **Teenusepakkujad** → **Lisa teenusepakkuja**
 4. Valige oma teenusepakkuja
 5. Kleepige oma API-võti
 6. Klõpsake nuppu **Ühenda**
-7. Valmis! Teil on nüüd juurdepääs selle teenusepakkuja mudelitele.
+7. Valmis! Nüüd on teil juurdepääs selle teenusepakkuja mudelitele.
 
-### Variant C: OAuth-teenusepakkuja (tellimus)
+### Valik C: OAuthi teenusepakkuja (tellimus)
 
 1. Avage juhtpaneel aadressil `http://localhost:20128`
-2. Valige **Teenusepakkujad** → **Lisa teenusepakkuja**
+2. Avage **Teenusepakkujad** → **Lisa teenusepakkuja**
 3. Valige oma teenusepakkuja (nt Claude Code või GitHub Copilot)
 4. Klõpsake nuppu **Ühenda OAuthiga**
 5. Logige oma kontoga sisse
-6. Valmis! Teil on nüüd juurdepääs tellimusega hõlmatud mudelitele.
+6. Valmis! Nüüd on teil juurdepääs tellimusega hõlmatud mudelitele.
 
-### Variant D: kohalikud MLX-mudelid (Apple Silicon)
+### Valik D: kohalikud MLX-mudelid (Apple Silicon)
 
-Ühismäluga Apple Siliconi Mac-arvutites toetab OmniRoute `mlx-lm.server` kaudu töötavate kohalike MLX-mudelite ühendamist tavapäraste OpenAI-ga ühilduvate kohalike teenusepakkujatena.
+Ühismäluga Apple Siliconi Macides toetab OmniRoute kohalike, `mlx-lm.server`-i kaudu töötavate MLX-mudelite ühendamist tavapäraste OpenAI-ga ühilduvate kohalike teenusepakkujatena.
 
 #### Eeltingimused
 
-- **Apple Siliconiga Mac** (M1/M2/M3/M4), soovitatavalt vähemalt 24GB ühismäluga
+- **Apple Siliconiga Mac** (M1/M2/M3/M4), soovitatavalt vähemalt 24 GB ühismäluga
 - Paketihaldur **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
@@ -112,7 +105,7 @@ ohutult uuesti proovida ainult ebaõnnestunud teenusepakkujate ühendamist.
    ```
 
 3. **Ühendage OmniRoute'i juhtpaneelil**:
-   - Valige **Teenusepakkujad** → **Lisa teenusepakkuja**
+   - Avage **Teenusepakkujad** → **Lisa teenusepakkuja**
    - Valige **MLX Gemma 26B** või **MLX Qwen 3.8 27B**
    - Klõpsake nuppu **Ühenda** (API-võtit pole vaja)
 
@@ -129,22 +122,22 @@ ohutult uuesti proovida ainult ebaõnnestunud teenusepakkujate ühendamist.
 
 #### Mäluhaldus
 
-**Oluline**: 24GB ühismälu korral saab korraga töötada ainult **üks suur MLX-mudel**.
+**Oluline**: 24 GB ühismälu korral saab korraga töötada ainult **üks suur MLX-mudel**.
 
-- Gemma 26B: tippmälukasutus ~15.9GB
-- Qwen 3.8 27B: tippmälukasutus ~13.1GB
+- Gemma 26B: maksimaalne mälukasutus ~15,9 GB
+- Qwen 3.8 27B: maksimaalne mälukasutus ~13,1 GB
 
-Peate seda käsitsi haldama:
+Seda tuleb hallata käsitsi:
 
-- käivitage korraga ainult üks MLX-server või
-- käivitage need eri arvutites või
-- peatage üks enne teise käivitamist
+- Käitage korraga ainult ühte MLX-serverit või
+- Käitage mõlemat eri masinates või
+- Peatage üks enne teise käivitamist
 
-OmniRoute ei halda MLX-serverite protsesse automaatselt — see ainult suunab päringud teie seadistatud OpenAI-ga ühilduvatesse lõpp-punktidesse.
+OmniRoute ei halda MLX-serveri protsesse automaatselt — see suunab päringud ainult teie seadistatud OpenAI-ga ühilduvatesse lõpp-punktidesse.
 
-#### Tööriistade kutsumise tugi
+#### Tööriistakutsete tugi
 
-Mõlemad mudelid toetavad OpenAI-ga ühilduvat tööriistade kutsumist. Testimiseks kasutage:
+Mõlemad mudelid toetavad OpenAI-ga ühilduvaid tööriistakutseid. Testimiseks kasutage järgmist:
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -152,20 +145,20 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "Kui palju on 2+2? Kasuta kalkulaatori tööriista."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Arvuta", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
 #### Tõrkeotsing
 
-| Probleem                          | Lahendus                                                                                          |
-| --------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Server ei käivitu                 | Vaata `uv run mlx_lm.server --help` ja kontrolli mudelite ID-sid                                  |
-| Mälu pole piisavalt               | Veendu, et töötab ainult üks mudel; sulge teised rakendused; kontrolli rakendust Activity Monitor |
-| Ühendusest keelduti               | Veendu, et server töötab õigel pordil (11435/11436)                                               |
-| Aeglased vastused                 | Esimene päring laadib mudeli mällu (~30–60 s); järgnevad päringud on kiired                       |
-| Tööriistade kutsumine ebaõnnestub | Veendu, et mudel toetab tööriistu; kontrolli OmniRoute'i logist tõlkevigu                         |
+| Probleem                   | Lahendus                                                                                              |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Server ei käivitu          | Vaadake `uv run mlx_lm.server --help` ja kontrollige mudeli ID-sid                                    |
+| Mälu sai otsa              | Veenduge, et töötab ainult üks mudel; sulgege muud rakendused; kontrollige rakendust Activity Monitor |
+| Ühendusest keelduti        | Veenduge, et server töötab õigel pordil (11435/11436)                                                 |
+| Aeglased vastused          | Esimene päring laadib mudeli mällu (~30–60 s); järgmised päringud on kiired                           |
+| Tööriistakutse ebaõnnestub | Veenduge, et mudel toetab tööriistu; kontrollige OmniRoute'i logidest teisendusvigu                   |
 
 ---
 
@@ -173,18 +166,16 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 Need teenusepakkujad pakuvad **tasuta juurdepääsu** ilma krediitkaardita:
 
-| Teenusepakkuja    | Tasuta kvoot        | Mudelid                                  | Ühendamisviis         |
-| ----------------- | ------------------- | ---------------------------------------- | --------------------- |
-| **Kiro AI**       | 50 krediiti kuus    | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Autentimist pole vaja |
-| **OpenCode Free** | Piiramatu           | GPT-4o, Claude, Gemini                   | Autentimist pole vaja |
-| **Pollinations**  | Võtit pole vaja     | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Autentimist pole vaja |
-| **LongCat**       | Ühekordselt 10M     | LongCat-2.0                              | API-võti + KYC        |
-| **Cloudflare AI** | 10K neuronit päevas | 50+ mudelit                              | Autentimist pole vaja |
-| **NVIDIA NIM**    | ~40 RPM             | 129 mudelit                              | API-võti on vajalik   |
-| **Cerebras**      | $5 liitumiskrediiti | GLM 4.7, GPT-OSS 120B                    | API-võti + kaart      |
-| **Qoder**         | Piiramatu           | Kimi-K2, DeepSeek-R1, Qwen3-coder        | Autentimist pole vaja |
+| Teenusepakkuja    | Tasuta kvoot            | Mudelid                                  | Ühendamine               |
+| ----------------- | ----------------------- | ---------------------------------------- | ------------------------ |
+| **Kiro AI**       | 50 krediiti kuus        | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Autentimine pole vajalik |
+| **Pollinations**  | Võtit pole vaja         | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Autentimine pole vajalik |
+| **LongCat**       | Ühekordselt 10 miljonit | LongCat-2.0                              | API võti + KYC           |
+| **Cloudflare AI** | 10 000 neuronit päevas  | Üle 50 mudeli                            | Autentimine pole vajalik |
+| **NVIDIA NIM**    | ~40 RPM                 | 129 mudelit                              | Vaja on API võtit        |
+| **Cerebras**      | $5 liitumiskrediiti     | GLM 4.7, GPT-OSS 120B                    | API võti + kaart         |
 
-**Nõuanne**: Ühendage mitu tasuta teenusepakkujat, et saada **piiramatult tasuta tehisintellekti** koos automaatse varuvariandiga!
+**Nõuanne**: Ühendage mitu tasuta teenusepakkujat, et saada **piiramatult tasuta tehisintellekti** koos automaatse varuvariandile ümberlülitumisega!
 
 ---
 
@@ -241,7 +232,7 @@ Teie teenusepakkuja on nüüd ühendatud. Saate seda kasutada väärtusega `mode
 
 OmniRoute töötab kõige paremini **mitme teenusepakkujaga**. See annab teile järgmised eelised:
 
-- **Automaatne varuvariant** — kui üks teenusepakkuja ei tööta, proovib OmniRoute järgmist
+- **Automaatne varuvalik** — kui üks teenusepakkuja ebaõnnestub, proovib OmniRoute järgmist
 - **Kulude optimeerimine** — OmniRoute valib iga päringu jaoks odavaima teenusepakkuja
 - **Kiiruse optimeerimine** — OmniRoute valib iga päringu jaoks kiireima teenusepakkuja
 - **Kvaliteedi optimeerimine** — OmniRoute valib iga ülesande jaoks parima teenusepakkuja
@@ -250,15 +241,15 @@ OmniRoute töötab kõige paremini **mitme teenusepakkujaga**. See annab teile j
 
 Parima kasutuskogemuse saamiseks ühendage vähemalt **3 teenusepakkujat**:
 
-1. **Üks tasuta teenusepakkuja** (Kiro, OpenCode Free või Pollinations) — alati saadaval
+1. **Üks tasuta teenusepakkuja** (Kiro või Pollinations) — alati saadaval
 2. **Üks kiire teenusepakkuja** (Groq, Cerebras) — kiirete vastuste jaoks
 3. **Üks kvaliteetne teenusepakkuja** (OpenAI, Anthropic, Google) — keerukate ülesannete jaoks
 
-Seejärel kasutage väärtust `model: "auto"` ja OmniRoute valib iga päringu jaoks automaatselt parima teenusepakkuja.
+Seejärel kasutage seadet `model: "auto"` ning OmniRoute valib iga päringu jaoks automaatselt parima teenusepakkuja.
 
 ---
 
-## Teenusepakkuja-spetsiifiline seadistamine
+## Teenusepakkujapõhine seadistamine
 
 ### OpenAI
 
@@ -284,6 +275,46 @@ Seejärel kasutage väärtust `model: "auto"` ja OmniRoute valib iga päringu ja
 2. OmniRoute'is: Teenusepakkujad → Lisa teenusepakkuja → DeepSeek
 3. Kleepige API-võti → Ühenda
 
+### Qoder: valige identimisteabe edastusviis
+
+Qoder nõuab identimisteavet. Selle kahel edastusviisil on erinevad võimalused; ainult mudeli nimi
+ei näita, mida konkreetne ühendus teha saab.
+
+| Identimisteave                    | OmniRoute'i edastusviis                        | Kutsuja tööriistakutsed                                          | Voogedastus                                                                |
+| --------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `pt-`-ga algav PAT                | Kohalik `qodercli` protsess OmniRoute'i hostis | Pole toetatud                                                    | Puhverdatud: SSE väljastatakse alles pärast CLI täieliku vastuse saabumist |
+| Mitte-PAT-pääsutõend või API-võti | DashScope'i OpenAI-ga ühilduv HTTP-lõpp-punkt  | Edastatakse muutmata kujul, olenevalt ülesvoolu mudelist/võtmest | Ülesvoolu HTTP/SSE tee                                                     |
+
+PAT-i puhul installige Qoder CLI OmniRoute'iga samasse hosti või konteinerisse. Täitmisfail
+peab olema leitav nimega `qodercli`; vastasel juhul määrake `CLI_QODER_BIN` selle täitmisfaili teeks. Ainult
+Dockeri hosti installitud CLI ei ole konteineris automaatselt saadaval. Puuduvate
+binaarfailide korral kuvatakse selgesõnaline tõrge, mis suunab teid installimise või tee seadistamise juurde.
+
+PAT-i vestlustee protsessi ajalõpp on 45 sekundit. See teisendab vestluse üheks
+viibaks ja käivitab CLI mittevoogedastuslikus printimisrežiimis. `stream: true` taotlemine muudab
+vastuse ümbrise SSE-ks; see ei paku ülesvoolust žetoonide järkjärgulist edastamist.
+CLI valideerimisel/mudelite loendi hankimisel kasutatakse eraldi 20-sekundilist ajalõppu. Need on praegused koodi
+vaikeväärtused, mitte juhtpaneelil seadistatavad sätted.
+
+Kasutage PAT-ühendusi tavalise vestluse jaoks. Agendipäringud, mis sisaldavad `tools` või pärandfunktsioone `functions`,
+välistavad identimisteabe valimisel PAT-kontod, sealhulgas kinnitatud kombineeritud sihtmärgid. Kombineeritud
+Qoderi kogum saab endiselt valida oma HTTP-konto. Otsekutsed PAT-i täiturile nurjuvad samuti
+enne CLI käivitamist selgesõnaliselt, selle asemel et tööriistade definitsioonid vaikselt kõrvale jätta. See
+piirang puudutab API kutsuja antud tööriistu, mitte sisemisi tööriistu, mida Qoder
+CLI võib ise kasutada. HTTP-võti ei taga, et iga mudel toetab tööriistu; tavapärased
+mudeli võimekuse kontrollid kehtivad endiselt.
+
+Brauseri OAuth on saadaval ainult siis, kui administraator seadistab kõik viis sätet:
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID` ja `QODER_OAUTH_CLIENT_SECRET`. Nende vaikeväärtused on tühjad; seadistamata
+installatsioon peaks kasutama toetatud identimisteabe importimist, mitte eeldama,
+et brauseri kaudu sisselogimise voog on kasutusvalmis.
+
+Teostuse viited: [Qoderi täitur](../../open-sse/executors/qoder.ts),
+[CLI käituskeskkond](../../open-sse/services/qoderCli.ts) ja
+[OAuthi konfiguratsioon](../../src/lib/oauth/constants/oauth.ts). Järkjärguline PAT-voogedastus
+ja seadistatav ajalõpp on eraldi täiustused; kirjeldatud käitumine ei luba nende olemasolu.
+
 ### Groq
 
 1. Hankige API-võti: https://console.groq.com/
@@ -294,29 +325,29 @@ Seejärel kasutage väärtust `model: "auto"` ja OmniRoute valib iga päringu ja
 
 ## Levinud küsimused
 
-### "Kas OmniRoute'i kasutamise eest tuleb maksta?"
+### „Kas OmniRoute'i kasutamise eest peab maksma?”
 
-**Ei!** OmniRoute on tasuta ja avatud lähtekoodiga. Tasuta teenusepakkujaid (Kiro, OpenCode Free, Pollinations) saab kasutada ilma midagi maksmata. Maksate ainult siis, kui otsustate kasutada tasulisi teenusepakkujaid.
+**Ei!** OmniRoute on tasuta ja avatud lähtekoodiga. Tasuta teenusepakkujaid (Kiro, Pollinations) saab kasutada ilma midagi maksmata. Maksma peab ainult siis, kui otsustad kasutada tasulisi teenusepakkujaid.
 
-### "Millisest teenusepakkujast peaksin alustama?"
+### „Millisest teenusepakkujast peaksin alustama?”
 
-Alustage **Kiro AI-st** — see on tasuta, ei vaja API-võtit ja annab juurdepääsu Claude'i mudelitele. Seejärel lisage vajaduse järgi teisi teenusepakkujaid.
+Alusta teenusepakkujaga **Kiro AI** — see on tasuta, ei nõua API-võtit ja annab juurdepääsu Claude'i mudelitele. Seejärel lisa vajaduse korral teisi teenusepakkujaid.
 
-### "Kas saan kasutada korraga mitut teenusepakkujat?"
+### „Kas saan kasutada korraga mitut teenusepakkujat?”
 
-**Jah!** See ongi OmniRoute'i peamine eesmärk. Ühendage mitu teenusepakkujat ja kasutage valikut `model: "auto"`, et OmniRoute valiks iga päringu jaoks parima.
+**Jah!** See ongi OmniRoute'i peamine eesmärk. Ühenda mitu teenusepakkujat ja kasuta valikut `model: "auto"`, et OmniRoute saaks valida iga päringu jaoks parima.
 
-### "Mis juhtub, kui teenusepakkuja lakkab töötamast?"
+### „Mis saab siis, kui teenusepakkuja lakkab töötamast?”
 
-OmniRoute jätab ebaõnnestunud teenusepakkujad automaatselt vahele ja proovib järgmist. Te ei pea midagi tegema.
+OmniRoute jätab mittetöötavad teenusepakkujad automaatselt vahele ja proovib järgmist. Sa ei pea ise midagi tegema.
 
-### "Kuidas teenusepakkuja ühendust katkestada?"
+### „Kuidas teenusepakkuja ühendust katkestada?”
 
-Avage Teenusepakkujad → klõpsake teenusepakkujal → klõpsake **Katkesta ühendus**.
+Ava Providers → klõpsa teenusepakkujal → klõpsa **Disconnect**.
 
-### "Kas saan kasutada oma olemasolevaid API-võtmeid?"
+### „Kas saan kasutada oma olemasolevaid API-võtmeid?”
 
-**Jah!** Kui teil on juba OpenAI, Anthropicu, Google'i või teiste teenusepakkujate API-võtmed, saate neid OmniRoute'is kasutada. Teenusepakkujaga ühenduse loomisel lihtsalt kleepige need.
+**Jah!** Kui sul on juba OpenAI, Anthropic, Google'i vms API-võtmed, saad neid OmniRoute'is kasutada. Ühendamisel lihtsalt kleebi need vastavasse välja.
 
 ---
 

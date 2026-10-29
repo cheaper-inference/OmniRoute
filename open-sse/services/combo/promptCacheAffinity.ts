@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { opaqueTokenFingerprint } from "../../utils/opaqueTokenFingerprint.ts";
 import {
   analyzePrefix,
   generatePromptCacheKey,
@@ -6,6 +6,7 @@ import {
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import { parseModel } from "../model.ts";
 import type { ResolvedComboTarget } from "./types.ts";
+import { getStrategyTraits } from "./strategyRegistry.ts";
 import { getOAuthSessionAvailability } from "../oauthSessionOccupancy.ts";
 
 interface PromptCacheAffinityTarget {
@@ -113,7 +114,7 @@ export function resolvePromptCacheAffinityKey(
   if (!key) return null;
 
   const source: PromptCacheAffinitySource = explicit ? "explicit" : "prefix";
-  const fingerprint = createHash("sha256").update(key).digest("hex").slice(0, 12);
+  const fingerprint = opaqueTokenFingerprint(key, { length: 12 });
   return { key, source, fingerprint };
 }
 
@@ -124,8 +125,8 @@ export function promptCacheTargetIdentity(target: PromptCacheAffinityTarget): st
 }
 
 function rendezvousScore(key: string, identity: string): bigint {
-  const digest = createHash("sha256").update(key).update("\0").update(identity).digest("hex");
-  return BigInt(`0x${digest.slice(0, 32)}`);
+  const digest = opaqueTokenFingerprint(`${key}\0${identity}`, { length: 32 });
+  return BigInt(`0x${digest}`);
 }
 
 const MAX_RENDEZVOUS_HIGH_BITS = (1n << 64n) - 1n;
@@ -280,7 +281,9 @@ export function expandPromptCacheAffinityTargetsFromConnections(
  * reorder must not silently override, even though affinity is still free to
  * pick among the remaining/fallback targets. `quota-share` and `weighted`
  * were already protected before this fix; session stickiness and an explicit
- * auto-router pin remain independently protected via their own flags.
+ * auto-router pin remain independently protected via their own flags. The protected set
+ * (auto / quota-share / quota-weighted / weighted / priority / fill-first / lkgp) is the
+ * `protectsFirstTargetFromAffinity` trait in the strategy registry.
  */
 export function shouldProtectOriginalFirst(
   stickyStuck: boolean,
@@ -290,13 +293,7 @@ export function shouldProtectOriginalFirst(
   return (
     stickyStuck ||
     autoUsedExplicitRouter ||
-    strategy === "auto" ||
-    strategy === "quota-share" ||
-    strategy === "weighted" ||
-    strategy === "priority" ||
-    strategy === "fill-first" ||
-    strategy === "lkgp" ||
-    strategy === "quota-weighted"
+    getStrategyTraits(strategy).protectsFirstTargetFromAffinity
   );
 }
 

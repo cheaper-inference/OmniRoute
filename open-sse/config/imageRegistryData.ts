@@ -18,6 +18,7 @@ import {
 import { AI_HORDE_IMAGE_PROVIDER } from "./providers/registry/aihorde/imageModels.ts";
 import { toRegistryImageModels as toSyntxImageModels } from "../services/syntxMediaCatalog.ts";
 import { ZENMUX_IMAGE_PROVIDER } from "./providers/registry/zenmux/imageModels.ts";
+import { MUSE_CODE_IMAGE_PROVIDER } from "./providers/registry/muse-code/imageModels.ts";
 
 export interface ImageModelEntry {
   id: string;
@@ -166,6 +167,7 @@ export const IMAGE_MODEL_ALIASES: Record<string, ImageModelAliasEntry> = {
 
 export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
   zenmux: ZENMUX_IMAGE_PROVIDER,
+  "muse-code": MUSE_CODE_IMAGE_PROVIDER,
   agnes: {
     id: "agnes",
     baseUrl: "https://apihub.agnes-ai.com/v1/images/generations",
@@ -264,6 +266,7 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
         name: "GPT 5.6 Luna (Codex Image)",
       },
       { id: "gpt-image-2.5-flare", name: "GPT Image 2.5 Flare (Codex)" },
+      { id: "gpt-image-2.5-sunburst", name: "GPT Image 2.5 Sunburst (Codex)" },
       { id: "gpt-image-2", name: "GPT Image 2 (Codex)" },
     ],
     supportedSizes: ["1024x1024", "1024x1536", "1536x1024"],
@@ -392,6 +395,27 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     authHeader: "bearer",
     format: "gemini-image", // Special format: uses Gemini generateContent API
     models: [{ id: "gemini-3.1-flash-image", name: "Gemini 3.1 Flash Image" }],
+    supportedSizes: ["1024x1024"],
+  },
+
+  // A Google AI Studio key can serve these models, but there was no `gemini`
+  // image provider, so they could never be image-combo targets (the combo
+  // filter requires an exact registry match). Distinct from `antigravity`
+  // above: that entry is OAuth against Cloud Code, while AI Studio keys
+  // authenticate with `x-goog-api-key` against the public endpoint, so this
+  // needs its own `gemini-ai-image` format rather than reusing `gemini-image`.
+  gemini: {
+    id: "gemini",
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta/models",
+    authType: "apikey",
+    authHeader: "x-goog-api-key",
+    format: "gemini-ai-image",
+    // The public Gemini API serves these under their `-preview` ids (the bare ids are the
+    // Antigravity/Cloud Code names, see antigravityModelAliases.ts).
+    models: [
+      { id: "gemini-3-pro-image-preview", name: "Gemini 3 Pro Image" },
+      { id: "gemini-3.1-flash-image-preview", name: "Gemini 3.1 Flash Image" },
+    ],
     supportedSizes: ["1024x1024"],
   },
 
@@ -660,6 +684,20 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
       { id: "hidream", name: "Hidream I1 Full" },
     ],
     supportedSizes: ["1024x1024", "1024x1280", "1280x1024"],
+  },
+
+  // NaN.Builders (https://nan.builders) — OpenAI-compatible /v1/images/generations.
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/images/generations",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    models: [
+      { id: "flux-2-klein", name: "FLUX.2 Klein" },
+      { id: "qwen-image-2.1", name: "Qwen Image 2.1" },
+    ],
+    supportedSizes: ["1024x1024"],
   },
 
   // NVIDIA NIM image generation (FLUX models). Distinct from the NVIDIA *chat* entry

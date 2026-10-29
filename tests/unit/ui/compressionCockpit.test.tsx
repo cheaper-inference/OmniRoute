@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React, { act } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from "vitest";
 import { NextIntlClientProvider } from "next-intl";
 import messages from "../../../src/i18n/messages/en.json";
@@ -35,13 +35,13 @@ const { CompressionCockpit } =
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-const containers: HTMLElement[] = [];
+const mounted: { root: Root; container: HTMLElement }[] = [];
 
 function mount(ui: React.ReactElement): HTMLElement {
   const container = document.createElement("div");
   document.body.appendChild(container);
-  containers.push(container);
   const root = createRoot(container);
+  mounted.push({ root, container });
   act(() => {
     root.render(
       <NextIntlClientProvider
@@ -67,9 +67,10 @@ beforeEach(() => {
   ).IS_REACT_ACT_ENVIRONMENT = true;
 });
 
-afterEach(() => {
-  while (containers.length > 0) {
-    containers.pop()?.remove();
+afterEach(async () => {
+  for (const instance of mounted.splice(0)) {
+    await act(async () => instance.root.unmount());
+    instance.container.remove();
   }
   document.body.innerHTML = "";
 });

@@ -48,6 +48,12 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`GET /api/v1/voices`](references/endpoints.md#get-apiv1voices)
 - [`POST /api/v1/speech-to-text`](references/endpoints.md#post-apiv1speech-to-text)
 - [`POST /api/v1/text-to-speech/{voiceId}`](references/endpoints.md#post-apiv1text-to-speechvoiceid)
+- [`POST /api/v1/sound-generation`](references/endpoints.md#post-apiv1sound-generation)
+- [`POST /api/v1/music`](references/endpoints.md#post-apiv1music)
+- [`POST /api/v1/music/stream`](references/endpoints.md#post-apiv1musicstream)
+- [`POST /api/v1/music/detailed`](references/endpoints.md#post-apiv1musicdetailed)
+- [`POST /api/v1/music/detailed/stream`](references/endpoints.md#post-apiv1musicdetailedstream)
+- [`POST /api/v1/music/plan`](references/endpoints.md#post-apiv1musicplan)
 - [`GET /api/v1/explain/routing`](references/endpoints.md#get-apiv1explainrouting)
 - [`GET /api/v1/providers/suggested-models`](references/endpoints.md#get-apiv1providerssuggested-models)
 - [`GET /api/v1/provider-plugin-manifest`](references/endpoints.md#get-apiv1provider-plugin-manifest)
@@ -86,6 +92,7 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`POST /api/v1/images/edits`](references/endpoints.md#post-apiv1imagesedits)
 - [`GET /api/v1/images/upscale`](references/endpoints.md#get-apiv1imagesupscale)
 - [`POST /api/v1/images/upscale`](references/endpoints.md#post-apiv1imagesupscale)
+- [`GET /api/v1/media/{id}`](references/endpoints.md#get-apiv1mediaid)
 - [`POST /api/v1/issues/report`](references/endpoints.md#post-apiv1issuesreport)
 - [`GET /api/v1/management/proxies`](references/endpoints.md#get-apiv1managementproxies)
 - [`POST /api/v1/management/proxies`](references/endpoints.md#post-apiv1managementproxies)
@@ -150,7 +157,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 ## Chat completions
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ### Endpoints
 
@@ -214,7 +221,7 @@ verbatim. Cached automatically via reasoning cache.
 
 ## Image generation
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ### Endpoints
 
@@ -255,7 +262,7 @@ Response: `{ created, data: [{ url? or b64_json, revised_prompt }] }`
 
 ## Text-to-speech
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ### Endpoint
 
@@ -296,7 +303,7 @@ Common OpenAI voices: `alloy`, `echo`, `fable`, `onyx`, `nova`, `shimmer`.
 
 ## Speech-to-text
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ### Endpoints
 
@@ -334,7 +341,7 @@ Response formats: `json`, `text`, `srt`, `verbose_json`, `vtt`.
 
 ## Embeddings
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ### Endpoint
 
@@ -375,7 +382,7 @@ Response: `{ data:[{ embedding:[...], index }], usage:{ prompt_tokens, total_tok
 
 ## Web search
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ### Endpoint
 
@@ -420,7 +427,7 @@ Response: `{ answer?, results:[{ url, title, content, score }] }`
 
 ## Web fetch
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ### Endpoint
 

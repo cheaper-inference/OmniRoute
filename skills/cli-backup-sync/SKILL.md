@@ -223,51 +223,25 @@ omniroute sync
 
 ### `sync push`
 
-**Flags:**
-
-- `--target <t>`
-- `--bundle <list>`
-- `--dry-run`
-
 **Example:**
 
 ```bash
 omniroute sync push
 ```
 
-### `sync pull`
-
-**Flags:**
-
-- `--source <s>`
-- `--merge`
-- `--replace`
-- `--dry-run`
+### `sync pull [outPath]`
 
 **Example:**
 
 ```bash
-omniroute sync pull
-```
-
-### `sync diff`
-
-**Flags:**
-
-- `--source <s>`
-- `--target <t>`
-
-**Example:**
-
-```bash
-omniroute sync diff
+omniroute sync pull omniroute-export.tar.gz
 ```
 
 ### `sync bundle <outPath>`
 
 **Flags:**
 
-- `--include <list>`
+- `--token <syncToken>`
 
 **Example:**
 
@@ -288,10 +262,6 @@ omniroute sync import <bundlePath>
 ```
 
 ### `sync initialize`
-
-**Flags:**
-
-- `--from-cloud`
 
 **Example:**
 
@@ -347,12 +317,4 @@ omniroute sync revoke <id>
 
 ```bash
 omniroute sync status
-```
-
-### `sync resolve`
-
-**Example:**
-
-```bash
-omniroute sync resolve
 ```

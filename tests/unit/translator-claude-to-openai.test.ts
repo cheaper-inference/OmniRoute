@@ -538,7 +538,13 @@ test("Claude -> OpenAI handles redacted thinking, empty arrays and unknown block
     role: "assistant",
     content: "",
   });
-  assert.equal(result.messages.length, 2);
+  // An unknown-only turn is kept with a type-only notice instead of being silently
+  // dropped (container_upload & newer block types).
+  assert.deepEqual(result.messages[2], {
+    role: "assistant",
+    content: "[unknown block omitted: not supported on this route]",
+  });
+  assert.equal(result.messages.length, 3);
 });
 
 test("Claude -> OpenAI keeps tool_choice none instead of widening it to auto", () => {

@@ -8,7 +8,7 @@ OmniRoute `free_proxies` jadvalida tashqi provayderlardan (1proxy, proxifly, ipl
 
 ## Roʻyxat marshruti — `GET /api/settings/free-proxies`
 
-Filtrlangan, saralangan va sahifalangan qism hamda umumiy sonni qaytaradi. Filtrlash va hisoblash SQL orqali bajariladi, shuning uchun interfeys barcha qatorlarni xotiraga yuklamasdan haqiqiy umumiy sonni (masalan, `Jami: 0`) koʻrsatishi mumkin.
+Filtrlangan, saralangan va sahifalangan qism hamda umumiy sonni qaytaradi. Filtrlash va hisoblash SQL orqali bajariladi, shuning uchun interfeys barcha qatorlarni xotiraga yuklamasdan haqiqiy umumiy sonni (masalan, `Total: 0`) koʻrsatishi mumkin.
 
 ### Soʻrov parametrlari
 
@@ -47,7 +47,7 @@ Filtrlangan, saralangan va sahifalangan qism hamda umumiy sonni qaytaradi. Filtr
 }
 ```
 
-`total` sahifalashdan **oldingi** filtrlangan umumiy sonni aks ettiradi, shuning uchun interfeys `Jami: N` va `hasMore` qiymatlarini bir-biridan mustaqil koʻrsatishi mumkin. `syncErrors` manba identifikatori boʻyicha kalitlanadi va faqat oxirgi sinxronlash muvaffaqiyatsiz tugagan manbalar uchun toʻldiriladi — `Jami: 0` natijasi hech qachon izohsiz qolmaydi.
+`total` sahifalashdan **oldingi** filtrlangan umumiy sonni aks ettiradi, shuning uchun interfeys `Total: N` va `hasMore` qiymatlarini bir-biridan mustaqil koʻrsatishi mumkin. `syncErrors` manba identifikatori boʻyicha kalitlanadi va faqat oxirgi sinxronlash muvaffaqiyatsiz tugagan manbalar uchun toʻldiriladi — `Total: 0` natijasi hech qachon izohsiz qolmaydi.
 
 ## Toʻplamga qoʻshish — `POST /api/settings/free-proxies/[id]/add-to-pool`
 

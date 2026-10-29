@@ -45,7 +45,7 @@ tuairiscíonn `GET /api/a2a/status` `status: "disabled"` agus `online: false`; t
 
 ## Modhanna JSON-RPC 2.0
 
-### `message/send` — Rith Sioncrónach
+### `message/send` — Forghníomhú Sioncronach
 
 Seolann sé teachtaireacht chuig scil agus fanann sé leis an bhfreagra iomlán.
 
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+I gcás `smart-routing`, is sárú sainráite ar
+`metadata.model` é `metadata.combo` don iarratas geata; seoltar é mar an fíor-`model`,
+seachas mar réimse JSON `x-combo` a ndéantar neamhaird de. Tá gnáthúdarú na heochrach API agus
+an t-údarú de réir sprice ag an ngeata fós i bhfeidhm. Diúltaítear teaglaim neamhbhailí nó folamh.
+
+Nochtann an toradh `requested_combo` (rún an ghlaoiteora), `dispatched_model`
+(an t-iarratas geata iarbhír), `response_model` (freagra an gheata) agus
+`confirmed_combo`. Is é `null` an réimse deireanach mura sainaithníonn an geata
+teaglaim go sainráite. Ní chuireann logaí cinnteoireachta A2A an forghníomhú i leith
+teaglaim ach amháin má tá sí deimhnithe, agus coinnítear iarratas neamhdheimhnithe mar `requestedCombo`.
+
 **Freagra:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Sruthú SSE
 
-Mar an gcéanna le `message/send`, ach tugann sé Imeachtaí arna Seoladh ag an bhFreastalaí ar ais le haghaidh sruthú fíor-ama.
+Mar an gcéanna le `message/send`, ach seoltar Imeachtaí arna Seoladh ag an bhFreastalaí ar ais le haghaidh sruthú fíor-ama.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Stádas Taisc a Fhiosrú
+### `tasks/get` — Fiosraigh Stádas Taisc
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Tasc a Chealú
+### `tasks/cancel` — Cealaigh Tasc
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Scileanna atá ar Fáil
 
-Nochtann OmniRoute 6 scil A2A atá sreangaithe in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Tá gach modúl scile suite in `src/lib/a2a/skills/`.
+nochtar OmniRoute 6 scil A2A sreangaithe i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Cónaíonn gach modúl scile i `src/lib/a2a/skills/`.
 
-| Scil                | ID                   | Cur Síos                                                                                                                                                               | Clibeanna                  | Samplaí                                        |
-| :------------------ | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------- |
-| Ródú Cliste         | `smart-routing`      | Ródálann sé leid tríd an soláthraí/teaglaim is fearr trí úsáid a bhaint as inneall teaglamaí + scóráil OmniRoute                                                       | ródú, soláthraithe         | "Ródáil an leid seo tríd an tsamhail is fearr" |
-| Bainistiú Cuóta     | `quota-management`   | Tuairiscíonn sé staid chuóta gach soláthraí agus cabhraíonn sé le glaoiteoirí cinneadh a dhéanamh cathain is ceart moilliú/athrú                                       | cuóta, soláthraithe        | "Seiceáil cuóta anthropic"                     |
-| Aimsiú Soláthraithe | `provider-discovery` | Liostaíonn sé soláthraithe suiteáilte mar aon lena gcumais, bratacha saorleibhéil agus stádas OAuth                                                                    | soláthraithe, aimsiú       | "Cad iad na soláthraithe atá ar fáil?"         |
-| Anailís Costais     | `cost-analysis`      | Measann sé costas iarratais/comhrá bunaithe ar an gcatalóg + úsáid le déanaí                                                                                           | costas, úsáid              | "Meas costas an chomhrá seo"                   |
-| Tuairisc Sláinte    | `health-report`      | Comhiomlánaíonn sé staid an scoradáin chiorcaid, na tréimhse fuaraithe agus an fhrithdhúnadh do gach soláthraí                                                         | sláinte, athléimneacht     | "Taispeáin stádas sláinte gach soláthraí"      |
-| Liostaigh Cumais    | `list-capabilities`  | Seolann sé catalóg iomlán 45 iontráil Scileanna Gníomhairí (23 API + 21 CLI + 1 chumraíocht) mar thábla markdown le URLanna amh SKILL.md chun comhthéacs a instealladh | catalóg, aimsiú, scileanna | "Liostaigh cumais uile OmniRoute"              |
+| Scil                   | ID                   | Cur síos                                                                                                                                                                       | Clibeanna                        | Samplaí                                     |
+| :--------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :------------------------------------------ |
+| Ródú Cliste            | `smart-routing`      | Bealach leid tríd an provider/combo optamach ag baint úsáide as scóráil inneall teaglama + OmniRoute                                                                           | ródú, soláthraithe               | "Rótáil an leid seo tríd an múnla is fearr" |
+| Bainistíocht Cuóta     | `quota-management`   | Cabhraíonn tuairiscí in aghaidh an tsoláthraí de réir an chuóta, le glaoiteoirí cinneadh a dhéanamh cén uair ba cheart dóibh throttle/switch a dhéanamh                        | cuóta, soláthraithe              | "Seiceáil cuóta le haghaidh antraipeach"    |
+| Fionnachtain Soláthraí | `provider-discovery` | Liostaíonn soláthraithe suiteáilte le cumais, bratacha saorshraith, stádas OAuth                                                                                               | soláthraithe, fionnachtana       | "Cad iad na soláthraithe atá ar fáil?"      |
+| Anailís Costas         | `cost-analysis`      | Meastacháin ar chostas request/conversation i bhfianaise na húsáide a úsáideadh le déanaí sa chatalóg +                                                                        | costas, úsáid                    | "Meastachán ar an gcostas don chomhrá seo"  |
+| Tuarascáil Sláinte     | `health-report`      | Comhiomláin scoradáin chiorcaid, fuarú, staid frithdhúnadh in aghaidh an tsoláthraí                                                                                            | sláinte, athléimneacht           | "Taispeáin stádas sláinte gach soláthraí"   |
+| Cumais Liosta          | `list-capabilities`  | Seoltar ar ais an chatalóg iomlán 45-iontráil Scileanna Gníomhaire (23 API + 21 CLI + 1 config) mar tábla marcála síos le amh SKILL.md URLs le haghaidh instealladh comhthéacs | catalóg, fionnachtain, scileanna | "Liostaigh gach acmhainn OmniRoute "        |
 
-> Ba cheart Cárta an Ghníomhaire a choinneáil ailínithe leis an gcatalóg bheo ina bhfuil 352 soláthraí; faightear líon na soláthraithe agus meiteashonraí saor in aisce/gan fíordheimhniú ón gclárlann ag am rite.
+> Ba cheart an Cárta Gníomhaire a choinneáil ar chomhréim leis an gcatalóg bheo 377-soláthraí; Faightear comhaireamh soláthraithe agus meiteashonraí free/no-auth ón gclár ama rite.
 
-### Sonraí faoin Scil `list-capabilities`
+### `list-capabilities` Scil Sonraigh
 
-Tá an scil `list-capabilities` thar a bheith úsáideach do ghníomhairí seachtracha ar gá dóibh a fháil amach cad a nochtann OmniRoute sula seolann siad glaonna API. Seolann sí déantán tábla markdown struchtúrtha:
+Tá an scil `list-capabilities` úsáideach go háirithe do ghníomhairí seachtracha ar gá dóibh a fháil amach cad a nochtar OmniRoute roimh ghlaonna API a sheoladh. Tugann sé déantán tábla marcála síos struchtúrtha ar ais:
 
 ```
-| ID | Ainm | Catagóir | Réimse | Críochphointí/Orduithe | URL Amh |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Fíordheimhniú & Seisiúin | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Áirítear an colún `rawUrl` i ngach ró ionas gur féidir le gníomhairí an SKILL.md iomlán a fháil láithreach. Léiríonn an réimse `metadata.totalSkills` méid na catalóige (45 inniu). Cur chun feidhme: `src/lib/a2a/skills/listCapabilities.ts`. Féach freisin [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Cuimsíonn gach sraith an colún `rawUrl` ionas gur féidir le gníomhairí an SKILL.md iomlán a fháil láithreach. Is ionann an réimse `metadata.totalSkills` agus méid na catalóige (45 inniu). Cur i bhfeidhm: `src/lib/a2a/skills/listCapabilities.ts`. Féach freisin [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -262,9 +266,9 @@ curtha isteach → ar siúl → críochnaithe
 
 ---
 
-## Samplaí Comhtháthaithe
+## Comhtháthú Samplaí
 
-### Python (requests)
+### Python (iarratais)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (faigh)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

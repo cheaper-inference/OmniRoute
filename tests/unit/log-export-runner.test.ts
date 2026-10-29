@@ -11,6 +11,7 @@ process.env.STORAGE_ENCRYPTION_KEY = "log-export-runner-test-key";
 
 const coreDb = await import("../../src/lib/db/core.ts");
 const destinationsDb = await import("../../src/lib/db/logExportDestinations.ts");
+const callLogDetails = await import("../../src/lib/db/callLogDetails.ts");
 const source = await import("../../src/lib/usage/callLogExportSource.ts");
 const artifacts = await import("../../src/lib/usage/callLogArtifacts.ts");
 const secrets = await import("../../src/lib/logExport/secrets.ts");
@@ -43,35 +44,27 @@ interface InsertedBatch {
 }
 
 function installFetchStub(options: { failInsert?: boolean; insertDelayMs?: number } = {}) {
-  const batches: InsertedBatch[] = [];
-  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
-    const href = String(url);
-    const body = typeof init?.body === "string" ? init.body : "";
-    if (href.includes("oauth2.googleapis.com/token")) {
-      return jsonResponse(200, { access_token: "stub-token", expires_in: 3600 });
-    }
-    if (href.endsWith("/insertAll")) {
-      if (options.failInsert) {
-        return jsonResponse(500, { error: { message: "backend error" } });
-      }
-      if (options.insertDelayMs) {
-        await new Promise((resolve) => setTimeout(resolve, options.insertDelayMs));
-      }
-      batches.push({ rows: (JSON.parse(body) as { rows: InsertRow[] }).rows });
-      return jsonResponse(200, {});
-    }
-    // Dataset and table both already exist, so prepare() is a no-op.
-    return jsonResponse(200, {});
-  }) as unknown as typeof fetch;
-  return batches;
-}
-
-function jsonResponse(status: number, json: unknown): Response {
-  return {
-    ok: status >= 200 && status < 300,
-    status,
-    json: async () => json,
-  } as unknown as Response;
+  const output = path.join(TEST_DATA_DIR, "bigquery-batches.jsonl");
+  fs.rmSync(output, { force: true });
+  runner.__setLogExportChildOptionsForTest({
+    modulePath: path.join(import.meta.dirname, "fixtures/logExportTestDestination.ts"),
+    config: { fixtureFailInsert: options.failInsert, fixtureInsertDelayMs: options.insertDelayMs },
+  });
+  // Preserve the original tests' live collection shape; fetch now runs in a child.
+  return new Proxy([] as InsertedBatch[], {
+    get(_target, property) {
+      const batches = fs.existsSync(output)
+        ? fs
+            .readFileSync(output, "utf8")
+            .trim()
+            .split("\n")
+            .filter(Boolean)
+            .map((line) => JSON.parse(line) as InsertedBatch)
+        : [];
+      const value = Reflect.get(batches, property);
+      return typeof value === "function" ? value.bind(batches) : value;
+    },
+  });
 }
 
 function insertCallLogs(count: number, startIndex = 0) {
@@ -115,6 +108,7 @@ test.beforeEach(() => {
 
 test.afterEach(() => {
   globalThis.fetch = originalFetch;
+  runner.__setLogExportChildOptionsForTest(null);
 });
 
 test.after(() => {
@@ -437,6 +431,156 @@ test("runDestinationExport_IncludeBodiesOn_ShipsClientAndProviderPayloads", asyn
   assert.match(String(row.pipeline_provider_response), /"4"/);
   assert.match(String(row.pipeline_client_response), /"4"/);
   assert.equal(row.bodies_truncated, false);
+});
+
+test("runDestinationExport_PendingArtifact_DoesNotSkipLaterBodies", async () => {
+  insertCallLogWithBodies("ready-before", { requestBody: { text: "first" } });
+  const db = coreDb.getDbInstance();
+  db.prepare(
+    `INSERT INTO call_logs (id, timestamp, detail_state, detail_pending_until, has_request_body)
+     VALUES ('pending-middle', ?, 'pending', ?, 1)`
+  ).run(new Date().toISOString(), Date.now() + 60_000);
+  insertCallLogWithBodies("ready-after", { requestBody: { text: "third" } });
+  const destination = createBigQueryDestination({ includeBodies: true, batchSize: 10 });
+  const batches = installFetchStub();
+
+  const first = await runner.runDestinationExport(destination);
+  assert.equal(first.exported, 1);
+  assert.equal(first.pendingAfterRun, 2);
+  assert.deepEqual(
+    batches.flatMap((batch) => batch.rows.map((row) => row.insertId)),
+    ["ready-before"]
+  );
+
+  const middle = artifacts.buildArtifactRelativePath(new Date().toISOString(), "pending-middle");
+  const timestamp = new Date().toISOString();
+  const pendingArtifact = artifacts.writeCallArtifact(
+    {
+      schemaVersion: 5,
+      summary: { id: "pending-middle", timestamp, model: "claude-opus-5" },
+      requestBody: { text: "second" },
+      responseBody: null,
+      error: null,
+    } as never,
+    middle
+  );
+  assert.ok(pendingArtifact);
+  db.prepare(
+    `UPDATE call_logs SET detail_state = 'ready', detail_pending_until = NULL,
+       artifact_relpath = ? WHERE id = 'pending-middle'`
+  ).run(middle);
+
+  const second = await runner.runDestinationExport(
+    destinationsDb.getLogExportDestination(destination.id)!
+  );
+  assert.equal(second.exported, 2);
+  assert.deepEqual(
+    batches.flatMap((batch) => batch.rows.map((row) => row.insertId)),
+    ["ready-before", "pending-middle", "ready-after"]
+  );
+  assert.match(String(batches[1].rows[0].json.request_body), /second/);
+  assert.match(String(batches[1].rows[1].json.request_body), /third/);
+});
+
+test("runDestinationExport_ExpiredPending_UnblocksBodiesWithoutTimestampHeuristics", async () => {
+  const db = coreDb.getDbInstance();
+  db.prepare(
+    `INSERT INTO call_logs (id, timestamp, detail_state, detail_pending_until, has_request_body)
+     VALUES (?, ?, 'pending', ?, 1)`
+  ).run("expired", "2099-01-01T00:00:00.000Z", Date.now() - 1);
+  insertCallLogWithBodies("after-expired", { requestBody: { text: "retained" } });
+  const destination = createBigQueryDestination({ includeBodies: true, batchSize: 10 });
+  const batches = installFetchStub();
+
+  const result = await runner.runDestinationExport(destination);
+  assert.equal(result.exported, 2);
+  assert.deepEqual(
+    batches.flatMap((batch) => batch.rows.map((row) => row.insertId)),
+    ["expired", "after-expired"]
+  );
+  assert.equal(batches[0].rows[0].json.request_body, null);
+  assert.match(String(batches[0].rows[1].json.request_body), /retained/);
+  assert.deepEqual(
+    db
+      .prepare("SELECT detail_state, detail_pending_until FROM call_logs WHERE id = 'expired'")
+      .get(),
+    { detail_state: "missing", detail_pending_until: null }
+  );
+});
+
+test("pending detail publication and expiry are conditional terminal transitions", () => {
+  const db = coreDb.getDbInstance();
+  const insert = db.prepare(
+    `INSERT INTO call_logs (id, timestamp, detail_state, detail_pending_until)
+     VALUES (?, ?, 'pending', ?)`
+  );
+  insert.run("expires-first", new Date().toISOString(), Date.now() - 1);
+  callLogDetails.expirePendingCallLogDetails(db);
+  assert.equal(
+    callLogDetails.publishPendingCallLogDetail(db, "expires-first", {
+      relPath: "late.json",
+      sizeBytes: 1,
+      sha256: "late",
+    }),
+    false
+  );
+  assert.equal(
+    db.prepare("SELECT detail_state FROM call_logs WHERE id = 'expires-first'").get().detail_state,
+    "missing"
+  );
+
+  insert.run("deadline-elapsed", new Date().toISOString(), Date.now() - 1);
+  assert.equal(
+    callLogDetails.publishPendingCallLogDetail(db, "deadline-elapsed", {
+      relPath: "too-late.json",
+      sizeBytes: 1,
+      sha256: "late",
+    }),
+    false
+  );
+  callLogDetails.failPendingCallLogDetail(db, "deadline-elapsed");
+  assert.equal(
+    db.prepare("SELECT detail_state FROM call_logs WHERE id = 'deadline-elapsed'").get()
+      .detail_state,
+    "missing"
+  );
+
+  insert.run("publishes-first", new Date().toISOString(), Date.now() + 60_000);
+  assert.equal(
+    callLogDetails.publishPendingCallLogDetail(db, "publishes-first", {
+      relPath: "early.json",
+      sizeBytes: 1,
+      sha256: "early",
+    }),
+    true
+  );
+  callLogDetails.expirePendingCallLogDetails(db);
+  assert.deepEqual(
+    db
+      .prepare("SELECT detail_state, artifact_relpath FROM call_logs WHERE id = 'publishes-first'")
+      .get(),
+    { detail_state: "ready", artifact_relpath: "early.json" }
+  );
+});
+
+test("runDestinationExport_PendingFirst_LeavesCursorUntilPublished", async () => {
+  const db = coreDb.getDbInstance();
+  db.prepare(
+    `INSERT INTO call_logs (id, timestamp, detail_state, detail_pending_until)
+     VALUES ('first-pending', ?, 'pending', ?)`
+  ).run(new Date().toISOString(), Date.now() + 60_000);
+  insertCallLogWithBodies("later-ready", { requestBody: { text: "later" } });
+  const destination = createBigQueryDestination({ includeBodies: true });
+  const batches = installFetchStub();
+  const result = await runner.runDestinationExport(destination);
+  assert.equal(result.exported, 0);
+  assert.equal(result.pendingAfterRun, 2);
+  assert.equal(destinationsDb.getLogExportDestination(destination.id)?.cursorRowId, 0);
+  assert.equal(batches.length, 0);
+
+  const summaries = createBigQueryDestination({ includeBodies: false });
+  const summaryResult = await runner.runDestinationExport(summaries);
+  assert.equal(summaryResult.exported, 2);
 });
 
 test("runDestinationExport_PayloadOverTheCap_TruncatesAndFlagsInsteadOfDropping", async () => {

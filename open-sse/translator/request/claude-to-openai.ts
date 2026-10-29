@@ -1,6 +1,11 @@
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
+import {
+  isClaudeServerWebSearchTool,
+  isSoleClaudeServerWebSearchTool,
+} from "../helpers/claudeServerWebSearch.ts";
+import { chatStrictFrom } from "../helpers/toolStrict.ts";
 
 type JsonRecord = Record<string, unknown>;
 const TOOL_CHOICE_ANY = ["a", "n", "y"].join("");
@@ -39,16 +44,6 @@ function normalizeOpenAIReasoningEffort(effort: unknown): string | undefined {
   return normalized || undefined;
 }
 
-function isClaudeServerWebSearchTool(tool: unknown): tool is JsonRecord {
-  if (!tool || typeof tool !== "object" || Array.isArray(tool)) return false;
-  const record = tool as JsonRecord;
-  return (
-    record.name === "web_search" &&
-    typeof record.type === "string" &&
-    /^web_search_\d{8}$/.test(record.type)
-  );
-}
-
 function toStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -79,13 +74,50 @@ function hasClaudeServerWebSearchTool(tools: unknown): boolean {
   return Array.isArray(tools) && tools.some((tool) => isClaudeServerWebSearchTool(tool));
 }
 
-function shouldUseNativeResponsesWebSearch(credentials: unknown): boolean {
-  return (
-    credentials !== null &&
-    typeof credentials === "object" &&
-    !Array.isArray(credentials) &&
-    (credentials as JsonRecord)._targetFormat === FORMATS.OPENAI_RESPONSES
-  );
+// Target formats whose translator understands the native web-search marker
+// `{ type: "web_search" }` that convertClaudeServerWebSearchTool emits: OpenAI
+// Responses consumes it directly, and the Gemini/Antigravity lane maps it to
+// Google Search grounding (`{ googleSearch: {} }`) in
+// geminiToolsSanitizer.ts::toGeminiGoogleSearchTool. Every other target keeps
+// receiving the plain `web_search` function the server tool degrades to.
+const NATIVE_WEB_SEARCH_TARGET_FORMATS = new Set<string>([
+  FORMATS.OPENAI_RESPONSES,
+  FORMATS.GEMINI,
+  FORMATS.ANTIGRAVITY,
+]);
+
+function nativeWebSearchTargetFormat(credentials: unknown): string | null {
+  if (credentials === null || typeof credentials !== "object" || Array.isArray(credentials)) {
+    return null;
+  }
+  const targetFormat = (credentials as JsonRecord)._targetFormat;
+  return typeof targetFormat === "string" && NATIVE_WEB_SEARCH_TARGET_FORMATS.has(targetFormat)
+    ? targetFormat
+    : null;
+}
+
+// OpenAI service_tier values. Anthropic's "standard_only" has no OpenAI twin beyond
+// "default"; "fast" is the alias the Codex billing/executor path already accepts.
+const OPENAI_SERVICE_TIERS = new Set(["auto", "default", "flex", "priority", "scale"]);
+const CLAUDE_TO_OPENAI_SERVICE_TIER: Record<string, string> = {
+  standard_only: "default",
+  fast: "priority",
+};
+// Only targets known to accept a top-level service_tier get it; strict
+// OpenAI-compatible gateways reject unknown fields with a 400.
+const SERVICE_TIER_PROVIDERS = new Set(["openai", "azure-openai", "codex"]);
+
+/** Client service_tier to keep across the Claude → OpenAI pivot, or undefined to drop it. */
+function resolveOpenAIServiceTier(tier: unknown, credentials: unknown): string | undefined {
+  if (typeof tier !== "string") return undefined;
+  const provider =
+    credentials !== null && typeof credentials === "object" && !Array.isArray(credentials)
+      ? (credentials as JsonRecord)._provider
+      : undefined;
+  if (typeof provider !== "string" || !SERVICE_TIER_PROVIDERS.has(provider)) return undefined;
+  const normalized = tier.trim().toLowerCase();
+  const mapped = CLAUDE_TO_OPENAI_SERVICE_TIER[normalized] ?? normalized;
+  return OPENAI_SERVICE_TIERS.has(mapped) ? mapped : undefined;
 }
 
 // Convert Claude request to OpenAI format
@@ -113,7 +145,7 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
 
   // Max tokens
   if (body.max_tokens) {
-    result.max_tokens = adjustMaxTokens(body);
+    result.max_tokens = adjustMaxTokens(body, { honorExplicitCap: true });
   }
 
   // Temperature
@@ -247,14 +279,30 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
     result.messages.push({ role: "user", content: "(continue)" });
   }
 
-  const useNativeResponsesWebSearch = shouldUseNativeResponsesWebSearch(credentials);
+  const nativeWebSearchTarget = nativeWebSearchTargetFormat(credentials);
+  const useResponsesWebSearch = nativeWebSearchTarget === FORMATS.OPENAI_RESPONSES;
+  // Gemini/Antigravity grounding is enabled only when the Claude server tool is the
+  // request's SOLE tool (the Claude Code WebSearch sub-request shape). An agent turn
+  // that merely declares the server tool alongside its own functions must keep those
+  // functions — grounding there would drop them (Antigravity 400s on a built-in tool
+  // mixed with functionDeclarations), so the mixed case drops the server tool instead
+  // and leaves the custom functions untouched, as it did before this lane existed.
+  const geminiGroundingTarget =
+    nativeWebSearchTarget === FORMATS.GEMINI || nativeWebSearchTarget === FORMATS.ANTIGRAVITY;
+  const useGeminiGrounding = geminiGroundingTarget && isSoleClaudeServerWebSearchTool(body.tools);
 
   // Tools
   if (body.tools && Array.isArray(body.tools)) {
     const normalizedTools = body.tools
       .map((tool) => {
-        if (useNativeResponsesWebSearch && isClaudeServerWebSearchTool(tool)) {
-          return convertClaudeServerWebSearchTool(tool);
+        if (isClaudeServerWebSearchTool(tool)) {
+          if (useResponsesWebSearch || useGeminiGrounding) {
+            return convertClaudeServerWebSearchTool(tool);
+          }
+          // Mixed Gemini/Antigravity request: drop the server tool rather than
+          // degrade it to a plain `web_search` functionDeclaration (which the
+          // Antigravity envelope then strips anyway) or enable grounding.
+          if (geminiGroundingTarget) return null;
         }
 
         if (!tool || typeof tool !== "object" || Array.isArray(tool)) return null;
@@ -268,6 +316,9 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
             name,
             description: typeof record.description === "string" ? record.description : "", // fix: never null (#276)
             parameters: normalizeToolSchema(record.input_schema),
+            // Preserve tool-level strict schema enforcement (9router#4172). Only booleans
+            // carry over; omitted stays omitted (non-strict on Chat).
+            ...chatStrictFrom(record),
           },
         };
       })
@@ -282,8 +333,12 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
   if (body.tool_choice) {
     result.tool_choice = convertToolChoice(
       body.tool_choice,
-      useNativeResponsesWebSearch && hasClaudeServerWebSearchTool(body.tools)
+      useResponsesWebSearch && hasClaudeServerWebSearchTool(body.tools)
     );
+    // Claude carries the single-call restriction on tool_choice (9router#4171).
+    if (body.tool_choice?.disable_parallel_tool_use === true) {
+      result.parallel_tool_calls = false;
+    }
   }
 
   // Reasoning effort: map Claude-side thinking controls to OpenAI reasoning_effort.
@@ -311,6 +366,11 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
   ) {
     result.reasoning_effort = "none";
   }
+
+  // Keep a client-sent tier across the pivot: billing reads it from the source body,
+  // so dropping it here made the reported tier and the tier actually served diverge.
+  const serviceTier = resolveOpenAIServiceTier(body.service_tier, credentials);
+  if (serviceTier) result.service_tier = serviceTier;
 
   return result;
 }
@@ -407,6 +467,47 @@ function fixMissingToolResponses(messages) {
   }
 }
 
+// Convert a Claude `document` block into an OpenAI content part. A base64 document
+// (Claude Code sends PDFs this way) becomes the Chat Completions `file` part, which
+// OpenAI accepts natively and geminiHelper turns into `inlineData`. Plain-text and URL
+// documents become text, because OpenAI `file` parts only carry base64 data.
+function convertClaudeDocumentBlock(block, preserveCacheControl = false): JsonRecord | null {
+  const source = block?.source;
+  const title = typeof block?.title === "string" && block.title ? block.title : null;
+  let part: JsonRecord | null = null;
+
+  if (source?.type === "base64" && typeof source.data === "string" && source.data) {
+    const mediaType = source.media_type || "application/pdf";
+    const file: JsonRecord = { file_data: `data:${mediaType};base64,${source.data}` };
+    if (title) file.filename = title;
+    part = { type: "file", file };
+  } else if (source?.type === "text" && typeof source.data === "string" && source.data) {
+    part = { type: "text", text: title ? `[${title}]\n${source.data}` : source.data };
+  } else if (source?.type === "url" && typeof source.url === "string" && source.url) {
+    part = { type: "text", text: `[Document${title ? `: ${title}` : ""}] ${source.url}` };
+  }
+
+  if (part && preserveCacheControl && block.cache_control !== undefined) {
+    part.cache_control = block.cache_control;
+  }
+  return part;
+}
+
+// Text notice for Claude block types OpenAI Chat has no equivalent for (container_upload,
+// newer types). Only the block type is echoed — sanitized and capped — never block data,
+// so a crafted `type` string cannot smuggle instructions into the prompt.
+function sanitizeBlockType(type: string): string {
+  return type
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "")
+    .slice(0, 64);
+}
+
+function buildOmittedBlocksNotice(types: string[]): string {
+  const safe = new Set(types.map((t) => sanitizeBlockType(t) || "unsupported"));
+  return [...safe].map((t) => `[${t} block omitted: not supported on this route]`).join("\n");
+}
+
 // Convert single Claude message - returns single message or array of messages
 function convertClaudeMessage(msg, preserveCacheControl = false) {
   // Preserve system role for mid-conversation system turns (#6954).
@@ -429,6 +530,7 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
     const parts = [];
     const toolCalls = [];
     const toolResults = [];
+    const omittedTypes: string[] = [];
     let reasoningContent = null;
 
     for (const block of msg.content) {
@@ -461,6 +563,12 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
             });
           }
           break;
+
+        case "document": {
+          const documentPart = convertClaudeDocumentBlock(block, preserveCacheControl);
+          if (documentPart) parts.push(documentPart);
+          break;
+        }
 
         case "thinking":
           reasoningContent = block.thinking || block.text || "";
@@ -496,6 +604,7 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
             // upstreams (port of decolua/9router#2123 by alican532).
             const textParts: string[] = [];
             let hasImage = false;
+            let hasDocument = false;
             for (const c of block.content) {
               if (c.type === "text") {
                 textParts.push(c.text);
@@ -513,13 +622,34 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
                 // `data:` URI too, which is exactly what the base64 branch above emits.
                 parts.push({ type: "image_url", image_url: { url: c.source.url } });
                 hasImage = true;
+              } else if (c.type === "document") {
+                // Same lift for documents: a `tool` message cannot carry a file part.
+                const documentPart = convertClaudeDocumentBlock(c);
+                if (documentPart?.type === "text") {
+                  textParts.push(documentPart.text as string);
+                } else if (documentPart) {
+                  parts.push(documentPart);
+                  hasDocument = true;
+                }
               }
             }
             resultContent =
               textParts.join("\n") ||
-              (hasImage ? "[tool returned an image; see attached]" : JSON.stringify(block.content));
+              (hasImage
+                ? "[tool returned an image; see attached]"
+                : hasDocument
+                  ? "[tool returned a document; see attached]"
+                  : JSON.stringify(block.content));
           } else if (block.content) {
             resultContent = JSON.stringify(block.content);
+          }
+
+          // The OpenAI tool role has no is_error field (strict upstreams reject
+          // unknown message fields): keep the failure visible with a marker.
+          if (block.is_error === true) {
+            resultContent = resultContent
+              ? `[tool_error: true]\n${resultContent}`
+              : "[tool_error: true]";
           }
 
           toolResults.push({
@@ -527,6 +657,10 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
             tool_call_id: block.tool_use_id,
             content: resultContent,
           });
+          break;
+
+        default:
+          if (typeof block?.type === "string" && block.type) omittedTypes.push(block.type);
           break;
       }
     }
@@ -576,6 +710,12 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
 
     if (reasoningContent !== null && role === "assistant") {
       return { role, content: "", reasoning_content: reasoningContent };
+    }
+
+    // Only unsupported blocks: keep the turn with a notice instead of returning null,
+    // which silently deleted it (and could leave the upstream with `messages: []`).
+    if (omittedTypes.length > 0) {
+      return { role, content: buildOmittedBlocksNotice(omittedTypes) };
     }
   }
 

@@ -1,0 +1,1 @@
+- **fix(release):** the post-publish verifier (`scripts/release/verify-published.mjs`) proves the published package by the installed CLI banner and the packaged `dist/package.json` and requires a healthy boot — `/api/monitoring/health` no longer reports a version, which made the check time out on every good release ([#17274](https://github.com/diegosouzapw/OmniRoute/pull/17274))

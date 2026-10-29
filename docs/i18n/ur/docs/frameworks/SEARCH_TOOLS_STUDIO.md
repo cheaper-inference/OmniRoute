@@ -35,36 +35,36 @@
 
 ## ٹیبز
 
-### سرچ ٹیب
+### تلاش ٹیب
 
-موجودہ `SearchForm` + `ResultsPanel` + `RerankPanel` کو ایک ٹیب میں ترقی دیتا ہے:
+موجودہ `SearchForm` + `ResultsPanel` + `RerankPanel` کو ایک ٹیب میں تبدیل کرتا ہے:
 
-- استفسار → نتائج (عنوان، URL، اقتباس، مطابقت کا اسکور)۔
-- کنفیگ پین میں فراہم کنندہ کا میٹا ڈیٹا (لاگت، کوٹا، حالت)۔
-- ری رینک سیکشن: ری رینک ماڈل منتخب کریں، نتائج کو دوبارہ ترتیب دیں، اور `positionDelta` دکھائیں۔
-- جب کوئی سرچ فراہم کنندہ کنفیگر نہ ہو تو CTA کے ساتھ خالی حالت۔
-- `SearchHistory.tsx` کے ذریعے سرچ ہسٹری۔
+- استفسار → نتائج (عنوان، URL، اقتباس، موزونیت اسکور)۔
+- Config پین میں فراہم کنندہ کا میٹا ڈیٹا (لاگت، کوٹا، حیثیت)۔
+- دوبارہ درجہ بندی کا سیکشن: دوبارہ درجہ بندی کا ماڈل منتخب کریں، نتائج کی ترتیب بدلیں، `positionDelta` دکھائیں۔
+- جب کوئی تلاش فراہم کنندہ کنفیگر نہ ہو تو CTA کے ساتھ خالی حالت۔
+- `SearchHistory.tsx` کے ذریعے تلاش کی سرگزشت۔
 - `POST /v1/search` کو کال کرتا ہے (موجودہ اینڈ پوائنٹ، کوئی تبدیلی نہیں)۔
 
 ### اسکریپ ٹیب
 
-`POST /v1/web/fetch` کے ذریعے URL سے مواد اخذ کرنے کے لیے نیا ٹیب (منصوبہ 05 میں بنایا گیا):
+`POST /v1/web/fetch` (پلان 05 میں بنایا گیا) کے ذریعے کسی URL سے مواد اخذ کرنے کے لیے نیا ٹیب:
 
-- ان پٹ: URL + مکمل صفحے کا ٹوگل + فارمیٹ سلیکٹر (markdown / text / HTML)۔
+- اِن پٹ: URL + مکمل صفحہ ٹوگل + فارمیٹ سلیکٹر (markdown / متن / HTML)۔
 - جمع کریں → حاصل کریں → `ScrapeResult.tsx` رینڈر کریں۔
-- `ScrapeResult`، markdown کا پیش منظر + خام مواد کا ٹوگل رینڈر کرتا ہے۔
-- حد: اگر جواب کا متن **256 KB** سے زیادہ ہو تو UI میں `(مختصر کیا گیا، خام مواد دیکھیں)` دکھایا جاتا ہے اور خام مواد Monaco موڈل میں کھلتا ہے (D21)۔
-- میٹا ڈیٹا پینل: فراہم کنندہ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search)، تاخیر، لاگت، جواب کا حجم، لنکس کی تعداد۔
+- `ScrapeResult`، markdown پیش منظر + خام مواد کا ٹوگل رینڈر کرتا ہے۔
+- حد: اگر رسپانس باڈی **256 KB** سے زیادہ ہو تو UI، `(مختصر کیا گیا، خام مواد دیکھیں)` دکھاتا ہے اور خام مواد کو Monaco موڈل (D21) میں کھولتا ہے۔
+- میٹا ڈیٹا پینل: فراہم کنندہ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search)، تاخیر، لاگت، رسپانس سائز، لنکس کی تعداد۔
 - `useScrapeFetch.ts` ہُک استعمال کرتا ہے۔
 
 ### موازنہ ٹیب
 
 ایک ہی استفسار/URL کو زیادہ سے زیادہ **4 فراہم کنندگان پر متوازی طور پر** چلاتا ہے (D22):
 
-- ہر فراہم کنندہ کے لیے شانہ بہ شانہ کالم۔
-- پیمائشیں: تاخیر، لاگت، نتائج کی تعداد، جواب کا حجم۔
-- سرچ کے لیے URL اوورلیپ کا حساب (ابتدائی نتیجے کے مقابلے میں مشترکہ URLs کی تعداد)۔
-- ہر فراہم کنندہ کے لیے `POST /v1/search` (سرچ) یا `POST /v1/web/fetch` (اسکریپ) کو کال کرتا ہے۔
+- ہر فراہم کنندہ کے لیے ساتھ ساتھ کالم۔
+- پیمائشیں: تاخیر، لاگت، نتائج کی تعداد، رسپانس سائز۔
+- تلاش کے لیے URL اوورلیپ کا حساب (ابتدائی نتیجے کے مقابلے میں مشترکہ URLs کی تعداد)۔
+- ہر فراہم کنندہ کے لیے `POST /v1/search` (تلاش) یا `POST /v1/web/fetch` (اسکریپ) کو کال کرتا ہے۔
 
 ---
 
@@ -97,15 +97,15 @@
 
 ---
 
-## Provider Catalog
+## فراہم کنندگان کی فہرست
 
-`ProviderCatalog.tsx`، `GET /api/search/providers` سے providers کی مکمل فہرست ظاہر کرتا ہے
-(جسے F4 میں fetch providers شامل کرنے کے لیے توسیع دی گئی):
+`ProviderCatalog.tsx`، `GET /api/search/providers` سے فراہم کنندگان کی مکمل فہرست ظاہر کرتا ہے
+(جسے F4 میں fetch فراہم کنندگان شامل کرنے کے لیے توسیع دی گئی ہے):
 
-| `kind` | `"search"` (20 providers) یا `"fetch"` (firecrawl، jina-reader، tavily-search، tinyfish، nimble-search، anysearch-search) |
+| `kind` | `"search"` (20 فراہم کنندگان) یا `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-اسٹیٹس کو **درخواست کے وقت اخذ کیا جاتا ہے**، یہ جانچ کر کہ آیا credentials موجود ہیں اور آیا
-تمام keys فی الحال cooldown میں ہیں۔
+اسٹیٹس کو **درخواست کے وقت اخذ کیا جاتا ہے**، اس بات کی جانچ کرکے کہ آیا اسناد موجود ہیں اور آیا
+تمام کلیدیں فی الحال cooldown میں ہیں۔
 
 ---
 
@@ -117,18 +117,18 @@ API key کا placeholder ہمیشہ `$OMNIROUTE_API_KEY` ہوتا ہے (D11، Pl
 
 ---
 
-## بیک اینڈ تبدیلیاں
+## بیک اینڈ میں تبدیلیاں
 
-اس فیچر کے لیے صرف ایک بیک اینڈ تبدیلی درکار تھی:
+اس فیچر کے لیے بیک اینڈ میں صرف ایک تبدیلی درکار تھی:
 
 ### توسیع شدہ `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` کو درج ذیل کے لیے توسیع دی گئی:
+`src/app/api/search/providers/route.ts` کو درج ذیل مقاصد کے لیے توسیع دی گئی:
 
-- تمام 6 fetch providers (`firecrawl`، `jina-reader`، `tavily-search`، `tinyfish`، `nimble-search`، `anysearch-search`) کو array میں شامل کرنا۔
-- ہر item میں `kind: "search" | "fetch"` شامل کرنا۔
-- live credential state سے اخذ کردہ `status: "configured" | "missing" | "rate_limited"` شامل کرنا۔
-- backward compatibility برقرار رکھنا — موجودہ fields (`id`، `name` وغیرہ) میں کوئی تبدیلی نہیں۔
+- ہر فیچ پرووائیڈر (`firecrawl`، `jina-reader`، `tavily-search`، `tinyfish`، `nimble-search`، `anysearch-search`، `parallel-search`) کو ارے میں شامل کرنا۔
+- ہر آئٹم میں `kind: "search" | "fetch"` شامل کرنا۔
+- لائیو اسناد کی حالت سے اخذ کردہ `status: "configured" | "missing" | "rate_limited"` شامل کرنا۔
+- پسماندہ مطابقت برقرار رکھنا — موجودہ فیلڈز (`id`، `name`، وغیرہ) میں کوئی تبدیلی نہیں کی گئی۔
 
 ---
 

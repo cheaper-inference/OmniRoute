@@ -13,7 +13,7 @@ export function isApiKeyRevealEnabled(): boolean {
   }
 }
 
-export function maskStoredApiKey(key: unknown): string | null {
-  if (typeof key !== "string") return null;
-  return key.slice(0, 8) + "****" + key.slice(-4);
-}
+// One mask implementation for the routes and the providerSpecificData response
+// sanitizer (`src/lib/providers/requestDefaults.ts`, reachable from a client
+// component, so it cannot import this DB-aware module). Lives in a pure leaf.
+export { maskStoredApiKey } from "@/shared/utils/apiKeyMask";

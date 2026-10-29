@@ -105,3 +105,26 @@ it("renders the public API URL instead of rebuilding an internal apiPort URL", a
   expect(container.textContent).not.toContain(":20131/api/v1");
   expect(replaceMock).not.toHaveBeenCalled();
 });
+
+// F4 (KEA-7886, lote 3): the page had no h1 (the step title was an h2) and the 6-step stepper
+// (6 × 32 px dots + 5 × 32 px connectors + gaps) overflowed both sides at 390 px.
+it("names the page with one h1 (the step title) and keeps the stepper narrow below sm", async () => {
+  await act(async () => {
+    root.render(<OnboardingWizard />);
+  });
+  await waitForText("getStarted");
+
+  const headings = container.querySelectorAll("h1");
+  expect(headings).toHaveLength(1);
+  expect(headings[0].textContent).toBe("welcome");
+
+  const stepper = container.querySelector("ol")!;
+  expect(stepper.className).toMatch(/\bgap-1\b/);
+  expect(stepper.className).toMatch(/\bsm:gap-2\b/);
+  const connectors = stepper.querySelectorAll('li > span[aria-hidden="true"]');
+  expect(connectors).toHaveLength(5);
+  for (const connector of connectors) {
+    expect(connector.className).toMatch(/\bw-3\b/);
+    expect(connector.className).toMatch(/\bsm:w-8\b/);
+  }
+});

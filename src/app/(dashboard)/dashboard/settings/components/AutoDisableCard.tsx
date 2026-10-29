@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, Button, Input } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
+import { Card, Button, Checkbox, Input } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import {
   AUTO_DISABLE_BANNED_SCOPES,
@@ -84,9 +86,7 @@ export default function AutoDisableCard() {
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary" aria-hidden="true">
-              block
-            </span>
+            <Icon name="block" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("autoDisableBannedAccounts")}</h2>
           </div>
           {editMode ? (
@@ -121,26 +121,21 @@ export default function AutoDisableCard() {
         <p className="text-sm text-text-muted mb-4">{t("autoDisableDescription")}</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="rounded-lg bg-black/5 dark:bg-white/5 p-4 flex flex-col justify-center">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={current.enabled}
-                onChange={(e) => setDraft((prev) => ({ ...prev, enabled: e.target.checked }))}
-                disabled={!editMode}
-                className="w-4 h-4 text-primary bg-surface/50 border-white/20 rounded focus:ring-primary/50"
-              />
-              <span className="text-sm font-medium">{t("autoDisableBannedAccounts")}</span>
-            </label>
+          <div className="rounded-lg bg-bg-subtle p-4 flex flex-col justify-center">
+            <Checkbox
+              checked={current.enabled}
+              onChange={(e) => setDraft((prev) => ({ ...prev, enabled: e.target.checked }))}
+              disabled={!editMode}
+              label={t("autoDisableBannedAccounts")}
+            />
           </div>
 
-          <div className="rounded-lg bg-black/5 dark:bg-white/5 p-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
-              {t("autoDisableThreshold")}
-            </h3>
+          <div className="rounded-lg bg-bg-subtle p-4">
             {editMode ? (
               <Input
                 type="number"
+                label={t("autoDisableThreshold")}
+                hint={t("autoDisableThresholdDesc")}
                 min="1"
                 max="10"
                 value={draft.threshold}
@@ -149,49 +144,49 @@ export default function AutoDisableCard() {
                 }
               />
             ) : (
-              <span className={`text-sm font-mono ${!data.enabled && "opacity-50"}`}>
-                {t("failures", { count: data.threshold })}
-              </span>
+              <>
+                <h3 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
+                  {t("autoDisableThreshold")}
+                </h3>
+                <span className={`text-sm font-mono ${data.enabled ? "" : "text-text-muted"}`}>
+                  {t("failures", { count: data.threshold })}
+                </span>
+                <p className="text-xs text-text-muted mt-2">{t("autoDisableThresholdDesc")}</p>
+              </>
             )}
-            <p className="text-xs text-text-muted mt-2">{t("autoDisableThresholdDesc")}</p>
           </div>
         </div>
 
-        <div className={`mt-4 rounded-lg bg-black/5 dark:bg-white/5 p-4 ${!current.enabled ? "opacity-50" : ""}`}>
-          <h3 className="text-xs font-bold uppercase tracking-wider mb-2">
-            {t("autoDisableBannedScope")}
-          </h3>
-          <p className="text-xs text-text-muted mb-3">{t("autoDisableBannedScopeDesc")}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="mt-4 rounded-lg bg-bg-subtle p-4">
+          <RadioGroup
+            name="auto-disable-banned-scope"
+            label={t("autoDisableBannedScope")}
+            description={t("autoDisableBannedScopeDesc")}
+            value={current.scope}
+            onValueChange={(next) =>
+              setDraft((prev) => ({ ...prev, scope: next as (typeof scopes)[number] }))
+            }
+            disabled={!editMode || !current.enabled}
+            orientation="horizontal"
+          >
             {scopes.map((scope) => (
-              <label
+              <RadioGroupItem
                 key={scope}
-                className={`flex items-start gap-3 rounded-lg border border-white/10 p-3 ${editMode && current.enabled ? "cursor-pointer" : "cursor-default"}`}
-              >
-                <input
-                  type="radio"
-                  name="auto-disable-banned-scope"
-                  value={scope}
-                  checked={current.scope === scope}
-                  onChange={() => setDraft((prev) => ({ ...prev, scope }))}
-                  disabled={!editMode || !current.enabled}
-                  className="mt-1 w-4 h-4 text-primary bg-surface/50 border-white/20 focus:ring-primary/50"
-                />
-                <span>
-                  <span className="block text-sm font-medium">
-                    {scope === "all"
-                      ? t("autoDisableBannedScopeAll")
-                      : t("autoDisableBannedScopeSubscription")}
-                  </span>
-                  <span className="block text-xs text-text-muted mt-1">
-                    {scope === "all"
-                      ? t("autoDisableBannedScopeAllDesc")
-                      : t("autoDisableBannedScopeSubscriptionDesc")}
-                  </span>
-                </span>
-              </label>
+                card
+                value={scope}
+                label={
+                  scope === "all"
+                    ? t("autoDisableBannedScopeAll")
+                    : t("autoDisableBannedScopeSubscription")
+                }
+                description={
+                  scope === "all"
+                    ? t("autoDisableBannedScopeAllDesc")
+                    : t("autoDisableBannedScopeSubscriptionDesc")
+                }
+              />
             ))}
-          </div>
+          </RadioGroup>
         </div>
       </div>
     </Card>

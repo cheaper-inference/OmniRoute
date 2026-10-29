@@ -6,6 +6,7 @@
  *   GET https://api.syntx.ai/api/v1/llm/limits                   → plan, window_6h/7d percent_left
  */
 import { SYNTX_API_BASE, looksLikeJwt, resolveSyntxToken, syntxAuthHeaders } from "../syntxAuth.ts";
+import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { parseResetTime, type UsageQuota } from "./quota.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
@@ -39,14 +40,14 @@ const SEVEN_DAYS_MS = 7 * 24 * 3600_000;
 export function parseSyntxTokenBalance(raw: unknown): number {
   if (typeof raw === "number" && Number.isFinite(raw)) return raw;
   if (typeof raw !== "string") return 0;
-  const n = Number.parseFloat(raw.replace(",", ".").trim());
+  const n = Number.parseFloat(raw.replaceAll(",", ".").trim());
   return Number.isFinite(n) ? n : 0;
 }
 
 export function parseSyntxPercentLeft(raw: unknown): number {
   if (typeof raw === "number" && Number.isFinite(raw)) return raw;
   if (typeof raw !== "string") return 0;
-  const n = Number.parseFloat(raw.replaceAll("%", "").replace(",", ".").trim());
+  const n = Number.parseFloat(raw.replaceAll("%", "").replaceAll(",", ".").trim());
   return Number.isFinite(n) ? n : 0;
 }
 
@@ -125,7 +126,8 @@ export function buildSyntxUsageResult(subscription: SyntxSubscription, limits: S
 export async function getSyntxUsage(
   apiKey?: unknown,
   accessToken?: unknown,
-  providerSpecificData?: unknown
+  providerSpecificData?: unknown,
+  connectionId?: string
 ) {
   const token = resolveSyntxToken({ apiKey, accessToken, providerSpecificData });
   if (!looksLikeJwt(token)) {
@@ -134,18 +136,27 @@ export async function getSyntxUsage(
 
   try {
     const headers = syntxAuthHeaders(token);
-    const [subRes, limRes] = await Promise.all([
-      fetch(`${SYNTX_API_BASE}/api/v1/user/subscription?ref=false`, {
-        method: "GET",
-        headers,
-        signal: AbortSignal.timeout(15_000),
-      }),
-      fetch(`${SYNTX_API_BASE}/api/v1/llm/limits`, {
-        method: "GET",
-        headers,
-        signal: AbortSignal.timeout(15_000),
-      }),
-    ]);
+    const subUrl = `${SYNTX_API_BASE}/api/v1/user/subscription?ref=false`;
+    const limUrl = `${SYNTX_API_BASE}/api/v1/llm/limits`;
+    const subInit: RequestInit = {
+      method: "GET",
+      headers,
+      signal: AbortSignal.timeout(15_000),
+    };
+    const limInit: RequestInit = {
+      method: "GET",
+      headers,
+      signal: AbortSignal.timeout(15_000),
+    };
+    const [subRes, limRes] = connectionId
+      ? await Promise.all([
+          fetchWithConnectionProxy(connectionId, subUrl, subInit),
+          fetchWithConnectionProxy(connectionId, limUrl, limInit),
+        ])
+      : await Promise.all([globalThis.fetch(subUrl, subInit), globalThis.fetch(limUrl, limInit)]);
+    if (!subRes || !limRes) {
+      return { message: "SYNTX limits failed (HTTP unknown)" };
+    }
 
     if (
       subRes.status === 401 ||

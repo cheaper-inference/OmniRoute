@@ -277,8 +277,9 @@ describe("PlaygroundStudio", () => {
       exportBtn?.click();
     });
 
-    // mock returns i18n key as text — assert on the key
-    expect(el.textContent).toContain("exportCode");
+    // mock returns i18n key as text — assert on the key. KEA-7886: the modal is the kit Dialog,
+    // portaled to document.body.
+    expect(document.querySelector("[role='dialog']")?.textContent).toContain("exportCode");
   });
 });
 

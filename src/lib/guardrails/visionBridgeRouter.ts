@@ -51,6 +51,13 @@ export interface VisionBridgeRouterConfig {
   minLatencySamples: number;
   /** Models to exclude from auto-routing */
   excludedModels: string[];
+  /**
+   * Partition of the selection caches for an API-key-scoped pick (the key's
+   * id + policy). A scoped pick must never be served from, or leak into, the
+   * unscoped cache, and its cached member is re-validated against the scoped
+   * `hasUsableCredentials` before reuse.
+   */
+  cacheScope?: string;
 }
 
 /**
@@ -409,15 +416,16 @@ function resolveVirtualCombo(fixedModel: string | undefined): string | undefined
 async function resolveCachedSelection(
   cacheKey: string,
   virtualCombo: string | undefined,
-  deps: VisionBridgeRouterDeps
+  deps: VisionBridgeRouterDeps,
+  scoped = false
 ): Promise<string | null> {
   const cached = selectionCache.get(cacheKey);
   if (!cached || cached.expiresAt <= Date.now()) return null;
 
   if (await cachedModelRemainsAvailable(cached.modelId, deps)) {
-    if (!virtualCombo) return cached.modelId;
     const checkCreds = deps.hasUsableCredentials ?? hasUsableCredentialsForModel;
-    if ((await checkCreds(cached.modelId)) !== false) return virtualCombo;
+    if (!virtualCombo && !scoped) return cached.modelId;
+    if ((await checkCreds(cached.modelId)) !== false) return virtualCombo ?? cached.modelId;
   }
   selectionCache.delete(cacheKey);
   return null;
@@ -455,11 +463,19 @@ export async function getBestVisionModel(
 
   // Check selection cache — key includes excluded models to prevent cache pollution
   // across different configurations
-  const cacheKey =
+  const baseCacheKey =
     fullConfig.excludedModels.length > 0
       ? `excl:${[...fullConfig.excludedModels].sort().join(",")}`
       : "default";
-  const cachedPick = await resolveCachedSelection(cacheKey, virtualCombo, deps);
+  const cacheKey = fullConfig.cacheScope
+    ? `scope:${fullConfig.cacheScope}|${baseCacheKey}`
+    : baseCacheKey;
+  const cachedPick = await resolveCachedSelection(
+    cacheKey,
+    virtualCombo,
+    deps,
+    Boolean(fullConfig.cacheScope)
+  );
   if (cachedPick) return cachedPick;
 
   // A recent scan already proved nothing here is usable. Re-running it costs a

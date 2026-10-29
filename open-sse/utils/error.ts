@@ -1,6 +1,7 @@
 import { CORS_HEADERS } from "./cors.ts";
 import { unwrapClinepassEnvelope } from "./clinepassEnvelope.ts";
 import { extractJsonErrorFields } from "./tencentEnvelope.ts";
+import { classifyProviderSafetyError } from "./providerSafety.ts";
 import {
   redactSensitiveErrorText,
   sanitizeErrorMessage,
@@ -12,8 +13,17 @@ import type { ModelCooldownErrorPayload } from "@/types";
 import { buildPassthroughErrorResponse } from "./upstreamErrorPassthrough.ts";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { resolveRetryAfterInstant } from "./retryAfterInstant.ts";
+import { parseAntigravityRetryTime, parseProseRetryDelayMs } from "./proseRetryDelay.ts";
+import { parseDetailedRetryHintFromJsonBody } from "../services/retryAfterJson.ts";
+
+import {
+  isSafePublicErrorIdentifier,
+  projectPublicErrorIdentifier,
+} from "./publicErrorIdentifiers.ts";
+export { projectPublicErrorIdentifier } from "./publicErrorIdentifiers.ts";
 
 export { parseRetryAfterHeader, resolveRetryAfterInstant } from "./retryAfterInstant.ts";
+export { parseAntigravityRetryTime, parseProseRetryDelayMs };
 
 export { redactSensitiveErrorText, sanitizeErrorMessage, sanitizeUpstreamDetails };
 
@@ -40,337 +50,6 @@ export type ErrorBodyClassification = {
   /** ISO / epoch-ms / Date the underlying quota/limit resets — see resolveRetryAfterInstant(). */
   retryAfter?: string | number | Date | null;
 };
-
-const PUBLIC_ERROR_IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
-const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
-  "abort",
-  "aborted",
-  "account_semaphore_capacity",
-  "acp_cancelled",
-  "acp_early_exit",
-  "acp_error",
-  "acp_output_too_large",
-  "acp_session_mismatch",
-  "acp_timeout",
-  "admission_aborted",
-  "admission_deadline",
-  "admission_lane_evicted",
-  "admission_oversized",
-  "admission_queue_full",
-  "admission_shutdown",
-  "admission_unavailable",
-  "all_accounts_inactive",
-  "all_targets_cooling_down",
-  "all_targets_skipped",
-  "antigravity_pool_busy",
-  "antigravity_pre_response_timeout",
-  "api_error",
-  "auth_error",
-  "authentication_error",
-  "authentication_required",
-  "bad_gateway",
-  "bad_request",
-  "bedrock_stream_error",
-  "billing_error",
-  "blackbox_auth_required",
-  "blackbox_rate_limit",
-  "blackbox_subscription_required",
-  "body_exceeds_budget",
-  "browser_stream_inconsistent",
-  "budget_exceeded",
-  "capability_mismatch",
-  "cf_mitigated_challenge",
-  "chat_admission_busy",
-  "chat_history_too_large",
-  "chatgpt_session_expired",
-  "chatgpt_submission_ambiguous",
-  "chatgpt_submitted_turn_failed",
-  "chatgpt_subscription_unavailable",
-  "chatgpt_web_codex_error",
-  "chatgpt_web_codex_turn_failed",
-  "claude_web_protocol_error",
-  "cli_not_found",
-  "client_cancelled",
-  "client_closed_request",
-  "client_disconnected",
-  "cloudflare_challenge",
-  "cloudflare_or_bot",
-  "codex_app_server_turn_failed",
-  "codex_app_server_unconfigured",
-  "codex_scope_cooldown",
-  "codex_tool_timeout",
-  "combo_target_timeout",
-  "combo_timeout",
-  "compaction_control_unavailable",
-  "compaction_handoff_failed",
-  "compaction_source_unavailable",
-  "connection_cooldown",
-  "connection_error",
-  "connection_not_allowed",
-  "connection_terminal_status",
-  "connection_unavailable",
-  "connector_error",
-  "connector_not_found",
-  "context_length_exceeded",
-  "context_window",
-  "devin_agentic_error",
-  "devin_cli_error",
-  "devin_desktop_error",
-  "devin_internal_tool_execution",
-  "direct_response_start_timeout",
-  "duplicate_tool_use_id",
-  "eai_again",
-  "econnrefused",
-  "econnreset",
-  "empty_acp_output",
-  "empty_content",
-  "empty_messages",
-  "empty_response",
-  "error",
-  "etimedout",
-  "executor_contract_violation",
-  "executor_error",
-  "extract_failed",
-  "feature_disabled",
-  "file_too_large",
-  "gateway_timeout",
-  "gcp_project_required",
-  "gemini_tpm_exhausted",
-  "grok_error",
-  "heap_pressure",
-  "huggingchat_generation_error",
-  "incompatible_reasoning_effort",
-  "inspector_error",
-  "insufficient_quota",
-  "internal_server_error",
-  "invalid_acp_frame",
-  "invalid_acp_upstream",
-  "invalid_api_key",
-  "invalid_authentication",
-  "invalid_connection_id",
-  "invalid_encrypted_content",
-  "invalid_grant",
-  "invalid_json",
-  "invalid_kiro_tool_call",
-  "invalid_output_schema",
-  "invalid_previous_response_binding",
-  "invalid_provider",
-  "invalid_request",
-  "invalid_request_body",
-  "invalid_request_error",
-  "invalid_tool_arguments",
-  "invalid_tool_choice",
-  "invalid_tool_json",
-  "invalid_tool_name",
-  "invalid_tools",
-  "invalid_trailer",
-  "key_allows_all_combos",
-  "key_allows_all_models",
-  "lease_action_invalid",
-  "lease_api_key_invalid",
-  "lease_authentication_required",
-  "lease_authorization_mismatch",
-  "lease_capacity_unavailable",
-  "lease_connection_mismatch",
-  "lease_content_type_required",
-  "lease_context_invalid",
-  "lease_context_required",
-  "lease_eligibility_unavailable",
-  "lease_error",
-  "lease_fence_stale",
-  "lease_key_configuration_invalid",
-  "lease_key_policy_invalid",
-  "lease_model_invalid",
-  "lease_no_eligible_connection",
-  "lease_required",
-  "lease_scope_required",
-  "lease_service_unavailable",
-  "lease_unsupported_route",
-  "lease_unsupported_transport",
-  "lmarena_error",
-  "lmarena_stream_error",
-  "message_limit",
-  "meta_ai_empty_response",
-  "meta_ai_mode_switch_failed",
-  "meta_ai_warmup_failed",
-  "meta_ai_ws_error",
-  "missing_authorization",
-  "missing_cookie",
-  "missing_credentials",
-  "missing_credits",
-  "missing_project_id",
-  "missing_session_id",
-  "missing_tool_name",
-  "missing_tool_use_id",
-  "mixed_tool_narrative",
-  "model_cooldown",
-  "model_excluded",
-  "model_lockout",
-  "model_not_found",
-  "model_not_supported",
-  "model_shutdown",
-  "multipart_protocol_violation",
-  "multiple_tool_requests",
-  "native_codex_pinned_model_unavailable",
-  "network_error",
-  "no_active_connection",
-  "no_free_eligible_connection",
-  "no_local_login",
-  "no_refresh_token",
-  "not_found",
-  "oauth_missing_project_id",
-  "origin_rejected",
-  "orphan_tool_result",
-  "payload_too_large",
-  "payment_required",
-  "peer_hop_limit_exceeded",
-  "peer_loop_detected",
-  "permission_denied",
-  "permission_error",
-  "pplx_error",
-  "premium_model_requires_key",
-  "previous_response_not_found",
-  "prompt_attachment_integrity",
-  "provider_circuit_half_open",
-  "provider_circuit_open",
-  "provider_deprecated",
-  "provider_error",
-  "provider_retired",
-  "provider_unavailable",
-  "proxy_family_unavailable",
-  "proxy_request_failed",
-  "proxy_unavailable",
-  "proxy_unreachable",
-  "quota_exhausted",
-  "quota_not_allocated",
-  "quota_only",
-  "rate_limit_error",
-  "rate_limit_exceeded",
-  "rate_limit_execution_timeout",
-  "rate_limit_longer_reached",
-  "rate_limit_queue_full",
-  "rate_limit_queue_timeout",
-  "rate_limit_queue_wedged",
-  "rate_limit_reached",
-  "rate_limited",
-  "reached_limit",
-  "read_failed",
-  "relay_timeout",
-  "request_failed",
-  "resource_exhausted",
-  "resource_pressure",
-  "risk_session_stale",
-  "semaphore_queue_full",
-  "semaphore_timeout",
-  "server_error",
-  "server_is_overloaded",
-  "service_not_running",
-  "service_unavailable",
-  "session_expired",
-  "session_pool_exhausted",
-  "spawn_failed",
-  "storage_encryption_stale",
-  "stream_content_stall",
-  "stream_disconnected",
-  "stream_early_eof",
-  "stream_error",
-  "stream_idle_timeout",
-  "stream_pipeline_error",
-  "stream_readiness_timeout",
-  "stream_terminated",
-  "stream_timeout",
-  "structure_limit",
-  "structured_output",
-  "structured_output_validation_failed",
-  "subscription_required",
-  "timeout",
-  "timeout_error",
-  "tls_circuit_open",
-  "tls_client_unavailable",
-  "tls_fingerprint_failed",
-  "tls_session_capacity",
-  "token_limit_exceeded",
-  "token_required",
-  "tool_calling_not_supported",
-  "tools",
-  "turn_in_progress",
-  "uc_auth_error",
-  "uc_generation_failed",
-  "uc_message_limit_exceeded",
-  "uc_paywall_exceeded",
-  "uc_rate_limit_exceeded",
-  "uc_timeout",
-  "uc_upstream_error",
-  "unauthorized",
-  "unavailable",
-  "und_err_body_timeout",
-  "und_err_connect_timeout",
-  "und_err_headers_timeout",
-  "und_err_socket",
-  "undeclared_historical_tool",
-  "unexecuted_tool_intent",
-  "unexpected_acp_response",
-  "unknown_devin_model",
-  "unknown_route",
-  "unknown_tool",
-  "unsafe_devin_home",
-  "unsupported_acp_version",
-  "unsupported_content_block",
-  "unsupported_control_for_provider",
-  "unsupported_endpoint",
-  "unsupported_feature",
-  "unsupported_image_block",
-  "unsupported_media_type",
-  "unsupported_role",
-  "unsupported_runtime",
-  "unsupported_system_block",
-  "unverified_codex_client",
-  "upgrade_required",
-  "upstream_access_denied",
-  "upstream_auth_error",
-  "upstream_empty_response",
-  "upstream_error",
-  "upstream_protocol_error",
-  "upstream_response_error",
-  "upstream_response_failed",
-  "upstream_server_error",
-  "upstream_timeout",
-  "upstream_websocket_connect_failed",
-  "upstream_websocket_error",
-  "usage_limit_exceeded",
-  "usage_limit_reached",
-  "video_artifact_content_type_invalid",
-  "video_artifact_download_failed",
-  "video_artifact_not_ready",
-  "video_artifact_signature_invalid",
-  "video_artifact_too_large",
-  "video_artifact_unavailable",
-  "video_artifact_url_blocked",
-  "video_artifact_url_invalid",
-  "vision",
-  "wreq_unavailable",
-  "writes_disabled",
-  "zai_stream_error",
-]);
-
-function isSafePublicErrorIdentifier(value: string): boolean {
-  if (!PUBLIC_ERROR_IDENTIFIER.test(value)) return false;
-  if (/^[1-5]\d{2}$/.test(value)) return true;
-  if (/^HTTP_[1-5]\d{2}$/i.test(value)) return true;
-  return SAFE_PUBLIC_ERROR_IDENTIFIERS.has(value.toLowerCase());
-}
-
-/** Project an internal classification onto the bounded client-visible identifier vocabulary. */
-export function projectPublicErrorIdentifier(value: unknown, fallback: unknown): string {
-  const safeFallback =
-    fallback === ""
-      ? ""
-      : typeof fallback === "string" && isSafePublicErrorIdentifier(fallback)
-        ? fallback
-        : "error";
-  if (typeof value !== "string") return safeFallback;
-  return isSafePublicErrorIdentifier(value) ? value : safeFallback;
-}
 
 /**
  * Build OpenAI-compatible error response body. Message is always sanitized
@@ -534,8 +213,7 @@ export function sanitizeRecoveryHint(
   if (!r || typeof r !== "object") return undefined;
   const action = typeof r.action === "string" ? (r.action as ComboRecoveryAction) : null;
   if (!action || !RECOVERY_ACTIONS.has(action)) return undefined;
-  // Reject empty OR whitespace-only next_step — the value must render usefully as a
-  // header and as a body field. A whitespace-only string would print as a blank hint.
+  // Reject empty/whitespace-only next_step: it must render as a non-blank header + body hint.
   const next_step = clampRecoveryStr(r.next_step, 200).trim();
   if (!next_step) return undefined;
   const hint: ComboRecoveryHint = { action, next_step };
@@ -707,6 +385,20 @@ export function isRetryAfterProvenanceEnabled(): boolean {
 }
 
 /**
+ * #15917 — opt-in CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED (default off): stop a combo on an
+ * exact content-policy refusal even when the remaining targets are different models. Lives
+ * here because this module already reads feature flags (no new open-sse → src edge). Fails
+ * closed to the default (heterogeneous combos advance) when the flag store cannot be read.
+ */
+export function isContentPolicyRefusalComboStopEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED");
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Seconds until a concrete FUTURE retry time, or null when there is none: absent,
  * non-positive or invalid values, numeric strings, and dates that already elapsed.
  * Unlike normalizeRetryAfterSeconds it never invents a 1s wait; when it returns a
@@ -753,57 +445,6 @@ function projectPublicRetryTimestamp(value: unknown): string | null {
 }
 
 /**
- * Parse Antigravity error message to extract retry time
- * Example: "You have exhausted your capacity on this model. Your quota will reset after 2h7m23s."
- * @param {string} message - Error message
- * @returns {number|null} Retry time in milliseconds, or null if not found
- */
-export function parseAntigravityRetryTime(message: unknown): number | null {
-  if (typeof message !== "string") return null;
-
-  // Match patterns like: 2h7m23s, 5m30s, 45s, 1h20m, etc.
-  const match = message.match(/reset after (\d+h)?(\d+m)?(\d+s)?/i);
-  if (!match) return null;
-
-  let totalMs = 0;
-
-  // Extract hours
-  if (match[1]) {
-    const hours = parseInt(match[1]);
-    totalMs += hours * 60 * 60 * 1000;
-  }
-
-  // Extract minutes
-  if (match[2]) {
-    const minutes = parseInt(match[2]);
-    totalMs += minutes * 60 * 1000;
-  }
-
-  // Extract seconds
-  if (match[3]) {
-    const seconds = parseInt(match[3]);
-    totalMs += seconds * 1000;
-  }
-
-  return totalMs > 0 ? totalMs : null;
-}
-
-const MAX_PROSE_RETRY_MS = 24 * 60 * 60 * 1000;
-
-/**
- * Retry delay in ms from upstream error prose (Antigravity "reset after 2h7m23s",
- * generic "retry after 30s"), capped at 24h; null when the text carries no hint.
- */
-export function parseProseRetryDelayMs(text: unknown): number | null {
-  if (typeof text !== "string" || text === "") return null;
-  const antigravityMs = parseAntigravityRetryTime(text);
-  if (antigravityMs) return Math.min(antigravityMs, MAX_PROSE_RETRY_MS);
-  const m = /retry\s+after\s+(\d{1,9})\s*s/i.exec(text);
-  const ms = m ? Number.parseInt(m[1], 10) * 1000 : 0;
-  return ms > 0 ? Math.min(ms, MAX_PROSE_RETRY_MS) : null;
-}
-
-/**
  * Combo drain paths: ISO retry time read from the prose of an upstream error body,
  * JSON or plain text. Null when RETRY_AFTER_PROVENANCE_ENABLED is off (legacy:
  * only structured retry fields are read) or when the text carries no hint.
@@ -838,14 +479,18 @@ export function logRetryHintUnreadable(
  * @returns {Promise<{statusCode: number, message: string, retryAfterMs: number|null, responseBody: unknown}>}
  */
 export async function parseUpstreamError(response: Response, provider: string | null = null) {
+  // Cap maximum retry time at 24 hours to prevent infinite wait
+  const MAX_RETRY_MS = 24 * 60 * 60 * 1000;
   let message = "";
   let retryAfterMs: number | null = null;
   let responseBody: unknown = null;
   let errorCode: unknown = undefined;
   let errorType: unknown = undefined;
+  let rawText = "";
 
   try {
     const text = await response.text();
+    rawText = text;
     responseBody = normalizePayloadForLog(text);
 
     // Try parse as JSON
@@ -873,6 +518,17 @@ export async function parseUpstreamError(response: Response, provider: string | 
     responseBody = { _rawText: message };
   }
 
+  // Code-only Responses failures still belong to the request, not account health.
+  const safety = classifyProviderSafetyError({
+    status: response.status,
+    code: errorCode,
+    type: errorType,
+    message,
+  });
+  if (safety) {
+    errorCode = safety.code;
+    errorType = "invalid_request_error";
+  }
   const messageStr = message;
 
   const retryAfterHeader = response.headers?.get?.("retry-after");
@@ -885,6 +541,19 @@ export async function parseUpstreamError(response: Response, provider: string | 
       if (Number.isFinite(retryAfterDate) && retryAfterDate > Date.now()) {
         retryAfterMs = retryAfterDate - Date.now();
       }
+    }
+  }
+
+  // #16442: a structured google.rpc.RetryInfo detail (`error.details[].retryDelay`)
+  // with NO prose hint in the message and NO Retry-After header is still an
+  // authoritative upstream window — Gemini 429s carry the delay only there. Read
+  // it from the raw body before the prose heuristics, mirroring the structured-
+  // first order detectRetryHint() uses on the classification side. Returns null
+  // for non-JSON bodies, so this is a no-op on every existing path.
+  if (response.status === 429 && !retryAfterMs) {
+    const structuredHint = parseDetailedRetryHintFromJsonBody(rawText, MAX_RETRY_MS);
+    if (structuredHint) {
+      retryAfterMs = structuredHint.retryAfterMs;
     }
   }
 
@@ -906,8 +575,6 @@ export async function parseUpstreamError(response: Response, provider: string | 
     }
   }
 
-  // Cap maximum retry time at 24 hours to prevent infinite wait
-  const MAX_RETRY_MS = 24 * 60 * 60 * 1000;
   if (retryAfterMs && retryAfterMs > MAX_RETRY_MS) {
     retryAfterMs = MAX_RETRY_MS;
   }
@@ -925,6 +592,23 @@ export async function parseUpstreamError(response: Response, provider: string | 
     responseBody,
     responseHeaders,
   };
+}
+
+/**
+ * Headers for a createErrorResult response. #16442: a parsed upstream retry hint
+ * must ride the REBUILT response, not only the `result.retryAfterMs` field —
+ * the fallback engine (chat.ts → markAccountUnavailable → checkFallbackError →
+ * detectRetryHint) reads `result.response.headers`, so dropping the header
+ * dropped the hint and every Gemini 429 with a details-only google.rpc.RetryInfo
+ * locked the model for the 3s base cooldown instead of the real upstream window.
+ * Standard seconds form; the passthrough branch below already does the same.
+ */
+function buildErrorResultHeaders(retryAfterMs: number | null | undefined): Record<string, string> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (retryAfterMs && Number.isFinite(retryAfterMs) && retryAfterMs > 0) {
+    headers["Retry-After"] = String(Math.ceil(retryAfterMs / 1000));
+  }
+  return headers;
 }
 
 /**
@@ -977,7 +661,7 @@ export function createErrorResult(
     errorCode,
     response: new Response(JSON.stringify(body), {
       status: statusCode,
-      headers: { "Content-Type": "application/json" },
+      headers: buildErrorResultHeaders(retryAfterMs),
     }),
   };
 

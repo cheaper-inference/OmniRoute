@@ -11,32 +11,19 @@
 
 ---
 
-## ଏହା କ’ଣ
+## ଏହା କଣ
 
-OmniRoute 329ଟି ପ୍ରଦାନକାରୀଙ୍କୁ ପଞ୍ଜୀକୃତ କରେ, ଯେଉଁଥିରେ **free/no-auth** ଭାବେ ଚିହ୍ନିତ 155ଟି କ୍ୟାଟାଲଗ୍ ଏଣ୍ଟ୍ରି ଅନ୍ତର୍ଭୁକ୍ତ
-(no-auth,
-free-tier OAuth, କିମ୍ବା free-tier API key —
-[Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ
-[Free Tiers directory](../reference/FREE_TIERS.md) ଦେଖନ୍ତୁ)। ସମସ୍ୟା ହେଉଛି: ମାଗଣା ପ୍ରଦାନକାରୀମାନଙ୍କର
-ମଡେଲ୍ ଗୁଣବତ୍ତାରେ ବ୍ୟାପକ ପାର୍ଥକ୍ୟ ରହିଥାଏ। ଏକ ଫ୍ରଣ୍ଟିୟର୍ ମଡେଲ୍ ପ୍ରଦାନ କରୁଥିବା no-auth ପ୍ରଦାନକାରୀ,
-ଏକ ଛୋଟ ପୁରୁଣା ମଡେଲ୍ ପ୍ରଦାନ କରୁଥିବା ପ୍ରଦାନକାରୀଠାରୁ ଅଧିକ ଉପଯୋଗୀ।
+OmniRoute 377 ପ୍ରଦାନକାରୀଙ୍କୁ ପଞ୍ଜିକରଣ କରେ, ଚିହ୍ନିତ 155 କାଟାଲଗ୍ ଏଣ୍ଟ୍ରିଗୁଡିକ ଅନ୍ତର୍ଭୁକ୍ତ କରେ \|**free/no-auth** (no-auth, free-tier OAuth, କିମ୍ବା free-tier API key - [ମାଗଣା ଟାୟାର୍ ଗାଇଡ୍](../getting-started/FREE-TIERS-GUIDE.md) ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ [ମାଗଣା ଟାୟାର୍ ଡିରେକ୍ଟୋରୀ](../reference/FREE_TIERS.md) ଦେଖନ୍ତୁ) \| ଧର: ମାଗଣା ପ୍ରଦାନକାରୀମାନେ ମଡେଲ ଗୁଣରେ ଭିନ୍ନ ଭିନ୍ନ ଅଟନ୍ତି \| ଏକ ସୀମାନ୍ତ ମଡେଲକୁ ସେବା କରୁଥିବା ଏକ ନୋ-ଅଥ୍ ପ୍ରଦାନକାରୀ ଏକ ଛୋଟ ଉତ୍ତରାଧିକାରୀ ମଡେଲ୍ ସେବା କରିବା ଅପେକ୍ଷା ଅଧିକ ଉପଯୋଗୀ \|
 
-**Free Provider Rankings**, "**କେଉଁ ମାଗଣା ପ୍ରଦାନକାରୀ ମୋତେ ସର୍ବୋତ୍ତମ ମଡେଲ୍ ଦେଉଛନ୍ତି?**" ପ୍ରଶ୍ନର ଉତ୍ତର
-ପ୍ରତ୍ୟେକ ମାଗଣା ପ୍ରଦାନକାରୀଙ୍କ କ୍ୟାଟାଲଗ୍କୁ **Arena AI leaderboard**-ର
-**କ୍ରାଉଡ୍-ସୋର୍ସ୍ଡ୍ ଗୁଣବତ୍ତା ସ୍କୋର୍** ସହିତ ଯୋଡ଼ି ଦେଇଥାଏ (ମାନବ-ପସନ୍ଦ ELO, LMArena
-ଚାଟ୍ବଟ୍ ଆରେନା ପଛରେ ଥିବା ସମାନ ଧାରଣା)। ତା’ପରେ ପ୍ରଦାନକାରୀମାନଙ୍କୁ ସେମାନଙ୍କର **ସର୍ବୋତ୍ତମ ମାଗଣା ମଡେଲ୍**-ର କ୍ଷମତା ଅନୁସାରେ ରାଙ୍କ୍ କରାଯାଏ।
+**ମାଗଣା ପ୍ରଦାନକାରୀ ମାନ୍ୟତା \|** ଉତ୍ତର "** କେଉଁ ମାଗଣା ପ୍ରଦାନକାରୀ ମୋତେ ସର୍ବୋତ୍ତମ ମଡେଲ୍ ଦିଅନ୍ତି?** ପ୍ରତ୍ୟେକ ମାଗଣା ପ୍ରଦାନକାରୀଙ୍କ କାଟାଲଗ୍ ସହିତ ଯୋଗଦାନ କରି \|** ଭିଡ଼-ସୋର୍ସଡ୍ ଗୁଣାତ୍ମକ ସ୍କୋର \|** ରୁ** ଆରେନା AI ଲିଡବୋର୍ଡ \|** (ମାନବ-ପସନ୍ଦ ELO, LMArena ଚାଟବଟ୍ ମ ena ଦାନ ପଛରେ ସମାନ ଧାରଣା) \| ପ୍ରଦାନକାରୀମାନେ ତା’ପରେ ସେମାନଙ୍କର ଶକ୍ତି ଦ୍ୱାରା ସ୍ଥାନିତ ହୁଅନ୍ତି \|** ସର୍ବୋତ୍ତମ ମାଗଣା ମଡେଲ୍ \|** ।
 
-ଏହି ରାଙ୍କିଂ ତିନୋଟି ବାସ୍ତବ ଉତ୍ସରୁ ଗଣନା କରାଯାଏ:
+ତିନୋଟି ପ୍ରକୃତ ଉତ୍ସରୁ ରାଙ୍କିଙ୍ଗ୍ ଗଣନା କରାଯାଇଛି:
 
-1. ମାଗଣା-ପ୍ରଦାନକାରୀ ତାଲିକାଗୁଡ଼ିକ — `NOAUTH_PROVIDERS`, ଏବଂ `hasFree` ଭାବେ ଫ୍ଲାଗ୍ ହୋଇଥିବା `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ
-   (`src/shared/constants/providers.ts`)।
-2. ପ୍ରଦାନକାରୀ ରେଜିଷ୍ଟ୍ରିରୁ ପ୍ରତ୍ୟେକ ପ୍ରଦାନକାରୀଙ୍କ ମଡେଲ୍ କ୍ୟାଟାଲଗ୍
-   (`open-sse/config/providerRegistry.ts`)।
-3. Arena ELO ସିଙ୍କ୍ ଇଞ୍ଜିନ୍ (`src/lib/arenaEloSync.ts`) ଦ୍ୱାରା `model_intelligence` DB ଟେବୁଲ୍ରେ ସଂରକ୍ଷିତ
-   ELO-ରୁ ପ୍ରାପ୍ତ ଟାସ୍କ୍-ଫିଟ୍ ସ୍କୋର୍ଗୁଡ଼ିକ।
+1. ମାଗଣା-ପ୍ରଦାନକାରୀ ତାଲିକା - `NOAUTH_PROVIDERS`, ଏବଂ `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ ଫ୍ଲାଗ୍ ହୋଇଥିବା `hasFree` (`src/shared/constants/providers.ts`) \|
+2. ପ୍ରଦାନକାରୀ ରେଜିଷ୍ଟ୍ରି (`open-sse/config/providerRegistry.ts`) ରୁ ପ୍ରତ୍ୟେକ ପ୍ରଦାନକାରୀଙ୍କ ମଡେଲ୍ କାଟାଲଗ୍ \|
+3. ଆର୍ନା ELO ସିଙ୍କ୍ ଇ engine ୍ଜିନ୍ (`src/lib/arenaEloSync.ts`) ଦ୍ୱାରା `model_intelligence` DB ଟେବୁଲରେ ସଂରକ୍ଷିତ ELO- ପ୍ରାପ୍ତ ଟାସ୍କ-ଫିଟ୍ ସ୍କୋର \|
 
-ଯୋଡ଼ିବାର ଲଜିକ୍ `src/lib/freeProviderRankings.ts`-ରେ ରହିଛି।
+ଯୋଗଦାନ ତର୍କ `src/lib/freeProviderRankings.ts` ରେ ରୁହେ \|
 
 ---
 
@@ -122,101 +109,103 @@ GET /api/free-provider-rankings?category=coding&limit=20
 
 ## ସ୍କୋରଗୁଡ଼ିକ କିପରି କାମ କରେ
 
-### ଉତ୍ସ: Arena AI ଲିଡରବୋର୍ଡ
+### ଉତ୍ସ: Arena AI leaderboard
 
-Arena ELO ସିଙ୍କ୍ ଇଞ୍ଜିନ୍ (`src/lib/arenaEloSync.ts`), Arena AI ଲିଡରବୋର୍ଡ API
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) ରୁ ଦୁଇଟି ଲିଡରବୋର୍ଡ — `text`
-ଏବଂ `code` — ଆଣେ। ପ୍ରତ୍ୟେକ ଲିଡରବୋର୍ଡ ଏଣ୍ଟ୍ରିରେ ଗୋଟିଏ ମଡେଲ୍ ନାମ, ଭେଣ୍ଡର୍, ELO `score`,
-କନ୍ଫିଡେନ୍ସ ଇଣ୍ଟରଭାଲ୍ ଏବଂ ଭୋଟ୍ ସଂଖ୍ୟା ଥାଏ।
+Arena ELO sync engine (`src/lib/arenaEloSync.ts`) Arena AI leaderboard API
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) ରୁ ଦୁଇଟି leaderboard — `text`
+ଏବଂ `code` — ଆଣିଥାଏ। ଯେତେବେଳେ ସେହି API କୌଣସି ବ୍ୟବହାରଯୋଗ୍ୟ board ଫେରାଏ ନାହିଁ, engine ଟି
+Hugging Face datasets-server ଉପରେ ଥିବା ଅଫିସିଆଲ `lmarena-ai/leaderboard-dataset` ଆଡ଼କୁ ଯାଏ
+(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` `activeSource`, `lastError` ଏବଂ
+`lastFailedAt` ରିପୋର୍ଟ କରେ। ପ୍ରତ୍ୟେକ leaderboard entry ଏକ model ନାମ, vendor, ELO `score`,
+confidence interval, ଏବଂ vote ଗଣନା ବହନ କରେ।
 
-ଲିଡରବୋର୍ଡ ବର୍ଗଗୁଡ଼ିକ OmniRoute କାର୍ଯ୍ୟ ବର୍ଗଗୁଡ଼ିକ ସହିତ ନିମ୍ନପ୍ରକାରେ ମ୍ୟାପ୍ ହୁଏ:
+Leaderboard ବର୍ଗଗୁଡ଼ିକ OmniRoute କାର୍ଯ୍ୟ ବର୍ଗଗୁଡ଼ିକ ସହ ମ୍ୟାପ୍ ହୁଏ:
 
-| Arena ଲିଡରବୋର୍ଡ | OmniRoute କାର୍ଯ୍ୟ ବର୍ଗଗୁଡ଼ିକ                      |
-| --------------- | ------------------------------------------------- |
-| `text`          | `default`, `review`, `documentation`, `debugging` |
-| `code`          | `coding`                                          |
+| Arena leaderboard | OmniRoute କାର୍ଯ୍ୟ ବର୍ଗ                            |
+| ----------------- | ------------------------------------------------- |
+| `text`            | `default`, `review`, `documentation`, `debugging` |
+| `code`            | `coding`                                          |
 
-### ସାମାନ୍ୟୀକରଣ (କାର୍ଯ୍ୟ-ଉପଯୋଗିତା ସ୍କୋର୍)
+### Normalization (task-fit ସ୍କୋର)
 
-କଞ୍ଚା ELO ସ୍କୋର୍ଗୁଡ଼ିକୁ ପ୍ରତ୍ୟେକ ଲିଡରବୋର୍ଡ ପାଇଁ ଗୋଟିଏ **`[0.4, 0.98]` ମଧ୍ୟରେ କାର୍ଯ୍ୟ-ଉପଯୋଗିତା ମୂଲ୍ୟ** ଭାବରେ ସାମାନ୍ୟୀକରଣ କରାଯାଏ:
+ମୂଳ ELO ସ୍କୋରଗୁଡ଼ିକ ପ୍ରତି leaderboard ରେ **`[0.4, 0.98]` ମଧ୍ୟରେ ଏକ task-fit ମୂଲ୍ୟ** କୁ normalize ହୁଏ:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-ସ୍କୋର୍ କେବେ ମଧ୍ୟ `0` କିମ୍ବା `1` ରେ ପହଞ୍ଚେ ନାହିଁ, ଯାହା ଉପଭୋକ୍ତା ଓଭର୍ରାଇଡ୍ ପାଇଁ ଅତିରିକ୍ତ ସୁଯୋଗ ରଖେ। ଏହା ହେଉଛି API ପ୍ରତିକ୍ରିୟାରେ ଆପଣ ଦେଖୁଥିବା `score` ଫିଲ୍ଡ ଏବଂ ଡ୍ୟାସ୍ବୋର୍ଡରେ ଦେଖାଯାଉଥିବା ଲେବଲ୍।
+ସ୍କୋର କେବେ `0` କିମ୍ବା `1` ଛୁଏଁ ନାହିଁ, ଯାହା user override ପାଇଁ ଅବକାଶ ଛାଡ଼ିଥାଏ। ଏହା ହେଉଛି
+ସେହି `score` field ଯାହା ଆପଣ API response ରେ ଦେଖନ୍ତି ଏବଂ dashboard ରେ ଦେଖାଯାଉଥିବା label।
 
-### ବିଶ୍ୱସନୀୟତା
+### ବିଶ୍ବାସନୀୟତା (Confidence)
 
-Arena ଭୋଟ୍ ସଂଖ୍ୟା ଆଧାରରେ ପ୍ରତ୍ୟେକ ଏଣ୍ଟ୍ରିକୁ ଗୋଟିଏ ବିଶ୍ୱସନୀୟତା ସ୍ତର ଦିଆଯାଏ:
+ପ୍ରତ୍ୟେକ entry Arena vote ଗଣନା ଆଧାରରେ ଏକ confidence ସ୍ତର ପାଏ:
 
-| ବିଶ୍ୱସନୀୟତା | ଭୋଟ୍ଗୁଡ଼ିକ |
-| ----------- | ---------- |
-| `high`      | ≥ 5,000    |
-| `medium`    | ≥ 1,000    |
-| `low`       | < 1,000    |
+| ବିଶ୍ବାସନୀୟତା | ଭୋଟ୍    |
+| ------------ | ------- |
+| `high`       | ≥ 5,000 |
+| `medium`     | ≥ 1,000 |
+| `low`        | < 1,000 |
 
 ### ସଂରକ୍ଷଣ ଏବଂ ସତେଜତା
 
-ସାମାନ୍ୟୀକୃତ ଏଣ୍ଟ୍ରିଗୁଡ଼ିକୁ `source = "arena_elo"` ସହିତ `model_intelligence` DB ଟେବୁଲ୍ରେ
-ଲେଖାଯାଏ (`src/lib/db/modelIntelligence.ts`)। ଏଣ୍ଟ୍ରିଗୁଡ଼ିକର **7 ଦିନ ପରେ
-ମିଆଦ ଶେଷ ହୁଏ**, ତେଣୁ ସିଙ୍କ୍ କରିବା ବନ୍ଦ କରିଥିବା କୌଣସି ପ୍ରଦାନକାରୀ ପୁରୁଣା ତଥ୍ୟ
-ପରିବେଷଣ କରିବା ପରିବର୍ତ୍ତେ ଶେଷରେ ବାଦ୍ ପଡ଼େ।
+Normalize ହୋଇଥିବା entry ଗୁଡ଼ିକ `source = "arena_elo"` ସହିତ `model_intelligence` DB ଟେବୁଲ୍ କୁ
+ଲେଖାଯାଏ (`src/lib/db/modelIntelligence.ts`)। Entry ଗୁଡ଼ିକ **7 ଦିନ ପରେ ମିଆଦ ପୂରଣ କରେ**,
+ତେଣୁ ଯେଉଁ provider sync ବନ୍ଦ କରିଦିଏ, ସେ ପୁରୁଣା ତଥ୍ୟ ପରିବେଷଣ ନକରି ଧୀରେ ଧୀରେ ତାଲିକାରୁ ବାହାରିଯାଏ।
 
-ସିଙ୍କ୍ **ଡିଫଲ୍ଟ ଭାବରେ ଚାଲୁ** ଥାଏ:
+Sync **ଡିଫଲ୍ଟ ରୂପେ ଚାଲୁ** ଥାଏ:
 
-- ଏହା ସର୍ଭର୍ ଆରମ୍ଭ ସମୟରେ ଥରେ ଏବଂ ତା’ପରେ ଏକ ପର୍ଯ୍ୟାୟକ୍ରମିକ ଟାଇମର୍ରେ ଚାଲେ
-  (`src/lib/arenaEloSync.ts`, `src/instrumentation-node.ts` ରୁ ସଂଯୋଜିତ)।
-- ଏହା **ଅବରୋଧକାରୀ ନୁହେଁ ଏବଂ କେବେ ମଧ୍ୟ ମାରାତ୍ମକ ନୁହେଁ** — ଯଦି ଅପ୍ଷ୍ଟ୍ରିମ୍ ଫେଚ୍ ବିଫଳ ହୁଏ, OmniRoute
-  ଚାଲୁ ରହେ ଏବଂ ର୍ୟାଙ୍କିଙ୍ଗ୍ଗୁଡ଼ିକ କେବଳ ଶେଷ ଭଲ ତଥ୍ୟ (କିମ୍ବା ଏକ ଖାଲି ଅବସ୍ଥା) ଦେଖାଏ।
+- ଏହା ସର୍ଭର ଆରମ୍ଭ ବେଳେ ଥରେ ଚାଲେ ଏବଂ ତାପରେ ଏକ ଆବ୍ତ୍ତିକ timer ରେ ଚାଲେ
+  (`src/lib/arenaEloSync.ts`, `src/instrumentation-node.ts` ରୁ wired)।
+- ଏହା **non-blocking ଏବଂ କେବେବି fatal ନୁହେଁ** — ଯଦି upstream fetch ବିଫଳ ହୁଏ, OmniRoute
+  ଚାଲୁ ରହେ ଏବଂ ranking ଗୁଡ଼ିକ କେବଳ ଶେଷ ଭଲ ତଥ୍ୟ (କିମ୍ବା ଖାଲି ଅବସ୍ଥା) ଦେଖାଏ।
 
-ଦୁଇଟି ପରିବେଶ ଭେରିଏବଲ୍ ଏହାକୁ ନିୟନ୍ତ୍ରଣ କରେ (
-[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ରେ ଡକ୍ୟୁମେଣ୍ଟ କରାଯାଇଛି):
+ଦୁଇଟି environment variable ଏହାକୁ ନିୟନ୍ତ୍ରଣ କରେ ([`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ରେ ଦଲିଲକୃତ):
 
-| ଭେରିଏବଲ୍                  | ଡିଫଲ୍ଟ        | ଉଦ୍ଦେଶ୍ୟ                                                   |
-| ------------------------- | ------------- | ---------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | ଆଉଟ୍ବାଉଣ୍ଡ ସିଙ୍କ୍ରୁ ବାଦ୍ ଦେବାକୁ `false` ଭାବରେ ସେଟ୍ କରନ୍ତୁ। |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | ସେକେଣ୍ଡରେ ସିଙ୍କ୍ ବ୍ୟବଧାନ।                                  |
+| Variable                  | Default       | ଉଦ୍ଦେଶ୍ୟ                                            |
+| ------------------------- | ------------- | --------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | outbound sync ରୁ ବାହାରିବା ପାଇଁ `false` ସେଟ୍ କରନ୍ତୁ। |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sync ବ୍ୟବଧାନ, ସେକେଣ୍ଡରେ।                            |
 
-### ମାନୁଆଲ୍ ସିଙ୍କ୍ / ସ୍ଥିତି / ସଫା କରିବା
+### ମାନୁଆଲ sync / ସ୍ଥିତି / ସଫା କରିବା
 
-ଅପରେଟର୍ମାନଙ୍କ ପାଇଁ, ଗୋଟିଏ ପ୍ରମାଣୀକୃତ ପରିଚାଳନା ଏଣ୍ଡପଏଣ୍ଟ ମାନୁଆଲ୍ ନିୟନ୍ତ୍ରଣ ପ୍ରଦାନ କରେ
-(`src/app/api/intelligence/sync/route.ts` — ପରିଚାଳନା ପ୍ରମାଣୀକରଣ ଆବଶ୍ୟକ):
+Operator ମାନଙ୍କ ପାଇଁ, ଏକ ପ୍ରମାଣିତ management endpoint ମାନୁଆଲ ନିୟନ୍ତ୍ରଣ ପ୍ରଦାନ କରେ
+(`src/app/api/intelligence/sync/route.ts` — management auth ଆବଶ୍ୟକ):
 
 ```
-GET    /api/intelligence/sync          # ବର୍ତ୍ତମାନର ସିଙ୍କ୍ ସ୍ଥିତି (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # ଏକ ମାନୁଆଲ୍ ସିଙ୍କ୍ ଟ୍ରିଗର୍ କରନ୍ତୁ; ଲେଖିବା ବିନା ପୂର୍ବାବଲୋକନ କରିବାକୁ ବଡି: { "dryRun": true }
-DELETE /api/intelligence/sync          # ସମସ୍ତ ସିଙ୍କ୍ ହୋଇଥିବା arena_elo ଇଣ୍ଟେଲିଜେନ୍ସ ଏଣ୍ଟ୍ରି ସଫା କରନ୍ତୁ
+GET    /api/intelligence/sync          # ବର୍ତ୍ତମାନର sync ସ୍ଥିତି (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # ମାନୁଆଲ sync ଆରମ୍ଭ କରନ୍ତୁ; body: { "dryRun": true } ଲେଖା ନକରି preview ଦେଖିବା ପାଇଁ
+DELETE /api/intelligence/sync          # sync ହୋଇଥିବା ସମସ୍ତ arena_elo intelligence entry ସଫା କରନ୍ତୁ
 ```
 
-ଯଦି ର୍ୟାଙ୍କିଙ୍ଗ୍ ପୃଷ୍ଠାଟି ଖାଲି ଅଛି, ଏକ ମାନୁଆଲ୍ `POST /api/intelligence/sync` (କିମ୍ବା କେବଳ
-ସର୍ଭର୍କୁ ପୁନଃଆରମ୍ଭ କରିବା) ଏହାକୁ ପୁନଃ ପୂରଣ କରେ।
+ଯଦି ranking ପୃଷ୍ଠା ଖାଲି ଥାଏ, ଏକ ମାନୁଆଲ `POST /api/intelligence/sync` (କିମ୍ବା କେବଳ
+ସର୍ଭରକୁ ପୁନରାରମ୍ଭ କରିବା) ଏହାକୁ ପୁଣି ପୂରଣ କରେ।
 
-### ମଡେଲ୍ଗୁଡ଼ିକୁ ଲିଡରବୋର୍ଡ ସହିତ ମେଳ କରିବା
+### Model ଗୁଡ଼ିକୁ leaderboard ସହ ମେଳ କରିବା
 
-ରେଜିଷ୍ଟ୍ରି ମଡେଲ୍ ID ଏବଂ Arena ମଡେଲ୍ ନାମଗୁଡ଼ିକ ସବୁବେଳେ ସଠିକ୍ ଭାବରେ ମେଳ ଖାଆନ୍ତି ନାହିଁ। ର୍ୟାଙ୍କିଙ୍ଗ୍
-ନମନୀୟ ମେଳକ ବ୍ୟବହାର କରେ (`src/lib/freeProviderRankings.ts` ରେ `findMatchingIntelligence`):
+Registry model ID ଗୁଡ଼ିକ ଏବଂ Arena model ନାମଗୁଡ଼ିକ ସର୍ବଦା ଠିକ୍ ମେଳ ଖାଏ ନାହିଁ। Ranking ଟି
+ନମନୀୟ matching ବ୍ୟବହାର କରେ (`src/lib/freeProviderRankings.ts` ରେ
+`findMatchingIntelligence`):
 
-1. ସାମାନ୍ୟୀକୃତ ମଡେଲ୍ ID ସହିତ ସଠିକ୍ ମେଳ।
-2. ଶେଷରେ ଥିବା ସଂସ୍କରଣ ସଫିକ୍ସ କାଢ଼ିବା ପରେ ମେଳ (ଯଥା `kimi-k2.6` → `kimi-k2`)।
-3. ପ୍ରିଫିକ୍ସ ମେଳ (ଗୋଟିଏ ଲିଡରବୋର୍ଡ ମଡେଲ୍ ନାମ ରେଜିଷ୍ଟ୍ରି ID-ର ଏକ ପ୍ରିଫିକ୍ସ ଅଟେ)।
+1. Normalize ହୋଇଥିବା model ID ଉପରେ ସଠିକ୍ ମେଳ।
+2. ଶେଷରେ ଥିବା version suffix କାଢ଼ିବା ପରେ ମେଳ (ଯେପରି `kimi-k2.6` → `kimi-k2`)।
+3. Prefix ମେଳ (leaderboard model ନାମଟି registry ID ର ଏକ prefix)।
 
-ସିଙ୍କ୍ ପାର୍ଶ୍ୱରେ, ଜଣାଶୁଣା ଭେଣ୍ଡର୍ ପ୍ରିଫିକ୍ସଗୁଡ଼ିକ (`anthropic/`, `openai/`, `google/`, …)
-କାଢ଼ି ଦିଆଯାଏ ଏବଂ ଏକ ଛୋଟ ଉପନାମ ମ୍ୟାପ୍ କ୍ୟାନୋନିକାଲ୍ ନାମଗୁଡ଼ିକୁ OmniRoute ଆଭ୍ୟନ୍ତରୀଣ ଭାବେ
-ବ୍ୟବହାର କରୁଥିବା ରୂପାନ୍ତରଗୁଡ଼ିକୁ ବିସ୍ତାର କରେ, ଯାହାଦ୍ୱାରା ମଡେଲ୍ଗୁଡ଼ିକ କୌଣସି ନାମ ଅଧୀନରେ ଖୋଜାଯାଇପାରେ।
+Sync ପାର୍ଶ୍ୱରେ, ଜଣାଶୁଣା vendor prefix ଗୁଡ଼ିକ (`anthropic/`, `openai/`, `google/`, …) କାଢ଼ି
+ଦିଆଯାଏ ଏବଂ ଏକ ଛୋଟ alias map ଆଦର୍ଶ ନାମଗୁଡ଼ିକୁ OmniRoute ଆଭ୍ୟନ୍ତରୀଣ ଭାବେ ବ୍ୟବହାର କରୁଥିବା
+variant ଗୁଡ଼ିକୁ ବିସ୍ତାର କରେ, ଯାହାଫଳରେ model ଗୁଡ଼ିକ ଯେକୌଣସି ନାମରେ ମଧ୍ୟ ଖୋଜିହୁଏ।
 
-### ଜଣେ ପ୍ରଦାନକାରୀଙ୍କୁ କିପରି ର୍ୟାଙ୍କ୍ କରାଯାଏ
+### Provider କିପରି rank ହୁଏ
 
-ପ୍ରତ୍ୟେକ ମାଗଣା ପ୍ରଦାନକାରୀ ପାଇଁ, ଇଞ୍ଜିନ୍ ତାହାର କ୍ୟାଟାଲଗ୍ରେ ଥିବା ପ୍ରତ୍ୟେକ ମଡେଲ୍କୁ ସ୍କୋର୍ କରେ, ତା’ପରେ:
+ପ୍ରତ୍ୟେକ ମାଗଣା provider ପାଇଁ, engine ତା'ର catalog ର ପ୍ରତ୍ୟେକ model କୁ ସ୍କୋର କରେ, ତାପରେ:
 
-- **ଶୀର୍ଷ ମଡେଲ୍** = ପ୍ରଦାନକାରୀଙ୍କ ସର୍ବାଧିକ ସ୍କୋର୍ ପାଇଥିବା ମଡେଲ୍।
-- **ହାରାହାରି ସ୍କୋର୍** = ସେହି ପ୍ରଦାନକାରୀଙ୍କ ସମସ୍ତ ସ୍କୋର୍ କରାଯାଇଥିବା ମଡେଲ୍ର ହାରାହାରି ସ୍କୋର୍।
-- **ମଡେଲ୍ଗୁଡ଼ିକ** = ପ୍ରଦାନକାରୀଙ୍କ କେତୋଟି ମଡେଲ୍ର Arena ସ୍କୋର୍ ଥିଲା।
+- **Top Model** = provider ର ସର୍ବାଧିକ ସ୍କୋର କରୁଥିବା model।
+- **Avg Score** = ସେହି provider ର ସ୍କୋର ହୋଇଥିବା ସମସ୍ତ model ର ହାରାହାରି ସ୍କୋର।
+- **Models** = provider ର କେତୋଟି model ର Arena ସ୍କୋର ଥିଲା।
 
-ପ୍ରଦାନକାରୀମାନଙ୍କୁ ପ୍ରଥମେ **ଶୀର୍ଷ-ମଡେଲ୍ ସ୍କୋର୍** ଏବଂ ତା’ପରେ ହାରାହାରି ସ୍କୋର୍ ଅନୁସାରେ ସଜାଯାଏ। ଏହା
-ଅତି କମ୍ରେ ଗୋଟିଏ ଶକ୍ତିଶାଳୀ ମାଗଣା ମଡେଲ୍ ପ୍ରଦାନ କରୁଥିବା ପ୍ରଦାନକାରୀଙ୍କୁ ପୁରସ୍କୃତ କରେ।
-
----
+Provider ଗୁଡ଼ିକ ପ୍ରଥମେ **top-model ସ୍କୋର** ଅନୁଯାୟୀ, ତାପରେ ହାରାହାରି ସ୍କୋର ଅନୁଯାୟୀ ସଜାଯାନ୍ତି। ଏହା
+ସେହି provider କୁ ପୁରସ୍କୃତ କରେ ଯିଏ ଅତିକମରେ ଗୋଟିଏ ଶକ୍ତିଶାଳୀ ମାଗଣା model ପ୍ରଦାନ କରେ।
 
 ## ମାଗଣା ପ୍ରଦାତା ବାଛିବା ପାଇଁ ଏହାର ବ୍ୟବହାର
 

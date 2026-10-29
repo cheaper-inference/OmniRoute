@@ -606,131 +606,136 @@ Fún àlàyé kíkún nípa àwọn àyípadà ayíká, wo [README](../README.md
 
 ---
 
-## 📊 Àwọn Àwòṣe Tó Wà
+## 📊 Àwọn Awoṣe Tó Wà Lọ́wọ́
 
 <details>
-<summary><b>Wo gbogbo àwọn àwòṣe tó wà</b></summary>
+<summary><b>Wo gbogbo àwọn awoṣe tó wà lọ́wọ́</b></summary>
 
-> A ṣe àkójọ tó wà nísàlẹ̀ láti inú `open-sse/config/providerRegistry.ts` fún v3.8.0. Àwọn katalọ́ọ̀gù awọsánmà (Gemini, OpenRouter, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) máa ń múṣiṣẹ́pọ̀ ní aládàáṣe — láti rí gbogbo katalọ́ọ̀gù tó wà lọ́wọ́lọ́wọ́, ṣí **Dashboard → Providers → [provider] → Available Models** tàbí pe `GET /api/models/catalog`.
+> Àkópọ̀ tó wà ní isàlẹ̀ ni a kó papọ̀ láti inu `open-sse/config/providerRegistry.ts` fún v3.8.0. Àwọn kàtálógù awọ̀nàmáàmá (Gemini, OpenRouter, àti bẹ́ẹ̀bẹ́ẹ̀ lọ) ni wọ́n ń ṣe àmúṣẹ́pọ̀ lọ́nà aláṣẹ́ṣe — fún kàtálógù tó ń ṣiṣẹ́ ní kikun, ṣí **Pátákó Ìṣàkóso → Àwọn Olùpèsè → [olùpèsè] → Àwọn Awoṣe Tó Wà Lọ́wọ́** tàbí pe `GET /api/models/catalog`.
 >
-> Tí àkójọ tí a kọ sínú olùpèsè kan bá ti yà kúrò nínú èyí tó wà lọ́wọ́lọ́wọ́, lo **Import from /models** lójú ewé yẹn (tàbí mú **Auto-Sync** ṣiṣẹ́) láti fa katalọ́ọ̀gù orísun òkè tó wà lọ́wọ́lọ́wọ́. A fìdí èyí múlẹ̀ nínú v3.8.50 fún LLM7.io (`gemini-3.1-flash-lite`) àti UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ìráyè àìlórúkọ Pollinations ṣì ní ààlà láti ọ̀dọ̀ orísun òkè nígbà ìdánwò kan náà.
+> Bí àkópọ̀ àtòbáwá ti olùpèsè kan bá ti yí padà, lo **Gba wọlé láti /models** lórí ojú-ìwé yẹn (tàbí mú **Àmúṣẹ́pọ̀ Aláṣẹ́ṣe** ṣiṣẹ́) láti fa kàtálógù orísun òkè tó ń ṣiṣẹ́. A fìdí èyí múlẹ̀ ní v3.8.50 fún LLM7.io (`gemini-3.1-flash-lite`) àti UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ìwọ̀le aláìlórúkọ ti Pollinations ṣì wà lábẹ́ ààlà orísun òkè nígbà àyẹ̀wó kannáà náà.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ àwọn ìpele ìsapá: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ àwọn ipele ìsapá: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth Ọ̀FẸ́: lo katalọ́ọ̀gù tó wà lọ́wọ́lọ́wọ́ tí a fi hàn lábẹ́ **Dashboard → Providers → Kiro → Available Models**. Wíwà rẹ̀ sinmi lórí àkọọ́lẹ̀ àti ètò ìsanwó.
+**Kiro (`kr/`)** — OAuth lọ́fẹ̀ẹ́: lo kàtálógù tó ń ṣiṣẹ́ tí wọ́n fi hàn lábẹ́ **Pátákó Ìṣàkóso → Àwọn Olùpèsè → Kiro → Àwọn Awoṣe Tó Wà Lọ́wọ́**. Èyí tó wà lọ́wọ́ dá lórí àkáǹtì àti ètò rẹ̀.
 
-**Qoder (`if/`)** — OAuth Ọ̀FẸ́: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth lọ́fẹ̀ẹ́: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/oṣù ní iye kan ṣoṣo tàbí gẹ́gẹ́ bí ìlò: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/fún oṣù lọ́nà tó dúró tàbí gẹ́gẹ́ bí ìlò ṣe lọ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — kọ́kọ́rọ́ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — Kọ́kọ́rọ̀ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Yára gan-an: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ó yára gan-an: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok abinibi: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok àbíbí: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — A gbàlejò rẹ̀ ní EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Tí wọ́n gbé ní EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Pẹ̀lú ìṣàfikún ìṣàwárí: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Tí ìwádìí ṣe àtìlẹ́yìn fún: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Orísun-ṣíṣí: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ọ̀fẹ́), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Orísun ṣíṣí: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (lọ́fẹ̀ẹ́), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Ìṣirò ìdáhùn tó yára: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Ìtumọ̀ tó yára: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Ìwọ̀n wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Ní ìwọ̀n wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Fojú sí RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Tó dojukọ lórí RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Fún ilé-iṣẹ́: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Fún àwọn ilé-iṣẹ́: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: A máa ń mú un ṣiṣẹ́pọ̀ lọ́wọ́lọ́wọ́ fún kọ́kọ́rọ́ API kọ̀ọ̀kan láti Google — kò sí àkójọ àìyípadà. So kọ́kọ́rọ́ kan pọ̀ ní **Dashboard → Providers**, lẹ́yìn náà lo **Available Models** láti ṣàgbéwọlé katalọ́ọ̀gù tó wà lọ́wọ́lọ́wọ́ (fún àpẹẹrẹ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Wọ́n ń ṣe àmúṣẹ́pọ̀ rẹ̀ láàyè fún kọ́kọ́rọ̀ API kọ̀ọ̀kan láti ọ̀dọ̀ Google — kò sí àkópọ̀ tó dúró. So kọ́kọ́rọ̀ kan pọ̀ nínú **Pátákó Ìṣàkóso → Àwọn Olùpèsè** lẹ́yìn náà lo **Àwọn Awoṣe Tó Wà Lọ́wọ́** láti gbe kàtálógù lọ́wọ́lọ́wọ́ wọlé (fún àpẹẹrẹ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Àwọn olùpèsè míì tó bá a mu** (àwọn tí a yàn): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (nípasẹ̀ `aws-bedrock`), `azure-ai`, `openrouter` (katalọ́ọ̀gù àgbéranṣẹ́ tààrà), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ọ̀kọ̀ọ̀kan ń tọ́jú àkójọ àwòṣe tirẹ̀ nínú `providerRegistry.ts`, a sì lè mú un ṣiṣẹ́pọ̀ ní aládàáṣe nígbà tí olùpèsè bá pèsè ojú òpin `/models`.
+**Àwọn olùpèsè mìíràn tó bá a mu** (tí a yan): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (nípasẹ̀ `aws-bedrock`), `azure-ai`, `openrouter` (kàtálógù tó ń gbe kọjá), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ọ̀kọ̀ọ̀kan wọn ń ṣàkóso àkópọ̀ awoṣe tirẹ̀ nínú `providerRegistry.ts`, ó sì ṣeé ṣe láti ṣe àmúṣẹ́pọ̀ rẹ̀ láìfọwọ́wọ́ nígbà tí olùpèsè náà bá fi òpin-ìsopọ̀ `/models` hàn.
 
-**Àkíyèsí nípa àwọn ID àwòṣe:** OmniRoute ń lo àwọn ID abinibi olùpèsè (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Àwọn ID kan ní àwọn ẹ̀yà nọ́mbà onídọ̀tì nítorí pé bẹ́ẹ̀ ni API orísun òkè ṣe ń retí wọn. Tí àwòṣe kan kò bá sí nínú àkójọ òkè, ṣiṣẹ́ `omniroute models --search <term>` tàbí lo `GET /api/models/catalog` láti fìdí wíwà rẹ̀ múlẹ̀.
+**Àkíyèsí nípa àwọn ID awoṣe:** OmniRoute ń lo àwọn ID àbíbí ti olùpèsè kọ̀ọ̀kan (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Àwọn ID kan ní àwọn ẹ̀yà tó kó àmì-ojúpo nítorí bẹ́ẹ̀ ni API orísun òkè ṣe ń retí wọn. Bí awoṣe kan kò bá sí nínú àkópọ̀ òkè, ṣe `omniroute models --search <term>` tàbí pe `GET /api/models/catalog` láti fìdí bó ṣe wà lọ́wọ́ múlẹ̀.
 
 </details>
 
 ---
 
-## 🧩 Àwọn Ẹ̀ya Ìlọsíwájú
+## 🧩 To ti ni ilọsiwaju Awọn ẹya ara ẹrọ
 
-### Àwọn Mó̩dẹ́lì Àdáni
+### Awọn awoṣe aṣa
 
-Ṣàfikún ID mó̩dẹ́lì èyíkéyìí sí olupèsè èyíkéyìí láì dúró de ìmúdójúìwọ̀n ètò:
+Ṣafikun ID awoṣe eyikeyi si olupese eyikeyi laisi iduro fun imudojuiwọn app kan:
 
 ```bash
-# Nípasẹ̀ API
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# Àkójọ: curl http://localhost:20128/api/provider-models?provider=openai
-# Yọ kúrò: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Tàbí lo Pátákó Ìṣàkóso: **Àwọn Olùpèsè → [Olùpèsè] → Àwọn Mó̩dẹ́lì Àdáni**.
+Tabi lo Dasibodu:** Awọn olupese → [Olupese] → Aṣa Awọn awoṣe** .
 
-Àwọn àkíyèsí:
+Awọn akọsilẹ:
 
-- Àwọn olupèsè OpenRouter àti àwọn olupèsè tó bá OpenAI/Anthropic mu ni a ń ṣàkóso láti **Àwọn Mó̩dẹ́lì Tó Wà** nìkan. Àfikún àfọwọ́ṣe, ìgbéwọlé, àti ìmúṣiṣẹ́pọ̀ aládàáṣe gbogbo wọn ń lọ sínú àkójọ àwọn mó̩dẹ́lì tó wà kan náà, nítorí náà kò sí abala Àwọn Mó̩dẹ́lì Àdáni lọ́tọ̀ fún àwọn olupèsè wọ̀nyẹn.
-- Abala **Àwọn Mó̩dẹ́lì Àdáni** jẹ́ fún àwọn olupèsè tí kò pèsè ìgbéwọlé àwọn mó̩dẹ́lì tó wà tí a ń ṣàkóso.
+- OpenRouter ati awọn olupese OpenAI/Anthropic-compatible ni iṣakoso lati** Awọn awoṣe to wa** nikan. Ṣafikun afọwọṣe, gbe wọle, ati imuṣiṣẹpọ adaṣe gbogbo ilẹ ni atokọ awoṣe to wa kanna, nitorinaa ko si apakan Awọn awoṣe Aṣa ọtọtọ fun awọn olupese wọnyẹn.
+- Awọn** Awọn awoṣe aṣa** apakan ti pinnu fun awọn olupese ti ko ṣe afihan awọn agbewọle agbewọle ti o wa ti iṣakoso.
 
-### Àwọn Olùpèsè Àdáni Tó Bá OpenAI Mu
+### Aṣa OpenAI-ibaramu Awọn olupese
 
-Ẹnu-ọ̀nà èyíkéyìí tó ń lo API OpenAI (aṣojú àdáni, vLLM, tàbí olùṣàkójọpọ̀ ẹni-kẹta)
-ni a lè ṣàfikún gẹ́gẹ́ bí nóòdù olupèsè tirẹ̀:
+Eyikeyi ẹnu-ọna ti o sọrọ OpenAI API (aṣoju ti ara ẹni ti gbalejo, vLLM, alaropo ẹni-kẹta) le ṣe afikun bi ipade olupese tirẹ:
 
-1. **Àwọn Olùpèsè → Ṣàfikún Èyí Tó Bá OpenAI Mu**.
-2. **Orúkọ**: àmì ìṣàfihàn fún nóòdù náà.
-3. **Ìṣáájú**: orúkọ ìtọ́sọ́nà. Àwọn kíláyẹ́ǹtì ń pe àwọn mó̩dẹ́lì gẹ́gẹ́ bí `<prefix>/<model>`, nítorí náà nóòdù kan tó ní
-   ìṣáájú `mygw` ń pèsè `mygw/gpt-4o-mini`. Ó ṣe pàtàkì; kò sí ìfòfindè ohun kikọ.
-4. **Irú API**: ìdílé endpoint tí ẹnu-ọ̀nà náà ń pèsè (Chat Completions, Responses,
-   Embeddings, ohun, àwọn àwòrán).
-5. **URL Ìpìlẹ̀**: gbòǹgbò API, títí kan `/v1` (fún àpẹẹrẹ
-   `https://gateway.example.com/v1`), kì í ṣe ipa-ọ̀nà `/chat/completions` kíkún. Àwọn ẹnu-ọ̀nà tó ní
-   àwọn ipa-ọ̀nà àìbámu sí ìlànà ń ṣètò wọn lábẹ́ **Àwọn Ètò Ìlọsíwájú** (ipa-ọ̀nà ìfọ̀rọ̀wérọ̀, ipa-ọ̀nà àwọn mó̩dẹ́lì).
-6. Ààyè **Kọ́kọ́rọ́ API (fún Ìdánwò)** ń dán àsopọ̀ náà wò nìkan. Lẹ́yìn ṣíṣẹ̀dá nóòdù náà,
-   ṣí i, kí o sì lo **Ṣàfikún Àsopọ̀** láti tọ́jú kọ́kọ́rọ́ tí àwọn ìbéèrè yóò lò.
+1. **Awọn olupese → Fi OpenAI Ibaramu** .
+2. **Oruko** : aami ifihan fun ipade.
+3. **Apejuwe** : orukọ afisona. Awọn alabara pe awọn awoṣe bi `<prefix>/<model>`, nitorinaa ipade kan pẹlu ìpele `mygw` yoo ṣiṣẹ `mygw/gpt-4o-mini`. Ti a beere; ko si ihamọ ohun kikọ.
+4. **API Iru** : idile ipari ti ẹnu-ọna naa n ṣiṣẹ (Awọn ipari iwiregbe, Awọn idahun, Awọn ifibọ, ohun, awọn aworan).
+5. **Ipilẹ URL** : root API, to ati pẹlu `/v1` (fun apẹẹrẹ `https://gateway.example.com/v1`), kii ṣe ọna `/chat/completions` kikun. Awọn ẹnu-ọna pẹlu awọn ọna ti kii ṣe deede ṣeto wọn labẹ** To ti ni ilọsiwaju Eto** (iwiregbe ona, awọn awoṣe ona).
+6. Awọn** Bọtini API (fun Ṣayẹwo)** aaye nikan ṣe idanwo asopọ. Lẹhin ṣiṣẹda ipade, ṣii ki o lo** Fi Asopọmọra kun** lati tọju bọtini ti awọn ibeere yoo lo.
 
-Nóòdù náà gba ID inú ti fọ́ọ̀mù `openai-compatible-<apiType>-<uuid>`; o kò nílò
-láti tẹ̀ ẹ́ láéláé, ìṣáájú náà ni orúkọ gbogbo ènìyàn.
+Ipade naa gba id inu ti fọọmu `openai-compatible-<apiType>-<uuid>`; o ko nilo lati tẹ sii, ìpele ni orukọ gbogbo eniyan.
 
-#### Àwọn ìṣáájú tí a fi pamọ́
+#### Ifipamọ awọn ami-iṣaaju
 
-Ìṣáájú kan kò lè jẹ́ ID tàbí orúkọ àfirọ́pò olupèsè inú ètò (fún àpẹẹrẹ `openai`, `cf`), bẹ́ẹ̀ ni
-kò lè jẹ́ ID olupèsè tí a ti fi sílẹ̀. Olùwádìí mó̩dẹ́lì ń ṣàyẹ̀wò àwọn ID àti orúkọ àfirọ́pò inú ètò ṣáájú
-àwọn nóòdù àdáni, nítorí náà nóòdù tó ń lo ọ̀kan lára àwọn ìṣáájú wọ̀nyẹn kò ní gba ìṣàn iṣẹ́ láéláé:
-`<prefix>/model` yóò lọ sí olupèsè inú ètò dípò rẹ̀, tàbí yóò kọ̀ láì gba ààyè bí a bá ti fi olupèsè náà
-sílẹ̀. A ó kọ ṣíṣẹ̀dá tàbí ṣíṣàtúnṣe nóòdù tó ní irú ìṣáájú bẹ́ẹ̀ pẹ̀lú:
+Apejuwe ko le jẹ id tabi inagijẹ ti olupese ti a ṣe sinu (fun apẹẹrẹ `openai`, `cf`), tabi id ti olupese ti fẹyìntì. Olupin awoṣe ṣe ayẹwo awọn ids ti a ṣe sinu ati awọn inagijẹ ṣaaju awọn apa aṣa, nitorinaa ipade kan ti o lo ọkan ninu awọn asọtẹlẹ yẹn kii yoo gba ijabọ rara: `<prefix>/model` yoo lọ si olupese ti a ṣe sinu dipo, tabi kuna ni pipade ti olupese yẹn ba ti fẹhinti. Ṣiṣẹda tabi ṣatunkọ oju ipade pẹlu iru ìpele kan ni a kọ pẹlu:
 
 ```text
-prefix: "<prefix>" jẹ́ ìṣáájú olupèsè tí a fi pamọ́ — yan ìṣáájú mìíràn (a kò lè lo àwọn ID/orúkọ àfirọ́pò tí a fi pamọ́ fún àwọn nóòdù àdáni nítorí àwọn ìbéèrè bíi <prefix>/model ń lọ sí olupèsè inú ètò tàbí wọn yóò kọ̀ láì gba ààyè nígbà tí a bá ti fi olupèsè náà sílẹ̀)
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-Yan ìṣáájú tó yàtọ̀ (`mygw`, `acme-proxy`). Bí àwọn ìbéèrè sí nóòdù àdáni bá kùnà pẹ̀lú
-àṣìṣe tó darúkọ olupèsè inú ètò tàbí àwọn ẹ̀rí ìdánimọ̀ rẹ̀, ṣàyẹ̀wò bóyá ìṣáájú nóòdù náà
-jẹ́ èyí tí a fi pamọ́: àwọn nóòdù tí a tọ́jú kí òfin yìí tó wà ṣì wà ní ìpamọ́, ṣùgbọ́n ìṣáájú wọn ń tọ́sọ́nà sí
-olupèsè inú ètò. Ṣàtúnṣe nóòdù náà, kí o sì fún un ní ìṣáájú tuntun.
+Yan ìpele kan pato (`mygw`, `acme-proxy`). Ti awọn ibeere si ipade aṣa ba kuna pẹlu aṣiṣe ti o lorukọ olupese ti a ṣe sinu tabi awọn iwe-ẹri rẹ, ṣayẹwo boya ìpele node ti wa ni ipamọ: awọn apa ti o fipamọ ṣaaju ki ofin yii wa tun wa ni ipamọ, ṣugbọn awọn ipa-ọna iṣaaju wọn si olupese ti a ṣe sinu. Ṣatunkọ ipade naa ki o fun ni ìpele titun kan.
 
-### Ṣíṣe Ẹ̀wọ̀n Àwọn Alábàáṣiṣẹ́pọ̀ OmniRoute
+#### Fun-asopọ awọn aṣayan ẹnu-ọna
 
-A lè ṣàfikún ẹnu-ọ̀nà OmniRoute mìíràn gẹ́gẹ́ bí olupèsè **Àdáni tó bá OpenAI mu**. Lo URL ìpìlẹ̀
-`/v1` ti alábàáṣiṣẹ́pọ̀ náà àti kọ́kọ́rọ́ API ìyàsọ́tọ̀ tó ní àṣẹ tó kéré jù lọ tí alábàáṣiṣẹ́pọ̀ náà fi fún un.
+Awọn bọtini wọnyi lọ sinu `providerSpecificData` asopọ (fun apẹẹrẹ nipasẹ `PUT /api/providers/{id}`):
 
-Fún àwọn ẹ̀wọ̀n aláfẹ̀yìntì tàbí ọ̀pọ̀-ìgbésẹ̀, mú olùṣọ́ lòdì sí yíyípo tó nílò yíyan wọlé ṣiṣẹ́ lórí gbogbo ẹnu-ọ̀nà:
+- `toolNameMaxLength` (odidi, 1-1024) - fun awọn ọna asopọ ibaramu ọna kika iwiregbe OpenAI eyiti ẹnu-ọna kọ awọn orukọ irinṣẹ gigun. Awọn orukọ gigun ni a firanṣẹ bi awọn inagijẹ kukuru ati mu pada ni idahun.
+- `quotaEndpoint` — aaye ipari quota/credits ẹnu-ọna, ka fun rinhoho ipin ipin dasibodu ati afisona-kito. Ṣiṣẹ lori mejeeji OpenAI- ati Anthropic-ibaramu awọn isopọ; apẹrẹ kikun ti wa ni akọsilẹ ni `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### Chaining OmniRoute ẹlẹgbẹ
+
+Ona-ọna OmniRoute miiran le ṣe afikun bi a** Aṣa OpenAI-ibaramu** olupese. Lo `/v1` ipilẹ URL ẹlẹgbẹ ati igbẹhin, bọtini API ti o kere ju ti o ti gbejade nipasẹ ẹlẹgbẹ yẹn.
+
+Fun awọn ẹwọn ilọtun-pada tabi awọn ẹwọn hop-pupọ, jẹ ki ẹṣọ lupu ijade ṣiṣẹ ni gbogbo ẹnu-ọna:
 
 ```bash
 # gateway-a
@@ -746,18 +751,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Àwọn ìbéèrè tí a fi ránṣẹ́ sí URL alábàáṣiṣẹ́pọ̀ tí a ti fàyè gbà ní pàtó nìkan ni yóò gba
-header `X-OmniRoute-Peer-Trace`. Ẹnu-ọ̀nà kan yóò kọ ID instance tó tún farahàn tàbí ìwọ̀n ìgbésẹ̀
-tó ti tán pẹ̀lú HTTP `508 Loop Detected`; àwọn olupèsè upstream déédéé kì í gba metadata alábàáṣiṣẹ́pọ̀.
+Awọn ibeere nikan ti a firanṣẹ si atokọ ti a gba laaye ni gbangba URL gba akọsori `X-OmniRoute-Peer-Trace` naa. Ẹnu-ọna kan kọ apẹẹrẹ ID ti o tun ṣe tabi isuna hop ti o rẹ pẹlu HTTP `508 Loop Detected`; awọn olupese oke lasan gba ko si metadata ẹlẹgbẹ.
 
-Ṣíṣe ẹ̀wọ̀n alábàáṣiṣẹ́pọ̀ kì í ṣe ìṣàdàkọ ibi ìpamọ́ data tàbí failover host. Ẹnu-ọ̀nà kọ̀ọ̀kan ní ipò
-SQLite, caches, àwọn káńtà oṣùwọ̀n, àti sessions tirẹ̀. Lo reverse proxy tí a ń ṣàyẹ̀wò ìlera rẹ̀ tàbí failover kíláyẹ́ǹtì
-fún wíwà-ní-múra active/passive tàbí active/active, kí o má sì gbé ibi ìpamọ́ SQLite kan sórí
-ọ̀pọ̀ instance OmniRoute tó ń ṣiṣẹ́ láéláé.
+Pipin ẹlẹgbẹ kii ṣe ẹda data tabi ikuna agbalejo. Ẹnu-ọna kọọkan tọju ipo SQLite ominira, awọn caches, awọn iṣiro oṣuwọn, ati awọn akoko. Lo aṣoju iyipada ti ilera ti a ṣayẹwo tabi ikuna alabara fun active/passive tabi wiwa active/active, ati pe ko gbe data data SQLite kan sinu awọn apẹẹrẹ OmniRoute ṣiṣiṣẹ lọpọlọpọ.
 
-### Àwọn Ọ̀nà Olùpèsè Ìyàsọ́tọ̀
+### Awọn ipa ọna Olupese igbẹhin
 
-Tọ́ àwọn ìbéèrè tààrà sí olupèsè kan pàtó pẹ̀lú ìfọwọ́sí mó̩dẹ́lì:
+Awọn ibeere ipa ọna taara si olupese kan pato pẹlu afọwọsi awoṣe:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -765,137 +765,137 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-A ó ṣàfikún ìṣáájú olupèsè náà láìfọwọ́ṣe bí kò bá sí. Àwọn mó̩dẹ́lì tí kò bára mu yóò dá `400` padà.
+Ipilẹṣẹ olupese ti wa ni afikun laifọwọyi ti o ba sonu. Awọn awoṣe ti ko baamu pada `400`.
 
-### Ìṣètò Aṣojú Nẹ́tíwọ́ọ̀kì
+### Iṣeto Aṣoju nẹtiwọki
 
 ```bash
-# Ṣètò aṣojú àpapọ̀
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Aṣojú fún olupèsè kọ̀ọ̀kan
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Dán aṣojú wò
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Ìṣáájú:** Èyí tó jẹ́ ti kọ́kọ́rọ́ → Èyí tó jẹ́ ti àkójọpọ̀ → Èyí tó jẹ́ ti olupèsè → Àpapọ̀ → Àyíká.
+**Iṣaaju:** Bọtini-pato → Konbo-pato → Olupese-pato → Agbaye → Ayika.
 
-### API Àkójọ Mó̩dẹ́lì
+### Awoṣe Catalog API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Ó ń dá àwọn mó̩dẹ́lì tí a pín sí ẹgbẹ́ gẹ́gẹ́ bí olupèsè pẹ̀lú àwọn irú (`chat`, `embedding`, `image`) padà.
+Dapada awọn awoṣe akojọpọ nipasẹ olupese pẹlu awọn oriṣi (`chat`, `embedding`, `image`).
 
-### Ìmúṣiṣẹ́pọ̀ Cloud
+### Awọsanma Sync
 
-- Mú àwọn olupèsè, àwọn àkójọpọ̀, àti àwọn ètò ṣiṣẹ́pọ̀ láàárín àwọn ẹ̀rọ
-- Ìmúṣiṣẹ́pọ̀ abẹ́lẹ̀ aládàáṣe pẹ̀lú timeout + fail-fast
-- Yan `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` ti ẹ̀gbẹ́ server ní àyíká production
+- Awọn olupese amuṣiṣẹpọ, awọn akojọpọ, ati awọn eto kọja awọn ẹrọ
+- Imuṣiṣẹpọ abẹlẹ aifọwọyi pẹlu akoko-akoko + kuna-sare
+- Ṣe ayanfẹ `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` -ẹgbẹ olupin ni iṣelọpọ
 
-### Cloudflare Quick Tunnel
+### Cloudflare Quick Eefin
 
-- Wà ní **Dashboard → Endpoints** fún Docker àti àwọn ìṣàgbékalẹ̀ míì tí o gbàlejò fúnra rẹ
-- Ó ṣẹ̀dá URL `https://*.trycloudflare.com` fún ìgbà díẹ̀, èyí tí yóò darí ìbéèrè sí endpoint `/v1` rẹ lọwọlọwọ tó bá OpenAI mu
-- Nígbà tí o bá kọ́kọ́ muu ṣiṣẹ́, ó máa ń fi `cloudflared` sílẹ̀ nígbà tí ó bá pọndandan nìkan; àwọn ìtúnrẹ̀bẹ̀rẹ̀ tó tẹ̀lé máa tún binary tí a ń ṣàkóso náà lò
-- Quick Tunnels kì í padà bọ̀ sípò láìfọwọ́yí lẹ́yìn tí OmniRoute tàbí container bá tún bẹ̀rẹ̀; tún muu ṣiṣẹ́ láti dashboard nígbà tí o bá nílò wọn
-- Àwọn URL tunnel jẹ́ ti ìgbà díẹ̀, wọ́n sì máa ń yí padà ní gbogbo ìgbà tí o bá dá tunnel dúró/tún bẹ̀rẹ̀ rẹ̀
-- Àwọn Quick Tunnels tí a ń ṣàkóso máa ń lo ìrìnàjò HTTP/2 gẹ́gẹ́ bí àìyípadà láti yẹra fún àwọn ìkìlọ̀ QUIC UDP buffer aláriwo nínú àwọn container tí ohun àmúlò wọn ní ààlà
-- Ṣètò `CLOUDFLARED_PROTOCOL=quic` tàbí `auto` bí o bá fẹ́ yí àṣàyàn ìrìnàjò tí a ń ṣàkóso padà
-- Ṣètò `CLOUDFLARED_BIN` bí o bá fẹ́ lo binary `cloudflared` tí a ti fi sílẹ̀ tẹ́lẹ̀ dípò èyí tí ètò ń gbà jáde tí ó sì ń ṣàkóso
-- Àwọn paneli Cloudflare Quick Tunnel, Tailscale Funnel, àti ngrok Tunnel lè jẹ́ fífihàn tàbí fífarapamọ́ ní **Settings → Appearance**. Fífarapamọ́ paneli kan kì í dá tunnel tó ń ṣiṣẹ́ dúró.
+- Wa ninu** Dasibodu → Endpoints** fun Docker ati awọn imuṣiṣẹ ti ara ẹni miiran
+- Ṣẹda `https://*.trycloudflare.com` URL fun igba diẹ ti o siwaju si OpenAI-ibaramu `/v1` lọwọlọwọ rẹ
+- Akọkọ jeki fifi `cloudflared` sori ẹrọ nikan nigbati o nilo; nigbamii tun bẹrẹ tun lo alakomeji iṣakoso kanna
+- Awọn Tunnels iyara kii ṣe atunṣe-laifọwọyi lẹhin OmniRoute tabi atunbere eiyan; tun mu wọn ṣiṣẹ lati dasibodu nigbati o nilo
+- Tunnel URLs jẹ ephemeral ati yi pada ni gbogbo igba ti o ba stop/start oju eefin naa
+- Aiyipada Awọn Tunnel Iyara ti iṣakoso si gbigbe HTTP/2 lati yago fun awọn ikilọ ifipamọ QUIC UDP alariwo ni awọn apoti ti o ni ihamọ
+- Ṣeto `CLOUDFLARED_PROTOCOL=quic` tabi `auto` ti o ba fẹ lati bori yiyan irinna ti iṣakoso
+- Ṣeto `CLOUDFLARED_BIN` ti o ba fẹran lilo alakomeji `cloudflared` ti a ti fi sii tẹlẹ dipo igbasilẹ iṣakoso
+- Cloudflare Eefin iyara, Tailscale Funnel, ati awọn panẹli eefin ngrok le ṣe afihan tabi farapamọ sinu** Eto → Irisi** . Ìbòmọ́lẹ̀ pánẹ́ẹ̀lì kan kò dá eefin tí ń ṣiṣẹ́ dúró.
 
-### Ìmòye LLM Gateway (Ìpele 9)
+### Imọye Ẹnu-ọna LLM (Ipele 9)
 
-- **Àpamọ́ Semantic** — Ó máa ń fi àwọn èsì tí kì í ṣe streaming, tí temperature=0, pamọ́ láìfọwọ́yí (kọjá rẹ̀ pẹ̀lú `X-OmniRoute-No-Cache: true`)
-- **Àìṣe-Àtúnsẹ Ìbéèrè** — Ó máa ń yọ àwọn ìbéèrè àtúnṣe kúrò láàárín 5s nípasẹ̀ header `Idempotency-Key` tàbí `X-Request-Id`
-- **Ìtọ́pinpin Ìlọsíwájú** — Àwọn ìṣẹ̀lẹ̀ SSE `event: progress` tí o lè yàn láti lò nípasẹ̀ header `X-OmniRoute-Progress: true`
-
----
-
-### Pápá Ìdánwò Atúmọ̀
-
-Wọlé sí i nípasẹ̀ **Dashboard → Translator**. Ṣàwárí àṣìṣe kí o sì fi ojú rí bí OmniRoute ṣe ń túmọ̀ àwọn ìbéèrè API láàárín àwọn olupèsè.
-
-| Ipò                    | Ète                                                                                            |
-| ---------------------- | ---------------------------------------------------------------------------------------------- |
-| **Pápá Ìdánwò**        | Yan àwọn fọ́ọ̀mù orísun/ibi-àfojúsùn, lẹ ìbéèrè kan síbẹ̀, kí o sì rí àbájáde tí a túmọ̀ lẹ́sẹ̀kẹsẹ̀  |
-| **Olùdánwò Ìfọ̀rọ̀wérọ̀** | Fi àwọn ìfiránṣẹ́ ìfọ̀rọ̀wérọ̀ lọ́wọ́lọ́wọ́ ránṣẹ́ nípasẹ̀ proxy, kí o sì ṣàyẹ̀wò gbogbo ìyíká ìbéèrè/èsì |
-| **Pẹpẹ Ìdánwò**        | Ṣe àwọn ìdánwò ọ̀pọ̀lọpọ̀ lórí oríṣiríṣi àkópọ̀ fọ́ọ̀mù láti jẹ́rìí pé ìtumọ̀ tọ̀nà                     |
-| **Àbojútó Lọ́wọ́lọ́wọ́**   | Wo àwọn ìtumọ̀ ní àkókò gidi bí àwọn ìbéèrè ṣe ń kọjá nípasẹ̀ proxy                              |
-
-**Àwọn ọ̀nà ìlò:**
-
-- Ṣàwárí ìdí tí àkópọ̀ client/olùpèsè kan pàtó fi kùnà
-- Jẹ́rìí pé àwọn tag ìrònú, àwọn ìpè irinṣẹ́, àti àwọn prompt ètò ni a túmọ̀ lọ́nà tó tọ́
-- Ṣe àfiwé àwọn ìyàtọ̀ fọ́ọ̀mù láàárín àwọn fọ́ọ̀mù OpenAI, Claude, Gemini, àti Responses API
+- **Kaṣe atunmọ** - Awọn caches aifọwọyi ti kii ṣe ṣiṣanwọle, awọn idahun = 0 otutu (fori pẹlu `X-OmniRoute-No-Cache: true`)
+- **Beere Idempotency** - Ṣe iyasọtọ awọn ibeere laarin 5s nipasẹ `Idempotency-Key` tabi akọsori `X-Request-Id`
+- **Ilọsiwaju Àtòjọ** - Jade-ni awọn iṣẹlẹ SSE `event: progress` nipasẹ akọsori `X-OmniRoute-Progress: true`
 
 ---
 
-### Àwọn Ọgbọ́n Ìdarí
+### Ibi isereile onitumọ
 
-Ṣètò nípasẹ̀ **Dashboard → Settings → Routing**. Dashboard ń fi àwọn ọgbọ́n mẹ́fà tí a ń lò jù lọ hàn; combos àti auto-router ń ṣe àtìlẹ́yìn fún àkójọpọ̀ tó gbòòrò sí i nínú ètò.
+Wiwọle nipasẹ** Dasibodu → Onitumọ** . Ṣatunkọ ati wo bi OmniRoute ṣe tumọ awọn ibeere API laarin awọn olupese.
 
-**Àwọn ọgbọ́n tí dashboard ń fihàn (ìdarí ní ìpele account):**
+| Ipo                   | Idi                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------------------- |
+| **Ibi isereile**      | Yan awọn ọna kika source/target, lẹẹmọ ibeere kan, ki o wo iṣẹjade ti a tumọ lesekese       |
+| **Oluyanju iwiregbe** | Firanṣẹ awọn ifiranṣẹ iwiregbe laaye nipasẹ aṣoju ki o ṣayẹwo ọmọ request/response ni kikun |
+| **Idanwo ibujoko**    | Ṣiṣe awọn idanwo ipele kọja awọn akojọpọ ọna kika pupọ lati jẹrisi atunse itumọ             |
+| **Live Monitor**      | Wo awọn itumọ akoko gidi bi awọn ibeere ṣe nṣan nipasẹ aṣoju                                |
 
-| Ọgbọ́n                             | Àpèjúwe                                                                                                |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Kún Àkọ́kọ́**                     | Ó ń lo àwọn account ní ìtòlẹ́sẹẹsẹ ààyò — account àkọ́kọ́ ń bójú tó gbogbo ìbéèrè títí tí kò fi sí nílẹ̀   |
-| **Yípo Lẹ́sẹẹsẹ**                  | Ó ń yí ká gbogbo àwọn account pẹ̀lú ààlà dídì configurable (àìyípadà: ìpè 3 fún account kọ̀ọ̀kan)         |
-| **P2C (Agbára Àwọn Àṣàyàn Méjì)** | Ó yan account 2 láìlétò, ó sì darí sí èyí tó ní ìlera jù — ó ń dọ́gba ẹrù pẹ̀lú àkíyèsí ìlera            |
-| **Láìlétò**                       | Ó ń yan account kan láìlétò fún ìbéèrè kọ̀ọ̀kan ní lílo Fisher-Yates shuffle                             |
-| **Èyí Tí A Lò Kéré Jù**           | Ó ń darí sí account tó ní timestamp `lastUsedAt` tó ti pẹ́ jù, láti pín traffic déédéé                  |
-| **Èyí Tí A Ṣàmúdára Fún Iye Owó** | Ó ń darí sí account tó ní iye ààyò tó kéré jù, láti ṣàmúdára fún àwọn olupèsè tó ní iye owó tó kéré jù |
+**Lo awọn igba:**
 
-**Àwọn ọgbọ́n combo àti auto tó ti gòkè** (a lè ṣètò fún combo kọ̀ọ̀kan tàbí nípasẹ̀ àwọn prefix `auto/*` — wo [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+- Ṣatunkọ idi ti apapọ client/provider kan pato kuna
+- Daju pe awọn afi ero, awọn ipe irinṣẹ, ati awọn eto eto ni itumọ ti tọ
+- Ṣe afiwe awọn iyatọ ọna kika laarin OpenAI, Claude, Gemini, ati Awọn idahun awọn ọna kika API
 
-- `priority` — ìtòlẹ́sẹẹsẹ líle, kì í ṣe round-robin láéláé
-- `weighted` — pípín traffic ní ìbámu pẹ̀lú àwọn weight ti model kọ̀ọ̀kan
-- `fill-first` — lo model àkọ́kọ́ títí tí yóò fi dé ààlà
+---
+
+### Awọn ilana ipa ọna
+
+Tunto nipasẹ** Dasibodu → Eto → afisona** . Dasibodu naa ṣafihan awọn ilana mẹfa ti a lo julọ; combos ati awọn olulana-laifọwọyi fipa atilẹyin kan anfani ṣeto.
+
+**Awọn ilana ti o han Dasibodu (iṣalaye ipele-iroyin):**
+
+| Ilana                           | Apejuwe                                                                                                        |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Kun First**                   | Nlo awọn akọọlẹ ni aṣẹ pataki - akọọlẹ akọkọ n ṣakoso gbogbo awọn ibeere titi ko si                            |
+| **Yika Robin**                  | Awọn iyipo nipasẹ gbogbo awọn akọọlẹ pẹlu opin alalepo atunto (aiyipada: awọn ipe 3 fun akọọlẹ kan)            |
+| **P2C (Agbara ti Aṣayan Meji)** | Yan awọn akọọlẹ laileto 2 ati awọn ipa-ọna si ọkan ti o ni ilera - awọn iwọntunwọnsi fifuye pẹlu akiyesi ilera |
+| **Laileto**                     | Laileto yan iroyin kan fun ibeere kọọkan nipa lilo Fisher-Yates Daarapọmọra                                    |
+| **Ti o kere julọ Lo**           | Awọn ipa ọna si akọọlẹ pẹlu akọbi `lastUsedAt` timestamp, pinpin ijabọ boṣeyẹ                                  |
+| **Iṣapeye idiyele**             | Awọn ipa ọna si akọọlẹ pẹlu iye ayo to kere julọ, iṣapeye fun awọn olupese ti o kere julọ                      |
+
+**To ti ni ilọsiwaju konbo ati auto ogbon** (ṣe atunto fun konbo tabi nipasẹ awọn ami-iṣaaju `auto/*` — wo [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+
+- `priority` - ti o muna ibere, kò yika-robins
+- `weighted` - ijabọ ipin nipasẹ awọn iwuwo awoṣe kọọkan
+- `fill-first` - imugbẹ akọkọ awoṣe titi awọn ifilelẹ lọ lu
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Agbára Àwọn Àṣàyàn Méjì)
-- `least-used` àti `cost-optimized`
-- `auto` — èyí tí score ń darí láàárín gbogbo àwọn candidate
-- `lkgp` (Olùpèsè Rere Tí A Mọ̀ Kẹ́yìn) — ó dì mọ́ olùpèsè tó ṣàṣeyọrí kẹ́yìn, lẹ́yìn náà ó padà sí àwọn òfin
-- `context-optimized` — ó yan model tó ní context window òfìfo tó tóbi jù
-- `context-relay` — ó so àwọn model long-context pọ̀ fún àwọn ìyípadà ìfọ̀rọ̀wérọ̀ tó tẹ̀lé
+- `p2c` (Agbara ti Aṣayan Meji)
+- `least-used` ati `cost-optimized`
+- `auto` - Dimegilio-ìṣó kọja gbogbo awọn oludije
+- `lkgp` (Olupese to dara ti a mọ kẹhin) - awọn pinni si olupese aṣeyọri ti o kẹhin, lẹhinna ṣubu pada si awọn ofin
+- `context-optimized` - mu awoṣe pẹlu ferese ọrọ-ọrọ ọfẹ ti o tobi julọ
+- `context-relay` - awọn ẹwọn awọn awoṣe ọrọ-gun-gun fun awọn titan-tẹle
 
-#### Header Sticky Session Ti Òde
+#### Akọsori Ikoni Alalepo Ita
 
-Fún session affinity ti òde (fún àpẹẹrẹ, àwọn agent Claude Code/Codex lẹ́yìn àwọn reverse proxy), fi èyí ránṣẹ́:
+Fun ijora igba ita (fun apẹẹrẹ, awọn aṣoju Claude Code/Codex lẹhin awọn aṣoju yiyipada), firanṣẹ:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute tún gba `x_session_id`, ó sì máa ń dá session key tó ń ṣiṣẹ́ padà nínú `X-OmniRoute-Session-Id`.
+OmniRoute tun gba `x_session_id` o si da bọtini igba ti o munadoko pada ni `X-OmniRoute-Session-Id`.
 
-Bí o bá lo Nginx tí o sì ń fi àwọn header tó ní underscore ránṣẹ́, muu èyí ṣiṣẹ́:
+Ti o ba lo Nginx ati firanṣẹ awọn akọle fọọmu abẹlẹ, mu ṣiṣẹ:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Àwọn Alias Model Wildcard
+#### Wildcard awoṣe Aliases
 
-Ṣẹ̀dá àwọn pattern wildcard láti tún àwọn orúkọ model darí:
+Ṣẹda awọn awoṣe kaadi igbẹ lati yi awọn orukọ awoṣe pada:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
 Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-Àwọn wildcard ṣe àtìlẹ́yìn fún `*` (àwọn lẹ́tà èyíkéyìí) àti `?` (lẹ́tà kan ṣoṣo).
+Wildcards ṣe atilẹyin `*` (awọn ohun kikọ eyikeyi) ati `?` (ohun kikọ kan).
 
-#### Àwọn Ẹ̀wọ̀n Fallback
+#### Awọn ẹwọn Fallback
 
-Ṣàlàyé àwọn ẹ̀wọ̀n fallback àgbáyé tí ó kan gbogbo àwọn ìbéèrè:
+Ṣetumo awọn ẹwọn isubu agbaye ti o waye lori gbogbo awọn ibeere:
 
 ```
 Chain: production-fallback
@@ -906,148 +906,204 @@ Chain: production-fallback
 
 ---
 
-### Ìfaradà & Àwọn Circuit Breaker
+### Awọn akojọpọ Olupese ti o wọpọ & Awọn Ilana ipa-ọna
 
-Ṣètò nípasẹ̀ **Dashboard → Settings → Resilience**.
+Eyi ni awọn apẹẹrẹ apẹẹrẹ fun apapọ ọpọlọpọ awọn olupese ati ipa ọna laarin wọn ni OmniRoute:
 
-OmniRoute ń ṣe ìmúlò ìfaradà ní ìpele olùpèsè pẹ̀lú àwọn apá márùn-ún:
+#### 1. Aṣoju Ifaminsi Konbo: Idiye ipari-giga pẹlu Cost/Speed Fallback
 
-1. **Ìlà Ìbéèrè & Ìṣàkóso Ìyára** — Ṣíṣe àtúnṣe ìṣàn ìbéèrè ní ìpele ètò:
-   - **Àwọn Ìbéèrè Fún Ìṣẹ́jú Kan (RPM)** — Iye ìbéèrè tó pọ̀ jù fún ìṣẹ́jú kan fún account kọ̀ọ̀kan
-   - **Àkókò Tó Kéré Jù Láàárín Àwọn Ìbéèrè** — Àlàfo tó kéré jù ní milliseconds láàárín àwọn ìbéèrè
-   - **Iye Ìbéèrè Tó Lè Ṣiṣẹ́ Papọ̀ Jù** — Iye ìbéèrè tó pọ̀ jù tó lè ṣiṣẹ́ ní àkókò kan náà fún account kọ̀ọ̀kan
-2. **Àkókò Ìsinmi Asopọ̀** — Ìṣètò fún irú ìfàṣẹsí kọ̀ọ̀kan fún asopọ̀ kan lẹ́yìn àwọn ìkùnà tí a lè tún gbìyànjú:
-   - **Àkókò Ìsinmi Ìpìlẹ̀** — Àkókò ìsinmi àiyipada fún àwọn ìkùnà upstream tí a lè tún gbìyànjú
-   - **Lo Àwọn Àmì Ìtọ́sọ́nà Àtúngbìyànjú Upstream** — Tẹ̀lé `Retry-After` tó jẹ́ ọ̀rọ̀ àṣẹ tàbí àwọn àmì ìtọ́sọ́nà àtúnṣètò nígbà tí a bá pèsè wọn
-   - **Iye Ìgbésẹ̀ Backoff Tó Pọ̀ Jù** — Ìpele exponential backoff tó ga jù fún àwọn ìkùnà tó ń ṣẹlẹ̀ léraléra
+Apẹrẹ fun awọn aṣoju ifaminsi (OpenCode, koodu Claude, Cursor, Cline). Awọn ipa ọna ni ibẹrẹ si awọn awoṣe ero iwaju, ja bo pada si awọn awoṣe ifaminsi iyara lori irẹwẹsi ipin tabi awọn aṣiṣe.
 
-3. **Olùdáwọ́dúró Circuit Olùpèsè** — Ń tọpinpin àwọn ìkùnà olùpèsè láti ìbẹ̀rẹ̀ dé òpin, ń samì sí olùpèsè kan gẹ́gẹ́ bí ẹni tí iṣẹ́ rẹ̀ ti dínkù nígbà tí ó bá dé òṣùwọ̀n ìkìlọ̀ tí a ṣètò, ó sì ń ṣí olùdáwọ́dúró náà nígbà tí ó bá dé òṣùwọ̀n ìkùnà tí a ṣètò:
-   - **Òṣùwọ̀n Ìdínkù Iṣẹ́** — Àwọn ìkùnà olùpèsè tó tẹ̀lé ara wọn kí ó tó wọ `DEGRADED`
-   - **Òṣùwọ̀n Ìkùnà** — Àwọn ìkùnà olùpèsè tó tẹ̀lé ara wọn kí ó tó wọ `OPEN`
-   - **Àkókò Ìdádúró Àtúnṣètò** — Àkókò tí a ó dúró kí a tó dán olùpèsè náà wò lẹ́ẹ̀kan sí i
-   - **CLOSED** (Ní Ìlera) — Àwọn ìbéèrè ń lọ lọ́nà déédéé
-   - **DEGRADED** — Àwọn ìbéèrè ṣì ń lọ bí a ṣe ń tọpinpin ìlọsíwájú àwọn ìkùnà
-   - **OPEN** — A dí olùpèsè náà fún ìgbà díẹ̀ lẹ́yìn àwọn ìkùnà tó ṣẹlẹ̀ léraléra
-   - **HALF_OPEN** — Ṣíṣàyẹ̀wò bóyá olùpèsè náà ti padà sípò
+- **Dasibodu** Combos → Konbo Tuntun → Oruko: `agent-coding` → Strategy: `Priority`
+- **Awọn awoṣe** :
+  1. `claude/claude-sonnet-4-6` (Aṣoju ifaminsi akọkọ)
+  2. `openai/gpt-4o` (ifasẹhin agbara giga giga)
+  3. `deepseek/deepseek-v4-flash` (Ṣiṣe-giga, ipadabọ ti o munadoko)
 
-   Àwọn ààlà oṣùwọ̀n `429` tó jẹ mọ́ asopọ̀ máa ń wà nínú **Àkókò Ìsinmi Asopọ̀**, wọn kì í sì í kà sí ti olùdáwọ́dúró olùpèsè.
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
 
-   Ipo runtime olùdáwọ́dúró olùpèsè ni a fi hàn ní **Dashboard → Health** nìkan.
+#### 2. Free-Tier Auto Failover Konbo
 
-4. **Dúró De Àkókò Ìsinmi** — Tí gbogbo asopọ̀ tó lè ṣiṣẹ́ bá ti wà ní àkókò ìsinmi, OmniRoute lè dúró de èyí tó máa parí kọ́kọ́, kí ó sì tún ìbéèrè client kan náà gbìyànjú láìfọwọ́ṣe.
+Awọn ẹwọn ọpọ-ọfẹ ati awọn olupese ti ko ni bọtini lati mu akoko iṣẹ pọ si laisi awọn idiyele API.
 
-5. **Ìṣàwárí Ààlà Oṣùwọ̀n Láìfọwọ́ṣe** — Nígbà tí àwọn olùpèsè upstream bá dá àwọn àkókò ìdúró tó ṣe kedere padà, àwọn àmì ìtọ́sọ́nà wọ̀nyẹn máa borí àkókò ìsinmi asopọ̀ agbègbè nígbà tí ìṣètò náà bá ṣiṣẹ́.
+- **Ilana** : `Least Used` tabi `Round Robin` (npin fifuye kọja awọn ipin)
+- **Awọn awoṣe** :
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
 
-**Ìmọ̀ràn Amọ̀ṣẹ́:** Lo ojú-ewé **Health** láti ṣàyẹ̀wò àti láti tún àwọn olùdáwọ́dúró olùpèsè tó ń ṣiṣẹ́ ṣètò lẹ́yìn ìdádúró iṣẹ́. Ojú-ewé Resilience ń yí ìṣètò padà nìkan.
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
+
+#### 3. Multimodal / Vision & Pipeline Text
+
+Sisopọ awọn awoṣe iran amọja pẹlu iran ọrọ iyara-giga fun ṣiṣan iṣẹ ti o kan oye aworan ati iran koodu.
+
+- **Àpẹẹrẹ** : Akopọ `Priority` kan ti o ṣe atokọ awọn awoṣe ti o lagbara iran ni akọkọ ati awoṣe text/code giga-giga ti o kẹhin.
+- **Awọn awoṣe** :
+  1. `gemini/gemini-2.5-pro` (oye image/multimodal ti o lagbara)
+  2. `openai/gpt-4o` (iran iwọntunwọnsi ati lilo irinṣẹ)
+  3. `deepseek/deepseek-v4-flash` ( iran Text/code )
 
 ---
 
-### Gbígbé Database Jáde / Wọlé
+### Resilience & Circuit Breakers
 
-Ṣàkóso àwọn àfẹ̀yìntì database ní **Dashboard → Settings → System & Storage**.
+Tunto nipasẹ** Dasibodu → Eto → Resilience** .
 
-| Ìgbésẹ̀                           | Àpèjúwe                                                                                                                                   |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| **Gbé Database Jáde**            | Ṣe ìgbàsílẹ̀ database SQLite lọ́wọ́lọ́wọ́ gẹ́gẹ́ bí fáìlì `.sqlite`                                                                              |
-| **Gbé Gbogbo Rẹ̀ Jáde (.tar.gz)** | Ṣe ìgbàsílẹ̀ àkójọpọ̀ àfẹ̀yìntì kíkún tó ní: database, àwọn ìṣètò, combos, àwọn asopọ̀ olùpèsè (láìsí credentials), metadata kọ́kọ́rọ́ API       |
-| **Gbé Database Wọlé**            | Gbé fáìlì `.sqlite` sókè láti rọ́pò database lọ́wọ́lọ́wọ́. A ó dá àfẹ̀yìntì ṣáájú ìgbéwọlé láìfọwọ́ṣe àyàfi tí `DISABLE_SQLITE_AUTO_BACKUP=true` |
+OmniRoute ṣe imuse resilience ipele olupese pẹlu awọn paati marun:
+
+1. **Bere isinyi & Pacing** - Ṣiṣeto ipele eto eto:
+   - **Awọn ibeere fun Iṣẹju kan (RPM)** - Awọn ibeere to pọju fun iṣẹju kan fun akọọlẹ kan
+   - **Min Time Laarin awọn ibeere** - Aafo ti o kere julọ ni awọn iṣẹju-aaya laarin awọn ibeere
+   - **Max Awọn ibeere igbakanna** - Awọn ibeere igbakana ti o pọju fun akọọlẹ kan
+
+2. **Itutu Asopọmọra** - Iṣeto ni iru-auth fun asopọ ẹyọkan lẹhin awọn ikuna atunyan:
+   - **Mimọ Cooldown** - Ferese itutu agbaiye aiyipada fun awọn ikuna oke ti o ṣee tun gbiyanju
+   - **Lo Awọn Italolobo Tun gbiyanju ni oke** - Bọla fun `Retry-After` aṣẹ tabi tun awọn amọran to nigba ti a pese
+   - **Max Backoff Igbesẹ** - Ipele ẹhin ipari ti o pọju fun awọn ikuna ti o leralera
+
+3. **Olupese Circuit Fifọ** - Tọpinpin awọn ikuna olupese lati opin-si-opin, samisi olupese ti o bajẹ ni iloro ikilọ ti atunto, ati ṣi ẹrọ fifọ nigbati o ba de opin ikuna atunto:
+   - **Ibalẹ Ibalẹ** - Awọn ikuna olupese itẹlera ṣaaju titẹ `DEGRADED`
+   - **Ipari Ikuna** - Awọn ikuna olupese itẹlera ṣaaju titẹ `OPEN`
+   - **Tun Aago Iṣeto** - Window akoko ṣaaju idanwo olupese lẹẹkansi
+   - **CLOSED** (ni ilera) - Awọn ibeere ṣan ni deede
+   - **DEGRADED** - Awọn ibeere ṣi nṣàn lakoko ti o ti tọpinpin awọn ikuna ti o ga
+   - **OPEN** - Olupese ti ni idinamọ fun igba diẹ lẹhin awọn ikuna leralera
+   - **HALF_OPEN** - Idanwo ti olupese ba ti gba pada
+
+   Awọn opin oṣuwọn `429` ti asopọ-dopin duro ni** Itutu Asopọmọra** ati ki o ma ṣe ka si olupilẹṣẹ olupese.
+
+   Ipo asiko isise fifọ olupese yoo han lori** Dasibodu → Health** nikan.
+
+4. **Duro Fun Itutu** - Ti gbogbo asopọ oludije ti n tutu tẹlẹ, OmniRoute le duro fun itutu agbaiye akọkọ ati tun gbiyanju ibeere alabara kanna ni adaṣe.
+
+5. **Oṣuwọn Ifilelẹ Aifọwọyi-iwari** - Nigbati awọn olupese oke ba pada awọn window iduro ti o fojuhan, awọn amọran wọnyẹn bori itutu asopọ agbegbe nigbati eto naa ba ṣiṣẹ.
+
+**Imọran Pro:** Lo awọn** Ilera** oju-iwe lati ṣayẹwo ati tunto awọn fifọ olupese laaye lẹhin ijade kan. Oju-iwe Resilience nikan yi iṣeto ni pada.
+
+---
+
+### Si ilẹ okeere / gbe wọle aaye data
+
+Ṣakoso awọn afẹyinti database ni** Dasibodu → Eto → Eto & Ibi ipamọ** .
+
+| Iṣe                       | Apejuwe                                                                                                                                            |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Gbejade aaye data**     | Ṣe igbasilẹ aaye data SQLite lọwọlọwọ bi faili `.sqlite` kan                                                                                       |
+| **Jade Gbogbo (.tar.gz)** | Ṣe igbasilẹ iwe ipamọ afẹyinti ni kikun pẹlu: aaye data, awọn eto, awọn akojọpọ, awọn asopọ olupese (ko si awọn iwe-ẹri), metadata bọtini API      |
+| **Gbe aaye data wọle**    | Ṣe igbasilẹ faili `.sqlite` kan lati rọpo aaye data lọwọlọwọ. Atilẹyin agbewọle-ṣaaju ti ṣẹda laifọwọyi ayafi ti `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API: Gbé database jáde
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Gbé gbogbo rẹ̀ jáde (àkójọpọ̀ kíkún)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Gbé database wọlé
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Ìfàṣẹsí Ìgbéwọlé:** A máa ṣàyẹ̀wò fáìlì tí a gbé wọlé fún ìpéye (àyẹ̀wò pragma SQLite), àwọn tábìlì tí a nílò (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), àti ìwọ̀n (100MB ni ó pọ̀ jù).
+**Ifọwọsi agbewọle:** Faili ti a ko wọle jẹ ifọwọsi fun iduroṣinṣin (ṣayẹwo SQLite pragma), awọn tabili ti a beere (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), ati iwọn (max 100MB).
 
-**Àwọn Ìlò:**
+**Lo Awọn ọran:**
 
-- Gbé OmniRoute láàárín àwọn ẹ̀rọ
-- Ṣẹ̀dá àwọn àfẹ̀yìntì ita fún ìmúpadàbọ̀sípò lẹ́yìn àjálù
-- Pín àwọn ìṣètò láàárín àwọn ọmọ ẹgbẹ́ (gbé gbogbo rẹ̀ jáde → pín àkójọpọ̀ náà)
-
----
-
-### Dashboard Àwọn Ìṣètò
-
-A ṣètò ojú-ewé àwọn ìṣètò sí **7 tabs** fún ìrìn kiri tó rọrùn:
-
-| Tab             | Àwọn Àkóónú                                                                                                                                                    |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Gbogbogbò**   | Àwọn irinṣẹ́ ìpamọ́ ètò, ìhùwàsí àiyipada, híhàn tunnel Endpoint                                                                                                 |
-| **Ìrísí**       | Àwọn ìṣàkóso theme (ìmọ́lẹ̀/òkùnkùn/ètò), híhàn sidebar, àwọn toggle panel fún àwọn káàdì tunnel Cloudflare/Tailscale/ngrok                                      |
-| **AI**          | Ìpín àròjinlẹ̀ (passthrough / auto-strip / àkànṣe / adaptive — wo [THINKING_BUDGET.md](./THINKING_BUDGET.md)), system prompt àgbáyé, àwọn ìṣirò cache prompt    |
-| **Ààbò**        | Àwọn ìṣètò Ìwọlé/Ọ̀rọ̀ aṣínà, Ìṣàkóso Ìwọlé IP, ìfàṣẹsí API fún `/models`, Dídí Olùpèsè, olùṣọ́ prompt-injection                                                  |
-| **Ìtọ́sọ́nà**     | Ètò ìtọ́sọ́nà àgbáyé (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), àwọn alias awoṣe wildcard, àwọn ẹ̀wọ̀n fallback, àwọn àiyipada combo |
-| **Ìfaradà**     | Ìlà ìbéèrè, àkókò ìsinmi asopọ̀, ìṣètò olùdáwọ́dúró olùpèsè, àti ìhùwàsí dídúró de àkókò ìsinmi                                                                  |
-| **Onítẹ̀síwájú** | Ìṣètò proxy àgbáyé (HTTP/SOCKS5), àwọn override proxy fún olùpèsè kọ̀ọ̀kan                                                                                       |
-
-Gbogbogbò kò tún ṣe àdàkọ àwọn àlàyé logging àti cache tí a lè kà nìkan mọ́. Àwọn ìṣètò ìdádúró database àti
-ìṣàtúnṣe ni a ń tọ́jú nípasẹ̀ `/api/settings/database`; fífi ọwọ́ pa cache rẹ́ máa ń lo
-`DELETE /api/cache`. Àwọn òpin iye ìlà log ìbéèrè àti proxy ni
-`CALL_LOGS_TABLE_MAX_ROWS` àti `PROXY_LOGS_TABLE_MAX_ROWS` ń ṣàkóso.
+- Gbe OmniRoute laarin awọn ẹrọ
+- Ṣẹda awọn afẹyinti ita fun imularada ajalu
+- Pin awọn atunto laarin awọn ọmọ ẹgbẹ ẹgbẹ (jade gbogbo ibi ipamọ → si ilẹ okeere)
 
 ---
 
-### Àwọn Ìnáwó & Ìṣàkóso Ìnáwó Àfojúsùn
+### Dasibodu Eto
 
-Wọlé sí i nípasẹ̀ **Dashboard → Costs**.
+Oju-iwe eto ti ṣeto sinu** 7 awọn taabu** fun irọrun lilọ kiri:
 
-| Tab                | Ète                                                                                                                    |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| **Ìnáwó Àfojúsùn** | Ṣètò àwọn òpin ìnáwó fún kọ́kọ́rọ́ API kọ̀ọ̀kan pẹ̀lú àwọn ìnáwó àfojúsùn ojoojúmọ́/ọ̀sọ̀ọ̀sẹ̀/oṣooṣù àti ìtọpinpin ní àkókò gidi |
-| **Ìdíyelé**        | Wo kí o sì ṣàtúnṣe àwọn àkọsílẹ̀ iye owó awoṣe — iye owó fún àwọn token input/output 1K fún olùpèsè kọ̀ọ̀kan              |
+| Taabu                  | Awọn akoonu                                                                                                                                               |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Gbogboogbo**         | Awọn irinṣẹ ibi ipamọ eto, ihuwasi aiyipada, hihan oju eefin Endpoint                                                                                     |
+| **Ifarahan**           | Awọn idari akori (light/dark/system), hihan ẹgbẹ ẹgbẹ, awọn iyipada nronu fun awọn kaadi eefin Cloudflare/Tailscale/ngrok                                 |
+| **AI**                 | Isuna ero (passthrough / auto-strip / custom / adaptive — wo [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), eto eto agbaye, awọn iṣiro kaṣe kiakia         |
+| **Aabo**               | awọn eto Login/Password, Iṣakoso Wiwọle IP, API auth fun `/models`, Idilọwọ Olupese, oluso abẹrẹ kiakia                                                   |
+| **Ipa ọna**            | Ilana ipa-ọna agbaye (Fikun akọkọ / Yika Robin / P2C / ID / Lilo ti o kere ju / Iṣapeye idiyele), inagijẹ awoṣe kaadi, awọn ẹwọn isubu, awọn abawọn konbo |
+| **Resilience**         | Beere isinyi, itutu asopọ asopọ, atunto fifọ olupese, ati ihuwasi idaduro-duro                                                                            |
+| **To ti ni ilọsiwaju** | Iṣeto-aṣoju agbaye (HTTP/SOCKS5), aṣoju aṣoju-olupese dojukọ                                                                                              |
+
+Gbogboogbo ko ṣe ẹda-iwe kika-nikan ati awọn akọsilẹ kaṣe mọ. Idaduro aaye data ati awọn eto iṣapeye ti wa ni idaduro nipasẹ `/api/settings/database`; imukuro kaṣe afọwọṣe nlo `DELETE /api/cache`. Ibeere ati awọn bọtini awọn ila iwe aṣoju jẹ iṣakoso nipasẹ `CALL_LOGS_TABLE_MAX_ROWS` ati `PROXY_LOGS_TABLE_MAX_ROWS`.
+
+---
+
+### Awọn idiyele & Isakoso isuna
+
+Wiwọle nipasẹ** Dasibodu → Awọn idiyele** .
+
+| Taabu         | Idi                                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------- |
+| **Isuna**     | Ṣeto awọn opin inawo fun bọtini API pẹlu awọn eto isuna daily/weekly/monthly ati ipasẹ akoko gidi |
+| **Ifowoleri** | Wo ati ṣatunkọ awọn titẹ sii idiyele awoṣe - idiyele fun awọn ami ami input/output 1K fun olupese |
 
 ```bash
-# API: Ṣètò ìnáwó
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Gba ipò ìnáwó lọ́wọ́lọ́wọ́
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Ìtọ́pa Iye Owó:** Gbogbo ìbéèrè máa ń ṣàkọsílẹ̀ lílo token, ó sì máa ń ṣírò iye owó nípa lílo tábìlì ìdíyelé. Wo àwọn ìpínlẹ̀ kíkún nínú **Dashboard → Usage** nípa olùpèsè, model, àti kọ́kọ́rọ́ API.
+**Titele iye owo:** Gbogbo ibeere ṣe igbasilẹ lilo ami ami ati ṣe iṣiro idiyele nipa lilo tabili idiyele. Wo breakdowns ni** Dasibodu → Lilo** nipasẹ olupese, awoṣe, ati bọtini API.
 
 ---
 
-### Ìyípadà Ohùn sí Ọ̀rọ̀
+### Igbasilẹ ohun
 
-OmniRoute ṣe àtìlẹ́yìn fún ìyípadà ohùn sí ọ̀rọ̀ nípasẹ̀ endpoint tó bá OpenAI mu:
+OmniRoute ṣe atilẹyin iwe-igbasilẹ ohun nipasẹ aaye ipari ibaramu OpenAI:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Àpẹẹrẹ pẹ̀lú curl
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` ni ipa-ọ̀nà abinibi Deepgram, ó sì nílò kọ́kọ́rọ́ API Deepgram.
-Tí OpenRouter nìkan ni a bá ṣètò, lo `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` jẹ ọna Deepgram abinibi ati pe o nilo bọtini Deepgram API kan. Ti o ba tunto OpenRouter nikan, lo `openrouter/deepgram/nova-3`.
 
-Àwọn olùpèsè **Ohùn-sí-Ọ̀rọ̀ (ìyípadà sí ọ̀rọ̀)**:
+**Ọrọ-si-ọrọ (igbasilẹ)** awọn olupese:
 
-- `openai/` (bá whisper mu)
+- `openai/` (ibaramu whisper)
 - `groq/` (Groq Whisper Turbo)
-- `deepgram/` (ẹbí Nova)
+- `deepgram/` ( idile Nova)
 - `assemblyai/`
 - `nvidia/` (Parakeet, Canary)
-- `huggingface/` (àwọn ẹ̀yà whisper)
+- `huggingface/` (awọn iyatọ whisper)
 - `qwen/`
 
-Àwọn olùpèsè **Ọ̀rọ̀-sí-Ohùn (`POST /v1/audio/speech`)**:
+**Ọrọ-si-Ọrọ (`POST /v1/audio/speech`)** awọn olupese:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1064,55 +1120,45 @@ Tí OpenRouter nìkan ni a bá ṣètò, lo `openrouter/deepgram/nova-3`.
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Àwọn ọ̀nà-àgbékalẹ̀ ohùn tí a ṣe àtìlẹ́yìn fún ìyípadà sí ọ̀rọ̀: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Àwọn ọ̀nà-àgbékalẹ̀ àbájáde TTS sinmi lórí olùpèsè (mp3, wav, opus, pcm, mulaw).
+Awọn ọna kika ohun ti o ni atilẹyin fun kikọ silẹ: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. awọn ọna kika TTS da lori olupese (mp3, wav, opus, PCm, mulaw).
 
 ---
 
-### Àwọn Ọgbọ́n Ìdọ́gbadọ́gba Combo
+### Konbo Iwontunwonsi ogbon
 
-Ṣètò ìdọ́gbadọ́gba fún combo kọ̀ọ̀kan nínú **Dashboard → Combos → Create/Edit → Strategy**.
+Ṣe atunto iwọntunwọnsi fun konbo ni** Dasibodu → Combos → Create/Edit → Strategy** .
 
-| Ọgbọ́n              | Àpèjúwe                                                                      |
-| ------------------ | ---------------------------------------------------------------------------- |
-| **Round-Robin**    | Máa ń yí ká láàárín àwọn model lọ́nà títẹ̀lé ara wọn                           |
-| **Priority**       | Máa ń gbìyànjú model àkọ́kọ́ nígbà gbogbo; yóò lo omiì nìkan nígbà àṣìṣe       |
-| **Random**         | Máa ń yan model kan láìlétò láti inú combo fún ìbéèrè kọ̀ọ̀kan                 |
-| **Weighted**       | Máa ń darí ní ìbámu pẹ̀lú àwọn ìwọ̀n tí a yàn fún model kọ̀ọ̀kan                 |
-| **Least-Used**     | Máa ń darí sí model tó ní àwọn ìbéèrè àìpẹ́ díẹ̀ jù (ó ń lo àwọn òṣùwọ̀n combo) |
-| **Cost-Optimized** | Máa ń darí sí model tó wà tí iye rẹ̀ kéré jù (ó ń lo tábìlì ìdíyelé)          |
+| Ilana                 | Apejuwe                                                                   |
+| --------------------- | ------------------------------------------------------------------------- |
+| **Yika-Robin**        | Yiyi nipasẹ awọn awoṣe lẹsẹsẹ                                             |
+| **Ni ayo**            | Nigbagbogbo gbiyanju akọkọ awoṣe; ṣubu pada nikan lori aṣiṣe              |
+| **Laileto**           | Yiyan awoṣe laileto lati konbo fun ibeere kọọkan                          |
+| **Ti iwuwo**          | Awọn ipa-ọna ni iwọn ti o da lori awọn iwuwo ti a sọtọ fun awoṣe          |
+| **Ti o kere julọ-Lo** | Awọn ipa ọna si awoṣe pẹlu awọn ibeere aipẹ diẹ (nlo awọn metiriki konbo) |
+| **Iṣapeye idiyele**   | Awọn ọna si awoṣe ti o wa lawin (nlo tabili idiyele)                      |
 
-A lè ṣètò àwọn àiyípadà combo àgbáyé nínú **Dashboard → Settings → Routing → Combo Defaults**.
-Àwọn àkókò-opin ibi-àfojúsùn combo máa ń jogún àkókò-opin ìbéèrè lọ́wọ́lọ́wọ́ gẹ́gẹ́ bí àiyípadà. Lo **Target timeout
-(seconds)** lórí àwọn àiyípadà combo tàbí combo kan ṣoṣo nígbà tí ààlà tó kúrú fún ibi-àfojúsùn kọ̀ọ̀kan bá yẹ
-kí ó fa ìpadà-sí-ẹ̀yìn tó yára.
+Awọn aipe konbo agbaye le ṣeto sinu** Dasibodu → Eto → afisona → Konbo aiyipada** . Awọn akoko ibi-afẹde Konbo jogun akoko akoko ibeere lọwọlọwọ nipasẹ aiyipada. Lo** Akoko ibi-afẹde (awọn iṣẹju-aaya)** lori awọn aseku konbo tabi konbo kọọkan nikan nigbati opin ibi-afẹde kukuru kan yẹ ki o fa ipadabọ yiyara.
 
-Àwọn ìmúdára combo aláìní ìdádúró jẹ́ ohun tí a ní láti yan láti ṣiṣẹ́. Fi **Zero-latency optimizations** sílẹ̀ ní àìṣiṣẹ́ láti
-dènà àwọn ẹ̀yà ìdádúró wọ̀nyí láti bá àwọn ibi-àfojúsùn ìpadà-sí-ẹ̀yìn dije, láti fo àwọn ibi-àfojúsùn ní ìbámu pẹ̀lú ìtàn TTFT,
-tàbí láti fún àwọn ìbéèrè ìpadà-sí-ẹ̀yìn pọ̀; ṣíṣiṣẹ́ rẹ̀ yóò gba hedging tí a ti ṣètò, àwọn ìfò TTFT àsọtẹ́lẹ̀,
-àti ìpọ̀pọ̀ ìpadà-sí-ẹ̀yìn onítẹ̀síwájú láàyè láti pààrọ̀ ìṣedéédé ìdarí/ìbéèrè fún ìdádúró ìkẹyìn tó kéré.
+Awọn iṣapeye konbo airi-idairi ti wa ni ijade. Fi silẹ** Awọn iṣapeye aipe-odo** alaabo lati ṣe idiwọ awọn ẹya airi wọnyi lati awọn ibi-afẹde ipadasẹhin ere-ije, fo awọn ibi-afẹde ti o da lori itan-akọọlẹ TTFT, tabi titẹkuro awọn ibeere isubu; muu jẹ ki o ngbanilaaye hedging tunto, awọn fo TTFT asọtẹlẹ, ati funmorawon fallback ti n ṣiṣẹ lati ṣowo iṣotitọ routing/request fun airi iru kekere.
 
-Pa **Reasoning token buffer** nígbà tí àwọn olùpèsè upstream bá nílò àwọn ààlà
-`max_tokens` / `maxOutputTokens` tó muna. Nígbà tí ó bá ṣiṣẹ́, ìdarí combo máa ń fi ààyè àfikún fún model ìrònú
-kún un fún àwọn model tó ní ààlà àbájáde tí a mọ̀ nìkan, yóò sì fi ààlà token oníbàárà sílẹ̀ láìyípadà nígbà tí
-iye ààbò tí a fi àfikún sí yóò kọjá ààlà yẹn. Tí ààlà oníbàárà bá ti ga ju ààlà tí a mọ̀ lọ,
-OmniRoute yóò sọ ọ́ kalẹ̀ sí ààlà yẹn kí ó tó fi ìbéèrè upstream ránṣẹ́.
+Pa a** Idaduro àmi Idi** nigbati awọn olupese oke nilo awọn opin `max_tokens` / `maxOutputTokens` ti o muna. Nigbati o ba ṣiṣẹ, ipa-ọna konbo nikan ṣe afikun ero-awoṣe headroom fun awọn awoṣe pẹlu fila iṣelọpọ ti a mọ ati fi opin ami ami alabara silẹ ko yipada nigbati iye ifipamọ ailewu yoo kọja fila yẹn. Ti opin alabara ba ti wa loke fila ti a mọ, OmniRoute dimole si fila yẹn ṣaaju fifiranṣẹ ibeere oke.
 
 ---
 
-### Dashboard Ìlera
+### Dasibodu ilera
 
-Wọlé sí i nípasẹ̀ **Dashboard → Health**. Àkópọ̀ ìlera ètò ní àkókò gidi pẹ̀lú káàdì 6:
+Wiwọle nipasẹ** Dasibodu → Health** . Akopọ ilera eto akoko gidi pẹlu awọn kaadi 6:
 
-| Káàdì                 | Ohun Tí Ó Ń Ṣàfihàn                                                   |
-| --------------------- | --------------------------------------------------------------------- |
-| **System Status**     | Àkókò ìṣiṣẹ́, version, lílo memory, data directory                     |
-| **Provider Health**   | Ipò ìṣiṣẹ́ circuit breaker olùpèsè àgbáyé                              |
-| **Rate Limits**       | Àwọn cooldown àsopọ̀ tó ń ṣiṣẹ́ fún account kọ̀ọ̀kan pẹ̀lú àkókò tó kù     |
-| **Active Lockouts**   | Àwọn lockout tó ń ṣiṣẹ́ tí a dá mọ́ model àti àwọn ìyọkúrò fún ìgbà díẹ̀ |
-| **Signature Cache**   | Àwọn ìṣirò cache ìmúkúrò àdáwòkọ (àwọn key tó ń ṣiṣẹ́, ìwọ̀n ìbámu)     |
-| **Latency Telemetry** | Àkójọpọ̀ ìdádúró p50/p95/p99 fún olùpèsè kọ̀ọ̀kan                        |
+| Kaadi                          | Ohun Ti O Fihan                                                     |
+| ------------------------------ | ------------------------------------------------------------------- |
+| **Ipo System**                 | Akoko ipari, ẹya, lilo iranti, ilana data                           |
+| **Ilera Olupese**              | Olupese agbaye onipin-ajo akoko asiko isise                         |
+| **Awọn idiwọn Oṣuwọn**         | Awọn itutu asopọ asopọ ti nṣiṣe lọwọ fun akọọlẹ pẹlu akoko to ku    |
+| **Awọn titiipa ti nṣiṣe lọwọ** | Awọn titiipa awoṣe-dopin ti nṣiṣe lọwọ ati awọn imukuro igba diẹ    |
+| **Kaṣe Ibuwọlu**               | Awọn iṣiro kaṣe idinkukuro (awọn bọtini ti nṣiṣe lọwọ, oṣuwọn lilu) |
+| **Lairi Telemetry**            | akopọ lairi p50/p95/p99 fun olupese                                 |
 
-**Ìmọ̀ràn Amọ̀jọ̀wọ́:** Ojú-ewé Health máa ń sọ ara rẹ̀ di ọ̀tun ní gbogbo ìṣẹ́jú-àáyá 10. Lo káàdì circuit breaker láti dá àwọn olùpèsè tó ń ní ìṣòro mọ̀.
+**Imọran Pro:** Oju-iwe Ilera n ṣe atunṣe laifọwọyi ni gbogbo iṣẹju mẹwa 10. Lo kaadi fifọ Circuit lati ṣe idanimọ iru awọn olupese ti n ni iriri awọn ọran.
 
 ---
 

@@ -52,6 +52,11 @@
       "status": 400,
       "throws": true
     },
+    "kimi-search": {
+      "message": "Provider \"kimi-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "status": 400,
+      "throws": true
+    },
     "linkup-search": {
       "message": "Provider \"linkup-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
       "status": 400,
@@ -64,6 +69,11 @@
     },
     "ollama-search": {
       "message": "Provider \"ollama-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "status": 400,
+      "throws": true
+    },
+    "parallel-search": {
+      "message": "Provider \"parallel-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
       "status": 400,
       "throws": true
     },

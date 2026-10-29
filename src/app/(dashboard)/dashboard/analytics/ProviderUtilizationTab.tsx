@@ -2,6 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { PROVIDER_COLORS as CHART_PROVIDER_COLORS } from "@/shared/components/analytics/chartColors";
+import SegmentedControl from "@/shared/components/SegmentedControl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { getAccountDisplayName } from "@/lib/display/names";
 import dynamic from "next/dynamic";
@@ -16,14 +20,8 @@ import type {
   UtilizationTimeRange,
 } from "@/shared/types/utilization";
 
-const PROVIDER_COLORS = [
-  "var(--color-primary)",
-  "var(--color-accent)",
-  "var(--color-success)",
-  "var(--color-warning)",
-  "var(--color-error)",
-  "var(--color-text-muted)",
-];
+// Series colours: the kit chart tokens (shared analytics palette).
+const PROVIDER_COLORS = CHART_PROVIDER_COLORS;
 
 function formatTimestamp(value: string, range: UtilizationTimeRange) {
   const date = new Date(value);
@@ -208,30 +206,19 @@ export default function ProviderUtilizationTab() {
         icon="monitoring"
         action={
           <div className="flex items-center gap-4">
-            <div className="flex rounded-lg border border-border/50 bg-black/5 p-1 dark:bg-white/5">
-              <button
-                onClick={() => setAggregateBy("provider")}
-                className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                  aggregateBy === "provider"
-                    ? "bg-surface text-text-main shadow-sm"
-                    : "text-text-muted hover:text-text-main"
-                }`}
-              >
-                <span className="material-symbols-outlined text-[14px]">dns</span>
-                {t("providerUtilizationGlobalView")}
-              </button>
-              <button
-                onClick={() => setAggregateBy("connection")}
-                className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                  aggregateBy === "connection"
-                    ? "bg-surface text-text-main shadow-sm"
-                    : "text-text-muted hover:text-text-main"
-                }`}
-              >
-                <span className="material-symbols-outlined text-[14px]">account_tree</span>
-                {t("providerUtilizationAccountSplit")}
-              </button>
-            </div>
+            <SegmentedControl
+              size="sm"
+              value={aggregateBy}
+              onChange={(next) => setAggregateBy(next as typeof aggregateBy)}
+              options={[
+                { value: "provider", label: t("providerUtilizationGlobalView"), icon: "dns" },
+                {
+                  value: "connection",
+                  label: t("providerUtilizationAccountSplit"),
+                  icon: "account_tree",
+                },
+              ]}
+            />
             <TimeRangeSelector value={range} onChange={setRange} />
           </div>
         }
@@ -239,61 +226,38 @@ export default function ProviderUtilizationTab() {
       >
         {loading && !hasData ? (
           <div className="flex min-h-80 items-center justify-center text-sm text-text-muted">
-            <span className="material-symbols-outlined mr-2 animate-spin text-[18px]">
-              progress_activity
-            </span>
+            <Icon name="progress_activity" size={18} className="mr-2 animate-spin" />
             {t("providerUtilizationLoading")}
           </div>
         ) : error ? (
           <div className="flex min-h-80 flex-col items-center justify-center gap-4 text-center">
-            <span className="material-symbols-outlined text-[32px] text-error">error</span>
+            <Icon name="error" size={32} className="text-error" />
             <div className="flex flex-col gap-1">
               <p className="text-sm font-medium text-text-main">
                 {t("providerUtilizationFailedToLoad")}
               </p>
               <p className="text-sm text-text-muted">{error}</p>
             </div>
-            <button
-              type="button"
-              onClick={handleRetry}
-              disabled={retrying}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {retrying ? (
-                <>
-                  <span className="material-symbols-outlined animate-spin text-[18px]">
-                    progress_activity
-                  </span>
-                  {t("retrying")}
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-[18px]">refresh</span>
-                  {t("retry")}
-                </>
-              )}
-            </button>
+            <Button onClick={handleRetry} loading={retrying} icon="refresh">
+              {retrying ? t("retrying") : t("retry")}
+            </Button>
           </div>
         ) : !hasData ? (
           <div className="flex min-h-80 flex-col items-center justify-center gap-4 text-center">
-            <span className="material-symbols-outlined text-[40px] text-text-muted/70">
-              timeline
-            </span>
+            <Icon name="timeline" size={40} className="text-text-muted/70" />
             <div className="flex flex-col gap-2">
               <p className="text-sm font-medium text-text-main">{t("providerUtilizationNoData")}</p>
               <p className="max-w-md text-sm text-text-muted">
                 {t("providerUtilizationNoDataDescription")}
               </p>
             </div>
-            <div className="rounded-lg border border-black/5 bg-black/[0.02] p-4 dark:border-white/5 dark:bg-white/[0.02]">
+            <div className="rounded-lg border border-border bg-surface-2 p-4">
               <p className="text-xs font-medium text-text-main">
                 {t("providerUtilizationGettingStarted")}
               </p>
               <ul className="mt-2 text-left text-xs text-text-muted">
                 <li className="flex items-start gap-2">
-                  <span className="material-symbols-outlined text-[14px] text-primary">
-                    check_circle
-                  </span>
+                  <Icon name="check_circle" size={14} className="text-primary" />
                   <span>
                     {t.rich("providerUtilizationStepConnect", {
                       strong: (chunks) => <strong>{chunks}</strong>,
@@ -301,15 +265,11 @@ export default function ProviderUtilizationTab() {
                   </span>
                 </li>
                 <li className="mt-1 flex items-start gap-2">
-                  <span className="material-symbols-outlined text-[14px] text-primary">
-                    check_circle
-                  </span>
+                  <Icon name="check_circle" size={14} className="text-primary" />
                   <span>{t("providerUtilizationStepEnable")}</span>
                 </li>
                 <li className="mt-1 flex items-start gap-2">
-                  <span className="material-symbols-outlined text-[14px] text-primary">
-                    check_circle
-                  </span>
+                  <Icon name="check_circle" size={14} className="text-primary" />
                   <span>{t("providerUtilizationStepAutomatic")}</span>
                 </li>
               </ul>
@@ -349,7 +309,7 @@ export default function ProviderUtilizationTab() {
                   <Card.Section key={point.provider} className="flex h-full flex-col gap-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-black/5 bg-surface text-text-main dark:border-white/5">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-surface text-text-main">
                           <ProviderIcon providerId={providerPart} size={22} />
                         </div>
                         <div>
@@ -390,7 +350,7 @@ export default function ProviderUtilizationTab() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <div className="h-2 overflow-hidden rounded-full bg-black/5 dark:bg-white/5">
+                      <div className="h-2 overflow-hidden rounded-full bg-surface-2">
                         <div
                           className={`h-full rounded-full transition-all ${
                             point.isExhausted ? "bg-error" : isLow ? "bg-warning" : "bg-primary"

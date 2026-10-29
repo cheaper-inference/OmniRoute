@@ -48,15 +48,11 @@ Claude Code **Anthropic Messages API** සමඟ සන්නිවේදනය 
 
 ---
 
-## සොයාගැනීමේ අන්වර්ථ නාම — Claude නොවන මාදිලි `/model` තේරීම්කාරකයේ පෙන්වන්න
+## සොයාගැනීමේ අන්වර්ථ (Discovery aliases) — `/model` picker එකේ Claude නොවන මොඩල් නිරාවරණය කරන්න
 
-Claude Code හි ද්වාර මාදිලි සොයාගැනීම ලැයිස්තුගත කරන්නේ `claude`
-හෝ `anthropic` සමඟ ආරම්භ වන හැඳුනුම් පමණි. එබැවින් `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` සමඟ ස්වදේශීය
-`/model` තේරීම්කාරකය සාමාන්යයෙන් පෙන්වන්නේ OmniRoute හි Claude/Anthropic මාදිලි **පමණි** —
-`kimi/kimi-k2.6` හෝ `glm/glm-5.2` නිවැරදිව මාර්ගගත වුවද කිසිවිටෙක නොපෙන්වයි.
+Claude Code හි gateway මොඩල් සොයාගැනීම `claude` හෝ `anthropic` ලෙස ආරම්භ වන ids පමණක් ලැයිස්තුගත කරයි. එබැවින් `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` සමඟ ස්වදේශීය `/model` picker එක සාමාන්යයෙන් පෙන්වන්නේ OmniRoute හි Claude/Anthropic මොඩල් **පමණි** — `kimi/kimi-k2.6` හෝ `glm/glm-5.2` කිසිවිටෙක නොපෙන්වයි, එය හරියටම route වුවද.
 
-OmniRoute හට සක්රීය කර ඇති ඕනෑම මාදිලියක් (සහ සංයෝජනයක්) `claude/…` හැඳුනුමක් යටතේ පිළිබිඹු කළ හැකි බැවින්, එය
-එම පෙරහන පසු කර තේරීම්කාරකයේ දිස් වේ:
+OmniRoute හට ඕනෑම සක්රීය කර ඇති මොඩලයක් (සහ combo එකක්) `claude/…` id එකක් යටතේ mirror කළ හැක, එවිට එය එම filter එක සමත් වී picker එකේ දිස්වේ:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,73 +60,65 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-ඔබ Claude Code තුළින් මේවායින් එකක් තෝරාගත් විට, OmniRoute විසින් මාර්ගගත කිරීමට පෙර `claude/` ආවරණය
-ඉවත් කර නැවත සැබෑ හැඳුනුම ලබා ගනී — සැබෑ `claude/<real-claude-model>` හැඳුනුමක්
-(සත්ය Claude OAuth සැපයුම්කරු) සැමවිටම නොවෙනස්ව තබනු ලැබේ.
+ඔබ Claude Code හි මෙවැනි එකක් තෝරාගත් විට, OmniRoute route කිරීමට පෙර `claude/` wrapper එක ඉවත් කර සැබෑ id එකට ආපසු හරවයි — සැබවින්ම `claude/<real-claude-model>` id එකක් (සැබෑ Claude OAuth provider එක) සැමවිටම ස්පර්ශ නොකළ ලෙස තබනු ලැබේ.
 
-**මෙය පෙරනිමියෙන් අක්රියයි** සහ මට්ටම් තුනක දොරටුවක් මඟින් පාලනය වේ (වඩාත් නිශ්චිත
-මට්ටම ප්රමුඛ වේ). එබැවින් Claude Code භාවිත නොකරන සේවාලාභීන් සඳහා සාමාන්ය OmniRoute එකක්
-එහි නාමාවලිය දෙගුණ නොකරයි:
+පෙරනිමියෙන් mirror කරනු ලබන්නේ base ids පමණි. opt-in `CATALOG_MIRROR_REFINEMENTS_ENABLED` feature flag එක සක්රීය කළ විට, catalog එක දැනටමත් ලැයිස්තුගත කර ඇති reasoning-effort variants (උදා. `codex/gpt-6-sol-high`) වෙනත් ඕනෑම id එකක් මෙන් mirror කරනු ලැබේ, එවිට Claude Code හට පැහැදිලි effort මට්ටමක් තෝරාගත හැක. request path එකට materialize කළ නොහැකි built-in `auto/*` ids mirror නොකෙරේ. effort variants ලැයිස්තුගත වේද යන්න තවමත් `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` මඟින් පාලනය වේ — base catalog එකේ නොමැති variant එකක් mirror එක කිසිවිටෙක එකතු නොකරයි.
 
-| මට්ටම      | ස්ථානය                                                                            |
-| ---------- | --------------------------------------------------------------------------------- |
-| මාදිලිය    | සැපයුම්කරුගේ විස්තර පිටුව → එක් එක් මාදිලිය සඳහා "Expose in Claude Code" ටොගලය    |
-| සැපයුම්කරු | සැපයුම්කරුගේ විස්තර පිටුව → සැපයුම්කරු මට්ටමේ ටොගලය (එහි සියලු මාදිලි ආවරණය කරයි) |
-| ගෝලීය      | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (පෙරනිමියෙන් අක්රියයි)   |
+**මෙය පෙරනිමියෙන් අක්රීයයි** සහ ත්රි-මට්ටම් gate එකකින් පාලනය වේ (වඩාත් නිශ්චිත එක ජය ගනී), එබැවින් සාමාන්ය OmniRoute එකක් Claude Code භාවිත නොකරන clients සඳහා එහි catalog එක කිසිවිටෙක දෙගුණ නොකරයි:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` පරිසර විචල්යය ගෝලීය මට්ටම සක්රීය කිරීමට බල කරන
-අතර උපකරණ පුවරුවේ අභිභවා යෑමට වඩා ප්රමුඛත්වය ගනී (එය එසේ කරන විට Feature Flags තිරය
-"පරිසර විචල්යය හරහා සක්රියයි" යන සටහනක් පෙන්වයි). එක් එක් සැපයුම්කරු සහ
-එක් එක් මාදිලිය සඳහා වන ටොගල මඟින් එය තවදුරටත් පිරිපහදු කරයි — උදා. ගෝලීය මට්ටම අක්රිය + Kimi සැපයුම්කරු සක්රිය නම්
-නිරාවරණය වන්නේ Kimi හි මාදිලි පමණි.
+| මට්ටම    | කොහෙද                                                                          |
+| -------- | ------------------------------------------------------------------------------ |
+| මොඩලය    | Provider විස්තර පිටුව → මොඩලය-එකකට "Expose in Claude Code" toggle එක           |
+| Provider | Provider විස්තර පිටුව → provider-මට්ටම් toggle එක (එහි සියලු මොඩල් ආවරණය කරයි) |
+| ගෝලීය    | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (පෙරනිමියෙන් අක්රීය)  |
 
-> ⚠️ **Claude නොවන මාදිලිවල කවුළු නොගැළපීම.** Claude Code එය හඳුනා නොගන්නා ඕනෑම හැඳුනුමක් සඳහා 200K සන්දර්භ
-> කවුළුවක් උපකල්පනය කරයි (`/v1/models` වෙතින් සැබෑ කවුළුවක් කියවීමට එයට නොහැකිය).
-> විශාල කවුළුවක් ඇති මාදිලියක් සඳහා (උදා. Kimi K2 හි 256K), ස්වයංක්රීය සංක්ෂිප්ත කිරීම
-> අකාලයේ ක්රියාත්මක නොවන ලෙස `CLAUDE_CODE_AUTO_COMPACT_WINDOW` මාදිලියේ සැබෑ කවුළුවට වඩා අඩු අගයකට සකසන්න.
-> ඉහත ජනනය කළ පැතිකඩ දැනටමත් එක් එක් මාදිලිය සඳහා මෙය සිදු කරයි.
+`EXPOSE_CC_DISCOVERY_ALIASES` පරිසර විචල්යය ගෝලීය මට්ටම බලහත්කාරයෙන් සක්රීය කරයි සහ dashboard override එකට වඩා ප්රමුඛතාව ගනී (එය එසේ වන විට Feature Flags තිරය "active via environment variable" සටහනක් පෙන්වයි). per-provider සහ per-model toggles එතැනින් සිට වැඩිදුර සකසයි — උදා. ගෝලීය අක්රීය + Kimi provider සක්රීය විට Kimi හි මොඩල් පමණක් නිරාවරණය වේ.
+
+> ⚠️ **Claude නොවන මොඩල්වල window නොගැලපීම.** Claude Code එය හඳුනා නොගන්නා ඕනෑම id එකක් සඳහා 200K context window එකක් උපකල්පනය කරයි (එයට `/v1/models` වෙතින් සැබෑ window එකක් කියවිය නොහැක). විශාල window එකක් ඇති මොඩලයක් සඳහා (උදා. Kimi K2 හි 256K), auto-compaction එක කලින් වේලාවට ක්රියාත්මක නොවන පරිදි `CLAUDE_CODE_AUTO_COMPACT_WINDOW` මොඩලයේ සැබෑ window එකට වඩා අඩු අගයකට සකසන්න. ඉහත ජනනය කළ profiles දැනටමත් මෙය මොඩලය-එකකට කර ඇත.
 
 ---
 
-## උපකරණ පුවරුවේ ආරම්භක සැකසුම් කොටස
+## ඩෑෂ්බෝඩ් හි ආරම්භක සැකසුම් කොටස
 
-Claude මෙවලම් කාඩ්පත (**උපකරණ පුවරුව → CLI Code**) මෙම instance එක සඳහා නිවැරදි `settings.json` ඛණ්ඩය
-discovery-alias තොරතුරු බොත්තම අසල, පිටපත් කිරීමේ බොත්තමක් සමඟ පෙන්වයි:
+Claude මෙවලම් කාඩ්පත (**Dashboard → CLI Code**) මෙම instance එක සඳහා නිශ්චිත `settings.json` ඛණ්ඩය, discovery-alias තොරතුරු බොත්තම අසල, පිටපත් කිරීමේ බොත්තමක් සමඟ පෙන්වයි:
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<ඔබේ OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<ඔබේ OmniRoute API යතුර>",
+    "ANTHROPIC_BASE_URL": "http://<ඔබගේ OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<ඔබගේ OmniRoute API යතුර>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-මූලික URL එක කාඩ්පත මඟින් විසඳන ලද URL එකයි (ඔබ ටයිප් කළ අභිරුචි අතික්රමණයක්ද ඇතුළුව), එය දැනටමත්
-සාමාන්යකරණය කර ඇත — `/v1` ප්රත්යයක් හෝ අවසාන slash එකක් නැත. **යතුර කිසිවිටෙක පෙන්වන්නේ නැත**: මෙම කොටස
-placeholder එකක් සමඟ සපයන බැවින් screenshot එකකින් හෝ paste කළ snippet එකකින් යතුරක් කාන්දු විය නොහැක. ඒ වෙනුවට ඔබේ යතුර paste කරන්න.
+මූලික URL එක යනු කාඩ්පත විසින් නිරාකරණය කරන ලද එකයි (ඔබ ඇතුළත් කළ අභිරුචි අතික්රමණයක්ද ඇතුළුව), එය දැනටමත් සාමාන්යකරණය කර ඇත — `/v1` උපසර්ගයක් හෝ අවසානයේ slash එකක් නොමැත. **යතුර කිසිවිටෙක පෙන්වනු නොලැබේ**: මෙම කොටසට placeholder එකක් ඇතුළත් වන බැවින්, තිර රුවකින් හෝ අලවන ලද snippet එකකින් යතුරක් හෙළි විය නොහැක. ඒ මත ඔබගේ යතුර අලවන්න.
 
-සැබෑ context window එක 200K නොවන ඕනෑම model එකක් සඳහා එම `env` කොටස යටතේම `CLAUDE_CODE_AUTO_COMPACT_WINDOW`
-එක් කරන්න — Claude Code තමන් හඳුනා නොගන්නා සෑම ID එකක් සඳහාම 200K ලෙස උපකල්පනය කරන බැවින්, එසේ නොකළහොත්
-ස්වයංක්රීය සම්පීඩනය වැරදි ස්ථානයේ ක්රියාත්මක වේ (පෙර කොටසේ අනතුරු ඇඟවීම බලන්න).
-snippet builder එකද එම අගය පිළිගන්නා බැවින්, ඉලක්කගත model එකේ window ප්රමාණය දන්නා caller එකකට
-එය සෘජුවම නිකුත් කළ හැක.
+සැබෑ context window එක 200K නොවන ඕනෑම model එකක් සඳහා එම `env` කොටස යටතේ `CLAUDE_CODE_AUTO_COMPACT_WINDOW` එක් කරන්න — Claude Code විසින් හඳුනා නොගන්නා සෑම id එකක් සඳහාම 200K ලෙස උපකල්පනය කරන බැවින්, එසේ නොකළහොත් ස්වයංක්රීය සම්පීඩනය වැරදි ස්ථානයකදී ක්රියාත්මක වේ (පෙර කොටසේ අනතුරු ඇඟවීම බලන්න). snippet builder එකද එම අගය පිළිගන්නා බැවින්, ඉලක්ක model එකේ window එක දන්නා caller කෙනෙකුට එය සෘජුවම නිකුත් කළ හැක.
 
-මූලාශ්රය: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (පිරිසිදු
-builder එකක්, unit test කර ඇත), `ClaudeGatewayOnboardingBlock` මඟින් පෙන්වනු ලැබේ.
+මූලාශ්රය: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (pure builder එකක්, unit test කර ඇත), `ClaudeGatewayOnboardingBlock` මඟින් පෙන්වනු ලැබේ.
+
+### එක් ගිණුමක් pin කරන්න (විකල්ප)
+
+සෑම Claude Code ඉල්ලීමක්ම එක් නිශ්චිත provider ගිණුමක් හරහා යැවීමට, එම `env` කොටසෙහි `ANTHROPIC_CUSTOM_HEADERS` හරහා `x-omniroute-connection` header එක එක් කරන්න:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+provider පිටුවේ connection පේළියේ ඇති `xxxxxxxx…` chip එකෙන් id එක පිටපත් කරන්න. pin කිරීම අදාළ වන්නේ single-model ids (`provider/model`) සඳහා පමණක් වන අතර, combos සඳහා නොවේ. නිශ්චිත fallback හැසිරීම සඳහා [එක් එක් ඉල්ලීම අනුව ගිණුම් pin කිරීම](../reference/API_REFERENCE.md#account-pinning-per-request) බලන්න.
 
 ---
 
 ## පැතිකඩ (`CLAUDE_CONFIG_DIR`)
 
-Claude Code සතුව **ස්වදේශීය profile ගොනු නොමැත** (Codex හි `~/.codex/<name>.config.toml` මෙන් නොව).
-සාමාන්යයෙන් නිර්දේශිත යාන්ත්රණය `CLAUDE_CONFIG_DIR` වේ — එක් එක් profile එක සඳහා වෙනම config directory එකක්,
-ඒ සෑම එකකම තමන්ගේම `settings.json`, අක්තපත්ර, ඉතිහාසය සහ cache එක ඇත.
+Claude Code සතුව **ස්වදේශීය පැතිකඩ ගොනු නොමැත** (Codex හි `~/.codex/<name>.config.toml` මෙන් නොව).
+සාමාන්යයෙන් භාවිත කරන යාන්ත්රණය වන්නේ `CLAUDE_CONFIG_DIR` ය — එක් එක් පැතිකඩ සඳහා වෙනම වින්යාස නාමාවලියක් වන අතර,
+ඒ සෑම එකකටම තමන්ගේම `settings.json`, අක්තපත්ර, ඉතිහාසය සහ හැඹිලිය ඇත.
 
-`omniroute setup-claude` සජීවී `/v1/models` නාමාවලිය ලබාගෙන, එක් model එකකට එක්
-profile එක බැගින් `~/.claude/profiles/<name>/settings.json` වෙත ලියයි, එහිදී
-**`setup-codex` හි නම්ම නැවත භාවිත කරයි** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
+`omniroute setup-claude` සජීවී `/v1/models` නාමාවලිය ලබාගෙන,
+**`setup-codex` හි ඇති නම්ම භාවිත කරමින්** (`glm52`, `kimi-k27`, `deepseek-pro`, …)
+එක් එක් ආකෘතිය සඳහා `~/.claude/profiles/<name>/settings.json` හි පැතිකඩක් ලියයි:
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -147,36 +135,40 @@ profile එක බැගින් `~/.claude/profiles/<name>/settings.json` ව�
 }
 ```
 
-> **සත්යාපන token එක කිසිවිටෙක profile එකට ලියනු නොලැබේ.** `omniroute launch --profile <name>`
-> සමඟ දියත් කරන්න (එය සක්රිය context එකෙන් `ANTHROPIC_AUTH_TOKEN` ඇතුළත් කරයි), නැතහොත්
-> `ANTHROPIC_AUTH_TOKEN` ඔබ විසින්ම export කර
+> **සත්යාපන ටෝකනය කිසිවිටෙකත් පැතිකඩට ලියනු නොලැබේ.** `omniroute launch --profile <name>`
+> සමඟ දියත් කරන්න (එය සක්රිය සන්දර්භයෙන් `ANTHROPIC_AUTH_TOKEN` ඇතුළත් කරයි), නැතහොත්
+> `ANTHROPIC_AUTH_TOKEN` ඔබම export කර
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude` ධාවනය කරන්න.
 
-**Model discovery පසු ස්වයංක්රීය සමමුහුර්තකරණය (තෝරා සක්රිය කළ යුතුය).** Provider model
-sync කිරීමකින් සජීවී නාමාවලිය වෙනස් වන සෑම අවස්ථාවකම OmniRoute හට මෙම
-`~/.claude/profiles/<name>/settings.json` ගොනු ස්වයංක්රීයව නැවත ජනනය කළ හැක — එවිට නව/නැවත නම් කළ
-model සඳහා command එක නැවත ධාවනය නොකර profiles ලැබේ. මෙය **පෙරනිමියෙන් අක්රියයි**: එය
-**CLI Code උපකරණ පුවරුවෙන්** ("CLI profile auto-sync" → Claude Code) මාරු කරන්න, නැතහොත්
-`OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` සකසන්න (එය පෙරනිමියෙන් සක්රිය `CLI_ALLOW_CONFIG_WRITES`
-ද පිළිපදියි). සක්රිය කළ විට එය ලියන්නේ profile ගොනු පමණි; එය කිසිවිටෙක ඔබේ සක්රිය/පෙරනිමි Claude
-config, auth, හෝ `~/.claude/settings.json` වෙනස් නොකරයි.
+**ආකෘති සොයාගැනීමෙන් පසු ස්වයංක්රීය සමමුහුර්තකරණය (තෝරා සක්රිය කළ යුතුය).** සැපයුම්කරුවෙකුගේ ආකෘති
+සමමුහුර්තකරණයක් සජීවී නාමාවලිය වෙනස් කරන සෑම අවස්ථාවකම OmniRoute හට මෙම
+`~/.claude/profiles/<name>/settings.json` ගොනු ස්වයංක්රීයව නැවත ජනනය කළ හැක — එබැවින් විධානය නැවත
+ධාවනය නොකරම නව/නැවත නම් කළ ආකෘති සඳහා පැතිකඩ ලැබේ. එය **පෙරනිමියෙන් අක්රියය**: **CLI Code උපකරණ පුවරුවෙන්**
+("CLI පැතිකඩ ස්වයංක්රීය සමමුහුර්තකරණය" → Claude Code) එය මාරු කරන්න, නැතහොත්
+`OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` සකසන්න (එය පෙරනිමියෙන් සක්රිය `CLI_ALLOW_CONFIG_WRITES` ද
+ගරු කරයි). සක්රිය කළ විට එය ලියන්නේ පැතිකඩ ගොනු පමණි; එය කිසිවිටෙකත් ඔබේ සක්රිය/පෙරනිමි Claude වින්යාසය,
+සත්යාපනය හෝ `~/.claude/settings.json` වෙනස් නොකරයි.
 
-### Profiles ජනනය කිරීම + භාවිත කිරීම
+### පැතිකඩ ජනනය කිරීම + භාවිත කිරීම
 
 ```bash
 # දේශීය OmniRoute
 omniroute setup-claude
 
-# දුරස්ථ VPS (සෑම profile එකකටම VPS URL එක ඇතුළත් කරයි)
+# දුරස්ථ VPS (සෑම පැතිකඩකටම VPS URL එක ඇතුළත් කරයි)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
-# ඇතැම් providers පමණි
+# ඇතැම් සැපයුම්කරුවන් පමණි
 omniroute setup-claude --only glm,kimi
 
-# ලිවීමෙන් තොරව පෙරදසුන
+# මෙම ධාරකයේ හඳුනා නොගත් local-CLI සැපයුම්කරුවන් සඳහාද (zcode, auggie, devin-cli-agentic,
+# codex-app-server) පැතිකඩ ලියන්න (දේශීය ඉලක්කයක් සඳහා පෙරනිමියෙන් මඟ හරිනු ලැබේ)
+omniroute setup-claude --include-local
+
+# නොලියා පෙරදසුනක් බලන්න
 omniroute setup-claude --dry-run
 
-# Profile එකක් දියත් කරන්න
+# පැතිකඩක් දියත් කරන්න
 omniroute launch --profile kimi-k27
 ```
 

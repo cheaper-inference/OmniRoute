@@ -1,0 +1,1 @@
+- **fix(sse):** tool parameters with a root anyOf union are merged into one object schema on Kimi and Moonshot instead of being reduced to an empty schema; only arguments required by every branch stay required, and a property declared by several branches keeps its first definition ([#17105](https://github.com/diegosouzapw/OmniRoute/pull/17105)) — thanks @maxmad64bis

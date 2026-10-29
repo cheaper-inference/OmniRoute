@@ -15,6 +15,7 @@ import {
   type ModelFamily,
 } from "@omniroute/open-sse/services/autoCombo/modelFamily.ts";
 import { getCachedSettings } from "@/lib/db/readCache";
+import { isAutoRequestResolvedCapabilitiesEnabled } from "@/shared/utils/featureFlags";
 import {
   createInvocationId,
   startAutoEvaluationTrace,
@@ -150,7 +151,9 @@ export async function createVirtualAutoCombo(
       state.spec,
       apiKeyId,
       state.model,
-      invocationId
+      invocationId,
+      // #16419 opt-in: resolved capabilities also feed the snapshot weights.
+      isAutoRequestResolvedCapabilitiesEnabled()
     );
     virtualCombo.name = state.model;
     virtualCombo.id = state.model;

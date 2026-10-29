@@ -6,38 +6,38 @@
 
 OmniRoute កំណត់កម្មវិធីបញ្ជា SQLite របស់វានៅពេលចាប់ផ្ដើម តាមរយៈខ្សែសង្វាក់បម្រុង 5 ជំហាន៖
 
-1. **`better-sqlite3` ដែលបានរួមបញ្ចូល** (តាមរយៈ `dependencies` ក្នុង `package.json`)
-   — លឿនបំផុត ប្រើឯកសារគោលពីរដើម ហើយត្រូវបានដំឡើងដោយ `npm install` នៅពេលមានឧបករណ៍ build។
+1. **`better-sqlite3` ដែលបានភ្ជាប់មកជាមួយ** (តាមរយៈ `dependencies` ក្នុង `package.json`)
+   — លឿនបំផុត ជា binary ដើម និងត្រូវបានដំឡើងដោយ `npm install` នៅពេលមានឧបករណ៍ build។
 
-2. **`better-sqlite3` ដែលបានដំឡើងនៅពេលដំណើរការ** (ក្នុង `~/.omniroute/runtime/`)
-   — ត្រូវបានដំឡើងនៅពេលត្រូវប្រើជាលើកដំបូង **ឬ** ដោយ `scripts/build/postinstall.mjs → scripts/postinstall.mjs`។
-   វាផ្ទៀងផ្ទាត់ magic bytes របស់ឯកសារ `.node` គោលពីរដើម (ELF / Mach-O / PE) មុនពេលផ្ទុក
-   ដើម្បីការពារពីឯកសារគោលពីរដែលខូច ឬមិនត្រូវនឹងវេទិកា។
+2. **`better-sqlite3` ដែលបានដំឡើងពេលដំណើរការ** (ក្នុង `~/.omniroute/runtime/`)
+   — ត្រូវបានដំឡើងតាមតម្រូវការនៅពេលដំណើរការលើកដំបូង **ឬ** ដោយ `scripts/build/postinstall.mjs → scripts/postinstall.mjs`។
+   វាផ្ទៀងផ្ទាត់ magic bytes របស់ `.node` ដើម (ELF / Mach-O / PE) មុនពេលផ្ទុក
+   ដើម្បីការពារពី binary ដែលខូច ឬសម្រាប់ platform មិនត្រឹមត្រូវ។
 
-3. **`node:sqlite`** (បណ្ណាល័យស្តង់ដារ Node ≥22.5) — មិនត្រូវការ build គោលពីរដើមទេ ហើយត្រូវបានប្រើនៅពេល
-   ផ្លូវ better-sqlite3 ទាំងពីរបរាជ័យ។ មានសំណុំមុខងារមានកម្រិត។
+3. **`node:sqlite`** (stdlib របស់ Node ≥22.5) — មិនត្រូវការ native build ទេ; ប្រើនៅពេល
+   ទីតាំង better-sqlite3 ទាំងពីរបរាជ័យ។ មានសំណុំមុខងារកម្រិតកំណត់។
 
 4. **`sql.js`** (WASM) — ជម្រើសបម្រុងចុងក្រោយ។ ដំណើរការបានគ្រប់ទីកន្លែង ប៉ុន្តែយឺតជាង
-   ហើយសរសេរទិន្នន័យតាមចន្លោះពេល ជំនួសឱ្យការសរសេរធ្វើសមកាលកម្ម។
+   ហើយសរសេរទិន្នន័យតាមចន្លោះពេល ជំនួសឱ្យការសរសេរភ្លាមៗបែបសមកាលកម្ម។
 
-## ហេតុអ្វីបានជាត្រូវការភាពស្មុគស្មាញនេះ?
+## ហេតុអ្វីបានជាមានភាពស្មុគស្មាញនេះ?
 
 - **Windows EBUSY**៖ `npm install -g omniroute@latest` អាចបរាជ័យ ប្រសិនបើ
-  `better_sqlite3.node` របស់កំណែមុនត្រូវបានចាក់សោដោយដំណើរការដែលកំពុងដំណើរការ។ ការដំឡើងពេលដំណើរការ
-  ក្នុង `~/.omniroute/runtime/` ជៀសវាង cache npm សកល។
-- **គ្មានឧបករណ៍ build**៖ បរិស្ថានមួយចំនួន (Windows របស់សាជីវកម្មដែលគ្មាន VS Build
-  Tools និង image Docker ទំហំតូចបំផុត) មិនអាច compile `better-sqlite3` បានទេ។ កម្មវិធីដំឡើងពេលដំណើរការ
-  ស្វែងរកឯកសារគោលពីរដែលបាន build រួចពីបញ្ជីឈ្មោះ npm ហើយកម្មវិធីបញ្ជាបម្រុង
+  `better_sqlite3.node` របស់កំណែមុន ត្រូវបានចាក់សោដោយ process ដែលកំពុងដំណើរការ។ ការដំឡើង
+  ពេលដំណើរការក្នុង `~/.omniroute/runtime/` ជៀសវាង npm cache សកល។
+- **គ្មានឧបករណ៍ build**៖ បរិស្ថានមួយចំនួន (Windows របស់ស្ថាប័នដែលគ្មាន VS Build
+  Tools, Docker images កម្រិតអប្បបរមា) មិនអាច compile `better-sqlite3` បានទេ។ កម្មវិធីដំឡើង
+  ពេលដំណើរការ ទាញយក binary ដែលបាន build ជាមុនពី npm registry; កម្មវិធីបញ្ជាបម្រុង
   ធានាថា OmniRoute នៅតែអាចចាប់ផ្ដើមបាន ទោះបីវាបរាជ័យក៏ដោយ។
-- **ប្រព័ន្ធផ្ដាច់ចេញពីបណ្ដាញ**៖ ប្រសិនបើមិនអាចចូលប្រើបញ្ជីឈ្មោះ npm បាន `node:sqlite`
+- **ប្រព័ន្ធដែលផ្ដាច់ពីបណ្ដាញ**៖ ប្រសិនបើមិនអាចចូលដំណើរការ npm registry បាន `node:sqlite`
   ឬ `sql.js` ធានានូវមុខងារមូលដ្ឋាន។
 
 ## ការផ្ទៀងផ្ទាត់ magic-byte
 
-មុនពេលផ្ទុកឯកសារ `.node` ដែលបានដំឡើងនៅពេលដំណើរការ OmniRoute អាន 8 byte
-ដំបូង ហើយផ្គូផ្គងវាជាមួយ magic ដែលស្គាល់សម្រាប់វេទិកានីមួយៗ៖
+មុនពេលផ្ទុកឯកសារ `.node` ដែលបានដំឡើងពេលដំណើរការ OmniRoute អាន 8 bytes ដំបូង
+ហើយផ្គូផ្គងជាមួយ magic ដែលស្គាល់សម្រាប់ platform នីមួយៗ៖
 
-| វេទិកា                | Byte (hex)    | ស្លាក       |
+| Platform              | Bytes (hex)   | ស្លាក       |
 | --------------------- | ------------- | ----------- |
 | Linux                 | `7F 45 4C 46` | `elf`       |
 | macOS 64-bit BE       | `FE ED FA CF` | `macho`     |
@@ -45,22 +45,22 @@ OmniRoute កំណត់កម្មវិធីបញ្ជា SQLite រប�
 | macOS fat (universal) | `CA FE BA BE` | `macho-fat` |
 | Windows               | `4D 5A` (MZ)  | `pe`        |
 
-magic ដែលមិនផ្គូផ្គង → ឯកសារត្រូវបានមិនអើពើ ហើយដំណើរការបម្រុងបន្តទៅជំហានបន្ទាប់។
+magic ដែលមិនត្រូវគ្នា → ឯកសារត្រូវបានមិនអើពើ ហើយដំណើរការបម្រុងបន្តទៅជំហានបន្ទាប់។
 
-## ការពិនិត្យមើលកម្មវិធីបញ្ជាដែលសកម្ម
+## ការពិនិត្យកម្មវិធីបញ្ជាដែលសកម្ម
 
 ```typescript
 import { getDriverInfo } from "@/lib/db/core";
 
 const info = getDriverInfo();
-// { ប្រភព: "bundled" | "runtime" | "runtime-installed-now" | "node-sqlite" | "sql-js",
-//   ប្រភេទ: "better-sqlite3" | "node-sqlite" | "sql-js" }
+// { source: "bundled" | "runtime" | "runtime-installed-now" | "node-sqlite" | "sql-js",
+//   kind: "better-sqlite3" | "node-sqlite" | "sql-js" }
 ```
 
 ## ការគ្រប់គ្រងដោយដៃ
 
 ```bash
-# រំលងការកម្ដៅ postinstall ជាមុន (សម្រាប់ការដំឡើង CI រហ័ស)
+# រំលងការកម្ដៅទុកជាមុនក្រោយការដំឡើង (សម្រាប់ការដំឡើង CI រហ័ស)
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute
 
 # បង្ខំឱ្យដំឡើង better-sqlite3 ពេលដំណើរការឡើងវិញ
@@ -71,25 +71,45 @@ omniroute  # នឹងដំឡើងឡើងវិញនៅពេលចាប�
 omniroute config db-info  # (ប្រសិនបើមានពាក្យបញ្ជា CLI)
 ```
 
+## ការធ្វើរោគវិនិច្ឆ័យការជាប់គាំងបែបសមកាលកម្ម
+
+ជាមួយ `better-sqlite3` សូមកំណត់ `OMNIROUTE_SQLITE_SLOW_MS=200` មុនពេលចាប់ផ្ដើម ដើម្បីជ្រើសចូល
+ការវាស់ពេលវេលា adapter បែបសមកាលកម្ម។ តាមលំនាំដើម វាត្រូវបានបិទ។ ប្រតិបត្តិការដែលបានបញ្ចប់ និងចំណាយពេល
+យ៉ាងហោចណាស់ចំនួនមិល្លីវិនាទីនោះ នឹងបញ្ចេញការព្រមាន `[SQLITE-SLOW]` ច្រើនបំផុតម្ដងក្នុងមួយ
+ដប់វិនាទីសម្រាប់ adapter នីមួយៗ។ ការព្រមានមានតែកម្មវិធីបញ្ជា ថ្នាក់ប្រតិបត្តិការ
+(`prepare`, `get`, `all`, `run`, `exec`, `pragma`, transaction ឬ maintenance) និង
+ចំនួនមិល្លីវិនាទីដែលបានកន្លងផុត៖ គ្មាន SQL, bindings, rows, paths ឬអត្ថបទ exception ទេ។
+
+នេះគឺជាជំនួយសម្រាប់ការធ្វើរោគវិនិច្ឆ័យ មិនមែនជា timeout ឬការបង្កើនប្រសិទ្ធភាព query ទេ។ វាមិនអាចរាយការណ៍
+អំពីប្រតិបត្តិការដែលមិនត្រឡប់មកវិញ មិនអាចបែងចែកការងារ CPU ពីការរង់ចាំ disk មិនអាចកំណត់អត្តសញ្ញាណ
+SQL ជាក់លាក់ ឬសង្កេតប្រតិបត្តិការដែលបានធ្វើតាមរយៈ handle របស់កម្មវិធីបញ្ជាដើមបានទេ។
+រយៈពេល backup បែបអសមកាលកម្មត្រូវបានដកចេញដោយចេតនា; កម្មវិធីបញ្ជា SQLite ផ្សេងទៀតមិនត្រូវបាន
+បំពាក់ឧបករណ៍វាស់ដោយការជ្រើសចូលនេះទេ។ ការបិទ variable នឹងស្ដារ adapter ដើម
+ដោយគ្មាន timing wrappers។ មិនមានការផ្លាស់ប្ដូរ database schema ឬការកំណត់រចនាសម្ព័ន្ធដែលបានរក្សាទុកទេ។
+
+ការព្រមានអំពី lag របស់ `/healthz` រាយការណ៍កម្រិតកំពូលរបស់ event-loop ចាប់តាំងពី sample មុន
+មិនមែនមធ្យមភាគពេញមួយអាយុកាលទេ។ សូមផ្គូផ្គង timestamps របស់វាជាមួយការព្រមានប្រតិបត្តិការយឺត
+និង metrics របស់ host/storage មុនពេលសន្និដ្ឋានថាការជាប់គាំងបណ្ដាលមកពី SQLite ឬ disk បរាជ័យ។
+
 ## ឯកសារយោង
 
 ការអនុវត្ត៖
 
-- `bin/cli/runtime/magicBytes.mjs` — មុខងារជំនួយសម្រាប់ផ្ទៀងផ្ទាត់ magic-byte របស់ឯកសារគោលពីរ
-- `bin/cli/runtime/sqliteRuntime.mjs` — កម្មវិធីដោះស្រាយពេលដំណើរការ 5 ជំហាន + កម្មវិធីដំឡើងនៅពេលត្រូវប្រើ
+- `bin/cli/runtime/magicBytes.mjs` — helpers សម្រាប់ផ្ទៀងផ្ទាត់ magic-byte របស់ binary
+- `bin/cli/runtime/sqliteRuntime.mjs` — កម្មវិធីដោះស្រាយ runtime 5 ជំហាន + កម្មវិធីដំឡើងតាមតម្រូវការ
 - `bin/cli/runtime/index.mjs` — កម្មវិធីសម្របសម្រួលការចាប់ផ្ដើម (`warmUpRuntimes()`)
-- `scripts/postinstall.mjs` — hook ក្រោយការដំឡើង npm (ការកម្ដៅជាមុនដែលមិនបង្កឱ្យបរាជ័យ)
+- `scripts/postinstall.mjs` — hook ក្រោយការដំឡើងរបស់ npm (ការកម្ដៅទុកជាមុនដែលមិនបង្កឱ្យបរាជ័យ)
 - `src/lib/db/core.ts` — ការនាំចេញ `ensureDbInitialized()` / `getDriverInfo()`
 
-## ទម្រង់ single-writer (មិនគាំទ្រ HA)
+## សណ្ឋាន writer តែមួយ (មិនគាំទ្រ HA)
 
-ខ្សែសង្វាក់កម្មវិធីបញ្ជាបម្រុងខាងលើនៅតែដំណើរការក្នុង **ដំណើរការតែមួយ**។ តាមលំនាំដើម SQLite
-របស់ OmniRoute គឺជា **អ្នកសរសេរតែមួយ**៖
+ខ្សែសង្វាក់កម្មវិធីបញ្ជាបម្រុងខាងលើនៅតែដំណើរការក្នុង **process តែមួយ**។ តាមលំនាំដើម SQLite
+របស់ OmniRoute គឺជា **writer តែមួយ**៖
 
-- កុំភ្ជាប់ replica OmniRoute ពីរទៅឯកសារ `storage.sqlite` ដូចគ្នា។
-- ការចាប់ផ្ដើម container ឡើងវិញ ការ deploy បែប Recreate ការ kill ដោយ OOM ឬការចាប់ផ្ដើមឡើងវិញដោយ HEALTHCHECK
-  នឹងផ្ដាច់ session SSE ទាំងអស់ដែលកំពុងដំណើរការ។ មិនមានការបង្ហូរ session នៅលើផ្លូវស្តង់ដារទេ។
-- ការពិនិត្យ liveness របស់ orchestrator ដែលចាត់ទុក `/healthz` យឺតថាបានស្លាប់ នឹងបញ្ឈប់
+- កុំភ្ជាប់ replica របស់ OmniRoute ពីរទៅឯកសារ `storage.sqlite` តែមួយ។
+- ការចាប់ផ្ដើម container ឡើងវិញ, Recreate deploy, OOM kill ឬការចាប់ផ្ដើមឡើងវិញដោយ HEALTHCHECK នឹងផ្ដាច់
+  រាល់ SSE session ដែលកំពុងដំណើរការ។ មិនមានការបង្ហូរ session នៅលើផ្លូវស្តង់ដារទេ។
+- liveness របស់ orchestrator ដែលចាត់ទុក `/healthz` យឺតថាបានស្លាប់ នឹងបញ្ឈប់
   replica តែមួយគត់។ គួរប្រើ TCP liveness + HTTP `/healthz` readiness។ សូមមើល
   [មគ្គុទ្ទេសក៍ Docker — ភាពអាចប្រើបាន](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
-  និង [អនុសាសន៍សម្រាប់ probe របស់ Kubernetes](./MONITORING_GUIDE.md#kubernetes-probe-recommendations)។
+  និង [អនុសាសន៍ Kubernetes probe](./MONITORING_GUIDE.md#kubernetes-probe-recommendations)។

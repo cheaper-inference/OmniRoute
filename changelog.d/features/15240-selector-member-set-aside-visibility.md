@@ -1,1 +1,0 @@
-- **feat(admin):** Expose selector member set-aside state (motive, window, repeat count) in pool visibility ([#15240](https://github.com/diegosouzapw/OmniRoute/pull/15240)).

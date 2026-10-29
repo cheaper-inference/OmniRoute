@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { aggregateComboEventsToSets } from "@/app/(dashboard)/dashboard/combos/live/fleetAggregation";
 import type { ComboEventInput } from "@/app/(dashboard)/dashboard/combos/live/comboFlowModel";
+import Button from "@/shared/components/Button";
 import { overviewProjection } from "../model/overviewProjection";
 import {
   orchStateColor,
@@ -52,9 +53,9 @@ function Card({
     >
       <div className="flex items-center justify-between gap-2">
         <span className="font-medium truncate">{node.label}</span>
-        <span className="text-[9px] uppercase text-muted shrink-0">{node.source}</span>
+        <span className="text-[9px] uppercase text-text-muted shrink-0">{node.source}</span>
       </div>
-      {node.sublabel && <div className="text-[10px] text-muted truncate">{node.sublabel}</div>}
+      {node.sublabel && <div className="text-[10px] text-text-muted truncate">{node.sublabel}</div>}
       <div className="flex items-center justify-between mt-1.5">
         <span className="text-[10px]" style={{ color }}>
           {node.state && t(STATE_KEY[node.state])}
@@ -63,15 +64,17 @@ function Card({
             ` · ${formatElapsed(now - Date.parse(node.startedAt))}`}
           {node.cost != null && ` · ${usd.format(node.cost)}`}
         </span>
-        <button
-          className="text-[10px] underline text-muted"
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 min-h-6 px-1.5 text-[10px]"
           onClick={(e) => {
             e.stopPropagation();
             onSeeInGraph();
           }}
         >
           {t("actionSeeInGraph")}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -113,22 +116,26 @@ export function OverviewTab({
     <div className="flex flex-col gap-4 p-4 h-full overflow-auto">
       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
         {(Object.keys(counts) as OrchState[]).map((s) => (
+          // kit-exception: Two-line count tile that filters the board: stays a native <button> (the kit
+          // Button is a single-line pill), on kit tokens, with the filter state in aria-pressed.
           <button
             key={s}
+            type="button"
+            aria-pressed={filter === s}
             onClick={() => setFilter(filter === s ? null : s)}
-            className={`rounded-lg border p-2 text-center ${filter === s ? "border-primary" : "border-border"}`}
+            className={`rounded-lg border bg-surface p-2 text-center ${filter === s ? "border-primary" : "border-border"}`}
           >
             <div className="text-lg font-semibold" style={{ color: orchStateColor(s) }}>
               {counts[s]}
             </div>
-            <div className="text-[10px] text-muted">{t(STATE_KEY[s])}</div>
+            <div className="text-[10px] text-text-muted">{t(STATE_KEY[s])}</div>
           </button>
         ))}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-start">
         {(["queued", "running", "waiting_approval", "done"] as const).map((col) => (
           <div key={col} className="flex flex-col gap-2">
-            <div className="text-[10px] font-semibold uppercase text-muted">
+            <div className="text-[10px] font-semibold uppercase text-text-muted">
               {col === "done"
                 ? `${t("stateSucceeded")} / ${t("stateFailed")} / ${t("stateCancelled")}`
                 : t(STATE_KEY[col])}

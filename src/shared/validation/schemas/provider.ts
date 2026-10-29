@@ -1,22 +1,9 @@
 import { z } from "zod";
 import {
-  ACCOUNT_FALLBACK_STRATEGY_VALUES,
-  ROUTING_STRATEGY_VALUES,
-} from "@/shared/constants/routingStrategies";
-import { SUPPORTED_BATCH_ENDPOINTS } from "@/shared/constants/batchEndpoints";
-import { MAX_REQUEST_BODY_LIMIT_MB, MIN_REQUEST_BODY_LIMIT_MB } from "@/shared/constants/bodySize";
-import { COMBO_CONFIG_MODES } from "@/shared/constants/comboConfigMode";
-import {
   MODEL_SUPPORTED_ENDPOINT_VALUES,
   normalizeModelSupportedEndpoints,
 } from "@/shared/constants/modelSupportedEndpoints";
-import { providerAllowsOptionalApiKey } from "@/shared/constants/providers";
-import { HIDEABLE_SIDEBAR_ITEM_IDS } from "@/shared/constants/sidebarVisibility";
-import {
-  isForbiddenUpstreamHeaderName,
-  isForbiddenCustomHeaderName,
-} from "@/shared/constants/upstreamHeaders";
-import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
+import { providerAllowsOptionalApiKey, resolveProviderId } from "@/shared/constants/providers";
 import { validateProviderSpecificData } from "@/shared/validation/providerSpecificData";
 import {
   isReservedProviderPrefix,
@@ -89,6 +76,16 @@ const providerNodeIconUrlSchema = z
 // Same fix shape as #6562 (priority cap raised to 100_000).
 export const MAX_PROVIDER_CREDENTIAL_LENGTH = 100_000;
 
+// #15930: credentials arriving with this prefix are encrypted envelopes produced by a
+// credential store. `encrypt()` deliberately skips re-encrypting values that already
+// carry it, so an envelope would be stored verbatim, fail to decrypt at runtime, and
+// surface only as a misleading "Missing API key" on the connection test. Plaintext
+// keys from every provider (sk-…, tvly-…, JWTs, cookie headers, JSON storage state)
+// start with something else, so rejecting at validation time is near-zero-false-positive.
+// Checked inline rather than via lib/db/encryption's looksEncrypted() because this
+// schema is imported by client-side dashboard code and must stay free of node:crypto.
+const ENCRYPTED_ENVELOPE_PREFIX = "enc:v1:";
+
 export const createProviderSchema = z
   .object({
     provider: z.string().min(1).max(100),
@@ -108,7 +105,7 @@ export const createProviderSchema = z
   })
   .superRefine((data, ctx) => {
     const apiKey = typeof data.apiKey === "string" ? data.apiKey.trim() : "";
-    const catalogAllowsOptionalKey = providerAllowsOptionalApiKey(data.provider);
+    const catalogAllowsOptionalKey = providerAllowsOptionalApiKey(resolveProviderId(data.provider));
     if (data.allowNoCredential === true && !catalogAllowsOptionalKey) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -120,6 +117,14 @@ export const createProviderSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "API key is required",
+        path: ["apiKey"],
+      });
+    }
+    if (apiKey.startsWith(ENCRYPTED_ENVELOPE_PREFIX)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "apiKey looks like an encrypted envelope from a credential store, not a plaintext key — store the plaintext API key",
         path: ["apiKey"],
       });
     }
@@ -288,6 +293,7 @@ export const providerModelMutationSchema = z.object({
     .array(z.enum(MODEL_SUPPORTED_ENDPOINT_VALUES))
     .transform(normalizeModelSupportedEndpoints)
     .default(["chat"]),
+  endpointCapabilitySource: z.enum(["declared", "inferred", "defaulted", "operator"]).optional(),
   // #2905: optional per-model wire format override for custom models (e.g. a
   // custom opencode-go model that must use the Anthropic Messages shape).
   targetFormat: z
@@ -354,6 +360,21 @@ export const removeModelAliasSchema = z.object({
   from: z.string().trim().min(1),
 });
 
+// Optional custom suffix for a compatible node's generated id
+// (`openai-compatible-<apiType>-<suffix>` / `anthropic-compatible[-cc]-<suffix>`); blank
+// keeps the random UUID. Restricted charset (no path/URL metacharacters) because the id
+// flows into URLs, logs, usage rows and combo targets.
+const providerIdSuffixSchema = z
+  .string()
+  .trim()
+  .max(64, "Provider ID suffix must be at most 64 characters")
+  .regex(
+    /^(?:[A-Za-z0-9][A-Za-z0-9_.-]*)?$/,
+    "Provider ID suffix can only contain letters, numbers, -, _ and . and must start with a letter or number"
+  )
+  .optional()
+  .nullable();
+
 export const createProviderNodeSchema = z
   .object({
     // #6874: name/prefix are required in general, but a `preset` (e.g.
@@ -388,9 +409,23 @@ export const createProviderNodeSchema = z
     customHeaders: customHeadersSchema,
     dailyQuotaResetTimezone: dailyQuotaResetTimezoneSchema,
     dailyQuotaResetHour: dailyQuotaResetHourSchema,
+    providerIdSuffix: providerIdSuffixSchema,
   })
   .superRefine((value, ctx) => {
     const nodeType = value.type || "openai-compatible";
+    if (
+      nodeType === "anthropic-compatible" &&
+      value.compatMode !== "cc" &&
+      /^cc-/i.test(value.providerIdSuffix || "")
+    ) {
+      // `anthropic-compatible-cc-` is the Claude Code compatible marker: a plain
+      // anthropic node with this suffix would be detected as CC-compatible at runtime.
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Provider ID suffix cannot start with "cc-" for Anthropic compatible nodes',
+        path: ["providerIdSuffix"],
+      });
+    }
     const normalizedPrefix = value.prefix?.trim();
     if (normalizedPrefix && isReservedProviderPrefix(normalizedPrefix)) {
       // Validate caller-supplied prefixes before preset handling. Presets may
@@ -640,6 +675,15 @@ export const updateProviderConnectionSchema = z
         code: z.ZodIssueCode.custom,
         message: "No valid fields to update",
         path: [],
+      });
+    }
+    const apiKey = typeof value.apiKey === "string" ? value.apiKey.trim() : "";
+    if (apiKey.startsWith(ENCRYPTED_ENVELOPE_PREFIX)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "apiKey looks like an encrypted envelope from a credential store, not a plaintext key — store the plaintext API key",
+        path: ["apiKey"],
       });
     }
   });

@@ -25,6 +25,7 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "combo-test-auto-secr
 const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
 const autoRoute = await import("../../src/app/api/combos/auto/route.ts");
 const testRoute = await import("../../src/app/api/combos/test/route.ts");
 
@@ -46,6 +47,17 @@ async function seedGeminiConnection() {
     email: "antigravity-one@example.com",
     accessToken: "fake-antigravity-access-token-one",
     tokenExpiresAt: new Date(Date.now() + 60_000).toISOString(),
+  });
+}
+
+async function seedEligibleAutoConnection() {
+  // A family-specific account alone is not an eligible default-auto fixture.
+  // Keep the shipped ToS exclusion enabled and supply an official API account.
+  await providersDb.createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    apiKey: "sk-test-auto-route-official-provider",
+    isActive: true,
   });
 }
 
@@ -78,6 +90,7 @@ function stubHealthyProbes() {
 test.beforeEach(async () => {
   globalThis.fetch = originalFetch;
   await resetStorage();
+  await settingsDb.updateSettings({ excludeTosAvoid: false });
 });
 
 test.afterEach(() => {
@@ -163,6 +176,7 @@ test("GET /api/combos/auto?id= materializes one virtual combo for the control ce
 
 test("GET /api/combos/auto?id= handles the bare default and rejects non-auto ids", async () => {
   await seedGeminiConnection();
+  await seedEligibleAutoConnection();
 
   const bare = await getAuto("id=auto");
   assert.equal(bare.status, 200);
@@ -179,6 +193,7 @@ test("GET /api/combos/auto?id= handles the bare default and rejects non-auto ids
 
 test("GET /api/combos/auto list still emits every kind including families", async () => {
   await seedGeminiConnection();
+  await seedEligibleAutoConnection();
   const response = await getAuto("");
   assert.equal(response.status, 200);
   const { combos } = (await response.json()) as {

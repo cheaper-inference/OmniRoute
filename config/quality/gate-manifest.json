@@ -89,6 +89,16 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:boundary",
+      "command": "node scripts/quality/measure-boundary.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:boundary:ratchet",
+      "command": "node scripts/quality/measure-boundary.mjs --ratchet",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:cycles",
       "command": "node scripts/check/check-cycles.mjs",
       "disposition": "separately-invoked"
@@ -379,6 +389,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:test-tla-order",
+      "command": "node scripts/check/check-test-tla-order.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:test-masking",
       "command": "node scripts/check/check-test-masking.mjs",
       "disposition": "separately-invoked"
@@ -441,6 +456,11 @@
     {
       "name": "lint:prose",
       "command": "vale docs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "quality:boundary",
+      "command": "node scripts/quality/measure-boundary.mjs",
       "disposition": "separately-invoked"
     },
     {
@@ -545,7 +565,7 @@
     },
     {
       "name": "test:e2e",
-      "command": "node scripts/dev/run-playwright-tests.mjs test tests/e2e/*.spec.ts",
+      "command": "node scripts/dev/run-playwright-tests.mjs",
       "disposition": "separately-invoked"
     },
     {
@@ -682,6 +702,16 @@
       "name": "typecheck:noimplicit:core",
       "command": "tsc --pretty false -p tsconfig.typecheck-noimplicit-core.json",
       "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:free-catalog-evidence",
+      "command": "node scripts/check/check-free-catalog-evidence.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:ui-kit-snapshot",
+      "command": "node scripts/check/check-ui-kit-snapshot.mjs",
+      "disposition": "separately-invoked"
     }
   ],
   "profiles": {
@@ -708,9 +738,11 @@
         "check:known-symbols",
         "check:route-guard-membership",
         "check:test-discovery",
+        "check:test-tla-order",
         "check:test-masking",
         "check:duplication",
-        "check:cycles:ratchet"
+        "check:cycles:ratchet",
+        "check:boundary:ratchet"
       ]
     },
     "quality-scan-fast": {
@@ -736,6 +768,7 @@
         "check:known-symbols",
         "check:route-guard-membership",
         "check:test-discovery",
+        "check:test-tla-order",
         "check:test-masking"
       ]
     }

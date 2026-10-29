@@ -14,6 +14,7 @@ import {
 } from "../../utils/streamHelpers.ts";
 import { sanitizeErrorMessage } from "../../utils/errorSanitization.ts";
 import { normalizeStreamFailurePayload } from "../../utils/streamErrorFormat.ts";
+import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { evaluateResponseValidation, type ResponseValidationConfig } from "./responseValidation.ts";
 import { getReasoningTokens } from "../../../src/lib/usage/tokenAccounting.ts";
 import { REASONING_BUFFER_MIN_TRIGGER } from "../reasoningTokenBuffer.ts";
@@ -237,13 +238,13 @@ function responsesApiOutputHasContent(output: unknown): boolean {
       const content = record.content;
       return (
         Array.isArray(content) &&
-        content.some(
-          (part) =>
-            !!part &&
-            typeof part === "object" &&
-            typeof (part as Record<string, unknown>).text === "string" &&
-            ((part as Record<string, string>).text as string).length > 0
-        )
+        content.some((part) => {
+          if (!isRecord(part)) return false;
+          return (
+            (typeof part.text === "string" && part.text.length > 0) ||
+            (part.type === "refusal" && typeof part.refusal === "string" && part.refusal.length > 0)
+          );
+        })
       );
     })
   );
@@ -285,6 +286,12 @@ export interface StreamingUpstreamFailure {
   message?: string;
   requestScoped: boolean;
   retryable: boolean;
+  /**
+   * #16438: the failure is a pre-output empty turn (the disconnect guard's synthetic
+   * "Provider returned empty content" frame or an explicit `empty_content` code). Read
+   * only when EMPTY_STREAM_SIBLING_RECOVERY_ENABLED is on; `code` keeps the wire value.
+   */
+  emptyContent?: boolean;
 }
 
 export interface ResponseQualityResult {
@@ -299,7 +306,12 @@ function classifyStreamingUpstreamFailure(parsed: unknown): StreamingUpstreamFai
   if (!normalized) return null;
   const type = normalized.type?.trim().toLowerCase() || "";
   const code = normalized.code?.trim().toLowerCase() || "";
+  // The disconnect guard's synthetic empty-turn error uses the generic wire code.
+  // Flag it separately so opt-in recovery can prefer a sibling without a lockout.
+  const emptyContent =
+    normalized.message === "Provider returned empty content" || code === "empty_content";
   const requestScoped =
+    isContentPolicyRefusal(normalized) ||
     type === "invalid_request_error" ||
     code === "invalid_request_error" ||
     type === "context_length_exceeded" ||
@@ -314,6 +326,7 @@ function classifyStreamingUpstreamFailure(parsed: unknown): StreamingUpstreamFai
     ...(message ? { message } : {}),
     requestScoped,
     retryable: !requestScoped && normalized.status >= 500,
+    ...(emptyContent ? { emptyContent: true } : {}),
   };
 }
 
@@ -352,8 +365,10 @@ export async function validateResponseQuality(
   log: { warn?: (...args: unknown[]) => void },
   responseValidation?: ResponseValidationConfig | null,
   signal?: AbortSignal | null,
-  trustedEmptyTurn = false
+  trustedEmptyTurn: boolean | (() => boolean) = false
 ): Promise<ResponseQualityResult> {
+  const permitsEmptyTurn = () =>
+    typeof trustedEmptyTurn === "function" ? trustedEmptyTurn() : trustedEmptyTurn;
   // Issue #3685: For Claude SSE streaming responses, use a BOUNDED PEEK to
   // detect the empty-content-block pattern (content_filter stop_reason with
   // no content_block_* events) WITHOUT de-streaming non-empty responses.
@@ -621,11 +636,13 @@ export async function validateResponseQuality(
             // A first-party Claude empty turn with an ordinary stop is a valid
             // response. Require the final message_stop and NO opened blocks:
             // an empty start/stop block (#1382) or content_filter still fails over.
+            // A refusal is final on any provider: the client must see it.
             if (
-              trustedEmptyTurn &&
               sse.hasMessageStop &&
               !sse.hasContentBlock &&
-              (sse.stopReason === "end_turn" || sse.stopReason === "stop_sequence")
+              (sse.stopReason === "refusal" ||
+                (permitsEmptyTurn() &&
+                  (sse.stopReason === "end_turn" || sse.stopReason === "stop_sequence")))
             ) {
               return { valid: true, clonedResponse: buildReplayResponse(reader) };
             }
@@ -693,6 +710,8 @@ export async function validateResponseQuality(
           // `outcome === "content"` branch above and never reaches here —
           // this branch only fires on genuinely empty completions.
           if (openAi.hasChoicePayload && openAi.hasTerminalMarker) {
+            if (permitsEmptyTurn())
+              return { valid: true, clonedResponse: buildReplayResponse(reader) };
             log.warn?.(
               "COMBO",
               "Streaming OpenAI-shape response reached finish_reason/[DONE] with no content, reasoning, or tool_calls — marking as invalid for combo failover"
@@ -869,7 +888,10 @@ export async function validateResponseQuality(
 
   const choices = json?.choices;
   if (json?.object === "response") {
-    if (!responsesApiOutputHasContent(json.output))
+    if (
+      !responsesApiOutputHasContent(json.output) &&
+      !(json.status === "completed" && permitsEmptyTurn())
+    )
       return { valid: false, reason: "empty_choices" };
     const status = typeof json.status === "string" ? json.status : "";
     // Same terminal set as detectMalformedNonStream (diagnostics.ts). A combo
@@ -943,12 +965,16 @@ export async function validateResponseQuality(
     return { valid: false, reason: specViolation };
   }
 
-  if (!hasContent && !hasToolCalls) {
+  const hasRefusal = typeof message.refusal === "string" && message.refusal.trim().length > 0;
+  if (!hasContent && !hasToolCalls && !hasRefusal) {
     // finish_reason "length" is a truncated completion (max_tokens hit), the
     // same case the Claude shape exempts as stop_reason "max_tokens" (#12968).
     // A thinking model that spends the whole budget before any visible token
     // is a valid response, not a reason to fail the combo target over.
-    if (firstChoice?.finish_reason === "length") {
+    if (
+      firstChoice?.finish_reason === "length" ||
+      (firstChoice?.finish_reason === "stop" && permitsEmptyTurn())
+    ) {
       return {
         valid: true,
         clonedResponse: new Response(text, {

@@ -48,6 +48,8 @@ export interface ConnectionFields {
   accessToken?: string | null;
   refreshToken?: string | null;
   idToken?: string | null;
+  providerSpecificData?: unknown;
+  credentialDecryptFailed?: boolean;
   [key: string]: unknown;
 }
 
@@ -80,6 +82,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { isTestContext, resolveDataDir } from "../dataPaths.ts";
+import { mapProviderSpecificDataSecrets } from "./providers/providerSpecificDataSecrets";
 
 function ensureSecretLoaded(): string | undefined {
   if (isTestContext()) {
@@ -369,6 +372,12 @@ export function encryptConnectionFields<T extends ConnectionFields | null | unde
   if (conn.accessToken) conn.accessToken = encrypt(conn.accessToken);
   if (conn.refreshToken) conn.refreshToken = encrypt(conn.refreshToken);
   if (conn.idToken) conn.idToken = encrypt(conn.idToken);
+  if (conn.providerSpecificData) {
+    conn.providerSpecificData = mapProviderSpecificDataSecrets(
+      conn.providerSpecificData,
+      (value) => encrypt(value)
+    );
+  }
   return conn;
 }
 
@@ -389,6 +398,17 @@ export function decryptConnectionFields<T extends ConnectionFields | null | unde
   const accessToken = decrypt(row.accessToken, { quiet: true });
   const refreshToken = decrypt(row.refreshToken, { quiet: true });
   const idToken = decrypt(row.idToken, { quiet: true });
+  const failedNested: Array<{ field: string; value: unknown }> = [];
+  const providerSpecificData = mapProviderSpecificDataSecrets(
+    row.providerSpecificData,
+    (value, field) => {
+      const plaintext = decrypt(value, { quiet: true });
+      if (looksEncrypted(value) && plaintext === null) {
+        failedNested.push({ field: `providerSpecificData.${field}`, value });
+      }
+      return plaintext;
+    }
+  );
 
   // #6148 — a stored credential that is still encrypted (`enc:v1:…`) but
   // decrypts to null means the STORAGE_ENCRYPTION_KEY changed or was unset.
@@ -398,7 +418,8 @@ export function decryptConnectionFields<T extends ConnectionFields | null | unde
     (looksEncrypted(row.apiKey) && apiKey === null) ||
     (looksEncrypted(row.accessToken) && accessToken === null) ||
     (looksEncrypted(row.refreshToken) && refreshToken === null) ||
-    (looksEncrypted(row.idToken) && idToken === null);
+    (looksEncrypted(row.idToken) && idToken === null) ||
+    failedNested.length > 0;
 
   if (credentialDecryptFailed) {
     const failed: Array<{ field: string; value: unknown }> = [];
@@ -410,6 +431,7 @@ export function decryptConnectionFields<T extends ConnectionFields | null | unde
       failed.push({ field: "refreshToken", value: row.refreshToken });
     if (looksEncrypted(row.idToken) && idToken === null)
       failed.push({ field: "idToken", value: row.idToken });
+    failed.push(...failedNested);
 
     const connectionId = typeof row.id === "string" ? row.id : "";
     const provider = typeof row.provider === "string" ? row.provider : "unknown";
@@ -433,6 +455,7 @@ export function decryptConnectionFields<T extends ConnectionFields | null | unde
     accessToken,
     refreshToken,
     idToken,
+    ...(row.providerSpecificData !== undefined ? { providerSpecificData } : {}),
     ...(credentialDecryptFailed ? { credentialDecryptFailed: true } : {}),
   };
 }

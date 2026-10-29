@@ -4,6 +4,7 @@ import { lookupReasoning, recordReplay } from "../../services/reasoningCache.ts"
 import { getModelTargetFormat } from "../../config/providerModels.ts";
 import { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
 import { sanitizeToolId } from "./schemaCoercion.ts";
+import { isRestoredClaudeThinkingBlock } from "../../services/claudeThinkingStore.ts";
 
 export { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
 
@@ -78,24 +79,28 @@ export function applyKimiCodingThinking(
   }
 }
 
+// Only text/thinking/redacted_thinking blocks can be blank; every other typed
+// block is real content. #7777: media-only turns (image/document) must count.
+// container_upload and newer block types must count too — an allowlist here
+// silently deleted those turns (possibly leaving `messages: []`).
+function isNonEmptyClaudeBlock(block: ClaudeContentBlock): boolean {
+  switch (block?.type) {
+    case "text":
+      return !!block.text?.trim();
+    case "thinking":
+      return !!block.thinking?.trim();
+    case "redacted_thinking":
+      return typeof block.data === "string" && !!block.data.trim();
+    default:
+      return typeof block?.type === "string" && block.type.length > 0;
+  }
+}
+
 // Check if message has valid non-empty content
 export function hasValidContent(msg: ClaudeMessage): boolean {
   if (typeof msg.content === "string" && msg.content.trim()) return true;
   if (Array.isArray(msg.content)) {
-    return msg.content.some(
-      (block) =>
-        (block.type === "text" && block.text?.trim()) ||
-        (block.type === "thinking" && block.thinking?.trim()) ||
-        (block.type === "redacted_thinking" &&
-          typeof block.data === "string" &&
-          block.data.trim()) ||
-        block.type === "tool_use" ||
-        block.type === "tool_result" ||
-        // #7777: media-only user turns are real content — dropping them
-        // silently deletes vision input on the CC bridge / Claude paths.
-        block.type === "image" ||
-        block.type === "document"
-    );
+    return msg.content.some(isNonEmptyClaudeBlock);
   }
   return false;
 }
@@ -610,14 +615,29 @@ export function prepareClaudeRequest(
 
     // Index of the LAST assistant message in the filtered array. Anthropic
     // enforces the latest assistant message's thinking blocks cannot be
-    // modified — preserve them verbatim. Older assistant messages can be
-    // rewritten to redacted_thinking { data } as before.
+    // modified — preserve them verbatim. Bound store-restored blocks in the
+    // trailing tool cycle are protected below too; completed history is unchanged.
     let latestAssistantIndex = -1;
     for (let k = filtered.length - 1; k >= 0; k--) {
       if (filtered[k]?.role === "assistant") {
         latestAssistantIndex = k;
         break;
       }
+    }
+
+    // A tool loop remains one active assistant cycle until an ordinary user
+    // turn. Signed blocks from every assistant/tool-result pair are immutable.
+    const activeAssistantIndexes = new Set<number>();
+    let cursor = filtered.length - 1;
+    if (filtered[cursor]?.role === "assistant") {
+      activeAssistantIndexes.add(cursor--);
+    }
+    while (cursor >= 0 && filtered[cursor]?.role === "user") {
+      const userContent = ensureMessageContentArray(filtered[cursor]);
+      if (!userContent.length || userContent.some((block) => block.type !== "tool_result")) break;
+      cursor -= 1;
+      if (cursor < 0 || filtered[cursor]?.role !== "assistant") break;
+      activeAssistantIndexes.add(cursor--);
     }
 
     let lastAssistantProcessed = false;
@@ -655,16 +675,23 @@ export function prepareClaudeRequest(
         // message when sending to an Anthropic-native upstream. Anthropic returns
         // 400 "blocks in the latest assistant message cannot be modified" if any
         // field changes. Injecting a NEW thinking block (when none exists) is fine.
-        // Older assistant messages can still be rewritten.
+        // Older assistant messages can still be rewritten unless their thinking
+        // came from the bound store and belongs to the active tool cycle.
         // For non-Anthropic providers: only the text replacement is skipped
         // for the latest assistant (if it already has non-empty thinking text);
         // field cleanup (signature strip, type normalization) still runs.
         const isLatestAssistant = i === latestAssistantIndex;
-        const latestThinkingBlocks: ClaudeContentBlock[] = isLatestAssistant
-          ? content.filter(
-              (b: ClaudeContentBlock) => b.type === "thinking" || b.type === "redacted_thinking"
-            )
-          : [];
+        const hasRestoredActiveThinking =
+          activeAssistantIndexes.has(i) &&
+          content
+            .filter((block) => block.type === "thinking" || block.type === "redacted_thinking")
+            .every(isRestoredClaudeThinkingBlock);
+        const latestThinkingBlocks: ClaudeContentBlock[] =
+          isLatestAssistant || hasRestoredActiveThinking
+            ? content.filter(
+                (b: ClaudeContentBlock) => b.type === "thinking" || b.type === "redacted_thinking"
+              )
+            : [];
         const latestHasExistingThinking = latestThinkingBlocks.length > 0;
         // #6953: a synthetic thinking block with an EMPTY signature/data (fabricated by a
         // non-Anthropic provider leg, e.g. codex reasoning_content) is NOT a genuine Claude

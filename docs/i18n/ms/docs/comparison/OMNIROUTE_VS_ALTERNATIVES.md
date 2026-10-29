@@ -4,46 +4,46 @@
 
 ---
 
-Perbandingan ciri secara objektif dengan penghala AI sumber terbuka yang popular.
+Perbandingan ciri objektif berbanding penghala AI sumber terbuka popular.
 
-> **Metodologi**: Repositori awam diaudit pada 2026-Q2. Versi seperti yang disenaraikan.
-> Serahkan pembetulan melalui PR — kami mahu maklumat ini tepat.
+> **Metodologi**: Repositori awam diaudit 2026-Q2. Versi seperti yang disenaraikan.
+> Hantar pembetulan melalui PR — kami mahu perbandingan ini tepat.
 
-| Ciri                                                  |                 OmniRoute 3.8                  |     LiteLLM 1.x      | OpenRouter (SaaS) |    Portkey     |
-| ----------------------------------------------------- | :--------------------------------------------: | :------------------: | :---------------: | :------------: |
-| **Penyedia**                                          |                    **329**                     |         ~100         |        ~50        |      ~30       |
-| **Entri katalog percuma/tanpa pengesahan**            |                    **155**                     |    tidak terpakai    |   laluan terus    | tidak terpakai |
-| **Boleh dihoskan sendiri**                            |                       ✅                       |          ✅          |        ❌         |   ⚠ berbayar   |
-| **Entri katalog OAuth**                               |                     **23**                     |        separa        |        ❌         |       ❌       |
-| **Gabungan sandaran automatik**                       |                **19 strategi**                 | berasaskan keutamaan | berasaskan tahap  |   berwajaran   |
-| **Gabungan (panel selari + sintesis penilai)**        |                       ✅                       |          ❌          |        ❌         |       ❌       |
-| **Sandaran Tahap 1/2/3 (langganan→murah→percuma)**    |                    ✅ + UI                     |        manual        |  tidak terpakai   |     manual     |
-| **Pemampatan token**                                  | 12 enjin bertindan (RTK + Caveman + LLMLingua) |        tiada         |       tiada       |     tiada      |
-| **Penjanaan multimodal (pertuturan/muzik/video)**     |                       ✅                       |          ❌          |   laluan terus    |       ❌       |
-| **Pelayan MCP terbina dalam**                         |              ✅ 110 alat, 33 skop              |          ❌          |        ❌         |       ❌       |
-| **Protokol A2A**                                      |                 ✅ 6 kemahiran                 |          ❌          |        ❌         |       ❌       |
-| **Memori (FTS5 + vektor)**                            |                       ✅                       |          ❌          |        ❌         |       ❌       |
-| **Pagar keselamatan (PII, suntikan, penglihatan)**    |                       ✅                       |        separa        |        ❌         |  ✅ berbayar   |
-| **Penyepaduan ejen awan**                             |          Codex, Cursor, Devin, Jules           |          ❌          |        ❌         |       ❌       |
-| **Pemutus litar bagi setiap penyedia**                |         ✅ 3 keadaan, pemulihan malas          |         asas         |        ❌         |       ✅       |
-| **Penyamaran cap jari TLS (JA3/JA4)**                 |                   ✅ wreq-js                   |          ❌          |        ❌         |       ❌       |
-| **Rangka kerja penilaian**                            |                ✅ terbina dalam                |          ❌          |        ❌         |   ⚠ berbayar   |
-| **Proksi MITM (memintas Cursor/Antigravity)**         |              ✅ merentas platform              |          ❌          |        ❌         |       ❌       |
-| **CLI dengan dulang sistem (tanpa Electron)**         |                       ✅                       |          ❌          |  tidak terpakai   | tidak terpakai |
-| **Pengesahan automatik ID mesin CLI**                 |                       ✅                       |          ❌          |  tidak terpakai   | tidak terpakai |
-| **Papan pemuka**                                      |                   Next.js 16                   |         asas         |    proprietari    |  proprietari   |
-| **i18n**                                              |                  **42 lokal**                  |          ❌          |        ❌         |       ⚠        |
-| **Kemahiran ejen awam (SKILL.md)**                    |                     ✅ 45                      |          ❌          |        ❌         |       ❌       |
-| **Sokongan terowong (Cloudflared, Tailscale, Ngrok)** |                       ✅                       |          ❌          |  tidak terpakai   | tidak terpakai |
-| **Lesen**                                             |                      MIT                       |         MIT          |    proprietari    |  proprietari   |
+| Ciri                                                  |                 OmniRoute 3.8                 |     LiteLLM 1.x      | OpenRouter (SaaS) |   Portkey   |
+| ----------------------------------------------------- | :-------------------------------------------: | :------------------: | :---------------: | :---------: |
+| **Penyedia**                                          |                    **329**                    |         ~100         |        ~50        |     ~30     |
+| **Entri katalog percuma/tanpa pengesahan**            |                    **155**                    |         n/a          |    passthrough    |     n/a     |
+| **Boleh dihos sendiri**                               |                      ✅                       |          ✅          |        ❌         | ⚠ berbayar  |
+| **Entri katalog OAuth**                               |                    **23**                     |        separa        |        ❌         |     ❌      |
+| **Kombo fallback automatik**                          |                **20 strategi**                | berasaskan keutamaan |  berasaskan tier  | berwajaran  |
+| **Fusion (panel selari + sintesis hakim)**            |                      ✅                       |          ❌          |        ❌         |     ❌      |
+| **Fallback Tier 1/2/3 (langganan→murah→percuma)**     |                    ✅ + UI                    |        manual        |        n/a        |   manual    |
+| **Mampatan token**                                    | tindanan 12 enjin (RTK + Caveman + LLMLingua) |        tiada         |       tiada       |    tiada    |
+| **Penjanaan multimodal (pertuturan/muzik/video)**     |                      ✅                       |          ❌          |    passthrough    |     ❌      |
+| **Pelayan MCP terbina dalam**                         |             ✅ 110 alat, 33 skop              |          ❌          |        ❌         |     ❌      |
+| **Protokol A2A**                                      |                ✅ 6 kemahiran                 |          ❌          |        ❌         |     ❌      |
+| **Memori (FTS5 + vektor)**                            |                      ✅                       |          ❌          |        ❌         |     ❌      |
+| **Guardrails (PII, suntikan, penglihatan)**           |                      ✅                       |        separa        |        ❌         | ✅ berbayar |
+| **Integrasi ejen awan**                               |          Codex, Cursor, Devin, Jules          |          ❌          |        ❌         |     ❌      |
+| **Pemutus litar setiap penyedia**                     |         ✅ 3-keadaan, pemulihan lazy          |         asas         |        ❌         |     ✅      |
+| **Stealth cap jari TLS (JA3/JA4)**                    |                  ✅ wreq-js                   |          ❌          |        ❌         |     ❌      |
+| **Rangka kerja eval**                                 |               ✅ terbina dalam                |          ❌          |        ❌         | ⚠ berbayar  |
+| **Proksi MITM (memintas Cursor/Antigravity)**         |             ✅ merentas platform              |          ❌          |        ❌         |     ❌      |
+| **CLI dengan dulang sistem (tiada Electron)**         |                      ✅                       |          ❌          |        n/a        |     n/a     |
+| **Pengesahan automatik ID mesin CLI**                 |                      ✅                       |          ❌          |        n/a        |     n/a     |
+| **Papan pemuka**                                      |                  Next.js 16                   |         asas         |    proprietari    | proprietari |
+| **i18n**                                              |                 **67 lokal**                  |          ❌          |        ❌         |      ⚠      |
+| **Kemahiran ejen awam (SKILL.md)**                    |                     ✅ 45                     |          ❌          |        ❌         |     ❌      |
+| **Sokongan terowong (Cloudflared, Tailscale, Ngrok)** |                      ✅                       |          ❌          |        n/a        |     n/a     |
+| **Lesen**                                             |                      MIT                      |         MIT          |    proprietari    | proprietari |
 
-## Bila perlu memilih OmniRoute
+## Bila nak pilih OmniRoute
 
-- Anda mengehos sendiri dan mahukan **liputan penyedia maksimum** (329 penyedia, 155 entri katalog percuma/tanpa pengesahan)
-- Anda memerlukan **pelayan MCP terbina dalam** (alat LLM, memori dan kemahiran didedahkan sebagai alat)
-- Anda memerlukan **protokol A2A** untuk aliran kerja antara ejen
-- Anda mahukan **penyamaran cap jari** (JA3/JA4) untuk mengelakkan pengesanan oleh CAPTCHA huluan
-- Anda memerlukan **ciri perusahaan** (pagar keselamatan, penilaian, jejak audit) tanpa bil SaaS
+- Anda menjadi hos sendiri dan mahu** liputan pembekal maksimum** (377 pembekal, 155 entri katalog free/no-auth )
+- Anda memerlukan a** pelayan MCP terbina dalam** ( alatan LLM, ingatan, kemahiran didedahkan sebagai alatan)
+- Awak perlukan** protokol A2A** untuk aliran kerja ejen-ke-ejen
+- awak nak** siluman cap jari** (JA3/JA4) untuk mengelakkan pengesanan oleh CAPTCHAs hulu
+- Awak perlukan** ciri perusahaan** (pengadang, eval, jejak audit) tanpa bil SaaS
 
 ## Bila perlu memilih LiteLLM
 

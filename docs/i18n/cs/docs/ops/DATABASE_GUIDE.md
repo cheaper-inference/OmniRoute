@@ -509,7 +509,7 @@ Pokud příkaz vrátí cokoli jiného než `ok`, **okamžitě přestaňte datab�
 
 ---
 
-## Zotavení po havárii
+## Obnova po havárii
 
 ### Scénář 1: Soubor WAL byl ztracen
 
@@ -520,7 +520,7 @@ Soubor `-wal` chybí, ale soubor `-shm` a hlavní databáze jsou neporušené:
 omniroute
 ```
 
-Pokud SQLite nedokáže provést automatické zotavení:
+Pokud SQLite nedokáže provést automatickou obnovu:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite ".recover" > recovered.sql
@@ -528,19 +528,22 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Scénář 2: Hlavní databázový soubor je poškozený
+### Scénář 2: Hlavní databázový soubor je poškozen
 
 Obnovte jej ze zálohy:
 
 ```bash
-omniroute sync pull --merge   # nebo: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` pouze stáhne úplný archiv `.tar.gz` ze spuštěného serveru
+(`GET /api/db-backups/exportAll`, vyžadováno oprávnění operátora); žádnou obnovu neprovede.
 
 ### Scénář 3: Šifrovací klíč byl ztracen
 
-Bez klíče **není zotavení možné**. Zašifrovaná pole jsou nečitelná. Znovu ručně přidejte všechny poskytovatele s novými přihlašovacími údaji.
+Bez klíče **není obnova možná**. Zašifrovaná pole nelze přečíst. Znovu ručně přidejte všechny poskytovatele s novými přihlašovacími údaji.
 
-> **Zmírnění rizika**: Šifrovací klíč vždy zálohujte samostatně, ideálně ve správci hesel nebo v KMS.
+> **Zmírnění rizika**: Šifrovací klíč vždy zálohujte samostatně, ideálně ve správci hesel nebo systému KMS.
 
 ### Scénář 4: Plný disk
 

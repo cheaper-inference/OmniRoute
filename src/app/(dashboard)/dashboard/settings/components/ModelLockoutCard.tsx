@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Button, Card, Toggle } from "@/shared/components";
-import { useNotificationStore } from "@/store/notificationStore";
 import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
+import { Badge, Button, Card, Input, Toggle } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
+import { useNotificationStore } from "@/store/notificationStore";
 
 type ModelLockoutSettings = {
   enabled: boolean;
@@ -101,29 +103,25 @@ function NumberField({
   onChange: (value: number) => void;
 }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="flex items-center justify-between text-xs text-text-muted">
-        <span>{label}</span>
-        {hint ? <span className="text-text-soft">{hint}</span> : null}
-      </span>
-      <div className="flex items-center gap-2">
-        <input
-          type="number"
-          min={min}
-          max={max}
-          value={value}
-          onChange={(event) => {
-            if (event.target.value === "") return;
-            const nextValue = Number(event.target.value);
-            if (Number.isFinite(nextValue)) {
-              onChange(nextValue);
-            }
-          }}
-          className="w-full rounded-lg border border-border bg-bg-subtle px-3 py-2 text-sm"
-        />
-        {suffix ? <span className="text-xs text-text-muted">{suffix}</span> : null}
-      </div>
-    </label>
+    <div className="flex items-end gap-2">
+      <Input
+        type="number"
+        label={label}
+        hint={hint}
+        min={min}
+        max={max}
+        value={value}
+        onChange={(event) => {
+          if (event.target.value === "") return;
+          const nextValue = Number(event.target.value);
+          if (Number.isFinite(nextValue)) {
+            onChange(nextValue);
+          }
+        }}
+        className="min-w-0 flex-1"
+      />
+      {suffix ? <span className="pb-2.5 text-xs text-text-muted">{suffix}</span> : null}
+    </div>
   );
 }
 
@@ -334,7 +332,7 @@ export default function ModelLockoutCard() {
     return (
       <Card className="p-6">
         <div className="flex items-center gap-2 text-sm text-text-muted">
-          <span className="material-symbols-outlined animate-spin">progress_activity</span>
+          <Icon name="progress_activity" className="animate-spin" />
           {t("modelLockoutLoading")}
         </div>
       </Card>
@@ -346,7 +344,7 @@ export default function ModelLockoutCard() {
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary">gpp_maybe</span>
+            <Icon name="gpp_maybe" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("modelLockout")}</h2>
           </div>
           <p className="text-sm text-text-muted">{t("modelLockoutPageDescription")}</p>
@@ -383,82 +381,78 @@ export default function ModelLockoutCard() {
 
         {/* Error codes — tag input */}
         <div className="rounded-lg border border-border bg-bg-subtle p-4">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-text-main">
-              {t("modelLockoutErrorCodes")}
-            </span>
-            <span className="text-xs text-text-muted">
-              {t("modelLockoutErrorCodesDescription")}
-            </span>
-          </label>
+          <Field
+            label={t("modelLockoutErrorCodes")}
+            hint={t("modelLockoutErrorCodesDescription")}
+            htmlFor="model-lockout-error-code"
+          >
+            {/* Chips row */}
+            {draft.errorCodes.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {draft.errorCodes.map((code) => (
+                  <Badge key={code} variant="primary" className="gap-1 pe-0.5">
+                    {code}
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      icon="close"
+                      onClick={() => removeErrorCode(code)}
+                      className="size-5 min-h-5"
+                      aria-label={t("removeErrorCode", { code })}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
 
-          {/* Chips row */}
-          {draft.errorCodes.length > 0 && (
-            <div className="mt-3 flex flex-wrap items-center gap-1.5">
-              {draft.errorCodes.map((code) => (
-                <span
-                  key={code}
-                  className="inline-flex items-center gap-1 rounded-md bg-primary/10 text-primary border border-primary/20 px-2 py-1 text-sm font-medium"
-                >
-                  {code}
-                  <button
-                    type="button"
-                    onClick={() => removeErrorCode(code)}
-                    className="inline-flex size-4 items-center justify-center rounded-sm hover:bg-primary/20 transition-colors"
-                    aria-label={t("removeErrorCode", { code })}
+            {/* Input row */}
+            <div className="flex items-center gap-2">
+              <Input
+                id="model-lockout-error-code"
+                type="text"
+                inputMode="numeric"
+                value={errorCodesInput}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/[^0-9]/g, "");
+                  if (raw.length <= 3) setErrorCodesInput(raw);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    commitErrorCodes();
+                  }
+                }}
+                placeholder={t("addErrorCode")}
+                className="w-32"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => commitErrorCodes()}
+                disabled={!errorCodesInput.trim()}
+              >
+                {tc("add")}
+              </Button>
+            </div>
+
+            {/* Suggested common codes — chips as clickable suggestions */}
+            {draft.errorCodes.length === 0 && errorCodesInput === "" && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-xs text-text-muted">{t("suggestions")}</span>
+                {[403, 404, 429, 502, 503, 504].map((code) => (
+                  <Button
+                    key={code}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => commitErrorCodes(String(code))}
+                    className="rounded-full"
                   >
-                    <span className="material-symbols-outlined text-sm leading-none">close</span>
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Input row */}
-          <div className="mt-3 flex items-center gap-2">
-            <input
-              type="text"
-              inputMode="numeric"
-              value={errorCodesInput}
-              onChange={(e) => {
-                const raw = e.target.value.replace(/[^0-9]/g, "");
-                if (raw.length <= 3) setErrorCodesInput(raw);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  commitErrorCodes();
-                }
-              }}
-              placeholder={t("addErrorCode")}
-              className="w-32 rounded-lg border border-border bg-bg px-3 py-2 text-sm outline-none focus:border-primary transition-colors placeholder:text-text-muted/50"
-            />
-            <button
-              type="button"
-              onClick={() => commitErrorCodes()}
-              disabled={!errorCodesInput.trim()}
-              className="rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text-muted hover:text-text-main hover:border-primary/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {tc("add")}
-            </button>
-          </div>
-
-          {/* Suggested common codes — chips as clickable suggestions */}
-          {draft.errorCodes.length === 0 && errorCodesInput === "" && (
-            <div className="mt-3 flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-xs text-text-muted">{t("suggestions")}</span>
-              {[403, 404, 429, 502, 503, 504].map((code) => (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => commitErrorCodes(String(code))}
-                  className="inline-flex items-center px-2 py-0.5 rounded-full bg-surface text-xs text-text-muted border border-border/40 hover:border-primary/40 hover:text-primary transition-colors"
-                >
-                  +{code}
-                </button>
-              ))}
-            </div>
-          )}
+                    +{code}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </Field>
         </div>
 
         {/* Cooldowns - grid */}

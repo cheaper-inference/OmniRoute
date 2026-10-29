@@ -9,8 +9,7 @@ import { parseNonStreamingResponseBody } from "@omniroute/open-sse/handlers/chat
 function makeResponse(body: string, contentType: string): Response {
   return {
     headers: {
-      get: (name: string) =>
-        name.toLowerCase() === "content-type" ? contentType : null,
+      get: (name: string) => (name.toLowerCase() === "content-type" ? contentType : null),
     },
     text: async () => body,
     body: null,
@@ -113,6 +112,64 @@ test("error-only SSE (no choices) → invalid_sse surfacing the upstream error (
   assert.equal(res.looksLikeSSE, true);
 });
 
+test("buffered Responses tool and image output survive cross-format detection", async () => {
+  const output = [
+    { type: "function_call", id: "fc_test", call_id: "call_test", name: "lookup", arguments: "{}" },
+    { type: "image_generation_call", id: "img_test", status: "completed", result: "fixture-image" },
+  ];
+  const res = await parseNonStreamingResponseBody({
+    ...baseOpts,
+    providerResponse: makeResponse(
+      `data: ${JSON.stringify({
+        type: "response.completed",
+        response: { id: "resp_test", object: "response", status: "completed", output },
+      })}\n\n`,
+      "text/event-stream"
+    ),
+  });
+  assert.equal(res.kind, "ok");
+  if (res.kind !== "ok") return;
+  assert.equal(res.responsePayloadFormat, "openai-responses");
+  assert.deepEqual(res.responseBody.output, [output[0], { ...output[1], call_id: undefined }]);
+});
+
+for (const frames of [
+  [{ type: "error", error: { message: "Responses failed" } }],
+  [
+    { type: "response.created", response: { id: "resp_failed", object: "response", output: [] } },
+    { error: { message: "Responses failed" } },
+  ],
+]) {
+  test(`identified Responses failure retains its error (${frames.length} frames)`, async () => {
+    const res = await parseNonStreamingResponseBody({
+      ...baseOpts,
+      providerResponse: makeResponse(
+        frames.map((frame) => `data: ${JSON.stringify(frame)}\n\n`).join(""),
+        "text/event-stream"
+      ),
+    });
+    assert.equal(res.kind, "ok");
+    if (res.kind !== "ok") return;
+    assert.equal(res.responsePayloadFormat, "openai-responses");
+    assert.equal(res.responseBody.status, "failed");
+    assert.deepEqual(res.responseBody.error, { message: "Responses failed" });
+  });
+}
+
+test("error-only SSE message is sanitized before returning the failure", async () => {
+  const res = await parseNonStreamingResponseBody({
+    ...baseOpts,
+    providerResponse: makeResponse(
+      `data: ${JSON.stringify({ error: { message: "Failure\n    at run (/app/private/server.js:1:2)" } })}\n\n`,
+      "text/event-stream"
+    ),
+  });
+  assert.equal(res.kind, "invalid_sse");
+  if (res.kind !== "invalid_sse") return;
+  assert.ok(!res.message.includes("/app/private/server.js"));
+  assert.ok(!res.message.includes("at run"));
+});
+
 test("unparseable SSE with no embedded error → generic invalid_sse message", async () => {
   const sse = "data: not-json-at-all\n\n";
   const res = await parseNonStreamingResponseBody({
@@ -167,3 +224,32 @@ test("buffering log fires debug when stream was expected, warn otherwise", async
   });
   assert.equal(warnCalls.length, 1);
 });
+
+for (const wrapped of [false, true]) {
+  test(`buffered ${wrapped ? "wrapped" : "native"} Gemini SSE reaches the non-streaming response caller`, async () => {
+    const payload = {
+      candidates: [{ content: { parts: [{ text: "hello Gemini" }] }, finishReason: "STOP" }],
+      usageMetadata: { promptTokenCount: 3, candidatesTokenCount: 2, totalTokenCount: 5 },
+    };
+    const response = new Response(
+      `data: ${JSON.stringify(wrapped ? { response: payload } : payload)}\n\n`,
+      {
+        headers: { "content-type": "text/event-stream" },
+      }
+    );
+    const result = await parseNonStreamingResponseBody({
+      ...baseOpts,
+      targetFormat: "gemini",
+      providerResponse: response,
+    });
+    assert.equal(result.kind, "ok");
+    if (result.kind !== "ok") return;
+    assert.equal(result.looksLikeSSE, true);
+    assert.equal(result.responseBody.choices[0].message.content, "hello Gemini");
+    assert.deepEqual(result.responseBody.usage, {
+      prompt_tokens: 3,
+      completion_tokens: 2,
+      total_tokens: 5,
+    });
+  });
+}

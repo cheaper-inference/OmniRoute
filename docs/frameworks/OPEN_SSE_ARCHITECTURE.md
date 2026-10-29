@@ -36,7 +36,7 @@ open-sse/
 ├── types.d.ts            # Public type exports
 ├── package.json          # @omniroute/open-sse
 ├── config/               # Provider configs, constants, registries
-├── executors/            # Per-provider HTTP executors (67 + base.ts/index.ts)
+├── executors/            # Per-provider HTTP executors (150 modules + base.ts/index.ts)
 ├── handlers/             # Request handlers (chatCore, responses, etc.)
 ├── lib/                  # Internal utilities
 ├── mcp-server/           # Model Context Protocol server
@@ -228,7 +228,7 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Supports **19 routing strategies** (see `src/shared/constants/routingStrategies.ts`):
+Supports **20 routing strategies** (see `src/shared/constants/routingStrategies.ts`):
 
 | Strategy            | Behavior                                                                  |
 | ------------------- | ------------------------------------------------------------------------- |
@@ -244,15 +244,18 @@ Supports **19 routing strategies** (see `src/shared/constants/routingStrategies.
 | `reset-aware`       | Aware of provider reset windows                                           |
 | `reset-window`      | Reset window-based routing                                                |
 | `headroom`          | Most remaining quota headroom first                                       |
+| `quota-weighted`    | Skip exhausted accounts, then draw by leftover quota ÷ in-flight load     |
 | `strict-random`     | Truly uniform (no quality weighting)                                      |
 | `auto`              | Use 16-factor scoring (`autoCombo/`)                                      |
 | `lkgp`              | Last known good provider first                                            |
 | `context-optimized` | Best for long-context requests                                            |
+| `cache-optimized`   | Pin each reusable prompt prefix to the same account (prompt-cache hits)   |
 | `fusion`            | Fan out to a panel in parallel, then synthesize via a judge (`fusion.ts`) |
+| `pipeline`          | Chain steps — each target's output feeds the next one                     |
 
 ### base.ts (1170 LOC)
 
-The **abstract executor** that all 107 executors extend. It contains:
+The **abstract executor** that every executor class extends (directly or through `DefaultExecutor` and other subclasses). It contains:
 
 - `buildUrl()` — default URL construction (subclasses override for custom)
 - `buildHeaders()` — default headers (auth, content-type)
@@ -330,9 +333,9 @@ Services are **focused, single-purpose modules** that handlers compose. The big 
 
 ---
 
-## Executors (75+ files)
+## Executors (150 modules)
 
-One file per provider. They all extend `BaseExecutor` and override what differs.
+Mostly one file per provider. The executor classes all extend `BaseExecutor` and override what differs; the other modules are per-provider helpers (tool schemas, fetch/TTS adapters, quirk handlers).
 
 ### Common Patterns
 
@@ -487,7 +490,7 @@ This handles:
 
 | File                          | Purpose                                           |
 | ----------------------------- | ------------------------------------------------- |
-| `providerRegistry.ts`         | Chat-model registry over the 352-provider catalog |
+| `providerRegistry.ts`         | Chat-model registry over the 377-provider catalog |
 | `providerModels.ts`           | Model aliases, format mapping                     |
 | `constants.ts`                | Timeouts, limits, status codes                    |
 | `defaultThinkingSignature.ts` | Default Claude thinking signature                 |

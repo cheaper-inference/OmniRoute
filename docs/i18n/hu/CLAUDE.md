@@ -8,17 +8,18 @@
 
 **Minden projektszabály az [`AGENTS.md`](AGENTS.md) fájlban található** — ez az egyetlen hiteles információforrás minden AI-asszisztens számára (architektúra, konvenciók, tesztelés, minőségi ellenőrzőkapuk, git-munkafolyamat, a 23 szigorú szabály, személyazonosításra alkalmas adatokkal kapcsolatos tanulságok). Olvasd el teljes egészében; ne add hozzá újra ide a projektszabályokat. Az alábbiak KIZÁRÓLAG a Claude Code-ra vonatkoznak — az `AGENTS.md` fájlban már meghatározott szabályok működésbeli pontosításai.
 
-## Worktree-elkülönítés — Claude Code-specifikus részletek
+## Worktree-izoláció — Claude Code-specifikus tudnivalók
 
-A teljes, kötelező worktree-protokoll (az alapág megerősítése, a `.claude/worktrees/` kanonikus
-útvonal, `cp -al` node_modules, eltávolítási szabályok) az `AGENTS.md` → Git-munkafolyamat → „Worktree
-isolation” szakaszában található. Claude Code-specifikus pontok:
+A teljes, kötelező worktree-protokoll (a base branch megerősítése, a `.claude/worktrees/`
+kanonikus útvonal, a `cp -al` node_modules, a lebontási szabályok) a
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) fájlban található (összefoglalva az `AGENTS.md` →
+Git-munkafolyamat → „Worktree-izoláció” részben). Claude Code-specifikus tudnivalók:
 
-- Erősítsd meg az alapágat az operátorral az `AskUserQuestion` használatával (19. szigorú szabály), kivéve, ha azt
-  már közölte veled.
-- Részesítsd előnyben a natív `EnterWorktree` eszközt — ez eleve a
-  `.claude/worktrees/` (a kanonikus útvonal) alatt hozza létre a worktree-ket. Hozd létre a worktree-t a dokumentált `git
-worktree add` paranccsal, majd hívd meg az `EnterWorktree` eszközt a worktree `path` értékével.
+- Erősítsd meg a base branchet az operátorral az `AskUserQuestion` segítségével (Hard Rule #19),
+  hacsak nem közölte már veled.
+- Részesítsd előnyben a natív `EnterWorktree` eszközt — az eleve a `.claude/worktrees/` alatt
+  hozza létre a worktree-ket (a kanonikus útvonal). Hozd létre a worktree-t a dokumentált `git
+worktree add` paranccsal, majd hívd meg az `EnterWorktree` eszközt a `path` értékével.
 
 ## Munkamenetek közötti biztonság — Claude Code-specifikus részletek
 

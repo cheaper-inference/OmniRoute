@@ -609,22 +609,22 @@ post_install() {
 
 ---
 
-## 📊 ଉପଲବ୍ଧ ମଡେଲ୍‌ଗୁଡ଼ିକ
+## 📊 ଉପଲବ୍ଧ ମଡେଲ୍ଗୁଡ଼ିକ
 
 <details>
 <summary><b>ସମସ୍ତ ଉପଲବ୍ଧ ମଡେଲ୍ ଦେଖନ୍ତୁ</b></summary>
 
-> ନିମ୍ନରେ ଥିବା ତାଲିକାଟି v3.8.0 ପାଇଁ `open-sse/config/providerRegistry.ts` ରୁ ସଂକଳିତ। କ୍ଲାଉଡ୍ କ୍ୟାଟାଲଗ୍‌ଗୁଡ଼ିକ (Gemini, OpenRouter ଇତ୍ୟାଦି) ଗତିଶୀଳ ଭାବରେ ସିଙ୍କ୍ ହୁଏ — ସମ୍ପୂର୍ଣ୍ଣ ଲାଇଭ୍ କ୍ୟାଟାଲଗ୍ ପାଇଁ **Dashboard → Providers → [provider] → Available Models** ଖୋଲନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` କଲ୍ କରନ୍ତୁ।
+> ନିମ୍ନ ତାଲିକାଟି v3.8.0 ପାଇଁ `open-sse/config/providerRegistry.ts` ରୁ ସଂଗୃହୀତ । କ୍ଲାଉଡ୍ କାଟାଲଗ୍ଗୁଡ଼ିକ (Gemini, OpenRouter ଇତ୍ୟାଦି) ଡାଇନାମିକ୍ ଭାବରେ ସିଙ୍କ୍ ହୁଅନ୍ତି — ସମ୍ପୂର୍ଣ୍ଣ ଲାଇଭ୍ କାଟାଲଗ୍ ପାଇଁ **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର → [provider] → ଉପଲବ୍ଧ ମଡେଲ୍ଗୁଡ଼ିକ** ଖୋଲନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` କଲ୍ କରନ୍ତୁ ।
 >
-> ଯଦି କୌଣସି ପ୍ରଦାନକାରୀଙ୍କ ବିଲ୍ଟ-ଇନ୍ ତାଲିକା ଅସଙ୍ଗତ ହୋଇଯାଇଛି, ତେବେ ଲାଇଭ୍ ଅପ୍‌ଷ୍ଟ୍ରିମ୍ କ୍ୟାଟାଲଗ୍ ଆଣିବା ପାଇଁ ସେହି ପୃଷ୍ଠାରେ **Import from /models** ବ୍ୟବହାର କରନ୍ତୁ (କିମ୍ବା **Auto-Sync** ସକ୍ଷମ କରନ୍ତୁ)। LLM7.io (`gemini-3.1-flash-lite`) ଏବଂ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ପାଇଁ ଏହା v3.8.50 ରେ ଯାଞ୍ଚ କରାଯାଇଥିଲା; ସେହି ପରୀକ୍ଷଣ ସମୟରେ Pollinations ର ଅଜ୍ଞାତ ପ୍ରବେଶ ଅପ୍‌ଷ୍ଟ୍ରିମ୍‌ରେ ସୀମିତ ରହିଥିଲା।
+> ଯଦି କୌଣସି ପ୍ରୋଭାଇଡରର ବିଲ୍ଟ-ଇନ୍ ତାଲିକା ପରିବର୍ତ୍ତିତ ହୋଇଯାଇଛି, ତେବେ ଲାଇଭ୍ ଅପ୍ଷ୍ଟ୍ରିମ୍ କାଟାଲଗ୍ ଆଣିବା ପାଇଁ ସେହି ପୃଷ୍ଠାରେ **/models ରୁ ଆମଦାନୀ କରନ୍ତୁ** ବ୍ୟବହାର କରନ୍ତୁ (କିମ୍ବା **ଅଟୋ-ସିଙ୍କ** ସକ୍ଷମ କରନ୍ତୁ) । ଏହା v3.8.50 ରେ LLM7.io (`gemini-3.1-flash-lite`) ଏବଂ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ପାଇଁ ଯାଞ୍ଚ କରାଯାଇଥିଲା; ସମାନ ଟେଷ୍ଟ ପାସ୍ ସମୟରେ Pollinations ଅଜ୍ଞାତ ପ୍ରବେଶ (anonymous access) ଅପ୍ଷ୍ଟ୍ରିମ୍-ସୀମିତ ରହିଥିଲା ।
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ପ୍ରୟାସ ସ୍ତରଗୁଡ଼ିକ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ଏଫର୍ଟ ଟିଅର୍ଗୁଡ଼ିକ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ମାଗଣା OAuth: **Dashboard → Providers → Kiro → Available Models** ଅଧୀନରେ ଦେଖାଯାଇଥିବା ଲାଇଭ୍ କ୍ୟାଟାଲଗ୍ ବ୍ୟବହାର କରନ୍ତୁ। ଉପଲବ୍ଧତା ଆକାଉଣ୍ଟ୍ ଏବଂ ପ୍ଲାନ୍ ଉପରେ ନିର୍ଭର କରେ।
+**Kiro (`kr/`)** — ମାଗଣା OAuth: **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର → Kiro → ଉପଲବ୍ଧ ମଡେଲ୍ଗୁଡ଼ିକ** ଅଧୀନରେ ଦେଖାଯାଉଥିବା ଲାଇଭ୍ କାଟାଲଗ୍ ବ୍ୟବହାର କରନ୍ତୁ । ଉପଲବ୍ଧତା ଆକାଉଣ୍ଟ ଏବଂ ପ୍ଲାନ୍ ଉପରେ ନିର୍ଭର କରେ ।
 
 **Qoder (`if/`)** — ମାଗଣା OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,108 +632,113 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ମାସକୁ ନିର୍ଦ୍ଧାରିତ $9 କିମ୍ବା ବ୍ୟବହାର ଅନୁସାରେ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ମାସ ଫ୍ଲାଟ୍ କିମ୍ବା ପ୍ରତି-ବ୍ୟବହାର: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API କୀ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — ଅତ୍ୟନ୍ତ ଦ୍ରୁତ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — ମୂଳ Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok ନେଟିଭ୍: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — EU-ହୋଷ୍ଟେଡ୍: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — ସନ୍ଧାନ-ସମୃଦ୍ଧ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — ସର୍ଚ୍ଚ-ଅଗ୍ମେଣ୍ଟେଡ୍: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ଓପନ୍-ସୋର୍ସ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ମାଗଣା), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ଓପନ୍-ସୋର୍ସ୍: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ମାଗଣା), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — ଦ୍ରୁତ ଇନ୍‌ଫରେନ୍ସ: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — ଦ୍ରୁତ ଇନଫରେନ୍ସ: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — ୱେଫର୍-ସ୍କେଲ୍: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-କେନ୍ଦ୍ରିତ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-ଫୋକସ୍ଡ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ଏଣ୍ଟର୍‌ପ୍ରାଇଜ୍: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ଏଣ୍ଟରପ୍ରାଇଜ୍: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google ରୁ ପ୍ରତ୍ୟେକ API କୀ ଅନୁସାରେ ଲାଇଭ୍ ସିଙ୍କ୍ ହୁଏ — କୌଣସି ସ୍ଥିର ତାଲିକା ନାହିଁ। **Dashboard → Providers** ରେ ଏକ କୀ ସଂଯୋଗ କରନ୍ତୁ, ତା’ପରେ ବର୍ତ୍ତମାନର କ୍ୟାଟାଲଗ୍ ଆମଦାନୀ କରିବା ପାଇଁ **Available Models** ବ୍ୟବହାର କରନ୍ତୁ (ଉଦାହରଣ: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
+**Gemini (Google Cloud `gemini/`)**: Google ରୁ ପ୍ରତି API key ଅନୁଯାୟୀ ଲାଇଭ୍ ସିଙ୍କ୍ ହୁଏ — କୌଣସି ସ୍ଥିର ତାଲିକା ନାହିଁ । **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର** ରେ ଏକ key ସଂଯୋଗ କରନ୍ତୁ ଏବଂ ତାପରେ ବର୍ତ୍ତମାନର କାଟାଲଗ୍ ଆମଦାନୀ କରିବାକୁ **ଉପଲବ୍ଧ ମଡେଲ୍ଗୁଡ଼ିକ** ବ୍ୟବହାର କରନ୍ତୁ (ଉଦାହରଣ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`) ।
 
-**ଅନ୍ୟାନ୍ୟ ସୁସଙ୍ଗତ ପ୍ରଦାନକାରୀ** (ନିର୍ବାଚିତ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ମାଧ୍ୟମରେ), `azure-ai`, `openrouter` (ପାସ୍‌ଥ୍ରୁ କ୍ୟାଟାଲଗ୍), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। ପ୍ରତ୍ୟେକ ନିଜସ୍ୱ ମଡେଲ୍ ତାଲିକା `providerRegistry.ts` ରେ ପରିଚାଳନା କରେ ଏବଂ ପ୍ରଦାନକାରୀ ଏକ `/models` ଏଣ୍ଡପଏଣ୍ଟ୍ ଉପଲବ୍ଧ କରାଇଲେ ତାହା ସ୍ୱୟଂଚାଳିତ ଭାବରେ ସିଙ୍କ୍ ହୋଇପାରେ।
+**ଅନ୍ୟାନ୍ୟ ସୁସଙ୍ଗତ ପ୍ରୋଭାଇଡର** (ମନୋନୀତ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ମାଧ୍ୟମରେ), `azure-ai`, `openrouter` (ପାସ୍ଥ୍ରୁ କାଟାଲଗ୍), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat` । ପ୍ରତ୍ୟେକ `providerRegistry.ts` ରେ ନିଜର ମଡେଲ୍ ତାଲିକା ରକ୍ଷଣାବେକ୍ଷଣ କରେ ଏବଂ ପ୍ରୋଭାଇଡର `/models` ଏଣ୍ଡପଏଣ୍ଟ ପ୍ରଦାନ କଲେ ଅଟୋ-ସିଙ୍କ୍ ହୋଇପାରେ ।
 
-**ମଡେଲ୍ ID ସମ୍ପର୍କିତ ଟିପ୍ପଣୀ:** OmniRoute ପ୍ରଦାନକାରୀଙ୍କ ମୂଳ ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ବ୍ୟବହାର କରେ। କିଛି ID ରେ ବିନ୍ଦୁଯୁକ୍ତ ସଂସ୍କରଣ ରହିଛି, କାରଣ ଅପ୍‌ଷ୍ଟ୍ରିମ୍ API ସେଗୁଡ଼ିକୁ ସେହି ରୂପରେ ଆଶା କରେ। ଯଦି କୌଣସି ମଡେଲ୍ ଉପରେ ତାଲିକାଭୁକ୍ତ ନାହିଁ, ଉପଲବ୍ଧତା ନିଶ୍ଚିତ କରିବା ପାଇଁ `omniroute models --search <term>` ଚଲାନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` କୁ ଅନୁରୋଧ ପଠାନ୍ତୁ।
+**ମଡେଲ୍ ID ସମ୍ପର୍କରେ ଟିପ୍ପଣୀ:** OmniRoute ପ୍ରୋଭାଇଡର-ନେଟିଭ୍ ID ବ୍ୟବହାର କରେ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) । କିଛି ID ରେ ଡଟେଡ୍ ଭର୍ସନ୍ ଥାଏ କାରଣ ଅପ୍ଷ୍ଟ୍ରିମ୍ API ସେହିପରି ଆଶା କରେ । ଯଦି କୌଣସି ମଡେଲ୍ ଉପରେ ତାଲିକାଭୁକ୍ତ ନାହିଁ, ତେବେ `omniroute models --search <term>` ଚଲାନ୍ତୁ କିମ୍ବା ଉପଲବ୍ଧତା ନିଶ୍ଚିତ କରିବାକୁ `GET /api/models/catalog` କଲ୍ କରନ୍ତୁ ।
 
 </details>
 
 ---
 
-## 🧩 ଉନ୍ନତ ବୈଶିଷ୍ଟ୍ୟଗୁଡ଼ିକ
+## 🧩 ଉନ୍ନତ ବ Features ଶିଷ୍ଟ୍ୟଗୁଡିକ \|
 
-### କଷ୍ଟମ୍ ମଡେଲ୍
+### କଷ୍ଟମ୍ ମଡେଲଗୁଡିକ \|
 
-ଆପ୍ ଅପଡେଟ୍ ପାଇଁ ଅପେକ୍ଷା ନକରି ଯେକୌଣସି ପ୍ରଦାନକାରୀରେ ଯେକୌଣସି ମଡେଲ୍ ID ଯୋଡ଼ନ୍ତୁ:
+ଏକ ଆପ୍ ଅଦ୍ୟତନକୁ ଅପେକ୍ଷା ନକରି ଯେକ any ଣସି ପ୍ରଦାନକାରୀକୁ ଯେକ any ଣସି ମଡେଲ୍ ID ଯୋଡନ୍ତୁ:
 
 ```bash
-# API ମାଧ୍ୟମରେ
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# ତାଲିକା: curl http://localhost:20128/api/provider-models?provider=openai
-# ଅପସାରଣ: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-କିମ୍ବା ଡ୍ୟାଶବୋର୍ଡ ବ୍ୟବହାର କରନ୍ତୁ: **ପ୍ରଦାନକାରୀ → [ପ୍ରଦାନକାରୀ] → କଷ୍ଟମ୍ ମଡେଲ୍**।
+କିମ୍ବା ଡ୍ୟାସବୋର୍ଡ ବ୍ୟବହାର କରନ୍ତୁ:** ପ୍ରଦାନକାରୀ → [ପ୍ରଦାନକାରୀ] → କଷ୍ଟମ ମଡେଲଗୁଡିକ \|** ।
 
 ଟିପ୍ପଣୀ:
 
-- OpenRouter ଏବଂ OpenAI/Anthropic-ସୁସଙ୍ଗତ ପ୍ରଦାନକାରୀଗୁଡ଼ିକ କେବଳ **ଉପଲବ୍ଧ ମଡେଲ୍**ରୁ ପରିଚାଳିତ ହୁଅନ୍ତି। ହସ୍ତଚାଳିତ ଯୋଗ, ଇମ୍ପୋର୍ଟ ଏବଂ ସ୍ୱୟଂଚାଳିତ ସିଙ୍କ୍—ସବୁ ସମାନ ଉପଲବ୍ଧ-ମଡେଲ୍ ତାଲିକାରେ ଯୋଡ଼ାଯାଏ, ତେଣୁ ସେହି ପ୍ରଦାନକାରୀମାନଙ୍କ ପାଇଁ ପୃଥକ କଷ୍ଟମ୍ ମଡେଲ୍ ବିଭାଗ ନାହିଁ।
-- **କଷ୍ଟମ୍ ମଡେଲ୍** ବିଭାଗଟି ସେହି ପ୍ରଦାନକାରୀମାନଙ୍କ ପାଇଁ ଉଦ୍ଦିଷ୍ଟ, ଯେଉଁମାନେ ପରିଚାଳିତ ଉପଲବ୍ଧ-ମଡେଲ୍ ଇମ୍ପୋର୍ଟ ପ୍ରଦାନ କରନ୍ତି ନାହିଁ।
+- OpenRouter ଏବଂ OpenAI/Anthropic-compatible ପ୍ରଦାନକାରୀମାନେ ଏଥିରୁ ପରିଚାଳିତ \|** ଉପଲବ୍ଧ ମଡେଲଗୁଡିକ \|** କେବଳ ସମାନ ଉପଲବ୍ଧ-ମଡେଲ ତାଲିକାରେ ସମସ୍ତ ଜମି ମାନୁଆଲ ଯୋଗ, ଆମଦାନୀ ଏବଂ ଅଟୋ-ସିଙ୍କ, ତେଣୁ ସେହି ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ କ separate ଣସି ପୃଥକ କଷ୍ଟମ ମଡେଲ ବିଭାଗ ନାହିଁ \|
+- The** କଷ୍ଟମ୍ ମଡେଲଗୁଡିକ \|** ବିଭାଗ ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ ଉଦ୍ଦିଷ୍ଟ ଯାହା ପରିଚାଳିତ ଉପଲବ୍ଧ-ମଡେଲ ଆମଦାନୀକୁ ପ୍ରକାଶ କରେ ନାହିଁ \|
 
-### କଷ୍ଟମ୍ OpenAI-ସୁସଙ୍ଗତ ପ୍ରଦାନକାରୀ
+### କଷ୍ଟମ୍ OpenAI- ସୁସଙ୍ଗତ ପ୍ରଦାନକାରୀ \|
 
-OpenAI API ସହିତ କାର୍ଯ୍ୟ କରୁଥିବା ଯେକୌଣସି ଗେଟୱେ (ଏକ ସ୍ୱୟଂ-ହୋଷ୍ଟେଡ୍ ପ୍ରକ୍ସି, vLLM, ଏକ ତୃତୀୟ-ପକ୍ଷ ଏଗ୍ରିଗେଟର୍)
-ନିଜସ୍ୱ ପ୍ରଦାନକାରୀ ନୋଡ୍ ଭାବରେ ଯୋଡ଼ାଯାଇପାରିବ:
+ଯେକ q ଣସି ଗେଟୱେ ଯାହାକି OpenAI API (ଏକ ସ୍ୱ-ହୋଷ୍ଟ ପ୍ରକ୍ସି, vLLM, ଏକ ତୃତୀୟ-ପକ୍ଷ ଏଗ୍ରିଗେଟର୍) କୁ କହିଥାଏ, ଏହାର ନିଜସ୍ୱ ପ୍ରଦାନକାରୀ ନୋଡ୍ ଭାବରେ ଯୋଗ କରାଯାଇପାରିବ:
 
-1. **ପ୍ରଦାନକାରୀ → OpenAI ସୁସଙ୍ଗତ ଯୋଡ଼ନ୍ତୁ**।
-2. **ନାମ**: ନୋଡ୍ ପାଇଁ ଏକ ପ୍ରଦର୍ଶନ ଲେବଲ୍।
-3. **ପ୍ରିଫିକ୍ସ**: ରାଉଟିଂ ନାମ। କ୍ଲାଏଣ୍ଟମାନେ `<prefix>/<model>` ଭାବରେ ମଡେଲ୍କୁ କଲ୍ କରନ୍ତି, ତେଣୁ
-   `mygw` ପ୍ରିଫିକ୍ସ ଥିବା ଏକ ନୋଡ୍ `mygw/gpt-4o-mini` ସେବା ପ୍ରଦାନ କରେ। ଏହା ଆବଶ୍ୟକ; ଅକ୍ଷର ଉପରେ କୌଣସି ପ୍ରତିବନ୍ଧକ ନାହିଁ।
-4. **API ପ୍ରକାର**: ଗେଟୱେ ଯେଉଁ ଏଣ୍ଡପଏଣ୍ଟ ପରିବାର ପ୍ରଦାନ କରେ (ଚାଟ୍ କମ୍ପ୍ଲିସନ୍, ରେସ୍ପନ୍ସ,
-   ଏମ୍ବେଡିଂ, ଅଡିଓ, ଇମେଜ୍)।
-5. **ବେସ୍ URL**: `/v1` ପର୍ଯ୍ୟନ୍ତ ଏବଂ ଏହାକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରି API ରୁଟ୍ (ଉଦାହରଣ ସ୍ୱରୂପ
-   `https://gateway.example.com/v1`), ସମ୍ପୂର୍ଣ୍ଣ `/chat/completions` ପଥ ନୁହେଁ। ଅଣ-ମାନକ ପଥ ଥିବା ଗେଟୱେଗୁଡ଼ିକ
-   ସେଗୁଡ଼ିକୁ **ଉନ୍ନତ ସେଟିଂସ୍** ଅଧୀନରେ ସେଟ୍ କରନ୍ତି (ଚାଟ୍ ପଥ, ମଡେଲ୍ ପଥ)।
-6. **API କୀ (ଯାଞ୍ଚ ପାଇଁ)** ଫିଲ୍ଡ କେବଳ କନେକ୍ସନ୍କୁ ପରୀକ୍ଷା କରେ। ନୋଡ୍ ସୃଷ୍ଟି କରିବା ପରେ,
-   ଏହାକୁ ଖୋଲନ୍ତୁ ଏବଂ ଅନୁରୋଧଗୁଡ଼ିକ ବ୍ୟବହାର କରିବାକୁ ଥିବା କୀ ସଂରକ୍ଷଣ ପାଇଁ **କନେକ୍ସନ୍ ଯୋଡ଼ନ୍ତୁ** ବ୍ୟବହାର କରନ୍ତୁ।
+1. **ପ୍ରଦାନକାରୀ → OpenAI ସୁସଙ୍ଗତ ଯୋଗ କରନ୍ତୁ \|** ।
+2. **ନାମ** : ନୋଡ୍ ପାଇଁ ଏକ ପ୍ରଦର୍ଶନ ଲେବଲ୍ \|
+3. **ଉପସର୍ଗ** : ରାଉଟିଙ୍ଗ୍ ନାମ \| ଗ୍ରାହକମାନେ ମଡେଲଗୁଡ଼ିକୁ `<prefix>/<model>` ଭାବରେ ଡାକନ୍ତି, ତେଣୁ `mygw` ଉପସର୍ଗ ସହିତ ଏକ ନୋଡ୍ `mygw/gpt-4o-mini` ସେବା କରେ \| ଆବଶ୍ୟକ; କ character ଣସି ବର୍ଣ୍ଣ ପ୍ରତିବନ୍ଧକ ନାହିଁ \|
+4. **API ପ୍ରକାର** : ଶେଷ ପଏଣ୍ଟ ପରିବାର ଗେଟୱେ ସେବା କରେ (ଚାଟ୍ ସମାପ୍ତି, ପ୍ରତିକ୍ରିୟା, ଏମ୍ବେଡିଂ, ଅଡିଓ, ପ୍ରତିଛବି) \|
+5. **ଆଧାର URL** : API ମୂଳ, `/v1` ପର୍ଯ୍ୟନ୍ତ ଏବଂ ଅନ୍ତର୍ଭୂକ୍ତ କରି (ଉଦାହରଣ ସ୍ୱରୂପ `https://gateway.example.com/v1`), ସମ୍ପୂର୍ଣ୍ଣ `/chat/completions` ପଥ ନୁହେଁ \| ଅଣ-ମାନକ ପଥ ସହିତ ଗେଟୱେଗୁଡିକ ସେଗୁଡିକୁ ସେଟ୍ କରେ \|** ଉନ୍ନତ ସେଟିଂସମୂହ \|** (ଚାଟ୍ ପଥ, ମଡେଲ୍ ପଥ) \|
+6. The**API କି (ଯାଞ୍ଚ ପାଇଁ)** କ୍ଷେତ୍ର କେବଳ ସଂଯୋଗକୁ ପରୀକ୍ଷା କରେ \| ନୋଡ୍ ତିଆରି କରିବା ପରେ ଏହାକୁ ଖୋଲ ଏବଂ ବ୍ୟବହାର କର \|** ସଂଯୋଗ ଯୋଡନ୍ତୁ \|** ଅନୁରୋଧ ବ୍ୟବହାର କରୁଥିବା ଚାବିକୁ ସଂରକ୍ଷଣ କରିବା ପାଇଁ \|
 
-ନୋଡ୍କୁ `openai-compatible-<apiType>-<uuid>` ରୂପରେ ଏକ ଆଭ୍ୟନ୍ତରୀଣ id ମିଳେ; ଆପଣଙ୍କୁ ଏହା କେବେବି
-ଟାଇପ୍ କରିବାକୁ ପଡ଼େ ନାହିଁ, ପ୍ରିଫିକ୍ସଟି ହେଉଛି ସାର୍ବଜନୀନ ନାମ।
+ନୋଡ୍ `openai-compatible-<apiType>-<uuid>` ଫର୍ମର ଏକ ଆଭ୍ୟନ୍ତରୀଣ id ପାଇଥାଏ \| ଆପଣ ଏହାକୁ ଟାଇପ୍ କରିବା ଆବଶ୍ୟକ କରନ୍ତି ନାହିଁ, ଉପସର୍ଗ ହେଉଛି ସର୍ବସାଧାରଣ ନାମ \|
 
-#### ସଂରକ୍ଷିତ ପ୍ରିଫିକ୍ସ
+#### ସଂରକ୍ଷିତ ଉପସର୍ଗ \|
 
-ଏକ ପ୍ରିଫିକ୍ସ ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀର id କିମ୍ବା alias (ଉଦାହରଣ ସ୍ୱରୂପ `openai`, `cf`) ହୋଇପାରିବ ନାହିଁ, କିମ୍ବା
-ଅବସରପ୍ରାପ୍ତ ପ୍ରଦାନକାରୀର id ମଧ୍ୟ ହୋଇପାରିବ ନାହିଁ। ମଡେଲ୍ ରିଜଲ୍ଭର୍ କଷ୍ଟମ୍ ନୋଡ୍ ପୂର୍ବରୁ
-ବିଲ୍ଟ-ଇନ୍ id ଏବଂ alias ଯାଞ୍ଚ କରେ, ତେଣୁ ସେହି ପ୍ରିଫିକ୍ସଗୁଡ଼ିକ ମଧ୍ୟରୁ ଗୋଟିଏ ବ୍ୟବହାର କରୁଥିବା ନୋଡ୍ କେବେବି ଟ୍ରାଫିକ୍ ଗ୍ରହଣ କରିବ ନାହିଁ:
-`<prefix>/model` ପରିବର୍ତ୍ତେ ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀ ପାଖକୁ ଯିବ, କିମ୍ବା ସେହି ପ୍ରଦାନକାରୀ
-ଅବସରପ୍ରାପ୍ତ ହୋଇଥିଲେ ବନ୍ଦ ଅବସ୍ଥାରେ ବିଫଳ ହେବ। ଏପରି ପ୍ରିଫିକ୍ସ ସହିତ ଏକ ନୋଡ୍ ସୃଷ୍ଟି କିମ୍ବା ସମ୍ପାଦନା କଲେ ନିମ୍ନଲିଖିତ ସନ୍ଦେଶ ସହିତ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ:
+ଏକ ଉପସର୍ଗ ଏକ ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀଙ୍କ ID କିମ୍ବା ଛଦ୍ମନାମ ହୋଇପାରିବ ନାହିଁ (ଉଦାହରଣ ସ୍ୱରୂପ `openai`, `cf`), କିମ୍ବା ଅବସରପ୍ରାପ୍ତ ପ୍ରଦାନକାରୀଙ୍କ id \| ମଡେଲ୍ ରିଜୋଲଭର କଷ୍ଟମ୍ ନୋଡ୍ ପୂର୍ବରୁ ବିଲ୍ଟ-ଇନ୍ ଏବଂ ଛଦ୍ମନାମ ଯାଞ୍ଚ କରିଥାଏ, ତେଣୁ ସେହି ଉପସର୍ଗଗୁଡ଼ିକ ମଧ୍ୟରୁ ଗୋଟିଏ ବ୍ୟବହାର କରୁଥିବା ନୋଡ୍ କଦାପି ଟ୍ରାଫିକ୍ ଗ୍ରହଣ କରିବ ନାହିଁ: `<prefix>/model` ଏହା ବଦଳରେ ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀଙ୍କୁ ଯିବ, କିମ୍ବା ଯଦି ସେହି ପ୍ରଦାନକାରୀ ଅବସର ନେଇଥିବେ ତେବେ ବନ୍ଦ ହୋଇଯିବ \| ଏହିପରି ଉପସର୍ଗ ସହିତ ଏକ ନୋଡ୍ ସୃଷ୍ଟି କିମ୍ବା ଏଡିଟ୍ କରିବା ସହିତ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଇଛି:
 
 ```text
-prefix: "<prefix>" ଏକ ସଂରକ୍ଷିତ ପ୍ରଦାନକାରୀ ପ୍ରିଫିକ୍ସ — ଏକ ଭିନ୍ନ ପ୍ରିଫିକ୍ସ ବାଛନ୍ତୁ (ସଂରକ୍ଷିତ ids/aliases କଷ୍ଟମ୍ ନୋଡ୍ ପାଇଁ ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ, କାରଣ <prefix>/model ପରି ଅନୁରୋଧଗୁଡ଼ିକ ଏକ ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀ ପାଖକୁ ରାଉଟ୍ ହୁଏ କିମ୍ବା ଅବସରପ୍ରାପ୍ତ ହୋଇଥିଲେ ବନ୍ଦ ଅବସ୍ଥାରେ ବିଫଳ ହୁଏ)
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-ଏକ ସ୍ୱତନ୍ତ୍ର ପ୍ରିଫିକ୍ସ (`mygw`, `acme-proxy`) ବାଛନ୍ତୁ। ଯଦି ଏକ କଷ୍ଟମ୍ ନୋଡ୍କୁ ଅନୁରୋଧଗୁଡ଼ିକ
-ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀ କିମ୍ବା ତାହାର ପ୍ରମାଣପତ୍ରର ନାମ ଉଲ୍ଲେଖ କରୁଥିବା ତ୍ରୁଟି ସହିତ ବିଫଳ ହୁଏ, ତେବେ ନୋଡ୍ର ପ୍ରିଫିକ୍ସ
-ସଂରକ୍ଷିତ କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ: ଏହି ନିୟମ ଅସ୍ତିତ୍ୱରେ ଆସିବା ପୂର୍ବରୁ ସଂରକ୍ଷିତ ହୋଇଥିବା ନୋଡ୍ଗୁଡ଼ିକ ଏବେ ମଧ୍ୟ ସଂରକ୍ଷିତ ଅଛି, କିନ୍ତୁ ସେମାନଙ୍କର ପ୍ରିଫିକ୍ସ
-ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀ ପାଖକୁ ରାଉଟ୍ ହୁଏ। ନୋଡ୍କୁ ସମ୍ପାଦନା କରନ୍ତୁ ଏବଂ ଏହାକୁ ଏକ ନୂତନ ପ୍ରିଫିକ୍ସ ଦିଅନ୍ତୁ।
+ଏକ ଭିନ୍ନ ଉପସର୍ଗ ବାଛନ୍ତୁ (`mygw`, `acme-proxy`) \| ଯଦି ଏକ କଷ୍ଟମ୍ ନୋଡକୁ ଅନୁରୋଧ ଏକ ତ୍ରୁଟି ସହିତ ବିଫଳ ହୁଏ ଯାହା ଏକ ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀ କିମ୍ବା ଏହାର ପରିଚୟପତ୍ରର ନାମ ଦେଇଥାଏ, ତେବେ ନୋଡର ଉପସର୍ଗ ସଂରକ୍ଷିତ ଅଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ: ଏହି ନିୟମ ବିଦ୍ୟମାନ ହେବା ପୂର୍ବରୁ ସଂରକ୍ଷିତ ନୋଡଗୁଡ଼ିକ ଏପର୍ଯ୍ୟନ୍ତ ସଂରକ୍ଷିତ ଅଛି, କିନ୍ତୁ ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ ସେମାନଙ୍କର ଉପସର୍ଗ ମାର୍ଗ \| ନୋଡ୍ ସଂପାଦନ କରନ୍ତୁ ଏବଂ ଏହାକୁ ଏକ ନୂତନ ଉପସର୍ଗ ଦିଅନ୍ତୁ \|
 
-### OmniRoute ପିଅର୍ଗୁଡ଼ିକୁ ଚେନ୍ କରିବା
+#### ପ୍ରତି-ସଂଯୋଗ ଗେଟୱେ ବିକଳ୍ପଗୁଡ଼ିକ \|
 
-ଅନ୍ୟ ଏକ OmniRoute ଗେଟୱେକୁ **କଷ୍ଟମ୍ OpenAI-ସୁସଙ୍ଗତ** ପ୍ରଦାନକାରୀ ଭାବରେ ଯୋଡ଼ାଯାଇପାରିବ। ପିଅର୍ର
-`/v1` ବେସ୍ URL ଏବଂ ସେହି ପିଅର୍ ଦ୍ୱାରା ଜାରି କରାଯାଇଥିବା ଏକ ଉତ୍ସର୍ଗୀକୃତ, ସର୍ବନିମ୍ନ-ଅଧିକାର API କୀ ବ୍ୟବହାର କରନ୍ତୁ।
+ଏହି ଚାବିଗୁଡ଼ିକ ଏକ ସଂଯୋଗର `providerSpecificData` କୁ ଯାଇଥାଏ (ଉଦାହରଣ ସ୍ୱରୂପ `PUT /api/providers/{id}` ମାଧ୍ୟମରେ):
 
-ପାରସ୍ପରିକ କିମ୍ବା ମଲ୍ଟି-ହପ୍ ଚେନ୍ ପାଇଁ, ପ୍ରତ୍ୟେକ ଗେଟୱେରେ ଅପ୍ଟ-ଇନ୍ ଲୁପ୍ ଗାର୍ଡ ସକ୍ଷମ କରନ୍ତୁ:
+- `toolNameMaxLength` (ଇଣ୍ଟିଜର୍, 1-1024) - OpenAI ଚାଟ୍-ଫର୍ମାଟ୍ ସୁସଙ୍ଗତ ସଂଯୋଗ ପାଇଁ ଯାହାର ଗେଟୱେ ଲମ୍ବା ଉପକରଣ ନାମକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ \| ଲମ୍ବା ନାମଗୁଡିକ କ୍ଷୁଦ୍ର ଛଦ୍ମନାମ ଭାବରେ ପଠାଯାଏ ଏବଂ ପ୍ରତିକ୍ରିୟାରେ ପୁନ restored ସ୍ଥାପିତ ହୁଏ \|
+- `quotaEndpoint` - ଗେଟୱେ ର quota/credits ଶେଷ ପଏଣ୍ଟ, ଡ୍ୟାସବୋର୍ଡ କୋଟା ଷ୍ଟ୍ରିପ୍ ଏବଂ କୋଟା-ସଚେତନ ମାର୍ଗ ପାଇଁ ପ read ଼ନ୍ତୁ \| ଉଭୟ OpenAI- ଏବଂ ଆନ୍ଥ୍ରୋପିକ୍-ସୁସଙ୍ଗତ ସଂଯୋଗ ଉପରେ କାର୍ଯ୍ୟ କରେ \| ସମ୍ପୂର୍ଣ୍ଣ ଆକୃତି `open-sse/services/usage/openaiCompatible.ts` ରେ ଡକ୍ୟୁମେଣ୍ଟ୍ ହୋଇଛି \|
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### OmniRoute ସାଥୀମାନଙ୍କୁ ଶୃଙ୍ଖଳା \|
+
+ଅନ୍ୟ ଏକ OmniRoute ଗେଟୱେକୁ a ଭାବରେ ଯୋଗ କରାଯାଇପାରିବ \|** କଷ୍ଟମ୍ OpenAI- ସୁସଙ୍ଗତ \|** ପ୍ରଦାନକାରୀ \| ସାଥିଙ୍କ `/v1` ଆଧାର URL ଏବଂ ସେହି ସାଥି ଦ୍ୱାରା ଜାରି କରାଯାଇଥିବା ଏକ ଉତ୍ସର୍ଗୀକୃତ, ସର୍ବନିମ୍ନ-ସୁବିଧା API କି ବ୍ୟବହାର କରନ୍ତୁ \|
+
+ପାରସ୍ପରିକ କିମ୍ବା ମଲ୍ଟି-ହପ୍ ଶୃଙ୍ଖଳା ପାଇଁ, ପ୍ରତ୍ୟେକ ଗେଟୱେରେ ଅପ୍ଟ-ଇନ୍ ଲୁପ୍ ଗାର୍ଡକୁ ସକ୍ଷମ କରନ୍ତୁ:
 
 ```bash
 # gateway-a
@@ -749,18 +754,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-କେବଳ ସ୍ପଷ୍ଟ ଭାବରେ ଅନୁମୋଦିତ ତାଲିକାରେ ଥିବା ପିଅର୍ URLକୁ ପଠାଯାଇଥିବା ଅନୁରୋଧଗୁଡ଼ିକ
-`X-OmniRoute-Peer-Trace` ହେଡର୍ ପ୍ରାପ୍ତ କରେ। ଏକ ଗେଟୱେ ପୁନରାବୃତ୍ତ instance ID କିମ୍ବା ସମାପ୍ତ ହୋଇଥିବା ହପ୍
-ବଜେଟ୍କୁ HTTP `508 Loop Detected` ସହିତ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ; ସାଧାରଣ ଅପ୍ଷ୍ଟ୍ରିମ୍ ପ୍ରଦାନକାରୀମାନେ କୌଣସି ପିଅର୍ ମେଟାଡାଟା ପାଆନ୍ତି ନାହିଁ।
+ଏକ ସ୍ପଷ୍ଟ ଅନୁମତି ପ୍ରାପ୍ତ ସାଥୀ URL କୁ ପଠାଯାଇଥିବା ଅନୁରୋଧଗୁଡ଼ିକ `X-OmniRoute-Peer-Trace` ହେଡର୍ ଗ୍ରହଣ କରେ \| ଏକ ଗେଟୱେ HTTP `508 Loop Detected` ସହିତ ବାରମ୍ବାର ଉଦାହରଣ ID କିମ୍ବା କ୍ଳାନ୍ତ ହପ୍ ବଜେଟ୍ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ \| ସାଧାରଣ ଅପଷ୍ଟ୍ରିମ ପ୍ରଦାନକାରୀମାନେ କ pe ଣସି ସାଥୀ ମେଟାଡାଟା ଗ୍ରହଣ କରନ୍ତି ନାହିଁ \|
 
-ପିଅର୍ ଚେନିଂ ଡାଟାବେସ୍ ପ୍ରତିକୃତିକରଣ କିମ୍ବା ହୋଷ୍ଟ ଫେଲଓଭର୍ ନୁହେଁ। ପ୍ରତ୍ୟେକ ଗେଟୱେ ସ୍ୱାଧୀନ
-SQLite ଅବସ୍ଥା, କ୍ୟାଶ୍, ରେଟ୍ କାଉଣ୍ଟର୍ ଏବଂ ସେସନ୍ ବଜାୟ ରଖେ। ଆକ୍ଟିଭ୍/ପ୍ୟାସିଭ୍ କିମ୍ବା ଆକ୍ଟିଭ୍/ଆକ୍ଟିଭ୍ ଉପଲବ୍ଧତା ପାଇଁ
-ସ୍ୱାସ୍ଥ୍ୟ-ଯାଞ୍ଚ ହୋଇଥିବା ରିଭର୍ସ ପ୍ରକ୍ସି କିମ୍ବା କ୍ଲାଏଣ୍ଟ ଫେଲଓଭର୍ ବ୍ୟବହାର କରନ୍ତୁ, ଏବଂ ଏକ SQLite ଡାଟାବେସ୍କୁ କେବେବି
-ଏକାଧିକ ଚାଲୁଥିବା OmniRoute ଇନ୍ଷ୍ଟାନ୍ସରେ ମାଉଣ୍ଟ କରନ୍ତୁ ନାହିଁ।
+ସାଥୀ ଶୃଙ୍ଖଳା ଡାଟାବେସ୍ ନକଲ କିମ୍ବା ହୋଷ୍ଟ ଫେଲଅଭର ନୁହେଁ \| ପ୍ରତ୍ୟେକ ଗେଟୱେ ସ୍ independent ାଧୀନ SQLite ସ୍ଥିତି, କ୍ୟାଚ୍, ରେଟ୍ କାଉଣ୍ଟର, ଏବଂ ଅଧିବେଶନ ରଖେ \| active/passive କିମ୍ବା active/active ଉପଲବ୍ଧତା ପାଇଁ ଏକ ସ୍ୱାସ୍ଥ୍ୟ-ଯାଞ୍ଚ ହୋଇଥିବା ଓଲଟା ପ୍ରକ୍ସି କିମ୍ବା କ୍ଲାଏଣ୍ଟ ଫେଲଅଭର ବ୍ୟବହାର କରନ୍ତୁ, ଏବଂ ଗୋଟିଏ SQLite ଡାଟାବେସକୁ ଏକାଧିକ ଚାଲୁଥିବା OmniRoute ପରିସ୍ଥିତିରେ କେବେବି ସ୍ଥାପନ କରନ୍ତୁ ନାହିଁ \|
 
-### ଉତ୍ସର୍ଗୀକୃତ ପ୍ରଦାନକାରୀ ରୁଟ୍
+### ଉତ୍ସର୍ଗୀକୃତ ପ୍ରଦାନକାରୀ ମାର୍ଗ \|
 
-ମଡେଲ୍ ବୈଧତା ଯାଞ୍ଚ ସହିତ ଅନୁରୋଧଗୁଡ଼ିକୁ ସିଧାସଳଖ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ ପ୍ରଦାନକାରୀ ପାଖକୁ ରାଉଟ୍ କରନ୍ତୁ:
+ମଡେଲ୍ ବ valid ଧତା ସହିତ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ ପ୍ରଦାନକାରୀଙ୍କୁ ସିଧାସଳଖ ମାର୍ଗ ଅନୁରୋଧ:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -768,137 +768,137 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-ପ୍ରଦାନକାରୀ ପ୍ରିଫିକ୍ସ ନଥିଲେ ଏହା ସ୍ୱୟଂଚାଳିତ ଭାବରେ ଯୋଡ଼ାଯାଏ। ମେଳ ଖାଉନଥିବା ମଡେଲ୍ଗୁଡ଼ିକ `400` ଫେରାନ୍ତି।
+ଅନୁପସ୍ଥିତ ଥିଲେ ପ୍ରଦାନକାରୀ ଉପସର୍ଗ ସ୍ୱୟଂ-ଯୋଗ ହୋଇଥାଏ \| ଅସନ୍ତୁଷ୍ଟ ମଡେଲଗୁଡିକ `400` ଫେରସ୍ତ କରେ \|
 
 ### ନେଟୱର୍କ ପ୍ରକ୍ସି ବିନ୍ୟାସ
 
 ```bash
-# ଗ୍ଲୋବାଲ୍ ପ୍ରକ୍ସି ସେଟ୍ କରନ୍ତୁ
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# ପ୍ରତି-ପ୍ରଦାନକାରୀ ପ୍ରକ୍ସି
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# ପ୍ରକ୍ସି ପରୀକ୍ଷା କରନ୍ତୁ
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**ପ୍ରାଥମିକତା:** କୀ-ନିର୍ଦ୍ଦିଷ୍ଟ → କମ୍ବୋ-ନିର୍ଦ୍ଦିଷ୍ଟ → ପ୍ରଦାନକାରୀ-ନିର୍ଦ୍ଦିଷ୍ଟ → ଗ୍ଲୋବାଲ୍ → ପରିବେଶ।
+**ପ୍ରାଧାନ୍ୟ:** କି-ନିର୍ଦ୍ଦିଷ୍ଟ → କମ୍ବୋ-ନିର୍ଦ୍ଦିଷ୍ଟ → ପ୍ରଦାନକାରୀ-ନିର୍ଦ୍ଦିଷ୍ଟ → ଗ୍ଲୋବାଲ୍ → ପରିବେଶ \|
 
-### ମଡେଲ୍ କ୍ୟାଟାଲଗ୍ API
+### ମଡେଲ୍ କାଟାଲଗ୍ API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-ପ୍ରକାର (`chat`, `embedding`, `image`) ସହିତ ପ୍ରଦାନକାରୀ ଅନୁଯାୟୀ ଗୋଷ୍ଠୀଭୁକ୍ତ ମଡେଲ୍ଗୁଡ଼ିକ ଫେରାଏ।
+ପ୍ରକାର (`chat`, `embedding`, `image`) ସହିତ ପ୍ରଦାନକାରୀ ଦ୍ group ାରା ଗ୍ରୁପ୍ ହୋଇଥିବା ମଡେଲଗୁଡିକ ଫେରସ୍ତ କରେ \|
 
-### କ୍ଲାଉଡ୍ ସିଙ୍କ୍
+### କ୍ଲାଉଡ୍ ସିଙ୍କ୍ \|
 
-- ଡିଭାଇସ୍ଗୁଡ଼ିକ ମଧ୍ୟରେ ପ୍ରଦାନକାରୀ, କମ୍ବୋ ଏବଂ ସେଟିଂସ୍ ସିଙ୍କ୍ କରନ୍ତୁ
-- ଟାଇମ୍ଆଉଟ୍ + ଫେଲ୍-ଫାଷ୍ଟ ସହିତ ସ୍ୱୟଂଚାଳିତ ବ୍ୟାକ୍ଗ୍ରାଉଣ୍ଡ ସିଙ୍କ୍
-- ପ୍ରୋଡକ୍ସନ୍ରେ ସର୍ଭର୍-ସାଇଡ୍ `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`କୁ ପ୍ରାଥମିକତା ଦିଅନ୍ତୁ
+- ଡିଭାଇସ୍ ମଧ୍ୟରେ ପ୍ରଦାନକାରୀ, କମ୍ବୋ, ଏବଂ ସେଟିଂସମୂହ ସିଙ୍କ କରନ୍ତୁ \|
+- ଟାଇମଆଉଟ୍ + ବିଫଳ-ଦ୍ରୁତ ସହିତ ସ୍ୱୟଂଚାଳିତ ପୃଷ୍ଠଭୂମି ସିଙ୍କ୍ \|
+- ଉତ୍ପାଦନରେ ସର୍ଭର ପାର୍ଶ୍ୱ `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` କୁ ପସନ୍ଦ କରନ୍ତୁ \|
 
-### Cloudflare କ୍ୱିକ୍ ଟନେଲ୍
+### Cloudflare ଦ୍ରୁତ ଟନେଲ୍ \|
 
-- Docker ଏବଂ ଅନ୍ୟାନ୍ୟ self-hosted deployment ପାଇଁ **Dashboard → Endpoints**ରେ ଉପଲବ୍ଧ
-- ଏକ ଅସ୍ଥାୟୀ `https://*.trycloudflare.com` URL ସୃଷ୍ଟି କରେ, ଯାହା ଆପଣଙ୍କ ବର୍ତ୍ତମାନର OpenAI-compatible `/v1` endpointକୁ forward କରେ
-- ପ୍ରଥମ ଥର ସକ୍ଷମ କଲେ, କେବଳ ଆବଶ୍ୟକ ସମୟରେ `cloudflared` install ହୁଏ; ପରବର୍ତ୍ତୀ restartଗୁଡ଼ିକ ସେହି managed binaryକୁ ପୁନଃବ୍ୟବହାର କରେ
-- OmniRoute କିମ୍ବା container restart ପରେ Quick Tunnelଗୁଡ଼ିକ ସ୍ୱୟଂଚାଳିତ ଭାବେ ପୁନଃସ୍ଥାପିତ ହୁଏ ନାହିଁ; ଆବଶ୍ୟକ ସମୟରେ dashboardରୁ ସେଗୁଡ଼ିକୁ ପୁନଃସକ୍ଷମ କରନ୍ତୁ
-- Tunnel URLଗୁଡ଼ିକ ଅସ୍ଥାୟୀ ଏବଂ tunnelକୁ ପ୍ରତ୍ୟେକ ଥର stop/start କଲେ ପରିବର୍ତ୍ତିତ ହୁଏ
-- ସୀମିତ containerଗୁଡ଼ିକରେ କୋଳାହଳପୂର୍ଣ୍ଣ QUIC UDP buffer warning ଏଡ଼ାଇବା ପାଇଁ managed Quick Tunnelଗୁଡ଼ିକ ଡିଫଲ୍ଟ ଭାବେ HTTP/2 transport ବ୍ୟବହାର କରେ
-- managed transport ଚୟନକୁ override କରିବାକୁ ଚାହୁଁଥିଲେ `CLOUDFLARED_PROTOCOL=quic` କିମ୍ବା `auto` ସେଟ୍ କରନ୍ତୁ
-- managed download ପରିବର୍ତ୍ତେ ପୂର୍ବରୁ install ହୋଇଥିବା `cloudflared` binary ବ୍ୟବହାର କରିବାକୁ ଚାହୁଁଥିଲେ `CLOUDFLARED_BIN` ସେଟ୍ କରନ୍ତୁ
-- Cloudflare Quick Tunnel, Tailscale Funnel ଏବଂ ngrok Tunnel panelଗୁଡ଼ିକୁ **Settings → Appearance**ରେ ଦେଖାଯାଇପାରିବ କିମ୍ବା ଲୁଚାଯାଇପାରିବ। କୌଣସି panel ଲୁଚାଇଲେ ଚାଲୁଥିବା tunnel ବନ୍ଦ ହୁଏ ନାହିଁ।
+- ରେ ଉପଲବ୍ଧ** ଡ୍ୟାସବୋର୍ଡ → ଶେଷ ପଏଣ୍ଟ \|** Docker ଏବଂ ଅନ୍ୟାନ୍ୟ ସ୍ୱ-ହୋଷ୍ଟ ନିୟୋଜନ ପାଇଁ \|
+- ଏକ ଅସ୍ଥାୟୀ `https://*.trycloudflare.com` URL ସୃଷ୍ଟି କରେ ଯାହାକି ତୁମର ସାମ୍ପ୍ରତିକ OpenAI- ସୁସଙ୍ଗତ `/v1` ଶେଷ ପଏଣ୍ଟକୁ ଅଗ୍ରସର ହୁଏ \|
+- ପ୍ରଥମେ ଯେତେବେଳେ ଆବଶ୍ୟକ ହୁଏ `cloudflared` ସଂସ୍ଥାପନ କରନ୍ତୁ; ପରେ ସମାନ ପରିଚାଳନା ହୋଇଥିବା ବାଇନାରୀକୁ ପୁନ rest ଆରମ୍ଭ କରେ \|
+- ଏକ OmniRoute କିମ୍ବା କଣ୍ଟେନର ପୁନ rest ଆରମ୍ଭ ପରେ ଦ୍ରୁତ ଟନେଲଗୁଡିକ ସ୍ auto ତ - ପୁନ restored ସ୍ଥାପିତ ହୁଏ ନାହିଁ; ଆବଶ୍ୟକ ସମୟରେ ସେମାନଙ୍କୁ ଡ୍ୟାସବୋର୍ଡରୁ ପୁନ enable- ସକ୍ଷମ କର \|
+- ଟନେଲ୍ URLs ଏଫେମେରାଲ୍ ଏବଂ ଆପଣ ପ୍ରତ୍ୟେକ ଥର ଟନେଲ୍ stop/start ପରିବର୍ତ୍ତନ କରନ୍ତି \|
+- ବାଧାପ୍ରାପ୍ତ ପାତ୍ରରେ କୋଳାହଳପୂର୍ଣ୍ଣ QUIC UDP ବଫର୍ ଚେତାବନୀକୁ ଏଡାଇବା ପାଇଁ HTTP/2 ପରିବହନ ପାଇଁ ଡିଫଲ୍ଟ ଭାବରେ ପରିଚାଳିତ ଦ୍ରୁତ ଟନେଲଗୁଡିକ \|
+- ଯଦି ଆପଣ ପରିଚାଳିତ ପରିବହନ ପସନ୍ଦକୁ ନବଲିଖନ କରିବାକୁ ଚାହୁଁଛନ୍ତି ତେବେ `CLOUDFLARED_PROTOCOL=quic` କିମ୍ବା `auto` ସେଟ୍ କରନ୍ତୁ \|
+- ଯଦି ଆପଣ ପରିଚାଳିତ ଡାଉନଲୋଡ୍ ପରିବର୍ତ୍ତେ ଏକ ପୂର୍ବ ସ୍ଥାପିତ `cloudflared` ବାଇନାରୀ ବ୍ୟବହାର କରିବାକୁ ପସନ୍ଦ କରନ୍ତି `CLOUDFLARED_BIN` ସେଟ୍ କରନ୍ତୁ \|
+- Cloudflare ଦ୍ରୁତ ଟନେଲ୍, Tailscale ଫନେଲ୍, ଏବଂ ngrok ଟନେଲ୍ ପ୍ୟାନେଲଗୁଡିକ ଦେଖାଯାଇପାରେ କିମ୍ବା ଲୁକ୍କାୟିତ ହୋଇପାରେ \|** ସେଟିଂସମୂହ → ଦୃଶ୍ୟମାନ \|** । ଏକ ପ୍ୟାନେଲ୍ ଲୁଚାଇବା ଏକ ଚାଲୁଥିବା ଟନେଲ୍ ବନ୍ଦ କରେ ନାହିଁ \|
 
-### LLM Gateway ବୁଦ୍ଧିମତ୍ତା (ପର୍ଯ୍ୟାୟ 9)
+### LLM ଗେଟୱେ ଇଣ୍ଟେଲିଜେନ୍ସ (ଚରଣ 9)
 
-- **Semantic Cache** — non-streaming, temperature=0 responseଗୁଡ଼ିକୁ ସ୍ୱୟଂଚାଳିତ ଭାବେ cache କରେ (`X-OmniRoute-No-Cache: true` ସହିତ bypass କରନ୍ତୁ)
-- **Request Idempotency** — `Idempotency-Key` କିମ୍ବା `X-Request-Id` header ମାଧ୍ୟମରେ 5s ମଧ୍ୟରେ requestଗୁଡ଼ିକୁ deduplicate କରେ
-- **Progress Tracking** — `X-OmniRoute-Progress: true` header ମାଧ୍ୟମରେ opt-in SSE `event: progress` event
-
----
-
-### Translator Playground
-
-**Dashboard → Translator** ମାଧ୍ୟମରେ access କରନ୍ତୁ। OmniRoute କିପରି providerଗୁଡ଼ିକ ମଧ୍ୟରେ API request ଅନୁବାଦ କରେ, ତାହା debug ଏବଂ visualize କରନ୍ତୁ।
-
-| ମୋଡ୍             | ଉଦ୍ଦେଶ୍ୟ                                                                                        |
-| ---------------- | ----------------------------------------------------------------------------------------------- |
-| **Playground**   | source/target format ଚୟନ କରନ୍ତୁ, ଏକ request paste କରନ୍ତୁ ଏବଂ ତତ୍କ୍ଷଣାତ୍ ଅନୁବାଦିତ output ଦେଖନ୍ତୁ |
-| **Chat Tester**  | proxy ମାଧ୍ୟମରେ live chat message ପଠାନ୍ତୁ ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ request/response cycle ଯାଞ୍ଚ କରନ୍ତୁ     |
-| **Test Bench**   | ଅନୁବାଦର ସଠିକତା ଯାଞ୍ଚ କରିବାକୁ ଏକାଧିକ format combinationରେ batch test ଚଲାନ୍ତୁ                     |
-| **Live Monitor** | requestଗୁଡ଼ିକ proxy ମାଧ୍ୟମରେ ପ୍ରବାହିତ ହେବା ସମୟରେ real-time ଅନୁବାଦ ଦେଖନ୍ତୁ                       |
-
-**ବ୍ୟବହାର କ୍ଷେତ୍ର:**
-
-- ନିର୍ଦ୍ଦିଷ୍ଟ client/provider combination କାହିଁକି ବିଫଳ ହୁଏ, ତାହା debug କରନ୍ତୁ
-- thinking tag, tool call ଏବଂ system prompt ସଠିକ୍ ଭାବେ ଅନୁବାଦ ହେଉଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ
-- OpenAI, Claude, Gemini ଏବଂ Responses API format ମଧ୍ୟରେ format ପାର୍ଥକ୍ୟ ତୁଳନା କରନ୍ତୁ
+- **ଅର୍ଥଗତ କ୍ୟାଚ୍ \|** - ଅଟୋ-କ୍ୟାଚ୍ ଅଣ-ଷ୍ଟ୍ରିମିଂ, ତାପମାତ୍ରା= 0 ପ୍ରତିକ୍ରିୟା ( `X-OmniRoute-No-Cache: true` ସହିତ ବାଇପାସ୍)
+- **Idempotency ଅନୁରୋଧ \|** - `Idempotency-Key` କିମ୍ବା `X-Request-Id` ହେଡର୍ ମାଧ୍ୟମରେ 5s ମଧ୍ୟରେ ଅନୁରୋଧକୁ ନକଲ କରନ୍ତୁ \|
+- **ପ୍ରଗତି ଟ୍ରାକିଂ \|** - `X-OmniRoute-Progress: true` ହେଡର୍ ମାଧ୍ୟମରେ ଅପ୍ଟ-ଇନ୍ SSE `event: progress` ଇଭେଣ୍ଟଗୁଡିକ \|
 
 ---
 
-### Routing କୌଶଳ
+### ଅନୁବାଦକ ଖେଳ ପଡିଆ \|
 
-**Dashboard → Settings → Routing** ମାଧ୍ୟମରେ configure କରନ୍ତୁ। dashboardରେ ସର୍ବାଧିକ ବ୍ୟବହୃତ ଛଅଟି କୌଶଳ ଦେଖାଯାଏ; combo ଏବଂ auto-router ଆଭ୍ୟନ୍ତରୀଣ ଭାବେ ଏକ ବ୍ୟାପକ set ସମର୍ଥନ କରେ।
+ମାଧ୍ୟମରେ ପ୍ରବେଶ** ଡ୍ୟାସବୋର୍ଡ → ଅନୁବାଦକ \|** । ପ୍ରଦାନକାରୀଙ୍କ ମଧ୍ୟରେ API ଅନୁରୋଧ କିପରି OmniRoute ଅନୁବାଦ କରେ ତାହା ଡିବଗ୍ ଏବଂ ଭିଜୁଆଲ୍ କରନ୍ତୁ \|
 
-**Dashboardରେ ଦୃଶ୍ୟମାନ କୌଶଳ (account-ସ୍ତରୀୟ routing):**
+| ମୋଡ୍                 | ଉଦ୍ଦେଶ୍ୟ                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------ |
+| **ଖେଳ ପଡିଆ**         | source/target ଫର୍ମାଟ୍ ଚୟନ କରନ୍ତୁ, ଏକ ଅନୁରୋଧ ଲେପନ କରନ୍ତୁ ଏବଂ ତୁରନ୍ତ ଅନୁବାଦିତ ଆଉଟପୁଟ୍ ଦେଖନ୍ତୁ \|   |
+| **ଚାଟ୍ ପରୀକ୍ଷକ \|**  | ପ୍ରକ୍ସି ମାଧ୍ୟମରେ ଲାଇଭ ଚାଟ୍ ବାର୍ତ୍ତା ପଠାନ୍ତୁ ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ request/response ଚକ୍ର ଯାଞ୍ଚ କରନ୍ତୁ \| |
+| **ପରୀକ୍ଷା ବେଞ୍ଚ \|** | ଅନୁବାଦ ସଠିକତା ଯାଞ୍ଚ କରିବାକୁ ଏକାଧିକ ଫର୍ମାଟ୍ ମିଶ୍ରଣରେ ବ୍ୟାଚ୍ ପରୀକ୍ଷା ଚଲାନ୍ତୁ \|                    |
+| **ଲାଇଭ୍ ମନିଟର \|**   | ଅନୁରୋଧ ପ୍ରକ୍ସି ମାଧ୍ୟମରେ ପ୍ରବାହିତ ହେଉଥିବାରୁ ରିଅଲ୍-ଟାଇମ୍ ଅନୁବାଦଗୁଡିକ ଦେଖନ୍ତୁ \|                    |
 
-| କୌଶଳ                           | ବର୍ଣ୍ଣନା                                                                                                                           |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **Fill First**                 | priority କ୍ରମରେ account ବ୍ୟବହାର କରେ — ଅନୁପଲବ୍ଧ ହେବା ପର୍ଯ୍ୟନ୍ତ primary account ସମସ୍ତ request ପରିଚାଳନା କରେ                           |
-| **Round Robin**                | configure କରାଯାଇପାରୁଥିବା sticky limit ସହିତ ସମସ୍ତ account ମଧ୍ୟରେ କ୍ରମାନ୍ୱୟରେ ଚକ୍ରାକାର ଭାବେ ବଦଳାଏ (ଡିଫଲ୍ଟ: ପ୍ରତି accountରେ 3ଟି call) |
-| **P2C (Power of Two Choices)** | 2ଟି random account ବାଛି ସ୍ୱାସ୍ଥ୍ୟକର accountକୁ route କରେ — ସ୍ୱାସ୍ଥ୍ୟ ସଚେତନତା ସହିତ load ସନ୍ତୁଳିତ କରେ                                 |
-| **Random**                     | Fisher-Yates shuffle ବ୍ୟବହାର କରି ପ୍ରତ୍ୟେକ request ପାଇଁ ଯାଦୃଚ୍ଛିକ ଭାବେ ଏକ account ଚୟନ କରେ                                           |
-| **Least Used**                 | ସର୍ବପୁରାତନ `lastUsedAt` timestamp ଥିବା accountକୁ route କରି trafficକୁ ସମାନ ଭାବେ ବଣ୍ଟନ କରେ                                           |
-| **Cost Optimized**             | ସର୍ବନିମ୍ନ priority value ଥିବା accountକୁ route କରି ସର୍ବନିମ୍ନ-ମୂଲ୍ୟର provider ପାଇଁ optimize କରେ                                      |
+**ମାମଲା ବ୍ୟବହାର କରନ୍ତୁ:**
 
-**ଉନ୍ନତ combo ଏବଂ auto କୌଶଳଗୁଡ଼ିକ** (ପ୍ରତ୍ୟେକ combo ପାଇଁ କିମ୍ବା `auto/*` prefix ମାଧ୍ୟମରେ configure କରାଯାଇପାରେ — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ଦେଖନ୍ତୁ):
+- ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ client/provider ମିଶ୍ରଣ କାହିଁକି ବିଫଳ ହୁଏ ତ୍ରୁଟି ନିବାରଣ କରନ୍ତୁ \|
+- ଯାଞ୍ଚ କରନ୍ତୁ ଯେ ଚିନ୍ତାଧାରା ଟ୍ୟାଗ୍, ଟୁଲ୍ କଲ୍, ଏବଂ ସିଷ୍ଟମ୍ ସଠିକ୍ ଅନୁବାଦ କରେ \|
+- OpenAI, Claude, Gemini, ଏବଂ Responses API ଫର୍ମାଟ୍ ମଧ୍ୟରେ ଫର୍ମାଟ୍ ପାର୍ଥକ୍ୟ ତୁଳନା କରନ୍ତୁ \|
 
-- `priority` — କଠୋର କ୍ରମ, କେବେ ମଧ୍ୟ round-robin କରେ ନାହିଁ
-- `weighted` — ପ୍ରତି-model weight ଅନୁସାରେ ଆନୁପାତିକ traffic ବିଭାଜନ
-- `fill-first` — limit ପୂରଣ ହେବା ପର୍ଯ୍ୟନ୍ତ ପ୍ରଥମ modelକୁ ବ୍ୟବହାର କରେ
+---
+
+### ମାର୍ଗ ରଣନୀତି
+
+ମାଧ୍ୟମରେ ବିନ୍ୟାସ କରନ୍ତୁ \|** ଡ୍ୟାସବୋର୍ଡ → ସେଟିଂସମୂହ → ରାଉଟିଙ୍ଗ୍ \|** । ଡ୍ୟାସବୋର୍ଡ ସର୍ବାଧିକ ବ୍ୟବହୃତ six ଟି କ strateg ଶଳକୁ ପ୍ରକାଶ କରେ; କମ୍ବୋ ଏବଂ ଅଟୋ-ରାଉଟର ଆଭ୍ୟନ୍ତରୀଣ ଭାବରେ ଏକ ବ୍ୟାପକ ସେଟ୍ କୁ ସମର୍ଥନ କରେ \|
+
+**ଡ୍ୟାସବୋର୍ଡ-ଦୃଶ୍ୟମାନ କ strateg ଶଳ (ଖାତା ସ୍ତରୀୟ ରାଉଟିଙ୍ଗ୍):**
+
+| ରଣନୀତି                       | ବର୍ଣ୍ଣନା                                                                                                        |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **ପ୍ରଥମେ ପୁରଣ କର \|**        | ଅଗ୍ରାଧିକାର କ୍ରମରେ ଖାତା ବ୍ୟବହାର କରେ - ପ୍ରାଥମିକ ଆକାଉଣ୍ଟ୍ ଉପଲବ୍ଧ ନହେବା ପର୍ଯ୍ୟନ୍ତ ସମସ୍ତ ଅନୁରୋଧ ପରିଚାଳନା କରେ \|      |
+| **ରାଉଣ୍ଡ ରବିନ୍ \|**          | ଏକ ବିନ୍ୟାସଯୋଗ୍ୟ ଷ୍ଟିକି ସୀମା ସହିତ ସମସ୍ତ ଆକାଉଣ୍ଟ୍ ମାଧ୍ୟମରେ ଚକ୍ରଗୁଡିକ (ଡିଫଲ୍ଟ: ପ୍ରତି ଆକାଉଣ୍ଟରେ 3 କଲ୍) \|           |
+| **P2C (ଦୁଇଟି ପସନ୍ଦର ଶକ୍ତି)** | 2 ଟି ଅନିୟମିତ ଆକାଉଣ୍ଟ୍ ଏବଂ ସ୍ ier ାସ୍ଥ୍ୟକର ମାର୍ଗ ବାଛନ୍ତୁ - ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ସଚେତନତା ସହିତ ଭାର ଭାର ସନ୍ତୁଳିତ କରେ \| |
+| **ଅନିୟମିତ \|**               | ଫିସର-ୟେଟସ୍ ଶଫଲ୍ ବ୍ୟବହାର କରି ପ୍ରତ୍ୟେକ ଅନୁରୋଧ ପାଇଁ ମନଇଚ୍ଛା ଏକ ଆକାଉଣ୍ଟ୍ ଚୟନ କରେ \|                                 |
+| **ସର୍ବନିମ୍ନ ବ୍ୟବହୃତ \|**     | ପୁରାତନ `lastUsedAt` ଟାଇମଷ୍ଟ୍ୟାମ୍ପ ସହିତ ଆକାଉଣ୍ଟକୁ ମାର୍ଗ, ସମାନ ଭାବରେ ଟ୍ରାଫିକ୍ ବଣ୍ଟନ କରେ \|                        |
+| **ମୂଲ୍ୟ ଅପ୍ଟିମାଇଜ୍**         | ସର୍ବନିମ୍ନ ଅଗ୍ରାଧିକାର ମୂଲ୍ୟ ସହିତ ଖାତାକୁ ମାର୍ଗ, ସର୍ବନିମ୍ନ ମୂଲ୍ୟର ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ ଅପ୍ଟିମାଇଜ୍ \|                 |
+
+**ଉନ୍ନତ କମ୍ବୋ ଏବଂ ଅଟୋ ରଣନୀତି \|** (କମ୍ବୋ ପ୍ରତି ବିନ୍ୟାସଯୋଗ୍ୟ କିମ୍ବା `auto/*` ଉପସର୍ଗ ମାଧ୍ୟମରେ - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ଦେଖନ୍ତୁ):
+
+- `priority` - କଠୋର ଆଦେଶ, କେବେବି ରାଉଣ୍ଡ-ରୋବିନ୍ \|
+- `weighted` - ପ୍ରତି ମଡେଲ ଓଜନ ଦ୍ prop ାରା ଆନୁପାତିକ ଟ୍ରାଫିକ୍ ବିଭାଜନ \|
+- `fill-first` - ସୀମା ନହେବା ପର୍ଯ୍ୟନ୍ତ ପ୍ରଥମ ମଡେଲକୁ ନିଷ୍କାସନ କର \|
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Power of Two Choices)
+- `p2c` (ଦୁଇଟି ପସନ୍ଦର ଶକ୍ତି)
 - `least-used` ଏବଂ `cost-optimized`
-- `auto` — ସମସ୍ତ candidate ମଧ୍ୟରେ score-ଆଧାରିତ
-- `lkgp` (Last Known Good Provider) — ଶେଷ ସଫଳ providerକୁ ସ୍ଥିର କରେ, ତା’ପରେ ruleଗୁଡ଼ିକୁ fallback କରେ
-- `context-optimized` — ସର୍ବବୃହତ୍ ଖାଲି context window ଥିବା modelକୁ ବାଛେ
-- `context-relay` — follow-up turn ପାଇଁ long-context modelଗୁଡ଼ିକୁ chain କରେ
+- `auto` - ସମସ୍ତ ପ୍ରାର୍ଥୀଙ୍କ ମଧ୍ୟରେ ସ୍କୋର-ଚାଳିତ \|
+- `lkgp` (ଶେଷ ଜଣାଶୁଣା ଉତ୍ତମ ପ୍ରଦାନକାରୀ) - ଶେଷ ସଫଳ ପ୍ରଦାନକାରୀଙ୍କୁ ପିନ, ତାପରେ ନିୟମକୁ ଫେରିଯାଏ \|
+- `context-optimized` - ସର୍ବ ବୃହତ ମାଗଣା ପ୍ରସଙ୍ଗ ୱିଣ୍ଡୋ ସହିତ ମଡେଲ୍ ବାଛିଥାଏ \|
+- `context-relay` - ଅନୁସରଣ ଟର୍ନ ପାଇଁ ଲମ୍ବା ପ୍ରସଙ୍ଗ ମଡେଲଗୁଡିକ ଶୃଙ୍ଖଳା \|
 
-#### ବାହ୍ୟ Sticky Session Header
+#### ବାହ୍ୟ ଷ୍ଟିକି ଅଧିବେଶନ ହେଡର୍ \|
 
-ବାହ୍ୟ session affinity ପାଇଁ (ଉଦାହରଣ ସ୍ୱରୂପ, reverse proxy ପଛରେ ଥିବା Claude Code/Codex agent), ପଠାନ୍ତୁ:
+ବାହ୍ୟ ଅଧିବେଶନ ସମ୍ବନ୍ଧ ପାଇଁ (ଉଦାହରଣ ସ୍ୱରୂପ, ଓଲଟା ପ୍ରକ୍ସି ପଛରେ Claude Code/Codex ଏଜେଣ୍ଟ), ପଠାନ୍ତୁ:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute `x_session_id`କୁ ମଧ୍ୟ ଗ୍ରହଣ କରେ ଏବଂ `X-OmniRoute-Session-Id`ରେ ପ୍ରଭାବୀ session key ଫେରାଏ।
+OmniRoute ମଧ୍ୟ `x_session_id` ଗ୍ରହଣ କରେ ଏବଂ `X-OmniRoute-Session-Id` ରେ ପ୍ରଭାବଶାଳୀ ଅଧିବେଶନ କି ଫେରସ୍ତ କରେ \|
 
-ଆପଣ Nginx ବ୍ୟବହାର କରୁଥିଲେ ଏବଂ underscore-form header ପଠାଉଥିଲେ, ସକ୍ଷମ କରନ୍ତୁ:
+ଯଦି ଆପଣ Nginx ବ୍ୟବହାର କରନ୍ତି ଏବଂ ଅଣ୍ଡରସ୍କୋର୍-ଫର୍ମ ହେଡର୍ ପଠାନ୍ତି, ସକ୍ଷମ କରନ୍ତୁ:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Wildcard Model Alias
+#### ୱାଇଲ୍ଡକାର୍ଡ ମଡେଲ୍ ଛଦ୍ମନାମ \|
 
-model ନାମ remap କରିବାକୁ wildcard pattern ସୃଷ୍ଟି କରନ୍ତୁ:
+ମଡେଲ ନାମଗୁଡ଼ିକୁ ରିମାପ୍ କରିବା ପାଇଁ ୱାଇଲ୍ଡକାର୍ଡ s ାଞ୍ଚା ସୃଷ୍ଟି କରନ୍ତୁ:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
 Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-Wildcard `*` (ଯେକୌଣସି character) ଏବଂ `?` (ଗୋଟିଏ character) ସମର୍ଥନ କରେ।
+ୱାଇଲ୍ଡକାର୍ଡ `*` (ଯେକ characters ଣସି ଅକ୍ଷର) ଏବଂ `?` (ଏକକ ବର୍ଣ୍ଣ) କୁ ସମର୍ଥନ କରେ \|
 
-#### Fallback Chain
+#### ଫଲବ୍ୟାକ୍ ଶୃଙ୍ଖଳା \|
 
-ସମସ୍ତ requestରେ ପ୍ରଯୁଜ୍ୟ global fallback chain ପରିଭାଷିତ କରନ୍ତୁ:
+ଗ୍ଲୋବାଲ୍ ଫଲବ୍ୟାକ୍ ଶୃଙ୍ଖଳାକୁ ବ୍ୟାଖ୍ୟା କରନ୍ତୁ ଯାହା ସମସ୍ତ ଅନୁରୋଧରେ ପ୍ରଯୁଜ୍ୟ:
 
 ```
 Chain: production-fallback
@@ -909,148 +909,204 @@ Chain: production-fallback
 
 ---
 
-### ସ୍ଥିତିସ୍ଥାପକତା ଏବଂ Circuit Breaker
+### ସାଧାରଣ ପ୍ରଦାନକାରୀ ମିଶ୍ରଣ ଏବଂ ମାର୍ଗ ମାର୍ଗ
 
-**Dashboard → Settings → Resilience** ମାଧ୍ୟମରେ configure କରନ୍ତୁ।
+OmniRoute ରେ ଏକାଧିକ ପ୍ରଦାନକାରୀ ଏବଂ ସେମାନଙ୍କ ମଧ୍ୟରେ ରାଉଟିଙ୍ଗ୍ ମିଶ୍ରଣ ପାଇଁ ଏଠାରେ ଉଦାହରଣ s ାଞ୍ଚାଗୁଡ଼ିକ ଅଛି:
 
-OmniRoute ପାଞ୍ଚଟି component ସହିତ provider-ସ୍ତରୀୟ ସ୍ଥିତିସ୍ଥାପକତା କାର୍ଯ୍ୟକାରୀ କରେ:
+#### 1। କୋଡିଂ ଏଜେଣ୍ଟ କମ୍ବୋ: Cost/Speed ଫଲବ୍ୟାକ୍ ସହିତ ହାଇ-ଏଣ୍ଡ୍ ଯୁକ୍ତି \|
 
-1. **Request Queue ଏବଂ Pacing** — system-ସ୍ତରୀୟ request shaping:
-   - **ପ୍ରତି ମିନିଟ୍ରେ Request (RPM)** — ପ୍ରତି account ପାଇଁ ପ୍ରତି ମିନିଟ୍ର ସର୍ବାଧିକ request
-   - **Requestଗୁଡ଼ିକ ମଧ୍ୟରେ ସର୍ବନିମ୍ନ ସମୟ** — requestଗୁଡ଼ିକ ମଧ୍ୟରେ millisecondରେ ସର୍ବନିମ୍ନ ବ୍ୟବଧାନ
-   - **ସର୍ବାଧିକ Concurrent Request** — ପ୍ରତି account ପାଇଁ ସର୍ବାଧିକ ଏକକାଳୀନ request
-2. **ସଂଯୋଗ କୁଲଡାଉନ୍** — ପୁନଃଚେଷ୍ଟାଯୋଗ୍ୟ ବିଫଳତା ପରେ ଗୋଟିଏ ସଂଯୋଗ ପାଇଁ ପ୍ରତି-ପ୍ରମାଣୀକରଣ-ପ୍ରକାର ବିନ୍ୟାସ:
-   - **ମୂଳ କୁଲଡାଉନ୍** — ପୁନଃଚେଷ୍ଟାଯୋଗ୍ୟ ଅପ୍ଷ୍ଟ୍ରିମ୍ ବିଫଳତା ପାଇଁ ଡିଫଲ୍ଟ କୁଲଡାଉନ୍ ଅବଧି
-   - **ଅପ୍ଷ୍ଟ୍ରିମ୍ ପୁନଃଚେଷ୍ଟା ସୂଚନା ବ୍ୟବହାର କରନ୍ତୁ** — ଉପଲବ୍ଧ କରାଯାଇଥିଲେ ପ୍ରାମାଣିକ `Retry-After` କିମ୍ବା ରିସେଟ୍ ସୂଚନାକୁ ସମ୍ମାନ କରେ
-   - **ସର୍ବାଧିକ ବ୍ୟାକଅଫ୍ ପଦକ୍ଷେପ** — ବାରମ୍ବାର ବିଫଳତା ପାଇଁ ସର୍ବାଧିକ ଘାତୀୟ ବ୍ୟାକଅଫ୍ ସ୍ତର
+କୋଡିଂ ଏଜେଣ୍ଟଗୁଡିକ ପାଇଁ ଆଦର୍ଶ (OpenCode, Claude କୋଡ୍, Cursor, Cline) \| ପ୍ରାରମ୍ଭରେ ସୀମାନ୍ତ ଯୁକ୍ତିଯୁକ୍ତ ମଡେଲଗୁଡିକ ପାଇଁ ମାର୍ଗ, କୋଟା ଥକ୍କା କିମ୍ବା ତ୍ରୁଟି ଉପରେ ଦ୍ରୁତ କୋଡିଂ ମଡେଲକୁ ଫେରିବା \|
 
-3. **ପ୍ରଦାନକାରୀ ସର୍କିଟ୍ ବ୍ରେକର୍** — ଆରମ୍ଭରୁ ଶେଷ ପର୍ଯ୍ୟନ୍ତ ପ୍ରଦାନକାରୀ ବିଫଳତାଗୁଡ଼ିକୁ ଟ୍ରାକ୍ କରେ, ବିନ୍ୟାସିତ ସତର୍କତା ସୀମାରେ ପ୍ରଦାନକାରୀକୁ ଅବନମିତ ଭାବେ ଚିହ୍ନିତ କରେ ଏବଂ ବିନ୍ୟାସିତ ବିଫଳତା ସୀମାରେ ପହଞ୍ଚିଲେ ବ୍ରେକର୍କୁ ଖୋଲେ:
-   - **ଅବନତି ସୀମା** — `DEGRADED` ଅବସ୍ଥାରେ ପ୍ରବେଶ କରିବା ପୂର୍ବରୁ କ୍ରମାଗତ ପ୍ରଦାନକାରୀ ବିଫଳତା
-   - **ବିଫଳତା ସୀମା** — `OPEN` ଅବସ୍ଥାରେ ପ୍ରବେଶ କରିବା ପୂର୍ବରୁ କ୍ରମାଗତ ପ୍ରଦାନକାରୀ ବିଫଳତା
-   - **ରିସେଟ୍ ସମୟସୀମା** — ପ୍ରଦାନକାରୀକୁ ପୁନର୍ବାର ପରୀକ୍ଷା କରିବା ପୂର୍ବରୁ ସମୟ ଅବଧି
-   - **CLOSED** (ସୁସ୍ଥ) — ଅନୁରୋଧଗୁଡ଼ିକ ସ୍ୱାଭାବିକ ଭାବରେ ପ୍ରବାହିତ ହୁଏ
-   - **DEGRADED** — ବର୍ଦ୍ଧିତ ବିଫଳତାଗୁଡ଼ିକୁ ଟ୍ରାକ୍ କରାଯାଉଥିବା ବେଳେ ମଧ୍ୟ ଅନୁରୋଧଗୁଡ଼ିକ ପ୍ରବାହିତ ହୁଏ
-   - **OPEN** — ବାରମ୍ବାର ବିଫଳତା ପରେ ପ୍ରଦାନକାରୀକୁ ସାମୟିକ ଭାବେ ଅବରୋଧ କରାଯାଏ
-   - **HALF_OPEN** — ପ୍ରଦାନକାରୀ ପୁନରୁଦ୍ଧାର ହୋଇଛି କି ନାହିଁ ପରୀକ୍ଷା କରାଯାଉଛି
+- **ଡ୍ୟାସବୋର୍ଡ \|** : କମ୍ବୋସ୍ → ନୂତନ କମ୍ବୋ → ନାମ: `agent-coding` → ରଣନୀତି: `Priority`
+- **ମଡେଲଗୁଡିକ** :
+  1. `claude/claude-sonnet-4-6` (ପ୍ରାଥମିକ କୋଡିଂ ଏଜେଣ୍ଟ)
+  2. `openai/gpt-4o` (ଦ୍ Secondary ିତୀୟ ଉଚ୍ଚ କ୍ଷମତା ବିଶିଷ୍ଟ ଫଲବ୍ୟାକ୍)
+  3. `deepseek/deepseek-v4-flash` (ଉଚ୍ଚ-ଦକ୍ଷତା, ବ୍ୟୟ-ପ୍ରଭାବଶାଳୀ ପତନ)
 
-   ସଂଯୋଗ-ପରିସରଭୁକ୍ତ `429` ହାର ସୀମାଗୁଡ଼ିକ **ସଂଯୋଗ କୁଲଡାଉନ୍**ରେ ରହେ ଏବଂ ପ୍ରଦାନକାରୀ ବ୍ରେକର୍ ପାଇଁ ଗଣନା କରାଯାଏ ନାହିଁ।
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
 
-   ପ୍ରଦାନକାରୀ ବ୍ରେକର୍ର ରନ୍ଟାଇମ୍ ଅବସ୍ଥା କେବଳ **ଡ୍ୟାସ୍ବୋର୍ଡ → ସ୍ୱାସ୍ଥ୍ୟ**ରେ ଦେଖାଯାଏ।
+#### ଫ୍ରି-ଟାୟର୍ ଅଟୋ ଫେଲୋଭର କମ୍ବୋ \|
 
-4. **କୁଲଡାଉନ୍ ପାଇଁ ଅପେକ୍ଷା କରନ୍ତୁ** — ଯଦି ପ୍ରତ୍ୟେକ ପ୍ରାର୍ଥୀ ସଂଯୋଗ ପୂର୍ବରୁ କୁଲଡାଉନ୍ରେ ଥାଏ, ତେବେ OmniRoute ସବୁଠାରୁ ଶୀଘ୍ର ସମାପ୍ତ ହେବାକୁ ଥିବା କୁଲଡାଉନ୍ ପର୍ଯ୍ୟନ୍ତ ଅପେକ୍ଷା କରି ସମାନ କ୍ଲାଏଣ୍ଟ ଅନୁରୋଧକୁ ସ୍ୱୟଂଚାଳିତ ଭାବେ ପୁନଃଚେଷ୍ଟା କରିପାରେ।
+API ଖର୍ଚ୍ଚ ବିନା ଅପଟାଇମ୍ କୁ ବ imize ାଇବା ପାଇଁ ଏକାଧିକ ମାଗଣା ସ୍ତର ଏବଂ ଚାବିହୀନ ପ୍ରଦାନକାରୀଙ୍କୁ ଶୃଙ୍ଖଳା \|
 
-5. **ହାର ସୀମା ସ୍ୱୟଂ-ଚିହ୍ନଟ** — ଯେତେବେଳେ ଅପ୍ଷ୍ଟ୍ରିମ୍ ପ୍ରଦାନକାରୀମାନେ ସ୍ପଷ୍ଟ ଅପେକ୍ଷା ଅବଧି ଫେରାନ୍ତି, ସେଟିଂ ସକ୍ଷମ ଥିଲେ ସେହି ସୂଚନାଗୁଡ଼ିକ ସ୍ଥାନୀୟ ସଂଯୋଗ କୁଲଡାଉନ୍କୁ ଅଗ୍ରାହ୍ୟ କରେ।
+- **ରଣନୀତି** : `Least Used` କିମ୍ବା `Round Robin` (କୋଟା ଉପରେ ଭାର ବଣ୍ଟନ କରେ)
+- **ମଡେଲଗୁଡିକ** :
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
 
-**ବିଶେଷଜ୍ଞ ପରାମର୍ଶ:** କୌଣସି ବିଭ୍ରାଟ ପରେ ସକ୍ରିୟ ପ୍ରଦାନକାରୀ ବ୍ରେକର୍ଗୁଡ଼ିକୁ ଯାଞ୍ଚ ଏବଂ ରିସେଟ୍ କରିବା ପାଇଁ **ସ୍ୱାସ୍ଥ୍ୟ** ପୃଷ୍ଠା ବ୍ୟବହାର କରନ୍ତୁ। ସହନଶୀଳତା ପୃଷ୍ଠା କେବଳ ବିନ୍ୟାସ ପରିବର୍ତ୍ତନ କରେ।
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
+
+#### 3। ମଲ୍ଟିମୋଡାଲ୍ / ଭିଜନ୍ ଏବଂ ଟେକ୍ସଟ୍ ପାଇପ୍ ଲାଇନ୍ \|
+
+ପ୍ରତିଛବି ବୁ understanding ାମଣା ଏବଂ କୋଡ୍ ଉତ୍ପାଦନ ସହିତ କାର୍ଯ୍ୟ ପ୍ରବାହ ପାଇଁ ଉଚ୍ଚ-ଗତି ପାଠ୍ୟ ଉତ୍ପାଦନ ସହିତ ବିଶେଷ ଦର୍ଶନ ମଡେଲଗୁଡିକ ଯୋଡି \|
+
+- **ନମୁନା** : ଏକ `Priority` କମ୍ବୋ ଯାହା ପ୍ରଥମେ ଦର୍ଶନ-ସକ୍ଷମ ମଡେଲଗୁଡିକ ତାଲିକାଭୁକ୍ତ କରେ ଏବଂ ଶେଷରେ ଏକ ଉଚ୍ଚ-ଥ୍ରୋପୁଟ୍ text/code ମଡେଲ୍ \|
+- **ମଡେଲଗୁଡିକ** :
+  1. `gemini/gemini-2.5-pro` (ଶକ୍ତିଶାଳୀ image/multimodal rehens ାମଣା)
+  2. `openai/gpt-4o` (ସନ୍ତୁଳିତ ଦର୍ଶନ ଏବଂ ଉପକରଣ ବ୍ୟବହାର)
+  3. `deepseek/deepseek-v4-flash` (Text/code generation ଼ି)
 
 ---
 
-### ଡାଟାବେସ୍ ରପ୍ତାନି / ଆମଦାନି
+### ସ୍ଥିରତା ଏବଂ ସର୍କିଟ ବ୍ରେକର୍ସ \|
 
-**ଡ୍ୟାସ୍ବୋର୍ଡ → ସେଟିଂସ୍ → ସିଷ୍ଟମ୍ ଏବଂ ଷ୍ଟୋରେଜ୍**ରେ ଡାଟାବେସ୍ ବ୍ୟାକଅପ୍ଗୁଡ଼ିକ ପରିଚାଳନା କରନ୍ତୁ।
+ମାଧ୍ୟମରେ ବିନ୍ୟାସ କରନ୍ତୁ \|** ଡ୍ୟାସବୋର୍ଡ → ସେଟିଂସମୂହ → ସ୍ଥିରତା \|** ।
 
-| କାର୍ଯ୍ୟ                              | ବର୍ଣ୍ଣନା                                                                                                                                                        |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **ଡାଟାବେସ୍ ରପ୍ତାନି କରନ୍ତୁ**          | ବର୍ତ୍ତମାନର SQLite ଡାଟାବେସ୍କୁ ଏକ `.sqlite` ଫାଇଲ୍ ଭାବରେ ଡାଉନଲୋଡ୍ କରେ                                                                                              |
-| **ସବୁକିଛି ରପ୍ତାନି କରନ୍ତୁ (.tar.gz)** | ଡାଟାବେସ୍, ସେଟିଂସ୍, କମ୍ବୋ, ପ୍ରଦାନକାରୀ ସଂଯୋଗ (କୌଣସି ପରିଚୟପତ୍ର ନାହିଁ), API କୀ ମେଟାଡାଟା ସମେତ ଏକ ସମ୍ପୂର୍ଣ୍ଣ ବ୍ୟାକଅପ୍ ଆର୍କାଇଭ୍ ଡାଉନଲୋଡ୍ କରେ                           |
-| **ଡାଟାବେସ୍ ଆମଦାନି କରନ୍ତୁ**           | ବର୍ତ୍ତମାନର ଡାଟାବେସ୍କୁ ବଦଳାଇବା ପାଇଁ ଏକ `.sqlite` ଫାଇଲ୍ ଅପଲୋଡ୍ କରେ। `DISABLE_SQLITE_AUTO_BACKUP=true` ନହେଲେ ଆମଦାନି ପୂର୍ବରୁ ସ୍ୱୟଂଚାଳିତ ଭାବେ ଏକ ବ୍ୟାକଅପ୍ ସୃଷ୍ଟି ହୁଏ |
+OmniRoute ପାଞ୍ଚଟି ଉପାଦାନ ସହିତ ପ୍ରଦାନକାରୀ ସ୍ତରର ସ୍ଥିରତା କାର୍ଯ୍ୟକାରୀ କରେ:
+
+1. **କ୍ୟୁ ଏବଂ ପେସିଂ ପାଇଁ ଅନୁରୋଧ \|** - ସିଷ୍ଟମ୍ ସ୍ତରୀୟ ଅନୁରୋଧ ଆକୃତି:
+   - **ପ୍ରତି ମିନିଟ୍ ପାଇଁ ଅନୁରୋଧ (RPM)** - ପ୍ରତି ଆକାଉଣ୍ଟରେ ପ୍ରତି ମିନିଟରେ ସର୍ବାଧିକ ଅନୁରୋଧ \|
+   - **ଅନୁରୋଧ ମଧ୍ୟରେ ସର୍ବନିମ୍ନ ସମୟ \|** - ଅନୁରୋଧ ମଧ୍ୟରେ ମିଲିସେକେଣ୍ଡରେ ସର୍ବନିମ୍ନ ବ୍ୟବଧାନ \|
+   - **ସର୍ବାଧିକ ସମନ୍ୱୟ ଅନୁରୋଧ \|** - ଖାତା ପାଇଁ ସର୍ବାଧିକ ଏକକାଳୀନ ଅନୁରୋଧ \|
+
+2. **ସଂଯୋଗ କୁଲଡାଉନ୍ \|** - ପୁନ ry ଚେଷ୍ଟା ଯୋଗ୍ୟ ବିଫଳତା ପରେ ଗୋଟିଏ ସଂଯୋଗ ପାଇଁ ପ୍ରତି-ଅଥ-ପ୍ରକାର ସଂରଚନା:
+   - **ବେସ୍ କୁଲଡାଉନ୍ \|** - ପୁନ ry ଚେଷ୍ଟା ଯୋଗ୍ୟ ଅପଷ୍ଟ୍ରିମ୍ ବିଫଳତା ପାଇଁ ଡିଫଲ୍ଟ କୁଲଡାଉନ୍ ୱିଣ୍ଡୋ \|
+   - **ଅପଷ୍ଟ୍ରିମ୍ ପୁନ ry ଚେଷ୍ଟା କରନ୍ତୁ \|** - ପ୍ରଦାନ କରାଯାଇଥିବାବେଳେ ପ୍ରାଧିକୃତ `Retry-After` କିମ୍ବା ପୁନ res ସେଟ୍ ସୂଚନାକୁ ସମ୍ମାନ କରେ \|
+   - **ସର୍ବାଧିକ ବ୍ୟାକଅଫ୍ ଷ୍ଟେପସ୍ \|** - ବାରମ୍ବାର ବିଫଳତା ପାଇଁ ସର୍ବାଧିକ ଏକ୍ସପୋନ୍ସନାଲ ବ୍ୟାକଅଫ୍ ସ୍ତର \|
+
+3. **ପ୍ରଦାନକାରୀ ସର୍କିଟ ବ୍ରେକର୍ \|** - ଏଣ୍ଡ-ଟୁ-ଏଣ୍ଡ ପ୍ରଦାନକାରୀ ବିଫଳତାକୁ ଟ୍ରାକ୍ କରେ, ବିନ୍ୟାସିତ ଚେତାବନୀ ସୀମାରେ ଏକ ପ୍ରଦାନକାରୀଙ୍କୁ ଚିହ୍ନିତ କରେ, ଏବଂ ବିନ୍ୟାସିତ ବିଫଳତା ସୀମା ପହଞ୍ଚିବା ପରେ ବ୍ରେକରକୁ ଖୋଲିଥାଏ:
+   - **ଅବନତି ସୀମା** - `DEGRADED` ପ୍ରବେଶ କରିବା ପୂର୍ବରୁ କ୍ରମାଗତ ପ୍ରଦାନକାରୀ ବିଫଳତା \|
+   - **ବିଫଳତା ସୀମା** - `OPEN` ପ୍ରବେଶ କରିବା ପୂର୍ବରୁ କ୍ରମାଗତ ପ୍ରଦାନକାରୀ ବିଫଳତା \|
+   - **ସମୟ ସମାପ୍ତ କରନ୍ତୁ \|** - ପ୍ରଦାନକାରୀ ପୁନର୍ବାର ପରୀକ୍ଷା ହେବା ପୂର୍ବରୁ ସମୟ ୱିଣ୍ଡୋ \|
+   - **CLOSED** (ସୁସ୍ଥ) - ଅନୁରୋଧଗୁଡିକ ସାଧାରଣ ଭାବରେ ପ୍ରବାହିତ ହୁଏ \|
+   - **DEGRADED** - ଉଚ୍ଚତର ବିଫଳତା ଟ୍ରାକ୍ ହୋଇଥିବାବେଳେ ଅନୁରୋଧଗୁଡିକ ପ୍ରବାହିତ ହେଉଛି \|
+   - **OPEN** - ବାରମ୍ବାର ବିଫଳତା ପରେ ପ୍ରଦାନକାରୀ ସାମୟିକ ଭାବରେ ଅବରୋଧିତ \|
+   - **HALF_OPEN** - ପ୍ରଦାନକାରୀ ସୁସ୍ଥ ହୋଇଛି କି ନାହିଁ ପରୀକ୍ଷା \|
+
+   ସଂଯୋଗ-ସ୍କୋପିଡ୍ `429` ହାର ସୀମା ରହିଥାଏ \|** ସଂଯୋଗ କୁଲଡାଉନ୍ \|** ଏବଂ ପ୍ରଦାନକାରୀ ବ୍ରେକର୍ ପ୍ରତି ଗଣନା କରନ୍ତୁ ନାହିଁ \|
+
+   ପ୍ରଦାନକାରୀ ବ୍ରେକର୍ ରାଇଟ୍ ସମୟ ଅବସ୍ଥା ଦେଖାଯାଇଛି \|** ଡ୍ୟାସବୋର୍ଡ → ସ୍ୱାସ୍ଥ୍ୟ** କେବଳ
+
+4. **କୁଲଡାଉନ୍ ପାଇଁ ଅପେକ୍ଷା କର \|** - ଯଦି ପ୍ରତ୍ୟେକ ପ୍ରାର୍ଥୀ ସଂଯୋଗ ପୂର୍ବରୁ ଥଣ୍ଡା ହୋଇଯାଉଛି, OmniRoute ପ୍ରାଥମିକ କୁଲଡାଉନ୍ ପାଇଁ ଅପେକ୍ଷା କରିପାରିବ ଏବଂ ସମାନ କ୍ଲାଏଣ୍ଟ ଅନୁରୋଧକୁ ପୁନ ry ଚେଷ୍ଟା କରିବ \|
+
+5. **ରେଟ୍ ସୀମା ଅଟୋ-ଚିହ୍ନଟ \|** - ଯେତେବେଳେ ଅପଷ୍ଟ୍ରିମ ପ୍ରଦାନକାରୀମାନେ ସ୍ପଷ୍ଟ ଅପେକ୍ଷା ୱିଣ୍ଡୋ ଫେରସ୍ତ କରନ୍ତି, ସେଟିଂ ସକ୍ଷମ ହେଲେ ସେହି ସୂଚନାଗୁଡ଼ିକ ସ୍ଥାନୀୟ ସଂଯୋଗ କୁଲଡାଉନ୍ କୁ ନବଲିଖନ କରେ \|
+
+**ପ୍ରୋ ଟିପ୍:** ବ୍ୟବହାର କରନ୍ତୁ** ସ୍ୱାସ୍ଥ୍ୟ** ଏକ ଅଘଟଣ ପରେ ଲାଇଭ୍ ପ୍ରଦାନକାରୀ ବ୍ରେକର୍ ଯାଞ୍ଚ ଏବଂ ପୁନ res ସେଟ୍ କରିବାକୁ ପୃଷ୍ଠା \| ସ୍ଥିରତା ପୃଷ୍ଠା କେବଳ ସଂରଚନାକୁ ପରିବର୍ତ୍ତନ କରିଥାଏ \|
+
+---
+
+### ଡାଟାବେସ୍ ରପ୍ତାନି / ଆମଦାନୀ \|
+
+ଡାଟାବେସ୍ ବ୍ୟାକଅପ୍ ପରିଚାଳନା କରନ୍ତୁ \|** ଡ୍ୟାସବୋର୍ଡ → ସେଟିଂସମୂହ → ସିଷ୍ଟମ୍ ଏବଂ ଷ୍ଟୋରେଜ୍ \|** ।
+
+| କାର୍ଯ୍ୟ                            | ବର୍ଣ୍ଣନା                                                                                                                                                                      |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ଡାଟାବେସ୍ ରପ୍ତାନି କରନ୍ତୁ \|**     | ସାମ୍ପ୍ରତିକ SQLite ଡାଟାବେସ୍ କୁ `.sqlite` ଫାଇଲ୍ ଭାବରେ ଡାଉନଲୋଡ୍ କରେ \|                                                                                                           |
+| **ସମସ୍ତ ରପ୍ତାନି କରନ୍ତୁ (.tar.gz)** | ଡାଟାବେସ୍, ସେଟିଂସମୂହ, କମ୍ବୋ, ପ୍ରଦାନକାରୀ ସଂଯୋଗ (କ cred ଣସି ପ୍ରମାଣପତ୍ର ନାହିଁ), API କି ମେଟାଡାଟା ଅନ୍ତର୍ଭୂକ୍ତ କରି ଏକ ସମ୍ପୂର୍ଣ୍ଣ ବ୍ୟାକଅପ୍ ଅଭିଲେଖାଗାର ଡାଉନଲୋଡ୍ କରେ \|                 |
+| **ଡାଟାବେସ୍ ଆମଦାନି କରନ୍ତୁ \|**      | ସାମ୍ପ୍ରତିକ ଡାଟାବେସ୍ ବଦଳାଇବା ପାଇଁ ଏକ `.sqlite` ଫାଇଲ୍ ଅପଲୋଡ୍ କରନ୍ତୁ \| `DISABLE_SQLITE_AUTO_BACKUP=true` ନହେବା ପର୍ଯ୍ୟନ୍ତ ଏକ ପ୍ରି-ଆମଦାନୀ ବ୍ୟାକଅପ୍ ସ୍ୱୟଂଚାଳିତ ଭାବରେ ସୃଷ୍ଟି ହୁଏ \| |
 
 ```bash
-# API: ଡାଟାବେସ୍ ରପ୍ତାନି କରନ୍ତୁ
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: ସବୁକିଛି ରପ୍ତାନି କରନ୍ତୁ (ସମ୍ପୂର୍ଣ୍ଣ ଆର୍କାଇଭ୍)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: ଡାଟାବେସ୍ ଆମଦାନି କରନ୍ତୁ
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**ଆମଦାନି ବୈଧତା ଯାଞ୍ଚ:** ଆମଦାନି ହୋଇଥିବା ଫାଇଲ୍ର ଅଖଣ୍ଡତା (SQLite pragma ଯାଞ୍ଚ), ଆବଶ୍ୟକୀୟ ଟେବୁଲ୍ (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) ଏବଂ ଆକାର (ସର୍ବାଧିକ 100MB) ଯାଞ୍ଚ କରାଯାଏ।
+**ଆମଦାନି ବ id ଧତା:** ଆମଦାନୀ ହୋଇଥିବା ଫାଇଲଟି ଅଖଣ୍ଡତା (SQLite pragma ଯାଞ୍ଚ), ଆବଶ୍ୟକ ସାରଣୀ (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), ଏବଂ ଆକାର (ସର୍ବାଧିକ 100MB) ପାଇଁ ବ valid ଧ ହୋଇଛି \|
 
-**ବ୍ୟବହାର ପରିସ୍ଥିତି:**
+**ମାମଲା ବ୍ୟବହାର କରନ୍ତୁ:**
 
-- OmniRouteକୁ ଗୋଟିଏ ମେସିନ୍ରୁ ଅନ୍ୟ ମେସିନ୍କୁ ସ୍ଥାନାନ୍ତର କରନ୍ତୁ
-- ବିପର୍ଯ୍ୟୟ ପୁନରୁଦ୍ଧାର ପାଇଁ ବାହ୍ୟ ବ୍ୟାକଅପ୍ ସୃଷ୍ଟି କରନ୍ତୁ
-- ଦଳର ସଦସ୍ୟମାନଙ୍କ ମଧ୍ୟରେ ବିନ୍ୟାସ ଅଂଶୀଦାର କରନ୍ତୁ (ସବୁକିଛି ରପ୍ତାନି କରନ୍ତୁ → ଆର୍କାଇଭ୍ ଅଂଶୀଦାର କରନ୍ତୁ)
+- ମେସିନ୍ ମଧ୍ୟରେ OmniRoute ସ୍ଥାନାନ୍ତର କରନ୍ତୁ \|
+- ବିପର୍ଯ୍ୟୟ ପୁନରୁଦ୍ଧାର ପାଇଁ ବାହ୍ୟ ବ୍ୟାକଅପ୍ ସୃଷ୍ଟି କରନ୍ତୁ \|
+- ଦଳ ସଦସ୍ୟଙ୍କ ମଧ୍ୟରେ ବିନ୍ୟାସ ଅଂଶୀଦାର କରନ୍ତୁ (ସମସ୍ତ → ଅଂଶୀଦାର ଅଭିଲେଖାଗାର ରପ୍ତାନି କରନ୍ତୁ)
 
 ---
 
-### ସେଟିଂସ୍ ଡ୍ୟାସ୍ବୋର୍ଡ
+### ସେଟିଂସମୂହ ଡ୍ୟାସବୋର୍ଡ \|
 
-ସହଜ ନେଭିଗେସନ୍ ପାଇଁ ସେଟିଂସ୍ ପୃଷ୍ଠାକୁ **7ଟି ଟ୍ୟାବ୍**ରେ ସଂଗଠିତ କରାଯାଇଛି:
+ସେଟିଙ୍ଗ୍ ପେଜ୍ ରେ ସଂଗଠିତ ହୋଇଛି \|** 7 ଟ୍ୟାବ୍ \|** ସହଜ ନାଭିଗେସନ୍ ପାଇଁ:
 
-| ଟ୍ୟାବ୍       | ବିଷୟବସ୍ତୁ                                                                                                                                                            |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **ସାଧାରଣ**   | ସିଷ୍ଟମ୍ ଷ୍ଟୋରେଜ୍ ଉପକରଣ, ଡିଫଲ୍ଟ ଆଚରଣ, ଏଣ୍ଡପଏଣ୍ଟ ଟନେଲ୍ ଦୃଶ୍ୟମାନତା                                                                                                      |
-| **ଦୃଶ୍ୟରୂପ** | ଥିମ୍ ନିୟନ୍ତ୍ରଣ (ଉଜ୍ଜ୍ୱଳ/ଗାଢ଼/ସିଷ୍ଟମ୍), ସାଇଡ୍ବାର୍ ଦୃଶ୍ୟମାନତା, Cloudflare/Tailscale/ngrok ଟନେଲ୍ କାର୍ଡ ପାଇଁ ପ୍ୟାନେଲ୍ ଟଗଲ୍                                               |
-| **AI**       | ଚିନ୍ତନ ବଜେଟ୍ (ପାସ୍ଥ୍ରୁ / ସ୍ୱୟଂ-ବାଦ / କଷ୍ଟମ୍ / ଅନୁକୂଳିତ — [THINKING_BUDGET.md](./THINKING_BUDGET.md) ଦେଖନ୍ତୁ), ଗ୍ଲୋବାଲ୍ ସିଷ୍ଟମ୍ ପ୍ରମ୍ପ୍ଟ, ପ୍ରମ୍ପ୍ଟ କ୍ୟାଶ୍ ପରିସଂଖ୍ୟାନ  |
-| **ସୁରକ୍ଷା**  | ଲଗଇନ୍/ପାସ୍ୱାର୍ଡ ସେଟିଂସ୍, IP ପ୍ରବେଶ ନିୟନ୍ତ୍ରଣ, `/models` ପାଇଁ API ପ୍ରମାଣୀକରଣ, ପ୍ରଦାନକାରୀ ଅବରୋଧ, ପ୍ରମ୍ପ୍ଟ-ଇଞ୍ଜେକ୍ସନ୍ ସୁରକ୍ଷା                                           |
-| **ରାଉଟିଂ**   | ଗ୍ଲୋବାଲ୍ ରାଉଟିଂ ରଣନୀତି (ପ୍ରଥମେ ପୂରଣ / ରାଉଣ୍ଡ ରବିନ୍ / P2C / ଯାଦୃଚ୍ଛିକ / ସର୍ବନିମ୍ନ ବ୍ୟବହୃତ / ଖର୍ଚ୍ଚ-ଅନୁକୂଳିତ), ୱାଇଲ୍ଡକାର୍ଡ ମଡେଲ୍ ଉପନାମ, ଫଲ୍ବ୍ୟାକ୍ ଶୃଙ୍ଖଳ, କମ୍ବୋ ଡିଫଲ୍ଟ |
-| **ସହନଶୀଳତା** | ଅନୁରୋଧ କ୍ୟୁ, ସଂଯୋଗ କୁଲଡାଉନ୍, ପ୍ରଦାନକାରୀ ବ୍ରେକର୍ ବିନ୍ୟାସ ଏବଂ କୁଲଡାଉନ୍ ପାଇଁ ଅପେକ୍ଷା ଆଚରଣ                                                                               |
-| **ଉନ୍ନତ**    | ଗ୍ଲୋବାଲ୍ ପ୍ରକ୍ସି ବିନ୍ୟାସ (HTTP/SOCKS5), ପ୍ରତି-ପ୍ରଦାନକାରୀ ପ୍ରକ୍ସି ଓଭର୍ରାଇଡ୍                                                                                           |
+| ଟ୍ୟାବ୍ \|       | ବିଷୟବସ୍ତୁ                                                                                                                                                                        |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ଜେନେରାଲ୍ \|** | ସିଷ୍ଟମ୍ ଷ୍ଟୋରେଜ୍ ଟୁଲ୍ସ, ଡିଫଲ୍ଟ ଆଚରଣ, ଏଣ୍ଡପଏଣ୍ଟ ଟନେଲ ଦୃଶ୍ୟମାନତା \|                                                                                                                |
+| **ଦୃଶ୍ୟ**       | ଥିମ୍ କଣ୍ଟ୍ରୋଲ୍ (light/dark/system), ସାଇଡ୍ ବାର୍ ଭିଜିବିଲିଟି, Cloudflare/Tailscale/ngrok ଟନେଲ୍ କାର୍ଡ ପାଇଁ ପ୍ୟାନେଲ୍ ଟୋଗଲ୍ \|                                                         |
+| **AI**          | ଚିନ୍ତାଧାରା ବଜେଟ୍ (ପାସ୍ଷ୍ଟ୍ରୋ / ଅଟୋ-ଷ୍ଟ୍ରିପ୍ / କଷ୍ଟମ୍ / ଆଡାପ୍ଟିଭ୍ - [THINKING_BUDGET.md](./THINKING_BUDGET.md) ଦେଖନ୍ତୁ), ଗ୍ଲୋବାଲ୍ ସିଷ୍ଟମ୍ ପ୍ରମ୍ପ୍ଟ, ପ୍ରମ୍ପ୍ଟ କ୍ୟାଚ୍ ପରିସଂଖ୍ୟାନ \| |
+| **ସୁରକ୍ଷା**     | Login/Password ସେଟିଙ୍ଗ୍, IP ଆକ୍ସେସ୍ କଣ୍ଟ୍ରୋଲ୍, `/models` ପାଇଁ API auth, ପ୍ରଦାନକାରୀ ବ୍ଲକିଂ, ପ୍ରମ୍ପ୍ଟ-ଇଞ୍ଜେକ୍ସନ୍ ଗାର୍ଡ \|                                                          |
+| **ମାର୍ଗ**       | ଗ୍ଲୋବାଲ୍ ରାଉଟିଙ୍ଗ୍ ରଣନୀତି (ପ୍ରଥମ / ରାଉଣ୍ଡ ରବିନ୍ / P2C / ରାଣ୍ଡମ୍ / ସର୍ବନିମ୍ନ ବ୍ୟବହୃତ / ମୂଲ୍ୟ ଅପ୍ଟିମାଇଜ୍), ୱାଇଲ୍ଡକାର୍ଡ ମଡେଲ୍ ଛଦ୍ମନାମ, ଫଲବ୍ୟାକ୍ ଚେନ୍, କମ୍ବୋ ଡିଫଲ୍ଟ ପୁରଣ କରନ୍ତୁ \|   |
+| **ସ୍ଥିରତା \|**  | ଧାଡି, ସଂଯୋଗ କୁଲଡାଉନ୍, ପ୍ରଦାନକାରୀ ବ୍ରେକର୍ ବିନ୍ୟାସ, ଏବଂ ଅପେକ୍ଷା-କୁଲଡାଉନ୍ ଆଚରଣ ପାଇଁ ଅନୁରୋଧ \|                                                                                       |
+| **ଉନ୍ନତ**       | ଗ୍ଲୋବାଲ୍ ପ୍ରକ୍ସି ବିନ୍ୟାସକରଣ (HTTP/SOCKS5), ପ୍ରତି-ପ୍ରଦାନକାରୀ ପ୍ରକ୍ସି ଓଭରବ୍ରିଡ୍ \|                                                                                                 |
 
-ସାଧାରଣ ଟ୍ୟାବ୍ରେ ଏବେ କେବଳ-ପଠନୀୟ ଲଗିଂ ଏବଂ କ୍ୟାଶ୍ ଟିପ୍ପଣୀଗୁଡ଼ିକର ପୁନରାବୃତ୍ତି ନାହିଁ। ଡାଟାବେସ୍ ରିଟେନ୍ସନ୍ ଏବଂ
-ଅପ୍ଟିମାଇଜେସନ୍ ସେଟିଂସ୍ଗୁଡ଼ିକ `/api/settings/database` ମାଧ୍ୟମରେ ସ୍ଥାୟୀ କରାଯାଏ; ମାନୁଆଲ୍ କ୍ୟାଶ୍ ସଫା କରିବା ପାଇଁ
-`DELETE /api/cache` ବ୍ୟବହୃତ ହୁଏ। ଅନୁରୋଧ ଏବଂ ପ୍ରକ୍ସି ଲଗ୍ର ଧାଡ଼ି ସୀମାଗୁଡ଼ିକ
-`CALL_LOGS_TABLE_MAX_ROWS` ଏବଂ `PROXY_LOGS_TABLE_MAX_ROWS` ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ ହୁଏ।
+ଜେନେରାଲ୍ ଆଉ କେବଳ ପଠନୀୟ ଲଗିଂ ଏବଂ କ୍ୟାଚ୍ ନୋଟ୍ ନକଲ କରେ ନାହିଁ \| ଡାଟାବେସ୍ ଧାରଣ ଏବଂ ଅପ୍ଟିମାଇଜେସନ୍ ସେଟିଂସମୂହ `/api/settings/database` ମାଧ୍ୟମରେ ସ୍ଥିର ହୋଇଛି; ମାନୁଆଲ୍ କ୍ୟାଚ୍ କ୍ଲିଅର୍ `DELETE /api/cache` ବ୍ୟବହାର କରେ \| ଅନୁରୋଧ ଏବଂ ପ୍ରକ୍ସି ଲଗ୍ ଧାଡି କ୍ୟାପ୍ ଗୁଡିକ `CALL_LOGS_TABLE_MAX_ROWS` ଏବଂ `PROXY_LOGS_TABLE_MAX_ROWS` ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ \|
 
 ---
 
 ### ଖର୍ଚ୍ଚ ଏବଂ ବଜେଟ୍ ପରିଚାଳନା
 
-**ଡ୍ୟାସ୍ବୋର୍ଡ → ଖର୍ଚ୍ଚ** ମାଧ୍ୟମରେ ପ୍ରବେଶ କରନ୍ତୁ।
+ମାଧ୍ୟମରେ ପ୍ରବେଶ** ଡ୍ୟାସବୋର୍ଡ → ମୂଲ୍ୟ** ।
 
-| ଟ୍ୟାବ୍               | ଉଦ୍ଦେଶ୍ୟ                                                                                                                  |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **ବଜେଟ୍**            | ଦୈନିକ/ସାପ୍ତାହିକ/ମାସିକ ବଜେଟ୍ ଏବଂ ବାସ୍ତବ-ସମୟ ଟ୍ରାକିଂ ସହିତ ପ୍ରତ୍ୟେକ API କୀ ପାଇଁ ଖର୍ଚ୍ଚ ସୀମା ସେଟ୍ କରନ୍ତୁ                      |
-| **ମୂଲ୍ୟ ନିର୍ଦ୍ଧାରଣ** | ମଡେଲ୍ ମୂଲ୍ୟ ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ ଦେଖନ୍ତୁ ଏବଂ ସମ୍ପାଦନା କରନ୍ତୁ — ପ୍ରତ୍ୟେକ ପ୍ରଦାନକାରୀ ପାଇଁ ପ୍ରତି 1K ଇନ୍ପୁଟ୍/ଆଉଟ୍ପୁଟ୍ ଟୋକେନ୍ର ଖର୍ଚ୍ଚ |
+| ଟ୍ୟାବ୍ \| | ଉଦ୍ଦେଶ୍ୟ                                                                                                       |
+| --------- | -------------------------------------------------------------------------------------------------------------- |
+| **ବଜେଟ୍** | daily/weekly/monthly ବଜେଟ୍ ଏବଂ ରିଅଲ୍ ଟାଇମ୍ ଟ୍ରାକିଂ ସହିତ API କି ପ୍ରତି ଖର୍ଚ୍ଚ ସୀମା ସେଟ୍ କରନ୍ତୁ \|                |
+| **ମୂଲ୍ୟ** | ମଡେଲ୍ ମୂଲ୍ୟ ପ୍ରବିଷ୍ଟଗୁଡିକ ଦେଖନ୍ତୁ ଏବଂ ସଂପାଦନ କରନ୍ତୁ - ପ୍ରତି ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ 1K input/output ଟୋକେନ୍ ମୂଲ୍ୟ \| |
 
 ```bash
-# API: ଏକ ବଜେଟ୍ ସେଟ୍ କରନ୍ତୁ
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: ବର୍ତ୍ତମାନର ବଜେଟ୍ ସ୍ଥିତି ପ୍ରାପ୍ତ କରନ୍ତୁ
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**ଖର୍ଚ୍ଚ ଟ୍ରାକିଂ:** ପ୍ରତ୍ୟେକ ଅନୁରୋଧ ଟୋକନ୍ ବ୍ୟବହାରକୁ ଲଗ୍ କରେ ଏବଂ ମୂଲ୍ୟ ସାରଣୀ ବ୍ୟବହାର କରି ଖର୍ଚ୍ଚ ଗଣନା କରେ। ପ୍ରଦାତା, ମଡେଲ୍ ଏବଂ API କୀ ଅନୁଯାୟୀ ବିବରଣୀ **Dashboard → Usage**ରେ ଦେଖନ୍ତୁ।
+**ମୂଲ୍ୟ ଟ୍ରାକିଂ:** ପ୍ରତ୍ୟେକ ଅନୁରୋଧ ଟୋକେନ୍ ବ୍ୟବହାରକୁ ଲଗ୍ କରେ ଏବଂ ମୂଲ୍ୟ ସାରଣୀ ବ୍ୟବହାର କରି ମୂଲ୍ୟ ଗଣନା କରେ \| ରେ ବ୍ରେକଡାଉନ୍ ଦେଖନ୍ତୁ \|** ଡ୍ୟାସବୋର୍ଡ → ବ୍ୟବହାର \|** ପ୍ରଦାନକାରୀ, ମଡେଲ୍, ଏବଂ API କି ଦ୍ୱାରା \|
 
 ---
 
-### ଅଡିଓ ଟ୍ରାନ୍ସକ୍ରିପ୍ସନ୍
+### ଅଡିଓ ଟ୍ରାନ୍ସକ୍ରିପସନ୍ \|
 
-OmniRoute, OpenAI-ସୁସଙ୍ଗତ ଏଣ୍ଡପଏଣ୍ଟ ମାଧ୍ୟମରେ ଅଡିଓ ଟ୍ରାନ୍ସକ୍ରିପ୍ସନ୍ ସମର୍ଥନ କରେ:
+OmniRoute OpenAI- ସୁସଙ୍ଗତ ଶେଷ ପଏଣ୍ଟ ମାଧ୍ୟମରେ ଅଡିଓ ଟ୍ରାନ୍ସକ୍ରିପସନ୍ କୁ ସମର୍ଥନ କରେ:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# curl ସହିତ ଉଦାହରଣ
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` ହେଉଛି ନେଟିଭ୍ Deepgram ରୁଟ୍ ଏବଂ ଏଥିପାଇଁ ଏକ Deepgram API କୀ ଆବଶ୍ୟକ।
-ଯଦି କେବଳ OpenRouter କନଫିଗର୍ କରାଯାଇଛି, ତେବେ `openrouter/deepgram/nova-3` ବ୍ୟବହାର କରନ୍ତୁ।
+`deepgram/nova-3` ହେଉଛି ଦେଶୀ ଦୀପଗ୍ରାମ ମାର୍ଗ ଏବଂ ଏକ ଦୀପଗ୍ରାମ API କି ଆବଶ୍ୟକ କରେ \| ଯଦି କେବଳ OpenRouter ବିନ୍ୟାସିତ ହୋଇଛି, `openrouter/deepgram/nova-3` ବ୍ୟବହାର କରନ୍ତୁ \|
 
-**ସ୍ପିଚ୍-ଟୁ-ଟେକ୍ସଟ୍ (ଟ୍ରାନ୍ସକ୍ରିପ୍ସନ୍)** ପ୍ରଦାତାମାନେ:
+**ସ୍ପିଚ୍-ଟୁ-ଟେକ୍ସଟ୍ (ଟ୍ରାନ୍ସକ୍ରିପସନ୍)** ପ୍ରଦାନକାରୀ:
 
-- `openai/` (whisper-ସୁସଙ୍ଗତ)
-- `groq/` (Groq Whisper Turbo)
-- `deepgram/` (Nova ପରିବାର)
+- `openai/` (ଫୁସ୍-ସୁସଙ୍ଗତ)
+- `groq/` (Groq ୱିସର୍ ଟର୍ବୋ)
+- `deepgram/` (ନୋଭା ପରିବାର)
 - `assemblyai/`
 - `nvidia/` (Parakeet, Canary)
-- `huggingface/` (whisper ଭାରିଆଣ୍ଟଗୁଡ଼ିକ)
+- `huggingface/` (ଫୁସ୍ଫୁସ୍ ପ୍ରକାର)
 - `qwen/`
 
-**ଟେକ୍ସଟ୍-ଟୁ-ସ୍ପିଚ୍ (`POST /v1/audio/speech`)** ପ୍ରଦାତାମାନେ:
+**ଟେକ୍ସଟ୍-ଟୁ-ସ୍ପିଚ୍ (`POST /v1/audio/speech`)** ପ୍ରଦାନକାରୀ:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1067,54 +1123,45 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-ଟ୍ରାନ୍ସକ୍ରିପ୍ସନ୍ ପାଇଁ ସମର୍ଥିତ ଅଡିଓ ଫର୍ମାଟ୍ଗୁଡ଼ିକ: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`। TTS ଆଉଟ୍ପୁଟ୍ ଫର୍ମାଟ୍ଗୁଡ଼ିକ ପ୍ରଦାତା ଉପରେ ନିର୍ଭର କରେ (mp3, wav, opus, pcm, mulaw)।
+ଟ୍ରାନ୍ସକ୍ରିପସନ୍ ପାଇଁ ସମର୍ଥିତ ଅଡିଓ ଫର୍ମାଟ୍: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`\| TTS ଆଉଟପୁଟ୍ ଫର୍ମାଟ୍ ପ୍ରଦାନକାରୀ ଉପରେ ନିର୍ଭର କରେ (mp3, wav, opus, pcm, mulaw) \|
 
 ---
 
-### କମ୍ବୋ ସନ୍ତୁଳନ କୌଶଳ
+### କମ୍ବୋ ସନ୍ତୁଳନ ରଣନୀତି \|
 
-**Dashboard → Combos → Create/Edit → Strategy**ରେ ପ୍ରତି-କମ୍ବୋ ସନ୍ତୁଳନ କନଫିଗର୍ କରନ୍ତୁ।
+ପ୍ରତି-କମ୍ବୋ ସନ୍ତୁଳନକୁ ବିନ୍ୟାସ କରନ୍ତୁ \|** ଡ୍ୟାସବୋର୍ଡ → କମ୍ବୋସ୍ → Create/Edit → ରଣନୀତି \|** ।
 
-| କୌଶଳ                  | ବର୍ଣ୍ଣନା                                                                          |
-| --------------------- | --------------------------------------------------------------------------------- |
-| **ରାଉଣ୍ଡ-ରବିନ୍**      | ମଡେଲ୍ଗୁଡ଼ିକ ମଧ୍ୟରେ କ୍ରମାନୁସାରେ ଘୂରିଥାଏ                                            |
-| **ପ୍ରାଥମିକତା**        | ସର୍ବଦା ପ୍ରଥମ ମଡେଲ୍ଟି ଚେଷ୍ଟା କରେ; କେବଳ ତ୍ରୁଟି ହେଲେ ଫଲ୍ବ୍ୟାକ୍ କରେ                   |
-| **ଯାଦୃଚ୍ଛିକ**         | ପ୍ରତ୍ୟେକ ଅନୁରୋଧ ପାଇଁ କମ୍ବୋରୁ ଏକ ଯାଦୃଚ୍ଛିକ ମଡେଲ୍ ବାଛେ                              |
-| **ଭାରିତ**             | ପ୍ରତି ମଡେଲ୍କୁ ଦିଆଯାଇଥିବା ଭାର ଆଧାରରେ ଆନୁପାତିକ ଭାବେ ରୁଟ୍ କରେ                        |
-| **ସର୍ବନିମ୍ନ-ବ୍ୟବହୃତ** | ସବୁଠାରୁ କମ୍ ସାମ୍ପ୍ରତିକ ଅନୁରୋଧ ଥିବା ମଡେଲ୍କୁ ରୁଟ୍ କରେ (କମ୍ବୋ ମେଟ୍ରିକ୍ସ ବ୍ୟବହାର କରେ) |
-| **ଖର୍ଚ୍ଚ-ଅନୁକୂଳିତ**   | ସବୁଠାରୁ ଶସ୍ତା ଉପଲବ୍ଧ ମଡେଲ୍କୁ ରୁଟ୍ କରେ (ମୂଲ୍ୟ ସାରଣୀ ବ୍ୟବହାର କରେ)                   |
+| ରଣନୀତି                   | ବର୍ଣ୍ଣନା                                                              |
+| ------------------------ | --------------------------------------------------------------------- |
+| **ରାଉଣ୍ଡ-ରବିନ୍ \|**      | କ୍ରମାଗତ ଭାବରେ ମଡେଲଗୁଡିକ ମାଧ୍ୟମରେ ଘୂର୍ଣ୍ଣନ କରେ \|                      |
+| **ପ୍ରାଥମିକତା \|**        | ସର୍ବଦା ପ୍ରଥମ ମଡେଲକୁ ଚେଷ୍ଟା କରେ; କେବଳ ତ୍ରୁଟି ଉପରେ ପଡ଼େ \|              |
+| **ଅନିୟମିତ \|**           | ପ୍ରତ୍ୟେକ ଅନୁରୋଧ ପାଇଁ କମ୍ବୋରୁ ଏକ ଅନିୟମିତ ମଡେଲ୍ ବାଛନ୍ତୁ \|              |
+| **ଓଜନ**                  | ମଡେଲ ପ୍ରତି ନିର୍ଦ୍ଦିଷ୍ଟ ଓଜନ ଉପରେ ଆଧାର କରି ଆନୁପାତିକ ଭାବରେ ମାର୍ଗଗୁଡିକ \| |
+| **ସର୍ବନିମ୍ନ-ବ୍ୟବହୃତ \|** | ସାମ୍ପ୍ରତିକ ଅନୁରୋଧ ସହିତ ମଡେଲକୁ ମାର୍ଗ (କମ୍ବୋ ମେଟ୍ରିକ୍ ବ୍ୟବହାର କରେ)      |
+| **ମୂଲ୍ୟ-ଅପ୍ଟିମାଇଜ୍**     | ଶସ୍ତା ଉପଲବ୍ଧ ମଡେଲକୁ ମାର୍ଗ (ମୂଲ୍ୟ ସାରଣୀ ବ୍ୟବହାର କରେ)                   |
 
-ଗ୍ଲୋବାଲ୍ କମ୍ବୋ ଡିଫଲ୍ଟଗୁଡ଼ିକ **Dashboard → Settings → Routing → Combo Defaults**ରେ ସେଟ୍ କରାଯାଇପାରିବ।
-କମ୍ବୋ ଟାର୍ଗେଟ୍ ଟାଇମ୍ଆଉଟ୍ଗୁଡ଼ିକ ଡିଫଲ୍ଟ ଭାବେ ବର୍ତ୍ତମାନର ଅନୁରୋଧ ଟାଇମ୍ଆଉଟ୍କୁ ଉତ୍ତରାଧିକାରରେ ପାଆନ୍ତି। ଯେତେବେଳେ ଏକ ସଂକ୍ଷିପ୍ତ ପ୍ରତି-ଟାର୍ଗେଟ୍ ସୀମା
-ଦ୍ରୁତତର ଫଲ୍ବ୍ୟାକ୍ ଟ୍ରିଗର୍ କରିବା ଉଚିତ, କେବଳ ସେତେବେଳେ କମ୍ବୋ ଡିଫଲ୍ଟ କିମ୍ବା ଏକ ବ୍ୟକ୍ତିଗତ କମ୍ବୋରେ **Target timeout
-(seconds)** ବ୍ୟବହାର କରନ୍ତୁ।
+ଗ୍ଲୋବାଲ୍ କମ୍ବୋ ଡିଫଲ୍ଟ ସେଟ୍ ହୋଇପାରିବ \|** ଡ୍ୟାସବୋର୍ଡ → ସେଟିଂସମୂହ → ରାଉଟିଙ୍ଗ → କମ୍ବୋ ଡିଫଲ୍ଟ \|** । କମ୍ବୋ ଟାର୍ଗେଟ୍ ସମୟ ସମାପ୍ତି ଡିଫଲ୍ଟ ଭାବରେ ସାମ୍ପ୍ରତିକ ଅନୁରୋଧ ସମୟ ସମାପ୍ତ କରେ \| ବ୍ୟବହାର କରନ୍ତୁ \|** ଟାର୍ଗେଟ୍ ସମୟ ସମାପ୍ତ (ସେକେଣ୍ଡ୍)** କମ୍ବୋ ଡିଫଲ୍ଟ କିମ୍ବା ଏକ ବ୍ୟକ୍ତିଗତ କମ୍ବୋ ଉପରେ ଯେତେବେଳେ କେବଳ ଟାର୍ଗେଟର ଏକ କ୍ଷୁଦ୍ର ସୀମା ଶୀଘ୍ର ଫଲବ୍ୟାକ୍ ଟ୍ରିଗର କରିବା ଉଚିତ \|
 
-ଶୂନ୍ୟ-ଲେଟେନ୍ସି କମ୍ବୋ ଅପ୍ଟିମାଇଜେସନ୍ଗୁଡ଼ିକ ଅପ୍ଟ-ଇନ୍ ଅଟେ। ଏହି ଲେଟେନ୍ସି ବୈଶିଷ୍ଟ୍ୟଗୁଡ଼ିକୁ ଫଲ୍ବ୍ୟାକ୍ ଟାର୍ଗେଟ୍ଗୁଡ଼ିକ ସହିତ ପ୍ରତିଯୋଗିତା କରିବା, TTFT
-ଇତିହାସ ଆଧାରରେ ଟାର୍ଗେଟ୍ଗୁଡ଼ିକୁ ଏଡ଼ାଇବା, କିମ୍ବା ଫଲ୍ବ୍ୟାକ୍ ଅନୁରୋଧଗୁଡ଼ିକୁ ସଙ୍କୁଚିତ କରିବାରୁ ରୋକିବା ପାଇଁ **Zero-latency optimizations**କୁ ଅକ୍ଷମ ରଖନ୍ତୁ; ଏହାକୁ ସକ୍ଷମ କଲେ କମ୍ ଟେଲ୍
-ଲେଟେନ୍ସି ପାଇଁ ରାଉଟିଂ/ଅନୁରୋଧ ଯଥାର୍ଥତା ସହିତ ସମଝୋତା କରିବାକୁ କନଫିଗର୍ ହୋଇଥିବା ହେଜିଂ, ପୂର୍ବାନୁମାନମୂଳକ TTFT
-ସ୍କିପ୍ ଏବଂ ସକ୍ରିୟ ଫଲ୍ବ୍ୟାକ୍ ସଙ୍କୋଚନକୁ ଅନୁମତି ମିଳେ।
+ଶୂନ-ବିଳମ୍ବତା କମ୍ବୋ ଅପ୍ଟିମାଇଜେସନ୍ ଅପ୍ଟ-ଇନ୍ ଅଟେ \| ଛାଡ** ଶୂନ-ବିଳମ୍ବତା ଅପ୍ଟିମାଇଜେସନ୍ \|** ଏହି ବିଳମ୍ବତା ବ features ଶିଷ୍ଟ୍ୟଗୁଡିକ ଦ r ଡ଼ିବା ଫଲବ୍ୟାକ୍ ଟାର୍ଗେଟ୍, TTFT ଇତିହାସ ଉପରେ ଆଧାର କରି ଟାର୍ଗେଟ୍ ଛାଡି, କିମ୍ବା ଫଲବ୍ୟାକ୍ ଅନୁରୋଧକୁ ସଙ୍କୋଚନ କରିବାକୁ ଅକ୍ଷମ; ଏହାକୁ ସକ୍ଷମ କରିବା ଦ୍ୱାରା ନିମ୍ନ ଲାଞ୍ଜ ବିଳମ୍ବ ପାଇଁ routing/request ବିଶ୍ୱସ୍ତତା ବାଣିଜ୍ୟ କରିବାକୁ ବିନ୍ୟାସିତ ହେଡିଂ, ଭବିଷ୍ୟବାଣୀ TTFT ସ୍କିପ୍, ଏବଂ ସକ୍ରିୟ ଫଲବ୍ୟାକ୍ ସଙ୍କୋଚନ ଅନୁମତି ଦିଏ \|
 
-ଯେତେବେଳେ ଅପ୍ଷ୍ଟ୍ରିମ୍ ପ୍ରଦାତାମାନେ କଠୋର
-`max_tokens` / `maxOutputTokens` ସୀମା ଆବଶ୍ୟକ କରନ୍ତି, **Reasoning token buffer**କୁ ଅକ୍ଷମ କରନ୍ତୁ। ଏହା ସକ୍ଷମ ଥିଲେ, କମ୍ବୋ ରାଉଟିଂ କେବଳ ଜଣାଶୁଣା ଆଉଟ୍ପୁଟ୍ କ୍ୟାପ୍ ଥିବା ମଡେଲ୍ଗୁଡ଼ିକ ପାଇଁ ରିଜନିଂ-ମଡେଲ୍
-ହେଡ୍ରୁମ୍ ଯୋଡ଼େ ଏବଂ ସୁରକ୍ଷିତ ବଫର୍ ମୂଲ୍ୟ ସେହି କ୍ୟାପ୍କୁ ଅତିକ୍ରମ କରୁଥିଲେ କ୍ଲାଏଣ୍ଟ ଟୋକନ୍ ସୀମାକୁ ଅପରିବର୍ତ୍ତିତ ରଖେ। ଯଦି କ୍ଲାଏଣ୍ଟ ସୀମା ପୂର୍ବରୁ ଏକ ଜଣାଶୁଣା କ୍ୟାପ୍ଠାରୁ ଅଧିକ ଥାଏ,
-OmniRoute ଅପ୍ଷ୍ଟ୍ରିମ୍ ଅନୁରୋଧ ପଠାଇବା ପୂର୍ବରୁ ଏହାକୁ ସେହି କ୍ୟାପ୍ ପର୍ଯ୍ୟନ୍ତ ହ୍ରାସ କରେ।
+ଅକ୍ଷମ କରନ୍ତୁ \|** ଟୋକେନ୍ ବଫର୍ ଯୁକ୍ତି କରିବା \|** ଯେତେବେଳେ ଅପଷ୍ଟ୍ରିମ ପ୍ରଦାନକାରୀମାନେ କଠୋର `max_tokens` / `maxOutputTokens` ସୀମା ଆବଶ୍ୟକ କରନ୍ତି \| ସକ୍ଷମ ହେଲେ, କମ୍ବୋ ରାଉଟିଙ୍ଗ୍ କେବଳ ଏକ ଜଣାଶୁଣା ଆଉଟପୁଟ୍ କ୍ୟାପ୍ ସହିତ ମଡେଲଗୁଡିକ ପାଇଁ ଯୁକ୍ତିଯୁକ୍ତ-ମଡେଲ୍ ହେଡରୁମ୍ ଯୋଗ କରିଥାଏ ଏବଂ ଯେତେବେଳେ ସୁରକ୍ଷିତ ବଫର୍ଡ ମୂଲ୍ୟ ସେହି କ୍ୟାପ୍ ଅତିକ୍ରମ କରିବ ସେତେବେଳେ କ୍ଲାଏଣ୍ଟ ଟୋକେନ୍ ସୀମାକୁ ଅପରିବର୍ତ୍ତିତ ରଖେ \| ଯଦି କ୍ଲାଏଣ୍ଟ ସୀମା ପୂର୍ବରୁ ଏକ ଜଣାଶୁଣା କ୍ୟାପ୍ ଉପରେ ଥାଏ, OmniRoute ଅପଷ୍ଟ୍ରିମ୍ ଅନୁରୋଧ ପଠାଇବା ପୂର୍ବରୁ ଏହାକୁ ସେହି କ୍ୟାପ୍କୁ ବନ୍ଦ କରିଦିଏ \|
 
 ---
 
-### ସ୍ୱାସ୍ଥ୍ୟ ଡ୍ୟାସ୍ବୋର୍ଡ
+### ସ୍ୱାସ୍ଥ୍ୟ ଡ୍ୟାସବୋର୍ଡ \|
 
-**Dashboard → Health** ମାଧ୍ୟମରେ ପ୍ରବେଶ କରନ୍ତୁ। 6ଟି କାର୍ଡ ସହିତ ରିଅଲ୍-ଟାଇମ୍ ସିଷ୍ଟମ୍ ସ୍ୱାସ୍ଥ୍ୟ ସମୀକ୍ଷା:
+ମାଧ୍ୟମରେ ପ୍ରବେଶ** ଡ୍ୟାସବୋର୍ଡ → ସ୍ୱାସ୍ଥ୍ୟ** । 6 ଟି କାର୍ଡ ସହିତ ରିଅଲ୍ ଟାଇମ୍ ସିଷ୍ଟମ୍ ସ୍ୱାସ୍ଥ୍ୟ ସମୀକ୍ଷା:
 
-| କାର୍ଡ                   | ଏହା କ’ଣ ଦେଖାଏ                                          |
-| ----------------------- | ------------------------------------------------------ |
-| **ସିଷ୍ଟମ୍ ସ୍ଥିତି**      | ଅପ୍ଟାଇମ୍, ସଂସ୍କରଣ, ମେମୋରି ବ୍ୟବହାର, ଡାଟା ଡିରେକ୍ଟୋରୀ     |
-| **ପ୍ରଦାତା ସ୍ୱାସ୍ଥ୍ୟ**   | ଗ୍ଲୋବାଲ୍ ପ୍ରଦାତା ସର୍କିଟ୍ ବ୍ରେକର୍ର ରନ୍ଟାଇମ୍ ସ୍ଥିତି      |
-| **ରେଟ୍ ସୀମା**           | ଅବଶିଷ୍ଟ ସମୟ ସହିତ ପ୍ରତି ଆକାଉଣ୍ଟର ସକ୍ରିୟ ସଂଯୋଗ କୁଲ୍ଡାଉନ୍ |
-| **ସକ୍ରିୟ ଲକ୍ଆଉଟ୍**      | ସକ୍ରିୟ ମଡେଲ୍-ସ୍କୋପ୍ଡ ଲକ୍ଆଉଟ୍ ଏବଂ ଅସ୍ଥାୟୀ ବହିଷ୍କରଣ      |
-| **ସିଗ୍ନେଚର୍ କ୍ୟାଶ୍**    | ଡିଡୁପ୍ଲିକେସନ୍ କ୍ୟାଶ୍ ପରିସଂଖ୍ୟାନ (ସକ୍ରିୟ କୀ, ହିଟ୍ ରେଟ୍) |
-| **ଲେଟେନ୍ସି ଟେଲିମେଟ୍ରି** | ପ୍ରତି ପ୍ରଦାତା ପାଇଁ p50/p95/p99 ଲେଟେନ୍ସି ସମୁଚ୍ଚୟ        |
+| କାର୍ଡ                    | ଏହା କ’ଣ ଦେଖାଏ \|                                        |
+| ------------------------ | ------------------------------------------------------- |
+| **ସିଷ୍ଟମ୍ ସ୍ଥିତି**       | ଅପଟାଇମ୍, ସଂସ୍କରଣ, ମେମୋରୀ ବ୍ୟବହାର, ଡାଟା ଡିରେକ୍ଟୋରୀ \|    |
+| **ପ୍ରଦାନକାରୀ ସ୍ୱାସ୍ଥ୍ୟ** | ଗ୍ଲୋବାଲ୍ ପ୍ରଦାନକାରୀ ସର୍କିଟ ବ୍ରେକର ଚାଲିବା ସମୟ ଅବସ୍ଥା \|  |
+| **ମୂଲ୍ୟ ସୀମା**           | ଅବଶିଷ୍ଟ ସମୟ ସହିତ ଆକାଉଣ୍ଟ ପ୍ରତି ସକ୍ରିୟ ସଂଯୋଗ କୁଲଡାଉନ୍ \| |
+| **ସକ୍ରିୟ ଲକଆଉଟ୍ \|**     | ସକ୍ରିୟ ମଡେଲ-ସ୍କୋପଡ୍ ଲକଆଉଟ୍ ଏବଂ ଅସ୍ଥାୟୀ ବହିଷ୍କାର \|      |
+| **ଦସ୍ତଖତ କ୍ୟାଚ୍**        | ନକଲ କ୍ୟାଶ ପରିସଂଖ୍ୟାନ (ସକ୍ରିୟ କି, ହିଟ୍ ହାର)              |
+| **ବିଳମ୍ବ ଟେଲିମେଟ୍ରି \|** | ପ୍ରତି ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁp50/p95/p99 ବିଳମ୍ବତା ଏକୀକରଣ \|  |
 
-**ବିଶେଷଜ୍ଞ ପରାମର୍ଶ:** Health ପୃଷ୍ଠା ପ୍ରତି 10 ସେକେଣ୍ଡରେ ସ୍ୱୟଂଚାଳିତ ଭାବେ ରିଫ୍ରେଶ୍ ହୁଏ। କେଉଁ ପ୍ରଦାତାମାନେ ସମସ୍ୟାର ସମ୍ମୁଖୀନ ହେଉଛନ୍ତି ଚିହ୍ନଟ କରିବାକୁ ସର୍କିଟ୍ ବ୍ରେକର୍ କାର୍ଡ ବ୍ୟବହାର କରନ୍ତୁ।
+**ପ୍ରୋ ଟିପ୍:** ସ୍ page ାସ୍ଥ୍ୟ ପୃଷ୍ଠା ପ୍ରତି 10 ସେକେଣ୍ଡରେ ସ୍ auto ତ - ସତେଜ ହୁଏ \| କେଉଁ ପ୍ରଦାନକାରୀମାନେ ସମସ୍ୟା ଭୋଗୁଛନ୍ତି ତାହା ଚିହ୍ନଟ କରିବାକୁ ସର୍କିଟ ବ୍ରେକର କାର୍ଡ ବ୍ୟବହାର କରନ୍ତୁ \|
 
 ---
 

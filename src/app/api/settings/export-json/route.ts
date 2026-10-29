@@ -4,8 +4,13 @@ import { getProviderConnections } from "@/lib/db/providers";
 import { getCachedProviderNodes } from "@/lib/db/readCache";
 import { getCombos } from "@/lib/db/combos";
 import { getApiKeys } from "@/lib/db/apiKeys";
-import { isAuthRequired, isAuthenticated } from "@/shared/utils/apiAuth";
+import { listAllApiKeyBillingHistory, listTeams } from "@/lib/db/teams";
 import {
+  CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
+  requireOperatorCredential,
+} from "@/lib/api/operatorCredential";
+import {
+  getAllDailyTeamUsageSummary,
   getAllUsageHistory,
   getAllDomainCostHistory,
   getAllDomainBudgets,
@@ -47,11 +52,12 @@ export function filterPaidComboSteps<T extends { models?: unknown }>(combos: T[]
  * Exports a legacy OmniRoute-compatible JSON backup.
  */
 export async function GET(request: Request) {
-  if (await isAuthRequired(request)) {
-    if (!(await isAuthenticated(request))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  // Hands out every stored credential: operator only (dashboard session, local CLI, or login
+  // disabled). API keys of any scope and `oma_` access tokens get 403.
+  const operatorVerdict = await requireOperatorCredential(request, {
+    forbiddenMessage: CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
+  });
+  if (operatorVerdict.ok === false) return operatorVerdict.response;
 
   try {
     const url = new URL(request.url);
@@ -84,6 +90,8 @@ export async function GET(request: Request) {
       providerNodes,
       combos,
       apiKeys,
+      teams: listTeams({ includeArchived: true }),
+      apiKeyBillingTeamHistory: listAllApiKeyBillingHistory(),
       // Metadata to identify export version
       _meta: {
         exportedAt: new Date().toISOString(),
@@ -97,6 +105,7 @@ export async function GET(request: Request) {
     // thousands of rows and make the config backup grow to many MBs.
     if (includeHistory) {
       exportData.usageHistory = getAllUsageHistory();
+      exportData.dailyTeamUsageSummary = getAllDailyTeamUsageSummary();
       exportData.domainCostHistory = getAllDomainCostHistory();
       exportData.domainBudgets = getAllDomainBudgets();
     }

@@ -12,6 +12,7 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const resetCredits = await import("../../src/lib/usage/codexResetCredits.ts");
 const codexAccount = await import("../../open-sse/services/codexAccount/index.ts");
+const accountFallback = await import("../../open-sse/services/accountFallback.ts");
 
 const originalFetch = globalThis.fetch;
 type QuotaUsageRecord = Record<string, { used?: unknown } | undefined>;
@@ -37,6 +38,7 @@ async function createCodexConnection(overrides: Record<string, unknown> = {}) {
 
 test.beforeEach(async () => {
   globalThis.fetch = originalFetch;
+  accountFallback.clearAllModelLockouts();
   await resetStorage();
 });
 
@@ -515,4 +517,81 @@ test("#12951 consumeCodexResetCredit incomplete usage refresh keeps nested child
     codexAccount.getCodexChildCooldown(after as never, "gpt-5.3-codex-spark"),
     parked.sparkUntil
   );
+});
+
+const HOUR_MS = 3_600_000;
+
+function lockQuotaScopes(id: string) {
+  accountFallback.lockModel("codex", id, "gpt-5.5", "quota_exhausted", 3 * 24 * HOUR_MS);
+  accountFallback.lockModel("codex", id, "gpt-5.3-codex-spark", "quota_exhausted", HOUR_MS);
+}
+
+test("#4305 consumeCodexResetCredit releases the recovered scope's in-memory model lockout", async () => {
+  const connection = (await createCodexConnection()) as { id: string };
+  const other = (await createCodexConnection()) as { id: string };
+  await persistBothChildCooldowns(connection.id);
+  lockQuotaScopes(connection.id);
+  accountFallback.lockModel("codex", other.id, "gpt-5.5", "quota_exhausted", HOUR_MS);
+  accountFallback.lockModel("codex", connection.id, "gpt-missing", "not_found", HOUR_MS);
+  assert.equal(accountFallback.isModelLocked("codex", connection.id, "gpt-5.5"), true);
+
+  mockResetThenUsage({ consumeBody: { code: "reset" } });
+
+  const result = await resetCredits.consumeCodexResetCredit(connection.id, "redeem-4305");
+  assert.equal(result.outcome, "reset");
+
+  // The codex scope recovered upstream → the 429's model lockout no longer parks the account.
+  assert.equal(accountFallback.isModelLocked("codex", connection.id, "gpt-5.5"), false);
+  // Spark's DB cooldown is still active (no spark windows observed) → its lockout stays.
+  assert.equal(accountFallback.isModelLocked("codex", connection.id, "gpt-5.3-codex-spark"), true);
+  // A missing-model lockout is not a quota state a reset credit can fix.
+  assert.equal(accountFallback.isModelLocked("codex", connection.id, "gpt-missing"), true);
+  // Other accounts are untouched.
+  assert.equal(accountFallback.isModelLocked("codex", other.id, "gpt-5.5"), true);
+});
+
+test("#4305 consumeCodexResetCredit keeps model lockouts while refreshed usage is still exhausted", async () => {
+  const connection = (await createCodexConnection()) as { id: string };
+  await persistBothChildCooldowns(connection.id);
+  lockQuotaScopes(connection.id);
+
+  mockResetThenUsage({
+    consumeBody: { code: "alreadyRedeemed" },
+    usageBody: {
+      plan_type: "plus",
+      rate_limit: {
+        primary_window: { used_percent: 100 },
+        secondary_window: { used_percent: 100 },
+      },
+    },
+  });
+
+  await resetCredits.consumeCodexResetCredit(connection.id, "redeem-4305-exhausted");
+  assert.equal(accountFallback.isModelLocked("codex", connection.id, "gpt-5.5"), true);
+  assert.equal(accountFallback.isModelLocked("codex", connection.id, "gpt-5.3-codex-spark"), true);
+});
+
+test("#4305 a failed redemption leaves model lockouts untouched", async () => {
+  const connection = (await createCodexConnection()) as { id: string };
+  await persistBothChildCooldowns(connection.id);
+  lockQuotaScopes(connection.id);
+
+  mockResetThenUsage({ consumeBody: { code: "noCredit" }, consumeStatus: 409 });
+
+  await assert.rejects(() =>
+    resetCredits.consumeCodexResetCredit(connection.id, "redeem-4305-fail")
+  );
+  assert.equal(accountFallback.isModelLocked("codex", connection.id, "gpt-5.5"), true);
+});
+
+test("#4305 a terminal (banned) account keeps its state after a redemption", async () => {
+  const connection = (await createCodexConnection({ testStatus: "banned" })) as { id: string };
+  await persistBothChildCooldowns(connection.id);
+  lockQuotaScopes(connection.id);
+
+  mockResetThenUsage({ consumeBody: { code: "reset" } });
+
+  await resetCredits.consumeCodexResetCredit(connection.id, "redeem-4305-banned");
+  assert.equal(accountFallback.isModelLocked("codex", connection.id, "gpt-5.5"), true);
+  assert.equal((await readConnection(connection.id)).testStatus, "banned");
 });

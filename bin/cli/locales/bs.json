@@ -123,7 +123,9 @@
       "maxCostOpt": "Maksimalni trošak po danu (USD)",
       "allowedModelsOpt": "Lista dozvoljenih modela odvojena zarezima",
       "nothingToSet": "Nisu navedena polja polise. Koristite --rate-limit, --max-cost ili --allowed-models.",
-      "updated": "Polisa je ažurirana."
+      "updated": "Polisa je ažurirana.",
+      "modelAccessModeOpt": "Način pristupa modelima (all | restricted)",
+      "unrestrictedOpt": "Dozvoli sve modele (--model-access-mode all)"
     },
     "expiration": {
       "title": "Istek ključa",
@@ -254,6 +256,7 @@
     "log": "Prikaži serverske logove inline",
     "no_recovery": "Onemogući automatsko ponovno pokretanje pri padu (režim otklanjanja grešaka)",
     "max_restarts": "Maksimalni broj ponovnih pokretanja nakon pada u roku od 30s prije odustajanja (podrazumijevano: 2)",
+    "headless": "Pokreni samo proxy pogon: kontrolna tabla onemogućena (404), opcionalni podsistemi preskočeni (postavlja OMNIROUTE_HEADLESS=1)",
     "tray": "Pokreni u sistemskom tray-u (samo desktop, opciono)",
     "no_tray": "Onemogući ikonu u sistemskom tray-u",
     "ready_timeout": "Vrijeme isteka readiness probe u ms (također OMNIROUTE_READY_TIMEOUT_MS, zadano 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Sinkronizuj konfiguraciju između OmniRoute instanci",
     "push": {
-      "description": "Pošalji konfiguraciju u cloud ili na udaljenu instancu",
-      "target": "Cilj (cloud ili context:name)",
-      "bundle": "Grupiši dijelove za sinhronizaciju",
-      "dryRun": "Pregled bez primjene"
+      "description": "Pošalji konfiguraciju u cloud ili na udaljenu instancu"
     },
     "pull": {
-      "description": "Povuci konfiguraciju iz oblaka ili udaljeno",
-      "source": "Izvor (cloud ili context:name)",
-      "merge": "Spoji sa postojećom konfiguracijom",
-      "replace": "Zamijeni postojeću konfiguraciju",
-      "dryRun": "Pregled bez primjene"
-    },
-    "diff": {
-      "source": "Izvorni kontekst",
-      "target": "Ciljni kontekst"
+      "description": "Povuci konfiguraciju iz oblaka ili udaljeno"
     },
     "bundle": {
       "description": "Izvezi konfiguraciju kao bundle datoteku",
-      "include": "Dijelovi koje treba uključiti (odvojeno zarezom)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Uvezi datoteku paketa",
       "dryRun": "Validiraj bez primjene"
-    },
-    "initialize": {
-      "fromCloud": "Inicijalizuj iz rezervne kopije u oblaku"
     },
     "tokens": {
       "description": "Upravljaj tokenima za sinhronizaciju",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Preskoči potvrdu"
       }
-    },
-    "resolve": {
-      "description": "Interaktivno riješite konflikte sinhronizacije"
     }
   },
   "config": {

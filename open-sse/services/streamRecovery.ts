@@ -34,6 +34,20 @@ function isToolcallOrderFixEnabled(): boolean {
   }
 }
 
+export const EMPTY_STREAM_SIBLING_RECOVERY_FLAG = "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED";
+
+/**
+ * #16438 opt-in: Claude/Codex empty-stream content probe plus a bounded retry on a
+ * sibling connection. Fail-closed: any resolution failure keeps the release behavior.
+ */
+export function isEmptyStreamSiblingRecoveryEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled(EMPTY_STREAM_SIBLING_RECOVERY_FLAG);
+  } catch {
+    return false;
+  }
+}
+
 /** Raised internally when an upstream stream ends without a terminal SSE marker. */
 export class TruncatedStreamError extends Error {
   constructor(message = "Provider stream ended without a terminal marker") {
@@ -737,6 +751,46 @@ export function createRecoverableStream(
     (emittedText.length > 0 ? !emittedTerminal : hallucinatedEmptyStop()) &&
     !toolCallBlocksContinuation();
 
+  // Whether the unscanned tail carries a terminal marker, delivered content, or a
+  // tool-call signal. emit() forwards every chunk before scanning only the prefix
+  // closed by "\n\n", so anything left in the tail already reached the client: text
+  // or reasoning there is rendered content, not "nothing". A truncated tool-call
+  // line never parses (chat or Responses vocabulary), so substring-search it too.
+  // The tail is whatever emit() held back after the last "\n\n" boundary. On a cut after pure
+  const tailCarriesTerminalOrToolCall = (): boolean => {
+    if (emittedTail.length === 0) return false;
+    const scan = scanOpenAiSseText(emittedTail);
+    if (scan.terminal || scan.sawToolCall) return true;
+    if (scan.text.length > 0 || scan.reasoningText.length > 0) return true;
+    const padded = emittedTail.endsWith("\n") ? emittedTail : `${emittedTail}\n`;
+    const bytes = encoder.encode(padded);
+    if (hasTerminalMarker(bytes)) return true;
+    return (
+      padded.includes("tool_calls") ||
+      padded.includes("function_call") ||
+      padded.includes("function_call_arguments")
+    );
+  };
+
+  // A cut after engagement that rendered nothing usable is safe to re-send: no side
+  // effect was shown (no text, no reasoning, no tool call) and the continuation body
+  // on an empty prefill replays the turns unchanged (see makeContinuationBody). Kept
+  // disjoint from canContinue(): this covers exactly the empty-prefix case it refuses.
+  // Never on a nominal end (cut=false would replay a finished turn), and only once
+  // (continuations===0) so a silent resend cannot burn the whole budget on repeats.
+  const canResendUnrendered = (cut: boolean): boolean =>
+    cut &&
+    continuations === 0 &&
+    continueEnabled &&
+    (emittedParsedOpenAi || emittedParsedResponses) &&
+    emittedText.length === 0 &&
+    emittedReasoningText.length === 0 &&
+    !emittedSawToolCall &&
+    !emittedToolCallFinish &&
+    !emittedTerminal &&
+    !tailCarriesTerminalOrToolCall() &&
+    !toolCallBlocksContinuation();
+
   // Report why a cut is not continued. Silent for non-OpenAI bodies (continuation never
   // applies to them) so the hook stays quiet on every Claude/Gemini-format stream end.
   const reportRefusal = () => {
@@ -787,13 +841,16 @@ export function createRecoverableStream(
     controller: ReadableStreamDefaultController<Uint8Array>,
     cut = true
   ): Promise<boolean> => {
+    const report = (event: ContinuationOutcome) => options.onContinueOutcome?.(event);
     if (!canContinue()) {
+      if (canResendUnrendered(cut)) {
+        return resendUnrendered(controller, report);
+      }
       if (cut) reportRefusal();
       return false;
     }
     continuations += 1;
     options.onContinue?.(continuations, emittedText);
-    const report = (event: ContinuationOutcome) => options.onContinueOutcome?.(event);
 
     let contStream: ReadableStream<Uint8Array> | null = null;
     try {
@@ -808,7 +865,16 @@ export function createRecoverableStream(
 
     // Drain the continuation fully (recovery favors correctness over token-by-token
     // streaming of the recovered tail), then emit only the de-duplicated suffix.
-    const contReader = contStream.getReader();
+    const raw = await drainContinuation(contStream);
+
+    const scan = scanOpenAiSseText(raw);
+    return finishContinuation(controller, scan, report);
+  };
+
+  // Drain a continuation stream fully; a mid-drain truncation ends the drain, and the
+  // caller decides what the partial bytes mean. Shared by the resend and normal paths.
+  const drainContinuation = async (stream: ReadableStream<Uint8Array>): Promise<string> => {
+    const contReader = stream.getReader();
     const contDecoder = new TextDecoder();
     let raw = "";
     for (;;) {
@@ -821,8 +887,47 @@ export function createRecoverableStream(
       if (r.done) break;
       if (r.value) raw += contDecoder.decode(r.value, { stream: true });
     }
+    return raw;
+  };
 
+  // Re-send the turns unchanged after a cut that rendered nothing usable. Any failure
+  // (no stream, empty drain, terminal-only drain) reports the existing `no-stream`
+  // outcome and returns false so the caller surfaces the ORIGINAL cut — never a clean
+  // terminal (an empty turn closed cleanly would read as success) and never a retry
+  // (the single-attempt guard is already spent). A drain carrying text joins the normal
+  // stitch below (de-duplication is a no-op on an empty prefix).
+  const resendUnrendered = async (
+    controller: ReadableStreamDefaultController<Uint8Array>,
+    report: (event: ContinuationOutcome) => void
+  ): Promise<boolean> => {
+    continuations += 1;
+    options.onContinue?.(continuations, "");
+    let contStream: ReadableStream<Uint8Array> | null = null;
+    try {
+      contStream = await options.continueStream!("");
+    } catch {
+      contStream = null;
+    }
+    if (!contStream) {
+      report({ attempt: continuations, outcome: "no-stream" });
+      return false;
+    }
+    const raw = await drainContinuation(contStream);
     const scan = scanOpenAiSseText(raw);
+    if (scan.text.length === 0) {
+      report({ attempt: continuations, outcome: "no-stream" });
+      return false;
+    }
+    return finishContinuation(controller, scan, report);
+  };
+
+  // Stitch a drained continuation into the client stream. Shared by the resend success
+  // path and the normal continuation path.
+  const finishContinuation = async (
+    controller: ReadableStreamDefaultController<Uint8Array>,
+    scan: OpenAiSseScan,
+    report: (event: ContinuationOutcome) => void
+  ): Promise<boolean> => {
     // A continuation whose overlap with what was already emitted falls below the documented
     // threshold is treated as a suspected restart rather than a real resume — see
     // STREAM_RECOVERY.MIN_CONTINUATION_OVERLAP_CHARS for the full trade-off rationale. This
@@ -920,6 +1025,21 @@ export function createRecoverableStream(
         const { done, value } = result;
         if (done) {
           if (holdback.committed) {
+            // Graceful end after commit: the tail below the last "\n\n" boundary was
+            // never scanned, so fold it through the shared parser before judging —
+            // the end of the stream is the last implicit emit.
+            const tail = emittedTail + trackDecoder.decode();
+            emittedTail = "";
+            const tailScan = scanOpenAiSseText(tail);
+            emittedText += tailScan.text;
+            emittedReasoningText += tailScan.reasoningText;
+            if (tailScan.finishReason !== null) emittedFinishReason = tailScan.finishReason;
+            if (tailScan.terminal) emittedTerminal = true;
+            if (tailScan.sawToolCallInFlight) emittedToolCallInFlight = true;
+            if (tailScan.sawToolCall) emittedSawToolCall = true;
+            if (tailScan.finishReason === "tool_calls") emittedToolCallFinish = true;
+            if (tailScan.parsedOpenAi) emittedParsedOpenAi = true;
+            if (tailScan.parsedResponses) emittedParsedResponses = true;
             // Graceful end after commit: try a mid-stream continuation whenever canContinue()
             // says the stream is worth continuing (silent truncation, or a clean-but-empty
             // reasoning-only stop) — canContinue() is the single source of truth here, same as

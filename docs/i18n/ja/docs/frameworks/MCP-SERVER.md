@@ -66,6 +66,16 @@ curl -i \
 
 `manage`を持たないキー（またはBearerなし）は`403 LOCAL_ONLY`を返します。同階層のプレフィックス`/api/cli-tools/runtime/*`は、意図的にバイパスできないようになっています。詳しくは[ルートガード階層 — manageスコープの例外](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)を参照してください。
 
+### Origin の検証
+
+認証後、`/api/mcp/*` へのすべてのリクエスト（トランスポートと `status`, `tools`, `audit`, `restart` などの管理ルート）は、呼び出し元（API キー、CLI トークン、ダッシュボードセッション、ログイン無効時の匿名ループバック）に関係なく `Origin` ヘッダーが検証されます。これは MCP Streamable HTTP 仕様が求める DNS リバインディング対策です。
+
+- **`Origin` ヘッダーなし** → 許可。OmniRoute CLI、SDK、IDE クライアントはこのヘッダーを送信しません。
+- **許可される `Origin`** → 任意のポートの `localhost` / `127.0.0.1` / `[::1]`、または OmniRoute 自身の公開 origin：`OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`、信頼済みリバースプロキシが転送した origin（`OMNIROUTE_TRUST_PROXY`、base URL が未設定の場合のみ）、またはループバック／LAN IP ホストへの直接アクセス。`Host` ヘッダーだけで origin が信頼されることはありません。
+- **それ以外の `Origin`（`null` を含む）** → `403`。本文は JSON-RPC エラー：`id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`。有効な CSRF トークンを提示したダッシュボードセッションは、他のダッシュボード書き込みと同様に引き続き許可されます。
+
+リバースプロキシの背後で配信されるブラウザ MCP クライアントには `OMNIROUTE_PUBLIC_BASE_URL` の設定が必要です。その他の origin 用の許可リストはありません。CORS プリフライト（`OPTIONS`）は Origin を検証しませんが、続く実際のリクエストは検証されます。
+
 ## IDE の設定
 
 Claude Desktop、Cursor、Cline、および互換性のある MCP クライアントのセットアップについては、[MCP クライアントの設定](../guides/SETUP_GUIDE.md#mcp-client-configuration)を参照してください。
@@ -279,67 +289,111 @@ SSEとストリーミング可能なHTTPトランスポートはどちらも、�
 
 ## 認証とスコープ
 
-MCP ツールは、呼び出し元からスコープ文字列を読み取ります。このチェックは、3つの独立した名前空間のうちの1つです。あるチェッカーがパスしても、他のチェッカーがパスするとは限りません。ルールは[3つのスコープ名前空間](#three-scope-namespaces)にあります。ツールカタログは[MCPツールスコープ](#mcp-tool-scopes)にあります。
+MCP ツール呼び出しは、呼び出し元からスコープ文字列を読み取ります。このチェックは、互いに独立した 3 つの名前空間のうちの 1 つです。あるチェッカーに合格しても、他のチェッカーに合格したことにはなりません。ルールについては、[3 つのスコープ名前空間](#three-scope-namespaces)を参照してください。
+ツールカタログについては、[MCP ツールスコープ](#mcp-tool-scopes)を参照してください。
 
-### 3つのスコープ名前空間
+### 3 つのスコープ名前空間
 
-APIキーの`manage`、MCPツールの`read:compression`、`oma_live_…`アクセストークンの`read`は、それぞれ異なる許可です。`read`アクセストークンをミューティング管理ルートに送信する呼び出し元は、HTTP 403 `Access token scope 'read' is insufficient; 'write' required.`を受け取ります。このランクは`scopeSatisfies`です。これはMCPテーブルを参照せず、MCPマッチャーもこれを参照しません。
+API キーの `manage`、MCP ツールの `read:compression`、および
+`oma_live_…` アクセストークンの `read` は、3 つの異なる権限です。`read`
+アクセストークンを変更系の管理ルートに送信した呼び出し元には、HTTP 403
+`Access token scope 'read' is insufficient; 'write' required.`
+が返されます。このランク判定は `scopeSatisfies` です。これは MCP テーブルを参照せず、MCP
+マッチャーもこのランク判定を参照しません。
 
-| 名前空間          | 資格情報                                                           | チェッカー       | 許可されるもの                                   |
-| :---------------- | :----------------------------------------------------------------- | :--------------- | :----------------------------------------------- |
-| APIキー管理       | `api_keys.scopes`                                                  | `hasManageScope` | そのBearerキーの管理REST                         |
-| APIキー追加       | 同じ配列、正確な文字列1つ                                          | 下記のヘルパー   | その1つの機能のみ                                |
-| MCPツールスコープ | 同じ配列、それ以外はMCP `_meta`、それ以外は `OMNIROUTE_MCP_SCOPES` | `scopeMatches`   | そのツール（強制が有効な場合）                   |
-| アクセストークン  | `oma_live_…`                                                       | `scopeSatisfies` | そのランクを必要とする管理ルートのメソッドとパス |
+| 名前空間           | 認証情報                                                                          | チェッカー           | 合格すると許可されるもの                               |
+| :----------------- | :-------------------------------------------------------------------------------- | :------------------- | :----------------------------------------------------- |
+| API キー管理       | `api_keys.scopes`                                                                 | `hasManageScope`     | その Bearer キーによる管理 REST                        |
+| API キー追加権限   | 同じ配列内の完全一致する 1 つの文字列                                             | 下記の名前のヘルパー | その 1 つの機能のみ                                    |
+| MCP ツールスコープ | 同じ配列、それがなければ MCP `_meta`、さらにそれもなければ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`       | 強制適用が有効になっている場合の、そのツール           |
+| アクセストークン   | `oma_live_…`                                                                      | `scopeSatisfies`     | メソッドとパスによってそのランクが要求される管理ルート |
 
-各資格情報のミントは、[管理認証](../guides/MANAGEMENT-AUTH.md)で説明されています。
+各認証情報の発行については、
+[管理認証](../guides/MANAGEMENT-AUTH.md)で説明しています。
 
-#### APIキーのスコープ
+#### API キースコープ
 
-1つの`api_keys.scopes`配列が2つのジョブに供給されます。これらは異なる関数を使用します。
+1 つの `api_keys.scopes` 配列が 2 つの役割を担います。それぞれ異なる関数を使用します。
 
-**管理REST。** `manage`と`admin`は`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`)のメンバーです。`hasManageScope`は、そのキーの管理ルートを認証するものです。`admin`は、それらのルートで管理可能です。ここでの`admin`という単語は、アクセストークンのランクではなく、MCPツールスコープに展開されません。
+**管理 REST。** `manage` と `admin` は、
+`MANAGEMENT_API_KEY_SCOPES`（`src/shared/constants/managementScopes.ts`）のメンバーです。
+そのキーに対して管理ルートを認可するのは `hasManageScope` です。`admin` は、
+それらのルートにおける管理権限を持ちます。ここでの `admin` という語は
+アクセストークンのランクではなく、MCP ツールスコープへ展開されることもありません。
 
-**追加文字列。** それぞれが正確なメンバーシップテストであり、それぞれが`MANAGEMENT_API_KEY_SCOPES`の外に留まります。
+**追加文字列。** 各文字列は完全一致によるメンバーシップテストであり、いずれも
+`MANAGEMENT_API_KEY_SCOPES` の対象外です。
 
-| スコープ | 許可されるもの  
-| `mcp:connect` | 非ループバックの`/api/mcp/` LOCAL_ONLYカーブアウトのみ (`hasMcpConnectOrManageScope`)。`manage`または`admin`を持つキーもそのカーブアウトを通過します。 |
-| `self:usage` | このキーの`GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)。`POST /api/keys`は作成時にこのスコープを追加します (`normalizeSelfServiceScopesForCreate`)。 |
-| `self:account-quota` | そのステータスペイロード内のアップストリームアカウントクォータ (`src/lib/usage/apiKeySelfService.ts`)。ステータスルートは引き続き`self:usage`を必要とします。 |
-| `policy:bypass-provider-quota` | このキーの推論呼び出しは、プロバイダー割り当てポリシーをスキップします (`src/sse/handlers/chat.ts`の`hasProviderQuotaBypassScope`)。 |
+| スコープ                       | 合格すると許可されるもの                                                                                                                                                          |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | 非ループバックの `/api/mcp/` に対する LOCAL_ONLY の例外のみ（`hasMcpConnectOrManageScope`）。`manage` または `admin` を持つキーも、この例外条件を満たします。                     |
+| `self:usage`                   | このキーに対する `GET /api/v1/me/status`（`src/app/api/v1/me/status/route.ts`）。`POST /api/keys` は、作成時にこのスコープを追加します（`normalizeSelfServiceScopesForCreate`）。 |
+| `self:account-quota`           | そのステータスペイロード内のアップストリームアカウントクォータ（`src/lib/usage/apiKeySelfService.ts`）。ステータスルートには引き続き `self:usage` が必要です。                    |
+| `policy:bypass-provider-quota` | このキーによる推論呼び出しは、プロバイダークォータポリシーをスキップします（`src/sse/handlers/chat.ts` の `hasProviderQuotaBypassScope`）。                                       |
 
 #### マッチング
 
-カタログは[MCPツールスコープ](#mcp-tool-scopes)の下の表です。`src/shared/constants/mcpScopes.ts`の`MCP_SCOPE_LIST`をそのカタログとして扱わないでください。それは元の型付きサブセットです。後のツールは、その隣にさらにスコープを宣言します (`read:notion`、`read:skills`、`read:local-corpus`、および残りの表)。
+カタログは、[MCP ツールスコープ](#mcp-tool-scopes)配下のテーブルです。
+`src/shared/constants/mcpScopes.ts` の `MCP_SCOPE_LIST` をそのカタログとして扱わないでください。
+これは元の型付きサブセットです。後から追加されたツールは、そのほかのスコープ
+（`read:notion`、`read:skills`、`read:local-corpus`、およびテーブル内の残りのスコープ）を
+その近くで宣言しています。
 
-`open-sse/mcp-server/scopeEnforcement.ts`の`evaluateToolScopes`は、すべての必須スコープが許可されたスコープのいずれかに一致する場合に呼び出しを許可します。
+`open-sse/mcp-server/scopeEnforcement.ts` の `evaluateToolScopes` は、
+必要なすべてのスコープが、付与されたスコープのいずれかに一致する場合に呼び出しを許可します。
 
-- `*`は、すべての必須スコープに一致します。
-- `*`で終わる許可スコープは、アスタリスクの前のプレフィックスで始まる必須スコープに一致します。`read:*`は`read:compression`に一致します。
-- その他の許可スコープは、同一の必須文字列にのみ一致します。
+- `*` は、必要なすべてのスコープに一致します。
+- 末尾が `*` の付与済みスコープは、必要なスコープがアスタリスクより前の
+  プレフィックスで始まる場合に一致します。`read:*` は `read:compression` に一致します。
+- それ以外の付与済みスコープは、必要な文字列と完全に同一である場合にのみ一致します。
 
-スコープが`["manage"]`であるキーは、`read:compression`の`scopeMatches`に失敗します。同じ呼び出しは、`admin`、`mcp:connect`、`read`、`write`が唯一の許可文字列である場合にも失敗します。MCPツールスコープには、末尾の`*`を超える階層はありません。
+スコープが `["manage"]` のキーは、`read:compression` に対する `scopeMatches` に失敗します。
+付与された文字列がそれぞれ単独で `admin`、`mcp:connect`、`read`、または `write` の場合も、
+同じ呼び出しは失敗します。末尾の `*` を除き、MCP ツールスコープ間に階層関係はありません。
 
-強制は`OMNIROUTE_MCP_ENFORCE_SCOPES=true`でない限りオフです（デフォルトは`false`）。オフの場合、`evaluateToolScopes`は呼び出しを許可し、カタログをスキップします。オンの場合、HTTPはBearerキーの`api_keys.scopes`を`authInfo`として使用します（[キーごとのHTTPスコープバインディング](#per-key-http-scope-binding-7895)を参照）。キーのスコープが解決されない場合、許可されたセットはMCP `_meta`、次に`OMNIROUTE_MCP_SCOPES`にフォールスルーします。
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` でない限り、強制適用は無効です（デフォルトは
+`false`）。無効な間、`evaluateToolScopes` は呼び出しを許可し、カタログのチェックを
+スキップします。有効な間、HTTP は Bearer キーの `api_keys.scopes` を
+`authInfo` として使用します（[キーごとの HTTP スコープバインディング](#per-key-http-scope-binding-7895)を参照）。
+キーのスコープを解決できない場合、付与済みセットの参照先は MCP `_meta`、次いで
+`OMNIROUTE_MCP_SCOPES` へとフォールスルーします。
 
-#### アクセストークンのスコープ
+#### アクセストークンスコープ
 
-`oma_live_…`トークン (`src/lib/accessTokens/scopes.ts`)は、`read`、`write`、または`admin`を運びます。`scopeSatisfies`はランクです。`admin`は`write`と`read`をカバーし、`write`は`read`をカバーします。不明なスコープは何もカバーしません。
+`oma_live_…` トークン（`src/lib/accessTokens/scopes.ts`）は、`read`、`write`、
+または `admin` を保持します。`scopeSatisfies` はランク判定です。`admin` は `write` と
+`read` を包含し、`write` は `read` を包含します。未知のスコープは何も包含しません。
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`)は、そのランクを`inferRequiredScope` (`src/server/authz/accessScopes.ts`)と比較します。
+`evaluateAccessTokenAuth`（`src/server/authz/accessTokenAuth.ts`）は、そのランクを
+`inferRequiredScope`（`src/server/authz/accessScopes.ts`）と比較します。
 
-- `GET`、`HEAD`、`OPTIONS`は`read`を必要とします。
-- その他のメソッドは`write`を必要とします。
-- `ADMIN_SCOPE_PREFIXES`内のパスは、すべてのメソッドに対して`admin`を必要とします。`/api/mcp`はこのリストにあるため、`write`アクセストークンはMCP HTTPサーフェスを呼び出すことができません。
-- `ADMIN_MUTATION_PREFIXES`内のパスは、ミューテーションに対してのみ`admin`を必要とします。
+- `GET`、`HEAD`、および `OPTIONS` には `read` が必要です。
+- それ以外のすべてのメソッドには `write` が必要です。
+- `ADMIN_SCOPE_PREFIXES` 内のパスには、すべてのメソッドで `admin` が必要です。`/api/mcp`
+  はそのリストに含まれているため、`write` アクセストークンでも MCP HTTP
+  サーフェスを呼び出すことはできません。
+- `ADMIN_MUTATION_PREFIXES` 内のパスには、変更操作の場合にのみ `admin` が必要です。
+- `ADMIN_MUTATION_EXACT_PATHS` 内のパス（`/api/settings`、
+  `/api/settings/require-login`）には、変更操作の場合、かつその完全一致パスに対してのみ
+  `admin` が必要です。その他の `/api/settings/*` サブルートでは引き続き `write` が適用されます。
 
-`PATCH /api/keys/{id}` はミューテーションであり、それらの管理者リストには含まれていないため、`read` トークンは 403 `Access token scope 'read' is insufficient; 'write' required.` を受け取ります。`write` または `admin` アクセストークンはそのルートを満たします。ダッシュボード JWT、ループバック CLI の machine-id トークン、および `manage` または `admin` を持つ API キーは、他のブランチを通り、このランクによって制限されません。
+`PATCH /api/keys/{id}` は変更操作であり、これらの管理者用リストには含まれていないため、
+`read` トークンには 403
+`Access token scope 'read' is insufficient; 'write' required.`
+が返されます。
+`write` または `admin` のアクセストークンは、このルートの要件を満たします。ダッシュボード JWT、
+ループバック CLI の machine-id トークン、および `manage` または `admin` を持つ API キーは、
+別の分岐を通るため、このランクによる制限を受けません。
 
-`/api/mcp` に対して `scopeSatisfies` を通過するアクセストークンは、管理ゲートをクリアしたにすぎません。ツール呼び出しは、引き続き API キーのスコープに対して `scopeMatches` を実行します。アクセストークンのランクは `scopeMatches` の入力ではありません。
+`/api/mcp` に対して `scopeSatisfies` を通過したアクセストークンは、
+管理ゲートを通過しただけです。ツール呼び出しでは、引き続き API キーの
+スコープに対して `scopeMatches` が実行されます。アクセストークンのランクは、
+`scopeMatches` への入力ではありません。
 
-### MCPツールのスコープ
+### MCP ツールのスコープ
 
-スコープの強制は `open-sse/mcp-server/scopeEnforcement.ts` に一元化されています。各ツールには特定のスコープが必要です。
+スコープの適用は `open-sse/mcp-server/scopeEnforcement.ts` に集約されています。
+各ツールには特定のスコープが必要です：
 
 | スコープ              | ツール                                                                                                                                                                              |
 | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -377,31 +431,65 @@ APIキーの`manage`、MCPツールの`read:compression`、`oma_live_…`アク�
 | `write:obsidian`      | 9個の書き込みツール — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                   |
 
-ワイルドカードスコープがサポートされています:`read:*`はすべての読み取りスコープを付与し、`*`は完全なアクセスを付与します。
+ワイルドカードスコープがサポートされています。`read:*` はすべての読み取りスコープを付与し、`*` は完全なアクセス権を付与します。
 
-### `mcp:connect` — ルート機能の絞り込み (#7895)
+### `mcp:connect` — 限定的なルート権限（#7895）
 
-非ループバックからHTTP/SSE MCPトランスポート（`/api/mcp/*`）に到達するには、`/api/mcp/` LOCAL_ONLYの特別許可（`docs/security/ROUTE_GUARD_TIERS.md`を参照）が必要です。これまで、この特別許可は完全な`manage`/`admin`スコープのAPIキーのみを受け入れていましたが、これはMCPとの通信のみを必要とする呼び出し元にとっては広すぎました。`src/shared/constants/managementScopes.ts`は現在`MCP_CONNECT_SCOPE = "mcp:connect"`をエクスポートしています。これは、`SELF_USAGE_SCOPE`と同じ前例を持つ、追加的で狭いスコープであり、`src/server/authz/policies/management.ts`における`/api/mcp/`バイパスのみを承認します。他の管理ルートアクセスは一切付与せず、意図的に`MANAGEMENT_API_KEY_SCOPES`から除外されています。`manage`/`admin`を持つキーは引き続き特別許可をそのまま通過します。`mcp:connect`は、リモートのMCP専用呼び出し元向けの低権限の代替手段であり、`hasMcpConnectOrManageScope()`を介してチェックされます。
+非ループバックからHTTP/SSE MCPトランスポート（`/api/mcp/*`）にアクセスするには、
+`/api/mcp/` のLOCAL_ONLY適用除外が必要です（`docs/security/ROUTE_GUARD_TIERS.md`を参照）。従来、
+この適用除外では完全な`manage`/`admin`スコープのAPIキーのみが受け入れられていましたが、これは
+MCPとの通信だけを必要とする呼び出し元には広すぎる権限でした。`src/shared/constants/managementScopes.ts`は現在、
+`MCP_CONNECT_SCOPE = "mcp:connect"`をエクスポートしています。これは（`SELF_USAGE_SCOPE`と同じ前例に基づく）
+追加的かつ限定的なスコープであり、`src/server/authz/policies/management.ts`内の
+`/api/mcp/`バイパスのみを許可します。他の管理ルートへのアクセス権は付与せず、
+意図的に`MANAGEMENT_API_KEY_SCOPES`の対象外とされています。`manage`/`admin`を保持するキーは
+引き続き変更なく適用除外を通過します。`mcp:connect`はリモートのMCP専用呼び出し元向けの、
+より権限の低い代替手段であり、`hasMcpConnectOrManageScope()`によってチェックされます。
 
-### キーごとのHTTPスコープバインディング (#7895)
+### キーごとのHTTPスコープバインディング（#7895）
 
-HTTP/SSEでは、`open-sse/mcp-server/httpTransport.ts`が`resolveMcpCallerAuthInfo()`（`open-sse/mcp-server/httpAuthContext.ts`）を介して呼び出し元の実際の`api_keys.scopes`を解決し、MCP SDKの`transport.handleRequest(req, { authInfo })`に渡すようになりました。これにより、各ツール呼び出しに到達する`extra.authInfo.scopes`は、Bearerキー自身のスコープを反映します。`scopeEnforcement.ts`の`resolveCallerScopeContext()`は、すでに`_meta`および`OMNIROUTE_MCP_SCOPES`環境フォールバックよりも`authInfo`を優先していました。今回の変更は、これまでHTTP経由で供給されていなかった、その最初の最高優先度のソースにデータを投入するだけです。APIキーが解決されない場合（ヘッダーなし、無効なキー）、`authInfo`は`undefined`のままであり、解決は既存の`meta`/環境チェーンにそのままフォールバックします。これは`OMNIROUTE_MCP_ENFORCE_SCOPES`のデフォルトを反転させるものではありません。強制は依然として明示的に有効にする必要があります。この変更は、有効になった場合にキーごとのパスが優先されるようにするだけです。stdioには呼び出し元ごとのIDがないため（`mcpCallerIdentity.ts`を参照）、影響を受けません。これは`_meta`/環境フォールバックチェーンにとどまります。
+HTTP/SSEでは、`open-sse/mcp-server/httpTransport.ts`が
+`resolveMcpCallerAuthInfo()`（`open-sse/mcp-server/httpAuthContext.ts`）を介して呼び出し元の実際の
+`api_keys.scopes`を解決し、それをMCP SDKの`transport.handleRequest(req, { authInfo })`に渡すようになりました。
+これにより、各ツール呼び出しに到達する`extra.authInfo.scopes`にはBearerキー自身のスコープが反映されます。
+`scopeEnforcement.ts`の`resolveCallerScopeContext()`は、すでに`_meta`および
+`OMNIROUTE_MCP_SCOPES`環境変数のフォールバックよりも`authInfo`を優先していました。この変更は、
+これまでHTTP経由では値が供給されていなかった最初の最優先ソースに値を設定するだけです。APIキーを解決できない場合
+（ヘッダーなし、無効なキー）、`authInfo`は`undefined`のままとなり、解決処理は変更なく既存の
+`meta`/環境変数チェーンへフォールスルーします。stdioには呼び出し元ごとのIDがないため
+（`mcpCallerIdentity.ts`を参照）、影響を受けません。引き続き`_meta`/環境変数のフォールバックチェーンを使用します。
+
+**限定スコープを持つHTTP/SSE呼び出し元に対しては、
+`OMNIROUTE_MCP_ENFORCE_SCOPES`に関係なく強制が有効になります。** `OMNIROUTE_MCP_ENFORCE_SCOPES`のデフォルト値が`false`でも
+安全なのは、スコープの照合対象となる呼び出し元ごとのIDが存在しない、ローカル/stdioの単一オペレーターフローのみです。
+`open-sse/mcp-server/server.ts::withScopeEnforcement()`は、`resolveCallerScopeContext()`が
+`source === "authInfo"`を解決した場合（つまり、キーごとの実際のHTTP Authorizationヘッダーであり、HTTP/SSEのみ）
+かつそのキーが完全な`manage`/`admin`スコープを保持していない場合、ツールごとのスコープ強制を
+無条件で有効にします（`scopeEnforcement.ts`の`shouldForceScopeEnforcement()`）。
+これにより、上記で`/api/mcp/`のLOCAL_ONLY適用除外のみを許可し、それ以外は何も許可しないと説明されている
+限定的な`mcp:connect`バイパススコープ「のみ」を保持するキーが、オペレーターによって
+リモート/非ループバックMCPアクセスが有効化された後、`OMNIROUTE_MCP_ENFORCE_SCOPES`のデフォルト値が
+`false`であるという理由だけで、すべてのMCPツールを呼び出せてしまうという抜け穴を塞ぎます。
+HTTP経由の完全な`manage`/`admin`キー、およびすべてのstdio/ローカル呼び出し元については、
+既存の`OMNIROUTE_MCP_ENFORCE_SCOPES`で制御される動作が変更なく維持されます。
+
+---
 
 ## 環境変数
 
-| 変数                                    | デフォルト                     | 用途                                                                                                                     |
-| :-------------------------------------- | :----------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`       | MCP サーバーが OmniRoute の内部 API を呼び出す際に使用するベース URL                                                     |
-| `OMNIROUTE_API_KEY`                     | （空）                         | 内部 API 呼び出しに `Authorization: Bearer` として転送される API キー                                                    |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false`（`"true"` のみ有効化） | 有効にすると、必要なスコープがない場合はツール呼び出しを拒否し、監査ログに `scope_denied:<reason>` を記録                |
-| `OMNIROUTE_MCP_SCOPES`                  | （空）                         | デフォルトで「利用可能」とみなされるスコープのカンマ区切り許可リスト（呼び出し元が独自のスコープを指定しない場合に使用） |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | （未設定 = オン）              | `0/false/off/no` に設定すると、登録時の MCP 説明圧縮を無効化                                                             |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | （未設定 = オン）              | 上記と同じ切り替え機能の代替エイリアス                                                                                   |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                        | 内部管理情報の読み取り（ヘルス、レジリエンス、コンボ、クォータ、使用量）を中断するまでの時間                             |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                        | プロバイダーからの応答を待つホップ（`route_request`、`web_search`、`web_fetch`）を中断するまでの時間                     |
-| `MCP_TOOL_DENY`                         | （未設定 = フィルターなし）    | `tools/list` から除外するツール名のカンマ区切りリスト（ツール数の削減 — 下記参照）                                       |
-| `MCP_TOOL_ALLOW`                        | （未設定 = フィルターなし）    | 排他的に保持するツール名のカンマ区切りリスト（許可リストモード — 下記参照）                                              |
-| `DATA_DIR`                              | `~/.omniroute`                 | ハートビートファイルは `${DATA_DIR}/runtime/mcp-heartbeat.json` に書き込まれる                                           |
+| 変数                                    | デフォルト                         | 用途                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| :-------------------------------------- | :--------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`           | MCP サーバーが OmniRoute の内部 API を呼び出す際に使用するベース URL                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `OMNIROUTE_API_KEY`                     | （空）                             | 内部 API 呼び出しに `Authorization: Bearer` として転送される API キー                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false`（`"true"` の場合のみ有効） | 有効にすると、必要なスコープがない場合はツール呼び出しを拒否し、監査ログに `scope_denied:<reason>` を記録します。また、このフラグに関係なく、キーごとの Authorization ヘッダーから解決された HTTP/SSE 呼び出し元（`source === "authInfo"`）が完全な `manage`/`admin` スコープを持たない場合（たとえば、限定的な `mcp:connect` バイパススコープしか持たないキー）にも、適用が強制されます。そのため、このデフォルト設定が安全なのはローカル/stdio の単一オペレーター構成のみであり、リモートの非ループバックアクセスには決して使用しないでください |
+| `OMNIROUTE_MCP_SCOPES`                  | （空）                             | デフォルトで「利用可能」と見なされるスコープのカンマ区切り許可リスト（呼び出し元が独自のスコープを指定しない場合に使用）                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | （未設定 = オン）                  | `0/false/off/no` に設定すると、登録時の MCP 説明圧縮を無効にします                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | （未設定 = オン）                  | 上記と同じ切り替え設定の代替エイリアス                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                            | 内部管理情報の読み取り（ヘルス、レジリエンス、組み合わせ、クォータ、使用量）に対する中断までの時間                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                            | プロバイダーからの応答を待つホップ（`route_request`、`web_search`、`web_fetch`）に対する中断までの時間                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `MCP_TOOL_DENY`                         | （未設定 = フィルターなし）        | `tools/list` から除外するツール名のカンマ区切りリスト（ツール数の削減 — 以下を参照）                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `MCP_TOOL_ALLOW`                        | （未設定 = フィルターなし）        | 排他的に保持するツール名のカンマ区切りリスト（許可リストモード — 下記参照）                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `DATA_DIR`                              | `~/.omniroute`                     | ハートビートファイルは `${DATA_DIR}/runtime/mcp-heartbeat.json` に書き込まれます                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ---
 

@@ -9,6 +9,7 @@
 
 import { parseEnvBoolean } from "@/shared/utils/envBoolean";
 import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
+import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
 
 // ─── Prompt Injection Patterns ───────────────────────────────────────
 
@@ -299,16 +300,35 @@ function detectInjection(text) {
 }
 
 /**
+ * Built-in rules narrowed to the operator's per-type selection (null = all),
+ * followed by any pre-compiled custom rules.
+ * @param {{ enabledTypes?: ReadonlySet<string> | null, customRules?: Array<{name: string, regex: RegExp, replacement: string}> }} [options]
+ */
+function resolvePiiRules(options) {
+  const enabled = options?.enabledTypes ?? null;
+  const builtins = enabled
+    ? PII_PATTERNS.filter((rule) => enabled.has(PII_REQUEST_TYPE_ALIASES[rule.name] ?? rule.name))
+    : PII_PATTERNS;
+  const custom = (options?.customRules ?? []).map((rule) => ({
+    name: rule.name,
+    pattern: rule.regex,
+    replacement: rule.replacement,
+  }));
+  return custom.length > 0 ? [...builtins, ...custom] : builtins;
+}
+
+/**
  * Scan and optionally redact PII from text.
  * @param {string} text
  * @param {boolean} redact - If true, replaces PII with placeholders
+ * @param {{ enabledTypes?: ReadonlySet<string> | null, customRules?: Array<{name: string, regex: RegExp, replacement: string}> }} [options] - per-type selection and custom rules
  * @returns {{ text: string, detections: Array<{type: string, count: number}> }}
  */
-function processPII(text, redact = false) {
+function processPII(text, redact = false, options = undefined) {
   const detections = [];
   let processed = text;
 
-  for (const rule of PII_PATTERNS) {
+  for (const rule of resolvePiiRules(options)) {
     const matches = text.match(rule.pattern);
     if (matches && matches.length > 0) {
       detections.push({ type: rule.name, count: matches.length });

@@ -15,9 +15,9 @@ a krokom zosúladenia.
 
 ## Nastavenie vývojového prostredia
 
-### Predpoklady
+### Požiadavky
 
-- **Node.js** `>=22.22.3 <23` alebo `>=24.0.0 <27` (odporúčané: 24 LTS)
+- **Node.js** `>=22.22.2 <23` alebo `>=24.0.0 <27` (odporúčané: 24 LTS)
 - **npm** 10+
 
 > **Používatelia npm v11+ (Node 24+):** Po spustení `npm install` overte, či boli nainštalované natívne moduly:
@@ -48,24 +48,24 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Kľúčové premenné pre vývoj:
 
-| Premenná               | Predvolená hodnota pre vývoj | Popis                          |
-| ---------------------- | ---------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                      | Port servera                   |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Základná URL pre frontend      |
-| `JWT_SECRET`           | (vygenerujte vyššie)         | Tajný kľúč na podpisovanie JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`                   | Heslo na prvé prihlásenie      |
-| `APP_LOG_LEVEL`        | `info`                       | Úroveň podrobnosti protokolov  |
+| Premenná               | Predvolená hodnota pre vývoj | Popis                             |
+| ---------------------- | ---------------------------- | --------------------------------- |
+| `PORT`                 | `20128`                      | Port servera                      |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Základná URL adresa frontendu     |
+| `JWT_SECRET`           | (vygenerujte vyššie)         | Tajný kľúč na podpisovanie JWT    |
+| `INITIAL_PASSWORD`     | `CHANGEME`                   | Heslo na prvé prihlásenie         |
+| `APP_LOG_LEVEL`        | `info`                       | Úroveň podrobnosti protokolovania |
 
 ### Nastavenia ovládacieho panela
 
-Ovládací panel poskytuje prepínače používateľského rozhrania pre funkcie, ktoré možno konfigurovať aj prostredníctvom premenných prostredia:
+Ovládací panel poskytuje prepínače používateľského rozhrania pre funkcie, ktoré možno nakonfigurovať aj pomocou premenných prostredia:
 
-| Umiestnenie nastavenia | Prepínač                   | Popis                                         |
-| ---------------------- | -------------------------- | --------------------------------------------- |
-| Nastavenia → Rozšírené | Režim ladenia              | Povolenie protokolov požiadaviek ladenia (UI) |
-| Nastavenia → Všeobecné | Viditeľnosť bočného panela | Zobrazenie/skrytie sekcií bočného panela      |
+| Umiestnenie nastavenia | Prepínač                   | Popis                                           |
+| ---------------------- | -------------------------- | ----------------------------------------------- |
+| Nastavenia → Pokročilé | Režim ladenia              | Zapnutie protokolov požiadaviek na ladenie (UI) |
+| Nastavenia → Všeobecné | Viditeľnosť bočného panela | Zobrazenie/skrytie sekcií bočného panela        |
 
-Tieto nastavenia sa ukladajú do databázy a pretrvávajú medzi reštartmi. Ak sú nastavené, prepíšu predvolené hodnoty premenných prostredia.
+Tieto nastavenia sú uložené v databáze a zachovávajú sa aj po reštartovaní. Ak sú nastavené, majú prednosť pred predvolenými hodnotami premenných prostredia.
 
 ### Lokálne spustenie
 
@@ -80,20 +80,20 @@ npm run start
 # Rýchla kompilácia iba backendu/API pre zmeny prispievateľov
 npm run build:contributor
 
-# Vydávacie zostavenie (čisté opätovné zostavenie + sentinel HEAD — vyžaduje sa na nasadenie)
-npm run build:release   # rm -rf .build dist && zostavenie + zápis dist/BUILD_SHA
+# Vydávacie zostavenie (čisté opätovné zostavenie + kontrolný súbor HEAD — vyžaduje sa na nasadenie)
+npm run build:release   # rm -rf .build dist && zostavenie + zapísanie dist/BUILD_SHA
 
 # Bežná konfigurácia portu
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Zostavenie pre prispievateľov vykonáva iba validačnú kompiláciu: nezostavuje samostatnú
-distribúciu ani voliteľné natívne baliace prostriedky. Keď potrebujete overiť balík určený
-na distribúciu, použite bežné produkčné zostavenie.
+Zostavenie pre prispievateľov vykonáva iba overenie kompilácie: nevytvára samostatnú
+distribúciu ani voliteľné natívne balíčkové prostriedky. Keď potrebujete overiť
+distribuovateľný balík, použite bežné produkčné zostavenie.
 
 ### Rozloženie výstupu zostavenia
 
-| Adresár   | Obsah                                                                              | Sledované |
+| Adresár   | Obsah                                                                              | Sledovaný |
 | --------- | ---------------------------------------------------------------------------------- | --------- |
 | `src/`    | Zdrojový kód aplikácie (TypeScript / TSX)                                          | Áno       |
 | `.build/` | Medzivýstupy — výstup `next build` (ignorovaný Gitom, `distDir = .build/next`)     | Nie       |
@@ -104,23 +104,23 @@ Proces zostavenia prebieha v jednom priechode:
 ```
 npm run build
   └─ next build → .build/next/standalone  (výstup Next.js)
-  └─ assembleStandalone()                 (kopíruje samostatný balík + statické + verejné + natívne prostriedky)
+  └─ assembleStandalone()                 (skopíruje samostatné + statické + verejné + natívne prostriedky)
        └─ výstup: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` navyše najskôr vyčistí oba adresáre a zapíše
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ako sentinel integrity nasadenia.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ako kontrolný súbor integrity nasadenia.
 
-`npm run build:contributor` používa profil zostavenia iba pre backend. Počas zostavovania dočasne nahrádza
-súbory UI ovládacieho panela zástupnými súbormi, zachováva obslužné rutiny trás API a po zostavení obnoví pôvodné súbory.
-Pre zmeny, ktoré ovplyvňujú UI ovládacieho panela, alebo na úplné overenie vydania použite `npm run build`;
-profil pre prispievateľov nenahrádza vydávacie zostavenie.
+`npm run build:contributor` používa profil zostavenia iba pre backend. Počas zostavovania dočasne nahradí
+súbory používateľského rozhrania ovládacieho panela zástupnými súbormi, zachová obslužné rutiny trás API a po
+zostavení obnoví pôvodné súbory. Pre zmeny ovplyvňujúce používateľské rozhranie ovládacieho panela alebo úplné
+overenie vydania použite `npm run build`; profil pre prispievateľov nenahrádza vydávacie zostavenie.
 
 > **Poznámka k nasadeniu na VPS:** vzdialený adresár obrazu `/usr/lib/node_modules/omniroute/app/`
-> zostáva nezmenený. Nástroje na nasadenie synchronizujú obsah adresára `dist/` do tohto umiestnenia pomocou rsync.
+> sa nemení. Nástroje na nasadenie pomocou rsync synchronizujú jeho obsah s obsahom adresára `dist/`.
 > Zmenila sa iba cesta k výstupu zostavenia v repozitári (`app/` → `dist/`).
 
-Predvolené URL:
+Predvolené URL adresy:
 
 - **Ovládací panel**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
@@ -175,17 +175,17 @@ Rozsahy (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`,
 ## Spúšťanie testov
 
 ```bash
-# Všetky testy (unit + vitest + ecosystem + e2e)
+# Všetky testy (jednotkové + vitest + ekosystémové + e2e)
 npm run test:all
 
 # Jeden testovací súbor (natívny testovací nástroj Node.js — používa ho väčšina testov)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Iba jednotkové testy ovplyvnené vašou zmenou (rovnaký selektor TIA ako v kontrolnom mechanizme CI, #8084)
+# Iba jednotkové testy ovplyvnené vašou zmenou (rovnaký selektor TIA ako v kontrolnom bode CI, #8084)
 npm run test:scoped            # zmeny v poslednom commite (alebo v pracovnom strome)
-npm run test:scoped:staged     # iba zmeny v stagingu — dobre sa dopĺňa so spustením pred commitom
-npm run test:scoped:full       # najprv znova zostaví mapu grafu importov (po pridaní/presunutí súborov)
-# Návratový kód 1 + „run the full suite“ znamená, že sa zmenil centrálny súbor (tsconfig, package.json, …)
+npm run test:scoped:staged     # iba pripravené zmeny — vhodné na spustenie pred commitom
+npm run test:scoped:full       # najskôr znova zostaví mapu grafu importov (po pridaní/presunutí súborov)
+# Ukončenie s kódom 1 + „spustite celý balík“ znamená, že sa zmenil centrálny súbor (tsconfig, package.json, …)
 # alebo nenamapovaný zdroj — selektor bezpečne zlyhá a nikdy nič potichu nepreskočí.
 
 # Vitest (server MCP, autoCombo, vyrovnávacia pamäť)
@@ -194,13 +194,13 @@ npm run test:vitest
 # Testy E2E (vyžadujú Playwright)
 npm run test:e2e
 
-# E2E protokolových klientov (transporty MCP, A2A)
+# E2E klientov protokolu (transporty MCP, A2A)
 npm run test:protocols:e2e
 
 # Testy kompatibility ekosystému
 npm run test:ecosystem
 
-# Kontrola pokrytia: 60 % príkazov/riadkov/funkcií/vetiev
+# Kontrolný bod pokrytia: 60 % príkazov/riadkov/funkcií/vetiev
 npm run test:coverage
 npm run coverage:report
 
@@ -208,49 +208,50 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Podmienený smoke test kombinácie so skutočnými upstream službami (vyžaduje prístup k VPS + reálne kredity poskytovateľov)
+# Kontrolovaný smoke test kombinácií so skutočnými upstream službami (vyžaduje prístup k VPS + kredity skutočných poskytovateľov)
 # Používa SKUTOČNÝCH poskytovateľov — niečo málo stojí. NIKDY sa nespúšťa v CI. Bez povolenia sa korektne preskočí.
-# Vyžaduje: prístup ssh root@192.168.0.15 (načíta snapshot databázy iba na čítanie z VPS).
+# Vyžaduje: prístup ssh root@192.168.0.15 (načíta z VPS snímku databázy iba na čítanie).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Živý smoke test VPS fázy 3 — bežné skripty Node ESM, ktoré pristupujú priamo k živému serveru .15.
+# Živý smoke test VPS fázy 3 — obyčajné skripty Node ESM, ktoré používajú priamo živý server .15.
 # Vyžaduje: prístup ssh root@192.168.0.15 (kombinácie sa vytvárajú/odstraňujú cez SSH sqlite).
-# Používa SKUTOČNÝCH poskytovateľov (malé náklady). Vytvára/odstraňuje iba kombinácie __live_test__*. NIKDY sa nespúšťa v CI.
-# Na .15 je REQUIRE_API_KEY=false, takže kľúč API nie je potrebný, ale ak sú nastavené COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY, rešpektuje ich.
-npm run test:combo:live:vps              # 7 scenárov HTTP (priorita/round-robin/vážený/náklady/fúzia/automatický + stav)
+# Používa SKUTOČNÝCH poskytovateľov (nízke náklady). Vytvára/odstraňuje iba kombinácie __live_test__*. NIKDY sa nespúšťa v CI.
+# Na .15 je REQUIRE_API_KEY=false, takže kľúč API nie je potrebný, no rešpektuje COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY, ak sú nastavené.
+npm run test:combo:live:vps              # 7 scenárov HTTP (priorita/round-robin/váženie/náklady/fúzia/automatický režim + stav)
 npm run test:combo:live:vps:failover     # pridáva skutočný scenár prepnutia medzi poskytovateľmi pri zlyhaní (spolu 8)
 ```
 
 Poznámky k pokrytiu:
 
-- `npm run test:coverage` meria pokrytie zdrojového kódu pre hlavnú sadu jednotkových testov, vylučuje `tests/**` a zahŕňa `open-sse/**`
-- Pull requesty musia zachovať kontrolu pokrytia na úrovni **60 % alebo viac** pre príkazy/riadky/funkcie/vetvy
-- Ak PR mení produkčný kód v `src/`, `open-sse/`, `electron/` alebo `bin/`, musí v rovnakom PR pridať alebo aktualizovať automatizované testy
-- `npm run coverage:report` vypíše podrobnú správu po jednotlivých súboroch z posledného spustenia merania pokrytia
+- `npm run test:coverage` meria pokrytie zdrojového kódu pre hlavný balík jednotkových testov, vylučuje `tests/**` a zahŕňa `open-sse/**`
+- Pull requesty musia zachovať kontrolný bod pokrytia na úrovni **60 %+** príkazov/riadkov/funkcií/vetiev
+- Ak PR mení produkčný kód v `src/`, `open-sse/`, `electron/` alebo `bin/`, musí v tom istom PR pridať alebo aktualizovať automatizované testy
+- `npm run coverage:report` vypíše podrobný prehľad po jednotlivých súboroch z posledného spustenia merania pokrytia
 - `npm run test:coverage:legacy` zachováva staršiu metriku na historické porovnanie
-- Plán postupného zlepšovania pokrytia nájdete v `docs/ops/COVERAGE_PLAN.md`
+- Fázový plán zlepšovania pokrytia nájdete v `docs/ops/COVERAGE_PLAN.md`
 
-### Požiadavky na Pull Request
+### Požiadavky na pull request
 
 Pred otvorením PR použite
-[odporúčaný postup prispievania](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) a spustite cielený cyklus pre
-vykonané zmeny. Za úplnú sadu jednotkových testov (4 časti CI), Vitest, kontrolu pokrytia na úrovni **60 % alebo viac** a
-produkčné zostavenie zodpovedá CI — ich lokálne spustenie neposkytuje žiadne ďalšie informácie, ktoré by vám
-už neposkytli kontroly PR, a na slabších počítačoch môže preťažiť hostiteľa (#8084):
+[Odporúčaný postup prispievania](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) na spustenie cieleného cyklu pre
+to, čo ste zmenili. Za celý balík jednotkových testov (4 časti CI), Vitest, kontrolný bod pokrytia **60 %+** a
+produkčné zostavenie zodpovedá CI — ich lokálne spustenie neposkytuje žiadne ďalšie informácie, ktoré by
+vám už neposkytli kontroly PR, a na slabších počítačoch môže vyčerpať prostriedky hostiteľa (#8084):
 
 - Spustite testovacie súbory, ktoré pokrývajú vašu zmenu: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Spustite `npm run lint`
 - Pri každej zmene produkčného kódu zahrňte alebo aktualizujte automatizované testy v rovnakom PR
+- V súboroch `node:test` umiestnite každý `await` najvyššej úrovne (napríklad `await import(...)`) pred prvý `test()` / `describe()`: pri použití `--test-force-exit` sa testy zaregistrované za ním nemusia potichu vôbec spustiť (#18045; vynucuje sa pomocou `npm run check:test-tla-order`)
 - Ak sa zmenil produkčný kód, uveďte zmenené alebo pridané testovacie súbory v opise PR
-- Ak sú tajné hodnoty projektu nakonfigurované v CI, skontrolujte výsledok SonarQube v PR
+- Keď sú v CI nakonfigurované tajné údaje projektu, skontrolujte výsledok SonarQube v PR
 
 Aktuálny stav testov: **122 súborov jednotkových testov**, ktoré pokrývajú:
 
-- Translátory poskytovateľov a konverziu formátov
+- Prekladače poskytovateľov a konverziu formátov
 - Obmedzovanie frekvencie požiadaviek, istič a odolnosť
-- Sémantickú vyrovnávaciu pamäť, idempotenciu a sledovanie priebehu
-- Databázové operácie a schému (21 modulov DB)
-- Toky OAuth a autentifikáciu
+- Sémantickú vyrovnávaciu pamäť, idempotentnosť a sledovanie priebehu
+- Databázové operácie a schému (21 databázových modulov)
+- Toky OAuth a overovanie totožnosti
 - Overovanie koncových bodov API (Zod v4)
 - Nástroje servera MCP a vynucovanie rozsahov
 - Systémy Memory a Skills
@@ -301,63 +302,63 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── (dashboard)/        # Stránky ovládacieho panela (23 sekcií)
 │   ├── api/                # Trasy API (51 adresárov)
 │   └── login/              # Stránky autentifikácie (.tsx)
-├── domain/                 # Modul pravidiel (policyEngine, comboResolver, costRules atď.)
+├── domain/                 # Mechanizmus pravidiel (policyEngine, comboResolver, costRules atď.)
 ├── lib/                    # Základná obchodná logika (.ts)
 │   ├── a2a/                # Server protokolu Agent-to-Agent v0.3
 │   ├── acp/                # Register protokolu Agent Communication Protocol
-│   ├── compliance/         # Modul pravidiel súladu
+│   ├── compliance/         # Mechanizmus pravidiel súladu
 │   ├── db/                 # Doménové moduly SQLite + 130 migrácií
 │   ├── memory/             # Trvalá konverzačná pamäť
-│   ├── oauth/              # Poskytovatelia, služby a pomocné nástroje OAuth
-│   ├── skills/             # Rozšíriteľný framework zručností
+│   ├── oauth/              # Poskytovatelia, služby a nástroje OAuth
+│   ├── skills/             # Rozšíriteľný rámec zručností
 │   ├── usage/              # Sledovanie používania a výpočet nákladov
-│   └── localDb.ts          # Iba vrstva opätovných exportov — nikdy sem nepridávajte logiku
+│   └── localDb.ts          # Iba vrstva opätovného exportu — nikdy sem nepridávajte logiku
 ├── middleware/              # Middleware požiadaviek (promptInjectionGuard)
 ├── mitm/                   # Proxy MITM (certifikát, DNS, smerovanie cieľa)
 ├── shared/
 │   ├── components/         # Komponenty React (.tsx)
-│   ├── constants/          # Definície poskytovateľov (329), rozsahy MCP, 19 stratégií smerovania
+│   ├── constants/          # Definície poskytovateľov (329), rozsahy MCP, 20 stratégií smerovania
 │   ├── utils/              # Istič, sanitizátor, pomocné nástroje autentifikácie
 │   └── validation/         # Schémy Zod v4
-└── sse/                    # Reťazec spracovania proxy SSE
+└── sse/                    # Kanál proxy SSE
 
 open-sse/                   # Pracovný priestor @omniroute/open-sse
-├── executors/              # 89 modulov implementácie vykonávačov
-├── handlers/               # 11 obslužných modulov požiadaviek (chat, odpovede, vnorenia, obrázky atď.)
+├── executors/              # 150 modulov vykonávateľov (triedy vykonávateľov + pomocné nástroje pre jednotlivých poskytovateľov)
+├── handlers/               # 11 obslužných programov požiadaviek (chat, odpovede, vnorenia, obrázky atď.)
 ├── mcp-server/             # Server MCP (110 jedinečných nástrojov, 3 transporty, 33 rozsahov)
 ├── services/               # 178 služieb najvyššej úrovne (combo, autoCombo, rateLimitManager atď.)
-├── translator/             # Prevodníky formátov (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── translator/             # Prekladače formátov (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Transformátor Responses API
-└── utils/                  # 22 pomocných modulov (stream, TLS, proxy, zaznamenávanie do logu)
+└── utils/                  # 22 modulov nástrojov (stream, TLS, proxy, protokolovanie)
 
-electron/                   # Multiplatformová desktopová aplikácia Electron
+electron/                   # Desktopová aplikácia Electron (multiplatformová)
 
 tests/
-├── unit/                   # Spúšťač testov Node.js (1 574 testovacích súborov)
+├── unit/                   # Nástroj na spúšťanie testov Node.js (1 574 testovacích súborov)
 ├── integration/            # Integračné testy
 ├── e2e/                    # Testy Playwright
 ├── security/               # Bezpečnostné testy
-├── translator/             # Testy špecifické pre prevodník
+├── translator/             # Testy špecifické pre prekladač
 └── load/                   # Záťažové testy
 
 docs/
 ├── adr/                     # Záznamy architektonických rozhodnutí
 ├── architecture/            # Architektúra a odolnosť systému
 ├── comparison/              # OmniRoute v porovnaní s alternatívami
-├── compression/             # Návody a pravidlá kompresie
-├── dev/                     # Vývojárske príručky
+├── compression/             # Príručky a pravidlá kompresie
+├── dev/                     # Príručky pre vývoj
 ├── diagrams/                # Diagramy architektúry
-├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── frameworks/              # MCP, A2A, OpenCode, pamäť, zručnosti
 ├── guides/                  # Používateľská príručka, Docker, nastavenie, riešenie problémov
 ├── i18n/                    # Internacionalizované preklady README
 ├── marketing/               # Marketingové materiály
 ├── ops/                     # Nasadenie, proxy, pokrytie, vydania
-├── providers/               # Dokumentácia špecifická pre poskytovateľov
+├── providers/               # Dokumentácia pre jednotlivých poskytovateľov
 ├── reference/               # Referenčná dokumentácia API, premenné prostredia, nástroje CLI, bezplatné úrovne
 ├── releases/                # Poznámky k vydaniam
-├── routing/                 # Modul automatických kombinácií, opakované prehrávanie uvažovania
+├── routing/                 # Mechanizmus automatických kombinácií, opakované prehrávanie uvažovania
 ├── screenshots/             # Snímky obrazovky ovládacieho panela
-├── security/                # Ochranné mechanizmy, súlad, skryté fungovanie, tokeny
+├── security/                # Ochranné mechanizmy, súlad, utajenie, tokeny
 └── specs/                   # Špecifikácie návrhu
 ```
 

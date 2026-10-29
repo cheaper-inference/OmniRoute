@@ -14,36 +14,36 @@ Az AgentBridge az OmniRoute MITM (Man-in-the-Middle, közbeékelődéses) proxyj
 
 ## §1 Áttekintés
 
-### Mi az AgentBridge?
+### Mi AgentBridge?
 
-Amikor egy IDE-ügynök (például GitHub Copilot, Cursor vagy Claude Code) API-hívást indít, közvetlenül kapcsolódik a külső AI-szolgáltatóhoz (OpenAI, Anthropic stb.). Az AgentBridge transzparens módon, TLS-szinten fogja el ezt a kapcsolatot — anélkül, hogy módosítani kellene az ügynök konfigurációját —, és átirányítja a kérést az OmniRoute-on keresztül.
+Amikor egy IDE ügynök (pl. GitHub Copilot, Cursor, Claude Code) API hívást kezdeményez, közvetlenül csatlakozik az upstream AI szolgáltatóhoz (OpenAI, Anthropic stb.). AgentBridge transzparensen elfogja ezt a kapcsolatot a TLS szinten – anélkül, hogy az ügynök konfigurációjának módosítása lenne szükséges –, és átírja a kérést OmniRoute keresztül.
 
-Ez a következőket teszi lehetővé:
+Ez azt jelenti, hogy:
 
-- **Bármely ügynök átirányítása bármely szolgáltatóhoz**: a Copilot az OpenAI-jal kommunikál? Irányítsa át az Anthropic Claude-hoz, a Geminihez vagy az OmniRoute 352 szolgáltatójának bármelyikéhez.
-- **Modell-hozzárendelések alkalmazása**: `gemini-3-flash` → `claude-sonnet-4.7` transzparens módon, a kezelő szintjén.
-- **Az ügynökök teljes forgalmának megfigyelése**: minden elfogott kérés közzétételre kerül a [Forgalomfigyelőben](./TRAFFIC_INSPECTOR.md).
-- **Az OmniRoute hibatűrésének alkalmazása**: a kombinált útválasztás, a megszakítók, a tartalék útvonalak és a költségkövetés az IDE-ügynökök forgalmára is érvényes.
+- **Bármely ügynök átirányítása bármely szolgáltatóhoz** : Copilot beszél OpenAI-vel? Irányítsa át Anthropic Claude, Gemini, vagy OmniRoute 377 szolgáltatójának bármelyikére.
+- **Alkalmazzon modellleképezéseket** : `gemini-3-flash` → `claude-sonnet-4.7` transzparensen a kezelő szintjén.
+- **Figyelje meg az összes ügynökforgalmat** : minden elfogott kérést közzétesznek a [Közlekedési Felügyelőnek](./TRAFFIC_INSPECTOR.md).
+- **Alkalmazza OmniRoute rugalmasságot** : kombinált útválasztás, megszakítók, tartalékok és költségkövetési munka IDE ügynökforgalom számára is.
 
-### Piaci pozicionálás
+### Pozicionálás kontra piac
 
-| Funkció                       | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ----------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                   |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                    |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                  |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                    |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                   |    —    |    —     |        ✓        |             ✓             |
-| Open Code                     |    —    |    —     |        ✓        |             ✓             |
-| Trae                          |    —    |    —     |        —        |    🔍 Vizsgálat alatt     |
-| Irányítópult felülete         |    ✓    |    ✗     |        ✗        |             ✓             |
-| Forgalomfigyelő               |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute-útválasztás         |    ✗    |    ✗     |        ✗        |             ✓             |
-| Modell-hozzárendelési felület |    ✗    |    ✗     |        ✗        |             ✓             |
-| Megkerülési lista             |    ✗    |    ✗     |        ✓        |             ✓             |
-| Külső CA-tanúsítvány          |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funkció                 | 9router | anti-api | llm-elfogó | **OmniRoute AgentBridge** |
+| ----------------------- | :-----: | :------: | :--------: | :-----------------------: |
+| Antigravity             |    ✓    |    ✓     |     —      |             ✓             |
+| GitHub Copilot          |    ✓    |    ✓     |     —      |             ✓             |
+| Kiro (AWS)              |    ✓    |    ✓     |     —      |             ✓             |
+| OpenAI Codex            |    —    |    ✓     |     —      |             ✓             |
+| Cursor IDE              |    ✓    |    ✓     |     —      |             ✓             |
+| Zed Industries          |    —    |    ✓     |     —      |             ✓             |
+| Claude kód              |    —    |    —     |     ✓      |             ✓             |
+| Nyissa meg a kódot      |    —    |    —     |     ✓      |             ✓             |
+| Trae                    |    —    |    —     |     —      |        🔍 Nyomozás        |
+| Műszerfal UI            |    ✓    |    ✗     |     ✗      |             ✓             |
+| Közlekedési felügyelő   |    ✗    |    ✗     |     ✓      |             ✓             |
+| OmniRoute routing       |    ✗    |    ✗     |     ✗      |             ✓             |
+| Modelleképezés UI       |    ✗    |    ✗     |     ✗      |             ✓             |
+| Kikerülési lista        |    ✗    |    ✗     |     ✓      |             ✓             |
+| Upstream CA tanúsítvány |    ✗    |    ✗     |     ✓      |             ✓             |
 
 ---
 
@@ -188,16 +188,16 @@ közös, ugrásonkénti/keretezési tiltólistán szereplő fejléceket (beleér
 
 ### 3.1 A MITM-kiszolgáló indítása/leállítása
 
-Használja az AgentBridge Server kártyát a `/dashboard/tools/agent-bridge` oldalon:
+Használja az AgentBridge kiszolgálókártyát a `/dashboard/tools/agent-bridge` oldalon:
 
-| Művelet                         | Leírás                                                                                       |
-| ------------------------------- | -------------------------------------------------------------------------------------------- |
-| Kiszolgáló indítása             | Elindítja a `src/mitm/server.cjs` fájlt a 443-as porton                                      |
-| Kiszolgáló leállítása           | Szabályosan leállítja a gyermekfolyamatot                                                    |
-| Kiszolgáló újraindítása         | Leállítás + indítás (érvényesíti a célbeállítások módosításait)                              |
-| Tanúsítvány megbízhatóvá tétele | Telepíti a `DATA_DIR/mitm/ca.crt` tanúsítványt az operációs rendszer megbízhatósági tárába   |
-| Tanúsítvány letöltése           | Letölti a `ca.crt` fájlt kézi telepítéshez                                                   |
-| Tanúsítvány újragenerálása      | Új CA-kulcspárt hoz létre (az összes meglévő, ügynökönkénti tanúsítvány érvénytelenné válik) |
+| Művelet                         | Leírás                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kiszolgáló indítása             | Elindítja a `src/mitm/server.cjs` fájlt a 443-as porton. A gyökér-CA modellen alapuló telepítésnél az első indításkor létrehozza a `ca.crt` fájlt, és megbízhatóként állítja be az aktív tanúsítványt, ha rendelkezésre áll sudo-jelszó                                                                                                                                                                                                                                                            |
+| Kiszolgáló leállítása           | Szabályosan leállítja a gyermekfolyamatot                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Kiszolgáló újraindítása         | Leállítás + indítás (érvényesíti a célbeállítások módosításait és az újragenerált tanúsítványt)                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Tanúsítvány megbízhatóvá tétele | Telepíti az aktív tanúsítványt az operációs rendszer megbízható tanúsítványtárába: gyökér-CA modell esetén `DATA_DIR/mitm/ca.crt`, örökölt levéltanúsítványos telepítés esetén `DATA_DIR/mitm/server.crt`                                                                                                                                                                                                                                                                                          |
+| Tanúsítvány letöltése           | Letölti az aktív tanúsítványt kézi telepítéshez (`omniroute-mitm-ca.crt` = `ca.crt`, örökölt levéltanúsítványos telepítés esetén pedig `omniroute-mitm.crt` = `server.crt`)                                                                                                                                                                                                                                                                                                                        |
+| Tanúsítvány újragenerálása      | Soha nem módosítja a tanúsítványmodellt. Örökölt levéltanúsítványos telepítés: új `server.crt`/`server.key` fájlokat állít elő (a használatukhoz indítsa újra a kiszolgálót). Gyökér-CA modell: lecseréli a `ca.crt`/`ca.key` fájlokat; ez a kiszolgáló futása közben nem engedélyezett. Egy korábban megbízható CA megbízhatóságát először visszavonja (ehhez sudo-jelszó szükséges), ellenkező esetben a csere megszakad. Ezt követően az ügyfeleknek ismét megbízhatóvá kell tenniük az új CA-t |
 
 ### 3.2 A tanúsítvány megbízhatóvá tétele
 
@@ -222,25 +222,25 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-Másik lehetőségként használja az irányítópult „Tanúsítvány megbízhatóvá tétele” gombját (ez az operációs rendszerének megfelelő parancsot futtatja, szükség esetén sudo-kéréssel).
+Másik lehetőségként használja az irányítópult „Tanúsítvány megbízhatóvá tétele” gombját (ez az operációs rendszerének megfelelő parancsot futtatja, és szükség esetén bekéri a sudo-jelszót).
 
-#### Az Electron-alapú IDE-k figyelmen kívül hagyják az operációs rendszer megbízhatósági tárát (`NODE_EXTRA_CA_CERTS`)
+#### Az Electron-alapú IDE-k figyelmen kívül hagyják az operációs rendszer megbízható tanúsítványtárát (`NODE_EXTRA_CA_CERTS`)
 
-Egyes IDE-k — különösen az **Antigravity IDE**, valamint más Electron- / VS Code-alapú alkalmazások — saját Node.js futtatókörnyezetet tartalmaznak, amely a kimenő `fetch`/HTTPS-kapcsolatokhoz **nem használja az operációs rendszer megbízhatósági tárát**. A CA megbízhatóvá tétele az operációs rendszer/NSS szintjén elegendő az IDE natív **háttérrendszeréhez** (például egy Go nyelvi kiszolgálóhoz, amely az operációs rendszer CA-csomagját használja), az **Electron kezelőfelületén** azonban továbbra is TLS-hiba jelentkezik — ez úgy jelenik meg, mintha az alkalmazásból a felhasználó _ki lenne jelentkeztetve_, vagy _„kapcsolati hiba”_ üzenet látható, noha a MITM-napló szerint a háttérrendszer rendszerindítási hívásai `200` választ adnak. Két lépés szükséges, és mindkettő fontos:
+Egyes IDE-k — különösen az **Antigravity IDE**, valamint más Electron- vagy VS Code-alapú alkalmazások — saját Node.js futtatókörnyezetet tartalmaznak, amely a kimenő `fetch`-/HTTPS-kapcsolatokhoz **nem használja az operációs rendszer megbízható tanúsítványtárát**. A CA operációs rendszer-/NSS-szintű megbízhatóvá tétele elegendő az IDE natív **háttérrendszeréhez** (például egy Go nyelvi kiszolgálóhoz, amely az operációs rendszer CA-csomagját használja), de az **Electron felülete** továbbra sem tud TLS-kapcsolatot létesíteni — ez úgy jelentkezik, hogy az alkalmazás _kijelentkezett_ állapotot vagy _„kapcsolati hibát”_ jelez, annak ellenére, hogy a MITM-napló szerint a háttérrendszer rendszerindítási hívásai `200` állapotkóddal térnek vissza. Két lépés szükséges, és mindkettő fontos:
 
 1. Irányítsa a futtatókörnyezetet kifejezetten a CA-ra:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
-2. **Indítsa el az IDE-t ebből a parancsértelmezőből.** Az asztali ikonról / Dockból / Start menüből történő indítás **nem** örökli a parancsértelmező exportált változóit, a `~/.config/environment.d/*.conf` pedig csak egy új grafikus bejelentkezés után lép érvénybe. Először teljesen zárja be az IDE-t — az Electron egyetlen példányt engedélyező zárolása miatt egy második indítás csupán a már futó folyamatot helyezi fókuszba, az új környezetet pedig figyelmen kívül hagyja.
+2. **Indítsa el az IDE-t ebből a parancsértelmezőből.** Az asztali ikonról / Dockból / Start menüből történő indítás **nem** örökli a parancsértelmező exportált változóit, a `~/.config/environment.d/*.conf` pedig csak új grafikus bejelentkezés után lép érvénybe. Először teljesen lépjen ki az IDE-ből — az Electron egyetlen példányt engedélyező zárolása miatt a második indítás csak a már futó folyamatot hozza előtérbe, az új környezetet pedig figyelmen kívül hagyja.
 
-Az operációs rendszer szintű megbízhatóság és a fenti NSS-lépés továbbra is szükséges (az egyes hitelesítési folyamatok által használt Chromium hálózati verem a felhasználónkénti NSS-tárat olvassa, és saját statikus rögzítésekkel rendelkezik a `*.googleapis.com` címekhez, amelyeket egy helyileg megbízhatónak jelölt CA felülbírál). A `NODE_EXTRA_CA_CERTS` ezenfelül a Node `fetch` útvonalát fedi le.
+A fenti, operációs rendszerre és NSS-re vonatkozó megbízhatósági lépés továbbra is szükséges (az egyes hitelesítési folyamatok által használt Chromium hálózati verem a felhasználónkénti NSS-tárat olvassa, és saját statikus rögzítésekkel rendelkezik a `*.googleapis.com` címekhez, amelyeket egy helyileg megbízható CA felülbírál). A `NODE_EXTRA_CA_CERTS` ezen felül a Node `fetch` útvonalát kezeli.
 
 ### 3.3 DNS-útválasztás
 
-Minden elfogni kívánt ügynök esetében az API-gazdagép(ek)nek a `127.0.0.1` címre kell feloldódniuk. Az AgentBridge automatikusan kezeli az `/etc/hosts` bejegyzéseit, amikor a Beállítási varázslóban be- vagy kikapcsolja egy ügynök DNS-ét.
+Minden elfogni kívánt ügynöknél az API-állomásnévnek vagy -állomásneveknek a `127.0.0.1` címre kell feloldódniuk. Az AgentBridge automatikusan kezeli az `/etc/hosts` bejegyzéseket, amikor a Beállítási varázslóban be- vagy kikapcsolja egy ügynök DNS-ét.
 
-Példa `/etc/hosts` bejegyzések a GitHub Copilothoz:
+Példa `/etc/hosts`-bejegyzések GitHub Copilothoz:
 
 ```
 127.0.0.1 api.githubcopilot.com
@@ -249,69 +249,74 @@ Példa `/etc/hosts` bejegyzések a GitHub Copilothoz:
 
 ### 3.4 Modellleképezés
 
-Az egyes ügynökkártyák Modellleképezési táblázatában határozhatja meg a forrás → cél leképezéseket:
+A forrás → cél leképezések meghatározásához használja az egyes ügynökkártyák Modellleképezési táblázatát:
 
 | Forrásmodell (az ügynök natív modellje) | Célmodell (OmniRoute) |
 | --------------------------------------- | --------------------- |
 | `gpt-4o`                                | `claude-sonnet-4.7`   |
 | `*` (helyettesítő karakter)             | `claude-haiku-4.7`    |
 
-A `*` helyettesítő karakter minden fel nem ismert modellt a megadott célhoz rendel. Az adatok az `agent_bridge_mappings` táblában maradnak meg.
+A `*` helyettesítő karakter minden fel nem ismert modellt a megadott célmodellre képez le. Az adatok az `agent_bridge_mappings` táblában maradnak meg.
 
-> **Tipp — derítse fel az ügynök tényleges modellazonosítóit.** Egy IDE olyan modellneveket küldhet, amelyek eltérnek a felhasználói felületén látható címkéktől, és a főverziók között is változhatnak. Az **Antigravity 2** például a `gemini-3.1-pro-low`, `gemini-pro-agent` és `gemini-3.1-flash-lite` értékeket küldi a hálózaton keresztül — nem pedig a régebbi dokumentációban szereplő `gemini-2.5-pro` értéket. Küldjön egy csevegési üzenetet úgy, hogy nincs beállítva megfelelő leképezés: a MITM naplózza a beérkező pontos `model:` értéket, és változatlanul továbbítja a kérést. Képezze le ezt a szó szerinti értéket, ezután a rendszer elfogja a következő kérést, és a célmodellhez irányítja.
+> **Tipp — derítse ki az ügynök valódi modellazonosítóit.** Egy IDE olyan modellneveket küldhet, amelyek eltérnek
+> a felhasználói felületen látható címkéktől, és a főverziók között is változhatnak. Az **Antigravity 2** például
+> a `gemini-3.1-pro-low`, `gemini-pro-agent` és `gemini-3.1-flash-lite` értékeket küldi ténylegesen — nem pedig a
+> régebbi dokumentációban szereplő `gemini-2.5-pro` értéket. Küldjön egy csevegési kérést úgy, hogy nincs hozzá illeszkedő leképezés: a MITM
+> naplózza a pontos beérkező `model:` értéket, és továbbengedi a kérést. Képezze le ezt a literális értéket, ezután
+> a következő kérést már elfogja és a célhoz irányítja a rendszer.
 
 ### 3.5 Kockázati figyelmeztetés
 
-Az AgentBridge elfogja azokat a hitelesítő adatokat (OAuth-tokeneket, API-kulcsokat), amelyekkel az IDE hitelesíti magát a felsőbb szintű szolgáltatóknál. Ezeket a rendszer **naplózás előtt maszkolja** (lásd §2.7), de az OmniRoute MITM-rétege számára láthatók. Minden ügynök első aktiválásakor megjelenik egy bezárható, kockázatokra figyelmeztető párbeszédpanel.
+Az AgentBridge elfogja azokat a hitelesítő adatokat (OAuth-tokeneket, API-kulcsokat), amelyeket az IDE a felsőbb szolgáltatóknál történő hitelesítéshez használ. Ezeket a rendszer **naplózás előtt maszkolja** (lásd: §2.7), de az OmniRoute MITM-rétege számára láthatók. Az egyes ügynökök első aktiválásakor egy bezárható, kockázatra figyelmeztető modális ablak jelenik meg.
 
 ### 3.6 Karbantartás és diagnosztika
 
-Az irányítópult egy **Karbantartás és diagnosztika** kártyát jelenít meg (`AgentBridgeMaintenanceCard`, helye: `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`), amely hozzáférhetővé teszi azokat az üzemeltetési MITM-útvonalakat, amelyekhez korábban nem tartozott felhasználói felület. Az alcíme: _„Végezze el az elfogási folyamat öntesztjét, vonja vissza a rendszerben megmaradt állapotot, és vigye át a beállításait más gépekre.”_ A kártya kliensoldali segédfüggvényei a `src/lib/inspector/agentBridgeMaintenanceApi.ts` fájlban találhatók.
+Az irányítópulton található egy **Karbantartás és diagnosztika** kártya (`AgentBridgeMaintenanceCard`, helye: `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`), amely felületen teszi elérhetővé azokat az üzemeltetési MITM-útvonalakat, amelyekhez korábban nem tartozott felhasználói felület. Az alcíme: _„Végezze el a rögzítési folyamat öntesztjét, vonja vissza a hátramaradt rendszerállapotot, és vigye át a beállításait más gépekre.”_ A kártya kliensoldali segédfüggvényei a `src/lib/inspector/agentBridgeMaintenanceApi.ts` fájlban találhatók.
 
-| Gomb                         | Útvonal                                | Funkció                                                                                                                                                                                                                                                               |
-| ---------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Diagnosztika**             | `GET /api/tools/agent-bridge/diagnose` | Futtatja a rögzítési folyamat önellenőrzését, és ellenőrzésenkénti jelentést jelenít meg (✓/✗ + javítási javaslat).                                                                                                                                                   |
-| **Javítás**                  | `POST /api/tools/agent-bridge/repair`  | Visszavonja az összeomlás vagy SIGKILL után hátramaradt árva MITM-rendszerállapotot (DNS-hamisítási bejegyzések, gyökér-hitelesítésszolgáltató, rendszerproxy). Idempotens — tiszta állapot esetén a „Nincs mit javítani” üzenetet adja.                              |
-| **CA eltávolítása**          | `DELETE /api/tools/agent-bridge/cert`  | Megszünteti a MITM gyökér-hitelesítésszolgáltató megbízhatóságát, és eltávolítja azt az operációs rendszer megbízhatósági tárából (explicit, idempotens). Csak akkor látható, ha a CA jelenleg megbízható; egy beágyazott „Eltávolítja a CA-t?” megerősítést igényel. |
-| **Konfiguráció exportálása** | `GET /api/tools/agent-bridge/config`   | Letölti a hordozható konfigurációs JSON-t (lásd: §3.7).                                                                                                                                                                                                               |
-| **Konfiguráció importálása** | `POST /api/tools/agent-bridge/config`  | Feltölt egy korábban exportált konfigurációs JSON-t (lásd: §3.7).                                                                                                                                                                                                     |
+| Gomb                         | Útvonal                                | Funkció                                                                                                                                                                                                                                                              |
+| ---------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Diagnosztika**             | `GET /api/tools/agent-bridge/diagnose` | Lefuttatja a rögzítési folyamat öntesztjét, és ellenőrzésenként jelentést jelenít meg (✓/✗ + javítási javaslat).                                                                                                                                                     |
+| **Javítás**                  | `POST /api/tools/agent-bridge/repair`  | Visszavonja az összeomlás vagy SIGKILL után hátramaradt, árva MITM-rendszerállapotot (DNS-hamisítási bejegyzések, gyökér-hitelesítésszolgáltató, rendszerproxy). Idempotens — tiszta állapot esetén a „Nincs mit javítani” üzenetet adja.                            |
+| **CA eltávolítása**          | `DELETE /api/tools/agent-bridge/cert`  | Megvonja a MITM gyökér-hitelesítésszolgáltató iránti bizalmat, és eltávolítja azt az operációs rendszer megbízhatósági tárából (explicit, idempotens). Csak akkor jelenik meg, ha a CA jelenleg megbízható; soron belüli „Eltávolítja a CA-t?” megerősítést igényel. |
+| **Konfiguráció exportálása** | `GET /api/tools/agent-bridge/config`   | Letölti a hordozható konfigurációs JSON-t (lásd: §3.7).                                                                                                                                                                                                              |
+| **Konfiguráció importálása** | `POST /api/tools/agent-bridge/config`  | Feltölt egy korábban exportált konfigurációs JSON-t (lásd: §3.7).                                                                                                                                                                                                    |
 
-Minden ügynökkártyához saját **Alapértelmezések visszaállítása** gomb is tartozik (`POST
-/api/tools/agent-bridge/agents/{id}/reset`) — ez egyetlen kattintással, ügynökönként hajtja végre a visszavonást: csak az adott
-ügynök gazdagép-hamisításait szünteti meg, törli a mentett modell-hozzárendeléseit, és visszaállítja a `dns_enabled`/`setup_completed`
-állapotát, így az IDE a teljes újraindítás után ismét a valódi upstream szolgáltatással kommunikál. A megosztott
-MITM-kiszolgálót vagy gyökér-hitelesítésszolgáltatót **nem** érinti (más ügynököknek továbbra is szükségük lehet rájuk) — ezek továbbra is elérhetők
-a Kiszolgálókártyán és a fenti **CA eltávolítása** műveleten keresztül. Windows rendszeren emellett lehetőség szerint lefuttatja az
-`ipconfig /flushdns` parancsot is, mivel a Windows DNS-ügyfele gyorsítótárazza a hosts fájl bejegyzéseit, és enélkül nem távolítaná el
-a frissen megszüntetett hamisítást.
+Minden ügynökkártyához saját **Alapértelmezés visszaállítása** gomb is tartozik (`POST
+/api/tools/agent-bridge/agents/{id}/reset`) — ez egyetlen kattintással, ügynökönként vonja vissza a módosításokat: csak az adott
+ügynök gazdagépneveinek hamisítását szünteti meg, törli a mentett modellleképezéseit, valamint alaphelyzetbe állítja a `dns_enabled`/`setup_completed`
+állapotát, így a teljes újraindítás után az IDE ismét a valódi felsőbb szolgáltatóval kommunikál. A művelet **nem** érinti a
+megosztott MITM-kiszolgálót vagy a gyökér-hitelesítésszolgáltatót (más ügynökök továbbra is függhetnek tőlük) — ezek továbbra is elérhetők
+a Kiszolgálókártyán és a fenti **CA eltávolítása** műveleten keresztül. Windows rendszeren a rendszer emellett lehetőség szerint lefuttatja az
+`ipconfig /flushdns` parancsot is, mivel a Windows DNS-ügyfele gyorsítótárazza a hosts fájl bejegyzéseit, és enélkül nem távolítaná el azonnal
+a frissen törölt hamisítást.
 
-**Diagnosztikai ellenőrzések** (`summarizeDiagnostics()` a `src/mitm/inspector/diagnostics.ts` fájlban). Az útvonal mindegyikhez lefuttatja a mellékhatással járó vizsgálatot, majd a logikai értékeket átadja a tiszta összegzőnek; a visszatérési érték egyetlen `healthy` minősítést, valamint hibánként egy-egy javaslatot tartalmaz:
+**Diagnosztikai ellenőrzések** (`summarizeDiagnostics()` a `src/mitm/inspector/diagnostics.ts` fájlban). Az útvonal mindegyikhez lefuttatja a mellékhatással járó vizsgálatot, és a logikai értékeket átadja a tiszta összegzőfüggvénynek; az eredmény egyetlen `healthy` minősítés, valamint hibánként egy javaslat:
 
-| Ellenőrzés neve    | Mit ellenőriz                                                                               | Javaslat hiba esetén                                                                                                                                                                                     |
-| ------------------ | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`   | A MITM-kiszolgáló folyamata aktív                                                           | „A MITM-kiszolgáló nem fut. Indítsa el az AgentBridge lapról.”                                                                                                                                           |
-| `server-reachable` | A MITM-kiszolgáló fogad kapcsolatokat a portján (TCP-vizsgálat)                             | „A MITM-kiszolgáló nem fogad kapcsolatokat a portján. Ellenőrizze, hogy a port szabad-e, és rendelkezik-e a hozzá való kapcsolódáshoz szükséges jogosultságokkal.”                                       |
-| `cert-exists`      | A MITM-tanúsítvány létrejött a lemezen                                                      | „Még nem jött létre MITM-tanúsítvány. Hozzon létre egyet az AgentBridge lapról.”                                                                                                                         |
-| `cert-trusted`     | A MITM gyökér-hitelesítésszolgáltató az operációs rendszer megbízhatósági tárában található | „Az operációs rendszer megbízhatósági tára nem bízik meg a MITM gyökér-hitelesítésszolgáltatóban, ezért a TLS-elfogás sikertelen lesz. Tegye megbízhatóvá a tanúsítványt az AgentBridge lapon.”          |
-| `dns-configured`   | A célként megadott gazdagépnevek hamisítva vannak az `/etc/hosts` fájlban                   | „A célként megadott gazdagépnevek nincsenek hamisítva az /etc/hosts fájlban, ezért a forgalom nem jut el a proxyhoz. Engedélyezze a DNS-t azoknál az ügynököknél, amelyek forgalmát rögzíteni szeretné.” |
+| Ellenőrzés neve    | Mit ellenőriz                                                                                | Javaslat hiba esetén                                                                                                                                                                           |
+| ------------------ | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | Aktív-e a MITM-kiszolgáló folyamata                                                          | „A MITM-kiszolgáló nem fut. Indítsa el az AgentBridge lapról.”                                                                                                                                 |
+| `server-reachable` | Fogad-e kapcsolatokat a MITM-kiszolgáló a portján (TCP-vizsgálat)                            | „A MITM-kiszolgáló nem fogad kapcsolatokat a portján. Ellenőrizze, hogy a port szabad-e, és rendelkezik-e a hozzá való kötéshez szükséges jogosultságokkal.”                                   |
+| `cert-exists`      | Létre lett-e hozva a MITM-tanúsítvány a lemezen                                              | „Még nem lett létrehozva MITM-tanúsítvány. Hozzon létre egyet az AgentBridge lapról.”                                                                                                          |
+| `cert-trusted`     | Szerepel-e a MITM gyökér-hitelesítésszolgáltató az operációs rendszer megbízhatósági tárában | „Az operációs rendszer tára nem bízik meg a MITM gyökér-hitelesítésszolgáltatóban, ezért a TLS-elfogás sikertelen lesz. Nyilvánítsa megbízhatónak a tanúsítványt az AgentBridge lapról.”       |
+| `dns-configured`   | Hamisítva vannak-e a cél-gazdagépnevek az `/etc/hosts` fájlban                               | „A cél-gazdagépnevek nincsenek hamisítva az /etc/hosts fájlban, ezért a forgalom soha nem éri el a proxyt. Engedélyezze a DNS-t azoknál az ügynököknél, amelyek forgalmát rögzíteni szeretné.” |
 
-**Árva állapotot jelző szalag:** amikor az oldal összeomlás után hátramaradt állapotot észlel (DNS-hamisítás / CA / rendszerproxy), a kártyán egy borostyánsárga szalag jelenik meg — _„Egy korábbi munkamenet rendszerállapotot hagyott hátra (DNS-hamisítás, CA vagy rendszerproxy). Futtassa a Javítás műveletet a megtisztításához.”_ —, és kiemeli a **Javítás** gombot. A `Repair` a ProxyBridge `--cleanup` jelzőjének alkalmazási rétegbeli megfelelője (a `src/mitm/manager.ts` fájlban található `repairMitm()` függvénynek delegálja a műveletet).
+**Árva állapotra figyelmeztető szalag:** amikor az oldal összeomlás után hátramaradt állapotot észlel (DNS-hamisítás / CA / rendszerproxy), a kártyán borostyánsárga figyelmeztető szalag jelenik meg — _„Egy korábbi munkamenet rendszerállapotot hagyott hátra (DNS-hamisítás, CA vagy rendszerproxy). Futtassa a Javítást az eltávolításához.”_ —, és kiemeli a **Javítás** gombot. A `Repair` a ProxyBridge `--cleanup` kapcsolójának alkalmazásrétegbeli megfelelője (a `src/mitm/manager.ts` fájlban található `repairMitm()` függvénynek adja át a feladatot).
 
-> A MITM gyökér-hitelesítésszolgáltató a leállítás és újraindítás között is telepítve marad, hogy ne legyen szükség
-> ismételt sudo-jóváhagyásokra (ugyanúgy, mint a mitmproxy/Charles esetében), ezért eltávolítása egy explicit
-> **CA eltávolítása** művelettel történik, nem pedig automatikusan a leállításkor.
+> A MITM gyökér-hitelesítésszolgáltató leállítás/indítás között is telepítve marad, hogy elkerülhetők legyenek az ismételt sudo
+> felszólítások (ugyanúgy, mint a mitmproxy/Charles esetében), ezért az eltávolítása külön
+> **CA eltávolítása** művelet, nem pedig olyasmi, ami leállításkor automatikusan megtörténik.
 
 ### 3.7 Hordozható konfiguráció importálása/exportálása
 
-Az AgentBridge képes a **kezelő által módosítható** állapotot verziózott JSON-adatcsomagba szerializálni, így a beállítás több gépen is reprodukálható. A szerializáló a `src/lib/inspector/configPortability.ts` fájlban található (`exportConfig()` / `importConfig()`), az ellenőrzést pedig az `AgentBridgeConfigSchema` végzi.
+Az AgentBridge képes a **kezelő által hangolható** állapotot verziózott JSON-adatblokkba szerializálni, így a beállítás más gépeken is reprodukálható. A szerializáló a `src/lib/inspector/configPortability.ts` fájlban található (`exportConfig()` / `importConfig()`), az ellenőrzést pedig az `AgentBridgeConfigSchema` végzi.
 
-Az export pontosan három elemet tartalmaz (a beépített alapértelmezéseket szándékosan **NEM** exportálja, így az importálás soha nem duplikálja azokat, és nem is ütközik velük):
+Az export pontosan három részt tartalmaz (a beépített alapértelmezések szándékosan **NINCSENEK** exportálva, így az importálás soha nem duplikálja őket, és nem is ütközik velük):
 
-| Mező             | Forrás                                                                 | Megjegyzések                                                                   |
-| ---------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `bypassPatterns` | felhasználó által definiált megkerülési minták (`agent_bridge_bypass`) | az alapértelmezett banki/kormányzati/okta minták ki vannak zárva               |
-| `customHosts`    | Traffic Inspector egyéni hosztjai (`inspector_custom_hosts`)           | mindegyik: `{ host, kind: "llm"\|"app"\|"custom", label? }`                    |
-| `agentMappings`  | ügynökönkénti modellleképezések (`agent_bridge_mappings`)              | `{ [agentId]: [{ source, target }] }` minden leképezéssel rendelkező ügynökhöz |
+| Mező             | Forrás                                                                     | Megjegyzések                                                                       |
+| ---------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `bypassPatterns` | felhasználó által meghatározott megkerülési minták (`agent_bridge_bypass`) | az alapértelmezett banki/kormányzati/okta minták ki vannak zárva                   |
+| `customHosts`    | a Traffic Inspector egyéni gazdagépei (`inspector_custom_hosts`)           | mindegyik: `{ host, kind: "llm"\|"app"\|"custom", label? }`                        |
+| `agentMappings`  | ügynökönkénti modell-hozzárendelések (`agent_bridge_mappings`)             | `{ [agentId]: [{ source, target }] }` minden hozzárendeléssel rendelkező ügynökhöz |
 
 ```jsonc
 // GET /api/tools/agent-bridge/config
@@ -325,13 +330,13 @@ Az export pontosan három elemet tartalmaz (a beépített alapértelmezéseket s
 }
 ```
 
-**Importálási viselkedés** (`POST /api/tools/agent-bridge/config`): a megkerülési minták és az ügynökönkénti leképezések **teljes egészében lecserélődnek**; az egyéni hosztok hozzáadása **idempotens** (`INSERT OR IGNORE`). A válasz jelzi, hogy az egyes típusokból hány lett alkalmazva:
+**Importálási viselkedés** (`POST /api/tools/agent-bridge/config`): a megkerülési minták és az ügynökönkénti hozzárendelések **teljes egészében lecserélődnek**; az egyéni gazdagépek hozzáadása **idempotens módon** történik (`INSERT OR IGNORE`). A válasz jelzi, hogy az egyes elemekből mennyi lett alkalmazva:
 
 ```jsonc
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-Ami **NEM** része a konfigurációnak: a kiszolgáló futási állapota, a tanúsítványok elérési útjai, az ügynökönkénti DNS-állapot, a felsőbb szintű CA elérési útja és a TPROXY-beállítások — ezek gazdagép-/futásidejű állapotok, nem hordozható beállítások.
+Amit a konfiguráció **NEM** tartalmaz: a kiszolgáló futási állapota, a tanúsítványok elérési útjai, az ügynökönkénti DNS-állapot, a felsőbb szintű hitelesítésszolgáltató elérési útja és a TPROXY-beállítások — ezek gazdagép-/futásidejű állapotok, nem pedig hordozható beállítások.
 
 ---
 
@@ -491,38 +496,38 @@ Ha az AgentBridge elfogja a kéréseket, de mindegyik sikertelen:
 
 ## §7 API-referencia
 
-Minden útvonal `LOCAL_ONLY` (csak loopbackon érhető el, a hitelesítés előtt kikényszerítve) és `SPAWN_CAPABLE`. Lásd: `src/server/authz/routeGuard.ts`.
+Minden útvonal `LOCAL_ONLY` (csak loopbackról érhető el, és ezt a hitelesítés előtt ellenőrzi a rendszer), valamint `SPAWN_CAPABLE`. Lásd: `src/server/authz/routeGuard.ts`.
 
 Alapútvonal: `/api/tools/agent-bridge/`
 
-| Metódus             | Útvonal                                        | Leírás                                                                                                                                       |
-| ------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | Globális szerverállapot + ügynökönkénti észlelés/állapot                                                                                     |
-| GET                 | `/api/tools/agent-bridge/agents`               | Regisztrált ügynökök listázása (azonosító, név, gazdagépek, működőképesség, állapot)                                                         |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Egy ügynök állapota (célkonfiguráció + észlelés + tárolt állapot)                                                                            |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Az ügynök `setup_completed` értékének frissítése                                                                                             |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Észlelési vizsgálat futtatása az ügynökhöz (`installed`, `version?`, `path?`)                                                                |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | DNS engedélyezése/letiltása az ügynökhöz (`{enabled: boolean}`)                                                                              |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Az ügynök modellleképezései                                                                                                                  |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Modellleképezések lecserélése                                                                                                                |
-| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Alapértelmezés visszaállítása: az ügynök DNS-hamisításának megszüntetése, leképezéseinek törlése és állapotának visszaállítása (lásd §3.6)   |
-| POST                | `/api/tools/agent-bridge/server`               | Szerver indítása/leállítása/újraindítása (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                             |
-| GET                 | `/api/tools/agent-bridge/cert`                 | Tanúsítvány állapota (`exists`, `trusted`, `path`)                                                                                           |
-| POST                | `/api/tools/agent-bridge/cert`                 | A MITM gyökér-hitelesítésszolgáltatói tanúsítvány megbízhatóvá tétele (telepítése)                                                           |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | A MITM gyökér-hitelesítésszolgáltatói tanúsítvány megbízhatóságának megszüntetése (eltávolítása) — idempotens (lásd §3.6)                    |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Az önaláírt MITM-tanúsítvány újragenerálása                                                                                                  |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | A PEM-tanúsítvány streamelése letöltéshez                                                                                                    |
-| GET                 | `/api/tools/agent-bridge/bypass`               | Megkerülési minták listázása (`default` + `user`)                                                                                            |
-| POST                | `/api/tools/agent-bridge/bypass`               | Felhasználó által meghatározott megkerülési minták teljes körű lecserélése                                                                   |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Egyetlen, felhasználó által meghatározott megkerülési minta eltávolítása                                                                     |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | A rögzítési folyamat önellenőrzése (lásd §3.6)                                                                                               |
-| POST                | `/api/tools/agent-bridge/repair`               | Gazdátlan MITM-rendszerállapot visszavonása (lásd §3.6)                                                                                      |
-| GET                 | `/api/tools/agent-bridge/config`               | Hordozható konfiguráció exportálása JSON formátumban (lásd §3.7)                                                                             |
-| POST                | `/api/tools/agent-bridge/config`               | Hordozható konfiguráció importálása JSON formátumban (lásd §3.7)                                                                             |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | A konfigurált upstream hitelesítésszolgáltatói tanúsítvány útvonalának lekérése                                                              |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Upstream hitelesítésszolgáltatói tanúsítvány útvonalának ellenőrzése és tartós mentése                                                       |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Upstream hitelesítésszolgáltatói tanúsítvány útvonalának csak ellenőrzése (próbafuttatás) — nem menti tartósan                               |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY transzparens visszafejtési rögzítési mód — lásd `docs/security/MITM-TPROXY-DECRYPT.md` (git; nincs beépítve a `/docs` dokumentációba) |
+| Metódus             | Útvonal                                        | Leírás                                                                                                                                                         |
+| ------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET                 | `/api/tools/agent-bridge/state`                | Globális szerverállapot + agentenkénti észlelés/állapot                                                                                                        |
+| GET                 | `/api/tools/agent-bridge/agents`               | Regisztrált agentek listázása (azonosító, név, hosztok, működőképesség, állapot)                                                                               |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Egy agent állapota (célkonfiguráció + észlelés + tárolt állapot)                                                                                               |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Az agent `setup_completed` értékének frissítése                                                                                                                |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Észlelési vizsgálat futtatása az agenthez (`installed`, `version?`, `path?`)                                                                                   |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | DNS engedélyezése/letiltása az agenthez (`{enabled: boolean}`)                                                                                                 |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Modell-hozzárendelések az agenthez                                                                                                                             |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Modell-hozzárendelések lecserélése                                                                                                                             |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Alapértelmezett állapot visszaállítása: az agent DNS-hamisításának visszavonása, hozzárendeléseinek törlése és állapotának alaphelyzetbe állítása (lásd: §3.6) |
+| POST                | `/api/tools/agent-bridge/server`               | Szerver indítása/leállítása/újraindítása (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                               |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Tanúsítvány állapota (`exists`, `trusted`, `path`)                                                                                                             |
+| POST                | `/api/tools/agent-bridge/cert`                 | A MITM gyökér-CA megbízhatóvá tétele (telepítése)                                                                                                              |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | A MITM gyökér-CA megbízhatóságának visszavonása (eltávolítása) — idempotens (lásd: §3.6)                                                                       |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Az aktív tanúsítvány újragenerálása a tanúsítványmodell módosítása nélkül (örökölt végponti tanúsítvány vagy gyökér-CA-rotáció — lásd: §3.1)                   |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Az aktív PEM-tanúsítvány streamelése letöltéshez (`ca.crt` a gyökér-CA-modellben, `server.crt` örökölt végponti tanúsítvány telepítésekor)                     |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Megkerülési minták listázása (`default` + `user`)                                                                                                              |
+| POST                | `/api/tools/agent-bridge/bypass`               | Felhasználó által definiált megkerülési minták teljes körű lecserélése                                                                                         |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Egyetlen, felhasználó által definiált megkerülési minta eltávolítása                                                                                           |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | A rögzítési folyamat önellenőrzése (lásd: §3.6)                                                                                                                |
+| POST                | `/api/tools/agent-bridge/repair`               | Gazdátlan MITM-rendszerállapot visszavonása (lásd: §3.6)                                                                                                       |
+| GET                 | `/api/tools/agent-bridge/config`               | Hordozható konfiguráció exportálása JSON formátumban (lásd: §3.7)                                                                                              |
+| POST                | `/api/tools/agent-bridge/config`               | Hordozható konfiguráció importálása JSON formátumban (lásd: §3.7)                                                                                              |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | A konfigurált upstream CA útvonalának lekérése                                                                                                                 |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Upstream CA-útvonal ellenőrzése és mentése                                                                                                                     |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Upstream CA-útvonal csak ellenőrzése (próbafuttatás) — nem menti                                                                                               |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY transzparens visszafejtési rögzítési mód — lásd: `docs/security/MITM-TPROXY-DECRYPT.md` (git; nincs beépítve a `/docs` dokumentációba)                  |
 
 Teljes OpenAPI-sémák: `docs/openapi.yaml` → `AgentBridge` címke.
 

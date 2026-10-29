@@ -42,6 +42,7 @@ test("Codex image catalog exposes the GPT-5.6 hosted-tool ids and the GPT Image 
       name: "GPT 5.6 Luna (Codex Image)",
     },
     { id: "gpt-image-2.5-flare", name: "GPT Image 2.5 Flare (Codex)" },
+    { id: "gpt-image-2.5-sunburst", name: "GPT Image 2.5 Sunburst (Codex)" },
     { id: "gpt-image-2", name: "GPT Image 2 (Codex)" },
   ]);
 
@@ -60,6 +61,7 @@ test("Codex GPT-5.6 image listings do not shadow the chat catalog ids", () => {
       "codex/gpt-5.6-terra-image",
       "codex/gpt-5.6-luna-image",
       "codex/gpt-image-2.5-flare",
+      "codex/gpt-image-2.5-sunburst",
       "codex/gpt-image-2",
     ]
   );

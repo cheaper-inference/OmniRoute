@@ -499,7 +499,7 @@ export default function ReasoningRoutingRules({
           </p>
         )}
         {(loadFailed || keyMissing) && (
-          <p className="mt-4 text-sm text-red-500" role="alert">
+          <p className="mt-4 text-sm text-error" role="alert">
             {keyMissing ? e("missingKey") : t("loadError")}
           </p>
         )}
@@ -760,7 +760,7 @@ export default function ReasoningRoutingRules({
                         />
                       )}
                       {catalogError && sourceKind === "model" && (
-                        <p className="text-sm text-amber-600">{e("catalogError")}</p>
+                        <p className="text-sm text-warning">{e("catalogError")}</p>
                       )}
                       <p className="rounded-lg bg-primary/5 p-3 text-sm leading-relaxed text-text-muted">
                         {e("matchStageHint")}
@@ -852,7 +852,7 @@ export default function ReasoningRoutingRules({
                   )}
                   <p className="text-sm text-text-muted">{e("effortHint." + form.effortMode)}</p>
                   {capabilityWarning && (
-                    <p role="status" className="text-sm text-amber-600 dark:text-amber-400">
+                    <p role="status" className="text-sm text-warning">
                       {capabilityWarning}
                     </p>
                   )}
@@ -939,11 +939,7 @@ export default function ReasoningRoutingRules({
                   <Button type="button" variant="ghost" onClick={() => confirmDiscard(reset)}>
                     {t("cancel")}
                   </Button>
-                  {dirty && (
-                    <span className="text-xs text-amber-600 dark:text-amber-400">
-                      {e("unsaved")}
-                    </span>
-                  )}
+                  {dirty && <span className="text-xs text-warning">{e("unsaved")}</span>}
                 </div>
               </fieldset>
             </form>
@@ -999,9 +995,7 @@ export default function ReasoningRoutingRules({
             ]}
           />
         </div>
-        {dirty && (
-          <p className="mt-4 text-sm text-amber-600 dark:text-amber-400">{e("saveBeforeCheck")}</p>
-        )}
+        {dirty && <p className="mt-4 text-sm text-warning">{e("saveBeforeCheck")}</p>}
         <Button
           className="mt-4"
           variant="secondary"
@@ -1031,7 +1025,7 @@ export default function ReasoningRoutingRules({
               <p className="text-sm text-text-muted">{e("notMatchedHint")}</p>
             )}
             {[...simulationErrors, ...(decision?.warnings || [])].map((warning, index) => (
-              <p key={index} className="text-sm text-amber-600">
+              <p key={index} className="text-sm text-warning">
                 {String(warning)}
               </p>
             ))}

@@ -143,10 +143,12 @@ function toFullModelString(model: string, providerId?: string | null): string {
 }
 
 function slugify(value: string): string {
+  // The first replace leaves at most one "-" at each edge, so the strip needs no quantifier
+  // (CodeQL #1165, js/polynomial-redos).
   const slug = value
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/^-|-$/g, "");
   return slug.length > 0 ? slug : "step";
 }
 

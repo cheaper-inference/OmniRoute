@@ -19,6 +19,7 @@ Live count: `ls open-sse/services/*.ts | wc -l` (currently 134). More including 
 - **`rateLimitManager.ts`** — Token bucket per API key + provider combo. Rejects before dispatch.
 - **`usage.ts`** — Per-request token/cost consumption tracking.
 - **`quotaCache.ts`** — In-memory quota snapshots, pre-loaded at startup.
+- **`ollamaPurchasedCredits.ts`** — Recognizes verified purchased USD balances before included-plan quota enforcement.
 
 ### Account & Token Management
 

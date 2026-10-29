@@ -37,9 +37,16 @@ on:
 # The nightly `schedule` run (runner-alert only) gets its own group: it runs on the
 # default branch ref, so sharing the publish group would let cancel-in-progress kill
 # an in-flight release-branch publish every night (#14560 follow-up).
+# A push to release/v* must NOT cancel the build already running for that branch (#17230):
+# the amd64 image takes ~2 h on the single omni-build runner and the branch merges faster than
+# that, so with cancel-in-progress the next/next-web channel went 13 days without an image
+# (24 cancelled publishes on 2026-10-19 alone). Without it GitHub still keeps at most one
+# running and one pending run per group — an older pending run is replaced by the newest push,
+# the in-flight build completes, the latest tip follows. Tags, releases, dispatches and the
+# scheduled alert keep cancelling.
 concurrency:
   group: docker-publish-${{ github.event_name == 'schedule' && 'runner-alert' || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/')) }}
 
 # Least-privilege default: read-only at the top level; the build and merge jobs that
 # push to GHCR grant packages: write themselves (Scorecard TokenPermissions).
@@ -53,7 +60,7 @@ jobs:
     # publish jobs that currently exclude schedule entirely.
     if: >-
       github.event_name != 'schedule' &&
-      (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute')
+      (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -144,8 +151,8 @@ jobs:
     name: Preflight — amd64 runner availability
     needs: prepare
     if: >-
-      github.event_name != 'schedule' && needs.prepare.outputs.skip != 'true' && vars.USE_VPS_RUNNER == 'true' &&
-      (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute')
+      github.event_name != 'schedule' && needs.prepare.outputs.skip != 'true' && vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' &&
+      (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -183,7 +190,7 @@ jobs:
       !cancelled() && github.event_name != 'schedule' &&
       needs.prepare.result == 'success' && needs.prepare.outputs.skip != 'true' &&
       (needs.runner-preflight.result == 'success' || needs.runner-preflight.result == 'skipped') &&
-      (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute')
+      (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
     # amd64: the .113 omni-build pool (31 GB / 32 cores, ONE listener since
     # #12048). Hosted ubuntu-24.04 is ~7 GB and dies ResourceExhausted (#11976).
     # Falls back to hosted when USE_VPS_RUNNER is off. arm64: no ARM box — stay
@@ -193,7 +200,7 @@ jobs:
     # (run 33253576569). The same tree's arm64 webpack build on hosted ARM
     # succeeded (run 33264823398). Dockerfile already documents webpack as the
     # Docker escape hatch (OMNIROUTE_USE_TURBOPACK=0).
-    runs-on: ${{ matrix.arch == 'amd64' && (vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-24.04') || 'ubuntu-24.04-arm' }}
+    runs-on: ${{ matrix.arch == 'amd64' && (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-24.04') || 'ubuntu-24.04-arm' }}
     # Share the 1-slot omni-build ceiling (#12048) with ci.yml `Build` /
     # npm-publish. Same group as main's Build so a :next publish waits beside
     # the artefact instead of sitting next to it. arm64 is hosted — its own
@@ -220,7 +227,7 @@ jobs:
             arch: arm64
     env:
       IMAGE_NAME: diegosouzapw/omniroute
-      GHCR_IMAGE_NAME: ghcr.io/diegosouzapw/omniroute
+      GHCR_IMAGE_NAME: ghcr.io/cheaper-inference/omniroute
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -248,6 +255,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Heap for the webpack build inside BuildKit: 12288 MB on every build-args block below.
+      # Validated on the hosted runners (16 GB) by the publishes of 2026-10-16/17 — runs
+      # 38904652365, 38907575198 and 39010473398, amd64 and arm64 green (27-55 min). It stays
+      # at or above build.yml's native webpack floor (10240 MB), never below it
+      # (tests/unit/docker-publish-build-heap-14325.test.ts).
       - name: Build and push platform image by digest
         id: build
         uses: docker/build-push-action@v7
@@ -352,6 +364,9 @@ jobs:
           DIGEST_BUN_WEB: ${{ steps.build-bun-web.outputs.digest }}
         run: |
           set -euo pipefail
+          # Self-hosted runners keep /tmp across runs: start empty so digests of
+          # earlier runs are never uploaded (#15184).
+          rm -rf /tmp/digests
           mkdir -p /tmp/digests/base /tmp/digests/web /tmp/digests/bun-base /tmp/digests/bun-web
           touch "/tmp/digests/base/${DIGEST_BASE#sha256:}"
           touch "/tmp/digests/web/${DIGEST_WEB#sha256:}"
@@ -412,7 +427,7 @@ jobs:
       - build
     if: >-
       github.event_name != 'schedule' && needs.prepare.outputs.skip != 'true' &&
-      (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute')
+      (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -420,7 +435,7 @@ jobs:
       security-events: write
     env:
       IMAGE_NAME: diegosouzapw/omniroute
-      GHCR_IMAGE_NAME: ghcr.io/diegosouzapw/omniroute
+      GHCR_IMAGE_NAME: ghcr.io/cheaper-inference/omniroute
       VERSION: ${{ needs.prepare.outputs.version }}
       PROMOTE_LATEST: ${{ needs.prepare.outputs.promote_latest }}
     steps:
@@ -480,6 +495,26 @@ jobs:
           pattern: digests-bun-web-*
           path: /tmp/digests/bun-web
           merge-multiple: true
+
+      - name: Guard against stale digests
+        run: |
+          set -euo pipefail
+          # One digest per arch (amd64 + arm64) at most; more means stale digests leaked in (#15184).
+          # An optional image (bun-web is best-effort) may have produced no digest at all: its
+          # download step then creates no directory, and `find <missing>` under pipefail used to
+          # abort this step with exit 1 and no message, taking every mandatory manifest down with
+          # it (v3.8.52 release run 39316002758). The manifest step already skips such images.
+          for dir in base web bun-base bun-web; do
+            if [ ! -d "/tmp/digests/$dir" ]; then
+              echo "digests in $dir: none (optional image produced no digest — skipped)"
+              continue
+            fi
+            count=$(find "/tmp/digests/$dir" -type f 2>/dev/null | wc -l)
+            if [ "$count" -gt 2 ]; then
+              echo "digests in $dir: found $count, expected at most 2 (stale digests leaked in)" >&2
+              exit 1
+            fi
+          done
 
       - name: Create Docker Hub version manifests
         run: |
@@ -650,7 +685,7 @@ jobs:
       - name: Upload Trivy SARIF to Security tab
         if: needs.prepare.outputs.version != 'main'
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@v4.38.2
+        uses: github/codeql-action/upload-sarif@v4.39.1
         with:
           sarif_file: trivy-results.sarif
           category: trivy-image
@@ -676,7 +711,8 @@ jobs:
     name: omni-build runner offline alert
     if: >-
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
-      (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute')
+      vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' &&
+      (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

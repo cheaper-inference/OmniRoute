@@ -48,15 +48,11 @@ jednostavno radi), proverava stanje servera i izvršava `claude`.
 
 ---
 
-## Alijasi za otkrivanje — prikažite modele koji nisu Claude u biraču `/model`
+## Алијаси за откривање — приказ не-Claude модела у `/model` изборнику
 
-Claude Code otkrivanje modela preko mrežnog prolaza prikazuje samo ID-ove koji počinju sa `claude`
-ili `anthropic`, pa uz `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` izvorni
-birač `/model` obično prikazuje **samo** OmniRoute-ove Claude/Anthropic modele —
-`kimi/kimi-k2.6` ili `glm/glm-5.2` se nikada ne pojavljuju, iako se ispravno usmeravaju.
+Откривање модела преко gateway-ја у Claude Code-у приказује само идентификаторе који почињу са `claude` или `anthropic`, тако да уз `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` уграђени `/model` изборник обично приказује **само** Claude/Anthropic моделе из OmniRoute-а — `kimi/kimi-k2.6` или `glm/glm-5.2` се никада не појављује, иако се усмерава без проблема.
 
-OmniRoute može da preslika bilo koji omogućeni model (i kombinaciju) pod ID-om `claude/…` kako bi
-prošao taj filter i pojavio se u biraču:
+OmniRoute може да преслика било који омогућени модел (и комбо) под `claude/…` идентификатором, тако да пролази кроз тај филтер и појављује се у изборнику:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,39 +60,28 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Kada izaberete neki od njih u Claude Code-u, OmniRoute uklanja omotač `claude/`
-i vraća stvarni ID pre usmeravanja — originalni ID `claude/<real-claude-model>`
-(stvarni Claude OAuth dobavljač) uvek ostaje neizmenjen.
+Када неки од њих изаберете у Claude Code-у, OmniRoute пре усмеравања уклања `claude/` омотач и враћа прави идентификатор — истински `claude/<real-claude-model>` идентификатор (стварни Claude OAuth провајдер) увек остаје нетакнут.
 
-**Ovo je podrazumevano isključeno** i kontroliše se pomoću trostepenog mehanizma (najspecifičniji
-nivo ima prednost), tako da običan OmniRoute nikada ne udvostručuje svoj katalog za klijente koji ne koriste
-Claude Code:
+Подразумевано се пресликавају само основни идентификатори. Када је укључен опциони feature flag `CATALOG_MIRROR_REFINEMENTS_ENABLED`, варијанте нивоа резоновања које каталог већ наводи (нпр. `codex/gpt-6-sol-high`) пресликавају се као и сваки други идентификатор, тако да Claude Code може да изабере експлицитан ниво напора, док се уграђени `auto/*` идентификатори које путања захтева не може да материјализује не пресликавају. То да ли се варијанте нивоа уопште приказују и даље одређује `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — пресликавање никада не додаје варијанту коју основни каталог нема.
 
-| Nivo      | Gde                                                                                                |
-| --------- | -------------------------------------------------------------------------------------------------- |
-| Model     | Stranica sa detaljima dobavljača → prekidač „Prikaži u Claude Code-u“ za svaki model               |
-| Dobavljač | Stranica sa detaljima dobavljača → prekidač na nivou dobavljača (obuhvata sve njegove modele)      |
-| Globalno  | Podešavanja → Zastavice funkcionalnosti → `EXPOSE_CC_DISCOVERY_ALIASES` (podrazumevano isključeno) |
+**Ово је подразумевано искључено** и контролише се преко три нивоа (најспецифичнији побеђује), тако да обичан OmniRoute никада не удвостручује свој каталог за клијенте који не користе Claude Code:
 
-Promenljiva okruženja `EXPOSE_CC_DISCOVERY_ALIASES` prisilno uključuje globalni nivo
-i ima prednost nad podešavanjem na kontrolnoj tabli (ekran Zastavice funkcionalnosti prikazuje
-napomenu „aktivno putem promenljive okruženja“ kada je to slučaj). Prekidači po dobavljaču i
-po modelu dodatno preciziraju ponašanje — npr. ako je globalni nivo isključen, a dobavljač Kimi uključen,
-prikazuju se samo Kimi modeli.
+| Ниво      | Где                                                                                   |
+| --------- | ------------------------------------------------------------------------------------- |
+| Модел     | Страница детаља провајдера → прекидач „Прикажи у Claude Code-у" по моделу             |
+| Провајдер | Страница детаља провајдера → прекидач на нивоу провајдера (покрива све његове моделе) |
+| Глобално  | Подешавања → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (подразумевано искључено)  |
 
-> ⚠️ **Nepodudaranje veličine prozora kod modela koji nisu Claude.** Claude Code pretpostavlja kontekstni
-> prozor od 200K za svaki ID koji ne prepoznaje (ne može da pročita stvarnu veličinu prozora iz
-> `/v1/models`). Za model sa većim prozorom (npr. Kimi K2 sa 256K), postavite
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na vrednost manju od stvarne veličine prozora modela kako se
-> automatsko sažimanje ne bi prerano aktiviralo. Generisani profili iznad već
-> podešavaju ovo za svaki model.
+Променљива окружења `EXPOSE_CC_DISCOVERY_ALIASES` принудно укључује глобални ниво и има предност над подешавањем у контролној табли (екран Feature Flags тада приказује напомену „активно преко променљиве окружења"). Прекидачи на нивоу провајдера и модела одатле додатно прецизирају подешавање — нпр. глобално искључено + укључен Kimi провајдер излаже само Kimi-јеве моделе.
+
+> ⚠️ **Неподударност прозора на не-Claude моделима.** Claude Code за сваки идентификатор који не препознаје претпоставља контекстни прозор од 200K (не може да прочита стварни прозор са `/v1/models`). За модел са већим прозором (нпр. Kimi K2 са 256K) подесите `CLAUDE_CODE_AUTO_COMPACT_WINDOW` на вредност испод стварног прозора модела, како се аутоматска компакција не би превремено покренула. Генерисани профили изнад то већ раде за сваки модел.
 
 ---
 
 ## Блок за почетно подешавање на контролној табли
 
-Картица алатке Claude (**Контролна табла → CLI Code**) приказује тачан фрагмент `settings.json`
-за ову инстанцу, поред дугмета са информацијама о алијасу за откривање, заједно са дугметом за копирање:
+Картица алатке Claude (**Контролна табла → CLI Code**) приказује тачан фрагмент датотеке `settings.json`
+за ову инстанцу, поред дугмета са информацијама о алијасу за откривање, као и дугме за копирање:
 
 ```jsonc
 {
@@ -108,29 +93,43 @@ prikazuju se samo Kimi modeli.
 }
 ```
 
-Основни URL је онај који је картица разрешила (укључујући прилагођену вредност коју сте унели) и већ је
-нормализован — без суфикса `/v1` и без косе црте на крају. **Кључ се никада не приказује**: блок садржи
-месточувара, тако да снимак екрана или налепљени исечак не могу да га открију. Замените га својим кључем.
+Основни URL је онај који је картица одредила (укључујући прилагођену вредност коју сте унели) и већ је
+нормализован — без суфикса `/v1` и без завршне косе црте. **Кључ се никада не приказује**: блок садржи
+чувар места, тако да снимак екрана или налепљени исечак не могу да открију кључ. Налепите свој кључ преко њега.
 
 Додајте `CLAUDE_CODE_AUTO_COMPACT_WINDOW` у исти блок `env` за сваки модел чији стварни
-контекстни прозор није 200K — Claude Code претпоставља 200K за сваки id који не препознаје, па се
+контекстни прозор није 200K — Claude Code подразумева 200K за сваки id који не препознаје, па се
 аутоматско сажимање у супротном покреће у погрешном тренутку (погледајте упозорење у претходном одељку).
 Градитељ исечка прихвата и ту вредност, тако да позивалац који зна величину прозора циљног модела
 може директно да је наведе.
 
 Извор: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (чист
-градитељ, покривен јединичним тестовима) који приказује `ClaudeGatewayOnboardingBlock`.
+градитељ, покривен јединичним тестовима), који приказује `ClaudeGatewayOnboardingBlock`.
+
+### Закључавање на један налог (опционално)
+
+Да бисте сваки Claude Code захтев слали преко једног одређеног налога добављача, додајте
+заглавље `x-omniroute-connection` путем `ANTHROPIC_CUSTOM_HEADERS` у исти блок `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Копирајте id из ознаке `xxxxxxxx…` у реду везе на страници добављача. Закључавање се
+примењује само на id-ове појединачних модела (`provider/model`), а не на комбинације. Погледајте
+[Закључавање налога по захтеву](../reference/API_REFERENCE.md#account-pinning-per-request) за
+тачно понашање резервног избора.
 
 ---
 
 ## Профили (`CLAUDE_CONFIG_DIR`)
 
-Claude Code **нема изворне датотеке профила** (за разлику од Codex-овог `~/.codex/<name>.config.toml`).
+Claude Code **нема изворне датотеке профила** (за разлику од Codex-ових `~/.codex/<name>.config.toml`).
 Уобичајени механизам је `CLAUDE_CONFIG_DIR` — засебан директоријум конфигурације за сваки
-профил, при чему сваки има сопствени `settings.json`, акредитиве, историју и кеш.
+профил, од којих сваки има сопствене `settings.json`, акредитиве, историју и кеш.
 
-`omniroute setup-claude` преузима активни каталог `/v1/models` и уписује по један
-профил за сваки модел у `~/.claude/profiles/<name>/settings.json`, користећи
+`omniroute setup-claude` преузима актуелни `/v1/models` каталог и уписује по један
+профил за сваки модел у `~/.claude/profiles/<name>/settings.json`, поново користећи
 **иста имена као `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
@@ -148,18 +147,18 @@ Claude Code **нема изворне датотеке профила** (за р
 }
 ```
 
-> **Токен за ауторизацију се никада не уписује у профил.** Покрените помоћу
-> `omniroute launch --profile <name>` (он убацује `ANTHROPIC_AUTH_TOKEN` из
+> **Токен за аутентификацију се никада не уписује у профил.** Покрените помоћу
+> `omniroute launch --profile <name>` (ова команда умеће `ANTHROPIC_AUTH_TOKEN` из
 > активног контекста) или сами извезите `ANTHROPIC_AUTH_TOKEN` и покрените
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
 **Аутоматска синхронизација након откривања модела (опционо).** OmniRoute може аутоматски поново да генерише исте
-датотеке `~/.claude/profiles/<name>/settings.json` кад год синхронизација модела добављача
-измени активни каталог — тако нови или преименовани модели добијају профиле без поновног покретања
-команде. Ово је **подразумевано искључено**: укључите га на **CLI Code контролној табли** („Аутоматска синхронизација
-CLI профила“ → Claude Code) или поставите `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (такође поштује
-`CLI_ALLOW_CONFIG_WRITES`, који је подразумевано укључен). Када је омогућено, уписује само датотеке профила; никада не
-мења вашу активну/подразумевану Claude конфигурацију, ауторизацију или `~/.claude/settings.json`.
+`~/.claude/profiles/<name>/settings.json` датотеке кад год синхронизација модела добављача
+промени актуелни каталог — тако нови или преименовани модели добијају профиле без поновног покретања
+команде. Ово је **подразумевано искључено**: укључите га на **CLI Code контролној табли** („Аутоматска
+синхронизација CLI профила“ → Claude Code) или подесите `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (такође поштује
+`CLI_ALLOW_CONFIG_WRITES`, који је подразумевано укључен). Када је омогућено, уписују се само датотеке профила; никада се
+не мењају ваша активна/подразумевана Claude конфигурација, аутентификација нити `~/.claude/settings.json`.
 
 ### Генерисање и коришћење профила
 
@@ -172,6 +171,10 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Само неки добављачи
 omniroute setup-claude --only glm,kimi
+
+# Такође упишите профиле за локалне CLI добављаче (zcode, auggie, devin-cli-agentic,
+# codex-app-server) који нису откривени на овом систему (подразумевано се прескачу за локално одредиште)
+omniroute setup-claude --include-local
 
 # Преглед без уписивања
 omniroute setup-claude --dry-run

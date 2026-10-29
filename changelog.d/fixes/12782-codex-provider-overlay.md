@@ -1,1 +1,0 @@
-- Fix `setup-codex` profiles referencing an undefined OmniRoute provider on fresh configurations, preserving existing provider/auth settings and keeping supplied API keys out of generated files (#12782).

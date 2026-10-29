@@ -612,17 +612,17 @@ post_install() {
 <details>
 <summary><b>सबै उपलब्ध मोडेलहरू हेर्नुहोस्</b></summary>
 
-> तलको सूची v3.8.0 का लागि `open-sse/config/providerRegistry.ts` बाट चयन गरिएको हो। क्लाउड क्याटलगहरू (Gemini, OpenRouter, आदि) गतिशील रूपमा सिंक हुन्छन् — पूर्ण लाइभ क्याटलगका लागि **Dashboard → Providers → [provider] → Available Models** खोल्नुहोस् वा `GET /api/models/catalog` कल गर्नुहोस्।
+> तलको सूची v3.8.0 को लागि `open-sse/config/providerRegistry.ts` बाट तयार गरिएको हो। क्लाउड क्याटलगहरू (Gemini, OpenRouter, आदि) गतिशील रूपमा सिंक गरिन्छन् — पूरा लाइभ क्याटलगको लागि **ड्यासबोर्ड → प्रोभाइडरहरू → [provider] → उपलब्ध मोडेलहरू** खोल्नुहोस् वा `GET /api/models/catalog` कल गर्नुहोस्।
 >
-> यदि कुनै प्रदायकको अन्तर्निर्मित सूची अद्यावधिक हुन बाँकी छ भने, लाइभ अपस्ट्रिम क्याटलग तान्न त्यस पृष्ठमा रहेको **Import from /models** प्रयोग गर्नुहोस् (वा **Auto-Sync** सक्षम गर्नुहोस्)। यो LLM7.io (`gemini-3.1-flash-lite`) र UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) का लागि v3.8.50 मा प्रमाणित गरिएको थियो; सोही परीक्षण चक्रमा Pollinations को बेनामी पहुँच अपस्ट्रिमबाटै सीमित रह्यो।
+> यदि कुनै प्रोभाइडरको बिल्ट-इन सूची पुरानो भएको छ भने, लाइभ अपस्ट्रीम क्याटलग तान्न त्यस पृष्ठमा **/models बाट आयात गर्नुहोस्** प्रयोग गर्नुहोस् (वा **Auto-Sync** सक्षम गर्नुहोस्)। यो v3.8.50 मा LLM7.io (`gemini-3.1-flash-lite`) र UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) का लागि प्रमाणित गरिएको थियो; उही परीक्षण चरणमा Pollinations को गुमनाम पहुँच अपस्ट्रीम-सीमित नै रह्यो।
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ प्रयास तहहरू: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort तहहरू: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — निःशुल्क OAuth: **Dashboard → Providers → Kiro → Available Models** अन्तर्गत देखाइएको लाइभ क्याटलग प्रयोग गर्नुहोस्। उपलब्धता खाता र योजनामा निर्भर हुन्छ।
+**Kiro (`kr/`)** — निःशुल्क OAuth: **ड्यासबोर्ड → प्रोभाइडरहरू → Kiro → उपलब्ध मोडेलहरू** अन्तर्गत देखाइएको लाइभ क्याटलग प्रयोग गर्नुहोस्। उपलब्धता खाता र योजनामा निर्भर हुन्छ।
 
 **Qoder (`if/`)** — निःशुल्क OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,37 +630,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/महिना निश्चित वा प्रयोगअनुसार: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/महीना फ्ल्याट वा प्रति-प्रयोग: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API कुञ्जी: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — अत्यन्त तीव्र: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — अति-छिटो: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — नेटिभ Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok नेटिभ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU मा होस्ट गरिएको: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-होस्टेड: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — खोजद्वारा संवर्धित: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — खोज-संवर्धित: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — खुला स्रोत: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (निःशुल्क), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — खुला-स्रोत: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (निःशुल्क), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — द्रुत इन्फरेन्स: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — छिटो इन्फरेन्स: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — वेफर-स्केल: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG-केन्द्रित: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — उद्यम: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — एन्टरप्राइज: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google बाट प्रत्येक API कुञ्जीअनुसार लाइभ सिंक गरिन्छ — कुनै स्थिर सूची छैन। **Dashboard → Providers** मा कुञ्जी जडान गर्नुहोस्, त्यसपछि हालको क्याटलग आयात गर्न **Available Models** प्रयोग गर्नुहोस् (उदाहरणका लागि `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
+**Gemini (Google Cloud `gemini/`)**: Google बाट प्रत्येक API key अनुसार लाइभ सिंक गरिन्छ — कुनै स्थिर सूची छैन। **ड्यासबोर्ड → प्रोभाइडरहरू** मा key जडान गर्नुहोस् अनि हालको क्याटलग आयात गर्न **उपलब्ध मोडेलहरू** प्रयोग गर्नुहोस् (जस्तै `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
 
-**अन्य अनुकूल प्रदायकहरू** (चयनित): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` मार्फत), `azure-ai`, `openrouter` (पासथ्रु क्याटलग), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। प्रत्येकले `providerRegistry.ts` मा आफ्नै मोडेल सूची राख्छ र प्रदायकले `/models` एन्डपोइन्ट उपलब्ध गराउँदा स्वतः सिंक गर्न सकिन्छ।
+**अन्य उपयुक्त प्रोभाइडरहरू** (चयनित): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` मार्फत), `azure-ai`, `openrouter` (पासथ्रू क्याटलग), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। प्रत्येकले `providerRegistry.ts` मा आफ्नै मोडेल सूची व्यवस्थापन गर्छ र प्रोभाइडरले `/models` एन्डपोइन्ट उपलब्ध गराएमा अटो-सिंक गर्न सकिन्छ।
 
-**मोडेल ID हरूबारे टिप्पणी:** OmniRoute ले प्रदायक-नेटिभ ID हरू (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) प्रयोग गर्छ। केही ID मा थोप्लायुक्त संस्करणहरू समावेश छन्, किनभने अपस्ट्रिम API ले तिनलाई त्यसरी नै अपेक्षा गर्छ। कुनै मोडेल माथि सूचीबद्ध छैन भने, उपलब्धता पुष्टि गर्न `omniroute models --search <term>` चलाउनुहोस् वा `GET /api/models/catalog` अनुरोध गर्नुहोस्।
+**मोडेल ID हरूबारे टिप्पणी:** OmniRoute ले प्रोभाइडर-नेटिभ ID हरू (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) प्रयोग गर्छ। केही ID हरूमा बिन्दुसहितका संस्करणहरू समावेश छन् किनकि अपस्ट्रीम API ले त्यही रूपमा अपेक्षा गर्छ। यदि कुनै मोडेल माथि सूचीबद्ध छैन भने, `omniroute models --search <term>` चलाउनुहोस् वा उपलब्धता पुष्टि गर्न `GET /api/models/catalog` प्रयोग गर्नुहोस्।
 
 </details>
 
@@ -668,70 +668,75 @@ post_install() {
 
 ## 🧩 उन्नत सुविधाहरू
 
-### अनुकूल मोडेलहरू
+### अनुकूलन मोडेलहरू
 
-एप अद्यावधिकको प्रतीक्षा नगरी कुनै पनि प्रदायकमा कुनै पनि मोडेल ID थप्नुहोस्:
+एप अपडेटको प्रतीक्षा नगरी कुनै पनि प्रदायकमा कुनै पनि मोडेल ID थप्नुहोस्:
 
 ```bash
-# API मार्फत
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# सूची: curl http://localhost:20128/api/provider-models?provider=openai
-# हटाउनुहोस्: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-वा ड्यासबोर्ड प्रयोग गर्नुहोस्: **Providers → [Provider] → Custom Models**।
+वा ड्यासबोर्ड प्रयोग गर्नुहोस्:** प्रदायकहरू → [प्रदायक] → अनुकूलन मोडेलहरू** ।
 
-टिप्पणीहरू:
+नोट:
 
-- OpenRouter र OpenAI/Anthropic-सङ्गत प्रदायकहरू **Available Models** बाट मात्र व्यवस्थापन गरिन्छन्। म्यानुअल रूपमा थपिएका, आयात गरिएका र स्वतः-सिङ्क गरिएका सबै मोडेलहरू एउटै उपलब्ध-मोडेल सूचीमा जान्छन्, त्यसैले ती प्रदायकहरूका लागि छुट्टै Custom Models खण्ड हुँदैन।
-- **Custom Models** खण्ड व्यवस्थापित उपलब्ध-मोडेल आयात उपलब्ध नगराउने प्रदायकहरूका लागि हो।
+- OpenRouter र OpenAI/Anthropic-compatible प्रदायकहरू बाट व्यवस्थित छन्** उपलब्ध मोडेलहरू** मात्र। एउटै उपलब्ध मोडेल सूचीमा सबै भूमि म्यानुअल थप्नुहोस्, आयात गर्नुहोस्, र स्वत: सिंक गर्नुहोस्, त्यसैले ती प्रदायकहरूको लागि कुनै छुट्टै अनुकूलन मोडेल खण्ड छैन।
+- द** अनुकूलन मोडेलहरू** खण्ड व्यवस्थित उपलब्ध-मोडेल आयातहरू पर्दाफाश नगर्ने प्रदायकहरूको लागि हो।
 
-### अनुकूल OpenAI-सङ्गत प्रदायकहरू
+### अनुकूलन OpenAI-कम्प्याटिबल प्रदायकहरू
 
-OpenAI API सँग सञ्चार गर्न सक्ने कुनै पनि गेटवे (स्व-होस्ट गरिएको प्रोक्सी, vLLM, तेस्रो-पक्ष एग्रिगेटर)
-लाई यसको आफ्नै प्रदायक नोडका रूपमा थप्न सकिन्छ:
+OpenAI API (स्व-होस्ट गरिएको प्रोक्सी, vLLM, तेस्रो-पक्ष एग्रीगेटर) बोल्ने कुनै पनि गेटवेलाई यसको आफ्नै प्रदायक नोडको रूपमा थप्न सकिन्छ:
 
-1. **Providers → Add OpenAI Compatible**।
-2. **Name**: नोडका लागि प्रदर्शन लेबल।
-3. **Prefix**: राउटिङ नाम। क्लाइन्टहरूले मोडेलहरूलाई `<prefix>/<model>` का रूपमा कल गर्छन्, त्यसैले
-   `mygw` प्रिफिक्स भएको नोडले `mygw/gpt-4o-mini` सेवा दिन्छ। यो आवश्यक छ; क्यारेक्टरसम्बन्धी कुनै प्रतिबन्ध छैन।
-4. **API Type**: गेटवेले सेवा दिने एन्डपोइन्ट परिवार (Chat Completions, Responses,
-   Embeddings, अडियो, तस्बिरहरू)।
-5. **Base URL**: `/v1` सम्म र त्यसलाई समावेश गर्ने API रुट (उदाहरणका लागि
-   `https://gateway.example.com/v1`), पूर्ण `/chat/completions` पथ होइन। गैर-मानक पथ भएका
-   गेटवेहरूले तिनलाई **Advanced Settings** अन्तर्गत सेट गर्छन् (च्याट पथ, मोडेल पथ)।
-6. **API Key (for Check)** फिल्डले जडान मात्र परीक्षण गर्छ। नोड सिर्जना गरेपछि,
-   यसलाई खोल्नुहोस् र अनुरोधहरूले प्रयोग गर्ने कुञ्जी भण्डारण गर्न **Add Connection** प्रयोग गर्नुहोस्।
+1. **प्रदायकहरू → OpenAI मिल्दो जोड्नुहोस्** ।
+2. **नाम** : नोडको लागि प्रदर्शन लेबल।
+3. **उपसर्ग** : मार्ग नाम। ग्राहकहरूले मोडेलहरूलाई `<prefix>/<model>` भनेर बोलाउँछन्, त्यसैले `mygw` उपसर्ग भएको नोडले `mygw/gpt-4o-mini` लाई सेवा दिन्छ। आवश्यक; त्यहाँ कुनै चरित्र प्रतिबन्ध छैन।
+4. **API प्रकार** : गेटवेले सेवा गर्ने अन्तिम बिन्दु परिवार (च्याट पूरा, प्रतिक्रियाहरू, इम्बेडिङहरू, अडियो, छविहरू)।
+5. **आधार URL** : API रूट, `/v1` सम्म र समावेश (उदाहरणका लागि `https://gateway.example.com/v1`), पूर्ण `/chat/completions` पथ होइन। गैर-मानक मार्गहरू भएका गेटवेहरूले तिनीहरूलाई तल राख्छन्** उन्नत सेटिङहरू** (च्याट मार्ग, मोडेल मार्ग)।
+6. द**API कुञ्जी (जाँचको लागि)** क्षेत्रले जडान मात्र परीक्षण गर्छ। नोड सिर्जना गरेपछि, यसलाई खोल्नुहोस् र प्रयोग गर्नुहोस्** जडान थप्नुहोस्** अनुरोधहरूले प्रयोग गर्ने कुञ्जी भण्डारण गर्न।
 
-नोडले `openai-compatible-<apiType>-<uuid>` ढाँचाको आन्तरिक id प्राप्त गर्छ; तपाईंले यसलाई कहिल्यै
-टाइप गर्नुपर्दैन, प्रिफिक्स नै सार्वजनिक नाम हो।
+नोडले `openai-compatible-<apiType>-<uuid>` फारमको आन्तरिक आईडी प्राप्त गर्दछ; तपाईंले यसलाई कहिल्यै टाइप गर्न आवश्यक छैन, उपसर्ग सार्वजनिक नाम हो।
 
-#### आरक्षित प्रिफिक्सहरू
+#### आरक्षित उपसर्गहरू
 
-प्रिफिक्स अन्तर्निर्मित प्रदायकको id वा उपनाम (उदाहरणका लागि `openai`, `cf`), वा
-सेवानिवृत्त प्रदायकको id हुन सक्दैन। मोडेल रिजोल्भरले अनुकूल नोडहरूभन्दा पहिले अन्तर्निर्मित id र उपनामहरू
-जाँच गर्छ, त्यसैले तीमध्ये कुनै प्रिफिक्स प्रयोग गर्ने नोडले कहिल्यै ट्राफिक प्राप्त गर्दैन:
-`<prefix>/model` अनुरोध त्यसको सट्टा अन्तर्निर्मित प्रदायकमा जान्छ, वा उक्त प्रदायक
-सेवानिवृत्त भएको भए बन्द अवस्थामा असफल हुन्छ। यस्तो प्रिफिक्स भएको नोड सिर्जना वा सम्पादन गर्दा निम्न त्रुटि देखाएर अस्वीकार गरिन्छ:
+उपसर्ग कुनै निर्मित प्रदायकको आईडी वा उपनाम हुन सक्दैन (उदाहरणका लागि `openai`, `cf`), न त सेवानिवृत्त प्रदायकको आईडी। मोडेल रिजोल्भरले कस्टम नोडहरू अघि बिल्ट-इन आईडी र उपनामहरू जाँच गर्दछ, त्यसैले ती उपसर्गहरू मध्ये एक प्रयोग गर्ने नोडले कहिल्यै ट्राफिक प्राप्त गर्दैन: `<prefix>/model` यसको सट्टामा निर्मित प्रदायकमा जान्छ, वा त्यो प्रदायक सेवानिवृत्त भएमा बन्द असफल हुन्छ। यस्तो उपसर्गको साथ नोड सिर्जना वा सम्पादन गर्न अस्वीकार गरिएको छ:
 
 ```text
-prefix: "<prefix>" आरक्षित प्रदायक प्रिफिक्स हो — फरक प्रिफिक्स रोज्नुहोस् (आरक्षित ids/aliases अनुकूल नोडहरूका लागि प्रयोग गर्न सकिँदैन किनभने <prefix>/model जस्ता अनुरोधहरू अन्तर्निर्मित प्रदायकमा रुट हुन्छन् वा प्रदायक सेवानिवृत्त हुँदा बन्द अवस्थामा असफल हुन्छन्)
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-फरक प्रिफिक्स (`mygw`, `acme-proxy`) रोज्नुहोस्। यदि अनुकूल नोडतर्फका अनुरोधहरू
-अन्तर्निर्मित प्रदायक वा त्यसका प्रमाणहरू उल्लेख गर्ने त्रुटिसहित असफल भएमा, नोडको प्रिफिक्स
-आरक्षित छ कि छैन जाँच गर्नुहोस्: यो नियम लागू हुनुअघि सुरक्षित गरिएका नोडहरू अझै भण्डारित छन्, तर तिनको प्रिफिक्स
-अन्तर्निर्मित प्रदायकतर्फ रुट हुन्छ। नोड सम्पादन गरेर त्यसलाई नयाँ प्रिफिक्स दिनुहोस्।
+एउटा छुट्टै उपसर्ग छान्नुहोस् (`mygw`, `acme-proxy`)। यदि अनुकूलन नोडमा अनुरोधहरू त्रुटिसँग असफल भएमा जसले बिल्ट-इन प्रदायक वा यसको प्रमाणहरू नाम दिन्छ, जाँच गर्नुहोस् कि नोडको उपसर्ग आरक्षित छ: यो नियम अवस्थित हुनु अघि बचत गरिएका नोडहरू अझै भण्डारण गरिएका छन्, तर तिनीहरूको उपसर्ग बिल्ट-इन प्रदायकमा मार्गहरू छन्। नोड सम्पादन गर्नुहोस् र यसलाई नयाँ उपसर्ग दिनुहोस्।
 
-### OmniRoute पियरहरू शृङ्खलाबद्ध गर्ने
+#### प्रति-जडान गेटवे विकल्पहरू
 
-अर्को OmniRoute गेटवेलाई **Custom OpenAI-compatible** प्रदायकका रूपमा थप्न सकिन्छ। पियरको
-`/v1` आधार URL र उक्त पियरले जारी गरेको समर्पित, न्यूनतम-अधिकारयुक्त API कुञ्जी प्रयोग गर्नुहोस्।
+यी कुञ्जीहरू जडानको `providerSpecificData` मा जान्छन् (उदाहरणका लागि `PUT /api/providers/{id}` मार्फत):
 
-पारस्परिक वा बहु-हप शृङ्खलाहरूका लागि, प्रत्येक गेटवेमा अप्ट-इन लुप गार्ड सक्षम गर्नुहोस्:
+- `toolNameMaxLength` (पूर्णांक, 1–1024) — OpenAI च्याट-ढाँचा मिल्दो जडानहरूको लागि जसको गेटवेले लामो उपकरण नामहरू अस्वीकार गर्दछ। लामो नामहरू छोटो उपनामको रूपमा पठाइन्छ र प्रतिक्रियामा पुनर्स्थापित गरिन्छ।
+- `quotaEndpoint` — गेटवेको quota/credits अन्तिम बिन्दु, ड्यासबोर्ड कोटा स्ट्रिप र कोटा-अवेयर रूटिङका लागि पढ्नुहोस्। OpenAI- र Anthropic-compatible जडानहरूमा काम गर्दछ; पूर्ण आकार `open-sse/services/usage/openaiCompatible.ts` मा दस्तावेज गरिएको छ।
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### OmniRoute साथीहरू चेनिङ
+
+अर्को OmniRoute गेटवे को रूपमा थप्न सकिन्छ** अनुकूलन OpenAI-संगत** प्रदायक। पियरको `/v1` आधार URL र त्यो साथीद्वारा जारी गरिएको समर्पित, न्यूनतम-विशेषाधिकार API कुञ्जी प्रयोग गर्नुहोस्।
+
+पारस्परिक वा बहु-हप चेनहरूको लागि, प्रत्येक गेटवेमा अप्ट-इन लूप गार्ड सक्षम गर्नुहोस्:
 
 ```bash
 # gateway-a
@@ -747,18 +752,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-स्पष्ट रूपमा अनुमति-सूचीमा राखिएको पियर URL मा पठाइएका अनुरोधहरूले मात्र
-`X-OmniRoute-Peer-Trace` हेडर प्राप्त गर्छन्। गेटवेले दोहोरिएको इन्स्टेन्स ID वा समाप्त भएको हप
-बजेटलाई HTTP `508 Loop Detected` सहित अस्वीकार गर्छ; साधारण अपस्ट्रिम प्रदायकहरूले कुनै पियर मेटाडेटा प्राप्त गर्दैनन्।
+स्पष्ट रूपमा अनुमति दिइएको peer URL लाई पठाइएका अनुरोधहरूले मात्र `X-OmniRoute-Peer-Trace` हेडर प्राप्त गर्छन्। गेटवेले HTTP `508 Loop Detected` सँग दोहोरिएको उदाहरण ID वा एक्स्टेड हप बजेट अस्वीकार गर्दछ; साधारण अपस्ट्रीम प्रदायकहरूले कुनै साथी मेटाडेटा प्राप्त गर्दैनन्।
 
-पियर शृङ्खलाबद्धता डेटाबेस प्रतिकृति वा होस्ट फेलओभर होइन। प्रत्येक गेटवेले स्वतन्त्र
-SQLite अवस्था, क्यास, दर काउन्टर र सेसनहरू राख्छ। सक्रिय/निष्क्रिय वा सक्रिय/सक्रिय उपलब्धताका लागि
-स्वास्थ्य-जाँच गरिएको रिभर्स प्रोक्सी वा क्लाइन्ट फेलओभर प्रयोग गर्नुहोस्, र एउटै SQLite डेटाबेसलाई
-चलिरहेका धेरै OmniRoute इन्स्टेन्सहरूमा कहिल्यै माउन्ट नगर्नुहोस्।
+पियर चेनिङ डाटाबेस प्रतिकृति वा होस्ट फेलओभर होइन। प्रत्येक गेटवेले स्वतन्त्र SQLite राज्य, क्यास, दर काउन्टरहरू, र सत्रहरू राख्छ। active/passive वा active/active उपलब्धताको लागि स्वास्थ्य जाँच गरिएको रिभर्स प्रोक्सी वा क्लाइन्ट फेलओभर प्रयोग गर्नुहोस्, र एक SQLite डाटाबेसलाई धेरै चलिरहेको OmniRoute उदाहरणहरूमा माउन्ट नगर्नुहोस्।
 
-### समर्पित प्रदायक रुटहरू
+### समर्पित प्रदायक मार्गहरू
 
-मोडेल प्रमाणीकरणसहित अनुरोधहरू सिधै कुनै निश्चित प्रदायकतर्फ रुट गर्नुहोस्:
+मोडेल प्रमाणीकरणको साथ एक विशिष्ट प्रदायकलाई सीधा अनुरोधहरू:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -766,25 +766,25 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-प्रदायक प्रिफिक्स नभएमा स्वतः थपिन्छ। नमिल्ने मोडेलहरूले `400` फर्काउँछन्।
+छुटेको खण्डमा प्रदायक उपसर्ग स्वतः थपिन्छ। बेमेल मोडेलहरू `400` फर्काउँछन्।
 
 ### नेटवर्क प्रोक्सी कन्फिगरेसन
 
 ```bash
-# ग्लोबल प्रोक्सी सेट गर्नुहोस्
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# प्रत्येक प्रदायकका लागि प्रोक्सी
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# प्रोक्सी परीक्षण गर्नुहोस्
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**प्राथमिकता:** कुञ्जी-विशिष्ट → कम्बो-विशिष्ट → प्रदायक-विशिष्ट → ग्लोबल → वातावरण।
+**अग्रता:** कुञ्जी-विशिष्ट → कम्बो-विशिष्ट → प्रदायक-विशिष्ट → ग्लोबल → वातावरण।
 
 ### मोडेल क्याटलग API
 
@@ -792,111 +792,111 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
 curl http://localhost:20128/api/models/catalog
 ```
 
-प्रदायकअनुसार समूहबद्ध गरिएका मोडेलहरू तिनका प्रकारहरू (`chat`, `embedding`, `image`) सहित फर्काउँछ।
+प्रकारहरू (`chat`, `embedding`, `image`) सहित प्रदायकद्वारा समूहबद्ध मोडेलहरू फर्काउँछ।
 
-### क्लाउड सिङ्क
+### क्लाउड सिंक
 
-- विभिन्न उपकरणहरूमा प्रदायकहरू, कम्बोहरू र सेटिङहरू सिङ्क गर्नुहोस्
-- टाइमआउट + छिटो-असफल हुने सुविधासहित स्वचालित पृष्ठभूमि सिङ्क
-- उत्पादन वातावरणमा सर्भर-साइड `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` लाई प्राथमिकता दिनुहोस्
+- सिंक प्रदायकहरू, कम्बोहरू, र यन्त्रहरूमा सेटिङहरू
+- टाइमआउट + फेल-फास्टको साथ स्वचालित पृष्ठभूमि सिंक
+- उत्पादनमा सर्भर-साइड `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` लाई प्राथमिकता दिनुहोस्
 
-### Cloudflare क्विक टनेल
+### Cloudflare द्रुत टनेल
 
-- Docker र अन्य self-hosted deployments का लागि **Dashboard → Endpoints** मा उपलब्ध छ
-- तपाईंको हालको OpenAI-compatible `/v1` endpoint मा forward गर्ने अस्थायी `https://*.trycloudflare.com` URL सिर्जना गर्छ
-- पहिलो पटक enable गर्दा आवश्यक परेको खण्डमा मात्र `cloudflared` install हुन्छ; त्यसपछिका restarts ले सोही managed binary पुनः प्रयोग गर्छन्
-- OmniRoute वा container restart भएपछि Quick Tunnels स्वतः restore हुँदैनन्; आवश्यक पर्दा dashboard बाट तिनलाई पुनः enable गर्नुहोस्
-- Tunnel URLs अस्थायी हुन्छन् र तपाईंले tunnel stop/start गर्दा हरेक पटक परिवर्तन हुन्छन्
-- सीमित containers मा अनावश्यक QUIC UDP buffer warnings बाट बच्न Managed Quick Tunnels ले पूर्वनिर्धारित रूपमा HTTP/2 transport प्रयोग गर्छन्
-- Managed transport छनोट override गर्न चाहनुहुन्छ भने `CLOUDFLARED_PROTOCOL=quic` वा `auto` सेट गर्नुहोस्
-- Managed download को सट्टा पहिले नै install गरिएको `cloudflared` binary प्रयोग गर्न चाहनुहुन्छ भने `CLOUDFLARED_BIN` सेट गर्नुहोस्
-- Cloudflare Quick Tunnel, Tailscale Funnel, र ngrok Tunnel panels लाई **Settings → Appearance** मा देखाउन वा लुकाउन सकिन्छ। Panel लुकाउँदा चलिरहेको tunnel बन्द हुँदैन।
+- मा उपलब्ध छ** ड्यासबोर्ड → अन्त्य बिन्दुहरू** Docker र अन्य स्व-होस्ट गरिएको परिनियोजनका लागि
+- एउटा अस्थायी `https://*.trycloudflare.com` URL सिर्जना गर्दछ जुन तपाइँको हालको OpenAI- संगत `/v1` अन्त्य बिन्दुमा फर्वार्ड गर्दछ।
+- पहिले आवश्यक हुँदा मात्र `cloudflared` स्थापनाहरू सक्षम गर्नुहोस्; पछि पुन: सुरु हुन्छ उही व्यवस्थित बाइनरी पुन: प्रयोग
+- द्रुत टनेलहरू OmniRoute वा कन्टेनर पुन: सुरु भएपछि स्वत: पुनर्स्थापित हुँदैनन्; आवश्यक पर्दा ड्यासबोर्डबाट तिनीहरूलाई पुन: सक्षम गर्नुहोस्
+- टनेल URLs क्षणिक हो र तपाईंले सुरुङ stop/start हरेक पटक परिवर्तन हुन्छ
+- बन्द कन्टेनरहरूमा शोर QUIC UDP बफर चेतावनीहरूबाट बच्न HTTP/2 यातायातमा द्रुत टनेलहरू पूर्वनिर्धारित रूपमा व्यवस्थित गरियो
+- यदि तपाइँ व्यवस्थित यातायात विकल्प ओभरराइड गर्न चाहनुहुन्छ भने `CLOUDFLARED_PROTOCOL=quic` वा `auto` सेट गर्नुहोस्
+- यदि तपाइँ व्यवस्थित डाउनलोडको सट्टा पूर्वस्थापित `cloudflared` बाइनरी प्रयोग गर्न चाहनुहुन्छ भने `CLOUDFLARED_BIN` सेट गर्नुहोस्।
+- Cloudflare क्विक टनेल, Tailscale फनेल, र ngrok टनेल प्यानलहरू देखाउन वा लुकाउन सकिन्छ** सेटिङहरू → उपस्थिति** । प्यानल लुकाउँदा चलिरहेको सुरुङ रोकिदैन।
 
-### LLM Gateway Intelligence (चरण 9)
+### LLM गेटवे इन्टेलिजेन्स (चरण 9)
 
-- **Semantic Cache** — Non-streaming, temperature=0 responses लाई स्वतः cache गर्छ (`X-OmniRoute-No-Cache: true` प्रयोग गरेर bypass गर्नुहोस्)
-- **Request Idempotency** — `Idempotency-Key` वा `X-Request-Id` header मार्फत 5s भित्रका requests लाई deduplicate गर्छ
-- **Progress Tracking** — `X-OmniRoute-Progress: true` header मार्फत opt-in SSE `event: progress` events उपलब्ध गराउँछ
-
----
-
-### Translator Playground
-
-**Dashboard → Translator** मार्फत पहुँच गर्नुहोस्। OmniRoute ले providers बीच API requests कसरी translate गर्छ भन्ने debug र visualize गर्नुहोस्।
-
-| मोड              | उद्देश्य                                                                                              |
-| ---------------- | ----------------------------------------------------------------------------------------------------- |
-| **Playground**   | Source/target formats चयन गर्नुहोस्, request paste गर्नुहोस्, र translated output तुरुन्तै हेर्नुहोस् |
-| **Chat Tester**  | Proxy मार्फत live chat messages पठाउनुहोस् र सम्पूर्ण request/response cycle निरीक्षण गर्नुहोस्       |
-| **Test Bench**   | Translation को शुद्धता प्रमाणित गर्न धेरै format combinations मा batch tests चलाउनुहोस्               |
-| **Live Monitor** | Requests proxy हुँदै प्रवाहित हुँदा real-time translations हेर्नुहोस्                                 |
-
-**प्रयोगका अवस्थाहरू:**
-
-- कुनै निश्चित client/provider combination किन असफल हुन्छ भन्ने debug गर्नुहोस्
-- Thinking tags, tool calls, र system prompts सही रूपमा translate भएका छन् कि छैनन् प्रमाणित गर्नुहोस्
-- OpenAI, Claude, Gemini, र Responses API formats बीचका format भिन्नताहरू तुलना गर्नुहोस्
+- **सिमेन्टिक क्यास** - स्वत: क्यास गैर-स्ट्रिमिङ, तापमान = 0 प्रतिक्रियाहरू ( `X-OmniRoute-No-Cache: true` सँग बाइपास)
+- **इडम्पोटेन्सी अनुरोध गर्नुहोस्** - `Idempotency-Key` वा `X-Request-Id` हेडर मार्फत 5s भित्र अनुरोधहरू डुप्लिकेट गर्दछ
+- **प्रगति ट्र्याकिंग** - `X-OmniRoute-Progress: true` हेडर मार्फत SSE `event: progress` घटनाहरू अप्ट-इन गर्नुहोस्
 
 ---
 
-### Routing Strategies
+### अनुवादक खेल मैदान
 
-**Dashboard → Settings → Routing** मार्फत configure गर्नुहोस्। Dashboard ले सबैभन्दा धेरै प्रयोग हुने छवटा strategies देखाउँछ; combos र auto-router ले आन्तरिक रूपमा अझ विस्तृत set support गर्छन्।
+मार्फत पहुँच गर्नुहोस्** ड्यासबोर्ड → अनुवादक** । डिबग गर्नुहोस् र OmniRoute ले कसरी प्रदायकहरू बीच API अनुरोधहरू अनुवाद गर्दछ।
 
-**Dashboard मा देखिने strategies (account-level routing):**
+| मोड                 | उद्देश्य                                                                                         |
+| ------------------- | ------------------------------------------------------------------------------------------------ |
+| **खेल मैदान**       | source/target ढाँचाहरू चयन गर्नुहोस्, अनुरोध टाँस्नुहोस्, र तुरुन्तै अनुवादित आउटपुट हेर्नुहोस्  |
+| **च्याट परीक्षक**   | प्रोक्सी मार्फत लाइभ च्याट सन्देशहरू पठाउनुहोस् र पूर्ण request/response चक्र निरीक्षण गर्नुहोस् |
+| **परीक्षण बेन्च**   | अनुवाद शुद्धता प्रमाणित गर्न धेरै ढाँचा संयोजनहरूमा ब्याच परीक्षणहरू चलाउनुहोस्                  |
+| **प्रत्यक्ष मनिटर** | प्रोक्सी मार्फत अनुरोधहरू प्रवाह गर्दा वास्तविक-समय अनुवादहरू हेर्नुहोस्                         |
 
-| Strategy                       | विवरण                                                                                                                   |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| **Fill First**                 | Priority क्रमअनुसार accounts प्रयोग गर्छ — अनुपलब्ध नहुँदासम्म primary account ले सबै requests सम्हाल्छ                 |
-| **Round Robin**                | Configurable sticky limit सहित सबै accounts पालैपालो प्रयोग गर्छ (पूर्वनिर्धारित: प्रत्येक account मा 3 calls)          |
-| **P2C (Power of Two Choices)** | 2 वटा random accounts छनोट गरेर बढी स्वस्थ account मा route गर्छ — स्वास्थ्य अवस्थालाई ध्यानमा राख्दै load सन्तुलन गर्छ |
-| **Random**                     | Fisher-Yates shuffle प्रयोग गरी प्रत्येक request का लागि random रूपमा account चयन गर्छ                                  |
-| **Least Used**                 | सबैभन्दा पुरानो `lastUsedAt` timestamp भएको account मा route गरेर traffic समान रूपमा वितरण गर्छ                         |
-| **Cost Optimized**             | सबैभन्दा कम priority value भएको account मा route गरेर न्यूनतम लागतका providers का लागि optimize गर्छ                    |
+**केसहरू प्रयोग गर्नुहोस्:**
 
-**Advanced combo र auto strategies** (प्रत्येक combo का लागि वा `auto/*` prefixes मार्फत configure गर्न सकिने — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) हेर्नुहोस्):
+- किन एक विशिष्ट client/provider संयोजन असफल हुन्छ डिबग गर्नुहोस्
+- प्रमाणित गर्नुहोस् कि सोच ट्यागहरू, उपकरण कलहरू, र प्रणाली प्रम्प्टहरू सही रूपमा अनुवाद गर्नुहोस्
+- OpenAI, Claude, Gemini, र प्रतिक्रियाहरू API ढाँचाहरू बीचको ढाँचा भिन्नताहरू तुलना गर्नुहोस्
 
-- `priority` — कडा क्रम, कहिल्यै round-robin गर्दैन
-- `weighted` — प्रत्येक model को weights अनुसार proportional traffic विभाजन
-- `fill-first` — Limits नपुग्दासम्म पहिलो model प्रयोग गर्छ
+---
+
+### मार्ग रणनीतिहरू
+
+मार्फत कन्फिगर गर्नुहोस्** ड्यासबोर्ड → सेटिङहरू → रूटिङ** । ड्यासबोर्डले सबैभन्दा धेरै प्रयोग हुने छवटा रणनीतिहरूलाई उजागर गर्दछ; कम्बोज र अटो-राउटरले आन्तरिक रूपमा फराकिलो सेटलाई समर्थन गर्दछ।
+
+**ड्यासबोर्ड देखिने रणनीतिहरू (खाता-स्तर राउटिङ):**
+
+| रणनीति                       | विवरण                                                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **पहिले भर्नुहोस्**          | प्राथमिकता क्रममा खाताहरू प्रयोग गर्दछ — प्राथमिक खाताले अनुपलब्ध नभएसम्म सबै अनुरोधहरू ह्यान्डल गर्छ        |
+| **राउन्ड रोबिन**             | कन्फिगर योग्य टाँसिने सीमाको साथ सबै खाताहरू मार्फत चक्र (पूर्वनिर्धारित: प्रति खाता 3 कलहरू)                |
+| **P2C (दुई विकल्पको शक्ति)** | 2 अनियमित खाताहरू र स्वस्थ्यका लागि मार्गहरू छान्नुहोस् — स्वास्थ्यको जागरूकताको साथ भारलाई सन्तुलनमा राख्छ। |
+| **अनियमित**                  | Fisher-Yates shuffle प्रयोग गरी प्रत्येक अनुरोधको लागि अनियमित रूपमा खाता चयन गर्दछ                          |
+| **कम प्रयोग गरिएको**         | सबैभन्दा पुरानो `lastUsedAt` टाइमस्ट्याम्पको साथ खातामा मार्गहरू, यातायात समान रूपमा वितरण गर्दै             |
+| **लागत अनुकूलित**            | सबैभन्दा कम प्राथमिकता मूल्यको साथ खातामा मार्गहरू, सबैभन्दा कम लागत प्रदायकहरूको लागि अनुकूलन               |
+
+**उन्नत कम्बो र स्वत: रणनीतिहरू** (प्रति कम्बो वा `auto/*` उपसर्गहरू मार्फत कन्फिगर योग्य — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) हेर्नुहोस्):
+
+- `priority` - कडा आदेश, राउन्ड-रोबिन कहिल्यै
+- `weighted` - प्रति-मोडेल वजन द्वारा समानुपातिक यातायात विभाजन
+- `fill-first` - सीमा हिट नभएसम्म पहिलो मोडेल नाली
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Power of Two Choices)
+- `p2c` (दुई विकल्पको शक्ति)
 - `least-used` र `cost-optimized`
-- `auto` — सबै candidates मा score द्वारा सञ्चालित
-- `lkgp` (Last Known Good Provider) — पछिल्लो सफल provider मा स्थिर गर्छ, त्यसपछि rules अनुसार fallback गर्छ
-- `context-optimized` — सबैभन्दा ठूलो खाली context window भएको model चयन गर्छ
-- `context-relay` — Follow-up turns का लागि long-context models लाई श्रृंखलाबद्ध गर्छ
+- `auto` - सबै उम्मेद्वारहरूमा स्कोर-संचालित
+- `lkgp` (अन्तिम ज्ञात राम्रो प्रदायक) - अन्तिम सफल प्रदायकमा पिन गर्नुहोस्, त्यसपछि नियमहरूमा फर्किन्छ।
+- `context-optimized` - सबैभन्दा ठूलो नि: शुल्क सन्दर्भ विन्डोको साथ मोडेल छान्छ
+- `context-relay` - फलो-अप पालोहरूको लागि लामो-सन्दर्भ मोडेलहरू चेन
 
-#### External Sticky Session Header
+#### बाह्य स्टिकी सत्र हेडर
 
-External session affinity का लागि (उदाहरणका लागि, reverse proxies पछाडि रहेका Claude Code/Codex agents), निम्न पठाउनुहोस्:
+बाह्य सत्र सम्बन्धका लागि (उदाहरणका लागि, रिभर्स प्रोक्सीहरू पछाडि Claude Code/Codex एजेन्टहरू), पठाउनुहोस्:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute ले `x_session_id` पनि स्वीकार गर्छ र प्रभावकारी session key लाई `X-OmniRoute-Session-Id` मा फर्काउँछ।
+OmniRoute `x_session_id` पनि स्वीकार गर्छ र `X-OmniRoute-Session-Id` मा प्रभावकारी सत्र कुञ्जी फर्काउँछ।
 
-तपाईं Nginx प्रयोग गर्नुहुन्छ र underscore-form headers पठाउनुहुन्छ भने, निम्न enable गर्नुहोस्:
+यदि तपाइँ Nginx प्रयोग गर्नुहुन्छ र अन्डरस्कोर-फार्म हेडरहरू पठाउनुहुन्छ, सक्षम गर्नुहोस्:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Wildcard Model Aliases
+#### वाइल्डकार्ड मोडेल उपनाम
 
-Model names लाई remap गर्न wildcard patterns सिर्जना गर्नुहोस्:
+मोडेल नामहरू पुन: म्याप गर्न वाइल्डकार्ड ढाँचाहरू सिर्जना गर्नुहोस्:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
 Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-Wildcards ले `*` (जुनसुकै characters) र `?` (एउटा character) support गर्छन्।
+वाइल्डकार्डहरूले `*` (कुनै पनि क्यारेक्टर) र `?` (एकल क्यारेक्टर) लाई समर्थन गर्दछ।
 
-#### Fallback Chains
+#### फलब्याक चेनहरू
 
-सबै requests मा लागू हुने global fallback chains परिभाषित गर्नुहोस्:
+सबै अनुरोधहरूमा लागू हुने विश्वव्यापी फलब्याक चेनहरू परिभाषित गर्नुहोस्:
 
 ```
 Chain: production-fallback
@@ -907,152 +907,208 @@ Chain: production-fallback
 
 ---
 
-### Resilience र Circuit Breakers
+### साझा प्रदायक संयोजन र रूटिङ ढाँचाहरू
 
-**Dashboard → Settings → Resilience** मार्फत configure गर्नुहोस्।
+यहाँ धेरै प्रदायकहरू संयोजन गर्न र OmniRoute मा तिनीहरूको बीचमा रूटिङको लागि उदाहरण ढाँचाहरू छन्:
 
-OmniRoute ले पाँचवटा components सहित provider-level resilience कार्यान्वयन गर्छ:
+#### 1. कोडिङ एजेन्ट कम्बो: Cost/Speed फलब्याकको साथ उच्च-अन्त तर्क
 
-1. **Request Queue र Pacing** — System-level request shaping:
-   - **Requests Per Minute (RPM)** — प्रत्येक account का लागि प्रति मिनेट requests को अधिकतम सङ्ख्या
-   - **Min Time Between Requests** — Requests बीचको न्यूनतम अन्तर, milliseconds मा
-   - **Max Concurrent Requests** — प्रत्येक account का लागि एकै समयमा चल्न सक्ने requests को अधिकतम सङ्ख्या
-2. **जडान कूलडाउन** — पुनः प्रयास गर्न मिल्ने विफलतापछि प्रत्येक प्रमाणीकरण प्रकारका लागि एउटै जडानको कन्फिगरेसन:
-   - **आधारभूत कूलडाउन** — पुनः प्रयास गर्न मिल्ने अपस्ट्रिम विफलताहरूका लागि पूर्वनिर्धारित कूलडाउन अवधि
-   - **अपस्ट्रिम पुनः प्रयास सङ्केतहरू प्रयोग गर्नुहोस्** — उपलब्ध गराइँदा आधिकारिक `Retry-After` वा रिसेट सङ्केतहरूको पालना गर्छ
-   - **अधिकतम ब्याकअफ चरणहरू** — दोहोरिने विफलताहरूका लागि अधिकतम एक्सपोनेन्सियल ब्याकअफ स्तर
+कोडिङ एजेन्टहरूको लागि आदर्श (OpenCode, Claude कोड, Cursor, Cline)। सुरुमा सीमान्त तर्क मोडेलहरूमा मार्गहरू, कोटा थकान वा त्रुटिहरूमा द्रुत कोडिङ मोडेलहरूमा फर्किँदै।
 
-3. **प्रदायक सर्किट ब्रेकर** — सुरुदेखि अन्त्यसम्मका प्रदायक विफलताहरू ट्र्याक गर्छ, कन्फिगर गरिएको चेतावनी सीमा पुगेपछि प्रदायकलाई कमजोर भएको भनी चिन्ह लगाउँछ र कन्फिगर गरिएको विफलता सीमा पुगेपछि ब्रेकर खोल्छ:
-   - **कमजोरी सीमा** — `DEGRADED` अवस्थामा प्रवेश गर्नुअघिका लगातार प्रदायक विफलताहरू
-   - **विफलता सीमा** — `OPEN` अवस्थामा प्रवेश गर्नुअघिका लगातार प्रदायक विफलताहरू
-   - **रिसेट समयसीमा** — प्रदायकलाई पुनः परीक्षण गर्नुअघिको समयावधि
-   - **CLOSED** (स्वस्थ) — अनुरोधहरू सामान्य रूपमा प्रवाहित हुन्छन्
-   - **DEGRADED** — बढेका विफलताहरू ट्र्याक भइरहँदा पनि अनुरोधहरू प्रवाहित भइरहन्छन्
-   - **OPEN** — दोहोरिएका विफलतापछि प्रदायकलाई अस्थायी रूपमा रोक लगाइन्छ
-   - **HALF_OPEN** — प्रदायक पुनः सामान्य भएको छ कि छैन भनेर परीक्षण गर्दै
+- **ड्यासबोर्ड** : Combos → नयाँ कम्बो → नाम: `agent-coding` → रणनीति: `Priority`
+- **मोडेलहरू** :
+  1. `claude/claude-sonnet-4-6` (प्राथमिक कोडिङ एजेन्ट)
+  2. `openai/gpt-4o` (सेकेन्डरी उच्च क्षमता फलब्याक)
+  3. `deepseek/deepseek-v4-flash` (उच्च-दक्षता, लागत-प्रभावी फलब्याक)
 
-   जडान-स्कोपका `429` दर सीमाहरू **जडान कूलडाउन** मै रहन्छन् र प्रदायक ब्रेकरमा गणना हुँदैनन्।
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
 
-   प्रदायक ब्रेकरको रनटाइम अवस्था **ड्यासबोर्ड → स्वास्थ्य** मा मात्र देखाइन्छ।
+#### २. फ्री-टियर अटो फेलओभर कम्बो
 
-4. **कूलडाउनका लागि प्रतीक्षा गर्नुहोस्** — यदि प्रत्येक उम्मेदवार जडान पहिले नै कूलडाउनमा छ भने, OmniRoute ले सबैभन्दा चाँडो सकिने कूलडाउनसम्म प्रतीक्षा गरेर सोही क्लाइन्ट अनुरोधलाई स्वचालित रूपमा पुनः प्रयास गर्न सक्छ।
+API लागतहरू बिना अपटाइम अधिकतम गर्न धेरै फ्रि-टियर र किलेस प्रदायकहरूलाई चेन गर्दछ।
 
-5. **दर सीमा स्वतः पहिचान** — अपस्ट्रिम प्रदायकहरूले स्पष्ट प्रतीक्षा अवधि फर्काउँदा, सेटिङ सक्षम गरिएको छ भने ती सङ्केतहरूले स्थानीय जडान कूलडाउनलाई अधिलेखन गर्छन्।
+- **रणनीति** : `Least Used` वा `Round Robin` (कोटाहरूमा लोड वितरण गर्दछ)
+- **मोडेलहरू** :
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
 
-**विशेष सुझाव:** आउटेजपछि सक्रिय प्रदायक ब्रेकरहरू निरीक्षण र रिसेट गर्न **स्वास्थ्य** पृष्ठ प्रयोग गर्नुहोस्। लचिलोपन पृष्ठले कन्फिगरेसन मात्र परिवर्तन गर्छ।
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
+
+#### 3. मल्टिमोडल / भिजन र टेक्स्ट पाइपलाइन
+
+छवि बुझाइ र कोड उत्पादन समावेश कार्यप्रवाहहरूको लागि उच्च-गति पाठ जेनरेशनको साथ विशेष दृष्टि मोडेलहरू जोडा।
+
+- **ढाँचा** : एक `Priority` कम्बो जसले पहिले दर्शन-सक्षम मोडेलहरू सूचीबद्ध गर्दछ र उच्च-थ्रुपुट text/code मोडेल अन्तिममा।
+- **मोडेलहरू** :
+  1. `gemini/gemini-2.5-pro` (बलियो image/multimodal समझ)
+  2. `openai/gpt-4o` (सन्तुलित दृष्टि र उपकरण प्रयोग)
+  3. `deepseek/deepseek-v4-flash` (Text/code पुस्ता)
 
 ---
 
-### डेटाबेस निर्यात / आयात
+### लचिलोपन र सर्किट ब्रेकरहरू
 
-**ड्यासबोर्ड → सेटिङहरू → प्रणाली र भण्डारण** मा डेटाबेस ब्याकअपहरू व्यवस्थापन गर्नुहोस्।
+मार्फत कन्फिगर गर्नुहोस्** ड्यासबोर्ड → सेटिङहरू → लचिलोपन** ।
 
-| कार्य                               | विवरण                                                                                                                                               |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **डेटाबेस निर्यात गर्नुहोस्**       | हालको SQLite डेटाबेसलाई `.sqlite` फाइलका रूपमा डाउनलोड गर्छ                                                                                         |
-| **सबै निर्यात गर्नुहोस् (.tar.gz)** | डेटाबेस, सेटिङहरू, कम्बोहरू, प्रदायक जडानहरू (प्रमाण-पत्रबिना) र API कुञ्जी मेटाडेटासहितको पूर्ण ब्याकअप अभिलेख डाउनलोड गर्छ                        |
-| **डेटाबेस आयात गर्नुहोस्**          | हालको डेटाबेस प्रतिस्थापन गर्न `.sqlite` फाइल अपलोड गर्छ। `DISABLE_SQLITE_AUTO_BACKUP=true` नभएसम्म आयातपूर्व ब्याकअप स्वचालित रूपमा सिर्जना गरिन्छ |
+OmniRoute पाँच कम्पोनेन्टहरूसँग प्रदायक-स्तर लचिलोपन लागू गर्दछ:
+
+1. **लाम र पेसिङ अनुरोध गर्नुहोस्** - प्रणाली-स्तर अनुरोध आकार:
+   - **अनुरोध प्रति मिनेट (RPM)** - प्रति मिनेट प्रति खाता अधिकतम अनुरोध
+   - **अनुरोधहरू बीचको न्यूनतम समय** - अनुरोधहरू बीच मिलिसेकेन्डमा न्यूनतम अन्तर
+   - **अधिकतम समवर्ती अनुरोधहरू** - प्रति खाता अधिकतम एक साथ अनुरोधहरू
+
+2. **जडान कूलडाउन** - पुन: प्रयास गर्न सकिने विफलताहरू पछि एकल जडानको लागि प्रति-प्रमाण-प्रकार कन्फिगरेसन:
+   - **बेस कूलडाउन** - पुन: प्रयास गर्न मिल्ने अपस्ट्रिम विफलताहरूको लागि पूर्वनिर्धारित कूलडाउन विन्डो
+   - **अपस्ट्रीम पुन: प्रयास संकेतहरू प्रयोग गर्नुहोस्** - प्रदान गरिएको बेलामा आधिकारिक `Retry-After` वा रिसेट संकेतहरूको सम्मान गर्दछ
+   - **अधिकतम ब्याकअफ चरणहरू** - बारम्बार असफलताहरूको लागि अधिकतम घातीय ब्याकअफ स्तर
+
+3. **प्रदायक सर्किट ब्रेकर** - अन्त-देखि-अन्त प्रदायक विफलताहरू ट्र्याक गर्दछ, कन्फिगर गरिएको चेतावनी थ्रेसहोल्डमा अपमानित प्रदायकलाई चिन्ह लगाउँदछ, र कन्फिगर गरिएको विफलता थ्रेसहोल्ड पुगेपछि ब्रेकर खोल्छ:
+   - **पतन थ्रेसहोल्ड** - `DEGRADED` प्रविष्ट गर्नु अघि लगातार प्रदायक विफलता
+   - **असफलता थ्रेसहोल्ड** - `OPEN` प्रविष्ट गर्नु अघि लगातार प्रदायक विफलता
+   - **टाइमआउट रिसेट गर्नुहोस्** - प्रदायक पुन: परीक्षण गर्नु अघि समय विन्डो
+   - **CLOSED** (स्वस्थ) - अनुरोधहरू सामान्य रूपमा प्रवाहित हुन्छन्
+   - **DEGRADED** - उच्च असफलताहरू ट्र्याक हुँदा अनुरोधहरू अझै प्रवाह हुन्छन्
+   - **OPEN** - बारम्बार असफलता पछि प्रदायक अस्थायी रूपमा अवरुद्ध छ
+   - **HALF_OPEN** - प्रदायक निको भएको छ भने परीक्षण
+
+   जडान-स्कोप गरिएको `429` दर सीमा भित्र रहन्छ** जडान कूलडाउन** र प्रदायक ब्रेकर तिर गणना नगर्नुहोस्।
+
+   प्रदायक ब्रेकर रनटाइम अवस्था देखाइएको छ** ड्यासबोर्ड → स्वास्थ्य** मात्र।
+
+4. **Cooldown को लागी प्रतीक्षा गर्नुहोस्** — यदि प्रत्येक उम्मेद्वार जडान पहिले नै चिसो भइरहेको छ भने, OmniRoute सबैभन्दा प्रारम्भिक कूलडाउनको लागि पर्खन सक्छ र स्वचालित रूपमा उही ग्राहक अनुरोध पुन: प्रयास गर्न सक्छ।
+
+5. **मूल्य सीमा स्वतः पत्ता लगाउने** — जब अपस्ट्रिम प्रदायकहरूले स्पष्ट प्रतीक्षा विन्डोहरू फर्काउँछन्, ती संकेतहरूले स्थानीय जडान कूलडाउनलाई ओभरराइड गर्दछ जब सेटिङ सक्षम हुन्छ।
+
+**प्रो टिप:** प्रयोग गर्नुहोस्** स्वास्थ्य** आउटेज पछि प्रत्यक्ष प्रदायक ब्रेकरहरू निरीक्षण गर्न र रिसेट गर्न पृष्ठ। लचिलोपन पृष्ठले मात्र कन्फिगरेसन परिवर्तन गर्दछ।
+
+---
+
+### डाटाबेस निर्यात / आयात
+
+मा डाटाबेस ब्याकअप प्रबन्ध गर्नुहोस्** ड्यासबोर्ड → सेटिङहरू → प्रणाली र भण्डारण** ।
+
+| कार्य                               | विवरण                                                                                                                                                |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **डाटाबेस निर्यात गर्नुहोस्**       | हालको SQLite डाटाबेसलाई `.sqlite` फाइलको रूपमा डाउनलोड गर्दछ                                                                                         |
+| **सबै निर्यात गर्नुहोस् (.tar.gz)** | एक पूर्ण ब्याकअप संग्रह डाउनलोड गर्दछ: डाटाबेस, सेटिङहरू, कम्बोहरू, प्रदायक जडानहरू (कुनै प्रमाणहरू छैनन्), API कुञ्जी मेटाडेटा                      |
+| **डाटाबेस आयात गर्नुहोस्**          | हालको डाटाबेस बदल्नको लागि `.sqlite` फाइल अपलोड गर्नुहोस्। `DISABLE_SQLITE_AUTO_BACKUP=true` नभएसम्म पूर्व-आयात ब्याकअप स्वचालित रूपमा सिर्जना हुन्छ |
 
 ```bash
-# API: डेटाबेस निर्यात गर्नुहोस्
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: सबै निर्यात गर्नुहोस् (पूर्ण अभिलेख)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: डेटाबेस आयात गर्नुहोस्
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**आयात प्रमाणीकरण:** आयात गरिएको फाइलको अखण्डता (SQLite pragma जाँच), आवश्यक तालिकाहरू (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) र आकार (अधिकतम 100MB) प्रमाणीकरण गरिन्छ।
+**आयात प्रमाणीकरण:** आयात गरिएको फाइल अखण्डता (SQLite pragma check), आवश्यक तालिकाहरू (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), र साइज (अधिकतम 100MB) को लागि मान्य गरिएको छ।
 
-**प्रयोगका अवस्थाहरू:**
+**केसहरू प्रयोग गर्नुहोस्:**
 
-- OmniRoute लाई एक मेसिनबाट अर्को मेसिनमा स्थानान्तरण गर्नुहोस्
-- विपद् पुनर्प्राप्तिका लागि बाह्य ब्याकअपहरू सिर्जना गर्नुहोस्
-- टोलीका सदस्यहरूबीच कन्फिगरेसनहरू साझेदारी गर्नुहोस् (सबै निर्यात गर्नुहोस् → अभिलेख साझेदारी गर्नुहोस्)
+- मेसिनहरू बीच OmniRoute माइग्रेट गर्नुहोस्
+- प्रकोप रिकभरीको लागि बाह्य ब्याकअपहरू सिर्जना गर्नुहोस्
+- टोली सदस्यहरू बीच कन्फिगरेसन साझेदारी गर्नुहोस् (सबै → साझेदारी अभिलेख निर्यात गर्नुहोस्)
 
 ---
 
 ### सेटिङ ड्यासबोर्ड
 
-सजिलो नेभिगेसनका लागि सेटिङ पृष्ठलाई **7 वटा ट्याब** मा व्यवस्थित गरिएको छ:
+सेटिङ पृष्ठ मा संगठित छ** 7 ट्याबहरू** सजिलो नेभिगेसन को लागी:
 
-| ट्याब       | सामग्री                                                                                                                                                                                         |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **सामान्य** | प्रणाली भण्डारण उपकरणहरू, पूर्वनिर्धारित व्यवहार, एन्डपोइन्ट टनेलको दृश्यता                                                                                                                     |
-| **देखावट**  | थिम नियन्त्रणहरू (उज्यालो/अँध्यारो/प्रणाली), साइडबारको दृश्यता, Cloudflare/Tailscale/ngrok टनेल कार्डहरूका लागि प्यानल टगलहरू                                                                   |
-| **AI**      | सोच बजेट (जस्ताको तस्तै पठाउने / स्वतः हटाउने / अनुकूलित / अनुकूली — [THINKING_BUDGET.md](./THINKING_BUDGET.md) हेर्नुहोस्), विश्वव्यापी प्रणाली प्रम्प्ट, प्रम्प्ट क्यास तथ्याङ्क              |
-| **सुरक्षा** | लगइन/पासवर्ड सेटिङहरू, IP पहुँच नियन्त्रण, `/models` का लागि API प्रमाणीकरण, प्रदायक अवरोध, प्रम्प्ट-इन्जेक्सन सुरक्षा                                                                          |
-| **राउटिङ**  | विश्वव्यापी राउटिङ रणनीति (पहिले भर्ने / राउन्ड रोबिन / P2C / अनियमित / सबैभन्दा कम प्रयोग भएको / लागत अनुकूलित), वाइल्डकार्ड मोडेल उपनामहरू, फलब्याक शृङ्खलाहरू, कम्बोका पूर्वनिर्धारित मानहरू |
-| **लचिलोपन** | अनुरोध पङ्क्ति, जडान कूलडाउन, प्रदायक ब्रेकर कन्फिगरेसन र कूलडाउनका लागि प्रतीक्षा गर्ने व्यवहार                                                                                                |
-| **उन्नत**   | विश्वव्यापी प्रोक्सी कन्फिगरेसन (HTTP/SOCKS5), प्रत्येक प्रदायकका लागि प्रोक्सी अधिलेखनहरू                                                                                                      |
+| ट्याब        | सामग्री                                                                                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **सामान्य**  | प्रणाली भण्डारण उपकरणहरू, पूर्वनिर्धारित व्यवहार, अन्त्यबिन्दु सुरुङ दृश्यता                                                                                             |
+| **उपस्थिति** | विषयवस्तु नियन्त्रणहरू (light/dark/system), साइडबार दृश्यता, Cloudflare/Tailscale/ngrok टनेल कार्डहरूको लागि प्यानल टगलहरू                                               |
+| **AI**       | सोच्दै बजेट (पासथ्रु / स्वत: पट्टी / अनुकूलन / अनुकूली — हेर्नुहोस् [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), विश्वव्यापी प्रणाली प्रम्प्ट, प्रम्प्ट क्यास तथ्याङ्क  |
+| **सुरक्षा**  | Login/Password सेटिङहरू, IP पहुँच नियन्त्रण, `/models` को लागि API प्रमाणीकरण, प्रदायक ब्लकिङ, प्रम्प्ट-इंजेक्शन गार्ड                                                   |
+| **रूटिङ**    | ग्लोबल राउटिंग रणनीति (पहिलो भर्नुहोस् / राउन्ड रोबिन / P2C / अनियमित / कम प्रयोग गरिएको / लागत अनुकूलित), वाइल्डकार्ड मोडेल उपनाम, फलब्याक चेन, कम्बो पूर्वनिर्धारितहरू |
+| **लचिलोपन**  | अनुरोध लाइन, जडान कूलडाउन, प्रदायक ब्रेकर कन्फिगरेसन, र कूलडाउनको लागि प्रतीक्षा गर्ने व्यवहार                                                                           |
+| **उन्नत**    | ग्लोबल प्रोक्सी कन्फिगरेसन (HTTP/SOCKS5), प्रति-प्रदायक प्रोक्सी ओभरराइडहरू                                                                                              |
 
-सामान्य ट्याबले अब पढ्न-मात्र मिल्ने लगिङ र क्याससम्बन्धी टिप्पणीहरू दोहोर्याउँदैन। डेटाबेस अवधारण र
-अनुकूलन सेटिङहरू `/api/settings/database` मार्फत सुरक्षित राखिन्छन्; म्यानुअल क्यास सफाइका लागि
-`DELETE /api/cache` प्रयोग गरिन्छ। अनुरोध र प्रोक्सी लगका पङ्क्ति सीमाहरू
-`CALL_LOGS_TABLE_MAX_ROWS` र `PROXY_LOGS_TABLE_MAX_ROWS` द्वारा नियन्त्रण गरिन्छन्।
+सामान्यले अब पढ्ने-मात्र लगिङ र क्यास नोटहरू नक्कल गर्दैन। डाटाबेस रिटेन्सन र अप्टिमाइजेसन सेटिङहरू `/api/settings/database` मार्फत कायम रहन्छ; म्यानुअल क्यास क्लियरिङले `DELETE /api/cache` प्रयोग गर्दछ। अनुरोध र प्रोक्सी लग पङ्क्ति क्याप्स `CALL_LOGS_TABLE_MAX_ROWS` र `PROXY_LOGS_TABLE_MAX_ROWS` द्वारा नियन्त्रित छन्।
 
 ---
 
 ### लागत र बजेट व्यवस्थापन
 
-**ड्यासबोर्ड → लागतहरू** मार्फत पहुँच गर्नुहोस्।
+मार्फत पहुँच गर्नुहोस्** ड्यासबोर्ड → लागत** ।
 
-| ट्याब              | उद्देश्य                                                                                                       |
-| ------------------ | -------------------------------------------------------------------------------------------------------------- |
-| **बजेट**           | दैनिक/साप्ताहिक/मासिक बजेट र वास्तविक-समय ट्र्याकिङसहित प्रत्येक API कुञ्जीका लागि खर्च सीमा सेट गर्नुहोस्     |
-| **मूल्य निर्धारण** | प्रदायकअनुसार प्रत्येक 1K इनपुट/आउटपुट टोकनको लागतसहित मोडेल मूल्य प्रविष्टिहरू हेर्नुहोस् र सम्पादन गर्नुहोस् |
+| ट्याब              | उद्देश्य                                                                                                         |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| **बजेट**           | daily/weekly/monthly बजेट र वास्तविक-समय ट्र्याकिङको साथ प्रति API कुञ्जी खर्च सीमाहरू सेट गर्नुहोस्             |
+| **मूल्य निर्धारण** | मोडेल मूल्य निर्धारण प्रविष्टिहरू हेर्नुहोस् र सम्पादन गर्नुहोस् — लागत प्रति 1K input/output टोकन प्रति प्रदायक |
 
 ```bash
-# API: बजेट सेट गर्नुहोस्
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: हालको बजेट स्थिति प्राप्त गर्नुहोस्
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**लागत ट्र्याकिङ:** प्रत्येक अनुरोधले टोकन प्रयोग लग गर्छ र मूल्य तालिका प्रयोग गरी लागत गणना गर्छ। प्रदायक, मोडेल र API कुञ्जीअनुसारको विस्तृत विवरण **Dashboard → Usage** मा हेर्नुहोस्।
+**लागत ट्र्याकिङ:** प्रत्येक अनुरोधले टोकन प्रयोग लगाउँछ र मूल्य तालिका प्रयोग गरी लागत गणना गर्दछ। मा ब्रेकडाउनहरू हेर्नुहोस्** ड्यासबोर्ड → उपयोग** प्रदायक, मोडेल, र API कुञ्जी द्वारा।
 
 ---
 
-### अडियो ट्रान्सक्रिप्सन
+### अडियो ट्रान्सक्रिप्शन
 
-OmniRoute ले OpenAI-सङ्गत endpoint मार्फत अडियो ट्रान्सक्रिप्सन समर्थन गर्छ:
+OmniRoute OpenAI-compatible endpoint मार्फत अडियो ट्रान्सक्रिप्सनलाई समर्थन गर्दछ:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# curl सहितको उदाहरण
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` नेटिभ Deepgram route हो र यसलाई Deepgram API कुञ्जी आवश्यक पर्छ।
-OpenRouter मात्र कन्फिगर गरिएको छ भने, `openrouter/deepgram/nova-3` प्रयोग गर्नुहोस्।
+`deepgram/nova-3` नेटिभ Deepgram मार्ग हो र एक Deepgram API कुञ्जी चाहिन्छ। यदि OpenRouter मात्र कन्फिगर गरिएको छ भने, `openrouter/deepgram/nova-3` प्रयोग गर्नुहोस्।
 
-**स्पिच-टु-टेक्स्ट (ट्रान्सक्रिप्सन)** प्रदायकहरू:
+**भाषण-देखि-पाठ (ट्रान्सक्रिप्शन)** प्रदायकहरू:
 
-- `openai/` (whisper-सङ्गत)
-- `groq/` (Groq Whisper Turbo)
-- `deepgram/` (Nova परिवार)
+- `openai/` (फुसफुस मिल्ने)
+- `groq/` (Groq व्हिस्पर टर्बो)
+- `deepgram/` (नोभा परिवार)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Canary)
-- `huggingface/` (whisper भेरियन्टहरू)
+- `nvidia/` (प्याराकीट, क्यानरी)
+- `huggingface/` (फुसफुस संस्करण)
 - `qwen/`
 
-**टेक्स्ट-टु-स्पिच (`POST /v1/audio/speech`)** प्रदायकहरू:
+**टेक्स्ट-टू-स्पिच (`POST /v1/audio/speech`)** प्रदायकहरू:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
-- `deepgram/` (Aura)
+- `deepgram/` (आभा)
 - `nvidia/` (Magpie TTS)
 - `elevenlabs/`
 - `huggingface/`
@@ -1065,53 +1121,45 @@ OpenRouter मात्र कन्फिगर गरिएको छ भन�
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-ट्रान्सक्रिप्सनका लागि समर्थित अडियो ढाँचाहरू: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`। TTS आउटपुट ढाँचाहरू प्रदायकमा निर्भर हुन्छन् (mp3, wav, opus, pcm, mulaw)।
+ट्रान्सक्रिप्शनका लागि समर्थित अडियो ढाँचाहरू: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`। TTS आउटपुट ढाँचाहरू प्रदायकमा निर्भर हुन्छन् (mp3, wav, opus, pcm, mulaw)।
 
 ---
 
 ### कम्बो सन्तुलन रणनीतिहरू
 
-प्रत्येक कम्बोको सन्तुलन **Dashboard → Combos → Create/Edit → Strategy** मा कन्फिगर गर्नुहोस्।
+प्रति कम्बो सन्तुलन कन्फिगर गर्नुहोस्** ड्यासबोर्ड → कम्बोस → Create/Edit → रणनीति** ।
 
-| रणनीति                      | विवरण                                                                          |
-| --------------------------- | ------------------------------------------------------------------------------ |
-| **राउन्ड-रोबिन**            | मोडेलहरू पालैपालो क्रमिक रूपमा परिवर्तन गर्छ                                   |
-| **प्राथमिकता**              | सधैँ पहिलो मोडेल प्रयास गर्छ; त्रुटि हुँदा मात्र fallback गर्छ                 |
-| **अनियमित**                 | प्रत्येक अनुरोधका लागि कम्बोबाट एउटा अनियमित मोडेल छान्छ                       |
-| **भारित**                   | प्रत्येक मोडेललाई तोकिएको भारका आधारमा समानुपातिक रूपमा route गर्छ             |
-| **सबैभन्दा कम प्रयोग भएको** | हालसालै सबैभन्दा कम अनुरोध भएको मोडेलमा route गर्छ (कम्बो metrics प्रयोग गर्छ) |
-| **लागत-अनुकूलित**           | उपलब्ध सबैभन्दा सस्तो मोडेलमा route गर्छ (मूल्य तालिका प्रयोग गर्छ)            |
+| रणनीति             | विवरण                                                                             |
+| ------------------ | --------------------------------------------------------------------------------- |
+| **राउन्ड-रोबिन**   | क्रमिक रूपमा मोडेलहरू मार्फत घुमाउँछ                                              |
+| **प्राथमिकता**     | सधैं पहिलो मोडेल कोसिस गर्छ; गल्तीमा मात्र फर्किन्छ                               |
+| **अनियमित**        | प्रत्येक अनुरोधको लागि कम्बोबाट अनियमित मोडेल छान्छ                               |
+| **भारित**          | प्रति मोडेल तोकिएको तौलमा आधारित समानुपातिक मार्गहरू                              |
+| **कम प्रयोग हुने** | सबैभन्दा थोरै अनुरोधहरू भएका मोडेलका लागि मार्गहरू (कम्बो मेट्रिक्स प्रयोग गर्दछ) |
+| **लागत-अनुकूलित**  | सस्तो उपलब्ध मोडेलका लागि मार्गहरू (मूल्य निर्धारण तालिका प्रयोग गर्दछ)           |
 
-ग्लोबल कम्बो पूर्वनिर्धारित मानहरू **Dashboard → Settings → Routing → Combo Defaults** मा सेट गर्न सकिन्छ।
-पूर्वनिर्धारित रूपमा कम्बो target timeout ले हालको अनुरोध timeout इनहेरिट गर्छ। छोटो प्रति-target सीमा आवश्यक हुँदा मात्र कम्बो पूर्वनिर्धारित मान वा व्यक्तिगत कम्बोमा **Target timeout
-(seconds)** प्रयोग गर्नुहोस्, जसले छिटो fallback ट्रिगर गर्छ।
+ग्लोबल कम्बो पूर्वनिर्धारित सेट गर्न सकिन्छ** ड्यासबोर्ड → सेटिङहरू → रूटिङ → कम्बो पूर्वनिर्धारितहरू** । कम्बो लक्ष्य टाइमआउटले पूर्वनिर्धारित रूपमा हालको अनुरोध टाइमआउट इनहेरिट गर्छ। प्रयोग गर्नुहोस्** लक्ष्य टाइमआउट (सेकेन्ड)** कम्बो पूर्वनिर्धारित वा व्यक्तिगत कम्बोमा मात्र जब छोटो प्रति-लक्ष्य सीमाले छिटो फलब्याक ट्रिगर गर्नुपर्छ।
 
-शून्य-विलम्बता कम्बो अनुकूलनहरू opt-in हुन्। यी विलम्बता सुविधाहरूले fallback target सँग प्रतिस्पर्धा गर्न, TTFT
-इतिहासका आधारमा target छोड्न वा fallback अनुरोधहरू सङ्कुचित गर्न नदिन **Zero-latency optimizations** असक्षम राख्नुहोस्; यसलाई सक्षम गर्दा कन्फिगर गरिएको hedging, पूर्वानुमानात्मक TTFT
-skip र सक्रिय fallback compression ले न्यून tail
-latency का लागि routing/request fidelity साट्न सक्छन्।
+शून्य विलम्बता कम्बो अनुकूलनहरू अप्ट-इन छन्। छोड्नुहोस्** शून्य विलम्बता अनुकूलन** रेसिङ फलब्याक लक्ष्यहरू, TTFT इतिहासमा आधारित लक्ष्यहरू छोड्न, वा फलब्याक अनुरोधहरू कम्प्रेस गर्नबाट यी विलम्बता सुविधाहरू रोक्न असक्षम गरिएको छ; यसलाई सक्षम गर्नाले कन्फिगर गरिएको हेजिङ, प्रेडिक्टिव TTFT स्किपहरू, र प्रोएक्टिभ फलब्याक कम्प्रेसनलाई कम टेल विलम्बताको लागि routing/request फिडेलिटी ट्रेड गर्न अनुमति दिन्छ।
 
-Upstream प्रदायकहरूले कडा
-`max_tokens` / `maxOutputTokens` सीमाहरू आवश्यक पार्दा **Reasoning token buffer** असक्षम गर्नुहोस्। सक्षम हुँदा, कम्बो routing ले ज्ञात आउटपुट सीमा भएका मोडेलहरूका लागि मात्र reasoning-model
-headroom थप्छ र सुरक्षित buffered मानले त्यो सीमा नाघ्ने भएमा क्लाइन्ट token सीमा अपरिवर्तित राख्छ। यदि क्लाइन्ट सीमा पहिले नै ज्ञात सीमाभन्दा माथि छ भने,
-OmniRoute ले upstream अनुरोध पठाउनुअघि त्यसलाई उक्त सीमासम्म घटाउँछ।
+असक्षम गर्नुहोस्** तर्क टोकन बफर** जब अपस्ट्रीम प्रदायकहरूलाई कडा `max_tokens` / `maxOutputTokens` सीमा चाहिन्छ। सक्षम हुँदा, कम्बो राउटिङले ज्ञात आउटपुट क्याप भएका मोडेलहरूका लागि तर्क-मोडल हेडरूम मात्र थप्छ र सुरक्षित बफर गरिएको मान त्यो क्याप नाघिसकेको अवस्थामा क्लाइन्ट टोकन सीमालाई अपरिवर्तित छोड्छ। यदि क्लाइन्ट सीमा पहिले नै ज्ञात क्याप भन्दा माथि छ भने, OmniRoute अपस्ट्रीम अनुरोध पठाउनु अघि यसलाई त्यो क्यापमा तल राख्छ।
 
 ---
 
 ### स्वास्थ्य ड्यासबोर्ड
 
-**Dashboard → Health** मार्फत पहुँच गर्नुहोस्। ६ वटा कार्डसहितको वास्तविक-समय प्रणाली स्वास्थ्य अवलोकन:
+मार्फत पहुँच गर्नुहोस्** ड्यासबोर्ड → स्वास्थ्य** । 6 कार्डहरूको साथ वास्तविक-समय प्रणाली स्वास्थ्य सिंहावलोकन:
 
-| कार्ड                   | यसले के देखाउँछ                                           |
-| ----------------------- | --------------------------------------------------------- |
-| **प्रणाली स्थिति**      | अपटाइम, संस्करण, मेमोरी प्रयोग, डेटा डाइरेक्टरी           |
-| **प्रदायक स्वास्थ्य**   | ग्लोबल प्रदायक circuit breaker को runtime स्थिति          |
-| **दर सीमाहरू**          | बाँकी समयसहित प्रत्येक खाताका सक्रिय connection cooldown  |
-| **सक्रिय लकआउटहरू**     | सक्रिय मोडेल-स्कोप्ड lockout र अस्थायी exclusion          |
-| **सिग्नेचर क्यास**      | Deduplication cache तथ्याङ्क (सक्रिय कुञ्जीहरू, hit rate) |
-| **विलम्बता टेलिमेट्री** | प्रत्येक प्रदायकको p50/p95/p99 विलम्बता aggregation       |
+| कार्ड                      | यसले के देखाउँछ                                          |
+| -------------------------- | -------------------------------------------------------- |
+| **प्रणाली स्थिति**         | अपटाइम, संस्करण, मेमोरी उपयोग, डाटा डाइरेक्टरी           |
+| **स्वास्थ्य सेवा प्रदायक** | ग्लोबल प्रदायक सर्किट ब्रेकर रनटाइम अवस्था               |
+| **दर सीमाहरू**             | बाँकी समयको साथ प्रति खाता सक्रिय जडान कूलडाउनहरू        |
+| **सक्रिय तालाबन्दीहरू**    | सक्रिय मोडेल-स्कोप गरिएको लकआउटहरू र अस्थायी बहिष्करणहरू |
+| **हस्ताक्षर क्यास**        | डुप्लिकेशन क्यास तथ्याङ्कहरू (सक्रिय कुञ्जीहरू, हिट दर)  |
+| **विलम्बता टेलिमेट्री**    | प्रति प्रदायक p50/p95/p99 विलम्बता एकत्रीकरण             |
 
-**विशेष सुझाव:** Health पृष्ठ प्रत्येक १० सेकेन्डमा स्वतः रिफ्रेस हुन्छ। कुन प्रदायकमा समस्या भइरहेको छ भनी पहिचान गर्न circuit breaker कार्ड प्रयोग गर्नुहोस्।
+**प्रो टिप:** स्वास्थ्य पृष्ठ प्रत्येक 10 सेकेन्डमा स्वत: रिफ्रेस हुन्छ। कुन प्रदायकहरूले समस्याहरू भोगिरहेका छन् भनेर पहिचान गर्न सर्किट ब्रेकर कार्ड प्रयोग गर्नुहोस्।
 
 ---
 

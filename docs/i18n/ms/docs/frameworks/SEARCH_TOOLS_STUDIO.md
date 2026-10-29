@@ -38,34 +38,34 @@ Studio tiga tab yang menyatukan carian web, pengikisan web dan perbandingan peny
 
 ### Tab Carian
 
-Mengembangkan `SearchForm` + `ResultsPanel` + `RerankPanel` yang sedia ada menjadi satu tab:
+Mengembangkan `SearchForm` + `ResultsPanel` + `RerankPanel` sedia ada menjadi sebuah tab:
 
 - Pertanyaan → hasil (tajuk, URL, petikan, skor kerelevanan).
 - Metadata penyedia dalam anak tetingkap Konfigurasi (kos, kuota, status).
-- Bahagian susun semula: pilih model susun semula, susun semula hasil, paparkan `positionDelta`.
+- Bahagian penyusunan semula: pilih model penyusunan semula, susun semula hasil, paparkan `positionDelta`.
 - Keadaan kosong dengan seruan tindakan apabila tiada penyedia carian dikonfigurasikan.
 - Sejarah carian melalui `SearchHistory.tsx`.
 - Memanggil `POST /v1/search` (titik akhir sedia ada, tiada perubahan).
 
-### Tab Kikis
+### Tab Pengerukan
 
 Tab baharu untuk mengekstrak kandungan daripada URL melalui `POST /v1/web/fetch` (dicipta dalam pelan 05):
 
 - Input: URL + togol halaman penuh + pemilih format (markdown / teks / HTML).
-- Hantar → ambil → paparkan `ScrapeResult.tsx`.
+- Serah → ambil → paparkan `ScrapeResult.tsx`.
 - `ScrapeResult` memaparkan pratonton markdown + togol mentah.
-- Had: jika isi respons > **256 KB**, UI memaparkan `(dipenggal, lihat mentah)` dan membuka kandungan mentah dalam modal Monaco (D21).
-- Panel metadata: penyedia (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), kependaman, kos, saiz respons, bilangan pautan.
-- Menggunakan cangkuk `useScrapeFetch.ts`.
+- Had: jika badan respons > **256 KB**, UI memaparkan `(dipendekkan, lihat data mentah)` dan membuka data mentah dalam modal Monaco (D21).
+- Panel metadata: penyedia (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), kependaman, kos, saiz respons, bilangan pautan.
+- Menggunakan pencangkuk `useScrapeFetch.ts`.
 
-### Tab Banding
+### Tab Perbandingan
 
-Menjalankan pertanyaan/URL yang sama merentasi sehingga **4 penyedia secara selari** (D22):
+Menjalankan pertanyaan/URL yang sama merentas sehingga **4 penyedia secara selari** (D22):
 
 - Lajur bersebelahan bagi setiap penyedia.
 - Metrik: kependaman, kos, bilangan hasil, saiz respons.
 - Pengiraan pertindihan URL untuk carian (bilangan URL yang dikongsi berbanding hasil awal).
-- Memanggil `POST /v1/search` (carian) atau `POST /v1/web/fetch` (kikis) bagi setiap penyedia.
+- Memanggil `POST /v1/search` (carian) atau `POST /v1/web/fetch` (pengerukan) bagi setiap penyedia.
 
 ---
 
@@ -103,9 +103,9 @@ Menjalankan pertanyaan/URL yang sama merentasi sehingga **4 penyedia secara sela
 `ProviderCatalog.tsx` mendedahkan senarai penuh penyedia daripada `GET /api/search/providers`
 (diperluas dalam F4 untuk menyertakan penyedia pengambilan):
 
-| `kind` | `"search"` (20 penyedia) atau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 penyedia) atau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Status **ditentukan pada masa permintaan** dengan memeriksa sama ada kelayakan tersedia dan sama ada
+Status **ditentukan pada masa permintaan** dengan memeriksa sama ada kelayakan wujud dan sama ada
 semua kunci sedang dalam tempoh bertenang.
 
 ---
@@ -118,17 +118,17 @@ Ruang letak kunci API sentiasa `$OMNIROUTE_API_KEY` (D11, dikongsi dengan Playgr
 
 ---
 
-## Perubahan Bahagian Belakang
+## Perubahan Bahagian Pelayan
 
-Hanya satu perubahan bahagian belakang diperlukan untuk ciri ini:
+Hanya satu perubahan bahagian pelayan diperlukan untuk ciri ini:
 
 ### `GET /api/search/providers` yang Diperluas
 
 `src/app/api/search/providers/route.ts` telah diperluas untuk:
 
-- Menyertakan kesemua 6 penyedia pengambilan (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) dalam tatasusunan.
+- Menyertakan setiap penyedia pengambilan (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) dalam tatasusunan.
 - Menambahkan `kind: "search" | "fetch"` pada setiap item.
-- Menambahkan `status: "configured" | "missing" | "rate_limited"` yang ditentukan daripada keadaan kelayakan semasa.
+- Menambahkan `status: "configured" | "missing" | "rate_limited"` yang diperoleh daripada keadaan kelayakan semasa.
 - Mengekalkan keserasian ke belakang — medan sedia ada (`id`, `name`, dan sebagainya) tidak berubah.
 
 ---

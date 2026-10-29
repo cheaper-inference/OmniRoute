@@ -1,0 +1,1 @@
+- **fix(usage):** Prevent updates and completions with an unmatched explicit ID from affecting another pending request ([#17891](https://github.com/cheaper-inference/OmniRoute/pull/17891)) — thanks @AiCaptain357

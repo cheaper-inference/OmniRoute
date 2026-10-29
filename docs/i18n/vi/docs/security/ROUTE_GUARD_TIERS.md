@@ -12,195 +12,214 @@ Tất cả các route API quản lý OmniRoute đều được phân loại vào
 
 ### Cấp 1 — LOCAL_ONLY
 
-**Được thực thi bởi:** `isLocalOnlyPath(path)` → kiểm tra máy chủ loopback  
-**Bỏ qua:** Mặc định không có. Ngoại lệ giới hạn dành cho các đường dẫn trong
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` khi yêu cầu chứa khóa API hợp lệ
-có phạm vi `manage` (xem [Ngoại lệ cho phạm vi manage](#manage-scope-carve-out)).
+**Được thực thi bởi:** `isLocalOnlyPath(path)` → kiểm tra host loopback
+**Cách vượt qua:** Không có theo mặc định. Ngoại lệ hẹp cho các đường dẫn trong
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` khi request mang theo API key hợp lệ
+với scope `manage` (xem [Ngoại lệ cho scope manage](#manage-scope-carve-out)).
 
-Các route này tạo tiến trình con hoặc thực thi mã trong runtime. Việc cho phép
-lưu lượng không phải loopback truy cập chúng sẽ cho phép kẻ tấn công đã lấy được
-JWT hợp lệ (ví dụ: thông qua tunnel Cloudflared/Ngrok) kích hoạt việc tạo tiến
-trình — một nhóm CVE đã được biết đến
+Các route này tạo (spawn) tiến trình con hoặc thực thi mã runtime. Việc để lộ
+chúng cho lưu lượng không phải loopback sẽ cho phép kẻ tấn công đã có được JWT
+hợp lệ (ví dụ qua một tunnel Cloudflared/Ngrok) kích hoạt việc tạo tiến trình —
+một lớp CVE đã biết
 ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
 
-**GHSA-fhh6-4qxv-rpqj là gì (nhóm tấn công):** một máy chủ quản lý/tác tử
-công khai một endpoint có chức năng khởi chạy tiến trình con (`npm install`,
-`node`, trình duyệt, proxy, `git`, `tar`, …). Nếu endpoint đó có thể được truy cập
-từ bên ngoài máy chủ — vì người vận hành đặt OmniRoute sau tunnel
-nginx/Cloudflare/Tailscale và JWT bị rò rỉ, hoặc cơ chế xác thực bị cấu hình sai —
-thì kẻ tấn công có thể biến việc "gọi một API" thành "chạy một lệnh trên máy chủ"
-(thực thi mã từ xa). OmniRoute ngăn chặn điều này bằng cách thực thi
-**kiểm tra máy chủ loopback vô điều kiện, trước mọi bước kiểm tra xác thực**, trên
-mọi route có khả năng tạo tiến trình: token bị rò rỉ qua tunnel vẫn không thể
-truy cập chức năng tạo tiến trình.
+**GHSA-fhh6-4qxv-rpqj là gì (lớp tấn công):** một server quản lý/agent để lộ
+một endpoint khởi chạy tiến trình con (`npm install`, `node`, trình duyệt,
+proxy, `git`, `tar`, …). Nếu endpoint đó có thể truy cập từ bên ngoài host — do
+operator đặt OmniRoute sau một tunnel nginx/Cloudflare/Tailscale và JWT bị rò rỉ,
+hoặc xác thực bị cấu hình sai — kẻ tấn công sẽ biến "gọi một API" thành "chạy
+một lệnh trên host" (thực thi mã từ xa). OmniRoute khắc phục điều này bằng cách
+thực thi **kiểm tra host loopback một cách vô điều kiện, trước mọi kiểm tra xác
+thực**, trên mọi route có khả năng spawn: một token bị rò rỉ qua tunnel vẫn
+không thể chạm tới việc spawn.
 
-**Toàn bộ tập hợp LOCAL_ONLY.** Nguồn có thẩm quyền là
+**Toàn bộ tập LOCAL_ONLY.** Nguồn chuẩn xác là
 `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` trong
-`src/server/authz/routeGuard.ts`; bảng bên dưới phản ánh trạng thái hiện tại. Cổng
-`check-route-guard-membership` liệt kê mọi `route.ts` nằm trong các tiền tố có khả
-năng tạo tiến trình và khiến CI thất bại nếu có bất kỳ route nào không được phân
-loại là chỉ cục bộ.
+`src/server/authz/routeGuard.ts`; bảng dưới đây phản ánh trạng thái hiện tại.
+Gate `check-route-guard-membership` liệt kê mọi `route.ts` nằm dưới các prefix
+có khả năng spawn và làm CI thất bại nếu bất kỳ route nào không được phân loại
+là local-only.
 
-| Tiền tố / mẫu                                                                                            | Lý do chỉ dành cho môi trường cục bộ                                                                                                     |
-| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | Máy chủ MCP — khởi chạy các cầu nối stdio + trình xử lý SSE                                                                              |
-| `/api/cli-tools/runtime/`                                                                                | Môi trường chạy công cụ CLI — thực thi mã plugin tùy ý                                                                                   |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Trình ghi cài đặt cho từng công cụ, có thể tác động đến tệp nhị phân/cấu hình công cụ trên máy chủ                                       |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Lệnh khởi chạy `getCliRuntimeStatus()` giống sáu công cụ cùng nhóm ở trên (GHSA-35fw-cv32-2373)                                          |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Kiểm tra kho công cụ CLI — khởi chạy `command -v` / `--version` cho từng công cụ (GHSA-35fw-cv32-2373)                                   |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Điều khiển proxy MITM Antigravity (khởi chạy/định cấu hình proxy hệ thống)                                                               |
-| `/api/modality-bridge/video/`                                                                            | Thăm dò môi trường chạy Video Bridge nghiêm ngặt trên loopback tin cậy và cầu nối trích xuất nội bộ                                      |
-| `/api/services/`                                                                                         | Dịch vụ nhúng (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + khởi chạy                                                   |
-| `/dashboard/providers/services/`                                                                         | Proxy ngược tới giao diện người dùng của các dịch vụ nhúng                                                                               |
-| `/api/tunnels/cloudflared`                                                                               | Cài đặt/khởi chạy tệp nhị phân cloudflared                                                                                               |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Cài đặt/điều khiển tailscaled trên máy chủ                                                                                               |
-| `/api/copilot/`                                                                                          | Trình điều khiển LLM không xác thực — mặc định chỉ dành cho CLI                                                                          |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — khởi chạy máy chủ MITM + chỉnh sửa DNS                                                                                     |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — trình lắng nghe http-proxy + proxy hệ thống                                                                          |
-| `/api/settings/mitm`                                                                                     | Bật chặn bắt MITM (trạng thái proxy cấp hệ thống)                                                                                        |
-| `/api/issue-agent/`                                                                                      | Tác tử xử lý sự cố — khởi chạy công cụ cục bộ trên kho mã                                                                                |
-| `/api/plugins/`, `/api/plugins`                                                                          | Plugin — tải/thực thi qua `worker_threads` + `child_process`                                                                             |
-| `/api/middleware/`                                                                                       | Middleware người dùng — tải/thực thi mã của người vận hành trong cùng tiến trình                                                         |
-| `/api/system/version`                                                                                    | Tự động cập nhật (chỉ POST; GET/HEAD/OPTIONS được miễn) — khởi chạy `git checkout` + `npm install`                                       |
-| `/api/db-backups/exportAll`                                                                              | Khởi chạy `tar` để tạo kho lưu trữ xuất                                                                                                  |
-| `/api/local/`                                                                                            | Trình khởi chạy cục bộ bằng 1 cú nhấp (hiện tại là Redis) — khởi chạy podman/docker                                                      |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Vòng đời proxy Headroom — khởi chạy CLI python / gửi tín hiệu đến PID                                                                    |
-| `/api/jobs`, `/api/jobs/`                                                                                | Điều khiển trình chạy tác vụ — thực thi công việc theo lịch trên máy chủ                                                                 |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` trước khi nhập thông tin xác thực                                                                        |
-| `/api/oauth/kiro/auto-import`                                                                            | Đọc các tệp thông tin xác thực Kiro CLI từ máy chủ                                                                                       |
-| `/api/skills/collect/`                                                                                   | Thu thập kỹ năng — phát hiện/cài đặt công cụ cục bộ                                                                                      |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Đăng ký + thực thi trình xử lý kỹ năng — có thể khởi chạy vùng chứa sandbox (GHSA-jx89)                                                  |
-| `/api/discovery/`                                                                                        | Thăm dò khám phá mạng/nhà cung cấp cục bộ                                                                                                |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Khởi chạy trình duyệt có giao diện + phiên VNC để đăng nhập tương tác                                                                    |
-| `/api/acp/agents`                                                                                        | ACP — phát hiện và khởi chạy các tệp nhị phân CLI agent cục bộ                                                                           |
-| `/api/resilience/connections`                                                                            | JSON về khả năng phục hồi theo từng tài khoản (thời gian chờ, bộ ngắt mạch, khóa). HTML của bảng điều khiển không chỉ giới hạn ở cục bộ. |
-| `/api/providers/cursor/agent-availability`                                                               | Kiểm tra lời nhắc cài đặt trên bảng điều khiển — khởi chạy `cursor-agent status --format json`                                           |
-| `/api/providers/{id}/login` (regex)                                                                      | Khởi chạy Playwright Chromium có giao diện để đăng nhập bằng cookie web                                                                  |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | Luồng thủ công có giao diện + tự động đăng nhập bằng điện thoại/SMS dựa trên phiên (khởi chạy Playwright)                                |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Gia hạn phiên Cursor thủ công — kích hoạt `cursor-agent`                                                                                 |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Chẩn đoán bản cài đặt Codex CLI cục bộ (khởi chạy tệp nhị phân)                                                                          |
+| Prefix / pattern                                                                                         | Why it's local-only                                                                                       |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | Máy chủ MCP — khởi chạy các cầu nối stdio + trình xử lý SSE                                               |
+| `/api/cli-tools/runtime/`                                                                                | Runtime công cụ CLI — thực thi mã plugin tùy ý                                                            |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Trình ghi cài đặt theo từng công cụ, có thể chạm tới binary/cấu hình của công cụ trên máy chủ             |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Cùng lệnh spawn `getCliRuntimeStatus()` như sáu mục phía trên (GHSA-35fw-cv32-2373)                       |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Trình thăm dò kiểm kê CLI — chạy `command -v` / `--version` cho từng công cụ (GHSA-35fw-cv32-2373)        |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Điều khiển proxy MITM Antigravity (khởi chạy/trỏ proxy hệ thống)                                          |
+| `/api/modality-bridge/video/`                                                                            | Trình thăm dò runtime Video Bridge chỉ chấp nhận loopback tin cậy và cầu nối trích xuất nội bộ            |
+| `/api/services/`                                                                                         | Các dịch vụ nhúng (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + khởi chạy                |
+| `/dashboard/providers/services/`                                                                         | Reverse proxy tới UI của các dịch vụ nhúng                                                                |
+| `/api/tunnels/cloudflared`                                                                               | Cài đặt/khởi chạy binary cloudflared                                                                      |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Cài đặt/điều khiển tailscaled trên máy chủ                                                                |
+| `/api/copilot/`                                                                                          | Driver LLM không xác thực — mặc định chỉ dành cho CLI                                                     |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — khởi chạy máy chủ MITM + chỉnh sửa DNS                                                      |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — trình lắng nghe http-proxy + proxy hệ thống                                           |
+| `/api/settings/mitm`                                                                                     | Bật tính năng đánh chặn MITM (trạng thái proxy ở cấp hệ thống)                                            |
+| `/api/issue-agent/`                                                                                      | Issue agent — khởi chạy công cụ cục bộ tác động lên repo                                                  |
+| `/api/plugins/`, `/api/plugins`                                                                          | Plugin — tải/thực thi qua `worker_threads` + `child_process`                                              |
+| `/api/middleware/`                                                                                       | Middleware người dùng — tải/thực thi mã của người vận hành ngay trong tiến trình                          |
+| `/api/system/version`                                                                                    | Tự động cập nhật (chỉ POST; GET/HEAD/OPTIONS được loại trừ) — khởi chạy `git checkout` + `npm install`    |
+| `/api/db-backups/exportAll`                                                                              | Khởi chạy `tar` để tạo archive xuất dữ liệu                                                               |
+| `/api/local/`                                                                                            | Trình khởi chạy cục bộ một cú nhấp chuột (hiện tại là Redis) — khởi chạy podman/docker                    |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Vòng đời proxy Headroom — khởi chạy python CLI / gửi tín hiệu tới PID                                     |
+| `/api/jobs`, `/api/jobs/`                                                                                | Điều khiển trình chạy job — thực thi công việc theo lịch trên máy chủ                                     |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` trước khi nhập thông tin xác thực                                         |
+| `/api/oauth/kiro/auto-import`                                                                            | Đọc các tệp thông tin xác thực của Kiro CLI từ máy chủ                                                    |
+| `/api/skills/collect/`                                                                                   | Thu thập skill — phát hiện/cài đặt công cụ cục bộ                                                         |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Đăng ký + thực thi skill handler — chạm đến việc spawn container sandbox (GHSA-jx89)                      |
+| `/api/discovery/`                                                                                        | Các probe khám phá mạng/provider cục bộ                                                                   |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Khởi tạo trình duyệt headful + phiên VNC cho các lần đăng nhập tương tác                                  |
+| `/api/acp/agents`                                                                                        | ACP — khám phá và spawn các binary agent CLI cục bộ                                                       |
+| `/api/resilience/connections`                                                                            | JSON resilience theo tài khoản (cooldown, breaker, lockout). HTML của dashboard không chỉ giới hạn local. |
+| `/api/providers/cursor/agent-availability`                                                               | Kiểm tra install-nudge của dashboard — spawn `cursor-agent status --format json`                          |
+| `/api/providers/{id}/login` (regex)                                                                      | Khởi chạy Playwright Chromium headful để đăng nhập bằng web-cookie                                        |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Luồng headful thủ công + tự động đăng nhập bằng điện thoại/SMS dựa trên session (spawn Playwright)        |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Gia hạn session Cursor thủ công — nudge `cursor-agent`                                                    |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Chẩn đoán bản cài Codex CLI cục bộ (spawn binary)                                                         |
 
 **Phản hồi khi vi phạm:** `403 LOCAL_ONLY`
 
-#### Ngoại lệ cho phạm vi quản lý
+#### Ngoại lệ (carve-out) theo scope manage
 
-Một tập con các đường dẫn LOCAL_ONLY CÓ THỂ được truy cập từ địa chỉ không phải loopback nếu và
-chỉ nếu yêu cầu mang `Authorization: Bearer <api-key>` có
-metadata bao gồm phạm vi `manage` (hoặc `admin`). Ngoại lệ này được kiểm soát
-tường minh theo từng đường dẫn thông qua `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, để
-mặc định cho mọi đường dẫn LOCAL_ONLY mới vẫn là chỉ cho phép loopback nghiêm ngặt. Các yêu cầu
-không được xác thực và yêu cầu sử dụng khóa không có quyền quản lý vẫn bị từ chối với
+Một tập hợp con các đường dẫn LOCAL_ONLY CÓ THỂ được truy cập từ non-loopback nếu
+và chỉ nếu request mang theo header `Authorization: Bearer <api-key>` mà
+metadata của nó bao gồm scope `manage` (hoặc `admin`). Ngoại lệ này được kiểm soát
+tường minh theo từng đường dẫn thông qua `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` để
+mặc định cho bất kỳ đường dẫn LOCAL_ONLY mới nào vẫn là strict-loopback. Các request
+chưa xác thực và các request có key không thuộc quyền manage vẫn bị từ chối với
 `403 LOCAL_ONLY`.
 
-Hiện tại, tiền tố duy nhất có thể bỏ qua là `/api/mcp/`. `/api/cli-tools/runtime/` và
-`/api/services/` được chủ ý loại trừ vì chúng có thể khởi chạy các
-tiến trình con tùy ý (`npm install`, `node`), chính là loại CVE mà tầng
-LOCAL_ONLY được tạo ra để ngăn chặn.
+Hiện tại, prefix duy nhất có thể bypass là `/api/mcp/`. `/api/cli-tools/runtime/` và
+`/api/services/` cố ý bị loại trừ vì chúng có thể spawn các tiến trình con tùy ý
+(`npm install`, `node`) — đây chính là lớp CVE mà tầng LOCAL_ONLY được tạo ra để ngăn chặn.
 
-**#7895 — phạm vi hẹp `mcp:connect`:** ngoại lệ `/api/mcp/` CŨNG chấp nhận
-khóa Bearer có phạm vi hẹp `mcp:connect`
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), được kiểm tra thông qua
+**#7895 — scope hẹp `mcp:connect`:** ngoại lệ của `/api/mcp/` CŨNG chấp nhận
+một Bearer key nắm giữ scope hẹp `mcp:connect`
+(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), được kiểm tra qua
 `hasMcpConnectOrManageScope()` trong `src/server/authz/policies/management.ts`.
-Phạm vi này CHỈ áp dụng cho `/api/mcp/` — `mcp:connect` không cấp bất kỳ quyền nào trên các
-route quản lý khác (bao gồm mọi tiền tố bỏ qua LOCAL_ONLY khác, nếu sau này có
-thêm), và nó được chủ ý loại trừ khỏi
-`MANAGEMENT_API_KEY_SCOPES`. Khóa có `manage`/`admin` vẫn được
-áp dụng ngoại lệ chính xác như trước; `mcp:connect` là một lựa chọn thay thế
-có đặc quyền thấp hơn dành cho các ứng dụng gọi từ xa chỉ sử dụng MCP và không cần quyền quản lý rộng.
+Điều này CHỈ giới hạn trong `/api/mcp/` — `mcp:connect` không cấp bất kỳ quyền nào trên
+bất kỳ route quản lý nào khác (bao gồm mọi prefix bypass LOCAL_ONLY khác, nếu có
+được thêm vào sau này), và nó cố ý bị loại khỏi
+`MANAGEMENT_API_KEY_SCOPES`. Một key nắm giữ `manage`/`admin` vẫn vượt qua
+ngoại lệ đúng như trước; `mcp:connect` là một phương án thay thế có đặc quyền thấp hơn
+dành cho các caller từ xa chỉ dùng MCP, những người không nên cần quyền quản lý rộng.
 
-| Yêu cầu                                                     | Đường dẫn                  | Kết quả                            |
-| ----------------------------------------------------------- | -------------------------- | ---------------------------------- |
-| Không phải loopback, không có Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY                     |
-| Không phải loopback, Bearer có phạm vi `manage`             | `/api/mcp/*`               | Cho phép                           |
-| Không phải loopback, Bearer có phạm vi `mcp:connect`        | `/api/mcp/*`               | Cho phép                           |
-| Không phải loopback, Bearer không có `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY                     |
-| Không phải loopback, Bearer có phạm vi `mcp:connect`        | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                     |
-| Không phải loopback, Bearer có phạm vi `manage`             | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                     |
-| Loopback, có hoặc không có bất kỳ Bearer nào                | mọi LOCAL_ONLY             | Cho phép (vượt qua cổng kiểm soát) |
+| Request                                              | Đường dẫn                  | Kết quả                  |
+| ---------------------------------------------------- | -------------------------- | ------------------------ |
+| Non-loopback, không có Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY           |
+| Non-loopback, Bearer có scope `manage`               | `/api/mcp/*`               | Cho phép                 |
+| Non-loopback, Bearer có scope `mcp:connect`          | `/api/mcp/*`               | Cho phép                 |
+| Non-loopback, Bearer không có `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY           |
+| Non-loopback, Bearer có scope `mcp:connect`          | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY           |
+| Non-loopback, Bearer có scope `manage`               | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY           |
+| Loopback, có/không có Bearer                         | bất kỳ LOCAL_ONLY nào      | Cho phép (vượt qua gate) |
 
-#### Hướng dẫn dành cho người vận hành & kiểm tra
+#### Hướng dẫn & kiểm toán cho người vận hành
 
-Nếu bạn chạy OmniRoute phía sau reverse proxy hoặc tunnel (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok), quá trình kiểm tra loopback vẫn bảo vệ các route có khả năng
-khởi chạy ở trên — yêu cầu có địa chỉ máy khách không phải loopback sẽ bị từ chối với
-`403 LOCAL_ONLY` **trước khi quá trình xác thực chạy**, vì vậy JWT bị rò rỉ không thể tiếp cận chức năng khởi chạy. Vẫn còn hai
-trách nhiệm dành cho người vận hành:
+Nếu bạn chạy OmniRoute phía sau một reverse proxy hoặc tunnel (nginx, Caddy, Cloudflare
+Tunnel, Tailscale, Ngrok), việc kiểm tra loopback vẫn bảo vệ các route có khả năng spawn
+ở trên — một request có địa chỉ client là non-loopback sẽ bị từ chối với
+`403 LOCAL_ONLY` **trước khi auth chạy**, vì vậy một JWT bị rò rỉ không thể chạm tới việc spawn. Hai
+trách nhiệm của người vận hành vẫn còn:
 
-- **Không được "sửa" lỗi 403 bằng cách giả mạo IP máy khách thành loopback.** Việc đặt
-  `X-Forwarded-For: 127.0.0.1`, hoặc sử dụng proxy ghi lại địa chỉ nguồn thành
-  loopback, sẽ mở lại chính loại RCE mà tầng này ngăn chặn. Chỉ cung cấp quyền truy cập vào
-  bảng điều khiển/API thông qua proxy — tuyệt đối không cung cấp quyền truy cập vào các route có khả năng khởi chạy.
-- **Giữ ngoại lệ phạm vi quản lý ở mức tối thiểu.** Chỉ `/api/mcp/` có thể được bỏ qua, và
-  chỉ với API key có phạm vi `manage`. `SPAWN_CAPABLE_PREFIXES` tuyệt đối không thể được
-  thêm vào danh sách bỏ qua — schema zod sẽ từ chối chúng và
-  `isLocalOnlyBypassableByManageScope` sẽ từ chối chúng trong thời gian chạy (phòng thủ theo chiều sâu),
-  đây chính là ý nghĩa của cụm từ "không thể được đặt thành có thể bỏ qua" trên bảng điều khiển. Các route có
-  phân đoạn động và đường dẫn tĩnh có khả năng khởi chạy bên dưới `/api/providers/` (ví dụ: `/login`,
-  `/refresh-cursor`) được thành phần đồng hành dựa trên regex `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` trong
-  `src/shared/constants/spawnCapablePrefixes.ts` bao phủ, chứ không phải mảng phẳng
-  `SPAWN_CAPABLE_PREFIXES` — mảng phẳng sẽ phải bao phủ toàn bộ
-  tiền tố `/api/providers/` để phát hiện chúng, làm phạm vi của cây route mà các
-  bảng điều khiển từ xa sử dụng hợp lệ cho CRUD nhà cung cấp trở nên quá rộng.
+- **Đừng "sửa" lỗi 403 bằng cách giả mạo IP client thành loopback.** Việc đặt
+  `X-Forwarded-For: 127.0.0.1`, hoặc một proxy ghi đè địa chỉ nguồn thành
+  loopback, sẽ mở lại chính lớp lỗ hổng RCE mà tầng này đóng lại. Hãy đưa
+  dashboard/API ra ngoài qua proxy — tuyệt đối không đưa các route có khả năng spawn.
+- **Giữ phần bypass theo scope manage ở mức tối thiểu.** Chỉ `/api/mcp/` là có thể
+  bypass, và chỉ với API key có scope `manage`. Các `SPAWN_CAPABLE_PREFIXES`
+  không bao giờ có thể được thêm vào danh sách bypass — zod schema từ chối chúng và
+  `isLocalOnlyBypassableByManageScope` từ chối chúng tại runtime (phòng thủ chiều
+  sâu — defence-in-depth), đó chính là điều dashboard muốn nói khi ghi "cannot be
+  made bypassable" (không thể được phép bypass). Cùng một deny-list cũng chứa
+  một vài route LOCAL_ONLY không spawn nhưng cũng không bao giờ được phép
+  truy cập từ xa — `/api/oauth/kiro/auto-import` (đọc các file credential Kiro
+  cục bộ trên host), `/api/discovery/` và `/api/issue-agent/`. Bộ nạp snapshot
+  runtime cũng loại bỏ các mục như vậy khỏi một hàng settings đã lưu, và
+  chức năng import JSON legacy (`/api/settings/import-json`) không bao giờ ghi các
+  key bypass. Mọi mục trong `LOCAL_ONLY_API_PREFIXES` phải nằm trong deny-list
+  hoặc được rà soát là đủ điều kiện bypass (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`).
+  Các route spawn-capable có segment động và đường dẫn tĩnh dưới `/api/providers/`
+  (ví dụ `/login`, `/refresh-cursor`) được bao phủ bởi phần bổ trợ dựa trên regex
+  `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` trong
+  `src/shared/constants/spawnCapablePrefixes.ts`, chứ không phải bởi mảng phẳng
+  `SPAWN_CAPABLE_PREFIXES` — mảng phẳng đó sẽ phải bao phủ toàn bộ
+  tiền tố `/api/providers/` mới bắt được chúng, khiến phạm vi mở rộng quá mức
+  đối với một cây route mà các dashboard từ xa vẫn sử dụng hợp lệ cho CRUD provider.
 
-**Kiểm tra quyền truy cập** — để xác minh không có gì từ bên ngoài máy chủ đang tiếp cận các route này:
+**Kiểm tra truy cập** — để xác minh không có gì từ ngoài host đang chạm tới các route này:
 
-- Mở **Kho kiểm kê phân quyền** trên `/dashboard/settings/security`: trang này hiển thị
-  danh sách tiền tố LOCAL_ONLY hiện hành, những tiền tố nào có thể bỏ qua và tập hợp
-  có khả năng khởi chạy tiến trình được xác định tại thời điểm biên dịch ("không thể cho phép bỏ qua").
-- Tìm kiếm trong nhật ký reverse proxy / truy cập của bạn các tiền tố ở trên đi kèm với
-  địa chỉ máy khách không phải loopback. Bất kỳ lượt truy cập nào như vậy trả về `200` thay vì
-  `403 LOCAL_ONLY` đều có nghĩa là proxy đang che giấu IP thực của máy khách — hãy sửa proxy.
-- Một mục `403 LOCAL_ONLY` trong nhật ký của OmniRoute đối với một trong các đường dẫn này cho thấy
-  cơ chế bảo vệ đang hoạt động đúng như dự kiến, không phải lỗi cần loại bỏ.
+- Mở **Authorization Inventory** (Bảng kiểm kê phân quyền) trên `/dashboard/settings/security`: nó hiển thị
+  danh sách tiền tố LOCAL_ONLY trực tiếp, những tiền tố nào có thể bypass, và tập hợp
+  spawn-capable tại thời điểm biên dịch ("cannot be made bypassable" — không thể được phép bypass).
+- Grep log reverse-proxy / access log của bạn để tìm các tiền tố ở trên đi kèm với
+  một địa chỉ client không phải loopback. Bất kỳ lượt truy cập nào như vậy trả về `200`
+  thay vì `403 LOCAL_ONLY` nghĩa là proxy đang che giấu IP client thật — hãy sửa proxy.
+- Một `403 LOCAL_ONLY` trong log của OmniRoute cho một trong các đường dẫn này là dấu hiệu
+  guard đang hoạt động đúng như thiết kế, không phải lỗi cần loại bỏ.
 
-### Cấp 2 — ALWAYS_PROTECTED
+#### Các route truy cập được từ xa với cơ chế kiểm soát probe tại điểm gọi
 
-**Được thực thi bởi:** `isAlwaysProtectedPath(path)` → bỏ qua cơ chế vượt qua `requireLogin=false`
-**Bỏ qua:** Không thể khi `requireLogin=false`; luôn yêu cầu JWT
+Một số route phải vẫn truy cập được từ dashboard từ xa nhưng chạy một probe phía host
+(`which <binary>`, `<binary> --version`, `tailscale status --json`) cho các caller cục bộ.
+Chúng không phải LOCAL_ONLY đối với `GET`; thay vào đó handler đọc kết quả đánh giá peer
+tin cậy bằng `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) và chỉ chạy probe
+cho các caller `loopback` / `lan`. Caller `remote` nhận được cùng một dạng response được
+xây dựng từ các nguồn không spawn (trạng thái đã lưu, settings, kiểm tra fs), được đánh dấu `probed: false`.
 
-Các route này có tính phá hủy hoặc không thể đảo ngược. Việc cho phép chúng trong một bản cài đặt
-"không mật khẩu" sẽ đồng nghĩa với việc bất kỳ ai trên cùng mạng LAN đều có thể xóa sạch cơ sở dữ liệu
-hoặc chấm dứt tiến trình máy chủ.
+| Route                                                            | Probe bị bỏ qua đối với caller từ xa                               |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | Probe runtime CLI (`allowLocalRuntimeProbe`) và spawn CLI-fallback |
+| `GET /api/headroom/status`                                       | `which headroom` và các probe `--version` của python               |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`  |
+| `GET /api/tunnels/cloudflared` (GET được miễn khỏi LOCAL_ONLY)   | Tra cứu PATH bằng `which cloudflared`                              |
 
-| Đường dẫn                                 | Lý do                                                                          |
-| ----------------------------------------- | ------------------------------------------------------------------------------ |
-| `/api/shutdown`                           | Chấm dứt tiến trình máy chủ                                                    |
-| `/api/settings/database`                  | Xuất, nhập và xóa sạch cơ sở dữ liệu                                           |
-| `/api/db-backups`                         | Quyền truy cập vào kho lưu trữ sao lưu toàn bộ cơ sở dữ liệu                   |
-| `/api/settings/export-json`               | Xuất toàn bộ khối cài đặt (bao gồm cả dữ liệu bí mật)                          |
-| `/api/settings/import-json`               | Thay thế toàn bộ khối cài đặt                                                  |
-| `/api/providers/health-autopilot/actions` | Thực thi các hành động khắc phục tự động                                       |
-| `/api/settings/obsidian`                  | Cấp thông tin xác thực WebDAV có thể tái sử dụng cho mọi thư mục gốc của vault |
+Một route đọc mới có probe host sẽ tuân theo mẫu tương tự, hoặc được phân loại
+LOCAL_ONLY ngay từ đầu.
 
-**Phản hồi khi vi phạm:** `401 Authentication required`
+### Tầng 2 — ALWAYS_PROTECTED
 
-`/api/settings/obsidian` bao gồm route con `/webdav` của nó: `POST` trỏ dịch vụ tệp WebDAV —
-được phục vụ bởi lớp Node tùy chỉnh trước Next.js, nằm ngoài pipeline này — đến một thư mục gốc
-do bên gọi chọn và trả về thông tin xác thực Basic vừa được cấp, `DELETE` luân chuyển các thông tin
-xác thực đó, còn `POST` của route cha lưu token API REST của Obsidian. GHSA-62vw chỉ che giấu việc
-tiết lộ mật khẩu qua `GET`; cơ chế cấp phát vẫn nằm ở cấp fail-open (GHSA-7pq4-8pvv-rx7r).
-`enableObsidianVaultSync()` còn từ chối vault nếu vault đó chính là thư mục dữ liệu, nằm bên trong
-thư mục dữ liệu hoặc chứa thư mục dữ liệu.
+**Được thực thi bởi:** `isAlwaysProtectedPath(path)` → bỏ qua bypass `requireLogin=false`
+**Bypass:** Không có khi `requireLogin=false`; JWT luôn được yêu cầu
 
-### Khởi tạo bản cài đặt mới chỉ dành cho loopback — dựa trên peer thực, không phải `Host`
+Các route này mang tính phá hủy hoặc không thể đảo ngược. Cho phép chúng trong một bản
+cài đặt "không mật khẩu" đồng nghĩa với việc bất kỳ ai trên cùng LAN cũng có thể xóa sạch
+database hoặc kill tiến trình server.
 
-Khi chưa cấu hình mật khẩu quản lý (và không có `INITIAL_PASSWORD`), `isAuthRequired()` trong
-`src/shared/utils/apiAuth.ts` chỉ cho phép khởi tạo ẩn danh **đối với các peer loopback**.
-Loopback được xác định lần lượt từ các tín hiệu peer đáng tin cậy: peer TCP thực được đóng dấu bằng token
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, là thông tin mà chính sách nhìn thấy), phán quyết
-`AUTHZ_HEADER_PEER_LOCALITY` của chính pipeline (là thông tin mà các trình xử lý route nhìn thấy, chỉ
-được tin cậy khi `OMNIROUTE_PEER_STAMP_TOKEN` được đặt), hoặc peer socket thực đối với các bên gọi trực tiếp.
-`Host` / `nextUrl.hostname` không bao giờ được tham chiếu, và thao tác ghi mật khẩu đầu tiên
-(`POST /api/settings/require-login`) cũng chịu cùng ràng buộc này thay vì mở cho mọi
-peer mạng (GHSA-7pq4-8pvv-rx7r). `managementPolicy` truyền trực tiếp phán quyết `peerContext`
-của chính nó xuống dưới, vì vậy các header của yêu cầu ORIGINAL (trước khi bị loại bỏ) không bao giờ
-quyết định phán quyết này.
+| Path                                      | Lý do                                                            |
+| ----------------------------------------- | ---------------------------------------------------------------- |
+| `/api/shutdown`                           | Kết thúc tiến trình server                                       |
+| `/api/settings/database`                  | Export, import và xóa sạch database                              |
+| `/api/db-backups`                         | Truy cập kho lưu trữ backup database đầy đủ                      |
+| `/api/settings/export-json`               | Export toàn bộ blob settings (bao gồm cả secrets)                |
+| `/api/settings/import-json`               | Thay thế toàn bộ blob settings                                   |
+| `/api/providers/health-autopilot/actions` | Thực thi các hành động khắc phục của autopilot                   |
+| `/api/settings/obsidian`                  | Tạo credential WebDAV tái sử dụng được cho bất kỳ vault root nào |
+| `/api/relay/tokens`                       | Tạo, liệt kê, chỉnh sửa và thu hồi relay token                   |
+| `/api/cli-tools/apply`                    | Ghi đè cấu hình CLI trên host của operator                       |
+| `/api/cli-tools/guide-settings`           | Ghi các file cấu hình CLI theo hướng dẫn                         |
+| `/api/cli-tools/hermes-agent-settings`    | Ghi cấu hình Hermes agent                                        |
+| `/api/cli-tools/backups`                  | Khôi phục và xóa các bản backup cấu hình CLI                     |
+| `/api/log-export`                         | Gửi call log đến một đích đã cấu hình                            |
+| `/api/restart`                            | Khởi động lại tiến trình server                                  |
 
-### Cấp 3 — MANAGEMENT (mặc định)
+**Response khi vi phạm:** `401 Authentication required`
 
-Tất cả các route quản lý khác. Yêu cầu xác thực trừ khi đã cấu hình
-`requireLogin=false`. Token CLI có thể xác thực các route này (loopback + HMAC hợp lệ).
+`/api/settings/obsidian` bao phủ route con `/webdav` của nó: `POST` trỏ dịch vụ tệp WebDAV — được phục vụ bởi lớp Node tùy chỉnh chạy trước Next.js, nằm ngoài pipeline này — tới một thư mục gốc do người gọi chọn và trả về thông tin xác thực Basic vừa được tạo mới, `DELETE` xoay vòng chúng, còn `POST` ở cấp cha lưu trữ token Obsidian REST API. GHSA-62vw chỉ che giấu việc lộ mật khẩu qua `GET`; việc cấp phát vẫn nằm ở tầng fail-open (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` còn từ chối một vault trùng với, nằm bên trong, hoặc chứa thư mục dữ liệu.
+
+#### Việc xuất và khôi phục thông tin xác thực chỉ dành cho operator
+
+Tầng trên chỉ quyết định liệu có bắt buộc _một_ thông tin xác thực nào đó hay không. Các route tải xuống thông tin xác thực đã lưu bổ sung một bước kiểm tra thứ hai trong handler: `GET /api/settings/export-json` (các kết nối provider đã giải mã và API key thô), `GET /api/db-backups/export` (tệp SQLite) và `GET /api/db-backups/exportAll` (toàn bộ bản lưu trữ) gọi `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). Nó chấp nhận một phiên dashboard, chủ thể CLI cục bộ, hoặc một instance đã tắt đăng nhập, và trả về `403` cho API key ở bất kỳ phạm vi nào (kể cả `manage` và `admin`) cũng như cho các access token `oma_`. Các tác vụ phá hủy tương ứng giữ cùng ranh giới đó: `POST /api/db-backups/import` (tệp `.sqlite` tải lên, kể cả `dryRun=true`), `POST /api/db-backups` (khôi phục một bản sao lưu đã lưu theo id) và `POST /api/settings/import-json` (khôi phục JSON cũ) thay thế cơ sở dữ liệu đang hoạt động hoặc toàn bộ tập cài đặt/kết nối/API key, nên thông tin xác thực máy cũng không thể kích hoạt chúng. Việc phá hủy các điểm khôi phục cũng giữ cùng ranh giới đó: `DELETE /api/db-backups` (dọn dẹp — giữ lại N bản mới nhất / loại bỏ các bản cũ hơn D ngày) và `PATCH /api/db-backups` (cài đặt lưu giữ), bởi cấu hình lưu giữ được duy trì chính là thứ mà `cleanupDbBackups()` áp dụng sau mỗi lần sao lưu tự động (`src/lib/db/backup.ts`), nên một thông tin xác thực máy có khả năng lưu `keepLatest: 1` sẽ cắt tỉa mọi thứ ở lần snapshot tiếp theo. Việc liệt kê và tạo bản sao lưu (`GET`/`PUT /api/db-backups`) vẫn giữ xác thực quản lý thông thường. Việc cấp token đồng bộ (`POST /api/sync/tokens`) dùng cùng helper đó, cộng thêm token dịch vụ nội bộ loopback đáng tin cậy.
+
+### Bootstrap cài đặt mới chỉ dành cho loopback — theo peer thực, không phải `Host`
+
+Khi chưa cấu hình mật khẩu quản lý (và không có `INITIAL_PASSWORD`), `isAuthRequired()` trong `src/shared/utils/apiAuth.ts` giữ bootstrap ẩn danh mở **chỉ cho các peer loopback**. Loopback được xác định từ các tín hiệu peer đáng tin cậy, theo thứ tự: peer TCP thực được đóng dấu token (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, thứ mà policy nhìn thấy), kết luận `AUTHZ_HEADER_PEER_LOCALITY` của chính pipeline (thứ mà các route handler nhìn thấy, chỉ đáng tin khi `OMNIROUTE_PEER_STAMP_TOKEN` được đặt), hoặc peer socket thực đối với các lượt gọi trực tiếp. `Host` / `nextUrl.hostname` không bao giờ được tham khảo, và việc ghi mật khẩu đầu tiên (`POST /api/settings/require-login`) cũng chịu cùng ràng buộc đó thay vì mở cho mọi peer mạng (GHSA-7pq4-8pvv-rx7r). `managementPolicy` truyền xuống một cách tường minh kết luận `peerContext` của chính nó, nên các header của request GỐC (trước khi bị loại bỏ) không bao giờ quyết định điều đó.
+
+### Tầng 3 — MANAGEMENT (mặc định)
+
+Tất cả các route quản lý khác. Yêu cầu xác thực trừ khi `requireLogin=false` được cấu hình. Token CLI có thể xác thực các route này (loopback + HMAC hợp lệ).
 
 ## Thứ tự đánh giá
 

@@ -8,6 +8,11 @@ import {
 } from "@/lib/db/settings";
 import { getRuntimePorts } from "@/lib/runtime/ports";
 import { updateSettingsSchema } from "@/shared/validation/settingsSchemas";
+import { oidcAdmissionClaimSchema } from "@/shared/utils/oidcAdmissionClaim";
+import {
+  DASHBOARD_SESSION_STATE_SETTINGS_KEYS,
+  SECURITY_IMPACTING_SETTINGS_KEYS,
+} from "@/shared/constants/securityImpactingSettings";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
@@ -27,9 +32,11 @@ import {
   verifyManagementPassword,
 } from "@/lib/auth/managementPassword";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import { requireOperatorCredential } from "@/lib/api/operatorCredential";
 import { isPaidModelTarget } from "@/shared/utils/freeModels";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance";
-import { isAuthRequired, isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
+import { deriveSettingsAuditActor, emitSettingsFailureAudit } from "@/lib/api/settingsAudit";
+import { isAuthRequired } from "@/shared/utils/apiAuth";
 import {
   DASHBOARD_SESSION_COOKIE,
   REVOKED_SESSIONS_SETTING,
@@ -38,16 +45,12 @@ import {
   mintDashboardSessionToken,
   verifyDashboardSessionToken,
 } from "@/shared/utils/dashboardSessionToken";
-import { isCliTokenAuthValid } from "@/lib/middleware/cliTokenAuth";
-import { extractApiKey } from "@/sse/services/auth";
-import { getApiKeyMetadata } from "@/lib/db/apiKeys";
 import { getRadarAdminUrl } from "@/lib/radar/links";
 import {
   AUTHZ_HEADER_AUTH_ID,
   AUTHZ_HEADER_AUTH_KIND,
   AUTHZ_HEADER_PEER_LOCALITY,
 } from "@/server/authz/headers";
-import { readSubjectFromHeaders } from "@/server/authz/assertAuth";
 
 /**
  * Force this route to run dynamically per-request and never be cached/prerendered.
@@ -108,65 +111,6 @@ function parseExpectedRevision(
   return undefined;
 }
 
-/**
- * Settings keys whose change broadens attack surface. Spec §Security:
- * password re-auth is required when any of these is present in a PATCH body.
- *
- * - `localOnlyManageScopeBypassEnabled` / `localOnlyManageScopeBypassPrefixes`:
- *   T-011 bypass kill-switch + per-prefix list. Operator must re-confirm
- *   before broadening the LOCAL_ONLY carve-out.
- * - `requireLogin`: dashboard login enforcement toggle.
- * - `newPassword`: password rotation (existing). Handled by the same gate so
- *   the password-verify only fires ONCE per PATCH.
- *
- * Note: `mcpEnabled` is NOT gated server-side — the dedicated MCP page
- * (/dashboard/mcp) toggles it via patchSetting() without a currentPassword
- * prompt. The Authz section can still prompt client-side for consistency,
- * but the server accepts the change without re-auth.
- */
-const SECURITY_IMPACTING_KEYS = [
-  "localOnlyManageScopeBypassEnabled",
-  "localOnlyManageScopeBypassPrefixes",
-  "requireLogin",
-  "newPassword",
-  "oidcEnabled",
-  "oidcDisablePasswordLogin",
-  "oidcClientSecret",
-] as const;
-
-/**
- * Derive an audit actor string from the inbound request. Falls back to
- * `"dashboard"` for cookie sessions, `"apikey:<id>"` for Bearer API keys,
- * `"cli"` for CLI machine-token sessions, and `"anonymous"` otherwise. Best
- * effort — any lookup error degrades to `"unknown"` so the audit row still
- * carries actor context.
- */
-async function deriveAuditActor(request: Request): Promise<string> {
-  try {
-    if (await isDashboardSessionAuthenticated(request)) return "dashboard";
-  } catch {
-    /* fall through */
-  }
-  const subject = readSubjectFromHeaders(request.headers);
-  if (subject.kind === "management_key" && subject.label === "local-cli-token") return "cli";
-  try {
-    if (await isCliTokenAuthValid(request)) return "cli";
-  } catch {
-    /* fall through */
-  }
-  try {
-    const apiKey = extractApiKey(request);
-    if (apiKey) {
-      const meta = await getApiKeyMetadata(apiKey);
-      if (meta?.id) return `apikey:${meta.id}`;
-      return "apikey:unknown";
-    }
-  } catch {
-    return "unknown";
-  }
-  return "anonymous";
-}
-
 /** Deep-equality for diff detection. JSON round-trip handles plain settings. */
 function isDeepEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
@@ -194,6 +138,45 @@ function computeSettingsDiff(
   return diff;
 }
 
+/** 403 for API keys of any scope and `oma_` access tokens that touch a security-policy key. */
+const SECURITY_POLICY_FORBIDDEN_MESSAGE =
+  "Changing security-policy settings (login, OIDC, CORS origins, brute-force protection) requires a signed-in dashboard session or the local CLI; API keys and access tokens cannot change them.";
+
+/**
+ * Settings that decide who reaches the dashboard: the re-auth-gated keys, every `oidc*` key
+ * and the server-written session state. Only the instance operator may change them — a
+ * delegated machine credential (manage-scoped API key, `oma_` token) is refused even when it
+ * knows the password, on top of the password re-auth below.
+ */
+const OPERATOR_ONLY_SETTINGS_KEYS = new Set<string>([
+  ...SECURITY_IMPACTING_SETTINGS_KEYS,
+  ...DASHBOARD_SESSION_STATE_SETTINGS_KEYS,
+]);
+
+function touchesOperatorOnlySettings(body: Record<string, unknown>): boolean {
+  return Object.keys(body).some(
+    (key) => OPERATOR_ONLY_SETTINGS_KEYS.has(key) || key.startsWith("oidc")
+  );
+}
+
+/** 403 (audited as OPERATOR_REQUIRED) when a machine credential touches security policy. */
+async function rejectMachineSecurityPolicyWrite(
+  request: Request,
+  body: Record<string, unknown>,
+  actor: string,
+  attemptedKeys: string[]
+): Promise<Response | null> {
+  if (!touchesOperatorOnlySettings(body)) return null;
+  const verdict = await requireOperatorCredential(request, {
+    forbiddenMessage: SECURITY_POLICY_FORBIDDEN_MESSAGE,
+  });
+  if (verdict.ok === false) {
+    emitSettingsFailureAudit(request, actor, "OPERATOR_REQUIRED", attemptedKeys);
+    return verdict.response;
+  }
+  return null;
+}
+
 /** List of top-level body keys the operator attempted to change (audit context). */
 function attemptedKeysOf(body: Record<string, unknown> | null | undefined): string[] {
   if (!body || typeof body !== "object") return [];
@@ -201,30 +184,6 @@ function attemptedKeysOf(body: Record<string, unknown> | null | undefined): stri
     (k) =>
       k !== "currentPassword" && k !== "newPassword" && k !== "password" && k !== "expectedRevision"
   );
-}
-
-/** Emit a settings.update_failed row. Never throws — audit must not break flow. */
-function emitSettingsFailureAudit(
-  request: Request,
-  actor: string,
-  reason: string,
-  attemptedKeys: string[]
-) {
-  try {
-    const { ipAddress, requestId } = getAuditRequestContext(request);
-    logAuditEvent({
-      action: "settings.update_failed",
-      actor,
-      target: "settings",
-      resourceType: "settings",
-      status: "failure",
-      ipAddress: ipAddress || undefined,
-      requestId: requestId || undefined,
-      details: { reason, attempted_keys: attemptedKeys },
-    });
-  } catch {
-    /* best effort */
-  }
 }
 
 export async function GET(request: Request) {
@@ -299,12 +258,53 @@ function readCookie(request: Request, name: string): string | null {
   return null;
 }
 
+type OidcPolicyError = { code: string; message: string };
+
+/**
+ * Cross-field OIDC admission rules for a settings PATCH: when OIDC is (or becomes) enabled the
+ * admission claim policy must be well-formed, and at least one admission rule (an allowed
+ * subject/email or a claim policy) must exist. Returns the error body, or null when valid.
+ */
+async function validateOidcPolicyPatch(
+  body: Record<string, unknown>
+): Promise<OidcPolicyError | null> {
+  if (
+    body.oidcEnabled === undefined &&
+    body.oidcAllowedSubjects === undefined &&
+    body.oidcAdmissionClaim === undefined
+  ) {
+    return null;
+  }
+  const current = await getSettings();
+  const enabled = (body.oidcEnabled as boolean | undefined) ?? current.oidcEnabled === true;
+  if (!enabled) return null;
+  const subjects = Array.isArray(body.oidcAllowedSubjects)
+    ? (body.oidcAllowedSubjects as unknown[])
+    : ((current.oidcAllowedSubjects as unknown[] | undefined) ?? []);
+  const hasAtLeastOne = subjects.some((s) => typeof s === "string" && s.trim().length > 0);
+  const admissionClaim =
+    body.oidcAdmissionClaim === undefined ? current.oidcAdmissionClaim : body.oidcAdmissionClaim;
+  if (admissionClaim != null && !oidcAdmissionClaimSchema.safeParse(admissionClaim).success) {
+    return {
+      code: "OIDC_ADMISSION_CLAIM_INVALID",
+      message: "Invalid OIDC admission claim policy",
+    };
+  }
+  if (!hasAtLeastOne && !admissionClaim) {
+    return {
+      code: "OIDC_ALLOWED_SUBJECTS_REQUIRED",
+      message: "OIDC requires at least one allowed subject/email or an admission claim policy",
+    };
+  }
+  return null;
+}
+
 export async function PATCH(request: Request) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
 
   // Derive actor + raw body once so the rejection paths can audit consistently.
-  const actor = await deriveAuditActor(request);
+  const actor = await deriveSettingsAuditActor(request);
   let rawBody: Record<string, unknown> = {};
   try {
     rawBody = (await request.json()) as Record<string, unknown>;
@@ -314,6 +314,14 @@ export async function PATCH(request: Request) {
     emitSettingsFailureAudit(request, actor, "INVALID_JSON", []);
     return NextResponse.json(
       { error: { code: "INVALID_JSON", message: "Request body is not valid JSON" } },
+      { status: 400 }
+    );
+  }
+  if (!rawBody || typeof rawBody !== "object" || Array.isArray(rawBody)) {
+    // Valid JSON that is not an object (`null`, a string, a number): nothing to read keys from.
+    emitSettingsFailureAudit(request, actor, "INVALID_BODY", []);
+    return NextResponse.json(
+      { error: { code: "INVALID_BODY", message: "Request body must be a JSON object" } },
       { status: 400 }
     );
   }
@@ -340,6 +348,14 @@ export async function PATCH(request: Request) {
     }
     const body: typeof validation.data & { password?: string } = { ...validation.data };
 
+    const operatorOnly = await rejectMachineSecurityPolicyWrite(
+      request,
+      validation.data as Record<string, unknown>,
+      actor,
+      attemptedKeys
+    );
+    if (operatorOnly) return operatorOnly;
+
     // Sanitize model lockout settings: clamp values to valid bounds.
     if (body.modelLockout) {
       body.modelLockout = resolveModelLockoutSettings({
@@ -347,33 +363,19 @@ export async function PATCH(request: Request) {
       }) as typeof body.modelLockout;
     }
 
-    if (body.oidcEnabled !== undefined || body.oidcAllowedSubjects !== undefined) {
-      const current = await getSettings();
-      const enabled = body.oidcEnabled ?? current.oidcEnabled === true;
-      const subjects = Array.isArray(body.oidcAllowedSubjects)
-        ? (body.oidcAllowedSubjects as unknown[])
-        : ((current.oidcAllowedSubjects as unknown[] | undefined) ?? []);
-      const hasAtLeastOne = subjects.some((s) => typeof s === "string" && s.trim().length > 0);
-      if (enabled && !hasAtLeastOne) {
-        emitSettingsFailureAudit(request, actor, "OIDC_ALLOWED_SUBJECTS_REQUIRED", attemptedKeys);
-        return NextResponse.json(
-          {
-            error: {
-              code: "OIDC_ALLOWED_SUBJECTS_REQUIRED",
-              message:
-                "oidcAllowedSubjects must contain at least one subject or email when oidcEnabled is true",
-            },
-          },
-          { status: 400 }
-        );
-      }
+    const oidcPolicyError = await validateOidcPolicyPatch(body);
+    if (oidcPolicyError) {
+      emitSettingsFailureAudit(request, actor, oidcPolicyError.code, attemptedKeys);
+      return NextResponse.json({ error: oidcPolicyError }, { status: 400 });
     }
 
     // VALIDATED body so we never trip on stray unknown keys. If any security
     // key is present, require currentPassword + verify against the stored
     // bcrypt hash. Dedupes with the previous inline newPassword reauth — the
     // password is verified at most once per PATCH.
-    const touchedSecurityKeys = SECURITY_IMPACTING_KEYS.filter((k) => k in validation.data);
+    const touchedSecurityKeys = SECURITY_IMPACTING_SETTINGS_KEYS.filter(
+      (k) => k in validation.data
+    );
     if (touchedSecurityKeys.length > 0) {
       const settings = await getSettings();
       // Lazy-hash any plaintext INITIAL_PASSWORD migration BEFORE we read the
@@ -449,7 +451,7 @@ export async function PATCH(request: Request) {
 
     // Password rotation: hash the new value AFTER the gate has accepted the
     // currentPassword (or the cold-boot exception fired). The gate already
-    // included `newPassword` in SECURITY_IMPACTING_KEYS, so no separate
+    // included `newPassword` in SECURITY_IMPACTING_SETTINGS_KEYS, so no separate
     // verify happens here — strictly hashing + body rewriting.
     // A password change also ends every dashboard session issued before it, so a copy of the
     // old cookie cannot outlive the password it was issued under.

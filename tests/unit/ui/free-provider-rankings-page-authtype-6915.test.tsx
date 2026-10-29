@@ -13,6 +13,14 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as unknown as typeof ResizeObserver;
+
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
 // Return a STABLE `t` function identity across renders (real next-intl memoizes
@@ -28,18 +36,19 @@ vi.mock("next-intl", () => ({
 
 // ── Import component after mocks ──────────────────────────────────────────────
 
-const { default: FreeProviderRankingsPage } = await import(
-  "@/app/(dashboard)/dashboard/free-provider-rankings/page"
-);
+const { default: FreeProviderRankingsPage } =
+  await import("@/app/(dashboard)/dashboard/free-provider-rankings/page");
 
 // ── Fixture data ──────────────────────────────────────────────────────────────
 
-function makeRanking(overrides: Partial<{
-  id: string;
-  name: string;
-  category: "noauth" | "oauth" | "apikey";
-  averageScore: number;
-}> = {}) {
+function makeRanking(
+  overrides: Partial<{
+    id: string;
+    name: string;
+    category: "noauth" | "oauth" | "apikey";
+    averageScore: number;
+  }> = {}
+) {
   return {
     id: overrides.id ?? "provider-noauth",
     name: overrides.name ?? "Provider NoAuth",
@@ -128,7 +137,10 @@ function tableRowNames(el: HTMLDivElement): string[] {
 // ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ rankings: [] }) }));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({ ok: true, json: async () => ({ rankings: [] }) })
+  );
 });
 
 afterEach(() => {
@@ -183,7 +195,9 @@ describe("FreeProviderRankingsPage — Type filter + group-by-type sort (#6915)"
   }, 15000);
 
   it("existing configuredOnly/availableOnly toggles remain independently functional alongside the new Type filter", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ rankings: FIXTURE_RANKINGS }) });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => ({ rankings: FIXTURE_RANKINGS }) });
     vi.stubGlobal("fetch", fetchMock);
     const el = await renderPageWithFixture();
     vi.stubGlobal("fetch", fetchMock);

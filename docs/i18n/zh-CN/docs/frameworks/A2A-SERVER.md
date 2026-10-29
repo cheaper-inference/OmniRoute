@@ -47,7 +47,7 @@ A2A 由 **Endpoints → A2A** 开关控制，默认处于禁用状态。禁用�
 
 ### `message/send` — 同步执行
 
-向技能发送消息并等待完整响应。
+向技能发送消息，并等待完整响应。
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,16 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+对于 `smart-routing`，`metadata.combo` 是网关请求中对
+`metadata.model` 的显式覆盖；它会作为真正的 `model` 发送，
+而不是作为被忽略的 `x-combo` JSON 字段。网关常规的 API 密钥和
+每目标授权仍然适用。无效或空的组合会被拒绝。
+
+结果会公开 `requested_combo`（调用方意图）、`dispatched_model`
+（实际网关请求）、`response_model`（网关响应）和
+`confirmed_combo`。除非网关明确标识某个组合，否则最后一个字段为 `null`。
+A2A 决策日志仅将执行归因于已确认的组合，并将未确认的请求保留为 `requestedCombo`。
+
 **响应：**
 
 ```json
@@ -76,22 +86,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +102,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE 流式传输
 
-与 `message/send` 相同，但返回服务器发送事件，以进行实时流式传输。
+与 `message/send` 相同，但返回服务器发送事件以进行实时流式传输。
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -148,31 +151,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## 可用技能
 
-OmniRoute 提供了 6 个 A2A 技能，它们在 `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` 中完成连接。每个技能模块均位于 `src/lib/a2a/skills/` 中。
+OmniRoute公开了`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`中的 6 个A2A技能。每个技能模块都位于`src/lib/a2a/skills/`中。
 
-| 技能         | ID                   | 描述                                                                                                                                        | 标签             | 示例                        |
-| :----------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | :--------------- | :-------------------------- |
-| 智能路由     | `smart-routing`      | 使用 OmniRoute 的组合引擎和评分机制，通过最优提供者/组合路由提示词                                                                          | 路由、提供者     | “通过最佳模型路由此提示词”  |
-| 配额管理     | `quota-management`   | 报告各提供者的配额状态，帮助调用方决定何时限流/切换                                                                                         | 配额、提供者     | “检查 anthropic 的配额”     |
-| 提供者发现   | `provider-discovery` | 列出已安装的提供者及其能力、免费套餐标记和 OAuth 状态                                                                                       | 提供者、发现     | “有哪些可用的提供者？”      |
-| 成本分析     | `cost-analysis`      | 根据目录和近期使用情况，估算请求/对话的成本                                                                                                 | 成本、使用情况   | “估算此对话的成本”          |
-| 健康状况报告 | `health-report`      | 汇总各提供者的断路器、冷却和锁定状态                                                                                                        | 健康状况、韧性   | “显示所有提供者的健康状态”  |
-| 列出能力     | `list-capabilities`  | 以 Markdown 表格形式返回包含 45 个条目的完整 Agent Skills 目录（23 个 API + 21 个 CLI + 1 个配置），并附带用于上下文注入的原始 SKILL.md URL | 目录、发现、技能 | “列出 OmniRoute 的所有能力” |
+| 技能       | ID                   | 描述                                                                                                        | 标签             | 示例                       |
+| :--------- | :------------------- | :---------------------------------------------------------------------------------------------------------- | :--------------- | :------------------------- |
+| 智能路由   | `smart-routing`      | 使用OmniRoute的组合引擎+评分通过最佳provider/combo路由提示                                                  | 路由、提供者     | “通过最佳模型路由此提示”   |
+| 配额管理   | `quota-management`   | 报告每个提供者的配额状态，帮助调用者决定何时进行throttle/switch                                             | 配额、供应商     | “检查人类配额”             |
+| 提供者发现 | `provider-discovery` | 列出已安装的提供者及其功能、免费层标志、 OAuth状态                                                          | 提供者、发现     | “有哪些供应商可用？”       |
+| 成本分析   | `cost-analysis`      | 根据目录+最近的使用情况估计request/conversation的成本                                                       | 成本、使用量     | “估计这次对话的成本”       |
+| 健康报告   | `health-report`      | 聚合每个提供者的断路器、冷却时间、锁定状态                                                                  | 健康、韧性       | “显示所有提供者的健康状况” |
+| 列出能力   | `list-capabilities`  | 返回完整的 45 条目代理技能目录（23 API + 21 CLI + 1 配置）作为降价表，并使用原始SKILL.md URLs进行上下文注入 | 目录、发现、技能 | “列出所有OmniRoute功能”    |
 
-> Agent Card 应与实时的 352 个提供者目录保持一致；提供者数量以及免费/无需身份验证的元数据均来自运行时注册表。
+> 代理卡应与实时 377 提供者目录保持一致；提供者计数和free/no-auth数据源自运行时注册表。
 
-### `list-capabilities` 技能详情
+### `list-capabilities`技能详情
 
-`list-capabilities` 技能对于需要在发送 API 调用之前了解 OmniRoute 所提供功能的外部代理尤其有用。它会返回一个结构化的 Markdown 表格工件：
+`list-capabilities`技能对于需要在发送API调用之前发现OmniRoute公开的内容的外部代理特别有用。它返回一个结构化的 Markdown 表工件：
 
 ```
-| ID | 名称 | 类别 | 领域 | 端点/命令 | 原始 URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | 身份验证与会话 | api | 身份验证 | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-每一行都包含 `rawUrl` 列，以便代理可以立即获取完整的 SKILL.md。`metadata.totalSkills` 字段与目录大小保持一致（目前为 45）。实现：`src/lib/a2a/skills/listCapabilities.ts`。另请参阅 [AGENT-SKILLS.md](./AGENT-SKILLS.md)。
+每行都包含`rawUrl`列，因此代理可以立即获取完整的SKILL.md。 `metadata.totalSkills`字段反映了目录大小（今天为 45）。实现： `src/lib/a2a/skills/listCapabilities.ts`。另请参见[AGENT-SKILLS.md](./AGENT-SKILLS.md) 。
 
 ---
 
@@ -264,7 +267,7 @@ JSON-RPC 端点 `/a2a` 是规范的 A2A 入口点。以下 REST 端点为仪表�
 
 ## 集成示例
 
-### Python（requests）
+### Python（请求）
 
 ```python
 import requests
@@ -283,7 +286,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript（fetch）
+### TypeScript （获取）
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {
