@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Компонент на таблото API: адаптери през `packages/ui-kit` — вижте `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: имена на икони, използвани от екраните → Lucide компоненти (`<Icon>`)                      |
-| `constants/providers.ts`         | **377 доставчици** със Zod валидиране (източник на истината)                                           |
+| `constants/providers.ts`         | **378 доставчици** със Zod валидиране (източник на истината)                                           |
 | `constants/cliTools.ts`          | Външен регистър CLI инструменти                                                                        |
 | `constants/routingStrategies.ts` | **20 стратегии за маршрутизиране** с приоритети                                                        |
 | `constants/publicApiRoutes.ts`   | Маршрути, които изискват удостоверяване на носител (срещу управление).                                 |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Външни CLI интеграции + Вътрешни OmniRoute CLI                                                 |
 | `I18N.md`                   | i18n архитектура, добавяне на език, 67 локализации                                             |
 | `UNINSTALL.md`              | Чисти стъпки за деинсталиране                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Автоматично генерирано** каталог от 377 доставчици (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Автоматично генерирано** каталог от 378 доставчици (regen: `npm run gen:provider-reference`) |
 
 ### Подсистема за дълбоки гмуркания
 

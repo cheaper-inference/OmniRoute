@@ -163,7 +163,7 @@ OmniRoute onthult 6 A2A vaardigheden die zijn vastgelegd in `src/lib/a2a/taskExe
 | Gezondheidsrapport               | `health-report`      | Verzamelt de stroomonderbreker, cooldown en lock-outstatus per provider                                                                                                 | gezondheid, veerkracht              | "Toon gezondheidsstatus van alle zorgverleners" |
 | Maak een lijst van mogelijkheden | `list-capabilities`  | Retourneert de volledige Agent Skills-catalogus met 45 vermeldingen (23 API + 21 CLI + 1 config) als een afprijstabel met onbewerkte SKILL.md URLs voor contextinjectie | catalogus, ontdekking, vaardigheden | "Laat alle OmniRoute mogelijkheden zien"        |
 
-> De Agent Card moet in lijn blijven met de live 377-providercatalogus; providertellingen en free/no-auth metagegevens zijn afkomstig uit het runtime-register.
+> De Agent Card moet in lijn blijven met de live 378-providercatalogus; providertellingen en free/no-auth metagegevens zijn afkomstig uit het runtime-register.
 
 ### `list-capabilities` -vaardigheidsdetail
 

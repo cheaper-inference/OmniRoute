@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `components/`                    | 대시보드 구성요소 API: `packages/ui-kit` 통한 어댑터 — `docs/architecture/DESIGN_SYSTEM.md` 참조 |
 | `constants/iconMap.ts`           | `ICON_MAP`: 화면에서 사용되는 아이콘 이름 → Lucide 구성 요소(`<Icon>`)                           |
-| `constants/providers.ts`         | **377개 제공자** Zod 검증 포함(진실의 출처)                                                      |
+| `constants/providers.ts`         | **378개 제공자** Zod 검증 포함(진실의 출처)                                                      |
 | `constants/cliTools.ts`          | 외부 CLI 도구 레지스트리                                                                         |
 | `constants/routingStrategies.ts` | **20가지 라우팅 전략** 우선순위가 있는                                                           |
 | `constants/publicApiRoutes.ts`   | Bearer(관리 대비) 인증이 필요한 경로                                                             |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 외부 CLI 통합 + 내부 OmniRoute CLI                                            |
 | `I18N.md`                   | i18n 아키텍처, 언어 추가, 67개 로케일                                         |
 | `UNINSTALL.md`              | 깔끔한 제거 단계                                                              |
-| `PROVIDER_REFERENCE.md`     | **자동 생성** 377개 공급자 카탈로그(재생성: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **자동 생성** 378개 공급자 카탈로그(재생성: `npm run gen:provider-reference`) |
 
 ### 하위 시스템 심층 분석
 

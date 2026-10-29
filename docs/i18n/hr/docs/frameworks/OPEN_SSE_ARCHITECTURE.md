@@ -488,7 +488,7 @@ Time se obrađuju:
 
 | File                          | Svrha                                                      |
 | ----------------------------- | ---------------------------------------------------------- |
-| `providerRegistry.ts`         | Registar modela chata preko kataloga 377 pružatelja usluga |
+| `providerRegistry.ts`         | Registar modela chata preko kataloga 378 pružatelja usluga |
 | `providerModels.ts`           | Aliasi modela, mapiranje formata                           |
 | `constants.ts`                | Istek vremena, ograničenja, statusni kodovi                |
 | `defaultThinkingSignature.ts` | Zadani potpis Claude razmišljanje                          |

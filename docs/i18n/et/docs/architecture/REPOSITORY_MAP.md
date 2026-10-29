@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `components/`                    | Armatuurlaua komponent API: adapterid üle `packages/ui-kit` – vt `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekraanidel kasutatavad ikooninimed → Lucide'i komponendid (`<Icon>`)                      |
-| `constants/providers.ts`         | **377 pakkujat** Zod valideerimisega (tõe allikas)                                                    |
+| `constants/providers.ts`         | **378 pakkujat** Zod valideerimisega (tõe allikas)                                                    |
 | `constants/cliTools.ts`          | Väline CLI tööriista register                                                                         |
 | `constants/routingStrategies.ts` | **20 marsruutimisstrateegiat** prioriteetidega                                                        |
 | `constants/publicApiRoutes.ts`   | Marsruudid, mis nõuavad kandja (vs haldamise) autentimist                                             |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Välised CLI integratsioonid + Sisemine OmniRoute CLI                                           |
 | `I18N.md`                   | i18n arhitektuur, keele lisamine, 67 lokaali                                                   |
 | `UNINSTALL.md`              | Puhastage desinstalli sammud                                                                   |
-| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** kataloog 377 pakkujast (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** kataloog 378 pakkujast (regen: `npm run gen:provider-reference`) |
 
 ### Alamsüsteemi süvasukeldumised
 

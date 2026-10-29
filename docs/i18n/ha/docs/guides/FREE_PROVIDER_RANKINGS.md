@@ -13,7 +13,7 @@
 
 ## Me Yake
 
-OmniRoute yayi rijistar masu samarwa 377, gami da shigarwar kasida 155 da aka yiwa alama**free/no-auth** (no-auth, free-tier OAuth, ko free-tier API key - duba [Jagoran Tiers Kyauta](../getting-started/FREE-TIERS-GUIDE.md) da cikakken [jagorar Tiers Kyauta](../reference/FREE_TIERS.md) ). Kama: masu samar da kyauta sun bambanta sosai a cikin ingancin ƙirar. Mai ba da izini wanda ke ba da samfurin iyaka yana da amfani sosai fiye da wanda ke ba da ƙaramin ƙirar gado.
+OmniRoute yayi rijistar masu samarwa 378, gami da shigarwar kasida 155 da aka yiwa alama**free/no-auth** (no-auth, free-tier OAuth, ko free-tier API key - duba [Jagoran Tiers Kyauta](../getting-started/FREE-TIERS-GUIDE.md) da cikakken [jagorar Tiers Kyauta](../reference/FREE_TIERS.md) ). Kama: masu samar da kyauta sun bambanta sosai a cikin ingancin ƙirar. Mai ba da izini wanda ke ba da samfurin iyaka yana da amfani sosai fiye da wanda ke ba da ƙaramin ƙirar gado.
 
 **Matsayin Masu Ba da Kyauta** amsa"** wane mai bada kyauta ya ba ni mafi kyawun samfurin?** " ta hanyar shiga kowane kasida ta masu bada kyauta tare da** Maki masu inganci da jama'a suka samo asali** daga** Jagoran jagororin Arena AI** ( ELO zaɓin ɗan adam, ra'ayin guda ɗaya a bayan fagen LMArena chatbot). Masu bayarwa sai an jera su da ƙarfinsu** mafi kyawun samfurin kyauta** .
 

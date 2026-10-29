@@ -14,7 +14,7 @@
 
 ## Bu nima
 
-OmniRoute 377 ta provayderni ro'yxatdan o'tkazadi, shu jumladan 155 ta katalog yozuvlari belgilangan**free/no-auth** (no-auth, free-tier OAuth yoki free-tier API key — [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) va to'liq [Free Tiers katalogiga](../reference/FREE_TIERS.md) qarang). Qo'lga olish: bepul provayderlar model sifati bo'yicha juda farq qiladi. Chegaraviy modelga xizmat ko'rsatuvchi avtorizatsiyasiz provayder kichik eski modelga xizmat ko'rsatuvchidan ko'ra ancha foydalidir.
+OmniRoute 378 ta provayderni ro'yxatdan o'tkazadi, shu jumladan 155 ta katalog yozuvlari belgilangan**free/no-auth** (no-auth, free-tier OAuth yoki free-tier API key — [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) va to'liq [Free Tiers katalogiga](../reference/FREE_TIERS.md) qarang). Qo'lga olish: bepul provayderlar model sifati bo'yicha juda farq qiladi. Chegaraviy modelga xizmat ko'rsatuvchi avtorizatsiyasiz provayder kichik eski modelga xizmat ko'rsatuvchidan ko'ra ancha foydalidir.
 
 **Bepul provayderlar reytingi** javoblar"** Qaysi bepul provayder menga eng yaxshi modelni beradi?** " bilan har bir bepul provayderning katalogiga qo'shilish orqali** olomon manbalaridan olingan sifat ballari** dan** Arena AI yetakchilar jadvali** (inson-afzal ELO, LMArena chatbot arenasining orqasida xuddi shu fikr). Keyin provayderlar ularning kuchiga qarab tartiblanadi** Eng yaxshi bepul model** .
 

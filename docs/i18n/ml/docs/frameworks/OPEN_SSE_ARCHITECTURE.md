@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ഫയൽ                           | ഉദ്ദേശം                                       |
 | ----------------------------- | --------------------------------------------- |
-| `providerRegistry.ts`         | 377-പ്രൊവൈഡർ കാറ്റലോഗിൽ ചാറ്റ് മോഡൽ രജിസ്ട്രി |
+| `providerRegistry.ts`         | 378-പ്രൊവൈഡർ കാറ്റലോഗിൽ ചാറ്റ് മോഡൽ രജിസ്ട്രി |
 | `providerModels.ts`           | മോഡൽ അപരനാമങ്ങൾ, ഫോർമാറ്റ് മാപ്പിംഗ്          |
 | `constants.ts`                | സമയപരിധികൾ, പരിധികൾ, സ്റ്റാറ്റസ് കോഡുകൾ       |
 | `defaultThinkingSignature.ts` | ഡിഫോൾട്ട് Claude തിങ്കിംഗ് സിഗ്നേച്ചർ         |

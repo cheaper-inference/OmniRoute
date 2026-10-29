@@ -20,7 +20,7 @@ Khi một tác nhân IDE (ví dụ: GitHub Copilot, Cursor, Claude Code) thực 
 
 Điều này có nghĩa là bạn có thể:
 
-- **Định tuyến lại bất kỳ đại lý nào đến bất kỳ nhà cung cấp nào** : Copilot đang nói chuyện với OpenAI? Chuyển hướng nó tới Anthropic Claude, Gemini hoặc bất kỳ nhà cung cấp nào trong số 377 nhà cung cấp của OmniRoute.
+- **Định tuyến lại bất kỳ đại lý nào đến bất kỳ nhà cung cấp nào** : Copilot đang nói chuyện với OpenAI? Chuyển hướng nó tới Anthropic Claude, Gemini hoặc bất kỳ nhà cung cấp nào trong số 378 nhà cung cấp của OmniRoute.
 - **Áp dụng ánh xạ mô hình** : `gemini-3-flash` → `claude-sonnet-4.7` một cách minh bạch ở cấp độ xử lý.
 - **Quan sát tất cả lưu lượng đại lý** : mọi yêu cầu bị chặn sẽ được công bố tới [Thanh tra giao thông](./TRAFFIC_INSPECTOR.md).
 - **Áp dụng khả năng phục hồi OmniRoute** : định tuyến kết hợp, bộ ngắt mạch, dự phòng và theo dõi chi phí cũng hoạt động đối với lưu lượng tác nhân IDE.

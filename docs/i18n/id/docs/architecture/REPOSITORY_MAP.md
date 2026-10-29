@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponen dasbor API: adaptor melalui `packages/ui-kit` — lihat `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nama ikon yang digunakan oleh layar → Komponen Lucide (`<Icon>`)                        |
-| `constants/providers.ts`         | **377 penyedia** dengan validasi Zod (sumber kebenaran)                                             |
+| `constants/providers.ts`         | **378 penyedia** dengan validasi Zod (sumber kebenaran)                                             |
 | `constants/cliTools.ts`          | Registri alat CLI eksternal                                                                         |
 | `constants/routingStrategies.ts` | **20 strategi perutean** dengan prioritas                                                           |
 | `constants/publicApiRoutes.ts`   | Rute yang memerlukan autentikasi Pembawa (vs manajemen).                                            |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrasi CLI eksternal + OmniRoute CLI internal                                          |
 | `I18N.md`                   | arsitektur i18n, menambahkan bahasa, 67 lokal                                             |
 | `UNINSTALL.md`              | Bersihkan langkah-langkah uninstall                                                       |
-| `PROVIDER_REFERENCE.md`     | **Dibuat secara otomatis** katalog 377 penyedia (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Dibuat secara otomatis** katalog 378 penyedia (regen: `npm run gen:provider-reference`) |
 
 ### Penyelaman mendalam subsistem
 

@@ -488,7 +488,7 @@ Hiki hushughulikia:
 
 | Faili                           | Kusudi                                                         |
 | ------------------------------- | -------------------------------------------------------------- |
-| `providerRegistry.ts`           | Usajili wa muundo wa gumzo juu ya katalogi ya watoa huduma 377 |
+| `providerRegistry.ts`           | Usajili wa muundo wa gumzo juu ya katalogi ya watoa huduma 378 |
 | `providerModels.ts`             | Lakabu za mfano, uchoraji wa ramani                            |
 | `constants.ts`                  | Muda umeisha, vikomo, misimbo ya hali                          |
 | `defaultThinkingSignature.ts`   | Sahihi chaguo-msingi Claude ya kufikiria                       |

@@ -12,7 +12,7 @@
 
 ## Was es ist
 
-OmniRoute registriert 377 Anbieter, davon 155 markierte Katalogeinträge**free/no-auth** (no-auth, Free-Tier OAuth oder Free-Tier API -Schlüssel – siehe [Leitfaden zu Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) und das vollständige [Free Tiers-Verzeichnis](../reference/FREE_TIERS.md) ). Der Haken: Bei kostenlosen Anbietern gibt es große Unterschiede in der Modellqualität. Ein Anbieter ohne Authentifizierung, der ein Frontier-Modell bedient, ist weitaus nützlicher als einer, der ein kleines Legacy-Modell bedient.
+OmniRoute registriert 378 Anbieter, davon 155 markierte Katalogeinträge**free/no-auth** (no-auth, Free-Tier OAuth oder Free-Tier API -Schlüssel – siehe [Leitfaden zu Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) und das vollständige [Free Tiers-Verzeichnis](../reference/FREE_TIERS.md) ). Der Haken: Bei kostenlosen Anbietern gibt es große Unterschiede in der Modellqualität. Ein Anbieter ohne Authentifizierung, der ein Frontier-Modell bedient, ist weitaus nützlicher als einer, der ein kleines Legacy-Modell bedient.
 
 **Kostenlose Anbieter-Rankings** Antworten“** Welcher kostenlose Anbieter bietet mir das beste Modell?** " indem Sie sich dem Katalog jedes kostenlosen Anbieters anschließen** Crowdsourcing-Qualitätsbewertungen** aus dem** Arena AI -Rangliste** (human-preference ELO, die gleiche Idee hinter der LMArena-Chatbot-Arena). Die Anbieter werden dann nach ihrer Stärke eingestuft** bestes kostenloses Modell** .
 

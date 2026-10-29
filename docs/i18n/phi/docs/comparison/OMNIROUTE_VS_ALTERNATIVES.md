@@ -39,7 +39,7 @@ Layunin na paghahambing ng mga feature vs mga sikat na open-source AI router.
 
 ## Kailan pipiliin ang OmniRoute
 
-- Self-host ka at gusto mo** maximum na saklaw ng provider** (377 provider, 155 free/no-auth catalog entries)
+- Self-host ka at gusto mo** maximum na saklaw ng provider** (378 provider, 155 free/no-auth catalog entries)
 - Kailangan mo ng isang** built-in na MCP server** (LLM tool, memorya, mga kasanayang nakalantad bilang mga tool)
 - kailangan mo**A2A protocol** para sa mga daloy ng trabaho ng ahente sa ahente
 - gusto mo** fingerprint stealth** (JA3/JA4) upang maiwasan ang pagtuklas ng upstream CAPTCHAs

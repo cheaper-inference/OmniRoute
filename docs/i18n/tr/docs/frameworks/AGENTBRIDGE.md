@@ -20,7 +20,7 @@ Bir IDE aracısı (örneğin, GitHub Copilot, Cursor, Claude Code) bir API çağ
 
 Bu, şunları yapabileceğiniz anlamına gelir:
 
-- **Herhangi bir aracıyı herhangi bir sağlayıcıya yeniden yönlendirin** : Copilot OpenAI ile mi konuşuyor? Bunu Anthropic Claude, Gemini veya OmniRoute 377 sağlayıcılarından herhangi birine yönlendirin.
+- **Herhangi bir aracıyı herhangi bir sağlayıcıya yeniden yönlendirin** : Copilot OpenAI ile mi konuşuyor? Bunu Anthropic Claude, Gemini veya OmniRoute 378 sağlayıcılarından herhangi birine yönlendirin.
 - **Model eşlemelerini uygulama** : `gemini-3-flash` → `claude-sonnet-4.7` işleyici düzeyinde şeffaf bir şekilde.
 - **Tüm temsilci trafiğini gözlemleyin** : ele geçirilen her istek [Trafik Müfettişine](./TRAFFIC_INSPECTOR.md) yayınlanır.
 - **OmniRoute esnekliğini uygulayın** : birleşik yönlendirme, devre kesiciler, geri dönüşler ve maliyet takibi IDE aracı trafiği için de çalışır.

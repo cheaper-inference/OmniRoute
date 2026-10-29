@@ -14,7 +14,7 @@ OmniRoute je lokalni usmerjevalni prehod AI in nadzorna plošča, zgrajena na Ne
 
 Osnovne zmogljivosti:
 
-- Površina API združljiva z OpenAI, za CLI/tools (377 ponudnikov, 156 izvajalskih modulov)
+- Površina API združljiva z OpenAI, za CLI/tools (378 ponudnikov, 156 izvajalskih modulov)
 - prevod Request/response med formati ponudnika
 - Nadomestni kombinirani model (zaporedje več modelov)
 - Strukturirani kombinirani koraki (`provider + model + connection`) z vrstnim redom med izvajanjem `compositeTiers`

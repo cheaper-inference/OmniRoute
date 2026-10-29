@@ -13,7 +13,7 @@
 
 ## Hvad det er
 
-OmniRoute registrerer 377 udbydere, herunder 155 katalogposter markeret**free/no-auth** (no-auth, free-tier OAuth eller free-tier API nøgle - se [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) og hele [Free Tiers-biblioteket](../reference/FREE_TIERS.md) ). Fangsten: gratis udbydere varierer meget i modelkvalitet. En udbyder uden godkendelse, der betjener en grænsemodel, er langt mere nyttig end en, der betjener en lille ældre model.
+OmniRoute registrerer 378 udbydere, herunder 155 katalogposter markeret**free/no-auth** (no-auth, free-tier OAuth eller free-tier API nøgle - se [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) og hele [Free Tiers-biblioteket](../reference/FREE_TIERS.md) ). Fangsten: gratis udbydere varierer meget i modelkvalitet. En udbyder uden godkendelse, der betjener en grænsemodel, er langt mere nyttig end en, der betjener en lille ældre model.
 
 **Gratis udbyderrangeringer** svar"** hvilken gratis udbyder giver mig den bedste model?** " ved at deltage i hver gratis udbyders katalog med** crowd-sourced kvalitetsresultater** fra** Arena AI leaderboard** (human-preference ELO, den samme idé bag LMArena chatbot arenaen). Udbydere bliver derefter rangeret efter styrken af deres** bedste gratis model** .
 

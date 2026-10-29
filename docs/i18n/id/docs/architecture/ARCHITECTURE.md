@@ -14,7 +14,7 @@ OmniRoute adalah gateway perutean dan dasbor AI lokal yang dibangun di atas Next
 
 Kemampuan inti:
 
-- Permukaan API yang kompatibel dengan OpenAI untuk CLI/tools (377 penyedia, 156 modul pelaksana)
+- Permukaan API yang kompatibel dengan OpenAI untuk CLI/tools (378 penyedia, 156 modul pelaksana)
 - terjemahan Request/response lintas format penyedia
 - Penggantian kombo model (urutan multi-model)
 - Langkah kombo terstruktur (`provider + model + connection`) dengan pengurutan waktu proses berdasarkan `compositeTiers`

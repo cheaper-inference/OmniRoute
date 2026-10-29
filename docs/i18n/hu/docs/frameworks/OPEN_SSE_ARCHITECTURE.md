@@ -488,7 +488,7 @@ Ez a következőket kezeli:
 
 | Fájl                                | Cél                                                                   |
 | ----------------------------------- | --------------------------------------------------------------------- |
-| `providerRegistry.ts`               | Chat-modell regisztrációja a 377-es szolgáltató katalógusán keresztül |
+| `providerRegistry.ts`               | Chat-modell regisztrációja a 378-es szolgáltató katalógusán keresztül |
 | `providerModels.ts`                 | Modell álnevek, formátumleképezés                                     |
 | `constants.ts`                      | Időtúllépések, korlátok, állapotkódok                                 |
 | `defaultThinkingSignature.ts`       | Alapértelmezett Claude gondolkodó aláírás                             |

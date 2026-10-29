@@ -39,7 +39,7 @@ Kwatancen fasaloli cikin adalci da shahararrun mashiga AI na buɗaɗɗen tushe.
 
 ## Lokacin zabar OmniRoute
 
-- Kai mai masaukin baki da so** matsakaicin ɗaukar hoto** (Masu samar da 377, shigarwar kundin free/no-auth 155)
+- Kai mai masaukin baki da so** matsakaicin ɗaukar hoto** (Masu samar da 378, shigarwar kundin free/no-auth 155)
 - Kuna buƙatar a** ginanniyar uwar garken MCP** (kayan aikin LLM, ƙwaƙwalwar ajiya, ƙwarewar da aka fallasa azaman kayan aiki)
 - Kuna bukata**A2A protocol** don wakili-zuwa-wakili ayyukan aiki
 - Kuna so** satar sawun yatsa** (JA3/JA4) don gujewa ganowa ta sama CAPTCHAs

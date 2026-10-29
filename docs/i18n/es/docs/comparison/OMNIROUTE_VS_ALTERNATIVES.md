@@ -39,7 +39,7 @@ Comparación objetiva de características frente a routers de IA de código abie
 
 ## Cuando elegir OmniRoute
 
-- Eres autohospedador y quieres** cobertura máxima del proveedor** (377 proveedores, 155 entradas de catálogo free/no-auth )
+- Eres autohospedador y quieres** cobertura máxima del proveedor** (378 proveedores, 155 entradas de catálogo free/no-auth )
 - Necesitas un** servidor MCP incorporado** (herramientas LLM, memoria, habilidades expuestas como herramientas)
 - necesitas** protocolo A2A** para flujos de trabajo de agente a agente
 - Quieres** sigilo de huellas dactilares** (JA3/JA4) para evitar la detección por CAPTCHAs ascendente

@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Componenta tabloului de bord API: adaptoare peste `packages/ui-kit` — vezi `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nume de pictograme utilizate de ecranele componente → Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **377 de furnizori** cu validare Zod (sursa adevărului)                                                         |
+| `constants/providers.ts`         | **378 de furnizori** cu validare Zod (sursa adevărului)                                                         |
 | `constants/cliTools.ts`          | Registrul extern al instrumentului CLI                                                                          |
 | `constants/routingStrategies.ts` | **20 de strategii de rutare** cu prioritati                                                                     |
 | `constants/publicApiRoutes.ts`   | Rute care necesită autentificare Bearer (vs management)                                                         |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrari externe CLI + Intern OmniRoute CLI                                              |
 | `I18N.md`                   | Arhitectură i18n, adăugarea unei limbi, 67 de locații                                     |
 | `UNINSTALL.md`              | Curățați pașii de dezinstalare                                                            |
-| `PROVIDER_REFERENCE.md`     | **Generat automat** catalog cu 377 de furnizori (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Generat automat** catalog cu 378 de furnizori (regen: `npm run gen:provider-reference`) |
 
 ### Subsistem scufundări adânci
 

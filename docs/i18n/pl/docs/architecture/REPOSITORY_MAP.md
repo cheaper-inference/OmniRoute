@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Komponent deski rozdzielczej API: adaptery na `packages/ui-kit` — patrz `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nazwy ikon używane na ekranach → Komponenty Lucide (`<Icon>`)                                    |
-| `constants/providers.ts`         | **377 dostawców** z walidacją Zod (źródło prawdy)                                                            |
+| `constants/providers.ts`         | **378 dostawców** z walidacją Zod (źródło prawdy)                                                            |
 | `constants/cliTools.ts`          | Zewnętrzny rejestr narzędzi CLI                                                                              |
 | `constants/routingStrategies.ts` | **20 strategii routingu** z priorytetami                                                                     |
 | `constants/publicApiRoutes.ts`   | Trasy wymagające uwierzytelnienia okaziciela (w porównaniu z zarządzaniem).                                  |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Zewnętrzne integracje CLI + Wewnętrzne OmniRoute CLI                                           |
 | `I18N.md`                   | Architektura i18n, dodanie języka, 67 lokalizacji                                              |
 | `UNINSTALL.md`              | Wyczyść kroki dezinstalacji                                                                    |
-| `PROVIDER_REFERENCE.md`     | **Wygenerowane automatycznie** katalog 377 dostawców (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Wygenerowane automatycznie** katalog 378 dostawców (regen: `npm run gen:provider-reference`) |
 
 ### Głębokie nurkowanie w podsystemie
 

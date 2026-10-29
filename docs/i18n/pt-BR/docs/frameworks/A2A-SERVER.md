@@ -163,7 +163,7 @@ OmniRoute expõe 6 habilidades A2A conectadas em `src/lib/a2a/taskExecution.ts::
 | Relatório de saúde     | `health-report`      | Agrega disjuntor, resfriamento e estado de bloqueio por provedor                                                                                                                      | saúde, resiliência                | "Mostrar o estado de saúde de todos os provedores" |
 | Listar recursos        | `list-capabilities`  | Retorna o catálogo completo de habilidades do agente com 45 entradas (configuração 23 API + 21 CLI + 1) como uma tabela de descontos com SKILL.md URLs bruto para injeção de contexto | catálogo, descoberta, habilidades | "Listar todos os recursos OmniRoute "              |
 
-> O Cartão de Agente deve ser mantido alinhado com o catálogo ativo de 377 provedores; contagens de provedores e metadados free/no-auth são provenientes do registro de tempo de execução.
+> O Cartão de Agente deve ser mantido alinhado com o catálogo ativo de 378 provedores; contagens de provedores e metadados free/no-auth são provenientes do registro de tempo de execução.
 
 ### Detalhe da habilidade `list-capabilities`
 

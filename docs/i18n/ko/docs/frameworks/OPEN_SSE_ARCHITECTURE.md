@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | 파일                          | 목적                                      |
 | ----------------------------- | ----------------------------------------- |
-| `providerRegistry.ts`         | 377 제공자 카탈로그를 통한 채팅 모델 등록 |
+| `providerRegistry.ts`         | 378 제공자 카탈로그를 통한 채팅 모델 등록 |
 | `providerModels.ts`           | 모델 별칭, 형식 매핑                      |
 | `constants.ts`                | 시간 초과, 한도, 상태 코드                |
 | `defaultThinkingSignature.ts` | 기본 Claude 사고 서명                     |

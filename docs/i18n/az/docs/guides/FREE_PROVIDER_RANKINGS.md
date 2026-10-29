@@ -14,7 +14,7 @@
 
 ## Bu Nədir
 
-OmniRoute 377 provayderi, o cümlədən 155 kataloq qeydini qeyd edir**free/no-auth** (auth yoxdur, pulsuz səviyyəli OAuth və ya pulsuz səviyyəli API açarı — [Pulsuz Tiers Bələdçisinə](../getting-started/FREE-TIERS-GUIDE.md) və tam [Pulsuz Tiers kataloquna](../reference/FREE_TIERS.md) baxın). Tutmaq: pulsuz provayderlər model keyfiyyətində vəhşicəsinə dəyişir. Sərhəd modelinə xidmət edən auth olmayan provayder kiçik bir köhnə modelə xidmət edəndən daha faydalıdır.
+OmniRoute 378 provayderi, o cümlədən 155 kataloq qeydini qeyd edir**free/no-auth** (auth yoxdur, pulsuz səviyyəli OAuth və ya pulsuz səviyyəli API açarı — [Pulsuz Tiers Bələdçisinə](../getting-started/FREE-TIERS-GUIDE.md) və tam [Pulsuz Tiers kataloquna](../reference/FREE_TIERS.md) baxın). Tutmaq: pulsuz provayderlər model keyfiyyətində vəhşicəsinə dəyişir. Sərhəd modelinə xidmət edən auth olmayan provayder kiçik bir köhnə modelə xidmət edəndən daha faydalıdır.
 
 **Pulsuz Provayder Reytinqləri** cavablar"** Hansı pulsuz provayder mənə ən yaxşı modeli verir?** " ilə hər bir pulsuz provayderin kataloquna qoşularaq** izdiham qaynaqlı keyfiyyət balları** dən** Arena AI liderlər lövhəsi** (insan üstünlük ELO, LMArena chatbot arenasının arxasında eyni fikir). Provayderlər daha sonra onların gücünə görə sıralanır** Ən yaxşı pulsuz model** .
 

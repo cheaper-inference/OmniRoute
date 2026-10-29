@@ -39,7 +39,7 @@ Objektívne porovnanie funkcií oproti populárnym open-source AI smerovačom.
 
 ## Kedy zvoliť OmniRoute
 
-- Ste self-hostiteľ a chcete** maximálne pokrytie poskytovateľa** (377 poskytovateľov, 155 záznamov v katalógu free/no-auth )
+- Ste self-hostiteľ a chcete** maximálne pokrytie poskytovateľa** (378 poskytovateľov, 155 záznamov v katalógu free/no-auth )
 - Potrebujete a** vstavaný server MCP** (LLM nástroje, pamäť, zručnosti vystavené ako nástroje)
 - Potrebujete** protokol A2A** pre pracovné toky agent-agent
 - chceš** tajnosť odtlačkov prstov** (JA3/JA4), aby sa predišlo detekcii protiprúdovým CAPTCHAs

@@ -20,7 +20,7 @@ Meta aġent IDE (eż., GitHub Copilot, Cursor, Claude Code) jagħmel sejħa API,
 
 Dan ifisser li tista':
 
-- **Ibdel kull aġent lejn kwalunkwe fornitur** : Copilot titkellem ma OpenAI? Idderieġih lil Anthropic Claude, Gemini, jew lil xi wieħed mit-377 fornitur ta' OmniRoute.
+- **Ibdel kull aġent lejn kwalunkwe fornitur** : Copilot titkellem ma OpenAI? Idderieġih lil Anthropic Claude, Gemini, jew lil xi wieħed mit-378 fornitur ta' OmniRoute.
 - **Applika mappings tal-mudell** : `gemini-3-flash` → `claude-sonnet-4.7` b'mod trasparenti fil-livell ta' handler.
 - **Osserva t-traffiku kollu tal-aġenti** : kull talba interċettata tiġi ppubblikata lill - [Ispettur tat - Traffiku](./TRAFFIC_INSPECTOR.md).
 - **Applika OmniRoute resilience** : combo routing, circuit breakers, fallbacks, u xogħol ta 'traċċar tal-ispejjeż għat-traffiku tal-aġent IDE ukoll.

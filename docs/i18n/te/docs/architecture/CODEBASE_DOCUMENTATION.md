@@ -490,7 +490,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode` `cursor` `default` `devin-cli` `muse-spark-web` `nlpcloud` `opencode` `perplexity-web` `petals` `pollinations` `devin-desktop` `claudeIdentity.ts` `qoder` రిజిస్ట్రీ) `index.ts`
 
-> గమనిక: ఇక్కడ జాబితా చేయని ప్రొవైడర్లు జెనరిక్ OpenAI-అనుకూల కార్యనిర్వాహకుడిని ఉపయోగించి `default.ts` ద్వారా సేవలు అందిస్తారు. పూర్తి ప్రొవైడర్ కేటలాగ్ (377 ప్రొవైడర్లు) `src/shared/constants/providers.ts` లో నివసిస్తుంది.
+> గమనిక: ఇక్కడ జాబితా చేయని ప్రొవైడర్లు జెనరిక్ OpenAI-అనుకూల కార్యనిర్వాహకుడిని ఉపయోగించి `default.ts` ద్వారా సేవలు అందిస్తారు. పూర్తి ప్రొవైడర్ కేటలాగ్ (378 ప్రొవైడర్లు) `src/shared/constants/providers.ts` లో నివసిస్తుంది.
 
 ### 4.3 `open-sse/translator/`
 

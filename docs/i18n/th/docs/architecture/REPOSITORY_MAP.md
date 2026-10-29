@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `components/`                    | ส่วนประกอบแดชบอร์ด API: อะแดปเตอร์บน `packages/ui-kit` — ดู `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ชื่อไอคอนที่ใช้โดยหน้าจอ → ส่วนประกอบ Lucide (`<Icon>`)                              |
-| `constants/providers.ts`         | **ผู้ให้บริการ 377 ราย** ด้วยการตรวจสอบ Zod (แหล่งที่มาของความจริง)                              |
+| `constants/providers.ts`         | **ผู้ให้บริการ 378 ราย** ด้วยการตรวจสอบ Zod (แหล่งที่มาของความจริง)                              |
 | `constants/cliTools.ts`          | รีจิสทรีเครื่องมือ CLI ภายนอก                                                                    |
 | `constants/routingStrategies.ts` | **20 กลยุทธ์การกำหนดเส้นทาง** มีลำดับความสำคัญ                                                   |
 | `constants/publicApiRoutes.ts`   | เส้นทางที่ต้องมีการตรวจสอบสิทธิ์ผู้ถือ (เทียบกับการจัดการ)                                       |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | การรวม CLI ภายนอก + ภายใน OmniRoute CLI                                                        |
 | `I18N.md`                   | สถาปัตยกรรม i18n เพิ่มภาษา 67 ภาษา                                                             |
 | `UNINSTALL.md`              | ล้างขั้นตอนการถอนการติดตั้ง                                                                    |
-| `PROVIDER_REFERENCE.md`     | **สร้างอัตโนมัติ** แค็ตตาล็อกของผู้ให้บริการ 377 ราย (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **สร้างอัตโนมัติ** แค็ตตาล็อกของผู้ให้บริการ 378 ราย (regen: `npm run gen:provider-reference`) |
 
 ### เจาะลึกระบบย่อย
 

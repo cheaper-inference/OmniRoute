@@ -39,7 +39,7 @@ Objektiv funktionsjämförelse mot populära AI-routrar med öppen källkod.
 
 ## När ska man välja OmniRoute
 
-- Du är självvärd och vill** maximal leverantörstäckning** (377 leverantörer, 155 free/no-auth -katalogposter)
+- Du är självvärd och vill** maximal leverantörstäckning** (378 leverantörer, 155 free/no-auth -katalogposter)
 - Du behöver en** inbyggd MCP server** (LLM verktyg, minne, färdigheter exponerade som verktyg)
 - Du behöver**A2A protokoll** för agent-till-agent-arbetsflöden
 - Du vill** fingeravtryck smygande** (JA3/JA4) för att undvika upptäckt av uppströms CAPTCHAs

@@ -39,7 +39,7 @@ Obiektywne porównanie funkcji z popularnymi routerami AI open-source.
 
 ## Kiedy wybrać OmniRoute
 
-- Jesteś gospodarzem i chcesz** maksymalny zasięg dostawcy** (377 dostawców, 155 wpisów w katalogu free/no-auth )
+- Jesteś gospodarzem i chcesz** maksymalny zasięg dostawcy** (378 dostawców, 155 wpisów w katalogu free/no-auth )
 - Potrzebujesz** wbudowany serwer MCP** (narzędzia LLM, pamięć, umiejętności eksponowane jako narzędzia)
 - Potrzebujesz** protokół A2A** dla przepływów pracy między agentami
 - Chcesz** ukrywanie odcisków palców** (JA3/JA4), aby uniknąć wykrycia przez nadrzędny CAPTCHAs

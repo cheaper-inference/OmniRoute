@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Bangaren dashboard API: adaftar akan `packages/ui-kit` - duba `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: icon sunayen da allon ke amfani da → Lucide components (`<Icon>`)                      |
-| `constants/providers.ts`         | **377 masu bayarwa** tare da ingancin Zod (tushen gaskiya)                                         |
+| `constants/providers.ts`         | **378 masu bayarwa** tare da ingancin Zod (tushen gaskiya)                                         |
 | `constants/cliTools.ts`          | Wurin yin rajistar kayan aikin CLI na waje                                                         |
 | `constants/routingStrategies.ts` | **20 dabaru dabaru** tare da fifiko                                                                |
 | `constants/publicApiRoutes.ts`   | Hanyoyin da ke buƙatar mai ba da izini ( vs management) auth                                       |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Haɗin CLI na waje + ciki OmniRoute CLI                                                            |
 | `I18N.md`                   | i18n gine-gine, ƙara harshe, yankuna 67                                                           |
 | `UNINSTALL.md`              | Tsaftace matakan cirewa                                                                           |
-| `PROVIDER_REFERENCE.md`     | **An ƙirƙira ta atomatik** Katalogi na masu samarwa 377 (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **An ƙirƙira ta atomatik** Katalogi na masu samarwa 378 (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem zurfin-nutse
 

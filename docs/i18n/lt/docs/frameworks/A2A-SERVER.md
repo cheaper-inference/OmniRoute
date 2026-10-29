@@ -163,7 +163,7 @@ OmniRoute atskleidžia 6 A2A įgūdžius, prijungtus prie `src/lib/a2a/taskExecu
 | Sveikatos ataskaita           | `health-report`      | Agregatai grandinės pertraukiklis, aušinimas, blokavimo būsena kiekvienam teikėjui                                                                    | sveikata, atsparumas           | „Rodyti visų paslaugų teikėjų sveikatos būklę“ |
 | Galimybių sąrašas             | `list-capabilities`  | Pateikiamas visas 45 įrašų Agent Skills katalogas (23 API + 21 CLI + 1 config) kaip sumažinimo lentelė su neapdorotu SKILL.md URLs kontekstui įterpti | katalogas, atradimas, įgūdžiai | "Išvardykite visas OmniRoute galimybes"        |
 
-> Agento kortelė turi būti suderinta su tiesioginiu 377 teikėjų katalogu; teikėjų skaičius ir free/no-auth metaduomenys gaunami iš vykdymo laiko registro.
+> Agento kortelė turi būti suderinta su tiesioginiu 378 teikėjų katalogu; teikėjų skaičius ir free/no-auth metaduomenys gaunami iš vykdymo laiko registro.
 
 ### `list-capabilities` įgūdžių detalė
 

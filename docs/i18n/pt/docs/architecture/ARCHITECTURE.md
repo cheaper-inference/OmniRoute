@@ -14,7 +14,7 @@ OmniRoute é um gateway de encaminhamento AI local e painel construído em Next.
 
 Capacidades principais:
 
-- Superfície API compatível com OpenAI para CLI/tools (377 fornecedores, 156 módulos executores)
+- Superfície API compatível com OpenAI para CLI/tools (378 fornecedores, 156 módulos executores)
 - Tradução Request/response em formatos de fornecedores
 - Fallback de combinação de modelos (sequência de vários modelos)
 - Etapas combinadas estruturadas (`provider + model + connection`) com ordenação do tempo de execução por `compositeTiers`

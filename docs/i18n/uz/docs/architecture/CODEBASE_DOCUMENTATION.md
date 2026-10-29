@@ -489,7 +489,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode` `petals` `perplexity-web`, `pollinations`, `qoder`, plus `devin-desktop`(birgalikda identifikatsiya yordamchisi) va `claudeIdentity.ts` (ro'yxatga olish kitobi) `index.ts`
 
-> Eslatma: bu yerda sanab o‘tilmagan provayderlarga `default.ts` umumiy OpenAI-mos ijrochi yordamida xizmat ko‘rsatadi. To'liq provayderlar katalogi (377 provayder) `src/shared/constants/providers.ts` da yashaydi.
+> Eslatma: bu yerda sanab o‘tilmagan provayderlarga `default.ts` umumiy OpenAI-mos ijrochi yordamida xizmat ko‘rsatadi. To'liq provayderlar katalogi (378 provayder) `src/shared/constants/providers.ts` da yashaydi.
 
 ### 4.3 `open-sse/translator/`
 

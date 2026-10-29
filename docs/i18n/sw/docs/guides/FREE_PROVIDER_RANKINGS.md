@@ -13,7 +13,7 @@
 
 ## Ni Nini
 
-OmniRoute inasajili watoa huduma 377, ikijumuisha maingizo 155 ya katalogi yaliyowekwa alama**free/no-auth** ( no-auth, free-tier OAuth, au free-tier API key — tazama [Mwongozo wa Viwango Huru](../getting-started/FREE-TIERS-GUIDE.md) na [saraka kamili ya Viwango vya Bure](../reference/FREE_TIERS.md) ). Kukamata: watoa huduma bila malipo hutofautiana sana katika ubora wa mfano. Mtoa huduma ambaye hakuna mwandishi anayetoa kielelezo cha mipaka ni muhimu zaidi kuliko anayetoa mfano mdogo wa urithi.
+OmniRoute inasajili watoa huduma 378, ikijumuisha maingizo 155 ya katalogi yaliyowekwa alama**free/no-auth** ( no-auth, free-tier OAuth, au free-tier API key — tazama [Mwongozo wa Viwango Huru](../getting-started/FREE-TIERS-GUIDE.md) na [saraka kamili ya Viwango vya Bure](../reference/FREE_TIERS.md) ). Kukamata: watoa huduma bila malipo hutofautiana sana katika ubora wa mfano. Mtoa huduma ambaye hakuna mwandishi anayetoa kielelezo cha mipaka ni muhimu zaidi kuliko anayetoa mfano mdogo wa urithi.
 
 **Nafasi za Watoa Huduma Bila Malipo** majibu"** ni mtoaji gani wa bure anayenipa mfano bora?** " kwa kujiunga na kila katalogi ya mtoa huduma bila malipo na** alama za ubora zinazotokana na umati** kutoka kwa** AI wa wanaoongoza wa uwanja** (upendeleo wa kibinadamu ELO, wazo lile lile nyuma ya medani ya gumzo ya LMArena). Watoa huduma huwekwa kulingana na nguvu zao** mfano bora wa bure** .
 

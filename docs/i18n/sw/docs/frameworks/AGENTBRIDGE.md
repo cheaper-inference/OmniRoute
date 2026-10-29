@@ -20,7 +20,7 @@ Wakati wakala wa IDE (km, GitHub Copilot, Cursor, Claude Code) anapiga simu API,
 
 Hii inamaanisha kuwa unaweza:
 
-- **Rudisha wakala yeyote kwa mtoa huduma yeyote** : Copilot kuzungumza na OpenAI? Ielekeze upya kwa Anthropic Claude, Gemini, au yeyote kati ya watoa huduma 377 wa OmniRoute.
+- **Rudisha wakala yeyote kwa mtoa huduma yeyote** : Copilot kuzungumza na OpenAI? Ielekeze upya kwa Anthropic Claude, Gemini, au yeyote kati ya watoa huduma 378 wa OmniRoute.
 - **Tumia michoro za kielelezo** : `gemini-3-flash` → `claude-sonnet-4.7` kwa uwazi katika kiwango cha kidhibiti.
 - **Angalia trafiki yote ya wakala** : kila ombi lililoingiliwa huchapishwa kwa [Mkaguzi wa Trafiki](./TRAFFIC_INSPECTOR.md).
 - **Tumia ustahimilivu wa OmniRoute** : uelekezaji wa mseto, vivunja saketi, vikwazo, na kazi ya kufuatilia gharama kwa trafiki ya wakala IDE pia.

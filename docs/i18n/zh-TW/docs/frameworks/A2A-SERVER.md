@@ -162,7 +162,7 @@ OmniRoute公開了`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`中的 6 個
 | 健康報告   | `health-report`      | 聚合每個提供者的斷路器、冷卻時間、鎖定狀態                                                                  | 健康、韌性       | “顯示所有提供者的健康狀況” |
 | 列出能力   | `list-capabilities`  | 返回完整的 45 條目代理技能目錄（23 API + 21 CLI + 1 配置）作為降價表，並使用原始SKILL.md URLs進行上下文注入 | 目錄、發現、技能 | “列出所有OmniRoute功能”    |
 
-> 代理卡應與即時 377 提供者目錄保持一致；提供者計數和free/no-auth資料源自運行時註冊表。
+> 代理卡應與即時 378 提供者目錄保持一致；提供者計數和free/no-auth資料源自運行時註冊表。
 
 ### `list-capabilities`技能詳情
 

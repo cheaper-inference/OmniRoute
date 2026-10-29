@@ -492,7 +492,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, zqn , zqo , zqp , zqq , zqr , `opencode`, `perplexity-web`, `petals`, zqs , `pollinations`, zqs , zqy , `qoder`, `vertex`, `devin-desktop`, zqy , zqs , zqy , `claudeIdentity.ts`, `index.ts` (comhroinnt) agus cúnta (roinnt)
 
-> Nóta: déanann `default.ts` freastal ar sholáthraithe nach bhfuil liostaithe anseo ag baint úsáide as an seiceadóir cineálach OpenAI-comhoiriúnach. Tá catalóg iomlán an tsoláthraí (377 soláthraí) ina chónaí i `src/shared/constants/providers.ts`.
+> Nóta: déanann `default.ts` freastal ar sholáthraithe nach bhfuil liostaithe anseo ag baint úsáide as an seiceadóir cineálach OpenAI-comhoiriúnach. Tá catalóg iomlán an tsoláthraí (378 soláthraí) ina chónaí i `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

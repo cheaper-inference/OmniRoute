@@ -13,7 +13,7 @@
 
 ## Ano Ito
 
-Nagrerehistro ang OmniRoute 377 provider, kasama ang 155 na mga entry sa catalog na minarkahan**free/no-auth** (no-auth, free-tier OAuth, o free-tier API key — tingnan ang [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) at ang buong [Free Tiers na direktoryo](../reference/FREE_TIERS.md) ). Ang catch: ang mga libreng provider ay nag-iiba-iba sa kalidad ng modelo. Ang isang walang-auth provider na naghahatid ng isang frontier na modelo ay higit na kapaki-pakinabang kaysa sa isang naghahatid ng isang maliit na legacy na modelo.
+Nagrerehistro ang OmniRoute 378 provider, kasama ang 155 na mga entry sa catalog na minarkahan**free/no-auth** (no-auth, free-tier OAuth, o free-tier API key — tingnan ang [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) at ang buong [Free Tiers na direktoryo](../reference/FREE_TIERS.md) ). Ang catch: ang mga libreng provider ay nag-iiba-iba sa kalidad ng modelo. Ang isang walang-auth provider na naghahatid ng isang frontier na modelo ay higit na kapaki-pakinabang kaysa sa isang naghahatid ng isang maliit na legacy na modelo.
 
 **Libreng Ranggo ng Provider** mga sagot"** aling libreng provider ang nagbibigay sa akin ng pinakamahusay na modelo?** " sa pamamagitan ng pagsali sa katalogo ng bawat libreng provider na may** mga marka ng kalidad na pinagmumulan ng karamihan** mula sa** Arena AI leaderboard** (human-preference ELO, ang parehong ideya sa likod ng LMArena chatbot arena). Ang mga provider ay niraranggo ayon sa lakas ng kanilang** pinakamahusay na libreng modelo** .
 

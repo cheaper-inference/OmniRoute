@@ -14,7 +14,7 @@ OmniRoute on paikallinen AI -reititysyhdyskäytävä ja kojelauta, joka on raken
 
 Ydinominaisuudet:
 
-- OpenAI-yhteensopiva API pinta CLI/tools (377 tarjoajaa, 156 toteuttajamoduulia)
+- OpenAI-yhteensopiva API pinta CLI/tools (378 tarjoajaa, 156 toteuttajamoduulia)
 - Request/response -käännös eri palveluntarjoajien formaateissa
 - Mallin yhdistelmävara (usean mallin sarja)
 - Strukturoidut yhdistelmäaskeleet (`provider + model + connection`) `compositeTiers`:n ajonaikaisessa järjestyksessä

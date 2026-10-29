@@ -20,7 +20,7 @@ Lokacin da wakilin IDE (misali, GitHub Copilot, Cursor, Claude Code) yayi kiran 
 
 Wannan yana nufin zaku iya:
 
-- **Mayar da kowane wakili zuwa kowane mai bayarwa** : Copilot magana da OpenAI? Miyar da shi zuwa Anthropic Claude, Gemini, ko kowane daga cikin masu samar da OmniRoute 377.
+- **Mayar da kowane wakili zuwa kowane mai bayarwa** : Copilot magana da OpenAI? Miyar da shi zuwa Anthropic Claude, Gemini, ko kowane daga cikin masu samar da OmniRoute 378.
 - **Aiwatar da taswirar ƙira** : `gemini-3-flash` → `claude-sonnet-4.7` a bayyane a matakin mai kulawa.
 - **Kula da duk zirga-zirgar wakili** : Ana buga duk buƙatun da aka katse zuwa ga [Inspector Traffic](./TRAFFIC_INSPECTOR.md).
 - **Aiwatar da juriyar OmniRoute** : Hanyar haɗakarwa, masu watsewar kewayawa, koma baya, da aikin bin diddigin farashi don zirga-zirgar wakilin IDE kuma.

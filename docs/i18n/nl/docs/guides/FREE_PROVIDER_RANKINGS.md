@@ -13,7 +13,7 @@
 
 ## Wat het is
 
-OmniRoute registreert 377 aanbieders, waarvan 155 gemarkeerde catalogusitems**free/no-auth** (no-auth, free-tier OAuth of free-tier API key - zie de [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) en de volledige [Free Tiers directory](../reference/FREE_TIERS.md) ). Het addertje onder het gras: gratis aanbieders variëren enorm in modelkwaliteit. Een aanbieder zonder authenticatie die een grensmodel bedient, is veel nuttiger dan een aanbieder die een klein, oud model bedient.
+OmniRoute registreert 378 aanbieders, waarvan 155 gemarkeerde catalogusitems**free/no-auth** (no-auth, free-tier OAuth of free-tier API key - zie de [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) en de volledige [Free Tiers directory](../reference/FREE_TIERS.md) ). Het addertje onder het gras: gratis aanbieders variëren enorm in modelkwaliteit. Een aanbieder zonder authenticatie die een grensmodel bedient, is veel nuttiger dan een aanbieder die een klein, oud model bedient.
 
 **Gratis ranglijsten van aanbieders** antwoorden "** welke gratis aanbieder geeft mij het beste model?** " door lid te worden van de catalogus van elke gratis aanbieder** crowdsourced kwaliteitsscores** van de** Arena AI -klassement** (human-preference ELO, hetzelfde idee achter de LMArena chatbot-arena). Aanbieders worden vervolgens gerangschikt op basis van de kracht van hun** beste gratis model** .
 

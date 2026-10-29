@@ -488,7 +488,7 @@ Ini menangani:
 
 | Mengajukan                      | Tujuan                                              |
 | ------------------------------- | --------------------------------------------------- |
-| `providerRegistry.ts`           | Registri model obrolan melalui katalog penyedia 377 |
+| `providerRegistry.ts`           | Registri model obrolan melalui katalog penyedia 378 |
 | `providerModels.ts`             | Alias model, pemetaan format                        |
 | `constants.ts`                  | Batas waktu, batasan, kode status                   |
 | `defaultThinkingSignature.ts`   | Tanda tangan pemikiran Claude default               |

@@ -919,6 +919,14 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     authPrefix: "Bearer ",
     parseResponse: (data) => data.data || data.models || [],
   },
+  megabrain: {
+    url: "https://api.getmegabrain.com/api/openrouter/models",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    parseResponse: (data) => data.data || data.models || [],
+  },
   "ollama-cloud": {
     // Hosted Ollama lists directly callable models at /api/tags (#16823).
     url: "https://ollama.com/api/tags",

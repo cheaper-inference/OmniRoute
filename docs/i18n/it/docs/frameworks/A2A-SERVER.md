@@ -163,7 +163,7 @@ OmniRoute espone 6 abilità A2A cablate in `src/lib/a2a/taskExecution.ts::A2A_SK
 | Rapporto sulla salute   | `health-report`      | Aggrega interruttore automatico, raffreddamento e stato di blocco per fornitore                                                                                                                     | salute, resilienza             | "Mostra lo stato di salute di tutti i fornitori"         |
 | Elenco capacità         | `list-capabilities`  | Restituisce il catalogo completo delle competenze dell'agente a 45 voci (23 API + 21 CLI + 1 configurazione) come tabella di ribasso con SKILL.md URLs non elaborato per l'inserimento del contesto | catalogo, scoperta, competenze | "Elenca tutte le funzionalità OmniRoute "                |
 
-> La Carta Agente deve essere mantenuta allineata al catalogo live del fornitore 377; i conteggi dei provider e i metadati free/no-auth provengono dal registro di runtime.
+> La Carta Agente deve essere mantenuta allineata al catalogo live del fornitore 378; i conteggi dei provider e i metadati free/no-auth provengono dal registro di runtime.
 
 ### `list-capabilities` Dettaglio abilità
 

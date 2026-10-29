@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | សមាសធាតុផ្ទាំងគ្រប់គ្រង API: អាដាប់ទ័រលើ `packages/ui-kit` — សូមមើល `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ឈ្មោះរូបតំណាងដែលប្រើដោយអេក្រង់ → Lucide components (`<Icon>`)                                |
-| `constants/providers.ts`         | **អ្នកផ្គត់ផ្គង់ 377** ជាមួយនឹងការបញ្ជាក់ Zod (ប្រភពនៃការពិត)                                            |
+| `constants/providers.ts`         | **អ្នកផ្គត់ផ្គង់ 378** ជាមួយនឹងការបញ្ជាក់ Zod (ប្រភពនៃការពិត)                                            |
 | `constants/cliTools.ts`          | បញ្ជីឈ្មោះឧបករណ៍ CLI ខាងក្រៅ                                                                             |
 | `constants/routingStrategies.ts` | **យុទ្ធសាស្ត្រកំណត់ផ្លូវចំនួន 20** ជាមួយនឹងអាទិភាព                                                       |
 | `constants/publicApiRoutes.ts`   | ផ្លូវដែលទាមទារសិទ្ធិ Bearer (ទល់នឹងការគ្រប់គ្រង)                                                         |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ការរួមបញ្ចូល CLI ខាងក្រៅ + ខាងក្នុង OmniRoute CLI                                                 |
 | `I18N.md`                   | ស្ថាបត្យកម្ម i18n បន្ថែមភាសា 67 មូលដ្ឋាន                                                          |
 | `UNINSTALL.md`              | សម្អាតជំហានលុបការដំឡើង                                                                            |
-| `PROVIDER_REFERENCE.md`     | **បង្កើតដោយស្វ័យប្រវត្តិ** កាតាឡុករបស់អ្នកផ្តល់សេវា 377 (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **បង្កើតដោយស្វ័យប្រវត្តិ** កាតាឡុករបស់អ្នកផ្តល់សេវា 378 (regen: `npm run gen:provider-reference`) |
 
 ### ប្រព័ន្ធរងការជ្រមុជទឹកជ្រៅ
 

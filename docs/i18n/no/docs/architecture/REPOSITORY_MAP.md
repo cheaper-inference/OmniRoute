@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard-komponent API: adaptere over `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnavn som brukes av skjermene → Lucide-komponenter (`<Icon>`)                       |
-| `constants/providers.ts`         | **377 tilbydere** med Zod -validering (kilde til sannhet)                                          |
+| `constants/providers.ts`         | **378 tilbydere** med Zod -validering (kilde til sannhet)                                          |
 | `constants/cliTools.ts`          | Eksternt CLI -verktøyregister                                                                      |
 | `constants/routingStrategies.ts` | **20 rutingstrategier** med prioriteringer                                                         |
 | `constants/publicApiRoutes.ts`   | Ruter som krever bærer (mot administrasjon) autentisering                                          |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Eksterne CLI -integrasjoner + Intern OmniRoute CLI                                      |
 | `I18N.md`                   | i18n-arkitektur, legger til et språk, 67 lokaliteter                                    |
 | `UNINSTALL.md`              | Rengjør avinstalleringstrinn                                                            |
-| `PROVIDER_REFERENCE.md`     | **Autogenerert** katalog med 377 leverandører (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Autogenerert** katalog med 378 leverandører (regen: `npm run gen:provider-reference`) |
 
 ### Delsystem dypdykk
 

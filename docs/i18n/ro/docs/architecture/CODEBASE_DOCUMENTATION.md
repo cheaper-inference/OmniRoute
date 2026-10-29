@@ -490,7 +490,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` plus `claudeIdentity.ts` (asistent de identitate partajată) și `index.ts` (registru).
 
-> Notă: furnizorii care nu sunt enumerați aici sunt deserviți de `default.ts` folosind executatorul generic compatibil cu OpenAI. Catalogul complet de furnizori (377 de furnizori) locuiește în `src/shared/constants/providers.ts`.
+> Notă: furnizorii care nu sunt enumerați aici sunt deserviți de `default.ts` folosind executatorul generic compatibil cu OpenAI. Catalogul complet de furnizori (378 de furnizori) locuiește în `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------- |
 | `components/`                    | ڈیش بورڈ جزو API: اڈاپٹر اوور `packages/ui-kit` — دیکھیں `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: اسکرینز کے ذریعے استعمال ہونے والے آئیکن کے نام → Lucide اجزاء (`<Icon>`)         |
-| `constants/providers.ts`         | **377 فراہم کرنے والے** Zod توثیق کے ساتھ (سچائی کا ذریعہ)                                    |
+| `constants/providers.ts`         | **378 فراہم کرنے والے** Zod توثیق کے ساتھ (سچائی کا ذریعہ)                                    |
 | `constants/cliTools.ts`          | بیرونی CLI ٹول رجسٹری                                                                         |
 | `constants/routingStrategies.ts` | **20 روٹنگ کی حکمت عملی** ترجیحات کے ساتھ                                                     |
 | `constants/publicApiRoutes.ts`   | وہ راستے جن کے لیے بیئرر (بمقابلہ مینجمنٹ) تصنیف کی ضرورت ہوتی ہے۔                            |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | بیرونی CLI انضمام + اندرونی OmniRoute CLI                                                             |
 | `I18N.md`                   | i18n فن تعمیر، ایک زبان کا اضافہ، 67 لوکیلز                                                           |
 | `UNINSTALL.md`              | ان انسٹال کے مراحل کو صاف کریں۔                                                                       |
-| `PROVIDER_REFERENCE.md`     | **خود کار طریقے سے تیار کردہ** 377 فراہم کنندگان کی فہرست ( regen : `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **خود کار طریقے سے تیار کردہ** 378 فراہم کنندگان کی فہرست ( regen : `npm run gen:provider-reference`) |
 
 ### سب سسٹم گہرے غوطے
 

@@ -39,7 +39,7 @@ Ulinganisho wa vipengele bila upendeleo dhidi ya maruta maarufu ya AI ya chanzo 
 
 ## Wakati wa kuchagua OmniRoute
 
-- Wewe mwenyewe mwenyeji na unataka** kiwango cha juu cha chanjo ya mtoa huduma** (Watoa huduma 377, maingizo ya katalogi ya free/no-auth 155)
+- Wewe mwenyewe mwenyeji na unataka** kiwango cha juu cha chanjo ya mtoa huduma** (Watoa huduma 378, maingizo ya katalogi ya free/no-auth 155)
 - Unahitaji** seva MCP iliyojengwa ndani** ( Zana za LLM, kumbukumbu, ujuzi wazi kama zana)
 - Unahitaji** itifaki A2A** kwa mtiririko wa kazi kati ya wakala kwa wakala
 - Unataka** wizi wa alama za vidole** (JA3/JA4) ili kuzuia kugunduliwa na CAPTCHAs ya juu ya mkondo

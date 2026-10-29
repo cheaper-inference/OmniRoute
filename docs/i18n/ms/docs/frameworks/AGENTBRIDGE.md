@@ -20,7 +20,7 @@ Apabila ejen IDE (cth, GitHub Copilot, Cursor, Claude Code) membuat panggilan AP
 
 Ini bermakna anda boleh:
 
-- **Halakan semula mana-mana ejen kepada mana-mana pembekal** : Copilot bercakap dengan OpenAI? Ubah hala ke Anthropic Claude, Gemini, atau mana-mana pembekal 377 OmniRoute.
+- **Halakan semula mana-mana ejen kepada mana-mana pembekal** : Copilot bercakap dengan OpenAI? Ubah hala ke Anthropic Claude, Gemini, atau mana-mana pembekal 378 OmniRoute.
 - **Gunakan pemetaan model** : `gemini-3-flash` → `claude-sonnet-4.7` secara telus di peringkat pengendali.
 - **Perhatikan semua trafik ejen** : setiap permintaan yang dipintas diterbitkan kepada [Pemeriksa Trafik](./TRAFFIC_INSPECTOR.md).
 - **Terapkan ketahanan OmniRoute** : penghalaan kombo, pemutus litar, sandaran dan kerja pengesanan kos untuk trafik ejen IDE juga.

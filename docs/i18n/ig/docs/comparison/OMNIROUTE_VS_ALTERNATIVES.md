@@ -39,7 +39,7 @@ Ntụnyere atụmatụ ziri ezi megide AI routers open-source ama ama.
 
 ## Mgbe ịhọrọ OmniRoute
 
-- Ị na-elekọta onwe gị ma chọọ** mkpuchi onye na-eweta kacha** (ndị na-enye 377, ndenye katalọgụ free/no-auth 155)
+- Ị na-elekọta onwe gị ma chọọ** mkpuchi onye na-eweta kacha** (ndị na-enye 378, ndenye katalọgụ free/no-auth 155)
 - Ị chọrọ a** ihe nkesa MCP arụnyere n'ime ya** (ngwaọrụ LLM, ebe nchekwa, nka ekpughere dị ka ngwaọrụ)
 - Ị chọrọ**A2A protocol** maka ndị nnọchi anya ọrụ na-arụ ọrụ
 - Ị chọrọ** stealth mkpịsị aka mkpịsị aka** (JA3/JA4) iji zere nchọta site n'elu CAPTCHAs

@@ -39,7 +39,7 @@ Populyar açıq mənbəli AI routerləri ilə obyektiv xüsusiyyət müqayisəsi
 
 ## Nə vaxt OmniRoute seçmək lazımdır
 
-- Özünüzə ev sahibliyi edirsiniz və istəyirsiniz** provayderin maksimum əhatə dairəsi** (377 provayder, 155 free/no-auth kataloq girişi)
+- Özünüzə ev sahibliyi edirsiniz və istəyirsiniz** provayderin maksimum əhatə dairəsi** (378 provayder, 155 free/no-auth kataloq girişi)
 - Sizə lazımdır** quraşdırılmış MCP serveri** (LLM alətləri, yaddaş, alətlər kimi ifşa olunan bacarıqlar)
 - Sizə lazımdır**A2A protokolu** agentdən agentə iş axınları üçün
 - İstəyirsən** barmaq izi gizliliyi** (JA3/JA4) yuxarı CAPTCHAs tərəfindən aşkarlanmamaq üçün

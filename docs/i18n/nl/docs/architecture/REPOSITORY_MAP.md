@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboardcomponent API: adapters via `packages/ui-kit` — zie `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: pictogramnamen gebruikt door de schermen → Lucide-componenten (`<Icon>`)              |
-| `constants/providers.ts`         | **377 aanbieders** met Zod -validatie (bron van waarheid)                                         |
+| `constants/providers.ts`         | **378 aanbieders** met Zod -validatie (bron van waarheid)                                         |
 | `constants/cliTools.ts`          | Extern CLI toolregister                                                                           |
 | `constants/routingStrategies.ts` | **20 routeringsstrategieën** met prioriteiten                                                     |
 | `constants/publicApiRoutes.ts`   | Routes waarvoor Bearer-authenticatie (vs. management) vereist is                                  |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externe CLI -integraties + Interne OmniRoute CLI                                                   |
 | `I18N.md`                   | i18n-architectuur, een taal toegevoegd, 67 locales                                                 |
 | `UNINSTALL.md`              | Reinig de verwijderingsstappen                                                                     |
-| `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerd** catalogus van 377 aanbieders (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerd** catalogus van 378 aanbieders (regen: `npm run gen:provider-reference`) |
 
 ### Subsysteem diepe duiken
 

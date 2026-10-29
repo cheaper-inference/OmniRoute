@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ගොනුව                         | අරමුණ                                                  |
 | ----------------------------- | ------------------------------------------------------ |
-| `providerRegistry.ts`         | 377 සපයන්නන්ගේ නාමාවලිය හරහා කතාබස්-ආකෘති රෙජිස්ට්‍රිය |
+| `providerRegistry.ts`         | 378 සපයන්නන්ගේ නාමාවලිය හරහා කතාබස්-ආකෘති රෙජිස්ට්‍රිය |
 | `providerModels.ts`           | ආකෘති අන්වර්ථ, ආකෘති සිතියම්කරණය                       |
 | `constants.ts`                | කල් ඉකුත්වීම්, සීමාවන්, තත්ව කේත                       |
 | `defaultThinkingSignature.ts` | පෙරනිමි Claude චින්තන අත්සන                            |

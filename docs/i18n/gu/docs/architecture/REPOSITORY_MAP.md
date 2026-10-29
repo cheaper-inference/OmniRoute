@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------ |
 | `components/`                    | ડેશબોર્ડ ઘટક API: `packages/ui-kit` ઉપર એડેપ્ટર — `docs/architecture/DESIGN_SYSTEM.md` જુઓ |
 | `constants/iconMap.ts`           | `ICON_MAP`: સ્ક્રીનો દ્વારા ઉપયોગમાં લેવાતા આઇકોન નામો → લ્યુસાઇડ ઘટકો (`<Icon>`)          |
-| `constants/providers.ts`         | **377 પ્રદાતાઓ** Zod માન્યતા સાથે (સત્યનો સ્ત્રોત)                                         |
+| `constants/providers.ts`         | **378 પ્રદાતાઓ** Zod માન્યતા સાથે (સત્યનો સ્ત્રોત)                                         |
 | `constants/cliTools.ts`          | બાહ્ય CLI ટૂલ રજિસ્ટ્રી                                                                    |
 | `constants/routingStrategies.ts` | **20 રૂટીંગ વ્યૂહરચના** પ્રાથમિકતાઓ સાથે                                                   |
 | `constants/publicApiRoutes.ts`   | રૂટ્સ કે જેને બેરર (વિ મેનેજમેન્ટ) ઓથની જરૂર હોય છે                                        |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | બાહ્ય CLI એકીકરણ + આંતરિક OmniRoute CLI                                      |
 | `I18N.md`                   | i18n આર્કિટેક્ચર, એક ભાષા ઉમેરીને, 67 લોકેલ                                  |
 | `UNINSTALL.md`              | અનઇન્સ્ટોલ કરવાના પગલાં સાફ કરો                                              |
-| `PROVIDER_REFERENCE.md`     | **ઓટો-જનરેટ** 377 પ્રદાતાઓની સૂચિ ( regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **ઓટો-જનરેટ** 378 પ્રદાતાઓની સૂચિ ( regen: `npm run gen:provider-reference`) |
 
 ### સબસિસ્ટમ ડીપ-ડાઈવ્સ
 

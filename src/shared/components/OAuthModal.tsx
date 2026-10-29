@@ -53,6 +53,7 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "amazon-q",
   "kimi-coding",
   "kilocode",
+  "megabrain",
   "codebuddy-cn",
   "freebuff",
   "codebuddy-intl",

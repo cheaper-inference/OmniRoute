@@ -488,7 +488,7 @@ Coinníonn `open-sse/config/` an ciseal cumraíochta:
 
 | Comhad                        | Cuspóir                                            |
 | ----------------------------- | -------------------------------------------------- |
-| `providerRegistry.ts`         | Clár comhrá samhail thar an gcatalóg 377-soláthraí |
+| `providerRegistry.ts`         | Clár comhrá samhail thar an gcatalóg 378-soláthraí |
 | `providerModels.ts`           | Ailiasanna múnla, mapáil formáide                  |
 | `constants.ts`                | Amanna ama, teorainneacha, cóid stádais            |
 | `defaultThinkingSignature.ts` | Síniú smaoineamh Claude réamhshocraithe            |

@@ -488,7 +488,7 @@ Deze verwerkt:
 
 | Bestand                       | Doel                                               |
 | ----------------------------- | -------------------------------------------------- |
-| `providerRegistry.ts`         | Chat-modelregistratie via de 377-providercatalogus |
+| `providerRegistry.ts`         | Chat-modelregistratie via de 378-providercatalogus |
 | `providerModels.ts`           | Modelaliassen, indelingstoewijzing                 |
 | `constants.ts`                | Time-outs, limieten, statuscodes                   |
 | `defaultThinkingSignature.ts` | Standaard Claude denkensignatuur                   |

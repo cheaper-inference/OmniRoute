@@ -20,7 +20,7 @@ AgentBridge 是 OmniRoute 的 MITM（中間人）代理，可攔截來自 IDE AI
 
 這意味著您可以：
 
-- **將任何代理重新路由到任何提供者**: Copilot與OpenAI交談？將其重定向到Anthropic Claude、 Gemini或OmniRoute的 377 個提供者中的任何一個。
+- **將任何代理重新路由到任何提供者**: Copilot與OpenAI交談？將其重定向到Anthropic Claude、 Gemini或OmniRoute的 378 個提供者中的任何一個。
 - **應用模型映射**: `gemini-3-flash` → `claude-sonnet-4.7`在處理程序層級透明。
 - **觀察所有代理流量**：每個攔截的請求都會發佈到[Traffic Inspector](./TRAFFIC_INSPECTOR.md) 。
 - **應用OmniRoute彈性**：組合路由、斷路器、後備和成本追蹤也適用於IDE代理流量。

@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Վահանակի բաղադրիչ API. ադապտերներ `packages/ui-kit` վրա — տես `docs/architecture/DESIGN_SYSTEM.md`        |
 | `constants/iconMap.ts`           | `ICON_MAP`. պատկերակների անուններ, որոնք օգտագործվում են էկրանների կողմից → Lucide բաղադրիչներ (`<Icon>`) |
-| `constants/providers.ts`         | **377 պրովայդեր** Zod վավերացմամբ (ճշմարտության աղբյուր)                                                  |
+| `constants/providers.ts`         | **378 պրովայդեր** Zod վավերացմամբ (ճշմարտության աղբյուր)                                                  |
 | `constants/cliTools.ts`          | Արտաքին CLI գործիքի գրանցամատյան                                                                          |
 | `constants/routingStrategies.ts` | **20 երթուղային ռազմավարություն** առաջնահերթություններով                                                  |
 | `constants/publicApiRoutes.ts`   | Երթուղիներ, որոնք պահանջում են Bearer (ընդդեմ կառավարման) auth                                            |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Արտաքին CLI ինտեգրումներ + Ներքին OmniRoute CLI                                            |
 | `I18N.md`                   | i18n ճարտարապետություն, ավելացնելով լեզու, 67 տեղանք                                       |
 | `UNINSTALL.md`              | Մաքրել տեղահանման քայլերը                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Ավտոմատ գեներացվող** 377 մատակարարների կատալոգ (ռեգեն՝ `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Ավտոմատ գեներացվող** 378 մատակարարների կատալոգ (ռեգեն՝ `npm run gen:provider-reference`) |
 
 ### Ենթահամակարգի խորը սուզումներ
 

@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ファイル                      | 目的                                                    |
 | ----------------------------- | ------------------------------------------------------- |
-| `providerRegistry.ts`         | 377 プロバイダー カタログ上のチャット モデル レジストリ |
+| `providerRegistry.ts`         | 378 プロバイダー カタログ上のチャット モデル レジストリ |
 | `providerModels.ts`           | モデルの別名、形式のマッピング                          |
 | `constants.ts`                | タイムアウト、制限、ステータスコード                    |
 | `defaultThinkingSignature.ts` | デフォルトのClaude思考署名                              |

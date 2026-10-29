@@ -13,7 +13,7 @@
 
 ## X'inhu
 
-OmniRoute tirreġistra 377 fornitur, inklużi 155 entrati fil-katalgu mmarkati**free/no-auth** (no-auth, free-tier OAuth, jew free-tier API key — ara l- [Gwida tal-Livelli Ħieles](../getting-started/FREE-TIERS-GUIDE.md) u d- [direttorju sħiħ tal-Livelli Ħieles](../reference/FREE_TIERS.md) ). Il-qabda: il-fornituri b'xejn ivarjaw ħafna fil-kwalità tal-mudell. Fornitur mingħajr awtorizzazzjoni li jservi mudell ta' fruntiera huwa ferm aktar utli minn wieħed li jservi mudell żgħir ta' wirt.
+OmniRoute tirreġistra 378 fornitur, inklużi 155 entrati fil-katalgu mmarkati**free/no-auth** (no-auth, free-tier OAuth, jew free-tier API key — ara l- [Gwida tal-Livelli Ħieles](../getting-started/FREE-TIERS-GUIDE.md) u d- [direttorju sħiħ tal-Livelli Ħieles](../reference/FREE_TIERS.md) ). Il-qabda: il-fornituri b'xejn ivarjaw ħafna fil-kwalità tal-mudell. Fornitur mingħajr awtorizzazzjoni li jservi mudell ta' fruntiera huwa ferm aktar utli minn wieħed li jservi mudell żgħir ta' wirt.
 
 **Klassifiki tal-Fornituri Ħieles** tweġibiet "** liema fornitur b'xejn jagħtini l-aħjar mudell?** " billi tingħaqad mal-katalgu ta' kull fornitur b'xejn ma'** punteġġi tal-kwalità li jinxtraw mill-folla** mill-** Arena AI leaderboard** (human-preference ELO, l-istess idea wara l-LMArena chatbot arena). Il-fornituri huma mbagħad ikklassifikati skont is-saħħa tagħhom** l-aħjar mudell b'xejn** .
 

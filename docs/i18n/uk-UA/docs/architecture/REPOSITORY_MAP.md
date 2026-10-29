@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Компонент приладової панелі API: адаптери через `packages/ui-kit` — див. `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: назви піктограм, які використовуються компонентами екранів → Lucide (`<Icon>`)                    |
-| `constants/providers.ts`         | **377 провайдерів** з перевіркою Zod (джерело правди)                                                         |
+| `constants/providers.ts`         | **378 провайдерів** з перевіркою Zod (джерело правди)                                                         |
 | `constants/cliTools.ts`          | Зовнішній реєстр інструментів CLI                                                                             |
 | `constants/routingStrategies.ts` | **20 стратегій маршрутизації** з пріоритетами                                                                 |
 | `constants/publicApiRoutes.ts`   | Маршрути, які вимагають автентифікації носія (проти керування).                                               |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | CLI інтеграція + Внутрішня OmniRoute CLI                                                   |
 | `I18N.md`                   | Архітектура i18n, додавання мови, 67 локалей                                               |
 | `UNINSTALL.md`              | Етапи чистого видалення                                                                    |
-| `PROVIDER_REFERENCE.md`     | **Автоматично створено** каталог 377 провайдерів (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Автоматично створено** каталог 378 провайдерів (regen: `npm run gen:provider-reference`) |
 
 ### Підсистема глибоких занурень
 

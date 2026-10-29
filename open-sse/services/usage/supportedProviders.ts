@@ -99,6 +99,9 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "agentrouter",
   // Kilo Code personal USD balance (GET /api/profile/balance, existing OAuth token)
   "kilocode",
+  // MegaBrain plan session + weekly limits (GET /api/profile/limits, OAuth token or mb-v1 key)
+  "megabrain",
+  "mb",
   // OpenRouter key limits + account credits (GET /api/v1/key + /api/v1/credits)
   "openrouter",
   // LLM Gateway DevPass allowance (GET /v1/key → monthly + weekly premium)

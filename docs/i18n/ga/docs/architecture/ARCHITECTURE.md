@@ -14,7 +14,7 @@ Is geata ródaithe áitiúil AI agus painéal é OmniRoute tógtha ar Next.js. S
 
 Cumais lárnacha:
 
-- Dromchla API atá comhoiriúnach le OpenAI do CLI/tools (377 soláthraí, 156 modúl seiceadóir)
+- Dromchla API atá comhoiriúnach le OpenAI do CLI/tools (378 soláthraí, 156 modúl seiceadóir)
 - Request/response aistriúchán thar formáidí soláthraí
 - Cúltaca teaglama samhail (seicheamh ilmhúnlaí)
 - Céimeanna teaglama struchtúrtha (`provider + model + connection`) le hordú ama rite ag `compositeTiers`
