@@ -7,14 +7,14 @@
  * messages and rejects any single message over 6000 chars) and parsing the
  * model's text reply back into OpenAI `tool_calls`.
  *
- * The contract asks for bare JSON — `{"name": …, "arguments": {…}, "_nonce": …}`,
- * or an array of those for a multi-call turn — because models reproduce JSON
- * far more reliably than an invented markup dialect. The tag ladder below is
- * kept as a recovery net for drift and for history replayed from sessions that
- * started before the JSON contract.
+ * The contract asks for bare JSON — `{"type": "tool_call", "name": ...,
+ * "arguments": {...}, "_nonce": ...}`, or an array of those for a multi-call
+ * turn — because models reproduce JSON far more reliably than an invented
+ * markup dialect. The tag ladder below is kept as a recovery net for drift and
+ * for history replayed from sessions that started before the JSON contract.
  *
  * Real-world shapes observed from the playground:
- *   - `{"name": "bash", "arguments": {"command": "ls"}}` — the contract's shape
+ *   - `{"type": "tool_call", "name": "bash", "arguments": {"command": "ls"}}` — the contract's shape
  *   - `{"name": "bash", "command": "ls"}` — flattened, arguments beside the name
  *   - `<tool>{"command": "ls"}</tool>` — no name field, infer from schema
  *   - `<tool name="bash">{"command": "ls"}</tool>` — explicit name attribute
@@ -170,7 +170,7 @@ export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
 
   const nonce = getToolNonce(tools);
   const call = (name: string, args: string) =>
-    `{"name": "${name}", "arguments": ${args}, "_nonce": "${nonce}"}`;
+    `{"type": "tool_call", "name": "${name}", "arguments": ${args}, "_nonce": "${nonce}"}`;
   const prompt = [
     "# Tool Calling Instructions",
     "",
@@ -178,6 +178,7 @@ export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
     "To use a tool, reply with raw JSON. The entire reply is the JSON value: an object `{...}` for one call, or an array `[{...}, {...}]` for several calls.",
     "",
     "Each call has these keys:",
+    '- `type` (string, required): always `"tool_call"` — it marks the object as a call.',
     "- `name` (string, required): the exact tool name from the Tools list below.",
     "- `arguments` (object, required): the tool's declared argument keys with their values.",
     `- \`_nonce\` (string, required): the fixed value \`"${nonce}"\`, copied verbatim into every call.`,
@@ -188,6 +189,7 @@ export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
     "## Rules",
     "- **One call:** reply with a single JSON object.",
     "- **Several calls:** reply with one JSON array containing every call.",
+    '- **Type:** only `"type": "tool_call"` marks a call — no other value is a call.',
     "- **Argument names:** use the keys from the tool's declared schema, spelled exactly.",
     "- **Nonce:** every call, including each item inside an array, carries `_nonce`.",
     "- **No tool needed:** answer in plain prose.",
@@ -241,17 +243,17 @@ export function buildCfToolReminder(tools: ChatCompletionTool[]): string {
     "To call a tool, reply with raw JSON. The entire reply is the JSON value: an object `{...}` for one call, or an array `[{...}, {...}]` for several calls.",
     "",
     "## Call Format",
-    `{"name": "<tool>", "arguments": {"arg": value}, "_nonce": "${nonce}"}`,
+    `{"type": "tool_call", "name": "<tool>", "arguments": {"arg": value}, "_nonce": "${nonce}"}`,
     "",
     "## Example",
-    `{"name": "read", "arguments": {"path": "src/index.js"}, "_nonce": "${nonce}"}`,
+    `{"type": "tool_call", "name": "read", "arguments": {"path": "src/index.js"}, "_nonce": "${nonce}"}`,
     "",
     "## Rules",
     `- **Available tools:** ${shown.join(", ")}${more}.`,
-    "- **Keys:** `name` holds the tool name, and `arguments` holds that tool's declared argument keys.",
+    '- **Keys:** `type` is always `"tool_call"`, `name` holds the tool name, and `arguments` holds that tool\'s declared argument keys.',
     `- **Nonce:** every call carries \`"_nonce": "${nonce}"\`, including each item inside an array.`,
     '- **JSON escaping:** inside string values, write each double quote as \\" and each line break as \\n.',
-    `- **make sure you follow the exact rule for json schema.** and your output must be valid json object or array - **no** syntext errors.`,
+    "- **JSON validity:** the reply must be exactly one valid JSON object or array, with no syntax errors.",
     "- **No tool needed:** answer in plain prose.",
   ].join("\n");
 }
@@ -406,8 +408,13 @@ export function hasMalformedCfToolIntent(
   // name the caller does not declare, arguments that are not an object. Prose
   // that merely quotes a tool's schema (`{"name": "read", "description": …}`)
   // must not trigger a retry.
+  // The contract's `"type": "tool_call"` marker counts on its own: it is what a
+  // cut-off reply tends to keep while losing the rest (`{"type": "tool_call",
+  // "name": "re`), and without it such a turn reported no intent at all, so it
+  // was answered as plain text with the half-written call buried in it.
   const jsonIntent =
     /"tool_calls"\s*:/.test(text) ||
+    /"type"\s*:\s*"tool_calls?"/i.test(text) ||
     (toolNames.some((name) =>
       new RegExp(`"name"\\s*:\\s*"${escapeRegex(name)}"`, "i").test(text)
     ) &&

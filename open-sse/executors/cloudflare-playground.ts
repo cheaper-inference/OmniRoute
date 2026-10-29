@@ -78,17 +78,19 @@ const BLOCKED_MESSAGE =
 
 /**
  * Re-ask sent to a fresh room when a reply carried tool intent the parser could
- * not read. It restates the contract's three hard requirements (one JSON object
- * per call, the tool name in `name`, the nonce included verbatim) because the
- * models that invent their own envelope are the same ones that skim the
+ * not read. It restates the contract's hard requirements (one JSON object per
+ * call, the `type`/`name`/`arguments` keys, the nonce included verbatim) because
+ * the models that invent their own envelope are the same ones that skim the
  * contract.
  */
 const CF_TOOL_REPAIR_NOTE =
   "Your previous response contained a tool call that the client could not read, so it was rejected. " +
   "Retry the requested next action from scratch, following the tool contract exactly: " +
   "reply with ONLY a JSON object (or an array of them for several calls) shaped like " +
-  '{"name": "<tool>", "arguments": {...}, "_nonce": "<nonce>"}, with the arguments as a single ' +
-  "JSON object and the _nonce binding copied verbatim. No XML tags and no code fences.";
+  '{"type": "tool_call", "name": "<tool>", "arguments": {...}, "_nonce": "<nonce>"}, with the ' +
+  "arguments as a single JSON object and the _nonce binding copied verbatim. " +
+  "If your previous reply was cut off, send every call again, complete: a single object, or one " +
+  "array holding all of them. No XML tags and no code fences.";
 
 // ── Frame parsing & translation (pure — unit-tested against live captures) ──
 

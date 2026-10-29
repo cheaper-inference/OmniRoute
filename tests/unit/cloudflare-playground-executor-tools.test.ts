@@ -530,7 +530,10 @@ test("toCfMessages replays assistant tool_calls as JSON envelopes", () => {
   assert.equal(out.length, 2);
   // The replayed call must match the shape the contract asks for, or the model
   // imitates its own history instead of the contract.
-  assert.equal(out[1].parts[0].text, '{"name":"bash","arguments":{"command":"ls"}}');
+  assert.equal(
+    out[1].parts[0].text,
+    '{"type":"tool_call","name":"bash","arguments":{"command":"ls"}}'
+  );
 });
 
 test("toCfMessages replays tool results as a JSON envelope", () => {
@@ -742,6 +745,36 @@ test("executor gives up after one repair retry instead of looping", async () => 
   assert.equal(parsed.choices[0].message.content, broken);
   assert.ok(!parsed.choices[0].message.tool_calls);
   assert.equal(rooms.length, 2);
+});
+
+test("executor retries a cut-off multi-call reply instead of executing a prefix", async () => {
+  const nonce = cfToolNonce(READ_TOOLS);
+  const call = (path: string) =>
+    `{"type": "tool_call", "name": "read", "arguments": {"path": "${path}"}, "_nonce": "${nonce}"}`;
+  // Two calls, the array never closed. Before the truncation guard the first
+  // call was executed and the second dropped, so the turn looked complete and
+  // nothing asked the model to finish it.
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, `[${call("a.py")},\n{"type": "tool_call", "name": "re`),
+    (chatId) => buildSuccessFrames(chatId, `[${call("a.py")}, ${call("b.py")}]`),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { content: string | null; tool_calls?: Array<{ function: { arguments: string } }> };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(
+    parsed.choices[0].message.tool_calls?.length,
+    2,
+    "every call must come from the retry, not from the cut-off reply"
+  );
+  assert.equal(parsed.choices[0].message.content, null);
+  assert.equal(rooms.length, 2, "the cut-off reply must be retried, not half-executed");
+  assert.notEqual(rooms[0], rooms[1], "the retry must open a fresh room");
 });
 
 test("executor retries when a bound call's arguments violate the declared schema", async () => {

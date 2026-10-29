@@ -94,6 +94,7 @@ export function cfToolCallMarkup(toolCalls: CfMessageLike["tool_calls"]): string
   const calls = toolCalls
     .filter((call) => call && typeof call.function?.name === "string")
     .map((call) => ({
+      type: "tool_call",
       name: call.function!.name as string,
       arguments: cfArgumentsValue(call.function!.arguments),
     }));

@@ -75,13 +75,14 @@ test("serializeCfToolPrompt generates a compact contract block", () => {
   assert.ok(prompt.includes("# Tool Calling Instructions"));
   assert.ok(prompt.includes("bash"));
   assert.ok(prompt.includes("read_file"));
-  // The worked example is the JSON envelope: name, arguments, nonce.
+  // The worked example is the JSON envelope, in the order the key list gives it:
+  // the type marker, the name, the arguments, the nonce.
   assert.match(
     prompt,
-    /\{"name": "read", "arguments": \{"path": "package\.json"\}, "_nonce": "[a-z0-9]+"\}/
+    /\{"type": "tool_call", "name": "read", "arguments": \{"path": "package\.json"\}, "_nonce": "[a-z0-9]+"\}/
   );
   // Several calls are shown as one array, which is the shape the reply is held to.
-  assert.match(prompt, /Assistant: \[\{"name": "read"/);
+  assert.match(prompt, /Assistant: \[\{"type": "tool_call", "name": "read"/);
   // Nothing in the contract asks for markup any more.
   assert.ok(!prompt.includes("<read>"), "the contract must not show a tool tag");
   assert.ok(!prompt.includes("</"), "the contract must not show a closing tag");
@@ -102,6 +103,7 @@ test("serializeCfToolPrompt states the envelope keys and the reply shape", () =>
   assert.ok(prompt.includes("an array `[{...}, {...}]` for several calls"));
   assert.ok(prompt.includes("reply with one JSON array containing every call"));
   // Every envelope key is spelled out, so the model is not guessing field names.
+  assert.ok(prompt.includes('`type` (string, required): always `"tool_call"`'));
   assert.ok(prompt.includes("`name` (string, required): the exact tool name"));
   assert.ok(prompt.includes("`arguments` (object, required): the tool's declared argument keys"));
   // Requirement is stated twice: in the key list, and as a rule.
@@ -113,6 +115,8 @@ test("serializeCfToolPrompt states the envelope keys and the reply shape", () =>
       "- **Nonce:** every call, including each item inside an array, carries `_nonce`."
     )
   );
+  // The discriminator is stated as a rule as well as in the key list.
+  assert.ok(prompt.includes('- **Type:** only `"type": "tool_call"` marks a call'));
 });
 
 test("serializeCfToolPrompt is stable for one tool set", () => {
@@ -916,7 +920,9 @@ test("compactCfConversation renders replayed tool calls and results", () => {
   ];
   const { block } = compactCfConversation(messages, 1);
   assert.ok(
-    block!.includes('### ASSISTANT\n{"name":"bash","arguments":{"command":"ls"}}'),
+    block!.includes(
+      '### ASSISTANT\n{"type":"tool_call","name":"bash","arguments":{"command":"ls"}}'
+    ),
     "replayed calls use the JSON envelope the contract asks for"
   );
   assert.ok(
@@ -1113,14 +1119,19 @@ test("buildCfToolReminder restates the contract with this request's nonce", () =
   assert.ok(reminder.includes("# Tool Call Reminder"));
   // Shape line plus a concrete example the model can copy.
   assert.ok(
-    reminder.includes(`{"name": "<tool>", "arguments": {"arg": value}, "_nonce": "${nonce}"}`)
+    reminder.includes(
+      `{"type": "tool_call", "name": "<tool>", "arguments": {"arg": value}, "_nonce": "${nonce}"}`
+    )
   );
+  assert.ok(reminder.includes('`type` is always `"tool_call"`'));
   assert.ok(reminder.includes("`name` holds the tool name"));
   assert.ok(!reminder.includes('{"name": "bash"'), "the reminder must not prime the first tool");
   // The binding is the one the caller validated against, not a fresh one.
   assert.ok(reminder.includes(`"_nonce": "${nonce}"`));
   // Escaping guidance for large bodies — the failure the reminder exists for.
   assert.ok(reminder.includes('write each double quote as \\" and each line break as \\n'));
+  // The validity rule: exactly one well-formed JSON value, nothing around it.
+  assert.ok(reminder.includes("the reply must be exactly one valid JSON object or array"));
   // Declared names are listed so an invented one is not the obvious choice.
   assert.ok(reminder.includes("bash, read_file"));
   // The no-tool escape hatch must survive, or the model calls a tool regardless.

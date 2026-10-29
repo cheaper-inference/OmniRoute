@@ -365,6 +365,35 @@ function findCfJsonSpans(text: string): CfJsonSpan[] {
   return spans;
 }
 
+/**
+ * True when the reply opens a JSON document that never closes — the shape a
+ * multi-call turn has when the model ran out of tokens mid-array
+ * (`[{...}, {...`).
+ *
+ * The scanner can still read every value that came before the cut, so without
+ * this guard a truncated turn executes a *prefix* of its calls and drops the
+ * rest without a word. Detected here, the turn parses to zero calls and the
+ * executor's intent check turns it into the single repair retry.
+ *
+ * Only an opener that starts a JSON document counts (an object key, or an array
+ * of them) — a stray brace inside prose must never suppress a reply that also
+ * carried a well-formed call.
+ */
+function isIncompleteCfJsonDocument(text: string): boolean {
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i];
+    if (ch !== "{" && ch !== "[") {
+      i++;
+      continue;
+    }
+    const end = matchJsonEnd(text, i);
+    if (end === -1) return /^\s*\{?\s*"/.test(text.slice(i + 1));
+    i = end;
+  }
+  return false;
+}
+
 /** Parse one JSON span leniently (the same repairs the tag parser applies). */
 function parseCfJsonPayload(raw: string): unknown {
   const normalized = normalizeToolArguments(raw);
@@ -405,8 +434,22 @@ const CF_JSON_META_KEYS = new Set<string>([
   "function",
   "tool_calls",
   "toolCalls",
+  "type",
   "_nonce",
 ]);
+
+/**
+ * Values of the `type` discriminator the contract asks for. The contract sends
+ * `"type": "tool_call"`; the plural spelling is accepted because a multi-call
+ * turn is an array of calls and models sometimes label the array, not each
+ * element.
+ */
+const CF_JSON_CALL_TYPES = new Set(["tool_call", "tool_calls"]);
+
+/** True when the object carries the contract's `"type": "tool_call"` marker. */
+function isCfCallTypeValue(obj: Record<string, unknown>): boolean {
+  return typeof obj.type === "string" && CF_JSON_CALL_TYPES.has(obj.type.trim().toLowerCase());
+}
 
 /** True when at least one argument key is a property the tool declares. */
 function hasDeclaredArgument(
@@ -433,10 +476,11 @@ function hasDeclaredArgument(
  * models drift into (`{"name": "read", "path": "a"}` — every non-envelope key
  * is an argument).
  *
- * A bare JSON object is only a call when it *names a declared tool*, or when it
- * proves it belongs to this request by carrying the nonce. Without that gate any
- * JSON the model quoted in prose (a config snippet, a schema) would be read as a
- * call and the answer would be replaced by a bogus retry.
+ * A bare JSON object is only a call when it *names a declared tool*, when it
+ * proves it belongs to this request by carrying the nonce, or when it declares
+ * the contract's `type: "tool_call"`. That gate keeps the JSON a model quotes
+ * while explaining something (a config snippet, a tool schema) from being read
+ * as a call and replacing the answer with a bogus retry.
  */
 function cfCallsFromJsonValue(
   value: unknown,
@@ -492,6 +536,13 @@ function cfCallsFromJsonValue(
   }
 
   const envelopeNonce = typeof obj._nonce === "string" ? obj._nonce : undefined;
+  // The contract's discriminator. Optional on purpose: the envelope without it
+  // is still the same three keys, and models drop fields. When present it is a
+  // stronger signal than "the name happens to match a declared tool", so it
+  // also makes an envelope with a fuzzy or unknown name a *call attempt* — the
+  // finalizer then rejects it and the turn is retried instead of the reply being
+  // returned as text with a call buried in it.
+  const discriminated = isCfCallTypeValue(obj);
   let args: Record<string, unknown> | null = null;
 
   if (argsSource !== undefined) {
@@ -524,14 +575,15 @@ function cfCallsFromJsonValue(
 
   const boundToRequest = nonce !== undefined && envelopeNonce === nonce;
   // An unnamed payload is only trustworthy when it carries this request's nonce.
-  if (name === null && !boundToRequest) return [];
-  if (!declared && !boundToRequest) return [];
+  if (name === null && !boundToRequest && !discriminated) return [];
+  if (!declared && !boundToRequest && !discriminated) return [];
   // The flattened form is drift, so it needs a second signal before it is
   // executed: the whole reply is the envelope, the envelope is bound to this
-  // request, or it carries at least one argument the tool actually declares.
-  // That is what separates `{"name": "read", "path": "a.ts"}` from a schema the
-  // model quoted while explaining (`{"name": "read", "description": …}`).
-  if (argsSource === undefined && !standalone && !boundToRequest) {
+  // request, it declares its own type, or it carries at least one argument the
+  // tool actually declares. That is what separates
+  // `{"name": "read", "path": "a.ts"}` from a schema the model quoted while
+  // explaining (`{"name": "read", "description": ...}`).
+  if (argsSource === undefined && !standalone && !boundToRequest && !discriminated) {
     const named = declared ?? resolvedName;
     if (!named || !hasDeclaredArgument(named, args, availableTools)) return [];
   }
@@ -548,7 +600,8 @@ function cfCallsFromJsonValue(
 /**
  * True when a parsed JSON value looks like the call envelope rather than an
  * ordinary object the model happened to quote: it names a declared tool, is a
- * `tool_calls` wrapper, or carries the request nonce.
+ * `tool_calls` wrapper, carries the request nonce, or declares the contract's
+ * `"type": "tool_call"`.
  */
 function isCfCallJsonValue(value: unknown, declared: Set<string>): boolean {
   if (Array.isArray(value)) return value.some((item) => isCfCallJsonValue(item, declared));
@@ -556,6 +609,7 @@ function isCfCallJsonValue(value: unknown, declared: Set<string>): boolean {
   const obj = value as Record<string, unknown>;
   if (obj.tool_calls !== undefined || obj.toolCalls !== undefined) return true;
   if (typeof obj._nonce === "string") return true;
+  if (isCfCallTypeValue(obj)) return true;
   const fn = obj.function;
   const candidates = [
     obj.name,
@@ -611,6 +665,10 @@ export function parseCfJsonCalls(
   const calls: CfParsedToolCall[] = [];
   const spans: Array<[number, number]> = [];
   if (!text) return { calls, spans };
+  // A turn cut off mid-document yields nothing rather than the calls that
+  // happened to complete before the cut, so the executor retries it whole
+  // instead of executing a prefix. See `isIncompleteCfJsonDocument`.
+  if (isIncompleteCfJsonDocument(text)) return { calls, spans };
 
   const standalone = isStandaloneCfJsonText(text);
   for (const span of findCfJsonSpans(text)) {
