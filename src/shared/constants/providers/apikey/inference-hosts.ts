@@ -203,6 +203,18 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     textIcon: "LA",
     website: "https://lambda.ai",
   },
+  runcrate: {
+    id: "runcrate",
+    serviceKinds: ["llm"],
+    alias: "runcrate",
+    name: "Runcrate",
+    icon: "terminal",
+    color: "#1A2B79",
+    textIcon: "RC",
+    website: "https://www.runcrate.ai",
+    hasFree: true,
+    freeNote: "Open models are free with your GitHub account",
+  },
   sambanova: {
     id: "sambanova",
     serviceKinds: ["llm"],
