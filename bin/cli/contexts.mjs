@@ -298,6 +298,47 @@ export function resolveActiveContext(overrideName) {
   return { baseUrl: `http://localhost:${process.env.PORT || "20128"}` };
 }
 
+function originOf(value) {
+  const raw = String(value ?? "");
+  // URL parsers disagree on backslashes, tabs and newlines: WHATWG reads a
+  // backslash as "/" and drops tabs and newlines, Python's urllib and httpx
+  // (used by tools such as aider) do not. A URL with any of them, or with
+  // userinfo, does not name a single server.
+  if (/[\\\s\x00-\x1f\x7f]/.test(raw)) return null;
+  try {
+    const url = new URL(raw);
+    if (url.username || url.password) return null;
+    // Opaque origins (file:, data:, ...) serialize as "null" and would all
+    // compare equal; they never identify a server.
+    return url.origin === "null" ? null : url.origin;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * True when `destinationUrl` is on the same origin (scheme, host, port) as the
+ * context's baseUrl. A context without a baseUrl targets the local default, as
+ * in api.mjs getBaseUrl().
+ */
+export function isContextOrigin(ctx, destinationUrl) {
+  if (!ctx) return false;
+  const contextBase = ctx.baseUrl || `http://localhost:${process.env.PORT || "20128"}`;
+  const contextOrigin = originOf(contextBase);
+  return contextOrigin !== null && contextOrigin === originOf(destinationUrl);
+}
+
+/**
+ * The context's stored credential (scoped accessToken, else legacy apiKey), or
+ * undefined when `destinationUrl` is not on the context's own origin. A token
+ * belongs to the server that issued it; callers that send it or write it into
+ * a tool config next to some other URL must go through this.
+ */
+export function contextCredentialFor(ctx, destinationUrl) {
+  if (!isContextOrigin(ctx, destinationUrl)) return undefined;
+  return ctx.accessToken || ctx.apiKey || undefined;
+}
+
 /** Async variant for callers that need to observe a just-created keychain entry. */
 export async function resolveActiveContextAsync(overrideName) {
   await hydrateCredentialCache(readConfigFile());

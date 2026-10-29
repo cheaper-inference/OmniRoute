@@ -1,6 +1,12 @@
 import { setTimeout as sleep } from "node:timers/promises";
 import { getCliToken, CLI_TOKEN_HEADER } from "./utils/cliToken.mjs";
-import { resolveActiveContext, resolveActiveContextAsync } from "./contexts.mjs";
+import {
+  contextCredentialFor,
+  resolveActiveContext,
+  resolveActiveContextAsync,
+} from "./contexts.mjs";
+
+export { isContextOrigin } from "./contexts.mjs";
 
 export const RETRY_DEFAULTS = Object.freeze({
   maxAttempts: 3,
@@ -85,13 +91,19 @@ export async function buildHeaders(opts) {
   // key — a real `--api-key <x>` flag or a command-supplied token like
   // `connect --key` — counts as explicit and wins. Within a context the scoped
   // accessToken wins over the legacy apiKey.
+  //
+  // A context credential belongs to the server it was issued by, so it is only
+  // attached when the request goes to that context's own origin. A --base-url,
+  // OMNIROUTE_BASE_URL or absolute URL that points somewhere else (including
+  // `connect` probing a new server) falls through to the explicit/ambient key.
+  const destinationUrl = opts.destinationUrl ?? getBaseUrl(opts);
   const ambientKey = process.env.OMNIROUTE_API_KEY || null;
   const explicitKey = opts.apiKey && opts.apiKey !== ambientKey ? opts.apiKey : null;
   let auth = explicitKey;
   if (!auth) {
     try {
       const ctx = await resolveActiveContextAsync(opts.context ?? process.env.OMNIROUTE_CONTEXT);
-      auth = ctx?.accessToken || ctx?.apiKey || null;
+      auth = contextCredentialFor(ctx, destinationUrl) || null;
     } catch {
       // No context credential available — fall through to the ambient fallback.
     }
@@ -103,7 +115,6 @@ export async function buildHeaders(opts) {
   // Inject the machine-derived credential only for an explicit local loopback
   // destination. Remote contexts and absolute remote URLs use scoped access
   // tokens and must never receive this machine-bound local credential.
-  const destinationUrl = opts.destinationUrl ?? getBaseUrl(opts);
   if (!isLoopbackUrl(destinationUrl)) {
     headers.delete(CLI_TOKEN_HEADER);
   } else {
