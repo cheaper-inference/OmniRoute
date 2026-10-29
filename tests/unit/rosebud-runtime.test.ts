@@ -256,6 +256,9 @@ test("concurrent artifact readers never observe a partially downloaded file", as
     })
   );
   const runtime = new RosebudRuntime(async (_profile, args) => {
+    if (args[1] === "status")
+      return { id: "remote", status: "succeeded", asset: { id: "asset" }, charged_credits: 250 };
+    assert.equal(args[1], "download");
     const out = args.at(-1)!;
     await writeFile(out, png.subarray(0, 4));
     started();
