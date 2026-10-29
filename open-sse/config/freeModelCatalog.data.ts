@@ -22,7 +22,7 @@ import type { FreeModelBudget } from "./freeModelCatalog.ts";
  * rewrites file timestamps on every deploy, which would report a months-old
  * catalog as "updated today". Bump this whenever the entries below change.
  */
-export const FREE_CATALOG_CURATED_AT = "2026-10-25";
+export const FREE_CATALOG_CURATED_AT = "2026-10-29";
 
 export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "agentrouter", modelId: "claude-opus-4-8", displayName: "Claude Opus 4.8", monthlyTokens: 0, creditTokens: 200000000, freeType: "one-time-initial", poolKey: "agentrouter", tos: "caution" },
@@ -316,9 +316,11 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "nscale", modelId: "openai/gpt-oss-20b", displayName: "openai/gpt-oss-20b", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "nscale", tos: "caution" },
   { provider: "nscale", modelId: "meta-llama/Llama-4-Scout-17B-16E-Instruct", displayName: "meta-llama/Llama-4-Scout-17B-16E-Instruct", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "nscale", tos: "caution" },
   { provider: "nscale", modelId: "meta-llama/Llama-3.3-70B-Instruct", displayName: "meta-llama/Llama-3.3-70B-Instruct", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "nscale", tos: "caution" },
-  { provider: "nvidia", modelId: "google/gemma-4-31b-it", displayName: "Gemma 4 31B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
-  { provider: "nvidia", modelId: "nvidia/nemotron-3.5-super-vl-120b-a12b", displayName: "Nemotron 3.5 Super VL 120B A12B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
-  { provider: "nvidia", modelId: "openai/gpt-oss-120b", displayName: "GPT OSS 120B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
+  // NVIDIA API free tier is rate-limited but permanently available (not a one-time credit).
+  // freeType corrected from "one-time-initial" → "recurring-uncapped" per NVIDIA NIM docs.
+  { provider: "nvidia", modelId: "google/gemma-4-31b-it", displayName: "Gemma 4 31B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution" },
+  { provider: "nvidia", modelId: "nvidia/nemotron-3.5-super-vl-120b-a12b", displayName: "Nemotron 3.5 Super VL 120B A12B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution" },
+  { provider: "nvidia", modelId: "openai/gpt-oss-120b", displayName: "GPT OSS 120B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution" },
   // evidence: public-page https://ollama.com/pricing (2026-09-02) — Free plan: "Starter usage credits
   // included · Includes access to starter models · Add credits to unlock all models"; docs.ollama.com/cloud:
   // "usage resets monthly". No token figure and no named starter-model list ⇒ recurring-uncapped.
