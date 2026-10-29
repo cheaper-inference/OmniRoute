@@ -161,7 +161,7 @@ test("Codex precedence: falls to the captured default when nothing is set", asyn
   await withEnv({ CODEX_CLIENT_VERSION: undefined }, () => {
     resetOverrides();
     assert.equal(codex.getCodexClientVersion(), codex.DEFAULT_CODEX_CLIENT_VERSION);
-    assert.equal(codex.getCodexClientVersionSource(), "default");
+    assert.equal(codex.getCodexAdvertisedVersionSource(), "default");
     assert.equal(
       codex.resolveCodexAdvertisedVersion(undefined),
       codex.DEFAULT_CODEX_CLIENT_VERSION
@@ -173,7 +173,7 @@ test("Codex precedence: env wins over the default when no override is set", asyn
   await withEnv({ CODEX_CLIENT_VERSION: "0.153.0" }, () => {
     resetOverrides();
     assert.equal(codex.getCodexClientVersion(), "0.153.0");
-    assert.equal(codex.getCodexClientVersionSource(), "env");
+    assert.equal(codex.getCodexAdvertisedVersionSource(), "env");
     assert.equal(codex.resolveCodexAdvertisedVersion(null), "0.153.0");
   });
 });
@@ -192,7 +192,7 @@ test("Codex inference: the dashboard override outranks the caller's forwarded ve
   await withEnv({ CODEX_CLIENT_VERSION: "0.153.0" }, () => {
     setCliVersionOverrides({ codex: "0.156.0" });
     assert.equal(codex.resolveCodexAdvertisedVersion(CALLER_HEADERS), "0.156.0");
-    assert.equal(codex.getCodexClientVersionSource(), "settings");
+    assert.equal(codex.getCodexAdvertisedVersionSource(), "settings");
     resetOverrides();
   });
 });
@@ -299,18 +299,47 @@ test("Codex precedence: a discovered release newer than the pin reports `discove
     try {
       codex.seedCodexClientVersionCache(discovered);
       assert.equal(codex.getCodexClientVersion(), discovered);
-      assert.equal(codex.getCodexClientVersionSource(), "discovered");
+      assert.equal(codex.getCodexAdvertisedVersionSource(), "discovered");
       // The inference face still forwards the caller's own version first...
       assert.equal(codex.resolveCodexAdvertisedVersion(CALLER_HEADERS), "0.154.0");
       // ...and falls to the discovered version when the caller sends none.
       assert.equal(codex.resolveCodexAdvertisedVersion({}), discovered);
       setCliVersionOverrides({ codex: "0.156.0" });
       assert.equal(codex.getCodexClientVersion(), "0.156.0");
-      assert.equal(codex.getCodexClientVersionSource(), "settings");
+      assert.equal(codex.getCodexAdvertisedVersionSource(), "settings");
       assert.equal(codex.resolveCodexAdvertisedVersion(CALLER_HEADERS), "0.156.0");
     } finally {
       resetOverrides();
       codex.clearCodexClientVersionCache();
+      codex.resetCodexClientVersionCacheForTests();
+    }
+  });
+});
+
+test("Codex discovery observability: a dashboard override reports `override`, not a failed refresh", async () => {
+  // Two getters coexist after merging the release: getCodexAdvertisedVersionSource()
+  // names the dashboard layer, while getCodexClientVersionSource() is the
+  // discovery-health signal (#16714) that the models route turns into a
+  // "degraded catalog" warning. A dashboard override skips the registry refresh,
+  // so without this the health signal stayed on "fallback" and blamed a refresh
+  // that never ran.
+  await withEnv({ CODEX_CLIENT_VERSION: undefined }, async () => {
+    resetOverrides();
+    codex.resetCodexClientVersionCacheForTests();
+    try {
+      setCliVersionOverrides({ codex: "0.156.0" });
+      const version = await codex.refreshCodexClientVersion(async () => {
+        assert.fail("a dashboard override must not fetch registry metadata");
+      });
+      assert.equal(version, "0.156.0");
+      assert.equal(codex.getCodexClientVersionSource(), "override");
+      assert.equal(codex.getCodexAdvertisedVersionSource(), "settings");
+
+      resetOverrides();
+      assert.equal(codex.getCodexClientVersionSource(), "fallback");
+      assert.equal(codex.getCodexAdvertisedVersionSource(), "default");
+    } finally {
+      resetOverrides();
       codex.resetCodexClientVersionCacheForTests();
     }
   });

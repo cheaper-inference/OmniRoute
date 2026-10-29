@@ -1,0 +1,1 @@
+- **ci:** the Quality Gates workflow no longer runs its own `Unit Tests fast-path` (4 shards) and `Vitest (fast-path)` jobs, which repeated the CI unit suite and vitest command-for-command on every PR since CI started running on release PRs. Each PR now uses about 62 fewer runner-minutes and 5 fewer hosted jobs.

@@ -119,28 +119,37 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 ## Ток увоза API кључа
 
 Аутентификација API кључем намењена је дуготрајним Kiro / AWS CodeWhisperer bearer акредитивима. Она
-не користи OAuth освежавање и тиме избегава поништавање дељене OIDC сесије.
+не користи OAuth освежавање, па се тиме избегава поништавање дељене OIDC сесије.
 
 ### Контролна табла
 
-1. Отворите **Контролна табла -> Добављачи -> Kiro**.
+1. Отворите **Контролна табла -> Провајдери -> Kiro**.
 2. Изаберите **API кључ**.
-3. Налепите API кључ и опционални AWS регион (подразумевано је `us-east-1`).
-4. OmniRoute проверава кључ и чува везу.
+3. Налепите API кључ и изаберите AWS регион: **Аутоматско откривање** (подразумевано), **Исток САД
+   (Северна Вирџинија)** или **Европа (Франкфурт)**.
+4. OmniRoute проверава кључ и чува везу фиксирану за регион у којем
+   кључ функционише.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` прихвата `auto` (подразумевано), `us-east-1` или `eu-central-1`; свака друга вредност се
+одбија са HTTP 400.
 
 ### Интерни уговор
 
 API рута проверава кључ позивањем `KiroService.validateApiKey()`, који
-користи `ListAvailableProfiles` у односу на CodeWhisperer/Amazon Q
-крајњу тачку која одговара региону и разрешава `profileArn`.
+позива `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(API површина коју Amazon Q користи за закључивање помоћу API кључа), уз временско ограничење од 10 s по региону. У
+режиму `auto` прво испробава `us-east-1`, затим `eu-central-1`, и чува први регион
+који прихвати кључ. Ако је кључ одбијен у сваком потенцијалном региону, увоз не успева уз
+HTTP 400. Потом се, по принципу најбољег покушаја, позива `ListAvailableProfiles` ради проналажења опционог
+`profileArn` (AWS га одбија за већину API кључева).
 
 Сачувана веза користи:
 
@@ -157,8 +166,11 @@ API рута проверава кључ позивањем `KiroService.validat
 
 Током извршавања, `KiroExecutor.buildHeaders()` шаље кључ као
 `Authorization: Bearer <key>` и додаје `tokentype: API_KEY`. Позиви за квоту/профил
-користе исту ознаку како би AWS третирао bearer као дуготрајни API кључ, а не
-као OIDC или токен за приступ преко друштвених налога.
+користе исту ознаку како би AWS bearer третирао као дуготрајни API кључ, а не као
+OIDC или токен за приступ преко друштвених мрежа. `KiroExecutor.execute()` шаље закључивање помоћу API кључа само
+на `https://q.<region>.amazonaws.com/generateAssistantResponse` — укључујући `us-east-1`
+— зато што Kiro IDE мрежни пролаз одбија `TokenType=API_KEY`, а
+`codewhisperer.us-east-1` одбија корисни садржај API кључа као неважеће тело захтева (HTTP 400).
 
 ---
 

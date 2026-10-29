@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getCombos, createCombo } from "@/lib/db/combos";
+import { normalizeSnapshotWeights } from "@/lib/combos/snapshotWeights";
 import { normalizeComboModels } from "@/lib/combos/steps";
 import { duplicateAutoComboSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -11,6 +12,7 @@ import {
 import { AutoVariant } from "@omniroute/open-sse/services/autoCombo/autoPrefix";
 import { AutoComboSpec } from "@omniroute/open-sse/services/autoCombo/virtualFactory";
 import { MODEL_FAMILIES, ModelFamily } from "@omniroute/open-sse/services/autoCombo/modelFamily";
+import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 
 // POST /api/combos/duplicate - Resolve an auto-combo into a static combo snapshot.
 // Takes an auto/* template name, resolves its candidate pool using the same logic as
@@ -128,18 +130,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Normalize scored weights so they sum to exactly 100.
-    const totalWeight = normalizedModels.reduce((s, m) => s + (m.weight ?? 0), 0);
-    if (totalWeight > 0 && normalizedModels.length > 0) {
-      for (const m of normalizedModels) {
-        m.weight = Math.max(1, Math.floor(((m.weight ?? 0) / totalWeight) * 100));
-      }
-      let remainder = 100 - normalizedModels.reduce((s, m) => s + m.weight, 0);
-      for (let i = 0; i < normalizedModels.length && remainder > 0; i++) {
-        normalizedModels[i].weight++;
-        remainder--;
-      }
-    }
+    normalizeSnapshotWeights(normalizedModels);
 
     // Generate a unique combo name based on the template (no "copy" appellation).
     const baseName = `static-${name.replace("auto/", "")}`;
@@ -170,15 +161,7 @@ export async function POST(request: Request) {
     return NextResponse.json(comboData, { status: 201 });
   } catch (error) {
     console.error("Error duplicating auto-combo:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to duplicate auto-combo",
-        details:
-          typeof error === "object" && error !== null && "message" in error
-            ? String(error.message)
-            : String(error),
-      },
-      { status: 500 }
-    );
+    const body = buildErrorBody(500, "Failed to duplicate auto-combo");
+    return NextResponse.json({ error: body.error.message }, { status: 500 });
   }
 }

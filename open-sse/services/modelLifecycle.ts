@@ -105,7 +105,7 @@ export const MODEL_LIFECYCLE_RECORDS: readonly ModelLifecycleRecord[] = Object.f
 const RECORDS_BY_KEY = new Map<string, ModelLifecycleRecord>();
 
 function lifecycleKey(provider: string, model: string): string {
-  return `${provider.trim().toLowerCase()}\0${model.trim()}`;
+  return `${provider.trim().toLowerCase()}\0${model.trim().toLowerCase()}`;
 }
 
 for (const record of MODEL_LIFECYCLE_RECORDS) {
@@ -218,9 +218,7 @@ export function getModelLifecycleDecision(
         status: "shutdown",
         action: "reject",
         shutdownAt: typeof entry?.retiredOn === "string" ? entry.retiredOn : null,
-        replacement: replacementId
-          ? { provider: entry?.vendor ?? "", model: replacementId }
-          : null,
+        replacement: replacementId ? { provider: entry?.vendor ?? "", model: replacementId } : null,
         source: SNAPSHOT_SOURCE,
       };
     }
@@ -256,7 +254,9 @@ export function formatModelLifecycleMessage(decision: ModelLifecycleDecision): s
     ? ` Use "${decision.replacement.provider}/${decision.replacement.model}" instead.`
     : "";
   if (decision.status === "shutdown") {
-    const when = decision.shutdownAt ? ` was shut down on ${decision.shutdownAt}` : " has been retired by its vendor";
+    const when = decision.shutdownAt
+      ? ` was shut down on ${decision.shutdownAt}`
+      : " has been retired by its vendor";
     return `Model "${modelRef}"${when} and cannot be routed automatically.${replacement}`;
   }
   return `Model "${modelRef}" is deprecated and is scheduled to shut down on ${decision.shutdownAt}.${replacement}`;

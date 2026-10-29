@@ -4,105 +4,67 @@
 
 ---
 
-Τελευταία ενημέρωση: 2026-08-23
+Τελευταία ενημέρωση: 23-08-2026
 
-Το OmniRoute ενσωματώνεται με τρεις κατηγορίες εργαλείων CLI, κατανεμημένες σε τρεις αποκλειστικές σελίδες του πίνακα ελέγχου:
+OmniRoute ενσωματώνεται με τρεις κατηγορίες εργαλείων CLI που κατανέμονται σε τρεις αποκλειστικές σελίδες του πίνακα ελέγχου:
 
-| Σελίδα         | Διαδρομή                | Έννοια                                                                                       | Πλήθος          |
-| -------------- | ----------------------- | -------------------------------------------------------------------------------------------- | --------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Εργαλεία προγραμματισμού που κατευθύνετε στο OmniRoute (Πελάτης → CLI → OmniRoute → Πάροχος) | 26              |
-| **CLI Agents** | `/dashboard/cli-agents` | Αυτόνομοι πράκτορες που κατευθύνετε στο OmniRoute (ίδια ροή, ευρύτερο πεδίο)                 | 10              |
-| **ACP Agents** | `/dashboard/acp-agents` | CLI που εκκινεί το OmniRoute ως backend μέσω stdio/ACP (αντίστροφη ροή)                      | δείτε το μητρώο |
+| Σελίδα            | Διαδρομή                | Εννοια                                                                                      | Κόμης           |
+| ----------------- | ----------------------- | ------------------------------------------------------------------------------------------- | --------------- |
+| **Κώδικας CLI**   | `/dashboard/cli-code`   | Εργαλεία κωδικοποίησης που υποδεικνύετε σε OmniRoute (Πελάτης → CLI → OmniRoute → Provider) | 26              |
+| **Πράκτορες CLI** | `/dashboard/cli-agents` | Αυτόνομοι πράκτορες που υποδεικνύετε σε OmniRoute (ίδια ροή, ευρύτερο πεδίο εφαρμογής)      | 11              |
+| **Πράκτορες ACP** | `/dashboard/acp-agents` | CLIs που το OmniRoute δημιουργείται ως backend μέσω stdio/ACP (αντίστροφη ροή)              | δείτε το μητρώο |
 
-Οι παλαιότερες διαδρομές ανακατευθύνουν μέσω 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Οι διαδρομές παλαιού τύπου ανακατευθύνονται μέσω 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
-## Πώς Λειτουργεί
+## Πώς λειτουργεί
 
 ```
-CLI Code's / CLI Agents (ροή κατανάλωσης):
+CLI Κώδικα / CLI Agents (ροή κατανάλωσης):
 Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Agent / Goose / ...
            │
            ▼  (όλα κατευθύνονται στο OmniRoute)
     http://YOUR_SERVER:20128/v1
            │
-           ▼  (το OmniRoute δρομολογεί στον κατάλληλο provider)
+           ▼  (το OmniRoute δρομολογεί στον σωστό πάροχο)
     Anthropic / OpenAI / Gemini / DeepSeek / Groq / Mistral / ...
 
 ACP Agents (αντίστροφη ροή εκκίνησης):
-    Αίτημα client → OmniRoute → εκκινεί CLI μέσω stdio/ACP → απόκριση
+    Αίτημα πελάτη → OmniRoute → εκκινεί CLI μέσω stdio/ACP → απόκριση
 ```
 
-**Πλεονεκτήματα:**
+**Οφέλη:**
 
-- Ένα API key για τη διαχείριση όλων των εργαλείων
-- Παρακολούθηση κόστους για όλα τα CLIs στο dashboard
-- Εναλλαγή μοντέλου χωρίς επαναδιαμόρφωση κάθε εργαλείου
+- Ένα κλειδί API για τη διαχείριση όλων των εργαλείων
+- Παρακολούθηση κόστους για όλα τα CLI στον πίνακα ελέγχου
+- Εναλλαγή μοντέλων χωρίς επαναδιαμόρφωση κάθε εργαλείου
 - Λειτουργεί τοπικά και σε απομακρυσμένους διακομιστές (VPS, Docker, Akamai, Cloudflare Tunnel)
 
 ---
 
 ## Αυτόματη διαμόρφωση με `setup-*`
 
-Δεν χρειάζεται να γράφετε τη διαμόρφωση κάθε εργαλείου χειροκίνητα. Το OmniRoute παρέχει μια εντολή `setup-*`
-ανά υποστηριζόμενο CLI που διαβάζει τον **ζωντανό** κατάλογο μοντέλων από ένα τρέχον
-OmniRoute (τοπικό ή απομακρυσμένο) και γράφει τη δική του διαμόρφωση του εργαλείου στον υπολογιστή σας:
+Δεν χρειάζεται να γράψετε τις ρυθμίσεις παραμέτρων κάθε εργαλείου με το χέρι. OmniRoute στέλνει μια εντολή `setup-*` ανά υποστηριζόμενη CLI που διαβάζει το** ζω** κατάλογος μοντέλων από ένα OmniRoute που εκτελείται (τοπικό ή απομακρυσμένο) και γράφει τη διαμόρφωση του εργαλείου στο μηχάνημά σας:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Κάθε εντολή δέχεται `--remote <url> --api-key <key>` (διαμόρφωση ενός τοπικού εργαλείου έναντι ενός
-απομακρυσμένου OmniRoute), `--dry-run` (προεπισκόπηση χωρίς εγγραφή) και `--port`. Εργαλεία
-χωρίς αυτόματη ανακάλυψη μοντέλων (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) δέχονται
-`--model <id>` (και `--yes` για μη διαδραστικές εκτελέσεις). Το `setup-5dive` είναι η
-μοναδική συνταγή που δεν γράφει κάτω από το `$HOME`: διαμορφώνει έναν στόλο πρακτόρων 5dive
-γράφοντας ένα προφίλ ελέγχου ταυτότητας που ανήκει στον root στον κεντρικό υπολογιστή του στόλου,
-οπότε επανεκτελείται μέσω `sudo` και δεν έχει δική του απομακρυσμένη λειτουργία. Για να εκκινήσετε ένα CLI με το
-σωστό περιβάλλον ενσωματωμένο και χωρίς καμία διαμόρφωση γραμμένη, χρησιμοποιήστε τον γενικό
-εκκινητή `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — οι στόχοι και τα ψευδώνυμα προέρχονται από το `bin/cli/cli-manifest.mjs`); οι παλαιότεροι
-εκκινητές ανά εργαλείο `omniroute launch` (Claude Code) και `omniroute launch-codex`
-(Codex) παραμένουν διαθέσιμοι. Το Gemini CLI είναι μόνο για εκκίνηση: είναι ένας στόχος
-`omniroute run` αλλά δεν έχει συνταγή `setup-*`/`configure`.
+Καθένα δέχεται `--remote <url> --api-key <key>` (διαμόρφωση τοπικού εργαλείου έναντι απομακρυσμένου OmniRoute), `--dry-run` (προεπισκόπηση χωρίς εγγραφή) και `--port`. Εργαλεία χωρίς αυτόματη ανακάλυψη μοντέλου (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) λαμβάνουν `--model <id>` (και `--yes` για μη διαδραστικές διαδρομές). `setup-5dive` είναι η μοναδική συνταγή που δεν γράφει κάτω από `$HOME`: διαμορφώνει έναν στόλο πρακτόρων 5 dive γράφοντας ένα προφίλ εξουσιοδότησης που ανήκει στο root στον κεντρικό υπολογιστή του στόλου, επομένως εκτελείται ξανά μέσω `sudo` και δεν έχει τη δική του απομακρυσμένη λειτουργία. Για να εκκινήσετε ένα CLI με το σωστό env και χωρίς καμία γραμμένη ρύθμιση παραμέτρων, χρησιμοποιήστε το γενικό πρόγραμμα εκκίνησης `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini, Whycodes — οι στόχοι και τα ψευδώνυμα προέρχονται από `bin/cli/cli-manifest.mjs`). οι παλαιού τύπου εκτοξευτές ανά εργαλείο `omniroute launch` (Claude Code) και `omniroute launch-codex` (Codex) παραμένουν διαθέσιμοι. Gemini CLI είναι μόνο για εκτόξευση: είναι στόχος `omniroute run` αλλά δεν έχει συνταγή `setup-*`/`configure`.
 
-> **Πλήρης αναφορά:** ο κύριος πίνακας — τι γράφει κάθε εντολή, κάθε σημαία,
-> τοπικό έναντι απομακρυσμένου, και ποια εργαλεία θέλουν ένα επίθημα `/v1` — βρίσκεται στο
-> **[CLI Integrations](../guides/CLI-INTEGRATIONS.md)**.
+> **Πλήρης αναφορά:** ο κύριος πίνακας - τι γράφει κάθε εντολή, κάθε σημαία, τοπικό έναντι απομακρυσμένου και ποια εργαλεία θέλουν επίθημα `/v1` - ζει σε** [Ενσωματώσεις CLI](../guides/CLI-INTEGRATIONS.md)** .
 
-### Εκτέλεση αυτών μέσα σε ένα κοντέινερ
+### Τοποθετήστε τα μέσα σε ένα δοχείο
 
-Μια εντολή `setup-*` που εκτελείται μέσα στο κοντέινερ του OmniRoute γράφει στον
-δικό του οικιακό κατάλογο του κοντέινερ, τον οποίο κανένα CLI του κεντρικού υπολογιστή δεν διαβάζει και ο οποίος
-εξαφανίζεται με το κοντέινερ. Το OmniRoute το ανιχνεύει αυτό και τερματίζει με κωδικό `2` με οδηγίες
-αντί να γράψει. Δύο υποστηριζόμενοι τρόποι προώθησης — εγκαταστήστε το CLI στον κεντρικό υπολογιστή και
-`omniroute connect` στο κοντέινερ, ή συνδέστε τους καταλόγους διαμόρφωσης και ορίστε το
-`CLI_CONFIG_HOME` (το προφίλ `host` του compose). Κάθε εντολή `setup-*`, καθώς και
-`omniroute configure` και `omniroute config set`, δέχεται
-`--allow-container-write` όταν η διαμόρφωση των δικών του CLIs του κοντέινερ είναι αυτό που
-πραγματικά εννοούσατε· το `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` κάνει το ίδιο για
-τον διακομιστή. Δείτε
-[Docker Guide → Configuring host CLI tools](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Μια εντολή `setup-*` που εκτελείται μέσα στο κοντέινερ OmniRoute γράφει στο σπίτι του ίδιου του κοντέινερ, την οποία κανένας κεντρικός υπολογιστής CLI δεν διαβάζει και η οποία εξαφανίζεται με το κοντέινερ. OmniRoute το εντοπίζει και βγαίνει από `2` με οδηγίες αντί για εγγραφή. Δύο υποστηριζόμενοι τρόποι προς τα εμπρός — εγκαταστήστε το CLI στον κεντρικό υπολογιστή και `omniroute connect` στο κοντέινερ ή συνδέστε-προσαρτήστε τα config dir και ορίστε `CLI_CONFIG_HOME` (το προφίλ σύνθεσης `host` ). Κάθε εντολή `setup-*`, συν `omniroute configure` και `omniroute config set`, δέχεται `--allow-container-write` κατά τη διαμόρφωση του CLIs του κοντέινερ είναι αυτό που στην πραγματικότητα εννοούσατε. `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` κάνει το ίδιο για τον διακομιστή. Ανατρέξτε [στον οδηγό Docker → Διαμόρφωση εργαλείων κεντρικού υπολογιστή CLI](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Το **apply endpoint** του πίνακα ελέγχου (`POST /api/cli-tools/apply`) επιβάλλει την
-ίδια προστασία: σε ένα κοντέινερ, μια εγγραφή του οποίου ο στόχος δεν είναι συνδεδεμένος από τον
-κεντρικό υπολογιστή απαντά **`422`** με `containerEphemeralTarget: true`, το ασφαλές κείμενο σφάλματος και —
-για τα εργαλεία με συνταγή κεντρικού υπολογιστή (claude, codex, opencode, cline,
-kilo, continue) — μια `hostSetupCommand` (π.χ. `omniroute setup-opencode`) για εκτέλεση
-στον κεντρικό υπολογιστή αντ' αυτού· τίποτα δεν γράφεται. Το `dryRun: true` συνεχίζει να λειτουργεί σε
-λειτουργία κοντέινερ και επιστρέφει μια επεξεργασμένη προεπισκόπηση + διαδρομή στόχου χωρίς να αγγίξει τον δίσκο.
-Το περιεχόμενο προεπισκόπησης δεν είναι μια διαμόρφωση που φέρει διαπιστευτήρια για αντιγραφή ή εισαγωγή.
-Εφαρμόστε με το αρχικό εργαλείο/βασική διεύθυνση URL/κλειδί API/εισόδους μοντέλου στον κεντρικό υπολογιστή,
-ή χρησιμοποιήστε την υποδεικνυόμενη εντολή ρύθμισης από την πλευρά του κεντρικού υπολογιστή. Δείτε
-[CLI configuration security](../security/CLI-CONFIGURATION.md) για την κεφαλίδα προεπισκόπησης και το συμβόλαιο αιτήματος.
-Αυτή η συμπεριφορά είναι σκόπιμη και προστατεύεται από παλινδρόμηση από το
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — ποτέ μην "διορθώσετε" ένα 422
-αφαιρώντας την προστασία.
+Το ταμπλό** εφαρμόστε το τελικό σημείο** (`POST /api/cli-tools/apply`) επιβάλλει την ίδια προστασία: σε ένα κοντέινερ, απαντά μια εγγραφή της οποίας ο στόχος δεν είναι δεσμευμένος από τον κεντρικό υπολογιστή**`422`** με `containerEphemeralTarget: true`, το ασφαλές κείμενο σφάλματος και — για τα εργαλεία με συνταγή κεντρικού υπολογιστή (claude, codex, opencode, cline, kilo, συνέχεια) — ένα `hostSetupCommand` (π.χ. `omniroute setup-opencode`) για εκτέλεση στον κεντρικό υπολογιστή. τίποτα δεν είναι γραμμένο. `dryRun: true` συνεχίζει να εργάζεται σε λειτουργία κοντέινερ και επιστρέφει μια ανανεωμένη διαδρομή προεπισκόπησης + στόχου χωρίς να αγγίζει το δίσκο. Το περιεχόμενο της προεπισκόπησης δεν είναι μια διαμόρφωση που φέρει διαπιστευτήρια για αντιγραφή ή εισαγωγή. Εφαρμόστε με τις αρχικές εισόδους tool/base URL/API key/model στον κεντρικό υπολογιστή ή χρησιμοποιήστε την υποδεικνυόμενη εντολή εγκατάστασης από την πλευρά του κεντρικού υπολογιστή. Δείτε [την ασφάλεια διαμόρφωσης CLI](../security/CLI-CONFIGURATION.md) για την κεφαλίδα προεπισκόπησης και τη σύμβαση αιτήματος. Αυτή η συμπεριφορά είναι σκόπιμη και προστατεύεται από παλινδρόμηση από `tests/unit/api/cli-tools/apply-container-guard.test.ts` — ποτέ μην "διορθώσετε" ένα 422 αφαιρώντας το προστατευτικό.
 
 ---
 
@@ -110,46 +72,47 @@ kilo, continue) — μια `hostSetupCommand` (π.χ. `omniroute setup-opencode`
 
 Ο ενοποιημένος κατάλογος βρίσκεται στο `src/shared/constants/cliTools.ts` ως `CLI_TOOLS: Record<string, CliCatalogEntry>`.
 
-Κάθε εγγραφή έχει τα παρακάτω πεδία (ορισμένα στο `src/shared/schemas/cliCatalog.ts`):
+Κάθε καταχώριση έχει τα ακόλουθα πεδία (ορίζονται στο `src/shared/schemas/cliCatalog.ts`):
 
-| Πεδίο                                           | Τύπος                                                        | Περιγραφή                                                         |
-| ----------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------- |
-| `category`                                      | `"code" \| "agent"`                                          | Σε ποια σελίδα εμφανίζεται το εργαλείο                            |
-| `vendor`                                        | `string`                                                     | Προέλευση εργαλείου ("Anthropic", "OSS (P. Gauthier)")            |
-| `acpSpawnable`                                  | `boolean`                                                    | Μπορεί επίσης να χρησιμοποιηθεί ως ACP Agent (εμφανίζεται badge)  |
-| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | Επίπεδο υποστήριξης προσαρμοσμένου endpoint. `"none"` = ουρά MITM |
-| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | Μηχανισμός διαμόρφωσης                                            |
-| `id`, `name`, `color`, `description`, `docsUrl` | standard                                                     | Βασικά πεδία εμφάνισης                                            |
+| Πεδίο                                           | Τύπος                                                        | Περιγραφή                                                                 |
+| ----------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| `category`                                      | `"code" \| "agent"`                                          | Σε ποια σελίδα εμφανίζεται το εργαλείο                                    |
+| `vendor`                                        | `string`                                                     | Προέλευση εργαλείου ("Anthropic", "OSS (P. Gauthier)")                    |
+| `acpSpawnable`                                  | `boolean`                                                    | Μπορεί επίσης να χρησιμοποιηθεί ως ACP Agent (εμφανίζεται σήμα)           |
+| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | Επίπεδο υποστήριξης προσαρμοσμένου endpoint. `"none"` = εκκρεμότητες MITM |
+| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | Μηχανισμός ρύθμισης παραμέτρων                                            |
+| `id`, `name`, `color`, `description`, `docsUrl` | τυπικό                                                       | Βασικά πεδία εμφάνισης                                                    |
 
-Εγγραφές με `baseUrlSupport: "none"` **δεν εμφανίζονται** στις σελίδες του dashboard — καταχωρούνται στην ουρά MITM για το plan 11 (βλ. `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
+Οι καταχωρίσεις με `baseUrlSupport: "none"` **δεν εμφανίζονται** στις σελίδες του πίνακα ελέγχου — είναι καταχωρισμένες στις εκκρεμότητες MITM για το πλάνο 11 (βλ. `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
 
-### Επίπεδα δυνατοτήτων (καταλογογραφημένο × ανιχνεύσιμο × ρυθμιζόμενο × εκτελέσιμο)
+### Επίπεδα δυνατοτήτων (καταλογογραφημένο × ανιχνεύσιμο × διαμορφώσιμο × εκκινήσιμο)
 
-Δεν είναι κάθε καταλογογραφημένο εργαλείο ανιχνεύσιμο, ρυθμιζόμενο ή εκτελέσιμο. Κάθε επίπεδο έχει μία
-δηλώνουσα πηγή, και ένα drift test τα διατηρεί ευθυγραμμισμένα:
+Δεν είναι κάθε καταλογογραφημένο εργαλείο ανιχνεύσιμο, διαμορφώσιμο ή εκκινήσιμο. Κάθε επίπεδο έχει μία
+πηγή δήλωσης και μια δοκιμή απόκλισης διατηρεί τον συγχρονισμό τους:
 
-| Επίπεδο               | Σημασία                                                                     | Δηλώνεται στο                                                     |
-| --------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| **Καταλογογραφημένο** | Εμφανίζεται στον κατάλογο του dashboard (όνομα, vendor, docs, τύπος config) | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                  |
-| **Ανιχνεύσιμο**       | Ανίχνευση binary/config, health checks, config paths                        | `src/shared/services/cliRuntime.ts` (`CLI_TOOLS` runtime catalog) |
-| **Ρυθμιζόμενο**       | Υποστηρίζεται από το `omniroute configure <cli>` (υπάρχει setup recipe)     | `bin/cli/cli-manifest.mjs` (`configure: true`)                    |
-| **Εκτελέσιμο**        | Υποστηρίζεται από το `omniroute run <target>` (ορισμένη έγχυση env/args)    | `bin/cli/cli-manifest.mjs` (`run: true`)                          |
+| Επίπεδο               | Σημασία                                                                                       | Δηλώνεται στο                                                       |
+| --------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| **Καταλογογραφημένο** | Εμφανίζεται στον κατάλογο του πίνακα ελέγχου (όνομα, προμηθευτής, τεκμηρίωση, τύπος ρύθμισης) | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                    |
+| **Ανιχνεύσιμο**       | Ανίχνευση binary/ρυθμίσεων, έλεγχοι εύρυθμης λειτουργίας, διαδρομές ρυθμίσεων                 | `src/shared/services/cliRuntime.ts` (κατάλογος runtime `CLI_TOOLS`) |
+| **Διαμορφώσιμο**      | Υποστηρίζεται από το `omniroute configure <cli>` (υπάρχει συνταγή ρύθμισης)                   | `bin/cli/cli-manifest.mjs` (`configure: true`)                      |
+| **Εκκινήσιμο**        | Υποστηρίζεται από το `omniroute run <target>` (έχει οριστεί εισαγωγή env/ορισμάτων)           | `bin/cli/cli-manifest.mjs` (`run: true`)                            |
 
-Το `bin/cli/cli-manifest.mjs` είναι το κανονικό εκτελέσιμο manifest για τις επιφάνειες εντολών CLI:
-`run`, `configure` και οι γεννήτριες shell-completion αντλούν τις λίστες στόχων τους, την επίλυση alias (για παράδειγμα `kilocode`/`kilo-code`/`kilo_cli` → `kilo`)
-και τη σύνδεση flag `--model` από αυτό. Η φρουρά drift
-`tests/unit/cli/cli-manifest-drift.test.ts` βεβαιώνει ότι το manifest, ο runtime
-κατάλογος, ο κατάλογος UI και κάθε επιφάνεια καταναλωτή παραμένουν συγχρονισμένα — ένας στόχος που προστίθεται σε
-μία επιφάνεια χωρίς τις υπόλοιπες αποτυγχάνει στη σουίτα αντί να ξεφύγει σιωπηλά.
+Το `bin/cli/cli-manifest.mjs` είναι το κανονικό εκτελέσιμο manifest για τις επιφάνειες εντολών
+CLI: τα `run`, `configure` και οι γεννήτριες αυτόματης συμπλήρωσης κελύφους αντλούν όλα από αυτό
+τις λίστες στόχων, την επίλυση ψευδωνύμων (για παράδειγμα `kilocode`/`kilo-code`/`kilo_cli` → `kilo`)
+και τη διασύνδεση της σημαίας `--model`. Ο έλεγχος απόκλισης
+`tests/unit/cli/cli-manifest-drift.test.ts` επαληθεύει ότι το manifest, ο κατάλογος
+runtime, ο κατάλογος UI και κάθε επιφάνεια κατανάλωσης παραμένουν συγχρονισμένα — ένας στόχος που προστίθεται σε
+μία επιφάνεια χωρίς τις υπόλοιπες προκαλεί αποτυχία της σουίτας αντί να αποκλίνει σιωπηρά.
 
 ---
 
-## 1. Κατάλογος Κώδικα CLI (26 εργαλεία)
+## 1. Κατάλογος του CLI Code (27 εργαλεία)
 
-Όλα τα εργαλεία που εμφανίζονται στο `/dashboard/cli-code`. Όσα έχουν `baseUrlSupport: none` συνδέονται μέσω MITM ή χειροκίνητου οδηγού αντί για προσαρμοσμένη βασική διεύθυνση URL:
+Όλα τα εργαλεία που εμφανίζονται στο `/dashboard/cli-code`. Όσα έχουν `baseUrlSupport: none` συνδέονται μέσω MITM ή μέσω μη αυτόματου οδηγού, αντί για προσαρμοσμένο βασικό URL:
 
 | id           | name                    | vendor                 | baseUrlSupport | configType     | acpSpawnable |
-| :----------- | :---------------------- | :--------------------- | :------------- | :------------- | :----------- |
+| ------------ | ----------------------- | ---------------------- | -------------- | -------------- | ------------ |
 | claude       | Claude Code             | Anthropic              | full           | env            | true         |
 | codex        | OpenAI Codex CLI        | OpenAI                 | full           | custom         | true         |
 | zcode        | ZCode (GLM Coding Plan) | Z.ai                   | none           | custom         | false        |
@@ -157,7 +120,7 @@ kilo, continue) — μια `hostSetupCommand` (π.χ. `omniroute setup-opencode`
 | kilo         | Kilo Code               | Kilo-Org               | full           | custom         | false        |
 | roo          | Roo Code                | Roo (OSS)              | full           | guide          | false        |
 | continue     | Continue                | continue.dev           | full           | guide          | false        |
-| aider        | Aider                   | OSS (Π. Γκοτιέ)        | full           | guide          | true         |
+| aider        | Aider                   | OSS (P. Gauthier)      | full           | guide          | true         |
 | forge        | ForgeCode               | Antinomy HQ            | full           | custom         | true         |
 | jcode        | jcode                   | 1jehuang (OSS)         | full           | custom         | false        |
 | deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)      | full           | custom         | false        |
@@ -171,67 +134,69 @@ kilo, continue) — μια `hostSetupCommand` (π.χ. `omniroute setup-opencode`
 | grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries         | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research          | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon                 | none           | mitm           | false        |
 | custom       | Custom CLI              | —                      | full           | custom-builder | false        |
 
-Εργαλεία με `baseUrlSupport: "partial"` εμφανίζουν ένα σήμα "⚠ Μερική Βασική Διεύθυνση URL" στην κάρτα του πίνακα ελέγχου.
+Τα εργαλεία με `baseUrlSupport: "partial"` εμφανίζουν ένα σήμα "⚠ Μερικό βασικό URL" στην κάρτα του πίνακα ελέγχου.
 ---
 
-## 2. Κατάλογος Πρακτόρων CLI (10 εργαλεία)
+## 2. Κατάλογος πρακτόρων CLI (11 εργαλεία)
 
 Αυτόνομοι πράκτορες που εμφανίζονται στο `/dashboard/cli-agents`:
 
-| id           | όνομα            | προμηθευτής              | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Πράκτορας Hermes | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| ταυτότητα             | όνομα                 | πωλητής                  | baseUrlSupport | acpSpawnable |
+| --------------------- | --------------------- | ------------------------ | -------------- | ------------ |
+| ερμής-πράκτορας       | Πράκτορας Ερμής       | Έρευνα Nous              | γεμάτος        | ψευδής       |
+| ανοιχτό νύχι          | OpenClaw              | OSS (P. Steinberger)     | γεμάτος        | αληθής       |
+| χήνα                  | Χήνα                  | Block / Linux Foundation | γεμάτος        | αληθής       |
+| διερμηνέας            | Ανοίξτε τον Διερμηνέα | OSS                      | γεμάτος        | αληθής       |
+| στημόνι               | Warp AI               | Warp Inc.                | μερικός        | αληθής       |
+| πράκτορας-κατάστρωμα  | Agent Deck            | asheshgoplani (OSS)      | γεμάτος        | ψευδής       |
+| omp                   | Oh My Pi              | OSS                      | γεμάτος        | αληθής       |
+| λέτα                  | Letta CLI             | Λέτα                     | γεμάτος        | ψευδής       |
+| πρωταρχικός πράκτορας | Πρωθυπουργός          | Prime Intellect (OSS)    | γεμάτος        | ψευδής       |
+| 5 βουτιά              | 5 βουτιά              | OSS (5dive-ai)           | γεμάτος        | ψευδής       |
+| γιατί κωδικοί         | WhyCodes              | Γιατί Corporation        | γεμάτος        | ψευδής       |
 
 ---
 
 ## 3. ACP Agents (/dashboard/acp-agents)
 
-Αυτή η σελίδα (μετονομάστηκε από `/dashboard/agents`) εμφανίζει CLIs που το OmniRoute μπορεί να **εκκινήσει** ως μηχανές εκτέλεσης backend μέσω πρωτοκόλλου stdio/ACP. Ο κατάλογος διατηρείται ξεχωριστά στο `src/lib/acp/registry.ts` και **δεν** είναι ίδιος με το `CLI_TOOLS`.
+Αυτή η σελίδα (μετονομάστηκε από `/dashboard/agents`) εμφανίζει CLI που το OmniRoute μπορεί να **εκκινήσει** ως μηχανές εκτέλεσης backend μέσω του πρωτοκόλλου stdio/ACP. Ο κατάλογος διατηρείται ξεχωριστά στο `src/lib/acp/registry.ts` και **δεν** είναι ο ίδιος με το `CLI_TOOLS`.
 
 ---
 
-## 4. Εκκρεμότητες MITM (δεν εμφανίζονται στο dashboard)
+## 4. Εκκρεμότητες MITM (δεν εμφανίζονται στον πίνακα ελέγχου)
 
-Τα παρακάτω CLIs δεν υποστηρίζουν εγγενώς προσαρμοσμένη base URL και **δεν περιλαμβάνονται** στις σελίδες CLI Code ή CLI Agents. Αποτελούν υποψήφια για υποκλοπή MITM στο πλάνο 11:
+Τα ακόλουθα CLI δεν υποστηρίζουν εγγενώς προσαρμοσμένο βασικό URL και **δεν παρατίθενται** στις σελίδες CLI Code ή CLI Agents. Είναι υποψήφια για υποκλοπή MITM στο πλάνο 11:
 
 | CLI                 | Αιτία                                                                  |
 | ------------------- | ---------------------------------------------------------------------- |
 | windsurf            | Το BYOK περιορίζεται σε επιλεγμένα μοντέλα Claude + εταιρικό URL/token |
 | amp                 | Κλειστό οικοσύστημα (Sourcegraph)                                      |
-| amazon-q / kiro-cli | AWS SSO auth, χωρίς προσαρμοσμένο URL                                  |
-| cowork              | Anthropic Desktop, χωρίς ρυθμιζόμενο endpoint                          |
+| amazon-q / kiro-cli | Έλεγχος ταυτότητας AWS SSO, χωρίς προσαρμοσμένο URL                    |
+| cowork              | Anthropic Desktop, χωρίς διαμορφώσιμο endpoint                         |
 
-Δείτε το `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` για την πλήρη διασταυρούμενη αναφορά.
+Δείτε το `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` για την πλήρη διασταύρωση αναφορών.
 
 ---
 
 ## 5. API Μαζικής Ανίχνευσης
 
-Όλη η ανίχνευση εργαλείων συγκεντρώνεται μέσω ενός μοναδικού endpoint:
+Η ανίχνευση όλων των εργαλείων συγκεντρώνεται μέσω ενός μοναδικού endpoint:
 
 **`GET /api/cli-tools/all-statuses`**
 
-- Έλεγχος ταυτότητας: `requireCliToolsAuth(request)` (ίδιος με τις υπόλοιπες διαδρομές `/api/cli-tools/`)
+- Έλεγχος ταυτότητας: `requireCliToolsAuth(request)` (ίδιος με τις άλλες διαδρομές `/api/cli-tools/`)
 - Επιστρέφει: `Record<toolId, ToolBatchStatus>` (τύπος: `src/shared/types/cliBatchStatus.ts`)
-- Στρατηγική: `Promise.all` σε όλα τα εργαλεία, χρονικό όριο 5 δευτερολέπτων ανά εργαλείο
-- Cache: εντός μνήμης LRU με ευρετήριο βάσει `mtime` του αρχείου ρυθμίσεων. Ακυρώνεται όταν αλλάζει το mtime. Επαναφέρεται κατά την επανεκκίνηση του server.
+- Στρατηγική: `Promise.all` για όλα τα εργαλεία, με χρονικό όριο 5s ανά εργαλείο
+- Cache: LRU στη μνήμη, ευρετηριασμένη βάσει του `mtime` του αρχείου ρυθμίσεων. Η cache ακυρώνεται όταν αλλάζει το mtime. Μηδενίζεται κατά την επανεκκίνηση του διακομιστή.
 
-Μορφή απόκρισης ανά εργαλείο:
+Δομή απόκρισης ανά εργαλείο:
 
 ```ts
 interface ToolBatchStatus {
@@ -248,7 +213,7 @@ interface ToolBatchStatus {
     endpoint?: string | null;
     lastConfiguredAt?: string | null;
   };
-  error?: string; // εξυγιανσμένο, χωρίς stack traces
+  error?: string; // εξυγιασμένο, χωρίς ίχνη στοίβας
 }
 ```
 
@@ -256,54 +221,54 @@ interface ToolBatchStatus {
 
 ## 6. Χειριστές Ρυθμίσεων για Νέα Εργαλεία
 
-Τα νέα εργαλεία με `configType: "custom"` διαθέτουν αποκλειστικά routes API ρυθμίσεων:
+Τα νέα εργαλεία με `configType: "custom"` διαθέτουν αποκλειστικές διαδρομές API ρυθμίσεων:
 
-| Route                                       | Εργαλείο                                                         |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                          |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url flag)                                          |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legacy)                           |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primary + legacy `~/.deepseek` sync) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                            |
-| `POST /api/cli-tools/pi-settings`           | Pi coding agent                                                  |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)            |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + dedicated `.env` key)       |
+| Διαδρομή                                    | Εργαλείο                                                                       |
+| ------------------------------------------- | ------------------------------------------------------------------------------ |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                        |
+| `POST /api/cli-tools/jcode-settings`        | jcode (σημαία --base-url)                                                      |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, παλαιού τύπου)                                  |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, κύριος + συγχρονισμός παλαιού τύπου `~/.deepseek`) |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                          |
+| `POST /api/cli-tools/pi-settings`           | Πράκτορας προγραμματισμού Pi                                                   |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                          |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + αποκλειστικό κλειδί `.env`)               |
 
-Όλα τα routes χρησιμοποιούν `sanitizeErrorMessage()` για αποκρίσεις σφάλματος (Κανόνας #12).
+Όλες οι διαδρομές χρησιμοποιούν τη `sanitizeErrorMessage()` για αποκρίσεις σφαλμάτων (Αυστηρός Κανόνας #12).
 
 ---
 
-## 7. Αρχιτεκτονική Σελίδων Dashboard
+## 7. Αρχιτεκτονική Σελίδων Πίνακα Ελέγχου
 
-### CLI Code (`/dashboard/cli-code`)
+### CLI Κώδικα (`/dashboard/cli-code`)
 
-- `src/app/(dashboard)/dashboard/cli-code/page.tsx` — server component
-- `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — client grid
+- `src/app/(dashboard)/dashboard/cli-code/page.tsx` — στοιχείο διακομιστή
+- `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — πλέγμα πελάτη
 - `src/app/(dashboard)/dashboard/cli-code/[id]/page.tsx` — σελίδα λεπτομερειών εργαλείου
 - `src/app/(dashboard)/dashboard/cli-code/components/` — 12 εξειδικευμένες κάρτες εργαλείων + `ToolDetailClient.tsx`
 
-### CLI Agents (`/dashboard/cli-agents`)
+### Πράκτορες CLI (`/dashboard/cli-agents`)
 
-- `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — server component
-- `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — client grid
+- `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — στοιχείο διακομιστή
+- `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — πλέγμα πελάτη
 - `src/app/(dashboard)/dashboard/cli-agents/[id]/page.tsx` — επαναχρησιμοποιεί το `ToolDetailClient`
 
-### ACP Agents (`/dashboard/acp-agents`)
+### Πράκτορες ACP (`/dashboard/acp-agents`)
 
-- `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — server component (μετακινήθηκε από `agents/`)
+- `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — στοιχείο διακομιστή (μεταφέρθηκε από το `agents/`)
 
-### Κοινά Στοιχεία UI (`src/shared/components/cli/`)
+### Κοινόχρηστα Στοιχεία Διεπαφής Χρήστη (`src/shared/components/cli/`)
 
-| Αρχείο                  | Σκοπός                                                      |
-| ----------------------- | ----------------------------------------------------------- |
-| `CliToolCard.tsx`       | Έξυπνη κάρτα κατάστασης (ανίχνευση + διαμόρφωση + endpoint) |
-| `CliConceptCard.tsx`    | Κάρτα επεξήγησης έννοιας ανά σελίδα                         |
-| `CliComparisonCard.tsx` | Σύγκριση τριών στηλών μεταξύ τύπων CLI                      |
-| `BaseUrlSelect.tsx`     | Αναπτυσσόμενο endpoint (Τοπικό/Cloud/Προσαρμοσμένο)         |
-| `ApiKeySelect.tsx`      | Επιλογέας κλειδιού API                                      |
-| `ManualConfigModal.tsx` | Modal με αντιγράψιμο απόσπασμα διαμόρφωσης                  |
+| Αρχείο                  | Σκοπός                                                           |
+| ----------------------- | ---------------------------------------------------------------- |
+| `CliToolCard.tsx`       | Έξυπνη κάρτα κατάστασης (ανίχνευση + διαμόρφωση + τελικό σημείο) |
+| `CliConceptCard.tsx`    | Κάρτα επεξήγησης εννοιών ανά σελίδα                              |
+| `CliComparisonCard.tsx` | Σύγκριση τριών στηλών μεταξύ τύπων CLI                           |
+| `BaseUrlSelect.tsx`     | Αναπτυσσόμενο μενού τελικού σημείου (Τοπικό/Cloud/Προσαρμοσμένο) |
+| `ApiKeySelect.tsx`      | Επιλογέας κλειδιού API                                           |
+| `ManualConfigModal.tsx` | Παράθυρο κώδικα διαμόρφωσης με δυνατότητα αντιγραφής             |
 
-### Κοινό Hook (`src/shared/hooks/cli/`)
+### Κοινόχρηστο Hook (`src/shared/hooks/cli/`)
 
 | Αρχείο                    | Σκοπός                                                                                  |
 | ------------------------- | --------------------------------------------------------------------------------------- |
@@ -313,24 +278,24 @@ interface ToolBatchStatus {
 
 ## 8. i18n
 
-Νέα namespaces που προστέθηκαν στο plan 14 F9:
+Νέοι χώροι ονομάτων προστέθηκαν στο σχέδιο 14 F9:
 
-| Namespace   | Σκοπός                                                                                            |
-| ----------- | ------------------------------------------------------------------------------------------------- |
-| `cliCommon` | Κοινές συμβολοσειρές (ετικέτες καρτών, κείμενα εννοιών/συγκρίσεων, ετικέτες σελίδας λεπτομερειών) |
-| `cliCode`   | Συμβολοσειρές σελίδας CLI Code                                                                    |
-| `cliAgents` | Συμβολοσειρές σελίδας CLI Agents                                                                  |
-| `acpAgents` | Συμβολοσειρές σελίδας ACP Agents                                                                  |
+| Χώρος ονομάτων | Σκοπός                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------- |
+| `cliCommon`    | Κοινόχρηστες συμβολοσειρές (ετικέτες καρτών, κείμενα εννοιών/συγκρίσεων, ετικέτες σελίδας λεπτομερειών) |
+| `cliCode`      | Συμβολοσειρές της σελίδας CLI Code                                                                      |
+| `cliAgents`    | Συμβολοσειρές της σελίδας CLI Agents                                                                    |
+| `acpAgents`    | Συμβολοσειρές της σελίδας ACP Agents                                                                    |
 
-Παρέχονται πλήρεις μεταφράσεις PT-BR και EN. 39 άλλες τοπικές ρυθμίσεις επιστρέφουν αυτόματα στα EN μέσω συγχώνευσης σε επίπεδο namespace στο `src/i18n/request.ts`.
+Παρέχονται πλήρεις μεταφράσεις για PT-BR και EN. Οι υπόλοιπες 39 τοπικές ρυθμίσεις χρησιμοποιούν αυτόματα την EN ως εφεδρική γλώσσα μέσω συγχώνευσης σε επίπεδο χώρου ονομάτων στο `src/i18n/request.ts`.
 
 ---
 
-## 9. Γρήγορη Εκκίνηση
+## 9. Γρήγορη εκκίνηση
 
-### Βήμα 1 — Απόκτηση Κλειδιού API OmniRoute
+### Βήμα 1 — Αποκτήστε ένα κλειδί API του OmniRoute
 
-1. Ανοίξτε το `/dashboard/api-manager` → **Δημιουργία Κλειδιού API**
+1. Ανοίξτε το `/dashboard/api-manager` → **Δημιουργία κλειδιού API**
 2. Δώστε του ένα όνομα (π.χ. `cli-tools`) και επιλέξτε όλα τα δικαιώματα
 3. Αντιγράψτε το κλειδί — θα το χρειαστείτε για κάθε CLI παρακάτω
 
@@ -338,9 +303,9 @@ interface ToolBatchStatus {
 
 ---
 
-### Βήμα 2 — Εγκατάσταση Εργαλείων CLI
+### Βήμα 2 — Εγκαταστήστε τα εργαλεία CLI
 
-Όλα τα εργαλεία βασισμένα σε npm απαιτούν Node.js 22.22.2+ ή 24.x:
+Όλα τα εργαλεία που βασίζονται στο npm απαιτούν Node.js 22.22.2+ ή 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -361,58 +326,58 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (εκκινείται μέσω `omniroute run gemini` → /v1beta επιφάνεια)
+# Google Gemini CLI (εκκινείται μέσω `omniroute run gemini` → επιφάνεια /v1beta)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Βασισμένο σε Rust
+cargo install smelt  # Βασίζεται στη Rust
 
-# Pi coding agent
-# δείτε https://github.com/zechnerj/pi-coding-agent για εγκατάσταση
+# Πράκτορας προγραμματισμού Pi
+# δείτε το https://github.com/zechnerj/pi-coding-agent για την εγκατάσταση
 
 # jcode
-# δείτε https://github.com/1jehuang/jcode για εγκατάσταση
+# δείτε το https://github.com/1jehuang/jcode για την εγκατάσταση
 ```
 
 ---
 
-### Βήμα 3 — Διαμόρφωση μέσω Dashboard
+### Βήμα 3 — Διαμορφώστε μέσω του πίνακα ελέγχου
 
 1. Μεταβείτε στο `http://localhost:20128/dashboard/cli-code`
 2. Βρείτε το εργαλείο σας στο πλέγμα
 3. Κάντε κλικ στην κάρτα για να ανοίξετε τη σελίδα λεπτομερειών του εργαλείου
-4. Επιλέξτε το κλειδί API και τη βασική URL σας
-5. Κάντε κλικ στο **Apply Config** ή αντιγράψτε το τμήμα χειροκίνητης διαμόρφωσης
+4. Επιλέξτε το κλειδί API και τη βασική διεύθυνση URL
+5. Κάντε κλικ στο **Εφαρμογή διαμόρφωσης** ή αντιγράψτε το απόσπασμα χειροκίνητης διαμόρφωσης
 
 ---
 
-### Βήμα 4 — Ορισμός Καθολικών Μεταβλητών Περιβάλλοντος
+### Βήμα 4 — Ορίστε καθολικές μεταβλητές περιβάλλοντος
 
 ```bash
-# Καθολικό Τερματικό Σημείο OmniRoute
+# Καθολικό τελικό σημείο του OmniRoute
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Το Gemini CLI διαβάζει το GOOGLE_GEMINI_BASE_URL στη ΡΙΖΑ (το SDK του προσαρτά /v1beta/... μόνο του)
+# Το Gemini CLI διαβάζει το GOOGLE_GEMINI_BASE_URL στη ΡΙΖΑ (το SDK του προσθέτει μόνο του το /v1beta/...)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Για **απομακρυσμένο διακομιστή** αντικαταστήστε το `localhost:20128` με την IP ή τον τομέα του διακομιστή,
+> Για έναν **απομακρυσμένο διακομιστή**, αντικαταστήστε το `localhost:20128` με τη διεύθυνση IP ή τον τομέα του διακομιστή,
 > π.χ. `http://<your-server-ip>:20128`.
 
 ---
 
-### Βήμα 4 — Διαμόρφωση Κάθε Εργαλείου
+### Βήμα 4 — Διαμορφώστε κάθε εργαλείο
 
 #### Claude Code
 
 ```bash
-# Δημιουργία ~/.claude/settings.json:
+# Δημιουργήστε το ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -423,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Χρησιμοποιήστε την ενοποιημένη ρίζα πύλης Anthropic για το Claude Code. Μην προσαρτήσετε `/v1` εδώ.
+Χρησιμοποιήστε τη ρίζα της ενοποιημένης πύλης Anthropic για το Claude Code. Μην προσθέσετε το `/v1` εδώ.
 
 **Δοκιμή:** `claude "say hello"`
 
@@ -432,8 +397,8 @@ EOF
 #### OpenAI Codex
 
 Το σύγχρονο Codex (v0.137+) διαβάζει μόνο το `~/.codex/config.toml` — το παλιό
-`config.yaml` ανήκει στο παλαιό npm CLI και αγνοείται σιωπηλά. Το κλειδί API
-παραμένει στη μεταβλητή περιβάλλοντος `OMNIROUTE_API_KEY` (`env_key`), ποτέ
+`config.yaml` ανήκει στο παλαιότερο npm CLI και αγνοείται χωρίς ειδοποίηση. Το κλειδί API
+παραμένει στη μεταβλητή περιβάλλοντος `OMNIROUTE_API_KEY` (`env_key`) και ποτέ
 μέσα στο αρχείο:
 
 ```bash
@@ -482,8 +447,8 @@ EOF
 
 **Δοκιμή:** `opencode`
 
-> Χρησιμοποιήστε `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> για αποστολή παραλλαγών thinking.
+> Χρησιμοποιήστε το `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
+> για να στείλετε παραλλαγές συλλογισμού.
 
 ---
 
@@ -502,9 +467,9 @@ EOF
 ```
 
 **Λειτουργία VS Code:**
-Ρυθμίσεις επέκτασης Cline → Πάροχος API: `OpenAI Compatible` → Βασική URL: `http://localhost:20128/v1`
+Ρυθμίσεις επέκτασης Cline → Πάροχος API: `OpenAI Compatible` → Βασική διεύθυνση URL: `http://localhost:20128/v1`
 
-Ή χρησιμοποιήστε το dashboard OmniRoute → **CLI Tools → Cline → Apply Config**.
+Εναλλακτικά, χρησιμοποιήστε τον πίνακα ελέγχου του OmniRoute → **Εργαλεία CLI → Cline → Εφαρμογή διαμόρφωσης**.
 
 ---
 
@@ -525,7 +490,7 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Ή χρησιμοποιήστε το dashboard OmniRoute → **CLI Tools → KiloCode → Apply Config**.
+Εναλλακτικά, χρησιμοποιήστε τον πίνακα ελέγχου του OmniRoute → **Εργαλεία CLI → KiloCode → Εφαρμογή διαμόρφωσης**.
 
 ---
 
@@ -549,14 +514,14 @@ models:
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Χρησιμοποιήστε αυτό όταν το VS Code Insiders είναι διαμορφωμένο για μοντέλα προσαρμοσμένου τερματικού σημείου και θέλετε το OmniRoute να λειτουργεί χωρίς προσαρμοσμένο πεδίο κεφαλίδας.
+Χρησιμοποιήστε αυτήν την επιλογή όταν το VS Code Insiders είναι διαμορφωμένο για μοντέλα προσαρμοσμένων τελικών σημείων και θέλετε το OmniRoute να λειτουργεί χωρίς προσαρμοσμένο πεδίο κεφαλίδας.
 
 **Προτεινόμενη τοποθεσία:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Παράδειγμα με χρήση του διακριτικού ψευδωνύμου OmniRoute:**
+**Παράδειγμα χρήσης του ψευδωνύμου OmniRoute με token:**
 
 ```json
 [
@@ -581,66 +546,66 @@ models:
 **Σημειώσεις:**
 
 - Αντικαταστήστε το `sk-your-omniroute-key` με ένα κλειδί API που δημιουργήθηκε στο OmniRoute.
-- Το πεδίο `url` πρέπει να δείχνει στο `/api/v1/vscode/{token}/chat/completions`.
-- Το πεδίο `modelsUrl` πρέπει να δείχνει στο `/api/v1/vscode/{token}/models`.
+- Το πεδίο `url` θα πρέπει να παραπέμπει στο `/api/v1/vscode/{token}/chat/completions`.
+- Το πεδίο `modelsUrl` θα πρέπει να παραπέμπει στο `/api/v1/vscode/{token}/models`.
 - Προτιμήστε την κανονική ροή `/v1` + κεφαλίδα Bearer όταν ο client υποστηρίζει προσαρμοσμένες κεφαλίδες.
-- Τα διακριτικά ενσωματωμένα σε URL αποτελούν εναλλακτική συμβατότητας και ενδέχεται να εμφανιστούν σε αρχεία καταγραφής επεξεργαστή ή ιστορικό διακομιστή μεσολάβησης.
+- Τα token που είναι ενσωματωμένα σε URL αποτελούν εναλλακτική λύση συμβατότητας και ενδέχεται να εμφανίζονται στα αρχεία καταγραφής του editor ή στο ιστορικό του proxy.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Σύνδεση στον λογαριασμό σας AWS/Kiro:
+# Συνδεθείτε στον λογαριασμό σας AWS/Kiro:
 kiro-cli login
 
-# Το CLI χρησιμοποιεί τη δική του αυθεντικοποίηση — το OmniRoute δεν απαιτείται ως backend για το ίδιο το Kiro CLI.
+# Το CLI χρησιμοποιεί τον δικό του έλεγχο ταυτότητας — το OmniRoute δεν απαιτείται ως backend για το ίδιο το Kiro CLI.
 # Χρησιμοποιήστε το kiro-cli παράλληλα με το OmniRoute για άλλα εργαλεία.
 kiro-cli status
 ```
 
-Για την επιτραπέζια εφαρμογή **Kiro IDE**, χρησιμοποιήστε το τερματικό σημείο MITM που εκθέτει το OmniRoute
-στο `/dashboard/cli-tools → Kiro`.
+Για την εφαρμογή desktop **Kiro IDE**, χρησιμοποιήστε το endpoint MITM που παρέχεται από το OmniRoute
+στη διαδρομή `/dashboard/cli-tools → Kiro`.
 
 ---
 
 ## 10. Εσωτερικό CLI του OmniRoute
 
-Το εκτελέσιμο αρχείο `omniroute` παρέχει εντολές για τον κύκλο ζωής του διακομιστή, την αρχική ρύθμιση, τα διαγνωστικά και τη διαχείριση παρόχων. Σημείο εισόδου: `bin/omniroute.mjs`.
+Το εκτελέσιμο αρχείο `omniroute` παρέχει εντολές για τον κύκλο ζωής του διακομιστή, τη ρύθμιση, τα διαγνωστικά και τη διαχείριση παρόχων. Σημείο εισόδου: `bin/omniroute.mjs`.
 
 ```bash
 omniroute                              # Εκκίνηση διακομιστή (προεπιλεγμένη θύρα 20128)
-omniroute setup                        # Διαδραστικός οδηγός αρχικής ρύθμισης
+omniroute setup                        # Διαδραστικός οδηγός ρύθμισης
 omniroute doctor                       # Έλεγχος ρυθμίσεων, βάσης δεδομένων, θυρών και περιβάλλοντος εκτέλεσης
-omniroute providers list               # Διαμορφωμένες συνδέσεις παρόχων
+omniroute providers list               # Ρυθμισμένες συνδέσεις παρόχων
 omniroute providers test-all           # Δοκιμή κάθε ενεργής σύνδεσης
 omniroute reset-password               # Επαναφορά του κωδικού πρόσβασης διαχειριστή
 omniroute logs                         # Συνεχής ροή αρχείων καταγραφής αιτημάτων
-omniroute health                       # Αναλυτική κατάσταση εύρυθμης λειτουργίας (breakers, cache, μνήμη)
+omniroute health                       # Λεπτομερής κατάσταση υγείας (διακόπτες κυκλώματος, προσωρινή μνήμη, μνήμη)
 omniroute --version                    # Εμφάνιση έκδοσης
 omniroute --help                       # Εμφάνιση όλων των εντολών
 ```
 
-### Αρχική ρύθμιση και αρχικοποίηση
+### Ρύθμιση & Αρχικοποίηση
 
 ```bash
-omniroute setup                        # Διαδραστικός οδηγός αρχικής ρύθμισης
-omniroute setup --non-interactive      # Λειτουργία CI/αυτοματισμού (διαβάζει μεταβλητές περιβάλλοντος + flags)
-omniroute setup --password '<value>'   # Άμεσος ορισμός κωδικού πρόσβασης διαχειριστή
+omniroute setup                        # Διαδραστικός οδηγός ρύθμισης
+omniroute setup --non-interactive      # Λειτουργία CI/αυτοματισμού (διαβάζει μεταβλητές περιβάλλοντος + σημαίες)
+omniroute setup --password '<value>'   # Απευθείας ορισμός κωδικού πρόσβασης διαχειριστή
 omniroute setup --add-provider \
   --provider openai \
   --api-key '<value>' \
   --test-provider                      # Προσθήκη και δοκιμή παρόχου σε ένα βήμα
 ```
 
-Αναγνωρισμένες μεταβλητές περιβάλλοντος για μη διαδραστική αρχική ρύθμιση:
+Αναγνωρισμένες μεταβλητές περιβάλλοντος για μη διαδραστική ρύθμιση:
 
-| Μεταβλητή           | Σκοπός                                                                                   |
-| ------------------- | ---------------------------------------------------------------------------------------- |
-| `OMNIROUTE_API_KEY` | Κλειδί API παρόχου (συνδέεται με το `--api-key` μέσω της μεθόδου `.env()` του Commander) |
-| `DATA_DIR`          | Παράκαμψη του καταλόγου δεδομένων του OmniRoute                                          |
+| Μεταβλητή           | Σκοπός                                                                         |
+| ------------------- | ------------------------------------------------------------------------------ |
+| `OMNIROUTE_API_KEY` | Κλειδί API παρόχου (συνδεδεμένο με το `--api-key` μέσω του Commander `.env()`) |
+| `DATA_DIR`          | Παράκαμψη του καταλόγου δεδομένων του OmniRoute                                |
 
-Όλες οι άλλες μη διαδραστικές είσοδοι μεταβιβάζονται ως flags και όχι ως μεταβλητές περιβάλλοντος:
+Όλες οι υπόλοιπες μη διαδραστικές είσοδοι μεταβιβάζονται ως σημαίες και όχι ως μεταβλητές περιβάλλοντος:
 `--password`, `--provider`, `--provider-name`, `--provider-base-url`, `--default-model`
 (δείτε τις επιλογές του `omniroute setup` παραπάνω).
 
@@ -649,29 +614,29 @@ omniroute setup --add-provider \
 ```bash
 omniroute doctor                       # Έλεγχος ρυθμίσεων, βάσης δεδομένων, θυρών, περιβάλλοντος εκτέλεσης, μνήμης και διαθεσιμότητας
 omniroute doctor --json                # JSON αναγνώσιμο από μηχανή
-omniroute doctor --no-liveness         # Παράλειψη του ελέγχου εύρυθμης λειτουργίας μέσω HTTP
-omniroute doctor --host 0.0.0.0        # Παράκαμψη του host ελέγχου διαθεσιμότητας
-omniroute doctor --liveness-url <url>  # Παράκαμψη με πλήρες URL του endpoint εύρυθμης λειτουργίας
+omniroute doctor --no-liveness         # Παράλειψη του ελέγχου υγείας HTTP
+omniroute doctor --host 0.0.0.0        # Παράκαμψη κεντρικού υπολογιστή για τον έλεγχο διαθεσιμότητας
+omniroute doctor --liveness-url <url>  # Παράκαμψη με πλήρες URL του τελικού σημείου υγείας
 ```
 
-Το doctor εκτελεί τους εξής ελέγχους: `Config`, `Database`, `Storage/encryption`,
+Η εντολή doctor εκτελεί τους εξής ελέγχους: `Config`, `Database`, `Storage/encryption`,
 `Port availability`, `Node runtime`, `Native binary` (better-sqlite3),
-`Memory` και `Server liveness`. Τερματίζεται με μη μηδενικό κωδικό εξόδου εάν οποιοσδήποτε έλεγχος έχει τιμή `fail`.
+`Memory` και `Server liveness`. Τερματίζει με μη μηδενικό κωδικό εάν οποιοσδήποτε έλεγχος έχει αποτέλεσμα `fail`.
 
-### Διαχείριση παρόχων
+### Διαχείριση Παρόχων
 
 ```bash
 omniroute providers available                       # Κατάλογος παρόχων του OmniRoute
-omniroute providers available --search openai       # Φιλτράρισμα καταλόγου κατά id/όνομα/ψευδώνυμο/κατηγορία
+omniroute providers available --search openai       # Φιλτράρισμα καταλόγου κατά αναγνωριστικό/όνομα/ψευδώνυμο/κατηγορία
 omniroute providers available --category api-key    # Φιλτράρισμα κατά κατηγορία (api-key, oauth, free, ...)
 omniroute providers available --json                # JSON αναγνώσιμο από μηχανή
 
-omniroute providers list                            # Διαμορφωμένες συνδέσεις παρόχων
+omniroute providers list                            # Ρυθμισμένες συνδέσεις παρόχων
 omniroute providers list --json
 
-omniroute providers test <id|name>                  # Δοκιμή μίας διαμορφωμένης σύνδεσης
+omniroute providers test <id|name>                  # Δοκιμή μίας ρυθμισμένης σύνδεσης
 omniroute providers test-all                        # Δοκιμή κάθε ενεργής σύνδεσης
-omniroute providers validate                        # Δομική επικύρωση μόνο τοπικά
+omniroute providers validate                        # Τοπικός μόνο δομικός έλεγχος εγκυρότητας
 omniroute providers add <provider> --credential-env PROVIDER_KEY
 omniroute providers import ./providers.json --dry-run --json
 omniroute providers auth <provider>                 # Υπάρχουσα ροή OAuth
@@ -679,45 +644,57 @@ omniroute providers edit <id|name> --default-model <model>
 omniroute providers remove <id|name> --yes
 ```
 
-Οι εντολές `providers add/import/auth/edit/remove` χρησιμοποιούν κατά προτεραιότητα το API και επομένως λειτουργούν με βάση
-το ενεργό τοπικό ή απομακρυσμένο context. Για την εισαγωγή διαπιστευτηρίων πρέπει να χρησιμοποιούνται
-τα `--credential-stdin` ή `--credential-env`· το `--dry-run --json` αναφέρει μόνο
-την παρουσία/μορφή με απόκρυψη ευαίσθητων δεδομένων. Το `providers available` διαβάζει τον κατάλογο του OmniRoute·
-τα `providers list/test/test-all/validate` διατηρούν την τοπική συμπεριφορά SQLite και
+Οι εντολές `providers add/import/auth/edit/remove` χρησιμοποιούν πρωτίστως το API και, επομένως, λειτουργούν με βάση
+το ενεργό τοπικό ή απομακρυσμένο περιβάλλον. Για την εισαγωγή διαπιστευτηρίων πρέπει να χρησιμοποιείται το
+`--credential-stdin` ή το `--credential-env`· το `--dry-run --json` αναφέρει μόνο
+την παρουσία/δομή με απόκρυψη ευαίσθητων δεδομένων. Η εντολή `providers available` διαβάζει τον κατάλογο του OmniRoute·
+οι εντολές `providers list/test/test-all/validate` διατηρούν την τοπική τους συμπεριφορά SQLite και
 δεν απαιτούν την εκτέλεση του διακομιστή.
 
-### Ανάκτηση και επαναφορά
+Για έναν προσαρμοσμένο κόμβο συμβατό με OpenAI ή Anthropic, συσχετίστε τα διαπιστευτήρια με
+το αναγνωριστικό κόμβου που επιστρέφεται από το `omniroute nodes add`, χρησιμοποιώντας το `omniroute keys add "$NODE_ID" --stdin`.
+Αυτό απαιτεί διακομιστή σε λειτουργία και έλεγχο ταυτότητας διαχείρισης για το ενεργό περιβάλλον.
+Το CLI χρησιμοποιεί το `POST /api/providers`, το οποίο επικυρώνει τον κόμβο και αντιγράφει τις ρυθμίσεις
+του τελικού σημείου του στη σύνδεση. Ένας κόμβος που λείπει, μια αποτυχία εξουσιοδότησης ή ένας μη διαθέσιμος
+διακομιστής επιστρέφει σφάλμα χωρίς τη δημιουργία εφεδρικού τοπικού διαπιστευτηρίου.
+
+Το `nodes add --base-url` ορίζει το τελικό σημείο του κόμβου· αυτό διαφέρει από τη διεύθυνση του διακομιστή
+στο `OMNIROUTE_BASE_URL`. Για αρχεία OpenAPI, χρησιμοποιήστε το
+`omniroute openapi dump --format json --out ./openapi.json`· η καθολική επιλογή `--output`
+καθορίζει τη μορφοποίηση εμφάνισης του CLI και όχι το όνομα αρχείου προορισμού.
+
+### Ανάκτηση & Επαναφορά
 
 ```bash
 omniroute reset-password                # Επαναφορά του κωδικού πρόσβασης διαχειριστή (επίσης: omniroute-reset-password)
-omniroute reset-encrypted-columns       # Εμφάνιση προειδοποίησης + dry-run για επαναφορά κρυπτογραφημένων διαπιστευτηρίων
-omniroute reset-encrypted-columns --force  # Πραγματικός μηδενισμός των κρυπτογραφημένων διαπιστευτηρίων στο SQLite
+omniroute reset-encrypted-columns       # Εμφάνιση προειδοποίησης + δοκιμαστική εκτέλεση για την επαναφορά κρυπτογραφημένων διαπιστευτηρίων
+omniroute reset-encrypted-columns --force  # Πραγματικός μηδενισμός των κρυπτογραφημένων διαπιστευτηρίων σε SQLite
 ```
 
-### Εξαγωγή διαπιστευτηρίων (⚠ χειριστείτε με προσοχή)
+### Εξαγωγή Διαπιστευτηρίων (⚠ χειριστείτε με προσοχή)
 
 ```bash
-omniroute auth export                                 # Εμφάνιση προειδοποίησης + αίτημα επιβεβαίωσης — χωρίς πρόσβαση στη βάση δεδομένων
+omniroute auth export                                 # Εμφάνιση προειδοποίησης + απαίτηση επιβεβαίωσης — χωρίς πρόσβαση στη βάση δεδομένων
 omniroute auth export --force                          # Εξαγωγή των ΑΠΟΚΡΥΠΤΟΓΡΑΦΗΜΕΝΩΝ διαπιστευτηρίων ΟΛΩΝ των συνδέσεων στο stdout ως JSON
 omniroute auth export --force --id <id>                 # Εξαγωγή μόνο της σύνδεσης που αντιστοιχεί
 omniroute auth export --force --format env               # Παραγωγή γραμμών OMNIROUTE_<PROVIDER>_<FIELD>=<value>
 omniroute auth export --force --out creds.json           # Εγγραφή σε αρχείο (δημιουργείται με δικαιώματα 0600)
 ```
 
-Το `auth export` εκτελείται **μόνο τοπικά** (άμεση ανάγνωση SQLite, χωρίς διαδρομή HTTP) και σκοπίμως εμφανίζει/εγγράφει
-τιμές `apiKey`/`accessToken`/`refreshToken`/`idToken` σε **απλό κείμενο** — αυτό αποτελεί λειτουργία και όχι
-σφάλμα. Χωρίς το `--force`, δεν διαβάζεται τίποτα από τη βάση δεδομένων και δεν αποκρυπτογραφείται τίποτα. Ένα banner
-προειδοποίησης εμφανίζεται πάντοτε στο stderr πριν από την έξοδο οποιουδήποτε απλού κειμένου. Απαιτεί να έχει
+Το `auth export` λειτουργεί **μόνο τοπικά** (άμεση ανάγνωση SQLite, χωρίς διαδρομή HTTP) και σκόπιμα εκτυπώνει/εγγράφει
+τιμές `apiKey`/`accessToken`/`refreshToken`/`idToken` σε **απλό κείμενο** — αυτό είναι το χαρακτηριστικό, όχι
+σφάλμα. Τίποτα δεν διαβάζεται από τη βάση δεδομένων και τίποτα δεν αποκρυπτογραφείται χωρίς το `--force`. Ένα προειδοποιητικό
+πλαίσιο εκτυπώνεται πάντα στο stderr πριν από την εμφάνιση οποιουδήποτε απλού κειμένου. Απαιτεί να έχει
 οριστεί το `STORAGE_ENCRYPTION_KEY`. Ένα πεδίο που αποτυγχάνει να αποκρυπτογραφηθεί (παρωχημένο κλειδί, κατεστραμμένο κρυπτοκείμενο) αναφέρεται ως
 `<field>DecryptFailed: true`, αντί να διακόπτεται ολόκληρη η εξαγωγή ή να αποκαλύπτεται το υποκείμενο σφάλμα.
 
 ### Άλλες υποεντολές
 
-Αυτές προϋποθέτουν ότι εκτελείται ένας διακομιστής OmniRoute, εκτός εάν αναφέρεται διαφορετικά:
+Αυτές προϋποθέτουν έναν διακομιστή OmniRoute σε λειτουργία, εκτός αν αναφέρεται διαφορετικά:
 
 ```bash
 omniroute status                       # Αναλυτική κατάσταση χρόνου εκτέλεσης
-omniroute logs                         # Ροή καταγραφών αιτημάτων (--json, --search, --follow)
+omniroute logs                         # Ροή αρχείων καταγραφής αιτημάτων (--json, --search, --follow)
 omniroute config list                  # Εμφάνιση διαμορφωμένων εργαλείων CLI
 
 omniroute provider list                # Παράθεση διαθέσιμων παρόχων (ψευδώνυμο του providers list)
@@ -729,71 +706,103 @@ omniroute combo list | switch | create | delete
 omniroute backup                       # Στιγμιότυπο διαμόρφωσης + βάσης δεδομένων
 omniroute restore                      # Επαναφορά από προηγούμενο στιγμιότυπο
 
-omniroute health                       # Αναλυτική κατάσταση εύρυθμης λειτουργίας (διακόπτες, κρυφή μνήμη, μνήμη)
+omniroute health                       # Λεπτομερής κατάσταση εύρυθμης λειτουργίας (διακόπτες κυκλώματος, κρυφή μνήμη, μνήμη)
 omniroute quota                        # Χρήση ορίου παρόχου
 omniroute cache                        # Κατάσταση κρυφής μνήμης
-omniroute cache clear                  # Εκκαθάριση σημασιολογικής κρυφής μνήμης + κρυφής μνήμης υπογραφών
+omniroute cache clear                  # Εκκαθάριση σημασιολογικών κρυφών μνημών και κρυφών μνημών υπογραφών
 
 omniroute mcp status | restart         # Κατάσταση / επανεκκίνηση διακομιστή MCP
 omniroute a2a status | card            # Κατάσταση διακομιστή A2A / κάρτα πράκτορα
 
 omniroute tunnel list | create | stop  # Διαχείριση σηράγγων (cloudflare/tailscale/ngrok)
-omniroute env show | get <k> | set <k> <v>  # Προβολή / ορισμός μεταβλητών περιβάλλοντος (προσωρινά)
+omniroute env show | get <k> | set <k> <v>  # Επιθεώρηση / ορισμός μεταβλητών περιβάλλοντος (προσωρινά)
 
-omniroute test                         # Γρήγορος έλεγχος συνδεσιμότητας παρόχου
+omniroute test                         # Βασική δοκιμή συνδεσιμότητας παρόχου
 omniroute update                       # Έλεγχος για ενημερώσεις
 omniroute completion                   # Δημιουργία συμπλήρωσης κελύφους
 ```
 
 ### Συνήθεις σημαίες
 
-| Σημαία              | Περιγραφή                                                                      |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `--no-open`         | Να μην ανοίγει αυτόματα το πρόγραμμα περιήγησης κατά την εκκίνηση              |
-| `--port <n>`        | Παράκαμψη της θύρας API (προεπιλογή 20128)                                     |
-| `--mcp`             | Εκτέλεση ως διακομιστής MCP μέσω stdio (για IDE)                               |
-| `--non-interactive` | Λειτουργία CI (χωρίς προτροπές· ανάγνωση από μεταβλητές περιβάλλοντος/σημαίες) |
-| `--json`            | Έξοδος JSON αναγνώσιμη από μηχανή (doctor, providers κ.λπ.)                    |
-| `--help`, `-h`      | Εμφάνιση βοήθειας για τη συγκεκριμένη εντολή                                   |
-| `--version`, `-v`   | Εκτύπωση της εγκατεστημένης έκδοσης                                            |
+| Σημαία              | Περιγραφή                                                         |
+| ------------------- | ----------------------------------------------------------------- |
+| `--no-open`         | Να μην ανοίγει αυτόματα το πρόγραμμα περιήγησης κατά την εκκίνηση |
+| `--port <n>`        | Παράκαμψη της θύρας API (προεπιλογή 20128)                        |
+| `--mcp`             | Εκτέλεση ως διακομιστής MCP μέσω stdio (για IDE)                  |
+| `--non-interactive` | Λειτουργία CI (χωρίς προτροπές· ανάγνωση από env/σημαίες)         |
+| `--json`            | Μηχαναγνώσιμη έξοδος JSON (doctor, providers κ.λπ.)               |
+| `--help`, `-h`      | Εμφάνιση βοήθειας συγκεκριμένης για την εντολή                    |
+| `--version`, `-v`   | Εκτύπωση της εγκατεστημένης έκδοσης                               |
 
 ---
 
-## Διαθέσιμα Endpoints API
+## Διαθέσιμα API Endpoints
 
-| Endpoint                   | Περιγραφή                           | Χρήση για                        |
-| -------------------------- | ----------------------------------- | -------------------------------- |
-| `/v1/chat/completions`     | Τυπική συνομιλία (όλοι οι πάροχοι)  | Όλα τα σύγχρονα εργαλεία         |
-| `/v1/responses`            | Responses API (μορφή OpenAI)        | Codex, agentic workflows         |
-| `/v1/completions`          | Παλαιού τύπου ολοκληρώσεις κειμένου | Παλαιότερα εργαλεία με `prompt:` |
-| `/v1/embeddings`           | Ενσωματώσεις κειμένου               | RAG, αναζήτηση                   |
-| `/v1/images/generations`   | Δημιουργία εικόνας                  | GPT-Image, Flux, κ.λπ.           |
-| `/v1/audio/speech`         | Κείμενο σε ομιλία                   | ElevenLabs, OpenAI TTS           |
-| `/v1/audio/transcriptions` | Ομιλία σε κείμενο                   | Deepgram, AssemblyAI             |
+| Endpoint                   | Περιγραφή                           | Χρήση για                                       |
+| -------------------------- | ----------------------------------- | ----------------------------------------------- |
+| `/v1/chat/completions`     | Τυπική συνομιλία (όλοι οι πάροχοι)  | Όλα τα σύγχρονα εργαλεία                        |
+| `/v1/responses`            | Responses API (μορφή OpenAI)        | Codex, ροές εργασίας με πράκτορες               |
+| `/v1/completions`          | Συμπληρώσεις κειμένου παλαιού τύπου | Παλαιότερα εργαλεία που χρησιμοποιούν `prompt:` |
+| `/v1/embeddings`           | Ενσωματώσεις κειμένου               | RAG, αναζήτηση                                  |
+| `/v1/images/generations`   | Δημιουργία εικόνων                  | GPT-Image, Flux κ.λπ.                           |
+| `/v1/audio/speech`         | Μετατροπή κειμένου σε ομιλία        | ElevenLabs, OpenAI TTS                          |
+| `/v1/audio/transcriptions` | Μετατροπή ομιλίας σε κείμενο        | Deepgram, AssemblyAI                            |
 
-Έτοιμα παραδείγματα για επικόλληση με tokenized URL OmniRoute:
+Έτοιμα προς επικόλληση παραδείγματα με ένα URL του OmniRoute που περιέχει token:
 
 ```txt
-Token example: sk-a3ab3c080beaee3a-69f4a4-070d71af
+Παράδειγμα token: sk-a3ab3c080beaee3a-69f4a4-070d71af
 
-Standard OpenAI base: http://localhost:20128/v1
-VS Code models: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/models
-VS Code chat: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/chat/completions
-VS Code responses: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/responses
-Ollama tags: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/tags
-Ollama chat: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/chat
+Τυπική βάση OpenAI: http://localhost:20128/v1
+Μοντέλα VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/models
+Συνομιλία VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/chat/completions
+Αποκρίσεις VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/responses
+Ετικέτες Ollama: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/tags
+Συνομιλία Ollama: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/chat
 ```
 
 ---
 
 ## Αντιμετώπιση προβλημάτων
 
-| Σφάλμα                                                     | Αιτία                                       | Επίλυση                                                    |
-| ---------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------------- |
-| `Connection refused`                                       | Το OmniRoute δεν εκτελείται                 | `omniroute serve`                                          |
-| `401 Unauthorized`                                         | Λανθασμένο κλειδί API                       | Ελέγξτε στο `/dashboard/api-manager`                       |
-| `No combo configured`                                      | Δεν υπάρχει ενεργός συνδυασμός δρομολόγησης | Ρυθμίστε στο `/dashboard/combos`                           |
-| Το CLI εμφανίζει "not installed"                           | Το εκτελέσιμο δεν βρίσκεται στο PATH        | Ελέγξτε με `which <command>`                               |
-| Το Dashboard εμφανίζει "not detected" μετά την εγκατάσταση | Η κρυφή μνήμη είναι παλιά                   | Κάντε κλικ στο "⟳ Refresh detection" στο dashboard         |
-| Παλιός σύνδεσμος `/dashboard/cli-tools`                    | Σελιδοδείκτης προ v3.8.6                    | Ανακατευθύνεται αυτόματα στο `/dashboard/cli-code` (308)   |
-| Παλιός σύνδεσμος `/dashboard/agents`                       | Σελιδοδείκτης προ v3.8.6                    | Ανακατευθύνεται αυτόματα στο `/dashboard/acp-agents` (308) |
+| Σφάλμα                                                          | Αιτία                                       | Διόρθωση                                                 |
+| --------------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------- |
+| `Connection refused`                                            | Το OmniRoute δεν εκτελείται                 | `omniroute serve`                                        |
+| `401 Unauthorized`                                              | Λανθασμένο API key                          | Ελέγξτε στο `/dashboard/api-manager`                     |
+| `No combo configured`                                           | Δεν υπάρχει ενεργός συνδυασμός δρομολόγησης | Ρυθμίστε έναν στο `/dashboard/combos`                    |
+| Το CLI εμφανίζει "not installed"                                | Το εκτελέσιμο αρχείο δεν βρίσκεται στο PATH | Ελέγξτε με `which <command>`                             |
+| Ο πίνακας ελέγχου εμφανίζει "not detected" μετά την εγκατάσταση | Η προσωρινή μνήμη δεν είναι ενημερωμένη     | Κάντε κλικ στο "⟳ Refresh detection" στον πίνακα ελέγχου |
+| Παλιός σύνδεσμος `/dashboard/cli-tools`                         | Σελιδοδείκτης πριν από την v3.8.6           | Αυτόματη ανακατεύθυνση στο `/dashboard/cli-code` (308)   |
+| Παλιός σύνδεσμος `/dashboard/agents`                            | Σελιδοδείκτης πριν από την v3.8.6           | Αυτόματη ανακατεύθυνση στο `/dashboard/acp-agents` (308) |
+
+## Διαχείριση της πολιτικής inference-key με το OmniRoute CLI
+
+Χρησιμοποιήστε ένα πιστοποιημένο περιβάλλον διαχείρισης (δείτε την [Απομακρυσμένη λειτουργία](../guides/REMOTE-MODE.md))
+για να επιθεωρήσετε ή να ενημερώσετε ένα υπάρχον inference key μέσω του ID του:
+
+```bash
+omniroute --output json keys policy show KEY_ID
+omniroute keys policy set KEY_ID --unrestricted
+omniroute --output json keys policy show KEY_ID
+```
+
+Το `--unrestricted` είναι ψευδώνυμο του `--model-access-mode all`. Η ενημέρωση διαγράφει τη
+λίστα επιτρεπόμενων μοντέλων. Διατηρεί τα scopes, τους κανόνες σύνδεσης, τα αποκλεισμένα μοντέλα, τα όρια ρυθμού
+και τα όρια κόστους, επομένως αυτά τα άλλα στοιχεία ελέγχου μπορούν ακόμη να απορρίψουν ένα αίτημα. Ένα ρητό
+`--allowed-models ""` επιλέγει επίσης το `all`· συνδυάστε το με το
+`--model-access-mode restricted` για να διατηρήσετε ένα περιορισμένο key χωρίς επιτρεπόμενα μοντέλα.
+Μια μη κενή λίστα διαχωρισμένη με κόμματα επιλέγει το `restricted`, εκτός εάν καθοριστεί ρητά κάτι διαφορετικό.
+Ο αντιφατικός συνδυασμός `all` με μια μη κενή λίστα επιτρεπόμενων μοντέλων απορρίπτεται πριν από την αποστολή αιτήματος.
+
+Το `--rate-limit 30` ορίζει τα αιτήματα ανά λεπτό και διατηρεί τους κανόνες για άλλα χρονικά
+παράθυρα. Το `--max-cost 5` ενεργοποιεί το ημερήσιο όριο σε USD χωρίς να αλλάζει το εβδομαδιαίο όριο·
+το `--max-cost 0` καταργεί το ημερήσιο όριο και διατηρεί την υπάρχουσα ρύθμιση εναλλαγής ορίου χρήσης
+και το εβδομαδιαίο όριο. Τα πεδία πολιτικής που παραλείπονται παραμένουν αμετάβλητα. Οι αλλαγές ορίου ρυθμού διαβάζουν
+πρώτα την τρέχουσα πολιτική· αποφύγετε τις ταυτόχρονες αλλαγές στον πίνακα ορίων ρυθμού του ίδιου key.
+
+Οι εντολές πολιτικής χρησιμοποιούν πιστοποιημένα `GET`/`PATCH /api/keys/{id}` και τηρούν το ενεργό
+περιβάλλον και την καθολική επιλογή `--api-key`. Η έξοδος JSON περιέχει μόνο πεδία πολιτικής,
+χωρίς το αποθηκευμένο key ή την καλυμμένη αναπαράστασή του. Ένα διαπιστευτήριο αποκλειστικά για inference
+δεν μπορεί να εξουσιοδοτήσει αλλαγές διαχείρισης. Μια απόκριση 401/403 απαιτεί έλεγχο του διαπιστευτηρίου
+και του περιβάλλοντος διαχείρισης· δεν αποδεικνύει αποτυχία τοπικού CLI-token ή salt.
+Δείτε το [CLI Token](../security/CLI_TOKEN.md) για την ξεχωριστή σύμβαση τοπικού ελέγχου ταυτότητας.

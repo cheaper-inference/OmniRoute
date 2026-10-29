@@ -17,6 +17,7 @@ Object.assign(process.env, {
 const providersModule = await import("../../src/lib/oauth/providers/index.ts");
 const oauthModule = await import("../../src/lib/oauth/constants/oauth.ts");
 const antigravityHeadersModule = await import("../../open-sse/services/antigravityHeaders.ts");
+const antigravityVersionModule = await import("../../open-sse/services/antigravityVersion.ts");
 const oauthHelpersModule = await import("../../src/lib/oauth/providers.ts");
 
 const PROVIDERS = providersModule.default;
@@ -28,6 +29,7 @@ const {
   CLINE_CONFIG,
   CODEX_CONFIG,
   CODEBUDDY_CN_CONFIG,
+  CODEBUDDY_INTL_CONFIG,
   WORKBUDDY_CONFIG,
   DEVIN_DESKTOP_CONFIG,
   ZED_CONFIG,
@@ -49,6 +51,11 @@ const {
   MUSE_CODE_CONFIG,
 } = oauthModule;
 const { getAntigravityLoadCodeAssistMetadata } = antigravityHeadersModule;
+const {
+  ANTIGRAVITY_IDE_FALLBACK_VERSION,
+  clearAntigravityVersionCaches,
+  seedAntigravityIdeVersionCache,
+} = antigravityVersionModule;
 
 const originalFetch = globalThis.fetch;
 
@@ -75,6 +82,7 @@ const EXPECTED_PROVIDER_KEYS = [
   "xai-oauth",
   "openference",
   "codebuddy-cn",
+  "codebuddy-intl",
   "workbuddy",
   "zed",
   "zed-hosted",
@@ -111,6 +119,7 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   "xai-oauth": XAI_OAUTH_CONFIG,
   openference: OPENFERENCE_CONFIG,
   "codebuddy-cn": CODEBUDDY_CN_CONFIG,
+  "codebuddy-intl": CODEBUDDY_INTL_CONFIG,
   workbuddy: WORKBUDDY_CONFIG,
   zed: ZED_CONFIG,
   "zed-hosted": ZED_HOSTED_CONFIG,
@@ -571,67 +580,76 @@ test("Cline decodes embedded callback payloads without using the network", async
 });
 
 test("Antigravity runs mocked browser OAuth exchanges and post-exchange enrichment", async () => {
-  useFetchSequence([
-    jsonResponse({ access_token: "anti-access", refresh_token: "anti-refresh", expires_in: 7200 }),
-    jsonResponse({ email: "anti@example.com" }),
-    (_url, init: any = {}) => {
-      assert.equal(init.method, "POST");
-      assert.equal(init.headers.Authorization, "Bearer anti-access");
-      assert.match(
-        init.headers["User-Agent"],
-        /^antigravity\/2\.1\.1 [^ ]+\/[^ ]+ google-api-nodejs-client\/10\.3\.0$/
-      );
-      assert.equal(init.headers["X-Goog-Api-Client"], "gl-node/22.21.1");
-      assert.deepEqual(
-        JSON.parse(String(init.body)).metadata,
-        getAntigravityLoadCodeAssistMetadata()
-      );
-      assert.equal(JSON.parse(String(init.body)).cloudaicompanionProject, undefined);
-      return jsonResponse({
-        cloudaicompanionProject: { id: "anti-project" },
-        allowedTiers: [{ id: "tier-default", isDefault: true }],
-      });
-    },
-    (_url, init: any = {}) => {
-      assert.equal(init.method, "POST");
-      assert.equal(init.headers.Authorization, "Bearer anti-access");
-      assert.match(
-        init.headers["User-Agent"],
-        /^antigravity\/2\.1\.1 [^ ]+\/[^ ]+ google-api-nodejs-client\/10\.3\.0$/
-      );
-      assert.equal(init.headers["X-Goog-Api-Client"], "gl-node/22.21.1");
-      assert.deepEqual(
-        JSON.parse(String(init.body)).metadata,
-        getAntigravityLoadCodeAssistMetadata()
-      );
-      assert.equal(JSON.parse(String(init.body)).tier_id, "tier-default");
-      assert.equal(JSON.parse(String(init.body)).cloudaicompanionProject, undefined);
-      return jsonResponse({
-        done: true,
-        response: { cloudaicompanionProject: { id: "anti-project-final" } },
-      });
-    },
-  ]);
-
-  const antigravityTokens = await PROVIDERS.antigravity.exchangeToken(
-    ANTIGRAVITY_CONFIG,
-    "code-2",
-    "http://localhost/callback"
+  // Pin the IDE version the User-Agent carries: it reads a module-level cache that other files
+  // seed or clear under --test-isolation=none, and the fallback moved to 2.5.5 in #16512.
+  seedAntigravityIdeVersionCache(ANTIGRAVITY_IDE_FALLBACK_VERSION);
+  const ideVersion = ANTIGRAVITY_IDE_FALLBACK_VERSION.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const ideNodeUa = new RegExp(
+    `^antigravity/${ideVersion} [^ ]+/[^ ]+ google-api-nodejs-client/10\\.3\\.0$`
   );
-  const antigravityExtra = await PROVIDERS.antigravity.postExchange(antigravityTokens);
-  const antigravityMapped = PROVIDERS.antigravity.mapTokens(antigravityTokens, antigravityExtra);
-  // postExchange runs onboarding fire-and-forget now (it must never block the OAuth
-  // login response); give the background onboard call a tick to consume its mocked
-  // fetch so the sequence drains deterministically.
-  await new Promise((r) => setTimeout(r, 50));
+  try {
+    useFetchSequence([
+      jsonResponse({
+        access_token: "anti-access",
+        refresh_token: "anti-refresh",
+        expires_in: 7200,
+      }),
+      jsonResponse({ email: "anti@example.com" }),
+      (_url, init: any = {}) => {
+        assert.equal(init.method, "POST");
+        assert.equal(init.headers.Authorization, "Bearer anti-access");
+        assert.match(init.headers["User-Agent"], ideNodeUa);
+        assert.equal(init.headers["X-Goog-Api-Client"], "gl-node/22.21.1");
+        assert.deepEqual(
+          JSON.parse(String(init.body)).metadata,
+          getAntigravityLoadCodeAssistMetadata()
+        );
+        assert.equal(JSON.parse(String(init.body)).cloudaicompanionProject, undefined);
+        return jsonResponse({
+          cloudaicompanionProject: { id: "anti-project" },
+          allowedTiers: [{ id: "tier-default", isDefault: true }],
+        });
+      },
+      (_url, init: any = {}) => {
+        assert.equal(init.method, "POST");
+        assert.equal(init.headers.Authorization, "Bearer anti-access");
+        assert.match(init.headers["User-Agent"], ideNodeUa);
+        assert.equal(init.headers["X-Goog-Api-Client"], "gl-node/22.21.1");
+        assert.deepEqual(
+          JSON.parse(String(init.body)).metadata,
+          getAntigravityLoadCodeAssistMetadata()
+        );
+        assert.equal(JSON.parse(String(init.body)).tier_id, "tier-default");
+        assert.equal(JSON.parse(String(init.body)).cloudaicompanionProject, undefined);
+        return jsonResponse({
+          done: true,
+          response: { cloudaicompanionProject: { id: "anti-project-final" } },
+        });
+      },
+    ]);
 
-  assert.equal(antigravityMapped.email, "anti@example.com");
-  // projectId comes from loadCodeAssist ("anti-project"), NOT the backgrounded
-  // onboardUser response ("anti-project-final"). Onboarding is fire-and-forget, so it
-  // no longer updates the returned projectId synchronously — matching the 9router web
-  // flow, which also returns the loadCodeAssist project id.
-  assert.equal(antigravityMapped.projectId, "anti-project");
-  assert.equal(antigravityMapped.providerSpecificData.clientProfile, "ide");
+    const antigravityTokens = await PROVIDERS.antigravity.exchangeToken(
+      ANTIGRAVITY_CONFIG,
+      "code-2",
+      "http://localhost/callback"
+    );
+    const antigravityExtra = await PROVIDERS.antigravity.postExchange(antigravityTokens);
+    const antigravityMapped = PROVIDERS.antigravity.mapTokens(antigravityTokens, antigravityExtra);
+    // postExchange runs onboarding fire-and-forget now (it must never block the OAuth
+    // login response); give the background onboard call a tick to consume its mocked
+    // fetch so the sequence drains deterministically.
+    await new Promise((r) => setTimeout(r, 50));
+
+    assert.equal(antigravityMapped.email, "anti@example.com");
+    // projectId comes from loadCodeAssist ("anti-project"), NOT the backgrounded
+    // onboardUser response ("anti-project-final"). Onboarding is fire-and-forget, so it
+    // no longer updates the returned projectId synchronously — matching the 9router web
+    // flow, which also returns the loadCodeAssist project id.
+    assert.equal(antigravityMapped.projectId, "anti-project");
+    assert.equal(antigravityMapped.providerSpecificData.clientProfile, "ide");
+  } finally {
+    clearAntigravityVersionCaches();
+  }
 });
 
 test("Qoder enabled mode exchanges tokens and loads profile metadata through mocked endpoints", async () => {

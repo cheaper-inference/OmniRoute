@@ -4,28 +4,13 @@
 
 ---
 
-सामायिक executable manifest, प्रतिबंधित child environments आणि कायमस्वरूपी
-Gemini सेटअपसाठी, [CLI launch contracts](./CLI-LAUNCH-CONTRACTS.md) पहा.
+सामायिक एक्झिक्युटेबल मॅनिफेस्ट, प्रतिबंधित चाइल्ड एनवायरमेंट आणि पर्सिस्टंट Gemini सेटअपसाठी, [CLI लॉन्च कॉन्ट्रॅक्ट्स](./CLI-LAUNCH-CONTRACTS.md) पहा.
 
-OmniRoute मध्ये `setup-*` commands चे एक कुटुंब दिलेले आहे, जे coding
-CLI (Codex, Claude Code, OpenCode, Cline, …) ला OmniRoute चा backend म्हणून वापरण्यासाठी configure करते — त्यामुळे
-tool **एका** endpoint शी संवाद साधते आणि OmniRoute auto-fallback सह योग्य provider कडे
-route करते. प्रत्येक command चालू असलेल्या OmniRoute (स्थानिक किंवा remote) मधून **live** model catalog वाचते
-आणि **तुमच्या** मशीनवर tool ची स्वतःची config file लिहिते. tool त्यास समर्थन देत असेल तेथे API key चा संदर्भ
-environment variable द्वारे दिला जातो. tool-local environment file कायमस्वरूपी जतन करणाऱ्या commands ची नोंद खाली केली आहे.
+OmniRoute `setup-*` कमांड्सचे एक कुटुंब पाठवते जे OmniRoute ला बॅकएंड म्हणून वापरण्यासाठी कोडिंग CLI (Codex, Claude कोड, OpenCode, Cline, …) कॉन्फिगर करते — म्हणून साधन** एक** ऑटो-फॉलबॅकसह योग्य प्रदात्याकडे एंडपॉइंट आणि OmniRoute मार्ग. प्रत्येक आदेश वाचतो** जगणे** चालू असलेल्या OmniRoute (स्थानिक किंवा रिमोट) वरून मॉडेल कॅटलॉग आणि टूलची स्वतःची कॉन्फिगरेशन फाइल वर लिहितो** आपले** मशीन API की हे साधन जेथे सपोर्ट करते तेथे पर्यावरण व्हेरिएबलद्वारे संदर्भित केले जाते. टूल-लोकल एन्व्हायर्नमेंट फाइल टिकून राहणाऱ्या कमांड्स खाली नमूद केल्या आहेत.
 
-एक generic launcher देखील आहे — `omniroute run <target>` — जो कोणतीही config न लिहिता,
-योग्य env inject करून `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` किंवा `gemini`
-spawn करतो. Targets आणि त्यांचे aliases canonical manifest `bin/cli/cli-manifest.mjs`
-(`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`) मधून येतात आणि `omniroute completion` त्याच
-manifest मधून मिळालेले target शब्द उपलब्ध करून देते. जुने प्रत्येक tool साठीचे launchers —
-`omniroute launch` (Claude Code) आणि `omniroute launch-codex` (Codex) — अद्याप
-उपलब्ध आहेत.
+एक सामान्य लाँचर — `omniroute run <target>` — देखील आहे जो `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` किंवा `whycodes` योग्य env इंजेक्ट करून, कोणतीही कॉन्फिगरेशन लिहिल्याशिवाय तयार करतो. लक्ष्ये आणि त्यांची उपनावे कॅनोनिकल मॅनिफेस्ट `bin/cli/cli-manifest.mjs` (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`) मधून येतात आणि `omniroute completion` समान मॅनिफेस्ट-व्युत्पन्न लक्ष्य शब्द ऑफर करते. लीगेसी प्रति-टूल लाँचर्स — `omniroute launch` (Claude कोड) आणि `omniroute launch-codex` (Codex) — उपलब्ध आहेत.
 
-त्याच स्थानिक/remote संदर्भातून provider onboarding उपलब्ध आहे. खालील
-API-first commands management authentication ला provider credentials पासून वेगळे ठेवतात
-आणि structured output मध्ये credential कधीही print करत नाहीत:
+त्याच local/remote संदर्भातून प्रदाता ऑनबोर्डिंग उपलब्ध आहे. खालील API-प्रथम आदेश व्यवस्थापन प्रमाणीकरण प्रदाता क्रेडेन्शियल्सपासून वेगळे ठेवतात आणि संरचित आउटपुटमध्ये क्रेडेंशियल कधीही मुद्रित करत नाहीत:
 
 ```bash
 omniroute providers add glm --credential-env GLM_API_KEY --name work
@@ -35,117 +20,69 @@ omniroute providers edit <connection-id> --default-model glm/glm-5.2
 omniroute providers remove <connection-id> --yes
 ```
 
-Scripts साठी `--credential-stdin` किंवा `--credential-env` ला प्राधान्य द्या; नियंत्रित स्थानिक वापरासाठी
-`--credential` कायम ठेवले आहे. non-interactive terminal वर `providers remove` साठी `--yes`
-आवश्यक आहे आणि सर्व पाच commands सक्रिय context किंवा global `--base-url`/`--api-key`
-options चा मान राखतात.
+स्क्रिप्टसाठी, `--credential-stdin` किंवा `--credential-env` प्राधान्य द्या; `--credential` नियंत्रित स्थानिक वापरासाठी राखून ठेवले आहे. `providers remove` ला नॉन-इंटरॅक्टिव्ह टर्मिनलवर `--yes` आवश्यक आहे आणि सर्व पाच कमांड्स सक्रिय संदर्भ किंवा जागतिक `--base-url`/`--api-key` पर्यायांचा आदर करतात.
 
-Provider selectors संदिग्ध ID prefixes, names किंवा provider names नाकारतात; अनेक connections जुळत असतील तेव्हा
-पूर्ण connection ID वापरा. Create आणि edit commands जतन केलेले connection पुन्हा वाचतात आणि removal नंतर
-ते यापुढे वाचता येत नसल्याची पडताळणी केली जाते. Import करताना आधीपासून अस्तित्वात असलेली provider/name जोडी वगळली जाते.
-Import केलेल्या entries, CLI ला पुरवलेले management endpoint, context किंवा management credentials override करू शकत नाहीत.
+प्रदाता निवडक अस्पष्ट ID उपसर्ग, नावे किंवा प्रदात्याची नावे नाकारतात; जेव्हा अनेक कनेक्शन जुळतात तेव्हा पूर्ण कनेक्शन ID वापरा. आदेश तयार करा आणि संपादित करा जतन केलेले कनेक्शन परत वाचा आणि काढून टाकणे सत्यापित करते की ते यापुढे वाचनीय नाही. आयात विद्यमान provider/name जोडी वगळते. आयात केलेल्या नोंदी CLI ला पुरवलेले व्यवस्थापन एंडपॉइंट, संदर्भ किंवा व्यवस्थापन क्रेडेन्शियल्स ओव्हरराइड करू शकत नाहीत.
 
-दोन सर्वाधिक समृद्ध integrations च्या एकदाच करावयाच्या, हाताने लिहिलेल्या मूलभूत setup साठी,
-प्रत्येक tool चे सखोल मार्गदर्शक पहा:
+दोन सर्वात श्रीमंत एकत्रीकरणांच्या एक-वेळच्या, हस्तलिखित बेस सेटअपसाठी, प्रति-टूल सखोल डाइव्ह पहा:
 
-- [Claude Code configuration](./CLAUDE-CODE-CONFIGURATION.md)
-- [Codex CLI configuration](./CODEX-CLI-CONFIGURATION.md)
-- [Remote Mode](./REMOTE-MODE.md) — तुमच्या laptop वरून remote OmniRoute (VPS / Tailnet) नियंत्रित करा
-- [VS Code Copilot Chat](./VSCODE-COPILOT.md) — OmniCopilot extension; तो editor मधून तुमच्यासाठी हे
-  `setup-*` commands देखील चालवू शकतो
+- [Claude कोड कॉन्फिगरेशन](./CLAUDE-CODE-CONFIGURATION.md)
+- [Codex CLI कॉन्फिगरेशन](./CODEX-CLI-CONFIGURATION.md)
+- [रिमोट मोड](./REMOTE-MODE.md) — तुमच्या लॅपटॉपवरून रिमोट OmniRoute (VPS / Tailnet) चालवा
+- [VS कोड Copilot चॅट](./VSCODE-COPILOT.md) — OmniCopilot विस्तार; ते तुमच्यासाठी या `setup-*` कमांड्स एडिटरमधून देखील चालवू शकते
 
 ---
 
-## मुख्य तक्ता
+## मास्टर टेबल
 
-प्रत्येक कमांड **सक्रिय संदर्भाचा** (`omniroute connect` ने सेट केलेला, पहा
-[दूरस्थ मोड](./REMOTE-MODE.md)) किंवा स्पष्ट `--remote <url> --api-key <key>` फ्लॅग्सचा आदर करते.
-खालील "स्थानिक विरुद्ध दूरस्थ" याचा अर्थ: कोणतेही फ्लॅग्स नसताना ती `http://localhost:20128` ला लक्ष्य करते;
-`--remote` सह (किंवा सक्रिय दूरस्थ संदर्भासह) ती त्या
-सर्व्हरवरून कॅटलॉग मिळवते आणि कॉन्फिगरेशन स्थानिक पातळीवर लिहिते.
+प्रत्येक आदेशाचा सन्मान करतो** सक्रिय संदर्भ** ( `omniroute connect` सह सेट करा, [रिमोट मोड](./REMOTE-MODE.md) पहा) किंवा स्पष्ट `--remote <url> --api-key <key>` ध्वज. खाली "स्थानिक वि रिमोट" चा अर्थ आहे: कोणतेही ध्वज नसताना ते `http://localhost:20128` लक्ष्य करते; `--remote` (किंवा सक्रिय रिमोट संदर्भ) सह ते त्या सर्व्हरवरून कॅटलॉग मिळवते आणि कॉन्फिग स्थानिकरित्या लिहिते.
 
-| कमांड                      | साधन                     | ते काय लिहिते                                                                                                                                                            | प्रमुख फ्लॅग्स                                                                                                                             | स्थानिक विरुद्ध दूरस्थ |
-| -------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
-| `omniroute setup-codex`    | OpenAI Codex CLI         | `~/.codex/<name>.config.toml` — प्रत्येक सुसंगत मजकूर मॉडेलसाठी एक प्रोफाइल (`codex --profile <name>`)                                                                   | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | दोन्ही                 |
-| `omniroute setup-claude`   | Claude Code              | `~/.claude/profiles/<name>/settings.json` — जुळणाऱ्या प्रत्येक मॉडेलसाठी एक प्रोफाइल (`CLAUDE_CONFIG_DIR`)                                                               | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | दोन्ही                 |
-| `omniroute setup-opencode` | OpenCode (OpenAI-सुसंगत) | `~/.config/opencode/opencode.json` — कॅटलॉगमधील प्रत्येक मॉडेलसह `omniroute` प्रदाता (`opencode -m omniroute/<model>`)                                                   | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | दोन्ही                 |
-| `omniroute setup-cline`    | Cline                    | `~/.cline/data/{globalState,secrets}.json` (CLI मोड) + VS Code विस्ताराची सेटिंग्ज प्रदर्शित करते                                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | दोन्ही                 |
-| `omniroute setup-kilo`     | Kilo Code                | `~/.local/share/kilo/auth.json` (CLI) + उपलब्ध असल्यास VS Code मधील `settings.json` मध्ये `kilocode.*` विलीन करते                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | दोन्ही                 |
-| `omniroute setup-continue` | Continue / `cn` CLI      | `~/.continue/config.yaml` — `provider: openai` मॉडेल्स, `${{ secrets.OMNIROUTE_API_KEY }}` द्वारे की                                                                     | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | दोन्ही                 |
-| `omniroute setup-cursor`   | Cursor                   | काहीही नाही — अॅपमधील पायऱ्या प्रदर्शित करते (Cursor संरचना अपारदर्शक SQLite स्वरूपात आहे)                                                                               | `--remote` `--api-key` `--only` `--port`                                                                                                   | दोन्ही                 |
-| `omniroute setup-roo`      | Roo Code                 | `~/.omniroute/roo-settings.json` (आयात दस्तऐवज) + VS Code मधील `settings.json` उपलब्ध असल्यास `roo-cline.autoImportSettingsPath` सेट करते                                | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | दोन्ही                 |
-| `omniroute setup-crush`    | Crush                    | `~/.config/crush/crush.json` — `openai-compat` प्रदाता, `$OMNIROUTE_API_KEY` द्वारे की                                                                                   | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | दोन्ही                 |
-| `omniroute setup-goose`    | Goose                    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + पर्यावरण कृतीसूची प्रदर्शित करते                                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | दोन्ही                 |
-| `omniroute setup-aider`    | Aider                    | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + पर्यावरण कृतीसूची प्रदर्शित करते                                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | दोन्ही                 |
-| `omniroute setup-qwen`     | Qwen Code                | `~/.qwen/settings.json` — V4 `modelProviders.openai` अॅरे + `~/.qwen/.env` मध्ये `OMNIROUTE_API_KEY`                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | दोन्ही                 |
-| `omniroute setup-5dive`    | 5dive (एजंट समूह)        | `$HOME` अंतर्गत काहीही नाही — `5dive agent auth set` द्वारे 5dive **प्रमाणीकरण प्रोफाइल** (`/var/lib/5dive/auth-profiles/<name>/`) लिहिते; फक्त root, समूह होस्टवर चालते | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | दोन्ही                 |
-| `omniroute run <target>`   | रनटाइम प्रारंभ (सामान्य) | काहीही नाही — योग्य पर्यावरण आणि आर्ग्युमेंट्ससह `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` सुरू करते; Qwen आणि Gemini तात्पुरते विलग होम वापरतात       | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | दोन्ही                 |
-| `omniroute launch`         | Claude Code              | काहीही नाही — `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` समाविष्ट करून `claude` सुरू करते                                                                               | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | दोन्ही                 |
-| `omniroute launch-codex`   | OpenAI Codex CLI         | काहीही नाही — `-c` फ्लॅग्सद्वारे `omniroute` प्रदाता समाविष्ट करून `codex` सुरू करते                                                                                     | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | दोन्ही                 |
+| आज्ञा                      | साधन                     | ते काय लिहिते                                                                                                                                                             | मुख्य ध्वज                                                                                                                                 | स्थानिक वि रिमोट |
+| -------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- |
+| `omniroute setup-codex`    | OpenAI Codex CLI         | `~/.codex/<name>.config.toml` — एक प्रोफाइल प्रति सुसंगत मजकूर मॉडेल (`codex --profile <name>`)                                                                           | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | दोन्ही           |
+| `omniroute setup-claude`   | Claude कोड               | `~/.claude/profiles/<name>/settings.json` — जुळलेल्या मॉडेलसाठी एक प्रोफाइल (`CLAUDE_CONFIG_DIR`)                                                                         | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | दोन्ही           |
+| `omniroute setup-opencode` | OpenCode (openai-सुसंगत) | `~/.config/opencode/opencode.json` — प्रत्येक कॅटलॉग मॉडेलसह `omniroute` प्रदाता (`opencode -m omniroute/<model>`)                                                        | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | दोन्ही           |
+| `omniroute setup-cline`    | Cline                    | `~/.cline/data/{globalState,secrets}.json` (CLI मोड) + प्रिंट VS कोड विस्तार सेटिंग्ज                                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | दोन्ही           |
+| `omniroute setup-kilo`     | किलो कोड                 | `~/.local/share/kilo/auth.json` (CLI) + जर असेल तर VS कोड `settings.json` मध्ये `kilocode.*` विलीन करते                                                                   | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | दोन्ही           |
+| `omniroute setup-continue` | सुरू ठेवा / `cn` CLI     | `~/.continue/config.yaml` — `provider: openai` मॉडेल, `${{ secrets.OMNIROUTE_API_KEY }}` द्वारे की                                                                        | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | दोन्ही           |
+| `omniroute setup-cursor`   | Cursor                   | काहीही नाही — ॲपमधील पायऱ्या मुद्रित करते (Cursor कॉन्फिगरेशन अपारदर्शक SQLite आहे)                                                                                       | `--remote` `--api-key` `--only` `--port`                                                                                                   | दोन्ही           |
+| `omniroute setup-roo`      | रू कोड                   | `~/.omniroute/roo-settings.json` (इम्पोर्ट डॉक) VS कोड `settings.json` अस्तित्वात असल्यास + `roo-cline.autoImportSettingsPath` सेट करते                                   | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | दोन्ही           |
+| `omniroute setup-crush`    | क्रश                     | `~/.config/crush/crush.json` — `openai-compat` प्रदाता, `$OMNIROUTE_API_KEY` द्वारे की                                                                                    | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | दोन्ही           |
+| `omniroute setup-zed`      | Zed                      | `~/.config/zed/settings.json` — `openai_compatible.omniroute` प्रदाता (≤ 25 टूल-सक्षम मॉडेल), `$OMNIROUTE_API_KEY` द्वारे की                                              | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | दोन्ही           |
+| `omniroute setup-goose`    | हंस                      | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + प्रिंट्स env रेसिपी                                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | दोन्ही           |
+| `omniroute setup-aider`    | मदतनीस                   | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + प्रिंट्स env रेसिपी                                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | दोन्ही           |
+| `omniroute setup-qwen`     | Qwen कोड                 | `~/.qwen/settings.json` — zqe `~/.qwen/.env` V4 `modelProviders.openai` ॲरे + `OMNIROUTE_API_KEY`                                                                         | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | दोन्ही           |
+| `omniroute setup-5dive`    | 5 डायव्ह (एजंट फ्लीट)    | `$HOME` अंतर्गत काहीही नाही — 5dive लिहितो** प्रमाणीकरण प्रोफाइल** (`/var/lib/5dive/auth-profiles/<name>/`) `5dive agent auth set` द्वारे ; फक्त रूट, फ्लीट होस्टवर चालते | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | दोन्ही           |
+| `omniroute setup-whycodes` | WhyCodes                 | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); मार्ग `$WHYCODES_HOME/config.toml` किंवा `~/.whycodes/config.toml` आहे                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | दोन्ही           |
+| `omniroute run <target>`   | रनटाइम लाँच (सामान्य)    | काहीही नाही — योग्य env आणि args सह `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` स्पॉन करा; Qwen आणि Gemini तात्पुरते वेगळे घर वापरतात          | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | दोन्ही           |
+| `omniroute launch`         | Claude कोड               | काहीही नाही — `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` इंजेक्ट केलेल्या `claude` निर्मिती करते                                                                         | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | दोन्ही           |
+| `omniroute launch-codex`   | OpenAI Codex CLI         | काहीही नाही — `omniroute` प्रदात्यासह `codex` `-c` फ्लॅगद्वारे इंजेक्ट केले जाते                                                                                          | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | दोन्ही           |
 
-फ्लॅग्सवरील नोंदी (कमांड स्रोतामध्ये पडताळलेल्या):
+ध्वजांवर टिपा (कमांड स्त्रोतामध्ये सत्यापित):
 
-- `--remote <url>` — दूरस्थ OmniRoute वरून कॅटलॉग मिळवा (`--port`
-  आणि सक्रिय कॉन्टेक्स्टला अधिलिखित करते). `--api-key <key>` त्या
-  सर्व्हरसाठी क्रेडेन्शियल पुरवते (डीफॉल्टनुसार `OMNIROUTE_API_KEY` env var किंवा सक्रिय कॉन्टेक्स्टचे टोकन).
-- `--only <patterns>` — स्वल्पविरामाने विभक्त केलेल्या सबस्ट्रिंग्ज; जुळणारे केवळ model IDs
-  ठेवा (उदा. `--only glm,kimi`). `setup-codex`, `setup-claude`,
-  `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush` वर उपलब्ध.
-- `--dry-run` — फाइलसिस्टममध्ये कोणताही बदल न करता नेमके काय लिहिले जाईल ते
-  मुद्रित करा. `setup-cursor` **वगळता** प्रत्येक `setup-*` कमांडवर उपलब्ध
-  (`setup-cursor` कधीही फाइल लिहीत नाही).
-- `--model <id>` — मॉडेलचे स्वयं-शोधन नसलेल्या साधनांसाठी आवश्यक (किंवा परस्परसंवादी पद्धतीने निवडले जाते):
-  Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. ही साधने
-  गैर-परस्परसंवादी रनसाठी `--yes` देखील स्वीकारतात (ज्यासाठी नंतर `--model` आवश्यक असते).
-  डीफॉल्ट उच्च-स्तरीय मॉडेल सेट करण्यासाठी `setup-opencode` `--model` स्वीकारते.
-- `omniroute run` वरील `--model <id>` मॅनिफेस्टच्या प्रति-टार्गेट जोडणीचे
-  (`bin/cli/cli-manifest.mjs`) अनुसरण करते: **aider** ला `--model openai/<id>` आणि
-  **opencode** ला `--model omniroute/<id>` मिळते (id मध्ये तो प्रीफिक्स आधीपासून नसेल तरच
-  तो जोडला जातो); **qwen** आणि **gemini** ला id जसाच्या तसा मिळतो;
-  **claude** ला तो `ANTHROPIC_MODEL` द्वारे, **goose** ला `GOOSE_MODEL` द्वारे आणि
-  **codex** ला `-c model_providers.omniroute.*` args द्वारे मिळतो. **Qwen हे `--model`
-  अनिवार्यपणे आवश्यक असलेले एकमेव रन टार्गेट आहे** — त्याशिवाय `omniroute run qwen`
-  चालवल्यास स्पष्ट त्रुटीसह `2` एक्झिट कोड मिळतो.
-- `--port <port>` — स्थानिक OmniRoute पोर्ट (डीफॉल्ट `20128`; `--remote`
-  सेट केले असल्यास दुर्लक्षित). सर्व `setup-*` आणि दोन्ही लाँचर्सवर उपलब्ध.
-- `omniroute run` एक्झिट कोड्स: चाइल्ड CLI चा स्वतःचा एक्झिट कोड जसाच्या तसा
-  पुढे पाठवला जातो; `2` = अवैध आर्ग्युमेंट्स (असमर्थित टार्गेट, आवश्यक
-  `--model` उपलब्ध नसणे, कंटेनर गार्ड); `127` = टार्गेट बायनरी `PATH` मध्ये नाही;
-  `130`/`143`/`129` = लाँच अनुक्रमे `SIGINT`/`SIGTERM`/`SIGHUP` ने समाप्त झाले;
-  `1` = इतर रनटाइम लाँच अपयश.
-- दोन्ही लाँचर्स (`launch`, `launch-codex`) `setup-claude` / `setup-codex` ने लिहिलेले
-  प्रोफाइल निवडण्यासाठी `--profile <name>` स्वीकारतात, तसेच अंतर्गत
-  `claude` / `codex` बायनरीसाठी पास-थ्रू args स्वीकारतात.
+- `--remote <url>` — दूरस्थ OmniRoute वरून कॅटलॉग आणा ( `--port` आणि सक्रिय संदर्भ अधिलिखित करते). `--api-key <key>` त्या सर्व्हरसाठी क्रेडेन्शियल पुरवते ( `OMNIROUTE_API_KEY` env var, किंवा सक्रिय संदर्भाच्या टोकनसाठी डीफॉल्ट).
+- `--only <patterns>` — स्वल्पविरामाने विभक्त केलेले सबस्ट्रिंग; फक्त जुळणारे मॉडेल IDs ठेवा (उदा. `--only glm,kimi`). `setup-codex`, `setup-claude`, `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed` वर उपलब्ध आहे .
+- `--dry-run` — फाइल सिस्टमला स्पर्श न करता नेमके काय लिहिले जाईल ते मुद्रित करा. प्रत्येक `setup-*` कमांडवर उपलब्ध** वगळता** `setup-cursor` (जे कधीही फाइल लिहित नाही).
+- `--model <id>` — मॉडेल ऑटो-डिस्कव्हरी नसलेल्या साधनांसाठी आवश्यक (किंवा परस्पररित्या निवडले): Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. ती साधने परस्परसंवादी नसलेल्या धावांसाठी `--yes` देखील स्वीकारतात (ज्याला नंतर `--model` आवश्यकता असते). डीफॉल्ट टॉप-लेव्हल मॉडेल सेट करण्यासाठी `setup-opencode` `--model` घेते.
+- `omniroute run` वरील `--model <id>` मॅनिफेस्टच्या प्रति-लक्ष्य वायरिंगचे अनुसरण करते (`bin/cli/cli-manifest.mjs`):** मदत करणारा** `--model openai/<id>` आणि प्राप्त करते** ओपनकोड** `--model omniroute/<id>` (उपसर्ग फक्त तेव्हाच जोडला जातो जेव्हा आयडी आधीपासून वाहून जात नाही);** क्वेन** आणि** मिथुन** आयडी शब्दशः प्राप्त करा;** क्लॉड** ते `ANTHROPIC_MODEL` द्वारे मिळते,** हंस** `GOOSE_MODEL` द्वारे,** का कोड** `-P omniroute -m <id>` द्वारे, आणि** कोडेक्स** `-c model_providers.omniroute.*` args द्वारे.**Qwen हे एकमेव रन लक्ष्य आहे ज्यासाठी `--model` कठोर आवश्यकता आहे** — त्याशिवाय `omniroute run qwen` स्पष्ट त्रुटीसह `2` मधून बाहेर पडते.
+- `--port <port>` — स्थानिक OmniRoute पोर्ट (डिफॉल्ट `20128`, `--remote` सेट केल्यावर दुर्लक्ष केले जाते). सर्व `setup-*` आणि दोन्ही लाँचरवर सादर करा.
+- `omniroute run` एक्झिट कोड: चाइल्ड CLI चा स्वतःचा एक्झिट कोड शब्दशः प्रसारित केला जातो; `2` = अवैध वितर्क (असमर्थित लक्ष्य, गहाळ आवश्यक `--model`, कंटेनर गार्ड); `127` = लक्ष्य बायनरी `PATH` मध्ये नाही; `130`/`143`/`129` लाँच `SIGINT`/`SIGTERM`/`SIGHUP` द्वारे समाप्त झाल्यावर; `1` = इतर रनटाइम लाँच अयशस्वी.
+- दोन लाँचर्स (`launch`, `launch-codex`) `setup-claude` / `setup-codex` ने लिहिलेले प्रोफाइल निवडण्यासाठी `--profile <name>` स्वीकारतात, तसेच अंतर्निहित `claude` / `codex` बायनरीसाठी पास-थ्रू आर्ग्स.
 
-परस्परसंवादी पिकर सेटअप रेसिपीजमध्येही सामायिक केला जातो:
+परस्परसंवादी पिकर सेटअप रेसिपीद्वारे देखील सामायिक केला जातो:
 
 ```bash
-# सक्रिय स्थानिक किंवा दूरस्थ मॉडेल कॅटलॉगमधून निवडा आणि टार्गेट कॉन्फिगर करा.
+# Pick from the active local or remote model catalog and configure the target.
 omniroute configure claude
 omniroute configure opencode --provider glm
 omniroute configure qwen --model qwen/qwen3.8-max-preview --yes
 ```
 
-`configure` सध्या `codex`, `claude`, `opencode`, `qwen`, `aider`, `goose`,
-`cline`, `continue`, `kilo`, आणि `5dive` साठी तपासलेल्या रेसिपीजकडे कार्य सोपवते.
-केवळ IDE साठी असलेल्या,
-MITM आणि केवळ मार्गदर्शक स्वरूपातील कॅटलॉग नोंदी स्पष्ट `setup-*`/मॅन्युअल प्रवाह म्हणून कायम राहतात आणि
-लाँच करता येणारे टार्गेट म्हणून सादर केल्या जात नाहीत.
+`configure` सध्या `codex`, `claude`, `opencode`, `qwen`, `aider`, `goose`, `cline`, `continue`, `kilo`, आणि `5dive` साठी चाचणी केलेल्या पाककृतींना प्रतिनिधीत्व देत आहे . केवळ IDE, MITM आणि मार्गदर्शक-केवळ कॅटलॉग नोंदी स्पष्टपणे `setup-*`/मॅन्युअल प्रवाह आहेत आणि लॉन्च करण्यायोग्य लक्ष्य म्हणून सादर केल्या जात नाहीत.
 
-> `setup-opencode` हे **हलके openai-सुसंगत** OpenCode एकत्रीकरण आहे.
-> आणखी एक अधिक सुविधासंपन्न प्लगइन एकत्रीकरणही आहे — `omniroute setup opencode` — जे
-> `@omniroute/opencode-plugin` इंस्टॉल करते. त्या वेगवेगळ्या कमांड्स आहेत; वरील तक्ता
-> `setup-opencode` चे दस्तऐवजीकरण करतो.
+> `setup-opencode` आहे** हलके ओपनई-सुसंगत** OpenCode एकत्रीकरण. एक समृद्ध प्लगइन एकीकरण देखील आहे — `omniroute setup opencode` — जे `@omniroute/opencode-plugin` स्थापित करते. ते भिन्न आज्ञा आहेत; वरील सारणी कागदपत्रे `setup-opencode`.
 >
-> प्लगइन दोन पॅकेजेसमध्ये येते, प्रत्येक OpenCode मेजर आवृत्तीसाठी एक, कारण दोन्ही
-> लोडर्सना वेगवेगळे एंट्रीपॉइंट्स अपेक्षित असतात:
-> OpenCode v1 साठी `@omniroute/opencode-plugin` आणि
-> OpenCode v2 साठी `@omniroute/opencode-plugin-v2`. v2 पॅकेज नवीन
-> (`0.1.0`) आहे आणि अजूनही बदलत असलेल्या होस्ट कराराचे अनुसरण करते, त्यामुळे एखाद्या विशिष्ट आकाराची
-> कल्पना करण्याऐवजी ते OpenCode कॅटलॉग ड्राफ्टमध्ये आरंभ करत असलेली रचना वाचते.
-> `opencode.json` मध्ये `plugins` नोंद जोडून ते इंस्टॉल करा; `omniroute setup opencode`
-> अजूनही v1 पॅकेज इंस्टॉल करते. पर्याय आणि क्रेडेन्शियल शोधण्याचा क्रम
-> पॅकेज README मध्ये दिलेला आहे.
+> प्लगइन दोन पॅकेजेसमध्ये येते, एक प्रति OpenCode मेजर, कारण दोन लोडरना वेगवेगळ्या एंट्रीपॉइंट्सची अपेक्षा असते: OpenCode v1 साठी `@omniroute/opencode-plugin` आणि OpenCode v2 साठी `@omniroute/opencode-plugin-v2`. v2 पॅकेज नवीन आहे (`0.1.0`) आणि होस्ट कॉन्ट्रॅक्टचे अनुसरण करते जे अद्याप हलत आहे, म्हणून ते गृहीत न धरता कॅटलॉग ड्राफ्टमध्ये आकार OpenCode सीड्स वाचते. `opencode.json` मध्ये `plugins` एंट्री जोडून ते स्थापित करा; `omniroute setup opencode` अजूनही v1 पॅकेज स्थापित करते. पर्याय आणि क्रेडेन्शियल लुकअप ऑर्डर पॅकेज README मध्ये आहेत.
 
 ---
 
@@ -266,23 +203,23 @@ API की 5dive ला **stdin** (`--api-key=-`) वर दिली जात�
 
 ---
 
-## बेस URL पद्धती (कोणत्या साधनांना `/v1` आवश्यक आहे)
+## बेस URL कन्व्हेन्शन्स (कोणती साधने `/v1` हवी आहेत)
 
-OmniRoute हे OpenAI पृष्ठभाग `/v1` वर, Anthropic पृष्ठभाग रूटवर,
-आणि मूळ Gemini पृष्ठभाग `/v1beta` वर उपलब्ध करून देते. प्रत्येक एकत्रीकरण त्याच्या
-साधनाला अपेक्षित असलेल्या स्वरूपाशी जोडलेले आहे (कमांड स्रोतामध्ये सत्यापित):
+OmniRoute `/v1` वर OpenAI पृष्ठभाग, रूटवर Anthropic पृष्ठभाग आणि `/v1beta` वर मूळ Gemini पृष्ठभाग उघड करतो. प्रत्येक इंटिग्रेशन त्याच्या टूलच्या अपेक्षेनुसार वायर्ड असते (कमांड स्त्रोतामध्ये सत्यापित):
 
-| एकत्रीकरण                                                                  | लिहिलेला बेस URL | `/v1`?                                      |
-| -------------------------------------------------------------------------- | ---------------- | ------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | रूट              | नाही — Cline `/v1/chat/completions` जोडते   |
-| `setup-goose` (`OPENAI_HOST`)                                              | रूट              | नाही — Goose पाथ जोडते                      |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | रूट              | नाही — LiteLLM `/v1/chat/completions` जोडते |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1` सह         | होय                                         |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | रूट              | नाही — Claude Code `/v1/messages` जोडते     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1` सह         | होय                                         |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1` सह         | होय                                         |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | रूट              | नाही — SDK `/v1beta/models/…` जोडते         |
-| `setup-5dive` (प्रमाणीकरण प्रोफाइलमधील `ANTHROPIC_BASE_URL`)               | रूट              | नाही — Claude Code `/v1/messages` जोडते     |
+| एकत्रीकरण                                                                  | बेस URL लिहिले | `/v1`?                                      |
+| -------------------------------------------------------------------------- | -------------- | ------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | रूट            | नाही — Cline `/v1/chat/completions` जोडते   |
+| `setup-goose` (`OPENAI_HOST`)                                              | रूट            | नाही — हंस मार्ग जोडतो                      |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | रूट            | नाही — LiteLLM `/v1/chat/completions` जोडते |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1`          | होय                                         |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1`          | होय                                         |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | रूट            | नाही — Claude कोड `/v1/messages` जोडतो      |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1`          | होय                                         |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1`          | होय                                         |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | रूट            | नाही — SDK `/v1beta/models/…` जोडते         |
+| `setup-5dive` ( प्रमाणीकरण प्रोफाइलमध्ये`ANTHROPIC_BASE_URL` )             | रूट            | नाही — Claude कोड `/v1/messages` जोडतो      |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | `/v1`          | होय — WhyCodes पोस्ट `/chat/completions`    |
 
 ---
 

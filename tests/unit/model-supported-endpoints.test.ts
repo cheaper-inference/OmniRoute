@@ -72,3 +72,8 @@ test("accepts the responses endpoint emitted by Codex discovery", () => {
   assert.equal(parsed.success, true);
   assert.deepEqual(parsed.success && parsed.data.supportedEndpoints, ["responses"]);
 });
+
+test("classifyModelSupportedEndpoints returns empty object when chat or responses is supported", () => {
+  assert.deepEqual(classifyModelSupportedEndpoints(["chat", "images"]), {});
+  assert.deepEqual(classifyModelSupportedEndpoints(["responses", "audio-transcriptions"]), {});
+});

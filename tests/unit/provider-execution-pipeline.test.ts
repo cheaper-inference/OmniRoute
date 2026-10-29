@@ -1027,3 +1027,47 @@ test("upstream error code/type survive into the error outcome", async () => {
     assert.equal(outcome.result.status, 422);
   }
 });
+
+test("Gemini PerDay QuotaFailure reaches the classification text, not the client message", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  const { hasGoogleDailyQuotaViolation } =
+    await import("../../open-sse/services/retryAfterJson.ts");
+  const message = "You exceeded your current quota.\nPlease retry in 26.6s.";
+  const input = makeInput({
+    policy: { allowAccountRotation: false, allowModelFallback: false },
+    provider: "gemini",
+    model: "gemini-2.5-flash",
+    send: async () =>
+      makeAttempt(
+        {
+          error: {
+            code: 429,
+            message,
+            status: "RESOURCE_EXHAUSTED",
+            details: [
+              {
+                "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+                violations: [{ quotaId: "GenerateRequestsPerDayPerProjectPerModel-FreeTier" }],
+              },
+              { "@type": "type.googleapis.com/google.rpc.RetryInfo", retryDelay: "26s" },
+            ],
+          },
+        },
+        429
+      ),
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(outcome.kind, "error");
+  if (outcome.kind === "error") {
+    const rawMessage = String(outcome.result.rawMessage);
+    assert.ok(rawMessage.startsWith(message), "the upstream message is kept verbatim");
+    assert.equal(hasGoogleDailyQuotaViolation(rawMessage), true);
+    assert.equal(
+      hasGoogleDailyQuotaViolation(outcome.result.error),
+      false,
+      "client text unchanged"
+    );
+  }
+});

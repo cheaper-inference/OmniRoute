@@ -391,3 +391,87 @@ test("handleEmbedding clearly rejects modalities not advertised by the resolved 
     globalThis.fetch = originalFetch;
   }
 });
+
+test("#18244: normalize native Gemini embedding usage metadata for single and batch requests", async () => {
+  const { prepareStructuredEmbeddingRequest } =
+    await import("../../open-sse/handlers/embeddingStructuredInput.ts");
+  const provider = {
+    id: "gemini",
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/embeddings",
+    authType: "apikey",
+    authHeader: "bearer",
+    structuredInputProtocol: "gemini-embed-content" as const,
+    models: [],
+  };
+  const options = { fetchMedia: async () => { throw new Error("unexpected fetch"); } };
+  const single = await prepareStructuredEmbeddingRequest(
+    provider, "gemini-embedding-2", { input: "hello" }, "key", options
+  );
+  const batch = await prepareStructuredEmbeddingRequest(
+    provider, "gemini-embedding-2", { input: ["hello", "world"] }, "key", options
+  );
+  const originalSingle = {
+    embedding: { values: [0.25, -0.75] },
+    usageMetadata: { promptTokenCount: 8, promptTokenDetails: [{ modality: "TEXT", tokenCount: 8 }] },
+  };
+  const originalBatch = {
+    embeddings: [{ values: [0.25] }, { values: [-0.75] }],
+    usageMetadata: { promptTokenCount: 21, promptTokenDetails: [{ modality: "TEXT", tokenCount: 21 }] },
+  };
+  assert.deepEqual(single.normalizeResponse?.(originalSingle), {
+    object: "list",
+    data: [{ object: "embedding", embedding: [0.25, -0.75], index: 0 }],
+    usage: { prompt_tokens: 8, total_tokens: 8 },
+  });
+  assert.deepEqual(batch.normalizeResponse?.(originalBatch), {
+    object: "list",
+    data: [
+      { object: "embedding", embedding: [0.25], index: 0 },
+      { object: "embedding", embedding: [-0.75], index: 1 },
+    ],
+    usage: { prompt_tokens: 21, total_tokens: 21 },
+  });
+  // Metadata is response-wide. Preserve vectors and positions; never multiply by batch size.
+  assert.deepEqual(originalBatch.embeddings, [{ values: [0.25] }, { values: [-0.75] }]);
+});
+
+test("#18244: missing or invalid Gemini usage metadata never invents token counts", async () => {
+  const { prepareStructuredEmbeddingRequest } =
+    await import("../../open-sse/handlers/embeddingStructuredInput.ts");
+  const provider = {
+    id: "gemini",
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/embeddings",
+    authType: "apikey",
+    authHeader: "bearer",
+    structuredInputProtocol: "gemini-embed-content" as const,
+    models: [],
+  };
+  const options = { fetchMedia: async () => { throw new Error("unexpected fetch"); } };
+  const single = await prepareStructuredEmbeddingRequest(
+    provider, "gemini-embedding-2", { input: "hello" }, "key", options
+  );
+  const batch = await prepareStructuredEmbeddingRequest(
+    provider, "gemini-embedding-2", { input: ["hello", "world"] }, "key", options
+  );
+  const missingOrInvalid = [
+    undefined, null, [], "tokens", {}, { promptTokenCount: "8" },
+    { promptTokenCount: -1 }, { promptTokenCount: 1.5 },
+    { promptTokenCount: Number.MAX_SAFE_INTEGER + 1 },
+    { promptTokenCount: Number.POSITIVE_INFINITY },
+  ];
+  for (const metadata of missingOrInvalid) {
+    const expected = { prompt_tokens: 0, total_tokens: 0 };
+    assert.deepEqual(
+      single.normalizeResponse?.({ embedding: { values: [0.25] }, usageMetadata: metadata })?.usage,
+      expected
+    );
+    assert.deepEqual(
+      batch.normalizeResponse?.({ embeddings: [{ values: [0.25] }], usageMetadata: metadata })?.usage,
+      expected
+    );
+  }
+  assert.deepEqual(
+    single.normalizeResponse?.({ embedding: { values: [0.25] }, usageMetadata: { promptTokenCount: 0 } })?.usage,
+    { prompt_tokens: 0, total_tokens: 0 }
+  );
+});

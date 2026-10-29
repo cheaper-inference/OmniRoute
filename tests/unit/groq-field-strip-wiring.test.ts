@@ -156,3 +156,39 @@ test("Groq GPT-OSS dispatch maps forced none to low and drops foreign reasoning 
   assert.equal("reasoning" in capturedBody, false);
   assert.equal("output_config" in capturedBody, false);
 });
+
+test("Groq executor strips per-message reasoning_content without mutating the caller", async () => {
+  const executor = new DefaultExecutor("groq");
+  const originalFetch = globalThis.fetch;
+  let capturedBody: Record<string, unknown> | null = null;
+
+  globalThis.fetch = async (_url: string | URL | Request, init: RequestInit = {}) => {
+    capturedBody = JSON.parse(String(init.body));
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+
+  const assistant = { role: "assistant", content: "earlier answer", reasoning_content: "thought" };
+  try {
+    await executor.execute({
+      model: "openai/gpt-oss-120b",
+      body: {
+        messages: [{ role: "user", content: "hi" }, assistant, { role: "user", content: "again" }],
+      },
+      stream: false,
+      credentials: { apiKey: "groq-test-key" },
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  assert.ok(capturedBody !== null, "fetch should have been called");
+  const messages = capturedBody!.messages as Record<string, unknown>[];
+  assert.equal(messages.length, 3);
+  assert.equal("reasoning_content" in messages[1], false, "reasoning_content must be stripped");
+  assert.equal(messages[1].content, "earlier answer");
+  assert.equal(messages[1].role, "assistant");
+  assert.equal(assistant.reasoning_content, "thought", "caller message must stay untouched");
+});

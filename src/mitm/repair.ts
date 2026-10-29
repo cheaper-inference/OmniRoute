@@ -3,6 +3,7 @@ import fs from "fs";
 import { resolveMitmDataDir } from "./dataDir.ts";
 import { removeDNSEntry, removeDNSEntries } from "./dns/dnsConfig.ts";
 import { uninstallCert } from "./cert/install.ts";
+import { resolveActiveMitmCert } from "./cert/activeCert.ts";
 import { ALL_TARGETS } from "./targets/index.ts";
 import { listCustomHosts } from "@/lib/db/inspectorCustomHosts.ts";
 import { getGheCopilotHosts } from "@/lib/db/providers.ts";
@@ -37,7 +38,25 @@ export function collectManagedHosts(): string[] {
 export interface RepairPlan {
   dnsHostsToRemove: string[];
   removeCert: boolean;
+  /** Cert files to untrust, active cert first (see collectCertsToUntrust). */
+  certPathsToUntrust: string[];
   revertSystemProxy: boolean;
+}
+
+/**
+ * Every on-disk MITM cert a repair should remove from the trust store: the
+ * ACTIVE cert first (`ca.crt` under the root-CA model, `server.crt` on a
+ * legacy-leaf install — resolved by `resolveActiveMitmCert()` exactly as the
+ * start path trusts it), then a leftover legacy `server.crt` from before a
+ * root-CA migration, which may still be trusted too. Repair used to check
+ * only `server.crt`, so under the root-CA model it left the CA trusted.
+ * `uninstallCert()` is a no-op for a cert that is not in the store, so the
+ * extra entry is free — same over-inclusive policy as collectManagedHosts().
+ */
+export function collectCertsToUntrust(): string[] {
+  const { certPath } = resolveActiveMitmCert();
+  const legacyLeaf = path.join(resolveMitmDataDir(), "mitm", "server.crt");
+  return [...new Set([certPath, legacyLeaf])].filter((p) => fs.existsSync(p));
 }
 
 /**
@@ -49,6 +68,7 @@ export function buildRepairPlan(): RepairPlan {
   return {
     dnsHostsToRemove: collectManagedHosts(),
     removeCert: true,
+    certPathsToUntrust: collectCertsToUntrust(),
     revertSystemProxy: true,
   };
 }
@@ -97,17 +117,19 @@ export async function performRepairSteps(sudoPassword: string): Promise<string[]
     log.error({ err }, "repairMitm: DNS cleanup failed (continuing)");
   }
 
-  // 2. Certificate — uninstall the MITM root CA from the trust store.
+  // 2. Certificate — untrust the active MITM cert (root CA or legacy leaf)
+  //    plus any leftover legacy leaf. Each one is attempted independently.
   if (plan.removeCert) {
-    try {
-      const certPath = path.join(resolveMitmDataDir(), "mitm", "server.crt");
-      if (fs.existsSync(certPath)) {
+    let removedAny = false;
+    for (const certPath of plan.certPathsToUntrust) {
+      try {
         await uninstallCert(sudoPassword, certPath);
-        repaired.push("cert");
+        removedAny = true;
+      } catch (err) {
+        log.error({ err, certPath }, "repairMitm: cert removal failed (continuing)");
       }
-    } catch (err) {
-      log.error({ err }, "repairMitm: cert removal failed (continuing)");
     }
+    if (removedAny) repaired.push("cert");
   }
 
   // 3. System proxy — best-effort revert if applied in this process.

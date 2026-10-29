@@ -1,1 +1,0 @@
-- **fix(sse):** a replayed Responses event is dropped when `sequence_number` is a whole-number string ([#15510](https://github.com/diegosouzapw/OmniRoute/pull/15510) — thanks @HouMinXi)

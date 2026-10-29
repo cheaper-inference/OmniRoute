@@ -48,90 +48,111 @@ bare virker), udfører et sundhedstjek af serveren og starter `claude` via exec.
 
 ---
 
-## Discovery-aliasser — vis ikke-Claude-modeller i `/model`-vælgeren
+## Discovery-aliaser — vis ikke-Claude-modeller i `/model`-vælgeren
 
-Claude Codes modelregistrering via gateway viser kun id'er, der begynder med `claude`
-eller `anthropic`, så når `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, viser den
-indbyggede `/model`-vælger normalt **kun** OmniRoutes Claude-/Anthropic-modeller — en
-`kimi/kimi-k2.6` eller `glm/glm-5.2` vises aldrig, selvom den kan routes uden problemer.
+Claude Codes gateway-modelopdagelse viser kun id'er, der begynder med `claude`
+eller `anthropic`, så med `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` viser den
+indbyggede `/model`-vælger normalt **kun** OmniRoutes Claude/Anthropic-modeller —
+en `kimi/kimi-k2.6` eller `glm/glm-5.2` dukker aldrig op, selvom den router fint.
 
-OmniRoute kan spejle enhver aktiveret model (og kombination) under et `claude/…`-id, så den
-passerer filteret og vises i vælgeren:
+OmniRoute kan spejle enhver aktiveret model (og combo) under et `claude/…`-id, så
+den passerer det filter og vises i vælgeren:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<kombination "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Når du vælger en af disse i Claude Code, fjerner OmniRoute `claude/`-omslaget
-og gendanner det rigtige id før routing — et ægte `claude/<real-claude-model>`-id
+Når du vælger en af disse i Claude Code, fjerner OmniRoute `claude/`-indpakningen,
+så det rigtige id står tilbage før routing — et ægte `claude/<real-claude-model>`-id
 (den faktiske Claude OAuth-udbyder) efterlades altid urørt.
 
-**Dette er som standard deaktiveret** og styres af en portmekanisme på tre niveauer (det mest specifikke
-har forrang), så en almindelig OmniRoute-installation aldrig fordobler sit katalog for klienter, der ikke bruger
-Claude Code:
+Som standard spejles kun basis-id'er. Med det valgfri feature-flag
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` slået til spejles reasoning-effort-varianter,
+som kataloget allerede viser (f.eks. `codex/gpt-6-sol-high`), ligesom ethvert andet
+id, så Claude Code kan vælge et eksplicit effort-niveau, og indbyggede `auto/*`-id'er,
+som forespørgselsstien ikke kan materialisere, spejles ikke. Om effort-varianter
+overhovedet vises, styres stadig af `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` —
+spejlet tilføjer aldrig en variant, som basiskataloget ikke har.
 
-| Niveau  | Hvor                                                                                     |
-| ------- | ---------------------------------------------------------------------------------------- |
-| Model   | Udbyderens detaljeside → til/fra-knappen "Expose in Claude Code" pr. model               |
-| Udbyder | Udbyderens detaljeside → til/fra-knap på udbyderniveau (omfatter alle dens modeller)     |
-| Globalt | Indstillinger → Funktionsflag → `EXPOSE_CC_DISCOVERY_ALIASES` (deaktiveret som standard) |
+**Dette er slået fra som standard** og styres af en gate med tre niveauer (mest
+specifik vinder), så en almindelig OmniRoute aldrig fordobler sit katalog for
+klienter, der ikke bruger Claude Code:
 
-Miljøvariablen `EXPOSE_CC_DISCOVERY_ALIASES` gennemtvinger aktivering på globalt niveau
-og har forrang frem for tilsidesættelsen i kontrolpanelet (skærmen med funktionsflag viser
-en bemærkning om "active via environment variable", når det er tilfældet). Til/fra-knapper pr. udbyder og
-pr. model finjusterer derfra — f.eks. eksponerer globalt deaktiveret + Kimi-udbyder aktiveret
-kun Kimis modeller.
+| Niveau  | Hvor                                                                        |
+| ------- | --------------------------------------------------------------------------- |
+| Model   | Udbyderens detaljeside → pr.-model-knappen "Expose in Claude Code"          |
+| Udbyder | Udbyderens detaljeside → knap på udbyderniveau (dækker alle dens modeller)  |
+| Global  | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (fra som standard) |
 
-> ⚠️ **Uoverensstemmelse i kontekstvindue for ikke-Claude-modeller.** Claude Code antager et kontekstvindue
-> på 200K for ethvert id, det ikke genkender (det kan ikke læse det faktiske vindue fra
-> `/v1/models`). For en model med et større vindue (f.eks. Kimi K2's 256K) skal du indstille
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` til en værdi under modellens faktiske vindue, så
-> automatisk komprimering ikke udløses for tidligt. De genererede profiler ovenfor
-> gør allerede dette pr. model.
+Miljøvariablen `EXPOSE_CC_DISCOVERY_ALIASES` tvinger det globale niveau til og har
+forrang frem for dashboard-tilsidesættelsen (Feature Flags-skærmen viser en note om
+"active via environment variable", når den gør). Knapper pr. udbyder og pr. model
+forfiner derfra — f.eks. globalt fra + Kimi-udbyder til eksponerer kun Kimis modeller.
+
+> ⚠️ **Vindues-uoverensstemmelse på ikke-Claude-modeller.** Claude Code antager et
+> kontekstvindue på 200K for ethvert id, den ikke genkender (den kan ikke læse et
+> reelt vindue fra `/v1/models`). For en model med et større vindue (f.eks. Kimi K2's
+> 256K) skal du sætte `CLAUDE_CODE_AUTO_COMPACT_WINDOW` til en værdi under modellens
+> reelle vindue, så auto-komprimering ikke udløses for tidligt. De genererede
+> profiler ovenfor gør allerede dette pr. model.
 
 ---
 
 ## Onboarding-blok på dashboardet
 
 Claude-værktøjskortet (**Dashboard → CLI Code**) viser det nøjagtige `settings.json`-fragment
-for denne instans ved siden af infoknappen for discovery-aliasset sammen med en kopieringsknap:
+for denne instans ved siden af infoknappen for discovery-aliaset og med en kopieringsknap:
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<din OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<din OmniRoute API-nøgle>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-Basis-URL'en er den, som kortet har fundet (inklusive en brugerdefineret tilsidesættelse, du har indtastet), og er allerede
+Basis-URL'en er den, som kortet har fundet (inklusive en brugerdefineret tilsidesættelse, du har indtastet), og den er allerede
 normaliseret — intet `/v1`-suffiks og ingen afsluttende skråstreg. **Nøglen vises aldrig**: blokken indeholder en
-pladsholder, så et skærmbillede eller et indsat kodestykke ikke kan lække en nøgle. Indsæt din nøgle i stedet for den.
+pladsholder, så et skærmbillede eller et indsat kodestykke ikke kan lække den. Erstat pladsholderen med din nøgle.
 
 Tilføj `CLAUDE_CODE_AUTO_COMPACT_WINDOW` under den samme `env`-blok for enhver model, hvis reelle
-kontekstvindue ikke er 200K — Claude Code antager 200K for hvert id, den ikke genkender, så
-automatisk komprimering ellers aktiveres på det forkerte tidspunkt (se advarslen i forrige afsnit).
-Kodestykke-generatoren accepterer også denne værdi, så en kalder, der kender målmodellens vindue,
-kan generere den direkte.
+kontekstvindue ikke er 200K — Claude Code antager 200K for alle id'er, som det ikke genkender, så
+automatisk komprimering ellers udløses på det forkerte tidspunkt (se advarslen i forrige afsnit).
+Kodestykke-generatoren accepterer også denne værdi, så en kalder, der kender målmodellens vinduesstørrelse,
+kan inkludere den direkte.
 
 Kilde: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (ren
-generator, enhedstestet), vist af `ClaudeGatewayOnboardingBlock`.
+generator, enhedstestet), som vises af `ClaudeGatewayOnboardingBlock`.
+
+### Fastlås én konto (valgfrit)
+
+Hvis alle Claude Code-anmodninger skal sendes gennem én bestemt udbyderkonto, skal du tilføje
+`x-omniroute-connection`-headeren via `ANTHROPIC_CUSTOM_HEADERS` i den samme `env`-blok:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Kopiér id'et fra `xxxxxxxx…`-chippen på forbindelsesrækken på udbydersiden. Fastlåsningen gælder kun
+for id'er med én model (`provider/model`), ikke for kombinationer. Se
+[Kontofastlåsning pr. anmodning](../reference/API_REFERENCE.md#account-pinning-per-request) for den
+præcise fallback-adfærd.
 
 ---
 
 ## Profiler (`CLAUDE_CONFIG_DIR`)
 
 Claude Code har **ingen indbyggede profilfiler** (i modsætning til Codex' `~/.codex/<name>.config.toml`).
-Den anbefalede mekanisme er `CLAUDE_CONFIG_DIR` — en separat konfigurationsmappe for hver
+Den idiomatiske mekanisme er `CLAUDE_CONFIG_DIR` — en separat konfigurationsmappe for hver
 profil, hver med sin egen `settings.json`, legitimationsoplysninger, historik og cache.
 
 `omniroute setup-claude` henter det aktuelle `/v1/models`-katalog og skriver én
-profil pr. model i `~/.claude/profiles/<name>/settings.json` ved at genbruge
-**de samme navne som `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
+profil pr. model til `~/.claude/profiles/<name>/settings.json` og genbruger de
+**samme navne som `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -149,15 +170,15 @@ profil pr. model i `~/.claude/profiles/<name>/settings.json` ved at genbruge
 ```
 
 > **Godkendelsestokenet skrives aldrig til profilen.** Start med
-> `omniroute launch --profile <name>` (den injicerer `ANTHROPIC_AUTH_TOKEN` fra den
+> `omniroute launch --profile <name>` (den indsætter `ANTHROPIC_AUTH_TOKEN` fra den
 > aktive kontekst), eller eksportér selv `ANTHROPIC_AUTH_TOKEN`, og kør
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Automatisk synkronisering efter modelregistrering (valgfrit).** OmniRoute kan automatisk regenerere de samme
-`~/.claude/profiles/<name>/settings.json`-filer, hver gang en synkronisering af udbydermodeller
-ændrer det aktuelle katalog — så nye eller omdøbte modeller får profiler, uden at kommandoen skal køres igen.
-Det er **deaktiveret som standard**: slå det til fra **CLI Code-dashboardet** ("Automatisk synkronisering af
-CLI-profiler" → Claude Code), eller indstil `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (den respekterer også
+**Automatisk synkronisering efter modelregistrering (tilvalg).** OmniRoute kan automatisk gendanne disse
+samme `~/.claude/profiles/<name>/settings.json`-filer, hver gang en synkronisering af udbydermodeller
+ændrer det aktuelle katalog — så nye modeller og modeller med ændrede navne får profiler, uden at
+kommandoen skal køres igen. Funktionen er **deaktiveret som standard**: Slå den til fra **CLI Code-dashboardet** ("Automatisk
+synkronisering af CLI-profiler" → Claude Code), eller angiv `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (den respekterer også
 `CLI_ALLOW_CONFIG_WRITES`, som er aktiveret som standard). Når funktionen er aktiveret, skriver den kun profilfiler; den ændrer aldrig
 din aktive Claude-standardkonfiguration, godkendelse eller `~/.claude/settings.json`.
 
@@ -170,8 +191,12 @@ omniroute setup-claude
 # Ekstern VPS (indlejrer VPS-URL'en i hver profil)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
-# Kun nogle udbydere
+# Kun visse udbydere
 omniroute setup-claude --only glm,kimi
+
+# Skriv også profiler for lokale CLI-udbydere (zcode, auggie, devin-cli-agentic,
+# codex-app-server), som ikke registreres på denne vært (udelades som standard for et lokalt mål)
+omniroute setup-claude --include-local
 
 # Forhåndsvisning uden at skrive
 omniroute setup-claude --dry-run

@@ -66,6 +66,7 @@ export const VISION_MODEL_ID_FRAGMENTS = [
   "gemini-1.5",
   "gemini-2",
   "gemini-3",
+  "gemini-4",
   "gemini-exp",
   "claude-3",
   "claude-fable",

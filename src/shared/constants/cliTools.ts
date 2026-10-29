@@ -242,9 +242,9 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
     acpSpawnable: false,
     baseUrlSupport: "none",
     modelAliases: [
-      "gemini-3.7-flash-high",
-      "gemini-3.7-flash-medium",
-      "gemini-3.7-flash-low",
+      "gemini-3.8-flash-high",
+      "gemini-3.8-flash-medium",
+      "gemini-3.8-flash-low",
       "claude-opus-4-6-thinking",
       "claude-sonnet-4-6",
       "gemini-pro-agent",
@@ -252,9 +252,9 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
       "gpt-oss-120b-medium",
     ],
     defaultModels: [
-      createCliModel("gemini-3.7-flash-high", "Gemini 3.7 Flash High"),
-      createCliModel("gemini-3.7-flash-medium", "Gemini 3.7 Flash Medium"),
-      createCliModel("gemini-3.7-flash-low", "Gemini 3.7 Flash Low"),
+      createCliModel("gemini-3.8-flash-high", "Gemini 3.8 Flash High"),
+      createCliModel("gemini-3.8-flash-medium", "Gemini 3.8 Flash Medium"),
+      createCliModel("gemini-3.8-flash-low", "Gemini 3.8 Flash Low"),
       createCliModel("gemini-pro-agent", "Gemini 3.1 Pro High"),
       createCliModel("gemini-3.1-pro-low", "Gemini 3.1 Pro Low"),
       createCliModel("claude-sonnet-4-6", "Claude Sonnet 4.6"),
@@ -710,6 +710,49 @@ aider --openai-api-base "{{baseUrl}}" --model "{{model}}"`,
     defaultCommand: "crush",
   },
 
+  /** Zed editor's built-in agent via an OpenAI-compatible provider (`omniroute setup-zed`). */
+  zed: {
+    id: "zed",
+    name: "Zed",
+    image: "/providers/zed-hosted.svg",
+    color: "#084CCF",
+    description: "Zed code editor — built-in agent through an OpenAI-compatible provider",
+    docsUrl: "https://zed.dev/docs/ai/llm-providers#openai-api-compatible",
+    configType: "guide",
+    category: "code",
+    vendor: "Zed Industries",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    guideSteps: [
+      { step: 1, title: "Install Zed", desc: "Download Zed from zed.dev" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+    ],
+    codeBlock: {
+      language: "json",
+      code: `// ~/.config/zed/settings.json — or run: omniroute setup-zed
+{
+  "language_models": {
+    "openai_compatible": {
+      "omniroute": {
+        "api_url": "{{baseUrl}}",
+        "available_models": [
+          { "name": "{{model}}", "display_name": "{{model}}", "max_tokens": 200000 }
+        ]
+      }
+    }
+  }
+}`,
+    },
+    notes: [
+      {
+        type: "info",
+        text: "Zed reads the key from the OMNIROUTE_API_KEY environment variable and never stores it in settings.json. Export it, then start Zed from that shell.",
+      },
+    ],
+  },
+
   // ── Agent entries ─────────────────────────────────────────────────────────
 
   /** ★ Added by plan 14 (CLI Pages Redesign) — 2026-05-27 */
@@ -871,7 +914,7 @@ OPENAI_API_KEY: "{{apiKey}}"`,
     ],
   },
 
-  /** ★ 5dive agent fleets (diegosouzapw/OmniRoute#11578) — 2026-08-28 */
+  /** ★ 5dive agent fleets (cheaper-inference/OmniRoute#11578) — 2026-08-28 */
   "5dive": {
     id: "5dive",
     name: "5dive",
@@ -906,6 +949,61 @@ OPENAI_API_KEY: "{{apiKey}}"`,
       {
         type: "warning",
         text: "Writing a 5dive auth profile is root-only, and each agent's own runtime model pin outranks the profile's model default — pass --agent <name> to pin the seats too.",
+      },
+    ],
+  },
+
+  /** ★ WhyCodes CLI agent (diegosouzapw/OmniRoute#14096) — 2026-09-18 */
+  whycodes: {
+    id: "whycodes",
+    name: "WhyCodes",
+    icon: "terminal",
+    color: "#2563EB",
+    description:
+      "WhyCodes — broad-purpose autonomous CLI agent (TUI, named agents, tools, memory); OpenAI-compatible base URL points at OmniRoute",
+    docsUrl: "https://github.com/whycorporation/whycodes",
+    configType: "custom",
+    category: "agent",
+    vendor: "Why Corporation",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "whycodes",
+    settingsFile: "$WHYCODES_HOME/config.toml",
+    guideSteps: [
+      {
+        step: 1,
+        title: "Install WhyCodes",
+        desc: "Install WhyCodes with Homebrew (brew tap whycorporation/whycodes https://github.com/whycorporation/whycodes && brew install whycorporation/whycodes/whycodes), a release binary, or cargo — see https://github.com/whycorporation/whycodes#installation",
+      },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+      {
+        step: 5,
+        title: "Write the provider",
+        desc: "omniroute setup-whycodes --model <id>   (or: whycodes provider add omniroute --api-key <key> --base-url <origin>/v1)",
+      },
+    ],
+    codeBlock: {
+      language: "toml",
+      code: `[providers.omniroute]
+name = "omniroute"
+base_url = "{{baseUrl}}"
+api_key = "{{apiKey}}"
+
+[default_model]
+provider_id = "omniroute"
+model_id = "{{model}}"
+supports_tools = true`,
+    },
+    notes: [
+      {
+        type: "info",
+        text: "WhyCodes talks Chat Completions at /v1/chat/completions. Config lives at $WHYCODES_HOME/config.toml, or ~/.whycodes/config.toml (%USERPROFILE%\\.whycodes on Windows); `whycodes config path` prints it.",
+      },
+      {
+        type: "warning",
+        text: "whycodes acp is not implemented — this card is not ACP-spawnable.",
       },
     ],
   },

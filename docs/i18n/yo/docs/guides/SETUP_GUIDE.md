@@ -138,62 +138,63 @@ omniroute providers validate
 
 ## Ìṣètò Ohun Èlò CLI
 
-### 1) So Àwọn Olùpèsè Pọ̀ kí o sì Ṣẹ̀dá Kọ́kọ́rọ́ API
+### 1) So Àwọn Olùpèsè pọ̀ kí o sì Ṣẹ̀dá API Key
 
-1. Ṣí Dashboard → `Providers`, kí o sì so ó kéré tán olùpèsè kan pọ̀ (OAuth tàbí kọ́kọ́rọ́ API).
-2. Ṣí Dashboard → `Endpoints`, kí o sì ṣẹ̀dá kọ́kọ́rọ́ API kan.
-3. (Kì í ṣe dandan) Ṣí Dashboard → `Combos`, kí o sì ṣètò ẹ̀wọ̀n ìgbàpadà rẹ.
+1. Ṣí Dashboard → `Providers` kí o sì so ó kéré tán mọ́ olùpèsè kan (OAuth tàbí API key).
+2. Ṣí Dashboard → `Endpoints` kí o sì ṣẹ̀dá API key kan.
+3. (Àṣàyàn) Ṣí Dashboard → `Combos` kí o sì ṣètò ẹ̀wọ̀n ìpadà-sẹ́yìn rẹ.
 
-### 2) Darí Ohun Èlò Kíkọ Kóòdù Rẹ
+### 2) Darí Ohun Èlò Ìkọ Kóòdù Rẹ
 
 ```txt
 URL Ìpìlẹ̀: http://localhost:20128/v1
-Kọ́kọ́rọ́ API:  [dà á láti ojú-ìwé Endpoint]
-Àwòṣe:    if/qwen3.8-max-preview (tàbí ìpele-àkọ́kọ́ olùpèsè/àwòṣe èyíkéyìí)
+API Key:    [dà á kọ láti ojú-ìwé Endpoint]
+Módẹ́lì:    if/qwen3.8-max-preview (tàbí ìpele ìbẹ̀rẹ̀ olùpèsè/módẹ́lì èyíkéyìí)
 ```
 
-Tí olóòtú rẹ kò bá lè fi `Authorization: Bearer ...` ránṣẹ́, lo ìpìlẹ̀ ìbámu tó ní àmì ìdánimọ̀ dípò rẹ̀:
+Tí olóòtú rẹ kò bá lè fi `Authorization: Bearer ...` ránṣẹ́, lo ìpìlẹ̀ ìbámu tí a fi token sí dípò rẹ:
 
 ```txt
 URL Ìpìlẹ̀: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-URL Àwọn Àwòṣe: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+URL Àwọn Módẹ́lì: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
 URL Ìfọ̀rọ̀wérọ̀: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-URL Àwọn Táàgì Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+URL Àwọn Tags Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
 Ó ń ṣiṣẹ́ pẹ̀lú Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, àti àwọn SDK tó bá OpenAI mu.
 
-#### Ṣètò láìfọwọ́ṣe pẹ̀lú `setup-*`
+#### Ṣètò rẹ̀ láìfọwọ́ṣe pẹ̀lú `setup-*`
 
-Dípò lílẹ URL ìpìlẹ̀ àti kọ́kọ́rọ́ mọ́lẹ̀ lọ́wọ́, jẹ́ kí OmniRoute kọ àtòpọ̀ tirẹ̀ fún ohun èlò kọ̀ọ̀kan
-láti inú àkójọ àwòṣe tó ń ṣiṣẹ́. Àṣẹ kan fún ohun èlò kọ̀ọ̀kan:
+Dípò lílẹ URL ìpìlẹ̀ àti kọ́kọ́rọ́ náà mọ́lẹ̀ lọ́wọ́, jẹ́ kí OmniRoute kọ
+ìṣètò ohun èlò kọ̀ọ̀kan láti inú àkójọ àwọn módẹ́lì tó ń ṣiṣẹ́. Àṣẹ kan fún ohun èlò kọ̀ọ̀kan:
 
 ```bash
-omniroute setup-codex        # Àwọn prófáìlì ~/.codex/<name>.config.toml
+omniroute setup-codex        # àwọn prófáìlì ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (ó bá OpenAI mu)
-omniroute setup-cline        # Àwọn ààtò Cline CLI + ẹ̀kúnrẹ́rẹ́ VS Code
+omniroute setup-cline        # Àwọn ìṣètò Cline CLI + àfikún VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Ó tẹ àwọn ìgbésẹ̀ inú ètò Cursor jáde
+omniroute setup-cursor       # ń tẹ àwọn ìgbésẹ̀ inú ètò Cursor jáde
 omniroute setup-roo          # Ìgbéwọlé Roo Code + atọ́ka autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
 Ọ̀kọ̀ọ̀kan gba `--remote <url> --api-key <key>` láti ṣètò ohun èlò agbègbè kan láti ṣiṣẹ́ pẹ̀lú
-OmniRoute **àjìnnà**, àti `--dry-run` fún àwòtẹ́lẹ̀. Láti ṣe ìfilọ́lẹ̀ CLI kan pẹ̀lú env tó tọ́
-tí a ti fi sínú rẹ̀ láìkọ àtòpọ̀ kankan rárá, lo olùfilọ́lẹ̀ gbogbogbò
+OmniRoute **jíjìnnà**, àti `--dry-run` láti wo àgbéyẹ̀wò. Láti bẹ̀rẹ̀ CLI kan pẹ̀lú env tó tọ́
+tí a ti fi sínú rẹ̀ láìkọ ìṣètò kankan rárá, lo olùbẹ̀rẹ̀ gbogbogbò
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-àwọn olùfilọ́lẹ̀ àtijọ́ fún ohun èlò kọ̀ọ̀kan `omniroute launch` (Claude Code) àti
+àwọn olùbẹ̀rẹ̀ ohun èlò kọ̀ọ̀kan ti àtijọ́ `omniroute launch` (Claude Code) àti
 `omniroute launch-codex` (Codex) ṣì wà fún lílò.
 
-Fún tábìlì kíkún (ohun tí àṣẹ kọ̀ọ̀kan ń kọ, gbogbo àsíá, agbègbè ní ìfiwéra pẹ̀lú àjìnnà, àti àwọn àṣà URL-ìpìlẹ̀
+Fún tábìlì kíkún (ohun tí àṣẹ kọ̀ọ̀kan ń kọ, gbogbo flag, agbègbè sí jíjìnnà, àwọn àṣà URL ìpìlẹ̀
 `/v1`), wo **[Àwọn Ìṣọ̀kan CLI](./CLI-INTEGRATIONS.md)**.
 
-Fún ìṣètò alálàyé fún ohun èlò kọ̀ọ̀kan (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ), wo **[Ìtọ́sọ́nà Àwọn Ohun Èlò CLI](../reference/CLI-TOOLS.md)** tí a yà sọ́tọ̀.
+Fún ìṣètò alálàyé ohun èlò kọ̀ọ̀kan (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, àti àwọn mìíràn), wo **[Ìtọ́sọ́nà Àwọn Ohun Èlò CLI](../reference/CLI-TOOLS.md)** tí a yà sọ́tọ̀.
 
 ---
 
@@ -324,7 +325,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Àdàkọ Void Linux (xbps-src)
 
-Fún àwọn olùlò Void Linux, ẹ lè kọ package abínibí nípa lílo `xbps-src`. Fi ìdípọ̀ yìí pamọ́ gẹ́gẹ́ bí `srcpkgs/omniroute/template`:
+Fún àwọn olùlò Void Linux, ẹ lè kọ́ package abínibí nípa lílo `xbps-src`. Fi ìdíwọ̀n yìí pamọ́ gẹ́gẹ́ bí `srcpkgs/omniroute/template`:
 
 ```bash
 # Fáìlì àdàkọ fún 'omniroute'
@@ -338,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Ṣẹ̀dá checksum náà padà fún ìtújáde kọ̀ọ̀kan pẹ̀lú:
+# Ṣe àtúnṣẹ̀dá checksum fún ìtújáde kọ̀ọ̀kan pẹ̀lú:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

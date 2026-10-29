@@ -142,7 +142,7 @@ omniroute providers validate
 
 1. Atveriet informācijas paneli → `Providers` un pievienojiet vismaz vienu pakalpojumu sniedzēju (OAuth vai API atslēgu).
 2. Atveriet informācijas paneli → `Endpoints` un izveidojiet API atslēgu.
-3. (Neobligāti) Atveriet informācijas paneli → `Combos` un iestatiet rezerves ķēdi.
+3. (Neobligāti) Atveriet informācijas paneli → `Combos` un iestatiet savu rezerves secību.
 
 ### 2) Konfigurējiet savu programmēšanas rīku
 
@@ -165,35 +165,36 @@ Darbojas ar Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode un ar Open
 
 #### Automātiska konfigurēšana ar `setup-*`
 
-Tā vietā, lai manuāli ielīmētu bāzes URL un atslēgu, ļaujiet OmniRoute izveidot katra rīka
-konfigurāciju no aktuālā modeļu kataloga. Viena komanda katram rīkam:
+Tā vietā, lai manuāli ievadītu bāzes URL un atslēgu, ļaujiet OmniRoute izveidot katra rīka
+konfigurāciju no aktuālā modeļu kataloga. Katram rīkam viena komanda:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml profili
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (saderīgs ar openai)
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (saderīgs ar OpenAI)
 omniroute setup-cline        # Cline CLI + VS Code paplašinājuma iestatījumi
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # izdrukā Cursor lietotnē veicamās darbības
+omniroute setup-cursor       # izvada Cursor lietotnē veicamās darbības
 omniroute setup-roo          # Roo Code imports + autoImport rādītājs
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
 Katra komanda pieņem `--remote <url> --api-key <key>`, lai konfigurētu lokālu rīku darbam ar
-**attālu** OmniRoute, kā arī `--dry-run` priekšskatījumam. Lai palaistu CLI ar ievadītu pareizo
-vidi, vispār neierakstot konfigurāciju, izmantojiet vispārīgo palaidēju
+**attālu** OmniRoute, kā arī `--dry-run` priekšskatīšanai. Lai palaistu CLI ar ievadītu pareizo
+vidi, vispār neizveidojot konfigurāciju, izmantojiet vispārīgo palaidēju
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-joprojām ir pieejami mantotie atsevišķu rīku palaidēji `omniroute launch` (Claude Code) un
+joprojām ir pieejami mantotie katram rīkam paredzētie palaidēji `omniroute launch` (Claude Code) un
 `omniroute launch-codex` (Codex).
 
-Pilnu tabulu (ko katra komanda ieraksta, visi karodziņi, lokālais un attālais režīms, bāzes URL
-`/v1` principi) skatiet sadaļā **[CLI integrācijas](./CLI-INTEGRATIONS.md)**.
+Pilnu tabulu (ko katra komanda ieraksta, visus karogus, lokālo un attālo režīmu, bāzes URL
+`/v1` konvencijas) skatiet sadaļā **[CLI integrācijas](./CLI-INTEGRATIONS.md)**.
 
-Detalizētu katra rīka konfigurāciju (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot un citiem) skatiet atsevišķajā **[CLI rīku ceļvedī](../reference/CLI-TOOLS.md)**.
+Detalizētu katra rīka konfigurāciju (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot un citiem) skatiet īpašajā **[CLI rīku ceļvedī](../reference/CLI-TOOLS.md)**.
 
 ---
 
@@ -322,7 +323,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) veidne
+## Void Linux (`xbps-src`) veidne
 
 Void Linux lietotāji var izveidot vietējo pakotni, izmantojot `xbps-src`. Saglabājiet šo bloku kā `srcpkgs/omniroute/template`:
 
@@ -338,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Ģenerējiet kontrolsummu no jauna katram laidienam, izmantojot:
+# Atkārtoti ģenerējiet kontrolsummu katram laidienam ar:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

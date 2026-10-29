@@ -10,6 +10,7 @@ import {
   setCliVersionOverrides,
   type CliVersionOverrides,
 } from "@/shared/constants/cliVersions";
+import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -260,7 +261,14 @@ function normalizeAuthzBypass(settings: Record<string, unknown>): AuthzBypassSna
         new Set(
           rawPrefixes
             .map((entry) => (typeof entry === "string" ? entry.trim() : ""))
-            .filter((entry) => entry.length > 0 && entry.startsWith("/"))
+            // Defence-in-depth (Hard Rules #15/#17): the settings PATCH schema already
+            // refuses spawn-capable prefixes, but other write paths (legacy JSON import,
+            // full DB restore, hand-edited rows) bypass that schema. Never let one of
+            // them become a live bypass entry.
+            .filter(
+              (entry) =>
+                entry.length > 0 && entry.startsWith("/") && !isSpawnCapableBypassPrefix(entry)
+            )
         )
       )
     : [...DEFAULT_AUTHZ_BYPASS_SNAPSHOT.prefixes];

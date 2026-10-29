@@ -44,7 +44,12 @@ export function isSubscriptionQuotaText(lower: string, provider?: string | null)
     // Native Claude uses this wording for a long-window quota 429. Fresh quota
     // evidence decides model versus connection scope; other providers may use
     // the same phrase for a short RPM throttle.
-    (provider === "claude" && lower.includes("this request would exceed your account's rate limit"))
+    (provider === "claude" &&
+      lower.includes("this request would exceed your account's rate limit")) ||
+    // Native Claude returns this 429 once the account's monthly extra-usage spend cap is reached.
+    // It clears only when the billing month rolls over or the cap is raised, so it must park the
+    // connection like any other long-window quota instead of falling into the ~5s generic backoff.
+    (provider === "claude" && lower.includes("monthly spend limit"))
   );
 }
 
@@ -118,7 +123,12 @@ export function buildWeeklyQuotaFallback(
   provider?: string | null
 ): QuotaTextFallback | null {
   if (!isWeeklyUsageLimitText(errorStr.toLowerCase())) return null;
-  const parsedResetMs = parseDayGranularityResetMs(errorStr, MAX_WEEKLY_QUOTA_COOLDOWN_MS, nowMs, provider);
+  const parsedResetMs = parseDayGranularityResetMs(
+    errorStr,
+    MAX_WEEKLY_QUOTA_COOLDOWN_MS,
+    nowMs,
+    provider
+  );
   const cooldownMs =
     typeof parsedResetMs === "number" && parsedResetMs > 0
       ? parsedResetMs

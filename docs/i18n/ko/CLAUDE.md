@@ -8,13 +8,18 @@
 
 **모든 프로젝트 규칙은 [`AGENTS.md`](AGENTS.md)에 있습니다** — 모든 AI 어시스턴트가 따라야 할 아키텍처, 규칙, 테스트, 품질 게이트, git 워크플로, 23개의 필수 규칙, PII 관련 교훈을 담은 단일 진실 공급원입니다. 전체 내용을 읽으십시오. 프로젝트 규칙을 여기에 다시 추가하지 마십시오. 아래의 모든 내용은 Claude Code에만 적용되며, `AGENTS.md`에 이미 정의된 규칙을 운영 측면에서 보완합니다.
 
-## Worktree 격리 — Claude Code 관련 사항
+## Worktree 격리 — Claude Code 고유 사항
 
-필수 worktree 프로토콜 전체(기준 브랜치 확인, `.claude/worktrees/` 표준 경로, `cp -al` node_modules, 정리 규칙)는 `AGENTS.md` → Git Workflow → "Worktree isolation"에 있습니다. Claude Code 관련 사항:
+전체 필수 worktree 프로토콜(베이스 브랜치 확인, `.claude/worktrees/` 정규 경로,
+`cp -al` node_modules, 해체 규칙)은
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)에 있습니다 (`AGENTS.md` →
+Git 워크플로 → "Worktree 격리"에 요약됨). Claude Code 고유 사항:
 
-- 운영자가 기준 브랜치를 이미 알려주지 않았다면 `AskUserQuestion`을 통해 확인하십시오(필수 규칙 #19).
-- 네이티브 `EnterWorktree` 도구를 우선 사용하십시오. 이 도구는 이미 표준 경로인 `.claude/worktrees/` 아래에 worktree를 생성합니다. 문서에 명시된 `git
-worktree add` 명령으로 worktree를 생성한 다음 해당 `path`를 사용하여 `EnterWorktree`를 호출하십시오.
+- 운영자가 이미 알려주지 않은 한 `AskUserQuestion`(하드 규칙 #19)을 통해 운영자에게
+  베이스 브랜치를 확인하세요.
+- 네이티브 `EnterWorktree` 도구를 우선적으로 사용하세요 — 이 도구는 이미
+  `.claude/worktrees/`(정규 경로) 아래에 worktree를 생성합니다. 문서에 나온 `git worktree add`
+  명령으로 worktree를 생성한 다음, 그 `path`를 지정하여 `EnterWorktree`를 호출하세요.
 
 ## 세션 간 안전성 — Claude Code 관련 사항
 

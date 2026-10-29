@@ -15,19 +15,19 @@ UI/UX, i18n, CLI, ഡാറ്റാബേസ്, ബിൽഡ്/ഡിപ്�
 
 ## ഡെവലപ്മെന്റ് സജ്ജീകരണം
 
-### മുൻകൂർ ആവശ്യകതകൾ
+### മുൻവ്യവസ്ഥകൾ
 
-- **Node.js** `>=22.22.3 <23`, അല്ലെങ്കിൽ `>=24.0.0 <27` (ശുപാർശ ചെയ്യുന്നത്: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, അല്ലെങ്കിൽ `>=24.0.0 <27` (ശുപാർശ ചെയ്യുന്നത്: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ ഉപയോക്താക്കൾ (Node 24+):** `npm install` പ്രവർത്തിപ്പിച്ച ശേഷം നേറ്റീവ് മൊഡ്യൂളുകൾ ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ടെന്ന് പരിശോധിക്കുക:
+> **npm v11+ ഉപയോക്താക്കൾ (Node 24+):** `npm install` പ്രവർത്തിപ്പിച്ചതിന് ശേഷം നേറ്റീവ് മൊഡ്യൂളുകൾ ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ടെന്ന് സ്ഥിരീകരിക്കുക:
 > `node -e "require('better-sqlite3')"`. ഇത് `MODULE_NOT_FOUND` എന്ന പിശകോടെ പരാജയപ്പെടുകയാണെങ്കിൽ,
 > `npm approve-scripts better-sqlite3 && npm install` പ്രവർത്തിപ്പിക്കുക. കാണുക:
 > [പ്രശ്നപരിഹാരം](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### ക്ലോൺ ചെയ്ത് ഇൻസ്റ്റാൾ ചെയ്യുക
+### ക്ലോൺ ചെയ്യലും ഇൻസ്റ്റാളേഷനും
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -41,43 +41,43 @@ npm install
 # ടെംപ്ലേറ്റിൽ നിന്ന് നിങ്ങളുടെ .env സൃഷ്ടിക്കുക
 cp .env.example .env
 
-# ആവശ്യമായ രഹസ്യങ്ങൾ സൃഷ്ടിക്കുക
+# ആവശ്യമായ സീക്രട്ടുകൾ സൃഷ്ടിക്കുക
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ഡെവലപ്മെന്റിനുള്ള പ്രധാന വേരിയബിളുകൾ:
+ഡെവലപ്പ്മെന്റിനുള്ള പ്രധാന വേരിയബിളുകൾ:
 
-| വേരിയബിൾ               | ഡെവലപ്മെന്റ് ഡിഫോൾട്ട്   | വിവരണം                       |
-| ---------------------- | ------------------------ | ---------------------------- |
-| `PORT`                 | `20128`                  | സെർവർ പോർട്ട്                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ഫ്രണ്ട്എൻഡിന്റെ അടിസ്ഥാന URL |
-| `JWT_SECRET`           | (മുകളിൽ സൃഷ്ടിക്കുക)     | JWT സൈനിംഗ് രഹസ്യം           |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | ആദ്യ ലോഗിൻ പാസ്വേഡ്          |
-| `APP_LOG_LEVEL`        | `info`                   | ലോഗിന്റെ വിശദാംശനില          |
+| വേരിയബിൾ               | ഡെവലപ്പ്മെന്റ് ഡിഫോൾട്ട് | വിവരണം                        |
+| ---------------------- | ------------------------ | ----------------------------- |
+| `PORT`                 | `20128`                  | സെർവർ പോർട്ട്                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ഫ്രണ്ട്എൻഡിനുള്ള അടിസ്ഥാന URL |
+| `JWT_SECRET`           | (മുകളിൽ സൃഷ്ടിക്കുക)     | JWT സൈനിംഗ് സീക്രട്ട്         |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | ആദ്യ ലോഗിൻ പാസ്വേഡ്           |
+| `APP_LOG_LEVEL`        | `info`                   | ലോഗ് വിശദാംശനില               |
 
 ### ഡാഷ്ബോർഡ് ക്രമീകരണങ്ങൾ
 
-എൻവയോൺമെന്റ് വേരിയബിളുകൾ വഴിയും കോൺഫിഗർ ചെയ്യാവുന്ന സവിശേഷതകൾക്കായി ഡാഷ്ബോർഡ് UI ടോഗിളുകൾ നൽകുന്നു:
+എൻവയോൺമെന്റ് വേരിയബിളുകൾ വഴിയും കോൺഫിഗർ ചെയ്യാനാകുന്ന ഫീച്ചറുകൾക്കായി ഡാഷ്ബോർഡ് UI ടോഗിളുകൾ നൽകുന്നു:
 
-| ക്രമീകരണത്തിന്റെ സ്ഥാനം  | ടോഗിൾ          | വിവരണം                                            |
-| ------------------------ | -------------- | ------------------------------------------------- |
-| ക്രമീകരണങ്ങൾ → വിപുലമായവ | ഡീബഗ് മോഡ്     | ഡീബഗ് അഭ്യർത്ഥനാ ലോഗുകൾ പ്രവർത്തനക്ഷമമാക്കുക (UI) |
-| ക്രമീകരണങ്ങൾ → പൊതുവായത് | സൈഡ്ബാർ ദൃശ്യത | സൈഡ്ബാർ വിഭാഗങ്ങൾ കാണിക്കുക/മറയ്ക്കുക             |
+| ക്രമീകരണ സ്ഥാനം          | ടോഗിൾ          | വിവരണം                                             |
+| ------------------------ | -------------- | -------------------------------------------------- |
+| ക്രമീകരണങ്ങൾ → വിപുലമായവ | ഡീബഗ് മോഡ്     | ഡീബഗ് റിക്വസ്റ്റ് ലോഗുകൾ പ്രവർത്തനക്ഷമമാക്കുക (UI) |
+| ക്രമീകരണങ്ങൾ → പൊതുവായത് | സൈഡ്ബാർ ദൃശ്യത | സൈഡ്ബാർ വിഭാഗങ്ങൾ കാണിക്കുക/മറയ്ക്കുക              |
 
-ഈ ക്രമീകരണങ്ങൾ ഡാറ്റാബേസിൽ സംഭരിക്കപ്പെടുകയും റീസ്റ്റാർട്ടുകൾക്കുശേഷവും നിലനിൽക്കുകയും ചെയ്യും. അവ സജ്ജീകരിച്ചിരിക്കുമ്പോൾ env var ഡിഫോൾട്ടുകളെ അസാധുവാക്കും.
+ഈ ക്രമീകരണങ്ങൾ ഡാറ്റാബേസിൽ സംഭരിക്കുകയും റീസ്റ്റാർട്ടുകൾക്കുശേഷവും നിലനിൽക്കുകയും ചെയ്യുന്നു; അവ സജ്ജീകരിച്ചിട്ടുണ്ടെങ്കിൽ env var ഡിഫോൾട്ടുകളെ മറികടക്കും.
 
 ### ലോക്കലായി പ്രവർത്തിപ്പിക്കൽ
 
 ```bash
-# ഡെവലപ്മെന്റ് മോഡ് (ഹോട്ട് റീലോഡ്)
+# ഡെവലപ്പ്മെന്റ് മോഡ് (ഹോട്ട് റീലോഡ്)
 npm run dev
 
 # പ്രൊഡക്ഷൻ ബിൽഡ്
 npm run build    # next build → .build/next/ തുടർന്ന് assembleStandalone → dist/
 npm run start
 
-# സംഭാവകരുടെ മാറ്റങ്ങൾക്കായുള്ള വേഗത്തിലുള്ള ബാക്ക്എൻഡ്/API-മാത്രം കമ്പൈൽ
+# കോൺട്രിബ്യൂട്ടർ മാറ്റങ്ങൾക്കായി വേഗത്തിലുള്ള ബാക്ക്എൻഡ്/API-മാത്രം കംപൈൽ
 npm run build:contributor
 
 # റിലീസ് ബിൽഡ് (ക്ലീൻ റീബിൽഡ് + HEAD സെന്റിനൽ — ഡിപ്ലോയ്മെന്റിന് ആവശ്യമാണ്)
@@ -87,36 +87,36 @@ npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA എഴു
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-സംഭാവക ബിൽഡ് കമ്പൈൽ-മാത്രം മൂല്യനിർണ്ണയം നടത്തുന്നു: ഇത് സ്റ്റാൻഡ്അലോൺ
+കോൺട്രിബ്യൂട്ടർ ബിൽഡ് കംപൈൽ-മാത്രം വാലിഡേഷൻ നടത്തുന്നു: ഇത് സ്റ്റാൻഡ്എലോൺ
 ഡിസ്ട്രിബ്യൂഷൻ അസംബിൾ ചെയ്യുകയോ ഐച്ഛിക നേറ്റീവ് പാക്കേജിംഗ് അസറ്റുകൾ ബിൽഡ് ചെയ്യുകയോ ചെയ്യുന്നില്ല. വിതരണം ചെയ്യാവുന്ന ബണ്ടിൽ
-മൂല്യനിർണ്ണയം ചെയ്യേണ്ടിവരുമ്പോൾ സാധാരണ പ്രൊഡക്ഷൻ ബിൽഡ് ഉപയോഗിക്കുക.
+വാലിഡേറ്റ് ചെയ്യേണ്ടപ്പോൾ സാധാരണ പ്രൊഡക്ഷൻ ബിൽഡ് ഉപയോഗിക്കുക.
 
-### ബിൽഡ് ഔട്ട്പുട്ട് ലേഔട്ട്
+### ബിൽഡ് ഔട്ട്പുട്ട് ഘടന
 
 | ഡയറക്ടറി  | ഉള്ളടക്കം                                                                        | ട്രാക്ക് ചെയ്യുന്നത് |
 | --------- | -------------------------------------------------------------------------------- | -------------------- |
 | `src/`    | ആപ്ലിക്കേഷൻ സോഴ്സ് (TypeScript / TSX)                                            | അതെ                  |
-| `.build/` | ഇടനില ഫയലുകൾ — `next build` ഔട്ട്പുട്ട് (gitignored, `distDir = .build/next`)    | ഇല്ല                 |
-| `dist/`   | വിതരണം ചെയ്യാവുന്ന ബണ്ടിൽ — `assembleStandalone` അസംബിൾ ചെയ്യുന്നത് (gitignored) | ഇല്ല                 |
+| `.build/` | ഇടക്കാല ഫയലുകൾ — `next build` ഔട്ട്പുട്ട് (gitignored, `distDir = .build/next`)  | അല്ല                 |
+| `dist/`   | വിതരണം ചെയ്യാവുന്ന ബണ്ടിൽ — `assembleStandalone` അസംബിൾ ചെയ്യുന്നത് (gitignored) | അല്ല                 |
 
-ബിൽഡ് പൈപ്പ്ലൈൻ ഒരൊറ്റ പാസിലാണ് പ്രവർത്തിക്കുന്നത്:
+ബിൽഡ് പൈപ്പ്ലൈൻ ഒറ്റ പാസാണ്:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js ഔട്ട്പുട്ട്)
-  └─ assembleStandalone()                 (standalone + static + public + നേറ്റീവ് അസറ്റുകൾ പകർത്തുന്നു)
-       └─ ഔട്ട്പുട്ട്: dist/              (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (സ്റ്റാൻഡ്എലോൺ + സ്റ്റാറ്റിക് + പബ്ലിക് + നേറ്റീവ് അസറ്റുകൾ പകർത്തുന്നു)
+       └─ ഔട്ട്പുട്ട്: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` കൂടാതെ ആദ്യം രണ്ട് ഡയറക്ടറികളും വൃത്തിയാക്കുകയും
-ഡിപ്ലോയ്മെന്റ് സമഗ്രതാ സെന്റിനലായി `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) എഴുതുകയും ചെയ്യുന്നു.
+`npm run build:release` ഇതുകൂടാതെ ആദ്യം രണ്ട് ഡയറക്ടറികളും വൃത്തിയാക്കുകയും ഒരു ഡിപ്ലോയ് സമഗ്രതാ സെന്റിനലായി
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) എഴുതുകയും ചെയ്യുന്നു.
 
 `npm run build:contributor` ബാക്ക്എൻഡ്-മാത്രം ബിൽഡ് പ്രൊഫൈൽ ഉപയോഗിക്കുന്നു. ബിൽഡ് ചെയ്യുമ്പോൾ ഇത് താൽക്കാലികമായി
-ഡാഷ്ബോർഡ് UI ഫയലുകൾക്ക് സ്റ്റബുകൾ പകരം വയ്ക്കുകയും API റൂട്ട് ഹാൻഡ്ലറുകൾ നിലനിർത്തുകയും ബിൽഡിനുശേഷം യഥാർത്ഥ ഫയലുകൾ
+ഡാഷ്ബോർഡ് UI ഫയലുകൾക്ക് പകരം സ്റ്റബുകൾ ഉപയോഗിക്കുകയും API റൂട്ട് ഹാൻഡ്ലറുകൾ നിലനിർത്തുകയും ബിൽഡിന് ശേഷം യഥാർത്ഥ ഫയലുകൾ
 പുനഃസ്ഥാപിക്കുകയും ചെയ്യുന്നു. ഡാഷ്ബോർഡ് UI-യെ ബാധിക്കുന്ന മാറ്റങ്ങൾക്കോ പൂർണ്ണ
-റിലീസ് മൂല്യനിർണ്ണയത്തിനോ `npm run build` ഉപയോഗിക്കുക; സംഭാവക പ്രൊഫൈൽ റിലീസ് ബിൽഡിന് പകരമല്ല.
+റിലീസ് വാലിഡേഷനോ `npm run build` ഉപയോഗിക്കുക; കോൺട്രിബ്യൂട്ടർ പ്രൊഫൈൽ റിലീസ് ബിൽഡിന് പകരമല്ല.
 
-> **VPS ഡിപ്ലോയ്മെന്റ് കുറിപ്പ്:** റിമോട്ട് ഇമേജ് ഡയറക്ടറി `/usr/lib/node_modules/omniroute/app/`
+> **VPS ഡിപ്ലോയ് കുറിപ്പ്:** റിമോട്ട് ഇമേജ് ഡയറക്ടറി `/usr/lib/node_modules/omniroute/app/`
 > മാറ്റമില്ലാതെ തുടരുന്നു. ഡിപ്ലോയ് സ്കില്ലുകൾ `dist/`-ന്റെ ഉള്ളടക്കം അതിലേക്ക് rsync ചെയ്യുന്നു.
 > റിപ്പോസിറ്ററിക്കുള്ളിലെ ബിൽഡ് ഔട്ട്പുട്ട് പാത്ത് മാത്രമാണ് മാറിയത് (`app/` → `dist/`).
 
@@ -174,83 +174,85 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 ## ടെസ്റ്റുകൾ പ്രവർത്തിപ്പിക്കൽ
 
 ```bash
-# എല്ലാ ടെസ്റ്റുകളും (unit + vitest + ecosystem + e2e)
+# എല്ലാ ടെസ്റ്റുകളും (യൂണിറ്റ് + vitest + ഇക്കോസിസ്റ്റം + e2e)
 npm run test:all
 
-# ഒരൊറ്റ test file (Node.js native test runner — മിക്ക ടെസ്റ്റുകളും ഇതാണ് ഉപയോഗിക്കുന്നത്)
+# ഒരൊറ്റ ടെസ്റ്റ് ഫയൽ (Node.js നേറ്റീവ് ടെസ്റ്റ് റണ്ണർ — മിക്ക ടെസ്റ്റുകളും ഇത് ഉപയോഗിക്കുന്നു)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# നിങ്ങളുടെ മാറ്റം ബാധിച്ച unit test-കൾ മാത്രം (CI gate-ലെ അതേ TIA selector, #8084)
-npm run test:scoped            # അവസാന commit-ലെ മാറ്റങ്ങൾ (അല്ലെങ്കിൽ working tree-യിലെവ)
-npm run test:scoped:staged     # staged മാറ്റങ്ങൾ മാത്രം — pre-commit run-നൊപ്പം നന്നായി യോജിക്കുന്നു
-npm run test:scoped:full       # ആദ്യം import-graph map വീണ്ടും നിർമ്മിക്കുക (file-കൾ ചേർത്ത/നീക്കിയ ശേഷം)
-# Exit 1 + "run the full suite" എന്നത് ഒരു hub file (tsconfig, package.json, …) അല്ലെങ്കിൽ
-# map ചെയ്തിട്ടില്ലാത്ത source മാറിയെന്നാണ് അർത്ഥം — selector സുരക്ഷിതമായി പരാജയപ്പെടും; അത് ഒരിക്കലും നിശ്ശബ്ദമായി ഒഴിവാക്കില്ല.
+# നിങ്ങളുടെ മാറ്റം ബാധിക്കുന്ന യൂണിറ്റ് ടെസ്റ്റുകൾ മാത്രം (CI ഗേറ്റിന്റെ അതേ TIA സെലക്ടർ, #8084)
+npm run test:scoped            # അവസാന കമ്മിറ്റിലെ മാറ്റങ്ങൾ (അല്ലെങ്കിൽ വർക്കിങ് ട്രീയിലെ മാറ്റങ്ങൾ)
+npm run test:scoped:staged     # സ്റ്റേജ് ചെയ്ത മാറ്റങ്ങൾ മാത്രം — പ്രീ-കമ്മിറ്റ് റണ്ണിനൊപ്പം നന്നായി പ്രവർത്തിക്കുന്നു
+npm run test:scoped:full       # ആദ്യം ഇംപോർട്ട്-ഗ്രാഫ് മാപ്പ് പുനർനിർമ്മിക്കുന്നു (ഫയലുകൾ ചേർത്തതിനോ നീക്കിയതിനോ ശേഷം)
+# Exit 1 + "പൂർണ്ണ സ്യൂട്ട് പ്രവർത്തിപ്പിക്കുക" എന്നതിന്റെ അർത്ഥം ഒരു ഹബ് ഫയൽ (tsconfig, package.json, …) അല്ലെങ്കിൽ
+# മാപ്പ് ചെയ്യാത്ത സോഴ്സ് മാറിയെന്നാണ് — സെലക്ടർ സുരക്ഷിതമായി പരാജയപ്പെടുന്നു; അത് ഒരിക്കലും നിശ്ശബ്ദമായി ഒഴിവാക്കില്ല.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (MCP സെർവർ, autoCombo, കാഷ്)
 npm run test:vitest
 
-# E2E test-കൾ (Playwright ആവശ്യമാണ്)
+# E2E ടെസ്റ്റുകൾ (Playwright ആവശ്യമാണ്)
 npm run test:e2e
 
-# Protocol client-കളുടെ E2E (MCP transports, A2A)
+# പ്രോട്ടോക്കോൾ ക്ലയന്റുകളുടെ E2E (MCP ട്രാൻസ്പോർട്ടുകൾ, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem compatibility test-കൾ
+# ഇക്കോസിസ്റ്റം അനുയോജ്യതാ ടെസ്റ്റുകൾ
 npm run test:ecosystem
 
-# Coverage gate: statements/lines/functions/branches-ന് 60%
+# കവറേജ് ഗേറ്റ്: സ്റ്റേറ്റ്മെന്റുകൾ/ലൈനുകൾ/ഫങ്ഷനുകൾ/ബ്രാഞ്ചുകൾ എന്നിവയ്ക്ക് 60%
 npm run test:coverage
 npm run coverage:report
 
-# Lint + format പരിശോധന
+# ലിന്റ് + ഫോർമാറ്റ് പരിശോധന
 npm run lint
 npm run check
 
-# Gate ചെയ്ത real-upstream combo smoke (VPS access + യഥാർത്ഥ provider credits ആവശ്യമാണ്)
-# യഥാർത്ഥ provider-കളെ ഉപയോഗിക്കുന്നു — ചെറിയ ചെലവുണ്ടാകും. CI-യിൽ ഒരിക്കലും പ്രവർത്തിക്കില്ല. Gate ഇല്ലെങ്കിൽ പ്രശ്നമില്ലാതെ ഒഴിവാക്കും.
-# ആവശ്യമാണ്: ssh root@192.168.0.15 access (VPS-ൽനിന്ന് read-only DB snapshot source ചെയ്യുന്നു).
+# ഗേറ്റ് ചെയ്ത യഥാർത്ഥ-അപ്സ്ട്രീം കോംബോ സ്മോക്ക് ടെസ്റ്റ് (VPS ആക്സസ് + യഥാർത്ഥ പ്രൊവൈഡർ ക്രെഡിറ്റുകൾ ആവശ്യമാണ്)
+# യഥാർത്ഥ പ്രൊവൈഡറുകളെയാണ് സമീപിക്കുന്നത് — ചെറിയ ചെലവുണ്ടാകും. CI-യിൽ ഒരിക്കലും പ്രവർത്തിക്കില്ല. ഗേറ്റ് ഇല്ലെങ്കിൽ പ്രശ്നമില്ലാതെ ഒഴിവാക്കപ്പെടും.
+# ആവശ്യമാണ്: ssh root@192.168.0.15 ആക്സസ് (VPS-ൽ നിന്ന് റീഡ്-ഒൺലി DB സ്നാപ്പ്ഷോട്ട് സോഴ്സ് ചെയ്യുന്നു).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — സാധാരണ Node ESM script-കൾ, live .15 server-നെ നേരിട്ട് ഉപയോഗിക്കുന്നു.
-# ആവശ്യമാണ്: ssh root@192.168.0.15 access (combo-കൾ SSH sqlite വഴി സൃഷ്ടിക്കുകയും നീക്കം ചെയ്യുകയും ചെയ്യുന്നു).
-# യഥാർത്ഥ provider-കളെ ഉപയോഗിക്കുന്നു (ചെറിയ ചെലവ്). __live_test__* combo-കൾ മാത്രം സൃഷ്ടിക്കുന്നു/നീക്കംചെയ്യുന്നു. CI-യിൽ ഒരിക്കലും പ്രവർത്തിക്കില്ല.
-# .15-ൽ REQUIRE_API_KEY=false ആയതിനാൽ API key ആവശ്യമില്ല, എന്നാൽ സജ്ജീകരിച്ചിട്ടുണ്ടെങ്കിൽ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY മാനിക്കും.
-npm run test:combo:live:vps              # 7 HTTP സാഹചര്യങ്ങൾ (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # യഥാർത്ഥ cross-provider failover സാഹചര്യം ചേർക്കുന്നു (ആകെ 8)
+# ഘട്ടം-3 VPS ലൈവ് സ്മോക്ക് ടെസ്റ്റ് — സാധാരണ Node ESM സ്ക്രിപ്റ്റുകൾ, ലൈവ് .15 സെർവറിനെ നേരിട്ട് സമീപിക്കുന്നു.
+# ആവശ്യമാണ്: ssh root@192.168.0.15 ആക്സസ് (SSH sqlite വഴി കോംബോകൾ സൃഷ്ടിക്കുകയും നീക്കം ചെയ്യുകയും ചെയ്യുന്നു).
+# യഥാർത്ഥ പ്രൊവൈഡറുകളെയാണ് സമീപിക്കുന്നത് (ചെറിയ ചെലവ്). __live_test__* കോംബോകൾ മാത്രമേ സൃഷ്ടിക്കുകയോ ഇല്ലാതാക്കുകയോ ചെയ്യൂ. CI-യിൽ ഒരിക്കലും പ്രവർത്തിക്കില്ല.
+# .15-ൽ REQUIRE_API_KEY=false ആയതിനാൽ API കീ ആവശ്യമില്ല, എന്നാൽ സജ്ജീകരിച്ചിട്ടുണ്ടെങ്കിൽ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY മാനിക്കുന്നു.
+npm run test:combo:live:vps              # 7 HTTP സാഹചര്യങ്ങൾ (പ്രയോറിറ്റി/റൗണ്ട്-റോബിൻ/വെയ്റ്റഡ്/കോസ്റ്റ്/ഫ്യൂഷൻ/ഓട്ടോ + ഹെൽത്ത്)
+npm run test:combo:live:vps:failover     # യഥാർത്ഥ ക്രോസ്-പ്രൊവൈഡർ ഫെയിൽഓവർ സാഹചര്യം ചേർക്കുന്നു (ആകെ 8)
 ```
 
-Coverage കുറിപ്പുകൾ:
+കവറേജ് കുറിപ്പുകൾ:
 
-- `npm run test:coverage` പ്രധാന unit test suite-ന്റെ source coverage അളക്കുന്നു, `tests/**` ഒഴിവാക്കുന്നു, കൂടാതെ `open-sse/**` ഉൾപ്പെടുത്തുന്നു
-- Pull request-കൾ statements/lines/functions/branches-നുള്ള coverage gate **60%+** ആയി നിലനിർത്തണം
-- ഒരു PR `src/`, `open-sse/`, `electron/`, അല്ലെങ്കിൽ `bin/` എന്നതിലെ production code മാറ്റുന്നുവെങ്കിൽ, അതേ PR-ൽ automated test-ുകൾ ചേർക്കുകയോ പുതുക്കുകയോ വേണം
-- `npm run coverage:report` ഏറ്റവും പുതിയ coverage run-ൽനിന്നുള്ള വിശദമായ file-by-file report പ്രിന്റ് ചെയ്യുന്നു
-- `npm run test:coverage:legacy` ചരിത്രപരമായ താരതമ്യത്തിനായി പഴയ metric നിലനിർത്തുന്നു
-- ഘട്ടംഘട്ടമായ coverage മെച്ചപ്പെടുത്തൽ roadmap-നായി `docs/ops/COVERAGE_PLAN.md` കാണുക
+- `npm run test:coverage` പ്രധാന യൂണിറ്റ് ടെസ്റ്റ് സ്യൂട്ടിന്റെ സോഴ്സ് കവറേജ് അളക്കുന്നു, `tests/**` ഒഴിവാക്കുന്നു, കൂടാതെ `open-sse/**` ഉൾപ്പെടുത്തുന്നു
+- പുൾ റിക്വസ്റ്റുകൾ സ്റ്റേറ്റ്മെന്റുകൾ/ലൈനുകൾ/ഫങ്ഷനുകൾ/ബ്രാഞ്ചുകൾ എന്നിവയുടെ കവറേജ് ഗേറ്റ് **60%+** ആയി നിലനിർത്തണം
+- ഒരു PR, `src/`, `open-sse/`, `electron/`, അല്ലെങ്കിൽ `bin/` എന്നിവയിലെ പ്രൊഡക്ഷൻ കോഡ് മാറ്റുന്നുവെങ്കിൽ, അതേ PR-ൽ ഓട്ടോമേറ്റഡ് ടെസ്റ്റുകൾ ചേർക്കുകയോ അപ്ഡേറ്റ് ചെയ്യുകയോ വേണം
+- `npm run coverage:report` ഏറ്റവും പുതിയ കവറേജ് റണ്ണിൽ നിന്നുള്ള വിശദമായ ഓരോ ഫയലിന്റെയും റിപ്പോർട്ട് പ്രിന്റ് ചെയ്യുന്നു
+- `npm run test:coverage:legacy` ചരിത്രപരമായ താരതമ്യത്തിനായി പഴയ മെട്രിക് നിലനിർത്തുന്നു
+- ഘട്ടംഘട്ടമായ കവറേജ് മെച്ചപ്പെടുത്തൽ റോഡ്മാപ്പിനായി `docs/ops/COVERAGE_PLAN.md` കാണുക
 
-### Pull Request ആവശ്യകതകൾ
+### പുൾ റിക്വസ്റ്റ് ആവശ്യകതകൾ
 
-ഒരു PR തുറക്കുന്നതിന് മുമ്പ്, നിങ്ങൾ മാറ്റിയവയ്ക്കായുള്ള focused loop പ്രവർത്തിപ്പിക്കാൻ
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ഉപയോഗിക്കുക. പൂർണ്ണ unit suite (4 CI shards), Vitest, **60%+** coverage gate, കൂടാതെ
-production build എന്നിവ CI-യുടെ ഉത്തരവാദിത്തമാണ് — അവ പ്രാദേശികമായി പ്രവർത്തിപ്പിക്കുന്നത് PR പരിശോധനകൾ ഇതിനകം നൽകാത്ത ഒരു സൂചനയും അധികമായി നൽകുന്നില്ല; ചെറിയ machine-കളിൽ അത് host-ന്റെ ശേഷി പൂർണ്ണമായി ഉപയോഗിച്ചേക്കാം (#8084):
+ഒരു PR തുറക്കുന്നതിന് മുമ്പ്, നിങ്ങൾ മാറ്റിയതിനായുള്ള കേന്ദ്രീകൃത ലൂപ്പ് പ്രവർത്തിപ്പിക്കാൻ
+[സംഭാവനയ്ക്കുള്ള ഗോൾഡൻ പാത്ത്](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ഉപയോഗിക്കുക. പൂർണ്ണ യൂണിറ്റ് സ്യൂട്ട് (4 CI ഷാർഡുകൾ), Vitest, **60%+** കവറേജ് ഗേറ്റ്,
+പ്രൊഡക്ഷൻ ബിൽഡ് എന്നിവ CI-യുടെ ഉത്തരവാദിത്വമാണ് — അവ ലോക്കലായി പ്രവർത്തിപ്പിക്കുന്നത് PR
+പരിശോധനകൾ നൽകാത്ത അധിക സൂചനയൊന്നും നൽകുന്നില്ല; ചെറിയ മെഷീനുകളിൽ അത് ഹോസ്റ്റിന്റെ ശേഷി പൂർണ്ണമായി ഉപയോഗിച്ചേക്കാം (#8084):
 
-- നിങ്ങളുടെ മാറ്റം ഉൾക്കൊള്ളുന്ന test file-കൾ പ്രവർത്തിപ്പിക്കുക: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- നിങ്ങളുടെ മാറ്റം ഉൾക്കൊള്ളുന്ന ടെസ്റ്റ് ഫയലുകൾ പ്രവർത്തിപ്പിക്കുക: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` പ്രവർത്തിപ്പിക്കുക
-- production code മാറുമ്പോഴെല്ലാം അതേ PR-ൽ automated test-ുകൾ ഉൾപ്പെടുത്തുകയോ പുതുക്കുകയോ ചെയ്യുക
-- production code മാറിയിട്ടുണ്ടെങ്കിൽ, മാറ്റിയതോ ചേർത്തതോ ആയ test file-കൾ PR വിവരണത്തിൽ ഉൾപ്പെടുത്തുക
-- CI-യിൽ project secret-ുകൾ ക്രമീകരിച്ചിട്ടുണ്ടെങ്കിൽ PR-ലെ SonarQube ഫലം പരിശോധിക്കുക
+- പ്രൊഡക്ഷൻ കോഡ് മാറുമ്പോഴെല്ലാം അതേ PR-ൽ ഓട്ടോമേറ്റഡ് ടെസ്റ്റുകൾ ഉൾപ്പെടുത്തുകയോ അപ്ഡേറ്റ് ചെയ്യുകയോ ചെയ്യുക
+- `node:test` ഫയലുകളിൽ, എല്ലാ ടോപ്പ്-ലെവൽ `await`-കളും (`await import(...)` പോലുള്ളവ) ആദ്യത്തെ `test()` / `describe()`-ന് മുമ്പായി നൽകുക: `--test-force-exit` ഉപയോഗിക്കുമ്പോൾ, അതിനുശേഷം രജിസ്റ്റർ ചെയ്ത ടെസ്റ്റുകൾ ഒരിക്കലും പ്രവർത്തിക്കാതെ നിശ്ശബ്ദമായി ഒഴിവാകാം (#18045; `npm run check:test-tla-order` ഇത് നിർബന്ധമാക്കുന്നു)
+- പ്രൊഡക്ഷൻ കോഡ് മാറിയിട്ടുണ്ടെങ്കിൽ, മാറ്റിയതോ ചേർത്തതോ ആയ ടെസ്റ്റ് ഫയലുകൾ PR വിവരണത്തിൽ ഉൾപ്പെടുത്തുക
+- CI-യിൽ പ്രോജക്റ്റ് സീക്രറ്റുകൾ കോൺഫിഗർ ചെയ്തിരിക്കുമ്പോൾ PR-ലെ SonarQube ഫലം പരിശോധിക്കുക
 
-നിലവിലെ test സ്ഥിതി: താഴെപ്പറയുന്നവ ഉൾക്കൊള്ളുന്ന **122 unit test file-കൾ**:
+നിലവിലെ ടെസ്റ്റ് നില: ഇവ ഉൾക്കൊള്ളുന്ന **122 യൂണിറ്റ് ടെസ്റ്റ് ഫയലുകൾ**:
 
-- Provider translator-ുകളും format conversion-ഉം
-- Rate limiting, circuit breaker, resilience
-- Semantic cache, idempotency, progress tracking
-- Database പ്രവർത്തനങ്ങളും schema-യും (21 DB module-കൾ)
-- OAuth flow-കളും authentication-ഉം
-- API endpoint validation (Zod v4)
-- MCP server tool-ുകളും scope enforcement-ഉം
-- Memory, Skills system-ുകൾ
+- പ്രൊവൈഡർ ട്രാൻസ്ലേറ്ററുകളും ഫോർമാറ്റ് പരിവർത്തനവും
+- റേറ്റ് ലിമിറ്റിങ്, സർക്യൂട്ട് ബ്രേക്കർ, പ്രതിരോധശേഷി
+- സെമാന്റിക് കാഷ്, ഐഡംപൊട്ടൻസി, പുരോഗതി ട്രാക്കിങ്
+- ഡാറ്റാബേസ് പ്രവർത്തനങ്ങളും സ്കീമയും (21 DB മൊഡ്യൂളുകൾ)
+- OAuth ഫ്ലോകളും ഓതന്റിക്കേഷനും
+- API എൻഡ്പോയിന്റ് വാലിഡേഷൻ (Zod v4)
+- MCP സെർവർ ടൂളുകളും സ്കോപ്പ് നിർബന്ധമാക്കലും
+- മെമ്മറി, സ്കിൽസ് സിസ്റ്റങ്ങൾ
 
 ---
 
@@ -293,67 +295,67 @@ production build എന്നിവ CI-യുടെ ഉത്തരവാദി�
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard പേജുകൾ (23 വിഭാഗങ്ങൾ)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth പേജുകൾ (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, തുടങ്ങിയവ)
-├── lib/                    # പ്രധാന business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite domain modules + 130 migrations
-│   ├── memory/             # സ്ഥിരമായ conversational memory
-│   ├── oauth/              # OAuth providers, services, utilities
-│   ├── skills/             # വിപുലീകരിക്കാവുന്ന skill framework
-│   ├── usage/              # Usage tracking-ഉം cost calculation-ഉം
-│   └── localDb.ts          # Re-export layer മാത്രം — ഇവിടെ ഒരിക്കലും logic ചേർക്കരുത്
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # ഡാഷ്ബോർഡ് പേജുകൾ (23 വിഭാഗങ്ങൾ)
+│   ├── api/                # API റൂട്ടുകൾ (51 ഡയറക്ടറികൾ)
+│   └── login/              # ഓതന്റിക്കേഷൻ പേജുകൾ (.tsx)
+├── domain/                 # പോളിസി എൻജിൻ (policyEngine, comboResolver, costRules തുടങ്ങിയവ)
+├── lib/                    # പ്രധാന ബിസിനസ് ലോജിക് (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 പ്രോട്ടോക്കോൾ സെർവർ
+│   ├── acp/                # Agent Communication Protocol രജിസ്ട്രി
+│   ├── compliance/         # കംപ്ലയൻസ് പോളിസി എൻജിൻ
+│   ├── db/                 # SQLite ഡൊമെയ്ൻ മൊഡ്യൂളുകൾ + 130 മൈഗ്രേഷനുകൾ
+│   ├── memory/             # സ്ഥിരമായ സംഭാഷണ മെമ്മറി
+│   ├── oauth/              # OAuth പ്രൊവൈഡറുകൾ, സേവനങ്ങൾ, യൂട്ടിലിറ്റികൾ
+│   ├── skills/             # വിപുലീകരിക്കാവുന്ന സ്കിൽ ഫ്രെയിംവർക്ക്
+│   ├── usage/              # ഉപയോഗ ട്രാക്കിങ്ങും ചെലവ് കണക്കാക്കലും
+│   └── localDb.ts          # റീ-എക്സ്പോർട്ട് ലെയർ മാത്രം — ഇവിടെ ഒരിക്കലും ലോജിക് ചേർക്കരുത്
+├── middleware/              # റിക്വസ്റ്റ് മിഡിൽവെയർ (promptInjectionGuard)
+├── mitm/                   # MITM പ്രോക്സി (സർട്ടിഫിക്കറ്റ്, DNS, ടാർഗെറ്റ് റൂട്ടിങ്)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, 19 routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # React കംപോണന്റുകൾ (.tsx)
+│   ├── constants/          # പ്രൊവൈഡർ നിർവചനങ്ങൾ (329), MCP സ്കോപ്പുകൾ, 20 റൂട്ടിങ് തന്ത്രങ്ങൾ
+│   ├── utils/              # സർക്യൂട്ട് ബ്രേക്കർ, സാനിറ്റൈസർ, ഓതന്റിക്കേഷൻ ഹെൽപ്പറുകൾ
+│   └── validation/         # Zod v4 സ്കീമകൾ
+└── sse/                    # SSE പ്രോക്സി പൈപ്പ്ലൈൻ
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, തുടങ്ങിയവ)
-├── mcp-server/             # MCP server (110 വ്യത്യസ്ത tools, 3 transports, 33 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, തുടങ്ങിയവ)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse വർക്ക്സ്പേസ്
+├── executors/              # 150 എക്സിക്യൂട്ടർ മൊഡ്യൂളുകൾ (എക്സിക്യൂട്ടർ ക്ലാസുകൾ + ഓരോ പ്രൊവൈഡറിനുമുള്ള ഹെൽപ്പറുകൾ)
+├── handlers/               # 11 റിക്വസ്റ്റ് ഹാൻഡ്ലറുകൾ (ചാറ്റ്, റെസ്പോൺസുകൾ, എംബെഡ്ഡിങ്ങുകൾ, ചിത്രങ്ങൾ തുടങ്ങിയവ)
+├── mcp-server/             # MCP സെർവർ (110 വ്യത്യസ്ത ടൂളുകൾ, 3 ട്രാൻസ്പോർട്ടുകൾ, 33 സ്കോപ്പുകൾ)
+├── services/               # 178 ടോപ്പ്-ലെവൽ സേവനങ്ങൾ (combo, autoCombo, rateLimitManager തുടങ്ങിയവ)
+├── translator/             # ഫോർമാറ്റ് ട്രാൻസ്ലേറ്ററുകൾ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API ട്രാൻസ്ഫോർമർ
+└── utils/                  # 22 യൂട്ടിലിറ്റി മൊഡ്യൂളുകൾ (സ്ട്രീം, TLS, പ്രോക്സി, ലോഗിങ്)
 
-electron/                   # Electron desktop app (പല പ്ലാറ്റ്ഫോമുകളിലും പ്രവർത്തിക്കുന്നത്)
+electron/                   # Electron ഡെസ്ക്ടോപ്പ് ആപ്പ് (ക്രോസ്-പ്ലാറ്റ്ഫോം)
 
 tests/
-├── unit/                   # Node.js test runner (1,574 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-നുള്ള പ്രത്യേക tests
-└── load/                   # Load tests
+├── unit/                   # Node.js ടെസ്റ്റ് റണ്ണർ (1,574 ടെസ്റ്റ് ഫയലുകൾ)
+├── integration/            # ഇന്റഗ്രേഷൻ ടെസ്റ്റുകൾ
+├── e2e/                    # Playwright ടെസ്റ്റുകൾ
+├── security/               # സുരക്ഷാ ടെസ്റ്റുകൾ
+├── translator/             # ട്രാൻസ്ലേറ്ററിനായുള്ള പ്രത്യേക ടെസ്റ്റുകൾ
+└── load/                   # ലോഡ് ടെസ്റ്റുകൾ
 
 docs/
-├── adr/                     # Architecture Decision Records
-├── architecture/            # System architecture-ഉം resilience-ഉം
-├── comparison/              # OmniRoute-ഉം മറ്റ് ബദലുകളും തമ്മിലുള്ള താരതമ്യം
-├── compression/             # Compression guides-ഉം rules-ഉം
-├── dev/                     # Development guides
-├── diagrams/                # Architecture diagrams
+├── adr/                     # ആർക്കിടെക്ചർ തീരുമാന രേഖകൾ
+├── architecture/            # സിസ്റ്റം ആർക്കിടെക്ചറും പ്രതിരോധശേഷിയും
+├── comparison/              # OmniRoute-ഉം ബദലുകളും തമ്മിലുള്ള താരതമ്യം
+├── compression/             # കംപ്രഷൻ ഗൈഡുകളും നിയമങ്ങളും
+├── dev/                     # ഡെവലപ്മെന്റ് ഗൈഡുകൾ
+├── diagrams/                # ആർക്കിടെക്ചർ ഡയഗ്രാമുകൾ
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # User guide, Docker, setup, troubleshooting
-├── i18n/                    # അന്താരാഷ്ട്രവൽക്കരിച്ച README പരിഭാഷകൾ
-├── marketing/               # Marketing സാമഗ്രികൾ
-├── ops/                     # Deployment, proxy, coverage, releases
-├── providers/               # Provider-നുള്ള പ്രത്യേക docs
-├── reference/               # API reference, env vars, CLI tools, free tiers
-├── releases/                # Release notes
-├── routing/                 # Auto-combo engine, reasoning replay
-├── screenshots/             # Dashboard screenshots
-├── security/                # Guardrails, compliance, stealth, tokens
-└── specs/                   # Design specs
+├── guides/                  # ഉപയോക്തൃ ഗൈഡ്, Docker, സജ്ജീകരണം, ട്രബിൾഷൂട്ടിങ്
+├── i18n/                    # അന്തർദേശീയവൽക്കരിച്ച README പരിഭാഷകൾ
+├── marketing/               # മാർക്കറ്റിങ് സാമഗ്രികൾ
+├── ops/                     # വിന്യാസം, പ്രോക്സി, കവറേജ്, റിലീസുകൾ
+├── providers/               # പ്രൊവൈഡർ-നിർദ്ദിഷ്ട ഡോക്യുമെന്റേഷൻ
+├── reference/               # API റഫറൻസ്, എൻവയോൺമെന്റ് വേരിയബിളുകൾ, CLI ടൂളുകൾ, സൗജന്യ ടയറുകൾ
+├── releases/                # റിലീസ് കുറിപ്പുകൾ
+├── routing/                 # ഓട്ടോ-കോംബോ എൻജിൻ, റീസണിങ് റീപ്ലേ
+├── screenshots/             # ഡാഷ്ബോർഡ് സ്ക്രീൻഷോട്ടുകൾ
+├── security/                # ഗാർഡ്റെയിലുകൾ, കംപ്ലയൻസ്, സ്റ്റെൽത്ത്, ടോക്കണുകൾ
+└── specs/                   # ഡിസൈൻ സ്പെസിഫിക്കേഷനുകൾ
 ```
 
 ---

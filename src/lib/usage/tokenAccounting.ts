@@ -23,6 +23,17 @@ function getPromptTokenDetails(tokens: unknown): JsonRecord {
 export function getPromptCacheReadTokens(tokens: unknown): number {
   const tokenRecord = asRecord(tokens);
   const promptDetails = getPromptTokenDetails(tokenRecord);
+  // Compatibility aliases may contain zero while a later field reports a cache hit.
+  const firstPositive = [
+    tokenRecord.cacheRead,
+    tokenRecord.cache_read_input_tokens,
+    tokenRecord.cached_tokens,
+    promptDetails.cached_tokens,
+  ]
+    .map(toFiniteNumber)
+    .find((value) => value > 0);
+  if (firstPositive !== undefined) return firstPositive;
+
   return toFiniteNumber(
     tokenRecord.cacheRead ??
       tokenRecord.cache_read_input_tokens ??
@@ -103,14 +114,19 @@ export function getLoggedOutputTokens(tokens: unknown): number {
  * Return the reasoning/thinking output token count.
  * Checks multiple field locations used by different providers:
  *   - completion_tokens_details.reasoning_tokens (OpenAI, OpenRouter)
+ *   - output_tokens_details.reasoning_tokens (OpenAI Responses API, Codex)
  *   - reasoning_tokens (GitHub — top-level)
  *   - reasoning (usage_history DB format)
  */
 export function getReasoningTokens(tokens: unknown): number {
   const tokenRecord = asRecord(tokens);
   const completionDetails = asRecord(tokenRecord.completion_tokens_details);
+  const outputDetails = asRecord(tokenRecord.output_tokens_details);
   return toFiniteNumber(
-    tokenRecord.reasoning ?? tokenRecord.reasoning_tokens ?? completionDetails.reasoning_tokens
+    tokenRecord.reasoning ??
+      tokenRecord.reasoning_tokens ??
+      completionDetails.reasoning_tokens ??
+      outputDetails.reasoning_tokens
   );
 }
 

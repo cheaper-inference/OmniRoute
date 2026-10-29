@@ -30,93 +30,97 @@ Talba tal-Klijent
 
 ---
 
-## Modalitajiet tal-Kompressjoni
+## Modi ta' Kompressjoni
 
 ### Off
 
-Ma tiġi applikata l-ebda kompressjoni. Il-messaġġi kollha jgħaddu mingħajr tibdil.
+L-ebda kompressjoni ma tiġi applikata. Il-messaġġi kollha jgħaddu mingħajr bidla.
 
-### Modalità Lite (iffrankar ta' ~15%, latenza ta' <1ms)
+### Modalità Lite (~15% iffrankar, <1ms latenza)
 
-L-aktar modalità sikura — ebda bidla semantika, tindif tal-ifformattjar biss:
+L-iktar modalità sigura — l-ebda bidla semantika, biss tindif tal-formatjar:
 
-| Teknika                  | Deskrizzjoni                                               |
-| ------------------------ | ---------------------------------------------------------- |
-| `collapseWhitespace`     | Tgħaqqad linji vojta konsekuttivi u tneħħi spazji fit-tarf |
-| `dedupSystemPrompt`      | Tneħħi messaġġi tas-sistema duplikati                      |
-| `compressToolResults`    | Tikkompressa outputs verbose tal-għodod/funzjonijiet       |
-| `removeRedundantContent` | Tneħħi struzzjonijiet ripetuti                             |
-| `replaceImageUrls`       | Tqassar URIs tad-data tal-immaġnijiet base64               |
+| Teknika                  | Deskrizzjoni                                                      |
+| ------------------------ | ----------------------------------------------------------------- |
+| `collapseWhitespace`     | Waħħad linji vojta konsekuttivi u spazji żejda fl-aħħar tal-linji |
+| `dedupSystemPrompt`      | Neħħi messaġġi tas-sistema duplikati                              |
+| `compressToolResults`    | Kompressa outputs verbali ta' għodod/funzjonijiet                 |
+| `removeRedundantContent` | Neħħi struzzjonijiet ripetuti                                     |
+| `replaceImageUrls`       | Qassar id-data URIs ta' immaġini base64                           |
 
-**L-aħjar għal:** Użu dejjem attiv u flussi tax-xogħol fejn is-sikurezza hija kritika.
+**L-aħjar għal:** Użu dejjem attiv, flussi ta' xogħol kritiċi għas-sigurtà.
 
-### Modalità Standard (iffrankar ta' ~30%)
+### Modalità Standard (~30% iffrankar)
 
-Ispirata minn [Caveman](https://github.com/JuliusBrussee/caveman) — tneħħi kliem żejjed u formulazzjonijiet verbose filwaqt li żżomm it-tifsira:
+Ispirata minn [Caveman](https://github.com/JuliusBrussee/caveman) — tneħħi kliem żejda u frażijiet verbali filwaqt li tippreserva t-tifsira:
 
-- Tneħħi kliem żejjed ("jekk jogħġbok", "naħseb", "bażikament", "fil-fatt")
-- Tqassar frażijiet verbose ("sabiex" → "biex", "bħala riżultat ta'" → "minħabba")
-- Tneħħi espressjonijiet edukati ta' eżitazzjoni ("Jimportak...", "Jekk tista' possibbilment...")
-- Aktar minn 30 regola regex irfinati għal prompts tal-ipprogrammar
+- Tneħħi kliem li jimla ("jekk jogħġbok", "naħseb", "bażikament", "attwalment")
+- Ikkondensa frażijiet verbali ("sabiex" → "biex", "bħala riżultat ta'" → "għaliex")
+- Tneħħi formuli edukati żejda ("Tindunnjax...", "Kieku tkun tista'...")
+- Aktar minn 30 regola regex imfassla għal prompts tal-programmazzjoni
 
-**L-aħjar għal:** Flussi tax-xogħol ta' kuljum għall-ipprogrammar u timijiet konxji mill-ispejjeż.
+**L-aħjar għal:** Flussi ta' xogħol ta' programmazzjoni ta' kuljum, timijiet konxji mill-ispejjeż.
 
-### Modalità Aggressive (iffrankar ta' ~50%)
+### Modalità Aggressiva (~50% iffrankar)
 
 Ġestjoni intelliġenti tal-istorja għal sessjonijiet twal:
 
-- **Tixjiħ tal-Messaġġi** — messaġġi eqdem jiġu kkompressati progressivament
-- **Kompressjoni tar-Riżultati tal-Għodod** — outputs twal tal-għodod jitqassru jew jitħallew barra (l-ewwel/l-aħħar linji,
-  iffiltrar tal-linji li jaqblu, kumpattazzjoni tal-keys JSON)
-- **Protezzjonijiet tal-Integrità Strutturali** — jiżguraw li l-pari `tool_use` + `tool_result` jibqgħu konsistenti
-- **Għarfien tat-Tieqa tal-Kuntest** — jirrispetta l-limiti tat-tokens għal kull mudell
+- **Tixjiħ tal-Messaġġi** — messaġġi eqdem jiġu kompressati progressivament
+- **Kompressjoni tar-Riżultati tal-Għodod** — outputs twal ta' għodod jitqattgħu jew jiġu
+  eliditi (l-ewwel/l-aħħar linji, filtrar ta' linji li jaqblu, kompattazzjoni ta' keys JSON)
+- **Gwardjani tal-Integrità Strutturali** — jiżguraw li l-pari `tool_use` + `tool_result`
+  jibqgħu konsistenti
+- **Kuxjenza tat-Tieqa tal-Kuntest** — tirrispetta l-limiti tat-tokens ta' kull mudell
 
-**L-aħjar għal:** Sessjonijiet estiżi ta' debugging u codebases kbar.
+**L-aħjar għal:** Sessjonijiet estiżi ta' debugging, codebases kbar.
 
-### Modalità Ultra (iffrankar ta' ~75%)
+### Modalità Ultra (~75% iffrankar)
 
 Kompressjoni massima għal xenarji fejn it-tokens huma kritiċi:
 
-- **Żbir Euristiku** — żbir tal-proża bbażat fuq punteġġ
-- **Preservazzjoni tal-Istruttura** — blokok tal-kodiċi delimitati, kodiċi inline, URLs u identifikaturi jiġu
-  sostitwiti temporanjament u mbagħad jerġgħu jiddaħħlu verbatim, mingħajr ma qatt jinżabru
-- **Livell SLM fakultattiv** — mudell lokali żgħir jista' jirfina ż-żbir meta jkun ikkonfigurat
-- Indipendenti mill-modalità Aggressive: ma jwettaqx tixjiħ tal-messaġġi, kompressjoni tar-riżultati tal-għodod
-  jew is-sommarizzatur fallback (falliment fil-livell SLM biss jista' jgħaddi pass fallback minn
-  aggressive)
+- **Qtugħ Ewristiku** — qtugħ ta' tokens tal-prosa ibbażat fuq punteġġ
+- **Preservazzjoni tal-Istruttura** — blokki ta' kodiċi bil-fences, kodiċi inline, URLs u
+  identifikaturi jiġu kkunvertiti f'tombstones u mbagħad jerġgħu jiġu sstituti verbatim,
+  qatt ma jitqattgħu
+- **Livell SLM opzjonali** — mudell lokali żgħir jista' jirfina l-qtugħ meta jiġi kkonfigurat
+- Indipendenti mill-modalità Aggressiva: ma tħaddimx it-tixjiħ tal-messaġġi, il-kompressjoni
+  tar-riżultati tal-għodod jew is-summarizer ta' fallback (biss falliment fil-livell SLM
+  jista' jgħaddi pass ta' fallback permezz tal-aggressiva)
 
-**L-aħjar għal:** Meta tilħaq ripetutament il-limiti tal-kuntest.
+**L-aħjar għal:** Meta tkun qed tilħaq il-limiti tal-kuntest ripetutament.
 
 ### Modalità RTK (firxa upstream ta' 60-90%)
 
-Il-modalità RTK hija ottimizzata għal outputs verbose tal-għodod li jidhru f'sessjonijiet ta' aġenti tal-ipprogrammar:
+Il-modalità RTK hija ottimizzata għal outputs verbali ta' għodod li jidhru f'sessjonijiet ta' aġenti tal-programmazzjoni:
 
-- Tidentifika klassijiet ta' kmandi/outputs bħal `git status`, `git diff`, `git log`, test runners,
-  builds ta' TypeScript/Vite/Webpack, ESLint/Biome/Prettier, audits/installazzjonijiet ta' npm, logs ta' Docker, output tal-infrastruttura,
-  u output ġeneriku tax-shell
+- Tidentifika klassijiet ta' kmand/output bħal `git status`, `git diff`, `git log`, test
+  runners, builds ta' TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs,
+  logs ta' Docker, output ta' infrastruttura, u output ġeneriku tal-shell
 - Tapplika pakketti ta' filtri JSON minn `open-sse/services/compression/engines/rtk/filters/`
-- Timporta filtri bl-iskema RTK TOML v1 minn fajls `filters.toml` tal-proġett jew globali, b'validazzjoni
-  ta' testijiet inline u kontroll tal-fiduċja għall-fajls tal-proġett
-- Tinkludi 55 filtru integrat b'kampjuni inline għall-verifika
-- Tneħħi sekwenzi ta' kontroll ANSI, vireg tal-progress, linji ripetuti u storbju li ma jeħtieġx azzjoni
-- Tippreserva fallimenti, żbalji, twissijiet, fajls mibdula, sommarji u t-tarf ta' output twil
-- Tappoġġja filtri tal-proġett b'kontroll tal-fiduċja, filtri globali u rkupru fakultattiv tal-output mhux ipproċessat b'redazzjoni
+- Timporta filtri RTK TOML schema v1 minn fajls `filters.toml` tal-proġett jew globali,
+  b'validazzjoni permezz ta' testijiet inline u trust-gating għal fajls tal-proġett
+- Tiġi fornuta ma' 56 filtru integrat b'kampjuni ta' verifika inline
+- Tneħħi sekwenzi ta' kontroll ANSI, progress bars, linji ripetuti, u ħoss li ma jirrikjedi l-ebda azzjoni
+- Żżomm fallimenti, żbalji, twissijiet, fajls mibdula, sommarji, u l-aħħar parti ta' output twil
+- Tappoġġa filtri ta' proġett soġġetti għal trust-gating, filtri globali, u rkupru opzjonali
+  ta' output grezz iredattjat
 
-**L-aħjar għal:** Sessjonijiet ta' aġenti bi traskrizzjonijiet tas-shell, builds, tests, git, grep u outputs tal-fajls.
+**L-aħjar għal:** Sessjonijiet ta' aġenti b'traskrizzjonijiet ta' shell, build, test, git, grep, u output ta' fajls.
 
 ### Modalità Stacked (firxa eliġibbli ta' 78-95%)
 
-Il-modalità Stacked tħaddem diversi magni tal-kompressjoni f'ordni deterministiku. Il-pipeline predefinit huwa:
+Il-modalità Stacked tħaddem diversi magni ta' kompressjoni f'ordni deterministika. Il-pipeline default hija:
 
 ```txt
 RTK -> Caveman
 ```
 
-Dak l-ordni l-ewwel iżomm kumpatt l-output tat-terminal/għodod, imbagħad japplika l-kondensazzjoni semantika ta' Caveman
-għall-prompt li jifdal bil-lingwa naturali. Il-pipelines Stacked jistgħu jiġu kkonfigurati globalment jew permezz ta'
-combos tal-kompressjoni assenjati lil combos tar-routing.
+Dik l-ordni żżomm l-output tat-terminal/għodod kompatt l-ewwel, u mbagħad tapplika
+kondensazzjoni semantika ta' Caveman lill-prompt f'lingwa naturali li jifdal. Pipelines
+Stacked jistgħu jiġu kkonfigurati globalment jew permezz ta' combos ta' kompressjoni
+assenjati lil combos ta' routing.
 
-**L-aħjar għal:** Kuntest imħallat b'logs kbar tal-għodod flimkien ma' struzzjonijiet umani jew sommarji tal-assistent.
+**L-aħjar għal:** Kuntest mħallat b'logs kbar ta' għodod flimkien ma' struzzjonijiet umani jew sommarji tal-assistent.
 
 ---
 
@@ -331,34 +335,34 @@ Il-modalità RTK hija ispirata minn **[RTK - Rust Token Killer](https://github.c
 
 ## Sistemi Avvanzati ta' Kompressjoni
 
-Lil hinn mis-7 modalitajiet deskritti hawn fuq (is-sors jaċċetta wkoll il-modalitajiet `codex-responses` u
-`omniglyph`, li din il-gwida ma tkoprix), it-taqsimiet ta' hawn taħt ikopru funzjonalitajiet
-li jaħdmu fi ħdan dawk il-modalitajiet jew flimkien magħhom: Tool Result Compression u Progressive Aging
-huma l-passi 1 u 2 tal-magna aggressive (il-modalità Aggressive u pass `aggressive` ta'
-pipeline stacked), Stacked Pipeline huwa l-mod kif taħdem il-modalità Stacked, Cache-Aware Compression
-tbaxxi `aggressive` u `ultra` għal `standard` għall-fornituri li jużaw il-caching waqt li l-kompressjoni
-tkun mixgħula, u Caveman Output Mode u Output Styles huma struzzjonijiet fakultattivi fil-prompt tas-sistema,
+Lil hinn mis-7 modi deskritti hawn fuq (is-sors jaċċetta wkoll il-modi `codex-responses` u
+`omniglyph`, li din il-gwida ma tkoprix), it-taqsimiet ta' hawn taħt ikopru karatteristiċi
+li jaħdmu ġewwa dawk il-modi jew flimkien magħhom: il-Kompressjoni tar-Riżultati tal-Għodod u t-Tixjiħ Progressiv
+huma l-passi 1 u 2 tal-magna aggressiva (il-modalità Aggressiva u pass `aggressive` ta'
+pipeline f'munzell), il-Pipeline f'Munzell huwa l-mod kif taħdem il-modalità Stacked, il-Kompressjoni
+Konxja mill-Cache tbaxxi `aggressive` u `ultra` għal `standard` għall-fornituri li jużaw il-cache waqt li l-kompressjoni
+tkun mixgħula, u l-Modalità ta' Output Caveman u l-Istili tal-Output huma struzzjonijiet fakultattivi għall-prompt tas-sistema,
 mitfija awtomatikament, li jsawru l-output tal-mudell minflok jikkompressaw it-talba.
 
-### Kompressjoni Konxja tal-Cache
+### Kompressjoni Konxja mill-Cache
 
-Xi fornituri (bħal Anthropic bil-caching tal-prompts) jappoġġjaw **il-caching tal-prompts**,
-li jippermettilhom iżommu partijiet mill-prompt fil-cache biex inaqqsu l-ispejjeż u l-latenza. Meta
-l-caching ikun attivat, il-kompressjoni aggressive tista' fil-fatt **tagħmel ħsara** lill-prestazzjoni
+Xi fornituri (bħal Anthropic bil-cache tal-prompt) jappoġġjaw il-**cache tal-prompt**,
+li jippermettilhom ipoġġu partijiet mill-prompt fil-cache biex inaqqsu l-ispejjeż u l-latenza. Meta
+l-cache tkun attivata, il-kompressjoni aggressiva tista' fil-fatt **tagħmel ħsara** lill-prestazzjoni
 għax tibdel it-tokens maħżuna fil-cache, u b'hekk tinvalida l-cache.
 
-Il-modulu `cachingAware.ts` isolvi dan billi **jidentifika l-kuntest tal-caching** u
-**jaġġusta l-istrateġija tal-kompressjoni** kif xieraq.
+Il-modulu `cachingAware.ts` isolvi dan billi **jidentifika l-kuntest tal-cache** u
+**jaġġusta l-istrateġija tal-kompressjoni** skont dan.
 
-#### Kif taħdem
+#### Kif jaħdem
 
-1. **Identifika l-kuntest tal-caching** — Jiskannja l-korp tat-talba għal markaturi `cache_control`
-2. **Identifika l-fornituri tal-caching** — Jiċċekkja jekk il-fornitur fil-mira jappoġġjax il-caching
-3. **Aġġusta l-istrateġija** — Ibaxxi `aggressive`/`ultra` għal `standard` għall-fornituri tal-caching
-4. **Aqbeż il-prompt tas-sistema** — Il-prompts tas-sistema ġeneralment jinħażnu fil-cache, għalhekk tikkompressahomx
+1. **Jidentifika l-kuntest tal-cache** — Jiskennja l-body tat-talba għal markaturi `cache_control`
+2. **Jidentifika l-fornituri tal-cache** — Jiċċekkja jekk il-fornitur fil-mira jappoġġjax il-cache
+3. **Jaġġusta l-istrateġija** — Ibaxxi `aggressive`/`ultra` għal `standard` għall-fornituri tal-cache
+4. **Jaqbeż il-prompt tas-sistema** — Il-prompts tas-sistema ġeneralment jinħażnu fil-cache, għalhekk tikkompressahomx
 
-Il-funzjoni awżiljarja tal-istrateġija tirritorna wkoll flag `deterministicOnly`, iżda l-bennej tal-pjan juża
-biss l-istrateġija — bħalissa xejn aktar 'l isfel fil-fluss ma jaqra l-flag.
+Il-helper tal-istrateġija jirritorna wkoll flag `deterministicOnly`, iżda l-bennej tal-pjan juża
+biss l-istrateġija — attwalment xejn aktar 'l isfel fil-proċess ma jaqra l-flag.
 
 #### Eżempju ta' kodiċi
 
@@ -383,26 +387,26 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### Meta għandha tintuża
 
-Il-kompressjoni konxja tal-cache hija **dejjem mixgħula** — ma teħtieġ l-ebda konfigurazzjoni. Tiġi attivata kull meta
-l-kompressjoni tkun mixgħula u l-fornitur fil-mira jappoġġja l-caching tal-prompts (Anthropic, OpenAI,
-eċċ.); markaturi espliċiti `cache_control` mhumiex meħtieġa — fornitur tal-caching waħdu
-jiskatta t-tnaqqis tal-livell, filwaqt li l-markaturi waħedhom qatt ma jagħmlu dan (l-identifikazzjoni tal-markaturi tipprovdi data lit-telemetrija
-tal-cache, mhux lid-deċiżjoni dwar l-istrateġija).
+Il-kompressjoni konxja mill-cache hija **dejjem mixgħula** — mhi meħtieġa l-ebda konfigurazzjoni. Tibda taħdem kull meta
+l-kompressjoni tkun mixgħula u l-fornitur fil-mira jappoġġja l-cache tal-prompt (Anthropic, OpenAI,
+eċċ.); markaturi espliċiti `cache_control` mhumiex meħtieġa — fornitur tal-cache waħdu
+jattiva t-tnaqqis fil-livell, u l-markaturi waħedhom qatt ma jagħmlu dan (l-identifikazzjoni tal-markaturi tipprovdi dejta għat-telemetrija
+tal-cache, mhux għad-deċiżjoni dwar l-istrateġija).
 
 ### Tixjiħ Progressiv
 
-Konverżazzjonijiet twal jakkumulaw ħafna dawriet ta' messaġġi, iżda d-dawriet eqdem isiru inqas
-rilevanti. Il-modulu `progressiveAging.ts` **jiddegrada l-messaġġi skont id-distanza tad-dawra**
-(id-distanza titkejjel mit-tmiem tal-konverżazzjoni). Bil-valuri prestabbiliti rilaxxati
+Konversazzjonijiet twal jakkumulaw ħafna skambji ta' messaġġi, iżda l-iskambji eqdem isiru inqas
+rilevanti. Il-modulu `progressiveAging.ts` **inaqqas il-livell tal-messaġġi skont id-distanza tal-iskambji**
+(id-distanza titkejjel mit-tmiem tal-konversazzjoni). Bil-valuri prestabbiliti fornuti
 (`verbatim: 2, light: 2, moderate: 3`):
 
-- **L-aħħar 2 dawriet (distanza ≤ 2)**: Jinżammu kelma b'kelma
-- **Distanza 3**: Kompressjoni stil bniedem tal-għerien (tneħħija ta' kliem żejjed)
+- **L-aħħar 2 skambji (distanza ≤ 2)**: Jinżammu kelma b'kelma
+- **Distanza 3**: Kompressjoni Caveman (tneħħija tal-kliem żejjed)
 - **Distanza 4+**: Il-messaġġi tal-assistent jiġu miġbura fil-qosor; il-messaġġi tal-utent jitnaqqsu għall-ewwel
-  linja tagħhom, b'limitu ta' 120 karattru; rwoli oħra ma jinbidlux. Il-prompts tas-sistema, il-messaġġi
-  li diġà ġew imqaddma u l-aħħar messaġġ tal-utent dejjem jinżammu kelma b'kelma, irrispettivament mid-distanza.
-  Xejn ma jitneħħa kompletament, u l-faxxa `light`
-  ma tistax tintlaħaq bil-valuri default inklużi (`light` hija ugwali għal `verbatim`).
+  linja tagħhom, b'limitu ta' 120 karattru; rwoli oħra ma jintmessux. Il-prompts tas-sistema, il-messaġġi
+  li diġà ġew soġġetti għat-tixjiħ u l-aħħar messaġġ tal-utent dejjem jinżammu kelma b'kelma irrispettivament mid-distanza.
+  Xejn ma jitneħħa għalkollox, u l-faxxa `light`
+  ma tistax tintlaħaq bil-valuri prestabbiliti fornuti (`light` huwa daqs `verbatim`).
 
 #### Eżempju ta' kodiċi
 
@@ -413,68 +417,68 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... 50 dawra oħra ...
+  // ... 50 skambju ieħor ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // l-aħħar 3 dawriet: kelma b'kelma
+  verbatim: 3, // l-aħħar 3 skambji: kelma b'kelma
   light: 8, // distanza <= 8: kompressjoni ħafifa
-  moderate: 20, // distanza <= 20: kompressjoni stil bniedem tal-għerien
-  fullSummary: 5, // meħtieġa mit-tip, iżda ma tinq arax mill-kodiċi tal-faxex
+  moderate: 20, // distanza <= 20: kompressjoni caveman
+  fullSummary: 5, // meħtieġ mit-tip, ma jinqarax mill-kodiċi tat-tqassim f'faxex
   // distanza > 20: miġbur fil-qosor (assistent) / tinżamm l-ewwel linja (utent)
 });
 
 // saved = għadd ta' tokens iffrankati
 ```
 
-#### Meta tużah
+#### Meta għandu jintuża
 
-It-tixjiħ progressiv huwa **dejjem attiv** għall-modalità `aggressive` — huwa l-pass 2 ta'
+It-tixjiħ progressiv huwa **dejjem mixgħul** għall-modalità `aggressive` — huwa l-pass 2 ta'
 `compressAggressive()`. Il-modalità Ultra ma tħaddmux. Huwa
 partikolarment effettiv għal:
 
-- Sessjonijiet twal ta' kodifikazzjoni
-- Konverżazzjonijiet fuq diversi jiem
+- Sessjonijiet twal ta' programmazzjoni
+- Konversazzjonijiet fuq diversi jiem
 - Flussi tax-xogħol aġentiċi b'ħafna sejħiet ta' għodod
 
-### Modalità ta' Output Stil Bniedem tal-Għerien
+### Modalità ta' Output Caveman
 
-Il-modalità ta' output stil bniedem tal-għerien iżżid **struzzjonijiet fil-prompt tas-sistema** li jitolbu lill-mudell innifsu
-jagħti output konċiż — il-livell `lite` jitlob tweġibiet konċiżi li jżommu sentenzi sħaħ, `full`
-jitolbu "jwieġeb fil-qosor bħal bniedem tal-għerien intelliġenti", u `ultra` jitlob output telegrafiku;
-l-istruzzjonijiet sempliċement jitolbu, ma jistgħux jiggarantixxuh. It-talbiet jirċevuhom permezz ta'
+Il-modalità ta' output Caveman iżżid **struzzjonijiet mal-prompt tas-sistema** li jitolbu lill-mudell innifsu jipproduċi
+output konċiż — il-livell `lite` jitlob tweġibiet konċiżi li jżommu sentenzi sħaħ, `full`
+jitolbu biex "iwieġeb fil-qosor bħal caveman intelliġenti", u `ultra` jitlob output telegrafiku;
+l-istruzzjonijiet jitolbu biss, ma jistgħux jiggarantixxuh. It-talbiet jirċevuhom permezz ta'
 `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`):
 `open-sse/handlers/chatCore.ts` l-ewwel jirriżolvi l-għażla bix-shim tal-kompatibbiltà retroattiva
 (`resolveOutputStyleSelection()` f'
 `open-sse/services/compression/outputStyles/backCompat.ts`), li, waqt li `outputStyles`
-tkun vojta, timmappja `cavemanOutputMode` attiv għall-istil ta' output `terse-prose` fil-livell
-`cavemanOutputMode.intensity` (ara Kompatibbiltà retroattiva hawn taħt); għażla `outputStyles`
-mhux vojta tintuża kif inhi, u mbagħad `cavemanOutputMode.enabled` u `intensity` ma jkollhom
-l-ebda effett, filwaqt li l-iswiċċ `autoClarity` tagħha jibqa' japplika. `outputMode.ts` fih it-testi
-tal-istruzzjonijiet (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), l-evitar ibbażat fuq il-kontenut u l-funzjoni
-awżiljarja tat-tqegħid li tuża l-injezzjoni; l-injettur `applyCavemanOutputMode()` tiegħu stess ma għandu
-l-ebda min isejjaħlu fil-produzzjoni.
+ikun vojt, jimmappja `cavemanOutputMode` attivat għall-istil ta' output `terse-prose` f'
+`cavemanOutputMode.intensity` (ara l-Kompatibbiltà retroattiva hawn taħt); għażla `outputStyles`
+li ma tkunx vojta tintuża kif inhi, u mbagħad `cavemanOutputMode.enabled` u `intensity` ma jkollhom l-ebda
+effett, filwaqt li t-toggle `autoClarity` tiegħu jibqa' japplika. `outputMode.ts` fih it-testi
+tal-istruzzjonijiet (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), il-bypass tal-kontenut u l-helper
+tat-tqegħid li tuża l-injezzjoni; l-injettur `applyCavemanOutputMode()` tiegħu stess m'għandu l-ebda
+sejħa fil-produzzjoni.
 
 #### Kif jaħdem
 
-Din il-modalità ma tikkompressax l-input. Hija żżid blokka ta' struzzjonijiet mal-prompt tas-sistema
-(ara Kif taħdem l-injezzjoni hawn taħt), u kwalunkwe modalità ta' kompressjoni tal-input magħżula għat-talba
-xorta titħaddem wara, fuq il-korp li issa fih il-blokka. Qabel il-klawżola kondiviża
-tal-limiti li biha jintemm kull livell, il-livell Ingliż `full` jgħid:
+Din il-modalità ma tikkompressax l-input. Hija żżid blokka ta’ struzzjonijiet mal-prompt tas-sistema
+(ara Kif taħdem l-injezzjoni hawn taħt), u kwalunkwe modalità ta’ kompressjoni tal-input magħżula għat-talba
+xorta titħaddem wara, fuq il-kontenut li issa jinkludi l-blokka. Qabel il-klawżola kondiviża
+tal-limiti li biha jintemm kull livell, il-livell `full` bl-Ingliż jgħid:
 
-> "Wieġeb fil-qosor bħal bniedem tal-għerien intelliġenti. Neħħi l-artikli (a/an/the), kliem żejjed (just/really/basically/actually/simply), korteżiji u espressjonijiet ta' eżitazzjoni. Frammenti aċċettabbli. Sinonimi qosra (big mhux extensive, fix mhux implement). Żomm is-sustanza teknika, il-kodiċi, l-iżbalji, il-URLs u l-identifikaturi kollha eżatti."
+> "Wieġeb fil-qosor bħal bniedem tal-għerien intelliġenti. Neħħi l-artikli (a/an/the), kliem żejjed (just/really/basically/actually/simply), kortesiji, lingwaġġ eżitanti. Frammenti aċċettabbli. Sinonimi qosra (big mhux extensive, fix mhux implement). Żomm eżatti s-sustanza teknika kollha, il-code, l-errors, il-URLs, u l-identifiers."
 
 Dan jaħdem partikolarment tajjeb għal:
 
-- Ġenerazzjoni ta' kodiċi (output aktar konċiż = inqas tokens)
-- Mistoqsijiet u tweġibiet ta' malajr (m'hemmx bżonn ta' spjegazzjonijiet elaborati)
-- Ipproċessar f'lottijiet (jimmassimizza l-volum ipproċessat)
+- Ġenerazzjoni ta’ code (output aktar konċiż = inqas tokens)
+- Mistoqsijiet u tweġibiet ta’ malajr (m’hemmx bżonn ta’ spjegazzjonijiet elaborati)
+- Ipproċessar f’lottijiet (immassimizza t-throughput)
 
 #### Meta tużah
 
-Il-modalità ta' output stil bniedem tal-għerien hija **fakultattiva**. Bil-kompressjoni attiva (`enabled: true`, l-iswiċċ ewlieni
-fil-paġna tas-Settings tal-Kompressjoni), attivaha b'`cavemanOutputMode.enabled`; `intensity`
-tagħżel `lite`, `full` jew `ultra`:
+Il-modalità tal-output Caveman hija **opt-in**. Bil-kompressjoni mixgħula (`enabled: true`, is-swiċċ ewlieni
+mixgħul fil-paġna Compression Settings), ixgħelha b’`cavemanOutputMode.enabled`; `intensity`
+jagħżel `lite`, `full` jew `ultra`:
 
 ```json
 {
@@ -486,94 +490,98 @@ tagħżel `lite`, `full` jew `ultra`:
 }
 ```
 
-L-iswiċċ **Modalità tal-Output** ta' kombinazzjoni ta' kompressjoni (`outputMode`, bil-livell f'`outputModeIntensity`)
+Is-swiċċ **Output Mode** ta’ kombinazzjoni tal-kompressjoni (`outputMode`, bil-livell f’`outputModeIntensity`)
 jissettja l-istess swiċċ għat-talbiet li għalihom tapplika dik il-kombinazzjoni, u l-għodda MCP
 `omniroute_set_compression_engine` tiktbu permezz tal-argument boolean tagħha `outputMode`.
-Għażla `outputStyles` mhux vojta tieħu preċedenza fuq dan l-iswiċċ. Fid-dashboard,
-l-attivazzjoni tal-istil ta' output **Proża konċiża** tinjetta l-istess blokka (ara Stili tal-Output
+Għażla `outputStyles` mhux vojta tieħu preċedenza fuq dan is-swiċċ. Fid-dashboard, meta tattiva
+l-istil tal-output **Terse prose**, tiġi injettata l-istess blokka (ara Output Styles
 hawn taħt).
 
-### Stili tal-Output (katalogu)
+### Stili tal-Output (katalgu)
 
-Il-modalità ta' output stil bniedem tal-għerien ta' hawn fuq hija l-**mogħdija preċedenti bi stil wieħed**. Fażi 4 iġġeneralizzatha
-f'katalogu ta' stili ta' output li jistgħu jiġu kkombinati: `OUTPUT_STYLE_CATALOG` f'
-`open-sse/services/compression/outputStyles/catalog.ts`. Kull stil huwa struzzjoni fil-prompt tas-sistema
-li titlob lill-mudell innifsu jagħti output irħas; l-istili jistgħu jiġu attivati
-flimkien u jiġu injettati fl-ordni tal-katalogu.
+Il-modalità tal-output Caveman ta’ hawn fuq hija l-**mogħdija legata ta’ stil wieħed**. Fażi 4 ġġeneralizzatha
+f’katalgu ta’ stili tal-output li jistgħu jiġu kkombinati: `OUTPUT_STYLE_CATALOG` f’
+`open-sse/services/compression/outputStyles/catalog.ts`. Kull stil huwa struzzjoni tal-prompt tas-sistema
+li titlob lill-mudell innifsu jipproduċi output irħas; l-istili jistgħu jiġu attivati
+flimkien u jiġu injettati skont l-ordni tal-katalgu.
 
-| Stil                                   | `id`          | X’jagħmel                                                                                                                                                                                                                             | Lingwi tal-istruzzjonijiet                    |
-| -------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Proża konċiża                          | `terse-prose` | Ineħħi kliem żejjed/artikli/espressjonijiet ta’ inċertezza; iżomm is-sustanza teknika preċiża. L-istess test bħall-modalità preċedenti tal-output caveman (irreferenzjata, mhux miktuba mill-ġdid).                                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Inqas kodiċi                           | `less-code`   | Skala YAGNI: l-iżgħar bidla li taħdem, mingħajr astrazzjonijiet mhux mitluba.                                                                                                                                                         | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ponytail (żviluppatur senior għażżien) | `ponytail`    | "L-aħjar kodiċi huwa l-kodiċi li qatt ma nkiteb": użu mill-ġdid > kitba mill-ġdid, kawża ewlenija > sintomu, l-iqsar diff li jaħdem.                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Għandi ADHD (azzjoni l-ewwel)          | `i-have-adhd` | Azzjoni l-ewwel (kmand/mogħdija/snippet qabel il-proża), passi numerati u limitati, pass konkret LI JMISS wieħed, ebda introduzzjoni/sommarju/għeluq. Adattat minn [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT). | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| CJK konċiż (文言)                      | `terse-cjk`   | Tweġiba `full`/`ultra` biċ-Ċiniż Klassiku (文言); `lite` jitlob biss tweġibiet qosra mingħajr kliem funzjonali, korteżiji jew tiżjin.                                                                                                 | zh (ristrett skont il-locale, ara hawn taħt)  |
+| Stil                                    | `id`            | X’jagħmel                                                                                                                                                                                                                                                              | Lingwi tal-istruzzjonijiet                    |
+| --------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Proża konċiża                           | `terse-prose`   | Neħħi l-kliem żejjed/l-artikli/il-lingwaġġ eżitanti; żomm is-sustanza teknika eżatta. L-istess test bħall-modalità legata tal-output Caveman (referenzjat, mhux miktub mill-ġdid).                                                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Inqas code                              | `less-code`     | Sellum YAGNI: l-iżgħar bidla li taħdem, mingħajr astrazzjonijiet mhux mitluba.                                                                                                                                                                                         | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Ponytail (żviluppatur senior għażżien)  | `ponytail`      | "L-aħjar code huwa l-code li qatt ma nkiteb": użu mill-ġdid > kitba mill-ġdid, kawża ewlenija > sintomu, l-iqsar diff li taħdem.                                                                                                                                       | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Għandi ADHD (azzjoni l-ewwel)           | `i-have-adhd`   | Azzjoni l-ewwel (command/path/snippet qabel il-proża), passi numerati u limitati, pass konkret WIEĦED li jmiss, mingħajr introduzzjoni/taqsira/għeluq. Adattat minn [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                                 | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Filtru Antislop għall-UI                | `antislop-ui`   | Kull teknika viżiva trid tgħaddi minn test tal-iskop (ġerarkija, identità, leġġibbiltà); ebda gradients/glass/glow awtomatiċi, paletta limitata, ebda layouts ta’ templates. Iż-żewġ stili antislop iżidu limitu ta’ ebda controls mejta / ebda stqarrijiet ivvintati. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Filtru Antislop għall-kitba u l-bnedmin | `antislop-copy` | Kitba speċifika (ebda sing twil, CTAs ġeneriċi, buzzwords, għeluq ta’ chatbot, fatti vvintati) flimkien ma’ regoli għan-nies: kuntrast WCAG AA, focus viżibbli, aċċess bit-tastiera, stati vojta/ta’ tagħbija/ta’ żball, adattament mill-ġdid għall-mobile.            | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| CJK konċiż (文言)                       | `terse-cjk`     | Tweġiba `full`/`ultra` biċ-Ċiniż Klassiku (文言); `lite` jitlob biss tweġibiet qosra mingħajr kliem funzjonali, kortesiji jew tiżjin.                                                                                                                                  | zh (ristrett skont il-locale, ara hawn taħt)  |
 
 Kull stil jiġi bi tliet livelli ta’ intensità — `lite`, `full`, `ultra` — u kull livell
-jispiċċa bil-klawżola kondiviża tal-limiti (`SHARED_BOUNDARIES` f’`outputMode.ts`), li
-żżomm il-blokki tal-kodiċi, il-mogħdijiet tal-fajls, il-kmandi, l-iżbalji u l-URLs eżatti. It-testi tal-livelli ta’
-`terse-prose` u `terse-cjk` iżidu l-identifikaturi ma’ dik il-lista.
+jintemm bil-klawżola kondiviża tal-limiti (`SHARED_BOUNDARIES` f’`outputMode.ts`), li
+żżomm il-code blocks, il-file paths, il-commands, l-errors u l-URLs eżatti. It-testi tal-livelli
+`terse-prose` u `terse-cjk` iżidu l-identifiers ma’ dik il-lista.
 
-`terse-cjk` huwa ristrett skont il-locale għal `zh` f’żewġ postijiet. Il-paġna tas-Settings tal-Kompressjoni turi
+`terse-cjk` huwa ristrett għal-locale `zh` f’żewġ postijiet. Il-paġna Compression Settings turi
 r-ringiela tiegħu biss meta l-lingwa tal-UI tad-dashboard tkun iċ-Ċiniż (`zh-CN` jew `zh-TW`), u
 `applyOutputStyles()` jinjettah biss meta l-lingwa riżolta tat-talba (ara l-Għażla tal-lingwa
-hawn taħt) tkun `zh`. Il-ħabi tar-ringiela ma jneħħix għażla ssejvjata ta’ `terse-cjk`:
-l-API tas-settings taċċetta kwalunkwe id tal-istil, u s-salvataġġ ta’ stili oħra fil-paġna jżommha. Fil-ħin
-tat-talba, il-verifika tal-lingwa ta’ `applyOutputStyles()` hija l-uniku restrizzjoni tal-locale.
+hawn taħt) tkun `zh`. Il-ħabi tar-ringiela ma jneħħix għażla `terse-cjk` salvata:
+l-API tas-settings taċċetta kwalunkwe style id, u meta jiġu salvati stili oħra fil-paġna, din tinżamm. Fil-ħin
+tat-talba, il-verifika tal-lingwa minn `applyOutputStyles()` hija l-uniku limitu tal-locale.
 
 #### Kif taħdem l-injezzjoni
 
 `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) jirriżolvi
 l-għażla mal-katalgu (ids mhux magħrufa u stili li ma jaqblux mal-locale
-jitneħħew, qatt ma jkun hemm żball; għażla li ma tirriżolvi għall-ebda stil tħalli l-body
-mhux mibdul, maqbuż bħala `no_styles`), jgħaqqad l-istruzzjonijiet magħżula skont l-ordni tal-katalgu,
-iżid il-klawżola tal-limiti **darba** (flimkien mal-klawżola tas-sikurezza, `SAFETY_BOUNDARIES` jew it-
-traduzzjoni tagħha, meta jintgħażel `less-code` jew `ponytail`), u jibda l-blokka b’markatur
-idempotenti wieħed (`[OmniRoute Output Styles]`), sabiex l-applikazzjoni mill-ġdid ma tagħmel xejn. Meta
-l-lingwa riżolta (ara l-Għażla tal-lingwa hawn taħt) ikollha traduzzjoni, tiġi injettata l-
-istruzzjoni lokalizzata minflok dik bl-Ingliż.
+jitneħħew, u qatt ma jitqiesu bħala żball; għażla li ma tirriżolvi għall-ebda stil tħalli l-body
+mhux mibdul, maqbuż bħala `no_styles`), jgħaqqad l-istruzzjonijiet magħżula fl-ordni
+tal-katalgu,
+iżid il-klawżola tal-limiti **darba** (flimkien mal-klawżola tas-sikurezza, `SAFETY_BOUNDARIES` jew
+it-traduzzjoni tagħha, meta jintgħażel `less-code` jew `ponytail`), u jibda l-blokka
+b'markatur wieħed ta' idempotenza (`[OmniRoute Output Styles]`), sabiex applikazzjoni
+mill-ġdid ma tagħmel xejn. Meta l-lingwa riżolta (ara l-Għażla tal-lingwa hawn taħt) ikollha
+traduzzjoni, tiddaħħal l-istruzzjoni lokalizzata minflok dik bl-Ingliż.
 
-F’body b’array `messages` mhux vojt, il-verifika tal-idempotenza ssir qabel il-
-bypass tal-kontenut: meta l-markatur `[OmniRoute Output Styles]` ikun diġà fil-field
-`system` tal-ogħla livell (string jew array ta’ blokki tal-kontenut) jew f’messaġġ tas-system b’kontenut
-string, il-body jitħalla mhux mibdul bħala `already_applied` u ma ssir l-ebda verifika tal-kliem ewlieni.
-Inkella bypass tal-kontenut (`shouldBypassCavemanOutputMode()` f’
+Fuq body b'array `messages` mhux vojt, il-verifika tal-idempotenza taħdem qabel
+il-bypass tal-kontenut: meta l-markatur `[OmniRoute Output Styles]` ikun diġà fil-field
+`system` tal-ogħla livell (string jew array ta' blokok tal-kontenut) jew f'messaġġ tas-system
+b'kontenut string, il-body jitħalla mhux mibdul bħala `already_applied` u ma ssir l-ebda
+verifika tal-kliem ewlieni.
+Inkella, bypass tal-kontenut (`shouldBypassCavemanOutputMode()` f'
 `open-sse/services/compression/outputMode.ts`) jiċċekkja t-test tal-aħħar tliet
-messaġġi, ikun xi jkun ir-rwol tagħhom, u jaqbeż l-istili għat-turn kollu meta dak it-test
-jaqbel mal-kliem ewlieni tiegħu dwar is-sigurtà, azzjonijiet irriversibbli jew kjarifika, jew ma’
-sekwenza sensittiva għall-ordni: `first`, `then`, `after that`, `before`, `rollback` jew
+messaġġi, ikun xi jkun ir-role tagħhom, u jaqbeż l-istili għat-turn kollu meta dak it-test
+jaqbel mal-kliem ewlieni tiegħu dwar is-sigurtà, azzjonijiet irriversibbli jew kjarifika, jew
+ma' sekwenza sensittiva għall-ordni: `first`, `then`, `after that`, `before`, `rollback` jew
 `backup` segwit fi żmien 240 karattru minn `delete`, `drop`, `migrate`, `deploy` jew
-`release`. Il-bypass jaħdem waqt li t-toggle **Auto-Clarity Bypass**
-(`cavemanOutputMode.autoClarity`, mixgħul awtomatikament) ikun mixgħul; jekk it-toggle jintefa, il-
-verifika tal-kliem ewlieni tinqabeż.
+`release`. Il-bypass jaħdem sakemm it-toggle **Auto-Clarity Bypass**
+(`cavemanOutputMode.autoClarity`, mixgħul b'mod awtomatiku) ikun mixgħul; it-tifi tat-toggle
+jaqbeż il-verifika tal-kliem ewlieni.
 
-Meta l-bypass iħalli t-turn jgħaddi, `placeSystemInstruction()` (l-istess fajl), li
+Meta l-bypass iħalli t-turn jgħaddi, `placeSystemInstruction()` (fl-istess file), li
 qatt ma joħloq `messages[0]` ġdid, iqiegħed il-blokka fl-ewwel wieħed minn dawn li jsib:
 
-1. Messaġġ tas-system fil-bidu b’kontenut string: il-blokka tiżdied wara t-test tiegħu.
-2. Il-field `system` tal-ogħla livell: il-blokka tiżdied wara t-test ta’ string, jew
-   tiżdied bħala blokka ġdida ta’ test ma’ array ta’ blokki tal-kontenut.
-3. L-ewwel messaġġ tas-system sussegwenti b’kontenut string: il-blokka tiżdied wara t-
-   test tiegħu.
-4. L-ebda wieħed minn dawn: il-blokka tidħol f’messaġġ tas-system ġdid fi tmiem `messages`.
+1. Messaġġ tas-system fil-bidu b'kontenut string: il-blokka tiżdied wara t-test tiegħu.
+2. Il-field `system` tal-ogħla livell: il-blokka tiżdied wara t-test ta' string, jew
+   tiżdied bħala blokka ġdida ta' test ma' array ta' blokok tal-kontenut.
+3. L-ewwel messaġġ tas-system sussegwenti b'kontenut string: il-blokka tiżdied wara
+   t-test tiegħu.
+4. L-ebda wieħed minn dawn ta' hawn fuq: il-blokka tidħol f'messaġġ tas-system ġdid fi tmiem `messages`.
 
-F’body mingħajr array `messages` (jew b’wieħed vojt), ma jsir l-ebda bypass tal-kontenut u
-field `system` tal-ogħla livell ma jiġix ikkonsultat. Il-blokka tiżdied wara t-test ta’
+Fuq body mingħajr array `messages` (jew b'wieħed vojt), ma jsir l-ebda bypass tal-kontenut u
+l-field `system` tal-ogħla livell ma jiġix ikkonsultat. Il-blokka tiżdied wara t-test ta'
 field `instructions` string, sakemm dak il-field ma jkunx diġà fih il-markatur
-`[OmniRoute Output Styles]`, f’liema każ il-body jitħalla mhux mibdul bħala
+`[OmniRoute Output Styles]`, f'liema każ il-body jitħalla mhux mibdul bħala
 `already_applied`. Meta l-body ma jkollux field `instructions` string iżda jkollu `input`
 (string jew array), il-blokka ssir `instructions`, u tissostitwixxi kwalunkwe valur mhux string
-li kellu dak il-field. Body li la għandu field `instructions` string u lanqas `input` string jew array
-jitħalla mhux mibdul u jinqabeż bħala `no_messages`.
+li dak il-field kellu. Body li la għandu field `instructions` string u lanqas `input` string jew
+array jitħalla mhux mibdul u jinqabeż bħala `no_messages`.
 
 #### Kif tattivah
 
-Fid-dashboard: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`), fit-taqsima Output styles: ringiela waħda għal kull stil b’toggle mixgħul/mitfi
-u selettur tal-livell. L-istili jiġu injettati waqt li l-kompressjoni nnifisha tkun mixgħula (it-toggle
-ewlieni tal-paġna, `enabled`). It-toggle **Auto-Clarity Bypass** jinsab fil-paġna **Caveman**
-(`/dashboard/context/caveman`), fil-kard **Output Mode** tagħha. B’mod programmatiku,
-il-konfigurazzjoni tal-kompressjoni tippersisti l-għażla bħala:
+Fid-dashboard: **Kuntest tal-Kompressjoni → Settings tal-Kompressjoni**
+(`/dashboard/context/settings`), fit-taqsima tal-istili tal-output: ringiela waħda għal kull stil b'toggle
+mixgħul/mitfi u selettur tal-livell. L-istili jiddaħħlu waqt li l-kompressjoni nnifisha tkun mixgħula
+(it-toggle ewlieni tal-paġna, `enabled`). It-toggle **Auto-Clarity Bypass** jinsab fil-paġna
+**Caveman** (`/dashboard/context/caveman`), fil-card **Output Mode** tagħha. B'mod programmatiku,
+il-config tal-kompressjoni jippersisti l-għażla bħala:
 
 ```json
 {
@@ -584,138 +592,134 @@ il-konfigurazzjoni tal-kompressjoni tippersisti l-għażla bħala:
 }
 ```
 
-Kompatibbiltà retroattiva: waqt li `outputStyles` ikun vojt, is-setting l-antik
-`cavemanOutputMode.enabled` jiġi mmappjat għal `terse-prose` fil-livell
-`cavemanOutputMode.intensity`. Il-blokka mbagħad tibda bil-marker
-`[OmniRoute Output Styles]`, filwaqt li l-injettur l-antik `applyCavemanOutputMode()`
-kien jikteb `[OmniRoute Caveman Output Mode]`. Taħt il-marker, it-test jaqbel mal-injezzjoni
-l-antika f’en, pt-BR, es, de, fr, it, ru, id u vi; f’ja u zh għandu spazju wieħed
-addizzjonali qabel il-klawżola tal-konfini. `terse-prose` huwa tradott għal pt-BR, es, de,
-fr, it, ru, zh, ja, id u vi, għalhekk talba li l-lingwa riżolta tagħha tkun `hu` tirċievi
-t-test bl-Ingliż, filwaqt li l-injettur l-antik kien juża t-test tiegħu bl-Ungeriż.
+Kompatibbiltà b'lura: waqt li `outputStyles` ikun vojt, is-setting legat
+`cavemanOutputMode.enabled` jiġi mmappjat għal `terse-prose` f'
+`cavemanOutputMode.intensity`. Imbagħad il-blokka tibda bil-markatur
+`[OmniRoute Output Styles]`, fejn l-injettur legat `applyCavemanOutputMode()`
+kien idaħħal `[OmniRoute Caveman Output Mode]`. Taħt il-markatur, it-test jaqbel mal-injezzjoni
+legata f'en, pt-BR, es, de, fr, it, ru, id u vi; f'ja u zh ikollu spazju żejjed wieħed
+qabel il-klawżola tal-limiti. `terse-prose` jiġi tradott għal pt-BR, es, de,
+fr, it, ru, zh, ja, id u vi, għalhekk request li l-lingwa riżolta tiegħu tkun `hu` jirċievi
+t-test bl-Ingliż fejn l-injettur legat kien juża dak bl-Ungeriż.
 
-L-għażla tal-lingwa tal-istil tal-output (`resolveOutputStyleLanguage()` f’
-`outputStyles/apply.ts`): meta `languageConfig.enabled` ikun mixgħul, `autoDetect` jieħu
-kampjun mill-aħħar messaġġ tal-utent fl-array `messages` tat-talba li jkollu test
-(kontenut bħala string, jew il-`text` tal-partijiet tal-kontenut tiegħu) u jħaddem fuqu
-d-detettur tal-magna Caveman (`detectCompressionLanguage()`). Id-detettur jirritorna `zh`
-għal test b’karattri Han u mingħajr kana; inkella jirritorna dik fost `it`, `pt-BR`, `es`,
-`de`, `fr`, `ru`, `ja`, `hu` u `id` li jkollha l-aktar tqabbil ma’ indikazzjonijiet, u
-`en` meta ma jkun hemm ebda tqabbil — test li ma jkunx jista’ jikklassifika jirċievi
-l-Ingliż, qatt `defaultLanguage`, u `vi` qatt ma jiġi identifikat minkejja li l-istili
-jinkludu test `vi`. Il-body ta’ Responses API iżomm id-dawriet tiegħu f’`input`, li ma
-jittiħidx bħala kampjun, għalhekk jirċievi `defaultLanguage`, u mbagħad l-Ingliż. Meta
-ebda messaġġ tal-utent f’`messages` ma jkollu test, jew meta `autoDetect` ikun mitfi,
-japplika `defaultLanguage`, u mbagħad l-Ingliż. Meta `languageConfig.enabled` ikun mitfi,
-il-lingwa tkun l-Ingliż — sakemm ma tapplikax kombinazzjoni ta’ kompressjoni għat-talba
-(kombinazzjoni assenjata lill-kombinazzjoni tar-routing tat-talba, jew il-kombinazzjoni
-predefinita tal-kompressjoni li chatCore juża bħala alternattiva għall-pipeline inkorporat
-f’saffi): l-applikazzjoni ta’ kombinazzjoni tixgħel `languageConfig.enabled` għal dik
-it-talba u tissettja `defaultLanguage` mill-pakketti tal-lingwa tal-kombinazzjoni (il-valur
-issejvjat jekk ikun wieħed mill-pakketti tal-kombinazzjoni, inkella l-ewwel pakkett
-tal-kombinazzjoni, li b’mod predefinit ikun `en`), filwaqt li l-valur issejvjat ta’
-`autoDetect` (mixgħul b’mod predefinit) xorta japplika. Il-magna tal-input Caveman tagħżel
-il-lingwa tal-pakkett tar-regoli tagħha b’mod differenti — għal kull parti tat-test u,
-meta l-awtodetezzjoni tkun mitfija, suġġett għal `enabledPacks`.
+Għażla tal-lingwa għall-istili tal-output (`resolveOutputStyleLanguage()` f'
+`outputStyles/apply.ts`): b'`languageConfig.enabled` mixgħul, `autoDetect` jieħu kampjun
+mill-aktar messaġġ riċenti tal-user fl-array `messages` tar-request li jkollu test (kontenut
+string, jew it-`text` tal-partijiet tal-kontenut tiegħu) u jħaddem fuqu d-detector tal-engine
+Caveman (`detectCompressionLanguage()`). Id-detector jirritorna `zh` għal test b'karattri
+Han u mingħajr kana; inkella jirritorna dik fost `it`, `pt-BR`, `es`, `de`,
+`fr`, `ru`, `ja`, `hu` u `id` li jkollha l-aktar tqabbil ta' ħjiel, u `en` meta ma jkun hemm
+ebda tqabbil — test li ma jistax jikklassifika jingħata l-Ingliż, qatt `defaultLanguage`, u
+`vi` qatt ma jiġi identifikat minkejja li l-istili jinkludu test `vi`. Body tal-Responses API
+iżomm it-turns tiegħu f'`input`, li ma jitteħidx bħala kampjun, għalhekk jirċievi
+`defaultLanguage`, u mbagħad l-Ingliż. Meta l-ebda messaġġ tal-user f'`messages` ma jkollu
+test, jew meta `autoDetect` ikun mitfi, japplika `defaultLanguage`, u mbagħad l-Ingliż.
+B'`languageConfig.enabled` mitfi, il-lingwa tkun l-Ingliż — sakemm ma japplikax combo
+tal-kompressjoni għar-request (combo assenjat lill-combo tar-routing tar-request, jew il-combo
+tal-kompressjoni default li chatCore jirrikorri għalih għall-pipeline inkorporat u stacked):
+l-applikazzjoni ta' combo tixgħel `languageConfig.enabled` għal dak ir-request u tissettja
+`defaultLanguage` mill-packs tal-lingwi tal-combo (il-valur issejvjat jekk ikun wieħed
+mill-packs tal-combo, inkella l-ewwel pack tal-combo, li b'mod default ikun `en`), filwaqt li
+l-`autoDetect` issejvjat (mixgħul b'mod awtomatiku) jibqa' japplika. L-engine tal-input
+Caveman jagħżel il-lingwa tar-rule-pack b'mod differenti — għal kull parti tat-test u, meta
+l-auto-detect ikun mitfi, soġġett għal `enabledPacks`.
 
 Il-matriċi stil × lingwa hija ffissata minn
-`tests/unit/compression/output-styles-i18n-matrix.test.ts`: kull stil fil-katalgu jeħtieġ
-entrata fil-`BASELINE_LANGUAGES` tat-test; stil li mhuwiex ristrett skont il-locale jrid
-jinkludi traduzzjoni pt-BR (il-`terse-cjk`, li huwa ristrett skont il-locale, huwa eżentat
-minn din ir-regola), sakemm ma jkunx elenkat f’`KNOWN_ENGLISH_ONLY`, li jista’ jinkludi
-biss stili mingħajr ebda traduzzjoni — stil elenkat li jkollu kwalunkwe traduzzjoni
-jfalli t-test; u stil ifalli t-test meta jitlef lingwa elenkata fl-entrata tiegħu
-f’`BASELINE_LANGUAGES`. Biex iżżid stil, ara
+`tests/unit/compression/output-styles-i18n-matrix.test.ts`: kull stil fil-katalgu jeħtieġ entrata
+fil-`BASELINE_LANGUAGES` tat-test; stil li mhuwiex ristrett skont il-lokalità jrid jinkludi
+traduzzjoni pt-BR (it-`terse-cjk`, li huwa ristrett skont il-lokalità, huwa eżentat minn din ir-regola) sakemm ma jkunx
+elenkat f’`KNOWN_ENGLISH_ONLY`, li jista’ jinkludi biss stili mingħajr ebda traduzzjoni —
+stil elenkat li għandu xi traduzzjoni jfalli mit-test; u stil ifalli mit-test meta
+jitlef lingwa elenkata fl-entrata tiegħu ta’ `BASELINE_LANGUAGES`. Biex iżżid stil, ara
 [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
 ### Kompressjoni tar-Riżultati tal-Għodod
 
 `compressToolResult()` f’`open-sse/services/compression/toolResultCompressor.ts`
-jikkompressa t-test tar-riżultat tal-għodda permezz ta’ **5 strateġiji**. Jipprovahom
-f’din l-ordni, u l-ewwel strateġija mixgħula li l-kontroll tagħha jaqbel mal-kontenut
-tiddeċiedi r-riżultat:
+jikkompressa t-test tar-riżultati tal-għodod permezz ta’ **5 strateġiji**. Jipprovahom f’din l-ordni, u
+l-ewwel strateġija attivata li l-kontroll tagħha jaqbel mal-kontenut tiddetermina r-riżultat:
 
-1. **`fileContent`**: kontenut ta’ 3 linji jew aktar li fih mill-inqas linja waħda, meta tiġi injorata
-   l-indentazzjoni tal-bidu, tibda b’`import `, `export `, `function `, `class `,
+1. **`fileContent`**: kontenut ta’ 3 linji jew aktar li fih tal-inqas linja waħda, mingħajr ma
+   titqies l-indentazzjoni inizjali, tibda b’`import `, `export `, `function `, `class `,
    `const `, `let `, `var ` jew `return ` (il-kelma ewlenija flimkien ma’ spazju), jew b’`if`,
    `for` jew `while` segwita minn `(` jew ` (`, iżomm l-ewwel 20 linja u l-aħħar 5 linji, bil-parti
-   tan-nofs imħollija barra mmarkata.
-2. **`grepSearch`**: kontenut b’mill-inqas linja waħda tal-forma `<path>:<digits>:`,
-   fejn it-test qabel l-ewwel żewġ punti ma fih ebda spazju vojt, iżomm biss dawk il-linji, sa
-   massimu ta’ 30, segwiti minn għadd ta’ kwalunkwe taqbiliet oħra u mil-lista tal-fajls li qablu;
+   tan-nofs li tħalliet barra mmarkata.
+2. **`grepSearch`**: kontenut b’tal-inqas linja waħda tal-għamla `<path>:<digits>:`,
+   fejn it-test qabel l-ewwel kolon ma fih l-ebda spazju vojt, iżomm biss dawk il-linji, sa
+   massimu ta’ 30, segwiti minn għadd ta’ kwalunkwe taqbiliet oħra u l-lista tal-fajls li fihom instabu t-taqbiliet;
    kull linja oħra titneħħa. Linja waħda bħal din hija biżżejjed biex tattiva l-istrateġija, għalhekk
    linja ta’ log li tibda b’timbru tal-ħin bħal `12:30:45` tgħodd ukoll.
-3. **`shellOutput`**: output li fih sekwenza ANSI CSI (`ESC[` imbagħad ċifri jew
+3. **`shellOutput`**: output li fih sekwenza ANSI CSI (`ESC[` segwit minn ċifri jew
    punti u virgoli u mbagħad ittra, bħal fil-kodiċijiet tal-kulur) jew `$` segwit minn spazju vojt
    fi kwalunkwe post fit-test jitlef dawk is-sekwenzi (escapes oħra, bħal `ESC[?25l` jew
-   sekwenza OSC għat-titlu tat-tieqa, jinżammu) u jżomm l-aħħar 50 linja, b’linji konsekuttivi
-   ripetuti magħquda f’waħda. Minħabba li dan il-kontroll jitħaddem qabel `json` u `errorMessage`,
-   output JSON jew ta’ żball li fih `$` bħal dan qatt ma jasal għandhom meta
-   `shellOutput` ikun attiv.
+   sekwenza OSC għat-titlu tat-tieqa, jinżammu) u jżomm l-aħħar 50 linja, filwaqt li linji
+   konsekuttivi ripetuti jingħaqdu f’waħda. Minħabba li dan il-kontroll jitwettaq qabel `json` u `errorMessage`,
+   output JSON jew ta’ żball li fih `$` bħal dan qatt ma jasal għalihom meta
+   `shellOutput` ikun attivat.
 4. **`json`**: payload JSON ta’ aktar minn 2,000 karattru li jibda b’`{` jew `[` (wara
-   spazju vojt fakultattiv) u jiġi pparsjat, jinġabar fil-qosor: array ta’ aktar minn 7 elementi jżomm
-   l-ewwel 5 u l-aħħar 2 elementi tiegħu u l-għadd totali tiegħu, u object iżomm l-ewwel 20
-   key tiegħu, b’kull valur ta’ object jew array imbeżżaq sostitwit minn placeholder `{…N keys}`
-   (għal array, N huwa t-tul tiegħu) u markatur `_remaining_<N>_keys` li jgħodd il-keys
-   imneħħija wara l-ewwel 20. Il-valuri skalari jiġu kkupjati sħaħ, għalhekk object b’20 key
-   jew inqas mingħajr valuri mbeżżqa jiġi biss indentat mill-ġdid — wieħed imminifikat jikseb karattri
-   u jibqa’ l-istess.
-5. **`errorMessage`**: output li fih, fi kwalunkwe post u bi kwalunkwe taħlita ta’ ittri kbar u żgħar, `error:`,
+   spazju vojt fakultattiv) u li jista’ jiġi pparsjat jiġi mqassar: array ta’ aktar minn 7 elementi jżomm
+   l-ewwel 5 u l-aħħar 2 elementi tiegħu u l-għadd totali tiegħu, u oġġett iżomm l-ewwel 20
+   key tiegħu, b’kull valur ta’ oġġett jew array annidat sostitwit b’placeholder `{…N keys}`
+   (għal array, N huwa t-tul tiegħu) u marker `_remaining_<N>_keys` li jgħodd il-keys
+   li tneħħew wara l-ewwel 20. Il-valuri skalari jiġu kkupjati sħaħ, għalhekk oġġett b’20 key
+   jew inqas mingħajr valuri annidati jerġa’ jiġi indentat biss — wieħed minimizzat jiżdiedlu l-għadd ta’ karattri
+   u jibqa’ mhux mibdul.
+5. **`errorMessage`**: output li fih, fi kwalunkwe post u irrispettivament mill-użu ta’ ittri kbar jew żgħar, `error:`,
    `error ` (il-kelma segwita minn spazju, bħal f’`no error found`), `[error]`,
    `exception:`, `exception `, `[exception]` jew `traceback` iżomm l-ewwel linja tiegħu,
-   l-10 linji ta’ wara u l-aħħar 3, b’markatur `… [N frames elided] …` minflok il-
-   linji ta’ bejniethom. Il-markatur jidher biss meta aktar minn 13-il linja jsegwu l-ewwel
+   l-10 linji ta’ wara u l-aħħar 3, b’marker `… [N frames elided] …` minflok il-
+   linji ta’ bejniethom. Il-marker jidher biss meta aktar minn 13-il linja jsegwu l-ewwel
    linja, għalhekk output ta’ żball ta’ 14-il linja jew inqas ma jitqassarx (bi 12 jew 13-il linja l-
    aħħar 3 jirrepetu linji li diġà nżammu).
 
-Wara li strateġija taqbel, anki waħda li ma tiffranka xejn, l-istrateġiji ta’ wara ma jiġux
-ippruvati. Meta l-istrateġija li taqbel ma tiffranka ebda token stmat (it-tul ÷ 4, imqarreb ’il fuq) —
+Wara li strateġija taqbel, anki jekk ma tiffranka xejn, l-istrateġiji ta’ wara ma jiġux
+ippruvati. Meta l-istrateġija li taqbel ma tiffranka l-ebda token stmat (it-tul ÷ 4, arrotondat ’il fuq) —
 pereżempju fajl li jixbah kodiċi ta’ 25 linja jew inqas, jew array JSON ta’ aktar minn 2,000
-karattru b’7 elementi jew inqas — l-engine aggressiv iżomm ir-riżultat oriġinali tal-għodda:
-iż-żewġ callers (`compressAggressive()` u `compressAnthropicToolResultBlock()`)
+karattru b’7 elementi jew inqas — il-magna aggressiva żżomm ir-riżultat oriġinali tal-għodda:
+iż-żewġ min isejħilha (`compressAggressive()` u `compressAnthropicToolResultBlock()`)
 iżommu l-oriġinal meta `saved` ikun 0 jew inqas, filwaqt li `compressToolResult()` innifsu xorta
-jirritorna l-output ta’ dik l-istrateġija. Il-pass tar-riżultat tal-għodda mhuwiex l-aħħar kelma: is-
-summarizer ta’ fallback tal-engine xorta jista’ jqassar messaġġ `tool` jew `function` itwal
+jirritorna l-output ta’ dik l-istrateġija. Il-pass tar-riżultat tal-għodda mhuwiex id-deċiżjoni finali:
+is-summarizzatur fallback tal-magna xorta jista’ jqassar messaġġ `tool` jew `function` itwal
 minn 8,192 karattru (`maxTokensPerMessage`, 2,048, immultiplikat b’4).
 
-#### Meta għandu jintuża
+#### Meta tużaha
 
-Il-kompressjoni tar-riżultat tal-għodda hija l-ewwel pass tal-engine aggressiv (`compressAggressive()` f’
+Il-kompressjoni tar-riżultati tal-għodod hija l-ewwel pass tal-magna aggressiva (`compressAggressive()` f’
 `open-sse/services/compression/aggressive.ts`), għalhekk titħaddem fil-modalità Aggressive u fi
-pass `aggressive` ta’ pipeline stacked. Tikkompressa messaġġi `tool` u `function`
-bil-forma ta’ OpenAI u t-test ġewwa blocks `tool_result` ta’ Anthropic. Kull strateġija għandha s-
-switch tagħha taħt `aggressive.toolStrategies`, kollha attivi b’mod awtomatiku. Fid-dashboard, is-
-switches jinsabu fil-veduta **Advanced** tal-paġna Caveman waqt li l-kompressjoni tkun attiva u l-
-modalità awtomatika tkun Aggressive.
+pass `aggressive` ta’ pipeline f’munzell. Tikkompressa messaġġi `tool` u `function`
+fil-format ta’ OpenAI u t-test ġewwa blokki `tool_result` ta’ Anthropic. Kull strateġija għandha
+l-iswiċċ tagħha taħt `aggressive.toolStrategies`, kollha attivati awtomatikament. Fid-dashboard, l-
+iswiċċijiet jinsabu fil-veduta **Advanced** tal-paġna Caveman meta l-kompressjoni tkun attivata u l-
+modalità predefinita tkun Aggressive.
 
-### Pipeline Stacked
+### Pipeline f’Munzell
 
-Il-modalità stacked tħaddem **diversi engines f’sekwenza** — normalment RTK l-ewwel
-(iffrankar ta’ 60-90% fuq l-output tal-għodda), imbagħad Caveman fuq it-test li jifdal (iffrankar ta’
-~46% tal-input). Flimkien, dan jagħti l-**firxa eliġibbli ta’ 78-95%** (ara Upstream Savings Math
-hawn fuq): `1 - (1 - 0.60..0.90) × (1 - 0.46)` jagħti medja ta’ ≈89%.
+Il-modalità f’munzell tħaddem **diversi magni f’sekwenza** — normalment RTK l-ewwel
+(iffrankar ta’ 60-90% fuq l-output tal-għodod), imbagħad Caveman fuq it-test li jifdal (~46% ta’
+ffrankar fuq l-input). Meta jiġu kkombinati, dan jagħti l-**firxa eliġibbli ta’ 78-95%** (ara l-Kalkolu tal-Iffrankar
+Upstream hawn fuq): `1 - (1 - 0.60..0.90) × (1 - 0.46)` jagħti medja ta’ ≈89%.
 
-#### Kif jaħdem
+#### Kif taħdem
 
 ```
 Input (1000 token)
-  → RTK (filtru konxju mill-kmand) → 200 token
+  → RTK (filtru konxju mill-kmandi) → 200 token
     → Caveman (tneħħija tal-mili) → 108 token
   → Output (108 token, ~89% iffrankar)
 ```
 
-#### Meta għandu jintuża
+#### Meta tużaha
 
-Uża l-modalità stacked għal:
+Uża l-modalità f’munzell għal:
 
-- Flussi tax-xogħol li jiddependu ħafna fuq l-għodod (kodifikazzjoni aġentika, riċerka)
+- Flussi tax-xogħol li jużaw ħafna għodod (kodifikazzjoni aġentika, riċerka)
 - Ipproċessar f’lottijiet sensittiv għall-ispejjeż
-- Meta jkollok bżonn l-iffrankar massimu ta’ tokens
+- Meta teħtieġ l-akbar iffrankar possibbli ta’ tokens
 
-Il-pipelines stacked jiġu kkonfigurati permezz tas-setting globali tal-kompressjoni `stackedPipeline`,
-jew permezz ta’ combo tal-kompressjoni msemmi assenjat lil combo tar-routing (ara
-Per-Combo Override hawn fuq) — mhux permezz ta’ `modePack` ta’ auto-combo (dak il-field
-ibiddel biss il-piż tal-għażla tal-mudell tal-auto-combo, u `stacked` mhuwiex isem validu ta’ pack).
+Il-pipelines f’munzell jiġu kkonfigurati permezz tas-setting globali tal-kompressjoni `stackedPipeline`,
+jew permezz ta’ combo tal-kompressjoni msemmija assenjata lil combo tar-routing (ara
+l-Override għal Kull Combo hawn fuq) — mhux permezz ta’ `modePack` ta’ auto-combo (dak il-field
+jerġa’ jwieżen biss l-għażla tal-mudell tal-auto-combo, u `stacked` mhuwiex isem validu ta’ pack).
 
 ---
 

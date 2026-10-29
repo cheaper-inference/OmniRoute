@@ -512,7 +512,7 @@ Agar u `ok` dan boshqa natija qaytarsa, **maʼlumotlar bazasidan foydalanishni d
 
 ### 1-holat: WAL fayli yoʻqolgan
 
-`-wal` fayli yoʻqolgan, ammo `-shm` va asosiy maʼlumotlar bazasi butun:
+`-wal` fayli yoʻq, ammo `-shm` va asosiy maʼlumotlar bazasi shikastlanmagan:
 
 ```bash
 # Keyingi ochishda avtomatik ravishda tiklanadi
@@ -529,24 +529,27 @@ mv recovered.db ~/.omniroute/storage.sqlite
 
 ### 2-holat: Asosiy maʼlumotlar bazasi fayli buzilgan
 
-Zaxira nusxadan tiklang:
+Zaxira nusxasidan tiklang:
 
 ```bash
-omniroute sync pull --merge   # yoki: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` faqat ishlab turgan serverdan toʻliq `.tar.gz` arxivini yuklab oladi
+(`GET /api/db-backups/exportAll`, operator hisob maʼlumotlari talab qilinadi); u hech narsani tiklamaydi.
 
 ### 3-holat: Shifrlash kaliti yoʻqolgan
 
-Kalitsiz **tiklashning imkoni yoʻq**. Shifrlangan maydonlarni oʻqib boʻlmaydi. Barcha provayderlarni yangi hisob maʼlumotlari bilan qoʻlda qayta qoʻshing.
+Kalitsiz **tiklashning iloji yoʻq**. Shifrlangan maydonlarni oʻqib boʻlmaydi. Barcha provayderlarni yangi hisob maʼlumotlari bilan qoʻlda qayta qoʻshing.
 
-> **Xavfni kamaytirish**: Shifrlash kalitini har doim alohida joyda, yaxshisi parollar menejeri yoki KMS tizimida zaxiralang.
+> **Oldini olish chorasi**: Shifrlash kalitining zaxira nusxasini har doim alohida, yaxshisi parollar menejeri yoki KMS tizimida saqlang.
 
 ### 4-holat: Disk toʻlgan
 
-SQLite `SQLITE_FULL` xatolarini qaytaradi. Diskda joy boʻshating, soʻng:
+SQLite `SQLITE_FULL` xatolarini qaytaradi. Diskda joy boʻshating, soʻng quyidagini bajaring:
 
 ```bash
-# Joy boʻshatish uchun WAL nazorat nuqtasini yarating
+# Joy bo'shatish uchun WAL nazorat nuqtasini yarating
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

@@ -9,6 +9,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
+import { Skeleton } from "@/shared/components/Loading";
+import Select from "@/shared/components/Select";
+import Toggle from "@/shared/components/Toggle";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -56,35 +63,6 @@ function confirmLeave(event: BeforeUnloadEvent) {
 }
 
 // ── Sub-components ──────────────────────────────────────────────────────────────
-
-function Toggle({
-  checked,
-  onChange,
-  ariaLabel,
-}: {
-  checked: boolean;
-  onChange: () => void;
-  ariaLabel: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={ariaLabel}
-      onClick={onChange}
-      className={`relative w-10 h-5 rounded-full transition-colors ${
-        checked ? "bg-green-500" : "bg-border"
-      }`}
-    >
-      <span
-        className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-          checked ? "left-5" : "left-0.5"
-        }`}
-      />
-    </button>
-  );
-}
 
 // ── Main component ──────────────────────────────────────────────────────────────
 
@@ -207,31 +185,33 @@ export default function CompressionHub() {
   // ── Derived state ─────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-10 text-sm text-text-muted">
-        {t("loading")}
+      <div className="flex flex-col gap-3 p-4" aria-busy="true">
+        <span className="ci-sr-only">{t("loading")}</span>
+        <Skeleton className="h-32 w-full" />
       </div>
     );
   }
 
   if (loadFailed) {
     return (
-      <section className="flex flex-col gap-5 rounded-xl border border-primary/30 bg-surface p-5">
+      <Card padding="sm" className="flex flex-col gap-5 border-primary/30">
         <div className="flex items-center justify-between gap-4">
-          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="text-sm text-error">
             {tSettings("compressionTitle")}: {tCommon("failedToLoad")}
           </p>
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => {
               setLoading(true);
               setLoadAttempt((attempt) => attempt + 1);
             }}
-            className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs text-text-main hover:bg-bg"
+            className="shrink-0"
           >
             {tSettings("retry")}
-          </button>
+          </Button>
         </div>
-      </section>
+      </Card>
     );
   }
 
@@ -241,29 +221,31 @@ export default function CompressionHub() {
     : "";
 
   return (
-    <section className="flex flex-col gap-5 rounded-xl border border-primary/30 bg-surface p-5">
+    <Card padding="sm" className="flex flex-col gap-5 border-primary/30">
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-[26px] text-primary" aria-hidden="true">
-            hub
-          </span>
+          <Icon name="hub" size={26} className="text-primary" />
           <div>
             <h1 className="text-xl font-bold text-text-main">{t("hubTitle")}</h1>
             <p className="text-sm text-text-muted">{t("hubDescription")}</p>
           </div>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => setExplainerOpen((v) => !v)}
-          className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs text-text-main hover:bg-bg"
+          aria-expanded={explainerOpen}
+          className="shrink-0"
         >
           {explainerOpen ? t("hideExplanation") : t("howItWorks")}
-        </button>
+        </Button>
       </div>
 
       {error && (
-        <p className="rounded border border-danger/40 px-3 py-2 text-xs text-danger">{error}</p>
+        <p role="alert" className="rounded border border-error/40 px-3 py-2 text-xs text-error">
+          {error}
+        </p>
       )}
 
       {/* ── Explainer ── */}
@@ -301,18 +283,13 @@ export default function CompressionHub() {
 
       {/* ── Active profile ── */}
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg p-4">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="active-profile" className="text-sm font-semibold text-text-main">
-            {t("activeProfile")}
-          </label>
-          <p className="text-xs text-text-muted">{t("activeProfileDescription")}</p>
-        </div>
-        <select
+        <Select
           id="active-profile"
+          label={t("activeProfile")}
+          hint={t("activeProfileDescription")}
           data-testid="active-profile-select"
           value={settings?.activeComboId ?? ""}
           onChange={(e) => saveSettings({ activeComboId: e.target.value || null })}
-          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main"
         >
           <option value="">{t("defaultFromPanel")}</option>
           {combos.map((c) => (
@@ -320,7 +297,7 @@ export default function CompressionHub() {
               {c.name}
             </option>
           ))}
-        </select>
+        </Select>
         <div
           data-testid="active-profile-preview"
           className="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-text-muted"
@@ -357,11 +334,13 @@ export default function CompressionHub() {
             ariaLabel={t("contextEditingAria")}
           />
         </div>
-        <div className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-500">
-          <span className="material-symbols-outlined text-[16px]">info</span>
-          <span>{t("contextEditingNote")}</span>
-        </div>
+        <Alert
+          variant="warning"
+          icon={<Icon name="info" size={16} />}
+          className="[&>.ci-alert__dismiss]:hidden"
+          description={t("contextEditingNote")}
+        />
       </div>
-    </section>
+    </Card>
   );
 }

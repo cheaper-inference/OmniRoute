@@ -17,17 +17,17 @@ kapsamı ve uzlaştırma adımlarıyla eşleştirir.
 
 ### Ön Koşullar
 
-- **Node.js** `>=22.22.3 <23` veya `>=24.0.0 <27` (önerilen: 24 LTS)
+- **Node.js** `>=22.22.2 <23` veya `>=24.0.0 <27` (önerilen: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ kullanıcıları (Node 24+):** `npm install` sonrasında yerel modüllerin kurulduğunu doğrulayın:
+> **npm v11+ kullanıcıları (Node 24+):** `npm install` sonrasında yerel modüllerin yüklendiğini doğrulayın:
 > `node -e "require('better-sqlite3')"`. Komut `MODULE_NOT_FOUND` hatasıyla başarısız olursa
 > `npm approve-scripts better-sqlite3 && npm install` komutunu çalıştırın. Bkz.
 > [Sorun Giderme](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klonlama ve Kurulum
+### Klonlama ve Yükleme
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -41,36 +41,36 @@ npm install
 # Şablondan .env dosyanızı oluşturun
 cp .env.example .env
 
-# Gerekli gizli değerleri oluşturun
+# Gerekli gizli anahtarları oluşturun
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Geliştirme için temel değişkenler:
 
-| Değişken               | Geliştirme Varsayılanı   | Açıklama                  |
-| ---------------------- | ------------------------ | ------------------------- |
-| `PORT`                 | `20128`                  | Sunucu portu              |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Ön yüz için temel URL     |
-| `JWT_SECRET`           | (yukarıda oluşturun)     | JWT imzalama gizli değeri |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | İlk oturum açma parolası  |
-| `APP_LOG_LEVEL`        | `info`                   | Günlük ayrıntı düzeyi     |
+| Değişken               | Geliştirme Varsayılanı   | Açıklama                    |
+| ---------------------- | ------------------------ | --------------------------- |
+| `PORT`                 | `20128`                  | Sunucu portu                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Ön yüz için temel URL       |
+| `JWT_SECRET`           | (yukarıda oluşturun)     | JWT imzalama gizli anahtarı |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | İlk oturum açma parolası    |
+| `APP_LOG_LEVEL`        | `info`                   | Günlük ayrıntı düzeyi       |
 
 ### Pano Ayarları
 
-Pano, ortam değişkenleri aracılığıyla da yapılandırılabilen özellikler için UI anahtarları sunar:
+Pano, ortam değişkenleri aracılığıyla da yapılandırılabilen özellikler için kullanıcı arayüzü anahtarları sağlar:
 
-| Ayar Konumu        | Anahtar                  | Açıklama                                          |
-| ------------------ | ------------------------ | ------------------------------------------------- |
-| Ayarlar → Gelişmiş | Hata Ayıklama Modu       | Hata ayıklama istek günlüklerini etkinleştir (UI) |
-| Ayarlar → Genel    | Kenar Çubuğu Görünürlüğü | Kenar çubuğu bölümlerini göster/gizle             |
+| Ayar Konumu        | Anahtar                  | Açıklama                                            |
+| ------------------ | ------------------------ | --------------------------------------------------- |
+| Ayarlar → Gelişmiş | Hata Ayıklama Modu       | Hata ayıklama istek günlüklerini etkinleştirir (UI) |
+| Ayarlar → Genel    | Kenar Çubuğu Görünürlüğü | Kenar çubuğu bölümlerini gösterir/gizler            |
 
 Bu ayarlar veritabanında saklanır, yeniden başlatmalar arasında korunur ve ayarlandıklarında ortam değişkeni varsayılanlarını geçersiz kılar.
 
 ### Yerel Olarak Çalıştırma
 
 ```bash
-# Geliştirme modu (anında yeniden yükleme)
+# Geliştirme modu (otomatik yeniden yükleme)
 npm run dev
 
 # Üretim derlemesi
@@ -80,24 +80,24 @@ npm run start
 # Katkıda bulunanların değişiklikleri için hızlı, yalnızca arka uç/API derlemesi
 npm run build:contributor
 
-# Sürüm derlemesi (temiz yeniden derleme + HEAD kontrol işareti — dağıtım için gereklidir)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA dosyasını yazar
+# Sürüm derlemesi (temiz yeniden derleme + HEAD doğrulama işareti — dağıtım için gereklidir)
+npm run build:release   # rm -rf .build dist && derleme + dist/BUILD_SHA dosyasını yazar
 
 # Yaygın port yapılandırması
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
 Katkıda bulunanlara yönelik derleme yalnızca derleme doğrulaması gerçekleştirir: bağımsız
-dağıtımı oluşturmaz veya isteğe bağlı yerel paketleme varlıklarını derlemez. Dağıtılabilir paketi
-doğrulamanız gerektiğinde normal üretim derlemesini kullanın.
+dağıtımı bir araya getirmez veya isteğe bağlı yerel paketleme varlıklarını derlemez. Dağıtılabilir
+paketi doğrulamanız gerektiğinde normal üretim derlemesini kullanın.
 
 ### Derleme Çıktısı Düzeni
 
-| Dizin     | İçerik                                                                                         | İzleniyor mu? |
-| --------- | ---------------------------------------------------------------------------------------------- | ------------- |
-| `src/`    | Uygulama kaynak kodu (TypeScript / TSX)                                                        | Evet          |
-| `.build/` | Ara çıktılar — `next build` çıktısı (git tarafından yok sayılır, `distDir = .build/next`)      | Hayır         |
-| `dist/`   | Dağıtılabilir paket — `assembleStandalone` tarafından oluşturulur (git tarafından yok sayılır) | Hayır         |
+| Dizin     | İçerik                                                                                           | İzleniyor |
+| --------- | ------------------------------------------------------------------------------------------------ | --------- |
+| `src/`    | Uygulama kaynak kodu (TypeScript / TSX)                                                          | Evet      |
+| `.build/` | Ara çıktılar — `next build` çıktısı (git tarafından yok sayılır, `distDir = .build/next`)        | Hayır     |
+| `dist/`   | Dağıtılabilir paket — `assembleStandalone` tarafından birleştirilir (git tarafından yok sayılır) | Hayır     |
 
 Derleme işlem hattı tek geçişten oluşur:
 
@@ -108,17 +108,18 @@ npm run build
        └─ çıktı: dist/                    (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ayrıca önce her iki dizini de temizler ve dağıtım bütünlüğü kontrol işareti olarak
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dosyasını yazar.
+`npm run build:release` ayrıca önce her iki dizini de temizler ve dağıtım bütünlüğü doğrulama
+işareti olarak `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dosyasını yazar.
 
 `npm run build:contributor`, yalnızca arka uca yönelik derleme profilini kullanır. Derleme sırasında
-pano UI dosyalarını geçici olarak yer tutucularla değiştirir, API rota işleyicilerini korur ve derlemeden
-sonra özgün dosyaları geri yükler. Pano UI'sini etkileyen değişikliklerde veya tam sürüm
-doğrulaması için `npm run build` kullanın; katkıda bulunan profili, sürüm derlemesinin yerini tutmaz.
+pano kullanıcı arayüzü dosyalarını geçici olarak geçersiz içeriklerle değiştirir, API rota işleyicilerini
+korur ve derlemeden sonra özgün dosyaları geri yükler. Pano kullanıcı arayüzünü etkileyen değişiklikler
+veya tam sürüm doğrulaması için `npm run build` kullanın; katkıda bulunan profili, sürüm derlemesinin
+yerine geçmez.
 
 > **VPS dağıtım notu:** uzak görüntü dizini `/usr/lib/node_modules/omniroute/app/`
-> değişmemiştir. Dağıtım becerileri, `dist/` içeriğini rsync ile bu dizine aktarır.
-> Yalnızca depo içindeki derleme çıktı yolu değişmiştir (`app/` → `dist/`).
+> değişmemiştir. Dağıtım araçları, `dist/` içeriğini rsync ile bu dizine aktarır.
+> Yalnızca depo içindeki derleme çıktısı yolu değişmiştir (`app/` → `dist/`).
 
 Varsayılan URL'ler:
 
@@ -178,15 +179,15 @@ Kapsamlar (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci
 # Tüm testler (birim + vitest + ekosistem + e2e)
 npm run test:all
 
-# Tek test dosyası (Node.js yerel test çalıştırıcısı — testlerin çoğu bunu kullanır)
+# Tek test dosyası (Node.js yerel test çalıştırıcısı — çoğu test bunu kullanır)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Yalnızca değişikliğinizden etkilenen birim testleri (CI geçidiyle aynı TIA seçicisi, #8084)
 npm run test:scoped            # son commit'teki (veya çalışma ağacındaki) değişiklikler
-npm run test:scoped:staged     # yalnızca hazırlama alanındaki değişiklikler — commit öncesi çalıştırmayla iyi eşleşir
+npm run test:scoped:staged     # yalnızca hazırlama alanındaki değişiklikler — commit öncesi çalıştırmayla iyi uyum sağlar
 npm run test:scoped:full       # önce içe aktarma grafiği eşlemesini yeniden oluşturur (dosya ekledikten/taşıdıktan sonra)
-# Çıkış 1 + "run the full suite", bir merkez dosyanın (tsconfig, package.json, …) veya
-# eşlenmemiş bir kaynağın değiştiği anlamına gelir — seçici güvenli biçimde başarısız olur, hiçbir zaman sessizce atlamaz.
+# Çıkış kodu 1 + "run the full suite", bir merkez dosyanın (tsconfig, package.json, …) veya
+# eşlenmemiş bir kaynak dosyanın değiştiği anlamına gelir — seçici güvenli biçimde başarısız olur, hiçbir şeyi sessizce atlamaz.
 
 # Vitest (MCP sunucusu, autoCombo, önbellek)
 npm run test:vitest
@@ -208,52 +209,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Geçitli gerçek üst sağlayıcı kombinasyon smoke testi (VPS erişimi + gerçek sağlayıcı kredileri gerektirir)
-# GERÇEK sağlayıcılara istek gönderir — düşük miktarda maliyet oluşturur. CI'da ASLA çalışmaz. Geçit olmadan sorunsuzca atlanır.
-# Gereken: ssh root@192.168.0.15 erişimi (VPS'ten salt okunur bir DB anlık görüntüsü alır).
+# Geçitli gerçek üst kaynak combo duman testi (VPS erişimi + gerçek sağlayıcı kredileri gerektirir)
+# GERÇEK sağlayıcılara istek gönderir — küçük bir maliyeti vardır. CI'da ASLA çalışmaz. Geçit olmadan sorunsuzca atlanır.
+# Gereksinim: ssh root@192.168.0.15 erişimi (VPS'ten salt okunur bir DB anlık görüntüsü alır).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Aşama-3 VPS canlı smoke testi — düz Node ESM betikleri, doğrudan canlı .15 sunucusuna istek gönderir.
-# Gereken: ssh root@192.168.0.15 erişimi (kombinasyonlar SSH sqlite aracılığıyla oluşturulur/kaldırılır).
-# GERÇEK sağlayıcılara istek gönderir (düşük maliyet). Yalnızca __live_test__* kombinasyonlarını oluşturur/siler. CI'da ASLA çalışmaz.
-# .15 üzerinde REQUIRE_API_KEY=false olduğundan API anahtarı gerekmez, ancak ayarlanmışsa COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY değerlerini kullanır.
-npm run test:combo:live:vps              # 7 HTTP senaryosu (öncelik/round-robin/ağırlıklı/maliyet/birleştirme/otomatik + sağlık)
+# Aşama 3 VPS canlı duman testi — düz Node ESM betikleri, canlı .15 sunucusuna doğrudan istek gönderir.
+# Gereksinim: ssh root@192.168.0.15 erişimi (combo'lar SSH sqlite üzerinden oluşturulur/kaldırılır).
+# GERÇEK sağlayıcılara istek gönderir (küçük maliyet). Yalnızca __live_test__* combo'larını oluşturur/siler. CI'da ASLA çalışmaz.
+# .15 üzerinde REQUIRE_API_KEY=false olduğundan API anahtarı gerekmez, ancak ayarlanmışsa COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY değerlerine uyar.
+npm run test:combo:live:vps              # 7 HTTP senaryosu (öncelik/döngüsel/ağırlıklı/maliyet/birleştirme/otomatik + sağlık)
 npm run test:combo:live:vps:failover     # gerçek bir sağlayıcılar arası yük devretme senaryosu ekler (toplam 8)
 ```
 
 Kapsam notları:
 
-- `npm run test:coverage`, ana birim testi paketi için kaynak kapsamını ölçer, `tests/**` öğesini hariç tutar ve `open-sse/**` öğesini dahil eder
-- Pull request'ler; ifadeler/satırlar/fonksiyonlar/dallar için kapsam geçidini **%60+** seviyesinde tutmalıdır
-- Bir PR, `src/`, `open-sse/`, `electron/` veya `bin/` içindeki üretim kodunu değiştiriyorsa aynı PR'da otomatik testler eklemeli veya mevcut testleri güncellemelidir
-- `npm run coverage:report`, en son kapsam çalıştırmasından dosya bazında ayrıntılı raporu yazdırır
+- `npm run test:coverage`, ana birim test paketi için kaynak kapsamını ölçer, `tests/**` kapsam dışı bırakılır ve `open-sse/**` dahil edilir
+- Pull request'ler ifadeler/satırlar/fonksiyonlar/dallar için kapsam geçidini **%60+** düzeyinde tutmalıdır
+- Bir PR, `src/`, `open-sse/`, `electron/` veya `bin/` içindeki üretim kodunu değiştiriyorsa aynı PR içinde otomatik testler eklemeli veya mevcut testleri güncellemelidir
+- `npm run coverage:report`, en son kapsam çalıştırmasından ayrıntılı dosya bazında raporu yazdırır
 - `npm run test:coverage:legacy`, geçmiş karşılaştırmalar için eski metriği korur
-- Aşamalı kapsam iyileştirme yol haritası için `docs/ops/COVERAGE_PLAN.md` belgesine bakın
+- Aşamalı kapsam iyileştirme yol haritası için `docs/ops/COVERAGE_PLAN.md` dosyasına bakın
 
 ### Pull Request Gereksinimleri
 
-Bir PR açmadan önce, değiştirdiğiniz öğelere yönelik odaklı döngüyü çalıştırmak için
-[Katkı İçin Altın Yol](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) belgesini kullanın. Tam birim testi paketi
-(4 CI parçası), Vitest, **%60+** kapsam geçidi ve üretim derlemesi CI'ın sorumluluğundadır —
-bunları yerel olarak çalıştırmak, PR kontrollerinin zaten sağlayacağı bilgilere katkıda bulunmaz ve
-daha düşük kapasiteli makinelerde sistemi tamamen meşgul edebilir (#8084):
+Bir PR açmadan önce, değiştirdiğiniz öğeler için odaklanmış döngüyü çalıştırmak üzere
+[Katkı Altın Yolunu](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) kullanın. Tam birim test paketi (4 CI parçası), Vitest, **%60+** kapsam geçidi ve
+üretim derlemesi CI'ın sorumluluğundadır — bunları yerel olarak çalıştırmak, PR
+denetimlerinin zaten sağlamayacağı ek bir sinyal sağlamaz ve daha küçük makinelerde sistemi tamamen meşgul edebilir (#8084):
 
 - Değişikliğinizi kapsayan test dosyalarını çalıştırın: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` komutunu çalıştırın
-- Üretim kodu değiştiğinde aynı PR'a otomatik testler ekleyin veya mevcut testleri güncelleyin
-- Üretim kodu değiştiğinde değiştirilen veya eklenen test dosyalarını PR açıklamasına dahil edin
-- Proje gizli değerleri CI'da yapılandırılmışsa PR üzerindeki SonarQube sonucunu kontrol edin
+- Üretim kodu değiştiğinde aynı PR içinde otomatik testler ekleyin veya mevcut testleri güncelleyin
+- `node:test` dosyalarında, her üst düzey `await` ifadesini (`await import(...)` gibi) ilk `test()` / `describe()` çağrısından önce yerleştirin: `--test-force-exit` altında bundan sonra kaydedilen testler sessizce hiç çalışmayabilir (#18045; `npm run check:test-tla-order` tarafından zorunlu kılınır)
+- Üretim kodu değiştiğinde değiştirilen veya eklenen test dosyalarını PR açıklamasına ekleyin
+- Proje gizli anahtarları CI'da yapılandırılmışsa PR üzerindeki SonarQube sonucunu kontrol edin
 
-Mevcut test durumu: Aşağıdakileri kapsayan **122 birim testi dosyası**:
+Mevcut test durumu: Şunları kapsayan **122 birim test dosyası**:
 
 - Sağlayıcı çeviricileri ve biçim dönüştürme
 - Hız sınırlama, devre kesici ve dayanıklılık
-- Semantik önbellek, idempotency ve ilerleme takibi
-- Veritabanı işlemleri ve şema (21 DB modülü)
+- Anlamsal önbellek, eş etkili işlemler ve ilerleme takibi
+- Veritabanı işlemleri ve şeması (21 DB modülü)
 - OAuth akışları ve kimlik doğrulama
 - API uç noktası doğrulaması (Zod v4)
-- MCP sunucusu araçları ve kapsam zorlaması
-- Memory ve Skills sistemleri
+- MCP sunucu araçları ve kapsam uygulaması
+- Bellek ve Skills sistemleri
 
 ---
 
@@ -298,28 +299,28 @@ src/                        # TypeScript (.ts / .tsx)
 │   └── login/              # Kimlik doğrulama sayfaları (.tsx)
 ├── domain/                 # İlke motoru (policyEngine, comboResolver, costRules vb.)
 ├── lib/                    # Temel iş mantığı (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protokol sunucusu
-│   ├── acp/                # Agent Communication Protocol kayıt defteri
-│   ├── compliance/         # Uyumluluk ilke motoru
+│   ├── a2a/                # Aracıdan Aracıya v0.3 protokol sunucusu
+│   ├── acp/                # Aracı İletişim Protokolü kayıt defteri
+│   ├── compliance/         # Uyumluluk ilkesi motoru
 │   ├── db/                 # SQLite alan modülleri + 130 migrasyon
 │   ├── memory/             # Kalıcı konuşma belleği
 │   ├── oauth/              # OAuth sağlayıcıları, hizmetleri ve yardımcı araçları
-│   ├── skills/             # Genişletilebilir beceri çerçevesi
+│   ├── skills/             # Genişletilebilir beceri çatısı
 │   ├── usage/              # Kullanım takibi ve maliyet hesaplama
 │   └── localDb.ts          # Yalnızca yeniden dışa aktarma katmanı — buraya asla mantık eklemeyin
-├── middleware/              # İstek ara yazılımı (promptInjectionGuard)
+├── middleware/              # İstek ara katmanı (promptInjectionGuard)
 ├── mitm/                   # MITM proxy'si (sertifika, DNS, hedef yönlendirme)
 ├── shared/
 │   ├── components/         # React bileşenleri (.tsx)
-│   ├── constants/          # Sağlayıcı tanımları (329), MCP kapsamları, 19 yönlendirme stratejisi
+│   ├── constants/          # Sağlayıcı tanımları (329), MCP kapsamları, 20 yönlendirme stratejisi
 │   ├── utils/              # Devre kesici, temizleyici, kimlik doğrulama yardımcıları
 │   └── validation/         # Zod v4 şemaları
 └── sse/                    # SSE proxy işlem hattı
 
 open-sse/                   # @omniroute/open-sse çalışma alanı
-├── executors/              # 89 yürütücü uygulama modülü
+├── executors/              # 150 yürütücü modülü (yürütücü sınıfları + sağlayıcıya özel yardımcılar)
 ├── handlers/               # 11 istek işleyicisi (sohbet, yanıtlar, gömmeler, görseller vb.)
-├── mcp-server/             # MCP sunucusu (110 benzersiz araç, 3 taşıma yöntemi, 33 kapsam)
+├── mcp-server/             # MCP sunucusu (110 benzersiz araç, 3 aktarım yöntemi, 33 kapsam)
 ├── services/               # 178 üst düzey hizmet (combo, autoCombo, rateLimitManager vb.)
 ├── translator/             # Biçim dönüştürücüleri (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Responses API dönüştürücüsü
@@ -332,7 +333,7 @@ tests/
 ├── integration/            # Entegrasyon testleri
 ├── e2e/                    # Playwright testleri
 ├── security/               # Güvenlik testleri
-├── translator/             # Dönüştürücüye özgü testler
+├── translator/             # Dönüştürücüye özel testler
 └── load/                   # Yük testleri
 
 docs/
@@ -342,17 +343,17 @@ docs/
 ├── compression/             # Sıkıştırma kılavuzları ve kuralları
 ├── dev/                     # Geliştirme kılavuzları
 ├── diagrams/                # Mimari diyagramları
-├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── frameworks/              # MCP, A2A, OpenCode, Bellek, Beceriler
 ├── guides/                  # Kullanıcı kılavuzu, Docker, kurulum, sorun giderme
 ├── i18n/                    # Uluslararasılaştırılmış README çevirileri
 ├── marketing/               # Pazarlama materyalleri
 ├── ops/                     # Dağıtım, proxy, kapsam, sürümler
-├── providers/               # Sağlayıcıya özgü belgeler
+├── providers/               # Sağlayıcıya özel belgeler
 ├── reference/               # API referansı, ortam değişkenleri, CLI araçları, ücretsiz katmanlar
 ├── releases/                # Sürüm notları
 ├── routing/                 # Otomatik kombinasyon motoru, akıl yürütme yeniden oynatma
 ├── screenshots/             # Pano ekran görüntüleri
-├── security/                # Koruyucu önlemler, uyumluluk, gizlilik, tokenlar
+├── security/                # Koruma önlemleri, uyumluluk, gizlilik, belirteçler
 └── specs/                   # Tasarım özellikleri
 ```
 

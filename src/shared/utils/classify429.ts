@@ -133,6 +133,11 @@ const QUOTA_PATTERNS: ReadonlyArray<RegExp> = [
   /使用上限/,
   /限额将在/,
   /已达?到.*上限/,
+  // GLM/z.ai out of credit (code 1113): "余额不足或无可用资源包,请充值。" — a
+  // long-period signal, so apikey-category 429s keep their credits classification.
+  /\[1113\]/,
+  /余额不足/,
+  /无可用资源包/,
 
   // Kimi/Moonshot: "您的账户额度已用尽，请充值后重试。"
   /额度已用尽/,
@@ -197,6 +202,42 @@ export function looksLikeQuotaExhausted(body: unknown): boolean {
 }
 
 /**
+ * Concurrency-limit wording in 429 bodies ("too many concurrent requests").
+ * The account is healthy — it is just busy with other in-flight requests —
+ * so the right reaction is to fail over to a sibling connection, not to climb
+ * the exponential backoff ladder. Every pattern is a fixed phrase with bounded
+ * alternations only (no `.*`), per the ReDoS rule.
+ */
+const CONCURRENCY_PATTERNS: ReadonlyArray<RegExp> = [
+  /too many (?:concurrent|simultaneous|parallel) (?:requests?|connections?|sessions?|calls?)/i,
+  /concurrent (?:requests?|connections?|sessions?) limit/i,
+  /concurrency limit/i,
+  /max(?:imum)? concurrency/i,
+  /parallel requests? limit/i,
+  /simultaneous requests? limit/i,
+  /high concurrency usage/i,
+  // GLM/z.ai code 1302: "您当前使用该API的并发数过高，请降低并发…"
+  /并发数?过高/,
+];
+
+/**
+ * Returns true if a 429 body reports a CONCURRENCY limit (contention on a
+ * healthy account). An explicit quota body always wins: a body that matches
+ * any quota pattern is never treated as concurrency.
+ *
+ * Deliberately NOT a `FailureKind`: the circuit breaker's per-kind cooldowns
+ * key on `classify429`, and that contract stays unchanged (a concurrency 429
+ * still reads `rate_limit` there). Only the connection-cooldown path consumes
+ * this signal (open-sse/services/accountFallback.ts).
+ */
+export function looksLikeConcurrencyLimit(body: unknown): boolean {
+  const text = bodyToText(body);
+  if (!text) return false;
+  if (!CONCURRENCY_PATTERNS.some((pat) => pat.test(text))) return false;
+  return !looksLikeQuotaExhausted(text);
+}
+
+/**
  * A declared upstream retry window at or beyond this is treated as
  * long-period exhaustion. One hour mirrors the circuit breaker's
  * `quota_exhausted` cooldown bucket (`cooldownByKind`, wired in
@@ -228,9 +269,14 @@ const TERMINAL_QUOTA_PATTERNS: ReadonlyArray<RegExp> = [
   /insufficient balance/i,
 ];
 
+// Mirror of retryAfterJson's COMPOUND_DURATION_RE ("151h58m18.015s", "2h7m",
+// "45m3s") — anchored and bounded (ReDoS rule); see parseDelaySeconds below.
+const COMPOUND_DURATION_RE =
+  /^(?:(\d{1,9})h(\d{1,9})m(?:(\d{1,9}(?:\.\d{1,12})?)s)?|(\d{1,9})h(\d{1,9}(?:\.\d{1,12})?)s|(\d{1,9})m(\d{1,9}(?:\.\d{1,12})?)s)$/i;
+
 /**
  * Parse an upstream delay string ("38s", "26.66s", "1500ms", "2m", "1h",
- * or a bare number of seconds) into seconds.
+ * compound Go-style "2h7m23s", or a bare number of seconds) into seconds.
  *
  * Deliberately mirrors `parseDelayString` in
  * open-sse/services/retryAfterJson.ts (#7940) rather than importing it:
@@ -249,6 +295,13 @@ function parseDelaySeconds(value: unknown): number | null {
   if (min) return Number.parseFloat(min[1]) * 60;
   const hr = /^(\d+(?:\.\d+)?)\s*h$/i.exec(str);
   if (hr) return Number.parseFloat(hr[1]) * 3600;
+  const compound = COMPOUND_DURATION_RE.exec(str);
+  if (compound) {
+    const hours = Number(compound[1] ?? compound[4] ?? 0);
+    const minutes = Number(compound[2] ?? compound[6] ?? 0);
+    const seconds = Number.parseFloat(compound[3] ?? compound[5] ?? compound[7] ?? "0");
+    return hours * 3600 + minutes * 60 + seconds;
+  }
   const bare = Number.parseFloat(str);
   return Number.isFinite(bare) ? bare : null;
 }

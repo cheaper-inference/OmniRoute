@@ -143,6 +143,11 @@ const LEAK_SHAPES: LeakShape[] = [
     key: "sk-" + fill(36, ALNUM + "_-", 2),
     type: "openai_compatible",
   },
+  // House tokens (`oma_live_` + base64url) had no catalog entry, so the
+  // catalog-only guardrail echoed them verbatim. Kept out of LEAK_SHAPES on
+  // purpose: the catalog name (`oma_live`) differs from the mask label (`oma`),
+  // while the shared loop asserts `[REDACTED:<type>]` with `type` as name.
+  // Dedicated tests below pin the exact `[REDACTED:oma]` label instead.
 ];
 
 const CONTEXTS: Array<[string, (key: string) => string]> = [
@@ -181,6 +186,9 @@ test("GHSA-r4q7: leaves short prose tokens and sub-bound prefixes untouched", ()
     "gsk_" + fill(19, ALNUM),
     "xai-" + fill(19, ALNUM),
     "sk-" + fill(19, ALNUM),
+    "oma_live_xxx",
+    "oma_live_" + fill(19, ALNUM + "_-"),
+    "oma_live_not_a_real_token",
     // `sk-` preceded by an alphanumeric is part of a larger word, not a key prefix.
     "risk-based-access-control-policy-evaluation-failed",
     "Model gpt-5 is not available on this plan",
@@ -241,6 +249,8 @@ test("GHSA-r4q7: catalog ordering keeps the generic sk- fallback last", () => {
   assert.ok(names.indexOf("xai") > names.indexOf("anthropic_alt"));
   assert.ok(names.indexOf("groq") < names.indexOf("google"));
   assert.ok(names.indexOf("xai") < names.indexOf("google"));
+  assert.ok(names.indexOf("oma_live") > names.indexOf("anthropic_alt"));
+  assert.ok(names.indexOf("oma_live") < names.indexOf("google"));
 });
 
 test("GHSA-r4q7: catalog regexes are ReDoS-safe and globally flagged", () => {
@@ -254,7 +264,7 @@ test("GHSA-r4q7: catalog regexes are ReDoS-safe and globally flagged", () => {
     assert.ok(safeRegex(pattern.regex), `${pattern.name} failed safe-regex: ${pattern.regex}`);
   }
 
-  for (const name of ["groq", "xai", "openai_compatible"]) {
+  for (const name of ["groq", "xai", "oma_live", "openai_compatible"]) {
     const pattern = CREDENTIAL_PATTERNS.find((p) => p.name === name);
     assert.ok(pattern, `${name} missing from catalog`);
     assert.ok(safeRegex(pattern.regex), `${name} failed safe-regex`);
@@ -262,4 +272,43 @@ test("GHSA-r4q7: catalog regexes are ReDoS-safe and globally flagged", () => {
     // no alternation of overlapping classes.
     assert.doesNotMatch(pattern.regex.source, /\.\*|\.\+|\)\*|\)\+/);
   }
+});
+
+// ---------------------------------------------------------------------------
+// House tokens (`oma_live_` + base64url, 43-char suffix in production) had no
+// catalog entry, so the catalog-only guardrail echoed them verbatim. The
+// catalog name (`oma_live`) differs from the mask label (`oma`), so these
+// dedicated cases pin the exact `[REDACTED:oma]` label per context instead of
+// reusing the LEAK_SHAPES loop above.
+// ---------------------------------------------------------------------------
+
+const OMA_TOKEN = "oma_live_" + fill(43, ALNUM + "_-");
+const OMA_CONTEXTS: Array<[string, (key: string) => string]> = [
+  ["bare", (key) => key],
+  ["sentence", (key) => `upstream error: Invalid API Key ${key} for model foo`],
+  ["json-msg", (key) => `{"error":{"message":"Incorrect API key provided: ${key}. Check docs."}}`],
+];
+
+for (const [contextName, wrap] of OMA_CONTEXTS) {
+  test(`masks house access token in ${contextName} context`, () => {
+    const input = wrap(OMA_TOKEN);
+    const result = redactCredentials(input);
+
+    assert.equal(result.modified, true, `not modified: ${input}`);
+    assert.equal(result.text.includes(OMA_TOKEN), false, `token survived: ${result.text}`);
+    assert.ok(result.text.includes("[REDACTED:oma]"), `expected [REDACTED:oma] in: ${result.text}`);
+    assert.deepEqual(
+      result.detections.map((d) => d.type),
+      ["oma_live"],
+      `unexpected detection set for ${contextName}`
+    );
+  });
+}
+
+test("masks house token at the 20-char lower bound and spares shorter look-alikes", () => {
+  const masked = redactCredentials(
+    `upstream error: Invalid API Key oma_live_${fill(20, ALNUM + "_-")} end`
+  );
+  assert.equal(masked.modified, true);
+  assert.ok(masked.text.includes("[REDACTED:oma]"), masked.text);
 });

@@ -17,7 +17,7 @@ import {
 import {
   DEFAULT_CODEX_CLIENT_VERSION,
   getCodexClientVersion,
-  getCodexClientVersionSource,
+  getCodexAdvertisedVersionSource,
 } from "@omniroute/open-sse/config/codexClient.ts";
 import { updateCliVersionSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -45,7 +45,7 @@ const RESOLVERS: Record<
   },
   codex: {
     resolve: getCodexClientVersion,
-    source: getCodexClientVersionSource,
+    source: getCodexAdvertisedVersionSource,
     pinned: DEFAULT_CODEX_CLIENT_VERSION,
   },
 };

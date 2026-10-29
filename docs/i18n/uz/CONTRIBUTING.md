@@ -17,13 +17,13 @@ qamrovi va muvofiqlashtirish bosqichlari bilan bogʻlangan.
 
 ### Dastlabki talablar
 
-- **Node.js** `>=22.22.3 <23` yoki `>=24.0.0 <27` (tavsiya etiladi: 24 LTS)
+- **Node.js** `>=22.22.2 <23` yoki `>=24.0.0 <27` (tavsiya etiladi: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ foydalanuvchilari (Node 24+):** `npm install` dan soʻng mahalliy modullar oʻrnatilganini tekshiring:
+> **npm v11+ foydalanuvchilari (Node 24+):** `npm install` buyrugʻidan soʻng mahalliy modullar oʻrnatilganini tekshiring:
 > `node -e "require('better-sqlite3')"`. Agar u `MODULE_NOT_FOUND` xatosi bilan bajarilmasa,
-> `npm approve-scripts better-sqlite3 && npm install` buyrugʻini ishga tushiring. Quyidagiga qarang:
-> [Muammolarni bartaraf etish](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> `npm approve-scripts better-sqlite3 && npm install` buyrugʻini ishga tushiring. Batafsil:
+> [Nosozliklarni bartaraf etish](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
@@ -48,13 +48,13 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Ishlab chiqish uchun asosiy oʻzgaruvchilar:
 
-| Oʻzgaruvchi            | Ishlab chiqishdagi standart qiymat | Tavsif                       |
-| ---------------------- | ---------------------------------- | ---------------------------- |
-| `PORT`                 | `20128`                            | Server porti                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | Frontend uchun asosiy URL    |
-| `JWT_SECRET`           | (yuqorida yarating)                | JWT imzolash maxfiy kaliti   |
-| `INITIAL_PASSWORD`     | `CHANGEME`                         | Birinchi kirish paroli       |
-| `APP_LOG_LEVEL`        | `info`                             | Jurnal tafsilotlari darajasi |
+| Oʻzgaruvchi            | Ishlab chiqishdagi standart qiymat | Tavsif                          |
+| ---------------------- | ---------------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                            | Server porti                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | Frontend uchun asosiy URL       |
+| `JWT_SECRET`           | (yuqorida yarating)                | JWT imzolash uchun maxfiy kalit |
+| `INITIAL_PASSWORD`     | `CHANGEME`                         | Birinchi kirish uchun parol     |
+| `APP_LOG_LEVEL`        | `info`                             | Jurnal tafsilotlari darajasi    |
 
 ### Boshqaruv paneli sozlamalari
 
@@ -65,7 +65,7 @@ Boshqaruv paneli muhit oʻzgaruvchilari orqali ham sozlanishi mumkin boʻlgan fu
 | Sozlamalar → Kengaytirilgan | Nosozliklarni tuzatish rejimi | Nosozliklarni tuzatish soʻrov jurnallarini yoqish (UI) |
 | Sozlamalar → Umumiy         | Yon panel koʻrinishi          | Yon panel boʻlimlarini koʻrsatish/yashirish            |
 
-Bu sozlamalar maʼlumotlar bazasida saqlanadi va qayta ishga tushirishlar davomida saqlanib qoladi; ular oʻrnatilganda muhit oʻzgaruvchilarining standart qiymatlarini bekor qiladi.
+Bu sozlamalar maʼlumotlar bazasida saqlanadi va qayta ishga tushirishlar orasida saqlanib qoladi; oʻrnatilganda ular muhit oʻzgaruvchilarining standart qiymatlarini bekor qiladi.
 
 ### Mahalliy muhitda ishga tushirish
 
@@ -73,54 +73,48 @@ Bu sozlamalar maʼlumotlar bazasida saqlanadi va qayta ishga tushirishlar davomi
 # Ishlab chiqish rejimi (avtomatik qayta yuklash)
 npm run dev
 
-# Ishlab chiqarish uchun build
-npm run build    # next build → .build/next/, soʻng assembleStandalone → dist/
+# Ishlab chiqarish uchun yigʻish
+npm run build    # next build → .build/next/, keyin assembleStandalone → dist/
 npm run start
 
-# Hissa qoʻshuvchilar oʻzgarishlari uchun faqat backend/API ni tezkor kompilyatsiya qilish
+# Hissa qoʻshuvchilar oʻzgarishlari uchun faqat backend/API’ni tezkor kompilyatsiya qilish
 npm run build:contributor
 
-# Reliz buildi (toza qayta build + HEAD sentinel — deploy uchun talab qilinadi)
+# Reliz yigʻilishi (toza qayta yigʻish + HEAD nazorat belgisi — joylashtirish uchun talab qilinadi)
 npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA fayliga yozadi
 
-# Keng tarqalgan port konfiguratsiyasi
+# Keng tarqalgan port sozlamasi
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Hissa qoʻshuvchi buildi faqat kompilyatsiya tekshiruvini bajaradi: u mustaqil
-tarqatma toʻplamini yigʻmaydi yoki ixtiyoriy mahalliy paketlash resurslarini build qilmaydi. Yetkazib beriladigan
-toʻplamni tekshirishingiz kerak boʻlganda odatiy ishlab chiqarish buildidan foydalaning.
+Hissa qoʻshuvchilar yigʻilishi faqat kompilyatsiya tekshiruvini bajaradi: u mustaqil distributivni yigʻmaydi yoki ixtiyoriy mahalliy paketlash resurslarini yaratmaydi. Yetkazib beriladigan toʻplamni tekshirish kerak boʻlganda, odatiy ishlab chiqarish yigʻilishidan foydalaning.
 
-### Build natijasi tuzilishi
+### Yigʻish natijasi tuzilishi
 
-| Katalog   | Tarkibi                                                                              | Kuzatiladi |
-| --------- | ------------------------------------------------------------------------------------ | ---------- |
-| `src/`    | Ilova manba kodi (TypeScript / TSX)                                                  | Ha         |
-| `.build/` | Oraliq fayllar — `next build` natijasi (gitignored, `distDir = .build/next`)         | Yoʻq       |
-| `dist/`   | Yetkazib beriladigan toʻplam — `assembleStandalone` tomonidan yigʻiladi (gitignored) | Yoʻq       |
+| Katalog   | Tarkibi                                                                                                        | Kuzatiladimi |
+| --------- | -------------------------------------------------------------------------------------------------------------- | ------------ |
+| `src/`    | Ilova manba kodi (TypeScript / TSX)                                                                            | Ha           |
+| `.build/` | Oraliq fayllar — `next build` natijasi (git tomonidan eʼtiborsiz qoldiriladi, `distDir = .build/next`)         | Yoʻq         |
+| `dist/`   | Yetkazib beriladigan toʻplam — `assembleStandalone` tomonidan yigʻiladi (git tomonidan eʼtiborsiz qoldiriladi) | Yoʻq         |
 
-Build jarayoni bitta oʻtishda bajariladi:
+Yigʻish jarayoni bir bosqichda amalga oshiriladi:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js natijasi)
-  └─ assembleStandalone()                 (mustaqil toʻplam + statik fayllar + public + mahalliy resurslarni nusxalaydi)
-       └─ natija: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (mustaqil fayllar + statik fayllar + ommaviy fayllar + mahalliy resurslarni nusxalaydi)
+       └─ natija: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` bundan tashqari avval ikkala katalogni ham tozalaydi va deploy yaxlitligini tekshiruvchi sentinel sifatida
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) fayliga yozadi.
+`npm run build:release` qoʻshimcha ravishda avval har ikkala katalogni tozalaydi va joylashtirish yaxlitligini tekshirish belgisi sifatida `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) faylini yozadi.
 
-`npm run build:contributor` faqat backend uchun moʻljallangan build profilidan foydalanadi. Build davomida u
-boshqaruv paneli UI fayllarini vaqtincha stub fayllar bilan almashtiradi, API marshrut ishlov beruvchilarini saqlab qoladi va builddan
-soʻng asl fayllarni tiklaydi. Boshqaruv paneli UI qismiga taʼsir qiladigan oʻzgarishlar yoki relizni toʻliq
-tekshirish uchun `npm run build` dan foydalaning; hissa qoʻshuvchi profili reliz buildining oʻrnini bosa olmaydi.
+`npm run build:contributor` faqat backend uchun moʻljallangan yigʻish profilidan foydalanadi. Yigʻish vaqtida u boshqaruv paneli UI fayllarini vaqtincha almashtiradi, API marshrut ishlov beruvchilarini saqlab qoladi va yigʻishdan soʻng asl fayllarni tiklaydi. Boshqaruv paneli UI’iga taʼsir qiladigan oʻzgarishlar yoki toʻliq reliz tekshiruvi uchun `npm run build` buyrugʻidan foydalaning; hissa qoʻshuvchi profili reliz yigʻilishini almashtirmaydi.
 
-> **VPS deploy eslatmasi:** masofaviy image katalogi `/usr/lib/node_modules/omniroute/app/`
-> oʻzgarmagan. Deploy vositalari `dist/` tarkibini unga rsync orqali koʻchiradi.
-> Faqat repozitoriy ichidagi build natijasi yoʻli oʻzgardi (`app/` → `dist/`).
+> **VPS’ga joylashtirish eslatmasi:** masofaviy obraz katalogi `/usr/lib/node_modules/omniroute/app/`
+> oʻzgarishsiz qoladi. Joylashtirish vositalari `dist/` tarkibini unga rsync orqali nusxalaydi.
+> Faqat repozitoriy ichidagi yigʻish natijasi yoʻli oʻzgardi (`app/` → `dist/`).
 
-Standart URL manzillar:
+Standart URL’lar:
 
 - **Boshqaruv paneli**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
@@ -178,15 +172,15 @@ Qoʻllanish sohalari (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `d
 # Barcha testlar (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Bitta test fayli (Node.js ichki test ishga tushiruvchisi — aksariyat testlar shundan foydalanadi)
+# Bitta test fayli (Node.js mahalliy test ishga tushirgichi — aksariyat testlar bundan foydalanadi)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Faqat oʻzgartirishingiz taʼsir qilgan unit-testlar (CI darvozasi bilan bir xil TIA selektori, #8084)
-npm run test:scoped            # oxirgi commitdagi (yoki ishchi daraxtdagi) oʻzgartirishlar
-npm run test:scoped:staged     # faqat staged oʻzgartirishlar — pre-commit ishga tushirish bilan yaxshi ishlaydi
-npm run test:scoped:full       # avval import-graf xaritasini qayta yarating (fayllarni qoʻshish/koʻchirishdan keyin)
-# Exit 1 + "run the full suite" hub fayli (tsconfig, package.json, …) yoki
-# xaritalanmagan manba oʻzgarganini anglatadi — selektor xavfsiz tarzda toʻxtaydi, u hech qachon sezdirmasdan oʻtkazib yubormaydi.
+# Faqat o‘zgartirishingiz ta’sir qilgan unit testlar (CI nazoratidagi bilan bir xil TIA selektori, #8084)
+npm run test:scoped            # oxirgi commitdagi (yoki ishchi daraxtdagi) o‘zgarishlar
+npm run test:scoped:staged     # faqat stage qilingan o‘zgarishlar — pre-commit ishga tushirilishi bilan yaxshi mos keladi
+npm run test:scoped:full       # avval import-graf xaritasini qayta quradi (fayllarni qo‘shish/ko‘chirishdan keyin)
+# Exit 1 + "to‘liq to‘plamni ishga tushiring" hub fayli (tsconfig, package.json, …) yoki
+# xaritada yo‘q manba o‘zgarganini anglatadi — selektor xavfsiz tarzda to‘xtaydi, hech qachon indamay o‘tkazib yubormaydi.
 
 # Vitest (MCP serveri, autoCombo, kesh)
 npm run test:vitest
@@ -194,13 +188,13 @@ npm run test:vitest
 # E2E testlari (Playwright talab qilinadi)
 npm run test:e2e
 
-# Protokol mijozlari E2E testlari (MCP transportlari, A2A)
+# Protokol klientlari E2E testlari (MCP transportlari, A2A)
 npm run test:protocols:e2e
 
 # Ekotizim mosligi testlari
 npm run test:ecosystem
 
-# Qamrov darvozasi: operatorlar/satrlar/funksiyalar/tarmoqlarning 60%i
+# Qamrov nazorati: operatorlar/satrlar/funksiyalar/tarmoqlar uchun 60%
 npm run test:coverage
 npm run coverage:report
 
@@ -208,52 +202,53 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Darvoza bilan himoyalangan haqiqiy upstream combo smoke testi (VPS ruxsati + haqiqiy provayder kreditlarini talab qiladi)
-# HAQIQIY provayderlarga murojaat qiladi — ozgina xarajat qiladi. CI muhitida HECH QACHON ishlamaydi. Darvozasiz muammosiz oʻtkazib yuboriladi.
-# Talab: ssh root@192.168.0.15 ruxsati (VPSdagi faqat oʻqish uchun DB snapshotidan foydalanadi).
+# Nazorat qilinadigan haqiqiy upstream combo smoke testi (VPS ruxsati + haqiqiy provayder kreditlarini talab qiladi)
+# HAQIQIY provayderlarga murojaat qiladi — ozgina xarajat qiladi. CI’da HECH QACHON ishga tushmaydi. Nazoratsiz toza tarzda o‘tkazib yuboriladi.
+# Talab qilinadi: ssh root@192.168.0.15 ruxsati (VPS’dan faqat o‘qish uchun DB snapshotini yuklaydi).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS jonli smoke testi — oddiy Node ESM skriptlari, jonli .15 serveriga toʻgʻridan-toʻgʻri murojaat qiladi.
-# Talab: ssh root@192.168.0.15 ruxsati (combolar SSH sqlite orqali yaratiladi/oʻchiriladi).
-# HAQIQIY provayderlarga murojaat qiladi (kichik xarajat). Faqat __live_test__* combolarini yaratadi/oʻchiradi. CI muhitida HECH QACHON ishlamaydi.
-# .15 serverida REQUIRE_API_KEY=false, shuning uchun API kaliti kerak emas, ammo oʻrnatilgan boʻlsa COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY qiymatlariga amal qiladi.
+# Phase-3 VPS jonli smoke testi — oddiy Node ESM skriptlari, jonli .15 serveriga bevosita murojaat qiladi.
+# Talab qilinadi: ssh root@192.168.0.15 ruxsati (combo’lar SSH sqlite orqali yaratiladi/o‘chiriladi).
+# HAQIQIY provayderlarga murojaat qiladi (kichik xarajat). Faqat __live_test__* combo’larini yaratadi/o‘chiradi. CI’da HECH QACHON ishga tushmaydi.
+# .15 da REQUIRE_API_KEY=false, shuning uchun API kaliti kerak emas, ammo o‘rnatilgan bo‘lsa COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY hisobga olinadi.
 npm run test:combo:live:vps              # 7 ta HTTP ssenariysi (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # provayderlararo haqiqiy failover ssenariysini qoʻshadi (jami 8 ta)
+npm run test:combo:live:vps:failover     # haqiqiy provayderlararo failover ssenariysini qo‘shadi (jami 8 ta)
 ```
 
-Qamrov boʻyicha izohlar:
+Qamrov bo‘yicha izohlar:
 
-- `npm run test:coverage` asosiy unit-test toʻplami uchun manba qamrovini oʻlchaydi, `tests/**` ni istisno qiladi va `open-sse/**` ni oʻz ichiga oladi
-- Pull requestlar operatorlar/satrlar/funksiyalar/tarmoqlar boʻyicha qamrov darvozasini **60%+** darajasida saqlashi kerak
-- Agar PR `src/`, `open-sse/`, `electron/` yoki `bin/` ichidagi ishlab chiqarish kodini oʻzgartirsa, ayni PR ichida avtomatlashtirilgan testlarni qoʻshishi yoki yangilashi kerak
-- `npm run coverage:report` soʻnggi qamrov ishga tushirilishidan olingan, har bir fayl boʻyicha batafsil hisobotni chiqaradi
+- `npm run test:coverage` asosiy unit testlar to‘plami uchun manba qamrovini o‘lchaydi, `tests/**` ni chiqarib tashlaydi va `open-sse/**` ni o‘z ichiga oladi
+- Pull requestlar operatorlar/satrlar/funksiyalar/tarmoqlar qamrovi nazoratini **60%+** darajasida saqlashi kerak
+- Agar PR `src/`, `open-sse/`, `electron/` yoki `bin/` ichidagi production kodini o‘zgartirsa, ayni PR’da avtomatlashtirilgan testlarni qo‘shishi yoki yangilashi kerak
+- `npm run coverage:report` oxirgi qamrov ishga tushirilishidan olingan batafsil faylma-fayl hisobotni chiqaradi
 - `npm run test:coverage:legacy` tarixiy taqqoslash uchun eski metrikani saqlab qoladi
-- Qamrovni bosqichma-bosqich yaxshilash yoʻl xaritasi uchun `docs/ops/COVERAGE_PLAN.md` fayliga qarang
+- Qamrovni bosqichma-bosqich yaxshilash yo‘l xaritasi uchun `docs/ops/COVERAGE_PLAN.md` ga qarang
 
 ### Pull Request talablari
 
-PR ochishdan oldin oʻzgartirgan narsangiz uchun yoʻnaltirilgan siklni ishga tushirish maqsadida
-[Hissa qoʻshishning oltin yoʻli](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) dan foydalaning.
-Toʻliq unit-test toʻplami (4 ta CI shardi), Vitest, **60%+** qamrov darvozasi va
-ishlab chiqarish buildi CI masʼuliyatidir — ularni lokal ravishda ishga tushirish PR
-tekshiruvlari allaqachon bermaydigan qoʻshimcha signal bermaydi va kichikroq kompyuterlarda host resurslarini toʻliq band qilishi mumkin (#8084):
+PR ochishdan oldin o‘zgartirgan narsangiz uchun yo‘naltirilgan siklni ishga tushirish maqsadida
+[Hissa qo‘shishning asosiy yo‘li](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) dan foydalaning.
+To‘liq unit testlar to‘plami (4 ta CI shard), Vitest, **60%+** qamrov nazorati va
+production build CI zimmasida — ularni lokal ravishda ishga tushirish PR tekshiruvlari sizga
+allaqachon taqdim etmaydigan hech qanday qo‘shimcha ma’lumot bermaydi va kichikroq mashinalarda hostni to‘liq band qilishi mumkin (#8084):
 
-- Oʻzgartirishingizni qamrab oladigan test fayllarini ishga tushiring: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- O‘zgartirishingizni qamrab oluvchi test fayllarini ishga tushiring: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` ni ishga tushiring
-- Ishlab chiqarish kodi oʻzgarganda ayni PR ichida avtomatlashtirilgan testlarni qoʻshing yoki yangilang
-- Ishlab chiqarish kodi oʻzgarganda PR tavsifiga oʻzgartirilgan yoki qoʻshilgan test fayllarini kiriting
-- Loyiha sirlari CI muhitida sozlangan boʻlsa, PRdagi SonarQube natijasini tekshiring
+- Production kodi o‘zgargan har safar ayni PR’da avtomatlashtirilgan testlarni qo‘shing yoki yangilang
+- `node:test` fayllarida har bir yuqori darajadagi `await` ni (masalan, `await import(...)`) birinchi `test()` / `describe()` dan oldin joylashtiring: `--test-force-exit` ostida undan keyin ro‘yxatdan o‘tkazilgan testlar indamay umuman ishga tushmasligi mumkin (#18045; `npm run check:test-tla-order` orqali majburiy tekshiriladi)
+- Production kodi o‘zgargan bo‘lsa, o‘zgartirilgan yoki qo‘shilgan test fayllarini PR tavsifiga kiriting
+- Loyiha sirlari CI’da sozlangan bo‘lsa, PR’dagi SonarQube natijasini tekshiring
 
-Joriy test holati: quyidagilarni qamrab oluvchi **122 ta unit-test fayli**:
+Joriy test holati: quyidagilarni qamrab oluvchi **122 ta unit test fayli**:
 
-- Provayder translatorlari va formatni aylantirish
+- Provayder tarjimonlari va format konvertatsiyasi
 - Tezlikni cheklash, circuit breaker va chidamlilik
-- Semantik kesh, idempotentlik, jarayonni kuzatish
-- Maʼlumotlar bazasi amallari va sxemasi (21 ta DB moduli)
+- Semantik kesh, idempotentlik va jarayonni kuzatish
+- Ma’lumotlar bazasi operatsiyalari va sxemasi (21 ta DB moduli)
 - OAuth jarayonlari va autentifikatsiya
 - API endpoint validatsiyasi (Zod v4)
-- MCP server vositalari va scope talablarini majburiy qoʻllash
-- Memory va Skills tizimlari
+- MCP server vositalari va scope talablarini majburiy qo‘llash
+- Xotira va Skills tizimlari
 
 ---
 
@@ -293,12 +288,12 @@ Amalda qoʻllangan misollar uchun `open-sse/utils/stream.ts` va `open-sse/utils/
 
 ---
 
-## Loyiha tuzilishi
+## Loyiha tuzilmasi
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Boshqaruv paneli sahifalari (23 ta boʻlim)
+│   ├── (dashboard)/        # Boshqaruv paneli sahifalari (23 ta bo‘lim)
 │   ├── api/                # API marshrutlari (51 ta katalog)
 │   └── login/              # Autentifikatsiya sahifalari (.tsx)
 ├── domain/                 # Siyosat mexanizmi (policyEngine, comboResolver, costRules va boshqalar)
@@ -309,28 +304,28 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── db/                 # SQLite domen modullari + 130 ta migratsiya
 │   ├── memory/             # Doimiy suhbat xotirasi
 │   ├── oauth/              # OAuth provayderlari, xizmatlari va yordamchi vositalari
-│   ├── skills/             # Kengaytiriladigan koʻnikmalar freymvorki
-│   ├── usage/              # Foydalanishni kuzatish va xarajatni hisoblash
-│   └── localDb.ts          # Faqat qayta eksport qilish qatlami — bu yerga hech qachon mantiq qoʻshmang
-├── middleware/              # Soʻrov vositachi dasturi (promptInjectionGuard)
-├── mitm/                   # MITM proksi (sertifikat, DNS, maqsadni marshrutlash)
+│   ├── skills/             # Kengaytiriladigan ko‘nikmalar freymvorki
+│   ├── usage/              # Foydalanishni kuzatish va xarajatlarni hisoblash
+│   └── localDb.ts          # Faqat qayta eksport qilish qatlami — bu yerga hech qachon mantiq qo‘shmang
+├── middleware/              # So‘rov oraliq dasturi (promptInjectionGuard)
+├── mitm/                   # MITM proksi (sertifikat, DNS, maqsadli marshrutlash)
 ├── shared/
 │   ├── components/         # React komponentlari (.tsx)
-│   ├── constants/          # Provayder taʼriflari (329 ta), MCP doiralari, 19 ta marshrutlash strategiyasi
-│   ├── utils/              # Avtomatik uzgich, sanitayzer, autentifikatsiya yordamchilari
+│   ├── constants/          # Provayder ta’riflari (329 ta), MCP qamrovlari, 20 ta marshrutlash strategiyasi
+│   ├── utils/              # O‘chirgich, tozalovchi, autentifikatsiya yordamchilari
 │   └── validation/         # Zod v4 sxemalari
 └── sse/                    # SSE proksi konveyeri
 
 open-sse/                   # @omniroute/open-sse ish maydoni
-├── executors/              # 89 ta ijrochi amalga oshirish moduli
-├── handlers/               # 11 ta soʻrov ishlovchisi (chat, javoblar, embeddinglar, tasvirlar va boshqalar)
-├── mcp-server/             # MCP serveri (110 ta noyob vosita, 3 ta transport, 33 ta doira)
+├── executors/              # 150 ta ijrochi modul (ijrochi sinflar + har bir provayder uchun yordamchilar)
+├── handlers/               # 11 ta so‘rov ishlovchisi (chat, javoblar, embeddinglar, tasvirlar va boshqalar)
+├── mcp-server/             # MCP serveri (110 ta noyob vosita, 3 ta transport, 33 ta qamrov)
 ├── services/               # 178 ta yuqori darajadagi xizmat (combo, autoCombo, rateLimitManager va boshqalar)
 ├── translator/             # Format tarjimonlari (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Responses API transformeri
-└── utils/                  # 22 ta yordamchi modul (oqim, TLS, proksi, jurnalga yozish)
+└── utils/                  # 22 ta yordamchi modul (oqim, TLS, proksi, jurnallash)
 
-electron/                   # Electron ish stoli ilovasi (turli platformalar uchun)
+electron/                   # Electron ish stoli ilovasi (ko‘p platformali)
 
 tests/
 ├── unit/                   # Node.js test bajaruvchisi (1 574 ta test fayli)
@@ -341,21 +336,21 @@ tests/
 └── load/                   # Yuklama testlari
 
 docs/
-├── adr/                     # Arxitektura qarorlari yozuvlari
-├── architecture/            # Tizim arxitekturasi va bardoshlilik
-├── comparison/              # OmniRoute va muqobil yechimlar taqqoslanishi
-├── compression/             # Siqish boʻyicha qoʻllanmalar va qoidalar
-├── dev/                     # Ishlab chiqish boʻyicha qoʻllanmalar
+├── adr/                     # Arxitektura qarorlari qaydlari
+├── architecture/            # Tizim arxitekturasi va barqarorligi
+├── comparison/              # OmniRoute va muqobillar taqqoslanishi
+├── compression/             # Siqish bo‘yicha qo‘llanmalar va qoidalar
+├── dev/                     # Ishlab chiqish bo‘yicha qo‘llanmalar
 ├── diagrams/                # Arxitektura diagrammalari
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Foydalanuvchi qoʻllanmasi, Docker, sozlash, muammolarni bartaraf etish
+├── guides/                  # Foydalanuvchi qo‘llanmasi, Docker, sozlash, muammolarni bartaraf etish
 ├── i18n/                    # Xalqarolashtirilgan README tarjimalari
 ├── marketing/               # Marketing materiallari
 ├── ops/                     # Joylashtirish, proksi, qamrov, relizlar
-├── providers/               # Provayderlarga xos hujjatlar
-├── reference/               # API maʼlumotnomasi, muhit oʻzgaruvchilari, CLI vositalari, bepul tariflar
+├── providers/               # Provayderga xos hujjatlar
+├── reference/               # API ma’lumotnomasi, muhit o‘zgaruvchilari, CLI vositalari, bepul tariflar
 ├── releases/                # Reliz qaydlari
-├── routing/                 # Avtomatik kombinatsiya mexanizmi, mulohazalarni qayta ijro etish
+├── routing/                 # Avtomatik kombinatsiya mexanizmi, mulohazalarni takrorlash
 ├── screenshots/             # Boshqaruv paneli skrinshotlari
 ├── security/                # Himoya cheklovlari, muvofiqlik, yashirinlik, tokenlar
 └── specs/                   # Dizayn spetsifikatsiyalari

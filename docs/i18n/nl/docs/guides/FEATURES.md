@@ -298,13 +298,13 @@ Belangrijkste gedragingen:
 
 ## 🔑 Synchronisatietokens en configuratiebundel _(v3.6.6+)_
 
-Toegang vanaf meerdere apparaten en toegang voor externe operators is nu mogelijk via **afgebakende synchronisatietokens**:
+Toegang vanaf meerdere apparaten en toegang voor externe operators is nu mogelijk via **synchronisatietokens met een beperkt bereik**:
 
-- **`POST /api/sync/tokens`** — Geef een nieuw synchronisatietoken uit (afgebakend, met optionele vervaldatum)
+- **`POST /api/sync/tokens`** — Geef een nieuw synchronisatietoken uit (met een beperkt bereik en optionele vervaldatum)
 - **`DELETE /api/sync/tokens/:id`** — Trek een token in
-- **`GET /api/sync/bundle`** — Download een geversioneerde, met ETag geïndexeerde JSON-snapshot van alle niet-gevoelige instellingen (wachtwoorden gemaskeerd)
+- **`GET /api/sync/bundle`** — Download een geversioneerde, door een ETag geïdentificeerde JSON-snapshot van de configuratie (uitsluitend geverifieerd met een synchronisatietoken). Authenticatie-instellingen, zoals het dashboardwachtwoord, worden verwijderd, maar providerreferenties en API-sleutels worden wel opgenomen. Behandel het bestand daarom als een geheim
 
-De configuratiebundel wordt opgebouwd door `src/lib/sync/bundle.ts`. Clients vergelijken de `ETag`-responsheader om wijzigingen te detecteren zonder de volledige payload opnieuw te downloaden.
+De configuratiebundel wordt opgebouwd door `src/lib/sync/bundle.ts`. Clients vergelijken de `ETag`-responseheader om wijzigingen te detecteren zonder de volledige inhoud opnieuw te downloaden. Via de CLI slaat `omniroute sync bundle <outPath> --token <syncToken>` (of `OMNIROUTE_SYNC_TOKEN`) de bundel op in een bestand dat alleen toegankelijk is voor de eigenaar.
 
 ---
 
@@ -316,14 +316,14 @@ De configuratiebundel wordt opgebouwd door `src/lib/sync/bundle.ts`. Clients ver
 
 ---
 
-## 🛡️ Veilig uitgaand ophalen en SSRF-beveiliging _(v3.6.6+)_
+## 🛡️ Veilig uitgaand ophalen & SSRF-beveiliging _(v3.6.6+)_
 
-Alle providervalidatie- en modeldetectieaanroepen verlopen nu via een tweelaagse beveiliging voor uitgaand verkeer:
+Alle aanroepen voor providervalidatie en modeldetectie verlopen nu via een tweelaagse beveiliging voor uitgaand verkeer:
 
-1. **URL-beveiliging** (`src/shared/network/outboundUrlGuard.ts`) — Blokkeert privé-, loopback- en link-local-IP-bereiken voordat de socket wordt geopend.
-2. **Veilige fetch-wrapper** (`src/shared/network/safeOutboundFetch.ts`) — Past de URL-beveiliging toe, normaliseert time-outs en probeert tijdelijke fouten opnieuw met exponentiële back-off.
+1. **URL-beveiliging** (`src/shared/network/outboundUrlGuard.ts`) — Controleert eerst de doelhostnaam of het IP-adres zoals dit letterlijk is opgegeven; in de modus voor uitsluitend openbare adressen zet de wrapper voor veilig ophalen ook de naam om en weigert deze privé-IP-adressen. Standaard blokkeert deze beveiliging cloudmetadata-eindpunten: heel 169.254.0.0/16 plus de bekende metadatahostnamen; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` blokkeert ook privé- en loopbackhosts; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (of de verouderde instelling `OUTBOUND_SSRF_GUARD_ENABLED=false`) schakelt de controles uit. Een waarde die via een schakelaar in het dashboard van een vlag is opgeslagen, heeft voorrang op de bijbehorende variabele, en ingebouwde lokale providers slaan de beveiliging tijdens sleutelvalidatie over. Zie `docs/reference/ENVIRONMENT.md`.
+2. **Wrapper voor veilig ophalen** (`src/shared/network/safeOutboundFetch.ts`) — Past de URL-beveiliging toe, normaliseert time-outs en probeert tijdelijke fouten opnieuw met exponentiële back-off.
 
-Schendingen van de beveiligingsregels worden weergegeven als HTTP 422 (`URL_GUARD_BLOCKED`) en via `providerAudit.ts` naar het compliance-auditlogboek geschreven.
+Beveiligingsovertredingen worden weergegeven als `URL_GUARD_BLOCKED` — HTTP 503 via `getSafeOutboundFetchErrorStatus` (400 op de route voor modeldetectie) — en daadwerkelijke SSRF-blokkeringen tijdens validatie worden als `provider.validation.ssrf_blocked`-gebeurtenissen naar het auditlogboek geschreven.
 
 ---
 

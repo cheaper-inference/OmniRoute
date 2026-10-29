@@ -3,8 +3,9 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
+import Icon from "@/shared/components/Icon";
 import { UsageAnalytics, CardSkeleton } from "@/shared/components";
-import { cn } from "@/shared/utils/cn";
 import EvalsTab from "../usage/components/EvalsTab";
 import CacheHealthTab from "./CacheHealthTab";
 import ComboHealthTab from "./ComboHealthTab";
@@ -14,13 +15,7 @@ import SearchAnalyticsTab from "./SearchAnalyticsTab";
 import DiversityScoreCard from "./components/DiversityScoreCard";
 
 type AnalyticsTab =
-  | "overview"
-  | "evals"
-  | "search"
-  | "utilization"
-  | "combo-health"
-  | "cache-health"
-  | "route-trace";
+  "overview" | "evals" | "search" | "utilization" | "combo-health" | "cache-health" | "route-trace";
 
 const ANALYTICS_TABS: Array<{
   id: AnalyticsTab;
@@ -93,56 +88,39 @@ function AnalyticsPageContent() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div
-        role="tablist"
-        aria-label={t("sectionsAria")}
-        className="flex flex-wrap items-center gap-1 rounded-lg border border-border bg-bg-subtle p-1"
-      >
-        {ANALYTICS_TABS.map((tab) => {
-          const selected = activeTab === tab.id;
+    <Tabs
+      value={activeTab}
+      onValueChange={(next) => handleTabChange(next as AnalyticsTab)}
+      className="flex flex-col gap-6"
+    >
+      <TabsList aria-label={t("sectionsAria")} className="flex-wrap">
+        {ANALYTICS_TABS.map((tab) => (
+          <TabsTrigger key={tab.id} value={tab.id} className="gap-1.5">
+            <Icon name={tab.icon} size={16} />
+            {analyticsText(t, tab.labelKey, tab.label)}
+          </TabsTrigger>
+        ))}
+      </TabsList>
 
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              tabIndex={selected ? 0 : -1}
-              onClick={() => handleTabChange(tab.id)}
-              className={cn(
-                "focus-ring inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors",
-                selected
-                  ? "bg-surface text-text-main shadow-sm"
-                  : "text-text-muted hover:bg-surface/70 hover:text-text-main"
-              )}
-            >
-              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-                {tab.icon}
-              </span>
-              {analyticsText(t, tab.labelKey, tab.label)}
-            </button>
-          );
-        })}
-      </div>
-
-      <Suspense fallback={<CardSkeleton />}>
-        {activeTab === "overview" ? (
-          <>
-            <UsageAnalytics />
-            <DiversityScoreCard />
-          </>
-        ) : null}
-        {activeTab === "evals" ? <EvalsTab /> : null}
-        {activeTab === "search" ? <SearchAnalyticsTab /> : null}
-        {activeTab === "utilization" ? <ProviderUtilizationTab /> : null}
-        {activeTab === "combo-health" ? <ComboHealthTab /> : null}
-        {activeTab === "cache-health" ? <CacheHealthTab /> : null}
-        {activeTab === "route-trace" ? (
-          <RouteExplainabilityTab initialRequestId={initialRequestId} />
-        ) : null}
-      </Suspense>
-    </div>
+      <TabsContent value={activeTab} className="flex flex-col gap-6 focus-visible:outline-none">
+        <Suspense fallback={<CardSkeleton />}>
+          {activeTab === "overview" ? (
+            <>
+              <UsageAnalytics />
+              <DiversityScoreCard />
+            </>
+          ) : null}
+          {activeTab === "evals" ? <EvalsTab /> : null}
+          {activeTab === "search" ? <SearchAnalyticsTab /> : null}
+          {activeTab === "utilization" ? <ProviderUtilizationTab /> : null}
+          {activeTab === "combo-health" ? <ComboHealthTab /> : null}
+          {activeTab === "cache-health" ? <CacheHealthTab /> : null}
+          {activeTab === "route-trace" ? (
+            <RouteExplainabilityTab initialRequestId={initialRequestId} />
+          ) : null}
+        </Suspense>
+      </TabsContent>
+    </Tabs>
   );
 }
 

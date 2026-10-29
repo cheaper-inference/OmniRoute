@@ -511,9 +511,9 @@ Se restituisce un valore diverso da `ok`, **interrompere immediatamente l'utiliz
 
 ## Ripristino di emergenza
 
-### Scenario 1: file WAL perso
+### Scenario 1: File WAL perso
 
-Il file `-wal` è mancante, ma `-shm` e il database principale sono intatti:
+Il file `-wal` è mancante, ma `-shm` e il DB principale sono integri:
 
 ```bash
 # Viene ripristinato automaticamente alla successiva apertura
@@ -528,23 +528,26 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Scenario 2: file del database principale danneggiato
+### Scenario 2: File del DB principale danneggiato
 
-Ripristinare dal backup:
+Ripristina dal backup:
 
 ```bash
-omniroute sync pull --merge   # oppure: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### Scenario 3: chiave di crittografia persa
+`omniroute sync pull [outPath]` scarica soltanto un archivio `.tar.gz` completo da un server in esecuzione
+(`GET /api/db-backups/exportAll`, credenziali dell'operatore richieste); non ripristina nulla.
 
-**Non è possibile alcun ripristino** senza la chiave. I campi crittografati sono illeggibili. Aggiungere nuovamente tutti i provider manualmente con nuove credenziali.
+### Scenario 3: Chiave di crittografia persa
 
-> **Mitigazione**: eseguire sempre separatamente il backup della chiave di crittografia, preferibilmente in un gestore di password o in un KMS.
+**Nessun ripristino possibile** senza la chiave. I campi crittografati sono illeggibili. Aggiungi nuovamente tutti i provider manualmente con nuove credenziali.
 
-### Scenario 4: disco pieno
+> **Mitigazione**: esegui sempre il backup della chiave di crittografia separatamente, preferibilmente in un gestore di password o in un KMS.
 
-SQLite restituirà errori `SQLITE_FULL`. Liberare spazio su disco, quindi eseguire:
+### Scenario 4: Disco pieno
+
+SQLite restituirà errori `SQLITE_FULL`. Libera spazio su disco, quindi:
 
 ```bash
 # Esegue il checkpoint del WAL per liberare spazio

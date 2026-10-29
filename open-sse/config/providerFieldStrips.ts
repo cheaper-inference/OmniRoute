@@ -22,6 +22,11 @@ export const KNOWN_OFFENDING_FIELDS: readonly string[] = [
   // Codex → GLM or Ollama Cloud), whose strict endpoint rejects it as an extra
   // field. Retrying without it is safe because it only changes output style.
   "verbosity",
+  // Claude Code's top-level telemetry object. paramSupport.ts drops it up front
+  // for claude-* model ids; this catches Claude-shaped gateways whose model id
+  // does not contain "claude" and 400 with "diagnostics: Extra inputs are not
+  // permitted".
+  "diagnostics",
 ];
 
 /** Return the first known-offending field literally named in a 400 body, or null. */
@@ -69,6 +74,61 @@ export function detectUnsupportedParam(bodyText: string): string | null {
   const name =
     UNSUPPORTED_PARAM_RE.exec(bodyText)?.[1] ?? DEPRECATED_PARAM_RE.exec(bodyText)?.[1] ?? null;
   return name && !NON_STRIPPABLE_PARAMS.has(name.toLowerCase()) ? name : null;
+}
+
+/**
+ * Groq names a rejected per-message field as
+ *   `'messages.3' : property 'reasoning_content' is unsupported`.
+ * Every quantifier is bounded and the field class excludes quotes (ReDoS-safe).
+ */
+const MESSAGE_PROPERTY_REJECTED_RE =
+  /messages\.\d{1,6}['"`]?\s{0,4}:\s{0,4}property\s{1,4}['"`]([A-Za-z0-9_]{1,64})['"`]\s{1,4}(?:is|was)\s{1,4}(?:unsupported|not\s{1,4}supported)/gi;
+
+const MESSAGE_FIELD_NAME_RE = /^[a-z_][a-z0-9_]{0,63}$/;
+
+// Removing these changes what a message says, not how it is encoded.
+const NON_STRIPPABLE_MESSAGE_FIELDS = new Set(["content", "role", "tool_calls", "tool_call_id"]);
+
+/** pydantic/FastAPI `extra_forbidden` entries whose `loc` passes through `messages`. */
+function extraForbiddenMessageFields(bodyText: string): string[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(bodyText);
+  } catch {
+    return [];
+  }
+  if (!parsed || typeof parsed !== "object") return [];
+  const record = parsed as { detail?: unknown; error?: { detail?: unknown } | null };
+  const detail = Array.isArray(record.detail) ? record.detail : record.error?.detail;
+  if (!Array.isArray(detail)) return [];
+  const fields: string[] = [];
+  for (const entry of detail) {
+    const item = entry as { type?: unknown; loc?: unknown } | null;
+    if (item?.type !== "extra_forbidden" || !Array.isArray(item.loc)) continue;
+    if (!item.loc.includes("messages")) continue;
+    const last = item.loc[item.loc.length - 1];
+    if (typeof last === "string") fields.push(last);
+  }
+  return fields;
+}
+
+/**
+ * Field names an upstream 400 rejects on individual `messages[*]` entries. Only
+ * snake_case names up to 64 chars are returned, never semantic message fields.
+ */
+export function detectRejectedMessageFields(bodyText: string): string[] {
+  if (typeof bodyText !== "string" || !bodyText) return [];
+  const candidates = [
+    ...Array.from(bodyText.matchAll(MESSAGE_PROPERTY_REJECTED_RE), (match) => match[1]),
+    ...extraForbiddenMessageFields(bodyText),
+  ];
+  const fields = new Set<string>();
+  for (const name of candidates) {
+    if (MESSAGE_FIELD_NAME_RE.test(name) && !NON_STRIPPABLE_MESSAGE_FIELDS.has(name)) {
+      fields.add(name);
+    }
+  }
+  return [...fields];
 }
 
 /**
@@ -176,6 +236,9 @@ export function stripGroqUnsupportedFields<T extends Record<string, unknown>>(
           model: _model,
           messageId: _msgId,
           sender: _sender,
+          // Groq rejects replayed reasoning on any message:
+          // "'messages.N' : property 'reasoning_content' is unsupported".
+          reasoning_content: _reasoningContent,
           ...rest
         } = m as Record<string, unknown>;
 

@@ -1,6 +1,7 @@
 import { FORMATS } from "../../translator/formats.ts";
 import { isVerifiedNativeCodexRequest } from "../../config/codexIdentity.ts";
 import { isClaudeCodeCompatibleProvider } from "../../services/claudeCodeCompatible.ts";
+import { downgradeRestoredClaudeThinking } from "../../services/claudeThinkingStore.ts";
 import { isResponsesEndpointPath } from "../../utils/responsesEndpoint.ts";
 import { mergeClientAnthropicBeta } from "../../config/anthropicHeaders.ts";
 import { getHeaderValueCaseInsensitive } from "./headers.ts";
@@ -270,7 +271,10 @@ export function isAnthropicThinkingSignatureError({
  * active tool-use cycle is preserved verbatim: when the request ends in one or
  * more `user[tool_result]` turns, every paired assistant `tool_use` turn in that
  * still-open cycle keeps its thinking blocks. A trailing unresolved assistant
- * `tool_use` turn is protected as well.
+ * `tool_use` turn is protected as well. The one exception inside that cycle is a
+ * block OmniRoute itself restored from claudeThinkingStore (the client never sent
+ * it): it is swapped back to the #5312 `redacted_thinking` placeholder and
+ * forgotten, so a rejected restored signature is still recoverable.
  *
  * This helper is intentionally NOT used eagerly. Normal same-model requests must
  * retain their thinking history, cache shape, and current-model semantics.
@@ -313,13 +317,14 @@ export function stripHistoricalThinkingForSignatureRecovery<T>(body: T): T {
 
   let changed = false;
   const recoveredMessages = messages.map((message, index) => {
-    if (
-      !message ||
-      message.role !== "assistant" ||
-      !Array.isArray(message.content) ||
-      protectedAssistantIndexes.has(index)
-    ) {
+    if (!message || message.role !== "assistant" || !Array.isArray(message.content)) {
       return message;
+    }
+    if (protectedAssistantIndexes.has(index)) {
+      const downgraded = downgradeRestoredClaudeThinking(message.content);
+      if (!downgraded) return message;
+      changed = true;
+      return { ...message, content: downgraded as typeof message.content };
     }
 
     const content = message.content.filter((block) => !isThinkingBlock(block));

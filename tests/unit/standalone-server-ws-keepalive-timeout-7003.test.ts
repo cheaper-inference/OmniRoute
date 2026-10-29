@@ -56,6 +56,11 @@ test("standalone-server-ws.mjs applies keepAliveTimeout/headersTimeout to the wr
     /server\.headersTimeout\s*=\s*\w*[Tt]imeouts?\.headersTimeoutMs/,
     "expected the wrapped server object to have headersTimeout set from getMainServerTimeoutConfig()"
   );
+  assert.match(
+    source,
+    /socket\.setKeepAlive\(\s*true\s*,\s*\w*[Tt]imeouts?\.tcpKeepAliveInitialDelayMs\s*\)/,
+    "expected the server connection listener to configure TCP keepalive via socket.setKeepAlive()"
+  );
 });
 
 test("keepAliveTimeout/headersTimeout are applied inside createServerWithResponsesWs, before the server is returned", () => {

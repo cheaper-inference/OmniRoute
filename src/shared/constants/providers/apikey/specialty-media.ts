@@ -166,6 +166,23 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     hasFree: true,
     freeNote: "10M free tokens on signup (non-commercial), no credit card required",
   },
+  // Decision / evaluation API (System One / Jev). Not a chat provider — no
+  // chat models in the registry. Used by the jev combo strategy (#15276) and
+  // by any future System One passthrough (#13987).
+  typesafe: {
+    id: "typesafe",
+    serviceKinds: [],
+    alias: "typesafe",
+    name: "TypeSafe AI",
+    icon: "psychology",
+    color: "#4F46E5",
+    textIcon: "TS",
+    website: "https://docs.typesafe.ai",
+    authHint:
+      "Bearer API key for api.typesafe.ai. OmniRoute uses it for System One evaluation (Jev) — not chat completions. Store the key here; the jev combo strategy reads it at request time.",
+    apiHint:
+      "TypeSafe System One answers typed questions (noul / choice / score) against a state. OmniRoute does not expose TypeSafe models in chat pickers or combos.",
+  },
   "fal-ai": {
     id: "fal-ai",
     serviceKinds: [],
@@ -331,7 +348,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     subscriptionRisk: true,
     riskNoticeVariant: "oauth",
     authHint:
-      "Paste a Cursor user API key (crsr_...) from cursor.com/dashboard/api. OmniRoute exchanges it for a session token on demand; no IDE or cursor-agent install is needed. Usage bills to the Cursor plan that owns the key.",
+      "Paste a Cursor user API key (crsr_... or grok_...) from cursor.com/dashboard/api. OmniRoute exchanges it for a session token on demand; no IDE or cursor-agent install is needed. Usage bills to the Cursor plan that owns the key.",
     apiHint:
       "Same agent protocol and model catalog as the Cursor IDE provider. The Cursor CLI can also be pointed at /api/cursor-cli on this instance and authenticated with an OmniRoute API key.",
   },

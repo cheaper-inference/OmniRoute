@@ -5,6 +5,7 @@ import { getRawProviderConnections, getProviderConnectionsCount } from "@/lib/db
 import { getAllCircuitBreakerStatuses } from "@/shared/utils/circuitBreaker";
 import { resolveProviderId } from "@/shared/constants/providers";
 import { TERMINAL_CONNECTION_STATUSES } from "@/lib/quota/connectionRecovery";
+import { resolveProviderAvailability } from "@/lib/providerAvailability";
 import { sanitizeErrorMessage, buildErrorBody } from "@omniroute/open-sse/utils/error";
 import {
   getAllModelLockouts,
@@ -77,6 +78,19 @@ function toRotationState(
   }));
 }
 
+/** Last close verdict for one connection (read-only derivation; never stored). */
+function toLastClose(
+  breaker: BreakerWithHistory
+): { at: number; from: string; reason: string | null } | null {
+  for (let i = breaker.transitionHistory.length - 1; i >= 0; i--) {
+    const tr = breaker.transitionHistory[i];
+    if (tr.to === "CLOSED" && (tr.from === "OPEN" || tr.from === "HALF_OPEN")) {
+      return { at: tr.timestamp, from: tr.from, reason: tr.reason ?? null };
+    }
+  }
+  return null;
+}
+
 function toConnectionState(
   row: Record<string, unknown>,
   breakersMap: Map<string, BreakerWithHistory>,
@@ -127,6 +141,7 @@ function toConnectionState(
           failureCount: breaker.failureCount,
           retryAfterMs: breaker.retryAfterMs,
           lastFailureKind: breaker.lastFailureKind,
+          lastClose: toLastClose(breaker),
         }
       : null,
     lockouts: lockouts.map((l) => ({
@@ -135,6 +150,19 @@ function toConnectionState(
       remainingMs: l.remainingMs,
     })),
     rotation: rotationByConnection?.get(String(row.id ?? "")) ?? null,
+    // Typed availability (Section 2): a richer, honest classification alongside the
+    // coarse `connectionStatus` badge. Pure read-only derivation — never mutates.
+    availability: resolveProviderAvailability(
+      {
+        hasCredential: true,
+        isActive: Boolean(row.isActive),
+        testStatus,
+        lastErrorType: row.lastErrorType ? String(row.lastErrorType) : null,
+        rateLimitedUntil,
+        lastErrorAt: row.lastErrorAt ? String(row.lastErrorAt) : null,
+      },
+      now
+    ),
   };
 }
 

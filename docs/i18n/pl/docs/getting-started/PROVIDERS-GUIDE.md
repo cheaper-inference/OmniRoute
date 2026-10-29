@@ -10,48 +10,47 @@
 
 ## Czym jest dostawca?
 
-Pomyśl o dostawcy jak o **operatorze telefonicznym**. Tak jak potrzebujesz operatora telefonicznego, aby wykonywać połączenia, potrzebujesz dostawcy AI, aby korzystać z modeli AI. OmniRoute jest jak telefon współpracujący ze **wszystkimi operatorami** — możesz automatycznie przełączać się między nimi.
+Pomyśl o dostawcy jak o **operatorze telefonii komórkowej**. Tak jak potrzebujesz operatora, aby wykonywać połączenia, potrzebujesz dostawcy AI, aby korzystać z modeli AI. OmniRoute jest jak telefon, który działa ze **wszystkimi operatorami** — możesz automatycznie się między nimi przełączać.
 
 ### Typy dostawców
 
-| Typ            | Czym jest                  | Przykłady                         | Koszt                         |
-| -------------- | -------------------------- | --------------------------------- | ----------------------------- |
-| **Bezpłatny**  | Nie wymaga płatności       | Kiro, OpenCode Free, Pollinations | $0                            |
-| **Klucz API**  | Potrzebujesz klucza API    | OpenAI, Anthropic, Google         | Płatność według użycia        |
-| **OAuth**      | Logowanie za pomocą konta  | Claude Code, GitHub Copilot       | Subskrypcja                   |
-| **Web Cookie** | Używa sesji z przeglądarki | ChatGPT Web (Codex), Gemini Web   | $0 (korzysta z Twojego konta) |
+| Typ            | Czym jest                         | Przykłady                       | Koszt                         |
+| -------------- | --------------------------------- | ------------------------------- | ----------------------------- |
+| **Bezpłatny**  | Nie wymaga płatności              | Kiro, Pollinations              | $0                            |
+| **Klucz API**  | Potrzebujesz klucza API           | OpenAI, Anthropic, Google       | Opłata za użycie              |
+| **OAuth**      | Logowanie za pomocą konta         | Claude Code, GitHub Copilot     | Subskrypcja                   |
+| **Web Cookie** | Używa sesji z Twojej przeglądarki | ChatGPT Web (Codex), Gemini Web | $0 (korzysta z Twojego konta) |
 
-### Dostawcy korzystający z plików cookie
+### Dostawcy Web Cookie
 
-Ogólne instrukcje konfiguracji, ograniczenia, wskazówki dotyczące rozwiązywania problemów oraz informacje o uwierzytelnianiu specyficzne dla poszczególnych dostawców znajdziesz w pliku **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**.
+Ogólne instrukcje konfiguracji, ograniczenia, informacje o rozwiązywaniu problemów oraz wskazówki dotyczące uwierzytelniania u poszczególnych dostawców znajdziesz w dokumencie **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**.
 ---
 
-## Szybki start: połącz się z pierwszym dostawcą
+## Szybki start: połącz swojego pierwszego dostawcę
 
 ### Opcjonalna konfiguracja bezpłatnych dostawców przy pierwszym uruchomieniu
 
-Kreator pierwszego uruchomienia zawiera osobną kartę **Skonfiguruj bezpłatnych dostawców**. Ustala on bieżącą
-listę dostępnych dostawców na podstawie rejestru dostawców OmniRoute niewymagających uwierzytelniania, a następnie pozwala przejrzeć i odznaczyć każdego
-dostawcę przed potwierdzeniem. OmniRoute wyświetla ostrzeżenie dostawcy oraz łącze do jego witryny,
-aby umożliwić wcześniejsze zapoznanie się z warunkami świadczenia usług przez podmiot zewnętrzny, zasadami prywatności, dostępnością i limitami żądań.
+Kreator pierwszego uruchomienia zawiera osobną kartę **Skonfiguruj bezpłatnych dostawców**. Ustala on aktualną
+listę dostępnych dostawców na podstawie rejestru dostawców OmniRoute, którzy nie wymagają uwierzytelniania, a następnie umożliwia przejrzenie listy i odznaczenie każdego
+dostawcy przed potwierdzeniem. OmniRoute wyświetla ostrzeżenie dostawcy oraz link do jego witryny,
+aby umożliwić wcześniejsze zapoznanie się z warunkami korzystania z usług zewnętrznych, zasadami prywatności, dostępnością i limitami szybkości.
 
-Ta czynność jest opcjonalna: ukończenie pracy kreatora nigdy nie tworzy połączeń z bezpłatnymi dostawcami bez wiedzy użytkownika.
-Tworzone są wyłącznie połączenia z dostawcami, których nadal brakuje, a istniejące, niestandardowo skonfigurowane połączenia
-pozostają bez zmian. Wyniki dotyczące dostawców utworzonych, już skonfigurowanych oraz tych, których konfiguracja się nie powiodła, są raportowane osobno. Po częściowym powodzeniu
-możesz bezpiecznie ponowić próbę tylko dla nieudanych konfiguracji.
+Ta czynność jest opcjonalna: zakończenie pracy kreatora nigdy nie tworzy połączeń z bezpłatnymi dostawcami bez wiedzy użytkownika.
+Tworzone są tylko połączenia z dostawcami, których nadal brakuje, istniejące niestandardowe połączenia
+pozostają niezmienione, a informacje o dostawcach utworzonych, już skonfigurowanych i tych, których konfiguracja się nie powiodła, są raportowane osobno. Po częściowym powodzeniu operacji można
+bezpiecznie ponowić próbę tylko dla nieudanych konfiguracji.
 
 ### Opcja A: bezpłatny dostawca (bez karty kredytowej)
 
 1. Otwórz panel pod adresem `http://localhost:20128`
 2. Przejdź do **Dostawcy** → **Dodaj dostawcę**
-3. Wybierz jednego z następujących bezpłatnych dostawców:
+3. Wybierz jednego z tych bezpłatnych dostawców:
    - **Kiro AI** — Bezpłatne modele Claude (uwierzytelnianie nie jest wymagane)
-   - **OpenCode Free** — Bezpłatne modele GPT (uwierzytelnianie nie jest wymagane)
    - **Pollinations** — Bezpłatne modele GPT-5, Claude i Gemini (klucz nie jest wymagany)
-   - **LongCat** — 10 mln tokenów bezpłatnie (jednorazowy przydział, wymaga konta i weryfikacji KYC)
+   - **LongCat** — 10 mln bezpłatnych tokenów (jednorazowy przydział, wymagane konto i weryfikacja KYC)
    - **Cloudflare AI** — Ponad 50 modeli, 10 tys. neuronów dziennie
-   - **MLX Gemma 26B** — Lokalny model dla Apple Silicon (~38.5 tok./s, ~15.9GB RAM)
-   - **MLX Qwen 3.8 27B** — Lokalny model dla Apple Silicon (~9.1 tok./s, ~13.1GB RAM)
+   - **MLX Gemma 26B** — Lokalny model dla Apple Silicon (~38,5 tokena/s, ~15,9 GB pamięci RAM)
+   - **MLX Qwen 3.8 27B** — Lokalny model dla Apple Silicon (~9,1 tokena/s, ~13,1 GB pamięci RAM)
 4. Kliknij **Połącz**
 5. Gotowe! Masz teraz bezpłatny dostęp do AI.
 
@@ -65,7 +64,7 @@ możesz bezpiecznie ponowić próbę tylko dla nieudanych konfiguracji.
    - **Groq**: https://console.groq.com/
 2. Otwórz panel pod adresem `http://localhost:20128`
 3. Przejdź do **Dostawcy** → **Dodaj dostawcę**
-4. Wybierz dostawcę
+4. Wybierz swojego dostawcę
 5. Wklej swój klucz API
 6. Kliknij **Połącz**
 7. Gotowe! Masz teraz dostęp do modeli tego dostawcy.
@@ -74,18 +73,18 @@ możesz bezpiecznie ponowić próbę tylko dla nieudanych konfiguracji.
 
 1. Otwórz panel pod adresem `http://localhost:20128`
 2. Przejdź do **Dostawcy** → **Dodaj dostawcę**
-3. Wybierz dostawcę (np. Claude Code lub GitHub Copilot)
+3. Wybierz swojego dostawcę (np. Claude Code lub GitHub Copilot)
 4. Kliknij **Połącz przez OAuth**
 5. Zaloguj się na swoje konto
-6. Gotowe! Masz teraz dostęp do modeli objętych subskrypcją.
+6. Gotowe! Masz teraz dostęp do modeli objętych Twoją subskrypcją.
 
 ### Opcja D: lokalne modele MLX (Apple Silicon)
 
-Na komputerach Mac z układem Apple Silicon i pamięcią zunifikowaną OmniRoute umożliwia łączenie się z lokalnymi modelami MLX działającymi za pośrednictwem `mlx-lm.server` jak ze standardowymi lokalnymi dostawcami zgodnymi z OpenAI.
+Na komputerach Mac z procesorami Apple Silicon i pamięcią zunifikowaną OmniRoute umożliwia łączenie się z lokalnymi modelami MLX uruchomionymi za pośrednictwem `mlx-lm.server` jak ze zwykłymi lokalnymi dostawcami zgodnymi z OpenAI.
 
 #### Wymagania wstępne
 
-- **Mac z Apple Silicon** (M1/M2/M3/M4); zalecane co najmniej 24GB pamięci zunifikowanej
+- **Komputer Mac z Apple Silicon** (M1/M2/M3/M4); zalecane co najmniej 24 GB pamięci zunifikowanej
 - Menedżer pakietów **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
@@ -116,35 +115,35 @@ Na komputerach Mac z układem Apple Silicon i pamięcią zunifikowaną OmniRoute
    - Wybierz **MLX Gemma 26B** lub **MLX Qwen 3.8 27B**
    - Kliknij **Połącz** (klucz API nie jest wymagany)
 
-4. **Użyj z OpenCode**:
+4. **Używaj z OpenCode**:
    ```bash
    # Skonfiguruj OpenCode do korzystania z OmniRoute
    opencode config set api.base_url http://localhost:20128/v1
-   opencode config set api.key <twój-klucz-api-omniroute>
+   opencode config set api.key <your-omniroute-api-key>
 
-   # Użyj modeli MLX
+   # Używaj modeli MLX
    opencode run --model mlx-gemma/gemma-4-26b
    opencode run --model mlx-qwen/qwen3.8-27b
    ```
 
 #### Zarządzanie pamięcią
 
-**Ważne**: Przy 24GB pamięci zunifikowanej jednocześnie może działać tylko **jeden duży model MLX**.
+**Ważne**: przy 24 GB pamięci zunifikowanej w danym momencie może działać tylko **jeden duży model MLX**.
 
-- Gemma 26B: ~15.9GB pamięci szczytowej
-- Qwen 3.8 27B: ~13.1GB pamięci szczytowej
+- Gemma 26B: ~15,9 GB szczytowego użycia pamięci
+- Qwen 3.8 27B: ~13,1 GB szczytowego użycia pamięci
 
-Musisz zarządzać tym ręcznie:
+Trzeba zarządzać tym ręcznie:
 
 - Uruchamiaj tylko jeden serwer MLX naraz albo
-- Uruchom oba na osobnych komputerach, albo
+- Uruchamiaj oba na osobnych komputerach, albo
 - Zatrzymaj jeden przed uruchomieniem drugiego
 
 OmniRoute nie zarządza automatycznie procesami serwerów MLX — jedynie kieruje żądania do skonfigurowanych punktów końcowych zgodnych z OpenAI.
 
 #### Obsługa wywoływania narzędzi
 
-Oba modele obsługują wywoływanie narzędzi zgodne z OpenAI. Przetestuj za pomocą:
+Oba modele obsługują wywoływanie narzędzi zgodne z OpenAI. Przetestuj je za pomocą:
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -152,20 +151,20 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "Ile to 2+2? Użyj narzędzia kalkulatora."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Wykonuje obliczenia", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
 #### Rozwiązywanie problemów
 
-| Problem                         | Rozwiązanie                                                                                    |
-| ------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Serwer nie uruchamia się        | Sprawdź `uv run mlx_lm.server --help` i zweryfikuj identyfikatory modeli                       |
-| Brak pamięci                    | Upewnij się, że działa tylko jeden model; zamknij inne aplikacje; sprawdź Monitor aktywności   |
-| Połączenie odrzucone            | Sprawdź, czy serwer działa na właściwym porcie (11435/11436)                                   |
-| Wolne odpowiedzi                | Pierwsze żądanie ładuje model do pamięci (~30–60 s); kolejne żądania są realizowane szybko     |
-| Wywoływanie narzędzi nie działa | Upewnij się, że model obsługuje narzędzia; sprawdź logi OmniRoute pod kątem błędów tłumaczenia |
+| Problem                         | Rozwiązanie                                                                                         |
+| ------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Serwer się nie uruchamia        | Sprawdź `uv run mlx_lm.server --help` i zweryfikuj identyfikatory modeli                            |
+| Brak pamięci                    | Upewnij się, że działa tylko jeden model; zamknij inne aplikacje; sprawdź Monitor aktywności        |
+| Połączenie odrzucone            | Sprawdź, czy serwer działa na właściwym porcie (11435/11436)                                        |
+| Wolne odpowiedzi                | Pierwsze żądanie ładuje model do pamięci (~30–60 s); kolejne żądania są szybkie                     |
+| Wywoływanie narzędzi nie działa | Upewnij się, że model obsługuje narzędzia; sprawdź dzienniki OmniRoute pod kątem błędów tłumaczenia |
 
 ---
 
@@ -173,18 +172,16 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 Ci dostawcy oferują **bezpłatny dostęp** bez karty kredytowej:
 
-| Dostawca          | Bezpłatny limit              | Modele                                   | Sposób połączenia    |
-| ----------------- | ---------------------------- | ---------------------------------------- | -------------------- |
-| **Kiro AI**       | 50 kredytów/miesiąc          | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Bez uwierzytelniania |
-| **OpenCode Free** | Bez limitu                   | GPT-4o, Claude, Gemini                   | Bez uwierzytelniania |
-| **Pollinations**  | Klucz nie jest wymagany      | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Bez uwierzytelniania |
-| **LongCat**       | Jednorazowo 10 mln           | LongCat-2.0                              | Klucz API + KYC      |
-| **Cloudflare AI** | 10 tys. neuronów/dzień       | Ponad 50 modeli                          | Bez uwierzytelniania |
-| **NVIDIA NIM**    | ~40 RPM                      | 129 modeli                               | Wymagany klucz API   |
-| **Cerebras**      | 5 USD środków za rejestrację | GLM 4.7, GPT-OSS 120B                    | Klucz API + karta    |
-| **Qoder**         | Bez limitu                   | Kimi-K2, DeepSeek-R1, Qwen3-coder        | Bez uwierzytelniania |
+| Dostawca          | Bezpłatny limit         | Modele                                   | Jak się połączyć                   |
+| ----------------- | ----------------------- | ---------------------------------------- | ---------------------------------- |
+| **Kiro AI**       | 50 kredytów/miesiąc     | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Uwierzytelnianie nie jest wymagane |
+| **Pollinations**  | Klucz nie jest wymagany | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Uwierzytelnianie nie jest wymagane |
+| **LongCat**       | Jednorazowo 10M         | LongCat-2.0                              | Klucz API + KYC                    |
+| **Cloudflare AI** | 10K neuronów/dzień      | Ponad 50 modeli                          | Uwierzytelnianie nie jest wymagane |
+| **NVIDIA NIM**    | ~40 RPM                 | 129 modeli                               | Wymagany klucz API                 |
+| **Cerebras**      | $5 kredytu na start     | GLM 4.7, GPT-OSS 120B                    | Klucz API + karta                  |
 
-**Wskazówka**: Połącz wielu darmowych dostawców, aby korzystać z **bezpłatnej AI bez limitu** z automatycznym przełączaniem awaryjnym!
+**Wskazówka**: Połącz wielu darmowych dostawców, aby uzyskać **nieograniczony bezpłatny dostęp do AI** z automatycznym przełączaniem awaryjnym!
 
 ---
 
@@ -250,7 +247,7 @@ OmniRoute działa najlepiej z **wieloma dostawcami**. Zapewnia to:
 
 Połącz co najmniej **3 dostawców**, aby uzyskać najlepsze rezultaty:
 
-1. **Jeden darmowy dostawca** (Kiro, OpenCode Free lub Pollinations) — zawsze dostępny
+1. **Jeden bezpłatny dostawca** (Kiro lub Pollinations) — zawsze dostępny
 2. **Jeden szybki dostawca** (Groq, Cerebras) — do szybkich odpowiedzi
 3. **Jeden dostawca wysokiej jakości** (OpenAI, Anthropic, Google) — do złożonych zadań
 
@@ -258,7 +255,7 @@ Następnie użyj `model: "auto"`, a OmniRoute automatycznie wybierze najlepszego
 
 ---
 
-## Konfiguracja poszczególnych dostawców
+## Konfiguracja specyficzna dla dostawcy
 
 ### OpenAI
 
@@ -284,6 +281,46 @@ Następnie użyj `model: "auto"`, a OmniRoute automatycznie wybierze najlepszego
 2. W OmniRoute: Dostawcy → Dodaj dostawcę → DeepSeek
 3. Wklej klucz API → Połącz
 
+### Qoder: wybór sposobu przekazywania poświadczeń
+
+Qoder wymaga poświadczeń. Dwa dostępne sposoby ich przekazywania oferują różne możliwości; sama nazwa modelu
+nie określa, jakie operacje może wykonywać dane połączenie.
+
+| Poświadczenie                            | Sposób przekazywania w OmniRoute              | Wywoływanie narzędzi przez klienta                        | Strumieniowanie                                                                 |
+| ---------------------------------------- | --------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| PAT zaczynający się od `pt-`             | Lokalny proces `qodercli` na hoście OmniRoute | Nieobsługiwane                                            | Buforowane: SSE jest emitowane dopiero po zwróceniu pełnej odpowiedzi przez CLI |
+| Token dostępu inny niż PAT lub klucz API | Punkt końcowy HTTP DashScope zgodny z OpenAI  | Przekazywane dalej, zależnie od nadrzędnego modelu/klucza | Nadrzędna ścieżka HTTP/SSE                                                      |
+
+W przypadku PAT zainstaluj Qoder CLI na tym samym hoście lub w tym samym kontenerze co OmniRoute. Plik wykonywalny
+musi być dostępny jako `qodercli`; możesz też ustawić `CLI_QODER_BIN` na ścieżkę do tego pliku. CLI
+zainstalowane wyłącznie na hoście Dockera nie jest automatycznie dostępne w kontenerze. Brak
+pliku wykonywalnego powoduje wyświetlenie jednoznacznego błędu wskazującego konieczność instalacji lub ustawienia ścieżki.
+
+Ścieżka czatu PAT ma limit czasu procesu wynoszący 45 sekund. Spłaszcza konwersację do postaci
+promptu i wywołuje CLI w niestrumieniowym trybie wyjścia. Żądanie `stream: true` zmienia
+format odpowiedzi na SSE; nie zapewnia przyrostowego dostarczania tokenów z usługi nadrzędnej.
+Walidacja CLI i pobieranie listy modeli korzystają z osobnego limitu czasu wynoszącego 20 sekund. Są to obecne wartości
+domyślne w kodzie, a nie konfigurowalne ustawienia panelu.
+
+Połączeń PAT należy używać do zwykłego czatu. Żądania agentowe zawierające `tools` lub starsze `functions`
+wykluczają konta PAT podczas wyboru poświadczeń, również w przypadku przypiętych celów łączonych. Mieszana
+pula Qoder nadal może wybrać konto HTTP. Bezpośrednie wywołania wykonawcy PAT również kończą się
+jednoznacznym błędem przed uruchomieniem CLI, zamiast po cichu pomijać definicje narzędzi. To
+ograniczenie dotyczy narzędzi dostarczonych przez klienta API, a nie narzędzi wewnętrznych, których Qoder
+CLI może używać samodzielnie. Klucz HTTP nie gwarantuje, że każdy model obsługuje narzędzia; nadal
+obowiązują standardowe mechanizmy sprawdzania możliwości modelu.
+
+OAuth w przeglądarce jest dostępne tylko wtedy, gdy administrator skonfiguruje wszystkie pięć ustawień:
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID` oraz `QODER_OAUTH_CLIENT_SECRET`. Domyślnie są one puste; w
+nieskonfigurowanej instalacji należy użyć obsługiwanego importu poświadczeń, zamiast zakładać,
+że przepływ logowania w przeglądarce jest gotowy.
+
+Odwołania do implementacji: [wykonawca Qoder](../../open-sse/executors/qoder.ts),
+[środowisko uruchomieniowe CLI](../../open-sse/services/qoderCli.ts) oraz
+[konfiguracja OAuth](../../src/lib/oauth/constants/oauth.ts). Przyrostowe strumieniowanie PAT
+i konfigurowalny limit czasu są osobnymi usprawnieniami; opisane zachowanie ich nie gwarantuje.
+
 ### Groq
 
 1. Uzyskaj klucz API: https://console.groq.com/
@@ -296,11 +333,11 @@ Następnie użyj `model: "auto"`, a OmniRoute automatycznie wybierze najlepszego
 
 ### „Czy muszę płacić za korzystanie z OmniRoute?”
 
-**Nie!** OmniRoute jest bezpłatnym oprogramowaniem typu open source. Możesz korzystać z bezpłatnych dostawców (Kiro, OpenCode Free, Pollinations), nic za to nie płacąc. Płacisz tylko wtedy, gdy zdecydujesz się korzystać z płatnych dostawców.
+**Nie!** OmniRoute jest bezpłatny i ma otwarty kod źródłowy. Możesz korzystać z bezpłatnych dostawców (Kiro, Pollinations), nie ponosząc żadnych opłat. Płacisz tylko wtedy, gdy zdecydujesz się korzystać z płatnych dostawców.
 
 ### „Od którego dostawcy najlepiej zacząć?”
 
-Zacznij od **Kiro AI** — jest bezpłatny, nie wymaga klucza API i zapewnia dostęp do modeli Claude. Następnie dodawaj kolejnych dostawców w zależności od potrzeb.
+Zacznij od **Kiro AI** — jest bezpłatny, nie wymaga klucza API i zapewnia dostęp do modeli Claude. Następnie w razie potrzeby dodaj kolejnych dostawców.
 
 ### „Czy mogę korzystać z wielu dostawców jednocześnie?”
 
@@ -308,15 +345,15 @@ Zacznij od **Kiro AI** — jest bezpłatny, nie wymaga klucza API i zapewnia dos
 
 ### „Co się stanie, jeśli dostawca przestanie działać?”
 
-OmniRoute automatycznie pomija dostawców, którzy nie działają, i próbuje użyć kolejnego. Nie musisz nic robić.
+OmniRoute automatycznie pomija dostawców, którzy nie działają, i próbuje skorzystać z kolejnego. Nie musisz nic robić.
 
 ### „Jak odłączyć dostawcę?”
 
-Przejdź do sekcji Dostawcy → kliknij dostawcę → kliknij **Odłącz**.
+Przejdź do Providers → kliknij dostawcę → kliknij **Disconnect**.
 
-### „Czy mogę używać swoich istniejących kluczy API?”
+### „Czy mogę użyć swoich istniejących kluczy API?”
 
-**Tak!** Jeśli masz już klucze API do OpenAI, Anthropic, Google itp., możesz ich używać w OmniRoute. Po prostu wklej je podczas łączenia z dostawcą.
+**Tak!** Jeśli masz już klucze API do usług OpenAI, Anthropic, Google itp., możesz ich użyć w OmniRoute. Po prostu wklej je podczas łączenia z dostawcą.
 
 ---
 

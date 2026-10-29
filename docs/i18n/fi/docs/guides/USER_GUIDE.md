@@ -607,131 +607,136 @@ Täydellinen ympäristömuuttujien luettelo on [README-tiedostossa](../README.md
 
 ---
 
-## 📊 Saatavilla olevat mallit
+## 📊 Käytettävissä olevat mallit
 
 <details>
-<summary><b>Näytä kaikki saatavilla olevat mallit</b></summary>
+<summary><b>Näytä kaikki käytettävissä olevat mallit</b></summary>
 
-> Alla oleva luettelo on koottu tiedostosta `open-sse/config/providerRegistry.ts` versiolle v3.8.0. Pilvipalvelujen malliluettelot (Gemini, OpenRouter jne.) synkronoidaan dynaamisesti — saat koko ajantasaisen luettelon avaamalla **Hallintapaneeli → Palveluntarjoajat → [palveluntarjoaja] → Saatavilla olevat mallit** tai kutsumalla päätepistettä `GET /api/models/catalog`.
+> Alla oleva lista on koottu tiedostosta `open-sse/config/providerRegistry.ts` versiolle v3.8.0. Pilvikatalogit (Gemini, OpenRouter jne.) synkronoidaan dynaamisesti — täyden reaaliaikaisen katalogin näet valitsemalla **Hallintapaneeli → Palveluntarjoajat → [palveluntarjoaja] → Käytettävissä olevat mallit** tai kutsumalla `GET /api/models/catalog`.
 >
-> Jos palveluntarjoajan sisäinen luettelo ei ole enää ajan tasalla, nouda ajantasainen luettelo ylävirrasta käyttämällä kyseisellä sivulla toimintoa **Tuo kohteesta /models** (tai ottamalla käyttöön **Automaattinen synkronointi**). Tämä vahvistettiin versiossa v3.8.50 palveluille LLM7.io (`gemini-3.1-flash-lite`) ja UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinations-palvelun anonyymi käyttö pysyi ylävirran rajoittamana saman testikierroksen aikana.
+> Jos palveluntarjoajan sisäänrakennettu lista on vanhentunut, käytä kyseisellä sivulla olevaa toimintoa **Tuo /models-rajapinnasta** (tai ota käyttöön **Automaattinen synkronointi**) hakeaksesi ajantasaisen ylävirran katalogin. Tämä varmistettiin versiossa v3.8.50 LLM7.io:lle (`gemini-3.1-flash-lite`) ja UncloseAI:lle (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinationsin anonyymi käyttö pysyi ylävirran rajoittamana saman testikierroksen aikana.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ päättelytasot: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort-tasot: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ILMAINEN OAuth: käytä ajantasaista luetteloa kohdassa **Hallintapaneeli → Palveluntarjoajat → Kiro → Saatavilla olevat mallit**. Saatavuus riippuu tilistä ja tilauksesta.
+**Kiro (`kr/`)** — ILMAINEN OAuth: käytä reaaliaikaista katalogia, joka näkyy kohdassa **Hallintapaneeli → Palveluntarjoajat → Kiro → Käytettävissä olevat mallit**. Saatavuus riippuu tilistä ja tilaustasosta.
 
 **Qoder (`if/`)** — ILMAINEN OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2–0,6 $ / 1 milj.: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 $ / 1 milj.: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — kiinteä 9 $/kk tai käytön mukaan: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/kk kiinteä tai käytön mukaan: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API-avain: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Erittäin nopea: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Natiivi Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok-natiivit: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Isännöity EU:ssa: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU:ssa isännöity: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Hakutoiminnoilla täydennetty: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Haulla tehostettu: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Avoin lähdekoodi: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ilmainen), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Avoimen lähdekoodin: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ilmainen), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Nopea inferenssi: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Nopea päättely: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Kiekkomittakaava: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG-painotteinen: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Yrityskäyttöön: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Yrityskäyttöön: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synkronoidaan ajantasaisesti Googlelta API-avaimen perusteella — ei staattista luetteloa. Yhdistä avain kohdassa **Hallintapaneeli → Palveluntarjoajat** ja tuo sitten nykyinen luettelo käyttämällä toimintoa **Saatavilla olevat mallit** (esim. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Synkronoidaan reaaliajassa API-avaimella Googlelta — ei staattista listaa. Yhdistä avain kohdassa **Hallintapaneeli → Palveluntarjoajat** ja tuo sen jälkeen ajantasainen katalogi valitsemalla **Käytettävissä olevat mallit** (esim. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Muut yhteensopivat palveluntarjoajat** (valikoima): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock`-palvelun kautta), `azure-ai`, `openrouter` (luettelon läpivienti), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kukin ylläpitää omaa malliluetteloaan tiedostossa `providerRegistry.ts`, ja luettelo voidaan synkronoida automaattisesti, kun palveluntarjoaja tarjoaa `/models`-päätepisteen.
+**Muut yhteensopivat palveluntarjoajat** (valikoima): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (kautta `aws-bedrock`), `azure-ai`, `openrouter` (läpikulkukatalogi), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Jokainen ylläpitää omaa mallilistaansa tiedostossa `providerRegistry.ts`, ja ne voidaan synkronoida automaattisesti, kun palveluntarjoaja tarjoaa `/models`-päätepisteen.
 
-**Huomautus mallitunnuksista:** OmniRoute käyttää palveluntarjoajien natiiveja tunnuksia (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Jotkin tunnukset sisältävät pisteillä erotettuja versioita, koska ylävirran API odottaa niitä tässä muodossa. Jos mallia ei ole lueteltu yllä, vahvista sen saatavuus suorittamalla `omniroute models --search <term>` tai kutsumalla päätepistettä `GET /api/models/catalog`.
+**Huomautus mallitunnisteista:** OmniRoute käyttää palveluntarjoajien natiiveja tunnisteita (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Jotkin tunnisteet sisältävät pisteellisiä versioita, koska ylävirran API odottaa niitä sellaisina. Jos mallia ei ole lueteltu yllä, suorita `omniroute models --search <term>` tai tee pyyntö `GET /api/models/catalog` vahvistaaksesi saatavuuden.
 
 </details>
 
 ---
 
-## 🧩 Edistyneet ominaisuudet
+## 🧩 Lisäominaisuudet
 
 ### Mukautetut mallit
 
-Lisää mikä tahansa mallitunnus mille tahansa palveluntarjoajalle odottamatta sovelluspäivitystä:
+Lisää mikä tahansa malli ID mille tahansa palveluntarjoajalle odottamatta sovelluspäivitystä:
 
 ```bash
-# API:n kautta
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# Luettelo: curl http://localhost:20128/api/provider-models?provider=openai
-# Poista: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Tai käytä hallintapaneelia: **Palveluntarjoajat → [Palveluntarjoaja] → Mukautetut mallit**.
+Tai käytä Dashboardia:** Palveluntarjoajat → [Provider] → Mukautetut mallit** .
 
-Huomautukset:
+Huomautuksia:
 
-- OpenRouter- ja OpenAI-/Anthropic-yhteensopivia palveluntarjoajia hallitaan vain **Saatavilla olevat mallit** -osiossa. Manuaalisesti lisätyt, tuodut ja automaattisesti synkronoidut mallit päätyvät kaikki samaan saatavilla olevien mallien luetteloon, joten näille palveluntarjoajille ei ole erillistä Mukautetut mallit -osiota.
-- **Mukautetut mallit** -osio on tarkoitettu palveluntarjoajille, jotka eivät tarjoa hallittuja saatavilla olevien mallien tuonteja.
+- OpenRouter ja OpenAI/Anthropic-compatible -palveluntarjoajia hallitaan** Saatavilla olevat mallit** vain. Manuaalinen lisääminen, tuonti ja automaattinen synkronointi ovat kaikki samassa käytettävissä olevien mallien luettelossa, joten näille tarjoajille ei ole erillistä mukautetut mallit -osiota.
+- The** Mukautetut mallit** -osio on tarkoitettu palveluntarjoajille, jotka eivät paljasta hallittujen käytettävissä olevien mallien tuontia.
 
 ### Mukautetut OpenAI-yhteensopivat palveluntarjoajat
 
-Mikä tahansa OpenAI API -rajapintaa käyttävä yhdyskäytävä (itse ylläpidetty välityspalvelin, vLLM tai kolmannen osapuolen koontipalvelu)
-voidaan lisätä omaksi palveluntarjoajasolmukseen:
+Mikä tahansa yhdyskäytävä, joka puhuu OpenAI API (itseisännöity välityspalvelin, vLLM, kolmannen osapuolen aggregaattori), voidaan lisätä omaksi palveluntarjoajasolmukseen:
 
-1. **Palveluntarjoajat → Lisää OpenAI-yhteensopiva**.
-2. **Nimi**: solmun näyttönimi.
-3. **Etuliite**: reititysnimi. Asiakkaat kutsuvat malleja muodossa `<prefix>/<model>`, joten solmu, jonka
-   etuliite on `mygw`, palvelee mallia `mygw/gpt-4o-mini`. Pakollinen; merkeille ei ole rajoituksia.
-4. **API-tyyppi**: yhdyskäytävän tarjoama päätepisteperhe (Chat Completions, Responses,
-   Embeddings, ääni, kuvat).
-5. **Perus-URL**: API:n juuriosoite `/v1` mukaan lukien (esimerkiksi
-   `https://gateway.example.com/v1`), ei koko `/chat/completions`-polku. Yhdyskäytävät, joilla
-   on epästandardit polut, määrittävät ne kohdassa **Lisäasetukset** (keskustelupolku, mallipolku).
-6. **API-avain (tarkistusta varten)** -kenttä ainoastaan testaa yhteyden. Kun solmu on luotu,
-   avaa se ja tallenna pyyntöjen käyttämä avain valitsemalla **Lisää yhteys**.
+1. **Tarjoajat → Lisää OpenAI Yhteensopiva** .
+2. **Nimi** : solmun näyttötunniste.
+3. **Etuliite** : reitityksen nimi. Asiakkaat kutsuvat malleja nimellä `<prefix>/<model>`, joten solmu, jossa on etuliite `mygw` palvelee `mygw/gpt-4o-mini`. Pakollinen; ei ole merkkirajoitusta.
+4. **API tyyppi** : päätepisteperhe, jota yhdyskäytävä palvelee (keskustelut, vastaukset, upotukset, ääni, kuvat).
+5. **Pohja URL** : API -juuri `/v1` :hen asti (esimerkiksi `https://gateway.example.com/v1`), ei koko `/chat/completions` polkua. Yhdyskäytävät, joissa on epätyypilliset polut, asettavat ne alle** Lisäasetukset** (chat-polku, mallipolku).
+6. The**API -avain (sekkiin)** kenttä vain testaa yhteyttä. Kun olet luonut solmun, avaa se ja käytä** Lisää yhteys** tallentaaksesi avaimen, jota pyynnöt käyttävät.
 
-Solmu saa sisäisen tunnuksen muodossa `openai-compatible-<apiType>-<uuid>`; sitä ei koskaan
-tarvitse kirjoittaa, sillä etuliite on julkinen nimi.
+Solmu saa sisäisen tunnuksen muodossa `openai-compatible-<apiType>-<uuid>`; sinun ei tarvitse koskaan kirjoittaa sitä, etuliite on julkinen nimi.
 
 #### Varatut etuliitteet
 
-Etuliite ei voi olla sisäänrakennetun palveluntarjoajan tunnus tai alias (esimerkiksi `openai`, `cf`) eikä
-käytöstä poistetun palveluntarjoajan tunnus. Mallinratkaisija tarkistaa sisäänrakennetut tunnukset ja aliakset ennen
-mukautettuja solmuja, joten tällaista etuliitettä käyttävä solmu ei koskaan vastaanottaisi liikennettä:
-`<prefix>/model` ohjautuisi sen sijaan sisäänrakennetulle palveluntarjoajalle tai estettäisiin, jos kyseinen palveluntarjoaja
-on poistettu käytöstä. Tällaisella etuliitteellä varustetun solmun luominen tai muokkaaminen hylätään seuraavalla viestillä:
+Etuliite ei voi olla sisäänrakennetun palveluntarjoajan tunnus tai alias (esimerkiksi `openai`, `cf`), eikä eläkkeellä olevan palveluntarjoajan tunnus. Mallinratkaisu tarkistaa sisäänrakennetut tunnukset ja aliakset ennen mukautettuja solmuja, joten jotakin näistä etuliitteistä käyttävä solmu ei koskaan vastaanottaisi liikennettä: `<prefix>/model` siirtyisi sen sijaan sisäänrakennetulle palveluntarjoajalle tai epäonnistuisi sulkeutumaan, jos palveluntarjoaja poistuisi käytöstä. Solmun luominen tai muokkaaminen tällaisella etuliitteellä hylätään seuraavalla:
 
 ```text
-prefix: "<prefix>" on varattu palveluntarjoajan etuliite — valitse toinen etuliite (varattuja tunnuksia/aliaksia ei voi käyttää mukautetuissa solmuissa, koska pyynnöt, kuten <prefix>/model, reititetään sisäänrakennetulle palveluntarjoajalle tai estetään, kun palveluntarjoaja on poistettu käytöstä)
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-Valitse yksilöllinen etuliite (`mygw`, `acme-proxy`). Jos pyynnöt mukautetulle solmulle epäonnistuvat
-virheeseen, jossa mainitaan sisäänrakennettu palveluntarjoaja tai sen tunnistetiedot, tarkista, onko solmun etuliite
-varattu: ennen tämän säännön käyttöönottoa tallennetut solmut säilyvät edelleen, mutta niiden etuliite reitittää pyynnöt
-sisäänrakennetulle palveluntarjoajalle. Muokkaa solmua ja anna sille uusi etuliite.
+Valitse erillinen etuliite (`mygw`, `acme-proxy`). Jos mukautetun solmun pyynnöt epäonnistuvat virheellä, joka nimeää sisäänrakennetun palveluntarjoajan tai sen tunnistetiedot, tarkista, onko solmun etuliite varattu: ennen tämän säännön olemassaoloa tallennetut solmut tallennetaan edelleen, mutta niiden etuliitereitit sisäänrakennettuun toimittajaan. Muokkaa solmua ja anna sille uusi etuliite.
 
-### OmniRoute-vertaisyhdyskäytävien ketjuttaminen
+#### Yhteyskohtaiset yhdyskäytävän vaihtoehdot
 
-Toinen OmniRoute-yhdyskäytävä voidaan lisätä **mukautetuksi OpenAI-yhteensopivaksi** palveluntarjoajaksi. Käytä
-vertaisyhdyskäytävän `/v1`-perus-URL-osoitetta ja sen myöntämää erillistä, vähimpien oikeuksien API-avainta.
+Nämä näppäimet menevät yhteyden `providerSpecificData` (esimerkiksi `PUT /api/providers/{id}` kautta):
 
-Ota vastavuoroisissa tai monen siirtymän ketjuissa valinnainen silmukkasuojaus käyttöön jokaisessa yhdyskäytävässä:
+- `toolNameMaxLength` (kokonaisluku, 1–1024) — OpenAI -keskustelumuotoyhteensopiville yhteyksille, joiden yhdyskäytävä hylkää pitkät työkalujen nimet. Pidemmät nimet lähetetään lyhyinä aliaksina ja palautetaan vastaukseen.
+- `quotaEndpoint` – yhdyskäytävän quota/credits päätepiste, luetaan kojelaudan kiintiökaistalle ja kiintiötietoiselle reititykselle. Toimii sekä OpenAI- että Anthropic-yhteensopivissa liitännöissä; koko muoto on dokumentoitu `open-sse/services/usage/openaiCompatible.ts` ssä.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### OmniRoute Peersin ketjuttaminen
+
+Toinen OmniRoute yhdyskäytävä voidaan lisätä a** Mukautettu OpenAI-yhteensopiva** tarjoaja. Käytä vertaiskumppanin `/v1` perustaista URL ja kyseisen kumppanin myöntämää API avainta, jolla on vähiten etuoikeus.
+
+Ota käänteis- tai monihyppyketjuissa käyttöön opt-in-silmukan suoja jokaisessa yhdyskäytävässä:
 
 ```bash
 # gateway-a
@@ -747,18 +752,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Vain nimenomaisesti sallittujen vertaisyhdyskäytävien URL-osoitteisiin lähetetyt pyynnöt saavat
-`X-OmniRoute-Peer-Trace`-otsakkeen. Yhdyskäytävä hylkää toistuvan ilmentymätunnuksen tai loppuun käytetyn siirtymäbudjetin
-HTTP-virheellä `508 Loop Detected`; tavalliset ylävirran palveluntarjoajat eivät saa vertaissolmuja koskevia metatietoja.
+Vain sellaiset pyynnöt, jotka on lähetetty nimenomaisesti sallittujen luetteloon merkitylle vertaisryhmälle URL saavat `X-OmniRoute-Peer-Trace` otsikon. Yhdyskäytävä hylkää toistuvan ilmentymän ID tai käytetyn hyppybudjetin komennolla HTTP `508 Loop Detected`; tavalliset palveluntarjoajat eivät saa vertaismetatietoja.
 
-Vertaisyhdyskäytävien ketjuttaminen ei ole tietokannan replikointia tai isäntäpalvelimen vikasietoisuutta. Jokainen yhdyskäytävä ylläpitää itsenäistä
-SQLite-tilaa, välimuisteja, nopeuslaskureita ja istuntoja. Käytä kuntotarkistettua käänteistä välityspalvelinta tai asiakkaan
-vikasietoisuutta aktiivi/passiivi- tai aktiivi/aktiivi-saatavuuteen, äläkä koskaan liitä yhtä SQLite-tietokantaa
-useaan käynnissä olevaan OmniRoute-ilmentymään.
+Vertaisketjutus ei ole tietokannan replikointia tai isäntävirheenvaihtoa. Jokainen yhdyskäytävä säilyttää itsenäisen SQLite tilan, välimuistit, nopeuslaskurit ja istunnot. Käytä active/passive tai active/active käytettävyyttä tarkastettua käänteistä välityspalvelinta tai asiakkaan vikasietoa, äläkä koskaan liitä yhtä SQLite tietokantaa useisiin käynnissä oleviin OmniRoute esiintymiin.
 
-### Palveluntarjoajakohtaiset reitit
+### Palveluntarjoajan reitit
 
-Reititä pyynnöt suoraan tietylle palveluntarjoajalle mallin validoinnin kanssa:
+Reititä pyynnöt suoraan tietylle palveluntarjoajalle mallin validoinnilla:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -766,140 +766,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Palveluntarjoajan etuliite lisätään automaattisesti, jos se puuttuu. Väärää palveluntarjoajaa vastaavat mallit palauttavat arvon `400`.
+Palveluntarjoajan etuliite lisätään automaattisesti, jos se puuttuu. Yhteensopimattomat mallit palauttavat `400`.
 
-### Verkon välityspalvelimen määritys
+### Verkon välityspalvelimen asetukset
 
 ```bash
-# Aseta yleinen välityspalvelin
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Palveluntarjoajakohtainen välityspalvelin
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Testaa välityspalvelin
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Prioriteettijärjestys:** Avainkohtainen → Yhdistelmäkohtainen → Palveluntarjoajakohtainen → Yleinen → Ympäristö.
+**Ensisijaisuus:** Avainkohtainen → Yhdistelmäkohtainen → Palveluntarjoajakohtainen → Globaali → ympäristö.
 
-### Malliluettelon API
+### Malliluettelo API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Palauttaa mallit palveluntarjoajan mukaan ryhmiteltyinä tyyppeineen (`chat`, `embedding`, `image`).
+Palauttaa mallit ryhmiteltyinä tarjoajan mukaan tyypeillä (`chat`, `embedding`, `image`).
 
-### Pilvisynkronointi
+### Cloud Sync
 
-- Synkronoi palveluntarjoajat, yhdistelmät ja asetukset laitteiden välillä
-- Automaattinen taustasynkronointi aikakatkaisulla ja nopealla epäonnistumisella
-- Suosi tuotannossa palvelinpuolen `NEXT_PUBLIC_BASE_URL`-/`NEXT_PUBLIC_CLOUD_URL`-muuttujia
+- Synkronoi palveluntarjoajat, yhdistelmät ja asetukset eri laitteiden välillä
+- Automaattinen taustasynkronointi aikakatkaisulla + fail-fast
+- Suosi palvelinpuolen `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` tuotannossa
 
-### Cloudflare-pikatunneli
+### Cloudflare Quick Tunnel
 
-- Saatavilla kohdassa **Hallintapaneeli → Päätepisteet** Dockerille ja muille itse ylläpidetyille käyttöönotoille
-- Luo väliaikaisen `https://*.trycloudflare.com`-URL-osoitteen, joka välittää pyynnöt nykyiseen OpenAI-yhteensopivaan `/v1`-päätepisteeseesi
-- Ensimmäisellä käyttöönotolla `cloudflared` asennetaan vain tarvittaessa; myöhemmissä uudelleenkäynnistyksissä käytetään samaa hallittua binaaria
-- Quick Tunnel -tunneleita ei palauteta automaattisesti OmniRouten tai säilön uudelleenkäynnistyksen jälkeen; ota ne tarvittaessa uudelleen käyttöön hallintapaneelista
-- Tunnelien URL-osoitteet ovat väliaikaisia ja vaihtuvat aina, kun pysäytät tai käynnistät tunnelin
-- Hallitut Quick Tunnel -tunnelit käyttävät oletusarvoisesti HTTP/2-siirtotapaa, jotta rajoitetuissa säilöissä vältetään QUICin UDP-puskuria koskevat runsaat varoitukset
-- Aseta `CLOUDFLARED_PROTOCOL=quic` tai `auto`, jos haluat ohittaa hallitun siirtotavan valinnan
-- Aseta `CLOUDFLARED_BIN`, jos haluat käyttää esiasennettua `cloudflared`-binaaria hallitun latauksen sijaan
-- Cloudflare Quick Tunnel-, Tailscale Funnel- ja ngrok Tunnel -paneelit voidaan näyttää tai piilottaa kohdassa **Asetukset → Ulkoasu**. Paneelin piilottaminen ei pysäytä käynnissä olevaa tunnelia.
+- Saatavilla** Dashboard → Endpoints** Docker ja muita itseisännöityjä käyttöönottoja varten
+- Luo väliaikaisen `https://*.trycloudflare.com` URL, joka välittää nykyiseen OpenAI-yhteensopivaan `/v1` päätepisteeseen
+- Ensin käyttöönotto asentaa `cloudflared` vain tarvittaessa; myöhemmin uudelleenkäynnistys käyttää samaa hallittua binaaritiedostoa uudelleen
+- Pikatunneleita ei palauteta automaattisesti OmniRoute tai säiliön uudelleenkäynnistyksen jälkeen; ota ne uudelleen käyttöön kojelaudasta tarvittaessa
+- Tunnelin URLs ovat lyhytaikaisia ja muuttuvat aina, kun stop/start tunnelia
+- Hallitut pikatunnelit käyttävät oletuksena HTTP/2 -kuljetusta meluisten QUIC UDP -puskurivaroitusten välttämiseksi rajoitetuissa säiliöissä
+- Aseta `CLOUDFLARED_PROTOCOL=quic` tai `auto` jos haluat ohittaa hallitun liikenteen valinnan
+- Aseta `CLOUDFLARED_BIN` jos haluat käyttää esiasennettua `cloudflared` binaaritiedostoa hallitun latauksen sijaan
+- Cloudflare Quick Tunnel-, Tailscale Funnel- ja ngrok Tunnel -paneelit voidaan näyttää tai piilottaa** Asetukset → Ulkoasu** . Paneelin piilottaminen ei pysäytä käynnissä olevaa tunnelia.
 
-### LLM-yhdyskäytävän älykkyys (vaihe 9)
+### LLM Gateway Intelligence (vaihe 9)
 
-- **Semanttinen välimuisti** — Tallentaa automaattisesti välimuistiin vastaukset, jotka eivät ole suoratoistettuja ja joiden temperature=0 (ohita toiminnolla `X-OmniRoute-No-Cache: true`)
-- **Pyyntöjen idempotenssi** — Poistaa päällekkäiset pyynnöt 5 sekunnin sisällä `Idempotency-Key`- tai `X-Request-Id`-otsakkeen avulla
-- **Edistymisen seuranta** — Erikseen käyttöön otettavat SSE:n `event: progress`-tapahtumat `X-OmniRoute-Progress: true`-otsakkeen avulla
+- **Semanttinen välimuisti** — Tallentaa automaattisesti välimuistiin ei-suoratoiston, lämpötila = 0 -vastaukset (ohita `X-OmniRoute-No-Cache: true`:llä)
+- **Pyydä Idempotenssia** — Poistaa pyyntöjen kaksoiskappaleet 5 sekunnissa `Idempotency-Key` tai `X-Request-Id` otsikon kautta
+- **Edistyksen seuranta** — Ota SSE `event: progress` -tapahtumat käyttöön `X-OmniRoute-Progress: true` otsikon kautta
 
 ---
 
-### Kääntäjän kokeiluympäristö
+### Kääntäjä leikkikenttä
 
-Avaa kohdasta **Hallintapaneeli → Kääntäjä**. Selvitä ja visualisoi, miten OmniRoute muuntaa API-pyyntöjä palveluntarjoajien välillä.
+Pääsy kautta** Kojelaudan → -kääntäjä** . Tee virheenkorjaus ja visualisoi, kuinka OmniRoute kääntää API pyynnöt palveluntarjoajien välillä.
 
-| Tila                        | Tarkoitus                                                                                                 |
-| --------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **Kokeiluympäristö**        | Valitse lähde- ja kohdemuodot, liitä pyyntö ja näe muunnettu tulos välittömästi                           |
-| **Keskustelutestaaja**      | Lähetä reaaliaikaisia keskusteluviestejä välityspalvelimen kautta ja tarkastele koko pyyntö-vastausjaksoa |
-| **Testipenkki**             | Suorita erätestejä useilla muotoyhdistelmillä muunnoksen oikeellisuuden varmistamiseksi                   |
-| **Reaaliaikainen seuranta** | Seuraa muunnoksia reaaliajassa pyyntöjen kulkiessa välityspalvelimen kautta                               |
+| tila                | Tarkoitus                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| **Leikkikenttä**    | Valitse source/target -muodot, liitä pyyntö ja näet käännetyn tulosteen välittömästi       |
+| **Chatin testaaja** | Lähetä live-chat-viestejä välityspalvelimen kautta ja tarkista koko request/response sykli |
+| **Testipenkki**     | Suorita erätestejä useille muotoyhdistelmille varmistaaksesi käännöksen oikeellisuuden     |
+| **Live Monitor**    | Katso reaaliaikaisia käännöksiä, kun pyynnöt kulkevat välityspalvelimen kautta             |
 
 **Käyttötapaukset:**
 
-- Selvitä, miksi tietty asiakas- ja palveluntarjoajayhdistelmä epäonnistuu
-- Varmista, että ajattelutunnisteet, työkalukutsut ja järjestelmäkehotteet muunnetaan oikein
-- Vertaile OpenAI-, Claude-, Gemini- ja Responses API -muotojen eroja
+- Selvitä, miksi tietty client/provider yhdistelmä epäonnistuu
+- Varmista, että ajattelutunnisteet, työkalukutsut ja järjestelmäkehotteet käännetään oikein
+- Vertaa muotoeroja OpenAI, Claude, Gemini ja Responses API -muotojen välillä
 
 ---
 
 ### Reititysstrategiat
 
-Määritä kohdassa **Hallintapaneeli → Asetukset → Reititys**. Hallintapaneelissa näkyvät kuusi käytetyintä strategiaa; yhdistelmät ja automaattinen reititin tukevat sisäisesti laajempaa valikoimaa.
+Määritä kautta** Dashboard → Asetukset → Reititys** . Kojelauta näyttää kuusi eniten käytettyä strategiaa; yhdistelmät ja automaattinen reititin tukevat sisäisesti laajempaa sarjaa.
 
 **Hallintapaneelissa näkyvät strategiat (tilitason reititys):**
 
-| Strategia                              | Kuvaus                                                                                                                  |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Täytä ensimmäinen**                  | Käyttää tilejä prioriteettijärjestyksessä — ensisijainen tili käsittelee kaikki pyynnöt, kunnes se ei ole käytettävissä |
-| **Vuorottelu**                         | Kiertää kaikkien tilien välillä määritettävällä pysyvyysrajalla (oletus: 3 kutsua tiliä kohden)                         |
-| **P2C (kahden vaihtoehdon menetelmä)** | Valitsee 2 satunnaista tiliä ja reitittää terveemmälle — tasapainottaa kuormaa ottaen palvelun kunnon huomioon          |
-| **Satunnainen**                        | Valitsee kullekin pyynnölle satunnaisen tilin Fisher–Yates-sekoituksella                                                |
-| **Vähiten käytetty**                   | Reitittää tilille, jolla on vanhin `lastUsedAt`-aikaleima, ja jakaa liikenteen tasaisesti                               |
-| **Kustannusoptimoitu**                 | Reitittää tilille, jolla on pienin prioriteettiarvo, ja optimoi käytön edullisimmille palveluntarjoajille               |
+| strategia                       | Kuvaus                                                                                                                |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Täytä ensin**                 | Käyttää tilejä tärkeysjärjestyksessä – ensisijainen tili käsittelee kaikki pyynnöt, kunnes ne eivät ole käytettävissä |
+| **Round Robin**                 | Käy läpi kaikki tilit määritettävissä olevalla rajoituksella (oletus: 3 puhelua tiliä kohden)                         |
+| **P2C (Kahden valinnan voima)** | Valitsee 2 satunnaista tiliä ja reitit terveempään tiliin – tasapainottaa kuormituksen ja tietoisuuden terveydestä    |
+| **Satunnainen**                 | Valitsee satunnaisesti tilin kullekin pyynnölle käyttämällä Fisher-Yates shufflea                                     |
+| **Vähiten käytetty**            | Reitit tilille, jolla on vanhin `lastUsedAt` -aikaleima, jakaa liikenteen tasaisesti                                  |
+| **Kustannusoptimoitu**          | Reitittää tilille, jolla on alhaisin prioriteettiarvo, optimoiden edullisimpien palveluntarjoajien mukaan             |
 
-**Yhdistelmien ja automaattisen reitityksen edistyneet strategiat** (määritettävissä yhdistelmäkohtaisesti tai `auto/*`-etuliitteillä — katso [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+**Kehittyneet yhdistelmä- ja automaattistrategiat** (konfiguroitavissa yhdistelmää kohti tai `auto/*` -etuliitteillä - katso [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — tiukka järjestys, ei koskaan vuorottele
-- `weighted` — liikenteen suhteellinen jako mallikohtaisten painotusten mukaan
-- `fill-first` — käyttää ensimmäistä mallia, kunnes rajat saavutetaan
+- `priority` - tiukka järjestys, ei koskaan kiertokulkuja
+- `weighted` — suhteellinen liikenne jaettuna mallikohtaisilla painoilla
+- `fill-first` — tyhjennä ensimmäinen malli, kunnes rajat täyttyvät
 - `round-robin` / `strict-random` / `random`
-- `p2c` (kahden vaihtoehdon menetelmä)
+- `p2c` (Kahden valinnan voima)
 - `least-used` ja `cost-optimized`
-- `auto` — pisteytykseen perustuva valinta kaikkien ehdokkaiden joukosta
-- `lkgp` (viimeisin toimivaksi tiedetty palveluntarjoaja) — lukittuu viimeksi onnistuneeseen palveluntarjoajaan ja siirtyy sitten varasääntöihin
+- `auto` – kaikkien ehdokkaiden tulosperusteinen
+- `lkgp` (Last Known Good Provider) – kiinnittää viimeiseen onnistuneeseen palveluntarjoajaan ja palaa sitten sääntöihin
 - `context-optimized` — valitsee mallin, jolla on suurin vapaa konteksti-ikkuna
-- `context-relay` — ketjuttaa pitkän kontekstin malleja jatkovuoroja varten
+- `context-relay` — ketjuttaa pitkän kontekstin malleja seurantakäännöksiä varten
 
-#### Ulkoinen pysyvän istunnon otsake
+#### Ulkoinen Sticky Session Header
 
-Jos tarvitset ulkoista istuntokohtaisuutta (esimerkiksi käänteisten välityspalvelinten takana oleville Claude Code-/Codex-agenteille), lähetä:
+Ulkoisten istuntojen affiniteettia varten (esimerkiksi Claude Code/Codex -agentit käänteisten välityspalvelinten takana) lähetä:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute hyväksyy myös `x_session_id`-arvon ja palauttaa käytössä olevan istuntoavaimen `X-OmniRoute-Session-Id`-otsakkeessa.
+OmniRoute hyväksyy myös `x_session_id` ja palauttaa tehokkaan istuntoavaimen `X-OmniRoute-Session-Id`:ssä.
 
-Jos käytät Nginxiä ja lähetät alaviivoja sisältäviä otsakkeita, ota käyttöön:
+Jos käytät Nginxiä ja lähetät alaviiva-lomakkeen otsikoita, ota käyttöön:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Mallien jokerimerkkialiakset
+#### Jokerimerkkimallin aliakset
 
-Luo jokerimerkkikuvioita mallinimien uudelleenmääritystä varten:
+Luo jokerimerkkikuvioita mallien nimien yhdistämiseksi uudelleen:
 
 ```
-Kuvio: claude-sonnet-*     →  Kohde: cc/claude-sonnet-4-6
-Kuvio: gpt-*               →  Kohde: gh/gpt-5.3-codex
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-Jokerimerkit tukevat merkkejä `*` (mitkä tahansa merkit) ja `?` (yksi merkki).
+Jokerimerkit tukevat `*` (kaikki merkit) ja `?` (yksittäinen merkki).
 
 #### Varaketjut
 
-Määritä yleiset varaketjut, joita käytetään kaikissa pyynnöissä:
+Määritä maailmanlaajuiset varaketjut, jotka koskevat kaikkia pyyntöjä:
 
 ```
-Ketju: production-fallback
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -907,153 +907,209 @@ Ketju: production-fallback
 
 ---
 
-### Vikasietoisuus ja virtapiirikatkaisijat
+### Yleiset tarjoajien yhdistelmät ja reititysmallit
 
-Määritä kohdassa **Hallintapaneeli → Asetukset → Vikasietoisuus**.
+Tässä on esimerkkejä useiden palveluntarjoajien yhdistämisestä ja niiden välisestä reitityksestä OmniRoute ssa:
 
-OmniRoute toteuttaa palveluntarjoajatason vikasietoisuuden viidellä osalla:
+#### 1. Koodausagentin yhdistelmä: Huippuluokan päättely ja Cost/Speed Fallback
 
-1. **Pyyntöjono ja tahdistus** — Järjestelmätason pyyntöjen muotoilu:
-   - **Pyyntöjä minuutissa (RPM)** — Pyyntöjen enimmäismäärä minuutissa tiliä kohden
-   - **Pyyntöjen vähimmäisväli** — Pyyntöjen välinen vähimmäisaika millisekunteina
-   - **Samanaikaisten pyyntöjen enimmäismäärä** — Samanaikaisten pyyntöjen enimmäismäärä tiliä kohden
-2. **Yhteyden jäähdytysaika** — Todennustyyppikohtainen määritys yksittäiselle yhteydelle uudelleenyrityksen sallivien virheiden jälkeen:
-   - **Perusjäähdytysaika** — Oletusarvoinen jäähdytysjakso uudelleenyrityksen salliville ylävirran virheille
-   - **Käytä ylävirran uudelleenyritysvihjeitä** — Noudattaa ensisijaisia `Retry-After`- tai nollausvihjeitä, kun ne on annettu
-   - **Takaisinkytkentävaiheiden enimmäismäärä** — Eksponentiaalisen takaisinkytkennän enimmäistaso toistuville virheille
+Ihanteellinen koodaaville aineille (OpenCode, Claude Code, Cursor, Cline). Reitit alunperin rajapäättelymalleihin, palaten nopeisiin koodausmalleihin kiintiöiden loppuun kulumisen tai virheiden vuoksi.
 
-3. **Palveluntarjoajan katkaisija** — Seuraa palveluntarjoajan päästä päähän -virheitä, merkitsee palveluntarjoajan heikentyneeksi määritetyllä varoituskynnyksellä ja avaa katkaisijan, kun määritetty virhekynnys saavutetaan:
-   - **Heikentymiskynnys** — Peräkkäisten palveluntarjoajavirheiden määrä ennen siirtymistä `DEGRADED`-tilaan
-   - **Virhekynnys** — Peräkkäisten palveluntarjoajavirheiden määrä ennen siirtymistä `OPEN`-tilaan
-   - **Nollauksen aikakatkaisu** — Aikajakso ennen kuin palveluntarjoajaa testataan uudelleen
-   - **CLOSED** (Toimintakuntoinen) — Pyynnöt kulkevat normaalisti
-   - **DEGRADED** — Pyynnöt kulkevat edelleen, kun lisääntyneitä virheitä seurataan
-   - **OPEN** — Palveluntarjoaja estetään tilapäisesti toistuvien virheiden jälkeen
-   - **HALF_OPEN** — Testataan, onko palveluntarjoaja palautunut
+- **Kojelauta** : Combos → Uusi Combo → Nimi: `agent-coding` → Strategia: `Priority`
+- **Mallit** :
+  1. `claude/claude-sonnet-4-6` (ensisijainen koodausagentti)
+  2. `openai/gpt-4o` (toissijainen suuren kapasiteetin varatoiminto)
+  3. `deepseek/deepseek-v4-flash` (tehokas, kustannustehokas varavaihtoehto)
 
-   Yhteyskohtaiset `429`-nopeusrajoitukset pysyvät **Yhteyden jäähdytysajassa**, eikä niitä lasketa mukaan palveluntarjoajan katkaisijaan.
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
 
-   Palveluntarjoajan katkaisijan suorituksenaikainen tila näkyy vain kohdassa **Hallintapaneeli → Terveys**.
+#### 2. Free-Tier Auto Failover Combo
 
-4. **Odota jäähdytysajan päättymistä** — Jos kaikki ehdolla olevat yhteydet ovat jo jäähtymässä, OmniRoute voi odottaa aikaisimman jäähdytysajan päättymistä ja yrittää samaa asiakaspyyntöä automaattisesti uudelleen.
+Ketjuttaa useita vapaan tason ja avaimettomia palveluntarjoajia maksimoimaan käytettävyyden ilman API kustannuksia.
 
-5. **Nopeusrajoituksen automaattinen tunnistus** — Kun ylävirran palveluntarjoajat palauttavat täsmällisiä odotusaikoja, nämä vihjeet ohittavat paikallisen yhteyden jäähdytysajan, jos asetus on käytössä.
+- **strategia** : `Least Used` tai `Round Robin` (jakaa kuorman kiintiöiden kesken)
+- **Mallit** :
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
 
-**Ammattilaisvinkki:** Tarkastele ja nollaa aktiivisia palveluntarjoajien katkaisijoita käyttökatkon jälkeen **Terveys**-sivulla. Vikasietoisuus-sivu muuttaa vain määrityksiä.
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
+
+#### 3. Multimodaalinen / Vision & Text Pipeline
+
+Erikoistuneiden visiomallien yhdistäminen nopeaan tekstin luomiseen työnkulkuja varten, joihin kuuluu kuvan ymmärtäminen ja koodin luominen.
+
+- **Kuvio** : `Priority` yhdistelmä, jossa näkyvät mallit ensin ja tehokkaat text/code -mallit viimeisenä.
+- **Mallit** :
+  1. `gemini/gemini-2.5-pro` (vahva image/multimodal -ymmärrys)
+  2. `openai/gpt-4o` (tasapainoinen näkö ja työkalujen käyttö)
+  3. `deepseek/deepseek-v4-flash` (Text/code sukupolvi)
+
+---
+
+### Kestävyys ja katkaisijat
+
+Määritä kautta** Dashboard → Asetukset → Resilience** .
+
+OmniRoute toteuttaa toimittajatason joustavuutta viidellä komponentilla:
+
+1. **Pyydä jonoa ja tahdistusta** — Järjestelmätason pyyntöjen muotoilu:
+   - **Pyynnöt minuutissa (RPM)** — Pyyntöjen enimmäismäärä minuutissa per tili
+   - **Minimiaika pyyntöjen välillä** — Pienin väli millisekunteina pyyntöjen välillä
+   - **Samanaikaisia pyyntöjä enintään** — Samanaikaisten pyyntöjen enimmäismäärä tiliä kohden
+
+2. **Yhteyden jäähdytys** — Auth-tyyppinen konfiguraatio yhdelle yhteydelle uudelleen yritettävissä olevien virheiden jälkeen:
+   - **Perusjäähdytys** — Oletusjäähdytysikkuna uudelleen yritettävissä oleville alkuvirran virheille
+   - **Käytä Upstream Retry Vinkkejä** — Kunnioita arvovaltaisia `Retry-After` tai nollausvinkkejä, kun niitä tarjotaan
+   - **Max peruutusvaiheet** — Suurin eksponentiaalinen perääntymistaso toistuvia vikoja varten
+
+3. **Palveluntarjoajan katkaisija** — Seuraa päästä päähän -palveluntarjoajan vikoja, merkitsee palveluntarjoajan heikentyneeksi määritetyllä varoituskynnyksellä ja avaa katkaisijan, kun määritetty vikakynnys saavutetaan:
+   - **Hajoamisen kynnys** — Peräkkäiset palveluntarjoajan viat ennen `DEGRADED` syöttämistä
+   - **Epäonnistumisen kynnys** — Peräkkäiset palveluntarjoajan viat ennen `OPEN` syöttämistä
+   - **Nollaa aikakatkaisu** — Aikaikkuna ennen kuin palveluntarjoaja testataan uudelleen
+   - **CLOSED** (Terve) – Pyynnöt kulkevat normaalisti
+   - **DEGRADED** — Pyynnöt jatkuvat, kun kohonneita vikoja seurataan
+   - **OPEN** — Palveluntarjoaja on tilapäisesti estetty toistuvien vikojen jälkeen
+   - **HALF_OPEN** — Testataan, onko palveluntarjoaja toipunut
+
+   Yhteystason `429` -nopeusrajat pysyvät ennallaan** Yhteyden jäähdytys** ja niitä ei lasketa mukaan palveluntarjoajan katkaisijaan.
+
+   Palveluntarjoajan katkaisijan ajonaikainen tila näkyy** Kojelauta → Health** vain.
+
+4. **Odota jäähtymistä** — Jos jokainen ehdokasyhteys on jo jäähtymässä, OmniRoute voi odottaa aikaisinta jäähtymistä ja yrittää automaattisesti uudelleen samaa asiakaspyyntöä.
+
+5. **Rate Limit Auto-Detection** — Kun ylävirran palveluntarjoajat palauttavat nimenomaiset odotusikkunat, nämä vihjeet ohittavat paikallisen yhteyden jäähtymisen, kun asetus on käytössä.
+
+**Provinkki:** Käytä** Terveys** sivu tarkastaaksesi ja nollataksesi reaaliaikaiset palveluntarjoajan katkaisijat käyttökatkon jälkeen. Resilience-sivu muuttaa vain määrityksiä.
 
 ---
 
 ### Tietokannan vienti / tuonti
 
-Hallitse tietokannan varmuuskopioita kohdassa **Hallintapaneeli → Asetukset → Järjestelmä ja tallennustila**.
+Hallitse tietokannan varmuuskopioita** Kojelauta → Asetukset → Järjestelmä ja tallennustila** .
 
-| Toiminto                 | Kuvaus                                                                                                                                                                 |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Vie tietokanta**       | Lataa nykyisen SQLite-tietokannan `.sqlite`-tiedostona                                                                                                                 |
-| **Vie kaikki (.tar.gz)** | Lataa täydellisen varmuuskopioarkiston, joka sisältää tietokannan, asetukset, yhdistelmät, palveluntarjoajayhteydet (ei tunnistetietoja) ja API-avainten metatiedot    |
-| **Tuo tietokanta**       | Lataa palveluun `.sqlite`-tiedoston nykyisen tietokannan korvaamiseksi. Tuontia edeltävä varmuuskopio luodaan automaattisesti, ellei `DISABLE_SQLITE_AUTO_BACKUP=true` |
+| Toiminta                 | Kuvaus                                                                                                                                                         |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vie tietokanta**       | Lataa nykyisen SQLite tietokannan `.sqlite` -tiedostona                                                                                                        |
+| **Vie kaikki (.tar.gz)** | Lataa täyden varmuuskopioarkiston, joka sisältää: tietokanta, asetukset, yhdistelmät, palveluntarjoajan yhteydet (ei tunnistetietoja), API -avaimen metatiedot |
+| **Tuo tietokanta**       | Lataa `.sqlite` -tiedosto nykyisen tietokannan korvaamiseksi. Tuontia edeltävä varmuuskopio luodaan automaattisesti, ellei `DISABLE_SQLITE_AUTO_BACKUP=true`   |
 
 ```bash
-# API: Vie tietokanta
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Vie kaikki (täydellinen arkisto)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Tuo tietokanta
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Tuonnin tarkistus:** Tuodun tiedoston eheys (SQLite pragma -tarkistus), vaaditut taulut (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) ja koko (enintään 100 Mt) tarkistetaan.
+**Tuonnin vahvistus:** Tuodun tiedoston eheys (SQLite pragma check ), vaaditut taulukot (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) ja koko (enintään 100 Mt) tarkistetaan.
 
 **Käyttötapaukset:**
 
-- Siirrä OmniRoute koneesta toiseen
+- Siirrä OmniRoute koneiden välillä
 - Luo ulkoisia varmuuskopioita katastrofipalautusta varten
-- Jaa määrityksiä tiimin jäsenten kesken (vie kaikki → jaa arkisto)
+- Jaa kokoonpanot tiimin jäsenten välillä (vie kaikki → jakoarkisto)
 
 ---
 
-### Asetusten hallintapaneeli
+### Asetukset Dashboard
 
-Asetussivu on järjestetty **7 välilehteen** helppoa siirtymistä varten:
+Asetussivu on järjestetty** 7 välilehteä** navigoinnin helpottamiseksi:
 
-| Välilehti          | Sisältö                                                                                                                                                                                  |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Yleiset**        | Järjestelmän tallennustyökalut, oletustoiminta, päätepistetunnelin näkyvyys                                                                                                              |
-| **Ulkoasu**        | Teeman hallinta (vaalea/tumma/järjestelmä), sivupalkin näkyvyys, Cloudflare-/Tailscale-/ngrok-tunnelikorttien paneelivalinnat                                                            |
-| **Tekoäly**        | Päättelybudjetti (välitys / automaattinen poisto / mukautettu / mukautuva — katso [THINKING_BUDGET.md](./THINKING_BUDGET.md)), yleinen järjestelmäkehote, kehotteiden välimuistitilastot |
-| **Suojaus**        | Kirjautumis- ja salasana-asetukset, IP-pääsynhallinta, API-todennus `/models`-rajapinnalle, palveluntarjoajien estäminen, suojaus kehotesyötteiltä                                       |
-| **Reititys**       | Yleinen reititysstrategia (Täytä ensin / Vuorottelu / P2C / Satunnainen / Vähiten käytetty / Kustannusoptimoitu), yleismerkilliset mallialiakset, varaketjut, yhdistelmien oletukset     |
-| **Vikasietoisuus** | Pyyntöjono, yhteyden jäähdytysaika, palveluntarjoajan katkaisijan määritys ja jäähdytysajan päättymisen odottaminen                                                                      |
-| **Lisäasetukset**  | Yleinen välityspalvelinmääritys (HTTP/SOCKS5), palveluntarjoajakohtaiset välityspalvelinohitukset                                                                                        |
+| Tab              | Sisällys                                                                                                                                                                                  |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Kenraali**     | Järjestelmän tallennustyökalut, oletuskäyttäytyminen, päätepistetunnelin näkyvyys                                                                                                         |
+| **Ulkonäkö**     | Teeman säätimet (light/dark/system), sivupalkin näkyvyys, paneelikytkimet Cloudflare/Tailscale/ngrok tunnelikorteille                                                                     |
+| **AI**           | Ajatteleva budjetti (läpivienti / automaattinen poisto / mukautettu / mukautuva - katso [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), yleinen järjestelmäkehote, välimuistin tiedot       |
+| **Turvallisuus** | Login/Password -asetukset, IP Access Control, API -todennus `/models`, palveluntarjoajan esto, pikaruiskutuksen suoja                                                                     |
+| **Reititys**     | Maailmanlaajuinen reititysstrategia (Fill First / Round Robin / P2C / Satunnainen / Vähiten käytetty / Kustannusoptimoitu), jokerimerkkimallien aliakset, varaketjut, yhdistelmäoletukset |
+| **Joustavuus**   | Pyydä jonoa, yhteyden jäähdytystä, palveluntarjoajan katkaisijan konfiguraatiota ja odotustoimintoa                                                                                       |
+| **Edistynyt**    | Globaali välityspalvelinmääritys (HTTP/SOCKS5), palveluntarjoajakohtaiset välityspalvelimen ohitukset                                                                                     |
 
-Yleiset-välilehti ei enää toista vain luku -muotoisia loki- ja välimuistihuomautuksia. Tietokannan säilytys- ja
-optimointiasetukset tallennetaan `/api/settings/database`-rajapinnan kautta; välimuisti tyhjennetään manuaalisesti komennolla
-`DELETE /api/cache`. Pyyntö- ja välityspalvelinlokien rivien enimmäismääriä hallitaan muuttujilla
-`CALL_LOGS_TABLE_MAX_ROWS` ja `PROXY_LOGS_TABLE_MAX_ROWS`.
+Yleiset eivät enää kopioi vain luku -lokia ja välimuistin muistiinpanoja. Tietokannan säilytys- ja optimointiasetukset säilyvät `/api/settings/database` kautta; manuaalinen välimuistin tyhjennys käyttää `DELETE /api/cache`. Pyyntö- ja välityspalvelimen lokirivien yläpäät ohjataan `CALL_LOGS_TABLE_MAX_ROWS` llä ja `PROXY_LOGS_TABLE_MAX_ROWS` llä.
 
 ---
 
 ### Kustannusten ja budjetin hallinta
 
-Avaa kohdasta **Hallintapaneeli → Kustannukset**.
+Pääsy kautta** Kojelaudan → kustannukset** .
 
-| Välilehti       | Tarkoitus                                                                                                                 |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **Budjetti**    | Aseta API-avainkohtaiset kulutusrajat päivä-, viikko- ja kuukausibudjeteilla sekä reaaliaikaisella seurannalla            |
-| **Hinnoittelu** | Tarkastele ja muokkaa mallien hinnoittelutietoja — palveluntarjoajakohtainen hinta 1 000 syöte-/tulostetunnistetta kohden |
+| Tab             | Tarkoitus                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Budjetti**    | Aseta kulutusrajat API -avainta kohti daily/weekly/monthly -budjeteilla ja reaaliaikaisella seurannalla             |
+| **Hinnoittelu** | Tarkastele ja muokkaa mallin hinnoittelumerkintöjä – hinta per 1 000 input/output -tunnusta palveluntarjoajaa kohti |
 
 ```bash
-# API: Aseta budjetti
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Hae budjetin nykyinen tila
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Kustannusten seuranta:** Jokaisen pyynnön tunnisteiden käyttö kirjataan ja kustannus lasketaan hinnaston perusteella. Tarkastele palveluntarjoaja-, malli- ja API-avainkohtaisia erittelyjä kohdassa **Hallintapaneeli → Käyttö**.
+**Kustannusten seuranta:** Jokainen pyyntö kirjaa tunnuksen käytön ja laskee kustannukset hinnoittelutaulukon avulla. Näytä erittelyt** Kojelaudan → käyttö** palveluntarjoajan, mallin ja API -avaimen mukaan.
 
 ---
 
-### Äänen litterointi
+### Äänen transkriptio
 
-OmniRoute tukee äänen litterointia OpenAI-yhteensopivan päätepisteen kautta:
+OmniRoute tukee äänen transkriptiota OpenAI-yhteensopivan päätepisteen kautta:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Esimerkki curl-komennolla
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` on Deepgramin natiivi reitti ja vaatii Deepgram-API-avaimen.
-Jos vain OpenRouter on määritetty, käytä reittiä `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` on alkuperäinen Deepgram-reitti ja vaatii Deepgram API -avaimen. Jos vain OpenRouter on määritetty, käytä `openrouter/deepgram/nova-3`.
 
-**Puhe tekstiksi (litterointi)** -palveluntarjoajat:
+**Puhe tekstiksi (transkriptio)** palveluntarjoajat:
 
-- `openai/` (Whisper-yhteensopiva)
+- `openai/` (kuiskauksen kanssa yhteensopiva)
 - `groq/` (Groq Whisper Turbo)
-- `deepgram/` (Nova-tuoteperhe)
+- `deepgram/` (Nova-perhe)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Canary)
-- `huggingface/` (Whisper-muunnelmat)
+- `nvidia/` (papakoi, kanarialainen)
+- `huggingface/` (kuiskausmuunnelmat)
 - `qwen/`
 
-**Teksti puheeksi (`POST /v1/audio/speech`)** -palveluntarjoajat:
+**Tekstistä puheeksi (`POST /v1/audio/speech`)** palveluntarjoajat:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
-- `deepgram/` (Aura)
-- `nvidia/` (Magpie TTS)
+- `deepgram/` (aura)
+- `nvidia/` (harakka TTS)
 - `elevenlabs/`
 - `huggingface/`
 - `inworld/`
@@ -1065,56 +1121,45 @@ Jos vain OpenRouter on määritetty, käytä reittiä `openrouter/deepgram/nova-
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Litteroinnin tukemat äänimuodot: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS-tulostusmuodot riippuvat palveluntarjoajasta (mp3, wav, opus, pcm, mulaw).
+Tuetut ääniformaatit transkriptiossa: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS tulostusmuodot riippuvat palveluntarjoajasta (mp3, wav, opus, pcm, mulaw).
 
 ---
 
-### Yhdistelmien tasapainotusstrategiat
+### Yhdistetyt tasapainotusstrategiat
 
-Määritä yhdistelmäkohtainen tasapainotus kohdassa **Hallintapaneeli → Yhdistelmät → Luo/Muokkaa → Strategia**.
+Määritä yhdistelmätasapainotus** Dashboard → Combos → Create/Edit → Strategia** .
 
-| Strategia              | Kuvaus                                                                                      |
-| ---------------------- | ------------------------------------------------------------------------------------------- |
-| **Vuorottelu**         | Vaihtaa mallia järjestyksessä                                                               |
-| **Prioriteetti**       | Kokeilee aina ensimmäistä mallia; siirtyy varamalliin vain virhetilanteessa                 |
-| **Satunnainen**        | Valitsee jokaiselle pyynnölle satunnaisen mallin yhdistelmästä                              |
-| **Painotettu**         | Reitittää suhteellisesti mallikohtaisten painotusten perusteella                            |
-| **Vähiten käytetty**   | Reitittää malliin, jolla on vähiten viimeaikaisia pyyntöjä (käyttää yhdistelmän mittareita) |
-| **Kustannusoptimoitu** | Reitittää halvimpaan saatavilla olevaan malliin (käyttää hinnastoa)                         |
+| strategia              | Kuvaus                                                                                 |
+| ---------------------- | -------------------------------------------------------------------------------------- |
+| **Round-Robin**        | Pyörii mallien välillä peräkkäin                                                       |
+| **Prioriteetti**       | Kokeilee aina ensimmäistä mallia; palautuu vain virheestä                              |
+| **Satunnainen**        | Valitsee satunnaisen mallin yhdistelmästä jokaiselle pyynnölle                         |
+| **Painotettu**         | Reitit suhteellisesti mallikohtaisten painojen perusteella                             |
+| **Vähiten käytetty**   | Reitit malliin, jolla on vähiten viimeaikaisia pyyntöjä (käyttää yhdistelmämittareita) |
+| **Kustannusoptimoitu** | Reitit halvimpaan saatavilla olevaan malliin (käyttää hintataulukkoa)                  |
 
-Yhdistelmien yleiset oletusasetukset voidaan määrittää kohdassa **Hallintapaneeli → Asetukset → Reititys → Yhdistelmien oletusasetukset**.
-Yhdistelmän kohteiden aikakatkaisut perivät oletusarvoisesti nykyisen pyynnön aikakatkaisun. Käytä yhdistelmien oletusasetusten tai yksittäisen yhdistelmän **Kohteen aikakatkaisu
-(sekuntia)** -asetusta vain silloin, kun lyhyemmän kohdekohtaisen rajan halutaan
-käynnistävän nopeamman varareittiin siirtymisen.
+Yleiset yhdistelmäoletukset voidaan asettaa** Dashboard → Settings → Routing → Combo Oletukset** . Yhdistelmäkohteen aikakatkaisut perivät oletuksena nykyisen pyynnön aikakatkaisun. Käyttää** Tavoitteen aikakatkaisu (sekuntia)** yhdistelmä-oletusasetuksissa tai yksittäisessä yhdistelmässä vain silloin, kun lyhyemmän kohdekohtaisen rajan pitäisi käynnistää nopeampi palautus.
 
-Nollaviiveiset yhdistelmäoptimoinnit ovat valinnaisia. Jätä **Nollaviiveiset optimoinnit** pois käytöstä,
-jotta nämä viiveominaisuudet eivät kilpailuta varakohteita, ohita kohteita TTFT-historian
-perusteella tai tiivistä varapyyntöjä; käyttöönotto sallii määritetyn rinnakkaisen varmistuksen, ennakoivat TTFT-
-ohitukset ja ennakoivan varapyyntöjen tiivistämisen, jolloin reitityksen ja pyyntöjen tarkkuudesta tingitään pienemmän
-häntäviiveen saavuttamiseksi.
+Nollaviiveen yhdistelmäoptimoinnit ovat valinnaisia. Lähde** Nollalatenssioptimointi** poistettu käytöstä estämään näitä latenssiominaisuuksia kilpailemasta varatavoitteista, ohittamasta TTFT historiaan perustuvia kohteita tai pakkaamasta varapyyntöjä; Sen ottaminen käyttöön mahdollistaa määritetyn suojauksen, ennakoivan TTFT ohitukset ja ennakoivan varapakkauksen routing/request -tarkkuuden vaihtamiseksi pienempään loppuviiveeseen.
 
-Poista **Päättelytunnisteiden puskuri** käytöstä, kun ylävirran palveluntarjoajat edellyttävät tiukkoja
-`max_tokens`- / `maxOutputTokens`-rajoja. Kun asetus on käytössä, yhdistelmäreititys lisää päättelymallien
-lisätilaa vain malleille, joilla on tunnettu tulostusraja, ja jättää asiakkaan tunnisterajan ennalleen, jos
-turvallinen puskuroitu arvo ylittäisi kyseisen rajan. Jos asiakkaan raja ylittää jo tunnetun rajan,
-OmniRoute pienentää sen kyseiseen rajaan ennen pyynnön lähettämistä ylävirtaan.
+Poista käytöstä** Päättelytunnistepuskuri** kun alkupään palveluntarjoajat vaativat tiukkoja `max_tokens` / `maxOutputTokens` rajoja. Kun yhdistelmäreititys on käytössä, se lisää päättelymallin liikkumavaraa vain malleille, joiden lähtöraja on tunnettu, ja jättää asiakastunnisteen rajan ennalleen, kun turvallinen puskuroitu arvo ylittää tämän rajan. Jos asiakasraja on jo tunnetun ylärajan yläpuolella, OmniRoute kiinnittää sen kyseiseen rajaan ennen ylävirran pyynnön lähettämistä.
 
 ---
 
-### Kunnon hallintapaneeli
+### Terveyden hallintapaneeli
 
-Avaa kohdasta **Hallintapaneeli → Kunto**. Reaaliaikainen järjestelmän kunnon yleiskatsaus, jossa on 6 korttia:
+Pääsy kautta** Kojelauta → Health** . Reaaliaikainen järjestelmän kunnon yleiskatsaus 6 kortilla:
 
-| Kortti                       | Mitä se näyttää                                                          |
-| ---------------------------- | ------------------------------------------------------------------------ |
-| **Järjestelmän tila**        | Käyttöaika, versio, muistin käyttö, datahakemisto                        |
-| **Palveluntarjoajien kunto** | Yleisen palveluntarjoajakohtaisen katkaisijan ajonaikainen tila          |
-| **Nopeusrajoitukset**        | Tilikohtaiset aktiiviset yhteyksien jäähdytysajat ja jäljellä oleva aika |
-| **Aktiiviset estot**         | Aktiiviset mallikohtaiset estot ja väliaikaiset poissulkemiset           |
-| **Allekirjoitusvälimuisti**  | Deduplication-välimuistin tilastot (aktiiviset avaimet, osumaprosentti)  |
-| **Viivetelemetria**          | Palveluntarjoajakohtainen p50/p95/p99-viiveiden koonti                   |
+| Kortti                        | Mitä se näyttää                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------------ |
+| **Järjestelmän tila**         | Käyttöaika, versio, muistin käyttö, tietohakemisto                                   |
+| **Palveluntarjoajan terveys** | Globaalin palveluntarjoajan katkaisijan ajonaikainen tila                            |
+| **Rate Limits**               | Aktiiviset yhteyden jäädytykset tiliä kohden jäljellä olevan ajan kanssa             |
+| **Aktiiviset lukitukset**     | Aktiiviset mallikohtaiset lukitukset ja väliaikaiset poissulkemiset                  |
+| **Allekirjoitusvälimuisti**   | Päällekkäisyyden poistamisen välimuistitilastot (aktiiviset avaimet, osumaprosentti) |
+| **Latenssi-telemetria**       | p50/p95/p99 viiveen yhdistäminen palveluntarjoajaa kohti                             |
 
-**Ammattilaisvinkki:** Kunto-sivu päivittyy automaattisesti 10 sekunnin välein. Tunnista katkaisijakortin avulla, millä palveluntarjoajilla esiintyy ongelmia.
+**Provinkki:** Terveyssivu päivittyy automaattisesti 10 sekunnin välein. Käytä katkaisijakorttia tunnistaaksesi, millä palveluntarjoajilla on ongelmia.
 
 ---
 

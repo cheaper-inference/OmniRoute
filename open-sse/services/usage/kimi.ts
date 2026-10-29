@@ -154,11 +154,16 @@ function applyKimiMembershipRatios(quotas: Record<string, UsageQuota>, usages: u
   const mapping: Array<[string, string, string]> = [
     ["limit_7d", "code_7d", "Code · 7d"],
     ["limit_5h", "code_5h", "Code · 5h"],
+    ["limit_month_total", "monthly", "Monthly"],
   ];
   for (const [source, key, displayName] of mapping) {
     const quota = createKimiRatioQuota(rec[source]);
     if (!quota) continue;
-    quotas[key] = { ...quota, displayName };
+    quotas[key] = {
+      ...quota,
+      displayName,
+      ...(key === "monthly" ? { isPercentageOnly: true } : {}),
+    };
   }
 }
 
@@ -268,9 +273,8 @@ export async function getKimiUsage(
     const dataObj = toRecord(data);
     const billing = buildKimiBillingStatus(dataObj.boosterWallet ?? dataObj.booster_wallet);
 
-    // The managed Kimi Code API reports the Code 7-day quota in `usage`.
-    // The website's separate shared-membership total/Kimi split comes from a
-    // Web-session-only endpoint and cannot be read with a Coding OAuth token.
+    // Older plans report a Code 7-day count in `usage`; newer responses also
+    // include explicit membership ratio windows in `usages`.
     const weeklyQuota = createKimiCountQuota(dataObj.usage);
     if (weeklyQuota) {
       quotas.code_7d = { ...weeklyQuota, displayName: "Code · 7d" };

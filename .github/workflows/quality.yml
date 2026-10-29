@@ -2,7 +2,10 @@ name: Quality Gates
 
 on:
   push:
-    branches: [main, "release/**"]
+    # release/** pushes are covered by the PR run of each change plus Release-Green on the
+    # merged combination (see ci.yml for the 2026-10-18 measurement); the per-push run here
+    # only ever queued hosted slots and was cancelled by the next merge.
+    branches: [main]
   pull_request:
     branches: [main, "release/**"]
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft, edited]
@@ -36,6 +39,8 @@ jobs:
       i18n: ${{ steps.classify.outputs.i18n }}
       workflow: ${{ steps.classify.outputs.workflow }}
       testsOnly: ${{ steps.classify.outputs.testsOnly }}
+      # Exposure only (one-CI-policy step 1, RFC #8084): no job depends on it yet.
+      domains: ${{ steps.classify.outputs.domains }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -47,6 +52,10 @@ jobs:
           node-version: ${{ env.CI_NODE_VERSION }}
       - name: Validate gate inventory
         run: npm run check:gate-manifest
+      - name: Validate recurring free catalog evidence
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        run: npm run check:free-catalog-evidence
       - id: classify
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -60,6 +69,7 @@ jobs:
               echo "i18n=true"
               echo "workflow=true"
               echo "testsOnly=false"
+              echo "domains=build,catalog,cli,core,db,docs,i18n,provider,routing,tests,ui,workflow"
             } >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -241,9 +251,11 @@ jobs:
           # Ratchet-mode gates append --ratchet. `cycles` belongs here since #15281
           # (69cb18dca8): check-cycles.mjs exits 1 on ANY cycle without --ratchet, and
           # the frozen ceiling lives in quality-baseline.json → metrics.cycles — same
-          # `check:cycles:ratchet` semantics ci.yml runs (base-red #15306).
+          # `check:cycles:ratchet` semantics ci.yml runs (base-red #15306). `boundary`
+          # caps the open-sse → src edge count (measure-boundary.mjs --ratchet, ceiling
+          # quality-baseline.json → metrics.boundaryOpenSseToSrc) — same as ci.yml lint.
           ratchet_gates=(
-            secrets vuln-ratchet workflows openapi-breaking cycles
+            secrets vuln-ratchet workflows openapi-breaking cycles boundary
           )
           failed=()
           for g in "${gates[@]}"; do
@@ -265,7 +277,16 @@ jobs:
           done
           for g in "${ratchet_gates[@]}"; do
             echo "::group::check:$g (ratchet)"
-            npm run "check:$g" -- --ratchet || failed+=("$g")
+            # boundary is base-relative on PR events, like file-size (#8522): the ceiling
+            # becomes max(baseline ceiling, edges on the PR base), so open-sse → src edges
+            # other merges added after the seed never red an innocent PR; only edges this
+            # PR adds block. workflow_dispatch (no PR base) keeps the absolute ceiling.
+            case "$g" in boundary) BASE_RELATIVE=1 ;; *) BASE_RELATIVE= ;; esac
+            if [ -n "$BASE_RELATIVE" ] && [ -n "${PR_BASE_SHA:-}" ]; then
+              npm run "check:$g" -- --ratchet --base-ref "$PR_BASE_SHA" || failed+=("$g")
+            else
+              npm run "check:$g" -- --ratchet || failed+=("$g")
+            fi
             echo "::endgroup::"
           done
           echo "::group::typecheck:core"
@@ -306,13 +327,15 @@ jobs:
           exit $RC
       # TIA: build the impact map at runtime (gitignored, ~21MB) and run only the
       # unit tests impacted by this PR's changed files. On hub/unmapped changes the
-      # selector returns __RUN_ALL__ — full-suite authority is the parallel
-      # `fast-unit` 4-shard job (test:unit:ci:shard; was 2-shard, #6781), NOT an
-      # unsharded re-run here. Stacking unsharded test:unit:ci on top of fast-unit
-      # doubled wall time (~16 min extra on ubuntu-latest) without extra coverage.
+      # selector returns __RUN_ALL__ — full-suite authority is ci.yml's `test-unit`
+      # 8-shard job (test:unit:ci:shard), NOT an unsharded re-run here. Stacking an
+      # unsharded test:unit:ci on top of it doubled wall time without extra coverage.
+      # (quality.yml had its own 4-shard `fast-unit` + `fast-vitest` for PR->release from
+      # 2026-06-23; ci.yml runs on those PRs since #14420 (2026-10-01), so both were an
+      # exact duplicate — ~62 runner-min and 5 hosted jobs per PR — and were removed.)
       #
       # BLOCKING for the *impacted subset* (flipped 2026-06-17). Fail-safe full
-      # coverage remains required via `Unit Tests fast-path` (fast-unit).
+      # coverage remains required via ci.yml `Unit Tests (N/8)` (test-unit).
       - name: Impacted unit tests (TIA subset; blocking)
         env:
           GITHUB_BASE_REF: ${{ github.base_ref }}
@@ -322,7 +345,7 @@ jobs:
           [ -f config/quality/test-impact-map.json ] || node scripts/quality/build-test-impact-map.mjs
           SEL="$(node scripts/quality/select-impacted-tests.mjs)"
           # Shadow evidence (#8084): persist every selection so TIA false negatives can
-          # be measured against fast-unit's full-suite verdict across releases BEFORE
+          # be measured against ci.yml test-unit's full-suite verdict across releases BEFORE
           # any gate authority moves off ordinary PRs. Artifact uploaded below.
           printf '%s\n' "$SEL" > tia-selection.txt
           if [ -z "$SEL" ]; then
@@ -335,12 +358,12 @@ jobs:
           # which must not happen on a blocking gate. DATA_DIR isolation keeps the parallel
           # run race-free regardless of concurrency.
           if echo "$SEL" | grep -q "__RUN_ALL__"; then
-            echo "TIA selection: __RUN_ALL__ (fail-safe) — full-suite authority stays with fast-unit" >> "$GITHUB_STEP_SUMMARY"
-            echo "Fail-safe: __RUN_ALL__ — deferring FULL unit suite to fast-unit (4-shard)."
-            echo "Not re-running unsharded test:unit:ci here (duplicate of fast-unit coverage)."
+            echo "TIA selection: __RUN_ALL__ (fail-safe) — full-suite authority stays with ci.yml test-unit" >> "$GITHUB_STEP_SUMMARY"
+            echo "Fail-safe: __RUN_ALL__ — deferring FULL unit suite to ci.yml test-unit (8-shard)."
+            echo "Not re-running unsharded test:unit:ci here (duplicate of test-unit coverage)."
             exit 0
           fi
-          echo "TIA selection: $(grep -c . tia-selection.txt) impacted test file(s) — full suite still runs in fast-unit (shadow-evidence phase, #8084)" >> "$GITHUB_STEP_SUMMARY"
+          echo "TIA selection: $(grep -c . tia-selection.txt) impacted test file(s) — full suite still runs in ci.yml test-unit (shadow-evidence phase, #8084)" >> "$GITHUB_STEP_SUMMARY"
           echo "Running impacted tests:"; echo "$SEL"
           mapfile -t FILES <<< "$SEL"
           # Loader parity with test:unit:ci:shard (#6787): tests/unit/dashboard/** runs
@@ -364,7 +387,7 @@ jobs:
           fi
           exit $RC
       # #8084 shadow evidence: keep the raw selection downloadable so TIA misses can be
-      # audited against fast-unit failures on the same run (gate moves need this data).
+      # audited against ci.yml test-unit failures on the same commit (gate moves need this data).
       - name: Upload TIA selection (shadow evidence)
         if: always()
         uses: actions/upload-artifact@v7
@@ -373,96 +396,6 @@ jobs:
           path: tia-selection.txt
           if-no-files-found: ignore
           retention-days: 30
-
-  fast-vitest:
-    name: Vitest (fast-path)
-    needs: changes
-    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) && needs.changes.outputs.code == 'true') }}
-    # Dynamic runner — see fast-gates (own-origin + flag; fork/unset → ubuntu-latest).
-    # PINNED to hosted, deliberately not on the USE_VPS_RUNNER switch (gap 19). One variable
-    # governed the build and the test jobs, which want OPPOSITE machines: the build needs the
-    # .113's RAM, the tests need the hosted runner's link. Measured on 2026-07-29 —
-    # actions/setup-node took 20m06s on .113 with 4 concurrent runners versus 16s hosted (npm
-    # cache restore saturating the link), while the tests themselves tied, 2m54 vs 2m31. So
-    # self-hosted is strictly worse here and there is nothing to configure.
-    runs-on: ubuntu-latest
-    env:
-      JWT_SECRET: ci-lint-secret-with-sufficient-length-for-validation
-      API_KEY_SECRET: ci-lint-api-key-secret-long
-      DISABLE_SQLITE_AUTO_BACKUP: "true"
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v7
-        with:
-          package-manager-cache: false
-          node-version: ${{ env.CI_NODE_VERSION }}
-      - uses: ./.github/actions/npm-ci-retry
-        with:
-          # PR acceleration is not release-candidate provenance.
-          cache: ${{ github.event_name == 'pull_request' }}
-      # WS5.2/5.3: JUnit feeds Trunk Flaky Tests — the fast-path runs on EVERY PR,
-      # which is where flaky-detection volume actually comes from (ci.yml's heavy
-      # jobs only run on the release PR). Advisory upload, own-origin only.
-      - run: npm run test:vitest -- --reporter=default --reporter=junit --outputFile.junit=trunk-junit/vitest-fastpath.xml
-      - name: Upload test results to Trunk (advisory)
-        if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
-        continue-on-error: true
-        uses: trunk-io/analytics-uploader@14c0f18990953eecd01c9c5afe3cc63a73b6c371 # v2.1.5
-        with:
-          junit-paths: trunk-junit/**/*.xml
-          org-slug: omniroute
-          token: ${{ secrets.TRUNK_TOKEN }}
-
-  fast-unit:
-    name: Unit Tests fast-path (${{ matrix.shard }}/4)
-    needs: changes
-    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) && needs.changes.outputs.code == 'true') }}
-    # Dynamic runner — see fast-gates (own-origin + flag; fork/unset → ubuntu-latest).
-    # This is the heaviest fast-path job; 4-way sharding (was 2, #6781) halves the
-    # critical path again (~8.5min → ~4.5min on ubuntu-latest; ~2min on the 8-slot
-    # runner box). Node's native --test-shard=N/total takes any denominator — only
-    # this matrix and the TEST_SHARD env below encode the shard count.
-    # PINNED to hosted, deliberately not on the USE_VPS_RUNNER switch (gap 19). One variable
-    # governed the build and the test jobs, which want OPPOSITE machines: the build needs the
-    # .113's RAM, the tests need the hosted runner's link. Measured on 2026-07-29 —
-    # actions/setup-node took 20m06s on .113 with 4 concurrent runners versus 16s hosted (npm
-    # cache restore saturating the link), while the tests themselves tied, 2m54 vs 2m31. So
-    # self-hosted is strictly worse here and there is nothing to configure.
-    runs-on: ubuntu-latest
-    # A shard finishes in ~10 min. Without a ceiling a hung test process holds the PR for
-    # GitHub's 6 h default: on 2026-08-28 shard 1/4 sat 64 min without a line of output
-    # (twice, same spot — a timing race, gone on the third run) while the other three
-    # shards were long green. 30 min = 3x the normal wall-clock; a shard that needs more
-    # is a hang, not a slow run, and a fast red with a re-run beats a silent 6 h hold.
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]
-    env:
-      JWT_SECRET: ci-lint-secret-with-sufficient-length-for-validation
-      API_KEY_SECRET: ci-lint-api-key-secret-long
-      DISABLE_SQLITE_AUTO_BACKUP: "true"
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v7
-        with:
-          package-manager-cache: false
-          node-version: ${{ env.CI_NODE_VERSION }}
-      - uses: ./.github/actions/npm-ci-retry
-        with:
-          # PR acceleration is not release-candidate provenance.
-          cache: ${{ github.event_name == 'pull_request' }}
-      # QW-d: fonte única — o mesmo npm script do CI pesado/local. Fecha dois drifts do
-      # comando inline antigo: os dirs `memory` e `usage` estavam FORA do glob (testes
-      # silenciosamente não rodavam no fast path) e o setupPolyfill não era importado.
-      - run: npm run test:unit:ci:shard
-        env:
-          TEST_SHARD: ${{ matrix.shard }}/4
 
   # ── Pacote 4 (plano mestre testes+CI, aprovado 2026-07-04) ─────────────────────────
   # No-new-warnings por PR via ESLint bulk suppressions nativo (>=9.24). O baseline
@@ -587,8 +520,6 @@ jobs:
       - changes
       - docs-gates
       - fast-gates
-      - fast-vitest
-      - fast-unit
       - lint-guard
       - merge-integrity
     steps:

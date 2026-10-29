@@ -24,6 +24,33 @@ const defaults: Dependencies = {
   },
 };
 
+async function loadReadyCatalog(provider: string, connection: string, dependencies: Dependencies) {
+  let models = await dependencies.load(provider, connection);
+  if (models.length === 0) {
+    const key = `${provider}:${connection}`;
+    let pending = inFlight.get(key);
+    if (!pending) {
+      pending = dependencies.sync(provider, connection).finally(() => inFlight.delete(key));
+      inFlight.set(key, pending);
+    }
+    if (!(await pending)) throw new Error("Model catalog sync failed");
+    models = await dependencies.load(provider, connection);
+  }
+  return models;
+}
+
+/** Repair catalogs removed by older sibling-sync pruning when enabling an account. */
+export async function restoreActivatedConnectionCatalog(
+  provider: string,
+  connection: string,
+  isActive: unknown,
+  dependencies: Dependencies = defaults
+): Promise<void> {
+  if (provider !== "codex" || isActive !== true) return;
+  const models = await loadReadyCatalog(provider, connection, dependencies);
+  if (models.length === 0) throw new Error("Model catalog remains unavailable");
+}
+
 /** Populate a missing account catalog before an explicit model test reaches routing. */
 export async function prepareConnectionModelTest(
   provider: string,
@@ -34,22 +61,7 @@ export async function prepareConnectionModelTest(
   if (provider !== "codex" || !connection) return null;
   const id = model.replace(/^(codex|cx)\//, "");
   try {
-    let models = await dependencies.load(provider, connection);
-    if (models.length === 0) {
-      const key = `${provider}:${connection}`;
-      let pending = inFlight.get(key);
-      if (!pending) {
-        pending = dependencies.sync(provider, connection).finally(() => inFlight.delete(key));
-        inFlight.set(key, pending);
-      }
-      if (!(await pending))
-        return {
-          status: 503,
-          message:
-            "This account's model catalog could not be refreshed. Retry model sync before testing.",
-        };
-      models = await dependencies.load(provider, connection);
-    }
+    const models = await loadReadyCatalog(provider, connection, dependencies);
     if (!models.some((entry) => entry.id === id))
       return {
         status: 422,

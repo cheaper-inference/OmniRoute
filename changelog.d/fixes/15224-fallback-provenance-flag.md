@@ -1,1 +1,0 @@
-- **fix(routing):** unknown models now carry a provenance flag on pricing and latency bootstrap fallbacks, so guesses are traceable instead of silent ([#15224](https://github.com/diegosouzapw/OmniRoute/pull/15224)) — thanks @maxmad64bis

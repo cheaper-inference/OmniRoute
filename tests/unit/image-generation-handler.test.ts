@@ -765,7 +765,7 @@ test("handleImageGeneration sends Antigravity image requests with native image_g
     assert.equal(captured.headers.Authorization, "Bearer ag-token");
     assert.equal(captured.headers["x-client-name"], undefined);
     assert.equal(captured.headers["x-goog-user-project"], undefined);
-    assert.match(captured.headers["User-Agent"], /^antigravity\/ide\/2\.1\.1 /);
+    assert.match(captured.headers["User-Agent"], /^antigravity\/ide\/2\.5\.5 /);
     assert.equal(captured.headers["x-goog-api-client"], undefined);
     assert.equal(captured.body.project, "project-123");
     assert.match(captured.body.requestId, /^image_gen\//);
@@ -781,6 +781,66 @@ test("handleImageGeneration sends Antigravity image requests with native image_g
     });
     assert.deepEqual(result.data.data, [
       { b64_json: "YmFzZTY0LWdlbWluaQ==", revised_prompt: "painted beach" },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("handleImageGeneration sends Gemini AI Studio image requests with API-key auth", async () => {
+  const originalFetch = globalThis.fetch;
+  let captured;
+
+  globalThis.fetch = async (url, options = {}) => {
+    captured = {
+      url: String(url),
+      headers: options.headers,
+      body: JSON.parse(String(options.body || "{}")),
+    };
+
+    return new Response(
+      JSON.stringify({
+        candidates: [
+          {
+            content: {
+              parts: [
+                { text: "A revised image prompt" },
+                { inlineData: { mimeType: "image/png", data: "Z2VtaW5pLWltYWdl" } },
+              ],
+            },
+          },
+        ],
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  };
+
+  try {
+    const result = await handleImageGeneration({
+      body: {
+        model: "gemini/gemini-3-pro-image-preview",
+        prompt: "painted beach",
+        size: "1024x1024",
+      },
+      credentials: { apiKey: "ai-studio-key" },
+      log: null,
+    });
+
+    assert.equal(result.success, true);
+    assert.equal(
+      captured.url,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent"
+    );
+    assert.equal(captured.headers["x-goog-api-key"], "ai-studio-key");
+    assert.deepEqual(captured.body, {
+      contents: [{ role: "user", parts: [{ text: "painted beach" }] }],
+      generationConfig: {
+        responseModalities: ["TEXT", "IMAGE"],
+        imageConfig: { aspectRatio: "1:1" },
+      },
+    });
+    assert.deepEqual(result.data.data, [
+      { b64_json: "Z2VtaW5pLWltYWdl", revised_prompt: "A revised image prompt" },
     ]);
   } finally {
     globalThis.fetch = originalFetch;

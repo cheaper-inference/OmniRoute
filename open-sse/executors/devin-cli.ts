@@ -145,10 +145,18 @@ export class DevinCliExecutor extends BaseExecutor {
 
     log?.info?.("DEVIN", `devin acp → model=${model}, bin=${devinBin}`);
 
+    // Set when the consumer cancels the body (client disconnect). Enqueueing or closing a
+    // cancelled controller throws ERR_INVALID_STATE, and the child's `close` handler would
+    // raise that inside an EventEmitter listener — an uncaught exception for the whole server.
+    let consumerGone = false;
+    let childProcess: ReturnType<typeof spawn> | null = null;
+
     const sseStream = new ReadableStream<Uint8Array>({
       start(controller) {
         const enc = new TextEncoder();
-        const emit = (data: string) => controller.enqueue(enc.encode(data));
+        const emit = (data: string) => {
+          if (!consumerGone) controller.enqueue(enc.encode(data));
+        };
 
         const env: NodeJS.ProcessEnv = { ...process.env };
         if (apiKey) env.WINDSURF_API_KEY = apiKey;
@@ -160,6 +168,7 @@ export class DevinCliExecutor extends BaseExecutor {
           // On Windows, devin.exe may need shell resolution
           shell: process.platform === "win32",
         });
+        childProcess = child;
 
         let spawnError: Error | null = null;
         let stdinClosed = false;
@@ -246,7 +255,7 @@ export class DevinCliExecutor extends BaseExecutor {
           }, 2000);
           killTimer.unref?.();
 
-          controller.close();
+          if (!consumerGone) controller.close();
         };
 
         // ── stdout reader (NDJSON) ──────────────────────────────────────────
@@ -470,6 +479,10 @@ export class DevinCliExecutor extends BaseExecutor {
           clientInfo: { name: "omniroute", version: "1.0" },
           capabilities: {},
         });
+      },
+      cancel() {
+        consumerGone = true;
+        if (childProcess && !childProcess.killed) childProcess.kill("SIGTERM");
       },
     });
 

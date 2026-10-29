@@ -8,6 +8,7 @@
  */
 
 import { toRecord, toNumber, clampPercentage } from "./scalars.ts";
+import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { type UsageQuota, parseResetTime } from "./quota.ts";
 
 const REQUEST_TIMEOUT_MS = 12_000;
@@ -124,13 +125,20 @@ function buildPlanUsageQuotas(
 
 async function fetchJson(
   url: string,
-  init: RequestInit
+  init: RequestInit,
+  connectionId?: string
 ): Promise<{ ok: true; data: Record<string, unknown> } | { ok: false }> {
   try {
-    const response = await fetch(url, {
-      ...init,
-      signal: init.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
+    const response = connectionId
+      ? await fetchWithConnectionProxy(connectionId, url, {
+          ...init,
+          signal: init.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        })
+      : await globalThis.fetch(url, {
+          ...init,
+          signal: init.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        });
+    if (!response) return { ok: false };
     if (!response.ok) return { ok: false };
     const data = toRecord(await response.json().catch(() => null));
     if (Object.keys(data).length === 0) return { ok: false };
@@ -234,10 +242,11 @@ function tryAuthUsage(data: Record<string, unknown>): CursorUsageResult | null {
 
 async function fetchCookieDashboardUsage(
   accessToken: string,
-  userId: string
+  userId: string,
+  connectionId?: string
 ): Promise<CursorUsageResult> {
   try {
-    const response = await fetch(CURSOR_COOKIE_USAGE_CONFIG.usageUrl, {
+    const cookieInit: RequestInit = {
       method: "POST",
       redirect: "manual",
       headers: {
@@ -250,7 +259,20 @@ async function fetchCookieDashboardUsage(
       },
       body: "{}",
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
+    };
+    const response = connectionId
+      ? await fetchWithConnectionProxy(
+          connectionId,
+          CURSOR_COOKIE_USAGE_CONFIG.usageUrl,
+          cookieInit
+        )
+      : await globalThis.fetch(CURSOR_COOKIE_USAGE_CONFIG.usageUrl, cookieInit);
+    if (!response) {
+      return {
+        plan: "Cursor",
+        message: "Cursor connected. No active plan usage returned.",
+      };
+    }
 
     if (response.status >= 300 && response.status < 400) {
       return {
@@ -301,7 +323,8 @@ async function fetchCookieDashboardUsage(
  */
 export async function getCursorUsage(
   accessToken: string,
-  providerSpecificData?: unknown
+  providerSpecificData?: unknown,
+  connectionId?: string
 ): Promise<CursorUsageResult> {
   if (!accessToken) {
     return { message: `Cursor access token missing. ${REAUTH_HINT}` };
@@ -309,33 +332,45 @@ export async function getCursorUsage(
 
   const auth = bearerHeaders(accessToken);
 
-  const period = await fetchJson(CURSOR_PERIOD_USAGE_URL, {
-    method: "POST",
-    headers: {
-      ...auth,
-      "Content-Type": "application/json",
-      "Connect-Protocol-Version": "1",
+  const period = await fetchJson(
+    CURSOR_PERIOD_USAGE_URL,
+    {
+      method: "POST",
+      headers: {
+        ...auth,
+        "Content-Type": "application/json",
+        "Connect-Protocol-Version": "1",
+      },
+      body: "{}",
     },
-    body: "{}",
-  });
+    connectionId
+  );
   if (period.ok) {
     const mapped = tryPeriodUsage(period.data);
     if (mapped) return mapped;
   }
 
-  const summary = await fetchJson(CURSOR_USAGE_SUMMARY_URL, {
-    method: "GET",
-    headers: auth,
-  });
+  const summary = await fetchJson(
+    CURSOR_USAGE_SUMMARY_URL,
+    {
+      method: "GET",
+      headers: auth,
+    },
+    connectionId
+  );
   if (summary.ok) {
     const mapped = tryUsageSummary(summary.data);
     if (mapped) return mapped;
   }
 
-  const authUsage = await fetchJson(CURSOR_AUTH_USAGE_URL, {
-    method: "GET",
-    headers: auth,
-  });
+  const authUsage = await fetchJson(
+    CURSOR_AUTH_USAGE_URL,
+    {
+      method: "GET",
+      headers: auth,
+    },
+    connectionId
+  );
   if (authUsage.ok) {
     const mapped = tryAuthUsage(authUsage.data);
     if (mapped) return mapped;
@@ -354,5 +389,5 @@ export async function getCursorUsage(
     };
   }
 
-  return fetchCookieDashboardUsage(accessToken, userId);
+  return fetchCookieDashboardUsage(accessToken, userId, connectionId);
 }

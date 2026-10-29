@@ -1,0 +1,1 @@
+- **refactor(routing):** Share decoded Combo attempt failures between retry and quota decisions while preserving retry hints, response identity, and public errors ([#17956](https://github.com/cheaper-inference/OmniRoute/pull/17956)) — thanks @MumuTW

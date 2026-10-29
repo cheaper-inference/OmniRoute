@@ -48,6 +48,16 @@ test("shouldNullRefreshTokenAfterUnrecoverable_Claude_IsFalse", async () => {
   assert.equal(shouldNullRefreshTokenAfterUnrecoverable("Claude"), false);
 });
 
+test("shouldNullRefreshTokenAfterUnrecoverable_KimiCoding_IsFalse (#16984)", async () => {
+  const { shouldNullRefreshTokenAfterUnrecoverable, stopTokenHealthCheck } =
+    await import("../../src/lib/tokenHealthCheck.ts");
+  stopTokenHealthCheck();
+  assert.equal(shouldNullRefreshTokenAfterUnrecoverable("kimi-coding"), false);
+  assert.equal(shouldNullRefreshTokenAfterUnrecoverable("KIMI-CODING"), false);
+  // A genuinely consumed Codex refresh token still follows its existing policy.
+  assert.equal(shouldNullRefreshTokenAfterUnrecoverable("codex"), true);
+});
+
 test("shouldNullRefreshTokenAfterUnrecoverable_Codex_IsTrue", async () => {
   const { shouldNullRefreshTokenAfterUnrecoverable, stopTokenHealthCheck } =
     await import("../../src/lib/tokenHealthCheck.ts");

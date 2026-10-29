@@ -3,6 +3,7 @@
  * implementation; the only change is that closed-over request state arrives
  * through deps.
  */
+import { markEmptyTurnExecution, inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 
 import type { BaseExecutor } from "../../executors/base.ts";
 import type { AgentGoalPolicy } from "../../utils/agentGoalPolicy.ts";
@@ -34,8 +35,7 @@ import { HTTP_STATUS, STREAM_RECOVERY } from "../../config/constants.ts";
 import { parseRetryAfterMs } from "../../services/apiKeyRotator.ts";
 import { createRecoverableStream, makeContinuationBody } from "../../services/streamRecovery.ts";
 import { persistCodexChildQuotaResponse } from "../../services/codexAccount/index.ts";
-import { invalidateCodexQuotaCache } from "../../services/codexQuotaFetcher.ts";
-import { invalidateGenericQuotaCacheOnStatus } from "../../services/genericQuotaFetcher.ts";
+import { invalidateQuotaCacheOnStatus } from "../../services/genericQuotaFetcher.ts";
 import {
   isRateLimitEnabled,
   withRateLimit,
@@ -63,6 +63,7 @@ import { resolveProviderId } from "@/shared/constants/providers";
 import { buildContinuationLogHooks } from "./recoveryTraceLogging.ts";
 import { formatStreamRecoveryRetryWarning } from "./streamErrorResult.ts";
 import { injectSystemPromptPostTranslation } from "../../services/systemPrompt.ts";
+import type { ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
 
 export type ChatCoreExecutorResult = {
   response: Response;
@@ -137,6 +138,7 @@ export type ExecuteProviderRequestDeps = {
   requestedModel: string;
   resilienceSettings: ResilienceSettings;
   settings: Record<string, unknown> | null | undefined;
+  toolDisclosure?: ToolDisclosureConfig | null;
   skipUpstreamRetry: boolean;
   stream: boolean;
   streamController: { signal: AbortSignal };
@@ -191,6 +193,7 @@ export async function executeProviderRequest(
     traceId,
     translatedBody,
     trustedEffortContext,
+    toolDisclosure,
     upstreamStream,
     userAgent: _userAgent,
   } = deps;
@@ -211,6 +214,7 @@ export async function executeProviderRequest(
       isOpencodeClient,
       rawBody: body,
       clientRawRequest,
+      toolDisclosure,
     });
 
     // Global System Prompt — SINGLE injection point (post-translation) for
@@ -224,7 +228,7 @@ export async function executeProviderRequest(
     // `systemInstruction`, responses `instructions`. Carrier-less targets
     // (kiro user-fold, antigravity Cloud Code envelope) are covered by the
     // gated PRE-translation pass before translateRequest instead.
-    bodyToSend = injectSystemPromptPostTranslation(bodyToSend, { targetFormat });
+    bodyToSend = injectSystemPromptPostTranslation(bodyToSend, { targetFormat, provider });
 
     updatePendingScope(pendingScope, {
       providerRequest: bodyToSend,
@@ -365,6 +369,7 @@ export async function executeProviderRequest(
               }
             );
             const res = normalizeExecutorResult(rawExecutorResult);
+            res.response = markEmptyTurnExecution(res.response, res.url, execCreds);
             trace("post_executor", { status: res?.response?.status });
 
             // When a payload override rewrote body.model (custom-model alias →
@@ -398,16 +403,15 @@ export async function executeProviderRequest(
                     log?.debug?.("CODEX", persistedQuota.exhaustionLog);
                   }
                 }
-                if (res.response.status === 429) {
-                  invalidateCodexQuotaCache(String(attemptConnectionId));
-                }
               } catch (err) {
                 const errMessage = err instanceof Error ? err.message : String(err);
                 log?.debug?.("CODEX", `Failed to persist codex quota state: ${errMessage}`);
               }
-            } else if (attemptConnectionId && res.response.status === 429) {
-              // Dropped generic quota cache after 429
-              invalidateGenericQuotaCacheOnStatus({
+            }
+            if (attemptConnectionId && res.response.status === 429) {
+              // Dropped generic quota cache after 429 — bespoke fetchers drop their
+              // own cache through the registry; the generic wrapper is the fallback.
+              invalidateQuotaCacheOnStatus({
                 provider,
                 connectionId: String(attemptConnectionId),
                 status: res.response.status,
@@ -620,11 +624,14 @@ export async function executeProviderRequest(
               return {
                 ...res,
                 _executionCredentials: execCreds,
-                response: new Response(clientBody, {
-                  status: res.response.status,
-                  statusText: res.response.statusText,
-                  headers: new Headers(normalizeHeaders(res.response.headers)),
-                }),
+                response: inheritEmptyTurnPolicy(
+                  res.response,
+                  new Response(clientBody, {
+                    status: res.response.status,
+                    statusText: res.response.statusText,
+                    headers: new Headers(normalizeHeaders(res.response.headers)),
+                  })
+                ),
               };
             }
 
@@ -693,7 +700,10 @@ export async function executeProviderRequest(
 
       return {
         ...rawResult,
-        response: new Response(payload, { status, statusText, headers: responseHeaders }),
+        response: inheritEmptyTurnPolicy(
+          rawResult.response,
+          new Response(payload, { status, statusText, headers: responseHeaders })
+        ),
         _dedupSnapshot: {
           status,
           statusText,

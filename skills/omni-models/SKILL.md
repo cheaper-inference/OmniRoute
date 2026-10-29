@@ -18,10 +18,34 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 
 List available models
 
-Returns all models available across configured providers.
+Returns all models available across configured providers. The discovery filters (`capability`, `min_context`, `kind`, `q`) are opt-in: without them the response is unchanged. They narrow the caller's own (key-filtered) catalog and run before `limit`/`after` paging.
 
 ```bash
-curl https://localhost:20128/api/v1/models \
+curl http://localhost:20128/api/v1/models \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/v1/models/query
+
+Query a model shortlist
+
+Filtered shortlist over the same catalog as `GET /v1/models` (same auth and per-key visibility). Results are ordered by `owned_by`, then `id`, and capped by `limit` (default 20, maximum 100).
+
+```bash
+curl -X POST http://localhost:20128/api/v1/models/query \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/v1/models/health
+
+Per-model pause state for the caller's key
+
+Read-only liveness view over the in-memory model lockout store. `ok` means no pause observed by this instance (not a health verdict); connection-level pauses live outside the store read here. Additive: leaves GET /v1/models and its cache untouched. `retry_after` carries the shortest remaining lockout in seconds, rounded up, only when `state` is `cooling`. One documented difference from the dispatch 429 `model_cooldown` rule: a model with one lockout-covered connection and one connection-level cooldown still reads `cooling` here, while the 429 requires every connection to carry a model cooldown.
+
+```bash
+curl http://localhost:20128/api/v1/models/health \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -30,7 +54,7 @@ curl https://localhost:20128/api/v1/models \
 List models (management)
 
 ```bash
-curl https://localhost:20128/api/models \
+curl http://localhost:20128/api/models \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -39,7 +63,7 @@ curl https://localhost:20128/api/models \
 Create or update a model alias
 
 ```bash
-curl -X POST https://localhost:20128/api/models/alias \
+curl -X POST http://localhost:20128/api/models/alias \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -50,7 +74,7 @@ curl -X POST https://localhost:20128/api/models/alias \
 Get full model catalog
 
 ```bash
-curl https://localhost:20128/api/models/catalog \
+curl http://localhost:20128/api/models/catalog \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -59,7 +83,7 @@ curl https://localhost:20128/api/models/catalog \
 GET models › openrouter catalog
 
 ```bash
-curl https://localhost:20128/api/models/openrouter-catalog \
+curl http://localhost:20128/api/models/openrouter-catalog \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -68,7 +92,7 @@ curl https://localhost:20128/api/models/openrouter-catalog \
 POST models › test
 
 ```bash
-curl -X POST https://localhost:20128/api/models/test \
+curl -X POST http://localhost:20128/api/models/test \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -79,7 +103,7 @@ curl -X POST https://localhost:20128/api/models/test \
 POST models › test all
 
 ```bash
-curl -X POST https://localhost:20128/api/models/test-all \
+curl -X POST http://localhost:20128/api/models/test-all \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -90,7 +114,7 @@ curl -X POST https://localhost:20128/api/models/test-all \
 GET models › <model>
 
 ```bash
-curl https://localhost:20128/api/v1/models/{model} \
+curl http://localhost:20128/api/v1/models/{model} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 

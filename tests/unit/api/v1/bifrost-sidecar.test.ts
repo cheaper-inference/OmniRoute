@@ -178,7 +178,10 @@ test("bifrost route: shared relay security helpers sanitize forwarded client met
     },
   });
 
-  assert.equal(getClientIp(req), "198.51.100.8");
+  // Forwarding headers are forensic-only: the throttle must not key on them.
+  const clientIp = getClientIp(req);
+  assert.equal(clientIp.forensic, "198.51.100.8");
+  assert.notEqual(clientIp.throttleKey, "198.51.100.8");
   assert.equal(sanitizeForensicHeader("ua\r\nforged"), "ua forged");
 });
 

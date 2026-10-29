@@ -2,8 +2,9 @@
 // behavior from BaseExecutor.execute() (base.ts) to keep that file under its
 // frozen size cap. On an upstream 400 that names an offending request field,
 // the field is deleted from the live body and the SAME url is retried once per
-// field; "Unsupported parameter" errors are optionally persisted to the
-// provider's param blocklist (#6625).
+// field (a field named on `messages[*]` is dropped from a rebuilt messages
+// array instead); "Unsupported parameter" errors are optionally persisted to
+// the provider's param blocklist (#6625).
 import {
   getParamFilterConfig,
   addParamToBlocklist,
@@ -12,6 +13,7 @@ import {
 import { HTTP_STATUS } from "../../config/constants.ts";
 import {
   findOffendingField,
+  detectRejectedMessageFields,
   detectUnsupportedParam,
   isUnsupportedThinkingError,
   REASONING_REQUEST_FIELDS,
@@ -109,6 +111,44 @@ async function applyThinkingUnsupportedRecovery(
   return fetchFn(url, { ...fetchOptions, body: retryBody });
 }
 
+/**
+ * The 400 names a field that lives on individual `messages[*]` entries (Groq
+ * "'messages.N' : property 'X' is unsupported", pydantic extra_forbidden). Rebuild
+ * `messages` without those fields — the caller's message objects stay untouched,
+ * since combo fallback reuses them — and retry once; null when nothing applies.
+ */
+async function applyMessageFieldRecovery(
+  params: FieldDowngradeParams,
+  record: Record<string, unknown>,
+  errText: string
+): Promise<Response | null> {
+  const { url, body, fetchOptions, fetchFn, serializeBody, strippedFields, log } = params;
+  const messages = record.messages;
+  if (!Array.isArray(messages)) return null;
+  const hasField = (field: string) =>
+    messages.some((m) => m && typeof m === "object" && Object.hasOwn(m, field));
+  const fields = detectRejectedMessageFields(errText).filter(
+    (field) =>
+      !params.protectedFields?.includes(field) &&
+      !strippedFields.has(`messages.*.${field}`) &&
+      hasField(field)
+  );
+  if (fields.length === 0) return null;
+  record.messages = messages.map((m) => {
+    if (!m || typeof m !== "object" || !fields.some((f) => Object.hasOwn(m, f))) return m;
+    const copy = { ...(m as Record<string, unknown>) };
+    for (const field of fields) delete copy[field];
+    return copy;
+  });
+  for (const field of fields) strippedFields.add(`messages.*.${field}`);
+  const retryBody = await serializeBody(body);
+  log?.debug?.(
+    "FIELD_400",
+    `Upstream 400 rejected messages[*].${fields.join(", messages[*].")} on ${url} — retrying without it`
+  );
+  return fetchFn(url, { ...fetchOptions, body: retryBody });
+}
+
 /** Returns the response to use going forward (the retry's when one was issued). */
 export async function applyFieldDowngradeRecovery(params: FieldDowngradeParams): Promise<Response> {
   const { url, fetchOptions, fetchFn, serializeBody, strippedFields, log } = params;
@@ -135,6 +175,8 @@ export async function applyFieldDowngradeRecovery(params: FieldDowngradeParams):
     log?.debug?.("FIELD_400", `Upstream 400 rejected ${offending} on ${url} — retrying without it`);
     return fetchFn(url, { ...fetchOptions, body: retryBody });
   }
+  const messageFieldRetry = await applyMessageFieldRecovery(params, record, errText);
+  if (messageFieldRetry) return messageFieldRetry;
   const thinkingRetry = await applyThinkingUnsupportedRecovery(params, record, errText);
   if (thinkingRetry) return thinkingRetry;
   return (await applyAutoLearnRecovery(params, record, errText)) ?? response;

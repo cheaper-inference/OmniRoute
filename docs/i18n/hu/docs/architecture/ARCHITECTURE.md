@@ -10,77 +10,76 @@ _Utolsó frissítés: 2026-06-28_
 
 ## Vezetői összefoglaló
 
-Az OmniRoute egy Next.js-alapú helyi AI-útválasztó átjáró és vezérlőpult.
-Egyetlen, OpenAI-kompatibilis végpontot (`/v1/*`) biztosít, és több felsőbb szintű szolgáltató között irányítja a forgalmat formátumátalakítással, tartalékra váltással, tokenfrissítéssel és használatkövetéssel.
+OmniRoute egy helyi AI útválasztási átjáró és műszerfal, amely Next.js re épül. Egyetlen OpenAI-kompatibilis végpontot (`/v1/*`) biztosít, és a forgalmat több upstream szolgáltató között irányítja át fordítással, tartalékkal, tokenfrissítéssel és használat követéssel.
 
-Fő képességek:
+Alapvető képességek:
 
-- OpenAI-kompatibilis API-felület CLI-khez/eszközökhöz (355 szolgáltató, 108 végrehajtó)
-- Kérések és válaszok átalakítása a szolgáltatói formátumok között
-- Modellkombinációs tartalékra váltás (többmodelles sorozat)
-- Strukturált kombinációs lépések (`provider + model + connection`) futásidejű sorrendezéssel a `compositeTiers` alapján
-- Fiókszintű tartalékra váltás (szolgáltatónként több fiók)
-- Kvóta-előellenőrzés és kvótatudatos P2C-fiókválasztás a fő csevegési útvonalon
-- OAuth- és API-kulcs-alapú szolgáltatói kapcsolatok kezelése (22 OAuth-szolgáltatói modul)
-- Beágyazások létrehozása a `/v1/embeddings` használatával (18 szolgáltató)
-- Képgenerálás a `/v1/images/generations` használatával (több mint 10 szolgáltató, több mint 20 modell)
-- Hangátírás a `/v1/audio/transcriptions` használatával (18 szolgáltató)
-- Szövegfelolvasás a `/v1/audio/speech` használatával (24 beépített szolgáltató)
-- Videógenerálás a `/v1/videos/generations` használatával (ComfyUI + SD WebUI)
-- Zenegenerálás a `/v1/music/generations` használatával (ComfyUI)
-- Webes keresés a `/v1/search` használatával (20 szolgáltató)
-- Moderálás a `/v1/moderations` használatával
-- Újrarangsorolás a `/v1/rerank` használatával
-- Think címkék (`<think>...</think>`) feldolgozása következtetési modellekhez
-- Válaszok tisztítása a szigorú OpenAI SDK-kompatibilitás érdekében
-- Szerepkör-normalizálás (developer→system, system→user) a szolgáltatók közötti kompatibilitás érdekében
-- Strukturált kimenet átalakítása (json_schema → Gemini responseSchema)
-- Szolgáltatók, kulcsok, aliasok, kombinációk, beállítások és árképzés helyi perzisztálása (122 adatbázismodul)
-- Használat- és költségkövetés, valamint kérésnaplózás
-- Opcionális felhőszinkronizálás több eszköz és állapot szinkronizálásához
-- IP-engedélyezési és -tiltási lista az API-hozzáférés szabályozásához
-- Gondolkodási keret kezelése (változatlan továbbítás/automatikus/egyéni/adaptív)
-- Globális rendszerprompt beillesztése
-- Munkamenet-követés és ujjlenyomat-képzés
-- Fiókonkénti továbbfejlesztett sebességkorlátozás szolgáltatóspecifikus profilokkal
-- Megszakító (circuit breaker) minta a szolgáltatói ellenálló képességhez
-- Lavinaszerű párhuzamos kérések elleni védelem mutexzárolással
-- Aláírás-alapú kérésdeduplikációs gyorsítótár
-- Tartományi réteg: költségszabályok, tartalékra váltási szabályzat, kizárási szabályzat
-- Context Relay: munkamenet-átadási összefoglalók a folytonosság fenntartásához fiókváltáskor
-- Tartományi állapot perzisztálása (SQLite write-through gyorsítótár tartalékra váltásokhoz, keretekhez, kizárásokhoz és megszakítókhoz)
-- Szabályzatmotor a kérések központosított kiértékeléséhez (kizárás → keret → tartalékra váltás)
-- Kéréstelemetria p50/p95/p99 késleltetési aggregációval
-- Kombinációs célpontok telemetriája és korábbi állapota a `combo_execution_key` / `combo_step_id` használatával
-- Korrelációs azonosító (X-Request-Id) a végpontok közötti nyomkövetéshez
-- Megfelelőségi auditnaplózás API-kulcsonkénti letiltási lehetőséggel
-- Kiértékelési keretrendszer az LLM-ek minőségbiztosításához
-- Állapot-vezérlőpult a szolgáltatói megszakítók valós idejű állapotával
-- MCP Server (110 eszköz) 3 átviteli móddal (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) képességekkel és feladat-életciklussal
-- Memóriarendszer (kinyerés, beillesztés, visszakeresés, összegzés)
-- Képességrendszer (regisztrációs adatbázis, végrehajtó, elkülönített környezet, beépített képességek)
-- MITM-proxy tanúsítványkezeléssel és DNS-kezeléssel
-- Promptinjektálás elleni védelmi köztesszoftver
-- Prompttömörítési folyamat Caveman, RTK, egymásra épülő folyamatok, tömörítési kombinációk, nyelvi csomagok és analitika támogatásával
-- ACP (Agent Communication Protocol) regisztrációs adatbázis
-- Moduláris OAuth-szolgáltatók (22 különálló modul a `src/lib/oauth/providers/` alatt)
-- Eltávolítási/teljes eltávolítási szkriptek
-- OAuth-környezet javítási művelete
-- WebSocket-híd OpenAI-kompatibilis WS-kliensekhez (`/v1/ws`)
-- Szinkronizációs tokenek kezelése (kibocsátás/visszavonás, ETag-verziózott konfigurációscsomag-letöltés)
-- GLM Thinking (`glmt`) első osztályú szolgáltatói előbeállítás
-- Hibrid tokenszámlálás (szolgáltatói oldali `/messages/count_tokens`, becslési tartalékmegoldással)
-- Modellaliasok automatikus inicializálása (több mint 30, proxyk közötti dialektusnormalizálás indításkor)
-- Biztonságos kimenő lekérés SSRF-védelemmel, privát URL-ek blokkolásával és konfigurálható újrapróbálkozással
-- Várakozási időt figyelembe vevő csevegési újrapróbálkozások konfigurálható `requestRetry` és `maxRetryIntervalSec` értékekkel
-- Futásidejű környezet ellenőrzése Zod használatával indításkor
-- Megfelelőségi audit v2 lapozással, szolgáltatói CRUD-eseményekkel és az SSRF miatt blokkolt ellenőrzések naplózásával
+- OpenAI-kompatibilis API felület CLI/tools (377 szolgáltató, 156 végrehajtó modul)
+- Request/response fordítás a szolgáltatói formátumok között
+- Modell kombinált tartalék (több modell sorozat)
+- Strukturált kombinált lépések (`provider + model + connection`) `compositeTiers` futásidejű sorrendjével
+- Fiókszintű tartalék (szolgáltatónként több fiók)
+- Kvóta előzetes ellenőrzése és kvóta-tudatos P2C -fiók kiválasztása a fő csevegési útvonalon
+- OAuth + API-kulcs szolgáltató kapcsolatkezelés (27 OAuth szolgáltató modul)
+- Generálás beágyazása `/v1/embeddings` keresztül (18 szolgáltató)
+- Képgenerálás `/v1/images/generations` keresztül (10 + szolgáltató, 20 + modell)
+- Hang átírása `/v1/audio/transcriptions` keresztül (18 szolgáltató)
+- Szövegfelolvasó `/v1/audio/speech` keresztül (24 beépített szolgáltató)
+- Videó generálása `/v1/videos/generations` segítségével (ComfyUI + SD WebUI)
+- Zenegenerálás `/v1/music/generations` keresztül (ComfyUI)
+- Internetes keresés `/v1/search` keresztül (20 szolgáltató)
+- Moderálás `/v1/moderations` keresztül
+- Újrasorolás `/v1/rerank` keresztül
+- Gondoljon a címkeelemzésre (`<think>...</think>`) az érvelési modellekhez
+- Válasz fertőtlenítés a szigorú OpenAI SDK kompatibilitás érdekében
+- Szerepkör normalizálás (fejlesztői → rendszer, rendszer → felhasználó) a szolgáltatók közötti kompatibilitás érdekében
+- Strukturált kimenet átalakítás (json_schema → Gemini responseSchema)
+- Helyi megmaradás a szolgáltatók, kulcsok, álnevek, kombinációk, beállítások, árképzés számára (122 DB modul)
+- Usage/cost követés és kérésnaplózás
+- Opcionális felhőszinkronizálás multi-device/state szinkronizáláshoz
+- IP allowlist/blocklist API hozzáférés-vezérléshez
+- Gondolkodó költségvetés-menedzsment (passthrough/auto/custom/adaptive)
+- Globális rendszer azonnali befecskendezése
+- Munkamenet-követés és ujjlenyomatvétel
+- Fiókonként továbbfejlesztett díjkorlátozás szolgáltató-specifikus profilokkal
+- Megszakító minta a szolgáltatói rugalmasság érdekében
+- Mennydörgés elleni állományvédelem mutex zárral
+- Aláírás-alapú kérés deduplikációs gyorsítótár
+- Domain réteg: költségszabályok, tartalék házirend, kizárási szabályzat
+- Context Relay: munkamenet-átadási összefoglalók a fiókrotáció folytonosságához
+- Tartomány állapotának fennmaradása (SQLite átírási gyorsítótár tartalékok, költségvetések, zárolások, árammegszakítók számára)
+- Házirend motor a kérelmek központosított kiértékeléséhez (lockout → budget → backback)
+- Telemetria kérése p50/p95/p99 késleltetési összesítéssel
+- Kombinált céltelemetria és történelmi kombinált célállapot `combo_execution_key` / `combo_step_id` segítségével
+- Korreláció ID (X-Request-Id) a végpontok közötti nyomkövetéshez
+- Megfelelőségi audit naplózás API kulcsonkénti leiratkozással
+- Eval keretrendszer LLM minőségbiztosításhoz
+- Egészségügyi műszerfal valós idejű szolgáltatói megszakító állapottal
+- MCP szerver (110 eszköz) 3 átvitellel (stdio/SSE/Streamable HTTP)
+- A2A szerver (JSON-RPC 2.0 + SSE) készségekkel és feladatok életciklusával
+- Memóriarendszer (kivonás, injekció, előhívás, összegzés)
+- Skills rendszer (nyilvántartó, végrehajtó, homokozó, beépített készségek)
+- MITM proxy tanúsítványkezeléssel és DNS kezeléssel
+- Azonnali befecskendezésvédő köztes szoftver
+- Gyors tömörítési folyamat Cavemannel, RTK, halmozott folyamatokkal, tömörítési kombókkal, nyelvi csomagokkal és elemzésekkel
+- ACP (Agent Communication Protocol) nyilvántartás
+- Moduláris OAuth szolgáltatók (22 egyedi modul a `src/lib/oauth/providers/` alatt)
+- Uninstall/full-uninstall szkriptek
+- OAuth környezetvédelmi javítási akció
+- WebSocket híd OpenAI-kompatibilis WS kliensekhez (`/v1/ws`)
+- Szinkron tokenkezelés (issue/revoke, ETag-verziójú konfigurációs csomag letöltése)
+- GLM Thinking (`glmt`) első osztályú szolgáltató előre beállított
+- Hibrid token számlálás (szolgáltató oldali `/messages/count_tokens` becslési tartalékkal)
+- Modell alias automatikus vetés (30 + proxy dialektusok közötti normalizálás indításkor)
+- Biztonságos kimenő letöltés SSRF védelemmel, privát URL blokkolással és konfigurálható újrapróbálkozással
+- Lehűlés-tudatos csevegési próbálkozások konfigurálható `requestRetry` és `maxRetryIntervalSec` segítségével
+- Futási környezet ellenőrzése Zod val indításkor
+- Megfelelőségi audit v2 oldalszámozással, szolgáltatói CRUD eseményekkel és SSRF által blokkolt érvényesítési naplózással
 
 Elsődleges futásidejű modell:
 
-- A `src/app/api/*` alatti Next.js alkalmazásútvonalak valósítják meg a vezérlőpult API-jait és a kompatibilitási API-kat
-- A `src/sse/*` + `open-sse/*` alatti megosztott SSE-/útválasztási mag kezeli a szolgáltatói végrehajtást, az átalakítást, a streamelést, a tartalékra váltást és a használati adatokat
+- A Next.js alkalmazásútvonalai `src/app/api/*` alatt mind a műszerfali APIs, mind a kompatibilitási APIs megvalósítják
+- A `src/sse/*` + `open-sse/*` megosztott SSE/routing magja kezeli a szolgáltató végrehajtását, fordítását, adatfolyamát, visszaállítását és használatát
 
 ## Referenciadiagramok
 
@@ -114,43 +113,51 @@ a többi a saját szakterületéhez tartozó útmutatóból érhető el.
 - A helyi folyamaton kívüli szolgáltatói SLA/vezérlősík
 - Maguk a külső CLI-binárisok (Claude CLI, Codex CLI stb.)
 
-## Az irányítópult jelenlegi felülete
+## Irányítópult-felület (jelenlegi)
 
-A `src/app/(dashboard)/dashboard/` alatti fő oldalak:
+Fő oldalak a `src/app/(dashboard)/dashboard/` alatt:
 
-- `/dashboard` — gyors kezdés és a szolgáltatók áttekintése
-- `/dashboard/endpoint` — végpontproxy, valamint MCP-, A2A- és API-végpontlapok
+- `/dashboard` — gyors kezdés és szolgáltatói áttekintés
+- `/dashboard/endpoint` — végpontproxy, valamint MCP-, A2A- és API-végpontfülek
 - `/dashboard/providers` — szolgáltatói kapcsolatok és hitelesítő adatok
-- `/dashboard/combos` — kombinációs stratégiák, sablonok, lépésalapú összeállító, modellútválasztási szabályok és manuálisan tartósított sorrend
+- `/dashboard/combos` — kombinációs stratégiák, sablonok, lépésalapú összeállító, modellútválasztási szabályok és kézzel beállított, tartós sorrend
 - `/dashboard/auto-combo` — Auto Combo Engine: pontozási súlyok, módcsomagok, virtuális gyári előbeállítások és telemetria
-- `/dashboard/costs` — költségösszesítés és az árazás áttekinthetősége
-- `/dashboard/analytics` — használati analitika, kiértékelések és kombinációs célok állapota
+- `/dashboard/costs` — költségösszesítés és árképzési áttekinthetőség
+- `/dashboard/analytics` — használati analitika, kiértékelések és a kombinációs célok állapota
 - `/dashboard/limits` — kvóta- és sebességkorlátozási vezérlők
 - `/dashboard/cli-tools` — CLI-bevezetés, futtatókörnyezet-észlelés és konfigurációgenerálás
-- `/dashboard/agents` — észlelt ACP-ügynökök és egyéni ügynökök regisztrálása
+- `/dashboard/agents` — észlelt ACP-ügynökök és egyéni ügynökök regisztrációja
 - `/dashboard/cloud-agents` — felhőben futtatott ügynökfeladatok (Codex Cloud, Devin, Jules) és a feladatok életciklusa
-- `/dashboard/skills` — A2A-képességjegyzék, izolált végrehajtás és beépített képességkatalógus
-- `/dashboard/memory` — tartós társalgási memória vizsgálata és lekérése
-- `/dashboard/webhooks` — kimenő webhook-előfizetések, titokrotáció és újrapróbálkozási statisztikák
+- `/dashboard/skills` — A2A-képességjegyzék, homokozókörnyezetben történő végrehajtás és beépített képességkatalógus
+- `/dashboard/memory` — tartós társalgási memória vizsgálata és visszakeresése
+- `/dashboard/webhooks` — kimenő webhook-előfizetések, titokkulcs-rotáció és újrapróbálkozási statisztikák
 - `/dashboard/batch` — kötegelt feladatok beküldése és előrehaladása
-- `/dashboard/cache` — olvasás közben feltöltődő gyorsítótár és következtetési gyorsítótár statisztikái, valamint kiürítési vezérlők
-- `/dashboard/playground` — interaktív csevegési tesztfelület bármely konfigurált kombinációval vagy modellel
-- `/dashboard/changelog` — alkalmazáson belüli változásnapló-megjelenítő (a `CHANGELOG.md` fájlt jeleníti meg)
+- `/dashboard/cache` — átengedéses és következtetési gyorsítótár statisztikái, valamint kiürítési vezérlők
+- `/dashboard/playground` — interaktív csevegési tesztkörnyezet bármely konfigurált kombinációval vagy modellel
+- `/dashboard/changelog` — alkalmazáson belüli változásnapló-megjelenítő (a `CHANGELOG.md` fájlt rendereli)
 - `/dashboard/system` — futtatókörnyezeti diagnosztika, verzióinformációk és környezet-ellenőrzési felület
-- `/dashboard/onboarding` — első futtatáskor megjelenő beállítási varázsló új telepítésekhez
-- `/dashboard/media` — kép-, videó- és zenei tesztfelület
+- `/dashboard/onboarding` — első futtatási beállítóvarázsló új telepítésekhez
+- `/dashboard/media` — kép-, videó- és zenetesztkörnyezet
 - `/dashboard/search-tools` — keresési szolgáltatók tesztelése és előzmények
-- `/dashboard/health` — rendelkezésre állási idő, megszakítók, sebességkorlátok és kvótafigyelt munkamenetek
+- `/dashboard/health` — rendelkezésre állás, megszakítók, sebességkorlátok és kvótafigyelt munkamenetek
 - `/dashboard/logs` — kérés-, proxy-, audit- és konzolnaplók
-- `/dashboard/settings` — rendszerbeállítási lapok (általános, útválasztás, kombinációs alapértékek stb.)
-- `/dashboard/context/caveman` — Caveman-tömörítési szabályok, nyelvi csomagok, előnézet és kimeneti mód
-- `/dashboard/context/rtk` — RTK-parancskimeneti szűrők, előnézet és futtatókörnyezeti biztonsági beállítások
+- `/dashboard/settings` — rendszerbeállítási fülek (általános, útválasztás, kombinációs alapértelmezések stb.)
+- `/dashboard/context/caveman` — Caveman tömörítési szabályok, nyelvi csomagok, előnézet és kimeneti mód
+- `/dashboard/context/rtk` — RTK parancskimeneti szűrők, előnézet és futásidejű biztonsági beállítások
 - `/dashboard/context/combos` — útválasztási kombinációkhoz rendelt, elnevezett tömörítési folyamatláncok
-- `/dashboard/translator` — a fordító vizsgálata és a kérésformátum átalakításának előnézete
+- `/dashboard/translator` — fordítóvizsgálat és kérésformátum-konverziós előnézet
 - `/dashboard/audit` — megfelelőségi auditnaplók lapozható böngészője strukturált metaadatokkal
-- `/dashboard/usage` — a `usage_history` adataihoz kapcsolódó, kérésenkénti használati böngésző
+- `/dashboard/usage` — kérésenkénti használati böngésző a `usage_history` adataihoz kapcsolva
 - `/dashboard/compression` — tömörítési analitika, statisztikák és folyamatlánc-hozzárendelés
 - `/dashboard/api-manager` — API-kulcsok életciklusa és modellengedélyek
+
+Felhasználói felületi réteg: minden oldal egyetlen kereten belül jelenik meg — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (a készlet
+`SidebarProvider`/`SidebarInset` elemei, valamint az OmniRoute `Sidebar.tsx` és `Header.tsx` fájljai). Az oldalak az
+építőelemeiket a `@/shared/components` modulból (a `packages/ui-kit` alatt szállított Keak CI UI Kit adapterei)
+vagy a készlet komponens-alútvonalairól (`@omniroute/ui-kit/table`, `…/page-header`) importálják, az ikonokat pedig
+az `<Icon>` elemen keresztül (`ICON_MAP` → Lucide). A téma (alapértelmezés szerint `system`, világos/sötét) és a tokenek
+a készletből származnak a `src/app/globals.css` fájlban található hídon keresztül. Részletek: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Magas szintű rendszerkörnyezet
 
@@ -263,67 +270,68 @@ Felügyeleti területek:
 A fő folyamat moduljai:
 
 - Belépési pont: `src/sse/handlers/chat.ts`
-- Központi koordináció: `open-sse/handlers/chatCore.ts`
+- Alapvető vezérlés: `open-sse/handlers/chatCore.ts`
 - Szolgáltatói végrehajtási adapterek: `open-sse/executors/*`
 - Formátumfelismerés/szolgáltatói konfiguráció: `open-sse/services/provider.ts`
 - Modell feldolgozása/feloldása: `src/sse/services/model.ts`, `open-sse/services/model.ts`
 - Fiók-visszaállási logika: `open-sse/services/accountFallback.ts`
-- Fordítási jegyzék: `open-sse/translator/index.ts`
+- Fordítási nyilvántartás: `open-sse/translator/index.ts`
 - Adatfolyam-átalakítások: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
 - Használati adatok kinyerése/normalizálása: `open-sse/utils/usageTracking.ts`
-- Think címkék elemzője: `open-sse/utils/thinkTagParser.ts`
+- Think-címke elemzője: `open-sse/utils/thinkTagParser.ts`
 - Beágyazáskezelő: `open-sse/handlers/embeddings.ts`
-- Beágyazásszolgáltatói jegyzék: `open-sse/config/embeddingRegistry.ts`
+- Beágyazási szolgáltatók nyilvántartása: `open-sse/config/embeddingRegistry.ts`
 - Képgenerálási kezelő: `open-sse/handlers/imageGeneration.ts`
-- Képszolgáltatói jegyzék: `open-sse/config/imageRegistry.ts`
-- Választisztítás: `open-sse/handlers/responseSanitizer.ts`
-- Szerepkör-normalizálás: `open-sse/services/roleNormalizer.ts`
+- Képszolgáltatók nyilvántartása: `open-sse/config/imageRegistry.ts`
+- Válaszok megtisztítása: `open-sse/handlers/responseSanitizer.ts`
+- Szerepkörök normalizálása: `open-sse/services/roleNormalizer.ts`
 
 Szolgáltatások (üzleti logika):
 
 - Fiókkiválasztás/pontozás: `open-sse/services/accountSelector.ts`
 - A kontextus életciklusának kezelése: `open-sse/services/contextManager.ts`
 - IP-szűrés kikényszerítése: `open-sse/services/ipFilter.ts`
-- Munkamenetek nyomon követése: `open-sse/services/sessionManager.ts`
-- Kérések deduplikálása: `open-sse/services/signatureCache.ts`
-- Rendszerprompt beillesztése: `open-sse/services/systemPrompt.ts`
+- Munkamenetek követése: `open-sse/services/sessionManager.ts`
+- Kérések deduplikációja: `open-sse/services/signatureCache.ts`
+- Rendszerprompt beszúrása: `open-sse/services/systemPrompt.ts`
 - Gondolkodási keret kezelése: `open-sse/services/thinkingBudget.ts`
 - Helyettesítő karakteres modellútválasztás: `open-sse/services/wildcardRouter.ts`
-- Sebességkorlátok kezelése: `open-sse/services/rateLimitManager.ts`
+- Sebességkorlátozás kezelése: `open-sse/services/rateLimitManager.ts`
 - Megszakító: `src/shared/utils/circuitBreaker.ts`
-- Kontextusátadás: `open-sse/services/contextHandoff.ts` — átadási összefoglaló létrehozása és beillesztése a kontextusközvetítési stratégiához
+- Kontextusátadás: `open-sse/services/contextHandoff.ts` — átadási összefoglaló létrehozása és beszúrása a kontextusközvetítési stratégiához
 - Tömörítés: `open-sse/services/compression/*` — proaktív tömörítés a szolgáltatói fordítás előtt;
-  tartalmazza a Caveman-szabályokat, az RTK-szűrőket, az egymásra épülő feldolgozási láncokat, a tömörítési kombinációkat, a statisztikákat és az ellenőrzést
-- Codex-kvótalekérő: `open-sse/services/codexQuotaFetcher.ts` — lekéri a Codex-kvótát a kontextusközvetítési átadással kapcsolatos döntésekhez
-- Újrapróbálkozás a várakozási idő figyelembevételével: `src/sse/services/cooldownAwareRetry.ts` — modellenkénti, várakozási időt alkalmazó újrapróbálkozások konfigurálható `requestRetry` / `maxRetryIntervalSec` értékekkel
-- Biztonságos kimenő lekérés: `src/shared/network/safeOutboundFetch.ts` — védett szolgáltató-/modelllekérés SSRF-védelemmel, privát URL-ek blokkolásával, újrapróbálkozással és időtúllépéssel
-- Kimenő URL-ek védelme: `src/shared/network/outboundUrlGuard.ts` — ellenőrzi a szolgáltatói URL-eket a privát/localhost CIDR-tartományok alapján
-- Szolgáltatói kérések alapértékei: `open-sse/services/providerRequestDefaults.ts` — szolgáltatói szintű `maxTokens`, `temperature`, `thinkingBudgetTokens` alapértékek
-- GLM-szolgáltatói konstansok: `open-sse/config/glmProvider.ts` — megosztott GLM-modellek, kvóta-URL-ek, GLMT-időtúllépés/alapértékek
-- Antigravity-felsőbb réteg: `open-sse/config/antigravityUpstream.ts` — alap-URL és felderítési útvonal konstansai
+  tartalmazza a Caveman-szabályokat, RTK-szűrőket, egymásra épülő feldolgozási láncokat, tömörítési kombinációkat, statisztikákat és ellenőrzést
+- Codex-kvótalekérő: `open-sse/services/codexQuotaFetcher.ts` — lekéri a Codex-kvótát a kontextusközvetítési átadási döntésekhez
+- Várakozási időt figyelembe vevő újrapróbálkozás: `src/sse/services/cooldownAwareRetry.ts` — modellenkénti, várakozási idővel működő újrapróbálkozások konfigurálható `requestRetry` / `maxRetryIntervalSec` értékekkel
+- Biztonságos kimenő lekérés: `src/shared/network/safeOutboundFetch.ts` — védett szolgáltató-/modell-lekérés SSRF-védelemmel, privát URL-ek blokkolásával, újrapróbálkozással és időtúllépéssel
+- Kimenő URL-ek védelme: `src/shared/network/outboundUrlGuard.ts` — gazdagép-ellenőrzések a szolgáltatói URL-eken; a `src/shared/network/outboundUrlGuardPolicy.ts` az `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, az `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` és a hozzájuk tartozó irányítópulti kapcsolók alapján választja ki a módot (lásd: `docs/reference/ENVIRONMENT.md`)
+- Szolgáltatói kérések alapértelmezett értékei: `open-sse/services/providerRequestDefaults.ts` — szolgáltatói szintű `maxTokens`, `temperature`, `thinkingBudgetTokens` alapértékek
+- GLM szolgáltatói konstansok: `open-sse/config/glmProvider.ts` — megosztott GLM-modellek, kvóta-URL-ek, GLMT-időtúllépési és alapértelmezett értékek
+- Antigravity felsőbb réteg: `open-sse/config/antigravityUpstream.ts` — alap-URL és felderítési útvonal konstansai
 - Codex-klienskonstansok: `open-sse/config/codexClient.ts` — verziózott felhasználóiügynök- és kliensverzió-értékek
-- Modellaliasok kezdeti adatai: `src/lib/modelAliasSeed.ts` — indításkor több mint 30, proxyk közötti dialektusalias létrehozása
+- Modellaliasok kiinduló adatai: `src/lib/modelAliasSeed.ts` — indításkor több mint 30, proxy-dialektusok közötti aliast tölt be
 
 A tartományi réteg moduljai:
 
-- Költségszabályok/-keretek: `src/domain/costRules.ts`
+- Költségszabályok/keretek: `src/domain/costRules.ts`
 - Visszaállási szabályzat: `src/domain/fallbackPolicy.ts`
 - Kombinációfeloldó: `src/domain/comboResolver.ts`
 - Kizárási szabályzat: `src/domain/lockoutPolicy.ts`
 - Szabályzatmotor: `src/domain/policyEngine.ts` — központosított kizárás → keret → visszaállás kiértékelés
-- Hibakódkatalógus: `src/shared/constants/errorCodes.ts`
+- Hibakód-katalógus: `src/shared/constants/errorCodes.ts`
 - Kérésazonosító: `src/shared/utils/requestId.ts`
 - Lekérési időtúllépés: `src/shared/utils/fetchTimeout.ts`
 - Kéréstelemetria: `src/shared/utils/requestTelemetry.ts`
-- Megfelelőség/auditálás: `src/lib/compliance/index.ts`
+- Megfelelőség/audit: `src/lib/compliance/index.ts`
 - Kiértékelés-futtató: `src/lib/evals/evalRunner.ts`
 - Tartományi állapot tartós tárolása: `src/lib/db/domainState.ts` — SQLite CRUD a visszaállási láncokhoz, keretekhez, költségelőzményekhez, kizárási állapothoz és megszakítókhoz
 
-OAuth-szolgáltatói modulok (22 különálló fájl a `src/lib/oauth/providers/` alatt):
+OAuth-szolgáltatói modulok (27 különálló fájl a `src/lib/oauth/providers/` alatt):
 
-- Jegyzékindex: `src/lib/oauth/providers/index.ts`
-- Egyes szolgáltatók: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Vékony burkolóréteg: `src/lib/oauth/providers.ts` — újraexportálás az egyes modulokból
+- Nyilvántartási index: `src/lib/oauth/providers/index.ts`
+- Egyedi szolgáltatók: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Megosztott segédfüggvények: `codebuddyDeviceAuth.ts` (CodeBuddy CN/nemzetközi eszközfolyamat), `museCodeDeviceResponse.ts`
+- Vékony burkolómodul: `src/lib/oauth/providers.ts` — újraexportál az egyedi modulokból
 
 ## 5) Beágyazott szolgáltatások (v3.8.4)
 
@@ -347,167 +355,124 @@ Architekturális rétegek:
 
 Részletes leírás: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## Fő alrendszerek (v3.8.0)
+## Főbb alrendszerek (v3.8.0)
 
-### A. Auto Combo motor
+### A. Automatikus kombinált motor
 
-Az Auto Combo a kérések feldolgozásakor dinamikusan pontozza és választja ki az útválasztási célokat ahelyett,
-hogy statikus kombinációdefinícióra támaszkodna. Ez működteti az `auto/*` modellelőtag-családot.
+Az Auto Combo dinamikusan pontozza és kiválasztja az útválasztási célokat a kérés időpontjában, ahelyett, hogy statikus kombináció-definícióra hagyatkozna. Ez hajtja a `auto/*` modell előtagcsaládot.
 
-- A motor belépési pontja: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Feloldó: `src/domain/comboResolver.ts` (az `auto/` előtag automatikus felismerése)
-- Irányítópult: `/dashboard/auto-combo`
-- Telemetria: `auto_combo_decisions` SQLite-tábla
+- Motorbemenet: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Feloldó: `src/domain/comboResolver.ts` ( `auto/` előtag automatikus felismerése)
+- Műszerfal: `/dashboard/auto-combo`
+- Telemetria: `auto_combo_decisions` SQLite asztal
 
-Fő képességek:
+Főbb képességek:
 
-- **19 útválasztási stratégia** (prioritásos, súlyozott, elsőként feltöltő, körkörös, P2C, véletlenszerű,
-  legkevésbé használt, költségoptimalizált, visszaállítás-tudatos, visszaállítási ablakos, tartalékkapacitás-alapú, szigorúan véletlenszerű,
-  **auto**, lkgp, kontextusoptimalizált, kontextustovábbító, **fusion**, valamint egy tartalék útvonal) —
-  az auto a v3.8.0 legfontosabb újdonsága; a `fusion` (párhuzamos továbbítás egy panelnek + bírói szintézis,
-  `open-sse/services/fusion.ts`) a v3.8.36 újdonsága.
-- **16 tényezős pontozás**: kvóta, állapot, inverz költség, inverz késleltetés, feladatilleszkedés és
-  további tíz tényező. A tényezők és alapértelmezett súlyaik kanonikus táblázata a
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) dokumentumban található — az itteni megismétlése
-  egy újabb helyet teremtene, ahol elavulhat.
-- A **virtuális gyár** ideiglenes kombinációkat hoz létre, ha nincs megfelelő nevű kombináció,
-  a jelölteket pedig az aktív és megfelelő állapotú szolgáltatói kapcsolatokból választja ki.
-- **Automatikus előtagok**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — mindegyikhez egy finomhangolt súlyprofil tartozik.
-- **6 módcsomag**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` és `chaos-mode` — az irányítópultról alkalmazható előre beállított súlykonfigurációk.
-  (Nem tévesztendők össze a fenti `auto/*` előtagokkal, amelyek a kérések feldolgozásakor kiválasztott változatok.)
+- **20 útválasztási stratégia** (prioritás, súlyozott, kitöltési sorrend, kör-robin, P2C, véletlenszerű, legkevésbé használt, költségoptimalizált, reset-aware, reset-window, headroom, kvótával súlyozott, szigorú véletlenszerű,** auto** , lkgp, kontextusra optimalizált, gyorsítótárra optimalizált, környezetrelé,** fúzió** , pipeline) — auto a 3.8.0-s v3.8.0 címsor kiegészítése; `fusion` (panel fan-out + bíró szintézis, `open-sse/services/fusion.ts`) új a v3.8.36-ban.
+- **16 faktoros pontozás** : kvóta, egészség, fordított költség, fordított késleltetés, feladat-illesztés és még tíz. A faktorok kanonikus táblázata és alapértelmezett súlyaik [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — -ben élnek, ha itt újra megismételjük, ez egy második helyet adna az elavulásnak.
+- **Virtuális gyár** efemer kombinációkat valósít meg, ha nem létezik megfelelő nevű kombináció, így a jelölteket egészséges aktív szolgáltatói kapcsolatokból szerzi be.
+- **Automatikus előtagok** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — mindegyiket hangolt súlyprofil támogatja.
+- **6 mód csomag** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` és `chaos-mode` — előre beállított súlykonfigurációk, amelyek a műszerfalról hívhatók. (Nem tévesztendő össze a fenti `auto/*` előtagokkal, amelyek kérésidő-változatok.)
 
-Az algoritmus teljes részletességű ismertetéséért (tényezőképletek, súlyok finomhangolása) lásd:
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+A teljes algoritmus részleteit (tényezőképletek, súlyhangolás) lásd: [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
 ### B. Felhőügynökök
 
-A Cloud Agents egységes, adatbázis-alapú feladat-életciklus mögé foglalja a külső fél által üzemeltetett kódügynök-platformokat (Codex Cloud, Devin,
-Jules). Minden feladatlétrehozási és -ellenőrzési
-végpont kezelői hitelesítést igényel.
+A Cloud Agents a harmadik féltől származó kódügynök-platformokat (Codex Cloud, Devin, Jules) egységes, adatbázis-támogatott feladatéletciklus mögé burkolja. Minden feladat creation/inspection végpontja felügyeleti hitelesítést igényel.
 
-- Modulgyökér: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, valamint az egyes ügynökök alkönyvtárai az `agents/` alatt)
+- Modul gyökér: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, plusz ügynökönkénti alkönyvtárak `agents/` alatt)
 - Ügynökönkénti megvalósítások: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Nyilvános végpontok: `/api/v1/agents/tasks/*` (listázás/létrehozás/lekérés/megszakítás)
-- Kezelői végpontok: `/api/cloud/*` (kiépítés, állapot, kötegelt műveletek)
-- Irányítópult: `/dashboard/cloud-agents`
-- Tárolás: `cloud_agent_tasks` tábla
+- Nyilvános végpontok: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- Felügyeleti végpontok: `/api/cloud/*` (kiépítés, állapot, köteg)
+- Műszerfal: `/dashboard/cloud-agents`
+- Tárolás: `cloud_agent_tasks` asztal
 
-Az egyes ügynökök kiépítésével és az OAuth részleteivel kapcsolatban lásd:
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+Az ügynökönkénti kiépítés és OAuth sajátosságaiért lásd: [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
 ### C. Védőkorlátok
 
-A védőkorlátmodul egy menet közben újratölthető köztesréteg, amely személyazonosításra alkalmas adatok (PII), promptinjektálás és
-nem biztonságos vizuális tartalom szempontjából vizsgálja a kéréseket és válaszokat. A szabálysértések
-HTTP **503** válasszal és strukturált hibakóddal azonnal megszakítják a kérést, lehetővé téve,
-hogy az alsóbb rétegbeli hívók újrapróbálkozzanak vagy másik ágra térjenek.
+A védőkorlát modul egy üzem közben újratölthető köztes szoftverréteg, amely megvizsgálja a kéréseket és válaszokat PII, a gyors befecskendezés és a nem biztonságos látástartalom szempontjából. A szabálysértések rövidre zárják a kérést HTTP vel** 503** plusz egy strukturált hibakód, amely lehetővé teszi a későbbi hívók számára, hogy újra próbálkozzanak vagy elágazjanak.
 
-- Modulgyökér: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Menet közbeni újratöltés: a nyilvántartás figyeli a konfiguráció változásait, és helyben újraépíti a láncot
-- Bekötési pontok: csevegéskezelő belépési pontja, képgenerálási kezelő, választisztító
-- HTTP-szerződés: a szabálysértések `503` válaszként jelennek meg, ahol `error.code = "GUARDRAIL_VIOLATION"`
+- Modul gyökér: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Hot reload: a rendszerleíró adatbázis figyeli a konfigurációs változásokat, és a helyén újraépíti a láncot
+- Bekötési pontok: chatkezelő belépés, képgeneráló kezelő, válaszfertőtlenítő
+- HTTP szerződés: a jogsértések `503` ként jelennek meg `error.code = "GUARDRAIL_VIOLATION"` vel
 
-A szabálykészletek létrehozásával és a küszöbértékek finomhangolásával kapcsolatban lásd:
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+A szabálykészlet létrehozásáról és a küszöbhangolásról lásd: [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
-### D. Tartományi réteg
+### D. Domain réteg
 
-A `src/domain/` névtér központosítja a házirenddel kapcsolatos döntéseket, így az útvonalkezelőknek nem kell
-saját maguknak összeállítaniuk a kizárási/költségkeret-/tartaléklogikát.
+A `src/domain/` névtér központosítja a politikai döntéseket, így az útvonalkezelőknek nem kell maguknak összeállítaniuk lockout/budget/fallback logikát.
 
-- Házirendmotor: `src/domain/policyEngine.ts` — egyetlen belépési pont a
-  végrehajtás előtti kiértékeléshez (kizárás → költségkeret → tartalék sorrend)
+- Irányelvmotor: `src/domain/policyEngine.ts` — egyetlen belépési pont a végrehajtás előtti értékeléshez (zárolási → költségvetési → tartalék rendelés)
 - Költségszabályok: `src/domain/costRules.ts`
-- Tartalék házirend: `src/domain/fallbackPolicy.ts`
-- Kizárási házirend: `src/domain/lockoutPolicy.ts`
-- Címkealapú útválasztás: `src/domain/tagRouter.ts`
-- Kombinációfeloldó: `src/domain/comboResolver.ts` — konkrét végrehajtási tervekké oldja fel a kombinációneveket, az auto/\*
-  előtagokat és a helyettesítő karakteres modellcélokat
-- Kapcsolat- és modellszabályok összekapcsolója: `src/domain/connectionModelRules.ts`
-- Modell-elérhetőségi pillanatképek: `src/domain/modelAvailability.ts`
-- Szolgáltatói lejáratok követése: `src/domain/providerExpiration.ts`
-- Kvótagyorsítótár: `src/domain/quotaCache.ts`
-- Degradációs állapot: `src/domain/degradation.ts`
-- Konfiguráció-ellenőrzés: `src/domain/configAudit.ts`
-- OmniRoute-válaszmetaadatok összeállítója: `src/domain/omnirouteResponseMeta.ts`
-- Értékelési alrendszer: `src/domain/assessment/` — időszakos értékelési feladatok
+- Tartalék irányelv: `src/domain/fallbackPolicy.ts`
+- Kizárási politika: `src/domain/lockoutPolicy.ts`
+- Címke alapú útválasztás: `src/domain/tagRouter.ts`
+- Kombinált feloldó: `src/domain/comboResolver.ts` — feloldja a kombinált neveket, az auto/\* előtagokat és a helyettesítő karakteres modellcélokat a konkrét végrehajtási tervekhez
+- Connection/model szabálycsatlakozó: `src/domain/connectionModelRules.ts`
+- Modell elérhetőségi pillanatképek: `src/domain/modelAvailability.ts`
+- Szolgáltató lejáratának követése: `src/domain/providerExpiration.ts`
+- Kvóta gyorsítótár: `src/domain/quotaCache.ts`
+- Lebomlási állapot: `src/domain/degradation.ts`
+- Konfiguráció audit: `src/domain/configAudit.ts`
+- OmniRoute válasz metaadat-készítő: `src/domain/omnirouteResponseMeta.ts`
+- Értékelési alrendszer: `src/domain/assessment/` — időszakos értékelési munkák
 
 ### E. Engedélyezési folyamat
 
-Az engedélyezési folyamat minden beérkező kérést besorol, és a továbbítás előtt
-alkalmazza a megfelelő szabályzatláncot.
+Az engedélyezési folyamat minden bejövő kérelmet osztályoz, és a megfelelő házirend-láncot alkalmazza a feladás előtt.
 
-- Folyamat belépési pontja: `src/server/authz/pipeline.ts`
-- Kérésosztályozó: `src/server/authz/classify.ts` — megkülönbözteti a nyilvános
-  kompatibilitási útvonalakat a felügyeleti útvonalaktól
-- Nyilvános útvonalak jegyzéke: `src/shared/constants/publicApiRoutes.ts`
-- Szabályzatok: `src/server/authz/policies/` — egymással kombinálható predikátumok
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` stb.)
-- Fejléc-segédprogramok: `src/server/authz/headers.ts`
-- Ellenőrzési segédfüggvény: `src/server/authz/assertAuth.ts`
-- Kéréskörnyezet: `src/server/authz/context.ts`
+- Csővezeték-bevezetés: `src/server/authz/pipeline.ts`
+- Kérelem osztályozója: `src/server/authz/classify.ts` — megkülönbözteti a nyilvános kompatibilitási útvonalakat a kezelési útvonalaktól
+- Közút leltár: `src/shared/constants/publicApiRoutes.ts`
+- Irányelvek: `src/server/authz/policies/` — összeállítható predikátumok (`requireApiKey`, `requireManagement`, `requireFreshAuth` stb.)
+- Fejléc segédprogramok: `src/server/authz/headers.ts`
+- Állítási segéd: `src/server/authz/assertAuth.ts`
+- A kérés szövegkörnyezete: `src/server/authz/context.ts`
 
-A nyilvános és a felügyeleti útvonalak között szigorú határ húzódik: az agent/cooldown API-k és
-a szolgáltatómódosítások felügyeleti hitelesítést igényelnek (ennek hiányában HTTP 401).
+A nyilvános és a felügyeleti útvonalak kemény határvonalat jelentenek: agent/cooldown APIs és a szolgáltatói mutációk kezelési hitelesítést igényelnek (HTTP 401, ha hiányzik).
 
-Az útvonal-besorolási szabályok teljes leírását lásd itt:
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+A teljes útvonal-besorolási szabályokat lásd: [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. Munkafolyamat-FSM és feladattudatos útválasztó
+### F. Workflow FSM és Task-Aware Router
 
-A kombinációk kiválasztása fölé rétegzett, véges állapotú gép által vezérelt útválasztó,
-amely az észlelt munkafolyamat-szakasz (tervezés, végrehajtás,
-felülvizsgálat) és a háttérfeladatokhoz való affinitás alapján irányítja a forgalmat.
+Egy véges állapotú gép által vezérelt útválasztó, amely a kombinált kiválasztás fölé rétegezve irányítja a forgalmat az észlelt munkafolyamat szakasza (tervezés, végrehajtás, áttekintés) és a háttérfeladat-affinitás alapján.
 
-- Munkafolyamat-FSM: `open-sse/services/workflowFSM.ts`
-- Feladattudatos útválasztó: `open-sse/services/taskAwareRouter.ts`
-- Háttérfeladat-érzékelő: `open-sse/services/backgroundTaskDetector.ts`
-- Szándékosztályozó: `open-sse/services/intentClassifier.ts`
+- Munkafolyamat FSM: `open-sse/services/workflowFSM.ts`
+- Feladat-tudatos útválasztó: `open-sse/services/taskAwareRouter.ts`
+- Háttérfeladat detektor: `open-sse/services/backgroundTaskDetector.ts`
+- Szándékos osztályozó: `open-sse/services/intentClassifier.ts`
 
-Az FSM állapotátmenetei bekerülnek az Auto Combo pontozásába, így a rendszer a háttérben futó
-vagy automatizált feladatoknál az olcsóbb modelleket, az interaktív
-tervezési és felülvizsgálati fordulóknál pedig az erősebb modelleket részesíti előnyben.
+A FSM átmenetek beépülnek az Auto Combo pontozásába, és az olcsóbb modellek felé hajlanak background/automation feladatokhoz, és az erősebb modellek felé az interaktív planning/review fordulatokhoz.
 
-### G. Szolgáltatóspecifikus ellenálló képesség
+### G. Szolgáltató-specifikus rugalmasság
 
-Több szolgáltató dedikált ellenálló képességi és rejtőzködési modulokat kínál, amelyek
-a globális áramkör-megszakító, a kapcsolati várakoztatás és a modellzárolási rétegek működésére épülnek:
+Számos szolgáltató dedikált rugalmassági és lopakodó modulokat szállít, amelyek visszatartják a globális megszakító / kapcsolat lehűlés / modellzár réteget:
 
-- Antigravity 429 motor: `open-sse/services/antigravity429Engine.ts` (váltogatja
-  az identitást, megtisztítja a válaszfejléceket, valamint a kreditek és verziók nyomon követését végzi az
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts` segítségével)
-- ModelScope kvótaszabályzat: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (kompatibilitási csatorna kézfogása): `open-sse/services/claudeCodeCCH.ts`,
-  valamint `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Claude Code ujjlenyomat-formálás: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code obfuszkáció: `open-sse/services/claudeCodeObfuscation.ts`
+- Antigravity 429 motor: `open-sse/services/antigravity429Engine.ts` (az identitás elforgatása, a válaszfejlécek tisztítása, credits/version nyomon követése `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` segítségével)
+- Antigravity 429 őr: `open-sse/services/antigravity429Guard.ts` (az upstream 429-ek kérésenkénti költségvetése az összes gazdagépen, `ANTIGRAVITY_MAX_429_ATTEMPTS`; a visszautasított test azonos újraküldésére helyileg válaszol; `src/sse/handlers/chat.ts` nem indítja újra az ilyen kérést a lehűlés-tudatos újrapróbálkozáson keresztül)
+- ModelScope kvótapolitika: `open-sse/services/modelscopePolicy.ts`
+- Claude kód CCH (kompatibilitási csatorna kézfogás): `open-sse/services/claudeCodeCCH.ts`, plusz `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Kód ujjlenyomat formázás: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Kódzavarás: `open-sse/services/claudeCodeObfuscation.ts`
 
-A teljes rejtőzködési forgatókönyvet és az üzemeltetési útmutatást lásd itt:
-`docs/security/STEALTH_GUIDE.md` (git; nincs lefordítva a `/docs` könyvtárba).
+A teljes rejtett játékkönyvet és a működési útmutatást lásd `docs/security/STEALTH_GUIDE.md` (git; nincs `/docs`-be fordítva).
 
-### H. Webhookok, következtetési gyorsítótár, olvasási gyorsítótár
+### H. Webhooks, érvelési gyorsítótár, olvasási gyorsítótár
 
-- **Webhookok** — kimenő értesítések küldése a szolgáltató-, fiók- és feladateseményekhez.
-  - Küldő: `src/lib/webhookDispatcher.ts`
-  - Tárolás: `webhooks` SQLite-tábla (a `src/lib/db/webhooks.ts` használatával)
-  - Vezérlőpult: `/dashboard/webhooks` (feliratkozások, titkos kulcsok, újrapróbálkozási előzmények)
-  - Az eseménytaxonómiát és az újrapróbálkozási szemantikát lásd itt: [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Következtetési gyorsítótár** — újrajátszható következtetési blokkok a gondolkodási
-  tokeneket kibocsátó szolgáltatókhoz (Claude, GLMT stb.), így az egymást követő fordulók kihagyhatják az újbóli gondolkodást.
-  - Adatbázisréteg: `src/lib/db/reasoningCache.ts`
-  - Szolgáltatásréteg: `open-sse/services/reasoningCache.ts`
-  - Az újrajátszási szemantikát lásd itt: [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Olvasási gyorsítótár** — rövid élettartamú, aláírás alapján kulcsolt válaszgyorsítótár,
-  amely a hibás felsőbb szintű SDK-kból érkező azonos újrapróbálkozások összevonására szolgál.
-  - Adatbázisréteg: `src/lib/db/readCache.ts`
-  - Statisztikai végpont: `GET /api/cache/stats`, vezérlőpult: `/dashboard/cache`
+- **Webhookok** — kimenő feladás provider/account/task eseményekhez.
+  - Diszpécser: `src/lib/webhookDispatcher.ts`
+  - Tárhely: `webhooks` SQLite asztal ( `src/lib/db/webhooks.ts` n keresztül)
+  - Irányítópult: `/dashboard/webhooks` (előfizetések, titkok, újrapróbálkozási előzmények)
+  - Az eseménytaxonómiával és az újrapróbálkozási szemantikával kapcsolatban lásd [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Érvelési gyorsítótár** — újrajátszható érvelési blokkok olyan szolgáltatók számára, amelyek gondolkodási tokeneket (Claude, GLMT stb.) bocsátanak ki, így az egymást követő fordulatok kihagyhatják az újragondolást.
+  - DB réteg: `src/lib/db/reasoningCache.ts`
+  - Szolgáltatási réteg: `open-sse/services/reasoningCache.ts`
+  - A visszajátszás szemantikáját lásd: [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Olvassa el a gyorsítótárat** — rövid élettartamú válaszgyorsítótár, amelyet aláírással kulcsolnak, és a törött upstream SDKs azonos újrapróbálkozásainak összecsukására használják.
+  - DB réteg: `src/lib/db/readCache.ts`
+  - Statisztikák végpontja: `GET /api/cache/stats`, műszerfal `/dashboard/cache` nél
 
 ## 3) Perzisztenciaréteg
 
@@ -531,16 +496,17 @@ Tartományi állapotadatbázis (SQLite):
 - Táblák (létrehozásuk helye: `src/lib/db/core.ts`): `domain_fallback_chains`, `domain_budgets`, `domain_cost_history`, `domain_lockout_state`, `domain_circuit_breakers`
 - Azonnali adatbázisba írást alkalmazó gyorsítótár-minta: futásidőben a memóriabeli Mapek a mérvadók; a módosítások szinkron módon íródnak az SQLite-ba; hidegindításkor az állapot visszaáll az adatbázisból
 
-## 4) Hitelesítési és biztonsági felületek
+## 4) Hitelesítés + biztonsági felületek
 
-- Irányítópult cookie-alapú hitelesítése: `src/proxy.ts`, `src/app/api/auth/login/route.ts`
-- API-kulcsok generálása/ellenőrzése: `src/shared/utils/apiKey.ts`
-- A szolgáltatói titkos adatok a `providerConnections` bejegyzéseiben tárolódnak
-- Kimenőproxy-támogatás az `open-sse/utils/proxyFetch.ts` (környezeti változók) és az `open-sse/utils/networkProxy.ts` (szolgáltatónként vagy globálisan konfigurálható) révén
-- SSRF-/kimenő-URL-védelem: `src/shared/network/outboundUrlGuard.ts` — minden szolgáltatói hívásnál blokkolja a privát/loopback/link-local tartományokat
-- Futásidejű környezetellenőrzés: `src/lib/env/runtimeEnv.ts` — Zod-séma az összes környezeti változóhoz; a problémák indítási hibákként/figyelmeztetésekként jelennek meg
+- Vezérlőpult cookie-alapú hitelesítése: `src/proxy.ts`, `src/app/api/auth/login/route.ts`
+- API-kulcsok létrehozása/ellenőrzése: `src/shared/utils/apiKey.ts`
+- A szolgáltatói titkos adatok a `providerConnections` bejegyzésekben vannak tartósan tárolva
+- Kimenő proxy támogatása az `open-sse/utils/proxyFetch.ts` (környezeti változók) és az `open-sse/utils/networkProxy.ts` (szolgáltatónként vagy globálisan konfigurálható) révén
+- SSRF-/kimenő URL-védelem: `src/shared/network/outboundUrlGuard.ts` — gazdagép-ellenőrzések a szolgáltatói hívásoknál és a webhook-célpontoknál; a módot a `src/shared/network/outboundUrlGuardPolicy.ts` határozza meg (jelzők: `docs/reference/ENVIRONMENT.md`)
+- Futásidejű környezeti ellenőrzés: `src/lib/env/runtimeEnv.ts` — Zod-séma az összes környezeti változóhoz, amely az indítási hibákat/figyelmeztetéseket is megjeleníti
 - Szinkronizálási tokenek: `src/lib/db/syncTokens.ts` — hatókörrel rendelkező tokenek a konfigurációscsomag-letöltési végpontokhoz; a `sync_tokens` SQLite-tábla tárolja őket (`024_create_sync_tokens.sql` migráció)
-- WebSocket-kézfogás hitelesítése: `src/lib/ws/handshake.ts` — API-kulcs vagy munkamenet-cookie segítségével ellenőrzi a WS-frissítési kéréseket
+- WebSocket-kézfogás hitelesítése: `src/lib/ws/handshake.ts` — API-kulccsal vagy munkamenet-cookie-val ellenőrzi a WS-frissítési kéréseket
+- Az élő vezérlőpult WebSocket-hitelesítése: `src/server/ws/liveServer.ts` — a segédfolyamat (a `LIVE_WS_PORT` porton) vezérlőpult-munkamenet-cookie-t vagy kezelési hatókörrel (`manage`/`admin`) rendelkező Bearer API-kulcsot fogad el; a csak következtetésre jogosító kulcsokat elutasítja. A belső `POST /__omniroute_event` közzétevő végpont csak akkor fogad el loopback társtól érkező kapcsolatot, ha nincs jelen proxyugrást jelző fejléc (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
 ## 5) Felhőalapú szinkronizálás
 

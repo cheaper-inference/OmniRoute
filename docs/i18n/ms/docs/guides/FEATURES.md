@@ -298,13 +298,13 @@ Tingkah laku utama:
 
 ## 🔑 Token Penyegerakan & Himpunan Konfigurasi _(v3.6.6+)_
 
-Akses berbilang peranti dan akses pengendali luaran kini boleh dilakukan melalui **token penyegerakan berskop**:
+Akses berbilang peranti dan pengendali luaran kini boleh dilakukan melalui **token penyegerakan dengan skop**:
 
-- **`POST /api/sync/tokens`** — Keluarkan token penyegerakan baharu (berskop, dengan tamat tempoh pilihan)
+- **`POST /api/sync/tokens`** — Keluarkan token penyegerakan baharu (dengan skop dan tamat tempoh pilihan)
 - **`DELETE /api/sync/tokens/:id`** — Batalkan token
-- **`GET /api/sync/bundle`** — Muat turun petikan JSON berversi dan berkunci ETag bagi semua tetapan tidak sensitif (kata laluan disunting)
+- **`GET /api/sync/bundle`** — Muat turun petikan JSON berversi bagi konfigurasi yang dikunci dengan ETag (disahkan dengan token penyegerakan sahaja). Tetapan pengesahan seperti kata laluan papan pemuka dibuang, tetapi kelayakan penyedia dan kunci API disertakan, jadi anggap fail tersebut sebagai rahsia
 
-Himpunan konfigurasi dibina oleh `src/lib/sync/bundle.ts`. Pengguna membandingkan pengepala respons `ETag` untuk mengesan perubahan tanpa memuat turun semula keseluruhan muatan.
+Himpunan konfigurasi dibina oleh `src/lib/sync/bundle.ts`. Pengguna membandingkan pengepala respons `ETag` untuk mengesan perubahan tanpa memuat turun semula keseluruhan muatan. Daripada CLI, `omniroute sync bundle <outPath> --token <syncToken>` (atau `OMNIROUTE_SYNC_TOKEN`) menyimpannya sebagai fail yang hanya boleh diakses oleh pemilik.
 
 ---
 
@@ -320,10 +320,10 @@ Himpunan konfigurasi dibina oleh `src/lib/sync/bundle.ts`. Pengguna membandingka
 
 Semua panggilan pengesahan penyedia dan penemuan model kini melalui perlindungan keluar dua lapisan:
 
-1. **Perlindungan URL** (`src/shared/network/outboundUrlGuard.ts`) — Menyekat julat IP peribadi/gelung balik/pautan setempat sebelum soket dibuka.
-2. **Pembalut pengambilan selamat** (`src/shared/network/safeOutboundFetch.ts`) — Menggunakan perlindungan URL, menormalkan tamat masa dan mencuba semula ralat sementara dengan undur eksponen.
+1. **Perlindungan URL** (`src/shared/network/outboundUrlGuard.ts`) — Mula-mula menyemak nama hos atau literal IP sasaran seperti yang ditulis; dalam mod awam sahaja, pembalut pengambilan selamat turut menyelesaikan nama tersebut dan menolak jawapan peribadi. Secara lalai, ia menyekat titik akhir metadata awan — keseluruhan 169.254.0.0/16 serta nama hos metadata yang diketahui; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` turut menyekat hos peribadi dan gelung balik; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (atau `OUTBOUND_SSRF_GUARD_ENABLED=false` yang legasi) mematikan semakan tersebut. Nilai yang disimpan melalui togol papan pemuka sesuatu bendera mengatasi pemboleh ubahnya, dan penyedia tempatan terbina dalam melangkau perlindungan semasa pengesahan kunci. Lihat `docs/reference/ENVIRONMENT.md`.
+2. **Pembalut pengambilan selamat** (`src/shared/network/safeOutboundFetch.ts`) — Menggunakan perlindungan URL, menormalkan tamat masa, dan mencuba semula ralat sementara dengan sela masa eksponen.
 
-Pelanggaran perlindungan dipaparkan sebagai HTTP 422 (`URL_GUARD_BLOCKED`) dan ditulis ke dalam log audit pematuhan melalui `providerAudit.ts`.
+Pelanggaran perlindungan dipaparkan sebagai `URL_GUARD_BLOCKED` — HTTP 503 melalui `getSafeOutboundFetchErrorStatus` (400 pada laluan penemuan model) — dan sekatan SSRF sebenar semasa pengesahan ditulis ke dalam log audit sebagai peristiwa `provider.validation.ssrf_blocked`.
 
 ---
 

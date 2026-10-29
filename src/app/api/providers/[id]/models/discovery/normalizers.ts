@@ -22,10 +22,11 @@ import {
 } from "@omniroute/open-sse/services/antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "@omniroute/open-sse/services/antigravityProjectPersist.ts";
 import { asRecord, toNonEmptyString } from "./helpers";
+import type { DiscoveryFailure } from "@/shared/discovery/degradedCause";
 
 const antigravityDiscoveryInflight = new Map<
   string,
-  Promise<Array<{ id: string; name: string }>>
+  Promise<{ models: Array<{ id: string; name: string }>; failure?: DiscoveryFailure }>
 >();
 
 type AntigravityDiscoveryModel = {
@@ -157,9 +158,10 @@ export async function fetchAntigravityDiscoveryModelsCached(
   proxy: unknown,
   providerSpecificData?: unknown,
   provider: "antigravity" | "agy" = "antigravity"
-): Promise<
-  Array<{ id: string; name: string; inputTokenLimit?: number; outputTokenLimit?: number }>
-> {
+): Promise<{
+  models: Array<{ id: string; name: string; inputTokenLimit?: number; outputTokenLimit?: number }>;
+  failure?: DiscoveryFailure;
+}> {
   const profile = normalizeAntigravityClientProfile(asRecord(providerSpecificData).clientProfile);
   const cacheKey = `${provider}:${connectionId}:${accessToken.substring(0, 16)}:${profile}`;
   const inflight = antigravityDiscoveryInflight.get(cacheKey);
@@ -177,6 +179,9 @@ export async function fetchAntigravityDiscoveryModelsCached(
         asRecord(providerSpecificData)
       );
     }
+
+    // The first attempt that produced no model explains the fallback.
+    let failure: DiscoveryFailure | undefined;
 
     for (const discoveryUrl of [
       ...getAntigravityFetchAvailableModelsUrls(),
@@ -197,6 +202,7 @@ export async function fetchAntigravityDiscoveryModelsCached(
           console.warn(
             `[models] ${provider} discovery failed at ${discoveryUrl} (${response.status}): ${errorText}`
           );
+          failure = failure ?? { status: response.status };
           continue;
         }
 
@@ -205,15 +211,17 @@ export async function fetchAntigravityDiscoveryModelsCached(
           provider
         ).map((model) => mapAntigravityModelForClient(model, provider));
         if (models.length > 0) {
-          return models;
+          return { models };
         }
+        failure = failure ?? { code: "EMPTY_CATALOG" };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         console.warn(`[models] ${provider} discovery threw for ${discoveryUrl}: ${message}`);
+        failure = failure ?? {};
       }
     }
 
-    return [];
+    return { models: [], ...(failure ? { failure } : {}) };
   })().finally(() => {
     antigravityDiscoveryInflight.delete(cacheKey);
   });
@@ -238,6 +246,38 @@ export function normalizeDataRobotCatalogResponse(
       return { id: model, name };
     })
     .filter((value): value is { id: string; name: string } => Boolean(value));
+}
+
+// Upstream fields that declare supported reasoning efforts (#15762). Only these are carried
+// through so the sync extractor sees them; spreading the whole record would alter other flows.
+const OPENAI_LIKE_EFFORT_DECLARATION_KEYS = [
+  "reasoning",
+  "supported_reasoning_levels",
+  "thinking",
+  "metadata",
+  "capabilities",
+  "supportedThinkingEfforts",
+  "reasoning_options",
+  "vendors",
+] as const;
+
+function pickEffortDeclarations(item: Record<string, unknown>): Record<string, unknown> {
+  const picked: Record<string, unknown> = {};
+  for (const key of OPENAI_LIKE_EFFORT_DECLARATION_KEYS) {
+    if (item[key] !== undefined && item[key] !== null) picked[key] = item[key];
+  }
+  return picked;
+}
+
+// SiliconFlow free-only imports rely on live pricing and explicit flags. Keep
+// that evidence through discovery so a paid row cannot become free by losing
+// its veto. Project only the fields consumed by payloadFreeEvidence.
+function pickSiliconFlowPricingEvidence(item: Record<string, unknown>): Record<string, unknown> {
+  const picked: Record<string, unknown> = {};
+  for (const key of ["pricing", "isFree", "is_free", "free", "tags"] as const) {
+    if (item[key] !== undefined && item[key] !== null) picked[key] = item[key];
+  }
+  return picked;
 }
 
 export function normalizeOpenAiLikeModelsResponse(
@@ -266,7 +306,13 @@ export function normalizeOpenAiLikeModelsResponse(
         id;
       const ownedBy =
         toNonEmptyString(item.owned_by) || toNonEmptyString(item.provider) || fallbackOwner;
-      return { id, name, owned_by: ownedBy };
+      return {
+        ...pickEffortDeclarations(item),
+        ...(fallbackOwner === "siliconflow" ? pickSiliconFlowPricingEvidence(item) : {}),
+        id,
+        name,
+        owned_by: ownedBy,
+      };
     })
     .filter((value): value is { id: string; name: string; owned_by: string } => Boolean(value));
 }

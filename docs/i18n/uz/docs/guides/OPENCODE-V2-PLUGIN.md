@@ -73,28 +73,29 @@ imkoniyatlari cheklangan tanlagich hech qachon tushunarsiz bo‘lib qolmaydi.
 
 ## Sozlamalar
 
-| Kalit                            | Standart qiymat                                       | Izohlar                                                                                                                             |
-| -------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                                         | Provayder identifikatori, integratsiya identifikatori va modellar ko‘rsatiladigan prefiks                                           |
-| `baseURL`                        | talab qilinadi                                        | Shlyuz ildiz manzili, faqat `http(s)`; zarur joylarda `/v1` suffiksi qo‘shiladi                                                     |
-| `apiKey`                         | ulangan hisob ma’lumotlari, so‘ng `OMNIROUTE_API_KEY` | `/v1/*` uchun chat kaliti                                                                                                           |
-| `managementReadToken`            | `apiKey`ga qaytadi                                    | `/api/*` uchun kalit — odatda u bilan **bir xil emas**                                                                              |
-| `displayName`                    | `"OmniRoute"`                                         | Tanlash ro‘yxatidagi provayder nomi                                                                                                 |
-| `timeoutMs`                      | `10000`                                               | Har bir endpoint uchun so‘rov kutish vaqti (avtomatik kombinatsiyalar 5 soniyadan foydalanadi)                                      |
-| `modelCacheTtlMs`                | `300000`                                              | Katalog keshi TTL muddati; diskdagi snapshot sovuq ishga tushirishlarni tezlashtiradi                                               |
-| `timeouts`                       | `timeoutMs`ga qaytadi                                 | Har bir endpoint uchun ms hisobidagi vaqt chegaralari: `models`, `combos`, `autoCombos`, `enrichment`                               |
-| `enrichment`                     | `true`                                                | Nomlar, narxlar va bepul tarif limitlarini olish                                                                                    |
-| `providerTag`                    | `true`                                                | Ko‘rsatiladigan nomga so‘rov yo‘naltiriladigan yuqori oqim provayderi prefiksini qo‘shish                                           |
-| `usableOnly`                     | `false`                                               | Faqat shlyuz sozlangan deb ko‘rsatgan provayderlarni saqlash                                                                        |
-| `showcasePerOwner`               | `10`                                                  | Standart ko‘rinishda har bir provayder uchun saqlanadigan yozuvlar                                                                  |
-| `freshPerOwner`                  | `10`                                                  | Standart ko‘rinishning yangi modellar bo‘limida har bir provayder uchun saqlanadigan yozuvlar                                       |
-| `freshWindowDays`                | `90`                                                  | Yangi modellar bo‘limi uchun kunlar hisobidagi yangilik davri                                                                       |
-| `usageMemory`                    | `true`                                                | 30 kunlik foydalanish tahlilida qayd etilgan, statik ravishda olib tashlangan yozuvlarni tiklash (boshqaruv tokeni kerak)           |
-| `visibleModels` / `hiddenModels` | `[]`                                                  | Aniq moslik yoki suffiks bo‘yicha ruxsat ro‘yxatlari; taqiq ustun keladi                                                            |
-| `geminiSanitization`             | `true`                                                | Gemini vosita sxemalarida qabul qilmaydigan JSON-Schema kalit so‘zlarini olib tashlash (`$ref` vositalari o‘zgartirilmay uzatiladi) |
-| `apiFormat.allowAnthropic`       | `false`                                               | Ruxsat ro‘yxatidagi identifikatorlarni Anthropic API bloki orqali yo‘naltirish                                                      |
-| `apiFormat.anthropicModels`      | `[]`                                                  | Anthropic’ga yo‘naltiriladigan to‘liq model identifikatorlari                                                                       |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                      | Jurnal tafsilotlari darajasi                                                                                                        |
+| Kalit                            | Standart qiymat                                       | Izohlar                                                                                                                                                           |
+| -------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                         | Provayder identifikatori, integratsiya identifikatori va modellar ko‘rsatiladigan prefiks                                                                         |
+| `baseURL`                        | talab qilinadi                                        | Shlyuz ildiz manzili, faqat `http(s)`; zarur joylarda `/v1` suffiksi qo‘shiladi                                                                                   |
+| `apiKey`                         | ulangan hisob ma’lumotlari, so‘ng `OMNIROUTE_API_KEY` | `/v1/*` uchun chat kaliti                                                                                                                                         |
+| `managementReadToken`            | `apiKey` qiymatiga qaytadi                            | `/api/*` uchun kalit — odatda ayni kalit **emas**                                                                                                                 |
+| `displayName`                    | `"OmniRoute"`                                         | Tanlash ro‘yxatidagi provayder nomi                                                                                                                               |
+| `timeoutMs`                      | `10000`                                               | Har bir so‘rov nuqtasi uchun olish kutish vaqti (avtomatik kombinatsiyalar 5 soniyadan foydalanadi)                                                               |
+| `modelCacheTtlMs`                | `300000`                                              | Katalog keshi TTL muddati; diskdagi surat sovuq ishga tushirishni tezlashtiradi                                                                                   |
+| `timeouts`                       | `timeoutMs` qiymatiga qaytadi                         | Har bir so‘rov nuqtasi uchun millisekundlardagi vaqt limitlari: `models`, `combos`, `autoCombos`, `enrichment`                                                    |
+| `enrichment`                     | `true`                                                | Nomlar, narxlar va bepul tarif limitlarini olish                                                                                                                  |
+| `providerTag`                    | `true`                                                | Ko‘rsatiladigan nomga u yo‘naltiradigan yuqori oqim provayderi prefiksini qo‘shish                                                                                |
+| `usableOnly`                     | `false`                                               | Faqat shlyuz sozlangan deb bildirgan provayderlarni saqlash                                                                                                       |
+| `combosSource`                   | `"api"`                                               | `"models"` `/api/combos` so‘rovini o‘tkazib yuboradi va `/v1/models` kombinatsiya qatorlarini e’lon qiladi; a’zo darajasidagi filtrlar `"api"` qiymatini saqlaydi |
+| `showcasePerOwner`               | `10`                                                  | Har bir provayder uchun standart ko‘rinishda saqlanadigan yozuvlar                                                                                                |
+| `freshPerOwner`                  | `10`                                                  | Har bir provayder uchun standart ko‘rinishda saqlanadigan yangi yozuvlar                                                                                          |
+| `freshWindowDays`                | `90`                                                  | Yangi yozuvlar tarmog‘i uchun kunlardagi yangilik oynasi                                                                                                          |
+| `usageMemory`                    | `true`                                                | 30 kunlik foydalanish tahlilida nomlangan, statik ravishda olib tashlangan yozuvlarni tiklash (boshqaruv tokeni talab qilinadi)                                   |
+| `visibleModels` / `hiddenModels` | `[]`                                                  | Aniq yoki suffiks bo‘yicha ruxsat ro‘yxatlari; taqiq ustun keladi; `*` butun katalogni e’lon qiladi (boshqa filtrlar baribir qo‘llanadi)                          |
+| `geminiSanitization`             | `true`                                                | Gemini vosita sxemalaridan rad etadigan JSON-Schema kalit so‘zlarini olib tashlash (`$ref` vositalari o‘zgartirilmasdan uzatiladi)                                |
+| `apiFormat.allowAnthropic`       | `false`                                               | Ruxsat ro‘yxatidagi identifikatorlarni Anthropic API bloki orqali yo‘naltirish                                                                                    |
+| `apiFormat.anthropicModels`      | `[]`                                                  | Anthropic’ga yo‘naltiriladigan to‘liq model identifikatorlari                                                                                                     |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                      | Jurnal tafsilotlari darajasi                                                                                                                                      |
 
 Foydalanish xotirasi standart holatda yoqilgan. Boshqaruv tokenisiz u faol bo‘lmaydi
 (ishga tushirish haqidagi bildirishnoma jurnalga yoziladi) va hech narsa tiklanmaydi.
@@ -114,11 +115,16 @@ Buni oʻchirish uchun `"geminiSanitization": false` ni belgilang.
 
 ## Muammolarni bartaraf etish
 
-| Alomat                                                       | Sabab                                                                                                                                 |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Tanlash vositasida OmniRoute modeli koʻrinmaydi              | Hech qanday kalit aniqlanmadi (ishga tushirishdagi ogohlantirishni tekshiring) yoki shlyuzga ulanib boʻlmayapti                       |
-| Xom model identifikatorlari, kombinatsiyalar va narxlar yoʻq | Boshqaruv endpointlari tokenni rad etdi — `managementReadToken` ni belgilang                                                          |
-| Seans `opencode-<id>/…` ga biriktirilgan                     | v1 plagini `opencode-<id>` ni eʼlon qilgan; v2 esa faqat `<id>` ni eʼlon qiladi, shuning uchun modelni `<id>/…` ostidan qayta tanlang |
+| Alomat                                                       | Sabab                                                                                                                                |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Tanlash oynasida OmniRoute modeli ko‘rinmaydi                | Kalit aniqlanmagan (ishga tushirishdagi ogohlantirishni tekshiring) yoki shlyuzga ulanib bo‘lmaydi                                   |
+| Xom model identifikatorlari, kombinatsiyalar va narxlar yo‘q | Boshqaruv so‘nggi nuqtalari tokenni rad etdi — `managementReadToken` ni sozlang                                                      |
+| Qisqa yoki bo‘sh `freeOnly` katalogi                         | Boshqaruv tokeni yo‘q yoki token rad etilgan — xost jurnalidagi yangilash xulosasi satrini (`unmatched-free` soni) o‘qing            |
+| `opencode-<id>/…` ga biriktirilgan seans                     | v1 plagini `opencode-<id>` ni e’lon qilgan; v2 esa faqat `<id>` ni e’lon qiladi, shuning uchun modelni `<id>/…` ostida qayta tanlang |
+
+Muhit o‘zgaruvchilari opencode server jarayoniga yetib borishi kerak: xost
+xizmat sifatida ishlaganda, `opencode models` buyrug‘ini ishga tushiradigan qobiq va server
+muhiti bir-biridan farq qiladi, shuning uchun kalitni server o‘qiydigan joyda eksport qiling.
 
 ## Shuningdek qarang
 

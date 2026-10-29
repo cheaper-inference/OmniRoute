@@ -27,9 +27,12 @@ export type CodexClientVersionFetch = (
   init: SafeOutboundFetchOptions & { method: "GET"; headers: Record<string, string> }
 ) => Promise<Response>;
 
+type CodexClientVersionSource = "override" | "registry" | "pinned" | "fallback";
+
 let cachedCodexVersion: string | null = null;
 let codexVersionRefreshAt = 0;
 let codexVersionRefresh: Promise<string> | null = null;
+let codexVersionSource: CodexClientVersionSource = "fallback";
 const DEFAULT_CODEX_USER_AGENT_PLATFORM = "Windows 10.0.26200";
 const DEFAULT_CODEX_USER_AGENT_ARCH = "x64";
 const CODEX_VERSION_OVERRIDE_ENV = "CODEX_CLIENT_VERSION";
@@ -51,6 +54,40 @@ type FetchLike = typeof fetch;
 
 let versionCache: CodexVersionCache | null = null;
 let versionInFlight: Promise<string> | null = null;
+
+function describeError(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
+/**
+ * A silent fallback to the pinned version is indistinguishable from a healthy
+ * install: the live catalog just comes back short and #16714 has no trace to
+ * follow. Warn once per failed refresh so the operator can see why discovery
+ * stopped seeing new models.
+ */
+function reportCodexVersionFallback(reason: string): void {
+  codexVersionSource = "fallback";
+  console.warn(
+    `[codex] client version refresh failed (${reason}); discovery stays on ` +
+      `${getCodexClientVersion()} and may omit models the backend gates behind a newer client`
+  );
+}
+
+/**
+ * Which version the next upstream call will advertise. `fallback` means the
+ * last refresh failed and the catalog may be short (#16714); `registry` means
+ * the npm metadata was applied; `pinned` means the registry answered but is not
+ * newer than the built-in floor (healthy, nothing to fix); `override` means
+ * the dashboard override or CODEX_CLIENT_VERSION won (no refresh runs then).
+ * For the operator-facing layer name (settings/env/discovered/default) see
+ * getCodexAdvertisedVersionSource().
+ */
+export function getCodexClientVersionSource(): CodexClientVersionSource {
+  if (getCliVersionOverride("codex")) return "override";
+  if (getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN)) return "override";
+  return codexVersionSource;
+}
 
 function getSafeEnvValue(name: string, pattern: RegExp): string | null {
   const raw = process.env[name];
@@ -235,14 +272,24 @@ export function refreshCodexClientVersion(fetchImpl: CodexClientVersionFetch): P
               .find((part) => part !== 0) ?? 0;
           if (difference >= 0) {
             cachedCodexVersion = parsed.data.version;
+            codexVersionSource = "registry";
+            refreshAfter = CODEX_VERSION_CACHE_TTL_MS;
+          } else {
+            // The pin is a floor, so a registry that lags behind it is healthy:
+            // nothing failed, there is nothing to warn about and no reason to
+            // retry sooner than a successful refresh would.
+            if (!cachedCodexVersion) codexVersionSource = "pinned";
             refreshAfter = CODEX_VERSION_CACHE_TTL_MS;
           }
+        } else {
+          reportCodexVersionFallback("registry metadata did not match the expected shape");
         }
       } else {
         await response.body?.cancel();
+        reportCodexVersionFallback(`registry responded with HTTP ${response.status}`);
       }
-    } catch {
-      // Registry unavailable or invalid: retain the last-known-good version or offline pin.
+    } catch (error) {
+      reportCodexVersionFallback(`registry request failed: ${describeError(error)}`);
     }
     codexVersionRefreshAt = Date.now() + refreshAfter;
     return getCodexClientVersion();
@@ -258,6 +305,7 @@ export function resetCodexClientVersionCacheForTests(): void {
   cachedCodexVersion = null;
   codexVersionRefreshAt = 0;
   codexVersionRefresh = null;
+  codexVersionSource = "fallback";
 }
 
 /**
@@ -268,7 +316,7 @@ export function resetCodexClientVersionCacheForTests(): void {
  * Note this is the NON-caller-aware chain; see resolveCodexAdvertisedVersion for
  * the inference path, which additionally forwards the caller's own version.
  */
-export function getCodexClientVersionSource(): CliVersionSource {
+export function getCodexAdvertisedVersionSource(): CliVersionSource {
   if (getCliVersionOverride("codex")) return "settings";
   if (getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN)) return "env";
   const discovered =

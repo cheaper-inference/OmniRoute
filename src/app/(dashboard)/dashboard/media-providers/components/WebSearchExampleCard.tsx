@@ -2,9 +2,14 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Slider } from "@omniroute/ui-kit/slider";
+import Input from "@/shared/components/Input";
 import { useApiKey } from "../../providers/hooks/useApiKey";
 import { buildCurl } from "../../providers/utils/buildCurl";
-import { PLAYGROUND_KEY_ID_HEADER, resolvePlaygroundKeyId } from "../../providers/utils/playgroundAuth";
+import {
+  PLAYGROUND_KEY_ID_HEADER,
+  resolvePlaygroundKeyId,
+} from "../../providers/utils/playgroundAuth";
 import { PlaygroundCard } from "./PlaygroundCard";
 
 interface Props {
@@ -138,31 +143,22 @@ export function WebSearchExampleCard({ providerId }: Props) {
       }
     >
       {/* Query */}
-      <div>
-        <label className="block text-xs text-text-muted mb-1">{t("query")}</label>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t("webSearchSample")}
-          className="w-full rounded-md border border-border bg-bg-subtle text-sm px-2 py-1.5 text-text-main focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </div>
+      <Input
+        label={t("query")}
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={t("webSearchSample")}
+      />
       {/* Max results */}
-      <div>
-        <label className="block text-xs text-text-muted mb-1">
-          {t("numResults")} ({numResults})
-        </label>
-        <input
-          type="range"
-          min="1"
-          max="20"
-          step="1"
-          value={numResults}
-          onChange={(e) => setNumResults(Number(e.target.value))}
-          className="w-full"
-        />
-      </div>
+      <Slider
+        label={t("numResults")}
+        min={1}
+        max={20}
+        step={1}
+        value={numResults}
+        onValueChange={setNumResults}
+      />
     </PlaygroundCard>
   );
 }

@@ -185,7 +185,10 @@ export function resolveExecutionCredentials(opts: {
   // PROVIDER_MODELS registry via getModelTargetFormat() and has no other way
   // to see a custom model's override — mirrors the zai/glm-coding-apikey fix
   // (#7364) for the same class of bug.
-  if (targetFormat === FORMATS.OPENAI_RESPONSES && provider === "github") {
+  if (
+    targetFormat === FORMATS.OPENAI_RESPONSES &&
+    (provider === "github" || provider === "ghe-copilot")
+  ) {
     providerSpecificData.targetFormat = targetFormat;
   }
 

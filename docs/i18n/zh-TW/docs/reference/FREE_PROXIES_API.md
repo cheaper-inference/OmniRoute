@@ -13,7 +13,7 @@ OmniRoute 在 `free_proxies` 資料表中提供一組精選的免費代理伺服
 
 傳回經過篩選、排序及分頁的資料切片，以及總筆數。篩選與
 計數均在 SQL 中執行，因此 UI 無須將所有資料列載入記憶體，
-即可顯示實際總數（例如 `總計：0`）。
+即可顯示實際總數（例如 `Total: 0`）。
 
 ### 查詢參數
 
@@ -53,8 +53,8 @@ OmniRoute 在 `free_proxies` 資料表中提供一組精選的免費代理伺服
 ```
 
 `total` 代表分頁**之前**經過篩選的總筆數，因此 UI 可分別呈現
-`總計：N` 與 `hasMore`。`syncErrors` 以來源 ID 作為鍵，且僅包含
-上次同步失敗的來源，因此 `總計：0` 的結果絕不會沒有任何說明。
+`Total: N` 與 `hasMore`。`syncErrors` 以來源 ID 作為鍵，且僅包含
+上次同步失敗的來源，因此 `Total: 0` 的結果絕不會沒有任何說明。
 
 ## 加入集區 — `POST /api/settings/free-proxies/[id]/add-to-pool`
 

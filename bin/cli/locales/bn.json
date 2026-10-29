@@ -123,7 +123,9 @@
       "maxCostOpt": "প্রতিদিনের সর্বোচ্চ খরচ (USD)",
       "allowedModelsOpt": "অনুমোদিত মডেলগুলোর কমা-বিভাজিত তালিকা",
       "nothingToSet": "কোনো নীতি ফিল্ড দেওয়া হয়নি। --rate-limit, --max-cost, অথবা --allowed-models ব্যবহার করুন।",
-      "updated": "নীতি আপডেট করা হয়েছে।"
+      "updated": "নীতি আপডেট করা হয়েছে।",
+      "modelAccessModeOpt": "মডেল অ্যাক্সেস মোড (all | restricted)",
+      "unrestrictedOpt": "সব মডেল অনুমোদন করুন (--model-access-mode all)"
     },
     "expiration": {
       "title": "কী-এর মেয়াদ শেষ হওয়া",
@@ -254,6 +256,7 @@
     "log": "server log-গুলো inline দেখান",
     "no_recovery": "crash হলে auto-restart নিষ্ক্রিয় করুন (debugging mode)",
     "max_restarts": "হাল ছাড়ার আগে 30s-এর মধ্যে crash-এর পর restart-এর সর্বোচ্চ সংখ্যা (ডিফল্ট: 2)",
+    "headless": "শুধু প্রক্সি ইঞ্জিন চালান: ড্যাশবোর্ড নিষ্ক্রিয় (404), ঐচ্ছিক সাবসিস্টেম বাদ দেওয়া হয় (OMNIROUTE_HEADLESS=1 সেট করে)",
     "tray": "সিস্টেম ট্রেতে চালু করুন (শুধু ডেস্কটপ, ঐচ্ছিক)",
     "no_tray": "সিস্টেম ট্রে আইকন নিষ্ক্রিয় করুন",
     "ready_timeout": "রেডিনেস প্রোবের সময়সীমা মিলিসেকেন্ডে (এছাড়াও OMNIROUTE_READY_TIMEOUT_MS, ডিফল্ট 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "OmniRoute ইনস্ট্যান্সগুলোর মধ্যে কনফিগারেশন সিঙ্ক করুন",
     "push": {
-      "description": "কনফিগ ক্লাউড বা রিমোট ইনস্ট্যান্সে পুশ করুন",
-      "target": "লক্ষ্য (cloud বা context:name)",
-      "bundle": "সিঙ্ক করার জন্য বান্ডেলের অংশসমূহ",
-      "dryRun": "প্রয়োগ না করে পূর্বরূপ দেখুন"
+      "description": "কনফিগ ক্লাউড বা রিমোট ইনস্ট্যান্সে পুশ করুন"
     },
     "pull": {
-      "description": "ক্লাউড বা রিমোট থেকে কনফিগ আনুন",
-      "source": "উৎস (ক্লাউড বা context:name)",
-      "merge": "বিদ্যমান কনফিগের সঙ্গে মার্জ করুন",
-      "replace": "বিদ্যমান কনফিগ প্রতিস্থাপন করুন",
-      "dryRun": "প্রয়োগ না করে পূর্বরূপ দেখুন"
-    },
-    "diff": {
-      "source": "উৎস কনটেক্সট",
-      "target": "লক্ষ্য কনটেক্সট"
+      "description": "ক্লাউড বা রিমোট থেকে কনফিগ আনুন"
     },
     "bundle": {
       "description": "কনফিগ একটি বান্ডেল ফাইল হিসেবে এক্সপোর্ট করুন",
-      "include": "অন্তর্ভুক্ত করার অংশসমূহ (কমা দিয়ে পৃথক করা)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "একটি বান্ডেল ফাইল ইমপোর্ট করুন",
       "dryRun": "প্রয়োগ না করে যাচাই করুন"
-    },
-    "initialize": {
-      "fromCloud": "ক্লাউড ব্যাকআপ থেকে শুরু করুন"
     },
     "tokens": {
       "description": "সিঙ্ক টোকেন পরিচালনা করুন",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "নিশ্চিতকরণ এড়িয়ে যান"
       }
-    },
-    "resolve": {
-      "description": "ইন্টারঅ্যাক্টিভভাবে সিঙ্ক দ্বন্দ্ব সমাধান করুন"
     }
   },
   "config": {

@@ -10,6 +10,8 @@ import {
 } from "../../../utils/reasoningPlaceholder.ts";
 import { getReadableReasoningValue } from "../../../utils/reasoningFields.ts";
 import { generateToolCallId } from "../../helpers/toolCallHelper.ts";
+import { coerceToolCallArguments } from "../../helpers/toolArguments.ts";
+import { chatStrictForResponses } from "../../helpers/toolStrict.ts";
 import {
   JsonRecord,
   RESPONSES_STORE_MARKER,
@@ -330,7 +332,7 @@ export function openaiToOpenAIResponsesRequest(
             type: "function_call",
             call_id: clampCallId(toString(toolCall.id).trim() || generateToolCallId()),
             name: fnName,
-            arguments: toString(fn.arguments, "{}"),
+            arguments: coerceToolCallArguments(fn.arguments),
             status: "completed",
           });
         }
@@ -345,7 +347,7 @@ export function openaiToOpenAIResponsesRequest(
             type: "function_call",
             call_id: clampCallId(`call_${fnName}`),
             name: fnName,
-            arguments: toString(fc.arguments, "{}"),
+            arguments: coerceToolCallArguments(fc.arguments),
             status: "completed",
           });
         }
@@ -446,7 +448,8 @@ export function openaiToOpenAIResponsesRequest(
           name,
           description: toString(fn.description),
           parameters: fn.parameters,
-          strict: fn.strict,
+          // Omitted strict is non-strict on Chat but strict-normalized on Responses.
+          strict: chatStrictForResponses(fn),
         };
       }
       return toolValue;

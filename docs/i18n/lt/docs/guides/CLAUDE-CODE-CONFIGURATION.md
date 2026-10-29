@@ -48,54 +48,61 @@ tiesiog veikia), patikrina serverio būklę ir paleidžia `claude`.
 
 ---
 
-## Aptikimo pseudonimai — pateikite ne Claude modelius `/model` parinkiklyje
+## Aptikimo slapyvardžiai — ne Claude modelių rodymas `/model` pasirinkiklyje
 
-Claude Code šliuzo modelių aptikimo funkcija pateikia tik tuos ID, kurie prasideda `claude`
-arba `anthropic`, todėl, kai `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, vietinis
-`/model` parinkiklis paprastai rodo **tik** OmniRoute Claude / Anthropic modelius —
-`kimi/kimi-k2.6` arba `glm/glm-5.2` niekada nepateikiami, nors į juos užklausos nukreipiamos tinkamai.
+Claude Code šliuzo modelių aptikimas išvardija tik ID, kurie prasideda `claude`
+arba `anthropic`, todėl su `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` įgimtasis
+`/model` pasirinkiklis paprastai rodo **tik** OmniRoute Claude/Anthropic modelius —
+`kimi/kimi-k2.6` ar `glm/glm-5.2` niekada nepasirodo, nors nukreipimas į juos veikia gerai.
 
-OmniRoute gali dubliuoti bet kurį įjungtą modelį (ir derinį), suteikdamas jam `claude/…` ID, kad jis
-praeitų šį filtrą ir būtų rodomas parinkiklyje:
+OmniRoute gali dubliuoti bet kurį įjungtą modelį (ir kombinaciją) su `claude/…` ID, kad jis
+praeitų šį filtrą ir atsirastų pasirinkiklyje:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<derinys "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Kai Claude Code pasirenkate vieną iš jų, prieš nukreipdamas užklausą OmniRoute pašalina `claude/`
-apvalkalą ir atkuria tikrąjį ID — autentiškas `claude/<real-claude-model>` ID
-(tikrasis Claude OAuth teikėjas) visada paliekamas nepakeistas.
+Kai Claude Code pasirenkate vieną iš jų, OmniRoute prieš nukreipimą nuima `claude/` apvalkalą
+ir atkuria tikrąjį ID — tikras `claude/<real-claude-model>` ID
+(faktinis Claude OAuth teikėjas) visada paliekamas nepaliestas.
 
-**Pagal numatytuosius nustatymus ši funkcija išjungta** ir valdoma trijų lygių mechanizmu (pirmenybė
-teikiama konkrečiausiam nustatymui), todėl įprastas OmniRoute nedubliuoja savo katalogo klientams, kurie
-nenaudoja Claude Code:
+Pagal numatymą dubliuojami tik baziniai ID. Įjungus pasirenkamą
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` funkcijų vėliavėlę, samprotavimo intensyvumo variantai,
+kuriuos katalogas jau išvardija (pvz., `codex/gpt-6-sol-high`), dubliuojami kaip bet kuris
+kitas ID, todėl Claude Code gali pasirinkti aiškų intensyvumo lygį, o integruoti `auto/*` ID,
+kurių užklausos kelias negali materializuoti, nedubliuojami. Ar intensyvumo variantai
+apskritai išvardijami, vis dar lemia `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` —
+dubliavimas niekada neprideda varianto, kurio neturi bazinis katalogas.
 
-| Lygis      | Kur                                                                                                |
-| ---------- | -------------------------------------------------------------------------------------------------- |
-| Modelis    | Teikėjo išsamios informacijos puslapis → kiekvieno modelio „Expose in Claude Code“ jungiklis       |
-| Teikėjas   | Teikėjo išsamios informacijos puslapis → teikėjo lygio jungiklis (taikomas visiems jo modeliams)   |
-| Visuotinis | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (pagal numatytuosius nustatymus išjungta) |
+**Pagal numatymą tai išjungta** ir valdoma trijų lygių kontrole (svarbiausias labiausiai
+specifinis lygmuo), todėl paprastas OmniRoute niekada nedvigubina savo katalogo klientams,
+kurie nenaudoja Claude Code:
 
-Aplinkos kintamasis `EXPOSE_CC_DISCOVERY_ALIASES` priverstinai įjungia visuotinį lygį
-ir turi pirmenybę prieš valdymo skydelio nuostatą (Feature Flags ekrane rodoma
-pastaba „active via environment variable“, kai jis naudojamas). Teikėjų ir
-modelių jungikliai leidžia nustatymą patikslinti — pvz., išjungus visuotinį lygį ir įjungus Kimi teikėją,
-pateikiami tik Kimi modeliai.
+| Lygmuo   | Kur                                                                                |
+| -------- | ---------------------------------------------------------------------------------- |
+| Modelis  | Teikėjo detalių puslapis → kiekvieno modelio perjungiklis „Expose in Claude Code"  |
+| Teikėjas | Teikėjo detalių puslapis → teikėjo lygmens perjungiklis (apima visus jo modelius)  |
+| Globalus | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (pagal numatymą išjungta) |
 
-> ⚠️ **Ne Claude modelių lango neatitikimas.** Claude Code daro prielaidą, kad bet kurio
-> neatpažįstamo ID konteksto langas yra 200K (tikrojo lango dydžio jis negali nuskaityti iš
-> `/v1/models`). Jei modelio langas didesnis (pvz., Kimi K2 yra 256K), nustatykite
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` reikšmę, mažesnę už tikrąjį modelio langą, kad
-> automatinis sutankinimas nebūtų atliekamas per anksti. Anksčiau minėti sugeneruoti profiliai tai jau
-> nustato kiekvienam modeliui.
+Aplinkos kintamasis `EXPOSE_CC_DISCOVERY_ALIASES` priverčia įjungti globalų lygmenį
+ir turi pirmenybę prieš valdymo skydo pakeitimą (tokiu atveju Feature Flags ekrane rodoma
+pastaba „active via environment variable"). Teikėjo ir modelio lygmens perjungikliai toliau
+tikslina nustatymus — pvz., globaliai išjungus + Kimi teikėjui įjungus atidengiami tik Kimi modeliai.
+
+> ⚠️ **Lango neatitikimas ne Claude modeliuose.** Claude Code bet kuriam neatpažįstamam ID
+> daro prielaidą, kad konteksto langas yra 200K (jis negali nuskaityti tikro lango iš
+> `/v1/models`). Modeliui su didesniu langu (pvz., Kimi K2 su 256K) nustatykite
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` į reikšmę, mažesnę už tikrą modelio langą, kad
+> automatinis sutankinimas neįsijungtų per anksti. Aukščiau sugeneruoti profiliai tai jau
+> atlieka kiekvienam modeliui.
 
 ---
 
-## Įvadinis blokas valdymo skydelyje
+## Parengimo blokas prietaisų skydelyje
 
-Claude įrankio kortelėje (**Valdymo skydelis → CLI kodas**), šalia modelių aptikimo pseudonimo informacijos mygtuko, rodomas tikslus šiam egzemplioriui skirtas `settings.json` fragmentas su kopijavimo mygtuku:
+Claude įrankio kortelėje (**Prietaisų skydelis → CLI Code**) pateikiamas tikslus šiam egzemplioriui skirtas `settings.json` fragmentas šalia aptikimo alternatyviojo pavadinimo informacijos mygtuko ir kopijavimo mygtukas:
 
 ```jsonc
 {
@@ -107,19 +114,33 @@ Claude įrankio kortelėje (**Valdymo skydelis → CLI kodas**), šalia modelių
 }
 ```
 
-Bazinis URL yra tas, kurį nustatė kortelė (įskaitant jūsų įvestą pasirinktinę reikšmę), ir jis jau normalizuotas — be `/v1` priesagos ir be baigiamojo pasvirojo brūkšnio. **Raktas niekada nerodomas**: bloke pateikiamas vietaženklis, todėl ekrano kopija ar įklijuotas fragmentas negali jo atskleisti. Pakeiskite vietaženklį savo raktu.
+Bazinis URL yra tas, kurį nustatė kortelė (įskaitant jūsų įvestą pasirinktinį pakeitimą), ir jis jau normalizuotas — be `/v1` priesagos ir be pasvirojo brūkšnio pabaigoje. **Raktas niekada nepateikiamas**: bloke naudojamas vietos rezervavimo tekstas, todėl ekrano kopija ar įklijuotas fragmentas negali jo atskleisti. Vietoje jo įklijuokite savo raktą.
 
-Po tuo pačiu `env` bloku pridėkite `CLAUDE_CODE_AUTO_COMPACT_WINDOW` kiekvienam modeliui, kurio tikrasis konteksto langas nėra 200K — Claude Code kiekvienam neatpažįstamam ID priskiria 200K, todėl kitu atveju automatinis glaudinimas suveikia netinkamu metu (žr. ankstesnio skyriaus įspėjimą). Fragmentų kūrimo priemonė taip pat priima šią reikšmę, todėl iškvietėjas, žinantis tikslinio modelio lango dydį, gali ją pateikti tiesiogiai.
+Į tą patį `env` bloką įtraukite `CLAUDE_CODE_AUTO_COMPACT_WINDOW` bet kuriam modeliui, kurio tikrasis konteksto langas nėra 200K — Claude Code numato 200K kiekvienam neatpažįstamam id, todėl kitu atveju automatinis sutraukimas suaktyvinamas netinkamu metu (žr. ankstesnio skyriaus įspėjimą). Fragmento kūrimo priemonė taip pat priima šią reikšmę, todėl iškviečianti programa, žinanti tikslinio modelio lango dydį, gali ją įtraukti tiesiogiai.
 
-Šaltinis: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (grynoji kūrimo funkcija, patikrinta vienetiniais testais), atvaizduojamas komponento `ClaudeGatewayOnboardingBlock`.
+Šaltinis: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (grynoji kūrimo funkcija, patikrinta vienetų testais), pateikiamas naudojant `ClaudeGatewayOnboardingBlock`.
+
+### Vienos paskyros susiejimas (neprivaloma)
+
+Norėdami kiekvieną Claude Code užklausą siųsti per vieną konkrečią teikėjo paskyrą, tame pačiame `env` bloke per `ANTHROPIC_CUSTOM_HEADERS` pridėkite `x-omniroute-connection` antraštę:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Nukopijuokite id iš teikėjo puslapio ryšio eilutėje esančios `xxxxxxxx…` žymos. Susiejimas taikomas tik vieno modelio id (`provider/model`), o ne deriniams. Tikslus veikimas, kai reikia naudoti atsarginį variantą, aprašytas skyriuje [Paskyros susiejimas kiekvienai užklausai](../reference/API_REFERENCE.md#account-pinning-per-request).
 
 ---
 
 ## Profiliai (`CLAUDE_CONFIG_DIR`)
 
-Claude Code **neturi savųjų profilių failų** (kitaip nei Codex `~/.codex/<name>.config.toml`). Įprastas mechanizmas yra `CLAUDE_CONFIG_DIR` — atskiras konfigūracijos katalogas kiekvienam profiliui, turintis nuosavus `settings.json`, kredencialus, istoriją ir podėlį.
+Claude Code **neturi savųjų profilių failų** (kitaip nei Codex `~/.codex/<name>.config.toml`).
+Įprastas mechanizmas yra `CLAUDE_CONFIG_DIR` — atskiras konfigūracijos katalogas kiekvienam
+profiliui, kuriame saugomi jo `settings.json`, prisijungimo duomenys, istorija ir podėlis.
 
-`omniroute setup-claude` gauna aktualų `/v1/models` katalogą ir kiekvienam modeliui įrašo po profilį į `~/.claude/profiles/<name>/settings.json`, naudodamas **tuos pačius pavadinimus kaip `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
+`omniroute setup-claude` gauna dabartinį `/v1/models` katalogą ir įrašo po vieną
+profilį kiekvienam modeliui į `~/.claude/profiles/<name>/settings.json`, pakartotinai naudodama
+**tuos pačius pavadinimus kaip `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -141,7 +162,13 @@ Claude Code **neturi savųjų profilių failų** (kitaip nei Codex `~/.codex/<na
 > aktyvaus konteksto) arba patys eksportuokite `ANTHROPIC_AUTH_TOKEN` ir vykdykite
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Automatinis sinchronizavimas aptikus modelius (pasirenkamas).** OmniRoute gali automatiškai iš naujo sugeneruoti tuos pačius `~/.claude/profiles/<name>/settings.json` failus, kai teikėjo modelių sinchronizavimas pakeičia aktualų katalogą — taip nauji ar pervardyti modeliai gauna profilius, iš naujo nevykdant komandos. Pagal numatytąją nuostatą ši funkcija yra **išjungta**: įjunkite ją **CLI kodo valdymo skydelyje** („Automatinis CLI profilių sinchronizavimas“ → Claude Code) arba nustatykite `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (taip pat atsižvelgiama į `CLI_ALLOW_CONFIG_WRITES`, kuri pagal numatytąją nuostatą įjungta). Įjungus šią funkciją, įrašomi tik profilių failai; aktyvi arba numatytoji Claude konfigūracija, autentifikavimo duomenys ir `~/.claude/settings.json` niekada nekeičiami.
+**Automatinis sinchronizavimas po modelių aptikimo (pasirenkamas).** OmniRoute gali automatiškai iš naujo sugeneruoti tuos pačius
+`~/.claude/profiles/<name>/settings.json` failus, kai teikėjo modelių
+sinchronizavimas pakeičia dabartinį katalogą — taip nauji arba pervadinti modeliai gauna profilius, nereikalaujant iš naujo vykdyti
+komandos. Pagal numatytuosius nustatymus ši funkcija yra **išjungta**: įjunkite ją **CLI Code valdymo skydelyje** („CLI profilių
+automatinis sinchronizavimas“ → Claude Code) arba nustatykite `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (taip pat atsižvelgiama į
+`CLI_ALLOW_CONFIG_WRITES`, kuris pagal numatytuosius nustatymus įjungtas). Įjungus šią funkciją, įrašomi tik profilių failai; ji niekada
+nekeičia aktyviosios ar numatytosios Claude konfigūracijos, autentifikavimo duomenų arba `~/.claude/settings.json`.
 
 ### Profilių generavimas ir naudojimas
 
@@ -149,16 +176,20 @@ Claude Code **neturi savųjų profilių failų** (kitaip nei Codex `~/.codex/<na
 # Vietinis OmniRoute
 omniroute setup-claude
 
-# Nuotolinis VPS (VPS URL įrašomas į kiekvieną profilį)
+# Nuotolinis VPS (įrašo VPS URL į kiekvieną profilį)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Tik kai kurie teikėjai
 omniroute setup-claude --only glm,kimi
 
-# Peržiūra nieko neįrašant
+# Taip pat įrašyti profilius vietiniams CLI teikėjams (zcode, auggie, devin-cli-agentic,
+# codex-app-server), neaptiktiems šiame kompiuteryje (pagal numatytuosius nustatymus praleidžiami vietiniam tikslui)
+omniroute setup-claude --include-local
+
+# Peržiūrėti nieko neįrašant
 omniroute setup-claude --dry-run
 
-# Profilio paleidimas
+# Paleisti profilį
 omniroute launch --profile kimi-k27
 ```
 

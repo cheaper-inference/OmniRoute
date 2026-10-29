@@ -8,79 +8,78 @@
 
 _Ilisasishwa mara ya mwisho: 2026-06-28_
 
-## Muhtasari Mkuu
+## Muhtasari wa Mtendaji
 
-OmniRoute ni lango la ndani la uelekezaji wa AI na dashibodi iliyojengwa kwa Next.js.
-Hutoa endpoint moja inayooana na OpenAI (`/v1/*`) na kuelekeza trafiki kwenye watoa huduma wengi wa nje huku ikitekeleza utafsiri, urejeaji mbadala, uonyeshaji upya wa tokeni, na ufuatiliaji wa matumizi.
+OmniRoute ni lango la ndani AI la uelekezaji na dashibodi iliyojengwa juu ya Next.js. Inatoa sehemu moja ya mwisho inayooana na OpenAI (`/v1/*`) na trafiki ya njia katika watoa huduma wengi wa juu kwa tafsiri, njia mbadala, kuonyesha upya ishara na ufuatiliaji wa matumizi.
 
-Uwezo mkuu:
+Uwezo wa msingi:
 
-- Kiolesura cha API kinachooana na OpenAI kwa CLI/zana (watoa huduma 355, vitekelezaji 108)
-- Utafsiri wa maombi/majibu kati ya miundo ya watoa huduma
-- Urejeaji mbadala wa mchanganyiko wa modeli (mfuatano wa modeli nyingi)
-- Hatua za mchanganyiko zenye muundo (`provider + model + connection`) zikiwa na mpangilio wa wakati wa utekelezaji kupitia `compositeTiers`
-- Urejeaji mbadala katika kiwango cha akaunti (akaunti nyingi kwa kila mtoa huduma)
-- Ukaguzi wa awali wa mgao na uteuzi wa akaunti wa P2C unaozingatia mgao katika njia kuu ya gumzo
-- Usimamizi wa miunganisho ya watoa huduma kwa OAuth + ufunguo wa API (moduli 22 za watoa huduma wa OAuth)
-- Uzalishaji wa embeddings kupitia `/v1/embeddings` (watoa huduma 18)
-- Uzalishaji wa picha kupitia `/v1/images/generations` (watoa huduma 10+, modeli 20+)
+- Uso wa API unaoendana na OpenAI kwa CLI/tools (watoa huduma 377, moduli 156 za watekelezaji)
+- Request/response tafsiri katika miundo ya mtoaji
+- Mfano mbadala wa mseto (mfuatano wa miundo mingi)
+- Hatua za mchanganyiko zilizoundwa (`provider + model + connection`) na kuagiza wakati wa kukimbia na `compositeTiers`
+- Urejeshaji wa kiwango cha akaunti (akaunti nyingi kwa kila mtoaji)
+- Kiasi cha malipo ya awali na uteuzi wa akaunti ya P2C inayofahamu kiasi katika njia kuu ya gumzo
+- OAuth + usimamizi wa muunganisho wa mtoa huduma muhimu wa API (moduli 27 za watoa huduma OAuth )
+- Uzalishaji wa kupachika kupitia `/v1/embeddings` (watoa huduma 18)
+- Uzalishaji wa picha kupitia `/v1/images/generations` (watoa huduma + 10, miundo 20 + )
 - Unukuzi wa sauti kupitia `/v1/audio/transcriptions` (watoa huduma 18)
-- Ubadilishaji wa maandishi kuwa matamshi kupitia `/v1/audio/speech` (watoa huduma 24 waliojumuishwa)
+- Maandishi-kwa-hotuba kupitia `/v1/audio/speech` (watoa huduma 24 waliojengewa ndani)
 - Uzalishaji wa video kupitia `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Uzalishaji wa muziki kupitia `/v1/music/generations` (ComfyUI)
+- Kizazi cha muziki kupitia `/v1/music/generations` (ComfyUI)
 - Utafutaji wa wavuti kupitia `/v1/search` (watoa huduma 20)
-- Ukaguzi wa maudhui kupitia `/v1/moderations`
-- Upangaji upya wa matokeo kupitia `/v1/rerank`
-- Uchanganuzi wa lebo za fikra (`<think>...</think>`) kwa modeli za kutoa hoja
-- Usafishaji wa majibu ili kuhakikisha uoanifu mkali na OpenAI SDK
-- Urekebishaji wa majukumu (developer→system, system→user) kwa ajili ya uoanifu kati ya watoa huduma
-- Ubadilishaji wa matokeo yenye muundo (json_schema → Gemini responseSchema)
-- Uhifadhi wa ndani wa watoa huduma, funguo, lakabu, michanganyiko, mipangilio, na bei (moduli 122 za DB)
-- Ufuatiliaji wa matumizi/gharama na uwekaji kumbukumbu za maombi
-- Usawazishaji wa hiari wa wingu kwa ajili ya usawazishaji wa vifaa vingi/hali
-- Orodha ya kuruhusu/kuzuia anwani za IP kwa udhibiti wa ufikiaji wa API
-- Usimamizi wa bajeti ya kufikiri (upitishaji wa moja kwa moja/otomatiki/maalumu/inayobadilika)
-- Uingizaji wa ujumbe wa mfumo wa kimataifa
-- Ufuatiliaji wa vipindi na utambuzi kwa alama bainifu
-- Uwekaji kikomo ulioboreshwa wa kasi kwa kila akaunti kwa kutumia wasifu maalumu wa kila mtoa huduma
-- Muundo wa circuit breaker kwa ustahimilivu wa watoa huduma
-- Ulinzi dhidi ya msongamano wa maombi ya wakati mmoja kwa kutumia kufunga kwa mutex
-- Akiba ya kuondoa urudiaji wa maombi kulingana na sahihi
-- Tabaka la kikoa: kanuni za gharama, sera ya urejeaji mbadala, sera ya kufungia ufikiaji
-- Context Relay: muhtasari wa kukabidhi vipindi ili kudumisha mwendelezo wakati wa kubadilisha akaunti
-- Uhifadhi wa hali ya kikoa (akiba ya SQLite ya uandishi wa moja kwa moja kwa urejeaji mbadala, bajeti, kufungia ufikiaji, na circuit breakers)
-- Injini ya sera kwa tathmini ya kati ya maombi (kufungia ufikiaji → bajeti → urejeaji mbadala)
-- Telemetria ya maombi yenye ujumlishaji wa ucheleweshaji wa p50/p95/p99
-- Telemetria ya malengo ya mchanganyiko na historia ya afya ya malengo ya mchanganyiko kupitia `combo_execution_key` / `combo_step_id`
-- Kitambulisho cha uhusiano (X-Request-Id) kwa ufuatiliaji kutoka mwanzo hadi mwisho
-- Uwekaji kumbukumbu za ukaguzi wa uzingatiaji wenye chaguo la kujiondoa kwa kila ufunguo wa API
-- Mfumo wa tathmini kwa uhakikisho wa ubora wa LLM
-- Dashibodi ya afya yenye hali ya wakati halisi ya circuit breaker ya mtoa huduma
-- Seva ya MCP (zana 110) yenye njia 3 za usafirishaji (stdio/SSE/Streamable HTTP)
-- Seva ya A2A (JSON-RPC 2.0 + SSE) yenye ujuzi na mzunguko wa maisha wa kazi
-- Mfumo wa kumbukumbu (uchimbaji, uingizaji, urejeshaji, ufupishaji)
-- Mfumo wa ujuzi (sajili, kitekelezaji, sandbox, ujuzi uliojumuishwa)
-- Proksi ya MITM yenye usimamizi wa vyeti na ushughulikiaji wa DNS
-- Middleware ya ulinzi dhidi ya uingizaji wa hila katika prompt
-- Mchakato wa kubana prompt wenye Caveman, RTK, michakato iliyopangwa kwa tabaka, michanganyiko ya ubanaji, vifurushi vya lugha, na uchanganuzi
-- Sajili ya ACP (Agent Communication Protocol)
-- Watoa huduma wa OAuth wenye moduli (moduli 22 tofauti chini ya `src/lib/oauth/providers/`)
-- Hati za kusanidua/kusanidua kikamilifu
-- Kitendo cha kurekebisha mazingira ya OAuth
-- Daraja la WebSocket kwa wateja wa WS wanaooana na OpenAI (`/v1/ws`)
-- Usimamizi wa tokeni za usawazishaji (utoaji/ubatilishaji, upakuaji wa kifurushi cha usanidi chenye matoleo ya ETag)
-- Mpangilio wa awali wa mtoa huduma wa kiwango cha kwanza wa GLM Thinking (`glmt`)
-- Kuhesabu tokeni kwa njia mseto (`/messages/count_tokens` ya upande wa mtoa huduma yenye makadirio kama mbadala)
-- Uanzishaji wa kiotomatiki wa lakabu za modeli (urekebishaji 30+ wa lahaja za proksi mbalimbali wakati wa kuanza)
-- Uchotaji salama wa nje wenye ulinzi wa SSRF, uzuiaji wa URL za faragha, na majaribio mapya yanayoweza kusanidiwa
-- Majaribio mapya ya gumzo yanayozingatia muda wa kusubiri na yenye `requestRetry` pamoja na `maxRetryIntervalSec` zinazoweza kusanidiwa
-- Uthibitishaji wa mazingira ya wakati wa utekelezaji kwa kutumia Zod wakati wa kuanza
-- Ukaguzi wa uzingatiaji v2 wenye ugawaji wa kurasa, matukio ya CRUD ya watoa huduma, na uwekaji kumbukumbu wa uthibitishaji uliozuiwa na SSRF
+- Udhibiti kupitia `/v1/moderations`
+- Kuweka upya nafasi kupitia `/v1/rerank`
+- Fikiria uchanganuzi wa lebo (`<think>...</think>`) kwa mifano ya hoja
+- Usafishaji wa majibu kwa utangamano madhubuti wa OpenAI SDK
+- Urekebishaji wa jukumu (mfumo wa → wa msanidi, mtumiaji wa → wa mfumo) kwa utangamano wa mtoaji mtambuka
+- Ubadilishaji wa pato lililoundwa (json_schema → Gemini majibuSchema)
+- Uvumilivu wa ndani kwa watoa huduma, funguo, lakabu, mchanganyiko, mipangilio, bei (moduli 122 DB )
+- Usage/cost kufuatilia na kuomba ukataji miti
+- Usawazishaji wa hiari wa wingu kwa ulandanishi multi-device/state
+- IP allowlist/blocklist kwa udhibiti wa ufikiaji API
+- Kufikiria usimamizi wa bajeti (passthrough/auto/custom/adaptive)
+- Sindano ya haraka ya mfumo wa kimataifa
+- Ufuatiliaji wa kipindi na alama za vidole
+- Uzuiaji wa viwango ulioimarishwa kwa kila akaunti kwa kutumia wasifu mahususi wa mtoaji
+- Mchoro wa kivunja mzunguko wa ustahimilivu wa mtoa huduma
+- Ulinzi wa kundi dhidi ya ngurumo na kufuli bubu
+- Akiba ya upunguzaji wa ombi kulingana na saini
+- Safu ya kikoa: sheria za gharama, sera mbadala, sera ya kufunga nje
+- Upeanaji wa Muktadha: muhtasari wa kukabidhiwa kwa kipindi kwa mwendelezo wa mzunguko wa akaunti
+- Udumifu wa hali ya kikoa (SQLite kuandika kupitia akiba ya makosa, bajeti, kufunga nje, vivunja saketi)
+- Injini ya sera ya tathmini ya ombi la kati (kuzuia → bajeti → kurudi nyuma)
+- Omba telemetry kwa p50/p95/p99 latency aggregation
+- Telemetry lengwa la mchanganyiko na afya inayolengwa ya kihistoria kupitia `combo_execution_key` / `combo_step_id`
+- Uwiano ID (X-Ombi-Id) kwa ufuatiliaji wa mwisho hadi mwisho
+- Uwekaji kumbukumbu wa ukaguzi wa kufuata kwa kuchagua kutoka kwa kila kitufe cha API
+- Mfumo wa Eval wa uhakikisho wa ubora LLM
+- Dashibodi ya afya iliyo na hali ya kivunja saketi ya mtoa huduma wa wakati halisi
+- Seva MCP (zana 110) yenye usafiri 3 (stdio/SSE/Streamable HTTP)
+- Seva ya A2A (JSON-RPC 2.0 + SSE) yenye ujuzi na mzunguko wa maisha ya kazi
+- Mfumo wa kumbukumbu (uchimbaji, sindano, kurejesha, muhtasari)
+- Mfumo wa ujuzi (msajili, mtekelezaji, sanduku la mchanga, ujuzi uliojengwa ndani)
+- wakala wa MITM na usimamizi wa cheti na utunzaji DNS
+- Chombo cha kati cha kuzuia sindano
+- Bomba la ukandamizaji wa haraka na Caveman, RTK, mabomba yaliyopangwa, mchanganyiko wa mbano, pakiti za lugha na uchanganuzi
+- ACP (Itifaki ya Mawasiliano ya Wakala) sajili
+- Watoa huduma OAuth za msimu (moduli 22 za mtu binafsi chini ya `src/lib/oauth/providers/`)
+- hati Uninstall/full-uninstall
+- OAuth hatua ya ukarabati wa mazingira
+- daraja la WebSocket kwa wateja wa WS wanaolingana na OpenAI (`/v1/ws`)
+- Udhibiti wa tokeni wa kusawazisha (issue/revoke, upakuaji wa kifungu cha usanidi kilichotolewa na ETag)
+- GLM Kufikiri (`glmt`) mpangilio wa awali wa mtoaji wa daraja la kwanza
+- Kuhesabu tokeni mseto ( `/messages/count_tokens` ya upande wa mtoaji na ukadiriaji wa kurudi nyuma)
+- Kielelezo cha lakabu la upandaji mbegu kiotomatiki (urekebishaji wa lahaja ya wakala 30 + wakati wa kuanza)
+- Uletaji salama wa kwenda nje na walinzi SSRF, uzuiaji wa URL binafsi, na ujaribu tena unaoweza kusanidiwa.
+- Gumzo la kufahamu hali tulivu hujaribu tena kwa `requestRetry` na `maxRetryIntervalSec` zinazoweza kusanidiwa
+- Uthibitishaji wa mazingira wa wakati wa utekelezaji na Zod wakati wa kuanza
+- Ukaguzi wa utiifu v2 na utaftaji, matukio ya mtoaji CRUD, na ukataji wa uthibitishaji uliozuiwa na SSRF.
 
-Muundo mkuu wa wakati wa utekelezaji:
+Muundo msingi wa wakati wa utekelezaji:
 
-- Njia za programu ya Next.js chini ya `src/app/api/*` hutekeleza API za dashibodi pamoja na API za uoanifu
-- Kiini cha pamoja cha SSE/uelekezaji katika `src/sse/*` + `open-sse/*` hushughulikia utekelezaji wa watoa huduma, utafsiri, utiririshaji, urejeaji mbadala, na matumizi
+- njia za programu Next.js chini ya `src/app/api/*` hutekeleza dashibodi APIs na utangamano APIs
+- Msingi wa SSE/routing ulioshirikiwa katika `src/sse/*` + `open-sse/*` hushughulikia utekelezaji wa mtoaji, tafsiri, utiririshaji, urejeshaji nyuma na matumizi.
 
 ## Michoro ya Marejeleo
 
@@ -114,43 +113,50 @@ mingine imeunganishwa kutoka kwenye miongozo yake mahususi ya kikoa.
 - SLA/kiwango cha udhibiti cha mtoa huduma nje ya mchakato wa ndani
 - Faili tekelezi za nje za CLI zenyewe (Claude CLI, Codex CLI, n.k.)
 
-## Sehemu za Dashboard (Za Sasa)
+## Sehemu ya Dashibodi (Ya Sasa)
 
 Kurasa kuu zilizo chini ya `src/app/(dashboard)/dashboard/`:
 
 - `/dashboard` — mwongozo wa kuanza haraka + muhtasari wa watoa huduma
-- `/dashboard/endpoint` — proxy ya endpoint + MCP + A2A + vichupo vya endpoint za API
+- `/dashboard/endpoint` — proksi ya endpoint + vichupo vya MCP + A2A + endpoint ya API
 - `/dashboard/providers` — miunganisho na vitambulisho vya watoa huduma
-- `/dashboard/combos` — mikakati ya combo, violezo, kijenzi kinachotegemea hatua, kanuni za kuelekeza modeli, mpangilio wa kudumu unaosimamiwa mwenyewe
-- `/dashboard/auto-combo` — Auto Combo Engine: uzani wa alama, vifurushi vya hali, mipangilio awali ya kiwanda pepe, telemetria
+- `/dashboard/combos` — mikakati ya combo, violezo, kijenzi cha hatua, kanuni za uelekezaji wa modeli, upangaji wa kudumu wa mikono
+- `/dashboard/auto-combo` — Injini ya Auto Combo: uzani wa alama, vifurushi vya hali, mipangilio awali ya kiwanda pepe, telemetria
 - `/dashboard/costs` — ujumlishaji wa gharama na mwonekano wa bei
-- `/dashboard/analytics` — uchanganuzi wa matumizi, tathmini, hali ya malengo ya combo
-- `/dashboard/limits` — vidhibiti vya kiwango cha matumizi/kasi
-- `/dashboard/cli-tools` — utambulishaji wa CLI, utambuzi wa mazingira ya utekelezaji, utengenezaji wa usanidi
-- `/dashboard/agents` — mawakala wa ACP waliotambuliwa + usajili wa mawakala maalum
-- `/dashboard/cloud-agents` — kazi za mawakala wanaopangishwa kwenye cloud (Codex Cloud, Devin, Jules) na mzunguko wa maisha wa kazi
+- `/dashboard/analytics` — uchanganuzi wa matumizi, tathmini, hali ya lengo la combo
+- `/dashboard/limits` — vidhibiti vya mgao/kasi
+- `/dashboard/cli-tools` — uanzishaji wa CLI, utambuzi wa mazingira ya utekelezaji, utengenezaji wa usanidi
+- `/dashboard/agents` — mawakala wa ACP waliotambuliwa + usajili wa wakala maalum
+- `/dashboard/cloud-agents` — kazi za mawakala wanaopangishwa kwenye wingu (Codex Cloud, Devin, Jules) na mzunguko wa maisha wa kazi
 - `/dashboard/skills` — sajili ya ujuzi wa A2A, utekelezaji katika sandbox, katalogi ya ujuzi uliojengewa ndani
-- `/dashboard/memory` — ukaguzi na urejeshaji wa kumbukumbu endelevu za mazungumzo
-- `/dashboard/webhooks` — usajili wa webhook zinazotoka, ubadilishaji wa siri, takwimu za majaribio ya kutuma tena
+- `/dashboard/memory` — ukaguzi na urejeshaji wa kumbukumbu endelevu ya mazungumzo
+- `/dashboard/webhooks` — usajili wa webhook zinazoenda nje, ubadilishaji wa siri, takwimu za majaribio upya
 - `/dashboard/batch` — uwasilishaji wa kazi za kundi na maendeleo
-- `/dashboard/cache` — takwimu za akiba ya usomaji-pitia na uhoji, vidhibiti vya uondoaji
-- `/dashboard/playground` — mazingira shirikishi ya mazungumzo dhidi ya combo/modeli yoyote iliyosanidiwa
+- `/dashboard/cache` — takwimu za akiba ya usomaji-kupitia na ya uhawilishaji, vidhibiti vya uondoaji
+- `/dashboard/playground` — uwanja shirikishi wa gumzo unaotumia combo/modeli yoyote iliyosanidiwa
 - `/dashboard/changelog` — kitazamaji cha kumbukumbu ya mabadiliko ndani ya programu (huonyesha `CHANGELOG.md`)
-- `/dashboard/system` — uchunguzi wa mazingira ya utekelezaji, taarifa za toleo, sehemu ya uthibitishaji wa mazingira
+- `/dashboard/system` — uchunguzi wa mazingira ya utekelezaji, maelezo ya toleo, sehemu ya uthibitishaji wa mazingira
 - `/dashboard/onboarding` — mchawi wa usanidi wa matumizi ya kwanza kwa usakinishaji mpya
-- `/dashboard/media` — mazingira ya majaribio ya picha/video/muziki
+- `/dashboard/media` — uwanja wa picha/video/muziki
 - `/dashboard/search-tools` — majaribio na historia ya watoa huduma za utafutaji
-- `/dashboard/health` — muda wa upatikanaji, vivunja mzunguko, vikomo vya kasi, vipindi vinavyofuatiliwa kiwango cha matumizi
-- `/dashboard/logs` — kumbukumbu za maombi/proxy/ukaguzi/console
+- `/dashboard/health` — muda wa upatikanaji, vikata saketi, vikomo vya kasi, vipindi vinavyofuatiliwa kwa mgao
+- `/dashboard/logs` — kumbukumbu za maombi/proksi/ukaguzi/konsoli
 - `/dashboard/settings` — vichupo vya mipangilio ya mfumo (ya jumla, uelekezaji, chaguo-msingi za combo, n.k.)
-- `/dashboard/context/caveman` — kanuni za ukandamizaji za Caveman, vifurushi vya lugha, onyesho la kuchungulia, na hali ya matokeo
-- `/dashboard/context/rtk` — vichujio vya matokeo ya amri za RTK, onyesho la kuchungulia, na mipangilio ya usalama wa mazingira ya utekelezaji
-- `/dashboard/context/combos` — mifumo ya ukandamizaji yenye majina iliyogawiwa kwa combo za uelekezaji
-- `/dashboard/translator` — ukaguzi wa kitafsiri na onyesho la kuchungulia ubadilishaji wa muundo wa ombi
-- `/dashboard/audit` — kivinjari cha kumbukumbu za ukaguzi wa uzingatiaji chenye ugawaji wa kurasa na metadata iliyopangwa
+- `/dashboard/context/caveman` — kanuni za mgandamizo za Caveman, vifurushi vya lugha, onyesho la awali, na hali ya matokeo
+- `/dashboard/context/rtk` — vichujio vya matokeo ya amri za RTK, onyesho la awali, na mipangilio ya usalama wa mazingira ya utekelezaji
+- `/dashboard/context/combos` — mabomba ya mgandamizo yaliyopewa majina na kuhusishwa na combo za uelekezaji
+- `/dashboard/translator` — ukaguzi wa kitafsiri na onyesho la awali la ubadilishaji wa muundo wa ombi
+- `/dashboard/audit` — kivinjari cha kumbukumbu za ukaguzi wa utiifu chenye upangaji wa kurasa na metadata iliyopangwa
 - `/dashboard/usage` — kivinjari cha matumizi kwa kila ombi kilichounganishwa na `usage_history`
-- `/dashboard/compression` — uchanganuzi wa ukandamizaji, takwimu, na ugawaji wa mfumo wa uchakataji
-- `/dashboard/api-manager` — mzunguko wa maisha wa ufunguo wa API na ruhusa za modeli
+- `/dashboard/compression` — uchanganuzi wa mgandamizo, takwimu, na ugawaji wa mabomba
+- `/dashboard/api-manager` — mzunguko wa maisha wa funguo za API na ruhusa za modeli
+
+Safu ya UI: kila ukurasa huonyeshwa ndani ya ganda moja — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset` za kifurushi, `Sidebar.tsx` na `Header.tsx` za OmniRoute). Kurasa huleta
+vipengele vyake vya msingi kutoka `@/shared/components` (adapta juu ya Keak CI UI Kit iliyojumuishwa katika
+`packages/ui-kit`) au kutoka njia ndogo za vipengele vya kifurushi (`@omniroute/ui-kit/table`, `…/page-header`), na
+ikoni kupitia `<Icon>` (`ICON_MAP` → Lucide). Mandhari (`system` kwa chaguo-msingi, angavu/giza) na tokeni hutoka
+kwenye kifurushi kupitia daraja lililo katika `src/app/globals.css`. Maelezo: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Muktadha wa Mfumo wa Kiwango cha Juu
 
@@ -260,7 +266,7 @@ Vikoa vya usimamizi:
 
 ## 2) SSE + Kiini cha Tafsiri
 
-Moduli za mtiririko mkuu:
+Moduli kuu za mtiririko:
 
 - Kiingilio: `src/sse/handlers/chat.ts`
 - Uratibu mkuu: `open-sse/handlers/chatCore.ts`
@@ -269,15 +275,15 @@ Moduli za mtiririko mkuu:
 - Uchanganuzi/utatuzi wa modeli: `src/sse/services/model.ts`, `open-sse/services/model.ts`
 - Mantiki ya kutumia akaunti mbadala: `open-sse/services/accountFallback.ts`
 - Sajili ya tafsiri: `open-sse/translator/index.ts`
-- Mageuzi ya mtiririko: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Uchimbaji/usawazishaji wa matumizi: `open-sse/utils/usageTracking.ts`
-- Kichanganuzi cha tagi ya kufikiri: `open-sse/utils/thinkTagParser.ts`
-- Kishughulikiaji cha upachikaji: `open-sse/handlers/embeddings.ts`
+- Mabadiliko ya mtiririko: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Utoaji/usanifishaji wa matumizi: `open-sse/utils/usageTracking.ts`
+- Kichanganuzi cha lebo za kufikiri: `open-sse/utils/thinkTagParser.ts`
+- Kishughulikia upachikaji: `open-sse/handlers/embeddings.ts`
 - Sajili ya watoa huduma za upachikaji: `open-sse/config/embeddingRegistry.ts`
-- Kishughulikiaji cha utengenezaji wa picha: `open-sse/handlers/imageGeneration.ts`
+- Kishughulikia uzalishaji wa picha: `open-sse/handlers/imageGeneration.ts`
 - Sajili ya watoa huduma za picha: `open-sse/config/imageRegistry.ts`
 - Usafishaji wa majibu: `open-sse/handlers/responseSanitizer.ts`
-- Usawazishaji wa majukumu: `open-sse/services/roleNormalizer.ts`
+- Usanifishaji wa majukumu: `open-sse/services/roleNormalizer.ts`
 
 Huduma (mantiki ya biashara):
 
@@ -285,45 +291,46 @@ Huduma (mantiki ya biashara):
 - Usimamizi wa mzunguko wa maisha wa muktadha: `open-sse/services/contextManager.ts`
 - Utekelezaji wa kichujio cha IP: `open-sse/services/ipFilter.ts`
 - Ufuatiliaji wa vipindi: `open-sse/services/sessionManager.ts`
-- Uondoaji wa nakala rudufu za maombi: `open-sse/services/signatureCache.ts`
+- Uondoaji wa maombi yanayojirudia: `open-sse/services/signatureCache.ts`
 - Uingizaji wa kidokezo cha mfumo: `open-sse/services/systemPrompt.ts`
 - Usimamizi wa bajeti ya kufikiri: `open-sse/services/thinkingBudget.ts`
-- Uelekezaji wa modeli kwa kutumia kibambo-jumuishi: `open-sse/services/wildcardRouter.ts`
+- Uelekezaji wa modeli kwa kutumia vibambo-jokeri: `open-sse/services/wildcardRouter.ts`
 - Usimamizi wa kikomo cha kasi: `open-sse/services/rateLimitManager.ts`
-- Kikatiza mzunguko: `src/shared/utils/circuitBreaker.ts`
-- Uhamishaji wa muktadha: `open-sse/services/contextHandoff.ts` — utengenezaji na uingizaji wa muhtasari wa uhamishaji kwa mkakati wa upeanaji muktadha
-- Mbanano: `open-sse/services/compression/*` — mbanano wa mapema kabla ya tafsiri ya mtoa huduma;
-  unajumuisha kanuni za Caveman, vichujio vya RTK, mifuatano ya hatua zilizorundikwa, michanganyiko ya mbanano, takwimu na uthibitishaji
-- Kileta kiwango cha matumizi cha Codex: `open-sse/services/codexQuotaFetcher.ts` — huleta kiwango cha matumizi cha Codex kwa maamuzi ya uhamishaji wa upeanaji muktadha
-- Kujaribu tena kwa kuzingatia muda wa kusubiri: `src/sse/services/cooldownAwareRetry.ts` — majaribio ya kila modeli baada ya muda wa kusubiri yenye `requestRetry` / `maxRetryIntervalSec` inayoweza kusanidiwa
-- Uletaji salama wa nje: `src/shared/network/safeOutboundFetch.ts` — uletaji uliolindwa wa mtoa huduma/modeli wenye kinga dhidi ya SSRF, uzuiaji wa URL za faragha, jaribio upya na muda wa kuisha
-- Kinga ya URL zinazotoka nje: `src/shared/network/outboundUrlGuard.ts` — huthibitisha URL za watoa huduma dhidi ya masafa ya CIDR ya faragha/localhost
+- Kivunja mzunguko: `src/shared/utils/circuitBreaker.ts`
+- Uhamishaji wa muktadha: `open-sse/services/contextHandoff.ts` — uzalishaji na uingizaji wa muhtasari wa uhamishaji kwa mkakati wa kupeleka muktadha
+- Mfinyazo: `open-sse/services/compression/*` — mfinyazo wa mapema kabla ya tafsiri ya mtoa huduma;
+  unajumuisha kanuni za Caveman, vichujio vya RTK, mifumo ya hatua zilizopangwa, michanganyiko ya mfinyazo, takwimu na uthibitishaji
+- Kichotaji cha mgao wa Codex: `open-sse/services/codexQuotaFetcher.ts` — huchota mgao wa Codex kwa maamuzi ya uhamishaji wa kupeleka muktadha
+- Jaribio upya linalozingatia kipindi cha kusubiri: `src/sse/services/cooldownAwareRetry.ts` — majaribio upya ya kipindi cha kusubiri kwa kila modeli yenye `requestRetry` / `maxRetryIntervalSec` zinazoweza kusanidiwa
+- Uchotaji salama wa nje: `src/shared/network/safeOutboundFetch.ts` — uchotaji wa mtoa huduma/modeli uliolindwa kwa kinga dhidi ya SSRF, uzuiaji wa URL za faragha, jaribio upya na muda wa kusubiri
+- Kinga ya URL za nje: `src/shared/network/outboundUrlGuard.ts` — ukaguzi wa seva pangishi kwenye URL za watoa huduma; `src/shared/network/outboundUrlGuardPolicy.ts` huchagua hali kutoka `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, na vitufe vyake vya kuwasha/kuzima kwenye dashibodi (angalia `docs/reference/ENVIRONMENT.md`)
 - Chaguo-msingi za maombi ya mtoa huduma: `open-sse/services/providerRequestDefaults.ts` — chaguo-msingi za kiwango cha mtoa huduma za `maxTokens`, `temperature`, `thinkingBudgetTokens`
-- Konstanti za mtoa huduma wa GLM: `open-sse/config/glmProvider.ts` — modeli zinazoshirikiwa za GLM, URL za kiwango cha matumizi, muda wa kuisha/chaguo-msingi za GLMT
-- Chanzo cha juu cha Antigravity: `open-sse/config/antigravityUpstream.ts` — URL msingi na konstanti za njia ya ugunduzi
-- Konstanti za kiteja cha Codex: `open-sse/config/codexClient.ts` — thamani za user-agent na toleo la kiteja zilizo na matoleo
-- Mbegu ya lakabu za modeli: `src/lib/modelAliasSeed.ts` — huanzisha lakabu 30+ za lahaja zinazotumika kwenye proksi mbalimbali wakati wa kuanzisha
+- Thamani thabiti za mtoa huduma wa GLM: `open-sse/config/glmProvider.ts` — modeli za GLM zinazoshirikiwa, URL za mgao, muda wa kusubiri/chaguo-msingi za GLMT
+- Chanzo cha juu cha Antigravity: `open-sse/config/antigravityUpstream.ts` — URL msingi na thamani thabiti za njia ya ugunduzi
+- Thamani thabiti za kiteja cha Codex: `open-sse/config/codexClient.ts` — thamani zenye matoleo za wakala wa mtumiaji na toleo la kiteja
+- Mbegu ya lakabu za modeli: `src/lib/modelAliasSeed.ts` — hupanda lakabu 30+ za lahaja baina ya proksi wakati wa kuanza
 
-Moduli za tabaka la kikoa:
+Moduli za safu ya kikoa:
 
-- Kanuni/bajeti za gharama: `src/domain/costRules.ts`
+- Kanuni za gharama/bajeti: `src/domain/costRules.ts`
 - Sera ya kutumia mbadala: `src/domain/fallbackPolicy.ts`
-- Kitatuzi cha michanganyiko: `src/domain/comboResolver.ts`
-- Sera ya kufungia nje: `src/domain/lockoutPolicy.ts`
-- Injini ya sera: `src/domain/policyEngine.ts` — tathmini ya kati ya kufungia nje → bajeti → kutumia mbadala
+- Kitatuzi cha mchanganyiko: `src/domain/comboResolver.ts`
+- Sera ya kufungia: `src/domain/lockoutPolicy.ts`
+- Injini ya sera: `src/domain/policyEngine.ts` — tathmini iliyowekwa kati ya kufungia → bajeti → kutumia mbadala
 - Katalogi ya misimbo ya hitilafu: `src/shared/constants/errorCodes.ts`
 - Kitambulisho cha ombi: `src/shared/utils/requestId.ts`
-- Muda wa kuisha wa uletaji: `src/shared/utils/fetchTimeout.ts`
+- Muda wa kusubiri wa uchotaji: `src/shared/utils/fetchTimeout.ts`
 - Telemetria ya maombi: `src/shared/utils/requestTelemetry.ts`
 - Uzingatiaji/ukaguzi: `src/lib/compliance/index.ts`
-- Kiendeshaji cha tathmini: `src/lib/evals/evalRunner.ts`
-- Uhifadhi wa hali ya kikoa: `src/lib/db/domainState.ts` — SQLite CRUD kwa minyororo ya kutumia mbadala, bajeti, historia ya gharama, hali ya kufungia nje na vikatiza mzunguko
+- Kiendesha tathmini: `src/lib/evals/evalRunner.ts`
+- Udumishaji wa hali ya kikoa: `src/lib/db/domainState.ts` — SQLite CRUD kwa misururu ya kutumia mbadala, bajeti, historia ya gharama, hali ya kufungia na vivunja mzunguko
 
-Moduli za watoa huduma wa OAuth (faili 22 mahususi chini ya `src/lib/oauth/providers/`):
+Moduli za watoa huduma wa OAuth (faili 27 mahususi chini ya `src/lib/oauth/providers/`):
 
 - Fahirisi ya sajili: `src/lib/oauth/providers/index.ts`
-- Watoa huduma mahususi: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Kifungashio chepesi: `src/lib/oauth/providers.ts` — husafirisha tena kutoka kwenye moduli mahususi
+- Watoa huduma mahususi: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Visaidizi vinavyoshirikiwa: `codebuddyDeviceAuth.ts` (mtiririko wa kifaa wa CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
+- Kifungashio chepesi: `src/lib/oauth/providers.ts` — husafirisha upya kutoka kwenye moduli mahususi
 
 ## 5) Huduma Zilizopachikwa (v3.8.4)
 
@@ -348,168 +355,124 @@ Tabaka za usanifu:
 
 Uchambuzi wa kina: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## Mifumo Midogo Mikuu (v3.8.0)
+## Mifumo midogo mikuu (v3.8.0)
 
-### A. Injini ya Auto Combo
+### A. Injini ya Mchanganyiko Otomatiki
 
-Auto Combo hupatia malengo ya uelekezaji alama kwa njia inayobadilika na kuyachagua wakati ombi linapowasilishwa, badala ya
-kutegemea ufafanuzi tuli wa combo. Huwezesha familia ya viambishi-awali vya miundo ya `auto/*`.
+Mchanganyiko Kiotomatiki hupata alama na kuchagua shabaha za uelekezaji wakati wa ombi, badala ya kutegemea ufafanuzi wa mseto tuli. Inatia nguvu familia ya kiambishi awali `auto/*`.
 
-- Kiingilio cha injini: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Kitatuzi: `src/domain/comboResolver.ts` (utambuzi wa kiotomatiki wa kiambishi-awali cha `auto/`)
+- Ingizo la injini: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Kisuluhishi: `src/domain/comboResolver.ts` (ugunduzi-otomatiki wa kiambishi awali cha `auto/` )
 - Dashibodi: `/dashboard/auto-combo`
-- Telemetria: jedwali la SQLite la `auto_combo_decisions`
+- Telemetry: meza `auto_combo_decisions` SQLite
 
 Uwezo muhimu:
 
-- **Mikakati 19 ya uelekezaji** (kipaumbele, yenye uzani, kujaza-kwanza, mzunguko wa zamu, P2C, nasibu,
-  iliyotumika-kidogo-zaidi, iliyoboreshwa-kwa-gharama, inayozingatia-kuweka-upya, dirisha-la-kuweka-upya, nafasi-ya-ziada, nasibu-kali,
-  **auto**, lkgp, iliyoboreshwa-kwa-muktadha, upelekaji-wa-muktadha, **fusion**, pamoja na njia mbadala) —
-  auto ndiyo nyongeza kuu katika v3.8.0; `fusion` (usambazaji sambamba kwa paneli + usanisi wa mwamuzi,
-  `open-sse/services/fusion.ts`) ni mpya katika v3.8.36.
-- **Utoaji alama wa vipengele 16**: kikomo, afya, kinyume cha gharama, kinyume cha muda wa kusubiri, kufaa kwa kazi na
-  vipengele vingine kumi. Jedwali rasmi la vipengele na uzani wake chaguomsingi linapatikana katika
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — kulirudia hapa kungelipatia sehemu ya pili
-  ambapo linaweza kupitwa na wakati.
-- **Kiwanda pepe** huunda combo za muda mfupi wakati hakuna combo yenye jina inayolingana,
-  kikichukua wagombea kutoka kwa miunganisho hai na yenye afya ya watoa huduma.
-- **Viambishi-awali vya auto**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — kila kimoja kikitegemezwa na wasifu wa uzani ulioboreshwa.
-- **Vifurushi 6 vya hali**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` na `chaos-mode` — usanidi wa uzani uliowekwa tayari unaoweza kuitwa kutoka
-  kwenye dashibodi. (Visichanganywe na viambishi-awali vya `auto/*` vilivyo hapo juu, ambavyo ni
-  vibadala vya wakati wa ombi.)
+- **Mikakati 20 ya uelekezaji** (kipaumbele, uzani, jaza kwanza, duara-robin, P2C, nasibu, isiyotumika sana, iliyoboreshwa kwa gharama, fahamu upya, weka upya dirisha, chumba cha kichwa, uzani wa kiasi, bila mpangilio maalum,** kiotomatiki** , lkgp, uboreshaji wa muktadha, uboreshaji wa akiba, upeanaji-muktadha,** muunganisho** , pipeline) — auto ni nyongeza ya kichwa katika v3.8.0; `fusion` (jopo la fan-out + judge synthesis, `open-sse/services/fusion.ts`) ni mpya katika v3.8.36.
+- **16-factors bao** : kiasi, afya, gharama kinyume, kusubiri kinyume, usawa wa kazi na kumi zaidi. Jedwali la kisheria la vipengele na uzani wao chaguo-msingi huishi katika [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — kuirejesha hapa kungeipa nafasi ya pili kutoweka.
+- **Kiwanda halisi** hubadilisha michanganyiko ya muda mfupi wakati hakuna mchanganyiko unaolingana uliopo, kutafuta waombaji kutoka kwa miunganisho yenye afya ya watoa huduma.
+- **Viambishi otomatiki** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — kila moja ikiungwa mkono na wasifu uliopangwa.
+- **Pakiti 6 za modi** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` na `chaos-mode` — usanidi wa uzito uliowekwa mapema unaoweza kupigiwa simu kutoka kwenye dashibodi. (Isichanganywe na viambishi awali vya `auto/*` hapo juu, ambavyo ni lahaja za muda wa ombi.)
 
-Kwa maelezo kamili ya algoriti (fomula za vipengele, urekebishaji wa uzani), angalia
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Kwa maelezo kamili ya algorithmic (fomula za sababu, kurekebisha uzito), angalia [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
 ### B. Mawakala wa Wingu
 
-Cloud Agents hufunika majukwaa ya mawakala wa msimbo yanayopangishwa na wahusika wengine (Codex Cloud, Devin,
-Jules) nyuma ya mzunguko sawa wa maisha ya kazi unaotegemea hifadhidata. Sehemu-fikio zote za kuunda/kukagua kazi
-zinahitaji uthibitishaji wa usimamizi.
+Cloud Agents hufunga majukwaa ya wakala wa msimbo aliyepangishwa na wahusika wengine (Codex Cloud, Devin, Jules) nyuma ya mzunguko wa maisha wa kazi unaoungwa mkono na DB. Miisho yote creation/inspection kazi inahitaji uthibitishaji wa usimamizi.
 
-- Mzizi wa moduli: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, pamoja na saraka ndogo za kila wakala chini ya `agents/`)
+- Mzizi wa moduli: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, pamoja na saraka ndogo za kila wakala chini ya `agents/`)
 - Utekelezaji wa kila wakala: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Sehemu-fikio za umma: `/api/v1/agents/tasks/*` (orodhesha/unda/pata/ghairi)
-- Sehemu-fikio za usimamizi: `/api/cloud/*` (uandalizi, hali, bechi)
+- Miisho ya umma: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- Mwisho wa usimamizi: `/api/cloud/*` (utoaji, hali, kundi)
 - Dashibodi: `/dashboard/cloud-agents`
-- Hifadhi: jedwali la `cloud_agent_tasks`
+- Uhifadhi: meza `cloud_agent_tasks`
 
-Kwa maelezo ya uandalizi wa kila wakala na OAuth, angalia
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+Kwa utoaji wa kila wakala na maelezo mahususi OAuth, angalia [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. Vizuizi vya Usalama
+### C. Walinzi
 
-Moduli ya vizuizi vya usalama ni tabaka la programu kati linaloweza kupakiwa upya papo hapo ambalo hukagua maombi
-na majibu ili kubaini PII, udukuzi wa prompt, na maudhui hatari ya kuona. Ukiukaji
-hukatiza ombi mara moja kwa HTTP **503** pamoja na msimbo wa hitilafu uliopangwa, hivyo kuruhusu
-waitaji wa chini ya mtiririko kujaribu tena au kufuata tawi jingine.
+Sehemu ya guardrails ni safu ya vifaa vya kati vinavyoweza kupakiwa upya vinavyokagua maombi na majibu ya PII, sindano ya papo hapo na maudhui yasiyo salama ya kuona. Ukiukaji hufanya ombi kwa muda mfupi na HTTP** 503** pamoja na msimbo wa hitilafu uliopangwa, kuruhusu wapigaji simu kujaribu tena au tawi.
 
-- Mzizi wa moduli: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Upakiaji upya papo hapo: rejista hufuatilia mabadiliko ya usanidi na kujenga upya mnyororo pale ulipo
-- Sehemu za kuunganisha: kiingilio cha kishughulikiaji cha gumzo, kishughulikiaji cha uzalishaji wa picha, kitakasaji cha majibu
-- Mkataba wa HTTP: ukiukaji hujitokeza kama `503` wenye `error.code = "GUARDRAIL_VIOLATION"`
+- Mzizi wa moduli: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Upakiaji upya wa moto: saa za usajili kwa mabadiliko ya usanidi na huunda tena mnyororo mahali pake
+- Pointi za kuingia ndani: ingizo la kidhibiti cha gumzo, kidhibiti cha kutengeneza picha, kisafishaji cha majibu
+- mkataba HTTP : ukiukaji hujitokeza kama `503` na `error.code = "GUARDRAIL_VIOLATION"`
 
-Kwa uandishi wa seti za kanuni na urekebishaji wa viwango, angalia
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+Kwa utunzi wa seti ya sheria na urekebishaji wa kizingiti, angalia [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Tabaka la Kikoa
 
-Nafasi ya majina ya `src/domain/` huweka maamuzi ya sera katika sehemu moja ili vishughulikiaji vya njia
-visilazimike kuunganisha mantiki ya kufungia/bajeti/njia mbadala vyenyewe.
+Nafasi ya majina `src/domain/` huweka maamuzi ya sera katikati ili vidhibiti njia si lazima vikusanye mantiki lockout/budget/fallback wenyewe.
 
-- Injini ya sera: `src/domain/policyEngine.ts` — sehemu moja ya kuingilia kwa
-  tathmini kabla ya utekelezaji (ufungiaji → bajeti → mpangilio wa njia mbadala)
-- Kanuni za gharama: `src/domain/costRules.ts`
-- Sera ya njia mbadala: `src/domain/fallbackPolicy.ts`
-- Sera ya kufungia: `src/domain/lockoutPolicy.ts`
-- Uelekezaji kulingana na lebo: `src/domain/tagRouter.ts`
-- Kitatuzi cha combo: `src/domain/comboResolver.ts` — hutatua majina ya combo, viambishi-awali vya auto/\*,
-  na malengo ya miundo yenye vibambo-wakilishi kuwa mipango mahususi ya utekelezaji
-- Kiunganishi cha kanuni za muunganisho/muundo: `src/domain/connectionModelRules.ts`
-- Vijipicha vya upatikanaji wa miundo: `src/domain/modelAvailability.ts`
-- Ufuatiliaji wa kuisha kwa muda wa mtoa huduma: `src/domain/providerExpiration.ts`
-- Akiba ya kikomo: `src/domain/quotaCache.ts`
-- Hali ya kuzorota: `src/domain/degradation.ts`
+- Injini ya sera: `src/domain/policyEngine.ts` — mahali pa kuingilia moja kwa ajili ya tathmini ya kabla ya utekelezaji (kufungia → bajeti → kuagiza mbadala)
+- Sheria za gharama: `src/domain/costRules.ts`
+- Sera mbadala: `src/domain/fallbackPolicy.ts`
+- Sera ya kufungia nje: `src/domain/lockoutPolicy.ts`
+- Uelekezaji wa msingi wa lebo: `src/domain/tagRouter.ts`
+- Kitatuzi cha mchanganyiko: `src/domain/comboResolver.ts` — hutatua majina ya mchanganyiko, viambishi oto/\*, na shabaha za kielelezo cha kadi-mwitu kwa mipango madhubuti ya utekelezaji.
+- Connection/model kiunganishi cha sheria: `src/domain/connectionModelRules.ts`
+- Muundo wa picha za upatikanaji: `src/domain/modelAvailability.ts`
+- Ufuatiliaji wa mwisho wa muda wa mtoa huduma: `src/domain/providerExpiration.ts`
+- Akiba ya sehemu: `src/domain/quotaCache.ts`
+- Hali ya uharibifu: `src/domain/degradation.ts`
 - Ukaguzi wa usanidi: `src/domain/configAudit.ts`
-- Kijenzi cha metadata ya majibu ya OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- Mfumo mdogo wa tathmini: `src/domain/assessment/` — kazi za tathmini za mara kwa mara
+- mjenzi wa metadata ya majibu OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- Mfumo mdogo wa tathmini: `src/domain/assessment/` — kazi za tathmini ya mara kwa mara
 
-### E. Msururu wa Uidhinishaji
+### E. Uidhinishaji Bomba
 
-Darasa la mchakato wa uidhinishaji huainisha kila ombi linaloingia na kutumia
-msururu unaofaa wa sera kabla ya kulipeleka.
+Njia ya uidhinishaji inaainisha kila ombi linaloingia na kutumia msururu wa sera ufaao kabla ya kutumwa.
 
-- Kiingilio cha mchakato: `src/server/authz/pipeline.ts`
-- Kiainishaji cha ombi: `src/server/authz/classify.ts` — hutofautisha njia za umma
-  za uoanifu na njia za usimamizi
+- Uingizaji wa bomba: `src/server/authz/pipeline.ts`
+- Ombi la uainishaji: `src/server/authz/classify.ts` — hutofautisha njia za uoanifu za umma na njia za usimamizi
 - Orodha ya njia za umma: `src/shared/constants/publicApiRoutes.ts`
-- Sera: `src/server/authz/policies/` — vihusishi vinavyoweza kuunganishwa
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth`, n.k.)
-- Zana za vichwa: `src/server/authz/headers.ts`
-- Kisaidizi cha uthibitishaji: `src/server/authz/assertAuth.ts`
+- Sera: `src/server/authz/policies/` — viambishi vinavyoweza kutungwa (`requireApiKey`, `requireManagement`, `requireFreshAuth`, n.k.)
+- Huduma za kichwa: `src/server/authz/headers.ts`
+- Msaidizi wa madai: `src/server/authz/assertAuth.ts`
 - Muktadha wa ombi: `src/server/authz/context.ts`
 
-Njia za umma na za usimamizi zina mpaka madhubuti: API za wakala/kusubiri na
-mabadiliko ya watoa huduma yanahitaji uthibitishaji wa usimamizi (HTTP 401 ikiwa haupo).
+Njia za umma dhidi ya usimamizi ni mpaka mgumu: agent/cooldown APIs na mabadiliko ya watoa huduma yanahitaji uthibitisho wa usimamizi (HTTP 401 ikiwa haipo).
 
-Kwa kanuni kamili za uainishaji wa njia, angalia
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+Kwa sheria kamili za uainishaji wa njia, angalia [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. FSM ya Mtiririko wa Kazi na Kipanga-Njia Kinachozingatia Kazi
+### F. Workflow FSM na Task-Aware Rota
 
-Kipanga-njia kinachoendeshwa na mashine ya hali yenye kikomo, kilichowekwa juu ya uteuzi wa mchanganyiko ili kuelekeza
-trafiki kulingana na hatua iliyotambuliwa ya mtiririko wa kazi (upangaji, utekelezaji,
-ukaguzi) na uhusiano na kazi ya chinichini.
+Kipanga njia kinachoendeshwa na mashine ya hali ya juu kilichowekwa juu ya uteuzi wa mseto ili kuelekeza trafiki kulingana na hatua ya utendakazi iliyotambuliwa (kupanga, kutekeleza, kukagua) na mshikamano wa kazi ya usuli.
 
-- FSM ya mtiririko wa kazi: `open-sse/services/workflowFSM.ts`
-- Kipanga-njia kinachozingatia kazi: `open-sse/services/taskAwareRouter.ts`
-- Kitambuzi cha kazi za chinichini: `open-sse/services/backgroundTaskDetector.ts`
-- Kiainishaji cha dhamira: `open-sse/services/intentClassifier.ts`
+- Mtiririko wa kazi FSM: `open-sse/services/workflowFSM.ts`
+- Kipanga njia kinachofahamu kazi: `open-sse/services/taskAwareRouter.ts`
+- Kigunduzi cha kazi ya usuli: `open-sse/services/backgroundTaskDetector.ts`
+- Kiainishi cha nia: `open-sse/services/intentClassifier.ts`
 
-Mabadiliko ya hali ya FSM huingizwa katika uwekaji alama wa Auto Combo, yakipendelea modeli za gharama nafuu
-kwa kazi za chinichini/otomatiki na modeli zenye uwezo zaidi kwa hatua shirikishi za
-upangaji/ukaguzi.
+Mabadiliko ya FSM huingia kwenye bao la Combo Otomatiki, ikiegemea miundo ya bei nafuu kwa kazi za background/automation na kuelekea miundo thabiti zaidi ya zamu ingiliani planning/review.
 
-### G. Ustahimilivu Mahususi kwa Mtoa Huduma
+### G. Ustahimilivu Mahususi wa Mtoa Huduma
 
-Watoa huduma kadhaa huja na moduli maalumu za ustahimilivu na ufichaji ambazo hutumia
-matabaka ya jumla ya kikatiza saketi / muda wa kusubiri wa muunganisho / kufungiwa kwa modeli:
+Watoa huduma kadhaa husafirisha moduli mahususi za ustahimilivu na siri ambazo zinarudi nyuma kwenye kikatiza mzunguko wa kimataifa / hali baridi ya muunganisho / tabaka za kufuli za mfano:
 
-- Injini ya Antigravity 429: `open-sse/services/antigravity429Engine.ts` (hubadilisha
-  utambulisho, husafisha vichwa vya majibu, huendesha ufuatiliaji wa salio/toleo kupitia
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- Sera ya kiasi cha matumizi cha ModelScope: `open-sse/services/modelscopePolicy.ts`
-- CCH (Makubaliano ya Awali ya Njia ya Uoanifu) ya Claude Code: `open-sse/services/claudeCodeCCH.ts`,
-  pamoja na `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Uundaji wa alama bainifu ya Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
-- Ufichaji wa Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
+- injini ya Antigravity 429: `open-sse/services/antigravity429Engine.ts` (huzungusha utambulisho, kusugua vichwa vya majibu, huendesha ufuatiliaji wa credits/version kupitia `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (bajeti ya kila ombi la 429s za juu kwa wapangishi wote, `ANTIGRAVITY_MAX_429_ATTEMPTS`; utumaji upya sawa wa chombo kilichokataliwa hujibiwa ndani ya nchi; `src/sse/handlers/chat.ts` haiwanzishi upya ombi kama hilo kupitia jaribio la kufahamu baridi)
+- sera ya mgao wa ModelScope : `open-sse/services/modelscopePolicy.ts`
+- Msimbo wa Claude CCH (Kushikana kwa mkono kwa Idhaa ya Upatanifu): `open-sse/services/claudeCodeCCH.ts`, pamoja na `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- uundaji wa alama za vidole za Claude : `open-sse/services/claudeCodeFingerprint.ts`
+- Claude upotoshaji wa msimbo: `open-sse/services/claudeCodeObfuscation.ts`
 
-Kwa mwongozo kamili wa mbinu za ufichaji na uendeshaji, angalia
-`docs/security/STEALTH_GUIDE.md` (git; haijajumuishwa katika `/docs`).
+Kwa kitabu kamili cha kucheza na mwongozo wa uendeshaji, angalia `docs/security/STEALTH_GUIDE.md` (git; haijajumuishwa `/docs`).
 
-### H. Webhooks, Akiba ya Utoaji Hoja, Akiba ya Usomaji
+### H. Webhooks, Akiba ya Kutoa Sababu, Akiba ya Soma
 
-- **Webhooks** — usambazaji wa nje kwa matukio ya mtoa huduma/akaunti/kazi.
-  - Kisambazaji: `src/lib/webhookDispatcher.ts`
-  - Hifadhi: jedwali la SQLite la `webhooks` (kupitia `src/lib/db/webhooks.ts`)
-  - Dashibodi: `/dashboard/webhooks` (usajili, siri, historia ya majaribio upya)
-  - Kwa uainishaji wa matukio na taratibu za majaribio upya, angalia [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Akiba ya Utoaji Hoja** — vizuizi vya utoaji hoja vinavyoweza kuchezwa tena kwa watoa huduma wanaotoa
-  tokeni za kufikiri (Claude, GLMT, n.k.) ili hatua zinazofuatana ziweze kuruka kufikiri upya.
-  - Tabaka la DB: `src/lib/db/reasoningCache.ts`
-  - Tabaka la huduma: `open-sse/services/reasoningCache.ts`
-  - Kwa taratibu za kucheza tena, angalia [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Akiba ya Usomaji** — akiba ya majibu ya muda mfupi inayotambuliwa kwa saini na kutumiwa
-  kuunganisha majaribio upya yanayofanana kutoka kwa SDK za awali zenye hitilafu.
-  - Tabaka la DB: `src/lib/db/readCache.ts`
-  - Endpoint ya takwimu: `GET /api/cache/stats`, dashibodi iko katika `/dashboard/cache`
+- **Viboko vya mtandao** — utumaji wa nje kwa matukio ya provider/account/task.
+  - Mtangazaji: `src/lib/webhookDispatcher.ts`
+  - Uhifadhi: meza ya `webhooks` SQLite kupitia `src/lib/db/webhooks.ts`)
+  - Dashibodi: `/dashboard/webhooks` (usajili, siri, historia ya kujaribu tena)
+  - Kwa taksonomia ya matukio na jaribu tena semantiki, angalia [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Akiba ya Kuzingatia** — vizuizi vya hoja vinavyoweza kuchezwa tena kwa watoa huduma wanaotoa tokeni za kufikiri (Claude, GLMT, nk.) ili zamu zinazofuatana ziweze kuruka kufikiria upya.
+  - safu ya DB : `src/lib/db/reasoningCache.ts`
+  - Safu ya huduma: `open-sse/services/reasoningCache.ts`
+  - Kwa semantiki ya kucheza tena, tazama [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Soma Cache** — akiba ya majibu ya muda mfupi iliyowekewa saini na kutumika kukunja majaribio sawa kutoka kwa SDKs iliyovunjika ya juu ya mkondo.
+  - safu ya DB : `src/lib/db/readCache.ts`
+  - Mwisho wa takwimu: `GET /api/cache/stats`, dashibodi katika `/dashboard/cache`
 
 ## 3) Safu ya Uhifadhi Endelevu
 
@@ -535,14 +498,15 @@ DB ya Hali ya Kikoa (SQLite):
 
 ## 4) Sehemu za Uthibitishaji + Usalama
 
-- Uthibitishaji wa kidakuzi cha dashibodi: `src/proxy.ts`, `src/app/api/auth/login/route.ts`
+- Uthibitishaji wa dashibodi kwa kutumia kidakuzi: `src/proxy.ts`, `src/app/api/auth/login/route.ts`
 - Uundaji/uthibitishaji wa ufunguo wa API: `src/shared/utils/apiKey.ts`
-- Siri za watoa huduma huhifadhiwa katika maingizo ya `providerConnections`
-- Usaidizi wa proksi inayotoka kupitia `open-sse/utils/proxyFetch.ts` (vigezo vya mazingira) na `open-sse/utils/networkProxy.ts` (inaweza kusanidiwa kwa kila mtoa huduma au kwa jumla)
-- Kinga ya SSRF / URL inayotoka: `src/shared/network/outboundUrlGuard.ts` — huzuia masafa ya faragha/loopback/link-local kwa miito yote ya watoa huduma
-- Uthibitishaji wa mazingira wakati wa utekelezaji: `src/lib/env/runtimeEnv.ts` — schema ya Zod kwa vigezo vyote vya mazingira, inayoonyeshwa kama hitilafu/maonyo ya kuanzisha
-- Tokeni za ulandanishi: `src/lib/db/syncTokens.ts` — tokeni zenye upeo kwa sehemu za mwisho za kupakua kifurushi cha usanidi; zinaungwa mkono na jedwali la SQLite `sync_tokens` (uhamishaji `024_create_sync_tokens.sql`)
-- Uthibitishaji wa mawasiliano ya awali ya WebSocket: `src/lib/ws/handshake.ts` — huthibitisha maombi ya uboreshaji wa WS kupitia ufunguo wa API au kidakuzi cha kipindi
+- Siri za watoa huduma huhifadhiwa katika vipengee vya `providerConnections`
+- Usaidizi wa proksi ya miunganisho inayotoka kupitia `open-sse/utils/proxyFetch.ts` (vigezo vya mazingira) na `open-sse/utils/networkProxy.ts` (inaweza kusanidiwa kwa kila mtoa huduma au kwa wote)
+- Kinga dhidi ya SSRF / URL inayotoka: `src/shared/network/outboundUrlGuard.ts` — ukaguzi wa seva mwenyeji kwenye miito ya watoa huduma na malengo ya webhook; hali hutoka kwenye `src/shared/network/outboundUrlGuardPolicy.ts` (bendera katika `docs/reference/ENVIRONMENT.md`)
+- Uthibitishaji wa mazingira wakati wa utekelezaji: `src/lib/env/runtimeEnv.ts` — skimu ya Zod kwa vigezo vyote vya mazingira, huku hitilafu/maonyo yakionyeshwa wakati wa kuanzisha
+- Tokeni za ulandanishi: `src/lib/db/syncTokens.ts` — tokeni zenye mawanda maalum kwa ncha za kupakua kifurushi cha usanidi; zinahifadhiwa katika jedwali la SQLite la `sync_tokens` (uhamishaji `024_create_sync_tokens.sql`)
+- Uthibitishaji wa kuanzisha muunganisho wa WebSocket: `src/lib/ws/handshake.ts` — huthibitisha maombi ya uboreshaji wa WS kupitia ufunguo wa API au kidakuzi cha kipindi
+- Uthibitishaji wa WebSocket ya dashibodi ya moja kwa moja: `src/server/ws/liveServer.ts` — huduma saidizi (mlango `LIVE_WS_PORT`) hukubali kidakuzi cha kipindi cha dashibodi au ufunguo wa API wa Bearer wenye wigo wa usimamizi (`manage`/`admin`); funguo za uinferensi pekee hukataliwa. Ncha yake ya ndani ya uchapishaji ya `POST /__omniroute_event` hukubali wenza wa loopback pekee wakati hakuna kichwa cha mpito wa proksi (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
 ## 5) Ulandanishi wa Wingu
 
@@ -804,25 +768,25 @@ Faili halisi za hifadhi:
 - kumbukumbu zilizopangwa za data za miito: `${DATA_DIR}/call_logs/`
 - vipindi vya hiari vya utatuzi wa kitafsiri/maombi: `<repo>/logs/...`
 
-## Topolojia ya Utekelezaji
+## Topolojia ya Usambazaji
 
 ```mermaid
 flowchart LR
-    subgraph LocalHost[Developer Host]
-        CLI[CLI Tools]
-        Browser[Dashboard Browser]
+    subgraph LocalHost[Hosti ya Msanidi]
+        CLI[Zana za CLI]
+        Browser[Kivinjari cha Dashibodi]
     end
 
-    subgraph ContainerOrProcess[OmniRoute Runtime]
-        Next[Next.js Server\nPORT=20128]
-        Core[SSE Core + Executors]
+    subgraph ContainerOrProcess[Mazingira ya Utekelezaji ya OmniRoute]
+        Next[Seva ya Next.js\nPORT=20128]
+        Core[Kiini cha SSE + Vitekelezaji]
         MainDB[(storage.sqlite)]
-        UsageDB[(usage tables + log artifacts)]
+        UsageDB[(majedwali ya matumizi + vizalia vya kumbukumbu)]
     end
 
-    subgraph External[External Services]
-        Providers[AI Providers]
-        SyncCloud[Cloud Sync Service]
+    subgraph External[Huduma za Nje]
+        Providers[Watoa Huduma za AI]
+        SyncCloud[Huduma ya Usawazishaji wa Wingu]
     end
 
     CLI --> Next

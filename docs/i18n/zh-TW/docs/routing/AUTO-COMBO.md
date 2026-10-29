@@ -180,6 +180,8 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 | `quality`             | 0.03     | 由路由事件品質追蹤器根據回饋產生的輸出品質訊號；沒有觀測資料的候選項目會獲得中性分數 0.5                                                             |
 | `reliability`         | 0.00     | 根據過去 24 小時使用記錄，在至少十個樣本的門檻下計算觀測到的成功比例 `1 - failureRate`（否則使用即時指標）；沒有觀測資料的候選項目視為 1.0。預設停用 |
 
+`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+
 **總和：**`0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`，如 `DEFAULT_WEIGHTS` 中所宣告；使用者設定的權重會在評分前由 `normalizeScoringWeights()` 重新正規化為一個分布。
 
 ## 模式套件
@@ -243,47 +245,50 @@ curl -sS http://localhost:20128/v1/chat/completions \
 
 ## 所有路由策略
 
-OmniRoute 的組合引擎支援 **19 種路由策略**（宣告於 `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`）。Auto Combo 引擎本身透過 `auto` 策略提供；其他策略則可用於持久化組合。
+OmniRoute 的組合引擎支援 **20 種路由策略**（宣告於 `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`）。Auto Combo 引擎本身透過 `auto` 策略公開；其他策略則可供持久化組合使用。
 
-| 策略                | 說明                                                                                                                                   |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | 具有明確優先順序、以第一個目標為優先的排序清單                                                                                         |
-| `weighted`          | 依各目標權重進行加權隨機選擇                                                                                                           |
-| `round-robin`       | 依序循環使用各目標（採批次方式；詳見下文）                                                                                             |
-| `context-relay`     | 在各目標之間移交上下文（適用於長對話）                                                                                                 |
-| `fill-first`        | 先用滿每個目標的配額，再移至下一個目標                                                                                                 |
-| `p2c`               | 二選一（Power-of-2-choices）隨機負載平衡                                                                                               |
-| `random`            | 均勻隨機選擇                                                                                                                           |
-| `least-used`        | 選擇目前負載最低的目標                                                                                                                 |
-| `cost-optimized`    | 根據目錄定價，將每次請求的成本降至最低                                                                                                 |
-| `reset-aware` ⭐    | 依配額重設時間排定優先順序 — 重設週期較短者排名較高                                                                                    |
-| `reset-window`      | 優先選擇配額週期最快重設的目標                                                                                                         |
-| `headroom`          | 選擇剩餘配額空間最多的目標                                                                                                             |
-| `strict-random`     | 隨機選擇，不對重複項目去重                                                                                                             |
-| `auto`              | 使用 Auto Combo 評分（16 項因素）— **建議使用**                                                                                        |
-| `lkgp`              | 最後已知良好路徑（固定使用上次成功的提供者，然後才退回至規則）                                                                         |
-| `context-optimized` | 選擇最適合目前上下文大小的目標                                                                                                         |
-| `cache-optimized`   | 依提示快取親和性重新排序目標 — 最有可能已保存此請求快取前綴的連線會最先嘗試（`open-sse/services/combo/promptCacheAffinity.ts`、#8008） |
-| `fusion` 🧬         | 平行分派給一組模型，然後由評判模型合成單一答案（詳見下文）                                                                             |
-| `pipeline`          | 依序執行各目標，將每個步驟的輸出傳入下一步的輸入；僅傳回最終答案（#6396）                                                              |
+| 策略                | 說明                                                                                                                                  |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------ |
+| `priority`          | 採用明確優先順序、以第一個目標為優先的有序清單                                                                                        |
+| `weighted`          | 根據每個目標的權重進行加權隨機選擇                                                                                                    |
+| `round-robin`       | 依序循環使用各目標（採批次處理；見下文）                                                                                              |
+| `context-relay`     | 在各目標之間移交上下文（適用於長對話）                                                                                                |
+| `fill-first`        | 先用完每個目標的配額，再移至下一個目標                                                                                                |
+| `p2c`               | 二選一隨機負載平衡                                                                                                                    |
+| `random`            | 均勻隨機選擇                                                                                                                          |
+| `least-used`        | 選擇目前負載最低的目標                                                                                                                |
+| `cost-optimized`    | 根據目錄定價，將每次請求的成本降至最低                                                                                                |
+| `reset-aware` ⭐    | 依配額重設時間排定優先順序——重設週期較短者排名較高                                                                                    |
+| `reset-window`      | 優先選擇配額週期即將重設的目標                                                                                                        |
+| `headroom`          | 選擇剩餘配額空間最多的目標                                                                                                            |
+| `quota-weighted`    | 略過配額已耗盡的帳戶，再依剩餘配額除以進行中負載的比例，從其餘帳戶中選擇；現有對話會繼續固定至原目標                                  |
+| `strict-random`     | 不對重複項目進行去重的隨機選擇                                                                                                        |
+| `auto`              | 使用 Auto Combo 評分（16 項因素）——**建議使用**                                                                                       |
+| `lkgp`              | 最後已知可用路徑（固定使用最近一次成功的提供者，然後回退至規則）                                                                      |
+| `context-optimized` | 選擇最符合目前上下文大小的目標                                                                                                        |
+| `cache-optimized`   | 依提示快取親和性重新排序目標——最有可能已持有此請求快取前綴的連線會最先嘗試（`open-sse/services/combo/promptCacheAffinity.ts`、#8008） |
+| `fusion` 🧬         | 平行分派至一組模型，然後由評審模型綜合產生單一答案（見下文）                                                                          |
+| `pipeline`          | 依序執行各目標，將每個步驟的輸出傳入下一個步驟作為輸入；僅回傳最終答案（#6396）                                                       |
 
 ⭐ = v3.8.0 新增 · 🧬 = v3.8.36 新增
 
 ### `weighted` 語意
 
-`weighted` 是**每次請求進行一次按比例隨機抽取**
-（`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`），而非均衡器：
+`weighted` 是**針對每個請求進行一次按比例隨機抽取**
+（`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`），而不是用來均衡分配：
 
-- 每個請求會依 `weight / totalWeight` 的機率抽取**一個**步驟；其餘步驟會依權重遞減排序，作為該請求的後援鏈。
-- 權重為 `0`（或未設定）的步驟，只要任何其他步驟的權重 > 0，就**絕不會被抽中** — 它只能在抽中的步驟失敗後作為後援。只有當**所有**權重皆為 0 時，才會改為均勻選擇。
-- 若某步驟的所有目標皆不可用 — 提供者斷路器為 `OPEN`、連線處於冷卻期、模型遭鎖定 — 該步驟會在抽取前遭到移除（`open-sse/services/combo/targetResolution.ts`），因此單一健康步驟可能暫時贏得每個請求。
-- `stickyWeightedLimit`（組合設定，預設值 `1` = 關閉）會將抽中的步驟固定使用指定次數的連續成功請求，之後才重新抽取。
+- 每個請求會以 `weight / totalWeight` 的機率抽取**一個**步驟；其餘步驟則依權重由高至低排序，作為該請求的回退鏈。
+- 權重為 `0`（或未設定）的步驟，只要有任何其他步驟的權重 > 0，就**永遠不會被抽中**——只有在抽中的步驟失敗後，才可能作為回退選項。僅當**所有**權重皆為 0 時，選擇才會變為均勻隨機。
+- 若某步驟的所有目標皆不可用——提供者斷路器為 `OPEN`、連線處於冷卻期、模型遭鎖定——該步驟會在抽取前遭到移除（`open-sse/services/combo/targetResolution.ts`），因此單一健康步驟可能暫時贏得每一個請求。
+- `stickyWeightedLimit`（組合設定，預設值 `1` = 關閉）會將抽中的步驟固定使用指定次數的連續成功，之後才重新抽取。
 
-若需要嚴格輪替，請使用 `round-robin`；在 `weighted` 中使用相等權重只能達到統計上的平衡，而非嚴格平衡。
+若需嚴格輪替，請使用 `round-robin`；在 `weighted` 中設定相同權重只能達到統計上的平衡，而非嚴格平衡。
 
 ### 代理式管線模式
 
-兩步驟的 `pipeline` 組合可透過 `config.agenticOrchestration.enabled` 選擇啟用規劃器／執行器路由。第一個目標負責規劃與最終答案；第二個目標則發出用戶端原生工具呼叫。OmniRoute 會從請求協定中偵測工具結果的接續內容、詢問規劃器是否需要進行下一輪工具呼叫，並動態選擇執行器或規劃器作為面向用戶端的最終步驟。
+至少包含兩個模型的 `pipeline` 組合，可透過 `config.agenticOrchestration.enabled` 選擇啟用規劃器／執行器路由。第一個目標負責規劃與最終回答；第二個目標則發出用戶端原生工具呼叫。OmniRoute 會從請求協定中偵測工具結果的接續內容，詢問規劃器是否需要進行另一輪工具呼叫，並動態選擇執行器或規劃器作為面向用戶端的最終步驟。
+
+第二個目標之後的其他模型會依序作為執行器備援。若 HTTP 回應失敗或發生傳輸例外，系統會繼續嘗試下一個執行器，同時沿用相同的規劃器決策與原生工具，但使用該執行器自己的步驟提示詞和解析後的連線。第一個成功的回應會原封不動地傳回，包括 SSE 串流；成功的串流開始後若發生失敗，便無法在此重試。若所有執行器皆失敗，則傳回最後一次失敗。用戶端中止操作會停止分派。
 
 ```json
 {
@@ -295,17 +300,17 @@ OmniRoute 的組合引擎支援 **19 種路由策略**（宣告於 `src/shared/c
 }
 ```
 
-執行器可在單一回應中發出多個彼此獨立的呼叫。相依呼叫會在後續用戶端工具結果輪次中處理，且規劃器會審查每個結果。`maxToolRounds` 預設為 `8`，可接受 `1`–`32`；達到上限後，規劃器必須產生當下最佳的最終答案。內部規劃器決策會經過緩衝，而所選定的面向用戶端回應則會保留原始的串流偏好設定。
+執行器可在單一回應中發出多個彼此獨立的呼叫。相依呼叫會在後續用戶端工具結果輪次中處理，且規劃器會審查每個結果。`maxToolRounds` 預設為 `8`，接受 `1`–`32`；達到上限後，規劃器必須產生當下可得的最佳最終回答。內部規劃器決策會先經過緩衝，而選定的用戶端回應則會保留原始的串流偏好設定。
 
-### `round-robin` 黏著式批次與帳戶展開
+### `round-robin` 黏著批次與帳戶展開
 
-輪詢採用批次方式，而非每個步驟處理一個請求：
+Round-robin 採批次方式，而非每個請求輪替一次：
 
-- `stickyRoundRobinLimit`（依序採用組合設定、`comboStickyRoundRobinLimit`、`settings.stickyRoundRobinLimit`，預設為 **3**）會在連續成功指定次數後，才從同一目標輪轉至下一個目標。若要每個請求都輪轉，請將組合覆寫值設為 `1`。組合編輯器會顯示有效值及其來源層級。
-- `connectionAwareExpansion`（依序採用組合設定、設定，預設為 **false**）會在輪轉前，將每個提供者層級的步驟展開為各帳戶目標。群組 B 策略（priority、weighted、round-robin、random、p2c、least-used、cost-optimized、lkgp、fill-first、strict-random、context-optimized、cache-optimized、context-relay、fusion、pipeline）在啟用此功能前會維持提供者層級的檢視。組合編輯器提供繼承／開啟／關閉選項；繼承會使用全域預設值（關閉）。
-- 提示詞快取位置相近性路由（`promptCacheAffinityEnabled`，預設為 **true**）會重新排序已釘選的連線，使相符的快取鍵維持在同一帳戶上。對於跨已釘選之各帳戶步驟的輪詢與加權輪轉，它具有更高優先順序。若需要嚴格輪轉，請在 Settings → Combo defaults 下將其關閉。此設定無法針對個別組合覆寫。
+- `stickyRoundRobinLimit`（依序採用組合設定、`comboStickyRoundRobinLimit`、`settings.stickyRoundRobinLimit`，預設為 **3**）會讓同一目標在連續成功指定次數後才輪替。若要每個請求輪替一次，請將組合覆寫值設為 `1`。組合編輯器會顯示實際生效值及其來源層級。
+- `connectionAwareExpansion`（依序採用組合設定、設定，預設為 **false**）會在輪替前，將每個提供者層級的步驟展開成各帳戶目標。B 組策略（priority、weighted、round-robin、random、p2c、least-used、cost-optimized、lkgp、fill-first、strict-random、context-optimized、cache-optimized、context-relay、fusion、pipeline）在啟用此功能前會維持提供者層級的檢視。組合編輯器提供繼承／開啟／關閉選項；繼承會使用全域預設值（關閉）。
+- 提示詞快取區域性路由（`promptCacheAffinityEnabled`，預設為 **true**）會重新排序已固定的連線，讓相符的快取鍵持續使用同一帳戶。其優先順序高於跨固定帳戶步驟的 round-robin 與 weighted 輪替。若需要嚴格輪替，請前往「Settings → Combo defaults」將其關閉。此設定無法針對個別組合覆寫。
 
-若要在單一模型上進行多帳戶輪轉，建議使用**一個動態帳戶步驟**（空白的 `connectionId`，使用整個集區），並將黏著上限設為 `1`，而非使用三個已釘選的 `connectionId`。即使 RR 計數器持續遞增，已釘選的步驟加上位置相近性機制仍會集中至同一帳戶。
+若要在單一模型上進行多帳戶輪替，建議使用**一個動態帳戶步驟**（`connectionId` 留空、使用整個集區）並將黏著限制設為 `1`，而不是使用三個固定的 `connectionId`。固定步驟加上親和性機制會集中到同一帳戶，即使 RR 計數器持續遞增亦然。
 
 ## 融合策略
 
@@ -405,13 +410,13 @@ Auto Combo 引擎不需要預先定義的組合。相反地，`open-sse/services
 
 ## API
 
-**沒有專用的 `POST /api/combos/auto` 端點** — Auto-Combo 可透過兩種方式使用：
+**沒有專用的 `POST /api/combos/auto` 端點**——Auto-Combo 可透過兩種方式使用：
 
-1. **零設定（建議）：** 傳送任何聊天補全請求，並將 `model` 設為 `"auto"` 或 `"auto/<variant>"`。虛擬工廠會針對每個請求建立組合 — 不需要持久化，也不需要 API 呼叫。
+1. **零設定（建議）：** 傳送任何聊天補全請求，並使用 `model: "auto"` 或 `model: "auto/<variant>"`。虛擬工廠會為每個請求建構組合——無須持久化，也無須進行 API 呼叫。
 
-2. **使用 `strategy: "auto"` 的持久化組合：** 透過 `POST /api/combos` 建立一般組合，並設定 `strategy: "auto"`，以及 `config.auto.weights` / `config.auto.candidatePool`。系統會使用相同的評分引擎；組合會儲存在 `combos` 中，並可透過 ID 重複使用。
+2. **使用 `strategy: "auto"` 的持久化組合：** 透過 `POST /api/combos` 建立一般組合，並設定 `strategy: "auto"`，以及 `config.auto.weights` / `config.auto.candidatePool`。系統會使用相同的評分引擎；該組合會儲存在 `combos` 中，並可透過 ID 重複使用。
 
-對於探索用途，`GET /api/combos/auto` 會列出每個變體及其解析後的候選集區，以及 `context_length` / `max_output_tokens` — 其值為候選集區各上下文視窗中的最大值。用戶端（例如 opencode 外掛程式）必須公告這些值，而不是 `0`：零上下文會完全停用 opencode 的自動壓縮，讓工作階段持續增長，直到閘道的歷史記錄清除機制破壞上下文。公告最大值是安全的，因為 Auto-Combo 的上下文預先篩選器會將超大請求路由至具有大型上下文視窗的候選項目。
+若要探索可用項目，`GET /api/combos/auto` 會列出每個變體及其解析後的候選集，另包含 `context_length` / `max_output_tokens`——即候選集中各個視窗的最大值。用戶端（例如 opencode 外掛程式）必須宣告這些值，而非 `0`：內容長度為零會完全停用 opencode 的自動壓縮，導致工作階段持續增長，直到閘道的歷史記錄清除機制破壞上下文。宣告最大值是安全的，因為 Auto-Combo 的上下文預先篩選器會將超大請求路由至具有大型視窗的候選項目。
 
 ```bash
 # 零設定用法（不建立組合）
@@ -420,7 +425,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# 透過一般組合端點建立持久化自動組合
+# 透過一般 combos 端點建立持久化的自動組合
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
@@ -428,31 +433,32 @@ curl -X POST http://localhost:20128/api/combos \
 
 ### 自動路由器策略
 
-持久化的 `strategy: "auto"` 組合可以將 `config.routerStrategy`（或舊版的
-`config.auto.routerStrategy`）設定為下列其中之一：
+持久化的 `strategy: "auto"` 組合可將 `config.routerStrategy`（或舊版
+`config.auto.routerStrategy`）設定為下列其中一項：
 
-- `rules` — 預設的加權評分
-- `score` — 選擇設定中加權分數最高的項目。分數完全相同時，會保留設定的
-  候選項目順序；現有的 `explorationRate` 會從完整的排序集區中抽樣。
-- `cost` / `eco` — 最便宜的健康提供者
-- `latency` / `fast` — 套用可靠性懲罰後，p95 延遲最低者
-- `sla-aware` / `sla` — 優先選擇符合 p95 延遲、錯誤率及選用
+- `rules`——預設的加權評分
+- `score`——選取已設定加權分數最高的項目。分數完全相同時，會保留設定的
+  候選項目順序；現有的 `explorationRate` 會從完整的已排序候選集中取樣。
+- `cost` / `eco`——最便宜的健康提供者
+- `latency` / `fast`——具有可靠性懲罰的最低 p95 延遲
+- `sla-aware` / `sla`——優先選取符合 p95 延遲、錯誤率及選用
   成本 SLO 的候選項目
-- `lkgp` — 優先使用最後已知良好的提供者
+- `lkgp`——優先使用最後一個已知良好的提供者
+- `nadir`——詢問 [Nadir](https://getnadir.com) 的決策 API，判斷提示需要候選集中的哪個模型；需主動啟用，失敗時開放回退至 `rules`
 
 ### 路由器策略詳解
 
-Auto-Combo 引擎提供 6 種可插拔的 **RouterStrategy** 實作，
-您可以透過 `config.routerStrategy`（或舊版的 `config.auto.routerStrategy`）進行切換。
-每個策略都會根據 `RoutingContext`
-（任務類型、工具／視覺提示、權杖估算值、選用的 SLA 政策、選用的
-最後已知良好提供者），從候選集區中選出一個提供者。
+Auto-Combo 引擎提供 7 種可插拔的 **RouterStrategy** 實作，
+您可透過 `config.routerStrategy`（或舊版 `config.auto.routerStrategy`）進行切換。
+每個策略會根據 `RoutingContext`
+（任務類型、工具／視覺提示、Token 估算值、選用的 SLA 政策、選用的
+最後已知良好提供者），從候選集中挑選一個提供者。
 
-#### 1. `rules`（預設）— 16 因子加權評分
+#### 1. `rules`（預設）——16 項因素加權評分
 
-包裝現有的評分引擎。先篩除斷路器狀態為 `OPEN` 的
-候選項目，接著使用目前的任務類型與 `getTaskFitness()` 執行 `scorePool()`，
-並選擇分數最高的提供者。
+封裝現有的評分引擎。先篩除斷路器狀態為 `OPEN` 的
+候選項目，接著使用目前的任務類型及 `getTaskFitness()` 執行 `scorePool()`，
+並選取分數最高的提供者。
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -472,16 +478,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**適用時機**：預設選項。當您希望在所有訊號之間取得均衡取捨時使用。
+**適用情境**：預設選項。適合希望在所有訊號之間取得均衡取捨時使用。
 
 **別名**：`rules`（無別名）
 
 ---
 
-#### 2. `cost` / `eco` — 最便宜的健康提供者
+#### 2. `cost` / `eco`——最便宜的健康提供者
 
-依照 `costPer1MTokens` 對候選集區進行排序（遞增），並選擇最便宜的提供者。
-會先篩除 `OPEN` 候選項目。
+依 `costPer1MTokens`（遞增）排序候選集，並選取最便宜的提供者。
+會先篩除狀態為 `OPEN` 的候選項目。
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -496,15 +502,16 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**適用時機**：成本敏感型工作負載、批次處理或背景工作。
+**適用情境**：成本敏感型工作負載、批次處理或背景作業。
 
 **別名**：`cost`、`eco`
 
 ---
 
-#### 3. `latency` / `fast` — 套用可靠性懲罰後，p95 延遲最低者
+#### 3. `latency` / `fast`——具有可靠性懲罰的最低 p95 延遲
 
-依據 `p95LatencyMs + (errorRate * 1000)` 排序。錯誤率懲罰可確保不可靠的提供者排名較低，即使其標稱延遲很低亦然。
+依 `p95LatencyMs + (errorRate * 1000)` 排序。錯誤率懲罰可確保
+不可靠的提供者即使名義延遲較低，排名仍會較後。
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -521,25 +528,28 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**適用時機**：對延遲敏感的工作負載，例如即時聊天、自動完成或互動式程式設計助理。
+**適用情境**：對延遲敏感的工作負載，例如即時聊天、自動完成或
+互動式程式設計助理。
 
 **別名**：`latency`、`fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — 延遲／錯誤／成本 SLO 合規性
+#### 4. `sla-aware` / `sla`——延遲／錯誤／成本 SLO 合規性
 
-根據每個候選項符合已設定 SLO 政策的程度進行評分：
+根據每個候選項目符合所設定 SLO 政策的程度進行評分：
 
-| 因素       | 權重 | 公式                                              |
-| ---------- | ---- | ------------------------------------------------- |
-| 延遲分數   | 35%  | `threshold / max(value, ε)`                       |
-| 錯誤分數   | 35%  | `threshold / max(value, ε)`                       |
-| 健康度分數 | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
-| 成本分數   | 10%  | `threshold / max(value, ε)` 或反向正規化          |
-| 穩定性分數 | 5%   | 反向正規化的延遲標準差                            |
+| 因素         | 權重 | 公式                                              |
+| ------------ | ---- | ------------------------------------------------- |
+| 延遲分數     | 35%  | `threshold / max(value, ε)`                       |
+| 錯誤分數     | 35%  | `threshold / max(value, ε)`                       |
+| 健康狀態分數 | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
+| 成本分數     | 10%  | `threshold / max(value, ε)` 或反向正規化          |
+| 穩定性分數   | 5%   | 反向正規化的延遲標準差                            |
 
-當 `hardConstraints: true` 時，候選項主要依據**違規分數**（超出任何 SLO 的程度）排序，接著再依綜合分數排序。否則，只會依綜合分數排序。
+當 `hardConstraints: true` 時，候選項目會先依照**違規分數**
+（超出任何 SLO 的程度）排序，再依綜合分數排序。否則只會依照
+綜合分數排序。
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -548,7 +558,7 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... 根據政策對每個候選項進行評分：{ targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... 根據原則對每個候選項目評分：{ targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
@@ -574,9 +584,11 @@ class SLAStrategyImpl implements RouterStrategy {
 
 ---
 
-#### 5. `lkgp` — 優先使用最後已知的良好提供者
+#### 5. `lkgp` — 優先使用最後一個已知良好的提供者
 
-首先嘗試**最後已知的良好提供者**（若已設定），然後退回使用 `rules` 策略。適合用於工作階段黏著性——由相同提供者處理對話中的後續請求。
+會先嘗試**最後一個已知良好的提供者**（若已設定），接著退回使用
+`rules` 策略。這適合用於工作階段黏著性——由同一個提供者處理
+對話中的後續請求。
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -603,15 +615,63 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-**適用時機**：希望由相同提供者處理後續請求的多輪對話（例如為了快取、情境連續性或定價一致性）。
+**適用時機**：當您希望由同一個提供者處理多輪對話中的
+後續請求時（例如為了快取、上下文連貫性或定價一致性）。
 
 **別名**：`lkgp`（無其他別名）
 
 ---
 
+#### 6. `nadir` — 透過 Nadir 依提示選擇模型
+
+上述每種策略都會依據各自的遙測資料對候選項目進行排名；它們都不會讀取
+請求。`nadir` 會將最後一輪使用者訊息以及集區中的模型 ID 傳送至
+[Nadir](https://getnadir.com) 的決策 API（`POST /v1/bucket`），並路由至 Nadir
+從該選單中選出的模型（`simple` → 能勝任的最便宜模型，`complex` →
+前沿模型）。提供該模型的連線仍由 `rules` 選擇，因此配額、
+健康狀態與成本仍會決定使用哪個帳號。
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "nadir",
+    "nadir": {
+      "apiKey": "ndr_...",
+      "baseUrl": "https://api.getnadir.com",
+      "timeoutMs": 2000
+    }
+  }
+}
+```
+
+`OMNIROUTE_NADIR_API_KEY` 與 `OMNIROUTE_NADIR_BASE_URL` 是這兩個
+字串的備用環境變數。只有自行託管 Nadir 時才需要 `baseUrl`（可接受尾端帶有 `/v1`）。
+無金鑰的呼叫會使用 Nadir 的匿名方案，該方案會依每個 IP 限制速率。使用金鑰時
+（[建立一個](https://app.getnadir.com/dashboard/api-keys)），每次決策都會
+記錄到您的 Nadir 儀表板。完整的設定與驗證說明：
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/)。
+
+傳送至外部的內容包括：最後一則使用者訊息的文字（前 16k 個字元）、候選
+模型 ID，以及 `source: "omniroute"` 通道標籤。不會傳送系統提示、歷史記錄、工具或
+標頭。
+
+失敗行為採用開放式失效：逾時（預設為 2000 ms）、非 2xx 回應、主機無法連線、
+格式錯誤的回應，或選取結果不在集區內時，都會採用 `rules`
+決策，且原因前面會加上 `NadirStrategy: fallback (…)`。呼叫失敗後，
+該策略會略過網路請求 30 秒，因此服務中斷時每 30 秒只會產生一次逾時，而非
+每個請求都發生一次。只有當 Nadir 確實做出選擇時，路由事件才會回報 `strategy: "nadir"`。
+
+**適用時機**：流量中的任務難度不一，且集區橫跨多個模型層級（小型、中型
+與前沿模型），而您希望降低一律使用前沿模型所產生的成本。
+
+**別名**：`nadir`（無其他別名）
+
+---
+
 ### 自訂路由器策略
 
-您可以透過公用 API 註冊自己的 `RouterStrategy` 實作：
+您可以透過公開 API 註冊自己的 `RouterStrategy` 實作：
 
 ```ts
 import {
@@ -639,7 +699,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-然後即可使用：
+接著使用它：
 
 ```json
 {
@@ -654,13 +714,14 @@ registerStrategy("my-custom", new MyCustomStrategy());
 
 ### 路由器策略選擇指南
 
-| 使用案例       | 策略        | 原因                           |
-| -------------- | ----------- | ------------------------------ |
-| 平衡型工作負載 | `rules`     | 預設值——考量所有因素           |
-| 最小化成本     | `cost`      | 一律選擇最便宜的提供者         |
-| 最小化延遲     | `latency`   | 選擇最快且可靠的提供者         |
-| 嚴格的 SLO     | `sla-aware` | 依 p95／錯誤／成本門檻進行篩選 |
-| 多輪聊天       | `lkgp`      | 工作階段黏著性                 |
+| 使用情境     | 策略        | 原因                             |
+| ------------ | ----------- | -------------------------------- |
+| 均衡工作負載 | `rules`     | 預設值 — 會考量所有因素          |
+| 最小化成本   | `cost`      | 一律選擇最便宜的提供者           |
+| 最小化延遲   | `latency`   | 選擇速度最快且可靠的提供者       |
+| 嚴格的 SLO   | `sla-aware` | 依 p95／錯誤率／成本閾值進行篩選 |
+| 多輪對話     | `lkgp`      | 工作階段黏著性                   |
+| 混合難度     | `nadir`     | 依每個提示選擇模型層級           |
 
 SLA 感知欄位：
 
@@ -732,15 +793,15 @@ SLA 感知欄位：
 
 ## 檔案
 
-| 檔案                                                      | 用途                                                                         |
-| :-------------------------------------------------------- | :--------------------------------------------------------------------------- |
-| `open-sse/services/autoCombo/scoring.ts`                  | 16 因子評分函式、`DEFAULT_WEIGHTS`、池正規化                                 |
-| `open-sse/services/autoCombo/taskFitness.ts`              | 模型 × 任務適配度查找                                                        |
-| `open-sse/services/autoCombo/engine.ts`                   | 選擇邏輯、多臂吃角子機、預算上限                                             |
-| `open-sse/services/autoCombo/selfHealing.ts`              | 排除、探測、事件模式                                                         |
-| `open-sse/services/autoCombo/modePacks.ts`                | 6 種權重設定檔（快速交付、省成本、品質優先、離線友善、可靠性優先、混沌模式） |
-| `open-sse/services/autoCombo/autoPrefix.ts`               | `auto/` 前綴剖析器 + 6 種變體                                                |
-| `open-sse/services/autoCombo/virtualFactory.ts`           | 從即時連線建立記憶體內的 `AutoComboConfig`                                   |
-| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | 用於模擬提供者登錄檔的測試掛鉤                                               |
-| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES`（19 種策略）                                       |
-| `src/sse/handlers/chat.ts`                                | 整合：auto-prefix 短路處理                                                   |
+| 檔案                                                      | 用途                                                                           |
+| :-------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| `open-sse/services/autoCombo/scoring.ts`                  | 16 因子評分函式、`DEFAULT_WEIGHTS`、集區正規化                                 |
+| `open-sse/services/autoCombo/taskFitness.ts`              | 模型 × 任務適配度查詢                                                          |
+| `open-sse/services/autoCombo/engine.ts`                   | 選擇邏輯、多臂吃角子機、預算上限                                               |
+| `open-sse/services/autoCombo/selfHealing.ts`              | 排除、探測、事件模式                                                           |
+| `open-sse/services/autoCombo/modePacks.ts`                | 6 種權重設定檔（快速交付、節省成本、品質優先、離線友善、可靠性優先、混沌模式） |
+| `open-sse/services/autoCombo/autoPrefix.ts`               | `auto/` 前綴剖析器 + 6 種變體                                                  |
+| `open-sse/services/autoCombo/virtualFactory.ts`           | 從即時連線建立記憶體內的 `AutoComboConfig`                                     |
+| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | 用於模擬提供者登錄檔的測試掛鉤                                                 |
+| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES`（20 種策略）                                         |
+| `src/sse/handlers/chat.ts`                                | 整合：auto-prefix 短路處理                                                     |
