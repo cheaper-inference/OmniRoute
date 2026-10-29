@@ -28,9 +28,6 @@ export const MAX_BODY_BYTES_AUDIO = 100 * 1024 * 1024;
 /** Larger limit for file uploads: 500 MB */
 export const MAX_BODY_BYTES_FILE = 500 * 1024 * 1024;
 
-/** Larger limit for LLM request payloads: 50 MB */
-export const MAX_BODY_BYTES_LLM_API = 50 * 1024 * 1024;
-
 /** Fixed limit for the loopback-only Video Bridge extraction broker: 50 MB. */
 export const MAX_BODY_BYTES_VIDEO_BRIDGE_BROKER = 50 * 1024 * 1024;
 
@@ -62,8 +59,6 @@ const ROUTE_LIMITS: BodySizeRule[] = [
     fixedLimit: true,
   },
   { prefix: "/api/db-backups/import", limit: MAX_BODY_BYTES_IMPORT },
-  { prefix: "/api/v1/chat/completions", limit: MAX_BODY_BYTES_LLM_API },
-  { prefix: "/api/v1/responses", limit: MAX_BODY_BYTES_LLM_API },
   { prefix: "/api/v1/images", limit: MAX_BODY_BYTES_MEDIA },
   { prefix: "/api/v1/videos", limit: MAX_BODY_BYTES_MEDIA },
   { prefix: "/api/v1/audio/transcriptions", limit: MAX_BODY_BYTES_AUDIO },

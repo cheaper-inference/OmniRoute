@@ -15,6 +15,8 @@
  * connection's burst cannot starve others (#9654).
  */
 
+import { getCachedSettings } from "../../lib/db/readCache";
+import { getConfiguredBodySizeLimitBytes } from "./bodySizeGuard";
 import { createLogger } from "../utils/logger";
 import { DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS } from "../../lib/resilience/settings";
 import v8 from "node:v8";
@@ -57,11 +59,6 @@ function parseNonNegativeInt(value: string | undefined, fallback: number): numbe
 export const CHAT_LARGE_BODY_BYTES = parsePositiveInt(
   process.env.OMNIROUTE_CHAT_LARGE_BODY_BYTES,
   256 * 1024
-);
-
-export const CHAT_HARD_MAX_BODY_BYTES = parsePositiveInt(
-  process.env.OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES,
-  50 * 1024 * 1024
 );
 
 export const CHAT_MAX_HEAVY_IN_FLIGHT = parsePositiveInt(
@@ -1022,6 +1019,18 @@ function rebuildRequest(request: Request, body: Uint8Array): Request {
   } as RequestInit & { duplex: "half" });
 }
 
+async function getChatBodyLimitBytes(): Promise<number> {
+  try {
+    return getConfiguredBodySizeLimitBytes(await getCachedSettings());
+  } catch (error) {
+    shedLog.warn(
+      { err: error },
+      "Failed to load request body limit; using the environment default"
+    );
+    return getConfiguredBodySizeLimitBytes();
+  }
+}
+
 /** Reserve heavyweight capacity and ingest the body with a hard byte bound. */
 export async function admitChatRequest(
   request: Request,
@@ -1038,7 +1047,9 @@ export async function admitChatRequest(
   const controller =
     options.controller ?? perConnectionAdmissionController.getController(sessionId);
   const largeBodyBytes = options.largeBodyBytes ?? CHAT_LARGE_BODY_BYTES;
-  const hardMaxBytes = options.hardMaxBytes ?? CHAT_HARD_MAX_BODY_BYTES;
+  // Snapshot the same saved limit used by the header guard, once per request.
+  // Legacy OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES is not a second, hidden ceiling.
+  const hardMaxBytes = options.hardMaxBytes ?? (await getChatBodyLimitBytes());
   const queueMs = options.queueMs ?? 0;
   const internalBypass = isInternalAdmissionBypass(request);
   const contentLength = parseContentLength(request.headers.get("content-length"));

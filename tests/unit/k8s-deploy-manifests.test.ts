@@ -24,6 +24,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { parseAllDocuments } from "yaml";
+import { DEFAULT_REQUEST_BODY_LIMIT_MB } from "../../src/shared/constants/bodySize";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
 const K8S_DIR = path.join(REPO_ROOT, "deploy/kubernetes");
@@ -375,15 +376,8 @@ test("the ingress body limit is not below the application's own cap", () => {
   // nginx return 413 for bodies the app would have accepted, and the app's own
   // 413 handling (which tells the client to compact) never gets to run. Read the
   // real default rather than restating it, so raising one side fails this test.
-  const admission = fs.readFileSync(
-    path.join(REPO_ROOT, "src/shared/middleware/chatBodyAdmission.ts"),
-    "utf8"
-  );
-  const appCap = admission.match(
-    /CHAT_HARD_MAX_BODY_BYTES = parsePositiveInt\(\s*process\.env\.OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES,\s*(\d+)\s*\*\s*1024\s*\*\s*1024/
-  );
-  assert.ok(appCap, "could not read the app's hard body cap — update this test with it");
-  const appCapMb = Number(appCap[1]);
+  // Deployments increasing maxBodySizeMb must also raise their ingress limit.
+  const appCapMb = DEFAULT_REQUEST_BODY_LIMIT_MB;
 
   const ing = firstOfKind(
     loadYaml<K8sDoc>("deploy/kubernetes/overlays/k8s/ingress.yaml"),
