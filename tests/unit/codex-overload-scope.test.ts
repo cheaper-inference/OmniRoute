@@ -354,7 +354,7 @@ test("Codex capacity 429 keeps genuine percent and token exhaustion protected", 
     );
   }
   assert.equal(
-    isTransientCodexCapacity429(429, "Codex is at capacity\\nYour quota\\nis exhausted", {}),
+    isTransientCodexCapacity429(429, "Codex is at capacity\nYour quota\nis exhausted", {}),
     false
   );
   for (const headers of [
