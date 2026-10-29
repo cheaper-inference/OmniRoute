@@ -2987,6 +2987,29 @@
       "stream": "https://api.z.ai/api/coding/paas/v4/chat/completions"
     }
   },
+  "gondola": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.gondola-ai.com/v1/chat/completions",
+      "stream": "https://api.gondola-ai.com/v1/chat/completions"
+    }
+  },
   "greenpt": {
     "format": "openai",
     "headers": {

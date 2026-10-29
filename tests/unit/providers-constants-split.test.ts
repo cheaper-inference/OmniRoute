@@ -58,7 +58,8 @@ const P = await import("../../src/shared/constants/providers.ts");
 // NaN.Builders adds one apikey/gateways entry — 250.
 // DaoXE adds one apikey/gateways entry — 251.
 // ainetcafe (#13862) adds one apikey/gateways entry — 253.
-const APIKEY_PROVIDER_COUNT = 253;
+// Gondola (#15554) adds one apikey/gateways entry (apikey/gondola.ts) — 254.
+const APIKEY_PROVIDER_COUNT = 254;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [

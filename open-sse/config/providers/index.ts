@@ -259,6 +259,7 @@ import { llmKiwiProvider } from "./registry/llm-kiwi/index.ts";
 import { literouterProvider } from "./registry/literouter/index.ts";
 import { greenptProvider } from "./registry/greenpt/index.ts";
 import { ainetcafeProvider } from "./registry/ainetcafe/index.ts";
+import { gondolaProvider } from "./registry/gondola/index.ts";
 import { onomeoProvider } from "./registry/onomeo/index.ts";
 import { eurouterProvider } from "./registry/eurouter/index.ts";
 import { unificallyProvider } from "./registry/unifically/index.ts";
@@ -553,6 +554,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   literouter: literouterProvider,
   greenpt: greenptProvider,
   ainetcafe: ainetcafeProvider,
+  gondola: gondolaProvider,
   onomeo: onomeoProvider,
   eurouter: eurouterProvider,
   unifically: unificallyProvider,
