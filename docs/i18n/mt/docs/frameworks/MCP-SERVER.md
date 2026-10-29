@@ -72,6 +72,16 @@ curl -i \
 
 Ċavetta li mhijiex manage (jew ebda Bearer) terġa `403 LOCAL_ONLY`. Il-prefiss wieħed `/api/cli-tools/runtime/*` huwa apposta mhux baxx passabbli — ara [Livelli tal-Gwardja tal-rott — Ħlas tal-iskop manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Validazzjoni tal-Origin
+
+Wara l-awtentikazzjoni, kull talba lejn `/api/mcp/*` — it-transports u r-rotot ta' ġestjoni bħal `status`, `tools`, `audit`, `restart` — għandha l-header `Origin` tagħha vvalidata, ikun min ikun is-sejjieħ (ċavetta API, token tas-CLI, sessjoni tad-dashboard, jew loopback anonimu bil-login mitfi). Din hija l-protezzjoni kontra DNS rebinding li teħtieġ l-ispeċifikazzjoni MCP Streamable HTTP.
+
+- **L-ebda header `Origin`** → permess. Is-CLI ta' OmniRoute, l-SDK u l-klijenti IDE ma jibagħtuhiex.
+- **`Origin` permess** → `localhost` / `127.0.0.1` / `[::1]` fuq kwalunkwe port, jew l-oriġini pubblika ta' OmniRoute stess: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, l-oriġini mgħoddija minn reverse proxy fdat (`OMNIROUTE_TRUST_PROXY`, biss meta ma jkunx issettjat base URL), jew host IP loopback/LAN aċċessat direttament. Il-header `Host` waħdu qatt ma jagħmel oriġini fdata.
+- **Kwalunkwe `Origin` ieħor, inkluż `null`** → `403` b'korp ta' żball JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Sessjoni tad-dashboard li tippreżenta token CSRF validu għadha tiġi aċċettata, bħal fil-kitbiet l-oħra tad-dashboard.
+
+Klijent MCP tal-browser servut wara reverse proxy jeħtieġ `OMNIROUTE_PUBLIC_BASE_URL`; m'hemm l-ebda lista ta' permess għal oriġini oħra. Il-preflight CORS (`OPTIONS`) ma jiġix iċċekkjat għall-Origin; it-talba ta' wara iva.
+
 ## Konfigurazzjoni tal-IDE
 
 Ara [Konfigurazjoni tal-Klijent MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) għal Claude Desktop,
@@ -290,55 +300,55 @@ It-trasport SSE u HTTP li jista' jiġi sfruttat it-tnejn huma ibblukkati sakemm 
 
 ## Awtentikazzjoni u Ambiti
 
-Is-sejħiet tal-għodod MCP jaqraw is-strings tal-ambitu mingħand min jagħmel is-sejħa. Dak il-kontroll huwa wieħed minn tliet
-spazji tal-ismijiet indipendenti. Suċċess minn kontrollur wieħed ma jfissirx suċċess mill-oħrajn.
+Is-sejħiet tal-għodod MCP jaqraw is-sekwenzi tal-ambiti mingħand min jagħmel is-sejħa. Dak il-kontroll huwa wieħed minn tliet
+spazji tal-ismijiet indipendenti. Approvazzjoni minn kontrollur wieħed mhijiex approvazzjoni mill-oħrajn.
 Ir-regoli jinsabu f’[Tliet spazji tal-ismijiet tal-ambiti](#three-scope-namespaces).
 Il-katalgu tal-għodod jinsab f’[Ambiti tal-għodod MCP](#mcp-tool-scopes).
 
 ### Tliet spazji tal-ismijiet tal-ambiti
 
 `manage` fuq ċavetta API, `read:compression` fuq għodda MCP, u `read` fuq
-token ta’ aċċess `oma_live_…` huma tliet awtorizzazzjonijiet differenti. Min jagħmel sejħa u jibgħat token ta’ aċċess
-`read` lil rotta ta’ ġestjoni li tagħmel bidliet jirċievi HTTP 403
+token tal-aċċess `oma_live_…` huma tliet awtorizzazzjonijiet differenti. Min jagħmel sejħa u jibgħat token tal-aċċess `read`
+lejn rotta ta’ ġestjoni li timmodifika jirċievi HTTP 403
 `Access token scope 'read' is insufficient; 'write' required.`
 Dak il-grad huwa `scopeSatisfies`. Dan ma jikkonsultax it-tabella MCP, u l-mekkaniżmu ta’
 tqabbil MCP ma jikkonsultahx.
 
-| Spazju tal-ismijiet      | Kredenzjali                                                             | Kontrollur                  | Suċċess jippermetti                                                    |
-| :----------------------- | :---------------------------------------------------------------------- | :-------------------------- | :--------------------------------------------------------------------- |
-| Ġestjoni taċ-ċavetta API | `api_keys.scopes`                                                       | `hasManageScope`            | REST ta’ ġestjoni għal dik iċ-ċavetta Bearer                           |
-| Addittiv taċ-ċavetta API | l-istess array, string eżatta waħda                                     | il-helper imsemmi hawn taħt | Dik il-kapaċità waħda biss                                             |
-| Ambiti tal-għodod MCP    | l-istess array, inkella `_meta` ta’ MCP, inkella `OMNIROUTE_MCP_SCOPES` | `scopeMatches`              | Dik l-għodda, ladarba l-infurzar ikun attiv                            |
-| Token ta’ aċċess         | `oma_live_…`                                                            | `scopeSatisfies`            | Ir-rotta ta’ ġestjoni li l-metodu u l-path tagħha jeħtieġu dak il-grad |
+| Spazju tal-ismijiet      | Kredenzjali                                                             | Kontrollur                                | Approvazzjoni tippermetti                                                  |
+| :----------------------- | :---------------------------------------------------------------------- | :---------------------------------------- | :------------------------------------------------------------------------- |
+| Ġestjoni taċ-ċavetta API | `api_keys.scopes`                                                       | `hasManageScope`                          | REST tal-ġestjoni għal dik iċ-ċavetta Bearer                               |
+| Żieda għaċ-ċavetta API   | l-istess array, sekwenza eżatta waħda                                   | il-funzjoni awżiljarja msemmija hawn taħt | Dik il-kapaċità biss                                                       |
+| Ambiti tal-għodod MCP    | l-istess array, inkella `_meta` ta’ MCP, inkella `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                            | Dik l-għodda, ladarba l-infurzar ikun mixgħul                              |
+| Token tal-aċċess         | `oma_live_…`                                                            | `scopeSatisfies`                          | Ir-rotta ta’ ġestjoni li l-metodu u l-mogħdija tagħha jeħtieġu dak il-grad |
 
-Il-ħolqien ta’ kull kredenzjali huwa kopert f’
+Il-ħruġ ta’ kull kredenzjali huwa kopert f’
 [Awtentikazzjoni tal-Ġestjoni](../guides/MANAGEMENT-AUTH.md).
 
 #### Ambiti taċ-ċwievet API
 
-Array wieħed `api_keys.scopes` jaqdi żewġ funzjonijiet. Dawn jużaw funzjonijiet differenti.
+Array wieħed `api_keys.scopes` jintuża għal żewġ kompiti. Dawn jużaw funzjonijiet differenti.
 
-**REST ta’ ġestjoni.** `manage` u `admin` huma l-membri ta’
+**REST tal-ġestjoni.** `manage` u `admin` huma l-membri ta’
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
 `hasManageScope` huwa dak li jawtorizza r-rotot ta’ ġestjoni għal dik iċ-ċavetta. `admin` għandu
-kapaċità ta’ ġestjoni fuq dawk ir-rotot. Il-kelma `admin` hawnhekk mhijiex il-
-grad tat-token ta’ aċċess u ma tespandix f’ambiti tal-għodod MCP.
+kapaċità ta’ ġestjoni fuq dawk ir-rotot. Il-kelma `admin` hawnhekk mhijiex il-grad
+tat-token tal-aċċess u ma tespandix f’ambiti tal-għodod MCP.
 
-**Strings addittivi.** Kull waħda hija test ta’ sħubija eżatta, u kull waħda tibqa’
+**Sekwenzi addittivi.** Kull waħda hija test eżatt ta’ appartenenza, u kull waħda tibqa’
 barra minn `MANAGEMENT_API_KEY_SCOPES`.
 
-| Ambitu                         | Suċċess jippermetti                                                                                                                                                            |
+| Ambitu                         | Approvazzjoni tippermetti                                                                                                                                                      |
 | :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `mcp:connect`                  | L-eċċezzjoni LOCAL_ONLY ta’ `/api/mcp/` mhux loopback biss (`hasMcpConnectOrManageScope`). Ċavetta b’`manage` jew `admin` xorta tgħaddi minn dik l-eċċezzjoni.                 |
 | `self:usage`                   | `GET /api/v1/me/status` għal din iċ-ċavetta (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` iżid dan l-ambitu waqt il-ħolqien (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Kwoti tal-kont upstream fi ħdan dik id-data tal-istatus (`src/lib/usage/apiKeySelfService.ts`). Ir-rotta tal-istatus xorta teħtieġ `self:usage`.                               |
+| `self:account-quota`           | Kwoti tal-kont upstream f’dik it-tagħbija tal-istatus (`src/lib/usage/apiKeySelfService.ts`). Ir-rotta tal-istatus xorta teħtieġ `self:usage`.                                 |
 | `policy:bypass-provider-quota` | Is-sejħiet ta’ inferenza ta’ din iċ-ċavetta jaqbżu l-politika tal-kwota tal-fornitur (`hasProviderQuotaBypassScope` f’`src/sse/handlers/chat.ts`).                             |
 
 #### Tqabbil
 
 Il-katalgu huwa t-tabella taħt [Ambiti tal-għodod MCP](#mcp-tool-scopes). Tittrattax
 `MCP_SCOPE_LIST` f’`src/shared/constants/mcpScopes.ts` bħala dak il-katalgu:
-huwa s-subsett oriġinali bit-tipi definiti. Għodod miżjuda aktar tard jiddikjaraw ambiti oħra maġenbu
+dan huwa s-subsett ittajpjat oriġinali. Għodod miżjuda aktar tard jiddikjaraw ambiti oħra maġenbu
 (`read:notion`, `read:skills`, `read:local-corpus`, u l-bqija tat-tabella).
 
 `evaluateToolScopes` f’`open-sse/mcp-server/scopeEnforcement.ts` jippermetti sejħa
@@ -347,46 +357,50 @@ meta kull ambitu meħtieġ jaqbel ma’ xi ambitu mogħti:
 - `*` jaqbel ma’ kull ambitu meħtieġ.
 - Ambitu mogħti li jispiċċa b’`*` jaqbel ma’ ambitu meħtieġ li jibda bil-
   prefiss ta’ qabel l-asterisk. `read:*` jaqbel ma’ `read:compression`.
-- Kull ambitu mogħti ieħor jaqbel biss mal-istess string eżatta meħtieġa.
+- Kull ambitu mogħti ieħor jaqbel biss mas-sekwenza meħtieġa identika.
 
 Ċavetta li l-ambiti tagħha huma `["manage"]` ma tgħaddix minn `scopeMatches` għal `read:compression`.
-L-istess sejħa ma tgħaddix għal `admin`, `mcp:connect`, `read`, u `write` meta dawk
-ikunu l-uniċi strings mogħtija. Ma hemm ebda ġerarkija fost l-ambiti tal-għodod MCP
-lil hinn mill-`*` fit-tarf.
+L-istess sejħa ma tgħaddix għal `admin`, `mcp:connect`, `read`, u `write` meta dawn
+ikunu l-uniċi sekwenzi mogħtija. M’hemm l-ebda ġerarkija fost l-ambiti tal-għodod MCP
+lil hinn mill-`*` finali.
 
-L-infurzar ikun mitfi sakemm `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (il-valur
-default huwa `false`). Waqt li jkun mitfi, `evaluateToolScopes` jippermetti s-sejħa u jaqbeż il-
-katalgu. Waqt li jkun mixgħul, HTTP juża l-`api_keys.scopes` taċ-ċavetta Bearer bħala
+L-infurzar ikun mitfi sakemm `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (valur predefinit
+`false`). Waqt li jkun mitfi, `evaluateToolScopes` jippermetti s-sejħa u jaqbeż il-
+katalgu. Waqt li jkun mixgħul, HTTP juża `api_keys.scopes` taċ-ċavetta Bearer bħala
 `authInfo` (ara [Rabta tal-ambitu HTTP għal kull ċavetta](#per-key-http-scope-binding-7895)).
-Meta ma jinstab ebda ambitu taċ-ċavetta, is-sett mogħti jaqa’ lura għal `_meta` ta’ MCP, imbagħad
-għal `OMNIROUTE_MCP_SCOPES`.
+Meta ma jiġux solvuti ambiti taċ-ċavetta, is-sett mogħti jgħaddi għal `_meta` ta’ MCP, imbagħad għal
+`OMNIROUTE_MCP_SCOPES`.
 
-#### Ambiti tat-tokens ta’ aċċess
+#### Ambiti tat-tokens tal-aċċess
 
-It-tokens `oma_live_…` (`src/lib/accessTokens/scopes.ts`) iġorru `read`, `write`,
+It-tokens `oma_live_…` (`src/lib/accessTokens/scopes.ts`) ikollhom `read`, `write`,
 jew `admin`. `scopeSatisfies` huwa grad: `admin` ikopri `write` u `read`, u
 `write` ikopri `read`. Ambiti mhux magħrufa ma jkopru xejn.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) iqabbel dak il-
-grad ma’ `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) iqabbel dak
+il-grad ma’ `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD`, u `OPTIONS` jeħtieġu `read`.
 - Kull metodu ieħor jeħtieġ `write`.
-- Paths f’`ADMIN_SCOPE_PREFIXES` jeħtieġu `admin` għal kull metodu. `/api/mcp`
-  jinsab f’dik il-lista, għalhekk token ta’ aċċess `write` xorta ma jistax isejjaħ is-superfiċje HTTP
+- Mogħdijiet f’`ADMIN_SCOPE_PREFIXES` jeħtieġu `admin` għal kull metodu. `/api/mcp`
+  jinsab f’dik il-lista, għalhekk token tal-aċċess `write` xorta ma jistax isejjaħ l-interfaċċa HTTP
   ta’ MCP.
-- Paths f’`ADMIN_MUTATION_PREFIXES` jeħtieġu `admin` biss għall-mutazzjonijiet.
+- Mogħdijiet f’`ADMIN_MUTATION_PREFIXES` jeħtieġu `admin` biss għal modifiki.
+- Mogħdijiet f’`ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
+  `/api/settings/require-login`) jeħtieġu `admin` biss għal modifiki, u biss fuq
+  dik il-mogħdija eżatta — subrotot oħra `/api/settings/*` iżommu `write`.
 
-`PATCH /api/keys/{id}` hija mutazzjoni u mhijiex f'dawk il-listi tal-amministratur, għalhekk
-token `read` jirċievi 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Token ta' aċċess `write` jew `admin` jissodisfa dik ir-rotta. JWT tad-dashboard, it-token
-tal-machine-id tas-CLI loopback, u API key b'`manage` jew `admin` jgħaddu minn
-fergħat oħra u mhumiex limitati minn din il-klassifikazzjoni.
+`PATCH /api/keys/{id}` hija mutazzjoni u mhijiex f'dawk il-listi tal-amministratur, għalhekk token
+`read` jirċievi 403
+`L-ambitu 'read' tat-token ta' aċċess mhuwiex biżżejjed; huwa meħtieġ 'write'.`
+Token ta' aċċess `write` jew `admin` jissodisfa dik ir-rotta. JWT tad-dashboard,
+it-token machine-id tas-CLI tal-loopback, u ċavetta tal-API b'`manage` jew `admin`
+jgħaddu minn fergħat oħra u mhumiex ristretti minn dan il-grad.
 
-Token ta' aċċess li jgħaddi minn `scopeSatisfies` għal `/api/mcp` ikun għadda biss mill-
-kontroll tal-ġestjoni. Is-sejħiet tal-għodod xorta waħda jħaddmu `scopeMatches` kontra l-ambiti
-tal-API key. Il-klassifikazzjoni tat-token ta' aċċess mhijiex input għal `scopeMatches`.
+Token ta' aċċess li jgħaddi minn `scopeSatisfies` għal `/api/mcp` ikun għadda
+biss mill-punt ta' kontroll tal-ġestjoni. Is-sejħiet tal-għodod xorta jħaddmu
+`scopeMatches` kontra l-ambiti taċ-ċavetta tal-API. Il-grad tat-token ta' aċċess
+mhuwiex input għal `scopeMatches`.
 
 ### Ambiti tal-għodod MCP
 
@@ -431,44 +445,44 @@ Kull għodda teħtieġ ambiti speċifiċi:
 
 L-ambiti wildcard huma appoġġjati: `read:*` jagħti l-ambiti kollha tal-qari, filwaqt li `*` jagħti aċċess sħiħ.
 
-### `mcp:connect` — kapaċità limitata tar-rotta (#7895)
+### `mcp:connect` — kapaċità ristretta tar-rotta (#7895)
 
-L-aċċess għat-trasport HTTP/SSE MCP (`/api/mcp/*`) minn indirizz mhux loopback jeħtieġ
-l-eċċezzjoni LOCAL_ONLY ta’ `/api/mcp/` (ara `docs/security/ROUTE_GUARD_TIERS.md`). Storikament,
-dik l-eċċezzjoni kienet taċċetta biss API key b’ambitu sħiħ `manage`/`admin` — wisq wiesa’
-għal min jagħmel sejħiet u jeħtieġ biss jikkomunika ma’ MCP. `src/shared/constants/managementScopes.ts` issa
-jesporta `MCP_CONNECT_SCOPE = "mcp:connect"`: ambitu addittiv u limitat (fuq l-istess preċedent bħal
-`SELF_USAGE_SCOPE`) li jawtorizza BISS il-bypass ta’ `/api/mcp/` f’
-`src/server/authz/policies/management.ts` — ma jagħti l-ebda aċċess ieħor għar-rotot ta’ ġestjoni
-u intenzjonalment jinżamm BARRA minn `MANAGEMENT_API_KEY_SCOPES`. Key li jkollha `manage`/`admin`
-xorta tgħaddi mill-eċċezzjoni mingħajr tibdil; `mcp:connect` hija alternattiva b’inqas privileġġi għal
-dawk li jagħmlu sejħiet remoti lil MCP biss, ivverifikata permezz ta’ `hasMcpConnectOrManageScope()`.
+L-aċċess għat-trasport HTTP/SSE MCP (`/api/mcp/*`) minn indirizz li mhuwiex loopback jeħtieġ l-eċċezzjoni LOCAL_ONLY ta’
+`/api/mcp/` (ara `docs/security/ROUTE_GUARD_TIERS.md`). Storikament,
+dik l-eċċezzjoni kienet taċċetta biss ċavetta API b’ambitu sħiħ `manage`/`admin` — wisq wiesa’ għal
+klijent li jeħtieġ biss jikkomunika ma’ MCP. `src/shared/constants/managementScopes.ts` issa
+jesporta `MCP_CONNECT_SCOPE = "mcp:connect"`: ambitu addittiv u ristrett (fuq l-istess preċedent bħal
+`SELF_USAGE_SCOPE`) li jawtorizza BISS il-bypass ta’ `/api/mcp/` fi
+`src/server/authz/policies/management.ts` — ma jagħti l-ebda aċċess għal rotot oħra ta’ ġestjoni
+u deliberatament jinżamm BARRA minn `MANAGEMENT_API_KEY_SCOPES`. Ċavetta li għandha `manage`/`admin`
+xorta tgħaddi mill-eċċezzjoni mingħajr tibdil; `mcp:connect` huwa alternattiva bi privileġġi aktar baxxi għal
+klijenti remoti li jużaw biss MCP, ivverifikata permezz ta’ `hasMcpConnectOrManageScope()`.
 
-### Rabta tal-ambiti HTTP għal kull key (#7895)
+### Rabta tal-ambitu HTTP għal kull ċavetta (#7895)
 
-Fuq HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` issa jirriżolvi l-
-`api_keys.scopes` reali ta’ min jagħmel is-sejħa permezz ta’ `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-u jgħaddih lill-`transport.handleRequest(req, { authInfo })` tal-MCP SDK, sabiex
-`extra.authInfo.scopes` li jasal f’kull sejħa ta’ għodda jirrifletti l-ambiti tal-Bearer key stess.
+Permezz ta’ HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` issa jirriżolvi l-ambiti reali
+`api_keys.scopes` tal-klijent permezz ta’ `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
+u jgħaddihom lill-`transport.handleRequest(req, { authInfo })` tal-MCP SDK, sabiex
+`extra.authInfo.scopes` li jasal f’kull sejħa ta’ għodda jirrifletti l-ambiti taċ-ċavetta Bearer innifisha.
 `resolveCallerScopeContext()` ta’ `scopeEnforcement.ts` diġà kien jagħti prijorità lil `authInfo` fuq
-il-fallback ta’ `_meta` u tal-varjabbli tal-ambjent `OMNIROUTE_MCP_SCOPES` — dan sempliċement jimla dak l-ewwel
-sors bl-ogħla prijorità, li qabel ma kienx jiġi pprovdut fuq HTTP. Meta ma tiġi riżolta l-ebda API key
-(ebda header, key invalida), `authInfo` jibqa’ `undefined` u r-riżoluzzjoni tkompli tul il-katina
-eżistenti ta’ fallback `meta`/ambjent mingħajr tibdil. stdio ma għandu l-ebda identità għal kull min jagħmel is-sejħa (ara
-`mcpCallerIdentity.ts`) u mhuwiex affettwat — jibqa’ juża l-katina ta’ fallback `_meta`/ambjent.
+il-fallback ta’ `_meta` u l-varjabbli tal-ambjent `OMNIROUTE_MCP_SCOPES` — dan sempliċement jimla dak l-ewwel
+sors bl-ogħla prijorità, li qabel ma kienx jiġi pprovdut permezz ta’ HTTP. Meta ma tiġi riżolta l-ebda ċavetta API
+(l-ebda header, ċavetta invalida), `authInfo` jibqa’ `undefined` u r-riżoluzzjoni tkompli bil-katina
+eżistenti ta’ `meta`/varjabbli tal-ambjent mingħajr tibdil. stdio m’għandux identità għal kull klijent (ara
+`mcpCallerIdentity.ts`) u mhuwiex affettwat — jibqa’ juża l-katina ta’ fallback ta’ `_meta`/varjabbli tal-ambjent.
 
-**L-infurzar jiġi attivat bilfors għal dawk li jagħmlu sejħiet HTTP/SSE b’ambiti limitati, irrispettivament minn
+**L-infurzar jiġi attivat bilfors għal klijenti HTTP/SSE b’ambitu ristrett irrispettivament minn
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Il-fatt li `OMNIROUTE_MCP_ENFORCE_SCOPES` għandu valur predefinit ta’ `false` huwa sikur biss
-għall-fluss lokali/stdio b’operatur wieħed, fejn ma hemm l-ebda identità għal kull min jagħmel is-sejħa li magħha jistgħu jintrabtu l-ambiti.
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` jattiva l-infurzar tal-ambiti għal kull għodda
-mingħajr kundizzjonijiet (`shouldForceScopeEnforcement()` f’`scopeEnforcement.ts`)
+għall-fluss lokali/stdio b’operatur wieħed, fejn ma hemm l-ebda identità għal kull klijent li magħha jista’ jiġi assoċjat ambitu.
+`open-sse/mcp-server/server.ts::withScopeEnforcement()` jattiva mingħajr kundizzjonijiet l-infurzar tal-ambitu
+għal kull għodda (`shouldForceScopeEnforcement()` fi `scopeEnforcement.ts`)
 kull meta `resolveCallerScopeContext()` ikun irriżolva
-`source === "authInfo"` (jiġifieri header HTTP Authorization reali għal kull key, għal HTTP/SSE biss) U dik
-il-key ma jkollhiex ambitu sħiħ `manage`/`admin`. Dan jagħlaq il-lakuna fejn key li jkollha BISS
-l-ambitu limitat ta’ bypass `mcp:connect` — iddokumentat hawn fuq bħala li ma jawtorizza xejn ħlief
+`source === "authInfo"` (jiġifieri header HTTP Authorization reali għal kull ċavetta, għal HTTP/SSE biss) U dik
+iċ-ċavetta ma jkollhiex ambitu sħiħ `manage`/`admin`. Dan jagħlaq il-lakuna fejn ċavetta li jkollha BISS
+l-ambitu ristrett ta’ bypass `mcp:connect` — iddokumentat hawn fuq bħala li ma jawtorizza xejn ħlief
 l-eċċezzjoni LOCAL_ONLY ta’ `/api/mcp/` — setgħet inkella tinvoka kull għodda MCP ladarba operatur
-jattiva aċċess MCP remot/mhux loopback, sempliċement minħabba li `OMNIROUTE_MCP_ENFORCE_SCOPES` jiġi pprovdut
-b’`false` bħala valur predefinit. Key sħiħa `manage`/`admin` fuq HTTP, u kull min jagħmel sejħiet stdio/lokali, iżommu
+jattiva aċċess MCP remot/mhux loopback, sempliċement għax `OMNIROUTE_MCP_ENFORCE_SCOPES` jiġi pprovdut
+b’`false` bħala valur predefinit. Ċavetta sħiħa `manage`/`admin` permezz ta’ HTTP, u kull klijent stdio/lokali, iżommu
 mingħajr tibdil l-imġiba eżistenti kkontrollata minn `OMNIROUTE_MCP_ENFORCE_SCOPES`.
 
 ---

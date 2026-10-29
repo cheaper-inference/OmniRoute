@@ -66,6 +66,16 @@ curl -i \
 
 Առանց `manage` տիրույթի բանալին (կամ Bearer-ի բացակայությունը) վերադարձնում է `403 LOCAL_ONLY`։ Հարակից `/api/cli-tools/runtime/*` նախածանցը դիտավորյալ շրջանցելի ՉԷ․ տե՛ս [Երթուղիների պաշտպանության մակարդակներ — manage տիրույթի բացառություն](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)։
 
+### Origin-ի ստուգում
+
+Նույնականացումից հետո `/api/mcp/*`-ին ուղղված յուրաքանչյուր հարցման — տրանսպորտների և `status`, `tools`, `audit`, `restart` նման կառավարման երթուղիների — `Origin` վերնագիրը ստուգվում է՝ անկախ կանչողից (API բանալի, CLI թոքեն, dashboard-ի նիստ կամ անանուն loopback՝ անջատված մուտքով)։ Սա DNS rebinding-ից պաշտպանությունն է, որը պահանջում է MCP Streamable HTTP սպեցիֆիկացիան։
+
+- **`Origin` վերնագիր չկա** → թույլատրվում է։ OmniRoute CLI-ը, SDK-ն և IDE հաճախորդները այն չեն ուղարկում։
+- **Թույլատրված `Origin`** → `localhost` / `127.0.0.1` / `[::1]` ցանկացած պորտում, կամ OmniRoute-ի սեփական հանրային origin-ը՝ `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, վստահելի հակադարձ պրոքսիի փոխանցած origin-ը (`OMNIROUTE_TRUST_PROXY`, միայն երբ base URL սահմանված չէ), կամ ուղղակիորեն դիմված loopback/LAN IP հոսթ։ Միայն `Host` վերնագիրը երբեք origin-ը վստահելի չի դարձնում։
+- **Ցանկացած այլ `Origin`, ներառյալ `null`** → `403`՝ JSON-RPC սխալի մարմնով՝ `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`։ Վավեր CSRF թոքեն ներկայացնող dashboard-ի նիստը շարունակում է ընդունվել, ինչպես dashboard-ի մյուս գրառումների դեպքում։
+
+Հակադարձ պրոքսիի հետևում սպասարկվող բրաուզերային MCP հաճախորդին անհրաժեշտ է `OMNIROUTE_PUBLIC_BASE_URL`; այլ origin-ների համար թույլատրված ցուցակ չկա։ CORS նախնական հարցումը (`OPTIONS`) Origin-ով չի ստուգվում, իսկ հաջորդող հարցումը՝ ստուգվում է։
+
 ## IDE-ի կազմաձևում
 
 Claude Desktop-ի, Cursor-ի, Cline-ի և համատեղելի MCP հաճախորդների կազմաձևման համար տե՛ս [MCP հաճախորդի կազմաձևում](../guides/SETUP_GUIDE.md#mcp-client-configuration) բաժինը։
@@ -283,161 +293,197 @@ OmniRoute-ին միացված են LLM մատակարարների համար օ�
 
 ## Նույնականացում և scope-եր
 
-MCP գործիքների կանչերը կարդում են scope տողերը կանչողից։ Այդ ստուգումը երեք անկախ անվանատարածքներից մեկն է։ Մի ստուգիչով անցնելը չի նշանակում անցնել նաև մյուսներով։ Կանոնները նկարագրված են [Scope-երի երեք անվանատարածքներ](#three-scope-namespaces) բաժնում։
+MCP գործիքների կանչերը կարդում են scope տողերը կանչողից։ Այդ ստուգումը երեք
+անկախ անվանատարածքներից մեկն է։ Մեկ ստուգիչից ստացված թույլտվությունը չի նշանակում
+մյուսներից ստացված թույլտվություն։
+Կանոնները նկարագրված են [Scope-երի երեք անվանատարածքներ](#three-scope-namespaces) բաժնում։
 Գործիքների կատալոգը ներկայացված է [MCP գործիքների scope-երը](#mcp-tool-scopes) բաժնում։
 
 ### Scope-երի երեք անվանատարածքներ
 
-API բանալու `manage`-ը, MCP գործիքի `read:compression`-ը և `oma_live_…` հասանելիության թոքենի `read`-ը երեք տարբեր թույլտվություններ են։ Կանչողները, որոնք փոփոխող կառավարման երթուղուն ուղարկում են `read` հասանելիության թոքեն, ստանում են HTTP 403՝
+API բանալու `manage`-ը, MCP գործիքի `read:compression`-ը և
+`oma_live_…` հասանելիության թոքենի `read`-ը երեք տարբեր թույլտվություններ են։
+Այն կանչողները, որոնք փոփոխող կառավարման երթուղուն ուղարկում են `read`
+հասանելիության թոքեն, ստանում են HTTP 403՝
 `Access token scope 'read' is insufficient; 'write' required.`
-Այդ աստիճանակարգումը կատարվում է `scopeSatisfies`-ի միջոցով։ Այն չի դիմում MCP աղյուսակին, իսկ MCP համադրիչը չի դիմում դրան։
+Այդ աստիճանակարգը `scopeSatisfies`-ն է։ Այն չի ստուգում MCP աղյուսակը, իսկ MCP
+համապատասխանեցնողը չի ստուգում այդ աստիճանակարգը։
 
-| Անվանատարածք           | Հավաստագիր                                                      | Ստուգիչ                       | Հաջող ստուգումը թույլ է տալիս                                          |
-| :--------------------- | :-------------------------------------------------------------- | :---------------------------- | :--------------------------------------------------------------------- |
-| API բանալու կառավարում | `api_keys.scopes`                                               | `hasManageScope`              | Կառավարման REST տվյալ Bearer բանալու համար                             |
-| API բանալու հավելում   | նույն զանգվածը, մեկ ճշգրիտ տող                                  | ստորև նշված օժանդակ ֆունկցիան | Միայն այդ մեկ հնարավորությունը                                         |
-| MCP գործիքի scope-եր   | նույն զանգվածը, այլապես MCP `_meta`, ապա `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | Այդ գործիքը՝ ստուգման կիրառումը միացնելուց հետո                        |
-| Հասանելիության թոքեն   | `oma_live_…`                                                    | `scopeSatisfies`              | Կառավարման այն երթուղին, որի մեթոդն ու ուղին պահանջում են այդ աստիճանը |
+| Անվանատարածք               | Հավաստագիր                                                              | Ստուգիչ                       | Հաջող ստուգումը թույլ է տալիս                                           |
+| :------------------------- | :---------------------------------------------------------------------- | :---------------------------- | :---------------------------------------------------------------------- |
+| API բանալու կառավարում     | `api_keys.scopes`                                                       | `hasManageScope`              | Կառավարման REST՝ տվյալ Bearer բանալու համար                             |
+| API բանալու հավելյալ scope | նույն զանգվածը՝ մեկ ճշգրիտ տող                                          | ստորև նշված օժանդակ ֆունկցիան | Միայն տվյալ մեկ հնարավորությունը                                        |
+| MCP գործիքների scope-եր    | նույն զանգվածը, հակառակ դեպքում MCP `_meta`, ապա `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | Տվյալ գործիքը՝ հարկադիր ստուգումը միացնելուց հետո                       |
+| Հասանելիության թոքեն       | `oma_live_…`                                                            | `scopeSatisfies`              | Կառավարման այն երթուղին, որի մեթոդը և ուղին պահանջում են տվյալ աստիճանը |
 
 Յուրաքանչյուր հավաստագրի ստեղծումը նկարագրված է
 [Կառավարման նույնականացում](../guides/MANAGEMENT-AUTH.md) բաժնում։
 
-#### API բանալու scope-եր
+#### API բանալիների scope-երը
 
-Մեկ `api_keys.scopes` զանգվածը կատարում է երկու գործառույթ։ Դրանք օգտագործում են տարբեր ֆունկցիաներ։
+Մեկ `api_keys.scopes` զանգված սպասարկում է երկու նպատակ։ Դրանց համար օգտագործվում են տարբեր ֆունկցիաներ։
 
 **Կառավարման REST։** `manage`-ը և `admin`-ը
 `MANAGEMENT_API_KEY_SCOPES`-ի անդամներն են (`src/shared/constants/managementScopes.ts`)։
-`hasManageScope`-ն է լիազորում տվյալ բանալու կառավարման երթուղիները։ `admin`-ը թույլ է տալիս կառավարում իրականացնել այդ երթուղիներում։ Այստեղ `admin` բառը հասանելիության թոքենի աստիճան չէ և չի ընդլայնվում՝ ներառելով MCP գործիքների scope-երը։
+`hasManageScope`-ն է թույլատրում տվյալ բանալու համար կառավարման երթուղիները։
+Այդ երթուղիներում `admin`-ը կառավարման հնարավորություն է տալիս։ Այստեղ `admin`
+բառը հասանելիության թոքենի աստիճանը չէ և չի ընդլայնվում՝ ներառելով MCP գործիքների scope-երը։
 
-**Հավելվող տողեր։** Դրանցից յուրաքանչյուրը ստուգվում է զանգվածին ճշգրիտ անդամակցության միջոցով, և յուրաքանչյուրը մնում է `MANAGEMENT_API_KEY_SCOPES`-ից դուրս։
+**Հավելյալ տողեր։** Յուրաքանչյուրի համար կատարվում է անդամակցության ճշգրիտ ստուգում,
+և դրանցից յուրաքանչյուրը մնում է `MANAGEMENT_API_KEY_SCOPES`-ից դուրս։
 
-| Scope                          | Հաջող ստուգումը թույլ է տալիս                                                                                                                                                     |
-| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Միայն ոչ loopback `/api/mcp/` LOCAL_ONLY բացառությունը (`hasMcpConnectOrManageScope`)։ `manage` կամ `admin` ունեցող բանալին նույնպես անցնում է այդ բացառության ստուգումը։         |
-| `self:usage`                   | `GET /api/v1/me/status` տվյալ բանալու համար (`src/app/api/v1/me/status/route.ts`)։ `POST /api/keys`-ը ստեղծելիս ավելացնում է այս scope-ը (`normalizeSelfServiceScopesForCreate`)։ |
-| `self:account-quota`           | Վերին հոսքի հաշվի քվոտաները՝ այդ կարգավիճակի օգտակար բեռի ներսում (`src/lib/usage/apiKeySelfService.ts`)։ Կարգավիճակի երթուղին շարունակում է պահանջել `self:usage`։               |
-| `policy:bypass-provider-quota` | Այս բանալու inference կանչերը շրջանցում են մատակարարի քվոտայի քաղաքականությունը (`hasProviderQuotaBypassScope`՝ `src/sse/handlers/chat.ts`-ում)։                                  |
+| Scope                          | Հաջող ստուգումը թույլ է տալիս                                                                                                                                                   |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mcp:connect`                  | Միայն non-loopback `/api/mcp/` LOCAL_ONLY բացառությունը (`hasMcpConnectOrManageScope`)։ `manage` կամ `admin` ունեցող բանալին նույնպես անցնում է այդ բացառության ստուգումը։      |
+| `self:usage`                   | Այս բանալու համար `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)։ `POST /api/keys`-ը ստեղծելիս ավելացնում է այս scope-ը (`normalizeSelfServiceScopesForCreate`)։ |
+| `self:account-quota`           | Վերին մակարդակի հաշիվների քվոտաները՝ տվյալ կարգավիճակի օգտակար բեռի ներսում (`src/lib/usage/apiKeySelfService.ts`)։ Կարգավիճակի երթուղին շարունակում է պահանջել `self:usage`։   |
+| `policy:bypass-provider-quota` | Այս բանալու inference կանչերը շրջանցում են մատակարարի քվոտայի քաղաքականությունը (`hasProviderQuotaBypassScope`՝ `src/sse/handlers/chat.ts`-ում)։                                |
 
-#### Համադրում
+#### Համապատասխանեցում
 
-Կատալոգը [MCP գործիքների scope-երը](#mcp-tool-scopes) բաժնի աղյուսակն է։ Մի՛ դիտարկեք `src/shared/constants/mcpScopes.ts`-ի `MCP_SCOPE_LIST`-ը որպես այդ կատալոգ․ այն սկզբնական տիպավորված ենթաբազմությունն է։ Ավելի ուշ ավելացված գործիքներն իրենց կողքին հայտարարում են լրացուցիչ scope-եր (`read:notion`, `read:skills`, `read:local-corpus` և աղյուսակի մնացած scope-երը)։
+Կատալոգը [MCP գործիքների scope-երը](#mcp-tool-scopes) բաժնի աղյուսակն է։
+`src/shared/constants/mcpScopes.ts`-ում գտնվող `MCP_SCOPE_LIST`-ը մի՛ համարեք
+այդ կատալոգը․ այն սկզբնական տիպավորված ենթաբազմությունն է։ Հետագայում ավելացված
+գործիքները դրա կողքին հայտարարում են լրացուցիչ scope-եր (`read:notion`,
+`read:skills`, `read:local-corpus` և աղյուսակի մնացած scope-երը)։
 
-`open-sse/mcp-server/scopeEnforcement.ts`-ի `evaluateToolScopes`-ը թույլ է տալիս կանչը, երբ յուրաքանչյուր պահանջվող scope համապատասխանում է որևէ տրամադրված scope-ի․
+`open-sse/mcp-server/scopeEnforcement.ts`-ում գտնվող `evaluateToolScopes`-ը
+թույլ է տալիս կանչը, երբ յուրաքանչյուր պահանջվող scope համապատասխանում է
+որևէ տրամադրված scope-ի՝
 
 - `*`-ը համապատասխանում է յուրաքանչյուր պահանջվող scope-ի։
-- `*`-ով ավարտվող տրամադրված scope-ը համապատասխանում է այն պահանջվող scope-ին, որը սկսվում է աստղանիշին նախորդող նախածանցով։ `read:*`-ը համապատասխանում է `read:compression`-ին։
-- Յուրաքանչյուր այլ տրամադրված scope համապատասխանում է միայն նույնական պահանջվող տողին։
+- `*`-ով ավարտվող տրամադրված scope-ը համապատասխանում է այն պահանջվող scope-ին,
+  որը սկսվում է աստղանիշին նախորդող նախածանցով։ `read:*`-ը համապատասխանում է
+  `read:compression`-ին։
+- Ցանկացած այլ տրամադրված scope համապատասխանում է միայն նույնական պահանջվող տողին։
 
-Այն բանալին, որի scope-երն են `["manage"]`, չի անցնում `scopeMatches`-ը `read:compression`-ի համար։ Նույն կանչը չի անցնում նաև `admin`, `mcp:connect`, `read` և `write` արժեքների դեպքում, երբ դրանք միակ տրամադրված տողերն են։ MCP գործիքների scope-երի միջև աստիճանակարգ չկա՝ բացի վերջում դրված `*`-ից։
+Այն բանալին, որի scope-երը `["manage"]` են, չի անցնում `scopeMatches` ստուգումը
+`read:compression`-ի համար։ Նույն կանչը չի անցնում նաև `admin`, `mcp:connect`,
+`read` և `write` արժեքների դեպքում, երբ դրանք միակ տրամադրված տողերն են։
+MCP գործիքների scope-երի միջև աստիճանակարգ չկա՝ բացի վերջում դրված `*`-ից։
 
-Ստուգման կիրառումն անջատված է, եթե `OMNIROUTE_MCP_ENFORCE_SCOPES=true` չէ (կանխադրված արժեքը՝ `false`)։ Քանի դեռ այն անջատված է, `evaluateToolScopes`-ը թույլ է տալիս կանչը և բաց է թողնում կատալոգի ստուգումը։ Երբ այն միացված է, HTTP-ն օգտագործում է Bearer բանալու `api_keys.scopes`-ը որպես `authInfo` (տե՛ս [HTTP scope-ի կապակցում ըստ բանալու](#per-key-http-scope-binding-7895))։
-Երբ բանալու ոչ մի scope չի որոշվում, տրամադրված scope-երի բազմության համար հաջորդաբար օգտագործվում են MCP `_meta`-ն, ապա `OMNIROUTE_MCP_SCOPES`-ը։
+Հարկադիր ստուգումն անջատված է, եթե `OMNIROUTE_MCP_ENFORCE_SCOPES=true` չէ
+(լռելյայն՝ `false`)։ Երբ այն անջատված է, `evaluateToolScopes`-ը թույլ է տալիս
+կանչը և շրջանցում է կատալոգը։ Երբ այն միացված է, HTTP-ն որպես `authInfo`
+օգտագործում է Bearer բանալու `api_keys.scopes`-ը (տե՛ս
+[HTTP scope-ի կապակցումն ըստ բանալու](#per-key-http-scope-binding-7895))։
+Երբ բանալու որևէ scope չի որոշվում, տրամադրված բազմությունը հաջորդաբար անցնում է
+MCP `_meta`-ին, ապա՝ `OMNIROUTE_MCP_SCOPES`-ին։
 
-#### Հասանելիության թոքենների scope-եր
+#### Հասանելիության թոքենների scope-երը
 
-`oma_live_…` թոքենները (`src/lib/accessTokens/scopes.ts`) պարունակում են `read`, `write` կամ `admin`։ `scopeSatisfies`-ը աստիճանակարգ է․ `admin`-ը ներառում է `write`-ն ու `read`-ը, իսկ `write`-ը՝ `read`-ը։ Անհայտ scope-երը ոչինչ չեն ներառում։
+`oma_live_…` թոքենները (`src/lib/accessTokens/scopes.ts`) կրում են `read`,
+`write` կամ `admin`։ `scopeSatisfies`-ը աստիճանակարգ է․ `admin`-ը ներառում է
+`write`-ը և `read`-ը, իսկ `write`-ը՝ `read`-ը։ Անհայտ scope-երը ոչինչ չեն ներառում։
 
-`evaluateAccessTokenAuth`-ը (`src/server/authz/accessTokenAuth.ts`) այդ աստիճանը համեմատում է `inferRequiredScope`-ի հետ (`src/server/authz/accessScopes.ts`)․
+`evaluateAccessTokenAuth`-ը (`src/server/authz/accessTokenAuth.ts`) համեմատում է
+այդ աստիճանակարգը `inferRequiredScope`-ի հետ (`src/server/authz/accessScopes.ts`)՝
 
 - `GET`, `HEAD` և `OPTIONS` մեթոդները պահանջում են `read`։
-- Մնացած բոլոր մեթոդները պահանջում են `write`։
-- `ADMIN_SCOPE_PREFIXES`-ում գտնվող ուղիները յուրաքանչյուր մեթոդի համար պահանջում են `admin`։ `/api/mcp`-ն այդ ցանկում է, ուստի `write` հասանելիության թոքենը դեռևս չի կարող կանչել MCP HTTP մակերեսը։
-- `ADMIN_MUTATION_PREFIXES`-ում գտնվող ուղիները `admin` են պահանջում միայն փոփոխությունների համար։
+- Բոլոր մյուս մեթոդները պահանջում են `write`։
+- `ADMIN_SCOPE_PREFIXES`-ում գտնվող ուղիները յուրաքանչյուր մեթոդի համար պահանջում են
+  `admin`։ `/api/mcp`-ն այդ ցանկում է, ուստի `write` հասանելիության թոքենը
+  դեռևս չի կարող կանչել MCP HTTP մակերեսը։
+- `ADMIN_MUTATION_PREFIXES`-ում գտնվող ուղիները `admin` են պահանջում միայն
+  փոփոխող գործողությունների համար։
+- `ADMIN_MUTATION_EXACT_PATHS`-ում գտնվող ուղիները (`/api/settings`,
+  `/api/settings/require-login`) `admin` են պահանջում միայն փոփոխող
+  գործողությունների համար և միայն հենց այդ ուղու դեպքում․
+  `/api/settings/*` մյուս ենթաերթուղիները շարունակում են պահանջել `write`։
 
-`PATCH /api/keys/{id}`-ը փոփոխություն է և նշված չէ ադմինիստրատորի այդ ցուցակներում, ուստի
+`PATCH /api/keys/{id}`-ը մուտացիա է և ներառված չէ այդ ադմինիստրատիվ ցուցակներում, ուստի
 `read` թոքենը ստանում է 403՝
 `Access token scope 'read' is insufficient; 'write' required.`
-`write` կամ `admin` հասանելիության թոքենը բավարարում է այդ երթուղու պահանջները։ Կառավարման վահանակի JWT-ն,
+`write` կամ `admin` հասանելիության թոքենը բավարարում է այդ երթուղու պահանջները։ Վահանակի JWT-ն,
 loopback CLI-ի machine-id թոքենը և `manage` կամ `admin` ունեցող API բանալին
 անցնում են այլ ճյուղերով և չեն սահմանափակվում այս աստիճանակարգով։
 
 Հասանելիության թոքենը, որը `/api/mcp`-ի համար անցնում է `scopeSatisfies` ստուգումը, հաղթահարել է
-միայն կառավարման դարպասը։ Գործիքների կանչերը դեռևս API բանալու
-scope-երի նկատմամբ գործարկում են `scopeMatches`։ Հասանելիության թոքենի աստիճանը `scopeMatches`-ի մուտքային տվյալ չէ։
+միայն կառավարման անցակետը։ Գործիքների կանչերը շարունակում են API բանալու
+scope-ների նկատմամբ գործարկել `scopeMatches`։ Հասանելիության թոքենի աստիճանը `scopeMatches`-ի մուտքային տվյալ չէ։
 
-### MCP գործիքների scope-երը
+### MCP գործիքների scope-ներ
 
-Scope-երի կիրարկումը կենտրոնացված է `open-sse/mcp-server/scopeEnforcement.ts`-ում։
-Յուրաքանչյուր գործիք պահանջում է որոշակի scope-եր.
+Scope-ների կիրառումը կենտրոնացված է `open-sse/mcp-server/scopeEnforcement.ts`-ում։
+Յուրաքանչյուր գործիք պահանջում է որոշակի scope-ներ.
 
-| Տիրույթ               | Գործիքներ                                                                                                                                                                         |
-| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                 |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                         |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                            |
-| `read:quota`          | `check_quota`                                                                                                                                                                     |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                            |
-| `read:models`         | `list_models_catalog`                                                                                                                                                             |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                     |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                             |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                                |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                       |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                    |
-| `read:cache`          | `cache_stats`                                                                                                                                                                     |
-| `write:cache`         | `cache_flush`                                                                                                                                                                     |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                        |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                 |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                             |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                  |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                            |
-| `read:memory`         | `memory_search`                                                                                                                                                                   |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                      |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                |
-| `write:skills`        | `skills_enable`                                                                                                                                                                   |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                  |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                  |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                           |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                         |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                  |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                    |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                   |
-| `read:obsidian`       | Կարդալու 13 գործիք — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | Գրելու 9 գործիք — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                  |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                 |
+| Հասանելիության շրջանակ | Գործիքներ                                                                                                                                                                         |
+| :--------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`          | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                 |
+| `read:combos`          | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                         |
+| `write:combos`         | `switch_combo`, `set_routing_strategy`                                                                                                                                            |
+| `read:quota`           | `check_quota`                                                                                                                                                                     |
+| `read:usage`           | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                            |
+| `read:models`          | `list_models_catalog`                                                                                                                                                             |
+| `execute:completions`  | `route_request`, `test_combo`                                                                                                                                                     |
+| `execute:search`       | `web_search`, `x_search`, `web_fetch`                                                                                                                                             |
+| `write:budget`         | `set_budget_guard`                                                                                                                                                                |
+| `write:resilience`     | `set_resilience_profile`, `db_health_check`                                                                                                                                       |
+| `pricing:write`        | `sync_pricing`                                                                                                                                                                    |
+| `read:cache`           | `cache_stats`                                                                                                                                                                     |
+| `write:cache`          | `cache_flush`                                                                                                                                                                     |
+| `read:compression`     | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                        |
+| `write:compression`    | `compression_configure`, `set_compression_engine`                                                                                                                                 |
+| `read:proxies`         | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                             |
+| `read:notion`          | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                  |
+| `write:notion`         | `notion_append_blocks`                                                                                                                                                            |
+| `read:memory`          | `memory_search`                                                                                                                                                                   |
+| `write:memory`         | `memory_add`, `memory_clear`                                                                                                                                                      |
+| `read:skills`          | `skills_list`, `skills_executions`                                                                                                                                                |
+| `write:skills`         | `skills_enable`                                                                                                                                                                   |
+| `execute:skills`       | `skills_execute`                                                                                                                                                                  |
+| `read:catalog`         | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                  |
+| `read:tools`           | `omniroute_tool_search`                                                                                                                                                           |
+| `read:radar`           | `omniroute_radar_catalog`                                                                                                                                                         |
+| `read:gamification`    | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                  |
+| `write:gamification`   | `gamification_invite`, `gamification_transfer`                                                                                                                                    |
+| `read:plugins`         | `plugin_list`, `plugin_executions`                                                                                                                                                |
+| `write:plugins`        | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                   |
+| `read:obsidian`        | Ընթերցման 13 գործիք՝ `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`       | Գրառման 9 գործիք՝ `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                  |
+| `read:local-corpus`    | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                 |
 
-Փոխարինման նշանով հասանելիության շրջանակներն աջակցվում են. `read:*`-ը տրամադրում է կարդալու բոլոր շրջանակները, իսկ `*`-ը՝ լիարժեք հասանելիություն։
+Wildcard տիրույթներն աջակցվում են. `read:*`-ը տրամադրում է ընթերցման բոլոր տիրույթները, իսկ `*`-ը՝ լիարժեք հասանելիություն։
 
-### `mcp:connect` — սահմանափակ երթուղային հնարավորություն (#7895)
+### `mcp:connect` — նեղ երթուղային իրավասություն (#7895)
 
-Ոչ loopback հասցեից HTTP/SSE MCP փոխադրամիջոցին (`/api/mcp/*`) հասնելու համար անհրաժեշտ է
+Ոչ loopback հասցեից HTTP/SSE MCP փոխադրամիջոցին (`/api/mcp/*`) հասնելու համար պահանջվում է
 `/api/mcp/` LOCAL_ONLY բացառությունը (տե՛ս `docs/security/ROUTE_GUARD_TIERS.md`)։ Նախկինում
-այդ բացառությունն ընդունում էր միայն ամբողջական `manage`/`admin` շրջանակով API բանալի, ինչը չափազանց լայն հասանելիություն էր այն
-կանչողի համար, որին միայն MCP-ի հետ հաղորդակցվել է անհրաժեշտ։ Այժմ `src/shared/constants/managementScopes.ts`-ը
-արտահանում է `MCP_CONNECT_SCOPE = "mcp:connect"`՝ լրացուցիչ, սահմանափակ շրջանակ (`SELF_USAGE_SCOPE`-ի
-նույն նախադեպով), որը լիազորում է ՄԻԱՅՆ շրջանցել `/api/mcp/` սահմանափակումը
+այդ բացառությունն ընդունում էր միայն ամբողջական `manage`/`admin` տիրույթով API բանալի, ինչը չափազանց
+լայն իրավասություն էր այն կանչողի համար, որին անհրաժեշտ է միայն հաղորդակցվել MCP-ի հետ։ `src/shared/constants/managementScopes.ts`-ն այժմ
+արտահանում է `MCP_CONNECT_SCOPE = "mcp:connect"`՝ հավելվող, նեղ տիրույթ (նույն նախադեպը, ինչ
+`SELF_USAGE_SCOPE`-ը), որը լիազորում է ՄԻԱՅՆ `/api/mcp/` շրջանցումը
 `src/server/authz/policies/management.ts`-ում. այն կառավարման որևէ այլ երթուղու հասանելիություն
 չի տրամադրում և միտումնավոր ներառված ՉԷ `MANAGEMENT_API_KEY_SCOPES`-ում։ `manage`/`admin`
-ունեցող բանալին նախկինի պես անցնում է այդ բացառությամբ. `mcp:connect`-ը նվազ արտոնություններով այլընտրանք է
-միայն հեռակա MCP կանչողների համար և ստուգվում է `hasMcpConnectOrManageScope()`-ի միջոցով։
+ունեցող բանալին նախկինի պես անցնում է բացառությունը. `mcp:connect`-ը նվազ արտոնյալ այլընտրանք է
+միայն հեռավար MCP օգտագործող կանչողների համար և ստուգվում է `hasMcpConnectOrManageScope()`-ի միջոցով։
 
-### Յուրաքանչյուր բանալուն HTTP շրջանակի կապակցում (#7895)
+### Յուրաքանչյուր բանալու HTTP տիրույթի կապակցում (#7895)
 
-HTTP/SSE-ի միջոցով աշխատելիս `open-sse/mcp-server/httpTransport.ts`-ն այժմ
-`resolveMcpCallerAuthInfo()`-ի (`open-sse/mcp-server/httpAuthContext.ts`) միջոցով որոշում է կանչողի իրական
-`api_keys.scopes`-ը և այն փոխանցում MCP SDK-ի `transport.handleRequest(req, { authInfo })`-ին, որպեսզի
-յուրաքանչյուր գործիքի կանչին հասնող `extra.authInfo.scopes`-ն արտացոլի Bearer բանալու սեփական շրջանակները։
-`scopeEnforcement.ts`-ի `resolveCallerScopeContext()`-ն արդեն առաջնահերթություն էր տալիս `authInfo`-ին՝
-`_meta`-ի և `OMNIROUTE_MCP_SCOPES` միջավայրային փոփոխականի պահուստային տարբերակի նկատմամբ. այս փոփոխությունը պարզապես լրացնում է այդ առաջին՝
-ամենաբարձր առաջնահերթություն ունեցող աղբյուրը, որը նախկինում HTTP-ի միջոցով տվյալներ չէր ստանում։ Երբ որևէ API բանալի չի որոշվում
-(վերնագիր չկա, կամ բանալին անվավեր է), `authInfo`-ն մնում է `undefined`, և որոշումը նախկինի պես անցնում է
-գոյություն ունեցող `meta`/միջավայրային փոփոխականների շղթային։ stdio-ն յուրաքանչյուր կանչողի առանձին նույնականացում չունի (տե՛ս
-`mcpCallerIdentity.ts`) և չի փոփոխվել. այն շարունակում է օգտագործել `_meta`/միջավայրային փոփոխականների պահուստային շղթան։
+HTTP/SSE-ի միջոցով `open-sse/mcp-server/httpTransport.ts`-ն այժմ ստանում է կանչողի իրական
+`api_keys.scopes`-ը `resolveMcpCallerAuthInfo()`-ի միջոցով (`open-sse/mcp-server/httpAuthContext.ts`)
+և փոխանցում այն MCP SDK-ի `transport.handleRequest(req, { authInfo })`-ին, որպեսզի
+յուրաքանչյուր գործիքի կանչին հասնող `extra.authInfo.scopes`-ն արտացոլի Bearer բանալու սեփական տիրույթները։
+`scopeEnforcement.ts`-ի `resolveCallerScopeContext()`-ն արդեն `authInfo`-ն գերադասում էր
+`_meta`-ից և `OMNIROUTE_MCP_SCOPES` միջավայրային պահուստային տարբերակից. այս փոփոխությունը միայն լրացնում է այդ առաջին՝
+ամենաբարձր առաջնահերթությամբ աղբյուրը, որը նախկինում HTTP-ի միջոցով տվյալներ չէր ստանում։ Երբ որևէ API բանալի չի
+որոշվում (վերնագիր չկա կամ բանալին անվավեր է), `authInfo`-ն մնում է `undefined`, և որոշումը նախկինի պես
+անցնում է գոյություն ունեցող `meta`/միջավայրային շղթային։ stdio-ն չունի յուրաքանչյուր կանչողին հատուկ նույնականացում (տե՛ս
+`mcpCallerIdentity.ts`) և չի ազդվում. այն շարունակում է օգտագործել `_meta`/միջավայրային պահուստային շղթան։
 
-**Սահմանափակ շրջանակով HTTP/SSE կանչողների համար կիրառումը պարտադիր է՝ անկախ
+**Նեղ տիրույթով HTTP/SSE կանչողների համար հարկադրական կիրառումը միացված է՝ անկախ
 `OMNIROUTE_MCP_ENFORCE_SCOPES`-ից։** `OMNIROUTE_MCP_ENFORCE_SCOPES`-ի լռելյայն `false` արժեքն անվտանգ է միայն
-տեղային/stdio՝ մեկ օպերատորով աշխատանքի հոսքի համար, որտեղ չկա յուրաքանչյուր կանչողի առանձին նույնականացում, որի նկատմամբ հնարավոր է շրջանակ կիրառել։
-`open-sse/mcp-server/server.ts::withScopeEnforcement()`-ը յուրաքանչյուր գործիքի համար շրջանակի
-կիրառումը միացնում է անվերապահորեն (`scopeEnforcement.ts`-ի `shouldForceScopeEnforcement()`),
+տեղային/stdio մեկ օպերատորով աշխատանքի համար, որտեղ չկա կանչողին հատուկ նույնականացում՝ տիրույթով
+սահմանափակելու համար։ `open-sse/mcp-server/server.ts::withScopeEnforcement()`-ը յուրաքանչյուր գործիքի տիրույթի
+հարկադրական կիրառումն անվերապահորեն միացնում է (`shouldForceScopeEnforcement()`՝ `scopeEnforcement.ts`-ում),
 երբ `resolveCallerScopeContext()`-ը որոշել է
-`source === "authInfo"` (այսինքն՝ յուրաքանչյուր բանալուն համապատասխանող իրական HTTP Authorization վերնագիր, միայն HTTP/SSE-ի համար), ԵՎ այդ
-բանալին չունի ամբողջական `manage`/`admin` շրջանակ։ Սա փակում է այն բացը, որի պատճառով ՄԻԱՅՆ
-սահմանափակ `mcp:connect` շրջանցման շրջանակն ունեցող բանալին, որը վերևում նկարագրված է որպես միայն
-`/api/mcp/` LOCAL_ONLY բացառությունը լիազորող, հակառակ դեպքում կարող էր կանչել MCP-ի բոլոր գործիքները, երբ օպերատորը
-միացներ հեռակա/ոչ loopback MCP հասանելիությունը՝ պարզապես այն պատճառով, որ `OMNIROUTE_MCP_ENFORCE_SCOPES`-ը
-լռելյայն տրամադրվում է `false` արժեքով։ HTTP-ի միջոցով օգտագործվող ամբողջական `manage`/`admin` բանալու և յուրաքանչյուր stdio/տեղային կանչողի համար
-`OMNIROUTE_MCP_ENFORCE_SCOPES`-ով կառավարվող առկա վարքագիծը մնում է անփոփոխ։
+`source === "authInfo"` (այսինքն՝ յուրաքանչյուր բանալուն հատուկ իրական HTTP Authorization վերնագիր, միայն HTTP/SSE-ի համար) ԵՎ այդ
+բանալին չունի ամբողջական `manage`/`admin` տիրույթ։ Սա փակում է այն բացը, որի դեպքում ՄԻԱՅՆ
+վերը նկարագրված նեղ `mcp:connect` շրջանցման տիրույթն ունեցող բանալին, որը բացի
+`/api/mcp/` LOCAL_ONLY բացառությունից որևէ այլ բան չի լիազորում, հակառակ դեպքում կարող էր կանչել MCP-ի բոլոր գործիքները, երբ օպերատորը
+միացներ հեռավար/ոչ loopback MCP հասանելիությունը՝ պարզապես այն պատճառով, որ `OMNIROUTE_MCP_ENFORCE_SCOPES`-ը
+լռելյայն մատակարարվում է `false` արժեքով։ HTTP-ի միջոցով ամբողջական `manage`/`admin` բանալու և stdio/տեղային բոլոր կանչողների համար
+`OMNIROUTE_MCP_ENFORCE_SCOPES`-ով կառավարվող գոյություն ունեցող վարքագիծը մնում է անփոփոխ։
 
 ---
 

@@ -9,6 +9,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const testDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-attempt-logging-test-"));
 process.env.DATA_DIR = testDataDir;
@@ -18,12 +19,13 @@ const { getCallLogById, getCallLogs } = await import("../../src/lib/usage/callLo
 const { persistAttemptLogs } = await import("../../open-sse/handlers/chatCore/attemptLogging.ts");
 const { getAuditLog } = await import("../../src/lib/compliance/index.ts");
 
-type CodexRotationEnvelope = {
+type CallLogEnvelope = {
   _omniroute?: {
     codexAccountRotation?: {
       initialConnectionId: unknown;
       finalConnectionId: unknown;
     };
+    geminiPromptCache?: Record<string, unknown>;
   };
 };
 
@@ -57,12 +59,13 @@ function baseCtx(overrides: Record<string, unknown> = {}) {
   } as Parameters<typeof persistAttemptLogs>[1];
 }
 
-async function pollForCallLog(traceId: string, tries = 120) {
+async function pollForCallLog(traceId: string, timeoutMs = CALL_LOG_SETTLE_TIMEOUT_MS) {
   // #14451: call_logs.id is a fresh UUID. The dashboard traceId is stored on
   // correlation_id so a test can still find the attempt without sharing a PK.
-  for (let i = 0; i < tries; i++) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
     const rows = await getCallLogs({ correlationId: traceId, limit: 5 });
-    if (rows[0]?.id) {
+    if (rows[0]?.id && rows[0].detailState === "ready") {
       const row = await getCallLogById(rows[0].id);
       if (row) return row as Record<string, unknown>;
     }
@@ -71,9 +74,13 @@ async function pollForCallLog(traceId: string, tries = 120) {
   return null;
 }
 
-function getCodexAccountRotation(value: unknown) {
+function getOmniRouteMeta(value: unknown) {
   if (!value || typeof value !== "object") return undefined;
-  return (value as CodexRotationEnvelope)._omniroute?.codexAccountRotation;
+  return (value as CallLogEnvelope)._omniroute;
+}
+
+function getCodexAccountRotation(value: unknown) {
+  return getOmniRouteMeta(value)?.codexAccountRotation;
 }
 
 before(async () => {
@@ -132,6 +139,37 @@ test("cacheSource 'semantic' is preserved", async () => {
   const row = await pollForCallLog(id);
   assert.ok(row);
   assert.equal(row.cacheSource, "semantic");
+});
+
+test("persists bounded Gemini cache evidence under request and response _omniroute metadata", async () => {
+  const id = "attempt-gemini-cache-1";
+  const geminiPromptCache = {
+    schemaVersion: 1,
+    mode: "implicit",
+    evidence: "hit",
+    providerCounters: { cachedContentTokenCount: 40_929 },
+    prefixBoundary: "unknown",
+    prefixMethod: "unavailable",
+  };
+
+  persistAttemptLogs(
+    {
+      status: 200,
+      tokens: { prompt_tokens: 46_212, cached_tokens: 40_929 },
+      responseBody: { candidates: [] },
+      geminiPromptCache,
+    },
+    baseCtx({
+      pendingRequestId: id,
+      provider: "antigravity",
+      model: "gemini-3.7-flash-tiered",
+    })
+  );
+
+  const row = await pollForCallLog(id);
+  assert.ok(row, "call log row should be persisted");
+  assert.deepEqual(getOmniRouteMeta(row.requestBody)?.geminiPromptCache, geminiPromptCache);
+  assert.deepEqual(getOmniRouteMeta(row.responseBody)?.geminiPromptCache, geminiPromptCache);
 });
 
 test("connectionId falls back to credentials.connectionId when null, and error is persisted", async () => {

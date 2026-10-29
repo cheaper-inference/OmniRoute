@@ -37,33 +37,33 @@ Běžné problémy a jejich řešení pro OmniRoute.
 
 ---
 
-### Omezování počtu požadavků u bezplatných poskytovatelů (429 / 400 / 401)
+### Omezení rychlosti u bezplatných poskytovatelů (429 / 400 / 401)
 
-**Příznak**: Při použití `model: "auto"` s bezplatnými poskytovateli nebo poskytovateli bez ověřování (opencode, auggie atd.) občas místo odpovědí obdržíte `HTTP 429`, `400` nebo `401`. Pokud stejný dotaz o několik okamžiků později zopakujete, požadavek uspěje, ale automatizace (úlohy cron, agenti, skripty) skončí při prvním selhání.
+**Příznak**: Při použití `model: "auto"` s bezplatnými poskytovateli nebo poskytovateli bez ověřování (auggie atd.) občas místo odpovědí obdržíte chybu `HTTP 429`, `400` nebo `401`. Po zopakování stejného dotazu o několik okamžiků později požadavky uspějí, ale automatizace (úlohy cron, agenti, skripty) se při prvním selhání přeruší.
 
 **Hlavní příčina**: Kombinují se tři nezávislé režimy selhání:
 
-1. **Limit požadavků poskytovatele (`429`)**: Bezplatné tarify mohou vynucovat kvótu pro určité časové období. Dávka souběžných volání ji vyčerpá, takže další požadavek je odmítnut, dokud se limit neobnoví.
-2. **Nefunkční model v režimu passthrough (`400`/`401`)**: Fondy `auto/*` mohou zahrnovat modely passthrough od `opencode`, které jsou zaregistrované v katalogu, ale nemají platné přihlašovací údaje (např. `oc/north-mini-code-free` → `401`). Automatický směrovač některý z nich vyzkouší, selže a chyba se rozšíří dříve, než se aktivuje záložní řešení.
-3. **Zesílení souběžností (`429` při zatížení)**: Když k `auto` přistupuje více relací agentů či úloh cron současně, celková frekvence požadavků překročí míru tolerovanou bezplatnými poskytovateli, takže jsou legitimní volání označena jako zneužívající.
+1. **Omezení rychlosti poskytovatele (`429`)**: Bezplatné úrovně mohou vynucovat kvótu pro určité časové okno. Dávka paralelních volání ji vyčerpá, takže je další požadavek odmítnut, dokud se časové okno neobnoví.
+2. **Nefunkční model v režimu passthrough (`400`/`401`)**: Fondy `auto/*` mohou obsahovat modely passthrough, které jsou zaregistrovány v katalogu, ale nemají platné přihlašovací údaje (→ `401`). Automatický směrovač jeden z nich vyzkouší, selže a chyba se rozšíří dříve, než se aktivuje záložní řešení.
+3. **Zesílení souběžností (`429` při zatížení)**: Když se na `auto` současně obrátí více relací agentů nebo úloh cron, celková četnost požadavků překročí míru, kterou bezplatní poskytovatelé tolerují, takže jsou legitimní volání označena za zneužívající.
 
-**Ověřená oprava (hlášeno komunitou, 2026-08-10)**: Nastavte tři proměnné prostředí tak, aby rotace, souběžnost a záložní řešení zvládly nestabilitu bezplatného tarifu namísto ukončení s chybou:
+**Ověřená oprava (nahlášeno komunitou, 2026-08-10)**: upravte tři proměnné prostředí tak, aby rotace, souběžnost a záložní řešení absorbovaly nestabilitu bezplatné úrovně, místo aby kvůli ní došlo k selhání:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # při 400/401 přejde na jiný model či poskytovatele (přeskočí nefunkční modely passthrough)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explicitní limit přijímání náročných požadavků (ve výchozím nastavení není nastaven: počet požadavků není omezen, viz poznámka níže)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # prodlouží omezené čekání nad výchozí hodnotu RATE_LIMIT_MAX_WAIT_MS pro pomalé upstreamy
+export OMNIROUTE_ROTATE_ON_400=true           # při 400/401 přejít na jiný model nebo k jinému poskytovateli (přeskočí nefunkční modely passthrough)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explicitní limit přijímání náročných požadavků (ve výchozím nastavení nenastaveno: počet požadavků není omezen, viz poznámka níže)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # zvýšit omezenou dobu čekání nad výchozí hodnotu RATE_LIMIT_MAX_WAIT_MS pro pomalé upstreamy
 ```
 
-Nastavte je v prostředí procesu OmniRoute (v démonu, např. prostřednictvím souboru plist LaunchAgent nebo `systemctl edit`) a poté OmniRoute restartujte. Příznak rotace má ze všech nastavení největší účinek: převádí závažné selhání na transparentní opakování požadavku u funkčního poskytovatele ve fondu.
+Nastavte je v prostředí procesu OmniRoute (démonu, například prostřednictvím souboru plist nástroje LaunchAgent nebo příkazu `systemctl edit`) a poté OmniRoute restartujte. Příznak rotace má zdaleka největší účinek: změní úplné selhání na transparentní opakování požadavku u funkčního poskytovatele ve fondu.
 
-**Poznámka**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` omezuje počet náročných požadavků — tedy požadavků s dlouhým kontextem — spuštěných současně; tento limit představuje vstupní bránu, nikoli omezení počtu požadavků poskytovatele. **Aktualizace #503-fanout:** Tato proměnná již není nastavena ve výchozím nastavení (nyní se uplatní pouze tehdy, když je explicitně nakonfigurována jako výše) — přijímání náročných požadavků je místo toho řízeno automaticky odvozeným bajtovým rozpočtem (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), který se přizpůsobuje skutečnému limitu paměti hostitele. Nové nasazení by proto mělo zaznamenat mnohem méně odmítnutí `503 chat_admission_busy`, aniž by bylo nutné tuto proměnnou vůbec nastavovat; její explicitní nastavení zde stále funguje přesně podle dokumentace. Explicitní přepsání bajtového rozpočtu je omezeno na 8 MiB–2 GiB. Chyba `413 body_exceeds_budget` není přechodná: zvyšte tento bajtový rozpočet, snižte `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` nebo zvyšte limit paměti procesu. Odmítnutí `inflight_bytes_budget` způsobuje dočasné soupeření o prostředky a požadavek lze nadále opakovat. Omezení počtu požadavků pro jednotlivé poskytovatele (`open-sse/services/rateLimitManager.ts`) se řídí samostatně pomocí `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` a `RATE_LIMIT_AUTO_ENABLE` — viz `.env.example`.
+**Poznámka**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` omezuje počet náročných požadavků — požadavků s dlouhým kontextem — spuštěných současně; tento limit představuje přijímací bránu, nikoli omezení rychlosti poskytovatele. **Aktualizace k větvení chyb #503:** tato proměnná již není nastavena ve výchozím nastavení (nyní se uplatní pouze při explicitní konfiguraci, jako výše) — přijímání náročných požadavků je místo toho řízeno automaticky odvozeným bajtovým rozpočtem (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), který se škáluje podle skutečného paměťového limitu hostitele, takže by v nové instalaci mělo docházet k výrazně menšímu počtu odmítnutí `503 chat_admission_busy`, aniž by bylo nutné tuto proměnnou vůbec nastavovat; její explicitní nastavení zde nadále funguje přesně podle dokumentace. Explicitní přepsání bajtového rozpočtu je omezeno na rozsah 8 MiB–2 GiB. Chyba `413 body_exceeds_budget` není přechodná: zvyšte tento bajtový rozpočet, snižte `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` nebo zvyšte paměťový limit procesu. Odmítnutí `inflight_bytes_budget` je způsobeno dočasným soupeřením o prostředky a požadavek lze nadále opakovat. Omezení rychlosti pro jednotlivé poskytovatele (`open-sse/services/rateLimitManager.ts`) je samostatně řízeno proměnnými `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` a `RATE_LIMIT_AUTO_ENABLE` — viz `.env.example`.
 
-**Jak ověřit, že oprava funguje**: spusťte svého agenta/cron dvakrát rychle po sobě a ověřte, že obě spuštění proběhnou úspěšně. Před opravou druhé spuštění obvykle vyvolá chybu `429`/`401`. Po opravě se neúspěšné požadavky (pokud nějaké nastanou) automaticky opakují a volání se dokončí. Můžete také zavolat `curl /monitoring/health` a sledovat pole `rateLimitedUntil` u připojení poskytovatelů a `circuitBreakers.providerBreakers[].state` u dotčených poskytovatelů — stav může být `CLOSED`, `DEGRADED`, `OPEN` nebo `HALF_OPEN` (viz `src/shared/utils/circuitBreaker.ts`) a poskytovatel, u kterého opakovaně dochází k selhání, přejde přes stavy `CLOSED → DEGRADED → OPEN`, než po uplynutí intervalu pro reset povolí zkušební požadavek (`HALF_OPEN`).
+**Jak ověřit, že oprava funguje**: spusťte agenta nebo úlohu cron dvakrát rychle po sobě a ověřte, že obě spuštění uspějí. Před opravou druhé spuštění obvykle vyvolá chybu `429`/`401`. Po opravě jsou případná selhání transparentně opakována a volání se dokončí. Můžete také použít `curl /monitoring/health` a sledovat pole `rateLimitedUntil` u připojení poskytovatelů a hodnotu `circuitBreakers.providerBreakers[].state` u dotčených poskytovatelů — stav je jedním z `CLOSED`, `DEGRADED`, `OPEN` nebo `HALF_OPEN` (viz `src/shared/utils/circuitBreaker.ts`) a poskytovatel, který opakovaně selhává, přejde ze stavu `CLOSED → DEGRADED → OPEN`, než po uplynutí intervalu obnovení systém propustí zkušební požadavek (`HALF_OPEN`).
 
-**Pokud se stále zobrazuje chyba 429**: aktivní účet daného poskytovatele skutečně vyčerpal svou _kvótu_ (nejde pouze o omezení frekvence požadavků). Přidejte druhý účet stejného poskytovatele v řídicím panelu OmniRoute → Providers → Accounts, nebo přidejte jiného bezplatného poskytovatele (např. `routeway`, `auggie`). Rotace pomáhá pouze s dočasnými chybami omezení frekvence/400/401; úplné vyčerpání kvóty vyžaduje druhé přihlašovací údaje nebo jiného poskytovatele.
+**Pokud se chyba 429 stále objevuje**: aktivní účet u daného poskytovatele skutečně vyčerpal svou _kvótu_ (nejde pouze o omezení rychlosti). Přidejte pro stejného poskytovatele druhý účet na řídicím panelu OmniRoute → Providers → Accounts nebo přidejte jiného bezplatného poskytovatele (například `routeway`, `auggie`). Rotace pomáhá pouze s přechodným omezením rychlosti nebo chybami 400/401; úplné vyčerpání kvóty vyžaduje druhé přihlašovací údaje nebo jiného poskytovatele.
 
-**Pokud se u modelů pro zpracování obrazu (`auto/vision`, `bazaarlink/*`) zobrazuje chyba 403**: připojený účet nemá placený tarif, který zahrnuje zpracování obrazu, nebo API klíč nemá dostatečná oprávnění. V řídicím panelu poskytovatele ověřte, že rozsah oprávnění klíče zahrnuje zpracování obrazu/multimodální funkce, případně připojte účet s placeným tarifem a ponechte jej jako cíl pro zpracování obrazu.
+**Pokud se u modelů pro obrazový vstup (`auto/vision`, `bazaarlink/*`) zobrazuje chyba 403**: připojený účet nemá placený tarif zahrnující obrazový vstup nebo klíč API nemá dostatečná oprávnění. Na řídicím panelu poskytovatele ověřte, že rozsah oprávnění klíče zahrnuje obrazový nebo multimodální vstup, případně připojte účet s placeným tarifem a ponechte jej jako cíl pro obrazový vstup.
 
 ---
 
@@ -90,39 +90,39 @@ Varování pocházejí ze zastaralých rozsahů partnerských závislostí v bal
 
 ---
 
-## Varování o zablokovaných instalačních skriptech npm (globální instalace)
+## Upozornění na zablokované instalační skripty npm (globální instalace)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Při spuštění `npm install -g omniroute` novější verze npm (v11+ a v12+) ve výchozím nastavení blokují skripty životního cyklu balíčků a zobrazují varování týkající se instalačních skriptů:
+Při spuštění `npm install -g omniroute` novější verze npm (v11+ a v12+) ve výchozím nastavení blokují skripty životního cyklu balíčků a zobrazí upozornění na instalační skripty:
 
 ```
-npm warn install-scripts 7 balíčků mělo zablokované instalační skripty, protože nejsou zahrnuty v allowScripts:
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
-### Lze toto varování ignorovat?
+### Lze toto upozornění ignorovat?
 
-**Částečně, ale spuštění bez skriptů se nedoporučuje.** OmniRoute obsahuje bezpečné záložní mechanismy: pokud nelze ze samostatného balíčku načíst nativní vazby `better-sqlite3`, aplikace postupně použije alternativní ovladače, například `node:sqlite` nebo `sql.js` (viz [Řešení běhového prostředí SQLite](../ops/SQLITE_RUNTIME.md)). Server se přesto spustí, ale použití záložních řešení WASM, jako je `sql.js`, vypne režim SQLite WAL (Write-Ahead Logging) a zvýší režii paměti a synchronizace disku.
+**Částečně, ale spuštění bez skriptů se nedoporučuje.** OmniRoute obsahuje bezpečné záložní mechanismy: pokud nelze načíst nativní vazby `better-sqlite3` ze samostatného balíčku, aplikace přejde na alternativní ovladače, například `node:sqlite` nebo `sql.js` (viz [Výběr běhového prostředí SQLite](../ops/SQLITE_RUNTIME.md)). Server se přesto spustí, ale použití záložních řešení založených na WASM, jako je `sql.js`, zakáže režim WAL (Write-Ahead Logging) databáze SQLite a zvýší režii paměti a synchronizace disku.
 
 ### Které skripty jsou skutečně vyžadovány?
 
-Ne všechny blokované skripty jsou pro spuštění OmniRoute nezbytné:
+Ne všechny zablokované skripty jsou pro běh OmniRoute nezbytné:
 
-- **Nezbytné (`omniroute`, `better-sqlite3`):** OmniRoute běží ze samostatného aplikačního balíčku Next.js (`dist/`). Během instalace npm stáhne nebo zkompiluje nativní ovladač SQLite specifický pro hostitelský systém do `node_modules/better-sqlite3/` na nejvyšší úrovni. Skript `postinstall` projektu OmniRoute (`scripts/build/postinstall.mjs`) následně ověří a zkopíruje tyto binární soubory specifické pro hostitelský systém do `dist/node_modules/`, aby k nim měl samostatný server přístup. Pokud je skript postinstall balíčku `omniroute` zablokován, tento krok kopírování se přeskočí.
-- **Volitelné/tranzitivní (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Jde o pomocné nástroje pro sestavení, nástroje pro sledování změn nebo nástroje systémové klíčenky. Jejich povolení zabrání varováním při sestavení, ale nejsou vyžadovány pro základní funkce směrování.
-- **Vyloučeno (`onnxruntime-node`):** Volitelná závislost pro lokální embeddingy AI, která **není** pro běh OmniRoute vyžadována. Její skript postinstall stáhne z NuGet přibližně 300 MB prostředků CUDA; nezahrnujte ji do seznamu povolených položek, pokud výslovně neplánujete používat lokální akceleraci ONNX na podporovaném hardwaru.
+- **Nezbytné (`omniroute`, `better-sqlite3`):** OmniRoute se spouští ze samostatného aplikačního balíčku Next.js (`dist/`). Během instalace npm stáhne nebo zkompiluje nativní ovladač SQLite určený pro hostitelský systém do adresáře nejvyšší úrovně `node_modules/better-sqlite3/`. Skript `postinstall` systému OmniRoute (`scripts/build/postinstall.mjs`) poté tyto binární soubory specifické pro hostitelský systém ověří a zkopíruje do `dist/node_modules/`, aby k nim měl samostatný server přístup. Pokud je skript postinstall balíčku `omniroute` zablokován, tento krok kopírování se přeskočí.
+- **Volitelné/tranzitivní (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Jde o pomocné nástroje pro sestavení, nástroje pro sledování změn nebo nástroje systémové klíčenky. Jejich povolením předejdete upozorněním při sestavení, ale pro základní funkce směrování nejsou vyžadovány.
+- **Vyloučené (`onnxruntime-node`):** Jde o volitelnou závislost pro lokální embeddingy AI, která **není** pro běh OmniRoute vyžadována. Její skript postinstall stáhne z NuGet přibližně 300 MB komponent CUDA; nezařazujte ji na seznam povolených balíčků, pokud výslovně neplánujete používat lokální akceleraci ONNX na podporovaném hardwaru.
 
 ### Doporučené řešení
 
-Chcete-li během globální instalace povolit požadované instalační skripty a potlačit varování, předejte `--allow-scripts` pro OmniRoute a jeho nativní závislosti:
+Chcete-li během globální instalace povolit požadované instalační skripty a potlačit upozornění, předejte pro OmniRoute a jeho nativní závislosti parametr `--allow-scripts`:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Případně to můžete trvale nakonfigurovat pro všechny globální instalace ve svém uživatelském účtu:
+Případně můžete toto nastavení nakonfigurovat trvale pro všechny globální instalace v rámci svého uživatelského účtu:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +131,7 @@ npm install -g omniroute
 
 ### Ověření instalace
 
-Po instalaci spusťte vestavěný diagnostický nástroj a ověřte, že jsou nativní vazby i běhové prostředí v pořádku:
+Po instalaci spusťte vestavěný diagnostický nástroj a ověřte, že nativní vazby i běhové prostředí fungují správně:
 
 ```bash
 omniroute doctor

@@ -498,6 +498,13 @@ const COSTS_ITEMS: readonly SidebarItemDefinition[] = [
     icon: "price_change",
   },
   {
+    id: "costs-teams",
+    href: "/dashboard/costs/teams",
+    i18nKey: "costsTeams",
+    subtitleKey: "costsTeamsSubtitle",
+    icon: "groups",
+  },
+  {
     id: "costs-budget",
     href: "/dashboard/costs/budget",
     i18nKey: "costsBudget",
@@ -807,7 +814,7 @@ const HELP_ITEMS: readonly SidebarItemDefinition[] = [
   },
   {
     id: "issues",
-    href: "https://github.com/diegosouzapw/OmniRoute/issues",
+    href: "https://github.com/cheaper-inference/OmniRoute/issues",
     i18nKey: "issues",
     subtitleKey: "issuesSubtitle",
     icon: "bug_report",

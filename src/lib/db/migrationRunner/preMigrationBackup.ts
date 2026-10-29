@@ -1,10 +1,11 @@
-import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
 
+import { hashFileSync } from "../backupFileHash";
 import { resolveBackupFile } from "../backupPaths";
 import type { SqliteAdapter } from "../adapters/types";
 import { tryOpenSync } from "../adapters/driverFactory";
+import { chmodQuiet, DB_SECRET_DIR_MODE, DB_SECRET_FILE_MODE } from "../filePermissions";
 import { migrationConsole as console } from "./logger";
 
 export type PreMigrationBackupReceipt = {
@@ -28,25 +29,7 @@ function fsyncDirectoryEntry(directory: string): void {
   }
 }
 
-export function hashFileSync(filePath: string): string {
-  const hash = createHash("sha256");
-  const fd = fs.openSync(filePath, "r");
-  const buffer = Buffer.allocUnsafe(1024 * 1024);
-  let position = 0;
-
-  try {
-    while (true) {
-      const bytesRead = fs.readSync(fd, buffer, 0, buffer.length, position);
-      if (bytesRead === 0) break;
-      hash.update(buffer.subarray(0, bytesRead));
-      position += bytesRead;
-    }
-  } finally {
-    fs.closeSync(fd);
-  }
-
-  return hash.digest("hex");
-}
+export { hashFileSync } from "../backupFileHash";
 
 function getReusablePreMigrationBackup(
   candidatePath: string,
@@ -220,7 +203,7 @@ function cleanupOwnedSnapshotTemp(tempDir: string | null, tempPath: string | nul
 
 function ensureBackupDirectory(backupDir: string): void {
   if (!fs.existsSync(backupDir)) {
-    fs.mkdirSync(backupDir, { recursive: true });
+    fs.mkdirSync(backupDir, { recursive: true, mode: DB_SECRET_DIR_MODE });
     fsyncDirectoryEntry(path.dirname(backupDir));
   }
   if (!fs.lstatSync(backupDir).isDirectory()) {
@@ -283,6 +266,8 @@ export function createPreMigrationBackup(db: SqliteAdapter): PreMigrationBackupR
       }
     }
 
+    // Owner-only before publication: the hard link / rename keeps this inode's mode.
+    chmodQuiet(tempPath, DB_SECRET_FILE_MODE);
     const sha256 = hashFileSync(tempPath);
     backupPath = path.join(backupDir, `db_state-${sha256}_pre-migration.sqlite`);
     const reusable = getReusablePreMigrationBackup(backupPath, sha256);

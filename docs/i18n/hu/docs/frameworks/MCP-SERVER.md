@@ -72,6 +72,16 @@ curl -i \
 
 Egy nem `manage` kulcs (vagy Bearer hiánya) `403 LOCAL_ONLY` hibát ad vissza. A `/api/cli-tools/runtime/*` testvér előtag szándékosan NEM megkerülhető – lásd [Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Origin-ellenőrzés
+
+Hitelesítés után minden `/api/mcp/*` felé irányuló kérés — a transportok és az olyan kezelőútvonalak, mint `status`, `tools`, `audit`, `restart` — `Origin` fejlécét ellenőrizzük, bárki is a hívó (API-kulcs, CLI-token, dashboard-munkamenet vagy névtelen loopback kikapcsolt bejelentkezéssel). Ez az MCP Streamable HTTP specifikáció által megkövetelt DNS rebinding elleni védelem.
+
+- **Nincs `Origin` fejléc** → engedélyezett. Az OmniRoute CLI, az SDK és az IDE-kliensek nem küldik.
+- **Engedélyezett `Origin`** → `localhost` / `127.0.0.1` / `[::1]` bármely porton, vagy az OmniRoute saját nyilvános originje: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, egy megbízható reverse proxy által továbbított origin (`OMNIROUTE_TRUST_PROXY`, csak ha nincs base URL beállítva), vagy közvetlenül elért loopback/LAN IP-hoszt. Önmagában a `Host` fejléc soha nem tesz megbízhatóvá egy origint.
+- **Bármely más `Origin`, beleértve a `null` értéket** → `403` JSON-RPC hibatörzzsel: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Az érvényes CSRF-tokent felmutató dashboard-munkamenet továbbra is elfogadott, akárcsak a többi dashboard-írásnál.
+
+A reverse proxy mögül kiszolgált böngészős MCP-kliensnek `OMNIROUTE_PUBLIC_BASE_URL` szükséges; más originekhez nincs engedélyezőlista. A CORS előzetes kérés (`OPTIONS`) nincs Origin-ellenőrzés alatt; az utána következő kérés igen.
+
 ## IDE konfiguráció
 
 Lásd az [MCP kliens konfigurációt](../guides/SETUP_GUIDE.md#mcp-client-configuration) a Claude Desktop, Cursor, Cline és kompatibilis MCP kliens beállításához.
@@ -281,27 +291,27 @@ Mind az SSE, mind a streamelhető HTTP transzportok blokkolva vannak, amíg az M
 ## Hitelesítés és hatókörök
 
 Az MCP-eszközhívások a hívótól olvassák be a hatókör-karakterláncokat. Ez az ellenőrzés három
-független névtér egyikéhez tartozik. Az egyik ellenőrzőn való megfelelés nem jelent megfelelést a többinél.
-A szabályokat lásd: [Három hatókör-névtér](#three-scope-namespaces).
-Az eszközkatalógust lásd: [MCP-eszközök hatókörei](#mcp-tool-scopes).
+független névtér egyikéhez tartozik. Az egyik ellenőrző sikeres eredménye nem jelenti azt, hogy a többi is sikeres lesz.
+A szabályokat lásd itt: [A három hatókör-névtér](#a-három-hatókör-névtér).
+Az eszközkatalógust lásd itt: [MCP-eszközhatókörök](#mcp-eszközhatókörök).
 
-### Három hatókör-névtér
+### A három hatókör-névtér
 
 Az API-kulcson lévő `manage`, az MCP-eszközön lévő `read:compression`, valamint az
-`oma_live_…` hozzáférési tokenen lévő `read` három különböző jogosultság. Ha a hívó `read`
-hozzáférési tokent küld egy módosítást végző felügyeleti útvonalnak, HTTP 403 választ kap:
-`Access token scope 'read' is insufficient; 'write' required.`
-Ezt a rangsort a `scopeSatisfies` kezeli. Nem vizsgálja az MCP-táblát, és az MCP
-illesztője sem vizsgálja ezt a rangsort.
+`oma_live_…` hozzáférési tokenen lévő `read` három különböző jogosultság. Azok a hívók, amelyek `read`
+hozzáférési tokent küldenek egy állapotmódosító felügyeleti útvonalnak, HTTP 403 választ kapnak:
+`A hozzáférési token 'read' hatóköre nem elegendő; 'write' szükséges.`
+Ezt a rangsort a `scopeSatisfies` kezeli. Nem veszi figyelembe az MCP-táblázatot, és az MCP
+illesztője sem veszi figyelembe ezt a rangsort.
 
-| Névtér                 | Hitelesítő adat                                                    | Ellenőrző                          | A megfelelés ezt engedélyezi                                                        |
-| :--------------------- | :----------------------------------------------------------------- | :--------------------------------- | :---------------------------------------------------------------------------------- |
-| API-kulcsos felügyelet | `api_keys.scopes`                                                  | `hasManageScope`                   | Felügyeleti REST az adott Bearer kulcshoz                                           |
-| API-kulcsos kiegészítő | ugyanaz a tömb, egy pontos karakterlánc                            | az alább megnevezett segédfüggvény | Kizárólag az adott képesség                                                         |
-| MCP-eszközhatókörök    | ugyanaz a tömb, egyébként MCP `_meta`, majd `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                     | Az adott eszköz, miután a kikényszerítés be van kapcsolva                           |
-| Hozzáférési token      | `oma_live_…`                                                       | `scopeSatisfies`                   | Az a felügyeleti útvonal, amelynek metódusa és elérési útja az adott rangot igényli |
+| Névtér                 | Hitelesítő adat                                                    | Ellenőrző                          | A sikeres ellenőrzés ezt engedélyezi                                             |
+| :--------------------- | :----------------------------------------------------------------- | :--------------------------------- | :------------------------------------------------------------------------------- |
+| API-kulcsos felügyelet | `api_keys.scopes`                                                  | `hasManageScope`                   | Felügyeleti REST az adott Bearer-kulcshoz                                        |
+| API-kulcsos kiegészítő | ugyanaz a tömb, egyetlen pontos karakterlánc                       | az alább megnevezett segédfüggvény | Csak az adott képesség                                                           |
+| MCP-eszközhatókörök    | ugyanaz a tömb, egyébként MCP `_meta`, majd `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                     | Az adott eszköz, miután a kikényszerítés be van kapcsolva                        |
+| Hozzáférési token      | `oma_live_…`                                                       | `scopeSatisfies`                   | Az a felügyeleti útvonal, amelynek metódusa és elérési útja ezt a rangot igényli |
 
-Az egyes hitelesítő adatok kiadását a
+Az egyes hitelesítő adatok kibocsátását a
 [Felügyeleti hitelesítés](../guides/MANAGEMENT-AUTH.md) ismerteti.
 
 #### API-kulcsok hatókörei
@@ -310,73 +320,75 @@ Egyetlen `api_keys.scopes` tömb két feladatot lát el. Ezek különböző füg
 
 **Felügyeleti REST.** A `manage` és az `admin` a
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) elemei.
-A `hasManageScope` engedélyezi az adott kulcs számára a felügyeleti útvonalakat. Az `admin`
+Az adott kulcshoz tartozó felügyeleti útvonalakat a `hasManageScope` engedélyezi. Az `admin`
 felügyeleti jogosultságot biztosít ezeken az útvonalakon. Az `admin` szó itt nem a
-hozzáférési token rangját jelenti, és nem bővül MCP-eszközhatókörökké.
+hozzáférési token rangját jelenti, és nem bővül ki MCP-eszközhatókörökké.
 
-**Kiegészítő karakterláncok.** Mindegyik pontos tagsági vizsgálatot használ, és mindegyik kívül marad
-a `MANAGEMENT_API_KEY_SCOPES` halmazon.
+**Kiegészítő karakterláncok.** Mindegyiknél pontos tagsági vizsgálat történik, és mindegyik a
+`MANAGEMENT_API_KEY_SCOPES` hatókörén kívül marad.
 
-| Hatókör                        | A megfelelés ezt engedélyezi                                                                                                                                                                |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mcp:connect`                  | Kizárólag a nem visszacsatolási címről érkező `/api/mcp/` LOCAL_ONLY kivételt (`hasMcpConnectOrManageScope`). A `manage` vagy `admin` hatókörű kulcs szintén megfelel ennél a kivételnél.   |
-| `self:usage`                   | A kulcshoz tartozó `GET /api/v1/me/status` hívást (`src/app/api/v1/me/status/route.ts`). A `POST /api/keys` létrehozáskor hozzáadja ezt a hatókört (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | A felsőbb rétegbeli fiókkvótákat az adott állapotadatban (`src/lib/usage/apiKeySelfService.ts`). Az állapotútvonal továbbra is megköveteli a `self:usage` hatókört.                         |
-| `policy:bypass-provider-quota` | A kulcs következtetési hívásai kihagyják a szolgáltatói kvótaszabályzatot (`hasProviderQuotaBypassScope` a `src/sse/handlers/chat.ts` fájlban).                                             |
+| Hatókör                        | A sikeres ellenőrzés ezt engedélyezi                                                                                                                                               |
+| :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Csak a nem loopback `/api/mcp/` LOCAL_ONLY kivételt (`hasMcpConnectOrManageScope`). A `manage` vagy `admin` hatókörű kulcs továbbra is megfelel ennek a kivételnek.                |
+| `self:usage`                   | `GET /api/v1/me/status` ehhez a kulcshoz (`src/app/api/v1/me/status/route.ts`). A `POST /api/keys` létrehozáskor hozzáadja ezt a hatókört (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | A felsőbb szintű fiókkvótákat az adott állapot-válaszban (`src/lib/usage/apiKeySelfService.ts`). Az állapotútvonalhoz továbbra is szükséges a `self:usage`.                        |
+| `policy:bypass-provider-quota` | A kulcs következtetési hívásai kihagyják a szolgáltatói kvótaszabályzatot (`hasProviderQuotaBypassScope` a `src/sse/handlers/chat.ts` fájlban).                                    |
 
 #### Illesztés
 
-A katalógus az [MCP-eszközök hatókörei](#mcp-tool-scopes) alatti táblázat. Ne
-tekintse az `src/shared/constants/mcpScopes.ts` fájlban lévő `MCP_SCOPE_LIST` értéket ennek a katalógusnak:
-az csak az eredeti, típusokkal ellátott részhalmaz. A későbbi eszközök további hatóköröket deklarálnak mellette
-(`read:notion`, `read:skills`, `read:local-corpus` és a táblázat többi eleme).
+A katalógus az [MCP-eszközhatókörök](#mcp-eszközhatókörök) alatti táblázat. Ne
+tekintse az `src/shared/constants/mcpScopes.ts` fájlban található `MCP_SCOPE_LIST` értéket ennek a katalógusnak:
+az csak az eredeti típusos részhalmaz. A később hozzáadott eszközök további hatóköröket deklarálnak mellette
+(`read:notion`, `read:skills`, `read:local-corpus`, valamint a táblázat többi eleme).
 
-Az `open-sse/mcp-server/scopeEnforcement.ts` fájlban lévő `evaluateToolScopes` akkor engedélyez egy hívást,
-ha minden szükséges hatókör illeszkedik valamelyik megadott hatókörhöz:
+Az `open-sse/mcp-server/scopeEnforcement.ts` fájlban található `evaluateToolScopes` akkor engedélyez egy hívást,
+ha minden szükséges hatókör illeszkedik valamelyik megadott hatókörre:
 
 - A `*` minden szükséges hatókörre illeszkedik.
-- A `*` karakterrel végződő megadott hatókör olyan szükséges hatókörre illeszkedik, amely
-  a csillag előtti előtaggal kezdődik. A `read:*` illeszkedik a `read:compression` értékre.
-- Minden más megadott hatókör csak a vele teljesen azonos szükséges karakterláncra illeszkedik.
+- A `*` karakterrel végződő megadott hatókör minden olyan szükséges hatókörre illeszkedik, amely a
+  csillag előtti előtaggal kezdődik. A `read:*` illeszkedik a `read:compression` értékre.
+- Minden más megadott hatókör csak a vele azonos szükséges karakterláncra illeszkedik.
 
-Az `["manage"]` hatókörökkel rendelkező kulcs nem felel meg a `scopeMatches` ellenőrzésének a `read:compression` esetén.
-Ugyanez a hívás az `admin`, `mcp:connect`, `read` és `write` esetén is meghiúsul, ha csak ezek
-a karakterláncok vannak megadva. Az MCP-eszközhatókörök között a záró `*` által biztosított illesztésen túl
-nincs hierarchia.
+Az a kulcs, amelynek hatókörei `["manage"]`, nem felel meg a `scopeMatches` ellenőrzésnek a `read:compression`
+esetén. Ugyanez a hívás az `admin`, `mcp:connect`, `read` és `write` esetén is sikertelen, ha csak ezek
+a karakterláncok vannak megadva. Az MCP-eszközhatókörök között a záró `*` használatán túl nincs hierarchia.
 
-A kikényszerítés ki van kapcsolva, kivéve, ha `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (alapértelmezett érték:
+A kikényszerítés ki van kapcsolva, kivéve, ha `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (alapértelmezés:
 `false`). Amíg ki van kapcsolva, az `evaluateToolScopes` engedélyezi a hívást, és kihagyja a
-katalógust. Amíg be van kapcsolva, a HTTP a Bearer kulcs `api_keys.scopes` értékét használja
-`authInfo` értékként (lásd: [HTTP-hatókör kulcsonkénti kötése](#per-key-http-scope-binding-7895)).
+katalógust. Amikor be van kapcsolva, a HTTP a Bearer-kulcs `api_keys.scopes` értékét használja
+`authInfo`-ként (lásd: [Kulcsonkénti HTTP-hatókör-hozzárendelés](#kulcsonkénti-http-hatókör-hozzárendelés-7895)).
 Ha nem oldható fel egyetlen kulcshatókör sem, a megadott halmaz először az MCP `_meta`, majd az
-`OMNIROUTE_MCP_SCOPES` értékére lép tovább.
+`OMNIROUTE_MCP_SCOPES` értékére vált vissza.
 
 #### Hozzáférési tokenek hatókörei
 
 Az `oma_live_…` tokenek (`src/lib/accessTokens/scopes.ts`) `read`, `write`
-vagy `admin` hatókört hordoznak. A `scopeSatisfies` rangsort használ: az `admin` magában foglalja a `write` és `read`,
-a `write` pedig a `read` jogosultságot. Az ismeretlen hatókörök semmire sem adnak jogosultságot.
+vagy `admin` értéket hordoznak. A `scopeSatisfies` rangsort alkalmaz: az `admin` lefedi a `write` és a `read`
+értéket, a `write` pedig lefedi a `read` értéket. Az ismeretlen hatókörök semmit sem fednek le.
 
-Az `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) összehasonlítja ezt
-a rangot az `inferRequiredScope` (`src/server/authz/accessScopes.ts`) által meghatározott követelménnyel:
+Az `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ezt a rangot hasonlítja össze az
+`inferRequiredScope` (`src/server/authz/accessScopes.ts`) eredményével:
 
-- A `GET`, `HEAD` és `OPTIONS` metódusokhoz `read` szükséges.
+- A `GET`, `HEAD` és `OPTIONS` metódushoz `read` szükséges.
 - Minden más metódushoz `write` szükséges.
-- Az `ADMIN_SCOPE_PREFIXES` elemei között szereplő elérési utak minden metódushoz `admin` jogosultságot igényelnek. Az `/api/mcp`
+- Az `ADMIN_SCOPE_PREFIXES` értékben szereplő elérési utakhoz minden metódus esetén `admin` szükséges. Az `/api/mcp`
   szerepel ezen a listán, ezért egy `write` hozzáférési token továbbra sem hívhatja meg az MCP HTTP
-  felületét.
-- Az `ADMIN_MUTATION_PREFIXES` elemei között szereplő elérési utak csak a módosításokhoz igényelnek `admin` jogosultságot.
+  felületet.
+- Az `ADMIN_MUTATION_PREFIXES` értékben szereplő elérési utakhoz csak módosítások esetén szükséges `admin`.
+- Az `ADMIN_MUTATION_EXACT_PATHS` értékben szereplő elérési utakhoz (`/api/settings`,
+  `/api/settings/require-login`) csak módosítások esetén és csak pontosan azon az
+  elérési úton szükséges `admin` — a többi `/api/settings/*` alútvonalnál továbbra is elegendő a `write`.
 
-A `PATCH /api/keys/{id}` egy módosító művelet, és nem szerepel ezeken az adminisztrátori listákon, ezért egy
+A `PATCH /api/keys/{id}` egy módosítási művelet, és nem szerepel ezeken az adminisztrátori listákon, ezért egy
 `read` token 403-as választ kap:
 `Az access token 'read' hatóköre nem elegendő; 'write' szükséges.`
-Egy `write` vagy `admin` access token megfelel az útvonal követelményeinek. Egy irányítópult-JWT, a
-loopback CLI machine-id tokenje, valamint egy `manage` vagy `admin` jogosultságú API-kulcs
-más ágakon halad tovább, és ez a rangsorolás nem szűkíti őket.
+Egy `write` vagy `admin` access token megfelel az útvonal követelményeinek. Egy dashboard JWT, a
+loopback CLI gépazonosító tokenje, valamint egy `manage` vagy `admin` jogosultságú API-kulcs
+más ágakon halad végig, és ez a rangsorolás nem korlátozza őket.
 
-Az az access token, amely megfelel a `scopeSatisfies` ellenőrzésnek az `/api/mcp` esetében, csak a
-felügyeleti kapun jutott át. Az eszközhívások továbbra is a `scopeMatches` függvénnyel ellenőrzik az API-kulcsok
-hatóköreit. Az access token rangja nem bemenete a `scopeMatches` függvénynek.
+Az az access token, amely átmegy a `scopeSatisfies` ellenőrzésen az `/api/mcp` esetében, csak a
+felügyeleti kapun jutott át. Az eszközhívások továbbra is lefuttatják a `scopeMatches` ellenőrzést az API-kulcsok
+hatóköreivel szemben. Az access token rangja nem bemeneti értéke a `scopeMatches` függvénynek.
 
 ### MCP-eszközök hatókörei
 
@@ -423,55 +435,43 @@ A helyettesítő karakteres hatókörök támogatottak: a `read:*` minden olvas�
 
 ### `mcp:connect` — szűk útvonal-képesség (#7895)
 
-A HTTP/SSE MCP-átvitel (`/api/mcp/*`) nem loopback címről való eléréséhez szükség van az
+A HTTP/SSE MCP-transzport (`/api/mcp/*`) nem visszacsatolási címről történő eléréséhez szükség van az
 `/api/mcp/` LOCAL_ONLY kivételre (lásd: `docs/security/ROUTE_GUARD_TIERS.md`). Korábban
 ez a kivétel csak teljes `manage`/`admin` hatókörű API-kulcsot fogadott el — ez túl széles
-jogosultság egy olyan hívó számára, amelynek csak az MCP-vel kell kommunikálnia. A
-`src/shared/constants/managementScopes.ts` mostantól exportálja az
-`MCP_CONNECT_SCOPE = "mcp:connect"` értéket: ez egy additív, szűk hatókör (a
-`SELF_USAGE_SCOPE` precedensét követve), amely KIZÁRÓLAG az `/api/mcp/` megkerülést
-engedélyezi a `src/server/authz/policies/management.ts` fájlban — semmilyen más
-felügyeleti útvonalhoz nem biztosít hozzáférést, és szándékosan NEM szerepel a
-`MANAGEMENT_API_KEY_SCOPES` között. A `manage`/`admin` jogosultsággal rendelkező kulcsok
-továbbra is változatlanul átjutnak a kivételen; az `mcp:connect` alacsonyabb jogosultságú
-alternatíva a kizárólag távoli MCP-t használó hívók számára, amelyet a
-`hasMcpConnectOrManageScope()` ellenőriz.
+egy olyan hívó számára, amelynek csak az MCP-vel kell kommunikálnia. A `src/shared/constants/managementScopes.ts` mostantól
+exportálja az `MCP_CONNECT_SCOPE = "mcp:connect"` értéket: ez egy kiegészítő, szűk hatókör (a
+`SELF_USAGE_SCOPE` mintájára), amely KIZÁRÓLAG az `/api/mcp/` megkerülést engedélyezi a
+`src/server/authz/policies/management.ts` fájlban — semmilyen más felügyeleti útvonalhoz nem biztosít hozzáférést,
+és szándékosan NEM szerepel a `MANAGEMENT_API_KEY_SCOPES` között. A `manage`/`admin`
+hatókörrel rendelkező kulcs továbbra is változatlanul megfelel a kivétel feltételeinek; az `mcp:connect` alacsonyabb jogosultságú alternatíva
+a csak MCP-t használó távoli hívók számára, amelyet a `hasMcpConnectOrManageScope()` ellenőriz.
 
 ### Kulcsonkénti HTTP-hatókör-hozzárendelés (#7895)
 
-HTTP/SSE használatakor az `open-sse/mcp-server/httpTransport.ts` mostantól feloldja a hívó
-tényleges `api_keys.scopes` értékét a `resolveMcpCallerAuthInfo()`
-(`open-sse/mcp-server/httpAuthContext.ts`) segítségével, és átadja azt az MCP SDK
-`transport.handleRequest(req, { authInfo })` hívásának, így az egyes eszközhívásokhoz
-eljutó `extra.authInfo.scopes` a Bearer-kulcs saját hatóköreit tükrözi. A
-`scopeEnforcement.ts` fájlban található `resolveCallerScopeContext()` már eddig is
-előnyben részesítette az `authInfo` értékét a `_meta` és az `OMNIROUTE_MCP_SCOPES`
-környezeti változóra való tartalék visszaeséssel szemben — ez a módosítás csupán feltölti
-ezt az első, legmagasabb prioritású forrást, amely HTTP-n keresztül korábban nem kapott
-adatot. Ha nem sikerül API-kulcsot feloldani (nincs fejléc, vagy a kulcs érvénytelen), az
-`authInfo` értéke `undefined` marad, és a feloldás változatlanul visszaesik a meglévő
-`meta`/környezeti változó láncra. A stdio nem rendelkezik hívónkénti identitással (lásd:
-`mcpCallerIdentity.ts`), ezért ez nem érinti — továbbra is a `_meta`/környezeti változó
-tartalék láncot használja.
+HTTP/SSE használata esetén az `open-sse/mcp-server/httpTransport.ts` mostantól feloldja a hívó tényleges
+`api_keys.scopes` értékét a `resolveMcpCallerAuthInfo()` segítségével (`open-sse/mcp-server/httpAuthContext.ts`),
+és átadja azt az MCP SDK `transport.handleRequest(req, { authInfo })` hívásának, így
+az egyes eszközhívásokhoz eljutó `extra.authInfo.scopes` a Bearer-kulcs saját hatóköreit tükrözi.
+A `scopeEnforcement.ts` fájlban található `resolveCallerScopeContext()` már eddig is előnyben részesítette az `authInfo` értékét
+a `_meta` és az `OMNIROUTE_MCP_SCOPES` környezetiváltozó-tartalékmegoldással szemben — ez a módosítás csupán feltölti ezt az első,
+legmagasabb prioritású forrást, amely HTTP-n keresztül korábban nem kapott adatot. Ha egyetlen API-kulcs sem oldható fel
+(nincs fejléc, vagy érvénytelen a kulcs), az `authInfo` értéke `undefined` marad, és a feloldás változatlanul továbblép a
+meglévő `meta`/környezeti láncra. A stdio nem rendelkezik hívónkénti identitással (lásd:
+`mcpCallerIdentity.ts`), ezért ez nem érinti — továbbra is a `_meta`/környezeti tartalékláncot használja.
 
-**A hatókörök érvényesítése a szűk hatókörű HTTP/SSE-hívóknál az
-`OMNIROUTE_MCP_ENFORCE_SCOPES` értékétől függetlenül kényszerítve van.** Az, hogy az
-`OMNIROUTE_MCP_ENFORCE_SCOPES` alapértelmezett értéke `false`, csak a helyi/stdio,
-egyetlen operátoros működésnél biztonságos, ahol nincs hívónkénti identitás, amelyhez
-hatóköri korlátozást lehetne rendelni. Az
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` feltétel nélkül bekapcsolja az
-eszközönkénti hatókör-érvényesítést (a `scopeEnforcement.ts` fájlban található
-`shouldForceScopeEnforcement()` révén), amikor a `resolveCallerScopeContext()` által
-feloldott érték `source === "authInfo"` (vagyis valódi, kulcsonkénti HTTP Authorization
-fejléc, kizárólag HTTP/SSE esetén), ÉS az adott kulcs nem rendelkezik teljes
-`manage`/`admin` hatókörrel. Ez megszünteti azt a rést, amelyen keresztül egy KIZÁRÓLAG a
-szűk `mcp:connect` megkerülési hatókörrel rendelkező kulcs — amely a fenti dokumentáció
-szerint kizárólag az `/api/mcp/` LOCAL_ONLY kivételt engedélyezi — egyébként minden MCP-eszközt
-meghívhatott volna, miután egy operátor engedélyezte a távoli/nem loopback MCP-hozzáférést,
-pusztán azért, mert az `OMNIROUTE_MCP_ENFORCE_SCOPES` alapértelmezett értéke `false`.
-A HTTP-n keresztül használt teljes `manage`/`admin` kulcsok, valamint minden stdio/helyi
-hívó esetén a meglévő, `OMNIROUTE_MCP_ENFORCE_SCOPES` által vezérelt viselkedés
-változatlan marad.
+**A hatókör-érvényesítés a szűk hatókörű HTTP/SSE-hívóknál az
+`OMNIROUTE_MCP_ENFORCE_SCOPES` értékétől függetlenül kötelező.** Az `OMNIROUTE_MCP_ENFORCE_SCOPES` alapértelmezett `false`
+értéke csak a helyi/stdio egyetlen operátoros működésnél biztonságos, ahol nincs hívónkénti identitás,
+amelyhez hatókört lehetne rendelni. Az `open-sse/mcp-server/server.ts::withScopeEnforcement()` feltétel nélkül bekapcsolja
+az eszközönkénti hatókör-érvényesítést (a `scopeEnforcement.ts` fájlban található `shouldForceScopeEnforcement()`),
+amikor a `resolveCallerScopeContext()` által feloldott érték
+`source === "authInfo"` (azaz valódi, kulcsonkénti HTTP Authorization fejléc, kizárólag HTTP/SSE esetén), ÉS az adott
+kulcs nem rendelkezik teljes `manage`/`admin` hatókörrel. Ez megszünteti azt a rést, amely miatt egy KIZÁRÓLAG
+a szűk `mcp:connect` megkerülési hatókörrel rendelkező kulcs — amely a fenti dokumentáció szerint semmi másra nem ad jogosultságot, csak az
+`/api/mcp/` LOCAL_ONLY kivételre — egyébként minden MCP-eszközt meghívhatott volna, miután egy operátor
+engedélyezte a távoli/nem visszacsatolási címről történő MCP-hozzáférést, pusztán azért, mert az `OMNIROUTE_MCP_ENFORCE_SCOPES`
+alapértelmezett értéke `false`. Egy HTTP-n keresztül használt teljes `manage`/`admin` kulcs, valamint minden stdio/helyi hívó esetében
+a meglévő, `OMNIROUTE_MCP_ENFORCE_SCOPES` által vezérelt működés változatlan marad.
 
 ---
 

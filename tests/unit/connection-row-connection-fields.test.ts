@@ -33,13 +33,20 @@ function declaredFields(source: string): Set<string> {
 
 test("every connection.<field> read in ConnectionRow is declared on ConnectionRowConnection", () => {
   const source = readFileSync(rowFile, "utf8");
-  const declared = declaredFields(source);
-  const read = new Set([...source.matchAll(/\bconnection\.([A-Za-z_]\w*)/g)].map((m) => m[1]));
+  const types = readFileSync(path.join(path.dirname(rowFile), "connectionRowTypes.ts"), "utf8");
+  const declared = declaredFields(types);
+  const statusSource = readFileSync(
+    path.join(path.dirname(rowFile), "connectionRowStatus.ts"),
+    "utf8"
+  );
+  const read = new Set(
+    [...`${source}\n${statusSource}`.matchAll(/\bconnection\.([A-Za-z_]\w*)/g)].map((m) => m[1])
+  );
   const undeclared = [...read].filter((field) => !declared.has(field)).sort();
   assert.deepEqual(undeclared, []);
 });
 
 test("rateLimitAutoProtected is declared as an optional boolean", () => {
-  const source = readFileSync(rowFile, "utf8");
+  const source = readFileSync(path.join(path.dirname(rowFile), "connectionRowTypes.ts"), "utf8");
   assert.match(source, /^\s+rateLimitAutoProtected\?: boolean;$/m);
 });

@@ -22,7 +22,7 @@ const HARD_TIMEOUT_GRACE_MS =
 
 export const tlsClientModule = createTlsClientModule({
   providerName: "Perplexity",
-  tlsProfile: "firefox_148",
+  tlsProfile: "firefox_151",
   emulationOs: "macos",
   domain: "https://www.perplexity.ai",
   streamEofPolicy: "include",

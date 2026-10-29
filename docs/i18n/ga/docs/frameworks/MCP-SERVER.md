@@ -72,6 +72,16 @@ curl -i \
 
 Filleann eochair nach bhfuil scóip bainistíochta aici (nó gan Bearer) `403 LOCAL_ONLY`. Ní féidir an t-iarmhír comharsanachta `/api/cli-tools/runtime/*` a sheachbhóthar go feasach - féach [Tairmeanna Cosanta Acmhainní — Marcáil Tharmainn Scóip Bainistíochta](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Bailíochtú Origin
+
+Tar éis fíordheimhnithe, déantar ceanntásc `Origin` gach iarratais chuig `/api/mcp/*` — na transports agus na bealaí bainistíochta ar nós `status`, `tools`, `audit`, `restart` — a bhailíochtú, cibé cé hé an glaoiteoir (eochair API, comhartha CLI, seisiún painéil, nó loopback gan ainm agus logáil isteach díchumasaithe). Seo í an chosaint ar DNS rebinding a éilíonn sonraíocht MCP Streamable HTTP.
+
+- **Gan cheanntásc `Origin`** → ceadaithe. Ní sheolann OmniRoute CLI, an SDK ná cliaint IDE é.
+- **`Origin` ceadaithe** → `localhost` / `127.0.0.1` / `[::1]` ar aon phort, nó bunús poiblí OmniRoute féin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, an bunús a chuireann seachfhreastalaí droim ar ais iontaofa ar aghaidh (`OMNIROUTE_TRUST_PROXY`, ach amháin nuair nach bhfuil base URL socraithe), nó óstach IP loopback/LAN a rochtainítear go díreach. Ní dhéanann ceanntásc `Host` leis féin bunús iontaofa riamh.
+- **Aon `Origin` eile, `null` san áireamh** → `403` le corp earráide JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Glactar fós le seisiún painéil a chuireann comhartha CSRF bailí i láthair, mar a dhéantar le scríbhinní eile an phainéil.
+
+Teastaíonn `OMNIROUTE_PUBLIC_BASE_URL` ó chliant MCP brabhsálaí a fhreastalaítear taobh thiar de sheachfhreastalaí droim ar ais; níl liosta ceadaithe ann do bhunúis eile. Ní sheiceáiltear Origin ar réamhiarratas CORS (`OPTIONS`); seiceáiltear an t-iarratas a leanann é.
+
 ## Cumraíocht IDE
 
 Féach [Cumraíocht Chliaint MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) le haghaidh Claude Desktop,
@@ -281,183 +291,131 @@ Tá iompar SSE agus HTTP in-stream cosnaithe go dtí go ndéantar an freastalaí
 
 ## Fíordheimhniú & Scóip
 
-Léann glaonna uirlisí MCP teaghráin scóipe ón nglaoiteoir. Tá an tseiceáil sin ar cheann de thrí
-ainmspás neamhspleácha. Ní hionann pas ó sheiceálaí amháin agus pas ó na cinn eile.
-Tá na rialacha le fáil in [Trí ainmspás scóipe](#three-scope-namespaces).
-Tá catalóg na n-uirlisí le fáil in [Scóip uirlisí MCP](#mcp-tool-scopes).
+Léann glaonna uirlisí MCP teaghráin scóipe ón nglaoiteoir. Tá an tseiceáil sin ar cheann de thrí ainmspás neamhspleácha. Ní hionann pas ó sheiceálaí amháin agus pas ó na cinn eile. Tá na rialacha in [Trí ainmspás scóipe](#three-scope-namespaces).
+Tá catalóg na n-uirlisí in [Scóip uirlisí MCP](#mcp-tool-scopes).
 
 ### Trí ainmspás scóipe
 
-Is trí dheontas éagsúla iad `manage` ar eochair API, `read:compression` ar uirlis MCP, agus `read` ar
-chomhartha rochtana `oma_live_…`. Faigheann glaoiteoirí a sheolann comhartha rochtana `read`
-chuig bealach bainistíochta a dhéanann athrú HTTP 403
+Is trí dheontas éagsúla iad `manage` ar eochair API, `read:compression` ar uirlis MCP, agus `read` ar chomhartha rochtana `oma_live_…`. Faigheann glaoiteoirí a sheolann comhartha rochtana `read` chuig bealach bainistíochta a dhéanann athrú HTTP 403:
 `Access token scope 'read' is insufficient; 'write' required.`
-Is é `scopeSatisfies` an rang sin. Ní théann sé i gcomhairle leis an tábla MCP, agus ní théann
-meaitseálaí MCP i gcomhairle leis.
+Is é `scopeSatisfies` an rang sin. Ní théann sé i gcomhairle leis an tábla MCP, agus ní théann meaitseálaí MCP i gcomhairle leis.
 
-| Ainmspás                  | Dintiúr                                                      | Seiceálaí                             | An méid a cheadaíonn pas                                                |
-| :------------------------ | :----------------------------------------------------------- | :------------------------------------ | :---------------------------------------------------------------------- |
-| Bainistíocht eochrach API | `api_keys.scopes`                                            | `hasManageScope`                      | REST bainistíochta don eochair Bearer sin                               |
-| Breisiú eochrach API      | an t-eagar céanna, teaghrán beacht amháin                    | an fheidhm chúnta atá ainmnithe thíos | An cumas amháin sin                                                     |
-| Scóip uirlisí MCP         | an t-eagar céanna, nó `_meta` MCP, nó `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                        | An uirlis sin, a luaithe a bhíonn forfheidhmiú ar siúl                  |
-| Comhartha rochtana        | `oma_live_…`                                                 | `scopeSatisfies`                      | An bealach bainistíochta a n-éilíonn a mhodh agus a chonair an rang sin |
+| Ainmspás                  | Dintiúr                                                      | Seiceálaí                      | An méid a cheadaíonn pas                                              |
+| :------------------------ | :----------------------------------------------------------- | :----------------------------- | :-------------------------------------------------------------------- |
+| Bainistíocht eochrach API | `api_keys.scopes`                                            | `hasManageScope`               | REST bainistíochta don eochair Bearer sin                             |
+| Breisiúchán eochrach API  | an t-eagar céanna, teaghrán beacht amháin                    | an cúntóir atá ainmnithe thíos | An cumas amháin sin                                                   |
+| Scóip uirlisí MCP         | an t-eagar céanna, nó MCP `_meta`, nó `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                 | An uirlis sin, a luaithe a bhíonn forfheidhmiú ar siúl                |
+| Comhartha rochtana        | `oma_live_…`                                                 | `scopeSatisfies`               | An bealach bainistíochta a éilíonn a mhodh agus a chonair an rang sin |
 
-Clúdaítear cruthú gach dintiúir in
+Clúdaítear eisiúint gach dintiúir in
 [Fíordheimhniú Bainistíochta](../guides/MANAGEMENT-AUTH.md).
 
 #### Scóip eochrach API
 
-Comhlíonann eagar amháin `api_keys.scopes` dhá chúram. Úsáideann siad feidhmeanna éagsúla.
+Freastalaíonn eagar amháin `api_keys.scopes` ar dhá chúram. Úsáideann siad feidhmeanna éagsúla.
 
-**REST bainistíochta.** Is iad `manage` agus `admin` na baill de
+**REST bainistíochta.** Is iad `manage` agus `admin` baill
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-Is é `hasManageScope` a údaraíonn bealaí bainistíochta don eochair sin. Tá `admin`
-in ann bainistíocht a dhéanamh ar na bealaí sin. Ní hé an focal `admin` anseo
-rang an chomhartha rochtana agus ní leathnaíonn sé ina scóip uirlisí MCP.
+Is é `hasManageScope` a údaraíonn bealaí bainistíochta don eochair sin. Tá cumas bainistíochta ag `admin` ar na bealaí sin. Ní hionann an focal `admin` anseo agus rang an chomhartha rochtana, agus ní leathnaíonn sé ina scóip uirlisí MCP.
 
-**Teaghráin bhreisitheacha.** Is tástáil bheacht ballraíochta gach ceann acu, agus fanann gach ceann acu
-lasmuigh de `MANAGEMENT_API_KEY_SCOPES`.
+**Teaghráin bhreise.** Is tástáil bhallraíochta bheacht gach ceann acu, agus fanann gach ceann acu lasmuigh de `MANAGEMENT_API_KEY_SCOPES`.
 
-| Scóip                          | An méid a cheadaíonn pas                                                                                                                                                                |
-| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | An eisceacht LOCAL_ONLY neamh-loopback `/api/mcp/` amháin (`hasMcpConnectOrManageScope`). Éiríonn le heochair a bhfuil `manage` nó `admin` aici san eisceacht sin fós.                  |
-| `self:usage`                   | `GET /api/v1/me/status` don eochair seo (`src/app/api/v1/me/status/route.ts`). Cuireann `POST /api/keys` an scóip seo leis tráth a chruthaithe (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Cuótaí cuntais réamhtheachtacha laistigh den phálasta stádais sin (`src/lib/usage/apiKeySelfService.ts`). Éilíonn an bealach stádais `self:usage` fós.                                  |
-| `policy:bypass-provider-quota` | Seachnaíonn glaonna tátail na heochrach seo polasaí chuóta an tsoláthraí (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`).                                                 |
+| Scóip                          | An méid a cheadaíonn pas                                                                                                                                                             |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | An t-eisceacht LOCAL_ONLY neamh-loopback `/api/mcp/` amháin (`hasMcpConnectOrManageScope`). Gabhann eochair le `manage` nó `admin` tríd an eisceacht sin fós.                        |
+| `self:usage`                   | `GET /api/v1/me/status` don eochair seo (`src/app/api/v1/me/status/route.ts`). Cuireann `POST /api/keys` an scóip seo leis tráth cruthaithe (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Cuótaí cuntais réamhtheachtacha laistigh den phálasta stádais sin (`src/lib/usage/apiKeySelfService.ts`). Éilíonn an bealach stádais `self:usage` fós.                               |
+| `policy:bypass-provider-quota` | Scipeálann glaonna tátail na heochrach seo polasaí chuóta an tsoláthraí (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`).                                               |
 
 #### Meaitseáil
 
-Is í an chatalóg an tábla faoi [Scóip uirlisí MCP](#mcp-tool-scopes). Ná caith le
-`MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` mar an gcatalóg sin:
-is é an fothacar clóscríofa bunaidh é. Fógraíonn uirlisí níos déanaí scóip eile taobh leis
-(`read:notion`, `read:skills`, `read:local-corpus`, agus an chuid eile den tábla).
+Is í an chatalóg an tábla faoi [Scóip uirlisí MCP](#mcp-tool-scopes). Ná caith le `MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` mar an gcatalóg sin:
+is é an fo-thacar clóscríofa bunaidh é. Fógraíonn uirlisí níos déanaí scóip bhreise taobh leis (`read:notion`, `read:skills`, `read:local-corpus`, agus an chuid eile den tábla).
 
-Ceadaíonn `evaluateToolScopes` in `open-sse/mcp-server/scopeEnforcement.ts` glao
-nuair a mheaitseálann gach scóip riachtanach scóip dheonaithe éigin:
+Ceadaíonn `evaluateToolScopes` in `open-sse/mcp-server/scopeEnforcement.ts` glao nuair a mheaitseálann gach scóip riachtanach scóip dheonaithe éigin:
 
 - Meaitseálann `*` gach scóip riachtanach.
-- Meaitseálann scóip dheonaithe a chríochnaíonn le `*` scóip riachtanach a thosaíonn leis
-  an réimír roimh an réiltín. Meaitseálann `read:*` `read:compression`.
+- Meaitseálann scóip dheonaithe a chríochnaíonn le `*` scóip riachtanach a thosaíonn leis an réimír roimh an réiltín. Meaitseálann `read:*` `read:compression`.
 - Ní mheaitseálann gach scóip dheonaithe eile ach an teaghrán riachtanach comhionann.
 
-Teipeann ar eochair arb iad `["manage"]` a scóip `scopeMatches` a chomhlíonadh do `read:compression`.
-Teipeann ar an nglao céanna i gcás `admin`, `mcp:connect`, `read`, agus `write` nuair is iad sin
-na teaghráin dheonaithe amháin. Níl aon ordlathas i measc scóip uirlisí MCP
-seachas an `*` deiridh.
+Teipeann ar eochair arb iad `["manage"]` a scóip `scopeMatches` a shásamh do `read:compression`.
+Teipeann an glao céanna i gcás `admin`, `mcp:connect`, `read`, agus `write` nuair is iad sin na teaghráin dheonaithe amháin. Níl aon ordlathas i measc scóip uirlisí MCP seachas an `*` deiridh.
 
 Bíonn an forfheidhmiú múchta mura bhfuil `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (réamhshocrú
-`false`). Fad atá sé múchta, ceadaíonn `evaluateToolScopes` an glao agus scipeálann sé an
-chatalóg. Fad atá sé ar siúl, úsáideann HTTP `api_keys.scopes` na heochrach Bearer mar
-`authInfo` (féach [Ceangal scóipe HTTP de réir eochrach](#per-key-http-scope-binding-7895)).
-Nuair nach réitítear aon scóip eochrach, téann an tacar deonaithe ar aghaidh go `_meta` MCP, agus ansin
-go `OMNIROUTE_MCP_SCOPES`.
+`false`). Fad is atá sé múchta, ceadaíonn `evaluateToolScopes` an glao agus scipeálann sé an chatalóg. Fad is atá sé ar siúl, úsáideann HTTP `api_keys.scopes` na heochrach Bearer mar `authInfo` (féach [Ceangal scóipe HTTP de réir eochrach](#per-key-http-scope-binding-7895)).
+Nuair nach réitítear aon scóip eochrach, téann an tacar deonaithe ar aghaidh chuig MCP `_meta`, agus ansin chuig `OMNIROUTE_MCP_SCOPES`.
 
-#### Scóip comharthaí rochtana
+#### Scóip chomharthaí rochtana
 
-Bíonn `read`, `write`,
-nó `admin` ag comharthaí `oma_live_…` (`src/lib/accessTokens/scopes.ts`). Is rang é `scopeSatisfies`: clúdaíonn `admin` `write` agus `read`, agus
-clúdaíonn `write` `read`. Ní chlúdaíonn scóip anaithnide aon rud.
+Iompraíonn comharthaí `oma_live_…` (`src/lib/accessTokens/scopes.ts`) `read`, `write`, nó `admin`. Is rang é `scopeSatisfies`: clúdaíonn `admin` `write` agus `read`, agus clúdaíonn `write` `read`. Ní chlúdaíonn scóip anaithnide aon rud.
 
-Déanann `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) comparáid idir an
-rang sin agus `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+Déanann `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) an rang sin a chur i gcomparáid le `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - Éilíonn `GET`, `HEAD`, agus `OPTIONS` `read`.
 - Éilíonn gach modh eile `write`.
-- Éilíonn conairí in `ADMIN_SCOPE_PREFIXES` `admin` do gach modh. Tá `/api/mcp`
-  ar an liosta sin, mar sin ní féidir le comhartha rochtana `write` dromchla HTTP MCP a ghlaoch
-  fós.
+- Éilíonn conairí in `ADMIN_SCOPE_PREFIXES` `admin` do gach modh. Tá `/api/mcp` ar an liosta sin, mar sin ní féidir le comhartha rochtana `write` dromchla HTTP MCP a ghlaoch fós.
 - Ní éilíonn conairí in `ADMIN_MUTATION_PREFIXES` `admin` ach amháin le haghaidh athruithe.
+- Ní éilíonn conairí in `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
+  `/api/settings/require-login`) `admin` ach amháin le haghaidh athruithe, agus ar an gconair bheacht sin amháin — coimeádann fo-bhealaí eile `/api/settings/*` `write`.
 
-`PATCH /api/keys/{id}` is sóchán é agus níl sé ar na liostaí riaracháin sin, mar sin faigheann comhartha
-`read` freagra 403:
-`Access token scope 'read' is insufficient; 'write' required.`
-Comhlíonann comhartha rochtana `write` nó `admin` riachtanais an bhealaigh sin. Téann JWT an deais, comhartha aitheantais meaisín CLI loopback, agus eochair API le `manage` nó `admin` trí bhrainsí eile agus ní chuireann an chéim seo srian orthu.
+`PATCH /api/keys/{id}` is sóchán é agus níl sé ar na liostaí riaracháin sin, mar sin faigheann comhartha `read` 403
+`Níl raon feidhme an chomhartha rochtana 'read' leordhóthanach; tá 'write' riachtanach.`
+Comhlíonann comhartha rochtana `write` nó `admin` riachtanais an bhealaigh sin. Téann JWT an deais, comhartha machine-id CLI an loopback, agus eochair API le `manage` nó `admin` trí bhrainsí eile agus ní chuireann an rang seo srian orthu.
 
-Níl ach geata na bainistíochta sáraithe ag comhartha rochtana a éiríonn leis in `scopeSatisfies` le haghaidh `/api/mcp`. Ritheann glaonna uirlisí `scopeMatches` fós i gcoinne scóipeanna eochracha API. Ní ionchur do `scopeMatches` í céim an chomhartha rochtana.
+Ní bhíonn ach an geata bainistíochta sáraithe ag comhartha rochtana a éiríonn leis in `scopeSatisfies` le haghaidh `/api/mcp`. Ritheann glaonna uirlise `scopeMatches` fós i gcoinne raonta feidhme eochracha API. Ní ionchur é rang an chomhartha rochtana do `scopeMatches`.
 
-### Scóipeanna uirlisí MCP
+### Raonta feidhme uirlisí MCP
 
-Tá forfheidhmiú scóipeanna láraithe in `open-sse/mcp-server/scopeEnforcement.ts`.
-Teastaíonn scóipeanna sonracha ó gach uirlis:
+Tá forfheidhmiú raonta feidhme láraithe in `open-sse/mcp-server/scopeEnforcement.ts`.
+Teastaíonn raonta feidhme sonracha ó gach uirlis:
 
-| Raon                  | Uirlisí                                                                                                                                                                                  |
-| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                        |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                                |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                                   |
-| `read:quota`          | `check_quota`                                                                                                                                                                            |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                                   |
-| `read:models`         | `list_models_catalog`                                                                                                                                                                    |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                            |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                                    |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                                       |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                              |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                           |
-| `read:cache`          | `cache_stats`                                                                                                                                                                            |
-| `write:cache`         | `cache_flush`                                                                                                                                                                            |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                               |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                        |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                                    |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                         |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                                   |
-| `read:memory`         | `memory_search`                                                                                                                                                                          |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                             |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                       |
-| `write:skills`        | `skills_enable`                                                                                                                                                                          |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                         |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                         |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                                  |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                                |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                         |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                           |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                       |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                          |
-| `read:obsidian`       | 13 uirlis léitheoireachta — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 n-uirlis scríbhneoireachta — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …            |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                        |
+| Raon                  | Uirlisí                                                                                                                                                                        |
+| :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                              |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                      |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                         |
+| `read:quota`          | `check_quota`                                                                                                                                                                  |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                         |
+| `read:models`         | `list_models_catalog`                                                                                                                                                          |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                  |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                          |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                             |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                    |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                 |
+| `read:cache`          | `cache_stats`                                                                                                                                                                  |
+| `write:cache`         | `cache_flush`                                                                                                                                                                  |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                     |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                              |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                          |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                               |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                         |
+| `read:memory`         | `memory_search`                                                                                                                                                                |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                   |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                             |
+| `write:skills`        | `skills_enable`                                                                                                                                                                |
+| `execute:skills`      | `skills_execute`                                                                                                                                                               |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                               |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                        |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                      |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                               |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                 |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                             |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                |
+| `read:obsidian`       | 13 uirlis léite — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 n-uirlis scríofa — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …            |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                              |
 
-Tacaítear le scóipeanna saoróige: deonaíonn `read:*` gach scóip léitheoireachta, agus deonaíonn `*` rochtain iomlán.
+Tacaítear le scóipeanna saoróige: deonaíonn `read:*` gach scóip léite, agus deonaíonn `*` rochtain iomlán.
 
 ### `mcp:connect` — cumas cúng bealaigh (#7895)
 
-Chun iompar HTTP/SSE MCP (`/api/mcp/*`) a bhaint amach ó sheoladh nach seoladh loopback é, teastaíonn
-an t-eisceacht LOCAL_ONLY `/api/mcp/` (féach `docs/security/ROUTE_GUARD_TIERS.md`). Go stairiúil,
-níor ghlac an eisceacht sin ach le heochair API a raibh scóip iomlán `manage`/`admin` aici — róleathan do
-ghlaoiteoir nach gá dó ach cumarsáid a dhéanamh le MCP. Easpórtálann `src/shared/constants/managementScopes.ts`
-`MCP_CONNECT_SCOPE = "mcp:connect"` anois: scóip bhreise chúng (de réir an fhasach chéanna le
-`SELF_USAGE_SCOPE`) nach n-údaraíonn ACH seachaint `/api/mcp/` in
-`src/server/authz/policies/management.ts` — ní dheonaíonn sí rochtain ar aon bhealach bainistíochta eile
-agus coinnítear í d'aon ghnó LASMUIGH de `MANAGEMENT_API_KEY_SCOPES`. Gabhann eochair a bhfuil `manage`/`admin`
-aici tríd an eisceacht gan athrú fós; is rogha eile ar phribhléid níos ísle é `mcp:connect` do
-ghlaoiteoirí cianda MCP-amháin, agus seiceáiltear é trí `hasMcpConnectOrManageScope()`.
+Chun iompar HTTP/SSE MCP (`/api/mcp/*`) a bhaint amach ó sheoladh nach seoladh lúbais é, teastaíonn eisceacht LOCAL_ONLY `/api/mcp/` (féach `docs/security/ROUTE_GUARD_TIERS.md`). Go stairiúil, níor ghlac an eisceacht sin ach le heochair API ag a raibh scóip iomlán `manage`/`admin` — rochtain a bhí róleathan do ghlaoiteoir nach gá dó ach cumarsáid a dhéanamh le MCP. Easpórtálann `src/shared/constants/managementScopes.ts` anois `MCP_CONNECT_SCOPE = "mcp:connect"`: scóip bhreise chúnga (de réir an fhasaigh chéanna le `SELF_USAGE_SCOPE`) nach n-údaraíonn ACH seachaint `/api/mcp/` in `src/server/authz/policies/management.ts` — ní dheonaíonn sí rochtain ar aon bhealach bainistíochta eile agus coinnítear í d'aon ghnó LASMUIGH de `MANAGEMENT_API_KEY_SCOPES`. Gabhann eochair ag a bhfuil `manage`/`admin` tríd an eisceacht fós gan athrú; is rogha eile ar phribhléid níos ísle é `mcp:connect` do ghlaoiteoirí cianda MCP-amháin, agus déantar é a sheiceáil trí `hasMcpConnectOrManageScope()`.
 
 ### Ceangal scóipe HTTP de réir eochrach (#7895)
 
-Thar HTTP/SSE, réitíonn `open-sse/mcp-server/httpTransport.ts` fíorluach
-`api_keys.scopes` an ghlaoiteora anois trí `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-agus cuireann sé ar aghaidh é chuig `transport.handleRequest(req, { authInfo })` de chuid MCP SDK, ionas go
-léiríonn `extra.authInfo.scopes` a shroicheann gach glao uirlise scóipeanna na heochrach Bearer féin.
-Thug `resolveCallerScopeContext()` in `scopeEnforcement.ts` tús áite cheana féin do `authInfo` thar
-`_meta` agus cúltaca timpeallachta `OMNIROUTE_MCP_SCOPES` — ní dhéanann sé seo ach an chéad fhoinse sin, an
-fhoinse is airde tosaíochta, a líonadh; foinse nár soláthraíodh roimhe seo thar HTTP. Nuair nach réitítear
-aon eochair API (gan ceanntásc, eochair neamhbhailí), fanann `authInfo` mar `undefined` agus téann an réiteach
-ar aghaidh chuig an slabhra `meta`/timpeallachta atá ann cheana gan athrú. Níl aon aitheantas de réir glaoiteora
-ag stdio (féach `mcpCallerIdentity.ts`) agus ní dhéanann sé seo difear dó — fanann sé ar an slabhra cúltaca
-`_meta`/timpeallachta.
+Thar HTTP/SSE, réitíonn `open-sse/mcp-server/httpTransport.ts` fíorluach `api_keys.scopes` an ghlaoiteora anois trí `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) agus cuireann sé ar aghaidh é chuig `transport.handleRequest(req, { authInfo })` de chuid SDK MCP, ionas go léiríonn `extra.authInfo.scopes` a shroicheann gach glao uirlise scóipeanna na heochrach Bearer féin. Thug `resolveCallerScopeContext()` in `scopeEnforcement.ts` tús áite cheana féin do `authInfo` thar `_meta` agus cúltaca na timpeallachta `OMNIROUTE_MCP_SCOPES` — ní dhéanann sé seo ach an chéad fhoinse sin, an fhoinse is airde tosaíochta, a líonadh; ní raibh sonraí á soláthar di roimhe seo thar HTTP. Nuair nach réitítear aon eochair API (gan ceanntásc nó le heochair neamhbhailí), fanann `authInfo` mar `undefined` agus téann an réiteach ar aghaidh chuig an slabhra `meta`/timpeallachta atá ann cheana gan athrú. Níl aon aitheantas de réir glaoiteora ag stdio (féach `mcpCallerIdentity.ts`) agus ní dhéantar difear dó — fanann sé ar an slabhra cúltaca `_meta`/timpeallachta.
 
-**Cuirtear forfheidhmiú ar siúl go héigeantach do ghlaoiteoirí HTTP/SSE a bhfuil scóip chúng acu, beag beann ar
-`OMNIROUTE_MCP_ENFORCE_SCOPES`.** Níl sé sábháilte `OMNIROUTE_MCP_ENFORCE_SCOPES` a bheith socraithe mar `false` de
-réir réamhshocraithe ach amháin don sreabhadh áitiúil/stdio aon-oibreora, áit nach bhfuil aon aitheantas de réir glaoiteora
-ann lena scópáil. Cuireann `open-sse/mcp-server/server.ts::withScopeEnforcement()` forfheidhmiú scóipe de réir uirlise
-ar siúl gan choinníoll (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) aon uair a réitigh
-`resolveCallerScopeContext()`
-`source === "authInfo"` (i.e. fíorcheanntásc HTTP Authorization de réir eochrach, HTTP/SSE amháin) AGUS nach
-bhfuil scóip iomlán `manage`/`admin` ag an eochair sin. Dúnann sé seo an bhearna trína bhféadfadh eochair nach raibh aici ACH
-an scóip chúng seachanta `mcp:connect` — a bhfuil cur síos uirthi thuas mar scóip nach n-údaraíonn aon ní seachas
-eisceacht LOCAL_ONLY `/api/mcp/` — gach uirlis MCP a agairt murach sin a luaithe a chumasaigh oibreoir
-rochtain MCP chianda/neamh-loopback, go simplí toisc go seoltar `OMNIROUTE_MCP_ENFORCE_SCOPES`
-mar `false` de réir réamhshocraithe. Coinníonn eochair iomlán `manage`/`admin` thar HTTP, agus gach glaoiteoir stdio/áitiúil,
-an t-iompar atá ann cheana faoi rialú `OMNIROUTE_MCP_ENFORCE_SCOPES` gan athrú.
+**Cuirtear forfheidhmiú i bhfeidhm go héigeantach do ghlaoiteoirí HTTP/SSE a bhfuil scóip chúng acu, beag beann ar `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Níl sé sábháilte `OMNIROUTE_MCP_ENFORCE_SCOPES` a bheith réamhshocraithe mar `false` ach amháin don sreabhadh áitiúil/stdio d'oibreoir aonair, áit nach bhfuil aon aitheantas de réir glaoiteora ann lena scópáil. Cuireann `open-sse/mcp-server/server.ts::withScopeEnforcement()` forfheidhmiú scóipe de réir uirlise ar siúl go neamhchoinníollach (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) aon uair a réitigh `resolveCallerScopeContext()` `source === "authInfo"` (is é sin, fíorcheanntásc HTTP Authorization de réir eochrach, HTTP/SSE-amháin) AGUS nach bhfuil scóip iomlán `manage`/`admin` ag an eochair sin. Dúnann sé seo an bhearna ina bhféadfadh eochair nach raibh aici ACH an scóip chúng sheachanta `mcp:connect` — a bhfuil cur síos uirthi thuas mar scóip nach n-údaraíonn aon rud seachas eisceacht LOCAL_ONLY `/api/mcp/` — gach uirlis MCP a agairt murach sin a luaithe a chumasódh oibreoir rochtain MCP chianda/neamhlúbais, díreach toisc go soláthraítear `OMNIROUTE_MCP_ENFORCE_SCOPES` mar `false` de réir réamhshocraithe. Coinníonn eochair iomlán `manage`/`admin` thar HTTP, agus gach glaoiteoir stdio/áitiúil, an t-iompar reatha atá rialaithe ag `OMNIROUTE_MCP_ENFORCE_SCOPES` gan athrú.
 
 ---
 

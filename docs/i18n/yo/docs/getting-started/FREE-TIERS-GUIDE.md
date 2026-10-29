@@ -16,43 +16,42 @@ OmniRoute **ń ṣàkójọpọ̀** àwọn àsopọ̀ tí a ti ṣètò sínú 
 
 ---
 
-## Àwọn Olùpèsè Àpẹẹrẹ Tó Ní Ìráyè Ọ̀fẹ́
+## Àwọn Olùpèsè Àṣojú Tí A Lè Lò Lọ́fẹ̀ẹ́
 
-### Ìráyè Tó Ń Tún Wá, Tí Kò Nílò Kọ́kọ́rọ́, Tàbí Tí Kò Ní Ààlà
+### Ìráyè-sí Tó Ń Tún Wá, Tí Kò Nílò Kọ́kọ́rọ́, Tàbí Tí Kò Ní Ààlà
 
-Àwọn olùpèsè wọ̀nyí ní ọ̀nà ìráyè ọ̀fẹ́ tó ń tún wá, tí kò nílò kọ́kọ́rọ́, tàbí tí kò ní ààlà nínú àkójọ tí a ti ṣe àyẹ̀wò. “Tí kò ní ààlà” túmọ̀ sí pé kò sí òpin token tí a tẹ̀ jáde; àwọn ààlà oṣùwọ̀n, ìṣiṣẹ́ lẹ́ẹ̀kan náà, àkọọ́lẹ̀, ẹkùn, àti ìlànà ṣì lè wà:
+Àwọn olùpèsè wọ̀nyí ní ọ̀nà ìráyè-sí lọ́fẹ̀ẹ́ tó ń tún wá, tí kò nílò kọ́kọ́rọ́, tàbí tí kò ní ààlà nínú àkójọ tí a ti ṣàyẹ̀wò. “Tí kò ní ààlà” túmọ̀ sí pé kò sí òpin token tí a tẹ̀ jáde; ààlà ìwọ̀n ìbéèrè, ìṣiṣẹ́ lẹ́ẹ̀kan náà, àkọọ́lẹ̀, ẹkùn, àti ìlànà ṣì lè wúlò:
 
-| Olùpèsè           | Àwọn Model                                                                                      | Ìpín                                                                                                                                   | Bí A Ṣe Lè Sopọ̀                                                                                |
-| ----------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, àti àwọn mìíràn                                    | Àkójọ tí a ti ṣe àyẹ̀wò fojú díwọ̀n pé ó ní àpapọ̀ 25K-token fún oṣù kan                                                                  | Ìlànà OAuth/àkọọ́lẹ̀; ToS ni a sàmì sí `avoid` nínú àkójọ náà                                    |
-| **OpenCode Free** | Àkójọpọ̀ model `*-free` lọ́wọ́lọ́wọ́ nínú ìforúkọsílẹ̀ olùpèsè                                        | Kò nílò kọ́kọ́rọ́; kò sí òpin token tí a tẹ̀ jáde                                                                                          | Kò nílò ẹ̀rí ìdánimọ̀ olùpèsè; ToS ni a sàmì sí `avoid`                                          |
-| **Pollinations**  | Àkójọpọ̀ model tí kò nílò kọ́kọ́rọ́ lọ́wọ́lọ́wọ́; a ti dá àwọn model kan tẹ́lẹ̀ dúró tàbí wọ́n nílò kọ́kọ́rọ́ | Kò nílò kọ́kọ́rọ́; kò sí òpin token tí a tẹ̀ jáde                                                                                          | Kò nílò ẹ̀rí ìdánimọ̀ olùpèsè fún àwọn model tí kò nílò kọ́kọ́rọ́                                   |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, àti àwọn mìíràn                    | Kọ́kọ́rọ́ API ọ̀fẹ́ (kò sí ààlà oṣùwọ̀n, kò nílò káàdì); **gbogbo ìbéèrè ni a ń ṣe àkọsílẹ̀ rẹ̀** fún ìwádìí (jáde kúrò ní logfare.ai/consent) | Gba kọ́kọ́rọ́ lẹ́sẹ̀kẹsẹ̀ ní logfare.ai/register; ToS/ìpamọ́ ní logfare.ai/tos àti logfare.ai/privacy |
-| **Cloudflare AI** | Àkójọ Workers AI                                                                                | Àpapọ̀ tí a ti ṣe àyẹ̀wò fojú díwọ̀n pé ó tó ~30M token/oṣù láti inú àwọn ẹ̀ka lílò tí a tẹ̀ jáde                                           | Àkọọ́lẹ̀ Cloudflare àti àwọn ẹ̀rí ìdánimọ̀ API                                                     |
-| **Gemini**        | Ìdílé Gemini Flash                                                                              | Àwọn ààlà oṣùwọ̀n tó yàtọ̀ síra gẹ́gẹ́ bí iṣẹ́-àkànṣe/model; kò sí ìpín token oṣooṣù tó dúró ṣinṣin nínú àkọlé náà                          | Kọ́kọ́rọ́ API Google AI Studio; ṣàyẹ̀wò àwọn ààlà iṣẹ́-àkànṣe tó ń ṣiṣẹ́                             |
-| **Groq**          | Àwọn model Llama, GPT-OSS, àti Qwen                                                             | Àpapọ̀ tí a ti ṣe àyẹ̀wò fojú díwọ̀n pé ó tó ~15M token/oṣù                                                                               | Kọ́kọ́rọ́ API Groq; àwọn ààlà oṣùwọ̀n kan wà                                                       |
+| Olùpèsè           | Àwọn Model                                                                                      | Ìpín                                                                                                                                                 | Bí A Ṣe Lè Sopọ̀                                                                                |
+| ----------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, àti àwọn mìíràn                                    | Àkójọ tí a ṣàyẹ̀wò fojú díwọ̀n àkójọpọ̀ oṣooṣù token 25K tí a ń pín                                                                                     | Ìlànà OAuth/àkọọ́lẹ̀; ToS ní àmì `avoid` nínú àkójọ náà                                          |
+| **Pollinations**  | Àkójọpọ̀ model tí kò nílò kọ́kọ́rọ́ lọ́wọ́lọ́wọ́; a ti dá àwọn model kan tẹ́lẹ̀ dúró tàbí wọ́n nílò kọ́kọ́rọ́ | Kò nílò kọ́kọ́rọ́; kò sí òpin token tí a tẹ̀ jáde                                                                                                        | Kò nílò ẹ̀rí ìdánimọ̀ olùpèsè fún àwọn model tí kò nílò kọ́kọ́rọ́                                   |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, àti púpọ̀ sí i                      | Kọ́kọ́rọ́ API lọ́fẹ̀ẹ́ (kò sí ààlà ìwọ̀n ìbéèrè, kò sì nílò káàdì); **gbogbo ìbéèrè ni a ń ṣàkọsílẹ̀** fún ìwádìí (jáde kúrò nínú ètò ní logfare.ai/consent) | Gba kọ́kọ́rọ́ lẹ́sẹ̀kẹsẹ̀ ní logfare.ai/register; ToS/ìpamọ́ ní logfare.ai/tos àti logfare.ai/privacy |
+| **Cloudflare AI** | Àkójọ Workers AI                                                                                | Àkójọpọ̀ tí a ṣàyẹ̀wò fojú díwọ̀n ~30M token/oṣù láti inú àwọn ẹ̀ka lílò tí a tẹ̀ jáde                                                                    | Àkọọ́lẹ̀ Cloudflare àti àwọn ẹ̀rí ìdánimọ̀ API                                                     |
+| **Gemini**        | Ìdílé Gemini Flash                                                                              | Àwọn ààlà ìwọ̀n ìbéèrè tó yàtọ̀ gẹ́gẹ́ bí project/model; kò sí ìpín token oṣooṣù tó dúró ṣinṣin nínú àkọlé                                               | Kọ́kọ́rọ́ API Google AI Studio; ṣàyẹ̀wò àwọn ààlà tó ń ṣiṣẹ́ fún project náà                        |
+| **Groq**          | Àwọn model Llama, GPT-OSS, àti Qwen                                                             | Àkójọpọ̀ tí a ṣàyẹ̀wò fojú díwọ̀n ~15M token/oṣù                                                                                                        | Kọ́kọ́rọ́ API Groq; àwọn ààlà ìwọ̀n ìbéèrè wúlò                                                    |
 
-### Àwọn Ẹ̀bùn Ìforúkọsílẹ̀ àti Kirẹditi Tó Jẹ́ Ti Olùpèsè Kan Pàtó
+### Àwọn Ìpín Ìforúkọsílẹ̀ àti Kírẹ́díìtì Pàtó Fún Olùpèsè
 
-Àwọn olùpèsè wọ̀nyí ń fúnni ní ẹ̀bùn ìforúkọsílẹ̀ tàbí kirẹditi ìpolówó, lábẹ́ àwọn òfin yíyẹ wọn. Gẹ́gẹ́ bí a ti fìdí rẹ̀ múlẹ̀ ní 2026-10-08, [ìdíyelé Cerebras](https://www.cerebras.ai/pricing) nílò ọ̀nà ìsanwó fún kirẹditi $5 ẹ̀ẹ̀kan ṣoṣo tó máa parí lẹ́yìn ọjọ́ 30; kì í ṣe ìpín token tó ń tún wá. [Àwọn ààlà oṣùwọ̀n Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) yàtọ̀ síra gẹ́gẹ́ bí iṣẹ́-àkànṣe, model, àti ipele, nítorí náà a kò yí wọn padà sí ìpín token oṣooṣù tí a ṣe ìdánilójú rẹ̀.
+Àwọn olùpèsè wọ̀nyí ń fúnni ní ìpín ìforúkọsílẹ̀ tàbí kírẹ́díìtì ìpolówó, ní ìbámu pẹ̀lú àwọn òfin yíyẹ wọn. Gẹ́gẹ́ bí a ṣe fìdí rẹ̀ múlẹ̀ ní 2026-10-08, [ìdíyelé Cerebras](https://www.cerebras.ai/pricing) nílò ọ̀nà ìsanwó fún kírẹ́díìtì $5 lẹ́ẹ̀kan ṣoṣo tó máa parí lẹ́yìn ọjọ́ 30; kì í ṣe ìpín token tó ń tún wá. [Àwọn ààlà ìwọ̀n ìbéèrè Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) yàtọ̀ gẹ́gẹ́ bí project, model, àti ipele, nítorí náà a kò yí wọn padà sí ìpín token oṣooṣù tí a ṣe ìdánilójú rẹ̀.
 
-| Olùpèsè       | Kirẹditi Ọ̀fẹ́                                                                | Àwọn Model                       | Bí A Ṣe Lè Gbà Á                                             |
-| ------------- | --------------------------------------------------------------------------- | -------------------------------- | ------------------------------------------------------------ |
-| **Cerebras**  | Kirẹditi ìpolówó $5 ẹ̀ẹ̀kan ṣoṣo; ó máa parí lẹ́yìn ọjọ́ 30                     | Àkójọ inference lọ́wọ́lọ́wọ́         | Àkọọ́lẹ̀ àti ọ̀nà ìsanwó tó fẹsẹ̀ múlẹ̀                           |
-| **DeepSeek**  | 5M token ọ̀fẹ́                                                                | DeepSeek V4                      | Forúkọsílẹ̀ ní platform.deepseek.com                          |
-| **LongCat**   | Ẹ̀bùn 10M-token ẹ̀ẹ̀kan ṣoṣo                                                   | LongCat 2.0                      | Kọ́kọ́rọ́ API + KYC; san bí o ṣe ń lò lẹ́yìn tí ẹ̀bùn náà bá parí |
-| **Vertex AI** | Kirẹditi ìforúkọsílẹ̀ $300 tí a ṣàfihàn gẹ́gẹ́ bí ~300M token nínú model ìnáwó | Gemini àti àwọn model alábàáṣiṣẹ́ | Àkọọ́lẹ̀ Google Cloud; àwọn òfin ìsanwó àti yíyẹ kan wà        |
+| Olùpèsè       | Kírẹ́díìtì Ọ̀fẹ́                                                                | Àwọn Model                       | Bí A Ṣe Lè Gbà Á                                               |
+| ------------- | ---------------------------------------------------------------------------- | -------------------------------- | -------------------------------------------------------------- |
+| **Cerebras**  | Kírẹ́díìtì ìpolówó $5 lẹ́ẹ̀kan ṣoṣo; ó máa parí lẹ́yìn ọjọ́ 30                    | Àkójọ inference lọ́wọ́lọ́wọ́         | Àkọọ́lẹ̀ àti ọ̀nà ìsanwó tó fẹsẹ̀ múlẹ̀                             |
+| **DeepSeek**  | 5M token lọ́fẹ̀ẹ́                                                               | DeepSeek V4                      | Forúkọ sílẹ̀ ní platform.deepseek.com                           |
+| **LongCat**   | Ìpín token 10M lẹ́ẹ̀kan ṣoṣo                                                   | LongCat 2.0                      | Kọ́kọ́rọ́ API + KYC; sanwó bí o ṣe ń lò lẹ́yìn tí ìpín náà bá parí |
+| **Vertex AI** | Kírẹ́díìtì ìforúkọsílẹ̀ $300 tí a ṣàfihàn gẹ́gẹ́ bí ~300M token nínú àwòṣe ìnáwó | Gemini àti àwọn model alábàáṣiṣẹ́ | Àkọọ́lẹ̀ Google Cloud; àwọn òfin ìdíyelé àti yíyẹ wúlò           |
 
-### Ìráyè Míì Tó Ní Ààlà
+### Ìráyè-sí Mìíràn Tó Ní Ààlà
 
 Àwọn olùpèsè wọ̀nyí ní **àwọn ipele ọ̀fẹ́** pẹ̀lú àwọn ààlà pàtó:
 
-| Olùpèsè                    | Ààlà Ọ̀fẹ́                                                                                     | Àwọn Model                                            | Ó Dára Jù Fún |
-| -------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ------------- |
-| **GitHub Models**          | Àpapọ̀ tí a ti ṣe àyẹ̀wò fojú díwọ̀n pé ó tó ~18M token/oṣù                                     | Ìṣàyẹ̀wò ọ̀pọ̀lọpọ̀ model                                 |
-| **Hugging Face**           | Àpapọ̀ oṣooṣù kékeré tó ń tún wá                                                              | Àwọn àdánwò àti oríṣiríṣi model                       |
-| **OpenRouter free models** | Àpapọ̀ tó ní ààlà ìbéèrè; àfikún owó ẹ̀ẹ̀kan ṣoṣo tí kò pọn dandan máa ń pọ̀ sí ìpín tó ń tún wá | Àkójọ ìpadà-sẹ́yìn tó gbòòrò                           |
-| **AI Horde**               | Agbára àwùjọ tí kò nílò kọ́kọ́rọ́; wíwà rẹ̀ ń yàtọ̀ síra                                          | Inference alápín tó máa ń ṣiṣẹ́ nígbà tí àǹfààní bá wà |
+| Olùpèsè                    | Ààlà Ọ̀fẹ́                                                                                                   | Àwọn Model                          | Ó Dára Jù Fún |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------- |
+| **GitHub Models**          | Àkójọpọ̀ tí a ṣàyẹ̀wò fojú díwọ̀n ~18M token/oṣù                                                              | Ìṣírò oríṣiríṣi model               |
+| **Hugging Face**           | Àkójọpọ̀ oṣooṣù kékeré tó ń tún wá                                                                          | Àwọn àdánwò àti onírúurú model      |
+| **OpenRouter free models** | Àkójọpọ̀ tí a ń pín tó ní ààlà ìbéèrè; àfikún owó lẹ́ẹ̀kan ṣoṣo tó jẹ́ àṣàyàn ń mú kí ààyè tó ń tún wá pọ̀ sí i | Àkójọ ìpadà-sẹ́yìn tó gbòòrò         |
+| **AI Horde**               | Agbára àwùjọ tí kò nílò kọ́kọ́rọ́; wíwà rẹ̀ máa ń yàtọ̀                                                         | Inference alápín tó dá lórí àǹfààní |
 
 ---
 

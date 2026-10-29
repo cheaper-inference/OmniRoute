@@ -1,5 +1,6 @@
 import dns from "node:dns";
 import { Agent, type Dispatcher } from "undici";
+import * as undici from "undici";
 import {
   isCloudMetadataHost,
   isPrivateHost,
@@ -66,6 +67,21 @@ export function createGuardedLookup(
   };
 }
 
+function compatibleGuardedDispatcher(agent: Dispatcher): Dispatcher {
+  if (typeof agent.dispatch !== "function") {
+    throw new Error("This runtime does not support guarded outbound dispatchers");
+  }
+  const Bridge = undici.Dispatcher1Wrapper;
+  if (typeof Bridge !== "function") return agent;
+  return new (class extends Bridge {
+    dispatch(options: Dispatcher.DispatchOptions, handler: Dispatcher.DispatchHandler): boolean {
+      return typeof handler?.onRequestStart === "function"
+        ? agent.dispatch(options, handler)
+        : super.dispatch(options, handler);
+    }
+  })(agent);
+}
+
 const guardedDispatchers = new Map<ConnectGuardMode, Dispatcher>();
 
 /**
@@ -88,6 +104,7 @@ export function getGuardedDispatcher(guard: ConnectGuardMode): Dispatcher {
         lookup: createGuardedLookup(guard),
       } as never,
     });
+    dispatcher = compatibleGuardedDispatcher(dispatcher);
     guardedDispatchers.set(guard, dispatcher);
   }
   return dispatcher;

@@ -6,6 +6,7 @@ import { getRegisteredProviderEffortBaseModelId } from "../utils/registeredEffor
 import { hasProviderModelAlias, resolveProviderModelAlias } from "./modelCanonicalization.ts";
 import { resolveActivePrefixedProviderModel } from "./prefixedProviderModel.ts";
 import { logger } from "../utils/logger.ts";
+import { boundedMap } from "../../src/lib/quota/boundedMap.ts";
 
 export { resolveProviderAlias };
 export { resolveCanonicalProviderModel } from "./modelCanonicalization.ts";
@@ -46,7 +47,7 @@ const CROSS_PROXY_MODEL_ALIASES: Record<string, string> = {
   "deepseek-v3-2": "deepseek-v3.2",
   "qwen3-coder:480b": "Qwen/Qwen3-Coder-480B-A35B-Instruct",
   "claude-opus-4.5": "claude-opus-4-5-20251101",
-  "anthropic/claude-opus-4.5": "claude-opus-4-5-20251101",
+  "anthropic/claude-opus-4.5": "anthropic/claude-opus-4-5",
 };
 
 const CROSS_PROXY_MODEL_ALIASES_LOWER = Object.fromEntries(
@@ -61,12 +62,16 @@ const MODEL_TO_PROVIDERS = new Map<string, string[]>();
 for (const [aliasOrId, models] of Object.entries(PROVIDER_MODELS)) {
   const providerId = ALIAS_TO_PROVIDER_ID[aliasOrId] || aliasOrId;
   for (const modelEntry of models || []) {
-    const modelId = modelEntry?.id;
-    if (!modelId) continue;
-    const providers = MODEL_TO_PROVIDERS.get(modelId) || [];
-    if (!providers.includes(providerId)) {
-      providers.push(providerId);
-      MODEL_TO_PROVIDERS.set(modelId, providers);
+    // Registry aliases are routable ids too: a client pinned to a legacy id must
+    // still infer the provider that declares it, even when the catalog dropped
+    // the standalone row (e.g. opencode-zen's deepseek-v4-flash-free alias).
+    for (const modelId of [modelEntry?.id, ...(modelEntry?.aliases || [])]) {
+      if (!modelId) continue;
+      const providers = MODEL_TO_PROVIDERS.get(modelId) || [];
+      if (!providers.includes(providerId)) {
+        providers.push(providerId);
+        MODEL_TO_PROVIDERS.set(modelId, providers);
+      }
     }
   }
 }
@@ -148,6 +153,15 @@ interface ProviderConnectionLike {
  * placeholder. A "/"-qualified model name is an explicit provider/model choice
  * and is always returned untouched.
  *
+ * Only a placeholder is replaced: the resolved model must be empty, null or
+ * "auto". A concrete bare model name (e.g. a catalog short name such as
+ * "claude-haiku-4-5") is an explicit choice too; replacing it with the
+ * connection's `defaultModel` silently served a different model (a Gemini
+ * default answering a Claude request) with no error anywhere.
+ *
+ * Set `BARE_MODEL_DEFAULT_OVERRIDE_LEGACY=true` to restore the previous
+ * behaviour (any bare name is replaced); it logs one warning per pair.
+ *
  * Pure function — `requestedModelStr` is the raw client-facing model string
  * (used only to decide whether the name is "bare"); `resolvedModel` is the
  * already-resolved model that would otherwise be sent upstream.
@@ -161,10 +175,33 @@ export function resolveBareModelToConnectionDefault(
   if (typeof requestedModelStr !== "string" || requestedModelStr.includes("/")) {
     return fallback;
   }
-  if (typeof connectionDefaultModel === "string" && connectionDefaultModel.length > 0) {
+  if (typeof connectionDefaultModel !== "string" || connectionDefaultModel.length === 0) {
+    return fallback;
+  }
+  if (fallback === null || fallback === "" || fallback === "auto") {
+    return connectionDefaultModel;
+  }
+  if (fallback === connectionDefaultModel) return fallback;
+  if (isBareModelDefaultOverrideLegacy()) {
+    warnLegacyBareModelOverride(fallback, connectionDefaultModel);
     return connectionDefaultModel;
   }
   return fallback;
+}
+
+function isBareModelDefaultOverrideLegacy() {
+  return isTruthyEnv(process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY);
+}
+
+const legacyBareModelOverrideWarned = new Set<string>();
+
+function warnLegacyBareModelOverride(model: string, connectionDefaultModel: string) {
+  const key = `${model}|${connectionDefaultModel}`;
+  if (legacyBareModelOverrideWarned.has(key)) return;
+  legacyBareModelOverrideWarned.add(key);
+  log.warn(
+    `BARE_MODEL_DEFAULT_OVERRIDE_LEGACY: '${model}' replaced by the connection defaultModel '${connectionDefaultModel}'`
+  );
 }
 
 function isCrossProxyModelCompatEnabled() {
@@ -228,6 +265,12 @@ export function hasKnownProviderModel(
 
 function resolveInferredProviderModel(provider: string, modelId: string) {
   return resolveProviderModelAlias(provider, modelId);
+}
+
+function normalizeProviderScopedModelId(provider: string | null, modelId: string | null) {
+  // Compatibility dialects must not rewrite an ID this provider already serves.
+  if (hasKnownProviderModel(provider, modelId)) return modelId;
+  return normalizeCrossProxyModelId(modelId).modelId;
 }
 
 function getInferredProvidersForModel(modelId: string, dynamicProviders: string[] = []) {
@@ -363,6 +406,23 @@ function shouldTreatAsExactModelId(modelStr: string | null) {
   return !hasKnownProviderModel(providerOrAlias, providerScopedModel);
 }
 
+// parseModel is deterministic for a given string except MODEL_ALIAS_COMPAT_ENABLED,
+// which normalizeCrossProxyModelId reads on every call. The flag is part of the key
+// so an env toggle cannot return a stale parse. Callers receive a copy: the cache
+// must not alias a mutated result into the next request.
+export const PARSE_MODEL_CACHE_LIMIT = 2048;
+export const parseModelCache = boundedMap<ParsedModel>(
+  "parse-model-cache",
+  PARSE_MODEL_CACHE_LIMIT,
+  "lru"
+);
+
+function parseModelCacheKey(modelStr: string): string {
+  const raw = process.env.MODEL_ALIAS_COMPAT_ENABLED;
+  const compat = raw === "false" || raw === "0" ? "0" : "1";
+  return `${compat}\0${modelStr}`;
+}
+
 /**
  * Resolve a provider/model pair into canonical provider ID + provider-scoped model ID.
  * Keeps provider-specific legacy aliases out of downstream capability and budget lookups.
@@ -372,6 +432,16 @@ function shouldTreatAsExactModelId(modelStr: string | null) {
  * Supports [1m] suffix for extended 1M context window (e.g. "claude-sonnet-4-6[1m]")
  */
 export function parseModel(modelStr: string | null | undefined): ParsedModel {
+  if (typeof modelStr !== "string") return parseModelUncached(modelStr);
+  const key = parseModelCacheKey(modelStr);
+  const cached = parseModelCache.get(key);
+  if (cached) return { ...cached };
+  const parsed = parseModelUncached(modelStr);
+  parseModelCache.set(key, parsed);
+  return { ...parsed };
+}
+
+function parseModelUncached(modelStr: string | null | undefined): ParsedModel {
   // Guard truthy non-strings (object/number/array), not just falsy values — a
   // malformed combo `modelStr` or providerSpecificData saved as an object would
   // otherwise reach `cleanStr.endsWith("[1m]")` and crash with
@@ -505,7 +575,7 @@ function resolveModelAliasTarget(
 
     return {
       provider: resolveProviderAlias(resolved.provider),
-      model: normalizeCrossProxyModelId(resolved.model).modelId || resolved.model,
+      model: normalizeProviderScopedModelId(resolved.provider, resolved.model) || resolved.model,
     };
   }
 
@@ -563,21 +633,13 @@ async function resolveModelByProviderInference(modelId: string, extendedContext:
     }
   }
 
-  // Opencode free-tier models always route to opencode when active — prevents
-  // prefix inference from misrouting -free names to other providers when the
-  // live catalog is temporarily unreachable.
-  //
-  // A literal `activeProviders?.has("opencode")` check is unreachable in
-  // practice: `getActiveProviderSet()` canonicalizes every connection's
-  // provider id through `resolveProviderAlias()`, and the manual override
-  // above (`ALIAS_TO_PROVIDER_ID["opencode"] = "opencode-zen"`) rewrites any
-  // "opencode" id to "opencode-zen" before it ever reaches the active set —
-  // so an active no-auth opencode connection never appears as "opencode".
-  // Check both opencode-family canonical ids that catalog this model id.
+  // OpenCode Zen catalog ids (`big-pickle`, `*-free`) route to opencode-zen
+  // when it is active — prevents prefix inference from misrouting -free names
+  // to other providers when the live catalog is temporarily unreachable.
   if (modelId === "big-pickle" || modelId.endsWith("-free")) {
     const candidates = MODEL_TO_PROVIDERS.get(modelId) || [];
     const activeOpencodeCandidate = candidates.find(
-      (p) => (p === "opencode" || p === "opencode-zen") && activeProviders?.has(p)
+      (p) => p === "opencode-zen" && activeProviders?.has(p)
     );
     if (activeOpencodeCandidate) {
       return { provider: activeOpencodeCandidate, model: modelId, extendedContext };
@@ -774,7 +836,7 @@ export async function getModelInfoCore(
   const { extendedContext } = parsed;
 
   if (!parsed.isAlias) {
-    const normalizedModel = normalizeCrossProxyModelId(parsed.model).modelId;
+    const normalizedModel = normalizeProviderScopedModelId(parsed.provider, parsed.model);
     const canonicalModel = resolveProviderModelAlias(parsed.provider, normalizedModel);
     return {
       provider: parsed.provider,

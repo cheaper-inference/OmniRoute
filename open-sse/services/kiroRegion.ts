@@ -67,6 +67,31 @@ export function kiroRuntimeHost(region: string): string {
     : `https://q.${region}.amazonaws.com`;
 }
 
+/** Region selector value that asks API-key import to detect the key's Amazon Q region. */
+export const KIRO_API_KEY_AUTO_REGION = "auto";
+
+/**
+ * Normalize a stored/requested API-key region to one of the Q profile regions, falling back to
+ * us-east-1. The result is interpolated into a hostname, so only allowlisted values pass (SSRF
+ * guard, GHSA-6mwv-4mrm-5p3m).
+ */
+export function resolveKiroApiKeyRegion(region: unknown): string {
+  const normalized = typeof region === "string" ? region.trim().toLowerCase() : "";
+  return (KIRO_PROFILE_REGIONS as readonly string[]).includes(normalized)
+    ? normalized
+    : "us-east-1";
+}
+
+/**
+ * Runtime host for long-lived Kiro API keys. API keys authenticate only on the regional Amazon Q
+ * surface: the Kiro IDE gateway (runtime.*.kiro.dev) rejects TokenType=API_KEY, and
+ * codewhisperer.us-east-1 authenticates the key but answers HTTP 400 REQUEST_BODY_INVALID for
+ * the same payload. So, unlike kiroRuntimeHost, us-east-1 also maps to q.us-east-1.
+ */
+export function kiroApiKeyRuntimeHost(region: unknown): string {
+  return `https://q.${resolveKiroApiKeyRegion(region)}.amazonaws.com`;
+}
+
 /** Extract the region from a CodeWhisperer profile ARN (`arn:aws:codewhisperer:{region}:...`). */
 export function regionFromKiroProfileArn(profileArn?: string | null): string | undefined {
   if (typeof profileArn !== "string") return undefined;

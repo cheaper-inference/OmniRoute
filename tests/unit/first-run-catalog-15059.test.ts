@@ -28,18 +28,22 @@ test.after(() => {
 test("fresh auto pool excludes provider-wide ToS-avoid models missing from the budget catalog", async () => {
   const prepared = await prepareVirtualAutoComboInputs();
   assert.equal(
-    prepared.regularCandidates.some((row) => row.provider === "opencode"),
+    prepared.regularCandidates.some((row) => row.provider === "duckduckgo-web"),
     false
   );
 });
 
 test("provider ToS verdict covers a newly discovered model absent from the budget catalog", () => {
-  const pool = [{ provider: "opencode", model: "new-uncataloged-model", connectionId: "noauth" }];
+  const pool = [
+    { provider: "duckduckgo-web", model: "new-uncataloged-model", connectionId: "noauth" },
+  ];
   assert.deepEqual(filterTosAvoidCandidates(pool, true, []), []);
 });
 
 test("explicit ToS filter opt-out preserves the original candidate", () => {
-  const pool = [{ provider: "opencode", model: "new-uncataloged-model", connectionId: "noauth" }];
+  const pool = [
+    { provider: "duckduckgo-web", model: "new-uncataloged-model", connectionId: "noauth" },
+  ];
   assert.equal(filterTosAvoidCandidates(pool, false, []), pool);
 });
 

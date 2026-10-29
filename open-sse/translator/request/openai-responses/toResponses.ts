@@ -11,6 +11,7 @@ import {
 import { getReadableReasoningValue } from "../../../utils/reasoningFields.ts";
 import { generateToolCallId } from "../../helpers/toolCallHelper.ts";
 import { coerceToolCallArguments } from "../../helpers/toolArguments.ts";
+import { chatStrictForResponses } from "../../helpers/toolStrict.ts";
 import {
   JsonRecord,
   RESPONSES_STORE_MARKER,
@@ -447,7 +448,8 @@ export function openaiToOpenAIResponsesRequest(
           name,
           description: toString(fn.description),
           parameters: fn.parameters,
-          strict: fn.strict,
+          // Omitted strict is non-strict on Chat but strict-normalized on Responses.
+          strict: chatStrictForResponses(fn),
         };
       }
       return toolValue;

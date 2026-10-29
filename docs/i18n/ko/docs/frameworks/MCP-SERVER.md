@@ -72,6 +72,16 @@ curl -i \
 
 `manage` 범위가 없는 키를 사용하거나 Bearer를 제공하지 않으면 `403 LOCAL_ONLY`가 반환됩니다. 인접한 접두사 `/api/cli-tools/runtime/*`는 의도적으로 우회할 수 없습니다. 자세한 내용은 [라우트 가드 계층 — manage 범위 예외](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)를 참조하세요.
 
+### Origin 검증
+
+인증 후 `/api/mcp/*`로 가는 모든 요청(트랜스포트와 `status`, `tools`, `audit`, `restart` 같은 관리 라우트)은 호출자(API 키, CLI 토큰, 대시보드 세션, 로그인 비활성화 시 익명 루프백)와 관계없이 `Origin` 헤더를 검증받습니다. 이는 MCP Streamable HTTP 사양이 요구하는 DNS 리바인딩 방어입니다.
+
+- **`Origin` 헤더 없음** → 허용. OmniRoute CLI, SDK, IDE 클라이언트는 이 헤더를 보내지 않습니다.
+- **허용되는 `Origin`** → 모든 포트의 `localhost` / `127.0.0.1` / `[::1]`, 또는 OmniRoute 자체 공개 origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, 신뢰된 리버스 프록시가 전달한 origin(`OMNIROUTE_TRUST_PROXY`, base URL이 설정되지 않은 경우에만), 또는 루프백/LAN IP 호스트 직접 접속. `Host` 헤더만으로는 어떤 origin도 신뢰되지 않습니다.
+- **그 밖의 모든 `Origin`(`null` 포함)** → `403`, JSON-RPC 오류 본문: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. 유효한 CSRF 토큰을 제시한 대시보드 세션은 다른 대시보드 쓰기와 마찬가지로 계속 허용됩니다.
+
+리버스 프록시 뒤에서 제공되는 브라우저 MCP 클라이언트는 `OMNIROUTE_PUBLIC_BASE_URL`가 필요하며, 다른 origin을 위한 허용 목록은 없습니다. CORS 프리플라이트(`OPTIONS`)는 Origin을 검사하지 않지만, 뒤따르는 실제 요청은 검사합니다.
+
 ## IDE 구성
 
 Claude Desktop, Cursor, Cline 및 호환되는 MCP 클라이언트 설정은 [MCP 클라이언트 구성](../guides/SETUP_GUIDE.md#mcp-client-configuration)을 참조하세요.
@@ -288,103 +298,115 @@ MCP 도구/라우트 계층에 도달하기 전에 실행되며 구조화된 위
 
 ---
 
-## 인증 및 스코프
+## 인증 및 범위
 
-MCP 도구 호출은 호출자의 스코프 문자열을 읽습니다. 이 검사는 서로 독립적인 세 가지 네임스페이스 중 하나입니다. 한 검사기의 통과가 다른 검사기의 통과를 의미하지는 않습니다.
-관련 규칙은 [세 가지 스코프 네임스페이스](#three-scope-namespaces)를 참조하세요.
-도구 카탈로그는 [MCP 도구 스코프](#mcp-tool-scopes)를 참조하세요.
+MCP 도구 호출은 호출자에게서 범위 문자열을 읽습니다. 이 검사는 서로 독립적인 세 가지
+네임스페이스 중 하나입니다. 한 검사기를 통과했다고 해서 다른 검사기도 통과하는 것은 아닙니다.
+규칙은 [세 가지 범위 네임스페이스](#three-scope-namespaces)를 참조하세요.
+도구 카탈로그는 [MCP 도구 범위](#mcp-tool-scopes)를 참조하세요.
 
-### 세 가지 스코프 네임스페이스
+### 세 가지 범위 네임스페이스
 
-API 키의 `manage`, MCP 도구의 `read:compression`, `oma_live_…` 액세스 토큰의 `read`는 서로 다른 세 가지 권한입니다. `read` 액세스 토큰을 변경 작업을 수행하는 관리 경로에 전송하면 HTTP 403과 함께 다음 메시지가 반환됩니다.
+API 키의 `manage`, MCP 도구의 `read:compression`, `oma_live_…` 액세스 토큰의
+`read`는 서로 다른 세 가지 권한입니다. `read` 액세스 토큰으로 상태를 변경하는 관리
+경로를 호출하면 HTTP 403
 `Access token scope 'read' is insufficient; 'write' required.`
-이 순위는 `scopeSatisfies`입니다. 이는 MCP 테이블을 참조하지 않으며, MCP 매처도 이 순위를 참조하지 않습니다.
+오류가 발생합니다. 이 순위는 `scopeSatisfies`에 해당합니다. 이 함수는 MCP 테이블을
+참조하지 않으며, MCP 매처도 이 순위를 참조하지 않습니다.
 
 | 네임스페이스     | 자격 증명                                                      | 검사기             | 통과 시 허용되는 작업                            |
 | :--------------- | :------------------------------------------------------------- | :----------------- | :----------------------------------------------- |
-| API 키 관리      | `api_keys.scopes`                                              | `hasManageScope`   | 해당 Bearer 키를 통한 관리 REST                  |
-| API 키 추가 권한 | 동일한 배열의 정확히 일치하는 문자열 하나                      | 아래에 명시된 헬퍼 | 해당 기능 하나만 허용                            |
-| MCP 도구 스코프  | 동일한 배열, 없으면 MCP `_meta`, 없으면 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 적용이 활성화된 경우 해당 도구                   |
+| API 키 관리      | `api_keys.scopes`                                              | `hasManageScope`   | 해당 Bearer 키를 사용한 관리 REST                |
+| API 키 추가 범위 | 동일한 배열의 정확히 일치하는 문자열 하나                      | 아래에 명시된 헬퍼 | 해당 기능 하나만                                 |
+| MCP 도구 범위    | 동일한 배열, 없으면 MCP `_meta`, 없으면 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 범위 적용이 활성화된 경우 해당 도구              |
 | 액세스 토큰      | `oma_live_…`                                                   | `scopeSatisfies`   | 메서드와 경로에서 해당 순위를 요구하는 관리 경로 |
 
-각 자격 증명의 발급 방법은
+각 자격 증명을 발급하는 방법은
 [관리 인증](../guides/MANAGEMENT-AUTH.md)에서 다룹니다.
 
-#### API 키 스코프
+#### API 키 범위
 
-하나의 `api_keys.scopes` 배열이 두 가지 용도로 사용됩니다. 각 용도는 서로 다른 함수를 사용합니다.
+하나의 `api_keys.scopes` 배열이 두 가지 역할에 사용됩니다. 각 역할은 서로 다른 함수를 사용합니다.
 
 **관리 REST.** `manage`와 `admin`은
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`)의 구성원입니다.
-해당 키에 대해 관리 경로를 승인하는 것은 `hasManageScope`입니다. `admin`은
-이러한 경로에서 관리 권한을 제공합니다. 여기서 `admin`이라는 단어는
-액세스 토큰 순위가 아니며 MCP 도구 스코프로 확장되지도 않습니다.
+해당 키에 대한 관리 경로를 승인하는 함수는 `hasManageScope`입니다. `admin`은 해당
+경로에서 관리 권한을 부여합니다. 여기서 `admin`이라는 단어는 액세스 토큰의 순위가
+아니며 MCP 도구 범위로 확장되지도 않습니다.
 
-**추가 문자열.** 각각은 정확한 구성원 일치 검사이며, 모두
+**추가 문자열.** 각 문자열은 정확한 멤버십 검사를 거치며, 모두
 `MANAGEMENT_API_KEY_SCOPES` 외부에 유지됩니다.
 
-| 스코프                         | 통과 시 허용되는 작업                                                                                                                                                             |
-| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | 루프백이 아닌 `/api/mcp/`의 LOCAL_ONLY 예외만 허용합니다(`hasMcpConnectOrManageScope`). `manage` 또는 `admin`이 있는 키도 이 예외 검사를 통과합니다.                              |
-| `self:usage`                   | 이 키에 대한 `GET /api/v1/me/status`를 허용합니다(`src/app/api/v1/me/status/route.ts`). `POST /api/keys`는 생성 시 이 스코프를 추가합니다(`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | 해당 상태 페이로드 내의 업스트림 계정 할당량을 허용합니다(`src/lib/usage/apiKeySelfService.ts`). 상태 경로에는 여전히 `self:usage`가 필요합니다.                                  |
-| `policy:bypass-provider-quota` | 이 키의 추론 호출은 제공자 할당량 정책을 건너뜁니다(`src/sse/handlers/chat.ts`의 `hasProviderQuotaBypassScope`).                                                                  |
+| 범위                           | 통과 시 허용되는 작업                                                                                                                                                           |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mcp:connect`                  | 비루프백 `/api/mcp/`의 LOCAL_ONLY 예외만 허용합니다(`hasMcpConnectOrManageScope`). `manage` 또는 `admin`이 있는 키도 이 예외를 통과합니다.                                      |
+| `self:usage`                   | 이 키에 대한 `GET /api/v1/me/status`를 허용합니다(`src/app/api/v1/me/status/route.ts`). `POST /api/keys`는 생성 시 이 범위를 추가합니다(`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | 해당 상태 페이로드에 업스트림 계정 할당량을 포함합니다(`src/lib/usage/apiKeySelfService.ts`). 상태 경로에는 여전히 `self:usage`가 필요합니다.                                   |
+| `policy:bypass-provider-quota` | 이 키의 추론 호출이 공급자 할당량 정책을 건너뛰도록 합니다(`src/sse/handlers/chat.ts`의 `hasProviderQuotaBypassScope`).                                                         |
 
-#### 매칭
+#### 일치 규칙
 
-카탈로그는 [MCP 도구 스코프](#mcp-tool-scopes) 아래의 테이블입니다.
+카탈로그는 [MCP 도구 범위](#mcp-tool-scopes) 아래의 테이블입니다.
 `src/shared/constants/mcpScopes.ts`의 `MCP_SCOPE_LIST`를 해당 카탈로그로
-취급하지 마세요. 이는 최초의 형식 지정된 하위 집합입니다. 이후 추가된 도구는 그 옆에서
-추가 스코프를 선언합니다(`read:notion`, `read:skills`, `read:local-corpus` 및 테이블의 나머지 항목).
+간주하지 마세요. 이것은 최초의 타입 지정 하위 집합입니다. 이후 추가된 도구들은 그 옆에서
+추가 범위를 선언합니다(`read:notion`, `read:skills`, `read:local-corpus` 및 테이블의
+나머지 범위).
 
-`open-sse/mcp-server/scopeEnforcement.ts`의 `evaluateToolScopes`는
-필요한 모든 스코프가 부여된 스코프 중 하나와 일치할 때 호출을 허용합니다.
+`open-sse/mcp-server/scopeEnforcement.ts`의 `evaluateToolScopes`는 필요한 모든 범위가
+부여된 범위 중 하나와 일치할 때 호출을 허용합니다.
 
-- `*`는 필요한 모든 스코프와 일치합니다.
-- 부여된 스코프가 `*`로 끝나면 별표 앞의 접두사로 시작하는 필수 스코프와 일치합니다. `read:*`는 `read:compression`과 일치합니다.
-- 그 밖의 부여된 스코프는 정확히 동일한 필수 문자열과만 일치합니다.
+- `*`는 필요한 모든 범위와 일치합니다.
+- `*`로 끝나는 부여된 범위는 필요한 범위가 별표 앞의 접두사로 시작할 때 일치합니다.
+  `read:*`는 `read:compression`과 일치합니다.
+- 그 외의 부여된 모든 범위는 필요한 범위의 문자열이 완전히 동일할 때만 일치합니다.
 
-스코프가 `["manage"]`인 키는 `read:compression`에 대한 `scopeMatches`를 통과하지 못합니다.
-동일한 호출에서 부여된 문자열이 각각 `admin`, `mcp:connect`, `read`, `write`뿐인 경우에도
-검사에 실패합니다. 끝의 `*` 외에는 MCP 도구 스코프 간에 계층 구조가 없습니다.
+범위가 `["manage"]`인 키는 `read:compression`에 대한 `scopeMatches`를 통과하지
+못합니다. 부여된 문자열이 `admin`, `mcp:connect`, `read`, `write` 중 하나뿐인
+경우에도 동일한 호출은 실패합니다. 끝에 붙는 `*` 외에는 MCP 도구 범위 사이에
+어떠한 계층 구조도 없습니다.
 
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true`가 아니면 적용은 비활성화됩니다(기본값은
-`false`). 비활성화된 동안에는 `evaluateToolScopes`가 호출을 허용하고
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true`로 설정하지 않으면 범위 적용은 비활성화됩니다
+(기본값은 `false`). 비활성화된 동안에는 `evaluateToolScopes`가 호출을 허용하고
 카탈로그를 건너뜁니다. 활성화된 동안에는 HTTP가 Bearer 키의 `api_keys.scopes`를
-`authInfo`로 사용합니다([키별 HTTP 스코프 바인딩](#per-key-http-scope-binding-7895) 참조).
-키 스코프가 확인되지 않으면 부여된 집합은 MCP `_meta`, 그다음
+`authInfo`로 사용합니다([키별 HTTP 범위 바인딩](#per-key-http-scope-binding-7895) 참조).
+키 범위를 확인할 수 없으면 부여된 범위 집합은 MCP `_meta`, 그다음
 `OMNIROUTE_MCP_SCOPES`로 대체됩니다.
 
-#### 액세스 토큰 스코프
+#### 액세스 토큰 범위
 
-`oma_live_…` 토큰(`src/lib/accessTokens/scopes.ts`)은 `read`, `write`
-또는 `admin`을 가집니다. `scopeSatisfies`는 순위입니다. `admin`은 `write`와 `read`를
-포함하고, `write`는 `read`를 포함합니다. 알 수 없는 스코프는 아무 권한도 제공하지 않습니다.
+`oma_live_…` 토큰(`src/lib/accessTokens/scopes.ts`)에는 `read`, `write` 또는
+`admin`이 포함됩니다. `scopeSatisfies`는 순위를 사용합니다. `admin`은 `write`와
+`read`를 포함하며, `write`는 `read`를 포함합니다. 알 수 없는 범위는 아무 권한도
+부여하지 않습니다.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`)는 해당 순위를
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`)는 이 순위를
 `inferRequiredScope` (`src/server/authz/accessScopes.ts`)와 비교합니다.
 
 - `GET`, `HEAD`, `OPTIONS`에는 `read`가 필요합니다.
 - 그 외의 모든 메서드에는 `write`가 필요합니다.
-- `ADMIN_SCOPE_PREFIXES`의 경로는 모든 메서드에 `admin`이 필요합니다. `/api/mcp`가
-  이 목록에 포함되므로 `write` 액세스 토큰으로도 MCP HTTP 표면을 호출할 수 없습니다.
-- `ADMIN_MUTATION_PREFIXES`의 경로에는 변경 작업에만 `admin`이 필요합니다.
+- `ADMIN_SCOPE_PREFIXES`의 경로는 모든 메서드에 `admin`을 요구합니다. `/api/mcp`가
+  이 목록에 있으므로 `write` 액세스 토큰으로도 MCP HTTP 표면을 호출할 수 없습니다.
+- `ADMIN_MUTATION_PREFIXES`의 경로는 상태를 변경하는 작업에만 `admin`을 요구합니다.
+- `ADMIN_MUTATION_EXACT_PATHS`의 경로(`/api/settings`,
+  `/api/settings/require-login`)는 상태를 변경하는 작업에만, 그리고 정확히 해당
+  경로에서만 `admin`을 요구합니다. 다른 `/api/settings/*` 하위 경로에는 계속
+  `write`가 적용됩니다.
 
-`PATCH /api/keys/{id}`는 변경 작업이며 해당 관리자 목록에 포함되지 않으므로,
-`read` 토큰에는 403 응답이 반환됩니다.
+`PATCH /api/keys/{id}`는 변경 작업(mutation)이며 해당 admin 목록에 포함되지 않으므로,
+`read` 토큰은 403 응답을 받습니다.
 `Access token scope 'read' is insufficient; 'write' required.`
 `write` 또는 `admin` 액세스 토큰은 해당 라우트의 요구 사항을 충족합니다. 대시보드 JWT,
-루프백 CLI machine-id 토큰, 그리고 `manage` 또는 `admin` 권한을 가진 API 키는
-다른 분기를 사용하며 이 등급의 제한을 받지 않습니다.
+loopback CLI machine-id 토큰, 그리고 `manage` 또는 `admin` 권한이 있는 API 키는
+다른 분기로 처리되며 이 등급의 제한을 받지 않습니다.
 
 `/api/mcp`에 대해 `scopeSatisfies`를 통과한 액세스 토큰은 관리 게이트만
-통과한 것입니다. 도구 호출에는 여전히 API 키 범위를 대상으로 `scopeMatches`가
-실행됩니다. 액세스 토큰 등급은 `scopeMatches`의 입력값이 아닙니다.
+통과한 것입니다. 도구 호출에서는 여전히 API 키 스코프를 대상으로 `scopeMatches`를
+실행합니다. 액세스 토큰의 등급은 `scopeMatches`의 입력값이 아닙니다.
 
-### MCP 도구 범위
+### MCP 도구 스코프
 
-범위 적용은 `open-sse/mcp-server/scopeEnforcement.ts`에서 중앙 집중식으로 처리됩니다.
-각 도구에는 특정 범위가 필요합니다:
+스코프 적용은 `open-sse/mcp-server/scopeEnforcement.ts`에서 중앙 집중식으로 처리됩니다.
+각 도구에는 특정 스코프가 필요합니다:
 
 | 범위                  | 도구                                                                                                                                                                          |
 | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -422,47 +444,45 @@ API 키의 `manage`, MCP 도구의 `read:compression`, `oma_live_…` 액세스 
 | `write:obsidian`      | 쓰기 도구 9개 — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                             |
 
-와일드카드 범위가 지원됩니다. `read:*`는 모든 읽기 범위를 부여하고, `*`는 전체 접근 권한을 부여합니다.
+와일드카드 범위가 지원됩니다. `read:*`는 모든 읽기 범위를 부여하며, `*`는 전체 액세스 권한을 부여합니다.
 
 ### `mcp:connect` — 제한된 라우트 권한 (#7895)
 
-루프백이 아닌 곳에서 HTTP/SSE MCP 전송(`/api/mcp/*`)에 접근하려면
-`/api/mcp/` LOCAL_ONLY 예외가 필요합니다(`docs/security/ROUTE_GUARD_TIERS.md` 참조). 기존에는
-이 예외에서 전체 `manage`/`admin` 범위 API 키만 허용했는데, 이는 MCP와 통신하기만 하면 되는
+비루프백에서 HTTP/SSE MCP 전송(`/api/mcp/*`)에 접근하려면
+`/api/mcp/` LOCAL_ONLY 예외 처리가 필요합니다(`docs/security/ROUTE_GUARD_TIERS.md` 참조). 기존에는
+이 예외 처리가 전체 `manage`/`admin` 범위 API 키만 허용했으며, 이는 MCP와 통신하기만 하면 되는
 호출자에게는 지나치게 광범위했습니다. 이제 `src/shared/constants/managementScopes.ts`는
-`MCP_CONNECT_SCOPE = "mcp:connect"`를 내보냅니다. 이는 추가적으로 부여할 수 있는 제한된 범위로서
-(`SELF_USAGE_SCOPE`와 동일한 선례), `src/server/authz/policies/management.ts`의
-`/api/mcp/` 우회만 허용합니다. 다른 관리 라우트에 대한 접근 권한은 부여하지 않으며,
+`MCP_CONNECT_SCOPE = "mcp:connect"`를 내보냅니다. 이는
+`src/server/authz/policies/management.ts`의 `/api/mcp/` 우회만 허용하는 추가적인 제한 범위(`SELF_USAGE_SCOPE`와 동일한 선례)이며, 다른 관리 라우트에 대한 액세스 권한은 부여하지 않고
 의도적으로 `MANAGEMENT_API_KEY_SCOPES`에서 제외되어 있습니다. `manage`/`admin`을 보유한 키는
-기존과 동일하게 예외를 통과하며, `mcp:connect`는 원격 MCP 전용 호출자를 위한 더 낮은 권한의
-대안으로서 `hasMcpConnectOrManageScope()`를 통해 검사됩니다.
+변경 없이 계속 예외 처리를 통과하며, `mcp:connect`는 원격 MCP 전용 호출자를 위한
+최소 권한 대안으로서 `hasMcpConnectOrManageScope()`를 통해 확인됩니다.
 
 ### 키별 HTTP 범위 바인딩 (#7895)
 
-이제 HTTP/SSE에서 `open-sse/mcp-server/httpTransport.ts`는
+HTTP/SSE에서 `open-sse/mcp-server/httpTransport.ts`는 이제
 `resolveMcpCallerAuthInfo()`(`open-sse/mcp-server/httpAuthContext.ts`)를 통해 호출자의 실제
-`api_keys.scopes`를 확인하고 이를 MCP SDK의 `transport.handleRequest(req, { authInfo })`에
-전달하므로, 각 도구 호출에 전달되는 `extra.authInfo.scopes`에는 Bearer 키 자체의 범위가
-반영됩니다. `scopeEnforcement.ts`의 `resolveCallerScopeContext()`는 이미 `_meta` 및
-`OMNIROUTE_MCP_SCOPES` 환경 변수 폴백보다 `authInfo`를 우선시했습니다. 이번 변경은 HTTP에서
-이전에 제공되지 않았던 첫 번째 최우선 소스에 값을 채울 뿐입니다. 확인되는 API 키가 없으면
-(헤더 없음, 유효하지 않은 키) `authInfo`는 `undefined`로 유지되며, 확인 과정은 기존과 동일하게
-`meta`/환경 변수 체인으로 넘어갑니다. stdio에는 호출자별 ID가 없으므로
+`api_keys.scopes`를 확인하고 이를 MCP SDK의 `transport.handleRequest(req, { authInfo })`에 전달합니다. 따라서
+각 도구 호출에 전달되는 `extra.authInfo.scopes`는 Bearer 키 자체의 범위를 반영합니다.
+`scopeEnforcement.ts`의 `resolveCallerScopeContext()`는 이미 `_meta` 및
+`OMNIROUTE_MCP_SCOPES` 환경 변수 폴백보다 `authInfo`를 우선시했습니다. 이번 변경은 이전에는 HTTP를 통해
+제공되지 않았던 최우선 소스를 채우기만 합니다. API 키를 확인할 수 없는 경우
+(헤더 없음, 유효하지 않은 키) `authInfo`는 `undefined`로 유지되고, 범위 확인은 변경 없이
+기존 `meta`/환경 변수 체인으로 폴백합니다. stdio에는 호출자별 ID가 없으므로
 (`mcpCallerIdentity.ts` 참조) 영향을 받지 않으며, 계속 `_meta`/환경 변수 폴백 체인을 사용합니다.
 
-**범위가 제한된 HTTP/SSE 호출자에 대해서는 `OMNIROUTE_MCP_ENFORCE_SCOPES`와 관계없이
-적용이 강제됩니다.** `OMNIROUTE_MCP_ENFORCE_SCOPES`의 기본값이 `false`인 것은 범위를 적용할
-호출자별 ID가 없는 로컬/stdio 단일 운영자 흐름에서만 안전합니다.
+**범위가 제한된 HTTP/SSE 호출자에게는 `OMNIROUTE_MCP_ENFORCE_SCOPES`와 관계없이
+범위 적용이 강제로 활성화됩니다.** `OMNIROUTE_MCP_ENFORCE_SCOPES`의 기본값이 `false`인 것은
+범위를 적용할 호출자별 ID가 없는 로컬/stdio 단일 운영자 흐름에서만 안전합니다.
 `open-sse/mcp-server/server.ts::withScopeEnforcement()`는
-`resolveCallerScopeContext()`에서 `source === "authInfo"`로 확인된 경우(즉, 실제 키별 HTTP
-Authorization 헤더이며 HTTP/SSE에만 해당) 그리고 해당 키가 전체 `manage`/`admin` 범위를
-보유하지 않은 경우에는 항상 도구별 범위 적용을 활성화합니다(`scopeEnforcement.ts`의
-`shouldForceScopeEnforcement()`). 이를 통해, 위에서 `/api/mcp/` LOCAL_ONLY 예외 외에는 아무것도
-허용하지 않는 것으로 설명된 제한된 `mcp:connect` 우회 범위만 보유한 키가 운영자가 원격/비루프백
-MCP 접근을 활성화한 후 모든 MCP 도구를 호출할 수 있었던 허점을 막습니다. 이러한 허점은
-`OMNIROUTE_MCP_ENFORCE_SCOPES`의 기본 제공 값이 `false`이기 때문에 발생할 수 있었습니다.
-HTTP를 통한 전체 `manage`/`admin` 키와 모든 stdio/로컬 호출자에는 기존의
-`OMNIROUTE_MCP_ENFORCE_SCOPES` 기반 동작이 그대로 유지됩니다.
+`resolveCallerScopeContext()`가 `source === "authInfo"`를 확인한 경우(즉, 키별 실제 HTTP Authorization 헤더이며 HTTP/SSE에만 해당) 그리고
+해당 키가 전체 `manage`/`admin` 범위를 보유하지 않은 경우 항상 도구별 범위 적용을 활성화합니다
+(`scopeEnforcement.ts`의 `shouldForceScopeEnforcement()`). 이를 통해 원격/비루프백 MCP 액세스가
+활성화된 후, 위에서 `/api/mcp/` LOCAL_ONLY 예외 처리 외에는 아무것도 허용하지 않는 것으로 설명된
+제한된 `mcp:connect` 우회 범위만 보유한 키가 단지 `OMNIROUTE_MCP_ENFORCE_SCOPES`의 기본값이
+`false`라는 이유로 모든 MCP 도구를 호출할 수 있었던 허점이 차단됩니다. HTTP를 통한 전체
+`manage`/`admin` 키와 모든 stdio/로컬 호출자는 기존의
+`OMNIROUTE_MCP_ENFORCE_SCOPES`로 제어되는 동작을 변경 없이 유지합니다.
 
 ---
 

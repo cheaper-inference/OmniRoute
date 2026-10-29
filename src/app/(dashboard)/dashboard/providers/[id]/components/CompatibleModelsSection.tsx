@@ -9,7 +9,7 @@ import { filterUnavailableModelRows } from "@/lib/providers/mergeProviderModelLi
  * Never imports from ProviderDetailPageClient.
  */
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Button } from "@/shared/components";
+import { Button, Input } from "@/shared/components";
 import {
   matchesModelCatalogQuery,
   normalizeModelCatalogSource,
@@ -48,6 +48,7 @@ export interface CompatibleModelsSectionProps {
   syncedCatalogAuthoritative?: boolean;
   customModels?: CompatModelRow[];
   fallbackModels?: CompatModelRow[];
+  endpointAdapters?: Record<string, "available" | "unavailable" | "unknown">;
   allowImport: boolean;
   description: string;
   inputLabel: string;
@@ -117,6 +118,7 @@ export default function CompatibleModelsSection({
   syncedCatalogAuthoritative = false,
   customModels = [],
   fallbackModels = [],
+  endpointAdapters = {},
   description,
   inputLabel,
   inputPlaceholder,
@@ -475,23 +477,15 @@ export default function CompatibleModelsSection({
       <p className="text-sm text-text-muted">{description}</p>
 
       <div className="flex items-end gap-2 flex-wrap">
-        <div className="flex-1 min-w-[240px]">
-          <label
-            htmlFor="new-compatible-model-input"
-            className="text-xs text-text-muted mb-1 block"
-          >
-            {inputLabel}
-          </label>
-          <input
-            id="new-compatible-model-input"
-            type="text"
-            value={newModel}
-            onChange={(e) => setNewModel(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-            placeholder={inputPlaceholder}
-            className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
-          />
-        </div>
+        <Input
+          id="new-compatible-model-input"
+          label={inputLabel}
+          value={newModel}
+          onChange={(e) => setNewModel(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+          placeholder={inputPlaceholder}
+          className="flex-1 min-w-[240px]"
+        />
         <Button size="sm" icon="add" onClick={handleAdd} disabled={!newModel.trim() || adding}>
           {adding ? t("adding") : t("add")}
         </Button>
@@ -562,6 +556,27 @@ export default function CompatibleModelsSection({
                   <PassthroughModelRow
                     key={`${providerStorageAlias}:${modelId}`}
                     modelId={modelId}
+                    endpointInfo={(() => {
+                      const discovered = availableModels.find((row) => row.id === modelId);
+                      const selected = customModelMap.get(modelId);
+                      const catalog = fallbackModels.find((row) => row.id === modelId);
+                      return {
+                        supportedEndpoints:
+                          selected?.supportedEndpoints ??
+                          discovered?.supportedEndpoints ??
+                          catalog?.supportedEndpoints,
+                        endpointCapabilitySource:
+                          selected?.endpointCapabilitySource ??
+                          discovered?.endpointCapabilitySource ??
+                          catalog?.endpointCapabilitySource,
+                        discoveredEndpoints: discovered?.supportedEndpoints,
+                        resettable: Boolean(
+                          discovered && selected?.endpointCapabilitySource === "operator"
+                        ),
+                        onChanged: onModelsChanged,
+                        adapterStatuses: endpointAdapters,
+                      };
+                    })()}
                     fullModel={fullModel}
                     alias={alias}
                     displayName={displayName}

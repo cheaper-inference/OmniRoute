@@ -10,48 +10,47 @@
 
 ## Kaj je ponudnik?
 
-Ponudnika si predstavljajte kot **mobilnega operaterja**. Tako kot za opravljanje klicev potrebujete mobilnega operaterja, za uporabo modelov umetne inteligence potrebujete ponudnika umetne inteligence. OmniRoute je kot telefon, ki deluje z **vsemi operaterji** — med njimi lahko preklapljate samodejno.
+Ponudnika si predstavljajte kot **mobilnega operaterja**. Tako kot za opravljanje klicev potrebujete mobilnega operaterja, za uporabo modelov umetne inteligence potrebujete ponudnika umetne inteligence. OmniRoute je kot telefon, ki deluje z **vsemi operaterji** — med njimi lahko samodejno preklapljate.
 
 ### Vrste ponudnikov
 
-| Vrsta                | Kaj pomeni                       | Primeri                           | Strošek                  |
-| -------------------- | -------------------------------- | --------------------------------- | ------------------------ |
-| **Brezplačni**       | Plačilo ni potrebno              | Kiro, OpenCode Free, Pollinations | $0                       |
-| **Ključ API**        | Potrebujete ključ API            | OpenAI, Anthropic, Google         | Plačilo glede na uporabo |
-| **OAuth**            | Prijava z vašim računom          | Claude Code, GitHub Copilot       | Naročnina                |
-| **Spletni piškotek** | Uporablja sejo vašega brskalnika | ChatGPT Web (Codex), Gemini Web   | $0 (uporablja vaš račun) |
+| Vrsta                | Kaj je to                        | Primeri                         | Strošek                  |
+| -------------------- | -------------------------------- | ------------------------------- | ------------------------ |
+| **Brezplačno**       | Plačilo ni potrebno              | Kiro, Pollinations              | $0                       |
+| **Ključ API**        | Potrebujete ključ API            | OpenAI, Anthropic, Google       | Plačilo glede na uporabo |
+| **OAuth**            | Prijava z vašim računom          | Claude Code, GitHub Copilot     | Naročnina                |
+| **Spletni piškotek** | Uporablja sejo vašega brskalnika | ChatGPT Web (Codex), Gemini Web | $0 (uporablja vaš račun) |
 
 ### Ponudniki s spletnimi piškotki
 
-Za splošna navodila za nastavitev, omejitve, odpravljanje težav in navodila za preverjanje pristnosti pri posameznih ponudnikih glejte **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**.
+Za splošna navodila za nastavitev, omejitve, odpravljanje težav in navodila za preverjanje pristnosti za posamezne ponudnike glejte **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**.
 ---
 
 ## Hitri začetek: povežite svojega prvega ponudnika
 
 ### Izbirna začetna nastavitev brezplačnih ponudnikov
 
-Čarovnik ob prvem zagonu ponuja izrecno kartico **Nastavi brezplačne ponudnike**. Trenutni
-seznam primernih ponudnikov pridobi iz registra ponudnikov OmniRoute, ki ne zahtevajo preverjanja pristnosti, nato pa vam omogoči, da pred
+Čarovnik ob prvem zagonu ponudi izrecno kartico **Nastavi brezplačne ponudnike**. Trenutni
+seznam upravičenih ponudnikov pridobi iz registra ponudnikov OmniRoute, ki ne zahtevajo preverjanja pristnosti, nato pa vam omogoči, da pred
 potrditvijo pregledate posamezne ponudnike in prekličete njihov izbor. OmniRoute prikaže opozorilo ponudnika in povezavo do njegovega spletnega mesta,
 da lahko najprej pregledate pogoje tretje osebe, pravilnik o zasebnosti, razpoložljivost in omejitve hitrosti.
 
-To dejanje ni obvezno: dokončanje čarovnika nikoli ne ustvari povezav z brezplačnimi ponudniki brez vaše vednosti.
-Ustvari samo ponudnike, ki še manjkajo, obstoječe prilagojene povezave pa pusti
-nespremenjene ter ločeno poroča o ustvarjenih, že konfiguriranih in neuspešnih ponudnikih. Po delno uspešnem rezultatu lahko
-varno znova poskusite samo z neuspešnimi ponudniki.
+To dejanje je izbirno: dokončanje čarovnika nikoli ne ustvari povezav z brezplačnimi ponudniki brez vaše vednosti.
+Ustvari samo ponudnike, ki še manjkajo, obstoječe prilagojene povezave pa
+pusti nespremenjene ter ločeno poroča o ustvarjenih, že konfiguriranih in neuspešnih ponudnikih. Po delno uspešnem rezultatu lahko
+varno znova poskusite samo pri neuspešnih ponudnikih.
 
 ### Možnost A: brezplačni ponudnik (brez kreditne kartice)
 
 1. Odprite nadzorno ploščo na naslovu `http://localhost:20128`
 2. Pojdite na **Ponudniki** → **Dodaj ponudnika**
-3. Izberite enega od naslednjih brezplačnih ponudnikov:
+3. Izberite enega od teh brezplačnih ponudnikov:
    - **Kiro AI** — Brezplačni modeli Claude (preverjanje pristnosti ni potrebno)
-   - **OpenCode Free** — Brezplačni modeli GPT (preverjanje pristnosti ni potrebno)
-   - **Pollinations** — Brezplačni modeli GPT-5, Claude in Gemini (ključ ni potreben)
-   - **LongCat** — 10 milijonov brezplačnih žetonov (enkratna dodelitev, zahteva račun in preverjanje KYC)
-   - **Cloudflare AI** — Več kot 50 modelov, 10.000 nevronov na dan
-   - **MLX Gemma 26B** — Lokalni model za Apple Silicon (~38,5 žetona/s, ~15,9 GB pomnilnika RAM)
-   - **MLX Qwen 3.8 27B** — Lokalni model za Apple Silicon (~9,1 žetona/s, ~13,1 GB pomnilnika RAM)
+   - **Pollinations** — Brezplačni GPT-5, Claude in Gemini (ključ ni potreben)
+   - **LongCat** — 10 milijonov brezplačnih žetonov (enkratna dodelitev, zahtevana sta račun in KYC)
+   - **Cloudflare AI** — Več kot 50 modelov, 10.000 nevronov/dan
+   - **MLX Gemma 26B** — Lokalni model za Apple Silicon (~38,5 žetona/s, ~15,9 GB RAM-a)
+   - **MLX Qwen 3.8 27B** — Lokalni model za Apple Silicon (~9,1 žetona/s, ~13,1 GB RAM-a)
 4. Kliknite **Poveži**
 5. Končano! Zdaj imate brezplačen dostop do umetne inteligence.
 
@@ -74,7 +73,7 @@ varno znova poskusite samo z neuspešnimi ponudniki.
 
 1. Odprite nadzorno ploščo na naslovu `http://localhost:20128`
 2. Pojdite na **Ponudniki** → **Dodaj ponudnika**
-3. Izberite svojega ponudnika (npr. Claude Code ali GitHub Copilot)
+3. Izberite svojega ponudnika (npr. Claude Code, GitHub Copilot)
 4. Kliknite **Poveži z OAuth**
 5. Prijavite se s svojim računom
 6. Končano! Zdaj imate dostop do modelov v okviru svoje naročnine.
@@ -85,7 +84,7 @@ Za računalnike Mac s procesorjem Apple Silicon in poenotenim pomnilnikom OmniRo
 
 #### Predpogoji
 
-- **Mac s procesorjem Apple Silicon** (M1/M2/M3/M4); priporočeno je vsaj 24 GB poenotenega pomnilnika
+- **Mac s procesorjem Apple Silicon** (M1/M2/M3/M4); priporočeno je 24 GB ali več poenotenega pomnilnika
 - Upravitelj paketov **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
@@ -111,7 +110,7 @@ Za računalnike Mac s procesorjem Apple Silicon in poenotenim pomnilnikom OmniRo
    uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
    ```
 
-3. **Povežite v nadzorni plošči OmniRoute**:
+3. **Povežite se na nadzorni plošči OmniRoute**:
    - Pojdite na **Ponudniki** → **Dodaj ponudnika**
    - Izberite **MLX Gemma 26B** ali **MLX Qwen 3.8 27B**
    - Kliknite **Poveži** (ključ API ni potreben)
@@ -129,18 +128,18 @@ Za računalnike Mac s procesorjem Apple Silicon in poenotenim pomnilnikom OmniRo
 
 #### Upravljanje pomnilnika
 
-**Pomembno**: Pri 24 GB poenotenega pomnilnika se lahko hkrati izvaja samo **en velik model MLX**.
+**Pomembno**: pri 24 GB poenotenega pomnilnika se lahko hkrati izvaja samo **en velik model MLX**.
 
-- Gemma 26B: največja poraba pomnilnika ~15,9 GB
-- Qwen 3.8 27B: največja poraba pomnilnika ~13,1 GB
+- Gemma 26B: ~15,9 GB največje porabe pomnilnika
+- Qwen 3.8 27B: ~13,1 GB največje porabe pomnilnika
 
 To morate upravljati ročno:
 
 - Hkrati izvajajte samo en strežnik MLX ali
 - Oba izvajajte na ločenih računalnikih ali
-- Pred zagonom drugega ustavite prvega
+- Enega ustavite, preden zaženete drugega
 
-OmniRoute ne upravlja samodejno procesov strežnika MLX — zahteve zgolj usmerja do končnih točk, združljivih z OpenAI, ki jih konfigurirate.
+OmniRoute ne upravlja samodejno procesov strežnika MLX — zahteve samo usmerja do končnih točk, združljivih z OpenAI, ki jih konfigurirate.
 
 #### Podpora za klicanje orodij
 
@@ -159,13 +158,13 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 #### Odpravljanje težav
 
-| Težava                  | Rešitev                                                                                      |
-| ----------------------- | -------------------------------------------------------------------------------------------- |
-| Strežnik se ne zažene   | Preverite `uv run mlx_lm.server --help` in preverite ID-je modelov                           |
-| Premalo pomnilnika      | Zagotovite, da se izvaja samo en model; zaprite druge aplikacije; preverite Activity Monitor |
-| Povezava je zavrnjena   | Preverite, ali strežnik deluje na pravilnih vratih (11435/11436)                             |
-| Počasni odzivi          | Prva zahteva naloži model v pomnilnik (~30–60 s); nadaljnje zahteve so hitre                 |
-| Klicanje orodij ne uspe | Preverite, ali model podpira orodja; v dnevnikih OmniRoute preverite napake pri prevajanju   |
+| Težava                  | Rešitev                                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------------------------- |
+| Strežnik se ne zažene   | Preverite `uv run mlx_lm.server --help` in preverite ID-je modelov                              |
+| Premalo pomnilnika      | Poskrbite, da se izvaja samo en model; zaprite druge aplikacije; preverite Nadzornik aktivnosti |
+| Povezava je zavrnjena   | Preverite, ali strežnik deluje na pravilnih vratih (11435/11436)                                |
+| Počasni odzivi          | Prva zahteva naloži model v pomnilnik (~30–60 s); naslednje zahteve so hitre                    |
+| Klicanje orodij ne uspe | Preverite, ali model podpira orodja; v dnevnikih OmniRoute preverite napake pri prevajanju      |
 
 ---
 
@@ -173,17 +172,16 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 Ti ponudniki omogočajo **brezplačen dostop** brez kreditne kartice:
 
-| Ponudnik          | Brezplačna kvota          | Modeli                                   | Način povezave            |
-| ----------------- | ------------------------- | ---------------------------------------- | ------------------------- |
-| **Kiro AI**       | 50 kreditov/mesec         | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Avtentikacija ni potrebna |
-| **OpenCode Free** | Neomejeno                 | GPT-4o, Claude, Gemini                   | Avtentikacija ni potrebna |
-| **Pollinations**  | Ključ ni potreben         | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Avtentikacija ni potrebna |
-| **LongCat**       | 10M enkratno              | LongCat-2.0                              | Ključ API + KYC           |
-| **Cloudflare AI** | 10K nevronov/dan          | Več kot 50 modelov                       | Avtentikacija ni potrebna |
-| **NVIDIA NIM**    | ~40 zahtev/minuto         | 129 modelov                              | Potreben je ključ API     |
-| **Cerebras**      | $5 dobroimetja ob prijavi | GLM 4.7, GPT-OSS 120B                    | Ključ API + kartica       |
+| Ponudnik          | Brezplačna kvota             | Modeli                                   | Način povezave            |
+| ----------------- | ---------------------------- | ---------------------------------------- | ------------------------- |
+| **Kiro AI**       | 50 dobropisov/mesec          | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Avtentikacija ni potrebna |
+| **Pollinations**  | Ključ ni potreben            | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Avtentikacija ni potrebna |
+| **LongCat**       | 10M enkratno                 | LongCat-2.0                              | Ključ API + KYC           |
+| **Cloudflare AI** | 10K nevronov/dan             | Več kot 50 modelov                       | Avtentikacija ni potrebna |
+| **NVIDIA NIM**    | ~40 RPM                      | 129 modelov                              | Potreben je ključ API     |
+| **Cerebras**      | $5 dobropisa ob registraciji | GLM 4.7, GPT-OSS 120B                    | Ključ API + kartica       |
 
-**Nasvet**: Povežite več brezplačnih ponudnikov za **neomejeno brezplačno umetno inteligenco** s samodejnim preklopom na nadomestnega ponudnika!
+**Namig**: Povežite več brezplačnih ponudnikov za **neomejeno brezplačno umetno inteligenco** s samodejnim preklopom na nadomestnega ponudnika!
 
 ---
 
@@ -240,7 +238,7 @@ Vaš ponudnik je zdaj povezan. Uporabite ga lahko z `model: "auto"` ali pa ponud
 
 OmniRoute najbolje deluje z **več ponudniki**. To vam omogoča:
 
-- **Samodejni preklop ob napaki** — Če en ponudnik ne deluje, OmniRoute poskusi naslednjega
+- **Samodejni preklop** — Če en ponudnik odpove, OmniRoute poskusi naslednjega
 - **Optimizacijo stroškov** — OmniRoute za vsako zahtevo izbere najcenejšega ponudnika
 - **Optimizacijo hitrosti** — OmniRoute za vsako zahtevo izbere najhitrejšega ponudnika
 - **Optimizacijo kakovosti** — OmniRoute za vsako opravilo izbere najboljšega ponudnika
@@ -249,7 +247,7 @@ OmniRoute najbolje deluje z **več ponudniki**. To vam omogoča:
 
 Za najboljšo izkušnjo povežite vsaj **3 ponudnike**:
 
-1. **En brezplačni ponudnik** (Kiro, OpenCode Free ali Pollinations) — Vedno na voljo
+1. **En brezplačen ponudnik** (Kiro ali Pollinations) — Vedno na voljo
 2. **En hiter ponudnik** (Groq, Cerebras) — Za hitre odgovore
 3. **En kakovosten ponudnik** (OpenAI, Anthropic, Google) — Za zahtevna opravila
 
@@ -333,27 +331,27 @@ in nastavljiva časovna omejitev sta ločeni izboljšavi; to vedenje ju ne zagot
 
 ## Pogosta vprašanja
 
-### "Ali moram za uporabo OmniRoute plačati?"
+### »Ali moram za uporabo OmniRoute plačati?«
 
-**Ne!** OmniRoute je brezplačen in odprtokoden. Brez kakršnega koli plačila lahko uporabljate brezplačne ponudnike (Kiro, OpenCode Free, Pollinations). Plačate samo, če se odločite uporabljati plačljive ponudnike.
+**Ne!** OmniRoute je brezplačen in odprtokoden. Brezplačne ponudnike (Kiro, Pollinations) lahko uporabljate brez kakršnega koli plačila. Plačate le, če se odločite uporabljati plačljive ponudnike.
 
-### "S katerim ponudnikom naj začnem?"
+### »S katerim ponudnikom naj začnem?«
 
-Začnite s **Kiro AI** — je brezplačen, ne zahteva ključa API in omogoča dostop do modelov Claude. Nato po potrebi dodajte več ponudnikov.
+Začnite s **Kiro AI** — je brezplačen, ne zahteva ključa API in omogoča dostop do modelov Claude. Nato po potrebi dodajte še druge ponudnike.
 
-### "Ali lahko uporabljam več ponudnikov hkrati?"
+### »Ali lahko uporabljam več ponudnikov hkrati?«
 
-**Da!** To je glavni namen OmniRoute. Povežite več ponudnikov in uporabite `model: "auto"`, da bo OmniRoute za vsako zahtevo izbral najboljšega.
+**Da!** Prav to je bistvo OmniRoute. Povežite več ponudnikov in uporabite `model: "auto"`, da OmniRoute za vsako zahtevo izbere najboljšega.
 
-### "Kaj se zgodi, če ponudnik preneha delovati?"
+### »Kaj se zgodi, če ponudnik preneha delovati?«
 
-OmniRoute samodejno preskoči nedelujoče ponudnike in poskusi z naslednjim. Ni vam treba storiti ničesar.
+OmniRoute samodejno preskoči ponudnike, pri katerih je prišlo do napake, in poskusi z naslednjim. Storiti vam ni treba ničesar.
 
-### "Kako prekinem povezavo s ponudnikom?"
+### »Kako prekinem povezavo s ponudnikom?«
 
-Pojdite na Ponudniki → kliknite ponudnika → kliknite **Prekini povezavo**.
+Pojdite v Providers → kliknite ponudnika → kliknite **Prekini povezavo**.
 
-### "Ali lahko uporabim svoje obstoječe ključe API?"
+### »Ali lahko uporabim svoje obstoječe ključe API?«
 
 **Da!** Če že imate ključe API za OpenAI, Anthropic, Google itd., jih lahko uporabite v OmniRoute. Ko povezujete ponudnika, jih preprosto prilepite.
 

@@ -1,1 +1,0 @@
-- **fix(proxy):** Steer the local core selector off every set-aside pool member, whatever the refusal motive, instead of quota refusals only ([#15140](https://github.com/diegosouzapw/OmniRoute/pull/15140)) — thanks @maxmad64bis

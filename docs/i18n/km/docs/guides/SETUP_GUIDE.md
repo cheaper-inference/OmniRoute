@@ -138,21 +138,21 @@ omniroute providers validate
 
 ## ការកំណត់រចនាសម្ព័ន្ធឧបករណ៍ CLI
 
-### 1) ភ្ជាប់អ្នកផ្ដល់សេវា និងបង្កើត API Key
+### 1) ភ្ជាប់អ្នកផ្តល់សេវា និងបង្កើត API Key
 
-1. បើក Dashboard → `Providers` ហើយភ្ជាប់អ្នកផ្ដល់សេវាយ៉ាងហោចណាស់មួយ (OAuth ឬ API key)។
-2. បើក Dashboard → `Endpoints` ហើយបង្កើត API key មួយ។
-3. (ជាជម្រើស) បើក Dashboard → `Combos` ហើយកំណត់ខ្សែសង្រ្គោះបម្រុងរបស់អ្នក។
+1. បើក Dashboard → `Providers` ហើយភ្ជាប់អ្នកផ្តល់សេវាយ៉ាងហោចណាស់មួយ (OAuth ឬ API key)។
+2. បើក Dashboard → `Endpoints` ហើយបង្កើត API key។
+3. (ជាជម្រើស) បើក Dashboard → `Combos` ហើយកំណត់ខ្សែសង្វាក់បម្រុងរបស់អ្នក។
 
-### 2) ភ្ជាប់ឧបករណ៍សរសេរកូដរបស់អ្នក
+### 2) តម្រង់ឧបករណ៍សរសេរកូដរបស់អ្នក
 
 ```txt
 Base URL: http://localhost:20128/v1
-API Key:  [copy from Endpoint page]
-Model:    if/qwen3.8-max-preview (or any provider/model prefix)
+API Key:  [ចម្លងពីទំព័រ Endpoint]
+Model:    if/qwen3.8-max-preview (ឬបុព្វបទអ្នកផ្តល់សេវា/ម៉ូដែលណាមួយ)
 ```
 
-ប្រសិនបើកម្មវិធីកែសម្រួលរបស់អ្នកមិនអាចផ្ញើ `Authorization: Bearer ...` បានទេ សូមប្រើ base ដែលត្រូវគ្នា និងមាន token ជំនួសវិញ៖
+ប្រសិនបើកម្មវិធីកែសម្រួលរបស់អ្នកមិនអាចផ្ញើ `Authorization: Bearer ...` បានទេ សូមប្រើមូលដ្ឋានភាពឆបគ្នាដែលមានថូខឹនជំនួសវិញ៖
 
 ```txt
 Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -161,39 +161,33 @@ Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
 Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-ដំណើរការជាមួយ Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode និង SDK ដែលត្រូវគ្នាជាមួយ OpenAI។
+ដំណើរការជាមួយ Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode និង SDK ដែលឆបគ្នាជាមួយ OpenAI។
 
 #### កំណត់រចនាសម្ព័ន្ធដោយស្វ័យប្រវត្តិជាមួយ `setup-*`
 
-ជំនួសឱ្យការបិទភ្ជាប់ base URL និង key ដោយដៃ អនុញ្ញាតឱ្យ OmniRoute សរសេរការកំណត់រចនាសម្ព័ន្ធផ្ទាល់ខ្លួនរបស់ឧបករណ៍នីមួយៗ
-ពីកាតាឡុកម៉ូដែលដែលកំពុងដំណើរការ។ ប្រើពាក្យបញ្ជាមួយសម្រាប់ឧបករណ៍នីមួយៗ៖
+ជំនួសឱ្យការបិទភ្ជាប់ URL មូលដ្ឋាន និង key ដោយដៃ អនុញ្ញាតឱ្យ OmniRoute សរសេរការកំណត់រចនាសម្ព័ន្ធផ្ទាល់ខ្លួនរបស់ឧបករណ៍នីមួយៗពីបញ្ជីម៉ូដែលបច្ចុប្បន្ន។ ប្រើមួយ command សម្រាប់ឧបករណ៍នីមួយៗ៖
 
 ```bash
-omniroute setup-codex        # ទម្រង់ ~/.codex/<name>.config.toml
+omniroute setup-codex        # profile នៅក្នុង ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (ត្រូវគ្នាជាមួយ openai)
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (ឆបគ្នាជាមួយ OpenAI)
 omniroute setup-cline        # ការកំណត់ Cline CLI + ផ្នែកបន្ថែម VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # បង្ហាញជំហានក្នុងកម្មវិធីរបស់ Cursor
 omniroute setup-roo          # ការនាំចូល Roo Code + ទ្រនិច autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-ពាក្យបញ្ជានីមួយៗទទួលយក `--remote <url> --api-key <key>` ដើម្បីកំណត់រចនាសម្ព័ន្ធឧបករណ៍មូលដ្ឋានឱ្យប្រើជាមួយ OmniRoute
-**ពីចម្ងាយ** ព្រមទាំង `--dry-run` ដើម្បីមើលជាមុន។ ដើម្បីចាប់ផ្ដើម CLI ដោយបានបញ្ចូល env ត្រឹមត្រូវ
-និងមិនសរសេរការកំណត់រចនាសម្ព័ន្ធអ្វីទាំងអស់ សូមប្រើកម្មវិធីចាប់ផ្ដើមទូទៅ
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-កម្មវិធីចាប់ផ្ដើមជាក់លាក់តាមឧបករណ៍ចាស់ៗ `omniroute launch` (Claude Code) និង
-`omniroute launch-codex` (Codex) នៅតែអាចប្រើបាន។
+នីមួយៗទទួលយក `--remote <url> --api-key <key>` ដើម្បីកំណត់រចនាសម្ព័ន្ធឧបករណ៍មូលដ្ឋានឱ្យប្រើជាមួយ OmniRoute **ពីចម្ងាយ** ព្រមទាំង `--dry-run` សម្រាប់មើលជាមុន។ ដើម្បីដំណើរការ CLI ដោយបញ្ចូល env ត្រឹមត្រូវ និងមិនសរសេរការកំណត់រចនាសម្ព័ន្ធអ្វីទាំងអស់ សូមប្រើកម្មវិធីបើកដំណើរការទូទៅ `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini)។ កម្មវិធីបើកដំណើរការចាស់តាមឧបករណ៍នីមួយៗ `omniroute launch` (Claude Code) និង `omniroute launch-codex` (Codex) នៅតែអាចប្រើបាន។
 
-សម្រាប់តារាងពេញលេញ (អ្វីដែលពាក្យបញ្ជានីមួយៗសរសេរ, flag ទាំងអស់, មូលដ្ឋានធៀបនឹងពីចម្ងាយ, អនុសញ្ញា base-URL
-`/v1`) សូមមើល **[ការរួមបញ្ចូល CLI](./CLI-INTEGRATIONS.md)**។
+សម្រាប់តារាងពេញលេញ (អ្វីដែល command នីមួយៗសរសេរ flag ទាំងអស់ មូលដ្ឋានធៀបនឹងពីចម្ងាយ និងអនុសញ្ញា URL មូលដ្ឋាន `/v1`) សូមមើល **[ការរួមបញ្ចូល CLI](./CLI-INTEGRATIONS.md)**។
 
-សម្រាប់ការកំណត់រចនាសម្ព័ន្ធលម្អិតតាមឧបករណ៍នីមួយៗ (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot និងច្រើនទៀត) សូមមើល **[មគ្គុទ្ទេសក៍ឧបករណ៍ CLI](../reference/CLI-TOOLS.md)** ដែលផ្ដល់ជូនដោយឡែក។
+សម្រាប់ការកំណត់រចនាសម្ព័ន្ធលម្អិតតាមឧបករណ៍នីមួយៗ (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot និងឧបករណ៍ផ្សេងទៀត) សូមមើល **[មគ្គុទ្ទេសក៍ឧបករណ៍ CLI](../reference/CLI-TOOLS.md)** ដែលបានរៀបចំជាពិសេស។
 
 ---
 
@@ -322,23 +316,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## ពុម្ពសម្រាប់ Void Linux (xbps-src)
+## គំរូសម្រាប់ Void Linux (xbps-src)
 
-សម្រាប់អ្នកប្រើ Void Linux អ្នកអាចបង្កើតកញ្ចប់ដើមបានដោយប្រើ `xbps-src`។ រក្សាទុកប្លុកនេះជា `srcpkgs/omniroute/template`៖
+សម្រាប់អ្នកប្រើប្រាស់ Void Linux អ្នកអាចបង្កើតកញ្ចប់ដើមដោយប្រើ `xbps-src`។ រក្សាទុកប្លុកនេះជា `srcpkgs/omniroute/template`៖
 
 ```bash
-# ឯកសារពុម្ពសម្រាប់ 'omniroute'
+# ឯកសារគំរូសម្រាប់ 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="ច្រកផ្លូវ AI សកលដែលមានការបញ្ជូនផ្លូវឆ្លាតវៃសម្រាប់អ្នកផ្ដល់សេវា LLM ជាច្រើន"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# បង្កើត checksum ឡើងវិញសម្រាប់ការចេញផ្សាយនីមួយៗដោយប្រើ៖
+# បង្កើត checksum ឡើងវិញសម្រាប់រាល់ការចេញផ្សាយដោយប្រើ៖
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

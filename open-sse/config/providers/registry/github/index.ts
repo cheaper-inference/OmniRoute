@@ -216,5 +216,9 @@ export const githubProvider: RegistryEntry = {
       contextLength: 500000,
       maxOutputTokens: 128000,
     },
+    // Copilot-side model selection (required for Copilot Free): chatCore resolves
+    // `auto` to a concrete model via POST /auto before routing — see
+    // handlers/chatCore/copilotAutoModel.ts. Vision is decided per request.
+    { id: "auto", name: "Auto", toolCalling: true },
   ],
 };

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import { Card } from "@/shared/components";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
@@ -60,15 +62,15 @@ type AutopilotReport = {
 };
 
 const STATUS_STYLES: Record<AutopilotReport["status"], string> = {
-  healthy: "bg-green-500/10 text-green-400 border-green-500/20",
-  warning: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  critical: "bg-red-500/10 text-red-400 border-red-500/20",
+  healthy: "bg-success/10 text-success border-success/20",
+  warning: "bg-warning/10 text-warning border-warning/20",
+  critical: "bg-error/10 text-error border-error/20",
 };
 
 const SEVERITY_STYLES: Record<AutopilotIssue["severity"], string> = {
-  info: "bg-blue-500/10 text-blue-300 border-blue-500/20",
-  warning: "bg-amber-500/10 text-amber-300 border-amber-500/20",
-  critical: "bg-red-500/10 text-red-300 border-red-500/20",
+  info: "bg-info/10 text-info border-info/20",
+  warning: "bg-warning/10 text-warning border-warning/20",
+  critical: "bg-error/10 text-error border-error/20",
 };
 
 const SEVERITY_RANK: Record<AutopilotIssue["severity"], number> = {
@@ -204,14 +206,16 @@ function ProviderIssues({
                   {issue.actions.map((action) => {
                     const busy = busyAction === `${issue.id}:${action.type}`;
                     return (
-                      <button
+                      <Button
                         key={`${issue.id}:${action.type}`}
+                        variant="secondary"
+                        size="sm"
                         onClick={() => void onApply(issue, action)}
                         disabled={busy || Boolean(busyAction)}
-                        className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20 disabled:opacity-50"
+                        className="text-xs"
                       >
                         {busy ? t("applying") : actionLabel(action, t)}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -306,7 +310,7 @@ export default function ProviderHealthAutopilotCard() {
         <div>
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <span className="material-symbols-outlined text-[18px]">health_and_safety</span>
+              <Icon name="health_and_safety" size={18} />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-text-main">{t("title")}</h2>
@@ -314,13 +318,9 @@ export default function ProviderHealthAutopilotCard() {
             </div>
           </div>
         </div>
-        <button
-          onClick={() => void load()}
-          disabled={loading}
-          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main transition-colors hover:bg-surface/80 disabled:opacity-50"
-        >
+        <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
           {t("refresh")}
-        </button>
+        </Button>
       </div>
 
       <div className="mt-4 grid gap-3 md:grid-cols-4">
@@ -357,7 +357,7 @@ export default function ProviderHealthAutopilotCard() {
       )}
 
       {error ? (
-        <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        <div className="mt-4 rounded-lg border border-error/20 bg-error/10 px-3 py-2 text-sm text-error">
           {error}
         </div>
       ) : loading && !report ? (
@@ -389,10 +389,10 @@ export default function ProviderHealthAutopilotCard() {
                 <span
                   className={`w-fit rounded-full border px-2 py-1 text-xs font-medium ${
                     provider.state === "down"
-                      ? "border-red-500/20 bg-red-500/10 text-red-300"
+                      ? "border-error/20 bg-error/10 text-error"
                       : provider.state === "degraded"
-                        ? "border-amber-500/20 bg-amber-500/10 text-amber-300"
-                        : "border-green-500/20 bg-green-500/10 text-green-300"
+                        ? "border-warning/20 bg-warning/10 text-warning"
+                        : "border-success/20 bg-success/10 text-success"
                   }`}
                 >
                   {t(`providerState.${provider.state}`)}

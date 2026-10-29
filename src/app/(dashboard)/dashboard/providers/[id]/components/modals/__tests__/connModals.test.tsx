@@ -6,6 +6,7 @@
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { kitSelectValue } from "../../../../../../../../../tests/helpers/kitSelect";
 import AddApiKeyModal from "../AddApiKeyModal";
 import EditConnectionModal from "../EditConnectionModal";
 
@@ -28,7 +29,9 @@ function renderModal(node: React.ReactElement) {
     act(() => root.unmount());
     container.remove();
   });
-  return container;
+  // The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+  // document.body, so queries start there (the container is a child of body).
+  return document.body;
 }
 
 function setInputValue(input: HTMLInputElement, value: string) {
@@ -100,7 +103,7 @@ describe("conn-modals (Phase 1c extraction)", () => {
         onClose={vi.fn()}
       />
     );
-    expect(c.querySelector("*")).not.toBeNull();
+    expect(c.querySelector('[role="dialog"]')).not.toBeNull();
   });
 
   it("AddApiKeyModal renders OpenRouter preset outside advanced settings", () => {
@@ -361,7 +364,7 @@ describe("conn-modals (Phase 1c extraction)", () => {
         onClose={vi.fn()}
       />
     );
-    expect(c.querySelector("*")).not.toBeNull();
+    expect(c.querySelector('[role="dialog"]')).not.toBeNull();
   });
 
   it("EditConnectionModal renders the API key value returned by the provider connection API", () => {
@@ -432,10 +435,16 @@ describe("conn-modals (Phase 1c extraction)", () => {
       />
     );
 
-    const regionSelect = Array.from(c.querySelectorAll("select")).find((select) =>
-      Array.from(select.options).some((option) => option.value === "china-beijing")
+    // The region picker is the kit (Radix) Select since KEA-7886: a combobox trigger
+    // labelled by the field, showing the selected option's label ("… (Beijing)").
+    const regionLabel = Array.from(c.querySelectorAll("label")).find((label) =>
+      label.textContent?.includes("apiRegionLabel")
     );
-    expect(regionSelect?.value).toBe("china-beijing");
+    const regionSelect = regionLabel ? document.getElementById(regionLabel.htmlFor) : null;
+    expect(regionSelect?.getAttribute("role")).toBe("combobox");
+    expect(kitSelectValue(regionSelect!)).toBe("china-beijing");
+    expect(regionSelect?.textContent).toContain("(Beijing)");
+    expect(regionSelect?.textContent).not.toContain("(Singapore)");
   });
 
   it("EditConnectionModal renders without ReferenceError for oauth connection", () => {

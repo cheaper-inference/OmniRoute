@@ -80,7 +80,10 @@ test("GET /api/db-backups/exportAll includes call_logs artifacts in the archive"
   const archivePath = path.join(TEST_DATA_DIR, "backup-export.tar.gz");
   fs.writeFileSync(archivePath, archiveBuffer);
 
-  const listing = execFileSync("tar", ["-tzf", archivePath], { encoding: "utf8" });
+  const listing = execFileSync("tar", ["-tzf", path.basename(archivePath)], {
+    cwd: TEST_DATA_DIR,
+    encoding: "utf8",
+  });
   assert.match(listing, /call_logs\//);
   assert.match(listing, /call_logs\/.+\.json/);
   assert.match(listing, /metadata\.json/);

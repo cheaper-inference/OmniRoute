@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach, beforeAll, vi } from "vitest";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -15,37 +15,50 @@ const options = [
   { id: "b", name: "beta", strategy: "round-robin", stepCount: 3 },
 ];
 
+// The picker renders the kit (Radix) Select, which has no DOM <option>s: open the combobox
+// with the keyboard and read the role="option" items instead.
+function openPicker(getByRole) {
+  fireEvent.keyDown(getByRole("combobox"), { key: "Enter" });
+}
+
+beforeAll(() => {
+  // Radix Select calls these on open; jsdom does not implement them.
+  const proto = window.HTMLElement.prototype as unknown as Record<string, unknown>;
+  proto.hasPointerCapture ??= () => false;
+  proto.releasePointerCapture ??= () => {};
+  proto.scrollIntoView ??= () => {};
+});
+
 describe("ComboReferencePicker", () => {
   afterEach(() => {
     cleanup();
   });
 
   it("lists the referenceable combos with strategy and step count", () => {
-    const { container } = render(
+    const { getByRole, getAllByRole } = render(
       <ComboReferencePicker t={t} value="" onChange={() => {}} options={options} onAdd={() => {}} />
     );
-    const texts = Array.from(container.querySelectorAll("option")).map((o) =>
+    expect(getByRole("combobox", { name: "Reference another combo" }).textContent).toContain(
+      "Select an existing combo to reference"
+    );
+    openPicker(getByRole);
+    const texts = getAllByRole("option").map((o) =>
       (o.textContent || "").replace(/\s+/g, " ").trim()
     );
-    expect(texts).toEqual([
-      "Select an existing combo to reference",
-      "alpha · priority · 1 step",
-      "beta · round-robin · 3 steps",
-    ]);
+    expect(texts).toEqual(["alpha · priority · 1 step", "beta · round-robin · 3 steps"]);
   });
 
   it("reports the selected combo name and disables Add until one is chosen", () => {
     const onChange = vi.fn();
     const onAdd = vi.fn();
-    const { container, getByRole, rerender } = render(
+    const { getByRole, rerender } = render(
       <ComboReferencePicker t={t} value="" onChange={onChange} options={options} onAdd={onAdd} />
     );
-    const button = getByRole("button") as HTMLButtonElement;
+    const button = getByRole("button", { name: "Add combo ref" }) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
 
-    fireEvent.change(container.querySelector("select") as HTMLSelectElement, {
-      target: { value: "beta" },
-    });
+    openPicker(getByRole);
+    fireEvent.click(getByRole("option", { name: "beta · round-robin · 3 steps" }));
     expect(onChange).toHaveBeenCalledWith("beta");
 
     rerender(
@@ -57,7 +70,7 @@ describe("ComboReferencePicker", () => {
         onAdd={onAdd}
       />
     );
-    const enabled = getByRole("button") as HTMLButtonElement;
+    const enabled = getByRole("button", { name: "Add combo ref" }) as HTMLButtonElement;
     expect(enabled.disabled).toBe(false);
     fireEvent.click(enabled);
     expect(onAdd).toHaveBeenCalledTimes(1);

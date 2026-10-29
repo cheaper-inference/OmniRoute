@@ -514,7 +514,7 @@ function main() {
   if ((STRICT || RATCHET) && scheduledGuardFindings.length > 0) {
     console.error(
       `\n[check-workflows] FAIL — ${scheduledGuardFindings.length} scheduled job(s) without the upstream-only guard.\n` +
-        "  Scheduled runs must stay in diegosouzapw/OmniRoute: keep the job-level `if:` naming both\n" +
+        "  Scheduled runs must stay in cheaper-inference/OmniRoute: keep the job-level `if:` naming both\n" +
         "  `github.event_name != 'schedule'` and `github.repository`."
     );
     process.exit(1);

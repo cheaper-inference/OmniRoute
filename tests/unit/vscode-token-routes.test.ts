@@ -32,8 +32,6 @@ const vscodeV1ChatCompletionsRoute =
 const vscodeChatCompletionsRoute =
   await import("../../src/app/api/v1/vscode/[token]/chat/completions/route.ts");
 const vscodeResponsesRoute = await import("../../src/app/api/v1/vscode/[token]/responses/route.ts");
-const serviceTierVariants =
-  await import("../../src/app/api/v1/vscode/[token]/serviceTierVariants.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");
 
 async function resetStorage() {
@@ -1131,15 +1129,6 @@ test("vscode tokenized api/show route exposes service tier variants with suffixe
   assert.equal(body.model, "gpt-5.6-sol__provider_cx__tier_priority");
   assert.equal(body.remote_model, "Codex GPT 5.6 Sol (Fast)");
   assert.equal(body.details.family, "gpt-5.6-sol");
-});
-
-test("vscode tokenized chat routes rewrite family-first ids back to the codex provider id", async () => {
-  const payload = serviceTierVariants.resolveVscodeServiceTierRequest({
-    model: "gpt-5.6-sol__provider_cx__tier_priority",
-  });
-
-  assert.equal(payload.model, "cx/gpt-5.6-sol");
-  assert.equal(payload.service_tier, "priority");
 });
 
 test("vscode tokenized /chat/completions route applies the path token and codex tier rewrite", async () => {

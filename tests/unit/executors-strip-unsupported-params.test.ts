@@ -3,7 +3,7 @@
 //
 // Rule coverage:
 //   1. claude-opus-4 series: temperature deprecated → Anthropic 400.
-//   2. github + gpt-5.4: temperature unsupported.
+//   2. github + GPT-5.4+/GPT-6.x: temperature unsupported.
 //   3. github + Claude (except opus/sonnet 4.6): thinking + reasoning_effort rejected.
 //   4. nvidia + z-ai/glm-5.2: reasoning rejected → NVIDIA 400.
 //   5. volcengine + kimi-k2-5-260127: max_tokens clamped to the Ark endpoint cap
@@ -55,6 +55,55 @@ test("stripUnsupportedParams: github + gpt-5 (non-5.4) keeps temperature", () =>
   const body: Record<string, unknown> = { temperature: 1 };
   stripUnsupportedParams("github", "gpt-5", body);
   assert.equal(body.temperature, 1);
+});
+
+test("stripUnsupportedParams: github strips temperature for GPT-5.4+ and GPT-6.x ids", () => {
+  // Copilot 400s "Unsupported parameter: 'temperature'" for GPT-5.4 and newer GPT-5.x,
+  // plus GPT-6.x — including ids without a minor version such as gpt-6-astra.
+  for (const model of [
+    "gpt-5.4",
+    "gpt-5.4-mini",
+    "gpt-5.5",
+    "gpt-5.6-luna",
+    "gpt-5.6-sol",
+    "gpt-5.6-terra",
+    "gpt-5.9",
+    "gpt-5.10",
+    "gpt-6-astra",
+    "gpt-6.0",
+    "gpt-6.1-sol",
+    "GPT-6.10",
+  ]) {
+    const body: Record<string, unknown> = { temperature: 0.7, top_p: 1 };
+    stripUnsupportedParams("github", model, body);
+    assert.deepEqual(body, { top_p: 1 }, `${model}: temperature must be stripped`);
+  }
+});
+
+test("stripUnsupportedParams: github keeps temperature outside the GPT-5.4+/GPT-6 range", () => {
+  for (const model of [
+    "gpt-4.1",
+    "gpt-4o",
+    "gpt-5",
+    "gpt-5-mini",
+    "gpt-5.0",
+    "gpt-5.3-codex",
+    "gpt-7.0",
+    "gpt-60",
+    "gpt-5.4invalid",
+  ]) {
+    const body: Record<string, unknown> = { temperature: 0.7 };
+    stripUnsupportedParams("github", model, body);
+    assert.equal(body.temperature, 0.7, `${model}: temperature must be preserved`);
+  }
+});
+
+test("stripUnsupportedParams: GPT-5.4+/GPT-6 temperature rule is GitHub-only", () => {
+  for (const provider of ["openai", "azure", "openrouter"]) {
+    const body: Record<string, unknown> = { temperature: 0.7 };
+    stripUnsupportedParams(provider, "gpt-6.1-sol", body);
+    assert.equal(body.temperature, 0.7, `${provider}: temperature must be preserved`);
+  }
 });
 
 test("stripUnsupportedParams: codex strips temperature and top_p (Responses 400)", () => {
@@ -193,14 +242,15 @@ test("STRIP_RULES is non-empty and every rule has a drop list, a clamp mechanism
   assert.ok(__STRIP_RULES_FOR_TEST.length > 0);
   for (const rule of __STRIP_RULES_FOR_TEST) {
     const hasDrop = Array.isArray(rule.drop) && rule.drop.length > 0;
+    const hasDropIfNull = Array.isArray(rule.dropIfNull) && rule.dropIfNull.length > 0;
     const hasClamp = rule.clampToModelMaxOutput === true || Number.isFinite(rule.maxOutputCap);
     const hasThinkingMap =
       typeof rule.mapThinkingType === "object" &&
       rule.mapThinkingType !== null &&
       Object.keys(rule.mapThinkingType).length > 0;
     assert.ok(
-      hasDrop || hasClamp || hasThinkingMap,
-      "rule must either drop params, clamp max output, or map a thinking type"
+      hasDrop || hasDropIfNull || hasClamp || hasThinkingMap,
+      "rule must either drop params (always or only when null), clamp max output, or map a thinking type"
     );
     assert.ok(typeof rule.match === "function" || rule.match instanceof RegExp);
   }

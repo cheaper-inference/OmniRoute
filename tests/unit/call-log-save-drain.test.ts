@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 
 import { useDecollidedMigrationsDir } from "./helpers/decollidedMigrationsDir.ts";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 useDecollidedMigrationsDir();
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-call-log-drain-"));
@@ -33,10 +34,9 @@ test("call-log drain waits for artifact metadata and summary commit", async () =
   });
 
   // The first cold spawn of the worker_threads artifact worker (loaded via tsx)
-  // can take ~2.4s on its own before queued artifact writes even start draining,
-  // so a 2s wait is flaky on cold runs. 10s is generous headroom while still
-  // failing fast on a genuinely stuck drain.
-  assert.equal(await callLogs.waitForCallLogSaves(10_000), true);
+  // takes seconds before queued artifact writes even start draining; the bound
+  // only fails a genuinely stuck drain (see CALL_LOG_SETTLE_TIMEOUT_MS).
+  assert.equal(await callLogs.waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
 
   const row = core
     .getDbInstance()

@@ -298,13 +298,13 @@ Ključna vedenja:
 
 ## 🔑 Sinhronizacijski žetoni in konfiguracijski paket _(v3.6.6+)_
 
-Dostop iz več naprav in dostop zunanjih upravljavcev sta zdaj mogoča prek **sinhronizacijskih žetonov z določenim obsegom**:
+Dostop iz več naprav in dostop zunanjih operaterjev sta zdaj mogoča prek **sinhronizacijskih žetonov z omejenim obsegom**:
 
-- **`POST /api/sync/tokens`** — Izdaja novega sinhronizacijskega žetona (z določenim obsegom in neobveznim potekom veljavnosti)
-- **`DELETE /api/sync/tokens/:id`** — Preklic žetona
-- **`GET /api/sync/bundle`** — Prenos različičenega posnetka JSON vseh neobčutljivih nastavitev, vezanega na ETag (gesla so prekrita)
+- **`POST /api/sync/tokens`** — Izdaja novega sinhronizacijskega žetona (z omejenim obsegom in izbirnim potekom veljavnosti)
+- **`DELETE /api/sync/tokens/:id`** — Prekliče žeton
+- **`GET /api/sync/bundle`** — Prenese različičen posnetek konfiguracije JSON, določen z `ETag` (overjanje je mogoče samo s sinhronizacijskim žetonom). Nastavitve overjanja, kot je geslo nadzorne plošče, so odstranjene, vendar so poverilnice ponudnikov in ključi API vključeni, zato datoteko obravnavajte kot skrivnost
 
-Konfiguracijski paket ustvari `src/lib/sync/bundle.ts`. Odjemalci primerjajo glavo odgovora `ETag`, da zaznajo spremembe brez ponovnega prenosa celotne vsebine.
+Konfiguracijski paket ustvari `src/lib/sync/bundle.ts`. Odjemalci primerjajo glavo odgovora `ETag`, da zaznajo spremembe brez ponovnega prenosa celotne vsebine. V CLI-ju ga ukaz `omniroute sync bundle <outPath> --token <syncToken>` (ali `OMNIROUTE_SYNC_TOKEN`) shrani v datoteko, dostopno samo lastniku.
 
 ---
 

@@ -25,6 +25,7 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "combo-test-auto-secr
 const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
 const autoRoute = await import("../../src/app/api/combos/auto/route.ts");
 const testRoute = await import("../../src/app/api/combos/test/route.ts");
 
@@ -89,6 +90,7 @@ function stubHealthyProbes() {
 test.beforeEach(async () => {
   globalThis.fetch = originalFetch;
   await resetStorage();
+  await settingsDb.updateSettings({ excludeTosAvoid: false });
 });
 
 test.afterEach(() => {

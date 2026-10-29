@@ -6,7 +6,12 @@
  */
 import { isInputBoundRequestFailure } from "./comboPredicates.ts";
 import { comboTargetDecision } from "./statusDecisionTable.ts";
-import { errorResponse, errorResponseWithComboDiagnostics } from "../../utils/error.ts";
+import {
+  errorResponse,
+  errorResponseWithComboDiagnostics,
+  isContentPolicyRefusalComboStopEnabled,
+} from "../../utils/error.ts";
+import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { buildRedactedSummary } from "./comboErrorAggregation.ts";
 import type { ComboDiagnostics } from "../../utils/error.ts";
 import { formatExhaustedConnectionKey } from "./comboDiagFormat.ts";
@@ -144,6 +149,16 @@ export function qualityValidationFailure(quality: ResponseQualityResult): {
   ok: false;
   response: Response;
 } {
+  const failure = quality.upstreamFailure;
+  if (failure && isContentPolicyRefusal(failure)) {
+    return {
+      ok: false,
+      response: errorResponse(failure.status, failure.message || "Upstream request refused", {
+        code: failure.code,
+        type: failure.type ?? "invalid_request_error",
+      }),
+    };
+  }
   return {
     ok: false,
     response: quality.upstreamFailure
@@ -158,6 +173,10 @@ export function shouldAbortOnInputBoundFailure(opts: {
 }): boolean {
   const structured = opts.structuredError as
     { code?: string | null; type?: string | null } | undefined;
+  // #15917: stopping the combo on a content-policy refusal — even with different models
+  // remaining — instead of routing around the provider's policy is opt-in via
+  // CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED; off keeps the release routing.
+  if (isContentPolicyRefusal(structured) && isContentPolicyRefusalComboStopEnabled()) return true;
   return isInputBoundRequestFailure(structured) && opts.remainderIsHomogeneous;
 }
 

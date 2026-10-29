@@ -3,8 +3,20 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { PROVIDER_ORDER } from "./constants";
+import { useProviderOrder } from "./useProviderOrder";
 import QuotaCard from "./QuotaCard";
-import { worstStatus, type CardStatus, compareProviderGroups } from "./utils";
+import QuotaHealthOverview from "./QuotaHealthOverview";
+import { buildHealthGroups, type HealthAccount } from "./healthOverview";
+import { displayAccount } from "./availabilityDisplay";
+import { HealthCounts } from "./HealthOverviewChrome";
+import { useTranslations } from "next-intl";
+import {
+  worstStatus,
+  type CardStatus,
+  compareProviderGroups,
+  type QuotaVisibilityScope,
+} from "./utils";
+import Icon from "@/shared/components/Icon";
 import { compareTr } from "@/shared/utils/turkishText";
 
 interface Props {
@@ -25,9 +37,12 @@ interface Props {
   loadingResetCreditsId?: string | null;
   /** Per-operator quota row visibility (upstream 9router#2371 port). */
   quotaVisibility?: Record<string, { hidden?: string[] }>;
-  onHideQuota?: (provider: string, quota: any) => void;
-  onShowQuota?: (provider: string, quota: any) => void;
+  onHideQuota?: (scope: QuotaVisibilityScope, quota: any) => void;
+  onShowQuota?: (scope: QuotaVisibilityScope, quota: any) => void;
   compact?: boolean;
+  overview?: boolean;
+  accounts?: Record<string, HealthAccount>;
+  summaryFailed?: boolean;
 }
 
 const STATUS_RANK: Record<CardStatus, number> = {
@@ -140,6 +155,52 @@ interface ProviderQuotaSectionProps extends Omit<Props, "connections"> {
   defaultOpen?: boolean;
 }
 
+function ProviderQuotaHeader({
+  group,
+  providerLabel,
+  activeCount,
+  count,
+  open,
+}: {
+  group: ReturnType<typeof buildHealthGroups>[number] | undefined;
+  providerLabel: string;
+  activeCount: number;
+  count: number;
+  open: boolean;
+}) {
+  const t = useTranslations("usage");
+  const groupColor = group
+    ? {
+        critical: "var(--color-error)",
+        alert: "var(--color-warning)",
+        ok: "var(--color-success)",
+        empty: "var(--color-text-muted)",
+        paused: "var(--color-text-muted)",
+      }[group.status]
+    : undefined;
+  return (
+    <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
+      <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
+      <div className="min-w-0 flex-1">
+        <h3 className="text-sm font-semibold text-text-main leading-5 truncate">
+          {group && (
+            <span
+              className="me-2 inline-block h-2 w-2 rounded-full"
+              style={{ background: groupColor }}
+              aria-hidden
+            />
+          )}
+          {providerLabel}
+        </h3>
+        <p className="text-[11px] text-text-muted tabular-nums">
+          {t("activeCount", { count: activeCount })} / {t("accountsCount", { count })}
+        </p>
+      </div>
+      {group && <HealthCounts accounts={group.accounts.map((a) => displayAccount(a))} />}
+    </summary>
+  );
+}
+
 function ProviderQuotaSection({
   provider,
   connections,
@@ -160,8 +221,11 @@ function ProviderQuotaSection({
   quotaVisibility,
   onHideQuota,
   onShowQuota,
+  accounts,
 }: ProviderQuotaSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const group =
+    accounts && buildHealthGroups(connections.map((c) => accounts[c.id]).filter(Boolean))[0];
   const activeCount = connections.filter((conn) => conn.isActive ?? true).length;
   const providerLabel = providerLabels[provider] || provider;
 
@@ -171,20 +235,13 @@ function ProviderQuotaSection({
       onToggle={(event) => setOpen((event.target as HTMLDetailsElement).open)}
       className="rounded-lg border border-border bg-surface overflow-hidden"
     >
-      <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden">
-        <span className="material-symbols-outlined text-[16px] text-text-muted">
-          {open ? "expand_less" : "expand_more"}
-        </span>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-text-main leading-5 truncate">
-            {providerLabel}
-          </h3>
-          <p className="text-[11px] text-text-muted tabular-nums">
-            {activeCount} active / {connections.length} account
-            {connections.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-      </summary>
+      <ProviderQuotaHeader
+        group={group}
+        providerLabel={providerLabel}
+        activeCount={activeCount}
+        count={connections.length}
+        open={open}
+      />
       <div className="px-3 pb-3">
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-3">
           {connections.map((conn) => (
@@ -205,8 +262,16 @@ function ProviderQuotaSection({
               redeemingResetCredit={redeemingResetCreditId === conn.id}
               loadingResetCredits={loadingResetCreditsId === conn.id}
               quotaVisibility={quotaVisibility}
-              onHideQuota={onHideQuota ? (q) => onHideQuota(conn.provider, q) : undefined}
-              onShowQuota={onShowQuota ? (q) => onShowQuota(conn.provider, q) : undefined}
+              onHideQuota={
+                onHideQuota
+                  ? (q) => onHideQuota({ connectionId: conn.id, provider: conn.provider }, q)
+                  : undefined
+              }
+              onShowQuota={
+                onShowQuota
+                  ? (q) => onShowQuota({ connectionId: conn.id, provider: conn.provider }, q)
+                  : undefined
+              }
             />
           ))}
         </div>
@@ -235,7 +300,14 @@ export default function QuotaCardGrid({
   onHideQuota,
   onShowQuota,
   compact = false,
+  overview = false,
+  accounts,
+  summaryFailed,
 }: Props) {
+  const { order } = useProviderOrder(connections.map((c) => c.provider));
+  const orderedConnections = [...connections].sort(
+    (a, b) => order.indexOf(a.provider) - order.indexOf(b.provider)
+  );
   if (connections.length === 0) return null;
 
   const renderCard = (conn: (typeof connections)[number]) => (
@@ -256,16 +328,39 @@ export default function QuotaCardGrid({
       redeemingResetCredit={redeemingResetCreditId === conn.id}
       loadingResetCredits={loadingResetCreditsId === conn.id}
       quotaVisibility={quotaVisibility}
-      onHideQuota={onHideQuota ? (q) => onHideQuota(conn.provider, q) : undefined}
-      onShowQuota={onShowQuota ? (q) => onShowQuota(conn.provider, q) : undefined}
+      onHideQuota={
+        onHideQuota
+          ? (q) => onHideQuota({ connectionId: conn.id, provider: conn.provider }, q)
+          : undefined
+      }
+      onShowQuota={
+        onShowQuota
+          ? (q) => onShowQuota({ connectionId: conn.id, provider: conn.provider }, q)
+          : undefined
+      }
     />
   );
+
+  if (overview) {
+    return (
+      <QuotaHealthOverview
+        connections={connections}
+        quotaData={quotaData}
+        quotaVisibility={quotaVisibility}
+        accounts={accounts}
+        summaryFailed={summaryFailed}
+        providerLabels={providerLabels}
+        emailsVisible={emailsVisible}
+        renderCard={renderCard}
+      />
+    );
+  }
 
   // Compact mode: flat 3-column card grid, across all connections.
   if (compact) {
     return (
       <div className="grid grid-cols-[repeat(auto-fill,minmax(17rem,1fr))] gap-3">
-        {connections.map(renderCard)}
+        {orderedConnections.map(renderCard)}
       </div>
     );
   }
@@ -274,7 +369,9 @@ export default function QuotaCardGrid({
   // deterministically (PROVIDER_ORDER rank → label → key) so the group order
   // never shuffles between quota refreshes, and connections are
   // priority-sorted within each provider.
-  const groups = buildProviderGroups(connections, quotaData, providerLabels);
+  const groups = buildProviderGroups(connections, quotaData, providerLabels).sort(
+    (a, b) => order.indexOf(a.provider) - order.indexOf(b.provider)
+  );
 
   return (
     <div className="space-y-4">
@@ -283,6 +380,7 @@ export default function QuotaCardGrid({
           key={provider}
           provider={provider}
           connections={conns}
+          accounts={accounts}
           quotaData={quotaData}
           loading={loading}
           errors={errors}

@@ -298,13 +298,13 @@ Tingkah laku utama:
 
 ## 🔑 Token Penyegerakan & Himpunan Konfigurasi _(v3.6.6+)_
 
-Akses berbilang peranti dan akses pengendali luaran kini boleh dilakukan melalui **token penyegerakan berskop**:
+Akses berbilang peranti dan pengendali luaran kini boleh dilakukan melalui **token penyegerakan dengan skop**:
 
-- **`POST /api/sync/tokens`** — Keluarkan token penyegerakan baharu (berskop, dengan tamat tempoh pilihan)
+- **`POST /api/sync/tokens`** — Keluarkan token penyegerakan baharu (dengan skop dan tamat tempoh pilihan)
 - **`DELETE /api/sync/tokens/:id`** — Batalkan token
-- **`GET /api/sync/bundle`** — Muat turun petikan JSON berversi dan berkunci ETag bagi semua tetapan tidak sensitif (kata laluan disunting)
+- **`GET /api/sync/bundle`** — Muat turun petikan JSON berversi bagi konfigurasi yang dikunci dengan ETag (disahkan dengan token penyegerakan sahaja). Tetapan pengesahan seperti kata laluan papan pemuka dibuang, tetapi kelayakan penyedia dan kunci API disertakan, jadi anggap fail tersebut sebagai rahsia
 
-Himpunan konfigurasi dibina oleh `src/lib/sync/bundle.ts`. Pengguna membandingkan pengepala respons `ETag` untuk mengesan perubahan tanpa memuat turun semula keseluruhan muatan.
+Himpunan konfigurasi dibina oleh `src/lib/sync/bundle.ts`. Pengguna membandingkan pengepala respons `ETag` untuk mengesan perubahan tanpa memuat turun semula keseluruhan muatan. Daripada CLI, `omniroute sync bundle <outPath> --token <syncToken>` (atau `OMNIROUTE_SYNC_TOKEN`) menyimpannya sebagai fail yang hanya boleh diakses oleh pemilik.
 
 ---
 

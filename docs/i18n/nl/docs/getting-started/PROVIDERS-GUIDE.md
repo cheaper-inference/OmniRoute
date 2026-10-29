@@ -10,34 +10,34 @@
 
 ## Wat is een provider?
 
-Zie een provider als een **telecomprovider**. Net zoals je een telecomprovider nodig hebt om te bellen, heb je een AI-provider nodig om AI-modellen te gebruiken. OmniRoute is als een telefoon die met **alle providers** werkt — je kunt automatisch tussen providers schakelen.
+Zie een provider als een **telecomprovider**. Net zoals je een telecomprovider nodig hebt om te bellen, heb je een AI-provider nodig om AI-modellen te gebruiken. OmniRoute is als een telefoon die met **alle providers** werkt — je kunt automatisch tussen providers wisselen.
 
 ### Typen providers
 
-| Type            | Wat het is                    | Voorbeelden                       | Kosten                   |
-| --------------- | ----------------------------- | --------------------------------- | ------------------------ |
-| **Gratis**      | Geen betaling vereist         | Kiro, OpenCode Free, Pollinations | $0                       |
-| **API-sleutel** | Je hebt een API-sleutel nodig | OpenAI, Anthropic, Google         | Betalen naar gebruik     |
-| **OAuth**       | Inloggen met je account       | Claude Code, GitHub Copilot       | Abonnement               |
-| **Webcookie**   | Gebruikt je browsersessie     | ChatGPT Web (Codex), Gemini Web   | $0 (gebruikt je account) |
+| Type            | Wat het is                    | Voorbeelden                     | Kosten                   |
+| --------------- | ----------------------------- | ------------------------------- | ------------------------ |
+| **Gratis**      | Geen betaling vereist         | Kiro, Pollinations              | $0                       |
+| **API-sleutel** | Je hebt een API-sleutel nodig | OpenAI, Anthropic, Google       | Betalen per gebruik      |
+| **OAuth**       | Inloggen met je account       | Claude Code, GitHub Copilot     | Abonnement               |
+| **Webcookie**   | Gebruikt je browsersessie     | ChatGPT Web (Codex), Gemini Web | $0 (gebruikt je account) |
 
-### Providers met webcookies
+### Webcookieproviders
 
-Zie **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** voor algemene configuratie-instructies, beperkingen, probleemoplossing en providerspecifieke authenticatierichtlijnen.
+Zie **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** voor algemene installatie-instructies, beperkingen, probleemoplossing en providerspecifieke richtlijnen voor authenticatie.
 ---
 
-## Snel aan de slag: verbind je eerste provider
+## Snel aan de slag: verbind uw eerste provider
 
-### Optionele configuratie van gratis providers bij de eerste start
+### Optionele configuratie van gratis providers bij de eerste uitvoering
 
-De wizard bij de eerste start biedt een expliciete kaart **Gratis providers configureren**. Deze stelt de actuele
-lijst met in aanmerking komende providers samen op basis van het providerregister van OmniRoute waarvoor geen authenticatie nodig is, en laat je vervolgens elke
-provider controleren en deselecteren voordat je bevestigt. OmniRoute toont de waarschuwing van de provider en een link naar diens website,
-zodat je eerst de voorwaarden, privacy, beschikbaarheid en gebruikslimieten van de externe partij kunt bekijken.
+De wizard voor de eerste uitvoering biedt een expliciete kaart **Gratis providers instellen**. De wizard leidt de huidige
+lijst met geschikte providers af uit OmniRoute's register van providers waarvoor geen authenticatie vereist is. Vervolgens kunt u elke
+provider controleren en deselecteren voordat u bevestigt. OmniRoute toont de waarschuwing van de provider en een link naar de website
+zodat u eerst de voorwaarden, privacy, beschikbaarheid en limieten van de externe partij kunt controleren.
 
-Deze actie is optioneel: bij het voltooien van de wizard worden nooit stilzwijgend verbindingen met gratis providers
-aangemaakt. Alleen providers die nog ontbreken worden aangemaakt, bestaande aangepaste verbindingen blijven
-ongewijzigd en aangemaakte, reeds geconfigureerde en mislukte providers worden afzonderlijk gerapporteerd. Na een gedeeltelijk resultaat kun je
+Deze actie is optioneel: bij het voltooien van de wizard worden nooit stilzwijgend verbindingen met gratis providers aangemaakt.
+Er worden alleen providers aangemaakt die nog ontbreken, bestaande aangepaste verbindingen blijven
+ongewijzigd en aangemaakte, reeds geconfigureerde en mislukte providers worden afzonderlijk gerapporteerd. Na een gedeeltelijk resultaat kunt u
 veilig alleen de mislukte providers opnieuw proberen.
 
 ### Optie A: gratis provider (geen creditcard)
@@ -46,18 +46,17 @@ veilig alleen de mislukte providers opnieuw proberen.
 2. Ga naar **Providers** → **Provider toevoegen**
 3. Selecteer een van deze gratis providers:
    - **Kiro AI** — Gratis Claude-modellen (geen authenticatie nodig)
-   - **OpenCode Free** — Gratis GPT-modellen (geen authenticatie nodig)
    - **Pollinations** — Gratis GPT-5, Claude en Gemini (geen sleutel nodig)
    - **LongCat** — 10 miljoen tokens gratis (eenmalige toekenning, account + KYC vereist)
    - **Cloudflare AI** — Meer dan 50 modellen, 10.000 neuronen per dag
-   - **MLX Gemma 26B** — Lokaal Apple Silicon-model (~38.5 tokens/s, ~15.9GB RAM)
-   - **MLX Qwen 3.8 27B** — Lokaal Apple Silicon-model (~9.1 tokens/s, ~13.1GB RAM)
+   - **MLX Gemma 26B** — Lokaal Apple Silicon-model (~38,5 tok/s, ~15,9 GB RAM)
+   - **MLX Qwen 3.8 27B** — Lokaal Apple Silicon-model (~9,1 tok/s, ~13,1 GB RAM)
 4. Klik op **Verbinden**
-5. Klaar! Je hebt nu gratis toegang tot AI.
+5. Klaar! U hebt nu gratis toegang tot AI.
 
 ### Optie B: provider met API-sleutel (betaald)
 
-1. Vraag een API-sleutel aan via de website van de provider:
+1. Verkrijg een API-sleutel via de website van de provider:
    - **OpenAI**: https://platform.openai.com/api-keys
    - **Anthropic**: https://console.anthropic.com/
    - **Google**: https://aistudio.google.com/apikey
@@ -65,27 +64,27 @@ veilig alleen de mislukte providers opnieuw proberen.
    - **Groq**: https://console.groq.com/
 2. Open het dashboard op `http://localhost:20128`
 3. Ga naar **Providers** → **Provider toevoegen**
-4. Selecteer je provider
-5. Plak je API-sleutel
+4. Selecteer uw provider
+5. Plak uw API-sleutel
 6. Klik op **Verbinden**
-7. Klaar! Je hebt nu toegang tot de modellen van die provider.
+7. Klaar! U hebt nu toegang tot de modellen van die provider.
 
 ### Optie C: OAuth-provider (abonnement)
 
 1. Open het dashboard op `http://localhost:20128`
 2. Ga naar **Providers** → **Provider toevoegen**
-3. Selecteer je provider (bijvoorbeeld Claude Code of GitHub Copilot)
+3. Selecteer uw provider (bijvoorbeeld Claude Code of GitHub Copilot)
 4. Klik op **Verbinden met OAuth**
-5. Log in met je account
-6. Klaar! Je hebt nu toegang tot de modellen van je abonnement.
+5. Meld u aan met uw account
+6. Klaar! U hebt nu toegang tot de modellen van uw abonnement.
 
 ### Optie D: lokale MLX-modellen (Apple Silicon)
 
-Voor Apple Silicon-Macs met gedeeld geheugen ondersteunt OmniRoute verbindingen met lokale MLX-modellen die via `mlx-lm.server` worden uitgevoerd als reguliere, lokale OpenAI-compatibele providers.
+Voor Apple Silicon-Macs met gedeeld geheugen ondersteunt OmniRoute verbindingen met lokale MLX-modellen die via `mlx-lm.server` worden uitgevoerd als reguliere, met OpenAI compatibele lokale providers.
 
 #### Vereisten
 
-- **Apple Silicon-Mac** (M1/M2/M3/M4) met bij voorkeur minstens 24GB gedeeld geheugen
+- **Apple Silicon-Mac** (M1/M2/M3/M4) met bij voorkeur minimaal 24 GB gedeeld geheugen
 - **uv**-pakketbeheerder: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
@@ -118,7 +117,7 @@ Voor Apple Silicon-Macs met gedeeld geheugen ondersteunt OmniRoute verbindingen 
 
 4. **Gebruik met OpenCode**:
    ```bash
-   # Configureer OpenCode om OmniRoute te gebruiken
+   # Configureer OpenCode voor gebruik met OmniRoute
    opencode config set api.base_url http://localhost:20128/v1
    opencode config set api.key <your-omniroute-api-key>
 
@@ -129,22 +128,22 @@ Voor Apple Silicon-Macs met gedeeld geheugen ondersteunt OmniRoute verbindingen 
 
 #### Geheugenbeheer
 
-**Belangrijk**: met 24GB gedeeld geheugen kan er slechts **één groot MLX-model tegelijk worden uitgevoerd**.
+**Belangrijk**: met 24 GB gedeeld geheugen kan er slechts **één groot MLX-model tegelijk worden uitgevoerd**.
 
-- Gemma 26B: ~15.9GB piekgeheugengebruik
-- Qwen 3.8 27B: ~13.1GB piekgeheugengebruik
+- Gemma 26B: ~15,9 GB piekgeheugen
+- Qwen 3.8 27B: ~13,1 GB piekgeheugen
 
-Je moet dit handmatig beheren:
+U moet dit handmatig beheren:
 
 - Voer slechts één MLX-server tegelijk uit, of
 - Voer beide uit op afzonderlijke machines, of
-- Stop de ene voordat je de andere start
+- Stop de ene voordat u de andere start
 
-OmniRoute beheert MLX-serverprocessen niet automatisch — het stuurt alleen verzoeken door naar de OpenAI-compatibele eindpunten die je configureert.
+OmniRoute beheert MLX-serverprocessen niet automatisch — het stuurt alleen verzoeken door naar de met OpenAI compatibele eindpunten die u configureert.
 
-#### Ondersteuning voor toolaanroepen
+#### Ondersteuning voor functieaanroepen
 
-Beide modellen ondersteunen OpenAI-compatibele toolaanroepen. Test dit met:
+Beide modellen ondersteunen met OpenAI compatibele functieaanroepen. Test dit met:
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -152,38 +151,37 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "Wat is 2+2? Gebruik de calculator-tool."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Berekenen", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
 #### Probleemoplossing
 
-| Probleem             | Oplossing                                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------------------- |
-| Server start niet    | Controleer `uv run mlx_lm.server --help` en verifieer de model-ID's                                     |
-| Onvoldoende geheugen | Zorg dat er slechts één model wordt uitgevoerd; sluit andere apps; controleer Activiteitenweergave      |
-| Verbinding geweigerd | Controleer of de server op de juiste poort (11435/11436) draait                                         |
-| Trage reacties       | Bij het eerste verzoek wordt het model in het geheugen geladen (~30-60 s); volgende verzoeken zijn snel |
-| Toolaanroep mislukt  | Controleer of het model tools ondersteunt; controleer de OmniRoute-logboeken op vertaalfouten           |
+| Probleem                   | Oplossing                                                                                               |
+| -------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Server start niet          | Controleer `uv run mlx_lm.server --help` en verifieer de model-ID's                                     |
+| Onvoldoende geheugen       | Zorg dat slechts één model wordt uitgevoerd; sluit andere apps; controleer Activiteitenweergave         |
+| Verbinding geweigerd       | Controleer of de server op de juiste poort (11435/11436) wordt uitgevoerd                               |
+| Trage antwoorden           | Bij het eerste verzoek wordt het model in het geheugen geladen (~30-60 s); volgende verzoeken zijn snel |
+| Functieaanroepen mislukken | Controleer of het model functies ondersteunt; controleer de OmniRoute-logboeken op omzettingsfouten     |
 
 ---
 
-## Beste gratis providers
+## Beste gratis aanbieders
 
-Deze providers bieden **gratis toegang** zonder creditcard:
+Deze aanbieders bieden **gratis toegang** zonder creditcard:
 
-| Provider          | Gratis quotum      | Modellen                                 | Verbinding maken         |
+| Aanbieder         | Gratis quotum      | Modellen                                 | Verbinding maken         |
 | ----------------- | ------------------ | ---------------------------------------- | ------------------------ |
 | **Kiro AI**       | 50 credits/maand   | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Geen authenticatie nodig |
-| **OpenCode Free** | Onbeperkt          | GPT-4o, Claude, Gemini                   | Geen authenticatie nodig |
 | **Pollinations**  | Geen sleutel nodig | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Geen authenticatie nodig |
 | **LongCat**       | Eenmalig 10M       | LongCat-2.0                              | API-sleutel + KYC        |
 | **Cloudflare AI** | 10K neuronen/dag   | Meer dan 50 modellen                     | Geen authenticatie nodig |
 | **NVIDIA NIM**    | ~40 RPM            | 129 modellen                             | API-sleutel nodig        |
 | **Cerebras**      | $5 aanmeldtegoed   | GLM 4.7, GPT-OSS 120B                    | API-sleutel + kaart      |
 
-**Tip**: Verbind meerdere gratis providers voor **onbeperkt gratis AI-gebruik** met automatische fallback!
+**Tip**: Verbind meerdere gratis aanbieders voor **onbeperkte gratis AI** met automatische terugval!
 
 ---
 
@@ -240,7 +238,7 @@ Je provider is nu verbonden. Je kunt deze gebruiken met `model: "auto"` of de pr
 
 OmniRoute werkt het beste met **meerdere providers**. Dit biedt je:
 
-- **Automatische failover** — Als één provider uitvalt, probeert OmniRoute de volgende
+- **Automatische terugval** — Als één provider uitvalt, probeert OmniRoute de volgende
 - **Kostenoptimalisatie** — OmniRoute kiest voor elk verzoek de goedkoopste provider
 - **Snelheidsoptimalisatie** — OmniRoute kiest voor elk verzoek de snelste provider
 - **Kwaliteitsoptimalisatie** — OmniRoute kiest voor elke taak de beste provider
@@ -249,11 +247,11 @@ OmniRoute werkt het beste met **meerdere providers**. Dit biedt je:
 
 Verbind ten minste **3 providers** voor de beste ervaring:
 
-1. **Eén gratis provider** (Kiro, OpenCode Free of Pollinations) — Altijd beschikbaar
+1. **Eén gratis provider** (Kiro of Pollinations) — Altijd beschikbaar
 2. **Eén snelle provider** (Groq, Cerebras) — Voor snelle antwoorden
-3. **Eén hoogwaardige provider** (OpenAI, Anthropic, Google) — Voor complexe taken
+3. **Eén kwaliteitsprovider** (OpenAI, Anthropic, Google) — Voor complexe taken
 
-Gebruik vervolgens `model: "auto"`, waarna OmniRoute automatisch voor elk verzoek de beste provider kiest.
+Gebruik vervolgens `model: "auto"`. OmniRoute kiest dan automatisch de beste provider voor elk verzoek.
 
 ---
 
@@ -335,7 +333,7 @@ en een configureerbare time-out zijn afzonderlijke verbeteringen; dit gedrag bel
 
 ### "Moet ik betalen om OmniRoute te gebruiken?"
 
-**Nee!** OmniRoute is gratis en opensource. Je kunt gratis providers (Kiro, OpenCode Free, Pollinations) gebruiken zonder iets te betalen. Je betaalt alleen als je ervoor kiest om betaalde providers te gebruiken.
+**Nee!** OmniRoute is gratis en open source. Je kunt gratis providers (Kiro, Pollinations) gebruiken zonder iets te betalen. Je betaalt alleen als je ervoor kiest om betaalde providers te gebruiken.
 
 ### "Met welke provider kan ik het beste beginnen?"
 
@@ -343,19 +341,19 @@ Begin met **Kiro AI** — deze is gratis, vereist geen API-sleutel en geeft je t
 
 ### "Kan ik meerdere providers tegelijk gebruiken?"
 
-**Ja!** Dat is precies het doel van OmniRoute. Koppel meerdere providers en gebruik `model: "auto"` om OmniRoute voor elk verzoek de beste te laten kiezen.
+**Ja!** Dat is precies het doel van OmniRoute. Verbind meerdere providers en gebruik `model: "auto"` om OmniRoute voor elk verzoek de beste provider te laten kiezen.
 
-### "Wat als een provider uitvalt?"
+### "Wat gebeurt er als een provider uitvalt?"
 
-OmniRoute slaat niet-werkende providers automatisch over en probeert de volgende. Je hoeft niets te doen.
+OmniRoute slaat providers die niet werken automatisch over en probeert de volgende. Je hoeft niets te doen.
 
 ### "Hoe ontkoppel ik een provider?"
 
-Ga naar Providers → klik op de provider → klik op **Disconnect**.
+Ga naar Providers → klik op de provider → klik op **Ontkoppelen**.
 
 ### "Kan ik mijn bestaande API-sleutels gebruiken?"
 
-**Ja!** Als je al API-sleutels voor OpenAI, Anthropic, Google enzovoort hebt, kun je deze in OmniRoute gebruiken. Plak ze gewoon wanneer je de provider koppelt.
+**Ja!** Als je al API-sleutels hebt voor OpenAI, Anthropic, Google enzovoort, kun je deze in OmniRoute gebruiken. Plak ze gewoon wanneer je verbinding maakt met de provider.
 
 ---
 

@@ -300,11 +300,11 @@ Comportamentos principais:
 
 O acesso a partir de vários dispositivos e por operadores externos é agora possível através de **tokens de sincronização com âmbito definido**:
 
-- **`POST /api/sync/tokens`** — Emitir um novo token de sincronização (com âmbito definido e expiração opcional)
-- **`DELETE /api/sync/tokens/:id`** — Revogar um token
-- **`GET /api/sync/bundle`** — Transferir um instantâneo JSON versionado, identificado por ETag, de todas as definições não sensíveis (palavras-passe ocultadas)
+- **`POST /api/sync/tokens`** — Emite um novo token de sincronização (com âmbito definido e validade opcional)
+- **`DELETE /api/sync/tokens/:id`** — Revoga um token
+- **`GET /api/sync/bundle`** — Transfere um instantâneo JSON versionado da configuração, identificado por ETag (autenticado apenas com um token de sincronização). As definições de autenticação, como a palavra-passe do painel, são removidas, mas as credenciais dos fornecedores e as chaves de API são incluídas, pelo que o ficheiro deve ser tratado como confidencial
 
-O pacote de configuração é criado por `src/lib/sync/bundle.ts`. Os consumidores comparam o cabeçalho de resposta `ETag` para detetar alterações sem voltar a transferir todo o conteúdo.
+O pacote de configuração é criado por `src/lib/sync/bundle.ts`. Os consumidores comparam o cabeçalho de resposta `ETag` para detetar alterações sem voltar a transferir a carga útil completa. Na CLI, `omniroute sync bundle <outPath> --token <syncToken>` (ou `OMNIROUTE_SYNC_TOKEN`) guarda-o num ficheiro acessível apenas pelo proprietário.
 
 ---
 

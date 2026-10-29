@@ -35,6 +35,7 @@ import { sanitizeErrorMessage } from "../utils/error.ts";
 import { handleFalMusicGeneration } from "./mediaGeneration/fal.ts";
 import { handleSyntxMusicGeneration } from "./syntxAudio.ts";
 import { handleMinimaxMusicGeneration } from "./mediaGeneration/minimaxMusic.ts";
+import { handleElevenLabsMusicGeneration } from "./mediaGeneration/elevenLabsMusic.ts";
 
 function normalizeKieSunoModel(model: string): string {
   const map: Record<string, string> = {
@@ -84,7 +85,7 @@ function normalizeKieMusicTracks(recordData: unknown): Array<Record<string, unkn
 /**
  * Handle music generation request
  */
-export async function handleMusicGeneration({ body, credentials, log }) {
+export async function handleMusicGeneration({ body, credentials, log, signal = null }) {
   const { provider, model } = parseMusicModel(body.model);
 
   if (!provider) {
@@ -131,6 +132,10 @@ export async function handleMusicGeneration({ body, credentials, log }) {
     return handleFalMusicGeneration({ model, provider, providerConfig, body, credentials, log });
   }
 
+  if (providerConfig.format === "elevenlabs-music") {
+    return handleElevenLabsMusicGeneration({ model, body, credentials });
+  }
+
   if (providerConfig.format === "comfyui") {
     return handleComfyUIMusicGeneration({
       model,
@@ -164,7 +169,7 @@ export async function handleMusicGeneration({ body, credentials, log }) {
   }
 
   if (providerConfig.format === "syntx-music") {
-    return handleSyntxMusicGeneration({ model, provider, body, credentials, log });
+    return handleSyntxMusicGeneration({ model, provider, body, credentials, log, signal });
   }
 
   return {

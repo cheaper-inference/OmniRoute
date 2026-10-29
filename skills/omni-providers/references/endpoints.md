@@ -213,7 +213,7 @@ curl -X POST http://localhost:20128/api/providers/test-batch \
 
 Validate provider credentials
 
-Spawns a fixed ACP summarizer binary to validate credentials — loopback-only (Hard Rules #15/#17, audit #15159 S-01).
+Validates provider credentials over HTTP. The devin CLI-spawn fallback is call-site gated on the trusted peer-locality header (loopback/LAN only, Hard Rules #15/#17, audit #15159 S-01, #15766 shape); the route itself is management-auth remote-reachable.
 
 ```bash
 curl -X POST http://localhost:20128/api/providers/validate \
@@ -287,6 +287,8 @@ curl http://localhost:20128/api/provider-nodes \
 ### POST /api/provider-nodes
 
 Create provider node
+
+Optional `providerIdSuffix` (letters, digits, `-`, `_`, `.`; max 64; must start with a letter or digit) replaces the random UUID in the generated node id (`openai-compatible-<apiType>-<suffix>`, `anthropic-compatible-<suffix>`, `anthropic-compatible-cc-<suffix>`). Blank keeps the UUID.
 
 ```bash
 curl -X POST http://localhost:20128/api/provider-nodes \
@@ -553,7 +555,7 @@ curl -X POST http://localhost:20128/api/providers/{id}/sync-models \
 
 POST providers › bulk
 
-Reaches the same spawn as /api/providers/validate (webProvidersB.ts) — loopback-only (Hard Rules #15/#17, audit #15159 S-01).
+The devin CLI-spawn fallback (webProvidersB.ts) is call-site gated on the trusted peer-locality header — loopback/LAN only (Hard Rules #15/#17, audit #15159 S-01, #15766 shape); the route is management-auth remote-reachable.
 
 ```bash
 curl -X POST http://localhost:20128/api/providers/bulk \
@@ -754,7 +756,7 @@ curl http://localhost:20128/api/providers/health-matrix \
 
 POST providers › import
 
-Reaches the same spawn as /api/providers/validate (webProvidersB.ts) — loopback-only (Hard Rules #15/#17, audit #15159 S-01).
+The devin CLI-spawn fallback (webProvidersB.ts) is call-site gated on the trusted peer-locality header — loopback/LAN only (Hard Rules #15/#17, audit #15159 S-01, #15766 shape); the route is management-auth remote-reachable.
 
 ```bash
 curl -X POST http://localhost:20128/api/providers/import \

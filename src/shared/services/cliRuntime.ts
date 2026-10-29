@@ -7,6 +7,7 @@ import { getHermesHome } from "@/lib/cli-helper/config-generator/hermesHome";
 import { getCachedLoginShellPath, mergeShellPath } from "./loginShellPath";
 import { withSettingsFallback } from "./cliInstallFallback";
 import { GROK_BUILD_RUNTIME_ENTRY, AMP_RUNTIME_ENTRY } from "./cliRuntimeGrokBuild";
+import { WHYCODES_RUNTIME_ENTRY } from "./cliRuntimeWhyCodes";
 import { isLocationTrusted, findKnownPathMatch } from "./cliRuntimeKnownPath";
 import { buildHealthcheckPath } from "./cliRuntimeHealthcheckPath";
 import { appendWindowsKnownBinPaths, mergeWindowsLookupPath } from "./cliRuntimeWindowsNode";
@@ -342,6 +343,7 @@ const CLI_TOOLS: Record<string, any> = {
       authProfiles: "auth-profiles",
     },
   },
+  whycodes: WHYCODES_RUNTIME_ENTRY,
 };
 
 /**
@@ -369,7 +371,11 @@ export const normalizeCliToolId = (toolId: string): string => {
   return CLI_TOOL_ALIASES[normalized] || normalized;
 };
 
-const isWindows = () => process.platform === "win32";
+// This module is bundled on Linux for Windows installations. Turbopack can
+// constant-fold process.platform at build time and strip the Windows discovery
+// and where.exe branches, leaving CLI binaries undetectable on Windows (#17157).
+// os.platform() is evaluated at runtime, preserving both platform paths.
+const isWindows = () => os.platform() === "win32";
 
 /**
  * (#510) Normalize MSYS2/Git-Bash style paths to Windows-native paths.
@@ -395,12 +401,12 @@ const parseBoolean = (value: unknown, defaultValue = true) => {
 };
 
 export const shouldUseShellForCommand = (command: string): boolean => {
-  if (!isWindows()) return false;
-
   // Windows npm CLI wrappers are usually .cmd/.bat files and require cmd.exe.
   // Direct executables should not go through the shell: absolute paths with spaces
   // (for example C:\Users\Name With Spaces\...\claude.exe) are split by cmd.exe.
-  return /\.(?:cmd|bat)$/i.test(command);
+  // Keep the platform guard in the expression: Turbopack can drop the return
+  // after an early platform branch in a Linux-built Windows bundle (#16547).
+  return isWindows() && /\.(?:cmd|bat)$/i.test(command);
 };
 
 const runProcess = (

@@ -35,35 +35,33 @@ Il client (`src/lib/obsidian/api.ts`) incapsula la Local REST API con:
 
 ## Configurazione
 
-Non esiste **alcuna variabile d'ambiente** per il token o l'URL di base di Obsidian:
-entrambi vengono archiviati nella tabella SQLite `key_value` (namespace `obsidian`) tramite
-`src/lib/db/obsidian.ts`. Il token è **crittografato a riposo** (AES-256-GCM, con
-fallback di compatibilità all'indietro in testo non crittografato). Esegui la configurazione
-dalla scheda **Sorgenti di contesto** della dashboard degli endpoint (`ObsidianSourceCard`)
-oppure tramite l'API REST delle impostazioni.
+Non esiste **alcuna variabile di ambiente** per il token o l'URL di base di Obsidian: entrambi sono
+memorizzati nella tabella SQLite `key_value` (namespace `obsidian`) tramite
+`src/lib/db/obsidian.ts`. Il token è **cifrato quando memorizzato** (AES-256-GCM, con
+fallback di retrocompatibilità in testo normale). Esegui la configurazione dalla scheda **Origini di contesto** della
+dashboard degli endpoint (`ObsidianSourceCard`) oppure tramite l'API REST delle impostazioni.
 
 > [!IMPORTANT]
-> Il plugin **Obsidian Local REST API** deve essere installato e in esecuzione. La sua
-> interfaccia REST è in ascolto su **HTTP `127.0.0.1:27123`** (l'URL di base predefinito).
-> La porta `27124` è un endpoint MCP/HTTPS _separato_ ed è esplicitamente rifiutata dalla
-> route delle impostazioni. Per connettersi da un altro dispositivo, usa
-> `http://<tailscale-ip>:27123`.
+> Il plugin **Obsidian Local REST API** deve essere installato e in esecuzione. La sua interfaccia
+> REST è in ascolto su **HTTP `127.0.0.1:27123`** (l'URL di base predefinito). La porta `27124`
+> è un endpoint MCP/HTTPS _separato_ ed è esplicitamente rifiutata dalla route delle impostazioni.
+> Se ti connetti da un altro dispositivo, usa `http://<tailscale-ip>:27123`.
 
 ### Chiavi di configurazione (SQLite `key_value`, namespace `obsidian`)
 
-| Chiave            | Scopo                                                                 | Crittografato |
-| ----------------- | --------------------------------------------------------------------- | ------------- |
-| `api_key`         | Token bearer della Local REST API                                     | sì            |
-| `base_url`        | URL di base REST (predefinito `http://127.0.0.1:27123`)               | no            |
-| `vault_path`      | Percorso assoluto della directory del vault (per la sincronizzazione) | no            |
-| `webdav_username` | Nome utente WebDAV generato (sincronizzazione del vault)              | no            |
-| `webdav_password` | Password WebDAV generata (sincronizzazione del vault)                 | sì            |
-| `webdav_enabled`  | Indica se la sincronizzazione WebDAV del vault è abilitata            | no            |
+| Chiave            | Scopo                                                                 | Cifrato |
+| ----------------- | --------------------------------------------------------------------- | ------- |
+| `api_key`         | Token bearer dell'API REST locale                                     | sì      |
+| `base_url`        | URL di base REST (predefinito `http://127.0.0.1:27123`)               | no      |
+| `vault_path`      | Percorso assoluto della directory del vault (per la sincronizzazione) | no      |
+| `webdav_username` | Nome utente WebDAV generato (sincronizzazione del vault)              | no      |
+| `webdav_password` | Password WebDAV generata (sincronizzazione del vault)                 | sì      |
+| `webdav_enabled`  | Indica se la sincronizzazione WebDAV del vault è abilitata            | no      |
 
 ### Configurazione tramite REST
 
 ```bash
-# Salva e convalida il token della Local REST API (POST esegue la convalida tramite un controllo dello stato)
+# Salva e convalida il token dell'API REST locale (POST esegue la convalida tramite un controllo dello stato)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
@@ -71,20 +69,18 @@ curl -X POST http://localhost:20128/api/settings/obsidian \
 # Controlla lo stato della connessione (restituisce connected, hasToken, baseUrl, vaultPath)
 curl http://localhost:20128/api/settings/obsidian
 
-# Disconnetti (cancella il token archiviato)
+# Disconnetti (rimuove il token memorizzato)
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Tutti i metodi richiedono l'autenticazione alla dashboard. `POST` rifiuta qualsiasi URL
-sulla porta `27124` e convalida il token chiamando l'endpoint di stato della Local REST API
-prima di salvarlo.
+Tutti i metodi richiedono l'autenticazione alla dashboard. `POST` rifiuta qualsiasi URL sulla porta `27124`
+e convalida il token chiamando l'endpoint di stato dell'API REST locale prima di salvarlo.
 
-### Sincronizzazione WebDAV del vault
+### Sincronizzazione del vault tramite WebDAV
 
-`src/app/api/settings/obsidian/webdav/route.ts` gestisce una sincronizzazione opzionale
-del vault basata su WebDAV (orchestrata da `src/lib/obsidianSync.ts`). L'abilitazione
-configura OmniRoute affinché utilizzi una directory locale del vault e genera una coppia
-casuale di nome utente/password WebDAV:
+`src/app/api/settings/obsidian/webdav/route.ts` gestisce una sincronizzazione facoltativa del
+vault basata su WebDAV (eseguita da `src/lib/obsidianSync.ts`). Abilitandola, OmniRoute utilizza una
+directory locale del vault e genera una coppia casuale di nome utente/password WebDAV:
 
 ```bash
 # Abilita la sincronizzazione WebDAV per una directory del vault (genera nome utente/password)
@@ -95,18 +91,25 @@ curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
 # Ottieni lo stato della sincronizzazione WebDAV (le credenziali vengono restituite solo quando è abilitata)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# Disabilita la sincronizzazione WebDAV (cancella le credenziali + il file .stignore gestito)
+# Disabilita la sincronizzazione WebDAV (rimuove le credenziali e il file .stignore gestito)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
-### Sorgente di contesto per chiave API (opzionale)
+### Origine di contesto per chiave API (facoltativa)
 
-La configurazione di Obsidian può essere definita **per ciascuna chiave API** tramite la
-tabella `api_key_context_sources` (`src/lib/db/apiKeyContextSources.ts`). Quando una
-chiamata MCP include l'id di una chiave API autenticata, `getObsidianConfigForApiKey()`
-preferisce il token, l'URL di base e il percorso del vault specifici di quella chiave
-(`source: "api_key"`); in caso contrario, ricorre alla configurazione globale
-(`source: "global"`).
+La configurazione di Obsidian può essere definita **per ogni chiave API** tramite la tabella `api_key_context_sources`
+(`src/lib/db/apiKeyContextSources.ts`). Quando una chiamata MCP include l'id di una chiave API autenticata,
+`getObsidianConfigForApiKey()` preferisce il token, l'URL di base e il percorso del vault specifici di tale chiave
+(`source: "api_key"`); in caso contrario, utilizza la configurazione globale come fallback (`source: "global"`).
+
+Gli strumenti MCP non relativi alla sincronizzazione richiedono che l'identità del chiamante sia risolta prima di leggere questa configurazione.
+Un chiamante privo di identità riceve `Obsidian API token not configured` e non viene inviata alcuna richiesta al vault.
+I chiamanti HTTP vengono risolti tramite le credenziali della richiesta; i chiamanti stdio
+possono essere risolti tramite `OMNIROUTE_API_KEY` o `ROUTER_API_KEY`. Un chiamante HTTP non risolto
+non può ereditare l'identità dell'ambiente del server. I soli ID segnaposto non autorizzano
+l'accesso; resta supportata una credenziale di ambiente valida che viene risolta come `env-key`.
+Le chiavi autenticate prive di una configurazione Obsidian specifica mantengono il fallback globale.
+I quattro strumenti `obsidian_sync_*` mantengono il proprio comportamento separato relativo al token di sincronizzazione.
 
 ## Strumenti MCP (22)
 

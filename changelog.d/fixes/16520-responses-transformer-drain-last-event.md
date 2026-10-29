@@ -1,1 +1,0 @@
-- **fix(sse):** `/v1/responses` no longer drops the last upstream event when the stream ends without a trailing blank line ([#16520](https://github.com/diegosouzapw/OmniRoute/pull/16520)) — thanks @ntdat812

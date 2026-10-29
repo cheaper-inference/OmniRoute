@@ -123,7 +123,9 @@
       "maxCostOpt": "Günlük maksimum maliyet (USD)",
       "allowedModelsOpt": "İzin verilen modellerin virgülle ayrılmış listesi",
       "nothingToSet": "Hiçbir politika alanı sağlanmadı. --rate-limit, --max-cost veya --allowed-models kullanın.",
-      "updated": "Politika güncellendi."
+      "updated": "Politika güncellendi.",
+      "modelAccessModeOpt": "Model erişim modu (all | restricted)",
+      "unrestrictedOpt": "Tüm modellere izin ver (--model-access-mode all)"
     },
     "expiration": {
       "title": "Anahtar Süre Sonu",
@@ -1169,32 +1171,18 @@
   "sync": {
     "description": "Yapılandırmayı OmniRoute örnekleri arasında eşitle",
     "push": {
-      "description": "Yapılandırmayı buluta veya uzak örneğe gönder",
-      "target": "Hedef (cloud veya context:name)",
-      "bundle": "Eşitlenecek paket bölümleri",
-      "dryRun": "Uygulamadan önizle"
+      "description": "Yapılandırmayı buluta veya uzak örneğe gönder"
     },
     "pull": {
-      "description": "Yapılandırmayı buluttan veya uzak örnekten çek",
-      "source": "Kaynak (cloud veya context:name)",
-      "merge": "Mevcut yapılandırmayla birleştir",
-      "replace": "Mevcut yapılandırmayı değiştir",
-      "dryRun": "Uygulamadan önizle"
-    },
-    "diff": {
-      "source": "Kaynak bağlam",
-      "target": "Hedef bağlam"
+      "description": "Yapılandırmayı buluttan veya uzak örnekten çek"
     },
     "bundle": {
       "description": "Yapılandırmayı paket dosyası olarak dışa aktar",
-      "include": "Dahil edilecek bölümler (virgülle ayrılmış)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Bir paket dosyasını içe aktar",
       "dryRun": "Uygulamadan doğrula"
-    },
-    "initialize": {
-      "fromCloud": "Bulut yedeğinden başlat"
     },
     "tokens": {
       "description": "Eşitleme belirteçlerini yönet",
@@ -1206,9 +1194,6 @@
       "revoke": {
         "yes": "Onayı atla"
       }
-    },
-    "resolve": {
-      "description": "Eşitleme çakışmalarını etkileşimli olarak çöz"
     }
   },
   "config": {

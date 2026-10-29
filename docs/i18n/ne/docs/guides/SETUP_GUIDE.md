@@ -141,10 +141,10 @@ omniroute providers validate
 ### 1) प्रदायकहरू जडान गर्नुहोस् र API कुञ्जी सिर्जना गर्नुहोस्
 
 1. Dashboard → `Providers` खोल्नुहोस् र कम्तीमा एउटा प्रदायक (OAuth वा API कुञ्जी) जडान गर्नुहोस्।
-2. Dashboard → `Endpoints` खोल्नुहोस् र API कुञ्जी सिर्जना गर्नुहोस्।
+2. Dashboard → `Endpoints` खोल्नुहोस् र एउटा API कुञ्जी सिर्जना गर्नुहोस्।
 3. (वैकल्पिक) Dashboard → `Combos` खोल्नुहोस् र आफ्नो फलब्याक शृङ्खला सेट गर्नुहोस्।
 
-### 2) आफ्नो कोडिङ उपकरणलाई लक्षित गराउनुहोस्
+### 2) आफ्नो कोडिङ उपकरणलाई निर्देशित गर्नुहोस्
 
 ```txt
 आधार URL: http://localhost:20128/v1
@@ -156,43 +156,44 @@ API कुञ्जी:  [Endpoint पृष्ठबाट प्रतिल�
 
 ```txt
 आधार URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-मोडेलहरूको URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+मोडेलहरू URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
 च्याट URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama ट्याग URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Ollama ट्यागहरू URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, र OpenAI-सङ्गत SDK हरूसँग काम गर्छ।
+Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, र OpenAI-अनुकूल SDK हरूसँग काम गर्छ।
 
 #### `setup-*` मार्फत स्वतः कन्फिगर गर्नुहोस्
 
 आधार URL र कुञ्जी हातैले टाँस्नुको सट्टा, OmniRoute लाई प्रत्यक्ष मोडेल क्याटलगबाट प्रत्येक उपकरणको
-आफ्नै कन्फिग लेख्न दिनुहोस्। प्रत्येक उपकरणका लागि एउटा कमान्ड:
+आफ्नै कन्फिग लेख्न दिनुहोस्। प्रत्येक उपकरणका लागि एउटा आदेश:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml प्रोफाइलहरू
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-सङ्गत)
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-अनुकूल)
 omniroute setup-cline        # Cline CLI + VS Code एक्सटेन्सन सेटिङहरू
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor का इन-एप चरणहरू प्रिन्ट गर्छ
-omniroute setup-roo          # Roo Code आयात + autoImport सूचक
+omniroute setup-cursor       # Cursor का एपभित्रका चरणहरू प्रिन्ट गर्छ
+omniroute setup-roo          # Roo Code आयात + autoImport पोइन्टर
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-स्थानीय उपकरणलाई **रिमोट** OmniRoute सँग कन्फिगर गर्न प्रत्येकले `--remote <url> --api-key <key>` स्वीकार गर्छ,
-साथै पूर्वावलोकनका लागि `--dry-run`। सही env इन्जेक्ट गरेर र कुनै पनि कन्फिग नलेखी CLI सुरु गर्न,
-सामान्य लन्चर `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) प्रयोग गर्नुहोस्;
+**रिमोट** OmniRoute विरुद्ध स्थानीय उपकरण कन्फिगर गर्न प्रत्येकले `--remote <url> --api-key <key>` स्वीकार गर्छ,
+साथै पूर्वावलोकनका लागि `--dry-run` पनि स्वीकार गर्छ। सही env इन्जेक्ट गरी र कुनै पनि कन्फिग नलेखी CLI सुरु गर्न,
+जेनेरिक लन्चर `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) प्रयोग गर्नुहोस्;
 पुराना प्रति-उपकरण लन्चरहरू `omniroute launch` (Claude Code) र
-`omniroute launch-codex` (Codex) पनि उपलब्ध छन्।
+`omniroute launch-codex` (Codex) अझै उपलब्ध छन्।
 
-पूर्ण तालिकाका लागि (प्रत्येक कमान्डले के लेख्छ, हरेक फ्ल्याग, स्थानीय बनाम रिमोट, आधार-URL
+पूर्ण तालिकाका लागि (प्रत्येक आदेशले के लेख्छ, सबै फ्ल्याग, स्थानीय बनाम रिमोट, आधार-URL
 `/v1` परम्पराहरू), **[CLI एकीकरणहरू](./CLI-INTEGRATIONS.md)** हेर्नुहोस्।
 
-प्रति-उपकरण विस्तृत कन्फिगरेसनका लागि (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, र थप), समर्पित **[CLI उपकरण मार्गदर्शिका](../reference/CLI-TOOLS.md)** हेर्नुहोस्।
+प्रत्येक उपकरणको विस्तृत कन्फिगरेसनका लागि (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, र थप), समर्पित **[CLI उपकरण मार्गदर्शिका](../reference/CLI-TOOLS.md)** हेर्नुहोस्।
 
 ---
 
@@ -323,7 +324,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Void Linux (`xbps-src`) टेम्प्लेट
 
-Void Linux प्रयोगकर्ताहरूले `xbps-src` प्रयोग गरेर नेटिभ प्याकेज निर्माण गर्न सक्छन्। यो ब्लकलाई `srcpkgs/omniroute/template` को रूपमा सुरक्षित गर्नुहोस्:
+Void Linux प्रयोगकर्ताहरूका लागि, तपाईंले `xbps-src` प्रयोग गरेर नेटिभ प्याकेज निर्माण गर्न सक्नुहुन्छ। यो ब्लकलाई `srcpkgs/omniroute/template` का रूपमा सुरक्षित गर्नुहोस्:
 
 ```bash
 # 'omniroute' का लागि टेम्प्लेट फाइल
@@ -332,12 +333,12 @@ version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universal AI gateway with smart routing for multiple LLM providers"
+short_desc="धेरै LLM प्रदायकहरूका लागि स्मार्ट राउटिङसहितको विश्वव्यापी AI गेटवे"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# प्रत्येक रिलिजका लागि यसरी चेकसम पुनः उत्पन्न गर्नुहोस्:
+# प्रत्येक रिलीजका लागि यसरी चेकसम पुनः उत्पन्न गर्नुहोस्:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

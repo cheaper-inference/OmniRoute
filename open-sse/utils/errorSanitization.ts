@@ -4,6 +4,7 @@ import {
   stripRecognizedErrorStackTail,
 } from "./errorPathRedaction.ts";
 import { CREDENTIAL_PATTERNS } from "./credentialPatterns.ts";
+import { isPublicProviderSafetyCode } from "./providerSafety.ts";
 
 // Length cap protects against pathological inputs even before tokenization.
 const MAX_ERROR_LEN = 4096;
@@ -13,6 +14,7 @@ const STRONG_CREDENTIAL_TOKEN_SOURCE =
   "(?:eyJ[A-Za-z0-9_-]{5,}\\.[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}|" +
   "github_pat_[A-Za-z0-9_]{20,}|ghp_[A-Za-z0-9]{20,}|glpat-[A-Za-z0-9_-]{20,}|" +
   "xox[a-z]-[A-Za-z0-9-]{10,}|(?:AKIA|ASIA)[A-Z0-9]{16}|" +
+  "(?<![A-Za-z0-9])oma_live_[A-Za-z0-9_-]{20,}|" +
   "(?<![A-Za-z0-9])sk[-_][A-Za-z0-9._~+/=-]{8,}|" +
   "(?<![A-Za-z0-9])[A-Za-z0-9]{3,}sk[-_][A-Za-z0-9._~+/=-]{8,})";
 const STRONG_CREDENTIAL_TOKEN = new RegExp(STRONG_CREDENTIAL_TOKEN_SOURCE, "i");
@@ -821,7 +823,8 @@ function projectUpstreamErrorIdentifier(key: UpstreamClassificationKey, value: u
   if (
     /^[1-5]\d{2}$/.test(value) ||
     /^HTTP_[1-5]\d{2}$/i.test(value) ||
-    SAFE_UPSTREAM_ERROR_IDENTIFIERS.has(value.toLowerCase())
+    SAFE_UPSTREAM_ERROR_IDENTIFIERS.has(value.toLowerCase()) ||
+    isPublicProviderSafetyCode(value)
   ) {
     return value;
   }

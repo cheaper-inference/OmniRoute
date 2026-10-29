@@ -1,1 +1,0 @@
-- **fix(claude):** drop the Claude Code `diagnostics` telemetry field that Anthropic rejects with 400 "Extra inputs are not permitted" ([#16543](https://github.com/diegosouzapw/OmniRoute/pull/16543)) — thanks @arcslash

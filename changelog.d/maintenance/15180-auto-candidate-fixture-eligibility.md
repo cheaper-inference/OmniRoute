@@ -1,1 +1,0 @@
-- Align auto-combo inspector and skipped-variant test fixtures with the default ToS eligibility policy, preserving strict-cost, account-lockout, and warning assertions. Related to #15180.

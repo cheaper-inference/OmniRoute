@@ -1,1 +1,0 @@
-- Apply the provider's ToS verdict to auto-routing candidates missing from the per-model budget catalog, and clarify first-run setup, account requirements, promotional credits, and aggregate free-tier estimates (#15059).

@@ -38,29 +38,29 @@ Studio dengan tiga tab yang menyatukan pencarian web, scraping web, dan perbandi
 
 ### Tab Pencarian
 
-Mengembangkan `SearchForm` + `ResultsPanel` + `RerankPanel` yang sudah ada menjadi sebuah tab:
+Mengembangkan `SearchForm` + `ResultsPanel` + `RerankPanel` yang ada menjadi sebuah tab:
 
 - Kueri → hasil (judul, URL, cuplikan, skor relevansi).
 - Metadata penyedia di panel Konfigurasi (biaya, kuota, status).
-- Bagian rerank: pilih model rerank, urutkan ulang hasil, tampilkan `positionDelta`.
-- Status kosong dengan CTA saat tidak ada penyedia pencarian yang dikonfigurasi.
+- Bagian pemeringkatan ulang: pilih model pemeringkatan ulang, urutkan ulang hasil, tampilkan `positionDelta`.
+- Status kosong dengan CTA ketika tidak ada penyedia pencarian yang dikonfigurasi.
 - Riwayat pencarian melalui `SearchHistory.tsx`.
 - Memanggil `POST /v1/search` (endpoint yang sudah ada, tanpa perubahan).
 
 ### Tab Scrape
 
-Tab baru untuk mengekstrak konten dari URL melalui `POST /v1/web/fetch` (dibuat dalam paket 05):
+Tab baru untuk mengekstrak konten dari URL melalui `POST /v1/web/fetch` (dibuat dalam rencana 05):
 
-- Input: URL + sakelar halaman penuh + pemilih format (markdown / teks / HTML).
+- Input: URL + tombol aktif/nonaktif halaman penuh + pemilih format (markdown / teks / HTML).
 - Kirim → ambil → render `ScrapeResult.tsx`.
-- `ScrapeResult` merender pratinjau markdown + sakelar mentah.
-- Batas: jika isi respons > **256 KB**, UI menampilkan `(dipotong, lihat data mentah)` dan membuka data mentah dalam modal Monaco (D21).
-- Panel metadata: penyedia (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latensi, biaya, ukuran respons, jumlah tautan.
+- `ScrapeResult` merender pratinjau markdown + tombol aktif/nonaktif konten mentah.
+- Batas: jika isi respons > **256 KB**, UI menampilkan `(dipotong, lihat versi mentah)` dan membuka konten mentah dalam modal Monaco (D21).
+- Panel metadata: penyedia (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latensi, biaya, ukuran respons, jumlah tautan.
 - Menggunakan hook `useScrapeFetch.ts`.
 
 ### Tab Perbandingan
 
-Menjalankan kueri/URL yang sama di hingga **4 penyedia secara paralel** (D22):
+Menjalankan kueri/URL yang sama pada hingga **4 penyedia secara paralel** (D22):
 
 - Kolom berdampingan untuk setiap penyedia.
 - Metrik: latensi, biaya, jumlah hasil, ukuran respons.
@@ -101,12 +101,12 @@ Menjalankan kueri/URL yang sama di hingga **4 penyedia secara paralel** (D22):
 ## Katalog Penyedia
 
 `ProviderCatalog.tsx` menampilkan daftar lengkap penyedia dari `GET /api/search/providers`
-(diperluas pada F4 untuk menyertakan penyedia pengambilan):
+(diperluas dalam F4 untuk menyertakan penyedia fetch):
 
-| `kind` | `"search"` (20 penyedia) atau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 penyedia) atau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Status **ditentukan pada saat permintaan** dengan memeriksa apakah kredensial tersedia dan apakah
-semua kunci sedang dalam masa jeda.
+semua kunci saat ini sedang dalam masa cooldown.
 
 ---
 
@@ -126,9 +126,9 @@ Hanya satu perubahan backend yang diperlukan untuk fitur ini:
 
 `src/app/api/search/providers/route.ts` diperluas untuk:
 
-- Menyertakan semua 6 penyedia pengambilan (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) dalam array.
+- Menyertakan setiap penyedia fetch (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) dalam array.
 - Menambahkan `kind: "search" | "fetch"` ke setiap item.
-- Menambahkan `status: "configured" | "missing" | "rate_limited"` yang ditentukan dari status kredensial secara langsung.
+- Menambahkan `status: "configured" | "missing" | "rate_limited"` yang berasal dari status kredensial aktual.
 - Mempertahankan kompatibilitas mundur — field yang sudah ada (`id`, `name`, dll.) tidak berubah.
 
 ---

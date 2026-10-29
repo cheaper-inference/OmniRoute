@@ -16,34 +16,34 @@ AgentBridge on OmniRoute'i MITM-puhverserver (vahendusrünne ehk Man-in-the-Midd
 
 ### Mis on AgentBridge?
 
-Kui IDE agent (nt GitHub Copilot, Cursor või Claude Code) teeb API-kutse, loob see ühenduse otse ülesvoolu tehisintellektiteenuse pakkujaga (OpenAI, Anthropic jne). AgentBridge püüab selle ühenduse TLS-i tasandil läbipaistvalt kinni — ilma et agendi konfiguratsiooni oleks vaja muuta — ja kirjutab päringu ümber nii, et see läbiks OmniRoute'i.
+Kui IDE agent (nt GitHub Copilot, Cursor, Claude kood) teeb API -kõne, ühendub see otse ülesvoolu AI pakkujaga (OpenAI, Anthropic jne). AgentBridge katkestab selle ühenduse läbipaistvalt TLS tasemel – ilma agendi konfiguratsiooni muutmist nõudmata – ja kirjutab päringu ümber OmniRoute kaudu.
 
-See tähendab, et saad:
+See tähendab, et saate:
 
-- **Suuna mis tahes agent mis tahes teenusepakkujale ümber**: kas Copilot suhtleb OpenAI-ga? Suuna see ümber Anthropic Claude'i, Gemini või mõne muu OmniRoute'i 352 teenusepakkuja juurde.
-- **Rakenda mudelite vastendusi**: `gemini-3-flash` → `claude-sonnet-4.7` läbipaistvalt töötleja tasandil.
-- **Jälgi kogu agentide liiklust**: iga kinnipüütud päring avaldatakse [liiklusinspektoris](./TRAFFIC_INSPECTOR.md).
-- **Rakenda OmniRoute'i töökindlusfunktsioone**: kombineeritud marsruutimine, kaitselülitid, varuvariandid ja kulude jälgimine toimivad ka IDE agentide liikluse puhul.
+- **Suunake mis tahes agent mis tahes teenusepakkuja juurde** : Copilot räägid OpenAI-ga? Suunake see ümber Anthropic Claude, Gemini või mõnele OmniRoute 377 pakkujale.
+- **Rakendage mudeli vastendusi** : `gemini-3-flash` → `claude-sonnet-4.7` läbipaistvalt käitleja tasemel.
+- **Jälgige kogu agendiliiklust** : iga pealtkuulatud päring avaldatakse [liiklusinspektorile](./TRAFFIC_INSPECTOR.md).
+- **Rakendage OmniRoute vastupidavust** : kombineeritud marsruutimine, kaitselülitid, varud ja kulude jälgimine ka IDE agendi liikluse jaoks.
 
-### Positsioneerimine võrreldes turuga
+### Positsioneerimine vs turg
 
-| Funktsioon                           | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ------------------------------------ | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                          |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                       |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                           |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                         |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                           |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                       |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                          |    —    |    —     |        ✓        |             ✓             |
-| Open Code                            |    —    |    —     |        ✓        |             ✓             |
-| Trae                                 |    —    |    —     |        —        |       🔍 Uurimisel        |
-| Juhtpaneeli kasutajaliides           |    ✓    |    ✗     |        ✗        |             ✓             |
-| Liiklusinspektor                     |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute'i marsruutimine            |    ✗    |    ✗     |        ✗        |             ✓             |
-| Mudelite vastendamise kasutajaliides |    ✗    |    ✗     |        ✗        |             ✓             |
-| Möödumisloend                        |    ✗    |    ✗     |        ✓        |             ✓             |
-| Ülesvoolu CA-sertifikaat             |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funktsioon              | 9 ruuter | anti-api | llm-pealtkuulaja | **OmniRoute AgentBridge** |
+| ----------------------- | :------: | :------: | :--------------: | :-----------------------: |
+| Antigravity             |    ✓     |    ✓     |        —         |             ✓             |
+| GitHub Copilot          |    ✓     |    ✓     |        —         |             ✓             |
+| Kiro (AWS)              |    ✓     |    ✓     |        —         |             ✓             |
+| OpenAI Codex            |    —     |    ✓     |        —         |             ✓             |
+| Cursor IDE              |    ✓     |    ✓     |        —         |             ✓             |
+| Zed Industries          |    —     |    ✓     |        —         |             ✓             |
+| Claude kood             |    —     |    —     |        ✓         |             ✓             |
+| Ava kood                |    —     |    —     |        ✓         |             ✓             |
+| Trae                    |    —     |    —     |        —         |         🔍 Uurib          |
+| Armatuurlaud UI         |    ✓     |    ✗     |        ✗         |             ✓             |
+| Liiklusinspektor        |    ✗     |    ✗     |        ✓         |             ✓             |
+| OmniRoute marsruutimine |    ✗     |    ✗     |        ✗         |             ✓             |
+| Mudeli kaardistamine UI |    ✗     |    ✗     |        ✗         |             ✓             |
+| Möödasõiduloend         |    ✗     |    ✗     |        ✓         |             ✓             |
+| Ülesvoolu CA sert       |    ✗     |    ✗     |        ✓         |             ✓             |
 
 ---
 
@@ -187,20 +187,20 @@ Sõltumatut puhasruumi skannerit rakendatakse päringu kehadele ja mandaadipäis
 
 ### 3.1 MITM-serveri käivitamine/peatamine
 
-Kasutage AgentBridge'i serverikaarti aadressil `/dashboard/tools/agent-bridge`:
+Kasutage AgentBridge'i serverikaarti asukohas `/dashboard/tools/agent-bridge`:
 
-| Toiming                      | Kirjeldus                                                                                   |
-| ---------------------------- | ------------------------------------------------------------------------------------------- |
-| Käivita server               | Käivitab `src/mitm/server.cjs` pordil 443                                                   |
-| Peata server                 | Sulgeb alamprotsessi korrektselt                                                            |
-| Taaskäivita server           | Peatab ja käivitab uuesti (rakendab sihtmärgi muudatused)                                   |
-| Usalda sertifikaati          | Installib `DATA_DIR/mitm/ca.crt` operatsioonisüsteemi usaldushoidlasse                      |
-| Laadi sertifikaat alla       | Laadib faili `ca.crt` käsitsi installimiseks alla                                           |
-| Genereeri sertifikaat uuesti | Loob uue CA-võtmepaari (kõik olemasolevad agendipõhised sertifikaadid muudetakse kehtetuks) |
+| Toiming                      | Kirjeldus                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Käivita server               | Käivitab faili `src/mitm/server.cjs` pordil 443. Juur-CA mudeli korral loob see esimesel käivitamisel faili `ca.crt` ja lisab aktiivse sertifikaadi usaldusväärsete hulka, kui sudo parool on saadaval                                                                                                                                                                                                                                      |
+| Peata server                 | Sulgeb alamprotsessi korrektselt                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Taaskäivita server           | Peatab ja käivitab uuesti (rakendab sihtmärgi muudatused ja uuesti genereeritud sertifikaadi)                                                                                                                                                                                                                                                                                                                                               |
+| Usalda sertifikaati          | Installib aktiivse sertifikaadi operatsioonisüsteemi usaldushoidlasse: juur-CA mudeli korral `DATA_DIR/mitm/ca.crt`, pärand-lehtsertifikaadiga installi korral `DATA_DIR/mitm/server.crt`                                                                                                                                                                                                                                                   |
+| Laadi sertifikaat alla       | Laadib aktiivse sertifikaadi käsitsi installimiseks alla (`omniroute-mitm-ca.crt` = `ca.crt` või pärand-lehtsertifikaadiga installi korral `omniroute-mitm.crt` = `server.crt`)                                                                                                                                                                                                                                                             |
+| Genereeri sertifikaat uuesti | Ei muuda kunagi sertifikaadimudelit. Pärand-lehtsertifikaadiga install: väljastab uued `server.crt`/`server.key` failid (nende kasutuselevõtuks taaskäivitage server). Juur-CA mudel: roteerib failid `ca.crt`/`ca.key`; serveri töötamise ajal toimingust keeldutakse. Vana usaldatud CA eemaldatakse esmalt usaldusväärsete hulgast (vajab sudo parooli) või roteerimine katkestatakse. Seejärel peavad kliendid uut CA-d uuesti usaldama |
 
 ### 3.2 Sertifikaadi usaldamine
 
-Operatsioonisüsteem peab AgentBridge'i CA-sertifikaati usaldama, enne kui IDE-d MITM-ühenduse aktsepteerivad.
+Enne kui IDE-d MITM-ühenduse aktsepteerivad, peab operatsioonisüsteem AgentBridge'i CA-sertifikaati usaldama.
 
 **Linux (NSS — Chrome/Firefox):**
 
@@ -221,36 +221,28 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-Või kasutage töölaual nuppu „Usalda sertifikaati“ (käivitab teie operatsioonisüsteemile sobiva käsu ja kuvab vajaduse korral sudo-viiba).
+Või kasutage töölaual nuppu „Usalda sertifikaati” (käivitab teie operatsioonisüsteemile sobiva käsu ja kuvab vajaduse korral sudo parooli viiba).
 
 #### Electronil põhinevad IDE-d eiravad operatsioonisüsteemi usaldushoidlat (`NODE_EXTRA_CA_CERTS`)
 
-Mõned IDE-d — eelkõige **Antigravity IDE** ja muud Electronil / VS Code'il põhinevad rakendused — sisaldavad
-oma Node.js-i käituskeskkonda, mis **ei kasuta operatsioonisüsteemi usaldushoidlat** väljaminevate
-`fetch`/HTTPS-ühenduste jaoks. CA usaldamisest operatsioonisüsteemi/NSS-i tasemel piisab IDE natiivsele **taustakomponendile**
-(nt Go keeleserverile, mis kasutab operatsioonisüsteemi CA-komplekti), kuid **Electroni kasutajaliideses**
-TLS-ühendus siiski nurjub — see väljendub nii, et rakendus näib olevat _välja logitud_ või kuvab
-_"ühenduse vea"_, kuigi MITM-logis on näha, et taustakomponendi alglaadimispäringud tagastavad `200`. Vaja on
-kahte sammu ja mõlemad on olulised:
+Mõned IDE-d — eelkõige **Antigravity IDE** ja teised Electronil / VS Code'il põhinevad rakendused — sisaldavad oma Node.js-i käituskeskkonda, mis **ei kasuta operatsioonisüsteemi usaldushoidlat** väljaminevate `fetch`/HTTPS-päringute jaoks. CA usaldamine operatsioonisüsteemi/NSS-i tasemel on piisav IDE loomuliku **taustaprotsessi** jaoks (nt Go keeleserver, mis kasutab operatsioonisüsteemi CA-kimpu), kuid **Electroni kasutajaliideses** esineb endiselt TLS-i tõrge — rakendus näib olevat _välja logitud_ või kuvab _„ühenduse tõrke”_, kuigi MITM-i logi näitab, et taustaprotsessi alglaadimispäringud tagastavad `200`. Vajalikud on kaks toimingut ja mõlemad on olulised:
 
-1. Suunake käituskeskkond otseselt CA-d kasutama:
+1. Suunake käituskeskkond otse CA-le:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
-2. **Käivitage IDE sellest käsureakeskkonnast.** Selle käivitamisel töölauaikooni / Docki / Start-menüü kaudu
-   käsureakeskkonna eksporditud muutujaid **ei pärita** ning `~/.config/environment.d/*.conf` rakendub alles pärast
-   uut graafilist sisselogimist. Sulgege IDE esmalt täielikult — Electroni üksikeksemplari lukk tähendab, et teine
-   käivitus keskendub lihtsalt olemasolevale protsessile ja uut keskkonda eiratakse.
+2. **Käivitage IDE sellest kestast.** Töölauaikooni / Docki / Start-menüü kaudu käivitamisel
+   kestamuutujaid **ei pärita** ja `~/.config/environment.d/*.conf` rakendub alles pärast
+   uut graafilist sisselogimist. Sulgege IDE esmalt täielikult — Electroni üksikeksemplari lukk
+   tähendab, et teine käivitus toob lihtsalt olemasoleva protsessi esiplaanile ja uut keskkonda eiratakse.
 
-Ülaltoodud operatsioonisüsteemi usaldushoidla + NSS-i samm on endiselt vajalik (mõne autentimisvoo kasutatav Chromiumi
-võrgupinu loeb kasutajapõhist NSS-i hoidlat ja sisaldab oma staatilisi vasteid domeenile `*.googleapis.com`, mille
-kohalikult usaldatud CA alistab). `NODE_EXTRA_CA_CERTS` katab lisaks Node'i `fetch`-tee.
+Ülaltoodud operatsioonisüsteemi usaldamise + NSS-i toiming on endiselt vajalik (mõne autentimisvoo kasutatav Chromiumi võrgupinu loeb kasutajapõhist NSS-i hoidlat ja sellel on oma staatilised kinnistused domeeni `*.googleapis.com` jaoks, mille kohalikult usaldatud CA alistab). `NODE_EXTRA_CA_CERTS` katab lisaks Node'i `fetch`-tee.
 
-### 3.3 DNS-i marsruutimine
+### 3.3 DNS-marsruutimine
 
-Iga agendi puhul, mida soovite pealt kuulata, peavad selle API-hostid lahenduma aadressiks `127.0.0.1`. AgentBridge haldab `/etc/hosts` kirjeid automaatselt, kui lülitate seadistusviisardis agendi DNS-i sisse või välja.
+Iga agendi puhul, mille liiklust soovite pealt kuulata, peavad selle API-hostid lahenema aadressiks `127.0.0.1`. AgentBridge haldab `/etc/hosts` kirjeid automaatselt, kui lülitate seadistusviisardis agendi DNS-i sisse või välja.
 
-Näited GitHub Copiloti `/etc/hosts` kirjetest:
+GitHub Copiloti `/etc/hosts` kirjete näide:
 
 ```
 127.0.0.1 api.githubcopilot.com
@@ -259,74 +251,74 @@ Näited GitHub Copiloti `/etc/hosts` kirjetest:
 
 ### 3.4 Mudelite vastendamine
 
-Kasutage iga agendikaardi mudelite vastendustabelit, et määrata lähte- → sihtmudeli vastendused:
+Kasutage iga agendikaardi mudelite vastendamise tabelit, et määratleda lähte- → sihtmudeli vastendused:
 
-| Lähte­mudel (agendi omamudel) | Sihtmudel (OmniRoute) |
+| Lähte mudel (agendi omamudel) | Sihtmudel (OmniRoute) |
 | ----------------------------- | --------------------- |
 | `gpt-4o`                      | `claude-sonnet-4.7`   |
 | `*` (metamärk)                | `claude-haiku-4.7`    |
 
-Metamärk `*` vastendab mis tahes tuvastamata mudeli määratud sihtmudeliga. Talletatakse tabelis `agent_bridge_mappings`.
+Metamärk `*` vastendab iga tundmatu mudeli määratud sihtmudeliga. Salvestatakse tabelisse `agent_bridge_mappings`.
 
 > **Nõuanne — tehke kindlaks agendi tegelikud mudeli-ID-d.** IDE võib saata mudelinimesid, mis erinevad
 > selle kasutajaliidese siltidest ja muutuvad põhiversioonide vahel. Näiteks saadab **Antigravity 2**
 > võrgu kaudu `gemini-3.1-pro-low`, `gemini-pro-agent` ja `gemini-3.1-flash-lite` — mitte vanemates
-> dokumentides näidatud `gemini-2.5-pro`. Saatke üks vestlussõnum ilma sobiva vastenduseta: MITM
-> logib täpse saabuva `model:` väärtuse ja laseb päringu muutmata edasi. Vastendage see täpne väärtus ning
-> järgmine päring peetakse kinni ja marsruuditakse teie sihtmudelile.
+> dokumentides näidatud `gemini-2.5-pro`. Saatke üks vestlus ilma sobiva vastenduseta: MITM
+> logib täpse sissetuleva `model:` väärtuse ja edastab päringu muutmata kujul. Vastendage see sõnasõnaline väärtus ning
+> järgmine päring peetakse kinni ja suunatakse teie sihtmärgile.
 
 ### 3.5 Riskiteade
 
-AgentBridge kuulab pealt identimisteavet (OAuthi pääsuloa tõendeid, API-võtmeid), mida IDE kasutab ülesvoolu teenusepakkujate juures autentimiseks. Need **maskitakse enne logimist** (vt §2.7), kuid on OmniRoute'i MITM-kihile nähtavad. Iga agendi esmakordsel aktiveerimisel kuvatakse suletav riskiteate modaalaken.
+AgentBridge püüab kinni identimisteabe (OAuthi tokenid, API-võtmed), mida IDE kasutab autentimiseks ülesvoolu teenusepakkujate juures. See teave **maskeeritakse enne logimist** (vt §2.7), kuid on OmniRoute'i MITM-kihile nähtav. Iga agendi esmakordsel aktiveerimisel kuvatakse suletav riskiteate modaalaken.
 
 ### 3.6 Hooldus ja diagnostika
 
-Töölaual on kaart **Hooldus ja diagnostika** (`AgentBridgeMaintenanceCard`, asukohas `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`), mis toob kasutajaliidesesse operatiivsed MITM-marsruudid, millel varem kasutajaliides puudus. Selle alapealkiri on: _„Testige pealtkuulamiskonveierit, tühistage süsteemi jäänud olek ja teisaldage seadistus masinate vahel.“_ Kaardi kliendi abifunktsioonid asuvad failis `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
+Töölaual on kaart **Hooldus ja diagnostika** (`AgentBridgeMaintenanceCard`, asukohas `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`), mis teeb kasutajaliideses kättesaadavaks MITM-i toimingumarsruudid, millel varem kasutajaliides puudus. Selle alapealkiri on: _„Testige andmehõivekonveierit, tühistage alles jäänud süsteemiolek ja teisaldage seadistus ühest masinast teise.“_ Kaardi kliendi abifunktsioonid asuvad failis `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
 
-| Nupp                         | Marsruut                               | Mida see teeb                                                                                                                                                                                             |
-| ---------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Diagnostika**              | `GET /api/tools/agent-bridge/diagnose` | Käitab hõivekonveieri enesetesti ja kuvab iga kontrolli kohta aruande (✓/✗ + parandussoovitus).                                                                                                           |
-| **Paranda**                  | `POST /api/tools/agent-bridge/repair`  | Tühistab krahhi või SIGKILL-i järel alles jäänud omanikuta MITM-i süsteemioleku (DNS-i võltskirjed, juur-CA, süsteemiproksi). Idempotentne — puhta oleku korral teatab „Midagi pole parandada”.           |
-| **Eemalda CA**               | `DELETE /api/tools/agent-bridge/cert`  | Eemaldab MITM-i juur-CA usalduse ja kustutab selle OS-i usaldushoidlast (selgesõnaline, idempotentne). Kuvatakse ainult siis, kui CA on parajasti usaldatud; nõuab reasiseselt kinnitust „Eemaldada CA?”. |
-| **Ekspordi konfiguratsioon** | `GET /api/tools/agent-bridge/config`   | Laadib alla porditava konfiguratsiooni JSON-i (vt §3.7).                                                                                                                                                  |
-| **Impordi konfiguratsioon**  | `POST /api/tools/agent-bridge/config`  | Laadib üles varem eksporditud konfiguratsiooni JSON-i (vt §3.7).                                                                                                                                          |
+| Nupp                         | Marsruut                               | Mida see teeb                                                                                                                                                                                              |
+| ---------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Diagnoosi**                | `GET /api/tools/agent-bridge/diagnose` | Käivitab andmehõivekonveieri enesetesti ja kuvab iga kontrolli kohta aruande (✓/✗ + parandussoovitus).                                                                                                     |
+| **Paranda**                  | `POST /api/tools/agent-bridge/repair`  | Tühistab krahhi või SIGKILL-i järel alles jäänud omanikuta MITM-i süsteemioleku (DNS-i võltsimiskirjed, juur-CA, süsteemi puhverserver). Idempotentne — puhta oleku korral teatab „Midagi pole parandada“. |
+| **Eemalda CA**               | `DELETE /api/tools/agent-bridge/cert`  | Tühistab MITM-i juur-CA usalduse ja eemaldab selle OS-i usaldushoidlast (eksplitsiitne, idempotentne). Kuvatakse ainult siis, kui CA on praegu usaldatud; nõuab reasisest kinnitust „Kas eemaldada CA?“.   |
+| **Ekspordi konfiguratsioon** | `GET /api/tools/agent-bridge/config`   | Laadib alla teisaldatava konfiguratsiooni JSON-i (vt §3.7).                                                                                                                                                |
+| **Impordi konfiguratsioon**  | `POST /api/tools/agent-bridge/config`  | Laadib üles varem eksporditud konfiguratsiooni JSON-i (vt §3.7).                                                                                                                                           |
 
-Igal agendikaardil on ka oma nupp **Taasta vaikeväärtused** (`POST
-/api/tools/agent-bridge/agents/{id}/reset`) — ühe klõpsuga agendipõhine tagasivõtmine, mis eemaldab võltsingu ainult selle
-agendi hostidelt, kustutab selle salvestatud mudelivastendused ja lähtestab selle `dns_enabled`/`setup_completed`
+Igal agendikaardil on ka oma nupp **Taasta vaikeseaded** (`POST
+/api/tools/agent-bridge/agents/{id}/reset`) — ühe klõpsuga agendipõhine tagasivõtmistoiming, mis eemaldab võltsimise ainult selle
+agendi hostidelt, kustutab salvestatud mudelivastendused ning lähtestab selle `dns_enabled`/`setup_completed`
 oleku, et IDE suhtleks pärast täielikku taaskäivitamist taas tegeliku ülesvooluteenusega. See **ei** mõjuta
 jagatud MITM-serverit ega juur-CA-d (teised agendid võivad neist endiselt sõltuda) — need jäävad ligipääsetavaks
 serverikaardi ja ülaltoodud toimingu **Eemalda CA** kaudu. Windowsis käivitatakse võimaluse korral ka
-`ipconfig /flushdns`, sest Windowsi DNS-klient puhverdab hosts-faili kirjeid ega eemalda
-äsja kustutatud võltskirjet muidu.
+`ipconfig /flushdns`, sest Windowsi DNS-klient puhverdab hosts-faili kirjeid ega kustuta
+äsja eemaldatud võltskirjet muidu.
 
-**Diagnostikakontrollid** (`summarizeDiagnostics()` failis `src/mitm/inspector/diagnostics.ts`). Marsruut käitab iga kontrolli jaoks kõrvalmõjudega proovi ja edastab tõeväärtused puhtale kokkuvõttefunktsioonile; tagastatakse üks `healthy` otsus koos iga tõrke parandussoovitusega:
+**Diagnostikakontrollid** (`summarizeDiagnostics()` failis `src/mitm/inspector/diagnostics.ts`). Marsruut käivitab iga kontrolli jaoks kõrvalmõjudega sondi ja edastab kahendväärtused puhtale kokkuvõttefunktsioonile; tagastatakse üks `healthy` hinnang koos iga tõrke parandussoovitusega:
 
-| Kontrolli nimi     | Mida see kontrollib                                     | Soovitus tõrke korral                                                                                                                                |
-| ------------------ | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`   | MITM-serveri protsess on aktiivne                       | „MITM-server ei tööta. Käivitage see AgentBridge'i vahekaardilt.”                                                                                    |
-| `server-reachable` | MITM-server võtab oma pordil ühendusi vastu (TCP-proov) | „MITM-server ei võta oma pordil ühendusi vastu. Kontrollige, et port oleks vaba ja et teil oleksid õigused selle sidumiseks.”                        |
-| `cert-exists`      | MITM-sertifikaat on kettale genereeritud                | „MITM-sertifikaati pole veel genereeritud. Genereerige see AgentBridge'i vahekaardilt.”                                                              |
-| `cert-trusted`     | MITM-i juur-CA on OS-i usaldushoidlas                   | „OS-i usaldushoidla ei usalda MITM-i juur-CA-d, mistõttu TLS-i pealtkuulamine nurjub. Usaldage sertifikaati AgentBridge'i vahekaardilt.”             |
-| `dns-configured`   | Siht-hostinimed on failis `/etc/hosts` võltsitud        | „Siht-hostinimed pole failis /etc/hosts võltsitud, mistõttu liiklus ei jõua kunagi proksini. Lubage DNS agentidele, mille liiklust soovite hõivata.” |
+| Kontrolli nimi     | Mida see kontrollib                                    | Soovitus tõrke korral                                                                                                                                                  |
+| ------------------ | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | MITM-serveri protsess on aktiivne                      | „MITM-server ei tööta. Käivitage see AgentBridge'i vahekaardilt.“                                                                                                      |
+| `server-reachable` | MITM-server võtab oma pordil ühendusi vastu (TCP-sond) | „MITM-server ei võta oma pordil ühendusi vastu. Kontrollige, kas port on vaba ja kas teil on õigus seda siduda.“                                                       |
+| `cert-exists`      | MITM-sertifikaat on kettale genereeritud               | „MITM-sertifikaati pole veel genereeritud. Genereerige see AgentBridge'i vahekaardilt.“                                                                                |
+| `cert-trusted`     | MITM-i juur-CA asub OS-i usaldushoidlas                | „OS-i hoidla ei usalda MITM-i juur-CA-d, mistõttu TLS-i pealtkuulamine nurjub. Usaldage sertifikaati AgentBridge'i vahekaardil.“                                       |
+| `dns-configured`   | Siht-hostinimed on failis `/etc/hosts` võltsitud       | „Siht-hostinimed pole failis /etc/hosts võltsitud, mistõttu liiklus ei jõua kunagi puhverserverisse. Lubage DNS nende agentide jaoks, mille liiklust soovite hõivata.“ |
 
-**Omanikuta oleku bänner:** kui leht tuvastab krahhi järel alles jäänud oleku (DNS-i võltsing / CA / süsteemiproksi), kuvatakse kaardil merevaigukollane bänner — _„Eelmine seanss jättis süsteemioleku alles (DNS-i võltsing, CA või süsteemiproksi). Käivitage selle puhastamiseks parandamine.”_ — ja nupp **Paranda** tõstetakse esile. `Repair` on rakenduskihi vaste ProxyBridge'i lipule `--cleanup` (see delegeerib funktsioonile `repairMitm()` failis `src/mitm/manager.ts`).
+**Omanikuta oleku bänner:** kui leht tuvastab krahhist maha jäänud oleku (DNS-i võltsimine / CA / süsteemi puhverserver), kuvab kaart merevaigukarva bänneri — _„Eelmine seanss jättis süsteemioleku alles (DNS-i võltsimine, CA või süsteemi puhverserver). Käivitage selle puhastamiseks parandamine.“_ — ja tõstab esile nupu **Paranda**. `Repair` on ProxyBridge'i lipu `--cleanup` rakenduskihi analoog (see delegeerib funktsioonile `repairMitm()` failis `src/mitm/manager.ts`).
 
-> MITM-i juur-CA jäetakse peatamise ja käivitamise vahel installituks, et vältida korduvaid sudo
-> viipasid (sama käitumine nagu mitmproxy/Charlesi puhul), mistõttu on selle eemaldamine selgesõnaline
-> toiming **Eemalda CA**, mitte miski, mis toimuks peatamisel automaatselt.
+> MITM-juur-CA jääb peatamiste ja käivitamiste vahel installituks, et vältida korduvaid sudo
+> viipasid (sama käitumine nagu mitmproxy/Charles puhul), seega on selle eemaldamine eraldi
+> toiming **Eemalda CA**, mitte miski, mis toimub peatamisel automaatselt.
 
-### 3.7 Porditava konfiguratsiooni import ja eksport
+### 3.7 Teisaldatava konfiguratsiooni import/eksport
 
-AgentBridge saab serialiseerida **operaatori häälestatava** oleku versioonitud JSON-objektiks, et seadistust saaks eri masinates kopeerida. Serialiseerija on `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), mida valideerib `AgentBridgeConfigSchema`.
+AgentBridge saab **operaatori kohandatava** oleku serialiseerida versioonitud JSON-plokiks, et seadistust saaks eri masinates kopeerida. Serialiseerija asub failis `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`) ja seda valideerib `AgentBridgeConfigSchema`.
 
 Eksport sisaldab täpselt kolme osa (sisseehitatud vaikeväärtusi tahtlikult **EI** ekspordita, et importimine neid kunagi ei dubleeriks ega nendega vastuollu satuks):
 
-| Väli             | Allikas                                                         | Märkused                                                             |
-| ---------------- | --------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `bypassPatterns` | kasutaja määratud möödaviigumustrid (`agent_bridge_bypass`)     | vaikimisi panga-/valitsus-/okta-mustrid on välja jäetud              |
-| `customHosts`    | Traffic Inspectori kohandatud hostid (`inspector_custom_hosts`) | iga kirje: `{ host, kind: "llm"\|"app"\|"custom", label? }`          |
-| `agentMappings`  | agendipõhised mudelivastendused (`agent_bridge_mappings`)       | `{ [agentId]: [{ source, target }] }` iga vastendustega agendi kohta |
+| Väli             | Allikas                                                         | Märkused                                                                |
+| ---------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `bypassPatterns` | kasutaja määratud möödaviigumustrid (`agent_bridge_bypass`)     | panga-/riigiasutuste/Okta vaikemustrid jäetakse välja                   |
+| `customHosts`    | Traffic Inspectori kohandatud hostid (`inspector_custom_hosts`) | igaüks: `{ host, kind: "llm"\|"app"\|"custom", label? }`                |
+| `agentMappings`  | agendipõhised mudelivastendused (`agent_bridge_mappings`)       | `{ [agentId]: [{ source, target }] }` iga vastendusi omava agendi kohta |
 
 ```jsonc
 // GET /api/tools/agent-bridge/config
@@ -346,7 +338,7 @@ Eksport sisaldab täpselt kolme osa (sisseehitatud vaikeväärtusi tahtlikult **
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-Mida konfiguratsioon **EI sisalda**: serveri tööolek, sertide teed, agendipõhine DNS-i olek, ülesvoolu CA tee ja TPROXY sätted — need on hosti/käituskeskkonna olek, mitte teisaldatavad eelistused.
+Mida konfiguratsioon **EI** sisalda: serveri töötamise olek, serditeed, agendipõhine DNS-i olek, ülesvoolu CA tee ega TPROXY sätted — need on hosti/käituskeskkonna olek, mitte teisaldatavad eelistused.
 
 ---
 
@@ -506,38 +498,38 @@ Kui AgentBridge püüab päringud kinni, kuid kõik päringud nurjuvad:
 
 ## §7 API viide
 
-Kõik marsruudid on `LOCAL_ONLY` (ainult tagasisideaadressilt, jõustatakse enne autentimist) ja `SPAWN_CAPABLE`. Vt `src/server/authz/routeGuard.ts`.
+Kõik marsruudid on `LOCAL_ONLY` (ainult loopback-liidesel, jõustatakse enne autentimist) ja `SPAWN_CAPABLE`. Vt `src/server/authz/routeGuard.ts`.
 
 Baastee: `/api/tools/agent-bridge/`
 
-| Meetod              | Tee                                            | Kirjeldus                                                                                                                     |
-| ------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | Serveri globaalne olek + iga agendi tuvastus/olek                                                                             |
-| GET                 | `/api/tools/agent-bridge/agents`               | Registreeritud agentide loend (ID, nimi, hostid, kasutatavus, olek)                                                           |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Ühe agendi olek (sihtkonfiguratsioon + tuvastus + salvestatud olek)                                                           |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Agendi `setup_completed` väärtuse värskendamine                                                                               |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Agendi tuvastuskontrolli käivitamine (`installed`, `version?`, `path?`)                                                       |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Agendi DNS-i lubamine/keelamine (`{enabled: boolean}`)                                                                        |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Agendi mudelivastendused                                                                                                      |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Mudelivastenduste asendamine                                                                                                  |
-| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Vaikeseadete taastamine: selle agendi DNS-i võltsimise tühistamine, vastenduste kustutamine ja oleku lähtestamine (vt §3.6)   |
-| POST                | `/api/tools/agent-bridge/server`               | Serveri käivitamine/peatamine/taaskäivitamine (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)         |
-| GET                 | `/api/tools/agent-bridge/cert`                 | Serdi olek (`exists`, `trusted`, `path`)                                                                                      |
-| POST                | `/api/tools/agent-bridge/cert`                 | MITM-i juur-CA usaldamine (installimine)                                                                                      |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | MITM-i juur-CA usalduse eemaldamine — idempotentne (vt §3.6)                                                                  |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Iseallkirjastatud MITM-serdi uuesti genereerimine                                                                             |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | PEM-serdi voogedastus allalaadimiseks                                                                                         |
-| GET                 | `/api/tools/agent-bridge/bypass`               | Möödaviigumustrite loend (`default` + `user`)                                                                                 |
-| POST                | `/api/tools/agent-bridge/bypass`               | Kasutaja määratud möödaviigumustrite täielik asendamine                                                                       |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Ühe kasutaja määratud möödaviigumustri eemaldamine                                                                            |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | Hõivekonveieri enesetest (vt §3.6)                                                                                            |
-| POST                | `/api/tools/agent-bridge/repair`               | Orvuks jäänud MITM-i süsteemioleku tühistamine (vt §3.6)                                                                      |
-| GET                 | `/api/tools/agent-bridge/config`               | Porditava konfiguratsiooni eksportimine JSON-vormingus (vt §3.7)                                                              |
-| POST                | `/api/tools/agent-bridge/config`               | Porditava konfiguratsiooni importimine JSON-vormingus (vt §3.7)                                                               |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Konfigureeritud ülesvoolu-CA tee hankimine                                                                                    |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Ülesvoolu-CA tee valideerimine + püsiv salvestamine                                                                           |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Ülesvoolu-CA tee ainult valideerimine (proovikäivitus) — ei salvestata püsivalt                                               |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY läbipaistva dekrüptimisega hõiverežiim — vt `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei kompileerita `/docs` alla) |
+| Meetod              | Tee                                            | Kirjeldus                                                                                                                          |
+| ------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| GET                 | `/api/tools/agent-bridge/state`                | Serveri globaalne olek + iga agendi tuvastus/olek                                                                                  |
+| GET                 | `/api/tools/agent-bridge/agents`               | Registreeritud agentide loend (id, nimi, hostid, kasutatavus, olek)                                                                |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Ühe agendi olek (sihtkonfiguratsioon + tuvastus + salvestatud olek)                                                                |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Agendi `setup_completed` värskendamine                                                                                             |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Agendi tuvastusproovi käivitamine (`installed`, `version?`, `path?`)                                                               |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Agendi DNS-i lubamine/keelamine (`{enabled: boolean}`)                                                                             |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Agendi mudelivastendused                                                                                                           |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Mudelivastenduste asendamine                                                                                                       |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Vaikeseadete taastamine: selle agendi DNS-i võltsimise tühistamine, vastenduste kustutamine ja oleku lähtestamine (vt §3.6)        |
+| POST                | `/api/tools/agent-bridge/server`               | Serveri käivitamine/peatamine/taaskäivitamine (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)              |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Serdi olek (`exists`, `trusted`, `path`)                                                                                           |
+| POST                | `/api/tools/agent-bridge/cert`                 | MITM-i juur-CA usaldamine (installimine)                                                                                           |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | MITM-i juur-CA usalduse eemaldamine — idempotentne (vt §3.6)                                                                       |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Aktiivse serdi uuesti genereerimine serdimudelit muutmata (pärand-lehtsert või juur-CA rotatsioon — vt §3.1)                       |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Aktiivse PEM-serdi voogedastus allalaadimiseks (juur-CA mudeli korral `ca.crt`, pärand-lehtserdi installi korral `server.crt`)     |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Möödavoolumustrite loend (`default` + `user`)                                                                                      |
+| POST                | `/api/tools/agent-bridge/bypass`               | Kasutaja määratud möödavoolumustrite täielik asendamine                                                                            |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Ühe kasutaja määratud möödavoolumustri eemaldamine                                                                                 |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | Hõivekonveieri enesetest (vt §3.6)                                                                                                 |
+| POST                | `/api/tools/agent-bridge/repair`               | Omanikuta MITM-i süsteemioleku tagasivõtmine (vt §3.6)                                                                             |
+| GET                 | `/api/tools/agent-bridge/config`               | Teisaldatava konfiguratsiooni eksportimine JSON-ina (vt §3.7)                                                                      |
+| POST                | `/api/tools/agent-bridge/config`               | Teisaldatava konfiguratsiooni importimine JSON-ina (vt §3.7)                                                                       |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Konfigureeritud ülesvoolu-CA tee hankimine                                                                                         |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Ülesvoolu-CA tee valideerimine + püsiv salvestamine                                                                                |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Ülesvoolu-CA tee ainult valideerimine (proovikäivitus) — ei salvestata püsivalt                                                    |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY läbipaistva dekrüptimisega hõiverežiim — vt `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei kompileerita kataloogi `/docs`) |
 
 Täielikud OpenAPI skeemid: `docs/openapi.yaml` → silt `AgentBridge`.
 

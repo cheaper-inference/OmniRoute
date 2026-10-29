@@ -8,21 +8,21 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## विकास सेटअप
+## विकासासाठी सेटअप
 
 ### पूर्वआवश्यकता
 
-- **Node.js** `>=22.22.3 <23`, किंवा `>=24.0.0 <27` (शिफारस केलेले: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, किंवा `>=24.0.0 <27` (शिफारस केलेले: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ वापरकर्ते (Node 24+):** `npm install` नंतर, नेटिव्ह मॉड्यूल्स स्थापित झाली आहेत याची खात्री करा:
+> **npm v11+ वापरकर्ते (Node 24+):** `npm install` नंतर, नेटिव्ह मॉड्यूल्स इन्स्टॉल झाली आहेत याची खात्री करा:
 > `node -e "require('better-sqlite3')"`. ते `MODULE_NOT_FOUND` सह अयशस्वी झाल्यास,
-> `npm approve-scripts better-sqlite3 && npm install` चालवा. पहा
-> [समस्यानिवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> `npm approve-scripts better-sqlite3 && npm install` चालवा. अधिक माहितीसाठी
+> [समस्यानिवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) पहा.
 
 - **Git**
 
-### क्लोन करा आणि स्थापित करा
+### क्लोन आणि इन्स्टॉल करणे
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -30,7 +30,7 @@ cd OmniRoute
 npm install
 ```
 
-### पर्यावरण चल
+### पर्यावरणीय चल
 
 ```bash
 # टेम्प्लेटवरून तुमची .env फाइल तयार करा
@@ -41,9 +41,9 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-विकासासाठी प्रमुख चल:
+विकासासाठी महत्त्वाची चले:
 
-| चल                     | विकास डीफॉल्ट            | वर्णन                   |
+| चल                     | विकासासाठी डीफॉल्ट       | वर्णन                   |
 | ---------------------- | ------------------------ | ----------------------- |
 | `PORT`                 | `20128`                  | सर्व्हर पोर्ट           |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | फ्रंटएंडसाठी बेस URL    |
@@ -53,67 +53,67 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 ### डॅशबोर्ड सेटिंग्ज
 
-डॅशबोर्डमध्ये अशा वैशिष्ट्यांसाठी UI टॉगल उपलब्ध आहेत, जी पर्यावरण चलांद्वारेही कॉन्फिगर केली जाऊ शकतात:
+डॅशबोर्डमध्ये अशा वैशिष्ट्यांसाठी UI टॉगल्स दिली आहेत, जी पर्यावरणीय चलांद्वारेदेखील कॉन्फिगर करता येतात:
 
 | सेटिंगचे स्थान     | टॉगल               | वर्णन                          |
 | ------------------ | ------------------ | ------------------------------ |
 | सेटिंग्ज → प्रगत   | डीबग मोड           | डीबग विनंती लॉग सक्षम करा (UI) |
 | सेटिंग्ज → सामान्य | साइडबार दृश्यमानता | साइडबार विभाग दाखवा/लपवा       |
 
-ही सेटिंग्ज डेटाबेसमध्ये संग्रहित केली जातात आणि रीस्टार्टनंतरही कायम राहतात; सेट केल्यावर ती env var डीफॉल्टना अधिलिखित करतात.
+ही सेटिंग्ज डेटाबेसमध्ये संग्रहित केली जातात आणि रीस्टार्टनंतरही कायम राहतात; ती सेट केलेली असल्यास पर्यावरणीय चलांची डीफॉल्ट मूल्ये ओव्हरराइड करतात.
 
-### स्थानिकरित्या चालवणे
+### स्थानिकरीत्या चालवणे
 
 ```bash
-# विकास मोड (हॉट रीलोड)
+# विकास मोड (हॉट रिलोड)
 npm run dev
 
 # उत्पादन बिल्ड
-npm run build    # next build → .build/next/ त्यानंतर assembleStandalone → dist/
+npm run build    # next build → .build/next/ नंतर assembleStandalone → dist/
 npm run start
 
-# योगदानकर्त्यांच्या बदलांसाठी जलद बॅकएंड/API-केवळ कंपाइल
+# योगदानकर्त्यांच्या बदलांसाठी जलद बॅकएंड/API-पुरते संकलन
 npm run build:contributor
 
 # रिलीज बिल्ड (स्वच्छ रीबिल्ड + HEAD सेंटिनेल — डिप्लॉयसाठी आवश्यक)
 npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA लिहिते
 
-# सामान्य पोर्ट कॉन्फिगरेशन
+# सर्वसाधारण पोर्ट कॉन्फिगरेशन
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-योगदानकर्ता बिल्ड केवळ-कंपाइल प्रमाणीकरण करते: ते स्टँडअलोन
-वितरण असेंबल करत नाही किंवा पर्यायी नेटिव्ह पॅकेजिंग अॅसेट्स बिल्ड करत नाही. वितरणयोग्य बंडलचे
+योगदानकर्ता बिल्ड केवळ संकलनाचे प्रमाणीकरण करते: ते स्वतंत्र
+वितरण असेंबल करत नाही किंवा पर्यायी नेटिव्ह पॅकेजिंग अॅसेट्स बिल्ड करत नाही. वितरित करता येणाऱ्या बंडलचे
 प्रमाणीकरण करायचे असल्यास नियमित उत्पादन बिल्ड वापरा.
 
-### बिल्ड आउटपुट मांडणी
+### बिल्ड आउटपुटची रचना
 
-| निर्देशिका | सामग्री                                                                      | ट्रॅक केलेले |
-| ---------- | ---------------------------------------------------------------------------- | ------------ |
-| `src/`     | ॲप्लिकेशन स्रोत (TypeScript / TSX)                                           | होय          |
-| `.build/`  | मध्यवर्ती फाइल्स — `next build` आउटपुट (gitignored, `distDir = .build/next`) | नाही         |
-| `dist/`    | वितरणयोग्य बंडल — `assembleStandalone` द्वारे असेंबल केलेले (gitignored)     | नाही         |
+| निर्देशिका | सामग्री                                                                          | ट्रॅक केलेली |
+| ---------- | -------------------------------------------------------------------------------- | ------------ |
+| `src/`     | ॲप्लिकेशन स्रोत (TypeScript / TSX)                                               | होय          |
+| `.build/`  | मध्यवर्ती फाइल्स — `next build` आउटपुट (gitignored, `distDir = .build/next`)     | नाही         |
+| `dist/`    | वितरित करता येणारे बंडल — `assembleStandalone` द्वारे असेंबल केलेले (gitignored) | नाही         |
 
 बिल्ड पाइपलाइन एकाच पासमध्ये चालते:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js आउटपुट)
-  └─ assembleStandalone()                 (स्टँडअलोन + स्टॅटिक + पब्लिक + नेटिव्ह अॅसेट्स कॉपी करते)
+  └─ assembleStandalone()                 (standalone + static + public + नेटिव्ह अॅसेट्स कॉपी करते)
        └─ आउटपुट: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` याव्यतिरिक्त प्रथम दोन्ही निर्देशिका साफ करते आणि डिप्लॉय अखंडता सेंटिनेल म्हणून
+`npm run build:release` याव्यतिरिक्त सुरुवातीला दोन्ही निर्देशिका साफ करते आणि डिप्लॉय अखंडता सेंटिनेल म्हणून
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लिहिते.
 
-`npm run build:contributor` केवळ-बॅकएंड बिल्ड प्रोफाइल वापरते. बिल्ड करताना ते तात्पुरत्या स्वरूपात
-डॅशबोर्ड UI फाइल्ससाठी स्टब वापरते, API रूट हँडलर कायम ठेवते आणि बिल्डनंतर मूळ फाइल्स
+`npm run build:contributor` केवळ-बॅकएंड बिल्ड प्रोफाइल वापरते. बिल्ड करताना ते तात्पुरते
+डॅशबोर्ड UI फाइल्ससाठी स्टब्स वापरते, API रूट हँडलर्स कायम ठेवते आणि बिल्डनंतर मूळ फाइल्स
 पुनर्स्थापित करते. डॅशबोर्ड UI वर परिणाम करणाऱ्या बदलांसाठी किंवा संपूर्ण
-रिलीज प्रमाणीकरणासाठी `npm run build` वापरा; योगदानकर्ता प्रोफाइल हे रिलीज बिल्डचा पर्याय नाही.
+रिलीज प्रमाणीकरणासाठी `npm run build` वापरा; योगदानकर्ता प्रोफाइल हा रिलीज बिल्डचा पर्याय नाही.
 
-> **VPS डिप्लॉय टीप:** रिमोट इमेज निर्देशिका `/usr/lib/node_modules/omniroute/app/`
+> **VPS डिप्लॉय नोंद:** रिमोट इमेज निर्देशिका `/usr/lib/node_modules/omniroute/app/`
 > बदललेली नाही. डिप्लॉय कौशल्ये `dist/` मधील सामग्री त्यामध्ये rsync करतात.
-> केवळ रेपॉजिटरीमधील बिल्ड आउटपुट पथ बदलला (`app/` → `dist/`).
+> केवळ रेपॉझिटरीमधील बिल्ड आउटपुट पाथ बदलला आहे (`app/` → `dist/`).
 
 डीफॉल्ट URLs:
 
@@ -172,81 +172,82 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 # सर्व चाचण्या (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# एकच चाचणी फाइल (Node.js चे मूळ टेस्ट रनर — बहुतेक चाचण्या हे वापरतात)
+# एकच चाचणी फाइल (Node.js नेटिव्ह टेस्ट रनर — बहुतेक चाचण्या हेच वापरतात)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# केवळ तुमच्या बदलामुळे प्रभावित झालेल्या युनिट चाचण्या (CI गेटप्रमाणेच TIA निवडकर्ता, #8084)
-npm run test:scoped            # शेवटच्या कमिटमधील (किंवा वर्किंग ट्रीमधील) बदल
-npm run test:scoped:staged     # केवळ स्टेज केलेले बदल — प्री-कमिट रनसोबत उत्तम जुळते
-npm run test:scoped:full       # आधी इम्पोर्ट-ग्राफ मॅप पुन्हा तयार करा (फाइल्स जोडल्यानंतर/हलवल्यानंतर)
-# Exit 1 + "run the full suite" याचा अर्थ हब फाइल (tsconfig, package.json, …) किंवा एखादा
-# मॅप न केलेला स्रोत बदलला आहे — निवडकर्ता सुरक्षितपणे अयशस्वी होतो, तो कधीही गुपचूप वगळत नाही.
+# फक्त तुमच्या बदलामुळे प्रभावित झालेल्या unit चाचण्या (CI गेटसारखाच TIA सिलेक्टर, #8084)
+npm run test:scoped            # शेवटच्या commit मधील (किंवा working tree मधील) बदल
+npm run test:scoped:staged     # फक्त staged बदल — pre-commit रनसोबत चांगले जुळते
+npm run test:scoped:full       # प्रथम import-graph मॅप पुन्हा तयार करा (फाइल्स जोडल्यानंतर/हलवल्यानंतर)
+# Exit 1 + "संपूर्ण suite चालवा" याचा अर्थ hub फाइल (tsconfig, package.json, …) किंवा
+# मॅप न केलेला source बदलला आहे — सिलेक्टर सुरक्षितपणे अपयशी ठरतो; तो कधीही गुपचूप वगळत नाही.
 
-# Vitest (MCP सर्व्हर, autoCombo, कॅशे)
+# Vitest (MCP सर्व्हर, autoCombo, cache)
 npm run test:vitest
 
 # E2E चाचण्या (Playwright आवश्यक)
 npm run test:e2e
 
-# प्रोटोकॉल क्लायंट्सच्या E2E चाचण्या (MCP ट्रान्सपोर्ट्स, A2A)
+# Protocol clients E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# इकोसिस्टम सुसंगतता चाचण्या
+# Ecosystem सुसंगतता चाचण्या
 npm run test:ecosystem
 
-# कव्हरेज गेट: स्टेटमेंट्स/ओळी/फंक्शन्स/ब्रँचेससाठी 60%
+# Coverage गेट: statements/lines/functions/branches साठी 60%
 npm run test:coverage
 npm run coverage:report
 
-# लिंट + स्वरूप तपासणी
+# Lint + format तपासणी
 npm run lint
 npm run check
 
-# गेट केलेली वास्तविक-अपस्ट्रीम कॉम्बो स्मोक चाचणी (VPS प्रवेश + वास्तविक प्रदाता क्रेडिट्स आवश्यक)
-# वास्तविक प्रदात्यांना विनंत्या पाठवते — थोडा खर्च होतो. CI मध्ये कधीही चालत नाही. गेटशिवाय व्यवस्थितपणे वगळली जाते.
-# आवश्यक: ssh root@192.168.0.15 प्रवेश (VPS वरून केवळ-वाचनीय DB स्नॅपशॉट सोर्स करते).
+# गेट केलेली real-upstream combo smoke चाचणी (VPS प्रवेश + वास्तविक provider credits आवश्यक)
+# वास्तविक providers वापरते — थोडा खर्च होतो. CI मध्ये कधीही चालत नाही. गेट नसल्यास व्यवस्थित वगळली जाते.
+# आवश्यक: ssh root@192.168.0.15 प्रवेश (VPS वरून read-only DB snapshot वापरते).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS लाइव्ह स्मोक — साध्या Node ESM स्क्रिप्ट्स, लाइव्ह .15 सर्व्हरला थेट विनंत्या पाठवतात.
-# आवश्यक: ssh root@192.168.0.15 प्रवेश (SSH sqlite द्वारे कॉम्बो तयार केले/काढून टाकले जातात).
-# वास्तविक प्रदात्यांना विनंत्या पाठवते (कमी खर्च). केवळ __live_test__* कॉम्बो तयार करते/हटवते. CI मध्ये कधीही चालत नाही.
-# .15 वर REQUIRE_API_KEY=false असल्यामुळे API की आवश्यक नाही, पण सेट केले असल्यास COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY वापरते.
+# Phase-3 VPS live smoke — साध्या Node ESM scripts, थेट live .15 सर्व्हर वापरतात.
+# आवश्यक: ssh root@192.168.0.15 प्रवेश (SSH sqlite द्वारे combos तयार केले/हटवले जातात).
+# वास्तविक providers वापरते (कमी खर्च). फक्त __live_test__* combos तयार करते/हटवते. CI मध्ये कधीही चालत नाही.
+# .15 वर REQUIRE_API_KEY=false असल्यामुळे API key आवश्यक नाही, परंतु सेट केले असल्यास COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY वापरते.
 npm run test:combo:live:vps              # 7 HTTP परिस्थिती (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # वास्तविक क्रॉस-प्रोव्हायडर फेलओव्हर परिस्थिती जोडते (एकूण 8)
+npm run test:combo:live:vps:failover     # वास्तविक cross-provider failover परिस्थिती जोडते (एकूण 8)
 ```
 
-कव्हरेजविषयी नोंदी:
+Coverage विषयी नोंदी:
 
-- `npm run test:coverage` मुख्य युनिट चाचणी संचाचे स्रोत कव्हरेज मोजते, `tests/**` वगळते आणि `open-sse/**` समाविष्ट करते
-- पुल रिक्वेस्ट्सनी स्टेटमेंट्स/ओळी/फंक्शन्स/ब्रँचेससाठी कव्हरेज गेट **60%+** राखले पाहिजे
-- एखाद्या PR ने `src/`, `open-sse/`, `electron/`, किंवा `bin/` मधील प्रॉडक्शन कोड बदलल्यास, त्याच PR मध्ये स्वयंचलित चाचण्या जोडल्या किंवा अद्ययावत केल्या पाहिजेत
-- `npm run coverage:report` नवीनतम कव्हरेज रनमधील प्रत्येक फाइलचा तपशीलवार अहवाल दर्शवते
-- `npm run test:coverage:legacy` ऐतिहासिक तुलनेसाठी जुने मेट्रिक जतन करते
-- टप्प्याटप्प्याने कव्हरेज सुधारण्याचा आराखडा पाहण्यासाठी `docs/ops/COVERAGE_PLAN.md` पहा
+- `npm run test:coverage` मुख्य unit test suite साठी source coverage मोजते, `tests/**` वगळते आणि `open-sse/**` समाविष्ट करते
+- Pull requests मध्ये statements/lines/functions/branches साठी coverage गेट **60%+** राखणे आवश्यक आहे
+- एखाद्या PR मध्ये `src/`, `open-sse/`, `electron/` किंवा `bin/` मधील production code बदलल्यास, त्याच PR मध्ये automated tests जोडणे किंवा अद्ययावत करणे आवश्यक आहे
+- `npm run coverage:report` नवीनतम coverage run मधील तपशीलवार, प्रत्येक फाइलनुसार report दाखवते
+- `npm run test:coverage:legacy` ऐतिहासिक तुलनेसाठी जुने metric जतन करते
+- टप्प्याटप्प्याने coverage सुधारण्याचा roadmap पाहण्यासाठी `docs/ops/COVERAGE_PLAN.md` पहा
 
-### पुल रिक्वेस्टच्या आवश्यकता
+### Pull Request आवश्यकता
 
-PR उघडण्यापूर्वी, तुम्ही बदललेल्या भागासाठी केंद्रित लूप चालवण्यासाठी
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) वापरा. संपूर्ण युनिट संच (4 CI शार्ड्स), Vitest, **60%+** कव्हरेज गेट आणि
-प्रॉडक्शन बिल्ड ही CI ची जबाबदारी आहे — ती स्थानिकरीत्या चालवल्याने PR
-तपासण्यांमधून आधीच मिळणार नाही अशी कोणतीही अतिरिक्त माहिती मिळत नाही आणि लहान मशीनवर त्यामुळे होस्ट पूर्ण क्षमतेने वापरला जाऊ शकतो (#8084):
+PR उघडण्यापूर्वी, तुम्ही केलेल्या बदलांसाठी focused loop चालवण्यासाठी
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) वापरा. संपूर्ण unit suite (4 CI shards), Vitest, **60%+** coverage गेट आणि
+production build ही CI ची जबाबदारी आहे — ती स्थानिक पातळीवर चालवल्याने PR
+तपासण्यांतून आधीच मिळणार नाही अशी कोणतीही अतिरिक्त माहिती मिळत नाही आणि लहान मशीनवर त्यामुळे host पूर्ण क्षमतेने वापरला जाऊ शकतो (#8084):
 
-- तुमचा बदल कव्हर करणाऱ्या चाचणी फाइल्स चालवा: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- तुमचा बदल समाविष्ट करणाऱ्या test files चालवा: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` चालवा
-- प्रॉडक्शन कोड बदलल्यावर त्याच PR मध्ये स्वयंचलित चाचण्या समाविष्ट करा किंवा अद्ययावत करा
-- प्रॉडक्शन कोड बदलल्यावर बदललेल्या किंवा जोडलेल्या चाचणी फाइल्स PR वर्णनात नमूद करा
-- CI मध्ये प्रकल्पाची सिक्रेट्स कॉन्फिगर केलेली असतील, तेव्हा PR वरील SonarQube निकाल तपासा
+- production code बदलल्यावर त्याच PR मध्ये automated tests समाविष्ट करा किंवा अद्ययावत करा
+- `node:test` फाइल्समध्ये, प्रत्येक top-level `await` (उदाहरणार्थ `await import(...)`) पहिल्या `test()` / `describe()` च्या आधी ठेवा: `--test-force-exit` अंतर्गत, त्यानंतर नोंदवलेल्या चाचण्या कधीही न चालता गुपचूप राहू शकतात (#18045; `npm run check:test-tla-order` द्वारे लागू केलेले)
+- production code बदलल्यावर PR वर्णनात बदललेल्या किंवा जोडलेल्या test files समाविष्ट करा
+- CI मध्ये project secrets configure केलेले असताना PR वरील SonarQube result तपासा
 
-सध्याची चाचणी स्थिती: **122 युनिट चाचणी फाइल्स**, ज्यांत खालील बाबी समाविष्ट आहेत:
+सध्याची चाचणी स्थिती: **122 unit test files**, ज्यांत पुढील बाबी समाविष्ट आहेत:
 
-- प्रदाता ट्रान्सलेटर आणि स्वरूप रूपांतरण
-- रेट लिमिटिंग, सर्किट ब्रेकर आणि लवचिकता
-- सिमॅंटिक कॅशे, आयडेम्पोटन्सी आणि प्रगती ट्रॅकिंग
-- डेटाबेस ऑपरेशन्स आणि स्कीमा (21 DB मॉड्यूल्स)
-- OAuth प्रवाह आणि प्रमाणीकरण
-- API एंडपॉइंट प्रमाणीकरण (Zod v4)
-- MCP सर्व्हर टूल्स आणि स्कोपची अंमलबजावणी
-- Memory आणि Skills प्रणाली
+- Provider translators आणि format conversion
+- Rate limiting, circuit breaker आणि resilience
+- Semantic cache, idempotency आणि progress tracking
+- Database operations आणि schema (21 DB modules)
+- OAuth flows आणि authentication
+- API endpoint validation (Zod v4)
+- MCP server tools आणि scope enforcement
+- Memory आणि Skills systems
 
 ---
 
@@ -286,65 +287,72 @@ PR उघडण्यापूर्वी, तुम्ही बदलले�
 
 ---
 
-## Project Structure
+## प्रकल्प संरचना
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # डॅशबोर्ड पृष्ठे (23 विभाग)
+│   ├── api/                # API मार्ग (51 निर्देशिका)
+│   └── login/              # प्रमाणीकरण पृष्ठे (.tsx)
+├── domain/                 # धोरण इंजिन (policyEngine, comboResolver, costRules, इत्यादी)
+├── lib/                    # मुख्य व्यवसाय तर्कशास्त्र (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 प्रोटोकॉल सर्व्हर
+│   ├── acp/                # Agent Communication Protocol नोंदणी
+│   ├── compliance/         # अनुपालन धोरण इंजिन
+│   ├── db/                 # SQLite डोमेन मॉड्यूल्स + 130 स्थलांतरे
+│   ├── memory/             # कायमस्वरूपी संभाषणात्मक स्मृती
+│   ├── oauth/              # OAuth प्रदाते, सेवा आणि उपयुक्तता
+│   ├── skills/             # विस्तारक्षम कौशल्य फ्रेमवर्क
+│   ├── usage/              # वापराचा मागोवा आणि खर्चाची गणना
+│   └── localDb.ts          # केवळ पुनर्निर्यात स्तर — येथे कधीही तर्कशास्त्र जोडू नका
+├── middleware/              # विनंती मिडलवेअर (promptInjectionGuard)
+├── mitm/                   # MITM प्रॉक्सी (प्रमाणपत्र, DNS, लक्ष्य रूटिंग)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # React घटक (.tsx)
+│   ├── constants/          # प्रदाता व्याख्या (329), MCP व्याप्ती, 20 रूटिंग धोरणे
+│   ├── utils/              # सर्किट ब्रेकर, सॅनिटायझर, प्रमाणीकरण सहाय्यके
+│   └── validation/         # Zod v4 स्कीमा
+└── sse/                    # SSE प्रॉक्सी पाइपलाइन
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse कार्यक्षेत्र
+├── executors/              # 150 एक्झिक्युटर मॉड्यूल्स (एक्झिक्युटर वर्ग + प्रत्येक प्रदात्यासाठी सहाय्यके)
+├── handlers/               # 11 विनंती हँडलर्स (चॅट, प्रतिसाद, एम्बेडिंग्ज, प्रतिमा, इत्यादी)
+├── mcp-server/             # MCP सर्व्हर (110 अद्वितीय साधने, 3 ट्रान्सपोर्ट्स, 33 व्याप्ती)
+├── services/               # 178 उच्च-स्तरीय सेवा (combo, autoCombo, rateLimitManager, इत्यादी)
+├── translator/             # स्वरूप अनुवादक (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API ट्रान्सफॉर्मर
+└── utils/                  # 22 उपयुक्तता मॉड्यूल्स (स्ट्रीम, TLS, प्रॉक्सी, लॉगिंग)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Electron डेस्कटॉप ॲप (बहु-प्लॅटफॉर्म)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Node.js चाचणी रनर (1,574 चाचणी फाइल्स)
+├── integration/            # एकत्रीकरण चाचण्या
+├── e2e/                    # Playwright चाचण्या
+├── security/               # सुरक्षा चाचण्या
+├── translator/             # अनुवादक-विशिष्ट चाचण्या
+└── load/                   # भार चाचण्या
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # आर्किटेक्चर निर्णय नोंदी
+├── architecture/            # प्रणाली आर्किटेक्चर आणि लवचिकता
+├── comparison/              # OmniRoute विरुद्ध पर्याय
+├── compression/             # संक्षेपण मार्गदर्शिका आणि नियम
+├── dev/                     # विकास मार्गदर्शिका
+├── diagrams/                # आर्किटेक्चर आकृत्या
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # वापरकर्ता मार्गदर्शिका, Docker, सेटअप, समस्यानिवारण
+├── i18n/                    # आंतरराष्ट्रीयीकृत README भाषांतरे
+├── marketing/               # विपणन साहित्य
+├── ops/                     # उपयोजन, प्रॉक्सी, व्याप्ती, प्रकाशने
+├── providers/               # प्रदाता-विशिष्ट दस्तऐवज
+├── reference/               # API संदर्भ, पर्यावरण चल, CLI साधने, विनामूल्य स्तर
+├── releases/                # प्रकाशन टिपणे
+├── routing/                 # स्वयं-कॉम्बो इंजिन, तर्क पुनरावृत्ती
+├── screenshots/             # डॅशबोर्ड स्क्रीनशॉट्स
+├── security/                # सुरक्षात्मक मर्यादा, अनुपालन, गुप्तता, टोकन्स
+└── specs/                   # डिझाइन तपशील
 ```
 
 ---
@@ -404,9 +412,13 @@ OAuth क्रेडेन्शियल्स `src/lib/oauth/constants/oauth.
 
 ---
 
-## Releasing
+## रिलीझ करणे
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+रिलीझचे व्यवस्थापन `/generate-release` वर्कफ्लोद्वारे केले जाते. नवीन GitHub Release तयार केल्यावर, पॅकेज GitHub Actions द्वारे **स्वयंचलितपणे npm वर प्रकाशित केले जाते**.
+
+VPS डिप्लॉयसाठी, `npm run build` ऐवजी `npm run build:release` वापरा — हे पूर्णपणे स्वच्छ
+रीबिल्ड करते, बंडल `dist/` मध्ये एकत्र करते आणि `dist/BUILD_SHA` सेंटिनेल लिहिते.
+त्यानंतर रिमोट `app/` डिरेक्टरीमध्ये `dist/` rsync करणारी `/deploy-vps-*-cc` कौशल्ये वापरा.
 
 ---
 

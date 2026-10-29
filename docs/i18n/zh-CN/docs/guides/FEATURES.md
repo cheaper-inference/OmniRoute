@@ -297,13 +297,13 @@ OmniRoute 现在通过 `/v1/ws` 升级端点支持**兼容 OpenAI 的 WebSocket 
 
 ## 🔑 同步令牌与配置包 _(v3.6.6+)_
 
-现在可通过**限定作用域的同步令牌**实现多设备和外部操作员访问：
+现在可以通过**限定作用域的同步令牌**实现多设备和外部操作方访问：
 
 - **`POST /api/sync/tokens`** — 签发新的同步令牌（限定作用域，可选过期时间）
 - **`DELETE /api/sync/tokens/:id`** — 撤销令牌
-- **`GET /api/sync/bundle`** — 下载包含所有非敏感设置的、带版本且以 ETag 为键的 JSON 快照（密码已脱敏）
+- **`GET /api/sync/bundle`** — 下载带版本号并以 ETag 为键的配置 JSON 快照（仅使用同步令牌进行身份验证）。其中会移除仪表板密码等身份验证设置，但会包含提供者凭据和 API 密钥，因此请将该文件视为机密信息
 
-配置包由 `src/lib/sync/bundle.ts` 构建。使用方通过比较 `ETag` 响应头来检测变更，无需重新下载完整载荷。
+配置包由 `src/lib/sync/bundle.ts` 构建。使用方通过比较 `ETag` 响应头来检测变更，无需重新下载完整的有效载荷。在 CLI 中，使用 `omniroute sync bundle <outPath> --token <syncToken>`（或 `OMNIROUTE_SYNC_TOKEN`）可将其保存为仅所有者可访问的文件。
 
 ---
 

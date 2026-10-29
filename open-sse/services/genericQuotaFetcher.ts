@@ -16,8 +16,13 @@
  * tests) can discover which windows that provider exposes.
  */
 
-import { getUsageForProvider, USAGE_FETCHER_PROVIDERS } from "./usage.ts";
+import { toNumberOrNull } from "@/shared/utils/numeric";
+
+import { hasOllamaPurchasedCredits } from "./ollamaPurchasedCredits.ts";
+import type { getUsageForProvider } from "./usage.ts";
+import { USAGE_FETCHER_PROVIDERS } from "./usage/fetcherProviders.ts";
 import {
+  getQuotaCacheInvalidator,
   getQuotaFetcher,
   registerQuotaFetcher,
   registerQuotaWindows,
@@ -26,7 +31,6 @@ import {
 } from "./quotaPreflight.ts";
 import { getAntigravityQuotaFamily, getQuotaFetchScope } from "./antigravityQuotaFamily.ts";
 import { boundedMap } from "../../src/lib/quota/boundedMap.ts";
-import { toNumberOrNull } from "@/shared/utils/numeric";
 
 type UsageFetcher = (
   connection: Parameters<typeof getUsageForProvider>[0],
@@ -78,7 +82,7 @@ export function __resetGenericQuotaFetcherForTests(): void {
 
 // One entry per (provider, connection); 4096 keeps even very large account pools
 // from ever evicting. An evicted entry only costs one extra upstream quota read.
-const cache = boundedMap<QuotaInfo>("quota-fetcher-cache", 4096, "ttl", CACHE_TTL_MS);
+const cache = boundedMap<QuotaInfo | null>("quota-fetcher-cache", 4096, "ttl", CACHE_TTL_MS);
 
 function connectionKey(provider: string, connectionId: string): string {
   return `${provider.trim()}::${connectionId.trim()}`;
@@ -114,11 +118,14 @@ function markPendingForceRefreshMiss(key: string): void {
   if (isPendingForceRefresh(key)) pendingForceRefreshMiss.set(key, Date.now());
 }
 
-function cachedQuotaIfFresh(key: string, forceRefresh: boolean, now: number): QuotaInfo | null {
-  if (forceRefresh) return null;
-  const cached = cache.get(key, now);
-  if (cached !== undefined) return cached;
-  return null;
+function cachedQuotaIfFresh(
+  key: string,
+  forceRefresh: boolean,
+  now: number
+): QuotaInfo | null | undefined {
+  if (forceRefresh) return undefined;
+  // undefined is a miss; null is a confirmed paid observation with unknown total headroom.
+  return cache.get(key, now);
 }
 
 function isForceRefreshMissCooling(key: string, forceRefresh: boolean, now: number): boolean {
@@ -132,6 +139,24 @@ function isConcurrentForceRefresh(key: string, refreshStamp: number | undefined)
   const currentStamp = pendingForceRefresh.get(key);
   if (currentStamp === refreshStamp) return false;
   return currentStamp !== undefined && Date.now() - currentStamp <= PENDING_FORCE_REFRESH_TTL_MS;
+}
+
+function recordUnmeasurableQuotaRead(
+  usage: unknown,
+  provider: string,
+  key: string,
+  forceKey: string,
+  refreshStamp: number | undefined
+): void {
+  if (!hasOllamaPurchasedCredits(usage, provider)) {
+    markPendingForceRefreshMiss(forceKey);
+    return;
+  }
+  if (isConcurrentForceRefresh(forceKey, refreshStamp)) return;
+  pendingForceRefresh.delete(forceKey);
+  pendingForceRefreshMiss.delete(forceKey);
+  // Cache the successful observation without inventing a quota or clearing the window catalog.
+  cache.set(key, null);
 }
 
 // 5min — same TTL as the original reap (CACHE_TTL_MS * 5). Expiry lazy on read
@@ -233,12 +258,21 @@ function aggregateGroupedQuotaValues(
   return { percentUsed, resetAt };
 }
 
+function quotaUsageRecord(
+  usage: unknown,
+  provider?: string | null
+): Record<string, unknown> | null {
+  if (!usage || typeof usage !== "object") return null;
+  const record = usage as Record<string, unknown>;
+  return hasOllamaPurchasedCredits(record, provider) ? null : record;
+}
+
 export function convertUsageToQuotaInfo(
   usage: unknown,
   context: UsageToQuotaContext = {}
 ): QuotaInfo | null {
-  if (!usage || typeof usage !== "object") return null;
-  const usageRecord = usage as Record<string, unknown>;
+  const usageRecord = quotaUsageRecord(usage, context.provider);
+  if (!usageRecord) return null;
   if (
     typeof usageRecord.message === "string" &&
     (!usageRecord.quotas || typeof usageRecord.quotas !== "object")
@@ -292,8 +326,14 @@ export function convertUsageToQuotaInfo(
 
   const normalized = normalizeQuotaWindows(providerScopedWindows, context);
   const { percentUsed, resetAt } = aggregateGroupedQuotaValues(providerScopedWindows);
+  const bootstrap = usageRecord.bootstrap as Record<string, unknown> | null | undefined;
+  const plan = [bootstrap?.organization_rate_limit_tier, usageRecord.plan]
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim())
+    .find((value) => value.length > 0);
 
   return {
+    ...(plan ? { plan } : {}),
     used: 0,
     total: 0,
     percentUsed,
@@ -407,7 +447,7 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
   const now = Date.now();
   const forceRefresh = isPendingForceRefresh(forceKey, now);
   const hit = cachedQuotaIfFresh(key, forceRefresh, now);
-  if (hit) return hit;
+  if (hit !== undefined) return hit;
   // convert-null / throw keep the force-refresh flag (agy inner caches are
   // still stale) but must not hammer those endpoints on every routing tick.
   if (isForceRefreshMissCooling(forceKey, forceRefresh, now)) return null;
@@ -418,7 +458,7 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
 
   let usage: unknown;
   try {
-    const fetchUsage = usageFetcherOverride ?? getUsageForProvider;
+    const fetchUsage = usageFetcherOverride ?? (await import("./usage.ts")).getUsageForProvider;
     usage = await fetchUsage(conn as Parameters<typeof getUsageForProvider>[0], {
       ...(forceRefresh ? { forceRefresh: true } : {}),
     });
@@ -429,7 +469,7 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
 
   const quota = convertUsageToQuotaInfo(usage, { provider, requestedModel });
   if (!quota) {
-    markPendingForceRefreshMiss(forceKey);
+    recordUnmeasurableQuotaRead(usage, provider, key, forceKey, refreshStamp);
     return null;
   }
 
@@ -470,11 +510,13 @@ export function invalidateGenericQuotaCache(provider: string, connectionId: stri
 }
 
 /**
- * Drop the generic quota cache after an upstream 429, matching Codex's
- * `invalidateCodexQuotaCache` on 429. Probe-origin failures must not mutate
- * routing caches (#9817).
+ * Drop the provider's cached quota snapshot after an upstream 429 so the next
+ * preflight reads fresh usage instead of serving a stale snapshot. A bespoke
+ * fetcher drops its own cache through the invalidator it registered for the
+ * provider; providers served by the generic wrapper keep the generic cache drop.
+ * Probe-origin failures must not mutate routing caches (#9817).
  */
-export function invalidateGenericQuotaCacheOnStatus(args: {
+export function invalidateQuotaCacheOnStatus(args: {
   provider: string | null | undefined;
   connectionId: string | null | undefined;
   status: number;
@@ -485,7 +527,9 @@ export function invalidateGenericQuotaCacheOnStatus(args: {
   const provider = typeof args.provider === "string" ? args.provider.trim() : "";
   const connectionId = typeof args.connectionId === "string" ? args.connectionId.trim() : "";
   if (!provider || !connectionId) return false;
-  invalidateGenericQuotaCache(provider, connectionId);
+  const invalidator = getQuotaCacheInvalidator(provider);
+  if (invalidator) invalidator(connectionId);
+  else invalidateGenericQuotaCache(provider, connectionId);
   return true;
 }
 

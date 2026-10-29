@@ -11,7 +11,7 @@
  * correct auth check — the same remedy already applied to dify (#11002) and bytez (#5422).
  */
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
-import { normalizeBaseUrl } from "./urlHelpers";
+import { normalizeBaseUrl, resolveV1ChatCompletionsUrl } from "./urlHelpers";
 import { buildBearerHeaders } from "./headers";
 import { validateDirectChatProvider } from "./directChatProbe";
 
@@ -24,13 +24,7 @@ export const ZYLO_DEFAULT_VALIDATION_MODEL_ID = "gpt-oss";
  * always returns `{base}/v1/chat/completions`.
  */
 export function resolveZyloChatUrl(baseUrl: string) {
-  const normalized = normalizeBaseUrl(baseUrl);
-  if (!normalized) return "";
-  const cleaned = normalized
-    .replace(/\/chat\/completions$/, "")
-    .replace(/\/models$/, "")
-    .replace(/\/v1$/, "");
-  return `${cleaned}/v1/chat/completions`;
+  return resolveV1ChatCompletionsUrl(baseUrl);
 }
 
 export async function validateZyloApiProvider({ apiKey, providerSpecificData = {} }: any) {

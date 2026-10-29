@@ -31,21 +31,22 @@
 
 ## Oge nkwado LTS (v3.9.x)
 
-Mgbe 3.8.59 gasịrị, ụdị na-esote bụ **3.9.0**, nke ga-emepe ahịrị nkwado ogologo oge na
-alaka `stable/v3` (lee [`ROADMAP.md`](ROADMAP.md) → "Phase 3 — v3.9.0 LTS").
+Mgbe 3.8.59 gasịrị, ụdị na-esote bụ **3.9.0**, nke na-amalite usoro nkwado ogologo oge na
+alaka `stable/v3` (lee [`ROADMAP.md`](ROADMAP.md) → "Nkeji 3 — v3.9.0 LTS").
 
 - **Ihe `stable/v3` na-enweta:** ndozi ntụpọ, mmelite nchekwa na mmelite ndị na-eweta ọrụ. Atụmatụ
-  ọhụrụ na-aga na chanel v4; ahịrị LTS na-ebute nkwụsi ike ụzọ. `npm install omniroute`
-  (`latest` dist-tag) ga-anọgide na v3 n'oge usoro v4 niile.
-- **Ogologo oge nkwado:** `<T-GAP-3: mkpebi onye nwe ya ka na-echere — lee ROADMAP.md>`. Ogologo
-  oge nkwado mgbe v4.0 GA gasịrị (mgbe `latest` gafere na v4) **ekpebibeghị ya**; a ga-emelite
-  ngalaba a mgbe onye na-elekọta ya kwupụtara ya. Ruo mgbe ahụ, echekwala na e nwere ụbọchị njedebe.
-- **Ịkọpụta adịghị ike n'ahịrị LTS:** jiri otu chanel ahụ a na-eji maka ụdị ọ bụla ọzọ —
-  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) nke nzuzo,
-  ọ bụghị okwu ọhaneze. Kwuo ụdị ị nwalere (dịka ọmụmaatụ `3.9.2`); ndozi ga-abanye na
-  `stable/v3` ma nyefee ya gaa n'ihu na v4.
-- **Ntọala nchekwa n'oge nkewa LTS:** a na-edekọ ọnọdụ nyocha a tụrụ, ihe akaebe route-guard na
-  ihe akaebe nzere ọhaneze na
+  ọhụrụ na-aga na ọwa v4; usoro LTS na-ebute nkwụsi ike ụzọ. `npm install omniroute`
+  (`latest` dist-tag) ga-anọgide na v3 n’oge usoro v4 niile.
+- **Ogologo oge ahụ:** `stable/v3` ga-enweta **ndozi nchekwa na ndozi ndaghachi dị oke njọ ruo
+  ọnwa 12 mgbe e wepụtara 3.9.0, ma ọ bụ ruo ụbọchị 90 mgbe e bipụtara v4.0.0 dị ka `latest` —
+  nke ọ bụla mechara**. A ga-edekọ ụbọchị njedebe sitere na nke a na ndetu mwepụta 3.9.0 nakwa na
+  [`ROADMAP.md`](ROADMAP.md) mgbe mwepụta ahụ mere.
+- **Ịkọ adịghị ike nchekwa n’usoro LTS:** jiri otu ọwa ahụ a na-eji maka ụdị ọ bụla ọzọ —
+  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) nzuzo,
+  ọ bụghị mkpesa ọhaneze ma ọlị. Kwuo ụdị ị nwalere (dịka ọmụmaatụ `3.9.2`); ndozi ga-abata na
+  `stable/v3`, a ga-ebufekwa ha gaa n’ihu na v4.
+- **Ntọala nchekwa mgbe e wepụtara LTS:** a na-edekọ ọnọdụ nyocha e tụrụ atụ, route-guard na
+  ihe akaebe nke nzere ọhaneze na
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

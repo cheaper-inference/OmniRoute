@@ -72,6 +72,16 @@ curl -i \
 
 ਕੋਈ ਗੈਰ-`manage` ਕੁੰਜੀ (ਜਾਂ Bearer ਨਾ ਹੋਣਾ) `403 LOCAL_ONLY` ਵਾਪਸ ਕਰਦੀ ਹੈ। ਨਾਲ ਵਾਲੇ ਪ੍ਰੀਫਿਕਸ `/api/cli-tools/runtime/*` ਨੂੰ ਜਾਣ-ਬੁੱਝ ਕੇ ਬਾਈਪਾਸਯੋਗ ਨਹੀਂ ਬਣਾਇਆ ਗਿਆ—[Route Guard ਪੱਧਰ—Manage-ਸਕੋਪ ਛੋਟ](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) ਵੇਖੋ।
 
+### Origin ਪ੍ਰਮਾਣਿਕਤਾ
+
+ਪ੍ਰਮਾਣੀਕਰਨ ਤੋਂ ਬਾਅਦ `/api/mcp/*` ਨੂੰ ਜਾਣ ਵਾਲੀ ਹਰ ਬੇਨਤੀ — ਟ੍ਰਾਂਸਪੋਰਟ ਅਤੇ `status`, `tools`, `audit`, `restart` ਵਰਗੇ ਪ੍ਰਬੰਧਨ ਰੂਟ — ਦੇ `Origin` ਹੈਡਰ ਦੀ ਜਾਂਚ ਹੁੰਦੀ ਹੈ, ਕਾਲਰ ਭਾਵੇਂ ਕੋਈ ਵੀ ਹੋਵੇ (API ਕੁੰਜੀ, CLI ਟੋਕਨ, ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਜਾਂ ਲੌਗਇਨ ਬੰਦ ਹੋਣ 'ਤੇ ਅਗਿਆਤ loopback)। ਇਹ MCP Streamable HTTP ਨਿਰਧਾਰਨ ਵੱਲੋਂ ਲੋੜੀਂਦੀ DNS rebinding ਸੁਰੱਖਿਆ ਹੈ।
+
+- **ਕੋਈ `Origin` ਹੈਡਰ ਨਹੀਂ** → ਇਜਾਜ਼ਤ ਹੈ। OmniRoute CLI, SDK ਅਤੇ IDE ਕਲਾਇੰਟ ਇਸਨੂੰ ਨਹੀਂ ਭੇਜਦੇ।
+- **ਮਨਜ਼ੂਰ `Origin`** → ਕਿਸੇ ਵੀ ਪੋਰਟ 'ਤੇ `localhost` / `127.0.0.1` / `[::1]`, ਜਾਂ OmniRoute ਦਾ ਆਪਣਾ ਜਨਤਕ origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, ਭਰੋਸੇਯੋਗ ਰਿਵਰਸ ਪ੍ਰੌਕਸੀ ਵੱਲੋਂ ਫਾਰਵਰਡ ਕੀਤਾ origin (`OMNIROUTE_TRUST_PROXY`, ਸਿਰਫ਼ ਜਦੋਂ base URL ਸੈੱਟ ਨਾ ਹੋਵੇ), ਜਾਂ ਸਿੱਧਾ ਪਹੁੰਚਿਆ loopback/LAN IP ਹੋਸਟ। ਸਿਰਫ਼ `Host` ਹੈਡਰ ਕਦੇ ਵੀ ਕਿਸੇ origin ਨੂੰ ਭਰੋਸੇਯੋਗ ਨਹੀਂ ਬਣਾਉਂਦਾ।
+- **`null` ਸਮੇਤ ਕੋਈ ਵੀ ਹੋਰ `Origin`** → JSON-RPC ਗਲਤੀ ਬਾਡੀ ਨਾਲ `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`। ਵੈਧ CSRF ਟੋਕਨ ਪੇਸ਼ ਕਰਨ ਵਾਲਾ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਹੋਰ ਡੈਸ਼ਬੋਰਡ ਲਿਖਤਾਂ ਵਾਂਗ, ਅਜੇ ਵੀ ਸਵੀਕਾਰ ਹੁੰਦਾ ਹੈ।
+
+ਰਿਵਰਸ ਪ੍ਰੌਕਸੀ ਪਿੱਛੇ ਪਰੋਸੇ ਜਾਂਦੇ ਬ੍ਰਾਊਜ਼ਰ MCP ਕਲਾਇੰਟ ਨੂੰ `OMNIROUTE_PUBLIC_BASE_URL` ਚਾਹੀਦਾ ਹੈ; ਹੋਰ origins ਲਈ ਕੋਈ ਇਜਾਜ਼ਤ-ਸੂਚੀ ਨਹੀਂ। CORS ਪ੍ਰੀਫਲਾਈਟ (`OPTIONS`) ਦੀ Origin ਜਾਂਚ ਨਹੀਂ ਹੁੰਦੀ; ਉਸ ਤੋਂ ਬਾਅਦ ਵਾਲੀ ਬੇਨਤੀ ਦੀ ਹੁੰਦੀ ਹੈ।
+
 ## IDE ਸੰਰਚਨਾ
 
 Claude Desktop, Cursor, Cline ਅਤੇ ਅਨੁਕੂਲ MCP ਕਲਾਇੰਟ ਸੈਟਅੱਪ ਲਈ [MCP ਕਲਾਇੰਟ ਸੰਰਚਨਾ](../guides/SETUP_GUIDE.md#mcp-client-configuration) ਵੇਖੋ।
@@ -284,107 +294,110 @@ SSE ਅਤੇ ਸਟ੍ਰੀਮਯੋਗ HTTP—ਦੋਵੇਂ ਟ੍ਰਾਂ
 ## ਪ੍ਰਮਾਣੀਕਰਨ ਅਤੇ ਸਕੋਪ
 
 MCP ਟੂਲ ਕਾਲਾਂ ਕਾਲਰ ਤੋਂ ਸਕੋਪ ਸਟ੍ਰਿੰਗਾਂ ਪੜ੍ਹਦੀਆਂ ਹਨ। ਇਹ ਜਾਂਚ ਤਿੰਨ
-ਸੁਤੰਤਰ ਨੇਮਸਪੇਸਾਂ ਵਿੱਚੋਂ ਇੱਕ ਹੈ। ਇੱਕ ਚੈਕਰ ਤੋਂ ਪਾਸ ਹੋਣਾ ਬਾਕੀਆਂ ਤੋਂ ਪਾਸ ਹੋਣਾ ਨਹੀਂ ਹੈ।
+ਸੁਤੰਤਰ ਨੇਮਸਪੇਸਾਂ ਵਿੱਚੋਂ ਇੱਕ ਹੈ। ਇੱਕ ਚੈਕਰ ਤੋਂ ਮਿਲੀ ਮਨਜ਼ੂਰੀ ਦੂਜਿਆਂ ਲਈ ਮਨਜ਼ੂਰੀ ਨਹੀਂ ਹੈ।
 ਨਿਯਮ [ਤਿੰਨ ਸਕੋਪ ਨੇਮਸਪੇਸ](#three-scope-namespaces) ਵਿੱਚ ਹਨ।
-ਟੂਲ ਕੈਟਾਲਾਗ [MCP ਟੂਲ ਸਕੋਪ](#mcp-tool-scopes) ਹੈ।
+ਟੂਲ ਕੈਟਾਲਾਗ [MCP ਟੂਲ ਸਕੋਪ](#mcp-tool-scopes) ਵਿੱਚ ਹੈ।
 
 ### ਤਿੰਨ ਸਕੋਪ ਨੇਮਸਪੇਸ
 
-ਇੱਕ API ਕੁੰਜੀ ਉੱਤੇ `manage`, ਇੱਕ MCP ਟੂਲ ਉੱਤੇ `read:compression`, ਅਤੇ ਇੱਕ
-`oma_live_…` ਐਕਸੈੱਸ ਟੋਕਨ ਉੱਤੇ `read` ਤਿੰਨ ਵੱਖ-ਵੱਖ ਮਨਜ਼ੂਰੀਆਂ ਹਨ। ਜਿਹੜੇ ਕਾਲਰ
-ਕਿਸੇ ਤਬਦੀਲੀ ਕਰਨ ਵਾਲੇ ਪ੍ਰਬੰਧਨ ਰੂਟ ਨੂੰ `read` ਐਕਸੈੱਸ ਟੋਕਨ ਭੇਜਦੇ ਹਨ, ਉਨ੍ਹਾਂ ਨੂੰ HTTP 403
+ਕਿਸੇ API ਕੁੰਜੀ ਉੱਤੇ `manage`, ਕਿਸੇ MCP ਟੂਲ ਉੱਤੇ `read:compression`, ਅਤੇ ਕਿਸੇ
+`oma_live_…` ਐਕਸੈੱਸ ਟੋਕਨ ਉੱਤੇ `read` ਤਿੰਨ ਵੱਖ-ਵੱਖ ਮਨਜ਼ੂਰੀਆਂ ਹਨ। ਜਿਹੜੇ ਕਾਲਰ ਕਿਸੇ ਤਬਦੀਲੀ ਕਰਨ ਵਾਲੇ
+ਪ੍ਰਬੰਧਨ ਰੂਟ ਨੂੰ `read` ਐਕਸੈੱਸ ਟੋਕਨ ਭੇਜਦੇ ਹਨ, ਉਨ੍ਹਾਂ ਨੂੰ HTTP 403
 `Access token scope 'read' is insufficient; 'write' required.`
-ਮਿਲਦਾ ਹੈ। ਉਹ ਰੈਂਕ `scopeSatisfies` ਹੈ। ਇਹ MCP ਸਾਰਣੀ ਦੀ ਜਾਂਚ ਨਹੀਂ ਕਰਦਾ, ਅਤੇ MCP
-ਮੈਚਰ ਵੀ ਇਸ ਦੀ ਜਾਂਚ ਨਹੀਂ ਕਰਦਾ।
+ਮਿਲਦਾ ਹੈ। ਇਹ ਰੈਂਕ `scopeSatisfies` ਹੈ। ਇਹ MCP ਟੇਬਲ ਨੂੰ ਨਹੀਂ ਵੇਖਦਾ, ਅਤੇ MCP
+ਮੈਚਰ ਵੀ ਇਸਨੂੰ ਨਹੀਂ ਵੇਖਦਾ।
 
-| ਨੇਮਸਪੇਸ           | ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ                                                   | ਚੈਕਰ                       | ਪਾਸ ਹੋਣ ਨਾਲ ਕੀ ਕਰਨ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ                      |
-| :---------------- | :------------------------------------------------------------- | :------------------------- | :------------------------------------------------------- |
-| API-ਕੁੰਜੀ ਪ੍ਰਬੰਧਨ | `api_keys.scopes`                                              | `hasManageScope`           | ਉਸ Bearer ਕੁੰਜੀ ਲਈ ਪ੍ਰਬੰਧਨ REST                          |
-| API-ਕੁੰਜੀ ਐਡਿਟਿਵ  | ਉਹੀ ਐਰੇ, ਇੱਕ ਬਿਲਕੁਲ ਸਟੀਕ ਸਟ੍ਰਿੰਗ                               | ਹੇਠਾਂ ਦਿੱਤੇ ਨਾਮ ਵਾਲਾ ਹੈਲਪਰ | ਸਿਰਫ਼ ਉਹ ਇੱਕ ਸਮਰੱਥਾ                                      |
-| MCP ਟੂਲ ਸਕੋਪ      | ਉਹੀ ਐਰੇ, ਨਹੀਂ ਤਾਂ MCP `_meta`, ਨਹੀਂ ਤਾਂ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | ਇਨਫੋਰਸਮੈਂਟ ਚਾਲੂ ਹੋਣ ਤੋਂ ਬਾਅਦ ਉਹ ਟੂਲ                      |
-| ਐਕਸੈੱਸ ਟੋਕਨ       | `oma_live_…`                                                   | `scopeSatisfies`           | ਉਹ ਪ੍ਰਬੰਧਨ ਰੂਟ ਜਿਸ ਦੀ ਮੈਥਡ ਅਤੇ ਪਾਥ ਨੂੰ ਉਸ ਰੈਂਕ ਦੀ ਲੋੜ ਹੈ |
+| ਨੇਮਸਪੇਸ           | ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ                                                   | ਚੈਕਰ              | ਮਨਜ਼ੂਰੀ ਨਾਲ ਕੀ ਸੰਭਵ ਹੁੰਦਾ ਹੈ                             |
+| :---------------- | :------------------------------------------------------------- | :---------------- | :------------------------------------------------------- |
+| API-ਕੁੰਜੀ ਪ੍ਰਬੰਧਨ | `api_keys.scopes`                                              | `hasManageScope`  | ਉਸ Bearer ਕੁੰਜੀ ਲਈ ਪ੍ਰਬੰਧਨ REST                          |
+| API-ਕੁੰਜੀ ਐਡਿਟਿਵ  | ਉਹੀ ਐਰੇ, ਇੱਕ ਬਿਲਕੁਲ ਮਿਲਦੀ ਸਟ੍ਰਿੰਗ                              | ਹੇਠਾਂ ਦਿੱਤਾ ਹੈਲਪਰ | ਸਿਰਫ਼ ਉਹ ਇੱਕ ਸਮਰੱਥਾ                                      |
+| MCP ਟੂਲ ਸਕੋਪ      | ਉਹੀ ਐਰੇ, ਨਹੀਂ ਤਾਂ MCP `_meta`, ਨਹੀਂ ਤਾਂ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`    | ਇਨਫੋਰਸਮੈਂਟ ਚਾਲੂ ਹੋਣ ਤੋਂ ਬਾਅਦ ਉਹ ਟੂਲ                      |
+| ਐਕਸੈੱਸ ਟੋਕਨ       | `oma_live_…`                                                   | `scopeSatisfies`  | ਉਹ ਪ੍ਰਬੰਧਨ ਰੂਟ ਜਿਸਦੀ ਮੈਥਡ ਅਤੇ ਪਾਥ ਨੂੰ ਉਹ ਰੈਂਕ ਲੋੜੀਂਦਾ ਹੈ |
 
-ਹਰੇਕ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਬਣਾਉਣ ਦੀ ਜਾਣਕਾਰੀ
+ਹਰੇਕ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਬਣਾਉਣ ਦੀ ਪ੍ਰਕਿਰਿਆ
 [ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ](../guides/MANAGEMENT-AUTH.md) ਵਿੱਚ ਦਿੱਤੀ ਗਈ ਹੈ।
 
 #### API-ਕੁੰਜੀ ਸਕੋਪ
 
-ਇੱਕ `api_keys.scopes` ਐਰੇ ਦੋ ਕੰਮਾਂ ਲਈ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ। ਉਹ ਵੱਖ-ਵੱਖ ਫੰਕਸ਼ਨਾਂ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ।
+ਇੱਕ `api_keys.scopes` ਐਰੇ ਦੋ ਕੰਮਾਂ ਲਈ ਵਰਤੀ ਜਾਂਦੀ ਹੈ। ਉਹ ਵੱਖ-ਵੱਖ ਫੰਕਸ਼ਨ ਵਰਤਦੇ ਹਨ।
 
 **ਪ੍ਰਬੰਧਨ REST।** `manage` ਅਤੇ `admin`,
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) ਦੇ ਮੈਂਬਰ ਹਨ।
 `hasManageScope` ਉਸ ਕੁੰਜੀ ਲਈ ਪ੍ਰਬੰਧਨ ਰੂਟਾਂ ਨੂੰ ਅਧਿਕਾਰਤ ਕਰਦਾ ਹੈ। ਉਨ੍ਹਾਂ ਰੂਟਾਂ ਉੱਤੇ `admin`
-ਪ੍ਰਬੰਧਨ-ਸਮਰੱਥ ਹੈ। ਇੱਥੇ `admin` ਸ਼ਬਦ ਐਕਸੈੱਸ-ਟੋਕਨ ਰੈਂਕ ਨਹੀਂ ਹੈ ਅਤੇ ਇਹ MCP ਟੂਲ ਸਕੋਪਾਂ
-ਵਿੱਚ ਵਿਸਤਾਰ ਨਹੀਂ ਹੁੰਦਾ।
+ਪ੍ਰਬੰਧਨ-ਸਮਰੱਥ ਹੈ। ਇੱਥੇ `admin` ਸ਼ਬਦ
+ਐਕਸੈੱਸ-ਟੋਕਨ ਰੈਂਕ ਨਹੀਂ ਹੈ ਅਤੇ ਇਹ MCP ਟੂਲ ਸਕੋਪਾਂ ਵਿੱਚ ਵਿਸਤਾਰ ਨਹੀਂ ਹੁੰਦਾ।
 
-**ਐਡਿਟਿਵ ਸਟ੍ਰਿੰਗਾਂ।** ਹਰੇਕ ਇੱਕ ਸਟੀਕ ਮੈਂਬਰਸ਼ਿਪ ਟੈਸਟ ਹੈ, ਅਤੇ ਹਰੇਕ
-`MANAGEMENT_API_KEY_SCOPES` ਤੋਂ ਬਾਹਰ ਰਹਿੰਦਾ ਹੈ।
+**ਐਡਿਟਿਵ ਸਟ੍ਰਿੰਗਾਂ।** ਹਰੇਕ ਲਈ ਬਿਲਕੁਲ ਸਹੀ ਮੈਂਬਰਸ਼ਿਪ ਟੈਸਟ ਹੁੰਦਾ ਹੈ, ਅਤੇ ਹਰੇਕ
+`MANAGEMENT_API_KEY_SCOPES` ਤੋਂ ਬਾਹਰ ਰਹਿੰਦੀ ਹੈ।
 
-| ਸਕੋਪ                           | ਪਾਸ ਹੋਣ ਨਾਲ ਕੀ ਕਰਨ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ                                                                                                                              |
+| ਸਕੋਪ                           | ਮਨਜ਼ੂਰੀ ਨਾਲ ਕੀ ਸੰਭਵ ਹੁੰਦਾ ਹੈ                                                                                                                                     |
 | :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | ਸਿਰਫ਼ ਨਾਨ-ਲੂਪਬੈਕ `/api/mcp/` LOCAL_ONLY ਅਪਵਾਦ (`hasMcpConnectOrManageScope`)। `manage` ਜਾਂ `admin` ਵਾਲੀ ਕੁੰਜੀ ਵੀ ਉਸ ਅਪਵਾਦ ਨੂੰ ਪਾਸ ਕਰਦੀ ਹੈ।                       |
+| `mcp:connect`                  | ਸਿਰਫ਼ ਨਾਨ-ਲੂਪਬੈਕ `/api/mcp/` LOCAL_ONLY ਛੋਟ (`hasMcpConnectOrManageScope`)। `manage` ਜਾਂ `admin` ਵਾਲੀ ਕੁੰਜੀ ਵੀ ਇਸ ਛੋਟ ਤੋਂ ਪਾਸ ਹੋ ਜਾਂਦੀ ਹੈ।                       |
 | `self:usage`                   | ਇਸ ਕੁੰਜੀ ਲਈ `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)। `POST /api/keys` ਬਣਾਉਣ ਵੇਲੇ ਇਹ ਸਕੋਪ ਜੋੜਦਾ ਹੈ (`normalizeSelfServiceScopesForCreate`)। |
-| `self:account-quota`           | ਉਸ ਸਟੇਟਸ ਪੇਲੋਡ ਅੰਦਰ ਅੱਪਸਟ੍ਰੀਮ ਖਾਤਾ ਕੋਟੇ (`src/lib/usage/apiKeySelfService.ts`)। ਸਟੇਟਸ ਰੂਟ ਨੂੰ ਫਿਰ ਵੀ `self:usage` ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।                               |
+| `self:account-quota`           | ਉਸ ਸਥਿਤੀ ਪੇਲੋਡ ਅੰਦਰ ਅੱਪਸਟ੍ਰੀਮ ਖਾਤਾ ਕੋਟੇ (`src/lib/usage/apiKeySelfService.ts`)। ਸਥਿਤੀ ਰੂਟ ਨੂੰ ਫਿਰ ਵੀ `self:usage` ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।                               |
 | `policy:bypass-provider-quota` | ਇਸ ਕੁੰਜੀ ਦੀਆਂ ਇਨਫਰੈਂਸ ਕਾਲਾਂ ਪ੍ਰਦਾਤਾ-ਕੋਟਾ ਨੀਤੀ ਨੂੰ ਛੱਡ ਦਿੰਦੀਆਂ ਹਨ (`src/sse/handlers/chat.ts` ਵਿੱਚ `hasProviderQuotaBypassScope`)।                                |
 
 #### ਮਿਲਾਨ
 
-ਕੈਟਾਲਾਗ [MCP ਟੂਲ ਸਕੋਪ](#mcp-tool-scopes) ਹੇਠਾਂ ਦਿੱਤੀ ਸਾਰਣੀ ਹੈ।
+ਕੈਟਾਲਾਗ [MCP ਟੂਲ ਸਕੋਪ](#mcp-tool-scopes) ਹੇਠਾਂ ਦਿੱਤੀ ਟੇਬਲ ਹੈ।
 `src/shared/constants/mcpScopes.ts` ਵਿੱਚ `MCP_SCOPE_LIST` ਨੂੰ ਉਹ ਕੈਟਾਲਾਗ ਨਾ ਸਮਝੋ:
-ਇਹ ਮੂਲ ਟਾਈਪ ਕੀਤਾ ਸਬਸੈੱਟ ਹੈ। ਬਾਅਦ ਦੇ ਟੂਲ ਇਸ ਦੇ ਨਾਲ ਹੋਰ ਸਕੋਪ ਘੋਸ਼ਿਤ ਕਰਦੇ ਹਨ
-(`read:notion`, `read:skills`, `read:local-corpus`, ਅਤੇ ਸਾਰਣੀ ਦੇ ਬਾਕੀ ਸਕੋਪ)।
+ਇਹ ਮੂਲ ਟਾਈਪ ਕੀਤਾ ਸਬਸੈੱਟ ਹੈ। ਬਾਅਦ ਦੇ ਟੂਲ ਇਸਦੇ ਨਾਲ ਹੋਰ ਸਕੋਪ ਘੋਸ਼ਿਤ ਕਰਦੇ ਹਨ
+(`read:notion`, `read:skills`, `read:local-corpus`, ਅਤੇ ਟੇਬਲ ਦੇ ਬਾਕੀ ਸਕੋਪ)।
 
-`open-sse/mcp-server/scopeEnforcement.ts` ਵਿੱਚ `evaluateToolScopes` ਕਿਸੇ ਕਾਲ ਦੀ
-ਆਗਿਆ ਉਦੋਂ ਦਿੰਦਾ ਹੈ ਜਦੋਂ ਹਰੇਕ ਲੋੜੀਂਦਾ ਸਕੋਪ ਕਿਸੇ ਦਿੱਤੇ ਗਏ ਸਕੋਪ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੋਵੇ:
+`open-sse/mcp-server/scopeEnforcement.ts` ਵਿੱਚ `evaluateToolScopes` ਕਿਸੇ ਕਾਲ ਨੂੰ
+ਉਦੋਂ ਮਨਜ਼ੂਰੀ ਦਿੰਦਾ ਹੈ ਜਦੋਂ ਹਰੇਕ ਲੋੜੀਂਦਾ ਸਕੋਪ ਕਿਸੇ ਦਿੱਤੇ ਗਏ ਸਕੋਪ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੋਵੇ:
 
-- `*` ਹਰ ਲੋੜੀਂਦੇ ਸਕੋਪ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ।
-- `*` ਉੱਤੇ ਖਤਮ ਹੋਣ ਵਾਲਾ ਦਿੱਤਾ ਗਿਆ ਸਕੋਪ ਉਸ ਲੋੜੀਂਦੇ ਸਕੋਪ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ ਜੋ
-  ਤਾਰੇ ਤੋਂ ਪਹਿਲਾਂ ਵਾਲੇ ਪ੍ਰੀਫਿਕਸ ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ। `read:*`, `read:compression` ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ।
-- ਹਰ ਹੋਰ ਦਿੱਤਾ ਗਿਆ ਸਕੋਪ ਸਿਰਫ਼ ਬਿਲਕੁਲ ਇੱਕੋ ਜਿਹੀ ਲੋੜੀਂਦੀ ਸਟ੍ਰਿੰਗ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ।
+- `*` ਹਰੇਕ ਲੋੜੀਂਦੇ ਸਕੋਪ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ।
+- `*` ਨਾਲ ਖਤਮ ਹੋਣ ਵਾਲਾ ਦਿੱਤਾ ਗਿਆ ਸਕੋਪ ਉਸ ਲੋੜੀਂਦੇ ਸਕੋਪ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ ਜੋ
+  ਸਟਾਰ ਤੋਂ ਪਹਿਲਾਂ ਵਾਲੇ ਪ੍ਰੀਫਿਕਸ ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ। `read:*`, `read:compression` ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ।
+- ਹਰ ਦੂਜਾ ਦਿੱਤਾ ਗਿਆ ਸਕੋਪ ਸਿਰਫ਼ ਬਿਲਕੁਲ ਇੱਕੋ ਜਿਹੀ ਲੋੜੀਂਦੀ ਸਟ੍ਰਿੰਗ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ।
 
-ਜਿਸ ਕੁੰਜੀ ਦੇ ਸਕੋਪ `["manage"]` ਹਨ, ਉਹ `read:compression` ਲਈ `scopeMatches` ਵਿੱਚ ਅਸਫਲ ਹੁੰਦੀ ਹੈ।
-ਜਦੋਂ `admin`, `mcp:connect`, `read`, ਅਤੇ `write` ਹੀ ਦਿੱਤੀਆਂ ਗਈਆਂ ਸਟ੍ਰਿੰਗਾਂ ਹੋਣ, ਤਾਂ ਉਹੀ
-ਕਾਲ ਇਨ੍ਹਾਂ ਲਈ ਵੀ ਅਸਫਲ ਹੁੰਦੀ ਹੈ। ਅੰਤਲੇ `*` ਤੋਂ ਇਲਾਵਾ MCP ਟੂਲ ਸਕੋਪਾਂ ਵਿਚਕਾਰ ਕੋਈ
-ਦਰਜਾਬੰਦੀ ਨਹੀਂ ਹੈ।
+ਜਿਸ ਕੁੰਜੀ ਦੇ ਸਕੋਪ `["manage"]` ਹਨ, ਉਹ `read:compression` ਲਈ `scopeMatches` ਵਿੱਚ ਅਸਫਲ ਰਹਿੰਦੀ ਹੈ।
+ਜਦੋਂ ਸਿਰਫ਼ `admin`, `mcp:connect`, `read`, ਜਾਂ `write` ਦਿੱਤੀਆਂ ਗਈਆਂ ਸਟ੍ਰਿੰਗਾਂ ਹੋਣ,
+ਤਾਂ ਉਹੀ ਕਾਲ ਇਨ੍ਹਾਂ ਲਈ ਵੀ ਅਸਫਲ ਰਹਿੰਦੀ ਹੈ। ਅੰਤ ਵਿੱਚ ਆਉਣ ਵਾਲੇ `*` ਤੋਂ ਇਲਾਵਾ
+MCP ਟੂਲ ਸਕੋਪਾਂ ਵਿੱਚ ਕੋਈ ਦਰਜਾਬੰਦੀ ਨਹੀਂ ਹੈ।
 
-ਜਦੋਂ ਤੱਕ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ਨਾ ਹੋਵੇ, ਇਨਫੋਰਸਮੈਂਟ ਬੰਦ ਰਹਿੰਦੀ ਹੈ (ਡਿਫੌਲਟ
-`false`)। ਜਦੋਂ ਇਹ ਬੰਦ ਹੁੰਦੀ ਹੈ, `evaluateToolScopes` ਕਾਲ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ ਅਤੇ
+ਜਦੋਂ ਤੱਕ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ਨਾ ਹੋਵੇ, ਇਨਫੋਰਸਮੈਂਟ ਬੰਦ ਰਹਿੰਦੀ ਹੈ (ਡਿਫਾਲਟ
+`false`)। ਜਦੋਂ ਇਹ ਬੰਦ ਹੁੰਦੀ ਹੈ, `evaluateToolScopes` ਕਾਲ ਨੂੰ ਮਨਜ਼ੂਰੀ ਦਿੰਦਾ ਹੈ ਅਤੇ
 ਕੈਟਾਲਾਗ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ। ਜਦੋਂ ਇਹ ਚਾਲੂ ਹੁੰਦੀ ਹੈ, HTTP Bearer ਕੁੰਜੀ ਦੇ `api_keys.scopes` ਨੂੰ
 `authInfo` ਵਜੋਂ ਵਰਤਦਾ ਹੈ ([ਪ੍ਰਤੀ-ਕੁੰਜੀ HTTP ਸਕੋਪ ਬਾਈਂਡਿੰਗ](#per-key-http-scope-binding-7895) ਵੇਖੋ)।
-ਜਦੋਂ ਕੋਈ ਕੁੰਜੀ ਸਕੋਪ ਰਿਜ਼ਾਲਵ ਨਹੀਂ ਹੁੰਦੇ, ਤਾਂ ਦਿੱਤਾ ਗਿਆ ਸੈੱਟ ਪਹਿਲਾਂ MCP `_meta`, ਅਤੇ ਫਿਰ
-`OMNIROUTE_MCP_SCOPES` ਵੱਲ ਫਾਲ-ਥਰੂ ਕਰਦਾ ਹੈ।
+ਜਦੋਂ ਕੋਈ ਕੁੰਜੀ ਸਕੋਪ ਰਿਜ਼ਾਲਵ ਨਹੀਂ ਹੁੰਦਾ, ਤਾਂ ਦਿੱਤਾ ਗਿਆ ਸੈੱਟ ਪਹਿਲਾਂ MCP `_meta`, ਅਤੇ ਫਿਰ
+`OMNIROUTE_MCP_SCOPES` ਤੱਕ ਫਾਲ-ਥਰੂ ਕਰਦਾ ਹੈ।
 
 #### ਐਕਸੈੱਸ-ਟੋਕਨ ਸਕੋਪ
 
 `oma_live_…` ਟੋਕਨ (`src/lib/accessTokens/scopes.ts`) `read`, `write`,
 ਜਾਂ `admin` ਰੱਖਦੇ ਹਨ। `scopeSatisfies` ਇੱਕ ਰੈਂਕ ਹੈ: `admin`, `write` ਅਤੇ `read`
-ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ, ਅਤੇ `write`, `read` ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ। ਅਣਜਾਣ ਸਕੋਪ ਕਿਸੇ ਚੀਜ਼ ਨੂੰ ਕਵਰ ਨਹੀਂ ਕਰਦੇ।
+ਦੋਵਾਂ ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ, ਅਤੇ `write`, `read` ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ। ਅਣਜਾਣ ਸਕੋਪ ਕੁਝ ਵੀ ਕਵਰ ਨਹੀਂ ਕਰਦੇ।
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ਉਸ ਰੈਂਕ ਦੀ
-`inferRequiredScope` (`src/server/authz/accessScopes.ts`) ਨਾਲ ਤੁਲਨਾ ਕਰਦਾ ਹੈ:
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ਉਸ
+ਰੈਂਕ ਦੀ ਤੁਲਨਾ `inferRequiredScope` (`src/server/authz/accessScopes.ts`) ਨਾਲ ਕਰਦਾ ਹੈ:
 
 - `GET`, `HEAD`, ਅਤੇ `OPTIONS` ਲਈ `read` ਲੋੜੀਂਦਾ ਹੈ।
 - ਹਰ ਹੋਰ ਮੈਥਡ ਲਈ `write` ਲੋੜੀਂਦਾ ਹੈ।
-- `ADMIN_SCOPE_PREFIXES` ਵਿੱਚ ਦਿੱਤੇ ਪਾਥਾਂ ਲਈ ਹਰ ਮੈਥਡ ਵਾਸਤੇ `admin` ਲੋੜੀਂਦਾ ਹੈ। `/api/mcp`
-  ਉਸ ਸੂਚੀ ਵਿੱਚ ਹੈ, ਇਸ ਲਈ ਇੱਕ `write` ਐਕਸੈੱਸ ਟੋਕਨ ਫਿਰ ਵੀ MCP HTTP
+- `ADMIN_SCOPE_PREFIXES` ਵਿੱਚਲੇ ਪਾਥਾਂ ਲਈ ਹਰ ਮੈਥਡ ਵਾਸਤੇ `admin` ਲੋੜੀਂਦਾ ਹੈ। `/api/mcp`
+  ਉਸ ਸੂਚੀ ਵਿੱਚ ਹੈ, ਇਸ ਲਈ `write` ਐਕਸੈੱਸ ਟੋਕਨ ਫਿਰ ਵੀ MCP HTTP
   ਸਰਫੇਸ ਨੂੰ ਕਾਲ ਨਹੀਂ ਕਰ ਸਕਦਾ।
-- `ADMIN_MUTATION_PREFIXES` ਵਿੱਚ ਦਿੱਤੇ ਪਾਥਾਂ ਲਈ ਸਿਰਫ਼ ਤਬਦੀਲੀਆਂ ਵਾਸਤੇ `admin` ਲੋੜੀਂਦਾ ਹੈ।
+- `ADMIN_MUTATION_PREFIXES` ਵਿੱਚਲੇ ਪਾਥਾਂ ਲਈ ਸਿਰਫ਼ ਤਬਦੀਲੀਆਂ ਵਾਸਤੇ `admin` ਲੋੜੀਂਦਾ ਹੈ।
+- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
+  `/api/settings/require-login`) ਵਿੱਚਲੇ ਪਾਥਾਂ ਲਈ ਸਿਰਫ਼ ਤਬਦੀਲੀਆਂ ਵਾਸਤੇ `admin` ਲੋੜੀਂਦਾ ਹੈ, ਅਤੇ ਸਿਰਫ਼
+  ਉਸੇ ਬਿਲਕੁਲ ਸਹੀ ਪਾਥ ਉੱਤੇ — ਹੋਰ `/api/settings/*` ਸਬ-ਰੂਟ `write` ਹੀ ਰੱਖਦੇ ਹਨ।
 
-`PATCH /api/keys/{id}` ਇੱਕ ਮਿਊਟੇਸ਼ਨ ਹੈ ਅਤੇ ਉਹਨਾਂ ਐਡਮਿਨ ਸੂਚੀਆਂ ਵਿੱਚ ਨਹੀਂ ਹੈ, ਇਸ ਲਈ ਇੱਕ
-`read` ਟੋਕਨ ਨੂੰ 403 ਪ੍ਰਾਪਤ ਹੁੰਦਾ ਹੈ:
+`PATCH /api/keys/{id}` ਇੱਕ mutation ਹੈ ਅਤੇ ਉਹਨਾਂ admin ਸੂਚੀਆਂ ਵਿੱਚ ਨਹੀਂ ਹੈ, ਇਸ ਲਈ
+ਇੱਕ `read` token ਨੂੰ 403 ਪ੍ਰਾਪਤ ਹੁੰਦਾ ਹੈ:
 `Access token scope 'read' is insufficient; 'write' required.`
-ਇੱਕ `write` ਜਾਂ `admin` ਐਕਸੈੱਸ ਟੋਕਨ ਉਸ ਰੂਟ ਦੀ ਲੋੜ ਪੂਰੀ ਕਰਦਾ ਹੈ। ਇੱਕ ਡੈਸ਼ਬੋਰਡ JWT,
-ਲੂਪਬੈਕ CLI machine-id ਟੋਕਨ, ਅਤੇ `manage` ਜਾਂ `admin` ਵਾਲੀ API ਕੁੰਜੀ
-ਹੋਰ ਸ਼ਾਖਾਵਾਂ ਰਾਹੀਂ ਜਾਂਦੇ ਹਨ ਅਤੇ ਇਸ ਰੈਂਕ ਦੁਆਰਾ ਸੀਮਿਤ ਨਹੀਂ ਕੀਤੇ ਜਾਂਦੇ।
+ਇੱਕ `write` ਜਾਂ `admin` access token ਉਸ route ਦੀ ਲੋੜ ਪੂਰੀ ਕਰਦਾ ਹੈ। ਇੱਕ dashboard JWT,
+loopback CLI machine-id token, ਅਤੇ `manage` ਜਾਂ `admin` ਵਾਲੀ API key
+ਹੋਰ branches ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ ਅਤੇ ਇਸ rank ਦੁਆਰਾ ਸੀਮਿਤ ਨਹੀਂ ਕੀਤੇ ਜਾਂਦੇ।
 
-ਇੱਕ ਐਕਸੈੱਸ ਟੋਕਨ ਜੋ `/api/mcp` ਲਈ `scopeSatisfies` ਪਾਸ ਕਰਦਾ ਹੈ, ਉਸਨੇ ਸਿਰਫ਼
-ਪ੍ਰਬੰਧਨ ਗੇਟ ਹੀ ਪਾਰ ਕੀਤਾ ਹੈ। ਟੂਲ ਕਾਲਾਂ ਹਾਲੇ ਵੀ API-ਕੁੰਜੀ
-ਸਕੋਪਾਂ ਦੇ ਮੁਕਾਬਲੇ `scopeMatches` ਚਲਾਉਂਦੀਆਂ ਹਨ। ਐਕਸੈੱਸ-ਟੋਕਨ ਰੈਂਕ `scopeMatches` ਲਈ ਇੱਕ ਇਨਪੁੱਟ ਨਹੀਂ ਹੈ।
+ਇੱਕ access token ਜੋ `/api/mcp` ਲਈ `scopeSatisfies` ਪਾਸ ਕਰਦਾ ਹੈ, ਉਸਨੇ ਸਿਰਫ਼
+management gate ਹੀ ਪਾਰ ਕੀਤਾ ਹੈ। Tool calls ਫਿਰ ਵੀ API-key
+scopes ਦੇ ਵਿਰੁੱਧ `scopeMatches` ਚਲਾਉਂਦੀਆਂ ਹਨ। Access-token rank ਨੂੰ `scopeMatches` ਲਈ input ਵਜੋਂ ਨਹੀਂ ਵਰਤਿਆ ਜਾਂਦਾ।
 
-### MCP ਟੂਲ ਸਕੋਪ
+### MCP tool scopes
 
-ਸਕੋਪ ਲਾਗੂਕਰਨ ਨੂੰ `open-sse/mcp-server/scopeEnforcement.ts` ਵਿੱਚ ਕੇਂਦਰੀਕ੍ਰਿਤ ਕੀਤਾ ਗਿਆ ਹੈ।
-ਹਰੇਕ ਟੂਲ ਲਈ ਖਾਸ ਸਕੋਪ ਲੋੜੀਂਦੇ ਹਨ:
+Scope enforcement ਨੂੰ `open-sse/mcp-server/scopeEnforcement.ts` ਵਿੱਚ ਕੇਂਦਰੀਕ੍ਰਿਤ ਕੀਤਾ ਗਿਆ ਹੈ।
+ਹਰੇਕ tool ਲਈ ਖਾਸ scopes ਲੋੜੀਂਦੇ ਹਨ:
 
 | ਦਾਇਰਾ                 | ਟੂਲ                                                                                                                                                                              |
 | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -427,42 +440,43 @@ MCP ਟੂਲ ਕਾਲਾਂ ਕਾਲਰ ਤੋਂ ਸਕੋਪ ਸਟ੍ਰ�
 ### `mcp:connect` — ਸੀਮਤ ਰੂਟ ਸਮਰੱਥਾ (#7895)
 
 ਗੈਰ-ਲੂਪਬੈਕ ਤੋਂ HTTP/SSE MCP ਟ੍ਰਾਂਸਪੋਰਟ (`/api/mcp/*`) ਤੱਕ ਪਹੁੰਚਣ ਲਈ
-`/api/mcp/` LOCAL_ONLY ਛੋਟ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ (`docs/security/ROUTE_GUARD_TIERS.md` ਵੇਖੋ)। ਇਤਿਹਾਸਕ ਤੌਰ 'ਤੇ,
-ਇਹ ਛੋਟ ਕੇਵਲ ਪੂਰੇ `manage`/`admin`-ਸਕੋਪ ਵਾਲੀ API ਕੁੰਜੀ ਨੂੰ ਸਵੀਕਾਰ ਕਰਦੀ ਸੀ—ਇਹ ਉਸ
-ਕਾਲਰ ਲਈ ਲੋੜ ਤੋਂ ਕਿਤੇ ਵੱਧ ਵਿਆਪਕ ਸੀ ਜਿਸਨੂੰ ਸਿਰਫ਼ MCP ਨਾਲ ਸੰਚਾਰ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ। `src/shared/constants/managementScopes.ts` ਹੁਣ
-`MCP_CONNECT_SCOPE = "mcp:connect"` ਐਕਸਪੋਰਟ ਕਰਦਾ ਹੈ: ਇੱਕ ਵਾਧੂ, ਸੀਮਤ ਸਕੋਪ (`SELF_USAGE_SCOPE` ਵਰਗੀ ਹੀ
-ਮਿਸਾਲ) ਜੋ `src/server/authz/policies/management.ts` ਵਿੱਚ ਕੇਵਲ `/api/mcp/` ਬਾਈਪਾਸ ਨੂੰ
-ਅਧਿਕਾਰਤ ਕਰਦਾ ਹੈ—ਇਹ ਕਿਸੇ ਹੋਰ ਪ੍ਰਬੰਧਨ-ਰੂਟ ਦੀ ਪਹੁੰਚ ਨਹੀਂ ਦਿੰਦਾ
-ਅਤੇ ਇਸਨੂੰ ਜਾਣਬੁੱਝ ਕੇ `MANAGEMENT_API_KEY_SCOPES` ਤੋਂ ਬਾਹਰ ਰੱਖਿਆ ਗਿਆ ਹੈ। `manage`/`admin` ਰੱਖਣ ਵਾਲੀ ਕੁੰਜੀ
-ਅਜੇ ਵੀ ਬਿਨਾਂ ਕਿਸੇ ਬਦਲਾਅ ਦੇ ਇਸ ਛੋਟ ਨੂੰ ਪਾਰ ਕਰਦੀ ਹੈ; `mcp:connect`, ਕੇਵਲ ਰਿਮੋਟ MCP ਕਾਲਰਾਂ ਲਈ
-ਘੱਟ-ਵਿਸ਼ੇਸ਼ ਅਧਿਕਾਰਾਂ ਵਾਲਾ ਵਿਕਲਪ ਹੈ, ਜਿਸਦੀ ਜਾਂਚ `hasMcpConnectOrManageScope()` ਰਾਹੀਂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
+`/api/mcp/` LOCAL_ONLY ਕਾਰਵ-ਆਉਟ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ (`docs/security/ROUTE_GUARD_TIERS.md` ਵੇਖੋ)। ਇਤਿਹਾਸਕ ਤੌਰ 'ਤੇ
+ਇਹ ਕਾਰਵ-ਆਉਟ ਸਿਰਫ਼ ਪੂਰੇ `manage`/`admin`-ਸਕੋਪ ਵਾਲੀ API ਕੁੰਜੀ ਨੂੰ ਸਵੀਕਾਰ ਕਰਦਾ ਸੀ — ਅਜਿਹੇ
+ਕਾਲਰ ਲਈ ਇਹ ਬਹੁਤ ਵਿਆਪਕ ਸੀ ਜਿਸ ਨੂੰ ਕੇਵਲ MCP ਨਾਲ ਸੰਚਾਰ ਕਰਨ ਦੀ ਲੋੜ ਹੈ। `src/shared/constants/managementScopes.ts` ਹੁਣ
+`MCP_CONNECT_SCOPE = "mcp:connect"` ਨੂੰ ਐਕਸਪੋਰਟ ਕਰਦਾ ਹੈ: ਇੱਕ ਵਾਧੂ, ਸੀਮਤ ਸਕੋਪ (`SELF_USAGE_SCOPE` ਵਰਗੀ ਹੀ ਮਿਸਾਲ)
+ਜੋ `src/server/authz/policies/management.ts` ਵਿੱਚ ਸਿਰਫ਼ `/api/mcp/` ਬਾਈਪਾਸ ਨੂੰ ਅਧਿਕਾਰਤ ਕਰਦਾ ਹੈ — ਇਹ
+ਕਿਸੇ ਹੋਰ ਮੈਨੇਜਮੈਂਟ-ਰੂਟ ਦੀ ਪਹੁੰਚ ਪ੍ਰਦਾਨ ਨਹੀਂ ਕਰਦਾ ਅਤੇ ਇਸਨੂੰ ਜਾਣਬੁੱਝ ਕੇ `MANAGEMENT_API_KEY_SCOPES` ਤੋਂ ਬਾਹਰ
+ਰੱਖਿਆ ਗਿਆ ਹੈ। `manage`/`admin` ਵਾਲੀ ਕੁੰਜੀ ਅਜੇ ਵੀ ਬਿਨਾਂ ਕਿਸੇ ਬਦਲਾਅ ਦੇ ਕਾਰਵ-ਆਉਟ ਪਾਸ ਕਰਦੀ ਹੈ;
+`mcp:connect` ਸਿਰਫ਼ ਰਿਮੋਟ MCP ਕਾਲਰਾਂ ਲਈ ਘੱਟ-ਵਿਸ਼ੇਸ਼ ਅਧਿਕਾਰਾਂ ਵਾਲਾ ਵਿਕਲਪ ਹੈ, ਜਿਸਦੀ ਜਾਂਚ
+`hasMcpConnectOrManageScope()` ਰਾਹੀਂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
 
 ### ਪ੍ਰਤੀ-ਕੁੰਜੀ HTTP ਸਕੋਪ ਬਾਈਂਡਿੰਗ (#7895)
 
-HTTP/SSE ਉੱਤੇ, `open-sse/mcp-server/httpTransport.ts` ਹੁਣ `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-ਰਾਹੀਂ ਕਾਲਰ ਦੇ ਅਸਲ `api_keys.scopes` ਨੂੰ ਰਿਜ਼ਾਲਵ ਕਰਦਾ ਹੈ
-ਅਤੇ ਇਸਨੂੰ MCP SDK ਦੇ `transport.handleRequest(req, { authInfo })` ਨੂੰ ਪਾਸ ਕਰਦਾ ਹੈ, ਤਾਂ ਜੋ
-ਹਰੇਕ ਟੂਲ ਕਾਲ ਤੱਕ ਪਹੁੰਚਣ ਵਾਲਾ `extra.authInfo.scopes`, Bearer ਕੁੰਜੀ ਦੇ ਆਪਣੇ ਸਕੋਪਾਂ ਨੂੰ ਦਰਸਾਏ।
-`scopeEnforcement.ts` ਦਾ `resolveCallerScopeContext()` ਪਹਿਲਾਂ ਹੀ `_meta` ਅਤੇ
-`OMNIROUTE_MCP_SCOPES` env ਫਾਲਬੈਕ ਨਾਲੋਂ `authInfo` ਨੂੰ ਤਰਜੀਹ ਦਿੰਦਾ ਸੀ—ਇਹ ਸਿਰਫ਼ ਉਸ ਪਹਿਲੇ,
-ਸਭ ਤੋਂ ਉੱਚ-ਤਰਜੀਹ ਵਾਲੇ ਸਰੋਤ ਨੂੰ ਭਰਦਾ ਹੈ, ਜਿਸਨੂੰ ਪਹਿਲਾਂ HTTP ਉੱਤੇ ਡਾਟਾ ਨਹੀਂ ਮਿਲਦਾ ਸੀ। ਜਦੋਂ ਕੋਈ API ਕੁੰਜੀ ਰਿਜ਼ਾਲਵ ਨਹੀਂ ਹੁੰਦੀ
-(ਕੋਈ ਹੈਡਰ ਨਹੀਂ, ਅਵੈਧ ਕੁੰਜੀ), ਤਾਂ `authInfo` `undefined` ਹੀ ਰਹਿੰਦਾ ਹੈ ਅਤੇ ਰਿਜ਼ੋਲਿਊਸ਼ਨ ਬਿਨਾਂ ਕਿਸੇ ਬਦਲਾਅ ਦੇ
-ਮੌਜੂਦਾ `meta`/env ਲੜੀ ਵੱਲ ਚਲਾ ਜਾਂਦਾ ਹੈ। stdio ਕੋਲ ਕੋਈ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਨਹੀਂ ਹੈ (`mcpCallerIdentity.ts` ਵੇਖੋ)
-ਅਤੇ ਇਸ ਉੱਤੇ ਕੋਈ ਅਸਰ ਨਹੀਂ ਪੈਂਦਾ—ਇਹ `_meta`/env ਫਾਲਬੈਕ ਲੜੀ ਉੱਤੇ ਹੀ ਰਹਿੰਦਾ ਹੈ।
+HTTP/SSE ਉੱਤੇ, `open-sse/mcp-server/httpTransport.ts` ਹੁਣ
+`resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) ਰਾਹੀਂ ਕਾਲਰ ਦੇ ਅਸਲ
+`api_keys.scopes` ਨੂੰ ਰਿਜ਼ਾਲਵ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸਨੂੰ MCP SDK ਦੇ `transport.handleRequest(req, { authInfo })`
+ਨੂੰ ਪਾਸ ਕਰਦਾ ਹੈ, ਤਾਂ ਜੋ ਹਰੇਕ ਟੂਲ ਕਾਲ ਤੱਕ ਪਹੁੰਚਣ ਵਾਲਾ `extra.authInfo.scopes` Bearer ਕੁੰਜੀ ਦੇ ਆਪਣੇ
+ਸਕੋਪਾਂ ਨੂੰ ਦਰਸਾਵੇ। `scopeEnforcement.ts` ਦਾ `resolveCallerScopeContext()` ਪਹਿਲਾਂ ਹੀ `_meta`
+ਅਤੇ `OMNIROUTE_MCP_SCOPES` env ਫਾਲਬੈਕ ਨਾਲੋਂ `authInfo` ਨੂੰ ਤਰਜੀਹ ਦਿੰਦਾ ਸੀ — ਇਹ ਸਿਰਫ਼ ਉਸ ਪਹਿਲੇ,
+ਸਭ ਤੋਂ ਉੱਚ-ਤਰਜੀਹ ਵਾਲੇ ਸਰੋਤ ਨੂੰ ਭਰਦਾ ਹੈ, ਜੋ ਪਹਿਲਾਂ HTTP ਉੱਤੇ ਭਰਿਆ ਨਹੀਂ ਜਾਂਦਾ ਸੀ। ਜਦੋਂ ਕੋਈ API ਕੁੰਜੀ
+ਰਿਜ਼ਾਲਵ ਨਹੀਂ ਹੁੰਦੀ (ਕੋਈ ਹੈਡਰ ਨਹੀਂ, ਅਵੈਧ ਕੁੰਜੀ), ਤਾਂ `authInfo` `undefined` ਹੀ ਰਹਿੰਦਾ ਹੈ ਅਤੇ ਰਿਜ਼ੋਲਿਊਸ਼ਨ
+ਬਿਨਾਂ ਬਦਲਾਅ ਦੇ ਮੌਜੂਦਾ `meta`/env ਲੜੀ ਵੱਲ ਚਲਾ ਜਾਂਦਾ ਹੈ। stdio ਦੀ ਕੋਈ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਨਹੀਂ ਹੈ
+(`mcpCallerIdentity.ts` ਵੇਖੋ) ਅਤੇ ਇਹ ਪ੍ਰਭਾਵਿਤ ਨਹੀਂ ਹੁੰਦਾ — ਇਹ `_meta`/env ਫਾਲਬੈਕ ਲੜੀ ਉੱਤੇ ਹੀ ਰਹਿੰਦਾ ਹੈ।
 
 **ਸੀਮਤ-ਸਕੋਪ ਵਾਲੇ HTTP/SSE ਕਾਲਰਾਂ ਲਈ ਲਾਗੂਕਰਨ ਨੂੰ
-`OMNIROUTE_MCP_ENFORCE_SCOPES` ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ ਜ਼ਬਰਦਸਤੀ ਚਾਲੂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।** `OMNIROUTE_MCP_ENFORCE_SCOPES` ਦਾ ਡਿਫਾਲਟ `false` ਹੋਣਾ ਕੇਵਲ
-ਸਥਾਨਕ/stdio ਸਿੰਗਲ-ਓਪਰੇਟਰ ਪ੍ਰਵਾਹ ਲਈ ਸੁਰੱਖਿਅਤ ਹੈ, ਜਿੱਥੇ ਸਕੋਪ ਲਾਗੂ ਕਰਨ ਲਈ ਕੋਈ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ
-ਨਹੀਂ ਹੁੰਦੀ। `open-sse/mcp-server/server.ts::withScopeEnforcement()` ਪ੍ਰਤੀ-ਟੂਲ ਸਕੋਪ
-ਲਾਗੂਕਰਨ ਨੂੰ ਬਿਨਾਂ ਸ਼ਰਤ ਚਾਲੂ ਕਰ ਦਿੰਦਾ ਹੈ (`scopeEnforcement.ts` ਵਿੱਚ `shouldForceScopeEnforcement()`)
+`OMNIROUTE_MCP_ENFORCE_SCOPES` ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ ਲਾਜ਼ਮੀ ਤੌਰ 'ਤੇ ਚਾਲੂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।** `OMNIROUTE_MCP_ENFORCE_SCOPES` ਦਾ ਮੂਲ ਰੂਪ ਵਿੱਚ `false` ਹੋਣਾ ਸਿਰਫ਼
+ਲੋਕਲ/stdio ਇਕੱਲੇ-ਓਪਰੇਟਰ ਪ੍ਰਵਾਹ ਲਈ ਸੁਰੱਖਿਅਤ ਹੈ, ਜਿੱਥੇ ਸਕੋਪ ਲਾਗੂ ਕਰਨ ਲਈ ਕੋਈ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਨਹੀਂ ਹੁੰਦੀ।
+`open-sse/mcp-server/server.ts::withScopeEnforcement()` ਪ੍ਰਤੀ-ਟੂਲ ਸਕੋਪ
+ਲਾਗੂਕਰਨ ਨੂੰ ਬਿਨਾਂ ਕਿਸੇ ਸ਼ਰਤ ਦੇ ਚਾਲੂ ਕਰਦਾ ਹੈ (`scopeEnforcement.ts` ਵਿੱਚ `shouldForceScopeEnforcement()`)
 ਜਦੋਂ ਵੀ `resolveCallerScopeContext()` ਨੇ
-`source === "authInfo"` ਰਿਜ਼ਾਲਵ ਕੀਤਾ ਹੋਵੇ (ਅਰਥਾਤ ਇੱਕ ਅਸਲ ਪ੍ਰਤੀ-ਕੁੰਜੀ HTTP Authorization ਹੈਡਰ, ਕੇਵਲ HTTP/SSE) AND ਉਸ
-ਕੁੰਜੀ ਕੋਲ ਪੂਰਾ `manage`/`admin` ਸਕੋਪ ਨਾ ਹੋਵੇ। ਇਹ ਉਸ ਖਾਮੀ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਿਸ ਵਿੱਚ ਕੇਵਲ
-ਸੀਮਤ `mcp:connect` ਬਾਈਪਾਸ ਸਕੋਪ ਰੱਖਣ ਵਾਲੀ ਕੁੰਜੀ—ਜਿਸਨੂੰ ਉੱਪਰ `/api/mcp/` LOCAL_ONLY ਛੋਟ ਤੋਂ ਇਲਾਵਾ ਹੋਰ ਕਿਸੇ ਚੀਜ਼ ਨੂੰ ਅਧਿਕਾਰਤ ਨਾ ਕਰਨ ਵਾਲੀ ਵਜੋਂ
-ਦਸਤਾਵੇਜ਼ਬੱਧ ਕੀਤਾ ਗਿਆ ਹੈ—ਫਿਰ ਵੀ ਹਰ MCP ਟੂਲ ਨੂੰ ਚਲਾ ਸਕਦੀ ਸੀ, ਜਦੋਂ ਕੋਈ ਓਪਰੇਟਰ
-ਰਿਮੋਟ/ਗੈਰ-ਲੂਪਬੈਕ MCP ਪਹੁੰਚ ਯੋਗ ਕਰ ਦਿੰਦਾ ਸੀ, ਸਿਰਫ਼ ਇਸ ਲਈ ਕਿਉਂਕਿ `OMNIROUTE_MCP_ENFORCE_SCOPES` ਮੂਲ ਰੂਪ ਵਿੱਚ
-`false` ਨਾਲ ਆਉਂਦਾ ਹੈ। HTTP ਉੱਤੇ ਪੂਰੀ `manage`/`admin` ਕੁੰਜੀ, ਅਤੇ ਹਰ stdio/ਸਥਾਨਕ ਕਾਲਰ ਲਈ,
-ਮੌਜੂਦਾ `OMNIROUTE_MCP_ENFORCE_SCOPES`-ਨਿਯੰਤਰਿਤ ਵਿਹਾਰ ਬਿਨਾਂ ਕਿਸੇ ਬਦਲਾਅ ਦੇ ਜਾਰੀ ਰਹਿੰਦਾ ਹੈ।
+`source === "authInfo"` ਰਿਜ਼ਾਲਵ ਕੀਤਾ ਹੋਵੇ (ਭਾਵ ਇੱਕ ਅਸਲ ਪ੍ਰਤੀ-ਕੁੰਜੀ HTTP Authorization ਹੈਡਰ, ਕੇਵਲ HTTP/SSE) ਅਤੇ ਉਸ
+ਕੁੰਜੀ ਕੋਲ ਪੂਰਾ `manage`/`admin` ਸਕੋਪ ਨਾ ਹੋਵੇ। ਇਹ ਉਸ ਖਾਮੀ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਿੱਥੇ ਸਿਰਫ਼
+ਸੀਮਤ `mcp:connect` ਬਾਈਪਾਸ ਸਕੋਪ ਰੱਖਣ ਵਾਲੀ ਕੁੰਜੀ — ਜਿਸਨੂੰ ਉੱਪਰ ਸਿਰਫ਼
+`/api/mcp/` LOCAL_ONLY ਕਾਰਵ-ਆਉਟ ਨੂੰ ਅਧਿਕਾਰਤ ਕਰਨ ਵਾਲੀ ਦਸਤਾਵੇਜ਼ਬੱਧ ਕੀਤਾ ਗਿਆ ਹੈ — ਨਹੀਂ ਤਾਂ ਓਪਰੇਟਰ ਵੱਲੋਂ
+ਰਿਮੋਟ/ਗੈਰ-ਲੂਪਬੈਕ MCP ਪਹੁੰਚ ਚਾਲੂ ਕਰਨ ਤੋਂ ਬਾਅਦ ਹਰ MCP ਟੂਲ ਨੂੰ ਵਰਤ ਸਕਦੀ ਸੀ, ਕੇਵਲ ਇਸ ਲਈ ਕਿਉਂਕਿ
+`OMNIROUTE_MCP_ENFORCE_SCOPES` ਮੂਲ ਰੂਪ ਵਿੱਚ `false` ਨਾਲ ਆਉਂਦਾ ਹੈ। HTTP ਉੱਤੇ ਪੂਰੀ `manage`/`admin` ਕੁੰਜੀ,
+ਅਤੇ ਹਰ stdio/ਲੋਕਲ ਕਾਲਰ ਲਈ, `OMNIROUTE_MCP_ENFORCE_SCOPES` ਦੁਆਰਾ ਨਿਯੰਤਰਿਤ ਮੌਜੂਦਾ ਵਿਹਾਰ
+ਬਿਨਾਂ ਬਦਲਾਅ ਦੇ ਬਣਿਆ ਰਹਿੰਦਾ ਹੈ।
 
 ---
 

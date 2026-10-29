@@ -1,4 +1,81 @@
 {
+  "teamCosts": {
+    "title": "ថ្លៃដើមក្រុម",
+    "subtitle": "គ្រប់គ្រងថវិកាទន់ចែករំលែក និងការប៉ាន់ស្មានថ្លៃដើមពីកាតាឡុក។",
+    "refresh": "ផ្ទុកឡើងវិញ",
+    "create": "បង្កើតក្រុម",
+    "edit": "កែសម្រួលក្រុម",
+    "archive": "ទុកក្នុងប័ណ្ណសារ",
+    "selectTeam": "ក្រុម",
+    "searchTeams": "ស្វែងរកក្រុម",
+    "statusFilter": "ស្ថានភាពក្រុម",
+    "active": "សកម្ម",
+    "archived": "បានទុកក្នុងប័ណ្ណសារ · អានតែប៉ុណ្ណោះ",
+    "allTeams": "ក្រុមទាំងអស់",
+    "noTeams": "មិនមានក្រុមដែលត្រូវគ្នាទេ។",
+    "selectHint": "បង្កើត ឬជ្រើសរើសក្រុម ដើម្បីមើលថ្លៃដើម។",
+    "loading": "កំពុងផ្ទុកថ្លៃដើមក្រុម…",
+    "budgetTitle": "ថវិកាទន់បច្ចុប្បន្ន",
+    "budgetSubtitle": "ការប្រើប្រាស់ជោគជ័យដែលបានកត់ត្រា · ផ្ទាំងរំកិល · មិនអាស្រ័យលើកាលបរិច្ឆេទរបាយការណ៍",
+    "archivedBudget": "បានទុកក្នុងប័ណ្ណសារ៖ ការអនុវត្តថវិកាអសកម្ម។ របាយការណ៍ប្រវត្តិនៅតែអាចប្រើបាន។",
+    "unlimited": "គ្មានដែនកំណត់ — មិនទាន់កំណត់ថវិកាទន់ចែករំលែកទេ។",
+    "budgetUnavailable": "ស្ថានភាពថវិកាមិនអាចប្រើបានទេ។ ផ្ទុកឡើងវិញដើម្បីសាកល្បងម្ដងទៀត។",
+    "used": "ការប្រើប្រាស់ជោគជ័យ",
+    "maximum": "ថវិកាអតិបរមា",
+    "remaining": "សមតុល្យដែលដឹង",
+    "resets": "កំណត់ឡើងវិញនៅ",
+    "unpricedBudget": "ការប្រើប្រាស់ជោគជ័យមួយផ្នែកមិនដឹងតម្លៃ។ ផលបូកដែលដឹងមិនពេញលេញ ការអនុវត្តថវិកាចាត់ទុកថាផ្ទាំងនេះលើសកម្រិត។",
+    "overBudget": "ថវិកាបានដល់ ឬលើសកម្រិត · លើស {amount}",
+    "reportTitle": "របាយការណ៍ការប្រើប្រាស់",
+    "reportSubtitle": "ការព្យាយាមទាំងអស់ · ការប៉ាន់ស្មានពីកាតាឡុកជា USD មិនមែនវិក្កយបត្រទេ · កាលបរិច្ឆេទ UTC ពេញ",
+    "reportPeriod": "រយៈពេលរបាយការណ៍",
+    "day1": "១ ថ្ងៃ",
+    "day7": "៧ ថ្ងៃ",
+    "day30": "៣០ ថ្ងៃ",
+    "allTime": "គ្រប់ពេល",
+    "reportSpend": "ការចំណាយប៉ាន់ស្មានរបស់របាយការណ៍",
+    "requests": "សំណើ",
+    "assignedKeys": "គន្លឹះដែលបានកំណត់",
+    "unpricedReport": "របាយការណ៍នេះមានតម្លៃមិនស្គាល់។ ការចំណាយប៉ាន់ស្មានមិនពេញលេញ។",
+    "breakdown": "ថ្លៃដើមតាមគន្លឹះ API",
+    "noUsage": "គ្មានការប្រើប្រាស់ក្នុងរយៈពេលរបាយការណ៍នេះទេ។",
+    "keyName": "ឈ្មោះគន្លឹះ API",
+    "tokens": "ថូខឹនបញ្ចូល + ចេញ",
+    "unnamedKey": "គន្លឹះគ្មានឈ្មោះ ឬត្រូវបានលុប",
+    "unpriced": "តម្លៃមិនស្គាល់",
+    "members": "សមាជិកភាព",
+    "memberSubtitle": "ការប្ដូរសមាជិកភាពទុកការចំណាយប្រវត្តិនៅក្រុមដើម។",
+    "searchKeys": "ស្វែងរកគន្លឹះ ឬម្ចាស់បច្ចុប្បន្ន",
+    "chooseKey": "ជ្រើសរើសគន្លឹះ API",
+    "unassigned": "មិនទាន់កំណត់",
+    "ownership": "ក្រុមចេញវិក្កយបត្របច្ចុប្បន្ន៖ {team}",
+    "assign": "កំណត់",
+    "remove": "ដកចេញ",
+    "noMembers": "គ្មានសមាជិកបច្ចុប្បន្នទេ។ ការប្រើប្រាស់ប្រវត្តិអាចនៅតែរាប់ចូលក្នុងថវិកា។",
+    "assignedAt": "បានកំណត់នៅ {date} (UTC)",
+    "name": "ឈ្មោះក្រុម",
+    "description": "ការពិពណ៌នា",
+    "enableBudget": "បើកថវិកាទន់ចែករំលែក",
+    "amount": "ចំនួនថវិកា (USD)",
+    "duration": "ផ្ទាំងថវិការំកិល",
+    "cancel": "បោះបង់",
+    "save": "រក្សាទុក",
+    "confirm": "បញ្ជាក់",
+    "transferTitle": "បញ្ជាក់ការផ្ទេរគន្លឹះ",
+    "transferMessage": "ផ្លាស់ទីគន្លឹះនេះពី “{source}” ទៅ “{destination}” ឬ? ការចំណាយប្រវត្តិនៅក្រុមដើម។",
+    "removeTitle": "ដកការកំណត់គន្លឹះចេញ",
+    "removeMessage": "ដកគន្លឹះនេះចេញពី “{team}” ឬ? ការចំណាយប្រវត្តិនៅក្នុងក្រុមនេះ។",
+    "archiveTitle": "ទុកក្រុមក្នុងប័ណ្ណសារ",
+    "archiveMessage": "ទុក “{team}” ក្នុងប័ណ្ណសារឬ? ការភ្ជាប់បច្ចុប្បន្នទាំងអស់បិទ ហើយការអនុវត្តថវិកាឈប់។ របាយការណ៍ប្រវត្តិនៅតែអាចប្រើបាន។",
+    "invalidName": "បញ្ចូលឈ្មោះ (១–២០០ តួអក្សរ) និងការពិពណ៌នាមិនលើស ២,០០០ តួអក្សរ។",
+    "invalidAmount": "បញ្ចូលចំនួនថវិកាកំណត់ដែលធំជាងសូន្យ។",
+    "unauthorized": "ចូលទៅផ្ទាំងគ្រប់គ្រង ដើម្បីបន្ត។",
+    "forbidden": "អ្នកគ្មានសិទ្ធិគ្រប់គ្រងក្រុមទេ។ ទិន្នន័យដែលអ្នកបញ្ចូលត្រូវបានរក្សាទុក។",
+    "notFound": "ក្រុម ឬការកំណត់នេះលែងមានទៀតហើយ។",
+    "conflict": "ការកំណត់ ឬក្រុមបានផ្លាស់ប្ដូរ។ ផ្ទុកឡើងវិញ ហើយបញ្ជាក់ភាពជាម្ចាស់បច្ចុប្បន្នមុនសាកល្បងម្ដងទៀត។",
+    "failed": "សំណើបរាជ័យ។ ទិន្នន័យដែលអ្នកបញ្ចូលត្រូវបានរក្សាទុក សូមសាកល្បងម្ដងទៀត។",
+    "partialBudget": "ធុងប្រចាំថ្ងៃដែលរក្សាទុកមួយចំនួនត្រួតគ្នាជាមួយព្រំដែនផ្ទាំង ហើយមិនអាចបែងចែកបានត្រឹមត្រូវទេ។ ការចំណាយដែលបង្ហាញមិនពេញលេញ ចំនួនដែលនៅសល់មិនអាចប្រើបាន។ គោលការណ៍ថវិកាទន់ដែលមានស្រាប់មិនផ្លាស់ប្ដូរ។"
+  },
   "codexKeyServiceMode": {
     "title": "មុខងារសេវាកម្ម Codex សម្រាប់ API key នេះ",
     "description": "អនុវត្តចំពោះសំណើ Codex រួមទាំងម៉ូដែល Codex នៅក្នុងកញ្ចប់រួម។ មុខងារដែលបានបង្ខំ នឹងជំនួសការកំណត់របស់កម្មវិធីអតិថិជន ការកំណត់សកល និងលំនាំដើមនៃការតភ្ជាប់។ អ្នកផ្តល់សេវាផ្សេងទៀតនៅតែមិនផ្លាស់ប្តូរ។",
@@ -25,8 +102,10 @@
     "confirm": "តើអ្នកប្រាកដទេ?",
     "refresh": "ផ្ទុកឡើងវិញ",
     "close": "បិទ",
+    "dialogTitleFallback": "ប្រអប់",
     "previousPage": "ទំព័រមុន",
     "nextPage": "ទំព័របន្ទាប់",
+    "pagination": "ការបែងចែកទំព័រ",
     "capsLockOn": "Caps Lock កំពុងបើក",
     "dismissNotification": "បិទការជូនដំណឹង",
     "toggleColumns": "បិទបើកជួរឈរ",
@@ -182,6 +261,7 @@
     "combos": "បន្សំ",
     "noModelsFound": "រកមិនឃើញម៉ូដែល",
     "clear": "សម្អាត",
+    "clearFilters": "សម្អាតតម្រង",
     "done": "រួចរាល់",
     "selectAll": "ជ្រើសរើសទាំងអស់",
     "unselectAll": "ដកការជ្រើសរើសទាំងអស់",
@@ -998,7 +1078,10 @@
     "batchFileUsedByCount": "ត្រូវបានប្រើដោយ {count, plural, one {# បាច់} other {# បាច់}}",
     "batchFilePreview": "មើលជាមុន",
     "batchFilePreviewTruncated": "កំពុងបង្ហាញ {shown} បន្ទាត់ដំបូង (សរុប {total} បន្ទាត់)",
-    "batchFileDownloadFull": "ទាញយកឯកសារពេញលេញ"
+    "batchFileDownloadFull": "ទាញយកឯកសារពេញលេញ",
+    "tokensPageTitle": "ថូខឹន",
+    "tokensPageDescription": "ផ្ញើថូខឹនរវាងសោ API ចែករំលែកកូដអញ្ជើញ និងភ្ជាប់ម៉ាស៊ីនមេសហគមន៍។",
+    "tokensServerUrlLabel": "URL ម៉ាស៊ីនមេ"
   },
   "disabled": "បានបិទ",
   "featureFlagOmnirouteEmergencyFallbackDescription": "បញ្ជូនសំណើដែលអស់ថវិកាទៅកាន់ provider/model ជំនួសឥតគិតថ្លៃសម្រាប់គ្រាអាសន្ន។",
@@ -1017,6 +1100,15 @@
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "អនុញ្ញាតឱ្យការសម្អាតដោយស្វ័យប្រវត្តិលុបកិច្ចការ Batch API ដែលស្ថិតក្នុងស្ថានភាពបញ្ចប់ (បានបញ្ចប់/បរាជ័យ/បានបោះបង់/ផុតកំណត់) និងចាស់ជាង OMNIROUTE_BATCH_RETENTION_DAYS រួមទាំងចំណុចត្រួតពិនិត្យតាមបន្ទាត់របស់កិច្ចការទាំងនោះ ព្រមទាំងសម្អាតខ្លឹមសារ BLOB របស់ឯកសារដែលបានផ្ទុកឡើង និងហួស expires_at របស់វា។ តាមលំនាំដើម មុខងារនេះត្រូវបានបិទ៖ ការដំឡើងដែលមានស្រាប់ទាំងអស់នឹងរក្សាទិន្នន័យនេះដូចមុនទាំងស្រុង រហូតដល់ប្រតិបត្តិករជ្រើសរើសបើកប្រើ។ Route DELETE /api/v1/batches/delete-completed ដែលប្រតិបត្តិករបើកដំណើរការ មិនរងផលប៉ះពាល់ទោះជាករណីណាក៏ដោយ — វាជាកិច្ចសន្យា public API ដាច់ដោយឡែក និងគ្មានលក្ខខណ្ឌ។",
   "featureFlagXaiOauthLiveModelDiscoveryDescription": "ទាញយកកាតាឡុកម៉ូដែល xAI ផ្ទាល់សម្រាប់ការតភ្ជាប់ xai-oauth ពី https://api.x.ai/v1/models ដោយប្រើ OAuth bearer token ជំនួសឱ្យ seed ឋិតិវន្តដែលបានកំណត់ជាប់។ តាមលំនាំដើម មុខងារនេះត្រូវបានបិទ៖ xai-oauth បន្តផ្តល់ seed ឋិតិវន្តដោយមិនផ្លាស់ប្តូរ។ ប្រសិនបើមានកំហុសក្នុងការដោះស្រាយណាមួយ ការស្វែងរកនឹងត្រឡប់ទៅប្រើ seed វិញ។",
   "featureFlagDbHealthcheckStartupDeferredEnabledDescription": "ដំណើរការការត្រួតពិនិត្យសុចរិតភាព/សុខភាពមូលដ្ឋានទិន្នន័យពេលចាប់ផ្តើម បន្ទាប់ពីម៉ាស៊ីនមេចាប់ផ្តើមទទួលសំណើ ជំនួសឱ្យការរារាំងការចាប់ផ្តើមរហូតដល់ការត្រួតពិនិត្យបានបញ្ចប់។ តាមលំនាំដើម មុខងារនេះត្រូវបានបិទ៖ ការចាប់ផ្តើមនឹងរង់ចាំការត្រួតពិនិត្យដូចមុនការផ្លាស់ប្តូរនេះ ដូច្នេះមូលដ្ឋានទិន្នន័យដែលខូចនៅតែត្រូវបានរកឃើញ មុនពេលសំណើដំបូងត្រូវបានបម្រើ។",
+  "featureFlagCatalogMirrorRefinementsEnabledDescription": "កែលម្អការស្វែងរក claude/ និងការឆ្លុះ functional-gateway នៅលើ /v1/models។ បិទតាមលំនាំដើម៖ ការឆ្លុះទាំងពីរដំណើរការដូចពីមុនទាំងស្រុង។ បើក៖ ការឆ្លុះការស្វែងរក claude/ នឹងគ្របដណ្ដប់ផងដែរលើវ៉ារ្យ៉ង់ reasoning-effort ដែលបានរាយ (-low/-medium/-high/-xhigh) រំលង id auto/* ដែលភ្ជាប់មកជាស្រេច ហើយ request path មិនអាចបង្កើតបាន និងរំលង alias ដែលបានរាយរួចហើយ។ ការឆ្លុះ functional-gateway រំលង combo និង id ដែល OmniRoute បានសំយោគ (claude/, no-think/) យក owner ពី owned_by មិនប្រើ owner ជា gateway របស់ខ្លួនឯង រំលង gateway ដែលបានបិទក្នុង blockedProviders និងរំលង model ដែលមិនស្ថិតក្នុង live catalog ផ្លូវការរបស់ gateway។",
+  "featureFlagOpencodePublishedCatalogRoutingEnabledDescription": "អនុញ្ញាតឱ្យម៉ូដែល OpenCode Zen និង OpenCode Go ដែលគ្មាន endpoint របស់ registry ដែលបានបញ្ជាក់ច្បាស់ ទាញយកចំណុចប្រទាក់សំណើរបស់ពួកវា (Responses សម្រាប់ @ai-sdk/openai និង Messages សម្រាប់ @ai-sdk/anthropic) ពីកាតាឡុក models.opencode.ai ដែលបានបោះពុម្ពផ្សាយ ដោយអាននៅផ្ទៃខាងក្រោយរៀងរាល់ 6 ម៉ោងម្តង។ តាមលំនាំដើម វាត្រូវបានបិទ៖ endpoint ត្រូវបានកំណត់តាមវិធីសាស្ត្រសន្និដ្ឋានរបស់ registry ដូចពីមុន ហើយកាតាឡុកមិនត្រូវបានទាញយកឡើយ។",
+  "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "ផ្ញើស្នាមសម្គាល់របស់កម្មវិធី CLI OpenCode v2 នៅលើសំណើ OpenCode Zen/Go៖ User-Agent opencode/latest/<2.x>/cli និង x-opencode-client cli ហើយនៅលើសំណើកម្រិតឥតគិតថ្លៃ សូមផ្ញើបឋមកថាសម័យ v2 គ្រោងការណ៍ឧបករណ៍អាន/shell របស់ CLI v2 និងមិនប្រើ tool_choice \"none\"។ តាមលំនាំដើម វាត្រូវបានបិទ៖ រាល់សំណើ OpenCode រក្សាអត្តសញ្ញាណ បឋមកថា និងខ្លឹមសារសំណើបច្ចុប្បន្នឱ្យនៅដដែល។",
+  "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "នៅពេលបញ្ជីបេក្ខជនរបស់ auto combo ទទេរួចហើយ មុនពេល pre-filter សម្រាប់ tool-calling ដំណើរការ (រាល់ target ត្រូវបានរំលងដោយសារ cooldowns, lockouts ឬ exhaustion) សូមឆ្លើយតបដោយ 503 no_eligible_targets ជំនួសឱ្យ 400 \"គ្មាន target ណាមួយគាំទ្រ tool calling ទេ\" capability_mismatch បែបចាស់។ បិទតាមលំនាំដើម៖ បញ្ជីទទេនឹងបន្តប្រើ 400 បែបចាស់។",
+  "featureFlagModelEndpointCapabilityGateEnabledDescription": "អនុវត្តស្លាក endpoint ម៉ូដែលដែលទុកចិត្តបាន (ដែលបានប្រកាសដោយកាតាឡុកអ្នកផ្តល់សេវា, បានសន្និដ្ឋានពី ID ម៉ូដែលឯកទេស ឬកំណត់ដោយប្រតិបត្តិករ)៖ បដិសេធសំណើដែលបានផ្ញើទៅ endpoint ដែលម៉ូដែលមិនផ្តល់សេវា ដោយប្រើ HTTP 400 មុនពេលបញ្ជូនបន្តនៅលើ /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations និង /v1/audio/*; លាក់ម៉ូដែលដែល endpoint មានស្លាករបស់វាមិនមានអាដាប់ទ័រ OmniRoute ពី /v1/models; និងឆ្លើយតបការធ្វើតេស្តម៉ូដែលនៅលើផ្ទាំងគ្រប់គ្រងដោយ 422 សម្រាប់ម៉ូដែលបែបនេះ។ បិទតាមលំនាំដើម៖ ស្លាក endpoint នៅតែសម្រាប់ផ្តល់ព័ត៌មាន ហើយសំណើត្រូវបានបញ្ជូនបន្តដូចមុនទាំងស្រុង។",
+  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "នៅលើ relay ដែលឆបគ្នាជាមួយ Anthropic ធម្មតា សូមរក្សា system turn នៅកណ្ដាលការសន្ទនាទុកក្នុងបញ្ជីសារ ជំនួសឱ្យការផ្លាស់ទីវាទៅកាន់ system prompt កម្រិតកំពូល ដើម្បីឱ្យបុព្វបទ prompt ដែលបានរក្សាទុកក្នុងឃ្លាំងសម្ងាត់មានស្ថិរភាពនៅគ្រប់ turn។ វាអនុវត្តតែនៅពេល client ខ្លួនឯងបានផ្ញើ beta mid-conversation-system-2026-04-07 ប៉ុណ្ណោះ។ តាមលំនាំដើម វាត្រូវបានបិទ៖ រាល់ system turn ត្រូវបានផ្លាស់ទីទៅក្នុង system prompt ដូចពីមុន ព្រោះ relay ដែលគ្មាន beta នោះនឹងបដិសេធ system turn នៅក្នុងបញ្ជីសារ។",
+  "featureFlagModelsDevEffortTiersEnabledDescription": "ប្រើកម្រិតនៃកិច្ចខិតខំប្រឹងប្រែងក្នុងការវែកញែកដែល models.dev បោះពុម្ពផ្សាយ នៅពេលដែលទាំងការកំណត់ជំនួសរបស់ប្រតិបត្តិករ និងបញ្ជីចុះឈ្មោះរបស់អ្នកផ្តល់សេវា មិនបានប្រកាសកម្រិតណាមួយ ដោយរក្សាទុកតែកម្រិតកិច្ចខិតខំប្រឹងប្រែងដែលស្គាល់ប៉ុណ្ណោះ ហើយចាត់ទុកបញ្ជីកម្រិតដែលបានប្រកាសទទេថាជា \"គ្មានកម្រិត\"។ បានបិទតាមលំនាំដើម៖ កាតាឡុកម៉ូដែល និងកម្រិតកិច្ចខិតខំប្រឹងប្រែងដែលបានដោះស្រាយ នឹងនៅដដែលដូចពីមុន។",
+  "featureFlagAutoRequestResolvedCapabilitiesDescription": "អនុញ្ញាតឱ្យសំណើ auto/* បង្កើតក្រុមបេក្ខជនដោយប្រើសមត្ថភាពម៉ូដែលដែលបានដោះស្រាយ (ចក្ខុវិស័យ ការវែកញែក ការគិត) និងពិន្ទុគុណភាពដែលបានសង្កេត ដែលអានក្នុងការអានជាដុំតែមួយ។ បិទតាមលំនាំដើម៖ ទម្ងន់បេក្ខជននៅពេលសំណើនៅដដែលដូចមុនទាំងស្រុង។ បើក៖ សញ្ញាទាំងនោះបញ្ចូលទៅក្នុងទម្ងន់ snapshot ដូច្នេះទម្ងន់បេក្ខជន និងការជ្រើសរើសអាចផ្លាស់ប្តូរ។",
+  "featureFlagCredentialHealthRetestAutoDisabledDescription": "អនុញ្ញាតឱ្យការស្កេនសុខភាពព័ត៌មានសម្ងាត់សាកល្បងការតភ្ជាប់ឡើងវិញ ដែល gateway បានបិទដោយស្វ័យប្រវត្តិ (ការតភ្ជាប់នីមួយៗច្រើនបំផុតម្តងរៀងរាល់ 6 ម៉ោង និង 5 ការតភ្ជាប់ក្នុងមួយការស្កេន) ហើយបើកការតភ្ជាប់ណាមួយឡើងវិញ នៅពេលការសាកល្បងឡើងវិញរបស់វាជោគជ័យ។ តាមលំនាំដើម វាត្រូវបានបិទ៖ ការតភ្ជាប់បែបនេះនៅតែបិទ រហូតដល់ប្រតិបត្តិករចាត់វិធានការ។ ការតភ្ជាប់ដែលត្រូវបានបិទដោយប្រតិបត្តិករ និងការតភ្ជាប់ដែលត្រូវបានហាមឃាត់ជាអចិន្ត្រៃយ៍ មិនត្រូវបានសាកល្បងឡើងវិញឡើយ។",
   "sidebar": {
     "home": "ទំព័រដើម",
     "dashboard": "ផ្ទាំងគ្រប់គ្រង",
@@ -1076,17 +1168,8 @@
     "serverDisconnectedMsg": "ម៉ាស៊ីនមេប្រូកស៊ីត្រូវបានបញ្ឈប់ ឬកំពុងចាប់ផ្តើមឡើងវិញ។",
     "expandSidebar": "ពង្រីករបារចំហៀង",
     "collapseSidebar": "បង្រួមរបារចំហៀង",
-    "themes": "រូបរាង",
-    "presetColors": "ពណ៌ពេញនិយម",
     "createTheme": "បង្កើតរូបរាង",
     "chooseColor": "ជ្រើសរើសពណ៌មួយ",
-    "themeCoral": "ពណ៌ផ្កាថ្ម",
-    "themeBlue": "ពណ៌ខៀវ",
-    "themeRed": "ពណ៌ក្រហម",
-    "themeGreen": "ពណ៌បៃតង",
-    "themeViolet": "ពណ៌ស្វាយ",
-    "themeOrange": "ពណ៌ទឹកក្រូច",
-    "themeCyan": "ពណ៌ខៀវបៃតង",
     "cliToolsShort": "ឧបករណ៍",
     "cache": "ឃ្លាំងសម្ងាត់",
     "cacheShort": "ឃ្លាំងសម្ងាត់",
@@ -1094,12 +1177,10 @@
     "themeSystem": "ប្រព័ន្ធរូបរាង",
     "whitelabelingDesc": "ការពិពណ៌នាអំពីការដាក់ម៉ាកយីហោផ្ទាល់ខ្លួន",
     "switchThemes": "ប្តូររូបរាង",
-    "themeAccentDesc": "ការពិពណ៌នាអំពីពណ៌សង្កត់នៃរូបរាង",
     "uploadFavicon": "ផ្ទុក Favicon ឡើង",
     "themeDark": "រូបរាងងងឹត",
     "customLogoDesc": "ការពិពណ៌នាអំពីឡូហ្គោផ្ទាល់ខ្លួន",
     "sidebarVisibilityToggle": "បិទបើកការបង្ហាញរបារចំហៀង",
-    "themeAccent": "ពណ៌សង្កត់នៃរូបរាង",
     "resetFavicon": "កំណត់ Favicon ឡើងវិញ",
     "whitelabeling": "ការដាក់ម៉ាកយីហោផ្ទាល់ខ្លួន",
     "darkMode": "មុខងារងងឹត",
@@ -1113,10 +1194,8 @@
     "customLogo": "ឡូហ្គោផ្ទាល់ខ្លួន",
     "appearance": "រូបរាង",
     "themeSelectionAria": "ស្លាក Aria សម្រាប់ការជ្រើសរើសរចនាប័ទ្ម",
-    "themeCreate": "បង្កើតរចនាប័ទ្ម",
     "customFaviconDesc": "ការពិពណ៌នា Favicon ផ្ទាល់ខ្លួន",
     "logoPreview": "ការមើលឡូហ្គោជាមុន",
-    "themeCustom": "រចនាប័ទ្មផ្ទាល់ខ្លួន",
     "hideHealthLogsDesc": "ការពិពណ៌នាអំពីការលាក់កំណត់ហេតុពិនិត្យសុខភាពប្រព័ន្ធ",
     "faviconPreview": "ការមើល Favicon ជាមុន",
     "changelog": "កំណត់ហេតុផ្លាស់ប្តូរ",
@@ -1343,7 +1422,9 @@
       "open": "បើក",
       "close": "បិទ"
     },
-    "noResults": "គ្មានលទ្ធផល"
+    "noResults": "គ្មានលទ្ធផល",
+    "costsTeams": "ក្រុម",
+    "costsTeamsSubtitle": "មជ្ឈមណ្ឌលថ្លៃដើមក្រុម"
   },
   "webhooks": {
     "title": "Webhooks",
@@ -1476,7 +1557,11 @@
       "chatIdPlaceholder": "-100123456789 ឬ @channelname",
       "chatIdHint": "លេខសម្គាល់ជាលេខតែមួយគត់ ឬឈ្មោះអ្នកប្រើប្រាស់សាធារណៈរបស់ការជជែក/ឆានែល។",
       "tutorial": "របៀបកំណត់រចនាសម្ព័ន្ធ Telegram webhook៖"
-    }
+    },
+    "copy": "ចម្លង",
+    "copied": "បានចម្លង!",
+    "expandDetails": "បង្ហាញព័ត៌មានលម្អិត",
+    "collapseDetails": "លាក់ព័ត៌មានលម្អិត"
   },
   "compliance": {
     "auditTitle": "សវនកម្ម",
@@ -1588,22 +1673,17 @@
     "mcpMetricCalls24h": "ការហៅ (24 ម៉ោង)",
     "mcpMetricSuccessRate": "អត្រាជោគជ័យ",
     "mcpMetricAvgDuration": "រយៈពេលមធ្យម",
-    "mcpMetricTopTool": "ឧបករណ៍កំពូល"
-  },
-  "themesPage": {
-    "title": "រូបរាង",
-    "description": "ជ្រើសរើសរូបរាងដែលបានកំណត់ជាមុន ឬបង្កើតដោយខ្លួនឯងដោយប្រើពណ៌តែមួយ",
-    "presetColors": "ពណ៌ពេញនិយម",
-    "customTheme": "រូបរាងផ្ទាល់ខ្លួន",
-    "customThemeDesc": "ចុចបង្កើតរូបរាង ហើយជ្រើសរើសពណ៌មួយ",
-    "createTheme": "បង្កើតរូបរាង",
-    "activePreset": "រូបរាងសកម្ម"
+    "mcpMetricTopTool": "ឧបករណ៍កំពូល",
+    "dismissError": "បិទកំហុស"
   },
   "header": {
+    "teamsDescription": "ការប៉ាន់ស្មានថ្លៃដើមក្រុម និងថវិកាទន់ចែករំលែក",
     "logout": "ចាកចេញ",
     "quickNavigation": "ការរុករករហ័ស",
     "quickNavigationTitle": "ការរុករករហ័ស (⌘K / Ctrl+K)",
     "openQuickNavigation": "បើកការរុករករហ័ស",
+    "openMenu": "បើកម៉ឺនុយ",
+    "products": "ផលិតផល Keak",
     "switchToLightMode": "ប្តូរទៅទម្រង់ភ្លឺ",
     "switchToDarkMode": "ប្តូរទៅទម្រង់ងងឹត",
     "language": "ភាសា",
@@ -1631,8 +1711,6 @@
     "anthropicCompatible": "ឆបគ្នាជាមួយ Anthropic",
     "media": "មេឌៀ",
     "mediaDescription": "បង្កើតរូបភាព វីដេអូ និងតន្ត្រី",
-    "themes": "រូបរាង",
-    "themesDescription": "ជ្រើសរើសរូបរាងពណ៌សម្រាប់ផ្ទាំងគ្រប់គ្រងទាំងមូល",
     "costsDescription": "តាមដានការចំណាយ វិភាគនិន្នាការ និងគ្រប់គ្រងថវិកា AI របស់អ្នកនៅគ្រប់អ្នកផ្តល់សេវា",
     "cacheDescription": "ត្រួតពិនិត្យប្រសិទ្ធភាពឃ្លាំងសម្ងាត់ប្រូមរបស់អ្នកផ្តល់សេវា និងការប្រើការឆ្លើយតបតាមន័យក្នុងមូលដ្ឋានឡើងវិញ។",
     "limitsDescription": "កំណត់រចនាសម្ព័ន្ធដែនកំណត់អត្រា និងកូតាតាម API key និងអ្នកផ្តល់សេវានីមួយៗ",
@@ -2470,6 +2548,9 @@
     "emptyFilterClear": "សម្អាតតម្រង",
     "disableNonPublicModels": "បិទម៉ូដែលមិនសាធារណៈ",
     "disableNonPublicModelsDesc": "បដិសេធសំណើសម្រាប់ម៉ូដែលដែលមិនត្រូវបានរកឃើញ ឬមិនត្រូវបានសម្គាល់ថាជាសាធារណៈក្នុងកាតាឡុករបស់អ្នកផ្តល់សេវា",
+    "forcedModel": "ម៉ូដែលបង្ខំ",
+    "forcedModelDesc": "បញ្ជូនសំណើជជែកនីមួយៗដែលធ្វើដោយសោនេះទៅម៉ូដែល ឬ combo នេះ មិនថាអតិថិជនស្នើម៉ូដែលណាក៏ដោយ (ឬនៅពេលវាមិនផ្ញើម៉ូដែលណាមួយ)។ ដែនកំណត់ម៉ូដែល combo និងថវិការបស់សោនៅតែអនុវត្ត។",
+    "forcedModelPlaceholder": "មិនបង្ខំ៖ ប្រើម៉ូដែលដែលអតិថិជនស្នើ",
     "normalKeysSection": "សោធម្មតា",
     "quotaKeysSection": "សោកូតា",
     "bypassProviderQuota": "រំលងកម្រិតកាត់ផ្ដាច់កូតារបស់អ្នកផ្តល់សេវា",
@@ -2483,7 +2564,12 @@
     "onlySelectedConnections": "តែការតភ្ជាប់ដែលបានជ្រើសរើសប៉ុណ្ណោះ",
     "selectAtLeastOneConnection": "ជ្រើសរើសការតភ្ជាប់យ៉ាងហោចណាស់មួយ ឬជ្រើសរើសការតភ្ជាប់ទាំងអស់។",
     "allConnectionsDesc": "សោនេះអាចប្រើការតភ្ជាប់សកម្មណាមួយបាន។",
-    "restrictedToConnections": "បានកំណត់ត្រឹម {count, plural, one {# ការតភ្ជាប់} other {# ការតភ្ជាប់}}។"
+    "restrictedToConnections": "បានកំណត់ត្រឹម {count, plural, one {# ការតភ្ជាប់} other {# ការតភ្ជាប់}}។",
+    "preferredConnections": "ការតភ្ជាប់ដែលពេញចិត្ត",
+    "preferredConnectionsDesc": "លំដាប់អាទិភាពសម្រាប់សោនីមួយៗ។ ប្រសិនបើការតភ្ជាប់ដែលពេញចិត្តមិនអាចប្រើបាន ការបញ្ជូនបន្តនឹងប្តូរទៅការតភ្ជាប់ដែលមានសិទ្ធិបន្ទាប់។",
+    "preferredConnectionsNone": "មិនបានកំណត់ចំណូលចិត្តទេ — យុទ្ធសាស្ត្របញ្ជូនបន្តលំនាំដើមត្រូវបានប្រើ។",
+    "preferredConnectionsClear": "សម្អាត",
+    "removeSelection": "លុប {name}"
   },
   "auditLog": {
     "title": "កំណត់ហេតុសវនកម្ម",
@@ -2595,7 +2681,9 @@
     "imageToTextBridgeCta": "កំណត់រចនាសម្ព័ន្ធស្ពានរូបភាព→អត្ថបទ នៅក្នុងការកំណត់ Modality Bridge",
     "sttBridgeCta": "កំណត់រចនាសម្ព័ន្ធស្ពានសំឡេងនិយាយ→អត្ថបទ នៅក្នុងការកំណត់ Modality Bridge",
     "existingConnection": "ការតភ្ជាប់ដែលមានស្រាប់",
-    "openrouterSttDescription": "ម៉ូដែលបម្លែងសំឡេងនិយាយជាអត្ថបទរបស់ OpenRouter ប្រើការតភ្ជាប់ OpenRouter ដែលអ្នកបានកំណត់រចនាសម្ព័ន្ធ។ មិនត្រូវការព័ត៌មានសម្គាល់អត្តសញ្ញាណដាច់ដោយឡែកទេ។"
+    "openrouterSttDescription": "ម៉ូដែលបម្លែងសំឡេងនិយាយជាអត្ថបទរបស់ OpenRouter ប្រើការតភ្ជាប់ OpenRouter ដែលអ្នកបានកំណត់រចនាសម្ព័ន្ធ។ មិនត្រូវការព័ត៌មានសម្គាល់អត្តសញ្ញាណដាច់ដោយឡែកទេ។",
+    "modalityTabsAria": "ប្រភេទមេឌៀ",
+    "serviceKindsAria": "ប្រភេទសេវាកម្ម"
   },
   "search": {
     "searchQuery": "សំណួរស្វែងរក",
@@ -2970,6 +3058,7 @@
       "amp": "ប្រើនៅពេលអ្នកចង់បានលំហូរការងាររហ័សរបស់ Amp ប៉ុន្តែនៅតែត្រូវការការអនុវត្តយ៉ាងតឹងរ៉ឹងនូវឈ្មោះជំនួស និងច្បាប់បញ្ជូនរបស់ OmniRoute។",
       "hermes": "ប្រើនៅពេលអ្នកត្រូវការជំនួយការ AI ស្រាល ដែលដំណើរការដោយផ្ទាល់ក្នុងស្ថានីយ សម្រាប់កិច្ចការរហ័ស។",
       "hermes-agent": "ប្រើនៅពេលអ្នកត្រូវការ Hermes Agent (by Nousresearch) ជាមួយម៉ូដែលលំនាំដើម ម៉ូដែលផ្ទេរភារកិច្ច ម៉ូដែលចក្ខុវិស័យ និងម៉ូដែលជំនួយ ដែលត្រូវបានបញ្ជូនតាម OmniRoute។",
+      "whycodes": "ប្រើនៅពេលអ្នកចង់បាន WhyCodes ជាភ្នាក់ងារ CLI ស្វយ័តសម្រាប់គោលបំណងទូទៅ (TUI, ភ្នាក់ងារមានឈ្មោះ, អង្គចងចាំ, swarm) ដែលចង្អុលទៅ OmniRoute។",
       "custom": "ប្រើសម្រាប់ការអនុវត្តឧបករណ៍ផ្ទាល់ខ្លួន ឬការកំណត់រចនាសម្ព័ន្ធទូទៅដែលត្រូវគ្នាជាមួយ OpenAI។"
     },
     "toolDescriptions": {
@@ -3009,7 +3098,9 @@
       "prime-agent": "Prime Agent — ក្របខណ្ឌសរសេរកូដ RLM ដែលអាចកែលម្អខ្លួនឯង និងគាំទ្រអ្នកផ្តល់សេវាដែលឆបគ្នាជាមួយ OpenAI",
       "warp": "Warp AI terminal ដែលគាំទ្រអ្នកផ្តល់សេវាផ្ទាល់ខ្លួន",
       "agent-deck": "ប្រព័ន្ធសម្របសម្រួលភ្នាក់ងារច្រើន Agent Deck",
-      "5dive": "5dive — ក្រុមភ្នាក់ងារសរសេរកូដដែលបង្ហោះដោយខ្លួនឯង; កម្រងព័ត៌មានផ្ទៀងផ្ទាត់មួយតភ្ជាប់ពួកវាទាំងអស់ទៅ OmniRoute"
+      "5dive": "5dive — ក្រុមភ្នាក់ងារសរសេរកូដដែលបង្ហោះដោយខ្លួនឯង; កម្រងព័ត៌មានផ្ទៀងផ្ទាត់មួយតភ្ជាប់ពួកវាទាំងអស់ទៅ OmniRoute",
+      "whycodes": "ភ្នាក់ងារ CLI ស្វយ័ត WhyCodes ជាមួយ base URL ដែលត្រូវគ្នានឹង OpenAI",
+      "zed": "កម្មវិធីកែកូដ Zed — ភ្នាក់ងារភ្ជាប់មកជាមួយ តាមរយៈអ្នកផ្តល់សេវាដែលត្រូវគ្នានឹង OpenAI"
     },
     "guides": {
       "cursor": {
@@ -3240,6 +3331,9 @@
     "copilotReloadInstruction": "បន្ទាប់មក ផ្ទុក VS Code ឡើងវិញ ហើយកំណត់សោ API នៅក្នុងប្រអប់បញ្ចូល។",
     "wireApiChatCompletions": "ការបំពេញការជជែក (/chat/completions)",
     "wireApiResponses": "API ការឆ្លើយតប (/responses)",
+    "codexModelCatalog": "បង្ហាញម៉ូដែល OmniRoute នៅក្នុងកម្មវិធីជ្រើស /model របស់ Codex",
+    "codexModelCatalogHint": "សរសេរ ~/.codex/omniroute-models.json ពីកាតាឡុកម៉ូដែលផ្ទាល់របស់ Codex ដែលបានដំឡើង (ប្រហែល 60 KB ក្នុងមួយម៉ូដែល)។ សូមអនុវត្តម្តងទៀតបន្ទាប់ពីធ្វើបច្ចុប្បន្នភាព Codex។",
+    "codexCatalogWarning": "កម្មវិធីជ្រើស /model របស់ Codex មិនត្រូវបានធ្វើបច្ចុប្បន្នភាពទេ៖ OmniRoute មិនអាចអានកាតាឡុកម៉ូដែលរបស់ Codex ដែលបានដំឡើងបានទេ។",
     "cliproxyapiActionFailed": "សកម្មភាពបានបរាជ័យ",
     "cliproxyapiActionSucceeded": "សកម្មភាពបានជោគជ័យ",
     "cliproxyapiCheckUpdates": "ពិនិត្យមើលបច្ចុប្បន្នភាព",
@@ -3262,7 +3356,8 @@
     "cliproxyapiUnknown": "មិនស្គាល់",
     "cliproxyapiUpdate": "ធ្វើបច្ចុប្បន្នភាព",
     "cliproxyapiUpdateAvailable": "មានបច្ចុប្បន្នភាព៖ v{current} → v{latest}",
-    "cliproxyapiVersion": "កំណែ"
+    "cliproxyapiVersion": "កំណែ",
+    "removeMapping": "លុបការផ្គូផ្គង"
   },
   "modelCatalog": {
     "title": "ម៉ូឌែល និង បន្សំ",
@@ -3326,6 +3421,18 @@
     "maxMembersPlaceholder": "ឧ. 10",
     "testSelected": "តេស្តធាតុដែលបានជ្រើសរើស ({count})",
     "testAllFiltered": "តេស្តធាតុដែលបានចម្រាញ់ទាំងអស់ ({count})",
+    "visibility": "ភាពមើលឃើញ",
+    "allVisibility": "មើលឃើញ និងលាក់",
+    "visibleOnly": "មើលឃើញ",
+    "hiddenOnly": "លាក់",
+    "visibleColumn": "មើលឃើញ",
+    "hideModel": "លាក់ {name} ពី /v1/models",
+    "showModel": "បង្ហាញ {name} ក្នុង /v1/models",
+    "hiddenBadge": "បានលាក់",
+    "hideFiltered": "លាក់ដែលបានត្រង ({count})",
+    "showFiltered": "បង្ហាញដែលបានត្រង ({count})",
+    "visibilityCounts": "{visible} មើលឃើញ · {hidden} លាក់ · សរុប {total}",
+    "visibilityUpdateFailed": "បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពភាពមើលឃើញនៃម៉ូដែល",
     "cancel": "បោះបង់",
     "clearResults": "សម្អាតលទ្ធផល",
     "testing": "កំពុងតេស្ត...",
@@ -3387,6 +3494,10 @@
     "title": "បន្សំ",
     "description": "បង្កើតបន្សំម៉ូដែលដោយប្រើការបញ្ជូនតាមទម្ងន់ និងការគាំទ្រការបម្រុងទុក",
     "autoCatalogTitle": "កាតាឡុកបញ្ជូនដោយស្វ័យប្រវត្តិ",
+    "autoTosLoadError": "មិនអាចផ្ទុកគោលការណ៍លក្ខខណ្ឌសេវាកម្មបានទេ។ សូមព្យាយាមម្តងទៀតមុនពេលផ្លាស់ប្តូរវា។",
+    "autoTosSaveError": "មិនអាចរក្សាទុកគោលការណ៍លក្ខខណ្ឌសេវាកម្មបានទេ។ ការកំណត់ពីមុននៅតែត្រូវបានបង្ហាញ។ សូមព្យាយាមម្តងទៀត។",
+    "autoTosIncludeLabel": "រួមបញ្ចូលអ្នកផ្តល់សេវាដែលបានសម្គាល់ ToS: avoid ក្នុង auto",
+    "autoTosDescription": "បិទតាមលំនាំដើម។ អនុវត្តចំពោះបន្សំ auto ទាំងអស់ មិនមែនគ្រាន់តែគណនីមួយទេ។ ការភ្ជាប់អ្នកផ្តល់សេវាមិនបើកជម្រើសនេះទេ។",
     "autoCatalogTemplateCount": "គំរូ {count}",
     "autoCatalogDescription": "បន្សំ auto/* ដែលមានស្រាប់ ត្រូវបានកំណត់ជាថាមវន្តពីអ្នកផ្តល់សេវាដែលបានភ្ជាប់។ ប្រើ ID ណាមួយក្នុងចំណោមនេះជាវាលម៉ូដែល — មិនចាំបាច់កំណត់រចនាសម្ព័ន្ធទេ។",
     "autoCatalogExpand": "ពង្រីកកាតាឡុកបញ្ជូនដោយស្វ័យប្រវត្តិ",
@@ -3498,6 +3609,9 @@
     "moveUp": "ផ្លាស់ទីឡើងលើ",
     "moveDown": "ផ្លាស់ទីចុះក្រោម",
     "removeModel": "លុបចេញ",
+    "testStep": "សាកល្បងម៉ូដែលនេះ",
+    "testStepRunning": "កំពុងសាកល្បង…",
+    "testStepNotTestable": "អាចសាកល្បងបានតែជំហានដែលមានម៉ូដែលតែមួយប៉ុណ្ណោះ",
     "saving": "កំពុងរក្សាទុក...",
     "liveNoProviders": "មិនទាន់មានអ្នកផ្តល់សេវាណាមួយត្រូវបានរកឃើញទេ។",
     "liveFleetDataHint": "ទិន្នន័យក្រុមម៉ូដែលត្រូវបានទទួលតាមរយៈព្រឹត្តិការណ៍បន្សំផ្ទាល់។",
@@ -3539,6 +3653,7 @@
     "playgroundNoCombosYet": "មិនទាន់មានបន្សំដែលបានកំណត់រចនាសម្ព័ន្ធទេ។",
     "playgroundCreateFirst": "បង្កើតមួយជាមុនសិន",
     "weighted": "តាមទម្ងន់",
+    "weightPercent": "ទម្ងន់ (%)",
     "leastUsed": "ប្រើតិចបំផុត",
     "costOpt": "បង្កើនប្រសិទ្ធភាពចំណាយ",
     "strategyGuideTitle": "របៀបប្រើយុទ្ធសាស្ត្រនេះ",
@@ -3700,6 +3815,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# គណនី} other {# គណនី}}",
     "builderGlobalAdded": "បានបន្ថែម",
     "builderGlobalAdd": "បន្ថែម",
+    "clearSearch": "សម្អាតការស្វែងរក",
     "manualModel": "ម៉ូដែលបញ្ចូលដោយដៃ",
     "manualModelInvalid": "បញ្ចូលម៉ូដែលក្នុងទម្រង់ provider/model។",
     "manualModelUnknownProvider": "មិនស្គាល់បុព្វបទអ្នកផ្តល់សេវា។",
@@ -3916,6 +4032,7 @@
     "builderComboRefStep": "បន្ថែមសេចក្ដីយោងបន្សំ",
     "builderPinnedAccount": "គណនីដែលបានខ្ទាស់",
     "builderLegacyEntry": "ធាតុពីជំនាន់មុន",
+    "builderStaleModel": "មិនមាននៅក្នុងកាតាឡុកផ្ទាល់ទេ",
     "reviewName": "ឈ្មោះ",
     "reviewStrategy": "យុទ្ធសាស្ត្រ",
     "reviewSteps": "ជំហាន",
@@ -3953,6 +4070,10 @@
     "responseValidationMinLength": "ប្រវែងខ្លឹមសារអប្បបរមា (តួអក្សរ)",
     "responseValidationJsonPaths": "ការត្រួតពិនិត្យ JSON-path",
     "responseValidationAddCheck": "+ បន្ថែមការត្រួតពិនិត្យ",
+    "responseValidationRemoveCheck": "លុបការត្រួតពិនិត្យ",
+    "responseValidationPath": "ផ្លូវ JSON",
+    "responseValidationCondition": "លក្ខខណ្ឌ",
+    "responseValidationValue": "តម្លៃរំពឹងទុក",
     "agentFeaturesSystemMessageOverride": "សារប្រព័ន្ធជំនួស",
     "agentFeaturesSystemMessagePlaceholder": "អ្នកគឺជាជំនួយការដែលមានជំនាញ...",
     "agentFeaturesSystemMessageHint": "ការជំនួសសារប្រព័ន្ធសម្រាប់ភ្នាក់ងារ",
@@ -4100,6 +4221,9 @@
     "showingTopCostRows": "កំពុងបង្ហាញ {shown} ក្នុងចំណោម {total} ជួរដែលត្រូវគ្នា (50 ជួរកំពូល)។"
   },
   "endpoint": {
+    "cloudUploadDestination": "គោលដៅធ្វើសមកាលកម្មលើពពក (មិនមែនសម្រាប់ច្បាប់ចម្លងបម្រុងក្នុងម៉ាស៊ីនទេ)៖",
+    "cloudUploadWarning": "ការធ្វើសមកាលកម្មលើពពកត្រូវបានបិទតាមលំនាំដើមនៅពេលដំឡើងថ្មី។ ការបើកវានឹងផ្ទុកឡើងសោ API របស់អ្នកផ្តល់សេវា ថូខឹនចូលប្រើ និងថូខឹនធ្វើឱ្យថ្មីរបស់ OAuth សោ API របស់ OmniRoute និងការកំណត់រចនាសម្ព័ន្ធទៅគោលដៅខាងលើ ឥឡូវនេះ និងនៅពេលធ្វើសមកាលកម្មនាពេលអនាគត។ វាដាច់ដោយឡែកពីច្បាប់ចម្លងបម្រុងក្នុងម៉ាស៊ីននៅផ្នែកការផ្ទុកទិន្នន័យ។ សូមបើកវាតែនៅពេលដែលអ្នកទុកចិត្តម៉ាស៊ីនមេនោះប៉ុណ្ណោះ។",
+    "cloudUploadConsent": "ខ្ញុំយល់ និងអនុញ្ញាតឱ្យផ្ទុកឡើងព័ត៌មានសម្គាល់អត្តសញ្ញាណរបស់ខ្ញុំទៅគោលដៅនេះ។",
     "title": "ចំណុចចុង API",
     "subtitle": "ប្រើ endpoint ដែលត្រូវគ្នាជាមួយ OpenAI ជាមួយ SDK និងឧបករណ៍ភាគច្រើន។",
     "testEndpoint": "សាកល្បង endpoint →",
@@ -5275,9 +5399,13 @@
         "skipped": "បានកំណត់រចនាសម្ព័ន្ធរួចហើយ",
         "failed": "បានបរាជ័យ"
       }
-    }
+    },
+    "stepProgress": "វឌ្ឍនភាពនៃការដំឡើង"
   },
   "providers": {
+    "tosAvoidNoticeTitle": "អ្នកផ្តល់សេវានេះត្រូវបានដកចេញពី auto តាមលំនាំដើម",
+    "tosAvoidNoticeDescription": "ស្ថានភាពលក្ខខណ្ឌសេវាកម្មរបស់វាត្រូវបានសម្គាល់ថា avoid។ ការភ្ជាប់គណនីមិនផ្លាស់ប្តូរគោលការណ៍នេះទេ។ សូមពិនិត្យលក្ខខណ្ឌរបស់អ្នកផ្តល់សេវា មុនពេលបើកការអនុញ្ញាតរួមសម្រាប់បន្សំ auto ទាំងអស់។",
+    "tosAvoidNoticeAction": "ពិនិត្យគោលការណ៍ auto",
     "codexReleaseCooldown": "Clear local cooldown",
     "codexReleaseCooldownHint": "Allow this Codex account to be tried again. Does not redeem a reset credit or change upstream limits.",
     "codexReleasingCooldown": "Clearing…",
@@ -5369,6 +5497,12 @@
     "reorderByAvailabilityTitle": "រៀបលំដាប់ការតភ្ជាប់ឡើងវិញតាមភាពអាចប្រើបាន",
     "reorderByAvailabilityError": "មិនអាចរៀបលំដាប់ការតភ្ជាប់ឡើងវិញតាមភាពអាចប្រើបានទេ",
     "distributeProxies": "ចែកចាយប្រូកស៊ី",
+    "clearAccountProxies": "លុបប្រូកស៊ីរបស់គណនី",
+    "clearAccountProxyAssignments": "លុបការកំណត់",
+    "clearAccountProxiesConfirm": "លុបការកំណត់ប្រូកស៊ីដាច់ដោយឡែកពីគណនីទាំង {count} របស់អ្នកផ្តល់សេវានេះ រួមទាំងគណនីដែលបានបិទដែរឬទេ? ប្រូកស៊ីដែលបានរក្សាទុក និងការកំណត់កម្រិតអ្នកផ្តល់សេវា/សកលនឹងត្រូវបានរក្សាទុកដដែល។ គណនីនឹងទទួលការកំណត់ប្រូកស៊ីរបស់អ្នកផ្តល់សេវា/សកលម្តងទៀត។",
+    "accountProxiesCleared": "បានលុបការកំណត់ប្រូកស៊ីរបស់គណនី។",
+    "clearAccountProxiesPartial": "មិនអាចកំណត់គណនីឡើងវិញបានពេញលេញចំនួន {count} ទេ។ ការកំណត់ដែលបានបង្ហាញត្រូវបានធ្វើឱ្យស្រស់ហើយ អ្នកអាចព្យាយាមម្តងទៀត។",
+    "clearAccountProxiesError": "មិនអាចកំណត់ប្រូកស៊ីរបស់គណនីឡើងវិញ ឬធ្វើឱ្យស្ថានភាពរបស់វាស្រស់បានទេ។ សូមផ្ទុកឡើងវិញ ហើយព្យាយាមម្តងទៀត។",
     "distributing": "កំពុងចែកចាយ...",
     "selectedCount": "{count, plural, one {បានជ្រើសរើស #} other {បានជ្រើសរើស #}}",
     "accountsCount": "{count, plural, one {# គណនី} other {# គណនី}}",
@@ -5490,6 +5624,9 @@
     "baseUrlLabel": "URL មូលដ្ឋាន",
     "apiTypeLabel": "ប្រភេទ API",
     "prefixHint": "ចាំបាច់។ បុព្វបទមិនស្ទួនសម្រាប់ឈ្មោះម៉ូដែល។",
+    "providerIdSuffixLabel": "បច្ច័យ ID អ្នកផ្តល់សេវា",
+    "providerIdSuffixHint": "ជាជម្រើស។ បន្ថែមទៅ ID អ្នកផ្តល់សេវាជំនួសឱ្យ ID ចៃដន្យ (តែអក្សរ លេខ -, _ និង . ប៉ុណ្ណោះ)។ ទុកទទេសម្រាប់ ID ចៃដន្យ។ មិនអាចផ្លាស់ប្តូរនៅពេលក្រោយបានទេ។",
+    "providerIdConflict": "មានអ្នកផ្តល់សេវាដែលមាន ID នេះរួចហើយ។ សូមជ្រើសរើសបច្ច័យ ID ផ្សេង។",
     "nameHint": "ចាំបាច់។ ស្លាកដែលងាយយល់សម្រាប់ថ្នាំងនេះ។",
     "baseUrlHint": "ចាំបាច់។ URL មូលដ្ឋាននៃ API របស់អ្នកផ្តល់សេវា។",
     "iconUrlLabel": "URL រូបតំណាង",
@@ -5554,6 +5691,7 @@
     "allModelsAlreadyImported": "ម៉ូដែលទាំងអស់ត្រូវបាននាំចូលរួចហើយ",
     "noNewModelsToImport": "គ្មានម៉ូដែលថ្មីសម្រាប់នាំចូលទេ — ម៉ូដែលទាំងអស់មាននៅក្នុងបញ្ជីឈ្មោះម៉ូដែល ឬបញ្ជីម៉ូដែលផ្ទាល់ខ្លួនរួចហើយ",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "ការស្វែងរកម៉ូដែលបរាជ័យ {time}",
     "skippingExistingModels": "កំពុងរំលងម៉ូដែលដែលមានស្រាប់ចំនួន {count}",
     "autoSync": "ធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ",
     "autoSyncShort": "ធ្វើសមកាលកម្ម",
@@ -5571,6 +5709,10 @@
     "autoSyncTooltip": "ធ្វើឱ្យបញ្ជីម៉ូដែលស្រស់ដោយស្វ័យប្រវត្តិរៀងរាល់ 6 ម៉ោងតាមលំនាំដើម (អាចកំណត់បានតាមរយៈ MODEL_SYNC_INTERVAL_HOURS)",
     "autoSyncEnabled": "បានបើកការធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ — ម៉ូដែលនឹងត្រូវបានធ្វើបច្ចុប្បន្នភាពតាមកាលកំណត់",
     "autoSyncDisabled": "បានបិទការធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ",
+    "autoSyncLastSynced": "បានធ្វើសមកាលកម្ម {time}",
+    "autoSyncNeverSynced": "មិនធ្លាប់ធ្វើសមកាលកម្ម",
+    "autoSyncImmediateFailed": "បានបើកការធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ ប៉ុន្តែការធ្វើឱ្យម៉ូដែលស្រស់ភ្លាមៗបានបរាជ័យ",
+    "autoSyncImmediatePartialFailure": "បានបើកការធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ ប៉ុន្តែការធ្វើឱ្យម៉ូដែលស្រស់ភ្លាមៗមួយចំនួនបានបរាជ័យ",
     "autoSyncToggleFailed": "មិនអាចបិទបើកការធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិបានទេ",
     "autoSyncPartialFailure": "ការធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិត្រូវបានធ្វើបច្ចុប្បន្នភាពសម្រាប់ការតភ្ជាប់មួយចំនួន ប៉ុន្តែមិនមែនទាំងអស់ទេ",
     "clearAllModels": "លុបម៉ូដែលទាំងអស់",
@@ -5708,12 +5850,32 @@
     "perKeyProxyEnabledTitle": "បានបើកការកំណត់ប្រូកស៊ីតាមសោសម្រាប់អ្នកផ្តល់សេវានេះ",
     "perKeyProxyDisabledTitle": "បានបិទការកំណត់ប្រូកស៊ីតាមសោសម្រាប់អ្នកផ្តល់សេវានេះ",
     "autoPriority": "ស្វ័យប្រវត្តិ៖ {priority}",
+    "copyConnectionId": "ចម្លង ID ការតភ្ជាប់។ ផ្ញើវានៅក្នុងក្បាលសំណើ {header} ដើម្បីភ្ជាប់សំណើទៅគណនីនេះ។",
+    "connectionIdCopied": "បានចម្លង",
+    "connectionPinTip": "គន្លឹះ៖ ដើម្បីភ្ជាប់សំណើទៅគណនីមួយ សូមផ្ញើ ID ការតភ្ជាប់របស់វានៅក្នុងក្បាលសំណើ {header} (ចុចលើស្លាក ID នៃការតភ្ជាប់ដើម្បីចម្លង)។ គណនីដែលបានភ្ជាប់ត្រូវបានប្រើតែមួយគត់ ខណៈពេលដែលវាកំពុងសម្រាក ឬអស់កូតា សំណើនឹងប្តូរទៅគណនីផ្សេងទៀត។",
     "proxy": "ប្រូកស៊ី",
     "retestAuthentication": "សាកល្បងការផ្ទៀងផ្ទាត់អត្តសញ្ញាណឡើងវិញ",
     "retest": "សាកល្បងឡើងវិញ",
+    "pingNow": {
+      "label": "Ping ឥឡូវនេះ",
+      "title": "ផ្ញើសំណើតូចមួយឥឡូវនេះ ដើម្បីឱ្យបង្អួចកូតារបស់គណនីនេះចាប់ផ្តើម។ ប្រើកូតា; មិនផ្លាស់ប្តូរ Auto-Ping ទេ។",
+      "completed": "Ping បានបញ្ចប់។",
+      "busy": "មាន Ping កំពុងដំណើរការរួចហើយសម្រាប់គណនីនេះ។",
+      "inactive": "សូមបើកដំណើរការគណនីនេះមុនពេល Ping។",
+      "unavailable": "គណនី ឬអ្នកផ្តល់សេវាមិនអាចប្រើបានឥឡូវនេះ; មិនបានផ្ញើសំណើទេ។",
+      "noModel": "គ្មានម៉ូដែល Ping ដែលអាចប្រើបាន; មិនបានផ្ញើសំណើទេ។",
+      "authFailed": "ការផ្ទៀងផ្ទាត់បានបរាជ័យ។ សូមភ្ជាប់គណនីនេះឡើងវិញ។",
+      "quotaUnavailable": "មិនអាចទទួលបានកូតា; មិនបានផ្ញើសំណើទេ។",
+      "quotaExhausted": "កូតាអស់ហើយ; មិនបានផ្ញើសំណើទេ។",
+      "notCompleted": "អ្នកផ្តល់សេវាមិនបានបញ្ចប់ Ping ទេ។",
+      "timeout": "Ping អស់ពេល; វាប្រហែលជានៅតែត្រូវបានបញ្ជូន។ សូមពិនិត្យកូតាមុនពេលព្យាយាមម្តងទៀត។",
+      "failed": "Ping បានបរាជ័យ។"
+    },
     "disableConnection": "បិទការតភ្ជាប់",
     "enableConnection": "បើកការតភ្ជាប់",
     "reauthenticateConnection": "ផ្ទៀងផ្ទាត់អត្តសញ្ញាណសម្រាប់ការតភ្ជាប់នេះឡើងវិញ",
+    "verifyAccount": "ផ្ទៀងផ្ទាត់គណនី",
+    "verifyAccountHint": "Google តម្រូវឱ្យអ្នកផ្ទៀងផ្ទាត់គណនីនេះ។ បើកតំណ បញ្ចប់ការត្រួតពិនិត្យ រួចព្យាយាមម្តងទៀត។",
     "proxyConfig": "ការកំណត់រចនាសម្ព័ន្ធប្រូកស៊ី",
     "aliasExistsAlert": "ឈ្មោះក្លែងក្លាយ \"{alias}\" មានរួចហើយ។ សូមប្រើម៉ូដែលផ្សេង ឬកែសម្រួលឈ្មោះក្លែងក្លាយដែលមានស្រាប់។",
     "aliasInputPlaceholder": "ឈ្មោះក្លែងក្លាយ",
@@ -5748,6 +5910,7 @@
     "contextWindowOverridePlaceholder": "ឧ. 131072",
     "contextWindowOverrideHint": "កំណត់ទំហំ context window ពិតប្រាកដរបស់ម៉ូដែលនេះដោយដៃ (ជាចំនួន token) នៅពេល provider រាយការណ៍មិនត្រឹមត្រូវ។ ការកំណត់នេះមានអាទិភាពលើតម្លៃដែលរកឃើញដោយស្វ័យប្រវត្តិ/តម្លៃក្នុងកាតាឡុក ហើយការពារ combo routing មិនឱ្យដកម៉ូដែលនេះចេញ។",
     "contextWindowOverrideInvalid": "តម្លៃជំនួស context window ត្រូវតែជាចំនួន token វិជ្ជមាន និងជាចំនួនគត់",
+    "maxOutputTokenOverrideInvalid": "តម្លៃជំនួស token បញ្ចេញអតិបរមា ត្រូវតែជាចំនួន token វិជ្ជមាន និងជាចំនួនគត់",
     "visionCapableLabel": "គាំទ្ររូបភាព",
     "visionCapableHint": "សម្គាល់ម៉ូដែលនេះដោយដៃថាគាំទ្ររូបភាព នៅពេល metadata សម្រាប់ការរកឃើញរបស់ provider មិនរាយការណ៍អំពី modality នៃការបញ្ចូលរូបភាព (ជាទូទៅកើតឡើងជាមួយ backend ដែល host ដោយខ្លួនឯង/ក្នុងម៉ាស៊ីន)។",
     "compatParamFiltersLabel": "តម្រងប៉ារ៉ាម៉ែត្រ",
@@ -6006,10 +6169,10 @@
     "apiFormatLabel": "ស្លាកទម្រង់ API",
     "apiKeyOptionalHint": "ទុកឱ្យទទេ ប្រសិនបើការដំឡើងក្នុងម៉ាស៊ីនរបស់អ្នក ឬអ្នកផ្តល់សេវាមិនតម្រូវឱ្យមានការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ។",
     "apiKeyOptionalLabel": "API Key (ជាជម្រើស)",
-    "apiRegionChina": "តំបន់ API ប្រទេសចិន",
-    "apiRegionHint": "ការណែនាំអំពីតំបន់ API",
-    "apiRegionInternational": "តំបន់ API អន្តរជាតិ",
-    "apiRegionLabel": "ស្លាកតំបន់ API",
+    "apiRegionChina": "ចិនដីគោក",
+    "apiRegionHint": "ជ្រើសរើសតំបន់ endpoint ដែលប្រើសម្រាប់ការចូលប្រើ API និងការតាមដានកូតា។",
+    "apiRegionInternational": "អន្តរជាតិ",
+    "apiRegionLabel": "តំបន់ API",
     "apikey": "API key",
     "audio": "អូឌីយ៉ូ",
     "audioProvidersHeading": "ចំណងជើងអ្នកផ្តល់សេវាអូឌីយ៉ូ",
@@ -6198,6 +6361,16 @@
     "supportedEndpointEmbeddings": "វ៉ិចទ័រតំណាង",
     "supportedEndpointImages": "រូបភាព",
     "supportedEndpointsLabel": "ចំណុចបញ្ចប់ដែលគាំទ្រ",
+    "endpointCapabilitiesEdit": "កែសម្រួល endpoint ម៉ូដែល",
+    "endpointCapabilitiesReset": "កំណត់ឡើងវិញទៅតម្លៃដែលបានរកឃើញ",
+    "endpointCapabilitiesDefaulted": "បានសន្មត់",
+    "endpointCapabilitiesDeclared": "បានប្រកាស",
+    "endpointCapabilitiesInferred": "បានសន្និដ្ឋាន",
+    "endpointCapabilitiesOperator": "ដោយដៃ",
+    "endpointCapabilitiesSave": "រក្សាទុក endpoint",
+    "endpointCapabilitiesSaveFailed": "បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាព endpoint ម៉ូដែល",
+    "endpointCapabilitiesResetFailed": "បរាជ័យក្នុងការកំណត់ endpoint ម៉ូដែលឡើងវិញ",
+    "endpointCapabilitiesNoAdapter": "មិនមានអាដាប់ទ័ររបស់អ្នកផ្តល់សេវាសម្រាប់ endpoint នេះទេ",
     "tagGroupHint": "ព័ត៌មានជំនួយអំពីក្រុមស្លាក",
     "tagGroupLabel": "ស្លាកក្រុមស្លាក",
     "tagGroupPlaceholder": "កន្លែងបញ្ចូលក្រុមស្លាក",
@@ -6480,6 +6653,7 @@
       "monsterapi": "ទទួលបាន API key នៅ monsterapi.ai",
       "moonshot": "ភ្ជាប់ Kimi ដោយប្រើ API key។",
       "morph": "កម្រិតឥតគិតថ្លៃ៖ 250K credits/ខែ, $0",
+      "apmix": "ភ្ជាប់ Apmix ជាមួយកូនសោ API ពី apmix.ai/dashboard — ជាវជាប់តែមួយ ម៉ូដែលច្រើន។",
       "nanogpt": "ភ្ជាប់ NanoGPT ដោយប្រើ API key។",
       "nebius": "ឥណទានសាកល្បងប្រហែល $1 នៅពេលចុះឈ្មោះ សម្រាប់ការធ្វើតេស្ត API",
       "nlpcloud": "NLP Cloud ប្រើ chatbot API ដែលជាកម្មសិទ្ធិផ្ទាល់ខ្លួន ជំនួសឱ្យ OpenAI chat/completions។ OmniRoute សម្របសារ OpenAI ទៅជា input/context/history និងផ្តល់កាតាឡុកក្នុងមូលដ្ឋាននៃម៉ូដែល chatbot ដែលគាំទ្រ។",
@@ -6576,8 +6750,7 @@
       "kiro": "កម្រិតឥតគិតថ្លៃ៖ 50 ក្រេឌីត/ខែ (~25K–100K tokens)។ ⚠️ លក្ខខណ្ឌប្រើប្រាស់ Kiro ហាមឃាត់ការប្រើប្រាស់ proxy/harness របស់ភាគីទីបី។",
       "codex": "ភ្ជាប់ OpenAI Codex ដោយប្រើលំហូរ OAuth ដែលមានស្រាប់។",
       "qwen": "ភ្ជាប់ Qwen Code ដោយប្រើលំហូរ OAuth ដែលមានស្រាប់។",
-      "github-models": "បង្កើត GitHub PAT ដែលមាន scope 'models: read' នៅ github.com/settings/tokens",
-      "apmix": "ភ្ជាប់ Apmix ជាមួយកូនសោ API ពី apmix.ai/dashboard — ជាវជាប់តែមួយ ម៉ូដែលច្រើន។"
+      "github-models": "បង្កើត GitHub PAT ដែលមាន scope 'models: read' នៅ github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} ទទួលយក ID ម៉ូដែលដើមរបស់ provider។ នាំចូលពី /models ឬបន្ថែម ID ផ្ទាល់ខ្លួនសម្រាប់ការកំណត់ផ្លូវ។",
     "bedrockModelsDescription": "ម៉ូដែល Amazon Bedrock ត្រូវបានកំណត់តាមតំបន់ AWS។ នាំចូលពី /models ឬបន្ថែម ID ម៉ូដែល Bedrock ដែលបានបើកប្រើក្នុងតំបន់ដែលបានជ្រើសរើស។",
@@ -7045,16 +7218,6 @@
     "settingsSidebarDesc": "ជ្រើសរើសធាតុរបារចំហៀងដែលត្រូវបង្ហាញ។ ធាតុចាំបាច់រក្សាឱ្យឧបករណ៍កម្រិតខ្ពស់នៅតែអាចស្វែងរកបាន។",
     "hideHealthLogs": "លាក់កំណត់ហេតុពិនិត្យសុខភាព",
     "hideHealthLogsDesc": "នៅពេលបើក នឹងមិនបង្ហាញសារ [HealthCheck] នៅក្នុងកុងសូលម៉ាស៊ីនមេទេ",
-    "themeAccent": "ពណ៌រូបរាង",
-    "themeAccentDesc": "ជ្រើសរើសពណ៌ដែលបានកំណត់ជាមុន ឬបង្កើតរូបរាងផ្ទាល់ខ្លួនដោយប្រើពណ៌តែមួយ",
-    "themeCreate": "បង្កើតរូបរាង",
-    "themeCustom": "រូបរាងផ្ទាល់ខ្លួន",
-    "themeBlue": "ខៀវ",
-    "themeRed": "ក្រហម",
-    "themeGreen": "បៃតង",
-    "themeViolet": "ស្វាយ",
-    "themeOrange": "ពណ៌ទឹកក្រូច",
-    "themeCyan": "ខៀវស៊ីយ៉ាន",
     "whitelabeling": "ម៉ាកយីហោ",
     "whitelabelingDesc": "កំណត់ឈ្មោះ និងរូបសញ្ញារបស់កម្មវិធីតាមបំណង",
     "appName": "ឈ្មោះកម្មវិធី",
@@ -7099,6 +7262,8 @@
         "NEEDS_CORE_NOT_CONFIGURED": "ការជាវនេះមាន node ដែលត្រូវការ proxy core ក្នុងម៉ាស៊ីន (SS/VMess/Trojan/VLESS)។ ពួកវានឹងមិនត្រូវបានកំណត់ផ្លូវទេ រហូតដល់អ្នកកំណត់រចនាសម្ព័ន្ធចំណុចបញ្ចប់ SOCKS5 របស់ local-core។",
         "NO_USABLE_NODES": "ការជាវនេះមិនមាន node ដែលអាចប្រើបានទេ (http/https/socks5 ឬ node ដែលមានចំណុចបញ្ចប់ local core)។",
         "SELECTOR_SWITCH_FAILED": "ការហៅបញ្ជា proxy-core បានបរាជ័យ; ផ្លូវមុននៅតែសកម្ម។ សូមពិនិត្យ URL និង secret បញ្ជា រួចផ្ទុកឡើងវិញ។",
+        "SELECTOR_EARLY_NO_CONTROL": "មិនមាន URL គ្រប់គ្រងទេ",
+        "SELECTOR_EARLY_UNMAPPED": "មិនមានការជាវដែលត្រូវគ្នា",
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "ការតភ្ជាប់គោលការណ៍ខ្នាតដែលបានបង្កើតមិនអាចជំនួសឯកសារដែលបានអនុម័តបានទេ។ មានការថតមួយនៅក្បែរនោះជំនួសវិញ។",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
@@ -7130,6 +7295,7 @@
       "createSubscription": "បង្កើតការជាវ",
       "loading": "កំពុងផ្ទុក…",
       "noSubscriptions": "មិនទាន់មានការជាវទេ។ ចុច \"បន្ថែមការជាវ\" ដើម្បីចាប់ផ្តើម។",
+      "earlySkipsSinceRestart": "ការរំលងរបស់ជម្រើស ចាប់តាំងពីការចាប់ផ្ដើមឡើងវិញចុងក្រោយ",
       "statusOk": "យល់ព្រម",
       "statusError": "កំហុស",
       "statusEmpty": "ទទេ",
@@ -7192,7 +7358,7 @@
       "nextSwitchNow": "ឥឡូវ",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7203,7 +7369,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "ផ្លូវឯកសារគោលការណ៍ខ្នាត",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "ជាការជ្រើសរើស៖ ផ្ទៀងផ្ទាត់ឯកសារដែលបានបង្កើតជាមួយឯកសារគោលការណ៍ខ្នាត មុននឹងជំនួសឯកសារដែលបានអនុម័ត។ ទុកឲ្យទំនេរដើម្បីបន្តសរសេរនៅក្បែរ។ ថតត្រូវបានបង្កើតប្រសិនបើមិនមាន។"
+      "coreBinaryPathHelp": "ជាការជ្រើសរើស៖ ផ្ទៀងផ្ទាត់ឯកសារដែលបានបង្កើតជាមួយឯកសារគោលការណ៍ខ្នាត មុននឹងជំនួសឯកសារដែលបានអនុម័ត។ ទុកឲ្យទំនេរដើម្បីបន្តសរសេរនៅក្បែរ។ ថតត្រូវបានបង្កើតប្រសិនបើមិនមាន។",
+      "urlFeedlessHint": "ទុកឱ្យទំនេរសម្រាប់ការជាវតែម្នាក់ឯងប៉ុណ្ណោះ៖ កំណត់ URL នៃបញ្ជាខាងក្រោម គ្មាន feed ត្រូវបានទាញយក ធ្វើបច្ចុប្បន្នភាព ឬភ្ជាប់ទេ។"
     },
     "bulkHealthcheck": "ការពិនិត្យស្ថានភាពជាក្រុម",
     "bulkHealthcheckDesc": "សាកល្បងប្រូកស៊ីដែលបានកំណត់រចនាសម្ព័ន្ធទាំងអស់ជាមួយ URL គោលដៅ ដើម្បីរកមើលថាតើមួយណាដំណើរការ។",
@@ -7644,6 +7811,7 @@
     "configured": "បានកំណត់រចនាសម្ព័ន្ធ",
     "none": "គ្មាន",
     "modelOverrideValuePlaceholder": "តម្លៃជាលេខ",
+    "modelOverrideKey": "សោសម្រាប់កំណត់ជំនួស",
     "modelOverrideReasoningEffortsPlaceholder": "បំបែកដោយសញ្ញាក្បៀសអង់គ្លេស ឧ. low, medium, high",
     "addKeyValue": "បន្ថែមគូសោ-តម្លៃ",
     "noModelOverrides": "មិនមានការកំណត់ជំនួសសម្រាប់ម៉ូដែលនេះទេ។",
@@ -7692,7 +7860,6 @@
     "customPricingNote": "អ្នកអាចកំណត់តម្លៃផ្ទាល់ខ្លួនជំនួសតម្លៃលំនាំដើមសម្រាប់ម៉ូដែលជាក់លាក់។ តម្លៃកំណត់ផ្ទាល់ខ្លួនមានអាទិភាពលើតម្លៃដែលបានរកឃើញដោយស្វ័យប្រវត្តិ។",
     "editPricing": "កែសម្រួលតម្លៃ",
     "viewFullDetails": "មើលព័ត៌មានលម្អិតទាំងអស់",
-    "themeCoral": "ផ្កាថ្ម",
     "adaptiveVolumeRouting": "ការកំណត់ផ្លូវតាមបរិមាណដោយសម្របខ្លួន",
     "adaptiveVolumeRoutingDesc": "ពង្រីក ឬបន្ថយការតភ្ជាប់ដោយថាមវន្ត ផ្អែកលើបរិមាណ payload និងសម្ពាធ throughput។",
     "lkgpToggleTitle": "អ្នកផ្តល់សេវាល្អចុងក្រោយដែលបានស្គាល់ (LKGP)",
@@ -7787,6 +7954,8 @@
     "compressionDesc": "កាត់បន្ថយការប្រើប្រាស់ថូខិនដោយបង្ហាប់ប្រូម មុនពេលផ្ញើទៅអ្នកផ្តល់សេវា",
     "autoCombosTitle": "បន្សំស្វ័យប្រវត្តិ",
     "autoCombosDesc": "អនុញ្ញាតឱ្យសោនេះប្រើបន្សំ auto/* ដែលមានស្រាប់ ដើម្បីជ្រើសរើសម៉ូដែលដោយស្វ័យប្រវត្តិពីគ្រប់អ្នកផ្តល់សេវាដែលបានកំណត់រចនាសម្ព័ន្ធ",
+    "ccDiscoveryAliasesTitle": "ឈ្មោះហៅកាត់សម្រាប់ការរកឃើញរបស់ Claude Code",
+    "ccDiscoveryAliasesDesc": "ប្រកាស mirrors ភាពឆបគ្នា claude/... សម្រាប់ម៉ូដែល និង combos ដែល key នេះអាចចូលប្រើបានរួចហើយ",
     "compressionGuidanceFullGuideLink": "មគ្គុទ្ទេសក៍ពេញលេញអំពីការបង្ហាប់",
     "compressionGuidanceShow": "ព័ត៌មានលម្អិត",
     "compressionGuidanceHide": "លាក់ព័ត៌មានលម្អិត",
@@ -8120,6 +8289,9 @@
     "storageIntegrityCheck": "ការពិនិត្យភាពត្រឹមត្រូវ",
     "storageIntegrityOk": "✓ ត្រឹមត្រូវ",
     "storageIntegrityError": "✗ កំហុស",
+    "storageIntegrityLastCheck": "បានពិនិត្យចុងក្រោយ {date}",
+    "storageIntegrityRunCheck": "រត់ការពិនិត្យភាពត្រឹមត្រូវ",
+    "storageIntegrityCheckFailed": "បានបរាជ័យក្នុងការពិនិត្យភាពត្រឹមត្រូវ",
     "storageUsageTokenBuffer": "ថូខឹនបម្រុងសម្រាប់ការប្រើប្រាស់",
     "storageUsageTokenBufferDesc": "ថូខឹនបន្ថែមដែលបញ្ចូលទៅក្នុងការប្រើប្រាស់ដែលបានរាយការណ៍ ដើម្បីគិតបញ្ចូលបន្ទុកបន្ថែមពីប្រូមប្រព័ន្ធ។",
     "storageUsageTokenBufferHint": "កំណត់ជា 0 ដើម្បីរាយការណ៍ចំនួនថូខឹនដើមរបស់អ្នកផ្តល់សេវា។ លំនាំដើម៖ 2000។",
@@ -8238,6 +8410,14 @@
       "terse-cjk": {
         "label": "CJK ខ្លីខ្លឹម (文言)",
         "description": "រចនាប័ទ្មភាសាចិនបុរាណខ្លីបំផុត (មានសម្រាប់តែភាសាចិន)។"
+      },
+      "antislop-ui": {
+        "label": "តម្រង UI Antislop",
+        "description": "រូបភាពដែលបានសាកល្បងគោលបំណង៖ គ្មាន gradient ទូទៅ ប្លង់គំរូ ឬវត្ថុបញ្ជាដែលមិនដំណើរការ។"
+      },
+      "antislop-copy": {
+        "label": "តម្រងអត្ថបទ និងមនុស្ស Antislop",
+        "description": "អត្ថបទស្មោះត្រង់ និងច្បាប់សម្រាប់មនុស្ស៖ គ្មានស្លាកស្នាម AI កម្រិតពន្លឺប្រៀបធៀប WCAG AA ក្ដារចុច ស្ថានភាព ការរៀបចំឡើងវិញលើទូរសព្ទ។"
       }
     },
     "resilienceWaitForCooldown": "រង់ចាំរយៈពេលសម្រាក",
@@ -8322,6 +8502,38 @@
     "codexAutoPingWarning": "ប្រើប្រាស់កូតា Codex ពិតប្រាកដមួយចំនួនតូចរាល់ពេល ping។ បិទតាមលំនាំដើម — បើកតែសម្រាប់ការតភ្ជាប់ដែលអ្នកពឹងផ្អែកយ៉ាងសកម្មប៉ុណ្ណោះ។",
     "codexAutoPingSaveError": "មិនអាចធ្វើបច្ចុប្បន្នភាពការកំណត់ Codex Auto-Ping បានទេ",
     "codexAutoPingToggleAria": "បិទ/បើកការផ្ញើ ping កូតា Codex ដោយស្វ័យប្រវត្តិសម្រាប់ {connection}",
+    "codexWakeups": {
+      "title": "ការដាស់តាមកាលវិភាគ",
+      "desc": "ផ្ញើ ping ទៅគណនីដែលបានជ្រើសតាមកាលវិភាគ ដើម្បីឱ្យបង្អួចកូតារបស់វាចាប់ផ្តើមនៅពេលដែលអ្នកចង់បាន។ ការដំណើរការនីមួយៗប្រើកូតា Codex ពិតបន្តិចបន្តួច។",
+      "name": "ឈ្មោះ",
+      "accounts": "គណនី",
+      "scheduleKind": "កាលវិភាគ",
+      "daily": "រៀងរាល់ថ្ងៃនៅម៉ោងកំណត់",
+      "interval": "រៀងរាល់ N នាទី",
+      "time": "ម៉ោង",
+      "timezone": "តំបន់ពេលវេលា",
+      "days": "ថ្ងៃ",
+      "minutes": "ចន្លោះពេលជានាទី (5–10080)",
+      "add": "បន្ថែមការដាស់",
+      "runNow": "ដំណើរការឥឡូវ",
+      "delete": "លុប",
+      "toggleAria": "បើកការដាស់ {name}",
+      "everyMinutes": "រៀងរាល់ {minutes} នាទី",
+      "dailyAt": "{days} ម៉ោង {time} ({timezone})",
+      "nextRun": "ដំណើរការបន្ទាប់៖ {time}",
+      "lastRun": "ដំណើរការចុងក្រោយ៖ {status}",
+      "saveError": "មិនអាចរក្សាទុកការដាស់បានទេ។ សូមពិនិត្យឈ្មោះ គណនី និងកាលវិភាគ។",
+      "actionError": "សកម្មភាពបរាជ័យ។ សូមព្យាយាមម្តងទៀតបន្តិចទៀត។",
+      "runStarted": "បានចាប់ផ្តើមដំណើរការ។",
+      "status": {
+        "running": "កំពុងដំណើរការ",
+        "succeeded": "ជោគជ័យ",
+        "failed": "បរាជ័យ",
+        "skipped": "បានរំលង",
+        "partial": "ជោគជ័យមួយផ្នែក",
+        "interrupted": "ត្រូវបានរំខាន"
+      }
+    },
     "codexFastTierTierLabel": "កម្រិតសេវា",
     "codexFastTierTierPriority": "អាទិភាព",
     "codexFastTierTierFlex": "បត់បែន",
@@ -8693,6 +8905,7 @@
     "cliproxyapiPort": "ច្រក",
     "qdrantHost": "ម៉ាស៊ីនមេ",
     "qdrantCollection": "បណ្តុំ",
+    "catalogVisibilityHint": "លេខសម្គាល់ម៉ូដែលដែលបានលាក់នៅតែអាចហៅបានដោយប្រើសិទ្ធិចូលប្រើដដែល។",
     "catalogScopeTitle": "បញ្ជី Models API",
     "catalogScopeDesc": "អ្វីដែល GET /v1/models បង្ហាញសម្រាប់សោនេះ។ ការបង្រួមបញ្ជីមិនផ្លាស់ប្តូរអ្វីដែលសោនេះអាចហៅប្រើបានឡើយ។",
     "catalogScopeAll": "ទាំងពីរ",
@@ -8800,7 +9013,52 @@
     "resilienceTokenRefreshScopeConnection": "ការតភ្ជាប់ (គណនីនីមួយៗមានឧបករណ៍ផ្ទុះផ្ទាល់ខ្លួន)",
     "resilienceTokenRefreshThreshold": "ការបរាជ័យមុនពេលផ្អាក",
     "resilienceTokenRefreshCooldown": "ផ្អាកបន្ទាប់ពីដំណើរការ",
-    "jev": "Jev"
+    "jev": "Jev",
+    "piiMasking": {
+      "title": "ការលាក់ទិន្នន័យផ្ទាល់ខ្លួន",
+      "description": "ជ្រើសរើសប្រភេទទិន្នន័យផ្ទាល់ខ្លួនដែលត្រូវលាក់ ហើយបន្ថែមលំនាំផ្ទាល់ខ្លួនរបស់អ្នក។ ការលាក់នៅតែបិទ រហូតដល់អ្នកបើកទង់មុខងារដែលបង្ហាញខាងក្រោម។",
+      "requestFlag": "ការលាក់សំណើ",
+      "responseFlag": "ការសម្អាតការឆ្លើយតប",
+      "templates": "គំរូ",
+      "template": {
+        "minimal": "អប្បបរមា",
+        "standard": "ស្តង់ដារ",
+        "financial": "ហិរញ្ញវត្ថុ",
+        "brazilian": "ប្រេស៊ីល",
+        "usa": "សហរដ្ឋអាមេរិក",
+        "full": "ពេញលេញ"
+      },
+      "builtinTypes": "ប្រភេទដែលមានស្រាប់",
+      "types": {
+        "email": "អាសយដ្ឋានអ៊ីមែល",
+        "phone_us": "លេខទូរស័ព្ទសហរដ្ឋអាមេរិក",
+        "phone_br": "លេខទូរស័ព្ទប្រេស៊ីល",
+        "ssn": "លេខសន្តិសុខសង្គមសហរដ្ឋអាមេរិក",
+        "credit_card": "លេខកាតឥណទាន",
+        "cpf": "CPF (លេខសម្គាល់អ្នកបង់ពន្ធប្រេស៊ីល)",
+        "cnpj": "CNPJ (លេខសម្គាល់ក្រុមហ៊ុនប្រេស៊ីល)",
+        "ip_address": "អាសយដ្ឋាន IPv4",
+        "ipv6_address": "អាសយដ្ឋាន IPv6",
+        "aws_key": "កូនសោចូលប្រើ AWS",
+        "api_key_generic": "កូនសោ API និងថូខឹន"
+      },
+      "customPatterns": "លំនាំផ្ទាល់ខ្លួន",
+      "customPatternsDesc": "ការផ្គូផ្គងត្រូវបានជំនួសដោយ [CUSTOM_REDACTED]។ រហូតដល់ {max} លំនាំ។ លំនាំដែលមានហានិភ័យនៃការត្រឡប់ក្រោយមហន្តរាយត្រូវបានបដិសេធ។",
+      "typeRegex": "កន្សោមធម្មតា",
+      "typeWildcard": "តួអក្សរជំនួស (* និង ?)",
+      "pattern": "លំនាំ",
+      "flags": "ទង់ (i, m, s, u)",
+      "sampleText": "អត្ថបទគំរូសម្រាប់សាកល្បងលំនាំ",
+      "test": "សាកល្បង",
+      "testMatches": "ការផ្គូផ្គង {count}",
+      "testFailed": "លំនាំត្រូវបានបដិសេធ៖ {message}",
+      "add": "បន្ថែមលំនាំ",
+      "saved": "បានរក្សាទុក",
+      "saveFailed": "មិនអាចរក្សាទុកបានទេ៖ {message}",
+      "statsTitle": "ការរកឃើញតាំងពីចាប់ផ្ដើមឡើងវិញ",
+      "statsEmpty": "មិនទាន់មានការរកឃើញទេ។",
+      "statsRequest": "សំណើ"
+    }
   },
   "contextRtk": {
     "title": "ម៉ាស៊ីន RTK",
@@ -8884,7 +9142,8 @@
     "tomlTestPassed": "បានជោគជ័យ",
     "tomlTestFailed": "បានបរាជ័យ",
     "tomlImportError": "មិនអាចដំណើរការឯកសារ RTK TOML បានទេ។",
-    "tomlFileReadError": "មិនអាចអានឯកសារ TOML ដែលបានជ្រើសរើសទេ។"
+    "tomlFileReadError": "មិនអាចអានឯកសារ TOML ដែលបានជ្រើសរើសទេ។",
+    "viewMode": "របៀបមើល"
   },
   "compressionEngineConfig": {
     "loading": "កំពុងផ្ទុក…",
@@ -9106,7 +9365,8 @@
     "languagePacksList": "កញ្ចប់ភាសា៖ {packs}",
     "dragToReorder": "អូសដើម្បីរៀបលំដាប់ជំហានឡើងវិញ",
     "engine": "ម៉ាស៊ីន",
-    "intensity": "កម្រិត"
+    "intensity": "កម្រិត",
+    "compressionOverride": "ការកំណត់ការបង្ហាប់ជំនួស"
   },
   "compressionStudio": {
     "noRun": "មិនមានការដំណើរការបង្ហាប់ទេ។",
@@ -9166,7 +9426,8 @@
     "encoderWinner": "អ្នកឈ្នះ៖ {winner}",
     "encoder": "អ៊ិនកូឌ័រ",
     "bytes": "បៃ",
-    "tokensCl100k": "តូខឹន (cl100k)"
+    "tokensCl100k": "តូខឹន (cl100k)",
+    "studioViews": "ទិដ្ឋភាព Studio"
   },
   "omniglyph": {
     "preview": "មើលជាមុន",
@@ -9372,7 +9633,9 @@
     "tooltipMinLength": "សារដែលខ្លីជាងនេះមិនត្រូវបានបង្ហាប់ទេ។ ទាបជាង = បង្ហាប់ច្រើនជាង។",
     "tooltipMinSavings": "បង្ហាប់តែក្នុងករណីដែលវាសន្សំបានយ៉ាងហោចណាស់ចំនួនថូខឹននេះ។",
     "ultraSettings": "ការកំណត់ Ultra",
-    "ultraSettingsDesc": "ការបង្ហាប់តាមអត្ថន័យដែលដំណើរការដោយ SLM"
+    "ultraSettingsDesc": "ការបង្ហាប់តាមអត្ថន័យដែលដំណើរការដោយ SLM",
+    "defaultLanguage": "ភាសាលំនាំដើម",
+    "viewMode": "របៀបមើល"
   },
   "translator": {
     "title": "កម្មវិធីបកប្រែ",
@@ -9684,6 +9947,9 @@
     "streamTransformFailed": "មិនអាចបំប្លែងទិន្នន័យបន្តបន្ទាប់បានទេ"
   },
   "usage": {
+    "healthExtraUsageBypass": "កូតាអស់ហើយ ប៉ុន្តែអនុញ្ញាតឱ្យប្រើប្រាស់បន្ថែម ដូច្នេះសេវាបន្តដំណើរការ។",
+    "healthPaidCreditsBypass": "កូតាអស់ហើយ ប៉ុន្តែឥណទានដែលបានបង់ប្រាក់នៅសល់អនុញ្ញាតឱ្យសេវាបន្តដំណើរការ។",
+    "healthFilteringBypass": "កូតាអស់ហើយ ប៉ុន្តែការត្រងកូតាក្នុងមូលដ្ឋានត្រូវបានបិទ ដូច្នេះសេវាបន្តដំណើរការ។",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
@@ -9851,6 +10117,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "កម្រិតកំណត់របស់អ្នកផ្តល់សេវា",
     "noProviders": "មិនមានអ្នកផ្តល់សេវាណាត្រូវបានភ្ជាប់ទេ",
+    "quotaAuthRequired": "តម្រូវឱ្យផ្ទៀងផ្ទាត់អត្តសញ្ញាណ - ចូលគណនីទៅកាន់ផ្ទាំងគ្រប់គ្រង",
+    "quotaAuthRequiredHint": "មិនអាចផ្ទុកការតភ្ជាប់របស់អ្នកផ្តល់សេវាបានទេ ព្រោះសម័យប្រើប្រាស់ផ្ទាំងគ្រប់គ្រងបានបាត់ ឬផុតកំណត់។ ចូលគណនី ហើយផ្ទុកឡើងវិញ ដើម្បីមើលកម្រិតកូតារបស់អ្នក។",
     "connectProvidersForQuota": "ភ្ជាប់ទៅអ្នកផ្តល់សេវាដោយប្រើ OAuth ដើម្បីតាមដានកម្រិតកូតា API និងការប្រើប្រាស់របស់អ្នក។",
     "accountsCount": "{count, plural, one {# គណនី} other {# គណនី}}",
     "filteredFromCount": "(បានត្រងចេញពី {count})",
@@ -9862,6 +10130,9 @@
     "hideQuotaRow": "លាក់ជួរកូតានេះ",
     "showQuotaRow": "បង្ហាញជួរកូតានេះ",
     "hiddenQuotaRowsLabel": "បានលាក់៖",
+    "quotaSpeedTitle": "ល្បឿនឌិកូដថ្មីៗលើគណនីនេះ (សំណើជោគជ័យ {count} ចុងក្រោយ)",
+    "quotaSpeedLine": "{model}: {avg} tok/s មធ្យម · ចុងក្រោយ {last} · TTFT {ttft}s (n={samples})",
+    "quotaSpeedLineNoTtft": "{model}: {avg} tok/s មធ្យម · ចុងក្រោយ {last} (n={samples})",
     "quotaVisibilityUpdateFailed": "បានបរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពការបង្ហាញកូតា",
     "account": "គណនី",
     "modelQuotas": "កូតារបស់ម៉ូដែល",
@@ -9897,9 +10168,6 @@
     "tierLite": "ស្រាល",
     "tierUnknown": "មិនស្គាល់",
     "statTotal": "សរុប",
-    "statCritical": "ធ្ងន់ធ្ងរ",
-    "statAlert": "ការព្រមាន",
-    "statHealthy": "ប្រក្រតី",
     "filterPurchaseTypeLabel": "ប្រភេទ",
     "filterTierLabel": "កម្រិត",
     "purchaseAll": "ទាំងអស់",
@@ -10137,7 +10405,61 @@
     "updatedShort": "បានធ្វើបច្ចុប្បន្នភាព",
     "lastRefreshed": "បានធ្វើឱ្យស្រស់ចុងក្រោយ",
     "providerQuota": "កូតារបស់អ្នកផ្តល់សេវា",
-    "providerQuotaHomeHint": "ស្ថានភាពផ្ទាល់នៅទូទាំងគណនីដែលបានភ្ជាប់"
+    "providerQuotaHomeHint": "ស្ថានភាពផ្ទាល់នៅទូទាំងគណនីដែលបានភ្ជាប់",
+    "claudeResetCreditDefaultTitle": "ការកំណត់ដែនកំណត់ Claude ឡើងវិញ",
+    "confirmRedeemClaudeResetCredit": "ការប្តូរយកនឹងកំណត់ដែនកំណត់នៃការប្រើប្រាស់ Claude ដែលមានសិទ្ធិឡើងវិញភ្លាមៗ និងប្រើប្រាស់ក្រេឌីតនេះជាអចិន្ត្រៃយ៍។",
+    "claudeResetCreditsModalTitle": "ក្រេឌីតកំណត់ Claude ឡើងវិញ",
+    "claudeResetCreditsModalExplainer": "ក្រេឌីតកំណត់ Claude ឡើងវិញដែលមាន និងការកំណត់វគ្គឡើងវិញប្រចាំសប្តាហ៍សម្រាប់គណនីនេះ។",
+    "healthAccountHint": "ផ្អែកលើការសង្កេតថ្មីៗ មិនមែនជាការសាកល្បងផ្ទាល់ទេ។ ជ្រើសរើសគណនីដើម្បីមើលព័ត៌មានលម្អិត។",
+    "healthRecovery": "ពេលវេលាស្ដារឡើងវិញដែលរំពឹងទុក",
+    "healthAvailable": "មាន",
+    "healthRestricted": "មានកម្រិតមួយផ្នែក",
+    "healthUnavailable": "មិនអាចប្រើបាន",
+    "healthPeakHourProtection": "ការការពារក្នុងម៉ោងមមាញឹក",
+    "healthCooldown": "រយៈពេលរង់ចាំ",
+    "healthQuotaExhausted": "កូតាត្រូវបានប្រើអស់",
+    "healthOverview": "ទិដ្ឋភាពទូទៅ",
+    "layoutFull": "ពេញលេញ",
+    "layoutCompact": "បង្រួម",
+    "healthQuotaError": "អានកូតាបរាជ័យ",
+    "healthNoRuntime": "មិនមានស្ថានភាពប្រតិបត្តិការ",
+    "healthPreviousSnapshot": "ការធ្វើបច្ចុប្បន្នភាពចុងក្រោយបរាជ័យ បង្ហាញលទ្ធផលមុន",
+    "healthPreviousFailure": "សំណើចុងក្រោយបរាជ័យ រយៈពេលរង់ចាំបានបញ្ចប់",
+    "healthAwaitingSync": "ហួសពេលកំណត់ឡើងវិញ រង់ចាំការធ្វើសមកាលកម្ម",
+    "healthVerdictUnavailable": "មិនអាចទទួលបានលទ្ធផលពិនិត្យភាពអាចប្រើបានទេ បង្ហាញតែកម្រិតកូតាប៉ុណ្ណោះ",
+    "healthSummaryFailed": "អានសេចក្តីសង្ខេបប្រតិបត្តិការបរាជ័យ អាចខ្វះព័ត៌មានចាក់សោម៉ូដែល",
+    "healthRuntimeObserved": "ស្ថានភាពបានធ្វើបច្ចុប្បន្នភាព {time}",
+    "healthQuotaObserved": "កូតាបានសង្កេត {time}",
+    "healthOldestQuota": "រូបភាពកូតាចាស់បំផុត៖ {time}",
+    "healthRecoveryUnknown": "មិនស្គាល់ពេលស្ដារឡើងវិញ",
+    "healthDetailsHint": "ចុចដើម្បីមើលព័ត៌មានលម្អិត និងសកម្មភាព",
+    "healthFiveHour": "៥ ម៉ោង",
+    "healthOverall": "សរុប",
+    "healthAction": "ត្រូវការសកម្មភាព",
+    "healthTitle": "ភាពអាចប្រើបាននៃគណនី",
+    "healthDrag": "អូសដើម្បីរៀបលំដាប់អ្នកផ្តល់សេវា",
+    "healthDragPosition": "{provider}, {count, plural, other {ទីតាំង {position, number} ក្នុងចំណោម #}}",
+    "healthResetOrder": "ស្ដារលំដាប់លំនាំដើម",
+    "healthPool": "ក្រុម {name}",
+    "healthOtherPool": "គណនីដូចគ្នា · {pool}: {status} (នៅសល់ {remaining})",
+    "healthIncluded": "រួមមានកំណត់ខ្លះ៖ {count, number}",
+    "healthBannerUnavailable": "គណនីមិនអាចប្រើបណ្តោះអាសន្ន៖ {count, number}",
+    "healthBannerAvailable": "គណនីទាំង {count, number} អាចប្រើបាន",
+    "healthLegendHide": "លាក់សេចក្តីពន្យល់និមិត្តសញ្ញា",
+    "healthLegendShow": "បង្ហាញសេចក្តីពន្យល់និមិត្តសញ្ញា",
+    "healthLegendOk": "ពណ៌ពេញ = កូតានៅសល់; ពាក់កណ្តាលថ្លា = បានប្រើ។",
+    "healthLegendCooldown": "កូតា {window} អស់។ ពណ៌ពេញ = ពេលបានរង់ចាំ; ពាក់កណ្តាលថ្លា = ពេលរង់ចាំនៅសល់។",
+    "healthLegendAction": "ការអនុញ្ញាតផុតកំណត់ ឬគណនីត្រូវបានហាម; ការរង់ចាំមិនអាចដោះស្រាយបាន។",
+    "healthLegendPartial": "នៅតែអាចប្រើបាន។ កំពូលលឿង = ម៉ូដែល ឬក្រុមត្រូវបានកំណត់។",
+    "healthWaited": "បានរង់ចាំ {percent}",
+    "healthWait": "នៅសល់ {duration} (ស្ដារនៅ {time})",
+    "healthFastest": "ស្ដារលឿនបំផុតក្រោយ {duration}",
+    "healthRatio": "អាចប្រើបាន {available, number} / {active, number}",
+    "healthCd5": "៥ ម៉ោង · រយៈពេលរង់ចាំ",
+    "healthCdw": "ប្រចាំសប្ដាហ៍ · រយៈពេលរង់ចាំ",
+    "healthRecentSuccessBypass": "ការបញ្ជូនអនុញ្ញាតឱ្យប្រើគណនីនេះ ព្រោះមានសំណើជោគជ័យថ្មីៗនេះ។",
+    "healthPurchasedBalanceBypass": "សមតុល្យដែលបានទិញអនុញ្ញាតឱ្យបន្តប្រើ បន្ទាប់ពីអស់កូតាដែលបានរួមបញ្ចូល។",
+    "healthCutoffAtRequest": "កម្រិតកូតាបច្ចុប្បន្នត្រូវបានពិនិត្យនៅពេលបញ្ជូនសំណើ។"
   },
   "modals": {
     "waitingAuth": "កំពុងរង់ចាំការផ្តល់សិទ្ធិ",
@@ -10924,7 +11246,8 @@
       "message": "សារ",
       "error": "កំហុស",
       "completion": "ការបញ្ចប់"
-    }
+    },
+    "statusFilter": "ស្ថានភាព"
   },
   "templateNames": {
     "simple-chat": "ការជជែកសាមញ្ញ",
@@ -11105,7 +11428,8 @@
     "minutesAgo": "{minutes} នាទីមុន",
     "hoursAgo": "{hours} ម៉ោងមុន",
     "daysAgo": "{days} ថ្ងៃមុន",
-    "entries": "ធាតុ"
+    "entries": "ធាតុ",
+    "viewSwitcherAria": "ទិដ្ឋភាពឃ្លាំងសម្ងាត់"
   },
   "proxyConfigModal": {
     "levelGlobal": "សកល",
@@ -11293,6 +11617,7 @@
     "tableHealth": "ស្ថានភាពដំណើរការ (24h)",
     "tableUsage": "ការប្រើប្រាស់",
     "tableActions": "សកម្មភាព",
+    "moreActions": "សកម្មភាពបន្ថែម",
     "test": "សាកល្បង",
     "edit": "កែសម្រួល",
     "delete": "លុប",
@@ -11372,7 +11697,7 @@
     "bulkImportNoValidEntries": "រកមិនឃើញធាតុត្រឹមត្រូវទេ។ សូមពិនិត្យទម្រង់ ហើយព្យាយាមម្ដងទៀត។",
     "bulkImportSuccess": "ការនាំចូលបានបញ្ចប់៖ បានបង្កើត {created}, បានធ្វើបច្ចុប្បន្នភាព {updated}, បានបរាជ័យ {failed}",
     "bulkImportErrorLine": "បន្ទាត់ {line}៖ {reason}",
-    "bulkImportMaxExceeded": "អាចនាំចូលប្រូកស៊ីបានអតិបរមា 100 ក្នុងមួយលើក",
+    "bulkImportMaxExceeded": "អាចនាំចូលប្រូកស៊ីបានអតិបរមា {max} ក្នុងមួយលើក",
     "bulkImportPreview": "មើលជាមុន",
     "clearAssignment": "(លុបការកំណត់)",
     "bulkProxyAssignment": "កំណត់ប្រូកស៊ីជាច្រើនក្នុងពេលតែមួយ",
@@ -11433,6 +11758,7 @@
     "poolSetAsideKindIpQuota429": "ដែនកំណត់អត្រា IP (429)",
     "poolSetAsideKindSlow": "ការឆ្លើយតបយឺត",
     "poolSetAsideKindGeoBlocked": "តំបន់បានរារាំង (403/451)",
+    "poolSetAsideKindOperatorReported": "ការលែងដំណើរការដែលអ្នកប្រតិបត្តិរាយការណ៍",
     "poolSetAsideUntil": "ត្រឡប់ទៅការបង្វិល {endsAt}",
     "poolSetAsideRepeat": "ដាក់ឡែក {count, plural, one {# ដង} other {# ដង}}",
     "poolUnknownAddress": "អាសយដ្ឋានមិនស្គាល់",
@@ -11542,7 +11868,6 @@
     "exportCodeTitle": "នាំចេញកូដ",
     "exportShort": "នាំចេញ",
     "noStateToExport": "មិនមានស្ថានភាព playground សម្រាប់នាំចេញទេ។",
-    "closeExportModal": "បិទប្រអប់នាំចេញ",
     "close": "បិទ",
     "exportRealKeyWarning": "ការព្រមានអំពីសុវត្ថិភាព៖ ការនាំចេញត្រូវបានរារាំង — បានរកឃើញ API key ពិតប្រាកដនៅក្នុងលទ្ធផល។ សូមកំណត់ API key របស់អ្នកឡើងវិញ ហើយព្យាយាមម្ដងទៀត។",
     "placeholderHintPrefix": "ជំនួស",
@@ -11655,7 +11980,8 @@
       "nextButton": "បន្ទាប់",
       "runButton": "ដំណើរការ",
       "promptPlaceholder": "បញ្ចូលសាររបស់អ្នក… (Enter ដើម្បីផ្ញើ, Shift+Enter សម្រាប់បន្ទាត់ថ្មី)"
-    }
+    },
+    "playgroundTabs": "របៀប Playground"
   },
   "miniPlayground": {
     "endpoint": "ចំណុចបញ្ចប់",
@@ -11726,7 +12052,8 @@
     "assistant": "ជំនួយការ",
     "errorLabel": "កំហុស",
     "requestFailed": "សំណើបានបរាជ័យ",
-    "stop": "បញ្ឈប់"
+    "stop": "បញ្ឈប់",
+    "messageInputAria": "សារ"
   },
   "requestLogger": {
     "recording": "កំពុងកត់ត្រា",
@@ -11913,8 +12240,18 @@
       "resilienceRotations": "ការបង្វិលគណនី {count} ដង",
       "resilienceRetried": "បានព្យាយាមវេនទទេម្តងទៀត",
       "resilienceContinued": "បានបន្តនៅកណ្តាលស្ទ្រីម",
-      "resilienceRecovered": "បានស្ដារឡើងវិញដោយសកម្មភាពធន់"
-    }
+      "resilienceRecovered": "បានស្ដារឡើងវិញដោយសកម្មភាពធន់",
+      "conversationContext": "បរិបទនៃការសន្ទនា",
+      "goToBottom": "ទៅខាងក្រោម",
+      "liveRefreshOn": "ការធ្វើឱ្យស្រស់ផ្ទាល់៖ បើក",
+      "liveRefreshOff": "ការធ្វើឱ្យស្រស់ផ្ទាល់៖ បិទ",
+      "liveRefresh": "ការធ្វើឱ្យស្រស់ផ្ទាល់",
+      "continuesFromParent": "បន្តពីធាតុមេ",
+      "continuesFrom": "បន្តពី {id}",
+      "viewConversation": "មើលការសន្ទនា",
+      "openConversation": "បើកការសន្ទនា {id}"
+    },
+    "tableLabel": "កំណត់ហេតុសំណើ"
   },
   "proxyLogger": {
     "filterAll": "ទាំងអស់",
@@ -11959,7 +12296,9 @@
     "colServedBy": "បានផ្តល់ដោយ",
     "filterTraffic": "ចរាចរណ៍",
     "filterTests": "ការសាកល្បង",
-    "filterSource": "ប្រភព"
+    "filterSource": "ប្រភព",
+    "tableLabel": "កំណត់ហេតុប្រូកស៊ី",
+    "sortLogs": "តម្រៀបកំណត់ហេតុ"
   },
   "endpointOptions": {
     "speech": "សំឡេងនិយាយ",
@@ -12044,7 +12383,8 @@
     "statusExhausted": "បានប្រើអស់",
     "statusAlerting": "កំពុងជូនដំណឹង",
     "statusError": "កំហុស",
-    "moreSuffix": "+{count} ទៀត"
+    "moreSuffix": "+{count} ទៀត",
+    "feedFilterLabel": "ត្រងព្រឹត្តិការណ៍"
   },
   "quotaShare": {
     "weightPercent": "ទម្ងន់ %",
@@ -12211,7 +12551,10 @@
     "ungroupedTitle": "មិនបានដាក់ជាក្រុម",
     "ungroupedHint": "ពូលទាំងនេះមិនត្រូវបានចាត់តាំងទៅក្រុមដែលមានស្រាប់ណាមួយទេ។ កែសម្រួលពូលមួយ ដើម្បីផ្លាស់ទីវាទៅក្រុមដែលមានស្រាប់។",
     "removeFailed": "មិនអាចដកពូលនេះចេញបានទេ។",
-    "dismiss": "បិទ"
+    "dismiss": "បិទ",
+    "allocationsHeading": "ការបែងចែក",
+    "wizardRemoveDimension": "លុបវិមាត្រ",
+    "wizardRemoveKey": "លុបកូនសោ"
   },
   "plugins": {
     "title": "កម្មវិធីជំនួយ",
@@ -12369,7 +12712,8 @@
       "settingsUpdateFailed": "ការធ្វើបច្ចុប្បន្នភាពការកំណត់បានបរាជ័យ",
       "serviceRevealApiKey": "{actor} បានបង្ហាញ API key សម្រាប់ {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "បិទកំហុស"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12502,7 +12846,21 @@
       "goNow": "ទៅឥឡូវនេះ",
       "message": "ឥឡូវនេះ MITM Proxy ស្ថិតនៅក្រោម AgentBridge។",
       "title": "ទំព័រនេះត្រូវបានផ្លាស់ទី"
-    }
+    },
+    "dnsOn": "បើក DNS",
+    "dnsOff": "បិទ DNS",
+    "showServerSettings": "បង្ហាញការកំណត់ម៉ាស៊ីនមេ",
+    "hideServerSettings": "លាក់ការកំណត់ម៉ាស៊ីនមេ",
+    "upstreamCaTesting": "កំពុងសាកល្បង…",
+    "removeMapping": "លុបការផ្គូផ្គង",
+    "mappingSourcePlaceholder": "ឧ., gemini-3.6-flash-medium ឬ * សម្រាប់ម៉ូដែលដែលមិនបានផ្គូផ្គងទាំងអស់",
+    "mappingWildcardHint": "ប្រើ * ជាប្រភព ដើម្បីបញ្ជូនគ្រប់ម៉ូដែលដែលមិនមានការផ្គូផ្គងជាក់លាក់តាមរយៈ OmniRoute ទៅកាន់គោលដៅដែលបានជ្រើសរើស។ ការផ្គូផ្គងប្រភពជាក់លាក់តែងតែមានអាទិភាពលើ *។",
+    "wizardDetectingModels": "កំពុងស្វែងរកម៉ូដែលពីចរាចរណ៍ដែលបានស្ទាក់ចាប់...",
+    "wizardDetectedModels": "បានរកឃើញ {count, plural, one {# ម៉ូដែល} other {# ម៉ូដែល}} ក្នុងចរាចរណ៍ដែលបានស្ទាក់ចាប់។ ជ្រើសរើសម៉ូដែលដែលអ្នកចង់បន្ថែម៖",
+    "wizardSelectedModels": "បានជ្រើសរើស {count, plural, one {# ម៉ូដែល} other {# ម៉ូដែល}}។ អ្នកនឹងផ្គូផ្គងពួកវាទៅនឹងម៉ូដែល OmniRoute នៅអេក្រង់បន្ទាប់។",
+    "wizardAddModels": "បន្ថែម {count, plural, one {# ម៉ូដែល} other {# ម៉ូដែល}}",
+    "wizardNoModelsDetected": "មិនទាន់រកឃើញម៉ូដែលទេ។ ប្រើ {agent} ដើម្បីធ្វើសំណើ បន្ទាប់មកដំណើរការអ្នកជំនួយការនេះម្តងទៀត ដើម្បីស្វែងរកម៉ូដែលដោយស្វ័យប្រវត្តិពីចរាចរណ៍។",
+    "wizardNoModelsHint": "ឬបិទអ្នកជំនួយការនេះ ហើយបន្ថែមការផ្គូផ្គងដោយដៃនៅក្នុងកាតភ្នាក់ងារ។"
   },
   "providerStats": {
     "unknownError": "កំហុសមិនស្គាល់",
@@ -12532,7 +12890,11 @@
     "avgTtft": "TTFT មធ្យម",
     "avgTotal": "សរុបមធ្យម",
     "requestTelemetry": "ទិន្នន័យតាមដានសំណើ",
-    "requestTelemetryDescription": "ការបែងចែកលំហូរដំណើរការ 7 ដំណាក់កាល (5 នាទីចុងក្រោយ)"
+    "requestTelemetryDescription": "ការបែងចែកលំហូរដំណើរការ 7 ដំណាក់កាល (5 នាទីចុងក្រោយ)",
+    "title": "ស្ថិតិអ្នកផ្តល់សេវា",
+    "description": "ចរាចរណ៍ រយៈពេលឆ្លើយតប និងអត្រាជោគជ័យតាមអ្នកផ្តល់សេវា និងតាមម៉ូដែល",
+    "combo": "បន្សំ",
+    "toggleModels": "បង្ហាញម៉ូដែលសម្រាប់ {provider}"
   },
   "relay": {
     "title": "ប្រូកស៊ី Relay បែប Serverless",
@@ -12693,7 +13055,18 @@
     "noRequestBody": "គ្មានតួសំណើ។",
     "noResponseBody": "គ្មានតួការឆ្លើយតប។",
     "formatted": "បានរៀបចំទ្រង់ទ្រាយ",
-    "raw": "ដើម"
+    "raw": "ដើម",
+    "requestCount": "{count, plural, one {# សំណើ} other {# សំណើ}}",
+    "expandList": "ពង្រីកបញ្ជី",
+    "collapseList": "បង្រួមបញ្ជី",
+    "snippetLanguage": "ភាសារបស់សំណុំកូដ",
+    "headersTable": "ក្បាលសារ",
+    "showSecrets": "បង្ហាញទិន្នន័យសម្ងាត់",
+    "maskSecrets": "បិទបាំងទិន្នន័យសម្ងាត់",
+    "llmNotAvailable": "មិនមានទិន្នន័យមេតា LLM សម្រាប់សំណើនេះទេ។",
+    "llmStreamYes": "បាទ/ចាស (SSE)",
+    "llmStreamNo": "ទេ",
+    "llmTotalTokens": "សរុប៖ {count} តូខឹន"
   },
   "cliCommon": {
     "companion": {
@@ -13152,7 +13525,8 @@
     "colReliabilityHelp": "សមាមាត្រនៃការហៅដែលអ្នកផ្តល់សេវានេះបានឆ្លើយតបជាក់ស្តែងក្នុងរយៈពេល 24 ម៉ោងចុងក្រោយ។ សញ្ញាដកមានន័យថា វាបានបម្រើចរាចរណ៍តិចពេក ដើម្បីកំណត់អត្រា។",
     "reliabilitySample": "ការហៅ {successes} ក្នុងចំណោម {requests} បានជោគជ័យក្នុងរយៈពេល {hours}h ចុងក្រោយ",
     "reliabilityTooFew": "មានការហៅតែ {requests} ប៉ុណ្ណោះក្នុងរយៈពេល {hours}h ចុងក្រោយ — តិចពេកដើម្បីកំណត់អត្រា",
-    "reliabilityNoTraffic": "មិនមានការហៅដែលបានកត់ត្រាក្នុងរយៈពេល 24h ចុងក្រោយទេ"
+    "reliabilityNoTraffic": "មិនមានការហៅដែលបានកត់ត្រាក្នុងរយៈពេល 24h ចុងក្រោយទេ",
+    "categoryFilter": "ប្រភេទកិច្ចការ"
   },
   "discovery": {
     "title": "ការស្វែងរកអ្នកផ្តល់សេវា",
@@ -13177,7 +13551,11 @@
     "method": "វិធីសាស្ត្រ",
     "auth": "ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ",
     "feasibility": "លទ្ធភាពអនុវត្ត",
-    "models": "ម៉ូដែល"
+    "models": "ម៉ូដែល",
+    "provider": "អ្នកផ្តល់សេវា",
+    "status": "ស្ថានភាព",
+    "endpoint": "Endpoint",
+    "actions": "សកម្មភាព"
   },
   "noAuthProvider": {
     "title": "មិនតម្រូវឱ្យផ្ទៀងផ្ទាត់អត្តសញ្ញាណ",
@@ -13226,7 +13604,8 @@
     "ownProxy": "ប្រូកស៊ីផ្ទាល់ខ្លួន",
     "freeTierPause": "ម៉ូឌែល {model} បានផ្អាក (429) នឹងត្រឡប់មកវិញនៅ {time}",
     "freeTierPauseProvider": "បានផ្អាក (429) នឹងត្រឡប់មកវិញនៅ {time}",
-    "freeTierPauseNote": "ការផ្អាកក្នុងដំណើរការនៅក្នុងវត្ថុនេះ"
+    "freeTierPauseNote": "ការផ្អាកក្នុងដំណើរការនៅក្នុងវត្ថុនេះ",
+    "proxyType": "ប្រភេទប្រូកស៊ី"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13399,7 +13778,10 @@
         "description": "សមិទ្ធផលលាក់កំបាំងមួយកំពុងរង់ចាំ...",
         "criteria": "បំពេញសមិទ្ធផលលាក់កំបាំង ដើម្បីបង្ហាញផ្លាកសញ្ញានេះ។"
       }
-    }
+    },
+    "leaderboardTitle": "តារាងចំណាត់ថ្នាក់",
+    "leaderboardDescription": "ចំណាត់ថ្នាក់ និងសមិទ្ធផលនៅទូទាំង API keys របស់អ្នក",
+    "badgeLocked": "បានចាក់សោ"
   },
   "featureFlags": {
     "title": "ទង់មុខងារ",
@@ -13640,6 +14022,7 @@
     "latency": "រយៈពេលឆ្លើយតប",
     "quota": "កូតា",
     "rangeWindow": "ចន្លោះពេល {range}",
+    "timeRange": "ចន្លោះពេល",
     "runtimeHealthBlend": "ការរួមបញ្ចូលទិន្នន័យពេលដំណើរការ/ស្ថានភាព",
     "averageResponseTime": "រយៈពេលឆ្លើយតបជាមធ្យម",
     "worstQuota": "កូតាដែលអាក្រក់បំផុត",
@@ -13841,7 +14224,11 @@
     "learnMore": "ស្វែងយល់បន្ថែម",
     "changelogLoadFailed": "មិនអាចផ្ទុកកំណត់ហេតុការផ្លាស់ប្តូរបានទេ។ សូមព្យាយាមម្តងទៀតនៅពេលក្រោយ។",
     "retry": "ព្យាយាមម្តងទៀត",
-    "viewFullHistory": "មើលប្រវត្តិពេញលេញនៅលើ GitHub"
+    "viewFullHistory": "មើលប្រវត្តិពេញលេញនៅលើ GitHub",
+    "title": "ព័ត៌មាន និងកំណត់ត្រាផ្លាស់ប្តូរ",
+    "description": "សេចក្តីប្រកាសពីក្រុម OmniRoute និងកំណត់ត្រាចេញផ្សាយចុងក្រោយបំផុត",
+    "viewLabel": "មើល",
+    "loadingNews": "កំពុងផ្ទុកសេចក្តីប្រកាស..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14243,7 +14630,8 @@
       "never": "-",
       "failureCount": "ចំនួនបរាជ័យ",
       "retryAfterMs": "ព្យាយាមម្ដងទៀតបន្ទាប់ពី (ms)",
-      "lastFailureKind": "ប្រភេទបរាជ័យចុងក្រោយ"
+      "lastFailureKind": "ប្រភេទបរាជ័យចុងក្រោយ",
+      "lastClose": "ការបិទចុងក្រោយ"
     },
     "empty": {
       "title": "គ្មានការតភ្ជាប់ទេ",
@@ -14391,7 +14779,9 @@
       "circuitBreakerState": "ស្ថានភាព Circuit Breaker របស់អ្នកផ្តល់សេវា",
       "lastUpdate": "ការធ្វើបច្ចុប្បន្នភាពចុងក្រោយ៖ {timestamp}",
       "uptimeMinutes": "{minutes} នាទី",
-      "uptimeHoursMinutes": "{hours} ម៉ោង {minutes} នាទី"
+      "uptimeHoursMinutes": "{hours} ម៉ោង {minutes} នាទី",
+      "breakerClosed": "បានបិទ",
+      "breakerNotClosed": "បើក ឬបើកពាក់កណ្តាល"
     },
     "statusPages": {
       "400": {
@@ -14466,6 +14856,9 @@
         "primaryAction": "ព័ត៌មានលម្អិតអំពីការថែទាំ",
         "secondaryAction": "ស្ថានភាពប្រព័ន្ធ"
       }
+    },
+    "miniapp": {
+      "askAnything": "សួរអ្វីក៏បាន…"
     }
   },
   "kiroAuthModal": {
@@ -14499,7 +14892,10 @@
     "importing": "កំពុងនាំចូល...",
     "apiKeyPlaceholder": "បិទភ្ជាប់ {providerLabel} API key របស់អ្នក...",
     "apiKeyStoredDescription": "ត្រូវបានរក្សាទុកដោយអ៊ិនគ្រីបជាលិខិតសម្គាល់អត្តសញ្ញាណប្រភេទ bearer ដែលមានសុពលភាពរយៈពេលវែង។ មិនមានដំណើរការ refresh ទេ។",
-    "apiKeyRegionDescription": "តំបន់ AWS សម្រាប់សោ (លំនាំដើម៖ us-east-1)",
+    "apiKeyRegionAuto": "រកឃើញដោយស្វ័យប្រវត្តិ (ណែនាំ)",
+    "apiKeyRegionUsEast1": "សហរដ្ឋអាមេរិកខាងកើត (វឺជីនៀខាងជើង)",
+    "apiKeyRegionEuCentral1": "អឺរ៉ុប (ហ្វ្រែងហ្វួត)",
+    "apiKeyRegionAutoDescription": "ការរកឃើញដោយស្វ័យប្រវត្តិសាកល្បងសហរដ្ឋអាមេរិកខាងកើតមុន បន្ទាប់មកអឺរ៉ុប (ហ្វ្រែងហ្វួត) ហើយរក្សាទុកតំបន់ដែលកូនសោដំណើរការ។",
     "validating": "កំពុងផ្ទៀងផ្ទាត់...",
     "validateAndSaveApiKey": "ផ្ទៀងផ្ទាត់ និងរក្សាទុក API Key",
     "errorAutoDetect": "មិនអាចរកឃើញ token ដោយស្វ័យប្រវត្តិបានទេ",
@@ -14559,7 +14955,10 @@
     "distributeProxies": {
       "distributing": "កំពុងចែកចាយ...",
       "complete": "រួចរាល់",
-      "defaultLabel": "ចែកចាយប្រូកស៊ី"
+      "defaultLabel": "ចែកចាយប្រូកស៊ី",
+      "confirmMessage": "កំណត់ប្រូកស៊ីដែលបានរក្សាទុកទៅគ្រប់គណនីក្នុងក្រុមនេះឬ? វានឹងជំនួសការកំណត់គណនីដែលមានស្រាប់ និងបើកដំណើរការការបញ្ជូនតាមប្រូកស៊ី រួមទាំងសម្រាប់គណនីដែលបានបិទផងដែរ។",
+      "confirmDistribute": "ចែកចាយប្រូកស៊ី",
+      "cancel": "បោះបង់"
     }
   },
   "providerTest": {
@@ -14650,7 +15049,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "បង្ហាញ {visible} / សរុប {total}",
+    "modeLabel": "របៀបបង្ហាញ",
+    "jumpToNow": "លោតទៅពេលវេលាបច្ចុប្បន្ន បន្ទាត់ NOW នឹងកំណត់ឡើងវិញទៅទីតាំង {position}%",
+    "laneReuse": "ការប្រើជួរឡើងវិញ",
+    "laneReuseLabel": "ចន្លោះពេលសម្រាប់ប្រើជួរឡើងវិញ (នាទី)",
+    "laneReuseHint": "សំណើដែលប្រើ conversation id ដូចគ្នា នឹងស្ថិតនៅលើជួរបន្ទាត់ពេលវេលាដូចគ្នា ដរាបណាគម្លាតរវាងពួកវាតិចជាងចំនួននាទីនេះ។",
+    "laneReuseUnit": "នាទី",
+    "autoRefresh": "ធ្វើឱ្យស្រស់ដោយស្វ័យប្រវត្តិ",
+    "autoRefreshLabel": "ចន្លោះពេលធ្វើឱ្យស្រស់ដោយស្វ័យប្រវត្តិ (វិនាទី)",
+    "autoRefreshHint": "ភាពញឹកញាប់ដែលបន្ទាត់ពេលវេលាទាញយកបញ្ជីសំណើពីម៉ាស៊ីនមេឡើងវិញ។",
+    "autoRefreshUnit": "វិ.",
+    "zoomOut": "បង្រួម",
+    "zoomIn": "ពង្រីក"
   },
   "metadata": {
     "compressionTitle": "ការបង្ហាប់",
@@ -14875,5 +15287,46 @@
     "saveMessage": "រក្សាទុកសារ",
     "defaultModel": "ម៉ូដែលសាកល្បងលំនាំដើម",
     "defaultModelHint": "ត្រូវបានប្រើដោយស្វ័យប្រវត្តិដោយប៊ូតុង «សាកល្បងសារ» សម្រាប់គណនីនេះ។ ត្រូវបានរក្សាទុកជាមួយការតភ្ជាប់; គ្មានសារណាមួយត្រូវបានផ្ញើទេ។"
+  },
+  "providerTransfer": {
+    "open": "ការផ្ទេរជ្រើសរើស",
+    "title": "ការផ្ទេរអ្នកផ្តល់សេវាជ្រើសរើស",
+    "description": "ផ្លាស់ទីគណនីអ្នកផ្តល់សេវាដែលបានជ្រើស (និងថ្នាំងអ្នកផ្តល់សេវាផ្ទាល់ខ្លួនដែលវាប្រើ) ទៅការដំឡើង OmniRoute មួយទៀត។ ឯកសារត្រូវបានបិទត្រាដោយឃ្លាសម្ងាត់ ហើយការនាំចូលមិនដែលលុបអ្វីទេ។",
+    "exportTab": "នាំចេញ",
+    "importTab": "នាំចូល",
+    "searchPlaceholder": "ស្វែងរកគណនី…",
+    "selectAll": "ជ្រើសទាំងអស់",
+    "clearSelection": "សម្អាត",
+    "selectedCount": "បានជ្រើស {count}",
+    "noAccounts": "គ្មានគណនីអ្នកផ្តល់សេវាដែលត្រូវគ្នាទេ។",
+    "loadFailed": "មិនអាចផ្ទុកគណនីអ្នកផ្តល់សេវាបានទេ។",
+    "passphrase": "ឃ្លាសម្ងាត់",
+    "passphraseConfirm": "បញ្ជាក់ឃ្លាសម្ងាត់",
+    "passphraseHint": "យ៉ាងហោចណាស់ {min} តួអក្សរ។ វាមិនដែលត្រូវបានរក្សាទុកទេ បើគ្មានវា ឯកសារមិនអាចបើកបានទេ។",
+    "passphraseMismatch": "ឃ្លាសម្ងាត់មិនត្រូវគ្នា។",
+    "oauthWarning": "គណនី OAuth ដែលបង្វិល refresh token អាចឈប់ដំណើរការលើការដំឡើងមួយ នៅពេលការដំឡើងមួយទៀតធ្វើឱ្យវាថ្មី។",
+    "acknowledge": "ខ្ញុំយល់ថាឯកសារនេះមានកូនសោ API និង token របស់គណនីដែលបានជ្រើស ដែលបិទត្រាដោយឃ្លាសម្ងាត់នេះ។",
+    "exportButton": "នាំចេញអ្វីដែលបានជ្រើស",
+    "exportDone": "បាននាំចេញគណនី {count}។",
+    "exportFailed": "ការនាំចេញបរាជ័យ។",
+    "chooseFile": "ជ្រើសឯកសារផ្ទេរ",
+    "invalidFile": "នេះមិនមែនជាឯកសារផ្ទេរអ្នកផ្តល់សេវា OmniRoute ទេ។",
+    "previewButton": "មើលជាមុន",
+    "previewFailed": "មិនអាចអានឯកសារផ្ទេរបានទេ។",
+    "summary": "ឯកសារនេះមានគណនី {connections} និងថ្នាំងអ្នកផ្តល់សេវា {nodes}។ គ្មានអ្វីត្រូវលុបទេ។",
+    "statusNew": "ថ្មី",
+    "statusIdentical": "ដូចគ្នា",
+    "statusConflict": "ជម្លោះ",
+    "statusUnsupported": "មិនគាំទ្រ",
+    "actionAdd": "បន្ថែម",
+    "actionSkip": "រំលង",
+    "actionReplace": "ជំនួស",
+    "providerNode": "ថ្នាំងអ្នកផ្តល់សេវា",
+    "importButton": "នាំចូល",
+    "importFailed": "ការនាំចូលបរាជ័យ។",
+    "importSuccess": "បាននាំចូលគណនី {connections} និងថ្នាំងអ្នកផ្តល់សេវា {nodes}; បានរំលង {skipped}។"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "ចាប់ផ្ដើមពីទីតាំងបច្ចុប្បន្ន (រំលងកំណត់ហេតុដែលមានស្រាប់)"
   }
 }

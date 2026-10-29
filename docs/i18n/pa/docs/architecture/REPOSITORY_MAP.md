@@ -5,9 +5,9 @@
 ---
 
 > **ਹਰੇਕ ਡਾਇਰੈਕਟਰੀ ਅਤੇ ਰੂਟ ਫ਼ਾਈਲ ਲਈ ਇੱਕ-ਲਾਈਨ ਵੇਰਵਾ।**
-> ਆਖਰੀ ਵਾਰ ਅੱਪਡੇਟ ਕੀਤਾ: 2026-06-28 — OmniRoute v3.8.40
+> ਆਖਰੀ ਅੱਪਡੇਟ: 2026-06-28 — OmniRoute v3.8.40
 >
-> ਕੋਡਬੇਸ ਵਿੱਚ ਤੇਜ਼ੀ ਨਾਲ ਨੈਵੀਗੇਟ ਕਰਨ ਲਈ ਇਸ ਨਕਸ਼ੇ ਦੀ ਵਰਤੋਂ ਕਰੋ। ਡੂੰਘਾਈ ਨਾਲ ਜਾਣਕਾਰੀ ਲਈ, ਸਮਰਪਿਤ ਦਸਤਾਵੇਜ਼ਾਂ ਦੇ ਲਿੰਕਾਂ ਦੀ ਪਾਲਣਾ ਕਰੋ।
+> ਕੋਡਬੇਸ ਵਿੱਚ ਤੇਜ਼ੀ ਨਾਲ ਨੈਵੀਗੇਟ ਕਰਨ ਲਈ ਇਸ ਨਕਸ਼ੇ ਦੀ ਵਰਤੋਂ ਕਰੋ। ਡੂੰਘੀ ਜਾਣਕਾਰੀ ਲਈ, ਸਮਰਪਿਤ ਦਸਤਾਵੇਜ਼ਾਂ ਦੇ ਲਿੰਕਾਂ ਦੀ ਪਾਲਣਾ ਕਰੋ।
 
 ## ਸਿਖਰਲੇ-ਪੱਧਰ ਦਾ ਟ੍ਰੀ
 
@@ -15,6 +15,7 @@
 OmniRoute/
 ├── src/                  # Next.js 16 ਐਪਲੀਕੇਸ਼ਨ (UI + API ਰੂਟ + ਲਾਇਬ੍ਰੇਰੀਆਂ + ਡੋਮੇਨ + ਸਰਵਰ)
 ├── open-sse/             # ਸਟ੍ਰੀਮਿੰਗ ਇੰਜਣ ਵਰਕਸਪੇਸ (ਹੈਂਡਲਰ, ਐਗਜ਼ੀਕਿਊਟਰ, ਅਨੁਵਾਦਕ, MCP ਸਰਵਰ)
+├── packages/            # npm ਵਰਕਸਪੇਸ: ui-kit (ਵੈਂਡਰ ਕੀਤਾ Keak CI UI Kit) ਅਤੇ browser-pool
 ├── electron/             # ਡੈਸਕਟਾਪ ਰੈਪਰ (Electron 41 + electron-builder 26.10)
 ├── bin/                  # CLI ਐਂਟਰੀ ਪੁਆਇੰਟ ਅਤੇ ਕਮਾਂਡ ਹੈਂਡਲਰ
 ├── scripts/              # ਬਿਲਡ, ਜਾਂਚ, ਸਿੰਕ ਅਤੇ ਇੱਕ-ਵਾਰ ਵਰਤੋਂ ਵਾਲੀਆਂ ਸਕ੍ਰਿਪਟਾਂ
@@ -23,22 +24,22 @@ OmniRoute/
 ├── public/               # Next.js ਸਟੈਟਿਕ ਐਸੈੱਟ, PWA ਮੈਨੀਫੈਸਟ, ਸਰਵਿਸ ਵਰਕਰ, ਆਈਕਨ
 ├── config/               # ਸਟੈਟਿਕ ਸੰਰਚਨਾ + ਕੁਆਲਿਟੀ-ਗੇਟ ਸਥਿਤੀ (i18n, payloadRules, quality/)
 ├── images/               # ਮਾਰਕੀਟਿੰਗ / README ਚਿੱਤਰ ਐਸੈੱਟ
-├── @omniroute/           # ਪ੍ਰਕਾਸ਼ਿਤ ਕਰਨ ਯੋਗ ਸਹਾਇਕ ਪੈਕੇਜ (opencode-plugin, opencode-provider)
-├── skills/               # CLI/ਏਜੰਟ ਸਕਿੱਲ ਪੈਕ (cli-* + omni-* + config-codex-cli)
+├── @omniroute/           # ਪ੍ਰਕਾਸ਼ਿਤ ਕੀਤੇ ਜਾ ਸਕਣ ਵਾਲੇ ਸਹਾਇਕ ਪੈਕੇਜ (opencode-plugin, opencode-provider)
+├── skills/               # CLI/ਏਜੰਟ ਹੁਨਰ ਪੈਕ (cli-* + omni-* + config-codex-cli)
 ├── examples/             # ਨਮੂਨਾ ਪਲੱਗਇਨ + omniroute-cmd-hello ਸਟਾਰਟਰ
 ├── contrib/              # ਕਮਿਊਨਿਟੀ ਯੋਗਦਾਨ (podman/)
 ├── .source/              # Fumadocs ਸਰੋਤ ਸੰਰਚਨਾ (source.config.mjs + server/browser/dynamic)
-├── .github/              # GitHub Actions ਵਰਕਫ਼ਲੋ + ਮੁੱਦਾ ਟੈਂਪਲੇਟ + PR ਟੈਂਪਲੇਟ
+├── .github/              # GitHub Actions ਵਰਕਫ਼ਲੋ + ਇਸ਼ੂ ਟੈਂਪਲੇਟ + PR ਟੈਂਪਲੇਟ
 ├── .husky/               # Git ਹੁੱਕ (pre-commit, pre-push)
 ├── .claude/              # Claude Code ਸਲੈਸ਼ ਕਮਾਂਡਾਂ (ਪ੍ਰੋਜੈਕਟ-ਸਕੋਪਡ)
-├── .agents/              # Codex / ਆਮ ਏਜੰਟ ਵਰਕਫ਼ਲੋ + ਸਕਿੱਲ (.claude/ ਦਾ ਪ੍ਰਤੀਬਿੰਬ)
+├── .agents/              # Codex / ਆਮ ਏਜੰਟ ਵਰਕਫ਼ਲੋ + ਹੁਨਰ (.claude/ ਦਾ ਪ੍ਰਤੀਬਿੰਬ)
 ├── .vscode/              # VS Code ਵਰਕਸਪੇਸ ਸੈਟਿੰਗਾਂ
-├── _ideia/               # ਯੋਜਨਾਬੰਦੀ ਨੋਟਸ (ਗੈਰ-ਰਸਮੀ; ਵੰਡੇ ਨਹੀਂ ਜਾਂਦੇ)
+├── _ideia/               # ਯੋਜਨਾ ਨੋਟਸ (ਗੈਰ-ਰਸਮੀ; ਰਿਲੀਜ਼ ਵਿੱਚ ਸ਼ਾਮਲ ਨਹੀਂ)
 ├── _mono_repo/           # ਇਤਿਹਾਸਕ ਸਬ-ਪ੍ਰੋਜੈਕਟ (cloud, site, vscode-extension)
 ├── _references/          # ਸੰਬੰਧਿਤ OSS ਪ੍ਰੋਜੈਕਟਾਂ ਤੋਂ ਸਿਰਫ਼-ਪੜ੍ਹਨਯੋਗ ਹਵਾਲਾ ਕਲੋਨ
-├── _tasks/               # ਹਰੇਕ ਰਿਲੀਜ਼ ਲਈ ਕਾਰਜ-ਟਰੈਕਿੰਗ ਫ਼ਾਈਲਾਂ (ਗੈਰ-ਰਸਮੀ)
+├── _tasks/               # ਹਰੇਕ ਰਿਲੀਜ਼ ਲਈ ਟਾਸਕ ਟ੍ਰੈਕਿੰਗ ਫ਼ਾਈਲਾਂ (ਗੈਰ-ਰਸਮੀ)
 ├── .build/ .worktrees/ dist/   # ਸਥਾਨਕ ਬਿਲਡ / git-worktree / ਬਿਲਡ-ਆਉਟਪੁੱਟ ਸਕ੍ਰੈਚ (gitignored)
-├── .issues/              # ਸਥਾਨਕ ਮੁੱਦਾ ਕੈਸ਼ (gitignored)
+├── .issues/              # ਸਥਾਨਕ ਇਸ਼ੂ ਕੈਸ਼ (gitignored)
 ├── .playwright-mcp/      # Playwright MCP ਟੈਸਟ ਆਰਟੀਫੈਕਟ
 ├── coverage/             # c8 ਕਵਰੇਜ ਆਉਟਪੁੱਟ (gitignored)
 ├── logs/                 # ਰਨਟਾਈਮ ਲੌਗ (gitignored)
@@ -52,59 +53,59 @@ OmniRoute/
 
 ## ਰੂਟ ਫ਼ਾਈਲਾਂ
 
-| ਫ਼ਾਈਲ                                       | ਉਦੇਸ਼                                                                                    |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| **README.md**                               | ਮਾਰਕੀਟਿੰਗ ਲੈਂਡਿੰਗ ਪੰਨਾ + ਤੁਰੰਤ ਸ਼ੁਰੂਆਤ + ਵਿਸ਼ੇਸ਼ਤਾ ਮੈਟ੍ਰਿਕਸ (`llm.txt` ਵੀ ਵੇਖੋ)          |
-| **CHANGELOG.md**                            | ਹਰ ਰਿਲੀਜ਼ ਲਈ ਤਬਦੀਲੀ-ਲਾਗ (`/version-bump-cc` ਸਕਿੱਲ ਦੁਆਰਾ ਸਵੈਚਾਲਿਤ ਤੌਰ 'ਤੇ ਬਣਾਇਆ ਗਿਆ)      |
-| **LICENSE**                                 | MIT ਲਾਇਸੈਂਸ ਦਾ ਪਾਠ                                                                       |
-| **CLAUDE.md**                               | Claude Code ਏਜੰਟਾਂ ਲਈ ਪ੍ਰੋਜੈਕਟ ਨਿਯਮ (ਸਖ਼ਤ ਨਿਯਮ, ਰੀਤੀਆਂ, ਦ੍ਰਿਸ਼)                          |
-| **AGENTS.md**                               | CLAUDE.md ਵਾਂਗ ਹੀ, ਪਰ ਗੈਰ-Claude AI ਏਜੰਟਾਂ ਲਈ (Codex, Cursor, ਆਦਿ)                       |
-| **GEMINI.md**                               | Gemini-ਅਧਾਰਿਤ ਏਜੰਟਾਂ ਲਈ ਸੰਖੇਪ ਨਿਯਮ (CLAUDE.md ਦਾ ਉਪ-ਸਮੂਹ)                                |
-| **CONTRIBUTING.md**                         | ਯੋਗਦਾਨਕਾਰ ਗਾਈਡ: ਸੈੱਟਅੱਪ, ਰਵਾਇਤੀ ਕਮਿਟਾਂ, ਟੈਸਟਿੰਗ, PR ਪ੍ਰਵਾਹ                               |
-| **SECURITY.md**                             | ਕਮਜ਼ੋਰੀ ਰਿਪੋਰਟਿੰਗ ਨੀਤੀ, ਸਮਰਥਿਤ ਵਰਜਨ, ਖ਼ਤਰਾ ਮਾਡਲ                                          |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — ਭਾਈਚਾਰਕ ਵਿਹਾਰ ਸੰਬੰਧੀ ਉਮੀਦਾਂ                                       |
-| **llm.txt**                                 | LLM ਕ੍ਰਾਲਰਾਂ ਲਈ ਅਨੁਕੂਲਿਤ ਸਧਾਰਨ-ਟੈਕਸਟ ਲੈਂਡਿੰਗ (AI ਸਹਾਇਕਾਂ ਲਈ SEO)                         |
-| **package.json**                            | npm ਮੈਨੀਫੈਸਟ, ਸਕ੍ਰਿਪਟਾਂ, ਨਿਰਭਰਤਾਵਾਂ, ਇੰਜਣ, c8 ਕਵਰੇਜ ਗੇਟ                                  |
-| **package-lock.json**                       | ਲੌਕ ਕੀਤਾ ਨਿਰਭਰਤਾ ਟ੍ਰੀ                                                                    |
-| **tsconfig.json**                           | ਰੂਟ TypeScript ਸੰਰਚਨਾ                                                                    |
-| **tsconfig.typecheck-core.json**            | `src/` ਕੋਰ ਲਈ ਟਾਈਪ-ਚੈੱਕ ਸੰਰਚਨਾ                                                           |
-| **tsconfig.typecheck-noimplicit-core.json** | ਸਖ਼ਤ (`noImplicitAny`) ਟਾਈਪ-ਚੈੱਕ                                                         |
-| **tsconfig.tsbuildinfo**                    | TS ਇੰਕ੍ਰਿਮੈਂਟਲ ਬਿਲਡ ਕੈਸ਼ (gitignored)                                                    |
-| **next.config.mjs**                         | Next.js 16 ਬਿਲਡ ਸੰਰਚਨਾ (ਸਟੈਂਡਅਲੋਨ ਆਉਟਪੁੱਟ)                                               |
-| **next-env.d.ts**                           | Next.js ਵੱਲੋਂ ਸਵੈਚਾਲਿਤ ਤੌਰ 'ਤੇ ਬਣਾਈਆਂ env ਕਿਸਮਾਂ                                         |
-| **eslint.config.mjs**                       | ESLint ਫਲੈਟ ਸੰਰਚਨਾ (ਹਰ ਪ੍ਰੋਜੈਕਟ ਖੇਤਰ ਲਈ ਨਿਯਮ)                                            |
-| **prettier.config.mjs**                     | Prettier ਫਾਰਮੈਟਿੰਗ ਨਿਯਮ                                                                  |
-| **postcss.config.mjs**                      | Tailwind/CSS ਪਾਈਪਲਾਈਨ ਲਈ PostCSS ਸੰਰਚਨਾ                                                  |
-| **playwright.config.ts**                    | Playwright E2E ਟੈਸਟ ਸੰਰਚਨਾ                                                               |
-| **vitest.config.ts**                        | Vitest ਸੰਰਚਨਾ (ਡਿਫਾਲਟ ਸੂਟ)                                                               |
-| **vitest.mcp.config.ts**                    | MCP ਸਰਵਰ / autoCombo / ਕੈਸ਼ ਸੂਟਾਂ ਲਈ Vitest ਸੰਰਚਨਾ                                       |
-| **sonar-project.properties**                | SonarQube/SonarCloud ਸੰਰਚਨਾ (ਕੋਡ ਗੁਣਵੱਤਾ)                                                |
-| **Dockerfile**                              | ਬਹੁ-ਪੜਾਅ Docker ਬਿਲਡ (ਬਿਲਡਰ → ਰਨਰ-ਬੇਸ → ਰਨਰ-CLI)                                         |
-| **docker-compose.yml**                      | 4 ਪ੍ਰੋਫ਼ਾਈਲਾਂ (ਬੇਸ, CLI, ਹੋਸਟ, cliproxyapi) + redis ਸਾਈਡਕਾਰ ਨਾਲ ਡਿਵੈਲਪਮੈਂਟ ਕੰਪੋਜ਼        |
-| **docker-compose.prod.yml**                 | ਪ੍ਰੋਡਕਸ਼ਨ ਕੰਪੋਜ਼ (ਪੋਰਟ 20130, redis, ਨਾਮਿਤ ਵਾਲਿਊਮ)                                       |
-| **.dockerignore**                           | Docker ਸੰਦਰਭ ਤੋਂ ਬਾਹਰ ਰੱਖੀਆਂ ਫ਼ਾਈਲਾਂ                                                     |
-| **fly.toml**                                | Fly.io ਡਿਪਲੌਇਮੈਂਟ ਸੰਰਚਨਾ (ਖੇਤਰ `sin`, ਪੋਰਟ 20128, /data ਵਾਲਿਊਮ)                          |
-| **.env.example**                            | env ਫ਼ਾਈਲ ਟੈਂਪਲੇਟ (ਪਹਿਲੀ ਇੰਸਟਾਲੇਸ਼ਨ 'ਤੇ `.env` ਵਿੱਚ ਸਵੈਚਾਲਿਤ ਤੌਰ 'ਤੇ ਕਾਪੀ ਕੀਤਾ ਜਾਂਦਾ ਹੈ) |
-| **.gitignore**                              | Git ਅਣਡਿੱਠਾ ਕਰਨ ਦੇ ਪੈਟਰਨ                                                                 |
-| **.npmignore**                              | npm ਪਬਲਿਸ਼ ਬਹਿਸ਼ਕਰਨ ਸੂਚੀ                                                                 |
-| **.npmrc**                                  | npm ਸੰਰਚਨਾ (ਰਜਿਸਟਰੀ, ਲੌਕਫ਼ਾਈਲ ਨੀਤੀ)                                                      |
-| **.node-version**                           | Node ਵਰਜਨ ਪਿੰਨ (nvm-ਅਨੁਕੂਲ ਟੂਲਾਂ ਦੁਆਰਾ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ)                                   |
-| **.nvmrc**                                  | nvm ਲਈ Node ਵਰਜਨ ਪਿੰਨ                                                                    |
-| **eslint.complexity.config.mjs**            | ਜਟਿਲਤਾ ਰੈਚਿਟ ਲਈ ESLint ਸੰਰਚਨਾ (`scripts/check/check-complexity.mjs --config`)            |
-| **eslint.sonarjs.config.mjs**               | SonarJS ਨਿਯਮਾਂ ਲਈ ESLint ਸੰਰਚਨਾ (ਸੰਜਾਣਾਤਮਕ ਜਟਿਲਤਾ / ਦੁਹਰਾਅ)                              |
-| **source.config.ts**                        | Fumadocs `defineDocs` ਸਰੋਤ ਸੰਰਚਨਾ (`.source/` ਨੂੰ ਫੀਡ ਕਰਦੀ ਹੈ)                           |
-| **knip.json**                               | Knip ਸੰਰਚਨਾ — ਅਣਵਰਤੀਆਂ ਫ਼ਾਈਲਾਂ/ਐਕਸਪੋਰਟਾਂ/ਨਿਰਭਰਤਾਵਾਂ (ਡੈੱਡ-ਕੋਡ ਗੇਟ ਨੂੰ ਫੀਡ ਕਰਦੀ ਹੈ)       |
-| **stryker.conf.json**                       | Stryker ਮਿਊਟੇਸ਼ਨ-ਟੈਸਟਿੰਗ ਸੰਰਚਨਾ                                                          |
-| **.size-limit.json**                        | size-limit ਬੰਡਲ ਬਜਟ ਸੰਰਚਨਾ                                                               |
-| **promptfooconfig.yaml**                    | promptfoo ਮੁਲਾਂਕਣ ਸੰਰਚਨਾ                                                                 |
-| **.gitleaks.toml**                          | gitleaks ਗੁਪਤ-ਜਾਣਕਾਰੀ ਸਕੈਨ ਨਿਯਮ-ਸਮੂਹ                                                     |
-| **.zizmor.yml**                             | zizmor GitHub-Actions ਸੁਰੱਖਿਆ-ਲਿੰਟ ਸੰਰਚਨਾ                                                |
-| **socket.yml**                              | Socket.dev ਸਪਲਾਈ-ਚੇਨ ਸੰਰਚਨਾ                                                              |
-| **news.json**                               | ਸਥਾਨਕੀਕ੍ਰਿਤ v2 ਘੋਸ਼ਣਾ ਫੀਡ; Radar ਲਾਂਚ ਆਈਟਮ ਨਿਸ਼ਕਿਰਿਆ ਰੂਪ ਵਿੱਚ ਭੇਜੀ ਜਾਂਦੀ ਹੈ              |
-| **flake.nix** / **flake.lock**              | Nix dev-shell ਪਰਿਭਾਸ਼ਾ + ਲਾਕ                                                             |
-| **.env**                                    | ਸਥਾਨਕ ਗੁਪਤ-ਜਾਣਕਾਰੀ (gitignored — `.env.example` ਤੋਂ ਤਿਆਰ ਕੀਤੀ)                           |
+| File                                        | Purpose                                                                                 |
+| ------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **README.md**                               | ਮਾਰਕੀਟਿੰਗ ਲੈਂਡਿੰਗ ਪੰਨਾ + ਤੁਰੰਤ ਸ਼ੁਰੂਆਤ + ਵਿਸ਼ੇਸ਼ਤਾ ਮੈਟ੍ਰਿਕਸ (`llm.txt` ਵੀ ਵੇਖੋ)         |
+| **CHANGELOG.md**                            | ਹਰ ਰਿਲੀਜ਼ ਲਈ ਤਬਦੀਲੀ-ਲਾਗ (`/version-bump-cc` ਸਕਿੱਲ ਦੁਆਰਾ ਸਵੈਚਲਿਤ ਤੌਰ 'ਤੇ ਤਿਆਰ ਕੀਤਾ)      |
+| **LICENSE**                                 | MIT ਲਾਇਸੈਂਸ ਦਾ ਪਾਠ                                                                      |
+| **CLAUDE.md**                               | Claude Code ਏਜੰਟਾਂ ਲਈ ਪ੍ਰੋਜੈਕਟ ਨਿਯਮ (ਸਖ਼ਤ ਨਿਯਮ, ਰਵਾਇਤਾਂ, ਦ੍ਰਿਸ਼)                        |
+| **AGENTS.md**                               | CLAUDE.md ਵਰਗਾ ਹੀ, ਪਰ ਗੈਰ-Claude AI ਏਜੰਟਾਂ ਲਈ (Codex, Cursor, ਆਦਿ)                      |
+| **GEMINI.md**                               | Gemini-ਅਧਾਰਿਤ ਏਜੰਟਾਂ ਲਈ ਸੰਖੇਪ ਨਿਯਮ (CLAUDE.md ਦਾ ਉਪ-ਸਮੂਹ)                               |
+| **CONTRIBUTING.md**                         | ਯੋਗਦਾਨਕਰਤਾ ਗਾਈਡ: ਸੈਟਅੱਪ, ਰਵਾਇਤੀ ਕਮਿਟ, ਟੈਸਟਿੰਗ, PR ਪ੍ਰਵਾਹ                                |
+| **SECURITY.md**                             | ਕਮਜ਼ੋਰੀ ਰਿਪੋਰਟ ਕਰਨ ਦੀ ਨੀਤੀ, ਸਮਰਥਿਤ ਵਰਜਨ, ਖ਼ਤਰਾ ਮਾਡਲ                                     |
+| **CODE_OF_CONDUCT.md**                      | ਯੋਗਦਾਨਕਰਤਾ ਇਕਰਾਰਨਾਮਾ — ਭਾਈਚਾਰਕ ਵਿਹਾਰ ਸੰਬੰਧੀ ਉਮੀਦਾਂ                                      |
+| **llm.txt**                                 | LLM ਕ੍ਰਾਲਰਾਂ ਲਈ ਅਨੁਕੂਲਿਤ ਸਧਾਰਨ-ਟੈਕਸਟ ਲੈਂਡਿੰਗ ਪੰਨਾ (AI ਸਹਾਇਕਾਂ ਲਈ SEO)                   |
+| **package.json**                            | npm ਮੈਨੀਫੈਸਟ, ਸਕ੍ਰਿਪਟਾਂ, ਨਿਰਭਰਤਾਵਾਂ, ਇੰਜਣ, c8 ਕਵਰੇਜ ਗੇਟ                                 |
+| **package-lock.json**                       | ਲੌਕ ਕੀਤਾ ਨਿਰਭਰਤਾ ਟ੍ਰੀ                                                                   |
+| **tsconfig.json**                           | ਰੂਟ TypeScript ਸੰਰਚਨਾ                                                                   |
+| **tsconfig.typecheck-core.json**            | `src/` ਕੋਰ ਲਈ ਟਾਈਪ-ਚੈੱਕ ਸੰਰਚਨਾ                                                          |
+| **tsconfig.typecheck-noimplicit-core.json** | ਸਖ਼ਤ (`noImplicitAny`) ਟਾਈਪ-ਚੈੱਕ                                                        |
+| **tsconfig.tsbuildinfo**                    | TS ਇਨਕ੍ਰਿਮੈਂਟਲ ਬਿਲਡ ਕੈਸ਼ (gitignored)                                                   |
+| **next.config.mjs**                         | Next.js 16 ਬਿਲਡ ਸੰਰਚਨਾ (ਸਟੈਂਡਅਲੋਨ ਆਉਟਪੁੱਟ)                                              |
+| **next-env.d.ts**                           | Next.js ਵੱਲੋਂ ਸਵੈਚਲਿਤ ਤੌਰ 'ਤੇ ਤਿਆਰ ਕੀਤੀਆਂ env ਕਿਸਮਾਂ                                    |
+| **eslint.config.mjs**                       | ESLint ਫਲੈਟ ਸੰਰਚਨਾ (ਹਰੇਕ ਪ੍ਰੋਜੈਕਟ ਖੇਤਰ ਲਈ ਨਿਯਮ)                                         |
+| **prettier.config.mjs**                     | Prettier ਫਾਰਮੈਟਿੰਗ ਨਿਯਮ                                                                 |
+| **postcss.config.mjs**                      | Tailwind/CSS ਪਾਈਪਲਾਈਨ ਲਈ PostCSS ਸੰਰਚਨਾ                                                 |
+| **playwright.config.ts**                    | Playwright E2E ਟੈਸਟ ਸੰਰਚਨਾ                                                              |
+| **vitest.config.ts**                        | Vitest ਸੰਰਚਨਾ (ਡਿਫਾਲਟ ਸੂਟ)                                                              |
+| **vitest.mcp.config.ts**                    | MCP ਸਰਵਰ / autoCombo / ਕੈਸ਼ ਸੂਟਾਂ ਲਈ Vitest ਸੰਰਚਨਾ                                      |
+| **sonar-project.properties**                | SonarQube/SonarCloud ਸੰਰਚਨਾ (ਕੋਡ ਗੁਣਵੱਤਾ)                                               |
+| **Dockerfile**                              | ਬਹੁ-ਪੜਾਅ Docker ਬਿਲਡ (ਬਿਲਡਰ → ਰਨਰ-ਬੇਸ → ਰਨਰ-CLI)                                        |
+| **docker-compose.yml**                      | 4 ਪ੍ਰੋਫਾਈਲਾਂ (ਬੇਸ, CLI, ਹੋਸਟ, cliproxyapi) + redis ਸਾਈਡਕਾਰ ਵਾਲਾ ਡਿਵੈਲਪਮੈਂਟ ਕੰਪੋਜ਼       |
+| **docker-compose.prod.yml**                 | ਪ੍ਰੋਡਕਸ਼ਨ ਕੰਪੋਜ਼ (ਪੋਰਟ 20130, redis, ਨਾਮਿਤ ਵਾਲਿਊਮ)                                      |
+| **.dockerignore**                           | Docker ਸੰਦਰਭ ਤੋਂ ਬਾਹਰ ਰੱਖੀਆਂ ਫਾਈਲਾਂ                                                     |
+| **fly.toml**                                | Fly.io ਡਿਪਲੋਇਮੈਂਟ ਸੰਰਚਨਾ (ਖੇਤਰ `sin`, ਪੋਰਟ 20128, /data ਵਾਲਿਊਮ)                         |
+| **.env.example**                            | env ਫਾਈਲ ਟੈਂਪਲੇਟ (ਪਹਿਲੀ ਇੰਸਟਾਲੇਸ਼ਨ ਵੇਲੇ `.env` ਵਿੱਚ ਸਵੈਚਲਿਤ ਤੌਰ 'ਤੇ ਕਾਪੀ ਕੀਤਾ ਜਾਂਦਾ ਹੈ) |
+| **.gitignore**                              | Git ਅਣਡਿੱਠਾ ਕਰਨ ਦੇ ਪੈਟਰਨ                                                                |
+| **.npmignore**                              | npm ਪ੍ਰਕਾਸ਼ਨ ਤੋਂ ਬਾਹਰ ਰੱਖਣ ਦੀ ਸੂਚੀ                                                      |
+| **.npmrc**                                  | npm ਸੰਰਚਨਾ (ਰਜਿਸਟਰੀ, ਲੌਕਫਾਈਲ ਨੀਤੀ)                                                      |
+| **.node-version**                           | Node ਵਰਜਨ ਪਿਨ (nvm-ਅਨੁਕੂਲ ਟੂਲਾਂ ਦੁਆਰਾ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ)                                   |
+| **.nvmrc**                                  | nvm ਲਈ Node ਵਰਜਨ ਪਿਨ                                                                    |
+| **eslint.complexity.config.mjs**            | ਜਟਿਲਤਾ ਰੈਚਟ ਲਈ ESLint ਸੰਰਚਨਾ (`scripts/check/check-complexity.mjs --config`)            |
+| **eslint.sonarjs.config.mjs**               | SonarJS ਨਿਯਮਾਂ ਲਈ ESLint ਸੰਰਚਨਾ (ਸੰਜਾਣਾਤਮਕ ਜਟਿਲਤਾ / ਦੁਹਰਾਵ)                             |
+| **source.config.ts**                        | Fumadocs `defineDocs` ਸਰੋਤ ਸੰਰਚਨਾ (`.source/` ਨੂੰ ਡਾਟਾ ਦਿੰਦੀ ਹੈ)                        |
+| **knip.json**                               | Knip ਸੰਰਚਨਾ — ਨਾ ਵਰਤੀਆਂ ਫਾਈਲਾਂ/ਨਿਰਯਾਤ/ਨਿਰਭਰਤਾਵਾਂ (ਡੈੱਡ-ਕੋਡ ਗੇਟ ਨੂੰ ਡਾਟਾ ਦਿੰਦੀ ਹੈ)       |
+| **stryker.conf.json**                       | Stryker ਮਿਊਟੇਸ਼ਨ-ਟੈਸਟਿੰਗ ਸੰਰਚਨਾ                                                         |
+| **.size-limit.json**                        | size-limit ਬੰਡਲ ਬਜਟ ਸੰਰਚਨਾ                                                              |
+| **promptfooconfig.yaml**                    | promptfoo ਮੁਲਾਂਕਣ ਸੰਰਚਨਾ                                                                |
+| **.gitleaks.toml**                          | gitleaks ਗੁਪਤ-ਜਾਣਕਾਰੀ ਸਕੈਨ ਨਿਯਮ-ਸੈੱਟ                                                    |
+| **.zizmor.yml**                             | zizmor GitHub-Actions ਸੁਰੱਖਿਆ-ਲਿੰਟ ਸੰਰਚਨਾ                                               |
+| **socket.yml**                              | Socket.dev ਸਪਲਾਈ-ਚੇਨ ਸੰਰਚਨਾ                                                             |
+| **news.json**                               | ਸਥਾਨਕੀਕ੍ਰਿਤ v2 ਘੋਸ਼ਣਾ ਫੀਡ; Radar ਲਾਂਚ ਆਈਟਮ ਅਕਿਰਿਆਸ਼ੀਲ ਰੂਪ ਵਿੱਚ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ           |
+| **flake.nix** / **flake.lock**              | Nix dev-shell ਪਰਿਭਾਸ਼ਾ + ਲਾਕ                                                            |
+| **.env**                                    | ਸਥਾਨਕ ਗੁਪਤ ਜਾਣਕਾਰੀ (gitignored — `.env.example` ਤੋਂ ਤਿਆਰ ਕੀਤੀ ਗਈ)                       |
 
-> **v3.8.26 ਵਿੱਚ ਰੂਟ ਤੋਂ ਬਾਹਰ ਭੇਜਿਆ ਗਿਆ (ਗੈਰ-ਜ਼ਰੂਰੀ ਭੀੜ ਘਟਾਉਣ ਲਈ):**
+> **v3.8.26 ਵਿੱਚ ਰੂਟ ਤੋਂ ਬਾਹਰ ਭੇਜਿਆ ਗਿਆ (ਅਵਿਵਸਥਾ ਘਟਾਉਣ ਲਈ):**
 >
 > - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ਅਤੇ ਤਿਆਰ ਕੀਤੀ `quality-metrics.json` (gitignored)। [`## config/`](#config--static-configs--quality-gate-state) ਵੇਖੋ।
 
@@ -114,160 +115,162 @@ OmniRoute/
 
 ```
 src/
-├── app/                 # App Router (ਪੰਨੇ + API ਰੂਟ + ਸਥਿਤੀ ਪੰਨੇ + ਲੈਂਡਿੰਗ ਪੰਨਾ)
-├── lib/                 # ਮੁੱਖ ਲਾਇਬ੍ਰੇਰੀਆਂ / ਡੋਮੇਨ ਮੋਡੀਊਲ (80 ਸਬ-ਡਾਇਰੈਕਟਰੀਆਂ + ~70 ਸਿਖਰਲੇ-ਪੱਧਰ ਦੀਆਂ ਫ਼ਾਈਲਾਂ)
-├── domain/              # ਸ਼ੁੱਧ ਡੋਮੇਨ ਤਰਕ (ਪਾਲਿਸੀ ਇੰਜਣ, ਫ਼ਾਲਬੈਕ, ਲਾਗਤ, ਲਾਕਆਊਟ, comboResolver, ਮੁਲਾਂਕਣ)
-├── server/              # ਕੇਵਲ-ਸਰਵਰ ਮੋਡੀਊਲ (authz ਪਾਈਪਲਾਈਨ, cors, auth ਮਿਡਲਵੇਅਰ) — ਕਲਾਇੰਟ ਤੋਂ ਇੰਪੋਰਟ ਨਹੀਂ ਕੀਤੇ ਜਾ ਸਕਦੇ
-├── shared/              # ਜਿੱਥੇ ਸੁਰੱਖਿਅਤ ਹੋਵੇ, ਸਰਵਰ ਅਤੇ ਕਲਾਇੰਟ ਵਿਚਕਾਰ ਸਾਂਝਾ (ਸਥਿਰਾਂਕ, ਕਿਸਮਾਂ, ਪ੍ਰਮਾਣਿਕਤਾ, ਕਾਂਟ੍ਰੈਕਟ, ਯੂਟਿਲਿਟੀਆਂ)
-├── i18n/                # next-intl ਸੰਰਚਨਾ + ਪ੍ਰਤੀ-ਲੋਕੇਲ ਸੁਨੇਹਾ JSON (42 ਲੋਕੇਲ)
-├── middleware/          # Next.js ਮਿਡਲਵੇਅਰ (ਬੇਨਤੀ ਸੰਵਰਧਨ, ਲੋਕੇਲ ਪਛਾਣ)
-├── mitm/                # MITM ਪ੍ਰੌਕਸੀ ਕੋਰ: ਸਰਟੀਫਿਕੇਟ ਬਣਾਉਣਾ/ਇੰਸਟਾਲ ਕਰਨਾ, ਹੈਂਡਲਰ, ਟਾਰਗੇਟ, ਇੰਸਪੈਕਟਰ, ਮਾਸਕ, ਪਾਸਥਰੂ
-│   ├── handlers/        # MitmHandlerBase ਨੂੰ ਐਕਸਟੈਂਡ ਕਰਨ ਵਾਲੀਆਂ 9 IDE-ਏਜੰਟ ਹੈਂਡਲਰ ਕਲਾਸਾਂ (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # ਟ੍ਰੈਫ਼ਿਕ ਕੈਪਚਰ ਪਰਤ: ਬਫ਼ਰ (ਇਨ-ਮੈਮੋਰੀ ਰਿੰਗ), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # ਮਾਡਲ ਅਡੈਪਟਰ ਜੋੜ (ਪੁਰਾਤਨ ਸ਼ਿਮ)
-├── scripts/             # ਇਨ-ਟ੍ਰੀ ਰੱਖ-ਰਖਾਅ ਸਕ੍ਰਿਪਟਾਂ (ਜਿਵੇਂ, backfillAggregation)
-├── sse/                 # ਪੁਰਾਤਨ SSE ਹੈਂਡਲਰ/ਸੇਵਾਵਾਂ (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # ਪੁਰਾਤਨ ਇਨ-ਮੈਮੋਰੀ ਸਟੋਰ (src/lib/db ਦੇ ਹੱਕ ਵਿੱਚ ਪੜਾਅਵਾਰ ਹਟਾਇਆ ਜਾ ਰਿਹਾ ਹੈ)
-├── types/               # ਸਾਂਝੀਆਂ TS ਕਿਸਮ ਫ਼ਾਈਲਾਂ
-├── instrumentation.ts   # Next.js ਟੈਲੀਮੈਟਰੀ ਹੁੱਕ (ਬ੍ਰਾਊਜ਼ਰ + ਐਜ)
-├── instrumentation-node.ts  # ਕੇਵਲ-Node ਇੰਸਟਰੂਮੈਂਟੇਸ਼ਨ
-└── proxy.ts             # HTTP-ਪ੍ਰੌਕਸੀ ਐਂਟਰੀ ਸ਼ਿਮ
+├── app/                 # App Router (pages + API routes + status pages + landing)
+├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
+├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
+├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
+├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
+├── middleware/          # Next.js middleware (request enrichment, locale detection)
+├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Model adapter glue (legacy shim)
+├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
+├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Legacy in-memory store (being phased out for src/lib/db)
+├── types/               # Shared TS type files
+├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
+├── instrumentation-node.ts  # Node-only instrumentation
+└── proxy.ts             # HTTP-proxy entry shim
 ```
 
-### `src/app/` — App Router (Next.js 16)
+### `src/app/` — ਐਪ ਰਾਊਟਰ (Next.js 16)
 
-| Path                                                                         | ਉਦੇਸ਼                                                                                                                                                                                                                                                                                                               |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | ਜਨਤਕ OpenAI-ਅਨੁਕੂਲ API (~25 ਉਪ-ਰੂਟ: ਚੈਟ, ਕੰਪਲੀਸ਼ਨ, ਐਮਬੈਡਿੰਗ, ਫ਼ਾਈਲਾਂ, ਬੈਚ, ਆਡੀਓ, ਚਿੱਤਰ, ਵੀਡੀਓ, ਸੰਗੀਤ, ਰੀਰੈਂਕ, ਮਾਡਰੇਸ਼ਨ, ਖੋਜ, ws, ਏਜੰਟ, ਖਾਤੇ, ਪ੍ਰਦਾਤਾ ਆਦਿ)                                                                                                                                                           |
-| `app/api/v1beta/`                                                            | Gemini-ਸ਼ੈਲੀ API ਐਂਡਪੌਇੰਟ                                                                                                                                                                                                                                                                                           |
-| `app/api/playground/`                                                        | Playground Studio ਰੂਟ: `improve-prompt/` (POST — LLM ਪ੍ਰੌਂਪਟ ਮੁੜ-ਲੇਖਕ), `presets/` (GET ਸੂਚੀ / POST ਬਣਾਓ), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` ਵੇਖੋ                                                                                                                       |
-| `app/api/` (ਗੈਰ-v1)                                                          | ਪ੍ਰਬੰਧਨ/ਐਡਮਿਨ ਰੂਟ (~60 ਡਾਇਰੈਕਟਰੀਆਂ: ਪ੍ਰਦਾਤਾ, ਕੰਬੋ, ਸੈਟਿੰਗਾਂ, mcp, a2a, ਮੁਲਾਂਕਣ, ਮੈਮੋਰੀ, ਹੁਨਰ, ਵੈੱਬਹੁੱਕ, ਅਨੁਪਾਲਨਾ, ਲਚਕਤਾ, ਨਿਗਰਾਨੀ, ਟਨਲ, cli-tools ਆਦਿ)                                                                                                                                                               |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ਰੂਟ (ਸਰਵਰ ਕੰਟਰੋਲ, ਏਜੰਟ ਸਥਿਤੀ/DNS/ਮੈਪਿੰਗਾਂ, ਬਾਈਪਾਸ, ਸਰਟੀਫਿਕੇਟ, ਅੱਪਸਟ੍ਰੀਮ-CA)। LOCAL_ONLY + SPAWN_CAPABLE। `docs/frameworks/AGENTBRIDGE.md §7` ਵੇਖੋ।                                                                                                                                        |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ ਰੂਟ (ਬੇਨਤੀਆਂ, ਸੈਸ਼ਨ, ਹੋਸਟ, ਕੈਪਚਰ-ਮੋਡ, ਐਕਸਪੋਰਟ, ws)। LOCAL_ONLY + SPAWN_CAPABLE। `docs/frameworks/TRAFFIC_INSPECTOR.md §8` ਵੇਖੋ।                                                                                                                                               |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 ਪ੍ਰਵੇਸ਼ ਬਿੰਦੂ (`POST /a2a`)                                                                                                                                                                                                                                                                        |
-| `app/.well-known/agent.json/`                                                | A2A ਏਜੰਟ ਕਾਰਡ (ਖੋਜ)                                                                                                                                                                                                                                                                                                 |
-| `app/(dashboard)/dashboard/`                                                 | ਡੈਸ਼ਬੋਰਡ UI ਪੰਨੇ (50+ ਭਾਗ, ~118 page.tsx ਫ਼ਾਈਲਾਂ: ਪ੍ਰਦਾਤਾ, ਕੰਬੋ, ਸੈਟਿੰਗਾਂ, ਮੈਮੋਰੀ, ਹੁਨਰ, ਵੈੱਬਹੁੱਕ, ਮੁਲਾਂਕਣ, ਆਡਿਟ, ਬੈਚ, ਕੈਸ਼, ਲਾਗਤਾਂ, ਸਿਹਤ, ਸਿਸਟਮ, ਸਰਗਰਮੀ ਆਦਿ)                                                                                                                                                       |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 ਟੈਬਾਂ: ਖੋਜ/ਸਕ੍ਰੇਪ/ਤੁਲਨਾ + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` ਵੇਖੋ                                                                                                                                                                            |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (ਯੋਜਨਾ 21): `page.tsx` (3-ਟੈਬ ਸ਼ੈੱਲ), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge ਡੈਸ਼ਬੋਰਡ ਪੰਨਾ — ਸਰਵਰ ਕਾਰਡ, 9 ਏਜੰਟ ਕਾਰਡ, ਸੈਟਅੱਪ ਵਿਜ਼ਾਰਡ, ਮਾਡਲ ਮੈਪਿੰਗ, ਬਾਈਪਾਸ ਸੂਚੀ। i18n PT-BR + EN। `docs/frameworks/AGENTBRIDGE.md` ਵੇਖੋ।                                                                                                                                                               |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector ਡੈਸ਼ਬੋਰਡ ਪੰਨਾ — DevTools ਵੰਡ, 7 ਵੇਰਵਾ ਟੈਬਾਂ, 4 ਕੈਪਚਰ ਮੋਡ ਟੌਗਲ, ਸੈਸ਼ਨ ਰਿਕਾਰਡਰ, ਸੰਦਰਭ ਰੰਗੀਕਰਨ। i18n PT-BR + EN। `docs/frameworks/TRAFFIC_INSPECTOR.md` ਵੇਖੋ।                                                                                                                                        |
-| `app/(dashboard)/dashboard/activity/`                                        | ਗਤੀਵਿਧੀ ਫੀਡ ਪੰਨਾ (ਗਰੁੱਪ B): `page.tsx` (ਸਰਵਰ) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` ਵੇਖੋ                                                                                                                 |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | ਕੋਟਾ ਸਾਂਝਾਕਰਨ ਪੰਨਾ (ਗਰੁੱਪ B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                           |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | ਪ੍ਰਦਾਤਾ ਯੋਜਨਾ ਸੰਰਚਨਾ ਪੰਨਾ (ਗਰੁੱਪ B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ਪ੍ਰਤੀ ਕਨੈਕਸ਼ਨ ਕੋਟਾ ਆਯਾਮਾਂ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਨਾ                                                                                                                                                                                       |
-| `app/docs/`                                                                  | ਏਮਬੈਡ ਕੀਤਾ ਦਸਤਾਵੇਜ਼ ਦਰਸ਼ਕ (`docs/*.md` ਨੂੰ ਰੈਂਡਰ ਕਰਦਾ ਹੈ)                                                                                                                                                                                                                                                           |
-| `app/landing/`                                                               | ਮਾਰਕੀਟਿੰਗ ਲੈਂਡਿੰਗ ਪੰਨਾ                                                                                                                                                                                                                                                                                              |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | ਪ੍ਰਮਾਣੀਕਰਨ-ਸੰਬੰਧੀ ਪੰਨੇ                                                                                                                                                                                                                                                                                              |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP ਗਲਤੀ ਪੰਨੇ                                                                                                                                                                                                                                                                                                      |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | ਸਥਿਰ/ਸਥਿਤੀ ਪੰਨੇ                                                                                                                                                                                                                                                                                                     |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | ਰੂਟ ਲੇਆਉਟ, ਮੁੱਖ ਪੰਨਾ, PWA ਮੈਨੀਫੈਸਟ, ਗਲੋਬਲ CSS                                                                                                                                                                                                                                                                       |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | ਗਲਤੀ ਸੀਮਾਵਾਂ                                                                                                                                                                                                                                                                                                        |
+| ਮਾਰਗ                                                                         | ਮਕਸਦ                                                                                                                                                                                                                                                                                                     |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | ਪਬਲਿਕ ਓਪਨਏਆਈ-ਕੰਪੈਟ API (~ 25 ਉਪ-ਰੂਟ: ਚੈਟ, ਸੰਪੂਰਨਤਾ, ਏਮਬੈਡਿੰਗ, ਫਾਈਲਾਂ, ਬੈਚ, ਆਡੀਓ, ਚਿੱਤਰ, ਵੀਡੀਓ, ਸੰਗੀਤ, ਮੁੜ ਦਰਜਾਬੰਦੀ, ਸੰਚਾਲਨ, ਖੋਜ, ਡਬਲਯੂਐਸ, ਏਜੰਟ, ਖਾਤੇ, ਪ੍ਰਦਾਤਾ, ਆਦਿ)                                                                                                                                      |
+| `app/api/v1beta/`                                                            | ਜੈਮਿਨੀ-ਸ਼ੈਲੀ ਦੇ API ਅੰਤਮ ਬਿੰਦੂ                                                                                                                                                                                                                                                                           |
+| `app/api/playground/`                                                        | ਪਲੇਗ੍ਰਾਉਂਡ ਸਟੂਡੀਓ ਰੂਟ: `improve-prompt/` (POST — LLM ਪ੍ਰੋਂਪਟ ਰੀਰਾਈਟਰ), `presets/` (GET ਸੂਚੀ / POST ਬਣਾਓ), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` ਦੇਖੋ                                                                                                             |
+| `app/api/` (ਗੈਰ-v1)                                                          | Management/admin ਰੂਟਸ (~ 60 ਡਾਇਰੈਕਟਰੀਆਂ: ਪ੍ਰਦਾਤਾ, ਕੰਬੋਜ਼, ਸੈਟਿੰਗਾਂ, ਐਮਸੀਪੀ, ਏ2ਏ, ਈਵਲਸ, ਮੈਮੋਰੀ, ਹੁਨਰ, ਵੈਬਹੁੱਕ, ਪਾਲਣਾ, ਲਚਕੀਲੇਪਨ, ਨਿਗਰਾਨੀ, ਸੁਰੰਗਾਂ, ਕਲੀ-ਟੂਲ, ਆਦਿ)                                                                                                                                           |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ਰਸਤੇ (ਸਰਵਰ ਕੰਟਰੋਲ, ਏਜੰਟ state/DNS/mappings, ਬਾਈਪਾਸ, ਸਰਟੀਫਿਕੇਟ, ਅੱਪਸਟ੍ਰੀਮ-CA)। LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` ਵੇਖੋ.                                                                                                                            |
+| `app/api/tools/traffic-inspector/`                                           | ਟ੍ਰੈਫਿਕ ਇੰਸਪੈਕਟਰ REST + WS API — 16 + ਰੂਟ (ਬੇਨਤੀ, ਸੈਸ਼ਨ, ਮੇਜ਼ਬਾਨ, ਕੈਪਚਰ-ਮੋਡ, ਨਿਰਯਾਤ, ws)। LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` ਵੇਖੋ.                                                                                                                                    |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 ਐਂਟਰੀ ਪੁਆਇੰਟ (`POST /a2a`)                                                                                                                                                                                                                                                              |
+| `app/.well-known/agent.json/`                                                | A2A ਏਜੰਟ ਕਾਰਡ (ਖੋਜ)                                                                                                                                                                                                                                                                                      |
+| `app/(dashboard)/dashboard/`                                                 | ਡੈਸ਼ਬੋਰਡ UI ਪੰਨੇ (50 + ਸੈਕਸ਼ਨ, ~ 118 page.tsx ਫਾਈਲਾਂ: ਪ੍ਰਦਾਤਾ, ਕੰਬੋਜ਼, ਸੈਟਿੰਗਾਂ, ਮੈਮੋਰੀ, ਹੁਨਰ, ਵੈਬਹੁੱਕ, ਈਵਲਸ, ਆਡਿਟ, ਬੈਚ, ਕੈਸ਼, ਲਾਗਤ, ਸਿਹਤ, ਸਿਸਟਮ, ਗਤੀਵਿਧੀ, ਆਦਿ)                                                                                                                                          |
+| `app/(dashboard)/dashboard/search-tools/`                                    | ਖੋਜ ਟੂਲ ਸਟੂਡੀਓ UI (3 ਟੈਬ: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` ਦੇਖੋ                                                                                                                                                                   |
+| `app/(dashboard)/dashboard/memory/`                                          | ਮੈਮੋਰੀ ਸਟੂਡੀਓ (ਯੋਜਨਾ 21): `page.tsx` (3-ਟੈਬ ਸ਼ੈੱਲ), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), zqnetusE , `hooks/` ( zqnetususe ) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge ਡੈਸ਼ਬੋਰਡ ਪੇਜ — ਸਰਵਰ ਕਾਰਡ, 9 ਏਜੰਟ ਕਾਰਡ, ਸੈੱਟਅੱਪ ਵਿਜ਼ਾਰਡ, ਮਾਡਲ ਮੈਪਿੰਗ, ਬਾਈਪਾਸ ਸੂਚੀ। i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` ਵੇਖੋ.                                                                                                                                                    |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | ਟ੍ਰੈਫਿਕ ਇੰਸਪੈਕਟਰ ਡੈਸ਼ਬੋਰਡ ਪੇਜ — DevTools ਸਪਲਿਟ, 7 ਵੇਰਵੇ ਟੈਬ, 4 ਕੈਪਚਰ ਮੋਡ ਟੌਗਲ, ਸੈਸ਼ਨ ਰਿਕਾਰਡਰ, ਸੰਦਰਭ ਰੰਗੀਕਰਨ। i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` ਵੇਖੋ.                                                                                                                               |
+| `app/(dashboard)/dashboard/activity/`                                        | ਗਤੀਵਿਧੀ ਫੀਡ ਪੰਨਾ (ਗਰੁੱਪ ਬੀ): `page.tsx` (ਸਰਵਰ) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — ਦੇਖੋ `docs/architecture/MONITORING_SECTIONS.md`                                                                                                     |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | ਕੋਟਾ ਸ਼ੇਅਰਿੰਗ ਪੰਨਾ (ਗਰੁੱਪ ਬੀ): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                               |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | ਪ੍ਰਦਾਤਾ ਯੋਜਨਾ ਸੰਰਚਨਾ ਪੰਨਾ (ਗਰੁੱਪ ਬੀ): `page.tsx` + `ProviderPlanConfigClient.tsx` — ਕੋਟਾ ਮਾਪ ਪ੍ਰਤੀ ਕੁਨੈਕਸ਼ਨ ਓਵਰਰਾਈਡ                                                                                                                                                                                      |
+| `app/docs/`                                                                  | ਏਮਬੇਡਡ ਦਸਤਾਵੇਜ਼ੀ ਦਰਸ਼ਕ (ਰੈਂਡਰ `docs/*.md`)                                                                                                                                                                                                                                                               |
+| `app/landing/`                                                               | ਮਾਰਕੀਟਿੰਗ ਲੈਂਡਿੰਗ ਪੰਨਾ                                                                                                                                                                                                                                                                                   |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | ਪ੍ਰਮਾਣਿਕਤਾ-ਸਬੰਧਤ ਪੰਨੇ                                                                                                                                                                                                                                                                                    |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP ਗਲਤੀ ਪੰਨੇ                                                                                                                                                                                                                                                                                           |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status ਪੰਨੇ                                                                                                                                                                                                                                                                                       |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | ਰੂਟ ਲੇਆਉਟ, ਹੋਮ, PWA ਮੈਨੀਫੈਸਟ, ਗਲੋਬਲ CSS                                                                                                                                                                                                                                                                  |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | ਗਲਤੀ ਸੀਮਾਵਾਂ                                                                                                                                                                                                                                                                                             |
 
-### `src/lib/` — ਮੁੱਖ ਲਾਇਬ੍ਰੇਰੀਆਂ (~50 ਮੋਡੀਊਲ)
+### `src/lib/` — ਕੋਰ ਲਾਇਬ੍ਰੇਰੀਆਂ (~ 50 ਮੋਡੀਊਲ)
 
-| ਮੋਡੀਊਲ                                   | ਉਦੇਸ਼                                                                                                                                                                                                                                                                                                                 |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A ਪ੍ਰੋਟੋਕੋਲ ਟਾਸਕ ਮੈਨੇਜਰ, ਸਕਿਲਜ਼ (5), ਸਟ੍ਰੀਮਿੰਗ                                                                                                                                                                                                                                                                      |
-| `acp/`                                   | CLI ਏਜੰਟ ਰਜਿਸਟਰੀ (ਸਥਾਨਕ CLI ਖੋਜ — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` ਵੇਖੋ)                                                                                                                                                                                                                                    |
-| `api/`                                   | ਸਾਂਝੇ API ਸਹਾਇਕ (`requireManagementAuth`, ਪ੍ਰਮਾਣਿਕਤਾ)                                                                                                                                                                                                                                                                 |
-| `auth/`                                  | ਸੈਸ਼ਨ, ਪਾਸਵਰਡ ਹੈਸ਼ਿੰਗ, ਟੋਕਨ ਪ੍ਰਮਾਣਿਕਤਾ                                                                                                                                                                                                                                                                                |
-| `batches/`                               | OpenAI Batches API ਹੈਂਡਲਰ                                                                                                                                                                                                                                                                                             |
-| `catalog/`                               | ਪ੍ਰਦਾਤਾ ਕੈਟਾਲੌਗ Zod ਪ੍ਰਮਾਣਿਕਤਾ + ਸਮਰੱਥਾ ਨਿਰਧਾਰਨ                                                                                                                                                                                                                                                                       |
-| `cloudAgent/`                            | ਕਲਾਉਡ ਏਜੰਟ (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` ਵੇਖੋ                                                                                                                                                                                                                                        |
-| `combos/`                                | ਕੌਂਬੋ ਨਿਰਧਾਰਨ + ਮੁੜ-ਕ੍ਰਮਬੱਧ ਕਰਨ ਵਾਲੇ ਸਹਾਇਕ                                                                                                                                                                                                                                                                            |
-| `audit/`                                 | ਸਰਗਰਮੀ ਫੀਡ ਸਹਾਇਕ: `highLevelActions.ts` (ਮਨਜ਼ੂਰ-ਸੂਚੀ + `isHighLevelAction()`), `activityIcons.ts` (ਕਾਰਵਾਈ → ਆਈਕਨ/ਕਿਰਿਆ ਮੈਪ), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` ਵੇਖੋ                                                                                                |
-| `compliance/`                            | ਆਡਿਟ ਲੌਗ + ਪ੍ਰਦਾਤਾ ਆਡਿਟ — `docs/security/COMPLIANCE.md` ਵੇਖੋ                                                                                                                                                                                                                                                          |
-| `compression/`                           | ਕੰਪ੍ਰੈਸ਼ਨ ਇੰਜਣ ਗਲੂ (ਇੰਜਣ `open-sse/services/compression/` ਵਿੱਚ ਹਨ)                                                                                                                                                                                                                                                    |
-| `config/`                                | ਰਨਟਾਈਮ ਸੰਰਚਨਾ ਸਹਾਇਕ                                                                                                                                                                                                                                                                                                   |
-| `db/`                                    | 120+ ਡੋਮੇਨ DB ਮੋਡੀਊਲ + 168 ਮਾਈਗ੍ਰੇਸ਼ਨ (SQLite ਲਈ ਹਮੇਸ਼ਾ ਇੱਥੋਂ ਹੀ ਲੰਘੋ)                                                                                                                                                                                                                                                |
-| `quota/`                                 | ਕੋਟਾ ਸਾਂਝਾਕਰਨ ਇੰਜਣ: `dimensions.ts` (ਕਿਸਮਾਂ/Zod), `types.ts` (QuotaStore ਇੰਟਰਫੇਸ), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` ਵੇਖੋ |
-| `radar/`                                 | Radar ਮੁਫ਼ਤ-ਮਾਡਲ ਕੈਟਾਲਾਗ ਕਲਾਇੰਟ: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` ਵੇਖੋ                                                                                                                                         |
-| `display/`                               | UI ਫਾਰਮੈਟਿੰਗ ਸਹਾਇਕ (ਲਾਗਤ, ਲੇਟੈਂਸੀ ਆਦਿ)                                                                                                                                                                                                                                                                                |
-| `embeddings/`                            | Embeddings ਸੇਵਾ ਸਹਾਇਕ                                                                                                                                                                                                                                                                                                 |
-| `env/`                                   | Env ਵੇਰੀਏਬਲ ਪਾਰਸਿੰਗ + ਪ੍ਰਮਾਣਿਕਤਾ                                                                                                                                                                                                                                                                                      |
-| `evals/`                                 | Eval ਫਰੇਮਵਰਕ (ਸੂਟ, ਰਨਰ, ਰਨਟਾਈਮ) — `docs/frameworks/EVALS.md` ਵੇਖੋ                                                                                                                                                                                                                                                     |
-| `guardrails/`                            | PII ਮਾਸਕਰ, ਪ੍ਰੌਂਪਟ ਇੰਜੈਕਸ਼ਨ, ਵਿਜ਼ਨ ਬ੍ਰਿਜ — `docs/security/GUARDRAILS.md` ਵੇਖੋ                                                                                                                                                                                                                                         |
-| `jobs/`                                  | ਬੈਕਗ੍ਰਾਊਂਡ ਜੌਬਾਂ (cron ਵਰਗੀਆਂ)                                                                                                                                                                                                                                                                                        |
-| `memory/`                                | ਗੱਲਬਾਤੀ ਮੈਮਰੀ (SQLite FTS5 + sqlite-vec ਹਾਈਬ੍ਰਿਡ RRF + Qdrant ਟੀਅਰ 2) — `docs/frameworks/MEMORY.md` ਵੇਖੋ                                                                                                                                                                                                              |
-| `memory/embedding/`                      | ਬਹੁ-ਸਰੋਤ embedding ਲੇਅਰ: `index.ts` (ਰਿਜ਼ਾਲਵਰ), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (ਯੋਜਨਾ 21)                                                                                                                                                                             |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ਰੈਪਰ — KNN ਬਰੂਟ-ਫੋਰਸ + ਹਾਈਬ੍ਰਿਡ RRF (FTS5 + ਵੈਕਟਰ, k=60)। ਲੇਜ਼ੀ-ਇਨੀਸ਼ੀਅਲਾਈਜ਼ੇਸ਼ਨ, sqlite-vec ਉਪਲਬਧ ਨਾ ਹੋਣ 'ਤੇ ਸੁਚੱਜੇ ਢੰਗ ਨਾਲ ਸੀਮਿਤ ਹੋ ਜਾਂਦਾ ਹੈ। (ਯੋਜਨਾ 21)                                                                                                                                          |
-| `memory/reindex.ts`                      | `runReindexBatch()` — ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ `needs_reindex=1` ਵਾਲੀਆਂ ਮੈਮਰੀਆਂ ਨੂੰ ਪ੍ਰੋਸੈਸ ਕਰਦਾ ਹੈ; `POST /api/memory/reindex` ਅਤੇ ਲੇਜ਼ੀ-ਬੈਕਫ਼ਿਲ ਪਾਥ ਵੱਲੋਂ ਕਾਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। (ਯੋਜਨਾ 21)                                                                                                                                      |
-| `monitoring/`                            | ਸਿਹਤ ਜਾਂਚਾਂ, ਮੈਟ੍ਰਿਕਸ ਉਤਸਰਜਨ                                                                                                                                                                                                                                                                                          |
-| `oauth/`                                 | 22 ਪ੍ਰੋਵਾਈਡਰ ਮੌਡਿਊਲਾਂ ਲਈ OAuth/ਇੰਪੋਰਟ ਫ਼ਲੋ (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                |
-| `plugins/`                               | ਪਲੱਗਇਨ ਰਜਿਸਟਰੀ                                                                                                                                                                                                                                                                                                        |
-| `promptCache/`                           | Anthropic-ਸ਼ੈਲੀ ਪ੍ਰੌਂਪਟ ਕੈਸ਼ ਬ੍ਰੇਕਪੁਆਇੰਟ                                                                                                                                                                                                                                                                              |
-| `skills/`                                | Skills ਫਰੇਮਵਰਕ (ਬਿਲਟ-ਇਨ + ਮਾਰਕੀਟਪਲੇਸ + SkillsSH) — `docs/frameworks/SKILLS.md` ਵੇਖੋ                                                                                                                                                                                                                                   |
-| `playground/`                            | Playground Studio ਦੇ ਸਾਂਝੇ ਸਹਾਇਕ: `codeExport.ts` (curl/Python/TS ਜਨਰੇਟਰ), `promptImprover.ts` (ਮੈਟਾ-ਪ੍ਰੌਂਪਟ ਬਿਲਡਰ), `streamMetrics.ts` (ਸ਼ੁੱਧ TTFT/TPS), `types.ts` (ਕੀਮਤ ਸਾਰਣੀ) — `docs/frameworks/PLAYGROUND_STUDIO.md` ਵੇਖੋ                                                                                       |
-| `webhookDispatcher.ts`                   | HMAC webhook ਡਿਲਿਵਰੀ — `docs/frameworks/WEBHOOKS.md` ਵੇਖੋ                                                                                                                                                                                                                                                             |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | ਟਨਲ ਮੈਨੇਜਰ — `docs/ops/TUNNELS_GUIDE.md` ਵੇਖੋ                                                                                                                                                                                                                                                                         |
-| `cloudSync.ts`, `initCloudSync.ts`       | ਸਥਿਤੀ ਦਾ ਵਿਕਲਪਿਕ ਕਲਾਉਡ ਸਿੰਕ                                                                                                                                                                                                                                                                                           |
-| `localDb.ts`                             | db ਮੋਡੀਊਲਾਂ ਲਈ ਮੁੜ-ਨਿਰਯਾਤ ਬੈਰਲ (ਕੋਈ ਲੌਜਿਕ ਨਹੀਂ — ਸਿਰਫ਼ ਮੁੜ-ਨਿਰਯਾਤ)                                                                                                                                                                                                                                                    |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | ਬੇਨਤੀ ਕੈਸ਼ਿੰਗ + ਆਈਡੈਂਪੋਟੈਂਸੀ                                                                                                                                                                                                                                                                                          |
-| (~30 ਹੋਰ ਉੱਚ-ਪੱਧਰੀ ਫ਼ਾਈਲਾਂ)              | ਵਿਸ਼ੇਸ਼ ਸਹਾਇਕ (logEnv, modelsDevSync, piiSanitizer, ਆਦਿ)                                                                                                                                                                                                                                                              |
+| ਮੋਡੀਊਲ                                   | ਮਕਸਦ                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | A2A ਪ੍ਰੋਟੋਕੋਲ ਟਾਸਕ ਮੈਨੇਜਰ, ਹੁਨਰ (5), ਸਟ੍ਰੀਮਿੰਗ                                                                                                                                                                                                                                                                       |
+| `acp/`                                   | CLI ਏਜੰਟ ਰਜਿਸਟਰੀ (ਸਥਾਨਕ CLI ਖੋਜ — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` ਦੇਖੋ)                                                                                                                                                                                                                                   |
+| `api/`                                   | ਸ਼ੇਅਰਡ API ਸਹਾਇਕ (`requireManagementAuth`, ਪ੍ਰਮਾਣਿਕਤਾ)                                                                                                                                                                                                                                                               |
+| `auth/`                                  | ਸੈਸ਼ਨ, ਪਾਸਵਰਡ ਹੈਸ਼ਿੰਗ, ਟੋਕਨ ਪ੍ਰਮਾਣਿਕਤਾ                                                                                                                                                                                                                                                                               |
+| `batches/`                               | OpenAI ਬੈਚਜ਼ API ਹੈਂਡਲਰ                                                                                                                                                                                                                                                                                              |
+| `catalog/`                               | ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ Zod ਪ੍ਰਮਾਣਿਕਤਾ + ਸਮਰੱਥਾ ਰੈਜ਼ੋਲੂਸ਼ਨ                                                                                                                                                                                                                                                                   |
+| `cloudAgent/`                            | ਕਲਾਉਡ ਏਜੰਟ (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` ਦੇਖੋ                                                                                                                                                                                                                                       |
+| `combos/`                                | ਕੰਬੋ ਰੈਜ਼ੋਲਿਊਸ਼ਨ + ਰੀਆਰਡਰ ਸਹਾਇਕ                                                                                                                                                                                                                                                                                      |
+| `audit/`                                 | ਗਤੀਵਿਧੀ ਫੀਡ ਸਹਾਇਕ: `highLevelActions.ts` (ਸਬੰਧੀ + `isHighLevelAction()`), `activityIcons.ts` (ਐਕਸ਼ਨ → icon/verb ਨਕਸ਼ਾ), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` ਦੇਖੋ                                                                                                    |
+| `compliance/`                            | ਆਡਿਟ ਲੌਗ + ਪ੍ਰਦਾਤਾ ਆਡਿਟ — `docs/security/COMPLIANCE.md` ਵੇਖੋ                                                                                                                                                                                                                                                         |
+| `compression/`                           | ਕੰਪਰੈਸ਼ਨ ਇੰਜਣ ਗੂੰਦ (ਇੰਜਣ `open-sse/services/compression/` ਵਿੱਚ ਰਹਿੰਦੇ ਹਨ)                                                                                                                                                                                                                                            |
+| `config/`                                | ਰਨਟਾਈਮ ਸੰਰਚਨਾ ਸਹਾਇਕ                                                                                                                                                                                                                                                                                                  |
+| `db/`                                    | 120 + ਡੋਮੇਨ DB ਮੋਡੀਊਲ + 168 ਮਾਈਗ੍ਰੇਸ਼ਨ (ਹਮੇਸ਼ਾ SQLite ਲਈ ਇੱਥੇ ਜਾਓ)                                                                                                                                                                                                                                                   |
+| `quota/`                                 | ਕੋਟਾ ਸ਼ੇਅਰਿੰਗ ਇੰਜਣ: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore ਇੰਟਰਫੇਸ), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — ਦੇਖੋ `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | ਰਾਡਾਰ ਫ੍ਰੀ-ਮਾਡਲ ਕੈਟਾਲਾਗ ਕਲਾਇੰਟ: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — ਦੇਖੋ `docs/frameworks/RADAR.md`                                                                                                                                         |
+| `display/`                               | UI ਫਾਰਮੈਟਿੰਗ ਸਹਾਇਕ (ਲਾਗਤ, ਲੇਟੈਂਸੀ, ਆਦਿ)                                                                                                                                                                                                                                                                              |
+| `embeddings/`                            | ਏਮਬੈਡਿੰਗ ਸੇਵਾ ਸਹਾਇਕ                                                                                                                                                                                                                                                                                                  |
+| `env/`                                   | Env ਵੇਰੀਏਬਲ ਪਾਰਸਿੰਗ + ਪ੍ਰਮਾਣਿਕਤਾ                                                                                                                                                                                                                                                                                     |
+| `evals/`                                 | ਈਵਲ ਫਰੇਮਵਰਕ (ਸੂਟ, ਰਨਰ, ਰਨਟਾਈਮ) — `docs/frameworks/EVALS.md` ਦੇਖੋ                                                                                                                                                                                                                                                     |
+| `guardrails/`                            | PII ਮਾਸਕਰ, ਪ੍ਰੋਂਪਟ ਇੰਜੈਕਸ਼ਨ, ਵਿਜ਼ਨ ਬ੍ਰਿਜ — `docs/security/GUARDRAILS.md` ਦੇਖੋ                                                                                                                                                                                                                                        |
+| `jobs/`                                  | ਪਿਛੋਕੜ ਦੀਆਂ ਨੌਕਰੀਆਂ (ਕ੍ਰੋਨ ਵਰਗੀਆਂ)                                                                                                                                                                                                                                                                                   |
+| `memory/`                                | ਗੱਲਬਾਤ ਦੀ ਮੈਮੋਰੀ (SQLite FTS5 + sqlite-vec ਹਾਈਬ੍ਰਿਡ RRF + Qdrant ਟੀਅਰ 2) — `docs/frameworks/MEMORY.md` ਵੇਖੋ                                                                                                                                                                                                          |
+| `memory/embedding/`                      | ਮਲਟੀ-ਸੋਰਸ ਏਮਬੈਡਿੰਗ ਲੇਅਰ: `index.ts` (ਰੈਜ਼ੋਲਵਰ), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (ਯੋਜਨਾ 21)                                                                                                                                                                            |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ਰੈਪਰ — KNN ਬਰੂਟ-ਫੋਰਸ + ਹਾਈਬ੍ਰਿਡ RRF (FTS5 + ਵੈਕਟਰ, k = 60)। Lazy-init, sqlite-vec ਅਣਉਪਲਬਧ ਹੋਣ 'ਤੇ ਸ਼ਾਨਦਾਰ ਢੰਗ ਨਾਲ ਘਟਾਉਂਦਾ ਹੈ। (ਯੋਜਨਾ 21)                                                                                                                                                           |
+| `memory/reindex.ts`                      | `runReindexBatch()` — ਬੈਕਗ੍ਰਾਉਂਡ ਵਿੱਚ `needs_reindex=1` ਨਾਲ ਯਾਦਾਂ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕਰਦਾ ਹੈ; `POST /api/memory/reindex` ਅਤੇ ਆਲਸੀ-ਬੈਕਫਿਲ ਮਾਰਗ ਦੁਆਰਾ ਬੁਲਾਇਆ ਜਾਂਦਾ ਹੈ। (ਯੋਜਨਾ 21)                                                                                                                                             |
+| `monitoring/`                            | ਸਿਹਤ ਜਾਂਚ, ਮੈਟ੍ਰਿਕਸ ਨਿਕਾਸ                                                                                                                                                                                                                                                                                            |
+| `oauth/`                                 | 22 ਪ੍ਰਦਾਤਾ ਮਾਡਿਊਲਾਂ ਲਈ OAuth/import ਫਲੋਅ (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, , kimideroqe, ਓਪਨ, ਕਿਮੀ, xai-oauth, zed-ਹੋਸਟਡ, zed)                                                                      |
+| `plugins/`                               | ਪਲੱਗਇਨ ਰਜਿਸਟਰੀ                                                                                                                                                                                                                                                                                                       |
+| `promptCache/`                           | ਐਂਥਰੋਪਿਕ-ਸ਼ੈਲੀ ਪ੍ਰੋਂਪਟ ਕੈਸ਼ ਬ੍ਰੇਕਪੁਆਇੰਟਸ                                                                                                                                                                                                                                                                             |
+| `skills/`                                | ਹੁਨਰ ਫਰੇਮਵਰਕ (ਬਿਲਟ-ਇਨ + ਮਾਰਕੀਟਪਲੇਸ + SkillsSH) — `docs/frameworks/SKILLS.md` ਦੇਖੋ                                                                                                                                                                                                                                    |
+| `playground/`                            | ਪਲੇਗ੍ਰਾਉਂਡ ਸਟੂਡੀਓ ਸਾਂਝੇ ਸਹਾਇਕ: `codeExport.ts` (curl/Python/TS ਜਨਰੇਟਰ), `promptImprover.ts` (ਮੈਟਾ-ਪ੍ਰੋਂਪਟ ਬਿਲਡਰ), `streamMetrics.ts` (ਸ਼ੁੱਧ TTFT/TPS), `types.ts` (ਕੀਮਤ ਸਾਰਣੀ) — ਦੇਖੋ `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                         |
+| `webhookDispatcher.ts`                   | HMAC ਵੈਬਹੁੱਕ ਡਿਲੀਵਰੀ — `docs/frameworks/WEBHOOKS.md` ਦੇਖੋ                                                                                                                                                                                                                                                            |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | ਸੁਰੰਗ ਪ੍ਰਬੰਧਕ - `docs/ops/TUNNELS_GUIDE.md` ਵੇਖੋ                                                                                                                                                                                                                                                                     |
+| `cloudSync.ts`, `initCloudSync.ts`       | ਰਾਜ ਦਾ ਵਿਕਲਪਿਕ ਕਲਾਉਡ ਸਿੰਕ                                                                                                                                                                                                                                                                                            |
+| `localDb.ts`                             | db ਮੋਡੀਊਲ ਲਈ ਬੈਰਲ ਮੁੜ-ਨਿਰਯਾਤ ਕਰੋ (ਕੋਈ ਤਰਕ ਨਹੀਂ - ਸਿਰਫ਼ ਮੁੜ-ਨਿਰਯਾਤ)                                                                                                                                                                                                                                                   |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | + idempotency ਕੈਸ਼ ਕਰਨ ਲਈ ਬੇਨਤੀ ਕਰੋ                                                                                                                                                                                                                                                                                  |
+| (~ 30 ਹੋਰ ਉੱਚ-ਪੱਧਰੀ ਫਾਈਲਾਂ)              | ਵਿਸ਼ੇਸ਼ ਸਹਾਇਕ (logEnv, modelsDevSync, piiSanitizer, ਆਦਿ)                                                                                                                                                                                                                                                             |
 
-### `src/lib/db/` — ਡੇਟਾਬੇਸ (137 ਮੋਡੀਊਲ + 193 ਮਾਈਗ੍ਰੇਸ਼ਨ)
+### `src/lib/db/` — ਡਾਟਾਬੇਸ (147 ਮੋਡੀਊਲ + 208 ਮਾਈਗ੍ਰੇਸ਼ਨ)
 
-| ਸਬ-ਡਾਇਰੈਕਟਰੀ              | ਉਦੇਸ਼                                                                                                                                                                         |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | WAL ਜਰਨਲਿੰਗ ਵਾਲਾ `getDbInstance()` ਸਿੰਗਲਟਨ                                                                                                                                    |
-| `db/migrations/`          | ਵਰਜ਼ਨ ਕੀਤੀਆਂ SQL ਫ਼ਾਈਲਾਂ (ਆਈਡੈਂਪੋਟੈਂਟ, ਟ੍ਰਾਂਜ਼ੈਕਸ਼ਨਲ)। `073_memory_vec.sql`, `memory_vec_meta` + `needs_reindex` ਕਾਲਮ ਜੋੜਦੀ ਹੈ (ਯੋਜਨਾ 21)।                                    |
-| `db/playgroundPresets.ts` | Playground Studio ਪ੍ਰੀਸੈੱਟਾਂ ਲਈ CRUD ਮੋਡੀਊਲ (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)    |
-| `db/memoryVec.ts`         | `memory_vec_meta` ਲਈ CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, ਆਦਿ (ਯੋਜਨਾ 21)                    |
-| `db/<domain>.ts`          | ਹਰੇਕ ਡੋਮੇਨ ਲਈ ਇੱਕ ਮੋਡੀਊਲ: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, ਆਦਿ। |
+| ਸਬਦੀਰ                     | ਮਕਸਦ                                                                                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `db/core.ts`              | WAL ਜਰਨਲਿੰਗ ਦੇ ਨਾਲ `getDbInstance()` ਸਿੰਗਲਟਨ                                                                                                                             |
+| `db/migrations/`          | ਸੰਸਕਰਣ ਵਾਲੀਆਂ SQL ਫਾਈਲਾਂ (ਆਦਰਸ਼ਕ, ਟ੍ਰਾਂਜੈਕਸ਼ਨਲ)। `073_memory_vec.sql` `memory_vec_meta` + `needs_reindex` ਕਾਲਮ (ਯੋਜਨਾ 21) ਜੋੜਦਾ ਹੈ।                                      |
+| `db/playgroundPresets.ts` | ਪਲੇਗ੍ਰਾਉਂਡ ਸਟੂਡੀਓ ਪ੍ਰੀਸੈਟਸ ਲਈ CRUD ਮੋਡੀਊਲ (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
+| `db/memoryVec.ts`         | `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, ਆਦਿ ਲਈ CRUD (ਯੋਜਨਾ 21)               |
+| `db/<domain>.ts`          | ਪ੍ਰਤੀ ਡੋਮੇਨ ਇੱਕ ਮੋਡੀਊਲ: ਪ੍ਰਦਾਤਾ, ਕੰਬੋਜ਼, apiKeys, ਉਪਭੋਗਤਾ, ਸੈਸ਼ਨ, ਵਰਤੋਂ, ਆਡਿਟ ਲੌਗ, ਵੈਬਹੁੱਕ, ਹੁਨਰ, ਮੈਮੋਰੀ_ਐਂਟਰੀਆਂ, ਕਲਾਉਡ_ਏਜੈਂਟ_ਟਾਸਕ, ਈਵਲਸ* \* , ਤਰਕ_ਕੈਸ਼, ਆਦਿ।            |
 
 ### `src/domain/`
 
-| ਮੋਡੀਊਲ                 | ਉਦੇਸ਼                                               |
-| ---------------------- | --------------------------------------------------- |
-| `policy.ts`            | ਨੀਤੀ ਇੰਜਣ                                           |
-| `fallbackPolicy.ts`    | ਫਾਲਬੈਕ ਫ਼ੈਸਲਾ ਟ੍ਰੀ                                  |
-| `costRules.ts`         | ਲਾਗਤ ਗਣਨਾ ਨਿਯਮ                                      |
-| `lockoutPolicy.ts`     | ਮਾਡਲ/ਕਨੈਕਸ਼ਨ ਲੌਕਆਉਟ ਨੀਤੀ                            |
-| `tagRouter.ts`         | ਟੈਗ-ਅਧਾਰਿਤ ਰਾਊਟਿੰਗ                                  |
-| `comboResolver.ts`     | ਕੌਂਬੋ ਰੈਜ਼ੋਲਿਊਸ਼ਨ (ਕੌਂਬੋ ਇੰਜਣ ਦੁਆਰਾ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ) |
-| `modelAvailability.ts` | ਪ੍ਰਤੀ-ਮਾਡਲ ਉਪਲਬਧਤਾ ਜਾਂਚ                             |
-| `assessment/`          | ਮਾਡਲ ਮੁਲਾਂਕਣ (RFC-AUTO-ASSESSMENT ਦਾ ਪੜਾਅ 1)        |
+| ਮੋਡੀਊਲ                 | ਮਕਸਦ                                          |
+| ---------------------- | --------------------------------------------- |
+| `policy.ts`            | ਨੀਤੀ ਇੰਜਣ                                     |
+| `fallbackPolicy.ts`    | ਫਾਲਬੈਕ ਫੈਸਲੇ ਦਾ ਰੁੱਖ                          |
+| `costRules.ts`         | ਲਾਗਤ ਗਣਨਾ ਦੇ ਨਿਯਮ                             |
+| `lockoutPolicy.ts`     | Model/connection ਤਾਲਾਬੰਦੀ ਨੀਤੀ                |
+| `tagRouter.ts`         | ਟੈਗ-ਅਧਾਰਿਤ ਰੂਟਿੰਗ                             |
+| `comboResolver.ts`     | ਕੰਬੋ ਰੈਜ਼ੋਲਿਊਸ਼ਨ (ਕੋਂਬੋ ਇੰਜਣ ਦੁਆਰਾ ਵਰਤਿਆ ਗਿਆ) |
+| `modelAvailability.ts` | ਪ੍ਰਤੀ-ਮਾਡਲ ਉਪਲਬਧਤਾ ਜਾਂਚ                       |
+| `assessment/`          | ਮਾਡਲ ਮੁਲਾਂਕਣ (RFC-ਆਟੋ-ਮੁਲਾਂਕਣ ਦਾ ਪੜਾਅ 1)      |
 
 ### `src/server/`
 
-| ਮੋਡੀਊਲ   | ਉਦੇਸ਼                                                                                             |
-| -------- | ------------------------------------------------------------------------------------------------- |
-| `authz/` | ਅਧਿਕਾਰਕਰਨ ਪਾਈਪਲਾਈਨ: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` ਵੇਖੋ |
-| `cors/`  | CORS ਸੰਰਚਨਾ                                                                                       |
-| `auth/`  | ਸੈਸ਼ਨ ਮਿਡਲਵੇਅਰ                                                                                    |
+| ਮੋਡੀਊਲ   | ਮਕਸਦ                                                                                               |
+| -------- | -------------------------------------------------------------------------------------------------- |
+| `authz/` | ਪ੍ਰਮਾਣਿਕਤਾ ਪਾਈਪਲਾਈਨ: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` ਦੇਖੋ |
+| `cors/`  | CORS ਸੰਰਚਨਾ                                                                                        |
+| `auth/`  | ਸੈਸ਼ਨ ਮਿਡਲਵੇਅਰ                                                                                     |
 
 ### `src/shared/`
 
-| ਮੋਡੀਊਲ                           | ਉਦੇਸ਼                                                               |
-| -------------------------------- | ------------------------------------------------------------------- |
-| `constants/providers.ts`         | Zod ਪ੍ਰਮਾਣਿਕਤਾ ਵਾਲੇ **355 ਪ੍ਰਦਾਤਾ** (ਸੱਚਾਈ ਦਾ ਸਰੋਤ)                 |
-| `constants/cliTools.ts`          | ਬਾਹਰੀ CLI ਟੂਲ ਰਜਿਸਟਰੀ                                               |
-| `constants/routingStrategies.ts` | ਤਰਜੀਹਾਂ ਵਾਲੀਆਂ **19 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ**                               |
-| `constants/publicApiRoutes.ts`   | ਉਹ ਰੂਟ ਜਿਨ੍ਹਾਂ ਲਈ Bearer (ਮੈਨੇਜਮੈਂਟ ਦੀ ਬਜਾਏ) ਪ੍ਰਮਾਣੀਕਰਨ ਲੋੜੀਂਦਾ ਹੈ  |
-| `constants/upstreamHeaders.ts`   | ਅੱਪਸਟ੍ਰੀਮ ਬੇਨਤੀਆਂ ਲਈ ਹੈਡਰ ਅਸਵੀਕਾਰ-ਸੂਚੀ                              |
-| `validation/schemas.ts`          | ~80 Zod ਸਕੀਮਾਵਾਂ (API ਕਾਂਟ੍ਰੈਕਟਾਂ ਲਈ ਸੱਚਾਈ ਦਾ ਇਕਮਾਤਰ ਸਰੋਤ)          |
-| `validation/helpers.ts`          | Zod ਪ੍ਰਮਾਣਿਕਤਾ ਸਹਾਇਕ (`validateBody`, ਆਦਿ)                          |
-| `types/`                         | ਸਾਂਝੀਆਂ TS ਕਿਸਮਾਂ                                                   |
-| `contracts/`                     | ਜਨਤਕ API ਕਾਂਟ੍ਰੈਕਟ (`package.json` ਵਿੱਚ `files:` ਦੁਆਰਾ ਵਰਤੇ ਜਾਂਦੇ)  |
-| `utils/circuitBreaker.ts`        | ਪ੍ਰਦਾਤਾ ਸਰਕਿਟ ਬ੍ਰੇਕਰ (`docs/architecture/RESILIENCE_GUIDE.md` ਵੇਖੋ) |
-| `utils/apiAuth.ts`               | API ਕੁੰਜੀ ਪ੍ਰਮਾਣਿਕਤਾ, ਸਕੋਪ ਜਾਂਚ                                     |
-| `utils/fetchTimeout.ts`          | ਅੱਪਸਟ੍ਰੀਮ fetch ਲਈ ਟਾਈਮਆਉਟ/ਅਬੋਰਟ ਰੈਪਰ                               |
-| `utils/releaseNotes.ts`          | ਬੰਦ ਕੀਤੇ v2/ਪੁਰਾਤਨ ਐਲਾਨਾਂ ਦਾ ਪਾਰਸਰ, ਸਥਾਨਕੀਕਰਨ ਅਤੇ ID ਖਾਰਜ ਕਰਨਾ      |
+| ਮੋਡੀਊਲ                           | ਮਕਸਦ                                                                                             |
+| -------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `components/`                    | ਡੈਸ਼ਬੋਰਡ ਕੰਪੋਨੈਂਟ API: `packages/ui-kit` ਉੱਤੇ ਅਡਾਪਟਰ — `docs/architecture/DESIGN_SYSTEM.md` ਵੇਖੋ |
+| `constants/iconMap.ts`           | `ICON_MAP`: ਸਕ੍ਰੀਨਾਂ ਦੁਆਰਾ ਵਰਤੇ ਜਾਣ ਵਾਲੇ ਆਈਕਨ ਨਾਮ → ਲੂਸਾਈਡ ਕੰਪੋਨੈਂਟਸ (`<Icon>`)                  |
+| `constants/providers.ts`         | **377 ਪ੍ਰਦਾਤਾ** Zod ਪ੍ਰਮਾਣਿਕਤਾ ਦੇ ਨਾਲ (ਸੱਚ ਦਾ ਸਰੋਤ)                                              |
+| `constants/cliTools.ts`          | ਬਾਹਰੀ CLI ਟੂਲ ਰਜਿਸਟਰੀ                                                                            |
+| `constants/routingStrategies.ts` | **20 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ** ਤਰਜੀਹਾਂ ਦੇ ਨਾਲ                                                            |
+| `constants/publicApiRoutes.ts`   | ਰੂਟ ਜਿਨ੍ਹਾਂ ਲਈ ਬੇਅਰਰ (ਬਨਾਮ ਪ੍ਰਬੰਧਨ) ਪ੍ਰਮਾਣਿਕਤਾ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ                                   |
+| `constants/upstreamHeaders.ts`   | ਅੱਪਸਟ੍ਰੀਮ ਬੇਨਤੀਆਂ ਲਈ ਸਿਰਲੇਖ ਅਸਵੀਕਾਰ                                                              |
+| `validation/schemas.ts`          | ~ 80 Zod ਸਕੀਮਾ ( API ਕੰਟਰੈਕਟਸ ਲਈ ਸੱਚਾਈ ਦਾ ਸਿੰਗਲ ਸਰੋਤ)                                            |
+| `validation/helpers.ts`          | Zod ਪ੍ਰਮਾਣਿਕਤਾ ਸਹਾਇਕ (`validateBody`, ਆਦਿ)                                                       |
+| `types/`                         | ਸਾਂਝੀਆਂ TS ਕਿਸਮਾਂ                                                                                |
+| `contracts/`                     | ਜਨਤਕ API ਕੰਟਰੈਕਟ ( `package.json` ਵਿੱਚ `files:` ਦੁਆਰਾ ਖਪਤ)                                       |
+| `utils/circuitBreaker.ts`        | ਪ੍ਰੋਵਾਈਡਰ ਸਰਕਟ ਬ੍ਰੇਕਰ ( `docs/architecture/RESILIENCE_GUIDE.md` ਦੇਖੋ)                            |
+| `utils/apiAuth.ts`               | API ਕੁੰਜੀ ਪ੍ਰਮਾਣਿਕਤਾ, ਸਕੋਪ ਚੈਕਿੰਗ                                                                |
+| `utils/fetchTimeout.ts`          | ਅੱਪਸਟ੍ਰੀਮ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ Timeout/abort ਰੈਪਰ                                                       |
+| `utils/releaseNotes.ts`          | ਬੰਦ v2/legacy ਘੋਸ਼ਣਾ ਪਾਰਸਰ, ਸਥਾਨੀਕਰਨ ਅਤੇ ID ਬਰਖਾਸਤਗੀ                                             |
 
 ---
 
 ## `open-sse/` — ਸਟ੍ਰੀਮਿੰਗ ਇੰਜਣ ਵਰਕਸਪੇਸ
 
-ਵੱਖਰਾ npm ਵਰਕਸਪੇਸ (`@omniroute/open-sse`)। ਬੇਨਤੀ ਪ੍ਰੋਸੈਸਿੰਗ + ਪ੍ਰਦਾਤਾ ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਸੰਭਾਲਦਾ ਹੈ।
+ਵੱਖਰਾ npm ਵਰਕਸਪੇਸ (`@omniroute/open-sse`)। ਬੇਨਤੀ ਪ੍ਰੋਸੈਸਿੰਗ + ਪ੍ਰੋਵਾਈਡਰ ਐਗਜ਼ਿਕਿਊਸ਼ਨ ਨੂੰ ਸੰਭਾਲਦਾ ਹੈ।
 
 ```
 open-sse/
 ├── handlers/            # 16 ਫ਼ਾਈਲਾਂ (12 ਹੈਂਡਲਰ + 4 ਸਹਾਇਕ): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, ਆਦਿ।
-├── executors/           # 67 ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਐਗਜ਼ੀਕਿਊਟਰ (BaseExecutor ਨੂੰ ਵਿਸਤਾਰਦੇ ਹਨ)
+├── executors/           # 150 ਐਗਜ਼ਿਕਿਊਟਰ ਮੋਡੀਊਲ (BaseExecutor ਨੂੰ ਵਿਸਤਾਰ ਕਰਨ ਵਾਲੀਆਂ ਕਲਾਸਾਂ + ਹਰੇਕ ਪ੍ਰੋਵਾਈਡਰ ਲਈ ਸਹਾਇਕ)
 ├── translator/          # ਫਾਰਮੈਟ ਕਨਵਰਟਰ (9 ਬੇਨਤੀ, 9 ਜਵਾਬ, 9 ਸਹਾਇਕ)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ ਸੇਵਾ ਮੋਡੀਊਲ (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, ਆਦਿ।)
+├── services/            # ~80+ ਸਰਵਿਸ ਮੋਡੀਊਲ (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, ਆਦਿ)
 ├── mcp-server/          # MCP ਸਰਵਰ (110 ਟੂਲ, 3 ਟ੍ਰਾਂਸਪੋਰਟ, 33 ਸਕੋਪ)
-├── config/              # ਪ੍ਰਦਾਤਾ/ਮਾਡਲ ਰਜਿਸਟਰੀਆਂ, ਹੈਡਰ ਸੰਰਚਨਾ, ਮਾਡਲ ਉਪਨਾਮ
+├── config/              # ਪ੍ਰੋਵਾਈਡਰ/ਮਾਡਲ ਰਜਿਸਟਰੀਆਂ, ਹੈਡਰ ਸੰਰਚਨਾ, ਮਾਡਲ ਉਪਨਾਮ
 ├── utils/               # TLS ਕਲਾਇੰਟ, ਪ੍ਰੌਕਸੀ fetch/dispatcher, ਨੈੱਟਵਰਕ ਸਹਾਇਕ
 ├── index.ts             # ਵਰਕਸਪੇਸ ਐਂਟਰੀ
 ├── package.json         # ਵਰਕਸਪੇਸ ਮੈਨੀਫੈਸਟ
@@ -277,190 +280,203 @@ open-sse/
 
 ### `open-sse/mcp-server/`
 
-| ਪਾਥ                         | ਉਦੇਸ਼                                                                         |
-| --------------------------- | ----------------------------------------------------------------------------- |
-| `server.ts`                 | MCP ਸਰਵਰ ਜੀਵਨ-ਚੱਕਰ (stdio + HTTP ਟ੍ਰਾਂਸਪੋਰਟ)                                  |
-| `httpTransport.ts`          | HTTP Streamable + SSE ਟ੍ਰਾਂਸਪੋਰਟ (`/api/mcp/sse`, `/api/mcp/stream`)          |
-| `audit.ts`                  | `mcp_tool_audit` ਟੇਬਲ ਵਿੱਚ ਆਡਿਟ ਲੌਗਿੰਗ                                        |
-| `scopeEnforcement.ts`       | ਪ੍ਰਤੀ-ਟੂਲ ਸਕੋਪ ਪ੍ਰਮਾਣੀਕਰਨ                                                     |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` ਲਈ ਸਿਹਤ ਹਾਰਟਬੀਟ                         |
-| `descriptionCompressor.ts`  | ਸੰਦਰਭ ਬਚਾਉਣ ਲਈ ਟੂਲ ਵਰਣਨ ਮੈਟਾਡਾਟਾ ਸੰਕੁਚਿਤ ਕਰਦਾ ਹੈ                              |
-| `schemas/tools.ts`          | 36 ਬੁਨਿਆਦੀ ਟੂਲ ਪਰਿਭਾਸ਼ਾਵਾਂ + ਸਕੋਪ                                             |
-| `tools/advancedTools.ts`    | ਉੱਨਤ ਟੂਲ ਲਾਗੂਕਰਨ                                                              |
-| `tools/memoryTools.ts`      | 3 ਮੈਮੋਰੀ ਟੂਲ (ਖੋਜ/ਜੋੜਨਾ/ਸਾਫ਼ ਕਰਨਾ)                                            |
-| `tools/skillTools.ts`       | 4 ਹੁਨਰ ਟੂਲ (ਸੂਚੀ/ਸਮਰੱਥ/ਚਲਾਉਣਾ/ਐਗਜ਼ੀਕਿਊਸ਼ਨ)                                    |
-| `tools/compressionTools.ts` | 5 ਸੰਕੁਚਨ ਟੂਲ                                                                  |
-| `README.md`                 | ਅੰਦਰੂਨੀ MCP ਸਰਵਰ README (`docs/frameworks/MCP-SERVER.md` ਤੋਂ ਕ੍ਰਾਸ-ਲਿੰਕ ਕੀਤਾ) |
+| ਪਾਥ                         | ਉਦੇਸ਼                                                                             |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `server.ts`                 | MCP ਸਰਵਰ ਜੀਵਨ-ਚੱਕਰ (stdio + HTTP ਟ੍ਰਾਂਸਪੋਰਟ)                                      |
+| `httpTransport.ts`          | HTTP Streamable + SSE ਟ੍ਰਾਂਸਪੋਰਟ (`/api/mcp/sse`, `/api/mcp/stream`)              |
+| `audit.ts`                  | `mcp_tool_audit` ਟੇਬਲ ਵਿੱਚ ਆਡਿਟ ਲੌਗਿੰਗ                                            |
+| `scopeEnforcement.ts`       | ਹਰੇਕ ਟੂਲ ਲਈ ਸਕੋਪ ਪ੍ਰਮਾਣਿਕਤਾ                                                       |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` ਵਿੱਚ ਸਿਹਤ ਹਾਰਟਬੀਟ                           |
+| `descriptionCompressor.ts`  | ਸੰਦਰਭ ਬਚਾਉਣ ਲਈ ਟੂਲ ਵੇਰਵਾ ਮੈਟਾਡਾਟਾ ਨੂੰ ਸੰਕੁਚਿਤ ਕਰਦਾ ਹੈ                             |
+| `schemas/tools.ts`          | 36 ਮੂਲ ਟੂਲ ਪਰਿਭਾਸ਼ਾਵਾਂ + ਸਕੋਪ                                                     |
+| `tools/advancedTools.ts`    | ਉੱਨਤ ਟੂਲ ਲਾਗੂਕਰਨ                                                                  |
+| `tools/memoryTools.ts`      | 3 ਮੈਮੋਰੀ ਟੂਲ (ਖੋਜ/ਜੋੜਨਾ/ਸਾਫ਼ ਕਰਨਾ)                                                |
+| `tools/skillTools.ts`       | 4 ਹੁਨਰ ਟੂਲ (ਸੂਚੀ/ਸਮਰੱਥ ਕਰਨਾ/ਚਲਾਉਣਾ/ਐਗਜ਼ਿਕਿਊਸ਼ਨ)                                   |
+| `tools/compressionTools.ts` | 5 ਸੰਕੁਚਨ ਟੂਲ                                                                      |
+| `README.md`                 | ਅੰਦਰੂਨੀ MCP ਸਰਵਰ README (`docs/frameworks/MCP-SERVER.md` ਤੋਂ ਕਰਾਸ-ਲਿੰਕ ਕੀਤਾ ਹੋਇਆ) |
+
+---
+
+## `packages/` — ਵਰਕਸਪੇਸ
+
+| ਪਾਥ                      | ਉਦੇਸ਼                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui-kit/`       | `@omniroute/ui-kit` — Keak CI UI Kit ਦਾ ਵੈਂਡਰ ਕੀਤਾ ਸਨੈਪਸ਼ਾਟ (`private`, `UNLICENSED`), ਜਿਸਨੂੰ ਸਰੋਤ ਵਜੋਂ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ (ਕੋਈ ਬਿਲਡ ਨਹੀਂ)। `UPSTREAM.md` ਅੱਪਸਟ੍ਰੀਮ ਕਮਿਟ ਨੂੰ ਪਿੰਨ ਕਰਦਾ ਹੈ ਅਤੇ ਲਾਇਸੈਂਸ ਅਧਿਕਾਰ ਦਰਜ ਕਰਦਾ ਹੈ; `PATCHES.md` ਸਥਾਨਕ ਪੈਚਾਂ ਦੀ ਸੂਚੀ ਦਿੰਦਾ ਹੈ (ਕੋਈ ਨਹੀਂ); `src/` ਨੂੰ ਸਿਰਫ਼ `scripts/dev/sync-ui-kit.sh` ਦੁਆਰਾ ਸਿੰਕ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ `npm run check:ui-kit-snapshot` ਦੁਆਰਾ ਸੁਰੱਖਿਅਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। `docs/architecture/DESIGN_SYSTEM.md` ਵੇਖੋ |
+| `packages/browser-pool/` | `@omniroute/browser-pool` — ਵਿਕਲਪਿਕ ਬ੍ਰਾਊਜ਼ਰ ਪੂਲ ਸਰਵਿਸ (CloakBrowser ਅਤੇ Playwright-ਸਮਰਥਿਤ ਚੈਟ)                                                                                                                                                                                                                                                                                                                                                                |
 
 ---
 
 ## `electron/` — ਡੈਸਕਟਾਪ ਰੈਪਰ
 
-| ਫ਼ਾਈਲ            | ਉਦੇਸ਼                                                                             |
-| ---------------- | --------------------------------------------------------------------------------- |
-| `main.js`        | Electron ਮੁੱਖ ਪ੍ਰਕਿਰਿਆ (BrowserWindow, ਐਮਬੈਡ ਕੀਤਾ Next.js ਸਰਵਰ, ਟ੍ਰੇ, ਆਟੋ-ਅੱਪਡੇਟ) |
-| `preload.js`     | IPC ਬ੍ਰਿਜ (contextBridge → `window.omniroute`)                                    |
-| `package.json`   | electron-builder ਸੰਰਚਨਾ + Electron 41 + electron-builder 26.10 ਨਿਰਭਰਤਾਵਾਂ         |
-| `assets/`        | ਐਪ ਆਈਕਨ (Windows .ico, macOS .icns, Linux .png)                                   |
-| `dist-electron/` | ਬਿਲਡ ਆਉਟਪੁੱਟ (gitignored)                                                         |
-| `types.d.ts`     | ਰੈਂਡਰਰ ਬ੍ਰਿਜ ਲਈ ਕਿਸਮ ਘੋਸ਼ਣਾਵਾਂ                                                    |
-| `README.md`      | ਅੰਦਰੂਨੀ Electron README (`docs/guides/ELECTRON_GUIDE.md` ਵੀ ਵੇਖੋ)                 |
+| ਫ਼ਾਈਲ            | ਉਦੇਸ਼                                                                                  |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| `main.js`        | Electron ਮੁੱਖ ਪ੍ਰਕਿਰਿਆ (BrowserWindow, ਐਂਬੈਡ ਕੀਤਾ Next.js ਸਰਵਰ, ਸਿਸਟਮ ਟਰੇ, ਆਟੋ-ਅੱਪਡੇਟ) |
+| `preload.js`     | IPC ਬ੍ਰਿਜ (contextBridge → `window.omniroute`)                                         |
+| `package.json`   | electron-builder ਸੰਰਚਨਾ + Electron 41 + electron-builder 26.10 ਨਿਰਭਰਤਾਵਾਂ              |
+| `assets/`        | ਐਪ ਆਈਕਨ (Windows .ico, macOS .icns, Linux .png)                                        |
+| `dist-electron/` | ਬਿਲਡ ਆਉਟਪੁੱਟ (gitignored)                                                              |
+| `types.d.ts`     | ਰੈਂਡਰਰ ਬ੍ਰਿਜ ਲਈ ਟਾਈਪ ਘੋਸ਼ਣਾਵਾਂ                                                         |
+| `README.md`      | ਅੰਦਰੂਨੀ Electron README (`docs/guides/ELECTRON_GUIDE.md` ਵੀ ਵੇਖੋ)                      |
 
 ---
 
 ## `bin/` — CLI
 
-| ਫ਼ਾਈਲ                                                                                                       | ਉਦੇਸ਼                                                                                                                     |
-| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute.mjs`                                                                                             | ਮੁੱਖ CLI ਐਂਟਰੀ — `omniroute serve`, `omniroute setup`, `omniroute doctor`, `omniroute providers`, `omniroute combos`, ਆਦਿ |
-| `reset-password.mjs`                                                                                        | ਵੱਖਰਾ ਪਾਸਵਰਡ ਰੀਸੈੱਟ CLI                                                                                                   |
-| `cli/commands/setup.mjs`                                                                                    | ਇੰਟਰਐਕਟਿਵ + ਗੈਰ-ਇੰਟਰਐਕਟਿਵ ਸੈੱਟਅੱਪ ਵਿਜ਼ਾਰਡ                                                                                 |
-| `cli/commands/doctor.mjs`                                                                                   | ਸਿਸਟਮ ਦੀ ਸਿਹਤ ਸੰਬੰਧੀ ਜਾਂਚ (8+ ਜਾਂਚਾਂ)                                                                                     |
-| `cli/commands/providers.mjs`                                                                                | ਪ੍ਰਦਾਤਾ ਸੂਚੀ/ਟੈਸਟ/ਪ੍ਰਮਾਣੀਕਰਨ                                                                                              |
-| `cli/{args,data-dir,encryption,io,provider-catalog,provider-store,provider-test,settings-store,sqlite}.mjs` | CLI ਸਹਾਇਕ ਮੋਡੀਊਲ                                                                                                          |
-| `cli/tray/tray.ts`                                                                                          | ਸਿਸਟਮ ਟਰੇ ਏਕੀਕਰਨ (ਕਰਾਸ-ਪਲੇਟਫਾਰਮ: Windows ਉੱਤੇ NotifyIcon, macOS/Linux ਉੱਤੇ systray2)                                      |
-| `cli/tray/tray.ps1`                                                                                         | PowerShell NotifyIcon ਬੈਕਐਂਡ (Windows, ਕੋਈ ਨਵੀਂ ਬਾਈਨਰੀ ਨਹੀਂ)                                                              |
-| `cli/tray/autostart.ts`                                                                                     | ਕਰਾਸ-ਪਲੇਟਫਾਰਮ ਆਟੋਸਟਾਰਟ (LaunchAgent / .desktop / ਰਜਿਸਟਰੀ)                                                                 |
-| `cli/runtime/sqliteRuntime.mjs`                                                                             | 5-ਪੜਾਵੀ SQLite ਡਰਾਈਵਰ ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਲੜੀ (ਬੰਡਲ ਕੀਤਾ → ਰਨਟਾਈਮ → ਲੇਜ਼ੀ-ਇੰਸਟਾਲ → node:sqlite → sql.js)                          |
-| `cli/runtime/magicBytes.mjs`                                                                                | ਬਾਈਨਰੀ ਮੈਜਿਕ-ਬਾਈਟ ਪ੍ਰਮਾਣੀਕਰਨ (ELF / Mach-O / Mach-O fat / PE)                                                             |
-| `cli/runtime/index.mjs`                                                                                     | `warmUpRuntimes()` — postinstall / ਪਹਿਲੀ ਸ਼ੁਰੂਆਤ ਵੇਲੇ ਡਰਾਈਵਰਾਂ ਨੂੰ ਪਹਿਲਾਂ ਹੀ ਰਿਜ਼ਾਲਵ ਕਰਦਾ ਹੈ                              |
-| `nodeRuntimeSupport.mjs`                                                                                    | ਇੰਸਟਾਲੇਸ਼ਨ ਵੇਲੇ ਸਮਰਥਿਤ Node.js ਵਰਜਨ ਦੀ ਪੁਸ਼ਟੀ ਕਰਦਾ ਹੈ                                                                     |
+| ਫ਼ਾਈਲ                                                                                                       | ਉਦੇਸ਼                                                                                                                      |
+| ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute.mjs`                                                                                             | ਮੁੱਖ CLI ਐਂਟਰੀ — `omniroute serve`, `omniroute setup`, `omniroute doctor`, `omniroute providers`, `omniroute combos`, ਆਦਿ। |
+| `reset-password.mjs`                                                                                        | ਸਟੈਂਡਅਲੋਨ ਪਾਸਵਰਡ ਰੀਸੈੱਟ CLI                                                                                                |
+| `cli/commands/setup.mjs`                                                                                    | ਇੰਟਰਐਕਟਿਵ + ਗੈਰ-ਇੰਟਰਐਕਟਿਵ ਸੈੱਟਅੱਪ ਵਿਜ਼ਾਰਡ                                                                                  |
+| `cli/commands/doctor.mjs`                                                                                   | ਸਿਸਟਮ ਸਿਹਤ ਡਾਇਗਨੌਸਟਿਕਸ (8+ ਜਾਂਚਾਂ)                                                                                         |
+| `cli/commands/providers.mjs`                                                                                | ਪ੍ਰਦਾਤਾ ਸੂਚੀ/ਟੈਸਟ/ਪ੍ਰਮਾਣੀਕਰਨ                                                                                               |
+| `cli/{args,data-dir,encryption,io,provider-catalog,provider-store,provider-test,settings-store,sqlite}.mjs` | CLI ਸਹਾਇਕ ਮੋਡੀਊਲ                                                                                                           |
+| `cli/tray/tray.ts`                                                                                          | ਸਿਸਟਮ ਟਰੇ ਏਕੀਕਰਨ (ਕਰਾਸ-ਪਲੇਟਫਾਰਮ: Windows 'ਤੇ NotifyIcon, macOS/Linux 'ਤੇ systray2)                                         |
+| `cli/tray/tray.ps1`                                                                                         | PowerShell NotifyIcon ਬੈਕਐਂਡ (Windows, ਕੋਈ ਨਵੀਂ ਬਾਈਨਰੀ ਨਹੀਂ)                                                               |
+| `cli/tray/autostart.ts`                                                                                     | ਕਰਾਸ-ਪਲੇਟਫਾਰਮ ਆਟੋਸਟਾਰਟ (LaunchAgent / .desktop / ਰਜਿਸਟਰੀ)                                                                  |
+| `cli/runtime/sqliteRuntime.mjs`                                                                             | 5-ਪੜਾਅ SQLite ਡਰਾਈਵਰ ਰੈਜ਼ੋਲੂਸ਼ਨ ਲੜੀ (ਬੰਡਲ ਕੀਤਾ → ਰਨਟਾਈਮ → ਲੇਜ਼ੀ-ਇੰਸਟਾਲ → node:sqlite → sql.js)                             |
+| `cli/runtime/magicBytes.mjs`                                                                                | ਬਾਈਨਰੀ ਮੈਜਿਕ-ਬਾਈਟ ਪ੍ਰਮਾਣੀਕਰਨ (ELF / Mach-O / Mach-O fat / PE)                                                              |
+| `cli/runtime/index.mjs`                                                                                     | `warmUpRuntimes()` — postinstall / ਪਹਿਲੀ ਸ਼ੁਰੂਆਤ ਵੇਲੇ ਡਰਾਈਵਰਾਂ ਨੂੰ ਪਹਿਲਾਂ ਹੀ ਰੈਜ਼ੋਲਵ ਕਰਦਾ ਹੈ                               |
+| `nodeRuntimeSupport.mjs`                                                                                    | ਇੰਸਟਾਲੇਸ਼ਨ ਵੇਲੇ ਸਮਰਥਿਤ Node.js ਵਰਜਨ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕਰਨਾ                                                                      |
 
 ---
 
-## `skills/` — ਸਰਵਜਨਿਕ ਏਜੰਟ ਸਕਿੱਲਾਂ
+## `skills/` — ਸਰਵਜਨਿਕ ਏਜੰਟ ਹੁਨਰ
 
-| ਫ਼ਾਈਲ                        | ਉਦੇਸ਼                                                                         |
-| ---------------------------- | ----------------------------------------------------------------------------- |
-| `skills/omniroute*/SKILL.md` | ਬਾਹਰੀ AI ਏਜੰਟਾਂ ਲਈ 10 ਸਕਿੱਲ ਮੈਨੀਫੈਸਟ (Claude Desktop, ChatGPT, Cursor, Cline) |
+| ਫ਼ਾਈਲ                        | ਉਦੇਸ਼                                                                        |
+| ---------------------------- | ---------------------------------------------------------------------------- |
+| `skills/omniroute*/SKILL.md` | ਬਾਹਰੀ AI ਏਜੰਟਾਂ ਲਈ 10 ਹੁਨਰ ਮੈਨੀਫੈਸਟ (Claude Desktop, ChatGPT, Cursor, Cline) |
 
 ---
 
 ## `scripts/` — ਬਿਲਡ ਅਤੇ ਜਾਂਚ ਸਕ੍ਰਿਪਟਾਂ
 
-| ਸਕ੍ਰਿਪਟ                             | ਉਦੇਸ਼                                                                                                |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `run-next.mjs`                      | env ਹਾਈਡ੍ਰੇਸ਼ਨ ਸਮੇਤ ਡਿਵੈਲਪਮੈਂਟ/ਸਟਾਰਟ ਰਨਰ                                                             |
-| `build-next-isolated.mjs`           | ਸਟੈਂਡਅਲੋਨ ਬਿਲਡ (Next.js 16 ਸਟੈਂਡਅਲੋਨ)                                                                |
-| `prepublish.ts`                     | `npm pack` ਤੋਂ ਪਹਿਲਾਂ ਪੈਕੇਜ ਦੀ ਤਿਆਰੀ                                                                 |
-| `postinstall.mjs`                   | ਪਹਿਲੀ ਇੰਸਟਾਲੇਸ਼ਨ ਵੇਲੇ `.env.example` ਤੋਂ ਆਪਣੇ-ਆਪ `.env` ਬਣਾਓ                                         |
-| `sync-env.mjs`                      | `.env` ਕੁੰਜੀਆਂ ਨੂੰ `.env.example` ਨਾਲ ਮੁੜ ਸਿੰਕ ਕਰੋ                                                   |
-| `check-cycles.mjs`                  | ਸਰਕੁਲਰ ਡਿਪੈਂਡੈਂਸੀਆਂ ਦਾ ਪਤਾ ਲਗਾਓ                                                                      |
-| `check-route-validation.mjs`        | ਪ੍ਰਮਾਣਿਤ ਕਰੋ ਕਿ ਸਾਰੇ API ਰੂਟਾਂ ਵਿੱਚ Zod ਵੈਲੀਡੇਸ਼ਨ ਹੈ                                                 |
-| `check-t11-any-budget.mjs`          | ਹਰ ਫ਼ਾਈਲ ਲਈ ਸਪਸ਼ਟ `any` ਬਜਟ ਲਾਗੂ ਕਰੋ                                                                 |
-| `check-docs-sync.mjs`               | ਦਸਤਾਵੇਜ਼ ਵਰਜ਼ਨ ਸਿੰਕ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ (ਮੌਜੂਦਾ pre-commit)                                                |
-| **`check-env-doc-sync.mjs`**        | ਨਵਾਂ: ਕੋਡ, `.env.example`, ਅਤੇ `ENVIRONMENT.md` ਵਿਚਲੇ env ਵੇਰੀਏਬਲਾਂ ਦੀ ਆਪਸੀ ਜਾਂਚ ਕਰੋ                 |
-| **`check-docs-counts-sync.mjs`**    | ਨਵਾਂ: ਪੁਸ਼ਟੀ ਕਰੋ ਕਿ ਗਿਣਤੀਆਂ (ਐਗਜ਼ੀਕਿਊਟਰ, ਰਣਨੀਤੀਆਂ, OAuth, A2A ਸਕਿੱਲਾਂ) ਦਸਤਾਵੇਜ਼ਾਂ ਨਾਲ ਮੇਲ ਖਾਂਦੀਆਂ ਹਨ |
-| **`check-deprecated-versions.mjs`** | ਨਵਾਂ: ਦਸਤਾਵੇਜ਼ਾਂ ਵਿੱਚ ਪੁਰਾਣੇ ਵਰਜ਼ਨਾਂ/ਮਿਤੀਆਂ ਨੂੰ ਚਿੰਨ੍ਹਿਤ ਕਰੋ                                         |
-| `check-supported-node-runtime.ts`   | ਪੁਸ਼ਟੀ ਕਰੋ ਕਿ ਮੌਜੂਦਾ Node ਵਰਜ਼ਨ ਸਮਰਥਿਤ ਹੈ                                                            |
-| `check-pr-test-policy.mjs`          | ਪ੍ਰੋਡਕਸ਼ਨ ਕੋਡ ਤਬਦੀਲੀਆਂ ਉੱਤੇ "ਟੈਸਟ ਲਾਜ਼ਮੀ ਹਨ" ਨਿਯਮ ਲਾਗੂ ਕਰੋ                                           |
-| **`gen-provider-reference.ts`**     | ਨਵਾਂ: ਕੈਟਾਲਾਗ ਤੋਂ `docs/reference/PROVIDER_REFERENCE.md` ਆਪਣੇ-ਆਪ ਤਿਆਰ ਕਰੋ                            |
-| `i18n/generate-multilang.mjs`       | Google Translate ਰਾਹੀਂ UI ਸਟ੍ਰਿੰਗਾਂ ਅਤੇ ਦਸਤਾਵੇਜ਼ਾਂ ਦਾ ਅਨੁਵਾਦ ਕਰੋ                                     |
-| `i18n_autotranslate.py`             | LLM-ਆਧਾਰਿਤ ਦਸਤਾਵੇਜ਼ ਅਨੁਵਾਦ ਪਾਈਪਲਾਈਨ                                                                  |
-| `validate_translation.py`           | ਹਰ ਲੋਕੇਲ ਲਈ ਅਨੁਵਾਦ ਦੀ ਪੁਸ਼ਟੀ                                                                         |
-| `check_translations.py`             | ਕੋਡ-ਪੱਧਰੀ i18n ਕੁੰਜੀ ਜਾਂਚ                                                                            |
-| `run-playwright-tests.mjs`          | Playwright E2E ਰਨਰ                                                                                   |
-| `run-protocol-clients-tests.mjs`    | MCP/A2A E2E ਰਨਰ                                                                                      |
-| `run-ecosystem-tests.mjs`           | ਈਕੋਸਿਸਟਮ (ਪ੍ਰੋਵਾਈਡਰ ਇੰਟੀਗ੍ਰੇਸ਼ਨ) ਟੈਸਟ                                                                |
-| `test-report-summary.mjs`           | ਕਵਰੇਜ ਸੰਖੇਪ ਮਾਰਕਡਾਊਨ ਤਿਆਰ ਕਰੋ                                                                        |
-| `smoke-electron-packaged.mjs`       | ਪੈਕੇਜ ਕੀਤੇ Electron ਬਿਲਡ ਦਾ ਸਮੋਕ ਟੈਸਟ ਕਰੋ                                                            |
-| `native-binary-compat.mjs`          | ਪੁਸ਼ਟੀ ਕਰੋ ਕਿ ਨੇਟਿਵ ਡਿਪੈਂਡੈਂਸੀਆਂ (`better-sqlite3`) Electron ਦੇ Node ਨਾਲ ਮੇਲ ਖਾਂਦੀਆਂ ਹਨ              |
-| `validate-pack-artifact.ts`         | npm pack ਆਉਟਪੁੱਟ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ                                                                       |
-| `responses-ws-proxy.mjs`            | Codex Responses API ਲਈ WebSocket ਬ੍ਰਿਜ                                                               |
-| `v1-ws-bridge.mjs`                  | `/api/v1/ws` ਐਂਡਪੌਇੰਟ ਲਈ WebSocket ਬ੍ਰਿਜ                                                             |
-| `standalone-server-ws.mjs`          | ਸਟੈਂਡਅਲੋਨ WS ਸਰਵਰ ਰਨਰ                                                                                |
-| `system-info.mjs`                   | ਸਹਾਇਤਾ ਲਈ ਸਿਸਟਮ/ਰਨਟਾਈਮ ਜਾਣਕਾਰੀ ਪ੍ਰਿੰਟ ਕਰੋ                                                            |
-| `healthcheck.mjs`                   | ਇੱਕ-ਵਾਰ ਦੀ ਸਿਹਤ ਜਾਂਚ (Docker HEALTHCHECK ਦੁਆਰਾ ਵਰਤੀ ਜਾਂਦੀ ਹੈ)                                        |
-| `uninstall.mjs`                     | ਸਾਫ਼ ਅਨਇੰਸਟਾਲ ਸਕ੍ਰਿਪਟ                                                                                |
+| ਸਕ੍ਰਿਪਟ                             | ਉਦੇਸ਼                                                                                              |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `run-next.mjs`                      | env ਹਾਈਡ੍ਰੇਸ਼ਨ ਨਾਲ ਡਿਵੈਲਪਮੈਂਟ/ਸਟਾਰਟ ਰਨਰ                                                            |
+| `build-next-isolated.mjs`           | ਸਟੈਂਡਅਲੋਨ ਬਿਲਡ (Next.js 16 ਸਟੈਂਡਅਲੋਨ)                                                              |
+| `prepublish.ts`                     | `npm pack` ਤੋਂ ਪਹਿਲਾਂ ਪੈਕੇਜ ਦੀ ਤਿਆਰੀ                                                               |
+| `postinstall.mjs`                   | ਪਹਿਲੀ ਇੰਸਟਾਲੇਸ਼ਨ ਵੇਲੇ `.env.example` ਤੋਂ `.env` ਆਪਣੇ-ਆਪ ਬਣਾਉਣਾ                                     |
+| `sync-env.mjs`                      | `.env` ਕੁੰਜੀਆਂ ਨੂੰ `.env.example` ਨਾਲ ਮੁੜ ਸਿੰਕ ਕਰਨਾ                                                |
+| `check-cycles.mjs`                  | ਚੱਕਰੀ ਨਿਰਭਰਤਾਵਾਂ ਦਾ ਪਤਾ ਲਗਾਉਣਾ                                                                     |
+| `check-route-validation.mjs`        | ਪ੍ਰਮਾਣਿਤ ਕਰਨਾ ਕਿ ਸਾਰੇ API ਰੂਟਾਂ ਵਿੱਚ Zod ਵੈਲੀਡੇਸ਼ਨ ਹੈ                                              |
+| `check-t11-any-budget.mjs`          | ਹਰ ਫ਼ਾਈਲ ਲਈ ਸਪਸ਼ਟ `any` ਬਜਟ ਲਾਗੂ ਕਰਨਾ                                                              |
+| `check-docs-sync.mjs`               | ਦਸਤਾਵੇਜ਼ ਸੰਸਕਰਣ ਸਿੰਕ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨਾ (ਮੌਜੂਦਾ ਪ੍ਰੀ-ਕਮਿਟ)                                             |
+| **`check-env-doc-sync.mjs`**        | ਨਵਾਂ: ਕੋਡ, `.env.example`, ਅਤੇ `ENVIRONMENT.md` ਵਿਚਲੇ env ਵੇਰੀਏਬਲਾਂ ਦੀ ਆਪਸੀ ਜਾਂਚ                   |
+| **`check-docs-counts-sync.mjs`**    | ਨਵਾਂ: ਪੁਸ਼ਟੀ ਕਰਨਾ ਕਿ ਗਿਣਤੀਆਂ (ਐਗਜ਼ਿਕਿਊਟਰ, ਰਣਨੀਤੀਆਂ, OAuth, A2A ਹੁਨਰ) ਦਸਤਾਵੇਜ਼ਾਂ ਨਾਲ ਮੇਲ ਖਾਂਦੀਆਂ ਹਨ |
+| **`check-deprecated-versions.mjs`** | ਨਵਾਂ: ਦਸਤਾਵੇਜ਼ਾਂ ਵਿੱਚ ਪੁਰਾਣੇ ਸੰਸਕਰਣਾਂ/ਮਿਤੀਆਂ ਨੂੰ ਚਿੰਨ੍ਹਿਤ ਕਰਨਾ                                     |
+| `check-supported-node-runtime.ts`   | ਪ੍ਰਮਾਣਿਤ ਕਰਨਾ ਕਿ ਮੌਜੂਦਾ Node ਸੰਸਕਰਣ ਸਮਰਥਿਤ ਹੈ                                                      |
+| `check-pr-test-policy.mjs`          | ਪ੍ਰੋਡਕਸ਼ਨ ਕੋਡ ਤਬਦੀਲੀਆਂ ਉੱਤੇ "ਟੈਸਟ ਲਾਜ਼ਮੀ ਹਨ" ਨਿਯਮ ਲਾਗੂ ਕਰਨਾ                                        |
+| **`gen-provider-reference.ts`**     | ਨਵਾਂ: ਕੈਟਾਲਾਗ ਤੋਂ `docs/reference/PROVIDER_REFERENCE.md` ਆਪਣੇ-ਆਪ ਤਿਆਰ ਕਰਨਾ                         |
+| `i18n/generate-multilang.mjs`       | Google Translate ਰਾਹੀਂ UI ਸਤਰਾਂ ਅਤੇ ਦਸਤਾਵੇਜ਼ਾਂ ਦਾ ਅਨੁਵਾਦ ਕਰਨਾ                                      |
+| `i18n_autotranslate.py`             | LLM-ਆਧਾਰਿਤ ਦਸਤਾਵੇਜ਼ ਅਨੁਵਾਦ ਪਾਈਪਲਾਈਨ                                                                |
+| `validate_translation.py`           | ਹਰ ਲੋਕੇਲ ਲਈ ਅਨੁਵਾਦ ਵੈਲੀਡੇਸ਼ਨ                                                                       |
+| `check_translations.py`             | ਕੋਡ-ਪਾਸੇ ਦੀ i18n ਕੁੰਜੀ ਜਾਂਚ                                                                        |
+| `run-playwright-tests.mjs`          | Playwright E2E ਰਨਰ                                                                                 |
+| `run-protocol-clients-tests.mjs`    | MCP/A2A E2E ਰਨਰ                                                                                    |
+| `run-ecosystem-tests.mjs`           | ਇਕੋਸਿਸਟਮ (ਪ੍ਰਦਾਤਾ ਏਕੀਕਰਨ) ਟੈਸਟ                                                                     |
+| `test-report-summary.mjs`           | ਕਵਰੇਜ ਸੰਖੇਪ markdown ਤਿਆਰ ਕਰਨਾ                                                                     |
+| `smoke-electron-packaged.mjs`       | ਪੈਕੇਜ ਕੀਤੇ Electron ਬਿਲਡ ਦਾ ਸਮੋਕ ਟੈਸਟ ਕਰਨਾ                                                         |
+| `native-binary-compat.mjs`          | ਪ੍ਰਮਾਣਿਤ ਕਰਨਾ ਕਿ ਨੇਟਿਵ ਨਿਰਭਰਤਾਵਾਂ (`better-sqlite3`) Electron ਦੇ Node ਨਾਲ ਮੇਲ ਖਾਂਦੀਆਂ ਹਨ           |
+| `validate-pack-artifact.ts`         | npm pack ਆਉਟਪੁੱਟ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨਾ                                                                    |
+| `responses-ws-proxy.mjs`            | Codex Responses API ਲਈ WebSocket ਬ੍ਰਿਜ                                                             |
+| `v1-ws-bridge.mjs`                  | `/api/v1/ws` ਐਂਡਪੋਇੰਟ ਲਈ WebSocket ਬ੍ਰਿਜ                                                           |
+| `standalone-server-ws.mjs`          | ਸਟੈਂਡਅਲੋਨ WS ਸਰਵਰ ਰਨਰ                                                                              |
+| `system-info.mjs`                   | ਸਹਾਇਤਾ ਲਈ ਸਿਸਟਮ/ਰਨਟਾਈਮ ਜਾਣਕਾਰੀ ਪ੍ਰਿੰਟ ਕਰਨਾ                                                         |
+| `healthcheck.mjs`                   | ਇੱਕ-ਵਾਰ ਦੀ ਸਿਹਤ ਜਾਂਚ (Docker HEALTHCHECK ਵੱਲੋਂ ਵਰਤੀ ਜਾਂਦੀ)                                         |
+| `uninstall.mjs`                     | ਸਾਫ਼ ਅਨਇੰਸਟਾਲ ਸਕ੍ਰਿਪਟ                                                                              |
+| `dev/sync-ui-kit.sh`                | ਪਿੰਨ ਕੀਤੇ ਕਮਿਟ ਉੱਤੇ CI UI Kit ਦੇ `src/` ਨੂੰ `packages/ui-kit/src` ਵਿੱਚ ਕਾਪੀ ਕਰਨਾ                   |
+| `check/check-ui-kit-snapshot.mjs`   | ਪ੍ਰੀ-ਕਮਿਟ ਗੇਟ: `packages/ui-kit/src` ਪਿੰਨ ਕੀਤੇ ਅੱਪਸਟ੍ਰੀਮ ਕਮਿਟ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ                     |
+| `dev/gen-icon-map.mjs`              | `npm run gen:icon-map` — ਵਰਤੋਂ ਵਿੱਚ ਆਈਕਨ ਨਾਮ ਜਿਨ੍ਹਾਂ ਨੂੰ `ICON_MAP` ਮੈਪ ਨਹੀਂ ਕਰਦਾ                  |
+| `dev/codemod-material-icons.mjs`    | ਲਿਟਰਲ Material Symbols spans ਨੂੰ `<Icon>` ਵਜੋਂ ਮੁੜ ਲਿਖਣਾ (ਮਾਈਗ੍ਰੇਸ਼ਨ ਟੂਲਿੰਗ)                       |
 
 ---
 
-## `docs/` — ਜਨਤਕ ਦਸਤਾਵੇਜ਼ੀਕਰਨ (7 ਰੂਟ ਫ਼ਾਈਲਾਂ + 17 ਸਬਡਾਇਰੈਕਟਰੀਆਂ)
+## `docs/` — ਜਨਤਕ ਦਸਤਾਵੇਜ਼ (7 ਰੂਟ ਫਾਈਲਾਂ + 17 ਸਬਡਾਈਰਜ਼)
 
-### ਸਿਖਰਲੇ-ਪੱਧਰ ਦੀਆਂ ਗਾਈਡਾਂ
+### ਸਿਖਰ-ਪੱਧਰ ਦੀਆਂ ਗਾਈਡਾਂ
 
-| ਦਸਤਾਵੇਜ਼                    | ਉਦੇਸ਼                                                                                                     |
-| --------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | ਉੱਚ-ਪੱਧਰੀ ਆਰਕੀਟੈਕਚਰ, ਸਬਸਿਸਟਮ ਨਕਸ਼ਾ, ਡੈਸ਼ਬੋਰਡ ਸਤਹ                                                          |
-| `CODEBASE_DOCUMENTATION.md` | ਇੰਜੀਨੀਅਰਿੰਗ ਹਵਾਲਾ: ਡਾਇਰੈਕਟਰੀਆਂ, ਮੋਡੀਊਲ, ਰਵਾਇਤਾਂ                                                           |
-| `FEATURES.md`               | v3.8 ਦੀਆਂ ਮੁੱਖ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਸਮੇਤ ਫ਼ੀਚਰ ਮੈਟ੍ਰਿਕਸ                                                           |
-| `USER_GUIDE.md`             | ਅੰਤਿਮ-ਉਪਭੋਗਤਾ ਮੈਨੂਅਲ (ਸੈੱਟਅੱਪ, ਮਾਡਲ, ਕੌਂਬੋ, CLIs, ਆਡੀਓ ਆਦਿ)                                               |
-| `API_REFERENCE.md`          | ਪ੍ਰਮਾਣੀਕਰਨ ਮਾਡਲ ਸਮੇਤ API ਐਂਡਪੌਇੰਟ ਹਵਾਲਾ                                                                   |
-| `openapi.yaml`              | OpenAPI 3.0 ਵਿਸ਼ੇਸ਼ਤਾ (121 ਪਾਥ)                                                                           |
-| `SETUP_GUIDE.md`            | ਇੰਸਟਾਲੇਸ਼ਨ ਵਿਧੀਆਂ (npm, npx, Docker, Electron, Termux, ਸਰੋਤ)                                              |
-| `ENVIRONMENT.md`            | ਸਾਰੇ env vars (~800 ਦਸਤਾਵੇਜ਼ਬੱਧ, ~3,050 ਲਾਈਨਾਂ `.env.example`)                                            |
-| `TROUBLESHOOTING.md`        | ਆਮ ਗਲਤੀਆਂ + v3.8.0 ਦੀਆਂ ਜਾਣੀਆਂ-ਪਛਾਣੀਆਂ ਸਮੱਸਿਆਵਾਂ                                                          |
-| `RELEASE_CHECKLIST.md`      | ਪੂਰਾ ਰਿਲੀਜ਼ ਪ੍ਰਵਾਹ (skills, husky, conventional commits, deploy)                                          |
-| `COVERAGE_PLAN.md`          | ਕਵਰੇਜ ਟੀਚੇ ਅਤੇ ਮੌਜੂਦਾ ਸਥਿਤੀ                                                                               |
-| `FREE_TIERS.md`             | ਚੁਣੇ ਹੋਏ ਮੁਫ਼ਤ-ਟੀਅਰ ਪ੍ਰਦਾਤਾ (48+ ਮੁਫ਼ਤ + 11 OAuth)                                                        |
-| `CLI-TOOLS.md`              | ਬਾਹਰੀ CLI ਏਕੀਕਰਨ + ਅੰਦਰੂਨੀ OmniRoute CLI                                                                  |
-| `I18N.md`                   | i18n ਆਰਕੀਟੈਕਚਰ, ਭਾਸ਼ਾ ਸ਼ਾਮਲ ਕਰਨਾ, 42 ਲੋਕੇਲ                                                                |
-| `UNINSTALL.md`              | ਸਾਫ਼ ਅਣਇੰਸਟਾਲੇਸ਼ਨ ਦੇ ਪੜਾਅ                                                                                 |
-| `PROVIDER_REFERENCE.md`     | 355 ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ **ਆਟੋਮੈਟਿਕ ਤੌਰ 'ਤੇ ਤਿਆਰ ਕੀਤੀ** ਕੈਟਾਲਾਗ (ਮੁੜ ਤਿਆਰ ਕਰੋ: `npm run gen:provider-reference`) |
+| ਡਾਕ                         | ਮਕਸਦ                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | ਉੱਚ-ਪੱਧਰੀ ਆਰਕੀਟੈਕਚਰ, ਸਬ-ਸਿਸਟਮ ਦਾ ਨਕਸ਼ਾ, ਡੈਸ਼ਬੋਰਡ ਸਤਹ                                  |
+| `CODEBASE_DOCUMENTATION.md` | ਇੰਜੀਨੀਅਰਿੰਗ ਸੰਦਰਭ: ਡਾਇਰੈਕਟਰੀਆਂ, ਮੋਡੀਊਲ, ਸੰਮੇਲਨ                                        |
+| `FEATURES.md`               | v3.8 ਹਾਈਲਾਈਟਸ ਦੇ ਨਾਲ ਫੀਚਰ ਮੈਟਰਿਕਸ                                                     |
+| `USER_GUIDE.md`             | ਅੰਤਮ-ਉਪਭੋਗਤਾ ਮੈਨੂਅਲ (ਸੈਟਅੱਪ, ਮਾਡਲ, ਕੰਬੋਜ਼, CLIs, ਆਡੀਓ, ਆਦਿ)                           |
+| `API_REFERENCE.md`          | ਪ੍ਰਮਾਣਿਕਤਾ ਮਾਡਲ ਦੇ ਨਾਲ API ਅੰਤਮ ਬਿੰਦੂ ਸੰਦਰਭ                                           |
+| `openapi.yaml`              | OpenAPI 3.0 ਸਪੇਕ (121 ਮਾਰਗ)                                                           |
+| `SETUP_GUIDE.md`            | ਇੰਸਟਾਲ ਕਰਨ ਦੇ ਤਰੀਕੇ (npm, npx, Docker, Electron, Termux, ਸਰੋਤ)                        |
+| `ENVIRONMENT.md`            | ਸਾਰੇ env vars (~ 800 ਦਸਤਾਵੇਜ਼ੀ, ~ 3,050 ਲਾਈਨਾਂ `.env.example`)                        |
+| `TROUBLESHOOTING.md`        | ਆਮ ਗਲਤੀਆਂ + v3.8.0 ਜਾਣੇ-ਪਛਾਣੇ ਮੁੱਦੇ                                                   |
+| `RELEASE_CHECKLIST.md`      | ਪੂਰਾ ਰੀਲੀਜ਼ ਪ੍ਰਵਾਹ (ਹੁਨਰ, ਹਸਕੀ, ਰਵਾਇਤੀ ਕਮਿਟ, ਤੈਨਾਤ)                                   |
+| `COVERAGE_PLAN.md`          | ਕਵਰੇਜ ਟੀਚੇ ਅਤੇ ਮੌਜੂਦਾ ਸਥਿਤੀ                                                           |
+| `FREE_TIERS.md`             | ਕਿਉਰੇਟਿਡ ਫ੍ਰੀ-ਟੀਅਰ ਪ੍ਰਦਾਤਾ (48 + ਮੁਫ਼ਤ + 11 OAuth)                                    |
+| `CLI-TOOLS.md`              | ਬਾਹਰੀ CLI ਏਕੀਕਰਣ + ਅੰਦਰੂਨੀ OmniRoute CLI                                              |
+| `I18N.md`                   | i18n ਆਰਕੀਟੈਕਚਰ, ਇੱਕ ਭਾਸ਼ਾ ਜੋੜਨਾ, 67 ਲੋਕੇਲ                                             |
+| `UNINSTALL.md`              | ਅਣਇੰਸਟੌਲ ਕਦਮਾਂ ਨੂੰ ਸਾਫ਼ ਕਰੋ                                                           |
+| `PROVIDER_REFERENCE.md`     | **ਸਵੈ-ਤਿਆਰ ਕੀਤਾ** 377 ਪ੍ਰਦਾਤਾਵਾਂ ਦਾ ਕੈਟਾਲਾਗ (regen: `npm run gen:provider-reference`) |
 
-### ਸਬਸਿਸਟਮਾਂ ਦੀ ਡੂੰਘੀ ਜਾਣਕਾਰੀ
+### ਉਪ-ਸਿਸਟਮ ਡੂੰਘੇ-ਡੁਬਕੀ
 
-| ਦਸਤਾਵੇਜ਼                                    | ਉਦੇਸ਼                                                               |
-| ------------------------------------------- | ------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | MCP ਸਰਵਰ: 110 ਟੂਲ, 3 ਟ੍ਰਾਂਸਪੋਰਟ, 33 ਸਕੋਪ, REST ਐਂਡਪੌਇੰਟ             |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 skills, REST ਸਹਾਇਕ, ਏਜੰਟ ਕਾਰਡ                 |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | ਏਕੀਕ੍ਰਿਤ ਗਾਈਡ: A2A ਬਨਾਮ ACP ਬਨਾਮ Cloud Agents                       |
-| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules ਆਰਕੈਸਟ੍ਰੇਸ਼ਨ                            |
-| `SKILLS.md`                                 | Skills ਫਰੇਮਵਰਕ (ਬਿਲਟ-ਇਨ + ਮਾਰਕੀਟਪਲੇਸ + SkillsSH + ਸੈਂਡਬਾਕਸ)         |
-| `RADAR.md`                                  | Radar ਮੁਫ਼ਤ-ਮਾਡਲ ਕੈਟਾਲਾਗ ਓਵਰਲੇਅ (`RADAR_ENABLED`, ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ) |
-| `MEMORY.md`                                 | ਮੈਮੋਰੀ ਸਿਸਟਮ (SQLite FTS5 + Qdrant)                                 |
-| `EVALS.md`                                  | ਮੁਲਾਂਕਣ ਫਰੇਮਵਰਕ (ਸੂਟ, ਰਨ, ਰੂਬਰਿਕ)                                   |
-| `GUARDRAILS.md`                             | PII ਮਾਸਕਰ, ਪ੍ਰੌਂਪਟ ਇੰਜੈਕਸ਼ਨ, ਵਿਜ਼ਨ ਬ੍ਰਿਜ                            |
-| `COMPLIANCE.md`                             | ਆਡਿਟ ਲੌਗ, ਰਿਟੈਨਸ਼ਨ, noLog ਔਪਟ-ਆਊਟ                                   |
-| `WEBHOOKS.md`                               | HMAC-ਦਸਤਖ਼ਤਸ਼ੁਦਾ ਵੈੱਬਹੁੱਕ ਡਿਲਿਵਰੀ                                   |
-| `REASONING_REPLAY.md`                       | `reasoning_content` ਲਈ ਹਾਈਬ੍ਰਿਡ ਮੈਮੋਰੀ/SQLite ਕੈਸ਼                  |
-| `AUTHZ_GUIDE.md`                            | ਅਧਿਕਾਰ-ਪ੍ਰਦਾਨ ਪਾਈਪਲਾਈਨ (`classify` → `policies` → `enforce`)        |
-| `RESILIENCE_GUIDE.md`                       | ਸਰਕਿਟ ਬ੍ਰੇਕਰ + ਕੂਲਡਾਊਨ + ਮਾਡਲ ਲੌਕਆਊਟ                                |
-| `docs/security/STEALTH_GUIDE.md` (ਕੇਵਲ git) | TLS ਫਿੰਗਰਪ੍ਰਿੰਟਿੰਗ (JA3/JA4), Claude Code CCH, MITM ਸਰਟੀਫਿਕੇਟ       |
-| `AUTO-COMBO.md`                             | Auto Combo ਇੰਜਣ (16-ਕਾਰਕ ਸਕੋਰਿੰਗ, 6 ਮੋਡ ਪੈਕ, ਵਰਚੁਅਲ ਫੈਕਟਰੀ)         |
+| ਡਾਕ                                          | ਮਕਸਦ                                                              |
+| -------------------------------------------- | ----------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | MCP ਸਰਵਰ: 110 ਟੂਲ, 3 ਟ੍ਰਾਂਸਪੋਰਟ, 33 ਸਕੋਪ, REST ਐਂਡਪੁਆਇੰਟ          |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 ਹੁਨਰ, REST ਸਹਾਇਕ, ਏਜੰਟ ਕਾਰਡ                 |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | ਯੂਨੀਫਾਈਡ ਗਾਈਡ: A2A ਬਨਾਮ ACP ਬਨਾਮ ਕਲਾਉਡ ਏਜੰਟ                       |
+| `CLOUD_AGENT.md`                             | Codex ਕਲਾਉਡ / Devin / Jules ਆਰਕੈਸਟਰੇਸ਼ਨ                           |
+| `SKILLS.md`                                  | ਹੁਨਰ ਫਰੇਮਵਰਕ (ਬਿਲਟ-ਇਨ + ਮਾਰਕੀਟਪਲੇਸ + SkillsSH + ਸੈਂਡਬੌਕਸ)         |
+| `RADAR.md`                                   | ਰਾਡਾਰ ਫ੍ਰੀ-ਮਾਡਲ ਕੈਟਾਲਾਗ ਓਵਰਲੇ (`RADAR_ENABLED`, ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ) |
+| `MEMORY.md`                                  | ਮੈਮੋਰੀ ਸਿਸਟਮ (SQLite FTS5 + Qdrant)                               |
+| `EVALS.md`                                   | ਈਵਲ ਫਰੇਮਵਰਕ (ਸੂਟ, ਰਨ, ਰੁਬਰਿਕਸ)                                    |
+| `GUARDRAILS.md`                              | PII ਮਾਸਕ, ਪ੍ਰੋਂਪਟ ਇੰਜੈਕਸ਼ਨ, ਵਿਜ਼ਨ ਬ੍ਰਿਜ                           |
+| `COMPLIANCE.md`                              | ਆਡਿਟ ਲੌਗ, ਰੀਟੈਨਸ਼ਨ, ਨੋਲੌਗ ਔਪਟ-ਆਊਟ                                 |
+| `WEBHOOKS.md`                                | HMAC-ਦਸਤਖਤ ਵੈੱਬਹੁੱਕ ਡਿਲੀਵਰੀ                                       |
+| `REASONING_REPLAY.md`                        | `reasoning_content` ਲਈ ਹਾਈਬ੍ਰਿਡ memory/SQLite ਕੈਸ਼                |
+| `AUTHZ_GUIDE.md`                             | ਪ੍ਰਮਾਣਿਕਤਾ ਪਾਈਪਲਾਈਨ (`classify` → `policies` → `enforce`)         |
+| `RESILIENCE_GUIDE.md`                        | ਸਰਕਟ ਬ੍ਰੇਕਰ + ਕੂਲਡਾਉਨ + ਮਾਡਲ ਲਾਕਆਉਟ                               |
+| `docs/security/STEALTH_GUIDE.md` (ਸਿਰਫ਼ git) | TLS ਫਿੰਗਰਪ੍ਰਿੰਟਿੰਗ (JA3/JA4), Claude ਕੋਡ CCH, MITM ਸਰਟੀਫਿਕੇਟ      |
+| `AUTO-COMBO.md`                              | ਆਟੋ ਕੰਬੋ ਇੰਜਣ (16-ਫੈਕਟਰ ਸਕੋਰਿੰਗ, 6 ਮੋਡ ਪੈਕ, ਵਰਚੁਅਲ ਫੈਕਟਰੀ)        |
 
-### ਕੰਪ੍ਰੈਸ਼ਨ
+### ਕੰਪਰੈਸ਼ਨ
 
-| ਦਸਤਾਵੇਜ਼                        | ਉਦੇਸ਼                                     |
-| ------------------------------- | ----------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | ਕੰਪ੍ਰੈਸ਼ਨ ਮੋਡਾਂ ਦੀ ਸੰਖੇਪ ਜਾਣਕਾਰੀ + ਰੋਡਮੈਪ |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK ਇੰਜਣ, ਰਜਿਸਟਰੀ ਕਾਂਟ੍ਰੈਕਟ     |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman ਰੂਲ ਪੈਕ JSON ਸਕੀਮਾ                |
-| `COMPRESSION_LANGUAGE_PACKS.md` | ਹਰੇਕ ਭਾਸ਼ਾ ਲਈ ਰੂਲ ਪੈਕ ਸੂਚੀ                |
-| `RTK_COMPRESSION.md`            | RTK ਘੋਸ਼ਣਾਤਮਕ ਪਾਈਪਲਾਈਨ (49 ਫਿਲਟਰ)         |
+| ਡਾਕ                             | ਮਕਸਦ                                   |
+| ------------------------------- | -------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | ਕੰਪਰੈਸ਼ਨ ਮੋਡ + ਰੋਡਮੈਪ ਦੀ ਸੰਖੇਪ ਜਾਣਕਾਰੀ |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK ਇੰਜਣ, ਰਜਿਸਟਰੀ ਇਕਰਾਰਨਾਮਾ  |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman ਨਿਯਮ ਪੈਕ JSON ਸਕੀਮਾ            |
+| `COMPRESSION_LANGUAGE_PACKS.md` | ਪ੍ਰਤੀ-ਭਾਸ਼ਾ ਨਿਯਮ ਪੈਕ ਵਸਤੂ ਸੂਚੀ         |
+| `RTK_COMPRESSION.md`            | RTK ਘੋਸ਼ਣਾਤਮਕ ਪਾਈਪਲਾਈਨ (56 ਫਿਲਟਰ)      |
 
-### ਡਿਪਲੌਇਮੈਂਟ
+### ਤੈਨਾਤੀ
 
-| ਦਸਤਾਵੇਜ਼                     | ਉਦੇਸ਼                                                             |
-| ---------------------------- | ----------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker ਬਿਲਡ, ਪ੍ਰੋਫ਼ਾਈਲ (base/cli/host/cliproxyapi), Redis ਸਾਈਡਕਾਰ |
-| `VM_DEPLOYMENT_GUIDE.md`     | ਆਮ VM/VPS ਡਿਪਲੌਇਮੈਂਟ (Ubuntu/Debian + nginx + systemd)            |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io ਡਿਪਲੌਇਮੈਂਟ (ਵਰਤਮਾਨ ਵਿੱਚ ਕੇਵਲ ਚੀਨੀ ਭਾਸ਼ਾ ਵਿੱਚ)              |
-| `TERMUX_GUIDE.md`            | Termux ਰਾਹੀਂ Android ਹੈੱਡਲੈੱਸ                                     |
-| `PWA_GUIDE.md`               | Progressive Web App ਇੰਸਟਾਲੇਸ਼ਨ + ਸਰਵਿਸ ਵਰਕਰ                       |
-| `ELECTRON_GUIDE.md`          | ਡੈਸਕਟਾਪ ਐਪ ਬਿਲਡ + ਦਸਤਖ਼ਤ + ਵੰਡ                                    |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                            |
-| `PROXY_GUIDE.md`             | 4-ਪੱਧਰੀ ਆਊਟਬਾਊਂਡ ਪ੍ਰੌਕਸੀ + 1proxy ਮਾਰਕੀਟਪਲੇਸ                      |
+| ਡਾਕ                          | ਮਕਸਦ                                                             |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker ਬਿਲਡ, ਪ੍ਰੋਫਾਈਲ (base/cli/host/cliproxyapi), Redis ਸਾਈਡਕਾਰ |
+| `VM_DEPLOYMENT_GUIDE.md`     | ਆਮ VM/VPS ਤੈਨਾਤੀ (Ubuntu/Debian + nginx + systemd)               |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io ਤੈਨਾਤੀ (ਇਸ ਵੇਲੇ ਚੀਨੀ-ਸਿਰਫ਼)                               |
+| `TERMUX_GUIDE.md`            | Termux ਰਾਹੀਂ ਐਂਡਰਾਇਡ ਹੈੱਡਲੈੱਸ                                    |
+| `PWA_GUIDE.md`               | ਪ੍ਰੋਗਰੈਸਿਵ ਵੈੱਬ ਐਪ + ਸੇਵਾ ਵਰਕਰ ਨੂੰ ਸਥਾਪਿਤ ਕਰੋ                    |
+| `ELECTRON_GUIDE.md`          | ਡੈਸਕਟੌਪ ਐਪ ਬਿਲਡ + ਸਾਈਨ + ਵੰਡੋ                                    |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale ਫਨਲ                              |
+| `PROXY_GUIDE.md`             | 4-ਪੱਧਰ ਦੀ ਆਊਟਬਾਉਂਡ ਪ੍ਰੌਕਸੀ + 1proxy ਮਾਰਕੀਟਪਲੇਸ                   |
 
-### ਸਬਡਾਇਰੈਕਟਰੀਆਂ
+### ਉਪ-ਡਾਇਰੈਕਟਰੀਆਂ
 
-| ਸਬਡਾਇਰੈਕਟਰੀ           | ਉਦੇਸ਼                                                                                                                                                                                                    |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ਸਥਾਨਕੀਕ੍ਰਿਤ ਦਸਤਾਵੇਜ਼ ਅਨੁਵਾਦ (41 ਲੋਕੇਲ)                                                                                                                                                                   |
-| `docs/screenshots/`   | ਗਾਈਡਾਂ ਲਈ ਚਿੱਤਰ ਐਸੈੱਟ                                                                                                                                                                                    |
-| `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) ਤੋਂ ਯੋਜਨਾਵਾਂ/ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ + ਖੋਜ — ਅਲੱਗ, ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਵਰਜ਼ਨ ਕੀਤਾ ਰਿਪੋ, ਮੁੱਖ ਟ੍ਰੀ ਵੱਲੋਂ gitignore ਕੀਤਾ ਹੋਇਆ। CLAUDE.md → "ਯੋਜਨਾਬੰਦੀ ਅਤੇ ਖੋਜ ਆਰਟੀਫੈਕਟ" ਵੇਖੋ। |
+| ਸਬਦੀਰ                 | ਮਕਸਦ                                                                                                                                                                                        |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | ਸਥਾਨਕ ਦਸਤਾਵੇਜ਼ ਅਨੁਵਾਦ (41 ਲੋਕੇਲ)                                                                                                                                                            |
+| `docs/screenshots/`   | ਗਾਈਡਾਂ ਲਈ ਚਿੱਤਰ ਸੰਪਤੀਆਂ                                                                                                                                                                     |
+| `_tasks/superpowers/` | ਸੁਪਰਪਾਵਰਜ਼ ਤੋਂPlans/specs (`writing-plans`/`brainstorming`) + ਰਿਸਰਚ — ਅਲੱਗ-ਥਲੱਗ, ਵੱਖ-ਵੱਖ ਸੰਸਕਰਣ ਵਾਲਾ ਰੈਪੋ, ਮੁੱਖ ਰੁੱਖ ਦੁਆਰਾ ਅਣਡਿੱਠ ਕੀਤਾ ਗਿਆ। CLAUDE.md → "ਯੋਜਨਾ ਅਤੇ ਖੋਜ ਕਲਾਤਮਕ ਚੀਜ਼ਾਂ" ਦੇਖੋ। |
 
 ---
 
 ## `tests/` — ਟੈਸਟ ਸੂਟ
 
-| ਸਬਡਾਇਰੈਕਟਰੀ                          | ਕਿਸਮ                                      | ਰਨਰ                              |
-| ------------------------------------ | ----------------------------------------- | -------------------------------- |
-| `tests/unit/`                        | ਯੂਨਿਟ ਟੈਸਟ (~4,800 ਫ਼ਾਈਲਾਂ, ਸਭ ਤੋਂ ਤੇਜ਼)  | Node ਨੇਟਿਵ ਟੈਸਟ ਰਨਰ              |
-| `tests/integration/`                 | ਮਲਟੀ-ਮੋਡੀਊਲ + DB ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਟੈਸਟ         | Node ਨੇਟਿਵ ਟੈਸਟ ਰਨਰ (ਸਮਕਾਲੀਤਾ 1) |
-| `tests/e2e/`                         | UI + ਵਰਕਫ਼ਲੋ E2E                          | Playwright                       |
-| `tests/e2e/protocol-clients.test.ts` | MCP + A2A ਰੀਅਲ-ਕਲਾਇੰਟ E2E                 | ਕਸਟਮ ਪ੍ਰੋਟੋਕੋਲ ਕਲਾਇੰਟ            |
-| `tests/e2e/ecosystem.test.ts`        | ਪ੍ਰੋਵਾਈਡਰ ਇੰਟੀਗ੍ਰੇਸ਼ਨ (ਨੈੱਟਵਰਕ ਵਰਤਣ ਵਾਲਾ) | Node ਨੇਟਿਵ ਟੈਸਟ ਰਨਰ              |
+| ਸਬ-ਡਾਇਰੈਕਟਰੀ                         | ਕਿਸਮ                                            | ਰਨਰ                                |
+| ------------------------------------ | ----------------------------------------------- | ---------------------------------- |
+| `tests/unit/`                        | ਯੂਨਿਟ ਟੈਸਟ (~4,800 ਫ਼ਾਈਲਾਂ, ਸਭ ਤੋਂ ਤੇਜ਼)        | Node ਦਾ ਮੂਲ ਟੈਸਟ ਰਨਰ               |
+| `tests/integration/`                 | ਮਲਟੀ-ਮੋਡੀਊਲ + DB ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਟੈਸਟ               | Node ਦਾ ਮੂਲ ਟੈਸਟ ਰਨਰ (ਸਮਕਾਲਿਕਤਾ 1) |
+| `tests/e2e/`                         | UI + ਵਰਕਫ਼ਲੋ E2E                                | Playwright                         |
+| `tests/e2e/protocol-clients.test.ts` | MCP + A2A ਅਸਲ-ਕਲਾਇੰਟ E2E                        | ਕਸਟਮ ਪ੍ਰੋਟੋਕੋਲ ਕਲਾਇੰਟ              |
+| `tests/e2e/ecosystem.test.ts`        | ਪ੍ਰਦਾਤਾ ਇੰਟੀਗ੍ਰੇਸ਼ਨ (ਨੈੱਟਵਰਕ ਦੀ ਵਰਤੋਂ ਕਰਨ ਵਾਲਾ) | Node ਦਾ ਮੂਲ ਟੈਸਟ ਰਨਰ               |
 
 ---
 
@@ -469,22 +485,22 @@ open-sse/
 | ਪਾਥ                 | ਉਦੇਸ਼                                                      |
 | ------------------- | ---------------------------------------------------------- |
 | `public/` (ਰੂਟ)     | ਫੇਵੀਕਾਨ, robots.txt, ਮੈਨੀਫੈਸਟ, ਸਰਵਿਸ ਵਰਕਰ, ਮਾਰਕੀਟਿੰਗ ਚਿੱਤਰ |
-| `public/providers/` | ਪ੍ਰੋਵਾਈਡਰ ਲੋਗੋ PNG/SVG (ਡੈਸ਼ਬੋਰਡ ਵਿੱਚ ਵਰਤੇ ਜਾਂਦੇ ਹਨ)       |
+| `public/providers/` | ਪ੍ਰਦਾਤਾ ਲੋਗੋ PNG/SVG (ਡੈਸ਼ਬੋਰਡ ਵਿੱਚ ਵਰਤੇ ਜਾਂਦੇ ਹਨ)         |
 
 ---
 
 ## `config/` — ਸਥਿਰ ਕੌਂਫਿਗਰੇਸ਼ਨ + ਕੁਆਲਿਟੀ-ਗੇਟ ਸਥਿਤੀ
 
 ਭੇਜੇ ਗਏ ਕੌਂਫਿਗਰੇਸ਼ਨ ਟੈਂਪਲੇਟਾਂ ਦੇ ਨਾਲ ਕਮਿਟ ਕੀਤੀਆਂ ਕੁਆਲਿਟੀ-ਗੇਟ ਬੇਸਲਾਈਨਾਂ
-(ਰੂਟ ਨੂੰ ਸੁਚੱਜਾ ਰੱਖਣ ਲਈ v3.8.26 ਵਿੱਚ ਰਿਪੋਜ਼ਟਰੀ ਰੂਟ ਤੋਂ ਇੱਥੇ ਲਿਆਂਦੀਆਂ ਗਈਆਂ)।
+(v3.8.26 ਵਿੱਚ ਰੂਟ ਨੂੰ ਹਲਕਾ ਰੱਖਣ ਲਈ ਰਿਪੋਜ਼ਟਰੀ ਰੂਟ ਤੋਂ ਇੱਥੇ ਲਿਆਂਦੀਆਂ ਗਈਆਂ)।
 
 | ਪਾਥ                                           | ਉਦੇਸ਼                                                                       |
 | --------------------------------------------- | --------------------------------------------------------------------------- |
-| `config/i18n.json`                            | ਲੋਕੇਲ ਸੂਚੀ + ਮੈਟਾਡੇਟਾ (42-ਲੋਕੇਲ ਗਿਣਤੀ ਲਈ ਅਧਿਕਾਰਤ ਸਰੋਤ)                      |
-| `config/i18n-schema.json`                     | `i18n.json` ਦੀ ਪੁਸ਼ਟੀ ਕਰਨ ਵਾਲੀ JSON ਸਕੀਮਾ                                   |
-| `config/payloadRules.json`                    | ਅੱਪਸਟ੍ਰੀਮ ਪੇਲੋਡ ਸੈਨਿਟਾਈਜ਼ੇਸ਼ਨ ਨਿਯਮ                                          |
+| `config/i18n.json`                            | ਲੋਕੇਲ ਸੂਚੀ + ਮੈਟਾਡੇਟਾ (42-ਲੋਕੇਲ ਗਿਣਤੀ ਲਈ ਪ੍ਰਮਾਣਿਕ ਸਰੋਤ)                     |
+| `config/i18n-schema.json`                     | `i18n.json` ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕਰਨ ਵਾਲੀ JSON ਸਕੀਮਾ                                |
+| `config/payloadRules.json`                    | ਅੱਪਸਟ੍ਰੀਮ ਪੇਲੋਡ ਸੈਨੀਟਾਈਜ਼ੇਸ਼ਨ ਨਿਯਮ                                          |
 | `config/quality/quality-baseline.json`        | ਮਲਟੀ-ਮੈਟ੍ਰਿਕ ਰੈਚਟ ਬੇਸਲਾਈਨ (`scripts/quality/check-quality-ratchet.mjs`)     |
-| `config/quality/complexity-baseline.json`     | ਸਥਿਰ ਕੀਤੀ ESLint-ਕੰਪਲੈਕਸਿਟੀ ਬੇਸਲਾਈਨ (`check-complexity.mjs`)                |
+| `config/quality/complexity-baseline.json`     | ਸਥਿਰ ਕੀਤੀ ESLint-ਜਟਿਲਤਾ ਬੇਸਲਾਈਨ (`check-complexity.mjs`)                    |
 | `config/quality/duplication-baseline.json`    | ਸਥਿਰ ਕੀਤੀ jscpd ਡੁਪਲੀਕੇਸ਼ਨ ਬੇਸਲਾਈਨ (`check-duplication.mjs`)                |
 | `config/quality/file-size-baseline.json`      | ਸਥਿਰ ਕੀਤੀ ਪ੍ਰਤੀ-ਫ਼ਾਈਲ ਆਕਾਰ ਬੇਸਲਾਈਨ (`check-file-size.mjs`)                  |
 | `config/quality/test-discovery-baseline.json` | ਸਥਿਰ ਕੀਤੀ ਅਨਾਥ-ਟੈਸਟ ਬੇਸਲਾਈਨ (`check-test-discovery.mjs`)                    |
@@ -494,12 +510,12 @@ open-sse/
 
 ---
 
-## `.github/` — GitHub ਏਕੀਕਰਨ
+## `.github/` — GitHub ਇੰਟੀਗ੍ਰੇਸ਼ਨ
 
 | ਪਾਥ                                | ਉਦੇਸ਼                                                    |
 | ---------------------------------- | -------------------------------------------------------- |
 | `.github/workflows/`               | GitHub Actions CI/CD ਵਰਕਫ਼ਲੋ (ਲਿੰਟ, ਟੈਸਟ, ਕਵਰੇਜ, ਰਿਲੀਜ਼) |
-| `.github/ISSUE_TEMPLATE/`          | ਬੱਗ/ਫ਼ੀਚਰ ਇਸ਼ੂ ਟੈਂਪਲੇਟ                                   |
+| `.github/ISSUE_TEMPLATE/`          | ਬੱਗ/ਫੀਚਰ ਇਸ਼ੂ ਟੈਂਪਲੇਟ                                    |
 | `.github/pull_request_template.md` | PR ਟੈਂਪਲੇਟ                                               |
 | `.github/dependabot.yml`           | ਡਿਪੈਂਡੈਂਸੀ ਅੱਪਡੇਟ ਸੰਰਚਨਾ                                 |
 
@@ -507,11 +523,11 @@ open-sse/
 
 ## `.husky/` — Git ਹੁੱਕ
 
-| ਫ਼ਾਈਲ        | ਉਦੇਸ਼                                                             |
-| ------------ | ----------------------------------------------------------------- |
-| `pre-commit` | `lint-staged + check-docs-sync + check:any-budget:t11` ਚਲਾਉਂਦਾ ਹੈ |
-| `pre-push`   | ਇਸ ਵੇਲੇ ਅਸਮਰੱਥ ਹੈ (ਟਿੱਪਣੀਬੱਧ)। `npm run test:unit` ਹੱਥੀਂ ਚਲਾਓ।    |
-| `_/`         | Husky ਦੇ ਅੰਦਰੂਨੀ ਹਿੱਸੇ                                            |
+| ਫ਼ਾਈਲ        | ਉਦੇਸ਼                                                                      |
+| ------------ | -------------------------------------------------------------------------- |
+| `pre-commit` | `lint-staged + check-docs-sync + check:any-budget:t11` ਚਲਾਉਂਦਾ ਹੈ          |
+| `pre-push`   | ਇਸ ਵੇਲੇ ਅਸਮਰੱਥ ਹੈ (ਟਿੱਪਣੀ ਬਣਾਇਆ ਹੋਇਆ)। `npm run test:unit` ਨੂੰ ਹੱਥੀਂ ਚਲਾਓ। |
+| `_/`         | Husky ਦੇ ਅੰਦਰੂਨੀ ਹਿੱਸੇ                                                     |
 
 ---
 
@@ -519,35 +535,35 @@ open-sse/
 
 | ਫ਼ਾਈਲ                                               | ਉਦੇਸ਼                                                     |
 | --------------------------------------------------- | --------------------------------------------------------- |
-| `commands/version-bump-cc.md`                       | `/version-bump-cc` — ਵਰਜਨ ਵਧਾਓ + ਸਵੈਚਾਲਿਤ ਚੇਂਜਲੌਗ         |
+| `commands/version-bump-cc.md`                       | `/version-bump-cc` — ਵਰਜ਼ਨ ਵਧਾਓ + ਸਵੈਚਾਲਿਤ ਚੇਂਜਲੌਗ        |
 | `commands/generate-release-cc.md`                   | `/generate-release-cc` — ਪੂਰਾ ਰਿਲੀਜ਼ ਵਰਕਫ਼ਲੋ              |
 | `commands/deploy-vps-{local,akamai,both}-cc.md`     | VPS 'ਤੇ ਡਿਪਲੌਇ ਕਰੋ                                        |
 | `commands/capture-release-evidences-cc.md`          | ਨਵੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ WebP ਵਜੋਂ ਰਿਕਾਰਡ ਕਰੋ |
-| `commands/review-{prs,discussions}-cc.md`           | GitHub PR ਅਤੇ ਚਰਚਾਵਾਂ ਦੀ ਛਾਂਟੀ ਕਰੋ                        |
+| `commands/review-{prs,discussions}-cc.md`           | GitHub PRs/ਚਰਚਾਵਾਂ ਦੀ ਛਾਂਟੀ ਕਰੋ                           |
 | `commands/{review-issues,implement-features}-cc.md` | ਇਸ਼ੂ ਵਰਕਫ਼ਲੋ                                              |
-| `settings.local.json`                               | ਹਰ ਪ੍ਰੋਜੈਕਟ ਲਈ Claude Code ਸੈਟਿੰਗਾਂ                       |
+| `settings.local.json`                               | ਪ੍ਰਤੀ-ਪ੍ਰੋਜੈਕਟ Claude Code ਸੈਟਿੰਗਾਂ                       |
 
 ---
 
 ## `.agents/` — ਆਮ ਏਜੰਟ ਵਰਕਫ਼ਲੋ (Codex / Cursor / ਆਦਿ)
 
-| ਪਾਥ                      | ਉਦੇਸ਼                                               |
-| ------------------------ | --------------------------------------------------- |
-| `workflows/*-ag.md`      | 11 ਵਰਕਫ਼ਲੋ ਪਰਿਭਾਸ਼ਾਵਾਂ (`.claude/commands/` ਦੀ ਨਕਲ) |
-| `skills/<name>/SKILL.md` | Codex ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਨੋਟਸ ਸਮੇਤ 9 ਹੁਨਰ ਪਰਿਭਾਸ਼ਾਵਾਂ      |
+| ਪਾਥ                      | ਉਦੇਸ਼                                                    |
+| ------------------------ | -------------------------------------------------------- |
+| `workflows/*-ag.md`      | 11 ਵਰਕਫ਼ਲੋ ਪਰਿਭਾਸ਼ਾਵਾਂ (`.claude/commands/` ਦਾ ਪ੍ਰਤੀਰੂਪ) |
+| `skills/<name>/SKILL.md` | Codex ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਨੋਟਸ ਸਮੇਤ 9 ਹੁਨਰ ਪਰਿਭਾਸ਼ਾਵਾਂ           |
 
-> **ਨੋਟ:** ਵਰਕਫ਼ਲੋ ਅਤੇ ਕਮਾਂਡਾਂ ਇਸ ਵੇਲੇ ਬਾਈਟ-ਦਰ-ਬਾਈਟ ਇੱਕੋ ਜਿਹੀਆਂ ਹਨ। ਜੇ `.agents/` ਦਾ ਉਦੇਸ਼ ਕਿਸੇ ਵੱਖਰੇ ਏਜੰਟ ਰਨਟਾਈਮ (Codex) ਨੂੰ ਟਾਰਗੇਟ ਕਰਨਾ ਹੈ, ਤਾਂ ਰੂਪਾਂਤਰਾਂ ਵਿੱਚ ਅਰਥਪੂਰਨ ਅੰਤਰ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ।
+> **ਨੋਟ:** ਵਰਕਫ਼ਲੋ ਅਤੇ ਕਮਾਂਡਾਂ ਇਸ ਵੇਲੇ ਬਾਈਟ-ਦਰ-ਬਾਈਟ ਇੱਕੋ ਜਿਹੀਆਂ ਹਨ। ਜੇਕਰ `.agents/` ਦਾ ਉਦੇਸ਼ ਕਿਸੇ ਵੱਖਰੇ ਏਜੰਟ ਰਨਟਾਈਮ (Codex) ਨੂੰ ਨਿਸ਼ਾਨਾ ਬਣਾਉਣਾ ਹੈ, ਤਾਂ ਵਰਿਅੰਟਾਂ ਵਿੱਚ ਅਰਥਪੂਰਨ ਅੰਤਰ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ।
 
 ---
 
-## `_ideia/`, `_mono_repo/`, `_references/`, `_tasks/` — ਮੁੱਖ ਟ੍ਰੀ ਤੋਂ ਬਾਹਰ
+## `_ideia/`, `_mono_repo/`, `_references/`, `_tasks/` — ਟ੍ਰੀ ਤੋਂ ਬਾਹਰ
 
-ਅੰਡਰਸਕੋਰ ਨਾਲ ਸ਼ੁਰੂ ਹੋਣ ਵਾਲੀਆਂ ਇਹ ਡਾਇਰੈਕਟਰੀਆਂ ਅਜਿਹੀ ਸਮੱਗਰੀ ਰੱਖਦੀਆਂ ਹਨ ਜੋ ਸ਼ਿਪ ਨਹੀਂ ਕੀਤੀ ਜਾਂਦੀ:
+ਇਨ੍ਹਾਂ ਅੰਡਰਸਕੋਰ-ਪ੍ਰੀਫਿਕਸ ਵਾਲੀਆਂ ਡਾਇਰੈਕਟਰੀਆਂ ਵਿੱਚ ਉਹ ਸਮੱਗਰੀ ਹੁੰਦੀ ਹੈ ਜੋ ਸ਼ਿਪ ਨਹੀਂ ਕੀਤੀ ਜਾਂਦੀ:
 
-- **`_ideia/`** — ਡਿਜ਼ਾਈਨ ਨੋਟਸ (ਮੁਲਤਵੀ / ਅਣਉਚਿਤ / ਵਿਹਾਰਯੋਗ ਸ਼੍ਰੇਣੀਆਂ)
+- **`_ideia/`** — ਡਿਜ਼ਾਈਨ ਨੋਟਸ (defer / notfit / viable ਸ਼੍ਰੇਣੀਆਂ)
 - **`_mono_repo/`** — ਇਤਿਹਾਸਕ ਸਬ-ਪ੍ਰੋਜੈਕਟ (omnirouteCloud, omnirouteSite, vscode-extension)
-- **`_references/`** — ਸੰਬੰਧਿਤ OSS ਪ੍ਰੋਜੈਕਟਾਂ (LiteLLM, 9router, ClawRouter, CLIProxyAPI, modelrelay, new-api, ਆਦਿ) ਦੇ ਸਿਰਫ਼-ਪੜ੍ਹਨਯੋਗ ਕਲੋਨ, ਵਿਕਾਸ ਦੌਰਾਨ ਆਪਸੀ ਹਵਾਲੇ ਲਈ
-- **`_tasks/`** — ਹਰ ਰਿਲੀਜ਼ ਲਈ ਟਾਸਕ-ਟਰੈਕਿੰਗ ਫ਼ਾਈਲਾਂ (ਗੈਰ-ਰਸਮੀ)
+- **`_references/`** — ਵਿਕਾਸ ਦੌਰਾਨ ਕਰਾਸ-ਰੈਫਰੈਂਸ ਲਈ ਸੰਬੰਧਿਤ OSS ਪ੍ਰੋਜੈਕਟਾਂ (LiteLLM, 9router, ClawRouter, CLIProxyAPI, modelrelay, new-api, ਆਦਿ) ਦੇ ਸਿਰਫ਼-ਪੜ੍ਹਨਯੋਗ ਕਲੋਨ
+- **`_tasks/`** — ਪ੍ਰਤੀ-ਰਿਲੀਜ਼ ਟਾਸਕ ਟਰੈਕਿੰਗ ਫ਼ਾਈਲਾਂ (ਗੈਰ-ਰਸਮੀ)
 
 `npm pack` ਆਉਟਪੁੱਟ ਵਿੱਚ ਸ਼ਾਮਲ ਨਹੀਂ ਹਨ। `.npmignore` ਵੇਖੋ।
 
@@ -571,10 +587,10 @@ open-sse/
 ## ਨੈਵੀਗੇਸ਼ਨ ਸੁਝਾਅ
 
 - **ਨਵੇਂ ਯੋਗਦਾਨਕਰਤਾ ਹੋ?** `CONTRIBUTING.md` → `CLAUDE.md` → `docs/architecture/ARCHITECTURE.md` → `docs/architecture/CODEBASE_DOCUMENTATION.md` ਪੜ੍ਹੋ।
-- **ਕੋਈ ਪ੍ਰੋਵਾਈਡਰ ਜੋੜ ਰਹੇ ਹੋ?** `docs/architecture/ARCHITECTURE.md § ਨਵਾਂ ਪ੍ਰੋਵਾਈਡਰ ਜੋੜਨਾ` ਦੀ ਪਾਲਣਾ ਕਰੋ + `docs/reference/PROVIDER_REFERENCE.md` ਨਾਲ ਮੁੜ ਜਾਂਚ ਕਰੋ।
-- **ਕੋਈ ਰੂਟ ਜੋੜ ਰਹੇ ਹੋ?** `docs/architecture/ARCHITECTURE.md § ਨਵਾਂ API ਰੂਟ ਜੋੜਨਾ` + `src/shared/validation/schemas.ts`।
-- **ਕੋਈ MCP ਟੂਲ ਜੋੜ ਰਹੇ ਹੋ?** `docs/frameworks/MCP-SERVER.md § ਟੂਲ ਜੋੜਨਾ`।
-- **ਕੋਈ A2A ਸਕਿੱਲ ਜੋੜ ਰਹੇ ਹੋ?** `docs/frameworks/A2A-SERVER.md § ਨਵੀਂ ਸਕਿੱਲ ਜੋੜਨਾ`।
-- **ਲੋਕਲ ਤੌਰ ’ਤੇ ਚਲਾ ਰਹੇ ਹੋ?** `docs/guides/SETUP_GUIDE.md`।
+- **ਕੋਈ ਪ੍ਰੋਵਾਈਡਰ ਜੋੜ ਰਹੇ ਹੋ?** `docs/architecture/ARCHITECTURE.md § Adding a New Provider` ਦੀ ਪਾਲਣਾ ਕਰੋ + `docs/reference/PROVIDER_REFERENCE.md` ਨਾਲ ਮੁੜ-ਜਾਂਚ ਕਰੋ।
+- **ਕੋਈ ਰੂਟ ਜੋੜ ਰਹੇ ਹੋ?** `docs/architecture/ARCHITECTURE.md § Adding a New API Route` + `src/shared/validation/schemas.ts`।
+- **ਕੋਈ MCP ਟੂਲ ਜੋੜ ਰਹੇ ਹੋ?** `docs/frameworks/MCP-SERVER.md § Adding a Tool`।
+- **ਕੋਈ A2A ਸਕਿੱਲ ਜੋੜ ਰਹੇ ਹੋ?** `docs/frameworks/A2A-SERVER.md § Adding a New Skill`।
+- **ਲੋਕਲ ਤੌਰ 'ਤੇ ਚਲਾ ਰਹੇ ਹੋ?** `docs/guides/SETUP_GUIDE.md`।
 - **ਡਿਪਲੌਇ ਕਰ ਰਹੇ ਹੋ?** `docs/guides/DOCKER_GUIDE.md` / `docs/ops/VM_DEPLOYMENT_GUIDE.md` / `docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md`।
 - **ਰਿਲੀਜ਼ ਕਰ ਰਹੇ ਹੋ?** `docs/ops/RELEASE_CHECKLIST.md` (ਅਤੇ `/generate-release-cc` Claude Code ਸਕਿੱਲ)।

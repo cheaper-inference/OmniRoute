@@ -34,24 +34,24 @@ open-sse/
 ├── types.d.ts            # 公開型エクスポート
 ├── package.json          # @omniroute/open-sse
 ├── config/               # プロバイダー設定、定数、レジストリ
-├── executors/            # プロバイダー別 HTTP エグゼキューター（67個 + base.ts/index.ts）
-├── handlers/             # リクエストハンドラー（chatCore、responses など）
+├── executors/            # プロバイダー別HTTPエグゼキューター（150モジュール + base.ts/index.ts）
+├── handlers/             # リクエストハンドラー（chatCore、responsesなど）
 ├── lib/                  # 内部ユーティリティ
-├── mcp-server/           # Model Context Protocol サーバー
+├── mcp-server/           # Model Context Protocolサーバー
 ├── services/             # 約298個のサービスモジュール
-├── transformer/          # Responses API 形式トランスフォーマー
+├── transformer/          # Responses API形式トランスフォーマー
 ├── translator/           # 形式変換（OpenAI ↔ Claude ↔ Gemini）
-└── utils/                # 共有ユーティリティ（ロギング、エラー、ストリームなど）
+└── utils/                # 共通ユーティリティ（ロギング、エラー、ストリームなど）
 ```
 
 ### モジュール数
 
 | ディレクトリ | ファイル数 | 目的 |
-| `executors/` | 167 | プロバイダー別 HTTP エグゼキューター（DefaultExecutor ファクトリーにより統一） |
-| `handlers/` | 157 | リクエストのエントリーポイント（chatCore、responses、embeddings） |
+| `executors/` | 167 | プロバイダー別HTTPエグゼキューター（DefaultExecutorファクトリーにより統合） |
+| `handlers/` | 157 | リクエストエントリーポイント（chatCore、responses、embeddings） |
 | `services/` | 約536 | ルーティング、キャッシュ、レート制限、更新など |
 | `translator/` | 56 | 形式変換（OpenAI ↔ Claude ↔ Gemini） |
-| `mcp-server/` | 44 | MCP ツールおよびトランスポート |
+| `mcp-server/` | 44 | MCPツールおよびトランスポート |
 | `utils/` | 約108 | 横断的ユーティリティ（ロギング、エラー、ストリーム） |
 | `config/` | 約339 | プロバイダー設定、定数、レジストリ |
 
@@ -169,19 +169,19 @@ needsTranslation(source, target): boolean
 
 ### chatCore.ts（5977行）
 
-**メインのリクエストハンドラー**です。非常に大きなファイルですが、構造は明確です。
+**メインのリクエストハンドラー**。サイズは大きいものの、明確な構造を持っています：
 
 ```ts
-// chatCore.tsの擬似構造
+// chatCore.ts の疑似構造
 export async function handleChat(request: NextRequest) {
   // 1. 認証 + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. ボディの検証
+  // 2. ボディのバリデーション
   const body = await parseRequestBody(request);
 
-  // 3. フォーマットの検出 + 変換
+  // 3. フォーマット検出 + 変換
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
@@ -205,11 +205,11 @@ export async function handleChat(request: NextRequest) {
 }
 ```
 
-1つの巨大な関数であるにもかかわらず、5段階のパイプラインに対応する**コメント付きのセクション**に整理されています。
+巨大な1つの関数ではありますが、5段階のパイプラインに対応する**コメント付きセクション**に整理されています。
 
 ### combo.ts（4456 LOC）
 
-コンボを順序付きターゲットへ解決する**ルーティングエンジン**です。
+コンボを順序付きターゲットに解決する**ルーティングエンジン**。
 
 ```ts
 // services/combo.ts
@@ -226,135 +226,138 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-**19種類のルーティング戦略**をサポートしています（`src/shared/constants/routingStrategies.ts`を参照）。
+**20種類のルーティング戦略**をサポートしています（`src/shared/constants/routingStrategies.ts` を参照）：
 
-| 戦略                | 動作                                                          |
-| ------------------- | ------------------------------------------------------------- |
-| `priority`          | 先頭ターゲットを優先する順序付きリスト                        |
-| `weighted`          | ターゲットごとの重みに基づく確率的選択                        |
-| `round-robin`       | ターゲットを順番に巡回                                        |
-| `context-relay`     | ターゲット間でコンテキストを引き継ぐ                          |
-| `fill-first`        | 次へ移る前にクォータを使い切る                                |
-| `p2c`               | 2択のうち良い方を選択                                         |
-| `random`            | 一様ランダム                                                  |
-| `least-used`        | 最近の使用回数が最も少ないものを選択                          |
-| `cost-optimized`    | 正常なターゲットのうち最も安価なものを優先                    |
-| `reset-aware`       | プロバイダーのリセット期間を考慮                              |
-| `reset-window`      | リセット期間に基づくルーティング                              |
-| `headroom`          | 残りのクォータ余裕が最も大きいものを優先                      |
-| `strict-random`     | 完全な一様ランダム（品質による重み付けなし）                  |
-| `auto`              | 16要素のスコアリングを使用（`autoCombo/`）                    |
-| `lkgp`              | 最後に正常動作した既知のプロバイダーを優先                    |
-| `context-optimized` | 長いコンテキストのリクエストに最適なものを選択                |
-| `fusion`            | 複数のパネルへ並列に展開し、審判役を通じて統合（`fusion.ts`） |
+| 戦略                | 動作                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| `priority`          | 先頭ターゲットから順に試行するリスト                                                       |
+| `weighted`          | ターゲットごとの重みに基づく確率的選択                                                     |
+| `round-robin`       | ターゲットを順番に循環                                                                     |
+| `context-relay`     | ターゲット間でコンテキストを引き継ぐ                                                       |
+| `fill-first`        | 次へ移る前にクォータを使い切る                                                             |
+| `p2c`               | Power of Two Choices（2つの選択肢から選ぶ方式）                                            |
+| `random`            | 一様ランダム                                                                               |
+| `least-used`        | 直近の使用回数が最も少ないものを選択                                                       |
+| `cost-optimized`    | 正常なターゲットの中で最も安価なものを優先                                                 |
+| `reset-aware`       | プロバイダーのリセットウィンドウを考慮                                                     |
+| `reset-window`      | リセットウィンドウに基づくルーティング                                                     |
+| `headroom`          | 残りクォータの余裕が最も大きいものを優先                                                   |
+| `quota-weighted`    | 枯渇したアカウントをスキップし、残りクォータ ÷ 処理中負荷で抽選                            |
+| `strict-random`     | 真に一様（品質による重み付けなし）                                                         |
+| `auto`              | 16ファクターのスコアリングを使用（`autoCombo/`）                                           |
+| `lkgp`              | 最後に正常動作が確認されたプロバイダーを優先                                               |
+| `context-optimized` | 長コンテキストのリクエストに最適                                                           |
+| `cache-optimized`   | 再利用可能なプロンプトプレフィックスを同一アカウントに固定（プロンプトキャッシュのヒット） |
+| `fusion`            | パネルに並列でファンアウトし、ジャッジで統合（`fusion.ts`）                                |
+| `pipeline`          | ステップをチェーン — 各ターゲットの出力が次のターゲットへの入力となる                      |
 
 ### base.ts（1170 LOC）
 
-107個すべてのエグゼキューターが継承する**抽象エグゼキューター**です。以下が含まれます。
+すべてのエグゼキュータークラスが継承する（直接、または `DefaultExecutor` などのサブクラス経由で）**抽象エグゼキューター**。以下を含みます：
 
-- `buildUrl()` — デフォルトのURL構築（カスタム動作が必要な場合はサブクラスでオーバーライド）
-- `buildHeaders()` — デフォルトのヘッダー（認証、content-type）
-- `transformRequest()` — デフォルトではそのまま渡す
-- `execute()` — 再試行、バックオフ、ブレーカーを備えたメインのHTTPループ
+- `buildUrl()` — デフォルトのURL構築（カスタムの場合はサブクラスがオーバーライド）
+- `buildHeaders()` — デフォルトヘッダー（認証、Content-Type）
+- `transformRequest()` — デフォルトではパススルー
+- `execute()` — リトライ/バックオフ/ブレーカー付きのメインHTTPループ
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // OpenAI/Anthropic互換のすべてのプロバイダーを処理
-  // プロバイダーは設定（URL、認証、ヘッダー）を登録するが、エグゼキューターのロジックは共有する
+  // すべての OpenAI/Anthropic 互換プロバイダーを処理
+  // プロバイダーは設定（URL、認証、ヘッダー）を登録するが、エグゼキューターのロジックは共有
 }
 ```
 
-プロバイダー固有の動作（認証ヘッダー、ベースURL、バージョンヘッダー）は、個別のエグゼキュータークラスではなく、プロバイダーレジストリを介して設定されます。
+プロバイダー固有の動作（認証ヘッダー、ベースURL、バージョンヘッダー）は、個別のエグゼキュータークラスではなく、プロバイダーレジストリを通じて設定されます。
 
 ````
 
 ---
 
-## サービス（117モジュール）
+## サービス（117 モジュール）
 
-サービスは、ハンドラーによって構成される、**特定の目的に特化した単一用途のモジュール**です。主なカテゴリーは次のとおりです。
+サービスは、ハンドラーが組み合わせて利用する**焦点を絞った単一目的のモジュール**です。主なカテゴリーは次の通りです。
 
-### ルーティングとコンボ
+### ルーティング & コンボ
 
 - `combo.ts` — コンボルーティングされたリクエストのエントリーポイント
-- `services/autoCombo/` — 16要素のスコアリング、8つの自動ルーティング戦略
-- `wildcardRouter.ts` — ワイルドカードルート（`gpt-*`）の照合
-- `modelFamilyFallback.ts` — T5ファミリー内のフォールバック
+- `services/autoCombo/` — 16 ファクターのスコアリング、8 つの自動ルーティング戦略
+- `wildcardRouter.ts` — ワイルドカードルート（`gpt-*`）のマッチング
+- `modelFamilyFallback.ts` — T5 ファミリー内フォールバック
 
-### レート制限とクォータ
+### レート制限 & クォータ
 
-- `rateLimitManager.ts` — キーとプロバイダーごとのトークンバケット
+- `rateLimitManager.ts` — キー + プロバイダーごとのトークンバケット
 - `usage.ts` — 使用量の記録
 - `quotaCache.ts` — インメモリのクォータスナップショット
 
-### アカウントとトークン
+### アカウント & トークン
 
-- `tokenRefresh.ts` — 401発生時のOAuth更新
+- `tokenRefresh.ts` — 401 時の OAuth リフレッシュ
 - `accountFallback.ts` — 代替アカウントへの切り替え
-- `sessionManager.ts` — 複数ターンのセッション状態
+- `sessionManager.ts` — マルチターンセッションの状態
 
 ### インテリジェンス
 
 - `intentClassifier.ts` — リクエストの意図を分類
-- `taskAwareRouter.ts` — タスクタイプ別にルーティング
-- `thinkingBudget.ts` — 思考トークンを割り当て
-- `contextManager.ts` — ルーティングコンテキストを注入
+- `taskAwareRouter.ts` — タスクタイプによるルーティング
+- `thinkingBudget.ts` — シンキングトークンの割り当て
+- `contextManager.ts` — ルーティングコンテキストの注入
 
 ### レジリエンス
 
-- `resilience.ts` — 再試行、バックオフ、サーキットブレーカーのオーケストレーション
+- `resilience.ts` — リトライ、バックオフ、ブレーカーのオーケストレーション
 - `emergencyFallback.ts` — 最終手段のフォールバック
 - `modelDeprecation.ts` — 後継モデルへの自動ルーティング
 
 ### 状態
 
 - `signatureCache.ts` — リクエストシグネチャによる重複排除
-- `volumeDetector.ts` — 負荷制限
+- `volumeDetector.ts` — ロードシェディング
 - `contextHandoff.ts` — セッションのシリアライズ
 
 ### 圧縮
 
 - `compression/`（サブディレクトリ）— 完全な圧縮パイプライン
-- エンジン、ルールパック、アダプターを網羅する39ファイル
+- エンジン、ルールパック、アダプターを網羅する 39 ファイル
 
 ### スキル
 
-- （[SKILLS.md](./SKILLS.md)で説明）
+- （[SKILLS.md](./SKILLS.md) で説明）
 
 ### メモリ
 
-- （[MEMORY.md](./MEMORY.md)で説明）
+- （[MEMORY.md](./MEMORY.md) で説明）
 
 ---
 
-## エグゼキューター（75以上のファイル）
+## エグゼキューター（150 モジュール）
 
-プロバイダーごとに1ファイルあります。すべてが`BaseExecutor`を拡張し、異なる部分をオーバーライドします。
+ほぼプロバイダーごとに 1 ファイルです。エグゼキュータークラスはすべて `BaseExecutor` を継承し、異なる部分のみをオーバーライドします。その他のモジュールはプロバイダーごとのヘルパー（ツールスキーマ、fetch/TTS アダプター、クワークハンドラー）です。
 
 ### 共通パターン
 
-プロバイダーは`getExecutor(providerId)`を介して解決され、設定済みのエグゼキューターが返されます。OpenAI/Anthropic互換プロバイダーは`DefaultExecutor`（`executors/default.ts`）を使用します。プロバイダー固有の動作（ベースURL、認証ヘッダー、APIバージョン）は`open-sse/config/providers/`で設定され、リクエストボディの変換は`open-sse/translator/`で処理されます。
+プロバイダーは `getExecutor(providerId)` を通じて解決され、設定されたエグゼキューターが返されます。OpenAI/Anthropic 互換のプロバイダーは `DefaultExecutor`（`executors/default.ts`）を使用します。プロバイダー固有の動作（ベース URL、認証ヘッダー、API バージョン）は `open-sse/config/providers/` で設定され、リクエストボディの変換は `open-sse/translator/` で処理されます。
 
-**カスタムURL**はプロバイダー設定で指定します。
+**カスタム URL** はプロバイダー設定で指定します：
 
 ```ts
-// open-sse/config/providers/内のプロバイダー設定
+// open-sse/config/providers/ 内のプロバイダー設定
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**カスタム認証**は、プロバイダーレジストリの認証設定（APIキー、OAuth、ヘッダープロファイル）を通じて処理されます。
+**カスタム認証** はプロバイダーレジストリの認証設定（API キー、OAuth、ヘッダープロファイル）を通じて処理されます。
 
-**カスタムリクエストボディ**の変換（たとえば、Anthropicによる`system`と`messages`の分離）は、`open-sse/translator/`でプロバイダーごとに登録されます。
+**カスタムリクエストボディ** の変換（例：Anthropic が `system` を `messages` から分離するなど）は、`open-sse/translator/` でプロバイダーごとに登録されます。
 
 ````
 
-### エグゼキューターファクトリ
+### エグゼキューターファクトリー
 
-`executors/index.ts`は`getExecutor(providerId)`をエクスポートします。
+`executors/index.ts` は `getExecutor(providerId)` をエクスポートします：
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-解決は`ExecutorRegistry`（`executors/registry.ts`）を介して行われます。特殊化された各エグゼキューターは、`executors/index.ts`の組み込みテーブルで宣言され、モジュールのロード時に`registerExecutor(alias, instance)`を介して登録されます。`getExecutor()`はレジストリを参照し、特殊化されたエントリが存在しないプロバイダーについては、メモ化された`DefaultExecutor`へフォールバックします。alias → executorの完全なマッピングは、ゴールデンテスト`tests/unit/executor-map-golden.test.ts`で規定されています。
+解決は `ExecutorRegistry`（`executors/registry.ts`）を通じて行われます。すべての特殊化されたエグゼキューターは `executors/index.ts` の組み込みテーブルで宣言され、モジュール読み込み時に `registerExecutor(alias, instance)` で登録されます。`getExecutor()` はレジストリを参照し、特殊化されたエントリーがないプロバイダーに対してはメモ化された `DefaultExecutor` にフォールバックします。完全なエイリアス → エグゼキューターのマッピングは、ゴールデンテスト `tests/unit/executor-map-golden.test.ts` によって特徴づけられています。
 
 ---
 
@@ -479,19 +482,19 @@ createResponsesApiTransformStream(): TransformStream
 
 ---
 
-## 設定
+## 構成
 
-`open-sse/config/` は設定レイヤーを保持します：
+`open-sse/config/`構成レイヤーを保持します。
 
-| ファイル                      | 目的                                                          |
-| ----------------------------- | ------------------------------------------------------------- |
-| `providerRegistry.ts`         | 352プロバイダーのカタログを対象としたチャットモデルレジストリ |
-| `providerModels.ts`           | モデルエイリアス、形式マッピング                              |
-| `constants.ts`                | タイムアウト、制限、ステータスコード                          |
-| `defaultThinkingSignature.ts` | デフォルトのClaude Thinkingシグネチャ                         |
-| `modelStrip.ts`（services内） | プロバイダーごとのフィールド除去                              |
+| ファイル                      | 目的                                                    |
+| ----------------------------- | ------------------------------------------------------- |
+| `providerRegistry.ts`         | 377 プロバイダー カタログ上のチャット モデル レジストリ |
+| `providerModels.ts`           | モデルの別名、形式のマッピング                          |
+| `constants.ts`                | タイムアウト、制限、ステータスコード                    |
+| `defaultThinkingSignature.ts` | デフォルトのClaude思考署名                              |
+| `modelStrip.ts` (サービス内)  | プロバイダーごとのフィールドストリッピング              |
 
-### プロバイダーレジストリのスキーマ
+### プロバイダー レジストリ スキーマ
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-モジュール読み込み時の Zod 検証により、すべてのプロバイダー設定が有効であることが保証されます。
+モジュールロード時のZod検証により、すべてのプロバイダー構成が有効であることが確認されます。
 
 ---
 

@@ -1,4 +1,5 @@
 import { SHARED_BOUNDARIES, CAVEMAN_INSTRUCTION_BY_LANGUAGE } from "../outputMode.ts";
+import { ANTISLOP_OUTPUT_STYLES } from "./antislop.ts";
 
 /**
  * A single output-steering style. Instruction text MUST be static per
@@ -307,6 +308,8 @@ export const OUTPUT_STYLE_CATALOG: Record<string, OutputStyle> = {
       ultra: `以极简文言回答，字字千金。仅留要义。代码、API名、错误串、URL、标识符照原样保留，绝不省略或改写。${SHARED_BOUNDARIES}`,
     },
   },
+  // antislop-ui + antislop-copy (opt-in UI / copy filters); kept in a sibling module.
+  ...ANTISLOP_OUTPUT_STYLES,
 };
 
 /** Catalog ids in declaration order (the deterministic concat order). */

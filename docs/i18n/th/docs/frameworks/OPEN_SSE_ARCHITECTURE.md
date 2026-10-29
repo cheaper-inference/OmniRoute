@@ -31,29 +31,29 @@
 ```
 open-sse/
 ├── index.ts              # จุดเริ่มต้นสาธารณะ
-├── types.d.ts            # การส่งออกชนิดข้อมูลสาธารณะ
+├── types.d.ts            # การส่งออกประเภทแบบสาธารณะ
 ├── package.json          # @omniroute/open-sse
-├── config/               # การกำหนดค่าผู้ให้บริการ ค่าคงที่ รีจิสทรี
-├── executors/            # ตัวดำเนินการ HTTP แยกตามผู้ให้บริการ (67 + base.ts/index.ts)
+├── config/               # การกำหนดค่าผู้ให้บริการ ค่าคงที่ และรีจิสทรี
+├── executors/            # ตัวดำเนินการ HTTP สำหรับผู้ให้บริการแต่ละราย (150 โมดูล + base.ts/index.ts)
 ├── handlers/             # ตัวจัดการคำขอ (chatCore, responses เป็นต้น)
 ├── lib/                  # ยูทิลิตีภายใน
 ├── mcp-server/           # เซิร์ฟเวอร์ Model Context Protocol
 ├── services/             # โมดูลบริการประมาณ 298 โมดูล
 ├── transformer/          # ตัวแปลงรูปแบบ Responses API
 ├── translator/           # การแปลรูปแบบ (OpenAI ↔ Claude ↔ Gemini)
-└── utils/                # ยูทิลิตีที่ใช้ร่วมกัน (การบันทึกล็อก ข้อผิดพลาด สตรีม เป็นต้น)
+└── utils/                # ยูทิลิตีที่ใช้ร่วมกัน (การบันทึก การจัดการข้อผิดพลาด สตรีม เป็นต้น)
 ```
 
 ### จำนวนโมดูล
 
 | ไดเรกทอรี | ไฟล์ | วัตถุประสงค์ |
-| `executors/` | 167 | ตัวดำเนินการ HTTP แยกตามผู้ให้บริการ (รวมเป็นหนึ่งผ่านแฟกทอรี DefaultExecutor) |
-| `handlers/` | 157 | จุดเริ่มต้นคำขอ (chatCore, responses, embeddings) |
+| `executors/` | 167 | ตัวดำเนินการ HTTP สำหรับผู้ให้บริการแต่ละราย (รวมเป็นหนึ่งผ่านแฟกทอรี DefaultExecutor) |
+| `handlers/` | 157 | จุดรับคำขอ (chatCore, responses, embeddings) |
 | `services/` | ~536 | การกำหนดเส้นทาง การแคช การจำกัดอัตรา การรีเฟรช เป็นต้น |
 | `translator/` | 56 | การแปลงรูปแบบ (OpenAI ↔ Claude ↔ Gemini) |
-| `mcp-server/` | 44 | เครื่องมือและ transport ของ MCP |
-| `utils/` | ~108 | ยูทิลิตีที่ครอบคลุมหลายส่วน (การบันทึกล็อก ข้อผิดพลาด สตรีม) |
-| `config/` | ~339 | การกำหนดค่าผู้ให้บริการ ค่าคงที่ รีจิสทรี |
+| `mcp-server/` | 44 | เครื่องมือและทรานสปอร์ต MCP |
+| `utils/` | ~108 | ยูทิลิตีที่ใช้งานข้ามส่วน (การบันทึก การจัดการข้อผิดพลาด สตรีม) |
+| `config/` | ~339 | การกำหนดค่าผู้ให้บริการ ค่าคงที่ และรีจิสทรี |
 
 ---
 
@@ -169,7 +169,7 @@ needsTranslation(source, target): boolean
 
 ### chatCore.ts (5977 บรรทัด)
 
-**ตัวจัดการคำขอหลัก** แม้จะมีขนาดใหญ่ แต่ก็มีโครงสร้างที่ชัดเจน:
+**ตัวจัดการ request หลัก** แม้จะมีขนาดใหญ่ แต่ก็มีโครงสร้างที่ชัดเจน:
 
 ```ts
 // โครงสร้างจำลองของ chatCore.ts
@@ -178,17 +178,17 @@ export async function handleChat(request: NextRequest) {
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. การตรวจสอบความถูกต้องของเนื้อหาคำขอ
+  // 2. การตรวจสอบ body
   const body = await parseRequestBody(request);
 
-  // 3. การตรวจหารูปแบบ + การแปลง
+  // 3. การตรวจจับรูปแบบ + การแปลง
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. การกำหนดเส้นทางแบบคอมโบ
+  // 4. การกำหนดเส้นทาง combo
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // ดำเนินการต่อไปยังเป้าหมายถัดไป
+      // ไปยัง target ถัดไป
     }
   }
 
-  // 5. ทางเลือกสำรองฉุกเฉิน
+  // 5. fallback ฉุกเฉิน
   return await emergencyFallback(body);
 }
 ```
 
-แม้จะเป็นฟังก์ชันขนาดใหญ่เพียงฟังก์ชันเดียว แต่ก็ถูกจัดระเบียบเป็น **ส่วนต่างๆ ที่มีความคิดเห็นกำกับ** ซึ่งสอดคล้องกับไปป์ไลน์ 5 ขั้นตอน
+แม้จะเป็นฟังก์ชันขนาดใหญ่เพียงฟังก์ชันเดียว แต่ก็ถูกจัดระเบียบเป็น**ส่วนต่าง ๆ ที่มีคอมเมนต์กำกับ**ซึ่งสอดคล้องกับ pipeline 5 ขั้นตอน
 
 ### combo.ts (4456 LOC)
 
-**กลไกการกำหนดเส้นทาง** ที่แปลงคอมโบให้เป็นเป้าหมายตามลำดับ
+**เอนจินกำหนดเส้นทาง**ที่แปลง combo ให้เป็น target ที่เรียงลำดับไว้แล้ว
 
 ```ts
 // services/combo.ts
@@ -226,117 +226,120 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-รองรับ **กลยุทธ์การกำหนดเส้นทาง 19 แบบ** (ดู `src/shared/constants/routingStrategies.ts`):
+รองรับ**กลยุทธ์การกำหนดเส้นทาง 20 แบบ** (ดู `src/shared/constants/routingStrategies.ts`):
 
-| กลยุทธ์             | ลักษณะการทำงาน                                                                 |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `priority`          | รายการเรียงลำดับโดยให้เป้าหมายแรกมาก่อน                                        |
-| `weighted`          | เลือกตามความน่าจะเป็นโดยอิงน้ำหนักของแต่ละเป้าหมาย                             |
-| `round-robin`       | วนผ่านเป้าหมายตามลำดับ                                                         |
-| `context-relay`     | ส่งต่อบริบทระหว่างเป้าหมาย                                                     |
-| `fill-first`        | ใช้โควตาให้เต็มก่อนย้ายไปยังเป้าหมายถัดไป                                      |
-| `p2c`               | ใช้วิธีเลือกหนึ่งจากสองตัวเลือก                                                |
-| `random`            | สุ่มแบบสม่ำเสมอ                                                                |
-| `least-used`        | เลือกเป้าหมายที่มีการใช้งานล่าสุดน้อยที่สุด                                    |
-| `cost-optimized`    | เลือกเป้าหมายที่พร้อมใช้งานและมีราคาถูกที่สุดก่อน                              |
-| `reset-aware`       | คำนึงถึงช่วงเวลารีเซ็ตของผู้ให้บริการ                                          |
-| `reset-window`      | กำหนดเส้นทางโดยอิงช่วงเวลารีเซ็ต                                               |
-| `headroom`          | เลือกเป้าหมายที่มีโควตาคงเหลือมากที่สุดก่อน                                    |
-| `strict-random`     | สุ่มแบบสม่ำเสมออย่างแท้จริง (ไม่มีการถ่วงน้ำหนักตามคุณภาพ)                     |
-| `auto`              | ใช้การให้คะแนนจาก 16 ปัจจัย (`autoCombo/`)                                     |
-| `lkgp`              | เลือกผู้ให้บริการล่าสุดที่ทราบว่าทำงานได้ก่อน                                  |
-| `context-optimized` | เหมาะที่สุดสำหรับคำขอที่มีบริบทยาว                                             |
-| `fusion`            | กระจายคำขอไปยังกลุ่มเป้าหมายพร้อมกัน แล้วสังเคราะห์ผ่านตัวตัดสิน (`fusion.ts`) |
+| กลยุทธ์             | พฤติกรรม                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------- |
+| `priority`          | รายการที่เรียงลำดับตาม target แรกสุด                                                              |
+| `weighted`          | สุ่มตามความน่าจะเป็นจากน้ำหนักของแต่ละ target                                                     |
+| `round-robin`       | หมุนเวียนผ่าน target ตามลำดับ                                                                     |
+| `context-relay`     | ส่งต่อ context ข้าม target                                                                        |
+| `fill-first`        | เติมโควตาให้เต็มก่อนย้ายไปตัวถัดไป                                                                |
+| `p2c`               | หลักการ Power of two choices                                                                      |
+| `random`            | สุ่มแบบเท่าเทียม (uniform)                                                                        |
+| `least-used`        | เลือกตัวที่ถูกใช้งานน้อยที่สุดในช่วงที่ผ่านมา                                                     |
+| `cost-optimized`    | เลือก target ที่พร้อมใช้งานและถูกที่สุดก่อน                                                       |
+| `reset-aware`       | รับรู้ถึงช่วงเวลารีเซ็ตของ provider                                                               |
+| `reset-window`      | กำหนดเส้นทางตามช่วงเวลารีเซ็ต                                                                     |
+| `headroom`          | เลือกตัวที่มีโควตาเหลือมากที่สุดก่อน                                                              |
+| `quota-weighted`    | ข้ามบัญชีที่หมดโควตา แล้วสุ่มตามโควตาที่เหลือหารด้วยโหลดที่กำลังทำงาน                             |
+| `strict-random`     | สุ่มแบบเท่าเทียมอย่างแท้จริง (ไม่มีการถ่วงน้ำหนักคุณภาพ)                                          |
+| `auto`              | ใช้การให้คะแนน 16 ปัจจัย (`autoCombo/`)                                                           |
+| `lkgp`              | เลือก provider ที่ทำงานได้ดีล่าสุดก่อน                                                            |
+| `context-optimized` | เหมาะที่สุดสำหรับ request ที่มี context ยาว                                                       |
+| `cache-optimized`   | ปักหมุด prompt prefix ที่นำกลับมาใช้ซ้ำได้แต่ละตัวไว้กับบัญชีเดิม (เพื่อให้เกิด prompt-cache hit) |
+| `fusion`            | กระจายงานไปยัง panel แบบขนาน แล้วสังเคราะห์ผลผ่าน judge (`fusion.ts`)                             |
+| `pipeline`          | เชื่อมขั้นตอนเป็นสายโซ่ — output ของแต่ละ target จะถูกป้อนให้ตัวถัดไป                             |
 
 ### base.ts (1170 LOC)
 
-**ตัวดำเนินการแบบนามธรรม** ที่ตัวดำเนินการทั้ง 107 ตัวสืบทอด มีองค์ประกอบดังนี้:
+**abstract executor** ที่ executor class ทุกตัวสืบทอดมา (โดยตรงหรือผ่าน `DefaultExecutor` และ subclass อื่น ๆ) ประกอบด้วย:
 
-- `buildUrl()` — สร้าง URL ตามค่าเริ่มต้น (คลาสย่อยสามารถเขียนทับเพื่อปรับแต่งได้)
-- `buildHeaders()` — ส่วนหัวตามค่าเริ่มต้น (การยืนยันตัวตน, content-type)
-- `transformRequest()` — ส่งผ่านโดยไม่มีการเปลี่ยนแปลงตามค่าเริ่มต้น
-- `execute()` — ลูป HTTP หลักที่มีการลองใหม่/หน่วงเวลาแบบทวีคูณ/เซอร์กิตเบรกเกอร์
+- `buildUrl()` — การสร้าง URL เริ่มต้น (subclass สามารถ override เพื่อปรับแต่งเอง)
+- `buildHeaders()` — header เริ่มต้น (auth, content-type)
+- `transformRequest()` — ส่งผ่านโดยตรงตามค่าเริ่มต้น
+- `execute()` — ลูป HTTP หลักพร้อม retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // รองรับผู้ให้บริการทั้งหมดที่เข้ากันได้กับ OpenAI/Anthropic
-  // ผู้ให้บริการลงทะเบียนการกำหนดค่า (URL, การยืนยันตัวตน, ส่วนหัว) แต่ใช้ตรรกะของตัวดำเนินการร่วมกัน
+  // จัดการ provider ทั้งหมดที่เข้ากันได้กับ OpenAI/Anthropic
+  // provider ลงทะเบียนการตั้งค่า (URL, auth, headers) แต่ใช้ตรรกะ executor ร่วมกัน
 }
 ```
 
-พฤติกรรมเฉพาะของผู้ให้บริการ (ส่วนหัวการยืนยันตัวตน, URL พื้นฐาน, ส่วนหัวเวอร์ชัน) ได้รับการกำหนดค่าผ่านรีจิสทรีผู้ให้บริการ ไม่ใช่ผ่านคลาสตัวดำเนินการแยกต่างหาก
+พฤติกรรมเฉพาะของ provider (auth header, base URL, version header) ถูกกำหนดค่าผ่าน provider registry ไม่ใช่ผ่าน executor class แยกกัน
 
 ````
 
 ---
 
-## บริการ (117 โมดูล)
+## Services (117 โมดูล)
 
-บริการคือ **โมดูลเฉพาะทางที่มีวัตถุประสงค์เดียว** ซึ่งแฮนด์เลอร์นำมาประกอบกัน หมวดหมู่หลัก ได้แก่:
+Services คือ**โมดูลที่มุ่งเน้นและมีวัตถุประสงค์เดียว** ซึ่ง handlers นำมาประกอบใช้งานร่วมกัน หมวดหมู่หลักๆ ได้แก่:
 
-### การกำหนดเส้นทางและคอมโบ
+### การกำหนดเส้นทางและ Combo
 
-- `combo.ts` — จุดเริ่มต้นสำหรับคำขอที่กำหนดเส้นทางแบบคอมโบ
-- `services/autoCombo/` — การให้คะแนนด้วย 16 ปัจจัย และกลยุทธ์กำหนดเส้นทางอัตโนมัติ 8 แบบ
-- `wildcardRouter.ts` — จับคู่เส้นทางแบบไวลด์การ์ด (`gpt-*`)
-- `modelFamilyFallback.ts` — การใช้โมเดลสำรองภายในตระกูล T5
+- `combo.ts` — จุดเริ่มต้นสำหรับคำขอที่ถูกกำหนดเส้นทางผ่าน combo
+- `services/autoCombo/` — การให้คะแนนจากปัจจัย 16 ตัว และกลยุทธ์การกำหนดเส้นทางอัตโนมัติ 8 แบบ
+- `wildcardRouter.ts` — จับคู่เส้นทางแบบ wildcard (`gpt-*`)
+- `modelFamilyFallback.ts` — fallback ภายในตระกูล T5
 
 ### การจำกัดอัตราและโควตา
 
-- `rateLimitManager.ts` — ถังโทเค็นต่อคีย์และผู้ให้บริการ
+- `rateLimitManager.ts` — token bucket ต่อ key+provider
 - `usage.ts` — การบันทึกการใช้งาน
-- `quotaCache.ts` — สแนปช็อตโควตาในหน่วยความจำ
+- `quotaCache.ts` — สแนปชอตโควตาที่อยู่ในหน่วยความจำ
 
-### บัญชีและโทเค็น
+### บัญชีและโทเทน
 
-- `tokenRefresh.ts` — รีเฟรช OAuth เมื่อได้รับ 401
-- `accountFallback.ts` — สลับไปใช้บัญชีสำรอง
-- `sessionManager.ts` — สถานะเซสชันแบบหลายรอบ
+- `tokenRefresh.ts` — รีเฟรช OAuth เมื่อพบ 401
+- `accountFallback.ts` — สลับไปยังบัญชีสำรอง
+- `sessionManager.ts` — สถานะเซสชันแบบ multi-turn
 
-### ความชาญฉลาด
+### อัจฉริยภาพ
 
 - `intentClassifier.ts` — จำแนกเจตนาของคำขอ
-- `taskAwareRouter.ts` — กำหนดเส้นทางตามประเภทงาน
-- `thinkingBudget.ts` — จัดสรรโทเค็นสำหรับการคิด
-- `contextManager.ts` — แทรกบริบทการกำหนดเส้นทาง
+- `taskAwareRouter.ts` — กำหนดเส้นทางตามประเภทของงาน
+- `thinkingBudget.ts` — จัดสรร thinking token
+- `contextManager.ts` — แทรกบริบทสำหรับการกำหนดเส้นทาง
 
-### ความทนทาน
+### ความยืดหยุ่น
 
-- `resilience.ts` — ประสานงานการลองใหม่ การหน่วงเวลาแบบทวีคูณ และวงจรตัดการทำงาน
-- `emergencyFallback.ts` — ทางเลือกสำรองสุดท้าย
-- `modelDeprecation.ts` — กำหนดเส้นทางไปยังโมเดลรุ่นสืบทอดโดยอัตโนมัติ
+- `resilience.ts` — การประสานงาน retry, backoff และ breaker
+- `emergencyFallback.ts` — fallback ทางเลือกสุดท้าย
+- `modelDeprecation.ts` — กำหนดเส้นทางอัตโนมัติไปยังโมเดลรุ่นสืบทอด
 
 ### สถานะ
 
-- `signatureCache.ts` — กำจัดรายการซ้ำตามลายเซ็นคำขอ
-- `volumeDetector.ts` — ลดภาระงาน
-- `contextHandoff.ts` — แปลงเซสชันเป็นรูปแบบที่จัดเก็บหรือส่งต่อได้
+- `signatureCache.ts` — ตัดข้อมูลซ้ำซ้อนด้วย signature ของคำขอ
+- `volumeDetector.ts` — การลดภาระ (load shedding)
+- `contextHandoff.ts` — การ serialize เซสชัน
 
 ### การบีบอัด
 
-- `compression/` (ไดเรกทอรีย่อย) — ไปป์ไลน์การบีบอัดแบบครบวงจร
-- 39 ไฟล์ที่ครอบคลุมเอนจิน ชุดกฎ และอะแดปเตอร์
+- `compression/` (ไดเรกทอรีย่อย) — ไปป์ไลน์การบีบอัดแบบสมบูรณ์
+- 39 ไฟล์ ครอบคลุมเอนจิน rule pack และ adapter
 
-### ทักษะ
+### Skills
 
 - (อธิบายไว้ใน [SKILLS.md](./SKILLS.md))
 
-### หน่วยความจำ
+### Memory
 
 - (อธิบายไว้ใน [MEMORY.md](./MEMORY.md))
 
 ---
 
-## ตัวดำเนินการ (มากกว่า 75 ไฟล์)
+## Executors (150 โมดูล)
 
-หนึ่งไฟล์ต่อผู้ให้บริการ ตัวดำเนินการทั้งหมดสืบทอดจาก `BaseExecutor` และโอเวอร์ไรด์เฉพาะส่วนที่แตกต่างกัน
+ส่วนใหญ่จะเป็นหนึ่งไฟล์ต่อผู้ให้บริการหนึ่งราย คลาส executor ทั้งหมดสืบทอด (extend) จาก `BaseExecutor` และ override เฉพาะส่วนที่แตกต่างกัน ส่วนโมดูลอื่นๆ เป็นตัวช่วยเฉพาะของผู้ให้บริการแต่ละราย (tool schema, adapter สำหรับ fetch/TTS, ตัวจัดการ quirk)
 
 ### รูปแบบทั่วไป
 
-ระบบจะแก้ไขผู้ให้บริการผ่าน `getExecutor(providerId)` ซึ่งจะคืนค่าตัวดำเนินการที่กำหนดค่าไว้ ผู้ให้บริการที่เข้ากันได้กับ OpenAI/Anthropic จะใช้ `DefaultExecutor` (`executors/default.ts`) พฤติกรรมเฉพาะของผู้ให้บริการ (URL ฐาน เฮดเดอร์การยืนยันตัวตน และเวอร์ชัน API) จะได้รับการกำหนดค่าใน `open-sse/config/providers/` ขณะที่การแปลงเนื้อหาคำขอจะดำเนินการใน `open-sse/translator/`
+ระบบจะค้นหาผู้ให้บริการผ่าน `getExecutor(providerId)` ซึ่งจะคืนค่า executor ที่ถูกกำหนดค่าไว้ ผู้ให้บริการที่เข้ากันได้กับ OpenAI/Anthropic จะใช้ `DefaultExecutor` (`executors/default.ts`) พฤติกรรมเฉพาะของผู้ให้บริการแต่ละราย (base URL, ส่วนหัวสำหรับ auth, เวอร์ชัน API) จะถูกกำหนดค่าไว้ใน `open-sse/config/providers/` ส่วนการแปลง request body จะถูกจัดการใน `open-sse/translator/`
 
-**URL แบบกำหนดเอง** ตั้งค่าผ่านการกำหนดค่าผู้ให้บริการ:
+**URL แบบกำหนดเอง** จะถูกตั้งค่าผ่านการกำหนดค่าผู้ให้บริการ:
 
 ```ts
 // การกำหนดค่าผู้ให้บริการใน open-sse/config/providers/
@@ -346,15 +349,15 @@ export default {
 }
 ````
 
-**การยืนยันตัวตนแบบกำหนดเอง** จัดการผ่านการกำหนดค่าการยืนยันตัวตนของรีจิสทรีผู้ให้บริการ (คีย์ API, OAuth และโปรไฟล์เฮดเดอร์)
+**การยืนยันตัวตนแบบกำหนดเอง** จะถูกจัดการผ่านการกำหนดค่า auth ของ provider registry (API key, OAuth, header profile)
 
-การแปลง **เนื้อหาคำขอแบบกำหนดเอง** (เช่น Anthropic แยก `system` ออกจาก `messages`) จะลงทะเบียนแยกตามผู้ให้บริการใน `open-sse/translator/`
+การแปลง **request body แบบกำหนดเอง** (เช่น กรณีของ Anthropic ที่แยก `system` ออกจาก `messages`) จะถูกลงทะเบียนแยกตามผู้ให้บริการแต่ละรายใน `open-sse/translator/`
 
 ````
 
-### แฟกทอรีตัวดำเนินการ
+### Executor Factory
 
-`executors/index.ts` ส่งออก `getExecutor(providerId)`:
+`executors/index.ts` ส่งออก (export) `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-การแก้ไขจะดำเนินการผ่าน `ExecutorRegistry` (`executors/registry.ts`): ตัวดำเนินการเฉพาะทางทุกตัวได้รับการประกาศไว้ในตารางในตัวของ `executors/index.ts` และลงทะเบียนผ่าน `registerExecutor(alias, instance)` เมื่อโหลดโมดูล ส่วน `getExecutor()` จะตรวจสอบรีจิสทรีและย้อนกลับไปใช้ `DefaultExecutor` ที่จดจำไว้สำหรับผู้ให้บริการที่ไม่มีรายการเฉพาะ การแมป alias → executor ทั้งหมดได้รับการกำหนดคุณลักษณะโดยการทดสอบมาตรฐาน `tests/unit/executor-map-golden.test.ts`
+การค้นหาจะดำเนินการผ่าน `ExecutorRegistry` (`executors/registry.ts`): executor เฉพาะทางทุกตัวจะถูกประกาศไว้ในตารางในตัวของ `executors/index.ts` และลงทะเบียนผ่าน `registerExecutor(alias, instance)` ณ ตอนที่โหลดโมดูล ส่วน `getExecutor()` จะตรวจสอบกับ registry และ fallback ไปยัง `DefaultExecutor` ที่ถูก memoize ไว้สำหรับผู้ให้บริการที่ไม่มีรายการเฉพาะทาง การแมป alias → executor ทั้งหมดจะถูกกำหนดลักษณะไว้โดย golden test `tests/unit/executor-map-golden.test.ts`
 
 ---
 
@@ -481,17 +484,17 @@ createResponsesApiTransformStream(): TransformStream
 
 ## การกำหนดค่า
 
-`open-sse/config/` จัดเก็บเลเยอร์การกำหนดค่า:
+`open-sse/config/` เก็บเลเยอร์การกำหนดค่าไว้:
 
-| ไฟล์                          | วัตถุประสงค์                                     |
-| ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | รีจิสทรีโมเดลแชตบนแค็ตตาล็อกผู้ให้บริการ 352 ราย |
-| `providerModels.ts`           | ชื่อแทนของโมเดลและการแมปรูปแบบ                   |
-| `constants.ts`                | ระยะหมดเวลา ขีดจำกัด และรหัสสถานะ                |
-| `defaultThinkingSignature.ts` | ลายเซ็นการคิดเริ่มต้นของ Claude                  |
-| `modelStrip.ts` (ใน services) | การตัดฟิลด์แยกตามผู้ให้บริการ                    |
+| ไฟล์                          | วัตถุประสงค์                                           |
+| ----------------------------- | ------------------------------------------------------ |
+| `providerRegistry.ts`         | รีจิสทรีโมเดลการแชทในแค็ตตาล็อกของผู้ให้บริการ 377 ราย |
+| `providerModels.ts`           | นามแฝงโมเดล การแมปรูปแบบ                               |
+| `constants.ts`                | การหมดเวลา ขีดจำกัด รหัสสถานะ                          |
+| `defaultThinkingSignature.ts` | ลายเซ็นการคิด Claude เริ่มต้น                          |
+| `modelStrip.ts` (ในบริการ)    | การลอกฟิลด์ต่อผู้ให้บริการ                             |
 
-### สคีมารีจิสทรีผู้ให้บริการ
+### สคีมารีจิสทรีของผู้ให้บริการ
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-การตรวจสอบความถูกต้องด้วย Zod ขณะโหลดโมดูลช่วยให้มั่นใจว่าการกำหนดค่าผู้ให้บริการทั้งหมดถูกต้อง
+การตรวจสอบความถูกต้อง Zod ที่โหลดโมดูลทำให้มั่นใจได้ว่าการกำหนดค่าของผู้ให้บริการทั้งหมดนั้นถูกต้อง
 
 ---
 

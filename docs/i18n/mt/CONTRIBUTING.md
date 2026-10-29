@@ -17,7 +17,7 @@ u mal-passi ta' rikonċiljazzjoni.
 
 ### Prerekwiżiti
 
-- **Node.js** `>=22.22.3 <23`, jew `>=24.0.0 <27` (rakkomandat: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, jew `>=24.0.0 <27` (rakkomandat: 24 LTS)
 - **npm** 10+
 
 > **Utenti ta' npm v11+ (Node 24+):** Wara `npm install`, ivverifika li l-moduli nattivi ġew installati:
@@ -38,7 +38,7 @@ npm install
 ### Varjabbli tal-Ambjent
 
 ```bash
-# Oħloq il-.env tiegħek mill-mudell
+# Oħloq il-fajl .env tiegħek mill-mudell
 cp .env.example .env
 
 # Iġġenera s-sigrieti meħtieġa
@@ -48,77 +48,77 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Varjabbli ewlenin għall-iżvilupp:
 
-| Varjabbli              | Valur Predefinit tal-Iżvilupp | Deskrizzjoni                   |
-| ---------------------- | ----------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                       | Port tas-server                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`      | URL bażi għall-frontend        |
-| `JWT_SECRET`           | (iġġenerah hawn fuq)          | Sigriet għall-iffirmar tal-JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`                    | Password tal-ewwel login       |
-| `APP_LOG_LEVEL`        | `info`                        | Livell ta' dettall tal-logs    |
+| Varjabbli              | Valur Predefinit tal-Iżvilupp | Deskrizzjoni                    |
+| ---------------------- | ----------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                       | Port tas-server                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`      | URL bażi għall-frontend         |
+| `JWT_SECRET`           | (iġġenera hawn fuq)           | Sigriet għall-iffirmar tal-JWT  |
+| `INITIAL_PASSWORD`     | `CHANGEME`                    | Password tal-ewwel login        |
+| `APP_LOG_LEVEL`        | `info`                        | Livell ta' dettall tar-reġistru |
 
 ### Settings tad-Dashboard
 
-Id-dashboard jipprovdi swiċċijiet tal-UI għal funzjonalitajiet li jistgħu jiġu kkonfigurati wkoll permezz tal-varjabbli tal-ambjent:
+Id-dashboard jipprovdi kontrolli fl-UI għal funzjonalitajiet li jistgħu jiġu kkonfigurati wkoll permezz tal-varjabbli tal-ambjent:
 
-| Post tas-Setting     | Swiċċ                            | Deskrizzjoni                                    |
-| -------------------- | -------------------------------- | ----------------------------------------------- |
-| Settings → Avvanzati | Modalità ta' Debugging           | Ippermetti logs ta' debugging għat-talbiet (UI) |
-| Settings → Ġenerali  | Viżibbiltà tal-Istrixxa tal-Ġenb | Uri/aħbi t-taqsimiet tal-istrixxa tal-ġenb      |
+| Post tas-Setting     | Kontroll                         | Deskrizzjoni                                 |
+| -------------------- | -------------------------------- | -------------------------------------------- |
+| Settings → Avvanzati | Modalità ta' Debug               | Attiva r-reġistri tat-talbiet tad-debug (UI) |
+| Settings → Ġenerali  | Viżibbiltà tal-Istrixxa tal-Ġenb | Uri/aħbi t-taqsimiet tal-istrixxa tal-ġenb   |
 
-Dawn is-settings jinħażnu fid-database u jibqgħu fis-seħħ wara li s-sistema terġa' tinbeda, filwaqt li jegħlbu l-valuri predefiniti tal-varjabbli tal-ambjent meta jkunu ssettjati.
+Dawn is-settings jinħażnu fid-database u jibqgħu fis-seħħ bejn startjar mill-ġdid, filwaqt li jieħdu preċedenza fuq il-valuri predefiniti tal-varjabbli tal-ambjent meta jkunu ssettjati.
 
 ### Tħaddim Lokalment
 
 ```bash
-# Modalità tal-iżvilupp (aġġornament awtomatiku)
+# Modalità tal-iżvilupp (rikarigu awtomatiku)
 npm run dev
 
-# Bini għall-produzzjoni
+# Build tal-produzzjoni
 npm run build    # next build → .build/next/ imbagħad assembleStandalone → dist/
 npm run start
 
-# Kompilazzjoni rapida tal-backend/API biss għall-bidliet tal-kontributuri
+# Kompilazzjoni rapida tal-backend/API biss għal bidliet mill-kontributuri
 npm run build:contributor
 
-# Bini tar-rilaxx (bini mill-ġdid nadif + indikatur HEAD — meħtieġ għall-implimentazzjoni)
+# Build tar-rilaxx (build mill-ġdid nadif + sentinella HEAD — meħtieġ għad-deployment)
 npm run build:release   # rm -rf .build dist && build + jikteb dist/BUILD_SHA
 
 # Konfigurazzjoni komuni tal-port
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Il-bini għall-kontributuri jwettaq validazzjoni permezz tal-kompilazzjoni biss: ma jiġborx id-distribuzzjoni
-standalone u lanqas ma jibni r-riżorsi fakultattivi għall-ippakkjar nattiv. Uża l-bini regolari għall-produzzjoni meta
+Il-build tal-kontributur iwettaq validazzjoni permezz tal-kompilazzjoni biss: ma jiġborx id-distribuzzjoni
+standalone u lanqas jibni l-assi fakultattivi tal-ippakkjar nattiv. Uża l-build regolari tal-produzzjoni meta
 jkollok bżonn tivvalida l-pakkett lest għad-distribuzzjoni.
 
-### Struttura tal-Output tal-Bini
+### Struttura tal-Output tal-Build
 
-| Direttorju | Kontenut                                                                               | Traċċat |
-| ---------- | -------------------------------------------------------------------------------------- | ------- |
-| `src/`     | Kodiċi sors tal-applikazzjoni (TypeScript / TSX)                                       | Iva     |
-| `.build/`  | Fajls intermedji — output ta' `next build` (injorat minn git, `distDir = .build/next`) | Le      |
-| `dist/`    | Pakkett lest għad-distribuzzjoni — miġbur minn `assembleStandalone` (injorat minn git) | Le      |
+| Direttorju | Kontenut                                                                         | Traċċat |
+| ---------- | -------------------------------------------------------------------------------- | ------- |
+| `src/`     | Kodiċi sors tal-applikazzjoni (TypeScript / TSX)                                 | Iva     |
+| `.build/`  | Fajls intermedji — output ta' `next build` (gitignored, `distDir = .build/next`) | Le      |
+| `dist/`    | Pakkett lest għad-distribuzzjoni — miġbur minn `assembleStandalone` (gitignored) | Le      |
 
-Il-pipeline tal-bini jitwettaq f'pass wieħed:
+Il-pipeline tal-build jitwettaq f'pass wieħed:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (output ta' Next.js)
-  └─ assembleStandalone()                 (jikkopja l-fajls standalone + static + public + ir-riżorsi nattivi)
+  └─ assembleStandalone()                 (jikkopja standalone + static + public + assi nattivi)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` barra minn hekk inaddaf iż-żewġ direttorji l-ewwel u jikteb
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bħala indikatur tal-integrità tal-implimentazzjoni.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bħala sentinella tal-integrità tad-deployment.
 
-`npm run build:contributor` juża l-profil tal-bini għall-backend biss. Dan jissostitwixxi temporanjament
-il-fajls tal-UI tad-dashboard bi stubs matul il-bini, iżomm il-handlers tar-rotot tal-API, u jirrestawra l-fajls oriġinali
-wara l-bini. Uża `npm run build` għal bidliet li jaffettwaw l-UI tad-dashboard jew għal
-validazzjoni sħiħa tar-rilaxx; il-profil għall-kontributuri mhuwiex sostitut għall-bini tar-rilaxx.
+`npm run build:contributor` juża l-profil tal-build tal-backend biss. Huwa jissostitwixxi temporanjament
+il-fajls tal-UI tad-dashboard b'verżjonijiet stub waqt il-build, iżomm il-handlers tar-rotot tal-API, u jirrestawra l-fajls oriġinali
+wara l-build. Uża `npm run build` għal bidliet li jaffettwaw l-UI tad-dashboard jew għal
+validazzjoni sħiħa tar-rilaxx; il-profil tal-kontributur mhuwiex sostitut għall-build tar-rilaxx.
 
-> **Nota dwar l-implimentazzjoni fuq VPS:** id-direttorju remot tal-immaġni `/usr/lib/node_modules/omniroute/app/`
-> ma nbidilx. Il-proċeduri tal-implimentazzjoni jużaw rsync għall-kontenut ta' `dist/` fih.
-> Inbidlet biss il-mogħdija tal-output tal-bini fir-repo (`app/` → `dist/`).
+> **Nota dwar deployment fuq VPS:** id-direttorju remot tal-image `/usr/lib/node_modules/omniroute/app/`
+> ma nbidilx. Il-mekkaniżmi tad-deployment jużaw rsync biex jikkopjaw fih il-kontenut ta' `dist/`.
+> Inbidlet biss il-mogħdija tal-output tal-build fir-repożitorju (`app/` → `dist/`).
 
 URLs predefiniti:
 
@@ -172,88 +172,91 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 
 ---
 
-## Qed Tista' Tqies Testijiet
+## Tħaddim tat-Testijiet
 
 ```bash
-# Kollha t-testijiet (unit + vitest + ecosystem + e2e)
+# It-testijiet kollha (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Singlu file ta' test (Node.js native test runner — l-aqwa testijiet jutu l-waħda)
+# Fajl wieħed tat-testijiet (runner nattiv tat-testijiet ta’ Node.js — il-biċċa l-kbira tat-testijiet jużaw dan)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Biex testijiet unit impattati biss mill-bidla tiegħek (istess TIA selector bħala l-CI gate, #8084)
-npm run test:scoped            # bidliet fil-commit l-aħħar (jew working tree)
-npm run test:scoped:staged     # bidliet staged biss — jaqbad sew b'pre-commit run
-npm run test:scoped:full       # rebildja l-import-graph map l-ewwel (wara li tżid/temmuv file)
-# Exit 1 + "run the full suite" jibni file hub (tsconfig, package.json, …) jew
-# sorgenti unmapped bedlet — is-selektor jiffaġġa safe, ma jmissx silently.
+# It-testijiet unit biss affettwati mill-bidla tiegħek (l-istess selettur TIA bħall-kontroll tas-CI, #8084)
+npm run test:scoped            # bidliet fl-aħħar commit (jew fis-siġra tax-xogħol)
+npm run test:scoped:staged     # bidliet staged biss — jaħdem tajjeb ma’ tħaddim pre-commit
+npm run test:scoped:full       # l-ewwel ibni mill-ġdid il-mappa tal-graff tal-importazzjonijiet (wara li żżid/iċċaqlaq fajls)
+# Exit 1 + "run the full suite" tfisser li nbidel fajl ċentrali (tsconfig, package.json, …) jew
+# sors mhux immappjat — is-selettur ifalli b’mod sikur u qatt ma jaqbeż testijiet fis-skiet.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (server MCP, autoCombo, cache)
 npm run test:vitest
 
-# Testijiet E2E (meħtieġ Playwright)
+# Testijiet E2E (jeħtieġu Playwright)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# E2E tal-klijenti tal-protokoll (trasporti MCP, A2A)
 npm run test:protocols:e2e
 
-# Testijiet ta' kompatibilità tal-ecosystem
+# Testijiet tal-kompatibbiltà tal-ekosistema
 npm run test:ecosystem
 
-# Coverage gate: 60% statements/lines/functions/branches
+# Limitu tal-kopertura: 60% dikjarazzjonijiet/linji/funzjonijiet/fergħat
 npm run test:coverage
 npm run coverage:report
 
-# Lint + format check
+# Kontroll tal-lint + format
 npm run lint
 npm run check
 
-# Gated real-upstream combo smoke (meħtieġ VPS access + real provider credits)
-# Jipprovokaw PROVIDERS REALE — jiswa ftit. QATT ma jirri fil-CI. Jiskipa clean mingħajr il-gate.
-# Meħtieġ: ssh root@192.168.0.15 access (sources a read-only DB snapshot mill-VPS).
+# Smoke test combo reali kkontrollat fuq upstream (jeħtieġ aċċess għall-VPS + krediti reali tal-fornitur)
+# Jaċċessa fornituri REALI — jiswa ftit. QATT ma jitħaddem fis-CI. Jinqabeż b’mod nadif mingħajr il-kontroll.
+# Jeħtieġ: aċċess ssh root@192.168.0.15 (juża snapshot read-only tad-DB mill-VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — plain Node ESM scripts, jipprovokaw live .15 server direttament.
-# Meħtieġ: ssh root@192.168.0.15 access (combos created/torn down via SSH sqlite).
-# Jipprovokaw PROVIDERS REALE (kost żgħira). Jikkreaw/jiddilettu biss __live_test__* combos. QATT ma jirri fil-CI.
-# REQUIRE_API_KEY=false fuq .15 għax ebda API key meħtieġa, imma jirispetta COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY jekk msetjup.
-npm run test:combo:live:vps              # 7 HTTP scenarios (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # żieda real cross-provider failover scenario (8 total)
+# Smoke test live tal-VPS tal-Fażi 3 — skripts Node ESM sempliċi, jaċċessaw direttament is-server live .15.
+# Jeħtieġ: aċċess ssh root@192.168.0.15 (il-combos jinħolqu/jitneħħew permezz ta’ SSH sqlite).
+# Jaċċessa fornituri REALI (spiża żgħira). Joħloq/iħassar biss combos __live_test__*. QATT ma jitħaddem fis-CI.
+# REQUIRE_API_KEY=false fuq .15 għalhekk mhi meħtieġa l-ebda API key, iżda jirrispetta COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY jekk issettjati.
+npm run test:combo:live:vps              # 7 xenarji HTTP (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # iżid xenarju reali ta’ failover bejn fornituri (8 b’kollox)
 ```
 
-Noti dwar Coverage:
+Noti dwar il-kopertura:
 
-- `npm run test:coverage` jikkalcola source coverage għall-main unit test suite, jieħu barra `tests/**`, u jinkludi `open-sse/**`
-- Pull requests għandhom jibqgħu l-coverage gate b'**60%+**' statements/lines/functions/branches
-- Jekk PR tibdel production code f'`src/`', `open-sse/`', `electron/`', jew `bin/`', għandha tżid jew tagħmel update għat-testijiet awtomatiċi fil-istess PR
-- `npm run coverage:report` tipprinta d-dettaljat file-by-file report mill-aħħar coverage run
-- `npm run test:coverage:legacy` tħalli l-metric l-qadima għal komparazzjoni storika
-- Ara `docs/ops/COVERAGE_PLAN.md` għall-roadmap ta' phased coverage improvement
+- `npm run test:coverage` ikejjel il-kopertura tas-sors għas-suite ewlenija tat-testijiet unit, jeskludi `tests/**`, u jinkludi `open-sse/**`
+- Il-pull requests iridu jżommu l-limitu tal-kopertura ta’ **60%+** għad-dikjarazzjonijiet/linji/funzjonijiet/fergħat
+- Jekk PR jibdel il-kodiċi tal-produzzjoni f’`src/`, `open-sse/`, `electron/`, jew `bin/`, irid iżid jew jaġġorna testijiet awtomatizzati fl-istess PR
+- `npm run coverage:report` jistampa r-rapport dettaljat fajl b’fajl mill-aktar tħaddim reċenti tal-kopertura
+- `npm run test:coverage:legacy` iżomm il-metrika l-antika għal tqabbil storiku
+- Ara `docs/ops/COVERAGE_PLAN.md` għall-pjan direzzjonali gradwali għat-titjib tal-kopertura
 
-### Rekwiziti tal-Pull Request
+### Rekwiżiti tal-Pull Request
 
-Qabel ma tiftaħ PR, uża l-
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) biex tirri l-focused loop għal
-x'bedlet. L-unit suite sħiħa (4 CI shards), Vitest, il-**60%+** coverage gate, u
-il-production build huma responsabbiltà tal-CI — jirruhom lokalment ma jżidu xejn signal li
-l-PR checks ma jkollokx, u fuq makkini żgħar jistgħu jissaturaw l-host (#8084):
+Qabel tiftaħ PR, uża l-
+[Proċess Rakkomandat għall-Kontribuzzjonijiet](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) biex tħaddem iċ-ċiklu ffukat għal
+dak li biddilt. Is-suite sħiħa tat-testijiet unit (4 shards tas-CI), Vitest, il-limitu tal-kopertura ta’ **60%+**, u
+l-build tal-produzzjoni huma r-responsabbiltà tas-CI — it-tħaddim tagħhom lokalment ma jipprovdi ebda indikazzjoni li l-kontrolli
+tal-PR ma jkunux diġà se jagħtuk, u fuq magni iżgħar jista’ jgħabbi żżejjed lill-host (#8084):
 
-- Irri l-test files li jkopru l-bidla tiegħek: `node --import tsx/esm --test tests/unit/<file>.test.ts`
-- Irri `npm run lint`
-- Inkludi jew agġorna testijiet awtomatiċi fil-istess PR meta production code jibbedel
-- Inkludi l-test files bedlet jew mżidda fid-deskrizzjoni tal-PR meta production code bedlet
-- Chekka r-riżultat ta' SonarQube fuq il-PR meta l-proġett secrets huma konfigurati fil-CI
+- Ħaddem il-fajls tat-testijiet li jkopru l-bidla tiegħek: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Ħaddem `npm run lint`
+- Inkludi jew aġġorna testijiet awtomatizzati fl-istess PR kull meta jinbidel il-kodiċi tal-produzzjoni
+- Fil-fajls `node:test`, poġġi kull `await` tal-ogħla livell (bħal `await import(...)`) qabel l-ewwel `test()` / `describe()`: taħt `--test-force-exit`, testijiet irreġistrati warajh jistgħu fis-skiet qatt ma jitħaddmu (#18045; infurzat minn `npm run check:test-tla-order`)
+- Inkludi l-fajls tat-testijiet mibdula jew miżjuda fid-deskrizzjoni tal-PR meta jkun inbidel il-kodiċi tal-produzzjoni
+- Iċċekkja r-riżultat ta’ SonarQube fuq il-PR meta s-segreti tal-proġett ikunu kkonfigurati fis-CI
 
-Status attwali tat-testijiet: **122 unit test files** li jkopru:
+L-istatus attwali tat-testijiet: **122 fajl tat-testijiet unit** li jkopru:
 
-- Provider translators u format conversion
-- Rate limiting, circuit breaker, u resilience
-- Semantic cache, idempotency, progress tracking
-- Database operations u schema (21 DB modules)
-- OAuth flows u authentication
-- API endpoint validation (Zod v4)
-- MCP server tools u scope enforcement
-- Memory u Skills systems
+- Tradutturi tal-fornituri u konverżjoni tal-format
+- Limitazzjoni tar-rata, circuit breaker, u reżiljenza
+- Cache semantiku, idempotenza, u traċċar tal-progress
+- Operazzjonijiet tad-database u schema (21 modulu tad-DB)
+- Flussi OAuth u awtentikazzjoni
+- Validazzjoni tal-endpoints tal-API (Zod v4)
+- Għodod tas-server MCP u infurzar tal-ambitu
+- Sistemi tal-Memorja u tal-Ħiliet
+
+---
 
 ## Stil tal-Kodiċi
 
@@ -290,69 +293,71 @@ Ara `open-sse/utils/stream.ts` u `open-sse/utils/streamHandler.ts` għal eżempj
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Paġni tal-dashboard (23 sezzjonijiet)
-│   ├── api/',              # Rotot API (51 direttorju)
+├── app/                    # App Router ta’ Next.js 16
+│   ├── (dashboard)/        # Paġni tad-dashboard (23 taqsima)
+│   ├── api/                # Rotot tal-API (51 direttorju)
 │   └── login/              # Paġni tal-awtentikazzjoni (.tsx)
-├── domain/                 # Magna tal-politika (policyEngine, comboResolver, costRules, eċċ.)
-├── lib/                    # Logika tan-negozju ta' l-qalba (.ts)
-│   ├── a2a/                # Server tal-protokoll A2A v0.3
-│   ├── acp/                # Reġistru tal-Komunikazzjoni tal-Aġent
-│   ├── compliance/         # Magna tal-politika tal-konformità
-│   ├── db/               # Moduli tal-q域 SQLite + 130 migrazzjonijiet
-│   ├── memory/             # Memorja twila tal-konversazzjoni
-│   ├── oauth/              # Fornituri, servizzi, u għodod tal-OAuth
-│   ├── skills/             # Frizat tar-ħiliet estiżibbli
-│   ├── usage/              # Tħassir tal-użu u kalkolu tal-ispiża
-│   └── localDb.ts          # Saff ta' re-export biss — qatt iżid logika hawn
-├── middleware/              # Middleware tal-bżonnijiet (promptInjectionGuard)
-├── mitm/                   # Proxy MITM (ċertifikat, DNS, rotta tal-miri)
+├── domain/                 # Magna tal-politiki (policyEngine, comboResolver, costRules, eċċ.)
+├── lib/                    # Loġika ewlenija tan-negozju (.ts)
+│   ├── a2a/                # Server tal-protokoll Agent-to-Agent v0.3
+│   ├── acp/                # Reġistru tal-Agent Communication Protocol
+│   ├── compliance/         # Magna tal-politiki tal-konformità
+│   ├── db/                 # Moduli tad-dominju SQLite + 130 migrazzjoni
+│   ├── memory/             # Memorja persistenti tal-konversazzjonijiet
+│   ├── oauth/              # Fornituri, servizzi u utilitajiet OAuth
+│   ├── skills/             # Qafas estensibbli tal-ħiliet
+│   ├── usage/              # Traċċar tal-użu u kalkolu tal-ispejjeż
+│   └── localDb.ts          # Saff ta’ esportazzjoni mill-ġdid biss — qatt iżżid loġika hawn
+├── middleware/              # Middleware tat-talbiet (promptInjectionGuard)
+├── mitm/                   # Proxy MITM (ċertifikat, DNS, direzzjonar tad-destinazzjoni)
 ├── shared/
 │   ├── components/         # Komponenti React (.tsx)
-│   ├── constants/          # Definizzjonijiet tal-fornitur (329), ambiti MCP, 19 strateġiji tal-rotta
-│   ├── utils/              # Serparator tal-midja, sanitizer, għodod tal-awtentikazzjoni
-│   └── validation/         # Schemas tal-Zod v4
-└── sse/                    # Provvista tal-rotta SSE
+│   ├── constants/          # Definizzjonijiet tal-fornituri (329), ambiti MCP, 20 strateġija ta’ direzzjonar
+│   ├── utils/              # Circuit breaker, sanitizer, għodod awżiljarji tal-awtentikazzjoni
+│   └── validation/         # Skemi Zod v4
+└── sse/                    # Pipeline tal-proxy SSE
 
-open-sse/                   # Spazju ta' @omniroute/open-sse
-├── executors/              # 89 modulu ta' implimentazzjoni tal-eżekutur
-├── handlers/               # 11 trattaturi tal-bżonnijiet (chat, risposti, embendings, immaġini, eċċ.)
-├── mcp-server/             # Server MCP (110 għodod uniċi, 3 trasporti, 33 ambiti)
-├── services/               # 178 servizz ta' l-ewwel livell (combo, autoCombo, rateLimitManager, eċċ.)
-├── translator/             # Tradutturi tal-format (OpenAI ↔ Claude ↔ Gemini ↔ Risposti ↔ Ollama)
-├── transformer/            # Traduttur tar-Risposti API
-└── utils/                  # 22 modulu tal-għodod (stream, TLS, proxy, logging)
+open-sse/                   # Spazju tax-xogħol @omniroute/open-sse
+├── executors/              # 150 modulu ta’ eżekuzzjoni (klassijiet tal-eżekuturi + għodod awżiljarji għal kull fornitur)
+├── handlers/               # 11-il handler tat-talbiet (chat, responses, embeddings, images, eċċ.)
+├── mcp-server/             # Server MCP (110 għodda unika, 3 trasporti, 33 ambitu)
+├── services/               # 178 servizz tal-ogħla livell (combo, autoCombo, rateLimitManager, eċċ.)
+├── translator/             # Tradutturi tal-formati (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Transformer tal-API Responses
+└── utils/                  # 22 modulu ta’ utilità (stream, TLS, proxy, logging)
 
-electron/                   # App desktop tal-Electron (pjanforma multipla)
+electron/                   # Applikazzjoni desktop Electron (għal diversi pjattaformi)
 
 tests/
-├── unit/                   # Test runner Node.js (1,574 fajls tal-test)
+├── unit/                   # Runner tat-testijiet Node.js (1,574 fajl tat-testijiet)
 ├── integration/            # Testijiet tal-integrazzjoni
 ├── e2e/                    # Testijiet Playwright
-├── security/               # Testijiet ta' sigurtà
+├── security/               # Testijiet tas-sigurtà
 ├── translator/             # Testijiet speċifiċi għat-traduttur
-└── load/                   # Testijiet tal-piż
+└── load/                   # Testijiet tat-tagħbija
 
 docs/
-├── adr/                     # Rekords tad-deċiżjonijiet tal-arkitettura
-├── architecture/            # Arkitettura tal-isistema u reżiljenza
-├── comparison/              # OmniRoute vs alternattivi
+├── adr/                     # Rekords tad-Deċiżjonijiet Arkitettoniċi
+├── architecture/            # Arkitettura u reżiljenza tas-sistema
+├── comparison/              # OmniRoute kontra alternattivi
 ├── compression/             # Gwidi u regoli tal-kompressjoni
 ├── dev/                     # Gwidi tal-iżvilupp
 ├── diagrams/                # Dijagrammi tal-arkitettura
-├── frameworks/              # MCP, A2A, OpenCode, Memorja, Ħiliet
-├── guides/                  # Gwida tal-utent, Docker, tħejjija, tifwir
-├── i18n/                    # Traduzzjonijiet internazzjonali tal-README
-├── marketing/               # Materiali tal-kummerċjalizzazzjoni
-├── ops/                     # Tħaddim, proxy, koperanza, rilizzi
-├── providers/               # Dokumenti speċifiċi tal-fornitur
-├── reference/             # Referenza API, varjambli tal-ambjent, għodod CLI, oqsas ħelsien
-├── releases/               # Noti tar-rilizzi
-├── routing/                 # Magna tal-combo awtomatika, riproduzzjoni tar-raguni
-├── screenshots/             # Skrinshots tal-dashboard
-├── security/               # Barriers, konformità, stealth, tokens
-└── specs/                   # Speċifikazzjonijiet tal-disinn
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Gwida għall-utent, Docker, konfigurazzjoni, soluzzjoni tal-problemi
+├── i18n/                    # Traduzzjonijiet internazzjonalizzati tar-README
+├── marketing/               # Materjal tal-marketing
+├── ops/                     # Distribuzzjoni, proxy, kopertura, rilaxxi
+├── providers/               # Dokumentazzjoni speċifika għall-fornituri
+├── reference/               # Referenza tal-API, varjabbli tal-ambjent, għodod CLI, livelli bla ħlas
+├── releases/                # Noti tar-rilaxx
+├── routing/                 # Magna auto-combo, riproduzzjoni tar-raġunament
+├── screenshots/             # Screenshots tad-dashboard
+├── security/                # Salvagwardji, konformità, stealth, tokens
+└── specs/                   # Speċifikazzjonijiet tad-disinn
 ```
+
+---
 
 ## Ġdid tal-Foritur
 

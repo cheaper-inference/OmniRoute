@@ -73,6 +73,16 @@ curl -i \
 
 یک کلید فاقد حوزهٔ manage (یا نبود Bearer) پاسخ `403 LOCAL_ONLY` را بازمیگرداند. پیشوند همسطح `/api/cli-tools/runtime/*` عمداً قابل دور زدن نیست — به بخش [سطوح محافظ مسیر — استثنای حوزهٔ manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) مراجعه کنید.
 
+### اعتبارسنجی Origin
+
+پس از احراز هویت، سرآیند `Origin` در هر درخواست به `/api/mcp/*` — ترابری‌ها و مسیرهای مدیریتی مانند `status`, `tools`, `audit`, `restart` — اعتبارسنجی می‌شود، فارغ از اینکه فراخوان کیست (کلید API، توکن CLI، نشست داشبورد یا loopback ناشناس با ورود غیرفعال). این همان محافظت در برابر DNS rebinding است که مشخصات MCP Streamable HTTP الزام می‌کند.
+
+- **بدون سرآیند `Origin`** ← مجاز. CLI ـِ OmniRoute، SDK و کلاینت‌های IDE آن را ارسال نمی‌کنند.
+- **`Origin` مجاز** ← `localhost` / `127.0.0.1` / `[::1]` روی هر پورت، یا origin عمومی خود OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`، origin ارسال‌شده توسط یک پراکسی معکوس مورد اعتماد (`OMNIROUTE_TRUST_PROXY`، فقط وقتی base URL تنظیم نشده باشد)، یا میزبان IP از نوع loopback/LAN که مستقیم به آن دسترسی می‌شود. سرآیند `Host` به‌تنهایی هرگز یک origin را مورد اعتماد نمی‌کند.
+- **هر `Origin` دیگر، از جمله `null`** ← `403` با بدنهٔ خطای JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. نشست داشبوردی که توکن CSRF معتبر ارائه کند، مانند سایر نوشتن‌های داشبورد، همچنان پذیرفته می‌شود.
+
+کلاینت MCP مرورگری که پشت پراکسی معکوس سرو می‌شود به `OMNIROUTE_PUBLIC_BASE_URL` نیاز دارد؛ فهرست مجاز برای originهای دیگر وجود ندارد. درخواست پیش‌پرواز CORS (`OPTIONS`) از نظر Origin بررسی نمی‌شود؛ درخواست بعدی بررسی می‌شود.
+
 ## پیکربندی IDE
 
 برای راهاندازی Claude Desktop،‏ Cursor،‏ Cline و کلاینتهای سازگار با MCP، به [پیکربندی کلاینت MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) مراجعه کنید.
@@ -289,108 +299,96 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 
 ---
 
-## احراز هویت و Scopeها
+## احراز هویت و محدودهها
 
-فراخوانیهای ابزار MCP رشتههای scope را از فراخواننده میخوانند. این بررسی یکی از سه
-فضای نام مستقل است. پذیرفتهشدن توسط یک بررسیکننده بهمعنای پذیرفتهشدن توسط سایرین نیست.
-قواعد در [سه فضای نام scope](#three-scope-namespaces) آمدهاند.
-فهرست ابزارها در [Scopeهای ابزار MCP](#mcp-tool-scopes) آمده است.
+فراخوانیهای ابزار MCP رشتههای محدوده را از فراخواننده میخوانند. این بررسی یکی از سه فضای نام مستقل است. قبولی در یک بررسیکننده بهمعنای قبولی در بررسیکنندههای دیگر نیست. قواعد در بخش [سه فضای نام محدوده](#three-scope-namespaces) آمدهاند.
+فهرست ابزارها در بخش [محدودههای ابزار MCP](#mcp-tool-scopes) قرار دارد.
 
-### سه فضای نام scope
+### سه فضای نام محدوده
 
-`manage` در یک کلید API، مقدار `read:compression` در یک ابزار MCP و مقدار `read` در یک
-توکن دسترسی `oma_live_…` سه مجوز متفاوت هستند. فراخوانندگانی که یک توکن دسترسی `read`
-را به یک مسیر مدیریتی تغییردهنده ارسال کنند، پاسخ HTTP 403
+`manage` در یک کلید API،‏ `read:compression` در یک ابزار MCP و `read` در یک توکن دسترسی `oma_live_…` سه مجوز متفاوتاند. فراخوانندگانی که یک توکن دسترسی `read` را به یک مسیر مدیریتی تغییردهنده ارسال کنند، پاسخ HTTP 403 زیر را دریافت میکنند:
 `Access token scope 'read' is insufficient; 'write' required.`
-را دریافت میکنند. این رتبهبندی متعلق به `scopeSatisfies` است. این تابع جدول MCP را بررسی نمیکند و تطبیقدهنده MCP
-نیز آن را بررسی نمیکند.
+این رتبهبندی توسط `scopeSatisfies` انجام میشود. این تابع به جدول MCP مراجعه نمیکند و تطبیقدهنده MCP نیز به آن مراجعه نمیکند.
 
-| فضای نام               | اعتبارنامه                                                                     | بررسیکننده                    | پذیرفتهشدن اجازه میدهد                               |
-| :--------------------- | :----------------------------------------------------------------------------- | :---------------------------- | :--------------------------------------------------- |
-| مدیریت کلید API        | `api_keys.scopes`                                                              | `hasManageScope`              | دسترسی به REST مدیریتی برای آن کلید Bearer           |
-| قابلیت افزوده کلید API | همان آرایه، یک رشته دقیق                                                       | تابع کمکی نامبردهشده در پایین | فقط همان یک قابلیت                                   |
-| Scopeهای ابزار MCP     | همان آرایه، در غیر این صورت `_meta` متعلق به MCP، و سپس `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | پس از فعالشدن اعمال محدودیت، دسترسی به آن ابزار      |
-| توکن دسترسی            | `oma_live_…`                                                                   | `scopeSatisfies`              | مسیر مدیریتیای که متد و مسیر آن به آن رتبه نیاز دارد |
+| فضای نام                  | اعتبارنامه                                                                     | بررسیکننده                    | قبولی چه چیزی را مجاز میکند                          |
+| :------------------------ | :----------------------------------------------------------------------------- | :---------------------------- | :--------------------------------------------------- |
+| مدیریت کلید API           | `api_keys.scopes`                                                              | `hasManageScope`              | REST مدیریتی برای آن کلید Bearer                     |
+| قابلیتهای افزوده کلید API | همان آرایه، با یک رشته دقیق                                                    | تابع کمکی نامبردهشده در ادامه | فقط همان یک قابلیت                                   |
+| محدودههای ابزار MCP       | همان آرایه، در غیر این صورت `_meta` مربوط به MCP، و سپس `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | پس از فعالشدن اعمال محدودیت، همان ابزار              |
+| توکن دسترسی               | `oma_live_…`                                                                   | `scopeSatisfies`              | مسیر مدیریتیای که متد و مسیر آن به آن رتبه نیاز دارد |
 
-ایجاد هر اعتبارنامه در
+صدور هر اعتبارنامه در
 [احراز هویت مدیریتی](../guides/MANAGEMENT-AUTH.md) توضیح داده شده است.
 
-#### Scopeهای کلید API
+#### محدودههای کلید API
 
-یک آرایه `api_keys.scopes` برای دو کار استفاده میشود. این دو کار از توابع متفاوتی استفاده میکنند.
+یک آرایه `api_keys.scopes` دو وظیفه را انجام میدهد. این وظایف از توابع متفاوتی استفاده میکنند.
 
-**REST مدیریتی.** مقادیر `manage` و `admin` اعضای
+**REST مدیریتی.** `manage` و `admin` اعضای
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) هستند.
-`hasManageScope` همان چیزی است که مسیرهای مدیریتی را برای آن کلید مجاز میکند. `admin` در
-آن مسیرها قابلیت مدیریت دارد. واژه `admin` در اینجا رتبه
-توکن دسترسی نیست و به scopeهای ابزار MCP گسترش نمییابد.
+تابع `hasManageScope` مسیرهای مدیریتی را برای آن کلید مجاز میکند. `admin` در آن مسیرها قابلیت مدیریت دارد. واژه `admin` در اینجا رتبه توکن دسترسی نیست و به محدودههای ابزار MCP گسترش پیدا نمیکند.
 
-**رشتههای افزوده.** هرکدام یک آزمون عضویت دقیق هستند و هرکدام خارج از
-`MANAGEMENT_API_KEY_SCOPES` باقی میمانند.
+**رشتههای افزوده.** هرکدام با آزمون عضویت دقیق بررسی میشوند و همگی بیرون از `MANAGEMENT_API_KEY_SCOPES` باقی میمانند.
 
-| Scope                          | پذیرفتهشدن اجازه میدهد                                                                                                                                                                 |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | فقط استثنای LOCAL_ONLY برای `/api/mcp/` غیر-loopback (`hasMcpConnectOrManageScope`). کلیدی با `manage` یا `admin` همچنان این استثنا را با موفقیت میگذراند.                             |
-| `self:usage`                   | دسترسی به `GET /api/v1/me/status` برای این کلید (`src/app/api/v1/me/status/route.ts`). هنگام ایجاد، `POST /api/keys` این scope را اضافه میکند (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | سهمیههای حساب بالادستی درون payload همان وضعیت (`src/lib/usage/apiKeySelfService.ts`). مسیر وضعیت همچنان به `self:usage` نیاز دارد.                                                    |
-| `policy:bypass-provider-quota` | فراخوانیهای inference این کلید، سیاست سهمیه ارائهدهنده را نادیده میگیرند (`hasProviderQuotaBypassScope` در `src/sse/handlers/chat.ts`).                                                |
+| محدوده                         | قبولی چه چیزی را مجاز میکند                                                                                                                                                   |
+| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | فقط استثنای LOCAL_ONLY برای `/api/mcp/` غیر-loopback‏ (`hasMcpConnectOrManageScope`). کلیدی با `manage` یا `admin` همچنان از این استثنا عبور میکند.                           |
+| `self:usage`                   | `GET /api/v1/me/status` برای این کلید (`src/app/api/v1/me/status/route.ts`). هنگام ایجاد، `POST /api/keys` این محدوده را اضافه میکند (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | سهمیههای حساب upstream درون payload همان وضعیت (`src/lib/usage/apiKeySelfService.ts`). مسیر وضعیت همچنان به `self:usage` نیاز دارد.                                           |
+| `policy:bypass-provider-quota` | فراخوانیهای inference این کلید، خطمشی سهمیه ارائهدهنده را نادیده میگیرند (`hasProviderQuotaBypassScope` در `src/sse/handlers/chat.ts`).                                       |
 
 #### تطبیق
 
-کاتالوگ، جدول زیر بخش [Scopeهای ابزار MCP](#mcp-tool-scopes) است.
-`MCP_SCOPE_LIST` در `src/shared/constants/mcpScopes.ts` را آن کاتالوگ در نظر نگیرید:
-این فهرست، زیرمجموعه نوعدار اولیه است. ابزارهای بعدی scopeهای بیشتری را در کنار آن تعریف میکنند
-(`read:notion`، `read:skills`، `read:local-corpus` و سایر موارد جدول).
+فهرست رسمی همان جدول زیر بخش [محدودههای ابزار MCP](#mcp-tool-scopes) است. `MCP_SCOPE_LIST` در `src/shared/constants/mcpScopes.ts` را آن فهرست در نظر نگیرید:
+این فقط زیرمجموعه نوعدار اولیه است. ابزارهای بعدی، محدودههای بیشتری را در کنار آن تعریف میکنند
+(`read:notion`،‏ `read:skills`،‏ `read:local-corpus` و سایر موارد جدول).
 
-تابع `evaluateToolScopes` در `open-sse/mcp-server/scopeEnforcement.ts` زمانی یک فراخوانی را
-مجاز میکند که هر scope الزامی با یکی از scopeهای اعطاشده تطبیق داشته باشد:
+تابع `evaluateToolScopes` در `open-sse/mcp-server/scopeEnforcement.ts` زمانی یک فراخوانی را مجاز میکند که هر محدوده موردنیاز با یکی از محدودههای اعطاشده تطبیق داشته باشد:
 
-- `*` با هر scope الزامی تطبیق دارد.
-- یک scope اعطاشده که به `*` ختم شود، با scope الزامیای تطبیق دارد که با
-  پیشوند قبل از ستاره آغاز شود. `read:*` با `read:compression` تطبیق دارد.
-- هر scope اعطاشده دیگر فقط با رشته الزامی کاملاً یکسان تطبیق دارد.
+- `*` با هر محدوده موردنیاز تطبیق دارد.
+- محدوده اعطاشدهای که به `*` ختم شود، با محدوده موردنیازی تطبیق دارد که با پیشوند قبل از ستاره آغاز شود. `read:*` با `read:compression` تطبیق دارد.
+- هر محدوده اعطاشده دیگر فقط با رشته موردنیاز کاملاً یکسان تطبیق دارد.
 
-کلیدی که scopeهای آن `["manage"]` هستند، در `scopeMatches` برای `read:compression`
-رد میشود. همان فراخوانی برای `admin`، `mcp:connect`، `read` و `write` نیز، هنگامی که اینها
-تنها رشتههای اعطاشده باشند، رد میشود. بهجز `*` انتهایی، هیچ سلسلهمراتبی میان scopeهای ابزار MCP
-وجود ندارد.
+کلیدی که محدودههای آن `["manage"]` است، در `scopeMatches` برای `read:compression` رد میشود.
+اگر `admin`،‏ `mcp:connect`،‏ `read` یا `write` تنها رشته اعطاشده باشد، همان فراخوانی برای آنها نیز رد میشود. بهجز `*` انتهایی، هیچ سلسلهمراتبی میان محدودههای ابزار MCP وجود ندارد.
 
-اعمال محدودیت غیرفعال است، مگر اینکه `OMNIROUTE_MCP_ENFORCE_SCOPES=true` باشد (مقدار پیشفرض
-`false` است). هنگامی که غیرفعال باشد، `evaluateToolScopes` فراخوانی را مجاز میکند و
-کاتالوگ را نادیده میگیرد. هنگامی که فعال باشد، HTTP از `api_keys.scopes` کلید Bearer بهعنوان
-`authInfo` استفاده میکند (به [اتصال scope HTTP بهازای هر کلید](#per-key-http-scope-binding-7895) مراجعه کنید).
-اگر هیچ scope کلیدی تعیین نشود، مجموعه اعطاشده ابتدا به `_meta` متعلق به MCP و سپس به
-`OMNIROUTE_MCP_SCOPES` منتقل میشود.
+اعمال محدودیت غیرفعال است، مگر آنکه `OMNIROUTE_MCP_ENFORCE_SCOPES=true` باشد (مقدار پیشفرض
+`false` است). تا زمانی که غیرفعال باشد، `evaluateToolScopes` فراخوانی را مجاز میکند و فهرست را نادیده میگیرد. هنگامی که فعال باشد، HTTP از `api_keys.scopes` کلید Bearer بهعنوان
+`authInfo` استفاده میکند (بخش [اتصال محدوده HTTP به تفکیک کلید](#per-key-http-scope-binding-7895) را ببینید).
+وقتی هیچ محدودهای برای کلید یافت نشود، مجموعه اعطاشده ابتدا به `_meta` مربوط به MCP و سپس به
+`OMNIROUTE_MCP_SCOPES` رجوع میکند.
 
-#### Scopeهای توکن دسترسی
+#### محدودههای توکن دسترسی
 
-توکنهای `oma_live_…` (`src/lib/accessTokens/scopes.ts`) دارای `read`، `write`
+توکنهای `oma_live_…` (`src/lib/accessTokens/scopes.ts`) دارای `read`،‏ `write`
 یا `admin` هستند. `scopeSatisfies` یک رتبهبندی است: `admin` شامل `write` و `read` میشود و
-`write` شامل `read` میشود. scopeهای ناشناخته هیچ سطحی را پوشش نمیدهند.
+`write` شامل `read` میشود. محدودههای ناشناخته هیچ دسترسیای فراهم نمیکنند.
 
-تابع `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) این
-رتبه را با `inferRequiredScope` (`src/server/authz/accessScopes.ts`) مقایسه میکند:
+تابع `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) این رتبه را با
+`inferRequiredScope` (`src/server/authz/accessScopes.ts`) مقایسه میکند:
 
-- متدهای `GET`، `HEAD` و `OPTIONS` به `read` نیاز دارند.
+- `GET`،‏ `HEAD` و `OPTIONS` به `read` نیاز دارند.
 - هر متد دیگری به `write` نیاز دارد.
 - مسیرهای موجود در `ADMIN_SCOPE_PREFIXES` برای هر متد به `admin` نیاز دارند. `/api/mcp`
-  در این فهرست قرار دارد، بنابراین حتی یک توکن دسترسی `write` نیز نمیتواند سطح HTTP متعلق به MCP را
-  فراخوانی کند.
+  در این فهرست قرار دارد؛ بنابراین حتی یک توکن دسترسی `write` نیز نمیتواند سطح HTTP مربوط به MCP را فراخوانی کند.
 - مسیرهای موجود در `ADMIN_MUTATION_PREFIXES` فقط برای عملیات تغییردهنده به `admin` نیاز دارند.
+- مسیرهای موجود در `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`،
+  `/api/settings/require-login`) فقط برای عملیات تغییردهنده و فقط در همان مسیر دقیق به `admin` نیاز دارند — سایر زیرمسیرهای `/api/settings/*` همچنان با `write` کار میکنند.
 
-`PATCH /api/keys/{id}` یک عملیات تغییردهنده است و در آن فهرستهای مدیریتی قرار ندارد؛ بنابراین یک توکن
-`read` پاسخ 403 دریافت میکند:
+`PATCH /api/keys/{id}` یک عملیات تغییردهنده است و در آن فهرستهای مدیریتی قرار ندارد؛ بنابراین، یک توکن با سطح دسترسی `read` پاسخ 403 دریافت میکند:
+
 `Access token scope 'read' is insufficient; 'write' required.`
-یک توکن دسترسی `write` یا `admin` الزامات آن مسیر را برآورده میکند. یک JWT داشبورد، توکن machine-id مربوط به CLI روی loopback و یک کلید API با سطح `manage` یا `admin` از شاخههای دیگری عبور میکنند و توسط این رتبه محدود نمیشوند.
 
-توکن دسترسیای که برای `/api/mcp` از `scopeSatisfies` عبور کند، فقط گیت مدیریتی را پشت سر گذاشته است. فراخوانی ابزارها همچنان `scopeMatches` را در برابر scopeهای کلید API اجرا میکند. رتبهٔ توکن دسترسی یکی از ورودیهای `scopeMatches` نیست.
+یک توکن دسترسی با سطح `write` یا `admin` الزامات آن مسیر را برآورده میکند. JWT داشبورد، توکن machine-id مربوط به CLI روی loopback و یک کلید API با سطح `manage` یا `admin` از شاخههای دیگری عبور میکنند و توسط این رتبهبندی محدود نمیشوند.
+
+توکن دسترسیای که برای `/api/mcp` بررسی `scopeSatisfies` را با موفقیت پشت سر میگذارد، فقط از دروازهٔ مدیریت عبور کرده است. فراخوانی ابزارها همچنان `scopeMatches` را در برابر scopeهای کلید API اجرا میکند. رتبهٔ توکن دسترسی، ورودی `scopeMatches` نیست.
 
 ### Scopeهای ابزار MCP
 
 اعمال scope بهصورت متمرکز در `open-sse/mcp-server/scopeEnforcement.ts` انجام میشود.
 هر ابزار به scopeهای مشخصی نیاز دارد:
 
-| محدوده                | ابزارها                                                                                                                                                                        |
+| دامنه                 | ابزارها                                                                                                                                                                        |
 | :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                              |
 | `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                      |
@@ -419,25 +417,54 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 | `read:tools`          | `omniroute_tool_search`                                                                                                                                                        |
 | `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                      |
 | `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                               |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                 |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                             |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                |
-| `read:obsidian`       | 13 ابزار خواندن — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 ابزار نوشتن — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                 |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                              |
+| `write:gamification`  | `gamification_invite`، `gamification_transfer`                                                                                                                                 |
+| `read:plugins`        | `plugin_list`، `plugin_executions`                                                                                                                                             |
+| `write:plugins`       | `plugin_scan`، `plugin_install`، `plugin_uninstall`، `plugin_activate`، `plugin_deactivate`، `plugin_configure`                                                                |
+| `read:obsidian`       | 13 ابزار خواندن — `obsidian_list_vault`، `obsidian_read_note`، `obsidian_search_simple`، `obsidian_search_structured`، `obsidian_get_periodic_note`، `obsidian_sync_status`، … |
+| `write:obsidian`      | 9 ابزار نوشتن — `obsidian_write_note`، `obsidian_append_note`، `obsidian_patch_note`، `obsidian_move_note`، `obsidian_delete_note`، `obsidian_sync_trigger`، …                 |
+| `read:local-corpus`   | `local_corpus_search`، `local_corpus_read`، `local_corpus_status`                                                                                                              |
 
-محدودههای دارای نویسهٔ عام پشتیبانی میشوند: `read:*` همهٔ محدودههای خواندن را اعطا میکند و `*` دسترسی کامل را اعطا میکند.
+دامنههای دارای نویسهٔ عام پشتیبانی میشوند: `read:*` همهٔ دامنههای خواندن را اعطا میکند و `*` دسترسی کامل را اعطا میکند.
 
 ### `mcp:connect` — قابلیت محدود مسیر (#7895)
 
-دسترسی به انتقال HTTP/SSE مربوط به MCP (`/api/mcp/*`) از یک آدرس غیر-loopback، به استثنای LOCAL_ONLY برای `/api/mcp/` نیاز دارد (به `docs/security/ROUTE_GUARD_TIERS.md` مراجعه کنید). در گذشته، این استثنا فقط یک کلید API با محدودهٔ کامل `manage`/`admin` را میپذیرفت—که برای فراخوانی که فقط نیاز دارد با MCP ارتباط برقرار کند، بیش از حد گسترده بود. اکنون `src/shared/constants/managementScopes.ts` مقدار `MCP_CONNECT_SCOPE = "mcp:connect"` را صادر میکند: محدودهای افزایشی و محدود (با همان رویهٔ `SELF_USAGE_SCOPE`) که فقط مجوز عبور از `/api/mcp/` را در `src/server/authz/policies/management.ts` میدهد—این محدوده هیچ دسترسی دیگری به مسیرهای مدیریتی اعطا نمیکند و عمداً خارج از `MANAGEMENT_API_KEY_SCOPES` نگه داشته شده است. کلیدی که دارای `manage`/`admin` باشد همچنان بدون تغییر از این استثنا عبور میکند؛ `mcp:connect` جایگزینی با سطح دسترسی کمتر برای فراخوانهای راهدورِ صرفاً MCP است که از طریق `hasMcpConnectOrManageScope()` بررسی میشود.
+دسترسی به انتقال HTTP/SSE مربوط به MCP (`/api/mcp/*`) از مبدأ غیر-loopback، به استثنای LOCAL_ONLY برای
+`/api/mcp/` نیاز دارد (به `docs/security/ROUTE_GUARD_TIERS.md` مراجعه کنید). در گذشته،
+این استثنا فقط یک کلید API با دامنهٔ کامل `manage`/`admin` را میپذیرفت — دامنهای بیشازحد گسترده برای
+فراخوانی که فقط باید با MCP ارتباط برقرار کند. اکنون `src/shared/constants/managementScopes.ts`
+مقدار `MCP_CONNECT_SCOPE = "mcp:connect"` را صادر میکند: دامنهای محدود و افزایشی (با همان رویهٔ
+`SELF_USAGE_SCOPE`) که فقط مجوز عبور از محدودیت `/api/mcp/` را در
+`src/server/authz/policies/management.ts` صادر میکند — این دامنه هیچ دسترسی دیگری به مسیرهای مدیریتی
+اعطا نمیکند و عمداً خارج از `MANAGEMENT_API_KEY_SCOPES` نگه داشته شده است. کلیدی که دارای `manage`/`admin`
+باشد همچنان بدون تغییر از این استثنا عبور میکند؛ `mcp:connect` جایگزینی با سطح دسترسی پایینتر برای
+فراخوانهای راه دورِ صرفاً MCP است که از طریق `hasMcpConnectOrManageScope()` بررسی میشود.
 
-### اتصال محدودهٔ HTTP بهازای هر کلید (#7895)
+### اتصال دامنهٔ HTTP بهازای هر کلید (#7895)
 
-در HTTP/SSE، اکنون `open-sse/mcp-server/httpTransport.ts` مقدار واقعی `api_keys.scopes` فراخوان را از طریق `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) تعیین میکند و آن را به `transport.handleRequest(req, { authInfo })` متعلق به SDK مربوط به MCP ارسال میکند؛ بنابراین `extra.authInfo.scopes` که به هر فراخوانی ابزار میرسد، محدودههای خود کلید Bearer را منعکس میکند. `resolveCallerScopeContext()` در `scopeEnforcement.ts` از قبل `authInfo` را نسبت به `_meta` و گزینهٔ جایگزین env یعنی `OMNIROUTE_MCP_SCOPES` در اولویت قرار میداد—این تغییر صرفاً نخستین منبع با بالاترین اولویت را مقداردهی میکند که پیشتر از طریق HTTP تغذیه نمیشد. هنگامی که هیچ کلید API تعیین نشود (نبودن header یا نامعتبر بودن کلید)، `authInfo` برابر `undefined` باقی میماند و فرایند تعیین، بدون تغییر به زنجیرهٔ موجود `meta`/env منتقل میشود. stdio فاقد هویت بهازای هر فراخوان است (به `mcpCallerIdentity.ts` مراجعه کنید) و تحت تأثیر قرار نمیگیرد—همچنان از زنجیرهٔ جایگزین `_meta`/env استفاده میکند.
+در HTTP/SSE، اکنون `open-sse/mcp-server/httpTransport.ts` دامنههای واقعی
+`api_keys.scopes` فراخوان را از طریق `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
+تفکیک میکند و آنها را به `transport.handleRequest(req, { authInfo })` در SDK مربوط به MCP
+ارسال میکند؛ بنابراین `extra.authInfo.scopes` که به هر فراخوانی ابزار میرسد، دامنههای خودِ کلید Bearer را
+بازتاب میدهد. `resolveCallerScopeContext()` در `scopeEnforcement.ts` از قبل `authInfo` را نسبت به
+`_meta` و راهکار جایگزین متغیر محیطی `OMNIROUTE_MCP_SCOPES` در اولویت قرار میداد — این تغییر فقط همان
+منبع اول و دارای بالاترین اولویت را مقداردهی میکند که پیشتر از طریق HTTP تغذیه نمیشد. وقتی هیچ کلید API
+تفکیک نشود (نبودن هدر یا نامعتبر بودن کلید)، `authInfo` برابر `undefined` باقی میماند و تفکیک بدون تغییر
+به زنجیرهٔ موجود `meta`/متغیر محیطی منتقل میشود. stdio هیچ هویت مجزایی برای هر فراخوان ندارد (به
+`mcpCallerIdentity.ts` مراجعه کنید) و تحت تأثیر قرار نمیگیرد — همچنان از زنجیرهٔ جایگزین `_meta`/متغیر محیطی استفاده میکند.
 
-**اعمال محدودیت برای فراخوانهای HTTP/SSE با محدودهٔ محدود، صرفنظر از
-`OMNIROUTE_MCP_ENFORCE_SCOPES` اجباری است.** مقدار پیشفرض `false` برای `OMNIROUTE_MCP_ENFORCE_SCOPES` فقط برای جریان تکاپراتوری local/stdio امن است؛ جایی که هیچ هویت بهازای هر فراخوان برای اعمال محدوده وجود ندارد. `open-sse/mcp-server/server.ts::withScopeEnforcement()` اعمال محدودهٔ هر ابزار را بدون قیدوشرط فعال میکند (`shouldForceScopeEnforcement()` در `scopeEnforcement.ts`) هر زمان که `resolveCallerScopeContext()` مقدار `source === "authInfo"` را تعیین کرده باشد (یعنی یک HTTP Authorization header واقعی بهازای هر کلید، صرفاً برای HTTP/SSE) و آن کلید محدودهٔ کامل `manage`/`admin` را نداشته باشد. این تغییر شکافی را میبندد که در آن، کلیدی که فقط محدودهٔ محدودِ عبور `mcp:connect` را در اختیار داشت—که در بالا مستند شده است و هیچ چیزی جز استثنای LOCAL_ONLY برای `/api/mcp/` را مجاز نمیکند—در غیر این صورت میتوانست پس از فعالسازی دسترسی راهدور/غیر-loopback به MCP توسط اپراتور، همهٔ ابزارهای MCP را فراخوانی کند؛ صرفاً به این دلیل که `OMNIROUTE_MCP_ENFORCE_SCOPES` بهصورت پیشفرض با مقدار `false` عرضه میشود. یک کلید دارای `manage`/`admin` کامل روی HTTP و همهٔ فراخوانهای stdio/local، رفتار موجود و وابسته به `OMNIROUTE_MCP_ENFORCE_SCOPES` را بدون تغییر حفظ میکنند.
+**اعمال محدودیت برای فراخوانهای HTTP/SSE با دامنهٔ محدود، صرفنظر از
+`OMNIROUTE_MCP_ENFORCE_SCOPES` اجباری است.** مقدار پیشفرض `false` برای `OMNIROUTE_MCP_ENFORCE_SCOPES` فقط
+برای جریان محلی/stdio تکاپراتوری امن است که در آن هیچ هویت مجزایی برای هر فراخوان وجود ندارد تا دامنه بر اساس آن
+اعمال شود. `open-sse/mcp-server/server.ts::withScopeEnforcement()` اعمال دامنهٔ هر ابزار را
+بدون قیدوشرط فعال میکند (`shouldForceScopeEnforcement()` در `scopeEnforcement.ts`)
+هرگاه `resolveCallerScopeContext()` مقدار
+`source === "authInfo"` را تفکیک کرده باشد (یعنی یک هدر HTTP Authorization واقعی بهازای هر کلید، فقط در HTTP/SSE) و آن
+کلید دامنهٔ کامل `manage`/`admin` را نداشته باشد. این کار شکافی را میبندد که در آن کلیدی که فقط
+دامنهٔ محدود `mcp:connect` را برای عبور در اختیار داشت — که در بالا مستند شده فقط مجوز استثنای LOCAL_ONLY برای
+`/api/mcp/` را صادر میکند — در غیر این صورت میتوانست پس از فعالسازی دسترسی MCP راه دور/غیر-loopback توسط اپراتور،
+صرفاً به این دلیل که `OMNIROUTE_MCP_ENFORCE_SCOPES` بهطور پیشفرض با مقدار
+`false` عرضه میشود، هر ابزار MCP را فراخوانی کند. یک کلید کامل `manage`/`admin` از طریق HTTP و تمام فراخوانهای
+stdio/محلی، رفتار موجودِ مشروط به `OMNIROUTE_MCP_ENFORCE_SCOPES` را بدون تغییر حفظ میکنند.
 
 ---
 

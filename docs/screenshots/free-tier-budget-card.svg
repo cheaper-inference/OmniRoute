@@ -3,13 +3,13 @@
 <rect x="16" y="16" width="868" height="564" rx="13" fill="#161b22" stroke="#30363d"/>
 <text x="868" y="572" fill="#484f58" font-size="10.5" text-anchor="end">OmniRoute · /dashboard/free-tiers · preview mockup</text>
 <text x="32" y="50" fill="#e6edf3" font-size="18" font-weight="700">Monthly free-token budget</text>
-<text x="868" y="50" fill="#7d8590" font-size="13" text-anchor="end">22 free pools · 489 models · one endpoint</text>
+<text x="868" y="50" fill="#7d8590" font-size="13" text-anchor="end">22 free pools · 484 models · one endpoint</text>
 <text x="32" y="84" fill="#7d8590" font-size="11.5">Steady / month</text>
 <text x="32" y="114" fill="#e6edf3" font-size="27" font-weight="800">~1.62B</text>
 <text x="330" y="84" fill="#7d8590" font-size="11.5">First month (+ signup credits)</text>
 <text x="330" y="114" fill="#3fb950" font-size="27" font-weight="800">~2.22B</text>
 <text x="700" y="84" fill="#7d8590" font-size="11.5">ToS-flagged (you decide)</text>
-<text x="700" y="114" fill="#d29922" font-size="27" font-weight="800">13 providers</text>
+<text x="700" y="114" fill="#d29922" font-size="27" font-weight="800">12 providers</text>
 <clipPath id="bar"><rect x="32" y="132" width="836" height="16" rx="8"/></clipPath>
 <g clip-path="url(#bar)"><rect x="32" y="132" width="836" height="16" fill="#21262d"/>
 <rect x="32.0" y="132" width="427.8" height="16" fill="#6c5ce7"/>
@@ -61,7 +61,7 @@
 <circle cx="676" cy="256" r="5" fill="#ffeaa7"/>
 <text x="687" y="260" fill="#c9d1d9" font-size="12.5">Qwen3.8 27B <tspan fill="#7d8590">6M</tspan></text>
 <circle cx="37" cy="286" r="5" fill="#fab1a0"/>
-<text x="48" y="290" fill="#c9d1d9" font-size="12.5">MiniMax-M2.7 <tspan fill="#7d8590">6M</tspan></text>
+<text x="48" y="290" fill="#c9d1d9" font-size="12.5">DeepSeek-V3.2 <tspan fill="#7d8590">6M</tspan></text>
 <circle cx="250" cy="286" r="5" fill="#81ecec"/>
 <text x="261" y="290" fill="#c9d1d9" font-size="12.5">Arcee Trinity Large Prev <tspan fill="#7d8590">5M</tspan></text>
 <circle cx="463" cy="286" r="5" fill="#6c5ce7"/>

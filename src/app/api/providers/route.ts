@@ -1,4 +1,9 @@
 import { getAllProviderLimitsCache } from "@/lib/db/providerLimits";
+import {
+  getDiscoveryStatesForConnections,
+  type DiscoveryStateEntry,
+  type DiscoveryStateRecord,
+} from "@/lib/db/discoveryState";
 import { NextResponse } from "next/server";
 import { getSettings } from "@/lib/db/settings";
 import { resolveResilienceSettings } from "@/lib/resilience/settings";
@@ -24,6 +29,7 @@ import {
   isOpenAICompatibleProvider,
   isAnthropicCompatibleProvider,
   providerAllowsOptionalApiKey,
+  NOAUTH_PROVIDERS,
   resolveProviderId,
 } from "@/shared/constants/providers";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
@@ -145,9 +151,22 @@ export async function GET(request: Request) {
 
     // Hide or mask sensitive fields
     const requestQueueSettings = resolveResilienceSettings(await getSettings()).requestQueue;
+    // The outcome of the last model discovery of each connection. A read
+    // failure must not break the connection list: an unknown outcome simply
+    // reads as "unknown".
+    let discoveryStates = new Map<string, DiscoveryStateRecord>();
+    try {
+      const discoveryEntries: DiscoveryStateEntry[] = connections.map((c) => ({
+        provider: String(c.provider ?? ""),
+        id: String(c.id ?? ""),
+      }));
+      discoveryStates = getDiscoveryStatesForConnections(discoveryEntries);
+    } catch (error) {
+      console.error("Failed to read the stored discovery outcomes:", error);
+    }
     const safeConnections = connections.map((c) => {
       const providerSpecificData = c.providerSpecificData
-        ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData)
+        ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData, { revealKeys })
         : undefined;
       return {
         ...c,
@@ -156,6 +175,13 @@ export async function GET(request: Request) {
         refreshToken: undefined,
         idToken: undefined,
         providerSpecificData,
+        // #16940: the row mapper drops null columns; keep "never synced" an
+        // explicit null so the dashboard contract does not depend on absence.
+        syncedModelsAt: typeof c.syncedModelsAt === "string" ? c.syncedModelsAt : null,
+        // Same contract for the discovery outcome: absent means "unknown",
+        // never "healthy".
+        discoveryState:
+          discoveryStates.get(`${String(c.provider ?? "")}:${String(c.id ?? "")}`) ?? null,
         rateLimitAutoProtected: isConnectionAutoProtected(
           {
             provider: String(c.provider),
@@ -238,11 +264,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Business validation
+    // Business validation. Own-property only: `in` is also true for Object.prototype
+    // keys ("toString", "constructor"), which are not catalogued providers.
+    const isNoAuthProvider =
+      typeof provider === "string" && Object.hasOwn(NOAUTH_PROVIDERS, provider);
     const isValidProvider =
       isManagedProviderConnectionId(provider) ||
       isOpenAICompatibleProvider(provider) ||
-      isAnthropicCompatibleProvider(provider);
+      isAnthropicCompatibleProvider(provider) ||
+      isNoAuthProvider;
 
     if (!isValidProvider) {
       return NextResponse.json({ error: "Invalid provider" }, { status: 400 });
@@ -579,7 +609,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (!Array.isArray(body.ids) || body.ids.length === 0) {
+  if (!body || typeof body !== "object" || !Array.isArray(body.ids) || body.ids.length === 0) {
     return NextResponse.json(
       { error: "ids must be a non-empty array of connection IDs" },
       { status: 400 }

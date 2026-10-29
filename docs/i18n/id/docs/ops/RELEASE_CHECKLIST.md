@@ -114,54 +114,54 @@ E2E secara otomatis, tanpa label apa pun.
 ### Pra-rilis
 
 - [ ] Semua PR yang ditargetkan untuk rilis ini telah digabungkan ke `release/vX.Y.0`
-- [ ] Semua item Linear/issue terbuka untuk versi ini telah ditutup atau dipindahkan ke milestone berikutnya
-- [ ] CI berhasil pada branch `release/vX.Y.0`
+- [ ] Semua item Linear/isu yang masih terbuka untuk versi ini telah ditutup atau dipindahkan ke milestone berikutnya
+- [ ] CI berhasil pada cabang `release/vX.Y.0`
 - [ ] Tidak ada penanda `TODO(release)` dalam kode: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Image dasar Docker sudah diperbarui (saat ini `node:24.15.0-trixie-slim`)
+- [ ] Image dasar Docker sudah terbaru (saat ini `node:24.15.0-trixie-slim`)
 
-### Versi & Changelog
+### Versi & Log Perubahan
 
 - [ ] Jalankan `/version-bump-cc <patch|minor|major>` (skill Claude Code)
   - Menaikkan versi `package.json`, `electron/package.json`
   - Membuat ulang `CHANGELOG.md` dari commit git sejak tag terakhir
   - Memperbarui badge README.md
 - [ ] Tinjau CHANGELOG.md secara manual dan rapikan pesan commit jika diperlukan
-- [ ] Pastikan bagian semver terbaru dalam `CHANGELOG.md` sama dengan versi `package.json`
-- [ ] Pertahankan `## [Unreleased]` sebagai bagian changelog pertama untuk pekerjaan mendatang
+- [ ] Pastikan bagian semver terbaru di `CHANGELOG.md` sama dengan versi `package.json`
+- [ ] Pertahankan `## [Unreleased]` sebagai bagian log perubahan pertama untuk pekerjaan mendatang
 - [ ] Perbarui `docs/openapi.yaml` → `info.version` harus sama dengan versi `package.json`
 
 ### Kualitas Kode
 
-- [ ] `npm run lint` — 0 error (peringatan sudah ada sebelumnya)
+- [ ] `npm run lint` — 0 galat (peringatan sudah ada sebelumnya)
 - [ ] `npm run typecheck:core` — bersih
 - [ ] `npm run typecheck:noimplicit:core` — bersih (ketat)
-- [ ] `npm run check:cycles` — tidak ada dependensi melingkar
-- [ ] `npm run check:any-budget:t11` — dalam batas anggaran
+- [ ] `npm run check:cycles:ratchet` — berada dalam batas maksimum `metrics.cycles` yang dibekukan (`check:cycles` biasa keluar dengan kode 1 jika ada siklus apa pun, #15281)
+- [ ] `npm run check:any-budget:t11` — berada dalam anggaran
 - [ ] `npm run check:route-validation:t06` — bersih
-- [ ] `npm run check:node-runtime` — batas minimum runtime yang didukung terpenuhi (`>=22.22.2 <23`, `>=24.0.0 <27`, sesuai `SUPPORTED_NODE_RANGE` dalam `src/shared/utils/nodeRuntimeSupport.ts`; selaras dengan `engines` pada `package.json`)
+- [ ] `npm run check:node-runtime` — batas minimum runtime yang didukung terpenuhi (`>=22.22.2 <23`, `>=24.0.0 <27`, sesuai `SUPPORTED_NODE_RANGE` di `src/shared/utils/nodeRuntimeSupport.ts`; selaras dengan `engines` di `package.json`)
 
 ### Pengujian
 
-- [ ] `npm run test:unit` — berhasil
-- [ ] `npm run test:vitest` — berhasil (server MCP, autoCombo, cache)
-- [ ] `npm run test:coverage` — ambang 60/60/60/60 terpenuhi (statement/baris/fungsi/branch)
-- [ ] `npm run test:integration` — berhasil (jika perubahan menyentuh DB / handler)
-- [ ] `npm run test:combo:matrix` — berhasil (matriks strategi combo: membuktikan secara deterministik keputusan pemilihan dari seluruh 19 strategi routing publik; jalankan ketika menyentuh routing combo, resolusi strategi, atau logika fallback)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **opsional/manual** (smoke test upstream nyata yang dibatasi; mengambil snapshot DB hanya-baca dari VPS `root@192.168.0.15`; mengakses penyedia nyata, menggunakan kredit; tidak pernah berjalan di CI; dilewati dengan bersih tanpa gate)
+- [ ] `npm run test:unit` — lulus
+- [ ] `npm run test:vitest` — lulus (server MCP, autoCombo, cache)
+- [ ] `npm run test:coverage` — ambang 60/60/60/60 terpenuhi (pernyataan/baris/fungsi/cabang)
+- [ ] `npm run test:integration` — lulus (jika perubahan menyentuh DB / handler)
+- [ ] `npm run test:combo:matrix` — lulus (matriks strategi combo: membuktikan keputusan pemilihan seluruh 19 strategi perutean publik secara deterministik; jalankan saat menyentuh perutean combo, resolusi strategi, atau logika fallback)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **opsional/manual** (smoke test real-upstream yang dilindungi gate; mengambil snapshot DB hanya-baca dari VPS `root@192.168.0.15`; mengakses penyedia nyata dan menggunakan kredit; tidak pernah berjalan di CI; dilewati secara bersih tanpa gate)
 - [ ] `npm run test:combo:live:vps` — **opsional/manual** (smoke test langsung VPS Fase-3: 7 skenario HTTP terhadap server `.15` yang aktif melalui Node ESM biasa; memerlukan `ssh root@192.168.0.15`; hanya membuat/menghapus combo `__live_test__*`; mengakses penyedia nyata; tidak pernah berjalan di CI)
-- [ ] `npm run test:e2e` — berhasil (perubahan UI)
-- [ ] `npm run test:protocols:e2e` — berhasil (perubahan MCP/A2A)
-- [ ] `npm run test:ecosystem` — berhasil
+- [ ] `npm run test:e2e` — lulus (perubahan UI)
+- [ ] `npm run test:protocols:e2e` — lulus (perubahan MCP/A2A)
+- [ ] `npm run test:ecosystem` — lulus
 
 ### Hook (Divalidasi Husky)
 
-Hook Husky berada di `.husky/` dan berjalan secara otomatis saat operasi git.
+Hook Husky berada di `.husky/` dan berjalan secara otomatis pada operasi git.
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** pemeriksaan deterministik cepat — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (diaktifkan 2026-06-13). Sengaja tidak menyertakan `test:unit` (lambat; dicakup oleh job CI `test-unit`).
-  - Jalankan `npm run test:unit` secara manual sebelum melakukan push pada branch rilis.
+- **pre-push:** gate deterministik yang cepat — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (diaktifkan 2026-06-13). Sengaja tidak menyertakan `test:unit` (lambat; dicakup oleh job CI `test-unit`).
+  - Jalankan `npm run test:unit` secara manual sebelum mendorong cabang rilis.
 
-Jika hook gagal: perbaiki masalah yang mendasarinya, jangan melewatinya dengan `--no-verify`.
+Jika hook gagal: perbaiki masalah yang mendasarinya, jangan lewati dengan `--no-verify`.
 
 ### Conventional Commits
 
@@ -171,74 +171,74 @@ Semua commit yang ditujukan untuk rilis harus mengikuti format `type(scope): sub
 
 **Cakupan yang valid:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-Perubahan yang tidak kompatibel: tambahkan footer `BREAKING CHANGE:` atau `!` setelah cakupan (misalnya `feat(api)!: drop /v0`).
+Perubahan yang merusak kompatibilitas: tambahkan footer `BREAKING CHANGE:` atau `!` setelah cakupan (misalnya `feat(api)!: drop /v0`).
 
 ### Dokumentasi
 
-- [ ] `npm run check:docs-sync` berhasil (dijalankan otomatis oleh pre-commit)
-- [ ] `npm run check:docs-all` berhasil (payung: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` keluar dengan kode 0 — kontrak env antara kode ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` tetap utuh
+- [ ] `npm run check:docs-sync` lulus (dijalankan otomatis oleh pre-commit)
+- [ ] `npm run check:docs-all` lulus (payung: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` keluar dengan kode 0 — kontrak env antara kode ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` tetap konsisten
 - [ ] `npm run check:doc-links` keluar dengan kode 0 — tidak ada referensi markdown internal yang rusak setelah restrukturisasi
-- [ ] `docs/architecture/ARCHITECTURE.md` ditinjau untuk memastikan tidak ada penyimpangan penyimpanan/runtime
-- [ ] `docs/guides/TROUBLESHOOTING.md` ditinjau untuk memastikan tidak ada penyimpangan variabel env dan operasional
+- [ ] `docs/architecture/ARCHITECTURE.md` telah ditinjau untuk penyimpangan penyimpanan/runtime
+- [ ] `docs/guides/TROUBLESHOOTING.md` telah ditinjau untuk penyimpangan variabel env dan operasional
 - [ ] Jika `.env.example` berubah: `docs/reference/ENVIRONMENT.md` diperbarui
 - [ ] Jika fitur baru memiliki UI: `docs/guides/USER_GUIDE.md` menyebutkannya
 - [ ] Jika fitur baru memiliki API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` diperbarui
-- [ ] Jika fitur baru berupa modul: tersedia `docs/<MODULE>.md` khusus
-- [ ] Jika ada perubahan yang merusak kompatibilitas: `docs/guides/TROUBLESHOOTING.md` memiliki catatan migrasi
+- [ ] Jika fitur baru merupakan modul: tersedia `docs/<MODULE>.md` khusus
+- [ ] Jika terdapat perubahan yang merusak kompatibilitas: `docs/guides/TROUBLESHOOTING.md` memiliki catatan migrasi
 
 ### i18n
 
-- [ ] `npm run i18n:check` keluar dengan kode 0 — status terjemahan (`.i18n-state.json`) sinkron dengan dokumentasi sumber (tidak ada sumber yang menyimpang dalam mode ketat; peringatan dalam mode peringatan dapat diterima untuk penyempurnaan dokumentasi di menit terakhir, tetapi harus 0 sebelum pemberian tag)
-- [ ] `npm run i18n:check-ui-coverage` keluar dengan kode 0 — setiap locale UI berada pada atau di atas ambang cakupan 80%
-- [ ] `npm run i18n:sync-ui:dry` melaporkan 0 kunci yang hilang di seluruh 42 locale
-- [ ] Jika dokumentasi sumber berbahasa Inggris berubah, jalankan `npm run i18n:run` (memerlukan `OMNIROUTE_TRANSLATION_API_KEY` di `.env`) sebelum pemberian tag
-- [ ] Kontribusi terjemahan dapat ditunda hingga rilis berikutnya jika bersifat minor (catat di CHANGELOG)
+- [ ] `npm run i18n:check` keluar dengan kode 0 — status terjemahan (`.i18n-state.json`) sinkron dengan dokumen sumber (tidak ada sumber yang menyimpang dalam mode ketat; pemberitahuan dalam mode peringatan dapat diterima untuk perbaikan dokumen pada saat-saat terakhir, tetapi harus bernilai 0 sebelum membuat tag)
+- [ ] `npm run i18n:check-ui-coverage` keluar dengan kode 0 — setiap locale UI berada pada atau di atas batas minimum cakupan 80%
+- [ ] `npm run i18n:sync-ui:dry` melaporkan 0 kunci yang hilang di seluruh 66 locale target (setiap locale kecuali sumber `en`)
+- [ ] Jika dokumen sumber berbahasa Inggris berubah, jalankan `npm run i18n:run` (memerlukan `OMNIROUTE_TRANSLATION_API_KEY` di `.env`) sebelum membuat tag
+- [ ] Kontribusi terjemahan dapat ditunda ke rilis berikutnya jika bersifat minor (catat di CHANGELOG)
 
 ### Migrasi Database
 
 - [ ] Jika `src/lib/db/migrations/` memiliki file baru:
   - [ ] Setiap migrasi bersifat idempoten (`CREATE TABLE IF NOT EXISTS`, dll.)
   - [ ] Migrasi dibungkus dalam transaksi
-  - [ ] Penomoran sudah benar (tidak ada celah dalam urutan)
+  - [ ] Dinomori dengan benar (tidak ada celah dalam urutan)
 - [ ] Uji pada instalasi baru: hapus `~/.omniroute/omniroute.db` dan jalankan `npm run dev`
 - [ ] Uji pada instalasi yang sudah ada: cadangkan DB, jalankan migrasi, verifikasi skema
 - [ ] File WAL (`-wal`, `-shm`) ditangani dengan benar jika migrasi menulis ulang tabel
 
-### Katalog Provider (Divalidasi dengan Zod)
+### Katalog Penyedia (divalidasi Zod)
 
-- [ ] Skema Zod `src/shared/constants/providers.ts` valid saat pemuatan
-  - [ ] Semua provider memiliki bidang wajib (`id`, `label`, `kind`, dll.)
-  - [ ] `freeNote` disediakan untuk provider gratis baru
-  - [ ] Provider OAuth memiliki `oauthConfig` yang terdaftar di `src/lib/oauth/constants/oauth.ts`
-- [ ] Jika provider baru ditambahkan: tersedia executor terkait di `open-sse/executors/`
-- [ ] Jika formatnya bukan OpenAI: tersedia translator di `open-sse/translator/`
+- [ ] Skema Zod `src/shared/constants/providers.ts` valid saat dimuat
+  - [ ] Semua penyedia memiliki kolom wajib (`id`, `label`, `kind`, dll.)
+  - [ ] `freeNote` disediakan untuk penyedia gratis baru
+  - [ ] Penyedia OAuth memiliki `oauthConfig` yang terdaftar di `src/lib/oauth/constants/oauth.ts`
+- [ ] Jika penyedia baru ditambahkan: tersedia eksekutor yang sesuai di `open-sse/executors/`
+- [ ] Jika formatnya bukan OpenAI: tersedia penerjemah di `open-sse/translator/`
 - [ ] Model terdaftar di `open-sse/config/providerRegistry.ts`
-- [ ] Pengujian unit di `tests/unit/` mencakup klasifikasi dan perutean provider
+- [ ] Pengujian unit di `tests/unit/` mencakup klasifikasi dan perutean penyedia
 
 ### Desktop (Electron)
 
 Jika `electron/` berubah:
 
 - [ ] `npm run electron:smoke:packaged` berhasil
-- [ ] Build diuji setidaknya untuk salah satu dari `:win`, `:mac`, `:linux`
+- [ ] Build diuji untuk setidaknya salah satu dari `:win`, `:mac`, `:linux`
 - [ ] Sertifikat penandatanganan kode belum kedaluwarsa (jika melakukan penandatanganan)
-- [ ] Versi `electron/package.json` cocok dengan `package.json` root
+- [ ] Versi `electron/package.json` sama dengan `package.json` root
 - [ ] Pointer kanal pembaruan otomatis diperbarui jika merilis ke `stable`
 
 ### Tata Letak Build
 
 Repositori menggunakan tiga direktori output yang berbeda — jangan pernah tertukar:
 
-| Direktori | Tujuan                                                                    | Dilacak?             |
-| --------- | ------------------------------------------------------------------------- | -------------------- |
-| `src/`    | Sumber aplikasi (TypeScript / TSX)                                        | Ya                   |
-| `.build/` | Perantara build — output `next build` (`distDir`)                         | Tidak (di-gitignore) |
-| `dist/`   | Bundel npm yang dapat didistribusikan — dirakit oleh `assembleStandalone` | Tidak (di-gitignore) |
+| Direktori | Tujuan                                                              | Dilacak?              |
+| --------- | ------------------------------------------------------------------- | --------------------- |
+| `src/`    | Sumber aplikasi (TypeScript / TSX)                                  | Ya                    |
+| `.build/` | Perantara build — output `next build` (`distDir`)                   | Tidak (diabaikan git) |
+| `dist/`   | Bundel npm siap didistribusikan — dirakit oleh `assembleStandalone` | Tidak (diabaikan git) |
 
 > **Catatan operator:** direktori image VPS jarak jauh tetap `/usr/lib/node_modules/omniroute/app/`.
 > Hanya output build **dalam repositori** yang dipindahkan (`app/` → `dist/`). Skill deployment melakukan rsync
-> konten `dist/` ke direktori `app/` jarak jauh — tidak diperlukan perubahan path VPS.
+> terhadap isi `dist/` ke direktori `app/` jarak jauh — tidak diperlukan perubahan jalur VPS.
 
 **Alur build tunggal:**
 
@@ -247,24 +247,24 @@ npm run build:release
   └─ rm -rf .build dist          (pembersihan)
   └─ next build → .build/next/   (perantara)
   └─ assembleStandalone          (menyalin standalone + static + public + native → dist/)
-  └─ menulis dist/BUILD_SHA      (sentinel HEAD)
+  └─ writes dist/BUILD_SHA       (sentinel HEAD)
 ```
 
 JANGAN jalankan `npm run build` yang diikuti dengan `npm run build:cli` terpisah untuk deployment — gunakan
-`npm run build:release` yang melakukan build ulang secara bersih + sentinel dalam satu perintah.
+`npm run build:release` yang melakukan build ulang bersih + sentinel dalam satu perintah.
 
 ### Validasi Artefak
 
 - [ ] `npm run build:release` berhasil dan `dist/BUILD_SHA` == `git rev-parse --short HEAD`
 - [ ] `npm run check:pack-artifact` bersih — tidak ada `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, atau residu lokal lainnya
 - [ ] `dist/server.js` tersedia setelah build
-- [ ] Smoke test runtime terpaket lokal opsional: `npm run dev:candidate -- validate` setelah `npm run dev:candidate -- build` menjalankan tarball yang telah dikemas pada `DATA_DIR` terisolasi dan memeriksa `/api/health` + `/v1/models` (lihat [Alur Utama Kontribusi](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] Smoke test runtime terpaket lokal opsional: `npm run dev:candidate -- validate` setelah `npm run dev:candidate -- build` menjalankan tarball terpaket pada `DATA_DIR` terisolasi dan memeriksa `/api/health` + `/v1/models` (lihat [Alur Utama Kontribusi](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
 
 ### Pemberian Tag & Rilis
 
 - [ ] Jalankan `/generate-release-cc` (skill Claude Code):
   - Membuat tag `vX.Y.Z`
-  - Mendorong tag dan branch
+  - Melakukan push tag dan branch
   - Membuka GitHub Release dengan isi changelog
   - Melampirkan installer Electron (jika dibuat)
 - [ ] Atau secara manual:
@@ -283,37 +283,37 @@ Skill deployment menggunakan alur rsync ringan — tanpa `npm pack`, tanpa `npm 
   - `/deploy-vps-akamai-cc` — VPS Akamai (69.164.221.35)
   - `/deploy-vps-both-cc` — keduanya
 - [ ] Sebelum melakukan deployment, pastikan `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Build harus dijalankan di tempat `node_modules` yang sebenarnya berada (checkout utama atau worktree yang telah menjalankan `npm ci` — BUKAN worktree dengan symlink)
-- [ ] Lakukan smoke test pada instans yang telah di-deploy:
+- [ ] Build harus dijalankan di tempat `node_modules` benar-benar tersedia (checkout utama atau worktree yang telah menjalankan `npm ci` — BUKAN worktree dengan symlink)
+- [ ] Lakukan smoke test terhadap instance yang telah di-deploy:
   - Buka `/dashboard/health` → periksa apakah string versi sesuai dengan rilis
-  - Jalankan permintaan `/v1/chat/completions` terhadap penyedia yang diketahui
-  - Pastikan `/api/monitoring/health` mengembalikan circuit breaker berstatus `CLOSED`
+  - Jalankan permintaan `/v1/chat/completions` terhadap penyedia yang sudah diketahui
+  - Verifikasi bahwa `/api/monitoring/health` mengembalikan circuit breaker `CLOSED`
   - Pastikan transport MCP merespons (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Pasc arilis
+### Setelah Rilis
 
 - [ ] Jalankan `/capture-release-evidences-cc` (skill Claude Code)
-  - Mengambil tangkapan layar/rekaman WebP dari fitur-fitur baru
-  - Melampirkannya ke catatan rilis/postingan blog
-- [ ] Perbarui GitHub Discussions/Discord dengan pengumuman rilis
+  - Mengambil tangkapan layar/rekaman WebP untuk fitur baru
+  - Melampirkannya ke catatan rilis / postingan blog
+- [ ] Perbarui GitHub Discussions / Discord dengan pengumuman rilis
 - [ ] Buka milestone untuk versi berikutnya
 - [ ] Jika kritis: sematkan diskusi atau posting di `news.json` untuk banner dalam aplikasi
 
 ### Gerbang peluncuran publik Radar
 
 Pengumuman Radar sengaja di-commit dengan `active: false`. Aktivasi merupakan perubahan terpisah
-setelah setiap item di bawah ini memiliki bukti:
+setelah bukti untuk setiap item di bawah ini tersedia:
 
 - [ ] Semua PR Radar bertumpuk telah di-merge dan CI pada ujung rilis berstatus hijau
-- [ ] Deploy dan lakukan smoke test pada rute Radar OSS dengan `RADAR_ENABLED` tetap nonaktif secara default
-- [ ] Lakukan smoke test pada `GET /planos`, `/termos`, `/privacidade`, dan `/reembolso` di host Radar yang disebutkan
-- [ ] Catat identitas/kontak/alamat operator dan tinjauan hukum yang disetujui pemilik di layanan privat
+- [ ] Deploy dan lakukan smoke test terhadap route Radar OSS dengan `RADAR_ENABLED` tetap nonaktif secara default
+- [ ] Lakukan smoke test terhadap `GET /planos`, `/termos`, `/privacidade`, dan `/reembolso` pada host Radar yang telah ditentukan
+- [ ] Catat identitas/kontak/alamat operator serta tinjauan hukum yang disetujui pemilik di layanan privat
 - [ ] Uji Stripe Checkout dan webhook bertanda tangan hanya dalam mode pengujian
-- [ ] Uji satu pengiriman email transaksional terenkripsi dengan pengirim/domain yang disetujui
+- [ ] Uji satu pengiriman email transaksional terenkripsi menggunakan pengirim/domain yang disetujui
 - [ ] Buktikan pemulihan cadangan dan satu proses riset yang diawasi serta dibatasi anggaran
 - [ ] Setujui kebijakan peninjauan BRL/PIX sebelum menerima bukti donasi
 - [ ] Aktifkan Checkout publik hanya setelah gerbang sebelumnya terpenuhi, lalu aktifkan ID `news.json` baru
-- [ ] Pastikan banner Beranda menggunakan salinan terlokalisasi dan ID baru muncul kembali setelah ID lama ditutup
+- [ ] Verifikasi bahwa banner Home menggunakan salinan yang dilokalkan dan ID baru muncul kembali setelah ID lama ditutup
 
 ## Uji asap Embedded Services (v3.8.4+)
 
@@ -384,67 +384,70 @@ Sebelum merilis versi v3.8.x apa pun, verifikasi item-item tambahan berikut:
 
 ---
 
-## Pemotongan LTS 3.9.0 (direhearsal pada 3.8.58)
+## Pemotongan 3.9.0 LTS (direhearsalkan di 3.8.58)
 
-Setelah v3.8.59, versi berikutnya adalah 3.9.0, dan tip-nya menjadi dua branch berumur panjang:
-`stable/v3` (jalur LTS v3, npm `latest`) dan `develop` (v4, dinaikkan ke 4.0.0, npm
-`nightly`). Model branch/channel, forward-port, dan label tersedia di
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); rencananya tersedia di [ROADMAP](../../ROADMAP.md) (Fase 3). Pemotongan dijalankan sekali;
-3.8.58 merehearsalnya dari awal hingga akhir pada fork, dan 3.8.59 ditutup dengan
+Setelah v3.8.59, versi berikutnya adalah 3.9.0, dan tip-nya menjadi dua cabang berumur panjang:
+`stable/v3` (jalur v3 LTS, npm `latest`) dan `develop` (v4, dinaikkan ke 4.0.0, npm
+`nightly`). Model cabang/channel, forward-port, dan label tersedia di
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); rencananya tersedia di [ROADMAP](../../ROADMAP.md) (Fase 3). Pemotongan dijalankan satu kali;
+3.8.58 merehearsalkannya dari awal hingga akhir pada sebuah fork, dan 3.8.59 ditutup dengan
 [daftar periksa GO/NO-GO](./LTS_GO_NO_GO.md).
 
 ### Dry-run (hanya baca, aman kapan saja)
 
 ```bash
 npm run release:dry-run-lts-cut                       # pemotongan sebenarnya: 3.9.0 dari HEAD, tag sebelumnya v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # tetapkan commit sumber
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # sematkan commit sumber
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` tidak mengeksekusi apa pun: skrip ini membaca git dan `gh` serta mencetak
-seluruh urutan — prasyarat (sumber dapat di-resolve, tag sebelumnya tersedia, `package.json` memiliki
-versi target, issue `release-freeze` terbuka, tidak ada issue `Release branch not green` yang terbuka
-pada branch rilis yang sudah ada — branch yang tidak ada dilaporkan sebagai `?` tidak diketahui, tidak pernah
-hijau — antrean `release` Mergify dikonfigurasi (G11: `queue_rules`, `checks_timeout`,
+`scripts/release/dry-run-lts-cut.mjs` tidak mengeksekusi apa pun: skrip ini membaca git dan `gh`, lalu mencetak
+seluruh urutan — prasyarat (sumber dapat di-resolve, repositori sumber memiliki riwayat lengkap —
+shallow clone tidak dapat melakukan push ke `stable/v3`, sisi penerima menolak pack pada parent hasil graft pertama,
+jadi lakukan pemotongan dari clone lengkap atau jalankan `git fetch --unshallow origin` terlebih dahulu — tag
+sebelumnya tersedia, `package.json` berisi versi target, issue `release-freeze` sedang terbuka, tidak ada
+issue `Release branch not green` yang terbuka
+pada cabang rilis yang ada — cabang yang tidak ada melaporkan `?` unknown, tidak pernah
+green — antrean `release` Mergify telah dikonfigurasi (G11: `queue_rules`, `checks_timeout`,
 label `queue`), ruleset `release/*` masih memblokir penghapusan dan force-push, serta
-`stable/v3` dan `develop` belum ada), kedua langkah branch, trigger workflow dorman
-dan kondisi `if:` mana yang menjadi true (serta mana yang tetap dibatasi oleh variabel repositori atau
-ditetapkan ke repositori kanonis), dist-tag yang diharapkan (`latest` → 3.9.0, `next` dan
-`nightly` kosong), dan rollback. Exit `0` = `RESULT: READY`, `1` = prasyarat pemblokir
+`stable/v3` dan `develop` belum tersedia), kedua langkah cabang, trigger workflow dorman dan
+kondisi `if:` mana yang menjadi true (serta mana yang tetap dibatasi oleh variabel repositori atau
+disematkan ke repositori kanonis), dist-tag yang diharapkan (`latest` → 3.9.0, `next` dan
+`nightly` kosong), serta rollback. Exit `0` = `RESULT: READY`, `1` = prasyarat pemblokir
 gagal (`✗`), `2` = kesalahan penggunaan. `--advisory <id,...>` menurunkan pemeriksaan menjadi peringatan (`!`)
 tanpa menyembunyikannya.
 
-Jalankan dry-run pemotongan sebenarnya selagi freeze rilis 3.9.0 masih terbuka — branch
+Jalankan dry-run pemotongan sebenarnya selagi release freeze 3.9.0 masih terbuka — cabang
 dibuat setelah tag dan sebelum Fase 12c mencabut freeze.
 
 ### Rehearsal 3.8.58 (khusus fork)
 
 ```bash
-# 1. Dry-run pada tip saat ini dengan parameter rehearsal
+# 1. Jalankan dry-run pada tip saat ini dengan parameter rehearsal
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Eksekusi terhadap remote FORK (origin, atau remote mana pun yang URL-nya merupakan
+# 2. Eksekusi terhadap remote FORK (origin, atau remote apa pun yang URL-nya merupakan
 #    repositori kanonis, akan ditolak; setiap langkah meminta konfirmasi di terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Jalankan workflow dorman di fork (workflow_dispatch saat dry-run
-#    melaporkan penetapan repositori kanonis), lalu lakukan rollback
+# 3. Uji workflow dorman di fork (workflow_dispatch jika dry-run
+#    melaporkan penyematan repositori kanonis), lalu lakukan rollback
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Commit kenaikan versi develop dibuat dengan plumbing git (working tree tidak disentuh) dan menaikkan
-lima file yang sama seperti commit pembukaan siklus: `package.json`, `open-sse/package.json`,
+Commit bump develop dibuat dengan git plumbing (working tree tidak disentuh) dan menaikkan
+lima file yang sama seperti commit cycle-open: `package.json`, `open-sse/package.json`,
 `electron/package.json`, `package-lock.json`, dan `docs/openapi.yaml`. Bagian `[4.0.0]`
-CHANGELOG dan mirror i18n-nya dibuka di `develop` setelahnya, sebelum PR pertamanya.
-Skrip tidak pernah mengubah dist-tag npm — rehearsal hal tersebut pada package sementara.
+CHANGELOG beserta mirror i18n-nya kemudian dibuka di `develop`, sebelum PR pertamanya.
+Skrip tidak pernah mengubah npm dist-tag — lakukan rehearsal terhadapnya pada package sementara.
 
 ### Artefak pratinjau PR (build sekali, promosikan byte yang sama)
 
 `.github/workflows/preview-artifact.yml` membuat satu tarball produksi dari head PR dan
-memvalidasi build yang sama persis (#8084 bagian (a)). Hanya untuk PR dalam repositori yang sama; tidak ada yang dipublikasikan.
+memvalidasi build yang sama persis (#8084 bagian (a)). Hanya untuk PR dari repositori yang sama; tidak ada yang dipublikasikan.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # atau tambahkan label `preview-artifact`
@@ -456,33 +459,33 @@ npm install -g ./omniroute-*.tgz                          # instalasi pratinjau
 
 Proses tersebut menjalankan `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, mengemas
 tarball, menjalankan `npm run check:pack-boot` (secret palsu, direktori data sementara), mengemas ulang, dan
-gagal kecuali digest-nya identik, lalu mencatat `artifact-identity.json` (SHA head, SHA base,
-hash lockfile, platform, arsitektur, ABI node, bundler, kebijakan build —
-`scripts/release/artifact-identity.mjs`) dan mengatestasikan tarball dalam job terpisah. Mempromosikan
+gagal kecuali digest-nya identik, kemudian mencatat `artifact-identity.json` (head SHA, base
+SHA, hash lockfile, platform, arch, node ABI, bundler, kebijakan build —
+`scripts/release/artifact-identity.mjs`) serta mengatestasi tarball dalam job terpisah. Mempromosikan
 pratinjau berarti menginstal tarball tersebut: jangan pernah melakukan build ulang dari sumber.
 
 ### Pemotongan (3.9.0, setelah GO)
 
 1. GO dicatat di [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` mencetak `RESULT: READY`.
-3. Buat branch di `origin` secara manual dengan perintah yang dicetak oleh dry-run — skrip
-   menolak melakukan push ke `origin`. Untuk menggunakan kembali commit develop yang telah ditinjau, jalankan
-   rehearsal `--execute` pada tip 3.9.0 terhadap fork Anda terlebih dahulu; skrip mencetak kedua SHA, dan
+3. Buat cabang di `origin` secara manual menggunakan perintah yang dicetak oleh dry-run —
+   skrip menolak melakukan push ke `origin`. Untuk menggunakan kembali commit develop yang telah ditinjau, jalankan
+   rehearsal `--execute` pada tip 3.9.0 terhadap fork Anda terlebih dahulu; perintah tersebut mencetak kedua SHA, dan
    commit yang sama dapat di-push:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Lindungi `stable/v3` dan `develop` (ruleset + antrean merge) sebelum PR pertama masuk.
-5. Workflow dorman diaktifkan berdasarkan keberadaan branch: `forward-port.yml` (push ke
+4. Lindungi `stable/v3` dan `develop` (ruleset + antrean penggabungan) sebelum PR pertama masuk.
+5. Workflow yang tidak aktif akan diaktifkan berdasarkan keberadaan cabang: `forward-port.yml` (push ke
    `stable/v3`), `validate-stable-pr.yml` (PR ke `stable/v3`), dan `nightly-v4-build.yml`
-   (melakukan build pada `develop`). Sebelum go-live, atur secret repositori `secrets.FORWARD_PORT_TOKEN` (agar CI berjalan pada
+   (membangun `develop`). Sebelum peluncuran, atur secret repositori `secrets.FORWARD_PORT_TOKEN` (agar CI berjalan pada
    PR forward-port); publikasi nightly tetap dinonaktifkan hingga pemilik mengatur variabel repositori
    `vars.NIGHTLY_PUBLISH` menjadi `true` dan npm Trusted Publishing menerima
-   `nightly-v4-build.yml`. Resolusi channel berada di `scripts/release/dist-tag.mjs`, resolver yang sama
+   `nightly-v4-build.yml`. Resolusi kanal dilakukan oleh `scripts/release/dist-tag.mjs`, resolver yang sama
    dengan yang digunakan `npm-publish.yml`.
-6. Verifikasi channel: `npm view omniroute dist-tags --json` menampilkan `latest` = 3.9.0 dan tidak ada
+6. Verifikasi kanal: `npm view omniroute dist-tags --json` menampilkan `latest` = 3.9.0 dan tidak ada
    `next` / `nightly` hingga v4 dipublikasikan.
 7. Rollback, jika diperlukan: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    dan `npm dist-tag add omniroute@3.8.59 latest`.

@@ -16,6 +16,9 @@ jobs:
       && vars.DEPLOY_ENABLED == 'true'
     name: Deploy OmniRoute to VPS
     runs-on: ubuntu-latest
+    # Bound a hung SSH session to an hour instead of GitHub's 6-hour default; the deploy
+    # itself fails fast when the VPS is unreachable (run 39101148517: 0 min of work).
+    timeout-minutes: 60
     steps:
       - name: Check VPS SSH reachability from runner
         id: reach

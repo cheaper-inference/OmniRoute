@@ -1,1 +1,0 @@
-- **fix(opencode):** route the Grok family (grok-4.5 + effort aliases, new grok-4.6 on Go; grok-4.6 and grok-build-0.1 on Zen) to the Responses endpoint instead of /chat/completions ([#16541](https://github.com/diegosouzapw/OmniRoute/pull/16541)) — thanks @thienpvt and @dqphong0302

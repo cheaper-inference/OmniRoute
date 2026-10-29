@@ -11,17 +11,18 @@ olùrànlọ́wọ́ AI (àkópọ̀-ẹ̀rọ, àwọn àṣà, ìdánwò, àw�
 àwọn ẹ̀kọ́ PII). Ka gbogbo rẹ̀; má ṣe tún fi àwọn òfin iṣẹ́ àkànṣe kún ibi yìí. Gbogbo ohun tó wà nísàlẹ̀ yìí kan
 Claude Code NÌKAN — àwọn àtúnṣe ìṣiṣẹ́ sí àwọn òfin tí a ti ṣàlàyé tẹ́lẹ̀ nínú `AGENTS.md`.
 
-## Ìyàsọ́tọ̀ worktree — àwọn àlàyé pàtó fún Claude Code
+## Ìyàsọ̀tọ̀ worktree — àwọn kókó pàtó fún Claude Code
 
-Gbogbo ìlànà worktree tí ó jẹ́ dandan (ìmúdájú ẹ̀ka ìpìlẹ̀, ọ̀nà àṣẹ `.claude/worktrees/`,
-`cp -al` node_modules, àwọn òfin ìparun) wà nínú `AGENTS.md` → Ìṣàn Iṣẹ́ Git → "Ìyàsọ́tọ̀
-worktree". Àwọn kókó pàtó fún Claude Code:
+Ìlànà worktree tó jẹ́ dandan ní kíkun (ìjẹ́rìsí base branch, ọ̀nà ìlànà `.claude/worktrees/`,
+`cp -al` node_modules, àwọn òfin ìtúká) wà nínú
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (tí a ṣe àkótán rẹ̀ nínú `AGENTS.md` →
+Git Workflow → "Worktree isolation"). Àwọn kókó pàtó fún Claude Code:
 
-- Jẹ́rìí ẹ̀ka ìpìlẹ̀ pẹ̀lú olùdarí nípasẹ̀ `AskUserQuestion` (Òfin Líle #19) àyàfi bí wọ́n
-  bá ti sọ fún ọ tẹ́lẹ̀.
-- Yan irinṣẹ́ abinibi `EnterWorktree` lákọ̀ọ́kọ́ — ó ti ń ṣẹ̀dá àwọn worktree lábẹ́
-  `.claude/worktrees/` (ọ̀nà àṣẹ). Ṣẹ̀dá worktree náà pẹ̀lú àṣẹ `git
-worktree add` tí a ṣàkọsílẹ̀, lẹ́yìn náà pe `EnterWorktree` pẹ̀lú `path` rẹ̀.
+- Jẹ́rìsí base branch náà pẹ̀lú olùṣàkóso nípasẹ̀ `AskUserQuestion` (Hard Rule #19) àyafi tí wọ́n bá
+  ti sọ fún ọ tẹ́lẹ̀.
+- Yan irinṣẹ́ `EnterWorktree` abínibí jù lọ — ó ti ń dá àwọn worktree sílẹ̀ lábẹ́
+  `.claude/worktrees/` (ọ̀nà ìlànà náà). Dá worktree náà pẹ̀lú àṣẹ `git
+worktree add` tí a ti kọ sílẹ̀, kí o sì pe `EnterWorktree` pẹ̀lú `path` rẹ̀.
 
 ## Ààbò láàárín àwọn sáà — àwọn àlàyé pàtó fún Claude Code
 

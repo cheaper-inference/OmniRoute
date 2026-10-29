@@ -13,14 +13,15 @@
 - [Docker Compose](#docker-compose)
 - [Elérhető profilok](#available-profiles)
 - [A gazdagép CLI-eszközeinek konfigurálása, amikor az OmniRoute Dockerben fut](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Redis oldalkonténer](#redis-sidecar)
+- [Redis-sidecar](#redis-sidecar)
 - [Éles környezethez készült Compose](#production-compose)
 - [A Dockerfile szakaszai](#dockerfile-stages)
 - [Kritikus környezeti változók](#critical-environment-variables)
 - [Docker Compose Caddyvel (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
 - [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
-- [Képcímkék](#image-tags)
-- [Rendelkezésre állás: az alapértelmezett SQLite csak egy replikát támogat](#availability-default-sqlite-is-single-replica)
+- [Rendszerképcímkék](#image-tags)
+- [Az irányítópult frissítése Dockerben](#dashboard-updates-in-docker)
+- [Rendelkezésre állás: az alapértelmezett SQLite egyetlen replikát támogat](#availability-default-sqlite-is-single-replica)
 - [Gemini regionális hibák Dockerben](#gemini-regional-errors-inside-docker)
 - [Fontos megjegyzések](#important-notes)
 
@@ -29,10 +30,10 @@
 ## Gyors futtatás
 
 > **Saját üzemeltetés egyetlen paranccsal?** Lásd az
-> [önálló üzemeltetési útmutatót](../getting-started/SELF_HOST_GUIDE.md) —
+> [Önálló üzemeltetési útmutatót](../getting-started/SELF_HOST_GUIDE.md) —
 > `docker compose -f docker-compose.selfhost.yml up -d` (közzétett rendszerkép +
-> Redis, csak visszacsatolási interfész, profilválasztás nélkül). Az alábbi gyors futtatás
-> az egykonténeres megoldás azoknak a felhasználóknak, akik már máshol futtatják a Redist.
+> Redis, csak visszacsatolási címen érhető el, profilválasztás nélkül). Az alábbi gyors futtatási
+> lehetőség az egyetlen konténeres megoldás azoknak a felhasználóknak, akik a Redist már máshol futtatják.
 
 ```bash
 docker run -d \
@@ -47,7 +48,7 @@ docker run -d \
 ## Környezeti fájllal
 
 ```bash
-# Először másolja és szerkessze a .env fájlt
+# Először másolja le és szerkessze a .env fájlt
 cp .env.example .env
 
 docker run -d \
@@ -75,57 +76,57 @@ docker compose --profile host up -d
 # Webprofil (Chromium/Playwright a webes munkamenetet használó szolgáltatókhoz)
 docker compose --profile web up -d
 
-# CLI + CLIProxyAPI oldalkonténer együttes használata
+# CLI + CLIProxyAPI-sidecar kombinálása
 docker compose --profile cli --profile cliproxyapi up -d
 ```
 
 ## Elérhető profilok
 
-Az OmniRoute Compose-profilokat tartalmaz a főbb telepítési konfigurációkhoz. Válassza ki a környezetének megfelelőt.
+Az OmniRoute Compose-profilokat biztosít a fő telepítési kialakításokhoz. Válassza ki a környezetének megfelelőt.
 
-| Profil                   | Szolgáltatás     | Mikor használja                                                                                                                                                                  | Parancs                                      |
-| ------------------------ | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `base` (alapértelmezett) | `omniroute-base` | Grafikus felület nélküli kiszolgáló / minimális futtatókörnyezet, mellékelt szolgáltatói CLI-k nélkül                                                                            | `docker compose --profile base up -d`        |
-| `cli`                    | `omniroute-cli`  | Ügynökalapú munkafolyamatokhoz, amelyek meghívják az `omniroute providers/setup/doctor` funkciókat és a mellékelt CLI-ket (Codex, Claude Code, Droid, OpenClaw)                  | `docker compose --profile cli up -d`         |
-| `host`                   | `omniroute-host` | Olyan Linux-gazdagépekhez, amelyek a `~/.local/bin`, `~/.codex`, `~/.claude` stb. csak olvasható csatolásával `network_mode`-szerű hozzáférést szeretnének a gazdagép CLI-jeihez | `docker compose --profile host up -d`        |
-| `cliproxyapi`            | `cliproxyapi`    | A [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) oldalkonténer futtatása a `8317` porton a felsőbb rétegbeli CLI-proxyzáshoz                                        | `docker compose --profile cliproxyapi up -d` |
-| `web`                    | `omniroute-web`  | Böngészőt igénylő, webes munkamenetet használó szolgáltatókhoz: `gemini-web`, `claude-web`, `claude-turnstile` (`runner-web` összeállítása, mellékelt Chromiummal)               | `docker compose --profile web up -d`         |
+| Profil                   | Szolgáltatás     | Mikor használja                                                                                                                                                            | Parancs                                      |
+| ------------------------ | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `base` (alapértelmezett) | `omniroute-base` | Grafikus felület nélküli kiszolgáló / minimális futtatókörnyezet, csomagolt szolgáltatói CLI-k nélkül                                                                      | `docker compose --profile base up -d`        |
+| `cli`                    | `omniroute-cli`  | Agentikus munkafolyamatokhoz, amelyek meghívják az `omniroute providers/setup/doctor` parancsot és a csomagolt CLI-ket (Codex, Claude Code, Droid, OpenClaw)               | `docker compose --profile cli up -d`         |
+| `host`                   | `omniroute-host` | Linux-gazdagépekhez, amelyek a `~/.local/bin`, `~/.codex`, `~/.claude` stb. csak olvasható csatolásával `network_mode`-szerű hozzáférést szeretnének a gazdagép CLI-jeihez | `docker compose --profile host up -d`        |
+| `cliproxyapi`            | `cliproxyapi`    | A [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) sidecar futtatása a `8317` porton a felsőbb szintű CLI-proxyzáshoz                                           | `docker compose --profile cliproxyapi up -d` |
+| `web`                    | `omniroute-web`  | Böngészőt igénylő, webes munkamenetet használó szolgáltatókhoz: `gemini-web`, `claude-web`, `claude-turnstile` (`runner-web` build, beépített Chromiummal)                 | `docker compose --profile web up -d`         |
 
 > Több profil is kombinálható: `docker compose --profile cli --profile cliproxyapi up -d`.
 
-## A gazdagép CLI-eszközeinek konfigurálása, amikor az OmniRoute Dockerben fut
+## A gazdagépi CLI-eszközök konfigurálása, amikor az OmniRoute Dockerben fut
 
 Az `omniroute setup-codex`, a `setup-claude`, a `config set <tool>` és az irányítópult
-**Konfiguráció mentése** gombja egyaránt olyan fájlokat ír, mint a `~/.codex/*.config.toml`. Ezeknek az elérési utaknak
-csak azon a gépen van jelentésük, amelyen a CLI ténylegesen fut. Ha ezeket a konténeren belül
-futtatja, az írás a konténer saját kezdőkönyvtárába (`/home/node` —
-a lemezkép `USER node` felhasználóval fut) kerül, ahonnan egyetlen gazdagépen futó CLI sem fogja beolvasni, és amely
-a konténer újbóli létrehozásakor azonnal törlődik.
+**Konfiguráció mentése** gombja mind olyan fájlokat írnak, mint a `~/.codex/*.config.toml`. Ezeknek az elérési utaknak
+csak azon a gépen van jelentésük, ahol a CLI ténylegesen fut. Ha ezeket a konténeren belül
+futtatja, az írás a konténer saját kezdőkönyvtárába kerül (`/home/node` —
+a lemezkép `USER node` felhasználóval fut), ahonnan a gazdagépi CLI soha nem fogja beolvasni, és ahol
+a konténer újbóli létrehozásakor azonnal elvész.
 
-Az OmniRoute ezt észleli, és használhatatlan sikerjelzés helyett
-utasításokkal együtt megtagadja az írást: a CLI `2` kóddal lép ki, az API pedig `422`
-választ ad, amelyben a `containerEphemeralTarget: true` szerepel.
+Az OmniRoute észleli ezt, és a nem használható sikerjelzés helyett utasításokkal
+megtagadja az írást: a CLI `2` kóddal lép ki, az API pedig `422`
+választ ad `containerEphemeralTarget: true` értékkel.
 
-### Ajánlott: futtassa a CLI-t a gazdagépen, az OmniRoute-ot pedig Dockerben
+### Javasolt: a CLI fusson a gazdagépen, az OmniRoute pedig Dockerben
 
-A konténer biztosítja az API-t; a CLI a gazdagépen található eszközöket konfigurálja.
+A konténer szolgáltatja az API-t; a CLI a gazdagépi eszközöket konfigurálja.
 
 ```bash
 docker compose --profile base up -d
 
 npm install -g omniroute
 omniroute connect http://localhost:20128   # irányítsa a CLI-t a konténerre
-omniroute setup-codex                      # a gazdagép valódi ~/.codex könyvtárába ír
+omniroute setup-codex                      # kiírja a tényleges ~/.codex könyvtárat a gazdagépen
 ```
 
-Ez a megfelelő választás, ha a Codex, a Claude Code, a Cursor vagy hasonló eszköz
-a laptopján fut — általában ez a szokásos beállítás.
+Ez a megfelelő választás, ha a Codex, a Claude Code, a Cursor vagy hasonló eszközök a
+laptopján futnak — általában ez a szokásos felállás.
 
-### Alternatíva: a gazdagép konfigurációs könyvtárainak bind mountolása (`host` profil)
+### Alternatíva: a gazdagépi konfigurációs könyvtárak bind csatolása (`host` profil)
 
-Ha azt szeretné, hogy maga a konténer írja a gazdagép konfigurációját, csatolja be a
+Ha azt szeretné, hogy maga a konténer írja a gazdagépi konfigurációt, csatolja be a
 könyvtárakat, és állítsa a `CLI_CONFIG_HOME` értékét a csatolás gyökérkönyvtárára. A `host` profil
-ezt már megteszi:
+ezt már eleve megteszi:
 
 ```yaml
 environment:
@@ -136,96 +137,96 @@ volumes:
   - ~/.claude:/host-home/.claude:rw
 ```
 
-A bind mount teszi megbízhatóvá az elérési utat: az OmniRoute beolvassa a
-`/proc/self/mountinfo` fájlt, és engedélyezi a csatolt elérési utakra történő írást (valamint azokba a könyvtárakba,
-amelyek gyermekkönyvtárai csatolási pontok — a fenti `/host-home` pontosan ilyen), miközben
-továbbra is megtagadja a nem csatolt elérési utakra történő írást.
+A bind csatolás teszi megbízhatóvá az elérési utat: az OmniRoute beolvassa a
+`/proc/self/mountinfo` fájlt, és engedélyezi az írást a csatolt elérési utakra (valamint az olyan könyvtárakba,
+amelyek gyermekei csatolási pontok, ami pontosan megfelel a fenti `/host-home` struktúrának), miközben
+továbbra is megtagadja az írást a nem csatolt helyekre.
 
-### Vészkijárat: a konténer saját CLI-jeinek konfigurálása (csak indokolt esetben)
+### Vészmegoldás: a konténer saját CLI-jeinek konfigurálása (csak indokolt esetben)
 
 Ha a CLI-k valóban a konténeren belül találhatók (a `cli` profilban), az írás
-szándékos. Adja át az `--allow-container-write` kapcsolót bármely `setup-*` parancsnak, vagy állítsa be
-az `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` értéket a kiszolgálón. Az írás megtörténik,
-de figyelmeztetés jelzi, hogy nem marad meg a konténer megszűnése után.
+szándékos. Adja át az `--allow-container-write` kapcsolót bármely `setup-*` parancsnak, vagy állítsa be az
+`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` értéket a kiszolgálóhoz. Az írás
+egy arra figyelmeztető üzenet mellett folytatódik, hogy az eredmény nem marad meg a konténer megszűnése után.
 
-> **Biztonsági figyelmeztetés — `cli` profil + `docker.sock` csatolása.**
-> A `cli` profil bind mountként csatolja a `/var/run/docker.sock` fájlt, hogy a konténeren belüli
-> automatikus frissítő újra létrehozhassa a stacket a gazdagép démonjával
-> (az `src/lib/system/autoUpdate.ts` ellenőrzi ezt a socketet, és annak
-> hiányában kihagyja a Docker-alapú eljárást). Ez a socket **a gazdagép root szintű bizalmi
-> határa**: bármi, ami hozzáfér, root jogosultsággal vezérli a gazdagép Docker-démonját —
-> létrehozhat, megvizsgálhat, leállíthat és eltávolíthat bármely konténert a gazdagépen.
+> **Biztonsági figyelmeztetés — `cli` profil + `docker.sock` csatolás.**
+> A `cli` profil bind csatolással csatolja a `/var/run/docker.sock` fájlt, hogy a konténeren belüli
+> automatikus frissítő újra létrehozhassa a stacket a gazdagép démonjának használatával
+> (az `src/lib/system/autoUpdate.ts` ellenőrzi ezt a socketet, és kihagyja a
+> Docker-útvonalat, ha az nem található). Ez a socket **a gazdagépi root jogosultsághoz vezető bizalmi
+> határ**: bármi, ami eléri, root jogosultsággal vezérelheti a gazdagép Docker-démonját —
+> létrehozhatja, vizsgálhatja, leállíthatja és eltávolíthatja a gazdagép bármely konténerét.
 > Következmények:
 >
 > 1. **Soha ne tegye elérhetővé a hálózaton a `cli` profil portját.** Tegye közzé
 >    a `127.0.0.1` címen (`ports: "127.0.0.1:${DASHBOARD_PORT:-20128}:..."`)
->    — egy LAN-ról elérhető `cli` profil esetén az irányítópult szintjén történő bármely távoli kódfuttatás
+>    — egy LAN-ról elérhető `cli` profil esetén bármely, irányítópult-szintű RCE
 >    a gazdagép teljes kompromittálásához vezet.
-> 2. **Ne csatoljon további gazdagépkönyvtárakat a `cli` profilba.**
->    A Docker-socket és bármely további csatolás együttesen teljes
->    olvasási/írási hozzáférést biztosít a konténernek a fájlrendszeréhez és a gazdagép konfigurációjához. Ha egy eszköznek
->    hozzá kell férnie egy projekthez, futtassa helyileg a CLI binárisával — ne csatolja
->    a `cli` konténerbe.
+> 2. **Ne csatoljon további gazdagépi könyvtárakat a `cli` profilba.**
+>    A Docker-socket és bármely további csatolás együttesen teljes olvasási/írási hozzáférést biztosít a konténernek
+>    a fájlrendszerhez és a gazdagép konfigurációjához. Ha egy eszköznek látnia kell egy projektet,
+>    futtassa helyileg a CLI binárissal — ne csatolja be a
+>    `cli` konténerbe.
 >
 > Ha nincs szüksége konténeren belüli automatikus frissítésre, ne kapcsolja be a `cli` profilt
 > (`COMPOSE_PROFILES=core,redis` vagy ennél rövidebb érték). A többi profil nem
 > csatolja a Docker-socketet.
 >
-> A MITM-mel kapcsolatos fenyegetési modellért tekintse meg a `docs/security/MITM-TPROXY-DECRYPT.md` fájlt (gitben található; nincs belefordítva a `/docs` könyvtárba),
-> a `codex`/`claude-code`/`droid`/`openclaw` binárisok eredetláncáért pedig a
+> A kapcsolódó MITM-fenyegetési modellért lásd a `docs/security/MITM-TPROXY-DECRYPT.md` fájlt (git; nincs belefordítva a `/docs` könyvtárba),
+> a `codex`/`claude-code`/`droid`/`openclaw` binárisok eredetigazolási láncáért pedig a
 > `docs/security/SUPPLY_CHAIN.md` fájlt.
 
 ## Redis sidecar
 
-Az OmniRoute a Redisre támaszkodik az elosztott sebességkorlátozó és a megosztott gyorsítótár működtetéséhez. A `redis` szolgáltatás **mindig definiálva van** a `docker-compose.yml` fájlban (nem tartozik hozzá profilkorlátozás), és minden más profillal együtt elindul.
+Az OmniRoute a Redisre támaszkodik az elosztott sebességkorlátozó és a megosztott gyorsítótár működtetéséhez. A `redis` szolgáltatás **mindig definiálva van** a `docker-compose.yml` fájlban (nincs profilhoz kötve), és minden más profillal együtt elindul.
 
-| Részlet                          | Érték                                            |
-| -------------------------------- | ------------------------------------------------ |
-| Lemezkép                         | `redis:7-alpine`                                 |
-| Konténer neve                    | `omniroute-redis`                                |
-| Belső port                       | `6379`                                           |
-| Gazdagép portja (felülbírálható) | `REDIS_PORT` (alapértelmezett: `6379`)           |
-| Gazdagép címe (felülbírálható)   | `REDIS_BIND_HOST` (alapértelmezett: `127.0.0.1`) |
-| Kötet                            | `omniroute-redis-data` → `/data`                 |
-| Állapot-ellenőrzés               | `redis-cli ping` (10 másodperces időköz)         |
+| Részlet                     | Érték                                           |
+| --------------------------- | ----------------------------------------------- |
+| Lemezkép                    | `redis:7-alpine`                                |
+| Konténer neve               | `omniroute-redis`                               |
+| Belső port                  | `6379`                                          |
+| Gazdagép portja (felülírás) | `REDIS_PORT` (alapértelmezés: `6379`)           |
+| Gazdagép címe (felülírás)   | `REDIS_BIND_HOST` (alapértelmezés: `127.0.0.1`) |
+| Kötet                       | `omniroute-redis-data` → `/data`                |
+| Állapot-ellenőrzés          | `redis-cli ping` (10 másodperces időköz)        |
 
 Kapcsolódó környezeti változók:
 
 - `REDIS_URL` — az alkalmazásba átadott kapcsolati karakterlánc (alapértelmezés szerint `redis://redis:6379`).
 - `REDIS_PORT` — a Redis-konténer gazdagépoldali portleképezése.
-- `REDIS_BIND_HOST` — az a gazdagépi hálózati interfész, amelyen a port közzé van téve. Alapértelmezett értéke `127.0.0.1`.
+- `REDIS_BIND_HOST` — az a gazdagép-interfész, amelyen a port közzé van téve. Alapértelmezett értéke `127.0.0.1`.
 
 > **Miért a visszacsatolási cím az alapértelmezett:** a sidecar `requirepass` nélkül fut, az
-> alkalmazáskonténerek pedig a compose-hálózaton keresztül (`redis:6379`) érik el — a közzétett port
-> csak a gazdagépoldali eszközök (`redis-cli`, helyi `npm run dev`) számára szükséges. A
-> `0.0.0.0` címen való közzététel egy hitelesítés nélküli Redist tenne elérhetővé a LAN minden
-> gazdagépe számára. Ha a `REDIS_BIND_HOST=0.0.0.0` értéket állítja be, adja hozzá a
-> `--requirepass` kapcsolót is a szolgáltatás `command:` mezőjéhez.
+> alkalmazáskonténerek pedig a compose-hálózaton keresztül (`redis:6379`) érik el — a közzétett
+> port csak a gazdagépoldali eszközök (`redis-cli`, helyi `npm run dev`) számára szükséges. A
+> `0.0.0.0` címen való közzététel egy hitelesítés nélküli Redist tenne elérhetővé a helyi hálózat
+> minden gazdagépe számára. Ha beállítja a `REDIS_BIND_HOST=0.0.0.0` értéket, adja hozzá a
+> `--requirepass` kapcsolót is a szolgáltatás `command:` beállításához.
 
-A **Redis letiltása** nem ajánlott (a sebességkorlátozó memóriabeli tartalékmegoldásra vált). Ha mégis szükséges, távolítsa el vagy tegye megjegyzésbe a `redis:` szolgáltatásblokkját a `docker-compose.yml` fájlban, vagy skálázza nullára:
+A **Redis letiltása** nem ajánlott (a sebességkorlátozó a memórián belüli tartalékmegoldásra áll vissza). Ha mégis szükséges, távolítsa el vagy tegye megjegyzésbe a `redis:` szolgáltatásblokkját a `docker-compose.yml` fájlban, vagy skálázza nullára:
 
 ```bash
 docker compose up -d --scale redis=0
 ```
 
-## Éles környezethez használható Compose
+## Éles környezethez készült Compose
 
 A fejlesztői környezet mellett futó, elkülönített éles pillanatképhez használja a `docker-compose.prod.yml` fájlt.
 
-| Részlet                             | Érték                                                                               |
-| ----------------------------------- | ----------------------------------------------------------------------------------- |
-| Fájl                                | `docker-compose.prod.yml`                                                           |
-| Irányítópult alapértelmezett portja | `PROD_DASHBOARD_PORT=20130` (a belső `${DASHBOARD_PORT:-20128}` portra leképezve)   |
-| API alapértelmezett portja          | `PROD_API_PORT=20131`                                                               |
-| Lemezkép                            | `omniroute:prod` (a `runner-cli` célból összeállítva)                               |
-| Redis-konténer                      | `omniroute-redis-prod` (`redis:8.6.2`, dedikált `redis-prod-data` kötet)            |
-| Adatkötet                           | `omniroute-prod-data` (elnevezett, az újbóli összeállítások között megőrzött)       |
-| Állapot-ellenőrzések                | `node healthcheck.mjs` + `redis-cli ping`, a `depends_on` a Redis állapotához kötve |
+| Részlet                             | Érték                                                                              |
+| ----------------------------------- | ---------------------------------------------------------------------------------- |
+| Fájl                                | `docker-compose.prod.yml`                                                          |
+| Irányítópult alapértelmezett portja | `PROD_DASHBOARD_PORT=20130` (a belső `${DASHBOARD_PORT:-20128}` portra leképezve)  |
+| API alapértelmezett portja          | `PROD_API_PORT=20131`                                                              |
+| Lemezkép                            | `omniroute:prod` (a `runner-cli` célból összeállítva)                              |
+| Redis-konténer                      | `omniroute-redis-prod` (`redis:8.6.2`, dedikált `redis-prod-data` kötet)           |
+| Adatkötet                           | `omniroute-prod-data` (elnevezett, újraépítések között megőrzött)                  |
+| Állapot-ellenőrzések                | `node healthcheck.mjs` + `redis-cli ping`, a `depends_on` a Redis állapotától függ |
 
 Használat:
 
 ```bash
-# Az éles verem összeállítása és elindítása
+# Az éles környezet összeállítása és elindítása
 docker compose -f docker-compose.prod.yml up -d --build
 
 # Naplók folyamatos megjelenítése
@@ -235,20 +236,20 @@ docker compose -f docker-compose.prod.yml logs -f
 docker compose -f docker-compose.prod.yml down
 ```
 
-Az éles verem a fejlesztői compose-környezettel párhuzamosan fut (eltérő konténernevekkel, portokkal és kötetekkel), így helyben folytathatja a fejlesztést, miközben az éles környezet továbbra is fut.
+Az éles környezet a fejlesztői compose-környezettel párhuzamosan fut (eltérő konténernevekkel, portokkal és kötetekkel), így helyben folytathatja a fejlesztést, miközben az éles környezet működésben marad.
 
 ## Dockerfile-szakaszok
 
-A tároló egy többlépcsős Dockerfile-t (`Dockerfile`) tartalmaz. Négy szakasz érhető el; válaszd ki a használati esetednek megfelelő `target` értéket.
+A tároló egy többlépcsős Dockerfile-t (`Dockerfile`) tartalmaz. Négy szakasz érhető el; válaszd ki a felhasználási esetednek megfelelő `target` értéket.
 
-| Szakasz       | Alapkép               | Cél                                                                                                                                                                                                                                                                                                                                         |
-| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Telepíti a függőségeket (`npm ci --legacy-peer-deps`), és futtatja az `npm run build` parancsot (alapértelmezés szerint Turbopack — lásd alább a fordításkori erőforrásokat)                                                                                                                                                                |
-| `runner-base` | `node:26-trixie-slim` | Éles futtatókörnyezet a Next.js önálló kimenetével. **Nem tartalmaz szolgáltatói CLI-ket.**                                                                                                                                                                                                                                                 |
-| `runner-cli`  | `runner-base`         | Hozzáadja a `git`, `docker.io`, `docker-compose` eszközöket és a globális CLI-ket: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Ezt válaszd az ágensalapú munkafolyamatokhoz.**                                                                                                                                     |
-| `runner-web`  | `runner-base`         | Hozzáadja a Playwrightot és egy Chromium böngészőt (`--with-deps`) a webes munkamenetet használó szolgáltatókhoz: `gemini-web`, `claude-web`, `claude-turnstile`. **Ezt válaszd, ha ezeket a szolgáltatókat használod** — az egyszerű lemezkép enélkül a kérés feldolgozásakor hibát ad (lásd a `-web` megjegyzést a kiadási csatornáknál). |
+| Szakasz       | Alaplemezkép          | Cél                                                                                                                                                                                                                                                                                                                                        |
+| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `builder`     | `node:26-trixie-slim` | Telepíti a függőségeket (`npm ci --legacy-peer-deps`), majd futtatja az `npm run build` parancsot (alapértelmezés szerint Turbopack — lásd alább a Fordítási erőforrások részt)                                                                                                                                                            |
+| `runner-base` | `node:26-trixie-slim` | Éles futtatókörnyezet a Next.js önálló kimenetével. **Nem tartalmaz szolgáltatói CLI-ket.**                                                                                                                                                                                                                                                |
+| `runner-cli`  | `runner-base`         | Hozzáadja a `git`, `docker.io`, `docker-compose` eszközöket és a globális CLI-ket: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Ezt válaszd az ügynökalapú munkafolyamatokhoz.**                                                                                                                                   |
+| `runner-web`  | `runner-base`         | Hozzáadja a Playwrightot és egy Chromium böngészőt (`--with-deps`) a webes munkamenetet használó szolgáltatókhoz: `gemini-web`, `claude-web`, `claude-turnstile`. **Ezt válaszd ezen szolgáltatók használatakor** — az alap lemezkép nélkülük a kérés feldolgozásakor hibát jelez (lásd a `-web` megjegyzést a Kiadási csatornák részben). |
 
-Egy adott cél kézi összeállítása:
+Adott cél manuális összeállítása:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,42 +257,42 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Fordításkori erőforrások
+### Fordítási erőforrások
 
-Három buildargumentum szabályozza a `builder` szakasz erőforrásigényét. Ezek csak a fordítás során érvényesek —
-az `OMNIROUTE_MEMORY_MB` (lásd alább) ettől független, futásidejű beállítás.
+Három összeállítási argumentum szabályozza a `builder` szakasz erőforrásigényét. Ezek kizárólag az összeállítás idején érvényesek —
+az `OMNIROUTE_MEMORY_MB` (lásd alább) ettől független futásidejű beállítás.
 
-| Buildargumentum             | Alapérték | Hatás                                                                                                                         |
-| --------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`       | A `0` webpackkel fordít: kisebb memória-csúcshasználat, de lassabb. Az `1` engedélyezi a Turbopack használatát.               |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`    | A létrehozott `next build` folyamat V8-halmának felső korlátja (`--max-old-space-size`).                                      |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`       | Beállítja a `CIRCLE_NODE_TOTAL` értékét; a Next ebből számítja ki a lapadatok gyűjtéséhez használt `workers = N - 1` értéket. |
+| Összeállítási argumentum    | Alapérték | Hatás                                                                                                                          |
+| --------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`       | A `0` webpackkel fordít: alacsonyabb csúcsmemória-igény, de lassabb. Az `1` engedélyezi a Turbopack használatát.               |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`    | A létrehozott `next build` folyamat V8-halmának felső korlátja (`--max-old-space-size`).                                       |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`       | Beállítja a `CIRCLE_NODE_TOTAL` értékét; a Next ebből számítja ki a `workers = N - 1` értéket az oldaladatok összegyűjtéséhez. |
 
-Az `OMNIROUTE_BUILD_WORKERS` értékét érdemes növelni egy nagy teljesítményű buildgépen, és ezt kell
-gyanúsítani akkor, ha egy korlátozott erőforrású fordítás a `✓ Compiled successfully` üzenet **után** áll le. Minden
-lapadat-feldolgozó külön folyamat, ahogy maga a szülő `next build` is;
-egy valódi VPS-en végzett reprodukció (issue #7518) az egyes folyamatok RSS-csúcshasználatát
-~4.5 GB értéken mérte, a `NODE_OPTIONS` halomjelzőtől függetlenül (a Turbopack a
-V8-halmon kívüli natív/Rust memóriában fordít). Az alapértelmezett `2` értéket (→ 1 feldolgozó, összesen 2
-folyamat) a közzétételi folyamat által használt 16 GB-os / 4 vCPU-s, GitHub által üzemeltetett futtatókhoz
-méreteztük. `8` esetén (→ 7 feldolgozó) a futtató memóriája elfogyott, és
-a buildkit a `ResourceExhausted: ... cannot allocate memory` hibával állította le a lépést;
-a `3` (→ 2 feldolgozó) még mindig nem fért el, miután a folyamatonkénti RSS-t
-közvetlenül mértük a becslés helyett. A `tests/unit/docker-build-memory-budget.test.ts`
+Az `OMNIROUTE_BUILD_WORKERS` értékét érdemes növelni nagy teljesítményű összeállítási környezetben, és ezt kell
+gyanúba venni, amikor egy korlátozott környezetben végzett összeállítás a `✓ Compiled successfully` üzenet **után** áll le. Minden
+oldaladat-feldolgozó saját folyamatként fut, ahogyan maga a szülő `next build` is;
+egy valós VPS-en végzett reprodukció (issue #7518) minden folyamat RSS-csúcsértékét
+~4,5 GB-ra mérte, a `NODE_OPTIONS` halombeállítástól függetlenül (a Turbopack a
+V8-halmon kívüli natív/Rust-memóriában fordít). Az alapértelmezett `2` érték (→ 1 feldolgozó, összesen 2
+folyamat) a közzétételi folyamatban használt, GitHub által üzemeltetett 16 GB / 4 vCPU-s futtatókhoz
+van méretezve. `8` értéknél (→ 7 feldolgozó) a futtató memóriája elfogyott, és
+a buildkit a `ResourceExhausted: ... cannot allocate memory` hibával leállította a lépést;
+még a `3` érték (→ 2 feldolgozó) sem fért el, amikor a folyamatonkénti RSS-t közvetlenül
+mérték ahelyett, hogy következtettek volna rá. A `tests/unit/docker-build-memory-budget.test.ts`
 a mért érték alapján végzi el a számítást, és hibát jelez, ha bármelyik beállítás
-meghaladja a futtató kapacitását.
+meghaladná a futtató kapacitását.
 
-A Turbopack a V8-halmon **kívül** elhelyezkedő natív Rust memóriában fordít, ezért
-az `OMNIROUTE_BUILD_MEMORY_MB` nem korlátozza azt. Memóriakorláttal rendelkező gazdagépen
-az OOM killer ilyenkor SIGKILL jellel állítja le a fordítást, mindenféle hibaüzenet nélkül — az egyszerűen
-félbeszakad a `Creating an optimized production build` közben, ami inkább tűnik lefagyásnak,
-mint memóriahiánynak. Ezért használ a `Dockerfile` alapértelmezés szerint webpacket
-(`OMNIROUTE_USE_TURBOPACK=0`), eltérően az `npm run dev` / `npm run build` parancsoktól, amelyeknél
-a kód alapértelmezése a Turbopack: egy buildargumentumok nélküli egyszerű `docker build .` parancs (amelyet
-a Railway és más egykattintásos tárhelyszolgáltatók futtatnak) nem állhat le észrevétlenül egy
-memóriakorlátos buildgépen. A közzétett lemezképek már explicit módon átadják az
-`OMNIROUTE_USE_TURBOPACK=0` értéket a `docker-publish.yml` fájlban. Bőséges RAM-mal rendelkező buildgépen
-a gyorsabb fordítás érdekében engedélyezd a Turbopack használatát:
+A Turbopack a V8-halmon **kívül** található natív Rust-memóriában fordít, ezért
+az `OMNIROUTE_BUILD_MEMORY_MB` nem korlátozza azt. Memóriakorlátos gazdagépen az
+OOM-kezelő ilyenkor mindenféle hibaüzenet nélkül SIGKILL jelzéssel leállítja az összeállítást — az egyszerűen
+félbeszakad a `Creating an optimized production build` folyamat közben, ami inkább
+lefagyásnak tűnik, mint memóriahiánynak. Ezért használ a `Dockerfile` alapértelmezés szerint webpacket
+(`OMNIROUTE_USE_TURBOPACK=0`), ellentétben az `npm run dev` / `npm run build` parancsokkal, ahol
+a kód alapértelmezése a Turbopack: egy minden összeállítási argumentum nélküli `docker build .` parancs (amelyet
+a Railway és más egykattintásos szolgáltatók futtatnak) nem állhat le csendben egy memóriakorlátos
+összeállítási környezetben. A közzétett lemezképek már explicit módon átadják az `OMNIROUTE_USE_TURBOPACK=0`
+értéket a `docker-publish.yml` fájlban. Bőséges RAM-mal rendelkező összeállítási környezetben a gyorsabb összeállításhoz
+engedélyezd a Turbopack használatát:
 
 ```bash
 docker build --target runner-base \
@@ -301,15 +302,15 @@ docker build --target runner-base \
 
 A `webpackBuildWorker` engedélyezve van, ezért a `next build` egy szülő- **és** egy feldolgozó
 folyamatot futtat, és mindkettő külön-külön figyelembe veszi az `OMNIROUTE_BUILD_MEMORY_MB` értékét. A konténer
-memóriakorlátját nagyjából ennek az értéknek a kétszerese fölé méretezd, ne csupán egyszeresére.
+memóriakorlátját ennek az értéknek nagyjából a kétszerese fölé állítsd, ne csupán egyszeresére.
 
 Ezen a forrásfán mérve (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Csomagoló | Konténerkorlát | Eredmény                                |
-| --------- | -------------- | --------------------------------------- |
-| Turbopack | 8 GiB / 16 GiB | Mindkettőnél OOM-leállítás, csendben    |
-| webpack   | 8 GiB          | A buildfeldolgozót SIGKILL állította le |
-| webpack   | 12 GiB         | Sikeres, a csúcsérték 11.1 GiB volt     |
+| Csomagoló | Konténer memóriakorlátja | Eredmény                                                      |
+| --------- | ------------------------ | ------------------------------------------------------------- |
+| Turbopack | 8 GiB / 16 GiB           | mindkét esetben az OOM-kezelő állította le, hibaüzenet nélkül |
+| webpack   | 8 GiB                    | a feldolgozófolyamatot SIGKILL állította le                   |
+| webpack   | 12 GiB                   | sikeres, 11,1 GiB-os csúcsértékkel                            |
 
 ### Futásidejű alapértékek
 
@@ -317,25 +318,25 @@ A `runner-base` által exportált alapértékek: `PORT=20128`, `HOSTNAME=0.0.0.0
 
 Memóriakezelés Dockerben:
 
-- A rendszerkép beállítja az `OMNIROUTE_MEMORY_MB=1024` értéket, és ebből származtatja a `NODE_OPTIONS=--max-old-space-size=1024` értéket.
+- A lemezkép beállítja az `OMNIROUTE_MEMORY_MB=1024` értéket, és ebből származtatja a `NODE_OPTIONS=--max-old-space-size=1024` értéket.
 - A tényleges kiszolgálófolyamatot az önálló indító indítja el, amely beolvassa az `OMNIROUTE_MEMORY_MB` értékét, és hozzáfűzi a `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` kapcsolót.
-- A Node az utolsóként megismételt `--max-old-space-size` értéket használja, így az `OMNIROUTE_MEMORY_MB` beállítása szabályozza a Docker tényleges heapkorlátját.
-- Mivel a rendszerkép ezt mindig beállítja, az indító saját, RAM alapján kalibrált tartalékértéke Docker alatt soha nem lép érvénybe. Növelje meg kifejezetten az adott munkaterheléshez (lásd az alábbi táblázatot). A `2048` még mindig túl kevés a kódolóügynökök `/v1/responses` kéréseihez.
+- A Node az utolsóként megadott `--max-old-space-size` értéket használja, ezért az `OMNIROUTE_MEMORY_MB` beállítása határozza meg a Dockerben érvényes heaphatárt.
+- Mivel a lemezkép ezt mindig beállítja, az indító saját, rendelkezésre álló RAM alapján kalibrált tartalékértéke Docker alatt soha nem lép életbe. Növelje meg kifejezetten az adott munkaterheléshez (lásd az alábbi táblázatot). A `2048` továbbra is túl kevés a kódoló ügynökök `/v1/responses` kéréseihez.
 
-### Futásidejű RAM kódolóügynökökhöz
+### Futásidejű RAM kódoló ügynökökhöz
 
-Az 1 GiB-os alapértelmezett Docker-beállítás egy irányítópulthoz vagy egyszerű csevegéshez szükséges minimum, nem éles környezethez megfelelő méret. A hosszú `POST /v1/responses` törzsek (több száz üzenettel és több tucat eszközzel) a tömörítés során több memóriabeli gráfot tartanak meg. Két, egymást átfedő, egyenként ~3 MiB-os / ~750k tokenes kérés **12 GiB** old-space mellett is V8-leállást okozott (`FATAL ERROR: Reached heap limit`), és egy 16 GiB-os cgroup OOM-korlátját is elérte. Lásd: [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Az alapértelmezett 1 GiB-os Docker-beállítás csak a vezérlőpulthoz és könnyű csevegéshez elegendő minimum, nem éles környezethez való méret. A hosszú `POST /v1/responses` törzsek (több száz üzenet, több tucat eszköz) a tömörítés során több memóriabeli gráfot is megőriznek. Két, egymást időben átfedő, egyenként körülbelül 3 MiB-os / 750 ezer tokenes kérés **12 GiB-os** old-space mellett is a V8 leállását okozta (`FATAL ERROR: Reached heap limit`), és egy 16 GiB-os cgroup esetén is OOM-hibát idézett elő. Lásd: [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-A **cgroup `--memory` méretét a heap fölé állítsa** — a natív pufferek, az SQLite és a tömörítés köztes adatai a V8-on kívül helyezkednek el.
+A **cgroup `--memory` értékét a heapméret fölé méretezze** — a natív pufferek, az SQLite és a tömörítés köztes adatai a V8-on kívül helyezkednek el.
 
-| Munkaterhelés                               | `OMNIROUTE_MEMORY_MB`           | Konténer / cgroup    | Megjegyzések                                                                                                                               |
-| ------------------------------------------- | ------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Irányítópult, egy egyszerű csevegés         | `1024` (rendszerkép alapértéke) | ≥2 GiB               |                                                                                                                                            |
-| Egy kódolóügynök (Claude/Codex/Grok)        | `8192`                          | ≥10 GiB              | Tipikus, egyetlen munkamenetes `/v1/responses`                                                                                             |
-| Két párhuzamos hosszú `/v1/responses`       | `10240`–`12288`                 | ≥12–16 GiB           | Mért V8-leállás ~12 GiB-os heapnél                                                                                                         |
-| Három vagy több párhuzamos hosszú kontextus | ne egyetlen folyamatban         | sorosítás / több RAM | Alapértelmezés szerint egyszerre 1 nagy erőforrás-igényű kérés engedélyezett; ennek RAM-bővítés nélküli növelése ismét előidézi a leállást |
+| Munkaterhelés                             | `OMNIROUTE_MEMORY_MB`        | Konténer / cgroup            | Megjegyzések                                                                                                                      |
+| ----------------------------------------- | ---------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Vezérlőpult, egy könnyű csevegés          | `1024` (lemezkép alapértéke) | ≥2 GiB                       |                                                                                                                                   |
+| Egy kódoló ügynök (Claude/Codex/Grok)     | `8192`                       | ≥10 GiB                      | Tipikus egymunkamenetes `/v1/responses`                                                                                           |
+| Két egyidejű hosszú `/v1/responses`       | `10240`–`12288`              | ≥12–16 GiB                   | Mért V8-leállás körülbelül 12 GiB-os heapnél                                                                                      |
+| Három vagy több egyidejű hosszú kontextus | ne egy folyamatban           | soros végrehajtás / több RAM | Az alapértelmezett nehézsúlyú beléptetési korlát 1 folyamatban lévő kérés; RAM-bővítés nélküli növelése ismét előidézi a leállást |
 
-Az `omniroute serve` közvetlenül a gépen futtatva a RAM ~35%-ára kalibrál (a `[512, 4096]` tartományra korlátozva), ha az `OMNIROUTE_MEMORY_MB` **nincs beállítva**. A Docker mindig `1024` értékre állítja, ezért ez a kalibrálás a hivatalos rendszerképben soha nem fut le.
+Az `omniroute serve` közvetlenül a gépen futtatva a RAM körülbelül 35%-ára kalibrál (a `[512, 4096]` tartományra korlátozva), ha az `OMNIROUTE_MEMORY_MB` **nincs beállítva**. A Docker mindig `1024` értékre állítja, ezért ez a kalibrálás a hivatalos lemezképben soha nem fut le.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -345,42 +346,43 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 
 ## Kritikus környezeti változók
 
-Az [ENVIRONMENT.md](../reference/ENVIRONMENT.md) fájlban dokumentált alapértelmezéseken túl a következő változók a legfontosabbak Docker alatti futtatáskor:
+Az [ENVIRONMENT.md](../reference/ENVIRONMENT.md) fájlban dokumentált alapértékeken túl a következő változók a legfontosabbak Docker alatti futtatáskor:
 
-| Változó                       | Cél                                                                                                                                                                                                                                                                                                                                                               | Alapértelmezett                     |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| `OMNIROUTE_WS_BRIDGE_SECRET`  | A WebSocket-híd megosztott titka. **Éles környezetben kötelező** — állítsa erős, véletlenszerű karakterláncra.                                                                                                                                                                                                                                                    | nincs beállítva (megadása kötelező) |
-| `REDIS_URL`                   | A sebességkorlátozó/gyorsítótár-háttérrendszer kapcsolati karakterlánca                                                                                                                                                                                                                                                                                           | `redis://redis:6379`                |
-| `REDIS_PORT`                  | A mellékelt Redis-konténer gazdagépoldali portja                                                                                                                                                                                                                                                                                                                  | `6379`                              |
-| `REDIS_BIND_HOST`             | Az a gazdagép-interfész, amelyen a mellékelt Redis portja közzé van téve (loopback, hacsak nem ad hozzá AUTH-hitelesítést)                                                                                                                                                                                                                                        | `127.0.0.1`                         |
-| `AUTO_UPDATE_HOST_REPO_DIR`   | A gazdagépen található elérési út, amely a `cli` profilban a `/workspace/omniroute` helyre van csatolva az önfrissítési munkafolyamatokhoz                                                                                                                                                                                                                        | `.` (aktuális könyvtár)             |
-| `OMNIROUTE_MEMORY_MB`         | A Node futásidejű heapmemória-korlátja a Docker önálló kiszolgálójához; felülírja a lemezkép fenti alapértelmezését. Kódoló ügynökök esetén: `8192`+ (lásd: [futásidejű RAM](#runtime-ram-for-coding-agents)).                                                                                                                                                    | `1024`                              |
-| `DASHBOARD_PORT` / `API_PORT` | Felülírja az irányítópult (20128) és az API (20129) közzétett portjait                                                                                                                                                                                                                                                                                            | `20128` / `20129`                   |
-| `APP_BIND_HOST`               | Az a gazdagép-interfész, amelyen a docker-compose közzéteszi az irányítópult, az API és az élő WS portjait. A `REQUIRE_API_KEY=false` beállítással (ez az alapértelmezett) a `0.0.0.0` elérhetővé teszi a névtelen `/v1` proxyt a LAN számára — csak `REQUIRE_API_KEY=true` beállítással vagy elé helyezett fordított proxyval tegye szélesebb körben elérhetővé. | `127.0.0.1`                         |
-| `CLIPROXY_BIND_HOST`          | Az a gazdagép-interfész, amelyen a docker-compose közzéteszi a `cliproxyapi` segédkonténert — ennek adatkötete tárolja a szolgáltatói hitelesítő adatokat.                                                                                                                                                                                                        | `127.0.0.1`                         |
-| `OMNIROUTE_PLUGINS_DIR`       | Az a könyvtár, amelyből a futásidejű beépülőmodul-kereső olvas, és amelybe telepít. Állítsa be, ha a beépülő modulok bind mounttal vannak csatolva: az alapértelmezett érték a `HOME` változót követi, amelyet a lemezkép nem feltétlenül exportál.                                                                                                               | `~/.omniroute/plugins`              |
-| `OMNIROUTE_BASE_PATH`         | URL-alútvonal, amikor az alkalmazás fordított proxy mögött van közzétéve (pl. `/omniroute`)                                                                                                                                                                                                                                                                       | _(üres = gyökér)_                   |
-| `NEXT_PUBLIC_BASE_URL`        | Nyilvános böngészőeredet az alútvonallal együtt (pl. `https://host/omniroute`)                                                                                                                                                                                                                                                                                    | nincs beállítva                     |
-| `PROD_DASHBOARD_PORT`         | A `docker-compose.prod.yml` gazdagépoldali irányítópultportja                                                                                                                                                                                                                                                                                                     | `20130`                             |
-| `CLIPROXYAPI_PORT`            | A `cliproxyapi` segédkonténer gazdagépoldali portja                                                                                                                                                                                                                                                                                                               | `8317`                              |
+| Változó                       | Rendeltetés                                                                                                                                                                                                                                                                                                                               | Alapértelmezett érték               |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `OMNIROUTE_WS_BRIDGE_SECRET`  | A WebSocket-híd megosztott titka. **Éles környezetben kötelező** — állítsa erős, véletlenszerű karakterláncra.                                                                                                                                                                                                                            | nincs beállítva (megadása kötelező) |
+| `REDIS_URL`                   | A sebességkorlátozó/gyorsítótár háttérrendszerének kapcsolati karakterlánca                                                                                                                                                                                                                                                               | `redis://redis:6379`                |
+| `REDIS_PORT`                  | A mellékelt Redis-konténer gazdagépen elérhető portja                                                                                                                                                                                                                                                                                     | `6379`                              |
+| `REDIS_BIND_HOST`             | Az a gazdagép-interfész, amelyen a mellékelt Redis portja közzé van téve (loopback, hacsak nem ad hozzá AUTH-hitelesítést)                                                                                                                                                                                                                | `127.0.0.1`                         |
+| `AUTO_UPDATE_HOST_REPO_DIR`   | A gazdagép azon elérési útja, amely az önfrissítési munkafolyamatokhoz a `cli` profilban a `/workspace/omniroute` helyre van csatolva                                                                                                                                                                                                     | `.` (aktuális könyvtár)             |
+| `OMNIROUTE_MEMORY_MB`         | A Node futásidejű heapmemória-korlátja az önálló Docker-kiszolgálóhoz; felülírja a lemezkép fenti alapértékét. Kódoló ügynökök esetén: `8192`+ (lásd: [futásidejű RAM](#runtime-ram-for-coding-agents)).                                                                                                                                  | `1024`                              |
+| `DASHBOARD_PORT` / `API_PORT` | Felülírja az irányítópult (20128) és az API (20129) közzétett portjait                                                                                                                                                                                                                                                                    | `20128` / `20129`                   |
+| `APP_BIND_HOST`               | Az a gazdagép-interfész, amelyen a docker-compose közzéteszi az irányítópult/API/élő WS portjait. `REQUIRE_API_KEY=false` esetén (ez az alapértelmezés) a `0.0.0.0` elérhetővé teszi a névtelen `/v1` proxyt a LAN számára — csak `REQUIRE_API_KEY=true` mellett vagy elé helyezett fordított proxyval tegye szélesebb körben elérhetővé. | `127.0.0.1`                         |
+| `CLIPROXY_BIND_HOST`          | Az a gazdagép-interfész, amelyen a docker-compose közzéteszi a `cliproxyapi` oldalkocsit — ennek adatkötete tárolja a szolgáltatói hitelesítő adatokat.                                                                                                                                                                                   | `127.0.0.1`                         |
+| `OMNIROUTE_PLUGINS_DIR`       | Az a könyvtár, amelyet a futásidejű bővítménykereső olvas, és amelybe telepít. Állítsa be, ha a bővítmények bind mounttal vannak csatolva: az alapértelmezés a `HOME` értékét követi, amelyet egy lemezkép nem feltétlenül exportál.                                                                                                      | `~/.omniroute/plugins`              |
+| `OMNIROUTE_BASE_PATH`         | URL-alútvonal, amikor az alkalmazást fordított proxy mögött teszik közzé (pl. `/omniroute`)                                                                                                                                                                                                                                               | _(üres = gyökér)_                   |
+| `NEXT_PUBLIC_BASE_URL`        | Nyilvános böngészőeredet az alútvonallal együtt (pl. `https://host/omniroute`)                                                                                                                                                                                                                                                            | nincs beállítva                     |
+| `PROD_DASHBOARD_PORT`         | Az irányítópult gazdagépoldali portja a `docker-compose.prod.yml` fájlhoz                                                                                                                                                                                                                                                                 | `20130`                             |
+| `CLIPROXYAPI_PORT`            | A `cliproxyapi` oldalkocsi gazdagépoldali portja                                                                                                                                                                                                                                                                                          | `8317`                              |
 
 ## Fordított proxy egy alútvonalon (Traefik / nginx)
 
 A Next.js `basePath` értéke belefordul az önálló csomagba. Az OmniRoute a beégetett
-értéket egy jelzőfájlban rögzíti az alkalmazás gyökérkönyvtárában (az `npm run build`
-során írja ki; a `scripts/docker/ensure-docker-base-path.mjs` olvassa be), és a konténer
-indulásakor összehasonlítja az `OMNIROUTE_BASE_PATH` értékével. Ha eltérnek, és a
-lemezkép a tartomány gyökeréhez készült, a belépési pont a
-`node dev/run-standalone.mjs` futtatása előtt átírja az önálló jegyzékeket, a beágyazott
-`basePath`/`assetPrefix` literálokat (a Next 16 az SSR-erőforrások URL-jeit kizárólag az
-`assetPrefix` alapján jeleníti meg — a javító ebbe is beilleszti az alútvonalat), a
-beégetett `/_next/static` erőforrás-URL-eket (klienshivatkozási jegyzékek, médiaimportok,
-előre renderelt hibaoldalak), valamint a kliensoldali `process.env` helyettesítőt.
+értéket egy, az alkalmazás gyökerében található jelzőfájlban rögzíti (amelyet az
+`npm run build` ír, a `scripts/docker/ensure-docker-base-path.mjs` pedig olvas), és a
+konténer indításakor összehasonlítja az `OMNIROUTE_BASE_PATH` értékével. Ha ezek
+eltérnek, és a lemezkép a tartomány gyökeréhez készült, a belépési pont átírja az
+önálló jegyzékeket, a beágyazott `basePath`/`assetPrefix` literálokat (a Next 16 az SSR
+eszköz-URL-eket kizárólag az `assetPrefix` alapján rendereli — a javító az alútvonalat
+ebbe is átmásolja), a beégetett `/_next/static` eszköz-URL-eket
+(kliensreferencia-jegyzékek, médiaimportok, előre renderelt hibaoldalak), valamint a
+kliens `process.env` helyettesítő rétegét, mielőtt a `node dev/run-standalone.mjs`
+elindul.
 
-### Összeállítás Compose használatával (ajánlott)
+### Compose-build (ajánlott)
 
-Állítsa be mindkét változót a `.env` fájlban, majd építse újra a lemezképet, hogy annak
-beállításai egyezzenek a futásidejű környezettel:
+Állítsa be mindkét változót a `.env` fájlban, majd építse újra a lemezképet, hogy a
+lemezkép és a futtatókörnyezet beállításai megegyezzenek:
 
 ```bash
 # .env
@@ -392,14 +394,14 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-A `docker-compose.yml` az `OMNIROUTE_BASE_PATH` értékét Docker build-argumentumként és
-futásidejű környezeti változóként is továbbítja.
+A `docker-compose.yml` Docker-build argumentumként és futásidejű környezeti
+változóként is továbbítja az `OMNIROUTE_BASE_PATH` értékét.
 
-### Előre elkészített gyökérlemezkép + futásidejű alútvonal
+### Előre elkészített gyökérszintű lemezkép + futásidejű alútvonal
 
-A közzétett `diegosouzapw/omniroute:*` lemezképek a tartomány gyökeréhez készültek. Az
-`OMNIROUTE_BASE_PATH` futásidőben továbbra is beállítható; a konténer induláskor egyszer
-módosítja a csomagot. Használja a hozzá tartozó nyilvános eredettel együtt:
+A közzétett `diegosouzapw/omniroute:*` lemezképek a tartomány gyökeréhez készültek.
+Az `OMNIROUTE_BASE_PATH` futásidőben továbbra is beállítható; a konténer indításkor
+egyszer módosítja a csomagot. Adja meg hozzá az egyező nyilvános origót:
 
 ```yaml
 services:
@@ -410,42 +412,42 @@ services:
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Állítsa be úgy a fordított proxyt, hogy a **teljes** külső elérési utat továbbítsa (ne
+Állítsa be a fordított proxyt úgy, hogy a **teljes** külső útvonalat továbbítsa (ne
 távolítsa el az előtagot). A Traefiknek a `PathPrefix(`/omniroute`)` útvonalat
 `StripPrefix` nélkül kell a konténerhez irányítania, hogy a Next.js az
-`/omniroute/...` útvonalat kapja meg, és az erőforrásokat az
+`/omniroute/...` útvonalat kapja meg, és az eszközöket az
 `/omniroute/_next/...` útvonalról szolgálja ki.
 
-A Docker állapotellenőrzése az aktív `OMNIROUTE_BASE_PATH` előtaggal ellátott, kis
-erőforrás-igényű `/healthz` életciklus-végpontot ellenőrzi. Az
-`/api/monitoring/health` továbbra is elérhető emberi vagy irányítópulti
+A Docker állapot-ellenőrzése az aktív `OMNIROUTE_BASE_PATH` előtaggal ellátott,
+kis erőforrás-igényű `/healthz` életciklus-végpontot vizsgálja. Az
+`/api/monitoring/health` továbbra is elérhető emberi vagy irányítópultos
 diagnosztikához; ha a konténer HEALTHCHECK ellenőrzését ismét erre szeretné irányítani
-(például mélyreható állapotellenőrzéshez), állítsa be az
+(például mélyreható állapot-ellenőrzéshez), állítsa be az
 `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health` értéket. Ez az útvonal **mélyreható**
 ellenőrzést végez (adatbázis + monitorozási összegzés) — megfelelő a Docker ritkán
-futó `HEALTHCHECK` ellenőrzéséhez, ha újra ezt választja, de **nem** alkalmas a
+futó `HEALTHCHECK` ellenőrzéséhez, ha ezt újra engedélyezi, de **nem** megfelelő a
 Kubernetes `livenessProbe` időközeihez.
 
-Orkesztrátorok (Kubernetes, Nomad stb.) esetén:
+Orkesztrátorokhoz (Kubernetes, Nomad stb.):
 
-| Vizsgálat       | Előnyben részesítendő                                                | Kerülendő                                                                          |
-| --------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Működőképesség  | HTTP `GET /livez`, vagy TCP a fő porton (`PORT`, alapérték: `20128`) | Az `/api/monitoring/health` működőképességi vizsgálatként                          |
-| Készenlét       | HTTP `GET /healthz`                                                  | Olyan szűk időkorlátok, amelyek az eseményhurok elfoglaltságát leállásként kezelik |
-| Mély / blackbox | `/api/monitoring/health`                                             | —                                                                                  |
+| Vizsgálat       | Előnyben részesítendő                                                     | Kerülendő                                                                          |
+| --------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Életképesség    | HTTP `GET /livez`, vagy TCP a fő porton (`PORT`, alapértelmezés: `20128`) | Az `/api/monitoring/health` használata életképesség-vizsgálatként                  |
+| Üzemkészség     | HTTP `GET /healthz`                                                       | Olyan szoros időkorlátok, amelyek az eseményhurok foglaltságát leállásként kezelik |
+| Mély / blackbox | `/api/monitoring/health`                                                  | —                                                                                  |
 
-A `/healthz` a folyamat életciklusát jelenti (`ok` / `starting` / `stopping`). A
-`/livez` csak azt ellenőrzi, hogy a folyamat él-e (200-as választ ad, amikor a kezelő
-futni képes; nem vár a készenléti állapotra). Mindkettő ugyanazon a Node eseményhurkon
-fut, mint a kérések kezelése, ezért a CPU-igényes katalógus- vagy tömörítési feladatok
-késleltethetik őket — az elfoglaltság ≠ leállás. Ha a HTTP-vizsgálatok túllépik az
-időkorlátot, részesítse előnyben a TCP-alapú működőképességi vizsgálatot. Teljes körű
-útmutató a vizsgálatokhoz:
-[Monitorozási útmutató — Kubernetes-vizsgálatokra vonatkozó ajánlások](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+A `/healthz` a folyamat életciklusáról ad jelentést (`ok` / `starting` / `stopping`).
+A `/livez` csak azt ellenőrzi, hogy a folyamat életben van-e (200-as választ ad,
+amikor a kezelő futni képes; nem várja meg az üzemkész állapotot). Mindkettő ugyanazon
+a Node-eseményhurkon fut, mint a kérések kezelése, ezért a CPU-igényes katalógus- vagy
+tömörítési műveletek késleltethetik őket — a foglalt ≠ leállt. Ha a HTTP-vizsgálatok
+túllépik az időkorlátot, részesítse előnyben a TCP-alapú életképesség-vizsgálatot. A
+vizsgálatok teljes útmutatója:
+[Monitorozási útmutató — ajánlások Kubernetes-vizsgálatokhoz](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
 ## Docker Compose Caddyvel (automatikus HTTPS/TLS)
 
-Az OmniRoute biztonságosan elérhetővé tehető a Caddy automatikus SSL-tanúsítvány-kezelésével. Győződjön meg arról, hogy a domain DNS A rekordja a kiszolgáló IP-címére mutat.
+Az OmniRoute biztonságosan elérhetővé tehető a Caddy automatikus SSL-kiépítésével. Győződjön meg arról, hogy a domain DNS A rekordja a szerver IP-címére mutat.
 
 ```yaml
 services:
@@ -459,7 +461,7 @@ services:
       - PORT=20128
       # Böngészőből elérhető forrás az OAuth-visszahívásokhoz, az irányítópult hivatkozásaihoz és a generált nyilvános URL-ekhez.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # Belső, kiszolgálók közötti URL az ütemezett feladatokhoz és a saját végpontra irányuló lekérésekhez.
+      # Belső, szerverek közötti URL az ütemezett feladatokhoz és az önmagára irányuló lekérésekhez.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -476,71 +478,71 @@ volumes:
   omniroute-data:
 ```
 
-A Caddy beállítja a szabványos továbbítási fejléceket a háttérben futó konténer számára. Az OmniRoute a
-`NEXT_PUBLIC_BASE_URL` értékét használja kanonikus nyilvános forrásként az OAuth-visszahívásokhoz és a generált nyilvános
-hivatkozásokhoz; a hitelesített irányítópult írási műveletei azonos forrásból származó kéréseket és munkamenethez kötött CSRF-
-védelmet használnak. Az `OMNIROUTE_TRUST_PROXY` beállítást csak olyan speciális telepítéseknél engedélyezze, ahol szándékosan
-azt szeretné, hogy az OmniRoute a nyilvános forrást megbízható továbbított fejlécekből származtassa az explicit
-konfiguráció helyett.
+A Caddy beállítja a szabványos továbbítási fejléceket az upstream tároló számára. Az OmniRoute a
+`NEXT_PUBLIC_BASE_URL` értékét használja az OAuth-visszahívások és a generált nyilvános
+hivatkozások kanonikus nyilvános forrásaként; az irányítópult hitelesített írási műveletei azonos eredetű kéréseket és munkamenethez kötött CSRF-
+védelmet használnak. Az `OMNIROUTE_TRUST_PROXY` beállítást csak olyan speciális telepítéseknél engedélyezze, amelyeknél szándékosan
+azt szeretné, hogy az OmniRoute az explicit konfiguráció helyett megbízható továbbított fejlécekből
+határozza meg a nyilvános forrást.
 
 ## Cloudflare Quick Tunnel
 
-A Docker-telepítések irányítópult-támogatása egy kattintással elérhető **Cloudflare Quick Tunnel** funkciót tartalmaz a `Dashboard → Endpoints` oldalon. Az első engedélyezés csak szükség esetén tölti le a `cloudflared` programot, ideiglenes alagutat indít az aktuális `/v1` végponthoz, és a generált `https://*.trycloudflare.com/v1` URL-t közvetlenül a normál nyilvános URL alatt jeleníti meg.
+A Docker-telepítések irányítópult-támogatása egyetlen kattintással elérhető **Cloudflare Quick Tunnel** funkciót tartalmaz a `Dashboard → Endpoints` oldalon. Az első engedélyezés csak szükség esetén tölti le a `cloudflared` csomagot, elindít egy ideiglenes alagutat az aktuális `/v1` végponthoz, és a generált `https://*.trycloudflare.com/v1` URL-t közvetlenül a normál nyilvános URL alatt jeleníti meg.
 
-A végpontok alagútpaneljei (Cloudflare, Tailscale, ngrok) a `Settings → Appearance` oldalon jeleníthetők meg vagy rejthetők el az aktív alagút állapotának módosítása nélkül.
+A végpontok alagútpaneljei (Cloudflare, Tailscale, ngrok) megjeleníthetők vagy elrejthetők a `Settings → Appearance` oldalon az aktív alagút állapotának megváltoztatása nélkül.
 
-### Megjegyzések az alagutakról
+### Megjegyzések az alagutakhoz
 
-- A Quick Tunnel URL-jei ideiglenesek, és minden újraindítás után megváltoznak.
-- A Quick Tunnels alagutak nem állnak helyre automatikusan az OmniRoute vagy a konténer újraindítása után. Szükség esetén engedélyezze őket újra az irányítópulton.
-- A felügyelt telepítés jelenleg Linux, macOS és Windows rendszereket támogat `x64` / `arm64` architektúrán.
-- A felügyelt Quick Tunnels alagutak alapértelmezés szerint HTTP/2 átvitelt használnak, hogy elkerüljék a korlátozott konténerkörnyezetekben jelentkező, UDP-pufferekkel kapcsolatos zajos QUIC-figyelmeztetéseket. Ha más átvitelt szeretne, állítsa a `CLOUDFLARED_PROTOCOL` értékét `quic` vagy `auto` értékre.
-- A Docker-lemezképek tartalmazzák a rendszer legfelső szintű CA-tanúsítványait, és átadják őket a felügyelt `cloudflared` folyamatnak, így elkerülhetők a TLS-megbízhatósági hibák, amikor az alagút a konténeren belül indul el.
-- Állítsa be a `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` értéket, ha azt szeretné, hogy az OmniRoute egy meglévő bináris fájlt használjon ahelyett, hogy letöltene egyet.
+- A Quick Tunnel URL-ek ideiglenesek, és minden újraindítás után megváltoznak.
+- A Quick Tunnels alagutak nem állnak automatikusan helyre az OmniRoute vagy a tároló újraindítása után. Szükség esetén engedélyezze őket újra az irányítópulton.
+- A felügyelt telepítés jelenleg Linux, macOS és Windows rendszereken támogatott `x64` / `arm64` architektúrán.
+- A felügyelt Quick Tunnels alapértelmezés szerint HTTP/2 átvitelt használ, hogy elkerülje a QUIC UDP-pufferekkel kapcsolatos, nagy mennyiségű figyelmeztetést a korlátozott tárolókörnyezetekben. Ha más átvitelt szeretne, állítsa a `CLOUDFLARED_PROTOCOL=quic` vagy `auto` értéket.
+- A Docker-lemezképek tartalmazzák a rendszer legfelső szintű CA-tanúsítványait, és átadják őket a felügyelt `cloudflared` számára, így elkerülhetők a TLS-megbízhatósági hibák, amikor az alagút a tárolón belül indul el.
+- Állítsa be a `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` értéket, ha azt szeretné, hogy az OmniRoute a letöltés helyett egy meglévő bináris fájlt használjon.
 
 ## Lemezképcímkék
 
 | Lemezkép                 | Címke    | Méret  | Leírás                                                       |
 | ------------------------ | -------- | ------ | ------------------------------------------------------------ |
 | `diegosouzapw/omniroute` | `latest` | ~250MB | A legmagasabb **közzétett** stabil SemVer (nem a git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | GitOps esetén rögzítse ezt a címkeosztályt                   |
+| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | GitOps esetén rögzítsen ilyen típusú címkét                  |
 
-Többplatformos jegyzék: natív `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). A Docker automatikusan kiválasztja a megfelelő architektúrát; adja meg a `--platform linux/amd64` kapcsolót, ha ARM-gazdagépeken ki kell kényszerítenie az AMD64-emulációt.
+Többplatformos manifest: natív `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). A Docker automatikusan kiválasztja a megfelelő architektúrát; adja meg a `--platform linux/amd64` kapcsolót, ha ARM-gazdagépeken kényszerítenie kell az AMD64-emulációt.
 
 ### Kiadási csatornák
 
 Az OmniRoute külön Docker-csatornákat tesz közzé a stabil kiadásokhoz, az aktív kiadási ág teszteléséhez és a fejlesztői buildekhez.
 
-| Csatorna                        | Forrás                                   | Módosíthatóság                      | Javasolt használat                                                                                                                              |
-| ------------------------------- | ---------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | Aláírt/verziózott kiadás                 | Megváltoztathatatlan                | Pontos kiadáshoz rögzített éles telepítések                                                                                                     |
-| `:latest` / `:latest-web`       | Legmagasabb **közzétett** stabil SemVer  | Módosítható stabil mutató           | A stabil kiadásokat egy SemVer-közzétételi feladat **után** követi — **nem** követi a `main` vagy a még kiadatlan `release/v*` véglegesítéseket |
-| `:next` / `:next-web`           | Aktuális alapértelmezett `release/v*` ág | Módosítható előzetes kiadási mutató | Az aktív kiadási ágba már bekerült, de stabil kiadásban még nem szereplő javítások tesztelése                                                   |
-| `:main` / `:main-web`           | `main` ág                                | Módosítható fejlesztési mutató      | Kizárólag fejlesztési és integrációs tesztelés                                                                                                  |
+| Csatorna                        | Forrás                                   | Módosíthatóság                      | Ajánlott használat                                                                                                                                   |
+| ------------------------------- | ---------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Aláírt/verziózott kiadás                 | Nem módosítható                     | Olyan éles telepítések, amelyek pontos kiadáshoz vannak rögzítve                                                                                     |
+| `:latest` / `:latest-web`       | Legmagasabb **közzétett** stabil SemVer  | Módosítható stabil mutató           | A stabil kiadásokat követi **egy SemVer-közzétételi feladat után** — **nem** követi a `main` ágat vagy a még kiadatlan `release/v*` véglegesítéseket |
+| `:next` / `:next-web`           | Aktuális alapértelmezett `release/v*` ág | Módosítható előzetes kiadási mutató | Az aktív kiadási ágba már bekerült, de stabil kiadásban még nem szereplő javítások tesztelése                                                        |
+| `:main` / `:main-web`           | `main` ág                                | Módosítható fejlesztési mutató      | Kizárólag fejlesztési és integrációs teszteléshez                                                                                                    |
 
 #### Webes munkamenet-szolgáltatók: a `-web` lemezképek
 
-A fenti csatornák mindegyike `-web` címkeként is elérhető (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), amely a `runner-web` fázisból épül — ugyanaz a lemezkép, kiegészítve a Playwrighttal és egy Chromium böngészővel. Az alap lemezkép Chromium **nélkül** érkezik; a `gemini-web`, a `claude-web` és a `claude-turnstile` igényli azt.
+Minden fenti csatornához tartozik egy `-web` címke is (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), amely a `runner-web` fázisból készül — ugyanaz a lemezkép, kiegészítve a Playwrighttal és egy Chromium böngészővel. A normál lemezkép **nem tartalmazza** a Chromiumot; a `gemini-web`, a `claude-web` és a `claude-turnstile` szolgáltatóknak szükségük van rá.
 
-A hiba késleltetve, nem pedig indításkor jelentkezik: ezek a szolgáltatók felsorolják a modelljeiket, és csatlakoztatottként jelennek meg az irányítópulton, de csak az első kérés hiúsul meg a következő hibával:
+A hiba késleltetve, nem pedig indításkor jelentkezik: ezek a szolgáltatók felsorolják modelljeiket, és csatlakoztatottként jelennek meg az irányítópulton, de az első kérés a következő hibával meghiúsul:
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Ha ezeket a szolgáltatókat használja, töltse le annak a csatornának a `-web` címkéjét, amelyet már használ — semmi más nem változik. npm/CLI-telepítés esetén (Docker-lemezkép nélkül) a böngésző bináris fájlja a megfelelő hiányzó összetevő: futtassa az `npx playwright install chromium` parancsot a gazdagépen.
+Ha ezeket a szolgáltatókat használja, töltse le annak a csatornának a `-web` címkéjét, amelyet már használ — semmi más nem változik. npm/CLI-telepítés esetén (Docker-lemezkép nélkül) az ennek megfelelő hiányzó összetevő a böngésző bináris fájlja: futtassa az `npx playwright install chromium` parancsot a gazdagépen.
 
 #### Az előzetes kiadási csatorna használata
 
-A `next` csatorna a jelenlegi alapértelmezett `release/v*` ágra történő minden push alkalmával újraépül, és AMD64-, valamint ARM64-platformra is közzétételre kerül. A régebbi karbantartási ágak nem írhatják felül. A csatorna lehúzható lemezképet biztosít azokhoz a javításokhoz, amelyek már bekerültek az aktív kiadási ágba, de a következő stabil címke még nem készült el.
+A `next` csatorna a jelenlegi alapértelmezett `release/v*` ágba történő minden push alkalmával újraépül, és AMD64, valamint ARM64 architektúrához is közzétételre kerül. A régebbi karbantartási ágak nem írhatják felül. A csatorna lehúzható rendszerképet biztosít azokhoz a javításokhoz, amelyek már beolvadtak az aktív kiadási ágba, de a következő stabil címke még nem készült el.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Docker Compose használata esetén írja felül a kiválasztott profil által használt lemezképcímkét, majd húzza le és hozza létre újra a szolgáltatást:
+Docker Compose esetén írja felül a kiválasztott profil által használt rendszerkép címkéjét, majd húzza le újra a rendszerképet, és hozza létre ismét a szolgáltatást:
 
 ```yaml
 services:
@@ -555,52 +557,125 @@ docker compose up -d
 
 #### Biztonság és visszaállítás
 
-A `next` egy folyamatosan változó, kiadás előtti csatorna. Az aktív kiadási ágra történő bármely push alkalmával megváltozhat, és **éles környezetben való használata nem támogatott**. Egy adott build kiértékelése során rögzítse a lemezkép kivonatát:
+A `next` egy változó előzetes kiadási csatorna. Az aktív kiadási ágba történő bármely push hatására megváltozhat, és **éles környezetben való használata nem támogatott**. Egy adott build kiértékelése során rögzítse a rendszerkép kivonatát:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Tesztelés előtt készítsen biztonsági mentést az OmniRoute adatkötetéről vagy a csatolt adatkönyvtárról. A visszaállításhoz állítsa vissza a korábban használt stabil verziót vagy kivonatot, majd hozza létre újra a konténert:
+Tesztelés előtt készítsen biztonsági másolatot az OmniRoute adatkötetről vagy a bind mounttal csatolt adatkönyvtárról. A visszaállításhoz állítsa vissza a korábban használt stabil verziót vagy kivonatot, majd hozza létre ismét a konténert:
 
 ```bash
 docker pull diegosouzapw/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Egy kiadási ágból készült build soha nem módosíthatja a `latest` címkét; a stabil mutatót kizárólag egy megfelelő stabil szemantikus verzió léptetheti elő. A `next` lemezképek esetében továbbra is kötelező a kiadási lemezkép ellenőrzése, valamint a CRITICAL súlyosságú sebezhetőségeket blokkoló ellenőrzési kapu teljesítése.
+Egy kiadási ágból készült build soha nem mozdíthatja el a `latest` címkét; a stabil mutatót kizárólag egy arra jogosult stabil szemantikus verzió léptetheti elő. A `next` rendszerképekre továbbra is érvényes a kiadási rendszerképek ellenőrzése és a KRITIKUS sebezhetőségek esetén blokkoló biztonsági kapu.
 
-**A `latest` nem garantálja, hogy a lemezkép naprakész a githez képest.** A `main` vagy az aktív `release/v*` ágba egyesített javítások **nem** kerülnek bele a `:latest` lemezképbe mindaddig, amíg közzé nem tesznek egy stabil SemVer-lemezképet, és a közzétételi feladat elő nem lépteti azt `:latest` címkére (ugyanazzal a kivonattal, mint az adott SemVer). Ha a `latest` változatlannak tűnik, miközben a GitHubon már látható a javítás, húzza le a `:next` lemezképet a kiadási ág teszteléséhez, vagy várja meg a SemVer-címkét.
+**A `latest` nem garantálja, hogy a git legfrissebb állapotát tartalmazza.** A `main` vagy az aktív `release/v*` ágba beolvasztott javítások **nem** kerülnek bele a `:latest` rendszerképbe mindaddig, amíg nem tesznek közzé egy stabil SemVer-rendszerképet, és a közzétételi feladat elő nem lépteti a `:latest` címkét, amely így ugyanarra a kivonatra mutat, mint az adott SemVer-verzió. Ha úgy tűnik, hogy a `latest` nem frissül, miközben a GitHubon már látható a javítás, a kiadási ág teszteléséhez húzza le a `:next` rendszerképet, vagy várja meg a SemVer-címkét.
 
-| Amit szeretne                                                                      | Használja ezt                                          |
-| ---------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| GitOps / éles környezet, amelyben nem megengedett az eltérés                       | Rögzítse a `:X.Y.Z` címkét (vagy a lemezkép kivonatát) |
-| A közzétett stabil verziók követése, minden kiadáskor elfogadva az újralétrehozást | `:latest`                                              |
-| Ki nem adott `release/v*` commitok tesztelése                                      | `:next` (nem éles környezethez)                        |
-| A `main` tesztelése                                                                | `:main` (nem éles környezethez)                        |
+| Cél                                                                                    | Használat                                                  |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| GitOps / éles környezet, amelyben nem megengedett az eltérés                           | Rögzítse az `:X.Y.Z` címkét (vagy a rendszerkép kivonatát) |
+| A közzétett stabil kiadások követése, minden kiadásnál elfogadva az újbóli létrehozást | `:latest`                                                  |
+| Ki nem adott `release/v*` commitok tesztelése                                          | `:next` (nem éles használatra)                             |
+| A `main` tesztelése                                                                    | `:main` (nem éles használatra)                             |
 
-## Elérhetőség: az alapértelmezett SQLite egyetlen replikát támogat
+## Irányítópult-frissítések Dockerben
 
-A szabványos Docker / Kubernetes OmniRoute **egy Node-folyamatból és egy SQLite-íróból** áll. A magas rendelkezésre állás **nem támogatott** ezen a topológián.
+Egy közzétett lemezképből futó konténer nem tudja lecserélni önmagát. Amikor az OmniRoute azt észleli, hogy
+konténerben fut (nincs `.git`-munkapéldány, és nem npm-telepítés), a kezdőlap irányítópultján lévő frissítési sáv
+az npm/git-utasítások helyett a gazdagépen futtatandó parancsot jeleníti meg, egy másolási gombbal:
 
-| Korlátozás                                                  | Következmény                                                                                                                                                                                                                                                                                                                                                                                            |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Egyetlen író                                                | **Ne** futtasson több replikát ugyanazzal az SQLite-fájllal. Ez megsérti az adatbázist.                                                                                                                                                                                                                                                                                                                 |
-| Újralétrehozás / újraindítás / HEALTHCHECK általi leállítás | A folyamatban lévő SSE-kapcsolatok, az irányítópult-munkamenetek és a memóriában tárolt állapot **teljes kiesése**. Minden csatlakoztatott kliens kapcsolata megszakad. Az üres végpont időszakában az új kérések fordított proxytól származó **`502 Bad Gateway: Unknown error`** választ kapnak, nem OmniRoute JSON-t — a kliensek ezt nem tudják megkülönböztetni egy szolgáltatói hibától (#11015). |
-| A `/healthz` végponttal azonos eseményhurok                 | Egy leterhelt katalógus- vagy tömörítési ciklus késleltetheti a próbákat; rövid időtúllépés esetén ez újraindítja az **egyetlen** replikát.                                                                                                                                                                                                                                                             |
+```bash
+docker compose pull omniroute && docker compose up -d --force-recreate omniroute
+```
 
-**Próbamátrix** (lásd még: [Kubernetes-próbákra vonatkozó javaslatok](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+A szolgáltatás neve az `AUTO_UPDATE_SERVICE` értékéből származik (alapértelmezés szerint `omniroute`, vagyis a
+`docker-compose.selfhost.yml` szolgáltatása). A `pull` csak lebegő címkét (`latest`, `next`) frissít; rögzített
+`:X.Y.Z` címke esetén először szerkessze a címkét.
 
-| Próba                          | Cél                                                                       | Ne használja                                                                     |
-| ------------------------------ | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Életképesség                   | TCP a `PORT` porton (alapértelmezés: `20128`), vagy enyhe HTTP `/healthz` | `/api/monitoring/health`                                                         |
-| Készenlét                      | HTTP `GET /healthz`                                                       | Olyan szűk időtúllépéseket, amelyek a leterhelt eseményhurkot leálltként kezelik |
-| Mélyreható / emberi ellenőrzés | `/api/monitoring/health`                                                  | Automatizált kubelet-életképességi próbához                                      |
+### Egykattintásos frissítések gazdagépi triggerfájllal
 
-**Frissítések:** számítson minden munkamenet megszakadására. Ha lehetséges, ürítse ki a klienseket; az alapértelmezett SQLite használatakor nincs folyamatos frissítés. A Compose `restart: unless-stopped` beállítása és a Docker `HEALTHCHECK` is lecseréli az egyetlen folyamatot, amikor a konténer Unhealthy állapotúvá válik — az érintettségi kör ugyanaz.
+Annak érdekében, hogy az **Update Now** továbbra is működjön a `/var/run/docker.sock` csatolása nélkül (ami a konténernek
+root jogosultságot ad a gazdagépen — lásd a fenti `cli`-profilra vonatkozó figyelmeztetést), állítsa be a `DOCKER_UPDATE_TRIGGER_FILE` változót az
+OmniRoute szolgáltatásban, és futtasson egy figyelőt a gazdagépen:
 
-Kubernetes-részlet **egyetlen replikához** (a Recreate kötelező; ne növelje a `replicas` értékét egyetlen SQLite-fájl használatakor):
+```yaml
+services:
+  omniroute:
+    environment:
+      DOCKER_UPDATE_TRIGGER_FILE: /app/data/update/docker-update.request
+    volumes:
+      - ./data:/app/data
+```
+
+Az elérési útnak a `DATA_DIR` könyvtáron belül kell lennie (a relatív értékek ehhez képest lesznek feloldva); minden más
+elutasításra kerül. Az **Update Now** ezután a `{ "requestedAt": "...", "targetVersion": "X.Y.Z" }` tartalmat írja ebbe a
+fájlba, `202` választ ad, az irányítópult pedig addig kérdezi le az `/api/system/version` végpontot, amíg az új verzió éles nem lesz,
+majd újratöltődik. Ebben a módban az OmniRoute soha nem futtat shell- vagy Docker-parancsot. Mint minden frissítési
+műveletnél, a kérés csak loopback/LAN-kliensektől kerül elfogadásra.
+
+Egy bind-csatolással elérhetővé tett adatkönyvtár stabil elérési utat biztosít a gazdagép számára a figyeléshez. Minta `systemd`-egységek
+(igazítsa a `/srv/omniroute` értékét ahhoz a könyvtárhoz, amely a compose-fájlt és a `data/` könyvtárat tartalmazza):
+
+```ini
+# /etc/systemd/system/omniroute-update.path
+[Unit]
+Description=Az OmniRoute irányítópult frissítési kéréseinek figyelése
+
+[Path]
+PathExists=/srv/omniroute/data/update/docker-update.request
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```ini
+# /etc/systemd/system/omniroute-update.service
+[Unit]
+Description=Az OmniRoute-konténer lekérése és újbóli létrehozása
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/omniroute
+ExecStartPre=/usr/bin/rm -f /srv/omniroute/data/update/docker-update.request
+ExecStart=/bin/sh -c 'docker compose pull omniroute || (sleep 15 && docker compose pull omniroute)'
+ExecStart=/usr/bin/docker compose up -d --force-recreate omniroute
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now omniroute-update.path
+```
+
+A szolgáltatás a lekérés előtt eltávolítja a kérésfájlt, így egy sikertelen futás nem kerül végtelen ciklusba. A
+`DOCKER_UPDATE_TRIGGER_FILE` nélkül az irányítópult továbbra is a kézi parancsos folyamatot használja.
+
+## Elérhetőség: az alapértelmezett SQLite egyetlen replika
+
+Stock Docker / Kubernetes OmniRoute is** one Node process + one SQLite író** . A magas rendelkezésre állás** nem támogatott** azon a topológián.
+
+| Kényszer                                      | Következmény                                                                                                                                                                                                                                                                                                                                |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Egyedülálló író                               | Tedd** nem** futtasson több replikát ugyanazon SQLite fájlon. Ez elrontja a DB.                                                                                                                                                                                                                                                             |
+| Újrakészítés / újraindítás / HEALTHCHECK kill | **Teljes leállás** a repülés közbeni SSE, a műszerfali munkamenetek és a memória állapota. Minden csatlakoztatott kliens leesik. Az üres végpont ablakban érkező új kérések fordított proxyt kapnak**`502 Bad Gateway: Unknown error`** , nem OmniRoute JSON — az ügyfelek nem tudják megkülönböztetni ezt a szolgáltatói hibától (#11015). |
+| Ugyanaz az eseményhurok, mint `/healthz`      | Egy elfoglalt katalógus vagy tömörítés késleltetheti a szondákat; egy rövid időtúllépés, majd újraindítja a** csak** másolat.                                                                                                                                                                                                               |
+
+**Szonda mátrix** (lásd még [a Kubernetes szonda ajánlásait](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
+
+| Szonda         | Cél                                                             | Ne használja                                                                |
+| -------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Életesség      | TCP `PORT` (alapértelmezett `20128`), vagy lágy HTTP `/healthz` | `/api/monitoring/health`                                                    |
+| Készenlét      | HTTP `GET /healthz`                                             | Szűk időtúllépések, amelyek az eseményhurok foglaltságát halottként kezelik |
+| Mély / emberek | `/api/monitoring/health`                                        | Automatizált kubelet életerő                                                |
+
+**Frissítések:** számítson arra, hogy minden munkamenet leesik. Drain ügyfeleket, ha lehet; az alapértelmezett SQLite n nincs folyamatos frissítés. `restart: unless-stopped` plusz Docker összeállítása `HEALTHCHECK` az egyetlen folyamatot is lecseréli, ha a tároló egészségtelen – ugyanaz a robbanási sugár.
+
+A kész jegyzékek és a Helm-diagram élőben `deploy/kubernetes/` és `deploy/helm/omniroute/` nyelven – lásd a [Kubernetes telepítési útmutatóját](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetes kódrészlet a** egyetlen replika** (Újra létrehozás szükséges; ne emeljen `replicas` t egyetlen SQLite fájlra):
 
 ```yaml
 spec:
@@ -627,31 +702,31 @@ spec:
             periodSeconds: 20
 ```
 
-A `preStop` alvás lehetővé teszi, hogy a kube eltávolítsa a Service-végpontokat a SIGTERM előtt, így az **új** forgalom már nem éri el a leálló folyamatot. A folyamatban lévő `/v1/responses` SSE-kapcsolatok kiürítésére a rendszer legfeljebb a `SHUTDOWN_TIMEOUT_MS` értékéig (alapértelmezés szerint 30 másodpercig) vár, nagy terhelésű befogadási bérletek használatával (#11015). A folyamatot még elérő új kérések `503` + `Retry-After: 5` választ kapnak. A Recreate miatti üresvégpont-időszak addig, amíg a cserepéldány Ready állapotba nem kerül, továbbra is teljes kiesést jelent — ez az SQLite-topológiából ered, nem a próba hibás konfigurációjából.
+`preStop` sleep lehetővé teszi, hogy a kube eldobja a szolgáltatás végpontjait SIGTERM előtt, így** új** a forgalom leáll, sújtja a haldokló folyamatot. Repülés közbeni `/v1/responses` SSE `SHUTDOWN_TIMEOUT_MS` (alapértelmezett 30 mp) lemerül nehézsúlyú belépőbérleti szerződések révén (#11015). Azok az új kérések, amelyek még mindig elérik a folyamatot `503` + `Retry-After: 5` fájlt kapják. Az Üres végpont-rés újra létrehozása, amíg a csere kész állapotba nem kerül, továbbra is súlyos kimaradást jelent – ez a SQLite topológia, nem pedig egy próba hiba.
 
-A külső Postgres / többírós HA **nem** dokumentált szabványos megoldás. Ha HA-ra van szüksége, tartson fenn egyetlen replikát, vagy használjon olyan topológiát, amelyet a projekt külön tesztelt és dokumentált. A Postgres/MySQL fejlesztése a [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) alatt található. Amíg ez nem jelenik meg, a **nagy** `/v1/responses` kapacitás növelésének egyetlen támogatott módja N független folyamat használata (lásd a következő szakaszt), nem pedig a `replicas > 1` beállítás egyetlen köteten.
+Külső Postgres / több író HA is** nem** dokumentált készletút. Ha HA van szüksége, tartson meg egyetlen replikát, vagy futtasson egy topológiát, amelyet a projekt külön tesztelt és dokumentált. A Postgres/MySQL mű a [#8075-](https://github.com/diegosouzapw/OmniRoute/issues/8075) ben lakik. Amíg ez kiszáll, az egyetlen támogatott módja a szaporításnak** nagy** `/v1/responses` kapacitás N független folyamat (következő rész), nem `replicas > 1` egy köteten.
 
 ## Horizontális skálázás: N független folyamat
 
-Egy Node-folyamat **egy V8-kupacot** használ. Két, egymást átfedő, ~3 MiB-os / ~750k tokenes kódolóügynök-`POST /v1/responses` kérés (RTK + Caveman) ~12 GiB-nál megszakítja ezt a kupacot (`FATAL ERROR: Reached heap limit`), és OOM-ot okozhat egy 16 GiB-os cgroupban. Lásd: [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Ez a mérés **memóriakeretre** vonatkozó figyelmeztetés, nem pedig a termék két egyidejű hosszú `/v1/responses` kérésre vonatkozó fix felső korlátja. Az erőforrás-igényes chatkérések befogadását egy automatikusan származtatott beolvasásibájt-keret (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) szabályozza, amely ugyanebből a V8-/cgroup-korlátból van méretezve — ennek felfelé történő felülbírálása (vagy a régi, kérésszám-alapú `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` korlát beállítása) egy már méretezett folyamatnál ismét előidézi a megszakítást. A kis chatkérések, a `/healthz`, a `/v1/models` és az MCP **nem** tartoznak e korlát alá.
+Egy Node-folyamat **egy V8-halommal** rendelkezik. Két, egymást átfedő, ~3 MiB / ~750k tokenes kódolóügynök-`POST /v1/responses` kérés (RTK + Caveman) ~12 Gi méretnél leállítja ezt a halmot (`FATAL ERROR: Reached heap limit`), és egy 16 Gi méretű cgroup esetén OOM-hibát okozhat. Lásd: [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Ez a mérés **memóriakeretre** vonatkozó figyelmeztetés, nem pedig a termék által megszabott, két párhuzamos hosszú `/v1/responses` kérésre vonatkozó merev felső korlát. A nagy erőforrás-igényű csevegések fogadását egy automatikusan meghatározott bemeneti bájtkeret (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) szabályozza, amelynek méretezése ugyanezen V8-/cgroup-korlát alapján történik — ennek felfelé történő felülbírálása (vagy a korábbi, kérésszám-alapú `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` korlát beállítása) egy már méretezett folyamatnál ismét előidézi a leállást. A kis csevegések, a `/healthz`, a `/v1/models` és az MCP **nem** tartoznak e korlát hatálya alá.
 
 ### Egy folyamat: kettőnél több hosszú `/v1/responses`
 
-Egy **egészséges** folyamat (a kupac az `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, alapértelmezetten `0.75` értéke alatt van) **futtathat** kettőnél több egyidejű hosszú `POST /v1/responses` kérést, amennyiben a folyamat egészére érvényes, folyamatban lévő bájtokra vonatkozó keretben (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) még van hely. Az `OMNIROUTE_CHAT_LARGE_BODY_BYTES` értékét elérő vagy meghaladó törzsek (alapértelmezetten 256 KiB) ugyanazt a nagy erőforrás-igényű foglalást használják, mint a szerkezetileg összetett kérések, valamint ugyanazt a [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) szerinti `tryAcquireHealthyHeadroom` kiskaput (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Több tucat egyidejű, hosszú SSE-kliens (az üzemeltetőknek gyakran 40–50-re van szükségük) **memóriakeret** kérdése — a kupacot, az elsődleges/tartalék helyeket és az `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` értékét kell méretezni —, nem pedig a termék fix „legfeljebb 2” korlátja. A túlterhelt kupac továbbra is újrapróbálható `503` válasszal utasít el kéréseket, így a #7849 problémája nem tér vissza.
+Egy **egészséges** folyamat (amelynek halma az `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, alapértelmezetten `0.75`, értéke alatt van) kettőnél több párhuzamos hosszú `POST /v1/responses` kérést **is futtathat**, ha a teljes folyamatra vonatkozó, folyamatban lévő bájtok keretében (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) még van hely. Az `OMNIROUTE_CHAT_LARGE_BODY_BYTES` értékét elérő vagy meghaladó törzsek (alapértelmezetten 256 KiB) ugyanazt a nagy erőforrás-igényű bérletet veszik igénybe, mint a szerkezetileg összetett kérések, és ugyanazt a [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) szerinti `tryAcquireHealthyHeadroom` kibúvót (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) használják. Több tíz párhuzamos hosszú SSE-kliens (az üzemeltetőknek gyakran 40–50-re van szükségük) **memóriakeret** kérdése — a halmot, az elsődleges/tartalék férőhelyeket és az `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` értékét kell megfelelően méretezni —, nem pedig a termék merev „legfeljebb 2” korlátja. A terhelt halom továbbra is megismételhető `503` válaszokkal utasítja el a kéréseket, hogy a #7849 ne térjen vissza.
 
-A **kupacok megsokszorozásához** (független V8 old-space-ekkel) **jelenleg**:
+A halmok **megsokszorozásához** (független V8 old-space területek) **jelenleg**:
 
-| Ezt tegye                                                                                                                                                                                                           | Ezt ne tegye                                                                 |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Futtasson **N konténert/podot**, mindegyiket **saját** `DATA_DIR` könyvtárral / kötettel                                                                                                                            | Ne állítson be `replicas > 1` értéket egy SQLite-fájlhoz                     |
-| Méretezze a nagy erőforrás-igényű folyamatban lévő kérések és az egészséges tartalékkapacitás keretét a kupac / folyamatbanlévőbájt-keret alapján; az 1–2 a #7849 konzervatív alapértelmezése, nem fix termékkorlát | Ne adjon egyetlen folyamatnak 8× RAM-ot és korlátlan darabszámkeretet        |
-| Opcionális: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` a **megosztott kvótaszámlálókhoz**                                                                                                                 | Ne kezelje a Redist megosztott SQLite-ként — nem az                          |
-| Másolja át a szolgáltatói titkos adatokat minden példányba (vagy fogadja el a különálló irányítópultokat)                                                                                                           | Ne számítson egyetlen irányítópultra / közös hívásnaplóra a példányok között |
-| Helyezzen elé bármilyen terheléselosztót; elegendő az API-kulcs vagy munkamenet szerinti ragadósság                                                                                                                 | Ne követeljen meg gyártóspecifikus, méretérzékeny köztes réteget             |
+| Ezt tegye                                                                                                                                                                                                              | Ezt ne tegye                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Futtasson **N konténert/podot**, mindegyiket **saját** `DATA_DIR` könyvtárral / kötettel                                                                                                                               | Ne állítson be `replicas > 1` értéket egyetlen SQLite-fájlhoz                |
+| A nagy erőforrás-igényű, folyamatban lévő kérések és az egészséges tartalék méretezését a halom / a folyamatban lévő bájtok kerete alapján végezze; az 1–2 a #7849 konzervatív alapértelmezése, nem merev termékkorlát | Ne adjon egy folyamatnak 8× RAM-ot és korlátlan darabszámkorlátot            |
+| Opcionális: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` a **megosztott kvótaszámlálókhoz**                                                                                                                    | Ne kezelje a Redist megosztott SQLite-ként — nem az                          |
+| Másolja be a szolgáltatói titkokat minden példányba (vagy fogadja el a particionált irányítópultokat)                                                                                                                  | Ne számítson egyetlen közös irányítópultra / hívásnaplóra a példányok között |
+| Helyezzen elé bármilyen terheléselosztót; elegendő az API-kulcs vagy munkamenet szerinti ragadósság                                                                                                                    | Ne követeljen gyártóspecifikus, méretérzékeny köztes réteget                 |
 
-Hardver: az egy példányra jutó egyidejű hosszú `/v1/responses` kérések száma **memóriakeret** kérdése (kupac + folyamatbanlévőbájt-keret / #10110). Az N független `DATA_DIR` továbbra is megsokszorozza a kupacokat: a gazdagép RAM-jának `N × cgroup` méretet kell lefednie, nem pedig „egy 16 GiB-os podot N=8 mellett”. Soha ne használjon `replicas > 1` értéket egyetlen SQLite-fájllal.
+Hardver: az egy példányra jutó párhuzamos hosszú `/v1/responses` kérések száma **memóriakeret** kérdése (halom + folyamatban lévő bájtok / #10110). Az `N` független `DATA_DIR` továbbra is megsokszorozza a halmokat: a gazdagép RAM-jának `N × cgroup` kapacitást kell fedeznie, nem pedig „egy 16 Gi méretű podot N=8 mellett”. Soha ne használjon `replicas > 1` értéket egyetlen SQLite-fájlhoz.
 
-Compose-vázlat (két kupac, két kötet — nem `deploy.replicas: 2`):
+Compose-vázlat (két halom, két kötet — nem `deploy.replicas: 2`):
 
 ```yaml
 services:
@@ -678,56 +753,54 @@ volumes:
   omniroute-b-data:
 ```
 
-A folyamaton belüli sűrűség (a tömörítés eltávolítása a HTTP-isolátumból) itt követhető: [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). A megosztott, tartós állapoton működő egyetlen logikai fürt itt követhető: [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+A folyamaton belüli sűrűség (a tömörítés kivitele a HTTP-izolátumból) kérdése: [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Egyetlen logikai fürt megosztott, tartós állapoton: [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
 ## Gemini regionális hibák Dockerben
 
 A Google AI Studio / Gemini API HTTP 400-as választ adhat FAILED_PRECONDITION állapottal és a következő üzenettel:
-`User location is not supported for the API use.` A gazdarendszeren sikeres kérés
-nem bizonyítja, hogy a konténer ugyanazt a kimenő útvonalat használja. A DNS-sorrend,
-az IPv4-/IPv6-kapcsolat, a VPN-útválasztás és a beállított proxyk eltérhetnek. Ellenőrizze
+`User location is not supported for the API use.` A gazdagépen sikeres kérés nem bizonyítja, hogy a konténer ugyanazt a kimenő útvonalat használja. A DNS-sorrend,
+az IPv4-/IPv6-kapcsolat, a VPN-útválasztás és a konfigurált proxyk eltérhetnek. Ellenőrizze
 [a Google által támogatott régiókat](https://ai.google.dev/gemini-api/docs/available-regions),
 valamint a tényleges kapcsolati útvonalat; ez a hiba önmagában nem jelenti azt, hogy az API-kulcs hibás.
 
 ### Részesítse előnyben a kapcsolatspecifikus proxyt
 
 Használja az OmniRoute [kapcsolatonkénti proxykonfigurációját](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-az érintett Gemini-kapcsolathoz, majd ismételje meg a **Test Connection** műveletet és egy kisebb kérést
-ugyanazzal a modellel. Így az útválasztási módosítás hatóköre az adott kapcsolatra korlátozódik. Ellenőrizze,
+az érintett Gemini-kapcsolathoz, majd ismételje meg a **Kapcsolat tesztelése** műveletet és egy kisebb kérést
+ugyanazzal a modellel. Így az útválasztás módosítása az adott kapcsolatra korlátozódik. Ellenőrizze,
 hogy a proxy elérhető-e a konténerből, és hogy a kapcsolat valóban azt választja-e.
-Az útvonal módosítása nem garantálja, hogy a felsőbb szintű szolgáltatás regionális feltételei teljesülnek.
+Az útvonal módosítása nem garantálja, hogy a felsőbb szintű szolgáltatás regionális jogosultsági feltételei teljesülnek.
 
-### A gazdarendszer és a konténer hálózatának összehasonlítása
+### A gazdagép és a konténer hálózatának összehasonlítása
 
-A hitelesített eredmények összehasonlításakor a kulcs, a modell és a kérés maradjon azonos; soha
-ne illesszen be hitelesítő adatokat, proxyjelszavakat vagy teljes hitelesítési fejléceket egy hibajegybe.
-Először vizsgálja meg, hogy az operációs rendszer feloldója mely címcsaládokat kínálja fel, ugyanazt a parancsot
-használva a gazdarendszeren és a konténeren belül:
+A hitelesített eredmények összehasonlításakor használjon azonos kulcsot, modellt és kérést; soha
+ne illesszen be hitelesítő adatokat, proxyjelszavakat vagy teljes engedélyezési fejléceket egy hibajegybe.
+Először ellenőrizze, hogy az operációs rendszer névfeloldója mely címcsaládokat kínálja, ugyanazt a parancsot
+használva a gazdagépen és a konténeren belül:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Az `omniroute` helyére az Ön által futtatott szolgáltatás nevét írja (például `omniroute-web`). Ezek
+Cserélje le az `omniroute` értéket a futtatott szolgáltatásra (például `omniroute-web`). Ezek
 a parancsok hitelesítő adatok és IP-címek nélkül írják ki a címcsaládokat. A visszaadott `6`
-csupán IPv6 DNS-eredményt jelez: **nem** bizonyítja a használható IPv6-útvonal vagy az API-hozzáférés meglétét.
-Ahol a `curl` telepítve van, hasonlítsa össze a `curl -4 -I https://generativelanguage.googleapis.com`
+csak IPv6-os DNS-eredményt jelez: **nem** bizonyítja a használható IPv6-útvonal vagy az API-hozzáférés meglétét.
+Ahol telepítve van a `curl`, hasonlítsa össze a `curl -4 -I https://generativelanguage.googleapis.com`
 és a `curl -6 -I https://generativelanguage.googleapis.com` eredményét mindkét környezetben.
-Egy HTTP-válasz bizonyítja az adott próba kapcsolatának működését, még akkor is, ha az egy nem hitelesített
-hibaválasz; a Gemini használati jogosultságát csak a hitelesített modellkérés ellenőrzi.
+A HTTP-válasz igazolja az adott próba kapcsolati működését, még akkor is, ha az egy hitelesítés nélküli
+hibaválasz; a Gemini-jogosultságot csak a hitelesített modellkérés ellenőrzi.
 
-### Gazdarendszer-szintű alternatíva: működő IPv6 és feloldási szabályzat
+### Gazdagépszintű alternatíva: működő IPv6 és névfeloldási házirend
 
-A [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) bejelentője
-a konténeres IPv6 engedélyezésével és a glibc címkiválasztásának módosításával állította helyre
-a hozzáférést a saját környezetében. Ezt környezetspecifikus alternatívaként kezelje. A feloldási beállítások
-módosítása előtt ellenőrizze, hogy működik-e a gazdarendszer IPv6-kapcsolata, a konténer kimenő kapcsolata
-és útválasztása, valamint a tűzfalszabályok. Egy privát ULA-cím önmagában nem igazolja a nyilvános
-IPv6-kapcsolat meglétét.
+A [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) bejelentője úgy állította helyre
+a hozzáférést a saját környezetében, hogy engedélyezte a konténeres IPv6-ot, és módosította a glibc címválasztását.
+Ezt környezetspecifikus alternatívaként kezelje. A névfeloldási beállítások módosítása előtt ellenőrizze
+a működő gazdagépi IPv6-ot, a konténer kimenő kapcsolatát/útválasztását és a tűzfalszabályokat.
+Egy privát ULA-cím önmagában nem igazolja a nyilvános IPv6-kapcsolat meglétét.
 
-A Compose alapértelmezett hálózatához már csatlakoztatott szolgáltatások esetén ez a részlet engedélyezi
-az IPv6-ot azon a hálózaton; tartsa meg a szolgáltatás többi beállítását, portjait, köteteit és konfigurációját:
+A Compose alapértelmezett hálózatához már csatlakoztatott szolgáltatások esetében ez a részlet engedélyezi
+az IPv6-ot az adott hálózaton; tartsa meg a szolgáltatás többi beállítását, portjait, köteteit és konfigurációját:
 
 ```yaml
 networks:
@@ -736,39 +809,39 @@ networks:
 ```
 
 Elnevezett hálózat esetén azon a hálózaton engedélyezze, amelyhez a szolgáltatás ténylegesen csatlakozik. A Docker
-képes ULA-alhálózatot kiosztani; csak akkor válasszon explicit, átfedésmentes alhálózatot, ha azt a hálózata
-megköveteli. Lásd a [Docker IPv6-hálózatkezelését](https://docs.docker.com/engine/daemon/ipv6/)
+kioszthat egy ULA-alhálózatot; explicit, átfedésmentes alhálózatot csak akkor válasszon, ha a hálózata
+ezt megköveteli. Lásd a [Docker IPv6-hálózatkezelését](https://docs.docker.com/engine/daemon/ipv6/)
 és a [Compose hálózati beállításait](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-**glibc-alapú rendszerképen** az `/etc/gai.conf` módosíthatja a címkiválasztást. A jelenlegi
-adattár Dockerfile-ja Debiant használ; az egyéni, musl-alapú rendszerképek nem használják ezt a mechanizmust.
-A bejelentett módosítás az ULA címkéjét `label fc00::/7 6` értékről
-`label fc00::/7 1` értékre változtatja. Induljon ki a rendszerkép teljes szabályzattáblájából, és őrizze meg annak
-többi bejegyzését: egy `label`- vagy `precedence`-bejegyzés hozzáadása lecseréli az alapértelmezett táblát, ezért
-egy csak a módosított sort tartalmazó fájl nem elegendő. A
+Egy **glibc-alapú lemezképen** az `/etc/gai.conf` módosíthatja a címválasztást. A jelenlegi
+adattár Dockerfile-ja Debiant használ; az egyéni, musl-alapú lemezképek nem használják ugyanezt a mechanizmust.
+A bejelentett módosítás az ULA-címke értékét `label fc00::/7 6` értékről
+`label fc00::/7 1` értékre változtatja. Induljon ki a lemezkép teljes házirendtáblájából, és őrizze meg annak többi
+bejegyzését: egy `label` vagy `precedence` bejegyzés hozzáadása lecseréli az alapértelmezett táblát, ezért egy
+csak a módosított sort tartalmazó fájl nem elegendő. A
 [glibc konfigurációs referenciája](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-dokumentálja ezeket a szemantikákat. A felülvizsgált fájlt csak olvasható módon csatolja az `/etc/gai.conf`
+dokumentálja ezeket a működési szabályokat. Csatolja a felülvizsgált fájlt csak olvasható bind mountként az `/etc/gai.conf`
 elérési útra, majd hozza létre újra a szolgáltatást a módosítás alkalmazásához.
 
-Ez az operációs rendszer címkiválasztását módosítja az adott konténerből induló **összes kimenő forgalomhoz**.
+Ez módosítja az operációs rendszer címválasztását az **adott konténer összes kimenő forgalmánál**.
 Nem kényszerít minden alkalmazást az IPv6 választására: a Node DNS-sorrendje és kapcsolatválasztása
-szintén számít. Különösen fontos, hogy a `--dns-result-order=ipv4first` az IPv4-et részesíti előnyben, és
-nem jelent megoldást egy kizárólag IPv4-et érintő hibára. Lásd a [Node DNS-sorrendjét](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+is számít. Különösen a `--dns-result-order=ipv4first` az IPv4-et részesíti előnyben, és
+nem jelent megoldást egy kizárólag IPv4-en jelentkező hibára. Lásd a [Node DNS-sorrendjét](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Minden gazdarendszer-szintű módosítás után tesztelje újra a Geminit és a többi szolgáltatóját. A visszaállításhoz
+Minden gazdagépszintű módosítás után tesztelje újra a Geminit és a többi szolgáltatót. A visszaállításhoz
 távolítsa el az egyéni `gai.conf` csatolását, állítsa vissza a korábbi hálózati konfigurációt, és
 egy karbantartási időszakban hozza létre újra az érintett szolgáltatást/hálózatot. Egy hálózat újbóli létrehozása
-megszakíthatja a hozzá csatlakozó többi konténer működését; ne törölje a tartós adatkötetet.
+megszakíthatja a hozzá csatlakoztatott többi konténer működését; ne törölje a tartós adatkötetet.
 
 ## Fontos megjegyzések
 
-- **SQLite WAL mód:** Meg kell várni, hogy a `docker stop` befejeződjön, így az OmniRoute a legújabb módosításokat visszaírhatja a `storage.sqlite` fájlba egy ellenőrzőpont létrehozásával. A mellékelt Compose-fájlok már 40 másodperces türelmi időt állítanak be a leállításhoz. Ha közvetlenül futtatja a lemezképet, tartsa meg a `--stop-timeout 40` beállítást.
-- **`DISABLE_SQLITE_AUTO_BACKUP`:** Állítsa `true` értékre, ha a rendszeres és írás előtti biztonsági mentéseket külsőleg kezelik. A meglévő adatbázisok migrációjához továbbra is saját tartós biztonsági pillanatkép és tömeges migráció elleni védelem szükséges.
-- **Adatmegőrzés:** Mindig csatoljon kötetet a `/app/data` elérési úthoz, hogy az adatbázis, a kulcsok és a konfigurációk a konténer újraindítása után is megmaradjanak.
+- **SQLite WAL mód:** Biztosítani kell, hogy a `docker stop` befejeződhessen, így az OmniRoute ellenőrzőpontba mentheti a legutóbbi módosításokat a `storage.sqlite` fájlba. A mellékelt Compose-fájlok már 40 másodperces türelmi időt állítanak be a leállításhoz. Ha közvetlenül futtatja a rendszerképet, tartsa meg a `--stop-timeout 40` beállítást.
+- **`DISABLE_SQLITE_AUTO_BACKUP`:** Állítsa `true` értékre, ha a rendszeres, illetve írás előtti biztonsági mentéseket külsőleg kezelik. A meglévő adatbázisok migrációjához továbbra is szükség van saját, tartós biztonsági pillanatképre és tömeges migráció elleni védelemre.
+- **Adatmegőrzés:** Mindig csatoljon kötetet az `/app/data` elérési úthoz, hogy az adatbázis, a kulcsok és a konfigurációk a konténerek újraindításai között is megmaradjanak.
 - **Portbeállítás:** Az alapértelmezett `20128` port módosításához írja felül a `PORT` környezeti változót.
 
 ## Lásd még
 
-- [Virtuális gép telepítési útmutatója](../ops/VM_DEPLOYMENT_GUIDE.md) — Virtuális gép + nginx + Cloudflare beállítása
-- [Fly.io telepítési útmutató](../ops/FLY_IO_DEPLOYMENT_GUIDE.md) — Telepítés a Fly.io platformra
+- [Virtuális gépes üzembe helyezési útmutató](../ops/VM_DEPLOYMENT_GUIDE.md) — Virtuális gép + nginx + Cloudflare beállítása
+- [Fly.io üzembe helyezési útmutató](../ops/FLY_IO_DEPLOYMENT_GUIDE.md) — Üzembe helyezés a Fly.io szolgáltatásban
 - [Környezeti konfiguráció](../reference/ENVIRONMENT.md) — Teljes `.env`-referencia

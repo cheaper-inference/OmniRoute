@@ -35,76 +35,85 @@ OmniRoute ከ**Obsidian** vault ጋር እንደ **የአውድ ምንጭ** ይ�
 
 ## ማዋቀር
 
-ለObsidian token ወይም base URL **ምንም environment variable የለም** — ሁለቱም
-በ`src/lib/db/obsidian.ts` በኩል በSQLite `key_value` ሰንጠረዥ (namespace `obsidian`)
-ውስጥ ይከማቻሉ። tokenው **በማከማቻ ላይ ሳለ የተመሰጠረ** ነው (AES-256-GCM፣
-ከplaintext የኋላ-ተኳኋኝ fallback ጋር)። ከEndpoint dashboard
-(`ObsidianSourceCard`) **Context Sources** tab ወይም በቅንብሮች REST API
-በኩል ያዋቅሩ።
+ለObsidian token ወይም base URL **ምንም environment variable የለም** — ሁለቱም በ
+`src/lib/db/obsidian.ts` አማካኝነት በSQLite `key_value` table (namespace `obsidian`) ውስጥ
+ይቀመጣሉ። token በማከማቻ ላይ ሳለ **የተመሰጠረ ነው** (AES-256-GCM፣ ከ
+plaintext backward-compat fallback ጋር)። ከEndpoint dashboard **Context Sources** tab
+(`ObsidianSourceCard`) ወይም በsettings REST API በኩል ያዋቅሩ።
 
 > [!IMPORTANT]
-> የ**Obsidian Local REST API** plugin መጫንና እየሰራ መሆን አለበት። የREST
-> interfaceው በ**HTTP `127.0.0.1:27123`** (ነባሪው base URL) ላይ ያዳምጣል። Port `27124`
-> _የተለየ_ MCP/HTTPS endpoint ሲሆን በቅንብሮች route በግልጽ ውድቅ ይደረጋል።
-> ከሌላ መሣሪያ ሲገናኙ `http://<tailscale-ip>:27123`ን ይጠቀሙ።
+> **Obsidian Local REST API** plugin መጫንና እየሰራ መሆን አለበት። የREST
+> interface በ**HTTP `127.0.0.1:27123`** (ነባሪው base URL) ላይ ያዳምጣል። Port `27124`
+> _የተለየ_ MCP/HTTPS endpoint ሲሆን በsettings route በግልጽ ውድቅ ይደረጋል።
+> ከሌላ device ለመገናኘት `http://<tailscale-ip>:27123` ይጠቀሙ።
 
-### የውቅር keys (SQLite `key_value`፣ namespace `obsidian`)
+### የማዋቀሪያ keys (SQLite `key_value`፣ namespace `obsidian`)
 
 | Key               | ዓላማ                                           | የተመሰጠረ |
 | ----------------- | --------------------------------------------- | ------ |
 | `api_key`         | የLocal REST API bearer token                  | አዎ     |
 | `base_url`        | የREST base URL (ነባሪ `http://127.0.0.1:27123`) | አይ     |
-| `vault_path`      | ወደ vault directory የሚወስድ ፍጹም ዱካ (ለማመሳሰል)      | አይ     |
-| `webdav_username` | የመነጨ WebDAV username (የvault ማመሳሰል)           | አይ     |
-| `webdav_password` | የመነጨ WebDAV password (የvault ማመሳሰል)           | አዎ     |
-| `webdav_enabled`  | የWebDAV vault ማመሳሰል መንቃቱን                     | አይ     |
+| `vault_path`      | ወደvault directory የሚወስድ absolute path (ለsync) | አይ     |
+| `webdav_username` | የተፈጠረ WebDAV username (vault sync)            | አይ     |
+| `webdav_password` | የተፈጠረ WebDAV password (vault sync)            | አዎ     |
+| `webdav_enabled`  | WebDAV vault sync የነቃ መሆኑን                    | አይ     |
 
 ### በREST በኩል ማዋቀር
 
 ```bash
-# የLocal REST API tokenን ያስቀምጡ + ያረጋግጡ (POST በstatus ፍተሻ ያረጋግጣል)
+# የLocal REST API tokenን ያስቀምጡ + ያረጋግጡ (POST በstatus check ያረጋግጣል)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
 
-# የግንኙነት statusን ይፈትሹ (connected፣ hasToken፣ baseUrl፣ vaultPath ይመልሳል)
+# የconnection statusን ያረጋግጡ (connected, hasToken, baseUrl, vaultPath ይመልሳል)
 curl http://localhost:20128/api/settings/obsidian
 
-# ግንኙነቱን ያቋርጡ (የተከማቸውን token ያጸዳል)
+# Connectionን ያቋርጡ (የተቀመጠውን token ያጸዳል)
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-ሁሉም methods የdashboard authentication ይፈልጋሉ። `POST` በport `27124`
-ላይ ያለ ማንኛውንም URL ውድቅ ያደርጋል፤ ከማከማቸቱ በፊትም የLocal REST API
-status endpointን በመጥራት tokenውን ያረጋግጣል።
+ሁሉም methods የdashboard authentication ይፈልጋሉ። `POST` በport `27124` ላይ ያለ
+ማንኛውንም URL ውድቅ ያደርጋል፣ እንዲሁም tokenን ከማስቀመጡ በፊት የLocal REST API
+status endpointን በመጥራት ያረጋግጣል።
 
-### የWebDAV vault ማመሳሰል
+### WebDAV vault sync
 
-`src/app/api/settings/obsidian/webdav/route.ts` እንደ አማራጭ በWebDAV የተደገፈ
-የvault ማመሳሰልን ያስተዳድራል (በ`src/lib/obsidianSync.ts` የሚመራ)። ማንቃቱ
-OmniRouteን ወደ አካባቢያዊ vault directory ያመለክታል እና በዘፈቀደ የWebDAV
-username/password ጥንድ ይፈጥራል፦
+`src/app/api/settings/obsidian/webdav/route.ts` አማራጭ WebDAV-backed
+vault syncን (በ`src/lib/obsidianSync.ts` የሚንቀሳቀስ) ያስተዳድራል። እሱን ማንቃት OmniRouteን
+ወደlocal vault directory ያመለክታል፣ እንዲሁም የዘፈቀደ WebDAV username/password ጥንድ
+ይፈጥራል፦
 
 ```bash
-# ለvault directory የWebDAV ማመሳሰልን ያንቁ (username/password ይፈጥራል)
+# ለvault directory WebDAV syncን ያንቁ (username/password ይፈጥራል)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
 
-# የWebDAV ማመሳሰል statusን ያግኙ (credentials የሚመለሱት ከነቃ ብቻ ነው)
+# የWebDAV sync statusን ያግኙ (credentials የሚመለሱት ከነቃ ብቻ ነው)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# የWebDAV ማመሳሰልን ያሰናክሉ (credentials + የሚተዳደረውን .stignore ያጸዳል)
+# WebDAV syncን ያሰናክሉ (credentials + የሚተዳደረውን .stignore ያጸዳል)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
-### በእያንዳንዱ API key የሚወሰን የአውድ ምንጭ (አማራጭ)
+### ለእያንዳንዱ API key context source (አማራጭ)
 
-የObsidian ውቅር በ`api_key_context_sources` ሰንጠረዥ
-(`src/lib/db/apiKeyContextSources.ts`) በኩል **ለእያንዳንዱ API key** ሊወሰን
-ይችላል። የMCP ጥሪ የተረጋገጠ API key id ሲይዝ፣ `getObsidianConfigForApiKey()`
-የዚያን key የራሱን token/base-URL/vault-path (`source: "api_key"`) ቅድሚያ
-ይሰጣል፤ ካልሆነ ወደ ዓለም አቀፉ ውቅር (`source: "global"`) fallback ያደርጋል።
+የObsidian config በ`api_key_context_sources` table
+(`src/lib/db/apiKeyContextSources.ts`) አማካኝነት **ለእያንዳንዱ API key** ሊገደብ ይችላል።
+አንድ MCP call የተረጋገጠ API key id ሲይዝ፣ `getObsidianConfigForApiKey()` የዚያን key
+የራሱን token/base-URL/vault-path (`source: "api_key"`) ቅድሚያ ይሰጣል፤ አለበለዚያ ወደ
+global config (`source: "global"`) fallback ያደርጋል።
+
+sync ያልሆኑ MCP tools ይህን config ከማንበባቸው በፊት የተረጋገጠ caller identity
+ይፈልጋሉ። identity የሌለው caller `Obsidian API token not configured` የሚል ምላሽ
+ይቀበላል፣ እና ምንም vault request አይላክም። HTTP callers በrequest credentials
+አማካኝነት ይለያሉ፤ stdio callers ደግሞ በ`OMNIROUTE_API_KEY` ወይም
+`ROUTER_API_KEY` አማካኝነት ሊለዩ ይችላሉ። ያልተለየ HTTP caller የserverን
+environment identity ሊወርስ አይችልም። Placeholder IDs ብቻቸውን accessን
+አይፈቅዱም፤ ወደ`env-key` የሚፈታ valid environment credential መደገፉን ይቀጥላል።
+የተረጋገጡ keys የራሳቸው per-key Obsidian config ከሌላቸው global fallbackን ይጠቀማሉ።
+አራቱ `obsidian_sync_*` tools የተለየውን sync-token behavior እንደያዙ ይቀጥላሉ።
 
 ## MCP መሣሪያዎች (22)
 

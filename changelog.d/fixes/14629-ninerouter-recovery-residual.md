@@ -1,1 +1,0 @@
-- Fix 9router recovery for named unsupported request fields on HTTP 400, preserve the body actually sent after retries, and reuse learned reasoning-effort limits for subsequent requests to the same forwarded model.

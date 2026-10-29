@@ -48,67 +48,65 @@ Claude Code 使用 **Anthropic Messages API**，并通过环境变量指向自�
 
 ---
 
-## 发现别名——在 `/model` 选择器中显示非 Claude 模型
+## 发现别名 —— 在 `/model` 选择器中显示非 Claude 模型
 
-Claude Code 的网关模型发现功能只会列出 ID 以 `claude`
-或 `anthropic` 开头的模型。因此，即使设置了 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`，
-原生 `/model` 选择器通常也**只会**显示 OmniRoute 的 Claude/Anthropic 模型——
-即使 `kimi/kimi-k2.6` 或 `glm/glm-5.2` 可以正常路由，也不会出现在其中。
+Claude Code 的网关模型发现功能只会列出以 `claude` 或 `anthropic` 开头的 id，因此在启用 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` 时，原生 `/model` 选择器通常**只**显示 OmniRoute 的 Claude/Anthropic 模型 —— 像 `kimi/kimi-k2.6` 或 `glm/glm-5.2` 这样的模型永远不会出现，即使它们可以正常路由。
 
-OmniRoute 可以将任意已启用的模型（以及组合）镜像为 `claude/…` ID，
-使其通过该筛选器并显示在选择器中：
+OmniRoute 可以将任何已启用的模型（以及 combo）镜像到 `claude/…` id 下，使其通过该过滤器并显示在选择器中：
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<组合 "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-当你在 Claude Code 中选择其中一个模型时，OmniRoute 会先移除 `claude/` 包装，
-还原为真实 ID，然后再进行路由——真正的 `claude/<real-claude-model>` ID
-（即实际的 Claude OAuth 提供者）始终保持不变。
+当你在 Claude Code 中选择其中某一项时，OmniRoute 会在路由前剥掉 `claude/` 包装，还原为真实 id —— 而真正的 `claude/<real-claude-model>` id（即实际的 Claude OAuth 提供者）始终不会被改动。
 
-**此功能默认关闭**，并由三级开关控制（越具体的级别优先级越高），
-因此对于不使用 Claude Code 的客户端，普通 OmniRoute 不会将其目录扩大一倍：
+默认情况下仅镜像基础 id。开启可选的 `CATALOG_MIRROR_REFINEMENTS_ENABLED` 功能标志后，目录中已列出的推理强度变体（例如 `codex/gpt-6-sol-high`）也会像其他 id 一样被镜像，这样 Claude Code 就可以选择明确的强度级别；而请求路径无法具体化的内置 `auto/*` id 则不会被镜像。强度变体是否会被列出，仍由 `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` 控制 —— 镜像永远不会添加基础目录中不存在的变体。
+
+**此功能默认关闭**，由三级门控控制（最具体的级别优先），因此普通的 OmniRoute 不会为不使用 Claude Code 的客户端把目录翻倍：
 
 | 级别   | 位置                                                        |
 | ------ | ----------------------------------------------------------- |
-| 模型   | 提供者详情页面 → 每个模型的“在 Claude Code 中公开”开关      |
-| 提供者 | 提供者详情页面 → 提供者级别开关（涵盖其所有模型）           |
+| 模型   | 提供者详情页 → 每个模型的"在 Claude Code 中公开"开关        |
+| 提供者 | 提供者详情页 → 提供者级开关（覆盖其所有模型）               |
 | 全局   | 设置 → 功能标志 → `EXPOSE_CC_DISCOVERY_ALIASES`（默认关闭） |
 
-`EXPOSE_CC_DISCOVERY_ALIASES` 环境变量会强制开启全局级别，
-并优先于控制面板中的覆盖设置（通过该环境变量启用时，功能标志页面会显示
-“已通过环境变量激活”的提示）。提供者级别和模型级别的开关可在此基础上进一步调整——
-例如，全局关闭但启用 Kimi 提供者时，只会公开 Kimi 的模型。
+`EXPOSE_CC_DISCOVERY_ALIASES` 环境变量会强制开启全局级别，并优先于仪表盘中的覆盖设置（当其生效时，功能标志界面会显示"通过环境变量激活"的提示）。提供者级和模型级开关在此基础上进一步细化 —— 例如，全局关闭 + Kimi 提供者开启时，只会公开 Kimi 的模型。
 
-> ⚠️ **非 Claude 模型的窗口不匹配问题。** 对于任何无法识别的 ID，Claude Code 都会假定其上下文
-> 窗口为 200K（它无法从 `/v1/models` 读取真实窗口大小）。对于窗口更大的模型
-> （例如 Kimi K2 的 256K），请将 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` 设置为低于
-> 模型真实窗口大小的值，以避免过早触发自动压缩。上面生成的配置文件已经
-> 按模型完成了此项设置。
+> ⚠️ **非 Claude 模型的上下文窗口不匹配。** Claude Code 对它无法识别的任何 id 都假定为 200K 上下文窗口（它无法从 `/v1/models` 读取真实的窗口大小）。对于窗口更大的模型（例如 Kimi K2 的 256K），请将 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` 设置为低于该模型真实窗口的值，以免自动压缩过早触发。上面生成的配置文件已针对每个模型完成了此设置。
 
 ---
 
 ## 仪表板上的引导区块
 
-Claude 工具卡片（**仪表板 → CLI Code**）会在发现别名信息按钮旁显示此实例对应的精确 `settings.json` 片段，并提供复制按钮：
+Claude 工具卡片（**Dashboard → CLI Code**）会在发现别名信息按钮旁呈现此实例对应的确切 `settings.json` 片段，并提供复制按钮：
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<你的 OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<你的 OmniRoute API 密钥>",
+    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-基础 URL 是卡片解析出的 URL（包括你输入的自定义覆盖值），并且已经过规范化——没有 `/v1` 后缀，也没有尾部斜杠。**密钥绝不会被显示**：该区块使用占位符，因此截图或粘贴的片段都不会泄露密钥。请用你的密钥替换该占位符。
+基础 URL 是卡片解析出的 URL（包括你输入的自定义覆盖值），并且已经过规范化——没有 `/v1` 后缀，也没有尾部斜杠。**密钥绝不会被呈现**：该区块使用占位符，因此屏幕截图或粘贴的片段都不会泄露密钥。请用你的密钥替换该占位符。
 
-对于实际上下文窗口不是 200K 的任何模型，请在同一个 `env` 区块下添加 `CLAUDE_CODE_AUTO_COMPACT_WINDOW`——Claude Code 会假定所有无法识别的 id 都使用 200K，因此否则自动压缩会在错误的时机触发（请参阅上一节中的警告）。片段构建器也接受该值，因此知道目标模型窗口大小的调用方可以直接将其输出。
+对于实际上下文窗口不是 200K 的任何模型，请在同一个 `env` 区块中添加 `CLAUDE_CODE_AUTO_COMPACT_WINDOW`——Claude Code 会假定它无法识别的每个 id 都具有 200K 的上下文窗口，否则自动压缩会在错误的时间点触发（请参阅上一节中的警告）。片段构建器也接受该值，因此知道目标模型窗口大小的调用方可以直接将其输出。
 
-来源：`src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet`（经过单元测试的纯构建器），由 `ClaudeGatewayOnboardingBlock` 渲染。
+来源：`src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet`（经过单元测试的纯构建器），由 `ClaudeGatewayOnboardingBlock` 呈现。
+
+### 固定一个账户（可选）
+
+要通过某个特定的提供者账户发送所有 Claude Code 请求，请在同一个 `env` 区块中通过 `ANTHROPIC_CUSTOM_HEADERS` 添加 `x-omniroute-connection` 标头：
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+从提供者页面连接行中的 `xxxxxxxx…` 标签复制 id。固定仅适用于单模型 id（`provider/model`），不适用于组合。有关确切的回退行为，请参阅[按请求固定账户](../reference/API_REFERENCE.md#account-pinning-per-request)。
 
 ---
 

@@ -1,0 +1,1 @@
+- **fix(api):** Honor existing exact and wildcard model aliases in multipart audio transcriptions while preserving combo precedence and resolved-target API-key policy ([#17232](https://github.com/diegosouzapw/OmniRoute/pull/17232)) — thanks @edosulai

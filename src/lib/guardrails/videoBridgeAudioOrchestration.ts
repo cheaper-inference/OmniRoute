@@ -22,6 +22,7 @@ import {
   selectAudioBridgeModel,
   type AudioCredentialCheck,
   type AudioPart,
+  type AudioTranscriptionConfig,
   type AudioTranscriptionTimedResult,
 } from "./audioBridgeHelpers";
 import { bridgeCacheKey, type BridgeCacheStore } from "./modalityBridge/bridgeCache";
@@ -47,6 +48,11 @@ export interface VideoAudioOrchestrationOptions {
   cacheKeyRef?: string;
   extractAudio?: typeof extractVideoAudioViaBroker;
   hasUsableCredentials?: AudioCredentialCheck;
+  /**
+   * GHSA-3w2r: the caller API key's scope, carried on the transcription
+   * self-loop (narrowing only). Omit for an unrestricted key.
+   */
+  keyScope?: AudioTranscriptionConfig["keyScope"];
   /** Configured STT model — `"auto"` or a fixed `provider/model` string. */
   model: string;
   /** Operator half of the dual opt-in (settings). */
@@ -177,6 +183,7 @@ async function runTranscription(
       model: sttModel,
       signal: options.signal,
       timeoutMs: options.timeoutMs,
+      ...(options.keyScope ? { keyScope: options.keyScope } : {}),
     });
     return { ok: true, value };
   } catch (error) {

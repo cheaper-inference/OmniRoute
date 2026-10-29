@@ -29,23 +29,24 @@ Jos löydät OmniRoutesta tietoturvahaavoittuvuuden, ilmoita siitä vastuullises
 | 3.7.x   | ✅ Tietoturvatuki                                    |
 | < 3.7.0 | ❌ Ei tuettu                                         |
 
-## LTS-tukijakso (v3.9.x)
+## LTS-tuki-ikkuna (v3.9.x)
 
-Version 3.8.59 jälkeen seuraava versio on **3.9.0**, joka avaa pitkäaikaisen tuen haaran
-`stable/v3`-branchissa (katso [`ROADMAP.md`](ROADMAP.md) → "Phase 3 — v3.9.0 LTS").
+Versionin 3.8.59 jälkeen seuraava versio on **3.9.0**, joka avaa pitkäaikaisen tuen linjan
+`stable/v3`-haarassa (katso [`ROADMAP.md`](ROADMAP.md) → "Vaihe 3 — v3.9.0 LTS").
 
-- **Mitä `stable/v3` vastaanottaa:** virheenkorjauksia, tietoturvakorjauksia ja palveluntarjoajien päivityksiä. Uudet
-  ominaisuudet tulevat v4-kanavaan; LTS-haara asettaa vakauden etusijalle. `npm install omniroute`
-  (`latest`-dist-tag) pysyy v3-versiossa koko v4-julkaisusyklin ajan.
-- **Tukijakson kesto:** `<T-GAP-3: omistajan päätös odottaa — katso ROADMAP.md>`. Tukijakson pituudesta
-  v4.0 GA:n jälkeen (kun `latest` siirtyy v4-versioon) **ei ole vielä päätetty**; tämä
-  osio päivitetään, kun ylläpitäjä ilmoittaa siitä. Siihen asti älä oleta päättymispäivää.
-- **Haavoittuvuuden ilmoittaminen LTS-haarassa:** käytä samaa kanavaa kuin muillekin versioille —
+- **Mitä `stable/v3` vastaanottaa:** virheenkorjauksia, tietoturvakorjauksia ja palveluntarjoajapäivityksiä. Uudet
+  ominaisuudet siirtyvät v4-kanavaan; LTS-linjalla vakaus on etusijalla. `npm install omniroute`
+  (`latest`-jakelutunniste) pysyy v3-versiossa koko v4-julkaisusyklin ajan.
+- **Tuki-ikkunan kesto:** `stable/v3` vastaanottaa **tietoturvakorjauksia ja kriittisten regressioiden korjauksia
+  12 kuukauden ajan version 3.9.0 julkaisusta tai siihen asti, kun version v4.0.0 julkaisemisesta `latest`-versiona on kulunut 90 päivää —
+  sen mukaan, kumpi ajankohta on myöhemmin**. Lopullinen päättymispäivä kirjataan version 3.9.0 julkaisutietoihin ja
+  tiedostoon [`ROADMAP.md`](ROADMAP.md), kun julkaisu tehdään.
+- **LTS-linjan haavoittuvuudesta ilmoittaminen:** käytä samaa kanavaa kuin muidenkin versioiden kohdalla —
   yksityistä [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) -ilmoitusta,
-  älä koskaan julkista issue-raporttia. Kerro, mitä versiota testasit (esimerkiksi `3.9.2`); korjaukset lisätään
+  ei koskaan julkista ongelmaraporttia. Ilmoita, minkä version testasit (esimerkiksi `3.9.2`); korjaukset lisätään
   `stable/v3`-haaraan ja siirretään eteenpäin v4-versioon.
-- **Tietoturvan lähtötaso LTS-haaran luontihetkellä:** mitattu haavoittuvuusskannerin tila, reittisuojauksen ja
-  julkisten tunnistetietojen tarkistustodisteet tallennetaan tiedostoon
+- **Tietoturvan lähtötaso LTS-julkaisun yhteydessä:** mitattu tarkistustyökalun tila sekä reittisuojauksen ja
+  julkisten tunnistetietojen todisteet kirjataan tiedostoon
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

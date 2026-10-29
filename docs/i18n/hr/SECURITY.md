@@ -31,21 +31,22 @@ Ako otkrijete sigurnosnu ranjivost u OmniRouteu, prijavite je na odgovoran nači
 
 ## Razdoblje LTS podrške (v3.9.x)
 
-Nakon verzije 3.8.59 sljedeća je verzija **3.9.0**, kojom se otvara linija dugoročne podrške na
+Nakon 3.8.59 sljedeća je verzija **3.9.0**, kojom započinje linija dugoročne podrške na
 grani `stable/v3` (pogledajte [`ROADMAP.md`](ROADMAP.md) → „Faza 3 — v3.9.0 LTS”).
 
 - **Što prima `stable/v3`:** ispravke pogrešaka, sigurnosne zakrpe i ažuriranja pružatelja. Nove
-  značajke odlaze u kanal v4; stabilnost je glavni prioritet LTS linije. `npm install omniroute`
+  značajke idu u kanal v4; stabilnost je glavni prioritet LTS linije. `npm install omniroute`
   (`latest` dist-tag) ostaje na v3 tijekom cijelog ciklusa v4.
-- **Trajanje razdoblja:** `<T-GAP-3: odluka vlasnika na čekanju — pogledajte ROADMAP.md>`. Duljina
-  razdoblja nakon opće dostupnosti verzije v4.0 (kada se `latest` prebaci na v4) **još nije određena**; ovaj
-  se odjeljak ažurira kada održavatelj to objavi. Do tada nemojte pretpostavljati datum završetka.
-- **Prijavljivanje ranjivosti u LTS liniji:** isti kanal kao i za svaku drugu verziju —
-  privatni [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  nikada javni problem. Navedite koju ste verziju testirali (primjerice `3.9.2`); ispravci se primjenjuju na
-  `stable/v3` i prenose unaprijed na v4.
-- **Sigurnosna osnova pri izdvajanju LTS-a:** izmjereno stanje skenera, zaštita ruta i
-  dokazi o javnim vjerodajnicama zabilježeni su u
+- **Trajanje razdoblja:** `stable/v3` prima **sigurnosne ispravke i ispravke kritičnih regresija
+  12 mjeseci nakon izdanja 3.9.0 ili do 90 dana nakon što v4.0.0 bude objavljen kao `latest` —
+  ovisno o tome što nastupi kasnije**. Konačni datum završetka bilježi se u napomenama uz izdanje 3.9.0 i u
+  datoteci [`ROADMAP.md`](ROADMAP.md) kada se izdanje objavi.
+- **Prijava ranjivosti u LTS liniji:** upotrijebite isti kanal kao i za svaku drugu verziju —
+  privatno [GitHubovo sigurnosno upozorenje](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  nikada javnu prijavu problema. Navedite koju ste verziju testirali (primjerice `3.9.2`); ispravke se primjenjuju na
+  `stable/v3` i prenose unaprijed u v4.
+- **Sigurnosna polazna osnova pri objavi LTS-a:** izmjereno stanje skenera, dokazi o zaštiti ruta i
+  javnim vjerodajnicama zabilježeni su u
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

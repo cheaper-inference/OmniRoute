@@ -116,33 +116,42 @@ Kui väli `region` jäetakse välja, kasutatakse vaikeväärtust `us-east-1`.
 
 ---
 
-## API-võtme impordivoog
+## API-võtme importimise voog
 
-API-võtmega autentimine on mõeldud pika elueaga Kiro / AWS CodeWhispereri esitaja mandaatidele.
-See ei kasuta OAuthi värskendamist ja väldib seetõttu jagatud OIDC-seansi kehtetuks muutmist.
+API-võtmega autentimine on mõeldud pikaajaliste Kiro / AWS CodeWhispereri kandjamandaatide jaoks. See ei kasuta OAuthi värskendamist, vältides seega jagatud OIDC-seansi kehtetuks muutumist.
 
 ### Töölaud
 
 1. Avage **Töölaud -> Pakkujad -> Kiro**.
 2. Valige **API-võti**.
-3. Kleepige API-võti ja soovi korral AWS-i piirkond (vaikimisi `us-east-1`).
-4. OmniRoute valideerib võtme ja salvestab ühenduse.
+3. Kleepige API-võti ja valige AWS-i piirkond: **Automaatne tuvastamine** (vaikimisi), **USA idaosa
+   (Põhja-Virginia)** või **Euroopa (Frankfurt)**.
+4. OmniRoute valideerib võtme ja salvestab ühenduse seotuna piirkonnaga, kus
+   võti töötab.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` aktsepteerib väärtusi `auto` (vaikimisi), `us-east-1` või `eu-central-1`; kõik muud väärtused
+lükatakse tagasi HTTP 400 vastusega.
 
 ### Sisemine leping
 
-API-marsruut valideerib võtme, kutsudes välja `KiroService.validateApiKey()`, mis
-kasutab piirkonnale vastava CodeWhispereri/Amazon Q lõpp-punkti suhtes meetodit
-`ListAvailableProfiles` ja lahendab väärtuse `profileArn`.
+API marsruut valideerib võtme, kutsudes välja `KiroService.validateApiKey()`, mis
+kutsub iga piirkonna kohta 10 s ajalõpuga välja
+`GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(Amazon Q liides, mida API-võtmega järeldamine kasutab).
+Režiimis `auto` proovib see esmalt piirkonda `us-east-1`, seejärel piirkonda `eu-central-1`, ning salvestab esimese piirkonna,
+mis võtme aktsepteerib. Kui võti lükatakse tagasi kõigis kandidaatpiirkondades, nurjub import
+HTTP 400 vastusega. Seejärel kutsutakse valikulise
+`profileArn`-i tuvastamiseks parima võimaliku tulemuse põhimõttel välja `ListAvailableProfiles` (AWS keelab selle enamiku API-võtmete puhul).
 
-Salvestatud ühendus kasutab järgmist struktuuri:
+Salvestatud ühendus kasutab järgmist:
 
 ```json
 {
@@ -155,10 +164,13 @@ Salvestatud ühendus kasutab järgmist struktuuri:
 }
 ```
 
-Käitamise ajal saadab `KiroExecutor.buildHeaders()` võtme kujul
-`Authorization: Bearer <key>` ja lisab `tokentype: API_KEY`. Kvoodi- ja profiilipäringud
-kasutavad sama tähist, et AWS käsitleks esitaja mandaati pika elueaga API-võtmena, mitte
-OIDC- või suhtlusplatvormi juurdepääsutõendina.
+Käituse ajal saadab `KiroExecutor.buildHeaders()` võtme kujul
+`Authorization: Bearer <key>` ja lisab `tokentype: API_KEY`. Kvoodi-/profiilikutsed
+kasutavad sama tähist, et AWS käsitleks kandjat pikaajalise API-võtmena, mitte
+OIDC- või sotsiaalvõrgustiku juurdepääsutõendina. `KiroExecutor.execute()` saadab API-võtmega järelduspäringuid ainult aadressile
+`https://q.<region>.amazonaws.com/generateAssistantResponse` — kaasa arvatud `us-east-1`
+—, sest Kiro IDE lüüs lükkab `TokenType=API_KEY` tagasi ja
+`codewhisperer.us-east-1` lükkab API-võtme lasti tagasi kui kehtetu päringukeha (HTTP 400).
 
 ---
 

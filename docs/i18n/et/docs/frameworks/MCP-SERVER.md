@@ -72,6 +72,16 @@ curl -i \
 
 Ilma haldusõiguseta võtme (või Bearer-i puudumise) korral tagastatakse `403 LOCAL_ONLY`. Kõrvutine tee-eesliide `/api/cli-tools/runtime/*` on tahtlikult NII, et sellest ei saa mööda minna — vaata [Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Origini kontroll
+
+Pärast autentimist kontrollitakse iga `/api/mcp/*` päringu — transportide ja haldusmarsruutide, nagu `status`, `tools`, `audit`, `restart` — `Origin` päist, olenemata kutsujast (API-võti, CLI-tunnus, töölaua seanss või anonüümne loopback väljalülitatud sisselogimisega). See on MCP Streamable HTTP spetsifikatsiooni nõutud kaitse DNS rebindingu vastu.
+
+- **`Origin` päis puudub** → lubatud. OmniRoute CLI, SDK ja IDE-kliendid seda ei saada.
+- **Lubatud `Origin`** → `localhost` / `127.0.0.1` / `[::1]` mis tahes pordil või OmniRoute'i enda avalik origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, usaldusväärse pöördpuhverserveri edastatud origin (`OMNIROUTE_TRUST_PROXY`, ainult kui base URL pole määratud) või otse kasutatav loopback/LAN IP-host. Ainuüksi `Host` päis ei muuda origini kunagi usaldusväärseks.
+- **Mis tahes muu `Origin`, sh `null`** → `403` JSON-RPC veakehaga: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Kehtiva CSRF-tunnusega töölaua seanssi aktsepteeritakse endiselt, nagu teiste töölaua kirjutuste puhul.
+
+Pöördpuhverserveri taga serveeritud brauseripõhine MCP-klient vajab `OMNIROUTE_PUBLIC_BASE_URL` seadistust; teiste originite lubamisloendit pole. CORS-eelpäringut (`OPTIONS`) Origini osas ei kontrollita; sellele järgnevat päringut kontrollitakse.
+
 ## IDE seadistamine
 
 Vaata [MCP kliendi seadistamise](../guides/SETUP_GUIDE.md#mcp-client-configuration) juhendit Claude Desktop,
@@ -291,118 +301,110 @@ Nii SSE kui ka Voogesitatava HTTP transpordi kasutamine on blokeeritud, kuni MCP
 
 ## Autentimine ja õigused
 
-MCP tööriistakutsed loevad õiguste stringe kutsujalt. See kontroll on üks kolmest
-sõltumatust nimeruumist. Ühe kontrollija läbimine ei tähenda teiste läbimist.
-Reegleid kirjeldab jaotis [Kolm õiguste nimeruumi](#three-scope-namespaces).
-Tööriistakataloog on jaotises [MCP tööriistade õigused](#mcp-tool-scopes).
+MCP tööriistakutsed loevad õiguste stringe kutsujalt. See kontroll kuulub ühte kolmest
+sõltumatust nimeruumist. Ühe kontrollija edukas tulemus ei tähenda teiste kontrollide
+läbimist. Reegleid kirjeldab jaotis [Kolm õiguste nimeruumi](#three-scope-namespaces).
+Tööriistakataloog asub jaotises [MCP tööriistade õigused](#mcp-tool-scopes).
 
 ### Kolm õiguste nimeruumi
 
-API-võtme `manage`, MCP tööriista `read:compression` ja
-`oma_live_…` juurdepääsutõendi `read` on kolm erinevat õigust. Kutsujad, kes
-saadavad muutvale haldusmarsruudile `read` juurdepääsutõendi, saavad vastuseks
-HTTP 403
+API-võtme `manage`, MCP tööriista `read:compression` ja `oma_live_…`
+juurdepääsutõendi `read` on kolm erinevat õigust. Kutsujad, kes saadavad
+muutvale haldusmarsruudile `read`-juurdepääsutõendi, saavad HTTP 403 vastuse
 `Access token scope 'read' is insufficient; 'write' required.`
-Seda taset kontrollib `scopeSatisfies`. See ei kasuta MCP tabelit ja MCP
-sobitaja ei kasuta seda.
+Seda õigustaset kontrollib `scopeSatisfies`. See ei kasuta MCP tabelit ning MCP
+sobitaja ei kasuta seda kontrolli.
 
-| Nimeruum             | Mandaat                                                               | Kontrollija                     | Kontrolli läbimine lubab                                  |
-| :------------------- | :-------------------------------------------------------------------- | :------------------------------ | :-------------------------------------------------------- |
-| API-võtme haldus     | `api_keys.scopes`                                                     | `hasManageScope`                | Selle Bearer-võtme halduse REST-i                         |
-| API-võtme lisaõigus  | sama massiiv, üks täpselt kattuv string                               | allpool nimetatud abifunktsioon | Ainult seda ühte võimekust                                |
-| MCP tööriistaõigused | sama massiiv, muul juhul MCP `_meta`, seejärel `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                  | Seda tööriista, kui õiguste jõustamine on sisse lülitatud |
-| Juurdepääsutõend     | `oma_live_…`                                                          | `scopeSatisfies`                | Haldusmarsruudi, mille meetod ja tee nõuavad seda taset   |
+| Nimeruum                | Mandaat                                                               | Kontrollija                     | Edukas kontroll lubab                                                   |
+| :---------------------- | :-------------------------------------------------------------------- | :------------------------------ | :---------------------------------------------------------------------- |
+| API-võtme haldus        | `api_keys.scopes`                                                     | `hasManageScope`                | Selle Bearer-võtme halduse REST-liidese kasutamise                      |
+| API-võtme lisaõigus     | sama massiiv, üks täpselt kattuv string                               | allpool nimetatud abifunktsioon | Ainult selle ühe funktsiooni kasutamise                                 |
+| MCP tööriistade õigused | sama massiiv, muul juhul MCP `_meta`, seejärel `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                  | Selle tööriista kasutamise, kui jõustamine on sisse lülitatud           |
+| Juurdepääsutõend        | `oma_live_…`                                                          | `scopeSatisfies`                | Haldusmarsruudi kasutamise, mille meetod ja tee nõuavad seda õigustaset |
 
 Iga mandaadi väljastamist käsitletakse jaotises
 [Halduse autentimine](../guides/MANAGEMENT-AUTH.md).
 
 #### API-võtme õigused
 
-Ühte `api_keys.scopes` massiivi kasutatakse kahe ülesande jaoks. Need kasutavad
-erinevaid funktsioone.
+Ühte `api_keys.scopes` massiivi kasutatakse kahe ülesande jaoks. Need kasutavad erinevaid funktsioone.
 
-**Halduse REST.** `manage` ja `admin` on hulga
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`)
-liikmed. Selle võtme haldusmarsruutide autoriseerimiseks kasutatakse
-`hasManageScope`. `admin` võimaldab neil marsruutidel haldustoiminguid teha.
-Sõna `admin` ei tähista siin juurdepääsutõendi taset ega laiene MCP
-tööriistaõigusteks.
+**Halduse REST-liides.** `manage` ja `admin` on
+`MANAGEMENT_API_KEY_SCOPES` liikmed (`src/shared/constants/managementScopes.ts`).
+`hasManageScope` autoriseerib selle võtme jaoks haldusmarsruudid. `admin`
+võimaldab neil marsruutidel haldustoiminguid teha. Sõna `admin` ei tähenda siin
+juurdepääsutõendi õigustaset ega laiene MCP tööriistade õigusteks.
 
-**Lisaõiguste stringid.** Iga stringi puhul kontrollitakse täpset kuulumist ja
-ükski neist ei kuulu hulka `MANAGEMENT_API_KEY_SCOPES`.
+**Lisaõiguste stringid.** Igaühe puhul kontrollitakse täpset liikmesust ning kõik need jäävad
+väljapoole `MANAGEMENT_API_KEY_SCOPES` hulka.
 
-| Õigus                          | Kontrolli läbimine lubab                                                                                                                                         |
-| :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Ainult mitte-loopback-ühenduste `/api/mcp/` LOCAL_ONLY erandit (`hasMcpConnectOrManageScope`). Võti, millel on `manage` või `admin`, läbib samuti selle erandi.  |
-| `self:usage`                   | Selle võtme `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` lisab selle õiguse loomisel (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Ülesvoolu konto kvoote selle oleku vastuses (`src/lib/usage/apiKeySelfService.ts`). Olekumarsruut nõuab endiselt õigust `self:usage`.                            |
-| `policy:bypass-provider-quota` | Selle võtme inferentsikutsed jätavad teenusepakkuja kvoodipoliitika vahele (`hasProviderQuotaBypassScope` failis `src/sse/handlers/chat.ts`).                    |
+| Õigus                          | Edukas kontroll lubab                                                                                                                                                                       |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mcp:connect`                  | Ainult mitte-tagasisideaadressilt `/api/mcp/` juurdepääsu erandi LOCAL_ONLY puhul (`hasMcpConnectOrManageScope`). Võti, millel on `manage` või `admin`, läbib samuti selle erandikontrolli. |
+| `self:usage`                   | Selle võtme jaoks `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` lisab selle õiguse loomisel (`normalizeSelfServiceScopesForCreate`).                      |
+| `self:account-quota`           | Ülesvooluteenuse konto kvoodid selles olekuandmestikus (`src/lib/usage/apiKeySelfService.ts`). Olekumarsruut nõuab endiselt õigust `self:usage`.                                            |
+| `policy:bypass-provider-quota` | Selle võtme inferentsikutsed jätavad teenusepakkuja kvoodipoliitika vahele (`hasProviderQuotaBypassScope` failis `src/sse/handlers/chat.ts`).                                               |
 
 #### Sobitamine
 
-Kataloog on jaotise [MCP tööriistade õigused](#mcp-tool-scopes) all olev tabel.
-Ärge käsitlege `MCP_SCOPE_LIST`-i failis
-`src/shared/constants/mcpScopes.ts` selle kataloogina: see on algne tüübistatud
-alamhulk. Hilisemad tööriistad deklareerivad selle kõrval täiendavaid õigusi
-(`read:notion`, `read:skills`, `read:local-corpus` ja ülejäänud tabelis olevad
-õigused).
+Kataloog on jaotise [MCP tööriistade õigused](#mcp-tool-scopes) all olev tabel. Ärge
+käsitlege failis `src/shared/constants/mcpScopes.ts` olevat `MCP_SCOPE_LIST` loendit selle kataloogina:
+see on algne tüübitud alamhulk. Hilisemad tööriistad deklareerivad selle kõrval täiendavaid õigusi
+(`read:notion`, `read:skills`, `read:local-corpus` ja ülejäänud tabelis olevad õigused).
 
-Failis `open-sse/mcp-server/scopeEnforcement.ts` olev `evaluateToolScopes` lubab
-kutse, kui iga nõutav õigus kattub mõne antud õigusega:
+Failis `open-sse/mcp-server/scopeEnforcement.ts` olev `evaluateToolScopes` lubab kutse,
+kui iga nõutav õigus vastab mõnele antud õigusele:
 
-- `*` kattub iga nõutava õigusega.
-- Antud õigus, mis lõpeb märgiga `*`, kattub nõutava õigusega, mis algab
-  tärnile eelneva prefiksiga. `read:*` kattub õigusega `read:compression`.
-- Kõik muud antud õigused kattuvad ainult identse nõutava stringiga.
+- `*` vastab igale nõutavale õigusele.
+- Antud õigus, mis lõpeb märgiga `*`, vastab nõutavale õigusele, mis algab
+  tärnile eelneva prefiksiga. `read:*` vastab õigusele `read:compression`.
+- Kõik muud antud õigused vastavad ainult identsele nõutavale stringile.
 
-Võti, mille õigused on `["manage"]`, ei läbi `scopeMatches`-kontrolli õiguse
-`read:compression` jaoks. Sama kutse nurjub õiguste `admin`, `mcp:connect`,
-`read` ja `write` puhul, kui need on ainsad antud stringid. MCP
-tööriistaõigustel ei ole hierarhiat peale lõpus oleva `*`.
+Võti, mille õigused on `["manage"]`, ei läbi `scopeMatches` kontrolli õiguse `read:compression`
+jaoks. Sama kutse ebaõnnestub õiguste `admin`, `mcp:connect`, `read` ja `write` puhul, kui need
+on ainsad antud stringid. MCP tööriistade õigustel pole hierarhiat peale lõpus oleva `*`.
 
-Õiguste jõustamine on välja lülitatud, välja arvatud juhul, kui
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` (vaikeväärtus on `false`). Kui see on välja
-lülitatud, lubab `evaluateToolScopes` kutse ja jätab kataloogi kontrollimata.
-Kui see on sisse lülitatud, kasutab HTTP Bearer-võtme `api_keys.scopes`
-massiivi väärtusena `authInfo` (vt
-[Võtmepõhine HTTP õiguste sidumine](#per-key-http-scope-binding-7895)).
-Kui võtme õigusi ei õnnestu tuvastada, võetakse antud õiguste hulk MCP
-`_meta`-st ja seejärel muutujast `OMNIROUTE_MCP_SCOPES`.
+Jõustamine on välja lülitatud, kui `OMNIROUTE_MCP_ENFORCE_SCOPES=true` pole määratud (vaikeväärtus
+on `false`). Kui see on välja lülitatud, lubab `evaluateToolScopes` kutse ja jätab
+kataloogi kontrollimata. Kui see on sisse lülitatud, kasutab HTTP Bearer-võtme
+`api_keys.scopes` väärtust atribuudina `authInfo` (vt [HTTP õiguste sidumine võtme kaupa](#per-key-http-scope-binding-7895)).
+Kui võtme õigusi ei õnnestu tuvastada, kasutatakse antud õiguste hulgana esmalt MCP `_meta` väärtust ja seejärel
+`OMNIROUTE_MCP_SCOPES` väärtust.
 
 #### Juurdepääsutõendi õigused
 
-`oma_live_…` tõendid (`src/lib/accessTokens/scopes.ts`) sisaldavad õigust
-`read`, `write` või `admin`. `scopeSatisfies` käsitleb neid tasemetena:
-`admin` hõlmab õigusi `write` ja `read` ning `write` hõlmab õigust `read`.
-Tundmatud õigused ei hõlma midagi.
+`oma_live_…` tõendid (`src/lib/accessTokens/scopes.ts`) sisaldavad õigust `read`, `write`
+või `admin`. `scopeSatisfies` kasutab õigustasemeid: `admin` hõlmab õigusi `write` ja `read` ning
+`write` hõlmab õigust `read`. Tundmatud õigused ei hõlma midagi.
 
 `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) võrdleb seda
-taset funktsiooni `inferRequiredScope`
-(`src/server/authz/accessScopes.ts`) tulemusega:
+õigustaset funktsiooni `inferRequiredScope` (`src/server/authz/accessScopes.ts`) tulemusega:
 
 - `GET`, `HEAD` ja `OPTIONS` nõuavad õigust `read`.
 - Kõik muud meetodid nõuavad õigust `write`.
-- Loendis `ADMIN_SCOPE_PREFIXES` olevad teed nõuavad iga meetodi puhul õigust
-  `admin`. `/api/mcp` on selles loendis, seega ei saa `write`
-  juurdepääsutõend ikkagi MCP HTTP-liidest kutsuda.
-- Loendis `ADMIN_MUTATION_PREFIXES` olevad teed nõuavad õigust `admin` ainult
-  muutmistoimingute jaoks.
+- Loendis `ADMIN_SCOPE_PREFIXES` olevad teed nõuavad iga meetodi puhul õigust `admin`. `/api/mcp`
+  on selles loendis, mistõttu ei saa `write`-juurdepääsutõend endiselt MCP HTTP-liidest
+  kutsuda.
+- Loendis `ADMIN_MUTATION_PREFIXES` olevad teed nõuavad õigust `admin` ainult muutmistoimingute puhul.
+- Loendis `ADMIN_MUTATION_EXACT_PATHS` olevad teed (`/api/settings`,
+  `/api/settings/require-login`) nõuavad õigust `admin` ainult muutmistoimingute puhul ja ainult
+  sellel täpsel teel — muud `/api/settings/*` alammarsruudid säilitavad õiguse `write` nõude.
 
-`PATCH /api/keys/{id}` on mutatsioon ega kuulu nendesse administraatori loenditesse, seega saab
-`read`-loaga token vastuseks 403
-`Juurdepääsutokeni ulatus „read” ei ole piisav; nõutav on „write”.`
-`write`- või `admin`-loaga juurdepääsutoken vastab selle marsruudi nõuetele. Töölaua JWT,
-tagasisideaadressi CLI machine-id token ja API-võti õigusega `manage` või `admin` läbivad
-teised harud ning see järk neid ei piira.
+`PATCH /api/keys/{id}` on muutmispäring ega kuulu nendesse administraatoriloenditesse, seega saab
+`read`-loaga pääsutõend vastuseks 403
+`Pääsutõendi luba „read” ei ole piisav; nõutav on „write”.`
+Selle marsruudi nõuded täidab `write`- või `admin`-loaga pääsutõend. Juhtpaneeli JWT,
+tagasisilmuse CLI machine-id tõend ja `manage`- või `admin`-loaga API-võti kasutavad
+teisi harusid ning see tase neid ei piira.
 
-Juurdepääsutoken, mis läbib `/api/mcp` jaoks kontrolli `scopeSatisfies`, on läbinud
-ainult halduslüüsi. Tööriistakutsed läbivad endiselt API-võtme ulatuste kontrolli
-`scopeMatches`. Juurdepääsutokeni järku ei kasutata funktsiooni `scopeMatches` sisendina.
+Pääsutõend, mis läbib `/api/mcp` jaoks kontrolli `scopeSatisfies`, on läbinud
+ainult halduse pääsukontrolli. Tööriistakutsed kontrollivad endiselt API-võtme
+lube funktsiooniga `scopeMatches`. Pääsutõendi tase ei ole funktsiooni `scopeMatches` sisend.
 
-### MCP-tööriistade ulatused
+### MCP-tööriistade load
 
-Ulatuste jõustamine on tsentraliseeritud failis `open-sse/mcp-server/scopeEnforcement.ts`.
-Iga tööriist nõuab konkreetseid ulatusi:
+Lubade jõustamine on tsentraliseeritud failis `open-sse/mcp-server/scopeEnforcement.ts`.
+Iga tööriist nõuab kindlaid lube:
 
 | Ulatus                | Tööriistad                                                                                                                                                                         |
 | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -444,43 +446,48 @@ Metamärgiga skoobid on toetatud: `read:*` annab kõik lugemisskoobid, `*` annab
 
 ### `mcp:connect` — kitsas marsruudivõimekus (#7895)
 
-HTTP/SSE MCP transpordini (`/api/mcp/*`) jõudmine mitte-loopback-liideselt nõuab
-`/api/mcp/` LOCAL_ONLY erandit (vt `docs/security/ROUTE_GUARD_TIERS.md`). Ajalooliselt
+HTTP/SSE MCP-transpordile (`/api/mcp/*`) ligipääsemiseks mitte-tagasisideaadressilt on vaja
+`/api/mcp/` LOCAL_ONLY-erandit (vt `docs/security/ROUTE_GUARD_TIERS.md`). Ajalooliselt
 aktsepteeris see erand ainult täieliku `manage`/`admin`-skoobiga API-võtit — see on liiga lai
-kutsuja jaoks, kes peab suhtlema ainult MCP-ga. `src/shared/constants/managementScopes.ts`
-ekspordib nüüd `MCP_CONNECT_SCOPE = "mcp:connect"`: täiendava kitsa skoobi (sama pretsedent nagu
-`SELF_USAGE_SCOPE`), mis volitab AINULT `/api/mcp/` möödapääsu failis
-`src/server/authz/policies/management.ts` — see ei anna juurdepääsu ühelegi teisele haldusmarsruudile
-ja on teadlikult jäetud `MANAGEMENT_API_KEY_SCOPES`-ist VÄLJA. `manage`/`admin`-skoobiga võti
-läbib erandi endiselt muutmata kujul; `mcp:connect` on väiksemate õigustega alternatiiv
-MCP-d kasutavatele kaugkutsujatele ning seda kontrollitakse funktsiooniga `hasMcpConnectOrManageScope()`.
+kutsuja jaoks, kes vajab ainult MCP-ga suhtlemist. `src/shared/constants/managementScopes.ts`
+ekspordib nüüd `MCP_CONNECT_SCOPE = "mcp:connect"`: täiendav kitsas skoop (järgides sama
+pretsedenti nagu `SELF_USAGE_SCOPE`), mis annab õiguse AINULT `/api/mcp/` möödapääsule failis
+`src/server/authz/policies/management.ts` — see ei anna juurdepääsu ühelegi teisele
+haldusteekonnale ning on sihilikult jäetud `MANAGEMENT_API_KEY_SCOPES`-ist VÄLJA. Võti, millel
+on `manage`/`admin`, läbib erandi endiselt muutmata kujul; `mcp:connect` on väiksemate
+õigustega alternatiiv ainult MCP-d kasutavatele kaugkutsujatele ning seda kontrollitakse
+funktsiooniga `hasMcpConnectOrManageScope()`.
 
 ### HTTP-skoobi sidumine võtme kaupa (#7895)
 
 HTTP/SSE kaudu lahendab `open-sse/mcp-server/httpTransport.ts` nüüd kutsuja tegelikud
-`api_keys.scopes`-skoobid funktsiooniga `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-ja edastab need MCP SDK meetodile `transport.handleRequest(req, { authInfo })`, nii et
-iga tööriistakutseni jõudev `extra.authInfo.scopes` kajastab Bearer-võtme enda skoope.
-`scopeEnforcement.ts`-i `resolveCallerScopeContext()` eelistas juba `authInfo`-t
-`_meta`-le ja keskkonnamuutuja `OMNIROUTE_MCP_SCOPES` varuvariandile — see muudatus täidab üksnes esimese,
-kõrgeima prioriteediga allika, mida varem HTTP kaudu ei täidetud. Kui ühtegi API-võtit ei leita
-(päis puudub, võti on kehtetu), jääb `authInfo` väärtuseks `undefined` ja lahendamine jätkub
-senise `meta`/keskkonnamuutuja ahela kaudu muutmata kujul. stdio-l puudub kutsujapõhine identiteet (vt
-`mcpCallerIdentity.ts`) ja muudatus seda ei mõjuta — see kasutab jätkuvalt `_meta`/keskkonnamuutuja varuahelat.
+`api_keys.scopes` väärtused funktsiooniga `resolveMcpCallerAuthInfo()`
+(`open-sse/mcp-server/httpAuthContext.ts`) ja edastab need MCP SDK meetodile
+`transport.handleRequest(req, { authInfo })`, nii et igasse tööriistakutsesse jõudev
+`extra.authInfo.scopes` kajastab Bearer-võtme enda skoope. Failis `scopeEnforcement.ts`
+olev `resolveCallerScopeContext()` eelistas juba `authInfo` väärtust `_meta` ja
+`OMNIROUTE_MCP_SCOPES` keskkonnamuutuja varuvariandile — see muudatus täidab üksnes esimese,
+kõrgeima prioriteediga allika, mis varem jäi HTTP kaudu täitmata. Kui ühtegi API-võtit ei
+lahendata (päis puudub või võti on kehtetu), jääb `authInfo` väärtuseks `undefined` ning
+lahendamine jätkub olemasoleva `meta`/keskkonnamuutuja ahela kaudu muutmata kujul. stdio-l
+puudub kutsujapõhine identiteet (vt `mcpCallerIdentity.ts`) ja muudatus seda ei mõjuta — see
+jääb kasutama `_meta`/keskkonnamuutuja varuahelat.
 
-**Kitsa skoobiga HTTP/SSE-kutsujate puhul jõustatakse skoobid sõltumata
-`OMNIROUTE_MCP_ENFORCE_SCOPES`-ist.** `OMNIROUTE_MCP_ENFORCE_SCOPES` vaikeväärtus `false` on turvaline ainult
-kohaliku/stdio ühe operaatori töövoo puhul, kus puudub kutsujapõhine identiteet, mille suhtes skoope rakendada.
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` lülitab tööriistapõhise skoopide
-jõustamise tingimusteta sisse (`shouldForceScopeEnforcement()` failis `scopeEnforcement.ts`)
-alati, kui `resolveCallerScopeContext()` lahendas
-`source === "authInfo"` (st tegelik võtmepõhine HTTP Authorization-päis, ainult HTTP/SSE korral) JA see
-võti ei sisalda täielikku `manage`/`admin`-skoopi. See kõrvaldab lünga, mille tõttu võti, millel on AINULT
-kitsas `mcp:connect`-möödapääsuskoop — mida eespool kirjeldatakse ainult
-`/api/mcp/` LOCAL_ONLY erandit volitavana — saaks muidu käivitada kõiki MCP-tööriistu pärast seda, kui operaator
-on lubanud MCP kaug- või mitte-loopback-juurdepääsu, ainuüksi seetõttu, et `OMNIROUTE_MCP_ENFORCE_SCOPES` tarnitakse
-vaikeväärtusega `false`. Täieliku `manage`/`admin`-skoobiga HTTP-võtme ja kõigi stdio/kohalike kutsujate puhul jääb
-senine `OMNIROUTE_MCP_ENFORCE_SCOPES`-iga juhitav käitumine muutmata.
+**Kitsaste skoopidega HTTP/SSE-kutsujatele jõustatakse kontroll olenemata
+`OMNIROUTE_MCP_ENFORCE_SCOPES` väärtusest.** See, et `OMNIROUTE_MCP_ENFORCE_SCOPES`
+vaikeväärtus on `false`, on turvaline ainult kohaliku/stdio ühe operaatoriga voo puhul, kus
+puudub kutsujapõhine identiteet, mille suhtes skoope rakendada.
+`open-sse/mcp-server/server.ts::withScopeEnforcement()` lülitab tööriistapõhise skoobikontrolli
+tingimusteta sisse (`shouldForceScopeEnforcement()` failis `scopeEnforcement.ts`) alati, kui
+`resolveCallerScopeContext()` lahendas väärtuse
+`source === "authInfo"` (s.t tegelik võtmepõhine HTTP Authorization-päis, ainult HTTP/SSE)
+JA sellel võtmel puudub täielik `manage`/`admin`-skoop. See kõrvaldab lünga, mille tõttu võti,
+millel on AINULT kitsas `mcp:connect`-möödapääsuskoop — mida kirjeldatakse eespool kui üksnes
+`/api/mcp/` LOCAL_ONLY-erandile õigust andvat — oleks muidu saanud käivitada kõiki MCP-tööriistu
+pärast seda, kui operaator lubas kaug- või mitte-tagasisideaadressilt MCP-juurdepääsu, lihtsalt
+seetõttu, et `OMNIROUTE_MCP_ENFORCE_SCOPES` tarnitakse vaikeväärtusega `false`. Täieliku
+`manage`/`admin`-võtme puhul HTTP kaudu ning kõigi stdio/kohalike kutsujate puhul jääb
+olemasolev `OMNIROUTE_MCP_ENFORCE_SCOPES`-iga juhitav käitumine muutmata.
 
 ---
 

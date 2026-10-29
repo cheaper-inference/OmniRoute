@@ -9,6 +9,7 @@
  * configurable TTL. Auto-expiry on read for stale entries.
  */
 import { redactSecrets } from "@/shared/utils/logRedaction";
+import { resolveRegisteredFeatureFlag } from "@/shared/utils/featureFlagResolverBridge";
 
 export interface CredentialHealthStatus {
   connectionId: string;
@@ -82,6 +83,37 @@ export function getCredentialHealth(connectionId: string): CredentialHealthStatu
 }
 
 /**
+ * Diagnoses that prove the credential itself is bad. `token_refresh_failed` belongs here:
+ * it is only emitted when the access token is already expired AND the refresh was
+ * rejected (dominantly `invalid_grant`), so dispatching the connection cannot succeed.
+ */
+export const INVALID_CREDENTIAL_DIAGNOSES: ReadonlySet<string> = new Set([
+  "upstream_auth_error",
+  "auth_missing",
+  "token_expired",
+  "token_refresh_failed",
+  "reauth_required",
+  "account_deactivated",
+  "auth_required",
+]);
+
+/**
+ * Default-off flag: when on, only a cached `error` carrying one of the
+ * INVALID_CREDENTIAL_DIAGNOSES blocks dispatch; inconclusive failures (timeouts, quota,
+ * outages, and the scheduler's untyped catch-path errors) fall through as "unknown".
+ * Off (default): any cached `error` blocks, exactly as before #16599.
+ */
+export const CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG = "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY";
+
+function isAuthDiagnosesOnlyGateEnabled(): boolean {
+  try {
+    return resolveRegisteredFeatureFlag(CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG);
+  } catch {
+    return false; // fail closed: the release gate (any error blocks)
+  }
+}
+
+/**
  * Check if a connection's credential health is "active" (recently tested and passing).
  * Returns:
  *   - true  → healthy, proceed
@@ -93,7 +125,15 @@ export function isCredentialHealthy(connectionId: string): boolean | undefined {
   if (!status) return undefined;
 
   if (status.status === "active") return true;
-  if (status.status === "error") return false;
+  if (status.status === "error") {
+    if (!isAuthDiagnosesOnlyGateEnabled()) return false;
+    // A failed probe is not proof of bad credentials: timeouts, quota and outages are inconclusive.
+    if (
+      typeof status.lastErrorType === "string" &&
+      INVALID_CREDENTIAL_DIAGNOSES.has(status.lastErrorType)
+    )
+      return false;
+  }
 
   return undefined;
 }

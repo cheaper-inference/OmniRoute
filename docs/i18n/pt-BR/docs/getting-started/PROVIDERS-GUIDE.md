@@ -10,18 +10,18 @@
 
 ## O que é um provedor?
 
-Pense em um provedor como uma **operadora de telefonia**. Assim como você precisa de uma operadora para fazer chamadas, você precisa de um provedor de IA para usar modelos de IA. O OmniRoute é como um telefone que funciona com **todas as operadoras** — você pode alternar entre elas automaticamente.
+Pense em um provedor como uma **operadora de telefonia**. Assim como você precisa de uma operadora de telefonia para fazer chamadas, você precisa de um provedor de IA para usar modelos de IA. O OmniRoute é como um telefone que funciona com **todas as operadoras** — você pode alternar entre elas automaticamente.
 
 ### Tipos de provedores
 
-| Tipo              | O que é                          | Exemplos                          | Custo              |
-| ----------------- | -------------------------------- | --------------------------------- | ------------------ |
-| **Gratuito**      | Nenhum pagamento necessário      | Kiro, OpenCode Free, Pollinations | $0                 |
-| **Chave de API**  | Você precisa de uma chave de API | OpenAI, Anthropic, Google         | Pagamento por uso  |
-| **OAuth**         | Login com sua conta              | Claude Code, GitHub Copilot       | Assinatura         |
-| **Cookie da Web** | Usa a sessão do seu navegador    | ChatGPT Web (Codex), Gemini Web   | $0 (usa sua conta) |
+| Tipo              | O que é                          | Exemplos                        | Custo                |
+| ----------------- | -------------------------------- | ------------------------------- | -------------------- |
+| **Gratuito**      | Não requer pagamento             | Kiro, Pollinations              | $0                   |
+| **Chave de API**  | Você precisa de uma chave de API | OpenAI, Anthropic, Google       | Pagamento por uso    |
+| **OAuth**         | Login com sua conta              | Claude Code, GitHub Copilot     | Assinatura           |
+| **Cookie da Web** | Usa a sessão do seu navegador    | ChatGPT Web (Codex), Gemini Web | $0 (usa a sua conta) |
 
-### Provedores por cookie da Web
+### Provedores com cookie da Web
 
 Consulte **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** para obter instruções gerais de configuração, limitações, solução de problemas e orientações de autenticação específicas de cada provedor.
 ---
@@ -30,25 +30,24 @@ Consulte **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** para obter instruçõe
 
 ### Configuração opcional de provedores gratuitos na primeira execução
 
-O assistente de primeira execução oferece um cartão explícito chamado **Configurar provedores gratuitos**. Ele obtém a lista atual de
-provedores elegíveis do registro de provedores sem autenticação do OmniRoute e permite que você analise e desmarque cada
+O assistente de primeira execução oferece um cartão explícito **Configurar provedores gratuitos**. Ele obtém a lista atual
+de provedores qualificados no registro de provedores sem autenticação do OmniRoute e permite que você revise e desmarque cada
 provedor antes de confirmar. O OmniRoute exibe o aviso de precaução do provedor e um link para o site dele,
-para que você possa analisar primeiro os termos, a privacidade, a disponibilidade e os limites de taxa de terceiros.
+para que você possa primeiro analisar os termos, a privacidade, a disponibilidade e os limites de uso de terceiros.
 
 Essa ação é opcional: concluir o assistente nunca cria silenciosamente conexões com provedores gratuitos.
-Ela cria apenas os provedores que ainda estão ausentes, mantém inalteradas as conexões personalizadas existentes
+Ele cria apenas os provedores que ainda não estão configurados, mantém inalteradas as conexões existentes personalizadas
 e informa individualmente os provedores criados, já configurados e com falha. Após um resultado parcial, você pode
-tentar novamente com segurança apenas os que falharam.
+tentar novamente com segurança apenas os que apresentaram falha.
 
 ### Opção A: provedor gratuito (sem cartão de crédito)
 
 1. Abra o painel em `http://localhost:20128`
 2. Acesse **Provedores** → **Adicionar provedor**
 3. Selecione um destes provedores gratuitos:
-   - **Kiro AI** — Modelos Claude gratuitos (nenhuma autenticação necessária)
-   - **OpenCode Free** — Modelos GPT gratuitos (nenhuma autenticação necessária)
-   - **Pollinations** — GPT-5, Claude e Gemini gratuitos (nenhuma chave necessária)
-   - **LongCat** — 10 milhões de tokens gratuitos (concessão única, exige conta + KYC)
+   - **Kiro AI** — Modelos Claude gratuitos (sem necessidade de autenticação)
+   - **Pollinations** — GPT-5, Claude e Gemini gratuitos (sem necessidade de chave)
+   - **LongCat** — 10 milhões de tokens gratuitos (concessão única; requer conta + KYC)
    - **Cloudflare AI** — Mais de 50 modelos, 10 mil neurônios/dia
    - **MLX Gemma 26B** — Modelo local para Apple Silicon (~38,5 tokens/s, ~15,9 GB de RAM)
    - **MLX Qwen 3.8 27B** — Modelo local para Apple Silicon (~9,1 tokens/s, ~13,1 GB de RAM)
@@ -74,9 +73,9 @@ tentar novamente com segurança apenas os que falharam.
 
 1. Abra o painel em `http://localhost:20128`
 2. Acesse **Provedores** → **Adicionar provedor**
-3. Selecione seu provedor (por exemplo, Claude Code, GitHub Copilot)
+3. Selecione seu provedor (por exemplo, Claude Code ou GitHub Copilot)
 4. Clique em **Conectar com OAuth**
-5. Faça login com sua conta
+5. Entre com sua conta
 6. Pronto! Agora você tem acesso aos modelos da sua assinatura.
 
 ### Opção D: modelos MLX locais (Apple Silicon)
@@ -94,14 +93,14 @@ Para Macs com Apple Silicon e memória unificada, o OmniRoute permite conectar m
 1. **Instale as dependências**:
 
    ```bash
-   # Instale o uv caso ainda não esteja instalado
+   # Instale o uv se ainda não estiver instalado
    curl -LsSf https://astral.sh/uv/install.sh | sh
 
    # Instale o mlx-lm
    uv pip install mlx-lm
    ```
 
-2. **Inicie os servidores MLX manualmente** (em terminais separados):
+2. **Inicie manualmente os servidores MLX** (em terminais separados):
 
    ```bash
    # Terminal 1: Gemma 4 26B A4B IT-QAT (porta 11435)
@@ -111,10 +110,10 @@ Para Macs com Apple Silicon e memória unificada, o OmniRoute permite conectar m
    uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
    ```
 
-3. **Conecte no painel do OmniRoute**:
+3. **Conecte pelo painel do OmniRoute**:
    - Acesse **Provedores** → **Adicionar provedor**
    - Selecione **MLX Gemma 26B** ou **MLX Qwen 3.8 27B**
-   - Clique em **Conectar** (nenhuma chave de API necessária)
+   - Clique em **Conectar** (não é necessária uma chave de API)
 
 4. **Use com o OpenCode**:
    ```bash
@@ -122,29 +121,29 @@ Para Macs com Apple Silicon e memória unificada, o OmniRoute permite conectar m
    opencode config set api.base_url http://localhost:20128/v1
    opencode config set api.key <your-omniroute-api-key>
 
-   # Use modelos MLX
+   # Use os modelos MLX
    opencode run --model mlx-gemma/gemma-4-26b
    opencode run --model mlx-qwen/qwen3.8-27b
    ```
 
 #### Gerenciamento de memória
 
-**Importante**: Com 24 GB de memória unificada, apenas **um modelo MLX grande pode ser executado por vez**.
+**Importante**: com 24 GB de memória unificada, apenas **um modelo MLX grande pode ser executado por vez**.
 
-- Gemma 26B: ~15,9 GB de memória máxima
-- Qwen 3.8 27B: ~13,1 GB de memória máxima
+- Gemma 26B: ~15,9 GB de memória no pico
+- Qwen 3.8 27B: ~13,1 GB de memória no pico
 
 Você deve gerenciar isso manualmente:
 
-- Execute apenas um servidor MLX por vez, ou
-- Execute ambos em máquinas separadas, ou
+- Execute apenas um servidor MLX por vez; ou
+- Execute cada servidor em uma máquina diferente; ou
 - Interrompa um antes de iniciar o outro
 
-O OmniRoute não gerencia automaticamente os processos dos servidores MLX — ele apenas encaminha as solicitações aos endpoints compatíveis com a OpenAI que você configurar.
+O OmniRoute não gerencia automaticamente os processos dos servidores MLX — ele apenas encaminha solicitações para os endpoints compatíveis com a OpenAI que você configurar.
 
-#### Suporte à chamada de ferramentas
+#### Suporte a chamadas de ferramentas
 
-Ambos os modelos oferecem suporte à chamada de ferramentas compatível com a OpenAI. Teste com:
+Ambos os modelos oferecem suporte a chamadas de ferramentas compatíveis com a OpenAI. Teste com:
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -159,13 +158,13 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 #### Solução de problemas
 
-| Problema                        | Solução                                                                                                                       |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| O servidor não inicia           | Consulte `uv run mlx_lm.server --help` e verifique os IDs dos modelos                                                         |
-| Memória insuficiente            | Certifique-se de que apenas um modelo esteja em execução; feche outros aplicativos; verifique o Monitor de Atividade          |
-| Conexão recusada                | Verifique se o servidor está em execução na porta correta (11435/11436)                                                       |
-| Respostas lentas                | A primeira solicitação carrega o modelo na memória (~30-60s); as solicitações seguintes são rápidas                           |
-| Falha na chamada de ferramentas | Certifique-se de que o modelo seja compatível com ferramentas; verifique os logs do OmniRoute para detectar erros de tradução |
+| Problema                          | Solução                                                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| O servidor não inicia             | Consulte `uv run mlx_lm.server --help` e verifique os IDs dos modelos                                                     |
+| Memória insuficiente              | Certifique-se de que apenas um modelo esteja em execução; feche outros aplicativos; verifique o Monitor de Atividade      |
+| Conexão recusada                  | Verifique se o servidor está sendo executado na porta correta (11435/11436)                                               |
+| Respostas lentas                  | A primeira solicitação carrega o modelo na memória (~30–60 s); as solicitações seguintes são rápidas                      |
+| Falha nas chamadas de ferramentas | Certifique-se de que o modelo ofereça suporte a ferramentas; verifique os logs do OmniRoute em busca de erros de tradução |
 
 ---
 
@@ -173,15 +172,14 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 Estes provedores oferecem **acesso gratuito** sem exigir cartão de crédito:
 
-| Provedor          | Cota gratuita             | Modelos                                  | Como conectar         |
-| ----------------- | ------------------------- | ---------------------------------------- | --------------------- |
-| **Kiro AI**       | 50 créditos/mês           | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Sem autenticação      |
-| **OpenCode Free** | Ilimitada                 | GPT-4o, Claude, Gemini                   | Sem autenticação      |
-| **Pollinations**  | Não requer chave          | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Sem autenticação      |
-| **LongCat**       | 10M em cota única         | LongCat-2.0                              | Chave de API + KYC    |
-| **Cloudflare AI** | 10K neurônios/dia         | Mais de 50 modelos                       | Sem autenticação      |
-| **NVIDIA NIM**    | ~40 RPM                   | 129 modelos                              | Requer chave de API   |
-| **Cerebras**      | Crédito de $5 no cadastro | GLM 4.7, GPT-OSS 120B                    | Chave de API + cartão |
+| Provedor          | Cota gratuita             | Modelos                                  | Como conectar           |
+| ----------------- | ------------------------- | ---------------------------------------- | ----------------------- |
+| **Kiro AI**       | 50 créditos/mês           | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Não requer autenticação |
+| **Pollinations**  | Não requer chave          | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Não requer autenticação |
+| **LongCat**       | 10M uma única vez         | LongCat-2.0                              | Chave de API + KYC      |
+| **Cloudflare AI** | 10K neurônios/dia         | Mais de 50 modelos                       | Não requer autenticação |
+| **NVIDIA NIM**    | ~40 RPM                   | 129 modelos                              | Requer chave de API     |
+| **Cerebras**      | Crédito de $5 no cadastro | GLM 4.7, GPT-OSS 120B                    | Chave de API + cartão   |
 
 **Dica**: Conecte vários provedores gratuitos para ter **IA gratuita ilimitada** com fallback automático!
 
@@ -236,24 +234,24 @@ Seu provedor agora está conectado. Você pode usá-lo com `model: "auto"` ou es
 
 ---
 
-## Como usar vários provedores
+## Usando vários provedores
 
 O OmniRoute funciona melhor com **vários provedores**. Isso oferece:
 
-- **Fallback automático** — se um provedor falhar, o OmniRoute tentará o próximo
-- **Otimização de custos** — o OmniRoute escolhe o provedor mais barato para cada solicitação
-- **Otimização de velocidade** — o OmniRoute escolhe o provedor mais rápido para cada solicitação
-- **Otimização de qualidade** — o OmniRoute escolhe o melhor provedor para cada tarefa
+- **Fallback automático** — Se um provedor falhar, o OmniRoute tentará o próximo
+- **Otimização de custos** — O OmniRoute seleciona o provedor mais barato para cada solicitação
+- **Otimização de velocidade** — O OmniRoute seleciona o provedor mais rápido para cada solicitação
+- **Otimização de qualidade** — O OmniRoute seleciona o melhor provedor para cada tarefa
 
 ### Configuração recomendada
 
 Conecte pelo menos **3 provedores** para obter a melhor experiência:
 
-1. **Um provedor gratuito** (Kiro, OpenCode Free ou Pollinations) — sempre disponível
-2. **Um provedor rápido** (Groq, Cerebras) — para respostas rápidas
-3. **Um provedor de alta qualidade** (OpenAI, Anthropic, Google) — para tarefas complexas
+1. **Um provedor gratuito** (Kiro ou Pollinations) — Sempre disponível
+2. **Um provedor rápido** (Groq, Cerebras) — Para respostas rápidas
+3. **Um provedor de alta qualidade** (OpenAI, Anthropic, Google) — Para tarefas complexas
 
-Depois, use `model: "auto"`, e o OmniRoute escolherá automaticamente o melhor provedor para cada solicitação.
+Em seguida, use `model: "auto"`, e o OmniRoute selecionará automaticamente o melhor provedor para cada solicitação.
 
 ---
 
@@ -335,11 +333,11 @@ e um tempo limite configurável são melhorias distintas; esse comportamento nã
 
 ### "Preciso pagar para usar o OmniRoute?"
 
-**Não!** O OmniRoute é gratuito e de código aberto. Você pode usar provedores gratuitos (Kiro, OpenCode Free, Pollinations) sem pagar nada. Você só paga se optar por usar provedores pagos.
+**Não!** O OmniRoute é gratuito e de código aberto. Você pode usar provedores gratuitos (Kiro, Pollinations) sem pagar nada. Você só paga se optar por usar provedores pagos.
 
 ### "Com qual provedor devo começar?"
 
-Comece com o **Kiro AI** — ele é gratuito, não requer chave de API e oferece acesso aos modelos Claude. Depois, adicione mais provedores conforme necessário.
+Comece com o **Kiro AI** — ele é gratuito, não requer uma chave de API e oferece acesso aos modelos Claude. Depois, adicione outros provedores conforme necessário.
 
 ### "Posso usar vários provedores ao mesmo tempo?"
 
@@ -347,9 +345,9 @@ Comece com o **Kiro AI** — ele é gratuito, não requer chave de API e oferece
 
 ### "E se um provedor ficar indisponível?"
 
-O OmniRoute ignora automaticamente os provedores que falharam e tenta o próximo. Você não precisa fazer nada.
+O OmniRoute ignora automaticamente os provedores com falha e tenta o próximo. Você não precisa fazer nada.
 
-### "Como desconecto um provedor?"
+### "Como faço para desconectar um provedor?"
 
 Acesse Provedores → clique no provedor → clique em **Desconectar**.
 

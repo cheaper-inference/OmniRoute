@@ -1,1 +1,0 @@
-- fix(security): chatgpt-web-codex CDP proxy now fails closed without a token, auto-provisions a shared secret in both compose files and the executor sends X-Omni-Cdp-Token on connectOverCDP (#14486)

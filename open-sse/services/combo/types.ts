@@ -66,6 +66,8 @@ export type SingleModelTarget =
       modelPinned?: boolean;
       /** Prior combo legs already attempted before this dispatch (#12339). */
       fallbackAttempts?: number;
+      /** Prefer a sibling after a pre-content empty turn; never widens target pins. */
+      emptyTurnConnectionId?: string | null;
     })
   | { modelAbortSignal: AbortSignal; fallbackAttempts?: number };
 

@@ -14,6 +14,7 @@ import {
 } from "../../utils/streamHelpers.ts";
 import { sanitizeErrorMessage } from "../../utils/errorSanitization.ts";
 import { normalizeStreamFailurePayload } from "../../utils/streamErrorFormat.ts";
+import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { evaluateResponseValidation, type ResponseValidationConfig } from "./responseValidation.ts";
 import { getReasoningTokens } from "../../../src/lib/usage/tokenAccounting.ts";
 import { REASONING_BUFFER_MIN_TRIGGER } from "../reasoningTokenBuffer.ts";
@@ -285,6 +286,12 @@ export interface StreamingUpstreamFailure {
   message?: string;
   requestScoped: boolean;
   retryable: boolean;
+  /**
+   * #16438: the failure is a pre-output empty turn (the disconnect guard's synthetic
+   * "Provider returned empty content" frame or an explicit `empty_content` code). Read
+   * only when EMPTY_STREAM_SIBLING_RECOVERY_ENABLED is on; `code` keeps the wire value.
+   */
+  emptyContent?: boolean;
 }
 
 export interface ResponseQualityResult {
@@ -299,7 +306,12 @@ function classifyStreamingUpstreamFailure(parsed: unknown): StreamingUpstreamFai
   if (!normalized) return null;
   const type = normalized.type?.trim().toLowerCase() || "";
   const code = normalized.code?.trim().toLowerCase() || "";
+  // The disconnect guard's synthetic empty-turn error uses the generic wire code.
+  // Flag it separately so opt-in recovery can prefer a sibling without a lockout.
+  const emptyContent =
+    normalized.message === "Provider returned empty content" || code === "empty_content";
   const requestScoped =
+    isContentPolicyRefusal(normalized) ||
     type === "invalid_request_error" ||
     code === "invalid_request_error" ||
     type === "context_length_exceeded" ||
@@ -314,6 +326,7 @@ function classifyStreamingUpstreamFailure(parsed: unknown): StreamingUpstreamFai
     ...(message ? { message } : {}),
     requestScoped,
     retryable: !requestScoped && normalized.status >= 500,
+    ...(emptyContent ? { emptyContent: true } : {}),
   };
 }
 
@@ -623,11 +636,13 @@ export async function validateResponseQuality(
             // A first-party Claude empty turn with an ordinary stop is a valid
             // response. Require the final message_stop and NO opened blocks:
             // an empty start/stop block (#1382) or content_filter still fails over.
+            // A refusal is final on any provider: the client must see it.
             if (
-              permitsEmptyTurn() &&
               sse.hasMessageStop &&
               !sse.hasContentBlock &&
-              (sse.stopReason === "end_turn" || sse.stopReason === "stop_sequence")
+              (sse.stopReason === "refusal" ||
+                (permitsEmptyTurn() &&
+                  (sse.stopReason === "end_turn" || sse.stopReason === "stop_sequence")))
             ) {
               return { valid: true, clonedResponse: buildReplayResponse(reader) };
             }

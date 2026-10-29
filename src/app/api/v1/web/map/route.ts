@@ -1,12 +1,15 @@
 import { z } from "zod";
 import { handleFirecrawlMap } from "@omniroute/open-sse/handlers/firecrawlMap.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
-import {
-  extractApiKey,
-  getProviderCredentialsWithQuotaPreflight,
-  isValidApiKey,
-} from "@/sse/services/auth";
+import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
+import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import {
+  isKeyScopeBlockedCredentials,
+  keyScopeBlockedResponse,
+  resolveKeyConnectionScope,
+  withoutKeyScopeBlocked,
+} from "@/sse/services/keyConnectionScope";
 import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import {
   validateBody,
@@ -60,24 +63,31 @@ export async function POST(request: Request) {
   if (isValidationFailure(validation))
     return errorResponse(400, formatValidationMessage(validation.error));
 
-  const apiKey = extractApiKey(request);
+  const { apiKey, valid: apiKeyValid } = await resolveClientApiKey(request);
   if (isRequireApiKeyEnabled() && !apiKey) return errorResponse(401, "Authentication required");
-  if (isRequireApiKeyEnabled() && apiKey && !(await isValidApiKey(apiKey))) {
+  if (isRequireApiKeyEnabled() && apiKey && !apiKeyValid) {
     return errorResponse(401, "Invalid API key");
   }
 
   const policy = await enforceApiKeyPolicy(request, "web-fetch");
   if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: Firecrawl connections stay inside the key's connection scope.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
 
   const excludedConnectionIds: string[] = [];
   for (let attempt = 0; attempt < 20; attempt++) {
-    const credentials = await getProviderCredentialsWithQuotaPreflight(
+    const selection = await getProviderCredentialsWithQuotaPreflight(
       "firecrawl",
       null,
-      null,
+      scope.allowedConnections,
       null,
       { excludeConnectionIds: excludedConnectionIds }
     );
+    if (isKeyScopeBlockedCredentials(selection) && excludedConnectionIds.length === 0) {
+      return keyScopeBlockedResponse("firecrawl", selection);
+    }
+    const credentials = withoutKeyScopeBlocked(selection);
     if (isAllRateLimitedCredentials(credentials)) {
       return rateLimitedProviderResponse("firecrawl", credentials);
     }

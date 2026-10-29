@@ -4,11 +4,11 @@
 
 ---
 
-Gunakan panduan ini untuk memilih siklus pengembangan andal terkecil bagi sebuah pull request. Panduan ini tidak
-menggantikan dokumen arsitektur dan keamanan khusus area yang ditautkan di bawah; panduan ini menghubungkan setiap jenis
-perubahan umum dengan kontrak, pemeriksaan terfokus, dan cakupan CI-nya.
+Gunakan panduan ini untuk memilih siklus pengembangan andal terkecil untuk sebuah pull request. Panduan ini tidak
+menggantikan dokumen arsitektur dan keamanan khusus area yang ditautkan di bawah; panduan ini menghubungkan setiap
+jenis perubahan umum dengan kontrak, pemeriksaan terfokus, dan cakupan CI-nya.
 
-## Jalur yang diikuti setiap perubahan
+## Alur yang diikuti setiap perubahan
 
 1. **Pilih basis sebelum mengedit.** Temukan branch `release/v*` aktif tertinggi dan buat branch dari
    ujungnya. Targetkan branch tersebut, bukan `main`. Jika pembekuan rilis sedang aktif, jangan targetkan branch
@@ -18,18 +18,18 @@ perubahan umum dengan kontrak, pemeriksaan terfokus, dan cakupan CI-nya.
    pengguna yang dipengaruhi perubahan. Tabel di bawah memberikan set awal minimum.
 3. **Tulis atau perbarui pengujian terfokus.** Perubahan produksi di `src/`, `open-sse/`, `electron/`, atau
    `bin/` memerlukan pengujian otomatis dalam PR yang sama. Jalankan file pengujian terkecil yang membuktikan
-   perilaku tersebut, lalu jalankan pemeriksaan terfokus yang tercantum.
-4. **Biarkan CI menjalankan matriks luas.** Seluruh shard unit, Vitest, ratchet cakupan, dan
-   build produksi dijalankan pada PR. Jalankan rangkaian pengujian luas secara lokal hanya ketika kegagalan terfokus menunjukkan
+   perilaku tersebut, lalu pemeriksaan terfokus yang tercantum.
+4. **Biarkan CI menjalankan matriks yang luas.** Seluruh shard unit, Vitest, ratchet cakupan, dan
+   build produksi dijalankan pada PR. Jalankan rangkaian pengujian yang luas secara lokal hanya ketika kegagalan terfokus menunjukkan
    dampak yang lebih luas atau ketika perubahan mencakup beberapa subsistem.
 5. **Selaraskan sebelum peninjauan.** Ambil basis aktif, periksa commit barunya dan diff Anda terhadap
    basis tersebut, lalu lakukan rebase atau merge basis sesuai alur kerja kontributor. Selesaikan konflik file
-   yang dihasilkan dan katalog dari sumbernya, hasilkan ulang, jalankan ulang siklus terfokus, dan pastikan
+   yang dihasilkan dan katalog dari sumbernya, hasilkan ulang, jalankan kembali siklus terfokus, dan konfirmasikan bahwa
    PR masih menargetkan branch rilis aktif.
 6. **Catat bukti.** Dalam templat PR, cantumkan perintah yang dijalankan, setiap file pengujian yang ditambahkan atau diubah,
-   migrasi atau feature flag, serta validasi khusus CI yang masih tertunda.
+   migrasi atau feature flag, dan semua validasi khusus CI yang masih tertunda.
 
-## Jalur utama berdasarkan jenis perubahan
+## Alur utama berdasarkan jenis perubahan
 
 Perintah di bawah adalah pemeriksaan terfokus minimum, bukan izin untuk melewatkan pengujian yang secara langsung mencakup
 perilaku yang Anda ubah.
@@ -41,11 +41,11 @@ perilaku yang Anda ubah.
 - Definisi provider di `src/shared/constants/providers/` dan komposisinya di
   `src/shared/constants/providers.ts`.
 - Model dan kapabilitas di `open-sse/config/providerRegistry.ts` atau file registry hasil ekstraksinya.
-- Pemilihan executor/translator, konfigurasi OAuth atau API key, aset dasbor, dan referensi
+- Pemilihan executor/translator, konfigurasi OAuth atau API key, aset dashboard, dan referensi
   provider yang dihasilkan jika berlaku.
-- Kredensial publik harus menggunakan `resolvePublicCred()`; respons kesalahan harus menggunakan helper kesalahan bersama
-  yang telah disanitasi. Lihat `docs/security/PUBLIC_CREDS.md` (git; tidak dikompilasi ke dalam `/docs`) dan
-  [Sanitasi Kesalahan](../security/ERROR_SANITIZATION.md).
+- Kredensial publik harus menggunakan `resolvePublicCred()`; respons error harus menggunakan helper error
+  bersama yang telah disanitasi. Lihat `docs/security/PUBLIC_CREDS.md` (git; tidak dikompilasi ke dalam `/docs`) dan
+  [Sanitasi Error](../security/ERROR_SANITIZATION.md).
 
 **Siklus terfokus**
 
@@ -59,7 +59,7 @@ npm run lint
 ```
 
 Uji juga setiap kelompok permintaan yang terpengaruh: chat, Responses, gambar, embedding, audio, atau video.
-Tinjau katalog yang dihasilkan dan golden diff sebagai perubahan kontrak; jangan menerimanya begitu saja.
+Tinjau diff katalog yang dihasilkan dan golden sebagai perubahan kontrak; jangan menerimanya tanpa pemeriksaan.
 
 ### Routing
 
@@ -67,7 +67,7 @@ Tinjau katalog yang dihasilkan dan golden diff sebagai perubahan kontrak; jangan
 
 - Nilai strategi publik dan metadata UI di `src/shared/constants/routingStrategies.ts`.
 - Dispatch dan pengurutan di bawah `open-sse/services/combo.ts` dan `open-sse/services/combo/`.
-- Skema combo, persistensi, status ketahanan, kapabilitas model, serta kontrol API/UI.
+- Skema combo, persistensi, status ketahanan, kapabilitas model, dan kontrol API/UI.
 - [Mesin Auto-Combo](../routing/AUTO-COMBO.md) dan dokumentasi ketahanan ketika perilaku berubah.
 
 **Siklus terfokus**
@@ -75,7 +75,7 @@ Tinjau katalog yang dihasilkan dan golden diff sebagai perubahan kontrak; jangan
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
 npm run test:combo:matrix        # perubahan strategi atau dispatch
-npm run check:known-symbols      # perubahan registrasi strategi
+npm run check:known-symbols      # perubahan pendaftaran strategi
 npm run lint
 ```
 
@@ -88,9 +88,9 @@ bersifat manual, bukan pengganti CI.
 
 - Route/page Next.js dan batas komponen bersama di bawah `src/app/` dan
   `src/shared/components/`.
-- Bentuk respons API, status pemuatan/kosong/kesalahan, perilaku keyboard dan pembaca layar,
+- Bentuk respons API, status pemuatan/kosong/error, perilaku keyboard dan pembaca layar,
   tata letak responsif, tema, dan perluasan locale.
-- String sumber UI bahasa Inggris di `src/i18n/messages/en.json`; jangan hard-code teks baru yang ditampilkan kepada pengguna.
+- String sumber UI bahasa Inggris di `src/i18n/messages/en.json`; jangan melakukan hard-code pada teks baru yang ditampilkan kepada pengguna.
 
 **Siklus terfokus**
 
@@ -102,7 +102,7 @@ npm run lint
 ```
 
 Jalankan aplikasi untuk perubahan interaksi atau visual dan periksa viewport sempit maupun lebar. CI menjalankan
-build produksi dan rangkaian pengujian yang lebih luas; perilaku visual tetap memerlukan pemeriksaan komponen terfokus, Playwright,
+build produksi dan rangkaian pengujian yang lebih luas; perilaku visual tetap memerlukan komponen terfokus, Playwright,
 atau pemeriksaan manual terdokumentasi yang sesuai dengan perubahan.
 
 ### i18n
@@ -112,8 +112,8 @@ atau pemeriksaan manual terdokumentasi yang sesuai dengan perubahan.
 - `src/i18n/messages/en.json` adalah sumber UI; `config/i18n.json` adalah sumber locale.
 - Katalog CLI berada secara terpisah di bawah `bin/cli/locales/`.
 - Pertahankan placeholder dan tag ICU secara persis. Jangan terjemahkan nama produk/provider/model,
-  nama protokol dan header, perintah, pengidentifikasi kode/JSON, URL, variabel lingkungan, atau
-  istilah yang dilindungi seperti `OmniRoute`, `OAuth`, `MCP`, dan `A2A`. Daftar sumber saat ini adalah
+  nama protokol dan header, perintah, identifier kode/JSON, URL, environment variable, atau
+  istilah terlindungi seperti `OmniRoute`, `OAuth`, `MCP`, dan `A2A`. Daftar sumber saat ini adalah
   `scripts/i18n/glossary/protected-terms.json`.
 
 **Siklus terfokus**
@@ -128,8 +128,8 @@ npm run lint
 ```
 
 Ini adalah panduan untuk sistem yang ada, bukan ajakan untuk memperluas tooling atau model key-nya.
-Jaga agar patch i18n tetap terarah selagi sistem pengganti sedang dirancang. Jangan jalankan perintah penerjemahan
-yang memanggil layanan eksternal kecuali tugas secara eksplisit memerlukan terjemahan yang dihasilkan dan
+Jaga agar patch i18n tetap terarah selama sistem pengganti sedang dirancang. Jangan jalankan perintah terjemahan
+yang memanggil layanan eksternal kecuali tugas tersebut secara eksplisit memerlukan terjemahan yang dihasilkan dan
 Anda telah meninjau diff yang dihasilkan.
 
 ### CLI
@@ -138,8 +138,8 @@ Anda telah meninjau diff yang dihasilkan.
 
 - Perintah dan flag publik di `bin/cli/`, perintah API yang dihasilkan, kode keluar, stdout/stderr dan
   bentuk output JSON, perilaku konfigurasi/lingkungan, serta file yang dikemas.
-- String yang ditampilkan kepada pengguna CLI harus menggunakan lapisan i18n CLI dan menjaga katalog `en`/`pt-BR` tetap selaras.
-- Pertahankan Node sebagai runtime yang didukung dan kontrak biner yang dipublikasikan.
+- String CLI yang ditampilkan kepada pengguna harus menggunakan lapisan i18n CLI dan menjaga katalog `en`/`pt-BR` tetap selaras.
+- Pertahankan Node sebagai runtime yang didukung serta kontrak biner yang dipublikasikan.
 
 **Siklus terfokus**
 
@@ -151,17 +151,17 @@ npm run check:pack-policy     # perubahan permukaan paket
 npm run lint
 ```
 
-Gunakan perintah yang tepat di direktori data sementara ketika perilaku bergantung pada parsing, file, atau status
-keluar. CI menjalankan pemeriksaan artefak paket dan ekosistem yang lebih luas.
+Gunakan perintah yang tepat di direktori data sementara ketika perilaku bergantung pada penguraian, file, atau status
+keluar. CI melakukan pemeriksaan artefak paket dan ekosistem yang lebih luas.
 
 ### Basis data
 
 **Kontrak**
 
-- Modul domain berada di bawah `src/lib/db/`; impor modul tertentu secara langsung (lapisan ekspor ulang `localDb.ts` yang lama telah dihapus).
-- Migrasi SQL bernomor dan idempoten berada di bawah `src/lib/db/migrations/`, dengan keamanan transaksi, perilaku
-  peningkatan versi, indeks, dan setiap pemanggil yang terdampak oleh skema.
-- Route dan handler tidak pernah menjalankan SQL mentah secara langsung.
+- Modul domain di bawah `src/lib/db/`; impor modul tertentu secara langsung (lapisan ekspor ulang `localDb.ts` yang lama telah dihapus).
+- Migrasi SQL bernomor dan idempoten di bawah `src/lib/db/migrations/`, keamanan transaksi, perilaku
+  peningkatan, indeks, serta setiap pemanggil yang terdampak oleh skema.
+- Rute dan handler tidak pernah menjalankan SQL mentah secara langsung.
 
 **Siklus terfokus**
 
@@ -173,7 +173,7 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Uji basis data baru dan peningkatan dari skema sebelumnya saat menambahkan migrasi. Pengujian basis data
+Uji basis data baru maupun peningkatan dari skema sebelumnya ketika menambahkan migrasi. Pengujian basis data
 harus menutup handle dan memanggil `resetDbInstance()` selama pembersihan. Jalankan `npm run test:bun:db` hanya ketika
 jalur adaptor Bun yang bersifat upaya terbaik berubah; Node tetap menjadi acuan utama.
 
@@ -181,10 +181,10 @@ jalur adaptor Bun yang bersifat upaya terbaik berubah; Node tetap menjadi acuan 
 
 **Kontrak**
 
-- Manifes/lockfile root dan workspace, `scripts/build/`, perakitan standalone Next.js, isi paket `dist/`,
-  metadata platform Electron, alur kerja CI, dan sentinel deployment.
-- Rentang Node yang didukung dan penggunaan Bun dalam daftar yang diizinkan di `CLAUDE.md` harus tetap dipertahankan.
-- Artefak build tetap tidak dilacak; kebijakan dependensi, lisensi, alur kerja, dan paket berlaku.
+- Manifes/lockfile root dan workspace, `scripts/build/`, perakitan standalone Next.js, konten paket
+  `dist/`, metadata platform Electron, alur kerja CI, serta sentinel deployment.
+- Rentang Node yang didukung dan penggunaan Bun yang diizinkan dalam `CLAUDE.md` harus tetap dipertahankan.
+- Artefak build tetap tidak dilacak; kebijakan dependensi, lisensi, alur kerja, dan paket tetap berlaku.
 
 **Siklus terfokus**
 
@@ -197,73 +197,105 @@ npm run lint
 ```
 
 Gunakan `npm run build` secara lokal hanya ketika perubahan memengaruhi kompilasi, perakitan standalone, aset,
-atau bundling runtime. Gunakan `npm run build:release` hanya untuk validasi rilis/deployment. Build CI adalah
+atau pembundelan runtime. Gunakan `npm run build:release` hanya untuk validasi rilis/deployment. Build CI merupakan
 indikator lintas platform terakhir; perubahan Electron khusus platform memerlukan build terfokus yang sesuai
 atau bukti smoke test.
 
-## Siklus kandidat lokal
+## Skrip developer untuk mesin bersama
 
-Pengujian sumber tidak dapat membuktikan bahwa artefak yang dikemas dapat berjalan: daftar pengemasan, dependensi yang dipangkas,
-dan biner native hanya mengalami kegagalan setelah tarball diinstal dan dijalankan. `npm run dev:candidate`
-(`scripts/dev/candidate.mjs`) adalah sisi lokal dari alur build-once / validate / promote dalam
-RFC #8084: perintah ini membangun satu kandidat, memvalidasi artefak yang sama persis, mempromosikannya dengan
-mengganti nama direktori, dan melakukan rollback ketika slot yang dipromosikan gagal dalam pemeriksaan kesehatannya.
+Dua helper `scripts/dev/` menangani loop lokal pada devbox tempat sesi lain sedang aktif:
 
 ```bash
-npm run dev:candidate -- run --dry-run --json  # tampilkan rencana, jangan ubah apa pun
-npm run dev:candidate -- run                   # bangun + validasi + promosikan, rollback otomatis
-npm run dev:candidate -- build                 # npm pack + instal ke _artifacts/candidate/<id>/
-npm run dev:candidate -- validate --id <id>    # jalankan pada port kosong, /api/health + /v1/models
-npm run dev:candidate -- promote --id <id>     # <id> → current, current → previous
-npm run dev:candidate -- rollback              # tukar current dan previous
-npm run dev:candidate -- run --from-tarball <file.tgz>  # gunakan kembali tarball yang dibangun di tempat lain (CI)
+scripts/dev/typecheck-touched.sh --base release/vX.Y.Z   # file dari merge-base(HEAD, base)..HEAD
+scripts/dev/typecheck-touched.sh src/a.ts tests/unit/b.test.ts   # hanya file-file ini
+scripts/dev/new-worktree.sh fix/1234-slug release/vX.Y.Z  # worktree terisolasi, aman dijalankan secara paralel
 ```
 
-- **Bangun sekali.** `build` mengemas pohon saat ini (memerlukan `dist/server.js`, jadi jalankan
-  `npm run build:release` terlebih dahulu) atau menyalin `--from-tarball`, lalu menginstal tarball ke
-  prefix npm yang terisolasi karena tarball tidak menyertakan `node_modules`. ID-nya adalah sha `HEAD`
-  pendek (`-dirty` ketika pohon memiliki perubahan lokal) atau `tgz-<sha256>` untuk tarball. ID bersih yang
-  sudah dibangun akan digunakan kembali alih-alih dibangun ulang; berikan `--force` untuk membangunnya ulang.
-- **Validasi paket, bukan sumbernya.** `validate` menjalankan CLI yang telah diinstal
-  (`serve --port <free port>`) dengan `DATA_DIR=<candidate>/data` yang baru, secret palsu, serta
-  `OMNIROUTE_API_KEY`, `STORAGE_ENCRYPTION_KEY`, dan `INITIAL_PASSWORD` milik operator yang dihapus dari
-  lingkungan, sehingga perintah ini memeriksa postur loopback tanpa kunci dari instalasi baru. Perintah ini menunggu
-  `GET /api/health` mengembalikan 200, mengharuskan `GET /v1/models` mengembalikan 200, menghentikan grup proses,
-  dan mencatat hasil dalam `validation.json` beserta hash tarball.
-- **Promosikan artefak yang sama.** `promote` menolak kandidat tanpa validasi yang berhasil untuk
-  hash tarball-nya saat ini. Slot aktif default adalah `_artifacts/candidate/current`; `--target <dir>`
-  memilih direktori lain pada sistem berkas yang sama, dan slot sebelumnya adalah `<dir>.previous`.
-  Setiap penggantian nama bersifat atomik, dan kegagalan di tengah proses akan membalikkan penggantian nama yang sudah dijalankan.
-- **Lakukan rollback.** `run` memvalidasi kembali slot yang dipromosikan dan menukar kembali `current` dan `previous` ketika
-  pemeriksaan tersebut gagal. Kandidat yang gagal pada validasi pertama tidak pernah dipromosikan.
+- `typecheck-touched.sh` melakukan pemeriksaan tipe hanya pada file `.ts/.tsx` yang tersentuh melalui
+  `tsconfig.touched.tmp.json` sementara (`extends ./tsconfig.json`, `types: ["node"]`, `noEmit`,
+  `incremental: false`) dengan heap sebesar 6 GB, sehingga menggantikan `tsc -p tsconfig.json`
+  untuk seluruh proyek yang mengalami OOM pada mesin dengan beban tinggi. Skrip ini mencetak error
+  dalam file yang tersentuh beserta satu baris ringkasan dan keluar dengan kode `1` untuk error
+  dalam file yang tersentuh, `2` ketika satu-satunya error berada dalam file yang diimpor atau tsc
+  berhenti tanpa diagnostik (baca log yang disebutkan di bawah `_artifacts/typecheck-touched/`),
+  dan `0` ketika tidak ada error. tsconfig sementara selalu dihapus; jangan pernah melakukan commit
+  terhadap file tersebut.
+- `new-worktree.sh` menjalankan proses bersamaan secara berurutan menggunakan
+  `<git-common-dir>/omniroute-new-worktree.lock` (menunggu hingga 600 detik secara default, dengan
+  pesan yang terlihat; header skrip mendokumentasikan cara menggantinya) dan membatalkan
+  branch yang dibuatnya ketika `git worktree add` gagal sebelum worktree tersedia, sehingga
+  percobaan ulang tidak memerlukan `git branch -D` manual. `node_modules` yang menggunakan hard link
+  dan salinan `.husky/_` tidak berubah.
 
-Semuanya ditulis di bawah `_artifacts/candidate/` yang diabaikan oleh git; instalasi OmniRoute
-yang sudah ada beserta direktori datanya tidak pernah disentuh. CLI yang dipromosikan berada di
-`_artifacts/candidate/current/prefix/bin/omniroute`; jalankan dengan `DATA_DIR` Anda sendiri saat
-menggunakannya. Kode keluar: `0` berhasil, `1` validasi atau promosi gagal, `2` kesalahan penggunaan atau build tidak tersedia.
+## Loop kandidat lokal
 
-## Siklus lokal versus CI
+Pengujian sumber tidak dapat membuktikan bahwa artefak terpaket dapat dimulai: daftar pemaketan,
+dependensi yang dipangkas, dan biner native hanya mengalami kegagalan setelah tarball diinstal dan
+dijalankan. `npm run dev:candidate` (`scripts/dev/candidate.mjs`) adalah bagian lokal dari alur
+build-once / validate / promote dari RFC #8084: perintah ini membuat satu kandidat, memvalidasi
+artefak yang persis sama, mempromosikannya melalui penggantian nama direktori, dan melakukan
+rollback ketika slot yang dipromosikan gagal dalam pemeriksaan kesehatannya.
 
-| Jalankan secara lokal untuk setiap patch                                                      | CI menyediakan sinyal yang luas                                                |
-| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Pengujian perilaku langsung dan gate kategori di atas                                         | Rangkaian lengkap unit test yang dibagi dalam shard dan pengujian serial       |
-| `npm run lint`                                                                                | Rangkaian Vitest serta ratchet cakupan/kualitas                                |
-| Pemeriksaan tipe atau build hanya jika diwajibkan oleh kontrak yang terdampak                 | Build produksi, keamanan, dokumentasi, dependensi, dan gate kebijakan PR       |
-| Interaksi manual/pemeriksaan langsung hanya jika otomatisasi tidak dapat membuktikan perilaku | Pemeriksaan integrasi lintas-job dan platform yang dikonfigurasi oleh workflow |
+```bash
+npm run dev:candidate -- run --dry-run --json  # cetak rencana tanpa mengubah apa pun
+npm run dev:candidate -- run                   # build + validasi + promosi, rollback otomatis
+npm run dev:candidate -- build                 # npm pack + instal ke _artifacts/candidate/<id>/
+npm run dev:candidate -- validate --id <id>    # mulai pada port kosong, /api/health + /v1/models
+npm run dev:candidate -- promote --id <id>     # <id> → current, current → previous
+npm run dev:candidate -- rollback              # tukar current dan previous
+npm run dev:candidate -- run --from-tarball <file.tgz>  # gunakan kembali tarball yang dibuat di tempat lain (CI)
+```
 
-Siklus terfokus yang hijau merupakan bukti tentang kontrak yang diubah, bukan jaminan bahwa pemeriksaan CI yang tidak terkait
-akan lulus. Sebaliknya, jangan biarkan setiap pengeditan lokal menunggu seluruh matriks repositori.
+- **Build sekali.** `build` memaketkan tree saat ini (memerlukan `dist/server.js`, jadi jalankan
+  `npm run build:release` terlebih dahulu) atau menyalin `--from-tarball`, kemudian menginstal
+  tarball ke prefix npm yang terisolasi karena tarball tidak menyertakan `node_modules`. Id-nya
+  adalah sha pendek `HEAD` (`-dirty` ketika tree memiliki perubahan lokal) atau `tgz-<sha256>` untuk
+  tarball. Id bersih yang sudah dibuat akan digunakan kembali alih-alih dibuat ulang; teruskan
+  `--force` untuk membuatnya ulang.
+- **Validasi paket, bukan sumbernya.** `validate` memulai CLI yang telah diinstal
+  (`serve --port <free port>`) dengan `DATA_DIR=<candidate>/data` baru, secret palsu, serta
+  `OMNIROUTE_API_KEY`, `STORAGE_ENCRYPTION_KEY`, dan `INITIAL_PASSWORD` milik operator yang
+  dihapus dari environment, sehingga memeriksa postur loopback tanpa kunci dari instalasi baru.
+  Perintah ini menunggu hingga `GET /api/health` mengembalikan 200, mengharuskan
+  `GET /v1/models` mengembalikan 200, menghentikan grup proses, dan mencatat hasilnya dalam
+  `validation.json` bersama hash tarball.
+- **Promosikan artefak yang sama.** `promote` menolak kandidat yang tidak memiliki validasi berhasil
+  untuk hash tarball saat ini. Slot aktif default adalah `_artifacts/candidate/current`;
+  `--target <dir>` memilih direktori lain pada sistem file yang sama, dan slot sebelumnya adalah
+  `<dir>.previous`. Setiap penggantian nama bersifat atomik, dan kegagalan di tengah proses akan
+  membalikkan penggantian nama yang telah dijalankan.
+- **Lakukan rollback.** `run` memvalidasi kembali slot yang telah dipromosikan dan menukar
+  `current` serta `previous` kembali ketika pemeriksaan tersebut gagal. Kandidat yang gagal pada
+  validasi pertama tidak akan pernah dipromosikan.
+
+Semuanya ditulis di bawah `_artifacts/candidate/` yang diabaikan oleh git; instalasi OmniRoute yang
+sudah ada dan direktori datanya tidak pernah disentuh. CLI yang dipromosikan berada di
+`_artifacts/candidate/current/prefix/bin/omniroute`; jalankan dengan `DATA_DIR` milik Anda sendiri
+saat menggunakannya. Kode keluar: `0` berhasil, `1` validasi atau promosi gagal, `2` kesalahan
+penggunaan atau build tidak tersedia.
+
+## Loop lokal versus CI
+
+| Jalankan secara lokal untuk setiap patch                                                  | CI menyediakan sinyal yang luas                                                |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Pengujian perilaku langsung dan gate kategori di atas                                     | Suite unit lengkap yang di-shard dan pengujian serial                          |
+| `npm run lint`                                                                            | Suite Vitest dan ratchet cakupan/kualitas                                      |
+| Pemeriksaan tipe atau build hanya jika diwajibkan oleh kontrak yang terdampak             | Build produksi, keamanan, dokumentasi, dependensi, dan gate kebijakan PR       |
+| Pemeriksaan interaksi manual/live hanya jika otomatisasi tidak dapat membuktikan perilaku | Pemeriksaan integrasi lintas-job dan platform yang dikonfigurasi oleh workflow |
+
+Loop terfokus yang hijau merupakan bukti tentang kontrak yang diubah, bukan bukti bahwa pemeriksaan CI yang tidak terkait
+akan lolos. Sebaliknya, jangan membuat setiap pengeditan lokal menunggu seluruh matriks repositori.
 
 ## Daftar periksa rekonsiliasi
 
-Sebelum meminta tinjauan:
+Sebelum meminta peninjauan:
 
 - Konfirmasikan bahwa basis PR masih merupakan cabang `release/v*` aktif tertinggi.
 - Ambil basis tersebut dan tinjau commit yang masuk sejak Anda membuat cabang.
-- Tinjau `git diff <active-base>...HEAD` untuk perubahan tak disengaja atau perubahan yang dihasilkan.
-- Selesaikan konflik katalog dan dokumen yang dihasilkan dengan memperbarui sumber lalu menghasilkan ulang output.
+- Tinjau `git diff <active-base>...HEAD` untuk perubahan yang tidak disengaja atau hasil generasi.
+- Selesaikan konflik katalog dan dokumen yang dihasilkan dengan memperbarui sumber dan menghasilkan ulang output.
 - Jalankan ulang setiap pengujian/gate terfokus yang tercantum dalam deskripsi PR setelah rekonsiliasi.
-- Jangan pernah melonggarkan assertion atau menghapus pengujian wajib hanya untuk menyesuaikan dengan basis yang telah berpindah.
+- Jangan pernah melonggarkan assertion atau menghapus pengujian wajib hanya agar sesuai dengan basis yang telah berpindah.
 
 Untuk aturan pembekuan rilis dan penargetan ulang, gunakan
 [Model Percabangan & Rilis](BRANCHING_MODEL.md). Untuk inventaris CI lengkap, gunakan

@@ -1,1 +1,0 @@
-- **feat(providers):** Add GPT-6.1 Sol to the OpenAI and Codex catalogs with provider-specific limits, Standard pricing, Codex reasoning/Fast wiring, and a synchronized Codex 0.159.2 client identity ([#15171](https://github.com/diegosouzapw/OmniRoute/pull/15171)) — thanks @xiaoyaner0201

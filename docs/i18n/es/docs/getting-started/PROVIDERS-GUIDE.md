@@ -10,44 +10,49 @@
 
 ## ¿Qué es un proveedor?
 
-Piensa en un proveedor como una **compañía telefónica**. Del mismo modo que necesitas una compañía telefónica para hacer llamadas, necesitas un proveedor de IA para usar modelos de IA. OmniRoute es como un teléfono que funciona con **todas las compañías**: puedes cambiar entre ellas automáticamente.
+Piensa en un proveedor como una **operadora telefónica**. Al igual que necesitas una operadora telefónica para hacer llamadas, necesitas un proveedor de IA para utilizar modelos de IA. OmniRoute es como un teléfono que funciona con **todas las operadoras**: puedes cambiar entre ellas automáticamente.
 
 ### Tipos de proveedores
 
-| Tipo             | Qué es                        | Ejemplos                          | Coste              |
-| ---------------- | ----------------------------- | --------------------------------- | ------------------ |
-| **Gratuito**     | No requiere pago              | Kiro, OpenCode Free, Pollinations | $0                 |
-| **Clave de API** | Necesitas una clave de API    | OpenAI, Anthropic, Google         | Pago por uso       |
-| **OAuth**        | Inicias sesión con tu cuenta  | Claude Code, GitHub Copilot       | Suscripción        |
-| **Cookie web**   | Usa la sesión de tu navegador | ChatGPT Web (Codex), Gemini Web   | $0 (usa tu cuenta) |
+| Tipo           | Qué es                            | Ejemplos                        | Coste                  |
+| -------------- | --------------------------------- | ------------------------------- | ---------------------- |
+| **Gratuito**   | No requiere pago                  | Kiro, Pollinations              | $0                     |
+| **Clave API**  | Necesitas una clave API           | OpenAI, Anthropic, Google       | Pago por uso           |
+| **OAuth**      | Inicia sesión con tu cuenta       | Claude Code, GitHub Copilot     | Suscripción            |
+| **Cookie web** | Utiliza la sesión de tu navegador | ChatGPT Web (Codex), Gemini Web | $0 (utiliza tu cuenta) |
 
-### Proveedores mediante cookies web
+### Proveedores con cookies web
 
-Consulta **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** para obtener instrucciones generales de configuración, información sobre limitaciones y resolución de problemas, y orientación de autenticación específica para cada proveedor.
+Consulta **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** para obtener instrucciones generales de configuración, conocer las limitaciones, solucionar problemas y consultar las indicaciones de autenticación específicas de cada proveedor.
 ---
 
 ## Inicio rápido: conecta tu primer proveedor
 
 ### Configuración opcional de proveedores gratuitos durante el primer inicio
 
-El asistente del primer inicio ofrece una tarjeta explícita llamada **Configurar proveedores gratuitos**. Obtiene la lista actual de proveedores aptos del registro de proveedores sin autenticación de OmniRoute y, a continuación, te permite revisar y deseleccionar cada proveedor antes de confirmar. OmniRoute muestra el aviso de precaución del proveedor y un enlace a su sitio para que puedas revisar primero las condiciones, la privacidad, la disponibilidad y los límites de uso de terceros.
+El asistente del primer inicio ofrece una tarjeta explícita para **Configurar proveedores gratuitos**. Obtiene la lista actual de proveedores
+aptos del registro de proveedores sin autenticación de OmniRoute y, a continuación, te permite revisar y deseleccionar cada
+proveedor antes de confirmar. OmniRoute muestra el aviso de precaución del proveedor y un enlace a su sitio
+para que puedas revisar primero los términos, la privacidad, la disponibilidad y los límites de uso de terceros.
 
-Esta acción es opcional: completar el asistente nunca crea conexiones con proveedores gratuitos de forma silenciosa. Solo crea los proveedores que aún faltan, no modifica las conexiones existentes personalizadas e informa individualmente de los proveedores creados, ya configurados y fallidos. Si el resultado es parcial, puedes volver a intentar de forma segura únicamente los que hayan fallado.
+Esta acción es opcional: al finalizar el asistente, nunca se crean silenciosamente conexiones con proveedores gratuitos.
+Solo crea los proveedores que aún faltan, no modifica las conexiones existentes personalizadas
+e informa individualmente de los proveedores creados, ya configurados y con errores. Tras un resultado parcial,
+puedes volver a intentar de forma segura solo los que hayan fallado.
 
 ### Opción A: proveedor gratuito (sin tarjeta de crédito)
 
 1. Abre el panel de control en `http://localhost:20128`
 2. Ve a **Proveedores** → **Añadir proveedor**
 3. Selecciona uno de estos proveedores gratuitos:
-   - **Kiro AI** — Modelos Claude gratuitos (no requieren autenticación)
-   - **OpenCode Free** — Modelos GPT gratuitos (no requieren autenticación)
-   - **Pollinations** — GPT-5, Claude y Gemini gratuitos (no requieren clave)
-   - **LongCat** — 10 millones de tokens gratuitos (concesión única; requiere cuenta y KYC)
+   - **Kiro AI** — Modelos Claude gratuitos (no se necesita autenticación)
+   - **Pollinations** — GPT-5, Claude y Gemini gratuitos (no se necesita clave)
+   - **LongCat** — 10 millones de tokens gratis (concesión única; requiere cuenta y KYC)
    - **Cloudflare AI** — Más de 50 modelos, 10 000 neuronas/día
    - **MLX Gemma 26B** — Modelo local para Apple Silicon (~38,5 tok/s, ~15,9 GB de RAM)
    - **MLX Qwen 3.8 27B** — Modelo local para Apple Silicon (~9,1 tok/s, ~13,1 GB de RAM)
 4. Haz clic en **Conectar**
-5. ¡Listo! Ya tienes acceso gratuito a la IA.
+5. ¡Listo! Ahora tienes acceso gratuito a la IA.
 
 ### Opción B: proveedor con clave de API (de pago)
 
@@ -62,7 +67,7 @@ Esta acción es opcional: completar el asistente nunca crea conexiones con prove
 4. Selecciona tu proveedor
 5. Pega tu clave de API
 6. Haz clic en **Conectar**
-7. ¡Listo! Ya tienes acceso a los modelos de ese proveedor.
+7. ¡Listo! Ahora tienes acceso a los modelos de ese proveedor.
 
 ### Opción C: proveedor OAuth (suscripción)
 
@@ -71,11 +76,11 @@ Esta acción es opcional: completar el asistente nunca crea conexiones con prove
 3. Selecciona tu proveedor (p. ej., Claude Code o GitHub Copilot)
 4. Haz clic en **Conectar con OAuth**
 5. Inicia sesión con tu cuenta
-6. ¡Listo! Ya tienes acceso a los modelos de tu suscripción.
+6. ¡Listo! Ahora tienes acceso a los modelos de tu suscripción.
 
 ### Opción D: modelos MLX locales (Apple Silicon)
 
-Para equipos Mac con Apple Silicon y memoria unificada, OmniRoute permite conectarse a modelos MLX locales que se ejecutan mediante `mlx-lm.server` como proveedores locales normales compatibles con OpenAI.
+Para equipos Mac con Apple Silicon y memoria unificada, OmniRoute permite conectarse a modelos MLX locales ejecutados mediante `mlx-lm.server` como proveedores locales habituales compatibles con OpenAI.
 
 #### Requisitos previos
 
@@ -95,7 +100,7 @@ Para equipos Mac con Apple Silicon y memoria unificada, OmniRoute permite conect
    uv pip install mlx-lm
    ```
 
-2. **Inicia manualmente los servidores MLX** (en terminales distintas):
+2. **Inicia manualmente los servidores MLX** (en terminales independientes):
 
    ```bash
    # Terminal 1: Gemma 4 26B A4B IT-QAT (puerto 11435)
@@ -105,14 +110,14 @@ Para equipos Mac con Apple Silicon y memoria unificada, OmniRoute permite conect
    uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
    ```
 
-3. **Conéctate desde el panel de control de OmniRoute**:
+3. **Conecta desde el panel de control de OmniRoute**:
    - Ve a **Proveedores** → **Añadir proveedor**
    - Selecciona **MLX Gemma 26B** o **MLX Qwen 3.8 27B**
    - Haz clic en **Conectar** (no se necesita una clave de API)
 
 4. **Úsalo con OpenCode**:
    ```bash
-   # Configura OpenCode para usar OmniRoute
+   # Configura OpenCode para que use OmniRoute
    opencode config set api.base_url http://localhost:20128/v1
    opencode config set api.key <your-omniroute-api-key>
 
@@ -121,9 +126,9 @@ Para equipos Mac con Apple Silicon y memoria unificada, OmniRoute permite conect
    opencode run --model mlx-qwen/qwen3.8-27b
    ```
 
-#### Gestión de la memoria
+#### Gestión de memoria
 
-**Importante**: Con 24 GB de memoria unificada, solo se puede ejecutar **un modelo MLX grande a la vez**.
+**Importante**: con 24 GB de memoria unificada, solo se puede ejecutar **un modelo MLX grande a la vez**.
 
 - Gemma 26B: ~15,9 GB de memoria máxima
 - Qwen 3.8 27B: ~13,1 GB de memoria máxima
@@ -131,10 +136,10 @@ Para equipos Mac con Apple Silicon y memoria unificada, OmniRoute permite conect
 Debes gestionar esto manualmente:
 
 - Ejecuta solo un servidor MLX a la vez, o
-- Ejecuta ambos en equipos distintos, o
+- Ejecuta ambos en equipos independientes, o
 - Detén uno antes de iniciar el otro
 
-OmniRoute no gestiona automáticamente los procesos de los servidores MLX; únicamente dirige las solicitudes a los endpoints compatibles con OpenAI que configures.
+OmniRoute no gestiona automáticamente los procesos de los servidores MLX; solo dirige las solicitudes a los endpoints compatibles con OpenAI que configures.
 
 #### Compatibilidad con llamadas a herramientas
 
@@ -146,20 +151,20 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "¿Cuánto es 2+2? Usa la herramienta de cálculo."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calcular", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
 #### Solución de problemas
 
-| Problema                           | Solución                                                                                                              |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| El servidor no se inicia           | Consulta `uv run mlx_lm.server --help` y verifica los identificadores de los modelos                                  |
-| Memoria insuficiente               | Asegúrate de que solo se ejecute un modelo; cierra otras aplicaciones; consulta el Monitor de Actividad               |
-| Conexión rechazada                 | Verifica que el servidor se esté ejecutando en el puerto correcto (11435/11436)                                       |
-| Respuestas lentas                  | La primera solicitud carga el modelo en la memoria (~30-60s); las solicitudes posteriores son rápidas                 |
-| Fallan las llamadas a herramientas | Asegúrate de que el modelo admita herramientas; revisa los registros de OmniRoute para detectar errores de traducción |
+| Problema                           | Solución                                                                                                                |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| El servidor no se inicia           | Consulta `uv run mlx_lm.server --help` y verifica los identificadores de los modelos                                    |
+| Memoria insuficiente               | Asegúrate de que solo se ejecute un modelo; cierra otras aplicaciones; consulta el Monitor de Actividad                 |
+| Conexión rechazada                 | Verifica que el servidor se esté ejecutando en el puerto correcto (11435/11436)                                         |
+| Respuestas lentas                  | La primera solicitud carga el modelo en memoria (~30-60 s); las solicitudes posteriores son rápidas                     |
+| Fallan las llamadas a herramientas | Asegúrate de que el modelo admita herramientas; consulta los registros de OmniRoute para detectar errores de traducción |
 
 ---
 
@@ -167,17 +172,16 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 Estos proveedores ofrecen **acceso gratuito** sin tarjeta de crédito:
 
-| Proveedor         | Cuota gratuita                | Modelos                                  | Cómo conectarse           |
-| ----------------- | ----------------------------- | ---------------------------------------- | ------------------------- |
-| **Kiro AI**       | 50 créditos/mes               | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | No requiere autenticación |
-| **OpenCode Free** | Ilimitada                     | GPT-4o, Claude, Gemini                   | No requiere autenticación |
-| **Pollinations**  | No requiere clave             | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | No requiere autenticación |
-| **LongCat**       | 10M por única vez             | LongCat-2.0                              | Clave de API + KYC        |
-| **Cloudflare AI** | 10K neuronas/día              | Más de 50 modelos                        | No requiere autenticación |
-| **NVIDIA NIM**    | ~40 RPM                       | 129 modelos                              | Requiere clave de API     |
-| **Cerebras**      | $5 de crédito por registrarse | GLM 4.7, GPT-OSS 120B                    | Clave de API + tarjeta    |
+| Proveedor         | Cuota gratuita               | Modelos                                  | Cómo conectarse           |
+| ----------------- | ---------------------------- | ---------------------------------------- | ------------------------- |
+| **Kiro AI**       | 50 créditos/mes              | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | No requiere autenticación |
+| **Pollinations**  | No requiere clave            | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | No requiere autenticación |
+| **LongCat**       | 10 M por única vez           | LongCat-2.0                              | Clave de API + KYC        |
+| **Cloudflare AI** | 10 000 neuronas/día          | Más de 50 modelos                        | No requiere autenticación |
+| **NVIDIA NIM**    | ~40 RPM                      | 129 modelos                              | Requiere clave de API     |
+| **Cerebras**      | Crédito de $5 al registrarse | GLM 4.7, GPT-OSS 120B                    | Clave de API + tarjeta    |
 
-**Consejo**: ¡Conecta varios proveedores gratuitos para obtener **IA gratuita ilimitada** con conmutación automática por error!
+**Consejo**: ¡Conecta varios proveedores gratuitos para obtener **IA gratuita ilimitada** con conmutación por error automática!
 
 ---
 
@@ -232,22 +236,22 @@ Tu proveedor ya está conectado. Puedes usarlo con `model: "auto"` o especificar
 
 ## Uso de varios proveedores
 
-OmniRoute funciona mejor con **varios proveedores**. Esto te ofrece:
+OmniRoute funciona mejor con **varios proveedores**. Esto ofrece:
 
-- **Conmutación automática en caso de error** — Si un proveedor falla, OmniRoute prueba con el siguiente
-- **Optimización de costes** — OmniRoute elige el proveedor más barato para cada solicitud
+- **Conmutación automática** — Si un proveedor falla, OmniRoute prueba con el siguiente
+- **Optimización de costes** — OmniRoute elige el proveedor más económico para cada solicitud
 - **Optimización de velocidad** — OmniRoute elige el proveedor más rápido para cada solicitud
 - **Optimización de calidad** — OmniRoute elige el mejor proveedor para cada tarea
 
 ### Configuración recomendada
 
-Conecta al menos **3 proveedores** para obtener la mejor experiencia:
+Conecta al menos **3 proveedores** para disfrutar de la mejor experiencia:
 
-1. **Un proveedor gratuito** (Kiro, OpenCode Free o Pollinations) — Siempre disponible
-2. **Un proveedor rápido** (Groq, Cerebras) — Para obtener respuestas rápidas
-3. **Un proveedor de alta calidad** (OpenAI, Anthropic, Google) — Para tareas complejas
+1. **Un proveedor gratuito** (Kiro o Pollinations) — Siempre disponible
+2. **Un proveedor rápido** (Groq, Cerebras) — Para respuestas rápidas
+3. **Un proveedor de calidad** (OpenAI, Anthropic, Google) — Para tareas complejas
 
-Después, usa `model: "auto"` y OmniRoute elegirá automáticamente el mejor para cada solicitud.
+A continuación, usa `model: "auto"` y OmniRoute elegirá automáticamente el mejor para cada solicitud.
 
 ---
 
@@ -327,9 +331,9 @@ y un tiempo de espera configurable son mejoras independientes; este comportamien
 
 ## Preguntas frecuentes
 
-### "¿Necesito pagar para usar OmniRoute?"
+### "¿Tengo que pagar para usar OmniRoute?"
 
-**¡No!** OmniRoute es gratuito y de código abierto. Puedes usar proveedores gratuitos (Kiro, OpenCode Free, Pollinations) sin pagar nada. Solo pagas si decides utilizar proveedores de pago.
+**¡No!** OmniRoute es gratuito y de código abierto. Puedes usar proveedores gratuitos (Kiro, Pollinations) sin pagar nada. Solo pagas si eliges usar proveedores de pago.
 
 ### "¿Con qué proveedor debería empezar?"
 
@@ -341,13 +345,13 @@ Empieza con **Kiro AI**: es gratuito, no requiere una clave de API y te da acces
 
 ### "¿Qué ocurre si un proveedor deja de funcionar?"
 
-OmniRoute omite automáticamente los proveedores que fallen y prueba con el siguiente. No necesitas hacer nada.
+OmniRoute omite automáticamente los proveedores que fallen y prueba con el siguiente. No tienes que hacer nada.
 
 ### "¿Cómo desconecto un proveedor?"
 
 Ve a Proveedores → haz clic en el proveedor → haz clic en **Desconectar**.
 
-### "¿Puedo usar mis claves de API actuales?"
+### "¿Puedo usar mis claves de API existentes?"
 
 **¡Sí!** Si ya tienes claves de API para OpenAI, Anthropic, Google, etc., puedes usarlas en OmniRoute. Solo tienes que pegarlas al conectar el proveedor.
 

@@ -29,24 +29,14 @@ OmniRoute でセキュリティ脆弱性を発見した場合は、責任ある�
 | 3.7.x      | ✅ セキュリティ                                 |
 | < 3.7.0    | ❌ サポート対象外                               |
 
-## LTS サポート期間（v3.9.x）
+## LTS サポート期間 (v3.9.x)
 
-3.8.59 の次のバージョンは **3.9.0** であり、`stable/v3` ブランチ上の長期サポートラインが
-開始されます（[`ROADMAP.md`](ROADMAP.md) → 「Phase 3 — v3.9.0 LTS」を参照）。
+3.8.59 の次のバージョンは **3.9.0** であり、`stable/v3` ブランチで長期サポートラインが開始されます（[`ROADMAP.md`](ROADMAP.md) → 「フェーズ 3 — v3.9.0 LTS」を参照）。
 
-- **`stable/v3` に適用されるもの：** バグ修正、セキュリティパッチ、プロバイダーの更新。
-  新機能は v4 チャンネルに導入され、LTS ラインでは安定性が最優先されます。`npm install omniroute`
-  （`latest` dist-tag）は、v4 サイクル全体を通じて v3 のまま維持されます。
-- **期間：** `<T-GAP-3: 所有者の決定待ち — ROADMAP.md を参照>`。v4.0 GA 後
-  （`latest` が v4 に切り替わる時点）のサポート期間は**まだ決定されていません**。メンテナーが
-  発表した時点でこのセクションが更新されます。それまでは、終了日を想定しないでください。
-- **LTS ラインの脆弱性の報告：** 他のバージョンと同じ窓口、つまり非公開の
-  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) を使用し、
-  公開 issue は決して作成しないでください。テストしたバージョン（例：`3.9.2`）を明記してください。
-  修正は `stable/v3` に適用され、v4 にもフォワードポートされます。
-- **LTS 分岐時点のセキュリティベースライン：** 測定されたスキャナーの状態、ルートガード、
-  公開認証情報に関する検証結果は、
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) に記録されています。
+- **`stable/v3` に含まれるもの:** バグ修正、セキュリティパッチ、プロバイダーの更新。新機能は v4 チャネルに導入され、LTS ラインでは安定性が最優先されます。`npm install omniroute`（`latest` dist-tag）は、v4 サイクル全体を通して v3 のまま維持されます。
+- **サポート期間:** `stable/v3` には、**3.9.0 のリリース後 12 か月間、または v4.0.0 が `latest` として公開されてから 90 日後までの、いずれか遅い時点まで、セキュリティ修正および重大なリグレッション修正が提供されます**。確定した終了日は、3.9.0 のリリース時に、そのリリースノートおよび [`ROADMAP.md`](ROADMAP.md) に記録されます。
+- **LTS ラインの脆弱性の報告:** 他のバージョンと同じチャネルを使用してください。公開 Issue は決して使用せず、非公開の [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) を使用します。テストしたバージョン（例: `3.9.2`）を明記してください。修正は `stable/v3` に適用され、v4 にもフォワードポートされます。
+- **LTS リリース時点のセキュリティベースライン:** 測定されたスキャナーの状態、ルートガード、および公開認証情報に関する検証結果は、[`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) に記録されます。
 
 ---
 

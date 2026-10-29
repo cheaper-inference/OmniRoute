@@ -158,9 +158,12 @@ test("GitHub fallback explains version candidates without warning about retired 
   assert.equal(body.source, "github_catalog");
   assert.deepEqual(body.models, []);
   assert.match(body.warning || "", /using GitHub model catalog.*future-model.*0\.200\.0/);
+  // Picker visibility does not revoke API compatibility: hidden, API-supported
+  // candidates still need the newer client profile, just like listed models.
+  assert.match(body.warning || "", /hidden-model/);
   assert.doesNotMatch(
     body.warning || "",
-    /gpt-5\.3-codex-spark|hidden-model|unsupported-model|unspecified-model|999\.0\.0/
+    /gpt-5\.3-codex-spark|unsupported-model|unspecified-model|999\.0\.0/
   );
 });
 

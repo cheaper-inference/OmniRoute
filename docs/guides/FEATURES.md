@@ -304,9 +304,9 @@ Multi-device and external operator access is now possible via **scoped sync toke
 
 - **`POST /api/sync/tokens`** — Issue a new sync token (scoped, with optional expiry)
 - **`DELETE /api/sync/tokens/:id`** — Revoke a token
-- **`GET /api/sync/bundle`** — Download a versioned, ETag-keyed JSON snapshot of all non-sensitive settings (passwords redacted)
+- **`GET /api/sync/bundle`** — Download a versioned, ETag-keyed JSON snapshot of the config (authenticated with a sync token only). Auth settings such as the dashboard password are stripped, but provider credentials and API keys are included, so treat the file as a secret
 
-The config bundle is built by `src/lib/sync/bundle.ts`. Consumers compare the `ETag` response header to detect changes without re-downloading the full payload.
+The config bundle is built by `src/lib/sync/bundle.ts`. Consumers compare the `ETag` response header to detect changes without re-downloading the full payload. From the CLI, `omniroute sync bundle <outPath> --token <syncToken>` (or `OMNIROUTE_SYNC_TOKEN`) saves it to an owner-only file.
 
 ---
 

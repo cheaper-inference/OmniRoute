@@ -72,6 +72,16 @@ curl -i \
 
 Ufunguo usio na `manage` (au bila Bearer) hurejesha `403 LOCAL_ONLY`. Kiambishi awali kinachohusiana `/api/cli-tools/runtime/*` hakiruhusiwi kupitwa kimakusudi — tazama [Viwango vya Route Guard — ruhusa maalum ya upeo wa manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Uthibitishaji wa Origin
+
+Baada ya uthibitishaji, kila ombi kwa `/api/mcp/*` — transport na njia za usimamizi kama `status`, `tools`, `audit`, `restart` — hukaguliwa kichwa chake cha `Origin`, bila kujali mpigaji ni nani (ufunguo wa API, tokeni ya CLI, kipindi cha dashibodi, au loopback isiyojulikana wakati kuingia kumezimwa). Hii ndiyo kinga dhidi ya DNS rebinding inayotakiwa na vipimo vya MCP Streamable HTTP.
+
+- **Hakuna kichwa cha `Origin`** → inaruhusiwa. OmniRoute CLI, SDK na wateja wa IDE hawakitumi.
+- **`Origin` inayoruhusiwa** → `localhost` / `127.0.0.1` / `[::1]` kwenye mlango wowote, au origin ya umma ya OmniRoute yenyewe: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin iliyopitishwa na reverse proxy inayoaminika (`OMNIROUTE_TRUST_PROXY`, pale tu base URL haijawekwa), au seva pangishi ya IP ya loopback/LAN inayofikiwa moja kwa moja. Kichwa cha `Host` pekee hakiwezi kamwe kufanya origin iaminike.
+- **`Origin` nyingine yoyote, ikiwemo `null`** → `403` pamoja na mwili wa hitilafu wa JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Kipindi cha dashibodi kinachowasilisha tokeni halali ya CSRF bado kinakubaliwa, kama ilivyo kwa maandishi mengine ya dashibodi.
+
+Mteja wa MCP wa kivinjari anayehudumiwa nyuma ya reverse proxy anahitaji `OMNIROUTE_PUBLIC_BASE_URL`; hakuna orodha ya kuruhusu origin nyingine. Ombi la awali la CORS (`OPTIONS`) halikaguliwi Origin; ombi linalofuata hukaguliwa.
+
 ## Usanidi wa IDE
 
 Tazama [Usanidi wa Mteja wa MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) kwa usanidi wa Claude Desktop,
@@ -289,103 +299,110 @@ Usafirishaji wa SSE na HTTP Inayoweza Kutiririshwa huzuiwa hadi seva ya MCP iwas
 
 ---
 
-## Uthibitishaji na Mawanda
+## Uthibitishaji na Wigo
 
-Miito ya zana za MCP husoma mifuatano ya mawanda kutoka kwa mpigaji. Ukaguzi huo ni mojawapo ya nafasi tatu huru za majina. Kufaulu kwa kikaguzi kimoja si kufaulu kwa vingine.
-Kanuni ziko katika [Nafasi tatu za majina ya mawanda](#three-scope-namespaces).
-Katalogi ya zana iko katika [Mawanda ya zana za MCP](#mcp-tool-scopes).
+Miito ya zana za MCP husoma mifuatano ya wigo kutoka kwa mpigaji. Ukaguzi huo ni mojawapo ya nafasi tatu huru za majina. Kufaulu kwa kikaguzi kimoja hakumaanishi kufaulu kwa vingine.
+Kanuni ziko katika [Nafasi tatu za majina ya wigo](#three-scope-namespaces).
+Katalogi ya zana iko katika [Wigo wa zana za MCP](#mcp-tool-scopes).
 
-### Nafasi tatu za majina ya mawanda
+### Nafasi tatu za majina ya wigo
 
 `manage` kwenye ufunguo wa API, `read:compression` kwenye zana ya MCP, na `read` kwenye tokeni ya ufikiaji ya
 `oma_live_…` ni ruhusa tatu tofauti. Wapigaji wanaotuma tokeni ya ufikiaji ya `read`
 kwenye njia ya usimamizi inayobadilisha data hupokea HTTP 403
 `Access token scope 'read' is insufficient; 'write' required.`
-Daraja hilo ni `scopeSatisfies`. Hairejelei jedwali la MCP, na kilinganishi cha MCP
-hakirejelei daraja hilo.
+Daraja hilo ni `scopeSatisfies`. Halirejelei jedwali la MCP, na kilinganishi cha MCP
+pia hakirejelei daraja hilo.
 
-| Nafasi ya majina            | Kitambulisho                                                              | Kikaguzi                                  | Kufaulu kunaruhusu                                                 |
-| :-------------------------- | :------------------------------------------------------------------------ | :---------------------------------------- | :----------------------------------------------------------------- |
-| Usimamizi wa ufunguo wa API | `api_keys.scopes`                                                         | `hasManageScope`                          | REST ya usimamizi kwa ufunguo huo wa Bearer                        |
-| Nyongeza ya ufunguo wa API  | safu ileile, mfuatano mmoja kamili                                        | kitendaji saidizi kilichotajwa hapa chini | Uwezo huo mmoja pekee                                              |
-| Mawanda ya zana za MCP      | safu ileile, vinginevyo `_meta` ya MCP, vinginevyo `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                            | Zana hiyo, mara utekelezaji wa masharti unapowashwa                |
-| Tokeni ya ufikiaji          | `oma_live_…`                                                              | `scopeSatisfies`                          | Njia ya usimamizi ambayo mbinu na njia yake vinahitaji daraja hilo |
+| Nafasi ya majina            | Kitambulisho                                                              | Kikaguzi                          | Kufaulu kunaruhusu                                                 |
+| :-------------------------- | :------------------------------------------------------------------------ | :-------------------------------- | :----------------------------------------------------------------- |
+| Usimamizi wa ufunguo wa API | `api_keys.scopes`                                                         | `hasManageScope`                  | REST ya usimamizi kwa ufunguo huo wa Bearer                        |
+| Nyongeza ya ufunguo wa API  | safu ileile, mfuatano mmoja unaolingana kikamilifu                        | kisaidizi kilichotajwa hapa chini | Uwezo huo mmoja pekee                                              |
+| Wigo wa zana za MCP         | safu ileile, vinginevyo `_meta` ya MCP, vinginevyo `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                    | Zana hiyo, mara utekelezaji wa masharti unapowashwa                |
+| Tokeni ya ufikiaji          | `oma_live_…`                                                              | `scopeSatisfies`                  | Njia ya usimamizi ambayo mbinu na njia yake zinahitaji daraja hilo |
 
-Utengenezaji wa kila kitambulisho umeelezwa katika
+Uundaji wa kila kitambulisho umeelezwa katika
 [Uthibitishaji wa Usimamizi](../guides/MANAGEMENT-AUTH.md).
 
-#### Mawanda ya ufunguo wa API
+#### Wigo wa ufunguo wa API
 
-Safu moja ya `api_keys.scopes` hutumika kwa kazi mbili. Kazi hizo hutumia vitendaji tofauti.
+Safu moja ya `api_keys.scopes` hufanya kazi mbili. Kila kazi hutumia vitendakazi tofauti.
 
 **REST ya usimamizi.** `manage` na `admin` ni vipengele vya
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` ndiyo huidhinisha njia za usimamizi kwa ufunguo huo. `admin` inaweza
-kutumika kwa usimamizi kwenye njia hizo. Neno `admin` hapa si daraja la
-tokeni ya ufikiaji na halipanuki kuwa mawanda ya zana za MCP.
+`hasManageScope` ndiyo inayoidhinisha njia za usimamizi kwa ufunguo huo. `admin` ina
+uwezo wa usimamizi kwenye njia hizo. Neno `admin` hapa si daraja la
+tokeni ya ufikiaji, wala halipanuki kuwa wigo wa zana za MCP.
 
-**Mifuatano ya nyongeza.** Kila mmoja ni ukaguzi wa uanachama kamili, na kila mmoja hubaki
+**Mifuatano ya nyongeza.** Kila mmoja ni jaribio la uanachama linalohitaji ulinganifu kamili, na kila mmoja hubaki
 nje ya `MANAGEMENT_API_KEY_SCOPES`.
 
 | Wigo                           | Kufaulu kunaruhusu                                                                                                                                                          |
 | :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `mcp:connect`                  | Msamaha wa LOCAL_ONLY wa `/api/mcp/` usio wa loopback pekee (`hasMcpConnectOrManageScope`). Ufunguo wenye `manage` au `admin` bado hufaulu msamaha huo.                     |
 | `self:usage`                   | `GET /api/v1/me/status` kwa ufunguo huu (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` huongeza wigo huu wakati wa kuunda (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Vikomo vya akaunti ya huduma ya juu ndani ya payload hiyo ya hali (`src/lib/usage/apiKeySelfService.ts`). Njia ya hali bado inahitaji `self:usage`.                         |
-| `policy:bypass-provider-quota` | Miito ya u推aji ya ufunguo huu huruka sera ya kikomo cha mtoa huduma (`hasProviderQuotaBypassScope` katika `src/sse/handlers/chat.ts`).                                     |
+| `self:account-quota`           | Vikomo vya akaunti ya upstream ndani ya payload hiyo ya hali (`src/lib/usage/apiKeySelfService.ts`). Njia ya hali bado inahitaji `self:usage`.                              |
+| `policy:bypass-provider-quota` | Miito ya inference ya ufunguo huu hupuuza sera ya kikomo cha mtoa huduma (`hasProviderQuotaBypassScope` katika `src/sse/handlers/chat.ts`).                                 |
 
 #### Ulinganishaji
 
-Katalogi ni jedwali lililo chini ya [Mawanda ya zana za MCP](#mcp-tool-scopes). Usichukulie
+Katalogi ni jedwali lililo chini ya [Wigo wa zana za MCP](#mcp-tool-scopes). Usichukulie
 `MCP_SCOPE_LIST` katika `src/shared/constants/mcpScopes.ts` kuwa katalogi hiyo:
-ni seti ndogo asilia yenye aina zilizobainishwa. Zana zilizoongezwa baadaye hutangaza mawanda zaidi kando yake
-(`read:notion`, `read:skills`, `read:local-corpus`, na mengine yaliyopo kwenye jedwali).
+ni sehemu ndogo ya awali yenye aina zilizobainishwa. Zana zilizoongezwa baadaye hutangaza wigo zaidi kando yake
+(`read:notion`, `read:skills`, `read:local-corpus`, na wigo mwingine katika jedwali).
 
 `evaluateToolScopes` katika `open-sse/mcp-server/scopeEnforcement.ts` huruhusu mwito
 wakati kila wigo unaohitajika unalingana na wigo fulani uliotolewa:
 
 - `*` hulingana na kila wigo unaohitajika.
-- Wigo uliotolewa unaoishia na `*` hulingana na wigo unaohitajika unaoanza na
-  kiambishi kilicho kabla ya alama ya nyota. `read:*` hulingana na `read:compression`.
-- Kila wigo mwingine uliotolewa hulingana tu na mfuatano unaohitajika unaofanana kabisa.
+- Wigo uliotolewa unaoishia kwa `*` hulingana na wigo unaohitajika unaoanza na
+  kiambishi kilicho kabla ya nyota. `read:*` hulingana na `read:compression`.
+- Kila wigo mwingine uliotolewa hulingana tu na mfuatano unaohitajika ulio sawa kabisa.
 
-Ufunguo ambao mawanda yake ni `["manage"]` haufanikiwi katika `scopeMatches` kwa `read:compression`.
-Mwito huohuo haufanikiwi kwa `admin`, `mcp:connect`, `read`, na `write` wakati hayo
-ndiyo tu mifuatano iliyotolewa. Hakuna ngazi kati ya mawanda ya zana za MCP
-zaidi ya `*` iliyo mwishoni.
+Ufunguo ambao wigo wake ni `["manage"]` hushindwa na `scopeMatches` kwa `read:compression`.
+Mwito huohuo hushindwa kwa `admin`, `mcp:connect`, `read`, na `write` ikiwa hiyo
+ndiyo mifuatano pekee iliyotolewa. Hakuna daraja kati ya wigo wa zana za MCP
+zaidi ya `*` ya mwisho.
 
-Utekelezaji wa masharti umezimwa isipokuwa `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (chaguomsingi
-`false`). Wakati umezimwa, `evaluateToolScopes` huruhusu mwito na kuruka
-katalogi. Wakati umewashwa, HTTP hutumia `api_keys.scopes` za ufunguo wa Bearer kama
-`authInfo` (tazama [Ufungamanishaji wa wigo wa HTTP kwa kila ufunguo](#per-key-http-scope-binding-7895)).
-Wakati hakuna mawanda ya ufunguo yanayopatikana, seti iliyotolewa huangukia kwenye `_meta` ya MCP, kisha
+Utekelezaji wa masharti umezimwa isipokuwa `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (chaguo-msingi
+`false`). Ukiwa umezimwa, `evaluateToolScopes` huruhusu mwito na kuruka
+katalogi. Ukiwa umewashwa, HTTP hutumia `api_keys.scopes` ya ufunguo wa Bearer kama
+`authInfo` (angalia [Ufungamanishaji wa wigo wa HTTP kwa kila ufunguo](#per-key-http-scope-binding-7895)).
+Wakati hakuna wigo wa ufunguo unaopatikana, seti iliyotolewa hujaribu `_meta` ya MCP, kisha
 `OMNIROUTE_MCP_SCOPES`.
 
-#### Mawanda ya tokeni ya ufikiaji
+#### Wigo wa tokeni ya ufikiaji
 
 Tokeni za `oma_live_…` (`src/lib/accessTokens/scopes.ts`) hubeba `read`, `write`,
-au `admin`. `scopeSatisfies` ni daraja: `admin` hujumuisha `write` na `read`, na
-`write` hujumuisha `read`. Mawanda yasiyojulikana hayatoi ruhusa yoyote.
+au `admin`. `scopeSatisfies` ni daraja: `admin` inajumuisha `write` na `read`, na
+`write` inajumuisha `read`. Wigo usiojulikana haujumuishi chochote.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) hulinganisha daraja hilo
-na `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) hulinganisha
+daraja hilo na `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD`, na `OPTIONS` zinahitaji `read`.
 - Kila mbinu nyingine inahitaji `write`.
-- Njia zilizo katika `ADMIN_SCOPE_PREFIXES` zinahitaji `admin` kwa kila mbinu. `/api/mcp`
-  ipo kwenye orodha hiyo, kwa hivyo tokeni ya ufikiaji ya `write` bado haiwezi kuita sehemu ya HTTP ya MCP.
-- Njia zilizo katika `ADMIN_MUTATION_PREFIXES` zinahitaji `admin` kwa mabadiliko pekee.
+- Njia katika `ADMIN_SCOPE_PREFIXES` zinahitaji `admin` kwa kila mbinu. `/api/mcp`
+  iko kwenye orodha hiyo, kwa hivyo tokeni ya ufikiaji ya `write` bado haiwezi kuita sehemu ya HTTP ya MCP.
+- Njia katika `ADMIN_MUTATION_PREFIXES` zinahitaji `admin` kwa mabadiliko pekee.
+- Njia katika `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
+  `/api/settings/require-login`) zinahitaji `admin` kwa mabadiliko pekee, na kwenye
+  njia hiyo kamili pekee — njia nyingine ndogo za `/api/settings/*` huendelea kutumia `write`.
 
-`PATCH /api/keys/{id}` ni badiliko na haipo kwenye orodha hizo za msimamizi, kwa hivyo tokeni ya
+`PATCH /api/keys/{id}` ni mabadiliko na haipo kwenye orodha hizo za msimamizi, kwa hivyo tokeni ya
 `read` hupokea 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Tokeni ya ufikiaji ya `write` au `admin` inakidhi mahitaji ya njia hiyo. JWT ya dashibodi, tokeni ya machine-id ya CLI ya loopback, na ufunguo wa API wenye `manage` au `admin` hupitia matawi mengine na hazibanwi na daraja hili.
+`Access token scope 'read' haitoshi; 'write' inahitajika.`
+Tokeni ya ufikiaji ya `write` au `admin` inakidhi njia hiyo. JWT ya dashibodi, tokeni ya
+machine-id ya CLI ya loopback, na ufunguo wa API wenye `manage` au `admin` hupitia
+matawi mengine na hayabanwi na daraja hili.
 
-Tokeni ya ufikiaji inayofaulu `scopeSatisfies` kwa `/api/mcp` imevuka lango la usimamizi pekee. Miito ya zana bado huendesha `scopeMatches` dhidi ya mawanda ya ufunguo wa API. Daraja la tokeni ya ufikiaji si ingizo la `scopeMatches`.
+Tokeni ya ufikiaji inayofaulu `scopeSatisfies` kwa `/api/mcp` imevuka tu
+kizuizi cha usimamizi. Miito ya zana bado huendesha `scopeMatches` dhidi ya mawanda ya
+ufunguo wa API. Daraja la tokeni ya ufikiaji si ingizo la `scopeMatches`.
 
 ### Mawanda ya zana za MCP
 
-Utekelezaji wa masharti ya mawanda umewekwa mahali pamoja katika `open-sse/mcp-server/scopeEnforcement.ts`.
+Utekelezaji wa mawanda umewekwa sehemu moja katika `open-sse/mcp-server/scopeEnforcement.ts`.
 Kila zana inahitaji mawanda mahususi:
 
 | Upeo                  | Zana                                                                                                                                                                             |
@@ -420,51 +437,51 @@ Kila zana inahitaji mawanda mahususi:
 | `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                   |
 | `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                               |
 | `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                  |
-| `read:obsidian`       | Zana 13 za kusoma — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | Zana 9 za kuandika — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …              |
+| `read:obsidian`       | zana 13 za kusoma — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | zana 9 za kuandika — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …              |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                |
 
-Mawanda yenye kadi-mwitu yanatumika: `read:*` hutoa mawanda yote ya kusoma, `*` hutoa ufikiaji kamili.
+Mawanda yenye vibambo mbadala yanatumika: `read:*` hutoa mawanda yote ya kusoma, `*` hutoa ufikiaji kamili.
 
-### `mcp:connect` — uwezo wenye ukomo wa njia (#7895)
+### `mcp:connect` — uwezo wenye upeo mdogo wa njia (#7895)
 
 Kufikia usafirishaji wa HTTP/SSE MCP (`/api/mcp/*`) kutoka anwani isiyo ya loopback kunahitaji
-ruhusa maalumu ya LOCAL_ONLY ya `/api/mcp/` (angalia `docs/security/ROUTE_GUARD_TIERS.md`). Kihistoria,
-ruhusa hiyo ilikubali tu ufunguo wa API wenye mawanda kamili ya `manage`/`admin` — ambayo ni mapana mno kwa
+ruhusa maalum ya LOCAL_ONLY ya `/api/mcp/` (angalia `docs/security/ROUTE_GUARD_TIERS.md`). Kihistoria,
+ruhusa hiyo ilikubali tu ufunguo wa API wenye mawanda kamili ya `manage`/`admin` — mapana mno kwa
 mpigaji anayehitaji tu kuwasiliana na MCP. `src/shared/constants/managementScopes.ts` sasa
-inasafirisha `MCP_CONNECT_SCOPE = "mcp:connect"`: wigo wa nyongeza wenye ukomo (kwa kufuata mfano sawa na
-`SELF_USAGE_SCOPE`) unaoidhinisha TU upitaji wa `/api/mcp/` katika
-`src/server/authz/policies/management.ts` — hautoi ufikiaji wa njia nyingine yoyote ya usimamizi
-na kwa makusudi haujajumuishwa katika `MANAGEMENT_API_KEY_SCOPES`. Ufunguo wenye `manage`/`admin`
-bado hupita ruhusa hiyo bila mabadiliko; `mcp:connect` ni mbadala wenye mapendeleo ya chini kwa
+inahamisisha `MCP_CONNECT_SCOPE = "mcp:connect"`: mawanda ya nyongeza yenye upeo mdogo (kwa kufuata mfano sawa na
+`SELF_USAGE_SCOPE`) ambayo yanaidhinisha TU upitishaji wa `/api/mcp/` katika
+`src/server/authz/policies/management.ts` — hayatoi ufikiaji wa njia nyingine yoyote ya usimamizi
+na yameachwa nje ya `MANAGEMENT_API_KEY_SCOPES` kimakusudi. Ufunguo wenye `manage`/`admin`
+bado hupita kwenye ruhusa hiyo maalum bila mabadiliko; `mcp:connect` ni mbadala wenye mapendeleo ya chini kwa
 wapigaji wa mbali wanaotumia MCP pekee, unaokaguliwa kupitia `hasMcpConnectOrManageScope()`.
 
-### Ufungamanishaji wa wigo wa HTTP kwa kila ufunguo (#7895)
+### Ufungaji wa mawanda ya HTTP kwa kila ufunguo (#7895)
 
 Kupitia HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` sasa hutambua
 `api_keys.scopes` halisi za mpigaji kupitia `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
 na kuzipitisha kwa `transport.handleRequest(req, { authInfo })` ya MCP SDK, ili
-`extra.authInfo.scopes` zinazofikia kila mwito wa zana ziakisi mawanda ya ufunguo wenyewe wa Bearer.
-`resolveCallerScopeContext()` ya `scopeEnforcement.ts` tayari ilikuwa ikipa `authInfo` kipaumbele kuliko
-`_meta` na njia mbadala ya env ya `OMNIROUTE_MCP_SCOPES` — mabadiliko haya yanajaza tu chanzo hicho cha kwanza,
-chenye kipaumbele cha juu zaidi, ambacho hapo awali hakikuwa kikijazwa kupitia HTTP. Wakati hakuna ufunguo wa API
-unaotambuliwa (hakuna kichwa, ufunguo si sahihi), `authInfo` hubaki `undefined` na utambuzi huendelea hadi kwenye
+`extra.authInfo.scopes` zinazofikia kila mwito wa zana ziakisi mawanda ya ufunguo wa Bearer wenyewe.
+`resolveCallerScopeContext()` ya `scopeEnforcement.ts` tayari ilipa `authInfo` kipaumbele kuliko
+`_meta` na hali mbadala ya env ya `OMNIROUTE_MCP_SCOPES` — hii inajaza tu chanzo hicho cha kwanza,
+chenye kipaumbele cha juu zaidi, ambacho awali hakikuwa kikijazwa kupitia HTTP. Wakati hakuna ufunguo wa API unaotambuliwa
+(hakuna kichwa, ufunguo batili), `authInfo` hubaki `undefined` na utambuzi huendelea kwenye
 msururu uliopo wa `meta`/env bila mabadiliko. stdio haina utambulisho wa kila mpigaji (angalia
-`mcpCallerIdentity.ts`) na haiathiriwi — inaendelea kutumia msururu mbadala wa `_meta`/env.
+`mcpCallerIdentity.ts`) na haiathiriki — hubaki kwenye msururu wa hali mbadala wa `_meta`/env.
 
-**Utekelezaji hulazimishwa kuwashwa kwa wapigaji wa HTTP/SSE wenye mawanda yenye ukomo bila kujali
+**Utekelezaji unalazimishwa kwa wapigaji wa HTTP/SSE wenye mawanda finyu bila kujali
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Thamani chaguo-msingi ya `false` ya `OMNIROUTE_MCP_ENFORCE_SCOPES` ni salama tu
-kwa mtiririko wa ndani/stdio wa mwendeshaji mmoja, ambapo hakuna utambulisho wa kila mpigaji wa kutumia kuweka wigo.
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` huwasha utekelezaji wa wigo kwa kila zana
-bila masharti (`shouldForceScopeEnforcement()` katika `scopeEnforcement.ts`)
+kwa mtiririko wa ndani/stdio wa mwendeshaji mmoja, ambapo hakuna utambulisho wa kila mpigaji wa kulinganishwa na mawanda.
+`open-sse/mcp-server/server.ts::withScopeEnforcement()` huwasha utekelezaji wa mawanda
+kwa kila zana bila masharti (`shouldForceScopeEnforcement()` katika `scopeEnforcement.ts`)
 wakati wowote ambapo `resolveCallerScopeContext()` imetambua
-`source === "authInfo"` (yaani, kichwa halisi cha HTTP Authorization cha kila ufunguo, kwa HTTP/SSE pekee) NA ufunguo
-huo hauna wigo kamili wa `manage`/`admin`. Hili huziba pengo ambalo ufunguo wenye TU
-wigo finyu wa upitaji wa `mcp:connect` — ulioelezwa hapo juu kuwa unaidhinisha tu ruhusa maalumu ya LOCAL_ONLY ya
-`/api/mcp/` — ungeweza vinginevyo kutumia kila zana ya MCP baada ya mwendeshaji
-kuwasha ufikiaji wa MCP wa mbali/usio wa loopback, kwa sababu tu `OMNIROUTE_MCP_ENFORCE_SCOPES` husambazwa
-ikiwa na `false` kwa chaguo-msingi. Ufunguo kamili wa `manage`/`admin` kupitia HTTP, na kila mpigaji wa stdio/ndani, huhifadhi
-bila mabadiliko tabia iliyopo inayodhibitiwa na `OMNIROUTE_MCP_ENFORCE_SCOPES`.
+`source === "authInfo"` (yaani, kichwa halisi cha HTTP Authorization kwa kila ufunguo, kwa HTTP/SSE pekee) NA ufunguo huo
+hauna mawanda kamili ya `manage`/`admin`. Hii huziba pengo ambapo ufunguo wenye mawanda finyu ya upitishaji ya
+`mcp:connect` PEKEE — yaliyoelezwa hapo juu kuwa hayaidhinishi chochote isipokuwa ruhusa maalum ya LOCAL_ONLY ya
+`/api/mcp/` — ungeweza vinginevyo kuita kila zana ya MCP mara tu mwendeshaji
+alipowezesha ufikiaji wa MCP wa mbali/usio wa loopback, kwa sababu tu `OMNIROUTE_MCP_ENFORCE_SCOPES` hutolewa
+ikiwa na `false` kwa chaguo-msingi. Ufunguo wenye `manage`/`admin` kamili kupitia HTTP, na kila mpigaji wa stdio/ndani, huhifadhi
+tabia iliyopo inayodhibitiwa na `OMNIROUTE_MCP_ENFORCE_SCOPES` bila mabadiliko.
 
 ---
 

@@ -39,31 +39,31 @@ Các sự cố thường gặp và giải pháp dành cho OmniRoute.
 
 ### Giới hạn tốc độ trên các nhà cung cấp miễn phí (429 / 400 / 401)
 
-**Triệu chứng**: Khi dùng `model: "auto"` với các nhà cung cấp miễn phí/không yêu cầu xác thực (opencode, auggie, v.v.), thỉnh thoảng bạn nhận được `HTTP 429`, `400` hoặc `401` thay vì câu trả lời. Các yêu cầu thành công khi thử lại cùng một lời nhắc sau đó ít phút, nhưng quy trình tự động hóa (tác vụ cron, agent, tập lệnh) bị gián đoạn ngay ở lần lỗi đầu tiên.
+**Triệu chứng**: Khi sử dụng `model: "auto"` với các nhà cung cấp miễn phí/không yêu cầu xác thực (auggie, v.v.), đôi khi bạn nhận được `HTTP 429`, `400` hoặc `401` thay vì câu trả lời. Các yêu cầu thành công khi thử lại cùng một prompt sau đó ít lâu, nhưng quy trình tự động hóa (cron job, agent, script) bị gián đoạn ngay khi gặp lỗi đầu tiên.
 
-**Nguyên nhân gốc rễ**: Ba kiểu lỗi độc lập cộng dồn với nhau:
+**Nguyên nhân gốc rễ**: Ba chế độ lỗi độc lập chồng lên nhau:
 
-1. **Giới hạn tốc độ của nhà cung cấp (`429`)**: Các gói miễn phí có thể áp dụng hạn ngạch theo từng khoảng thời gian. Một đợt yêu cầu song song sẽ làm cạn hạn ngạch, vì vậy yêu cầu tiếp theo bị từ chối cho đến khi khoảng thời gian được đặt lại.
-2. **Mô hình bị lỗi trong chế độ chuyển tiếp (`400`/`401`)**: Các nhóm `auto/*` có thể bao gồm các mô hình chuyển tiếp từ `opencode` đã được đăng ký trong danh mục nhưng không có thông tin xác thực đang hoạt động (ví dụ: `oc/north-mini-code-free` → `401`). Bộ định tuyến tự động thử một mô hình, thất bại và truyền lỗi ra ngoài trước khi cơ chế chuyển dự phòng kịp kích hoạt.
-3. **Khuếch đại do xử lý đồng thời (`429` khi tải cao)**: Khi nhiều phiên agent/cron cùng truy cập `auto`, tổng tốc độ yêu cầu vượt quá mức mà các nhà cung cấp miễn phí có thể chịu được, khiến các lệnh gọi hợp lệ bị đánh dấu là lạm dụng.
+1. **Giới hạn tốc độ của nhà cung cấp (`429`)**: Các gói miễn phí có thể áp dụng hạn ngạch theo từng khoảng thời gian. Một loạt lệnh gọi song song làm cạn hạn ngạch, vì vậy yêu cầu tiếp theo sẽ bị từ chối cho đến khi khoảng thời gian được đặt lại.
+2. **Model bị lỗi trong chế độ chuyển tiếp (`400`/`401`)**: Các pool `auto/*` có thể chứa các model chuyển tiếp đã được đăng ký trong catalog nhưng không có thông tin xác thực còn hiệu lực (→ `401`). Bộ định tuyến tự động thử một model, thất bại và lỗi được truyền ra trước khi cơ chế dự phòng kịp kích hoạt.
+3. **Khuếch đại do xử lý đồng thời (`429` khi tải cao)**: Khi nhiều phiên agent/cron cùng truy cập `auto` một lúc, tổng tốc độ yêu cầu vượt quá mức mà các nhà cung cấp miễn phí có thể chịu được, khiến các lệnh gọi hợp lệ bị gắn cờ là lạm dụng.
 
-**Cách khắc phục đã được xác minh (do cộng đồng báo cáo, 2026-08-10)**: điều chỉnh ba biến môi trường để việc luân chuyển, xử lý đồng thời và chuyển dự phòng hấp thụ các biến động của gói miễn phí thay vì thất bại vì chúng:
+**Cách khắc phục đã được xác minh (do cộng đồng báo cáo, 2026-08-10)**: điều chỉnh ba biến môi trường để cơ chế luân chuyển, kiểm soát đồng thời và dự phòng hấp thụ biến động của gói miễn phí thay vì bị dừng do lỗi:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # chuyển sang mô hình/nhà cung cấp khác khi gặp 400/401 (bỏ qua các mô hình chuyển tiếp bị lỗi)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # giới hạn tiếp nhận rõ ràng cho tác vụ nặng (mặc định không được đặt: không giới hạn số lượng yêu cầu, xem ghi chú bên dưới)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # tăng thời gian chờ có giới hạn vượt quá giá trị mặc định của RATE_LIMIT_MAX_WAIT_MS cho các dịch vụ thượng nguồn chậm
+export OMNIROUTE_ROTATE_ON_400=true           # chuyển sang model/nhà cung cấp khác khi gặp 400/401 (bỏ qua các model chuyển tiếp bị lỗi)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # đặt rõ giới hạn tiếp nhận tác vụ nặng (mặc định không đặt: không giới hạn số lượng yêu cầu, xem ghi chú bên dưới)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # tăng thời gian chờ có giới hạn vượt quá giá trị mặc định RATE_LIMIT_MAX_WAIT_MS cho các dịch vụ thượng nguồn chậm
 ```
 
-Đặt các biến này trong môi trường tiến trình OmniRoute (daemon, ví dụ thông qua plist LaunchAgent hoặc `systemctl edit`), rồi khởi động lại OmniRoute. Cờ luân chuyển là cơ chế mang lại hiệu quả cao nhất: nó biến một lỗi nghiêm trọng thành một lần thử lại minh bạch với một nhà cung cấp đang hoạt động tốt trong nhóm.
+Đặt các biến này trong môi trường của tiến trình OmniRoute (daemon, ví dụ thông qua plist của LaunchAgent hoặc `systemctl edit`), sau đó khởi động lại OmniRoute. Cờ luân chuyển là đòn bẩy có tác động lớn nhất: nó biến một lỗi nghiêm trọng thành một lần thử lại minh bạch với một nhà cung cấp đang hoạt động tốt trong pool.
 
-**Lưu ý**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` giới hạn số lượng yêu cầu nặng — có ngữ cảnh dài — được chạy cùng lúc; giới hạn này là một cổng tiếp nhận, không phải bộ giới hạn tốc độ của nhà cung cấp. **Cập nhật về #503-fanout:** biến này không còn được đặt theo mặc định (giờ đây nó chỉ có hiệu lực khi được cấu hình rõ ràng như ở trên) — thay vào đó, việc tiếp nhận tác vụ nặng được kiểm soát bằng ngân sách byte tự động suy ra (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) có khả năng tự điều chỉnh theo giới hạn bộ nhớ thực của máy chủ, vì vậy một bản triển khai mới sẽ gặp ít lỗi từ chối `503 chat_admission_busy` hơn đáng kể mà hoàn toàn không cần đặt biến này; việc đặt rõ ràng như ở đây vẫn hoạt động chính xác như đã mô tả. Các giá trị ghi đè ngân sách byte rõ ràng bị giới hạn trong khoảng 8 MiB–2 GiB. Lỗi `413 body_exceeds_budget` không phải là lỗi tạm thời: hãy tăng ngân sách byte đó, giảm `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` hoặc tăng giới hạn bộ nhớ của tiến trình. Việc loại bỏ yêu cầu do `inflight_bytes_budget` là tình trạng tranh chấp tài nguyên tạm thời và vẫn có thể thử lại. Việc giới hạn tốc độ theo từng nhà cung cấp (`open-sse/services/rateLimitManager.ts`) được quản lý riêng bởi `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` và `RATE_LIMIT_AUTO_ENABLE` — xem `.env.example`.
+**Lưu ý**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` giới hạn số lượng yêu cầu nặng — có ngữ cảnh dài — chạy cùng lúc; giới hạn này là cổng tiếp nhận, không phải bộ giới hạn tốc độ của nhà cung cấp. **Cập nhật #503-fanout:** biến này không còn được đặt theo mặc định (giờ đây nó chỉ có hiệu lực khi được cấu hình rõ ràng như ở trên) — thay vào đó, việc tiếp nhận tác vụ nặng được kiểm soát bằng ngân sách byte tự động suy ra (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), tự điều chỉnh theo giới hạn bộ nhớ thực tế của máy chủ, vì vậy một bản triển khai mới sẽ gặp ít lỗi từ chối `503 chat_admission_busy` hơn đáng kể mà không cần đặt biến này; việc đặt rõ biến này như ở đây vẫn hoạt động chính xác như tài liệu mô tả. Giá trị ghi đè ngân sách byte rõ ràng được giới hạn trong khoảng 8 MiB–2 GiB. Lỗi `413 body_exceeds_budget` không phải lỗi tạm thời: hãy tăng ngân sách byte đó, giảm `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` hoặc tăng giới hạn bộ nhớ của tiến trình. Việc loại bỏ tải do `inflight_bytes_budget` là tình trạng tranh chấp tạm thời và vẫn có thể thử lại. Cơ chế giới hạn tốc độ theo từng nhà cung cấp (`open-sse/services/rateLimitManager.ts`) được điều chỉnh riêng bằng `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` và `RATE_LIMIT_AUTO_ENABLE` — xem `.env.example`.
 
-**Cách xác minh bản sửa lỗi đã hoạt động**: chạy agent/cron hai lần liên tiếp trong khoảng thời gian ngắn và xác nhận cả hai lần đều thành công. Trước khi sửa, lần chạy thứ hai thường trả về lỗi `429`/`401`. Sau khi sửa, các lỗi (nếu có) sẽ được tự động thử lại và lệnh gọi sẽ hoàn tất. Bạn cũng có thể chạy `curl /monitoring/health` và theo dõi trường `rateLimitedUntil` trên các kết nối nhà cung cấp cũng như `circuitBreakers.providerBreakers[].state` đối với các nhà cung cấp bị ảnh hưởng — trạng thái là một trong các giá trị `CLOSED`, `DEGRADED`, `OPEN` hoặc `HALF_OPEN` (xem `src/shared/utils/circuitBreaker.ts`), và một nhà cung cấp liên tục gặp lỗi sẽ chuyển trạng thái `CLOSED → DEGRADED → OPEN` trước khi khoảng thời gian đặt lại cho phép một yêu cầu thăm dò đi qua (`HALF_OPEN`).
+**Cách xác minh cách khắc phục đã có hiệu lực**: chạy agent/cron hai lần liên tiếp trong thời gian ngắn và xác nhận cả hai lần đều thành công. Trước khi áp dụng cách khắc phục, lần chạy thứ hai thường trả về `429`/`401`. Sau khi áp dụng, các lỗi (nếu có) sẽ được thử lại một cách minh bạch và lệnh gọi sẽ hoàn tất. Bạn cũng có thể chạy `curl /monitoring/health` và theo dõi trường `rateLimitedUntil` trên các kết nối nhà cung cấp cùng `circuitBreakers.providerBreakers[].state` của các nhà cung cấp bị ảnh hưởng — trạng thái sẽ là một trong các giá trị `CLOSED`, `DEGRADED`, `OPEN` hoặc `HALF_OPEN` (xem `src/shared/utils/circuitBreaker.ts`), và một nhà cung cấp liên tục gặp lỗi sẽ chuyển từ `CLOSED → DEGRADED → OPEN` trước khi khoảng thời gian đặt lại cho phép một yêu cầu thăm dò đi qua (`HALF_OPEN`).
 
-**Nếu bạn vẫn thấy lỗi 429**: tài khoản đang hoạt động của nhà cung cấp đó thực sự đã dùng hết _hạn ngạch_ (không chỉ chạm giới hạn tốc độ). Hãy thêm tài khoản thứ hai cho cùng nhà cung cấp trong bảng điều khiển OmniRoute → Providers → Accounts, hoặc kết hợp thêm một nhà cung cấp miễn phí khác (ví dụ: `routeway`, `auggie`). Việc luân phiên chỉ hữu ích với các lỗi tạm thời về giới hạn tốc độ/400/401; khi hạn ngạch đã cạn hoàn toàn, bạn cần thông tin xác thực thứ hai hoặc một nhà cung cấp khác.
+**Nếu bạn vẫn gặp 429**: tài khoản đang hoạt động của nhà cung cấp đó thực sự đã dùng hết _hạn ngạch_ (không chỉ là giới hạn tốc độ). Thêm tài khoản thứ hai cho cùng nhà cung cấp trong bảng điều khiển OmniRoute → Providers → Accounts, hoặc kết hợp thêm một nhà cung cấp miễn phí khác (ví dụ: `routeway`, `auggie`). Cơ chế luân chuyển chỉ giúp xử lý các lỗi tạm thời về tốc độ/400/401; việc cạn kiệt hoàn toàn hạn ngạch đòi hỏi thông tin xác thực thứ hai hoặc một nhà cung cấp khác.
 
-**Nếu bạn thấy lỗi 403 trên các mô hình thị giác (`auto/vision`, `bazaarlink/*`)**: tài khoản được kết nối không có gói trả phí hỗ trợ tính năng thị giác, hoặc khóa API không có đủ quyền. Hãy xác minh trong bảng điều khiển của nhà cung cấp rằng phạm vi của khóa bao gồm tính năng thị giác/đa phương thức, hoặc kết nối một tài khoản thuộc gói trả phí và tiếp tục dùng tài khoản đó làm đích cho các yêu cầu thị giác.
+**Nếu bạn gặp 403 trên các model thị giác (`auto/vision`, `bazaarlink/*`)**: tài khoản đã kết nối không có gói trả phí bao gồm tính năng thị giác hoặc API key không có đủ quyền. Hãy xác minh trong bảng điều khiển của nhà cung cấp rằng phạm vi của key bao gồm thị giác/đa phương thức, hoặc kết nối tài khoản thuộc gói trả phí và giữ tài khoản đó làm đích xử lý thị giác.
 
 ---
 
@@ -94,35 +94,35 @@ Các cảnh báo bắt nguồn từ những phạm vi peer dependency đã lỗi
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Khi chạy `npm install -g omniroute`, các phiên bản npm mới hơn (v11+ và v12+) mặc định chặn các script vòng đời của package và hiển thị cảnh báo install-scripts:
+Khi chạy `npm install -g omniroute`, các phiên bản npm mới hơn (v11+ và v12+) mặc định chặn các tập lệnh vòng đời của gói và hiển thị cảnh báo install-scripts:
 
 ```
-npm warn install-scripts 7 package có script cài đặt bị chặn vì không được allowScripts cho phép:
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Có thể bỏ qua cảnh báo này không?
 
-**Có thể bỏ qua một phần, nhưng không nên chạy mà không có các script.** OmniRoute cung cấp các phương án dự phòng linh hoạt: nếu không thể tải các binding `better-sqlite3` gốc từ bundle độc lập, ứng dụng sẽ chuyển sang các driver thay thế như `node:sqlite` hoặc `sql.js` (xem [Phân giải SQLite trong thời gian chạy](../ops/SQLITE_RUNTIME.md)). Máy chủ vẫn sẽ khởi động, nhưng việc chạy trên các phương án dự phòng WASM như `sql.js` sẽ vô hiệu hóa chế độ WAL (Write-Ahead Logging) của SQLite, đồng thời làm tăng mức sử dụng bộ nhớ và chi phí đồng bộ hóa ổ đĩa.
+**Có thể bỏ qua một phần, nhưng không nên chạy khi không có các tập lệnh này.** OmniRoute có các cơ chế dự phòng an toàn: nếu không thể tải các binding `better-sqlite3` gốc từ gói độc lập, ứng dụng sẽ chuyển sang các trình điều khiển thay thế như `node:sqlite` hoặc `sql.js` (xem [Phân giải môi trường chạy SQLite](../ops/SQLITE_RUNTIME.md)). Máy chủ vẫn sẽ khởi động, nhưng việc chạy trên các cơ chế dự phòng WASM như `sql.js` sẽ vô hiệu hóa chế độ WAL (Write-Ahead Logging) của SQLite và làm tăng mức sử dụng bộ nhớ cũng như chi phí đồng bộ hóa ổ đĩa.
 
-### Những script nào thực sự bắt buộc?
+### Những tập lệnh nào thực sự bắt buộc?
 
-Không phải tất cả các script bị chặn đều cần thiết để chạy OmniRoute:
+Không phải tất cả các tập lệnh bị chặn đều thiết yếu để chạy OmniRoute:
 
-- **Thiết yếu (`omniroute`, `better-sqlite3`):** OmniRoute chạy từ bundle ứng dụng độc lập Next.js (`dist/`). Trong quá trình cài đặt, npm tải xuống hoặc biên dịch driver SQLite gốc dành riêng cho máy chủ trong `node_modules/better-sqlite3/` ở cấp cao nhất. Sau đó, script `postinstall` của OmniRoute (`scripts/build/postinstall.mjs`) xác minh và sao chép các tệp nhị phân dành riêng cho máy chủ này vào `dist/node_modules/` để máy chủ độc lập có thể truy cập chúng. Nếu script postinstall của `omniroute` bị chặn, bước sao chép này sẽ bị bỏ qua.
-- **Tùy chọn/có tính bắc cầu (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Đây là các trình trợ giúp xây dựng, công cụ theo dõi hoặc tiện ích chuỗi khóa hệ thống. Việc cho phép chúng sẽ ngăn các cảnh báo xây dựng, nhưng chúng không cần thiết đối với chức năng định tuyến cốt lõi.
-- **Bị loại trừ (`onnxruntime-node`):** Đây là một dependency tùy chọn dành cho embedding AI cục bộ và **không** bắt buộc để chạy OmniRoute. Script postinstall của nó tải xuống khoảng 300MB tài nguyên CUDA từ NuGet; không đưa nó vào danh sách cho phép trừ khi bạn chủ động muốn sử dụng khả năng tăng tốc ONNX cục bộ trên phần cứng được hỗ trợ.
+- **Thiết yếu (`omniroute`, `better-sqlite3`):** OmniRoute chạy từ một gói ứng dụng Next.js độc lập (`dist/`). Trong quá trình cài đặt, npm tải xuống hoặc biên dịch trình điều khiển SQLite gốc dành riêng cho máy chủ trong `node_modules/better-sqlite3/` cấp cao nhất. Sau đó, tập lệnh `postinstall` của OmniRoute (`scripts/build/postinstall.mjs`) xác minh và sao chép các tệp nhị phân dành riêng cho máy chủ này vào `dist/node_modules/` để máy chủ độc lập có thể truy cập chúng. Nếu tập lệnh postinstall của `omniroute` bị chặn, bước sao chép này sẽ bị bỏ qua.
+- **Tùy chọn/bắc cầu (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Đây là các công cụ hỗ trợ xây dựng, công cụ theo dõi hoặc tiện ích quản lý chuỗi khóa hệ thống. Việc cho phép chúng sẽ ngăn các cảnh báo xây dựng, nhưng chúng không bắt buộc đối với chức năng định tuyến cốt lõi.
+- **Bị loại trừ (`onnxruntime-node`):** Đây là một phần phụ thuộc tùy chọn dành cho embedding AI cục bộ và **không** bắt buộc để chạy OmniRoute. Tập lệnh postinstall của nó tải xuống khoảng 300MB tài nguyên CUDA từ NuGet; không đưa nó vào danh sách cho phép trừ khi bạn thực sự có ý định sử dụng tính năng tăng tốc ONNX cục bộ trên phần cứng được hỗ trợ.
 
-### Cách khắc phục được khuyến nghị
+### Cách khắc phục được đề xuất
 
-Để cho phép các script cài đặt bắt buộc trong quá trình cài đặt toàn cục và ẩn cảnh báo, hãy truyền `--allow-scripts` cho OmniRoute và các dependency gốc của nó:
+Để cho phép các tập lệnh cài đặt bắt buộc trong quá trình cài đặt toàn cục và loại bỏ cảnh báo, hãy truyền `--allow-scripts` cho OmniRoute và các phần phụ thuộc gốc của nó:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Ngoài ra, để cấu hình vĩnh viễn cho tất cả các lần cài đặt toàn cục trong tài khoản người dùng của bạn:
+Ngoài ra, để cấu hình cố định cho tất cả các lần cài đặt toàn cục trên tài khoản người dùng của bạn:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +131,7 @@ npm install -g omniroute
 
 ### Xác minh quá trình cài đặt
 
-Sau khi cài đặt, hãy chạy công cụ chẩn đoán tích hợp để đảm bảo các binding gốc và môi trường thời gian chạy đang hoạt động bình thường:
+Sau khi cài đặt, hãy chạy công cụ chẩn đoán tích hợp để đảm bảo các binding gốc và môi trường chạy hoạt động bình thường:
 
 ```bash
 omniroute doctor

@@ -39,29 +39,29 @@ Masalah lazim dan penyelesaian untuk OmniRoute.
 
 ### Pengehadan Kadar pada Penyedia Percuma (429 / 400 / 401)
 
-**Gejala**: Apabila menggunakan `model: "auto"` dengan penyedia percuma/tanpa pengesahan (opencode, auggie dan sebagainya), anda kadangkala menerima `HTTP 429`, `400`, atau `401` dan bukannya jawapan. Permintaan berjaya apabila gesaan yang sama dicuba semula beberapa ketika kemudian, tetapi automasi (tugas cron, ejen, skrip) terhenti pada kegagalan pertama.
+**Gejala**: Apabila menggunakan `model: "auto"` dengan penyedia percuma/tanpa pengesahan (auggie dan sebagainya), anda sekali-sekala menerima `HTTP 429`, `400`, atau `401` dan bukannya jawapan. Permintaan berjaya apabila gesaan yang sama dicuba semula beberapa ketika kemudian, tetapi automasi (tugas cron, ejen, skrip) terhenti pada kegagalan pertama.
 
-**Punca utama**: Tiga mod kegagalan berasingan berlaku serentak:
+**Punca utama**: Tiga mod kegagalan bebas berlaku serentak:
 
-1. **Had kadar penyedia (`429`)**: Peringkat percuma boleh menguatkuasakan kuota bagi setiap tetingkap masa. Ledakan panggilan selari menghabiskan kuota tersebut, lalu permintaan seterusnya ditolak sehingga tetingkap itu ditetapkan semula.
-2. **Model rosak dalam laluan terus (`400`/`401`)**: Kumpulan `auto/*` boleh merangkumi model laluan terus daripada `opencode` yang didaftarkan dalam katalog tetapi tidak mempunyai bukti kelayakan aktif (contohnya `oc/north-mini-code-free` → `401`). Penghala automatik mencuba salah satu daripadanya, gagal, dan ralat itu disebarkan sebelum sandaran sempat diaktifkan.
-3. **Penggandaan keserentakan (`429` ketika beban tinggi)**: Apabila berbilang sesi ejen/cron mengakses `auto` serentak, kadar permintaan keseluruhan melebihi kadar yang boleh diterima oleh penyedia percuma, lalu panggilan yang sah ditandai sebagai bersifat menyalah guna.
+1. **Had kadar penyedia (`429`)**: Peringkat percuma boleh mengenakan kuota bagi setiap tetingkap masa. Ledakan panggilan selari menghabiskan kuota tersebut, lalu permintaan seterusnya ditolak sehingga tetingkap ditetapkan semula.
+2. **Model rosak dalam passthrough (`400`/`401`)**: Kumpulan `auto/*` boleh merangkumi model passthrough yang didaftarkan dalam katalog tetapi tidak mempunyai bukti kelayakan aktif (→ `401`). Penghala automatik mencuba salah satu model, gagal, dan ralat disebarkan sebelum mekanisme sandaran sempat diaktifkan.
+3. **Penguatan keserentakan (`429` ketika beban tinggi)**: Apabila berbilang sesi ejen/cron mengakses `auto` serentak, kadar permintaan agregat melebihi tahap yang boleh diterima oleh penyedia percuma, menyebabkan panggilan yang sah ditandai sebagai penyalahgunaan.
 
-**Penyelesaian yang disahkan (dilaporkan oleh komuniti, 2026-08-10)**: laraskan tiga pemboleh ubah persekitaran supaya penggiliran, keserentakan dan sandaran menyerap turun naik peringkat percuma dan bukannya gagal kerananya:
+**Pembetulan yang disahkan (dilaporkan oleh komuniti, 2026-08-10)**: laraskan tiga pemboleh ubah persekitaran supaya penggiliran, keserentakan dan sandaran menyerap ketidakstabilan peringkat percuma dan bukannya gagal disebabkan olehnya:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # beralih kepada model/penyedia lain apabila menerima 400/401 (melangkau model laluan terus yang rosak)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # had kemasukan eksplisit untuk beban berat (tidak ditetapkan secara lalai: tiada had bilangan permintaan, lihat nota di bawah)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # tingkatkan tempoh menunggu terhad melepasi nilai lalai RATE_LIMIT_MAX_WAIT_MS untuk penyedia huluan yang perlahan
+export OMNIROUTE_ROTATE_ON_400=true           # beralih kepada model/penyedia lain apabila berlaku 400/401 (melangkau model passthrough yang rosak)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # had kemasukan eksplisit untuk permintaan berat (tidak ditetapkan secara lalai: tiada had bilangan permintaan, lihat nota di bawah)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # tingkatkan tempoh menunggu terhad melebihi nilai lalai RATE_LIMIT_MAX_WAIT_MS untuk huluan yang perlahan
 ```
 
-Tetapkan pemboleh ubah ini dalam persekitaran proses OmniRoute (demon, contohnya melalui plist LaunchAgent atau `systemctl edit`), kemudian mulakan semula OmniRoute. Bendera penggiliran ialah tetapan tunggal yang memberikan impak terbesar: ia menukar kegagalan mutlak menjadi percubaan semula secara telus menggunakan penyedia yang sihat dalam kumpulan.
+Tetapkan pemboleh ubah ini dalam persekitaran proses OmniRoute (demon tersebut, contohnya melalui plist LaunchAgent atau `systemctl edit`), kemudian mulakan semula OmniRoute. Bendera penggiliran ialah mekanisme tunggal yang memberikan impak terbesar: ia menukar kegagalan mutlak kepada percubaan semula telus melalui penyedia yang sihat dalam kumpulan.
 
-**Nota**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` mengehadkan bilangan permintaan beban berat — konteks panjang — yang dijalankan serentak; had ini ialah gerbang kemasukan, bukannya pengehad kadar penyedia. **Kemas kini #503-fanout:** pemboleh ubah ini tidak lagi ditetapkan secara lalai (kini ia hanya berkuat kuasa apabila dikonfigurasikan secara eksplisit seperti di atas) — sebaliknya, kemasukan beban berat dikawal oleh belanjawan bait terbitan automatik (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) yang melaraskan dirinya berdasarkan had memori sebenar hos. Oleh itu, penggunaan baharu sepatutnya mengalami jauh lebih sedikit penolakan `503 chat_admission_busy` tanpa perlu menetapkan pemboleh ubah ini; menetapkannya secara eksplisit di sini masih berfungsi tepat seperti yang didokumenkan. Penggantian belanjawan bait secara eksplisit dihadkan kepada 8 MiB–2 GiB. `413 body_exceeds_budget` bukan keadaan sementara: tingkatkan belanjawan bait tersebut, kurangkan `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, atau tingkatkan had memori proses. Pelepasan `inflight_bytes_budget` ialah persaingan sumber sementara dan masih boleh dicuba semula. Pengehadan kadar bagi setiap penyedia (`open-sse/services/rateLimitManager.ts`) dikawal secara berasingan oleh `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, dan `RATE_LIMIT_AUTO_ENABLE` — lihat `.env.example`.
+**Nota**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` mengehadkan bilangan permintaan berat — berkonteks panjang — yang dijalankan serentak; had tersebut ialah get kemasukan, bukannya pengehad kadar penyedia. **Kemas kini #503-fanout:** pemboleh ubah ini tidak lagi ditetapkan secara lalai (kini ia hanya berkuat kuasa apabila dikonfigurasikan secara eksplisit, seperti di atas) — sebaliknya, kemasukan permintaan berat dikawal oleh belanjawan bait terbitan automatik (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) yang menskalakan dirinya berdasarkan had memori sebenar hos, maka pelaksanaan baharu sepatutnya mengalami jauh lebih sedikit penolakan `503 chat_admission_busy` tanpa perlu menetapkan pemboleh ubah ini sama sekali; menetapkannya secara eksplisit di sini masih berfungsi tepat seperti yang didokumentasikan. Penggantian belanjawan bait secara eksplisit dihadkan kepada 8 MiB–2 GiB. `413 body_exceeds_budget` bukan bersifat sementara: tingkatkan belanjawan bait tersebut, kurangkan `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, atau tingkatkan had memori proses. Pelepasan beban `inflight_bytes_budget` ialah persaingan sumber sementara dan masih boleh dicuba semula. Pengehadan kadar bagi setiap penyedia (`open-sse/services/rateLimitManager.ts`) dikawal secara berasingan oleh `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, dan `RATE_LIMIT_AUTO_ENABLE` — lihat `.env.example`.
 
-**Cara mengesahkan ia berfungsi**: jalankan ejen/cron anda dua kali berturut-turut dalam tempoh singkat dan pastikan kedua-duanya berjaya. Sebelum pembaikan, pelaksanaan kedua biasanya menghasilkan ralat `429`/`401`. Selepas pembaikan, kegagalan (jika ada) akan dicuba semula secara telus dan panggilan akan selesai. Anda juga boleh menjalankan `curl /monitoring/health` dan memantau medan `rateLimitedUntil` pada sambungan penyedia serta `circuitBreakers.providerBreakers[].state` untuk penyedia yang terjejas — keadaannya ialah salah satu daripada `CLOSED`, `DEGRADED`, `OPEN`, atau `HALF_OPEN` (lihat `src/shared/utils/circuitBreaker.ts`), dan penyedia yang terus gagal akan bertukar daripada `CLOSED → DEGRADED → OPEN` sebelum tetingkap tetapan semula membenarkan satu percubaan pemeriksaan (`HALF_OPEN`).
+**Cara mengesahkan pembetulan berjaya**: jalankan ejen/cron anda dua kali dalam sela masa yang singkat dan sahkan kedua-duanya berjaya. Sebelum pembetulan, pelaksanaan kedua lazimnya menghasilkan `429`/`401`. Selepas pembetulan, kegagalan (jika ada) dicuba semula secara telus dan panggilan diselesaikan. Anda juga boleh menjalankan `curl /monitoring/health` dan memantau medan `rateLimitedUntil` pada sambungan penyedia serta `circuitBreakers.providerBreakers[].state` untuk penyedia yang terjejas — keadaan tersebut ialah salah satu daripada `CLOSED`, `DEGRADED`, `OPEN`, atau `HALF_OPEN` (lihat `src/shared/utils/circuitBreaker.ts`), dan penyedia yang terus gagal akan berubah daripada `CLOSED → DEGRADED → OPEN` sebelum tetingkap penetapan semula membenarkan prob melaluinya (`HALF_OPEN`).
 
-**Jika anda masih melihat 429**: akaun aktif untuk penyedia tersebut benar-benar telah kehabisan _kuota_ (bukan sekadar had kadar). Tambahkan akaun kedua untuk penyedia yang sama dalam papan pemuka OmniRoute → Providers → Accounts, atau gabungkan penyedia percuma lain (contohnya `routeway`, `auggie`). Penggiliran hanya membantu menangani ralat kadar/400/401 sementara; kehabisan kuota sepenuhnya memerlukan kelayakan kedua atau penyedia lain.
+**Jika anda masih melihat 429**: akaun aktif bagi penyedia tersebut benar-benar telah menghabiskan _kuotanya_ (bukan sekadar kadar). Tambahkan akaun kedua untuk penyedia yang sama dalam papan pemuka OmniRoute → Providers → Accounts, atau sertakan penyedia percuma lain (contohnya `routeway`, `auggie`). Penggiliran hanya membantu bagi had kadar sementara/400/401; kehabisan kuota sepenuhnya memerlukan bukti kelayakan kedua atau penyedia lain.
 
 **Jika anda melihat 403 pada model penglihatan (`auto/vision`, `bazaarlink/*`)**: akaun yang disambungkan tidak mempunyai pelan berbayar yang merangkumi penglihatan, atau kunci API tidak mempunyai kebenaran yang mencukupi. Sahkan dalam papan pemuka penyedia bahawa skop kunci merangkumi penglihatan/multimodal, atau sambungkan akaun peringkat berbayar dan kekalkannya sebagai sasaran penglihatan.
 
@@ -90,11 +90,11 @@ Amaran tersebut berpunca daripada julat kebergantungan setara yang lapuk dalam p
 
 ---
 
-## Amaran Skrip Pemasangan npm Disekat (pemasangan global)
+## Amaran npm install-scripts Disekat (pemasangan global)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Apabila menjalankan `npm install -g omniroute`, versi npm yang lebih baharu (v11+ dan v12+) menyekat skrip kitar hayat pakej secara lalai dan memaparkan amaran skrip pemasangan:
+Apabila menjalankan `npm install -g omniroute`, versi npm yang lebih baharu (v11+ dan v12+) menyekat skrip kitar hayat pakej secara lalai dan memaparkan amaran install-scripts:
 
 ```
 npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
@@ -104,19 +104,19 @@ npm warn install-scripts 7 packages had install scripts blocked because they are
 
 ### Bolehkah amaran ini diabaikan?
 
-**Sebahagiannya, tetapi menjalankan pemasangan tanpa skrip tidak disyorkan.** OmniRoute menyediakan mekanisme sandaran yang lancar: jika pengikatan natif `better-sqlite3` tidak dapat dimuatkan daripada berkas kendiri, aplikasi akan beralih kepada pemacu alternatif seperti `node:sqlite` atau `sql.js` (lihat [Penyelesaian Masa Jalan SQLite](../ops/SQLITE_RUNTIME.md)). Pelayan masih akan bermula, tetapi penggunaan mekanisme sandaran WASM seperti `sql.js` akan menyahdayakan mod WAL (Write-Ahead Logging) SQLite serta meningkatkan penggunaan memori dan overhed penyegerakan cakera.
+**Sebahagiannya, tetapi menjalankan aplikasi tanpa skrip tidak disyorkan.** OmniRoute menyediakan mekanisme sandaran yang baik: jika pengikatan natif `better-sqlite3` tidak dapat dimuatkan daripada berkas kendiri, aplikasi akan beralih kepada pemacu alternatif seperti `node:sqlite` atau `sql.js` (lihat [Penyelesaian Masa Jalan SQLite](../ops/SQLITE_RUNTIME.md)). Pelayan masih akan dimulakan, tetapi penggunaan mekanisme sandaran WASM seperti `sql.js` akan menyahdayakan mod WAL (Write-Ahead Logging) SQLite serta meningkatkan penggunaan memori dan overhed penyegerakan cakera.
 
-### Skrip manakah yang benar-benar diperlukan?
+### Skrip manakah yang sebenarnya diperlukan?
 
 Bukan semua skrip yang disekat penting untuk menjalankan OmniRoute:
 
-- **Penting (`omniroute`, `better-sqlite3`):** OmniRoute dijalankan daripada berkas aplikasi kendiri Next.js (`dist/`). Semasa pemasangan, npm memuat turun atau mengkompil pemacu SQLite natif khusus hos dalam `node_modules/better-sqlite3/` peringkat teratas. Skrip `postinstall` OmniRoute (`scripts/build/postinstall.mjs`) kemudiannya mengesahkan dan menyalin binari khusus hos ini ke dalam `dist/node_modules/` supaya pelayan kendiri boleh mengaksesnya. Jika skrip postinstall `omniroute` disekat, langkah penyalinan ini dilangkau.
-- **Pilihan/transitif (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Ini ialah pembantu binaan, alat pemantau, atau utiliti rantai kunci sistem. Membenarkannya akan mengelakkan amaran binaan, tetapi ia tidak diperlukan untuk fungsi penghalaan teras.
-- **Dikecualikan (`onnxruntime-node`):** Kebergantungan pilihan untuk pembenaman AI setempat dan **tidak** diperlukan untuk menjalankan OmniRoute. Skrip postinstallnya memuat turun kira-kira 300MB aset CUDA daripada NuGet; jangan sertakannya dalam senarai dibenarkan melainkan anda secara khusus mahu menggunakan pecutan ONNX setempat pada perkakasan yang disokong.
+- **Penting (`omniroute`, `better-sqlite3`):** OmniRoute dijalankan daripada berkas aplikasi kendiri Next.js (`dist/`). Semasa pemasangan, npm memuat turun atau menyusun pemacu SQLite natif khusus hos dalam `node_modules/better-sqlite3/` peringkat teratas. Skrip `postinstall` OmniRoute (`scripts/build/postinstall.mjs`) kemudian mengesahkan dan menyalin perduaan khusus hos ini ke dalam `dist/node_modules/` supaya pelayan kendiri boleh mengaksesnya. Jika skrip postinstall `omniroute` disekat, langkah penyalinan ini akan dilangkau.
+- **Pilihan/transitif (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Ini ialah pembantu binaan, alat pemantau atau utiliti rantai kunci sistem. Membenarkannya akan mengelakkan amaran binaan, tetapi pakej tersebut tidak diperlukan untuk fungsi penghalaan teras.
+- **Dikecualikan (`onnxruntime-node`):** Kebergantungan pilihan untuk pembenaman AI setempat dan **tidak** diperlukan untuk menjalankan OmniRoute. Skrip postinstall pakej ini memuat turun aset CUDA bersaiz ~300MB daripada NuGet; jangan masukkannya dalam senarai dibenarkan melainkan anda memang berhasrat untuk menggunakan pecutan ONNX setempat pada perkakasan yang disokong.
 
 ### Penyelesaian yang disyorkan
 
-Untuk membenarkan skrip pemasangan yang diperlukan semasa pemasangan global dan menyenyapkan amaran, berikan `--allow-scripts` untuk OmniRoute dan kebergantungan natifnya:
+Untuk membenarkan skrip pemasangan yang diperlukan semasa pemasangan global dan menyenyapkan amaran, gunakan `--allow-scripts` untuk OmniRoute dan kebergantungan natifnya:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild

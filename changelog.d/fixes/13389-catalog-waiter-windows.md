@@ -1,1 +1,0 @@
-- **fix(models):** Keep concurrent catalog timeouts in one shared build window and yield during API-key filtering so large authenticated catalogs do not stall unrelated requests.

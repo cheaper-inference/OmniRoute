@@ -72,6 +72,16 @@ curl -i \
 
 `manage` නොවන යතුරක් (හෝ Bearer නොමැති විට) `403 LOCAL_ONLY` ආපසු ලබා දෙයි. සහෝදර උපසර්ගය වන `/api/cli-tools/runtime/*` හිතාමතාම මඟහැරිය නොහැකි ලෙස සකසා ඇත — [මාර්ග ආරක්ෂක ස්තර — Manage විෂයපථ ව්යතිරේකය](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) බලන්න.
 
+### Origin තහවුරු කිරීම
+
+සත්‍යාපනයෙන් පසු `/api/mcp/*` වෙත එන සෑම ඉල්ලීමකම — ට්‍රාන්ස්පෝට් සහ `status`, `tools`, `audit`, `restart` වැනි කළමනාකරණ මාර්ග — `Origin` ශීර්ෂය, අමතන්නා කවුරුන් වුවද (API යතුර, CLI ටෝකනය, ඩෑෂ්බෝඩ් සැසිය, හෝ පිවිසුම අක්‍රිය විට නිර්නාමික loopback) පරීක්ෂා කෙරේ. මෙය MCP Streamable HTTP පිරිවිතරය අවශ්‍ය කරන DNS rebinding ආරක්ෂාවයි.
+
+- **`Origin` ශීර්ෂයක් නැත** → අවසර ඇත. OmniRoute CLI, SDK සහ IDE සේවාලාභීන් එය නොයවයි.
+- **අවසර ලත් `Origin`** → ඕනෑම පෝට් එකක `localhost` / `127.0.0.1` / `[::1]`, හෝ OmniRoute හි ම පොදු origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, විශ්වාසදායක reverse proxy එකක් යොමු කළ origin (`OMNIROUTE_TRUST_PROXY`, base URL සකසා නොමැති විට පමණි), හෝ සෘජුව ප්‍රවේශ වන loopback/LAN IP සත්කාරකය. `Host` ශීර්ෂය පමණක් කිසි විටෙක origin එකක් විශ්වාසදායක නොකරයි.
+- **`null` ඇතුළු වෙනත් ඕනෑම `Origin`** → JSON-RPC දෝෂ අන්තර්ගතය සමඟ `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. වලංගු CSRF ටෝකනයක් ඉදිරිපත් කරන ඩෑෂ්බෝඩ් සැසියක්, අනෙකුත් ඩෑෂ්බෝඩ් ලිවීම් මෙන්ම, තවමත් පිළිගැනේ.
+
+reverse proxy එකක් පිටුපස සේවය කරන බ්‍රවුසර MCP සේවාලාභියෙකුට `OMNIROUTE_PUBLIC_BASE_URL` අවශ්‍යයි; වෙනත් origins සඳහා අවසර ලැයිස්තුවක් නැත. CORS preflight (`OPTIONS`) Origin සඳහා පරීක්ෂා නොකෙරේ; ඊට පසු එන ඉල්ලීම පරීක්ෂා කෙරේ.
+
 ## IDE වින්යාසය
 
 Claude Desktop, Cursor, Cline සහ අනුකූල MCP සේවාලාභීන් පිහිටුවීම සඳහා [MCP සේවාලාභී වින්යාසය](../guides/SETUP_GUIDE.md#mcp-client-configuration) බලන්න.
@@ -288,75 +298,86 @@ Guardrails යනු කතාබස් නල මාර්ගය තුළ ය�
 
 ---
 
-## සත්යාපනය සහ විෂය පථ
+## සත්යාපනය සහ පරාස
 
-MCP මෙවලම් ඇමතුම් විසින් ඇමතුම්කරුගෙන් විෂය පථ තන්තු කියවනු ලැබේ. එම පරීක්ෂාව ස්වාධීන නාම අවකාශ තුනෙන් එකකි. එක් පරීක්ෂකයකුගෙන් ලැබෙන අනුමැතියක් අනෙක් පරීක්ෂකයන්ගෙන් ලැබෙන අනුමැතියක් නොවේ.
-නීති [විෂය පථ නාම අවකාශ තුන](#three-scope-namespaces) යටතේ ඇත.
-මෙවලම් නාමාවලිය [MCP මෙවලම් විෂය පථ](#mcp-tool-scopes) යටතේ ඇත.
+MCP මෙවලම් ඇමතුම්, අමතන්නා වෙතින් පරාස තන්තු කියවයි. එම පරීක්ෂාව ස්වාධීන
+නාමාවකාශ තුනෙන් එකකි. එක් පරීක්ෂකයකින් සමත් වීම අනෙක් ඒවායෙන් සමත් වීමක් නොවේ.
+නීති [පරාස නාමාවකාශ තුන](#three-scope-namespaces) යටතේ ඇත.
+මෙවලම් නාමාවලිය [MCP මෙවලම් පරාස](#mcp-tool-scopes) යටතේ ඇත.
 
-### විෂය පථ නාම අවකාශ තුන
+### පරාස නාමාවකාශ තුන
 
-API යතුරක් මත ඇති `manage`, MCP මෙවලමක් මත ඇති `read:compression`, සහ
-`oma_live_…` ප්රවේශ ටෝකනයක් මත ඇති `read` යනු වෙනස් අවසර තුනකි. විකරණ සිදු කරන කළමනාකරණ මාර්ගයකට `read` ප්රවේශ ටෝකනයක් යවන ඇමතුම්කරුවන්ට HTTP 403
+API යතුරක `manage`, MCP මෙවලමක `read:compression`, සහ
+`oma_live_…` ප්රවේශ ටෝකනයක `read` යනු වෙනස් ප්රදාන තුනකි. වෙනස්කම් සිදු කරන
+කළමනාකරණ මාර්ගයකට `read` ප්රවේශ ටෝකනයක් යවන අමතන්නන්ට HTTP 403
 `Access token scope 'read' is insufficient; 'write' required.`
-ලැබේ. එම ශ්රේණිය `scopeSatisfies` වේ. එය MCP වගුව පරිශීලනය නොකරන අතර, MCP ගැළපුම්කරු ද එය පරිශීලනය නොකරයි.
+ලැබේ. එම ශ්රේණිය `scopeSatisfies` වේ. එය MCP වගුව පරිශීලනය නොකරන අතර MCP
+ගැළපුම්කරු ද එය පරිශීලනය නොකරයි.
 
-| නාම අවකාශය          | අක්තපත්රය                                                         | පරීක්ෂකය               | අනුමැතියක් ඉඩ දෙන්නේ                                     |
-| :------------------ | :---------------------------------------------------------------- | :--------------------- | :------------------------------------------------------- |
-| API-යතුරු කළමනාකරණය | `api_keys.scopes`                                                 | `hasManageScope`       | එම Bearer යතුර සඳහා කළමනාකරණ REST                        |
-| API-යතුරු ආකලනීය    | එකම අරාව, එක් නිශ්චිත තන්තුවක්                                    | පහත නම් කර ඇති උපකාරකය | එම එක් හැකියාව පමණි                                      |
-| MCP මෙවලම් විෂය පථ  | එකම අරාව, නොඑසේ නම් MCP `_meta`, නොඑසේ නම් `OMNIROUTE_MCP_SCOPES` | `scopeMatches`         | බලාත්මක කිරීම සක්රිය කළ පසු එම මෙවලම                     |
-| ප්රවේශ ටෝකනය        | `oma_live_…`                                                      | `scopeSatisfies`       | එම ශ්රේණිය අවශ්ය වන ක්රමය සහ මාර්ගය සහිත කළමනාකරණ මාර්ගය |
+| නාමාවකාශය           | අක්තපත්රය                                                     | පරීක්ෂකය          | සමත් වීමකින් ඉඩ ලැබෙන්නේ                                 |
+| :------------------ | :------------------------------------------------------------ | :---------------- | :------------------------------------------------------- |
+| API-යතුරු කළමනාකරණය | `api_keys.scopes`                                             | `hasManageScope`  | එම Bearer යතුර සඳහා කළමනාකරණ REST                        |
+| API-යතුරු ආකලන      | එම අරාවම, එක් නිරවද්ය තන්තුවක්                                | පහත නම් කළ සහායකය | එම එක් හැකියාව පමණි                                      |
+| MCP මෙවලම් පරාස     | එම අරාවම, නැතිනම් MCP `_meta`, නැතිනම් `OMNIROUTE_MCP_SCOPES` | `scopeMatches`    | බලාත්මක කිරීම ක්රියාත්මක වූ පසු, එම මෙවලම                |
+| ප්රවේශ ටෝකනය        | `oma_live_…`                                                  | `scopeSatisfies`  | එම ශ්රේණිය අවශ්ය වන ක්රමය සහ මාර්ගය සහිත කළමනාකරණ මාර්ගය |
 
 එක් එක් අක්තපත්රය නිකුත් කිරීම
-[කළමනාකරණ සත්යාපනය](../guides/MANAGEMENT-AUTH.md) තුළ ආවරණය කර ඇත.
+[කළමනාකරණ සත්යාපනය](../guides/MANAGEMENT-AUTH.md) තුළ විස්තර කර ඇත.
 
-#### API-යතුරු විෂය පථ
+#### API-යතුරු පරාස
 
-එක් `api_keys.scopes` අරාවක් කාර්ය දෙකක් සඳහා යොදා ගැනේ. ඒවා වෙනස් ශ්රිත භාවිත කරයි.
+එක් `api_keys.scopes` අරාවක් කාර්යයන් දෙකකට භාවිත වේ. ඒවා වෙනස් ශ්රිත භාවිත කරයි.
 
 **කළමනාකරණ REST.** `manage` සහ `admin` යනු
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) හි සාමාජිකයන් වේ.
-එම යතුර සඳහා කළමනාකරණ මාර්ග අනුමත කරන්නේ `hasManageScope` ය. එම මාර්ගවලදී `admin` හට කළමනාකරණ හැකියාව ඇත. මෙහි `admin` යන වචනය
-ප්රවේශ-ටෝකන ශ්රේණිය නොවන අතර, එය MCP මෙවලම් විෂය පථ බවට විහිදෙන්නේ ද නැත.
+එම යතුර සඳහා කළමනාකරණ මාර්ග අනුමත කරන්නේ `hasManageScope` ය. එම මාර්ගවල
+`admin` හට කළමනාකරණ හැකියාව ඇත. මෙහි `admin` යන වචනය
+ප්රවේශ-ටෝකන ශ්රේණිය නොවන අතර එය MCP මෙවලම් පරාසවලට විහිදෙන්නේද නැත.
 
-**ආකලනීය තන්තු.** සෑම එකක්ම නිශ්චිත සාමාජිකත්ව පරීක්ෂාවක් වන අතර, සෑම එකක්ම
-`MANAGEMENT_API_KEY_SCOPES` වෙතින් පිටත පවතී.
+**ආකලන තන්තු.** සෑම එකක්ම නිරවද්ය සාමාජිකත්ව පරීක්ෂාවක් වන අතර, සෑම එකක්ම
+`MANAGEMENT_API_KEY_SCOPES` ට පිටතින් පවතී.
 
-| විෂය පථය                       | අනුමැතියක් ඉඩ දෙන්නේ                                                                                                                                                     |
-| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | loopback නොවන `/api/mcp/` LOCAL_ONLY ව්යතිරේකයට පමණි (`hasMcpConnectOrManageScope`). `manage` හෝ `admin` සහිත යතුරක් ද එම ව්යතිරේකයෙන් සමත් වේ.                          |
-| `self:usage`                   | මෙම යතුර සඳහා `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` නිර්මාණයේදී මෙම විෂය පථය එක් කරයි (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | එම තත්ත්ව payload එක තුළ upstream ගිණුම් කෝටා (`src/lib/usage/apiKeySelfService.ts`). තත්ත්ව මාර්ගයට තවමත් `self:usage` අවශ්ය වේ.                                        |
-| `policy:bypass-provider-quota` | මෙම යතුරේ inference ඇමතුම් provider-quota ප්රතිපත්තිය මඟ හරියි (`src/sse/handlers/chat.ts` හි `hasProviderQuotaBypassScope`).                                            |
+| පරාසය                          | සමත් වීමකින් ඉඩ ලැබෙන්නේ                                                                                                                                              |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | loopback නොවන `/api/mcp/` LOCAL_ONLY ව්යතිරේකය පමණි (`hasMcpConnectOrManageScope`). `manage` හෝ `admin` සහිත යතුරක් තවමත් එම ව්යතිරේකයෙන් සමත් වේ.                    |
+| `self:usage`                   | මෙම යතුර සඳහා `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` නිර්මාණයේදී මෙම පරාසය එක් කරයි (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | එම තත්ත්ව payload තුළ ඇති upstream ගිණුම් කෝටා (`src/lib/usage/apiKeySelfService.ts`). තත්ත්ව මාර්ගයට තවමත් `self:usage` අවශ්ය වේ.                                    |
+| `policy:bypass-provider-quota` | මෙම යතුරේ inference ඇමතුම් provider-quota ප්රතිපත්තිය මඟ හරියි (`src/sse/handlers/chat.ts` හි `hasProviderQuotaBypassScope`).                                         |
 
 #### ගැළපීම
 
-නාමාවලිය යනු [MCP මෙවලම් විෂය පථ](#mcp-tool-scopes) යටතේ ඇති වගුවයි.
-`src/shared/constants/mcpScopes.ts` හි `MCP_SCOPE_LIST` එම නාමාවලිය ලෙස නොසලකන්න:
-එය මුල් typed උපකුලකයයි. පසුව එකතු කළ මෙවලම් ඊට අමතර විෂය පථ ඒ අසල ප්රකාශ කරයි
-(`read:notion`, `read:skills`, `read:local-corpus`, සහ වගුවේ ඉතිරි ඒවා).
+නාමාවලිය යනු [MCP මෙවලම් පරාස](#mcp-tool-scopes) යටතේ ඇති වගුවයි.
+`src/shared/constants/mcpScopes.ts` හි `MCP_SCOPE_LIST` එම නාමාවලිය ලෙස
+නොසලකන්න: එය මුල් typed උපකුලකයයි. පසුව එක් කළ මෙවලම් එයට අමතර පරාස
+(`read:notion`, `read:skills`, `read:local-corpus`, සහ වගුවේ ඉතිරි ඒවා)
+ප්රකාශ කරයි.
 
-`open-sse/mcp-server/scopeEnforcement.ts` හි `evaluateToolScopes`, අවශ්ය සෑම විෂය පථයක්ම ප්රදානය කළ යම් විෂය පථයකට ගැළපෙන විට ඇමතුමකට ඉඩ දෙයි:
+`open-sse/mcp-server/scopeEnforcement.ts` හි `evaluateToolScopes`, අවශ්ය සෑම
+පරාසයක්ම ප්රදානය කළ කිසියම් පරාසයකට ගැළපෙන විට ඇමතුමකට ඉඩ දෙයි:
 
-- `*` සෑම අවශ්ය විෂය පථයකටම ගැළපේ.
-- `*` වලින් අවසන් වන ප්රදානය කළ විෂය පථයක්, තරුවට පෙර ඇති උපසර්ගයෙන් ආරම්භ වන අවශ්ය විෂය පථයකට ගැළපේ. `read:*`, `read:compression` සමඟ ගැළපේ.
-- අනෙක් සෑම ප්රදානය කළ විෂය පථයක්ම ගැළපෙන්නේ ඊට සර්වසම අවශ්ය තන්තුවට පමණි.
+- `*` සෑම අවශ්ය පරාසයකටම ගැළපේ.
+- `*` වලින් අවසන් වන ප්රදානය කළ පරාසයක්, තාරකාවට පෙර ඇති උපසර්ගයෙන් ආරම්භ වන
+  අවශ්ය පරාසයකට ගැළපේ. `read:*`, `read:compression` ට ගැළපේ.
+- අනෙක් සෑම ප්රදානය කළ පරාසයක්ම ගැළපෙන්නේ ඊට සර්වසම අවශ්ය තන්තුවට පමණි.
 
-විෂය පථ `["manage"]` වන යතුරක් `read:compression` සඳහා `scopeMatches` අසමත් වේ.
-ප්රදානය කළ එකම තන්තු ඒවා වන විට, එම ඇමතුම `admin`, `mcp:connect`, `read`, සහ `write` සඳහා ද අසමත් වේ. අවසානයේ ඇති `*` හැර MCP මෙවලම් විෂය පථ අතර ධුරාවලියක් නොමැත.
+`["manage"]` යන පරාස සහිත යතුරක් `read:compression` සඳහා `scopeMatches` අසමත් වේ.
+ප්රදානය කර ඇති එකම තන්තු ඒවා වන විට, එම ඇමතුමම `admin`, `mcp:connect`, `read`,
+සහ `write` සඳහාද අසමත් වේ. අවසානයේ ඇති `*` හැර MCP මෙවලම් පරාස අතර කිසිදු
+ධුරාවලියක් නොමැත.
 
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` නොමැති නම් බලාත්මක කිරීම අක්රියයි (පෙරනිමිය
-`false`). එය අක්රියව තිබියදී, `evaluateToolScopes` ඇමතුමට ඉඩ දී නාමාවලිය මඟ හරියි. එය සක්රියව තිබියදී, HTTP විසින් Bearer යතුරේ `api_keys.scopes`
-`authInfo` ලෙස භාවිත කරයි ([යතුරකට අදාළ HTTP විෂය පථ බැඳීම](#per-key-http-scope-binding-7895) බලන්න).
-යතුරු විෂය පථ කිසිවක් නිරාකරණය නොවන විට, ප්රදානය කළ කට්ටලය MCP `_meta` වෙතත්, ඉන් පසු
-`OMNIROUTE_MCP_SCOPES` වෙතත් පසුබසී.
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` නොවේ නම් බලාත්මක කිරීම අක්රියයි (පෙරනිමිය
+`false`). එය අක්රියව තිබියදී, `evaluateToolScopes` ඇමතුමට ඉඩ දී නාමාවලිය
+මඟ හරියි. එය ක්රියාත්මකව තිබියදී, HTTP විසින් Bearer යතුරේ `api_keys.scopes`,
+`authInfo` ලෙස භාවිත කරයි ([යතුරකට HTTP පරාස බැඳීම](#per-key-http-scope-binding-7895)
+බලන්න). කිසිදු යතුරු පරාසයක් විසඳාගත නොහැකි විට, ප්රදානය කළ කට්ටලය MCP
+`_meta` වෙතත්, ඉන් පසු `OMNIROUTE_MCP_SCOPES` වෙතත් පසුබසී.
 
-#### ප්රවේශ-ටෝකන විෂය පථ
+#### ප්රවේශ-ටෝකන පරාස
 
-`oma_live_…` ටෝකන (`src/lib/accessTokens/scopes.ts`) `read`, `write`,
-හෝ `admin` දරයි. `scopeSatisfies` යනු ශ්රේණියකි: `admin` විසින් `write` සහ `read` ආවරණය කරන අතර,
-`write` විසින් `read` ආවරණය කරයි. නොදන්නා විෂය පථ කිසිවක් ආවරණය නොකරයි.
+`oma_live_…` ටෝකන (`src/lib/accessTokens/scopes.ts`) තුළ `read`, `write`,
+හෝ `admin` අඩංගු වේ. `scopeSatisfies` යනු ශ්රේණියකි: `admin` විසින් `write` සහ
+`read` ආවරණය කරන අතර, `write` විසින් `read` ආවරණය කරයි. නොදන්නා පරාස කිසිවක්
+ආවරණය නොකරයි.
 
 `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) එම ශ්රේණිය
 `inferRequiredScope` (`src/server/authz/accessScopes.ts`) සමඟ සසඳයි:
@@ -365,23 +386,28 @@ API යතුරක් මත ඇති `manage`, MCP මෙවලමක් ම�
 - අනෙක් සෑම ක්රමයකටම `write` අවශ්ය වේ.
 - `ADMIN_SCOPE_PREFIXES` හි මාර්ග සඳහා සෑම ක්රමයකටම `admin` අවශ්ය වේ. `/api/mcp`
   එම ලැයිස්තුවේ ඇති බැවින්, `write` ප්රවේශ ටෝකනයකට තවමත් MCP HTTP
-  මතුපිට ඇමතීමට නොහැක.
-- `ADMIN_MUTATION_PREFIXES` හි මාර්ග සඳහා `admin` අවශ්ය වන්නේ විකරණ සඳහා පමණි.
+  අතුරුමුහුණත ඇමතිය නොහැක.
+- `ADMIN_MUTATION_PREFIXES` හි මාර්ග සඳහා `admin` අවශ්ය වන්නේ වෙනස්කම් සිදු කරන
+  ක්රියා සඳහා පමණි.
+- `ADMIN_MUTATION_EXACT_PATHS` හි මාර්ග (`/api/settings`,
+  `/api/settings/require-login`) සඳහා `admin` අවශ්ය වන්නේ වෙනස්කම් සිදු කරන
+  ක්රියා සඳහා පමණක් සහ එම නිරවද්ය මාර්ගය මත පමණි — අනෙකුත්
+  `/api/settings/*` උප-මාර්ග `write` ලෙසම පවතී.
 
 `PATCH /api/keys/{id}` යනු mutation එකක් වන අතර එය එම admin ලැයිස්තුවල නොමැති බැවින්,
-`read` token එකකට 403 ප්රතිචාරයක් ලැබේ:
+`read` token එකකට 403 ලැබේ:
 `Access token scope 'read' is insufficient; 'write' required.`
-`write` හෝ `admin` access token එකක් එම route එක සඳහා ප්රමාණවත් වේ. Dashboard JWT එකක්,
+`write` හෝ `admin` access token එකක් එම route එකේ අවශ්යතා සපුරාලයි. Dashboard JWT එකක්,
 loopback CLI machine-id token එකක් සහ `manage` හෝ `admin` සහිත API key එකක්
-වෙනත් branches භාවිත කරන අතර මෙම rank එක මඟින් සීමා නොකෙරේ.
+වෙනත් branches භාවිත කරන අතර මෙම rank එක මඟින් ඒවා සීමා නොකෙරේ.
 
-`/api/mcp` සඳහා `scopeSatisfies` සමත් වන access token එකක් පසු කර ඇත්තේ
+`/api/mcp` සඳහා `scopeSatisfies` සමත් වන access token එකක් පසුකර ඇත්තේ
 management gate එක පමණි. Tool calls තවමත් API-key
-scopes වලට එරෙහිව `scopeMatches` ක්රියාත්මක කරයි. Access-token rank එක `scopeMatches` සඳහා input එකක් නොවේ.
+scopes වලට එරෙහිව `scopeMatches` ධාවනය කරයි. Access-token rank එක `scopeMatches` සඳහා input එකක් නොවේ.
 
 ### MCP tool scopes
 
-Scope බලාත්මක කිරීම `open-sse/mcp-server/scopeEnforcement.ts` තුළ මධ්යගත කර ඇත.
+Scope enforcement එක `open-sse/mcp-server/scopeEnforcement.ts` තුළ මධ්යගත කර ඇත.
 සෑම tool එකකටම නිශ්චිත scopes අවශ්ය වේ:
 
 | විෂය පථය              | මෙවලම්                                                                                                                                                                             |
@@ -420,47 +446,47 @@ Scope බලාත්මක කිරීම `open-sse/mcp-server/scopeEnforcemen
 | `write:obsidian`      | ලිවීමේ මෙවලම් 9ක් — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                 |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                  |
 
-Wildcard විෂයපථ සඳහා සහාය දක්වයි: `read:*` මඟින් සියලු කියවීමේ විෂයපථ ලබා දෙන අතර, `*` මඟින් පූර්ණ ප්රවේශය ලබා දෙයි.
+Wildcard පරාස සඳහා සහය දක්වයි: `read:*` මඟින් සියලු කියවීමේ පරාස ලබා දෙන අතර, `*` මඟින් පූර්ණ ප්රවේශය ලබා දෙයි.
 
 ### `mcp:connect` — පටු route හැකියාව (#7895)
 
 loopback නොවන ස්ථානයකින් HTTP/SSE MCP transport (`/api/mcp/*`) වෙත ළඟා වීමට
-`/api/mcp/` LOCAL_ONLY carve-out එක අවශ්ය වේ (`docs/security/ROUTE_GUARD_TIERS.md` බලන්න). ඓතිහාසිකව,
-එම carve-out එක පිළිගත්තේ පූර්ණ `manage`/`admin`-විෂයපථ API key එකක් පමණි — MCP සමඟ පමණක්
-සන්නිවේදනය කිරීමට අවශ්ය caller කෙනෙකු සඳහා එය අනවශ්ය ලෙස පුළුල්ය. `src/shared/constants/managementScopes.ts` දැන්
-`MCP_CONNECT_SCOPE = "mcp:connect"` export කරයි: එය අතිරේක, පටු විෂයපථයකි (`SELF_USAGE_SCOPE` හා
-සමාන පූර්වාදර්ශයක් ඇති) සහ `src/server/authz/policies/management.ts` තුළ ඇති `/api/mcp/` bypass එකට
-පමණක් අවසර දෙයි — එය වෙනත් කිසිදු management-route ප්රවේශයක් ලබා නොදෙන අතර, හිතාමතාම
-`MANAGEMENT_API_KEY_SCOPES` වෙතින් බැහැර කර ඇත. `manage`/`admin` සහිත key එකක් තවමත් carve-out එක
-වෙනසකින් තොරව පසු කරයි; දුරස්ථ MCP-පමණක් callers සඳහා `mcp:connect` යනු අඩු වරප්රසාද සහිත
-විකල්පයක් වන අතර, එය `hasMcpConnectOrManageScope()` හරහා පරීක්ෂා කරයි.
+`/api/mcp/` LOCAL_ONLY carve-out එක අවශ්ය වේ (`docs/security/ROUTE_GUARD_TIERS.md` බලන්න). ඓතිහාසිකව
+එම carve-out එක පිළිගත්තේ පූර්ණ `manage`/`admin`-scope API key එකක් පමණි — MCP සමඟ පමණක්
+සන්නිවේදනය කිරීමට අවශ්ය caller කෙනෙකුට එය අතිශයින් පුළුල්ය. `src/shared/constants/managementScopes.ts` දැන්
+`MCP_CONNECT_SCOPE = "mcp:connect"` export කරයි: එය
+`src/server/authz/policies/management.ts` තුළ `/api/mcp/` bypass එකට පමණක් අවසර දෙන
+අතිරේක, පටු scope එකකි (`SELF_USAGE_SCOPE` හා සමාන පූර්වාදර්ශයකි) — එය වෙනත් කිසිදු management-route ප්රවේශයක්
+ලබා නොදෙන අතර හිතාමතාම `MANAGEMENT_API_KEY_SCOPES` වෙතින් බැහැර කර ඇත. `manage`/`admin` දරන key එකක්
+තවමත් වෙනසකින් තොරව carve-out එක සමත් වෙයි; දුරස්ථ MCP-only callers සඳහා `mcp:connect` යනු
+`hasMcpConnectOrManageScope()` හරහා පරීක්ෂා කරන, අඩු වරප්රසාද සහිත විකල්පයකි.
 
-### Key එකකට වෙන් වූ HTTP විෂයපථ බැඳීම (#7895)
+### එක් එක් key සඳහා HTTP scope බැඳීම (#7895)
 
 HTTP/SSE හරහා, `open-sse/mcp-server/httpTransport.ts` දැන්
-`resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) මඟින් callerගේ සැබෑ
-`api_keys.scopes` විසඳා, එය MCP SDK හි `transport.handleRequest(req, { authInfo })` වෙත යවයි; එම නිසා
-සෑම tool call එකක් වෙතම ළඟා වන `extra.authInfo.scopes`, Bearer key එකේම විෂයපථ පිළිබිඹු කරයි.
-`scopeEnforcement.ts` හි `resolveCallerScopeContext()` දැනටමත් `_meta` සහ
-`OMNIROUTE_MCP_SCOPES` env fallback එකට වඩා `authInfo` වෙත ප්රමුඛත්වය ලබා දී තිබුණි — මෙය සිදු කරන්නේ
-මීට පෙර HTTP හරහා දත්ත නොලැබුණු එම පළමු, ඉහළම ප්රමුඛතා මූලාශ්රය පිරවීම පමණි. API key එකක්
-විසඳාගත නොහැකි විට (header එකක් නොමැති විට හෝ key එක අවලංගු විට), `authInfo` `undefined` ලෙසම පවතින අතර
-විසඳීම, වෙනසකින් තොරව පවතින `meta`/env දාමය වෙත යොමු වේ. stdio සතුව එක් එක් caller සඳහා අනන්යතාවක් නොමැත
-(`mcpCallerIdentity.ts` බලන්න) සහ එයට මෙයින් බලපෑමක් නැත — එය `_meta`/env fallback දාමය මතම පවතී.
+`resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) හරහා callerගේ සැබෑ
+`api_keys.scopes` නිරාකරණය කර, එය MCP SDK හි `transport.handleRequest(req, { authInfo })` වෙත ලබා දෙයි; එබැවින්
+එක් එක් tool call එකට ලැබෙන `extra.authInfo.scopes`, Bearer key එකේම scopes නිරූපණය කරයි.
+`scopeEnforcement.ts` හි `resolveCallerScopeContext()` දැනටමත්
+`_meta` සහ `OMNIROUTE_MCP_SCOPES` env fallback වලට වඩා `authInfo` ප්රමුඛ කර තිබුණි — මෙයින් පුරවන්නේ
+පෙර HTTP හරහා දත්ත නොලැබුණු එම පළමු, ඉහළම ප්රමුඛතාව ඇති මූලාශ්රය පමණි. API key එකක් නිරාකරණය නොවන විට
+(header එකක් නොමැති විට හෝ key එක වලංගු නොවන විට), `authInfo` `undefined` ලෙස පවතින අතර නිරාකරණය
+වෙනසකින් තොරව පවතින `meta`/env දාමයට යොමු වෙයි. stdio සඳහා එක් එක් caller අනන්යතාවක් නොමැති බැවින්
+(`mcpCallerIdentity.ts` බලන්න) එයට බලපෑමක් නැත — එය `_meta`/env fallback දාමය මතම පවතී.
 
-**`OMNIROUTE_MCP_ENFORCE_SCOPES` නොසලකා, පටු විෂයපථ සහිත HTTP/SSE callers සඳහා
-බලාත්මක කිරීම අනිවාර්යයෙන් සක්රිය කෙරේ.** `OMNIROUTE_MCP_ENFORCE_SCOPES` හි පෙරනිමි අගය `false` වීම
-ආරක්ෂිත වන්නේ විෂයපථගත කිරීමට එක් එක් caller සඳහා අනන්යතාවක් නොමැති local/stdio තනි-operator ප්රවාහය සඳහා
-පමණි. `resolveCallerScopeContext()` විසින්
-`source === "authInfo"` විසඳා ඇති සෑම අවස්ථාවකම (එනම්, සැබෑ key එකකට අදාළ HTTP Authorization header එකක්,
-HTTP/SSE සඳහා පමණි) සහ එම key එක සතුව පූර්ණ `manage`/`admin` විෂයපථයක් නොමැති විට,
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` විසින් එක් එක් tool එක සඳහා විෂයපථ
+**`OMNIROUTE_MCP_ENFORCE_SCOPES` නොසලකා, පටු scopes සහිත HTTP/SSE callers සඳහා
+බලාත්මක කිරීම අනිවාර්යයෙන් සක්රිය කරයි.** `OMNIROUTE_MCP_ENFORCE_SCOPES` පෙරනිමියෙන් `false` වීම ආරක්ෂිත වන්නේ
+scope යෙදිය හැකි එක් එක් caller අනන්යතාවක් නොමැති local/stdio තනි-operator ප්රවාහය සඳහා පමණි.
+`resolveCallerScopeContext()` මඟින්
+`source === "authInfo"` නිරාකරණය කළ සෑම අවස්ථාවකම (එනම් සැබෑ එක් එක් key සඳහා වූ HTTP Authorization header එකක්,
+HTTP/SSE සඳහා පමණි) සහ එම key එකට පූර්ණ `manage`/`admin` scope නොමැති විට,
+`open-sse/mcp-server/server.ts::withScopeEnforcement()` එක් එක් tool සඳහා වූ scope
 බලාත්මක කිරීම කොන්දේසි විරහිතව සක්රිය කරයි (`scopeEnforcement.ts` හි `shouldForceScopeEnforcement()`).
-මෙමඟින්, ඉහත විස්තර කර ඇති පරිදි `/api/mcp/` LOCAL_ONLY carve-out එක හැර වෙනත් කිසිවකට අවසර නොදෙන
-පටු `mcp:connect` bypass විෂයපථය පමණක් සහිත key එකකට, operator කෙනෙකු දුරස්ථ/loopback නොවන MCP ප්රවේශය
-සක්රිය කළ පසු, `OMNIROUTE_MCP_ENFORCE_SCOPES` පෙරනිමියෙන් `false` ලෙස නිකුත් වන නිසා පමණක්
-සියලු MCP මෙවලම් ක්රියාත්මක කිරීමට හැකිව තිබූ හිඩැස වසයි. HTTP හරහා භාවිත කරන පූර්ණ
-`manage`/`admin` key එකක් සහ සෑම stdio/local caller කෙනෙකුම, දැනට පවතින
+මෙය පුරවන්නේ පටු `mcp:connect` bypass scope එක පමණක් දරන key එකකට — ඉහත ලේඛනගත කර ඇති පරිදි
+`/api/mcp/` LOCAL_ONLY carve-out හැර අන් කිසිවකට අවසර නොදෙන එකකට — operator කෙනෙකු
+දුරස්ථ/loopback නොවන MCP ප්රවේශය සක්රිය කළ පසු, `OMNIROUTE_MCP_ENFORCE_SCOPES` පෙරනිමියෙන්
+`false` ලෙස නිකුත් වන බැවින් පමණක්, වෙනත් ආකාරයකින් සෑම MCP tool එකක්ම කැඳවීමට හැකි වීමේ හිඩැසයි.
+HTTP හරහා පූර්ණ `manage`/`admin` key එකක් සහ සෑම stdio/local caller කෙනෙකුම, පවතින
 `OMNIROUTE_MCP_ENFORCE_SCOPES` මඟින් පාලනය වන හැසිරීම වෙනසකින් තොරව තබා ගනී.
 
 ---

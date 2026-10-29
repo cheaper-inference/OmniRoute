@@ -13,21 +13,21 @@ na usoro ime ka ihe kwekọọ.
 
 ---
 
-## Nhazi Maka Mmepe
+## Nhazi Mmepe
 
 ### Ihe Ndị A Chọrọ Tupu Amalite
 
-- **Node.js** `>=22.22.3 <23`, ma ọ bụ `>=24.0.0 <27` (nke akwadoro: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, ma ọ bụ `>=24.0.0 <27` (a tụrụ aro: 24 LTS)
 - **npm** 10+
 
-> **Ndị ọrụ npm v11+ (Node 24+):** Mgbe `npm install` gasịrị, nyochaa na arụnyere native modules:
-> `node -e "require('better-sqlite3')"`. Ọ bụrụ na ọ daa site na `MODULE_NOT_FOUND`,
+> **Ndị ọrụ npm v11+ (Node 24+):** Mgbe `npm install` gachara, chọpụta na etinyere modul native:
+> `node -e "require('better-sqlite3')"`. Ọ bụrụ na ọ daa na `MODULE_NOT_FOUND`,
 > mee `npm approve-scripts better-sqlite3 && npm install`. Lee
-> [Nchọpụta na Ndozi Nsogbu](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> [Nchọpụta na ndozi nsogbu](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Detuo Repository ma Wụnye
+### Klọnụ ma Wụnye
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,94 +35,94 @@ cd OmniRoute
 npm install
 ```
 
-### Environment Variables
+### Mgbanwe Gburugburụ
 
 ```bash
-# Mepụta .env gị site na template
+# Mepụta .env gị site na ndebiri ahụ
 cp .env.example .env
 
-# Mepụta secrets ndị achọrọ
+# Mepụta ihe nzuzo ndị achọrọ
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Variables ndị bụ isi maka mmepe:
+Mgbanwe ndị bụ isi maka mmepe:
 
-| Variable               | Uru Ndabara Maka Mmepe   | Nkọwa                       |
-| ---------------------- | ------------------------ | --------------------------- |
-| `PORT`                 | `20128`                  | Port nke server             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Base URL maka frontend      |
-| `JWT_SECRET`           | (mepụta ya n'elu)        | Secret maka ịbịanye aka JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Password mbata mbụ          |
-| `APP_LOG_LEVEL`        | `info`                   | Ọkwa nkọwa nke log          |
+| Mgbanwe                | Ndabara Mmepe            | Nkọwa                    |
+| ---------------------- | ------------------------ | ------------------------ |
+| `PORT`                 | `20128`                  | Ọdụ sava                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL ntọala maka ihu ngwa |
+| `JWT_SECRET`           | (mepụta ya n’elu)        | Ihe nzuzo mbinye aka JWT |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Okwuntughe nbanye mbụ    |
+| `APP_LOG_LEVEL`        | `info`                   | Ọkwa nkọwa nke ndekọ     |
 
-### Ntọala Dashboard
+### Ntọala Bọọdụ Njikwa
 
-Dashboard na-enye toggles UI maka atụmatụ ndị nwekwara ike ịhazi site na environment variables:
+Bọọdụ njikwa ahụ na-enye mgba ọkụ UI maka atụmatụ ndị nwekwara ike ịhazi site na mgbanwe gburugburụ:
 
-| Ebe Ntọala Dị       | Toggle             | Nkọwa                        |
-| ------------------- | ------------------ | ---------------------------- |
-| Settings → Advanced | Debug Mode         | Kwado logs arịrịọ debug (UI) |
-| Settings → General  | Sidebar Visibility | Gosi/zoo ngalaba sidebar     |
+| Ebe Ntọala Dị       | Mgba Ọkụ              | Nkọwa                                   |
+| ------------------- | --------------------- | --------------------------------------- |
+| Ntọala → Nke Dị Elu | Ọnọdụ Nchọpụta Njehie | Kwado ndekọ arịrịọ nchọpụta njehie (UI) |
+| Ntọala → Izugbe     | Ọdịdị Ogwe Akụkụ      | Gosi/zoo ngalaba ogwe akụkụ             |
 
-A na-echekwa ntọala ndị a na database, ha na-adịgidekwa mgbe e bidoghachiri sistemụ, ma na-anọchi uru ndabara nke env var mgbe edobere ha.
+A na-echekwa ntọala ndị a na ọdụ data, ha na-adịgidekwa mgbe ebidoghachiri ngwa, ma na-akagbu ndabara mgbanwe gburugburụ mgbe edobere ha.
 
-### Ịgba Ya na Kọmputa Gị
+### Ịgba Ya na Kọmputa Mpaghara
 
 ```bash
-# Ọnọdụ mmepe (hot reload)
+# Ọnọdụ mmepe (ntinyegharị ozugbo)
 npm run dev
 
-# Build maka production
+# Mwulite mmepụta
 npm run build    # next build → .build/next/ wee assembleStandalone → dist/
 npm run start
 
-# Compile ngwa ngwa nke backend/API naanị maka mgbanwe ndị ndị ntinye aka mere
+# Nchịkọta backend/API-naanị dị ọsọ maka mgbanwe ndị ntinye-aka
 npm run build:contributor
 
-# Build maka release (clean rebuild + HEAD sentinel — achọrọ maka deploy)
+# Mwulite mwepụta (mwuliteghachi dị ọcha + ihe nche HEAD — achọrọ maka mbuga)
 npm run build:release   # rm -rf .build dist && build + na-ede dist/BUILD_SHA
 
-# Nhazi port a na-ejikarị
+# Nhazi ọdụ a na-ejikarị
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Build nke onye ntinye aka na-eme naanị nkwado compile: ọ naghị achịkọta standalone
-distribution ma ọ bụ wuo optional native packaging assets. Jiri build production nkịtị mgbe
-ịchọrọ ịnwale bundle a pụrụ ibuga.
+Mwulite onye ntinye-aka na-eme nkwado nchịkọta-naanị: ọ naghị achịkọta nkesa standalone
+ma ọ bụ wulite akụrụngwa nkwakọ native ndị na-abụghị iwu. Jiri mwulite mmepụta nkịtị mgbe
+ịchọrọ ịkwado ngwugwu a pụrụ ibuga.
 
-### Nhazi Ebe Build Output Dị
+### Nhazi Nsonaazụ Mwulite
 
-| Directory | Ihe Dị N'ime Ya                                                       | Git Na-eso Ya |
-| --------- | --------------------------------------------------------------------- | ------------- |
-| `src/`    | Source nke ngwa (TypeScript / TSX)                                    | Ee            |
-| `.build/` | Ihe etiti — output `next build` (gitignored, `distDir = .build/next`) | Mba           |
-| `dist/`   | Bundle a pụrụ ibuga — nke `assembleStandalone` chịkọtara (gitignored) | Mba           |
+| Ndekọ     | Ihe Ndị Dị N’ime                                                            | Git Na-eso Ya |
+| --------- | --------------------------------------------------------------------------- | ------------- |
+| `src/`    | Koodu mmalite ngwa (TypeScript / TSX)                                       | Ee            |
+| `.build/` | Ihe etiti — nsonaazụ `next build` (git anaghị eso, `distDir = .build/next`) | Mba           |
+| `dist/`   | Ngwugwu a pụrụ ibuga — nke `assembleStandalone` chịkọtara (git anaghị eso)  | Mba           |
 
-Build pipeline na-agafe naanị otu ugboro:
+Usoro mwulite ahụ bụ otu ngafe:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (output Next.js)
-  └─ assembleStandalone()                 (na-edetuo standalone + static + public + native assets)
-       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (nsonaazụ Next.js)
+  └─ assembleStandalone()                 (na-edepụta standalone + static + public + akụrụngwa native)
+       └─ nsonaazụ: dist/                 (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` na-ehichapụkwa directories abụọ ahụ tupu oge eruo ma dee
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dịka deploy integrity sentinel.
+`npm run build:release` na-ebu ụzọ hichapụ ndekọ abụọ ahụ ma dee
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dịka ihe nche iguzosi ike n’ezi ihe nke mbuga.
 
-`npm run build:contributor` na-eji build profile nke backend naanị. Ọ na-etinye stubs nwa oge
-n'ọnọdụ faịlụ UI dashboard mgbe ọ na-ewu, na-edobe API route handlers, ma weghachite faịlụ mbụ
-mgbe build gwụsịrị. Jiri `npm run build` maka mgbanwe ndị na-emetụta UI dashboard ma ọ bụ maka
-nkwado release zuru ezu; contributor profile abụghị ihe ga-anọchi release build.
+`npm run build:contributor` na-eji profaịlụ mwulite backend-naanị. Ọ na-eji stub dochie
+faịlụ UI bọọdụ njikwa nwa oge mgbe a na-ewulite, na-edobe ndị njikwa ụzọ API, ma weghachite faịlụ mbụ
+mgbe mwulite ahụ gachara. Jiri `npm run build` maka mgbanwe ndị na-emetụta UI bọọdụ njikwa ma ọ bụ maka
+nkwado mwepụta zuru ezu; profaịlụ onye ntinye-aka abụghị nnọchi maka mwulite mwepụta.
 
-> **Ndetu deploy VPS:** remote image directory `/usr/lib/node_modules/omniroute/app/`
-> agbanwebeghị. Deploy skills na-eji rsync ebufe ihe dị n'ime `dist/` banye na ya.
-> Naanị build output path dị n'ime repository ka e bugharịrị (`app/` → `dist/`).
+> **Ndetu mbuga VPS:** ndekọ image dị n’ebe dị anya `/usr/lib/node_modules/omniroute/app/`
+> agbanwebeghị. Ngwa ọrụ mbuga na-eji rsync ebuga ihe ndị dị na `dist/` n’ime ya.
+> Naanị ụzọ nsonaazụ mwulite dị n’ime repo ka agbanweela (`app/` → `dist/`).
 
 URL ndabara:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **Bọọdụ Njikwa**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -172,87 +172,88 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 
 ---
 
-## Ịgba Ule
+## Ịgba Nnwale
 
 ```bash
-# Ule niile (unit + vitest + ecosystem + e2e)
+# Nnwale niile (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Otu faịlụ ule (Node.js native test runner — ọtụtụ ule na-eji nke a)
+# Otu faịlụ nnwale (ngwa ịgba nnwale nke Node.js — ọtụtụ nnwale na-eji nke a)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Naanị ule unit mgbanwe gị metụtara (otu TIA selector ahụ dị ka CI gate, #8084)
+# Naanị nnwale unit ndị mgbanwe gị metụtara (otu onye-ahọpụta TIA ahụ dị ka ọnụ ụzọ CI, #8084)
 npm run test:scoped            # mgbanwe dị na commit ikpeazụ (ma ọ bụ working tree)
-npm run test:scoped:staged     # naanị mgbanwe e tinyere na stage — na-arụkọ ọrụ nke ọma na pre-commit run
-npm run test:scoped:full       # buru ụzọ wughachi import-graph map (mgbe ị gbakwụnyere/bugharịrị faịlụ)
-# Exit 1 + "run the full suite" pụtara na hub file (tsconfig, package.json, …) ma ọ bụ
-# source na-enweghị mapping gbanwere — selector na-adaba n'ụzọ nchekwa, ọ naghị ahapụ ihe n’ime nzuzo.
+npm run test:scoped:staged     # naanị mgbanwe ndị e mere staged — na-arụkọ ọrụ nke ọma na pre-commit
+npm run test:scoped:full       # buru ụzọ wughachi maapụ import-graph (mgbe ị gbakwunyere/kpụgharịrị faịlụ)
+# Exit 1 + "gbaa test suite zuru ezu" pụtara na faịlụ hub (tsconfig, package.json, …) ma ọ bụ
+# source na-enweghị mapping gbanwere — onye-ahọpụta ahụ na-akwụsị n'ụzọ nchekwa, ọ dịghị mgbe ọ na-amafe ihe na nzuzo.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (sava MCP, autoCombo, nchekwa nwa oge)
 npm run test:vitest
 
-# Ule E2E (Playwright dị mkpa)
+# Nnwale E2E (Playwright dị mkpa)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# E2E maka ndị ahịa protocol (ụzọ mbufe MCP, A2A)
 npm run test:protocols:e2e
 
-# Ule ndakọrịta ecosystem
+# Nnwale ndakọrịta ecosystem
 npm run test:ecosystem
 
-# Coverage gate: 60% statements/lines/functions/branches
+# Ọnụ ụzọ coverage: 60% nke statements/lines/functions/branches
 npm run test:coverage
 npm run coverage:report
 
-# Nlele lint + format
+# Nnyocha lint + format
 npm run lint
 npm run check
 
-# Gated real-upstream combo smoke (VPS access + ezigbo provider credits dị mkpa)
-# Ọ na-akpọ EZIGBO providers — ọ na-eri obere ego. Ọ DỊGHỊ mgbe ọ na-agba na CI. Ọ na-awụfe nke ọma ma gate adịghị.
-# Ihe dị mkpa: ohere ssh root@192.168.0.15 (ọ na-eweta read-only DB snapshot site na VPS).
+# Nnwale smoke nke combo na real-upstream nwere ọnụ ụzọ (ohere VPS + kredit ezigbo provider dị mkpa)
+# Ọ na-akpọ ezigbo providers — ọ na-efu ntakịrị. Ọ DỊGHỊ mgbe ọ na-agba na CI. Ọ na-amafe n'enweghị nsogbu ma ọ bụrụ na ọnụ ụzọ adịghị.
+# Ihe achọrọ: ohere ssh root@192.168.0.15 (ọ na-enweta snapshot DB read-only site na VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — script Node ESM nkịtị, na-akpọ live .15 server ozugbo.
-# Ihe dị mkpa: ohere ssh root@192.168.0.15 (a na-emepụta/akwatu combos site na SSH sqlite).
-# Ọ na-akpọ EZIGBO providers (obere ego). Ọ na-emepụta/ehichapụ naanị __live_test__* combos. Ọ DỊGHỊ mgbe ọ na-agba na CI.
-# REQUIRE_API_KEY=false na .15 ya mere API key adịghị mkpa, mana ọ na-asọpụrụ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ma ọ bụrụ na edobere ha.
+# Nnwale smoke live nke VPS Phase-3 — scripts Node ESM nkịtị, na-akpọ sava live .15 ozugbo.
+# Ihe achọrọ: ohere ssh root@192.168.0.15 (a na-emepụta/akwatu combos site na SSH sqlite).
+# Ọ na-akpọ ezigbo providers (obere ego). Ọ na-emepụta/ehichapụ naanị combos __live_test__*. Ọ DỊGHỊ mgbe ọ na-agba na CI.
+# REQUIRE_API_KEY=false na .15, ya mere API key adịghị mkpa, mana ọ na-asọpụrụ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ma ọ bụrụ na e setịpụrụ ha.
 npm run test:combo:live:vps              # ọnọdụ HTTP 7 (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # na-agbakwụnye ezigbo ọnọdụ cross-provider failover (8 n’ozuzu)
+npm run test:combo:live:vps:failover     # na-agbakwunye ezigbo ọnọdụ failover gafee providers (8 n'ozuzu)
 ```
 
-Nkọwa coverage:
+Ndetu coverage:
 
-- `npm run test:coverage` na-atụ coverage nke source maka unit test suite bụ isi, na-ewepụ `tests/**`, ma tinye `open-sse/**`
-- Pull requests ga-edobe coverage gate na **60%+** statements/lines/functions/branches
-- Ọ bụrụ na PR agbanwee production code dị na `src/`, `open-sse/`, `electron/`, ma ọ bụ `bin/`, ọ ga-agbakwunye ma ọ bụ melite automated tests n’otu PR ahụ
-- `npm run coverage:report` na-ebipụta akụkọ zuru ezu faịlụ-kwa-faịlụ sitere na coverage run kachasị ọhụrụ
+- `npm run test:coverage` na-atụ coverage nke source maka test suite unit bụ isi, na-ewepụ `tests/**`, ma tinye `open-sse/**`
+- Pull requests ga-edobe ọnụ ụzọ coverage na **60%+** maka statements/lines/functions/branches
+- Ọ bụrụ na PR agbanwee production code dị na `src/`, `open-sse/`, `electron/`, ma ọ bụ `bin/`, ọ ga-agbakwunye ma ọ bụ melite nnwale akpaaka n'ime otu PR ahụ
+- `npm run coverage:report` na-ebipụta akụkọ zuru ezu nke faịlụ n'otu n'otu site na coverage run kachasị ọhụrụ
 - `npm run test:coverage:legacy` na-echekwa metric ochie maka ntụnyere akụkọ ihe mere eme
-- Lee `docs/ops/COVERAGE_PLAN.md` maka roadmap e kewara n’usoro iji meziwanye coverage
+- Lee `docs/ops/COVERAGE_PLAN.md` maka roadmap nke iji usoro nkebi meziwanye coverage
 
-### Ihe Pull Request Ga-Enwerịrị
+### Ihe Pull Request Ga-emerịrị
 
-Tupu imepee PR, jiri
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) gbaa focused loop maka
-ihe ị gbanwere. Unit suite zuru ezu (CI shards 4), Vitest, coverage gate **60%+**, na
-production build bụ ọrụ CI — ịgba ha na kọmputa nke gị anaghị enye ozi ọzọ PR
-checks agaghị enye gị, ma na igwe ndị pere mpe ọ nwere ike imeju host (#8084):
+Tupu imepe PR, jiri
+[Ụzọ Kasị Mma Maka Inye Aka](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) gbaa focused loop maka
+ihe ị gbanwere. Unit suite zuru ezu (CI shards 4), Vitest, ọnụ ụzọ coverage nke **60%+**, na
+production build bụ ọrụ CI — ịgba ha na kọmputa gị anaghị enye ozi ọ bụla ọzọ karịa nke PR
+checks ga-enyerịrị gị, ma n'igwe ndị pere mpe, ọ nwere ike iji ike host ahụ niile (#8084):
 
-- Gbaa faịlụ ule ndị na-ekpuchi mgbanwe gị: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Gbaa faịlụ nnwale ndị na-ekpuchi mgbanwe gị: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Gbaa `npm run lint`
-- Tinye ma ọ bụ melite automated tests n’otu PR ahụ mgbe ọ bụla production code gbanwere
-- Tinye faịlụ ule ndị gbanwere ma ọ bụ ndị agbakwunyere na nkọwa PR mgbe production code gbanwere
-- Lelee nsonaazụ SonarQube na PR mgbe ahaziri project secrets na CI
+- Tinye ma ọ bụ melite nnwale akpaaka n'ime otu PR ahụ mgbe ọ bụla production code gbanwere
+- N'ime faịlụ `node:test`, tinye `await` ọ bụla dị na top-level (dị ka `await import(...)`) tupu `test()` / `describe()` nke mbụ: n'okpuru `--test-force-exit`, nnwale ndị e debanyere aha mgbe nke ahụ gasịrị nwere ike ghara ịgba n'enweghị ọkwa ọ bụla (#18045; `npm run check:test-tla-order` na-amanye nke a)
+- Tinye faịlụ nnwale ndị gbanwere ma ọ bụ ndị agbakwunyere na nkọwa PR mgbe production code gbanwere
+- Lelee nsonaazụ SonarQube na PR mgbe a haziri project secrets na CI
 
-Ọnọdụ ule ugbu a: **faịlụ unit test 122** na-ekpuchi:
+Ọnọdụ nnwale ugbu a: **faịlụ nnwale unit 122** na-ekpuchi:
 
-- Provider translators na ntụgharị format
+- Ndị ntụgharị provider na ntụgharị format
 - Rate limiting, circuit breaker, na resilience
 - Semantic cache, idempotency, na progress tracking
-- Database operations na schema (DB modules 21)
+- Arụmọrụ database na schema (modul DB 21)
 - OAuth flows na authentication
-- Nkwado API endpoint (Zod v4)
-- Ngwaọrụ MCP server na mmanye scope
+- Nkwado endpoint API (Zod v4)
+- Ngwa sava MCP na mmanye scope
 - Sistemụ Memory na Skills
 
 ---
@@ -293,72 +294,72 @@ Lee `open-sse/utils/stream.ts` na `open-sse/utils/streamHandler.ts` maka ihe at�
 
 ---
 
-## Nhazi Ọrụ Ngo
+## Ọdịdị Projek
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Ibe dashboard (ngalaba 23)
-│   ├── api/                # Ụzọ API (directory 51)
-│   └── login/              # Ibe authentication (.tsx)
-├── domain/                 # Injin policy (policyEngine, comboResolver, costRules, wdg.)
-├── lib/                    # Isi logic azụmahịa (.ts)
-│   ├── a2a/                # Server protokol Agent-to-Agent v0.3
-│   ├── acp/                # Registry Agent Communication Protocol
-│   ├── compliance/         # Injin policy compliance
-│   ├── db/                 # Modul domain SQLite + migration 130
+│   ├── (dashboard)/        # Peeji dashboard (ngalaba 23)
+│   ├── api/                # Ụzọ API (ndekọ 51)
+│   └── login/              # Peeji njirimara (.tsx)
+├── domain/                 # Injin amụma (policyEngine, comboResolver, costRules, wdg.)
+├── lib/                    # Ọrụ azụmahịa ndị bụ isi (.ts)
+│   ├── a2a/                # Sava protokol Agent-to-Agent v0.3
+│   ├── acp/                # Ndebanye aha Agent Communication Protocol
+│   ├── compliance/         # Injin amụma nrubeisi
+│   ├── db/                 # Modul ngalaba SQLite + mbugharị 130
 │   ├── memory/             # Ebe nchekwa mkparịta ụka na-adịgide adịgide
-│   ├── oauth/              # Provider, service, na utility OAuth
-│   ├── skills/             # Framework skill a pụrụ ịgbasawanye
-│   ├── usage/              # Nsochi ojiji na ngụkọta ọnụahịa
-│   └── localDb.ts          # Naanị layer re-export — etinyela logic ebe a
-├── middleware/              # Middleware request (promptInjectionGuard)
-├── mitm/                   # Proxy MITM (cert, DNS, routing target)
+│   ├── oauth/              # Ndị na-eweta OAuth, ọrụ, na ngwa enyemaka
+│   ├── skills/             # Usoro nka enwere ike ịgbatị
+│   ├── usage/              # Nsochi ojiji na mgbakọ ọnụahịa
+│   └── localDb.ts          # Naanị oyi akwa mbupụgharị — etinyela mgbagha ebe a
+├── middleware/              # Middleware arịrịọ (promptInjectionGuard)
+├── mitm/                   # Proxy MITM (asambodo, DNS, ntụgharị ebe a na-aga)
 ├── shared/
-│   ├── components/         # Component React (.tsx)
-│   ├── constants/          # Nkọwa provider (329), scope MCP, atụmatụ routing 19
-│   ├── utils/              # Circuit breaker, sanitizer, ihe enyemaka authentication
+│   ├── components/         # Komponentị React (.tsx)
+│   ├── constants/          # Nkọwa ndị na-eweta (329), oke MCP, atụmatụ ntụgharị 20
+│   ├── utils/              # Circuit breaker, sanitizer, ndị enyemaka njirimara
 │   └── validation/         # Schema Zod v4
-└── sse/                    # Pipeline proxy SSE
+└── sse/                    # Usoro proxy SSE
 
-open-sse/                   # Workspace @omniroute/open-sse
-├── executors/              # Modul implementation executor 89
-├── handlers/               # Handler request 11 (chat, responses, embeddings, images, wdg.)
-├── mcp-server/             # Server MCP (ngwaọrụ pụrụ iche 110, transport 3, scope 33)
-├── services/               # Service ọkwa elu 178 (combo, autoCombo, rateLimitManager, wdg.)
-├── translator/             # Ndị ntụgharị format (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Transformer Responses API
-└── utils/                  # Modul utility 22 (stream, TLS, proxy, logging)
+open-sse/                   # Ebe ọrụ @omniroute/open-sse
+├── executors/              # Modul executor 150 (klaasị executor + ndị enyemaka maka onye na-eweta ọ bụla)
+├── handlers/               # Ndị njikwa arịrịọ 11 (nkata, nzaghachi, embeddings, onyonyo, wdg.)
+├── mcp-server/             # Sava MCP (ngwaọrụ pụrụ iche 110, ụzọ mbufe 3, oke 33)
+├── services/               # Ọrụ ọkwa kachasị elu 178 (combo, autoCombo, rateLimitManager, wdg.)
+├── translator/             # Ndị ntụgharị usoro (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Ihe mgbanwe Responses API
+└── utils/                  # Modul enyemaka 22 (stream, TLS, proxy, ndekọ)
 
-electron/                   # Ngwa desktop Electron (cross-platform)
+electron/                   # Ngwa desktọpụ Electron (na-arụ ọrụ n'elu nyiwe dị iche iche)
 
 tests/
-├── unit/                   # Test runner Node.js (faịlụ test 1,574)
-├── integration/            # Test integration
-├── e2e/                    # Test Playwright
-├── security/               # Test nchekwa
-├── translator/             # Test ndị metụtara translator kpọmkwem
-└── load/                   # Test ibu ọrụ
+├── unit/                   # Onye na-agba ule Node.js (faịlụ ule 1,574)
+├── integration/            # Ule njikọta
+├── e2e/                    # Ule Playwright
+├── security/               # Ule nchekwa
+├── translator/             # Ule ndị metụtara onye ntụgharị kpọmkwem
+└── load/                   # Ule ibu
 
 docs/
-├── adr/                     # Ndekọ Mkpebi Architecture
-├── architecture/            # Architecture sistemụ na ikike ịnagide ọdịda
-├── comparison/              # OmniRoute megide nhọrọ ndị ọzọ
-├── compression/             # Ntuziaka na iwu compression
+├── adr/                     # Ndekọ Mkpebi Nhazi
+├── architecture/            # Nhazi sistemụ na ike iguzogide nsogbu
+├── comparison/              # OmniRoute tụnyere nhọrọ ndị ọzọ
+├── compression/             # Ntuziaka na iwu mkpakọ
 ├── dev/                     # Ntuziaka mmepe
-├── diagrams/                # Eserese architecture
+├── diagrams/                # Eserese nhazi
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Ntuziaka onye ọrụ, Docker, setup, idozi nsogbu
-├── i18n/                    # Ntụgharị README n’asụsụ mba dị iche iche
-├── marketing/               # Ihe ndị e ji eme marketing
-├── ops/                     # Deployment, proxy, coverage, release
-├── providers/               # Dokumenteshọn kpọmkwem maka provider
-├── reference/               # Ntụaka API, env vars, ngwa CLI, free tiers
-├── releases/                # Ihe edeturu gbasara release
-├── routing/                 # Injin auto-combo, reasoning replay
-├── screenshots/             # Screenshot dashboard
-├── security/                # Guardrails, compliance, stealth, token
-└── specs/                   # Nkọwapụta imewe
+├── guides/                  # Ntuziaka onye ọrụ, Docker, nhazi, idozi nsogbu
+├── i18n/                    # Ntụgharị README e mere maka asụsụ mba ụwa
+├── marketing/               # Ihe mgbasa ozi ahịa
+├── ops/                     # Mbugharị, proxy, mkpuchi, mwepụta
+├── providers/               # Akwụkwọ metụtara ndị na-eweta kpọmkwem
+├── reference/               # Nrụtụaka API, mgbanwe gburugburu, ngwa CLI, ọkwa efu
+├── releases/                # Ihe edeturu gbasara mwepụta
+├── routing/                 # Injin auto-combo, mmegharị ntụgharị uche
+├── screenshots/             # Nseta ihuenyo dashboard
+├── security/                # Ihe mgbochi, nrubeisi, izochi onwe, token
+└── specs/                   # Nkọwapụta nhazi
 ```
 
 ---

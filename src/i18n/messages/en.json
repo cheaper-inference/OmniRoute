@@ -1,4 +1,81 @@
 {
+  "teamCosts": {
+    "title": "Team costs",
+    "subtitle": "Manage shared soft budgets and catalog cost estimates.",
+    "refresh": "Refresh",
+    "create": "Create team",
+    "edit": "Edit team",
+    "archive": "Archive",
+    "selectTeam": "Teams",
+    "searchTeams": "Search teams",
+    "statusFilter": "Team status",
+    "active": "Active",
+    "archived": "Archived · read only",
+    "allTeams": "All teams",
+    "noTeams": "No matching teams.",
+    "selectHint": "Create or select a team to view costs.",
+    "loading": "Loading team costs…",
+    "budgetTitle": "Current soft budget",
+    "budgetSubtitle": "Successful committed usage · rolling window · independent of report dates",
+    "archivedBudget": "Archived: budget enforcement is inactive. Historical reports remain available.",
+    "unlimited": "Unlimited — no shared soft budget configured.",
+    "budgetUnavailable": "Budget status is unavailable. Refresh to retry.",
+    "used": "Successful usage",
+    "maximum": "Budget maximum",
+    "remaining": "Known remaining",
+    "resets": "Resets",
+    "unpricedBudget": "Some successful usage has unknown pricing. The known sum is incomplete; budget enforcement treats this window as exceeded.",
+    "overBudget": "Budget reached or exceeded · {amount} over",
+    "reportTitle": "Usage report",
+    "reportSubtitle": "All attempts · catalog estimate in USD, not an invoice · whole UTC dates",
+    "reportPeriod": "Report period",
+    "day1": "1 day",
+    "day7": "7 days",
+    "day30": "30 days",
+    "allTime": "All time",
+    "reportSpend": "Estimated report spend",
+    "requests": "Requests",
+    "assignedKeys": "Assigned keys",
+    "unpricedReport": "This report contains unknown pricing. Estimated spend is incomplete.",
+    "breakdown": "Cost by API key",
+    "noUsage": "No usage in this report period.",
+    "keyName": "API key name",
+    "tokens": "Input + output tokens",
+    "unnamedKey": "Unnamed or deleted key",
+    "unpriced": "Unknown pricing",
+    "members": "Membership",
+    "memberSubtitle": "Changing membership keeps historical spend with its original team.",
+    "searchKeys": "Search keys or current owners",
+    "chooseKey": "Choose an API key",
+    "unassigned": "Unassigned",
+    "ownership": "Current billing team: {team}",
+    "assign": "Assign",
+    "remove": "Remove",
+    "noMembers": "No current members. Historical usage may still count toward the budget.",
+    "assignedAt": "Assigned {date} (UTC)",
+    "name": "Team name",
+    "description": "Description",
+    "enableBudget": "Enable shared soft budget",
+    "amount": "Budget amount (USD)",
+    "duration": "Rolling budget window",
+    "cancel": "Cancel",
+    "save": "Save",
+    "confirm": "Confirm",
+    "transferTitle": "Confirm key transfer",
+    "transferMessage": "Move this key from “{source}” to “{destination}”? Historical spend remains with the original team.",
+    "removeTitle": "Remove key assignment",
+    "removeMessage": "Remove this key from “{team}”? Historical spend remains in this team.",
+    "archiveTitle": "Archive team",
+    "archiveMessage": "Archive “{team}”? All current bindings close and budget enforcement stops. Historical reports remain available.",
+    "invalidName": "Enter a name (1–200 characters) and a description of at most 2,000 characters.",
+    "invalidAmount": "Enter a finite budget amount greater than zero.",
+    "unauthorized": "Sign in to the management dashboard to continue.",
+    "forbidden": "You do not have permission to manage teams. Your input is preserved.",
+    "notFound": "This team or assignment no longer exists.",
+    "conflict": "The assignment or team changed. Refresh and confirm the current ownership before trying again.",
+    "failed": "The request failed. Your input is preserved; please retry.",
+    "partialBudget": "Some retained daily buckets overlap the window boundary and cannot be apportioned exactly. Shown spend is incomplete; remaining allowance is unavailable. The existing soft-budget policy is unchanged."
+  },
   "codexKeyServiceMode": {
     "title": "Codex service mode for this API key",
     "description": "Applies to Codex requests, including Codex models inside combos. Forced modes override the client, global settings and connection defaults. Other providers remain unchanged.",
@@ -25,8 +102,10 @@
     "confirm": "Are you sure?",
     "refresh": "Refresh",
     "close": "Close",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Previous page",
     "nextPage": "Next page",
+    "pagination": "Pagination",
     "capsLockOn": "Caps Lock is on",
     "dismissNotification": "Dismiss notification",
     "toggleColumns": "Toggle columns",
@@ -182,6 +261,7 @@
     "combos": "Combos",
     "noModelsFound": "No models found",
     "clear": "Clear",
+    "clearFilters": "Clear filters",
     "done": "Done",
     "selectAll": "Select all",
     "unselectAll": "Unselect all",
@@ -998,7 +1078,10 @@
     "batchFileUsedByCount": "Used by {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "Preview",
     "batchFilePreviewTruncated": "Showing first {shown} lines ({total} total lines)",
-    "batchFileDownloadFull": "Download Full File"
+    "batchFileDownloadFull": "Download Full File",
+    "tokensPageTitle": "Tokens",
+    "tokensPageDescription": "Send tokens between API keys, share invite codes and connect community servers.",
+    "tokensServerUrlLabel": "Server URL"
   },
   "disabled": "Disabled",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Route budget-exhausted requests to the emergency free fallback provider/model.",
@@ -1017,6 +1100,15 @@
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "Let the automatic cleanup sweep delete terminal (completed/failed/cancelled/expired) Batch API jobs older than OMNIROUTE_BATCH_RETENTION_DAYS, along with their per-line checkpoints, and clear the BLOB content of uploaded files past their own expires_at. Off by default: every existing install keeps this data exactly as before until an operator opts in. The operator-triggered DELETE /api/v1/batches/delete-completed route is unaffected either way -- it is a separate, unconditional public API contract.",
   "featureFlagXaiOauthLiveModelDiscoveryDescription": "Fetch the live xAI model catalog for xai-oauth connections from https://api.x.ai/v1/models using the OAuth bearer token, instead of the frozen static seed. Off by default: xai-oauth keeps serving the static seed unchanged. On any resolution error, discovery falls back to the seed.",
   "featureFlagDbHealthcheckStartupDeferredEnabledDescription": "Run the startup database integrity/health check after the server starts accepting requests instead of blocking startup until it completes. Off by default: startup blocks on the check exactly like before this change, so a corrupt database is still caught before the first request is served.",
+  "featureFlagCatalogMirrorRefinementsEnabledDescription": "Refine the claude/ discovery and functional-gateway mirrors on /v1/models. Off by default: both mirror passes behave exactly as before. On: claude/ discovery mirrors also cover listed reasoning-effort variants (-low/-medium/-high/-xhigh), skip built-in auto/* ids the request path cannot materialize and skip an alias already listed; functional-gateway mirrors skip combos and OmniRoute-synthesized ids (claude/, no-think/), take the owner from owned_by, never use the owner as its own gateway, skip gateways disabled in blockedProviders and models outside a gateway's authoritative live catalog.",
+  "featureFlagOpencodePublishedCatalogRoutingEnabledDescription": "Let OpenCode Zen and OpenCode Go models without an explicit registry endpoint take their request surface (Responses for @ai-sdk/openai, Messages for @ai-sdk/anthropic) from the published models.opencode.ai catalog, read in the background every 6 h. Off by default: the endpoint comes from the registry heuristics exactly as before and the catalog is never fetched.",
+  "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Send the OpenCode v2 CLI client fingerprint on OpenCode Zen/Go requests: the opencode/latest/<2.x>/cli User-Agent and x-opencode-client cli, and on free-tier requests the v2 session headers, the v2 CLI read/shell tool schemas and no tool_choice \"none\". Off by default: every OpenCode request keeps the current identity, headers and body unchanged.",
+  "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "When an auto combo's candidate pool is already empty before the tool-calling pre-filter runs (every target skipped by cooldowns, lockouts or exhaustion), answer 503 no_eligible_targets instead of the legacy 400 \"No target supports tool calling\" capability_mismatch. Off by default: the empty pool keeps the legacy 400.",
+  "featureFlagModelEndpointCapabilityGateEnabledDescription": "Enforce trusted model endpoint tags (declared by the provider catalog, inferred from a specialty model id, or set by the operator): reject a request sent to an endpoint the model does not serve with HTTP 400 before dispatch on /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations and /v1/audio/*; hide models whose tagged endpoints have no OmniRoute adapter from /v1/models; and answer the dashboard model test with 422 for such models. Off by default: endpoint tags stay informational and requests are dispatched exactly as before.",
+  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "On plain anthropic-compatible relays, keep mid-conversation system turns inside the message list instead of moving them into the top-level system prompt, so the cached prompt prefix stays stable across turns. Applies only when the client itself sent the mid-conversation-system-2026-04-07 beta. Off by default: every system turn is moved into the system prompt exactly as before, because relays without that beta reject system turns in the message list.",
+  "featureFlagModelsDevEffortTiersEnabledDescription": "Use the reasoning effort tiers models.dev publishes when neither an operator override nor the provider registry declares any, keeping only known effort levels, and treat an empty declared tier list as \"no tiers\". Off by default: the model catalog and resolved effort tiers stay exactly as before.",
+  "featureFlagAutoRequestResolvedCapabilitiesDescription": "Let auto/* requests build the candidate pool with resolved model capabilities (vision, reasoning, thinking) and observed quality scores, read in one bulk pass. Off by default: request-time candidate weights stay exactly as before. On: those signals feed the snapshot weights, so candidate weights and selection can change.",
+  "featureFlagCredentialHealthRetestAutoDisabledDescription": "Let the credential health sweep retest connections the gateway switched off by itself (at most once every 6 hours each, 5 per sweep) and switch one back on when its retest passes. Off by default: such connections stay off until an operator acts. Operator-disabled and permanently banned connections are never retested.",
   "sidebar": {
     "home": "Home",
     "dashboard": "Dashboard",
@@ -1076,17 +1168,8 @@
     "serverDisconnectedMsg": "The proxy server has been stopped or is restarting.",
     "expandSidebar": "Expand sidebar",
     "collapseSidebar": "Collapse sidebar",
-    "themes": "Themes",
-    "presetColors": "Popular colors",
     "createTheme": "Create theme",
     "chooseColor": "Pick one color",
-    "themeCoral": "Coral",
-    "themeBlue": "Blue",
-    "themeRed": "Red",
-    "themeGreen": "Green",
-    "themeViolet": "Violet",
-    "themeOrange": "Orange",
-    "themeCyan": "Cyan",
     "cliToolsShort": "Tools",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1094,12 +1177,10 @@
     "themeSystem": "Theme System",
     "whitelabelingDesc": "Whitelabeling Desc",
     "switchThemes": "Switch Themes",
-    "themeAccentDesc": "Theme Accent Desc",
     "uploadFavicon": "Upload Favicon",
     "themeDark": "Theme Dark",
     "customLogoDesc": "Custom Logo Desc",
     "sidebarVisibilityToggle": "Sidebar Visibility Toggle",
-    "themeAccent": "Theme Accent",
     "resetFavicon": "Reset Favicon",
     "whitelabeling": "Whitelabeling",
     "darkMode": "Dark Mode",
@@ -1113,10 +1194,8 @@
     "customLogo": "Custom Logo",
     "appearance": "Appearance",
     "themeSelectionAria": "Theme Selection Aria",
-    "themeCreate": "Theme Create",
     "customFaviconDesc": "Custom Favicon Desc",
     "logoPreview": "Logo Preview",
-    "themeCustom": "Theme Custom",
     "hideHealthLogsDesc": "Hide Health Logs Desc",
     "faviconPreview": "Favicon Preview",
     "changelog": "Changelog",
@@ -1343,7 +1422,9 @@
       "open": "open",
       "close": "close"
     },
-    "noResults": "No results"
+    "noResults": "No results",
+    "costsTeams": "Teams",
+    "costsTeamsSubtitle": "Team cost centers"
   },
   "webhooks": {
     "title": "Webhooks",
@@ -1476,7 +1557,11 @@
       "chatIdPlaceholder": "-100123456789 or @channelname",
       "chatIdHint": "The unique numerical identifier or public username of the chat/channel.",
       "tutorial": "How to configure Telegram webhook:"
-    }
+    },
+    "copy": "Copy",
+    "copied": "Copied!",
+    "expandDetails": "Show details",
+    "collapseDetails": "Hide details"
   },
   "compliance": {
     "auditTitle": "Audit",
@@ -1588,22 +1673,17 @@
     "mcpMetricCalls24h": "Calls (24h)",
     "mcpMetricSuccessRate": "Success rate",
     "mcpMetricAvgDuration": "Avg duration",
-    "mcpMetricTopTool": "Top tool"
-  },
-  "themesPage": {
-    "title": "Themes",
-    "description": "Choose a preset theme or create your own with a single color",
-    "presetColors": "Popular colors",
-    "customTheme": "Custom theme",
-    "customThemeDesc": "Click create theme and pick one color",
-    "createTheme": "Create theme",
-    "activePreset": "Active theme"
+    "mcpMetricTopTool": "Top tool",
+    "dismissError": "Dismiss error"
   },
   "header": {
+    "teamsDescription": "Team cost estimates and shared soft budgets",
     "logout": "Logout",
     "quickNavigation": "Quick nav",
     "quickNavigationTitle": "Quick navigation (⌘K / Ctrl+K)",
     "openQuickNavigation": "Open quick navigation",
+    "openMenu": "Open menu",
+    "products": "Keak products",
     "switchToLightMode": "Switch to light mode",
     "switchToDarkMode": "Switch to dark mode",
     "language": "Language",
@@ -1631,8 +1711,6 @@
     "anthropicCompatible": "Anthropic Compatible",
     "media": "Media",
     "mediaDescription": "Generate images, videos, and music",
-    "themes": "Themes",
-    "themesDescription": "Choose a color theme for the whole dashboard panel",
     "costsDescription": "Track spending, analyze trends, and manage your AI budget across all providers",
     "cacheDescription": "Monitor provider prompt cache efficiency and local semantic response reuse.",
     "limitsDescription": "Configure rate limits and quotas per API key and provider",
@@ -2470,6 +2548,9 @@
     "emptyFilterClear": "Clear filters",
     "disableNonPublicModels": "Disable Non-Public Models",
     "disableNonPublicModelsDesc": "Reject requests for models that are not discovered or not marked as public in the provider catalog",
+    "forcedModel": "Enforced model",
+    "forcedModelDesc": "Route every chat request made with this key to this model or combo, whatever model the client asks for (or when it sends none). The key's model, combo and budget limits still apply.",
+    "forcedModelPlaceholder": "Not enforced: use the model the client requests",
     "normalKeysSection": "Normal keys",
     "quotaKeysSection": "Quota keys",
     "bypassProviderQuota": "Bypass provider quota cutoffs",
@@ -2483,7 +2564,12 @@
     "onlySelectedConnections": "Only selected connections",
     "selectAtLeastOneConnection": "Select at least one connection or choose All connections.",
     "allConnectionsDesc": "This key can use any active connection.",
-    "restrictedToConnections": "Restricted to {count, plural, one {# connection} other {# connections}}."
+    "restrictedToConnections": "Restricted to {count, plural, one {# connection} other {# connections}}.",
+    "preferredConnections": "Preferred connections",
+    "preferredConnectionsDesc": "Per-key priority order. If a preferred connection is unavailable, routing falls back to the next eligible one.",
+    "preferredConnectionsNone": "No preference set — the default routing strategy is used.",
+    "preferredConnectionsClear": "Clear",
+    "removeSelection": "Remove {name}"
   },
   "auditLog": {
     "title": "Audit Log",
@@ -2595,7 +2681,9 @@
     "imageToTextBridgeCta": "Configure the Image→Text bridge in Modality Bridge settings",
     "sttBridgeCta": "Configure the Speech→Text bridge in Modality Bridge settings",
     "existingConnection": "Existing connection",
-    "openrouterSttDescription": "OpenRouter speech-to-text models use your configured OpenRouter connection. No separate credential is required."
+    "openrouterSttDescription": "OpenRouter speech-to-text models use your configured OpenRouter connection. No separate credential is required.",
+    "modalityTabsAria": "Media type",
+    "serviceKindsAria": "Service type"
   },
   "search": {
     "searchQuery": "Search Query",
@@ -2970,6 +3058,7 @@
       "amp": "Use when you want Amp shorthand workflows but still need OmniRoute alias and routing rules enforcement.",
       "hermes": "Use when you need a lightweight terminal-native AI assistant for quick tasks.",
       "hermes-agent": "Use when you need Hermes Agent (by Nousresearch) with default, delegation, vision and auxiliary models routed through OmniRoute.",
+      "whycodes": "Use when you want WhyCodes as a broad-purpose autonomous CLI agent (TUI, named agents, memory, swarm) pointed at OmniRoute.",
       "custom": "Use for custom tool implementations or generic OpenAI-compatible configurations."
     },
     "toolDescriptions": {
@@ -3009,7 +3098,9 @@
       "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
       "warp": "Warp AI terminal with custom provider support",
       "agent-deck": "Agent Deck multi-agent orchestrator",
-      "5dive": "5dive — self-hosted fleet of coding agents; one auth profile points them all at OmniRoute"
+      "5dive": "5dive — self-hosted fleet of coding agents; one auth profile points them all at OmniRoute",
+      "whycodes": "WhyCodes autonomous CLI agent with OpenAI-compatible base URL",
+      "zed": "Zed code editor — built-in agent through an OpenAI-compatible provider"
     },
     "guides": {
       "cursor": {
@@ -3240,6 +3331,9 @@
     "copilotReloadInstruction": "Then reload VS Code and set the API key in the input prompt.",
     "wireApiChatCompletions": "Chat Completions (/chat/completions)",
     "wireApiResponses": "Responses API (/responses)",
+    "codexModelCatalog": "List OmniRoute models in Codex's /model picker",
+    "codexModelCatalogHint": "Writes ~/.codex/omniroute-models.json from your installed Codex's own model catalog (about 60 KB per model). Re-apply after upgrading Codex.",
+    "codexCatalogWarning": "Codex's /model picker was not updated: OmniRoute could not read the installed Codex model catalog.",
     "cliproxyapiActionFailed": "Action failed",
     "cliproxyapiActionSucceeded": "Action succeeded",
     "cliproxyapiCheckUpdates": "Check Updates",
@@ -3262,7 +3356,8 @@
     "cliproxyapiUnknown": "Unknown",
     "cliproxyapiUpdate": "Update",
     "cliproxyapiUpdateAvailable": "Update available: v{current} → v{latest}",
-    "cliproxyapiVersion": "Version"
+    "cliproxyapiVersion": "Version",
+    "removeMapping": "Remove mapping"
   },
   "modelCatalog": {
     "title": "Models & Combos",
@@ -3326,6 +3421,18 @@
     "maxMembersPlaceholder": "e.g. 10",
     "testSelected": "Test selected ({count})",
     "testAllFiltered": "Test all filtered ({count})",
+    "visibility": "Visibility",
+    "allVisibility": "Visible and hidden",
+    "visibleOnly": "Visible",
+    "hiddenOnly": "Hidden",
+    "visibleColumn": "Visible",
+    "hideModel": "Hide {name} from /v1/models",
+    "showModel": "Show {name} in /v1/models",
+    "hiddenBadge": "Hidden",
+    "hideFiltered": "Hide filtered ({count})",
+    "showFiltered": "Show filtered ({count})",
+    "visibilityCounts": "{visible} visible · {hidden} hidden · {total} total",
+    "visibilityUpdateFailed": "Failed to update model visibility",
     "cancel": "Cancel",
     "clearResults": "Clear results",
     "testing": "Testing...",
@@ -3387,6 +3494,10 @@
     "title": "Combos",
     "description": "Create model combos with weighted routing and fallback support",
     "autoCatalogTitle": "Auto-routing catalog",
+    "autoTosLoadError": "Could not load the ToS policy. Retry before changing it.",
+    "autoTosSaveError": "Could not save the ToS policy. The previous setting is still shown. Try again.",
+    "autoTosIncludeLabel": "Include providers marked ToS: avoid in auto",
+    "autoTosDescription": "Off by default. Applies to all auto combos, not just one account. Connecting a provider does not enable this option.",
     "autoCatalogTemplateCount": "{count} templates",
     "autoCatalogDescription": "Built-in auto/* combos resolved dynamically from connected providers. Use any of these IDs as the model field — no setup needed.",
     "autoCatalogExpand": "Expand auto-routing catalog",
@@ -3508,6 +3619,9 @@
     "moveUp": "Move up",
     "moveDown": "Move down",
     "removeModel": "Remove",
+    "testStep": "Test this model",
+    "testStepRunning": "Testing…",
+    "testStepNotTestable": "Only single-model steps can be tested",
     "saving": "Saving...",
     "liveNoProviders": "No providers observed yet.",
     "liveFleetDataHint": "Fleet data arrives through live combo events.",
@@ -3549,6 +3663,7 @@
     "playgroundNoCombosYet": "No combos configured yet.",
     "playgroundCreateFirst": "Create one first",
     "weighted": "Weighted",
+    "weightPercent": "Weight (%)",
     "leastUsed": "Least-Used",
     "costOpt": "Cost-Opt",
     "strategyGuideTitle": "How to use this strategy",
@@ -3710,6 +3825,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# account} other {# accounts}}",
     "builderGlobalAdded": "Added",
     "builderGlobalAdd": "Add",
+    "clearSearch": "Clear search",
     "manualModel": "Manual model",
     "manualModelInvalid": "Enter a model as provider/model.",
     "manualModelUnknownProvider": "Unknown provider prefix.",
@@ -3926,6 +4042,7 @@
     "builderComboRefStep": "Add combo reference",
     "builderPinnedAccount": "Pinned Account",
     "builderLegacyEntry": "Legacy entry",
+    "builderStaleModel": "Not in live catalog",
     "reviewName": "Name",
     "reviewStrategy": "Strategy",
     "reviewSteps": "Steps",
@@ -3963,6 +4080,10 @@
     "responseValidationMinLength": "Minimum content length (chars)",
     "responseValidationJsonPaths": "JSON-path checks",
     "responseValidationAddCheck": "+ Add check",
+    "responseValidationRemoveCheck": "Remove check",
+    "responseValidationPath": "JSON path",
+    "responseValidationCondition": "Condition",
+    "responseValidationValue": "Expected value",
     "agentFeaturesSystemMessageOverride": "Override system message",
     "agentFeaturesSystemMessagePlaceholder": "You are an expert assistant...",
     "agentFeaturesSystemMessageHint": "System message override for agents",
@@ -4100,6 +4221,9 @@
     "showingTopCostRows": "Showing {shown} of {total} matching rows (top 50)."
   },
   "endpoint": {
+    "cloudUploadDestination": "Cloud sync destination (not local backups):",
+    "cloudUploadWarning": "Cloud sync is disabled by default on new installations. Enabling it uploads provider API keys, OAuth access/refresh tokens, OmniRoute API keys, and configuration to the destination above, now and during future syncs. This is separate from local Storage backups. Only enable it if you trust that server.",
+    "cloudUploadConsent": "I understand and authorize uploading my credentials to this destination.",
     "title": "API Endpoint",
     "subtitle": "Use the OpenAI-compatible endpoint with most SDKs and tools.",
     "testEndpoint": "Test endpoint →",
@@ -5275,9 +5399,13 @@
         "skipped": "already configured",
         "failed": "failed"
       }
-    }
+    },
+    "stepProgress": "Setup progress"
   },
   "providers": {
+    "tosAvoidNoticeTitle": "This provider is excluded from auto by default",
+    "tosAvoidNoticeDescription": "Its ToS status is marked avoid. Connecting an account does not change this policy. Review the provider terms before using the global opt-in for all auto combos.",
+    "tosAvoidNoticeAction": "Review the auto policy",
     "codexReleaseCooldown": "Clear local cooldown",
     "codexReleaseCooldownHint": "Allow this Codex account to be tried again. Does not redeem a reset credit or change upstream limits.",
     "codexReleasingCooldown": "Clearing…",
@@ -5369,6 +5497,12 @@
     "reorderByAvailabilityTitle": "Reorder connections by availability",
     "reorderByAvailabilityError": "Failed to reorder connections by availability",
     "distributeProxies": "Distribute Proxies",
+    "clearAccountProxies": "Remove account proxies",
+    "clearAccountProxyAssignments": "Remove assignments",
+    "clearAccountProxiesConfirm": "Remove individual proxy assignments from all {count} accounts of this provider, including disabled accounts? Saved proxies and provider/global assignments are preserved. Accounts will inherit provider/global proxy settings again.",
+    "accountProxiesCleared": "Account proxy assignments removed.",
+    "clearAccountProxiesPartial": "Could not completely reset {count} account(s). The displayed assignments have been refreshed; you can retry.",
+    "clearAccountProxiesError": "Could not reset account proxies or refresh their status. Please reload and retry.",
     "distributing": "Distributing...",
     "selectedCount": "{count, plural, one {# selected} other {# selected}}",
     "accountsCount": "{count, plural, one {# account} other {# accounts}}",
@@ -5490,6 +5624,9 @@
     "baseUrlLabel": "Base URL",
     "apiTypeLabel": "API Type",
     "prefixHint": "Required. Unique prefix for model names.",
+    "providerIdSuffixLabel": "Provider ID suffix",
+    "providerIdSuffixHint": "Optional. Appended to the provider ID instead of a random one (letters, numbers, -, _ and . only). Leave blank for a random ID. Cannot be changed later.",
+    "providerIdConflict": "A provider with this ID already exists. Choose a different ID suffix.",
     "nameHint": "Required. A friendly label for this node.",
     "baseUrlHint": "Required. Provider API base URL.",
     "iconUrlLabel": "Icon URL",
@@ -5554,6 +5691,7 @@
     "allModelsAlreadyImported": "All models already imported",
     "noNewModelsToImport": "No new models to import — all models are already in the registry or custom models list",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Model discovery failed {time}",
     "skippingExistingModels": "Skipping {count} existing models",
     "autoSync": "Auto-Sync",
     "autoSyncShort": "Sync",
@@ -5571,6 +5709,10 @@
     "autoSyncTooltip": "Automatically refresh model list every 6h by default (configurable via MODEL_SYNC_INTERVAL_HOURS)",
     "autoSyncEnabled": "Auto-sync enabled — models will refresh periodically",
     "autoSyncDisabled": "Auto-sync disabled",
+    "autoSyncLastSynced": "Synced {time}",
+    "autoSyncNeverSynced": "Never synced",
+    "autoSyncImmediateFailed": "Auto-sync enabled, but the immediate model refresh failed",
+    "autoSyncImmediatePartialFailure": "Auto-sync enabled, but some immediate model refreshes failed",
     "autoSyncToggleFailed": "Failed to toggle auto-sync",
     "autoSyncPartialFailure": "Auto-sync updated for some connections, but not all",
     "clearAllModels": "Clear All Models",
@@ -5708,12 +5850,32 @@
     "perKeyProxyEnabledTitle": "Per-key proxy assignment enabled for this provider",
     "perKeyProxyDisabledTitle": "Per-key proxy assignment disabled for this provider",
     "autoPriority": "Auto: {priority}",
+    "copyConnectionId": "Copy connection ID. Send it in the {header} request header to pin a request to this account.",
+    "connectionIdCopied": "Copied",
+    "connectionPinTip": "Tip: to pin a request to one account, send its connection ID in the {header} request header (click the ID chip on a connection to copy it). The pinned account is used exclusively; while it is cooling down or out of quota, requests fall back to the other accounts.",
     "proxy": "Proxy",
     "retestAuthentication": "Retest authentication",
     "retest": "Retest",
+    "pingNow": {
+      "label": "Ping now",
+      "title": "Send one small request now so this account's quota window starts. Consumes quota; does not change Auto-Ping.",
+      "completed": "Ping completed.",
+      "busy": "A ping is already running for this account.",
+      "inactive": "Activate this account before pinging.",
+      "unavailable": "Account or provider is unavailable right now; no request sent.",
+      "noModel": "No ping model is available; no request sent.",
+      "authFailed": "Authentication failed. Reconnect this account.",
+      "quotaUnavailable": "Quota unavailable; no request sent.",
+      "quotaExhausted": "Quota exhausted; no request sent.",
+      "notCompleted": "The provider did not complete the ping.",
+      "timeout": "Ping timed out; it may still have been delivered. Check quota before retrying.",
+      "failed": "Ping failed."
+    },
     "disableConnection": "Disable connection",
     "enableConnection": "Enable connection",
     "reauthenticateConnection": "Re-authenticate this connection",
+    "verifyAccount": "Verify account",
+    "verifyAccountHint": "Google requires you to verify this account. Open the link, complete the check, then retry.",
     "proxyConfig": "Proxy config",
     "aliasExistsAlert": "Alias \"{alias}\" already exists. Please use a different model or edit existing alias.",
     "aliasInputPlaceholder": "alias name",
@@ -5748,6 +5910,7 @@
     "contextWindowOverridePlaceholder": "e.g. 131072",
     "contextWindowOverrideHint": "Manually set this model's real context window (tokens) when the provider misreports it. Wins over auto-detected/catalog values and prevents combo routing from dropping the model.",
     "contextWindowOverrideInvalid": "Context window override must be a positive whole number of tokens",
+    "maxOutputTokenOverrideInvalid": "Max output tokens override must be a positive whole number of tokens",
     "visionCapableLabel": "Vision capable",
     "visionCapableHint": "Manually flag this model as vision-capable when the provider's discovery metadata doesn't report an image input modality (common for self-hosted/local backends).",
     "compatParamFiltersLabel": "Param Filters",
@@ -6006,10 +6169,10 @@
     "apiFormatLabel": "Api Format Label",
     "apiKeyOptionalHint": "Leave empty if your local setup or provider does not require authentication.",
     "apiKeyOptionalLabel": "API Key (optional)",
-    "apiRegionChina": "Api Region China",
-    "apiRegionHint": "Api Region Hint",
-    "apiRegionInternational": "Api Region International",
-    "apiRegionLabel": "Api Region Label",
+    "apiRegionChina": "Mainland China",
+    "apiRegionHint": "Select the endpoint region used for API access and quota tracking.",
+    "apiRegionInternational": "International",
+    "apiRegionLabel": "API Region",
     "apikey": "Apikey",
     "audio": "Audio",
     "audioProvidersHeading": "Audio Providers Heading",
@@ -6198,6 +6361,16 @@
     "supportedEndpointEmbeddings": "Embeddings",
     "supportedEndpointImages": "Images",
     "supportedEndpointsLabel": "Supported endpoints",
+    "endpointCapabilitiesEdit": "Edit model endpoints",
+    "endpointCapabilitiesReset": "Reset to discovered",
+    "endpointCapabilitiesDefaulted": "Assumed",
+    "endpointCapabilitiesDeclared": "Declared",
+    "endpointCapabilitiesInferred": "Inferred",
+    "endpointCapabilitiesOperator": "Manual",
+    "endpointCapabilitiesSave": "Save endpoints",
+    "endpointCapabilitiesSaveFailed": "Failed to update model endpoints",
+    "endpointCapabilitiesResetFailed": "Failed to reset model endpoints",
+    "endpointCapabilitiesNoAdapter": "No provider adapter for this endpoint",
     "tagGroupHint": "Tag Group Hint",
     "tagGroupLabel": "Tag Group Label",
     "tagGroupPlaceholder": "Tag Group Placeholder",
@@ -6569,7 +6742,7 @@
       "claude": "Connect Claude Code with the existing OAuth flow.",
       "cline": "Connect Cline with the existing OAuth flow.",
       "cursor": "Connect Cursor IDE with the existing OAuth flow.",
-      "cursor-api": "Connect Cursor with a user API key (crsr_...) from cursor.com/dashboard/api; no IDE session needed.",
+      "cursor-api": "Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Connect GitHub Copilot with the existing OAuth flow.",
       "gitlab-duo": "OAuth application with ai_features + read_user scopes. Configure GITLAB_DUO_OAUTH_CLIENT_ID and optionally GITLAB_DUO_OAUTH_CLIENT_SECRET on this OmniRoute instance.",
       "kilocode": "Connect Kilo Code with the existing OAuth flow.",
@@ -7045,16 +7218,6 @@
     "settingsSidebarDesc": "Choose which sidebar items to show. Essentials keeps Advanced tools searchable.",
     "hideHealthLogs": "Hide Health Check Logs",
     "hideHealthLogsDesc": "When ON, suppress [HealthCheck] messages in server console",
-    "themeAccent": "Theme color",
-    "themeAccentDesc": "Choose a preset color or create your own theme with one color",
-    "themeCreate": "Create theme",
-    "themeCustom": "Custom theme",
-    "themeBlue": "Blue",
-    "themeRed": "Red",
-    "themeGreen": "Green",
-    "themeViolet": "Violet",
-    "themeOrange": "Orange",
-    "themeCyan": "Cyan",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Customize the application name and logo",
     "appName": "Application Name",
@@ -7099,6 +7262,8 @@
         "NEEDS_CORE_NOT_CONFIGURED": "This subscription has nodes that need a local proxy core (SS/VMess/Trojan/VLESS); they are not routed until you configure the local-core SOCKS5 endpoint.",
         "NO_USABLE_NODES": "Subscription yielded no usable nodes (http/https/socks5 or nodes with a local core endpoint).",
         "SELECTOR_SWITCH_FAILED": "The proxy-core control call failed; the previous route stays active. Check the control URL and secret, then refresh.",
+        "SELECTOR_EARLY_NO_CONTROL": "No control URL",
+        "SELECTOR_EARLY_UNMAPPED": "No matching subscription",
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "The generated core configuration could not replace the adopted file; the beside copy was kept instead.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
@@ -7130,6 +7295,7 @@
       "createSubscription": "Create Subscription",
       "loading": "Loading…",
       "noSubscriptions": "No subscriptions yet. Click \"Add Subscription\" to get started.",
+      "earlySkipsSinceRestart": "Selector skips since last restart",
       "statusOk": "OK",
       "statusError": "Error",
       "statusEmpty": "Empty",
@@ -7192,7 +7358,7 @@
       "nextSwitchNow": "Now",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7203,7 +7369,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Core binary path",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Optional: verifies the generated file with the core binary before replacing the adopted file. Leave empty to keep writing beside it. The directory is created when missing."
+      "coreBinaryPathHelp": "Optional: verifies the generated file with the core binary before replacing the adopted file. Leave empty to keep writing beside it. The directory is created when missing.",
+      "urlFeedlessHint": "Leave empty for a selector-only subscription: set a control URL below, no feed is fetched, refreshed, or bound."
     },
     "bulkHealthcheck": "Bulk Healthcheck",
     "bulkHealthcheckDesc": "Test all configured proxies against a target URL to find which ones work.",
@@ -7645,6 +7812,7 @@
     "configured": "configured",
     "none": "None",
     "modelOverrideValuePlaceholder": "Numeric value",
+    "modelOverrideKey": "Override key",
     "modelOverrideReasoningEffortsPlaceholder": "English comma-separated, e.g. low, medium, high",
     "addKeyValue": "Add key value",
     "noModelOverrides": "No overrides configured for this model.",
@@ -7693,7 +7861,6 @@
     "customPricingNote": "You can override default pricing for specific models. Custom overrides take priority over auto-detected pricing.",
     "editPricing": "Edit Pricing",
     "viewFullDetails": "View Full Details",
-    "themeCoral": "Coral",
     "adaptiveVolumeRouting": "Adaptive Volume Routing",
     "adaptiveVolumeRoutingDesc": "Scale connections dynamically based on payload volume and throughput pressure.",
     "lkgpToggleTitle": "Last Known Good Provider (LKGP)",
@@ -7788,6 +7955,8 @@
     "compressionDesc": "Reduce token usage by compressing prompts before sending to providers",
     "autoCombosTitle": "Auto Combos",
     "autoCombosDesc": "Allow this key to use the built-in auto/* combos, which pick a model automatically from every configured provider",
+    "ccDiscoveryAliasesTitle": "Claude Code discovery aliases",
+    "ccDiscoveryAliasesDesc": "Advertise claude/... compatibility mirrors for models and combos this key can already access",
     "compressionGuidanceFullGuideLink": "Full compression guide",
     "compressionGuidanceShow": "Details",
     "compressionGuidanceHide": "Hide details",
@@ -8121,6 +8290,9 @@
     "storageIntegrityCheck": "Integrity Check",
     "storageIntegrityOk": "✓ OK",
     "storageIntegrityError": "✗ Error",
+    "storageIntegrityLastCheck": "Last checked {date}",
+    "storageIntegrityRunCheck": "Run integrity check",
+    "storageIntegrityCheckFailed": "Integrity check failed",
     "storageUsageTokenBuffer": "Usage Token Buffer",
     "storageUsageTokenBufferDesc": "Extra tokens added to reported usage to account for system prompt overhead.",
     "storageUsageTokenBufferHint": "Set to 0 to report raw provider token counts. Default: 2000.",
@@ -8239,6 +8411,14 @@
       "terse-cjk": {
         "label": "Terse CJK (文言)",
         "description": "Classical-Chinese ultra-terse style (available only for Chinese)."
+      },
+      "antislop-ui": {
+        "label": "Antislop UI filter",
+        "description": "Purpose-tested visuals: no generic gradients, template layouts or dead controls."
+      },
+      "antislop-copy": {
+        "label": "Antislop copy and human filter",
+        "description": "Honest copy plus people rules: no AI tells, WCAG AA contrast, keyboard, states, mobile reflow."
       }
     },
     "resilienceWaitForCooldown": "Wait for Cooldown",
@@ -8323,6 +8503,38 @@
     "codexAutoPingWarning": "Consumes a small amount of real Codex quota on every ping. Off by default — enable only for connections you actively rely on.",
     "codexAutoPingSaveError": "Failed to update Codex Auto-Ping setting",
     "codexAutoPingToggleAria": "Toggle Codex quota auto-ping for {connection}",
+    "codexWakeups": {
+      "title": "Scheduled wakeups",
+      "desc": "Ping selected accounts on a schedule so their quota window starts when you want it to. Every run uses a small amount of real Codex quota.",
+      "name": "Name",
+      "accounts": "Accounts",
+      "scheduleKind": "Schedule",
+      "daily": "Daily at a set time",
+      "interval": "Every N minutes",
+      "time": "Time",
+      "timezone": "Timezone",
+      "days": "Days",
+      "minutes": "Interval in minutes (5–10080)",
+      "add": "Add wakeup",
+      "runNow": "Run now",
+      "delete": "Delete",
+      "toggleAria": "Enable wakeup {name}",
+      "everyMinutes": "Every {minutes} min",
+      "dailyAt": "{days} at {time} ({timezone})",
+      "nextRun": "Next run: {time}",
+      "lastRun": "Last run: {status}",
+      "saveError": "Could not save the wakeup. Check the name, accounts and schedule.",
+      "actionError": "The action failed. Try again in a moment.",
+      "runStarted": "Run started.",
+      "status": {
+        "running": "running",
+        "succeeded": "succeeded",
+        "failed": "failed",
+        "skipped": "skipped",
+        "partial": "partially succeeded",
+        "interrupted": "interrupted"
+      }
+    },
     "codexFastTierTierLabel": "Service tier",
     "codexFastTierTierPriority": "Priority",
     "codexFastTierTierFlex": "Flex",
@@ -8694,6 +8906,7 @@
     "cliproxyapiPort": "Port",
     "qdrantHost": "Host",
     "qdrantCollection": "Collection",
+    "catalogVisibilityHint": "Hidden model IDs remain callable with the same access permissions.",
     "catalogScopeTitle": "Models API listing",
     "catalogScopeDesc": "What GET /v1/models advertises for this key. Narrowing the list never changes what the key can call.",
     "catalogScopeAll": "Both",
@@ -8800,7 +9013,52 @@
     "resilienceTokenRefreshScopeProvider": "Provider (all accounts share one breaker)",
     "resilienceTokenRefreshScopeConnection": "Connection (each account has its own breaker)",
     "resilienceTokenRefreshThreshold": "Failures before pausing",
-    "resilienceTokenRefreshCooldown": "Pause after tripping"
+    "resilienceTokenRefreshCooldown": "Pause after tripping",
+    "piiMasking": {
+      "title": "PII masking",
+      "description": "Choose which kinds of personal data are masked and add your own patterns. Masking stays off until you turn on the feature flags shown below.",
+      "requestFlag": "Request masking",
+      "responseFlag": "Response sanitization",
+      "templates": "Templates",
+      "template": {
+        "minimal": "Minimal",
+        "standard": "Standard",
+        "financial": "Financial",
+        "brazilian": "Brazilian",
+        "usa": "USA",
+        "full": "Full"
+      },
+      "builtinTypes": "Built-in types",
+      "types": {
+        "email": "Email addresses",
+        "phone_us": "US phone numbers",
+        "phone_br": "Brazilian phone numbers",
+        "ssn": "US Social Security numbers",
+        "credit_card": "Credit card numbers",
+        "cpf": "CPF (Brazilian taxpayer ID)",
+        "cnpj": "CNPJ (Brazilian company ID)",
+        "ip_address": "IPv4 addresses",
+        "ipv6_address": "IPv6 addresses",
+        "aws_key": "AWS access keys",
+        "api_key_generic": "API keys and tokens"
+      },
+      "customPatterns": "Custom patterns",
+      "customPatternsDesc": "Matches are replaced with [CUSTOM_REDACTED]. Up to {max} patterns. Patterns that risk catastrophic backtracking are refused.",
+      "typeRegex": "Regular expression",
+      "typeWildcard": "Wildcard (* and ?)",
+      "pattern": "Pattern",
+      "flags": "Flags (i, m, s, u)",
+      "sampleText": "Sample text to test the pattern against",
+      "test": "Test",
+      "testMatches": "{count} matches",
+      "testFailed": "Pattern rejected: {message}",
+      "add": "Add pattern",
+      "saved": "Saved",
+      "saveFailed": "Could not save: {message}",
+      "statsTitle": "Detections since restart",
+      "statsEmpty": "No detections yet.",
+      "statsRequest": "Requests"
+    }
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -8884,7 +9142,8 @@
     "tomlTestPassed": "Passed",
     "tomlTestFailed": "Failed",
     "tomlImportError": "Could not process the RTK TOML file.",
-    "tomlFileReadError": "Could not read the selected TOML file."
+    "tomlFileReadError": "Could not read the selected TOML file.",
+    "viewMode": "View mode"
   },
   "compressionEngineConfig": {
     "loading": "Loading…",
@@ -9106,7 +9365,8 @@
     "languagePacksList": "Language packs: {packs}",
     "dragToReorder": "Drag to reorder step",
     "engine": "Engine",
-    "intensity": "Intensity"
+    "intensity": "Intensity",
+    "compressionOverride": "Compression override"
   },
   "compressionStudio": {
     "noRun": "No compression run available.",
@@ -9166,7 +9426,8 @@
     "encoderWinner": "winner: {winner}",
     "encoder": "encoder",
     "bytes": "bytes",
-    "tokensCl100k": "tokens (cl100k)"
+    "tokensCl100k": "tokens (cl100k)",
+    "studioViews": "Studio views"
   },
   "omniglyph": {
     "preview": "Preview",
@@ -9372,7 +9633,9 @@
     "tooltipMinLength": "Messages shorter than this are not compressed. Lower = more compression.",
     "tooltipMinSavings": "Only compress if it saves at least this many tokens.",
     "ultraSettings": "Ultra Settings",
-    "ultraSettingsDesc": "SLM-powered semantic compression"
+    "ultraSettingsDesc": "SLM-powered semantic compression",
+    "defaultLanguage": "Default language",
+    "viewMode": "View mode"
   },
   "translator": {
     "title": "Translator",
@@ -9684,6 +9947,9 @@
     "streamTransformFailed": "Failed to transform stream"
   },
   "usage": {
+    "healthExtraUsageBypass": "Quota exhausted; extra usage is allowed, so service continues.",
+    "healthPaidCreditsBypass": "Quota exhausted; usable paid credits allow service to continue.",
+    "healthFilteringBypass": "Quota exhausted; local quota filtering is disabled, so service continues.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
@@ -9851,6 +10117,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Provider Limits",
     "noProviders": "No Providers Connected",
+    "quotaAuthRequired": "Authentication required - sign in to the dashboard",
+    "quotaAuthRequiredHint": "Provider connections could not be loaded because the dashboard session is missing or expired. Sign in and refresh to see your quota limits.",
     "connectProvidersForQuota": "Connect to providers with OAuth to track your API quota limits and usage.",
     "accountsCount": "{count, plural, one {# account} other {# accounts}}",
     "filteredFromCount": "(filtered from {count})",
@@ -9862,6 +10130,9 @@
     "hideQuotaRow": "Hide this quota row",
     "showQuotaRow": "Show this quota row",
     "hiddenQuotaRowsLabel": "Hidden:",
+    "quotaSpeedTitle": "Recent decode speed on this account (last {count} successful requests)",
+    "quotaSpeedLine": "{model}: {avg} tok/s avg · last {last} · TTFT {ttft}s (n={samples})",
+    "quotaSpeedLineNoTtft": "{model}: {avg} tok/s avg · last {last} (n={samples})",
     "quotaVisibilityUpdateFailed": "Failed to update quota visibility",
     "account": "Account",
     "modelQuotas": "Model Quotas",
@@ -9897,9 +10168,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Unknown",
     "statTotal": "Total",
-    "statCritical": "Critical",
-    "statAlert": "Alert",
-    "statHealthy": "Healthy",
     "filterPurchaseTypeLabel": "Type",
     "filterTierLabel": "Tier",
     "purchaseAll": "All",
@@ -10137,7 +10405,61 @@
     "updatedShort": "Updated",
     "lastRefreshed": "Last refreshed",
     "providerQuota": "Provider Quota",
-    "providerQuotaHomeHint": "Live status across connected accounts"
+    "providerQuotaHomeHint": "Live status across connected accounts",
+    "claudeResetCreditDefaultTitle": "Claude limit reset",
+    "confirmRedeemClaudeResetCredit": "Redeeming immediately resets the eligible Claude usage limits and permanently consumes this credit.",
+    "claudeResetCreditsModalTitle": "Claude reset credits",
+    "claudeResetCreditsModalExplainer": "Available Claude reset credits and weekly session resets for this account.",
+    "healthAccountHint": "Based on recent observations, not a live probe. Select an account for details.",
+    "healthRecovery": "Expected recovery",
+    "healthAvailable": "Available",
+    "healthRestricted": "Partially restricted",
+    "healthUnavailable": "Unavailable",
+    "healthPeakHourProtection": "Peak-hour protection",
+    "healthCooldown": "Cooldown",
+    "healthQuotaExhausted": "Quota exhausted",
+    "healthOverview": "Overview",
+    "layoutFull": "Full",
+    "layoutCompact": "Compact",
+    "healthQuotaError": "Quota read failed",
+    "healthNoRuntime": "Runtime state unavailable",
+    "healthPreviousSnapshot": "Last refresh failed; showing previous result",
+    "healthPreviousFailure": "Last request failed; cooldown ended",
+    "healthAwaitingSync": "Reset time passed; waiting for sync",
+    "healthVerdictUnavailable": "Availability check unavailable; showing quota meters only",
+    "healthSummaryFailed": "Runtime summary read failed; model lockouts may be missing",
+    "healthRuntimeObserved": "Runtime updated {time}",
+    "healthQuotaObserved": "Quota observed {time}",
+    "healthOldestQuota": "Oldest quota snapshot {time}",
+    "healthRecoveryUnknown": "Recovery time unknown",
+    "healthDetailsHint": "Click for details and actions",
+    "healthFiveHour": "5 hours",
+    "healthOverall": "Overall",
+    "healthAction": "Needs attention",
+    "healthTitle": "Account availability",
+    "healthDrag": "Drag to reorder providers",
+    "healthDragPosition": "{provider}, {count, plural, one {position {position, number} of #} other {position {position, number} of #}}",
+    "healthResetOrder": "Restore default order",
+    "healthPool": "{name} pool",
+    "healthOtherPool": "Same account · {pool}: {status} ({remaining} remaining)",
+    "healthIncluded": "Includes {count, plural, one {# partially restricted account} other {# partially restricted accounts}}",
+    "healthBannerUnavailable": "{count, plural, one {# account temporarily unavailable} other {# accounts temporarily unavailable}}",
+    "healthBannerAvailable": "{count, plural, one {# account available} other {All # accounts available}}",
+    "healthLegendHide": "Hide legend",
+    "healthLegendShow": "Show legend",
+    "healthLegendOk": "Solid = remaining quota; translucent = used.",
+    "healthLegendCooldown": "{window} quota exhausted. Solid = time already waited; translucent = time left.",
+    "healthLegendAction": "Authorization expired or account banned; waiting will not fix it.",
+    "healthLegendPartial": "Still usable. Yellow cap = a model or pool is restricted.",
+    "healthWaited": "Waited {percent}",
+    "healthWait": "Wait {duration} ({time} recovery)",
+    "healthFastest": "Soonest recovery in {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} available} other {# / {active, number} available}}",
+    "healthCd5": "5h cooldown",
+    "healthCdw": "Weekly cooldown",
+    "healthRecentSuccessBypass": "Routing permits this account because a request succeeded recently.",
+    "healthPurchasedBalanceBypass": "Purchased balance permits use after the included allowance is exhausted.",
+    "healthCutoffAtRequest": "Live quota thresholds are checked when routing a request."
   },
   "modals": {
     "waitingAuth": "Waiting for Authorization",
@@ -10924,7 +11246,8 @@
       "message": "Message",
       "error": "Error",
       "completion": "Completion"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Simple Chat",
@@ -11105,7 +11428,8 @@
     "minutesAgo": "{minutes}m ago",
     "hoursAgo": "{hours}h ago",
     "daysAgo": "{days}d ago",
-    "entries": "Entries"
+    "entries": "Entries",
+    "viewSwitcherAria": "Cache view"
   },
   "proxyConfigModal": {
     "levelGlobal": "Global",
@@ -11293,6 +11617,7 @@
     "tableHealth": "Health (24h)",
     "tableUsage": "Usage",
     "tableActions": "Actions",
+    "moreActions": "More actions",
     "test": "Test",
     "edit": "Edit",
     "delete": "Delete",
@@ -11372,7 +11697,7 @@
     "bulkImportNoValidEntries": "No valid entries found. Check the format and try again.",
     "bulkImportSuccess": "Import complete: {created} created, {updated} updated, {failed} failed",
     "bulkImportErrorLine": "Line {line}: {reason}",
-    "bulkImportMaxExceeded": "Maximum 100 proxies per import",
+    "bulkImportMaxExceeded": "Maximum {max} proxies per import",
     "bulkImportPreview": "Preview",
     "clearAssignment": "(clear assignment)",
     "bulkProxyAssignment": "Bulk Proxy Assignment",
@@ -11433,6 +11758,7 @@
     "poolSetAsideKindIpQuota429": "IP rate-limited (429)",
     "poolSetAsideKindSlow": "slow responses",
     "poolSetAsideKindGeoBlocked": "region-blocked (403/451)",
+    "poolSetAsideKindOperatorReported": "outage reported by operator",
     "poolSetAsideUntil": "Back in rotation {endsAt}",
     "poolSetAsideRepeat": "Set aside {count, plural, one {# time} other {# times}}",
     "poolUnknownAddress": "Unknown address",
@@ -11542,7 +11868,6 @@
     "exportCodeTitle": "Export Code",
     "exportShort": "Export",
     "noStateToExport": "No playground state available to export.",
-    "closeExportModal": "Close export modal",
     "close": "Close",
     "exportRealKeyWarning": "Security warning: export blocked — a real API key was detected in the output. Please reset your API key and try again.",
     "placeholderHintPrefix": "Replace",
@@ -11655,7 +11980,8 @@
       "nextButton": "Next",
       "runButton": "Run",
       "promptPlaceholder": "Enter your message… (Enter to send, Shift+Enter for newline)"
-    }
+    },
+    "playgroundTabs": "Playground modes"
   },
   "miniPlayground": {
     "endpoint": "Endpoint",
@@ -11726,7 +12052,8 @@
     "assistant": "Assistant",
     "errorLabel": "Error",
     "requestFailed": "Request failed",
-    "stop": "Stop"
+    "stop": "Stop",
+    "messageInputAria": "Message"
   },
   "requestLogger": {
     "recording": "Recording",
@@ -11913,8 +12240,18 @@
       "resilienceRotations": "{count} account rotations",
       "resilienceRetried": "Retried empty turn",
       "resilienceContinued": "Resumed mid-stream",
-      "resilienceRecovered": "Recovered by a resilience action"
-    }
+      "resilienceRecovered": "Recovered by a resilience action",
+      "conversationContext": "Conversation Context",
+      "goToBottom": "Go to bottom",
+      "liveRefreshOn": "Live refresh: on",
+      "liveRefreshOff": "Live refresh: off",
+      "liveRefresh": "Live refresh",
+      "continuesFromParent": "continues from parent",
+      "continuesFrom": "Continues from {id}",
+      "viewConversation": "view conversation",
+      "openConversation": "Open conversation {id}"
+    },
+    "tableLabel": "Request logs"
   },
   "proxyLogger": {
     "filterAll": "All",
@@ -11959,7 +12296,9 @@
     "colServedBy": "Served by",
     "filterTraffic": "Traffic",
     "filterTests": "Tests",
-    "filterSource": "Source"
+    "filterSource": "Source",
+    "tableLabel": "Proxy logs",
+    "sortLogs": "Sort logs"
   },
   "endpointOptions": {
     "speech": "Speech",
@@ -12044,7 +12383,8 @@
     "statusExhausted": "EXHAUSTED",
     "statusAlerting": "ALERTING",
     "statusError": "ERROR",
-    "moreSuffix": "+{count} more"
+    "moreSuffix": "+{count} more",
+    "feedFilterLabel": "Filter events"
   },
   "quotaShare": {
     "weightPercent": "Weight %",
@@ -12211,7 +12551,10 @@
     "ungroupedTitle": "Ungrouped",
     "ungroupedHint": "These pools are not assigned to a known group. Edit a pool to move it into a real group.",
     "removeFailed": "Could not remove this pool.",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "allocationsHeading": "Allocations",
+    "wizardRemoveDimension": "Remove dimension",
+    "wizardRemoveKey": "Remove key"
   },
   "plugins": {
     "title": "Plugins",
@@ -12369,7 +12712,8 @@
       "settingsUpdateFailed": "Settings update failed",
       "serviceRevealApiKey": "{actor} revealed API key for {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Dismiss error"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12502,7 +12846,21 @@
       "goNow": "Go now",
       "message": "The MITM Proxy now lives under AgentBridge.",
       "title": "This page has moved"
-    }
+    },
+    "dnsOn": "DNS on",
+    "dnsOff": "DNS off",
+    "showServerSettings": "Show server settings",
+    "hideServerSettings": "Hide server settings",
+    "upstreamCaTesting": "Testing…",
+    "removeMapping": "Remove mapping",
+    "mappingSourcePlaceholder": "e.g., gemini-3.6-flash-medium, or * for all unmapped",
+    "mappingWildcardHint": "Use * as the source to route every model without an explicit mapping through OmniRoute to the selected target. Exact source matches always win over *.",
+    "wizardDetectingModels": "Detecting models from intercepted traffic...",
+    "wizardDetectedModels": "Found {count, plural, one {# model} other {# models}} in intercepted traffic. Select the ones you want to add:",
+    "wizardSelectedModels": "{count, plural, one {# model} other {# models}} selected. You'll map them to OmniRoute models in the next screen.",
+    "wizardAddModels": "Add {count, plural, one {# model} other {# models}}",
+    "wizardNoModelsDetected": "No models detected yet. Use {agent} to make a request, then run this wizard again to auto-detect models from traffic.",
+    "wizardNoModelsHint": "Or close this wizard and add mappings manually in the agent card."
   },
   "providerStats": {
     "unknownError": "Unknown error",
@@ -12532,7 +12890,11 @@
     "avgTtft": "Avg TTFT",
     "avgTotal": "Avg Total",
     "requestTelemetry": "Request Telemetry",
-    "requestTelemetryDescription": "7-phase pipeline breakdown (last 5 minutes)"
+    "requestTelemetryDescription": "7-phase pipeline breakdown (last 5 minutes)",
+    "title": "Provider stats",
+    "description": "Per-provider and per-model traffic, latency and success rates",
+    "combo": "Combo",
+    "toggleModels": "Show models for {provider}"
   },
   "relay": {
     "title": "Serverless Relay Proxies",
@@ -12693,7 +13055,18 @@
     "noRequestBody": "No request body.",
     "noResponseBody": "No response body.",
     "formatted": "Formatted",
-    "raw": "Raw"
+    "raw": "Raw",
+    "requestCount": "{count, plural, one {# request} other {# requests}}",
+    "expandList": "Expand list",
+    "collapseList": "Collapse list",
+    "snippetLanguage": "Snippet language",
+    "headersTable": "Headers",
+    "showSecrets": "Show secrets",
+    "maskSecrets": "Mask secrets",
+    "llmNotAvailable": "LLM metadata not available for this request.",
+    "llmStreamYes": "yes (SSE)",
+    "llmStreamNo": "no",
+    "llmTotalTokens": "Total: {count} tokens"
   },
   "cliCommon": {
     "companion": {
@@ -13152,7 +13525,8 @@
     "colReliabilityHelp": "Share of calls this provider actually answered over the last 24 hours. A dash means it served too little traffic to state a rate.",
     "reliabilitySample": "{successes} of {requests} calls succeeded in the last {hours}h",
     "reliabilityTooFew": "Only {requests} calls in the last {hours}h — too few to state a rate",
-    "reliabilityNoTraffic": "No calls recorded in the last 24h"
+    "reliabilityNoTraffic": "No calls recorded in the last 24h",
+    "categoryFilter": "Task category"
   },
   "discovery": {
     "title": "Provider Discovery",
@@ -13177,7 +13551,11 @@
     "method": "Method",
     "auth": "Auth",
     "feasibility": "Feasibility",
-    "models": "Models"
+    "models": "Models",
+    "provider": "Provider",
+    "status": "Status",
+    "endpoint": "Endpoint",
+    "actions": "Actions"
   },
   "noAuthProvider": {
     "title": "No authentication required",
@@ -13226,7 +13604,8 @@
     "ownProxy": "Own proxy",
     "freeTierPause": "Model {model} paused (429), back at {time}",
     "freeTierPauseProvider": "Paused (429), back at {time}",
-    "freeTierPauseNote": "In-process pause on this instance"
+    "freeTierPauseNote": "In-process pause on this instance",
+    "proxyType": "Proxy type"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13399,7 +13778,10 @@
         "description": "A hidden achievement awaits...",
         "criteria": "Complete the hidden achievement to reveal this badge."
       }
-    }
+    },
+    "leaderboardTitle": "Leaderboard",
+    "leaderboardDescription": "Rankings and achievements across your API keys",
+    "badgeLocked": "Locked"
   },
   "featureFlags": {
     "title": "Feature Flags",
@@ -13640,6 +14022,7 @@
     "latency": "Latency",
     "quota": "Quota",
     "rangeWindow": "{range} window",
+    "timeRange": "Time range",
     "runtimeHealthBlend": "runtime/health blend",
     "averageResponseTime": "average response time",
     "worstQuota": "Worst quota",
@@ -13841,7 +14224,11 @@
     "learnMore": "Learn more",
     "changelogLoadFailed": "Could not load the changelog. Please try again later.",
     "retry": "Retry",
-    "viewFullHistory": "View full history on GitHub"
+    "viewFullHistory": "View full history on GitHub",
+    "title": "News & changelog",
+    "description": "Announcements from the OmniRoute team and the latest release notes",
+    "viewLabel": "View",
+    "loadingNews": "Loading announcements..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14243,7 +14630,8 @@
       "never": "-",
       "failureCount": "Failure Count",
       "retryAfterMs": "Retry After (ms)",
-      "lastFailureKind": "Last Failure Kind"
+      "lastFailureKind": "Last Failure Kind",
+      "lastClose": "Last Close"
     },
     "empty": {
       "title": "No connections",
@@ -14391,7 +14779,9 @@
       "circuitBreakerState": "Provider Circuit Breaker State",
       "lastUpdate": "Last update: {timestamp}",
       "uptimeMinutes": "{minutes}m",
-      "uptimeHoursMinutes": "{hours}h {minutes}m"
+      "uptimeHoursMinutes": "{hours}h {minutes}m",
+      "breakerClosed": "Closed",
+      "breakerNotClosed": "Open or half-open"
     },
     "statusPages": {
       "400": {
@@ -14466,6 +14856,9 @@
         "primaryAction": "Maintenance Details",
         "secondaryAction": "System Status"
       }
+    },
+    "miniapp": {
+      "askAnything": "Ask anything…"
     }
   },
   "kiroAuthModal": {
@@ -14499,7 +14892,10 @@
     "importing": "Importing...",
     "apiKeyPlaceholder": "Paste your {providerLabel} API key...",
     "apiKeyStoredDescription": "Stored encrypted as a long-lived bearer credential. There is no refresh flow.",
-    "apiKeyRegionDescription": "AWS region for the key (default: us-east-1)",
+    "apiKeyRegionAuto": "Auto-detect (recommended)",
+    "apiKeyRegionUsEast1": "US East (N. Virginia)",
+    "apiKeyRegionEuCentral1": "Europe (Frankfurt)",
+    "apiKeyRegionAutoDescription": "Auto-detect tries US East first, then Europe (Frankfurt), and saves the region where the key works.",
     "validating": "Validating...",
     "validateAndSaveApiKey": "Validate and Save API Key",
     "errorAutoDetect": "Could not auto-detect token",
@@ -14559,7 +14955,10 @@
     "distributeProxies": {
       "distributing": "Distributing...",
       "complete": "Complete",
-      "defaultLabel": "Distribute Proxies"
+      "defaultLabel": "Distribute Proxies",
+      "confirmMessage": "Assign saved proxies to every account in this group? This replaces existing account assignments and enables proxy routing, including for disabled accounts.",
+      "confirmDistribute": "Distribute proxies",
+      "cancel": "Cancel"
     }
   },
   "providerTest": {
@@ -14650,7 +15049,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} visible / {total} total",
+    "modeLabel": "View mode",
+    "jumpToNow": "Jump to current time, NOW line resets to position {position}%",
+    "laneReuse": "Lane reuse",
+    "laneReuseLabel": "Lane reuse window (minutes)",
+    "laneReuseHint": "Requests sharing a conversation id stay on the same timeline row as long as the gap between them is under this many minutes.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Auto-refresh",
+    "autoRefreshLabel": "Auto-refresh interval (seconds)",
+    "autoRefreshHint": "How often the timeline re-fetches the request list from the server.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in"
   },
   "metadata": {
     "compressionTitle": "Compression",
@@ -14875,5 +15287,46 @@
     "saveMessage": "Save message",
     "defaultModel": "Default test model",
     "defaultModelHint": "Used automatically by the Test message buttons for this account. Saved with the connection; no message is sent."
+  },
+  "providerTransfer": {
+    "open": "Selective transfer",
+    "title": "Selective provider transfer",
+    "description": "Move chosen provider accounts (and the custom provider nodes they use) to another OmniRoute install. The file is sealed with a passphrase, and importing never deletes anything.",
+    "exportTab": "Export",
+    "importTab": "Import",
+    "searchPlaceholder": "Search accounts…",
+    "selectAll": "Select all",
+    "clearSelection": "Clear",
+    "selectedCount": "{count} selected",
+    "noAccounts": "No provider accounts match.",
+    "loadFailed": "Could not load provider accounts.",
+    "passphrase": "Passphrase",
+    "passphraseConfirm": "Confirm passphrase",
+    "passphraseHint": "At least {min} characters. It is never stored; without it the file cannot be opened.",
+    "passphraseMismatch": "Passphrases do not match.",
+    "oauthWarning": "OAuth accounts that rotate refresh tokens can stop working on one install once the other one refreshes them.",
+    "acknowledge": "I understand this file contains the selected accounts' API keys and tokens, sealed with this passphrase.",
+    "exportButton": "Export selected",
+    "exportDone": "Exported {count} accounts.",
+    "exportFailed": "Export failed.",
+    "chooseFile": "Choose transfer file",
+    "invalidFile": "This is not an OmniRoute provider transfer file.",
+    "previewButton": "Preview",
+    "previewFailed": "Could not read the transfer file.",
+    "summary": "{connections} accounts and {nodes} provider nodes in this file. Nothing here will be deleted.",
+    "statusNew": "New",
+    "statusIdentical": "Identical",
+    "statusConflict": "Conflict",
+    "statusUnsupported": "Unsupported",
+    "actionAdd": "Add",
+    "actionSkip": "Skip",
+    "actionReplace": "Replace",
+    "providerNode": "Provider node",
+    "importButton": "Import",
+    "importFailed": "Import failed.",
+    "importSuccess": "Imported {connections} accounts and {nodes} provider nodes; {skipped} skipped."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Start from current position (skip existing logs)"
   }
 }

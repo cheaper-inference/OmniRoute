@@ -25,6 +25,7 @@ import {
   type LMArenaModelMetadata,
 } from "./lmarena/models.ts";
 import { formatArenaPrompt, parseArenaSSE } from "./lmarena/stream.ts";
+import { resolveLMArenaClientInteraction } from "./lmarena/clientInteraction.ts";
 import {
   buildArenaUpstreamHttpResponse,
   createOpenAIArenaStream,
@@ -115,6 +116,9 @@ export class LMArenaExecutor extends BaseExecutor {
     const messages = Array.isArray(openaiBody.messages)
       ? (openaiBody.messages as OpenAIMessage[])
       : [];
+    // `cx` only when the operator supplied providerSpecificData.cx, or the synthesised
+    // blob behind the default-off LMARENA_SYNTHESIZED_CX_ENABLED flag (#16895).
+    const cx = resolveLMArenaClientInteraction(credentials);
     return {
       id: uuidv7(),
       mode: "direct-battle",
@@ -128,6 +132,7 @@ export class LMArenaExecutor extends BaseExecutor {
       },
       modality: "chat",
       recaptchaV3Token: readRecaptchaToken(credentials, body),
+      ...(cx ? { cx } : {}),
     };
   }
 

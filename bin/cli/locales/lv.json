@@ -123,7 +123,9 @@
       "maxCostOpt": "Maksimālā izmaksas dienā (USD)",
       "allowedModelsOpt": "Ar komatiem atdalīts atļauto modeļu saraksts",
       "nothingToSet": "Nav sniegtu politikas lauku. Izmantojiet --rate-limit, --max-cost vai --allowed-models.",
-      "updated": "Politika atjaunināta."
+      "updated": "Politika atjaunināta.",
+      "modelAccessModeOpt": "Modeļu piekļuves režīms (all | restricted)",
+      "unrestrictedOpt": "Atļaut visus modeļus (--model-access-mode all)"
     },
     "expiration": {
       "title": "Atslēgu derīguma termiņš",
@@ -1169,32 +1171,18 @@
   "sync": {
     "description": "Sinhronizēt konfigurāciju starp OmniRoute instancēm",
     "push": {
-      "description": "Iespiest konfigurāciju mākoņvai attālai instancei",
-      "target": "Mērķis (mākonis vai konteksts:nosaukums)",
-      "bundle": "Sinhronizējamie komplekti",
-      "dryRun": "Priekšskatīt, nepiemērojot"
+      "description": "Iespiest konfigurāciju mākoņvai attālai instancei"
     },
     "pull": {
-      "description": "Iegūt konfigurāciju no mākoņa vai attālas",
-      "source": "Avots (mākonis vai konteksts:nosaukums)",
-      "merge": "Apvienot ar esošo konfigurāciju",
-      "replace": "Aizstāt esošo konfigurāciju",
-      "dryRun": "Pirmspārskatīšana bez pielietošanas"
-    },
-    "diff": {
-      "source": "Avota konteksts",
-      "target": "Mērķa konteksts"
+      "description": "Iegūt konfigurāciju no mākoņa vai attālas"
     },
     "bundle": {
       "description": "Eksportēt konfigurāciju kā saišķa failu",
-      "include": "Iekļaujamās daļas (atdalītas ar komatu)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Importēt saišķa failu",
       "dryRun": "Validēt bez pielietošanas"
-    },
-    "initialize": {
-      "fromCloud": "Inicializēt no mākoņa dublējuma"
     },
     "tokens": {
       "description": "Pārvaldīt sinhronizācijas tokenus",
@@ -1206,9 +1194,6 @@
       "revoke": {
         "yes": "Izlaist apstiprinājumu"
       }
-    },
-    "resolve": {
-      "description": "Risināt sinhronizācijas konfliktus interaktīvi"
     }
   },
   "config": {

@@ -5,7 +5,8 @@
     "strictNullChecks": true,
     "noImplicitAny": false,
     "noEmit": true,
-    "incremental": false
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo-typecheck-core"
   },
   "include": [],
   "files": [

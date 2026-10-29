@@ -1,1 +1,0 @@
-- **fix(stream-recovery):** a stream cut after engagement with nothing rendered is now re-sent once on the same stream instead of surfacing a 502 ([#16377](https://github.com/diegosouzapw/OmniRoute/pull/16377)) — thanks @maxmad64bis (with thanks to @Xxx91n for the diagnosis in #11902)

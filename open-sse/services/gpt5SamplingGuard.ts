@@ -101,6 +101,20 @@ function hasFunctionTools(record: JsonRecord): boolean {
   });
 }
 
+function disableLunaToolReasoning<T extends JsonRecord>(
+  body: T,
+  log?: { warn?: (tag: string, message: string) => void } | null
+): T {
+  if (body.reasoning_effort === "none" && !Object.hasOwn(body, "reasoning")) return body;
+  const next: JsonRecord = { ...body, reasoning_effort: "none" };
+  delete next.reasoning;
+  log?.warn?.(
+    "PARAMS",
+    "Set reasoning_effort=none for GPT-6 Luna function tools on Chat Completions"
+  );
+  return next as T;
+}
+
 /**
  * Raw api.openai.com Chat Completions rejects GPT-5.x reasoning models that
  * carry BOTH function `tools` and an active `reasoning_effort` with HTTP 400:
@@ -138,6 +152,9 @@ export function stripGpt5ReasoningWhenTools<T extends Record<string, unknown>>(
   const record = asRecord(body);
   if (!record) return body;
   if (!hasFunctionTools(record)) return body;
+  // #16440: omission enables Luna's default reasoning, so stripping is insufficient.
+  // https://developers.openai.com/api/docs/models/gpt-6-luna
+  if (model.toLowerCase() === "gpt-6-luna") return disableLunaToolReasoning(body, log);
   if (!hasActiveReasoning(record, model)) return body;
 
   const stripped: string[] = [];
