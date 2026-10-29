@@ -57,3 +57,13 @@ export async function rosebudImageBinding(
     throw new RosebudError("connection_not_allowed", 403);
   return saved.connectionId;
 }
+
+/** Keep user-provided keys from colliding across independently authenticated callers. */
+export function scopedRosebudKey(scope: string, key: string) {
+  return (
+    "caller-" +
+    createHash("sha256")
+      .update(JSON.stringify([scope, key]))
+      .digest("hex")
+  );
+}

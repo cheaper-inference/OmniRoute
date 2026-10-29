@@ -25,19 +25,35 @@ export async function rosebudConnection(id: string) {
   await rosebudProfile(profile);
   return { connection, profile };
 }
-/** Preserve retries of jobs created before the cross-account binding index existed. */
-export async function findRosebudImageConnection(key: string, allowed: string[] | null) {
-  const matches: string[] = [];
+/** Limit first submissions to accounts whose current catalog supports this model. */
+export async function rosebudModelConnections(model: string, allowed: string[] | null) {
+  const ids: string[] = [];
   for (const connection of await getProviderConnections({ provider: "rosebud" })) {
-    if (allowed?.length && !allowed.includes(connection.id)) continue;
-    const profile = (connection.providerSpecificData as Record<string, unknown> | undefined)
-      ?.rosebudProfile;
-    if (typeof profile !== "string") continue;
-    if (await rosebudRuntime.jobForKey(profile, key)) matches.push(connection.id);
+    if (!connection.isActive || (allowed?.length && !allowed.includes(connection.id))) continue;
+    let data = connection.providerSpecificData as Record<string, unknown> | undefined;
+    if (
+      !Array.isArray(data?.rosebudModels) ||
+      Date.now() - Date.parse(String(data?.rosebudModelsChecked || "")) > 300000 ||
+      !data?.rosebudModelsChecked
+    ) {
+      try {
+        await discoverRosebud(connection.id);
+      } catch {
+        continue;
+      } // A pre-submit discovery failure must not hide healthy accounts.
+      data = (await getProviderConnectionById(connection.id))?.providerSpecificData as
+        Record<string, unknown> | undefined;
+    }
+    if (
+      Array.isArray(data?.rosebudModels) &&
+      data.rosebudModels.some(
+        (entry) =>
+          entry && typeof entry === "object" && entry.id === model.replace(/^rosebud\//, "")
+      )
+    )
+      ids.push(connection.id);
   }
-  if (matches.length > 1)
-    throw new RosebudError("ambiguous_legacy_request_requires_reconciliation", 409);
-  return matches[0];
+  return ids;
 }
 export async function connectRosebud(name: string) {
   const profile = randomUUID();
@@ -54,13 +70,14 @@ export async function connectRosebud(name: string) {
   return { connectionId: connection.id, status: login.status, approval_url: login.approval_url };
 }
 export async function rosebudAccount(id: string) {
-  const { profile, connection } = await rosebudConnection(id);
+  const { profile } = await rosebudConnection(id);
   const account = await rosebudRuntime.account(profile);
+  const latest = await getProviderConnectionById(id);
   await updateProviderConnection(id, {
     isActive: account.status === "active",
     testStatus: account.status === "active" ? "active" : "expired",
     providerSpecificData: {
-      ...((connection.providerSpecificData as Record<string, unknown>) || {}),
+      ...((latest?.providerSpecificData as Record<string, unknown>) || {}),
       rosebudAccount: account,
       rosebudLastChecked: new Date().toISOString(),
     },
@@ -78,7 +95,11 @@ export async function discoverRosebud(id: string) {
   const models = (await rosebudRuntime.models(profile)).map(rosebudCatalogEntry);
   const connection = await getProviderConnectionById(id);
   await updateProviderConnection(id, {
-    providerSpecificData: { ...(connection?.providerSpecificData || {}), rosebudModels: models },
+    providerSpecificData: {
+      ...(connection?.providerSpecificData || {}),
+      rosebudModels: models,
+      rosebudModelsChecked: new Date().toISOString(),
+    },
   });
   const connections = await getProviderConnections({ provider: "rosebud" });
   const merged = new Map(models.map((model) => [model.id, model]));

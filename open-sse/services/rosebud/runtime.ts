@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, readdir, rename, writeFile, stat, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { z } from "zod";
-import { rosebudArtifactType } from "./artifact.ts";
+import { rosebudArtifactType, ROSEBUD_ARTIFACT_FORMATS } from "./artifact.ts";
 import { rosebudModel, validateRosebudInput, type RosebudModel } from "./catalog.ts";
 import {
   runRosebud,
@@ -147,15 +147,6 @@ export class RosebudRuntime {
     if (job.profile !== profile) throw new RosebudError("job_not_found", 404);
     return job;
   }
-  async jobForKey(profile: string, key: string): Promise<RosebudJob | undefined> {
-    await rosebudProfile(profile);
-    try {
-      return await this.read(profile, hash(JSON.stringify([profile, key])));
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
-      throw error;
-    }
-  }
   async generate(profile: string, raw: unknown, signal?: AbortSignal | null): Promise<RosebudJob> {
     const request = generationInput.parse(raw);
     const modelId = request.model.replace(/^rosebud\//, "");
@@ -164,6 +155,16 @@ export class RosebudRuntime {
     if (request.category && request.category !== model.category)
       throw new RosebudError("unsupported_modality", 400);
     const input = validateRosebudInput(model, request.input);
+    const formats =
+      typeof input.output_format === "string" ? [input.output_format] : model.output_formats;
+    if (
+      !formats.length ||
+      formats.some(
+        (format) => !ROSEBUD_ARTIFACT_FORMATS.has(format.toLowerCase().replace(/^\./, ""))
+      )
+    )
+      throw new RosebudError("unsupported_output_format", 400);
+
     const fingerprint = hash(JSON.stringify([modelId, ordered(input), request.maxCredits ?? null]));
     const id = hash(JSON.stringify([profile, request.idempotencyKey ?? randomUUID()]));
     const folder = this.folder(id);
@@ -331,7 +332,7 @@ export class RosebudRuntime {
     if (!exists) {
       const temporary = file + "." + randomUUID();
       try {
-        await this.run(profile, ["assets", "download", assetId, "--out", temporary]);
+        await this.run(profile, ["assets", "download", assetId, "--out", temporary], 600000);
         const info = await stat(temporary);
         if (!info.isFile() || info.size > 128 * 1024 * 1024)
           throw new RosebudError("artifact_too_large", 413);

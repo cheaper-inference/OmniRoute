@@ -6,9 +6,9 @@ lastUpdated: 2026-09-22
 
 # OmniRoute MCP Server Documentation
 
-> Model Context Protocol server with 110 tools across routing, cache, compression, memory, skills, proxy, pool, Radar, and context source operations.
+> Model Context Protocol server with 129 tools across routing, cache, compression, memory, skills, proxy, pool, Radar, and context source operations.
 >
-> Source of truth: `open-sse/mcp-server/server.ts` computes **110 unique tools** with `countUniqueMcpTools()`: 45 canonical definitions (including the six CCR lifecycle tools, the agent-skills trio, `omniroute_radar_catalog`, and `omniroute_x_search`), plus memory (3), skills (4), GitHub skills (3), pool (6), gamification (8), plugins (8), Notion (6), Obsidian (22), local corpus (3), and two RTK-only compression tools.
+> Source of truth: `open-sse/mcp-server/server.ts` computes **129 unique tools** with `countUniqueMcpTools()`: 45 canonical definitions (including the six CCR lifecycle tools, the agent-skills trio, `omniroute_radar_catalog`, and `omniroute_x_search`), plus memory (3), skills (4), GitHub skills (3), pool (6), gamification (8), plugins (8), Notion (6), Obsidian (22), local corpus (3), two RTK-only compression tools, and Rosebud assets (19).
 
 ## Installation
 
@@ -254,7 +254,7 @@ See [AGENT-SKILLS.md](./AGENT-SKILLS.md) for the full catalog and how external a
 
 ## Related Frameworks (v3.8.0)
 
-The MCP tool inventory above (110 unique tools, computed by `countUniqueMcpTools()`) is intentionally
+The MCP tool inventory above (129 unique tools, computed by `countUniqueMcpTools()`) is intentionally
 scoped to runtime routing/cache/compression/memory/skills/proxy/context-source operations. Two adjacent
 frameworks ship alongside the MCP server in v3.8.0 and are documented separately:
 
@@ -446,6 +446,7 @@ Each tool requires specific scopes:
 | `read:obsidian`       | 13 read tools — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
 | `write:obsidian`      | 9 write tools — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …               |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                            |
+| `manage`              | Rosebud asset/account/publishing tools (19); local or LAN callers only, with connection restrictions enforced                                                                |
 
 Wildcard scopes are supported: `read:*` grants all read-scopes, `*` grants full access.
 
@@ -526,7 +527,7 @@ MCP tool, prompt, and resource registries can compress descriptions at registrat
 
 Description compression shrinks each tool's metadata; **tool-cardinality reduction** goes one step further by reducing _how many_ tools are announced at all. Advertising fewer tools in the `tools/list` manifest cuts the per-request token cost the client's model pays for the tool catalog ("layer 5" compression). The implementation is a pure, stateless filter in `open-sse/mcp-server/toolCardinality.ts` (`reduceToolManifest`), wired into the registration loop in `createMcpServer()` (`open-sse/mcp-server/server.ts`).
 
-**Opt-in, off by default.** The filter only runs when at least one of two environment variables is set; with neither set, all 110 tools are announced unchanged.
+**Opt-in, off by default.** The filter only runs when at least one of two environment variables is set; with neither set, all 129 tools are announced unchanged.
 
 | Variable         | Mode                                                                                    |
 | :--------------- | :-------------------------------------------------------------------------------------- |
@@ -564,7 +565,7 @@ The heartbeat snapshot contains:
   "transport": "stdio",
   "scopesEnforced": false,
   "allowedScopes": [],
-  "toolCount": 110
+  "toolCount": 129
 }
 ```
 
