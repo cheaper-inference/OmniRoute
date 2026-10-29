@@ -5953,6 +5953,7 @@
     "perModelQuotaDescription": "Meta din tkun attivata, l-iżbalji 429/404 jimblukkaw biss il-mudell speċifiku, mhux il-konnessjoni kollha. Użaha għal fornituri b'limiti tar-rata għal kull mudell (eż., ModelScope).",
     "importFreeModelsOnlyLabel": "Importa biss mudelli bla ħlas",
     "importFreeModelsOnlyHint": "Meta din tkun attivata, jiġu importati biss il-mudelli bla ħlas ta' dan il-fornitur. Il-mudelli bi ħlas jinqabżu.",
+    "importFreeModelsOnlyCompatibleHint": "Meta jkun attivat, jiġu importati biss il-mudelli li l-lista /models ta' dan l-endpoint timmarka bħala b'xejn (id :free, bandiera b'xejn jew prezzijiet żero). Il-mudelli bi ħlas u l-mudelli mingħajr data tal-prezzijiet jinqabżu.",
     "perModelQuotaToggle": "Swiċċ tal-Kwota għal Kull Mudell",
     "modelId": "ID tal-Mudell",
     "customModelPlaceholder": "eż. gpt-4.5-turbo",

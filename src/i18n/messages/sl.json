@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Ko je omogočeno, napake 429/404 zaklenejo samo določen model, ne pa celotne povezave. Uporabite za ponudnike z omejitvami števila zahtev za posamezne modele (npr. ModelScope).",
     "importFreeModelsOnlyLabel": "Uvozi samo brezplačne modele",
     "importFreeModelsOnlyHint": "Ko je omogočeno, se uvozijo samo brezplačni modeli tega ponudnika. Plačljivi modeli se preskočijo.",
+    "importFreeModelsOnlyCompatibleHint": "Ko je vklopljeno, se uvozijo samo modeli, ki jih seznam /models te končne točke označuje kot brezplačne (id s :free, oznaka brezplačno ali ničelne cene). Plačljivi modeli in modeli brez podatkov o cenah se preskočijo.",
     "perModelQuotaToggle": "Preklop kvote po modelu",
     "modelId": "ID modela",
     "customModelPlaceholder": "npr. gpt-4.5-turbo",

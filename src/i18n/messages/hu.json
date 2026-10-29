@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "Csak ingyenes modellek importálása",
     "importFreeModelsOnlyHint": "Ha engedélyezve van, csak a szolgáltató ingyenes modelljei kerülnek importálásra. A fizetős modellek kihagyásra kerülnek.",
+    "importFreeModelsOnlyCompatibleHint": "Ha be van kapcsolva, csak azok a modellek kerülnek importálásra, amelyeket ennek a végpontnak a /models listája ingyenesként jelöl (:free azonosító, ingyenes jelző vagy nulla ár). A fizetős modellek és az árazási adatok nélküli modellek kimaradnak.",
     "perModelQuotaToggle": "Modellenkénti kvóta kapcsoló",
     "modelId": "Modellazonosító",
     "customModelPlaceholder": "pl. gpt-4.5-turbo",

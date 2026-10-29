@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "केवल मुफ़्त मॉडल आयात करें",
     "importFreeModelsOnlyHint": "सक्षम होने पर, केवल इस प्रदाता के मुफ़्त मॉडल आयात किए जाते हैं। सशुल्क मॉडल छोड़ दिए जाते हैं।",
+    "importFreeModelsOnlyCompatibleHint": "सक्षम होने पर, केवल वे मॉडल इम्पोर्ट किए जाते हैं जिन्हें इस endpoint की /models सूची मुफ़्त के रूप में चिह्नित करती है (:free id, मुफ़्त फ़्लैग या शून्य कीमतें)। सशुल्क मॉडल और बिना मूल्य डेटा वाले मॉडल छोड़ दिए जाते हैं।",
     "perModelQuotaToggle": "प्रति-मॉडल कोटा टॉगल",
     "modelId": "मॉडल आईडी",
     "customModelPlaceholder": "जैसे जीपीटी-4.5-टर्बो",

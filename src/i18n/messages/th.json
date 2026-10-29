@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "นำเข้าเฉพาะโมเดลฟรี",
     "importFreeModelsOnlyHint": "เมื่อเปิดใช้งาน จะนำเข้าเฉพาะโมเดลฟรีของผู้ให้บริการรายนี้เท่านั้น ส่วนโมเดลที่ต้องชำระเงินจะถูกข้ามไป",
+    "importFreeModelsOnlyCompatibleHint": "เมื่อเปิดใช้งาน จะนำเข้าเฉพาะโมเดลที่รายการ /models ของ endpoint นี้ระบุว่าฟรี (id ที่ลงท้ายด้วย :free, แฟล็กฟรี หรือราคาเป็นศูนย์) โมเดลแบบชำระเงินและโมเดลที่ไม่มีข้อมูลราคาจะถูกข้าม",
     "perModelQuotaToggle": "การสลับโควต้าต่อรุ่น",
     "modelId": "รหัสรุ่น",
     "customModelPlaceholder": "เช่น gpt-4.5-เทอร์โบ",

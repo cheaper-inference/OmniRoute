@@ -5953,6 +5953,7 @@
     "perModelQuotaDescription": "Aktiv olduqda, 429/404 xətaları bütün bağlantını deyil, yalnız konkret modeli kilidləyir. Model üzrə sürət məhdudiyyəti olan provayderlər (məs., ModelScope) üçün istifadə edin.",
     "importFreeModelsOnlyLabel": "Yalnız pulsuz modelləri idxal et",
     "importFreeModelsOnlyHint": "Aktiv edildikdə, yalnız bu provayderin pulsuz modelləri idxal edilir. Ödənişli modellər buraxılır.",
+    "importFreeModelsOnlyCompatibleHint": "Aktiv olduqda, yalnız bu endpoint-in /models siyahısının pulsuz kimi qeyd etdiyi modellər idxal edilir (:free id, pulsuz bayrağı və ya sıfır qiymətlər). Ödənişli modellər və qiymət məlumatı olmayan modellər ötürülür.",
     "perModelQuotaToggle": "Model üzrə kvota keçidi",
     "modelId": "Model ID-si",
     "customModelPlaceholder": "məs., gpt-4.5-turbo",

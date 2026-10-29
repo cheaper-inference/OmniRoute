@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "Importer uniquement les modèles gratuits",
     "importFreeModelsOnlyHint": "Lorsqu'il est activé, seuls les modèles gratuits de ce fournisseur sont importés. Les modèles payants sont ignorés.",
+    "importFreeModelsOnlyCompatibleHint": "Lorsque cette option est activée, seuls les modèles que la liste /models de ce point de terminaison marque comme gratuits (un id en :free, un indicateur de gratuité ou des prix nuls) sont importés. Les modèles payants et ceux sans données de tarification sont ignorés.",
     "perModelQuotaToggle": "Basculement du quota par modèle",
     "modelId": "ID du modèle",
     "customModelPlaceholder": "par ex. gpt-4.5-turbo",

@@ -262,7 +262,8 @@ test(
         "utf8"
       )
     );
-    // Keep reviewed identities out of debt and retain their current evidence.
+    // Use the current policy: retired rows stay absent and reviewed or changed-economics
+    // rows retain their evidence rather than returning to the immutable seed debt.
     // Only debt varies between the synthetic commits below.
     const allDebt = policy.debt;
     assert.ok(allDebt.length > 0, "the fixture needs a legacy identity to retire and reintroduce");

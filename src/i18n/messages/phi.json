@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "I-import lang ang mga libreng modelo",
     "importFreeModelsOnlyHint": "Kapag pinagana, ang mga libreng modelo lang ng provider na ito ang ii-import. Lalaktawan ang mga may bayad na modelo.",
+    "importFreeModelsOnlyCompatibleHint": "Kapag naka-enable, ini-import lamang ang mga model na minarkahan bilang libre ng listahang /models ng endpoint na ito (isang :free na id, isang free flag, o zero na presyo). Nilalaktawan ang mga bayad na model at ang mga model na walang datos ng presyo.",
     "perModelQuotaToggle": "Toggle ng Quota Bawat Modelo",
     "modelId": "ID ng modelo",
     "customModelPlaceholder": "hal. gpt-4.5-turbo",

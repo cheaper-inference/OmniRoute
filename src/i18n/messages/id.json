@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "Impor hanya model gratis",
     "importFreeModelsOnlyHint": "Jika diaktifkan, hanya model gratis dari penyedia ini yang diimpor. Model berbayar dilewati.",
+    "importFreeModelsOnlyCompatibleHint": "Saat diaktifkan, hanya model yang ditandai gratis oleh daftar /models endpoint ini yang diimpor (id :free, penanda gratis, atau harga nol). Model berbayar dan model tanpa data harga dilewati.",
     "perModelQuotaToggle": "Pengalih Kuota Per Model",
     "modelId": "ID Model",
     "customModelPlaceholder": "misalnya gpt-4.5-turbo",

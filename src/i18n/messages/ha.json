@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Idan an kunna, kurakuran 429/404 suna kulle takamaiman samfurin ne kawai, ba duk haɗin ba. Yi amfani da wannan ga masu samarwa masu iyakokin ƙimar amfani na kowane samfuri (misali, ModelScope).",
     "importFreeModelsOnlyLabel": "Shigo da samfuran kyauta kawai",
     "importFreeModelsOnlyHint": "Idan an kunna, samfuran kyauta na wannan mai samarwa kawai za a shigo da su. Za a tsallake samfuran da ake biya.",
+    "importFreeModelsOnlyCompatibleHint": "Idan an kunna, samfuran da jerin /models na wannan endpoint ya yi musu alama a matsayin kyauta kawai ake shigowa da su (id mai :free, alamar kyauta ko farashin sifili). Ana tsallake samfuran da ake biya da samfuran da ba su da bayanan farashi.",
     "perModelQuotaToggle": "Maɓallin Kunna/Kashe Ƙayyadadden Kaso ga Kowane Samfuri",
     "modelId": "ID na Samfuri",
     "customModelPlaceholder": "misali gpt-4.5-turbo",

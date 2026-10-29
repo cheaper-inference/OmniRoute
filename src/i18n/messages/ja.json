@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "無料モデルのみをインポート",
     "importFreeModelsOnlyHint": "有効にすると、このプロバイダーの無料モデルのみがインポートされます。有料モデルはスキップされます。",
+    "importFreeModelsOnlyCompatibleHint": "有効にすると、このエンドポイントの /models 一覧で無料と示されたモデル（:free の ID、無料フラグ、または価格がゼロ）のみがインポートされます。有料モデルと価格情報のないモデルはスキップされます。",
     "perModelQuotaToggle": "モデルごとのクォータの切り替え",
     "modelId": "モデルID",
     "customModelPlaceholder": "例: gpt-4.5-ターボ",

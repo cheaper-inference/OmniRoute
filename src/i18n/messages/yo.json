@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Nígbà tí a bá mú un ṣiṣẹ́, àwọn àṣìṣe 429/404 máa ń ti àwòṣe pàtó náà nìkan pa, kì í ṣe gbogbo àsopọ̀ náà. Lò ó fún àwọn olupèsè tó ní ààlà ìwọ̀n lílò fún àwòṣe kọ̀ọ̀kan (fún àpẹẹrẹ, ModelScope).",
     "importFreeModelsOnlyLabel": "Gbé àwọn àwòṣe ọ̀fẹ́ wọlé nìkan",
     "importFreeModelsOnlyHint": "Nígbà tí a bá mú un ṣiṣẹ́, àwọn àwòṣe ọ̀fẹ́ ti olupèsè yìí nìkan ni a ó gbé wọlé. A ó fo àwọn àwòṣe tí a ń sanwó fún.",
+    "importFreeModelsOnlyCompatibleHint": "Nígbà tí ó bá ṣiṣẹ́, àwọn àwòṣe tí àtòjọ /models ti endpoint yìí sàmì sí gẹ́gẹ́ bí ọ̀fẹ́ nìkan ni a ó kó wọlé (id :free, àmì ọ̀fẹ́ tàbí iye owó òdo). A ó fo àwọn àwòṣe tí a ń sanwó fún àti àwọn àwòṣe tí kò ní dátà iye owó.",
     "perModelQuotaToggle": "Bọ́tìnì Títàn/Pípa Ìpín fún Àwòṣe Kọ̀ọ̀kan",
     "modelId": "ID Àwòṣe",
     "customModelPlaceholder": "fún àpẹẹrẹ, gpt-4.5-turbo",

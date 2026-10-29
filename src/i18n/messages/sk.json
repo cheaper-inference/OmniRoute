@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "Importovať iba bezplatné modely",
     "importFreeModelsOnlyHint": "Ak je táto možnosť povolená, importujú sa iba bezplatné modely tohto poskytovateľa. Platené modely sa preskočia.",
+    "importFreeModelsOnlyCompatibleHint": "Ak je zapnuté, importujú sa iba modely, ktoré zoznam /models tohto endpointu označuje ako bezplatné (id s :free, príznak zadarmo alebo nulové ceny). Platené modely a modely bez údajov o cene sa preskočia.",
     "perModelQuotaToggle": "Prepínač kvóty podľa modelu",
     "modelId": "ID modelu",
     "customModelPlaceholder": "napr. gpt-4.5-turbo",

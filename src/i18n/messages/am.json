@@ -5953,6 +5953,7 @@
     "perModelQuotaDescription": "ሲነቃ፣ የ429/404 ስህተቶች የሚቆልፉት መላውን ግንኙነት ሳይሆን የተወሰነውን ሞዴል ብቻ ነው። ለእያንዳንዱ ሞዴል የተለየ የአጠቃቀም ፍጥነት ገደብ ላላቸው አቅራቢዎች ይጠቀሙበት (ለምሳሌ ModelScope)።",
     "importFreeModelsOnlyLabel": "ነፃ ሞዴሎችን ብቻ አስመጣ",
     "importFreeModelsOnlyHint": "ሲነቃ፣ የዚህ አቅራቢ ነፃ ሞዴሎች ብቻ ይገባሉ። የሚከፈልባቸው ሞዴሎች ይታለፋሉ።",
+    "importFreeModelsOnlyCompatibleHint": "ሲነቃ፣ የዚህ endpoint /models ዝርዝር ነፃ ብሎ የሚያመለክታቸው ሞዴሎች ብቻ ይመጣሉ (:free መለያ፣ የነፃ ምልክት ወይም ዜሮ ዋጋ)። የሚከፈልባቸው ሞዴሎች እና የዋጋ መረጃ የሌላቸው ሞዴሎች ይዘለላሉ።",
     "perModelQuotaToggle": "የእያንዳንዱ ሞዴል ኮታ መቀየሪያ",
     "modelId": "የሞዴል መታወቂያ",
     "customModelPlaceholder": "ለምሳሌ gpt-4.5-turbo",

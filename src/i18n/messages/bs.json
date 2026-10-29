@@ -5953,6 +5953,7 @@
     "perModelQuotaDescription": "Kada je omogućeno, 429/404 greške zaključavaju samo specifični model, a ne cijelu vezu. Koristite za provajdere sa limitima brzine po modelu (npr. ModelScope).",
     "importFreeModelsOnlyLabel": "Uvezi samo besplatne modele",
     "importFreeModelsOnlyHint": "Kada je omogućeno, uvoze se samo besplatni modeli ovog provajdera. Plaćeni modeli se preskaču.",
+    "importFreeModelsOnlyCompatibleHint": "Kada je uključeno, uvoze se samo modeli koje lista /models ove krajnje tačke označava kao besplatne (:free id, oznaka besplatno ili nulte cijene). Plaćeni modeli i modeli bez podataka o cijenama se preskaču.",
     "perModelQuotaToggle": "Prekidač za kvote po modelu",
     "modelId": "ID modela",
     "customModelPlaceholder": "npr. Gpt-4.5-turbo",

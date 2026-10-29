@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Yoqilganda, 429/404 xatolari butun ulanishni emas, faqat muayyan modelni bloklaydi. Har bir model uchun alohida tezlik cheklovlari mavjud provayderlar (masalan, ModelScope) uchun foydalaning.",
     "importFreeModelsOnlyLabel": "Faqat bepul modellarni import qilish",
     "importFreeModelsOnlyHint": "Yoqilganda, faqat ushbu provayderning bepul modellari import qilinadi. Pulli modellar o‘tkazib yuboriladi.",
+    "importFreeModelsOnlyCompatibleHint": "Yoqilganda, faqat ushbu endpoint /models roʻyxati bepul deb belgilagan modellar import qilinadi (:free id, bepul belgisi yoki nol narxlar). Pullik modellar va narx maʼlumotlari boʻlmagan modellar oʻtkazib yuboriladi.",
     "perModelQuotaToggle": "Har bir model uchun kvota almashtirgichi",
     "modelId": "Model IDsi",
     "customModelPlaceholder": "masalan, gpt-4.5-turbo",

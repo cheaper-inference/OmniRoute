@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Nuair a chuirtear ar siúl é, ní ghlasann earráidí 429/404 ach an múnla sonrach, ní an nasc iomlán. Úsáid le haghaidh soláthraithe a bhfuil teorainneacha ráta in aghaidh an mhúnla acu (m.sh., ModelScope).",
     "importFreeModelsOnlyLabel": "Ná hiompórtáil ach múnlaí saor in aisce",
     "importFreeModelsOnlyHint": "Nuair a chuirtear ar siúl é, ní iompórtáiltear ach múnlaí saor in aisce an tsoláthraí seo. Scipeáiltear na múnlaí íoctha.",
+    "importFreeModelsOnlyCompatibleHint": "Nuair atá sé cumasaithe, ní iompórtáiltear ach na samhlacha a mharcálann liosta /models an chríochphointe seo mar shaor in aisce (id :free, bratach saor in aisce nó praghsanna nialasacha). Scipeáiltear samhlacha íoctha agus samhlacha gan sonraí praghsála.",
     "perModelQuotaToggle": "Scorán Cuóta in aghaidh an Mhúnla",
     "modelId": "Aitheantas Múnla",
     "customModelPlaceholder": "m.sh. gpt-4.5-turbo",

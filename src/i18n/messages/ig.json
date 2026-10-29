@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Mgbe agbanyere ya, njehie 429/404 na-akpọchi naanị model ahụ kpọmkwem, ọ bụghị njikọ ahụ dum. Jiri ya maka provider nwere oke ọnụego maka model ọ bụla (dịka ModelScope).",
     "importFreeModelsOnlyLabel": "Bubata naanị model efu",
     "importFreeModelsOnlyHint": "Mgbe agbanyere ya, naanị model efu nke provider a ka a na-ebubata. A na-amafere model ndị a na-akwụ ụgwọ.",
+    "importFreeModelsOnlyCompatibleHint": "Mgbe agbanyere ya, ọ bụ naanị ụdị ndị ndepụta /models nke endpoint a kara dị ka n'efu ka a na-ebubata (id :free, akara n'efu ma ọ bụ ọnụahịa efu). A na-awụfe ụdị ndị a na-akwụ ụgwọ na ụdị ndị na-enweghị data ọnụahịa.",
     "perModelQuotaToggle": "Mgba ọkụ oke ojiji maka Model ọ bụla",
     "modelId": "ID Model",
     "customModelPlaceholder": "dịka gpt-4.5-turbo",

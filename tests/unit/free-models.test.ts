@@ -23,8 +23,10 @@ test("providerHasFreeModels: resolves a provider alias to its canonical id", () 
 });
 
 test("isFreeModel: catalog membership works when called with the provider alias", () => {
-  // deepseek-v4-pro is a free ollama-cloud model; the list view calls with the alias.
-  assert.equal(isFreeModel("ollamacloud", { id: "deepseek-v4-pro" }), true);
+  // Use an unchanged legacy catalog row to exercise alias resolution, not a
+  // retired grant. This fixture does not recertify the provider's economics.
+  assert.equal(isFreeModel("ollamacloud", { id: "qwen3.5:397b" }), true);
+  assert.equal(isFreeModel("ollamacloud", { id: "deepseek-v4-pro" }), false);
 });
 
 test("isFreeModel: model id ending in :free is free", () => {

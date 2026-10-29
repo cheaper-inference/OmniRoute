@@ -5953,6 +5953,7 @@
     "perModelQuotaDescription": "启用后，429/404 错误只会锁定特定 Model，而不是整个连接。适用于具有按 Model 速率限制的 Provider（例如 ModelScope）。",
     "importFreeModelsOnlyLabel": "仅导入免费模型",
     "importFreeModelsOnlyHint": "启用后，仅导入此提供者的免费模型。付费模型将被跳过。",
+    "importFreeModelsOnlyCompatibleHint": "启用后，仅导入此端点的 /models 列表标记为免费的模型（带 :free 的 ID、免费标记或零价格）。付费模型以及没有定价数据的模型将被跳过。",
     "perModelQuotaToggle": "按模型配额开关",
     "modelId": "模型 ID",
     "customModelPlaceholder": "例如：gpt-4.5-turbo",

@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "Importer kun gratismodeller",
     "importFreeModelsOnlyHint": "Når aktivert, importeres kun denne leverandørens gratismodeller. Betalte modeller hoppes over.",
+    "importFreeModelsOnlyCompatibleHint": "Når aktivert, importeres bare modeller som dette endepunktets /models-liste merker som gratis (en :free-ID, et gratisflagg eller nullpriser). Betalte modeller og modeller uten prisdata hoppes over.",
     "perModelQuotaToggle": "Veksle mellom kvote per modell",
     "modelId": "Modell-ID",
     "customModelPlaceholder": "f.eks. gpt-4.5-turbo",

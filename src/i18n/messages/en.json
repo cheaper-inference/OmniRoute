@@ -5953,6 +5953,7 @@
     "perModelQuotaDescription": "When enabled, 429/404 errors only lock the specific model, not the entire connection. Use for providers with per-model rate limits (e.g., ModelScope).",
     "importFreeModelsOnlyLabel": "Import only free models",
     "importFreeModelsOnlyHint": "When enabled, only this provider's free models are imported. Paid models are skipped.",
+    "importFreeModelsOnlyCompatibleHint": "When enabled, only models that this endpoint's /models list marks as free (a :free id, a free flag, or zero prices) are imported. Paid models and models without pricing data are skipped.",
     "perModelQuotaToggle": "Per-Model Quota Toggle",
     "modelId": "Model ID",
     "customModelPlaceholder": "e.g. gpt-4.5-turbo",

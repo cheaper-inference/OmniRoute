@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "ייבוא מודלים חינמיים בלבד",
     "importFreeModelsOnlyHint": "כאשר אפשרות זו פעילה, רק המודלים החינמיים של ספק זה יובאו. מודלים בתשלום יידלגו.",
+    "importFreeModelsOnlyCompatibleHint": "כאשר האפשרות מופעלת, מיובאים רק מודלים שרשימת /models של נקודת קצה זו מסמנת כחינמיים (מזהה עם :free, דגל חינמי או מחירים אפסיים). מודלים בתשלום ומודלים ללא נתוני תמחור מדולגים.",
     "perModelQuotaToggle": "החלפת מכסות לכל דגם",
     "modelId": "מזהה דגם",
     "customModelPlaceholder": "למשל gpt-4.5-טורבו",

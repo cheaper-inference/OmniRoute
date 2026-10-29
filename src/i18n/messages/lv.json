@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Kad šī funkcija ir iespējota, 429/404 kļūdas bloķē tikai konkrēto modeli, nevis visu savienojumu. Izmantojiet pakalpojumu sniedzējiem, kuriem katram modelim ir atsevišķi pieprasījumu biežuma ierobežojumi (piem., ModelScope).",
     "importFreeModelsOnlyLabel": "Importēt tikai bezmaksas modeļus",
     "importFreeModelsOnlyHint": "Kad šī funkcija ir iespējota, tiek importēti tikai šī pakalpojumu sniedzēja bezmaksas modeļi. Maksas modeļi tiek izlaisti.",
+    "importFreeModelsOnlyCompatibleHint": "Ja iespējots, tiek importēti tikai tie modeļi, kurus šī galapunkta /models saraksts atzīmē kā bezmaksas (:free id, bezmaksas karodziņš vai nulles cenas). Maksas modeļi un modeļi bez cenu datiem tiek izlaisti.",
     "perModelQuotaToggle": "Katra modeļa kvotas slēdzis",
     "modelId": "Modeļa ID",
     "customModelPlaceholder": "piem., gpt-4.5-turbo",

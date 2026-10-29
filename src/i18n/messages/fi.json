@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "Tuo vain ilmaiset mallit",
     "importFreeModelsOnlyHint": "Kun käytössä, vain tämän tarjoajan ilmaiset mallit tuodaan. Maksulliset mallit ohitetaan.",
+    "importFreeModelsOnlyCompatibleHint": "Kun asetus on käytössä, tuodaan vain mallit, jotka tämän päätepisteen /models-luettelo merkitsee ilmaisiksi (:free-tunnus, ilmaisuuslippu tai nollahinnat). Maksulliset mallit ja mallit ilman hintatietoja ohitetaan.",
     "perModelQuotaToggle": "Mallikohtainen kiintiökytkin",
     "modelId": "Mallin tunnus",
     "customModelPlaceholder": "esim. gpt-4.5-turbo",

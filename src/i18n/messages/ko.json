@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "활성화하면 429/404 오류가 전체 연결이 아닌 해당 모델만 잠급니다. 모델별 속도 제한이 있는 공급자(예: ModelScope)에 사용하세요.",
     "importFreeModelsOnlyLabel": "무료 모델만 가져오기",
     "importFreeModelsOnlyHint": "활성화하면 이 제공자의 무료 모델만 가져옵니다. 유료 모델은 건너뜁니다.",
+    "importFreeModelsOnlyCompatibleHint": "활성화하면 이 엔드포인트의 /models 목록에서 무료로 표시된 모델(:free ID, 무료 플래그 또는 0 가격)만 가져옵니다. 유료 모델과 가격 정보가 없는 모델은 건너뜁니다.",
     "perModelQuotaToggle": "모델별 할당량 토글",
     "modelId": "모델 ID",
     "customModelPlaceholder": "예: gpt-4.5-turbo",

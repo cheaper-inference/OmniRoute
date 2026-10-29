@@ -21,6 +21,7 @@ import {
   isUsableAntigravityProjectId,
 } from "@omniroute/open-sse/services/antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "@omniroute/open-sse/services/antigravityProjectPersist.ts";
+import { hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
 import { asRecord, toNonEmptyString } from "./helpers";
 import type { DiscoveryFailure } from "@/shared/discovery/degradedCause";
 
@@ -269,10 +270,9 @@ function pickEffortDeclarations(item: Record<string, unknown>): Record<string, u
   return picked;
 }
 
-// SiliconFlow free-only imports rely on live pricing and explicit flags. Keep
-// that evidence through discovery so a paid row cannot become free by losing
-// its veto. Project only the fields consumed by payloadFreeEvidence.
-function pickSiliconFlowPricingEvidence(item: Record<string, unknown>): Record<string, unknown> {
+// Preserve SiliconFlow live evidence and other providers' paid vetoes through
+// discovery. Project only the fields consumed by payloadFreeEvidence.
+function pickPricingEvidence(item: Record<string, unknown>): Record<string, unknown> {
   const picked: Record<string, unknown> = {};
   for (const key of ["pricing", "isFree", "is_free", "free", "tags"] as const) {
     if (item[key] !== undefined && item[key] !== null) picked[key] = item[key];
@@ -308,7 +308,9 @@ export function normalizeOpenAiLikeModelsResponse(
         toNonEmptyString(item.owned_by) || toNonEmptyString(item.provider) || fallbackOwner;
       return {
         ...pickEffortDeclarations(item),
-        ...(fallbackOwner === "siliconflow" ? pickSiliconFlowPricingEvidence(item) : {}),
+        ...(fallbackOwner === "siliconflow" || hasPayloadPaidEvidence(item)
+          ? pickPricingEvidence(item)
+          : {}),
         id,
         name,
         owned_by: ownedBy,

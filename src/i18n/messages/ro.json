@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "Importă doar modelele gratuite",
     "importFreeModelsOnlyHint": "Când este activat, sunt importate doar modelele gratuite ale acestui furnizor. Modelele cu plată sunt ignorate.",
+    "importFreeModelsOnlyCompatibleHint": "Când este activat, sunt importate doar modelele pe care lista /models a acestui endpoint le marchează ca gratuite (un id cu :free, un indicator de gratuit sau prețuri zero). Modelele plătite și modelele fără date de preț sunt omise.",
     "perModelQuotaToggle": "Comutare cotă per model",
     "modelId": "ID model",
     "customModelPlaceholder": "de ex. gpt-4.5-turbo",

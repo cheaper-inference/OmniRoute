@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Khi được bật, lỗi 429/404 chỉ khóa mô hình cụ thể đó chứ không khóa toàn bộ kết nối. Sử dụng cho các nhà cung cấp có giới hạn tốc độ cho từng mô hình (ví dụ: ModelScope).",
     "importFreeModelsOnlyLabel": "Chỉ nhập các mô hình miễn phí",
     "importFreeModelsOnlyHint": "Khi được bật, chỉ các mô hình miễn phí của nhà cung cấp này được nhập. Các mô hình trả phí sẽ bị bỏ qua.",
+    "importFreeModelsOnlyCompatibleHint": "Khi được bật, chỉ các mô hình mà danh sách /models của endpoint này đánh dấu là miễn phí mới được nhập (id có :free, cờ miễn phí hoặc giá bằng 0). Các mô hình trả phí và mô hình không có dữ liệu giá sẽ bị bỏ qua.",
     "perModelQuotaToggle": "Bật/tắt hạn ngạch cho mỗi mô hình",
     "modelId": "ID mô hình",
     "customModelPlaceholder": "ví dụ: gpt-4.5-turbo",

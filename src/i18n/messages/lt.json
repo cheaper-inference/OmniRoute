@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Kai įjungta, 429/404 klaidos užblokuoja tik konkretų modelį, o ne visą ryšį. Naudokite teikėjams, taikantiems atskirus užklausų dažnio apribojimus kiekvienam modeliui (pvz., ModelScope).",
     "importFreeModelsOnlyLabel": "Importuoti tik nemokamus modelius",
     "importFreeModelsOnlyHint": "Kai įjungta, importuojami tik šio teikėjo nemokami modeliai. Mokami modeliai praleidžiami.",
+    "importFreeModelsOnlyCompatibleHint": "Įjungus importuojami tik tie modeliai, kuriuos šio galinio taško /models sąrašas pažymi kaip nemokamus (:free id, nemokamumo žymė arba nulinės kainos). Mokami modeliai ir modeliai be kainų duomenų praleidžiami.",
     "perModelQuotaToggle": "Kvotos pagal modelį jungiklis",
     "modelId": "Modelio ID",
     "customModelPlaceholder": "pvz., gpt-4.5-turbo",

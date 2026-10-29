@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "Yalnızca ücretsiz modelleri içe aktar",
     "importFreeModelsOnlyHint": "Etkinleştirildiğinde, yalnızca bu sağlayıcının ücretsiz modelleri içe aktarılır. Ücretli modeller atlanır.",
+    "importFreeModelsOnlyCompatibleHint": "Etkinleştirildiğinde yalnızca bu uç noktanın /models listesinin ücretsiz olarak işaretlediği modeller içe aktarılır (:free kimliği, ücretsiz bayrağı veya sıfır fiyatlar). Ücretli modeller ve fiyat verisi olmayan modeller atlanır.",
     "perModelQuotaToggle": "Model Başına Kota Geçişi",
     "modelId": "Model Kimliği",
     "customModelPlaceholder": "örneğin gpt-4.5-turbo",

@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Kui see on lubatud, lukustavad vead 429/404 ainult konkreetse mudeli, mitte kogu ühendust. Kasutage seda mudelipõhiste kiiruspiirangutega pakkujate puhul (nt ModelScope).",
     "importFreeModelsOnlyLabel": "Impordi ainult tasuta mudelid",
     "importFreeModelsOnlyHint": "Kui see on lubatud, imporditakse ainult selle pakkuja tasuta mudelid. Tasulised mudelid jäetakse vahele.",
+    "importFreeModelsOnlyCompatibleHint": "Kui see on lubatud, imporditakse ainult mudelid, mille selle lõpp-punkti /models loend märgib tasuta mudeliks (:free id, tasuta lipp või nullhinnad). Tasulised mudelid ja hinnaandmeteta mudelid jäetakse vahele.",
     "perModelQuotaToggle": "Mudelipõhise kvoodi lüliti",
     "modelId": "Mudeli ID",
     "customModelPlaceholder": "nt gpt-4.5-turbo",

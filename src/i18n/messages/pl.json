@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Gdy włączone, błędy 429/404 blokują tylko konkretny model, a nie całe połączenie. Używaj dla providers z rate limit na model (np. ModelScope).",
     "importFreeModelsOnlyLabel": "Importuj tylko darmowe models",
     "importFreeModelsOnlyHint": "Gdy włączone, importowane są tylko darmowe models tego provider. Płatne models są pomijane.",
+    "importFreeModelsOnlyCompatibleHint": "Po włączeniu importowane są tylko modele, które lista /models tego punktu końcowego oznacza jako darmowe (id z :free, flaga darmowy lub zerowe ceny). Modele płatne i modele bez danych o cenach są pomijane.",
     "perModelQuotaToggle": "Przełącznik quota na model",
     "modelId": "ID model",
     "customModelPlaceholder": "np. gpt-4.5-turbo",

@@ -1,5 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import {
   FREE_MODEL_BUDGETS,
   computeFreeModelTotals,
@@ -31,8 +32,18 @@ const formerlyMisclassifiedIds = [
 describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
   it("retains honest release catalog counts and never counts SiliconFlow as statically uncapped", () => {
     const totals = computeFreeModelTotals();
-    // 471 → 484: #16325 added 13 onomeo free-catalog rows (one uncapped pool, not steady-monthly).
-    assert.equal(totals.modelCount, 484);
+    // The 484 inherited identities include 13 onomeo rows added by #16325.
+    // Measured 2026-10-28 inventory subtracts five
+    // priced Ollama grants, three retired offers, two AINative grants and ten OpenCode-only offers.
+    // Includes the release base NVIDIA Nemotron 3.5 identity rename.
+    // Pin identities as well as the total so unrelated replacement is visible.
+    const identities = FREE_MODEL_BUDGETS.map((row) => `${row.provider}/${row.modelId}`).sort();
+    assert.equal(new Set(identities).size, 464);
+    assert.equal(
+      createHash("sha256").update(identities.join("\n")).digest("hex"),
+      "7c905895edcd8f7f0e80be30e15705a6ded978ae951a1da87b114d6a15c85884"
+    );
+    assert.equal(totals.modelCount, 464);
     assert.equal(totals.poolCount, 34);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
   });

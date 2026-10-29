@@ -5876,6 +5876,7 @@
     "perModelQuotaDescription": "Ikiwashwa, hitilafu za 429/404 huzuia modeli mahususi pekee, si muunganisho mzima. Tumia kwa watoa huduma wenye vikomo vya kiwango cha matumizi kwa kila modeli (k.m., ModelScope).",
     "importFreeModelsOnlyLabel": "Ingiza mifano ya bure pekee",
     "importFreeModelsOnlyHint": "Inapowezeshwa, ni mifano ya bure tu ya mtoa huduma huyu inayoingizwa. Mifano ya kulipia inarukwa.",
+    "importFreeModelsOnlyCompatibleHint": "Ikiwashwa, ni modeli tu ambazo orodha ya /models ya endpoint hii inaziweka alama kuwa za bure ndizo zinazoingizwa (id ya :free, alama ya bure au bei sifuri). Modeli za kulipia na modeli zisizo na data ya bei zinarukwa.",
     "perModelQuotaToggle": "Kigeuzi cha Kikomo kwa Kila Modeli",
     "modelId": "Kitambulisho cha Modeli",
     "customModelPlaceholder": "k.m. gpt-4.5-turbo",
