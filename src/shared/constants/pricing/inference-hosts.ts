@@ -459,6 +459,17 @@ export const DEFAULT_PRICING_INFERENCE = {
       cache_creation: 0,
     },
   },
+  // OpenCode Go per-1M rates from https://opencode.ai/docs/go/ (2026-10-23). The models.dev
+  // sync layer overrides these when it carries the same id.
+  "opencode-go": {
+    "kimi-k3.1-pro": {
+      input: 2.0,
+      output: 10.0,
+      cached: 0.2,
+      reasoning: 10.0,
+      cache_creation: 2.0,
+    },
+  },
   hyperbolic: {
     "openai/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     "gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },

@@ -1,5 +1,8 @@
 import { getCombos } from "@/lib/db/combos";
-import { buildProviderHealthAutopilotReport } from "@/lib/monitoring/providerHealthAutopilot";
+import {
+  buildProviderHealthAutopilotReport,
+  type ProviderAutopilotReport,
+} from "@/lib/monitoring/providerHealthAutopilot";
 import { buildComboForecastResponse } from "@/lib/usage/comboForecast";
 import { buildComboHealthResponse } from "@/lib/usage/comboHealth";
 import type {
@@ -16,7 +19,6 @@ import type {
   ComboForecastMetrics,
   ComboForecastResponse,
   ComboForecastRiskLevel,
-  ProviderAutopilotReport,
   ComboHealthMetrics,
   ComboHealthResponse,
   ComboRecord,
@@ -48,6 +50,11 @@ type ProviderIssueView = {
     connectionId?: string;
   };
   evidence?: JsonRecord;
+  providerAffectedConnectionIds?: string[];
+};
+
+type TargetEligibilityView = NonNullable<ComboHealthMetrics["targetHealth"]>[number] & {
+  eligibleConnectionIds?: string[] | null;
 };
 
 function sanitizeId(parts: Array<string | null | undefined>): string {
@@ -167,14 +174,59 @@ function providerIssueEvidence(providerIssue: ProviderIssueView): JsonRecord {
   };
 }
 
-function buildProviderIssueIndex(providerIssues: ProviderIssueView[]): ProviderIssueView[] {
-  return providerIssues.filter((entry) => Boolean(entry.target?.provider));
+function buildProviderIssueIndex(report: ProviderAutopilotReport): ProviderIssueView[] {
+  return report.providers.flatMap((provider) => {
+    const affectedConnectionIds = Array.from(
+      new Set(
+        provider.issues.flatMap((entry) => {
+          const connectionId = entry.target.connectionId;
+          return connectionId && entry.severity !== "info" ? [connectionId] : [];
+        })
+      )
+    );
+
+    return (provider.issues as ProviderIssueView[])
+      .filter((entry) => Boolean(entry.target?.provider))
+      .map((entry) => ({
+        ...entry,
+        providerAffectedConnectionIds: affectedConnectionIds,
+      }));
+  });
+}
+
+function hasForecastDataQualityGap(forecast: ComboForecastMetrics): boolean {
+  return (
+    forecast.confidence === "no_data" ||
+    forecast.confidence === "low" ||
+    forecast.dataQuality.pricingCoveragePct < 100 ||
+    forecast.dataQuality.quotaCoverage === "none" ||
+    forecast.dataQuality.quotaCoverage === "partial"
+  );
+}
+
+function buildQuotaMonitorConnectionIndex(
+  report: ProviderAutopilotReport
+): Map<string, Set<string>> {
+  const monitoredByProvider = new Map<string, Set<string>>();
+  for (const provider of report.providers) {
+    const quotaMonitor = provider.signals.quotaMonitor;
+    if (!quotaMonitor || typeof quotaMonitor !== "object" || Array.isArray(quotaMonitor)) continue;
+    const connectionIds = (quotaMonitor as JsonRecord).monitoredConnectionIds;
+    if (!Array.isArray(connectionIds)) continue;
+    const normalized = connectionIds.filter(
+      (connectionId): connectionId is string =>
+        typeof connectionId === "string" && connectionId.trim().length > 0
+    );
+    if (normalized.length > 0) monitoredByProvider.set(provider.provider, new Set(normalized));
+  }
+  return monitoredByProvider;
 }
 
 function buildIssuesForCombo(
   combo: ComboHealthMetrics,
   forecast: ComboForecastMetrics | undefined,
   providerIssues: ProviderIssueView[],
+  quotaMonitorConnectionsByProvider: Map<string, Set<string>>,
   includeActions: boolean
 ): ComboAutopilotIssue[] {
   const issues: ComboAutopilotIssue[] = [];
@@ -309,14 +361,33 @@ function buildIssuesForCombo(
 
     for (const providerIssue of providerIssues) {
       if (!providerIssueMatchesTarget(providerIssue, target)) continue;
+      const eligibleConnectionIds = (target as TargetEligibilityView).eligibleConnectionIds;
+      const issueConnectionId = providerIssue.target?.connectionId;
+      const affectedConnectionIds = new Set(providerIssue.providerAffectedConnectionIds ?? []);
+      const hasUnpinnedFallbackCapacity = Boolean(
+        !target.connectionId &&
+        issueConnectionId &&
+        Array.isArray(eligibleConnectionIds) &&
+        eligibleConnectionIds.length > 0 &&
+        (!eligibleConnectionIds.includes(issueConnectionId) ||
+          eligibleConnectionIds.some((connectionId) => !affectedConnectionIds.has(connectionId)))
+      );
+      const providerSeverity = hasUnpinnedFallbackCapacity
+        ? "info"
+        : (providerIssue.severity ?? "warning");
       issues.push(
         issue(
           combo,
           "provider_health_issue",
-          providerIssue.severity === "critical" ? "critical" : "warning",
+          providerSeverity,
           providerIssue.title ?? "Provider health issue affects combo target",
           providerIssue.recommendation ?? "Review provider health autopilot details.",
-          providerIssueEvidence(providerIssue),
+          {
+            ...providerIssueEvidence(providerIssue),
+            hasUnpinnedFallbackCapacity,
+            eligibilityProven: Array.isArray(eligibleConnectionIds),
+            eligibleConnectionIds: eligibleConnectionIds ?? null,
+          },
           includeActions,
           ["open_provider_health_autopilot", "open_combo_editor"],
           target
@@ -326,17 +397,59 @@ function buildIssuesForCombo(
   }
 
   if (forecast && riskRank(forecast.quotaRisk.level) >= riskRank("medium")) {
+    const hasDataQualityGap = hasForecastDataQualityGap(forecast);
+    const worstTarget = forecast.targets.find(
+      (target) => target.executionKey === forecast.quotaRisk.worstTargetExecutionKey
+    );
+    const healthTarget = worstTarget
+      ? targets.find((target) => target.executionKey === worstTarget.executionKey)
+      : undefined;
+    const eligibleConnectionIds = healthTarget
+      ? (healthTarget as TargetEligibilityView).eligibleConnectionIds
+      : undefined;
+    const relevantConnectionIds = worstTarget?.connectionId
+      ? [worstTarget.connectionId]
+      : Array.isArray(eligibleConnectionIds)
+        ? eligibleConnectionIds
+        : null;
+    const monitoredConnectionIds = worstTarget
+      ? quotaMonitorConnectionsByProvider.get(worstTarget.provider)
+      : undefined;
+    const hasQuotaMonitorCoverage = Boolean(
+      relevantConnectionIds &&
+      relevantConnectionIds.length > 0 &&
+      monitoredConnectionIds &&
+      relevantConnectionIds.every((connectionId) => monitoredConnectionIds.has(connectionId))
+    );
+    const diagnosticOnly =
+      !hasQuotaMonitorCoverage ||
+      forecast.confidence === "no_data" ||
+      forecast.confidence === "low" ||
+      forecast.dataQuality.quotaCoverage === "none";
     issues.push(
       issue(
         combo,
         "forecast_quota_risk",
-        forecast.quotaRisk.level === "critical" ? "critical" : "warning",
+        diagnosticOnly ? "info" : forecast.quotaRisk.level === "critical" ? "critical" : "warning",
         "Forecast predicts quota pressure",
         "Rebalance targets or review quotas before the forecast horizon is reached.",
         {
           risk: forecast.quotaRisk.level,
           projectedWorstRemainingPct: forecast.quotaRisk.projectedWorstRemainingPct,
           timeToExhaustDays: forecast.quotaRisk.timeToExhaustDays,
+          confidence: forecast.confidence,
+          quotaCoverage: forecast.dataQuality.quotaCoverage,
+          worstTargetExecutionKey: forecast.quotaRisk.worstTargetExecutionKey,
+          worstTargetProvider: worstTarget?.provider ?? null,
+          worstTargetRelevantConnectionIds: relevantConnectionIds,
+          monitoredConnectionIds: monitoredConnectionIds
+            ? Array.from(monitoredConnectionIds).sort()
+            : [],
+          quotaMonitorCoverageAmbiguous:
+            !worstTarget || !relevantConnectionIds || relevantConnectionIds.length === 0,
+          hasDataQualityGap,
+          hasQuotaMonitorCoverage,
+          diagnosticOnly,
         },
         includeActions,
         ["review_quota_limits", "open_combo_editor"]
@@ -345,19 +458,20 @@ function buildIssuesForCombo(
   }
 
   if (forecast) {
-    const hasDataQualityGap =
-      forecast.confidence === "no_data" ||
-      forecast.confidence === "low" ||
-      forecast.dataQuality.pricingCoveragePct < 100 ||
-      forecast.dataQuality.quotaCoverage === "none" ||
-      forecast.dataQuality.quotaCoverage === "partial";
+    const hasDataQualityGap = hasForecastDataQualityGap(forecast);
 
     if (hasDataQualityGap) {
+      const hasEnoughTrafficForPricingWarning =
+        forecast.history.requests > 0 &&
+        forecast.confidence !== "no_data" &&
+        forecast.confidence !== "low";
       issues.push(
         issue(
           combo,
           "data_quality_gap",
-          forecast.dataQuality.pricingCoveragePct < 80 ? "warning" : "info",
+          hasEnoughTrafficForPricingWarning && forecast.dataQuality.pricingCoveragePct < 80
+            ? "warning"
+            : "info",
           "Forecast data quality is incomplete",
           "Add pricing/quota data or generate more traffic to improve autopilot confidence.",
           {
@@ -395,9 +509,16 @@ function buildAutopilotCombo(
   combo: ComboHealthMetrics,
   forecast: ComboForecastMetrics | undefined,
   providerIssues: ProviderIssueView[],
+  quotaMonitorConnectionsByProvider: Map<string, Set<string>>,
   includeActions: boolean
 ): ComboAutopilotCombo {
-  const issues = buildIssuesForCombo(combo, forecast, providerIssues, includeActions);
+  const issues = buildIssuesForCombo(
+    combo,
+    forecast,
+    providerIssues,
+    quotaMonitorConnectionsByProvider,
+    includeActions
+  );
   const state = stateForIssues(issues);
   const providerIssueCount = issues.filter(
     (entry) => entry.kind === "provider_health_issue"
@@ -423,6 +544,39 @@ function buildAutopilotCombo(
       dataQualityNotes: forecast?.dataQuality.notes ?? [],
     },
     issues,
+  };
+}
+
+/** Ids and names of the combos that are not explicitly disabled (`isActive !== false`). */
+function collectActiveComboKeys(
+  combos: ComboRecord[] | undefined
+): { ids: Set<string>; names: Set<string> } | null {
+  if (!combos) return null;
+  const ids = new Set<string>();
+  const names = new Set<string>();
+  for (const combo of combos) {
+    if ((combo as JsonRecord).isActive === false) continue;
+    if (typeof combo.id === "string") ids.add(combo.id);
+    if (typeof combo.name === "string") names.add(combo.name);
+  }
+  return { ids, names };
+}
+
+function summarizeAutopilotCombos(combos: ComboAutopilotCombo[]) {
+  const countState = (state: ComboAutopilotCombo["state"]) =>
+    combos.filter((combo) => combo.state === state).length;
+  const issueCount = combos.reduce((sum, combo) => sum + combo.issues.length, 0);
+  const suggestionCount = combos.reduce(
+    (sum, combo) =>
+      sum + combo.issues.reduce((issueSum, issue) => issueSum + issue.actions.length, 0),
+    0
+  );
+  return {
+    downCount: countState("down"),
+    degradedCount: countState("degraded"),
+    healthyCount: countState("healthy"),
+    issueCount,
+    suggestionCount,
   };
 }
 
@@ -455,48 +609,48 @@ export async function buildComboHealthAutopilotReport(
         combos: combosSnapshot,
       }),
     options.providerHealthResponse ??
-      buildProviderHealthAutopilotReport({ includeHealthy: false, includeActions: false }),
+      buildProviderHealthAutopilotReport({ includeHealthy: true, includeActions: false }),
   ]);
 
   const forecastsByComboId = new Map(forecast.combos.map((entry) => [entry.comboId, entry]));
-  const providerIssues = buildProviderIssueIndex(
-    providerHealth.providers.flatMap((provider) => provider.issues as ProviderIssueView[])
-  );
+  const providerIssues = buildProviderIssueIndex(providerHealth);
+  const quotaMonitorConnectionsByProvider = buildQuotaMonitorConnectionIndex(providerHealth);
+  const activeComboKeys = collectActiveComboKeys(combosSnapshot);
 
-  const allCombos = health.combos.map((combo) =>
-    buildAutopilotCombo(
-      combo,
-      forecastsByComboId.get(combo.comboId),
-      providerIssues,
-      includeActions
+  const allCombos = health.combos
+    .filter(
+      (combo) =>
+        !activeComboKeys ||
+        activeComboKeys.ids.has(combo.comboId) ||
+        activeComboKeys.names.has(combo.comboName)
     )
-  );
+    .map((combo) =>
+      buildAutopilotCombo(
+        combo,
+        forecastsByComboId.get(combo.comboId),
+        providerIssues,
+        quotaMonitorConnectionsByProvider,
+        includeActions
+      )
+    );
   const combos = includeHealthy
     ? allCombos
     : allCombos.filter((combo) => combo.state !== "healthy");
-  const downCount = allCombos.filter((combo) => combo.state === "down").length;
-  const degradedCount = allCombos.filter((combo) => combo.state === "degraded").length;
-  const healthyCount = allCombos.filter((combo) => combo.state === "healthy").length;
-  const issueCount = allCombos.reduce((sum, combo) => sum + combo.issues.length, 0);
-  const suggestionCount = allCombos.reduce(
-    (sum, combo) =>
-      sum + combo.issues.reduce((issueSum, issue) => issueSum + issue.actions.length, 0),
-    0
-  );
+  const counts = summarizeAutopilotCombos(allCombos);
 
   return {
-    status: downCount > 0 ? "critical" : degradedCount > 0 ? "warning" : "healthy",
+    status: counts.downCount > 0 ? "critical" : counts.degradedCount > 0 ? "warning" : "healthy",
     checkedAt,
     timeRange: options.range,
     horizon: options.horizon,
     summary: {
       comboCount: allCombos.length,
-      healthyCount,
-      degradedCount,
-      downCount,
-      issueCount,
-      suggestionCount,
-      actionableCount: suggestionCount,
+      healthyCount: counts.healthyCount,
+      degradedCount: counts.degradedCount,
+      downCount: counts.downCount,
+      issueCount: counts.issueCount,
+      suggestionCount: counts.suggestionCount,
+      actionableCount: counts.suggestionCount,
     },
     combos,
   };

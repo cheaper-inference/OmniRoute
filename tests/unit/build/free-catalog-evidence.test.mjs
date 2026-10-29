@@ -242,68 +242,95 @@ test("CLI requires an event baseline for PR, merge-group and push checks", () =>
   }
 });
 
-test("CLI compares candidate debt to the event baseline, including merge queues and pushes", () => {
-  const dir = mkdtempSync(join(tmpdir(), "catalog-evidence-"));
-  const script = fileURLToPath(
-    new URL("../../../scripts/check/check-free-catalog-evidence.mjs", import.meta.url)
-  );
-  const frozen = JSON.parse(
-    readFileSync(
-      new URL("../../../config/quality/free-catalog-legacy-seed.json", import.meta.url),
-      "utf8"
-    )
-  );
-  // The immutable seed can retain identities subsequently removed from the catalog.
-  // Bootstrap only live rows; retired identities must not become valid debt again.
-  const liveKeys = new Set(FREE_MODEL_BUDGETS.map((entry) => `${entry.provider}/${entry.modelId}`));
-  const allDebt = frozen.entries
-    .map((entry) => `${entry.provider}/${entry.modelId}`)
-    .filter((key) => liveKeys.has(key));
-  const git = (...args) =>
-    execFileSync("git", args, {
-      cwd: dir,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-    }).trim();
-  const policyPath = join(dir, "config/quality/free-catalog-evidence.json");
-  const writePolicy = (debt) =>
-    writeFileSync(policyPath, JSON.stringify({ schemaVersion: 1, debt, evidence: [] }));
-  try {
-    git("init");
-    git("config", "user.name", "Catalog Test");
-    git("config", "user.email", "catalog-test@example.invalid");
-    git("commit", "--allow-empty", "-m", "fixture before policy");
-    const bootstrap = git("rev-parse", "HEAD");
-    mkdirSync(join(dir, "config/quality"), { recursive: true });
-    writeFileSync(
-      join(dir, "config/quality/free-catalog-legacy-seed.json"),
-      JSON.stringify(frozen)
+test(
+  "CLI compares candidate debt to the event baseline, including merge queues and pushes",
+  { timeout: 180000 },
+  () => {
+    const dir = mkdtempSync(join(tmpdir(), "catalog-evidence-"));
+    const script = fileURLToPath(
+      new URL("../../../scripts/check/check-free-catalog-evidence.mjs", import.meta.url)
     );
-    writePolicy(allDebt.slice(1));
-    git("add", "config");
-    git("commit", "-m", "fixture audited identity");
-    const audited = git("rev-parse", "HEAD");
-    writePolicy(allDebt);
-    git("add", "config");
-    git("commit", "-m", "fixture restores retired debt");
-    for (const event of ["pull_request", "merge_group", "push"]) {
-      const run = (base) =>
-        spawnSync(process.execPath, [script], {
-          cwd: dir,
-          encoding: "utf8",
-          env: {
-            ...process.env,
-            GITHUB_EVENT_NAME: event,
-            BASE_SHA: base,
-          },
-        });
-      const rejected = run(audited);
-      assert.equal(rejected.status, 1, event + rejected.stdout + rejected.stderr);
-      assert.match(rejected.stderr, /cannot grow or be reintroduced/);
-      assert.equal(run(bootstrap).status, 0, "initial debt is allowed against policy-free base");
-      assert.equal(run("HEAD").status, 0, "unchanged debt is allowed");
+    const frozen = JSON.parse(
+      readFileSync(
+        new URL("../../../config/quality/free-catalog-legacy-seed.json", import.meta.url),
+        "utf8"
+      )
+    );
+    const policy = JSON.parse(
+      readFileSync(
+        new URL("../../../config/quality/free-catalog-evidence.json", import.meta.url),
+        "utf8"
+      )
+    );
+    // Keep reviewed identities out of debt and retain their current evidence.
+    // Only debt varies between the synthetic commits below.
+    const allDebt = policy.debt;
+    assert.ok(allDebt.length > 0, "the fixture needs a legacy identity to retire and reintroduce");
+    const git = (...args) =>
+      execFileSync("git", args, {
+        cwd: dir,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+        timeout: 30000,
+        killSignal: "SIGKILL",
+        windowsHide: true,
+      }).trim();
+    const policyPath = join(dir, "config/quality/free-catalog-evidence.json");
+    const writePolicy = (debt) =>
+      writeFileSync(policyPath, JSON.stringify({ ...policy, debt }), "utf8");
+    try {
+      git("init");
+      if (process.platform === "win32") git("config", "core.longpaths", "true");
+      git("config", "user.name", "Catalog Test");
+      git("config", "user.email", "catalog-test@example.invalid");
+      git("commit", "--allow-empty", "-m", "fixture before policy");
+      const bootstrap = git("rev-parse", "HEAD");
+      mkdirSync(join(dir, "config/quality"), { recursive: true });
+      writeFileSync(
+        join(dir, "config/quality/free-catalog-legacy-seed.json"),
+        JSON.stringify(frozen),
+        "utf8"
+      );
+      writePolicy(allDebt.slice(1));
+      git("add", "config");
+      git("commit", "-m", "fixture audited identity");
+      const audited = git("rev-parse", "HEAD");
+      writePolicy(allDebt);
+      git("add", "config");
+      git("commit", "-m", "fixture restores retired debt");
+      for (const event of ["pull_request", "merge_group", "push"]) {
+        const run = (base) =>
+          spawnSync(process.execPath, [script], {
+            cwd: dir,
+            encoding: "utf8",
+            stdio: ["ignore", "pipe", "pipe"],
+            timeout: 30000,
+            killSignal: "SIGKILL",
+            windowsHide: true,
+            env: {
+              ...process.env,
+              GITHUB_EVENT_NAME: event,
+              BASE_SHA: base,
+            },
+          });
+        const rejected = run(audited);
+        assert.equal(rejected.status, 1, event + rejected.stdout + rejected.stderr);
+        assert.match(rejected.stderr, /cannot grow or be reintroduced/);
+        const initial = run(bootstrap);
+        assert.equal(
+          initial.status,
+          0,
+          "initial debt is allowed against policy-free base: " + initial.stdout + initial.stderr
+        );
+        const unchanged = run("HEAD");
+        assert.equal(
+          unchanged.status,
+          0,
+          "unchanged debt is allowed: " + unchanged.stdout + unchanged.stderr
+        );
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
     }
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
   }
-});
+);

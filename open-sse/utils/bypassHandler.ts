@@ -45,26 +45,20 @@ export function handleBypassRequest(body, model, userAgent = "") {
   // Pattern 2: Warmup
   if (!shouldBypass) {
     const firstText = getText(messages[0]?.content);
-    if (firstText === "Warmup") {
-      shouldBypass = true;
-    }
+    shouldBypass = firstText === "Warmup";
   }
 
   // Pattern 3: Count
   if (!shouldBypass && messages.length === 1 && messages[0]?.role === "user") {
     const firstText = getText(messages[0]?.content);
-    if (firstText === "count") {
-      shouldBypass = true;
-    }
+    shouldBypass = firstText === "count";
   }
 
   // Pattern 4: Skip patterns
   if (!shouldBypass && SKIP_PATTERNS?.length) {
     const userMessages = messages.filter((m) => m.role === "user");
     const userText = userMessages.map((m) => getText(m.content)).join(" ");
-    if (SKIP_PATTERNS.some((p) => userText.includes(p))) {
-      shouldBypass = true;
-    }
+    shouldBypass = SKIP_PATTERNS.some((p) => userText.includes(p));
   }
 
   // Pattern 5: Quota probe — max_tokens=1 + "quota" keyword (FCC try_quota_mock).
@@ -74,9 +68,7 @@ export function handleBypassRequest(body, model, userAgent = "") {
       .map((m) => getText(m.content))
       .join(" ")
       .toLowerCase();
-    if (userText.includes("quota")) {
-      shouldBypass = true;
-    }
+    shouldBypass = userText.includes("quota");
   }
 
   if (!shouldBypass) return null;

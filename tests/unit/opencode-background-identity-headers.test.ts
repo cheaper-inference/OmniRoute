@@ -78,7 +78,11 @@ test("discovery entries for opencode-zen / opencode-go attach the session header
     const headers = entry.buildHeaders!("test-token", {
       providerSpecificData: { opencodeGoWorkspaceId: "wrk_01ABC" },
     });
-    assert.equal(headers.Authorization, "Bearer test-token");
+    // Contract change: the zen/go catalog endpoint rejects a bearer with
+    // 401 api_key_expired and authenticates the same key via x-api-key only
+    // (live 2026-10-23, three accounts). The chat path keeps its bearer.
+    assert.equal(headers["x-api-key"], "test-token");
+    assert.equal(headers.Authorization, undefined);
     assert.equal(headers["User-Agent"], "opencode");
     assertDescendingSession(headers["x-opencode-session"]);
     // Same workspace → same identity as the raw helper (seed comes from psd).

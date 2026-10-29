@@ -462,7 +462,7 @@ test("wreq response streaming validates a fragmented SSE prefix and filters a fr
   };
   const module = createTlsClientModule({
     providerName: "Test",
-    tlsProfile: "firefox_148",
+    tlsProfile: "firefox_151",
     emulationOs: "macos",
     domain: "https://example.test",
     streamEofPolicy: "exclude",
@@ -503,7 +503,7 @@ test("byteResponse preserves arbitrary bytes as a content-typed data URL", async
   };
   const module = createTlsClientModule({
     providerName: "Test",
-    tlsProfile: "firefox_148",
+    tlsProfile: "firefox_151",
     domain: "https://example.test",
     streamEofPolicy: "include",
     responseValidation: "sse",
@@ -995,7 +995,7 @@ test("the include policy preserves a fragmented Perplexity end_of_stream marker"
   };
   const module = createTlsClientModule({
     providerName: "Perplexity",
-    tlsProfile: "firefox_148",
+    tlsProfile: "firefox_151",
     emulationOs: "macos",
     domain: "https://www.perplexity.ai",
     streamEofPolicy: "include",

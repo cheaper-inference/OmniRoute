@@ -50,12 +50,14 @@ function mouse(type: string, clientX: number, clientY = 100) {
 
 const MODES = ["follow", "live", "pan"] as const;
 
+// The mode buttons are kit Buttons (KEA-7886): the active one is the pressed toggle.
 function activeMode(): string | null {
   return (
-    MODES.find((m) =>
-      (
-        container.querySelector(`[data-testid="timeline-mode-${m}"]`) as HTMLElement
-      ).className.includes("bg-primary")
+    MODES.find(
+      (m) =>
+        (container.querySelector(`[data-testid="timeline-mode-${m}"]`) as HTMLElement).getAttribute(
+          "aria-pressed"
+        ) === "true"
     ) ?? null
   );
 }

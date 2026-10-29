@@ -130,12 +130,12 @@ test("Gemini aliases survive extraction alongside namespace identities", () => {
   const aliases = translated._toolNameMap;
   assert.ok(aliases instanceof Map);
   const identities = extractRequestToolIdentityMap(translated);
-  assert.deepEqual(identities?.get("functions__exec"), { namespace: "functions", name: "exec" });
+  assert.deepEqual(identities?.get("exec"), { namespace: "functions", name: "exec" });
   assert.equal(translated._toolNameMap, aliases);
 });
 
 test("namespaced custom tool metadata uses the declared qualified wire identity", () => {
-  assert.deepEqual([...collectResponsesCustomToolNames(tools, [])], ["functions__exec"]);
+  assert.deepEqual([...collectResponsesCustomToolNames(tools, [])], ["exec"]);
 });
 
 test("two Gemini custom calls round-trip raw input, namespace, history and a legitimate alias collision", async () => {
@@ -223,7 +223,7 @@ test("worker Chat-to-Responses transform restores namespaced custom items with f
               {
                 index: 0,
                 id: "call_fragmented",
-                function: { name: "functions__exec", arguments: '{"input":"text(' },
+                function: { name: "exec", arguments: '{"input":"text(' },
               },
             ],
           },
@@ -342,7 +342,7 @@ test("Responses function history uses the same qualified name as its declaration
   };
   const call = translated.messages.find((message) => message.tool_calls)?.tool_calls?.[0];
   assert.equal(call?.function.name, translated.tools[0].function.name);
-  assert.equal(call?.function.name, "functions__run");
+  assert.equal(call?.function.name, "run");
   assert.equal(call?.id, "call_run");
   assert.equal(call?.function.arguments, '{"value":7}');
 });
