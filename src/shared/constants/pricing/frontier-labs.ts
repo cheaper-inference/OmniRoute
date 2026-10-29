@@ -6,6 +6,7 @@ import {
   GPT_6_ASTRA_PRICING,
   GPT_6_SOL_PRICING,
   GEMINI_3_7_FLASH_PROMO_PRICING,
+  GEMINI_4_ARGON_PROMO_PRICING,
   GPT_5_5_PRICING,
   GPT_5_6_LUNA_PRICING,
   GPT_5_6_SOL_PRICING,
@@ -19,30 +20,51 @@ import {
   CLAUDE_OPUS_46_PRICING,
   CLAUDE_SONNET_46_PRICING,
   CLAUDE_SONNET_5_PRICING,
+  withOpenAiLongContextTier,
 } from "./shared-tiers";
 
 export const DEFAULT_PRICING_FRONTIER = {
   openai: {
-    "gpt-6-astra": GPT_6_ASTRA_PRICING,
-    "gpt-6.1-sol": GPT_6_SOL_PRICING,
-    "gpt-5.6": GPT_5_6_SOL_PRICING,
-    "gpt-5.6-sol": GPT_5_6_SOL_PRICING,
-    "gpt-5.6-terra": GPT_5_6_TERRA_PRICING,
-    "gpt-5.6-luna": GPT_5_6_LUNA_PRICING,
-    "gpt-5.5": GPT_5_5_PRICING,
+    // Rows below that OpenAI prices with a >272K long-context tier carry it via
+    // withOpenAiLongContextTier (see shared-tiers.ts for the source).
+    "gpt-6-astra": withOpenAiLongContextTier(GPT_6_ASTRA_PRICING),
+    // Sol/Luna mirror the dollar-equivalent Codex Standard rates already used for the
+    // codex provider (oauth-subscriptions.ts) until OpenAI publishes distinct API rates;
+    // without these rows the openai registry entries resolved to $0 (catalog pricing gate).
+    "gpt-6-sol": withOpenAiLongContextTier({
+      input: 2.0,
+      output: 10.0,
+      cached: 0.2,
+      reasoning: 10.0,
+      cache_creation: 2.5,
+    }),
+    "gpt-6-luna": withOpenAiLongContextTier({
+      input: 0.1,
+      output: 0.5,
+      cached: 0.01,
+      reasoning: 0.5,
+      cache_creation: 0.125,
+    }),
+    "gpt-6.1-sol": withOpenAiLongContextTier(GPT_6_SOL_PRICING),
+    "gpt-5.6": withOpenAiLongContextTier(GPT_5_6_SOL_PRICING),
+    "gpt-5.6-sol": withOpenAiLongContextTier(GPT_5_6_SOL_PRICING),
+    "gpt-5.6-terra": withOpenAiLongContextTier(GPT_5_6_TERRA_PRICING),
+    "gpt-5.6-luna": withOpenAiLongContextTier(GPT_5_6_LUNA_PRICING),
+    "gpt-5.5": withOpenAiLongContextTier(GPT_5_5_PRICING),
     // The -pro tier mirrors its base family pricing until OpenAI publishes a
     // distinct pro rate; without these rows the openai provider's gpt-5.x-pro
     // models (in the registry) resolved to $0 and tripped the catalog pricing gate.
     "gpt-5.5-pro": GPT_5_5_PRICING,
     // gpt-5.4 family (public API tier, with a lower nano tier). Without these rows the openai
     // provider's gpt-5.4* models resolved to $0.
-    "gpt-5.4": {
-      input: 5.0,
-      output: 20.0,
-      cached: 2.5,
-      reasoning: 30.0,
-      cache_creation: 5.0,
-    },
+    // gpt-5.4 standard rates: https://developers.openai.com/api/docs/models/gpt-5.4
+    "gpt-5.4": withOpenAiLongContextTier({
+      input: 2.5,
+      output: 15.0,
+      cached: 0.25,
+      reasoning: 15.0,
+      cache_creation: 2.5,
+    }),
     "gpt-5.4-pro": {
       input: 5.0,
       output: 20.0,
@@ -172,19 +194,21 @@ export const DEFAULT_PRICING_FRONTIER = {
       cache_creation: 3.0,
     },
     // Claude 4.5 Haiku — modelo eco mais recente da Anthropic (2025-10)
+    // Cache read $0.10 / 5-minute cache write $1.25 per MTok:
+    // https://platform.claude.com/docs/en/about-claude/pricing
     "claude-haiku-4-5-20251001": {
       input: 1.0,
       output: 5.0,
-      cached: 0.5,
+      cached: 0.1,
       reasoning: 7.5,
-      cache_creation: 1.0,
+      cache_creation: 1.25,
     },
     "claude-haiku-4.5": {
       input: 1.0,
       output: 5.0,
-      cached: 0.5,
+      cached: 0.1,
       reasoning: 7.5,
-      cache_creation: 1.0,
+      cache_creation: 1.25,
     },
     // Claude Sonnet 4.6 — maxOutput 64k tokens, $3/$15/M
     "claude-sonnet-4-6-20251031": {
@@ -236,6 +260,7 @@ export const DEFAULT_PRICING_FRONTIER = {
     "claude-opus-4": CLAUDE_OPUS_4_PRICING,
   },
   gemini: {
+    "gemini-4-argon": GEMINI_4_ARGON_PROMO_PRICING,
     "gemini-3.7-flash": GEMINI_3_7_FLASH_PROMO_PRICING,
     // Gemini 3.1 Pro — novo flagship Google (2026-03-17)
     // Context: 1.050.000 tokens | Max Output: 65.536
@@ -365,14 +390,24 @@ export const DEFAULT_PRICING_FRONTIER = {
     "blackboxai-pro": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
   },
   xai: {
-    // The static rate covers prompts below 200K tokens. xAI's provider-reported
-    // cost_in_usd_ticks remains authoritative for the >=200K pricing tier.
+    // Prompts reaching 200K tokens are billed at the long-context rate
+    // (https://docs.x.ai/developers/pricing). xAI's provider-reported
+    // cost_in_usd_ticks, when present, still takes precedence over this estimate.
     "grok-4.6": {
       input: 2.0,
       output: 6.0,
       cached: 0.5,
       reasoning: 6.0,
       cache_creation: 2.0,
+      long_context: {
+        threshold: 200_000,
+        inclusive: true,
+        input: 4.0,
+        cached: 1.0,
+        cache_creation: 4.0,
+        output: 12.0,
+        reasoning: 12.0,
+      },
     },
     "grok-3": {
       input: 3.0,

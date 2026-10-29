@@ -4,7 +4,7 @@
 
 ---
 
-> Täielik Dockeriga juurutamise teatmik. Kiireks alustamiseks vaadake [README Docker-sektsiooni](../README.md#-docker).
+> Täielik Dockeriga juurutamise teatmik. Kiireks alustamiseks vaadake [README Dockerit käsitlevat jaotist](../README.md#-docker).
 
 ## Sisukord
 
@@ -13,25 +13,27 @@
 - [Docker Compose](#docker-compose)
 - [Saadaolevad profiilid](#available-profiles)
 - [Hosti CLI-tööriistade seadistamine, kui OmniRoute töötab Dockeris](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Redise sidecar](#redis-sidecar)
+- [Redise külgkonteiner](#redis-sidecar)
 - [Tootmiskeskkonna Compose](#production-compose)
 - [Dockerfile'i etapid](#dockerfile-stages)
 - [Kriitilised keskkonnamuutujad](#critical-environment-variables)
 - [Docker Compose koos Caddyga (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare'i Quick Tunnel](#cloudflare-quick-tunnel)
+- [Cloudflare'i kiirtunnel](#cloudflare-quick-tunnel)
 - [Tõmmisesildid](#image-tags)
-- [Kättesaadavus: vaikimisi SQLite toetab üht replikaati](#availability-default-sqlite-is-single-replica)
+- [Töölaua uuendamine Dockeris](#dashboard-updates-in-docker)
+- [Kättesaadavus: vaikimisi SQLite toetab ühte replikat](#availability-default-sqlite-is-single-replica)
+- [Gemini piirkondlikud vead Dockeris](#gemini-regional-errors-inside-docker)
 - [Olulised märkused](#important-notes)
 
 ---
 
 ## Kiirkäivitus
 
-> **Isemajuta ühe käsuga?** Vaata
-> [isemajutuse juhendit](../getting-started/SELF_HOST_GUIDE.md) —
+> **Isehostimine ühe käsuga?** Vaadake
+> [isehostimise juhendit](../getting-started/SELF_HOST_GUIDE.md) —
 > `docker compose -f docker-compose.selfhost.yml up -d` (avaldatud tõmmis +
-> Redis, ainult loopback-liidesel, profiili pole vaja valida). Allolev kiirkäivitus on
-> ühe konteineriga lahendus kasutajatele, kes käitavad Redist juba mujal.
+> Redis, ainult loopback-liides, profiili pole vaja valida). Allolev kiirkäivitus on
+> ühe konteineri lahendus kasutajatele, kes juba käitavad Redist mujal.
 
 ```bash
 docker run -d \
@@ -62,13 +64,13 @@ docker run -d \
 ## Docker Compose
 
 ```bash
-# Baasprofiil (ilma CLI-tööriistadeta)
+# Põhiprofiil (ilma CLI-tööriistadeta)
 docker compose --profile base up -d
 
-# CLI-profiil (sisseehitatud Claude Code, Codex, OpenClaw)
+# CLI-profiil (sisseehitatud Claude Code, Codex ja OpenClaw)
 docker compose --profile cli up -d
 
-# Hostiprofiil (eelkõige Linuxile; haagib hosti CLI-binaarfailid kirjutuskaitstult)
+# Hosti profiil (eelkõige Linuxile; ühendab hosti CLI-binaarfailid kirjutuskaitstult)
 docker compose --profile host up -d
 
 # Veebiprofiil (Chromium/Playwright veebiseansi pakkujate jaoks)
@@ -82,48 +84,48 @@ docker compose --profile cli --profile cliproxyapi up -d
 
 OmniRoute sisaldab peamiste juurutusviiside jaoks Compose'i profiile. Valige oma keskkonnale sobiv profiil.
 
-| Profiil            | Teenus           | Millal kasutada                                                                                                                                       | Käsk                                         |
-| ------------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `base` (vaikimisi) | `omniroute-base` | Ilma graafilise liideseta server / minimaalne käituskeskkond, teenusepakkujate CLI-sid pole kaasas                                                    | `docker compose --profile base up -d`        |
-| `cli`              | `omniroute-cli`  | Agenttöövood, mis kutsuvad käske `omniroute providers/setup/doctor` ja kaasasolevaid CLI-sid (Codex, Claude Code, Droid, OpenClaw)                    | `docker compose --profile cli up -d`         |
-| `host`             | `omniroute-host` | Linuxi hostid, mis vajavad hosti CLI-dele `network_mode`-laadset juurdepääsu, ühendades kirjutuskaitstult `~/.local/bin`, `~/.codex`, `~/.claude` jne | `docker compose --profile host up -d`        |
-| `cliproxyapi`      | `cliproxyapi`    | [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) külgkonteineri käitamine pordil `8317` ülesvoolu CLI-puhverdamiseks                       | `docker compose --profile cliproxyapi up -d` |
-| `web`              | `omniroute-web`  | Brauserit vajavad veebiseansi pakkujad: `gemini-web`, `claude-web`, `claude-turnstile` (koostab `runner-web`-i, Chromium on kaasas)                   | `docker compose --profile web up -d`         |
+| Profiil            | Teenus           | Millal kasutada                                                                                                                                        | Käsk                                         |
+| ------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| `base` (vaikimisi) | `omniroute-base` | Kasutajaliideseta server / minimaalne käituskeskkond, pakkujate CLI-sid pole kaasas                                                                    | `docker compose --profile base up -d`        |
+| `cli`              | `omniroute-cli`  | Agenttöövood, mis kutsuvad välja `omniroute providers/setup/doctor`, ja kaasasolevad CLI-d (Codex, Claude Code, Droid, OpenClaw)                       | `docker compose --profile cli up -d`         |
+| `host`             | `omniroute-host` | Linuxi hostid, mis soovivad hosti CLI-dele `network_mode`-laadset juurdepääsu, ühendades `~/.local/bin`, `~/.codex`, `~/.claude` jne kirjutuskaitstult | `docker compose --profile host up -d`        |
+| `cliproxyapi`      | `cliproxyapi`    | [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) külgkonteineri käitamine pordil `8317` ülesvoolu CLI-puhverserveri jaoks                   | `docker compose --profile cliproxyapi up -d` |
+| `web`              | `omniroute-web`  | Brauserit vajavad veebiseansi pakkujad: `gemini-web`, `claude-web`, `claude-turnstile` (ehitab `runner-web`; Chromium on kaasas)                       | `docker compose --profile web up -d`         |
 
-> Kombineerida saab mitut profiili: `docker compose --profile cli --profile cliproxyapi up -d`.
+> Mitut profiili saab kombineerida: `docker compose --profile cli --profile cliproxyapi up -d`.
 
 ## Hosti CLI-tööriistade seadistamine, kui OmniRoute töötab Dockeris
 
 `omniroute setup-codex`, `setup-claude`, `config set <tool>` ja juhtpaneeli nupp
-**Salvesta konfiguratsioon** kirjutavad kõik faile, näiteks `~/.codex/*.config.toml`. Need teed
-omavad tähendust ainult masinas, kus CLI tegelikult töötab. Kui käivitate need
+**Salvesta konfiguratsioon** kirjutavad kõik faile, nagu `~/.codex/*.config.toml`. Neil teedel
+on tähendus ainult masinas, kus CLI tegelikult töötab. Kui käivitate need
 konteineris, kirjutatakse fail konteineri enda kodukataloogi (`/home/node` —
 tõmmis töötab kasutajana `USER node`), kust ükski hosti CLI seda kunagi ei loe ja kus see
 konteineri taasloomisel kohe kustutatakse.
 
-OmniRoute tuvastab selle ja keeldub kirjutamisest, kuvades kasutamiskõlbmatu
-eduteate asemel juhised: CLI lõpetab töö koodiga `2` ja API vastab koodiga `422`
+OmniRoute tuvastab selle ja keeldub kirjutamisest, kuvades juhised, selle asemel et
+teatada edust, mida te kasutada ei saa: CLI lõpetab töö koodiga `2` ja API vastab koodiga `422`
 ning väärtusega `containerEphemeralTarget: true`.
 
 ### Soovitus: käivitage CLI hostis ja OmniRoute Dockeris
 
-Konteiner pakub API-t; CLI seadistab teie hosti tööriistu.
+Konteiner teenindab API-t; CLI seadistab teie hosti tööriistu.
 
 ```bash
 docker compose --profile base up -d
 
 npm install -g omniroute
 omniroute connect http://localhost:20128   # suuna CLI konteinerile
-omniroute setup-codex                      # kirjutab hostis tegelikku ~/.codex kataloogi
+omniroute setup-codex                      # kirjutab hostis tegelikku kataloogi ~/.codex
 ```
 
-See on õige valik, kui Codex, Claude Code, Cursor või muu sarnane töötab teie
+See on õige valik, kui Codex, Claude Code, Cursor või mõni sarnane tööriist töötab teie
 sülearvutis — see on tavapärane seadistus.
 
-### Alternatiiv: ühendage hosti konfiguratsioonikataloogid bind-haakimisega (`host`-profiil)
+### Alternatiiv: ühendage hosti konfiguratsioonikataloogid siduvate haakimistega (`host`-profiil)
 
 Kui soovite, et konteiner ise kirjutaks teie hosti konfiguratsiooni, haakige
-kataloogid konteinerisse ja määrake `CLI_CONFIG_HOME` haake juurkataloogile. `host`-profiil
+kataloogid konteinerisse ja määrake `CLI_CONFIG_HOME` haakimise juurkataloogile. `host`-profiil
 teeb seda juba:
 
 ```yaml
@@ -135,72 +137,72 @@ volumes:
   - ~/.claude:/host-home/.claude:rw
 ```
 
-Bind-haakimine muudab tee usaldusväärseks: OmniRoute loeb faili
+Siduv haakimine muudab tee usaldusväärseks: OmniRoute loeb faili
 `/proc/self/mountinfo` ja lubab kirjutada haagitud teedele (ning kataloogidesse,
-mille alamkataloogid on haagitud, mis vastab täpselt ülaltoodud `/host-home` struktuurile), keeldudes
-endiselt kirjutamast haakimata teedele.
+mille alamkataloogid on haagitud — täpselt nagu ülaltoodud `/host-home`), keeldudes
+samal ajal kirjutamast haakimata teedele.
 
-### Varuväljapääs: konteineri enda CLI-de seadistamine (kasutage säästlikult)
+### Varuväljapääs: seadistage konteineri enda CLI-d (kasutage säästlikult)
 
 Kui CLI-d asuvad tõepoolest konteineris (`cli`-profiil), on kirjutamine
-taotluslik. Edastage mis tahes `setup-*` käsule `--allow-container-write` või määrake
+tahtlik. Edastage mis tahes `setup-*`-käsule `--allow-container-write` või määrake
 serveri jaoks `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`. Kirjutamine jätkub
-hoiatusega, et see ei säili pärast konteineri kadumist.
+hoiatusega, et andmed ei säili pärast konteineri eemaldamist.
 
-> **Turvahoiatus — `cli`-profiil + `docker.sock` haakimine.**
-> `cli`-profiil haagib bind-haakimisega `/var/run/docker.sock`, et konteinerisisene
-> automaatvärskendaja saaks hosti deemoni kaudu pinustiku uuesti luua
+> **Turvahoiatus — `cli`-profiil + `docker.sock`-haakimine.**
+> `cli`-profiil haagib faili `/var/run/docker.sock`, et konteinerisisene
+> automaatvärskendaja saaks hosti deemoni kaudu pinumiku uuesti luua
 > (`src/lib/system/autoUpdate.ts` kontrollib selle sokli olemasolu ja jätab
-> Dockeri tee selle puudumisel vahele). See sokkel on **hosti juurkasutaja taseme
+> Dockeri tee vahele, kui see puudub). See sokkel on **hosti juurkasutaja taseme
 > usalduspiir**: kõik, mis sellele ligi pääseb, juhib hosti Dockeri deemonit
-> juurkasutajana — see saab hostis luua, kontrollida, peatada ja eemaldada mis tahes konteineri.
+> juurkasutajana — see saab luua, kontrollida, peatada ja eemaldada hostis mis tahes konteineri.
 > Tagajärjed:
 >
-> 1. **Ärge kunagi avaldage `cli`-profiili porti võrku.** Avaldage
+> 1. **Ärge kunagi avage `cli`-profiili porti võrgule.** Avaldage
 >    see aadressil `127.0.0.1` (`ports: "127.0.0.1:${DASHBOARD_PORT:-20128}:..."`)
 >    — kohtvõrgust ligipääsetav `cli`-profiil muudab mis tahes juhtpaneeli taseme RCE
 >    hosti täielikuks kompromiteerimiseks.
-> 2. **Ärge bind-haakige `cli`-profiili täiendavaid hosti katalooge.**
->    Dockeri sokkel koos mis tahes täiendava haakega annab konteinerile täieliku
->    lugemis- ja kirjutamisõiguse teie failisüsteemile ning hosti konfiguratsioonile. Kui tööriist peab
->    projektile ligi pääsema, käivitage see lokaalselt CLI binaarfaili abil — ärge haakige projekti
+> 2. **Ärge siduge `cli`-profiiliga täiendavaid hosti katalooge.**
+>    Dockeri sokkel koos mis tahes täiendava haakimisega annab konteinerile täieliku
+>    lugemis- ja kirjutusõiguse teie failisüsteemile ning hosti konfiguratsioonile. Kui tööriist peab
+>    projektile ligi pääsema, käivitage see CLI-binaarfailiga lokaalselt — ärge haakige projekti
 >    `cli`-konteinerisse.
 >
 > Kui te ei vaja konteinerisisest automaatvärskendust, jätke `cli`-profiil välja
 > (`COMPOSE_PROFILES=core,redis` või lühem variant). Teised profiilid ei
 > haagi Dockeri soklit.
 >
-> Seotud MITM-i ohumudelit käsitleb `docs/security/MITM-TPROXY-DECRYPT.md` (git-is; seda ei kompileerita kataloogi `/docs`)
-> ja `codex`/`claude-code`/`droid`/`openclaw` binaarfailide päritoluahelat
-> kirjeldab `docs/security/SUPPLY_CHAIN.md`.
+> Seotud MITM-i ohumudelit kirjeldab `docs/security/MITM-TPROXY-DECRYPT.md` (gitis; seda ei kompileerita kataloogi `/docs`)
+> ning `docs/security/SUPPLY_CHAIN.md` kirjeldab
+> `codex`/`claude-code`/`droid`/`openclaw`-binaarfailide päritoluahelat.
 
-## Redis sidecar-konteiner
+## Redis-külgkonteiner
 
-OmniRoute kasutab Redist hajutatud päringusageduse piiraja ja jagatud vahemälu jaoks. Teenus `redis` on failis `docker-compose.yml` **alati määratletud** (sellel puudub profiilipiirang) ning see käivitub koos mis tahes muu profiiliga.
+OmniRoute kasutab Redist hajutatud päringusageduse piiraja ja jagatud vahemälu toetamiseks. Teenus `redis` on failis `docker-compose.yml` **alati määratletud** (sellel puudub profiilipiirang) ning see käivitub koos mis tahes muu profiiliga.
 
-| Üksikasjad                 | Väärtus                                   |
-| -------------------------- | ----------------------------------------- |
-| Tõmmis                     | `redis:7-alpine`                          |
-| Konteineri nimi            | `omniroute-redis`                         |
-| Sisemine port              | `6379`                                    |
-| Hosti port (ülekirjutatav) | `REDIS_PORT` (vaikimisi `6379`)           |
-| Hosti seos (ülekirjutatav) | `REDIS_BIND_HOST` (vaikimisi `127.0.0.1`) |
-| Andmeköide                 | `omniroute-redis-data` → `/data`          |
-| Tervisekontroll            | `redis-cli ping` (10 s intervall)         |
+| Üksikasjad                  | Väärtus                                   |
+| --------------------------- | ----------------------------------------- |
+| Tõmmis                      | `redis:7-alpine`                          |
+| Konteineri nimi             | `omniroute-redis`                         |
+| Sisemine port               | `6379`                                    |
+| Hostport (ülekirjutatav)    | `REDIS_PORT` (vaikimisi `6379`)           |
+| Hostiliides (ülekirjutatav) | `REDIS_BIND_HOST` (vaikimisi `127.0.0.1`) |
+| Andmeköide                  | `omniroute-redis-data` → `/data`          |
+| Tervisekontroll             | `redis-cli ping` (10 s intervall)         |
 
 Seotud keskkonnamuutujad:
 
 - `REDIS_URL` — rakendusse sisestatav ühendusstring (vaikimisi `redis://redis:6379`).
-- `REDIS_PORT` — Redis-konteineri hostipoolse pordi vastendus.
-- `REDIS_BIND_HOST` — hosti võrguliides, millel port avaldatakse. Vaikimisi `127.0.0.1`.
+- `REDIS_PORT` — Redis-konteineri hostipoolse pordivastenduse port.
+- `REDIS_BIND_HOST` — hostiliides, millel port avaldatakse. Vaikimisi `127.0.0.1`.
 
-> **Miks kasutatakse vaikimisi tagasisideaadressi:** sidecar-konteiner töötab ilma suvandita `requirepass` ja rakenduse
-> konteinerid pääsevad sellele juurde compose-võrgu kaudu (`redis:6379`) — avaldatud port on
-> mõeldud ainult hostipoolsetele tööriistadele (`redis-cli`, kohalik `npm run dev`). Avaldamine aadressil
-> `0.0.0.0` teeks autentimata Redise kättesaadavaks kõigile teie kohtvõrgu hostidele. Kui määrate
+> **Miks kasutatakse vaikimisi loopback-liidest:** külgkonteiner töötab ilma suvandita `requirepass` ja rakenduse
+> konteinerid pääsevad sellele ligi compose'i võrgu kaudu (`redis:6379`) — avaldatud port on
+> mõeldud ainult hostipoolsetele tööriistadele (`redis-cli`, kohalik `npm run dev`). Pordi avaldamine aadressil
+> `0.0.0.0` muudaks autentimata Redise kättesaadavaks kõigile teie kohtvõrgu hostidele. Kui määrate
 > `REDIS_BIND_HOST=0.0.0.0`, lisage teenuse väljale `command:` ka `--requirepass`.
 
-**Redise keelamine** pole soovitatav (päringusageduse piiraja läheb üle vähem töökindlale mälupõhisele varulahendusele). Kui see on siiski vajalik, eemaldage või kommenteerige välja teenuseplokk `redis:` failis `docker-compose.yml` või skaleerige see nullini:
+**Redise keelamine** pole soovitatav (päringusageduse piiraja lülitub piiratud funktsionaalsusega mälupõhisele varulahendusele). Kui see on siiski vajalik, eemaldage või kommenteerige teenuseplokk `redis:` failis `docker-compose.yml` või vähendage selle eksemplaride arv nullini:
 
 ```bash
 docker compose up -d --scale redis=0
@@ -208,7 +210,7 @@ docker compose up -d --scale redis=0
 
 ## Tootmiskeskkonna Compose
 
-Arenduskeskkonna kõrval töötava isoleeritud tootmistõmmise jaoks kasutage faili `docker-compose.prod.yml`.
+Arenduskeskkonnaga paralleelselt töötava isoleeritud tootmiskeskkonna hetktõmmise jaoks kasutage faili `docker-compose.prod.yml`.
 
 | Üksikasjad            | Väärtus                                                                             |
 | --------------------- | ----------------------------------------------------------------------------------- |
@@ -217,36 +219,36 @@ Arenduskeskkonna kõrval töötava isoleeritud tootmistõmmise jaoks kasutage fa
 | API vaikeport         | `PROD_API_PORT=20131`                                                               |
 | Tõmmis                | `omniroute:prod` (koostatud sihtmärgist `runner-cli`)                               |
 | Redis-konteiner       | `omniroute-redis-prod` (`redis:8.6.2`, eraldiseisev andmeköide `redis-prod-data`)   |
-| Andmeköide            | `omniroute-prod-data` (nimeline, säilib korduskoostamiste vahel)                    |
+| Andmeköide            | `omniroute-prod-data` (nimega, säilib pärast uuesti koostamist)                     |
 | Tervisekontrollid     | `node healthcheck.mjs` + `redis-cli ping`, kus `depends_on` sõltub Redise tervisest |
 
 Kasutamine:
 
 ```bash
-# Koosta ja käivita tootmiskeskkonna teenused
+# Koosta ja käivita tootmiskeskkonna pinu
 docker compose -f docker-compose.prod.yml up -d --build
 
 # Voogedasta logisid
 docker compose -f docker-compose.prod.yml logs -f
 
-# Peata ja eemalda teenused (säilita andmeköited)
+# Peata ja eemalda pinu (säilita andmeköited)
 docker compose -f docker-compose.prod.yml down
 ```
 
-Tootmiskeskkonna teenused töötavad paralleelselt arenduskeskkonna compose-teenustega (konteinerite nimed, pordid ja andmeköited on erinevad), mistõttu saate jätkata kohalikku arendust, samal ajal kui tootmiskeskkond töötab.
+Tootmiskeskkonna pinu töötab arenduskeskkonna compose'i pinuga paralleelselt (konteinerite nimed, pordid ja andmeköited on erinevad), seega saate jätkata kohalikku arendamist, samal ajal kui tootmiskeskkond jääb tööle.
 
 ## Dockerfile'i etapid
 
 Hoidla sisaldab mitmeetapilist Dockerfile'i (`Dockerfile`). Saadaval on neli etappi; vali oma kasutusjuhu jaoks õige `target`.
 
-| Etapp         | Baastõmmis            | Otstarve                                                                                                                                                                                                                                                                         |
-| ------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Paigaldab sõltuvused (`npm ci --legacy-peer-deps`) ja käivitab `npm run build` (vaikimisi Turbopack — vt allpool jaotist „Koostamisaegsed ressursid“)                                                                                                                            |
-| `runner-base` | `node:26-trixie-slim` | Tootmiskäituskeskkond Next.js-i autonoomse väljundiga. **Teenusepakkujate CLI-sid ei kaasata.**                                                                                                                                                                                  |
-| `runner-cli`  | `runner-base`         | Lisab `git`, `docker.io`, `docker-compose` ja globaalsed CLI-d: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Vali see agendipõhiste töövoogude jaoks.**                                                                                                  |
-| `runner-web`  | `runner-base`         | Lisab Playwrighti ja Chromiumi brauseri (`--with-deps`) veebiseansi pakkujate jaoks: `gemini-web`, `claude-web`, `claude-turnstile`. **Vali see nende pakkujate kasutamisel** — tavaline tõmmis nurjub ilma selleta päringu ajal (vt väljalaskekanalite jaotise märkust `-web`). |
+| Etapp         | Baastõmmis            | Otstarve                                                                                                                                                                                                                                                                            |
+| ------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | Installib sõltuvused (`npm ci --legacy-peer-deps`) ja käivitab `npm run build` (vaikimisi Turbopack — vaata allpool jaotist „Ehitusaegsed ressursid”)                                                                                                                               |
+| `runner-base` | `node:26-trixie-slim` | Tootmiskäituskeskkond Next.js-i autonoomse väljundiga. **Teenusepakkujate CLI-sid ei kaasata.**                                                                                                                                                                                     |
+| `runner-cli`  | `runner-base`         | Lisab `git`, `docker.io`, `docker-compose` ja globaalsed CLI-d: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Vali see agentpõhiste töövoogude jaoks.**                                                                                                      |
+| `runner-web`  | `runner-base`         | Lisab Playwrighti ja Chromiumi brauseri (`--with-deps`) veebiseansi pakkujate jaoks: `gemini-web`, `claude-web`, `claude-turnstile`. **Vali see nende pakkujate kasutamisel** — tavaline tõmmis nurjub ilma selleta päringu ajal (vaata väljalaskekanalite jaotise märkust `-web`). |
 
-Konkreetse sihtmärgi käsitsi koostamine:
+Konkreetse sihtmärgi käsitsi ehitamine:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -254,43 +256,42 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Koostamisaegsed ressursid
+### Ehitusaegsed ressursid
 
-Kolm koostamisargumenti määravad etapi `builder` ressursikulu. Need kehtivad ainult koostamise ajal —
+Kolm ehitusargumenti määravad etapi `builder` ressursikulu. Need kehtivad ainult ehitamise ajal —
 `OMNIROUTE_MEMORY_MB` (allpool) on eraldiseisev käitusaegne seadistus.
 
-| Koostamisargument           | Vaikeväärtus | Mõju                                                                                   |
-| --------------------------- | ------------ | -------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`          | `0` koostab webpackiga: väiksem mälu tippkasutus, kuid aeglasem. `1` lubab Turbopacki. |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`       | V8 kuhjamälu ülempiir (`--max-old-space-size`) käivitatud protsessile `next build`.    |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`          | Määrab `CIRCLE_NODE_TOTAL`; Next tuletab leheandmete kogumiseks `workers = N - 1`.     |
+| Ehitusargument              | Vaikeväärtus | Mõju                                                                                  |
+| --------------------------- | ------------ | ------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`          | `0` ehitab webpackiga: väiksem mälu tippkasutus, kuid aeglasem. `1` lubab Turbopacki. |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`       | V8 kuhjamälu ülempiir (`--max-old-space-size`) käivitatud protsessile `next build`.   |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`          | Määrab `CIRCLE_NODE_TOTAL`; Next tuletab leheandmete kogumiseks `workers = N - 1`.    |
 
-`OMNIROUTE_BUILD_WORKERS` on seadistus, mida võimsas koostamiskeskkonnas suurendada ja
-mida kahtlustada, kui piiratud ressurssidega koostamine nurjub **pärast** teadet
-`✓ Compiled successfully`. Iga leheandmete töötaja on eraldi protsess, nagu ka
-ülemprotsess `next build`; VPS-is tehtud reproduktsioonis (probleem #7518) mõõdeti
-iga protsessi RSS-i tippkasutuseks ~4,5 GB sõltumata kuhja lipust `NODE_OPTIONS`
-(Turbopack kompileerib V8 kuhjast väljaspool asuvas natiivses/Rusti mälus).
-Vaikeväärtus `2` (→ 1 töötaja, kokku 2 protsessi) on valitud avaldamiskonveieris
-kasutatavate GitHubi hostitud 16 GB / 4 vCPU-ga käitajate jaoks. Väärtusega `8`
-(→ 7 töötajat) sai sellel käitajal mälu otsa ja buildkit katkestas etapi veaga
-`ResourceExhausted: ... cannot allocate memory`; ka `3` (→ 2 töötajat) ei mahtunud
-enam piiridesse, kui protsessipõhist RSS-i tuletamise asemel otse mõõdeti.
-`tests/unit/docker-build-memory-budget.test.ts` teeb mõõdetud väärtuse põhjal
-arvutused ja nurjub, kui kumbki seadistus ületab käitaja võimalused.
+`OMNIROUTE_BUILD_WORKERS` on parameeter, mida võimsas ehituskeskkonnas suurendada ja mida
+kahtlustada, kui piiratud ressurssidega ehitus nurjub **pärast** teadet `✓ Compiled successfully`. Iga
+leheandmete tööprotsess on eraldi protsess, nagu ka emaprotsess `next build`;
+reaalses VPS-i reproduktsioonis (probleem #7518) mõõdeti iga protsessi RSS-i
+tippväärtuseks ~4,5 GB olenemata kuhjamälu lipust `NODE_OPTIONS` (Turbopack kompileerib
+V8 kuhjamälust väljaspool asuvas natiivses/Rusti mälus). Vaikeväärtus `2` (→ 1 tööprotsess, kokku 2
+protsessi) on kohandatud 16 GB / 4 vCPU-ga GitHubi hostitud käitajatele, mida
+avaldamiskonveier kasutab. Väärtusega `8` (→ 7 tööprotsessi) sai selle käitaja mälu otsa ja
+buildkit nurjas etapi veaga `ResourceExhausted: ... cannot allocate memory`;
+`3` (→ 2 tööprotsessi) ei mahtunud samuti, kui protsessipõhist RSS-i mõõdeti
+tuletamise asemel otse. `tests/unit/docker-build-memory-budget.test.ts`
+teeb mõõdetud väärtuse põhjal arvutused ja nurjub, kui kumbki seadistus
+ületab käitaja ressursid.
 
-Turbopack kompileerib natiivses Rusti mälus, mis asub **väljaspool** V8 kuhja, seega
-`OMNIROUTE_BUILD_MEMORY_MB` seda ei piira. Mälupiiranguga hostis lõpetab OOM-i
-tapja koostamise SIGKILL-iga ilma igasuguse veatekstita — protsess lihtsalt peatub
-toimingu `Creating an optimized production build` ajal, mis näib pigem hangumise
-kui mälu lõppemisena. Seetõttu kasutab `Dockerfile` vaikimisi webpacki
-(`OMNIROUTE_USE_TURBOPACK=0`), erinevalt käskudest `npm run dev` / `npm run build`,
-kus Turbopack on koodi vaikevalik: ilma koostamisargumentideta käivitatud
-`docker build .` (mida käitavad Railway ja teised ühe klõpsuga hostid) ei tohi
-mälupiiranguga koostamiskeskkonnas vaikides surra. Avaldatud tõmmised edastavad
-juba failis `docker-publish.yml` sõnaselgelt väärtuse
-`OMNIROUTE_USE_TURBOPACK=0`. Rohke muutmäluga koostamiskeskkonnas luba kiiremaks
-koostamiseks Turbopack:
+Turbopack kompileerib natiivses Rusti mälus, mis asub **väljaspool** V8 kuhjamälu, mistõttu
+`OMNIROUTE_BUILD_MEMORY_MB` seda ei piira. Mälu ülempiiriga hostis
+lõpetab OOM-i tõrjuja ehituse SIGKILLiga ilma ühegi veatekstita — see lihtsalt
+peatub poole tegevuse `Creating an optimized production build` pealt, mis näib pigem
+hangumise kui mälu lõppemisena. Seetõttu kasutab `Dockerfile` vaikimisi webpacki
+(`OMNIROUTE_USE_TURBOPACK=0`), erinevalt käskudest `npm run dev` / `npm run build`, kus
+Turbopack on koodi vaikevalik: ilma ehitusargumentideta käsk `docker build .` (mida
+käitavad Railway ja teised ühe klõpsuga hostid) ei tohi piiratud mäluga
+ehituskeskkonnas vaikselt nurjuda. Avaldatud tõmmised edastavad juba parameetri `OMNIROUTE_USE_TURBOPACK=0`
+failis `docker-publish.yml` selgesõnaliselt. Rohke muutmäluga ehituskeskkonnas luba
+kiiremaks ehitamiseks Turbopack:
 
 ```bash
 docker build --target runner-base \
@@ -298,44 +299,43 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` on lubatud, mistõttu `next build` käitab nii ülemprotsessi
-**kui ka** töötajaprotsessi ning kumbki järgib eraldi väärtust
-`OMNIROUTE_BUILD_MEMORY_MB`. Määra konteineri ülempiir ligikaudu sellest väärtusest
-kaks korda suuremaks, mitte sellega võrdseks.
+`webpackBuildWorker` on lubatud, seega käivitab `next build` nii ema- **kui ka** tööprotsessi
+ning kumbki järgib `OMNIROUTE_BUILD_MEMORY_MB` väärtust eraldi. Määra konteineri
+ülempiir sellest väärtusest ligikaudu kaks korda suuremaks, mitte sellega võrdseks.
 
-Mõõdetud selles puus (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+Selles lähtekoodipuus mõõdetud (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Pakendaja | Konteineri ülempiir | Tulemus                               |
-| --------- | ------------------- | ------------------------------------- |
-| Turbopack | 8 GiB / 16 GiB      | OOM lõpetas mõlemal juhul, vaikides   |
-| webpack   | 8 GiB               | koostamistöötaja lõpetati SIGKILL-iga |
-| webpack   | 12 GiB              | õnnestus, tippkasutus 11,1 GiB        |
+| Pakendaja | Konteineri ülempiir | Tulemus                            |
+| --------- | ------------------- | ---------------------------------- |
+| Turbopack | 8 GiB / 16 GiB      | OOM lõpetas mõlemad vaikselt       |
+| webpack   | 8 GiB               | tööprotsess lõpetati SIGKILLiga    |
+| webpack   | 12 GiB              | õnnestus, tippkasutus oli 11,1 GiB |
 
-### Käitusaegsed vaikeväärtused
+### Käitusaja vaikeväärtused
 
-Etapi `runner-base` eksporditud vaikeväärtused: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
+Etapi `runner-base` eksporditavad vaikeväärtused: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
 Mälukäitumine Dockeris:
 
 - Tõmmis määrab `OMNIROUTE_MEMORY_MB=1024` ja tuletab sellest `NODE_OPTIONS=--max-old-space-size=1024`.
-- Tegeliku serveriprotsessi käivitab eraldiseisev käiviti, mis loeb väärtust `OMNIROUTE_MEMORY_MB` ja lisab `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node kasutab viimasena korduvat `--max-old-space-size` väärtust, seega määrab `OMNIROUTE_MEMORY_MB` Dockeri tegeliku kuhjamälu piirangu.
-- Kuna tõmmis määrab selle alati, ei rakendu käiviti enda RAM-i järgi kalibreeritud varuväärtus Dockeris kunagi. Suurendage seda töökoormuse jaoks sõnaselgelt (vt allolevat tabelit). `2048` on programmeerimisagendi `/v1/responses` jaoks endiselt liiga väike.
+- Tegeliku serveriprotsessi käivitab eraldiseisev käivitaja, mis loeb muutujat `OMNIROUTE_MEMORY_MB` ja lisab `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Node kasutab viimast korduvat `--max-old-space-size` väärtust, seega juhib `OMNIROUTE_MEMORY_MB` Dockeris tegelikult kehtivat kuhjamälu piirangut.
+- Kuna tõmmis määrab selle alati, ei rakendu käivitaja enda RAM-i järgi kalibreeritud varuväärtus Dockeris kunagi. Suurendage seda töökoormuse jaoks sõnaselgelt (vt allolevat tabelit). `2048` on kodeerimisagendi `/v1/responses` jaoks endiselt liiga väike.
 
-### Käitusaegne RAM programmeerimisagentidele
+### Kodeerimisagentide käitusaegne RAM
 
-Dockeri 1 GiB vaikeväärtus on juhtpaneeli ja lihtvestluse miinimum, mitte tootmiskeskkonna jaoks sobiv maht. Pikad `POST /v1/responses` päringukehad (sajad sõnumid, kümned tööriistad) hoiavad tihendamise ajal mälus mitut struktuuri. Kaks kattuvat ~3 MiB / ~750k-sõne pikkust päringut on põhjustanud V8 töö katkemise **12 GiB** old-space'i juures (`FATAL ERROR: Reached heap limit`) ning samuti 16 GiB cgroup OOM-i. Vt [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Dockeri 1 GiB vaikeväärtus on juhtpaneeli ja kerge vestluse miinimum, mitte tootmiskeskkonnale sobiv maht. Pikad `POST /v1/responses` päringukehad (sajad sõnumid, kümned tööriistad) hoiavad tihendamise ajal mälus mitut graafi. Kaks kattuvat ~3 MiB / ~750k-tokenilist päringut on põhjustanud V8 töö katkemise **12 GiB** old-space'i juures (`FATAL ERROR: Reached heap limit`) ning tabanud ka 16 GiB cgroup'i OOM-i. Vt [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-Määrake **cgroupi `--memory` kuhjamälust suuremaks** — omapuhvrid, SQLite ja tihendamise vahetulemused paiknevad väljaspool V8-t.
+Määrake **cgroup'i `--memory` kuhjamälust suuremaks** — omapuhvrid, SQLite ja tihendamise vahetulemused asuvad väljaspool V8-t.
 
-| Töökoormus                                     | `OMNIROUTE_MEMORY_MB`         | Konteiner / cgroup       | Märkused                                                                                                               |
-| ---------------------------------------------- | ----------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| Juhtpaneel, üks lihtvestlus                    | `1024` (tõmmise vaikeväärtus) | ≥2 GiB                   |                                                                                                                        |
-| Üks programmeerimisagent (Claude/Codex/Grok)   | `8192`                        | ≥10 GiB                  | Tüüpiline ühe seansi `/v1/responses`                                                                                   |
-| Kaks samaaegset pikka `/v1/responses` päringut | `10240`–`12288`               | ≥12–16 GiB               | Mõõdetud V8 töö katkemine ~12 GiB kuhjamälu juures                                                                     |
-| Kolm või enam samaaegset pikka konteksti       | ärge kasutage ühes protsessis | jadastage / rohkem RAM-i | Vaikimisi lubatakse korraga 1 suure koormusega päring; selle suurendamine ilma lisamäluta põhjustab taas töö katkemise |
+| Töökoormus                                     | `OMNIROUTE_MEMORY_MB`         | Konteiner / cgroup       | Märkused                                                                                                                                     |
+| ---------------------------------------------- | ----------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Juhtpaneel, üks kerge vestlus                  | `1024` (tõmmise vaikeväärtus) | ≥2 GiB                   |                                                                                                                                              |
+| Üks kodeerimisagent (Claude/Codex/Grok)        | `8192`                        | ≥10 GiB                  | Tüüpiline ühe seansi `/v1/responses`                                                                                                         |
+| Kaks samaaegset pikka `/v1/responses` päringut | `10240`–`12288`               | ≥12–16 GiB               | Mõõdetud V8 katkestus ~12 GiB kuhjamälu juures                                                                                               |
+| Kolm või enam samaaegset pikka konteksti       | mitte ühes protsessis         | jadastage / rohkem RAM-i | Vaikimisi lubatakse korraga 1 ressursimahukas pooleliolev päring; selle arvu suurendamine ilma täiendava RAM-ita põhjustab katkestuse uuesti |
 
-`omniroute serve` kalibreerib füüsilises keskkonnas ligikaudu 35% RAM-ist (piiratud vahemikku `[512, 4096]`), kui `OMNIROUTE_MEMORY_MB` on **määramata**. Docker määrab alati väärtuse `1024`, mistõttu seda kalibreerimist ametlikus tõmmises kunagi ei tehta.
+Paljasmetallis töötav `omniroute serve` kalibreerib umbes 35% RAM-ist (piiratuna vahemikku `[512, 4096]`), kui `OMNIROUTE_MEMORY_MB` on **määramata**. Docker määrab alati väärtuse `1024`, mistõttu seda kalibreerimist ametlikus tõmmises kunagi ei käivitata.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -345,42 +345,42 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 
 ## Kriitilised keskkonnamuutujad
 
-Lisaks failis [ENVIRONMENT.md](../reference/ENVIRONMENT.md) dokumenteeritud vaikeväärtustele on Dockeri all käitamisel kõige olulisemad järgmised muutujad:
+Lisaks failis [ENVIRONMENT.md](../reference/ENVIRONMENT.md) dokumenteeritud vaikeväärtustele on Dockeris käitamisel kõige olulisemad järgmised muutujad:
 
-| Muutuja                       | Otstarve                                                                                                                                                                                                                                                                         | Vaikeväärtus            |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| `OMNIROUTE_WS_BRIDGE_SECRET`  | WebSocketi silla jagatud saladus. **Tootmiskeskkonnas nõutav** — määrake väärtuseks tugev juhuslik string.                                                                                                                                                                       | määramata (tuleb anda)  |
-| `REDIS_URL`                   | Ühendusstring päringusageduse piiraja / vahemälu taustsüsteemi jaoks                                                                                                                                                                                                             | `redis://redis:6379`    |
-| `REDIS_PORT`                  | Komplekti kuuluva Redise konteineri hostipoolne port                                                                                                                                                                                                                             | `6379`                  |
-| `REDIS_BIND_HOST`             | Hostiliides, millel komplekti kuuluva Redise port avaldatakse (tagasisideahela liides, kui te ei lisa autentimist)                                                                                                                                                               | `127.0.0.1`             |
-| `AUTO_UPDATE_HOST_REPO_DIR`   | Hosti tee, mis haagitakse isevärskendamise töövoogude jaoks profiilis `cli` asukohta `/workspace/omniroute`                                                                                                                                                                      | `.` (praegune kataloog) |
-| `OMNIROUTE_MEMORY_MB`         | Node'i kuhjamälu ülempiir Dockeri eraldiseisva serveri käitusajal; alistab ülal toodud tõmmise vaikeväärtuse. Kodeerimisagendid: `8192`+ (vt [käitusaja muutmälu](#runtime-ram-for-coding-agents)).                                                                              | `1024`                  |
-| `DASHBOARD_PORT` / `API_PORT` | Alistab töölaua (20128) ja API (20129) avaldatud pordid                                                                                                                                                                                                                          | `20128` / `20129`       |
-| `APP_BIND_HOST`               | Hostiliides, millel docker-compose avaldab töölaua/API/live-WS-i pordid. Kui `REQUIRE_API_KEY=false` (vaikeväärtus), avaldab `0.0.0.0` anonüümse `/v1`-proksi kohtvõrgule — laiendage juurdepääsu ainult juhul, kui `REQUIRE_API_KEY=true`, või kasutage selle ees pöördproksit. | `127.0.0.1`             |
-| `CLIPROXY_BIND_HOST`          | Hostiliides, millel docker-compose avaldab `cliproxyapi` külgkonteineri — selle andmeköide sisaldab teenusepakkuja identimisteavet.                                                                                                                                              | `127.0.0.1`             |
-| `OMNIROUTE_PLUGINS_DIR`       | Kataloog, mida käitusaegne pistikprogrammide skanner loeb ja kuhu see pistikprogramme installib. Määrake see, kui pistikprogrammid on sidushaagitud: vaikeväärtus järgib muutujat `HOME`, mida tõmmis ei pruugi eksportida.                                                      | `~/.omniroute/plugins`  |
-| `OMNIROUTE_BASE_PATH`         | URL-i alamtee, kui rakendus avaldatakse pöördproksi taga (nt `/omniroute`)                                                                                                                                                                                                       | _(tühi = juur)_         |
-| `NEXT_PUBLIC_BASE_URL`        | Avalik brauseri päritolu koos alamteega (nt `https://host/omniroute`)                                                                                                                                                                                                            | määramata               |
-| `PROD_DASHBOARD_PORT`         | Hostipoolne töölauaport faili `docker-compose.prod.yml` jaoks                                                                                                                                                                                                                    | `20130`                 |
-| `CLIPROXYAPI_PORT`            | Külgkonteineri `cliproxyapi` hostipoolne port                                                                                                                                                                                                                                    | `8317`                  |
+| Muutuja                       | Otstarve                                                                                                                                                                                                                                                                                                      | Vaikeväärtus              |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `OMNIROUTE_WS_BRIDGE_SECRET`  | WebSocketi silla jagatud saladus. **Tootmiskeskkonnas nõutav** — määrake tugev juhuslik string.                                                                                                                                                                                                               | määramata (tuleb määrata) |
+| `REDIS_URL`                   | Kiirusepiiraja / vahemälu taustteenuse ühendusstring                                                                                                                                                                                                                                                          | `redis://redis:6379`      |
+| `REDIS_PORT`                  | Komplekti kuuluva Redise konteineri hostipoolne port                                                                                                                                                                                                                                                          | `6379`                    |
+| `REDIS_BIND_HOST`             | Hostiliides, millel komplekti kuuluva Redise port avaldatakse (tagasisideaadress, kui te ei lisa autentimist)                                                                                                                                                                                                 | `127.0.0.1`               |
+| `AUTO_UPDATE_HOST_REPO_DIR`   | Hosti tee, mis ühendatakse isevärskenduse töövoogude jaoks `cli` profiilis asukohta `/workspace/omniroute`                                                                                                                                                                                                    | `.` (praegune kataloog)   |
+| `OMNIROUTE_MEMORY_MB`         | Dockeris töötava autonoomse serveri Node'i kuhjamälu ülempiir käitusajal; alistab ülaltoodud tõmmise vaikeväärtuse. Programmeerimisagendid: `8192`+ (vt [käitusaegne muutmälu](#runtime-ram-for-coding-agents)).                                                                                              | `1024`                    |
+| `DASHBOARD_PORT` / `API_PORT` | Alistab juhtpaneeli (20128) ja API (20129) avaldatud pordid                                                                                                                                                                                                                                                   | `20128` / `20129`         |
+| `APP_BIND_HOST`               | Hostiliides, millel docker-compose avaldab juhtpaneeli/API/live-WS-i pordid. Väärtusega `REQUIRE_API_KEY=false` (vaikeväärtus) teeb `0.0.0.0` anonüümse `/v1` puhverserveri kohtvõrgule kättesaadavaks — laiendage juurdepääsu ainult väärtusega `REQUIRE_API_KEY=true` või eespaikneva pöördpuhverserveriga. | `127.0.0.1`               |
+| `CLIPROXY_BIND_HOST`          | Hostiliides, millel docker-compose avaldab `cliproxyapi` kaaskonteineri — selle andmeköide sisaldab teenusepakkuja identimisteavet.                                                                                                                                                                           | `127.0.0.1`               |
+| `OMNIROUTE_PLUGINS_DIR`       | Kataloog, mida käitusaegne pistikprogrammide skanner loeb ja kuhu see pistikprogramme installib. Määrake see, kui pistikprogrammid ühendatakse sidumishaakena: vaikeväärtus järgib muutujat `HOME`, mida tõmmis ei pruugi eksportida.                                                                         | `~/.omniroute/plugins`    |
+| `OMNIROUTE_BASE_PATH`         | URL-i alamtee, kui rakendus avaldatakse pöördpuhverserveri taga (nt `/omniroute`)                                                                                                                                                                                                                             | _(tühi = juur)_           |
+| `NEXT_PUBLIC_BASE_URL`        | Avalik brauseri lähtekoht koos alamteega (nt `https://host/omniroute`)                                                                                                                                                                                                                                        | määramata                 |
+| `PROD_DASHBOARD_PORT`         | Faili `docker-compose.prod.yml` hostipoolne juhtpaneeli port                                                                                                                                                                                                                                                  | `20130`                   |
+| `CLIPROXYAPI_PORT`            | Kaaskonteineri `cliproxyapi` hostipoolne port                                                                                                                                                                                                                                                                 | `8317`                    |
 
 ## Pöördproksi alamteel (Traefik / nginx)
 
 Next.js-i `basePath` kompileeritakse autonoomsesse paketti. OmniRoute salvestab paketti
-lisatud väärtuse rakenduse juurkataloogis olevasse tunnusfaili (see kirjutatakse käsu
-`npm run build` ajal ja seda loeb `scripts/docker/ensure-docker-base-path.mjs`) ning
-võrdleb seda konteineri käivitumisel muutujaga `OMNIROUTE_BASE_PATH`. Kui need erinevad
-ja tõmmis loodi domeeni juurtee jaoks, kirjutab käivituspunkt enne käsu
-`node dev/run-standalone.mjs` käivitamist ümber autonoomse paketi manifestid,
-manustatud `basePath`/`assetPrefix` literaalid (Next 16 renderdab SSR-i varade URL-id
-ainult `assetPrefix` põhjal — paikaja peegeldab alamtee ka sinna), paketti lisatud
-`/_next/static` varade URL-id (kliendiviidete manifestid, meediumiimpordid,
-eelrenderdatud vealehed) ja kliendi `process.env`-i asenduskihi.
+lisatud väärtuse rakenduse juurkaustas asuvasse kontrollfaili (kirjutatakse käsu
+`npm run build` ajal; loetakse skriptiga `scripts/docker/ensure-docker-base-path.mjs`)
+ning võrdleb seda konteineri käivitumisel muutujaga `OMNIROUTE_BASE_PATH`. Kui väärtused
+erinevad ja tõmmis loodi domeeni juurtee jaoks, kirjutab sisenemispunkt enne
+`node dev/run-standalone.mjs` käivitamist ümber autonoomse paketi manifestid, manustatud
+`basePath`/`assetPrefix` literaalid (Next 16 renderdab SSR-i varade URL-id ainult
+`assetPrefix` põhjal — parandaja peegeldab alamtee ka sinna), paketti lisatud
+`/_next/static` varade URL-id (kliendiviidete manifestid, meediaimpordid, eelrenderdatud
+vealehed) ja kliendi `process.env` vahekihi.
 
-### Koostamine Compose'iga (soovitatav)
+### Compose'i järguga loomine (soovitatav)
 
-Määrake mõlemad muutujad failis `.env` ja seejärel koostage tõmmis uuesti, et tõmmise
-ning käituskeskkonna seaded ühtiksid:
+Määrake mõlemad muutujad failis `.env` ja looge tõmmis seejärel uuesti, et tõmmise ning
+käituskeskkonna seadistus ühtiks:
 
 ```bash
 # .env
@@ -392,14 +392,14 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` edastab `OMNIROUTE_BASE_PATH`-i nii Dockeri koosteargumendina kui
-ka käituskeskkonna keskkonnamuutujana.
+`docker-compose.yml` edastab muutuja `OMNIROUTE_BASE_PATH` nii Dockeri järguargumendi
+kui ka käituskeskkonna muutujana.
 
-### Eelkoostatud juurtee tõmmis + käitusaegne alamtee
+### Eelvalmistatud juurtee tõmmis + käitusaegne alamtee
 
-Avaldatud `diegosouzapw/omniroute:*` tõmmised on koostatud domeeni juurtee jaoks.
-Sellegipoolest saate määrata `OMNIROUTE_BASE_PATH`-i käitusajal; konteiner paikab paketti
-käivitumisel ühe korra. Kasutage koos sellega sobivat avalikku lähteaadressi:
+Avaldatud `diegosouzapw/omniroute:*` tõmmised on loodud domeeni juurtee jaoks.
+`OMNIROUTE_BASE_PATH` saab siiski määrata käitusajal; konteiner parandab paketti
+käivitumisel ühe korra. Kasutage koos sellega vastavat avalikku lähteaadressi:
 
 ```yaml
 services:
@@ -411,36 +411,36 @@ services:
 ```
 
 Seadistage pöördproksi edastama **täielikku** välist teed (ärge eemaldage prefiksit).
-Traefik peaks suunama `PathPrefix(`/omniroute`)` konteinerisse ilma `StripPrefix`-ita,
-et Next.js saaks tee `/omniroute/...` ja serveeriks varasid teelt
+Traefik peab suunama `PathPrefix(`/omniroute`)` konteinerisse ilma `StripPrefix`-ita,
+et Next.js saaks päringud kujul `/omniroute/...` ja serveeriks varasid asukohast
 `/omniroute/_next/...`.
 
-Dockeri tervisekontroll kontrollib aktiivse `OMNIROUTE_BASE_PATH`-iga prefiksitud
-kergekaalulist elutsükli lõpp-punkti `/healthz`. `/api/monitoring/health` jääb
-inimestele ja juhtpaneelidele mõeldud diagnostikaks kättesaadavaks; konteineri
-HEALTHCHECK-i uuesti sellele suunamiseks (näiteks põhjaliku tervisekontrolli
-jõustamiseks) määrake `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. See tee
-teeb **põhjaliku** kontrolli (andmebaas + seire kokkuvõte) — see sobib Dockeri harva
-käivitatava `HEALTHCHECK`-i jaoks, kui otsustate selle uuesti kasutusele võtta, kuid
-**mitte** Kubernetes `livenessProbe`-i intervallide jaoks.
+Dockeri tervisekontroll kontrollib kerget elutsükli lõpp-punkti `/healthz`, millele
+lisatakse aktiivne `OMNIROUTE_BASE_PATH` prefiks. `/api/monitoring/health` jääb
+inimestele ja juhtpaneelidele diagnostikaks kättesaadavaks; konteineri HEALTHCHECK-i
+sellele tagasi suunamiseks (näiteks põhjaliku tervisekontrolli jõustamiseks) määrake
+`OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. See tee teeb **põhjaliku**
+kontrolli (andmebaas + seirekokkuvõte) — see sobib Dockeri harva käivitatava
+`HEALTHCHECK`-i jaoks, kui otsustate selle uuesti kasutusele võtta, kuid **mitte**
+Kubernetese `livenessProbe` intervallidega kasutamiseks.
 
-Orkestreerimissüsteemide (Kubernetes, Nomad jne) puhul:
+Orkestreerimisplatvormide (Kubernetes, Nomad jne) korral:
 
-| Kontroll            | Eelistage                                                        | Vältige                                                            |
-| ------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Elusolek            | HTTP `GET /livez` või TCP põhipordil (`PORT`, vaikimisi `20128`) | `/api/monitoring/health` elusoleku kontrollina                     |
-| Valmisolek          | HTTP `GET /healthz`                                              | Lühikesi ajalõppe, mis käsitlevad hõivatud sündmusetsüklit surnuna |
-| Põhjalik / blackbox | `/api/monitoring/health`                                         | —                                                                  |
+| Kontroll                 | Eelistage                                                        | Vältige                                                        |
+| ------------------------ | ---------------------------------------------------------------- | -------------------------------------------------------------- |
+| Elusolek                 | HTTP `GET /livez` või TCP põhipordil (`PORT`, vaikimisi `20128`) | `/api/monitoring/health` elusoleku kontrollina                 |
+| Valmisolek               | HTTP `GET /healthz`                                              | Lühikesi ajalõppe, mis peavad hõivatud sündmusetsüklit surnuks |
+| Põhjalik / väliskontroll | `/api/monitoring/health`                                         | —                                                              |
 
-`/healthz` teatab protsessi elutsükli oleku (`ok` / `starting` / `stopping`). `/livez`
-kontrollib ainult seda, kas protsess töötab (200 alati, kui töötleja saab käivituda;
-see ei oota valmisolekut). Mõlemad töötavad siiski päringute töötlemisega samas Node'i
-sündmusetsüklis, mistõttu võivad protsessorimahukad kataloogi- või tihendustoimingud
-neid viivitada — hõivatud ≠ surnud. Kui HTTP-kontrollid aeguvad, eelistage TCP-põhist
-elusoleku kontrolli. Täielikud kontrollijuhised:
-[Seirejuhend — Kubernetes kontrollide soovitused](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` annab teada protsessi elutsükli olekust (`ok` / `starting` / `stopping`).
+`/livez` kontrollib ainult protsessi elusolekut (tagastab 200 alati, kui töötleja saab
+käivituda; see ei oota valmisolekut). Mõlemad töötavad siiski päringute töötlemisega
+samas Node'i sündmusetsüklis, mistõttu protsessorimahukas kataloogi- või pakkimistöö
+võib neid viivitada — hõivatud ≠ surnud. Kui HTTP-kontrollid aeguvad, eelistage TCP
+elusolekukontrolli. Täielikud kontrollijuhised:
+[Seirejuhend — Kubernetese kontrollide soovitused](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose koos Caddyga (automaatne HTTPS-i TLS)
+## Docker Compose koos Caddyga (HTTPS-i automaatne TLS)
 
 OmniRoute'i saab turvaliselt avalikustada Caddy automaatse SSL-i seadistamise abil. Veenduge, et teie domeeni DNS-i A-kirje osutaks teie serveri IP-aadressile.
 
@@ -454,9 +454,9 @@ services:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # Brauserile nähtav lähtekoht OAuthi tagasikutsete, töölaua linkide ja genereeritud avalike URL-ide jaoks.
+      # Brauserile nähtav lähtekoht OAuth-i tagasikutsete, töölaua linkide ja genereeritud avalike URL-ide jaoks.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # Sisemine serveritevaheline URL ajastatud tööde ja iseendale tehtavate päringute jaoks.
+      # Serveritevaheline sisemine URL ajastatud tööde ja isepäringute jaoks.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -474,70 +474,69 @@ volumes:
 ```
 
 Caddy määrab ülesvoolu konteineri jaoks standardsed edastuspäised. OmniRoute kasutab
-`NEXT_PUBLIC_BASE_URL`-i OAuthi tagasikutsete ja genereeritud avalike linkide kanoonilise avaliku
-lähtekohana; autenditud töölauakirjutused kasutavad sama lähtekoha päringuid koos seansiga seotud CSRF-i
-kaitsega. Lubage `OMNIROUTE_TRUST_PROXY` ainult keerukamate juurutuste puhul, kus soovite teadlikult,
-et OmniRoute tuletaks avaliku lähtekoha selgesõnalise konfiguratsiooni asemel usaldusväärsetest
-edastuspäistest.
+`NEXT_PUBLIC_BASE_URL`-i OAuth-i tagasikutsete ja genereeritud avalike linkide kanoonilise avaliku
+lähtekohana; autenditud töölaua kirjutuspäringud kasutavad sama lähtekoha päringuid koos seansiga seotud CSRF-i
+kaitsega. Lubage `OMNIROUTE_TRUST_PROXY` ainult täiustatud juurutuste puhul, kus soovite tahtlikult,
+et OmniRoute tuletaks avaliku lähtekoha selgesõnalise konfiguratsiooni asemel usaldusväärsetest edastuspäistest.
 
 ## Cloudflare Quick Tunnel
 
-Dockeri juurutuste töölauatugi sisaldab ühe klõpsuga kasutatavat **Cloudflare Quick Tunnelit** asukohas `Töölaud → Lõpp-punktid`. Esmakordsel lubamisel laaditakse `cloudflared` alla ainult vajaduse korral, käivitatakse ajutine tunnel teie praeguse `/v1` lõpp-punktini ning genereeritud `https://*.trycloudflare.com/v1` URL kuvatakse otse teie tavapärase avaliku URL-i all.
+Dockeri juurutuste töölauatugi sisaldab ühe klõpsuga **Cloudflare Quick Tunnelit** lehel `Dashboard → Endpoints`. Esmakordsel lubamisel laaditakse `cloudflared` alla ainult vajaduse korral, käivitatakse ajutine tunnel teie praeguse `/v1` lõpp-punktini ning genereeritud `https://*.trycloudflare.com/v1` URL kuvatakse otse teie tavapärase avaliku URL-i all.
 
-Lõpp-punktide tunnelipaneele (Cloudflare, Tailscale, ngrok) saab asukohas `Seaded → Välimus` kuvada või peita, ilma et aktiivse tunneli olek muutuks.
+Lõpp-punktide tunnelipaneele (Cloudflare, Tailscale, ngrok) saab lehel `Settings → Appearance` kuvada või peita ilma aktiivse tunneli olekut muutmata.
 
 ### Märkused tunneli kohta
 
 - Quick Tunneli URL-id on ajutised ja muutuvad pärast iga taaskäivitust.
 - Quick Tunneleid ei taastata pärast OmniRoute'i või konteineri taaskäivitamist automaatselt. Vajaduse korral lubage need töölaualt uuesti.
-- Hallatud installimine toetab praegu Linuxit, macOS-i ja Windowsit arhitektuuridel `x64` / `arm64`.
-- Hallatud Quick Tunnelid kasutavad vaikimisi HTTP/2 transporti, et vältida piiratud konteinerikeskkondades mürarikkaid QUIC-i UDP-puhvri hoiatusi. Kui soovite kasutada teistsugust transporti, määrake `CLOUDFLARED_PROTOCOL=quic` või `auto`.
-- Dockeri tõmmised sisaldavad süsteemi CA-juursertifikaate ja edastavad need hallatud `cloudflared`-ile, mis väldib TLS-i usaldustõrkeid, kui tunnel konteineris käivitub.
+- Hallatud installimine toetab praegu Linuxit, macOS-i ja Windowsi arhitektuuridel `x64` / `arm64`.
+- Hallatud Quick Tunnelid kasutavad vaikimisi HTTP/2 transporti, et vältida piiratud konteinerikeskkondades QUIC UDP puhvri häirivaid hoiatusi. Kui soovite muud transporti, määrake `CLOUDFLARED_PROTOCOL=quic` või `auto`.
+- Dockeri tõmmised sisaldavad süsteemi CA-juursertifikaate ja edastavad need hallatud `cloudflared`-ile, mis väldib TLS-i usaldusvigu tunneli konteineris käivitamisel.
 - Kui soovite, et OmniRoute kasutaks allalaadimise asemel olemasolevat binaarfaili, määrake `CLOUDFLARED_BIN=/absolute/path/to/cloudflared`.
 
-## Pildisildid
+## Tõmmise sildid
 
-| Pilt                     | Silt     | Suurus | Kirjeldus                                                  |
-| ------------------------ | -------- | ------ | ---------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | Kõrgeim **avaldatud** stabiilne SemVer (mitte giti `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | GitOpsi jaoks kinnitage seda tüüpi silt                    |
+| Tõmmis                   | Silt     | Suurus | Kirjeldus                                                 |
+| ------------------------ | -------- | ------ | --------------------------------------------------------- |
+| `diegosouzapw/omniroute` | `latest` | ~250MB | Kõrgeim **avaldatud** stabiilne SemVer (mitte git `main`) |
+| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | Kinnitage seda tüüpi silt GitOpsi jaoks                   |
 
-Mitme platvormi manifest: natiivne `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). Docker valib sobiva arhitektuuri automaatselt; edastage `--platform linux/amd64`, kui peate ARM-hostides sundima AMD64 emulatsiooni.
+Mitme platvormi manifest: omapärased `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). Docker valib sobiva arhitektuuri automaatselt; kui peate ARM-hostidel AMD64 emulatsiooni sundima, edastage `--platform linux/amd64`.
 
 ### Väljalaskekanalid
 
-OmniRoute avaldab stabiilsete väljalasete, aktiivse väljalaskeharu testimise ja arendusjärkude jaoks eraldi Dockeri kanalid.
+OmniRoute avaldab eraldi Dockeri kanalid stabiilsete väljalasete, aktiivse väljalaskeharu testimise ja arenduskoostude jaoks.
 
-| Kanal                           | Allikas                                | Muudetavus                  | Soovitatav kasutus                                                                                                                   |
-| ------------------------------- | -------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `:<version>` / `:<version>-web` | Allkirjastatud/versioonitud väljalase  | Muutmatu                    | Tootmiskeskkonna juurutused, mis on kinnitatud täpsele väljalaskele                                                                  |
-| `:latest` / `:latest-web`       | Kõrgeim **avaldatud** stabiilne SemVer | Muudetav stabiilne viit     | Järgib stabiilseid väljalaskeid **pärast** SemVeri avaldamistööd — **ei** jälgi haru `main` ega avaldamata `release/v*` sissekandeid |
-| `:next` / `:next-web`           | Praegune vaikimisi `release/v*` haru   | Muudetav eelväljalaske viit | Paranduste testimine, mis on jõudnud aktiivsesse väljalaskeharusse, kuid pole veel stabiilses väljalaskes                            |
-| `:main` / `:main-web`           | `main` haru                            | Muudetav arendusviit        | Ainult arendus- ja integratsioonitestimiseks                                                                                         |
+| Kanal                           | Allikas                                | Muudetavus                 | Soovitatav kasutus                                                                                                                          |
+| ------------------------------- | -------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Allkirjastatud/versioonitud väljalase  | Muutumatu                  | Tootmisjuurutused, mis on kinnitatud täpsele väljalaskele                                                                                   |
+| `:latest` / `:latest-web`       | Kõrgeim **avaldatud** stabiilne SemVer | Muudetav stabiilne viit    | Järgib stabiilseid väljalaskeid **pärast** SemVeri avaldamistööd — ei järgi **ei** haru `main` **ega** avaldamata `release/v*` sissekandeid |
+| `:next` / `:next-web`           | Praegune vaikimisi `release/v*` haru   | Muudetav eelväljalaskeviit | Paranduste testimine, mis on jõudnud aktiivsesse väljalaskeharusse, kuid pole veel stabiilses väljalaskes                                   |
+| `:main` / `:main-web`           | `main` haru                            | Muudetav arendusviit       | Ainult arendus- ja integratsioonitestimiseks                                                                                                |
 
-#### Veebiseansi pakkujad: `-web` pildid
+#### Veebiseansi pakkujad: `-web` tõmmised
 
-Igal ülaltoodud kanalil on ka `-web` silt (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), mis on loodud etapist `runner-web` — sama pilt koos Playwrighti ja Chromiumi brauseriga. Tavapilt tarnitakse **ilma** Chromiumita; `gemini-web`, `claude-web` ja `claude-turnstile` vajavad seda.
+Kõik ülaltoodud kanalid on saadaval ka `-web` sildina (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), mis koostatakse etapist `runner-web` — sama tõmmis koos Playwrighti ja Chromiumi brauseriga. Tavaline tõmmis tarnitakse **ilma** Chromiumita; `gemini-web`, `claude-web` ja `claude-turnstile` vajavad seda.
 
-Tõrge tekib viivitusega, mitte käivitamisel: need pakkujad loetlevad oma mudelid ja kuvatakse juhtpaneelil ühendatuna ning alles esimene päring nurjub teatega
+Tõrge ilmneb hiljem, mitte käivitamisel: need pakkujad loetlevad oma mudelid ja kuvatakse töölaual ühendatuna ning alles esimene päring nurjub teatega
 
 ```
-[500]: Välise mooduli playwright laadimine nurjus: Tõrge: Moodulit ei leitud
+[500]: Välise mooduli playwright laadimine nurjus: Viga: moodulit ei leitud
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Kui kasutate neid pakkujaid, tõmmake juba kasutatava kanali `-web` silt — midagi muud ei muutu. npm-i/CLI installi korral (ilma Dockeri pildita) on samaväärseks puuduvaks osaks brauseri binaarfail: käivitage hostis `npx playwright install chromium`.
+Kui kasutate neid pakkujaid, tõmmake kasutatava kanali `-web` silt — midagi muud ei muutu. npm-i/CLI installi korral (ilma Dockeri tõmmiseta) on samaväärne puuduv komponent brauseri binaarfail: käivitage hostis `npx playwright install chromium`.
 
 #### Eelväljalaskekanali kasutamine
 
-Kanal `next` luuakse uuesti iga tõuke korral praegusesse vaikimisi `release/v*` harusse ning avaldatakse nii AMD64 kui ka ARM64 jaoks. Vanemad hooldusharud ei saa seda üle kirjutada. Kanal pakub tõmmatavat pilti paranduste jaoks, mis on enne järgmise stabiilse sildi loomist aktiivsesse väljalaskeharusse mestitud.
+Kanal `next` ehitatakse uuesti iga tõuke korral praegusesse vaikimisi `release/v*` harusse ning avaldatakse nii AMD64 kui ka ARM64 jaoks. Vanemad hooldusharud ei saa seda üle kirjutada. Kanal pakub allalaaditavat tõmmist parandustega, mis on enne järgmise stabiilse sildi loomist aktiivsesse väljalaskeharusse mestitud.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Docker Compose'i puhul alistage valitud profiili kasutatav pildisilt ning seejärel tõmmake pilt ja looge teenus uuesti:
+Docker Compose'i puhul kirjuta valitud profiili kasutatav tõmmise silt üle, seejärel laadi tõmmis alla ja loo teenus uuesti:
 
 ```yaml
 services:
@@ -552,52 +551,126 @@ docker compose up -d
 
 #### Ohutus ja tagasipööramine
 
-`next` on ujuv eelväljalaskekanal. See võib aktiivsesse väljalaskeharusse tehtava mis tahes tõuke korral muutuda ja selle kasutamist **tootmiskeskkonnas ei toetata**. Konkreetse järgu hindamise ajaks kinnitage pildi räsi:
+`next` on ujuv eelväljalaskekanal. See võib aktiivsesse väljalaskeharusse tehtud iga tõuke korral muutuda ja **seda ei toetata tootmiskeskkonnas kasutamiseks**. Konkreetse järgu hindamise ajaks kinnista tõmmise räsi:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Enne testimist varundage OmniRoute'i andmeköide või haagitud andmekataloog. Tagasipööramiseks taastage varem kasutatud stabiilne versioon või räsi ja looge konteiner uuesti:
+Enne testimist varunda OmniRoute'i andmeköide või bind-mount'iga ühendatud andmekataloog. Tagasipööramiseks taasta varem kasutatud stabiilne versioon või räsi ja loo konteiner uuesti:
 
 ```bash
 docker pull diegosouzapw/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Väljalaskeharu järk ei saa kunagi silti `latest` muuta; stabiilset viita võib edendada ainult sobiv stabiilne semantiline versioon. `next` pildid säilitavad väljalaskepildi kontrollimise ja blokeeriva CRITICAL-turvanõrkuste kontrollpunkti.
+Väljalaskeharu järk ei saa kunagi muuta silti `latest`; stabiilse viida saab edasi viia ainult sobiv stabiilne semantiline versioon. `next`-tõmmiste puhul säilivad väljalasketõmmise kontroll ja blokeeriv CRITICAL-taseme haavatavuste kontrollvärav.
 
-**`latest` ei garanteeri giti ajakohasust.** Harusse `main` või aktiivsesse `release/v*` harusse mestitud parandused **ei** sisaldu sildis `:latest` enne, kui stabiilne SemVeri pilt on avaldatud ja avaldamistöö on edendanud silti `:latest` (sama räsi nagu sellel SemVeril). Kui `latest` näib tardununa, kuigi GitHub juba näitab parandust, tõmmake väljalaskeharu testimiseks `:next` või oodake SemVeri silti.
+**`latest` ei taga giti suhtes ajakohasust.** Harusse `main` või aktiivsesse `release/v*` harusse mestitud parandused **ei sisaldu** sildiga `:latest` tõmmises enne, kui avaldatakse stabiilne SemVer-tõmmis ja avaldamistöö viib sildi `:latest` edasi (sama räsi nagu sellel SemVer-il). Kui `latest` näib tardunud, kuigi GitHub juba kuvab parandust, laadi väljalaskeharu testimiseks alla `:next` või oota SemVer-silti.
 
-| Soovitud tulemus                                                                                            | Kasutage                            |
-| ----------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| GitOps/tootmiskeskkond, mis ei tohi triivida                                                                | Kinnitage `:X.Y.Z` (või pildi räsi) |
-| Avaldatud stabiilsete väljalasete järgimine ja teenuse uuesti loomise aktsepteerimine iga väljalaske korral | `:latest`                           |
-| Avaldamata `release/v*` sissekannete testimine                                                              | `:next` (mitte tootmiskeskkonnas)   |
-| Haru `main` testimine                                                                                       | `:main` (mitte tootmiskeskkonnas)   |
+| Soov                                                                                           | Kasuta                               |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------ |
+| GitOps/tootmiskeskkond, mis ei tohi triivida                                                   | Kinnista `:X.Y.Z` (või tõmmise räsi) |
+| Järgi avaldatud stabiilseid versioone ja aktsepteeri teenuse taasloomist iga väljalaske korral | `:latest`                            |
+| Testi avaldamata `release/v*` sissekandeid                                                     | `:next` (mitte tootmiskeskkonnas)    |
+| Testi haru `main`                                                                              | `:main` (mitte tootmiskeskkonnas)    |
 
-## Käideldavus: vaikimisi SQLite toetab ainult üht replikat
+## Juhtpaneeli uuendused Dockeris
 
-Standardne Docker / Kubernetes OmniRoute on **üks Node'i protsess + üks SQLite'i kirjutaja**. Kõrge käideldavus **ei ole selle topoloogia puhul toetatud**.
+Avaldatud tõmmisest loodud konteiner ei saa iseennast asendada. Kui OmniRoute tuvastab, et see töötab
+konteineris (puudub `.git`-väljavõte ja tegemist pole npm-i installiga), kuvab avalehe juhtpaneeli uuendusriba
+npm-i/git-i juhiste asemel käivitatavat hostikäsku koos kopeerimisnupuga:
 
-| Piirang                                                                 | Tagajärg                                                                                                                                                                                                                                                                                                                                                 |
-| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Üks kirjutaja                                                           | **Ärge** käitage mitut replikat sama SQLite'i faili vastu. See rikub andmebaasi.                                                                                                                                                                                                                                                                         |
-| Uuesti loomine / taaskäivitamine / HEALTHCHECK-i põhjustatud lõpetamine | Töösolevad SSE-ühendused, töölauaseansid ja mälus hoitav olek katkevad **täielikult**. Kõigi ühendatud klientide ühendus katkeb. Uued päringud saavad lõpp-punktideta ajavahemiku jooksul pöördpuhverserverilt vastuse **`502 Bad Gateway: Unknown error`**, mitte OmniRoute'i JSON-i — kliendid ei suuda seda teenusepakkuja tõrkest eristada (#11015). |
-| Sama sündmusetsükkel mis `/healthz`-il                                  | Hõivatud kataloogi- või tihendustsükkel võib kontrollpäringuid viivitada; lühike ajalõpp taaskäivitab seejärel **ainsa** replika.                                                                                                                                                                                                                        |
+```bash
+docker compose pull omniroute && docker compose up -d --force-recreate omniroute
+```
 
-**Kontrollide maatriks** (vt ka [Kubernetese kontrollide soovitusi](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+Teenuse nimi pärineb muutujast `AUTO_UPDATE_SERVICE` (vaikeväärtus on `omniroute`, faili
+`docker-compose.selfhost.yml` teenus). `pull` uuendab ainult liikuvat silti (`latest`, `next`); fikseeritud
+`:X.Y.Z` sildi korral muutke esmalt silti.
 
-| Kontroll              | Sihtmärk                                                        | Ärge kasutage                                                      |
-| --------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Elusolekukontroll     | TCP pordil `PORT` (vaikimisi `20128`) või leebe HTTP `/healthz` | `/api/monitoring/health`                                           |
-| Valmiduskontroll      | HTTP `GET /healthz`                                             | Lühikesi ajalõppe, mis käsitlevad hõivatud sündmusetsüklit tõrkena |
-| Põhjalik / inimestele | `/api/monitoring/health`                                        | Automaatse kubelet'i elusolekukontrollina                          |
+### Ühe klõpsuga uuendused hosti päästikufaili abil
 
-**Uuendused:** arvestage, et kõik seansid katkevad. Võimaluse korral suunake kliendid enne mujale; vaikimisi SQLite'iga ei saa jooksvat uuendamist teha. Compose'i `restart: unless-stopped` koos Dockeri `HEALTHCHECK`-iga asendab samuti ainsa protsessi, kui konteiner muutub olekusse Unhealthy — mõju ulatus on sama.
+Et **Uuenda kohe** töötaks ilma `/var/run/docker.sock`-i haakimata (mis annab konteinerile
+hostis juurkasutaja õigused — vt eespool olevat `cli` profiili hoiatust), määrake OmniRoute’i teenuses
+`DOCKER_UPDATE_TRIGGER_FILE` ja käivitage hostis jälgija:
 
-Kubernetese näide **ühe replika** jaoks (Recreate on kohustuslik; ärge suurendage `replicas` väärtust ühe SQLite'i faili puhul):
+```yaml
+services:
+  omniroute:
+    environment:
+      DOCKER_UPDATE_TRIGGER_FILE: /app/data/update/docker-update.request
+    volumes:
+      - ./data:/app/data
+```
+
+Tee peab asuma kataloogis `DATA_DIR` (suhtelised väärtused lahendatakse selle suhtes); kõik muu
+lükatakse tagasi. Seejärel kirjutab **Uuenda kohe** sellesse faili
+`{ "requestedAt": "...", "targetVersion": "X.Y.Z" }`, vastab koodiga `202` ning juhtpaneel küsitleb
+aadressi `/api/system/version`, kuni uus versioon töötab, ja laadib lehe uuesti. Selles režiimis ei
+käivita OmniRoute kunagi kesta- ega Dockeri käsku. Nagu kõigi uuendamistoimingute puhul, võetakse
+taotlus vastu ainult tagasisideahela-/LAN-klientidelt.
+
+Sidushaagitud andmekataloog annab hostile jälgimiseks püsiva tee. `systemd` näidisüksused
+(kohandage `/srv/omniroute` kataloogiks, mis sisaldab teie compose-faili ja kataloogi `data/`):
+
+```ini
+# /etc/systemd/system/omniroute-update.path
+[Unit]
+Description=Watch for OmniRoute dashboard update requests
+
+[Path]
+PathExists=/srv/omniroute/data/update/docker-update.request
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```ini
+# /etc/systemd/system/omniroute-update.service
+[Unit]
+Description=Pull and recreate the OmniRoute container
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/omniroute
+ExecStartPre=/usr/bin/rm -f /srv/omniroute/data/update/docker-update.request
+ExecStart=/bin/sh -c 'docker compose pull omniroute || (sleep 15 && docker compose pull omniroute)'
+ExecStart=/usr/bin/docker compose up -d --force-recreate omniroute
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now omniroute-update.path
+```
+
+Teenus eemaldab taotluse enne tõmbamist, et nurjunud käivitus ei jääks korduma. Ilma
+`DOCKER_UPDATE_TRIGGER_FILE`-ita säilitab juhtpaneel käsitsi käskude töövoo.
+
+## Kättesaadavus: vaikimisi SQLite on ühekoopia
+
+Stock Docker / Kubernetes OmniRoute on** üks sõlm töötleb + üks SQLite kirjutaja** . Kõrge kättesaadavus on** ei toetata** sellel topoloogial.
+
+| Piirang                                       | Tagajärg                                                                                                                                                                                                                                                                                              |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Üksik kirjanik                                | Tee** mitte** käivitada mitu koopiat sama SQLite faili vastu. See rikub DB.                                                                                                                                                                                                                           |
+| Loo uuesti / taaskäivitage / HEALTHCHECK kill | **Täielik katkestus** SSE, armatuurlaua seansside ja mälu oleku kohta. Iga ühendatud klient langeb. Uued päringud tühja lõpp-punkti akna ajal saavad pöördpuhverserveri**`502 Bad Gateway: Unknown error`** , mitte OmniRoute JSON — kliendid ei suuda seda teenusepakkuja tõrkest eristada (#11015). |
+| Sama sündmusetsükkel nagu `/healthz`          | Hõivatud kataloog või tihendusmärk võib viivitada sondidega; lühike ajalõpp ja seejärel taaskäivitab** ainult** koopia.                                                                                                                                                                               |
+
+**Sondi maatriks** (vt ka [Kubernetese sondi soovitusi](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
+
+| Sond             | Sihtmärk                                                 | Ärge kasutage                                                        |
+| ---------------- | -------------------------------------------------------- | -------------------------------------------------------------------- |
+| Elavdus          | TCP `PORT` (vaikimisi `20128`) või pehme HTTP `/healthz` | `/api/monitoring/health`                                             |
+| Valmisolek       | HTTP `GET /healthz`                                      | Tihedad ajalõpud, mis käsitlevad sündmusetsüklit hõivatud kui surnud |
+| Sügav / inimesed | `/api/monitoring/health`                                 | Automatiseeritud kubeleti elavus                                     |
+
+**Uuendused:** eeldada, et iga seanss langeb. Kui saate, tühjendage kliendid; SQLite vaikevärskendust ei toimu. Koosta `restart: unless-stopped` pluss Docker `HEALTHCHECK` asendab ka ainsa protsessi, kui konteiner on ebatervislik – sama plahvatuse raadius.
+
+Valmis manifestid ja Helmi diagramm on reaalajas `deploy/kubernetes/` ja `deploy/helm/omniroute/` puhul – vaadake [Kubernetese juurutusjuhendit](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetesi katkend a** üksik koopia** (Nõutav on uuesti loomine; ärge tõstke `replicas` ühe SQLite faili vastu):
 
 ```yaml
 spec:
@@ -624,31 +697,31 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop`-i ooteaeg võimaldab kube'il Service'i lõpp-punktid enne SIGTERM-i eemaldada, et **uus** liiklus ei jõuaks enam lõpetatava protsessini. Töösolevat `/v1/responses` SSE-d lastakse mahukate vastuvõtulubade kaudu töötada kuni `SHUTDOWN_TIMEOUT_MS`-is määratud ajani (vaikimisi 30 s) (#11015). Uued päringud, mis siiski protsessini jõuavad, saavad vastuseks `503` + `Retry-After: 5`. Recreate'i põhjustatud lõpp-punktideta ajavahemik kuni asendus on Ready-olekus tähendab endiselt täielikku katkestust — see tuleneb SQLite'i topoloogiast, mitte kontrollide valest seadistusest.
+`preStop` sleep laseb kube'il loobuda teenuse lõpp-punktidest enne SIGTERM d nii** uus** liiklus lakkab tabamast surevat protsessi. Lennu ajal `/v1/responses` SSE tühjendatakse kuni `SHUTDOWN_TIMEOUT_MS` (vaikimisi 30 s) raskekaalu sissepääsulepingute (#11015) kaudu. Uued taotlused, mis ikka protsessi jõuavad, saavad `503` + `Retry-After: 5`. Tühja lõpp-punkti tühiku taasloomine, kuni asendus on valmis, jääb tõsiseks katkestuseks – see on SQLite topoloogia, mitte sondi vale konfiguratsioon.
 
-Väline Postgres / mitme kirjutajaga HA **ei ole** dokumenteeritud standardlahendus. Kui vajate HA-d, kasutage üht replikat või topoloogiat, mida projekt on eraldi testinud ja dokumenteerinud. Postgres/MySQL-i arendus toimub teemas [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kuni see pole välja antud, on ainus toetatud viis **mahukate** `/v1/responses` päringute läbilaskevõime suurendamiseks N sõltumatut protsessi (järgmine jaotis), mitte `replicas > 1` ühel andmeköitel.
+Väline Postgres / mitmekirjutaja HA on** mitte** dokumenteeritud aktsiatee. Kui vajate HA, säilitage üks koopia või käivitage topoloogia, mida projekt on eraldi testinud ja dokumenteerinud. Postgres/MySQL teos asub asukohas [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kuni selle tarnimiseni on ainus toetatud viis paljundamiseks** suur** `/v1/responses` võimsus on N sõltumatut protsessi (järgmine jaotis), mitte `replicas > 1` ühel köitel.
 
 ## Horisontaalne skaleerimine: N sõltumatut protsessi
 
-Üks Node'i protsess on **üks V8 kuhi**. Kaks kattuvat ~3 MiB / ~750k-sõne pikkust kodeerimisagendi päringut `POST /v1/responses` (RTK + Caveman) katkestavad selle kuhja ~12 GiB juures (`FATAL ERROR: Reached heap limit`) ja võivad põhjustada 16 GiB cgroup'is OOM-i. Vaadake [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). See mõõtmistulemus on **mälueelarve** hoiatus, mitte toote jäik maksimum, mis lubaks ainult kaht samaaegset pikka `/v1/responses` päringut. Raskekaaluliste vestluste vastuvõttu piirab automaatselt tuletatud sisendi baitide eelarve (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), mille suurus põhineb samal V8/cgroup'i ülempiiril — selle suurendamine (või päringute arvul põhineva pärandpiirangu `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` määramine) juba sobivalt seadistatud protsessis põhjustab taas katkestuse. Väikesed vestlused, `/healthz`, `/v1/models` ja MCP **ei kuulu** selle piirangu alla.
+Üks Node’i protsess tähendab **ühte V8 kuhja**. Kaks kattuvat ~3 MiB / ~750k-tokeniga kodeerimisagendi päringut `POST /v1/responses` (RTK + Caveman) katkestavad selle kuhja töö ~12 Gi juures (`FATAL ERROR: Reached heap limit`) ja võivad põhjustada 16 Gi cgroup’is OOM-i. Vaadake [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). See mõõtmine on **mälueelarve** hoiatus, mitte toote jäik maksimum, mis lubaks ainult kaht samaaegset pikka `/v1/responses` päringut. Ressursimahukate vestluste vastuvõttu piirab automaatselt tuletatud sisendi baitide eelarve (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), mille suurus põhineb samal V8/cgroup’i ülempiiril — selle suurendamine (või päringute arvul põhineva pärandpiirangu `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` määramine) juba dimensioneeritud protsessis põhjustab taas katkestuse. Väikesed vestlused, `/healthz`, `/v1/models` ja MCP **ei kuulu** selle piirangu alla.
 
 ### Üks protsess: rohkem kui kaks pikka `/v1/responses` päringut
 
-**Töökorras** protsess (kuhi on alla `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` väärtuse, vaikimisi `0.75`) **võib** käitada rohkem kui kaht samaaegset pikka `POST /v1/responses` päringut, kui kogu protsessi töötlemisel olevate baitide eelarves (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) on veel ruumi. Päringukehad, mille maht on vähemalt `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (vaikimisi 256 KiB), kasutavad sama raskekaalulist luba nagu keeruka struktuuriga päringud ning sama [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` erandteed (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Kümnete samaaegsete pikkade SSE-klientide (operaatoritel on sageli vaja 40–50) toetamine on **mälueelarve** küsimus — määrake sobiv kuhja, põhi-/varuruumi pesade ja `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` suurus —, mitte toote jäik „max 2” piirang. Surve all olev kuhi tõrjub päringuid endiselt uuesti proovitava vastusega `503`, et #7849 ei korduks.
+**Terve** protsess (kuhi alla `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, vaikimisi `0.75`) **võib** käitada rohkem kui kaht samaaegset pikka `POST /v1/responses` päringut, kui protsessiüleses pooleliolevate baitide eelarves (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) on veel ruumi. Päringukehad, mille suurus on vähemalt `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (vaikimisi 256 KiB), võtavad sama ressursimahuka päringu loa nagu keeruka struktuuriga päringud ja kasutavad sama [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` erandit (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Kümned samaaegsed pikaajalised SSE-kliendid (operaatorid vajavad sageli 40–50) on **mälueelarve** küsimus — dimensioneerige kuhi + põhi-/varuruumi kohad + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` —, mitte toote jäik „max 2“ piirang. Surve all olev kuhi jätab päringuid endiselt kõrvale kordamist võimaldava vastusega `503`, et #7849 ei korduks.
 
-Kuhjade **mitmekordistamiseks** (sõltumatud V8 old-space'id) **praegu**:
+**Kuhjade mitmekordistamiseks** (sõltumatud V8 old-space’id) **praegu**:
 
-| Tehke                                                                                                                                                                                                                 | Ärge tehke                                                           |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Käitage **N konteinerit/podi**, millest igaühel on **oma** `DATA_DIR` / andmeköide                                                                                                                                    | Seadke `replicas > 1` ühe SQLite'i faili jaoks                       |
-| Määrake raskekaaluliste töötlemisel olevate päringute ja töökorras protsessi varuruumi suurus kuhja / töötlemisel olevate baitide eelarve põhjal; 1–2 on konservatiivne #7849 vaikeväärtus, mitte toote jäik maksimum | Andke ühele protsessile 8× rohkem RAM-i ja piiramatu arvupiirang     |
-| Valikuline: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` **jagatud kvoodiloendurite** jaoks                                                                                                                   | Ärge käsitlege Redist jagatud SQLite'ina — see ei ole seda           |
-| Kopeerige teenusepakkuja saladused igasse eksemplari (või leppige eraldatud töölaudadega)                                                                                                                             | Ärge eeldage üht töölauda / üht kõnelogi kõigi eksemplaride jaoks    |
-| Kasutage ees mis tahes koormusjaoturit; API-võtme või seansi põhine püsiseanss on piisav                                                                                                                              | Ärge nõudke teenusepakkuja-spetsiifilist suurust arvestavat vahevara |
+| Tehke                                                                                                                                                                                                   | Ärge tehke                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Käitage **N konteinerit/podi**, igaühel **oma** `DATA_DIR` / köide                                                                                                                                      | Määrake `replicas > 1` ühe SQLite-faili jaoks                                 |
+| Dimensioneerige ressursimahukate pooleliolevate päringute ja terve protsessi varuruum kuhja / pooleliolevate baitide eelarve järgi; 1–2 on konservatiivne #7849 vaikeväärtus, mitte toote jäik maksimum | Ärge andke ühele protsessile 8× RAM-i ega piiramatut päringute arvu ülempiiri |
+| Valikuline: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` **jagatud kvoodiloendurite** jaoks                                                                                                     | Ärge käsitlege Redist jagatud SQLite’ina — see ei ole seda                    |
+| Kopeerige teenusepakkuja saladused igasse instantsi (või leppige eraldatud töölaudadega)                                                                                                                | Ärge eeldage instantsideülest ühtset töölauda / kõnelogi                      |
+| Paigutage ette mis tahes koormusjaotur; API-võtme või seansi põhine püsiv suunamine on piisav                                                                                                           | Ärge nõudke teenusepakkuja spetsiifilist suurust arvestavat vahevara          |
 
-Riistvara: ühe eksemplari samaaegsete pikkade `/v1/responses` päringute arv on **mälueelarve** küsimus (kuhi + töötlemisel olevate baitide eelarve / #10110). `N` sõltumatut `DATA_DIR`-i mitmekordistavad endiselt kuhjade arvu: hosti RAM peab mahutama `N × cgroup`, mitte „üks 16 GiB pod väärtusega N=8”. Ärge kunagi kasutage `replicas > 1` ühe SQLite'i faili puhul.
+Riistvara: ühe instantsi samaaegsete pikkade `/v1/responses` päringute arv on **mälueelarve** küsimus (kuhi + pooleliolevate baitide eelarve / #10110). `N` sõltumatut `DATA_DIR`-i mitmekordistavad ikkagi kuhjade arvu: hosti RAM peab mahutama `N × cgroup`, mitte „üks 16 Gi pod, kus N=8“. Ärge kunagi kasutage ühe SQLite-faili korral `replicas > 1`.
 
-Compose'i näidis (kaks kuhja, kaks andmeköidet — mitte `deploy.replicas: 2`):
+Compose’i näidis (kaks kuhja, kaks köidet — mitte `deploy.replicas: 2`):
 
 ```yaml
 services:
@@ -677,15 +750,94 @@ volumes:
 
 Protsessisisene tihedus (tihendamine väljaspool HTTP-isolaati) on [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Üks loogiline klaster jagatud püsioleku peal on [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
+## Gemini piirkondlikud vead Dockeris
+
+Google AI Studio / Gemini API võib tagastada HTTP 400 veakoodiga FAILED_PRECONDITION ja teatega
+`User location is not supported for the API use.` Edukas päring hostis
+ei tõesta, et konteiner kasutab sama väljaminevat marsruuti. DNS-i järjestus,
+IPv4/IPv6 ühenduvus, VPN-i marsruutimine ja seadistatud puhverserverid võivad erineda. Kontrollige
+[Google'i toetatud piirkondi](https://ai.google.dev/gemini-api/docs/available-regions)
+ning tegelikku ühenduse marsruuti; ainuüksi see viga ei viita vigasele API-võtmele.
+
+### Eelistage ühendusepõhist puhverserverit
+
+Kasutage mõjutatud Gemini ühenduse jaoks OmniRoute'i [ühendusepõhist puhverserveri seadistust](../ops/PROXY_GUIDE.md#4-level-proxy-system)
+ning seejärel korrake toimingut **Test Connection** ja väikest päringut
+sama mudeliga. Nii piirdub marsruudimuudatus selle ühendusega. Veenduge,
+et puhverserver oleks konteinerist ligipääsetav ja et ühendus selle ka tegelikult valiks.
+Marsruudi muutmine ei taga, et ülesvooluteenus peab piirkonda sobivaks.
+
+### Võrrelge hosti ja konteineri võrguühendust
+
+Autenditud tulemuste võrdlemisel hoidke võti, mudel ja päring samana; ärge kunagi
+lisage probleemikirjeldusse mandaate, puhverserveri paroole ega täielikke autoriseerimispäiseid.
+Kõigepealt kontrollige, milliseid aadressiperekondi operatsioonisüsteemi nimelahendaja pakub, kasutades sama käsku
+hostis ja konteineris:
+
+```bash
+node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
+docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
+```
+
+Asendage `omniroute` kasutatava teenusega (näiteks `omniroute-web`). Need
+käsud väljastavad aadressiperekonnad ilma mandaatide või IP-aadressideta. Tagastatud `6`
+näitab ainult IPv6 DNS-i tulemust: see **ei** tõesta toimiva IPv6-marsruudi ega API-juurdepääsu olemasolu.
+Kui `curl` on installitud, võrrelge käsku `curl -4 -I https://generativelanguage.googleapis.com`
+käsuga `curl -6 -I https://generativelanguage.googleapis.com` mõlemas keskkonnas.
+HTTP-vastus tõendab selle kontrollpäringu ühenduvust isegi siis, kui vastuseks on autentimata
+päringu viga; Gemini kasutusõigust kontrollib ainult autenditud mudelipäring.
+
+### Hostitaseme alternatiiv: toimiv IPv6 ja nimelahendaja poliitika
+
+Probleemi [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) raporteerija taastas
+oma keskkonnas juurdepääsu, lubades konteineri IPv6 ja muutes glibc aadressivalikut.
+Käsitlege seda keskkonnaspetsiifilise alternatiivina. Enne nimelahendaja eelistuste muutmist
+veenduge, et hosti IPv6, konteineri väljaminev ühendus/marsruutimine ja tulemüürireeglid töötaksid.
+Privaatne ULA-aadress üksi ei tõenda avaliku IPv6-ühenduse olemasolu.
+
+Teenuste puhul, mis on juba ühendatud Compose'i vaikevõrguga, lubab järgmine fragment
+selles võrgus IPv6; säilitage ülejäänud teenuse, portide, andmeköidete ja seadistuse osa:
+
+```yaml
+networks:
+  default:
+    enable_ipv6: true
+```
+
+Nimega võrgu puhul lubage see võrgus, millega teenus tegelikult liitub. Docker võib
+eraldada ULA-alamvõrgu; valige selgesõnaline, mittekattuv alamvõrk ainult siis, kui teie võrk
+seda nõuab. Vaadake [Dockeri IPv6-võrgundust](https://docs.docker.com/engine/daemon/ipv6/)
+ja [Compose'i võrgusuvandeid](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+
+**glibc-põhises tõmmises** saab `/etc/gai.conf` muuta aadressivalikut. Hoidla praegune
+Dockerfile kasutab Debiani; kohandatud musl-põhised tõmmised seda mehhanismi ei kasuta.
+Raporteeritud muudatus asendab ULA sildi `label fc00::/7 6` sildiga
+`label fc00::/7 1`. Alustage tõmmise täielikust poliitikatabelist ja säilitage selle muud
+kirjed: kirje `label` või `precedence` lisamine asendab selle vaiketabeli, mistõttu ainult
+muudetud rida sisaldav fail ei ole piisav.
+[glibc seadistuse viitedokumentatsioon](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
+kirjeldab neid semantikaid. Ühendage ülevaadatud fail kirjutuskaitstult asukohta `/etc/gai.conf`
+ja looge teenus muudatuse rakendamiseks uuesti.
+
+See muudab operatsioonisüsteemi aadressivalikut **kogu sellest konteinerist väljuva liikluse jaoks**.
+See ei sunni iga rakendust IPv6 valima: olulised on ka Node'i DNS-i järjestus ja ühenduse
+valik. Eelkõige eelistab `--dns-result-order=ipv4first` IPv4 ja
+see ei lahenda ainult IPv4 kasutamisel tekkivat tõrget. Vaadake [Node'i DNS-i järjestust](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+
+Pärast iga hostitaseme muudatust testige uuesti Geminit ja teisi teenusepakkujaid. Tagasipööramiseks
+eemaldage kohandatud `gai.conf`-i ühendus, taastage varasem võrguseadistus ning
+looge mõjutatud teenus/võrk hooldusakna ajal uuesti. Võrgu uuesti loomine
+võib katkestada teiste sellega ühendatud konteinerite töö; ärge kustutage püsivate andmete andmeköidet.
+
 ## Olulised märkused
 
-- **SQLite'i WAL-režiim:** Käsul `docker stop` tuleks lasta lõpuni töötada, et OmniRoute saaks viimased muudatused tagasi faili `storage.sqlite` kontrollpunktina salvestada. Kaasasolevates Compose'i failides on peatamise ajapikenduseks juba määratud 40 s. Kui käitate tõmmist otse, säilitage `--stop-timeout 40`.
-- **`DISABLE_SQLITE_AUTO_BACKUP`:** Määrake väärtuseks `true`, kui rutiinseid ja kirjutamiseelseid varukoopiaid hallatakse väliselt. Olemasoleva andmebaasi migratsioonid nõuavad endiselt eraldi püsivat turvatõmmist ja massmigratsiooni kaitsemehhanismi.
-- **Andmete säilitamine:** Andmebaasi, võtmete ja konfiguratsioonide säilitamiseks konteineri taaskäivitamisel haakige alati köide asukohta `/app/data`.
-- **Pordi konfiguratsioon:** Vaikimisi kasutatava pordi `20128` muutmiseks alistage keskkonnamuutuja `PORT`.
+- **SQLite'i WAL-režiim:** Käsul `docker stop` tuleks lasta lõpuni töötada, et OmniRoute saaks viimased muudatused kontrollpunktina tagasi faili `storage.sqlite` kirjutada. Kaasasolevates Compose'i failides on juba määratud 40-sekundiline peatamise ajapikendus. Kui käitate tõmmist otse, säilitage `--stop-timeout 40`.
+- **`DISABLE_SQLITE_AUTO_BACKUP`:** Määrake väärtuseks `true`, kui korrapäraseid/kirjutamiseelseid varukoopiaid hallatakse väliselt. Olemasoleva andmebaasi migreerimine nõuab endiselt eraldi püsivat turvatõmmist ja massmigreerimise kaitset.
+- **Andmete säilitamine:** Andmebaasi, võtmete ja konfiguratsioonide säilitamiseks konteineri taaskäivituste vahel ühendage alati köide asukohta `/app/data`.
+- **Pordi konfiguratsioon:** Vaikimisi kasutatava pordi `20128` muutmiseks kirjutage keskkonnamuutuja `PORT` üle.
 
 ## Vaata ka
 
-- [VM-i juurutamise juhend](../ops/VM_DEPLOYMENT_GUIDE.md) — VM-i, nginxi ja Cloudflare'i seadistamine
-- [Fly.io juurutamise juhend](../ops/FLY_IO_DEPLOYMENT_GUIDE.md) — Juurutamine platvormile Fly.io
+- [VM-i juurutamisjuhend](../ops/VM_DEPLOYMENT_GUIDE.md) — VM-i + nginxi + Cloudflare'i seadistamine
+- [Fly.io juurutamisjuhend](../ops/FLY_IO_DEPLOYMENT_GUIDE.md) — Juurutamine Fly.io-sse
 - [Keskkonna konfiguratsioon](../reference/ENVIRONMENT.md) — Täielik `.env`-faili viide

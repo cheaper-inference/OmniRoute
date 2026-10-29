@@ -5,6 +5,7 @@ import {
   systemFieldIncludesMarker,
 } from "../outputMode.ts";
 import { detectCompressionLanguage } from "../languageDetector.ts";
+import { hasMediaBlocks } from "../mediaDetect.ts";
 import { OUTPUT_STYLE_IDS, outputStyleMeta, type OutputStyle } from "./catalog.ts";
 
 export type OutputStyleLevel = "lite" | "full" | "ultra";
@@ -180,6 +181,8 @@ export function buildOutputStylesInstruction(
  * - Single idempotency marker; re-applying is a no-op.
  * - Content bypass runs once across the whole turn (all-or-nothing); reason recorded.
  *   `options.autoClarity: false` (the Auto-Clarity Bypass toggle) skips it.
+ * - Media bypass (image/audio/file anywhere in the turn): style prompts degrade
+ *   multimodal grounding on susceptible models, so skip. Not gated on Auto-Clarity.
  */
 export function applyOutputStyles(
   body: ChatRequestBody,
@@ -190,6 +193,9 @@ export function applyOutputStyles(
   const resolved = resolveStyles(selection ?? [], language);
   if (resolved.length === 0) {
     return { body, applied: false, skippedReason: "no_styles" };
+  }
+  if (hasMediaBlocks(body)) {
+    return { body, applied: false, skippedReason: "media_content" };
   }
 
   const instruction = buildOutputStylesInstruction(resolved, language);

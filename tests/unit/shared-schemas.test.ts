@@ -16,7 +16,6 @@ import {
   InspectorSessionPatchSchema,
   InspectorCaptureModeActionSchema,
   InspectorSystemProxyActionSchema,
-  InspectorTlsInterceptToggleSchema,
   InspectorAnnotationPutSchema,
   InspectorListQuerySchema,
 } from "../../src/shared/schemas/inspector.ts";
@@ -35,21 +34,34 @@ test("AgentBridgeStateRowSchema — round-trip", () => {
 });
 
 test("AgentBridgeMappingRowSchema — round-trip", () => {
-  assert.ok(AgentBridgeMappingRowSchema.safeParse({
-    agent_id: "copilot", source_model: "gpt-4o", target_model: "claude-sonnet-4-5", updated_at: new Date().toISOString(),
-  }).success);
+  assert.ok(
+    AgentBridgeMappingRowSchema.safeParse({
+      agent_id: "copilot",
+      source_model: "gpt-4o",
+      target_model: "claude-sonnet-4-5",
+      updated_at: new Date().toISOString(),
+    }).success
+  );
 });
 
 test("AgentBridgeBypassRowSchema — round-trip", () => {
-  assert.ok(AgentBridgeBypassRowSchema.safeParse({
-    pattern: "*.bank.com", source: "user", created_at: new Date().toISOString(),
-  }).success);
+  assert.ok(
+    AgentBridgeBypassRowSchema.safeParse({
+      pattern: "*.bank.com",
+      source: "user",
+      created_at: new Date().toISOString(),
+    }).success
+  );
 });
 
 test("AgentBridgeBypassRowSchema — rejects invalid source enum", () => {
-  assert.ok(!AgentBridgeBypassRowSchema.safeParse({
-    pattern: "x", source: "custom", created_at: new Date().toISOString(),
-  }).success);
+  assert.ok(
+    !AgentBridgeBypassRowSchema.safeParse({
+      pattern: "x",
+      source: "custom",
+      created_at: new Date().toISOString(),
+    }).success
+  );
 });
 
 test("AgentBridgeServerActionSchema — all valid actions", () => {
@@ -67,7 +79,9 @@ test("AgentBridgeDnsActionSchema — round-trip", () => {
 });
 
 test("AgentBridgeMappingPutSchema — round-trip", () => {
-  assert.ok(AgentBridgeMappingPutSchema.safeParse({ mappings: [{ source: "a", target: "b" }] }).success);
+  assert.ok(
+    AgentBridgeMappingPutSchema.safeParse({ mappings: [{ source: "a", target: "b" }] }).success
+  );
 });
 
 test("AgentBridgeBypassUpsertSchema — round-trip", () => {
@@ -106,15 +120,14 @@ test("InspectorCaptureModeActionSchema — start/stop", () => {
 });
 
 test("InspectorSystemProxyActionSchema — apply with options", () => {
-  assert.ok(InspectorSystemProxyActionSchema.safeParse({ action: "apply", port: 8080, guardMinutes: 30 }).success);
+  assert.ok(
+    InspectorSystemProxyActionSchema.safeParse({ action: "apply", port: 8080, guardMinutes: 30 })
+      .success
+  );
 });
 
 test("InspectorSystemProxyActionSchema — rejects invalid port", () => {
   assert.ok(!InspectorSystemProxyActionSchema.safeParse({ action: "apply", port: 99999 }).success);
-});
-
-test("InspectorTlsInterceptToggleSchema — round-trip", () => {
-  assert.ok(InspectorTlsInterceptToggleSchema.safeParse({ enabled: false }).success);
 });
 
 test("InspectorAnnotationPutSchema — rejects over 10000 chars", () => {
@@ -122,10 +135,16 @@ test("InspectorAnnotationPutSchema — rejects over 10000 chars", () => {
 });
 
 test("InspectorListQuerySchema — round-trip with all filters", () => {
-  assert.ok(InspectorListQuerySchema.safeParse({
-    profile: "llm", host: "api.openai.com", agent: "copilot", status: "2xx",
-    source: "agent-bridge", sessionId: "550e8400-e29b-41d4-a716-446655440000",
-  }).success);
+  assert.ok(
+    InspectorListQuerySchema.safeParse({
+      profile: "llm",
+      host: "api.openai.com",
+      agent: "copilot",
+      status: "2xx",
+      source: "agent-bridge",
+      sessionId: "550e8400-e29b-41d4-a716-446655440000",
+    }).success
+  );
 });
 
 test("InspectorListQuerySchema — rejects non-uuid sessionId", () => {

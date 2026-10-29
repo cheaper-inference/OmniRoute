@@ -1,4 +1,7 @@
-import { getUpstreamTimeoutConfig } from "@/shared/utils/runtimeTimeouts";
+import {
+  getUpstreamTimeoutConfig,
+  readStreamActiveTimeoutOverrideMs,
+} from "@/shared/utils/runtimeTimeouts";
 import { resolvePublicCred } from "../utils/publicCreds.ts";
 import type { LegacyProvider } from "./providerRegistry.ts";
 import { loadProviderCredentials } from "./credentialLoader.ts";
@@ -29,9 +32,19 @@ export const STREAM_IDLE_TIMEOUT_MS = upstreamTimeouts.streamIdleTimeoutMs;
 export const STREAM_DISCONNECT_GRACE_PERIOD_MS = upstreamTimeouts.streamDisconnectGracePeriodMs;
 
 // Hard cap for a connected upstream stream. This timer never resets on
-// upstream byte activity and is independent of REQUEST_TIMEOUT_MS. Set
-// STREAM_ACTIVE_TIMEOUT_MS=0 to disable it.
+// upstream byte activity and is independent of REQUEST_TIMEOUT_MS. Left unset,
+// a target that declares a longer budget raises its own cap above the default
+// (resolveStreamActiveTimeoutMs). A positive STREAM_ACTIVE_TIMEOUT_MS is a hard
+// cap for every target; 0 disables it.
 export const STREAM_ACTIVE_TIMEOUT_MS = upstreamTimeouts.streamActiveTimeoutMs;
+// The operator's own value, or undefined when unset (see readStreamActiveTimeoutOverrideMs).
+export const STREAM_ACTIVE_TIMEOUT_OVERRIDE_MS = readStreamActiveTimeoutOverrideMs(process.env);
+// Re-exported so the engine reads them through this module instead of importing src.
+export {
+  DEFAULT_STREAM_ACTIVE_TIMEOUT_MS,
+  MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS,
+  MAX_TIMER_TIMEOUT_MS,
+} from "@/shared/utils/runtimeTimeouts";
 
 // Timeout for the first non-ping SSE event. Inherits REQUEST_TIMEOUT_MS when
 // set, unless STREAM_READINESS_TIMEOUT_MS is specified directly. This must stay
@@ -319,8 +332,14 @@ export const DEFAULT_API_LIMITS = {
 // Skip patterns - requests containing these texts will bypass provider
 export const SKIP_PATTERNS = ["Please write a 5-10 word title for the following conversation:"];
 
-// Default maximum number of tools allowed in a request (OpenAI default)
-export const MAX_TOOLS_LIMIT = 128;
+// Default maximum number of tools allowed in a request (OpenAI default).
+// Override with OMNIROUTE_MAX_TOOLS_LIMIT (positive integers only); any other
+// value (zero, negative, fractional, non-numeric) falls back to 128.
+const maxToolsLimitOverride = envInt("OMNIROUTE_MAX_TOOLS_LIMIT", 128);
+export const MAX_TOOLS_LIMIT =
+  Number.isInteger(maxToolsLimitOverride) && maxToolsLimitOverride > 0
+    ? maxToolsLimitOverride
+    : 128;
 
 // ── Credential Health Check ────────────────────────────────────────
 

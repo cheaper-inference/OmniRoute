@@ -51,8 +51,37 @@ const {
 // PROXY_POOL_SHARED_EGRESS_ORDER (shared-egress pool ordering, default off)
 // takes it to 80.
 // PROXY_OPERATOR_EGRESS_ENABLED (operator-pushed dated observed addresses per
-// pool member, default off) takes it to 81.
-const EXPECTED_FEATURE_FLAG_COUNT = 81;
+// pool member, default off) takes it to 82; USAGE_LIMIT_IGNORE_UNPRICED (#14799,
+// opt-in flag to count unpriced usage as $0 in USD quotas, default off) to 83;
+// REASONING_REPLAY_ENABLED (#12486, default on) to 84; COMBO_AUTO_PRUNE_STALE_STEPS
+// (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (one-shot Kiro
+// tool_call wrapper repair, default on) to 86.
+// OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, OpenCode model surface from the
+// published catalog, default off) takes it to 87.
+const EXPECTED_FEATURE_FLAG_COUNT = 111;
+// tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
+// (#16571, OpenCode v2 client fingerprint, default off) to 87.
+// tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
+// (#17003, lets Claude OAuth drop the redact-thinking beta for summarized thinking,
+// default off) to 87.
+// MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED (#16929/#16956, default off) takes it to 88.
+// ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, default off) takes it to 88.
+// MODELS_DEV_EFFORT_TIERS_ENABLED (#15944, default off) takes it to 88.
+// default off) to 87; AUTO_REQUEST_RESOLVED_CAPABILITIES (#16419, resolved-capability
+// scoring inputs on the auto/* request path, default off) to 88.
+// default off) to 87; CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED (#16190, retest of
+// gateway-disabled connections, default off) to 88.
+// CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY (#16599, default off) to 88.
+// default off) to 87; STREAM_LATE_OUTPUT_PROBE_ENABLED
+// (#16927 late-output stream probe, default off) to 88.
+// LMARENA_SYNTHESIZED_CX_ENABLED (#16895, default off) to 88.
+// CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED (#15917, default off) takes it to 88.
+// NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED (#16632, default off) to 88.
+// COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED (#16305, default off) takes it to 88.
+// default off) to 87; QUOTA_WINDOW_BOUNDED_PARK
+// (#17000, per-window quota policy honours the bounded park, default off) to 88.
+// default off) to 87; IMAGE_GENERATION_LONG_JOBS
+// (#16260, connection image timeout + caller cancellation + Playground SSE, default off) to 88.
 
 // ──────────────────────────────────────────────────────
 // Test group 1 — Flag definitions registry

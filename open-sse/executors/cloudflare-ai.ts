@@ -91,11 +91,16 @@ export class CloudflareAIExecutor extends BaseExecutor {
     const flattenTextParts = (content: unknown[]): string =>
       content.map((part) => (part as Record<string, unknown>).text as string).join("");
 
-    const messages = (body.messages as Array<Record<string, unknown>>).map((msg) =>
-      msg && Array.isArray(msg.content) && msg.content.every(isTextPart)
+    // Workers AI also requires `content` on every message (#4838). Assistant turns that only
+    // carry tool_calls arrive with the key absent (the Claude→OpenAI translator omits it) or
+    // set to null (standard OpenAI clients); both are rejected with HTTP 400, so fill "".
+    const messages = (body.messages as Array<Record<string, unknown>>).map((msg) => {
+      if (!msg || typeof msg !== "object") return msg;
+      if (msg.content === undefined || msg.content === null) return { ...msg, content: "" };
+      return Array.isArray(msg.content) && msg.content.every(isTextPart)
         ? { ...msg, content: flattenTextParts(msg.content) }
-        : msg
-    );
+        : msg;
+    });
 
     return { ...body, messages };
   }

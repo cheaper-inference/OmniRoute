@@ -116,33 +116,41 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ---
 
-## โฟลว์การนำเข้า API Key
+## ขั้นตอนการนำเข้าคีย์ API
 
-การยืนยันตัวตนด้วย API key ใช้สำหรับข้อมูลรับรอง bearer ของ Kiro / AWS CodeWhisperer ที่มีอายุการใช้งานยาวนาน โดย
-ไม่ใช้การรีเฟรช OAuth จึงหลีกเลี่ยงการทำให้เซสชัน OIDC ที่ใช้ร่วมกันไม่สามารถใช้งานได้
+การยืนยันตัวตนด้วยคีย์ API ใช้สำหรับข้อมูลประจำตัวแบบ bearer ของ Kiro / AWS CodeWhisperer ที่มีอายุยาวนาน โดยไม่ใช้การรีเฟรช OAuth จึงหลีกเลี่ยงการทำให้เซสชัน OIDC ที่ใช้ร่วมกันเป็นโมฆะ
 
-### Dashboard
+### แดชบอร์ด
 
-1. เปิด **Dashboard -> Providers -> Kiro**
-2. เลือก **API Key**
-3. วาง API key และระบุรีเจียน AWS หรือไม่ก็ได้ (`us-east-1` เป็นค่าเริ่มต้น)
-4. OmniRoute จะตรวจสอบความถูกต้องของคีย์และบันทึกการเชื่อมต่อ
+1. เปิด **แดชบอร์ด -> ผู้ให้บริการ -> Kiro**
+2. เลือก **คีย์ API**
+3. วางคีย์ API และเลือกรีเจียน AWS: **ตรวจหาอัตโนมัติ** (ค่าเริ่มต้น), **สหรัฐอเมริกาฝั่งตะวันออก
+   (เวอร์จิเนียตอนเหนือ)** หรือ **ยุโรป (แฟรงก์เฟิร์ต)**
+4. OmniRoute จะตรวจสอบความถูกต้องของคีย์และบันทึกการเชื่อมต่อโดยตรึงไว้กับรีเจียนที่
+   คีย์สามารถใช้งานได้
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
 
-### สัญญาภายในระบบ
+`region` ยอมรับค่า `auto` (ค่าเริ่มต้น), `us-east-1` หรือ `eu-central-1` ส่วนค่าอื่นๆ
+จะถูกปฏิเสธด้วย HTTP 400
+
+### ข้อตกลงภายใน
 
 เส้นทาง API จะตรวจสอบความถูกต้องของคีย์โดยเรียก `KiroService.validateApiKey()` ซึ่ง
-ใช้ `ListAvailableProfiles` กับ endpoint ของ CodeWhisperer/Amazon Q ที่ตรงกับรีเจียน
-และค้นหา `profileArn`
+เรียก `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(API พื้นผิวที่ Amazon Q ใช้สำหรับการอนุมานด้วยคีย์ API) โดยมีระยะหมดเวลา 10 วินาทีต่อรีเจียน ใน
+โหมด `auto` ระบบจะลอง `us-east-1` ก่อน แล้วจึงลอง `eu-central-1` และจัดเก็บรีเจียนแรก
+ที่ยอมรับคีย์ หากคีย์ถูกปฏิเสธในทุกรีเจียนที่เป็นตัวเลือก การนำเข้าจะล้มเหลวด้วย
+HTTP 400 จากนั้นระบบจะเรียก `ListAvailableProfiles` แบบพยายามเท่าที่ทำได้ เพื่อค้นหา
+`profileArn` ที่ไม่บังคับ (AWS ปฏิเสธคำขอนี้สำหรับคีย์ API ส่วนใหญ่)
 
-การเชื่อมต่อที่บันทึกไว้ใช้:
+การเชื่อมต่อที่บันทึกไว้ใช้ข้อมูลดังนี้:
 
 ```json
 {
@@ -157,8 +165,11 @@ curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
 
 ขณะรันไทม์ `KiroExecutor.buildHeaders()` จะส่งคีย์ในรูปแบบ
 `Authorization: Bearer <key>` และเพิ่ม `tokentype: API_KEY` การเรียกข้อมูลโควตา/โปรไฟล์
-จะใช้ตัวระบุเดียวกัน เพื่อให้ AWS ปฏิบัติต่อ bearer ดังกล่าวเป็น API key ที่มีอายุการใช้งานยาวนาน แทนที่จะเป็น
-โทเค็นการเข้าถึง OIDC หรือโทเค็นจากโซเชียล
+จะใช้ตัวระบุเดียวกัน เพื่อให้ AWS ปฏิบัติต่อ bearer ดังกล่าวเป็นคีย์ API ที่มีอายุยาวนาน แทนที่จะเป็น
+โทเค็นการเข้าถึงแบบ OIDC หรือโซเชียล `KiroExecutor.execute()` จะส่งการอนุมานด้วยคีย์ API
+ไปยัง `https://q.<region>.amazonaws.com/generateAssistantResponse` เท่านั้น — รวมถึง `us-east-1`
+— เนื่องจากเกตเวย์ Kiro IDE ปฏิเสธ `TokenType=API_KEY` และ
+`codewhisperer.us-east-1` ปฏิเสธเพย์โหลดของคีย์ API ว่าเป็นเนื้อหาคำขอที่ไม่ถูกต้อง (HTTP 400)
 
 ---
 

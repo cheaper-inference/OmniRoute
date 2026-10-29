@@ -316,6 +316,30 @@ type BadgeCriteria =
   | FirstCriteria
   | HiddenCriteria;
 
+/** Parse once so evaluation and hidden prerequisites agree on invalid definitions. */
+function parseBadgeCriteria(raw: string | null): BadgeCriteria | null {
+  if (!raw) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    if (error instanceof SyntaxError) return null;
+    throw error;
+  }
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    Array.isArray(parsed) ||
+    !("type" in parsed) ||
+    typeof parsed.type !== "string" ||
+    parsed.type.trim().length === 0
+  ) {
+    return null;
+  }
+  // Unknown nonempty types remain prerequisites; the switch does not award them.
+  return parsed as BadgeCriteria;
+}
+
 // ─── Helper: Action Count ────────────────────────────────────────────────────
 
 /**
@@ -334,9 +358,7 @@ async function getActionCount(apiKeyId: string, action: string): Promise<number>
   const db = getDbInstance();
 
   const row = db
-    .prepare(
-      `SELECT count AS total FROM xp_action_counts WHERE api_key_id = ? AND action = ?`
-    )
+    .prepare(`SELECT count AS total FROM xp_action_counts WHERE api_key_id = ? AND action = ?`)
     .get(apiKeyId, action) as { total: number } | undefined;
 
   return row?.total ?? 0;
@@ -375,29 +397,6 @@ async function getStreak(apiKeyId: string): Promise<number> {
   return data.currentStreak;
 }
 
-// ─── Helper: Leaderboard Rank ────────────────────────────────────────────────
-
-/**
- * Get the rank of an API key on the global leaderboard.
- * Rank = number of users with a higher score + 1.
- */
-async function getRank(apiKeyId: string, scope: string): Promise<number> {
-  const { getDbInstance } = await import("../db/core");
-  const db = getDbInstance();
-
-  const scoreRow = db
-    .prepare("SELECT score FROM leaderboard WHERE api_key_id = ? AND scope = ?")
-    .get(apiKeyId, scope) as { score: number } | undefined;
-
-  if (!scoreRow) return Infinity;
-
-  const rankRow = db
-    .prepare("SELECT COUNT(*) AS rank FROM leaderboard WHERE scope = ? AND score > ?")
-    .get(scope, scoreRow.score) as { rank: number } | undefined;
-
-  return (rankRow?.rank ?? 0) + 1;
-}
-
 // ─── Badge Evaluation Engine ─────────────────────────────────────────────────
 
 /**
@@ -418,24 +417,19 @@ export async function evaluateBadges(
   metadata?: Record<string, unknown>
 ): Promise<string[]> {
   // Import DB functions dynamically to avoid circular deps
-  const { getBadgeDefinitions, unlockBadge, getBadges } = await import("../db/gamification");
+  const { getBadgeDefinitions, unlockBadge, getBadges, getRank } =
+    await import("../db/gamification");
 
-  const definitions = getBadgeDefinitions();
+  const definitions = getBadgeDefinitions().flatMap((definition) => {
+    const criteria = parseBadgeCriteria(definition.criteria);
+    return criteria ? [{ definition, criteria }] : [];
+  });
   const earned = getBadges(apiKeyId);
   const earnedIds = new Set(earned.map((b) => b.badgeId));
   const newlyUnlocked: string[] = [];
 
-  for (const def of definitions) {
+  for (const { definition: def, criteria } of definitions) {
     if (earnedIds.has(def.id)) continue; // Already earned
-
-    if (!def.criteria) continue;
-
-    let criteria: BadgeCriteria;
-    try {
-      criteria = JSON.parse(def.criteria) as BadgeCriteria;
-    } catch {
-      continue; // Malformed criteria, skip
-    }
 
     let unlocked = false;
 
@@ -478,8 +472,9 @@ export async function evaluateBadges(
       }
 
       case "rank": {
-        const rank = await getRank(apiKeyId, "global");
-        unlocked = rank <= criteria.threshold;
+        // getRank returns 0 for a key with no leaderboard entry — that is unranked, not rank 0.
+        const rank = getRank(apiKeyId, "global");
+        unlocked = rank > 0 && rank <= criteria.threshold;
         break;
       }
 
@@ -493,9 +488,15 @@ export async function evaluateBadges(
           .get(apiKeyId) as { first_at: string | null } | undefined;
 
         if (firstLog?.first_at) {
-          const joinDate = new Date(firstLog.first_at);
+          // SQLite datetime('now') is UTC "YYYY-MM-DD HH:MM:SS" without a zone marker;
+          // a bare Date parse would read it as server-local time.
+          const joinDate = new Date(
+            /(?:Z|[+-]\d{2}:?\d{2})$/i.test(firstLog.first_at)
+              ? firstLog.first_at
+              : `${firstLog.first_at.replace(" ", "T")}Z`
+          );
           const windowEnd = new Date(joinDate);
-          windowEnd.setDate(windowEnd.getDate() + (criteria as FirstCriteria).window_days);
+          windowEnd.setUTCDate(windowEnd.getUTCDate() + (criteria as FirstCriteria).window_days);
           unlocked = new Date() <= windowEnd;
         }
         break;
@@ -504,9 +505,10 @@ export async function evaluateBadges(
       case "hidden": {
         // Secret badge: unlocked by having earned all other badges
         const allOtherDefs = definitions.filter(
-          (d) => d.id !== def.id && !JSON.parse(d.criteria).type?.toString().includes("hidden")
+          ({ definition, criteria }) =>
+            definition.id !== def.id && !criteria.type.includes("hidden")
         );
-        const allOtherEarned = allOtherDefs.every((d) => earnedIds.has(d.id));
+        const allOtherEarned = allOtherDefs.every(({ definition }) => earnedIds.has(definition.id));
         unlocked = allOtherEarned;
         break;
       }

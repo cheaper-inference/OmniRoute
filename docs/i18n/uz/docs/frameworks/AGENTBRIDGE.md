@@ -12,38 +12,38 @@ AgentBridge — OmniRoute’ning MITM (Man-in-the-Middle) proksisi bo‘lib, IDE
 
 ---
 
-## §1 Umumiy ma’lumot
+## §1 Umumiy ko'rinish
 
 ### AgentBridge nima?
 
-IDE agenti (masalan, GitHub Copilot, Cursor, Claude Code) API chaqiruvini amalga oshirganda, u to‘g‘ridan-to‘g‘ri yuqori oqimdagi AI provayderiga (OpenAI, Anthropic va boshqalar) ulanadi. AgentBridge ushbu ulanishni TLS darajasida shaffof tarzda — agent konfiguratsiyasini o‘zgartirishni talab qilmasdan — ushlab qoladi va so‘rovni OmniRoute orqali qayta yo‘naltiradi.
+IDE agenti (masalan, GitHub Copilot, Cursor, Claude Code) API chaqiruvini amalga oshirganda, u to‘g‘ridan-to‘g‘ri yuqoridagi AI provayderiga (OpenAI, Anthropic va boshqalar) ulanadi. AgentBridge ushbu ulanishni TLS darajasida shaffof tarzda ushlab turadi - hech qanday agent konfiguratsiyasini o'zgartirishni talab qilmasdan - va so'rovni OmniRoute orqali qayta yozadi.
 
-Bu sizga quyidagilarni amalga oshirish imkonini beradi:
+Bu shuni anglatadiki, siz:
 
-- **Istalgan agentni istalgan provayderga qayta yo‘naltirish**: Copilot OpenAI bilan ishlayaptimi? Uni Anthropic Claude, Gemini yoki OmniRoute’dagi 352 ta provayderdan istalgan biriga yo‘naltiring.
-- **Model mosliklarini qo‘llash**: `gemini-3-flash` → `claude-sonnet-4.7` mosligini ishlov beruvchi darajasida shaffof tarzda qo‘llang.
-- **Barcha agent trafigini kuzatish**: har bir ushlangan so‘rov [Traffic Inspector](./TRAFFIC_INSPECTOR.md) xizmatiga yuboriladi.
-- **OmniRoute barqarorlik imkoniyatlarini qo‘llash**: kombinatsiyalangan marshrutlash, avtomatik uzgichlar, zaxira yo‘nalishlar va xarajatlarni kuzatish IDE agentlari trafigi uchun ham ishlaydi.
+- **Har qanday agentni istalgan provayderga yo'naltiring** : Copilot OpenAI bilan gaplashyapsizmi? Uni Anthropic Claude, Gemini yoki OmniRoute ning 377 provayderlaridan biriga yo‘naltiring.
+- **Model xaritalarini qo'llang** : ishlov beruvchi darajasida `gemini-3-flash` → `claude-sonnet-4.7` shaffof.
+- **Barcha agent trafigini kuzating** : har bir ushlangan so'rov [Yo'l harakati inspektoriga](./TRAFFIC_INSPECTOR.md) e'lon qilinadi.
+- **OmniRoute chidamliligini qo'llang** : kombinatsiyalangan marshrutlash, o'chirgichlar, zaxiralar va IDE agent trafiki uchun xarajatlarni kuzatish ham ishlaydi.
 
-### Bozordagi muqobillarga nisbatan o‘rni
+### Bozorga nisbatan joylashishni aniqlash
 
-| Xususiyat                   | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| --------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                 |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot              |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                  |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                  |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries              |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                 |    —    |    —     |        ✓        |             ✓             |
-| Open Code                   |    —    |    —     |        ✓        |             ✓             |
-| Trae                        |    —    |    —     |        —        |     🔍 O‘rganilmoqda      |
-| Boshqaruv paneli interfeysi |    ✓    |    ✗     |        ✗        |             ✓             |
-| Trafik inspektori           |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute marshrutlashi     |    ✗    |    ✗     |        ✗        |             ✓             |
-| Model mosliklari interfeysi |    ✗    |    ✗     |        ✗        |             ✓             |
-| Chetlab o‘tish ro‘yxati     |    ✗    |    ✗     |        ✓        |             ✓             |
-| Yuqori oqim CA sertifikati  |    ✗    |    ✗     |        ✓        |             ✓             |
+| Xususiyat                  | 9 router | anti-api | llm-to'xtatuvchi | **OmniRoute AgentBridge** |
+| -------------------------- | :------: | :------: | :--------------: | :-----------------------: |
+| Antigravity                |    ✓     |    ✓     |        —         |             ✓             |
+| GitHub Copilot             |    ✓     |    ✓     |        —         |             ✓             |
+| Kiro (AWS)                 |    ✓     |    ✓     |        —         |             ✓             |
+| OpenAI Codex               |    —     |    ✓     |        —         |             ✓             |
+| Cursor IDE                 |    ✓     |    ✓     |        —         |             ✓             |
+| Zed Industries             |    —     |    ✓     |        —         |             ✓             |
+| Claude kodi                |    —     |    —     |        ✓         |             ✓             |
+| Kodni oching               |    —     |    —     |        ✓         |             ✓             |
+| Trae                       |    —     |    —     |        —         |         🔍 tergov         |
+| Boshqaruv paneli UI        |    ✓     |    ✗     |        ✗         |             ✓             |
+| Yo'l harakati inspektori   |    ✗     |    ✗     |        ✓         |             ✓             |
+| OmniRoute marshrutlash     |    ✗     |    ✗     |        ✗         |             ✓             |
+| Model xaritalash UI        |    ✗     |    ✗     |        ✗         |             ✓             |
+| O'tish ro'yxati            |    ✗     |    ✗     |        ✓         |             ✓             |
+| Yuqori oqim CA sertifikati |    ✗     |    ✗     |        ✓         |             ✓             |
 
 ---
 
@@ -188,18 +188,18 @@ ular Traffic Inspector buferiga yoki biror jurnalga kirishidan **oldin** qoʻlla
 
 `/dashboard/tools/agent-bridge` manzilidagi AgentBridge Server kartasidan foydalaning:
 
-| Amal                           | Tavsif                                                                                                         |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| Serverni ishga tushirish       | 443-portda `src/mitm/server.cjs` jarayonini ishga tushiradi                                                    |
-| Serverni toʻxtatish            | Quyi jarayonni xavfsiz tarzda toʻxtatadi                                                                       |
-| Serverni qayta ishga tushirish | Toʻxtatish + ishga tushirish (maqsad oʻzgarishlarini qoʻllaydi)                                                |
-| Sertifikatga ishonish          | `DATA_DIR/mitm/ca.crt` faylini OT ishonchli sertifikatlar omboriga oʻrnatadi                                   |
-| Sertifikatni yuklab olish      | Qoʻlda oʻrnatish uchun `ca.crt` faylini yuklab oladi                                                           |
-| Sertifikatni qayta yaratish    | Yangi CA kalitlar juftligini yaratadi (har bir agent uchun mavjud barcha sertifikatlar yaroqsiz boʻlib qoladi) |
+| Amal                           | Tavsif                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Serverni ishga tushirish       | 443-portda `src/mitm/server.cjs` faylini ishga tushiradi. Root-CA modelida u birinchi ishga tushirishda `ca.crt` faylini yaratadi va sudo paroli mavjud boʻlsa, faol sertifikatni ishonchli deb belgilaydi                                                                                                                                                                                                                                                                             |
+| Serverni toʻxtatish            | Quyi jarayonni xavfsiz tarzda toʻxtatadi                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Serverni qayta ishga tushirish | Toʻxtatish + ishga tushirish (nishon oʻzgarishlari va qayta yaratilgan sertifikatni qoʻllaydi)                                                                                                                                                                                                                                                                                                                                                                                         |
+| Sertifikatni ishonchli qilish  | Faol sertifikatni OT ishonchli sertifikatlar omboriga oʻrnatadi: root-CA modelida `DATA_DIR/mitm/ca.crt`, eski leaf oʻrnatilishida esa `DATA_DIR/mitm/server.crt`                                                                                                                                                                                                                                                                                                                      |
+| Sertifikatni yuklab olish      | Qoʻlda oʻrnatish uchun faol sertifikatni yuklab oladi (`omniroute-mitm-ca.crt` = `ca.crt` yoki eski leaf oʻrnatilishida `omniroute-mitm.crt` = `server.crt`)                                                                                                                                                                                                                                                                                                                           |
+| Sertifikatni qayta yaratish    | Sertifikat modelini hech qachon oʻzgartirmaydi. Eski leaf oʻrnatilishi: yangi `server.crt`/`server.key` yaratadi (undan foydalanish uchun serverni qayta ishga tushiring). Root-CA modeli: `ca.crt`/`ca.key` fayllarini yangilaydi; server ishlab turganida bunga ruxsat berilmaydi. Avval ishonchli eski CA ishonchli sertifikatlar roʻyxatidan chiqariladi (sudo paroli kerak) yoki yangilash bekor qilinadi. Shundan soʻng mijozlar yangi CAʼni yana ishonchli deb belgilashi kerak |
 
-### 3.2 Sertifikatga ishonish
+### 3.2 Sertifikatni ishonchli qilish
 
-IDEʼlar MITM ulanishini qabul qilishi uchun AgentBridge CA sertifikati OT tomonidan ishonchli deb tan olinishi kerak.
+IDEʼlar MITM ulanishini qabul qilishi uchun avval AgentBridge CA sertifikati OT tomonidan ishonchli deb belgilanishi kerak.
 
 **Linux (NSS — Chrome/Firefox):**
 
@@ -220,35 +220,23 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-Yoki boshqaruv panelidagi "Sertifikatga ishonish" tugmasidan foydalaning (u OT uchun mos buyruqni ishga tushiradi va zarur boʻlsa sudo soʻrovini koʻrsatadi).
+Yoki boshqaruv panelidagi "Sertifikatni ishonchli qilish" tugmasidan foydalaning (OT uchun mos buyruqni ishga tushiradi va zarur boʻlsa, sudo parolini soʻraydi).
 
 #### Electron asosidagi IDEʼlar OT ishonchli sertifikatlar omborini eʼtiborsiz qoldiradi (`NODE_EXTRA_CA_CERTS`)
 
-Ayrim IDEʼlar — xususan **Antigravity IDE** va Electron / VS Code asosidagi boshqa ilovalar — tashqi
-`fetch`/HTTPS soʻrovlari uchun **OT ishonchli sertifikatlar omboriga murojaat qilmaydigan**
-oʻz Node.js bajarilish muhitini oʻz ichiga oladi. CAʼga OT/NSS darajasida ishonish IDEʼning mahalliy **backend**
-qismi (masalan, OT CA toʻplamidan foydalanadigan Go til serveri) uchun yetarli, ammo **Electron frontend**
-qismida TLS baribir muvaffaqiyatsiz tugaydi — MITM jurnali backendʼning boshlangʻich soʻrovlari `200`
-qaytarayotganini koʻrsatsa ham, bu ilovada foydalanuvchi _tizimdan chiqarilgandek_ yoki
-_"ulanish xatosi"_ koʻrsatilishi sifatida namoyon boʻladi. Ikki qadam talab qilinadi va ikkalasi ham muhim:
+Baʼzi IDEʼlar — xususan, **Antigravity IDE** hamda Electron / VS Code asosidagi boshqa ilovalar — chiquvchi `fetch`/HTTPS soʻrovlari uchun **OT ishonchli sertifikatlar omboriga murojaat qilmaydigan** oʻz Node.js muhitini birga taqdim etadi. CAʼni OT/NSS darajasida ishonchli qilish IDEʼning mahalliy **backend** qismi (masalan, OT CA toʻplamidan foydalanadigan Go til serveri) uchun yetarli, ammo **Electron frontend** qismida TLS baribir ishlamaydi — bu MITM jurnalida backend boshlangʻich soʻrovlari `200` qaytarayotgan boʻlsa ham, ilovada foydalanuvchi tizimdan _chiqarilgandek_ yoki _"ulanish xatosi"_ koʻrsatilishi tarzida namoyon boʻladi. Ikki qadam talab qilinadi va ikkalasi ham muhim:
 
-1. Bajarilish muhitiga CA manzilini aniq koʻrsating:
+1. Muhitni CAʼga bevosita yoʻnaltiring:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
-2. **IDEʼni aynan shu shelldan ishga tushiring.** Uni ish stoli belgisi / Dock / Start menyusi orqali
-   ishga tushirish shell eksportlarini **meros qilib olmaydi**, `~/.config/environment.d/*.conf` esa faqat
-   yangi grafik kirishdan keyin qoʻllanadi. Avval IDEʼdan toʻliq chiqing — Electronʼning yagona nusxa qulfi
-   sababli ikkinchi ishga tushirish faqat mavjud jarayonni fokuslaydi va yangi muhit eʼtiborsiz qoldiriladi.
+2. **IDEʼni aynan shu shellʼdan ishga tushiring.** Uni ish stoli belgisi / Dock / Start menyusi orqali ishga tushirish shell eksportlarini **meros qilib olmaydi**, `~/.config/environment.d/*.conf` esa faqat grafik tizimga qaytadan kirilgandan keyin qoʻllanadi. Avval IDEʼdan toʻliq chiqing — Electronʼning singleton qulfi sababli ikkinchi marta ishga tushirish faqat mavjud jarayonni fokuslaydi va yangi muhit eʼtiborsiz qoldiriladi.
 
-Yuqoridagi OT ishonchi + NSS qadami baribir zarur (ayrim autentifikatsiya jarayonlari foydalanadigan Chromium
-tarmoq steki har bir foydalanuvchining NSS omborini oʻqiydi hamda `*.googleapis.com` uchun oʻzining statik
-pinlariga ega boʻlib, mahalliy ishonchli CA ularni bekor qiladi). `NODE_EXTRA_CA_CERTS` buning ustiga Node
-`fetch` yoʻlini qamrab oladi.
+Yuqoridagi OT ishonchi + NSS qadami hamon zarur (ayrim autentifikatsiya jarayonlarida ishlatiladigan Chromium tarmoq steki har bir foydalanuvchining NSS omborini oʻqiydi va `*.googleapis.com` uchun mahalliy ishonchli CA bekor qiladigan oʻz statik pinlariga ega). `NODE_EXTRA_CA_CERTS` buning ustiga Node `fetch` yoʻlini ham qamrab oladi.
 
 ### 3.3 DNS yoʻnaltirish
 
-Tutib qolmoqchi boʻlgan har bir agent uchun uning API hosti yoki hostlari `127.0.0.1` manziliga aniqlanishi kerak. Sozlash ustasida agent uchun DNSʼni yoqqaningizda AgentBridge `/etc/hosts` yozuvlarini avtomatik boshqaradi.
+Tutib qolmoqchi boʻlgan har bir agent uchun uning API host(lar)i `127.0.0.1` manziliga yoʻnaltirilishi kerak. Sozlash ustasida agent uchun DNSʼni yoqqaningizda AgentBridge `/etc/hosts` yozuvlarini avtomatik ravishda boshqaradi.
 
 GitHub Copilot uchun `/etc/hosts` yozuvlari namunasi:
 
@@ -259,74 +247,75 @@ GitHub Copilot uchun `/etc/hosts` yozuvlari namunasi:
 
 ### 3.4 Model moslashtirish
 
-Manba → maqsad mosliklarini belgilash uchun har bir agent kartasidagi Model Mapping jadvalidan foydalaning:
+Manba → nishon mosliklarini belgilash uchun har bir agent kartasidagi Model Mapping jadvalidan foydalaning:
 
-| Manba modeli (agentga xos) | Maqsad modeli (OmniRoute) |
+| Manba modeli (agentga xos) | Nishon modeli (OmniRoute) |
 | -------------------------- | ------------------------- |
 | `gpt-4o`                   | `claude-sonnet-4.7`       |
 | `*` (joker belgi)          | `claude-haiku-4.7`        |
 
-`*` joker belgisi tanilmagan har qanday modelni koʻrsatilgan maqsadga moslaydi. Maʼlumotlar `agent_bridge_mappings` jadvalida saqlanadi.
+`*` joker belgisi tanilmagan har qanday modelni belgilangan nishonga moslashtiradi. `agent_bridge_mappings` jadvalida saqlanadi.
 
-> **Maslahat — agentning haqiqiy model IDʼlarini aniqlang.** IDE oʻz interfeysidagi yorliqlardan farq qiladigan
-> va asosiy versiyalar oʻrtasida oʻzgaradigan model nomlarini yuborishi mumkin. Masalan, **Antigravity 2**
-> tarmoq orqali `gemini-3.1-pro-low`, `gemini-pro-agent` va `gemini-3.1-flash-lite` qiymatlarini yuboradi —
-> eski hujjatlarda koʻrsatilgan `gemini-2.5-pro` qiymatini emas. Mos keluvchi xaritalash mavjud boʻlmagan
-> holda bitta chat yuboring: MITM aniq kiruvchi `model:` qiymatini jurnalga yozadi va soʻrovni oʻtkazib yuboradi.
-> Aynan shu qiymatni moslang, shunda keyingi soʻrov tutib qolinadi va maqsadingizga yoʻnaltiriladi.
+> **Maslahat — agentning haqiqiy model IDlarini aniqlang.** IDE yuboradigan model nomlari
+> uning UI yorliqlaridan farq qilishi va asosiy versiyalar orasida oʻzgarishi mumkin. Masalan, **Antigravity 2**
+> tarmoq orqali `gemini-3.1-pro-low`, `gemini-pro-agent` va `gemini-3.1-flash-lite` nomlarini yuboradi —
+> eski hujjatlarda koʻrsatilgan `gemini-2.5-pro` nomini emas. Mos keluvchi xaritalash mavjud boʻlmagan holda
+> bitta chat yuboring: MITM kiruvchi aniq `model:` qiymatini jurnalga yozadi va soʻrovni oʻtkazib yuboradi.
+> Shu literal qiymatni xaritalang, shunda keyingi soʻrov tutib olinadi va maqsadingizga yoʻnaltiriladi.
 
 ### 3.5 Xavf haqida ogohlantirish
 
-AgentBridge IDE yuqori oqim provayderlari bilan autentifikatsiya qilish uchun foydalanadigan hisob maʼlumotlarini (OAuth tokenlari, API kalitlari) tutib qoladi. Ular **jurnalga yozilishidan oldin maskalanadi** (§2.7 ga qarang), biroq OmniRouteʼning MITM qatlamiga koʻrinadi. Har bir agent birinchi marta faollashtirilganda yopish mumkin boʻlgan xavf haqidagi ogohlantirish modal oynasi koʻrsatiladi.
+AgentBridge IDE yuqori darajadagi provayderlarda autentifikatsiya qilish uchun ishlatadigan hisob maʼlumotlarini (OAuth tokenlari, API kalitlari) tutib oladi. Ular **jurnalga yozilishidan oldin niqoblanadi** (§2.7 ga qarang), ammo OmniRoute’ning MITM qatlamiga koʻrinadi. Har bir agent birinchi marta faollashtirilganda yopish mumkin boʻlgan xavf haqida ogohlantirish modal oynasi koʻrsatiladi.
 
 ### 3.6 Texnik xizmat va diagnostika
 
-Boshqaruv panelida avval interfeysga ega boʻlmagan operatsion MITM yoʻnalishlarini koʻrsatadigan **Texnik xizmat va diagnostika** kartasi (`AgentBridgeMaintenanceCard`, `src/app/(dashboard)/dashboard/tools/agent-bridge/components/` ichida) mavjud. Uning taglavhasi: _"Tutib olish konveyerini mustaqil sinovdan oʻtkazing, tizimda qolib ketgan holatlarni bekor qiling va sozlamalaringizni qurilmalar oʻrtasida koʻchiring."_ Karta mijoz yordamchilari `src/lib/inspector/agentBridgeMaintenanceApi.ts` ichida joylashgan.
+Boshqaruv panelida avval UIga ega boʻlmagan operatsion MITM yoʻnalishlarini koʻrsatuvchi **Texnik xizmat va diagnostika** kartasi (`AgentBridgeMaintenanceCard`, `src/app/(dashboard)/dashboard/tools/agent-bridge/components/` ichida) mavjud. Uning taglavhasi: _"Tutib olish konveyerini mustaqil sinovdan oʻtkazing, tizimda qolib ketgan holatni bekor qiling va sozlamalaringizni kompyuterlar oʻrtasida koʻchiring."_ Karta mijoz yordamchilari `src/lib/inspector/agentBridgeMaintenanceApi.ts` ichida joylashgan.
 
-| Tugma                               | Yoʻnalish                              | Vazifasi                                                                                                                                                                                                                                       |
-| ----------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Diagnostika**                     | `GET /api/tools/agent-bridge/diagnose` | Qamrab olish konveyerining oʻz-oʻzini tekshirishini ishga tushiradi va har bir tekshiruv boʻyicha hisobotni koʻrsatadi (✓/✗ + muammoni bartaraf etish tavsiyasi).                                                                              |
-| **Tuzatish**                        | `POST /api/tools/agent-bridge/repair`  | Nosozlik yoki SIGKILL tufayli qolib ketgan egasiz MITM tizim holatini (DNS soxtalashtirish yozuvlari, ildiz CA, tizim proksisi) bekor qiladi. Idempotent — holat toza boʻlsa, «Tuzatiladigan hech narsa yoʻq» deb xabar beradi.                |
-| **CAni oʻchirish**                  | `DELETE /api/tools/agent-bridge/cert`  | MITM ildiz CAsiga boʻlgan ishonchni bekor qiladi va uni OT ishonchli sertifikatlar omboridan olib tashlaydi (aniq, idempotent). Faqat CA ayni paytda ishonchli boʻlsa koʻrsatiladi; satr ichidagi «CA oʻchirilsinmi?» tasdigʻini talab qiladi. |
-| **Konfiguratsiyani eksport qilish** | `GET /api/tools/agent-bridge/config`   | Koʻchma konfiguratsiya JSON faylini yuklab oladi (§3.7 ga qarang).                                                                                                                                                                             |
-| **Konfiguratsiyani import qilish**  | `POST /api/tools/agent-bridge/config`  | Avval eksport qilingan konfiguratsiya JSON faylini yuklaydi (§3.7 ga qarang).                                                                                                                                                                  |
+| Tugma                               | Yoʻnalish                              | Nima qiladi                                                                                                                                                                                                                                       |
+| ----------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Diagnostika**                     | `GET /api/tools/agent-bridge/diagnose` | Tutib olish konveyerining mustaqil sinovini ishga tushiradi va har bir tekshiruv boʻyicha hisobotni koʻrsatadi (✓/✗ + tuzatish maslahati).                                                                                                        |
+| **Tuzatish**                        | `POST /api/tools/agent-bridge/repair`  | Nosozlik yoki SIGKILL sabab qolib ketgan egasiz MITM tizim holatini (DNS soxtalashtirish yozuvlari, ildiz CA, tizim proksisi) bekor qiladi. Idempotent — holat toza boʻlsa, "Tuzatish uchun hech narsa yoʻq" deb xabar beradi.                    |
+| **CAnı olib tashlash**              | `DELETE /api/tools/agent-bridge/cert`  | MITM ildiz CAsiga boʻlgan ishonchni bekor qiladi va uni OS ishonch omboridan olib tashlaydi (aniq, idempotent). Faqat CAga ayni paytda ishonch bildirilganida koʻrsatiladi; qator ichidagi "CAnı olib tashlash kerakmi?" tasdigʻini talab qiladi. |
+| **Konfiguratsiyani eksport qilish** | `GET /api/tools/agent-bridge/config`   | Koʻchma konfiguratsiya JSON faylini yuklab oladi (§3.7 ga qarang).                                                                                                                                                                                |
+| **Konfiguratsiyani import qilish**  | `POST /api/tools/agent-bridge/config`  | Avval eksport qilingan konfiguratsiya JSON faylini yuklaydi (§3.7 ga qarang).                                                                                                                                                                     |
 
 Har bir agent kartasida oʻzining **Standart holatni tiklash** tugmasi ham mavjud (`POST
-/api/tools/agent-bridge/agents/{id}/reset`) — bu bir marta bosish orqali har bir agent uchun bekor qilish amali boʻlib, faqat shu
-agent hostlarining soxtalashtirilishini bekor qiladi, uning saqlangan model mosliklarini tozalaydi va `dns_enabled`/`setup_completed`
-holatini qayta oʻrnatadi, natijada IDE toʻliq qayta ishga tushirilgach, yana haqiqiy yuqori oqim xizmatiga ulanadi. U umumiy
-MITM serveri yoki ildiz CAga **tegmaydi** (boshqa agentlar hali ham ularga bogʻliq boʻlishi mumkin) — ularga yuqoridagi Server kartasi va
-**CAni oʻchirish** amali orqali kirish mumkin boʻlib qoladi. Windows tizimida u imkon qadar
-`ipconfig /flushdns` buyrugʻini ham ishga tushiradi, chunki Windows DNS Client hosts fayli yozuvlarini keshlaydi va aks holda
-endi olib tashlangan soxtalashtirish yozuvini oʻchirmaydi.
+/api/tools/agent-bridge/agents/{id}/reset`) — bu bir marta bosish orqali faqat shu agent
+hostlarining soxtalashtirilishini bekor qiladigan, uning saqlangan model xaritalashlarini tozalaydigan va
+`dns_enabled`/`setup_completed` holatini tiklaydigan har bir agent uchun alohida bekor qilish amalidir;
+natijada IDE toʻliq qayta ishga tushirilgach, yana haqiqiy yuqori darajadagi xizmat bilan aloqa qiladi. U
+umumiy MITM serveri yoki ildiz CAga **tegmaydi** (boshqa agentlar hali ham ularga bogʻliq boʻlishi mumkin) —
+ulardan Server kartasi va yuqoridagi **CAnı olib tashlash** amali orqali foydalanish mumkin boʻlib qoladi.
+Windows tizimida u imkon qadar `ipconfig /flushdns` buyrugʻini ham ishga tushiradi, chunki Windows DNS Client
+hosts fayli yozuvlarini keshlaydi va aks holda hozirgina olib tashlangan soxtalashtirish yozuvini oʻchirmaydi.
 
-**Diagnostika tekshiruvlari** (`src/mitm/inspector/diagnostics.ts` ichidagi `summarizeDiagnostics()`). Yoʻnalish har biri uchun taʼsirli tekshiruvni ishga tushiradi va mantiqiy qiymatlarni sof umumlashtiruvchiga uzatadi; yagona `healthy` xulosasi hamda har bir nosozlik uchun tavsiya qaytariladi:
+**Diagnostika tekshiruvlari** (`src/mitm/inspector/diagnostics.ts` ichidagi `summarizeDiagnostics()`). Yoʻnalish har biri uchun tashqi taʼsirga ega tekshiruvni ishga tushiradi va mantiqiy qiymatlarni sof umumlashtiruvchiga uzatadi; yagona `healthy` xulosasi hamda har bir nosozlik uchun maslahat qaytariladi:
 
-| Tekshiruv nomi     | Nimani tekshiradi                                                      | Nosozlik yuz bergandagi tavsiya                                                                                                                                   |
-| ------------------ | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`   | MITM server jarayoni faol ekanini                                      | «MITM serveri ishlamayapti. Uni AgentBridge varagʻidan ishga tushiring.»                                                                                          |
-| `server-reachable` | MITM serveri oʻz portida ulanishlarni qabul qilishini (TCP tekshiruvi) | «MITM serveri oʻz portida ulanishlarni qabul qilmayapti. Port boʻsh ekanini va uni bogʻlash uchun imtiyozlaringiz borligini tekshiring.»                          |
-| `cert-exists`      | MITM sertifikati diskda yaratilganini                                  | «Hali hech qanday MITM sertifikati yaratilmagan. Uni AgentBridge varagʻidan yarating.»                                                                            |
-| `cert-trusted`     | MITM ildiz CA OT ishonchli sertifikatlar omborida mavjudligini         | «MITM ildiz CAsiga OT ombori ishonmaydi, shu sababli TLS tutib olish ishlamaydi. Sertifikatni AgentBridge varagʻidan ishonchli deb belgilang.»                    |
-| `dns-configured`   | Maqsadli host nomlari `/etc/hosts` ichida soxtalashtirilganini         | «Maqsadli host nomlari /etc/hosts ichida soxtalashtirilmagan, shu sababli trafik proksiga yetib bormaydi. Qamrab olmoqchi boʻlgan agent(lar) uchun DNSni yoqing.» |
+| Tekshiruv nomi     | Nimani tekshiradi                                                      | Nosozlik yuz bergandagi maslahat                                                                                                                                 |
+| ------------------ | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | MITM server jarayoni faol ekanini                                      | "MITM serveri ishlamayapti. Uni AgentBridge ichki oynasidan ishga tushiring."                                                                                    |
+| `server-reachable` | MITM serveri oʻz portida ulanishlarni qabul qilishini (TCP tekshiruvi) | "MITM serveri oʻz portida ulanishlarni qabul qilmayapti. Port boʻshligini va unga bogʻlanish uchun huquqlaringiz borligini tekshiring."                          |
+| `cert-exists`      | MITM sertifikati diskda yaratilganini                                  | "Hali hech qanday MITM sertifikati yaratilmagan. Uni AgentBridge ichki oynasidan yarating."                                                                      |
+| `cert-trusted`     | MITM ildiz CAsi OS ishonch omborida mavjudligini                       | "MITM ildiz CAsiga OS ombori ishonmaydi, shuning uchun TLS tutib olish ishlamaydi. Sertifikatga AgentBridge ichki oynasidan ishonch bildiring."                  |
+| `dns-configured`   | Maqsadli host nomlari `/etc/hosts` ichida soxtalashtirilganini         | "Maqsadli host nomlari /etc/hosts ichida soxtalashtirilmagan, shu sababli trafik proksiga yetib bormaydi. Tutib olmoqchi boʻlgan agent(lar) uchun DNSni yoqing." |
 
-**Egasiz holat banneri:** sahifa nosozlikdan keyin qolib ketgan holatni (DNS soxtalashtirish / CA / tizim proksisi) aniqlasa, kartada qahrabo rangli banner — _«Avvalgi seans tizim holatini (DNS soxtalashtirish, CA yoki tizim proksisi) qoldirib ketgan. Uni tozalash uchun Tuzatishni ishga tushiring.»_ — koʻrsatiladi va **Tuzatish** tugmasi ajratib koʻrsatiladi. `Repair` ProxyBridgeʼning `--cleanup` bayrogʻiga ilova qatlami darajasidagi muqobildir (u vazifani `src/mitm/manager.ts` ichidagi `repairMitm()`ga topshiradi).
+**Egasiz holat banneri:** sahifa nosozlik sabab qolib ketgan holatni (DNS soxtalashtirish / CA / tizim proksisi) aniqlasa, kartada qahrabo rangli banner — _"Avvalgi seans tizim holatini qoldirib ketgan (DNS soxtalashtirish, CA yoki tizim proksisi). Uni tozalash uchun Tuzatishni ishga tushiring."_ — koʻrsatiladi va **Tuzatish** tugmasi ajratib koʻrsatiladi. `Repair` ProxyBridge’dagi `--cleanup` bayrogʻining ilova qatlami analogidir (u `src/mitm/manager.ts` ichidagi `repairMitm()`ga vakolat beradi).
 
-> Qayta-qayta sudo soʻrovlarini oldini olish uchun MITM ildiz CA toʻxtatish/ishga tushirishlar orasida oʻrnatilgan holda
-> saqlanadi (mitmproxy/Charles bilan bir xil xatti-harakat), shu sababli uni olib tashlash toʻxtatish paytida avtomatik
-> bajariladigan amal emas, balki aniq **CAni oʻchirish** amalidir.
+> MITM ildiz CA sertifikati takroriy sudo soʻrovlarini oldini olish uchun
+> toʻxtatish/ishga tushirish davomida oʻrnatilgan holda saqlanadi (mitmproxy/Charles bilan bir xil xatti-harakat), shuning uchun uni olib tashlash toʻxtatilganda avtomatik ravishda sodir boʻladigan amal emas, balki alohida
+> **CA sertifikatini olib tashlash** amalidir.
 
 ### 3.7 Koʻchma konfiguratsiyani import/eksport qilish
 
-AgentBridge sozlamani turli mashinalarda takrorlash mumkin boʻlishi uchun **operator sozlay oladigan** holatni versiyalangan JSON obyektiga serializatsiya qila oladi. Serializator — `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), u `AgentBridgeConfigSchema` orqali tekshiriladi.
+AgentBridge sozlamani bir nechta kompyuterda takrorlash imkonini berish uchun **operator sozlashi mumkin boʻlgan** holatni versiyalangan JSON obyektiga serializatsiya qila oladi. Serializator `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`) faylida joylashgan va `AgentBridgeConfigSchema` orqali tekshiriladi.
 
-Eksport aynan uchta qismni oʻz ichiga oladi (ichki standart qiymatlar ataylab eksport qilinmaydi, shuning uchun import qilish ularni hech qachon takrorlamaydi yoki ular bilan ziddiyatga kirmaydi):
+Eksport aynan uchta qismni oʻz ichiga oladi (oʻrnatilgan standart qiymatlar ataylab eksport qilinmaydi, shuning uchun import qilish ularni hech qachon takrorlamaydi yoki ular bilan ziddiyatga kirishmaydi):
 
-| Maydon           | Manba                                                                      | Izohlar                                                                   |
-| ---------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `bypassPatterns` | foydalanuvchi belgilagan chetlab oʻtish andozalari (`agent_bridge_bypass`) | standart bank/gov/okta andozalari chiqarib tashlanadi                     |
-| `customHosts`    | Traffic Inspector maxsus hostlari (`inspector_custom_hosts`)               | har biri: `{ host, kind: "llm"\|"app"\|"custom", label? }`                |
-| `agentMappings`  | har bir agent uchun model mosliklari (`agent_bridge_mappings`)             | mosliklarga ega har bir agent uchun `{ [agentId]: [{ source, target }] }` |
+| Maydon           | Manba                                                                      | Izohlar                                                                     |
+| ---------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `bypassPatterns` | foydalanuvchi belgilagan chetlab oʻtish andozalari (`agent_bridge_bypass`) | standart bank/gov/okta andozalari chiqarib tashlanadi                       |
+| `customHosts`    | Traffic Inspector maxsus xostlari (`inspector_custom_hosts`)               | har biri: `{ host, kind: "llm"\|"app"\|"custom", label? }`                  |
+| `agentMappings`  | har bir agent uchun model mosliklari (`agent_bridge_mappings`)             | mosliklari mavjud har bir agent uchun `{ [agentId]: [{ source, target }] }` |
 
 ```jsonc
 // GET /api/tools/agent-bridge/config
@@ -340,13 +329,13 @@ Eksport aynan uchta qismni oʻz ichiga oladi (ichki standart qiymatlar ataylab e
 }
 ```
 
-**Import qilish tartibi** (`POST /api/tools/agent-bridge/config`): chetlab oʻtish andozalari va har bir agent uchun mosliklar **toʻliq almashtiriladi**; maxsus hostlar **idempotent tarzda** qoʻshiladi (`INSERT OR IGNORE`). Javobda har biridan nechtasi qoʻllangani koʻrsatiladi:
+**Import qilish xatti-harakati** (`POST /api/tools/agent-bridge/config`): chetlab oʻtish andozalari va har bir agent uchun mosliklar **toʻliq almashtiriladi**; maxsus xostlar **idempotent tarzda** qoʻshiladi (`INSERT OR IGNORE`). Javobda har bir turdan nechtasi qoʻllangani koʻrsatiladi:
 
 ```jsonc
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-Konfiguratsiyaga **KIRITILMAYDIGAN** maʼlumotlar: serverning ishlash holati, sertifikat yoʻllari, har bir agentning DNS holati, yuqori oqim CA yoʻli va TPROXY sozlamalari — bular koʻchma parametrlar emas, balki host/ish vaqti holatidir.
+Konfiguratsiyaga **KIRITILMAYDIGAN** narsalar: serverning ishlash holati, sertifikat yoʻllari, har bir agentning DNS holati, yuqori oqim CA yoʻli va TPROXY sozlamalari — bular koʻchma afzalliklar emas, balki xost/ishlash muhiti holatidir.
 
 ---
 
@@ -506,38 +495,38 @@ Agar AgentBridge soʻrovlarni tutib olsa-yu, lekin barcha soʻrovlar muvaffaqiya
 
 ## §7 API maʼlumotnomasi
 
-Barcha marshrutlar `LOCAL_ONLY` (faqat loopback, autentifikatsiyadan oldin majburiy tekshiriladi) va `SPAWN_CAPABLE` hisoblanadi. `src/server/authz/routeGuard.ts` fayliga qarang.
+Barcha yoʻnalishlar `LOCAL_ONLY` (faqat loopback, autentifikatsiyadan oldin majburiy tekshiriladi) va `SPAWN_CAPABLE` hisoblanadi. `src/server/authz/routeGuard.ts` fayliga qarang.
 
 Asosiy yoʻl: `/api/tools/agent-bridge/`
 
-| Metod               | Yoʻl                                           | Tavsif                                                                                                                                                                |
-| ------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | Serverning global holati + har bir agent uchun aniqlash/holat maʼlumotlari                                                                                            |
-| GET                 | `/api/tools/agent-bridge/agents`               | Roʻyxatdan oʻtgan agentlar roʻyxati (id, nom, xostlar, yaroqlilik, holat)                                                                                             |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Bitta agentning holati (maqsad konfiguratsiyasi + aniqlash + saqlangan holat)                                                                                         |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Agent uchun `setup_completed` qiymatini yangilash                                                                                                                     |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Agent uchun aniqlash tekshiruvini ishga tushirish (`installed`, `version?`, `path?`)                                                                                  |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Agent uchun DNSʼni yoqish/oʻchirish (`{enabled: boolean}`)                                                                                                            |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Agent uchun model mosliklari                                                                                                                                          |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Model mosliklarini almashtirish                                                                                                                                       |
-| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Standart holatni tiklash: bu agentning DNS soxtalashtirishini bekor qilish, mosliklarini tozalash va holatini tiklash (§3.6 ga qarang)                                |
-| POST                | `/api/tools/agent-bridge/server`               | Serverni ishga tushirish/toʻxtatish/qayta ishga tushirish (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                     |
-| GET                 | `/api/tools/agent-bridge/cert`                 | Sertifikat holati (`exists`, `trusted`, `path`)                                                                                                                       |
-| POST                | `/api/tools/agent-bridge/cert`                 | MITM ildiz CA sertifikatiga ishonish (oʻrnatish)                                                                                                                      |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | MITM ildiz CA sertifikatiga ishonchni bekor qilish (olib tashlash) — idempotent (§3.6 ga qarang)                                                                      |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Oʻzi imzolagan MITM sertifikatini qayta yaratish                                                                                                                      |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | Yuklab olish uchun PEM sertifikatini oqim orqali uzatish                                                                                                              |
-| GET                 | `/api/tools/agent-bridge/bypass`               | Chetlab oʻtish andozalari roʻyxati (`default` + `user`)                                                                                                               |
-| POST                | `/api/tools/agent-bridge/bypass`               | Foydalanuvchi belgilagan chetlab oʻtish andozalarini toʻliq almashtirish                                                                                              |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Foydalanuvchi belgilagan bitta chetlab oʻtish andozasini olib tashlash                                                                                                |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | Tutib olish konveyerining oʻz-oʻzini tekshirishi (§3.6 ga qarang)                                                                                                     |
-| POST                | `/api/tools/agent-bridge/repair`               | Egasi qolmagan MITM tizim holatini bekor qilish (§3.6 ga qarang)                                                                                                      |
-| GET                 | `/api/tools/agent-bridge/config`               | Koʻchma konfiguratsiyani JSON formatida eksport qilish (§3.7 ga qarang)                                                                                               |
-| POST                | `/api/tools/agent-bridge/config`               | Koʻchma konfiguratsiyani JSON formatida import qilish (§3.7 ga qarang)                                                                                                |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Sozlangan yuqori oqim CA yoʻlini olish                                                                                                                                |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Yuqori oqim CA yoʻlini tekshirish + saqlash                                                                                                                           |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Yuqori oqim CA yoʻlini faqat tekshirish (sinov tariqasida) — saqlanmaydi                                                                                              |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY shaffof deshifrlash orqali tutib olish rejimi — `docs/security/MITM-TPROXY-DECRYPT.md` fayliga qarang (git ichida; `/docs` tarkibiga kompilyatsiya qilinmagan) |
+| Metod               | Yoʻl                                           | Tavsif                                                                                                                                            |
+| ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET                 | `/api/tools/agent-bridge/state`                | Global server holati + har bir agent uchun aniqlash/holat                                                                                         |
+| GET                 | `/api/tools/agent-bridge/agents`               | Roʻyxatdan oʻtgan agentlar roʻyxati (id, nom, hostlar, yaroqlilik, holat)                                                                         |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Bitta agent holati (maqsad konfiguratsiyasi + aniqlash + saqlangan holat)                                                                         |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Agent uchun `setup_completed` qiymatini yangilash                                                                                                 |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Agent uchun aniqlash tekshiruvini ishga tushirish (`installed`, `version?`, `path?`)                                                              |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Agent uchun DNSʼni yoqish/oʻchirish (`{enabled: boolean}`)                                                                                        |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Agent uchun model mosliklari                                                                                                                      |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Model mosliklarini almashtirish                                                                                                                   |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Standart holatni tiklash: ushbu agentning DNS soxtalashtirishini bekor qilish, mosliklarini tozalash va holatini tiklash (§3.6 ga qarang)         |
+| POST                | `/api/tools/agent-bridge/server`               | Serverni ishga tushirish/toʻxtatish/qayta ishga tushirish (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                 |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Sertifikat holati (`exists`, `trusted`, `path`)                                                                                                   |
+| POST                | `/api/tools/agent-bridge/cert`                 | MITM ildiz CAʼsiga ishonish (oʻrnatish)                                                                                                           |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | MITM ildiz CAʼsiga ishonchni bekor qilish (olib tashlash) — idempotent (§3.6 ga qarang)                                                           |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Sertifikat modelini oʻzgartirmasdan faol sertifikatni qayta yaratish (eskirgan yakuniy sertifikat yoki ildiz CA rotatsiyasi — §3.1 ga qarang)     |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Faol PEM sertifikatini yuklab olish uchun oqim orqali uzatish (ildiz CA modelida `ca.crt`, eskirgan yakuniy sertifikat oʻrnatmasida `server.crt`) |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Chetlab oʻtish andozalari roʻyxati (`default` + `user`)                                                                                           |
+| POST                | `/api/tools/agent-bridge/bypass`               | Foydalanuvchi belgilagan chetlab oʻtish andozalarini toʻliq almashtirish                                                                          |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Foydalanuvchi belgilagan bitta chetlab oʻtish andozasini olib tashlash                                                                            |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | Tutib olish konveyerining oʻz-oʻzini tekshirishi (§3.6 ga qarang)                                                                                 |
+| POST                | `/api/tools/agent-bridge/repair`               | Yetim qolgan MITM tizim holatini bekor qilish (§3.6 ga qarang)                                                                                    |
+| GET                 | `/api/tools/agent-bridge/config`               | Koʻchma konfiguratsiya JSONʼini eksport qilish (§3.7 ga qarang)                                                                                   |
+| POST                | `/api/tools/agent-bridge/config`               | Koʻchma konfiguratsiya JSONʼini import qilish (§3.7 ga qarang)                                                                                    |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Sozlangan yuqori oqim CA yoʻlini olish                                                                                                            |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Yuqori oqim CA yoʻlini tekshirish + saqlash                                                                                                       |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Yuqori oqim CA yoʻlini faqat tekshirish (sinov rejimi) — saqlanmaydi                                                                              |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY shaffof-deshlash tutib olish rejimi — `docs/security/MITM-TPROXY-DECRYPT.md` fayliga qarang (git; `/docs` ichiga kompilyatsiya qilinmaydi) |
 
 Toʻliq OpenAPI sxemalari: `docs/openapi.yaml` → `AgentBridge` tegi.
 

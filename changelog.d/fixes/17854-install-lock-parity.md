@@ -1,0 +1,1 @@
+- **fix(ci):** Reject stale or incomplete direct dependency versions before native install probes, including borrowed test runners that differ from the candidate lockfile; retain the lockfile digest in the verification receipt (#17854).

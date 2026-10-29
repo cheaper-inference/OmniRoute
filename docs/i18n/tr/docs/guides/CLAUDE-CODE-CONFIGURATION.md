@@ -49,17 +49,16 @@ etkin bağlamdan çözümler (böylece `omniroute connect <vps>` ve ardından
 
 ---
 
-## Keşif takma adları — Claude dışı modelleri `/model` seçicisinde gösterin
+## Keşif takma adları — Claude dışı modelleri `/model` seçicisinde gösterme
 
-Claude Code'un ağ geçidi model keşfi yalnızca kimlikleri `claude` veya
-`anthropic` ile başlayan modelleri listeler; bu nedenle
-`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` olduğunda yerel `/model` seçicisi
-normalde **yalnızca** OmniRoute'un Claude/Anthropic modellerini gösterir —
-`kimi/kimi-k2.6` veya `glm/glm-5.2`, sorunsuz yönlendirilse bile hiçbir zaman
-görünmez.
+Claude Code'un ağ geçidi model keşfi yalnızca `claude` veya `anthropic` ile başlayan
+kimlikleri listeler; bu nedenle `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
+ayarıyla yerel `/model` seçicisi normalde **yalnızca** OmniRoute'un
+Claude/Anthropic modellerini gösterir — bir `kimi/kimi-k2.6` veya `glm/glm-5.2`,
+sorunsuz şekilde yönlendirilse bile asla görünmez.
 
-OmniRoute, etkinleştirilmiş herhangi bir modeli (ve kombinasyonu), bu filtreden
-geçip seçicide görünmesi için bir `claude/…` kimliği altında yansıtabilir:
+OmniRoute, etkinleştirilmiş herhangi bir modeli (ve komboyu) bir `claude/…` kimliği
+altında yansıtabilir; böylece model bu filtreden geçer ve seçicide görünür:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -67,65 +66,87 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Claude Code'da bunlardan birini seçtiğinizde OmniRoute, yönlendirmeden önce
-`claude/` sarmalayıcısını kaldırarak gerçek kimliğe döner — gerçek bir
-`claude/<real-claude-model>` kimliğine (asıl Claude OAuth sağlayıcısı) ise her
-zaman dokunulmaz.
+Claude Code'da bunlardan birini seçtiğinizde, OmniRoute yönlendirmeden önce
+`claude/` sarmalayıcısını kaldırarak gerçek kimliğe geri döner — gerçek bir
+`claude/<real-claude-model>` kimliği (asıl Claude OAuth sağlayıcısı) her zaman
+olduğu gibi bırakılır.
 
-**Bu özellik varsayılan olarak kapalıdır** ve üç seviyeli bir geçit tarafından
-denetlenir (en özel olan önceliklidir); böylece standart bir OmniRoute,
-Claude Code kullanmayan istemciler için kataloğunu ikiye katlamaz:
+Varsayılan olarak yalnızca temel kimlikler yansıtılır. İsteğe bağlı
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` özellik bayrağı açıkken, kataloğun zaten
+listelediği akıl yürütme çabası varyantları (örn. `codex/gpt-6-sol-high`) diğer
+tüm kimlikler gibi yansıtılır; böylece Claude Code açık bir çaba seviyesi
+seçebilir ve istek yolunun somutlaştıramayacağı yerleşik `auto/*` kimlikleri
+yansıtılmaz. Çaba varyantlarının hiç listelenip listelenmeyeceği yine de
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` tarafından belirlenir — yansıtma,
+temel katalogda bulunmayan bir varyantı asla eklemez.
 
-| Seviye    | Konum                                                                                   |
-| --------- | --------------------------------------------------------------------------------------- |
-| Model     | Sağlayıcı ayrıntı sayfası → model bazlı "Claude Code'da göster" anahtarı                |
-| Sağlayıcı | Sağlayıcı ayrıntı sayfası → sağlayıcı düzeyindeki anahtar (tüm modellerini kapsar)      |
-| Genel     | Ayarlar → Özellik Bayrakları → `EXPOSE_CC_DISCOVERY_ALIASES` (varsayılan olarak kapalı) |
+**Bu özellik varsayılan olarak kapalıdır** ve üç seviyeli bir kapıyla kontrol
+edilir (en özel olan kazanır); böylece sade bir OmniRoute, Claude Code
+kullanmayan istemciler için kataloğunu asla ikiye katlamaz:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` ortam değişkeni, genel seviyeyi zorunlu olarak
-etkinleştirir ve kontrol panelindeki geçersiz kılma ayarına göre önceliklidir
-(Özellik Bayrakları ekranı, bu durumda "ortam değişkeni aracılığıyla etkin"
-notunu gösterir). Sağlayıcı ve model bazlı anahtarlar buradan itibaren ayarı
-daha da özelleştirir — örneğin genel ayar kapalı + Kimi sağlayıcısı açık
-olduğunda yalnızca Kimi'nin modelleri gösterilir.
+| Seviye    | Nerede                                                                             |
+| --------- | ---------------------------------------------------------------------------------- |
+| Model     | Sağlayıcı ayrıntı sayfası → model bazında "Claude Code'da göster" anahtarı         |
+| Sağlayıcı | Sağlayıcı ayrıntı sayfası → sağlayıcı seviyesinde anahtar (tüm modellerini kapsar) |
+| Genel     | Ayarlar → Özellik Bayrakları → `EXPOSE_CC_DISCOVERY_ALIASES` (varsayılan kapalı)   |
 
-> ⚠️ **Claude dışı modellerde pencere uyuşmazlığı.** Claude Code, tanımadığı tüm
-> kimlikler için 200K bağlam penceresi varsayar (`/v1/models` üzerinden gerçek
-> pencereyi okuyamaz). Daha büyük pencereye sahip bir modelde (ör. Kimi K2'nin
-> 256K penceresi), otomatik sıkıştırmanın zamanından önce devreye girmemesi için
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` değerini modelin gerçek penceresinden daha
-> düşük bir değere ayarlayın. Yukarıda oluşturulan profiller bunu zaten her
-> model için ayrı ayrı yapar.
+`EXPOSE_CC_DISCOVERY_ALIASES` ortam değişkeni genel seviyeyi zorla açar ve pano
+üzerinden yapılan geçersiz kılmanın önüne geçer (bu durumda Özellik Bayrakları
+ekranı "ortam değişkeni aracılığıyla etkin" notunu gösterir). Sağlayıcı başına ve
+model başına anahtarlar buradan itibaren ince ayar yapar — örneğin genel kapalı +
+Kimi sağlayıcısı açık ise yalnızca Kimi'nin modelleri gösterilir.
+
+> ⚠️ **Claude dışı modellerde pencere uyumsuzluğu.** Claude Code, tanımadığı
+> herhangi bir kimlik için 200K bağlam penceresi varsayar (`/v1/models`
+> üzerinden gerçek pencereyi okuyamaz). Daha büyük pencereye sahip bir model için
+> (örn. Kimi K2'nin 256K'sı), otomatik sıkıştırmanın erken tetiklenmemesi adına
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` değişkenini modelin gerçek penceresinin
+> altında bir değere ayarlayın. Yukarıdaki oluşturulmuş profiller bunu model
+> başına zaten yapmaktadır.
 
 ---
 
 ## Kontrol panelindeki ilk kullanım bloğu
 
-Claude araç kartı (**Kontrol Paneli → CLI Code**), kopyalama düğmesiyle birlikte keşif takma adı bilgi düğmesinin yanında bu örneğe ait tam `settings.json` parçasını görüntüler:
+Claude araç kartı (**Kontrol Paneli → CLI Code**), bu örneğe ait tam `settings.json` parçasını keşif takma adı bilgi düğmesinin yanında bir kopyalama düğmesiyle birlikte görüntüler:
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<OmniRoute adresiniz>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<OmniRoute API anahtarınız>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-Temel URL, kart tarafından çözümlenen URL'dir (yazdığınız özel geçersiz kılma değeri dahil) ve önceden normalleştirilmiştir — `/v1` son eki veya sonda eğik çizgi içermez. **Anahtar hiçbir zaman görüntülenmez**: blok bir yer tutucuyla sunulur; dolayısıyla ekran görüntüsü veya yapıştırılmış bir kod parçası anahtarı sızdıramaz. Kendi anahtarınızı bunun üzerine yapıştırın.
+Temel URL, kart tarafından çözümlenen URL'dir (yazdığınız özel geçersiz kılma değeri dâhil) ve önceden normalleştirilmiştir — `/v1` son eki ve sonda eğik çizgi yoktur. **Anahtar hiçbir zaman görüntülenmez**: blok bir yer tutucuyla sunulur; böylece ekran görüntüsü veya yapıştırılan bir kod parçası anahtarı sızdıramaz. Yer tutucunun üzerine anahtarınızı yapıştırın.
 
-Gerçek bağlam penceresi 200K olmayan tüm modeller için aynı `env` bloğunun altına `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ekleyin — Claude Code, tanımadığı her kimlik için 200K varsayar; bu nedenle otomatik sıkıştırma aksi takdirde yanlış noktada devreye girer (önceki bölümdeki uyarıya bakın). Kod parçası oluşturucu da bu değeri kabul eder; böylece hedef modelin pencere boyutunu bilen bir çağıran, değeri doğrudan oluşturabilir.
+Gerçek bağlam penceresi 200K olmayan tüm modeller için aynı `env` bloğunun altına `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ekleyin — Claude Code, tanımadığı her kimlik için 200K varsayar; dolayısıyla aksi hâlde otomatik sıkıştırma yanlış noktada tetiklenir (önceki bölümdeki uyarıya bakın). Kod parçası oluşturucu da bu değeri kabul eder; böylece hedef modelin bağlam penceresini bilen bir çağıran, bu değeri doğrudan üretebilir.
 
-Kaynak: `ClaudeGatewayOnboardingBlock` tarafından görüntülenen `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (saf oluşturucu, birim testli).
+Kaynak: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (saf oluşturucu, birim testli); `ClaudeGatewayOnboardingBlock` tarafından görüntülenir.
+
+### Tek bir hesabı sabitleme (isteğe bağlı)
+
+Her Claude Code isteğini belirli bir sağlayıcı hesabı üzerinden göndermek için aynı `env` bloğunda `ANTHROPIC_CUSTOM_HEADERS` aracılığıyla `x-omniroute-connection` üstbilgisini ekleyin:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Kimliği, sağlayıcı sayfasındaki bağlantı satırında bulunan `xxxxxxxx…` çipinden kopyalayın. Sabitleme yalnızca tek modelli kimlikler (`provider/model`) için geçerlidir, kombinasyonlar için geçerli değildir. Tam geri dönüş davranışı için [İstek başına hesap sabitleme](../reference/API_REFERENCE.md#account-pinning-per-request) bölümüne bakın.
 
 ---
 
 ## Profiller (`CLAUDE_CONFIG_DIR`)
 
-Claude Code'un **yerleşik profil dosyaları yoktur** (Codex'in `~/.codex/<name>.config.toml` dosyasından farklı olarak). Standart mekanizma `CLAUDE_CONFIG_DIR`'dır — her profil için ayrı bir yapılandırma dizini bulunur ve her birinin kendi `settings.json` dosyası, kimlik bilgileri, geçmişi ve önbelleği vardır.
+Claude Code'un **yerleşik profil dosyaları yoktur** (Codex'in `~/.codex/<name>.config.toml` dosyalarının aksine).
+Yaygın kullanılan mekanizma `CLAUDE_CONFIG_DIR`'dır — her profil için ayrı bir yapılandırma
+dizini bulunur ve her birinin kendi `settings.json` dosyası, kimlik bilgileri, geçmişi ve önbelleği vardır.
 
-`omniroute setup-claude`, canlı `/v1/models` kataloğunu getirir ve `~/.claude/profiles/<name>/settings.json` konumuna model başına bir profil yazar; **`setup-codex` ile aynı adları** (`glm52`, `kimi-k27`, `deepseek-pro`, …) yeniden kullanır:
+`omniroute setup-claude`, canlı `/v1/models` kataloğunu alır ve
+`~/.claude/profiles/<name>/settings.json` konumuna model başına bir profil yazar; bunu yaparken
+**`setup-codex` ile aynı adları** (`glm52`, `kimi-k27`, `deepseek-pro`, …) yeniden kullanır:
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -142,11 +163,22 @@ Claude Code'un **yerleşik profil dosyaları yoktur** (Codex'in `~/.codex/<name>
 }
 ```
 
-> **Kimlik doğrulama belirteci hiçbir zaman profile yazılmaz.** `omniroute launch --profile <name>` ile başlatın (etkin bağlamdaki `ANTHROPIC_AUTH_TOKEN` değerini enjekte eder) veya `ANTHROPIC_AUTH_TOKEN` değişkenini kendiniz dışa aktararak `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude` komutunu çalıştırın.
+> **Kimlik doğrulama belirteci hiçbir zaman profile yazılmaz.** Başlatmak için
+> `omniroute launch --profile <name>` komutunu kullanın (etkin bağlamdaki `ANTHROPIC_AUTH_TOKEN`
+> değerini enjekte eder) veya `ANTHROPIC_AUTH_TOKEN` değerini kendiniz dışa aktarıp
+> `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude` komutunu çalıştırın.
 
-**Model keşfinden sonra otomatik eşitleme (isteğe bağlı).** OmniRoute, sağlayıcı modeli eşitlemesi canlı kataloğu değiştirdiğinde aynı `~/.claude/profiles/<name>/settings.json` dosyalarını otomatik olarak yeniden oluşturabilir; böylece yeni veya yeniden adlandırılmış modeller, komutu yeniden çalıştırmadan profil edinir. Bu özellik **varsayılan olarak kapalıdır**: **CLI Code kontrol panelinden** etkinleştirin ("CLI profilini otomatik eşitle" → Claude Code) veya `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` olarak ayarlayın (`CLI_ALLOW_CONFIG_WRITES` ayarını da dikkate alır; bu ayar varsayılan olarak açıktır). Etkinleştirildiğinde yalnızca profil dosyalarını yazar; etkin/varsayılan Claude yapılandırmanızı, kimlik doğrulamanızı veya `~/.claude/settings.json` dosyasını hiçbir zaman değiştirmez.
+**Model keşfinden sonra otomatik eşitleme (isteğe bağlı).** OmniRoute, sağlayıcı model
+eşitlemesi canlı kataloğu her değiştirdiğinde aynı `~/.claude/profiles/<name>/settings.json`
+dosyalarını otomatik olarak yeniden oluşturabilir; böylece yeni/yeniden adlandırılmış modeller,
+komutu tekrar çalıştırmaya gerek kalmadan profil edinir. Bu özellik **varsayılan olarak kapalıdır**:
+**CLI Code panosundan** etkinleştirin ("CLI profilini otomatik eşitleme" → Claude Code) veya
+`OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` olarak ayarlayın (varsayılan olarak etkin olan
+`CLI_ALLOW_CONFIG_WRITES` ayarını da dikkate alır). Etkinleştirildiğinde yalnızca profil
+dosyalarını yazar; etkin/varsayılan Claude yapılandırmanızı, kimlik doğrulamanızı veya
+`~/.claude/settings.json` dosyasını hiçbir zaman değiştirmez.
 
-### Profil oluşturma ve kullanma
+### Profilleri oluşturma + kullanma
 
 ```bash
 # Yerel OmniRoute
@@ -158,10 +190,14 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 # Yalnızca bazı sağlayıcılar
 omniroute setup-claude --only glm,kimi
 
-# Yazmadan önizleme
+# Ayrıca bu ana makinede algılanmayan yerel CLI sağlayıcıları (zcode, auggie,
+# devin-cli-agentic, codex-app-server) için de profil yaz (yerel hedefte varsayılan olarak atlanır)
+omniroute setup-claude --include-local
+
+# Yazmadan önizle
 omniroute setup-claude --dry-run
 
-# Bir profil başlatın
+# Bir profili başlat
 omniroute launch --profile kimi-k27
 ```
 

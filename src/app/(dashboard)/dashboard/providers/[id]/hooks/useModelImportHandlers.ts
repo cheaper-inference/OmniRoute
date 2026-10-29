@@ -14,9 +14,10 @@
  */
 
 import React, { useState } from "react";
+import { settleBoundedSyncRequests } from "@/lib/providerModels/immediateSyncBatch";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { providerText, type ProviderMessageTranslator } from "../providerPageHelpers";
-import { classifyModelImport } from "./modelImportWarning";
+import { classifyModelImport, resolveNoNewModelsPhase } from "./modelImportWarning";
 
 interface NotifyStore {
   success: (message: string, title?: string) => number;
@@ -30,11 +31,15 @@ interface NotifyStore {
 export interface ImportProgress {
   current: number;
   total: number;
-  phase: "idle" | "fetching" | "importing" | "done" | "error";
+  phase: "idle" | "fetching" | "importing" | "done" | "warning" | "error";
   status: string;
   logs: string[];
   error: string;
   importedCount: number;
+  /** The discovery fell back to the built-in catalog — the dialog says so. */
+  degraded?: boolean;
+  /** The reason of the fallback, when the server published one. */
+  degradedCause?: string;
 }
 
 export interface UseModelImportHandlersParams {
@@ -72,6 +77,18 @@ export interface UseModelImportHandlersReturn {
   handleCompatibleImportWithProgress: (connectionId: string) => Promise<void>;
   handleToggleAutoSync: () => Promise<void>;
   handleToggleAutoFetchModels: () => Promise<void>;
+}
+
+/** Only successfully enabled connections need an immediate upstream discovery. */
+function newlyEnabledAutoSyncIds(
+  connections: UseModelImportHandlersParams["connections"],
+  results: PromiseSettledResult<Response>[]
+): string[] {
+  return connections.flatMap((connection, index) => {
+    const result = results[index];
+    if (connection.providerSpecificData?.autoSync === true || !connection.id) return [];
+    return result?.status === "fulfilled" && result.value.ok ? [connection.id] : [];
+  });
 }
 
 // ──── hook ───────────────────────────────────────────────────────────────────
@@ -164,19 +181,23 @@ export function useModelImportHandlers({
         isKnownModel: (id) => existingIds.has(id),
       });
       const importWarning = classification.warning;
+      const degradedCause = classification.cause;
+      const degraded = classification.degraded;
       // B-03 (#15159): when discovery fell back to a local/cache catalog the
       // headline must not read as an authoritative "nothing to import". The
-      // server's warning becomes the status, with the success-flavoured line
-      // demoted to a log entry — the operator sees the real cause first instead
-      // of scrolling for it. Only keys that already exist in all 66 locales are
-      // used; no new translation is introduced.
+      // banner at the top of the dialog now says so — with the reason — and the
+      // server's own text moves down to the log, where the per-provider nuance
+      // belongs. Only keys that already exist in all 66 locales are used; no new
+      // translation is introduced.
       if (classification.outcome === "no-models") {
         setImportProgress((prev) => ({
           ...prev,
-          phase: "done",
-          status: classification.degraded && importWarning ? importWarning : t("noModelsFound"),
+          phase: resolveNoNewModelsPhase(importWarning, degraded),
+          status: t("noModelsFound"),
+          degraded,
+          ...(degradedCause ? { degradedCause } : {}),
           logs: [
-            ...(classification.degraded && importWarning ? [t("noModelsFound")] : []),
+            ...(degraded && importWarning ? [importWarning] : []),
             t("noModelsReturnedFromEndpoint"),
           ],
         }));
@@ -186,18 +207,17 @@ export function useModelImportHandlers({
       const newModels = classification.newModels;
 
       if (classification.outcome === "nothing-new") {
+        // #15069: a degraded (local-catalog fallback) result is a terminal "warning", not a
+        // success — the live provider API was never actually consulted.
+        const noNewModelsPhase = resolveNoNewModelsPhase(importWarning, degraded);
         setImportProgress((prev) => ({
           ...prev,
-          phase: "done",
-          status:
-            classification.degraded && importWarning
-              ? importWarning
-              : t("allModelsAlreadyImported") || "All models already imported",
+          phase: noNewModelsPhase,
+          status: t("allModelsAlreadyImported") || "All models already imported",
+          degraded,
+          ...(degradedCause ? { degradedCause } : {}),
           logs: [
-            ...(classification.degraded && importWarning ? [t("allModelsAlreadyImported")] : []),
-            ...(importWarning && !(classification.degraded && importWarning)
-              ? [importWarning]
-              : []),
+            ...(importWarning ? [importWarning] : []),
             t("noNewModelsToImport") || "No new models to import",
           ],
           importedCount: 0,
@@ -213,6 +233,8 @@ export function useModelImportHandlers({
         total: newModels.length,
         current: 0,
         status: t("importingModelsProgress", { current: 0, total: newModels.length }),
+        degraded,
+        ...(degradedCause ? { degradedCause } : {}),
         logs: [
           ...(importWarning ? [importWarning] : []),
           t("foundModelsStartingImport", { count: newModels.length }),
@@ -229,7 +251,9 @@ export function useModelImportHandlers({
       const failures: string[] = [];
       for (let i = 0; i < newModels.length; i++) {
         const model = newModels[i];
-        const modelId = model.id || model.name || model.model;
+        const rawId = model.id || model.name || model.model;
+        // Same coercion classifyModelImport uses for the "already imported" check.
+        const modelId = typeof rawId === "string" ? rawId : String(rawId ?? "");
         if (!modelId) continue;
         const parts = modelId.split("/");
         const baseAlias = parts[parts.length - 1];
@@ -252,6 +276,9 @@ export function useModelImportHandlers({
             ...(typeof model.apiFormat === "string" ? { apiFormat: model.apiFormat } : {}),
             ...(Array.isArray(model.supportedEndpoints)
               ? { supportedEndpoints: model.supportedEndpoints }
+              : {}),
+            ...(typeof model.endpointCapabilitySource === "string"
+              ? { endpointCapabilitySource: model.endpointCapabilitySource }
               : {}),
             ...(typeof model.dimensions === "number" && model.dimensions > 0
               ? { dimensions: model.dimensions }
@@ -318,8 +345,9 @@ export function useModelImportHandlers({
         importedCount,
       }));
 
-      if (importedCount > 0 && failures.length > 0) {
-        // A reload would wipe the failure lines before they can be read.
+      if (importedCount > 0 && (failures.length > 0 || degraded)) {
+        // A reload would wipe the failure lines before they can be read, and it
+        // would erase the degraded notice too: the list is refreshed in place.
         await fetchProviderModelMeta();
       } else if (importedCount > 0) {
         setTimeout(() => {
@@ -478,16 +506,37 @@ export function useModelImportHandlers({
           })
         )
       );
+      // Only newly enabled connections need an immediate sync; existing
+      // enabled accounts remain on their scheduler cadence.
+      const syncIds = newValue ? newlyEnabledAutoSyncIds(activeWithId, results) : [];
+      // A provider may have many accounts sharing one upstream/IP. Fan out
+      // the setting writes as before, but cap *live* discovery calls at two
+      // to avoid a burst that can trigger shared upstream rate limits.
+      const syncResults = await settleBoundedSyncRequests(syncIds, async (id) => {
+        const response = await fetch(`/api/providers/${id}/sync-models`, {
+          method: "POST",
+          signal: AbortSignal.timeout(60_000),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      });
       await fetchConnections();
+      if (syncIds.length > 0) await fetchProviderModelMeta();
+      const syncFailed = syncResults.some((r) => r.status === "rejected");
       const fulfilled = results.filter((r) => r.status === "fulfilled" && r.value.ok).length;
-      if (fulfilled === results.length) {
+      if (fulfilled === results.length && !syncFailed) {
         notify[newValue ? "success" : "info"](
           newValue ? t("autoSyncEnabled") : t("autoSyncDisabled")
         );
       } else if (fulfilled === 0) {
         notify.error(t("autoSyncToggleFailed"));
       } else {
-        notify.warning(t("autoSyncPartialFailure"));
+        notify.warning(
+          t(
+            syncFailed && fulfilled === results.length
+              ? "autoSyncImmediatePartialFailure"
+              : "autoSyncPartialFailure"
+          )
+        );
       }
     } catch (error) {
       console.error("Error toggling auto-sync:", error);

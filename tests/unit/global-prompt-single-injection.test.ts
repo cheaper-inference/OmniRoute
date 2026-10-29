@@ -112,6 +112,43 @@ test("claude-format array system: prefix/suffix as text blocks, once each", () =
   assert.ok(!out.messages.some((m) => m.role === "system"));
 });
 
+test("anthropic-compatible relay with kept mid-conversation system turns: prompt goes to body.system only (#16236)", () => {
+  resetConfig();
+  const body = {
+    system: [{ type: "text", text: "CLIENT" }],
+    messages: [
+      { role: "user", content: "hi" },
+      { role: "system", content: "<total_tokens>100 tokens left</total_tokens>" },
+    ],
+  };
+  const out = injectSystemPromptPostTranslation(body, {
+    targetFormat: "claude",
+    provider: "anthropic-compatible-relay-test",
+  });
+  assert.deepEqual(out.system, [
+    { type: "text", text: "PREFIX-RULES" },
+    { type: "text", text: "CLIENT" },
+    { type: "text", text: "SUFFIX-RULES" },
+  ]);
+  assert.deepEqual(out.messages, body.messages, "conversation turns are not a prompt carrier");
+});
+
+test("native claude / provider-less claude target with system turns keeps the existing placement (#16236)", () => {
+  for (const provider of [undefined, "claude"]) {
+    resetConfig();
+    const body = {
+      system: [{ type: "text", text: "CLIENT" }],
+      messages: [
+        { role: "user", content: "hi" },
+        { role: "system", content: "<total_tokens>100 tokens left</total_tokens>" },
+      ],
+    };
+    const out = injectSystemPromptPostTranslation(body, { targetFormat: "claude", provider });
+    assert.deepEqual(out.system, body.system, `provider=${provider}: body.system untouched`);
+    assert.notDeepEqual(out.messages, body.messages, `provider=${provider}: messages carrier`);
+  }
+});
+
 test("gemini-format body: systemInstruction parts get prefix/suffix once each", () => {
   resetConfig();
   // Real shape produced by open-sse/translator/request/claude-to-gemini.ts:95-97

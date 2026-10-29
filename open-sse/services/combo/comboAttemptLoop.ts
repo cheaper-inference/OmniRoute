@@ -8,6 +8,7 @@ import {
   formatRetryAfter,
   getEarliestRateLimitedUntil,
   getModelLockoutInfo,
+  scanTransientModelLock,
 } from "../accountFallback.ts";
 import {
   getCachedProviderConnectionById,
@@ -40,6 +41,7 @@ import {
 import {
   resolveComboCooldownWaitDecision,
   resolveCircuitOpenWaitDecision,
+  isTransientComboCooldownReason,
   type ResolveComboCooldownDecisionResult,
 } from "./comboCooldownRetry.ts";
 import {
@@ -47,7 +49,7 @@ import {
   waitForCooldownAwareRetry,
 } from "../../../src/sse/services/cooldownAwareRetry.ts";
 import { toRetryAfterDisplayValue } from "./validateQuality.ts";
-import { finalizeComboTrace, finishComboTrace } from "./decisionTrace.ts";
+import { finalizeComboTrace } from "./decisionTrace.ts";
 import { isRetryAfterEligibleStatus } from "./unavailableRetryGate.ts";
 import { withQuotaExhaustionClassification } from "./quotaExhaustion.ts";
 import {
@@ -60,8 +62,13 @@ import {
 } from "./comboPredicates.ts";
 import { collectCircuitOpenExclusions, evaluateExecuteTargetGates } from "./executeTargetGates.ts";
 import { executeTargetAttempt } from "./executeTargetAttempt.ts";
+import type { ResolvedComboTarget } from "./types.ts";
 import { buildComboDiag } from "./executeTargetClassify.ts";
+import { attemptCompatRejectedFallback } from "./comboCompatFallback.ts";
+import { isProviderInCooldown } from "../providerCooldownTracker.ts";
 import type { AttemptLoopDeps, AttemptLoopState, ExecuteTargetResult } from "./attemptLoopTypes.ts";
+import { getStrategyTraits } from "./strategyRegistry.ts";
+import { resolveSkippedConnectionCooldownTerminal } from "./skippedConnectionCooldown.ts";
 
 /** A second in-flight copy of a body larger than this sits in the TLS send buffer. */
 const HEDGE_MAX_BODY_BYTES = 256 * 1024;
@@ -139,6 +146,53 @@ async function computeEarliestSkippedRateLimitedUntil(
   }
 }
 
+/** Pinned lookups stay exact. An empty connection id scans every account. */
+function lookupComboModelLockout(provider: string, connectionId: string, rawModel: string) {
+  if (!connectionId) return scanTransientModelLock(provider, rawModel);
+  return getModelLockoutInfo(provider, connectionId, rawModel);
+}
+
+/**
+ * Resolve the earliest TRANSIENT model-lockout expiry across the skipped
+ * targets (#16319). `computeEarliestSkippedRateLimitedUntil` only reads
+ * connection-level `rateLimitedUntil`, so a model-scoped cooldown never
+ * surfaced a recovery hint: a single-target combo whose only model sat in a
+ * short lock answered a hint-less 503 the client reads as an outage. Only
+ * reasons the cooldown-wait helper classifies as transient qualify — a
+ * `quota_exhausted` lock runs to midnight and auth/not-found locks never
+ * clear on their own, so neither may advertise a retry-after. Best-effort by
+ * design, like its connection-level sibling: terminal error construction must
+ * never become a new failure.
+ */
+async function computeEarliestSkippedModelLockUntil(
+  orderedTargets: AttemptLoopState["orderedTargets"]
+): Promise<string | null> {
+  try {
+    let earliestMs: number | null = null;
+    for (const target of orderedTargets) {
+      const provider = typeof target?.provider === "string" ? target.provider : "";
+      if (!provider) continue;
+      const connectionId = typeof target?.connectionId === "string" ? target.connectionId : "";
+      const rawModel = parseModel(target?.modelStr ?? "").model || "";
+      if (!rawModel) continue;
+      const info = lookupComboModelLockout(provider, connectionId, rawModel);
+      if (!info || !isTransientComboCooldownReason(info.reason)) continue;
+      if (typeof info.remainingMs !== "number" || !(info.remainingMs > 0)) continue;
+      const untilMs = Date.now() + info.remainingMs;
+      if (earliestMs === null || untilMs < earliestMs) earliestMs = untilMs;
+    }
+    return earliestMs === null ? null : new Date(earliestMs).toISOString();
+  } catch {
+    return null;
+  }
+}
+
+/** Earliest of two optional ISO instants (null-safe). */
+function earliestIsoInstant(a: string | null, b: string | null): string | null {
+  if (a && b) return Date.parse(a) <= Date.parse(b) ? a : b;
+  return a || b;
+}
+
 export type DispatchWithCooldownRetryExtra = {
   maxSetRetries: number;
   setRetryDelayMs: number;
@@ -149,6 +203,12 @@ export type DispatchWithCooldownRetryExtra = {
   comboCooldownBudgetLeftMs: { current: number };
   evaluateGates: typeof evaluateExecuteTargetGates;
   executeAttempt: typeof executeTargetAttempt;
+  /**
+   * #6238 last-resort tier: the targets the compat pre-filter rejected. Probed
+   * only when no compat-kept target was ever dispatched — the same guard the
+   * round-robin path applies before its terminal error.
+   */
+  compatRejectedTargets: ResolvedComboTarget[];
 };
 
 export async function dispatchWithCooldownRetry(opts: {
@@ -171,13 +231,24 @@ export async function dispatchWithCooldownRetry(opts: {
 
   try {
     for (let setTry = 0; setTry <= extra.maxSetRetries; setTry++) {
-      // #1731: Per-set-iteration set of providers whose quota is fully exhausted.
-      // Reset each retry so providers excluded in a previous attempt get another chance.
-      state.exhaustedProviders = new Set<string>();
-      state.exhaustedConnections = new Set<string>();
+      // Durable exhaustion (quota, credits, auth) survives the set boundary: a
+      // provider or connection whose quota is gone stays skipped on the next
+      // set. Transient failures (rate limit, connection error) are replayed.
+      // The request sets receive a COPY of the durable sets — never the same
+      // Set instance — so a transient mark written during this set can never
+      // be reported as durable on the next one.
+      const durableProviders =
+        setTry === 0 ? new Set<string>() : (state.durableExhaustedProviders ?? new Set<string>());
+      const durableConnections =
+        setTry === 0 ? new Set<string>() : (state.durableExhaustedConnections ?? new Set<string>());
+      state.durableExhaustedProviders = durableProviders;
+      state.durableExhaustedConnections = durableConnections;
+      state.exhaustedProviders = new Set<string>(durableProviders);
+      state.exhaustedConnections = new Set<string>(durableConnections);
       state.transientRateLimitedProviders = new Set<string>();
       state.skippedForCircuitOpen = false;
       state.earliestCircuitOpenRetryMs = 0;
+      state.skippedConnectionCooldownUntil = undefined;
       if (setTry > 0) {
         deps.log.info(
           "COMBO",
@@ -201,6 +272,10 @@ export async function dispatchWithCooldownRetry(opts: {
       }
 
       deps.startTime = Date.now();
+      // Fallbacks within this set try: one per ordered target abandoned before
+      // the one that serves the request. Abandoning the FIRST target counts
+      // too — it equals the index of the target that ends up serving, i.e. the
+      // value exposed as `X-OmniRoute-Fallback-Attempts`.
       state.fallbackCount = 0;
       state.recordedAttempts = 0;
       state.comboErrors = [];
@@ -276,8 +351,31 @@ export async function dispatchWithCooldownRetry(opts: {
       // and a slow upstream holds both copies for the whole headers wait.
       const bodySmallEnoughToHedge = isBodySmallEnoughToHedge(deps.body);
       const hasProtectedPriorityTarget =
-        deps.strategy === "priority" &&
+        getStrategyTraits(deps.strategy).honorsFallbackOnlyTargets &&
         state.orderedTargets.some((target) => target.fallbackOnlyOnQuotaExhaustion === true);
+
+      const hedgingEnabled =
+        zeroLatencyOptimizationsEnabled &&
+        deps.config.hedging &&
+        bodySmallEnoughToHedge &&
+        !hasProtectedPriorityTarget;
+      // Keep original target indices: gates and abort controllers key by index.
+      const dispatchIndices = state.orderedTargets.map((_, index) => index);
+      if (hedgingEnabled) {
+        const groups = new Map<string, number[]>();
+        for (const index of dispatchIndices) {
+          const key = state.orderedTargets[index].modelStr;
+          const group = groups.get(key) ?? [];
+          group.push(index);
+          groups.set(key, group);
+        }
+        dispatchIndices.length = 0;
+        for (let account = 0; account < state.orderedTargets.length; account++) {
+          for (const group of groups.values()) {
+            if (account < group.length) dispatchIndices.push(group[account]);
+          }
+        }
+      }
 
       const executeTarget = async (i: number): Promise<ExecuteTargetResult> => {
         const gate = await extra.evaluateGates({ index: i, state, deps });
@@ -292,7 +390,7 @@ export async function dispatchWithCooldownRetry(opts: {
         });
       };
 
-      for (let i = 0; i < state.orderedTargets.length; i++) {
+      for (const [dispatchPosition, i] of dispatchIndices.entries()) {
         if (anySuccess || state.comboExpired || comboRequestMalformed) break;
         // Another connection of the SAME model rejects the request identically:
         // a request-scoped refusal is not fixable by another account.
@@ -323,6 +421,9 @@ export async function dispatchWithCooldownRetry(opts: {
                 // Fatal error, abort combo
                 anySuccess = true;
                 globalResolve!(res.response);
+                for (const [idx, ac] of state.abortControllers.entries()) {
+                  if (idx !== i) ac.abort();
+                }
               }
             }
           } finally {
@@ -336,10 +437,17 @@ export async function dispatchWithCooldownRetry(opts: {
           // executeTarget's error handling) and no other task succeeds, the post-loop
           // `Promise.race([globalPromise, ...])` would hang forever. Resolve with a
           // 502 so the request terminates with an actionable error.
-          if (!anySuccess && globalResolve) {
-            anySuccess = true;
-            globalResolve(errorResponse(502, `Combo target ${i} failed with an unexpected error`));
-          }
+          // A thrown branch is still a branch failure, not proof that every
+          // other provider failed. Post-loop aggregation settles all-failure.
+          state.lastStatus = 502;
+          state.lastError = "Combo target failed with an unexpected error";
+          state.comboErrors.push({
+            model: state.orderedTargets[i].modelStr,
+            status: 502,
+            error: state.lastError,
+            kind: "provider",
+          });
+          state.recordedAttempts++;
         });
 
         runningTasks.add(task);
@@ -350,7 +458,7 @@ export async function dispatchWithCooldownRetry(opts: {
           deps.config.hedging &&
           bodySmallEnoughToHedge &&
           !hasProtectedPriorityTarget &&
-          i + 1 < state.orderedTargets.length
+          dispatchPosition + 1 < dispatchIndices.length
         ) {
           const hedgeDelay = resolveDelayMs(deps.config.hedgeDelayMs, 500);
           const timeoutPromise = new Promise<void>((r) => {
@@ -377,7 +485,12 @@ export async function dispatchWithCooldownRetry(opts: {
           );
         }
 
-        if (!anySuccess && !state.comboExpired && hasIdenticalModelErrorStreak(state.comboErrors)) {
+        if (
+          !hedgingEnabled &&
+          !anySuccess &&
+          !state.comboExpired &&
+          hasIdenticalModelErrorStreak(state.comboErrors)
+        ) {
           comboRequestMalformed = true;
           const last = state.comboErrors[state.comboErrors.length - 1];
           deps.log.warn(
@@ -395,6 +508,14 @@ export async function dispatchWithCooldownRetry(opts: {
         // disabled) cannot freeze this post-loop race forever.
         await Promise.race([globalPromise, Promise.all([...runningTasks]), loopSafetyPromise]);
         markLoopExpiredIfSafetyFired();
+      }
+
+      // This set has finished dispatching. Release its timer before any terminal
+      // response, set-retry delay, or cooldown-aware re-dispatch.
+      if (loopSafetyTimer) {
+        clearTimeout(loopSafetyTimer);
+        loopSafetyTimer = null;
+        activeLoopSafetyTimer = null;
       }
 
       // G1: if the safety timer won the race (request would otherwise hang), give
@@ -429,22 +550,13 @@ export async function dispatchWithCooldownRetry(opts: {
         );
       }
 
-      // #10681: finalize the decision trace (success).
+      // A resolved fatal response also sets anySuccess to stop dispatching.
       finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
-      finishComboTrace(deps.traceInvocationId, { status: 200 });
       if (anySuccess) {
-        // G1: clear the safety timer on the happy path so a successful combo does
-        // not leave a 10-minute timer alive per request.
-        if (loopSafetyTimer) {
-          clearTimeout(loopSafetyTimer);
-          loopSafetyTimer = null;
-        }
-        return await globalPromise;
+        const response = await globalPromise;
+        return response;
       }
 
-      // #10681: finalize the decision trace (global timeout).
-      finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
-      finishComboTrace(deps.traceInvocationId, { status: 504 });
       // Global combo timeout: return aggregated error immediately, skipping set retries.
       if (state.comboExpired) {
         const summary = buildRedactedSummary(state.comboErrors);
@@ -523,14 +635,84 @@ export async function dispatchWithCooldownRetry(opts: {
           );
           return dispatchWithCooldownRetry({ state, deps, extra });
         }
+        // #16319: a model-scoped cooldown is not a circuit-open skip. With zero
+        // dispatched attempts nothing populates state.earliestRetryAfter, so the
+        // general cooldown wait below never runs and a single-target combo
+        // crystallized a hint-less 503 while the lock had seconds left. Ask the
+        // same helper the post-dispatch path uses — it derives the wait from each
+        // target's own lock and rejects quota/auth/not-found reasons — and
+        // re-dispatch when a SHORT transient lock is about to clear.
+        const modelLockWait = resolveComboCooldownWaitDecision({
+          targets: state.orderedTargets,
+          earliestRetryAfter: null,
+          attempt: extra.comboCooldownAttempt.current,
+          budgetLeftMs: extra.comboCooldownBudgetLeftMs.current,
+          settings: deps.resilienceSettings.comboCooldownWait,
+          lookupLock: (provider, connectionId, target) => {
+            const rawModel = parseModel(target?.modelStr ?? "").model || "";
+            if (!rawModel) return null;
+            return lookupComboModelLockout(provider, connectionId, rawModel);
+          },
+          computeWaitMs: () => null,
+        });
+        if (modelLockWait.wait) {
+          deps.log.info(
+            "COMBO",
+            `${deps.strategy} model-lock wait: waiting ${Math.ceil(modelLockWait.waitMs / 1000)}s (reason=${modelLockWait.reason ?? "model_lockout"}) then retrying (attempt ${extra.comboCooldownAttempt.current + 1}/${deps.resilienceSettings.comboCooldownWait.maxAttempts})`
+          );
+          const completed = await waitForCooldownAwareRetry(modelLockWait.waitMs, deps.signal);
+          if (!completed) {
+            return errorResponse(499, "Request aborted");
+          }
+          extra.comboCooldownAttempt.current += 1;
+          extra.comboCooldownBudgetLeftMs.current = Math.max(
+            0,
+            extra.comboCooldownBudgetLeftMs.current - modelLockWait.waitMs
+          );
+          return dispatchWithCooldownRetry({ state, deps, extra });
+        }
       }
 
       // All set retries exhausted — return the final error
       // #10681: finalize the decision trace (all targets failed or skipped).
       finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
-      finishComboTrace(deps.traceInvocationId, { status: 503 });
       if (!state.lastStatus) {
         if (state.recordedAttempts === 0) {
+          // #6238: every compat-kept target was skipped as unavailable and NONE
+          // was ever attempted (recordedAttempts === 0). Before crystallizing
+          // 503, probe the targets the compat pre-filter rejected — a
+          // compat-rejected-but-healthy provider is a valid last-resort
+          // fallback tier, not a permanently dropped target. Mirrors the
+          // round-robin guard; a null result keeps the existing error path.
+          if (extra.compatRejectedTargets.length > 0) {
+            const compatFallbackResult = await attemptCompatRejectedFallback(
+              extra.compatRejectedTargets,
+              deps.body,
+              {
+                handleSingleModel: deps.handleSingleModelWithTimeout,
+                isModelAvailable: deps.isModelAvailable,
+                isProviderInCooldown: (target) =>
+                  deps.resilienceSettings.providerCooldown.enabled &&
+                  Boolean(target.provider && target.provider !== "unknown") &&
+                  isProviderInCooldown(
+                    target.provider as string,
+                    target.connectionId as string | undefined,
+                    deps.resilienceSettings
+                  ),
+                log: deps.log,
+                strategy: deps.strategy,
+              }
+            );
+            if (compatFallbackResult) {
+              recordComboRequest(deps.combo.name, null, {
+                success: true,
+                latencyMs: Date.now() - deps.startTime,
+                fallbackCount: state.fallbackCount,
+                strategy: deps.strategy,
+              });
+              return compatFallbackResult;
+            }
+          }
           notifyWebhookEvent("request.failed", {
             combo: deps.combo.name,
             reason: "ALL_TARGETS_SKIPPED",
@@ -556,8 +738,11 @@ export async function dispatchWithCooldownRetry(opts: {
           const quotaSkip = formatQuotaSkipMessage(
             collectQuotaWindowExclusions(state.orderedTargets)
           );
-          const skippedRateLimitedUntil = await computeEarliestSkippedRateLimitedUntil(
-            state.orderedTargets
+          // #16319: the connection-level scan misses model-scoped cooldowns —
+          // fold the earliest transient model-lock expiry into the same hint.
+          const skippedRateLimitedUntil = earliestIsoInstant(
+            await computeEarliestSkippedRateLimitedUntil(state.orderedTargets),
+            await computeEarliestSkippedModelLockUntil(state.orderedTargets)
           );
           const retryHuman = skippedRateLimitedUntil
             ? formatRetryAfter(toRetryAfterDisplayValue(skippedRateLimitedUntil))
@@ -617,7 +802,12 @@ export async function dispatchWithCooldownRetry(opts: {
       // classes (e.g. a quality failure + a sibling's 401) normalizes to a
       // 5xx-class status reflecting an infra/provider problem, not a client
       // error. See comboErrorAggregation.ts::resolveComboTerminalStatus.
-      const status = resolveComboTerminalStatus(state.comboErrors, state.lastStatus);
+      const terminal = resolveSkippedConnectionCooldownTerminal(
+        resolveComboTerminalStatus(state.comboErrors, state.lastStatus),
+        state
+      );
+      const status = terminal.status;
+      state.earliestRetryAfter = terminal.retryAfter ?? state.earliestRetryAfter;
       // #10314: build the terminal message from the structured per-target
       // outcomes (each distinct class+reason listed separately) instead of
       // mashing a single state.lastError with raw `[model (status)]` markers. Connection
@@ -653,7 +843,7 @@ export async function dispatchWithCooldownRetry(opts: {
           lookupLock: (provider, connectionId, target) => {
             const rawModel = parseModel(target?.modelStr ?? "").model || "";
             if (!rawModel) return null;
-            return getModelLockoutInfo(provider, connectionId, rawModel);
+            return lookupComboModelLockout(provider, connectionId, rawModel);
           },
           computeWaitMs: (retryAfter) => computeClosestRetryAfter(retryAfter).waitMs,
         });
@@ -681,9 +871,8 @@ export async function dispatchWithCooldownRetry(opts: {
         }
       }
 
-      // #10681: finalize the decision trace with the aggregated terminal status.
+      // #10681: finalize the decision trace after cooldown retries are exhausted.
       finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
-      finishComboTrace(deps.traceInvocationId, { status });
       // Retry-after decoration is separate from the wait decision above: only
       // rate-limit-class final statuses may carry a `(reset after ...)` suffix
       // (see unavailableRetryGate.ts — do not stitch a peer target's window onto
@@ -693,7 +882,7 @@ export async function dispatchWithCooldownRetry(opts: {
         deps.log.warn("COMBO", `All models failed | ${msg} (${retryHuman})`);
         return withQuotaExhaustionClassification(
           unavailableResponse(status, msg, state.earliestRetryAfter, retryHuman),
-          state.observedFailure ? state.allObservedFailuresQuota : null
+          terminal.quotaExhausted
         );
       }
 

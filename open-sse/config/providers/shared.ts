@@ -64,6 +64,12 @@ export interface RegistryModel {
    */
   alwaysReasons?: boolean;
   supportedThinkingEfforts?: readonly string[];
+  /**
+   * Effort suffixes that must fold onto this base model even when the live
+   * catalog lists `<id>-<effort>` as its own model. Use only when that catalog
+   * id is a different billed SKU, not the reasoning tier clients expect.
+   */
+  effortSuffixesThatFoldDespiteLiveCatalog?: readonly string[];
   supportsVision?: boolean;
   supportsAudio?: boolean;
   supportsVideo?: boolean;
@@ -220,6 +226,13 @@ export interface RegistryEntry {
    */
   forceStream?: boolean;
   /**
+   * Opt-in for providers that use prompt-emulated tool calling (e.g. web-session
+   * providers like opencode, duckduckgo-web, cloudflare-playground). When set to
+   * "emulated", the combo tool-calling filter will keep these providers eligible
+   * even though their registry/capability rows report toolCalling:false.
+   */
+  toolCalling?: "emulated" | boolean;
+  /**
    * Literal API key sent as the bearer token when the request has no real
    * credential (synthetic noauth fallback). Lets a primarily-authenticated
    * provider expose its free tier anonymously: e.g. Kilo's gateway accepts
@@ -247,6 +260,34 @@ export interface RegistryEntry {
    * standard OpenAI array-shaped content untouched (see openai-responses.ts).
    */
   requiresPlainStringContent?: boolean;
+  /**
+   * True for upstreams that accept a single-turn request but reject the
+   * replayed history an agent client sends from turn two on. Set this when the
+   * upstream reports a broken tool-call sequence or a missing reasoning
+   * passthrough for a history that is structurally valid Chat Completions.
+   *
+   * The repair, in `utils/strictChatHistory.ts`, coalesces a split assistant
+   * turn, keeps one result per tool call in call order, merges neighbouring
+   * user turns (upstreams that collapse them keep only the text, which silently
+   * drops a lifted image), and folds a trailing assistant message back onto the
+   * turn's tool results. Every step is a no-op on a body that already satisfies
+   * the shape, so this is safe to enable for any provider that needs one of them.
+   *
+   * WorkBuddy is the reference case: `11148 tool_call_sequence_broken` and
+   * `11155 reasoning content from the previous turn must be passed back`.
+   */
+  strictChatHistory?: boolean;
+  /**
+   * Literal string replacements applied to every string value in the outgoing
+   * request body, for upstreams that reject a request naming a competing client
+   * rather than rejecting a specific field. Keys, numbers, and structure are
+   * never touched.
+   *
+   * Order matters: list longer needles first so a shorter one cannot match
+   * inside them. WorkBuddy answers `11128 Illegal API invocation from an
+   * unapproved channel` for a body naming another agent client.
+   */
+  bodyStringReplacements?: ReadonlyArray<readonly [string, string]>;
   /**
    * Anthropic-compatible providers that omit the required `signature` field
    * from streamed thinking block starts. The passthrough stream adds only an
@@ -399,6 +440,8 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     "Llama-4-Maverick-17B-128E-Instruct",
     "Meta-Llama-3.3-70B-Instruct",
     "gpt-oss-120b",
+    "DeepSeek-V3.1",
+    "gemma-4-31B-it",
   ]),
   nscale: buildModels([
     "moonshotai/Kimi-K2.5",
@@ -413,14 +456,37 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     "Qwen2.5-Coder-32B-Instruct",
     "Mistral-Small-3.2-24B-Instruct-2506",
   ]),
-  baseten: buildModels([
-    "moonshotai/Kimi-K2.6",
-    "deepseek-ai/DeepSeek-V4-Pro",
-    "zai-org/GLM-5",
-    "MiniMaxAI/MiniMax-M2.5",
-    "nvidia/Nemotron-120B-A12B",
-    "openai/gpt-oss-120b",
-  ]),
+  // Offline seed from Baseten's supported-models table; live discovery is authoritative.
+  baseten: [
+    { id: "zai-org/GLM-5.3", name: "GLM 5.3", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.3-Fast", name: "GLM 5.3 Fast", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.3-Flash", name: "GLM 5.3 Flash", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.2", name: "GLM 5.2", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.2-Fast", name: "GLM 5.2 Fast", contextLength: 1048576 },
+    { id: "zai-org/GLM-4.7", name: "GLM 4.7", contextLength: 200000 },
+    { id: "deepseek-ai/DeepSeek-V4-Pro", name: "DeepSeek V4 Pro", contextLength: 1048576 },
+    {
+      id: "deepseek-ai/DeepSeek-V4-Pro-0813",
+      name: "DeepSeek V4 Pro 0813",
+      contextLength: 1048576,
+    },
+    {
+      id: "deepseek-ai/DeepSeek-V4-Flash-0731",
+      name: "DeepSeek V4 Flash 0731",
+      contextLength: 1048576,
+    },
+    { id: "moonshotai/Kimi-K3", name: "Kimi K3", contextLength: 1048576 },
+    { id: "moonshotai/Kimi-K2.6", name: "Kimi K2.6", contextLength: 262144 },
+    { id: "moonshotai/Kimi-K2.7-Code", name: "Kimi K2.7 Code", contextLength: 262144 },
+    { id: "openai/gpt-oss-120b", name: "GPT OSS 120B", contextLength: 131072 },
+    {
+      id: "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B",
+      name: "Nemotron 3 Ultra",
+      contextLength: 202000,
+    },
+    { id: "thinkingmachines/inkling", name: "Inkling", contextLength: 1048576 },
+    { id: "thinkingmachines/inkling-small", name: "Inkling Small", contextLength: 1048576 },
+  ],
   publicai: buildModels([
     "swiss-ai/apertus-70b-instruct",
     "swiss-ai/Apertus-8B-Instruct-2509",
@@ -736,6 +802,56 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     "Qwen/Qwen2.5-72B-Instruct",
   ]),
   nanogpt: buildModels(["chatgpt-4o-latest", "claude-3.5-sonnet", "gpt-4o-mini"]),
+  // Seed catalog mirrors apmix.ai/models (2026-09-25). The catalog is
+  // plan-scoped per key — live discovery via GET https://api.apmix.ai/v1/models
+  // serves what the key can actually reach; this list is the union fallback.
+  apmix: [
+    ...buildModels([
+      "claude-haiku-4-5",
+      "claude-sonnet-5",
+      "claude-opus-5",
+      "claude-opus-4-8",
+      "claude-opus-4-7",
+      "claude-opus-4-6",
+      "claude-fable-5",
+      "claude-sonnet-4-6",
+      "gpt-5.6-terra",
+      "gpt-5.6-sol",
+      "gpt-5.6-luna",
+      "gpt-5.5",
+      "gpt-6-astra",
+      "gpt-6-sol",
+      "gpt-6-luna",
+      "gpt-6-luna-free",
+      "gemini-3.8-flash",
+      "gemini-3.7-flash",
+      "gemini-3.6-flash",
+      "gemini-3.1-pro",
+      "grok-4.5",
+      "grok-4.6",
+      "grok-4.7",
+      "deepseek-v4-pro",
+      "deepseek-v4-flash",
+      "deepseek-v4.1-flash",
+      "deepseek-v4-flash-free",
+      "qwen3.8-flash",
+      "qwen3.8-max",
+      "glm-5.3-flash",
+      "glm-5.3",
+      "glm-5.2",
+      "glm-5-turbo",
+      "kimi-k2.7-code",
+      "kimi-k3",
+      "mimo-v2.5-pro",
+      "mimo-v2.5",
+      "hy4-preview",
+      "composer-2.5-fast",
+    ]),
+    // MiniMax M3 is multimodal (bazaarlink entry shape) — LEDGER-4 requires
+    // every seeded minimax-m3 outside promptql to carry supportsVision: true.
+    { id: "minimax-m3", name: "MiniMax M3", contextLength: 1048576, supportsVision: true },
+    ...buildModels(["muse-spark-1.3"]),
+  ],
   predibase: buildModels(["llama-3.3-70b"]),
   bytez: buildModels([
     "meta-llama/Llama-3.3-70B-Instruct",

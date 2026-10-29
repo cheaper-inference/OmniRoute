@@ -1,4 +1,8 @@
 import {
+  listProviderOutputOverrides,
+  persistOutputTokenOverride,
+} from "@/lib/providerModels/outputTokenOverrides";
+import {
   getCustomModels,
   getAllCustomModels,
   addCustomModel,
@@ -9,6 +13,7 @@ import {
   updateCustomModel,
   getModelCompatOverrides,
   mergeModelCompatOverride,
+  resetModelEndpointOverride,
   getHiddenModelsByProvider,
   type ModelCompatPatch,
 } from "@/lib/db/models";
@@ -29,6 +34,8 @@ import {
   isAnthropicCompatibleProvider,
 } from "@/shared/constants/providers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import { getRegisteredEndpointAdapterStatuses } from "@/lib/providerModels/endpointAdapterAvailability";
+import { isHiddenForModality } from "@/shared/utils/modelVisibility";
 export const dynamic = "force-dynamic";
 import { providerModelMutationSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -62,6 +69,10 @@ export async function GET(request) {
 
     const models = provider ? await getCustomModels(provider) : await getAllCustomModels();
     const modelCompatOverrides = provider ? getModelCompatOverrides(provider) : [];
+    const modelOutputOverrides = listProviderOutputOverrides(provider);
+    const outputOverrides = new Map(
+      modelOutputOverrides.map((row) => [row.modelId, row.maxOutputTokenOverride])
+    );
     // #4125: surface the manual/auto context-window override (Feature 5004 table) on
     // each custom-model row so the UI can show/edit it without a second round trip.
     const modelsWithContextOverride =
@@ -69,13 +80,17 @@ export async function GET(request) {
         ? models.map((model: Record<string, unknown>) => {
             const modelId = typeof model?.id === "string" ? model.id : null;
             const record = modelId ? getModelContextOverrideRecord(provider, modelId) : null;
+            const outputOverride = modelId ? outputOverrides.get(modelId) : undefined;
+            const outputFields =
+              outputOverride === undefined ? {} : { maxOutputTokenOverride: outputOverride };
             return record
               ? {
                   ...model,
+                  ...outputFields,
                   contextWindowOverride: record.realContext,
                   contextWindowOverrideSource: record.source,
                 }
-              : model;
+              : { ...model, ...outputFields };
           })
         : models;
 
@@ -106,8 +121,13 @@ export async function GET(request) {
 
     return Response.json({
       models: modelsWithContextOverride,
-      modelCompatOverrides,
+      modelCompatOverrides: modelCompatOverrides.map((override) => ({
+        ...override,
+        isHidden: isHiddenForModality(override, "chat"),
+      })),
       modelContextOverrides,
+      modelOutputOverrides,
+      endpointAdapters: provider ? getRegisteredEndpointAdapterStatuses(provider) : {},
       hiddenModelsByProvider,
     });
   } catch {
@@ -148,6 +168,7 @@ export async function POST(request) {
       source,
       apiFormat,
       supportedEndpoints,
+      endpointCapabilitySource,
       targetFormat,
       // #1294: persist the per-model token limits set in the add-model form.
       max_input_tokens: maxInputTokens,
@@ -181,6 +202,7 @@ export async function POST(request) {
         ...(typeof dimensions === "number" && dimensions > 0 ? { dimensions } : {}),
         ...(Array.isArray(supportedInputTypes) ? { supportedInputTypes } : {}),
         ...(typeof modelType === "string" ? { modelType } : {}),
+        ...(endpointCapabilitySource ? { endpointCapabilitySource } : {}),
       }
     );
     return Response.json({ model });
@@ -229,6 +251,7 @@ export async function PUT(request) {
       upstreamHeaders,
       compatByProtocol,
       contextWindowOverride,
+      maxOutputTokenOverride,
       supportsVision,
       generationConfig,
       isFree,
@@ -269,7 +292,9 @@ export async function PUT(request) {
       }
     }
 
-    const model = await updateCustomModel(provider, modelId, updates, { createIfMissing: true });
+    const model = await updateCustomModel(provider, modelId, updates, {
+      createIfMissing: maxOutputTokenOverride === undefined || Object.keys(updates).length > 0,
+    });
 
     if (!model) {
       const rawKeys = Object.keys(raw);
@@ -288,6 +313,7 @@ export async function PUT(request) {
             "upstreamHeaders",
             "compatByProtocol",
             "contextWindowOverride",
+            "maxOutputTokenOverride",
             "apiFormat",
             "targetFormat",
             "supportsVision",
@@ -298,6 +324,7 @@ export async function PUT(request) {
           "upstreamHeaders" in raw ||
           "compatByProtocol" in raw ||
           "contextWindowOverride" in raw ||
+          "maxOutputTokenOverride" in raw ||
           "apiFormat" in raw ||
           "targetFormat" in raw ||
           "supportsVision" in raw);
@@ -352,6 +379,7 @@ export async function PUT(request) {
         }
         return Response.json({
           ok: true,
+          ...persistOutputTokenOverride(provider, modelId, maxOutputTokenOverride),
           modelCompatOverrides: getModelCompatOverrides(provider),
           ...(contextWindowOverrideResult !== undefined
             ? { contextWindowOverride: contextWindowOverrideResult }
@@ -366,6 +394,7 @@ export async function PUT(request) {
 
     return Response.json({
       model,
+      ...persistOutputTokenOverride(provider, modelId, maxOutputTokenOverride),
       ...(contextWindowOverrideResult !== undefined
         ? { contextWindowOverride: contextWindowOverrideResult }
         : {}),
@@ -488,6 +517,7 @@ export async function DELETE(request) {
     const provider = searchParams.get("provider");
     const modelId = searchParams.get("model");
     const resetOverride = searchParams.get("resetOverride") === "true";
+    const resetEndpoints = searchParams.get("resetEndpoints") === "true";
 
     if (!provider) {
       return Response.json(
@@ -525,6 +555,16 @@ export async function DELETE(request) {
         },
         { status: 400 }
       );
+    }
+
+    if (resetEndpoints) {
+      const restored = await resetModelEndpointOverride(provider, modelId);
+      if (!restored)
+        return Response.json(
+          { error: { message: "No endpoint override to reset", type: "not_found" } },
+          { status: 404 }
+        );
+      return Response.json({ restored: true, resetEndpoints: true });
     }
 
     // Resetting a user-owned overlay must never delete the same-id synced base.

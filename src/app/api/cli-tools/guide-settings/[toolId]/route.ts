@@ -12,6 +12,12 @@ import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { resolveApiKey, getOrCreateApiKey } from "@/shared/services/apiKeyResolver";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { guardCliConfigWrite } from "@/lib/api/cliConfigWriteGuard";
+import {
+  configClobberRefusalResponse,
+  parseJsonObject,
+  parseYamlObject,
+  readExistingConfig,
+} from "../../_lib/readExistingConfig";
 
 /**
  * Where each guide tool's config lands, and the host command that writes the
@@ -41,14 +47,14 @@ const GUIDE_TOOL_TARGETS: Record<string, { resolve: () => string; hostCommand: s
  */
 export async function GET(request, { params }) {
   // cli-tools routes require the shared management auth guard on every exported handler.
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   void params;
   return NextResponse.json({ error: "GET not supported for this tool" }, { status: 400 });
 }
 
 export async function POST(request, { params }) {
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   let rawBody;
@@ -106,11 +112,23 @@ export async function POST(request, { params }) {
         );
     }
   } catch (error) {
+    const refusal = configClobberRefusalResponse(error);
+    if (refusal) return refusal;
     return NextResponse.json(
       { error: sanitizeErrorMessage(error instanceof Error ? error.message : String(error)) },
       { status: 500 }
     );
   }
+}
+
+// `models` is merged into below; a non-array value cannot be merged without
+// discarding it, so refuse it like an unparsable file.
+function parseContinueConfig(raw: string): Record<string, any> {
+  const parsed = parseJsonObject(raw);
+  if (parsed.models != null && !Array.isArray(parsed.models)) {
+    throw new TypeError("config.json `models` must be an array");
+  }
+  return parsed;
 }
 
 /**
@@ -125,14 +143,10 @@ async function saveContinueConfig({ baseUrl, apiKey, model }) {
   // Ensure dir exists
   await fs.mkdir(configDir, { recursive: true });
 
-  // Read existing config if any
-  let existingConfig: any = {};
-  try {
-    const raw = await fs.readFile(configPath, "utf-8");
-    existingConfig = JSON.parse(raw);
-  } catch {
-    // No existing config or invalid JSON — start fresh
-  }
+  // Read existing config if any. Only a missing file starts fresh — invalid
+  // JSON (or a non-array `models`) is refused (409) instead of being replaced.
+  const existingConfig: Record<string, any> =
+    (await readExistingConfig(configPath, parseContinueConfig)) ?? {};
 
   // Build the OmniRoute model entry
   const normalizedBaseUrl = String(baseUrl || "")
@@ -260,16 +274,10 @@ async function saveHermesConfig({ baseUrl, apiKey, model }) {
   }
   const selectedModel = model;
 
-  let existingConfig: Record<string, any> = {};
-  try {
-    const raw = await fs.readFile(configPath, "utf-8");
-    const parsed = yaml.load(raw);
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      existingConfig = parsed as Record<string, any>;
-    }
-  } catch {
-    // No existing config or unparsable YAML — start fresh.
-  }
+  // Only a missing file starts fresh. Unparsable YAML, or YAML whose top level
+  // is not a mapping, is refused (409) instead of being replaced.
+  const existingConfig: Record<string, any> =
+    (await readExistingConfig(configPath, parseYamlObject)) ?? {};
 
   const nextConfig = {
     ...existingConfig,

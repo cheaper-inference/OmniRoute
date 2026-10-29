@@ -7,24 +7,15 @@ import { v4 as uuidv4 } from "uuid";
 import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptWebRetirement";
 import { getDbInstance, rowToCamel, cleanNulls } from "./core";
 import { backupDbFile } from "./backup";
-import {
-  encryptConnectionFields,
-  decryptConnectionFields,
-  migrateLegacyEncryptedString,
-} from "./encryption";
+import { encryptConnectionFields, decryptConnectionFields } from "./encryption";
 import { createLazyRowProxy } from "./providers/lazyConnectionView";
 import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache";
-import { invalidateConnectionUpdate } from "./readCache";
+import { invalidateConnectionUpdate, type UpdateOpts } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
-import {
-  removeConnectionHealth,
-  removeConnectionIndex,
-} from "@omniroute/open-sse/services/apiKeyRotator.ts";
-import { invalidateReasoningRoutingRuleCache } from "./reasoningRoutingRules";
-import { normalizeProviderSpecificData } from "@/lib/providers/requestDefaults";
-import { withDerivedCookieExpiry } from "@/shared/utils/webCookieExpiry";
-import { WEB_COOKIE_PROVIDERS } from "@/shared/constants/providers";
-import { ensureCodexFingerprintSeed } from "@omniroute/open-sse/config/codexIdentity.ts";
+import { normalizeConnectionProviderSpecificData } from "./providers/providerSpecificData";
+import { applyAutomaticDisableMarker } from "@/lib/providers/operatorDisable";
+import { isRetestAutoDisabledEnabled } from "@/lib/credentialHealth/retestAutoDisabledFlag";
+import { ensureProviderSpecificDataSecretsEncrypted } from "./providers/migrations";
 import { bumpProxyConfigGeneration, getSettings } from "./settings";
 import {
   getStoredManagementPassword,
@@ -35,6 +26,7 @@ import {
   webSessionCredentialKey,
   parseProviderSpecificData,
   isMatchingOauthIdentity,
+  isWebCookieProviderId,
 } from "./webSessionDedup";
 import { LOCAL_PROVIDERS } from "@/shared/constants/providers";
 import { pickCodexConnectionForUser } from "@/lib/oauth/utils/codexConnectionSelection";
@@ -43,53 +35,6 @@ import { reconcileCodexUsageHistory } from "./providers/usageIdentityReconciliat
 import { isRuntimeRetiredProviderId } from "@/shared/constants/providerRetirement";
 import { applyCodexChildCooldownClearOnUpdate } from "./providers/codexAccountState";
 
-/**
- * normalizeProviderSpecificData + the Codex fingerprint-seed invariant: Codex
- * OAuth connections whose convergence mode derives account-scoped identities
- * (device/session/full — the default session included) carry a persisted
- * random seed (`codexFingerprintSeed`) as the derivation source. Created here
- * at the persistence choke point so every write path (manual create, OAuth
- * persist, edit, import) is covered; the seed is never regenerated once valid,
- * so identities stay put across saves. Pre-seed connections rotate from the
- * legacy connection-id derivation exactly once on their next write — the
- * OmniRoute analog of sub2api's migration-225 backfill (v0.1.178, #5696).
- */
-function normalizeConnectionProviderSpecificData(
-  provider: string | null,
-  providerSpecificData: unknown,
-  credentials: { accessToken?: unknown; refreshToken?: unknown },
-  existingProviderSpecificData?: unknown
-) {
-  const normalized = normalizeProviderSpecificData(provider, providerSpecificData);
-  const withExpiry = withDerivedCookieExpiryForProvider(provider, normalized, credentials);
-  if (provider !== "codex") return withExpiry;
-  return ensureCodexFingerprintSeed(
-    withExpiry,
-    credentials,
-    (existingProviderSpecificData as Record<string, unknown> | null) ?? null
-  );
-}
-
-function withDerivedCookieExpiryForProvider(
-  provider: string | null,
-  providerSpecificData: unknown,
-  credentials: { accessToken?: unknown; refreshToken?: unknown } | unknown
-): Record<string, unknown> {
-  const key = String(provider || "").toLowerCase();
-  if (!(WEB_COOKIE_PROVIDERS as Record<string, unknown>)[key]) {
-    // Both branches must satisfy the Codex seed signature below; the
-    // passthrough keeps whatever shape normalization already returned.
-    return (providerSpecificData ?? {}) as Record<string, unknown>;
-  }
-  const source = credentials as Record<string, unknown> | null;
-  const credential =
-    source && typeof source === "object"
-      ? (typeof source.apiKey === "string" && source.apiKey) ||
-        (typeof source.cookie === "string" && source.cookie) ||
-        null
-      : null;
-  return withDerivedCookieExpiry(providerSpecificData, credential);
-}
 import {
   withNullableMaxConcurrent,
   withNullableQuotaWindowThresholds,
@@ -280,6 +225,7 @@ export async function getRawProviderConnections(
   columns?: string[]
 ) {
   const db = getDbInstance() as unknown as DbLike;
+  ensureProviderSpecificDataSecretsEncrypted(db);
   let selectCols = "*";
   if (columns?.length) {
     const invalidColumns = columns.filter((col) => !PROVIDER_CONNECTIONS_COLUMNS.has(col));
@@ -361,6 +307,7 @@ export function getProviderConnectionsCount(filter: JsonRecord = {}): number {
 
 export async function getProviderConnectionById(id: string) {
   const db = getDbInstance() as unknown as DbLike;
+  ensureProviderSpecificDataSecretsEncrypted(db);
   const row = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
   if (!row) return null;
 
@@ -468,6 +415,21 @@ function normalizeBaseUrlForDedup(value: unknown): string {
  * already overwritten. #3368's actual goal (same cookie under a different name
  * dedupes) is unaffected: that was always the credential loop's job.
  */
+/**
+ * Cookie-session identity checks must use plaintext for both sides.
+ * #16836 encrypts selected providerSpecificData cookies with randomized AES-GCM,
+ * so matching a new plaintext cookie against the raw JSON column would always
+ * miss the same session and create duplicate provider connections.
+ * Preserve the existing fallback behavior for legacy unencrypted metadata.
+ */
+function storedCookieCredentialKey(raw: unknown): string | null {
+  const parsed = parseProviderSpecificData(raw);
+  if (!parsed) return null;
+  return webSessionCredentialKey(
+    decryptConnectionFields({ providerSpecificData: parsed }).providerSpecificData
+  );
+}
+
 function findExistingCookieConnection(
   db: DbLike,
   provider: unknown,
@@ -481,8 +443,7 @@ function findExistingCookieConnection(
       .prepare("SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'cookie'")
       .all(provider) as JsonRecord[];
     for (const row of cookieRows) {
-      const psd = parseProviderSpecificData(row.provider_specific_data);
-      if (psd && webSessionCredentialKey(psd) === newCredKey) return row;
+      if (storedCookieCredentialKey(row.provider_specific_data) === newCredKey) return row;
     }
   }
 
@@ -497,10 +458,7 @@ function findExistingCookieConnection(
           "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'cookie' AND name = ?"
         )
         .get(provider, name) as JsonRecord | undefined) || null;
-    if (
-      byName &&
-      !webSessionCredentialKey(parseProviderSpecificData(byName.provider_specific_data))
-    ) {
+    if (byName && !storedCookieCredentialKey(byName.provider_specific_data)) {
       return byName;
     }
   }
@@ -597,8 +555,7 @@ export async function createProviderConnection(data: JsonRecord) {
         ) || null;
     }
   } else if (data.authType === "apikey") {
-    // Name-based upsert (existing behavior): same provider + same name → update.
-    if (data.name) {
+    if (data.name && !isWebCookieProviderId(data.provider)) {
       existing =
         (db
           .prepare(
@@ -1007,7 +964,16 @@ function _updateConnectionRow(db: DbLike, id: string, data: JsonRecord) {
   ).run(_buildUpdateConnectionRowParams(id, data, now));
 }
 
-export async function updateProviderConnection(id: string, data: JsonRecord) {
+export type ProviderConnectionUpdateOpts = UpdateOpts & {
+  /** #16190: this isActive:false write is the permanent-ban auto-disable (never retested). */
+  permanentBan?: boolean;
+};
+
+export async function updateProviderConnection(
+  id: string,
+  data: JsonRecord,
+  opts?: ProviderConnectionUpdateOpts
+) {
   const db = getDbInstance() as unknown as DbLike;
   const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
   if (!existing) return null;
@@ -1033,6 +999,21 @@ export async function updateProviderConnection(id: string, data: JsonRecord) {
       existingCamel.providerSpecificData
     )
   );
+  // #16190: with CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, an automated switch-off is
+  // marked so the health sweep can retest it; a permanent-ban switch-off is always marked
+  // so that sweep never retests it, whenever the flag is turned on.
+  if (typeof data.isActive === "boolean") {
+    merged.providerSpecificData = applyAutomaticDisableMarker(
+      merged.providerSpecificData,
+      existingCamel.isActive,
+      data.isActive,
+      undefined,
+      {
+        stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
+        permanentBan: opts?.permanentBan === true,
+      }
+    );
+  }
   // Mirror the sanitization the create path applies — keep the returned
   // object in lockstep with what we persist.
   if ("quotaWindowThresholds" in merged) {
@@ -1066,7 +1047,7 @@ export async function updateProviderConnection(id: string, data: JsonRecord) {
     _updateConnectionRow(db, id, encryptConnectionFields({ ...merged }));
   })();
   backupDbFile("pre-write");
-  invalidateConnectionUpdate(id, data);
+  invalidateConnectionUpdate(id, data, opts);
   bumpProxyConfigGeneration();
 
   // Zero is the internal move-to-top sentinel. Explicit positive priorities
@@ -1081,12 +1062,17 @@ export async function updateProviderConnection(id: string, data: JsonRecord) {
     return getProviderConnectionById(id);
   }
 
+  // The write path keeps existing ciphertext in merged.providerSpecificData
+  // to avoid re-encrypting unchanged values. Return a decrypted copy instead:
+  // callers of updateProviderConnection must never see enc:v1 metadata as the
+  // usable console credentials (#16836).
+  const returned = decryptConnectionFields({ ...merged });
   const returnedConnection = withNullableRateLimitOverrides(
     withNullableQuotaWindowThresholds(
-      withNullableMaxConcurrent(cleanNulls(merged), merged),
-      merged
+      withNullableMaxConcurrent(cleanNulls(returned), returned),
+      returned
     ),
-    merged
+    returned
   );
 
   if (
@@ -1099,6 +1085,8 @@ export async function updateProviderConnection(id: string, data: JsonRecord) {
 
   return returnedConnection;
 }
+
+export { mergeConnectionProviderSpecificData } from "./providers/providerSpecificDataMerge";
 
 export {
   updateCodexScopedQuotaState,
@@ -1159,6 +1147,9 @@ export async function touchConnectionSyncedModelsAt(id: string): Promise<void> {
     updatedAt: now,
     id,
   });
+  // New successful-sync timestamp must be visible without waiting for the
+  // connection row cache to expire.
+  invalidateDbCache("connections", id, { skipModelCatalog: true });
 }
 
 /**

@@ -72,7 +72,7 @@ export function isUpstreamHttp2Enabled(
   return !["false", "0", "no", "off"].includes(raw);
 }
 
-function getDispatcherOptions(
+export function getDispatcherOptions(
   hostname?: string,
   env: Record<string, string | undefined> = process.env
 ) {
@@ -154,8 +154,7 @@ function getProxyDispatcherOptions(env: Record<string, string | undefined> = pro
   // by the retry-once-with-fresh-socket path in proxyFetch.ts (mirrors the
   // direct-path #4252 fix) instead of by killing all idle sockets after 1ms.
   //
-  // Pipelining 4 lets concurrent SSE streams multiplex over the pooled
-  // connection instead of each opening its own socket (#4163 regression).
+  // HTTP(S) proxies retain pipelining 4; SOCKS HTTP/1.1 is capped below.
   return {
     ...options,
     // ProxyAgent ignores connect and builds both TLS hops separately (#15313).
@@ -535,7 +534,7 @@ function buildProxyAuthorizationToken(parsed: URL): string | null {
 
 /**
  * Build a ProxyAgent / socks dispatcher for a normalized proxy URL using the
- * given options. Shared by the pooled dispatcher (keep-alive, pipelining 4)
+ * given options. Shared by the pooled dispatcher (keep-alive)
  * and the retry dispatcher (fresh no-keep-alive socket, mirrors #4252).
  */
 function buildProxyDispatcher(
@@ -560,7 +559,10 @@ function buildProxyDispatcher(
     return createSocksDispatcherWithFamily(
       socksOptions as unknown as Parameters<typeof createSocksDispatcherWithFamily>[0],
       family,
-      options
+      // With SOCKS/HTTP1 pipelining, a quota timeout can close the socket
+      // carrying an unrelated active stream. Cap pipelining at 1 to prevent
+      // this, preserving 0 so retries continue to use fresh connections.
+      { ...options, pipelining: Math.min(options.pipelining, 1) }
     );
   }
 

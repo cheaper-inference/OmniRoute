@@ -13,7 +13,7 @@ upande wa seva unaotolewa na njia ya orodha.
 ## Njia ya orodha — `GET /api/settings/free-proxies`
 
 Hurejesha sehemu iliyochujwa, iliyopangwa na kugawanywa katika kurasa pamoja na jumla ya idadi. Uchujaji na
-uhesabuji hufanyika katika SQL, ili UI iweze kuonyesha jumla halisi (k.m. `Jumla: 0`)
+uhesabuji hufanyika katika SQL, ili UI iweze kuonyesha jumla halisi (k.m. `Total: 0`)
 bila kupakia kila safu kwenye kumbukumbu.
 
 ### Vigezo vya hoja
@@ -54,8 +54,8 @@ bila kupakia kila safu kwenye kumbukumbu.
 ```
 
 `total` huwakilisha jumla iliyochujwa **kabla ya** ugawaji katika kurasa, ili UI iweze kuonyesha
-`Jumla: N` na `hasMore` kwa kujitegemea. `syncErrors` hupangwa kwa kitambulisho cha chanzo na
-hujazwa tu kwa vyanzo ambavyo usawazishaji wake wa mwisho ulishindwa — matokeo ya `Jumla: 0`
+`Total: N` na `hasMore` kwa kujitegemea. `syncErrors` hupangwa kwa kitambulisho cha chanzo na
+hujazwa tu kwa vyanzo ambavyo usawazishaji wake wa mwisho ulishindwa — matokeo ya `Total: 0`
 kamwe hayakosi maelezo.
 
 ## Kuongeza kwenye mkusanyiko — `POST /api/settings/free-proxies/[id]/add-to-pool`

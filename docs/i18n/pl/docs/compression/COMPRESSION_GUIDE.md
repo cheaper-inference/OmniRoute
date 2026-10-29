@@ -32,91 +32,82 @@ OmniRoute implementuje modułowy potok kompresji promptów, który działa **pro
 
 ## Tryby kompresji
 
-### Wyłączony
+### Wyłączona
 
-Kompresja nie jest stosowana. Wszystkie wiadomości są przekazywane bez zmian.
+Brak kompresji. Wszystkie wiadomości przechodzą bez zmian.
 
-### Tryb lekki (~15% oszczędności, opóźnienie <1ms)
+### Tryb Lite (~15% oszczędności, opóźnienie <1 ms)
 
-Najbezpieczniejszy tryb — bez zmian semantycznych, wyłącznie porządkowanie formatowania:
+Najbezpieczniejszy tryb — zerowa zmiana semantyczna, tylko uporządkowanie formatowania:
 
-| Technika                 | Opis                                                           |
-| ------------------------ | -------------------------------------------------------------- |
-| `collapseWhitespace`     | Łączenie kolejnych pustych wierszy i usuwanie końcowych spacji |
-| `dedupSystemPrompt`      | Usuwanie zduplikowanych wiadomości systemowych                 |
-| `compressToolResults`    | Kompresowanie rozwlekłych wyników narzędzi/funkcji             |
-| `removeRedundantContent` | Usuwanie powtarzających się instrukcji                         |
-| `replaceImageUrls`       | Skracanie identyfikatorów URI danych obrazów base64            |
+| Technika                 | Opis                                                    |
+| ------------------------ | ------------------------------------------------------- |
+| `collapseWhitespace`     | Scala kolejne puste wiersze i spacje na końcach wierszy |
+| `dedupSystemPrompt`      | Usuwa zduplikowane komunikaty systemowe                 |
+| `compressToolResults`    | Kompresuje rozwlekłe wyniki narzędzi/funkcji            |
+| `removeRedundantContent` | Usuwa powtarzające się instrukcje                       |
+| `replaceImageUrls`       | Skraca identyfikatory URI danych obrazów base64         |
 
-**Najlepszy do:** Stałego użycia i przepływów pracy o krytycznym znaczeniu dla bezpieczeństwa.
+**Najlepszy do:** pracy w trybie ciągłym, procesów krytycznych dla bezpieczeństwa.
 
-### Tryb standardowy (~30% oszczędności)
+### Tryb Standard (~30% oszczędności)
 
-Inspirowany rozwiązaniem [Caveman](https://github.com/JuliusBrussee/caveman) — usuwa słowa-wypełniacze i rozwlekłe sformułowania, zachowując znaczenie:
+Zainspirowany projektem [Caveman](https://github.com/JuliusBrussee/caveman) — usuwa słowa-wypełniacze i rozwlekłe sformułowania, zachowując znaczenie:
 
-- Usuwa słowa-wypełniacze („proszę”, „myślę, że”, „zasadniczo”, „właściwie”)
-- Skraca rozwlekłe wyrażenia („w celu” → „aby”, „w wyniku” → „ponieważ”)
-- Usuwa uprzejme asekuracyjne sformułowania („Czy zechcesz...”, „Jeśli mógłbyś...”)
+- Usuwa słowa-wypełniacze („please”, „I think”, „basically”, „actually”)
+- Skraca rozwlekłe zwroty („in order to” → „to”, „as a result of” → „because”)
+- Usuwa grzecznościowe wstawki („Would you mind...”, „If you could possibly...”)
 - Ponad 30 reguł regex dostosowanych do promptów programistycznych
 
-**Najlepszy do:** Codziennych zadań programistycznych i zespołów dbających o koszty.
+**Najlepszy do:** codziennych procesów programistycznych, zespołów dbających o koszty.
 
-### Tryb agresywny (~50% oszczędności)
+### Tryb Aggressive (~50% oszczędności)
 
 Inteligentne zarządzanie historią podczas długich sesji:
 
-- **Starzenie wiadomości** — starsze wiadomości są stopniowo coraz bardziej kompresowane
-- **Kompresja wyników narzędzi** — długie wyniki narzędzi są skracane lub pomijane (pierwsze/ostatnie wiersze,
-  filtrowanie wierszy z dopasowaniami, kompaktowanie kluczy JSON)
+- **Starzenie wiadomości** — starsze wiadomości są stopniowo coraz silniej kompresowane
+- **Kompresja wyników narzędzi** — długie wyniki narzędzi są obcinane lub skracane (pierwsze/ostatnie wiersze, filtrowanie wierszy z dopasowaniami, kompaktowanie kluczy JSON)
 - **Mechanizmy ochrony integralności strukturalnej** — zapewniają spójność par `tool_use` + `tool_result`
-- **Uwzględnianie okna kontekstu** — respektuje limity tokenów poszczególnych modeli
+- **Świadomość okna kontekstu** — przestrzega limitów tokenów dla poszczególnych modeli
 
-**Najlepszy do:** Rozbudowanych sesji debugowania i dużych baz kodu.
+**Najlepszy do:** długich sesji debugowania, dużych baz kodu.
 
 ### Tryb Ultra (~75% oszczędności)
 
-Maksymalna kompresja w scenariuszach, w których liczba tokenów ma krytyczne znaczenie:
+Maksymalna kompresja do scenariuszy krytycznych pod względem tokenów:
 
-- **Przycinanie heurystyczne** — przycinanie tokenów w prozie na podstawie punktacji
-- **Zachowanie struktury** — wydzielone bloki kodu, kod wbudowany, adresy URL i identyfikatory są
-  zastępowane znacznikami i ponownie wstawiane bez żadnych zmian; nigdy nie są przycinane
-- **Opcjonalna warstwa SLM** — po skonfigurowaniu mały model lokalny może doprecyzować przycinanie
-- Niezależny od trybu agresywnego: nie uruchamia starzenia wiadomości, kompresji wyników narzędzi
-  ani awaryjnego modułu podsumowującego (tylko awaria warstwy SLM może skierować przebieg awaryjny
-  przez tryb agresywny)
+- **Przycinanie heurystyczne** — przycinanie tokenów prozy na podstawie punktacji
+- **Zachowanie struktury** — blok kodu, kod inline, adresy URL i identyfikatory są zamieniane na znaczniki (tombstone) i ponownie zszywane w oryginalnej postaci — nigdy nie są przycinane
+- **Opcjonalna warstwa SLM** — po skonfigurowaniu mały lokalny model może udoskonalić przycinanie
+- Niezależny od trybu Aggressive: nie uruchamia starzenia wiadomości, kompresji wyników narzędzi ani awaryjnego streszczacza (tylko awaria warstwy SLM może skierować przebieg awaryjny przez tryb aggressive)
 
-**Najlepszy do:** Sytuacji, w których wielokrotnie osiągasz limity kontekstu.
+**Najlepszy do:** sytuacji, gdy wielokrotnie osiągasz limity kontekstu.
 
-### Tryb RTK (60–90% po stronie dostawcy nadrzędnego)
+### Tryb RTK (zakres 60–90% upstream)
 
-Tryb RTK jest zoptymalizowany pod kątem obszernych wyników narzędzi pojawiających się w sesjach agentów programistycznych:
+Tryb RTK jest zoptymalizowany pod kątem rozwlekłych wyników narzędzi pojawiających się w sesjach agentów programistycznych:
 
-- Wykrywa klasy poleceń/wyników, takie jak `git status`, `git diff`, `git log`, narzędzia uruchamiające testy,
-  kompilacje TypeScript/Vite/Webpack, ESLint/Biome/Prettier, audyty/instalacje npm, logi Docker, wyniki narzędzi infrastrukturalnych
-  oraz ogólne wyniki powłoki
+- Wykrywa klasy poleceń/wyjść, takie jak `git status`, `git diff`, `git log`, programy uruchamiające testy, kompilacje TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/instalacje, logi Dockera, wyjście infrastruktury oraz ogólne wyjście powłoki
 - Stosuje pakiety filtrów JSON z `open-sse/services/compression/engines/rtk/filters/`
-- Importuje filtry schematu RTK TOML v1 z projektowych lub globalnych plików `filters.toml`, z walidacją
-  testów wbudowanych i kontrolą zaufania dla plików projektowych
-- Zawiera 55 wbudowanych filtrów z osadzonymi przykładami weryfikacyjnymi
-- Usuwa sekwencje sterujące ANSI, paski postępu, powtarzające się wiersze i nieistotny szum
-- Zachowuje awarie, błędy, ostrzeżenia, zmienione pliki, podsumowania i końcową część długich wyników
-- Obsługuje projektowe filtry z kontrolą zaufania, filtry globalne oraz opcjonalne odzyskiwanie zredagowanych surowych wyników
+- Importuje filtry RTK TOML schema v1 z projektowych lub globalnych plików `filters.toml`, z walidacją przez testy inline i kontrolą zaufania dla plików projektowych
+- Dostarcza 56 wbudowanych filtrów z przykładami weryfikacji inline
+- Usuwa sekwencje sterujące ANSI, paski postępu, powtarzające się wiersze i szum niewymagający reakcji
+- Zachowuje niepowodzenia, błędy, ostrzeżenia, zmienione pliki, podsumowania i końcówkę długiego wyjścia
+- Obsługuje filtry projektowe z kontrolą zaufania, filtry globalne oraz opcjonalne odzyskiwanie surowego wyjścia po anonimizacji
 
-**Najlepszy do:** Sesji agentów obejmujących powłokę, kompilowanie, testowanie, git, grep i transkrypcje wyników plikowych.
+**Najlepszy do:** sesji agentowych z transkryptami powłoki, kompilacji, testów, git, grep i wyjścia plików.
 
-### Tryb warstwowy (78–95% kwalifikującego się zakresu)
+### Tryb Stacked (zakres kwalifikowany: 78–95%)
 
-Tryb warstwowy uruchamia wiele silników kompresji w deterministycznej kolejności. Domyślny potok to:
+Tryb Stacked uruchamia wiele silników kompresji w deterministycznej kolejności. Domyślny pipeline to:
 
 ```txt
 RTK -> Caveman
 ```
 
-Ta kolejność najpierw kompaktuje wyniki terminala/narzędzi, a następnie stosuje semantyczne skracanie Caveman do
-pozostałej części promptu w języku naturalnym. Potoki warstwowe można konfigurować globalnie lub za pomocą
-kombinacji kompresji przypisanych do kombinacji routingu.
+Taka kolejność najpierw zapewnia zwartość wyjścia terminala/narzędzi, a następnie stosuje semantyczną kondensację Caveman do pozostałego promptu w języku naturalnym. Pipeline'y Stacked można konfigurować globalnie lub poprzez kombinacje kompresji przypisane do kombinacji routingu.
 
-**Najlepszy do:** Mieszanego kontekstu zawierającego duże logi narzędzi oraz instrukcje użytkownika lub podsumowania asystenta.
+**Najlepszy do:** mieszanych kontekstów z dużymi logami narzędzi oraz instrukcjami użytkownika lub podsumowaniami asystenta.
 
 ---
 
@@ -335,28 +326,29 @@ Tryb RTK jest inspirowany projektem **[RTK - Rust Token Killer](https://github.c
 Poza 7 trybami opisanymi powyżej (kod źródłowy akceptuje również tryby `codex-responses` i
 `omniglyph`, których ten przewodnik nie omawia) poniższe sekcje opisują funkcje
 działające wewnątrz tych trybów lub obok nich: kompresja wyników narzędzi i progresywne starzenie
-to kroki 1 i 2 silnika agresywnego (tryb Agresywny i krok `aggressive`
-potoku stosowego), potok stosowy określa sposób działania trybu Stosowego, kompresja
-uwzględniająca pamięć podręczną obniża `aggressive` i `ultra` do `standard` w przypadku dostawców
-korzystających z pamięci podręcznej, gdy kompresja jest włączona, natomiast tryb wyjściowy Caveman i style danych wyjściowych są opcjonalnymi instrukcjami promptu systemowego,
-domyślnie wyłączonymi, które kształtują dane wyjściowe modelu zamiast kompresować żądanie.
+to kroki 1 i 2 agresywnego silnika (tryb Aggressive oraz krok `aggressive`
+potoku warstwowego), potok warstwowy określa sposób działania trybu Stacked, kompresja
+uwzględniająca pamięć podręczną obniża `aggressive` i `ultra` do `standard` dla dostawców
+korzystających z pamięci podręcznej, gdy kompresja jest włączona, a tryb odpowiedzi jaskiniowca
+i style odpowiedzi są opcjonalnymi instrukcjami promptu systemowego,
+domyślnie wyłączonymi, które kształtują odpowiedź modelu zamiast kompresować żądanie.
 
 ### Kompresja uwzględniająca pamięć podręczną
 
 Niektórzy dostawcy (np. Anthropic z buforowaniem promptów) obsługują **buforowanie promptów**,
-co pozwala im przechowywać części promptu w pamięci podręcznej w celu zmniejszenia kosztów i opóźnień. Gdy
+które pozwala im przechowywać części promptu w pamięci podręcznej, aby obniżyć koszty i opóźnienia. Gdy
 buforowanie jest włączone, agresywna kompresja może w rzeczywistości **pogorszyć** wydajność,
 ponieważ zmienia buforowane tokeny, unieważniając pamięć podręczną.
 
 Moduł `cachingAware.ts` rozwiązuje ten problem przez **wykrywanie kontekstu buforowania** i
-**odpowiednie dostosowywanie strategii kompresji**.
+odpowiednie **dostosowywanie strategii kompresji**.
 
 #### Jak to działa
 
-1. **Wykrywanie kontekstu buforowania** — skanuje treść żądania pod kątem znaczników `cache_control`
+1. **Wykrywanie kontekstu buforowania** — skanuje treść żądania w poszukiwaniu znaczników `cache_control`
 2. **Identyfikowanie dostawców obsługujących buforowanie** — sprawdza, czy docelowy dostawca obsługuje buforowanie
-3. **Dostosowywanie strategii** — obniża `aggressive`/`ultra` do `standard` w przypadku dostawców obsługujących buforowanie
-4. **Pomijanie promptu systemowego** — prompty systemowe są zwykle buforowane, dlatego nie należy ich kompresować
+3. **Dostosowywanie strategii** — obniża `aggressive`/`ultra` do `standard` dla dostawców obsługujących buforowanie
+4. **Pomijanie promptu systemowego** — prompty systemowe są zazwyczaj buforowane, więc nie są kompresowane
 
 Funkcja pomocnicza strategii zwraca również flagę `deterministicOnly`, ale konstruktor planu wykorzystuje
 wyłącznie strategię — obecnie żaden dalszy element nie odczytuje tej flagi.
@@ -384,26 +376,26 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### Kiedy używać
 
-Kompresja uwzględniająca pamięć podręczną jest **zawsze włączona** — nie wymaga konfiguracji. Uruchamia się, gdy
-kompresja jest włączona, a docelowy dostawca obsługuje buforowanie promptów (Anthropic, OpenAI
-itd.); jawne znaczniki `cache_control` nie są wymagane — sam dostawca obsługujący buforowanie
-wyzwala obniżenie trybu, natomiast same znaczniki nigdy tego nie robią (wykrywanie znaczników dostarcza danych telemetrycznych pamięci podręcznej,
-a nie wpływa na decyzję dotyczącą strategii).
+Kompresja uwzględniająca pamięć podręczną jest **zawsze włączona** — nie wymaga konfiguracji. Uruchamia się zawsze,
+gdy kompresja jest włączona, a docelowy dostawca obsługuje buforowanie promptów (Anthropic, OpenAI
+itp.); jawne znaczniki `cache_control` nie są wymagane — sam dostawca obsługujący buforowanie
+powoduje obniżenie poziomu, natomiast same znaczniki nigdy tego nie robią (wykrywanie znaczników zasila telemetrię
+pamięci podręcznej, a nie decyzję dotyczącą strategii).
 
 ### Progresywne starzenie
 
 Długie konwersacje gromadzą wiele tur wiadomości, ale starsze tury stają się mniej
-istotne. Moduł `progressiveAging.ts` **degraduje wiadomości na podstawie odległości w turach**
-(odległość jest mierzona od końca konwersacji). Przy dostarczanych ustawieniach domyślnych
+istotne. Moduł `progressiveAging.ts` **degraduje wiadomości według odległości tur**
+(odległość jest mierzona od końca konwersacji). Przy dostarczanych wartościach domyślnych
 (`verbatim: 2, light: 2, moderate: 3`):
 
-- **Ostatnie 2 tury (odległość ≤ 2)**: Zachowywane bez zmian
-- **Odległość 3**: Kompresja jaskiniowa (usuwanie wypełniaczy)
-- **Odległość 4+**: Wiadomości asystenta są podsumowywane; wiadomości użytkownika są skracane do pierwszego
-  wiersza, maksymalnie do 120 znaków; pozostałe role pozostają bez zmian. Prompty systemowe, wiadomości już poddane
-  starzeniu oraz najnowsza wiadomość użytkownika są zawsze zachowywane bez zmian, niezależnie od odległości.
-  Nic nie jest całkowicie usuwane, a przedział `light`
-  jest nieosiągalny przy dostarczanych ustawieniach domyślnych (`light` jest równe `verbatim`).
+- **Ostatnie 2 tury (odległość ≤ 2)**: zachowywane bez zmian
+- **Odległość 3**: kompresja jaskiniowca (usuwanie wypełniaczy)
+- **Odległość 4+**: wiadomości asystenta są podsumowywane; wiadomości użytkownika są ograniczane do pierwszego
+  wiersza o maksymalnej długości 120 znaków; pozostałe role pozostają bez zmian. Prompty systemowe, wcześniej postarzone
+  wiadomości oraz najnowsza wiadomość użytkownika są zawsze zachowywane bez zmian, niezależnie od odległości.
+  Nic nie jest całkowicie usuwane, a zakres `light`
+  jest nieosiągalny przy dostarczanych wartościach domyślnych (`light` jest równy `verbatim`).
 
 #### Przykład kodu
 
@@ -420,9 +412,9 @@ const messages = [
 const { messages: aged, saved } = applyAging(messages, {
   verbatim: 3, // ostatnie 3 tury: bez zmian
   light: 8, // odległość <= 8: lekka kompresja
-  moderate: 20, // odległość <= 20: kompresja jaskiniowa
-  fullSummary: 5, // wymagane przez typ, nieodczytywane przez kod podziału na przedziały
-  // odległość > 20: podsumowanie (asystent) / zachowany pierwszy wiersz (użytkownik)
+  moderate: 20, // odległość <= 20: kompresja jaskiniowca
+  fullSummary: 5, // wymagane przez typ, nieodczytywane przez kod podziału na zakresy
+  // odległość > 20: podsumowanie (asystent) / zachowanie pierwszego wiersza (użytkownik)
 });
 
 // saved = liczba zaoszczędzonych tokenów
@@ -430,51 +422,51 @@ const { messages: aged, saved } = applyAging(messages, {
 
 #### Kiedy używać
 
-Progresywne starzenie jest **zawsze włączone** w trybie `aggressive` — jest to krok 2 funkcji
-`compressAggressive()`. Tryb Ultra go nie uruchamia. Jest ono
+Progresywne starzenie jest **zawsze włączone** w trybie `aggressive` — stanowi krok 2 funkcji
+`compressAggressive()`. Tryb Ultra go nie uruchamia. Jest
 szczególnie skuteczne w przypadku:
 
 - Długotrwałych sesji programistycznych
-- Wielodniowych konwersacji
+- Konwersacji trwających wiele dni
 - Przepływów pracy agentów z wieloma wywołaniami narzędzi
 
-### Tryb odpowiedzi jaskiniowej
+### Tryb odpowiedzi jaskiniowca
 
-Tryb odpowiedzi jaskiniowej dodaje **instrukcje promptu systemowego**, które proszą sam model o
-zwięzłe odpowiedzi — poziom `lite` prosi o zwięzłe odpowiedzi zachowujące pełne zdania, `full`
-prosi, aby „odpowiadać zwięźle jak bystry jaskiniowiec”, a `ultra` prosi o odpowiedzi telegraficzne;
+Tryb odpowiedzi jaskiniowca dodaje **instrukcje promptu systemowego**, które proszą sam model o
+zwięzłą odpowiedź — poziom `lite` prosi o zwięzłe odpowiedzi zachowujące pełne zdania, `full`
+prosi, aby „odpowiadać zwięźle jak inteligentny jaskiniowiec”, a `ultra` prosi o odpowiedzi telegraficzne;
 instrukcje jedynie o to proszą i nie mogą tego zagwarantować. Żądania otrzymują je za pośrednictwem
 `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`):
 `open-sse/handlers/chatCore.ts` najpierw ustala wybór za pomocą warstwy zgodności wstecznej
 (`resolveOutputStyleSelection()` w
 `open-sse/services/compression/outputStyles/backCompat.ts`), która, gdy `outputStyles`
-jest puste, mapuje włączone `cavemanOutputMode` na styl odpowiedzi `terse-prose` z poziomem
-`cavemanOutputMode.intensity` (patrz Zgodność wsteczna poniżej); niepusty wybór `outputStyles`
-jest używany bez zmian, a `cavemanOutputMode.enabled` i `intensity` nie mają wtedy żadnego
+jest pusty, mapuje włączony `cavemanOutputMode` na styl odpowiedzi `terse-prose` o
+intensywności `cavemanOutputMode.intensity` (patrz Zgodność wsteczna poniżej); niepusty wybór `outputStyles`
+jest używany bez zmian, a `cavemanOutputMode.enabled` i `intensity` nie mają wtedy
 wpływu, natomiast przełącznik `autoClarity` nadal obowiązuje. Plik `outputMode.ts` zawiera
-teksty instrukcji (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), mechanizm pomijania zawartości oraz
-funkcję pomocniczą określającą miejsce używane przez mechanizm wstrzykiwania; jego własny
-mechanizm wstrzykiwania `applyCavemanOutputMode()` nie ma wywołującego go kodu produkcyjnego.
+teksty instrukcji (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), mechanizm pomijania treści oraz
+funkcję pomocniczą rozmieszczania używaną podczas wstrzykiwania; jego własny mechanizm wstrzykiwania `applyCavemanOutputMode()` nie ma
+wywołań w środowisku produkcyjnym.
 
 #### Jak to działa
 
 Ten tryb nie kompresuje danych wejściowych. Dodaje blok instrukcji do promptu systemowego
-(patrz Jak działa wstrzykiwanie poniżej), a dowolny tryb kompresji danych wejściowych wybrany dla żądania
-jest nadal uruchamiany później na treści, która zawiera już ten blok. Przed wspólną
-klauzulą ograniczeń, którą kończy się każdy poziom, angielski poziom `full` ma następującą treść:
+(zobacz Jak działa wstrzykiwanie poniżej), a każdy tryb kompresji danych wejściowych wybrany dla żądania
+nadal jest później uruchamiany na treści, która zawiera już ten blok. Przed wspólną
+klauzulą ograniczeń, którą kończy się każdy poziom, angielski poziom `full` brzmi:
 
-> „Odpowiadaj zwięźle jak bystry jaskiniowiec. Pomijaj rodzajniki (a/an/the), wypełniacze (just/really/basically/actually/simply), uprzejmości i wyrażenia asekuracyjne. Równoważniki zdań są dozwolone. Używaj krótkich synonimów (big zamiast extensive, fix zamiast implement). Zachowuj bez zmian całą treść techniczną, kod, błędy, adresy URL i identyfikatory.”
+> „Odpowiadaj zwięźle jak inteligentny jaskiniowiec. Pomijaj przedimki (a/an/the), wypełniacze (just/really/basically/actually/simply), uprzejmości i asekuracyjne sformułowania. Fragmenty zdań są OK. Używaj krótkich synonimów (big zamiast extensive, fix zamiast implement). Zachowuj dokładnie całą treść techniczną, kod, błędy, adresy URL i identyfikatory.”
 
 Działa to szczególnie dobrze w przypadku:
 
-- Generowania kodu (zwięźlejsze odpowiedzi = mniej tokenów)
+- Generowania kodu (zwięźlejsze dane wyjściowe = mniej tokenów)
 - Szybkich pytań i odpowiedzi (bez potrzeby rozbudowanych wyjaśnień)
 - Przetwarzania wsadowego (maksymalizacja przepustowości)
 
 #### Kiedy używać
 
-Tryb odpowiedzi jaskiniowej jest **opcjonalny**. Przy włączonej kompresji (`enabled: true`, główny przełącznik
-na stronie Compression Settings) włącz go za pomocą `cavemanOutputMode.enabled`; `intensity`
+Tryb wyjściowy Caveman jest **opcjonalny**. Przy włączonej kompresji (`enabled: true`, główny przełącznik
+na stronie ustawień kompresji) włącz go za pomocą `cavemanOutputMode.enabled`; `intensity`
 wybiera `lite`, `full` lub `ultra`:
 
 ```json
@@ -487,94 +479,103 @@ wybiera `lite`, `full` lub `ultra`:
 }
 ```
 
-Przełącznik **Output Mode** kombinacji kompresji (`outputMode`, z poziomem określonym przez `outputModeIntensity`)
-ustawia ten sam przełącznik dla żądań, do których ma zastosowanie dana kombinacja, a narzędzie MCP
-`omniroute_set_compression_engine` zapisuje go za pośrednictwem swojego logicznego argumentu `outputMode`.
-Niepusty wybór `outputStyles` ma pierwszeństwo przed tym przełącznikiem. W panelu włączenie stylu odpowiedzi
-**Terse prose** powoduje wstrzyknięcie tego samego bloku (patrz Style odpowiedzi poniżej).
+Przełącznik **Tryb wyjściowy** kombinacji kompresji (`outputMode`, z poziomem w `outputModeIntensity`)
+ustawia tę samą opcję dla żądań, których dotyczy dana kombinacja, a narzędzie MCP
+`omniroute_set_compression_engine` zapisuje ją za pośrednictwem swojego argumentu logicznego `outputMode`.
+Niepusty wybór `outputStyles` ma pierwszeństwo przed tym przełącznikiem. W panelu włączenie
+stylu wyjściowego **Zwięzła proza** wstrzykuje ten sam blok (zobacz Style wyjściowe poniżej).
 
-### Style odpowiedzi (katalog)
+### Style wyjściowe (katalog)
 
-Opisany powyżej tryb odpowiedzi jaskiniowej jest **starszą ścieżką pojedynczego stylu**. Faza 4 uogólniła go
-do postaci katalogu komponowalnych stylów odpowiedzi: `OUTPUT_STYLE_CATALOG` w
+Opisany wyżej tryb wyjściowy Caveman jest **starszą ścieżką pojedynczego stylu**. Faza 4 uogólniła go
+do katalogu łączonych stylów wyjściowych: `OUTPUT_STYLE_CATALOG` w
 `open-sse/services/compression/outputStyles/catalog.ts`. Każdy styl jest instrukcją promptu systemowego,
-która prosi sam model o generowanie tańszych odpowiedzi; style można włączać
-jednocześnie i są one wstrzykiwane w kolejności katalogowej.
+która nakazuje samemu modelowi generować tańsze dane wyjściowe; style można włączać
+jednocześnie i są wstrzykiwane w kolejności katalogowej.
 
-| Styl                      | `id`          | Działanie                                                                                                                                                                                                                                                   | Języki instrukcji                                       |
-| ------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| Zwięzła proza             | `terse-prose` | Usuwa wypełniacze/rodzajniki/asekuracyjne sformułowania; zachowuje precyzyjną treść techniczną. Ten sam tekst co w starszym trybie wyjściowym caveman (przywołany, nieprzepisywany).                                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi           |
-| Mniej kodu                | `less-code`   | Drabina YAGNI: najmniejsza działająca zmiana, bez niezamówionych abstrakcji.                                                                                                                                                                                | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi           |
-| Kucyk (leniwy senior dev) | `ponytail`    | „Najlepszy kod to kod, którego nigdy nie napisano”: ponowne użycie > przepisywanie, główna przyczyna > objaw, najkrótszy działający diff.                                                                                                                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi           |
-| Mam ADHD (najpierw akcja) | `i-have-adhd` | Najpierw działanie (polecenie/ścieżka/fragment przed opisem), numerowane kroki o ograniczonym zakresie, JEDEN konkretny następny krok, bez wstępu/podsumowania/zakończenia. Na podstawie [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT). | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi           |
-| Zwięzły CJK (文言)        | `terse-cjk`   | Odpowiedź `full`/`ultra` w klasycznym języku chińskim (文言); `lite` jedynie wymaga krótkich odpowiedzi bez wyrazów funkcyjnych, uprzejmości ani ozdobników.                                                                                                | zh (ograniczone ustawieniami regionalnymi, patrz niżej) |
+| Styl                               | `id`            | Działanie                                                                                                                                                                                                                                                                     | Języki instrukcji                                     |
+| ---------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Zwięzła proza                      | `terse-prose`   | Pomija wypełniacze/przedimki/asekuracyjne sformułowania; zachowuje dokładnie treść techniczną. Ten sam tekst co w starszym trybie wyjściowym Caveman (przywoływany, a nie powielany).                                                                                         | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi         |
+| Mniej kodu                         | `less-code`     | Drabina YAGNI: najmniejsza działająca zmiana, bez niezamówionych abstrakcji.                                                                                                                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi         |
+| Kucyk (leniwy starszy programista) | `ponytail`      | „Najlepszy kod to kod, który nigdy nie powstał”: ponowne użycie > przepisywanie, przyczyna źródłowa > objaw, najkrótszy działający diff.                                                                                                                                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi         |
+| Mam ADHD (najpierw działanie)      | `i-have-adhd`   | Najpierw działanie (polecenie/ścieżka/fragment przed opisem), numerowane kroki o ograniczonej liczbie, JEDEN konkretny następny krok, bez wstępu/podsumowania/zakończeń. Zaadaptowano z [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi         |
+| Filtr UI Antislop                  | `antislop-ui`   | Każda technika wizualna musi przejść test celowości (hierarchia, tożsamość, czytelność); bez domyślnych gradientów/szkła/poświaty, ograniczona paleta, bez szablonowych układów. Oba style antislop dodają ograniczenie zakazujące martwych kontrolek i zmyślonych twierdzeń. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi         |
+| Filtr tekstu i ludzki Antislop     | `antislop-copy` | Konkretne teksty (bez pauzy em, ogólnikowych CTA, modnych haseł, chatbotowych zakończeń i zmyślonych faktów) oraz reguły dla ludzi: kontrast WCAG AA, widoczny fokus, obsługa klawiaturą, stany pusty/ładowania/błędu, przeorganizowanie układu na urządzeniach mobilnych.    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi         |
+| Zwięzły CJK (文言)                 | `terse-cjk`     | Odpowiedź `full`/`ultra` w klasycznym języku chińskim (文言); `lite` wymaga jedynie krótkich odpowiedzi bez wyrazów funkcyjnych, uprzejmości i ozdobników.                                                                                                                    | zh (zależne od ustawień regionalnych, zobacz poniżej) |
 
-Każdy styl jest dostępny w trzech poziomach intensywności — `lite`, `full`, `ultra` — a każdy poziom
+Każdy styl ma trzy poziomy intensywności — `lite`, `full`, `ultra` — a każdy poziom
 kończy się wspólną klauzulą ograniczeń (`SHARED_BOUNDARIES` w `outputMode.ts`), która
-zachowuje dokładną postać bloków kodu, ścieżek plików, poleceń, błędów i adresów URL. Teksty poziomów
+zachowuje dokładnie bloki kodu, ścieżki plików, polecenia, błędy i adresy URL. Teksty poziomów
 `terse-prose` i `terse-cjk` dodają do tej listy identyfikatory.
 
-`terse-cjk` jest ograniczony do ustawienia regionalnego `zh` w dwóch miejscach. Strona ustawień kompresji wyświetla
+`terse-cjk` jest ograniczony do ustawień regionalnych `zh` w dwóch miejscach. Strona ustawień kompresji wyświetla
 jego wiersz tylko wtedy, gdy językiem interfejsu panelu jest chiński (`zh-CN` lub `zh-TW`), a
-`applyOutputStyles()` wstrzykuje go tylko wtedy, gdy ustalonym językiem żądania (patrz sekcja Wybór
+`applyOutputStyles()` wstrzykuje go tylko wtedy, gdy ustalonym językiem żądania (zobacz Wybór
 języka poniżej) jest `zh`. Ukrycie wiersza nie usuwa zapisanego wyboru `terse-cjk`:
-API ustawień akceptuje dowolny identyfikator stylu, a zapisywanie innych stylów na stronie zachowuje ten wybór. Podczas
-obsługi żądania sprawdzenie języka w `applyOutputStyles()` jest jedynym ograniczeniem regionalnym.
+API ustawień akceptuje dowolny identyfikator stylu, a zapisanie innych stylów na stronie zachowuje go.
+W czasie obsługi żądania jedyną kontrolą ustawień regionalnych jest sprawdzenie języka przez `applyOutputStyles()`.
 
 #### Jak działa wstrzykiwanie
 
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) dopasowuje
-wybór do katalogu (nieznane identyfikatory i style niezgodne z ustawieniem regionalnym są
-odrzucane bez zgłaszania błędu; wybór, który nie daje żadnego stylu, pozostawia treść
-bez zmian i jest pomijany jako `no_styles`), łączy wybrane instrukcje w kolejności
-katalogowej,
-jednokrotnie dołącza klauzulę ograniczeń **raz** (oraz klauzulę bezpieczeństwa, `SAFETY_BOUNDARIES` lub jej
-tłumaczenie, gdy wybrano `less-code` albo `ponytail`) i rozpoczyna blok pojedynczym
-znacznikiem idempotencji (`[OmniRoute Output Styles]`), dzięki czemu ponowne zastosowanie niczego nie zmienia. Gdy
-ustalony język (patrz sekcja Wybór języka poniżej) ma tłumaczenie, zamiast angielskiej
-instrukcji wstrzykiwana jest wersja zlokalizowana.
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) porównuje
+wybór z katalogiem (nieznane identyfikatory i style niezgodne z ustawieniami regionalnymi
+są pomijane, nigdy nie powodując błędu; wybór, który nie wskazuje żadnego stylu,
+pozostawia treść bez zmian i jest pomijany jako `no_styles`), łączy wybrane instrukcje
+w kolejności katalogowej, dodaje klauzulę ograniczeń **jeden raz** (wraz z klauzulą
+bezpieczeństwa, `SAFETY_BOUNDARIES` lub jej tłumaczeniem, gdy wybrano `less-code` albo
+`ponytail`) i rozpoczyna blok pojedynczym znacznikiem idempotencji
+(`[OmniRoute Output Styles]`), dzięki czemu ponowne zastosowanie nie powoduje żadnych
+zmian. Gdy ustalony język (zobacz sekcję Wybór języka poniżej) ma tłumaczenie,
+wstrzykiwana jest zlokalizowana instrukcja zamiast angielskiej.
 
-W treści z niepustą tablicą `messages` sprawdzenie idempotencji odbywa się przed
-pominięciem na podstawie zawartości: gdy znacznik `[OmniRoute Output Styles]` znajduje się już w polu
-`system` najwyższego poziomu (jako ciąg znaków lub tablica bloków treści) albo w komunikacie systemowym z treścią
-tekstową, treść pozostaje bez zmian ze statusem `already_applied`, a sprawdzanie słów kluczowych nie jest wykonywane.
-W przeciwnym razie mechanizm pomijania na podstawie zawartości (`shouldBypassCavemanOutputMode()` w
+W przypadku treści z niepustą tablicą `messages` sprawdzenie idempotencji jest wykonywane
+przed mechanizmem pomijania na podstawie zawartości: jeśli znacznik
+`[OmniRoute Output Styles]` znajduje się już w polu `system` najwyższego poziomu (będącym
+ciągiem znaków albo tablicą bloków zawartości) lub w komunikacie systemowym z zawartością
+tekstową, treść pozostaje niezmieniona ze statusem `already_applied`, a sprawdzanie słów
+kluczowych nie jest wykonywane. W przeciwnym razie mechanizm pomijania na podstawie
+zawartości (`shouldBypassCavemanOutputMode()` w
 `open-sse/services/compression/outputMode.ts`) sprawdza tekst trzech ostatnich
-wiadomości niezależnie od ich roli i pomija style dla całej tury, gdy tekst
-pasuje do słów kluczowych dotyczących bezpieczeństwa, nieodwracalnych działań lub doprecyzowania albo do
-sekwencji zależnej od kolejności: `first`, `then`, `after that`, `before`, `rollback` lub
-`backup`, po których w obrębie 240 znaków występuje `delete`, `drop`, `migrate`, `deploy` lub
-`release`. Pomijanie działa, gdy przełącznik **Auto-Clarity Bypass**
-(`cavemanOutputMode.autoClarity`, domyślnie włączony) jest aktywny; wyłączenie przełącznika pomija
-sprawdzanie słów kluczowych.
+komunikatów, niezależnie od ich roli, i pomija style dla całej tury, gdy tekst pasuje do
+słów kluczowych związanych z bezpieczeństwem, nieodwracalnymi działaniami lub
+doprecyzowaniem albo do sekwencji zależnej od kolejności: `first`, `then`, `after that`,
+`before`, `rollback` lub `backup`, po których w ciągu 240 znaków występuje `delete`,
+`drop`, `migrate`, `deploy` lub `release`. Mechanizm pomijania działa, gdy przełącznik
+**Auto-Clarity Bypass** (`cavemanOutputMode.autoClarity`, domyślnie włączony) jest
+włączony; wyłączenie przełącznika powoduje pominięcie sprawdzania słów kluczowych.
 
-Gdy mechanizm pomijania przepuści turę, `placeSystemInstruction()` (ten sam plik), który
-nigdy nie tworzy nowego `messages[0]`, umieszcza blok w pierwszym znalezionym miejscu z poniższych:
+Gdy mechanizm pomijania przepuści turę, `placeSystemInstruction()` (w tym samym pliku),
+który nigdy nie tworzy nowego `messages[0]`, umieszcza blok w pierwszym znalezionym
+spośród następujących miejsc:
 
-1. Początkowy komunikat systemowy z treścią tekstową: blok jest dołączany po jego tekście.
-2. Pole `system` najwyższego poziomu: blok jest dołączany po tekście ciągu znaków albo
-   dodawany jako nowy blok tekstowy do tablicy bloków treści.
-3. Pierwszy późniejszy komunikat systemowy z treścią tekstową: blok jest dołączany po jego
+1. Początkowy komunikat systemowy z zawartością tekstową: blok jest dodawany po jego
    tekście.
+2. Pole `system` najwyższego poziomu: blok jest dodawany po tekście ciągu znaków albo
+   jako nowy blok tekstowy do tablicy bloków zawartości.
+3. Pierwszy późniejszy komunikat systemowy z zawartością tekstową: blok jest dodawany
+   po jego tekście.
 4. Żadne z powyższych: blok trafia do nowego komunikatu systemowego na końcu `messages`.
 
-W treści bez tablicy `messages` (lub z pustą tablicą) nie jest wykonywane pomijanie na podstawie zawartości,
-a pole `system` najwyższego poziomu nie jest brane pod uwagę. Blok jest dołączany po tekście
-tekstowego pola `instructions`, chyba że pole to zawiera już znacznik
-`[OmniRoute Output Styles]`; w takim przypadku treść pozostaje bez zmian ze statusem
-`already_applied`. Gdy treść nie ma tekstowego pola `instructions`, ale zawiera `input`
-(jako ciąg znaków lub tablicę), blok staje się wartością `instructions`, zastępując każdą nietekstową wartość,
-która wcześniej znajdowała się w tym polu. Treść bez tekstowego pola `instructions` ani tekstowego lub tablicowego
-`input` pozostaje bez zmian i jest pomijana jako `no_messages`.
+W przypadku treści bez tablicy `messages` (lub z pustą tablicą) mechanizm pomijania na
+podstawie zawartości nie jest wykonywany, a pole `system` najwyższego poziomu nie jest
+brane pod uwagę. Blok jest dodawany po tekście pola `instructions` będącego ciągiem
+znaków, chyba że pole to zawiera już znacznik `[OmniRoute Output Styles]`; w takim
+przypadku treść pozostaje niezmieniona ze statusem `already_applied`. Gdy treść nie ma
+pola `instructions` będącego ciągiem znaków, ale zawiera `input` (ciąg znaków albo
+tablicę), blok staje się wartością `instructions`, zastępując każdą wartość tego pola,
+która nie jest ciągiem znaków. Treść bez pola `instructions` będącego ciągiem znaków ani
+pola `input` będącego ciągiem znaków lub tablicą pozostaje niezmieniona i jest pomijana
+ze statusem `no_messages`.
 
 #### Jak włączyć
 
 W panelu: **Kontekst kompresji → Ustawienia kompresji**
-(`/dashboard/context/settings`), w sekcji stylów wyjściowych: jeden wiersz na styl, z
-przełącznikiem wł./wył. i selektorem poziomu. Style są wstrzykiwane, gdy sama kompresja
-jest włączona (główny przełącznik strony, `enabled`). Przełącznik **Auto-Clarity Bypass**
-znajduje się na stronie **Caveman** (`/dashboard/context/caveman`), na jej karcie
-**Tryb wyjściowy**. Programistycznie konfiguracja kompresji zapisuje wybór jako:
+(`/dashboard/context/settings`), sekcja stylów wyjściowych: jeden wiersz na każdy styl,
+z przełącznikiem włączania/wyłączania i selektorem poziomu. Style są wstrzykiwane, gdy
+włączona jest sama kompresja (główny przełącznik strony, `enabled`). Przełącznik
+**Auto-Clarity Bypass** znajduje się na stronie **Caveman**
+(`/dashboard/context/caveman`), na karcie **Output Mode**. Programistycznie konfiguracja
+kompresji przechowuje wybór w następującej postaci:
 
 ```json
 {
@@ -586,119 +587,115 @@ znajduje się na stronie **Caveman** (`/dashboard/context/caveman`), na jej karc
 ```
 
 Zgodność wsteczna: gdy `outputStyles` jest puste, starsze ustawienie
-`cavemanOutputMode.enabled` jest mapowane na `terse-prose` z poziomem
-`cavemanOutputMode.intensity`. Blok zaczyna się następnie od znacznika
+`cavemanOutputMode.enabled` jest mapowane na `terse-prose` z poziomem określonym przez
+`cavemanOutputMode.intensity`. Blok zaczyna się wtedy od znacznika
 `[OmniRoute Output Styles]`, podczas gdy starszy mechanizm wstrzykiwania
-`applyCavemanOutputMode()` dodawał `[OmniRoute Caveman Output Mode]`. Poniżej znacznika
-tekst odpowiada starszemu wstrzyknięciu w językach en, pt-BR, es, de, fr, it, ru, id i
-vi; w ja i zh zawiera jedną dodatkową spację przed klauzulą dotyczącą granic.
-`terse-prose` ma tłumaczenia na pt-BR, es, de, fr, it, ru, zh, ja, id i vi, więc żądanie,
-dla którego rozpoznanym językiem jest `hu`, otrzymuje tekst angielski, podczas gdy
-starszy mechanizm wstrzykiwania używał tekstu węgierskiego.
+`applyCavemanOutputMode()` używał `[OmniRoute Caveman Output Mode]`. Poniżej znacznika
+tekst jest zgodny ze starszym wstrzyknięciem w językach en, pt-BR, es, de, fr, it, ru,
+id i vi; w językach ja i zh zawiera jedną dodatkową spację przed klauzulą ograniczeń.
+`terse-prose` ma tłumaczenia na języki pt-BR, es, de, fr, it, ru, zh, ja, id i vi,
+dlatego żądanie, którego ustalonym językiem jest `hu`, otrzymuje tekst angielski, podczas
+gdy starszy mechanizm wstrzykiwania używał tekstu węgierskiego.
 
 Wybór języka stylu wyjściowego (`resolveOutputStyleLanguage()` w
-`outputStyles/apply.ts`): gdy `languageConfig.enabled` jest włączone, `autoDetect`
-pobiera próbkę z najnowszej wiadomości użytkownika w tablicy `messages` żądania, która
-zawiera tekst (treść będącą ciągiem znaków albo `text` jej części składowych), i
-uruchamia na niej mechanizm wykrywania Caveman (`detectCompressionLanguage()`).
-Mechanizm wykrywania zwraca `zh` dla tekstu zawierającego znaki Han i niezawierającego
-kany; w przeciwnym razie zwraca ten spośród języków `it`, `pt-BR`, `es`, `de`, `fr`,
-`ru`, `ja`, `hu` i `id`, który ma najwięcej dopasowań wskazówek, a `en`, gdy nie ma
-żadnych dopasowań — tekst, którego nie można sklasyfikować, otrzymuje język angielski,
-nigdy `defaultLanguage`, a `vi` nigdy nie jest wykrywany, mimo że style zawierają tekst
-w języku `vi`. Treść interfejsu Responses API przechowuje swoje wypowiedzi w `input`,
-który nie jest próbkowany, dlatego używany jest `defaultLanguage`, a następnie język
-angielski. Gdy żadna wiadomość użytkownika w `messages` nie zawiera tekstu albo gdy
-`autoDetect` jest wyłączone, stosowany jest `defaultLanguage`, a następnie język
-angielski. Gdy `languageConfig.enabled` jest wyłączone, językiem jest angielski — chyba
-że do żądania ma zastosowanie kombinacja kompresji (kombinacja przypisana do kombinacji
-trasowania żądania albo domyślna kombinacja kompresji, której `chatCore` używa awaryjnie
-dla wbudowanego potoku warstwowego): zastosowanie kombinacji włącza
-`languageConfig.enabled` dla tego żądania i ustawia `defaultLanguage` na podstawie
-pakietów językowych kombinacji (zapisana wartość, jeśli należy do pakietów kombinacji,
-w przeciwnym razie pierwszy pakiet kombinacji, który domyślnie ma wartość `en`), podczas
-gdy zapisane ustawienie `autoDetect` (domyślnie włączone) nadal ma zastosowanie. Silnik
-wejściowy Caveman wybiera język pakietu reguł inaczej — osobno dla każdej części tekstu,
-a przy wyłączonym automatycznym wykrywaniu jest dodatkowo ograniczany przez
-`enabledPacks`.
+`outputStyles/apply.ts`): przy włączonym `languageConfig.enabled` funkcja `autoDetect`
+pobiera najnowszy komunikat użytkownika w tablicy `messages` żądania, który zawiera tekst
+(zawartość będącą ciągiem znaków albo `text` jego części zawartości), i uruchamia na nim
+detektor silnika Caveman (`detectCompressionLanguage()`). Detektor zwraca `zh` dla tekstu
+zawierającego znaki Han, ale bez kany; w przeciwnym razie zwraca ten spośród języków
+`it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` i `id`, który ma najwięcej dopasowań
+podpowiedzi, a gdy nie ma żadnych dopasowań — `en`. Tekst, którego nie można
+sklasyfikować, otrzymuje język angielski, nigdy `defaultLanguage`, natomiast `vi` nigdy
+nie jest wykrywany, mimo że style zawierają tekst w języku `vi`. Treść interfejsu
+Responses API przechowuje swoje tury w `input`, które nie jest próbkowane, dlatego
+otrzymuje `defaultLanguage`, a następnie język angielski. Gdy żaden komunikat użytkownika
+w `messages` nie zawiera tekstu lub gdy `autoDetect` jest wyłączone, stosowany jest
+`defaultLanguage`, a następnie język angielski. Gdy `languageConfig.enabled` jest
+wyłączone, używany jest język angielski — chyba że do żądania ma zastosowanie kombinacja
+kompresji (kombinacja przypisana do kombinacji routingu żądania albo domyślna kombinacja
+kompresji, do której chatCore przechodzi w przypadku wbudowanego potoku warstwowego):
+zastosowanie kombinacji włącza `languageConfig.enabled` dla tego żądania i ustawia
+`defaultLanguage` na podstawie pakietów językowych kombinacji (zapisana wartość, jeśli
+należy do pakietów kombinacji; w przeciwnym razie pierwszy pakiet kombinacji, domyślnie
+`en`), podczas gdy zapisane ustawienie `autoDetect` (domyślnie włączone) nadal
+obowiązuje. Silnik wejściowy Caveman wybiera język pakietu reguł inaczej — osobno dla
+każdej części tekstowej, a przy wyłączonym automatycznym wykrywaniu dodatkowo zależnie
+od `enabledPacks`.
 
-Macierz styl × język jest ustalona przez
-`tests/unit/compression/output-styles-i18n-matrix.test.ts`: każdy styl katalogowy musi
-mieć wpis w `BASELINE_LANGUAGES` testu; styl, który nie jest ograniczony do określonych
-ustawień regionalnych, musi zawierać tłumaczenie na pt-BR (ograniczony regionalnie
-`terse-cjk` jest zwolniony z tej reguły), chyba że jest wymieniony w
-`KNOWN_ENGLISH_ONLY`, które może zawierać wyłącznie style nieposiadające żadnych
-tłumaczeń — wymieniony styl, który ma jakiekolwiek tłumaczenie, powoduje niepowodzenie
-testu; styl powoduje również niepowodzenie testu, jeśli utraci język wymieniony w jego
-wpisie `BASELINE_LANGUAGES`. Aby dodać styl, zobacz
+Macierz styl × język jest ustalana przez
+`tests/unit/compression/output-styles-i18n-matrix.test.ts`: każdy styl katalogu musi mieć
+wpis w `BASELINE_LANGUAGES` testu; styl, który nie jest ograniczony do określonych ustawień regionalnych, musi zawierać
+tłumaczenie pt-BR (ograniczony regionalnie styl `terse-cjk` jest zwolniony z tej reguły), chyba że jest
+wymieniony w `KNOWN_ENGLISH_ONLY`, które może zawierać wyłącznie style bez jakichkolwiek tłumaczeń —
+wymieniony styl, który ma choć jedno tłumaczenie, powoduje niepowodzenie testu; styl powoduje również niepowodzenie testu,
+gdy traci język wymieniony w jego wpisie `BASELINE_LANGUAGES`. Aby dodać styl, zobacz
 [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
 ### Kompresja wyników narzędzi
 
 `compressToolResult()` w `open-sse/services/compression/toolResultCompressor.ts`
-kompresuje tekst wyników narzędzi przy użyciu **5 strategii**. Próbuje ich w tej
-kolejności, a pierwsza włączona strategia, której warunek pasuje do treści, określa
-wynik:
+kompresuje tekst wyników narzędzi przy użyciu **5 strategii**. Próbuje ich w tej kolejności, a
+pierwsza włączona strategia, której warunek pasuje do zawartości, określa wynik:
 
 1. **`fileContent`**: zawartość składająca się z co najmniej 3 wierszy, w której co najmniej jeden wiersz, po pominięciu
    początkowych wcięć, zaczyna się od `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` lub `return ` (słowo kluczowe wraz ze spacją) albo od `if`,
-   `for` lub `while`, po którym następuje `(` lub ` (`, zachowuje pierwsze 20 i ostatnie 5 wierszy,
-   a pominięty środek zostaje oznaczony.
-2. **`grepSearch`**: zawartość z co najmniej jednym wierszem w postaci `<path>:<digits>:`,
-   gdzie tekst przed pierwszym dwukropkiem nie zawiera białych znaków, zachowuje wyłącznie takie wiersze,
-   maksymalnie 30, po których podawana jest liczba pozostałych dopasowań oraz lista dopasowanych plików;
-   każdy inny wiersz jest usuwany. Jeden taki wiersz wystarcza do uruchomienia strategii, więc
-   wiersz dziennika rozpoczynający się znacznikiem czasu, takim jak `12:30:45`, również jest uwzględniany.
+   `const `, `let `, `var ` lub `return ` (słowo kluczowe wraz ze spacją), albo od `if`,
+   `for` lub `while`, po których występuje `(` lub ` (`, zachowuje pierwszych 20 i ostatnich 5 wierszy, z
+   oznaczeniem pominiętego fragmentu pośrodku.
+2. **`grepSearch`**: zawartość z co najmniej jednym wierszem w formacie `<path>:<digits>:`,
+   gdzie tekst przed pierwszym dwukropkiem nie zawiera białych znaków, zachowuje tylko takie wiersze,
+   maksymalnie 30, po których następuje liczba ewentualnych dalszych dopasowań oraz lista dopasowanych plików;
+   wszystkie pozostałe wiersze są odrzucane. Jeden taki wiersz wystarczy do uruchomienia strategii, więc
+   wiersz dziennika zaczynający się od znacznika czasu, takiego jak `12:30:45`, również jest uznawany za dopasowanie.
 3. **`shellOutput`**: dane wyjściowe zawierające sekwencję ANSI CSI (`ESC[`, następnie cyfry lub
-   średniki, a potem literę, jak w kodach kolorów) albo znak `$`, po którym w dowolnym miejscu tekstu
-   występuje biały znak, tracą te sekwencje (inne sekwencje sterujące, takie jak `ESC[?25l` lub
-   sekwencja OSC tytułu okna, są zachowywane) i zachowują ostatnie 50 wierszy, przy czym kolejne
-   powtarzające się wiersze są scalane. Ponieważ to sprawdzenie jest wykonywane przed `json` i `errorMessage`,
-   dane wyjściowe JSON lub błędu zawierające taki znak `$` nigdy do nich nie trafiają, gdy
+   średniki, a potem litera, jak w kodach kolorów) albo znak `$`, po którym w dowolnym miejscu
+   tekstu występuje biały znak, tracą te sekwencje (inne sekwencje sterujące, takie jak `ESC[?25l` lub
+   sekwencja OSC tytułu okna, są zachowywane) i zachowują ostatnich 50 wierszy, przy czym kolejne
+   powtarzające się wiersze są scalane. Ponieważ ten warunek jest sprawdzany przed `json` i `errorMessage`,
+   dane wyjściowe JSON lub błędu zawierające taki znak `$` nigdy do nich nie docierają, gdy
    `shellOutput` jest włączone.
-4. **`json`**: ładunek JSON o długości ponad 2000 znaków, który zaczyna się od `{` lub `[` (po
-   opcjonalnych białych znakach) i może zostać przeanalizowany, jest podsumowywany: tablica zawierająca więcej niż 7 elementów zachowuje
-   pierwszych 5 i ostatnie 2 elementy oraz ich łączną liczbę, natomiast obiekt zachowuje pierwszych 20
+4. **`json`**: ładunek JSON o długości ponad 2 000 znaków, który zaczyna się od `{` lub `[` (po
+   opcjonalnych białych znakach) i daje się przeanalizować, jest podsumowywany: tablica zawierająca więcej niż 7 elementów zachowuje
+   pierwszych 5 i ostatnie 2 elementy oraz ich łączną liczbę, a obiekt zachowuje pierwszych 20
    kluczy, przy czym każda wartość będąca zagnieżdżonym obiektem lub tablicą jest zastępowana symbolem zastępczym `{…N keys}`
-   (w przypadku tablicy N oznacza jej długość) oraz znacznikiem `_remaining_<N>_keys` zliczającym klucze
-   pominięte po pierwszych 20. Wartości skalarne są kopiowane w całości, więc obiekt zawierający nie więcej niż 20 kluczy
-   i bez zagnieżdżonych wartości otrzymuje jedynie nowe wcięcia — wersja zminimalizowana zyskuje znaki
-   i pozostaje bez zmian.
-5. **`errorMessage`**: dane wyjściowe zawierające w dowolnym miejscu i przy dowolnej wielkości liter `error:`,
+   (dla tablicy N oznacza jej długość) oraz znacznikiem `_remaining_<N>_keys` zliczającym klucze
+   pominięte po pierwszych 20. Wartości skalarne są kopiowane w całości, dlatego obiekt mający nie więcej niż 20 kluczy
+   i niezawierający zagnieżdżonych wartości jest jedynie ponownie formatowany z wcięciami — wersja zminimalizowana zyskuje znaki
+   i pozostaje niezmieniona.
+5. **`errorMessage`**: dane wyjściowe, które zawierają w dowolnym miejscu i niezależnie od wielkości liter `error:`,
    `error ` (słowo zakończone spacją, jak w `no error found`), `[error]`,
-   `exception:`, `exception `, `[exception]` lub `traceback` zachowują pierwszy wiersz,
-   kolejnych 10 wierszy oraz ostatnie 3, a wiersze między nimi są zastępowane znacznikiem
-   `… [N frames elided] …`. Znacznik pojawia się tylko wtedy, gdy po pierwszym wierszu występuje więcej
-   niż 13 wierszy, dlatego dane wyjściowe błędu składające się z nie więcej niż 14 wierszy nie są skracane (przy 12 lub 13 wierszach
+   `exception:`, `exception `, `[exception]` lub `traceback`, zachowują pierwszy wiersz,
+   kolejnych 10 wierszy oraz ostatnie 3, a wiersze pomiędzy nimi są zastępowane znacznikiem `… [N frames elided] …`.
+   Znacznik pojawia się tylko wtedy, gdy po pierwszym wierszu występuje więcej niż 13 wierszy,
+   dlatego dane wyjściowe błędu składające się z nie więcej niż 14 wierszy nie są skracane (przy 12 lub 13 wierszach
    ostatnie 3 powtarzają wiersze już zachowane).
 
-Po dopasowaniu strategii kolejne strategie nie są sprawdzane, nawet jeśli dana strategia
-niczego nie zaoszczędzi. Gdy dopasowana strategia nie oszczędza żadnych szacowanych tokenów (długość ÷ 4, zaokrąglona w górę) —
-na przykład w przypadku pliku przypominającego kod, zawierającego nie więcej niż 25 wierszy, lub tablicy JSON o długości ponad 2000
-znaków, zawierającej nie więcej niż 7 elementów — silnik agresywny zachowuje oryginalny wynik narzędzia:
-oba wywołania (`compressAggressive()` i `compressAnthropicToolResultBlock()`)
-zachowują oryginał, gdy `saved` wynosi 0 lub mniej, podczas gdy sama funkcja `compressToolResult()`
-nadal zwraca wynik tej strategii. Etap wyniku narzędzia nie jest ostateczny:
-awaryjny mechanizm podsumowujący silnika może nadal skrócić komunikat `tool` lub `function` dłuższy
-niż 8192 znaki (`maxTokensPerMessage`, 2048, pomnożone przez 4).
+Po dopasowaniu strategii późniejsze strategie nie są
+wypróbowywane, nawet jeśli dopasowana strategia niczego nie oszczędza. Gdy dopasowana strategia nie oszczędza żadnych szacowanych tokenów (długość ÷ 4, zaokrąglona w górę) —
+na przykład dla pliku przypominającego kod, który ma nie więcej niż 25 wierszy, lub tablicy JSON o długości ponad 2 000
+znaków, która ma nie więcej niż 7 elementów — silnik agresywny zachowuje oryginalny wynik narzędzia:
+oba miejsca wywołania (`compressAggressive()` i `compressAnthropicToolResultBlock()`)
+zachowują oryginał, gdy `saved` wynosi 0 lub mniej, natomiast sama funkcja `compressToolResult()` nadal
+zwraca wynik tej strategii. Etap wyniku narzędzia nie jest ostatnim słowem:
+awaryjny mechanizm podsumowujący silnika może nadal skrócić wiadomość `tool` lub `function` dłuższą
+niż 8 192 znaki (`maxTokensPerMessage`, 2 048, pomnożone przez 4).
 
 #### Kiedy używać
 
-Kompresja wyników narzędzi stanowi krok 1 silnika agresywnego (`compressAggressive()` w
-`open-sse/services/compression/aggressive.ts`), dlatego działa w trybie Aggressive oraz w kroku
-`aggressive` potoku stosowego. Kompresuje komunikaty `tool` i `function` w formacie OpenAI
-oraz tekst wewnątrz bloków Anthropic `tool_result`. Każda strategia ma własny
+Kompresja wyników narzędzi jest krokiem 1 silnika agresywnego (`compressAggressive()` w
+`open-sse/services/compression/aggressive.ts`), dlatego działa w trybie Aggressive oraz w
+kroku `aggressive` potoku stosowego. Kompresuje wiadomości `tool` i `function`
+w formacie OpenAI oraz tekst wewnątrz bloków Anthropic `tool_result`. Każda strategia ma własny
 przełącznik w `aggressive.toolStrategies`; wszystkie są domyślnie włączone. W panelu
-przełączniki znajdują się w widoku **Advanced** strony Caveman, gdy kompresja jest włączona,
-a domyślnym trybem jest Aggressive.
+przełączniki znajdują się w widoku **Advanced** strony Caveman, gdy kompresja jest włączona, a
+domyślnym trybem jest Aggressive.
 
 ### Potok stosowy
 
-Tryb stosowy uruchamia **wiele silników kolejno** — zwykle najpierw RTK
-(60–90% oszczędności w wynikach narzędzi), a następnie Caveman na pozostałym tekście (~46%
-oszczędności danych wejściowych). Łącznie daje to **kwalifikujący się zakres 78–95%** (patrz Obliczanie oszczędności nadrzędnych
-powyżej): `1 - (1 - 0.60..0.90) × (1 - 0.46)` daje średnio ≈89%.
+Tryb stosowy uruchamia **wiele silników po kolei** — zwykle najpierw RTK
+(60–90% oszczędności na danych wyjściowych narzędzi), a następnie Caveman na pozostałym tekście (~46% oszczędności
+na danych wejściowych). Łącznie daje to **kwalifikujący się zakres 78–95%** (zobacz powyżej Obliczanie oszczędności nadrzędnych):
+`1 - (1 - 0.60..0.90) × (1 - 0.46)` daje średnio ≈89%.
 
 #### Jak to działa
 
@@ -714,13 +711,13 @@ Dane wejściowe (1000 tokenów)
 Używaj trybu stosowego w przypadku:
 
 - Przepływów pracy intensywnie korzystających z narzędzi (programowanie agentowe, badania)
-- Przetwarzania wsadowego wrażliwego na koszty
+- Przetwarzania wsadowego uwzględniającego koszty
 - Sytuacji, gdy potrzebujesz maksymalnej oszczędności tokenów
 
 Potoki stosowe konfiguruje się za pomocą globalnego ustawienia kompresji `stackedPipeline`
-albo za pomocą nazwanego zestawu kompresji przypisanego do zestawu routingu (patrz
-Nadpisywanie dla poszczególnych zestawów powyżej) — nie za pomocą `modePack` automatycznego zestawu (to pole jedynie
-zmienia wagi wyboru modelu automatycznego zestawu, a `stacked` nie jest prawidłową nazwą pakietu).
+lub za pomocą nazwanego zestawu kompresji przypisanego do zestawu routingu (zobacz
+powyżej Nadpisanie dla zestawu) — nie za pomocą `modePack` automatycznego zestawu (to pole jedynie
+ponownie waży wybór modelu automatycznego zestawu, a `stacked` nie jest prawidłową nazwą pakietu).
 
 ---
 

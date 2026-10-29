@@ -208,6 +208,8 @@ export const comboRuntimeConfigSchema = z
     nestedComboMode: z.enum(["flatten", "execute"]).optional(),
     trackMetrics: z.boolean().optional(),
     reasoningTokenBufferEnabled: z.boolean().optional(),
+    // Keep (not drop) targets whose known output ceiling is below max_tokens.
+    outputLimitAdvisory: z.boolean().optional(),
     reasoningTransportFallback: z.enum(["skip", "drop"]).optional(),
     compressionMode: compressionModeSchema.optional(),
     failoverBeforeRetry: z.boolean().optional(),
@@ -232,12 +234,22 @@ export const comboRuntimeConfigSchema = z
     slaMaxCostPer1MTokens: z.coerce.number().positive().max(1000000).optional(),
     slaHardConstraints: z.boolean().optional(),
     sla: slaRoutingPolicySchema.optional(),
+    // `nadir` auto-router strategy (open-sse/services/autoCombo/nadirStrategy.ts).
+    nadir: z
+      .object({
+        apiKey: z.string().trim().max(200).optional(),
+        baseUrl: z.string().trim().max(500).optional(),
+        timeoutMs: z.coerce.number().int().min(100).max(30_000).optional(),
+      })
+      .strict()
+      .optional(),
     compositeTiers: compositeTiersSchema.optional(),
     resetAwareSessionWeight: z.coerce.number().min(0).max(100).optional(),
     resetAwareWeeklyWeight: z.coerce.number().min(0).max(100).optional(),
     resetAwareTieBandPercent: z.coerce.number().min(0).max(100).optional(),
     resetAwareExhaustionGuardPercent: z.coerce.number().min(0).max(100).optional(),
     quotaWeightedFloorPercent: z.coerce.number().min(0).max(100).optional(),
+    quotaWeightedScoring: z.enum(["leftover", "pace"]).optional(),
     resetAwareQuotaCacheTtlMs: z.coerce.number().int().min(0).max(300_000).optional(),
     resetAwareQuotaCacheMaxStaleMs: z.coerce.number().int().min(0).max(3_600_000).optional(),
     resetWindowWindows: z.array(z.enum(["weekly", "session", "monthly"])).optional(),
@@ -397,8 +409,10 @@ export const createComboSchema = z
     context_cache_protection: z.boolean().optional(),
     context_length: z.number().int().min(1000).max(2000000).optional(),
     // Optional embedding dimensions override for embedding combos.
-    // When set, the value is injected into every upstream embedding request as
-    // the `dimensions` field (and translated to `outputDimensionality` for Gemini).
+    // When set, the value is forwarded to every upstream embedding request as
+    // the `dimensions` field. Gemini's native embedContent transport maps it to
+    // `output_dimensionality` itself; the OpenAI-compatible endpoint honors
+    // `dimensions` natively, so no translation happens here (see #17158).
     // Stored as a string to match the OpenAI API convention; coerced to number
     // by the embedding handler. Leave unset to use each model's default.
     dimensions: z

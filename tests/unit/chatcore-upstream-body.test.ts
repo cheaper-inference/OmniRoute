@@ -689,6 +689,44 @@ test("preserves the full tool list when within the grok-cli limit", async () => 
   assert.equal(out.tools.length, 150);
 });
 
+// #13190: bypassDefaultToolLimit is the OpenCode *client* signal, not an operator override.
+// It lifts the generic default cap, but a provider's known hard limit (grok-cli 200, nvidia
+// 1536, or one learned from a real upstream 400) must still truncate — otherwise OpenCode
+// clients get a permanent upstream 400 for that provider.
+test("bypassDefaultToolLimit does not lift a known provider hard limit", async () => {
+  const tools = Array.from({ length: 250 }, (_, i) => ({
+    type: "function",
+    function: { name: `tool_${i}`, parameters: {} },
+  }));
+  const out = await prepareUpstreamBody({
+    translatedBody: { model: "grok-cli-model", messages: [], tools },
+    modelToCall: "grok-cli-model",
+    provider: "grok-cli",
+    targetFormat: "claude",
+    credentials: null,
+    bypassDefaultToolLimit: true,
+  });
+  assert.ok(Array.isArray(out.tools));
+  assert.equal(out.tools.length, 200);
+});
+
+test("bypassDefaultToolLimit still lifts the generic default cap for providers without a known limit", async () => {
+  const tools = Array.from({ length: 300 }, (_, i) => ({
+    type: "function",
+    function: { name: `tool_${i}`, parameters: {} },
+  }));
+  const out = await prepareUpstreamBody({
+    translatedBody: { model: "some-model", messages: [], tools },
+    modelToCall: "some-model",
+    provider: "openai",
+    targetFormat: "openai",
+    credentials: null,
+    bypassDefaultToolLimit: true,
+  });
+  assert.ok(Array.isArray(out.tools));
+  assert.equal(out.tools.length, 300);
+});
+
 // The web_search / web_fetch fallback replaces a hosted tool the client declared, and
 // the router executes its calls itself. Tools are sorted by name (#12234) before
 // namespaces are flattened, so behind a large MCP catalog (Codex with 200+ tools)
@@ -725,15 +763,20 @@ test("keeps the fallback tools in flat Responses and prefixed Claude shapes", as
     {
       targetFormat: "openai-responses",
       provider: "at428-flat",
+      limit: 128,
       tool: (name) => ({ type: "function", name, parameters: {} }),
     },
     {
       targetFormat: "claude",
       provider: "at428-claude",
+      // Claude-format targets have no default cap (#18120): exercise the learned-limit path.
+      limit: 100,
       tool: (name) => ({ name: `proxy_${name}`, input_schema: {} }),
     },
   ];
+  const { setDetectedToolLimit } = await import("../../open-sse/services/toolLimitDetector.ts");
   for (const shape of shapes) {
+    if (shape.limit < 128) setDetectedToolLimit(shape.provider, shape.limit);
     const tools = [
       ...Array.from({ length: 200 }, (_, i) =>
         shape.tool(`mcp__jira__tool_${String(i).padStart(3, "0")}`)
@@ -747,7 +790,7 @@ test("keeps the fallback tools in flat Responses and prefixed Claude shapes", as
       targetFormat: shape.targetFormat,
       credentials: null,
     });
-    assert.equal(out.tools.length, 128, shape.targetFormat);
+    assert.equal(out.tools.length, shape.limit, shape.targetFormat);
     assert.deepEqual(out.tools.at(-1), tools.at(-1), shape.targetFormat);
   }
 });

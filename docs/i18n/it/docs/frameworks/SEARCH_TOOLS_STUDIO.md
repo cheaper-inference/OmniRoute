@@ -38,12 +38,12 @@ Studio a tre schede che unifica ricerca web, web scraping e confronto affiancato
 
 ### Scheda Ricerca
 
-Trasforma gli attuali `SearchForm` + `ResultsPanel` + `RerankPanel` in una scheda:
+Trasforma gli esistenti `SearchForm` + `ResultsPanel` + `RerankPanel` in una scheda:
 
-- Query → risultati (titolo, URL, snippet, punteggio di rilevanza).
-- Metadati del provider nel pannello Configurazione (costo, quota, stato).
-- Sezione di rerank: selezione di un modello di rerank, riordinamento dei risultati, visualizzazione di `positionDelta`.
-- Stato vuoto con CTA quando non è configurato alcun provider di ricerca.
+- Query → risultati (titolo, URL, estratto, punteggio di rilevanza).
+- Metadati del provider nel pannello Config (costo, quota, stato).
+- Sezione di reranking: selezione di un modello di reranking, riordinamento dei risultati, visualizzazione di `positionDelta`.
+- Stato vuoto con CTA quando non sono configurati provider di ricerca.
 - Cronologia delle ricerche tramite `SearchHistory.tsx`.
 - Chiama `POST /v1/search` (endpoint esistente, nessuna modifica).
 
@@ -51,16 +51,16 @@ Trasforma gli attuali `SearchForm` + `ResultsPanel` + `RerankPanel` in una sched
 
 Nuova scheda per estrarre contenuti da un URL tramite `POST /v1/web/fetch` (creato nel piano 05):
 
-- Input: URL + interruttore per la pagina intera + selettore del formato (markdown / testo / HTML).
+- Input: URL + opzione pagina intera + selettore del formato (markdown / testo / HTML).
 - Invio → recupero → rendering di `ScrapeResult.tsx`.
-- `ScrapeResult` mostra l'anteprima markdown e un interruttore per i dati grezzi.
-- Limite: se il corpo della risposta supera **256 KB**, l'interfaccia mostra `(troncato, visualizza dati grezzi)` e apre i dati grezzi in una finestra modale Monaco (D21).
-- Pannello dei metadati: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latenza, costo, dimensione della risposta, numero di link.
+- `ScrapeResult` mostra l'anteprima markdown e un'opzione per visualizzare il contenuto non elaborato.
+- Limite: se il corpo della risposta supera **256 KB**, l'interfaccia mostra `(troncato, visualizza contenuto non elaborato)` e apre il contenuto non elaborato in una finestra modale Monaco (D21).
+- Pannello dei metadati: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latenza, costo, dimensione della risposta, numero di link.
 - Utilizza l'hook `useScrapeFetch.ts`.
 
 ### Scheda Confronto
 
-Esegue la stessa query o lo stesso URL su un massimo di **4 provider in parallelo** (D22):
+Esegue la stessa query/lo stesso URL su un massimo di **4 provider in parallelo** (D22):
 
 - Colonne affiancate per ciascun provider.
 - Metriche: latenza, costo, numero di risultati, dimensione della risposta.
@@ -103,9 +103,9 @@ Esegue la stessa query o lo stesso URL su un massimo di **4 provider in parallel
 `ProviderCatalog.tsx` espone l'elenco completo dei provider da `GET /api/search/providers`
 (esteso in F4 per includere i provider di recupero):
 
-| `kind` | `"search"` (20 provider) o `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 provider) oppure `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Lo stato viene **derivato al momento della richiesta** verificando se esistono credenziali e se
+Lo stato viene **determinato al momento della richiesta** verificando se esistono credenziali e se
 tutte le chiavi sono attualmente in cooldown.
 
 ---
@@ -126,10 +126,10 @@ Per questa funzionalità è stata necessaria una sola modifica al backend:
 
 `src/app/api/search/providers/route.ts` è stato esteso per:
 
-- Includere nell'array tutti e 6 i provider di recupero (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`).
+- Includere nell'array tutti i provider di fetch (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`).
 - Aggiungere `kind: "search" | "fetch"` a ogni elemento.
-- Aggiungere `status: "configured" | "missing" | "rate_limited"`, derivato dallo stato corrente delle credenziali.
-- Mantenere la compatibilità con le versioni precedenti — i campi esistenti (`id`, `name`, ecc.) rimangono invariati.
+- Aggiungere `status: "configured" | "missing" | "rate_limited"` derivato dallo stato delle credenziali in tempo reale.
+- Mantenere la retrocompatibilità, lasciando invariati i campi esistenti (`id`, `name`, ecc.).
 
 ---
 

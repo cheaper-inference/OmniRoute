@@ -16,63 +16,64 @@ As funcionalidades de ocultação existem para que o OmniRoute possa atuar como 
 
 ---
 
-## Camada de Impressão Digital TLS
+## Camada de fingerprinting TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-As sessões persistentes de `wreq-js` são criadas de forma diferida para cada âmbito de conta e proxy resolvido. O
-`TlsClient` ao nível do processo agrupa, no máximo, 128 sessões que emulam o **Chrome 124 no macOS** para
-serviços a montante protegidos pela Cloudflare. `TlsClient.fetch()` falha de forma segura quando o ambiente de execução nativo
-não está disponível; quem efetua a chamada pode selecionar explicitamente um mecanismo alternativo fora deste invólucro.
+As sessões persistentes de `wreq-js` são criadas de forma diferida por âmbito de conta e proxy resolvido. O
+`TlsClient` ao nível do processo mantém um conjunto máximo de 128 sessões que imitam o **Chrome 124 no macOS** para
+serviços upstream protegidos pela Cloudflare. `TlsClient.fetch()` falha de forma fechada quando o runtime nativo
+não está disponível; um chamador pode selecionar explicitamente uma alternativa fora deste wrapper.
 
-- Perfil de sessão: `browser: "chrome_124", os: "macos"`
+- Perfil da sessão: `browser: "chrome_124", os: "macos"`
 - Resolução do proxy (prioridade): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (também em minúsculas)
 - Tempo limite: `TLS_CLIENT_TIMEOUT_MS` (herda de `FETCH_TIMEOUT_MS`, predefinição 600000)
-- A Response do `wreq-js` é compatível com fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Monitor do primeiro byte (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  é resolvido assim que os cabeçalhos do serviço a montante chegam, pelo que `TLS_CLIENT_TIMEOUT_MS`, por si só, não consegue limitar um
-  corpo que nunca disponibilize um primeiro byte. `guardTlsFirstByte()` faz competir a primeira chamada a `read()` do corpo
-  com `TLS_FIRST_BYTE_WATCHDOG_MS` (predefinição `10000`, `0` desativa-o); um corpo sem problemas
-  não é afetado, enquanto um corpo bloqueado cancela o leitor wreq e permite que a lógica existente de
-  recurso alternativo TLS de `proxyFetch` prossiga para o mecanismo de expedição direta/por proxy (um pedido que não seja seguro repetir, por exemplo,
-  um POST com corpo, continua a gerar um erro em vez de ser repetido silenciosamente).
+- A Response de `wreq-js` é compatível com fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Watchdog do primeiro byte (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
+  é resolvido assim que os cabeçalhos upstream chegam, pelo que `TLS_CLIENT_TIMEOUT_MS`, por si só, não consegue limitar um
+  corpo que nunca disponibiliza um primeiro byte. `guardTlsFirstByte()` coloca em corrida o primeiro `read()` do corpo
+  com `TLS_FIRST_BYTE_WATCHDOG_MS` (predefinição `10000`, `0` desativa-o); um corpo saudável não é
+  afetado, enquanto um corpo bloqueado cancela o leitor wreq e permite que a lógica de alternativa TLS existente de
+  `proxyFetch` prossiga para o dispatcher direto/proxy (um pedido cuja repetição não seja segura, por exemplo,
+  um POST com um corpo, continua a lançar um erro em vez de ser repetido silenciosamente).
 
-### Transporte de fornecedores baseado em cookies web — wreq-js 3.2.0
+### Transporte do fornecedor de cookies Web — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` é o adaptador partilhado pelos cinco transportes
-especializados baseados em cookies web abaixo. Cada invólucro simples específico do fornecedor seleciona um perfil de browser/SO. O adaptador
-utiliza o carregador único do ambiente de execução wreq e o conjunto de transportes em `open-sse/utils/tlsClient.ts`, indexado por
-perfil + SO + proxy resolvido, enquanto cada pedido utiliza `cookieMode: "ephemeral"`. Assim, as contas e os
-pedidos partilham ligações ao nível do transporte, mas nunca uma sessão wreq nem um repositório de cookies.
+`open-sse/services/tlsClientBase.ts` é o adaptador partilhado para os cinco transportes
+especializados de cookies Web abaixo. Cada wrapper simples de fornecedor seleciona um perfil de browser/SO. O adaptador
+utiliza o carregador único do runtime wreq e o conjunto de transportes em `open-sse/utils/tlsClient.ts`, indexado por
+perfil + SO + proxy resolvido, enquanto cada pedido utiliza `cookieMode: "ephemeral"`. Assim, as contas e
+os pedidos partilham ligações ao nível do transporte, mas nunca uma sessão wreq nem um repositório de cookies.
 
-| Fornecedor | Perfil        | SO emulado | Política de EOF da transmissão      |
+| Fornecedor | Perfil        | SO emulado | Política de EOF do stream           |
 | ---------- | ------------- | ---------- | ----------------------------------- |
 | Claude     | `chrome_146`  | Linux      | incluir `[DONE]`                    |
-| Perplexity | `firefox_148` | macOS      | incluir `event: end_of_stream`      |
+| Perplexity | `firefox_151` | macOS      | incluir `event: end_of_stream`      |
 | Grok       | `chrome_146`  | Linux      | excluir `[DONE]`                    |
 | Notion     | `chrome_146`  | Windows    | incluir `[DONE]`                    |
 | LMArena    | `chrome_146`  | Windows    | sem sentinela; fechar no EOF nativo |
 
-- A transmissão consome diretamente a `ReadableStream` da resposta nativa; não é criado qualquer ficheiro temporário nem processo auxiliar.
-- São inspecionados até 256 bytes iniciais antes de expor uma transmissão. Os fornecedores SSE armazenam em memória intermédia os erros que não sejam SSE;
-  o Grok/LMArena converte desafios da Cloudflare em `403` e páginas HTML intermédias em `502`.
-- O tempo limite do pedido nativo permanece envolvido por um prazo máximo absoluto em JS. Um bloqueio invalida
-  e fecha apenas o transporte correspondente ao perfil/SO/proxy afetado, antes de o pedido seguinte o recriar.
-- A prioridade de resolução do proxy é `proxyUrl` por chamada → contexto da conta/painel associado ao pedido →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (incluindo variantes em minúsculas). Os erros de resolução provocam uma falha
-  segura, em vez de exporem uma ligação direta. O LMArena resolve deliberadamente em relação a `arena.ai`.
-- `byteResponse` devolve um URL `data:` com o tipo de conteúdo correto, sem corrupção de UTF-8.
+- O streaming consome diretamente a `ReadableStream` da resposta nativa; não é criado qualquer ficheiro temporário nem
+  processo auxiliar.
+- São inspecionados até 256 bytes iniciais antes de um stream ser disponibilizado. Os fornecedores SSE armazenam em buffer os erros
+  que não sejam SSE; Grok/LMArena mapeiam os desafios da Cloudflare para `403` e as páginas HTML intersticiais para `502`.
+- O tempo limite do pedido nativo continua envolvido por um prazo máximo absoluto em JS. Um bloqueio invalida
+  e fecha apenas o transporte de perfil/SO/proxy afetado, antes de o pedido seguinte o recriar.
+- A prioridade da resolução do proxy é `proxyUrl` por chamada → contexto de conta/painel limitado ao pedido →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (incluindo variantes em minúsculas). Os erros de resolução falham
+  de forma fechada, em vez de permitirem inadvertidamente uma ligação direta. O LMArena resolve deliberadamente relativamente a `arena.ai`.
+- `byteResponse` devolve um URL `data:` com tipo de conteúdo, sem corrupção de UTF-8.
 - Os erros são `TlsClientUnavailableError` (pacote/addon indisponível), `TlsClientHangError`
-  (prazo excedido) e `WreqTransportCapacityError` (o código de erro partilhado de capacidade de sessão)
-  quando todos os 128 espaços limitados de perfil/SO/proxy estão ativos ou a ser encerrados.
+  (prazo excedido) e `WreqTransportCapacityError` (o código de erro partilhado de capacidade de sessões)
+  quando todos os 128 slots limitados de perfil/SO/proxy estão ativos ou a ser encerrados.
 
-A sessão genérica de `TlsClient` acima continua especializada em estado persistente de cookies suportado pelo browser.
-Ambos os caminhos reutilizam um único carregador de módulos wreq em cache e um hook do ciclo de vida do processo; os respetivos conjuntos permanecem
+A sessão genérica de `TlsClient` acima continua especializada em estado persistente de cookies suportado
+pelo browser. Ambos os caminhos reutilizam um único carregador de módulo wreq em cache e um hook do ciclo de vida do processo; os respetivos conjuntos permanecem
 separados porque os tempos de vida dos cookies são intencionalmente diferentes.
 
 Os perfis são suportados pelo pacote fixado, mas a aceitação por WAF reais pode mudar independentemente
-dos testes de contrato locais. Valide as alterações às impressões digitais através de uma conta real explicitamente autorizada
-antes de alegar paridade com um browser do fornecedor a montante.
+dos testes de contrato locais. Valide as alterações de fingerprint numa conta real explicitamente autorizada
+antes de alegar paridade com um browser upstream.
 
 ---
 
@@ -121,7 +122,7 @@ Aplicado a: blocos `system`, todo o `messages[].content` e `tools[].description`
 
 Para relays Anthropic de terceiros que apenas aceitam tráfego do "Claude Code real":
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` por predefinição
@@ -245,7 +246,7 @@ Todos os endpoints MITM requerem autenticação de gestão (`requireCliToolsAuth
 
 | Variável                 | Predefinição                                                    |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

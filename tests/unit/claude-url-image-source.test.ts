@@ -110,9 +110,12 @@ test("claude→gemini still sends a base64 image as inlineData", () => {
   assert.deepEqual(parts, [{ inlineData: { mimeType: "image/png", data: "iVBORw0K" } }]);
 });
 
-test("claude→gemini keeps both tool_result images in order, after the response and before the text that follows", () => {
+test("claude→gemini keeps both tool_result images in order after the response and folds the text that follows into it", () => {
   // The trailing text is the shape #13335 was about: Claude Code appends a reminder after the
-  // tool result, and the images have to land between the response and that text.
+  // tool result, and the images have to land right after the response. Since #16601 that
+  // reminder is folded into functionResponse.response.result instead of following the images
+  // as a loose text part, which Vertex Gemini 3.6+ Flash rejects next to a functionResponse
+  // (#16443).
   const parts = toGemini([
     {
       role: "assistant",
@@ -130,8 +133,11 @@ test("claude→gemini keeps both tool_result images in order, after the response
   assert.deepEqual(parts.slice(responseIndex + 1), [
     { inlineData: { mimeType: "image/png", data: "iVBORw0K" } },
     { fileData: { fileUri: IMAGE_URL, mimeType: "image/*" } },
-    { text: "keep going" },
   ]);
+  assert.equal(
+    (parts[responseIndex].functionResponse as { response: { result: unknown } }).response.result,
+    "[tool returned an image; see attached]\nkeep going"
+  );
 });
 
 test("claude→gemini sends a URL image from a signature-less tool result too", () => {

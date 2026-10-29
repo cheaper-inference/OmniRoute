@@ -36,36 +36,36 @@ Studio s tromi kartami, ktoré zjednocuje webové vyhľadávanie, získavanie ob
 
 ## Karty
 
-### Karta Hľadať
+### Karta Vyhľadávanie
 
-Rozširuje existujúce `SearchForm` + `ResultsPanel` + `RerankPanel` do podoby karty:
+Rozširuje existujúce komponenty `SearchForm` + `ResultsPanel` + `RerankPanel` do podoby karty:
 
 - Dopyt → výsledky (názov, URL, úryvok, skóre relevantnosti).
 - Metadáta poskytovateľa na paneli Konfigurácia (náklady, kvóta, stav).
-- Sekcia rerankingu: výber modelu rerankingu, zmena poradia výsledkov, zobrazenie `positionDelta`.
+- Sekcia opätovného zoradenia: výber modelu opätovného zoradenia, zmena poradia výsledkov, zobrazenie `positionDelta`.
 - Prázdny stav s výzvou na akciu, keď nie sú nakonfigurovaní žiadni poskytovatelia vyhľadávania.
 - História vyhľadávania prostredníctvom `SearchHistory.tsx`.
 - Volá `POST /v1/search` (existujúci koncový bod, bez zmien).
 
-### Karta Získať obsah
+### Karta Extrakcia
 
-Nová karta na extrahovanie obsahu z URL prostredníctvom `POST /v1/web/fetch` (vytvorené v pláne 05):
+Nová karta na extrakciu obsahu z URL prostredníctvom `POST /v1/web/fetch` (vytvoreného v pláne 05):
 
 - Vstup: URL + prepínač celej stránky + výber formátu (markdown / text / HTML).
 - Odoslanie → načítanie → vykreslenie `ScrapeResult.tsx`.
-- `ScrapeResult` vykresľuje náhľad markdownu + prepínač nespracovaného obsahu.
-- Limit: ak je telo odpovede väčšie ako **256 KB**, používateľské rozhranie zobrazí `(skrátené, zobraziť nespracované)` a otvorí nespracovaný obsah v modálnom okne Monaco (D21).
-- Panel metadát: poskytovateľ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latencia, náklady, veľkosť odpovede, počet odkazov.
+- `ScrapeResult` vykresľuje náhľad markdownu + prepínač surového obsahu.
+- Limit: ak telo odpovede presiahne **256 KB**, používateľské rozhranie zobrazí `(skrátené, zobraziť surový obsah)` a otvorí surový obsah v modálnom okne Monaco (D21).
+- Panel metadát: poskytovateľ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latencia, náklady, veľkosť odpovede, počet odkazov.
 - Používa hook `useScrapeFetch.ts`.
 
-### Karta Porovnať
+### Karta Porovnanie
 
-Spustí rovnaký dopyt/URL paralelne až u **4 poskytovateľov** (D22):
+Spúšťa rovnaký dopyt/URL paralelne až u **4 poskytovateľov** (D22):
 
 - Stĺpce vedľa seba pre jednotlivých poskytovateľov.
 - Metriky: latencia, náklady, počet výsledkov, veľkosť odpovede.
-- Výpočet prekrytia URL pri vyhľadávaní (počet zdieľaných URL oproti pôvodnému výsledku).
-- Volá `POST /v1/search` (vyhľadávanie) alebo `POST /v1/web/fetch` (získavanie obsahu) pre každého poskytovateľa.
+- Výpočet prekrytia URL pri vyhľadávaní (počet zdieľaných URL oproti počiatočnému výsledku).
+- Volá `POST /v1/search` (vyhľadávanie) alebo `POST /v1/web/fetch` (extrakcia) pre každého poskytovateľa.
 
 ---
 
@@ -100,13 +100,13 @@ Spustí rovnaký dopyt/URL paralelne až u **4 poskytovateľov** (D22):
 
 ## Katalóg poskytovateľov
 
-`ProviderCatalog.tsx` sprístupňuje úplný zoznam poskytovateľov z `GET /api/search/providers`
-(rozšírený v F4 o poskytovateľov načítania):
+`ProviderCatalog.tsx` zobrazuje úplný zoznam poskytovateľov z `GET /api/search/providers`
+(rozšírený v F4 o poskytovateľov načítavania):
 
-| `kind` | `"search"` (20 poskytovateľov) alebo `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 poskytovateľov) alebo `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Stav sa **odvodzuje v čase požiadavky** kontrolou, či existujú prihlasovacie údaje a či
-sú všetky kľúče momentálne v režime cooldown.
+Stav je **odvodený v čase požiadavky** kontrolou, či existujú prihlasovacie údaje a či
+sú všetky kľúče momentálne v období čakania.
 
 ---
 
@@ -122,13 +122,13 @@ Zástupný symbol kľúča API je vždy `$OMNIROUTE_API_KEY` (D11, zdieľaný s 
 
 Pre túto funkciu bola potrebná iba jedna zmena backendu:
 
-### Rozšírené `GET /api/search/providers`
+### Rozšírený `GET /api/search/providers`
 
 Súbor `src/app/api/search/providers/route.ts` bol rozšírený tak, aby:
 
-- Zahŕňal všetkých 6 poskytovateľov načítania (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) v poli.
+- Zahŕňal každého poskytovateľa načítavania (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) v poli.
 - Pridal `kind: "search" | "fetch"` ku každej položke.
-- Pridal `status: "configured" | "missing" | "rate_limited"` odvodený zo živého stavu prihlasovacích údajov.
+- Pridal `status: "configured" | "missing" | "rate_limited"` odvodený od aktuálneho stavu prihlasovacích údajov.
 - Zachoval spätnú kompatibilitu — existujúce polia (`id`, `name` atď.) zostali nezmenené.
 
 ---

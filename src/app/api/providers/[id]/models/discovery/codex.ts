@@ -6,6 +6,7 @@ import {
   type CodexClientVersionFetch,
 } from "@omniroute/open-sse/config/codexClient.ts";
 import { readCodexReasoningMetadata } from "@/shared/reasoning/codexEfforts";
+import type { DiscoveryFailure } from "@/shared/discovery/degradedCause";
 import {
   classifyCodexDiscoveryModel,
   isCodexDiscoveryModelExcluded,
@@ -87,10 +88,29 @@ function getCodexModelItems(payload: unknown): unknown[] {
   if (Array.isArray(record.data)) return record.data;
   if (Array.isArray(payload)) return payload;
 
+  // An error envelope is not a model map. Without this, `{"error":{...}}`
+  // becomes a phantom model with id "error" and the caller counts it as a
+  // successful live catalog. It yields no items, and fetchCodexDiscoveryModels
+  // reports it as a failure (null) because it is not a recognised empty list.
+  if (record.error) return [];
+
   const objectItems = Object.entries(record)
     .filter(([, value]) => value && typeof value === "object" && !Array.isArray(value))
     .map(([key, value]) => ({ id: key, ...asRecord(value) }));
   return objectItems.length > 0 ? objectItems : [];
+}
+
+/**
+ * True only for an answer that is a model list and is empty: `[]`,
+ * `{"models": []}` or `{"data": []}` with no error. Anything else that yields no
+ * models (an error envelope, `{"detail": ...}`, an unknown shape) is a failure.
+ */
+function isEmptyCodexModelList(payload: unknown): boolean {
+  if (Array.isArray(payload)) return payload.length === 0;
+  const record = asRecord(payload);
+  if (record.error) return false;
+  const list = Array.isArray(record.models) ? record.models : record.data;
+  return Array.isArray(list) && list.length === 0;
 }
 
 function getCodexModelMetadata(record: JsonRecord): {
@@ -154,7 +174,7 @@ function buildCodexDiscoveryModel(
   if (!id) return null;
 
   const metadata = getCodexModelMetadata(record);
-  if (metadata.visibility === "hide" || metadata.supportedInApi === false) return null;
+  if (metadata.supportedInApi === false) return null;
 
   const topProvider = asRecord(record.top_provider);
   const limits = asRecord(record.limits);
@@ -377,13 +397,19 @@ export function mergeCodexLiveModelsWithLocalCatalog(
     if (!localModel.id) continue;
     const normalizedLocal = localCatalogModelToCodexDiscoveryModel(localModel);
     const existing = merged.get(localModel.id);
-    merged.set(
-      localModel.id,
-      existing ? mergeLiveAndLocalCodexModel(existing, normalizedLocal) : normalizedLocal
-    );
+    if (existing) {
+      merged.set(localModel.id, mergeLiveAndLocalCodexModel(existing, normalizedLocal));
+    }
   }
 
   return Array.from(merged.values());
+}
+
+/** Static entries are only a fallback when no remote or cached inventory exists. */
+export function buildCodexLocalFallbackCatalog(
+  localCatalogModels: CodexLocalCatalogModel[]
+): CodexDiscoveryModel[] {
+  return applyCodexDiscoveryFilters(localCatalogModels.map(localCatalogModelToCodexDiscoveryModel));
 }
 
 /** Return true to KEEP the model. */
@@ -506,6 +532,10 @@ export function enrichCodexModelsFromGithubCatalog(
   return [...githubCatalogModels];
 }
 
+/**
+ * The live Codex catalog, or the reason it could not be read. The reason is a
+ * code or an HTTP status — never a message, a body or an URL.
+ */
 export async function fetchCodexDiscoveryModels({
   accessToken,
   providerSpecificData,
@@ -514,8 +544,8 @@ export async function fetchCodexDiscoveryModels({
   accessToken: string | null;
   providerSpecificData?: Record<string, unknown> | null;
   fetchImpl: CodexModelsFetch;
-}): Promise<CodexDiscoveryModel[] | null> {
-  if (!accessToken) return null;
+}): Promise<{ models: CodexDiscoveryModel[]; failure?: DiscoveryFailure }> {
+  if (!accessToken) return { models: [], failure: { code: "NO_CREDENTIAL" } };
 
   try {
     await refreshCodexClientVersion(fetchImpl);
@@ -537,15 +567,28 @@ export async function fetchCodexDiscoveryModels({
       headers,
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) return { models: [], failure: { status: response.status } };
 
-    const models = normalizeCodexModelsResponse(await response.json());
-    return models.length > 0 ? models : null;
+    // A recognised, empty model list is reported as EMPTY_CATALOG: the account
+    // may simply have nothing discoverable right now (measured 2026-10-23 on
+    // both pro accounts, every client version). Every other body that yields no
+    // models, including an unparseable one, carries no code at all, so callers
+    // can still tell "answered with nothing" from "did not answer".
+    const payload: unknown = await response.json();
+    const models = normalizeCodexModelsResponse(payload);
+    if (models.length > 0) return { models };
+    return isEmptyCodexModelList(payload)
+      ? { models: [], failure: { code: "EMPTY_CATALOG" } }
+      : { models: [], failure: {} };
   } catch {
-    return null;
+    return { models: [], failure: {} };
   }
 }
 
+/**
+ * The public Codex catalog, or the reason it could not be read. The reason is a
+ * code or an HTTP status — never a message, a body or an URL.
+ */
 export async function fetchCodexGithubCatalogModels({
   fetchImpl,
   now = Date.now(),
@@ -554,9 +597,9 @@ export async function fetchCodexGithubCatalogModels({
   fetchImpl: CodexModelsFetch;
   now?: number;
   cacheTtlMs?: number;
-}): Promise<CodexDiscoveryModel[] | null> {
+}): Promise<{ models: CodexDiscoveryModel[]; failure?: DiscoveryFailure }> {
   const cachedModels = getFreshCodexGithubCatalogCache(now, cacheTtlMs);
-  if (cachedModels) return cachedModels;
+  if (cachedModels) return { models: cachedModels };
 
   try {
     const response = await fetchImpl(CODEX_GITHUB_MODELS_URL, {
@@ -565,16 +608,16 @@ export async function fetchCodexGithubCatalogModels({
     });
 
     const notModifiedModels = getNotModifiedCodexGithubCatalog(response, now, cacheTtlMs);
-    if (notModifiedModels) return notModifiedModels;
+    if (notModifiedModels) return { models: notModifiedModels };
 
-    if (!response.ok) return null;
+    if (!response.ok) return { models: [], failure: { status: response.status } };
 
     const models = normalizeCodexGithubCatalogResponse(await response.json());
-    if (models.length === 0) return null;
+    if (models.length === 0) return { models: [], failure: { code: "EMPTY_CATALOG" } };
 
     storeCodexGithubCatalogCache(models, response, now, cacheTtlMs);
-    return models;
+    return { models };
   } catch {
-    return codexGithubCatalogCache?.models || null;
+    return { models: codexGithubCatalogCache?.models || [], failure: {} };
   }
 }

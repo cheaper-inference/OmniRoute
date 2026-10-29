@@ -1,4 +1,6 @@
 import { HTTP_STATUS, FETCH_TIMEOUT_MS } from "../config/constants.ts";
+import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
+import { resolveProviderUserAgentOverride } from "./providerUserAgentOverride.ts";
 import { getRegistryEntry, requireCompatibleBaseUrl } from "../config/providerRegistry.ts";
 import { resolveFetchStartTimeout } from "../utils/fetchStartTimeoutPolicy.ts";
 import {
@@ -34,7 +36,11 @@ import {
 } from "../services/openrouterFreeWindow.ts";
 import { gateOutboundRequest } from "../services/wafRateLimit.ts";
 import { ClaudeUsageLimitGuard } from "./claudeUsageLimit.ts";
-import { shouldSkipIntraRetryFor429 } from "./rateLimitIntraRetry.ts";
+import {
+  INTRA_RETRY_MAX_HINT_MS,
+  readRateLimitRetryHintMs,
+  shouldSkipIntraRetryFor429,
+} from "./rateLimitIntraRetry.ts";
 import type { PoolConfig } from "../services/sessionPool/types.ts";
 import type { Session } from "../services/sessionPool/session.ts";
 import { SessionPool } from "../services/sessionPool/sessionPool.ts";
@@ -48,6 +54,7 @@ import {
   runWithOnPersist,
   getRefreshLeadMs,
   isUnrecoverableRefreshError,
+  NO_REFRESH_NEEDED,
 } from "../services/tokenRefresh.ts";
 import type { ProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
 import { signRequestBody } from "../services/claudeCodeCCH.ts";
@@ -61,6 +68,7 @@ import {
   modelSupportsContext1mBeta,
 } from "../services/claudeCodeCompatible.ts";
 import { getClaudeCodeCompatibleRequestDefaults } from "@/lib/providers/requestDefaults";
+import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import {
   cloakThirdPartyToolNames,
   remapToolNamesInRequest,
@@ -92,21 +100,19 @@ import {
   stripProxyToolPrefix,
 } from "./claudeIdentity.ts";
 import { withForcedResponsesUpstream } from "./forceResponsesUpstream.ts";
+import { finalizeClaudeThinkingOptions } from "./claudeThinkingOptions.ts";
+import { detachClaudeCodeRewriteTargets } from "./claudeOauthBodyIsolation.ts";
 import {
   mergeUpstreamExtraHeaders,
   setUserAgentHeader,
   applyConfiguredUserAgent,
+  applyHuggingFaceBillToHeader,
   stripStainlessHeadersForOpenAICompat,
 } from "./base/headers.ts";
 import { applyPeerTraceHeader } from "@/shared/resilience/peerRouting";
 import { applyClineProtocolHeaders } from "@/shared/utils/clineAuth";
 import { isProbeContext } from "@/shared/utils/probeOrigin";
-import {
-  parseAndValidatePublicUrl,
-  parseAndValidateNonMetadataUrl,
-} from "@/shared/network/outboundUrlGuard";
-import { getProviderValidationGuard } from "@/shared/network/outboundUrlGuardPolicy";
-import { isLocalProvider, isSelfHostedChatProvider } from "@/shared/constants/providers";
+import { assertDispatchUrlAllowed, dispatchGuarded } from "./dispatchPin.ts";
 // Header helpers extracted to a pure leaf; re-exported for external importers
 // (executors + tests) that import them from "./base.ts".
 export {
@@ -114,6 +120,7 @@ export {
   getCustomUserAgent,
   setUserAgentHeader,
   applyConfiguredUserAgent,
+  applyHuggingFaceBillToHeader,
   isOpenAICompatibleEndpoint,
   stripStainlessHeadersForOpenAICompat,
 } from "./base/headers.ts";
@@ -129,6 +136,7 @@ export type { ProviderCredentials, StrictValidationDispatch } from "./base/valid
 import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
 import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
 import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
+import { stripRedactThinkingBetaForVisibleThinking } from "./base/redactThinkingBeta.ts";
 
 function parseSerializedBody(bodyString: string): unknown {
   try {
@@ -225,11 +233,7 @@ export type CountTokensInput = {
   signal?: AbortSignal | null;
 };
 
-import {
-  hasActiveClaudeThinking,
-  readNestedThinkingBudget,
-  clampNestedThinkingBudget,
-} from "../utils/thinkingBudget.ts";
+import { readNestedThinkingBudget, clampNestedThinkingBudget } from "../utils/thinkingBudget.ts";
 
 /**
  * Strip the OmniRoute provider prefix from tool model fields (e.g.
@@ -292,6 +296,12 @@ export type ExecutorExecuteResult =
       transport?: string;
       /** Wire model id actually sent upstream (from the serialized body). */
       model?: unknown;
+      /**
+       * Internal-only upstream failure classification (#3229) — never reaches the client.
+       * Not a place for raw bodies, headers, URLs, or provider text: producers project to a
+       * closed set of scalars/enums first (see `projectAntigravityValidationDiagnostic`).
+       */
+      upstreamDiagnostic?: Record<string, unknown>;
     };
 export class BaseExecutor {
   provider: string;
@@ -420,13 +430,7 @@ export class BaseExecutor {
    * cloud-metadata IMDS pivot. Throws on a blocked URL.
    */
   protected assertOutboundUrlAllowed(url: string): void {
-    if (!url) return;
-    if (isLocalProvider(this.provider) || isSelfHostedChatProvider(this.provider)) return;
-    if (getProviderValidationGuard() === "public-only") {
-      parseAndValidatePublicUrl(url);
-      return;
-    }
-    parseAndValidateNonMetadataUrl(url);
+    assertDispatchUrlAllowed(this.provider, url);
   }
 
   /**
@@ -497,7 +501,7 @@ export class BaseExecutor {
     const providerId = this.config?.id || this.provider;
     if (providerId) {
       const envKey = `${providerId.toUpperCase().replace(/[^A-Z0-9]/g, "_")}_USER_AGENT`;
-      const envUA = process.env[envKey]?.trim();
+      const envUA = resolveProviderUserAgentOverride(providerId, process.env[envKey]);
       if (envUA) {
         setUserAgentHeader(headers, envUA);
       }
@@ -553,7 +557,12 @@ export class BaseExecutor {
       const cloned = { ...body } as Record<string, unknown>;
 
       if (Array.isArray(cloned.input)) {
-        cloned.input = sanitizeResponsesInputItems(cloned.input, false);
+        // #17834: native openai-compatible Responses passthrough keeps assistant commentary
+        // history, like the native Codex path (#3107). Other bodies keep the default drop.
+        cloned.input = sanitizeResponsesInputItems(cloned.input, false, {
+          dropInternalAssistantMessages:
+            cloned._nativeOpenAICompatibleResponsesPassthrough !== true,
+        });
       }
 
       if (Array.isArray(cloned.tools)) {
@@ -606,6 +615,15 @@ export class BaseExecutor {
     delayMs: 1500,
     backoffMultiplier: 2,
   };
+  /**
+   * Equal jitter for intra-URL retry backoff: returns a value in [base/2, base].
+   * Spreads concurrent retries over time so parallel requests hitting the same
+   * upstream throttle don't retry in lockstep (thundering herd). `random` is
+   * injectable for deterministic tests.
+   */
+  static jitterRetryDelayMs(baseMs: number, random: () => number = Math.random): number {
+    return Math.round(baseMs * (0.5 + random() * 0.5));
+  }
   // Timeout for receiving the initial upstream response headers. Once the response
   // starts streaming, STREAM_IDLE_TIMEOUT_MS / Undici bodyTimeout handle stalls.
   static FETCH_START_TIMEOUT_MS = FETCH_TIMEOUT_MS;
@@ -621,8 +639,9 @@ export class BaseExecutor {
   }
 
   needsRefresh(credentials?: ProviderCredentials | null) {
-    if (!credentials?.expiresAt) return false;
-    const expiresAtMs = new Date(credentials.expiresAt).getTime();
+    // Numeric epochs (s/ms, incl. the TEXT-column string form) and ISO; 0 = unknown.
+    const expiresAtMs = parseTokenExpiryMs(credentials?.expiresAt);
+    if (expiresAtMs <= 0) return false;
     // Use the provider-specific lead time (REFRESH_LEAD_MS) so rotating-token
     // providers like Codex refresh proactively far ahead of expiry. Keeping the
     // refresh_token "warm" prevents Auth0 from marking it as stale and revoking
@@ -675,12 +694,17 @@ export class BaseExecutor {
     }
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(requestBody),
-        signal: activeSignal || undefined,
-      });
+      const response = await dispatchGuarded(
+        this.provider,
+        url,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify(requestBody),
+          signal: activeSignal || undefined,
+        },
+        credentials
+      );
 
       const text = await response.text();
       if (!response.ok) {
@@ -759,7 +783,10 @@ export class BaseExecutor {
           this.refreshCredentials(credentials, log || null)
         );
 
-        if (refreshed && !proactivePersistRan) {
+        // API-key connections (no refresh token) answer with the shared
+        // NO_REFRESH_NEEDED sentinel: nothing was attempted, so there is
+        // nothing to classify, spread or warn about — keep the credentials.
+        if (refreshed && refreshed !== NO_REFRESH_NEEDED && !proactivePersistRan) {
           // ─────────────────────────────────────────────────────────────────────
           // ⚠️ SOURCE OF TRUTH — do not flip the proactive path back to
           //    "persist expired+inactive". Ask the operator first.
@@ -830,6 +857,8 @@ export class BaseExecutor {
     // Fields already stripped by the generic 400 field-downgrade below (once each,
     // across all fallback URLs — bounded retry loop).
     const strippedFields = new Set<string>();
+    // Explicit per-key tiers are policy, not optional compatibility hints.
+    const forcedCodexTier = this.provider === "codex" && getApiKeyCodexServiceTier(credentials);
     // thinking_budget 400 clamp-and-retry below: upstream's learned max applied to
     // later retry URLs (bounded per URL); also recorded via recordLearnedThinkingCap.
     let thinkingBudgetClampedMax: number | null = null;
@@ -853,6 +882,9 @@ export class BaseExecutor {
         body
       );
       applyConfiguredUserAgent(headers, requestCredentials?.providerSpecificData);
+      if (this.provider === "huggingface") {
+        applyHuggingFaceBillToHeader(headers, requestCredentials?.providerSpecificData);
+      }
 
       // Strip OpenAI SDK (X-Stainless-*) metadata + normalize SDK-derived User-Agent
       // on OpenAI-compatible passthrough requests — some upstream gateways 403 on them.
@@ -961,11 +993,14 @@ export class BaseExecutor {
             : requestOptions;
 
           try {
+            // Strict-validation fence (tip) first, then the connect-time DNS-rebinding guard
+            // for operator-supplied base URLs (#13330) as the transport.
             return await validationFetch(
               input.validationDispatch,
               this.provider,
               model,
-              requestCredentials
+              requestCredentials,
+              (url, init) => dispatchGuarded(this.provider, url, init, requestCredentials)
             )(requestUrl, optionsWithSignal);
           } finally {
             if (timeoutId) clearTimeout(timeoutId);
@@ -994,7 +1029,7 @@ export class BaseExecutor {
           transformedBody !== null
         ) {
           const tb = transformedBody as Record<string, unknown>;
-
+          detachClaudeCodeRewriteTargets(tb);
           stripProxyToolPrefix(tb);
           remapToolNamesInRequest(tb);
           // Cloak third-party tool names + sanitize invalid tool schemas so
@@ -1131,14 +1166,12 @@ export class BaseExecutor {
             }
           }
 
-          // Real CLI always pairs context_management with thinking. Mirror
-          // that invariant so long sessions don't accumulate thinking blocks
-          // toward the context cap.
-          if (hasActiveClaudeThinking(tb) && !tb.context_management) {
-            tb.context_management = {
-              edits: [{ type: "clear_thinking_20251015", keep: "all" }],
-            };
-          }
+          finalizeClaudeThinkingOptions(
+            tb,
+            this.provider,
+            getClaudeCodeCompatibleRequestDefaults(requestCredentials?.providerSpecificData)
+              .summarizeThinking === true
+          );
 
           const seed = activeCredentials?.accessToken || activeCredentials?.apiKey || "anon";
           const psd = activeCredentials?.providerSpecificData as
@@ -1345,8 +1378,9 @@ export class BaseExecutor {
             // drop any tool_result orphaned by that strip (discussion #2410).
             const adjacent = isClaude ? fixToolPairs(fixToolAdjacency(fixed)) : fixed;
             const stripped = stripTrailingAssistantOrphanToolUse(adjacent);
-            // Some providers (e.g. Mistral) require the last message to be user
-            // or tool and reject trailing assistant text messages with 400 (#3396).
+            // Some providers (Mistral #3396, official Claude OAuth) reject a
+            // trailing text-only assistant turn with 400. Strip here so combo
+            // failover does not burn the next account on the same body.
             tb.messages = stripTrailingAssistantForProvider(stripped, this.provider);
           }
         }
@@ -1388,16 +1422,27 @@ export class BaseExecutor {
           );
         }
 
+        // Explicit `thinking.display: "summarized"` must not be blanked by redact-thinking.
+        // Claude OAuth keeps its fingerprint beta unless the default-off
+        // CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED flag is on.
+        stripRedactThinkingBetaForVisibleThinking(headers, transformedBody, clientHeaders, {
+          connectionOptedIn: ccRequestDefaults.redactThinking === true,
+          claudeOAuth: this.provider === "claude" && hasClaudeOAuthToken,
+        });
         stripInternalBodyFields(transformedBody);
-        let bodyString = JSON.stringify(transformedBody);
 
         const shouldFingerprint =
           isCliCompatEnabled(fingerprintProvider) ||
           (this.provider === "claude" && (isClaudeCodeClient || hasClaudeOAuthToken));
+        let bodyString: string;
         if (shouldFingerprint) {
+          // Serialize once: applyFingerprint produces the body string itself — an
+          // eager stringify here would be a full multi-MB allocation, read never.
           const fingerprinted = applyFingerprint(fingerprintProvider, headers, transformedBody);
           finalHeaders = fingerprinted.headers;
           bodyString = fingerprinted.bodyString;
+        } else {
+          bodyString = JSON.stringify(transformedBody);
         }
 
         // CCH signing — replaces the cch=00000 placeholder in the billing
@@ -1603,6 +1648,7 @@ export class BaseExecutor {
           fetchFn: fetchWithStartTimeout,
           serializeBody: serializeRetryBody,
           strippedFields,
+          protectedFields: forcedCodexTier ? ["service_tier"] : undefined,
           log,
         });
 
@@ -1654,9 +1700,10 @@ export class BaseExecutor {
           if (/content[_-]blocked/i.test(wafErrText)) {
             retryAttemptsByUrl[urlIndex] = (retryAttemptsByUrl[urlIndex] ?? 0) + 1;
             const wafAttempt = retryAttemptsByUrl[urlIndex];
-            const wafBackoff =
+            const wafBackoff = BaseExecutor.jitterRetryDelayMs(
               BaseExecutor.WAF_RETRY_CONFIG.delayMs *
-              Math.pow(BaseExecutor.WAF_RETRY_CONFIG.backoffMultiplier, wafAttempt - 1);
+                Math.pow(BaseExecutor.WAF_RETRY_CONFIG.backoffMultiplier, wafAttempt - 1)
+            );
             log?.debug?.(
               "WAF_RETRY",
               `400 content-blocked intra-retry ${wafAttempt}/${BaseExecutor.WAF_RETRY_CONFIG.maxAttempts} on ${url} — waiting ${wafBackoff}ms`
@@ -1679,11 +1726,20 @@ export class BaseExecutor {
         ) {
           retryAttemptsByUrl[urlIndex] = (retryAttemptsByUrl[urlIndex] ?? 0) + 1;
           const attempt = retryAttemptsByUrl[urlIndex];
+          // Honor the upstream retry hint (Retry-After header / body) when it
+          // sits inside the intra-retry window — the skip guard above already
+          // dropped anything larger, so the wait is bounded by
+          // INTRA_RETRY_MAX_HINT_MS. Without a hint, jitter the fixed delay.
+          const hintMs = await readRateLimitRetryHintMs(response);
+          const waitMs =
+            hintMs !== null && hintMs <= INTRA_RETRY_MAX_HINT_MS
+              ? hintMs
+              : BaseExecutor.jitterRetryDelayMs(BaseExecutor.RETRY_CONFIG.delayMs);
           log?.debug?.(
             "RETRY",
-            `429 intra-retry ${attempt}/${BaseExecutor.RETRY_CONFIG.maxAttempts} on ${url} — waiting ${BaseExecutor.RETRY_CONFIG.delayMs}ms`
+            `429 intra-retry ${attempt}/${BaseExecutor.RETRY_CONFIG.maxAttempts} on ${url} — waiting ${waitMs}ms${hintMs !== null ? " (upstream hint)" : ""}`
           );
-          await new Promise((resolve) => setTimeout(resolve, BaseExecutor.RETRY_CONFIG.delayMs));
+          await new Promise((resolve) => setTimeout(resolve, waitMs));
           urlIndex--; // re-run this urlIndex on the next loop iteration
           continue;
         }

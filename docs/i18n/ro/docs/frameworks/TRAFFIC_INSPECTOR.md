@@ -40,12 +40,12 @@ Traffic Inspector este depanatorul de trafic HTTPS încorporat în OmniRoute —
 
 ## §2 Moduri de capturare
 
-Traffic Inspector acceptă **5 surse de capturare simultane**. Fiecare poate fi activată sau dezactivată independent. Câmpul `source` din fiecare `InterceptedRequest` (`src/mitm/inspector/types.ts`) are una dintre valorile `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` sau `"tproxy"`.
+Traffic Inspector acceptă **5 surse de capturare simultane**. Fiecare poate fi activată sau dezactivată independent. Câmpul `source` al fiecărui `InterceptedRequest` (`src/mitm/inspector/types.ts`) are una dintre valorile `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` sau `"tproxy"`.
 
-### Modul 1 — AgentBridge (implicit, activ permanent)
+### Modul 1 — AgentBridge (implicit, mereu activ)
 
-**Sursă:** Handlerele AgentBridge (`src/mitm/handlers/base.ts`)
-**Mecanism:** Fiecare apel `intercept()` din `MitmHandlerBase` apelează `hookBufferStart()` înainte de redirecționare și `hookBufferUpdate()` la finalizare. Nu necesită nicio configurare suplimentară — funcționează imediat ce AgentBridge rulează.
+**Sursă:** Gestionarele AgentBridge (`src/mitm/handlers/base.ts`)
+**Mecanism:** Fiecare apel `intercept()` din `MitmHandlerBase` apelează `hookBufferStart()` înainte de redirecționare și `hookBufferUpdate()` la finalizare. Nu necesită configurare suplimentară — funcționează imediat ce AgentBridge este pornit.
 **Acoperire:** Cei 9 agenți IDE configurați în AgentBridge
 **Notă:** Câmpul `source` din `InterceptedRequest` = `"agent-bridge"`
 
@@ -53,7 +53,7 @@ Traffic Inspector acceptă **5 surse de capturare simultane**. Fiecare poate fi 
 
 **Sursă:** Lista de gazde definită de utilizator (tabelul `inspector_custom_hosts`)
 **Mecanism:** Adăugarea unei gazde prin interfața cu utilizatorul adaugă `127.0.0.1 <host>` în `/etc/hosts` (necesită sudo). Serverul MITM AgentBridge existent (portul 443) generează dinamic un certificat SNI pentru noua gazdă.
-**Acoperire:** Orice aplicație care utilizează gazda adăugată — nu este necesară modificarea configurației aplicației
+**Acoperire:** Orice aplicație care utilizează gazda adăugată — nu este necesară nicio modificare a configurației aplicației
 **Notă:** `source` = `"custom-host"`
 
 Exemple de utilizare:
@@ -62,10 +62,10 @@ Exemple de utilizare:
 - Depanarea `my-internal-llm.company.com`
 - Capturarea traficului de la dispozitive mobile din aceeași rețea (prin falsificare ARP — avansat)
 
-### Modul 3 — Listener HTTP_PROXY (portul 8080)
+### Modul 3 — Ascultător HTTP_PROXY (portul 8080)
 
-**Sursă:** Aplicații care utilizează variabilele de mediu `HTTP_PROXY`/`HTTPS_PROXY`
-**Mecanism:** Listener secundar pe portul 8080 (`src/mitm/inspector/httpProxyServer.ts`), care funcționează ca un proxy explicit HTTP/HTTPS standard. Acceptă tuneluri `CONNECT` (HTTPS) și cereri HTTP directe.
+**Sursă:** Aplicațiile care utilizează variabilele de mediu `HTTP_PROXY`/`HTTPS_PROXY`
+**Mecanism:** Ascultător secundar pe portul 8080 (`src/mitm/inspector/httpProxyServer.ts`), care funcționează ca un proxy HTTP/HTTPS explicit standard. Acceptă tuneluri `CONNECT` (HTTPS) și cereri HTTP directe.
 **Acoperire:** Orice aplicație care respectă variabila de mediu `HTTP_PROXY` — fără modificări DNS, fără sudo
 **Notă:** `source` = `"http-proxy"`
 
@@ -78,48 +78,48 @@ export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**Limitare TLS:** Tunelurile HTTPS `CONNECT` sunt capturate doar ca metadate (gazdă, port, temporizare) — conținutul TLS nu este decriptat în mod implicit. Activați opțiunea „Decriptare HTTPS în modul proxy” (opțională, necesită ca certificatul AgentBridge să fie considerat de încredere) pentru inspectarea completă a conținutului.
+**Limitare TLS:** HTTPS trece printr-un tunel `CONNECT` simplu: ascultătorul retransmite octeții criptați fără a-i modifica și înregistrează doar metadatele (gazdă, port, sincronizare). Nu decriptează niciodată HTTPS și nu există nicio setare care să activeze decriptarea pentru acest mod. Pentru a captura corpurile HTTPS, direcționați gazda prin Modul 1 (AgentBridge), Modul 2 (Gazde personalizate) sau Modul 5 (decriptare TPROXY).
 
 **Conflict de port:** Dacă portul 8080 este utilizat, AgentBridge returnează un răspuns 409 cu o eroare structurată. Schimbați portul prin variabila de mediu `INSPECTOR_HTTP_PROXY_PORT`.
 
-### Modul 4 — Proxy la nivel de sistem (avansat, opțional)
+### Modul 4 — Proxy la nivelul întregului sistem (avansat, opțional)
 
-**Sursă:** Setările proxy la nivelul sistemului de operare (se aplică tuturor aplicațiilor de pe dispozitiv)
-**Mecanism:** Utilizează API-urile sistemului de operare pentru a redirecționa tot traficul HTTP/HTTPS prin listenerul HTTP_PROXY:
+**Sursă:** Setările proxy la nivel de sistem de operare (se aplică tuturor aplicațiilor de pe mașină)
+**Mecanism:** Utilizează API-urile sistemului de operare pentru a redirecționa tot traficul HTTP/HTTPS prin ascultătorul HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Acoperire:** Fiecare aplicație de pe dispozitiv care respectă setările proxy ale sistemului
+  **Acoperire:** Fiecare aplicație de pe mașină care respectă setările proxy ale sistemului
   **Notă:** `source` = `"system-proxy"`
 
 **Mecanisme de siguranță:**
 
-- Temporizator pentru dezactivare automată (implicit 30 de minute, configurabil prin `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
+- Temporizator de dezactivare automată (implicit 30 min, configurabil prin `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
 - Starea anterioară a proxy-ului de sistem este salvată în baza de date și restaurată la revenire
-- Panoul de control afișează mesajul „Se restabilește proxy-ul de sistem” dacă utilizatorul părăsește pagina cât timp acesta este activ
-- Interfața cu utilizatorul afișează insigna `⚠ Avansat` + o casetă de selectare pentru confirmare explicită
+- Tabloul de bord afișează mesajul „Se restabilește proxy-ul de sistem” dacă utilizatorul navighează în altă parte cât timp acesta este activ
+- Interfața cu utilizatorul afișează insigna `⚠ Avansat` + o casetă de validare pentru confirmare explicită
 
 ### Modul 5 — Decriptare transparentă TPROXY (Linux, root, opțională)
 
-**Sursă:** TPROXY din nucleu + rutare bazată pe politici (`src/mitm/tproxy/`)
-**Mecanism:** Marchează în `mangle OUTPUT` noile conexiuni TCP locale de ieșire către un port țintă (implicit `443`), o regulă `ip rule` redirecționează pachetele marcate către livrarea locală, iar ținta `TPROXY` din `mangle PREROUTING` le transmite unui listener transparent (**IP_TRANSPARENT**) (port implicit `8443`). Listenerul termină TLS folosind un certificat final emis **la cerere, pentru fiecare nume de gazdă SNI**, de către o CA dinamică, capturează schimbul de date decriptat și redirecționează cererea, recriptată, către destinația inițială.
-**Acoperire:** Gazde de destinație **arbitrare** de pe portul țintă — fără falsificarea `/etc/hosts`, fără variabila de mediu `HTTP_PROXY`, fără modificarea proxy-ului la nivel de sistem. Procesul interceptat nu necesită modificări de configurare, dar trebuie să acorde încredere CA-ului dinamic.
+**Sursă:** TPROXY la nivel de nucleu + rutare bazată pe politici (`src/mitm/tproxy/`)
+**Mecanism:** Marchează în `mangle OUTPUT` noile conexiuni TCP locale de ieșire către un port țintă (implicit `443`), o regulă `ip rule` redirecționează pachetele marcate către livrarea locală, iar ținta `TPROXY` din `mangle PREROUTING` le transmite unui ascultător transparent (**IP_TRANSPARENT**) (implicit pe portul `8443`). Ascultătorul încheie conexiunea TLS folosind un certificat final emis **la cerere, pentru fiecare nume de gazdă SNI**, de către o CA dinamică, capturează schimbul de date decriptat și redirecționează cererea, recriptată, către destinația inițială.
+**Acoperire:** Gazde de destinație **arbitrare** pe portul țintă — fără falsificarea `/etc/hosts`, fără variabila de mediu `HTTP_PROXY`, fără modificarea proxy-ului la nivelul întregului sistem. Procesul interceptat nu necesită nicio modificare de configurare, dar trebuie să acorde încredere CA-ului dinamic.
 **Notă:** `source` = `"tproxy"`
 
-**Cerințe:** Exclusiv Linux (**IP_TRANSPARENT** este disponibil numai pe Linux), capabilitatea **CAP_NET_ADMIN** (root) și un addon N-API nativ care trebuie compilat cu un lanț de instrumente C (`npm run build:native:tproxy`). Când acestea nu sunt disponibile, comutatorul din panoul de control este dezactivat și afișează indicația „Decriptarea TPROXY necesită Linux + root + addonul nativ”. Regulile firewall sunt aplicate/restabilite tranzacțional (o oprire neașteptată nu lasă niciodată în urmă o regulă `mangle`) și sunt eliminate la repornire. Un mecanism anti-buclă bazat pe SO_MARK împiedică reinterceptarea traficului redirecționat și recriptat de proxy.
+**Cerințe:** Numai Linux (**IP_TRANSPARENT** este disponibil exclusiv pe Linux), capabilitatea **CAP_NET_ADMIN** (root) și un addon N-API nativ care trebuie compilat cu un lanț de instrumente C (`npm run build:native:tproxy`). Când nu este disponibil, comutatorul din tabloul de bord este dezactivat și afișează sugestia „Decriptarea TPROXY necesită Linux + root + addonul nativ”. Regulile de firewall sunt aplicate/restabilite tranzacțional (o oprire neașteptată nu lasă niciodată în urmă o regulă `mangle`) și sunt șterse la repornire. Un mecanism anti-buclă bazat pe SO_MARK împiedică redirecționarea recriptată a proxy-ului să fie interceptată din nou.
 
-Acesta este un subsistem complex, cu propriul ghid dedicat operatorului — consultați `docs/security/MITM-TPROXY-DECRYPT.md` (git; neinclus în versiunea compilată din `/docs`) pentru rețeta firewall completă, CA-ul dinamic per SNI + programul de instalare în depozitul de încredere, ruta exclusiv locală, detaliile mecanismului anti-buclă și schema de configurare. Comutatorul este controlat prin `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (notă: ruta se află sub prefixul AgentBridge, nu sub prefixul Traffic Inspector).
+Acesta este un subsistem substanțial, cu propriul ghid dedicat pentru operatori — consultați `docs/security/MITM-TPROXY-DECRYPT.md` (git; neinclus în versiunea compilată din `/docs`) pentru configurația completă a firewallului, CA-ul dinamic pentru fiecare SNI + programul de instalare în depozitul de încredere, ruta exclusiv locală, detaliile mecanismului anti-buclă și schema de configurare. Comutatorul este controlat prin `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (notă: ruta se află sub prefixul AgentBridge, nu sub prefixul Traffic Inspector).
 
-### Comparația modurilor de capturare
+### Compararea modurilor de capturare
 
-| Mod                   | Configurare                     |           Sudo?           | Acoperire                                    | Note                                                                                                                                 |
-| --------------------- | ------------------------------- | :-----------------------: | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 1. AgentBridge        | Automată                        | O dată (certificat+hosts) | 9 agenți IDE                                 | Activat implicit                                                                                                                     |
-| 2. Custom Hosts       | Introducere pentru fiecare host |    Da (fișierul hosts)    | Orice aplicație care utilizează acel host    | Persistat în baza de date                                                                                                            |
-| 3. HTTP_PROXY         | `export HTTPS_PROXY=...`        |            Nu             | Aplicații care respectă variabilele de mediu | Portul 8080, fără decriptare TLS în mod implicit                                                                                     |
-| 4. La nivel de sistem | Comutare + confirmare           |            Da             | Toate aplicațiile de pe sistem               | Dezactivare automată în 30 de minute                                                                                                 |
-| 5. Decriptare TPROXY  | Comutare (Linux + addon nativ)  | Da (root + instalare CA)  | Orice host de pe portul țintă                | Decriptează hosturi arbitrare; dezactivată implicit — consultați `docs/security/MITM-TPROXY-DECRYPT.md` (git; necompilat în `/docs`) |
+| Mod                    | Configurare                      |           Sudo?           | Acoperire                                        | Note                                                                                                                             |
+| ---------------------- | -------------------------------- | :-----------------------: | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge         | Automată                         | O dată (certificat+hosts) | 9 agenți IDE                                     | Activat implicit                                                                                                                 |
+| 2. Gazde personalizate | Introducere pentru fiecare gazdă |    Da (fișierul hosts)    | Orice aplicație care utilizează gazda respectivă | Persistat în baza de date                                                                                                        |
+| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`         |            Nu             | Aplicații care respectă variabilele de mediu     | Portul 8080; HTTPS este tunelat prin CONNECT (doar metadate, niciodată decriptat)                                                |
+| 4. La nivel de sistem  | Comutare + confirmare            |            Da             | Toate aplicațiile de pe sistem                   | Dezactivare automată după 30 min                                                                                                 |
+| 5. Decriptare TPROXY   | Comutare (Linux + add-on nativ)  | Da (root + instalare CA)  | Orice gazdă de pe portul țintă                   | Decriptează gazde arbitrare; dezactivată implicit — consultați `docs/security/MITM-TPROXY-DECRYPT.md` (git; neinclus în `/docs`) |
 
 ---
 
@@ -341,29 +341,29 @@ Exportați prin `GET /api/tools/traffic-inspector/sessions/{id}/export.har` sau 
 
 ## §6 Securitate
 
-Traffic Inspector afișează **tot traficul HTTPS interceptat**, inclusiv antetele de autorizare și corpurile cererilor. Sunt implementate următoarele măsuri de control:
+Traffic Inspector afișează **tot traficul HTTPS interceptat**, inclusiv anteturile de autorizare și corpurile solicitărilor. Sunt implementate următoarele măsuri de control:
 
-| Măsură de control                  | Detalii                                                                                                                                                                                                                    |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                     | Toate rutele și endpointul WebSocket sunt accesibile numai prin interfața loopback (restricție aplicată în `routeGuard.ts` înainte de autentificare)                                                                       |
-| **Mascarea secretelor**            | Scanerul liniar `maskSecret()` maschează datele de autentificare Bearer RFC 6750, cheile cu prefix de furnizor și tokenurile opace lungi înainte de `TrafficBuffer.push()`                                                 |
-| **Limitarea dimensiunii corpului** | Corpurile > `INSPECTOR_MAX_BODY_KB` (implicit 1024 KB) sunt trunchiate și primesc notificarea `„(trunchiat pentru performanță)”`                                                                                           |
-| **Igienizarea antetelor**          | Numele sunt convertite la litere mici; antetele de încadrare/hop-by-hop și de autentificare proxy sunt eliminate; cookie-urile sunt mascate integral; valorile datelor de autentificare sunt delegate către `maskSecret()` |
-| **CSP**                            | O politică strictă de securitate a conținutului pe paginile Traffic Inspector pentru a preveni atacurile XSS prin corpuri de răspuns injectate                                                                             |
-| **Fără persistență implicită**     | `TrafficBuffer` este păstrat în memorie și se pierde la repornirea serverului. Sesiunile sunt păstrate numai atunci când sunt înregistrate în mod explicit                                                                 |
+| Măsură de control                      | Detalii                                                                                                                                                                                                          |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                         | Toate rutele și endpointul WebSocket sunt accesibile numai prin interfața loopback (impus în `routeGuard.ts` înainte de autentificare)                                                                           |
+| **Mascarea secretelor**                | Scanerul liniar `maskSecret()` maschează acreditările Bearer RFC 6750, cheile prefixate cu numele furnizorului și tokenurile opace lungi înainte de `TrafficBuffer.push()`                                       |
+| **Limită pentru dimensiunea corpului** | Corpurile > `INSPECTOR_MAX_BODY_KB` (implicit 1024 KB) sunt trunchiate și însoțite de notificarea `"(truncated for performance)"`                                                                                |
+| **Sanitizarea anteturilor**            | Numele sunt convertite în litere mici; anteturile de încadrare/hop-by-hop și de autentificare proxy sunt eliminate; cookie-urile sunt mascate complet; valorile acreditărilor sunt delegate către `maskSecret()` |
+| **CSP**                                | Politică strictă de securitate a conținutului pe paginile Traffic Inspector, pentru a preveni atacurile XSS prin corpuri de răspuns injectate                                                                    |
+| **Fără persistență implicită**         | `TrafficBuffer` este păstrat în memorie și se pierde la repornirea serverului. Sesiunile sunt persistate numai atunci când sunt înregistrate explicit                                                            |
 
 ### Reguli stricte aplicate
 
 | Regulă                            | Aplicare                                                                                            |
 | --------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | Toate răspunsurile de eroare HTTP de la rutele Traffic Inspector sunt igienizate                    |
+| **#12** `sanitizeErrorMessage`    | Toate răspunsurile de eroare HTTP de la rutele Traffic Inspector sunt sanitizate                    |
 | **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` este LOCAL_ONLY + SPAWN_CAPABLE (comenzi pentru proxy-ul de sistem) |
 
 ### Limitări cunoscute
 
-- **Modul proxy la nivel de sistem** afectează toate aplicațiile de pe dispozitiv, inclusiv clienții VPN și SSO. Utilizați-l întotdeauna cu temporizatorul de dezactivare automată. Nu îl utilizați pe dispozitive partajate.
-- **Tunel HTTPS CONNECT**: Modul 3 (HTTP_PROXY) capturează numai metadatele tunelului pentru destinațiile HTTPS, cu excepția cazului în care interceptarea TLS este activată. Acest lucru este intenționat — capturarea transparentă fără ca certificatul AgentBridge să fie considerat de încredere ar întrerupe verificarea TLS pentru aplicațiile respective.
-- **Șiruri codificate direct în unele componente**: Unele componente UI (F7/F8) conțin un număr mic de șiruri codificate direct, care nu sunt încă acoperite de cheile i18n. Acestea sunt documentate ca limitare cunoscută în raportul privind lacunele i18n; vor fi migrate într-o etapă ulterioară. Șirurile afectate sunt etichete decorative ale interfeței, care nu necesită traducere pentru utilizarea funcțională.
+- **Modul proxy la nivel de sistem** afectează toate aplicațiile de pe dispozitiv, inclusiv clienții VPN și SSO. Folosiți-l întotdeauna cu temporizatorul de dezactivare automată. Nu îl utilizați pe dispozitive partajate.
+- **HTTPS prin tunel CONNECT**: Modul 3 (HTTP_PROXY) capturează numai metadatele tunelului pentru destinațiile HTTPS și nu le decriptează niciodată. Acest comportament este intenționat — decriptarea ar necesita ca fiecare client să acorde încredere unui certificat MITM, astfel încât serviciul de ascultare menține criptarea HTTPS end-to-end. Folosiți AgentBridge, Custom Hosts sau decriptarea TPROXY atunci când aveți nevoie de corpurile HTTPS.
+- **Șiruri codificate direct în unele componente**: Unele componente UI (F7/F8) conțin un număr redus de șiruri codificate direct care nu sunt încă acoperite de cheile i18n. Acestea sunt documentate drept limitare cunoscută în raportul privind lacunele i18n; vor fi migrate într-o etapă ulterioară. Șirurile afectate sunt etichete UI decorative care nu necesită traducere pentru utilizarea funcțională.
 
 ---
 
@@ -428,9 +428,9 @@ Când memoria tampon atinge `INSPECTOR_BUFFER_SIZE` (valoare implicită: 1000), 
 
 ## §8 Referință API
 
-Toate rutele sunt `LOCAL_ONLY` (exclusiv prin loopback) și `SPAWN_CAPABLE` (comenzi pentru proxy-ul de sistem). Consultați `src/server/authz/routeGuard.ts`.
+Toate rutele sunt `LOCAL_ONLY` (doar pentru interfața loopback) și `SPAWN_CAPABLE` (comenzi proxy de sistem). Consultați `src/server/authz/routeGuard.ts`.
 
-Cale de bază: `/api/tools/traffic-inspector/`
+Calea de bază: `/api/tools/traffic-inspector/`
 
 ### Gestionarea cererilor
 
@@ -439,14 +439,14 @@ Cale de bază: `/api/tools/traffic-inspector/`
 | GET    | `/requests`                 | Listează cererile (filtrabile: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
 | GET    | `/requests/{id}`            | Detaliile unei singure cereri                                                          |
 | DELETE | `/requests`                 | Golește memoria tampon din memorie                                                     |
-| POST   | `/requests/{id}/replay`     | Execută din nou aceeași cerere prin routerul OmniRoute                                 |
+| POST   | `/requests/{id}/replay`     | Reexecută aceeași cerere prin routerul OmniRoute                                       |
 | PUT    | `/requests/{id}/annotation` | Salvează sau actualizează o notă asociată unei cereri                                  |
 
 ### WebSocket
 
-| Metodă | Cale  | Descriere                                                                                    |
-| ------ | ----- | -------------------------------------------------------------------------------------------- |
-| GET    | `/ws` | Flux WebSocket live. Trimite `snapshot` la conectare, apoi evenimente `new`/`update`/`clear` |
+| Metodă | Cale  | Descriere                                                                                            |
+| ------ | ----- | ---------------------------------------------------------------------------------------------------- |
+| GET    | `/ws` | Flux WebSocket în timp real. Trimite `snapshot` la conectare, apoi evenimente `new`/`update`/`clear` |
 
 ### Export
 
@@ -461,37 +461,36 @@ Cale de bază: `/api/tools/traffic-inspector/`
 | GET    | `/hosts`        | Listează gazdele personalizate                 |
 | POST   | `/hosts`        | Adaugă o gazdă (editează automat `/etc/hosts`) |
 | DELETE | `/hosts/{host}` | Elimină gazda                                  |
-| PATCH  | `/hosts/{host}` | Comută `enabled`                               |
+| PATCH  | `/hosts/{host}` | Comută starea `enabled`                        |
 
 ### Moduri de capturare
 
-| Metodă | Cale                           | Descriere                                                                                                       |
-| ------ | ------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| GET    | `/capture-modes`               | Starea modurilor AgentBridge / gazde personalizate / HTTP_PROXY / proxy de sistem + comutatorul `tls-intercept` |
-| POST   | `/capture-modes/http-proxy`    | Pornește/oprește ascultătorul HTTP_PROXY (`{action: "start"\|"stop"}`)                                          |
-| POST   | `/capture-modes/system-proxy`  | Aplică/dezactivează proxy-ul la nivel de sistem (`{action: "apply"\|"revert"}`)                                 |
-| POST   | `/capture-modes/tls-intercept` | Comută decriptarea corpului HTTPS în modul proxy (`{enabled: boolean}`)                                         |
+| Metodă | Cale                          | Descriere                                                                           |
+| ------ | ----------------------------- | ----------------------------------------------------------------------------------- |
+| GET    | `/capture-modes`              | Starea modurilor AgentBridge / gazde personalizate / HTTP_PROXY / proxy de sistem   |
+| POST   | `/capture-modes/http-proxy`   | Pornește/oprește listenerul HTTP_PROXY (`{action: "start"\|"stop"}`)                |
+| POST   | `/capture-modes/system-proxy` | Aplică/revocă proxy-ul la nivelul întregului sistem (`{action: "apply"\|"revert"}`) |
 
 > **Decriptarea TPROXY** (modul de capturare 5) este controlată printr-o rută
 > **separată**, aflată sub prefixul AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — nu
 > sub `/api/tools/traffic-inspector/`. Consultați
-> `docs/security/MITM-TPROXY-DECRYPT.md` (git; neinclus în versiunea compilată din `/docs`).
+> `docs/security/MITM-TPROXY-DECRYPT.md` (git; nu este compilat în `/docs`).
 
 ### Sesiuni
 
 | Metodă | Cale                        | Descriere                                                             |
 | ------ | --------------------------- | --------------------------------------------------------------------- |
-| POST   | `/sessions`                 | Pornește înregistrarea (`{name?: string}`)                            |
+| POST   | `/sessions`                 | Începe înregistrarea (`{name?: string}`)                              |
 | PATCH  | `/sessions/{id}`            | Oprește sau redenumește (`{action: "stop"\|"rename", name?: string}`) |
 | GET    | `/sessions`                 | Listează toate sesiunile salvate                                      |
 | GET    | `/sessions/{id}`            | Instantaneul sesiunii (toate cererile)                                |
 | DELETE | `/sessions/{id}`            | Șterge sesiunea                                                       |
 | GET    | `/sessions/{id}/export.har` | Exportă sesiunea în format HAR 1.2                                    |
 
-### Ingerare internă (alternativă D4)
+### Ingestie internă (rezervă D4)
 
-| Metodă | Cale               | Descriere                                                                                                                  |
-| ------ | ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| POST   | `/internal/ingest` | Acceptă cererea interceptată din calea de trecere directă `server.cjs`; necesită antetul `INSPECTOR_INTERNAL_INGEST_TOKEN` |
+| Metodă | Cale               | Descriere                                                                                                                    |
+| ------ | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/internal/ingest` | Acceptă cererea interceptată de pe calea de trecere directă `server.cjs`; necesită antetul `INSPECTOR_INTERNAL_INGEST_TOKEN` |
 
 Scheme OpenAPI complete: `docs/openapi.yaml` → eticheta `Traffic Inspector`.

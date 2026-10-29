@@ -8,6 +8,12 @@ function asRequestToolIdentity(value: unknown): RequestToolIdentity | null {
     : null;
 }
 
+function isExplicitFlatIdentity(value: unknown, toolName: string): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const identity = value as Record<string, unknown>;
+  return identity.namespace === "" && identity.name === toolName;
+}
+
 // #8295's `flattenNamespaceToolName` folds a declared `type:"namespace"` tool
 // group onto the Chat wire as `${nsName}__${leaf}`, always prefixed with the
 // MCP container convention documented in open-sse/executors/codex/tools.ts
@@ -56,7 +62,11 @@ function splitFlattenedNamespaceWireName(toolName: string): RequestToolIdentity 
  * splitting an otherwise unknown tool name outside the narrow `mcp__`
  * fallback below.
  */
-export function resolveRequestToolIdentity(identityMap: unknown, toolName: string) {
+export function resolveRequestToolIdentity(
+  identityMap: unknown,
+  toolName: string,
+  options: { explicitNames?: Iterable<string> | null } = {}
+) {
   if (!toolName) return null;
 
   const direct =
@@ -65,18 +75,45 @@ export function resolveRequestToolIdentity(identityMap: unknown, toolName: strin
       : identityMap && typeof identityMap === "object" && !Array.isArray(identityMap)
         ? (identityMap as Record<string, unknown>)[toolName]
         : undefined;
+  // Current flat declarations and ambiguous history must stay flat, including
+  // names that otherwise match a historical dot alias or the MCP split fallback.
+  if (isExplicitFlatIdentity(direct, toolName)) return null;
   const directIdentity = asRequestToolIdentity(direct);
   if (directIdentity) return directIdentity;
 
-  const candidates =
+  // Materialized: the identity walk below runs twice (dotted alias, then the unique
+  // bare-leaf fallback), and a Map's `values()` iterator is single-use.
+  const candidates = Array.from(
     identityMap instanceof Map
       ? identityMap.values()
       : identityMap && typeof identityMap === "object" && !Array.isArray(identityMap)
         ? Object.values(identityMap as Record<string, unknown>)
-        : [];
+        : []
+  );
   for (const candidate of candidates) {
     const identity = asRequestToolIdentity(candidate);
     if (identity && `${identity.namespace}.${identity.name}` === toolName) return identity;
+  }
+
+  // Unique bare-leaf resolution: a provider that dropped the `ns__` prefix (or a
+  // name fragment captured mid-stream) still resolves when exactly ONE ledger
+  // identity carries that leaf — e.g. bare `exec` for the declared
+  // `functions__exec`. An ambiguous leaf stays unresolved, and a client that also
+  // declared a flat tool of the same name keeps that tool's own identity
+  // (`options.explicitNames`, supplied from the request's schema map).
+  if (toolName && !toolName.includes("__")) {
+    const explicit =
+      options.explicitNames === undefined || options.explicitNames === null
+        ? null
+        : new Set(options.explicitNames);
+    if (!explicit || !explicit.has(toolName)) {
+      const leafMatches: RequestToolIdentity[] = [];
+      for (const candidate of candidates) {
+        const identity = asRequestToolIdentity(candidate);
+        if (identity && identity.name === toolName) leafMatches.push(identity);
+      }
+      if (leafMatches.length === 1) return leafMatches[0];
+    }
   }
 
   // The wire-name split only stands in for a request that declared no

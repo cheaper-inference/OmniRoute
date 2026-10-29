@@ -20,11 +20,43 @@ test("mergeUpstreamExtraHeaders merges string key-value pairs", () => {
   assert.equal(h["X-Other"], "val2");
 });
 
+test("mergeUpstreamExtraHeaders replaces same-name entries under any case (no comma-join)", () => {
+  // A client-forwarded lowercase attribution key plus an operator-configured
+  // variant must end as ONE entry — undici comma-joins case-duplicates.
+  const h: Record<string, string> = {
+    "http-referer": "https://client.example",
+    "x-title": "Client",
+  };
+  base.mergeUpstreamExtraHeaders(h, {
+    "HTTP-Referer": "https://configured.example",
+    "X-Title": "Operator",
+  });
+  assert.equal(Object.keys(h).filter((k) => k.toLowerCase() === "http-referer").length, 1);
+  assert.equal(h["HTTP-Referer"], "https://configured.example");
+  assert.equal(Object.keys(h).filter((k) => k.toLowerCase() === "x-title").length, 1);
+  assert.equal(h["X-Title"], "Operator");
+});
+
 test("mergeUpstreamExtraHeaders overrides user-agent via setUserAgentHeader", () => {
   const h: Record<string, string> = { "User-Agent": "old", "user-agent": "old" };
   base.mergeUpstreamExtraHeaders(h, { "user-agent": "new-agent" });
+  // Regression: the UA override must leave ONE entry; the old mirror kept both
+  // case variants and undici comma-joined them on the wire ("new, new").
+  assert.deepEqual(
+    Object.keys(h).filter((k) => k.toLowerCase() === "user-agent"),
+    ["User-Agent"]
+  );
   assert.equal(h["User-Agent"], "new-agent");
-  assert.equal(h["user-agent"], "new-agent");
+});
+
+test("setUserAgentHeader leaves exactly one entry regardless of prior case variants", () => {
+  const h: Record<string, string> = { "user-agent": "seeded-lower" };
+  base.setUserAgentHeader(h, "final/1.0");
+  assert.deepEqual(
+    Object.keys(h).filter((k) => k.toLowerCase() === "user-agent"),
+    ["User-Agent"]
+  );
+  assert.equal(h["User-Agent"], "final/1.0");
 });
 
 test("mergeUpstreamExtraHeaders skips empty keys", () => {
@@ -68,8 +100,12 @@ test("setUserAgentHeader sets User-Agent casing", () => {
 test("setUserAgentHeader overwrites existing", () => {
   const h: Record<string, string> = { "User-Agent": "old", "user-agent": "old" };
   base.setUserAgentHeader(h, "NewAgent/2.0");
+  // One canonical entry: the old lowercase mirror made undici comma-join both.
+  assert.deepEqual(
+    Object.keys(h).filter((k) => k.toLowerCase() === "user-agent"),
+    ["User-Agent"]
+  );
   assert.equal(h["User-Agent"], "NewAgent/2.0");
-  assert.equal(h["user-agent"], "NewAgent/2.0");
 });
 
 test("applyConfiguredUserAgent does nothing when no custom user agent", () => {

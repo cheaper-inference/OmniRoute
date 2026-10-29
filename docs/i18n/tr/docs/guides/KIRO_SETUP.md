@@ -118,33 +118,33 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ---
 
-## API Anahtarıyla İçe Aktarma Akışı
+## API Anahtarı İçe Aktarma Akışı
 
-API anahtarıyla kimlik doğrulama, uzun ömürlü Kiro / AWS CodeWhisperer bearer kimlik bilgileri içindir. OAuth yenilemesini
-kullanmadığından paylaşılan OIDC oturumunun geçersiz kılınmasını önler.
+API anahtarı kimlik doğrulaması, uzun ömürlü Kiro / AWS CodeWhisperer bearer kimlik bilgileri içindir. OAuth yenilemesini kullanmadığından, paylaşılan OIDC oturumlarının geçersiz kılınmasını önler.
 
-### Dashboard
+### Pano
 
-1. **Dashboard -> Providers -> Kiro** bölümünü açın.
-2. **API Key** seçeneğini seçin.
-3. API anahtarını ve isteğe bağlı AWS bölgesini (varsayılan olarak `us-east-1`) yapıştırın.
-4. OmniRoute anahtarı doğrular ve bağlantıyı kaydeder.
+1. **Pano -> Sağlayıcılar -> Kiro** bölümünü açın.
+2. **API Anahtarı** seçeneğini belirleyin.
+3. API anahtarını yapıştırın ve AWS bölgesini seçin: **Otomatik algıla** (varsayılan), **ABD Doğu
+   (Kuzey Virginia)** veya **Avrupa (Frankfurt)**.
+4. OmniRoute, anahtarı doğrular ve bağlantıyı anahtarın çalıştığı bölgeye sabitlenmiş olarak kaydeder.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region`; `auto` (varsayılan), `us-east-1` veya `eu-central-1` değerlerini kabul eder; diğer tüm değerler HTTP 400 ile reddedilir.
 
 ### Dahili Sözleşme
 
-API rotası, bölgeyle eşleşen CodeWhisperer/Amazon Q uç noktasına karşı
-`ListAvailableProfiles` kullanan ve bir `profileArn` çözen `KiroService.validateApiKey()`
-çağrısıyla anahtarı doğrular.
+API rotası, `KiroService.validateApiKey()` çağrısını yaparak anahtarı doğrular; bu işlev de bölge başına 10 saniyelik zaman aşımıyla `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR` adresini (Amazon Q yüzey API'sinin anahtar tabanlı çıkarım için kullandığı adres) çağırır. `auto` modunda önce `us-east-1`, ardından `eu-central-1` denenir ve anahtarı kabul eden ilk bölge kaydedilir. Tüm aday bölgelerde reddedilen bir anahtarın içe aktarımı HTTP 400 ile başarısız olur. Ardından, isteğe bağlı bir `profileArn` değerini keşfetmek için en iyi çaba yaklaşımıyla `ListAvailableProfiles` çağrılır (AWS, çoğu API anahtarı için bunu reddeder).
 
-Kaydedilen bağlantı şunları kullanır:
+Kaydedilen bağlantı şunu kullanır:
 
 ```json
 {
@@ -157,10 +157,7 @@ Kaydedilen bağlantı şunları kullanır:
 }
 ```
 
-Çalışma zamanında `KiroExecutor.buildHeaders()`, anahtarı
-`Authorization: Bearer <key>` olarak gönderir ve `tokentype: API_KEY` ekler. Kota/profil çağrıları
-aynı işaretleyiciyi kullanır; böylece AWS, bearer değerini bir OIDC veya sosyal erişim belirteci yerine
-uzun ömürlü bir API anahtarı olarak değerlendirir.
+Çalışma zamanında `KiroExecutor.buildHeaders()`, anahtarı `Authorization: Bearer <key>` olarak gönderir ve `tokentype: API_KEY` ekler. Kota/profil çağrıları da aynı işaretleyiciyi kullanır; böylece AWS, bearer değerini bir OIDC veya sosyal erişim belirteci yerine uzun ömürlü bir API anahtarı olarak değerlendirir. `KiroExecutor.execute()`, API anahtarıyla çıkarım isteklerini yalnızca `https://q.<region>.amazonaws.com/generateAssistantResponse` adresine gönderir — buna `us-east-1` de dahildir — çünkü Kiro IDE ağ geçidi `TokenType=API_KEY` değerini reddeder ve `codewhisperer.us-east-1`, API anahtarı yüklerini geçersiz istek gövdesi olarak reddeder (HTTP 400).
 
 ---
 

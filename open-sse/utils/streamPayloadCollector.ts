@@ -952,6 +952,10 @@ export function createStructuredSSECollector(options: CollectorOptions = {}) {
       return events.map((event) => cloneLogPayload(event));
     },
 
+    getEventCount() {
+      return events.length + droppedEvents;
+    },
+
     // The reducer-computed summary, built incrementally from EVERY pushed
     // payload (see CollectorOptions.format) — unlike
     // buildStreamSummaryFromEvents(getEvents(), ...), this is correct even

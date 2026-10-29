@@ -26,6 +26,8 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET ?? "skipped-variants-tes
 
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
+const modelsDb = await import("../../src/lib/db/models.ts");
 const modePacks = await import("../../open-sse/services/autoCombo/modePacks.ts");
 const combosAutoRoute = await import("../../src/app/api/combos/auto/route.ts");
 
@@ -77,6 +79,18 @@ async function callRoute(): Promise<{ status: number; combos: Array<{ id: string
   return { status: res.status, combos: (await res.json()).combos };
 }
 
+test.before(async () => {
+  assert.equal((await settingsDb.getSettings()).excludeTosAvoid, true);
+  await providersDb.createProviderConnection({
+    provider: "groq",
+    authType: "apikey",
+    apiKey: "synthetic-groq-key",
+    name: "Synthetic variants account",
+  });
+  await modelsDb.addCustomModel("groq", "openai/gpt-oss-120b", "Groq GPT OSS 120B");
+  await modelsDb.addCustomModel("groq", "openai/gpt-oss-20b", "Groq GPT OSS 20B");
+});
+
 test.after(() => {
   restorePacks();
   core.resetDbInstance();
@@ -88,7 +102,7 @@ test.after(() => {
 });
 
 test("stays quiet when every variant builds", async () => {
-  await settingsDb.updateSettings({ requireLogin: false });
+  await settingsDb.updateSettings({ requireLogin: false, excludeTosAvoid: false });
   restorePacks();
 
   const watcher = watchWarnings();
@@ -103,7 +117,7 @@ test("stays quiet when every variant builds", async () => {
 });
 
 async function expectSkipped(pack: string, ids: string[], notIds: string[] = []): Promise<void> {
-  await settingsDb.updateSettings({ requireLogin: false });
+  await settingsDb.updateSettings({ requireLogin: false, excludeTosAvoid: false });
   restorePacks();
   const { combos: baseline } = await callRoute();
   for (const id of ids) assert.ok(baseline.map((combo) => combo.id).includes(id));
@@ -140,7 +154,7 @@ test("logs one line naming the skipped tiered suffix variant", async () => {
 });
 
 test("a variant that fails once and builds in a later loop is kept and not reported", async () => {
-  await settingsDb.updateSettings({ requireLogin: false });
+  await settingsDb.updateSettings({ requireLogin: false, excludeTosAvoid: false });
   restorePacks();
   let calls = 0;
   Object.defineProperty(PACKS, "offline-friendly", {
@@ -164,7 +178,7 @@ test("a variant that fails once and builds in a later loop is kept and not repor
 });
 
 test("keeps the payload identical to the unfixed baseline", async () => {
-  await settingsDb.updateSettings({ requireLogin: false });
+  await settingsDb.updateSettings({ requireLogin: false, excludeTosAvoid: false });
   restorePacks();
   const { combos } = await callRoute();
   const ids = combos.map((combo) => combo.id);
@@ -174,7 +188,7 @@ test("keeps the payload identical to the unfixed baseline", async () => {
 });
 
 test("logs the first error on a single bounded line", async () => {
-  await settingsDb.updateSettings({ requireLogin: false });
+  await settingsDb.updateSettings({ requireLogin: false, excludeTosAvoid: false });
   restorePacks();
   poisonPack("offline-friendly", `first\nsecond\tline ${"x".repeat(1000)}`);
   const watcher = watchWarnings();

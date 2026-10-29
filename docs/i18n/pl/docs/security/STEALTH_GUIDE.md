@@ -20,68 +20,55 @@ Funkcje stealth istnieją po to, by OmniRoute mógł działać jako warstwa komp
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Trwałe sesje `wreq-js` są tworzone leniwie dla każdego zakresu konta i rozpoznanego serwera proxy. Ogólnoprocesowa pula `TlsClient` przechowuje maksymalnie 128 sesji podszywających się pod **Chrome 124 na macOS** na potrzeby usług nadrzędnych chronionych przez Cloudflare. `TlsClient.fetch()` odmawia wykonania żądania, gdy natywne środowisko uruchomieniowe jest niedostępne; kod wywołujący może jawnie wybrać mechanizm rezerwowy poza tą warstwą opakowującą.
+Trwałe sesje `wreq-js` są tworzone leniwie dla zakresu każdego konta i rozpoznanego serwera proxy. Ogólnoprocesowa pula `TlsClient` zawiera maksymalnie 128 sesji podszywających się pod **Chrome 124 w systemie macOS** na potrzeby usług nadrzędnych chronionych przez Cloudflare. `TlsClient.fetch()` kończy działanie błędem w trybie fail-closed, gdy natywne środowisko wykonawcze jest niedostępne; kod wywołujący może jawnie wybrać mechanizm rezerwowy poza tym wrapperem.
 
 - Profil sesji: `browser: "chrome_124", os: "macos"`
-- Rozpoznawanie proxy (priorytet): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (również małymi literami)
+- Rozpoznawanie serwera proxy (według priorytetu): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (również warianty pisane małymi literami)
 - Limit czasu: `TLS_CLIENT_TIMEOUT_MS` (dziedziczony z `FETCH_TIMEOUT_MS`, domyślnie 600000)
-- Obiekt Response z `wreq-js` jest zgodny z fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Mechanizm nadzorujący pierwszy bajt (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  kończy oczekiwanie natychmiast po nadejściu nagłówków z usługi nadrzędnej, dlatego sam
-  `TLS_CLIENT_TIMEOUT_MS` nie może ograniczyć oczekiwania na treść, która nigdy nie zwraca pierwszego
-  bajtu. `guardTlsFirstByte()` ściga pierwszy `read()` treści z limitem
-  `TLS_FIRST_BYTE_WATCHDOG_MS` (domyślnie `10000`, wartość `0` go wyłącza); prawidłowa treść pozostaje
-  bez zmian, natomiast zablokowana treść powoduje anulowanie czytnika wreq i pozwala istniejącej
-  logice awaryjnej TLS funkcji `proxyFetch` przejść do bezpośredniego dyspozytora lub dyspozytora
-  proxy (żądanie, którego nie można bezpiecznie powtórzyć, np. POST z treścią, nadal zgłasza błąd,
-  zamiast być niejawnie ponawiane).
+- Response biblioteki `wreq-js` jest zgodna z fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Mechanizm kontrolny pierwszego bajtu (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
+  jest rozwiązywane natychmiast po otrzymaniu nagłówków z usługi nadrzędnej, dlatego sam `TLS_CLIENT_TIMEOUT_MS` nie może ograniczyć czasu oczekiwania na
+  treść, która nigdy nie zwraca pierwszego bajtu. `guardTlsFirstByte()` przeprowadza wyścig między pierwszym `read()` treści
+  a `TLS_FIRST_BYTE_WATCHDOG_MS` (domyślnie `10000`, wartość `0` go wyłącza); prawidłowo działająca treść
+  pozostaje bez zmian, natomiast w przypadku zablokowanej treści czytnik wreq jest anulowany, co pozwala istniejącej
+  logice rezerwowej TLS w `proxyFetch` przejść do bezpośredniego dyspozytora lub dyspozytora proxy (żądanie, którego nie można bezpiecznie odtworzyć, np.
+  POST z treścią, nadal zgłasza wyjątek zamiast być po cichu ponawiane).
 
-### Transport dostawców korzystających z internetowych plików cookie — wreq-js 3.2.0
+### Transport dostawców opartych na plikach cookie przeglądarki — wreq-js 3.2.0
 
 `open-sse/services/tlsClientBase.ts` jest współdzielonym adapterem dla pięciu wyspecjalizowanych
-transportów korzystających z internetowych plików cookie, wymienionych poniżej. Każda lekka warstwa
-dostawcy wybiera profil przeglądarki/systemu operacyjnego. Adapter korzysta z jednego modułu
-ładującego środowisko wreq i puli transportów w `open-sse/utils/tlsClient.ts`, indeksowanej według
-profilu, systemu operacyjnego i rozpoznanego proxy, podczas gdy każde żądanie używa
-`cookieMode: "ephemeral"`. Konta i żądania współdzielą zatem połączenia na poziomie transportu, ale
-nigdy nie współdzielą sesji wreq ani magazynu plików cookie.
+transportów opartych na plikach cookie przeglądarki wymienionych poniżej. Każdy cienki wrapper dostawcy wybiera profil przeglądarki/systemu operacyjnego. Adapter
+korzysta z pojedynczego modułu ładującego środowisko wykonawcze wreq oraz puli transportów w `open-sse/utils/tlsClient.ts`, indeksowanej według
+profilu + systemu operacyjnego + rozpoznanego serwera proxy, natomiast każde żądanie używa `cookieMode: "ephemeral"`. Konta i
+żądania współdzielą więc połączenia na poziomie transportu, ale nigdy sesję wreq ani magazyn plików cookie.
 
 | Dostawca   | Profil        | Emulowany system operacyjny | Zasada EOF strumienia                    |
 | ---------- | ------------- | --------------------------- | ---------------------------------------- |
 | Claude     | `chrome_146`  | Linux                       | uwzględniaj `[DONE]`                     |
-| Perplexity | `firefox_148` | macOS                       | uwzględniaj `event: end_of_stream`       |
+| Perplexity | `firefox_151` | macOS                       | uwzględniaj `event: end_of_stream`       |
 | Grok       | `chrome_146`  | Linux                       | wykluczaj `[DONE]`                       |
 | Notion     | `chrome_146`  | Windows                     | uwzględniaj `[DONE]`                     |
-| LMArena    | `chrome_146`  | Windows                     | bez znacznika; zamknij przy natywnym EOF |
+| LMArena    | `chrome_146`  | Windows                     | bez sentinela; zamknij przy natywnym EOF |
 
-- Strumieniowanie bezpośrednio przetwarza natywny `ReadableStream` odpowiedzi; nie jest tworzony
-  żaden plik tymczasowy ani proces pomocniczy.
-- Przed udostępnieniem strumienia sprawdzanych jest maksymalnie 256 początkowych bajtów. Dostawcy
-  SSE buforują błędy niebędące SSE; Grok/LMArena mapują wyzwania Cloudflare na `403`, a pośrednie
-  strony HTML na `502`.
-- Natywny limit czasu żądania pozostaje objęty bezwzględnym, twardym terminem JS. Zawieszenie
-  unieważnia i zamyka wyłącznie transport powiązany z danym profilem/systemem operacyjnym/proxy,
-  zanim kolejne żądanie utworzy go ponownie.
-- Priorytet rozpoznawania proxy to `proxyUrl` dla danego wywołania → kontekst konta/panelu dla
-  danego żądania → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (w tym warianty pisane małymi literami).
-  Błędy rozpoznawania powodują odmowę wykonania żądania zamiast wycieku bezpośredniego połączenia.
-  LMArena celowo przeprowadza rozpoznawanie względem `arena.ai`.
-- `byteResponse` zwraca adres URL `data:` z określonym typem zawartości, bez uszkodzenia kodowania
-  UTF-8.
-- Błędy to `TlsClientUnavailableError` (pakiet/dodatek jest niedostępny), `TlsClientHangError`
-  (przekroczono termin) oraz `WreqTransportCapacityError` (kod błędu pojemności współdzielonej sesji),
-  gdy wszystkie 128 ograniczonych miejsc dla kombinacji profil/system operacyjny/proxy jest
-  aktywnych lub w trakcie zamykania.
+- Przesyłanie strumieniowe korzysta bezpośrednio z natywnego `ReadableStream` odpowiedzi; nie jest
+  tworzony żaden plik tymczasowy ani proces pomocniczy.
+- Przed udostępnieniem strumienia sprawdzanych jest maksymalnie 256 początkowych bajtów. Dostawcy SSE buforują błędy
+  inne niż SSE; Grok/LMArena mapują wyzwania Cloudflare na `403`, a strony pośrednie HTML na `502`.
+- Natywny limit czasu żądania pozostaje objęty bezwzględnym, nieprzekraczalnym terminem JS. Zawieszenie unieważnia
+  i zamyka wyłącznie transport dla profilu/systemu operacyjnego/serwera proxy, którego dotyczy problem, zanim zostanie on odtworzony przez następne żądanie.
+- Priorytet rozpoznawania serwera proxy to `proxyUrl` dla danego wywołania → kontekst konta/panelu ograniczony do żądania →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (włącznie z wariantami pisanymi małymi literami). Błędy rozpoznawania kończą działanie
+  w trybie fail-closed, zamiast dopuszczać wyciek przez połączenie bezpośrednie. LMArena celowo przeprowadza rozpoznawanie względem `arena.ai`.
+- `byteResponse` zwraca adres URL `data:` z określonym typem zawartości, bez uszkodzenia kodowania UTF-8.
+- Błędy to `TlsClientUnavailableError` (pakiet/dodatek niedostępny), `TlsClientHangError`
+  (przekroczenie terminu) oraz `WreqTransportCapacityError` (współdzielony kod błędu pojemności sesji),
+  gdy wszystkie 128 ograniczonych slotów profilu/systemu operacyjnego/serwera proxy jest aktywnych lub w trakcie zamykania.
 
-Ogólna sesja `TlsClient` opisana powyżej pozostaje wyspecjalizowana w trwałym stanie plików cookie
-zapewnianym przez przeglądarkę. Obie ścieżki ponownie wykorzystują jeden buforowany moduł ładujący
-wreq i hak cyklu życia procesu; ich pule pozostają oddzielne, ponieważ okresy przechowywania plików
-cookie celowo się różnią.
+Ogólna sesja `TlsClient` opisana powyżej pozostaje wyspecjalizowana w trwałym stanie plików cookie obsługiwanym przez przeglądarkę. Obie ścieżki ponownie wykorzystują jeden buforowany moduł ładujący wreq oraz punkt zaczepienia cyklu życia procesu; ich pule pozostają
+oddzielne, ponieważ okresy istnienia plików cookie są celowo różne.
 
-Profile są obsługiwane przez przypięty pakiet, ale rzeczywista akceptacja przez WAF może zmieniać
-się niezależnie od lokalnych testów kontraktowych. Przed zadeklarowaniem zgodności z przeglądarką
-usługi nadrzędnej należy zweryfikować zmiany fingerprintu przy użyciu jawnie autoryzowanego,
-aktywnego konta.
+Profile są obsługiwane przez przypięty pakiet, ale rzeczywista akceptacja przez WAF może zmieniać się niezależnie
+od lokalnych testów kontraktowych. Przed stwierdzeniem zgodności z przeglądarką usługi nadrzędnej należy zweryfikować zmiany fingerprintu przy użyciu jawnie autoryzowanego konta produkcyjnego.
 
 ---
 
@@ -130,7 +117,7 @@ Stosowane do: bloków `system`, całej zawartości `messages[].content` oraz `to
 
 Dla zewnętrznych przekaźników Anthropic, które akceptują wyłącznie „rzeczywisty ruch Claude Code”:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - Domyślnie `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
@@ -254,7 +241,7 @@ Wszystkie endpointy MITM wymagają management auth (`requireCliToolsAuth`). Has�
 
 | Zmienna                  | Wartość domyślna                                                |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

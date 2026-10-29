@@ -16,53 +16,32 @@ npm run build:release          # Release build
 npm run lint                   # ESLint (0 errors expected; warnings are pre-existing)
 npm run typecheck:core         # TypeScript check (should be clean)
 npm run typecheck:noimplicit:core  # Strict check (no implicit any)
-npm run test:coverage          # Unit tests + coverage gate (60/60/60/60 — statements/lines/functions/branches)
+npm run test:coverage          # Unit tests + coverage gate (67.33 / 67.33 / 72.02 / 65.08 — statements/lines/functions/branches, enforced by the blocking ratchet in config/quality/quality-baseline.json; test:coverage itself hardcodes 60)
 npm run check                  # lint + test combined
 npm run check:cycles           # Detect circular dependencies (advisory — lists the SCCs)
 npm run check:cycles:ratchet   # Same scan, blocking above the quality-baseline ceiling
 npm run check:docs-all         # Run after changing documentation (includes fabricated-docs validation)
 ```
 
-### Running Tests
-
-Run the most focused test for changed code first:
-
-```bash
-# Single test file (Node.js native test runner — most tests)
-node --import tsx/esm --test tests/unit/your-file.test.ts
-
-# Vitest (MCP server, autoCombo, cache)
-npm run test:vitest
-
-# All suites
-npm run test:all
-```
-
-Other suites: `npm run test:e2e`, `npm run test:protocols:e2e`, `npm run test:ecosystem`.
-
-For full test matrix, see `CONTRIBUTING.md` → "Running Tests". For deep architecture, see the
-Repository map and Reference Documentation sections below.
+Running tests: see [Testing](#testing) below (run the most focused test for changed code first).
 
 ---
 
 ## Project at a Glance
 
-**OmniRoute** — unified AI proxy/router. One endpoint, 358 LLM providers, auto-fallback.
+**OmniRoute** — unified AI proxy/router. One endpoint, 377 LLM providers, auto-fallback.
 
-| Layer         | Location                | Purpose                                                                                                                                                                   |
-| ------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| API Routes    | `src/app/api/v1/`       | Next.js App Router — entry points                                                                                                                                         |
-| Handlers      | `open-sse/handlers/`    | Request processing (chat, embeddings, etc)                                                                                                                                |
-| Executors     | `open-sse/executors/`   | Provider-specific HTTP dispatch                                                                                                                                           |
-| Translators   | `open-sse/translator/`  | Format conversion (OpenAI↔Claude↔Gemini)                                                                                                                                  |
-| Transformer   | `open-sse/transformer/` | Responses API ↔ Chat Completions                                                                                                                                          |
-| Services      | `open-sse/services/`    | Combo routing, rate limits, caching, etc                                                                                                                                  |
-| Database      | `src/lib/db/`           | SQLite domain modules (193 migrations)                                                                                                                                    |
-| Domain/Policy | `src/domain/`           | Policy engine, cost rules, fallback logic                                                                                                                                 |
-| MCP Server    | `open-sse/mcp-server/`  | 110 tools (45 canonical + memory/skill/GitHub/pool/gamification/plugin/Notion/Obsidian/local-corpus/RTK modules), 3 transports (stdio / SSE / Streamable HTTP), 33 scopes |
-| A2A Server    | `src/lib/a2a/`          | JSON-RPC 2.0 agent protocol                                                                                                                                               |
-| Skills        | `src/lib/skills/`       | Extensible skill framework                                                                                                                                                |
-| Memory        | `src/lib/memory/`       | Persistent conversational memory                                                                                                                                          |
+- API Routes — `src/app/api/v1/` (Next.js App Router entry points)
+- Handlers — `open-sse/handlers/` (request processing: chat, embeddings, etc)
+- Executors — `open-sse/executors/` (provider-specific HTTP dispatch)
+- Translators — `open-sse/translator/` (format conversion OpenAI↔Claude↔Gemini)
+- Transformer — `open-sse/transformer/` (Responses API ↔ Chat Completions)
+- Services — `open-sse/services/` (combo routing, rate limits, caching, etc)
+- Database — `src/lib/db/` (SQLite domain modules, 213 migrations)
+- Domain/Policy — `src/domain/` (policy engine, cost rules, fallback logic)
+- MCP Server — `open-sse/mcp-server/` (110 tools: 45 canonical + memory/skill/GitHub/pool/gamification/plugin/Notion/Obsidian/local-corpus/RTK modules; 3 transports: stdio / SSE / Streamable HTTP; 33 scopes)
+- A2A Server — `src/lib/a2a/` (JSON-RPC 2.0 agent protocol)
+- Skills — `src/lib/skills/` (extensible skill framework); Memory — `src/lib/memory/` (persistent conversational memory)
 
 Monorepo: `src/` (Next.js 16 app), `open-sse/` (streaming engine workspace), `electron/` (desktop app), `tests/`, `bin/` (CLI entry point).
 
@@ -84,162 +63,23 @@ Client → /v1/chat/completions (Next.js route)
 
 API routes follow a consistent pattern: `Route → CORS preflight → Zod body validation → Optional auth (extractApiKey/isValidApiKey) → API key policy enforcement → Handler delegation (open-sse)`. No global Next.js middleware — interception is route-specific.
 
-**Combo routing** (`open-sse/services/combo.ts`): 19 public strategies (priority, weighted, fill-first, round-robin, p2c, random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp, context-optimized, cache-optimized, context-relay, fusion, pipeline). Each target calls `handleSingleModel()` which wraps `handleChatCore()` with per-target error handling and circuit breaker checks. The `fusion` strategy is the exception: it fans out to a panel of models in parallel, then a judge model synthesizes one final answer (`open-sse/services/fusion.ts`). See `docs/routing/AUTO-COMBO.md` for the 16-factor Auto-Combo scoring + the full strategy table and `docs/architecture/RESILIENCE_GUIDE.md` for the 3 resilience layers.
+**Combo routing** (`open-sse/services/combo.ts`): 20 public strategies (priority, weighted, fill-first, round-robin, p2c, random, least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted, strict-random, auto, lkgp, context-optimized, cache-optimized, context-relay, fusion, pipeline). Each target calls `handleSingleModel()` (wraps `handleChatCore()` with per-target error handling + circuit breaker checks); the `fusion` strategy instead fans out to a panel of models in parallel and a judge model synthesizes one final answer (`open-sse/services/fusion.ts`). 16-factor Auto-Combo scoring + full strategy table: `docs/routing/AUTO-COMBO.md`; the 3 resilience layers: `docs/architecture/RESILIENCE_GUIDE.md`.
 
 ---
 
 ## Resilience Runtime State
 
-OmniRoute has three related but distinct temporary-failure mechanisms. Keep their
-scope separate when debugging routing behavior. See the
-[3-layer resilience diagram](./docs/diagrams/exported/resilience-3layers.svg)
-(source: [docs/diagrams/resilience-3layers.mmd](./docs/diagrams/resilience-3layers.mmd))
-for an at-a-glance map.
+Three related but distinct temporary-failure mechanisms — keep their **scope** separate when debugging routing:
 
-### Provider Circuit Breaker
+- **Provider Circuit Breaker** — scope: whole provider. 4 states (CLOSED/DEGRADED/OPEN/HALF_OPEN); lazy recovery — `getStatus()`/`canExecute()` refresh an expired `OPEN`, no background timer.
+- **Connection Cooldown** — scope: one connection/account/key. Lazy `rateLimitedUntil` skip + exponential backoff; terminal states (`banned`/`expired`/`credits_exhausted`) are NOT cooldowns.
+- **Model Lockout** — scope: provider + connection + model. One bad model never disables the whole connection (`open-sse/services/accountFallback.ts`).
 
-**Scope**: whole provider, e.g. `glm`, `openai`, `anthropic`.
-
-**Purpose**: stop sending traffic to a provider that is repeatedly failing at the
-upstream/service level, so one unhealthy provider does not slow down every request.
-
-**Implementation**:
-
-- Core class: `src/shared/utils/circuitBreaker.ts`
-- Chat gate/execution wiring: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Runtime status API: `src/app/api/monitoring/health/route.ts`
-- Shared wrappers: `open-sse/services/accountFallback.ts`
-- Persisted state table: `domain_circuit_breakers`
-
-**States** (4 — `src/shared/utils/circuitBreaker.ts`):
-
-- `CLOSED`: normal traffic is allowed.
-- `DEGRADED`: early-warning band — failures crossed the degradation threshold but not the
-  breaker threshold yet; traffic still flows, dashboards show the warning.
-- `OPEN`: provider is temporarily blocked; callers get a provider-circuit-open response
-  or combo routing skips to another target.
-- `HALF_OPEN`: reset timeout has elapsed; allow a probe request. Success closes the
-  breaker, failure opens it again.
-
-**Defaults** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, consumed via
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` in `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). The whole-provider
-breaker runs on `circuitBreakerThreshold` / `circuitBreakerReset`:
-
-| Profile | degrades at | opens at (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
-| ------- | ----------: | -----------------------------------: | ----------------------------: |
-| OAuth   |         `5` |                                  `8` |                         `60s` |
-| API key |         `7` |                                 `12` |                         `30s` |
-| Local   |   (derived) |                                  `2` |                         `15s` |
-
-`PROVIDER_PROFILES` also defines `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) and `providerCooldownMs` (5/10/1 min): these power the
-**window gate of the opt-in global Provider Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, default
-off) — a provider-level entry in `open-sse/services/providerCooldownTracker.ts` only counts as
-cooling after `providerFailureThreshold` failures inside `providerFailureWindowMs`, and then
-cools for `providerCooldownMs`. They are NOT the live breaker's thresholds — do not tune them
-expecting breaker behavior. Every default is overridable through the
-`OMNIROUTE_PROVIDER_BREAKER_*` and `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; the
-runtime-accurate reference table lives in `docs/architecture/RESILIENCE_GUIDE.md`.
-
-Only provider-level failure statuses should trip the provider breaker:
-
-```ts
-(408, 500, 502, 503, 504);
-```
-
-Do not trip the whole-provider breaker for normal account/key/model errors like most
-`401`, `403`, or `429` cases. Those usually belong to connection cooldown or model
-lockout. A generic API-key provider `403` should be recoverable unless it is classified
-as a terminal provider/account error.
-
-The breaker uses lazy recovery, not a background timer. When `OPEN` expires, reads such
-as `getStatus()`, `canExecute()`, and `getRetryAfterMs()` refresh the state to
-`HALF_OPEN`, so dashboards and combo candidate builders do not keep excluding an
-expired provider forever.
-
-### Connection Cooldown
-
-**Scope**: one provider connection/account/key.
-
-**Purpose**: temporarily skip one bad key/account while allowing other connections for
-the same provider to continue serving requests.
-
-**Implementation**:
-
-- Write/update path: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Account selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
-- Cooldown calculation: `open-sse/services/accountFallback.ts::checkFallbackError()`
-- Settings: `src/lib/resilience/settings.ts`
-
-Important fields on provider connections:
-
-```ts
-rateLimitedUntil;
-testStatus: "unavailable";
-lastError;
-lastErrorType;
-errorCode;
-backoffLevel;
-```
-
-During account selection, a connection is skipped while:
-
-```ts
-new Date(rateLimitedUntil).getTime() > Date.now();
-```
-
-Cooldowns are also lazy: when `rateLimitedUntil` is in the past, the connection becomes
-eligible again. On successful use, `clearAccountError()` clears `testStatus`,
-`rateLimitedUntil`, error fields, and `backoffLevel`.
-
-Default connection cooldown behavior:
-
-- OAuth base cooldown: `5s`.
-- API-key base cooldown: `3s`.
-- API-key `429` should prefer upstream retry hints (`Retry-After`, reset headers, or
-  parseable reset text) when available.
-- Repeated recoverable failures use exponential backoff:
-
-```ts
-baseCooldownMs * 2 ** failureIndex;
-```
-
-The anti-thundering-herd guard prevents concurrent failures on the same connection from
-repeatedly extending the cooldown or double-incrementing `backoffLevel`.
-
-Terminal states are not cooldowns. `banned`, `expired` (which becomes terminal only after N bounded retries via `EXPIRED_RETRY_MAX`), and `credits_exhausted` are
-intended to stay unavailable until credentials/settings change or an operator resets
-them. Do not overwrite terminal states with transient cooldown state.
-
-### Model Lockout
-
-**Scope**: provider + connection + model.
-
-**Purpose**: avoid disabling a whole connection when only one model is unavailable or
-quota-limited for that connection.
-
-Examples:
-
-- Per-model quota providers returning `429`.
-- Local providers returning `404` for one missing model.
-- Provider-specific mode/model permission failures such as selected Grok modes.
-
-Model lockout lives in `open-sse/services/accountFallback.ts` and lets the same
-connection continue serving other models.
-
-### Debugging Guidance
-
-- If all keys for a provider are skipped, inspect both provider breaker state and each
-  connection's `rateLimitedUntil`/`testStatus`.
-- If a provider appears permanently excluded after the reset window, check whether code
-  is reading raw `state` instead of using `getStatus()`/`canExecute()`.
-- If one provider key fails but others should work, prefer connection cooldown over
-  provider breaker.
-- If only one model fails, prefer model lockout over connection cooldown.
-- If a state should self-recover, it should have a future timestamp/reset timeout and a
-  read path that refreshes expired state. Permanent statuses require manual credential
-  or config changes.
+Defaults: `open-sse/config/constants.ts` → `PROVIDER_PROFILES` (overridable via
+`OMNIROUTE_PROVIDER_BREAKER_*` / `OMNIROUTE_CIRCUIT_BREAKER_*`). Only provider-level statuses
+`408/500/502/503/504` trip the provider breaker — most `401`/`403`/`429` belong to connection
+cooldown or model lockout. Full agent reference (files, states, thresholds, debugging):
+[`docs/architecture/RESILIENCE_GUIDE.md` → "Runtime state — agent quick reference"](docs/architecture/RESILIENCE_GUIDE.md#runtime-state--agent-quick-reference).
 
 ---
 
@@ -247,18 +87,17 @@ connection continue serving other models.
 
 Read the nearest `AGENTS.md` and the linked deep-dive before making a non-trivial change.
 
-| Area                               | Location                                                | Start here                                                                                                                                       |
-| ---------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| API routes                         | `src/app/api/v1/`                                       | [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)                                                                         |
-| Streaming request handling         | `open-sse/handlers/`                                    | [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)                                                                         |
-| Provider execution and translation | `open-sse/executors/`, `open-sse/translator/`           | [`docs/architecture/CODEBASE_DOCUMENTATION.md`](docs/architecture/CODEBASE_DOCUMENTATION.md)                                                     |
-| Routing and resilience             | `open-sse/services/`                                    | [`open-sse/services/AGENTS.md`](open-sse/services/AGENTS.md), [`docs/routing/AUTO-COMBO.md`](docs/routing/AUTO-COMBO.md)                         |
-| Database and migrations            | `src/lib/db/`, `src/lib/db/migrations/`                 | [`src/lib/db/AGENTS.md`](src/lib/db/AGENTS.md)                                                                                                   |
-| Domain policy                      | `src/domain/`                                           | [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)                                                                         |
-| MCP and A2A                        | `open-sse/mcp-server/`, `src/lib/a2a/`                  | [`docs/frameworks/MCP-SERVER.md`](docs/frameworks/MCP-SERVER.md), [`docs/frameworks/A2A-SERVER.md`](docs/frameworks/A2A-SERVER.md)               |
-| Agent features                     | `src/lib/{acp,memory,skills,cloudAgent}/`               | [`docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md), [`docs/frameworks/SKILLS.md`](docs/frameworks/SKILLS.md) |
-| Safety and governance              | `src/lib/{guardrails,compliance}/`, `src/server/authz/` | [`docs/security/GUARDRAILS.md`](docs/security/GUARDRAILS.md), [`docs/architecture/AUTHZ_GUIDE.md`](docs/architecture/AUTHZ_GUIDE.md)             |
-| Operations                         | `src/mitm/`, tunnel modules, `electron/`                | [`docs/ops/TUNNELS_GUIDE.md`](docs/ops/TUNNELS_GUIDE.md), [`docs/guides/ELECTRON_GUIDE.md`](docs/guides/ELECTRON_GUIDE.md)                       |
+- API routes — `src/app/api/v1/` → `docs/architecture/ARCHITECTURE.md`
+- Streaming request handling — `open-sse/handlers/` → `docs/architecture/ARCHITECTURE.md`
+- Provider execution and translation — `open-sse/executors/`, `open-sse/translator/` → `docs/architecture/CODEBASE_DOCUMENTATION.md`
+- Routing and resilience — `open-sse/services/` → `open-sse/services/AGENTS.md`, `docs/routing/AUTO-COMBO.md`
+- Database and migrations — `src/lib/db/`, `src/lib/db/migrations/` → `src/lib/db/AGENTS.md`
+- Domain policy — `src/domain/` → `docs/architecture/ARCHITECTURE.md`
+- MCP and A2A — `open-sse/mcp-server/`, `src/lib/a2a/` → `docs/frameworks/MCP-SERVER.md`, `docs/frameworks/A2A-SERVER.md`
+- Agent features — `src/lib/{acp,memory,skills,cloudAgent}/` → `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`, `docs/frameworks/SKILLS.md`
+- Safety and governance — `src/lib/{guardrails,compliance}/`, `src/server/authz/` → `docs/security/GUARDRAILS.md`, `docs/architecture/AUTHZ_GUIDE.md`
+- Operations — `src/mitm/`, tunnel modules, `electron/` → `docs/ops/TUNNELS_GUIDE.md`, `docs/guides/ELECTRON_GUIDE.md`
+- UI kit — `packages/ui-kit/` (vendored Keak CI UI Kit; adapters in `src/shared/components/`) → `docs/architecture/DESIGN_SYSTEM.md`
 
 ---
 
@@ -342,76 +181,17 @@ Documentation must describe verified behavior, not plausible behavior.
 
 ## Common Modification Scenarios
 
-### Adding a New Provider
+Full step-by-step recipes: [`docs/architecture/MODIFICATION_SCENARIOS.md`](docs/architecture/MODIFICATION_SCENARIOS.md). Quick index:
 
-0. Check `docs/reference/REMOVED_PROVIDERS.md` first — providers removed at their operator's request must never be reintroduced (guarded by `tests/unit/removed-providers-blocklist.test.ts`)
-1. Register in `src/shared/constants/providers.ts` (Zod-validated at load)
-2. Add executor in `open-sse/executors/` if custom logic needed (extend `BaseExecutor`)
-3. Add translator in `open-sse/translator/` if non-OpenAI format
-4. Add OAuth config in `src/lib/oauth/constants/oauth.ts` if OAuth-based — if the upstream CLI ships a public client_id/secret, embed via `resolvePublicCred()` (see `docs/security/PUBLIC_CREDS.md`), **never** as a literal
-5. Register models in `open-sse/config/providerRegistry.ts`
-6. Write tests in `tests/unit/` (include the publicCreds shape assertion if you added a new embedded default)
-
-### Adding a New API Route
-
-1. Create directory under `src/app/api/v1/your-route/`
-2. Create `route.ts` with `GET`/`POST` handlers
-3. Follow pattern: CORS → Zod body validation → optional auth → handler delegation
-4. Handler goes in `open-sse/handlers/` (import from there, not inline)
-5. Error responses use `buildErrorBody()` / `errorResponse()` from `open-sse/utils/error.ts` (auto-sanitized — never put `err.stack` or `err.message` raw in the body). See `docs/security/ERROR_SANITIZATION.md`.
-6. Add tests — including at least one assertion that error responses do not leak stack traces (`!body.error.message.includes("at /")`)
-
-### Adding a New DB Module
-
-1. Create `src/lib/db/yourModule.ts` — import `getDbInstance` from `./core.ts`
-2. Export CRUD functions for your domain table(s)
-3. Add migration in `src/lib/db/migrations/` if new tables needed
-4. Write tests
-
-### Adding a New MCP Tool
-
-1. Add tool definition in `open-sse/mcp-server/tools/` with Zod input schema + async handler
-2. Register in tool set (wired by `createMcpServer()`)
-3. Assign to appropriate scope(s)
-4. Write tests (tool invocation logged to the `mcp_tool_audit` table)
-
-### Adding a New A2A Skill
-
-1. Create skill in `src/lib/a2a/skills/` (6 already exist: smart-routing, quota-management, provider-discovery, cost-analysis, health-report, list-capabilities)
-2. Skill receives task context (messages, metadata) → returns structured result
-3. Register in `A2A_SKILL_HANDLERS` in `src/lib/a2a/taskExecution.ts`
-4. Expose in `src/app/.well-known/agent.json/route.ts` (Agent Card)
-5. Write tests in `tests/unit/`
-6. Document in `docs/frameworks/A2A-SERVER.md` skill table
-
-### Adding a New Cloud Agent
-
-1. Create agent class in `src/lib/cloudAgent/agents/` extending `CloudAgentBase` (4 already exist: codex-cloud, devin, jules, cursor-cloud)
-2. Implement `createTask`, `getStatus`, `approvePlan`, `sendMessage`, `listSources`
-3. Register in `src/lib/cloudAgent/registry.ts`
-4. Add OAuth/credentials handling if needed (`src/lib/oauth/providers/`)
-5. Tests + document in `docs/frameworks/CLOUD_AGENT.md`
-
-### Adding a New Embedded Service
-
-1. Create installer in `src/lib/services/installers/{name}.ts` modeled on `ninerouter.ts` (use `runNpm` from `installers/utils.ts` — no shell interpolation, hard rule #13).
-2. Register the service in `src/lib/services/bootstrap.ts` (add to `SERVICES[]` array and extend `buildSpawnArgsFactory()`).
-3. Add a DB seed row for the new service in `src/lib/db/migrations/` (`version_manager` table, `status='not_installed'`, `auto_start=0`).
-4. Create 8 API endpoints under `src/app/api/services/{name}/` (`_lib.ts`, `install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`). All delegate errors through `createErrorResponse()`. The shared `logs` endpoint is already wired via `[name]/logs/route.ts`.
-5. Verify `/api/services/` is in `LOCAL_ONLY_API_PREFIXES` in `src/server/authz/routeGuard.ts`; add a test asserting `isLocalOnlyPath()` returns `true` for the new prefix if you add one (hard rule #17).
-6. Add a UI tab in `src/app/(dashboard)/dashboard/providers/services/tabs/` reusing `ServiceStatusCard`, `ServiceLifecycleButtons`, `ServiceLogsPanel`.
-7. Document in `docs/frameworks/EMBEDDED-SERVICES.md` (update §1 service table + §4 API reference) and `docs/openapi.yaml`.
-8. Write tests: unit (`tests/unit/services/`), integration (`tests/integration/services/`, gated by `RUN_SERVICES_INT=1`), and update `docs/ops/RELEASE_CHECKLIST.md` smoke section.
-
-### Adding a New Guardrail / Eval / Skill / Webhook event
-
-- Guardrail: `src/lib/guardrails/` → docs: `docs/security/GUARDRAILS.md`
-- Eval suite: `src/lib/evals/` → docs: `docs/frameworks/EVALS.md`
-- Skill (sandbox): `src/lib/skills/` → docs: `docs/frameworks/SKILLS.md`
-- Webhook event: `src/lib/webhookDispatcher.ts` → docs: `docs/frameworks/WEBHOOKS.md`
-- Log-export destination: add `src/lib/logExport/destinations/<name>.ts` + one line in
-  `src/lib/logExport/registry.ts` → docs: `docs/frameworks/LOG-EXPORT.md`. The runner, REST layer
-  and dashboard form all read the registry, so nothing else changes.
+- **New provider**: check `docs/reference/REMOVED_PROVIDERS.md` first (blocklist-guarded — never reintroduce), then `src/shared/constants/providers.ts` → executor → translator → OAuth config (`resolvePublicCred()`, never a literal) → `open-sse/config/providerRegistry.ts` → tests.
+- **Dual auth (multiple API keys) for a provider**: add its ID to `DUAL_AUTH_PROVIDER_IDS` (`src/shared/constants/providers.ts`) + update its `authHint`; each key becomes its own connection row, rotated by `getProviderCredentials()`.
+- **New API route**: `src/app/api/v1/<route>/route.ts` — CORS → Zod → optional auth → handler in `open-sse/handlers/`; errors via `buildErrorBody()`; tests assert no stack-trace leak.
+- **New DB module**: `src/lib/db/<module>.ts` (`getDbInstance`) → migration if new tables → tests.
+- **New MCP tool**: `open-sse/mcp-server/tools/` (Zod schema) → register → scope → tests.
+- **New A2A skill**: `src/lib/a2a/skills/` → `A2A_SKILL_HANDLERS` → Agent Card → tests + doc table.
+- **New cloud agent**: `src/lib/cloudAgent/agents/` (extends `CloudAgentBase`) → `registry.ts` → OAuth → tests + doc.
+- **New embedded service**: installer → `bootstrap.ts` → DB seed → 8 API endpoints + `isLocalOnlyPath()` guard → UI tab → docs + OpenAPI → tests.
+- **Guardrail / eval / skill / webhook / log-export destination**: see the detail doc.
 
 ---
 
@@ -419,67 +199,38 @@ Documentation must describe verified behavior, not plausible behavior.
 
 For any non-trivial change, read the matching deep-dive first:
 
-| Area                                          | Doc                                                     |
-| --------------------------------------------- | ------------------------------------------------------- |
-| Repo navigation                               | `docs/architecture/REPOSITORY_MAP.md`                   |
-| Architecture                                  | `docs/architecture/ARCHITECTURE.md`                     |
-| Engineering reference                         | `docs/architecture/CODEBASE_DOCUMENTATION.md`           |
-| Auto-Combo (16-factor scoring, 19 strategies) | `docs/routing/AUTO-COMBO.md`                            |
-| Resilience (3 mechanisms)                     | `docs/architecture/RESILIENCE_GUIDE.md`                 |
-| Reasoning replay                              | `docs/routing/REASONING_REPLAY.md`                      |
-| Skills framework                              | `docs/frameworks/SKILLS.md`                             |
-| Radar (free-model catalog overlay)            | `docs/frameworks/RADAR.md`                              |
-| Memory system (FTS5 + Qdrant)                 | `docs/frameworks/MEMORY.md`                             |
-| Cloud agents                                  | `docs/frameworks/CLOUD_AGENT.md`                        |
-| Guardrails (PII / injection / vision)         | `docs/security/GUARDRAILS.md`                           |
-| Public upstream credentials (Gemini/etc.)     | `docs/security/PUBLIC_CREDS.md`                         |
-| Error message sanitization                    | `docs/security/ERROR_SANITIZATION.md`                   |
-| Evals                                         | `docs/frameworks/EVALS.md`                              |
-| Compliance / audit                            | `docs/security/COMPLIANCE.md`                           |
-| Webhooks                                      | `docs/frameworks/WEBHOOKS.md`                           |
-| Log export (call logs → BigQuery/…)           | `docs/frameworks/LOG-EXPORT.md`                         |
-| Authorization pipeline                        | `docs/architecture/AUTHZ_GUIDE.md`                      |
-| Stealth (TLS / fingerprint)                   | `docs/security/STEALTH_GUIDE.md`                        |
-| Agent protocols (A2A / ACP / Cloud)           | `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`              |
-| MCP server                                    | `docs/frameworks/MCP-SERVER.md`                         |
-| A2A server                                    | `docs/frameworks/A2A-SERVER.md`                         |
-| API reference + OpenAPI                       | `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` |
-| Provider catalog (auto-generated)             | `docs/reference/PROVIDER_REFERENCE.md`                  |
-| Tunnels                                       | `docs/ops/TUNNELS_GUIDE.md`                             |
-| Electron desktop app                          | `docs/guides/ELECTRON_GUIDE.md`                         |
-| VS Code Copilot Chat (OmniCopilot extension)  | `docs/guides/VSCODE-COPILOT.md`                         |
-| Release flow                                  | `docs/ops/RELEASE_CHECKLIST.md`                         |
-| Embedded services                             | `docs/frameworks/EMBEDDED-SERVICES.md`                  |
-| Quality gates (~90 scripts, allowlist policy) | `docs/architecture/QUALITY_GATES.md`                    |
+- Repo navigation — `docs/architecture/REPOSITORY_MAP.md` · Architecture — `docs/architecture/ARCHITECTURE.md` · Engineering reference — `docs/architecture/CODEBASE_DOCUMENTATION.md`
+- Auto-Combo (16-factor scoring, 20 strategies) — `docs/routing/AUTO-COMBO.md` · Reasoning replay — `docs/routing/REASONING_REPLAY.md`
+- Resilience (3 mechanisms + debugging) — `docs/architecture/RESILIENCE_GUIDE.md`
+- Modification recipes — `docs/architecture/MODIFICATION_SCENARIOS.md`
+- Skills framework — `docs/frameworks/SKILLS.md` · Radar (free-model catalog overlay) — `docs/frameworks/RADAR.md` · Memory system (FTS5 + Qdrant) — `docs/frameworks/MEMORY.md`
+- Cloud agents — `docs/frameworks/CLOUD_AGENT.md` · Agent protocols (A2A / ACP / Cloud) — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`
+- Guardrails (PII / injection / vision) — `docs/security/GUARDRAILS.md` · Public upstream credentials (Gemini/etc.) — `docs/security/PUBLIC_CREDS.md` · Error message sanitization — `docs/security/ERROR_SANITIZATION.md` · Compliance / audit — `docs/security/COMPLIANCE.md` · Stealth (TLS / fingerprint) — `docs/security/STEALTH_GUIDE.md`
+- Evals — `docs/frameworks/EVALS.md` · Webhooks — `docs/frameworks/WEBHOOKS.md` · Log export (call logs → BigQuery/…) — `docs/frameworks/LOG-EXPORT.md`
+- Authorization pipeline — `docs/architecture/AUTHZ_GUIDE.md`
+- MCP server — `docs/frameworks/MCP-SERVER.md` · A2A server — `docs/frameworks/A2A-SERVER.md`
+- API reference + OpenAPI — `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` · Provider catalog (auto-generated) — `docs/reference/PROVIDER_REFERENCE.md`
+- Tunnels — `docs/ops/TUNNELS_GUIDE.md` · Release flow — `docs/ops/RELEASE_CHECKLIST.md` · Worktree protocol — `docs/ops/WORKTREE_ISOLATION.md` · Hard Rules detail — `docs/ops/HARD_RULES_DETAIL.md` · Build warnings + Bun troubleshooting — `docs/ops/BUILD_WARNINGS.md`
+- Electron desktop app — `docs/guides/ELECTRON_GUIDE.md` · VS Code Copilot Chat (OmniCopilot extension) — `docs/guides/VSCODE-COPILOT.md`
+- Embedded services — `docs/frameworks/EMBEDDED-SERVICES.md` · Quality gates (~90 scripts, allowlist policy) — `docs/architecture/QUALITY_GATES.md`
 
 ---
 
 ## Testing
 
-| What                    | Command                                                                       |
-| ----------------------- | ----------------------------------------------------------------------------- |
-| Unit tests              | `npm run test:unit`                                                           |
-| Single file             | `node --import tsx/esm --test tests/unit/your-file.test.ts`                   |
-| Vitest (MCP, autoCombo) | `npm run test:vitest`                                                         |
-| E2E (Playwright)        | `npm run test:e2e`                                                            |
-| Protocol E2E (MCP+A2A)  | `npm run test:protocols:e2e` (CI job `test-protocols-e2e`, advisory — #10049) |
-| Ecosystem               | `npm run test:ecosystem` (CI job `test-ecosystem`, blocking)                  |
-| Coverage gate           | `npm run test:coverage` (60/60/60/60 — statements/lines/functions/branches)   |
-| Coverage report         | `npm run coverage:report`                                                     |
+- Unit tests — `npm run test:unit`; single file (Node native test runner — most tests) — `node --import tsx/esm --test tests/unit/your-file.test.ts`
+- Vitest (MCP server, autoCombo, cache) — `npm run test:vitest`; all suites — `npm run test:all`
+- E2E (Playwright) — `npm run test:e2e`; Protocol E2E (MCP+A2A) — `npm run test:protocols:e2e` (CI job `test-protocols-e2e`, advisory — #10049); Ecosystem — `npm run test:ecosystem` (CI job `test-ecosystem`, blocking)
+- Coverage gate — `npm run test:coverage` (67.33 / 67.33 / 72.02 / 65.08 — statements/lines/functions/branches, enforced by the blocking ratchet in config/quality/quality-baseline.json; test:coverage itself hardcodes 60); report — `npm run coverage:report`
+- Full test matrix: `CONTRIBUTING.md` → "Running Tests"
 
 **PR rule**: If you change production code in `src/`, `open-sse/`, `electron/`, or `bin/`, you must include or update tests in the same PR.
 
 **Test layer preference**: unit first → integration (multi-module or DB state) → e2e (UI/workflow only). Encode bug reproductions as automated tests before or alongside the fix.
 
-**Both test runners must pass**: `npm run test:unit` (Node native — most tests) AND `npm run test:vitest` (MCP server, autoCombo, cache) cover **non-overlapping files**. Both are wired in CI (jobs `test-unit` and `test-vitest`) and must be green before merging. A PR where only one suite passes may silently ship broken MCP tools or routing regressions.
+**Both test runners must pass**: `npm run test:unit` and `npm run test:vitest` cover **non-overlapping files**; both are CI jobs (`test-unit`, `test-vitest`) and must be green before merging — one green suite may silently ship broken MCP tools or routing regressions.
 
-**Bug fix / issue triage protocol (Hard Rule #18)**: Every fix for a reported issue must be validated by one of the following — no exceptions:
-
-1. **TDD (preferred)** — write a failing test reproducing the bug → fix it → confirm the test passes. The test becomes the permanent regression guard. Touch only the files the test proves need changing; nothing more.
-2. **Real-environment test (when TDD is not possible)** — deploy to the production VPS (`root@192.168.0.15`) and run a documented live test. Record the exact command + result in the PR description. Applies to: OAuth upstream flows, Cloudflare/WS upstream behavior, UI-only regressions, hardware-dependent behavior.
-3. "It worked locally without a test" does not count. A fix without a test or a VPS validation record is not a fix — it is a guess.
-
-Why this matters: fixing bug A while opening bug B is worse than not fixing at all. The TDD/VPS gate enforces surgical scope — you touch only what the failing test proves is broken. Examples where this paid off: #3090 (claude-web 403), #3113 (WS HTTP fallback), #3052 (heap-guard auto-calibration).
+**Bug fix / issue triage protocol (Hard Rule #18)**: failing-then-passing test (TDD, preferred) OR a documented live test on the production VPS (`root@192.168.0.15`) recorded in the PR; touch only what the failing test proves broken. Decision tree: `docs/ops/HARD_RULES_DETAIL.md` → Rule 18.
 
 **Copilot coverage policy**: When a PR changes production code and coverage is below 60% (statements/lines/functions/branches), do not just report — add or update tests, rerun the coverage gate, then ask for confirmation. Include commands run, changed test files, and final coverage result in the PR report.
 
@@ -507,14 +258,7 @@ Why this matters: fixing bug A while opening bug B is worse than not fixing at a
 
 ## Planning & Research Artifacts
 
-`_tasks/` is a **separate, isolated git repository** that is gitignored by the main
-repo (`.gitignore` → `_tasks/`). It is the canonical home for working artifacts —
-plans, specs/designs, research, hand-offs — so they stay **versioned in their own
-repo** instead of polluting the main OmniRoute tree.
-
-**Hard rule — never write planning / research output under `docs/` or the repo root.**
-Whenever any plan/spec/research generator runs in this project (superpowers or otherwise),
-save to `_tasks/` using the filename convention:
+`_tasks/` is a **separate, isolated git repository** that is gitignored by the main repo (`.gitignore` → `_tasks/`) — the canonical home for working artifacts (plans, specs/designs, research, hand-offs), versioned in their own repo instead of polluting the main OmniRoute tree. **Hard rule — never write planning / research output under `docs/` or the repo root.** Whenever any plan/spec/research generator runs in this project (superpowers or otherwise), save to `_tasks/` using the filename convention:
 
 | Artifact       | Save here                                                     |
 | -------------- | ------------------------------------------------------------- |
@@ -544,129 +288,60 @@ git push -u origin feat/your-feature
 
 - **pre-commit**: lint-staged + `check-docs-sync` + `check:any-budget:t11` + `check:tracked-artifacts`
 - **commit-msg**: `check:ai-attribution` — rejects AI/bot `Co-Authored-By` trailers and AI-generation footers in the message (Hard Rule #16; human co-authors allowed; also in the `quality.yml` fast-gates loop (PR→`release/**`) and a PR-only `ci.yml` lint step (PR→`main`) — #14436)
-- **pre-push**: intentionally light (PATH/npm sanity only). `any-budget` + `tracked-artifacts`
-  already run on pre-commit; re-running them on every push was pure double-pay. CI still
-  enforces both. (Was Fase 6A.12 full pre-push gate; folded into pre-commit in #6716.)
+- **pre-push**: intentionally light (PATH/npm sanity only) — `any-budget` + `tracked-artifacts` already run on pre-commit and CI still enforces both; re-running them per push was pure double-pay (was Fase 6A.12 full pre-push gate; folded into pre-commit in #6716).
 
 ### Worktree isolation (MANDATORY for every development task)
 
-Multiple sessions/agents work this repo in parallel. The main checkout is **shared**, so a
-`git checkout`/branch switch in it silently discards another session's uncommitted work and
-yanks the branch out from under whatever else is running (incidents: 2026-06-05, 2026-06-13).
+Hard Rule #19: one worktree + dedicated branch per task, base branch confirmed with the
+operator first (usually the active `release/vX.Y.Z`). Non-negotiables:
 
-**Rule: never develop on the shared main checkout. Every task gets its own git worktree on its
-own dedicated branch, and you MUST confirm the base branch with the operator before creating it.**
+- 🔴 Worktrees live ONLY under `.claude/worktrees/` — anywhere else escapes the tsconfig /
+  `.dockerignore` build-scope excludes (tsconfig `include: **/*` globs ~70× the codebase →
+  `next build` OOM, incident 2026-06-25) and scatters worktrees.
+- Reuse the main checkout's node_modules via **hard links** (`cp -al`), **never `ln -s`** —
+  Turbopack FATALs on a symlink resolving outside the project root while typecheck/lint/tests
+  keep passing (incident 2026-07-31, #9043).
+- Copy the gitignored `.husky/_` too (`cp -a <main>/.husky/_ .husky/_`) — without it **no
+  pre-commit gate runs and nothing says so** (59 commits slipped past
+  `scripts/check/check-git-identity.sh`, 2026-08-29 → 09-02). Prefer
+  `scripts/dev/new-worktree.sh <branch> [base]`, which does all of this and verifies the hook.
+- Work, commit, push, open the PR — all from inside the worktree.
+- Tear down only your own worktree + branch, **by name** (never `fix/*`/`feat/*` wildcards —
+  other sessions keep their own). Leave any worktree you didn't create untouched.
+- End every session with the main checkout back on the branch it started on.
 
-1. **Ask first — which base branch?** Before creating anything, ask the operator (unless they
-   already told you) from which branch the new worktree/branch should be cut. Do NOT assume
-   `main` or "whatever I'm on" — the answer is usually the active `release/vX.Y.Z`, but it can
-   be another feature/release branch. Get the base explicitly.
-2. **Create an isolated worktree + branch off that base** (never reuse the main checkout).
-   **🔴 MANDATORY PATH: every worktree lives under `.claude/worktrees/` — and nowhere else.**
-   This is the single canonical location. It is gitignored AND in the `tsconfig.json` /
-   `.dockerignore` excludes, so worktrees never leak into the build scope. **Never** use
-   `.worktrees/`, repo-root, or any other path — a worktree outside `.claude/worktrees/`
-   (a) escapes the build-scope excludes and poisons `next build` (the `tsconfig`
-   `include: **/*` globs ~70× the codebase → OOM; incident 2026-06-25) and (b) scatters
-   worktrees across two dirs.
-
-   ```bash
-   BASE_BRANCH="release/vX.Y.Z"          # ← the branch the operator confirmed in step 1
-   TASK="feat/your-feature"               # feat/ fix/ refactor/ docs/ test/ chore/
-   git fetch origin "$BASE_BRANCH"
-   git worktree add ".claude/worktrees/${TASK##*/}" -b "$TASK" "origin/$BASE_BRANCH"
-   cd ".claude/worktrees/${TASK##*/}"
-   # Reuse the main checkout's node_modules to skip a per-worktree npm install.
-   # HARD LINKS (`cp -al`), never a symlink: ~5s for the whole tree and near-zero extra
-   # disk (the inodes are shared), and unlike a symlink it does not break the dev server.
-   cp -al "$(git -C <main_checkout> rev-parse --show-toplevel)/node_modules" node_modules
-   # `.husky/_` is gitignored, so a fresh worktree does NOT have it and
-   # `core.hooksPath=.husky/_` then points at a directory that does not exist —
-   # every pre-commit gate goes silently mute. Copy it too.
-   cp -a "$(git -C <main_checkout> rev-parse --show-toplevel)/.husky/_" .husky/_
-   ```
-
-   `scripts/dev/new-worktree.sh <branch> [base]` does all of the above (canonical path,
-   hard-linked `node_modules`, `.husky/_`) and then **verifies** the hook is actually
-   executable, so prefer it over running the steps by hand.
-
-   **Never `ln -s` node_modules.** Turbopack rejects a symlink that resolves outside the
-   project root, so `npm run dev` dies with a FATAL panic (`Symlink [project]/node_modules
-is invalid, it points out of the filesystem root`) while typecheck, lint and the test
-   runners all keep passing — the error names "filesystem root", not the worktree, so it
-   reads like a Next/build bug and costs real time to trace (incident 2026-07-31, #9043).
-
-   **A worktree without `.husky/_` runs NO pre-commit gate — and says nothing.** `git`
-   resolves `core.hooksPath` relative to the worktree top; when the directory is missing it
-   simply finds no hook and commits. Nothing is printed, the commit succeeds, and the
-   identity/lint/docs gates never ran. This is how 59 commits carrying a stale identity
-   override (name of a contributor + the maintainer's e-mail) got past
-   `scripts/check/check-git-identity.sh` between 2026-08-29 and 09-02 — they were all made in
-   `cp -al` worktrees. Verify with `ls .husky/_/pre-commit` inside a new worktree, or just use
-   `scripts/dev/new-worktree.sh`, which fails loudly when the hook is not executable.
-
-3. **Work, commit, push, open the PR — all from inside the worktree.** Never `git checkout` a
-   different branch inside a worktree another session might share.
-4. **Tear down only your own** worktree + branch when done, from the main checkout:
-   `git worktree remove .claude/worktrees/<dir>` then `git branch -D <task>`. Never blanket-delete
-   `fix/*`/`feat/*` — other sessions keep their own; delete only the branches you created, by name.
-5. **Never touch another session's worktree, branch, or uncommitted changes.** If `git worktree
-list` shows worktrees you didn't create, leave them alone. End every session with the main
-   checkout back on the branch it started on (the active `release/vX.Y.Z`, never `main`).
+Full protocol with commands and incident history:
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md).
 
 ### Base-green check (PRs must not be born red)
 
 Before cutting a branch, merging the base into a PR branch, mass-retargeting PRs, or opening a
-PR: check whether the base tip is green. The `Release-Green (continuous)` workflow
-(`.github/workflows/nightly-release-green.yml`) publishes the verdict in a single deduplicated
-issue titled `🔴 Release branch not green: <branch>` (label `base-red`). One call replaces any
-local suite run for this purpose:
-
-```bash
-gh issue list --repo diegosouzapw/OmniRoute --state open \
-  --search "Release branch not green: <base> in:title"
-```
-
-If the base is red: never treat the inherited failures as your branch's defect; never "fix" them
-inside your feature branch (a base-red fix is its own freeze-gated `fix/release-vX.Y.Z-basereds`
-PR); and if you must open a PR anyway, add `⚠️ base-red inherited: #<issue>` to the PR body so
-reviewers and CI babysitters do not chase ghosts.
+PR, check the base tip's `🔴 Release branch not green: <branch>` issue (label `base-red`):
+`gh issue list --repo cheaper-inference/OmniRoute --state open --search "Release branch not green: <base> in:title"`.
+If red: never treat or "fix" the inherited failures in your branch (a base-red fix is its own
+freeze-gated `fix/release-vX.Y.Z-basereds` PR); a PR opened anyway carries
+`⚠️ base-red inherited: #<issue>` in its body. Full procedure: `docs/ops/WORKTREE_ISOLATION.md`.
 
 ### Sync-back landings are fast-forward, never squash
 
-A `main → release/vX+1` sync-back (Phase 5 of `/generate-release`, or any later "bring main's
-post-release commits over" PR) must reach the release branch as the merge commit it already is:
-`git merge-base --is-ancestor origin/release/vX+1 <head>` then
-`git push origin <head>:refs/heads/release/vX+1` (GitHub marks the PR merged). Squash-merging it
-drops `main` from the release branch's ancestry and the next sync-back re-conflicts on every file
-main touched (551 conflicts on the v3.8.50 → v3.8.51 sync before the two-step merge). After
-landing, `git merge-base --is-ancestor origin/main origin/release/vX+1` must be true — and check
-that `config/quality/eslint-suppressions.json` / `quality-baseline.json` carried main's freezes
-(they merge as "ours" silently). Details: `.agents/skills/generate-release/phases/phase-5-next-cycle.md`.
+A `main → release/vX+1` sync-back lands as the merge commit it already is
+(`git push origin <head>:refs/heads/release/vX+1`), never squashed — a squash drops `main` from
+the release ancestry and the next sync-back re-conflicts on every file (551 on v3.8.50 → v3.8.51).
+After landing, `git merge-base --is-ancestor origin/main origin/release/vX+1` must be true.
+Steps + baseline-freeze check: `docs/ops/WORKTREE_ISOLATION.md` → "Sync-back landings".
 
 ---
 
 ## Upstream contributions
 
-This checkout is a fork of `diegosouzapw/OmniRoute`. Keep fork-only deployment and personal
-automation changes out of upstream PRs.
-
-Start upstream work from the active upstream default branch, not `main`:
-
-```bash
-git fetch upstream
-git switch -c <branch-name> upstream/<default-branch>
-```
-
-Target that same release branch in the pull request. Stage only the intended files, run the
-focused checks, and use a Conventional Commit message (for example, `docs: slim AGENTS.md`).
+This checkout is the canonical `cheaper-inference/OmniRoute` repository (formerly `diegosouzapw/OmniRoute`; the old name redirects). Keep fork-only deployment and personal automation changes out of upstream PRs. Start upstream work from the active upstream default branch, not `main` (`git fetch upstream && git switch -c <branch-name> upstream/<default-branch>`), target that same release branch in the PR, stage only the intended files, run the focused checks, and use a Conventional Commit message (for example, `docs: slim AGENTS.md`).
 
 ---
 
 ## Environment
 
-- **Runtime**: Node.js ≥22.22.2 <23 || ≥24.0.0 <27, ES Modules. This is the **only supported** runtime for the published `omniroute` CLI, the server, and the test suites (`node:test` + vitest) — `engines.node` is authoritative and end users never need Bun. A **best-effort `bun:sqlite` compatibility path** exists so a global Bun install (`bun install -g omniroute`) can start without `better-sqlite3` (driver adapter + Bun-aware process spawning); it is **not** a supported runtime — no support guarantees — and every Bun-specific runtime change MUST preserve the Node driver/fallback chain and ship a Bun test (`test:bun:db`) or an explicit reason why the path is Node-only.
-- **Bun (build/dev script runner + compatibility smoke only)**: Bun `1.4.2` is pinned as an **exact devDependency** (provisioned through the existing `npm ci` via the lockfile's `@oven/bun-*` platform binaries — no `setup-bun`/ad-hoc install). It is used **only** to execute a small, allow-listed set of TypeScript **gate/generator scripts** (replacing `node --import tsx` for startup speed): the CI checks `check:provider-consistency`, `check:compression-budget`, `check:known-symbols`, and the non-CI `gen:provider-reference`, `bench:compression` — plus the focused `test:bun:db` compatibility smoke suite for the best-effort `bun:sqlite` path. **Do NOT** widen Bun to `npm install`, the build (`build:cli*`), `check:pack-artifact`, the supported published runtime, or the main test runners — those stay on Node. Any new Bun-invoking gate/generator script must be validated byte-identical against its `node --import tsx` output first. After pulling the lockfile change, run `npm install` so `bun` resolves locally (a stale `node_modules` will fail those scripts with `bun: not found`).
+- **Runtime**: Node.js ≥22.22.2 <23 || ≥24.0.0 <27, ES Modules — the **only supported** runtime for the published `omniroute` CLI, the server, and the test suites (`node:test` + vitest); `engines.node` is authoritative and end users never need Bun. A **best-effort `bun:sqlite` compatibility path** exists so a global Bun install (`bun install -g omniroute`) can start without `better-sqlite3` (driver adapter + Bun-aware process spawning); it is **not** a supported runtime — no support guarantees — and every Bun-specific runtime change MUST preserve the Node driver/fallback chain and ship a Bun test (`test:bun:db`) or an explicit reason why the path is Node-only.
+- **Bun (build/dev script runner + compatibility smoke only)**: Bun `1.4.2` is pinned as an **exact devDependency** (provisioned through the existing `npm ci` via the lockfile's `@oven/bun-*` platform binaries — no `setup-bun`/ad-hoc install). It executes **only** an allow-listed set of TypeScript gate/generator scripts (replacing `node --import tsx` for startup speed): the CI checks `check:provider-consistency`, `check:compression-budget`, `check:known-symbols`; the non-CI `gen:provider-reference`, `bench:compression`; plus the `test:bun:db` compatibility smoke suite. **Do NOT widen Bun to `npm install`, the build (`build:cli*`), `check:pack-artifact`, the supported published runtime, or the main test runners** — those stay on Node. Any new Bun-invoking script must be validated byte-identical against its `node --import tsx` output first. Bun failing (`bun: not found`, or the skipped-`postinstall` placeholder binary): `docs/ops/BUILD_WARNINGS.md` → "Bun script-runner failures".
 - **TypeScript**: 6.0+, target ES2022, module esnext, resolution bundler
 - **Path aliases**: `@/*` → `src/`, `@omniroute/open-sse` → `open-sse/`, `@omniroute/open-sse/*` → `open-sse/*`
 - **Default port**: 20128 (API + dashboard on same port)
@@ -678,13 +353,7 @@ focused checks, and use a Conventional Commit message (for example, `docs: slim 
 
 ## Quality Gates & Ratchets
 
-OmniRoute has **~90 quality-gate scripts** (`scripts/check/` + `scripts/quality/`) wired
-across **9 gate-running jobs** in `.github/workflows/ci.yml` (`lint`, `quality-gate`,
-`quality-extended`, `docs-sync-strict`, `i18n-ui-coverage`, `i18n`, `pr-test-policy`,
-`test-vitest`, `sonarqube`), plus the `quality.yml` fast-gates job (PR→`release/**`) and
-5 quality nightly workflows (`nightly-property`, `nightly-resilience`,
-`nightly-llm-security`, `nightly-mutation`, `nightly-schemathesis`). Full inventory, per-job breakdown, and operational
-procedures are in [`docs/architecture/QUALITY_GATES.md`](docs/architecture/QUALITY_GATES.md).
+OmniRoute has **~90 quality-gate scripts** (`scripts/check/` + `scripts/quality/`) wired across **9 gate-running jobs** in `.github/workflows/ci.yml`, plus the `quality.yml` fast-gates job (PR→`release/**`) and 5 quality nightly workflows. Full inventory, per-job breakdown, and operational procedures: [`docs/architecture/QUALITY_GATES.md`](docs/architecture/QUALITY_GATES.md).
 
 **Quick reference:**
 
@@ -695,19 +364,17 @@ procedures are in [`docs/architecture/QUALITY_GATES.md`](docs/architecture/QUALI
   `npm run quality:ratchet -- --update` when a metric genuinely improves.
 - Job `test-vitest` runs `npm run test:vitest` (MCP tools, autoCombo, cache) — blocking.
   `test:vitest:ui` has been blocking since PR #7127.
-- **Velocity phase (2026-08-30 → v4.0)**: every numeric baseline is loosened by 20% and
-  `--require-tighten` is advisory (`quality-baseline.json` → `_policy`); the nightly
-  `baseline-headroom` job tracks how much of the budget is left in the issue
-  "📈 Baseline headroom". See `docs/architecture/QUALITY_GATES.md` → "Velocity phase".
+- **Velocity phase (2026-08-30 → v4.0)**: every numeric baseline is loosened by 20% and `--require-tighten` is advisory (`quality-baseline.json` → `_policy`); the nightly `baseline-headroom` job tracks how much of the budget is left in the issue "📈 Baseline headroom". See `docs/architecture/QUALITY_GATES.md` → "Velocity phase".
 
-**Allowlist policy (short form):** Fix the cause; use the allowlist only for pre-existing
-violations you cannot fix in the same PR. Add a comment with justification + issue number.
-Stale allowlist entries (suppressing a violation that no longer exists) will be caught by
-the stale-enforcement added in Fase 6A.3.
+**Allowlist policy (short form):** fix the cause; use the allowlist only for pre-existing violations you cannot fix in the same PR (comment with justification + issue number). Stale entries are caught by the stale-enforcement added in Fase 6A.3.
 
 ---
 
 ## Hard Rules
+
+Rule numbers are stable and cited across scripts and docs — never renumber. Where a rule below
+is a short form, its complete binding text, rationale and incident history are in
+[`docs/ops/HARD_RULES_DETAIL.md`](docs/ops/HARD_RULES_DETAIL.md) under the same number.
 
 1. Never commit secrets or credentials
 2. Never barrel-import from `localDb.ts` — import specific `src/lib/db/*` modules
@@ -724,27 +391,29 @@ the stale-enforcement added in Fase 6A.3.
 13. Never string-interpolate external paths or runtime values into shell scripts passed to `exec()`/`spawn()` — pass via the `env` option instead. Reference: `src/mitm/cert/install.ts::updateNssDatabases`.
 14. Never dismiss a CodeQL / Secret-Scanning alert without (a) first checking the pattern docs above to see if the helper applies, and (b) recording the technical justification in the dismissal comment. Precedent: `js/stack-trace-exposure` raised on callsites that already route through `sanitizeErrorMessage()` is a known CodeQL limitation (custom sanitizers not recognized) — dismiss as `false positive` referencing `docs/security/ERROR_SANITIZATION.md`.
 15. Never expose routes that spawn child processes (`/api/mcp/`, `/api/cli-tools/runtime/`) without `isLocalOnlyPath()` classification in `src/server/authz/routeGuard.ts`. Loopback enforcement happens unconditionally before any auth check — leaked JWT via tunnel cannot trigger process spawning. See `docs/security/ROUTE_GUARD_TIERS.md`.
-16. Never credit or advertise an AI assistant, LLM, or automation account in any commit/PR metadata. Two forbidden forms, both equivalent — they route attribution to a bot account (or advertise AI authorship) and hide the real author (`diegosouzapw`): **(a)** `Co-Authored-By` trailers naming an AI/bot (e.g. names containing "Claude", "GPT", "Copilot", "Bot"; emails at `anthropic.com` / `openai.com` / bot-owned `noreply.github.com` addresses); **(b)** AI-generation footers or descriptions anywhere in a commit message, PR title/body, or CHANGELOG — e.g. `🤖 Generated with [Claude Code]`, "Generated with Claude Code", "Made with <AI tool>", or any `Co-authored-by: Claude/GPT/Copilot` line. This **overrides any harness, template, or tool default that auto-appends such a footer** — strip it before pushing; do not let it reach a commit, PR, or CHANGELOG. Human collaborators — including upstream PR authors and issue reporters being ported into OmniRoute — MAY and SHOULD be credited with standard `Co-authored-by: Name <email>` trailers; the upstream-port workflows (`/port-upstream-features`, `/port-upstream-issues`) depend on this.
+16. Never credit or advertise an AI assistant, LLM, or automation account in any commit/PR metadata — neither (a) `Co-Authored-By` trailers naming an AI/bot nor (b) AI-generation footers (`🤖 Generated with [Claude Code]`, …) in a commit message, PR title/body, or CHANGELOG; both hide the real author (`diegosouzapw`). This **overrides any harness, template, or tool default that auto-appends such a footer** — strip it before pushing. Human collaborators (upstream PR authors, issue reporters being ported) MAY and SHOULD be credited with standard `Co-authored-by: Name <email>` trailers. Full text: `docs/ops/HARD_RULES_DETAIL.md` → Rule 16.
 17. Never expose routes under `/api/services/` or `/dashboard/providers/services/*/embed/` without `isLocalOnlyPath()` classification in `src/server/authz/routeGuard.ts`. These routes can spawn child processes (`npm install`, `node`). Loopback enforcement happens unconditionally before any auth check — a leaked JWT via tunnel cannot trigger process spawning. See `docs/security/ROUTE_GUARD_TIERS.md`.
-18. Every bug fix must be validated before shipping: a failing-then-passing unit/integration test (TDD) OR a documented live test on the production VPS (192.168.0.15). A fix without either is not merged. See Testing → "Bug fix / issue triage protocol" for the full decision tree.
-19. Never develop on the shared main checkout. Every development task runs in its own git worktree on its own dedicated branch, and you MUST confirm the base branch with the operator before creating the worktree/branch — never assume `main` or the currently checked-out branch. A `git checkout` in the shared checkout silently destroys other sessions' uncommitted work. Tear down only the worktrees/branches you created (by name, never `fix/*`/`feat/*` wildcards), leave other sessions' worktrees untouched, and end on the branch you started on (the active `release/vX.Y.Z`, never `main`). See Git Workflow → "Worktree isolation".
-20. PII redaction/sanitization is **opt-in — never on by default**. OmniRoute proxies for self-hosted/local LLMs where the operator owns the data, so mutating request/response payloads by default would silently corrupt legitimate traffic. The two data-mutating PII feature flags **MUST** keep `defaultValue: "false"` in `src/shared/constants/featureFlagDefinitions.ts`: `PII_REDACTION_ENABLED` (request-side) and `PII_RESPONSE_SANITIZATION` (response + streaming). All three application points — `src/lib/guardrails/piiMasker.ts` (request guardrail), `src/lib/piiSanitizer.ts` (response), `src/lib/streamingPiiTransform.ts` (SSE) — are gated on these flags; with both off the `pii-masker` guardrail still runs but never mutates payloads (data passes through untouched). Flipping either default to `"true"` requires explicit operator approval. The regression guard is `tests/unit/pii-opt-in-default.test.ts` (asserts both definition defaults + behavioral pass-through). Opt-in is per-operator via env or the settings/DB override (`src/lib/db/featureFlags.ts`), never a silent default. See `docs/security/GUARDRAILS.md`.
-21. **Release-freeze — the FROZEN release branch belongs to the release captain; development does NOT stop (parallel-cycle model, 2026-07-04).** `/generate-release` opens a marker issue labeled `release-freeze` at the start of reconciliation (Phase 0a), **immediately cuts the next cycle's branch `release/vX+1` from the frozen tip (Phase 0a.0b — bump + living release PR + re-home of open PRs)**, and closes the freeze once the release PR squash-merges to `main`. Before merging **any** PR, every campaign workflow (`/review-prs`, `/review-group-prs`, `/merge-prs`, `/triage-fix-bugs`, `/implement-fix-bugs`, `/triage-features`, `/implement-features`, `/green-prs`, `/port-upstream-*`) **MUST** check `gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open` — if a freeze is active: **NEVER merge into the frozen `release/vX.Y.Z` named in the freeze title**; instead resolve the ACTIVE development branch (the **highest** `release/v*` by semver — normally `release/vX+1`, announced in a freeze-issue comment) and **retarget the PR there** (`gh pr edit <N> --base release/vX+1`, then VERIFY with `gh pr view <N> --json baseRefName` — the edit fails silently) and merge normally. **HOLD only when the highest release/v\* branch IS the frozen one** (the short window before 0a.0b completes, or a pre-parallel-cycle release) — in that case leave the PR ready and open, tell the operator, and resume when the next branch appears or the freeze lifts. The just-shipped fixes reach `release/vX+1` via the Phase 5 sync-back (`scripts/release/sync-next-cycle.mjs`); do not try to sync mid-release. This is a **coordination signal, not a permission lock**: the release captain and the campaign sessions share the `diegosouzapw` identity, so a GitHub branch-protection lock cannot distinguish them — only this honored marker prevents the mid-release commit races that forced full CHANGELOG re-reconciliation in v3.8.40/v3.8.41 (a parallel campaign advanced `release/vX.Y.Z` by 34 commits mid-run). The release captain's own reconciliation/cycle-open pushes are exempt — they _are_ the release. Fixes that must land during a freeze (a homologation finding) follow the post-merge read-only rule: land on `main` first via `fix/release-vX.Y.Z-*`. **⛔ ONLY `/generate-release` may raise a release-freeze, and ONLY at its Phase 0a (start of generating a new version) — lifted at Phase 12c after the squash-merge to `main`.** No campaign, session, or agent may open a `release-freeze` marker at any other time — a freeze is **never** a mid-development coordination tool. If a session ever believes a freeze is genuinely, unavoidably necessary outside the `/generate-release` flow, it **MUST first ask the operator (`diegosouzapw`) in chat, explicitly alert "estou criando um freeze" and get an explicit yes** — never open, extend, or re-open a `release-freeze` autonomously. Conversely, do **not** close/lift an active `/generate-release` freeze to unblock campaign merges: it protects the captain's single clean CI run and auto-lifts at Phase 12c — closing it early re-triggers the exact commit race it prevents. Verify a freeze is legitimate before acting on it: an open `release-freeze` whose title/body references an **OPEN** release PR (`gh pr view <N> --json state`) is the authorized captain freeze — hold, don't touch. (Cycle-model proposal: `_tasks/finished/release-flow/2026-07-04_proposta-ciclo-paralelo-v2.md`.)
-22. **Cross-session safety — this repo is worked by MANY parallel sessions/agents at once; never step on another's in-flight work.** Two absolute bans, both recurring incidents (this rule exists because they keep happening):
-    - **(a) Never `git stash` / `git stash pop` — ANYWHERE in this repo, including inside an isolated worktree, and including inside any subagent you dispatch.** `git stash` operates on the **shared repository object store**, not the per-worktree working tree — so a stash pushed or popped in one session can silently clobber or resurrect another parallel session's uncommitted changes. This is not hypothetical: 2026-07-02 a `#5923` quotaCache change leaked into the unrelated `#2296` worktree via a global `stash pop`, and the same class reincided through a **subagent**. To compare working changes against a base ref **without** stashing, use `git show <ref>:<path>` or `git diff <ref> -- <path>`; to confirm a typecheck/lint error is pre-existing on the base, inspect the base ref directly (`git show origin/release/vX.Y.Z:<path>`) — never stash your tree away to "get it clean". **Put this ban verbatim in the prompt of every subagent that touches git** (agents don't inherit this file's context — the recurrence was a subagent).
-    - **(b) Never merge, push, rebase, or force-push a PR / branch / worktree that another session is actively working.** An open PR whose head is a live fix worktree in `.claude/worktrees/` you did **not** create (e.g. `fix-5852`/`fix-5923` carrying fresh commits, even when they share your `diegosouzapw` identity), or any branch another session owns, is **off-limits — HOLD**, and let the owning session merge it. **Before** merging or pushing to any PR you did not create _this_ session, run `git worktree list` to check for a matching in-flight worktree and re-check `gh pr view <N> --json state,headRefOid`. Only the owning session merges its own in-flight PR; mid-flight merges race the owner and re-trigger the exact commit/CHANGELOG races Rule #19 and Rule #21 guard against. (Reinforces Rule #19.)
+18. Every bug fix must be validated before shipping: a failing-then-passing unit/integration test (TDD) OR a documented live test on the production VPS (192.168.0.15). A fix without either is not merged. See Testing → "Bug fix / issue triage protocol" and `docs/ops/HARD_RULES_DETAIL.md` → Rule 18 for the full decision tree.
+19. Never develop on the shared main checkout. Every development task runs in its own git worktree on its own dedicated branch, and you MUST confirm the base branch with the operator before creating the worktree/branch — never assume `main` or the currently checked-out branch. A `git checkout` in the shared checkout silently destroys other sessions' uncommitted work. Tear down only the worktrees/branches you created (by name, never `fix/*`/`feat/*` wildcards), leave other sessions' worktrees untouched, and end on the branch you started on (the active `release/vX.Y.Z`, never `main`). See Git Workflow → "Worktree isolation" and `docs/ops/WORKTREE_ISOLATION.md`.
+20. PII redaction/sanitization is **opt-in — never on by default**. The two data-mutating PII feature flags **MUST** keep `defaultValue: "false"` in `src/shared/constants/featureFlagDefinitions.ts`: `PII_REDACTION_ENABLED` (request-side) and `PII_RESPONSE_SANITIZATION` (response + streaming). Flipping either default to `"true"` requires explicit operator approval; opt-in is per-operator, never a silent default. Regression guard: `tests/unit/pii-opt-in-default.test.ts`. Full text: `docs/ops/HARD_RULES_DETAIL.md` → Rule 20.
+21. **Release-freeze — the FROZEN release branch belongs to the release captain; development does NOT stop (parallel-cycle model, 2026-07-04).** Before merging **any** PR, every campaign workflow **MUST** check `gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open`. If active: **NEVER merge into the frozen `release/vX.Y.Z`** — retarget the PR to the **highest** `release/v*` (`gh pr edit <N> --base release/vX+1`, then VERIFY with `gh pr view <N> --json baseRefName` — the edit fails silently) and merge normally; **HOLD only when the highest release/v\* branch IS the frozen one**. **⛔ ONLY `/generate-release` may raise a release-freeze (Phase 0a; lifted at Phase 12c)** — never open, extend, re-open or close one autonomously (any other freeze needs the operator's explicit yes). Full text: `docs/ops/HARD_RULES_DETAIL.md` → Rule 21.
+22. **Cross-session safety — this repo is worked by MANY parallel sessions/agents at once; never step on another's in-flight work.** Two absolute bans (both recurring incidents):
+    - **(a) Never `git stash` / `git stash pop` — ANYWHERE in this repo, including inside an isolated worktree, and including inside any subagent you dispatch.** `git stash` operates on the **shared repository object store**, not the per-worktree working tree — a stash in one session can silently clobber or resurrect another parallel session's uncommitted changes. Compare against a base ref with `git show <ref>:<path>` or `git diff <ref> -- <path>` instead — never stash your tree away to "get it clean". **Put this ban verbatim in the prompt of every subagent that touches git.**
+    - **(b) Never merge, push, rebase, or force-push a PR / branch / worktree that another session is actively working** — including a PR whose head is a live fix worktree in `.claude/worktrees/` you did **not** create, even when it shares your `diegosouzapw` identity: **HOLD, let the owning session merge it.** **Before** merging or pushing to any PR you did not create _this_ session, run `git worktree list` and re-check `gh pr view <N> --json state,headRefOid`. (Reinforces Rule #19.)
+
+    Full text + incidents: `docs/ops/HARD_RULES_DETAIL.md` → Rule 22.
+
 23. **`_tasks/` é INTOCÁVEL como estrutura — append/edit-only.** É um repositório git SEPARADO
     (remote privado `diegosouzapw/_tasks_omniroute`) montado como diretório real na raiz do
     checkout principal. Regras absolutas: (a) NUNCA mover, renomear, deletar, esvaziar ou
     transformar `_tasks` em symlink; sessões só podem CRIAR ou EDITAR arquivos dentro dele;
     (b) NUNCA rastrear `_tasks` (nem como symlink) no repo principal — o blob rastreado foi a
-    causa-raiz de DOIS wipes (2026-08-08 e 2026-08-10: `git reset --hard` materializou o
-    symlink rastreado por cima do diretório real e o git apagou todo o conteúdo ignorado sem
-    aviso); (c) após qualquer escrita relevante, `git -C _tasks add -A && git -C _tasks commit
-&& git -C _tasks push` — o push frequente é o backup real; (d) repetir esta proibição
-    VERBATIM no prompt de todo subagente que toque git; (e) se `_tasks` aparecer como symlink
-    quebrado, NÃO commitar nada — restaurar do remote e avisar o operador. O gate
-    `check:tracked-artifacts` (pre-commit + CI) bloqueia `_tasks` rastreado em qualquer forma.
+    causa-raiz de DOIS wipes (2026-08-08 e 2026-08-10); (c) após qualquer escrita relevante,
+    `git -C _tasks add -A && git -C _tasks commit && git -C _tasks push` — o push frequente é o
+    backup real; (d) repetir esta proibição VERBATIM no prompt de todo subagente que toque git;
+    (e) se `_tasks` aparecer como symlink quebrado, NÃO commitar nada — restaurar do remote e
+    avisar o operador. O gate `check:tracked-artifacts` (pre-commit + CI) bloqueia `_tasks`
+    rastreado em qualquer forma. Texto completo: `docs/ops/HARD_RULES_DETAIL.md` → Rule 23.
 
 ---
 
@@ -766,12 +435,7 @@ Ensure that any unit tests that trigger database migrations or establish SQLite 
 
 ## Local development access
 
-The dashboard is reachable at the operator's chosen URL/port (default `http://localhost:20128`). Credentials are operator-specific:
-
-- **Initial admin password** is read from the `INITIAL_PASSWORD` env var on first install (defaults to `CHANGEME` in `.env.example`; rotate immediately after first login).
-- **Local VPS / shared dev environments**: ask the operator for the URL and current credentials — they live in their personal vault, NOT in this repo.
-
-> Any credential observed in a previous version of this file was a non-production demo value; treat it as compromised and do not reuse it.
+Dashboard at the operator's chosen URL/port (default `http://localhost:20128`). Credentials are operator-specific: the **initial admin password** is read from `INITIAL_PASSWORD` on first install (defaults to `CHANGEME` in `.env.example`; rotate immediately after first login); for **local VPS / shared dev environments**, ask the operator — credentials live in their personal vault, NOT in this repo. Any credential observed in a previous version of this file was a non-production demo value; treat it as compromised and do not reuse it.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

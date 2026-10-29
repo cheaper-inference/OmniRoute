@@ -19,6 +19,21 @@ export function normalizeBaseUrl(baseUrl: string) {
   return value.trim().replace(/\/$/, "");
 }
 
+/**
+ * Shape an OpenAI-compatible base URL into its `/v1/chat/completions` route. Accepts the API
+ * root, a `/v1` root, a `/v1/models` URL, or a full `/v1/chat/completions` URL. Used by the
+ * validators whose public `/v1/models` cannot prove a key (Zylo #13828, Inception).
+ */
+export function resolveV1ChatCompletionsUrl(baseUrl: string) {
+  const normalized = normalizeBaseUrl(baseUrl);
+  if (!normalized) return "";
+  const cleaned = normalized
+    .replace(/\/chat\/completions$/, "")
+    .replace(/\/models$/, "")
+    .replace(/\/v1$/, "");
+  return `${cleaned}/v1/chat/completions`;
+}
+
 export function normalizeAzureOpenAIBaseUrl(baseUrl: string) {
   return normalizeBaseUrl(baseUrl)
     .replace(/\/openai$/i, "")

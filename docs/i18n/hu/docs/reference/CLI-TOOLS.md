@@ -6,188 +6,197 @@
 
 Utolsó frissítés: 2026-08-23
 
-Az OmniRoute három CLI-eszközkategóriát integrál, amelyek három különálló irányítópultoldalon érhetők el:
+OmniRoute CLI eszközök három kategóriájával integrálható, három dedikált irányítópult-oldalon:
 
-| Oldal          | Útvonal                 | Koncepció                                                                                              | Darabszám             |
-| -------------- | ----------------------- | ------------------------------------------------------------------------------------------------------ | --------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Kódolási eszközök, amelyeket az OmniRoute-hoz irányít (Kliens → CLI → OmniRoute → Szolgáltató)         | 26                    |
-| **CLI Agents** | `/dashboard/cli-agents` | Önálló ügynökök, amelyeket az OmniRoute-hoz irányít (azonos folyamat, szélesebb hatókör)               | 10                    |
-| **ACP Agents** | `/dashboard/acp-agents` | CLI-k, amelyeket az OmniRoute háttérrendszerként indít el stdio/ACP használatával (fordított folyamat) | lásd a nyilvántartást |
+| oldal            | Útvonal                 | Koncepció                                                                                  | Gróf                  |
+| ---------------- | ----------------------- | ------------------------------------------------------------------------------------------ | --------------------- |
+| **CLI kód**      | `/dashboard/cli-code`   | A OmniRoute -ra mutatott kódolóeszközök (kliens → CLI → OmniRoute → szolgáltató)           | 26                    |
+| **CLI ügynökök** | `/dashboard/cli-agents` | Önálló ügynökök, akikre OmniRoute mutat (ugyanaz az áramlás, szélesebb kör)                | 11                    |
+| **ACP ügynökök** | `/dashboard/acp-agents` | CLIs, hogy OmniRoute háttérprogramként jelenik meg stdio/ACP keresztül (fordított áramlás) | lásd a nyilvántartást |
 
-A korábbi útvonalak 308-as átirányítást használnak: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+A régi útvonalak a 308-ason keresztül irányítanak át: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
-## Hogyan működik
+## Működés
 
 ```
-CLI Kódok / CLI Ügynökök (fogyasztási áramlás):
-Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Ügynök / Goose / ...
+CLI Code's / CLI Agents (felhasználási folyamat):
+Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Agent / Goose / ...
            │
-           ▼  (mind az OmniRoute-ra mutat)
+           ▼  (mindegyik az OmniRoute-ra mutat)
     http://YOUR_SERVER:20128/v1
            │
            ▼  (az OmniRoute a megfelelő szolgáltatóhoz irányít)
     Anthropic / OpenAI / Gemini / DeepSeek / Groq / Mistral / ...
 
-ACP Ügynökök (fordított indítási áramlás):
-    Ügyfél kérés → OmniRoute → CLI indítása stdio/ACP-n keresztül → válasz
+ACP Agents (fordított indítási folyamat):
+    Klienskérés → OmniRoute → elindítja a CLI-t stdio/ACP használatával → válasz
 ```
 
 **Előnyök:**
 
-- Egy API kulcs az összes eszköz kezelésére
-- Költségkövetés az összes CLI-n az irányítópulton
+- Egyetlen API-kulcs az összes eszköz kezeléséhez
+- Az összes CLI költségeinek nyomon követése az irányítópulton
 - Modellváltás anélkül, hogy minden eszközt újra kellene konfigurálni
-- Helyben és távoli szervereken is működik (VPS, Docker, Akamai, Cloudflare Tunnel)
+- Helyileg és távoli kiszolgálókon is működik (VPS, Docker, Akamai, Cloudflare Tunnel)
 
 ---
 
 ## Automatikus konfigurálás `setup-*` segítségével
 
-Nem kell minden eszköz konfigurációját kézzel megírnia. Az OmniRoute minden támogatott CLI-hez biztosít egy `setup-*` parancsot, amely beolvassa a **valós idejű** modellkatalógust egy futó OmniRoute-ból (helyi vagy távoli), és megírja az eszköz saját konfigurációját a gépén:
+Nem kell minden eszköz konfigurációját kézzel megírnia. OmniRoute támogatott CLI -nként egy `setup-*` parancsot küld, amely beolvassa a** élő** modellkatalógus egy futó OmniRoute ről (helyi vagy távoli), és ráírja az eszköz saját konfigurációját a gépére:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Mindegyik elfogadja a `--remote <url> --api-key <key>` (helyi eszköz konfigurálása távoli OmniRoute ellenében), `--dry-run` (előnézet írás nélkül) és `--port` paramétereket. Azok az eszközök, amelyek nem rendelkeznek modell automatikus felderítéssel (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive), a `--model <id>` (és `--yes` a nem interaktív futtatásokhoz) paramétert veszik fel. A `setup-5dive` az egyetlen recept, amely nem ír a `$HOME` alá: egy 5dive ügynökflottát konfigurál azáltal, hogy egy root tulajdonú hitelesítési profilt ír a flotta gazdagépére, így `sudo`-n keresztül újra végrehajtódik, és nincs saját távoli módja. Ahhoz, hogy egy CLI-t a megfelelő környezeti változókkal injektálva és egyáltalán nem írt konfigurációval indítson el, használja az általános `omniroute run <target>` indítót (claude, codex, aider, goose, opencode, qwen, gemini – a célok és aliasok a `bin/cli/cli-manifest.mjs` fájlból származnak); a régi, eszközönkénti indítók, az `omniroute launch` (Claude Code) és az `omniroute launch-codex` (Codex) továbbra is elérhetők. A Gemini CLI csak indítható: ez egy `omniroute run` cél, de nincs `setup-*`/`configure` receptje.
+Mindegyik elfogadja `--remote <url> --api-key <key>` (helyi eszköz konfigurálása egy távoli OmniRoute hez), `--dry-run` (írás nélküli előnézet) és `--port`. Az automatikus modellfelderítés nélküli eszközök (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) `--model <id>` (és `--yes` nem interaktív futtatásokhoz) veszik. `setup-5dive` az egyetlen recept, amely nem ír `$HOME` alá: úgy konfigurál egy 5dive ügynök flottát, hogy root tulajdonú hitelesítési profilt ír a flotta gazdagépére, így újra végrehajtja `sudo`, és nincs saját távoli módja. Egy CLI elindításához a megfelelő env-vel, és egyáltalán nincs beírva konfiguráció, használja az általános `omniroute run <target>` indítót (claude, codex, aider, goose, opencode, qwen, gemini, Whycodes – a célok és az álnevek `bin/cli/cli-manifest.mjs` származnak); a régi eszközönkénti indítók, `omniroute launch` (Claude Code) és `omniroute launch-codex` (Codex) továbbra is elérhetők. Gemini CLI csak indítható: ez egy `omniroute run` cél, de nincs `setup-*`/`configure` receptje.
 
-> **Teljes referencia:** a fő táblázat – hogy mit ír minden parancs, minden flag, helyi vs távoli, és mely eszközök igénylik a `/v1` utótagot – a **[CLI Integrációk](../guides/CLI-INTEGRATIONS.md)** részben található.
+> **Teljes referencia:** a fő tábla – amit az egyes parancsok írnak, minden zászló, helyi vagy távoli, és mely eszközök szeretnének `/v1` utótagot – benne van** [CLI integrációk](../guides/CLI-INTEGRATIONS.md)** .
 
-### Ezek futtatása konténeren belül
+### Ezeket futtassa egy tartályban
 
-Az OmniRoute konténeren belül végrehajtott `setup-*` parancs a konténer saját home könyvtárába ír, amelyet egyetlen gazdagép CLI sem olvas, és amely a konténerrel együtt eltűnik. Az OmniRoute ezt észleli, és írás helyett `2`-es kóddal, utasításokkal lép ki. Két támogatott megoldás – telepítse a CLI-t a gazdagépre, és `omniroute connect` a konténerhez, vagy bind-mountolja a konfigurációs könyvtárakat, és állítsa be a `CLI_CONFIG_HOME` változót (a compose `host` profilja). Minden `setup-*` parancs, plusz az `omniroute configure` és az `omniroute config set`, elfogadja az `--allow-container-write` paramétert, ha a konténer saját CLI-jeinek konfigurálása volt a célja; az `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ugyanezt teszi a szerver esetében. Lásd a [Docker útmutató → Gazdagép CLI eszközök konfigurálása](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker) részt.
+A OmniRoute tárolón belül végrehajtott `setup-*` parancs a tároló saját otthonába ír, amit CLI gazdagép sem olvas be, és amely a tárolóval együtt eltűnik. OmniRoute ezt észleli, és írás helyett utasításokkal lép ki `2`. Két támogatott út: telepítse a CLI a gazdagépre és `omniroute connect` a tárolóra, vagy bind-mountolja a konfigurációs könyvtárakat, és állítsa be `CLI_CONFIG_HOME` (a `host` profilt). Valójában minden `setup-*` parancs, valamint `omniroute configure` és `omniroute config set` elfogadja `--allow-container-write` a tároló saját CLIs jének beállításakor; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ugyanezt teszi a szerverrel. Lásd: [Docker Guide → Host CLI eszközök konfigurálása](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-A műszerfal **alkalmazási végpontja** (`POST /api/cli-tools/apply`) ugyanazt a védelmet érvényesíti: egy konténerben, ha egy írás célja nincs bind-mountolva a gazdagépről, akkor **`422`**-es választ ad `containerEphemeralTarget: true` üzenettel, a biztonságos hibaüzenettel és – a gazdagép recepttel rendelkező eszközök (claude, codex, opencode, cline, kilo, continue) esetében – egy `hostSetupCommand` (pl. `omniroute setup-opencode`) paranccsal, amelyet a gazdagépen kell futtatni helyette; semmi sem íródik. A `dryRun: true` továbbra is működik konténer módban, és egy szerkesztett előnézetet + célútvonalat ad vissza a lemez érintése nélkül. Az előnézeti tartalom nem hitelesítő adatokat tartalmazó konfiguráció, amelyet másolni vagy importálni lehetne. Alkalmazza az eredeti eszközzel/alap URL-lel/API kulccsal/modell bemenetekkel a gazdagépen, vagy használja a jelzett gazdagép oldali beállítási parancsot. Lásd a [CLI konfiguráció biztonsága](../security/CLI-CONFIGURATION.md) részt az előnézeti fejléc és a kérés szerződésének részleteiért. Ez a viselkedés szándékos, és a `tests/unit/api/cli-tools/apply-container-guard.test.ts` teszt védi a regressziótól – soha ne "javítson" egy 422-es hibát a védelem eltávolításával.
-
----
-
-## Az Igazság Forrása
-
-Az egységes katalógus a `src/shared/constants/cliTools.ts` fájlban található `CLI_TOOLS: Record<string, CliCatalogEntry>` néven.
-
-Minden bejegyzésnek ezek a mezői vannak (a `src/shared/schemas/cliCatalog.ts` fájlban definiálva):
-
-| Mező                                            | Típus                                                        | Leírás                                                   |
-| ----------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------- |
-| `category`                                      | `"code" \| "agent"`                                          | Melyik oldalon jelenik meg az eszköz                     |
-| `vendor`                                        | `string`                                                     | Az eszköz származása ("Anthropic", "OSS (P. Gauthier)")  |
-| `acpSpawnable`                                  | `boolean`                                                    | ACP ügynökként is használható (jelvény megjelenítve)     |
-| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | Egyedi végpont támogatási szint. `"none"` = MITM backlog |
-| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | Konfigurációs mechanizmus                                |
-| `id`, `name`, `color`, `description`, `docsUrl` | standard                                                     | Alapvető megjelenítési mezők                             |
-
-A `baseUrlSupport: "none"` értékű bejegyzések **nincsenek megjelenítve** a műszerfal oldalain — ezek a MITM backlogban vannak regisztrálva a 11. tervhez (lásd: `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
-
-### Képességi szintek (katalógusba véve × észlelhető × konfigurálható × indítható)
-
-Nem minden katalógusba vett eszköz észlelhető, konfigurálható vagy indítható. Minden szintnek van egy
-nyilatkozati forrása, és egy drift teszt tartja őket összhangban:
-
-| Szint                | Jelentés                                                                                | Nyilatkozva itt                                                    |
-| -------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| **Katalógusba véve** | Megjelenik a műszerfal katalógusában (név, szállító, dokumentáció, konfigurációs típus) | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                   |
-| **Észlelhető**       | Bináris/config észlelés, egészségügyi ellenőrzések, konfigurációs utak                  | `src/shared/services/cliRuntime.ts` (`CLI_TOOLS` futási katalógus) |
-| **Konfigurálható**   | Támogatott az `omniroute configure <cli>` (beállítási recept létezik)                   | `bin/cli/cli-manifest.mjs` (`configure: true`)                     |
-| **Indítható**        | Támogatott az `omniroute run <target>` (env/args injekció definiálva)                   | `bin/cli/cli-manifest.mjs` (`run: true`)                           |
-
-A `bin/cli/cli-manifest.mjs` a CLI parancsok kanonikus végrehajtható manifesztje: `run`, `configure` és a shell-befejező generátorok mind származtatják a
-céllistáikat, az alias feloldást (például `kilocode`/`kilo-code`/`kilo_cli` → `kilo`)
-és a `--model` zászló bekötését. A drift őrző
-`tests/unit/cli/cli-manifest-drift.test.ts` biztosítja, hogy a manifeszt, a futási
-katalógus, a UI katalógus és minden fogyasztói felület szinkronban maradjon — egy cél, amelyet
-az egyik felülethez adnak hozzá, míg a többiekhez nem, meghiúsítja a tesztet ahelyett, hogy csendben eltérne.
-
-## 1. CLI Kódok Katalógusa (26 eszköz)
-
-Minden eszköz, amely megjelenik a `/dashboard/cli-code`-ban. Azok, amelyeknél `baseUrlSupport: none`, MITM vagy egy kézi útmutató révén vannak összekötve, nem pedig egyedi alap URL-en keresztül:
-
-| id           | név                       | szállító            | baseUrlSupport | configType   | acpSpawnable |
-| ------------ | ------------------------- | ------------------- | -------------- | ------------ | ------------ |
-| claude       | Claude Kód                | Anthropic           | teljes         | env          | true         |
-| codex        | OpenAI Codex CLI          | OpenAI              | teljes         | egyedi       | true         |
-| zcode        | ZCode (GLM Kódolási Terv) | Z.ai                | nincs          | egyedi       | false        |
-| cline        | Cline                     | OSS (ex-Claude Dev) | teljes         | egyedi       | true         |
-| kilo         | Kilo Kód                  | Kilo-Org            | teljes         | egyedi       | false        |
-| roo          | Roo Kód                   | Roo (OSS)           | teljes         | útmutató     | false        |
-| continue     | Continue                  | continue.dev        | teljes         | útmutató     | false        |
-| aider        | Aider                     | OSS (P. Gauthier)   | teljes         | útmutató     | true         |
-| forge        | ForgeCode                 | Antinomy HQ         | teljes         | egyedi       | true         |
-| jcode        | jcode                     | 1jehuang (OSS)      | teljes         | egyedi       | false        |
-| deepseek-tui | DeepSeek TUI              | Hunter Bown (OSS)   | teljes         | egyedi       | false        |
-| codewhale    | CodeWhale                 | Hmbown (OSS)        | teljes         | egyedi       | false        |
-| opencode     | OpenCode                  | Anomaly (ex-SST)    | teljes         | útmutató     | true         |
-| droid        | Factory Droid             | Factory AI          | részleges      | útmutató     | false        |
-| copilot      | GitHub Copilot CLI        | GitHub/MS           | teljes         | egyedi       | false        |
-| cursor-cli   | Cursor CLI                | Anysphere           | részleges      | útmutató     | true         |
-| smelt        | Smelt                     | leonardcser (OSS)   | teljes         | egyedi       | false        |
-| pi           | Pi (pi-kódoló-ügynök)     | M. Zechner (OSS)    | teljes         | egyedi       | false        |
-| grok-build   | Grok Build                | xAI                 | teljes         | egyedi       | false        |
-| crush        | Crush                     | OSS (Charm)         | teljes         | egyedi       | false        |
-| qwen         | Qwen Kód                  | Alibaba             | teljes         | útmutató     | true         |
-| cursor       | Cursor                    | Anysphere           | nincs          | útmutató     | false        |
-| antigravity  | Antigravitáció            | Google              | nincs          | mitm         | false        |
-| hermes       | Hermes                    | Nous Research       | nincs          | útmutató     | false        |
-| kiro         | Kiro AI                   | Amazon              | nincs          | mitm         | false        |
-| custom       | Egyedi CLI                | —                   | teljes         | egyedi-építő | false        |
-
-Azok az eszközök, amelyeknél `baseUrlSupport: "részleges"` egy "⚠ Alap URL részleges" jelvényt mutatnak a műszerfal kártyáján.
-
-## 2. CLI Ügynökök Katalógusa (8 eszköz)
-
-Önálló ügynökök, amelyek a `/dashboard/cli-agents`-ben jelennek meg:
-
-| id           | név              | szállító                 | baseUrlTámogatás | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | ---------------- | ------------ |
-| hermes-agent | Hermes Ügynök    | Nous Research            | teljes           | hamis        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | teljes           | igaz         |
-| goose        | Goose            | Block / Linux Foundation | teljes           | igaz         |
-| interpreter  | Open Interpreter | OSS                      | teljes           | igaz         |
-| warp         | Warp AI          | Warp Inc.                | részleges        | igaz         |
-| agent-deck   | Ügynök Deck      | asheshgoplani (OSS)      | teljes           | hamis        |
-| omp          | Oh My Pi         | OSS                      | teljes           | igaz         |
-| letta        | Letta CLI        | Letta                    | teljes           | hamis        |
+A műszerfalé** végpont alkalmazása** (`POST /api/cli-tools/apply`) ugyanazt a védelmet kényszeríti ki: egy konténerben egy olyan írás válaszol, amelynek a célpontja nincs bind-mountolva a gazdagépből**`422`** `containerEphemeralTarget: true`-vel a biztonságos hibaszöveg és — a gazdagéprecepttel rendelkező eszközöknél (claude, codex, opencode, cline, kilo, tovább) — egy `hostSetupCommand` (pl. `omniroute setup-opencode`), amely helyett a gazdagépen fut; nincs írva semmi. `dryRun: true` továbbra is konténer módban dolgozik, és a lemez érintése nélkül visszaadja a szerkesztett előnézeti + célútvonalat. Az előnézeti tartalom nem másolható vagy importálható hitelesítő adatokkal rendelkező konfiguráció. Alkalmazza az eredeti tool/base URL/API key/model bemenetekkel a gazdagépen, vagy használja a jelzett gazdagép-oldali beállítási parancsot. Tekintse meg [CLI konfigurációs biztonságát](../security/CLI-CONFIGURATION.md) az előnézeti fejléchez és a szerződés kéréséhez. Ez a viselkedés szándékos, és `tests/unit/api/cli-tools/apply-container-guard.test.ts` védi a regressziótól – soha ne "javítsa meg" a 422-t a védő eltávolításával.
 
 ---
 
-## 3. ACP Ügynökök (/dashboard/acp-agents)
+## Hiteles forrás
 
-Ez az oldal (átnevezve a `/dashboard/agents`-ről) azokat a CLI-ket mutatja, amelyeket az OmniRoute **indíthat** háttér végrehajtási motorokként stdio/ACP protokollon keresztül. A katalógust külön karbantartják a `src/lib/acp/registry.ts` fájlban, és **nem** ugyanaz, mint a `CLI_TOOLS`.
+Az egységes katalógus a `src/shared/constants/cliTools.ts` fájlban található `CLI_TOOLS: Record<string, CliCatalogEntry>` formájában.
+
+Minden bejegyzés a következő mezőkkel rendelkezik (a `src/shared/schemas/cliCatalog.ts` fájlban definiálva):
+
+| Mező                                            | Típus                                                        | Leírás                                                           |
+| ----------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
+| `category`                                      | `"code" \| "agent"`                                          | Melyik oldalon jelenik meg az eszköz                             |
+| `vendor`                                        | `string`                                                     | Az eszköz eredete („Anthropic”, „OSS (P. Gauthier)”)             |
+| `acpSpawnable`                                  | `boolean`                                                    | ACP Agentként is használható (jelvény jelenik meg)               |
+| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | Egyéni végpontok támogatási szintje. `"none"` = MITM-teendőlista |
+| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | Konfigurációs mechanizmus                                        |
+| `id`, `name`, `color`, `description`, `docsUrl` | szabványos                                                   | Alapvető megjelenítési mezők                                     |
+
+A `baseUrlSupport: "none"` értékkel rendelkező bejegyzések **nem jelennek meg** az irányítópult oldalain — ezek a 11. terv MITM-teendőlistájában vannak nyilvántartva (lásd: `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
+
+### Képességi szintek (katalogizált × észlelhető × konfigurálható × indítható)
+
+Nem minden katalogizált eszköz észlelhető, konfigurálható vagy indítható. Minden szintnek egyetlen
+deklarációs forrása van, és egy eltérésvizsgálat biztosítja ezek összhangját:
+
+| Szint              | Jelentés                                                                                         | Deklaráció helye                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| **Katalogizált**   | Megjelenik az irányítópult katalógusában (név, gyártó, dokumentáció, konfigurációtípus)          | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                       |
+| **Észlelhető**     | Bináris-/konfigurációészlelés, állapotellenőrzések, konfigurációs útvonalak                      | `src/shared/services/cliRuntime.ts` (`CLI_TOOLS` futásidejű katalógus) |
+| **Konfigurálható** | Az `omniroute configure <cli>` támogatja (létezik beállítási recept)                             | `bin/cli/cli-manifest.mjs` (`configure: true`)                         |
+| **Indítható**      | Az `omniroute run <target>` támogatja (a környezeti változók/argumentumok injektálása definiált) | `bin/cli/cli-manifest.mjs` (`run: true`)                               |
+
+A `bin/cli/cli-manifest.mjs` a CLI-parancsfelületek kanonikus végrehajtható manifestje:
+a `run`, a `configure` és a shell-kiegészítési generátorok mind ebből származtatják
+a célpontlistáikat, az aliasok feloldását (például `kilocode`/`kilo-code`/`kilo_cli` → `kilo`)
+és a `--model` kapcsoló bekötését. A
+`tests/unit/cli/cli-manifest-drift.test.ts` eltérésvédelmi teszt biztosítja, hogy a manifest, a futásidejű
+katalógus, a felhasználói felület katalógusa és minden felhasználói felület szinkronban maradjon — ha egy célpontot
+csak az egyik felülethez adnak hozzá a többi nélkül, a tesztcsomag hibával leáll ahelyett, hogy az eltérés észrevétlen maradna.
 
 ---
 
-## 4. MITM Hátralék (nem látható a műszerfalon)
+## 1. CLI kód katalógus (27 eszköz)
 
-Az alábbi CLI-k nem támogatják a testreszabott alap URL-t natívan, és **nincsenek felsorolva** a CLI Kód vagy CLI Ügynökök oldalain. Ezek a MITM lehallgatás jelöltjei a 11. tervben:
+`/dashboard/cli-code` ban megjelenő összes eszköz. `baseUrlSupport: none` vel rendelkezők MITM vagy egy kézi útmutatón keresztül vannak bekötve az egyéni URL bázis helyett:
 
-| CLI                 | Ok                                                                      |
-| ------------------- | ----------------------------------------------------------------------- |
-| windsurf            | BYOK korlátozott a kiválasztott Claude modellekre + vállalati URL/token |
-| amp                 | Zárt ökoszisztéma (Sourcegraph)                                         |
-| amazon-q / kiro-cli | AWS SSO hitelesítés, nincs testreszabott URL                            |
-| cowork              | Anthropic Desktop, nincs konfigurálható végpont                         |
+| id             | név                       | eladó               | baseUrlSupport | configType   | acpSpawnable |
+| -------------- | ------------------------- | ------------------- | -------------- | ------------ | ------------ |
+| claude         | Claude kód                | Anthropic           | tele           | env          | igaz         |
+| kódex          | OpenAI Codex CLI          | OpenAI              | tele           | szokás       | igaz         |
+| zcode          | ZCode (GLM kódolási terv) | Z.ai                | egyik sem      | szokás       | hamis        |
+| cline          | Cline                     | OSS (ex-Claude Dev) | tele           | szokás       | igaz         |
+| kiló           | Kilo kód                  | Kilo-Org            | tele           | szokás       | hamis        |
+| roo            | Roo Code                  | Roo (OSS)           | tele           | útmutató     | hamis        |
+| folytassa      | Folytatás                 | folytasd.dev        | tele           | útmutató     | hamis        |
+| segítő         | Aider                     | OSS (P. Gauthier)   | tele           | útmutató     | igaz         |
+| kovácsműhely   | ForgeCode                 | Antinómia HQ        | tele           | szokás       | igaz         |
+| jcode          | jcode                     | 1jehuang (OSS)      | tele           | szokás       | hamis        |
+| deepseek-tui   | DeepSeek TUI              | Hunter Bown (OSS)   | tele           | szokás       | hamis        |
+| kódbálna       | CodeWhale                 | Hmbown (OSS)        | tele           | szokás       | hamis        |
+| nyílt kód      | OpenCode                  | Anomália (ex-SST)   | tele           | útmutató     | igaz         |
+| droid          | Gyári droid               | Gyári AI            | részleges      | útmutató     | hamis        |
+| másodpilóta    | GitHub Copilot CLI        | GitHub/MS           | tele           | szokás       | hamis        |
+| kurzor-cli     | Cursor CLI                | Bármilyen gömb      | részleges      | útmutató     | igaz         |
+| bűzöslazac     | Bűzöslazac                | leonardcser (OSS)   | tele           | szokás       | hamis        |
+| pi             | Pi (pi-kódoló ügynök)     | M. Zechner (OSS)    | tele           | szokás       | hamis        |
+| grok-építeni   | Grok Build                | xAI                 | tele           | szokás       | hamis        |
+| összetörni     | Összetörni                | OSS (báj)           | tele           | szokás       | hamis        |
+| qwen           | Qwen kód                  | Alibaba             | tele           | útmutató     | igaz         |
+| zed            | Zed                       | Zed Industries      | tele           | útmutató     | hamis        |
+| kurzor         | Cursor                    | Bármilyen gömb      | egyik sem      | útmutató     | hamis        |
+| antigravitáció | Antigravity               | Google              | egyik sem      | mitm         | hamis        |
+| Hermész        | Hermész                   | Nous Research       | egyik sem      | útmutató     | hamis        |
+| kiro           | Kiro AI                   | Amazon              | egyik sem      | mitm         | hamis        |
+| szokás         | Egyedi CLI                | —                   | tele           | egyedi építő | hamis        |
 
-Lásd a `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` fájlt a teljes keresztreferenciáért.
+`baseUrlSupport: "partial"` ellátott eszközöknél a „⚠ Base URL parcial” jelvény látható az irányítópult kártyáján.
+---
+
+## 2. CLI ügynökkatalógus (11 eszköz)
+
+`/dashboard/cli-agents` ban megjelenő autonóm ágensek:
+
+| id                | név                    | eladó                    | baseUrlSupport | acpSpawnable |
+| ----------------- | ---------------------- | ------------------------ | -------------- | ------------ |
+| hermes-ügynök     | Hermes ügynök          | Nous Research            | tele           | hamis        |
+| nyitott karom     | OpenClaw               | OSS (P. Steinberger)     | tele           | igaz         |
+| liba              | Liba                   | Blokk / Linux Alapítvány | tele           | igaz         |
+| tolmács           | Nyissa meg a Tolmácsot | OSS                      | tele           | igaz         |
+| vetemedik         | Warp AI                | Warp Inc.                | részleges      | igaz         |
+| ügynök-fedélzet   | Agent Deck             | ashgoplani (OSS)         | tele           | hamis        |
+| omp               | Oh My Pi               | OSS                      | tele           | igaz         |
+| letta             | Letta CLI              | Letta                    | tele           | hamis        |
+| elsődleges ügynök | Elsődleges ügynök      | Elsődleges értelem (OSS) | tele           | hamis        |
+| 5 merülés         | 5 merülés              | OSS (5dive-ai)           | tele           | hamis        |
+| miértkódok        | WhyCodes               | Miért Corporation        | tele           | hamis        |
 
 ---
 
-## 5. Batch Észlelési API
+## 3. ACP-ügynökök (/dashboard/acp-agents)
 
-Minden eszköz észlelése egyetlen végponton keresztül aggregálódik:
+Ez az oldal (korábban `/dashboard/agents`) azokat a CLI-ket jeleníti meg, amelyeket az OmniRoute háttérbeli végrehajtómotorként képes **elindítani** a stdio/ACP protokollon keresztül. A katalógust külön, a `src/lib/acp/registry.ts` fájlban tartják karban, és az **nem** azonos a `CLI_TOOLS` katalógussal.
+
+---
+
+## 4. MITM-hátralék (nem jelenik meg az irányítópulton)
+
+A következő CLI-k natívan nem támogatják az egyéni alap URL-t, és **nem szerepelnek** a CLI Code vagy a CLI Agents oldalain. Ezek a 11. tervben szereplő MITM-elfogás jelöltjei:
+
+| CLI                 | Indok                                                                           |
+| ------------------- | ------------------------------------------------------------------------------- |
+| windsurf            | A BYOK csak bizonyos Claude-modellekre és vállalati URL-re/tokenre korlátozódik |
+| amp                 | Zárt ökoszisztéma (Sourcegraph)                                                 |
+| amazon-q / kiro-cli | AWS SSO-hitelesítés, nincs egyéni URL                                           |
+| cowork              | Anthropic Desktop, nincs konfigurálható végpont                                 |
+
+A teljes kereszthivatkozást lásd az `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` fájlban.
+
+---
+
+## 5. Kötegelt észlelési API
+
+Az összes eszköz észlelése egyetlen végponton keresztül történik:
 
 **`GET /api/cli-tools/all-statuses`**
 
-- Auth: `requireCliToolsAuth(request)` (ugyanaz, mint a többi `/api/cli-tools/` útvonal)
-- Visszatér: `Record<toolId, ToolBatchStatus>` (típus: `src/shared/types/cliBatchStatus.ts`)
-- Stratégia: `Promise.all` az összes eszközön, 5s időkorlát eszközönként
-- Cache: memóriában LRU, a konfigurációs fájl `mtime` alapján indexelve. A cache érvénytelenítve van, amikor az mtime változik. Visszaállítva a szerver újraindításakor.
+- Hitelesítés: `requireCliToolsAuth(request)` (ugyanaz, mint a többi `/api/cli-tools/` útvonalnál)
+- Visszatérési érték: `Record<toolId, ToolBatchStatus>` (típus: `src/shared/types/cliBatchStatus.ts`)
+- Stratégia: `Promise.all` használata az összes eszközön, eszközönként 5 másodperces időkorláttal
+- Gyorsítótár: memóriában tárolt LRU, amelyet a konfigurációs fájl `mtime` értéke indexel. A gyorsítótár érvényét veszti, amikor az mtime megváltozik. A kiszolgáló újraindításakor alaphelyzetbe áll.
 
-Válasz forma eszközönként:
+Az eszközönkénti válasz szerkezete:
 
 ```ts
 interface ToolBatchStatus {
@@ -204,95 +213,99 @@ interface ToolBatchStatus {
     endpoint?: string | null;
     lastConfiguredAt?: string | null;
   };
-  error?: string; // sanitált, nincs stack trace
+  error?: string; // megtisztítva, veremkövetések nélkül
 }
 ```
 
-## 6. Beállítási Kezelők Új Eszközökhöz
+---
 
-Az új eszközök, amelyek `configType: "custom"` beállítással rendelkeznek, dedikált beállítási API útvonalakkal rendelkeznek:
+## 6. Beállításkezelők új eszközökhöz
 
-| Útvonal                                     | Eszköz                                                                      |
-| ------------------------------------------- | --------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                     |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url flag)                                                     |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legacy)                                      |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, elsődleges + régi `~/.deepseek` szinkronizálás) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                       |
-| `POST /api/cli-tools/pi-settings`           | Pi kódoló ügynök                                                            |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                       |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + dedikált `.env` kulcs)                 |
+A `configType: "custom"` értékkel rendelkező új eszközök dedikált beállítási API-útvonalakkal rendelkeznek:
 
-Minden útvonal a `sanitizeErrorMessage()`-t használja a hiba válaszokhoz (Kemény Szabály #12).
+| Útvonal                                     | Eszköz                                                                          |
+| ------------------------------------------- | ------------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                         |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url kapcsoló)                                                     |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, örökölt)                                         |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, elsődleges + örökölt `~/.deepseek` szinkronizálása) |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                           |
+| `POST /api/cli-tools/pi-settings`           | Pi kódolóügynök                                                                 |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                           |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + dedikált `.env`-kulcs)                     |
+
+Minden útvonal a `sanitizeErrorMessage()` függvényt használja a hibaválaszokhoz (12. szigorú szabály).
 
 ---
 
-## 7. Dashboard Oldalak Architektúrája
+## 7. Az irányítópult oldalainak architektúrája
 
-### CLI Kód (`/dashboard/cli-code`)
+### CLI-kódok (`/dashboard/cli-code`)
 
-- `src/app/(dashboard)/dashboard/cli-code/page.tsx` — szerver komponens
-- `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — kliens rács
-- `src/app/(dashboard)/dashboard/cli-code/[id]/page.tsx` — eszköz részletező oldal
-- `src/app/(dashboard)/dashboard/cli-code/components/` — 12 specializált eszköz kártya + `ToolDetailClient.tsx`
+- `src/app/(dashboard)/dashboard/cli-code/page.tsx` — szerverkomponens
+- `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — kliensoldali rács
+- `src/app/(dashboard)/dashboard/cli-code/[id]/page.tsx` — eszköz részletes oldala
+- `src/app/(dashboard)/dashboard/cli-code/components/` — 12 specializált eszközkártya + `ToolDetailClient.tsx`
 
-### CLI Ügynökök (`/dashboard/cli-agents`)
+### CLI-ügynökök (`/dashboard/cli-agents`)
 
-- `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — szerver komponens
-- `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — kliens rács
-- `src/app/(dashboard)/dashboard/cli-agents/[id]/page.tsx` — újrahasználja a `ToolDetailClient`-et
+- `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — szerverkomponens
+- `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — kliensoldali rács
+- `src/app/(dashboard)/dashboard/cli-agents/[id]/page.tsx` — újra felhasználja a `ToolDetailClient` komponenst
 
-### ACP Ügynökök (`/dashboard/acp-agents`)
+### ACP-ügynökök (`/dashboard/acp-agents`)
 
-- `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — szerver komponens (áthelyezve az `agents/`-ből)
+- `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — szerverkomponens (áthelyezve az `agents/` könyvtárból)
 
-### Megosztott UI Komponensek (`src/shared/components/cli/`)
+### Megosztott felhasználóifelület-komponensek (`src/shared/components/cli/`)
 
-| Fájl                    | Cél                                                     |
-| ----------------------- | ------------------------------------------------------- |
-| `CliToolCard.tsx`       | Okos státusz kártya (észlelés + konfiguráció + végpont) |
-| `CliConceptCard.tsx`    | Oldalankénti fogalommagyarázó kártya                    |
-| `CliComparisonCard.tsx` | Három oszlopos összehasonlítás CLI típusok között       |
-| `BaseUrlSelect.tsx`     | Végpont legördülő (Helyi/Felhő/Személyre szabott)       |
-| `ApiKeySelect.tsx`      | API kulcs kiválasztó                                    |
-| `ManualConfigModal.tsx` | Másolható konfigurációs részlet modal                   |
+| Fájl                    | Rendeltetés                                                   |
+| ----------------------- | ------------------------------------------------------------- |
+| `CliToolCard.tsx`       | Intelligens állapotkártya (észlelés + konfiguráció + végpont) |
+| `CliConceptCard.tsx`    | Oldalankénti fogalommagyarázó kártya                          |
+| `CliComparisonCard.tsx` | Háromoszlopos összehasonlítás a CLI-típusok között            |
+| `BaseUrlSelect.tsx`     | Végpont legördülő menüje (helyi/felhő/egyéni)                 |
+| `ApiKeySelect.tsx`      | API-kulcs-választó                                            |
+| `ManualConfigModal.tsx` | Másolható konfigurációs kódrészletet tartalmazó modális ablak |
 
-### Megosztott Hook (`src/shared/hooks/cli/`)
+### Megosztott hook (`src/shared/hooks/cli/`)
 
-| Fájl                      | Cél                                                                             |
-| ------------------------- | ------------------------------------------------------------------------------- |
-| `useToolBatchStatuses.ts` | Lekéri a `/api/cli-tools/all-statuses`, kezeli a betöltési/frissítési állapotot |
+| Fájl                      | Rendeltetés                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| `useToolBatchStatuses.ts` | Lekéri az `/api/cli-tools/all-statuses` végpontot, kezeli a betöltési/frissítési állapotot |
+
+---
 
 ## 8. i18n
 
-Új névtér került hozzáadásra a 14 F9 tervben:
+A 14 F9 tervben hozzáadott új névterek:
 
-| Névtér      | Cél                                                                                        |
-| ----------- | ------------------------------------------------------------------------------------------ |
-| `cliCommon` | Megosztott szövegek (kártyacímkék, fogalom/összehasonlító szövegek, részletes oldalcímkék) |
-| `cliCode`   | CLI Kód oldal szövegei                                                                     |
-| `cliAgents` | CLI Ügynökök oldal szövegei                                                                |
-| `acpAgents` | ACP Ügynökök oldal szövegei                                                                |
+| Névtér      | Cél                                                                                                     |
+| ----------- | ------------------------------------------------------------------------------------------------------- |
+| `cliCommon` | Megosztott karakterláncok (kártyacímkék, koncepció- és összehasonlító szövegek, részletes oldal címkéi) |
+| `cliCode`   | A CLI Code oldal karakterláncai                                                                         |
+| `cliAgents` | A CLI Agents oldal karakterláncai                                                                       |
+| `acpAgents` | Az ACP Agents oldal karakterláncai                                                                      |
 
-Teljes PT-BR és EN fordítások állnak rendelkezésre. 39 másik nyelv automatikusan visszaesik az EN-re a névtér szintű egyesítés révén a `src/i18n/request.ts` fájlban.
+A teljes PT-BR és EN fordítás biztosított. A további 39 területi beállítás automatikusan az EN fordításra áll vissza a `src/i18n/request.ts` névtérszintű egyesítésén keresztül.
 
 ---
 
 ## 9. Gyors kezdés
 
-### 1. lépés — Szerezz egy OmniRoute API kulcsot
+### 1. lépés — OmniRoute API-kulcs beszerzése
 
-1. Nyisd meg a `/dashboard/api-manager` → **API kulcs létrehozása**
-2. Adj neki egy nevet (pl. `cli-tools`) és válaszd ki az összes engedélyt
-3. Másold a kulcsot — szükséged lesz rá az alábbi CLI-k mindegyikéhez
+1. Nyissa meg a `/dashboard/api-manager` oldalt → **API-kulcs létrehozása**
+2. Adjon neki nevet (pl. `cli-tools`), és válassza ki az összes jogosultságot
+3. Másolja ki a kulcsot — az alábbi CLI-eszközök mindegyikéhez szüksége lesz rá
 
-> A kulcsod így néz ki: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> A kulcs így néz ki: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### 2. lépés — Telepítsd a CLI eszközöket
+### 2. lépés — CLI-eszközök telepítése
 
-Minden npm-alapú eszköz megköveteli a Node.js 22.22.2+ vagy 24.x verziót:
+Minden npm-alapú eszközhöz Node.js 22.22.2+ vagy 24.x szükséges:
 
 ```bash
 # Claude Code (Anthropic)
@@ -313,7 +326,7 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (elindítható az `omniroute run gemini` → /v1beta felületen)
+# Google Gemini CLI (az `omniroute run gemini` paranccsal indítható → /v1beta felület)
 npm install -g @google/gemini-cli
 
 # Aider
@@ -322,49 +335,49 @@ pip install aider-chat
 # Smelt
 cargo install smelt  # Rust-alapú
 
-# Pi coding agent
-# lásd: https://github.com/zechnerj/pi-coding-agent a telepítéshez
+# Pi kódolóügynök
+# a telepítéshez lásd: https://github.com/zechnerj/pi-coding-agent
 
 # jcode
-# lásd: https://github.com/1jehuang/jcode a telepítéshez
+# a telepítéshez lásd: https://github.com/1jehuang/jcode
 ```
 
 ---
 
-### 3. lépés — Konfigurálj a Dashboardon
+### 3. lépés — Konfigurálás az irányítópulton keresztül
 
-1. Lépj a `http://localhost:20128/dashboard/cli-code` oldalra
-2. Keresd meg az eszközödet a rácsban
-3. Kattints a kártyára az eszköz részletes oldalának megnyitásához
-4. Válaszd ki az API kulcsodat és az alap URL-t
-5. Kattints a **Konfiguráció alkalmazása** gombra, vagy másold a manuális konfigurációs részletet
+1. Nyissa meg a `http://localhost:20128/dashboard/cli-code` oldalt
+2. Keresse meg az eszközt a rácsban
+3. Kattintson a kártyára az eszköz részletes oldalának megnyitásához
+4. Válassza ki az API-kulcsot és az alap URL-t
+5. Kattintson a **Konfiguráció alkalmazása** lehetőségre, vagy másolja ki a manuális konfigurációs kódrészletet
 
 ---
 
-### 4. lépés — Állítsd be a globális környezeti változókat
+### 4. lépés — Globális környezeti változók beállítása
 
 ```bash
-# OmniRoute Univerzális Végpont
+# OmniRoute univerzális végpont
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# A Gemini CLI a GOOGLE_GEMINI_BASE_URL-t a ROOT-nál olvassa (az SDK automatikusan hozzáfűzi a /v1beta/...-t)
+# A Gemini CLI a GYÖKÉRSZINTEN olvassa a GOOGLE_GEMINI_BASE_URL változót (az SDK saját maga fűzi hozzá a /v1beta/... részt)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> **Távoli szerver** esetén cseréld le a `localhost:20128`-at a szerver IP-címére vagy domainjére,
-> pl. `http://<your-server-ip>:20128`.
+> **Távoli szerver** esetén cserélje le a `localhost:20128` értéket a szerver IP-címére vagy tartományára,
+> például: `http://<your-server-ip>:20128`.
 
 ---
 
-### 4. lépés — Konfiguráld az egyes eszközöket
+### 4. lépés — Az egyes eszközök konfigurálása
 
 #### Claude Code
 
 ```bash
-# Hozd létre a ~/.claude/settings.json fájlt:
+# A ~/.claude/settings.json létrehozása:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -375,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Használj egységes Anthropic átjáró gyökeret a Claude Code-hoz. Ne fűzd hozzá a `/v1`-et itt.
+A Claude Code esetében az egyesített Anthropic-átjáró gyökerét használja. Itt ne fűzze hozzá a `/v1` részt.
 
 **Teszt:** `claude "say hello"`
 
@@ -383,10 +396,10 @@ Használj egységes Anthropic átjáró gyökeret a Claude Code-hoz. Ne fűzd ho
 
 #### OpenAI Codex
 
-A modern Codex (v0.137+) csak a `~/.codex/config.toml`-t olvassa — a régi
-`config.yaml` a hagyományos npm CLI-hez tartozik, és csendben figyelmen kívül hagyják. Az API
-kulcs a `OMNIROUTE_API_KEY` környezeti változóban (`env_key`) marad, soha
-nem a fájlban:
+A modern Codex (v0.137+) kizárólag a `~/.codex/config.toml` fájlt olvassa — a régi
+`config.yaml` az örökölt npm CLI-hez tartozik, ezért a rendszer minden jelzés nélkül figyelmen kívül hagyja. Az API-
+kulcs az `OMNIROUTE_API_KEY` környezeti változóban (`env_key`) marad, és soha nem kerül
+a fájlba:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -401,7 +414,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Teljes hivatkozás (profilok, `wire_api`, kontextusablakok): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Teljes referencia (profilok, `wire_api`, kontextusablakok): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
 **Teszt:** `codex "what is 2+2?"`
 
@@ -434,14 +447,14 @@ EOF
 
 **Teszt:** `opencode`
 
-> Használj `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> a gondolkodási variánsok küldésére.
+> A gondolkodási változatok küldéséhez használja az `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
+> parancsot.
 
 ---
 
 #### Cline (CLI vagy VS Code)
 
-**CLI mód:**
+**CLI-mód:**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -453,22 +466,22 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code mód:**
-Cline kiterjesztés beállításai → API Szolgáltató: `OpenAI Compatible` → Alap URL: `http://localhost:20128/v1`
+**VS Code-mód:**
+Cline-bővítmény beállításai → API-szolgáltató: `OpenAI Compatible` → Alap URL: `http://localhost:20128/v1`
 
-Vagy használd az OmniRoute dashboardot → **CLI Eszközök → Cline → Konfiguráció alkalmazása**.
+Vagy használja az OmniRoute irányítópultját → **CLI-eszközök → Cline → Konfiguráció alkalmazása**.
 
 ---
 
 #### KiloCode (CLI vagy VS Code)
 
-**CLI mód:**
+**CLI-mód:**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code beállítások:**
+**VS Code-beállítások:**
 
 ```json
 {
@@ -477,13 +490,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Vagy használd az OmniRoute dashboardot → **CLI Eszközök → KiloCode → Konfiguráció alkalmazása**.
+Vagy használja az OmniRoute irányítópultját → **CLI-eszközök → KiloCode → Konfiguráció alkalmazása**.
 
 ---
 
-#### Continue (VS Code Kiterjesztés)
+#### Continue (VS Code-bővítmény)
 
-Szerkeszd a `~/.continue/config.yaml` fájlt:
+Szerkessze a `~/.continue/config.yaml` fájlt:
 
 ```yaml
 models:
@@ -495,20 +508,20 @@ models:
     default: true
 ```
 
-Indítsd újra a VS Code-ot a szerkesztés után.
+A szerkesztés után indítsa újra a VS Code-ot.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Használj ezt, amikor a VS Code Insiders egyedi végpont modellekhez van konfigurálva, és szeretnéd, hogy az OmniRoute működjön egyedi fejlécmező nélkül.
+Akkor használja ezt, ha a VS Code Insiders egyéni végpontmodellekhez van konfigurálva, és azt szeretné, hogy az OmniRoute egyéni fejlécmező nélkül működjön.
 
 **Ajánlott hely:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Példa a tokenizált OmniRoute alias használatával:**
+**Példa a tokenizált OmniRoute-alias használatára:**
 
 ```json
 [
@@ -532,38 +545,38 @@ Használj ezt, amikor a VS Code Insiders egyedi végpont modellekhez van konfigu
 
 **Megjegyzések:**
 
-- Cseréld le a `sk-your-omniroute-key`-t egy OmniRoute-ban létrehozott API kulcsra.
-- Az `url` mezőnek a `/api/v1/vscode/{token}/chat/completions`-ra kell mutatnia.
-- A `modelsUrl` mezőnek a `/api/v1/vscode/{token}/models`-ra kell mutatnia.
-- Előnyben részesítsd a normál `/v1` + Bearer fejléc folyamatot, amikor az ügyfél támogatja az egyedi fejléceket.
-- Az URL-be ágyazott tokenek egy kompatibilitási visszaesés, és megjelenhetnek a szerkesztő naplóiban vagy proxy történetében.
+- Cserélje le az `sk-your-omniroute-key` értéket egy, az OmniRoute-ban létrehozott API-kulcsra.
+- A `url` mezőnek az `/api/v1/vscode/{token}/chat/completions` végpontra kell mutatnia.
+- A `modelsUrl` mezőnek az `/api/v1/vscode/{token}/models` végpontra kell mutatnia.
+- Ha a kliens támogatja az egyéni fejléceket, részesítse előnyben a szokásos `/v1` + Bearer fejléc használatát.
+- Az URL-be ágyazott tokenek kompatibilitási tartalékmegoldást jelentenek, és megjelenhetnek a szerkesztő naplóiban vagy a proxy előzményeiben.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Jelentkezz be az AWS/Kiro fiókodba:
+# Jelentkezzen be az AWS-/Kiro-fiókjába:
 kiro-cli login
 
-# A CLI saját hitelesítést használ — az OmniRoute nem szükséges a Kiro CLI háttérként.
-# Használj kiro-cli-t az OmniRoute mellett más eszközökhöz.
+# A CLI saját hitelesítést használ — magának a Kiro CLI-nek nincs szüksége az OmniRoute-ra háttérrendszerként.
+# Más eszközök esetében használja a kiro-cli-t az OmniRoute mellett.
 kiro-cli status
 ```
 
-A **Kiro IDE** asztali alkalmazáshoz használd az OmniRoute által kitetett MITM végpontot
+A **Kiro IDE** asztali alkalmazás esetében használja az OmniRoute által elérhetővé tett MITM-végpontot
 a `/dashboard/cli-tools → Kiro` alatt.
 
 ---
 
 ## 10. Belső OmniRoute CLI
 
-Az `omniroute` bináris parancsokat biztosít a szerver életciklusának kezeléséhez, a beállításhoz, a diagnosztikához és a szolgáltatók kezeléséhez. Belépési pont: `bin/omniroute.mjs`.
+Az `omniroute` bináris parancsokat biztosít a kiszolgáló életciklusának kezeléséhez, a beállításhoz, a diagnosztikához és a szolgáltatók kezeléséhez. Belépési pont: `bin/omniroute.mjs`.
 
 ```bash
-omniroute                              # Szerver indítása (alapértelmezett port: 20128)
+omniroute                              # Kiszolgáló indítása (alapértelmezett port: 20128)
 omniroute setup                        # Interaktív beállítási varázsló
-omniroute doctor                       # Konfiguráció, DB, portok és futtatókörnyezet ellenőrzése
+omniroute doctor                       # Konfiguráció, adatbázis, portok és futtatókörnyezet ellenőrzése
 omniroute providers list               # Konfigurált szolgáltatói kapcsolatok
 omniroute providers test-all           # Minden aktív kapcsolat tesztelése
 omniroute reset-password               # Az adminisztrátori jelszó visszaállítása
@@ -578,37 +591,37 @@ omniroute --help                       # Az összes parancs megjelenítése
 ```bash
 omniroute setup                        # Interaktív beállítási varázsló
 omniroute setup --non-interactive      # CI-/automatizálási mód (környezeti változókat és kapcsolókat olvas)
-omniroute setup --password '<value>'   # Az adminisztrátori jelszó közvetlen beállítása
+omniroute setup --password '<value>'   # Adminisztrátori jelszó közvetlen beállítása
 omniroute setup --add-provider \
   --provider openai \
   --api-key '<value>' \
-  --test-provider                      # Szolgáltató hozzáadása és tesztelése egy lépésben
+  --test-provider                      # Szolgáltató hozzáadása és tesztelése egyetlen lépésben
 ```
 
 A nem interaktív beállítás során felismert környezeti változók:
 
-| Változó             | Rendeltetés                                                              |
-| ------------------- | ------------------------------------------------------------------------ |
-| `OMNIROUTE_API_KEY` | Szolgáltatói API-kulcs (a Commander `.env()` révén a `--api-key` értéke) |
-| `DATA_DIR`          | Az OmniRoute adatkönyvtárának felülbírálása                              |
+| Változó             | Rendeltetés                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| `OMNIROUTE_API_KEY` | Szolgáltatói API-kulcs (a Commander `.env()` segítségével a `--api-key` kapcsolóhoz kötve) |
+| `DATA_DIR`          | Az OmniRoute adatkönyvtárának felülbírálása                                                |
 
-Minden egyéb nem interaktív bemenet kapcsolóként, nem pedig környezeti változóként adandó át:
+Minden más nem interaktív bemenet kapcsolóként, nem pedig környezeti változóként adandó át:
 `--password`, `--provider`, `--provider-name`, `--provider-base-url`, `--default-model`
 (lásd fent az `omniroute setup` beállításait).
 
 ### Diagnosztika
 
 ```bash
-omniroute doctor                       # Konfiguráció, DB, portok, futtatókörnyezet, memória és elérhetőség ellenőrzése
+omniroute doctor                       # Konfiguráció, adatbázis, portok, futtatókörnyezet, memória és elérhetőség ellenőrzése
 omniroute doctor --json                # Géppel olvasható JSON
-omniroute doctor --no-liveness         # A HTTP-s állapotpróba kihagyása
-omniroute doctor --host 0.0.0.0        # Az elérhetőségi vizsgálat gazdagépének felülbírálása
+omniroute doctor --no-liveness         # A HTTP-állapotpróba kihagyása
+omniroute doctor --host 0.0.0.0        # Az elérhetőségi gazdagép felülbírálása
 omniroute doctor --liveness-url <url>  # Az állapotvégpont teljes URL-jének felülbírálása
 ```
 
 A doctor a következő ellenőrzéseket futtatja: `Config`, `Database`, `Storage/encryption`,
 `Port availability`, `Node runtime`, `Native binary` (better-sqlite3),
-`Memory` és `Server liveness`. Nem nulla kilépési kóddal fejeződik be, ha bármely ellenőrzés eredménye `fail`.
+`Memory` és `Server liveness`. Nem nulla kilépési kóddal fejeződik be, ha bármelyik ellenőrzés eredménye `fail`.
 
 ### Szolgáltatók kezelése
 
@@ -623,7 +636,7 @@ omniroute providers list --json
 
 omniroute providers test <id|name>                  # Egy konfigurált kapcsolat tesztelése
 omniroute providers test-all                        # Minden aktív kapcsolat tesztelése
-omniroute providers validate                        # Csak helyi strukturális ellenőrzés
+omniroute providers validate                        # Kizárólag helyi szerkezeti ellenőrzés
 omniroute providers add <provider> --credential-env PROVIDER_KEY
 omniroute providers import ./providers.json --dry-run --json
 omniroute providers auth <provider>                 # Meglévő OAuth-folyamat
@@ -631,36 +644,58 @@ omniroute providers edit <id|name> --default-model <model>
 omniroute providers remove <id|name> --yes
 ```
 
-A `providers add/import/auth/edit/remove` elsősorban API-alapú, ezért az aktív helyi vagy távoli környezettel működik. A hitelesítési adatok beviteléhez a `--credential-stdin` vagy a `--credential-env` használata ajánlott; a `--dry-run --json` csak maszkolt jelenléti-/struktúra-információkat jelent. A `providers available` az OmniRoute katalógusát olvassa; a `providers list/test/test-all/validate` megőrzi a helyi SQLite-alapú működését, és nem igényli a szerver futását.
+A `providers add/import/auth/edit/remove` parancsok elsősorban API-alapúak, ezért
+az aktív helyi vagy távoli környezeten működnek. A hitelesítő adatokat a
+`--credential-stdin` vagy a `--credential-env` használatával kell megadni; a `--dry-run --json`
+csak kitakart jelenléti és szerkezeti információkat jelent. A `providers available`
+az OmniRoute katalógusát olvassa; a `providers list/test/test-all/validate` megtartja
+helyi SQLite-működését, és nem igényli a kiszolgáló futását.
+
+Egyedi OpenAI-kompatibilis vagy Anthropic-kompatibilis csomópont esetén társítsa a hitelesítő adatokat
+az `omniroute nodes add` által visszaadott csomópont-azonosítóhoz az `omniroute keys add "$NODE_ID" --stdin`
+használatával. Ehhez futó kiszolgáló és az aktív környezethez tartozó felügyeleti hitelesítés szükséges.
+A CLI a `POST /api/providers` végpontot használja, amely ellenőrzi a csomópontot, és annak végpontbeállításait
+a kapcsolatba másolja. Hiányzó csomópont, sikertelen engedélyezés vagy elérhetetlen kiszolgáló esetén
+hiba történik, helyi tartalék hitelesítő adat létrehozása nélkül.
+
+A `nodes add --base-url` a csomópont végpontját állítja be; ez nem azonos az
+`OMNIROUTE_BASE_URL` változóban megadott kiszolgálócímmel. OpenAPI-fájlokhoz használja az
+`omniroute openapi dump --format json --out ./openapi.json` parancsot; a globális `--output`
+a CLI megjelenítési formátumát választja ki, nem pedig a célfájl nevét.
 
 ### Helyreállítás és visszaállítás
 
 ```bash
 omniroute reset-password                # Az adminisztrátori jelszó visszaállítása (más néven: omniroute-reset-password)
-omniroute reset-encrypted-columns       # Figyelmeztetés és próbaüzem megjelenítése a titkosított hitelesítési adatok visszaállításához
-omniroute reset-encrypted-columns --force  # A titkosított hitelesítési adatok tényleges nullázása az SQLite-ban
+omniroute reset-encrypted-columns       # Figyelmeztetés és próbaüzem megjelenítése a titkosított hitelesítő adatok visszaállításához
+omniroute reset-encrypted-columns --force  # A titkosított hitelesítő adatok tényleges nullázása az SQLite-ban
 ```
 
-### Hitelesítési adatok exportálása (⚠ körültekintően kezelendő)
+### Hitelesítő adatok exportálása (⚠ körültekintően kezelendő)
 
 ```bash
-omniroute auth export                                 # Figyelmeztetés és megerősítési lépés megjelenítése — nincs DB-hozzáférés
-omniroute auth export --force                          # Az ÖSSZES kapcsolat VISSZAFEJTETT hitelesítési adatainak exportálása JSON-ként a szabványos kimenetre
+omniroute auth export                                 # Figyelmeztetés és megerősítési lépés megjelenítése — nincs adatbázis-hozzáférés
+omniroute auth export --force                          # MINDEN kapcsolat VISSZAFEJTETT hitelesítő adatainak exportálása JSON-ként a szabványos kimenetre
 omniroute auth export --force --id <id>                 # Csak az egyező kapcsolat exportálása
 omniroute auth export --force --format env               # OMNIROUTE_<PROVIDER>_<FIELD>=<value> sorok kibocsátása
 omniroute auth export --force --out creds.json           # Fájlba írás (0600 jogosultságokkal létrehozva)
 ```
 
-Az `auth export` **csak helyileg** működik (közvetlen SQLite-olvasás, HTTP-útvonal nélkül), és szándékosan **egyszerű szöveges** `apiKey`/`accessToken`/`refreshToken`/`idToken` értékeket jelenít meg vagy ír ki — ez funkció, nem hiba. A `--force` nélkül a rendszer semmit sem olvas az adatbázisból, és semmit sem fejt vissza. A rendszer mindig figyelmeztető szöveget ír a stderr kimenetre, mielőtt bármilyen egyszerű szöveges adatot kibocsátana. Ehhez a `STORAGE_ENCRYPTION_KEY` beállítása szükséges. Ha egy mező visszafejtése sikertelen (elavult kulcs vagy sérült titkosított szöveg), azt a rendszer `<field>DecryptFailed: true` formában jelenti ahelyett, hogy megszakítaná a teljes exportálást vagy kiszivárogtatná a mögöttes hibát.
+Az `auth export` **kizárólag helyben működik** (közvetlen SQLite-olvasás, HTTP-útvonal nélkül), és szándékosan
+**egyszerű szövegként** jeleníti meg vagy írja ki az `apiKey`/`accessToken`/`refreshToken`/`idToken` értékeket — ez funkció, nem
+hiba. A `--force` nélkül semmi sem kerül kiolvasásra az adatbázisból, és semmi sem kerül visszafejtésre. A szabványos hibakimenetre
+mindig megjelenik egy figyelmeztető szalag, mielőtt bármilyen egyszerű szöveges érték kiírásra kerülne. Ehhez be kell
+állítani a `STORAGE_ENCRYPTION_KEY` változót. Ha egy mező visszafejtése sikertelen (elavult kulcs, sérült titkosított szöveg), akkor
+a rendszer `<field>DecryptFailed: true` értékkel jelzi azt ahelyett, hogy megszakítaná a teljes exportálást, vagy kiszivárogtatná a mögöttes hibát.
 
 ### Egyéb alparancsok
 
-Ezek futó OmniRoute szervert feltételeznek, hacsak nincs másképp jelezve:
+Ezek futó OmniRoute-kiszolgálót feltételeznek, hacsak nincs másként jelezve:
 
 ```bash
 omniroute status                       # Átfogó futásidejű állapot
-omniroute logs                         # Kérésnaplók folyamatos megjelenítése (--json, --search, --follow)
-omniroute config list                  # Beállított CLI-eszközök megjelenítése
+omniroute logs                         # Kérésnaplók streamelése (--json, --search, --follow)
+omniroute config list                  # Konfigurált CLI-eszközök megjelenítése
 
 omniroute provider list                # Elérhető szolgáltatók listázása (a providers list aliasa)
 omniroute provider add                 # Az OmniRoute regisztrálása szolgáltatóként egy eszközön
@@ -689,53 +724,85 @@ omniroute completion                   # Parancsértelmező-kiegészítés gener
 
 ### Gyakori kapcsolók
 
-| Kapcsoló            | Leírás                                                   |
-| ------------------- | -------------------------------------------------------- |
-| `--no-open`         | Indításkor ne nyissa meg automatikusan a böngészőt       |
-| `--port <n>`        | Az API-port felülírása (alapértelmezett: 20128)          |
-| `--mcp`             | Futtatás MCP-kiszolgálóként stdio felett (IDE-k számára) |
-| `--non-interactive` | CI-mód (nincsenek kérdések; env/kapcsolók használata)    |
-| `--json`            | Géppel olvasható JSON-kimenet (doctor, providers stb.)   |
-| `--help`, `-h`      | Parancsspecifikus súgó megjelenítése                     |
-| `--version`, `-v`   | A telepített verzió kiírása                              |
+| Kapcsoló            | Leírás                                                                     |
+| ------------------- | -------------------------------------------------------------------------- |
+| `--no-open`         | Ne nyissa meg automatikusan a böngészőt indításkor                         |
+| `--port <n>`        | Az API-port felülbírálása (alapértelmezés: 20128)                          |
+| `--mcp`             | Futtatás MCP-kiszolgálóként stdio használatával (IDE-khez)                 |
+| `--non-interactive` | CI-mód (nincsenek kérdések; beolvasás környezeti változókból/kapcsolókból) |
+| `--json`            | Géppel olvasható JSON-kimenet (doctor, providers stb.)                     |
+| `--help`, `-h`      | Parancsspecifikus súgó megjelenítése                                       |
+| `--version`, `-v`   | A telepített verzió kiírása                                                |
 
 ---
 
-## Elérhető API végpontok
+## Elérhető API-végpontok
 
-| Végpont                    | Leírás                               | Használat                                      |
-| -------------------------- | ------------------------------------ | ---------------------------------------------- |
-| `/v1/chat/completions`     | Szabványos chat (minden szolgáltató) | Minden modern eszköz                           |
-| `/v1/responses`            | Válaszok API (OpenAI formátum)       | Codex, ügynöki munkafolyamatok                 |
-| `/v1/completions`          | Örökölt szöveg kiegészítések         | Régi eszközök, amelyek `prompt:`-ot használnak |
-| `/v1/embeddings`           | Szöveg beágyazások                   | RAG, keresés                                   |
-| `/v1/images/generations`   | Kép generálás                        | GPT-Image, Flux, stb.                          |
-| `/v1/audio/speech`         | Szöveg-beszéd                        | ElevenLabs, OpenAI TTS                         |
-| `/v1/audio/transcriptions` | Beszéd-szöveg                        | Deepgram, AssemblyAI                           |
+| Végpont                    | Leírás                                   | Felhasználási terület                      |
+| -------------------------- | ---------------------------------------- | ------------------------------------------ |
+| `/v1/chat/completions`     | Szabványos csevegés (minden szolgáltató) | Minden modern eszköz                       |
+| `/v1/responses`            | Responses API (OpenAI-formátum)          | Codex, ágensalapú munkafolyamatok          |
+| `/v1/completions`          | Örökölt szövegkiegészítések              | Régebbi, `prompt:` mezőt használó eszközök |
+| `/v1/embeddings`           | Szövegbeágyazások                        | RAG, keresés                               |
+| `/v1/images/generations`   | Képgenerálás                             | GPT-Image, Flux stb.                       |
+| `/v1/audio/speech`         | Szövegfelolvasás                         | ElevenLabs, OpenAI TTS                     |
+| `/v1/audio/transcriptions` | Beszéd szöveggé alakítása                | Deepgram, AssemblyAI                       |
 
-Kész példa, amely tartalmaz egy tokenizált OmniRoute URL-t:
+Beillesztésre kész példák tokennel ellátott OmniRoute URL-lel:
 
 ```txt
-Token példa: sk-a3ab3c080beaee3a-69f4a4-070d71af
+Tokenpélda: sk-a3ab3c080beaee3a-69f4a4-070d71af
 
-Szabványos OpenAI alap: http://localhost:20128/v1
-VS Code modellek: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/models
-VS Code chat: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/chat/completions
-VS Code válaszok: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/responses
-Ollama címkék: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/tags
-Ollama chat: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/chat
+Szabványos OpenAI-alapcím: http://localhost:20128/v1
+VS Code-modellek: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/models
+VS Code-csevegés: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/chat/completions
+VS Code-válaszok: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/responses
+Ollama-címkék: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/tags
+Ollama-csevegés: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/chat
 ```
 
 ---
 
 ## Hibaelhárítás
 
-| Hiba                                     | Ok                               | Megoldás                                                     |
-| ---------------------------------------- | -------------------------------- | ------------------------------------------------------------ |
-| `Connection refused`                     | OmniRoute nem fut                | `omniroute serve`                                            |
-| `401 Unauthorized`                       | Hibás API kulcs                  | Ellenőrizze a `/dashboard/api-manager`-ben                   |
-| `No combo configured`                    | Nincs aktív routing kombináció   | Állítsa be a `/dashboard/combos`-ban                         |
-| CLI azt mutatja, hogy "nincs telepítve"  | Bináris nem található a PATH-ban | Ellenőrizze a `which <command>`-ot                           |
-| A műszerfal "nem észlelt" telepítés után | A gyorsítótár elavult            | Kattintson a "⟳ Frissítés észlelése" gombra a műszerfalon    |
-| Régi link `/dashboard/cli-tools`         | Pre-v3.8.6 könyvjelző            | Automatikusan átirányítva a `/dashboard/cli-code`-ra (308)   |
-| Régi link `/dashboard/agents`            | Pre-v3.8.6 könyvjelző            | Automatikusan átirányítva a `/dashboard/acp-agents`-ra (308) |
+| Hiba                                                         | Ok                                  | Javítás                                                      |
+| ------------------------------------------------------------ | ----------------------------------- | ------------------------------------------------------------ |
+| `Connection refused`                                         | Az OmniRoute nem fut                | `omniroute serve`                                            |
+| `401 Unauthorized`                                           | Hibás API-kulcs                     | Ellenőrizze itt: `/dashboard/api-manager`                    |
+| `No combo configured`                                        | Nincs aktív útválasztási kombináció | Állítsa be itt: `/dashboard/combos`                          |
+| A CLI szerint „nincs telepítve”                              | A bináris fájl nincs a PATH-ban     | Ellenőrizze: `which <command>`                               |
+| A vezérlőpult a telepítés után „nem észlelt” állapotot mutat | A gyorsítótár elavult               | Kattintson a vezérlőpulton a „⟳ Észlelés frissítése” elemre  |
+| Régi hivatkozás: `/dashboard/cli-tools`                      | v3.8.6 előtti könyvjelző            | Automatikusan átirányítva ide: `/dashboard/cli-code` (308)   |
+| Régi hivatkozás: `/dashboard/agents`                         | v3.8.6 előtti könyvjelző            | Automatikusan átirányítva ide: `/dashboard/acp-agents` (308) |
+
+## A következtetési kulcs szabályzatának kezelése az OmniRoute CLI-vel
+
+Használjon hitelesített kezelési környezetet (lásd: [Távoli mód](../guides/REMOTE-MODE.md))
+egy meglévő következtetési kulcs azonosító alapján történő megtekintéséhez vagy frissítéséhez:
+
+```bash
+omniroute --output json keys policy show KEY_ID
+omniroute keys policy set KEY_ID --unrestricted
+omniroute --output json keys policy show KEY_ID
+```
+
+A `--unrestricted` a `--model-access-mode all` álneve. A frissítés törli a
+modellek engedélyezési listáját. Megőrzi a hatóköröket, a kapcsolati szabályokat, a letiltott modelleket, a sebességkorlátokat
+és a költségkorlátokat, így ezek a további vezérlők továbbra is elutasíthatnak egy kérést. A kifejezett
+`--allowed-models ""` szintén az `all` értéket választja; kombinálja a
+`--model-access-mode restricted` beállítással, hogy a kulcs korlátozott maradjon engedélyezett modellek nélkül.
+Egy nem üres, vesszővel elválasztott lista a `restricted` értéket választja, hacsak nincs más kifejezetten megadva.
+Az egymásnak ellentmondó `all` és nem üres engedélyezési lista kombinációját a rendszer a kérés elküldése előtt elutasítja.
+
+A `--rate-limit 30` percenkénti kérésszámot állít be, és megőrzi a többi időablakra
+vonatkozó szabályokat. A `--max-cost 5` engedélyezi a napi USD-korlátot a heti korlát módosítása nélkül;
+a `--max-cost 0` eltávolítja a napi korlátot, és megőrzi a meglévő használatikorlát-kapcsolót,
+valamint a heti korlátot. A kihagyott szabályzatmezők változatlanok maradnak. A sebességkorlát módosításakor a rendszer
+először beolvassa az aktuális szabályzatot; kerülje ugyanazon kulcs sebességkorlát-tömbjének párhuzamos szerkesztését.
+
+A szabályzatparancsok hitelesített `GET`/`PATCH /api/keys/{id}` kéréseket használnak, és figyelembe veszik az aktív
+környezetet, valamint a globális `--api-key` beállítást. A JSON-kimenet csak a szabályzatmezőket tartalmazza,
+a tárolt kulcs vagy annak maszkolt ábrázolása nélkül. Egy kizárólag következtetésre használható hitelesítő adat
+nem jogosít fel kezelési módosításokra. A 401/403 válasz esetén ellenőrizni kell a kezelési
+hitelesítő adatot és környezetet; ez nem bizonyít helyi CLI-token- vagy sóhibát.
+A különálló helyi hitelesítési szerződéssel kapcsolatban lásd: [CLI-token](../security/CLI_TOKEN.md).

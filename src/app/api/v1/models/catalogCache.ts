@@ -15,8 +15,9 @@
 import { createHmac } from "node:crypto";
 
 import { after } from "next/server";
+import { getCopilotRejectionCatalogVersion } from "@omniroute/open-sse/services/copilotModelRejections.ts";
 
-import { getModelCatalogCacheVersion } from "@/lib/db/readCache";
+import { getModelCatalogCacheVersion as getDatabaseCatalogVersion } from "@/lib/db/readCache";
 import { extractApiKey } from "@/sse/services/auth";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 
@@ -99,6 +100,8 @@ export function defaultBackgroundRefreshScheduler(task: () => Promise<unknown>):
 export type CatalogCacheOptions = {
   hideAutoCombos?: boolean;
   hideNoThinkVariants?: boolean;
+  /** Management-only build that keeps operator-hidden models (`/api/models/catalog`). */
+  revealHidden?: boolean;
   /**
    * Overrides `CATALOG_STALE_WHILE_REVALIDATE_MS` for this call only.
    *
@@ -147,7 +150,80 @@ function catalogBuildTimeoutMs(): number {
   return Number.isFinite(n) && n > 0 ? n : CATALOG_BUILD_TIMEOUT_MS_DEFAULT;
 }
 
-const catalogLastGood = new Map<string, CachedCatalog>();
+// Bound both maps independently: cursor/auth/filter combinations can create many keys.
+// Oversized responses still reach the caller without being retained.
+const CATALOG_CACHE_MAX_ENTRIES = 64;
+const CATALOG_CACHE_MAX_BYTES = 16 * 1024 * 1024;
+
+class BoundedCatalogCache {
+  private items = new Map<string, { entry: CachedCatalog; bytes: number }>();
+  private bytes = 0;
+
+  get(key: string): CachedCatalog | undefined {
+    const value = this.items.get(key);
+    if (!value) return undefined;
+    this.items.delete(key);
+    this.items.set(key, value);
+    return value.entry;
+  }
+
+  set(key: string, entry: CachedCatalog): void {
+    // Two bytes per UTF-16 code unit bounds V8's one-/two-byte string storage.
+    // Entry-count limits bound object/Map overhead independently of string size.
+    const bytes =
+      2 *
+      (key.length +
+        entry.body.length +
+        Object.entries(entry.headers).reduce(
+          (total, [name, value]) => total + name.length + value.length,
+          0
+        ));
+    if (bytes > CATALOG_CACHE_MAX_BYTES) return;
+    // An oversized refresh must preserve an existing bounded last-good entry.
+    this.delete(key);
+    while (
+      this.items.size >= CATALOG_CACHE_MAX_ENTRIES ||
+      this.bytes + bytes > CATALOG_CACHE_MAX_BYTES
+    ) {
+      this.delete(this.items.keys().next().value!);
+    }
+    this.items.set(key, { entry, bytes });
+    this.bytes += bytes;
+  }
+
+  private delete(key: string): void {
+    const value = this.items.get(key);
+    if (!value) return;
+    this.bytes -= value.bytes;
+    this.items.delete(key);
+  }
+
+  clear(): void {
+    this.items.clear();
+    this.bytes = 0;
+  }
+
+  pruneExpired(now: number, staleWindowMs: number): void {
+    for (const [key, { entry }] of this.items) {
+      const retention = entry.status === 200 ? Math.max(0, staleWindowMs) : 0;
+      if (entry.expiresAt <= now && (entry.status !== 200 || now - entry.expiresAt > retention)) {
+        this.delete(key);
+      }
+    }
+  }
+
+  *entries(): IterableIterator<[string, CachedCatalog]> {
+    for (const [key, { entry }] of this.items) yield [key, entry];
+  }
+
+  stats(): { entries: number; bytes: number } {
+    return { entries: this.items.size, bytes: this.bytes };
+  }
+}
+
+// Last-good has no TTL: timeout fallback deliberately survives the fresh/SWR
+// windows, until LRU pressure or a catalog generation change removes the entry.
+const catalogLastGood = new BoundedCatalogCache();
 
 export class CatalogBuildTimeoutError extends Error {
   constructor() {
@@ -178,7 +254,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   });
 }
 
-const catalogCache = new Map<string, CachedCatalog>();
+const catalogCache = new BoundedCatalogCache();
 
 /**
  * An in-flight build is bound to the catalog-state generation it started from
@@ -189,10 +265,11 @@ const catalogCache = new Map<string, CachedCatalog>();
  * on it), just without being persisted.
  */
 type InFlightBuild = {
-  generation: number;
+  generation: string;
   promise: Promise<CachedCatalog>;
   lastKeptAt?: number;
   timeoutCount?: number;
+  lastTimeoutCountedAt?: number;
 };
 const catalogInFlight = new Map<string, InFlightBuild>();
 
@@ -207,7 +284,9 @@ function buildCatalogCacheKey(request: Request, catalogSettings?: CatalogCacheOp
   const hideAuto = catalogSettings?.hideAutoCombos ? "1" : "0";
   const hideNoThink = catalogSettings?.hideNoThinkVariants ? "1" : "0";
   const page = catalogPageCacheKey(parseCatalogPage(request));
-  return `${prefix}|${isCodex}|${fingerprintCatalogAuthKey(apiKey)}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}`;
+  // Appended only when set, so every public /v1/models key stays byte-identical.
+  const reveal = catalogSettings?.revealHidden ? "|reveal" : "";
+  return `${prefix}|${isCodex}|${fingerprintCatalogAuthKey(apiKey)}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}`;
 }
 
 // Tracks the model-catalog cache version (src/lib/db/readCache.ts) as of the last
@@ -215,12 +294,16 @@ function buildCatalogCacheKey(request: Request, catalogSettings?: CatalogCacheOp
 // combos/pricing write; when it moves on, every memoized entry here was built from
 // state that no longer holds, so drop them all rather than keying by version (which
 // would leak one Map entry per version forever instead of ever pruning old ones).
+function getModelCatalogCacheVersion(): string {
+  return `${getDatabaseCatalogVersion()}:${getCopilotRejectionCatalogVersion()}`;
+}
 let lastSeenCatalogCacheVersion = getModelCatalogCacheVersion();
 function dropCatalogCacheIfStateChanged(): void {
   const currentVersion = getModelCatalogCacheVersion();
   if (currentVersion === lastSeenCatalogCacheVersion) return;
   lastSeenCatalogCacheVersion = currentVersion;
   catalogCache.clear();
+  catalogLastGood.clear();
   // Deliberately NOT clearing catalogInFlight: an in-flight build bound to the
   // previous generation is left to finish for its original caller, but the
   // generation check in the join path (below) keeps new requests from joining
@@ -259,7 +342,7 @@ export function mergeCatalogHeaders(
 function storePayload(
   cacheKey: string,
   payload: CatalogPayload,
-  buildGeneration: number
+  buildGeneration: string
 ): CachedCatalog {
   const entry: CachedCatalog = {
     body: payload.body,
@@ -371,12 +454,21 @@ async function awaitCatalogInFlight(
         lastGood.status
       );
     }
+    const boundMs = catalogBuildTimeoutMs();
     const shared = catalogInFlight.get(cacheKey);
     if (shared && shared.promise === inflight.promise) {
-      shared.timeoutCount = (shared.timeoutCount ?? 0) + 1;
-      shared.lastKeptAt = Date.now();
+      const now = Date.now();
+      // Concurrent waiters observe one expired build window. Counting each
+      // waiter would replace a live build after just one busy timeout wave.
+      if (
+        shared.lastTimeoutCountedAt === undefined ||
+        now - shared.lastTimeoutCountedAt >= boundMs
+      ) {
+        shared.timeoutCount = (shared.timeoutCount ?? 0) + 1;
+        shared.lastTimeoutCountedAt = now;
+      }
+      shared.lastKeptAt = now;
     }
-    const boundMs = catalogBuildTimeoutMs();
     const retryAfterSec = Math.max(1, Math.ceil((2 * boundMs) / 1000));
     const body = JSON.stringify(
       buildErrorBody(503, "catalog_build_timeout", undefined, {
@@ -417,9 +509,13 @@ export async function resolveCachedCatalogResponse(
 
   const cacheKey = buildCatalogCacheKey(request, catalogSettings);
   const now = Date.now();
+  const staleWindowMs =
+    catalogSettings?.getStaleWhileRevalidateMs?.() ?? CATALOG_STALE_WHILE_REVALIDATE_MS;
+  catalogCache.pruneExpired(now, staleWindowMs);
   const cached = catalogCache.get(cacheKey);
 
   if (cached && cached.expiresAt > now) {
+    if (cached.status === 200) catalogLastGood.get(cacheKey);
     return catalogStringResponse(
       cached.body,
       mergeCatalogHeaders(corsHeaders, cached.headers, diagnosticHeaders),
@@ -432,9 +528,8 @@ export async function resolveCachedCatalogResponse(
   // intermittent failure behind a fake success forever — and (b) it is within the
   // staleness window, so a refresh that keeps failing eventually falls through to the
   // cold-path wait instead of pinning ancient data.
-  const staleWindowMs =
-    catalogSettings?.getStaleWhileRevalidateMs?.() ?? CATALOG_STALE_WHILE_REVALIDATE_MS;
   if (cached && cached.status === 200 && now - cached.expiresAt <= staleWindowMs) {
+    catalogLastGood.get(cacheKey);
     startBackgroundRefresh(
       cacheKey,
       request,
@@ -488,6 +583,11 @@ export function __resetCatalogBuilderRunsForTest(): void {
   lastSeenCatalogCacheVersion = getModelCatalogCacheVersion();
 }
 
+/** Retained-string accounting only; successful bodies may be shared across maps. */
+export function __getCatalogCacheStatsForTest() {
+  return { cache: catalogCache.stats(), lastGood: catalogLastGood.stats() };
+}
+
 /** Counts full builder executions — proves concurrent requests share one run (#6408). */
 export function __getCatalogBuilderRunsForTest(): number {
   return _catalogBuilderRuns;
@@ -500,7 +600,7 @@ export function __getCatalogBuilderRunsForTest(): number {
  */
 export function __expireCatalogCacheForTest(msAgo = 1): void {
   const expiresAt = Date.now() - msAgo;
-  for (const [key, entry] of catalogCache.entries()) {
+  for (const [key, entry] of [...catalogCache.entries()]) {
     catalogCache.set(key, { ...entry, expiresAt });
   }
 }

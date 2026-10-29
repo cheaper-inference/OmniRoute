@@ -4,7 +4,7 @@
 
 ---
 
-> **Qısa xülasə**: Quraşdırın → Pulsuz provayder qoşun → IDE-nizi OmniRoute-a yönləndirin. Hazırdır.
+> **Qısaca**: Quraşdırın → Uyğun provayderi qoşun → IDE-nizi OmniRoute-a yönləndirin. Hazırdır.
 
 ---
 
@@ -47,33 +47,11 @@ OmniRoute `http://localhost:20128` ünvanında işə düşür. İdarə paneli av
 
 ---
 
-## Addım 3: Pulsuz provayder qoşun
+## Addım 3: Uyğun Provayderə Qoşulun
 
-Pulsuz provayder qoşaraq OmniRoute-dan **heç bir ödəniş etmədən** istifadə edə bilərsiniz.
+Şərtləri və kvotası ehtiyaclarınıza uyğun olan provayderi seçin. **İdarəetmə paneli → Provayderlər** bölməsində öz hesabınızı və ya API açarınızı qoşun, sonra bağlantını yoxlayın. Pulsuz girişə və açarsız əlçatanlığa zəmanət verilmir.
 
-### Seçim A: Kiro (Pulsuz Claude — Kredit kartı tələb olunmur)
-
-1. `http://localhost:20128` ünvanında idarə panelini açın
-2. **Providers** → **Add Provider** bölməsinə keçin
-3. **Kiro AI** seçin
-4. **Connect** düyməsinə klikləyin (API açarı tələb olunmur!)
-5. Hazırdır! İndi Claude modellərinə pulsuz girişiniz var.
-
-### Seçim B: OpenCode Free (Autentifikasiya tələb olunmur)
-
-1. `http://localhost:20128` ünvanında idarə panelini açın
-2. **Providers** → **Add Provider** bölməsinə keçin
-3. **OpenCode Free** seçin
-4. **Connect** düyməsinə klikləyin (API açarı tələb olunmur!)
-5. Hazırdır! İndi bir neçə modelə pulsuz girişiniz var.
-
-### Seçim C: Pollinations (Açar tələb olunmur)
-
-1. `http://localhost:20128` ünvanında idarə panelini açın
-2. **Providers** → **Add Provider** bölməsinə keçin
-3. **Pollinations** seçin
-4. **Connect** düyməsinə klikləyin (API açarı tələb olunmur!)
-5. Hazırdır! İndi GPT-5, Claude, Gemini və digər modellərə pulsuz girişiniz var.
+`auto`, Kiro da daxil olmaqla, `tos: avoid` ilə işarələnmiş provayderləri standart olaraq istisna edir. Hesab qoşmaq bu siyasəti dəyişmir. **İdarəetmə paneli → Kombinasiyalar** bölməsindəki qoşulma seçimi bütün avtomatik kombinasiyalara tətbiq olunur. Provayder seçməzdən əvvəl [Pulsuz Tariflər üzrə Təlimat](./FREE-TIERS-GUIDE.md) sənədini nəzərdən keçirin.
 
 ---
 
@@ -150,36 +128,36 @@ Sol yan paneldə [Monitoring/Logs](http://localhost:20128/dashboard/logs) bölm�
 
 ---
 
-## Növbəti addımlar
+## Növbəti addım nədir?
 
-- **[Auto-Combo təlimatı](./AUTO-COMBO-GUIDE.md)** — OmniRoute-un sizin üçün ən yaxşı süni intellekti seçməsinə imkan verin
-- **[Provayderlər üzrə təlimat](./PROVIDERS-GUIDE.md)** — Daha çox provayder qoşun (pulsuz və ödənişli)
-- **[Pulsuz tariflər üzrə təlimat](./FREE-TIERS-GUIDE.md)** — Kredit kartı olmadan pulsuz süni intellekt əldə edin
-- **[Nasazlıqların aradan qaldırılması](../guides/TROUBLESHOOTING.md)** — Ümumi problemləri həll edin
+- **[Avtomatik kombinasiya bələdçisi](./AUTO-COMBO-GUIDE.md)** — OmniRoute-un sizin üçün ən yaxşı süni intellekti seçməsinə imkan verin
+- **[Provayderlər üzrə bələdçi](./PROVIDERS-GUIDE.md)** — Daha çox provayderə qoşulun (pulsuz və ödənişli)
+- **[Pulsuz paketlər üzrə bələdçi](./FREE-TIERS-GUIDE.md)** — Provayder şərtlərini və pulsuz paket məhdudiyyətlərini nəzərdən keçirin
+- **[Problemlərin aradan qaldırılması](../guides/TROUBLESHOOTING.md)** — Ümumi problemləri həll edin
 
 ---
 
 ## Tez-tez verilən suallar
 
-### "API açarına ehtiyacım varmı?"
+### "Mənə API açarı lazımdır?"
 
-**Xeyr!** Pulsuz provayderlərdən (Kiro, OpenCode Free, Pollinations) heç bir API açarı olmadan istifadə edə bilərsiniz. Sadəcə onları idarə panelində qoşun.
+OmniRoute API açarı alətlərinizi autentifikasiya edir. Yuxarı axın giriş məlumatları provayderdən asılıdır: bəziləri API açarı və ya hesaba giriş tələb edir. Pulsuz girişə zəmanət verilmir.
 
 ### "`auto` nədir?"
 
-`auto` OmniRoute-a hər sorğu üçün ən yaxşı provayderi avtomatik seçməyi bildirir. O, sürəti, xərci, keyfiyyəti və əlçatanlığı nəzərə alır. Ətraflı məlumat üçün [Auto-Combo təlimatına](./AUTO-COMBO-GUIDE.md) baxın.
+`auto` OmniRoute-a hər sorğu üçün ən yaxşı provayderi avtomatik seçməyi bildirir. O, sürəti, qiyməti, keyfiyyəti və əlçatanlığı nəzərə alır. Ətraflı məlumat üçün [Avtomatik Kombinasiya Təlimatına](./AUTO-COMBO-GUIDE.md) baxın.
 
 ### "Qiyməti nə qədərdir?"
 
-OmniRoute özü **pulsuz və açıq mənbəlidir**. Yalnız istifadə etdiyiniz provayderlər üçün ödəniş edirsiniz. Bir çox provayderin pulsuz tarifləri var — [Pulsuz tariflər üzrə təlimata](./FREE-TIERS-GUIDE.md) baxın.
+OmniRoute özü **pulsuz və açıq mənbəlidir**. Yalnız istifadə etdiyiniz provayderlər üçün ödəniş edirsiniz. Bir çox provayderin pulsuz tarifləri var — [Pulsuz Tariflər Təlimatına](./FREE-TIERS-GUIDE.md) baxın.
 
 ### "Onu Claude Code / Cursor / Copilot ilə istifadə edə bilərəm?"
 
-**Bəli!** OmniRoute OpenAI formatını dəstəkləyən istənilən alətlə işləyir. Sadəcə baza URL-ni `http://localhost:20128/v1` olaraq təyin edin. Xüsusi quraşdırma təlimatları üçün [CLI alətləri üzrə təlimata](../reference/CLI-TOOLS.md) baxın.
+**Bəli!** OmniRoute OpenAI formatını dəstəkləyən istənilən alətlə işləyir. Sadəcə əsas URL-i `http://localhost:20128/v1` olaraq təyin edin. Xüsusi quraşdırma təlimatları üçün [CLI Alətləri Təlimatına](../reference/CLI-TOOLS.md) baxın.
 
-### "Provayder fəaliyyətini dayandırsa nə baş verəcək?"
+### "Provayderlərdən biri işləməsə nə baş verər?"
 
-OmniRoute uğursuz olan provayderləri avtomatik ötürür və növbəti provayderi sınayır. Heç nə etməyinizə ehtiyac yoxdur. Ətraflı məlumat üçün [Auto-Combo təlimatına](./AUTO-COMBO-GUIDE.md) baxın.
+OmniRoute nasaz provayderləri avtomatik olaraq ötürür və növbəti provayderi sınayır. Heç nə etməyinizə ehtiyac yoxdur. Ətraflı məlumat üçün [Avtomatik Kombinasiya Təlimatına](./AUTO-COMBO-GUIDE.md) baxın.
 
 ---
 

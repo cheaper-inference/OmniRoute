@@ -117,6 +117,43 @@ test("shouldSwallowUncaught preserves crash semantics for genuine errors", () =>
   assert.equal(shouldSwallowUncaught(realErr2, "uncaughtException"), false);
 });
 
+test("BodyTimeoutError from open-sse requires the exact timeout shape (#16817)", () => {
+  const timeout = Object.assign(new Error("Response body read timeout after 60000ms"), {
+    name: "BodyTimeoutError",
+  });
+  assert.equal(timeout.code, undefined);
+  assert.equal(sharedGuard.isRecoverableUpstreamTimeoutError(timeout), true);
+  assert.equal(shouldSwallowUncaught(timeout, "uncaughtException"), true);
+  assert.equal(shouldSwallowUncaught(timeout, "unhandledRejection"), true);
+  assert.equal(shouldSwallowUncaught(timeout, "unknownOrigin"), false);
+
+  for (const invalid of [
+    new Error("Response body read timeout after 60000ms"),
+    Object.assign(new Error("unrelated failure"), { name: "BodyTimeoutError" }),
+    Object.assign(new Error("Response body read timeout after 0ms"), { name: "BodyTimeoutError" }),
+    Object.assign(new Error("Response body read timeout after NaNms"), {
+      name: "BodyTimeoutError",
+    }),
+    Object.assign(new TypeError("programmer bug"), { name: "BodyTimeoutError" }),
+  ]) {
+    assert.equal(sharedGuard.isRecoverableUpstreamTimeoutError(invalid), false);
+    assert.equal(shouldSwallowUncaught(invalid, "unhandledRejection"), false);
+  }
+});
+
+test("process survives an actual unhandled BodyTimeoutError rejection (#16817)", async () => {
+  const { status, stdout, stderr } = await runGuardChild(`
+    const { installProcessCrashGuard } = await import(process.argv[1]);
+    installProcessCrashGuard();
+    const error = new Error("Response body read timeout after 60000ms");
+    error.name = "BodyTimeoutError";
+    Promise.reject(error);
+    setTimeout(() => { console.log("ALIVE"); process.exit(0); }, 60);
+  `);
+  assert.equal(status, 0, "child must survive the body timeout; stderr: " + stderr);
+  assert.match(stdout, /ALIVE/);
+});
+
 test("installProcessCrashGuard does not throw on import and is idempotent", () => {
   assert.doesNotThrow(() => installProcessCrashGuard(() => {}));
   assert.doesNotThrow(() => installProcessCrashGuard(() => {}));

@@ -16,62 +16,41 @@ Les fonctionnalités de furtivité permettent à OmniRoute de servir de couche d
 
 ---
 
-## Couche d'empreinte TLS
+## Couche d’empreinte TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Des sessions `wreq-js` persistantes sont créées à la demande pour chaque périmètre de compte et proxy résolu. À l'échelle du processus, `TlsClient` regroupe au maximum 128 sessions qui se font passer pour **Chrome 124 sur macOS** auprès des services en amont protégés par Cloudflare. `TlsClient.fetch()` échoue de manière fermée lorsque l'environnement d'exécution natif est indisponible ; un appelant peut sélectionner explicitement une solution de repli en dehors de cet encapsuleur.
+Des sessions persistantes `wreq-js` sont créées de manière différée pour chaque périmètre de compte et chaque proxy résolu. Le `TlsClient` à l’échelle du processus regroupe au maximum 128 sessions qui imitent **Chrome 124 sur macOS** pour les services en amont protégés par Cloudflare. `TlsClient.fetch()` échoue de manière sécurisée lorsque l’environnement d’exécution natif n’est pas disponible ; un appelant peut sélectionner explicitement une solution de repli en dehors de ce wrapper.
 
 - Profil de session : `browser: "chrome_124", os: "macos"`
 - Résolution du proxy (par ordre de priorité) : `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (également en minuscules)
-- Délai d'expiration : `TLS_CLIENT_TIMEOUT_MS` (hérite de `FETCH_TIMEOUT_MS`, valeur par défaut : 600000)
-- La réponse de `wreq-js` est compatible avec fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Délai d’expiration : `TLS_CLIENT_TIMEOUT_MS` (hérite de `FETCH_TIMEOUT_MS`, valeur par défaut : 600000)
+- La Response de `wreq-js` est compatible avec fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
 - Chien de garde du premier octet (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656) : `TlsClient.fetch()`
-  est résolue dès l'arrivée des en-têtes du service en amont ; `TLS_CLIENT_TIMEOUT_MS` ne peut donc
-  pas, à lui seul, limiter l'attente d'un corps qui ne produit jamais de premier octet. `guardTlsFirstByte()` met en concurrence
-  le premier `read()` du corps et `TLS_FIRST_BYTE_WATCHDOG_MS` (valeur par défaut : `10000` ; `0` le désactive) ; un corps sain
-  n'est pas affecté, tandis qu'un corps bloqué entraîne l'annulation du lecteur wreq et permet à la logique
-  existante de repli TLS de `proxyFetch` de poursuivre avec le répartiteur direct/proxy (une requête dont
-  la réexécution n'est pas sûre, par exemple une requête POST avec un corps, génère toujours une erreur au lieu
-  d'être réessayée silencieusement).
+  se résout dès l’arrivée des en-têtes du service en amont ; `TLS_CLIENT_TIMEOUT_MS` ne peut donc pas, à lui seul, limiter l’attente d’un corps qui ne fournit jamais de premier octet. `guardTlsFirstByte()` met en concurrence le premier `read()` du corps avec `TLS_FIRST_BYTE_WATCHDOG_MS` (valeur par défaut : `10000`, `0` le désactive) ; un corps sain n’est pas affecté, tandis qu’un corps bloqué entraîne l’annulation du lecteur wreq et permet à la logique de repli TLS existante de `proxyFetch` de poursuivre vers le répartiteur direct/proxy (une requête qui ne peut pas être rejouée en toute sécurité, par exemple une requête POST avec un corps, génère toujours une erreur au lieu d’être réessayée silencieusement).
 
-### Transport des fournisseurs par cookie web — wreq-js 3.2.0
+### Transport du fournisseur de cookies web — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` est l'adaptateur partagé par les cinq transports spécialisés
-par cookie web ci-dessous. Chaque encapsuleur léger propre à un fournisseur sélectionne un profil de navigateur/système d'exploitation. L'adaptateur
-utilise l'unique chargeur d'environnement d'exécution wreq et le pool de transports de `open-sse/utils/tlsClient.ts`, indexé par
-profil + système d'exploitation + proxy résolu, tandis que chaque requête utilise `cookieMode: "ephemeral"`. Les comptes et
-les requêtes partagent donc les connexions au niveau du transport, mais jamais une session wreq ni un magasin de cookies.
+`open-sse/services/tlsClientBase.ts` est l’adaptateur partagé par les cinq transports spécialisés de cookies web ci-dessous. Chaque wrapper léger de fournisseur sélectionne un profil de navigateur/système d’exploitation. L’adaptateur utilise le chargeur unique de l’environnement d’exécution wreq et le pool de transports de `open-sse/utils/tlsClient.ts`, indexé par profil + système d’exploitation + proxy résolu, tandis que chaque requête utilise `cookieMode: "ephemeral"`. Les comptes et les requêtes partagent donc les connexions au niveau du transport, mais jamais une session wreq ni un magasin de cookies.
 
-| Fournisseur | Profil        | Système d'exploitation émulé | Politique de fin de flux                           |
-| ----------- | ------------- | ---------------------------- | -------------------------------------------------- |
-| Claude      | `chrome_146`  | Linux                        | inclure `[DONE]`                                   |
-| Perplexity  | `firefox_148` | macOS                        | inclure `event: end_of_stream`                     |
-| Grok        | `chrome_146`  | Linux                        | exclure `[DONE]`                                   |
-| Notion      | `chrome_146`  | Windows                      | inclure `[DONE]`                                   |
-| LMArena     | `chrome_146`  | Windows                      | aucune sentinelle ; fermer à la fin de flux native |
+| Fournisseur | Profil        | Système d’exploitation émulé | Politique de fin de flux                              |
+| ----------- | ------------- | ---------------------------- | ----------------------------------------------------- |
+| Claude      | `chrome_146`  | Linux                        | inclure `[DONE]`                                      |
+| Perplexity  | `firefox_151` | macOS                        | inclure `event: end_of_stream`                        |
+| Grok        | `chrome_146`  | Linux                        | exclure `[DONE]`                                      |
+| Notion      | `chrome_146`  | Windows                      | inclure `[DONE]`                                      |
+| LMArena     | `chrome_146`  | Windows                      | aucune sentinelle ; fermer à la fin de fichier native |
 
-- La diffusion en continu consomme directement le `ReadableStream` de la réponse native ; aucun fichier temporaire ni processus auxiliaire n'est
-  créé.
-- Jusqu'à 256 octets initiaux sont inspectés avant d'exposer un flux. Les fournisseurs SSE mettent en mémoire tampon les erreurs
-  non-SSE ; Grok/LMArena convertissent les défis Cloudflare en `403` et les pages HTML interstitielles en `502`.
-- Le délai d'expiration natif de la requête reste encadré par une échéance absolue stricte en JS. Un blocage invalide
-  et ferme uniquement le transport concerné correspondant au profil/système d'exploitation/proxy avant que la requête suivante ne le recrée.
-- L'ordre de priorité de la résolution du proxy est le suivant : `proxyUrl` propre à l'appel → contexte de compte/tableau de bord associé à la requête →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (y compris leurs variantes en minuscules). Les erreurs de résolution entraînent
-  un échec fermé plutôt que la fuite d'une connexion directe. LMArena effectue délibérément la résolution par rapport à `arena.ai`.
-- `byteResponse` renvoie une URL `data:` typée par contenu, sans corruption UTF-8.
-- Les erreurs sont `TlsClientUnavailableError` (package/module complémentaire indisponible), `TlsClientHangError`
-  (échéance dépassée) et `WreqTransportCapacityError` (code d'erreur partagé de capacité de session)
-  lorsque les 128 emplacements bornés profil/système d'exploitation/proxy sont tous actifs ou en cours de fermeture.
+- La diffusion en continu consomme directement le `ReadableStream` de la réponse native ; aucun fichier temporaire ni processus auxiliaire n’est créé.
+- Jusqu’à 256 octets initiaux sont inspectés avant d’exposer un flux. Les fournisseurs SSE mettent en mémoire tampon les erreurs non-SSE ; Grok/LMArena associent les défis Cloudflare au code `403` et les pages HTML interstitielles au code `502`.
+- Le délai d’expiration natif de la requête reste encadré par une échéance absolue stricte côté JS. Un blocage invalide et ferme uniquement le transport concerné pour le profil/système d’exploitation/proxy avant que la requête suivante ne le recrée.
+- L’ordre de priorité de résolution du proxy est le suivant : `proxyUrl` propre à l’appel → contexte de compte/tableau de bord limité à la requête → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (y compris les variantes en minuscules). Les erreurs de résolution provoquent un échec sécurisé au lieu de laisser échapper une connexion directe. LMArena effectue délibérément la résolution par rapport à `arena.ai`.
+- `byteResponse` renvoie une URL `data:` dont le type de contenu est défini, sans corruption UTF-8.
+- Les erreurs sont `TlsClientUnavailableError` (package/module complémentaire indisponible), `TlsClientHangError` (échéance dépassée) et `WreqTransportCapacityError` (code d’erreur partagé de capacité de session) lorsque les 128 emplacements bornés de profil/système d’exploitation/proxy sont tous actifs ou en cours de fermeture.
 
-La session générique `TlsClient` ci-dessus reste spécialisée dans l'état persistant des cookies
-gérés par le navigateur. Les deux chemins réutilisent un même chargeur de module wreq mis en cache et le même hook de cycle de vie du processus ; leurs pools restent
-séparés, car la durée de vie de leurs cookies est volontairement différente.
+La session générique `TlsClient` ci-dessus reste spécialisée dans l’état persistant des cookies gérés par le navigateur. Les deux chemins réutilisent un même chargeur de module wreq mis en cache et un même hook de cycle de vie du processus ; leurs pools restent séparés, car les durées de vie de leurs cookies sont intentionnellement différentes.
 
-Les profils sont pris en charge par le package épinglé, mais l'acceptation effective par les WAF peut évoluer indépendamment
-des tests de contrat locaux. Validez les modifications d'empreinte avec un compte actif explicitement autorisé
-avant de revendiquer la parité avec un navigateur du service en amont.
+Les profils sont pris en charge par le package épinglé, mais l’acceptation réelle par le WAF peut évoluer indépendamment des tests de contrat locaux. Validez les modifications d’empreinte avec un compte actif explicitement autorisé avant d’affirmer une parité avec un navigateur du service en amont.
 
 ---
 
@@ -120,7 +99,7 @@ Appliqué aux éléments suivants : blocs `system`, tous les `messages[].content
 
 Pour les relais Anthropic tiers qui n’acceptent que du trafic provenant du « vrai Claude Code » :
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` par défaut
@@ -244,7 +223,7 @@ Tous les points de terminaison MITM nécessitent une authentification de gestion
 
 | Variable                 | Valeur par défaut                                               |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

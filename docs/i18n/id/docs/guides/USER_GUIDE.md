@@ -612,25 +612,25 @@ Untuk referensi lengkap variabel lingkungan, lihat [README](../README.md).
 <details>
 <summary><b>Lihat semua model yang tersedia</b></summary>
 
-> Daftar di bawah ini dikurasi dari `open-sse/config/providerRegistry.ts` untuk v3.8.0. Katalog cloud (Gemini, OpenRouter, dll.) disinkronkan secara dinamis — untuk melihat katalog lengkap dan terkini, buka **Dasbor → Penyedia → [penyedia] → Model yang Tersedia** atau panggil `GET /api/models/catalog`.
+> Daftar di bawah ini dikurasi dari `open-sse/config/providerRegistry.ts` untuk v3.8.0. Katalog cloud (Gemini, OpenRouter, dll.) disinkronkan secara dinamis — untuk katalog langsung yang lengkap, buka **Dasbor → Penyedia → [provider] → Model yang Tersedia** atau panggil `GET /api/models/catalog`.
 >
-> Jika daftar bawaan suatu penyedia sudah tidak sinkron, gunakan **Impor dari /models** pada halaman tersebut (atau aktifkan **Sinkronisasi Otomatis**) untuk mengambil katalog upstream terkini. Hal ini telah diverifikasi pada v3.8.50 untuk LLM7.io (`gemini-3.1-flash-lite`) dan UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); akses anonim Pollinations tetap dibatasi oleh upstream selama rangkaian pengujian yang sama.
+> Jika daftar bawaan penyedia telah bergeser, gunakan **Impor dari /models** di halaman tersebut (atau aktifkan **Sinkronisasi Otomatis**) untuk menarik katalog upstream langsung. Ini telah diverifikasi pada v3.8.50 untuk LLM7.io (`gemini-3.1-flash-lite`) dan UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); akses anonim Pollinations tetap dibatasi dari sisi upstream selama rangkaian pengujian yang sama.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ tingkat upaya: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ tingkat effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth GRATIS: gunakan katalog terkini yang ditampilkan di **Dasbor → Penyedia → Kiro → Model yang Tersedia**. Ketersediaan bergantung pada akun dan paket.
+**Kiro (`kr/`)** — OAuth GRATIS: gunakan katalog langsung yang ditampilkan di **Dasbor → Penyedia → Kiro → Model yang Tersedia**. Ketersediaan tergantung pada akun dan paket.
 
 **Qoder (`if/`)** — OAuth GRATIS: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1 juta: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1 juta: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — tarif tetap $9/bulan atau bayar sesuai pemakaian: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/bln flat atau per pemakaian: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Kunci API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -640,7 +640,7 @@ Untuk referensi lengkap variabel lingkungan, lihat [README](../README.md).
 
 **Mistral (`mistral/`)** — Dihosting di UE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Didukung pencarian: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Diperkaya pencarian: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Sumber terbuka: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -648,19 +648,19 @@ Untuk referensi lengkap variabel lingkungan, lihat [README](../README.md).
 
 **Cerebras (`cerebras/`)** — Skala wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Berfokus pada RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Fokus RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Perusahaan: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Disinkronkan secara langsung dari Google untuk setiap kunci API — tidak ada daftar statis. Hubungkan kunci di **Dasbor → Penyedia**, lalu gunakan **Model yang Tersedia** untuk mengimpor katalog terkini (misalnya `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Disinkronkan langsung per kunci API dari Google — tanpa daftar statis. Hubungkan kunci di **Dasbor → Penyedia** lalu gunakan **Model yang Tersedia** untuk mengimpor katalog terkini (mis. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Penyedia kompatibel lainnya** (pilihan): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (melalui `aws-bedrock`), `azure-ai`, `openrouter` (katalog passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Masing-masing mempertahankan daftar modelnya sendiri di `providerRegistry.ts` dan dapat disinkronkan secara otomatis ketika penyedia menyediakan endpoint `/models`.
+**Penyedia kompatibel lainnya** (pilihan): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (katalog passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Masing-masing memelihara daftar modelnya sendiri di `providerRegistry.ts` dan dapat disinkronkan secara otomatis ketika penyedia menyediakan endpoint `/models`.
 
-**Catatan tentang ID model:** OmniRoute menggunakan ID native penyedia (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Beberapa ID menyertakan versi bertitik karena itulah format yang diharapkan oleh API upstream. Jika suatu model tidak tercantum di atas, jalankan `omniroute models --search <term>` atau akses `GET /api/models/catalog` untuk mengonfirmasi ketersediaannya.
+**Catatan tentang ID model:** OmniRoute menggunakan ID native penyedia (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Beberapa ID menyertakan versi bertitik karena memang begitulah format yang diharapkan oleh API upstream. Jika suatu model tidak tercantum di atas, jalankan `omniroute models --search <term>` atau panggil `GET /api/models/catalog` untuk memastikan ketersediaannya.
 
 </details>
 
@@ -668,70 +668,75 @@ Untuk referensi lengkap variabel lingkungan, lihat [README](../README.md).
 
 ## 🧩 Fitur Lanjutan
 
-### Model Kustom
+### Model Khusus
 
-Tambahkan ID model apa pun ke penyedia mana pun tanpa menunggu pembaruan aplikasi:
+Tambahkan model ID apa pun ke penyedia mana pun tanpa menunggu pembaruan aplikasi:
 
 ```bash
-# Melalui API
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# Daftar: curl http://localhost:20128/api/provider-models?provider=openai
-# Hapus: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Atau gunakan Dasbor: **Penyedia → [Penyedia] → Model Kustom**.
+Atau gunakan Dasbor:** Penyedia → [Penyedia] → Model Kustom** .
 
 Catatan:
 
-- Penyedia yang kompatibel dengan OpenRouter dan OpenAI/Anthropic hanya dikelola dari **Model yang Tersedia**. Penambahan manual, impor, dan sinkronisasi otomatis semuanya masuk ke daftar model tersedia yang sama, sehingga tidak ada bagian Model Kustom terpisah untuk penyedia tersebut.
-- Bagian **Model Kustom** ditujukan bagi penyedia yang tidak menyediakan impor model tersedia yang terkelola.
+- penyedia OpenRouter dan OpenAI/Anthropic-compatible dikelola dari** Model yang Tersedia** hanya. Penambahan, impor, dan sinkronisasi otomatis secara manual semuanya berada dalam daftar model tersedia yang sama, sehingga tidak ada bagian Model Kustom terpisah untuk penyedia tersebut.
+- Itu** Model Khusus** bagian ini ditujukan bagi penyedia yang tidak mengekspos impor model tersedia yang dikelola.
 
 ### Penyedia Kustom yang Kompatibel dengan OpenAI
 
-Gateway apa pun yang menggunakan API OpenAI (proksi yang dihosting sendiri, vLLM, agregator pihak ketiga)
-dapat ditambahkan sebagai node penyedia tersendiri:
+Gateway apa pun yang menggunakan OpenAI API (proxy yang dihosting sendiri, vLLM, agregator pihak ketiga) dapat ditambahkan sebagai node penyedianya sendiri:
 
-1. **Penyedia → Tambahkan yang Kompatibel dengan OpenAI**.
-2. **Nama**: label tampilan untuk node.
-3. **Prefiks**: nama perutean. Klien memanggil model sebagai `<prefix>/<model>`, sehingga node dengan
-   prefiks `mygw` melayani `mygw/gpt-4o-mini`. Wajib; tidak ada batasan karakter.
-4. **Jenis API**: keluarga endpoint yang dilayani gateway (Chat Completions, Responses,
-   Embeddings, audio, gambar).
-5. **URL Dasar**: root API, hingga dan termasuk `/v1` (misalnya
-   `https://gateway.example.com/v1`), bukan path lengkap `/chat/completions`. Gateway dengan
-   path nonstandar mengaturnya di **Pengaturan Lanjutan** (path chat, path model).
-6. Kolom **Kunci API (untuk Pemeriksaan)** hanya menguji koneksi. Setelah membuat node,
-   buka node tersebut dan gunakan **Tambahkan Koneksi** untuk menyimpan kunci yang akan digunakan oleh permintaan.
+1. **Penyedia → Tambahkan OpenAI Kompatibel** .
+2. **Nama** : label tampilan untuk node.
+3. **Awalan** : nama perutean. Klien memanggil model sebagai `<prefix>/<model>`, sehingga node dengan awalan `mygw` melayani `mygw/gpt-4o-mini`. Diperlukan; tidak ada batasan karakter.
+4. **Tipe API** : keluarga titik akhir yang dilayani gateway (Penyelesaian Obrolan, Respons, Penyematan, audio, gambar).
+5. **Basis URL** : akar API, hingga dan termasuk `/v1` (misalnya `https://gateway.example.com/v1`), bukan jalur `/chat/completions` lengkap. Gateway dengan jalur non-standar mengaturnya di bawah** Pengaturan Lanjutan** (jalur obrolan, jalur model).
+6. Itu** Kunci API (untuk Pemeriksaan)** bidang hanya menguji koneksi. Setelah membuat node, buka dan gunakan** Tambahkan Koneksi** untuk menyimpan kunci yang akan digunakan permintaan.
 
-Node mendapatkan ID internal dengan format `openai-compatible-<apiType>-<uuid>`; Anda tidak pernah
-perlu mengetiknya karena prefiks adalah nama publiknya.
+Node mendapat id internal dalam bentuk `openai-compatible-<apiType>-<uuid>`; Anda tidak perlu mengetikkannya, awalannya adalah nama publik.
 
-#### Prefiks yang dicadangkan
+#### Awalan yang dicadangkan
 
-Prefiks tidak boleh sama dengan ID atau alias penyedia bawaan (misalnya `openai`, `cf`), maupun
-ID penyedia yang telah dihentikan. Penyelesai model memeriksa ID dan alias bawaan sebelum
-node kustom, sehingga node yang menggunakan salah satu prefiks tersebut tidak akan pernah menerima lalu lintas:
-`<prefix>/model` akan diarahkan ke penyedia bawaan atau ditolak jika penyedia tersebut
-telah dihentikan. Pembuatan atau pengeditan node dengan prefiks seperti itu ditolak dengan:
+Awalan tidak boleh berupa id atau alias penyedia bawaan (misalnya `openai`, `cf`), atau id penyedia yang sudah tidak digunakan lagi. Penyelesai model memeriksa id dan alias bawaan sebelum node khusus, sehingga node yang menggunakan salah satu awalan tersebut tidak akan pernah menerima lalu lintas: `<prefix>/model` akan menuju ke penyedia bawaan, atau gagal ditutup jika penyedia tersebut sudah dihentikan. Membuat atau mengedit node dengan awalan seperti itu ditolak dengan:
 
 ```text
-prefiks: "<prefix>" adalah prefiks penyedia yang dicadangkan — pilih prefiks lain (ID/alias yang dicadangkan tidak dapat digunakan untuk node kustom karena permintaan seperti <prefix>/model dirutekan ke penyedia bawaan atau ditolak saat penyedia telah dihentikan)
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-Pilih prefiks yang berbeda (`mygw`, `acme-proxy`). Jika permintaan ke node kustom gagal dengan
-kesalahan yang menyebutkan penyedia bawaan atau kredensialnya, periksa apakah prefiks node
-dicadangkan: node yang disimpan sebelum aturan ini diberlakukan masih tersimpan, tetapi prefiksnya dirutekan ke
-penyedia bawaan. Edit node dan berikan prefiks baru.
+Pilih awalan yang berbeda (`mygw`, `acme-proxy`). Jika permintaan ke node kustom gagal dengan kesalahan yang menyebutkan nama penyedia bawaan atau kredensialnya, periksa apakah awalan node dicadangkan: node yang disimpan sebelum aturan ini ada masih disimpan, namun awalannya dirutekan ke penyedia bawaan. Edit node dan berikan awalan baru.
 
-### Merangkai Peer OmniRoute
+#### Opsi gateway per koneksi
 
-Gateway OmniRoute lain dapat ditambahkan sebagai penyedia **Kustom yang kompatibel dengan OpenAI**. Gunakan
-URL dasar `/v1` milik peer dan kunci API khusus dengan hak akses minimum yang diterbitkan oleh peer tersebut.
+Kunci-kunci ini masuk ke `providerSpecificData` koneksi (misalnya melalui `PUT /api/providers/{id}`):
 
-Untuk rantai timbal balik atau multi-hop, aktifkan penjaga loop opsional di setiap gateway:
+- `toolNameMaxLength` (integer, 1–1024) — untuk koneksi yang kompatibel dengan format obrolan OpenAI yang gatewaynya menolak nama alat yang panjang. Nama yang lebih panjang dikirim sebagai alias pendek dan dikembalikan sebagai respons.
+- `quotaEndpoint` — titik akhir quota/credits gateway, dibaca untuk strip kuota dasbor dan perutean sadar kuota. Bekerja pada koneksi yang kompatibel dengan OpenAI dan Anthropic; bentuk lengkapnya didokumentasikan dalam `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### Merangkai OmniRoute Rekan
+
+Gerbang OmniRoute lain dapat ditambahkan sebagai a** Kompatibel dengan OpenAI khusus** penyedia. Gunakan basis `/v1` URL rekan dan kunci API khusus dengan hak istimewa paling rendah yang dikeluarkan oleh rekan tersebut.
+
+Untuk rantai timbal balik atau multi-hop, aktifkan opt-in loop guard di setiap gateway:
 
 ```bash
 # gateway-a
@@ -747,18 +752,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Hanya permintaan yang dikirim ke URL peer yang secara eksplisit masuk daftar izin yang menerima header
-`X-OmniRoute-Peer-Trace`. Gateway menolak ID instans yang berulang atau anggaran hop yang
-habis dengan HTTP `508 Loop Detected`; penyedia upstream biasa tidak menerima metadata peer.
+Hanya permintaan yang dikirim ke rekan URL yang diizinkan secara eksplisit yang menerima header `X-OmniRoute-Peer-Trace`. Sebuah gateway menolak instance berulang ID atau anggaran hop yang habis dengan HTTP `508 Loop Detected`; penyedia hulu biasa tidak menerima metadata rekan.
 
-Perangkaian peer bukanlah replikasi basis data atau failover host. Setiap gateway menyimpan
-status SQLite, cache, penghitung laju, dan sesi secara independen. Gunakan proksi balik dengan pemeriksaan kesehatan atau
-failover klien untuk ketersediaan aktif/pasif atau aktif/aktif, dan jangan pernah memasang satu basis data SQLite
-ke beberapa instans OmniRoute yang sedang berjalan.
+Peer chaining bukanlah replikasi database atau failover host. Setiap gateway menyimpan status SQLite, cache, penghitung laju, dan sesi secara independen. Gunakan proksi terbalik atau failover klien yang telah diperiksa kesehatannya untuk ketersediaan active/passive atau active/active, dan jangan pernah memasang satu basis data SQLite ke beberapa instans OmniRoute yang sedang berjalan.
 
 ### Rute Penyedia Khusus
 
-Rutekan permintaan secara langsung ke penyedia tertentu dengan validasi model:
+Merutekan permintaan langsung ke penyedia tertentu dengan validasi model:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -766,118 +766,118 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Prefiks penyedia ditambahkan secara otomatis jika belum ada. Model yang tidak cocok mengembalikan `400`.
+Awalan penyedia ditambahkan secara otomatis jika tidak ada. Model yang tidak cocok mengembalikan `400`.
 
 ### Konfigurasi Proksi Jaringan
 
 ```bash
-# Atur proksi global
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Proksi per penyedia
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Uji proksi
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Prioritas:** Khusus kunci → Khusus kombo → Khusus penyedia → Global → Lingkungan.
+**Hak lebih tinggi:** → khusus kunci Kombo → khusus penyedia → Lingkungan → Global.
 
-### API Katalog Model
+### Katalog Model API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Mengembalikan model yang dikelompokkan berdasarkan penyedia beserta jenisnya (`chat`, `embedding`, `image`).
+Mengembalikan model yang dikelompokkan berdasarkan penyedia dengan tipe (`chat`, `embedding`, `image`).
 
-### Sinkronisasi Cloud
+### Sinkronisasi Awan
 
 - Sinkronkan penyedia, kombo, dan pengaturan di seluruh perangkat
-- Sinkronisasi latar belakang otomatis dengan batas waktu + fail-fast
-- Utamakan `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` sisi server dalam produksi
+- Sinkronisasi latar belakang otomatis dengan batas waktu + gagal-cepat
+- Lebih suka `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` sisi server dalam produksi
 
-### Tunnel Cepat Cloudflare
+### Cloudflare Terowongan Cepat
 
-- Tersedia di **Dashboard → Endpoints** untuk Docker dan deployment mandiri lainnya
-- Membuat URL `https://*.trycloudflare.com` sementara yang meneruskan ke endpoint `/v1` kompatibel OpenAI Anda saat ini
-- Pengaktifan pertama menginstal `cloudflared` hanya jika diperlukan; proses mulai ulang berikutnya menggunakan kembali biner terkelola yang sama
-- Quick Tunnel tidak dipulihkan secara otomatis setelah OmniRoute atau container dimulai ulang; aktifkan kembali dari dashboard saat diperlukan
-- URL tunnel bersifat sementara dan berubah setiap kali Anda menghentikan/memulai tunnel
-- Quick Tunnel terkelola secara default menggunakan transport HTTP/2 untuk menghindari peringatan buffer UDP QUIC yang mengganggu di container dengan keterbatasan sumber daya
-- Atur `CLOUDFLARED_PROTOCOL=quic` atau `auto` jika Anda ingin mengganti pilihan transport terkelola
-- Atur `CLOUDFLARED_BIN` jika Anda lebih memilih menggunakan biner `cloudflared` yang telah diinstal sebelumnya daripada unduhan terkelola
-- Panel Cloudflare Quick Tunnel, Tailscale Funnel, dan ngrok Tunnel dapat ditampilkan atau disembunyikan di **Settings → Appearance**. Menyembunyikan panel tidak menghentikan tunnel yang sedang berjalan.
+- Tersedia di** Dasbor → Titik Akhir** untuk Docker dan penerapan yang dihosting sendiri lainnya
+- Membuat `https://*.trycloudflare.com` URL sementara yang meneruskan ke titik akhir `/v1` yang kompatibel dengan OpenAI Anda saat ini
+- Pertama-tama aktifkan pemasangan `cloudflared` hanya bila diperlukan; kemudian restart, gunakan kembali biner terkelola yang sama
+- Terowongan Cepat tidak dipulihkan secara otomatis setelah OmniRoute atau container dimulai ulang; aktifkan kembali dari dasbor bila diperlukan
+- Terowongan URLs bersifat sementara dan berubah setiap kali Anda stop/start terowongan
+- Terkelola Quick Tunnels default ke HTTP/2 transport untuk menghindari peringatan buffer QUIC UDP yang berisik dalam wadah yang dibatasi
+- Tetapkan `CLOUDFLARED_PROTOCOL=quic` atau `auto` jika Anda ingin mengganti pilihan transportasi terkelola
+- Setel `CLOUDFLARED_BIN` jika Anda lebih suka menggunakan biner `cloudflared` yang sudah diinstal sebelumnya daripada unduhan terkelola
+- panel Cloudflare Quick Tunnel, Tailscale Funnel, dan ngrok Tunnel dapat ditampilkan atau disembunyikan** Pengaturan → Penampilan** . Menyembunyikan panel tidak menghentikan terowongan yang sedang berjalan.
 
-### Kecerdasan LLM Gateway (Fase 9)
+### LLM Gateway Intelligence (Fase 9)
 
-- **Cache Semantik** — Secara otomatis menyimpan dalam cache respons non-streaming dengan temperature=0 (lewati dengan `X-OmniRoute-No-Cache: true`)
-- **Idempotensi Permintaan** — Mendeduplikasi permintaan dalam rentang 5 detik melalui header `Idempotency-Key` atau `X-Request-Id`
-- **Pelacakan Progres** — Event SSE `event: progress` yang dapat diaktifkan melalui header `X-OmniRoute-Progress: true`
+- **Cache Semantik** — Cache otomatis non-streaming, suhu respons = 0 (bypass dengan `X-OmniRoute-No-Cache: true`)
+- **Minta Idempotensi** — Menghapus duplikat permintaan dalam waktu 5 detik melalui header `Idempotency-Key` atau `X-Request-Id`
+- **Pelacakan Kemajuan** — Ikut serta dalam acara SSE `event: progress` melalui header `X-OmniRoute-Progress: true`
 
 ---
 
-### Playground Penerjemah
+### Taman Bermain Penerjemah
 
-Akses melalui **Dashboard → Translator**. Debug dan visualisasikan cara OmniRoute menerjemahkan permintaan API antarpenyedia.
+Akses melalui** Dasbor → Penerjemah** . Debug dan visualisasikan bagaimana OmniRoute menerjemahkan permintaan API antar penyedia.
 
-| Mode             | Tujuan                                                                                           |
-| ---------------- | ------------------------------------------------------------------------------------------------ |
-| **Playground**   | Pilih format sumber/target, tempel permintaan, dan lihat hasil terjemahan secara langsung        |
-| **Chat Tester**  | Kirim pesan chat langsung melalui proxy dan periksa seluruh siklus permintaan/respons            |
-| **Test Bench**   | Jalankan pengujian batch pada beberapa kombinasi format untuk memverifikasi ketepatan terjemahan |
-| **Live Monitor** | Pantau terjemahan secara real-time saat permintaan mengalir melalui proxy                        |
+| Mode                 | Tujuan                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------ |
+| **Tempat bermain**   | Pilih format source/target, tempelkan permintaan, dan lihat hasil terjemahan secara instan       |
+| **Penguji Obrolan**  | Kirim pesan obrolan langsung melalui proxy dan periksa siklus request/response penuh             |
+| **Bangku Tes**       | Jalankan pengujian batch pada berbagai kombinasi format untuk memverifikasi kebenaran terjemahan |
+| **Monitor Langsung** | Tonton terjemahan real-time saat permintaan mengalir melalui proxy                               |
 
 **Kasus penggunaan:**
 
-- Debug penyebab kegagalan kombinasi klien/penyedia tertentu
-- Verifikasi bahwa tag pemikiran, pemanggilan alat, dan prompt sistem diterjemahkan dengan benar
+- Debug mengapa kombinasi client/provider tertentu gagal
+- Verifikasi bahwa tag pemikiran, panggilan alat, dan perintah sistem diterjemahkan dengan benar
 - Bandingkan perbedaan format antara format OpenAI, Claude, Gemini, dan Responses API
 
 ---
 
 ### Strategi Perutean
 
-Konfigurasikan melalui **Dashboard → Settings → Routing**. Dashboard menampilkan enam strategi yang paling sering digunakan; combo dan auto-router secara internal mendukung rangkaian strategi yang lebih luas.
+Konfigurasikan melalui** Dasbor → Pengaturan → Perutean** . Dasbor memaparkan enam strategi yang paling sering digunakan; kombo dan router otomatis secara internal mendukung rangkaian yang lebih luas.
 
-**Strategi yang terlihat di dashboard (perutean tingkat akun):**
+**Strategi yang terlihat di dasbor (perutean tingkat akun):**
 
-| Strategi                       | Deskripsi                                                                                                                |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| **Isi yang Pertama**           | Menggunakan akun sesuai urutan prioritas — akun utama menangani semua permintaan hingga tidak tersedia                   |
-| **Round Robin**                | Menggilir semua akun dengan batas sticky yang dapat dikonfigurasi (default: 3 panggilan per akun)                        |
-| **P2C (Power of Two Choices)** | Memilih 2 akun secara acak dan merutekan ke akun yang lebih sehat — menyeimbangkan beban dengan mempertimbangkan kondisi |
-| **Acak**                       | Memilih akun secara acak untuk setiap permintaan menggunakan pengacakan Fisher-Yates                                     |
-| **Paling Jarang Digunakan**    | Merutekan ke akun dengan stempel waktu `lastUsedAt` terlama, sehingga mendistribusikan traffic secara merata             |
-| **Dioptimalkan untuk Biaya**   | Merutekan ke akun dengan nilai prioritas terendah, sehingga mengoptimalkan penggunaan penyedia berbiaya terendah         |
+| Strategi                       | Keterangan                                                                                                 |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| **Isi Dulu**                   | Menggunakan akun dalam urutan prioritas — akun utama menangani semua permintaan hingga tidak tersedia      |
+| **Usul**                       | Menggilir semua akun dengan batas melekat yang dapat dikonfigurasi (default: 3 panggilan per akun)         |
+| **P2C (Kekuatan Dua Pilihan)** | Pilih 2 akun acak dan rute ke akun yang lebih sehat — menyeimbangkan beban dengan kesadaran akan kesehatan |
+| **Acak**                       | Memilih akun secara acak untuk setiap permintaan menggunakan pengacakan Fisher-Yates                       |
+| **Paling Sedikit Digunakan**   | Merutekan ke akun dengan stempel waktu `lastUsedAt` terlama, mendistribusikan lalu lintas secara merata    |
+| **Biaya Dioptimalkan**         | Merutekan ke akun dengan nilai prioritas terendah, mengoptimalkan penyedia berbiaya terendah               |
 
-**Strategi combo dan otomatis tingkat lanjut** (dapat dikonfigurasi per combo atau melalui prefiks `auto/*` — lihat [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+**Kombo tingkat lanjut dan strategi otomatis** (dapat dikonfigurasi per kombo atau melalui awalan `auto/*` — lihat [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — urutan ketat, tidak pernah menggunakan round-robin
-- `weighted` — pembagian traffic secara proporsional berdasarkan bobot per model
-- `fill-first` — menggunakan model pertama hingga batas tercapai
+- `priority` — ketertiban yang ketat, tidak pernah bersifat round-robin
+- `weighted` — lalu lintas proporsional dibagi dengan bobot per model
+- `fill-first` — tiriskan model pertama hingga batasnya tercapai
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Power of Two Choices)
+- `p2c` (Kekuatan Dua Pilihan)
 - `least-used` dan `cost-optimized`
-- `auto` — berbasis skor di seluruh kandidat
-- `lkgp` (Last Known Good Provider) — menetapkan penyedia terakhir yang berhasil, lalu beralih ke aturan fallback
-- `context-optimized` — memilih model dengan jendela konteks kosong terbesar
-- `context-relay` — merangkai model berkonteks panjang untuk giliran lanjutan
+- `auto` — berdasarkan skor untuk semua kandidat
+- `lkgp` (Penyedia Baik yang Terakhir Diketahui) — menyematkan ke penyedia terakhir yang berhasil, lalu kembali ke aturan
+- `context-optimized` — memilih model dengan jendela konteks bebas terbesar
+- `context-relay` - merangkai model konteks panjang untuk putaran lanjutan
 
-#### Header Sesi Sticky Eksternal
+#### Header Sesi Lengket Eksternal
 
-Untuk afinitas sesi eksternal (misalnya, agen Claude Code/Codex di belakang reverse proxy), kirim:
+Untuk afinitas sesi eksternal (misalnya, agen Claude Code/Codex di belakang proksi terbalik), kirimkan:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute juga menerima `x_session_id` dan mengembalikan kunci sesi efektif dalam `X-OmniRoute-Session-Id`.
+OmniRoute juga menerima `x_session_id` dan mengembalikan kunci sesi yang efektif di `X-OmniRoute-Session-Id`.
 
-Jika Anda menggunakan Nginx dan mengirim header dengan format garis bawah, aktifkan:
+Jika Anda menggunakan Nginx dan mengirim header berbentuk garis bawah, aktifkan:
 
 ```nginx
 underscores_in_headers on;
@@ -888,18 +888,18 @@ underscores_in_headers on;
 Buat pola wildcard untuk memetakan ulang nama model:
 
 ```
-Pola: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
-Pola: gpt-*               →  Target: gh/gpt-5.3-codex
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-Wildcard mendukung `*` (karakter apa pun) dan `?` (satu karakter).
+Wildcard mendukung `*` (karakter apa saja) dan `?` (karakter tunggal).
 
-#### Rantai Fallback
+#### Rantai Pengganti
 
-Tentukan rantai fallback global yang berlaku untuk semua permintaan:
+Tentukan rantai fallback global yang berlaku di semua permintaan:
 
 ```
-Rantai: production-fallback
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -907,153 +907,209 @@ Rantai: production-fallback
 
 ---
 
-### Ketahanan & Circuit Breaker
+### Kombinasi Penyedia Umum & Pola Perutean
 
-Konfigurasikan melalui **Dashboard → Settings → Resilience**.
+Berikut adalah contoh pola untuk menggabungkan beberapa penyedia dan merutekannya di OmniRoute:
+
+#### 1. Kombo Agen Pengkodean: Penalaran Kelas Atas dengan Cost/Speed Fallback
+
+Ideal untuk agen pengkodean (OpenCode, Claude Code, Cursor, Cline). Awalnya mengarah ke model penalaran frontier, kembali ke model pengkodean cepat pada kehabisan kuota atau kesalahan.
+
+- **Dasbor** : Combo → Combo Baru → Nama: `agent-coding` → Strategi: `Priority`
+- **Model** :
+  1. `claude/claude-sonnet-4-6` (Agen pengkodean utama)
+  2. `openai/gpt-4o` (Fallback berkapasitas tinggi sekunder)
+  3. `deepseek/deepseek-v4-flash` (Penggantian dengan efisiensi tinggi dan hemat biaya)
+
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
+
+#### 2. Kombo Failover Otomatis Tingkat Gratis
+
+Merangkai beberapa penyedia tingkat gratis dan tanpa kunci untuk memaksimalkan waktu aktif tanpa biaya API.
+
+- **Strategi** : `Least Used` atau `Round Robin` (mendistribusikan beban ke seluruh kuota)
+- **Model** :
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
+
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
+
+#### 3. Multimodal / Visi & Saluran Teks
+
+Memasangkan model visi khusus dengan pembuatan teks berkecepatan tinggi untuk alur kerja yang melibatkan pemahaman gambar dan pembuatan kode.
+
+- **Pola** : Kombinasi `Priority` yang mencantumkan model berkemampuan penglihatan terlebih dahulu dan model text/code throughput tinggi di urutan terakhir.
+- **Model** :
+  1. `gemini/gemini-2.5-pro` (Pemahaman image/multimodal yang kuat)
+  2. `openai/gpt-4o` (Visi seimbang dan penggunaan alat)
+  3. `deepseek/deepseek-v4-flash` (generasi Text/code )
+
+---
+
+### Ketahanan & Pemutus Sirkuit
+
+Konfigurasikan melalui** Dasbor → Pengaturan → Ketahanan** .
 
 OmniRoute menerapkan ketahanan tingkat penyedia dengan lima komponen:
 
-1. **Antrean & Pengaturan Laju Permintaan** — Pembentukan traffic permintaan pada tingkat sistem:
-   - **Permintaan Per Menit (RPM)** — Jumlah maksimum permintaan per menit per akun
-   - **Waktu Minimum Antarpermintaan** — Jeda minimum dalam milidetik antarpermintaan
-   - **Jumlah Maksimum Permintaan Bersamaan** — Jumlah maksimum permintaan simultan per akun
-2. **Cooldown Koneksi** — Konfigurasi per jenis autentikasi untuk satu koneksi setelah kegagalan yang dapat dicoba ulang:
-   - **Cooldown Dasar** — Jangka waktu cooldown default untuk kegagalan upstream yang dapat dicoba ulang
-   - **Gunakan Petunjuk Percobaan Ulang Upstream** — Mematuhi petunjuk otoritatif `Retry-After` atau reset jika tersedia
-   - **Langkah Backoff Maksimum** — Tingkat backoff eksponensial maksimum untuk kegagalan berulang
+1. **Minta Antrian & Kecepatan** — Pembentukan permintaan tingkat sistem:
+   - **Permintaan Per Menit (RPM)** — Permintaan maksimum per menit per akun
+   - **Waktu Minimum Antar Permintaan** — Kesenjangan minimum dalam milidetik antar permintaan
+   - **Permintaan Serentak Maks** — Permintaan simultan maksimum per akun
 
-3. **Circuit Breaker Penyedia** — Melacak kegagalan penyedia secara menyeluruh, menandai penyedia sebagai terdegradasi pada ambang peringatan yang dikonfigurasi, dan membuka breaker ketika ambang kegagalan yang dikonfigurasi tercapai:
-   - **Ambang Degradasi** — Jumlah kegagalan penyedia berturut-turut sebelum memasuki `DEGRADED`
-   - **Ambang Kegagalan** — Jumlah kegagalan penyedia berturut-turut sebelum memasuki `OPEN`
-   - **Batas Waktu Reset** — Jangka waktu sebelum penyedia diuji kembali
+2. **Pendinginan Koneksi** — Konfigurasi tipe per autentikasi untuk satu koneksi setelah kegagalan yang dapat dicoba lagi:
+   - **Pendinginan Dasar** — Jendela cooldown default untuk kegagalan upstream yang dapat dicoba lagi
+   - **Gunakan Petunjuk Coba Ulang Hulu** — Menghormati `Retry-After` resmi atau petunjuk pengaturan ulang bila diberikan
+   - **Langkah Mundur Maks** — Tingkat backoff eksponensial maksimum untuk kegagalan berulang
+
+3. **Pemutus Arus Penyedia** — Melacak kegagalan penyedia end-to-end, menandai penyedia terdegradasi pada ambang peringatan yang dikonfigurasi, dan membuka pemutus ketika ambang kegagalan yang dikonfigurasi tercapai:
+   - **Ambang Batas Degradasi** — Kegagalan penyedia berturut-turut sebelum memasuki `DEGRADED`
+   - **Ambang Kegagalan** — Kegagalan penyedia berturut-turut sebelum memasuki `OPEN`
+   - **Atur Ulang Batas Waktu** — Jangka waktu sebelum penyedia diuji lagi
    - **CLOSED** (Sehat) — Permintaan mengalir secara normal
-   - **DEGRADED** — Permintaan tetap mengalir sementara peningkatan kegagalan dilacak
-   - **OPEN** — Penyedia diblokir sementara setelah kegagalan berulang
+   - **DEGRADED** — Permintaan masih mengalir sementara peningkatan kegagalan dilacak
+   - **OPEN** — Penyedia diblokir sementara setelah kegagalan berulang kali
    - **HALF_OPEN** — Menguji apakah penyedia telah pulih
 
-   Batas laju `429` pada cakupan koneksi tetap berada dalam **Cooldown Koneksi** dan tidak dihitung dalam breaker penyedia.
+   Batas kecepatan `429` cakupan koneksi tetap berlaku** Pendinginan Koneksi** dan tidak dihitung sebagai pemutus penyedia.
 
-   Status runtime breaker penyedia hanya ditampilkan di **Dasbor → Kesehatan**.
+   Status waktu proses pemutus penyedia ditampilkan** Dasbor → Kesehatan** hanya.
 
-4. **Tunggu Cooldown** — Jika setiap koneksi kandidat sedang dalam masa cooldown, OmniRoute dapat menunggu hingga cooldown yang paling awal selesai dan mencoba ulang permintaan klien yang sama secara otomatis.
+4. **Tunggu Cooldown** — Jika setiap kandidat koneksi sudah didinginkan, OmniRoute dapat menunggu hingga cooldown paling awal dan mencoba kembali permintaan klien yang sama secara otomatis.
 
-5. **Deteksi Otomatis Batas Laju** — Ketika penyedia upstream mengembalikan jangka waktu tunggu eksplisit, petunjuk tersebut menggantikan cooldown koneksi lokal jika pengaturan ini diaktifkan.
+5. **Deteksi Otomatis Batas Nilai** — Saat penyedia upstream mengembalikan jendela tunggu eksplisit, petunjuk tersebut akan menggantikan cooldown koneksi lokal saat pengaturan diaktifkan.
 
-**Kiat Profesional:** Gunakan halaman **Kesehatan** untuk memeriksa dan mereset breaker penyedia aktif setelah gangguan. Halaman Ketahanan hanya mengubah konfigurasi.
+**Kiat Pro:** Gunakan** Kesehatan** halaman untuk memeriksa dan menyetel ulang pemutus penyedia langsung setelah pemadaman. Halaman Ketahanan hanya mengubah konfigurasi.
 
 ---
 
 ### Ekspor / Impor Basis Data
 
-Kelola cadangan basis data di **Dasbor → Pengaturan → Sistem & Penyimpanan**.
+Kelola cadangan basis data di** Dasbor → Pengaturan → Sistem & Penyimpanan** .
 
-| Tindakan                   | Deskripsi                                                                                                                                             |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ekspor Basis Data**      | Mengunduh basis data SQLite saat ini sebagai file `.sqlite`                                                                                           |
-| **Ekspor Semua (.tar.gz)** | Mengunduh arsip cadangan lengkap yang mencakup: basis data, pengaturan, combo, koneksi penyedia (tanpa kredensial), metadata kunci API                |
-| **Impor Basis Data**       | Mengunggah file `.sqlite` untuk menggantikan basis data saat ini. Cadangan pra-impor dibuat secara otomatis kecuali `DISABLE_SQLITE_AUTO_BACKUP=true` |
+| Tindakan                   | Keterangan                                                                                                                                      |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ekspor Basis Data**      | Mengunduh database SQLite saat ini sebagai file `.sqlite`                                                                                       |
+| **Ekspor Semua (.tar.gz)** | Mengunduh arsip cadangan lengkap termasuk: basis data, pengaturan, kombo, koneksi penyedia (tanpa kredensial), metadata kunci API               |
+| **Impor Basis Data**       | Unggah file `.sqlite` untuk menggantikan database saat ini. Cadangan pra-impor dibuat secara otomatis kecuali `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API: Ekspor basis data
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Ekspor semua (arsip lengkap)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Impor basis data
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Validasi Impor:** File yang diimpor divalidasi untuk memastikan integritas (pemeriksaan pragma SQLite), tabel wajib (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), dan ukuran (maks. 100MB).
+**Validasi Impor:** File yang diimpor divalidasi untuk integritas (SQLite pragma check), tabel yang diperlukan (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), dan ukuran (maks 100MB).
 
 **Kasus Penggunaan:**
 
-- Memigrasikan OmniRoute antar mesin
-- Membuat cadangan eksternal untuk pemulihan bencana
-- Berbagi konfigurasi antar anggota tim (ekspor semua → bagikan arsip)
+- Migrasikan OmniRoute antar mesin
+- Buat cadangan eksternal untuk pemulihan bencana
+- Bagikan konfigurasi antar anggota tim (ekspor semua arsip berbagi → )
 
 ---
 
 ### Dasbor Pengaturan
 
-Halaman pengaturan diatur ke dalam **7 tab** untuk memudahkan navigasi:
+Halaman pengaturan disusun menjadi** 7 tab** untuk navigasi yang mudah:
 
-| Tab           | Isi                                                                                                                                                                         |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Umum**      | Alat penyimpanan sistem, perilaku default, visibilitas tunnel Endpoint                                                                                                      |
-| **Tampilan**  | Kontrol tema (terang/gelap/sistem), visibilitas bilah sisi, opsi panel untuk kartu tunnel Cloudflare/Tailscale/ngrok                                                        |
-| **AI**        | Anggaran pemikiran (passthrough / hapus otomatis / khusus / adaptif — lihat [THINKING_BUDGET.md](./THINKING_BUDGET.md)), prompt sistem global, statistik cache prompt       |
-| **Keamanan**  | Pengaturan Login/Kata Sandi, Kontrol Akses IP, autentikasi API untuk `/models`, Pemblokiran Penyedia, perlindungan terhadap injeksi prompt                                  |
-| **Perutean**  | Strategi perutean global (Isi Dahulu / Round Robin / P2C / Acak / Paling Jarang Digunakan / Dioptimalkan untuk Biaya), alias model wildcard, rantai fallback, default combo |
-| **Ketahanan** | Antrean permintaan, cooldown koneksi, konfigurasi breaker penyedia, dan perilaku tunggu-cooldown                                                                            |
-| **Lanjutan**  | Konfigurasi proksi global (HTTP/SOCKS5), penggantian proksi per penyedia                                                                                                    |
+| tab             | Isi                                                                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Umum**        | Alat penyimpanan sistem, perilaku default, visibilitas terowongan Endpoint                                                                                                |
+| **Penampilan**  | Kontrol tema (light/dark/system), visibilitas sidebar, panel matikan untuk kartu terowongan Cloudflare/Tailscale/ngrok                                                    |
+| **AI**          | Memikirkan anggaran (passthrough / auto-strip / custom / adaptif - lihat [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), perintah sistem global, statistik cache yang cepat |
+| **Keamanan**    | pengaturan Login/Password, Kontrol Akses IP, autentikasi API untuk `/models`, Pemblokiran Penyedia, pelindung injeksi cepat                                               |
+| **Rute**        | Strategi perutean global (Isi Pertama / Round Robin / P2C / Acak / Paling Sedikit Digunakan / Optimasi Biaya), alias model wildcard, rantai fallback, default kombo       |
+| **Ketangguhan** | Antrean permintaan, waktu tunggu koneksi, konfigurasi pemutus penyedia, dan perilaku menunggu waktu tunggu                                                                |
+| **Canggih**     | Konfigurasi proksi global (HTTP/SOCKS5), penggantian proksi per penyedia                                                                                                  |
 
-Umum tidak lagi menduplikasi catatan pencatatan log dan cache yang hanya-baca. Pengaturan retensi dan
-pengoptimalan basis data dipertahankan melalui `/api/settings/database`; pembersihan cache secara manual menggunakan
-`DELETE /api/cache`. Batas baris log permintaan dan proksi dikontrol oleh
-`CALL_LOGS_TABLE_MAX_ROWS` dan `PROXY_LOGS_TABLE_MAX_ROWS`.
+Umum tidak lagi menduplikasi logging read-only dan catatan cache. Pengaturan retensi dan pengoptimalan basis data dipertahankan melalui `/api/settings/database`; pembersihan cache manual menggunakan `DELETE /api/cache`. Batas baris log permintaan dan proksi dikontrol oleh `CALL_LOGS_TABLE_MAX_ROWS` dan `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
 ### Manajemen Biaya & Anggaran
 
-Akses melalui **Dasbor → Biaya**.
+Akses melalui** Dasbor → Biaya** .
 
-| Tab          | Tujuan                                                                                                       |
-| ------------ | ------------------------------------------------------------------------------------------------------------ |
-| **Anggaran** | Menetapkan batas pengeluaran per kunci API dengan anggaran harian/mingguan/bulanan dan pelacakan waktu nyata |
-| **Harga**    | Melihat dan mengedit entri harga model — biaya per 1K token input/output per penyedia                        |
+| tab          | Tujuan                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------- |
+| **Anggaran** | Tetapkan batas pengeluaran per kunci API dengan anggaran daily/weekly/monthly dan pelacakan waktu nyata |
+| **Harga**    | Lihat dan edit entri harga model — biaya per 1K token input/output per penyedia                         |
 
 ```bash
-# API: Tetapkan anggaran
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Dapatkan status anggaran saat ini
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Pelacakan Biaya:** Setiap permintaan mencatat penggunaan token dan menghitung biaya menggunakan tabel harga. Lihat perinciannya di **Dasbor → Penggunaan** berdasarkan penyedia, model, dan kunci API.
+**Pelacakan Biaya:** Setiap permintaan mencatat penggunaan token dan menghitung biaya menggunakan tabel harga. Lihat rinciannya** Dasbor → Penggunaan** menurut penyedia, model, dan kunci API.
 
 ---
 
 ### Transkripsi Audio
 
-OmniRoute mendukung transkripsi audio melalui endpoint yang kompatibel dengan OpenAI:
+OmniRoute mendukung transkripsi audio melalui titik akhir yang kompatibel dengan OpenAI:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Contoh dengan curl
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` adalah rute Deepgram native dan memerlukan kunci API Deepgram.
-Jika hanya OpenRouter yang dikonfigurasi, gunakan `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` adalah rute Deepgram asli dan memerlukan kunci Deepgram API. Jika hanya OpenRouter yang dikonfigurasi, gunakan `openrouter/deepgram/nova-3`.
 
-Penyedia **Ucapan-ke-Teks (transkripsi)**:
+**Pidato-ke-Teks (transkripsi)** penyedia:
 
-- `openai/` (kompatibel dengan Whisper)
-- `groq/` (Groq Whisper Turbo)
+- `openai/` (kompatibel dengan bisikan)
+- `groq/` (Groq Bisikan Turbo)
 - `deepgram/` (keluarga Nova)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Canary)
-- `huggingface/` (varian Whisper)
+- `nvidia/` (Parakeet, Kenari)
+- `huggingface/` (varian bisikan)
 - `qwen/`
 
-Penyedia **Teks-ke-Ucapan (`POST /v1/audio/speech`)**:
+**Teks-ke-Ucapan (`POST /v1/audio/speech`)** penyedia:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
 - `deepgram/` (Aura)
-- `nvidia/` (Magpie TTS)
+- `nvidia/` (murai TTS)
 - `elevenlabs/`
 - `huggingface/`
 - `inworld/`
@@ -1065,56 +1121,45 @@ Penyedia **Teks-ke-Ucapan (`POST /v1/audio/speech`)**:
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Format audio yang didukung untuk transkripsi: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Format keluaran TTS bergantung pada penyedia (mp3, wav, opus, pcm, mulaw).
+Format audio yang didukung untuk transkripsi: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. format keluaran TTS bergantung pada penyedia (mp3, wav, opus, pcm, mulaw).
 
 ---
 
 ### Strategi Penyeimbangan Kombo
 
-Konfigurasikan penyeimbangan per kombo di **Dasbor → Kombo → Buat/Edit → Strategi**.
+Konfigurasikan penyeimbangan per kombo** Dasbor → Combo → Create/Edit → Strategi** .
 
-| Strategi                     | Deskripsi                                                                                |
-| ---------------------------- | ---------------------------------------------------------------------------------------- |
-| **Round-Robin**              | Merotasi model secara berurutan                                                          |
-| **Prioritas**                | Selalu mencoba model pertama; beralih hanya jika terjadi kesalahan                       |
-| **Acak**                     | Memilih model secara acak dari kombo untuk setiap permintaan                             |
-| **Berbobot**                 | Mengarahkan secara proporsional berdasarkan bobot yang ditetapkan per model              |
-| **Paling Jarang Digunakan**  | Mengarahkan ke model dengan permintaan terbaru paling sedikit (menggunakan metrik kombo) |
-| **Dioptimalkan untuk Biaya** | Mengarahkan ke model termurah yang tersedia (menggunakan tabel harga)                    |
+| Strategi                     | Keterangan                                                                             |
+| ---------------------------- | -------------------------------------------------------------------------------------- |
+| **Round-Robin**              | Berputar melalui model secara berurutan                                                |
+| **Prioritas**                | Selalu mencoba model pertama; jatuh kembali hanya karena kesalahan                     |
+| **Acak**                     | Memilih model acak dari kombo untuk setiap permintaan                                  |
+| **Tertimbang**               | Rute secara proporsional berdasarkan bobot yang ditetapkan per model                   |
+| **Paling Sedikit Digunakan** | Merutekan ke model dengan permintaan terkini paling sedikit (menggunakan metrik kombo) |
+| **Dioptimalkan Biaya**       | Rute ke model termurah yang tersedia (menggunakan tabel harga)                         |
 
-Nilai default kombo global dapat ditetapkan di **Dasbor → Pengaturan → Perutean → Default Kombo**.
-Secara default, batas waktu target kombo mewarisi batas waktu permintaan saat ini. Gunakan **Batas waktu target
-(detik)** pada default kombo atau kombo individual hanya ketika batas per target yang lebih pendek diperlukan untuk
-memicu peralihan lebih cepat.
+Default kombo global dapat diatur** Dasbor → Pengaturan → Perutean → Combo Default** . Batas waktu target kombo mewarisi batas waktu permintaan saat ini secara default. Menggunakan** Batas waktu target (detik)** pada default kombo atau kombo individual hanya ketika batas per target yang lebih pendek akan memicu fallback yang lebih cepat.
 
-Optimalisasi kombo tanpa latensi bersifat opsional. Biarkan **Optimalisasi tanpa latensi** dinonaktifkan untuk
-mencegah fitur latensi ini menjalankan target peralihan secara bersamaan, melewati target berdasarkan riwayat
-TTFT, atau mengompresi permintaan peralihan; mengaktifkannya memungkinkan hedging yang dikonfigurasi, lompatan
-TTFT prediktif, dan kompresi peralihan proaktif untuk menukar fidelitas perutean/permintaan dengan latensi
-ekor yang lebih rendah.
+Pengoptimalan kombo tanpa latensi disertakan. Meninggalkan** Pengoptimalan tanpa latensi** dinonaktifkan untuk mencegah fitur latensi ini mempercepat target fallback, melewatkan target berdasarkan riwayat TTFT, atau mengompresi permintaan fallback; mengaktifkannya memungkinkan lindung nilai yang dikonfigurasi, lompatan TTFT prediktif, dan kompresi fallback proaktif untuk memperdagangkan fidelitas routing/request untuk latensi ekor yang lebih rendah.
 
-Nonaktifkan **Penyangga token penalaran** ketika penyedia upstream memerlukan batas
-`max_tokens` / `maxOutputTokens` yang ketat. Jika diaktifkan, perutean kombo hanya menambahkan ruang tambahan
-untuk model penalaran dengan batas keluaran yang diketahui dan membiarkan batas token klien tidak berubah ketika
-nilai aman dengan penyangga akan melampaui batas tersebut. Jika batas klien sudah berada di atas batas yang diketahui,
-OmniRoute menurunkannya ke batas tersebut sebelum mengirim permintaan upstream.
+Cacat** Penalaran buffer token** ketika penyedia hulu memerlukan batasan `max_tokens` / `maxOutputTokens` yang ketat. Saat diaktifkan, perutean kombo hanya menambahkan ruang kepala model penalaran untuk model dengan batas keluaran yang diketahui dan membiarkan batas token klien tidak berubah ketika nilai buffer aman melebihi batas tersebut. Jika batas klien sudah melebihi batas yang diketahui, OmniRoute membatasinya hingga batas tersebut sebelum mengirim permintaan upstream.
 
 ---
 
 ### Dasbor Kesehatan
 
-Akses melalui **Dasbor → Kesehatan**. Ringkasan kesehatan sistem secara real-time dengan 6 kartu:
+Akses melalui** Dasbor → Kesehatan** . Ikhtisar kesehatan sistem real-time dengan 6 kartu:
 
-| Kartu                  | Yang Ditampilkan                                                |
-| ---------------------- | --------------------------------------------------------------- |
-| **Status Sistem**      | Waktu aktif, versi, penggunaan memori, direktori data           |
-| **Kesehatan Penyedia** | Status runtime circuit breaker penyedia global                  |
-| **Batas Laju**         | Cooldown koneksi aktif per akun beserta waktu yang tersisa      |
-| **Penguncian Aktif**   | Penguncian aktif dalam cakupan model dan pengecualian sementara |
-| **Cache Tanda Tangan** | Statistik cache deduplikasi (kunci aktif, tingkat hit)          |
-| **Telemetri Latensi**  | Agregasi latensi p50/p95/p99 per penyedia                       |
+| Kartu                     | Apa yang Ditunjukkannya                                   |
+| ------------------------- | --------------------------------------------------------- |
+| **Status Sistem**         | Uptime, versi, penggunaan memori, direktori data          |
+| **Kesehatan Penyedia**    | Status runtime pemutus sirkuit penyedia global            |
+| **Batasan Tarif**         | Cooldown koneksi aktif per akun dengan sisa waktu         |
+| **Penguncian Aktif**      | Penguncian cakupan model aktif dan pengecualian sementara |
+| **Tembolok Tanda Tangan** | Statistik cache deduplikasi (kunci aktif, tingkat hit)    |
+| **Telemetri Latensi**     | agregasi latensi p50/p95/p99 per penyedia                 |
 
-**Tips Pro:** Halaman Kesehatan diperbarui secara otomatis setiap 10 detik. Gunakan kartu circuit breaker untuk mengidentifikasi penyedia yang sedang mengalami masalah.
+**Kiat Pro:** Halaman Kesehatan disegarkan secara otomatis setiap 10 detik. Gunakan kartu pemutus sirkuit untuk mengidentifikasi penyedia mana yang mengalami masalah.
 
 ---
 

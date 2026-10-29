@@ -1,13 +1,21 @@
 import { handleRerank } from "@omniroute/open-sse/handlers/rerank.ts";
+import { recordModalCallCost } from "@/domain/costRules";
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import {
   getProviderCredentialsWithQuotaPreflight,
   clearRecoveredProviderState,
 } from "@/sse/services/auth";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
-import { parseRerankModel, getRerankProvider } from "@omniroute/open-sse/config/rerankRegistry.ts";
+import { parseRerankModel } from "@omniroute/open-sse/config/rerankRegistry.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import {
+  createComboTargetKeyGate,
+  isKeyScopeBlockedCredentials,
+  keyScopeBlockedResponse,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
 import { v1RerankSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { loadRerankProviderNodes } from "@/app/api/v1/_shared/rerankProviderNodes";
@@ -26,7 +34,7 @@ import { CORS_HEADERS } from "@omniroute/open-sse/utils/cors.ts";
 import { deriveRerankProviderForChatProvider } from "@omniroute/open-sse/config/rerankRegistry.ts";
 import { resolveAlibabaQwen3RerankUrl } from "@/shared/constants/alibabaProviderRegions";
 import { getComboByName, getCombos } from "@/lib/db/combos";
-import { getDatabaseSettings } from "@/lib/db/databaseSettings";
+import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
 import { handleComboChat } from "@omniroute/open-sse/services/combo.ts";
 import * as log from "@/sse/utils/logger";
 
@@ -51,7 +59,7 @@ export async function OPTIONS() {
  * `RERANK_REMOTE_PROVIDER_NODES` opt-in and must pass the provider outbound URL policy
  * (see `_shared/rerankProviderNodes.ts`).
  */
-async function postHandler(request, context) {
+async function postHandler(request, _context) {
   let rawBody;
   try {
     rawBody = await request.json();
@@ -68,6 +76,13 @@ async function postHandler(request, context) {
   // Enforce API key policies (model restrictions + budget limits)
   const policy = await enforceApiKeyPolicy(request, body.model);
   if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: credential selection (direct and per combo target) stays inside
+  // the key's connection scope, the same scope chat applies.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
+  // Respect the authenticated API key's credential scope before checking model capabilities.
+  const endpointMismatch = await getRequestedModelEndpointMismatch(body.model, "rerank");
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
 
   return handleValidatedRerankRequestBody(
     {
@@ -80,6 +95,8 @@ async function postHandler(request, context) {
     {
       apiKeyId: policy.apiKeyInfo?.id || null,
       apiKeyName: policy.apiKeyInfo?.name || null,
+      allowedConnections: scope.allowedConnections,
+      isComboTargetAllowed: createComboTargetKeyGate(policy, body.model),
     }
   );
 }
@@ -95,6 +112,12 @@ type ValidatedRerankBody = {
 type RerankRequestMeta = {
   apiKeyId?: string | null;
   apiKeyName?: string | null;
+  /** GHSA-3w2r: the caller key's connection scope (null/undefined = unscoped). */
+  allowedConnections?: string[] | null;
+  /** GHSA-3w2r: combo per-target model gate for the caller key (undefined = none). */
+  isComboTargetAllowed?: (targetModelStr: string) => Promise<boolean>;
+  requestedModel?: string | null;
+  comboName?: string | null;
 };
 
 /**
@@ -109,6 +132,7 @@ export async function handleValidatedRerankRequestBody(
   meta: RerankRequestMeta = {}
 ): Promise<Response> {
   const modelStr = body.model;
+  const requestedModel = meta.requestedModel ?? modelStr;
 
   if (!modelStr.includes("/")) {
     try {
@@ -121,7 +145,7 @@ export async function handleValidatedRerankRequestBody(
 
         let settings = {};
         try {
-          settings = getDatabaseSettings();
+          settings = getUserDatabaseSettings();
         } catch {}
 
         return handleComboChat({
@@ -130,9 +154,13 @@ export async function handleValidatedRerankRequestBody(
           handleSingleModel: async (reqBody: any, targetModelStr: string) =>
             handleValidatedRerankRequestBody(
               { ...reqBody, model: targetModelStr } as ValidatedRerankBody,
-              meta
+              {
+                ...meta,
+                requestedModel,
+                comboName: meta.comboName || (typeof combo.name === "string" ? combo.name : null),
+              }
             ),
-          isModelAvailable: undefined,
+          isModelAvailable: meta.isComboTargetAllowed,
           log,
           settings,
           allCombos: allCombos as any,
@@ -179,7 +207,7 @@ export async function handleValidatedRerankRequestBody(
     const credentials = await getProviderCredentialsWithQuotaPreflight(
       effectiveProviderId,
       null,
-      null,
+      meta.allowedConnections ?? null,
       resolvedModelId
     );
     if (!credentials) {
@@ -187,6 +215,9 @@ export async function handleValidatedRerankRequestBody(
         HTTP_STATUS.BAD_REQUEST,
         `No credentials for provider: ${effectiveProviderId}`
       );
+    }
+    if (isKeyScopeBlockedCredentials(credentials)) {
+      return keyScopeBlockedResponse(effectiveProviderId, credentials);
     }
     if (isAllRateLimitedCredentials(credentials)) {
       return rateLimitedProviderResponse(effectiveProviderId, credentials);
@@ -237,6 +268,9 @@ export async function handleValidatedRerankRequestBody(
       connectionId: (credentials as { connectionId?: string } | null)?.connectionId || null,
       apiKeyId: meta.apiKeyId || null,
       apiKeyName: meta.apiKeyName || null,
+      onPricedCall: (call) => recordModalCallCost(meta.apiKeyId, call),
+      requestedModel,
+      comboName: meta.comboName || null,
     });
     if (response?.ok) {
       await clearRecoveredProviderState(credentials);
@@ -252,12 +286,19 @@ export async function handleValidatedRerankRequestBody(
     const localProvider = localProviders.find((p) => p.id === prefix);
 
     if (localProvider) {
-      const credentials = await getProviderCredentialsWithQuotaPreflight(localProvider.providerId);
+      const credentials = await getProviderCredentialsWithQuotaPreflight(
+        localProvider.providerId,
+        null,
+        meta.allowedConnections ?? null
+      );
       if (!credentials) {
         return errorResponse(
           HTTP_STATUS.BAD_REQUEST,
           `No credentials for local provider: ${prefix}`
         );
+      }
+      if (isKeyScopeBlockedCredentials(credentials)) {
+        return keyScopeBlockedResponse(prefix, credentials);
       }
       if (isAllRateLimitedCredentials(credentials)) {
         return rateLimitedProviderResponse(prefix, credentials);
@@ -325,6 +366,8 @@ export async function handleValidatedRerankRequestBody(
             error: errorMessage,
             apiKeyId: meta.apiKeyId || undefined,
             apiKeyName: meta.apiKeyName || undefined,
+            requestedModel,
+            comboName: meta.comboName || undefined,
           }).catch(() => {});
           return errorResponse(res.status, errorMessage);
         }
@@ -357,6 +400,8 @@ export async function handleValidatedRerankRequestBody(
           responseBody: data,
           apiKeyId: meta.apiKeyId || undefined,
           apiKeyName: meta.apiKeyName || undefined,
+          requestedModel,
+          comboName: meta.comboName || undefined,
         }).catch(() => {});
 
         const headers = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json" });
@@ -384,6 +429,8 @@ export async function handleValidatedRerankRequestBody(
           error: err.message,
           apiKeyId: meta.apiKeyId || undefined,
           apiKeyName: meta.apiKeyName || undefined,
+          requestedModel,
+          comboName: meta.comboName || undefined,
         }).catch(() => {});
         return errorResponse(500, `Rerank request failed: ${err.message}`);
       }

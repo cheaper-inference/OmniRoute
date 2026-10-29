@@ -25,6 +25,47 @@ export function extractImportWarning(data: unknown): string | null {
 }
 
 /**
+ * The reason of the degraded discovery, as the server published it.
+ *
+ * The server sends a closed vocabulary (a code or an HTTP status), never the
+ * upstream message, so the screen can show it as a technical value without
+ * leaking anything the provider sent.
+ */
+export function extractImportCause(data: unknown): string | null {
+  if (data && typeof data === "object" && "error" in data) {
+    const cause = (data as { error?: unknown }).error;
+    if (typeof cause === "string" && cause.trim()) return cause.trim();
+  }
+  return null;
+}
+
+/**
+ * #15069 — pure phase resolver for the zero-new-models branch in handleImportModels.
+ *
+ * When all fetched models are already registered, what the user sees depends on
+ * whether the fetch came from the live upstream API or fell back to a local
+ * catalog:
+ *
+ *  - the discovery degraded → phase "warning" (the live list was never read;
+ *    a success indicator would be misleading).
+ *  - the discovery did not degrade → phase "done" (a genuine success, even
+ *    when the server sent a warning with a catalog the operator asked for).
+ *
+ * Called with one argument, the warning text decides (the historical rule).
+ * Called with two, the degraded character decides: a catalog the operator
+ * asked for is not a fallback, and it must not be announced as one.
+ *
+ * Extracted as a pure function so unit tests can cover this branch without a React renderer.
+ */
+export function resolveNoNewModelsPhase(
+  importWarning: string | null,
+  degraded?: boolean
+): "warning" | "done" {
+  if (degraded === undefined) return importWarning ? "warning" : "done";
+  return degraded ? "warning" : "done";
+}
+
+/**
  * B-03 (#15159): decide what the Import button should SAY, given the raw
  * `/api/providers/[id]/models?refresh=true` payload.
  *
@@ -56,8 +97,16 @@ export type ClassifyModelImportInput = {
 
 export type ModelImportOutcome = "no-models" | "nothing-new" | "import";
 
-/** A model entry as discovery returns it; the id may be under any of these keys. */
-export type DiscoveredModel = { id?: unknown; name?: unknown; model?: unknown };
+/**
+ * A model entry as discovery returns it; the id may be under any of these keys. The rest of the
+ * entry (apiFormat, dimensions, inputTokenLimit, …) is forwarded to the import call as-is.
+ */
+export type DiscoveredModel = {
+  id?: unknown;
+  name?: unknown;
+  model?: unknown;
+  [field: string]: unknown;
+};
 
 export type ModelImportClassification = {
   outcome: ModelImportOutcome;
@@ -65,6 +114,8 @@ export type ModelImportClassification = {
   degraded: boolean;
   /** The server's warning text, when there is one. */
   warning: string | null;
+  /** The reason of the fallback, when the server published one. */
+  cause: string | null;
   newCount: number;
   /** How many models discovery returned in total. */
   total: number;
@@ -85,12 +136,21 @@ export function classifyModelImport({
   isKnownModel,
 }: ClassifyModelImportInput): ModelImportClassification {
   const warning = extractImportWarning(modelsData);
+  const cause = extractImportCause(modelsData);
   const degraded = isDegradedDiscovery(
     (modelsData ?? {}) as { source?: unknown; intentional?: unknown; warning?: unknown }
   );
 
   if (fetchedModels.length === 0) {
-    return { outcome: "no-models", degraded, warning, newCount: 0, total: 0, newModels: [] };
+    return {
+      outcome: "no-models",
+      degraded,
+      warning,
+      cause,
+      newCount: 0,
+      total: 0,
+      newModels: [],
+    };
   }
 
   const newModels = fetchedModels.filter(
@@ -101,6 +161,7 @@ export function classifyModelImport({
     outcome: newModels.length === 0 ? "nothing-new" : "import",
     degraded,
     warning,
+    cause,
     newCount: newModels.length,
     total: fetchedModels.length,
     newModels,

@@ -3,7 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Button } from "@/shared/components";
+import { SectionHeader } from "@omniroute/ui-kit/page-header";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import EmptyState from "@/shared/components/EmptyState";
+import Icon from "@/shared/components/Icon";
 import MediaProviderHeader from "../../components/MediaProviderHeader";
 import MediaProviderKindNav from "../../components/MediaProviderKindNav";
 import type { MediaKind } from "../../components/mediaKinds";
@@ -79,7 +83,7 @@ function renderPlayground(
       return (
         <div className="flex flex-col gap-2 border border-dashed border-border rounded-xl p-6">
           <div className="flex items-center gap-2 text-text-muted">
-            <span className="material-symbols-outlined text-[20px]">image_search</span>
+            <Icon name="image_search" size={20} />
             <h3 className="text-sm font-medium">{bridgeCopy.imageToText.title}</h3>
           </div>
           <p className="text-xs text-text-muted">{bridgeCopy.imageToText.description}</p>
@@ -137,7 +141,7 @@ export default function MediaProviderPageClient({
     <div className="flex flex-col gap-6">
       {activeKind === "stt" && providerId === "openrouter" && (
         <div className="text-xs text-text-muted border border-border rounded-lg p-3 flex items-start gap-2">
-          <span className="material-symbols-outlined text-[16px] text-blue-500 mt-0.5">info</span>
+          <Icon name="info" size={16} className="text-info mt-0.5" />
           <span>
             <strong>{t("existingConnection")}:</strong> {t("openrouterSttDescription")}
           </span>
@@ -158,27 +162,9 @@ export default function MediaProviderPageClient({
 
       {/* Connections */}
       <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">
-            {t("connections", { count: connections.length })}
-          </h2>
-          <Button
-            size="sm"
-            icon="add"
-            onClick={() => {
-              window.location.href = `/dashboard/providers/${providerId}`;
-            }}
-          >
-            {t("addConnection")}
-          </Button>
-        </div>
-
-        {loading ? (
-          <div className="py-8 text-center text-sm text-text-muted">{t("loading")}</div>
-        ) : connections.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-12 border border-dashed border-border rounded-xl text-text-muted text-sm">
-            <span className="material-symbols-outlined text-[28px]">key_off</span>
-            <span>{t("noConnections")}</span>
+        <SectionHeader
+          title={t("connections", { count: connections.length })}
+          actions={
             <Button
               size="sm"
               icon="add"
@@ -188,7 +174,20 @@ export default function MediaProviderPageClient({
             >
               {t("addConnection")}
             </Button>
-          </div>
+          }
+        />
+
+        {loading ? (
+          <div className="py-8 text-center text-sm text-text-muted">{t("loading")}</div>
+        ) : connections.length === 0 ? (
+          <EmptyState
+            icon="key_off"
+            title={t("noConnections")}
+            actionLabel={t("addConnection")}
+            onAction={() => {
+              window.location.href = `/dashboard/providers/${providerId}`;
+            }}
+          />
         ) : (
           <div className="flex flex-col divide-y divide-border rounded-xl border border-border overflow-hidden">
             {connections.map((conn) => (
@@ -196,18 +195,14 @@ export default function MediaProviderPageClient({
                 <span
                   className={`size-2 rounded-full shrink-0 ${
                     conn.testStatus === "active" || conn.testStatus === "success"
-                      ? "bg-green-500"
+                      ? "bg-success"
                       : conn.testStatus === "error" || conn.testStatus === "unavailable"
-                        ? "bg-red-500"
+                        ? "bg-error"
                         : "bg-text-muted"
                   }`}
                 />
                 <span className="text-sm font-medium flex-1 truncate">{conn.name ?? conn.id}</span>
-                {conn.isActive === false && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-bg-subtle border border-border text-text-muted">
-                    {t("disabled")}
-                  </span>
-                )}
+                {conn.isActive === false && <Badge size="sm">{t("disabled")}</Badge>}
               </div>
             ))}
           </div>

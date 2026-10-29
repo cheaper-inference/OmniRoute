@@ -3,6 +3,8 @@
  * Modeled on OpenCodex `adapters/cursor/cursor-errors.ts` (safe messages + quota vs size).
  */
 
+const WEEKLY_MODEL_ENTITLEMENT = /\S{1,100} is not included in your weekly usage\b/i;
+
 const ABSOLUTE_PATH_PATTERN =
   /(?:\/Users\/[^ "';,]+|\/home\/[^ "';,]+|[A-Za-z]:\\Users\\[^ "';,]+)/g;
 const CURSOR_CREDENTIAL_PATTERN =
@@ -89,8 +91,21 @@ export function isCursorBenignCancelError(value: unknown): boolean {
   return false;
 }
 
+/**
+ * True for the driveH2 safety-timeout error (CURSOR_STREAM_TIMEOUT_MS). When it
+ * fires after content was already streamed, the turn is finished as truncated
+ * (finish_reason "length") instead of being torn down mid-answer (#14727).
+ */
+export function isCursorStreamTimeoutError(value: unknown): boolean {
+  return errorCode(value) === "CURSOR_STREAM_TIMEOUT";
+}
+
 export function classifyCursorErrorKind(rawMessage: string): CursorErrorKind {
   const lower = rawMessage.toLowerCase();
+
+  // Explicit plan entitlement is model-unavailable, not exhausted account quota.
+  // Use the existing 404 contract so consumers lock only this connection/model.
+  if (WEEKLY_MODEL_ENTITLEMENT.test(lower)) return "not_found";
 
   if (lower.includes("resource_exhausted") || lower.includes("resource exhausted")) {
     return isCursorRequestTooLargeDetail(lower) ? "invalid" : "rate_limit";
@@ -105,6 +120,10 @@ export function classifyCursorErrorKind(rawMessage: string): CursorErrorKind {
   if (lower.includes("model not found")) {
     return lower.includes("reset after") ? "rate_limit" : "not_found";
   }
+
+  // #15671: a bare Connect `not_found` end-of-stream error (model absent from the
+  // account's plan) must surface as 404 so the model gets locked.
+  if (lower.includes("not_found")) return "not_found";
 
   if (
     lower.includes("unauthenticated") ||
@@ -247,7 +266,11 @@ export function resolveCursorEmptyTurnError(options: {
   const upstream = options.upstreamMessage?.trim();
   if (upstream) {
     const classified = classifyCursorError(upstream);
-    if (options.quotaExhaustedHint && classified.kind !== "auth") {
+    if (
+      options.quotaExhaustedHint &&
+      classified.kind !== "auth" &&
+      !WEEKLY_MODEL_ENTITLEMENT.test(upstream)
+    ) {
       return {
         ...classified,
         kind: "rate_limit",

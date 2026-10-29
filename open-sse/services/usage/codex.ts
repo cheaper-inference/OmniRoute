@@ -8,7 +8,8 @@
  * imports getCodexUsage (dispatcher). Behavior-preserving move.
  */
 
-import { buildCodexUsageQuotas } from "../codexUsageQuotas.ts";
+import { buildCodexUsageQuotas, findCodexSparkRateLimit } from "../codexUsageQuotas.ts";
+import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { getCodexBackendIdentityHeaders } from "../../config/codexClient.ts";
 import { getFieldValue } from "./scalars.ts";
 
@@ -32,7 +33,8 @@ export function setCodexUsageFetchForTests(fetchImpl: CodexUsageFetch | null): v
  */
 export async function getCodexUsage(
   accessToken?: string,
-  providerSpecificData: Record<string, unknown> = {}
+  providerSpecificData: Record<string, unknown> = {},
+  connectionId?: string
 ) {
   try {
     // Use persisted workspace ID from OAuth - NO FALLBACK
@@ -54,10 +56,23 @@ export async function getCodexUsage(
       headers["chatgpt-account-id"] = accountId;
     }
 
-    const response = await codexUsageFetch(CODEX_CONFIG.usageUrl, {
-      method: "GET",
-      headers,
-    });
+    const response = connectionId
+      ? await fetchWithConnectionProxy(
+          connectionId,
+          CODEX_CONFIG.usageUrl,
+          {
+            method: "GET",
+            headers,
+          },
+          { fetchFn: codexUsageFetch }
+        )
+      : await codexUsageFetch(CODEX_CONFIG.usageUrl, {
+          method: "GET",
+          headers,
+        });
+    if (!response) {
+      throw new Error("Codex API error: proxied request failed");
+    }
 
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
@@ -70,16 +85,23 @@ export async function getCodexUsage(
 
     const data = await response.json();
 
-    const { rateLimit, quotas, bankedResetCredits, rateLimitReachedType } =
+    const { rateLimit, quotas, bankedResetCredits, rateLimitReachedType, paidCredits } =
       buildCodexUsageQuotas(data);
+    const sparkLimitReached = getFieldValue(
+      findCodexSparkRateLimit(data).rateLimit,
+      "limit_reached",
+      "limitReached"
+    );
 
     return {
+      ...(typeof sparkLimitReached === "boolean" ? { sparkLimitReached } : {}),
       plan: String(getFieldValue(data, "plan_type", "planType") || "unknown"),
       limitReached: Boolean(getFieldValue(rateLimit, "limit_reached", "limitReached")),
       quotas,
       // Banked reset credits (display-only, eligibility-gated — issue #5199).
       // Absent for most accounts; never throws when the upstream omits it.
       ...(bankedResetCredits !== undefined ? { bankedResetCredits } : {}),
+      ...(paidCredits ? { paidCredits } : {}),
       ...(rateLimitReachedType !== undefined ? { rateLimitReachedType } : {}),
     };
   } catch (error) {

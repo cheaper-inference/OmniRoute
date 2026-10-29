@@ -1,5 +1,7 @@
 "use client";
 
+import { SortableTableHead } from "@omniroute/ui-kit/data-table-shell";
+
 /**
  * Model Breakdown table for Usage analytics (#8769).
  * Extracted from charts.tsx so sort logic can be fixed/tested without
@@ -9,7 +11,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Card from "../Card";
-import { getModelColor } from "@/shared/constants/colors";
+import { getSeriesColor } from "./chartColors";
 import { fmtCompact as fmt, fmtFull, fmtCost } from "@/shared/utils/formatting";
 import {
   nextModelBreakdownSort,
@@ -19,10 +21,19 @@ import {
   type ModelBreakdownSortField,
   type ModelBreakdownSortOrder,
 } from "./modelBreakdownSort";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 
 interface ModelTableProps {
   byModel?: ModelBreakdownRow[] | null;
   summary?: { totalTokens?: number | null } | null;
+  displayMode?: "compact" | "exact";
 }
 
 type Column = {
@@ -40,22 +51,7 @@ const COLUMNS: Column[] = [
   { field: "cost", labelKey: "chartCost", align: "right" },
 ];
 
-function SortIndicator({ active, sortOrder }: { active: boolean; sortOrder: string }) {
-  if (!active) {
-    return (
-      <span className="material-symbols-outlined text-[12px] opacity-0 group-hover:opacity-30">
-        unfold_more
-      </span>
-    );
-  }
-  return (
-    <span className="material-symbols-outlined text-[12px] text-primary">
-      {sortOrder === "asc" ? "expand_less" : "expand_more"}
-    </span>
-  );
-}
-
-export function ModelTable({ byModel, summary }: ModelTableProps) {
+export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelTableProps) {
   const t = useTranslations("analytics");
   const [sort, setSort] = useState<{
     by: ModelBreakdownSortField;
@@ -86,90 +82,90 @@ export function ModelTable({ byModel, summary }: ModelTableProps) {
           {t("chartModelBreakdown")}
         </h3>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="text-xs text-text-muted uppercase bg-black/[0.02] dark:bg-white/[0.02]">
-            <tr>
-              {COLUMNS.map((col) => (
-                <th
-                  key={col.field}
-                  className={`px-4 py-2.5 ${col.align === "right" ? "text-right" : "text-left"}`}
-                >
-                  <button
-                    type="button"
-                    className={`inline-flex items-center gap-1 cursor-pointer group hover:text-text-main ${
-                      col.align === "right" ? "justify-end w-full" : "justify-start"
-                    }`}
-                    onClick={() => toggleSort(col.field)}
-                  >
-                    <span>{t(col.labelKey)}</span>
-                    <SortIndicator active={sort.by === col.field} sortOrder={sort.order} />
-                  </button>
-                </th>
-              ))}
-              <th className="px-4 py-2.5 text-right w-36">{t("chartShare")}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {sorted.map((m, i) => (
-              <tr
-                key={String(m.model ?? i)}
-                className="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+      <Table
+        containerClassName="rounded-none border-0"
+        className="text-sm"
+        scrollbarLabel={t("chartModelBreakdown")}
+      >
+        <TableHeader>
+          <TableRow>
+            {COLUMNS.map((col) => (
+              <SortableTableHead
+                key={col.field}
+                align={col.align === "right" ? "right" : "left"}
+                className="px-4 py-2.5"
+                direction={sort.by === col.field ? sort.order : undefined}
+                // nextModelBreakdownSort owns the click rule (#8769); the kit only renders it.
+                onDirectionChange={() => toggleSort(col.field)}
               >
-                <td className="px-4 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: getModelColor(i) }}
-                    />
-                    <span className="font-medium">{m.model}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-2.5 text-right font-mono text-text-muted">
-                  {fmtFull(m.requests)}
-                </td>
-                <td
-                  className="px-4 py-2.5 text-right font-mono text-primary"
-                  title={fmtFull(m.promptTokens)}
-                >
-                  {fmt(m.promptTokens)}
-                </td>
-                <td
-                  className="px-4 py-2.5 text-right font-mono text-emerald-500"
-                  title={fmtFull(m.completionTokens)}
-                >
-                  {fmt(m.completionTokens)}
-                </td>
-                <td
-                  className="px-4 py-2.5 text-right font-mono font-semibold"
-                  title={fmtFull(m.totalTokens)}
-                >
-                  {fmt(m.totalTokens)}
-                </td>
-                <td className="px-4 py-2.5 text-right font-mono text-amber-500">
-                  {fmtCost(m.cost)}
-                </td>
-                <td className="px-4 py-2.5 text-right">
-                  <div className="flex items-center gap-2 justify-end">
-                    <div className="w-16 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{
-                          width: `${m.pct ?? 0}%`,
-                          backgroundColor: getModelColor(i),
-                        }}
-                      />
-                    </div>
-                    <span className="text-xs font-mono text-text-muted w-10 text-right">
-                      {m.pct ?? 0}%
-                    </span>
-                  </div>
-                </td>
-              </tr>
+                {t(col.labelKey)}
+              </SortableTableHead>
             ))}
-          </tbody>
-        </table>
-      </div>
+            <TableHead className="px-4 py-2.5 text-right w-36">{t("chartShare")}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sorted.map((m, i) => (
+            <TableRow key={String(m.model ?? i)}>
+              <TableCell className="px-4 py-2.5">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: getSeriesColor(i) }}
+                  />
+                  <span className="font-medium">{m.model}</span>
+                </div>
+              </TableCell>
+              <TableCell className="px-4 py-2.5 text-right font-mono text-text-muted">
+                {fmtFull(m.requests)}
+              </TableCell>
+              <TableCell
+                className="px-4 py-2.5 text-right font-mono text-primary"
+                title={
+                  displayMode === "exact" ? `~${fmt(m.promptTokens)}` : fmtFull(m.promptTokens)
+                }
+              >
+                {displayMode === "exact" ? fmtFull(m.promptTokens) : fmt(m.promptTokens)}
+              </TableCell>
+              <TableCell
+                className="px-4 py-2.5 text-right font-mono text-success"
+                title={
+                  displayMode === "exact"
+                    ? `~${fmt(m.completionTokens)}`
+                    : fmtFull(m.completionTokens)
+                }
+              >
+                {displayMode === "exact" ? fmtFull(m.completionTokens) : fmt(m.completionTokens)}
+              </TableCell>
+              <TableCell
+                className="px-4 py-2.5 text-right font-mono font-semibold"
+                title={displayMode === "exact" ? `~${fmt(m.totalTokens)}` : fmtFull(m.totalTokens)}
+              >
+                {displayMode === "exact" ? fmtFull(m.totalTokens) : fmt(m.totalTokens)}
+              </TableCell>
+              <TableCell className="px-4 py-2.5 text-right font-mono text-warning">
+                {fmtCost(m.cost)}
+              </TableCell>
+              <TableCell className="px-4 py-2.5 text-right">
+                <div className="flex items-center gap-2 justify-end">
+                  <div className="w-16 h-1.5 rounded-full bg-surface-2 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${m.pct ?? 0}%`,
+                        backgroundColor: getSeriesColor(i),
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs font-mono text-text-muted w-10 text-right">
+                    {m.pct ?? 0}%
+                  </span>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </Card>
   );
 }

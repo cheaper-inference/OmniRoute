@@ -4,94 +4,169 @@
 
 ---
 
-Ritheann an linn féinóstáilte (`self-hosted, omni-release` ar na hocht riteoir ar fad; `omni-build` ar dhá cheann) ar an meaisín **.113**.
-Tomhaiseadh é seo ar 2026-08-28 (iarbhreithniú v3.8.50, Cuid III):
+Ritheann an linn féinóstáilte ar an meaisín **.113** (`tomni-proxmox-113`). Ó 2026-10-18 i leith, tá **ról amháin**, lipéad amháin, agus buiséad cuimhne/CPU atá meánaithe de réir ualach oibre gach reathaí OmniRoute. Faigheann sliotán Turbopack na hacmhainní a theastaíonn ón tógáil; tá na sliotáin eile meánaithe de réir na mbuaicluachanna tomhaiste acu. Ní bhíonn róthiomnú ar an meaisín ach amháin nuair a tharlaíonn tógáil Turbopack ag an am céanna le tógáil webpack Release-Green agus jab lint; ionsúnn babhtáil an óstríomhaire (16 GB) é sin, agus ós rud é go ritheann tógálacha iarrataí tarraingthe ar reathaithe óstáilte, bíonn sliotán Turbopack díomhaoin an chuid is mó den am:
 
-| acmhainn  | luach                                                                                                           | an bhrí atá leis don sceidealú                                                                                                                                                   |
-| --------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **31 GB / 32 croí** (16 GB a bhí ann nuair a scríobhadh an cháipéis seo den chéad uair)                         | sroicheann `next-build` amháin buaic **~14 GB** → sáithíonn 2 thógáil throma chomhthráthacha an meaisín, agus leagann 3 cinn é (2026-08-28 06:42Z: ualach 56, cailleadh dhá jab) |
-| babhtáil  | 15 GB                                                                                                           | d’éirigh leis foilsiú v3.8.50 a chur i gcrích trí bhabhtáil; tá an brú le feiceáil in `/proc/pressure/memory`                                                                    |
-| `/tmp`    | **12 GB tmpfs = RAM**                                                                                           | is cuimhne é aon rud a fhágtar ansin; glantar iarmhair tar éis 3 h                                                                                                               |
-| diosca    | 188 GB                                                                                                          | sroicheann cóipeanna `_work` na 8 riteoir ~70 GB gan aon teorainn                                                                                                                |
-| riteoirí  | **6 éisteoir**: 4 OmniRoute (1 `omni-build` + 1 `omni-release` amháin + 2 `omni-light`) + OmniHeuris + OmniMind | roinneann siad uile an chuimhne thuas; tá `omniroute-113-3/-4/-7/-8` díchumasaithe (cuireann `systemctl enable --now` ceann ar ais i mbun oibre)                                 |
+| reathaí              | lipéad         | ról                                                                                                                                                   | `MemoryHigh` / `MemoryMax`    | `CPUQuota`     |
+| -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`   | Tógálacha Turbopack: `ci.yml` `Build` (brú/seoladh amháin), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, an tógáil a11y oíche | 56 GB / 60 GB (babhtáil 0)    | 1600 %         |
+| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), tógáil webpack                                                                                        | 20 GB / 24 GB (babhtáil 4 GB) | 800 %          |
+| `omniroute-113-2`    | `omni-light`   | jabanna oíche (Schemathesis, promptfoo, garak, k6) agus `quality.yml` `lint-guard`                                                                    | 12 GB / 16 GB (babhtáil 4 GB) | 600 %          |
+| `omniroute-113`      | `omni-light`   | an linn chéanna agus atá thuas                                                                                                                        | 8 GB / 12 GB                  | 400 %          |
+| OmniHeuris, OmniMind | (a stórtha)    | Dependabot amháin (buaic 155 MB an ceann, 2026-10-18)                                                                                                 | 4 GB / 6 GB                   | 200 % an ceann |
 
-## Suiteáil an glantóir (uair amháin, ar an meaisín)
+Tomhaiste 2026-10-18:
+
+| acmhainn   | luach                                  | cad a chiallaíonn sé don sceidealú                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| RAM / CPU  | **78 GB / 32 croí**                    | shroich tógáil táirgthe Turbopack buaic 49 GB gan uasteorainn (`tests/unit/ci-build-bundler-webpack.test.ts`); ar Next 16.3.8 coimeádann céim an tiomsaithe amháin ~40 GB (36 GB RSS in `next-build` móide 17 n-oibrí lódála ag 3 GB, tomhaiste 2026-10-18); bíonn tógáil webpack ag ~14–16 GB. Is féidir le tógáil Turbopack amháin agus tógáil webpack amháin rith le chéile; ní féidir le dhá thógáil Turbopack |
+| babhtáil   | 16 GB                                  | ritheann `omniroute-113-5` agus babhtáil díchumasaithe (`MemorySwapMax=0`), ionas go stoptar tógáil as smacht ag a huasteorainn seachas an meaisín a chur ag babhtáil                                                                                                                                                                                                                                              |
+| `/tmp`     | **12 GB tmpfs = RAM**                  | is cuimhne é aon rud a fhágtar ansin; glantar fuílleach tar éis 3 h                                                                                                                                                                                                                                                                                                                                                |
+| CPU        | ualach 60 ar 32 croí tugtha faoi deara | roimh na cuótaí, d'fhág tógáil Turbopack amháin (~1166 % CPU) móide sraith cumhdaigh ar an meaisín céanna na héisteoirí eile gan acmhainní dá gcomharthaí croí (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                               |
+| reathaithe | **7 n-éisteoir** (2026-10-28)          | 5 OmniRoute + OmniHeuris + OmniMind; iompraíonn `omniroute-113-7` `omni-build` freisin; scriosadh `omniroute-113-3/-4/-8` ón stórlann (2026-10-28)                                                                                                                                                                                                                                                                 |
+
+Tá na teorainneacha i `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` gach aonaid
+(coimeádtar na luachanna roimhe seo mar `override.conf.bak-20261018`) agus cuireadh i bhfeidhm beo iad le
+`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — gan atosú, mar sin níor
+cuireadh isteach ar aon jab a bhí ar siúl. Athraítear lipéid trí API na reathaithe (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), agus déantar é sin beo freisin.
+
+## Suiteáil an glantóir (aon uair amháin, ar an meaisín)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): gach 30 nóiméad, logáil chuig /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-Tá `lsof` riachtanach: deimhníonn an glantóir go bhfuil cosán díomhaoin trí léargas
-amháin a thógáil ar na comhaid oscailte sula mbaintear é, agus gan an uirlis ní
-bhaineann sé aon rud agus deir sé amhlaidh (cód scoir 1). Bain triail as aon athrú
-le `--dry-run` ar dtús — priontálann sé go díreach an méid a dhéanfadh sé agus ní
-athraíonn sé rud ar bith.
+Tá `lsof` riachtanach: cruthaíonn an glantóir go bhfuil conair díomhaoin trí léargas amháin de chomhaid
+oscailte a ghlacadh sula mbaintear í, agus gan an uirlis ní bhaineann sé aon rud agus deir sé
+é sin (stádas scoir 1). Bain triail as aon athrú le `--dry-run` ar dtús — priontálann sé go díreach cad a dhéanfadh sé
+agus ní bhaineann sé d'aon rud.
 
-An méid a dhéanann sé gach uair a ritheann sé: glanann sé ár n-iarmhair féin
-(`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) tar éis **3 h ar
-tmpfs** agus 24 h ar `_work/_temp` an diosca; maraíonn sé `next-build` atá níos
-sine ná 75 nóiméad (ní mhaireann aon jab chomh fada sin — ar 2026-08-27 rith ceann
-acu ar feadh 70 nóiméad tar éis do GitHub a dhearbhú go raibh a jab caillte);
-bearrann sé cóipeanna seiceáilte amach atá 48 h d’aois de riteoirí a bhfuil a
-n-aonad **stoptha**; eisíonn sé foláireamh má tá úsáid diosca ≥ 85 %, má tá
-`full/avg60` PSI cuimhne ≥ 10 %, agus má tá níos mó éisteoirí ann ná
-`MAX_ACTIVE_RUNNERS` (le miondealú omniroute/eile). Cód scoir 1 = ní mór aird a
-thabhairt air; léigh an loga.
+Cad a dhéanann sé gach uair a ritear é: glanann sé ár gcuid iarsmaí féin (`runner-*`, `omniroute-*`,
+`next-build*`, `e2e-build.tar.gz`) tar éis **3 u ar tmpfs** agus 24 u ar `_work/_temp`
+diosca; maraíonn sé `next-build` atá níos sine ná 75 nóiméad (ní ritheann aon jab chomh fada sin — ar
+2026-08-27 rith ceann acu ar feadh 70 nóiméad tar éis do GitHub a dhearbhú go raibh a jab caillte); bearrann sé
+seiceálacha amach 48 n-uaire d'aois ó reathaithe a bhfuil a n-aonad **stoptha**; tugann sé foláireamh nuair atá an diosca ≥ 85 %, PSI cuimhne
+`full/avg60` ≥ 10 %, agus nuair atá níos mó éisteoirí ann ná `MAX_ACTIVE_RUNNERS` (le miondealú
+omniroute/eile). Stádas scoir 1 = ní mór aird a thabhairt air; léigh an loga.
+
+Ní ghabhann riail an 75 nóiméad tógáil a bhfuil GitHub tar éis éirí as a jab cheana féin. Nuair nach féidir leis an
+`Runner.Listener` a jab a athnuachan, taispeánann `_diag/Runner_*.log`
+`POST request to …/renewjob timed out after 100 seconds`, tuairiscíonn an API go bhfuil an jab `completed`
+(teipthe) thart ar dheich nóiméad tar éis an athnuachana rathúil dheireanaigh, agus leanann `next-build` air ag rith
+gan aon jab ceangailte leis (2026-10-18: theip ar Thógáil #17066 ag 19:43 agus bhí a thógáil fós
+ag coinneáil 40 GB cúig nóiméad ina dhiaidh sin). Deimhnigh an tagairt sa `_diag/Worker_*.log` is nuaí, ansin
+seol SIGTERM chuig crann na tógála amháin de réir PID — `next-build`, `npm run build`, `build-next-isolated.mjs` agus
+próisis oibre `_work`. Ná bain riamh le `Runner.Listener`, `RunnerService.js` ná `Runner.Worker`: tuairiscíonn an
+próiseas oibre go bhfuil an jab curtha ar ceal agus téann an t-éisteoir ar líne arís as féin.
 
 ## Aonaid reathaí: KillMode
 
 Fágann `KillMode=process` réamhshocraithe an reathaí `Runner.Worker → npm → next-build`
-beo nuair a stoptar nó nuair a atosaítear aonad — leanann tógáil dhílleachta ag ídiú RAM agus
-CPU gan aon jab ceangailte léi. Tá comhad forlíontach ag gach aonad OmniRoute
+beo nuair a stoptar nó a atosaítear aonad — leanann tógáil dhílleachta uirthi ag ídiú RAM agus
+CPU gan aon jab ceangailte léi. Tá forlíontán ag gach aonad OmniRoute
 (`/etc/systemd/system/actions.runner.diegosouzapw-OmniRoute.<name>.service.d/10-killmode.conf`)
-le `KillMode=mixed`: SIGTERM chuig an éisteoir ar dtús, SIGKILL chuig an cgroup iomlán ag
-`TimeoutStop`. Tiocfaidh sé i bhfeidhm ar an gcéad atosú eile den aonad — atosaigh **reathaí amháin ag
-an am, agus é díomhaoin amháin**, leis an tseiceáil díomhaointis agus an t-atosú san ordú céanna.
+ina bhfuil `KillMode=mixed`: SIGTERM chuig an éisteoir ar dtús, SIGKILL chuig an cgroup iomlán ag
+`TimeoutStop`. Tagann sé i bhfeidhm an chéad uair eile a atosaítear an t-aonad — atosaigh **reathaí amháin ag
+an am, agus é díomhaoin amháin**, agus an tseiceáil díomhaointis agus an t-atosú san ordú céanna.
 
 ## Rialacha oibriúcháin
 
-- **Uasteorainn do thógálacha troma: CEANN AMHÁIN ag an am — curtha i bhfeidhm trí lipéad (ó 2026-08-29).** Díríonn gach jab
-  a ritheann `next build` iomlán ar `[self-hosted, omni-build]`, agus níl an lipéad sin ach ar
-  **`omniroute-113-5`** (cuireadh leis trí API na reathaithe é — gan
-  athchlárú): `ci.yml` `Build`, `npm-publish.yml` `publish`, an dá
-  bhailíochtú `nightly-release-green`, agus **amd64** in `docker-publish.yml` (tharla
-  ResourceExhausted ar an reathaí óstáilte 7 GB leis an gcrann seo — #11976). Fanann cuid arm64 Docker ar
-  `ubuntu-24.04-arm` (níl bosca ARM ann) le webpack. Úsáideann Docker amd64 webpack freisin:
-  tháinig scaoll ar Turbopack leis an gcrann seo laistigh de BuildKit (`TurbopackInternalError:
-there must be a path to a root`, rith 33253576569), fiú le 31 GB; d'éirigh le
-  tógáil arm64 webpack den chrann céanna ar ARM óstáilte. Roinneann amd64
-  `docker-publish` an grúpa comhthráthachta `heavy-build-main` le `Build` in `ci.yml`
-  (`cancel-in-progress: false`), mar sin fanann sé sa scuaine don aon sliotán amháin. Ní mór Docker Engine
-  a bheith ar `omniroute-113-5` (is é `docker info` an chéad chéim den jab foilsithe).
-  Ba é dhá cheann an uasteorainn roimhe seo agus bhí sé mícheart do 31 GB: ar
-  2026-08-29 17:26 UTC, thiomáin dhá `next-build` chomhthráthacha (15.4 GB + 17.2 GB RSS) an bosca
-  síos go 5 GB saor, agus 4 GB de swap in úsáid, agus mharaigh OOM na heithne ceann acu — chuir systemd
-  an marú i leith aonad an reathaí _eile_, mharaigh `runsvc.sh` an t-éisteoir sin le SIGKILL, agus
-  fuair an jab air bás leis an teachtaireacht "The runner has received a shutdown signal" (an téacs céanna le
-  OOM ar reathaí óstáilte). Ní choinníonn `omniroute-113-6` ach `omni-release`. Déantar tógálacha troma ó
-  chumaisc `main`, PRanna agus an rith oíche a shrathú anois ar aon sliotán amháin; is í an scuaine an praghas.
-  Fillfidh an dara sliotán an lá a gheobhaidh an VM Proxmox tuilleadh RAM (48–64 GB):
-  `gh api -X POST repos/<repo>/actions/runners/<id of omniroute-113-6>/labels -f 'labels[]=omni-build'`.
-- **Linn éadrom: `omni-light` (2026-08-29, #11965).** Tá `omni-light` ar `omniroute-113` agus `omniroute-113-2`
-  le haghaidh jabanna a dteastaíonn `next build` don inneall amháin (~5–6 GB) uathu ach nach dteastaíonn ceann iomlán uathu: na
-  jabanna oíche Schemathesis, promptfoo, garak agus axe-a11y. Rith siad ar an reathaí óstáilte 7 GB agus
-  fuair siad bás ar `release/v3.8.51` gan aon duine ag faire orthu. Is é 2 throm + 2 éadrom ≈ an cás is measa ar an mbosca
-  30 + 12 GB — os cionn 31 GB RAM, ach laistigh den 16 GB swap; is é an fíor-réiteach chun spás breise a fháil ná tuilleadh RAM
-  ar an VM Proxmox (`tomni-proxmox-113`), rud a athraíonn uasteorainneacha na lipéad go 3 throm + 2 éadrom.
-- **Níos lú éisteoirí d'aon ghnó.** Díchumasaíodh ceithre aonad OmniRoute ar 2026-08-29 — agus gan ach
-  `Build` in `ci.yml` agus na rití oíche ag úsáid an bhosca, bhí 8 n-éisteoir díomhaoin agus is
-  tionónta féideartha 14 GB é gach ceann breise. Is é 6 uasteorainn an ghlantóra (`MAX_ACTIVE_RUNNERS=6` in cron): comhaireann sé
-  gach `Runner.Listener` ar an mbosca, agus cuireann OmniHeuris + OmniMind dhá cheann lenár gceithre cinn.
-- **Ná glan `/tmp` ná `_work` de láimh riamh agus reathaí ar bith gnóthach.** Is mar gheall ar
-  sheiceáil agus scriosadh ina dhiaidh sin, le bearna eatarthu, a chaill jab beo Build a
-  `_work` ar 2026-08-27. Déanann an glantóir an tseiceáil agus an bhaint in aon chéim amháin;
+- **Tógáil Turbopack amháin ag an am — curtha i bhfeidhm de réir lipéid.** Díríonn gach jab a ritheann
+  `next build` iomlán Turbopack ar `[self-hosted, omni-build]`, agus níl an lipéad sin ach ar
+  **`omniroute-113-5`**: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
+  tógáil oíche a11y (#16853) agus **amd64** `docker-publish.yml` (webpack laistigh de BuildKit —
+  tháinig cliseadh tubaisteach ar Turbopack ann, rith 33253576569). Fanann géag Docker arm64 ar `ubuntu-24.04-arm`.
+  Comhroinneann amd64 `docker-publish` an grúpa comhthráthachta `heavy-build-main` le `Build`
+  `ci.yml` (`cancel-in-progress: false`). Ní mór Docker Engine a bheith ar `omniroute-113-5`. Ní
+  oireann an dara sliotán Turbopack i 78 GB (2 × 33–37 GB móide an chuid eile den mheaisín); ní bhíonn
+  an dara sliotán sábháilte ach amháin do thógálacha webpack.
+- **Ritheann Buildanna iarratais tarraingthe ar bhonneagar óstáilte (2026-10-18).** Ní shroicheann `Build`
+  `ci.yml` `omni-build` ach amháin le haghaidh `push` agus `workflow_dispatch`; ritheann gach Build
+  `pull_request` (ón tionscnamh féin nó ó fhorc) agus `merge_group` ar `ubuntu-latest` le webpack.
+  Nuair a seoladh gach PR ón tionscnamh féin chuig an sliotán, choinnigh Build Turbopack é ar feadh
+  29–58 nóiméad, d'fhan 18 Build sa scuaine ar feadh suas le 18 n-uaire, agus ní bhfuair Build `push`
+  na líne eisiúna féin an sliotán ach uair amháin as 40 jab. Ar bhonneagar óstáilte, tógann an Build
+  PR céanna 8–12 nóiméad taobh le jabanna eile an PR. Leanann Turbopack, an cuachtaire a sheolann
+  `npm-publish`, de bheith á thástáil ar an líne eisiúna le tógáil oíche a11y an bhrainse réamhshocraithe
+  (04:41 UTC), le gach Build `push` nó seolta de láimh a shroicheann an sliotán, agus le
+  `npm-publish` féin. Socraíonn `tests/unit/build/heavy-build-queue.test.ts`
+  an geata ceithre chlásal.
+- **Ná socraigh sliotán Turbopack riamh faoi bhun a riachtanais tomhaiste.** Ar 2026-10-18 ag 18:06,
+  íslíodh an sliotán ó 56G/60G go 40G/44G chun spás a dhéanamh do `omni-release`. D'fhan céim an
+  tiomsaithe ag an `MemoryHigh` ar feadh an rite iomláin (PSI cuimhne `full` 30–43 %), agus ní raibh
+  an `Runner.Listener`, a chomhroinneann an cgroup, in ann a jab a athnuachan. Athbhunaíodh socrú
+  56G/60G an úinéara ó 2026-10-17 an lá céanna. Faoi bhun an luacha sin ní theipeann ar an tógáil;
+  bíonn sí ag síor-mhalartú cuimhne, agus cailltear an jab.
+- **Tá a shliotán féin ag Release-Green (2026-10-18).** Go dtí sin rith an dá bhailíochtú Release-Green
+  ar `omni-build`: ar gach `push` (~10/uair, cuireadh 97 as 100 rith `push` ar ceal i lár na hoibre
+  in aon lá amháin) agus trí scuabadh iomlána ~2 h sa lá (d'fhan scuabadh 05:29 ar feadh 6 h leis an
+  sliotán) — bhí ró-éileamh ar an sliotán tógála aonair arís agus arís eile agus d'fhan Buildanna PR
+  ón tionscnamh féin ar feadh uaireanta. Díríonn `release-green` agus `main-green` anois ar
+  `omni-release` (`omniroute-113-6` amháin) le `OMNIROUTE_USE_TURBOPACK=0`, agus ní chuirtear rith atá
+  tosaithe ar ceal a thuilleadh de bharr `push` níos nuaí (comhdhlúthaíonn an sliotán ar feitheamh
+  an stoirm fós). Socraíonn `tests/unit/build/runner-capacity-routing.test.ts`
+  an ródú, an lasc webpack agus an riail nach dtógann aon rud ar `omni-release` le Turbopack.
+- **Linn éadrom: `omni-light`.** Ritheann `omniroute-113` agus `omniroute-113-2` na ritheanna oíche
+  a dteastaíonn `next build` don inneall cúil amháin uathu (~5–6 GB; webpack) agus `lint-guard`
+  `quality.yml`. Bhí `MemoryHigh=4G` ag `omniroute-113` go dtí 2026-10-18 — chaith tógáil promptfoo
+  54 nóiméad ag athéileamh cuimhne chun dul ar aghaidh ann; cuireann 8 GB deireadh leis an
+  scóigireacht.
+- **Níos lú éisteoirí d'aon ghnó.** Díchumasaíodh ceithre aonad OmniRoute ar 2026-08-29 — is tionónta
+  eile é gach éisteoir breise don bhuiséad cuimhne thuas. Is é 8 uasteorainn an ghlantóra
+  (`MAX_ACTIVE_RUNNERS=8` in cron): comhaireann sé gach `Runner.Listener` ar an meaisín, agus cuireann
+  OmniHeuris + OmniMind dhá cheann eile lenár gcúig cinn.
+- **Fanann jabanna Unit agus Vitest óstáilte.** Ní sheolann `ci.yml` a chuid scealpanna unit agus an jab Vitest chuig
+  `[self-hosted, omni-ci]` ach amháin nuair is `true` an athróg stórlainne `vars.USE_VPS_TEST_RUNNER`,
+  agus fiú ansin ní dhéantar é ach do rití `pull_request` ón stórlann chéanna; fanann forcanna, `merge_group` agus brúnna
+  ar `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Is é
+  `false` luach na hathróige. Ar 2026-10-28 thóg trí éisteoir `omni-ci` le 4 chroí 250–270 s le haghaidh `npm ci` agus shroich gach
+  scealpa unit teorainn 30 nóiméad an jab, i gcomparáid le ~634 s do scealpa óstáilte, agus ualach
+  17–24 ar an meaisín. Scriosadh na héisteoirí. Ná cas an athróg ar ais air gan éisteoirí atá toisithe do
+  scealpa unit.
+- **Ná glan `/tmp` ná `_work` de láimh riamh agus aon runner gnóthach.** Ba é
+  seiceáil-agus-scriosadh le bearna idir an dá chéim ba chúis le jab Build beo a `_work` a
+  chailleadh ar 2026-08-27. Déanann an glantóir an tseiceáil agus an bhaint in aon chéim amháin;
   lig dó é a dhéanamh.
-- Má stoptar reathaí i lár jab, cealaítear an jab (breathnaíodh air seo beo): ná húsáid `systemctl stop` ach amháin
-  nuair nach bhfuil aon mhacphróiseas `Runner.Worker` ag a éisteoir — agus déan é in aon ordú amháin.
-- Ní ceadmhach do shreafaí oibre déantáin a fhágáil in `/tmp` (tá sé in RAM). Íoslódáil chuig
-  `$RUNNER_TEMP` (ar diosca, ceann ar leith do gach reathaí) — thóg sé 27–32
-  nóiméad ar an déantán `next-build` 1.3 GB teacht i dtír ar an tmpfs agus 2 nóiméad é a uaslódáil ón diosca.
-- Tá an VPS `.15` le haghaidh homalógaithe amháin — ní ritheann sé reathaithe CI riamh.
+- Má stoptar runner i lár jab, cuirtear an jab ar ceal (breathnaíodh air beo): ná húsáid `systemctl stop`
+  ach amháin nuair nach bhfuil macphróiseas `Runner.Worker` ag a éisteoir — agus déan é in aon
+  ordú amháin.
+- Níor cheart do shreafaí oibre déantáin a fhágáil in `/tmp` (is RAM é). Íoslódáil chuig
+  `$RUNNER_TEMP` (ar diosca, ceann amháin in aghaidh an runner) — thóg sé 27–32 nóiméad ar an déantán
+  `next-build` 1.3 GB teacht i dtír ar an tmpfs agus 2 nóiméad é a uaslódáil ón diosca.
+- Is le haghaidh homalógaithe amháin atá an VPS `.15` — ní ritheann sé runner CI riamh.
+
+## Lána óstáilte (riteoirí arna n-óstáil ag GitHub)
+
+Baineann an stórlann leis an eagraíocht `cheaper-inference`, ar an bplean **Team**: **60
+jab óstáilte chomhthráthacha**, comhroinnte idir gach stórlann san eagraíocht, gach seiceáil PR,
+gach sreabhadh oibre a thionscnaítear le brú agus cumraíocht réamhshocraithe CodeQL. Tomhaiseadh na figiúirí thíos ar an bplean
+**Pro** (40 jab óstáilte chomhthráthacha). Tomhaiseadh an méid seo ar 2026-10-18 le linn
+feachtais chumaisc (~10 gcumasc/uair ar `release/v3.8.52`): cruthaíodh **2,500 rith sreafa oibre laistigh de
+24 h**, rinneadh 44 bhrú chuig an mbrainse laistigh de 6 h, agus bhí **106 jab óstáilte sa scuaine** fad a bhí seiceálacha PR ag fanacht ar feadh
+uaireanta agus cumascadh PRanna gan iad. Tionscnaíodh naoi sreabhadh oibre le gach brú chuig an mbrainse:
+
+| in aghaidh an bhrú chuig `release/v*`         | jabanna óstáilte | toradh le linn na géarchéime                                                      | ó 2026-10-18                                                                                 |
+| --------------------------------------------- | ---------------: | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `ci.yml` (maitrís iomlán)                     |       suas le 30 | curtha ar ceal ag an gcéad bhrú eile, 24 as 24 in aon lá amháin                   | ní chuirtear tús leis ar bhrúnna `release/**` (rith PR + Release-Green)                      |
+| `quality.yml`                                 |               ~6 | curtha ar ceal, 23 as 23                                                          | ní chuirtear tús leis ar bhrúnna `release/**`                                                |
+| `Release-Green` `--quick`                     |                0 | ritheadh ar `omni-build`, cuireadh 97 as 100 ar ceal                              | sliotán `omni-release`, ní chuirtear ar ceal riamh é, comhdhlúthaítear rith atá ar feitheamh |
+| `Lock released branch`, `OpenSSF Scorecard`   |                2 | rith amháin sa scuaine in aghaidh an bhrú                                         | rith amháin in aghaidh na tagartha (`tests/unit/build/hosted-lane-concurrency.test.ts`)      |
+| `Release acceptance` (tuairisc scátha)        |                1 | `npm ci` óstáilte amháin in aghaidh an bhrú, nár cuireadh ar ceal riamh           | gan athrú — iarrthóir ar scagaire `paths:`                                                   |
+| `Publish to Docker Hub` → `Deploy to VPS`     |                2 | curtha ar ceal in aghaidh an bhrú; téann céim amd64 san iomaíocht ar `omni-build` | gan athrú — cainéal imlonnaithe an úinéara                                                   |
+| Cumraíocht réamhshocraithe CodeQL (`dynamic`) |                4 | `javascript-typescript`, `actions`, `c-cpp`, `python` in aghaidh an bhrú          | gan athrú — Settings → Code security; ní scanann `c-cpp`/`python` aon rud anseo              |
+
+Socraíonn `tests/unit/build/push-storm-diet.test.ts` truicear brú `ci.yml` agus
+`quality.yml` chuig `main` amháin. Fo-éifeacht: ní fhaigheann Codecov uaslódáil bhunúsach a thuilleadh in aghaidh gach brú eisiúna (tá an
+chéim faisnéiseach agus `continue-on-error`); níl aon tionchar ar an ngeata cumhdaigh laistigh den stór ná ar an nóta tráchta PR.
+
+**Ní réitíonn acmhainn fhéinóstáilte bhreise an scuaine óstáilte.** D’fhéadfadh an bosca forbartha
+(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) riteoir a óstáil, ach coinníonn seisiúin na ngníomhairí
+a ualach ag 20–26 cheana féin, níl deamhan Docker i gcoimeádán an ghníomhaire, agus is í an lána
+óstáilte atá sáithithe. Bhí 71 GB saor ar an mbosca `.113` agus ualach 5–8 air ag an am céanna; is é
+an buiséad cuimhne in aghaidh an éisteora thuas an srian atá air (uasteorainn 6 éisteoir), ní an LAP. Is
+luamháin phróisis iad na roghanna atá fágtha: cumaisc PRanna feachtais trí scuaine Mergify (`label=queue`, roinneann
+baisceanna rith CI amháin `merge_group` seachas rith amháin in aghaidh an PR móide ceann amháin in aghaidh an bhrú), laghdaigh teangacha
+na cumraíochta réamhshocraithe CodeQL, agus scag `release-acceptance.yml` de réir na gcomhad a léann sé.

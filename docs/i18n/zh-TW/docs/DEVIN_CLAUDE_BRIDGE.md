@@ -5,19 +5,24 @@
 ---
 
 `devin-cli-agentic` 讓真正的 Claude Code 執行階段使用 OmniRoute 的本機 Anthropic
-Messages 端點，同時由官方 Devin CLI 透過 ACP stdio 提供模型回應。它
-不會修改現有的 Anthropic、Claude OAuth、Claude Web 或 `devin-cli` 提供者。
+Messages 端點，同時由官方 Devin CLI 透過 ACP stdio 提供模型回應。它不會修改現有的
+Anthropic、Claude OAuth、Claude Web 或 `devin-cli` 提供者。
 
-> **目前狀態：固定使用 Claude Code `2.1.258`；最近一次記錄的離線與即時驗證
-> 是在 `2.1.220` 上執行。** 固定於 `2.1.220` 的版本已透過 Devin CLI
-> `3000.2.17` 與模型 `swe-1-7-lightning` 完成三個隔離情境；最後一次即時執行證實了由用戶端掌控的 `Read`、
-> `Edit` 與 `Bash` 回合、成功的 `npm test` 結果、專案命令與技能
-> 探索、僅限 Devin 的路由，以及零 Claude 對外流量。之後固定版本已提升至 `2.1.258`
-> （OmniRoute 的 Claude 身分所模擬的 CLI 世代，也是首個原生提供
-> Fable 5.1 層級的版本）。在新的固定版本上，已於固定的基礎映像檔驗證安裝層與 `claude --version`，
-> 而且橋接器單元測試套件、`compose config` 與
-> 靜態隔離證明皆已通過——但尚未重新執行離線模擬情境與即時三情境
-> 套件。在使用此固定版本的橋接器之前，請重新執行它們（請參閱「更新固定工具」）。
+對於由用戶端擁有的工具呼叫，請透過 `devin-cli-agentic`（別名 `dva`）路由；這是支援
+工具、採用 Claude 格式的提供者。舊版 `devin-cli`（`dv`）ACP 執行器僅支援文字：
+它執行 Devin 不使用工具的 summarizer，且無法傳回工具呼叫。其模型中繼資料已據此標記，
+因此需要工具的組合路由會避開它。
+
+> **目前狀態：已固定至 Claude Code `2.1.258`；最後記錄的離線與即時驗證是在
+> `2.1.220` 上進行。** `2.1.220` 固定版本已透過 Devin CLI `3000.2.17` 和模型
+> `swe-1-7-lightning` 完成三個隔離情境；該次最終即時執行驗證了由用戶端擁有的 `Read`、
+> `Edit` 和 `Bash` 回合、成功的 `npm test` 結果、專案命令與技能探索、僅限 Devin 的
+> 路由，以及零 Claude 對外連線。之後固定版本已提升至 `2.1.258`
+> （OmniRoute 的 Claude 身分所模擬的 CLI 世代，也是第一個原生隨附
+> Fable 5.1 層級的版本線）。在新固定版本上，已於固定的基礎映像中驗證安裝層與
+> `claude --version`，且橋接器單元測試套件、`compose config` 和靜態隔離證明皆已通過
+> ——但尚未重新執行離線模擬情境與即時三情境套件。在以此固定版本使用橋接器之前，
+> 請重新執行它們（請參閱「更新固定工具」）。
 
 ## 架構
 
@@ -25,47 +30,47 @@ Messages 端點，同時由官方 Devin CLI 透過 ACP stdio 提供模型回應�
 Claude Code 2.1.258（隔離的非 root Linux 容器）
   -> http://omniroute:20128/v1/messages
   -> devin-cli-agentic（Claude 格式、無驗證提供者）
-  -> devin acp --agent-type summarizer（官方 ACP stdio，不含 Devin 工具）
+  -> devin acp --agent-type summarizer（官方 ACP stdio，不使用 Devin 工具）
   -> 專用 devin-auth 磁碟區中的 Devin 帳戶
 ```
 
-官方 CLI 的預設 ACP 代理程式可以執行自己的工具，因此此橋接器不使用
-它。橋接器會啟動固定的 `summarizer` ACP 代理程式；其官方 CLI 模式不含任何工具，並將
-序列化的 Anthropic 請求封裝為執行追蹤。當需要另一個由 Claude 掌控的
-動作時，回應必須恰好包含一個用戶端工具封套。任何 ACP
-`tool_call` 或 `tool_call_update` 都會在回應被回報為
-成功之前遭到拒絕。
+官方 CLI 的預設 ACP 代理程式可以執行自己的工具，因此此橋接器不使用它。它會啟動固定的
+`summarizer` ACP 代理程式；其官方 CLI 模式不含工具，並將序列化的 Anthropic 請求
+封裝為執行追蹤。當需要另一個由 Claude 擁有的動作時，回應必須恰好包含一個用戶端工具
+封套。任何 ACP `tool_call` 或 `tool_call_update` 都會在回應可被報告為成功之前遭到拒絕。
 
 `open-sse/executors/devin-agentic/serializer.ts` 中的序列化器會保留 `system`、
-`text`、`tool_use`、`tool_result`、`thinking`、`redacted_thinking`、`tool_choice`，以及
-Claude Code 提供的工具。影像與未知區塊會明確失敗。大型工具結果
-會使用可見的截斷標記。
+`text`、`tool_use`、`tool_result`、`thinking`、`redacted_thinking`、`tool_choice`，
+以及 Claude Code 提供的工具。影像與未知區塊會明確失敗。大型工具結果會使用可見的截斷標記。
 
-剖析器接受每個模型回合一個獨立的 `<tool>{...}</tool>` 封套。它會根據
-請求的工具清單檢查名稱、依照該工具的 JSON Schema 驗證引數、
-拒絕混合敘述與動作，並允許一次有界限的修復。Claude Code 接著會
-在本機執行產生的 Anthropic `tool_use`，並透過
+剖析器在每個模型回合中接受一個獨立的 `<tool>{...}</tool>` 封套。它會根據請求的工具
+清單檢查名稱、依照該工具的 JSON Schema 驗證引數、拒絕混合的敘述與動作，並允許一次
+受限的修復。接著，Claude Code 會在本機執行產生的 Anthropic `tool_use`，並透過
 OmniRoute 將 `tool_result` 傳回。
+
+## 自動路由
+
+當此提供者未遭封鎖時，即符合加入 OmniRoute `auto/*` 候選集區的資格。符合候選資格
+不保證會被選取：組合的路由策略（例如最後已知良好）可能偏好其他提供者。當您要求每個
+請求都必須透過 Devin 時，請使用 `dva/<model>` 或以 Devin 為優先的組合。
 
 ## 隔離與威脅模型
 
-主機的 Claude 安裝、帳戶與設定不在範圍內，並被視為
-禁止存取。Compose 服務：
+主機上的 Claude 安裝、帳戶與設定不在範圍內，且視為禁止存取。Compose 服務：
 
-- 以 UID/GID `10001:10001` 執行，使用唯讀根檔案系統、移除的權能，以及
+- 以 UID/GID `10001:10001` 執行，採用唯讀根檔案系統、移除 capabilities，並啟用
   `no-new-privileges`；
-- 使用私有的 `/home/bridge`、專用 Claude 設定磁碟區、隔離的 OmniRoute 資料，
-  以及獨立的 `devin-auth` 磁碟區；
-- 僅掛載可拋棄的 `.sandbox` 工作區／證據；
-- 不掛載主機家目錄、Keychain、SSH、雲端憑證或 Docker socket；
-- 建構明確的環境，並移除 Anthropic API／OAuth／路由變數；
+- 使用私有的 `/home/bridge`、專用的 Claude 設定 volume、隔離的 OmniRoute 資料，
+  以及獨立的 `devin-auth` volume；
+- 僅掛載可拋棄的 `.sandbox` 工作區與證據；
+- 不掛載主機的家目錄、Keychain、SSH、雲端憑證或 Docker socket；
+- 建立明確的環境，並移除 Anthropic API/OAuth/路由變數；
 - 僅將 Claude Code 推論導向 `http://omniroute:20128`，並使用僅限本機的金鑰。
 
-離線設定檔使用內部網路。在即時設定檔中，OmniRoute 僅透過
-`network-guard` 連線至官方 Devin 端點；不相關的目的地均會被拒絕。
-Claude Code 擁有獨立的拒絕所有對外流量防護，且只能透過 `NO_PROXY` 連線至本機 OmniRoute
-服務。防護稽核檔案僅由其防護程序掛載。這些
-指令碼會先驗證檔案擁有權、模式、連結計數與每項決策，再匯出
+離線設定檔使用內部網路。在即時設定檔中，OmniRoute 只能透過 `network-guard` 連線至
+官方 Devin 端點；其他不相關的目的地一律遭到拒絕。Claude Code 有獨立的拒絕所有
+對外連線防護，且只能透過 `NO_PROXY` 連線至本機 OmniRoute 服務。防護稽核檔案僅掛載
+至其對應的防護程序。這些指令碼會先驗證檔案擁有權、模式、連結數量及每項決策，再匯出
 不含權杖的證據。
 
 獨立執行隔離證明：
@@ -74,12 +79,11 @@ Claude Code 擁有獨立的拒絕所有對外流量防護，且只能透過 `NO_
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-它會驗證拓撲、具名掛載、非 root／唯讀設定、明確的本機路由、
-不存在敏感環境變數、不存在 Docker socket、封鎖對
-`api.anthropic.com` 與 `claude.ai` 的存取、僅限 Devin 的提供者選擇，以及
-ACP 後端無法使用時的明確失敗。
+它會驗證拓撲、具名掛載、非 root/唯讀設定、明確的本機路由、敏感環境變數不存在、
+Docker socket 不存在、對 `api.anthropic.com` 與 `claude.ai` 的存取遭到封鎖、
+僅選用 Devin 提供者，以及 ACP 後端無法使用時會明確失敗。
 
-## 首次設定與一般使用
+## 首次設定與一般使用方式
 
 建置已固定版本的映像：
 
@@ -87,13 +91,14 @@ ACP 後端無法使用時的明確失敗。
 ./scripts/devin-bridge/build
 ```
 
-僅對隔離的 Devin 磁碟區進行驗證：
+僅驗證隔離的 Devin volume：
 
 ```bash
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/login-devin
 ```
 
-登入命令使用官方為遠端／容器環境設計的手動權杖流程。該值會直接輸入至 CLI 提示中；不會作為程序引數傳遞、寫入 Git，或從主機複製。
+登入命令會使用專為遠端/容器環境設計的官方手動權杖流程。該值會直接輸入 CLI 提示中；
+不會作為程序引數傳遞、不會寫入 Git，也不會從主機複製。
 
 啟動隔離的 Claude Code 執行環境：
 
@@ -101,11 +106,13 @@ ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/login-devin
 ./scripts/devin-bridge/launch
 ```
 
-`launch` 會在啟動容器化的 Claude Code 前，重新檢查隔離狀態、Devin 驗證及模型探索。它絕不會執行主機上的 Claude 可執行檔。模型別名可在 `.env.devin-bridge` 中設定；每個設定值都必須保留 `devin-cli-agentic/` 前綴。
+`launch` 會在啟動容器化的 Claude Code 前，重新檢查隔離狀態、Devin 驗證及模型探索。
+它絕不會執行主機上的 Claude 可執行檔。模型別名可在 `.env.devin-bridge` 中設定；
+每個設定值都必須保留 `devin-cli-agentic/` 前綴。
 
 ## 驗證命令
 
-可重現的離線流程不需要 Devin 帳戶，且執行期間無須連線至網際網路：
+可重現的離線路徑不需要 Devin 帳戶，且執行階段不會連線至網際網路：
 
 ```bash
 ./scripts/devin-bridge/test-unit
@@ -114,42 +121,44 @@ ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/login-devin
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-需經驗證且須主動選用的即時流程如下：
+需經驗證並選擇性啟用的即時路徑為：
 
 ```bash
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/test-live-devin
 ```
 
-即時執行器會在各情境之間等待，以避免短時間內大量開啟 ACP 工作階段，並驗證結構化的 Claude 串流事件，而非信賴文字陳述。其三個情境可證明：
+即時執行器會在各情境之間等待，以避免短時間內大量開啟 ACP 工作階段，並驗證結構化的
+Claude 串流事件，而非信任文字陳述。其三種情境會證明：
 
-1. 直接讀取專案及分析缺陷；
-2. 實際執行一次 `Edit`、由用戶端掌控的 `Bash` `npm test`，以及產生終端結果；
-3. 執行 `/bridge-check`，並探索 `bridge-proof`、讀取專案、再次成功執行由用戶端掌控的 `npm test`，且在沒有待處理工作的情況下完成。
+1. 直接讀取專案及進行缺陷分析；
+2. 實際執行一次 `Edit`、由用戶端擁有的 `Bash` `npm test`，以及取得終端結果；
+3. 探索 `/bridge-check` 與 `bridge-proof`、讀取專案、再次成功執行由用戶端擁有的
+   `npm test`，並在沒有待處理工作的情況下完成。
 
-最後的閘門也會檢查 Devin 網路稽核，並要求 Claude 輸出流量稽核保持空白。
+最終閘門也會檢查 Devin 網路稽核，並要求 Claude 對外連線稽核維持空白。
 
-## 更新已固定版本的工具
+## 更新固定版本的工具
 
-映像會在 `docker/devin-bridge/Dockerfile` 中固定 Node、Claude Code 及 Devin CLI 的版本。更新步驟如下：
+映像檔會在 `docker/devin-bridge/Dockerfile` 中固定 Node、Claude Code 與 Devin CLI 的版本。若要更新：
 
 1. 變更明確指定的版本；
-2. 將兩個架構特定的 Devin 封存檔校驗和，替換為官方成品的對應值；
+2. 將兩個架構特定的 Devin 封存檔總和檢查碼替換為官方成品的值；
 3. 重新建置並執行所有離線驗證命令；
-4. 確認映像內的版本；
-5. 重新執行需經驗證的三情境即時測試套件。
+4. 確認映像檔內的版本；
+5. 重新執行經過驗證的三情境即時測試套件。
 
-請勿在主機上全域安裝任一 CLI，也不要以未經驗證的下載取代校驗和驗證。
+請勿在主機上全域安裝任一 CLI，也不要以未經驗證的下載取代總和檢查碼驗證。
 
 ## 診斷與清理
 
 - `docker compose -f docker/devin-bridge/compose.yml --profile offline logs omniroute`
-  會顯示本機路由及經過清理的執行器錯誤。
+  會顯示本機路由與經過清理的執行器錯誤。
 - `.sandbox/evidence/mock-acp.jsonl` 會記錄確定性的模擬 ACP 動作。
 - `.sandbox/evidence/claude-stream.jsonl` 會記錄實際的 Claude Code 離線執行。
-- `.sandbox/evidence/live-*.jsonl` 會記錄三個已驗證的即時串流。
-- `.sandbox/evidence/egress.jsonl` 及 `.sandbox/evidence/claude-egress.jsonl` 是經過驗證且不含權杖的防護稽核副本。
+- `.sandbox/evidence/live-*.jsonl` 會記錄三個經過驗證的即時串流。
+- `.sandbox/evidence/egress.jsonl` 與 `.sandbox/evidence/claude-egress.jsonl` 是守衛稽核經過驗證且不含權杖的副本。
 
-停止所擁有的容器及網路，同時保留登入／設定磁碟區：
+停止所擁有的容器與網路，同時保留登入／設定磁碟區：
 
 ```bash
 ./scripts/devin-bridge/clean
@@ -163,15 +172,13 @@ ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/test-live-devin
 
 ## 限制
 
-- 此橋接器依賴固定且不使用工具的 `summarizer` 角色，因為 Devin CLI `3000.2.17`
-  並未提供中立且不使用工具的 ACP 代理程式。此轉接器會補償採用摘要形式的
-  中間回應，但一次有界限的修復仍可能明確失敗。
-- 即時 ACP 呼叫可能傳回暫時性的 `502`/`504` 回應。測試框架會錯開各個情境；
-  持續性失敗仍會採取故障關閉機制，且絕不會選擇其他提供者。
-- ACP 上下文會根據每個 Anthropic 請求重新建構；不存在處理程序／工作階段
-  親和性。
-- 每個模型回應支援一次工具呼叫；平行呼叫會遭拒絕。
-- 明確不支援圖片。不會宣告支援視覺、思考輸出、投入程度控制，以及 1M
-  上下文視窗。
-- SSE 會使用有效的 Anthropic 生命週期事件，但會在收集完有界限的 ACP 輪次後
-  才送出；ACP 區塊不會以增量方式轉送。
+- 橋接器依賴固定的無工具 `summarizer` 角色，因為 Devin CLI `3000.2.17`
+  並未公開中性的無工具 ACP 代理程式。配接器會補償摘要形式的中間回應，
+  但一次有界限的修復仍可能明確失敗。
+- 即時 ACP 呼叫可能會傳回暫時性的 `502`/`504` 回應。測試工具會將各情境錯開執行；
+  持續失敗時仍會採取失敗關閉策略，且絕不選擇其他提供者。
+- ACP 上下文會從每個 Anthropic 請求重新建構；不存在處理程序／工作階段親和性。
+- 每個模型回應支援一次工具呼叫；平行呼叫會遭到拒絕。
+- 明確不支援圖片。視覺、思考輸出、投入程度控制及 1M 上下文視窗均不會對外宣告。
+- SSE 使用有效的 Anthropic 生命週期事件，但會在收集完有界限的 ACP 輪次後才發出；
+  ACP 區塊不會以增量方式轉送。

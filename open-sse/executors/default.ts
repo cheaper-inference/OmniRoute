@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
-
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { mapNvidiaGlm52ReasoningParams } from "./base/reasoningEffort.ts";
+import { mapBasetenReasoningParams } from "./base/basetenReasoning.ts";
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../config/constants.ts";
-import { getAccessToken } from "../services/tokenRefresh.ts";
+import { getAccessToken, NO_REFRESH_NEEDED } from "../services/tokenRefresh.ts";
 
 import {
   buildClaudeCodeCompatibleHeaders,
@@ -21,7 +21,7 @@ import {
 import { isOfficialAnthropicBaseUrl } from "../utils/anthropicHost.ts";
 import { applyProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
 import { stripUnsupportedParams } from "../translator/paramSupport.ts";
-import { normalizeOpenAIToolNames } from "../translator/helpers/toolCallHelper.ts";
+import { applyToolNameLengthAliases, resolveToolNameMaxLength } from "./toolNameLengthAlias.ts";
 import {
   injectReasoningContentForThinkingModel,
   shouldInjectReasoningContentPlaceholder,
@@ -62,10 +62,14 @@ import {
 import { forwardOpencodeClientHeaders } from "../utils/opencodeHeaders.ts";
 import { resolveZaiUrl } from "./default/zaiFormatOverride.ts";
 import { normalizePoolConfig, rejectStrictPool } from "./default/poolConfig.ts";
+import { isForceStreamProvider } from "./default/forceStreamBody.ts";
 import { acquireNvidiaConcurrencySlot } from "./default/nvidiaConcurrencyGate.ts";
+import { normalizeOpenAIToolCallIds } from "./default/openaiToolCallIds.ts";
 import { resolveAlibabaProviderBaseUrl } from "@/shared/constants/alibabaProviderRegions";
 import { xiaomiAlternateUrl, xiaomiMimoChatUrl } from "./default/xiaomiTokenPlan.ts";
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
+import { applyRegistryBodyRepairs } from "../utils/strictChatHistory.ts";
+import { withWorkbuddyHeaders, sanitizeWorkbuddyBody } from "../utils/workbuddyGateway.ts";
 
 const NVIDIA_TOOL_CALL_ID_PATTERN = /^[A-Za-z0-9]{9}$/;
 const PERPLEXITY_AGENT_DEFAULT_MAX_OUTPUT_TOKENS = 4096;
@@ -586,22 +590,14 @@ export class DefaultExecutor extends BaseExecutor {
         headers["x-api-key"] = effectiveKey || credentials.accessToken;
         break;
       case "clinepass": // dual-auth (OAuth or BYOK) — see applyClineAuthHeaders()
+      case "cline":
         // buildClinepassHeaders() (called below via isClinepass=true) is the single
         // source of truth for the OAuth-vs-BYOK decision, keyed off
         // credentials.accessToken — do not re-decide it here off credentials.authType,
         // which can diverge from the real credential shape (#11828 review).
-        if (credentials?.accessToken) {
-          console.debug("[Auth] Using OAuth token for Cline/Kilo Code request.");
-        } else {
-          console.debug("[Auth] Using direct API key for Cline/Kilo Code request.");
-        }
+        // OAuth token vs BYOK API key handled inside applyClineAuthHeaders
+        // (keyed off credentials.accessToken); no duplicate decision needed here.
         applyClineAuthHeaders(headers, credentials, effectiveKey, clientHeaders, true);
-        break;
-      case "cline":
-        // Cline's API requires the bearer token prefixed with `workos:` plus a
-        // set of Cline client-identification headers; plain `Bearer <token>`
-        // is rejected upstream. applyClineAuthHeaders() emits both.
-        applyClineAuthHeaders(headers, credentials, effectiveKey, clientHeaders, false);
         break;
       default:
         if (this.usesClaudeCodeProtocol(credentials)) {
@@ -675,6 +671,10 @@ export class DefaultExecutor extends BaseExecutor {
 
     headers["Accept"] = stream ? "text/event-stream" : "application/json";
 
+    // Client attribution first; operator custom headers below still win.
+    if (clientHeaders) {
+      forwardOpencodeClientHeaders(headers, clientHeaders, { forwardUserAgent: false });
+    }
     const isCompatibleProvider =
       this.provider?.startsWith?.("openai-compatible-") ||
       this.provider?.startsWith?.("anthropic-compatible-");
@@ -683,11 +683,7 @@ export class DefaultExecutor extends BaseExecutor {
       applyCustomHeaders(headers, credentials.providerSpecificData?.customHeaders);
     }
 
-    // Forward client request metadata headers (from OpenCode or similar clients)
-    // Allowlist-based: only specific x-opencode-* headers and User-Agent are forwarded
     if (clientHeaders) {
-      forwardOpencodeClientHeaders(headers, clientHeaders);
-
       // #3974: merge the client's negotiated anthropic-beta (allowlisted) into the
       // outbound set. The registry's static ANTHROPIC_BETA_CLAUDE_OAUTH lacks
       // tool-search-tool-2025-10-19, so deferred-tool requests were rejected with
@@ -709,13 +705,21 @@ export class DefaultExecutor extends BaseExecutor {
 
     normalizeAnthropicHeaderVariants(headers);
 
+    if (this.provider === "workbuddy") {
+      withWorkbuddyHeaders(headers, body);
+    }
+
     return headers;
   }
 
   /**
    * Downgrade `response_format: { type: "json_schema" }` to `json_object` for
-   * `openai-compatible-*` providers AND `kilocode`, injecting the JSON schema
-   * into the system prompt instead. DeepSeek / Ollama / local OpenAI-compatible
+   * `openai-compatible-*` providers, the native `deepseek` provider AND
+   * `kilocode`, injecting the JSON schema into the system prompt instead.
+   * Native DeepSeek documents only `json_object` and answers `json_schema` with
+   * HTTP 400 "This response_format type is unavailable now" (upstream report
+   * 9router#5139) — revisit this gate if DeepSeek ever ships native
+   * `json_schema`. DeepSeek / Ollama / local OpenAI-compatible
    * models often lack native Structured Output and return empty or malformed
    * content when a `json_schema` response_format is forwarded as-is (kilocode's
    * DeepSeek V4 Flash rejects it with HTTP 400 `Invalid input: response_format`,
@@ -726,8 +730,9 @@ export class DefaultExecutor extends BaseExecutor {
   applyJsonSchemaFallback<T>(body: T): T {
     const provider = this.provider ?? "";
     const isOpenAiCompatible = provider.startsWith("openai-compatible-");
+    const isDeepSeek = provider === "deepseek";
     const isKiloCode = provider === "kilocode";
-    if (!isOpenAiCompatible && !isKiloCode) return body;
+    if (!isOpenAiCompatible && !isDeepSeek && !isKiloCode) return body;
     if (!body || typeof body !== "object" || Array.isArray(body)) return body;
 
     const record = body as Record<string, unknown>;
@@ -735,19 +740,25 @@ export class DefaultExecutor extends BaseExecutor {
       { type?: string; json_schema?: { schema?: unknown } } | undefined;
     if (!rf) return body;
 
-    // openai-compatible-* providers accept json_object natively — only the
-    // json_schema form needs downgrading there. kilocode rejects BOTH forms,
-    // so it enters the strip path below regardless.
+    // openai-compatible-* accept json_object natively; only json_schema needs downgrading there.
+    // kilocode rejects BOTH forms, so it strips below. Non-JSON formats (text/unknown/malformed)
+    // get no JSON prompt: kilocode still drops the field it rejects, others pass through.
+    const { response_format: _dropped, ...rest } = record;
     if (isOpenAiCompatible && rf.type === "json_object") return body;
+    if (rf.type !== "json_schema" && rf.type !== "json_object")
+      return isKiloCode ? (rest as T) : body;
+    // Native DeepSeek accepts `text` and `json_object` — only json_schema is
+    // rewritten, and always (a schema-less json_schema 400s there too).
+    if (isDeepSeek && rf.type !== "json_schema") return body;
 
     const schema = rf.type === "json_schema" ? rf.json_schema?.schema : undefined;
-    if (rf.type === "json_schema" && !schema) return body;
+    if (rf.type === "json_schema" && !schema && !isDeepSeek) return body;
 
     const schemaJson = schema ? JSON.stringify(schema, null, 2) : null;
     const prompt =
       schemaJson !== null
-        ? `You must respond with valid JSON that strictly follows this JSON schema:\n\`\`\`json\n${schemaJson}\n\`\`\`\nRespond ONLY with the JSON object, no other text.`
-        : "You must respond with valid JSON only (a single JSON object), no other text.";
+        ? `You must respond with valid JSON that strictly follows this JSON schema:\n\`\`\`json\n${schemaJson}\n\`\`\`\nRespond ONLY with the JSON object, no other text and no markdown code fences.`
+        : "You must respond with valid JSON only (a single JSON object), no other text and no markdown code fences.";
 
     const messages: Array<Record<string, unknown>> = Array.isArray(record.messages)
       ? (record.messages as Array<Record<string, unknown>>).map((m) => ({ ...m }))
@@ -757,7 +768,7 @@ export class DefaultExecutor extends BaseExecutor {
       if (typeof sys.content === "string") {
         sys.content = `${sys.content}\n\n${prompt}`;
       } else if (Array.isArray(sys.content)) {
-        sys.content.push({ type: "text", text: `\n\n${prompt}` });
+        sys.content = [...sys.content, { type: "text", text: `\n\n${prompt}` }];
       }
     } else {
       messages.unshift({ role: "system", content: prompt });
@@ -767,10 +778,7 @@ export class DefaultExecutor extends BaseExecutor {
     // both json_schema AND json_object 400 with `param: response_format`) — strip
     // it entirely and rely on the schema prompt. openai-compatible-* providers
     // accept json_object, so keep the downgrade there.
-    if (isKiloCode) {
-      const { response_format: _dropped, ...rest } = record;
-      return { ...rest, messages } as T;
-    }
+    if (isKiloCode) return { ...rest, messages } as T;
     return { ...record, messages, response_format: { type: "json_object" } } as T;
   }
 
@@ -778,9 +786,16 @@ export class DefaultExecutor extends BaseExecutor {
   // `text` is an object missing `text.format` with a 400 missing_required_parameter.
   // The Responses API default for that field is { type: "text" }, so default it
   // for openai-compatible "responses" providers before forwarding upstream.
-  defaultResponsesTextFormat<T>(body: T): T {
+  // The type is resolved with the same anchored helper buildUrl uses, never a
+  // substring match: node IDs can carry an operator-chosen suffix (a chat node
+  // `openai-compatible-chat-my-responses` must stay chat).
+  defaultResponsesTextFormat<T>(
+    body: T,
+    credentials?: { providerSpecificData?: Record<string, unknown> | null } | null
+  ): T {
     if (!this.provider?.startsWith?.("openai-compatible-")) return body;
-    if (!this.provider.includes("responses")) return body;
+    const psd = credentials?.providerSpecificData ?? null;
+    if (getOpenAICompatibleType(this.provider, psd) !== "responses") return body;
     if (!body || typeof body !== "object" || Array.isArray(body)) return body;
     const record = body as Record<string, unknown>;
     const text = record.text;
@@ -816,14 +831,13 @@ export class DefaultExecutor extends BaseExecutor {
     }
 
     withDefaults = this.applyJsonSchemaFallback(withDefaults);
-    withDefaults = this.defaultResponsesTextFormat(withDefaults);
+    withDefaults = this.defaultResponsesTextFormat(withDefaults, credentials);
     if (this.provider === "perplexity-agent") {
       withDefaults = defaultPerplexityAgentMaxOutputTokens(withDefaults);
     }
 
-    if (this.provider === "nvidia") {
-      normalizeNvidiaToolCallIds(withDefaults);
-    }
+    if (this.provider === "nvidia") normalizeNvidiaToolCallIds(withDefaults);
+    if (this.provider === "openai") withDefaults = normalizeOpenAIToolCallIds(withDefaults);
 
     // Port of decolua/9router commit d652300e:
     // Cerebras returns 400 (wrong_api_format), Mistral returns 422
@@ -927,8 +941,11 @@ export class DefaultExecutor extends BaseExecutor {
       } else if (stream && targetFormat === "openai" && requestFormat !== "openai-responses") {
         // Do not inject stream_options when the outgoing body explicitly disables streaming.
         const defaultsRecord = withDefaults as Record<string, unknown>;
+        // #18007: forceStream providers must stream upstream even if the client body says false.
         const bodyDisablesStreamOptions =
-          defaultsRecord.stream !== undefined && defaultsRecord.stream !== true;
+          !isForceStreamProvider(this.provider) &&
+          defaultsRecord.stream !== undefined &&
+          defaultsRecord.stream !== true;
         if (bodyDisablesStreamOptions) {
           if (Object.prototype.hasOwnProperty.call(defaultsRecord, "stream_options")) {
             const withoutStreamOptions = { ...defaultsRecord };
@@ -948,6 +965,10 @@ export class DefaultExecutor extends BaseExecutor {
           const withoutStreamOptions = { ...withDefaults } as Record<string, unknown>;
           delete withoutStreamOptions.stream_options;
           withDefaults = withoutStreamOptions;
+        }
+        // #18007: stream_options opt-out must not leave a client stream:false on the wire.
+        if (!bodyDisablesStreamOptions && isForceStreamProvider(this.provider)) {
+          withDefaults = { ...(withDefaults as Record<string, unknown>), stream: true };
         }
       } else if (!stream && Object.prototype.hasOwnProperty.call(withDefaults, "stream_options")) {
         // #3884: stream_options is only valid on streaming requests. NVIDIA NIM
@@ -1001,6 +1022,7 @@ export class DefaultExecutor extends BaseExecutor {
       const bodyRecord = withDefaults as Record<string, unknown>;
       const outboundModel = typeof bodyRecord.model === "string" ? bodyRecord.model : model;
       withDefaults = mapNvidiaGlm52ReasoningParams(bodyRecord, this.provider, outboundModel);
+      withDefaults = mapBasetenReasoningParams(withDefaults, this.provider, outboundModel);
       stripUnsupportedParams(this.provider, outboundModel, withDefaults as Record<string, unknown>);
     }
 
@@ -1047,35 +1069,16 @@ export class DefaultExecutor extends BaseExecutor {
       }
     }
 
-    const toolNameMaxLength = getRegistryEntry(this.provider)?.toolNameMaxLength;
-    if (
-      toolNameMaxLength &&
-      withDefaults &&
-      typeof withDefaults === "object" &&
-      !Array.isArray(withDefaults)
-    ) {
-      const toolNameMap = normalizeOpenAIToolNames(withDefaults, toolNameMaxLength);
-      if (toolNameMap.size > 0) {
-        const existingToolNameMap =
-          (withDefaults as Record<string, unknown>)._toolNameMap instanceof Map
-            ? ((withDefaults as Record<string, unknown>)._toolNameMap as Map<string, string>)
-            : null;
-        const responseToolNameMap = existingToolNameMap
-          ? new Map(existingToolNameMap)
-          : new Map<string, string>();
-        for (const [alias, original] of toolNameMap) {
-          responseToolNameMap.set(alias, original);
-        }
-        Object.defineProperty(withDefaults, "_toolNameMap", {
-          value: responseToolNameMap,
-          enumerable: false,
-          configurable: true,
-          writable: true,
-        });
-      }
+    applyToolNameLengthAliases(
+      withDefaults,
+      resolveToolNameMaxLength(this.provider, credentials?.providerSpecificData)
+    );
+
+    if (this.provider === "workbuddy") {
+      withDefaults = sanitizeWorkbuddyBody(withDefaults);
     }
 
-    return withDefaults;
+    return applyRegistryBodyRepairs(this.provider, withDefaults);
   }
 
   // Reasoning models (ClinePass, OpenRouter, etc.) leave content empty when the reasoning
@@ -1099,11 +1102,11 @@ export class DefaultExecutor extends BaseExecutor {
     if (!reasoningEnabled) return body;
 
     const MIN_TOKENS = 4096;
-    const maxOutput =
-      typeof modelEntry.maxOutputTokens === "number" && modelEntry.maxOutputTokens > 0
-        ? modelEntry.maxOutputTokens
-        : MIN_TOKENS;
-    const target = Math.min(MIN_TOKENS, maxOutput);
+    // #14888: unknown real limit (no maxOutputTokens) -> don't fabricate a 4096 ceiling.
+    if (typeof modelEntry.maxOutputTokens !== "number" || modelEntry.maxOutputTokens <= 0) {
+      return body;
+    }
+    const target = Math.min(MIN_TOKENS, modelEntry.maxOutputTokens);
     const current = body.max_tokens ?? body.max_completion_tokens;
 
     // #6912: keep whichever token key transformRequest already set (o1/o3/o4/gpt-5 use
@@ -1113,8 +1116,13 @@ export class DefaultExecutor extends BaseExecutor {
 
     // #14888: a positive client budget is a choice. Raising it made reasoning
     // models spend the whole window on thinking and return empty content.
-    if (typeof current !== "number" || current <= 0) {
+    // #17971: an ABSENT client cap must not become a 4096 ceiling (truncates long
+    // reasoning outputs such as Codex compaction). Only repair an explicit invalid
+    // value; always-reasoning models keep their declared limit as the floor (#13198).
+    if (typeof current === "number" && current <= 0) {
       body[tokenKey] = target;
+    } else if (current === undefined && modelEntry.alwaysReasons === true) {
+      body[tokenKey] = modelEntry.maxOutputTokens;
     }
     return body;
   }
@@ -1136,7 +1144,7 @@ export class DefaultExecutor extends BaseExecutor {
         return null;
       }
     }
-    if (!credentials.refreshToken) return null;
+    if (!credentials.refreshToken) return NO_REFRESH_NEEDED;
     try {
       return await getAccessToken(this.provider, credentials, log);
     } catch (error) {

@@ -48,15 +48,15 @@ funciona de imediato), verifica o estado do servidor e executa `claude`.
 
 ---
 
-## Aliases de descoberta — apresentar modelos que não são Claude no seletor `/model`
+## Aliases de discovery — expor modelos não-Claude no seletor `/model`
 
-A descoberta de modelos do gateway do Claude Code apresenta apenas ids que começam por `claude`
-ou `anthropic`, pelo que, com `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, o seletor
-nativo `/model` apresenta normalmente **apenas** os modelos Claude/Anthropic do OmniRoute — um
-`kimi/kimi-k2.6` ou `glm/glm-5.2` nunca aparece, apesar de o encaminhamento funcionar corretamente.
+A descoberta de modelos do gateway do Claude Code apenas lista ids que começam com `claude`
+ou `anthropic`, pelo que com `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` o seletor
+nativo `/model` mostra normalmente **apenas** os modelos Claude/Anthropic do OmniRoute — um
+`kimi/kimi-k2.6` ou `glm/glm-5.2` nunca aparece, embora o encaminhamento funcione.
 
-O OmniRoute pode espelhar qualquer modelo ativo (e combinação) sob um id `claude/…`, para que este
-passe pelo filtro e apareça no seletor:
+O OmniRoute pode espelhar qualquer modelo ativado (e combo) sob um id `claude/…` para que
+passe nesse filtro e apareça no seletor:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,72 +64,92 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Quando seleciona um destes modelos no Claude Code, o OmniRoute remove o prefixo `claude/`
-e repõe o id real antes do encaminhamento — um id `claude/<real-claude-model>` genuíno
-(o fornecedor OAuth real do Claude) permanece sempre inalterado.
+Quando escolhe um destes no Claude Code, o OmniRoute remove o wrapper `claude/`
+para repor o id real antes do encaminhamento — um id `claude/<real-claude-model>`
+genuíno (o verdadeiro fornecedor Claude OAuth) é sempre deixado intacto.
 
-**Esta funcionalidade está desativada por predefinição** e é controlada por uma hierarquia de três níveis (o mais específico
-prevalece), para que uma instalação normal do OmniRoute nunca duplique o respetivo catálogo para clientes que não utilizam
+Por predefinição, apenas os ids base são espelhados. Com a feature flag opt-in
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` ativada, as variantes de nível de esforço de raciocínio que
+o catálogo já lista (por ex. `codex/gpt-6-sol-high`) são espelhadas como qualquer outro
+id, para que o Claude Code possa escolher um nível de esforço explícito, e os ids `auto/*`
+incorporados que o caminho de pedido não consegue materializar não são espelhados. A listagem
+das variantes de esforço continua a ser regida por `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — o
+espelho nunca adiciona uma variante que o catálogo base não tenha.
+
+**Isto está desativado por predefinição** e é controlado por um gate de três níveis (o mais específico
+prevalece), para que um OmniRoute simples nunca duplique o seu catálogo para clientes que não usam
 o Claude Code:
 
-| Nível      | Localização                                                                                     |
+| Nível      | Onde                                                                                            |
 | ---------- | ----------------------------------------------------------------------------------------------- |
-| Modelo     | Página de detalhes do fornecedor → opção "Expose in Claude Code" por modelo                     |
-| Fornecedor | Página de detalhes do fornecedor → opção ao nível do fornecedor (abrange todos os seus modelos) |
-| Global     | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (desativado por predefinição)          |
+| Modelo     | Página de detalhe do fornecedor → toggle "Expor no Claude Code" por modelo                      |
+| Fornecedor | Página de detalhe do fornecedor → toggle ao nível do fornecedor (abrange todos os seus modelos) |
+| Global     | Definições → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (desativado por predefinição)        |
 
 A variável de ambiente `EXPOSE_CC_DISCOVERY_ALIASES` força a ativação do nível global
-e tem precedência sobre a configuração do painel (o ecrã Feature Flags apresenta
-uma nota "active via environment variable" quando isso acontece). As opções por fornecedor e
-por modelo permitem refinar a partir daí — por exemplo, global desativado + fornecedor Kimi ativado expõe
+e tem precedência sobre a anulação definida no dashboard (o ecrã Feature Flags mostra
+uma nota "ativo via variável de ambiente" quando isso acontece). Os toggles por fornecedor e
+por modelo refinam a partir daí — por ex. global desativado + fornecedor Kimi ativado expõe
 apenas os modelos da Kimi.
 
-> ⚠️ **Incompatibilidade da janela em modelos que não são Claude.** O Claude Code assume uma janela de contexto de 200K
-> para qualquer id que não reconheça (não consegue obter a janela real a partir de
-> `/v1/models`). Para um modelo com uma janela maior (por exemplo, os 256K do Kimi K2), defina
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` com um valor inferior à janela real do modelo, para que
-> a compactação automática não seja acionada prematuramente. Os perfis gerados acima já
-> fazem isto para cada modelo.
-
----
+> ⚠️ **Desajuste de janela em modelos não-Claude.** O Claude Code assume uma janela de contexto
+> de 200K para qualquer id que não reconheça (não consegue ler uma janela real a partir de
+> `/v1/models`). Para um modelo com uma janela maior (por ex. os 256K do Kimi K2), defina
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` para um valor abaixo da janela real do modelo, de modo a que
+> a compactação automática não dispare prematuramente. Os perfis gerados acima já
+> fazem isto por modelo.
 
 ## Bloco de integração no painel
 
-O cartão da ferramenta Claude (**Painel → Código CLI**) apresenta o fragmento `settings.json` exato
+O cartão da ferramenta Claude (**Painel → Código CLI**) apresenta o fragmento exato de `settings.json`
 para esta instância, junto ao botão de informações do alias de descoberta, com um botão para copiar:
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<o seu OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<a sua chave de API do OmniRoute>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-O URL base é o resolvido pelo cartão (incluindo uma substituição personalizada que tenha introduzido), já
-normalizado — sem o sufixo `/v1` nem uma barra final. **A chave nunca é apresentada**: o bloco inclui um
-marcador de posição, pelo que uma captura de ecrã ou um fragmento colado não pode divulgá-la. Substitua-o pela sua chave.
+O URL base é o que foi determinado pelo cartão (incluindo uma substituição personalizada introduzida por si), já
+normalizado — sem o sufixo `/v1` e sem uma barra no final. **A chave nunca é apresentada**: o bloco inclui um
+marcador de posição, pelo que uma captura de ecrã ou um fragmento colado não pode expor uma chave. Substitua-o pela sua chave.
 
-Adicione `CLAUDE_CODE_AUTO_COMPACT_WINDOW` no mesmo bloco `env` para qualquer modelo cuja janela
-de contexto real não seja de 200K — o Claude Code assume 200K para todos os IDs que não reconhece, pelo que,
-caso contrário, a compactação automática é acionada no ponto errado (consulte o aviso na secção anterior).
-O gerador de fragmentos também aceita esse valor, pelo que um chamador que conheça a janela do modelo de destino
+Adicione `CLAUDE_CODE_AUTO_COMPACT_WINDOW` no mesmo bloco `env` para qualquer modelo cuja janela de
+contexto real não seja de 200K — o Claude Code pressupõe 200K para todos os ids que não reconhece, pelo que,
+caso contrário, a compactação automática é acionada no momento errado (consulte o aviso na secção anterior).
+O construtor do fragmento também aceita esse valor, pelo que um invocador que conheça a janela do modelo de destino
 pode emiti-lo diretamente.
 
-Fonte: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (gerador
-puro, testado por testes unitários), apresentado por `ClaudeGatewayOnboardingBlock`.
+Origem: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (construtor
+puro, com testes unitários), apresentado por `ClaudeGatewayOnboardingBlock`.
+
+### Fixar uma conta (opcional)
+
+Para enviar todos os pedidos do Claude Code através de uma conta específica do fornecedor, adicione o
+cabeçalho `x-omniroute-connection` através de `ANTHROPIC_CUSTOM_HEADERS` no mesmo bloco `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Copie o id do chip `xxxxxxxx…` na linha da ligação da página do fornecedor. A fixação aplica-se apenas
+a ids de modelo único (`provider/model`), não a combinações. Consulte
+[Fixação de conta por pedido](../reference/API_REFERENCE.md#account-pinning-per-request) para conhecer o
+comportamento de contingência exato.
 
 ---
 
 ## Perfis (`CLAUDE_CONFIG_DIR`)
 
-O Claude Code **não tem ficheiros de perfil nativos** (ao contrário de `~/.codex/<name>.config.toml`
-do Codex). O mecanismo convencional é `CLAUDE_CONFIG_DIR` — um diretório de configuração separado por
-perfil, cada um com o seu próprio `settings.json`, credenciais, histórico e cache.
+O Claude Code **não possui ficheiros de perfil nativos** (ao contrário de `~/.codex/<name>.config.toml` do Codex).
+O mecanismo habitual é `CLAUDE_CONFIG_DIR` — um diretório de configuração separado para cada
+perfil, cada um com os seus próprios `settings.json`, credenciais, histórico e cache.
 
-`omniroute setup-claude` obtém o catálogo `/v1/models` em tempo real e escreve um
+`omniroute setup-claude` obtém o catálogo `/v1/models` em tempo real e cria um
 perfil por modelo em `~/.claude/profiles/<name>/settings.json`, reutilizando os
 **mesmos nomes que `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
@@ -148,18 +168,17 @@ perfil por modelo em `~/.claude/profiles/<name>/settings.json`, reutilizando os
 }
 ```
 
-> **O token de autenticação nunca é escrito no perfil.** Inicie com
+> **O token de autenticação nunca é guardado no perfil.** Inicie com
 > `omniroute launch --profile <name>` (este injeta `ANTHROPIC_AUTH_TOKEN` a partir do
 > contexto ativo) ou exporte `ANTHROPIC_AUTH_TOKEN` manualmente e execute
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
 **Sincronização automática após a descoberta de modelos (opcional).** O OmniRoute pode regenerar automaticamente estes mesmos
 ficheiros `~/.claude/profiles/<name>/settings.json` sempre que uma sincronização dos modelos de um fornecedor
-altere o catálogo em tempo real — assim, os modelos novos ou cujo nome tenha sido alterado obtêm perfis sem ser necessário executar novamente o
-comando. Está **desativada por predefinição**: ative-a no **painel Código CLI** ("Sincronização automática de perfis
-CLI" → Claude Code) ou defina `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (também respeita
+altere o catálogo em tempo real — assim, os modelos novos ou com nomes alterados obtêm perfis sem ser necessário voltar a executar o
+comando. Está **desativada por predefinição**: ative-a no **painel de CLI Code** ("Sincronização automática de perfis da CLI" → Claude Code) ou defina `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (também respeita
 `CLI_ALLOW_CONFIG_WRITES`, ativada por predefinição). Quando ativada, apenas escreve ficheiros de perfil; nunca
-altera a configuração ativa/predefinida do Claude, a autenticação ou o `~/.claude/settings.json`.
+altera a configuração ativa/predefinida do Claude, a autenticação ou o ficheiro `~/.claude/settings.json`.
 
 ### Gerar e utilizar perfis
 
@@ -172,6 +191,10 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Apenas alguns fornecedores
 omniroute setup-claude --only glm,kimi
+
+# Também escreve perfis para fornecedores de CLI locais (zcode, auggie, devin-cli-agentic,
+# codex-app-server) não detetados neste anfitrião (ignorados por predefinição para um destino local)
+omniroute setup-claude --include-local
 
 # Pré-visualizar sem escrever
 omniroute setup-claude --dry-run

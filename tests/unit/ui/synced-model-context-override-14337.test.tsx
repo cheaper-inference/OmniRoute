@@ -20,9 +20,11 @@ vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock("@/shared/components", () => ({
+vi.mock("@/shared/components", async () => ({
+  // KEA-7886: form adapters (Button/Input/Checkbox/Select/FilterPills) as DOM-faithful stubs
+  ...(await import("../../helpers/sharedComponentStubs")).formStubs,
   Badge: ({ children, title }: any) => <span title={title}>{children}</span>,
-  Button: ({ children, onClick }: any) => <button onClick={onClick}>{children}</button>,
+  CapabilityBadge: ({ children, title }: any) => <span title={title}>{children}</span>,
 }));
 
 vi.mock(

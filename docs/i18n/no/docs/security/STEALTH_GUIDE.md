@@ -20,60 +20,60 @@ Stealth-funksjoner finnes slik at OmniRoute kan fungere som et kompatibilitetsla
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Vedvarende `wreq-js`-økter opprettes behovsstyrt per kontoomfang og løste proxy. Den prosessomfattende
-`TlsClient`-poolen inneholder maksimalt 128 økter som utgir seg for å være **Chrome 124 på macOS** overfor
-oppstrømstjenester bak Cloudflare. `TlsClient.fetch()` stanser med feil når den innebygde kjøretiden
-ikke er tilgjengelig. En kallende funksjon kan eksplisitt velge en reserveløsning utenfor denne wrapperen.
+Vedvarende `wreq-js`-økter opprettes ved behov per kontoomfang og løst proxy. Den
+prosessomfattende `TlsClient`-poolen inneholder maksimalt 128 økter som etterligner **Chrome 124 på macOS** for
+oppstrømstjenester bak Cloudflare. `TlsClient.fetch()` feiler lukket når den native kjøretiden ikke er
+tilgjengelig. En kallende part kan eksplisitt velge en reserveløsning utenfor denne innpakningen.
 
 - Øktprofil: `browser: "chrome_124", os: "macos"`
-- Proxy-oppløsning (prioritet): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (også med små bokstaver)
+- Proxyoppløsning (prioritet): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (også med små bokstaver)
 - Tidsavbrudd: `TLS_CLIENT_TIMEOUT_MS` (arves fra `FETCH_TIMEOUT_MS`, standardverdi 600000)
 - `wreq-js` Response er fetch-kompatibel (`headers`, `text()`, `json()`, `clone()`, `body`).
 - Vakthund for første byte (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  fullføres så snart headere fra oppstrømstjenesten ankommer, så `TLS_CLIENT_TIMEOUT_MS` alene kan ikke sette en grense for en
-  kropp som aldri leverer en første byte. `guardTlsFirstByte()` kjører kroppens første `read()` i et kappløp
-  mot `TLS_FIRST_BYTE_WATCHDOG_MS` (standardverdi `10000`; `0` deaktiverer den). En velfungerende kropp
+  fullføres så snart oppstrømshodene ankommer, så `TLS_CLIENT_TIMEOUT_MS` alene kan ikke avgrense en
+  kropp som aldri leverer en første byte. `guardTlsFirstByte()` kjører kroppens første `read()`
+  parallelt mot `TLS_FIRST_BYTE_WATCHDOG_MS` (standardverdi `10000`, `0` deaktiverer den). En frisk kropp
   påvirkes ikke, mens en fastlåst kropp avbryter wreq-leseren og lar den eksisterende
-  TLS-reservelogikken i `proxyFetch` gå videre til direkte-/proxy-dispatcheren (en forespørsel som ikke trygt kan spilles av på nytt, for eksempel
-  en POST med en kropp, utløser fortsatt en feil i stedet for å bli forsøkt på nytt uten varsel).
+  TLS-reservelogikken i `proxyFetch` gå videre til direkte-/proxy-ruting (en forespørsel som ikke trygt kan spilles av på nytt, f.eks.
+  en POST med en kropp, kaster fortsatt en feil i stedet for å bli forsøkt på nytt uten varsel).
 
-### Transport for leverandører med web-informasjonskapsler — wreq-js 3.2.0
+### Transport for leverandører med nettinformasjonskapsler — wreq-js 3.2.0
 
 `open-sse/services/tlsClientBase.ts` er den delte adapteren for de fem spesialiserte
-transportene med web-informasjonskapsler nedenfor. Hver enkelt leverandør-wrapper velger en nettleser-/OS-profil. Adapteren
-bruker den felles wreq-kjøretidslasteren og transportpoolen i `open-sse/utils/tlsClient.ts`, indeksert etter
+transportene med nettinformasjonskapsler nedenfor. Hver tynne leverandørinnpakning velger en nettleser-/OS-profil. Adapteren
+bruker den ene wreq-kjøretidslasteren og transportpoolen i `open-sse/utils/tlsClient.ts`, indeksert etter
 profil + OS + løst proxy, mens hver forespørsel bruker `cookieMode: "ephemeral"`. Kontoer og
 forespørsler deler derfor tilkoblinger på transportnivå, men aldri en wreq-økt eller informasjonskapselbeholder.
 
-| Leverandør | Profil        | Emulert OS | Retningslinje for EOF i strøm         |
-| ---------- | ------------- | ---------- | ------------------------------------- |
-| Claude     | `chrome_146`  | Linux      | inkluder `[DONE]`                     |
-| Perplexity | `firefox_148` | macOS      | inkluder `event: end_of_stream`       |
-| Grok       | `chrome_146`  | Linux      | ekskluder `[DONE]`                    |
-| Notion     | `chrome_146`  | Windows    | inkluder `[DONE]`                     |
-| LMArena    | `chrome_146`  | Windows    | ingen sentinel; lukk ved innebygd EOF |
+| Leverandør | Profil        | Emulert OS | Retningslinje for strømmens EOF    |
+| ---------- | ------------- | ---------- | ---------------------------------- |
+| Claude     | `chrome_146`  | Linux      | inkluder `[DONE]`                  |
+| Perplexity | `firefox_151` | macOS      | inkluder `event: end_of_stream`    |
+| Grok       | `chrome_146`  | Linux      | utelat `[DONE]`                    |
+| Notion     | `chrome_146`  | Windows    | inkluder `[DONE]`                  |
+| LMArena    | `chrome_146`  | Windows    | ingen sentinel; lukk ved nativ EOF |
 
-- Strømming konsumerer den innebygde responsens `ReadableStream` direkte; ingen midlertidig fil eller sideprosess
+- Strømming bruker den native responsens `ReadableStream` direkte. Ingen midlertidig fil eller sideprosess
   opprettes.
-- Opptil 256 innledende byte inspiseres før en strøm eksponeres. SSE-leverandører bufrer feil som ikke er SSE;
-  Grok/LMArena tilordner Cloudflare-utfordringer til `403` og HTML-mellomsider til `502`.
-- Tidsavbruddet for den innebygde forespørselen er fortsatt omsluttet av en absolutt, hard JS-tidsfrist. En fastlåsing ugyldiggjør
+- Opptil 256 innledende byte inspiseres før en strøm eksponeres. SSE-leverandører bufrer ikke-SSE-
+  feil. Grok/LMArena tilordner Cloudflare-utfordringer til `403` og HTML-mellomsider til `502`.
+- Tidsavbruddet for den native forespørselen er fortsatt innpakket i en absolutt hard JS-tidsfrist. En fastlåsing ugyldiggjør
   og lukker bare den berørte profil-/OS-/proxy-transporten før neste forespørsel oppretter den på nytt.
-- Prioriteten for proxy-oppløsning er `proxyUrl` per kall → forespørselsavgrenset konto-/dashbordkontekst →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (inkludert varianter med små bokstaver). Oppløsningsfeil stanser
-  med feil i stedet for å lekke en direkte tilkobling. LMArena foretar bevisst oppløsning mot `arena.ai`.
-- `byteResponse` returnerer en innholdstypeangitt `data:`-URL uten UTF-8-korrupsjon.
-- Feilene er `TlsClientUnavailableError` (pakken/tillegget er utilgjengelig), `TlsClientHangError`
-  (tidsfristen er overskredet) og `WreqTransportCapacityError` (feilkoden for delt øktkapasitet)
+- Prioriteten for proxyoppløsning er `proxyUrl` per kall → forespørselsavgrenset konto-/instrumentbordkontekst →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (inkludert varianter med små bokstaver). Oppløsningsfeil feiler
+  lukket i stedet for å lekke en direkte tilkobling. LMArena utfører bevisst oppløsning mot `arena.ai`.
+- `byteResponse` returnerer en innholdstypet `data:`-URL uten UTF-8-korrupsjon.
+- Feilene er `TlsClientUnavailableError` (pakke/tillegg utilgjengelig), `TlsClientHangError`
+  (tidsfrist overskredet) og `WreqTransportCapacityError` (den delte feilkoden for øktkapasitet)
   når alle de 128 avgrensede profil-/OS-/proxy-plassene er aktive eller i ferd med å lukkes.
 
-Den generiske `TlsClient`-økten ovenfor er fortsatt spesialisert for vedvarende, nettleserstøttet
-informasjonskapseltilstand. Begge banene gjenbruker én bufret wreq-modullaster og livssykluskrok for prosessen. Poolene deres forblir
-separate fordi levetiden til informasjonskapslene deres med hensikt er forskjellig.
+Den generiske `TlsClient`-økten ovenfor er fortsatt spesialisert for vedvarende nettleserstøttet
+informasjonskapseltilstand. Begge banene gjenbruker én bufret wreq-modullaster og prosesslivssykluskrok. Poolene deres forblir
+separate fordi levetidene til informasjonskapslene deres med hensikt er forskjellige.
 
-Profilene støttes av den versjonslåste pakken, men faktisk WAF-aksept kan endres uavhengig
+Profilene støttes av den fastlåste pakken, men faktisk WAF-godkjenning kan endres uavhengig
 av lokale kontrakttester. Valider endringer i fingeravtrykk mot en eksplisitt autorisert aktiv konto
-før det hevdes samsvar med en oppstrømsnettleser.
+før du hevder samsvar med en oppstrømsnettleser.
 
 ---
 
@@ -122,7 +122,7 @@ Brukes på: `system`-blokker, alt `messages[].content` og `tools[].description` 
 
 For tredjeparts Anthropic-reléer som bare godtar trafikk fra «ekte Claude Code»:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` som standard
@@ -244,7 +244,7 @@ Alle MITM-endepunkter krever administrasjonsautentisering (`requireCliToolsAuth`
 
 | Variabel                 | Standardverdi                                                   |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

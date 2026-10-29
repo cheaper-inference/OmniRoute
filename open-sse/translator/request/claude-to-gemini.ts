@@ -4,19 +4,31 @@ import {
   DEFAULT_SAFETY_SETTINGS,
   buildGeminiThinkingConfig,
   cleanJSONSchemaForAntigravity,
+  geminiModelRejectsThinkingConfig,
 } from "../helpers/geminiHelper.ts";
 import { buildGeminiTools, sanitizeGeminiToolName } from "../helpers/geminiToolsSanitizer.ts";
+import {
+  isGeminiTrailingModelTurnRejectingModel,
+  stripTrailingGeminiModelTurns,
+} from "../helpers/geminiTrailingModelTurn.ts";
+import {
+  isClaudeServerWebSearchTool,
+  isSoleClaudeServerWebSearchTool,
+} from "../helpers/claudeServerWebSearch.ts";
 import {
   buildGeminiThoughtSignatureKey,
   resolveGeminiThoughtSignature,
 } from "../../services/geminiThoughtSignatureStore.ts";
 import { capMaxOutputTokens, capThinkingBudget } from "../../../src/lib/modelCapabilities.ts";
 import { getModelSpec } from "../../../src/shared/constants/modelSpecs.ts";
+import { gemini38ThinkingConfig, isGemini38Model } from "../../services/thinkingBudget.ts";
+
 import {
   buildChangedToolNameMap,
   buildHistoricalToolResultContext,
   mergeConsecutiveSameRoleContents,
   ensureHistoryDoesNotOpenWithFunctionCall,
+  sanitizeFunctionResponseData,
   type GeminiContent,
 } from "./openai-to-gemini/helpers.ts";
 
@@ -44,6 +56,95 @@ function isUrlImageBlock(block) {
  */
 function urlImagePart(url) {
   return { fileData: { fileUri: url, mimeType: "image/*" } };
+}
+
+function isPlainTextPart(part: { text?: unknown }): boolean {
+  return Object.keys(part).length === 1 && typeof part.text === "string";
+}
+
+function appendTextToFunctionResponse(
+  part: { functionResponse?: { response?: Record<string, unknown> } },
+  textParts: string[]
+): boolean {
+  const response = part.functionResponse?.response;
+  if (!response || typeof response.result !== "string") return false;
+  const combinedText = textParts.join("\n");
+  if (!combinedText) return false;
+  response.result = response.result ? `${response.result}\n${combinedText}` : combinedText;
+  return true;
+}
+
+function mergeTrailingTextIntoFunctionResponses(contents: GeminiContent[]) {
+  for (const content of contents) {
+    if (content.role !== "user") continue;
+
+    const responseIndexes: number[] = [];
+    for (let index = 0; index < content.parts.length; index++) {
+      if (content.parts[index].functionResponse) responseIndexes.push(index);
+    }
+
+    for (let responseNumber = responseIndexes.length - 1; responseNumber >= 0; responseNumber--) {
+      const responseIndex = responseIndexes[responseNumber];
+      const nextResponseIndex = responseIndexes[responseNumber + 1] ?? content.parts.length;
+      const textIndexes: number[] = [];
+      const textParts: string[] = [];
+      for (let index = responseIndex + 1; index < nextResponseIndex; index++) {
+        const part = content.parts[index];
+        if (isPlainTextPart(part)) {
+          textIndexes.push(index);
+          textParts.push(part.text as string);
+        }
+      }
+      if (textParts.length === 0) continue;
+      if (!appendTextToFunctionResponse(content.parts[responseIndex], textParts)) continue;
+      for (const index of textIndexes.reverse()) content.parts.splice(index, 1);
+    }
+
+    // Origin now lifts a following system turn into leading text on the same
+    // user tool-result content. Fold that text into the first functionResponse
+    // so Vertex still sees a single functionResponse part.
+    const firstResponseIndex = content.parts.findIndex((part) => part.functionResponse);
+    if (firstResponseIndex <= 0) continue;
+    const leadingIndexes: number[] = [];
+    const leadingTexts: string[] = [];
+    let leadingOnlyText = true;
+    for (let index = 0; index < firstResponseIndex; index++) {
+      const part = content.parts[index];
+      if (isPlainTextPart(part)) {
+        leadingIndexes.push(index);
+        leadingTexts.push(part.text as string);
+      } else {
+        leadingOnlyText = false;
+        break;
+      }
+    }
+    if (!leadingOnlyText || leadingTexts.length === 0) continue;
+    if (!appendTextToFunctionResponse(content.parts[firstResponseIndex], leadingTexts)) continue;
+    for (const index of leadingIndexes.reverse()) content.parts.splice(index, 1);
+  }
+}
+
+type ToolUseOccurrence = { name: string; signature: string | null };
+
+/**
+ * A `tool_use.id` is only unique within one assistant turn: long agent sessions can reuse
+ * one id for different tools across turns. A conversation-wide `id → name` map (last wins)
+ * then names an earlier turn's functionResponse after a later tool, and Gemini rejects the
+ * whole request with 400 INVALID_ARGUMENT on every following turn. So each tool_use is
+ * queued per id in arrival order, and each tool_result consumes the oldest unconsumed one.
+ */
+function createToolUseOccurrenceQueue() {
+  const pending = new Map<unknown, ToolUseOccurrence[]>();
+  return {
+    push(id: unknown, occurrence: ToolUseOccurrence) {
+      const queue = pending.get(id);
+      if (queue) queue.push(occurrence);
+      else pending.set(id, [occurrence]);
+    },
+    consume(id: unknown): ToolUseOccurrence | undefined {
+      return pending.get(id)?.shift();
+    },
+  };
 }
 
 /**
@@ -138,6 +239,9 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
   // available; otherwise represent history as context text.
   const toolUseNames: Record<string, string> = {};
   const resolvedSignatures = new Map<string, string>();
+  // Same signatures keyed by the tool_use block itself, so a reused id keeps each
+  // occurrence's own signature (the id-keyed map above is only a fallback).
+  const toolUseSignatures = new Map<object, string>();
   if (body.messages && Array.isArray(body.messages)) {
     for (const msg of body.messages) {
       if (msg.role === "assistant" && Array.isArray(msg.content)) {
@@ -154,6 +258,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
             );
             if (typeof resolved === "string" && resolved.length > 0) {
               resolvedSignatures.set(block.id, resolved);
+              toolUseSignatures.set(block, resolved);
             }
           }
         }
@@ -166,6 +271,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
     // Tool-ids whose functionCall was omitted (no stored thought_signature) so the
     // matching tool_result becomes text instead of a Gemini-400'd functionResponse.
     const omittedToolCallIds = new Set<string>();
+    const toolUseOccurrences = createToolUseOccurrenceQueue();
     for (const msg of body.messages) {
       const parts = [];
       // Images returned inside tool_result blocks go right after the last tool response,
@@ -188,7 +294,13 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
               break;
 
             case "tool_use": {
-              const signatureForToolCall = resolvedSignatures.get(block.id);
+              const signatureForToolCall = toolUseSignatures.get(block);
+              if (block.id) {
+                toolUseOccurrences.push(block.id, {
+                  name: block.name ? sanitizeToolName(block.name) : "unknown",
+                  signature: signatureForToolCall ?? null,
+                });
+              }
               // Signature-less historical tool_use → omit native functionCall
               // (context mode). Matching tool_result becomes context text below.
               if (!signatureForToolCall) {
@@ -239,12 +351,20 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                   (hasImage ? "[tool returned an image; see attached]" : "");
               }
               const toolUseId = block.tool_use_id;
-              const name = toolUseNames[toolUseId] || "unknown";
+              // Pair with this id's oldest unconsumed tool_use; the id-keyed maps
+              // are only a fallback when no such tool_use preceded the result.
+              const pairedToolUse = toolUseOccurrences.consume(toolUseId);
+              const name = pairedToolUse
+                ? pairedToolUse.name
+                : toolUseNames[toolUseId] || "unknown";
+              const hasSignedToolUse = pairedToolUse
+                ? pairedToolUse.signature !== null
+                : resolvedSignatures.has(toolUseId);
 
               // Signature-less history: represent as context text so Gemini 3+
               // does not reject a native functionResponse without a matching
               // signed functionCall (#8979 / #3688).
-              if (!resolvedSignatures.has(toolUseId)) {
+              if (!hasSignedToolUse) {
                 parts.push({
                   text: buildHistoricalToolResultContext(name, content),
                 });
@@ -256,7 +376,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                 functionResponse: {
                   ...(stripFunctionCallId ? {} : { id: toolUseId }),
                   name,
-                  response: { result: content },
+                  response: { result: sanitizeFunctionResponseData(content) },
                 },
               });
               afterLastToolResult = parts.length;
@@ -294,7 +414,19 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
   }
 
   // ── Convert tools ──────────────────────────────────────────────
-  const geminiTools = buildGeminiTools(body.tools, {
+  // Claude Code's WebSearch sends Anthropic's dated web-search *server* tool as the
+  // request's sole tool. `buildGeminiTools` only recognizes the non-versioned
+  // `web_search` type, so normalize the dated form to the marker it maps to
+  // `{ googleSearch: {} }`. A mixed request (server tool next to custom tools) must
+  // NOT enable grounding — Antigravity 400s on a built-in tool mixed with
+  // functionDeclarations, and the custom tools have to survive — so there the server
+  // tool is dropped, matching the hub lane (claude-to-openai.ts).
+  const geminiToolsInput = Array.isArray(body.tools)
+    ? isSoleClaudeServerWebSearchTool(body.tools)
+      ? [{ type: "web_search" }]
+      : body.tools.filter((tool) => !isClaudeServerWebSearchTool(tool))
+    : body.tools;
+  const geminiTools = buildGeminiTools(geminiToolsInput, {
     toolNameMap,
   });
   if (geminiTools) {
@@ -303,7 +435,9 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
 
   // ── Thinking config ────────────────────────────────────────────
   // Priority: thinking.budget_tokens (Claude native) > output_config.effort (Claude Code).
-  if (model.startsWith("gemma-4")) {
+  // Models without thinking support (TTS, transcription, gemini-2.5-flash-image)
+  // 400 on ANY thinkingConfig, so they skip both paths below (#16928).
+  if (model.startsWith("gemma-4") || geminiModelRejectsThinkingConfig(model)) {
     // gemma-4 models returns - 400: Thinking budget is not supported for this model
   } else if (body.thinking?.type === "enabled" && typeof body.thinking.budget_tokens === "number") {
     // typeof check ensures only numeric budget_tokens triggers the thinking path;
@@ -325,7 +459,9 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
       // (possibly cap-clamped) budget value. Only the reasoning_effort/output_config.effort
       // paths below treat a resulting budget of 0 as "thinking disabled".
       // Flash-Lite models 400 on thinkingBudget 0, so it is omitted for them.
-      result.generationConfig.thinkingConfig = buildGeminiThinkingConfig(model, cappedBudget, true);
+      result.generationConfig.thinkingConfig = isGemini38Model(model)
+        ? gemini38ThinkingConfig(model, cappedBudget, body)
+        : buildGeminiThinkingConfig(model, cappedBudget, true);
     }
   } else if (typeof body.output_config?.effort === "string") {
     const effort = body.output_config.effort.toLowerCase();
@@ -349,10 +485,12 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
       // Models with thinkingBudgetCap:0 (e.g. gemini-3-flash) reject
       // thinkingConfig even for effort-based paths.
       if (getModelSpec(model)?.thinkingBudgetCap !== 0) {
-        result.generationConfig.thinkingConfig = {
-          thinkingBudget: budget,
-          includeThoughts: true,
-        };
+        result.generationConfig.thinkingConfig = isGemini38Model(model)
+          ? gemini38ThinkingConfig(model, budget, body)
+          : {
+              thinkingBudget: budget,
+              includeThoughts: true,
+            };
       }
     }
   }
@@ -369,10 +507,16 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
   // Gemini strictly rejects requests containing consecutive messages with the same role
   // (400 INVALID_ARGUMENT: "Request contains consecutive messages with the same role").
   // Normalize adjacent same-role messages by concatenating their parts.
-  result.contents = mergeConsecutiveSameRoleContents(result.contents);
+  result.contents = mergeConsecutiveSameRoleContents(result.contents, model);
+  mergeTrailingTextIntoFunctionResponses(result.contents);
   // Guard the one alternation violation the merge above cannot reach: history
   // that opens with a functionCall-bearing turn instead of a user turn.
   result.contents = ensureHistoryDoesNotOpenWithFunctionCall(result.contents);
+  // Gemini 3.x rejects a request ending on a model turn (assistant prefill) —
+  // 9router#4345. Gated so models that accept prefill are untouched.
+  if (isGeminiTrailingModelTurnRejectingModel(model)) {
+    result.contents = stripTrailingGeminiModelTurns(result.contents);
+  }
 
   return result;
 }

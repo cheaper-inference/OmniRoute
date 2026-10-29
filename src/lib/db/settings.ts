@@ -22,6 +22,7 @@ import { DEFAULT_RESPONSES_PREVIOUS_RESPONSE_ID_MODE } from "@/shared/constants/
 import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { type JsonRecord, toRecord } from "./settings/shared";
 import { resolveNoAuthSharedProviderProxy } from "./settings/noAuthProxyFallback";
+import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
 
 type ProxyValue = JsonRecord | string | null;
 type ProxyResolutionResult = {
@@ -161,6 +162,7 @@ export async function getSettings() {
     // Global connection-aware expansion fallback for group-B combo strategies is opt-in.
     connectionAwareExpansion: false,
     promptCacheAffinityEnabled: true,
+    geminiPromptCacheMode: "off",
     comboStrategy: "fallback",
     comboStickyRoundRobinLimit: null, // null = inherit stickyRoundRobinLimit (a literal default here shadows the documented batched-rotation default of 3 — #6678 regression caught by the v3.8.47 release CI)
     providerStrategies: {},
@@ -170,6 +172,9 @@ export async function getSettings() {
     // ProviderLimits/utils.tsx) — this is a personal view preference, not an
     // admin model-catalog edit. Ported from upstream decolua/9router#2371.
     quotaVisibility: {},
+    // #13917: operator-configurable ceiling for POST /api/settings/proxies/bulk-import.
+    // Resolved through resolveProxyBulkImportLimit at both enforcement points.
+    proxyBulkImportLimit: PROXY_BULK_IMPORT_LIMIT_DEFAULT,
     requestRetry: 3,
     maxRetryIntervalSec: 30,
     antigravitySignatureCacheMode: "enabled",
@@ -182,6 +187,7 @@ export async function getSettings() {
     oidcScopes: ["openid", "profile", "email"],
     oidcRedirectPath: "/api/auth/oidc/callback",
     oidcAllowedSubjects: [], // optional sub or email whitelist
+    oidcAdmissionClaim: null, // optional ID-token role/group admission policy
     mcpEnabled: false,
     a2aEnabled: false,
     hiddenSidebarItems: [],
@@ -256,7 +262,9 @@ export async function getSettings() {
     // live hard-stop-guaranteed quota check for non-keyless free candidates.
     // See open-sse/services/autoCombo/strictZeroCostFilter.ts.
     freeAccessPolicy: "off",
-    excludeTosAvoid: false,
+    // #15059: ON by default — providers whose curated verdict is `tos: "avoid"` (e.g. Antigravity)
+    // must not receive `auto` traffic on a fresh install. Opt out with PATCH /api/settings.
+    excludeTosAvoid: true,
     // #9418: Opt-in filter that hides auto/* virtual combos from the /v1/models catalog.
     // User-defined combos are unaffected; routing still works for hidden ids sent explicitly.
     hideAutoCombos: false,
@@ -794,7 +802,7 @@ export async function resolveProxyForConnection(
     }
   }
 
-  // Step 8.5 (#6272): no-auth providers (mimocode, opencode, ...) share a single
+  // Step 8.5 (#6272): no-auth providers share a single
   // synthetic connectionId that never matches a `provider_connections` row, so
   // `connectionRecord` above is null and Steps 5-8 (which require it) never run for
   // them — a provider-level proxy assigned to a no-auth provider was silently

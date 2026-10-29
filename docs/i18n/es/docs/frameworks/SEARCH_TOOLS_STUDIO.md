@@ -38,24 +38,24 @@ Studio con tres pestañas que unifica la búsqueda web, la extracción de conten
 
 ### Pestaña de búsqueda
 
-Convierte los componentes existentes `SearchForm` + `ResultsPanel` + `RerankPanel` en una pestaña:
+Transforma el conjunto existente de `SearchForm` + `ResultsPanel` + `RerankPanel` en una pestaña:
 
 - Consulta → resultados (título, URL, fragmento, puntuación de relevancia).
 - Metadatos del proveedor en el panel de configuración (coste, cuota, estado).
-- Sección de reranking: permite elegir un modelo de reranking, reordenar los resultados y mostrar `positionDelta`.
+- Sección de reordenación: permite seleccionar un modelo de reordenación, reordenar los resultados y mostrar `positionDelta`.
 - Estado vacío con CTA cuando no hay proveedores de búsqueda configurados.
-- Historial de búsquedas mediante `SearchHistory.tsx`.
+- Historial de búsqueda mediante `SearchHistory.tsx`.
 - Llama a `POST /v1/search` (endpoint existente, sin cambios).
 
 ### Pestaña de extracción
 
 Nueva pestaña para extraer contenido de una URL mediante `POST /v1/web/fetch` (creado en el plan 05):
 
-- Entrada: URL + interruptor de página completa + selector de formato (markdown / texto / HTML).
-- Envío → obtención → renderizado de `ScrapeResult.tsx`.
-- `ScrapeResult` renderiza una vista previa en markdown + un interruptor de contenido sin procesar.
+- Entrada: URL + selector de página completa + selector de formato (markdown / texto / HTML).
+- Enviar → obtener → renderizar `ScrapeResult.tsx`.
+- `ScrapeResult` renderiza una vista previa en markdown + selector de contenido sin procesar.
 - Límite: si el cuerpo de la respuesta supera los **256 KB**, la interfaz muestra `(truncado, ver contenido sin procesar)` y abre el contenido sin procesar en un modal de Monaco (D21).
-- Panel de metadatos: proveedor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latencia, coste, tamaño de la respuesta y cantidad de enlaces.
+- Panel de metadatos: proveedor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latencia, coste, tamaño de la respuesta, número de enlaces.
 - Usa el hook `useScrapeFetch.ts`.
 
 ### Pestaña de comparación
@@ -63,8 +63,8 @@ Nueva pestaña para extraer contenido de una URL mediante `POST /v1/web/fetch` (
 Ejecuta la misma consulta/URL en hasta **4 proveedores en paralelo** (D22):
 
 - Columnas en paralelo para cada proveedor.
-- Métricas: latencia, coste, cantidad de resultados y tamaño de la respuesta.
-- Cálculo de coincidencia de URL para la búsqueda (cantidad de URL compartidas frente al resultado inicial).
+- Métricas: latencia, coste, número de resultados, tamaño de la respuesta.
+- Cálculo de coincidencia de URL para la búsqueda (número de URL compartidas respecto al resultado inicial).
 - Llama a `POST /v1/search` (búsqueda) o `POST /v1/web/fetch` (extracción) para cada proveedor.
 
 ---
@@ -103,7 +103,7 @@ Ejecuta la misma consulta/URL en hasta **4 proveedores en paralelo** (D22):
 `ProviderCatalog.tsx` expone la lista completa de proveedores de `GET /api/search/providers`
 (ampliada en F4 para incluir proveedores de obtención):
 
-| `kind` | `"search"` (20 proveedores) o `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 proveedores) o `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 El estado se **determina en el momento de la solicitud** comprobando si existen credenciales y si
 todas las claves se encuentran actualmente en período de espera.
@@ -122,11 +122,11 @@ El marcador de posición de la clave de API siempre es `$OMNIROUTE_API_KEY` (D11
 
 Solo fue necesario un cambio en el backend para esta funcionalidad:
 
-### Ampliación de `GET /api/search/providers`
+### `GET /api/search/providers` ampliado
 
-`src/app/api/search/providers/route.ts` se amplió para:
+Se amplió `src/app/api/search/providers/route.ts` para:
 
-- Incluir los 6 proveedores de obtención (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) en el array.
+- Incluir todos los proveedores de obtención (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) en el array.
 - Añadir `kind: "search" | "fetch"` a cada elemento.
 - Añadir `status: "configured" | "missing" | "rate_limited"` derivado del estado actual de las credenciales.
 - Mantener la compatibilidad con versiones anteriores: los campos existentes (`id`, `name`, etc.) permanecen sin cambios.

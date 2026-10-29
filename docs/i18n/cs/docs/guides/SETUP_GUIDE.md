@@ -136,57 +136,58 @@ omniroute providers validate
 
 ---
 
-## Konfigurace nástroje CLI
+## Konfigurace nástrojů CLI
 
 ### 1) Připojte poskytovatele a vytvořte klíč API
 
-1. Otevřete Dashboard → `Providers` a připojte alespoň jednoho poskytovatele (OAuth nebo klíč API).
+1. Otevřete Dashboard → `Providers` a připojte alespoň jednoho poskytovatele (pomocí OAuth nebo klíče API).
 2. Otevřete Dashboard → `Endpoints` a vytvořte klíč API.
-3. (Volitelné) Otevřete Dashboard → `Combos` a nastavte řetězec záložních možností.
+3. (Volitelné) Otevřete Dashboard → `Combos` a nastavte svůj záložní řetězec.
 
-### 2) Nasměrujte svůj nástroj pro programování
+### 2) Nasměrujte svůj programovací nástroj
 
 ```txt
-Base URL: http://localhost:20128/v1
-API Key:  [zkopírujte ze stránky Endpoint]
-Model:    if/qwen3.8-max-preview (nebo libovolný prefix poskytovatel/model)
+Základní URL: http://localhost:20128/v1
+Klíč API:     [zkopírujte ze stránky Endpoint]
+Model:        if/qwen3.8-max-preview (nebo libovolný prefix poskytovatel/model)
 ```
 
-Pokud váš editor nedokáže odeslat `Authorization: Bearer ...`, použijte místo toho kompatibilní základní adresu s tokenem:
+Pokud váš editor nedokáže odeslat `Authorization: Bearer ...`, použijte místo toho tokenizovanou kompatibilní základní adresu:
 
 ```txt
-Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Základní URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+URL modelů: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+URL chatu: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+URL značek Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
 Funguje s Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode a sadami SDK kompatibilními s OpenAI.
 
 #### Automatická konfigurace pomocí `setup-*`
 
-Místo ručního vkládání základní adresy URL a klíče nechte OmniRoute zapsat vlastní konfiguraci každého nástroje z aktuálního katalogu modelů. Jeden příkaz pro každý nástroj:
+Místo ručního vkládání základní adresy URL a klíče nechte OmniRoute zapsat vlastní konfiguraci každého nástroje z aktuálního katalogu modelů. Pro každý nástroj slouží jeden příkaz:
 
 ```bash
 omniroute setup-codex        # profily ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (kompatibilní s OpenAI)
-omniroute setup-cline        # CLI Cline + nastavení rozšíření VS Code
+omniroute setup-cline        # nastavení CLI Cline a rozšíření VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # vypíše postup v aplikaci Cursor
-omniroute setup-roo          # import Roo Code + ukazatel autoImport
+omniroute setup-roo          # import do Roo Code a ukazatel autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Každý z nich přijímá `--remote <url> --api-key <key>` pro konfiguraci místního nástroje vůči **vzdálené** instanci OmniRoute a také `--dry-run` pro zobrazení náhledu. Chcete-li spustit CLI se správně vloženými proměnnými prostředí a bez zápisu jakékoli konfigurace, použijte obecný spouštěč `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); původní spouštěče pro jednotlivé nástroje `omniroute launch` (Claude Code) a `omniroute launch-codex` (Codex) zůstávají k dispozici.
+Každý z nich podporuje `--remote <url> --api-key <key>` pro konfiguraci místního nástroje vůči **vzdálenému** OmniRoute a také `--dry-run` pro náhled. Chcete-li spustit CLI se správně vloženými proměnnými prostředí, aniž by se zapsala jakákoli konfigurace, použijte obecný spouštěč `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); původní spouštěče pro jednotlivé nástroje `omniroute launch` (Claude Code) a `omniroute launch-codex` (Codex) zůstávají k dispozici.
 
-Úplnou tabulku (co jednotlivé příkazy zapisují, všechny příznaky, místní oproti vzdálenému režimu, konvence základní adresy URL s `/v1`) najdete v dokumentu **[Integrace CLI](./CLI-INTEGRATIONS.md)**.
+Úplnou tabulku (co jednotlivé příkazy zapisují, všechny příznaky, místní oproti vzdálenému režimu a konvence `/v1` pro základní URL) najdete v části **[Integrace CLI](./CLI-INTEGRATIONS.md)**.
 
-Podrobnou konfiguraci jednotlivých nástrojů (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot a další) najdete ve vyhrazeném **[Průvodci nástroji CLI](../reference/CLI-TOOLS.md)**.
+Podrobnou konfiguraci jednotlivých nástrojů (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot a další) najdete ve vyhrazené **[příručce nástrojů CLI](../reference/CLI-TOOLS.md)**.
 
 ---
 
@@ -317,10 +318,10 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Šablona pro Void Linux (xbps-src)
 
-Uživatelé Void Linuxu mohou vytvořit nativní balíček pomocí `xbps-src`. Uložte tento blok jako `srcpkgs/omniroute/template`:
+Uživatelé Void Linuxu mohou sestavit nativní balíček pomocí `xbps-src`. Uložte tento blok jako `srcpkgs/omniroute/template`:
 
 ```bash
-# Soubor šablony pro 'omniroute'
+# Soubor šablony pro „omniroute“
 pkgname=omniroute
 version=3.8.0
 revision=1

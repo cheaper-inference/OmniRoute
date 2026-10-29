@@ -9,6 +9,7 @@
 import { EXECUTOR_CONTRACT_VIOLATION_CODE } from "../../config/constants.ts";
 import { finitePercentUsed, remainingPercentFromQuotaWindows } from "../antigravityQuotaFamily.ts";
 import { errorResponse } from "../../utils/error.ts";
+import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { parseModel } from "../model.ts";
 import { isSelfInflictedUpstreamTimeout } from "../../handlers/chatCore/cooldownClassification.ts";
 import {
@@ -24,11 +25,13 @@ import {
   isProviderModelUnsupported400,
   cooldownUntilMs,
 } from "../accountFallback.ts";
+import { isModelNotFound404 } from "../accountFallback/perModelFailureScope.ts";
 import { isRequestScoped400 } from "../accountFallback/requestScoped400.ts";
 import { isResourceNotFoundResponse } from "../errorClassifier.ts";
 import { isOpencodeFreeTierRefusal } from "../../executors/opencodeGeoBlock.ts";
 import { getTrustedLocalRateLimitResponse } from "../rateLimitManager/errors.ts";
 import { TRANSLATION_FAILURE_CODE } from "../../handlers/chatCore/translationFailure.ts";
+import { isLocalModelPolicyResponse } from "../resolvedModelAccess.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 import {
   classifyComboOutcome,
@@ -142,7 +145,7 @@ export function hasIdenticalModelErrorStreak(
   if (comboErrors.length < streak) return false;
   const tail = comboErrors.slice(-streak);
   const [first, ...rest] = tail;
-  if (first.kind !== "model") return false;
+  if (first.kind !== "model" || first.status !== 400) return false;
   return rest.every(
     (e) => e.kind === first.kind && e.status === first.status && e.error === first.error
   );
@@ -197,10 +200,11 @@ export function shouldSkipForPredictedTtft(
 
 /**
  * Whole-provider circuit-breaker failure statuses for the combo path. Kept byte-identical
- * to the single-model path's `PROVIDER_BREAKER_FAILURE_STATUSES` (src/sse/handlers/chat.ts:206)
- * — the source of truth. 429 is deliberately EXCLUDED: a plain rate-limit must not open the
- * whole-provider breaker (it's connection-cooldown / model-lockout scope). Defined locally
- * rather than imported to avoid a cross-layer (open-sse → src/sse) import cycle.
+ * to the single-model path's `PROVIDER_BREAKER_FAILURE_STATUSES`
+ * (src/sse/handlers/chatPredicates.ts) — the source of truth. 429 is deliberately
+ * EXCLUDED: a plain rate-limit must not open the whole-provider breaker (it's
+ * connection-cooldown / model-lockout scope). Defined locally rather than imported to
+ * avoid a cross-layer (open-sse → src/sse) import cycle.
  */
 const PROVIDER_BREAKER_FAILURE_STATUSES = new Set([408, 500, 502, 503, 504]);
 
@@ -217,10 +221,9 @@ const PROVIDER_BREAKER_FAILURE_STATUSES = new Set([408, 500, 502, 503, 504]);
  * - Only whole-provider failure statuses (408/500/502/503/504) count. A plain rate-limit
  *   429 is deliberately EXCLUDED — it belongs to connection cooldown / model lockout scope
  *   (a genuine quota/token-limit 429 is handled there), NOT the whole-provider breaker. This
- *   mirrors the single-model path's `PROVIDER_BREAKER_FAILURE_STATUSES` (src/sse/handlers/
- *   chat.ts:206) — the source of truth — and the documented RESILIENCE_GUIDE policy. NOTE:
- *   this intentionally differs from `isProviderFailureCode` (accountFallback.ts), which
- *   INCLUDES 429 for connection-cooldown purposes and must not be changed here.
+ *   mirrors the single-model path's `PROVIDER_BREAKER_FAILURE_STATUSES`
+ *   (src/sse/handlers/chatPredicates.ts) — the source of truth — and the documented
+ *   RESILIENCE_GUIDE policy.
  * - When the next combo target is on the SAME provider, don't trip the provider breaker:
  *   a different model on that provider may still succeed. #8376: EXCEPT when the failure
  *   itself is a transport-level "proxy unreachable" event (`isProxyUnreachable`) — a dead
@@ -296,6 +299,12 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   // connection health signal and must never feed lockout/cooldown/disable.
   resource_pressure: true,
   heap_pressure: true,
+  // #17132: Quota Share absolute-cap block — OUR OWN per-API-key policy decision,
+  // emitted by the chatCore quota-share pre-hook. The shared connection is healthy
+  // and keeps serving the other pool keys, so this code must never feed
+  // markAccountUnavailable, the provider breaker, or the #1731/#1731v2 combo
+  // skip-marking — in a combo it only skips this one target.
+  quota_share_blocked: true,
 };
 
 /** Request/model-specific failures must not poison provider-wide resilience state. */
@@ -321,6 +330,7 @@ export function isRequestScopedUpstreamFailure(error?: {
   const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
   return (
     REQUEST_SCOPED_UPSTREAM_ERROR_CODES[code] === true ||
+    isContentPolicyRefusal(error) ||
     type === "invalid_request_error" ||
     type === "context_length_exceeded" ||
     type === "local_queue_capacity" ||
@@ -361,6 +371,7 @@ export function isComboRequestScopedFailure(
   error?: { code?: string | null; type?: string | null }
 ): boolean {
   return (
+    isLocalModelPolicyResponse(response) ||
     getTrustedLocalRateLimitResponse(response) !== null ||
     isRequestScopedUpstreamFailure(error) ||
     (response.status === 404 && isResourceNotFoundResponse(errorText)) ||
@@ -454,6 +465,9 @@ export function shouldSkipConnDisable(
         result.errorType === "context_length_exceeded"));
 
   return (
+    // Local turn deduplication is not an account or provider failure.
+    (result.status === 409 &&
+      (result.errorCode === "turn_in_progress" || result.errorType === "turn_in_progress")) ||
     result.status === 499 ||
     result.errorCode === "client_disconnected" ||
     result.errorType === "client_disconnected" ||
@@ -467,7 +481,11 @@ export function shouldSkipConnDisable(
     // #14815: translation fails locally on the client's body — no account is at fault.
     result.errorCode === TRANSLATION_FAILURE_CODE ||
     (is401 && hasExtraKeys) ||
-    isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) ||
+    // Cursor's typed model-unavailable 404 is not a malformed request. Reuse
+    // the same model attribution predicate as failure persistence; ordinary
+    // invalid_request_error (including 400) remains request-scoped.
+    (isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) &&
+      !(provider === "cursor" && isModelNotFound404(result.status, errorText))) ||
     isSelfInflictedUpstreamTimeout(result.status, result.errorType, provider) ||
     isReqScoped400
   );

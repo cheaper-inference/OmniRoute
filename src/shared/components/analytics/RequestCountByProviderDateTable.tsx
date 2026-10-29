@@ -20,7 +20,13 @@ import RequestCountTable, { type RequestCountSortField } from "./RequestCountTab
 import { useProviderDailyUsage } from "./useProviderDailyUsage";
 import { sortProviderDailyUsageRows } from "./requestCountSort";
 
-export default function RequestCountByProviderDateTable({ range }: { range: string }) {
+export default function RequestCountByProviderDateTable({
+  range,
+  displayMode = "compact",
+}: {
+  range: string;
+  displayMode?: "compact" | "exact";
+}) {
   const t = useTranslations("analytics");
   const tCommon = useTranslations("common");
   const [dateFilter, setDateFilter] = useState("");
@@ -58,7 +64,7 @@ export default function RequestCountByProviderDateTable({ range }: { range: stri
       {loading && rows.length === 0 ? (
         <div className="text-center text-text-muted text-sm py-8">{tCommon("loading")}</div>
       ) : error ? (
-        <div className="text-center text-red-500 text-sm py-8">
+        <div className="text-center text-error text-sm py-8">
           {tCommon("errorShort")}: {error}
         </div>
       ) : sorted.length === 0 ? (
@@ -73,6 +79,7 @@ export default function RequestCountByProviderDateTable({ range }: { range: stri
           providerLabel={t("chartProvider")}
           requestsLabel={t("chartRequests")}
           totalLabel={t("chartTotal")}
+          displayMode={displayMode}
         />
       )}
     </Card>

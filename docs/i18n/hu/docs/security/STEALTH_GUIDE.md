@@ -16,56 +16,62 @@ A rejtőzködési funkciók azért léteznek, hogy az OmniRoute kompatibilitási
 
 ---
 
-## TLS-ujjlenyomatozási réteg
+## TLS-ujjlenyomat-kezelési réteg
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-A tartós `wreq-js`-munkamenetek létrehozása lusta módon, fiókhatókörönként és feloldott proxynként történik. A folyamat egészére kiterjedő `TlsClient` legfeljebb 128 olyan munkamenetet tárol a készletben, amelyek **macOS rendszeren futó Chrome 124 böngészőt** utánoznak a Cloudflare mögött található upstream szolgáltatások számára. A `TlsClient.fetch()` biztonságosan hibára fut, ha a natív futtatókörnyezet nem érhető el; a hívó ezen burkolón kívül kifejezetten kiválaszthat egy tartalék megoldást.
+A tartós `wreq-js`-munkamenetek fiókhatókörönként és feloldott proxynként, lusta módon jönnek létre. A
+folyamatszintű `TlsClient` legfeljebb 128 munkamenetet tárol, amelyek **macOS rendszeren futó Chrome 124 böngészőt** személyesítenek meg a
+Cloudflare mögötti upstream szolgáltatásokhoz. A `TlsClient.fetch()` biztonságosan hibával leáll, ha a natív futtatókörnyezet
+nem érhető el; a hívó fél explicit módon választhat tartalék megoldást ezen a burkolón kívül.
 
 - Munkamenetprofil: `browser: "chrome_124", os: "macos"`
-- Proxyfeloldás (prioritási sorrendben): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (a kisbetűs változatokat is beleértve)
+- Proxyfeloldás (prioritási sorrendben): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (kisbetűs változatok is)
 - Időtúllépés: `TLS_CLIENT_TIMEOUT_MS` (a `FETCH_TIMEOUT_MS` értékét örökli, alapértelmezés szerint 600000)
-- A `wreq-js` Response kompatibilis a fetch API-val (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Első bájtos figyelő (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): a `TlsClient.fetch()`
-  azonnal feloldódik, amint megérkeznek az upstream fejlécek, ezért a `TLS_CLIENT_TIMEOUT_MS` önmagában
-  nem képes időkorlátot szabni egy olyan törzsnek, amely soha nem ad vissza első bájtot. A `guardTlsFirstByte()`
-  versenyezteti a törzs első `read()` hívását a `TLS_FIRST_BYTE_WATCHDOG_MS` értékével (alapértelmezés szerint
-  `10000`, a `0` letiltja); az egészséges törzset ez nem érinti, míg egy elakadt törzs esetén megszakítja a
-  wreq-olvasót, és lehetővé teszi, hogy a `proxyFetch` meglévő TLS-tartaléklogikája továbblépjen a közvetlen/proxy
-  diszpécserhez (egy nem biztonságosan újrajátszható kérés, például egy törzzsel rendelkező POST, továbbra is
-  hibát dob ahelyett, hogy a rendszer észrevétlenül újrapróbálná).
+- A `wreq-js` Response fetch-kompatibilis (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Első bájtos watchdog (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): a `TlsClient.fetch()`
+  azonnal visszatér, amint megérkeznek az upstream fejlécek, ezért a `TLS_CLIENT_TIMEOUT_MS` önmagában nem tudja időben korlátozni az olyan
+  törzset, amely soha nem ad első bájtot. A `guardTlsFirstByte()` versenyezteti a törzs első `read()`
+  műveletét a `TLS_FIRST_BYTE_WATCHDOG_MS` értékével (alapértelmezés szerint `10000`, a `0` letiltja); az egészséges törzset
+  ez nem érinti, míg elakadt törzs esetén megszakítja a wreq olvasóját, és lehetővé teszi, hogy a `proxyFetch` meglévő
+  TLS-tartaléklogikája továbblépjen a közvetlen/proxy diszpécserhez (a biztonságosan nem újrajátszható kérés, például
+  egy törzzsel rendelkező POST, továbbra is hibát dob a csendes újrapróbálkozás helyett).
 
-### Webes sütiket használó szolgáltatói átvitel — wreq-js 3.2.0
+### Webes cookie-szolgáltatók transzportja — wreq-js 3.2.0
 
-Az `open-sse/services/tlsClientBase.ts` az alábbi öt specializált, webes sütiket használó átvitel közös adaptere. Minden vékony szolgáltatói burkoló kiválaszt egy böngésző-/operációsrendszer-profilt. Az adapter az `open-sse/utils/tlsClient.ts` egyetlen wreq-futtatókörnyezet-betöltőjét és átviteli készletét használja, profil + operációs rendszer + feloldott proxy szerint kulcsolva, miközben minden kérés a `cookieMode: "ephemeral"` beállítást használja. A fiókok és kérések ezért megosztják az átviteli szintű kapcsolatokat, de soha nem osztoznak wreq-munkameneten vagy sütőtárolón.
+Az `open-sse/services/tlsClientBase.ts` az alábbi öt specializált
+webes cookie-transzport közös adaptere. Minden vékony szolgáltatói burkoló kiválaszt egy böngésző-/OS-profilt. Az adapter
+az `open-sse/utils/tlsClient.ts` egyetlen wreq-futtatókörnyezet-betöltőjét és transzportkészletét használja, amelynek kulcsa a
+profil + OS + feloldott proxy, miközben minden kérés a `cookieMode: "ephemeral"` beállítást használja. A fiókok és
+kérések így megosztják a transzportszintű kapcsolatokat, de soha nem osztoznak wreq-munkameneten vagy cookie-tárolón.
 
-| Szolgáltató | Profil        | Emulált operációs rendszer | Adatfolyam-végi szabályzat              |
-| ----------- | ------------- | -------------------------- | --------------------------------------- |
-| Claude      | `chrome_146`  | Linux                      | a `[DONE]` belefoglalása                |
-| Perplexity  | `firefox_148` | macOS                      | az `event: end_of_stream` belefoglalása |
-| Grok        | `chrome_146`  | Linux                      | a `[DONE]` kihagyása                    |
-| Notion      | `chrome_146`  | Windows                    | a `[DONE]` belefoglalása                |
-| LMArena     | `chrome_146`  | Windows                    | nincs jelző; bezárás natív EOF esetén   |
+| Szolgáltató | Profil        | Emulált OS | Adatfolyam-EOF szabályzata          |
+| ----------- | ------------- | ---------- | ----------------------------------- |
+| Claude      | `chrome_146`  | Linux      | tartalmazza: `[DONE]`               |
+| Perplexity  | `firefox_151` | macOS      | tartalmazza: `event: end_of_stream` |
+| Grok        | `chrome_146`  | Linux      | kihagyja: `[DONE]`                  |
+| Notion      | `chrome_146`  | Windows    | tartalmazza: `[DONE]`               |
+| LMArena     | `chrome_146`  | Windows    | nincs jelző; lezárás natív EOF-nál  |
 
-- Az adatfolyam-kezelés közvetlenül használja a natív válasz `ReadableStream` objektumát; nem jön
-  létre ideiglenes fájl vagy kísérőfolyamat.
-- Legfeljebb 256 kezdeti bájtot vizsgál meg a rendszer az adatfolyam elérhetővé tétele előtt. Az SSE-szolgáltatók
-  pufferelik a nem SSE-hibákat; a Grok/LMArena a Cloudflare-ellenőrzéseket `403`, a HTML-köztes oldalakat pedig
-  `502` állapotkódra képezi le.
-- A natív kérés időtúllépését továbbra is egy abszolút JS-korlát burkolja. Elakadás esetén csak az érintett
-  profil/operációs rendszer/proxy átvitel válik érvénytelenné és zárul be, mielőtt a következő kérés újra létrehozná.
-- A proxyfeloldás prioritása: hívásonkénti `proxyUrl` → kérés hatókörű fiók-/irányítópult-kontextus →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (a kisbetűs változatokat is beleértve). A feloldási hibák biztonságosan
-  hibára futnak ahelyett, hogy közvetlen kapcsolatot szivárogtatnának ki. Az LMArena szándékosan az `arena.ai`
-  alapján végez feloldást.
-- A `byteResponse` UTF-8-sérülés nélkül ad vissza egy tartalomtípussal ellátott `data:` URL-t.
+- A streamelés közvetlenül használja fel a natív válasz `ReadableStream` objektumát; nem jön létre ideiglenes fájl vagy kísérőfolyamat.
+- Legfeljebb 256 kezdeti bájtot vizsgál meg a rendszer a stream elérhetővé tétele előtt. Az SSE-szolgáltatók pufferelik a nem SSE
+  hibákat; a Grok/LMArena a Cloudflare-ellenőrzéseket `403`, a HTML köztes oldalakat pedig `502` állapotkódra képezi le.
+- A natív kérés időtúllépését továbbra is egy abszolút JS-időkorlát burkolja. Elakadás esetén
+  csak az érintett profil-/OS-/proxytranszport válik érvénytelenné és záródik be, mielőtt a következő kérés újra létrehozza.
+- A proxyfeloldás prioritása: hívásonkénti `proxyUrl` → kérés hatókörű fiók-/irányítópult-környezet →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (a kisbetűs változatokat is beleértve). A feloldási hibák
+  biztonságosan leállítják a műveletet a közvetlen kapcsolat kiszivárgása helyett. Az LMArena szándékosan az `arena.ai` alapján végzi a feloldást.
+- A `byteResponse` UTF-8-sérülés nélkül ad vissza tartalomtípussal ellátott `data:` URL-t.
 - A hibák típusai: `TlsClientUnavailableError` (a csomag/bővítmény nem érhető el), `TlsClientHangError`
-  (a határidő túllépve), valamint `WreqTransportCapacityError` (a megosztott munkamenet-kapacitási hibakód),
-  amikor mind a 128 korlátozott profil/operációs rendszer/proxy hely aktív vagy bezárás alatt áll.
+  (az időkorlát túllépve) és `WreqTransportCapacityError` (a megosztott munkamenet-kapacitási hibakód),
+  amikor mind a 128 korlátozott profil-/OS-/proxyhely aktív vagy bezárás alatt áll.
 
-A fenti általános `TlsClient`-munkamenet továbbra is a tartós, böngészőalapú sütiállapotra specializálódik. Mindkét útvonal ugyanazt a gyorsítótárazott wreq-modulbetöltőt és folyamat-életciklusfigyelőt használja újra; készleteik különállók maradnak, mert süti-élettartamaik szándékosan eltérnek.
+A fenti általános `TlsClient` munkamenet továbbra is a tartós, böngésző által támogatott cookie-állapotra
+specializálódik. Mindkét útvonal ugyanazt a gyorsítótárazott wreq-modulbetöltőt és folyamat-életciklus-hookot használja újra; készleteik
+különállóak maradnak, mivel a cookie-k élettartama szándékosan eltérő.
 
-A profilokat a rögzített csomag támogatja, de a valós WAF-elfogadás a helyi szerződéses tesztektől függetlenül is változhat. Mielőtt egy upstream böngészővel való egyenértékűséget állítana, ellenőrizze az ujjlenyomat-módosításokat egy kifejezetten engedélyezett, élő fiókkal.
+A rögzített csomag támogatja a profilokat, de a valós WAF-elfogadás a helyi szerződéstesztektől függetlenül
+változhat. Mielőtt egy upstream böngészővel való egyenértékűséget állítana, ellenőrizze az ujjlenyomat változásait egy explicit módon engedélyezett élő fiókkal.
 
 ---
 
@@ -114,7 +120,7 @@ Alkalmazási helyek: `system` blokkok, az összes `messages[].content`, valamint
 
 Olyan külső Anthropic-továbbítókhoz, amelyek csak „valódi Claude Code” forgalmat fogadnak el:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - Az `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` alapértelmezés szerint
@@ -238,7 +244,7 @@ Minden MITM-végpont kezelési hitelesítést igényel (`requireCliToolsAuth`). 
 
 | Változó                  | Alapértelmezett                                                 |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

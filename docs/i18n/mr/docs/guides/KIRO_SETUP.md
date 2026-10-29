@@ -113,30 +113,41 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ---
 
-## API-Key आयात प्रवाह
+## API-की आयात प्रवाह
 
-API-key प्रमाणीकरण दीर्घकाळ वैध राहणाऱ्या Kiro / AWS CodeWhisperer bearer क्रेडेन्शियल्ससाठी आहे. ते OAuth refresh वापरत नाही, त्यामुळे सामायिक OIDC सत्र अवैध होणे टाळले जाते.
+API-की प्रमाणीकरण हे दीर्घकाळ वैध राहणाऱ्या Kiro / AWS CodeWhisperer bearer क्रेडेन्शियल्ससाठी आहे. ते
+OAuth रिफ्रेश वापरत नाही, त्यामुळे सामायिक OIDC सत्र अवैध होणे टाळले जाते.
 
 ### डॅशबोर्ड
 
 1. **डॅशबोर्ड -> प्रदाते -> Kiro** उघडा.
-2. **API Key** निवडा.
-3. API key आणि पर्यायी AWS प्रदेश (`us-east-1` हे डीफॉल्ट) पेस्ट करा.
-4. OmniRoute key ची वैधता तपासते आणि कनेक्शन जतन करते.
+2. **API की** निवडा.
+3. API की पेस्ट करा आणि AWS प्रदेश निवडा: **स्वयं-शोध** (डीफॉल्ट), **US East
+   (N. Virginia)** किंवा **Europe (Frankfurt)**.
+4. OmniRoute कीची पडताळणी करते आणि ज्या प्रदेशात ती की कार्य करते त्या प्रदेशाशी निश्चित केलेले कनेक्शन जतन करते.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` हे `auto` (डीफॉल्ट), `us-east-1` किंवा `eu-central-1` स्वीकारते; इतर कोणतेही मूल्य
+HTTP 400 सह नाकारले जाते.
 
 ### अंतर्गत करार
 
-API route, `KiroService.validateApiKey()` कॉल करून key ची वैधता तपासतो; ही पद्धत संबंधित प्रदेशाशी जुळणाऱ्या CodeWhisperer/Amazon Q endpoint विरुद्ध `ListAvailableProfiles` वापरते आणि `profileArn` निर्धारित करते.
+API रूट `KiroService.validateApiKey()` कॉल करून कीची पडताळणी करते, जे
+`GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(API-की अनुमानासाठी Amazon Q वापरत असलेले पृष्ठभाग) प्रत्येक प्रदेशासाठी 10 सेकंदांच्या टाइमआउटसह कॉल करते.
+`auto` मोडमध्ये ते प्रथम `us-east-1`, नंतर `eu-central-1` वापरून पाहते आणि की स्वीकारणारा
+पहिला प्रदेश जतन करते. प्रत्येक संभाव्य प्रदेशात नाकारलेली की आयात HTTP 400 सह
+अयशस्वी करते. त्यानंतर पर्यायी `profileArn` शोधण्यासाठी सर्वोत्तम प्रयत्न म्हणून
+`ListAvailableProfiles` कॉल केले जाते (बहुतेक API कींसाठी AWS ते नाकारते).
 
-जतन केलेले कनेक्शन पुढील रचना वापरते:
+जतन केलेले कनेक्शन हे वापरते:
 
 ```json
 {
@@ -149,7 +160,13 @@ API route, `KiroService.validateApiKey()` कॉल करून key ची व�
 }
 ```
 
-रनटाइममध्ये, `KiroExecutor.buildHeaders()` key ला `Authorization: Bearer <key>` म्हणून पाठवते आणि `tokentype: API_KEY` जोडते. कोटा/प्रोफाइल कॉल्सही हाच मार्कर वापरतात, त्यामुळे AWS त्या bearer ला OIDC किंवा social access token ऐवजी दीर्घकाळ वैध राहणारी API key मानते.
+रनटाइमच्या वेळी, `KiroExecutor.buildHeaders()` की
+`Authorization: Bearer <key>` म्हणून पाठवते आणि `tokentype: API_KEY` जोडते. कोटा/प्रोफाइल कॉल्स
+तोच निर्देशक वापरतात, त्यामुळे AWS त्या bearer ला OIDC किंवा सोशल अॅक्सेस टोकनऐवजी
+दीर्घकाळ वैध राहणारी API की मानते. `KiroExecutor.execute()` API-की अनुमान केवळ
+`https://q.<region>.amazonaws.com/generateAssistantResponse` येथे पाठवते — यात `us-east-1`
+समाविष्ट आहे — कारण Kiro IDE गेटवे `TokenType=API_KEY` नाकारतो आणि
+`codewhisperer.us-east-1` API-की पेलोड्सना अवैध विनंती बॉडी म्हणून नाकारतो (HTTP 400).
 
 ---
 

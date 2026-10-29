@@ -32,7 +32,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "open-sse/handlers/chatCore/emptyTurnRetryLoop.ts": 1,
     "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 2,
     "open-sse/services/imageCombo.ts": 1,
-    "open-sse/services/speechCombo.ts": 1,
+    // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
+    // remotes) look up an in-scope connection for a connection-scoped API key
+    // before running (chat's #9057 rule) — one extra scoped lookup per site.
+    "open-sse/services/speechCombo.ts": 2,
     "open-sse/services/videoCombo.ts": 2,
     "src/app/api/compression/compare/verify/route.ts": 1,
     "src/app/api/internal/codex-responses-ws/route.ts": 1,
@@ -42,22 +45,31 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/search/providers/route.ts": 3,
     "src/app/api/v1/_shared/elevenLabsProxy.ts": 1,
     "src/app/api/v1/_shared/fishAudioProxy.ts": 1,
-    "src/app/api/v1/audio/speech/route.ts": 1,
+    // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
+    // remotes) look up an in-scope connection for a connection-scoped API key
+    // before running (chat's #9057 rule) — one extra scoped lookup per site.
+    "src/app/api/v1/audio/speech/route.ts": 2,
     "src/app/api/v1/_shared/videoModelResolution.ts": 1,
-    "src/app/api/v1/audio/transcriptions/route.ts": 2,
-    "src/app/api/v1/audio/translations/route.ts": 1,
+    "src/app/api/v1/audio/transcriptions/route.ts": 3,
+    "src/app/api/v1/audio/translations/route.ts": 2,
     "src/app/api/v1/classify/route.ts": 1,
     // v3.8.51 #11754: the second resolveImageRouteModel() call (a duplicate
     // of the retirement-check one hoisted before enforceApiKeyPolicy) was
     // removed as dead redundant code, 6->5. #12653 added combo target
     // resolution with the same shape as imageCombo, 5->6.
     // #15513: added Antigravity/Gemini image edits support branch, 6->7.
+    // #14269: SYNTX.ai image edits branch, same quota-preflight credential lookup
+    // shape as the sibling provider branches, 7->8.
+    // #14619 extracted Firefly's credential lookup into adobeFireflyEdit.ts;
+    // the same class-B site moves with it, 8->7 here and 0->1 in the helper.
     "src/app/api/v1/images/edits/route.ts": 7,
     "src/app/api/v1/images/generations/route.ts": 3,
     "src/app/api/v1/images/upscale/route.ts": 1,
     "src/app/api/v1/messages/count_tokens/route.ts": 1,
     "src/app/api/v1/moderations/route.ts": 1,
-    "src/app/api/v1/music/generations/route.ts": 2,
+    // GHSA-3w2r: the local-override lookup now reuses the shared
+    // resolveLocalOverrideCredentials (_shared/videoModelResolution.ts), 2->1.
+    "src/app/api/v1/music/generations/route.ts": 1,
     "src/app/api/v1/ocr/route.ts": 1,
     "src/app/api/v1/providers/[provider]/embeddings/route.ts": 1,
     "src/app/api/v1/providers/[provider]/images/generations/route.ts": 1,
@@ -66,12 +78,23 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/v1/segment/route.ts": 1,
     "src/app/api/v1/session-leases/route.ts": 1,
     "src/app/api/v1/videos/generations/route.ts": 2,
+    // #13788: Codex native web search (/v1/alpha/search) — same quota-preflight credential
+    // lookup as web/fetch (class B).
+    "src/app/api/v1/alpha/search/route.ts": 1,
     "src/app/api/v1/web/fetch/route.ts": 1,
+    // #15703: Firecrawl Map endpoint, same quota-preflight credential lookup as web/fetch (class B).
+    "src/app/api/v1/web/map/route.ts": 1,
     // #11088/#11271: third site is the synced local-endpoint route — it resolves
     // credentials through getProviderCredentials with the connection allowlist
     // from resolveLocalSyncedEndpointRoute, and handles allRateLimited, so it is
     // fenced the same way as the two pre-existing sites.
-    "src/lib/embeddings/service.ts": 3,
+    // #15761: local embeddings resolve credentials through the serving-connection allowlist
+    // (getProviderCredentials(provider, null, servingIds)) — one more site (3 -> 4).
+    // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
+    // remotes) look up an in-scope connection for a connection-scoped API key
+    // before running (chat's #9057 rule) — one extra scoped lookup per site.
+    "src/lib/embeddings/service.ts": 5,
+    "src/lib/images/adobeFireflyEdit.ts": 1,
     // PR #11390: second site is the generic derived-provider listing fallback —
     // read-only key presence probe used to decide whether a configured chat
     // provider may appear in the memory embedding-source dropdown.
@@ -103,7 +126,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/services/quotaAutoPing.ts": 1,
   },
   connection: {
-    "open-sse/handlers/autoComboCandidates.ts": 1,
+    // The read-only auto-candidate inspector no longer re-resolves connections one by one
+    // (getProviderConnectionById, 1->0): it reads one narrow, credential-free state projection
+    // (id, rate_limited_until, test_status) through getRawProviderConnections for the whole
+    // request. Transparency only, no credential selection and no dispatch.
     // Two of the three connection re-resolution sites moved into the streaming
     // leg with the decomposition (same sites, new home).
     "open-sse/handlers/chatCore.ts": 1,
@@ -128,8 +154,16 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // persisted-cooldown gate's connection read moved here byte-identically
     // (readConnectionForCooldownGate), so this is the same site, renamed.
     "open-sse/services/combo/executeTargetGates.ts": 1,
-    "open-sse/services/combo/providerWildcard.ts": 1,
+    // #15927: providerWildcard.ts no longer queries connections itself — the Alibaba
+    // free-tier drained-model filter now reads through getCachedProviderPoolConnections()
+    // (open-sse/services/providerConnectionPool.ts), which goes through the shared
+    // getCachedProviderConnections() read cache (its getProviderConnections site is the one
+    // already inventoried under src/lib/db/readCache.ts). Read-only state lookup, no dispatch, 1->0.
     "open-sse/services/tokenRefresh.ts": 1,
+    // #15138: per-account test message config/send — reads the row for its stored test model
+    // and active flag; dispatch goes through runSingleModelTest, which refuses managed-lease
+    // connections itself (class C).
+    "src/app/api/providers/[id]/test-message/route.ts": 3,
     "src/lib/providers/volcPlanAutoSyncBackfill.ts": 1,
     "src/lib/providers/volcenginePlanBinding.ts": 1,
     "src/app/(dashboard)/dashboard/tools/agent-bridge/page.tsx": 1,
@@ -186,8 +220,6 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/usage/codex-reset-credit/route.ts": 1,
     "src/app/api/usage/quota/route.ts": 1,
     "src/app/api/usage/utilization/route.ts": 1,
-    "src/app/api/v1/vscode/[token]/api/tags/route.ts": 1,
-    "src/app/api/v1/vscode/raw/[token]/api/tags/route.ts": 1,
     "src/app/api/v1beta/models/route.ts": 1,
     "src/instrumentation-node.ts": 1,
     "src/lib/a2a/skills/providerDiscovery.ts": 1,
@@ -196,12 +228,22 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/cloudSync.ts": 1,
     "src/lib/combos/builderOptions.ts": 1,
     "src/lib/copilot/tools.ts": 1,
+    // #16190: the retest of gateway-disabled connections loads the inactive rows once per
+    // sweep and re-reads a row by id after its test to see whether it was switched back on.
+    // State reads only: the retest dispatches through testSingleConnection, which defers
+    // while an exclusive lease is active, so it never selects a connection itself (class C).
+    "src/lib/credentialHealth/autoDisabledRevalidation.ts": 2,
     "src/lib/credentialHealth/scheduler.ts": 1,
     // Base drift (already present before #11754 boarded, from earlier-merged
     // #11698/#11720 retirement PRs' combined getProviderConnectionById
     // fallback in the three write-path functions): not introduced by this PR.
-    "src/lib/db/providers.ts": 3,
+    // #15485: the priority-0 move-to-top edit re-reads the row by id after reorderConnections (3 -> 4).
+    "src/lib/db/providers.ts": 4,
     "src/lib/db/readCache.ts": 2,
+    // Local embedding providers: reads the active rows only to build the allowlist of
+    // connections whose default model does not conflict with the requested one; the
+    // connection itself is still selected by getProviderCredentials (class C).
+    "src/lib/embeddings/service.ts": 1,
     "src/lib/freeProviderRankings.ts": 1,
     "src/lib/guardrails/visionBridgeCredentials.ts": 2,
     "src/lib/kimi/tokenRefresh.ts": 1,
@@ -232,10 +274,24 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #11495: verify-only sweep queries oauth + cookie connections
     // #13874: the health check re-reads the row inside the refresh lane to see whether
     // a Layer 2 refresh already rotated the token before it POSTs a consumed one (2 -> 3).
-    "src/lib/tokenHealthCheck.ts": 3,
+    // #15891: after a successful refresh, getRefreshRecoveryUpdate() re-reads the row's
+    // rateLimitedUntil so it does not clear an active cooldown's diagnostics — a state
+    // read, not connection selection or dispatch, class C like its siblings (3 -> 4).
+    "src/lib/tokenHealthCheck.ts": 4,
     "src/lib/tokenHealthCheckCopilot.ts": 1,
+    // Selective provider-account transfer: one read of every connection to build the
+    // catalog, the export selection and the import match set. Read-only state, no dispatch.
+    "src/lib/transfer/providerTransfer.ts": 1,
     "src/lib/usage/callLogs.ts": 1,
+    // #14728: Claude sibling of codexResetCredits.ts, same shape —
+    // isConnectionUnavailableToAuxiliaryActivity() gates the lookup, so an ACTIVE
+    // exclusive lease defers list/redeem (409 exclusive_lease_active).
+    "src/lib/usage/claudeResetCredits.ts": 1,
     "src/lib/usage/codexResetCredits.ts": 1,
+    // #17974: the combo health report reads the active connections once to decide which
+    // targets still have an eligible, model-advertising account — a read-only monitoring
+    // lookup behind the health endpoint, never connection selection or dispatch (class C).
+    "src/lib/usage/comboHealth.ts": 1,
     "src/lib/usage/comboScoringInspector.ts": 1,
     "src/lib/usage/glmResetCards.ts": 1,
     // v3.8.51 #12805 (c042a5188): grok-cli sibling of codexResetCredits.ts, same
@@ -243,9 +299,16 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // ACTIVE exclusive lease defers redemption (409 exclusive_lease_active).
     "src/lib/usage/grokResetCredits.ts": 1,
     "src/lib/usage/providerLimits.ts": 4,
+    // #4305 port: after a confirmed reset-credit redemption (whose caller already passed
+    // the auxiliary-lease gate) the row is re-read only to check its terminal/codex-scope
+    // state before lifting the local quota cooldown — a state read, never connection
+    // selection or dispatch, so class C.
+    "src/lib/usage/resetCreditCooldownRelease.ts": 1,
     "src/lib/usage/resilienceExplain.ts": 1,
     "src/lib/usage/usageStats.ts": 1,
     "src/lib/vncSession/service.ts": 2,
+    // #17360 moved the two VS Code tag routes' connection read here (same read-only listing).
+    "src/lib/vscode/tagModels.ts": 1,
     "src/lib/warmupScheduler.ts": 1,
     "src/shared/services/codexCatalogRevalidation.ts": 2,
     "src/shared/services/modelSyncScheduler.ts": 1,
@@ -280,13 +343,11 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
     Object.keys(EXPECTED.connection).map((file) => [
       file,
       [
-        "open-sse/handlers/autoComboCandidates.ts",
         "open-sse/handlers/chatCore.ts",
         "open-sse/handlers/chatCore/streamingResponse.ts",
         "open-sse/services/alibabaFreeTier.ts",
         "open-sse/services/alibabaFreeTierQuotaFetcher.ts",
         "open-sse/services/combo/executeTargetGates.ts",
-        "open-sse/services/combo/providerWildcard.ts",
         "open-sse/services/tokenRefresh.ts",
         "src/app/api/translator/send/route.ts",
         "src/lib/credentialHealth/scheduler.ts",
@@ -294,6 +355,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
         "src/lib/providers/volcPlanAutoSyncBackfill.ts",
         "src/lib/providers/volcenginePlanBinding.ts",
         "src/lib/services/quotaAutoPing.ts",
+        "src/lib/usage/claudeResetCredits.ts",
         "src/lib/usage/codexResetCredits.ts",
         "src/lib/usage/glmResetCards.ts",
         "src/lib/usage/grokResetCredits.ts",
@@ -404,6 +466,8 @@ test("managed request surfaces are fenced centrally or rejected before independe
     "src/lib/api/modelTestRunner.ts",
     "src/lib/modelValidation/runner.ts",
     "src/lib/services/quotaAutoPing.ts",
+    "src/lib/services/quotaAutoPingManual.ts",
+    "src/lib/usage/claudeResetCredits.ts",
     "src/lib/usage/codexResetCredits.ts",
     "src/lib/usage/glmResetCards.ts",
     "src/lib/usage/grokResetCredits.ts",

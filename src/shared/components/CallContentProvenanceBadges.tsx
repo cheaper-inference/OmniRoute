@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Badge from "./Badge";
 
 type UsageProvenance = "reported" | "estimated" | "absent" | null | undefined;
 
@@ -38,13 +39,15 @@ export function CallContentProvenanceBadges({
       </div>
       <div className="flex flex-wrap gap-1">
         {keys.map((key) => (
-          <span
+          <Badge
             key={key}
             data-testid={`content-provenance-${key}`}
-            className="inline-block px-2.5 py-1 rounded text-[10px] font-bold border bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30"
+            variant="warning"
+            size="sm"
+            className="font-bold"
           >
             {t(key)}
-          </span>
+          </Badge>
         ))}
       </div>
     </div>

@@ -37,6 +37,14 @@ test("normalizeArtifactPath normalizes slashes and leading relative markers", ()
   );
 });
 
+test("OTLP request-header helper is required in the published source manifest", () => {
+  const helper = "src/lib/logExport/destinations/otlpRequestHeaders.ts";
+  assert.ok(PACK_ARTIFACT_REQUIRED_PATHS.includes(helper));
+  assert.ok(existsSync(new URL(`../../${helper}`, import.meta.url)));
+  const pkg = JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8"));
+  assert.ok(pkg.files.includes("src/lib/"));
+});
+
 test("parseJsonArrayOutput extracts the first valid array from mixed command output", () => {
   const output = [
     "notice [not-json]",
@@ -191,6 +199,7 @@ test("build-next-isolated sibling imports are allowed in the published package",
     "scripts/build/assembleStandalone.mjs",
     "scripts/build/backendOnlyPages.mjs",
     "scripts/build/build-tproxy-native.mjs",
+    "scripts/i18n/generate-global-error-messages.mjs",
   ];
 
   const unexpectedPaths = findUnexpectedArtifactPaths(buildDependencies, {
@@ -199,6 +208,14 @@ test("build-next-isolated sibling imports are allowed in the published package",
   });
 
   assert.deepEqual(unexpectedPaths, []);
+
+  assert.deepEqual(
+    findUnexpectedArtifactPaths(["scripts/i18n/private-catalog.mjs"], {
+      exactPaths: PACK_ARTIFACT_ALLOWED_EXACT_PATHS,
+      prefixPaths: PACK_ARTIFACT_ALLOWED_PATH_PREFIXES,
+    }),
+    ["scripts/i18n/private-catalog.mjs"]
+  );
 });
 
 test("webdav-handler.mjs is allowed in staging dist/ (server-ws.mjs dependency, missed in 3.8.22 build)", () => {
@@ -323,6 +340,7 @@ test("findMissingArtifactPaths flags missing root runtime files in the tarball",
     "config/release/wreq-js-native-manifest.json",
     "config/release/wreq-js-rust-license-inventory.json",
     "config/release/wreq-js-rust-notices.md",
+    "dist/h2c-upgrade-guard.cjs",
     "dist/head-response-guard.cjs",
     "dist/http-method-guard.cjs",
     // #13636/#14064: server-ws.mjs crash guard, enforced by the closure suites.
@@ -335,6 +353,8 @@ test("findMissingArtifactPaths flags missing root runtime files in the tarball",
     "dist/responses-ws-proxy.mjs",
     "dist/server-ws.mjs",
     "dist/src/lib/db/healthCheckWorker.js",
+    "dist/src/lib/logExport/exportChild.js",
+    "dist/src/lib/logExport/package.json",
     "dist/src/lib/usage/callLogArtifactWorker.js",
     "dist/systemd-notify.mjs",
     "dist/tls-options.mjs",
@@ -345,6 +365,7 @@ test("findMissingArtifactPaths flags missing root runtime files in the tarball",
     "scripts/build/wreqJsNative.mjs",
     "scripts/packs/optionalPackInstaller.mjs",
     "scripts/packs/optionalPackManifest.mjs",
+    "src/lib/logExport/destinations/otlpRequestHeaders.ts",
     "src/shared/utils/nodeRuntimeSupport.ts",
   ]);
 });

@@ -1,13 +1,18 @@
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import * as log from "@/sse/utils/logger";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import {
+  createComboTargetKeyGate,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
 import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { v1EmbeddingsSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 
 import { createEmbeddingResponse, type EmbeddingHandlerOptions } from "@/lib/embeddings/service";
-import { extractApiKey, isValidApiKey } from "@/sse/services/auth";
+import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 
@@ -56,17 +61,24 @@ async function postHandler(request, context) {
 
   // Auth check — when REQUIRE_API_KEY=false, ignore presented invalid keys
   // so anonymous access works the same as all other client APIs (#7785).
-  const apiKeyRaw = extractApiKey(request);
+  const { apiKey: apiKeyRaw, valid: apiKeyValid } = await resolveClientApiKey(request);
   if (isRequireApiKeyEnabled() && !apiKeyRaw) {
     return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Authentication required");
   }
-  if (isRequireApiKeyEnabled() && apiKeyRaw && !(await isValidApiKey(apiKeyRaw))) {
+  if (isRequireApiKeyEnabled() && apiKeyRaw && !apiKeyValid) {
     return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Invalid API key");
   }
 
   // Enforce API key policies (model restrictions + budget limits)
   const policy = await enforceApiKeyPolicy(request, body.model);
   if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: credential selection (direct and per combo target) stays inside
+  // the key's connection scope, the same scope chat applies.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
+  // Respect the authenticated API key's credential scope before checking model capabilities.
+  const endpointMismatch = await getRequestedModelEndpointMismatch(body.model, "embeddings");
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
 
   // Extract API key info for logging
   const apiKeyMeta = policy.apiKeyInfo;
@@ -83,6 +95,8 @@ async function postHandler(request, context) {
     apiKeyId: apiKeyMeta?.id || null,
     apiKeyName: apiKeyMeta?.name || null,
     connectionId: null,
+    allowedConnections: scope.allowedConnections,
+    isComboTargetAllowed: createComboTargetKeyGate(policy, body.model),
   });
 }
 

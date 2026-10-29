@@ -17,71 +17,128 @@ OmniRoute ir maršrutu apzinoša autorizācijas cauruļvads, kas aizsargā katru
 
 ### 1. API atslēga (Bearer)
 
-Tiek izmantota ar OpenAI/Anthropic/Gemini saderīgām klientu API un dažiem pārvaldības maršrutiem, ja atslēgai ir tvērums `manage`.
+Tiek izmantota ar OpenAI/Anthropic/Gemini saderīgajām klientu API un dažiem pārvaldības maršrutiem, ja atslēgai ir tvērums `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-To validē `isValidApiKey()` / `extractApiKey()` failā `src/sse/services/auth.ts`, un tā tiek atkārtoti eksportēta, izmantojot `src/shared/utils/apiAuth.ts`. Validētājs arī pieņem vides mainīgos `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` kā pastāvīgas tiešās pārsūtīšanas atslēgas (problēma #1350).
+To validē `isValidApiKey()` / `extractApiKey()` failā `src/sse/services/auth.ts`, un tā tiek atkārtoti eksportēta, izmantojot `src/shared/utils/apiAuth.ts`. Validators pieņem arī vides mainīgos `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` kā pastāvīgas caurlaides atslēgas (problēma #1350).
 
-### 2. Informācijas paneļa sesija (auth_token sīkdatne)
+### 2. Informācijas paneļa sesija (auth_token sīkfails)
 
 Informācijas paneļa lapām un administratora darbībām.
 
 ```
-Cookie: auth_token=<JWT, kas parakstīts ar JWT_SECRET>
+Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Sīkdatne ir sesija tikai tad, ja JWT ir sekmīgi verificēts **un** satur `authenticated: true`
+Sīkfails ir sesija tikai tad, ja JWT ir sekmīgi verificēts **un** satur `authenticated: true`
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Katrs
-sīkdatnes izmantotājs (informācijas paneļa maršruta aizsargs (`isDashboardSessionAuthenticated()`), autorizācijas konveijera atsvaidzināšana, WebSocket savienojuma izveide, reāllaika
+sīkfaila patērētājs (informācijas paneļa maršruta aizsargs (`isDashboardSessionAuthenticated()`), autorizācijas konveijera atsvaidzināšana, WebSocket savienojuma izveide, reāllaika
 serveris, `/api/settings/require-login`, `/api/auth/status`) izmanto šo palīgfunkciju.
-Pastāv arī citi JWT, kas parakstīti ar `JWT_SECRET` — Cursor CLI tiešās pārsūtīšanas mehānisms atslēgu turētājiem izveido
-marķierus ar `iss "omniroute" / aud "cursor-cli"` — un tie nekad nav sesijas
+Pastāv arī citi JWT, kas parakstīti ar `JWT_SECRET` — Cursor CLI caurlaides mehānisms atslēgu
+turētājiem izsniedz marķierus ar `iss "omniroute" / aud "cursor-cli"` — un tie nekad nav sesijas
 (#13298).
 
 To verificē `isDashboardSessionAuthenticated()` failā `src/shared/utils/apiAuth.ts`. Konveijers automātiski atsvaidzina JWT, ja no tā 30 dienu derīguma termiņa ir atlikušas mazāk nekā 7 dienas.
 
-Sesija var beigties arī pirms tās 30 dienu termiņa beigām, jo katrs izsniedzējs izmanto `mintDashboardSessionToken` (izsniegšanas laiks `iat` un identifikators `jti`), un verificētājs pārbauda divus iestatījumus: `sessionsValidAfter`, kas tiek iestatīts paroles maiņas laikā, lai visas pirms tam izsniegtās sesijas vairs netiktu verificētas (pārlūks, kurā parole tika mainīta, saņem jaunu sīkdatni), un `revokedDashboardSessions`, kam `POST /api/auth/logout` pievieno tās sesijas `jti`, no kuras lietotājs ir izrakstījies. Vecākā laidienā izveidotajās sesijās nav neviena no šiem laukiem, un tās paliek derīgas līdz pirmajai paroles maiņai. Ja iestatījumus nevar nolasīt, sesija netiek uzskatīta par uzticamu.
+Sesija var beigties arī pirms tās 30 dienu termiņa beigām, jo katrs izsniedzējs izmanto `mintDashboardSessionToken` (izsniegšanas laiks `iat` un identifikators `jti`), un verificētājs pārbauda divus iestatījumus: `sessionsValidAfter`, kas tiek iestatīts paroles maiņas laikā, lai visas pirms tam izsniegtās sesijas vairs netiktu verificētas (pārlūkprogramma, kurā parole tika mainīta, saņem jaunu sīkfailu), un `revokedDashboardSessions`, kuram `POST /api/auth/logout` pievieno tās sesijas `jti`, no kuras lietotājs ir izrakstījies. Vecākā laidienā izsniegtās sesijas nesatur nevienu no šīm pretenzijām un paliek derīgas līdz pirmajai paroles maiņai. Ja iestatījumus nevar nolasīt, sesija netiek uzskatīta par uzticamu.
 
-Daži pārvaldības maršruti pieņem **jebkuru** no abiem režīmiem: sīkdatni VAI `Bearer <key>`, ja API atslēgai ir tvērums `manage` (vai `admin`). Tas nodrošina versijā v3.8 pievienoto darbplūsmu „konfigurējams, izmantojot API izsaukumus”.
+Daži pārvaldības maršruti pieņem **jebkuru** no abiem režīmiem: sīkfailu VAI `Bearer <key>`, ja API atslēgai ir tvērums `manage` (vai `admin`). Tas nodrošina versijā v3.8 pievienoto darbplūsmu „konfigurējams, izmantojot API izsaukumus”.
 
-#### Neobligāta OIDC pieteikšanās kontrole (#6973)
+#### Neobligāts OIDC pieteikšanās ierobežojums (#6973)
 
-Informācijas paneļa administratora pieteikšanās atbalsta arī **pēc izvēles iespējojamu** OIDC (OpenID Connect) plūsmu
-līdztekus noklusējuma pieteikšanās iespējai ar paroli — pieteikšanās ar paroli nekad netiek noņemta, tā tiek tikai
+Informācijas paneļa administratora pieteikšanās līdztekus noklusējuma pieteikšanās iespējai ar paroli atbalsta arī **brīvprātīgi iespējojamu** OIDC (OpenID Connect) plūsmu — pieteikšanās ar paroli nekad netiek noņemta, bet tikai
 papildināta:
 
-- Tā ir atspējota, ja vien `settings.oidcEnabled === true` **un** visi `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` nav konfigurēti (Iestatījumi → Autentifikācija).
+- Atspējots, ja vien `settings.oidcEnabled === true` **un** nav konfigurēti visi
+  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` (Iestatījumi → Autentifikācija).
   Pretējā gadījumā `GET /api/auth/oidc/login` atgriež `400`.
-- `GET /api/auth/oidc/login` nosaka `authorization_endpoint`, izmantojot izsniedzēja
-  `/.well-known/openid-configuration` (rezerves variants ir
+- `GET /api/auth/oidc/login` nosaka `authorization_endpoint` no izdevēja
+  `/.well-known/openid-configuration` (ja tas neizdodas, izmanto
   `<issuer>/authorize`), izveido novirzīšanas URI no ienākošā pieprasījuma
-  (ņemot vērā `x-forwarded-proto`) un novirza uz IdP ar nejaušu `state`,
-  kas glabājas `httpOnly` sīkdatnē `oidc_state`.
-- `GET /api/auth/oidc/callback` validē `state`, apmaina autorizācijas
-  kodu un verificē ID marķiera parakstu, izmantojot izsniedzēja JWKS
-  (`jose` funkciju `createRemoteJWKSet`, kas tiek kešota katram JWKS URI), kā arī veic `issuer`/`audience`
-  pārbaudes. Neobligātais atļauto vērtību saraksts `oidcAllowedSubjects` salīdzina marķiera
-  lauku `sub` vai tā lauku `email` — lauks `email` tiek ņemts vērā tikai tad, ja
-  `email_verified === true`, tādēļ IdP neverificēta e-pasta adrese nekad nevar iziet
-  šo kontroli.
-- Veiksmīgas autentifikācijas gadījumā tiek izveidots **tieši tāds pats** 30 dienu `auth_token` JWT, kādu izsniedz pieteikšanās
-  ar paroli (`src/app/api/auth/login/route.ts`), tādēļ pārējais
-  informācijas paneļa sesijas konveijers (automātiskā atsvaidzināšana, sīkdatņu karodziņi) paliek nemainīts —
-  OIDC aizstāj tikai veidu, kā sīkdatne tiek izveidota, nevis tās piešķirtās tiesības.
+  (ņemot vērā `x-forwarded-proto`) un novirza uz IdP ar nejauši ģenerētu `state`,
+  kas glabājas `httpOnly` sīkfailā `oidc_state`.
+- `GET /api/auth/oidc/callback` validē `state`, apmaina autorizācijas kodu
+  un pārbauda ID marķiera parakstu, izmantojot izdevēja JWKS
+  (`jose` funkciju `createRemoteJWKSet`, kešotu katram JWKS URI), kā arī veic
+  `issuer`/`audience` pārbaudes. Piekļuve informācijas panelim pieprasa aizpildītu
+  `oidcAllowedSubjects` sarakstu, `oidcAdmissionClaim` politiku vai abus.
+  Subjektu saraksts salīdzina `sub` vai `email` tikai tad, ja
+  `email_verified === true`. Neobligātā atribūtu politika pieņem ar punktiem
+  atdalītu ID marķiera atribūta ceļu (piemēram, `realm_access.roles`) un
+  pieņemamo vērtību masīvu; atrisinātajam atribūtam jābūt virkņu masīvam, kas
+  satur vismaz vienu pieņemamo vērtību. Ja ir konfigurētas abas politikas,
+  abām pārbaudēm jābūt sekmīgām. Trūkstoši vai nepareizi veidoti atribūti drošā
+  veidā liedz piekļuvi, un, ja nav nevienas politikas, atzvanīšanas punkts
+  atsaka pieteikšanos (`not_configured`). Esošās konfigurācijas, kurās norādīti
+  tikai subjekti, turpina darboties bez izmaiņām.
+- Keycloak parasti kartē realm lomas piekļuves marķieros, nevis obligāti ID
+  marķieros. Lai pieprasītu realm lomu `admin`, konfigurējiet šim klientam
+  protokola kartētāju, kas tā **ID marķierī** iekļauj `realm_access.roles`, un pēc
+  tam iestatiet `oidcAdmissionClaim` uz `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Pirms iespējojat piekļuvi tikai pēc lomas, pārbaudiet šī klienta faktisko
+  ID marķiera atribūtu; lietojumprogramma nelasa piekļuves marķiera lomas.
+  Marķiera izsniegšanas atteikums IdP pusē var papildināt šo pārbaudi
+  lietojumprogrammas pusē, bet nevar to aizstāt.
+- Sekmīgas pieteikšanās gadījumā tiek izveidots **tieši tāds pats** 30 dienu
+  `auth_token` JWT, kādu izsniedz pieteikšanās ar paroli
+  (`src/app/api/auth/login/route.ts`), tāpēc pārējā informācijas paneļa sesijas
+  apstrādes ķēde (automātiskā atsvaidzināšana, sīkfailu karodziņi) paliek
+  nemainīga — OIDC aizstāj tikai sīkfaila izveides veidu, nevis tā piešķirtās
+  tiesības. IdP lomu vai grupu izmaiņas nepadara esošās OmniRoute sesijas
+  nederīgas; to darbības laiku joprojām nosaka atteikšanās, paroles maiņa vai
+  sesijas termiņa beigas.
+- Katrs `oidc*` iestatījums (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) ir iekļauts
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  atbild ar `400 PASSWORD_REQUIRED`, ja vien pieprasījuma pamattekstā pārvaldības
+  parole nav norādīta kā `currentPassword` (ja tā ir nepareiza, tiek atgriezts
+  `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin` liedz _pieteikšanos_ ar
+  paroli (`POST /api/auth/login`), taču saglabā glabāto paroles jaucējvērtību,
+  un atkārtotā autentifikācija joprojām salīdzina `currentPassword` ar to.
+- Arī `corsOrigins` un `bruteForceProtection` ir iekļauti
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: jebkura no tiem prasību mīkstināšana vājina
+  pieteikšanās aizsardzību, tāpēc tiem nepieciešama tā pati atkārtotā
+  autentifikācija ar `currentPassword` (cilnē Drošība tas tiek pieprasīts), un
+  JSON importēšanas laikā tie tiek atmesti.
+- Katra drošības politikas atslēga — `SECURITY_IMPACTING_SETTINGS_KEYS` ieraksti,
+  katra `oidc*` atslēga un informācijas paneļa sesijas stāvoklis — pieprasījumā
+  `PATCH /api/settings` ir pieejama **tikai operatoram**: API atslēga ar `manage`
+  tvērumu vai `oma_` piekļuves marķieris tiek noraidīts ar `403` pat tad, ja tas
+  nosūta pareizo `currentPassword`, un atteikums tiek reģistrēts audita žurnālā
+  kā `settings.update_failed` ar `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` failā `src/lib/api/operatorCredential.ts`).
+  Parastos iestatījumus (motīvu, attēlošanas preferences) joprojām var mainīt ar
+  `manage` atslēgu vai `admin` piekļuves marķieri. Katra paša `/api/settings`
+  modificēšanas darbība (kā arī `/api/settings/require-login` modificēšana)
+  pieprasa arī piekļuves marķiera `admin` tvērumu
+  (`ADMIN_MUTATION_EXACT_PATHS` failā `src/server/authz/accessScopes.ts`, precīza
+  ceļa atbilstība); `GET` joprojām nepieciešams `read`, bet pārējie
+  `/api/settings/*` apakšmaršruti (starpniekserveri, kombināciju noklusējumi,
+  modeļu aizstājvārdi, saspiešana, tīrīšana…) saglabā no metodes atvasināto
+  `write` tvērumu.
+- `POST /api/settings/import-json` izlaiž šo atkārtoto autentifikāciju, tāpēc pirms
+  rakstīšanas tas atmet katru `IMPORT_STRIPPED_SETTINGS_KEYS` atslēgu (tajā pašā
+  failā): paroli un `currentPassword`, katru `SECURITY_IMPACTING_SETTINGS_KEYS`
+  ierakstu un informācijas paneļa sesijas stāvokli (`sessionsValidAfter`,
+  `revokedDashboardSessions`). Tādēļ vecākas dublējumkopijas importēšana nevar
+  atjaunot sesiju, kuru jau izbeidza paroles maiņa vai atteikšanās.
 
 ## Maršrutu klases
 
-`src/server/authz/types.ts` definē trīs klases; jebkurš maršruts, kuru nevar deterministiski klasificēt, pēc noklusējuma tiek klasificēts kā `MANAGEMENT`.
+`src/server/authz/types.ts` definē trīs klases. Jebkurš maršruts, ko nevar deterministiski klasificēt, pēc noklusējuma tiek piešķirts `MANAGEMENT`.
 
-| Klase        | Apraksts                                                                                                                                                             | Nepieciešamā autentifikācija                                                         |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `PUBLIC`     | Nepārprotami droši maršruti — pieteikšanās, atteikšanās, statuss, inicializācija, darbspējas pārbaude, sākotnējā iestatīšana.                                        | Nav                                                                                  |
-| `CLIENT_API` | Modeļu apkalpošanas galapunkti — `/api/v1/*`, `/api/v1beta/*`, kā arī aizstājējvārdi `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer atslēga, ja ir iespējots efektīvais `REQUIRE_API_KEY` funkcionalitātes karogs |
-| `MANAGEMENT` | Informācijas paneļa lapas, iestatījumi, nodrošinātāji, atslēgas, administrēšanas un diagnostikas galapunkti.                                                         | Informācijas paneļa sesija VAI Bearer ar `manage` tvērumu                            |
+| Klase        | Apraksts                                                                                                                                                          | Nepieciešamā autentifikācija                                          |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `PUBLIC`     | Skaidri drošie maršruti: pieteikšanās, izrakstīšanās, statuss, inicializācija, veselības pārbaude un onboarding bootstrap.                                        | Nav                                                                   |
+| `CLIENT_API` | Modeļu apkalpošanas galapunkti: `/api/v1/*`, `/api/v1beta/*`, kā arī aizstājvārdi `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer atslēga, kad ir iespējots funkciju karodziņš `REQUIRE_API_KEY` |
+| `MANAGEMENT` | Infopaneļa lapas, iestatījumi, pakalpojumu sniedzēji, atslēgas, administratīvie un diagnostikas galapunkti.                                                       | Infopaneļa sesija VAI Bearer ar `manage` darbības jomu                |
+
+Dažas `MANAGEMENT` darbības ir **tikai operatoram**: viena `manage` atslēga nepietiek. Saglabāto pilnvaru eksports (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), dublējuma atjaunošana pār pašreizējiem datiem (`POST /api/db-backups/import`, ieskaitot `dryRun=true`, `POST /api/db-backups` atjaunošana pēc id, `POST /api/settings/import-json`) un atjaunošanas punktu iznīcināšana (`DELETE /api/db-backups` tīrīšana, kā arī `PATCH /api/db-backups`, jo saglabātais glabāšanas laiks vada automātisko tīrīšanu pēc katras dublējuma kopijas) prasa infopaneļa sesiju, vietējo CLI identitāti vai to, ka pieteikšanās ir atspējota. Sinhronizācijas žetona izdošana (`POST /api/sync/tokens`) un `admin` darbības jomas CLI piekļuves žetona izveide (`POST /api/cli/tokens`) prasa infopaneļa sesiju vai vietējo CLI identitāti jebkurā pieteikšanās režīmā. API atslēgas jebkurā darbības jomā un `oma_` piekļuves žetoni nav operatora pilnvaras: tiem atgriež `403`, kad tāda nepieciešama. Pārbaude atrodas failā `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Pieteikšanās iestatījumu maiņa arī ir tikai operatoram: `POST /api/settings/require-login` (iestatīt pārvaldības paroli / pārslēgt `requireLogin`) pieņem šīs pilnvaras tikai tad, kad parole jau ir. Sākotnējās iestatīšanas bootstrap logs (paroles vēl nav) nemainās, un infopaneļa sesijai, lai aizstātu paroli, jānosūta `currentPassword` (`403`, ja tā trūkst vai ir nepareiza, reģistrēts kā `settings.update_failed`). Vietējais CLI un instance ar atspējotu pieteikšanos saglabā atjaunošanas ceļu un drīkst iestatīt paroli bez tā, jo abi ir piesaistīti resursdatoram, kas pieder datu direktorijai.
 
 ## Konveijers
 
@@ -232,15 +289,15 @@ Tā paliek izslēgta, ja vien `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Šis rangs attiecas tikai uz piekļuves marķiera
 akreditācijas datiem. Skatīt [Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md).
 
-## Autentifikācijas prasības pārslēgs
+## Nepieciešamās autentifikācijas slēdzis
 
 `isAuthRequired()` failā `src/shared/utils/apiAuth.ts` nosaka, vai pieprasījumam tiek piemērota **jebkāda** autentifikācija:
 
-- `settings.requireLogin === false` → autentifikācija ir globāli atspējota.
-- Nav konfigurēta parole **un** nav vides mainīgā `INITIAL_PASSWORD` → sāknēšanas režīms atļauj sākotnējās iestatīšanas vedni un lokālās atgriezeniskās cilpas pieprasījumus, taču no tīkla pieejamiem pieprasījumiem joprojām ir nepieciešami akreditācijas dati.
-- Jebkura DB kļūda → piekļuve tiek liegta (drošība pēc noklusējuma).
+- `settings.requireLogin === false` → autentifikācija ir globāli atspējota, izņemot vienmēr aizsargāto līmeni (skat. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) un izsaukumus, kas izsniedz pilnvaru, ko tā pieņem. Tiem nepieciešama tā pati pilnvara, kāda ir nepieciešama, ja pieteikšanās ir ieslēgta: sinhronizācijas žetonu izdošana, CLI piekļuves žetonu izdošana jebkurā darbības jomā un API atslēgas izveide ar `manage`/`admin` darbības jomu, šīs darbības jomas piešķiršana atslēgai vai tādas atslēgas regenerēšana vai parādīšana (`requireCredentialForManagementScopedKey()` failā `src/lib/api/requireManagementAuth.ts`). Atslēgas tikai secinājumiem paliek atvērtas.
+- Parole nav konfigurēta **un** nav vides mainīgā `INITIAL_PASSWORD` → bootstrap režīms atļauj iestatīšanas vedni un loopback pieprasījumus, bet ārējie tīkla pieprasījumi joprojām prasa pilnvaras.
+- Jebkura DB kļūda → bloķē piekļuvi (drošs pēc noklusējuma).
 
-Klienta API atslēgas prasības piemērošanai tiek izmantota `isRequireApiKeyEnabled()` failā `src/shared/utils/featureFlags.ts`, nevis tieša `process.env.REQUIRE_API_KEY` nolasīšana. Tas ir svarīgi izvietotām instancēm: pārslēdzot `REQUIRE_API_KEY` sadaļā Dashboard → Feature Flags, DB tiek saglabāta pārrakstīšanas vērtība, kas nekavējoties ietekmē `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` un citas klienta API autentifikācijas pārbaudes, kurās tiek izmantota šī palīgfunkcija. Ja funkciju karodziņu krātuvi nevar nolasīt, klienta API autentifikācija liedz piekļuvi un pieprasa atslēgu.
+Klienta API atslēgu piemērošanai izmanto `isRequireApiKeyEnabled()` no `src/shared/utils/featureFlags.ts`, nevis tiešu `process.env.REQUIRE_API_KEY` nolasīšanu. Tas ir svarīgi izvietotām instancēm: `REQUIRE_API_KEY` pārslēgšana Dashboard → Feature Flags saglabā DB pārrakstījumu un tūlīt ietekmē `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` un citas klienta API autentifikācijas pārbaudes, kas izmanto šo palīgfunkciju. Ja funkciju karodziņu krātuvi nevar nolasīt, klienta API autentifikācija bloķē piekļuvi un prasa atslēgu.
 
 ## Nesaderīgas izmaiņas — v3.8.0
 

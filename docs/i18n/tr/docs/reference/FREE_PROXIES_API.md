@@ -8,7 +8,7 @@ OmniRoute, harici sağlayıcılardan (1proxy, proxifly, iplocate, webshare) senk
 
 ## Liste rotası — `GET /api/settings/free-proxies`
 
-Filtrelenmiş, sıralanmış ve sayfalandırılmış bir kesitin yanı sıra toplam sayıyı döndürür. Filtreleme ve sayma SQL'de gerçekleştirilir; böylece kullanıcı arayüzü, her satırı belleğe yüklemeden gerçek toplamı (ör. `Toplam: 0`) gösterebilir.
+Filtrelenmiş, sıralanmış ve sayfalandırılmış bir kesitin yanı sıra toplam sayıyı döndürür. Filtreleme ve sayma SQL'de gerçekleştirilir; böylece kullanıcı arayüzü, her satırı belleğe yüklemeden gerçek toplamı (ör. `Total: 0`) gösterebilir.
 
 ### Sorgu parametreleri
 
@@ -47,7 +47,7 @@ Filtrelenmiş, sıralanmış ve sayfalandırılmış bir kesitin yanı sıra top
 }
 ```
 
-`total`, sayfalandırmadan **önceki** filtrelenmiş toplamı yansıtır; böylece kullanıcı arayüzü `Toplam: N` ve `hasMore` değerlerini birbirinden bağımsız olarak işleyebilir. `syncErrors`, kaynak kimliğine göre anahtarlanır ve yalnızca son senkronizasyonu başarısız olan kaynaklar için doldurulur; `Toplam: 0` sonucu hiçbir zaman açıklamasız bırakılmaz.
+`total`, sayfalandırmadan **önceki** filtrelenmiş toplamı yansıtır; böylece kullanıcı arayüzü `Total: N` ve `hasMore` değerlerini birbirinden bağımsız olarak işleyebilir. `syncErrors`, kaynak kimliğine göre anahtarlanır ve yalnızca son senkronizasyonu başarısız olan kaynaklar için doldurulur; `Total: 0` sonucu hiçbir zaman açıklamasız bırakılmaz.
 
 ## Havuza ekleme — `POST /api/settings/free-proxies/[id]/add-to-pool`
 

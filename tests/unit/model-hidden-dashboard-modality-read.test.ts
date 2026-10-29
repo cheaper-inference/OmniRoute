@@ -21,7 +21,8 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-hidden-da
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
-const { getHiddenModelsByProvider } = await import("../../src/lib/db/models.ts");
+const { getHiddenModelsByProvider, getModelCompatOverrides } =
+  await import("../../src/lib/db/models.ts");
 const { isHiddenForModality } = await import("../../src/shared/utils/modelVisibility.ts");
 const { buildCompatMap, isModelHiddenFn } =
   await import("../../src/app/(dashboard)/dashboard/providers/[id]/providerPageHelpers.ts");
@@ -82,13 +83,15 @@ test("premise: the dashboard's chat-scoped PATCH stores hiddenModalities.chat, n
   assert.equal(response.status, 200);
 
   const [override] = await readOverrides();
+  const [stored] = getModelCompatOverrides(PROVIDER);
   assert.ok(override, "the chat-scoped hide must persist an override row");
   assert.equal(override.hiddenModalities?.chat, true);
   assert.equal(
-    Object.prototype.hasOwnProperty.call(override, "isHidden"),
+    Object.prototype.hasOwnProperty.call(stored, "isHidden"),
     false,
     "the scoped write must not set the legacy all-modalities flag"
   );
+  assert.equal(override.isHidden, true, "the dashboard response projects chat-scoped visibility");
 });
 
 test("the dashboard reader reports a model hidden through the chat-scoped toggle", async () => {

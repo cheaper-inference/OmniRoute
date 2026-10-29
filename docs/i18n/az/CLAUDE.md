@@ -12,17 +12,18 @@ vahid həqiqət mənbəyidir (arxitektura, konvensiyalar, testlər, keyfiyyət y
 etməyin. Aşağıdakıların hamısı YALNIZ Claude Code üçün keçərlidir — bunlar `AGENTS.md` faylında
 artıq müəyyən edilmiş qaydaların əməliyyat dəqiqləşdirmələridir.
 
-## Worktree izolyasiyası — Claude Code xüsusiyyətləri
+## Worktree izolyasiyası — Claude Code-a xas məqamlar
 
-Məcburi worktree protokolunun tam təsviri (əsas branch-in təsdiqlənməsi, `.claude/worktrees/`
-kanonik yolu, `cp -al` node_modules, təmizləmə qaydaları) `AGENTS.md` → Git Workflow → "Worktree
-isolation" bölməsindədir. Claude Code-a xas məqamlar:
+Tam məcburi worktree protokolu (baza branch-inin təsdiqi, `.claude/worktrees/` kanonik
+yolu, `cp -al` node_modules, sökmə qaydaları)
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) faylındadır (xülasəsi `AGENTS.md` →
+Git iş axını → "Worktree izolyasiyası" bölməsində verilib). Claude Code-a xas məqamlar:
 
-- Əgər operator əsas branch-i artıq bildirməyibsə, onu `AskUserQuestion` vasitəsilə təsdiqləyin
-  (Sərt Qayda #19).
-- Daxili `EnterWorktree` alətinə üstünlük verin — o, worktree-ləri artıq `.claude/worktrees/`
-  (kanonik yol) altında yaradır. Worktree-ni sənədləşdirilmiş `git worktree add` əmri ilə yaradın,
-  sonra `path` dəyəri ilə `EnterWorktree` çağırın.
+- Operatorla baza branch-ini `AskUserQuestion` vasitəsilə təsdiqləyin (Sərt Qayda #19) — əgər
+  onlar bunu artıq sizə bildirməyiblərsə.
+- Nativ `EnterWorktree` alətinə üstünlük verin — o, worktree-ləri artıq
+  `.claude/worktrees/` altında yaradır (kanonik yol). Worktree-ni sənədləşdirilmiş `git worktree add`
+  əmri ilə yaradın, sonra `EnterWorktree`-ni onun `path` parametri ilə çağırın.
 
 ## Sessiyalararası təhlükəsizlik — Claude Code xüsusiyyətləri
 

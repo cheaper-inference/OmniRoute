@@ -16,61 +16,62 @@ Fitur penyamaran tersedia agar OmniRoute dapat bertindak sebagai lapisan kompati
 
 ---
 
-## Lapisan Sidik Jari TLS
+## Lapisan Fingerprinting TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Sesi `wreq-js` persisten dibuat secara lazy untuk setiap cakupan akun dan proksi yang telah di-resolve. `TlsClient` pada cakupan proses menampung paling banyak 128 sesi yang menyamar sebagai **Chrome 124 di macOS** untuk upstream di belakang Cloudflare. `TlsClient.fetch()` menerapkan mekanisme fail-closed ketika runtime native tidak tersedia; pemanggil dapat secara eksplisit memilih fallback di luar wrapper ini.
+Sesi `wreq-js` persisten dibuat secara lazy berdasarkan cakupan akun dan proxy yang telah di-resolve. `TlsClient` pada cakupan proses mengelola pool maksimal 128 sesi yang menyamar sebagai **Chrome 124 di macOS** untuk upstream di belakang Cloudflare. `TlsClient.fetch()` gagal secara tertutup ketika runtime native tidak tersedia; pemanggil dapat secara eksplisit memilih fallback di luar wrapper ini.
 
 - Profil sesi: `browser: "chrome_124", os: "macos"`
-- Resolusi proksi (prioritas): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (juga huruf kecil)
+- Resolusi proxy (prioritas): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (juga huruf kecil)
 - Batas waktu: `TLS_CLIENT_TIMEOUT_MS` (diwarisi dari `FETCH_TIMEOUT_MS`, default 600000)
 - Response `wreq-js` kompatibel dengan fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
 - Watchdog byte pertama (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  diselesaikan segera setelah header upstream tiba, sehingga `TLS_CLIENT_TIMEOUT_MS` saja tidak dapat membatasi
-  body yang tidak pernah menghasilkan byte pertama. `guardTlsFirstByte()` mengadu `read()` pertama pada body
-  dengan `TLS_FIRST_BYTE_WATCHDOG_MS` (default `10000`, `0` menonaktifkannya); body yang sehat tidak
-  terpengaruh, sedangkan body yang macet membatalkan reader wreq dan memungkinkan logika
-  fallback TLS milik `proxyFetch` yang sudah ada beralih ke dispatcher langsung/proksi (permintaan yang tidak aman
-  untuk diputar ulang, misalnya POST dengan body, tetap menghasilkan error alih-alih dicoba kembali secara diam-diam).
+  selesai segera setelah header upstream tiba, sehingga `TLS_CLIENT_TIMEOUT_MS` saja tidak dapat membatasi
+  body yang tidak pernah menghasilkan byte pertama. `guardTlsFirstByte()` menjalankan race antara `read()`
+  pertama pada body dan `TLS_FIRST_BYTE_WATCHDOG_MS` (default `10000`, `0` menonaktifkannya); body yang sehat
+  tidak terpengaruh, sedangkan body yang macet membatalkan reader wreq dan memungkinkan logika
+  fallback TLS yang sudah ada pada `proxyFetch` beralih ke dispatcher langsung/proxy (permintaan yang tidak
+  aman untuk diputar ulang, misalnya POST dengan body, tetap melempar error alih-alih dicoba ulang secara diam-diam).
 
-### Transportasi penyedia berbasis cookie web — wreq-js 3.2.0
+### Transport penyedia cookie web — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` adalah adaptor bersama untuk lima transportasi
-cookie web khusus di bawah ini. Setiap wrapper penyedia yang tipis memilih profil browser/OS. Adaptor tersebut
-menggunakan loader runtime wreq tunggal dan pool transportasi di `open-sse/utils/tlsClient.ts`, dengan kunci berdasarkan
-profil + OS + proksi yang telah di-resolve, sementara setiap permintaan menggunakan `cookieMode: "ephemeral"`. Dengan demikian, akun dan
-permintaan berbagi koneksi pada tingkat transportasi, tetapi tidak pernah berbagi sesi wreq atau cookie jar.
+`open-sse/services/tlsClientBase.ts` adalah adapter bersama untuk lima transport cookie web khusus
+di bawah ini. Setiap wrapper penyedia yang tipis memilih profil browser/OS. Adapter menggunakan
+loader runtime wreq tunggal dan pool transport di `open-sse/utils/tlsClient.ts`, dengan kunci
+berdasarkan profil + OS + proxy yang telah di-resolve, sementara setiap permintaan menggunakan
+`cookieMode: "ephemeral"`. Oleh karena itu, akun dan permintaan berbagi koneksi tingkat transport,
+tetapi tidak pernah berbagi sesi wreq atau cookie jar.
 
 | Penyedia   | Profil        | OS yang Diemulasi | Kebijakan EOF Stream                  |
 | ---------- | ------------- | ----------------- | ------------------------------------- |
 | Claude     | `chrome_146`  | Linux             | sertakan `[DONE]`                     |
-| Perplexity | `firefox_148` | macOS             | sertakan `event: end_of_stream`       |
+| Perplexity | `firefox_151` | macOS             | sertakan `event: end_of_stream`       |
 | Grok       | `chrome_146`  | Linux             | kecualikan `[DONE]`                   |
 | Notion     | `chrome_146`  | Windows           | sertakan `[DONE]`                     |
-| LMArena    | `chrome_146`  | Windows           | tanpa sentinel; tutup saat EOF native |
+| LMArena    | `chrome_146`  | Windows           | tanpa sentinel; tutup pada EOF native |
 
-- Streaming menggunakan `ReadableStream` response native secara langsung; tidak ada file sementara atau sidecar yang
+- Streaming menggunakan `ReadableStream` dari response native secara langsung; tidak ada file sementara atau sidecar yang
   dibuat.
-- Hingga 256 byte awal diperiksa sebelum stream diekspos. Penyedia SSE melakukan buffering terhadap error non-SSE;
-  Grok/LMArena memetakan challenge Cloudflare ke `403` dan interstisial HTML ke `502`.
-- Batas waktu permintaan native tetap dibungkus oleh tenggat mutlak JS. Kondisi hang menginvalidasi
-  dan menutup hanya transportasi profil/OS/proksi yang terdampak sebelum permintaan berikutnya membuatnya kembali.
-- Prioritas resolusi proksi adalah `proxyUrl` per pemanggilan → konteks akun/dasbor dalam cakupan permintaan →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (termasuk varian huruf kecil). Error resolusi menerapkan
-  fail-closed alih-alih membocorkan koneksi langsung. LMArena sengaja melakukan resolusi terhadap `arena.ai`.
+- Hingga 256 byte awal diperiksa sebelum stream diekspos. Penyedia SSE melakukan buffering untuk error non-SSE;
+  Grok/LMArena memetakan challenge Cloudflare ke `403` dan interstitial HTML ke `502`.
+- Batas waktu permintaan native tetap dibungkus oleh tenggat waktu absolut JS. Hang akan membatalkan
+  dan menutup hanya transport profil/OS/proxy yang terdampak sebelum permintaan berikutnya membuatnya kembali.
+- Prioritas resolusi proxy adalah `proxyUrl` per pemanggilan → konteks akun/dashboard dalam cakupan permintaan →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (termasuk varian huruf kecil). Error resolusi gagal
+  secara tertutup alih-alih membocorkan koneksi langsung. LMArena secara sengaja melakukan resolusi terhadap `arena.ai`.
 - `byteResponse` mengembalikan URL `data:` dengan tipe konten tanpa kerusakan UTF-8.
 - Error yang digunakan adalah `TlsClientUnavailableError` (paket/addon tidak tersedia), `TlsClientHangError`
-  (tenggat terlampaui), dan `WreqTransportCapacityError` (kode error kapasitas sesi bersama)
-  ketika seluruh 128 slot profil/OS/proksi terbatas sedang aktif atau dalam proses ditutup.
+  (tenggat waktu terlampaui), dan `WreqTransportCapacityError` (kode error kapasitas sesi bersama)
+  ketika seluruh 128 slot profil/OS/proxy yang dibatasi sedang aktif atau dalam proses ditutup.
 
-Sesi `TlsClient` generik di atas tetap dikhususkan untuk status cookie persisten yang didukung browser.
+Sesi generik `TlsClient` di atas tetap dikhususkan untuk status cookie persisten yang didukung browser.
 Kedua jalur menggunakan kembali satu loader modul wreq yang di-cache dan hook siklus hidup proses; pool keduanya tetap
-terpisah karena masa berlaku cookie-nya memang sengaja dibuat berbeda.
+terpisah karena masa aktif cookie masing-masing sengaja dibuat berbeda.
 
 Profil-profil tersebut didukung oleh paket yang versinya dikunci, tetapi penerimaan WAF aktual dapat berubah secara independen
-dari pengujian kontrak lokal. Validasi perubahan sidik jari terhadap akun live yang diotorisasi secara eksplisit
-sebelum mengeklaim kesetaraan dengan browser upstream.
+dari pengujian kontrak lokal. Validasi perubahan fingerprint terhadap akun aktif yang secara eksplisit diotorisasi
+sebelum mengklaim paritas dengan browser upstream.
 
 ---
 
@@ -119,7 +120,7 @@ Diterapkan pada: blok `system`, semua `messages[].content`, dan `tools[].descrip
 
 Untuk relay Anthropic pihak ketiga yang hanya menerima lalu lintas "Claude Code asli":
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` secara bawaan
@@ -241,7 +242,7 @@ Semua endpoint MITM memerlukan autentikasi manajemen (`requireCliToolsAuth`). Ka
 
 | Variabel                 | Default                                                         |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

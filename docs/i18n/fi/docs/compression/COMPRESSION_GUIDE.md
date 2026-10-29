@@ -32,91 +32,91 @@ Asiakaspyyntö
 
 ## Pakkaustilat
 
-### Pois käytöstä
+### Off
 
-Pakkausta ei käytetä. Kaikki viestit välitetään muuttumattomina.
+Pakkausta ei käytetä. Kaikki viestit menevät läpi muuttumattomina.
 
-### Kevyt tila (~15 %:n säästö, <1 ms:n viive)
+### Lite-tila (~15 % säästö, <1 ms viive)
 
-Turvallisin tila — ei semanttisia muutoksia, vain muotoilun siivousta:
+Turvallisin tila — ei lainkaan semanttisia muutoksia, vain muotoilun siistimistä:
 
-| Tekniikka                | Kuvaus                                                              |
-| ------------------------ | ------------------------------------------------------------------- |
-| `collapseWhitespace`     | Yhdistä peräkkäiset tyhjät rivit ja poista rivien lopun välilyönnit |
-| `dedupSystemPrompt`      | Poista päällekkäiset järjestelmäviestit                             |
-| `compressToolResults`    | Pakkaa monisanaiset työkalu-/funktiotulosteet                       |
-| `removeRedundantContent` | Poista toistetut ohjeet                                             |
-| `replaceImageUrls`       | Lyhennä base64-kuvadatan URI-tunnisteita                            |
+| Tekniikka                | Kuvaus                                                |
+| ------------------------ | ----------------------------------------------------- |
+| `collapseWhitespace`     | Yhdistää peräkkäiset tyhjät rivit ja loppuvälilyönnit |
+| `dedupSystemPrompt`      | Poistaa päällekkäiset järjestelmäviestit              |
+| `compressToolResults`    | Pakkaa monisanaiset työkalu-/funktiotulosteet         |
+| `removeRedundantContent` | Poistaa toistuvat ohjeet                              |
+| `replaceImageUrls`       | Lyhentää base64-kuvien data-URI:t                     |
 
-**Soveltuu parhaiten:** Jatkuvaan käyttöön ja turvallisuuskriittisiin työnkulkuihin.
+**Sopii parhaiten:** Jatkuvaan käyttöön ja turvallisuuskriittisiin työnkulkuihin.
 
-### Vakiotila (~30 %:n säästö)
+### Standard-tila (~30 % säästö)
 
-Inspiraationa [Caveman](https://github.com/JuliusBrussee/caveman) — poistaa täytesanoja ja monisanaisia ilmaisuja merkityksen säilyttäen:
+[Caveman](https://github.com/JuliusBrussee/caveman)-projektin innoittama — poistaa täytesanat ja monisanaiset ilmaisut merkitystä säilyttäen:
 
-- Poistaa täytesanoja ("ole hyvä", "luulen", "periaatteessa", "itse asiassa")
-- Tiivistää monisanaisia ilmauksia ("siinä tarkoituksessa, että" → "jotta", "sen seurauksena, että" → "koska")
-- Poistaa kohteliaan epäröinnin ("Voisitko...", "Jos vain mitenkään voisit...")
-- Yli 30 koodauskehotteille hienosäädettyä säännöllisen lausekkeen sääntöä
+- Poistaa täytesanat ("please", "I think", "basically", "actually")
+- Tiivistää monisanaisia ilmauksia ("in order to" → "to", "as a result of" → "because")
+- Poistaa kohteliaat varoittelevat muotoilut ("Would you mind...", "If you could possibly...")
+- Yli 30 regex-sääntöä, jotka on viritetty koodauskehotteisiin
 
-**Soveltuu parhaiten:** Päivittäisiin koodaustyönkulkuihin ja kustannustietoisille tiimeille.
+**Sopii parhaiten:** Päivittäisiin koodaustyönkulkuihin ja kustannustietoisille tiimeille.
 
-### Aggressiivinen tila (~50 %:n säästö)
+### Aggressiivinen tila (~50 % säästö)
 
-Älykäs historian hallinta pitkiä istuntoja varten:
+Älykäs historianhallinta pitkiin istuntoihin:
 
-- **Viestien ikäännytys** — vanhempia viestejä pakataan asteittain enemmän
-- **Työkalutulosteiden pakkaus** — pitkät työkalutulosteet katkaistaan tai jätetään pois (ensimmäiset/viimeiset rivit,
-  osumarivien suodatus, JSON-avainten tiivistäminen)
-- **Rakenteellisen eheyden suojaukset** — varmistaa, että `tool_use`- ja `tool_result`-parit pysyvät yhdenmukaisina
-- **Konteksti-ikkunan huomiointi** — noudattaa mallikohtaisia tunnisterajoja
+- **Viestien ikääntyminen** — vanhempia viestejä pakataan asteittain enemmän
+- **Työkalutulosten pakkaus** — pitkät työkalutulosteet katkaistaan tai karsitaan (ensimmäiset/viimeiset rivit,
+  osumarivien suodatus, JSON-avainten tiivistys)
+- **Rakenteellisen eheyden suojaukset** — varmistaa, että `tool_use` + `tool_result` -parit pysyvät yhtenäisinä
+- **Konteksti-ikkunan tietoisuus** — kunnioittaa mallikohtaisia token-rajoja
 
-**Soveltuu parhaiten:** Pitkiin virheenkorjausistuntoihin ja suuriin koodikantoihin.
+**Sopii parhaiten:** Pitkittyneisiin virheenkorjausistuntoihin ja suuriin koodikantoihin.
 
-### Ultra-tila (~75 %:n säästö)
+### Ultra-tila (~75 % säästö)
 
-Maksimaalinen pakkaus tilanteisiin, joissa tunnisteiden määrä on kriittinen:
+Maksimaalinen pakkaus token-kriittisiin tilanteisiin:
 
-- **Heuristinen karsinta** — pisteytykseen perustuva proosan tunnisteiden karsinta
-- **Rakenteen säilyttäminen** — aidatut koodilohkot, upotettu koodi, URL-osoitteet ja tunnisteet
-  korvataan paikkamerkeillä ja liitetään takaisin sanatarkasti, eikä niitä koskaan karsita
+- **Heuristinen karsinta** — pisteytykseen perustuva proosan token-karsinta
+- **Rakenteen säilyttäminen** — aidatut koodilohkot, rivinsisäinen koodi, URL-osoitteet ja tunnisteet
+  suojataan paikkamerkeillä ja ommellaan takaisin sanatarkasti; niitä ei koskaan karsita
 - **Valinnainen SLM-taso** — pieni paikallinen malli voi hienosäätää karsintaa, kun se on määritetty
-- Riippumaton aggressiivisesta tilasta: se ei suorita viestien ikäännytystä, työkalutulosteiden pakkausta
-  tai varatiivistäjää (vain SLM-tason vika voi ohjata varakäsittelyn
+- Riippumaton aggressiivisesta tilasta: se ei suorita viestien ikääntymistä, työkalutulosten pakkausta
+  tai varayhteenvetajaa (vain SLM-tason virhe voi ohjata varakierroksen
   aggressiivisen tilan kautta)
 
-**Soveltuu parhaiten:** Kun kontekstirajat ylittyvät toistuvasti.
+**Sopii parhaiten:** Kun törmäät kontekstirajoihin toistuvasti.
 
-### RTK-tila (60–90 %:n ylävirran vaihteluväli)
+### RTK-tila (60–90 % upstream-alueella)
 
-RTK-tila on optimoitu koodausagenttien istunnoissa esiintyville monisanaisille työkalutulosteille:
+RTK-tila on optimoitu monisanaisille työkalutulosteille, joita esiintyy koodausagentti-istunnoissa:
 
-- Tunnistaa komento-/tulosteluokkia, kuten `git status`, `git diff`, `git log`, testien suorittajat,
-  TypeScript/Vite/Webpack-koontiversiot, ESLint/Biome/Prettier, npm-tarkastukset/-asennukset, Docker-lokit, infrastruktuurin
-  tulosteet ja yleiset komentotulkin tulosteet
+- Tunnistaa komento-/tulosteluokkia kuten `git status`, `git diff`, `git log`, testiajurit,
+  TypeScript/Vite/Webpack-buildit, ESLint/Biome/Prettier, npm audit/install -komennot, Docker-lokit, infra-
+  tulosteet ja yleiset komentotulosteet
 - Käyttää JSON-suodatinpaketteja hakemistosta `open-sse/services/compression/engines/rtk/filters/`
-- Tuo RTK TOML schema v1 -suodattimia projektin tai yleisistä `filters.toml`-tiedostoista sekä käyttää upotettujen testien
-  validointia ja projektitiedostojen luottamusrajoitusta
-- Sisältää 55 sisäänrakennettua suodatinta ja upotetut vahvistusnäytteet
-- Poistaa ANSI-ohjaussekvenssit, edistymispalkit, toistetut rivit ja muun ei-toiminnallisen kohinan
-- Säilyttää epäonnistumiset, virheet, varoitukset, muuttuneet tiedostot, yhteenvedot ja pitkän tulosteen loppuosan
-- Tukee luottamusrajoitettuja projektisuodattimia, yleisiä suodattimia ja valinnaista peitetyn raakatulosteen palautusta
+- Tuo RTK TOML schema v1 -suodattimia projektin tai globaaleista `filters.toml`-tiedostoista, sisäänrakennetulla
+  testivarmennuksella ja luottamusporttauksella projektitiedostoille
+- Sisältää 56 sisäänrakennettua suodatinta varmennusesimerkeillä
+- Poistaa ANSI-ohjaussekvenssit, edistymispalkit, toistuvat rivit ja kohinan, joka ei vaadi toimia
+- Säilyttää virheet, varoitukset, muutetut tiedostot, yhteenvedot ja pitkien tulosteiden loppuosat
+- Tukee luottamusportattuja projektisuodattimia, globaaleja suodattimia ja valinnaista sensuroidun raakatulosteen palautusta
 
-**Soveltuu parhaiten:** Agentti-istuntoihin, joiden transkripteissä on komentotulkin, koonnin, testien, gitin, grepin ja tiedostotulosteiden sisältöä.
+**Sopii parhaiten:** Agentti-istuntoihin, joissa on komentotulkki-, build-, testi-, git-, grep- ja tiedostotulostelokeja.
 
-### Pinottu tila (78–95 % soveltuvasta sisällöstä)
+### Stacked-tila (78–95 % soveltuvalla alueella)
 
-Pinottu tila suorittaa useita pakkausmoottoreita deterministisessä järjestyksessä. Oletusputki on:
+Stacked-tila ajaa useita pakkausmoottoreita deterministisessä järjestyksessä. Oletusputki on:
 
 ```txt
 RTK -> Caveman
 ```
 
-Tämä järjestys tiivistää ensin pääte-/työkalutulosteen ja käyttää sitten Caveman-moottorin semanttista tiivistystä
-jäljellä olevaan luonnollisen kielen kehotteeseen. Pinotut putket voidaan määrittää yleisesti tai
-reititysyhdistelmiin liitettyjen pakkausyhdistelmien kautta.
+Tämä järjestys pitää pääte-/työkalutulosteet ensin kompakteina, minkä jälkeen Cavemanin semanttinen
+tiivistys kohdistetaan jäljelle jäävään luonnollisen kielen kehotteeseen. Pinotut putket voidaan
+määrittää globaalisti tai reititysyhdistelmiin liitettyjen pakkausyhdistelmien kautta.
 
-**Soveltuu parhaiten:** Sekalaiseen kontekstiin, jossa on suuria työkalulokeja sekä ihmisen antamia ohjeita tai avustajan yhteenvetoja.
+**Sopii parhaiten:** Sekalaiseen kontekstiin, jossa on suuria työkalulokeja sekä ihmisten ohjeita tai avustajan yhteenvetoja.
 
 ---
 
@@ -292,7 +292,7 @@ salasanat, tokenit ja salaisuudet ennen kuin mitään tallennetaan pysyvästi.
 
 ## Pakkaustilastot
 
-Jokainen pakattu pyyntö sisältää tilastot palvelinlokeissa:
+Jokainen pakattu pyyntö sisältää tilastot palvelimen lokeissa:
 
 ```json
 {
@@ -332,34 +332,37 @@ RTK-tila on saanut inspiraationsa **[RTK - Rust Token Killer](https://github.com
 
 ## Edistyneet pakkausjärjestelmät
 
-Edellä kuvattujen 7 tilan lisäksi (lähde hyväksyy myös `codex-responses`- ja
-`omniglyph`-tilat, joita tämä opas ei käsittele) seuraavissa osioissa käsitellään ominaisuuksia,
-jotka toimivat näiden tilojen sisällä tai rinnalla: työkalutulosten pakkaus ja asteittainen vanhentaminen
-ovat aggressiivisen moottorin vaiheet 1 ja 2 (Aggressive-tila ja pinotun käsittelyketjun
-`aggressive`-vaihe), pinottu käsittelyketju määrittää Stacked-tilan toiminnan, välimuistitietoinen pakkaus
-alentaa `aggressive`- ja `ultra`-tilat `standard`-tilaan välimuistia käyttävillä palveluntarjoajilla pakkauksen
-ollessa käytössä, ja Caveman-tulostila sekä tulostyylit ovat oletusarvoisesti poissa käytöstä olevia,
-valinnaisia järjestelmäkehoteohjeita, jotka muokkaavat mallin tulostetta pyynnön pakkaamisen sijaan.
+Edellä kuvattujen seitsemän tilan lisäksi (lähdekoodi hyväksyy myös `codex-responses`- ja
+`omniglyph`-tilat, joita tämä opas ei käsittele) alla olevissa osioissa käsitellään
+ominaisuuksia, jotka toimivat näiden tilojen sisällä tai rinnalla: työkalutulosten pakkaus
+ja progressiivinen vanhentaminen ovat aggressiivisen moottorin vaiheet 1 ja 2
+(Aggressive-tila ja pinotun putken `aggressive`-vaihe), pinottu putki määrittää
+Stacked-tilan toiminnan, välimuistitietoinen pakkaus alentaa `aggressive`- ja `ultra`-tilat
+`standard`-tilaan välimuistia käyttäville palveluntarjoajille pakkauksen ollessa käytössä,
+ja luolamiestulostustila sekä tulostustyylit ovat erikseen käyttöön otettavia
+järjestelmäkehotteen ohjeita, jotka ovat oletusarvoisesti poissa käytöstä ja muokkaavat
+mallin tulostetta pyynnön pakkaamisen sijaan.
 
 ### Välimuistitietoinen pakkaus
 
-Jotkin palveluntarjoajat (kuten Anthropic kehotteiden välimuistituksella) tukevat **kehotteiden välimuistitusta**,
-jonka avulla ne voivat tallentaa kehotteen osia välimuistiin kustannusten ja viiveen vähentämiseksi. Kun
-välimuisti on käytössä, aggressiivinen pakkaus voi itse asiassa **heikentää** suorituskykyä,
-koska se muuttaa välimuistiin tallennettuja tokeneita ja mitätöi välimuistin.
+Jotkin palveluntarjoajat (kuten Anthropic kehotteiden välimuistiin tallennuksen kanssa)
+tukevat **kehotteiden välimuistiin tallennusta**, jonka avulla ne voivat tallentaa osia
+kehotteesta välimuistiin kustannusten ja viiveen vähentämiseksi. Kun välimuistiin tallennus
+on käytössä, aggressiivinen pakkaus voi itse asiassa **heikentää** suorituskykyä, koska se
+muuttaa välimuistiin tallennettuja tokeneita ja mitätöi siten välimuistin.
 
 `cachingAware.ts`-moduuli ratkaisee tämän **tunnistamalla välimuistikontekstin** ja
 **mukauttamalla pakkausstrategiaa** sen mukaisesti.
 
-#### Näin se toimii
+#### Toimintaperiaate
 
-1. **Tunnista välimuistikonteksti** — Etsii pyynnön rungosta `cache_control`-merkintöjä
-2. **Tunnista välimuistia tukevat palveluntarjoajat** — Tarkistaa, tukeeko kohdepalveluntarjoaja välimuistitusta
-3. **Mukauta strategiaa** — Alentaa `aggressive`/`ultra`-tilan `standard`-tilaan välimuistia tukevilla palveluntarjoajilla
-4. **Ohita järjestelmäkehote** — Järjestelmäkehotteet tallennetaan yleensä välimuistiin, joten niitä ei pakata
+1. **Välimuistikontekstin tunnistus** — Etsii pyynnön rungosta `cache_control`-merkintöjä
+2. **Välimuistia käyttävien palveluntarjoajien tunnistus** — Tarkistaa, tukeeko kohdepalveluntarjoaja välimuistiin tallennusta
+3. **Strategian mukautus** — Alentaa `aggressive`/`ultra`-tilan `standard`-tilaan välimuistia käyttävillä palveluntarjoajilla
+4. **Järjestelmäkehotteen ohitus** — Järjestelmäkehotteet tallennetaan yleensä välimuistiin, joten niitä ei pakata
 
-Strategia-apufunktio palauttaa myös `deterministicOnly`-lipun, mutta suunnitelman muodostin käyttää
-vain strategiaa — mikään myöhemmän vaiheen osa ei tällä hetkellä lue lippua.
+Strategia-apufunktio palauttaa myös `deterministicOnly`-lipun, mutta suunnitelman muodostaja
+käyttää vain strategiaa — tällä hetkellä mikään myöhempi vaihe ei lue lippua.
 
 #### Koodiesimerkki
 
@@ -382,28 +385,30 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 // → { strategy: "standard", skipSystemPrompt: true, deterministicOnly: true }
 ```
 
-#### Milloin ominaisuutta käytetään
+#### Milloin käyttää
 
-Välimuistitietoinen pakkaus on **aina käytössä** — määrityksiä ei tarvita. Se aktivoituu aina,
-kun pakkaus on käytössä ja kohdepalveluntarjoaja tukee kehotteiden välimuistitusta (Anthropic, OpenAI
-jne.); eksplisiittisiä `cache_control`-merkintöjä ei vaadita — pelkkä välimuistia tukeva palveluntarjoaja
-käynnistää tilan alentamisen, eivätkä pelkät merkinnät koskaan tee niin (merkintöjen tunnistus tuottaa
-välimuistin telemetriatietoja eikä vaikuta strategiapäätökseen).
+Välimuistitietoinen pakkaus on **aina käytössä** — määrityksiä ei tarvita. Se aktivoituu
+aina, kun pakkaus on käytössä ja kohdepalveluntarjoaja tukee kehotteiden välimuistiin
+tallennusta (Anthropic, OpenAI jne.); eksplisiittisiä `cache_control`-merkintöjä ei tarvita
+— pelkkä välimuistia käyttävä palveluntarjoaja käynnistää tilan alentamisen, eivätkä
+merkinnät yksin koskaan tee niin (merkintöjen tunnistusta käytetään välimuistin
+telemetriaan, ei strategiapäätökseen).
 
-### Asteittainen vanhentaminen
+### Progressiivinen vanhentaminen
 
-Pitkiin keskusteluihin kertyy useita viestikierroksia, mutta vanhemmat kierrokset muuttuvat
-vähemmän olennaisiksi. `progressiveAging.ts`-moduuli **heikentää viestejä niiden kierrosetäisyyden perusteella**
-(etäisyys mitataan keskustelun lopusta). Julkaistuilla oletusarvoilla
-(`verbatim: 2, light: 2, moderate: 3`):
+Pitkiin keskusteluihin kertyy monia viestikierroksia, mutta vanhemmat kierrokset muuttuvat
+vähemmän merkityksellisiksi. `progressiveAging.ts`-moduuli **pelkistää viestejä niiden
+kierrosetäisyyden perusteella** (etäisyys mitataan keskustelun lopusta). Toimitukseen
+sisältyvillä oletusarvoilla (`verbatim: 2, light: 2, moderate: 3`):
 
-- **Viimeiset 2 vuoroa (etäisyys ≤ 2)**: Säilytetään sanatarkasti
+- **Viimeiset 2 kierrosta (etäisyys ≤ 2)**: Säilytetään sanatarkasti
 - **Etäisyys 3**: Luolamiespakkaus (täytesanojen poisto)
-- **Etäisyys 4+**: Avustajan viestit tiivistetään; käyttäjän viesteistä säilytetään vain ensimmäinen
-  rivi, enintään 120 merkkiä; muiden roolien viestejä ei muuteta. Järjestelmäkehotteet, jo vanhennetut
-  viestit ja käyttäjän uusin viesti säilytetään aina sanatarkasti etäisyydestä riippumatta.
-  Mitään ei poisteta kokonaan, eikä `light`-vyöhykettä voi saavuttaa toimitukseen sisältyvillä oletusarvoilla
-  (`light` on sama kuin `verbatim`).
+- **Etäisyys 4+**: Avustajan viestit tiivistetään; käyttäjän viesteistä säilytetään vain
+  ensimmäinen rivi, enintään 120 merkkiä; muihin rooleihin ei kosketa. Järjestelmäkehotteet,
+  jo vanhennetut viestit ja viimeisin käyttäjän viesti säilytetään aina sanatarkasti
+  etäisyydestä riippumatta. Mitään ei poisteta kokonaan, ja `light`-alue
+  ei ole saavutettavissa toimitukseen sisältyvillä oletusarvoilla (`light` on yhtä suuri
+  kuin `verbatim`).
 
 #### Koodiesimerkki
 
@@ -414,14 +419,14 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... vielä 50 vuoroa ...
+  // ... vielä 50 kierrosta ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // viimeiset 3 vuoroa: sanatarkasti
+  verbatim: 3, // viimeiset 3 kierrosta: sanatarkasti
   light: 8, // etäisyys <= 8: kevyt pakkaus
   moderate: 20, // etäisyys <= 20: luolamiespakkaus
-  fullSummary: 5, // tyyppi edellyttää tätä, mutta vyöhykekoodi ei lue sitä
+  fullSummary: 5, // tyyppi edellyttää tätä, mutta aluejakokoodi ei lue sitä
   // etäisyys > 20: tiivistetään (avustaja) / ensimmäinen rivi säilytetään (käyttäjä)
 });
 
@@ -431,51 +436,53 @@ const { messages: aged, saved } = applyAging(messages, {
 #### Milloin käyttää
 
 Progressiivinen vanhentaminen on **aina käytössä** `aggressive`-tilassa — se on
-`compressAggressive()`-toiminnon vaihe 2. Ultra-tila ei suorita sitä. Se on
+`compressAggressive()`-funktion vaihe 2. Ultra-tila ei suorita sitä. Se on
 erityisen tehokas seuraavissa tapauksissa:
 
-- Pitkäkestoiset koodausistunnot
+- Pitkäkestoiset ohjelmointi-istunnot
 - Useita päiviä kestävät keskustelut
 - Agenttipohjaiset työnkulut, joissa on paljon työkalukutsuja
 
-### Luolamiesvastaustila
+### Luolamiestulostustila
 
-Luolamiesvastaustila lisää **järjestelmäkehotteeseen ohjeita**, jotka pyytävät itse mallia
-tuottamaan niukkaa tekstiä — `lite`-taso pyytää tiiviitä vastauksia kokonaisia virkkeitä käyttäen, `full`
-pyytää sitä "vastaamaan niukasti kuin älykäs luolamies" ja `ultra` pyytää sähkösanomatyylistä tekstiä;
-ohjeet vain pyytävät tätä, eivätkä ne voi taata lopputulosta. Pyynnöt saavat ohjeet
-`applyOutputStyles()`-toiminnon kautta (`open-sse/services/compression/outputStyles/apply.ts`):
-`open-sse/handlers/chatCore.ts` ratkaisee valinnan ensin taaksepäin yhteensopivuutta tukevalla sovittimella
-(`resolveOutputStyleSelection()` tiedostossa
+Luolamiestulostustila lisää **järjestelmäkehotteeseen ohjeita**, jotka pyytävät mallia
+tuottamaan ytimekästä tekstiä — `lite`-taso pyytää lyhyitä vastauksia, joissa säilytetään
+kokonaiset virkkeet, `full` pyytää sitä "vastaamaan ytimekkäästi kuin älykäs luolamies",
+ja `ultra` pyytää sähkösanomamaista tulostetta; ohjeet vain pyytävät tätä, eivätkä voi
+taata sitä. Pyynnöt saavat nämä ohjeet `applyOutputStyles()`-funktion kautta
+(`open-sse/services/compression/outputStyles/apply.ts`):
+`open-sse/handlers/chatCore.ts` ratkaisee ensin valinnan taaksepäin yhteensopivalla
+sovituksella (`resolveOutputStyleSelection()` tiedostossa
 `open-sse/services/compression/outputStyles/backCompat.ts`), joka `outputStyles`-valinnan
-ollessa tyhjä yhdistää käytössä olevan `cavemanOutputMode`-asetuksen `terse-prose`-vastaustyyliin
-tasolla `cavemanOutputMode.intensity` (katso Taaksepäin yhteensopivuus jäljempänä); tyhjästä poikkeavaa `outputStyles`-valintaa
-käytetään sellaisenaan, jolloin `cavemanOutputMode.enabled`- ja `intensity`-asetuksilla ei enää ole
-vaikutusta, mutta sen `autoClarity`-valitsin on yhä voimassa. `outputMode.ts` sisältää
-ohjetekstit (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), sisällön ohituksen ja
-sijoitteluaputoiminnon, jota lisäys käyttää; sen omalla `applyCavemanOutputMode()`-lisäystoiminnolla ei ole
+ollessa tyhjä yhdistää käyttöön otetun `cavemanOutputMode`-asetuksen `terse-prose`-tulostustyyliin
+tasolla `cavemanOutputMode.intensity` (katso Taaksepäin yhteensopivuus alta);
+ei-tyhjää `outputStyles`-valintaa käytetään sellaisenaan, minkä jälkeen
+`cavemanOutputMode.enabled`- ja `intensity`-asetuksilla ei ole vaikutusta, mutta sen
+`autoClarity`-valitsin on edelleen voimassa. `outputMode.ts` sisältää ohjetekstit
+(`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), sisällön ohituksen ja sijoittelun apufunktion,
+joita lisäys käyttää; sen omalla `applyCavemanOutputMode()`-lisäystoiminnolla ei ole
 tuotantokäytössä kutsuja.
 
 #### Toimintaperiaate
 
-Tämä tila ei pakkaa syötettä. Se lisää järjestelmäkehotteeseen ohjelohkon
-(katso jäljempänä kohta Kuinka lisäys toimii), ja pyynnölle valittu syötteen pakkaustila
-suoritetaan silti tämän jälkeen rungolle, joka nyt sisältää kyseisen lohkon. Ennen
-kaikille tasoille yhteistä, niiden lopussa olevaa rajoja koskevaa lauseketta englanninkielinen `full`-taso kuuluu näin:
+Tämä tila ei pakkaa syötettä. Se lisää ohjelohkon järjestelmäkehotteeseen
+(katso alta, miten injektointi toimii), ja pyynnölle valittu syötteen pakkaustila
+suoritetaan silti myöhemmin lohkon sisältävälle rungolle. Ennen yhteistä
+rajoituslauseketta, johon jokainen taso päättyy, englanninkielinen `full`-taso kuuluu:
 
-> "Vastaa niukasti kuin älykäs luolamies. Jätä pois artikkelit (a/an/the), täytesanat (just/really/basically/actually/simply), kohteliaisuudet ja epäröivät ilmaukset. Virkkeenkatkelmat sallittuja. Käytä lyhyitä synonyymejä (big, ei extensive; fix, ei implement). Säilytä kaikki tekninen asiasisältö, koodi, virheet, URL-osoitteet ja tunnisteet täsmällisinä."
+> "Vastaa ytimekkäästi kuin fiksu luolaihminen. Jätä pois artikkelit (a/an/the), täytesanat (just/really/basically/actually/simply), kohteliaisuudet ja varaukset. Virkkeet voivat olla katkelmia. Käytä lyhyitä synonyymejä (big, ei extensive; fix, ei implement). Säilytä kaikki tekninen sisältö, koodi, virheet, URL-osoitteet ja tunnisteet täsmälleen ennallaan."
 
 Tämä toimii erityisen hyvin seuraavissa tapauksissa:
 
-- Koodin luonti (niukempi tuloste = vähemmän tokeneita)
+- Koodin generointi (ytimekkäämpi tuloste = vähemmän tokeneita)
 - Nopeat kysymykset ja vastaukset (ei tarvetta perusteellisille selityksille)
-- Eräkäsittely (maksimoi läpimenon)
+- Eräkäsittely (maksimoi suoritusteho)
 
 #### Milloin käyttää
 
-Luolamiesvastaustila on **valinnainen**. Kun pakkaus on käytössä (`enabled: true`, yleisvalitsin
-Pakkausasetukset-sivulla), ota se käyttöön asetuksella `cavemanOutputMode.enabled`; `intensity`
-valitsee tason `lite`, `full` tai `ultra`:
+Luolaihmis-tulostustila on **valinnainen**. Kun pakkaus on käytössä (`enabled: true`, Compression Settings -sivun pääkytkin
+on käytössä), ota se käyttöön asetuksella `cavemanOutputMode.enabled`; `intensity`
+valitsee arvon `lite`, `full` tai `ultra`:
 
 ```json
 {
@@ -487,94 +494,100 @@ valitsee tason `lite`, `full` tai `ultra`:
 }
 ```
 
-Pakkausyhdistelmän **Vastaustila**-valitsin (`outputMode`, taso asetuksessa `outputModeIntensity`)
-asettaa saman valinnan pyynnöille, joihin kyseistä yhdistelmää sovelletaan, ja
-`omniroute_set_compression_engine`-MCP-työkalu kirjoittaa sen totuusarvoisen `outputMode`-argumenttinsa
-kautta. Tyhjästä poikkeava `outputStyles`-valinta ohittaa tämän valitsimen. Hallintapaneelissa
-**Niukka proosa** -vastaustyylin käyttöönotto lisää saman lohkon (katso jäljempänä Vastaustyylit).
+Pakkausyhdistelmän **Output Mode** -kytkin (`outputMode`, taso kohdassa `outputModeIntensity`)
+asettaa saman kytkimen pyynnöille, joihin yhdistelmää sovelletaan, ja
+`omniroute_set_compression_engine`-MCP-työkalu kirjoittaa sen totuusarvoisen `outputMode`-argumenttinsa kautta. Ei-tyhjä `outputStyles`-valinta ohittaa tämän kytkimen. Hallintapaneelissa **Terse prose** -tulostustyylin käyttöönotto injektoi saman lohkon (katso Output
+Styles alta).
 
-### Vastaustyylit (luettelo)
+### Tulostustyylit (luettelo)
 
-Edellä kuvattu luolamiesvastaustila on **vanha yhden tyylin polku**. Vaiheessa 4 se
-yleistettiin yhdisteltävien vastaustyylien luetteloksi: `OUTPUT_STYLE_CATALOG` tiedostossa
+Yllä kuvattu luolaihmis-tulostustila on **vanha yhden tyylin polku**. Vaihe 4 yleisti sen
+yhdisteltävien tulostustyylien luetteloksi: `OUTPUT_STYLE_CATALOG` tiedostossa
 `open-sse/services/compression/outputStyles/catalog.ts`. Jokainen tyyli on järjestelmäkehotteen
-ohje, joka pyytää itse mallia tuottamaan edullisempaa tulostetta; useita tyylejä voidaan ottaa käyttöön
-samanaikaisesti, ja ne lisätään luettelon mukaisessa järjestyksessä.
+ohje, joka pyytää mallia itseään tuottamaan edullisemman tulosteen. Tyylejä voidaan ottaa käyttöön
+yhdessä, ja ne injektoidaan luettelon mukaisessa järjestyksessä.
 
-| Tyyli                                | `id`          | Mitä se tekee                                                                                                                                                                                                                                        | Ohjekielet                                     |
-| ------------------------------------ | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| Ytimekäs proosa                      | `terse-prose` | Poistaa täytesanat, artikkelit ja varaukset; säilyttää teknisen sisällön täsmällisenä. Sama teksti kuin vanhassa caveman-tulostustilassa (johon viitataan mutta jota ei kirjoiteta uudelleen).                                                       | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi  |
-| Vähemmän koodia                      | `less-code`   | YAGNI-portaat: pienin toimiva muutos, ei pyytämättömiä abstraktioita.                                                                                                                                                                                | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi  |
-| Poninhäntä (laiska senior-kehittäjä) | `ponytail`    | "Paras koodi on koodi, jota ei koskaan kirjoitettu": uudelleenkäyttö > uudelleenkirjoitus, juurisyy > oire, lyhin toimiva diff.                                                                                                                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi  |
-| Minulla on ADHD (toiminta ensin)     | `i-have-adhd` | Toiminta ensin (komento/polku/katkelma ennen proosaa), numeroidut rajatut vaiheet, YKSI konkreettinen seuraava vaihe, ei johdantoa/yhteenvetoa/lopetuksia. Mukautettu projektista [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT). | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi  |
-| Ytimekäs CJK (文言)                  | `terse-cjk`   | `full`/`ultra`-vastaus klassisella kiinalla (文言); `lite` pyytää vain lyhyitä vastauksia ilman funktiosanoja, kohteliaisuuksia tai koristelua.                                                                                                      | zh (rajoitettu kielialueen mukaan, katso alta) |
+| Tyyli                              | `id`            | Mitä se tekee                                                                                                                                                                                                                                                                                          | Ohjeiden kielet                                |
+| ---------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| Ytimekäs proosa                    | `terse-prose`   | Jättää pois täytesanat, artikkelit ja varaukset; säilyttää teknisen sisällön täsmälleen ennallaan. Sama teksti kuin vanhassa luolaihmis-tulostustilassa (siihen viitataan, eikä tekstiä toisteta).                                                                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi  |
+| Vähemmän koodia                    | `less-code`     | YAGNI-portaat: pienin toimiva muutos, ei pyytämättömiä abstraktioita.                                                                                                                                                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi  |
+| Ponytail (laiska senior-kehittäjä) | `ponytail`      | "Paras koodi on koodi, jota ei koskaan kirjoitettu": uudelleenkäyttö > uudelleenkirjoitus, juurisyy > oire, lyhin toimiva diff.                                                                                                                                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi  |
+| Minulla on ADHD (toiminta ensin)   | `i-have-adhd`   | Toiminta ensin (komento/polku/katkelma ennen proosaa), numeroidut rajatut vaiheet, YKSI konkreettinen seuraava vaihe, ei johdantoa/yhteenvetoa/lopetuksia. Mukautettu projektista [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                                                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi  |
+| Antislop-käyttöliittymäsuodatin    | `antislop-ui`   | Jokaisen visuaalisen tekniikan on läpäistävä tarkoitustesti (hierarkia, identiteetti, luettavuus); ei oletusarvoisia liukuvärejä/lasitehosteita/hehkua, rajattu paletti, ei mallipohja-asetteluja. Molemmat antislop-tyylit lisäävät rajan, joka kieltää toimimattomat ohjaimet ja sepitetyt väitteet. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi  |
+| Antislop-teksti- ja ihmissuodatin  | `antislop-copy` | Täsmällinen teksti (ei ajatusviivoja, yleisiä toimintakehotuksia, muotisanoja, chatbot-tyylisiä lopetuksia tai keksittyjä faktoja) sekä käyttäjiä koskevat säännöt: WCAG AA -kontrasti, näkyvä kohdistus, näppäimistökäyttö, tyhjä-, lataus- ja virhetilat sekä mobiiliasettelun mukautuminen.         | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi  |
+| Ytimekäs CJK (文言)                | `terse-cjk`     | `full`/`ultra`-vastaus klassisella kiinalla (文言); `lite` pyytää vain lyhyitä vastauksia ilman funktiosanoja, kohteliaisuuksia tai koristelua.                                                                                                                                                        | zh (rajoitettu kielialueen mukaan, katso alta) |
 
-Jokaisessa tyylissä on kolme voimakkuustasoa — `lite`, `full`, `ultra` — ja jokainen taso
-päättyy yhteiseen rajausehtoon (`SHARED_BOUNDARIES` tiedostossa `outputMode.ts`), joka
-säilyttää koodilohkot, tiedostopolut, komennot, virheet ja URL-osoitteet täsmällisinä. Tasojen
-`terse-prose` ja `terse-cjk` tekstit lisäävät tunnisteet tähän luetteloon.
+Jokaisessa tyylissä on kolme intensiteettitasoa — `lite`, `full`, `ultra` — ja jokainen taso
+päättyy yhteiseen rajoituslausekkeeseen (`SHARED_BOUNDARIES` tiedostossa `outputMode.ts`), joka
+säilyttää koodilohkot, tiedostopolut, komennot, virheet ja URL-osoitteet täsmälleen ennallaan. Tasojen `terse-prose` ja
+`terse-cjk` tekstit lisäävät tähän luetteloon myös tunnisteet.
 
-`terse-cjk` on rajattu kielialueen `zh` mukaan kahdessa paikassa. Pakkausasetukset-sivulla
-sen rivi näytetään vain, kun hallintapaneelin käyttöliittymän kieli on kiina (`zh-CN` tai `zh-TW`), ja
-`applyOutputStyles()` lisää sen vain, kun pyynnön ratkaistu kieli (katso Kielivalinta
-alta) on `zh`. Rivin piilottaminen ei poista tallennettua `terse-cjk`-valintaa:
+`terse-cjk` on rajattu `zh`-kielialueeseen kahdessa kohdassa. Compression Settings -sivu näyttää
+sen rivin vain, kun hallintapaneelin käyttöliittymän kieli on kiina (`zh-CN` tai `zh-TW`), ja
+`applyOutputStyles()` injektoi sen vain, kun pyynnölle määritetty kieli (katso Kielen
+valinta alta) on `zh`. Rivin piilottaminen ei poista tallennettua `terse-cjk`-valintaa:
 asetusrajapinta hyväksyy minkä tahansa tyylitunnuksen, ja muiden tyylien tallentaminen sivulla säilyttää sen. Pyynnön
-käsittelyn aikana `applyOutputStyles()`-kielentarkistus on ainoa kielialuerajoitus.
+käsittelyn aikana `applyOutputStyles()`-kielitarkistus on ainoa kielialuerajoitus.
 
-#### Miten lisääminen toimii
+#### Miten injektointi toimii
 
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) ratkaisee
-valinnan luettelon perusteella (tuntemattomat tunnukset ja kielialueeseen sopimattomat tyylit
-pudotetaan pois ilman virhettä; valinta, joka ei ratkea miksikään tyyliksi, jättää rungon
-muuttamatta ja ohitetaan syyllä `no_styles`), yhdistää valitut ohjeet luettelon
-järjestyksessä,
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) vertaa
+valintaa luetteloon (tuntemattomat tunnisteet ja kielialueeseen sopimattomat tyylit
+ohitetaan, eikä tästä koskaan aiheudu virhettä; jos valinta ei tuota yhtään tyyliä,
+runko jätetään muuttamatta ja ohitetaan syyllä `no_styles`), yhdistää valitut ohjeet
+luettelon mukaisessa järjestyksessä,
 lisää rajausehdon **kerran** (sekä turvallisuusehdon, `SAFETY_BOUNDARIES` tai sen
-käännöksen, kun `less-code` tai `ponytail` on valittu) ja aloittaa lohkon yhdellä
-idempotenssimerkinnällä (`[OmniRoute Output Styles]`), joten uudelleen lisääminen ei tee mitään. Kun
-ratkaistulle kielelle (katso Kielivalinta alta) on käännös, englanninkielisen ohjeen
-sijaan lisätään lokalisoitu ohje.
+käännöksen, kun `less-code` tai `ponytail` on valittuna) ja aloittaa lohkon yhdellä
+idempotenssimerkinnällä (`[OmniRoute Output Styles]`), joten uudelleensoveltaminen ei
+tee mitään. Kun ratkaistulle kielelle (katso Kielen valinta jäljempänä) on olemassa
+käännös, englanninkielisen ohjeen sijasta lisätään lokalisoitu ohje.
 
 Rungossa, jossa on ei-tyhjä `messages`-taulukko, idempotenssitarkistus suoritetaan ennen
-sisältöohitusta: kun `[OmniRoute Output Styles]` -merkintä on jo ylätason
-`system`-kentässä (merkkijonona tai sisältölohkotaulukkona) tai järjestelmäviestissä, jonka
-sisältö on merkkijono, runko jätetään muuttamatta syyllä `already_applied`, eikä avainsanatarkistusta suoriteta.
-Muussa tapauksessa sisältöohitus (`shouldBypassCavemanOutputMode()` tiedostossa
-`open-sse/services/compression/outputMode.ts`) tarkistaa kolmen viimeisen
-viestin tekstin niiden roolista riippumatta ja ohittaa tyylit koko vuorolta, kun teksti
-vastaa turvallisuuteen, peruuttamattomaan toimintoon tai selvennykseen liittyviä avainsanoja tai
-järjestyksestä riippuvaa sarjaa: `first`, `then`, `after that`, `before`, `rollback` tai
-`backup`, jota seuraa 240 merkin sisällä `delete`, `drop`, `migrate`, `deploy` tai
-`release`. Ohitus suoritetaan, kun **Auto-Clarity Bypass** -valitsin
-(`cavemanOutputMode.autoClarity`, oletusarvoisesti käytössä) on käytössä; valitsimen poistaminen käytöstä ohittaa
-avainsanatarkistuksen.
+sisällön ohitustarkistusta: kun `[OmniRoute Output Styles]` -merkintä on jo ylätason
+`system`-kentässä (merkkijonona tai sisältölohkojen taulukkona) tai järjestelmäviestissä,
+jonka sisältö on merkkijono, runko jätetään muuttamatta syyllä `already_applied`, eikä
+avainsanatarkistusta suoriteta. Muussa tapauksessa sisällön ohitustarkistus
+(`shouldBypassCavemanOutputMode()` tiedostossa
+`open-sse/services/compression/outputMode.ts`) tarkistaa kolmen viimeisen viestin tekstin
+niiden roolista riippumatta ja ohittaa tyylit koko vuorolta, kun teksti vastaa
+turvallisuuteen, peruuttamattomaan toimintoon tai selvennykseen liittyviä avainsanoja
+tai järjestyksestä riippuvaa sarjaa: `first`, `then`, `after that`, `before`, `rollback`
+tai `backup`, jota seuraa 240 merkin sisällä `delete`, `drop`, `migrate`, `deploy` tai
+`release`. Ohitustarkistus suoritetaan, kun **Auto-Clarity Bypass** -valitsin
+(`cavemanOutputMode.autoClarity`, oletusarvoisesti käytössä) on käytössä; valitsimen
+poistaminen käytöstä ohittaa avainsanatarkistuksen.
 
-Kun ohitus päästää vuoron läpi, `placeSystemInstruction()` (sama tiedosto), joka
-ei koskaan luo uutta `messages[0]`-alkiota, sijoittaa lohkon ensimmäiseen löytämäänsä kohteeseen näistä:
+Kun ohitustarkistus päästää vuoron läpi, `placeSystemInstruction()` (samassa tiedostossa),
+joka ei koskaan luo uutta `messages[0]`-alkiota, sijoittaa lohkon ensimmäiseen löytämäänsä
+seuraavista paikoista:
 
-1. Alussa oleva järjestelmäviesti, jonka sisältö on merkkijono: lohko lisätään sen tekstin perään.
-2. Ylätason `system`-kenttä: lohko lisätään merkkijonon tekstin perään tai
-   uutena tekstilohkona sisältölohkotaulukkoon.
-3. Ensimmäinen myöhempi järjestelmäviesti, jonka sisältö on merkkijono: lohko lisätään sen
+1. Alussa oleva järjestelmäviesti, jonka sisältö on merkkijono: lohko lisätään sen
    tekstin perään.
-4. Ei mikään edellisistä: lohko sijoitetaan uuteen järjestelmäviestiin `messages`-taulukon loppuun.
+2. Ylätason `system`-kenttä: lohko lisätään merkkijonon tekstin perään tai uutena
+   tekstilohkona sisältölohkojen taulukkoon.
+3. Ensimmäinen myöhempi järjestelmäviesti, jonka sisältö on merkkijono: lohko lisätään
+   sen tekstin perään.
+4. Ei mikään edellä mainituista: lohko sijoitetaan uuteen järjestelmäviestiin
+   `messages`-taulukon loppuun.
 
-Rungossa, jossa ei ole `messages`-taulukkoa (tai jossa se on tyhjä), sisältöohitusta ei suoriteta eikä
-ylätason `system`-kenttää tarkastella. Lohko lisätään merkkijonomuotoisen
-`instructions`-kentän tekstin perään, ellei kenttä jo sisällä
+Rungossa, jossa ei ole `messages`-taulukkoa (tai jossa se on tyhjä), sisällön
+ohitustarkistusta ei suoriteta eikä ylätason `system`-kenttää huomioida. Lohko lisätään
+merkkijonotyyppisen `instructions`-kentän tekstin perään, ellei kentässä jo ole
 `[OmniRoute Output Styles]` -merkintää, jolloin runko jätetään muuttamatta syyllä
-`already_applied`. Kun rungossa ei ole merkkijonomuotoista `instructions`-kenttää mutta siinä on `input`
-(merkkijono tai taulukko), lohkosta tulee `instructions`, ja se korvaa kentän mahdollisen muun kuin merkkijonoarvon.
-Runko, jossa ei ole merkkijonomuotoista `instructions`-kenttää eikä merkkijono- tai taulukkomuotoista
+`already_applied`. Kun rungossa ei ole merkkijonotyyppistä `instructions`-kenttää mutta
+siinä on `input` (merkkijono tai taulukko), lohkosta tulee `instructions`, ja se korvaa
+kentässä mahdollisesti olleen muun kuin merkkijonoarvon. Runko, jossa ei ole
+merkkijonotyyppistä `instructions`-kenttää eikä merkkijono- tai taulukkotyyppistä
 `input`-kenttää, jätetään muuttamatta ja ohitetaan syyllä `no_messages`.
 
 #### Käyttöönotto
 
-Hallintapaneessa: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`), Output styles -osio: yksi rivi kutakin tyyliä kohden sekä päälle/pois-
-kytkin ja tasovalitsin. Tyylit lisätään, kun itse pakkaus on käytössä (sivun
-pääkytkin `enabled`). **Auto-Clarity Bypass** -kytkin on **Caveman**-
-sivulla (`/dashboard/context/caveman`) sen **Output Mode** -kortissa. Ohjelmallisesti
-pakkausmääritys tallentaa valinnan seuraavasti:
+Hallintapaneelissa: **Compression Context → Compression Settings**
+(`/dashboard/context/settings`), Output styles -osio: yksi rivi kutakin tyyliä kohden
+sekä käytössä/pois käytöstä -valitsin ja tasovalitsin. Tyylit lisätään, kun itse pakkaus
+on käytössä (sivun päävalitsin `enabled`). **Auto-Clarity Bypass** -valitsin on
+**Caveman**-sivulla (`/dashboard/context/caveman`) sen **Output Mode** -kortissa.
+Ohjelmallisesti pakkausmääritykset säilyttävät valinnan seuraavasti:
 
 ```json
 {
@@ -585,141 +598,152 @@ pakkausmääritys tallentaa valinnan seuraavasti:
 }
 ```
 
-Taaksepäin yhteensopivuus: kun `outputStyles` on tyhjä, vanha `cavemanOutputMode.enabled`-
-asetus yhdistetään `terse-prose`-tyyliin tasolla `cavemanOutputMode.intensity`. Lohko alkaa tällöin
-`[OmniRoute Output Styles]`-merkinnällä, kun taas vanha `applyCavemanOutputMode()`-
-lisääjä kirjoitti `[OmniRoute Caveman Output Mode]`. Merkinnän alapuolella teksti vastaa
-vanhaa lisäystä kielillä en, pt-BR, es, de, fr, it, ru, id ja vi; kielillä ja ja zh siinä on yksi
-ylimääräinen välilyönti ennen rajoja koskevaa lausetta. `terse-prose` on käännetty kielille pt-BR, es, de,
-fr, it, ru, zh, ja, id ja vi, joten pyyntö, jonka ratkaistu kieli on `hu`, saa
-englanninkielisen tekstin, vaikka vanha lisääjä käytti unkarinkielistä tekstiään.
+Taaksepäin yhteensopivuus: kun `outputStyles` on tyhjä, vanha
+`cavemanOutputMode.enabled`-asetus vastaa `terse-prose`-tyyliä tasolla
+`cavemanOutputMode.intensity`. Lohko alkaa tällöin `[OmniRoute Output Styles]`
+-merkinnällä, kun taas vanha `applyCavemanOutputMode()`-lisäystoiminto käytti
+`[OmniRoute Caveman Output Mode]` -merkintää. Merkinnän alapuolella oleva teksti vastaa
+vanhaa lisäystä kielillä en, pt-BR, es, de, fr, it, ru, id ja vi; kielillä ja ja zh siinä
+on yksi ylimääräinen välilyönti ennen rajausehtoa. `terse-prose` on käännetty kielille
+pt-BR, es, de, fr, it, ru, zh, ja, id ja vi, joten pyyntö, jonka ratkaistu kieli on
+`hu`, saa englanninkielisen tekstin siinä, missä vanha lisäystoiminto käytti unkarinkielistä
+tekstiä.
 
-Tulostustyylin kielen valinta (`resolveOutputStyleLanguage()` tiedostossa
-`outputStyles/apply.ts`): kun `languageConfig.enabled` on käytössä, `autoDetect` ottaa näytteeksi
-pyynnön `messages`-taulukon uusimman tekstiä sisältävän käyttäjäviestin (merkkijonosisältö tai
-sen sisältöosien `text`) ja suorittaa sille Caveman-moottorin tunnistimen
-(`detectCompressionLanguage()`). Tunnistin palauttaa `zh`, jos tekstissä on han-
-merkkejä mutta ei kana-merkkejä; muussa tapauksessa se palauttaa sen kielistä `it`, `pt-BR`, `es`, `de`,
-`fr`, `ru`, `ja`, `hu` ja `id`, jolla on eniten vihjeosumia, sekä `en`, jos osumia ei ole —
-teksti, jota se ei pysty luokittelemaan, saa englannin, ei koskaan `defaultLanguage`-arvoa, eikä
-kieltä `vi` koskaan tunnisteta, vaikka tyylien mukana toimitetaan `vi`-teksti. Responses API -rungon
-vuorot säilytetään `input`-kentässä, josta ei oteta näytettä, joten se saa ensin `defaultLanguage`-arvon
-ja sitten englannin. Kun yksikään `messages`-taulukon käyttäjäviesti ei sisällä tekstiä tai kun
-`autoDetect` ei ole käytössä, käytetään ensin `defaultLanguage`-arvoa ja sitten englantia. Kun
-`languageConfig.enabled` ei ole käytössä, kieli on englanti — paitsi jos pyyntöön sovelletaan
-pakkausyhdistelmää (pyynnön reititysyhdistelmälle määritettyä yhdistelmää tai oletusarvoista
-pakkausyhdistelmää, johon chatCore turvautuu sisäänrakennetussa pinotussa
-käsittelyketjussa): yhdistelmän käyttäminen ottaa `languageConfig.enabled`-asetuksen käyttöön kyseiselle pyynnölle ja asettaa
-`defaultLanguage`-arvon yhdistelmän kielipakettien perusteella (tallennettu arvo, jos se kuuluu
-yhdistelmän paketteihin; muutoin yhdistelmän ensimmäinen paketti, jonka oletusarvo on `en`), samalla kun
-tallennettua `autoDetect`-asetusta (oletusarvoisesti käytössä) sovelletaan edelleen. Caveman-syötemoottori valitsee
-sääntöpakettinsa kielen eri tavalla — tekstiosa kerrallaan ja automaattisen tunnistuksen ollessa poissa käytöstä
-`enabledPacks`-asetuksen rajaamana.
+Tulostyylin kielen valinta (`resolveOutputStyleLanguage()` tiedostossa
+`outputStyles/apply.ts`): kun `languageConfig.enabled` on käytössä, `autoDetect` ottaa
+näytteeksi pyynnön `messages`-taulukon uusimman käyttäjäviestin, jossa on tekstiä
+(merkkijonosisältö tai sen sisältöosien `text`), ja suorittaa sille Caveman-moottorin
+tunnistimen (`detectCompressionLanguage()`). Tunnistin palauttaa `zh`, jos tekstissä on
+han-merkkejä mutta ei kana-merkkejä; muussa tapauksessa se palauttaa sen kielistä `it`,
+`pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` ja `id`, jolla on eniten vihjeosumia, sekä
+`en`, jos osumia ei ole — teksti, jota se ei pysty luokittelemaan, saa kielekseen
+englannin, ei koskaan `defaultLanguage`-arvoa, eikä kieltä `vi` koskaan tunnisteta,
+vaikka tyylit sisältävät `vi`-kielisen tekstin. Responses API -rungon vuorot ovat
+`input`-kentässä, josta ei oteta näytettä, joten se käyttää `defaultLanguage`-arvoa ja
+sen jälkeen englantia. Kun yhdelläkään `messages`-taulukon käyttäjäviestillä ei ole
+tekstiä tai kun `autoDetect` ei ole käytössä, käytetään `defaultLanguage`-arvoa ja sen
+jälkeen englantia. Kun `languageConfig.enabled` ei ole käytössä, kieli on englanti —
+ellei pyyntöön sovelleta pakkausyhdistelmää (pyynnön reititysyhdistelmälle määritettyä
+yhdistelmää tai oletusarvoista pakkausyhdistelmää, jota chatCore käyttää varalla
+sisäänrakennetussa pinotussa käsittelyketjussa): yhdistelmän soveltaminen ottaa
+`languageConfig.enabled`-asetuksen käyttöön kyseiselle pyynnölle ja asettaa
+`defaultLanguage`-arvon yhdistelmän kielipakettien perusteella (tallennettu arvo, jos se
+on yksi yhdistelmän paketeista, muussa tapauksessa yhdistelmän ensimmäinen paketti,
+jonka oletusarvo on `en`), mutta tallennettua `autoDetect`-asetusta (oletusarvoisesti
+käytössä) sovelletaan edelleen. Caveman-syötemoottori valitsee sääntöpakettinsa kielen
+eri tavalla — tekstiosa kerrallaan ja, kun automaattinen tunnistus ei ole käytössä,
+`enabledPacks`-asetuksen rajoittamana.
 
 Tyyli × kieli -matriisi on kiinnitetty testillä
-`tests/unit/compression/output-styles-i18n-matrix.test.ts`: jokainen luettelon tyyli tarvitsee
-merkinnän testin `BASELINE_LANGUAGES`-luettelossa; tyylin, jota ei ole rajattu alueasetuksen mukaan, mukana on toimitettava
-pt-BR-käännös (alueasetuksen mukaan rajattu `terse-cjk` on vapautettu tästä säännöstä), ellei sitä ole
-lueteltu `KNOWN_ENGLISH_ONLY`-luettelossa, joka saa sisältää vain tyylejä, joilla ei ole lainkaan käännöksiä —
-luettelossa oleva tyyli, jolla on jokin käännös, aiheuttaa testin epäonnistumisen; ja tyyli aiheuttaa testin epäonnistumisen, jos
-se menettää kielen, joka on lueteltu sen `BASELINE_LANGUAGES`-merkinnässä. Katso tyylin lisäämisohjeet tiedostosta
+`tests/unit/compression/output-styles-i18n-matrix.test.ts`: jokainen luettelotyyli tarvitsee
+merkinnän testin `BASELINE_LANGUAGES`-taulukossa; tyylin, jota ei ole rajattu aluekohtaisten
+asetusten perusteella, mukana on toimitettava pt-BR-käännös (aluekohtaisesti rajattu
+`terse-cjk` on vapautettu tästä vaatimuksesta), ellei tyyliä ole lueteltu kohdassa
+`KNOWN_ENGLISH_ONLY`, joka saa sisältää vain tyylejä, joilla ei ole lainkaan käännöksiä —
+lueteltu tyyli, jolla on yksikin käännös, aiheuttaa testin epäonnistumisen; lisäksi tyyli
+aiheuttaa testin epäonnistumisen, jos siitä poistuu kieli, joka on lueteltu sen
+`BASELINE_LANGUAGES`-merkinnässä. Katso tyylin lisäämisohjeet tiedostosta
 [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
 ### Työkalutulosten pakkaus
 
 `compressToolResult()` tiedostossa `open-sse/services/compression/toolResultCompressor.ts`
-pakkaa työkalutuloksen tekstin **5 strategialla**. Se kokeilee niitä tässä järjestyksessä, ja
-ensimmäinen käytössä oleva strategia, jonka tarkistus vastaa sisältöä, ratkaisee tuloksen:
+pakkaa työkalun tulostekstin **viidellä strategialla**. Se kokeilee niitä tässä
+järjestyksessä, ja ensimmäinen käytössä oleva strategia, jonka tarkistus vastaa sisältöä,
+määrittää tuloksen:
 
-1. **`fileContent`**: vähintään 3 rivin sisältö, jossa vähintään yksi rivi alkaa sisennyksen
-   ohittamisen jälkeen merkkijonolla `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` tai `return ` (avainsana ja välilyönti) tai merkkijonolla
-   `if`, `for` tai `while`, jota seuraa `(` tai ` (`, säilyttää ensimmäiset 20 ja
-   viimeiset 5 riviään, ja pois jätetty keskiosa merkitään.
-2. **`grepSearch`**: sisältö, jossa on vähintään yksi muotoa `<path>:<digits>:` oleva
-   rivi ja jossa ensimmäistä kaksoispistettä edeltävässä tekstissä ei ole tyhjemerkkejä,
-   säilyttää vain tällaiset rivit, enintään 30, minkä jälkeen ilmoitetaan mahdollisten
-   lisäosumien määrä ja osumia sisältävien tiedostojen luettelo; kaikki muut rivit
-   poistetaan. Yksi tällainen rivi riittää käynnistämään strategian, joten myös
-   aikaleimalla, kuten `12:30:45`, alkava lokirivi lasketaan mukaan.
-3. **`shellOutput`**: tulosteesta, joka sisältää ANSI CSI -sekvenssin (`ESC[` ja sen
-   jälkeen numeroita tai puolipisteitä sekä kirjain, kuten värikoodeissa) tai missä
-   tahansa kohdassa `$`-merkin, jota seuraa tyhjemerkki, poistetaan kyseiset sekvenssit
-   (muut ohjaussekvenssit, kuten `ESC[?25l` tai OSC-ikkunaotsikkosekvenssi, säilytetään),
-   ja sen viimeiset 50 riviä säilytetään siten, että peräkkäiset toistuvat rivit
-   yhdistetään. Koska tämä tarkistus suoritetaan ennen `json`- ja `errorMessage`-
-   strategioita, tällaisen `$`-merkin sisältävä JSON- tai virhetuloste ei koskaan päädy
-   niille, kun `shellOutput` on käytössä.
-4. **`json`**: yli 2 000 merkin JSON-kuorma, joka alkaa merkillä `{` tai `[` (mahdollisen
-   tyhjätilan jälkeen) ja jonka jäsennys onnistuu, tiivistetään: yli 7 alkion taulukosta
-   säilytetään ensimmäiset 5 ja viimeiset 2 alkiota sekä alkioiden kokonaismäärä, ja
-   objektista säilytetään ensimmäiset 20 avainta siten, että jokainen sisäkkäinen
-   objekti- tai taulukkoarvo korvataan paikkamerkillä `{…N keys}` (taulukon tapauksessa
-   N on sen pituus) ja ensimmäisten 20 avaimen jälkeen pois jätettyjen avainten määrä
-   ilmaistaan `_remaining_<N>_keys`-merkinnällä. Skalaariarvot kopioidaan kokonaisina,
-   joten enintään 20 avainta sisältävä objekti, jossa ei ole sisäkkäisiä arvoja, vain
-   sisennetään uudelleen — minifioitu objekti pitenee ja säilyy siksi muuttumattomana.
+1. **`fileContent`**: vähintään 3 riviä sisältävä sisältö, jossa vähintään yksi rivi alkaa
+   sisennyksen huomiotta jättämisen jälkeen merkkijonolla `import `, `export `,
+   `function `, `class `, `const `, `let `, `var ` tai `return ` (avainsana ja
+   välilyönti), tai merkkijonolla `if`, `for` tai `while`, jonka jälkeen tulee `(` tai
+   ` (`. Strategia säilyttää ensimmäiset 20 ja viimeiset 5 riviä ja merkitsee pois
+   jätetyn keskiosan.
+2. **`grepSearch`**: sisältö, jossa on vähintään yksi muotoa `<path>:<digits>:` oleva rivi
+   ja jossa ensimmäistä kaksoispistettä edeltävässä tekstissä ei ole tyhjemerkkejä.
+   Strategia säilyttää vain tällaiset rivit, enintään 30 kappaletta, minkä jälkeen
+   ilmoitetaan mahdollisten muiden osumien määrä ja luetellaan tiedostot, joista osumia
+   löytyi; kaikki muut rivit poistetaan. Yksi tällainen rivi riittää käynnistämään
+   strategian, joten myös aikaleimalla, kuten `12:30:45`, alkava lokirivi lasketaan
+   mukaan.
+3. **`shellOutput`**: tulosteesta, joka sisältää ANSI CSI -sekvenssin (`ESC[`, sitten
+   numeroita tai puolipisteitä ja lopuksi kirjain, kuten värikoodeissa) tai missä
+   tahansa tekstin kohdassa `$`-merkin, jota seuraa tyhjemerkki, poistetaan kyseiset
+   sekvenssit (muut ohjaussekvenssit, kuten `ESC[?25l` tai OSC-ikkunaotsikkosekvenssi,
+   säilytetään). Strategia säilyttää viimeiset 50 riviä ja yhdistää peräkkäiset
+   toistuvat rivit. Koska tämä tarkistus suoritetaan ennen `json`- ja
+   `errorMessage`-strategioita, tällaisen `$`-merkin sisältävä JSON- tai virhetuloste ei
+   koskaan päädy niihin, kun `shellOutput` on käytössä.
+4. **`json`**: yli 2 000 merkkiä pitkä JSON-hyötykuorma, joka alkaa merkillä `{` tai `[`
+   (mahdollisten tyhjemerkkien jälkeen) ja jonka jäsennys onnistuu, tiivistetään: yli 7
+   alkiota sisältävästä taulukosta säilytetään ensimmäiset 5 ja viimeiset 2 alkiota sekä
+   alkioiden kokonaismäärä, ja objektista säilytetään ensimmäiset 20 avainta. Jokainen
+   sisäkkäinen objekti- tai taulukkoarvo korvataan `{…N keys}`-paikkamerkillä
+   (taulukolle N on sen pituus), ja `_remaining_<N>_keys`-merkintä ilmoittaa ensimmäisten
+   20 avaimen jälkeen poistettujen avainten määrän. Skalaariarvot kopioidaan
+   kokonaisuudessaan, joten enintään 20 avainta sisältävä objekti, jossa ei ole
+   sisäkkäisiä arvoja, vain sisennetään uudelleen — minifioidun objektin merkkimäärä
+   kasvaa, joten se säilyy muuttumattomana.
 5. **`errorMessage`**: tuloste, joka sisältää missä tahansa kohdassa ja kirjainkoosta
-   riippumatta tekstin `error:`, `error ` (sana ja sitä seuraava välilyönti, kuten
+   riippumatta merkkijonon `error:`, `error ` (sana, jota seuraa välilyönti, kuten
    ilmauksessa `no error found`), `[error]`, `exception:`, `exception `,
    `[exception]` tai `traceback`, säilyttää ensimmäisen rivinsä, seuraavat 10 riviä ja
-   viimeiset 3 riviä siten, että niiden väliin jäävät rivit korvataan merkinnällä
-   `… [N frames elided] …`. Merkintä lisätään vain, kun ensimmäisen rivin jälkeen on
-   yli 13 riviä, joten enintään 14 rivin virhetulostetta ei lyhennetä (12 tai 13 rivin
-   tapauksessa viimeiset 3 riviä toistavat jo säilytettyjä rivejä).
+   viimeiset 3 riviä. Niiden väliin jäävät rivit korvataan merkinnällä
+   `… [N frames elided] …`. Merkintä tulee näkyviin vain, kun ensimmäisen rivin jälkeen
+   on yli 13 riviä, joten enintään 14-rivistä virhetulostetta ei lyhennetä (12 tai 13
+   rivin tapauksessa viimeiset 3 riviä toistavat jo säilytettyjä rivejä).
 
-Kun strategia täsmää, myöhempiä strategioita ei kokeilla, vaikka täsmännyt strategia ei
-säästäisi mitään. Kun täsmäävä strategia ei säästä arvioituja tokeneita (pituus ÷ 4,
-pyöristettynä ylöspäin) — esimerkiksi koodimainen tiedosto, jossa on enintään 25 riviä,
-tai yli 2 000 merkin JSON-taulukko, jossa on enintään 7 alkiota — aggressiivinen moottori
-säilyttää alkuperäisen työkalutuloksen: molemmat kutsujat (`compressAggressive()` ja
-`compressAnthropicToolResultBlock()`) säilyttävät alkuperäisen, kun `saved` on 0 tai
-pienempi, vaikka `compressToolResult()` itse palauttaa edelleen kyseisen strategian
-tuloksen. Työkalutuloksen käsittelyvaihe ei ole viimeinen sana: moottorin
-varatiivistin voi edelleen lyhentää yli 8 192 merkin `tool`- tai `function`-viestin
+Kun jokin strategia vastaa sisältöä, myöhempiä strategioita ei kokeilla, vaikka kyseinen
+strategia ei säästäisi mitään. Kun vastaava strategia ei säästä arvioituja tokeneita
+(pituus ÷ 4, pyöristettynä ylöspäin) — esimerkiksi koodia muistuttava tiedosto, jossa on
+enintään 25 riviä, tai yli 2 000 merkkiä pitkä JSON-taulukko, jossa on enintään 7
+alkiota — aggressiivinen moottori säilyttää alkuperäisen työkalutuloksen: molemmat
+kutsujat (`compressAggressive()` ja `compressAnthropicToolResultBlock()`) säilyttävät
+alkuperäisen, kun `saved` on 0 tai pienempi, vaikka `compressToolResult()` itse palauttaa
+silti kyseisen strategian tulosteen. Työkalutulosvaihe ei ole lopullinen: moottorin
+varatiivistin voi yhä lyhentää yli 8 192 merkkiä pitkän `tool`- tai `function`-viestin
 (`maxTokensPerMessage`, 2 048, kerrottuna neljällä).
 
-#### Milloin käyttää
+#### Milloin tätä käytetään
 
-Työkalutulosten pakkaus on aggressiivisen moottorin vaihe 1 (`compressAggressive()`
-tiedostossa `open-sse/services/compression/aggressive.ts`), joten se suoritetaan
-Aggressive-tilassa ja pinotun putken `aggressive`-vaiheessa. Se pakkaa OpenAI-muotoisia
-`tool`- ja `function`-viestejä sekä Anthropic-`tool_result`-lohkojen sisällä olevaa
-tekstiä. Jokaisella strategialla on oma kytkimensä kohdassa `aggressive.toolStrategies`,
-ja ne kaikki ovat oletusarvoisesti käytössä. Hallintapaneelissa kytkimet ovat
-Caveman-sivun **Advanced**-näkymässä, kun pakkaus on käytössä ja oletustilana on
-Aggressive.
+Työkalutulosten pakkaus on aggressiivisen moottorin ensimmäinen vaihe
+(`compressAggressive()` tiedostossa `open-sse/services/compression/aggressive.ts`), joten
+se suoritetaan Aggressive-tilassa ja pinotun käsittelyputken `aggressive`-vaiheessa. Se
+pakkaa OpenAI-muotoiset `tool`- ja `function`-viestit sekä Anthropic-muotoisten
+`tool_result`-lohkojen sisältämän tekstin. Kullakin strategialla on oma kytkimensä
+kohdassa `aggressive.toolStrategies`, ja kaikki ovat oletusarvoisesti käytössä.
+Hallintapaneelissa kytkimet ovat Caveman-sivun **Advanced**-näkymässä, kun pakkaus on
+käytössä ja oletustilana on Aggressive.
 
-### Pinottu putki
+### Pinottu käsittelyputki
 
-Pinottu tila suorittaa **useita moottoreita peräkkäin** — yleensä ensin RTK:n
-(60–90 %:n säästö työkalutuloksissa) ja sitten Cavemanin jäljellä olevalle tekstille
-(~46 %:n säästö syötteessä). Yhdistettynä tuloksena on **78–95 %:n kelvollinen
-vaihteluväli** (katso Upstream Savings Math edellä):
-`1 - (1 - 0.60..0.90) × (1 - 0.46)` on keskimäärin ≈89 %.
+Pinotussa tilassa suoritetaan **useita moottoreita peräkkäin** — yleensä ensin RTK
+(60–90 %:n säästö työkalutulosteesta) ja sitten Caveman jäljellä olevalle tekstille
+(~46 %:n säästö syötteestä). Yhdistettynä tämä muodostaa **78–95 %:n soveltuvan
+vaihteluvälin** (katso yllä oleva kohta Tulovirran säästölaskenta):
+`1 - (1 - 0.60..0.90) × (1 - 0.46)` tuottaa keskimäärin ≈89 %.
 
 #### Toimintaperiaate
 
 ```
 Syöte (1000 tokenia)
-  → RTK (komentotietoinen suodatin) → 200 tokenia
-    → Caveman (täytetekstin poisto) → 108 tokenia
+  → RTK (komennot huomioiva suodatin) → 200 tokenia
+    → Caveman (täytesanojen poisto) → 108 tokenia
   → Tuloste (108 tokenia, ~89 %:n säästö)
 ```
 
-#### Milloin käyttää
+#### Milloin tätä käytetään
 
-Käytä pinottua tilaa seuraaviin:
+Käytä pinottua tilaa seuraaviin tarkoituksiin:
 
-- Työkalupainotteiset työnkulut (agenttipohjainen ohjelmointi, tutkimus)
+- Paljon työkaluja käyttävät työnkulut (agenttipohjainen ohjelmointi, tutkimus)
 - Kustannusherkkä eräkäsittely
-- Kun tarvitset mahdollisimman suuren token-säästön
+- Kun tarvitset mahdollisimman suuren tokenisäästön
 
-Pinotut putket määritetään globaalilla `stackedPipeline`-pakkausasetuksella tai
-reititysyhdistelmälle määritetyllä nimetyllä pakkausyhdistelmällä (katso
-Per-Combo Override edellä) — ei automaattisen yhdistelmän `modePack`-kentän kautta
-(kyseinen kenttä vain painottaa uudelleen automaattisen yhdistelmän mallivalintaa, eikä
-`stacked` ole kelvollinen paketin nimi).
+Pinotut käsittelyputket määritetään yleisellä `stackedPipeline`-pakkausasetuksella tai
+reititysyhdistelmälle määritetyllä nimetyllä pakkausyhdistelmällä (katso yllä oleva kohta
+Yhdistelmäkohtainen ohitus) — ei automaattisen yhdistelmän `modePack`-kentällä (kyseinen
+kenttä vain muuttaa automaattisen yhdistelmän mallivalinnan painotuksia, eikä `stacked`
+ole kelvollinen paketin nimi).
 
 ---
 

@@ -6,7 +6,7 @@ import {
   type OpencodeSurface,
 } from "./opencodeFreeTierContract.ts";
 import { resolvePlaceholderNames } from "./opencodeToolObservation.ts";
-import { isOpencodeFreeTierRefusal } from "./opencodeGeoBlock.ts";
+import { isOpencodeFreeTierRefusal, isOpencodeQuotaShapeRefusal } from "./opencodeGeoBlock.ts";
 import { resolveOpencodeTargetFormat } from "./opencode.ts";
 
 type ExecutorInput = Parameters<BaseExecutorType["execute"]>[0];
@@ -31,6 +31,8 @@ type RetryCtx = {
   clientSession: string | undefined;
   borrowed: boolean | undefined;
   clientToolNames: readonly string[];
+  /** Opt-in OpenCode v2 fingerprint (#16571): the appended names carry the v2 CLI schemas. */
+  v2Fingerprint?: boolean;
 };
 
 /** Scope guards: refusal status, gated surface+model, own (non-borrowed) tools, object body. */
@@ -45,7 +47,19 @@ function retryScopeApplies(ctx: RetryCtx, input: ExecutorInput, status: number):
   return !!input.body && typeof input.body === "object" && !Array.isArray(input.body);
 }
 
-/** Read the refusal body; null when unreadable or not a free-tier refusal. */
+/**
+ * Whether a refusal on a request carrying its own tools may be retried once
+ * with the observed names appended: a free-tier refusal or a quota-shape
+ * refusal. The quota predicate's own exclusions win, so a refusal carrying a
+ * fingerprint, geo or user_blocked marker stays excluded here too.
+ */
+export function isOwnToolsRetryableRefusal(status: number, bodyText: string | null): boolean {
+  return (
+    isOpencodeFreeTierRefusal(status, bodyText) || isOpencodeQuotaShapeRefusal(status, bodyText)
+  );
+}
+
+/** Read the refusal body; null when unreadable or not a retryable refusal. */
 async function readRefusalBody(
   first: { response: Response },
   status: number,
@@ -53,7 +67,7 @@ async function readRefusalBody(
 ): Promise<string | null> {
   try {
     const text = await first.response.clone().text();
-    return isOpencodeFreeTierRefusal(status, text) ? text : null;
+    return isOwnToolsRetryableRefusal(status, text) ? text : null;
   } catch {
     log?.debug?.("OPENCODE", "body read failed on free-tier retry check");
     return null;
@@ -109,7 +123,8 @@ export async function retryFreeTierRefusalWithObservedTools(
     ctx.provider,
     model,
     ctx.clientSession,
-    configured
+    configured,
+    ctx.v2Fingerprint === true
   );
   if (merged === input.body) return null;
   if (addsNothingBeyondFirstDispatch(ctx, model, configured, merged)) return null;

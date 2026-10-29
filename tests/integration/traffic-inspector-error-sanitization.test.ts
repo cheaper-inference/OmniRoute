@@ -34,8 +34,6 @@ const httpProxyRoute =
   await import("../../src/app/api/tools/traffic-inspector/capture-modes/http-proxy/route.ts");
 const systemProxyRoute =
   await import("../../src/app/api/tools/traffic-inspector/capture-modes/system-proxy/route.ts");
-const tlsInterceptRoute =
-  await import("../../src/app/api/tools/traffic-inspector/capture-modes/tls-intercept/route.ts");
 
 function noStackTrace(msg: string, label: string): void {
   assert.ok(
@@ -172,18 +170,4 @@ test("system-proxy: invalid body does not leak stack", async () => {
   const res = await systemProxyRoute.POST(req);
   assert.equal(res.status, 400);
   noStackTrace(await getErrorMessage(res), "POST /capture-modes/system-proxy");
-});
-
-test("tls-intercept: missing enabled field does not leak stack", async () => {
-  const req = new Request(
-    "http://localhost/api/tools/traffic-inspector/capture-modes/tls-intercept",
-    {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ enabled: "not-a-boolean" }),
-    }
-  );
-  const res = await tlsInterceptRoute.POST(req);
-  assert.equal(res.status, 400);
-  noStackTrace(await getErrorMessage(res), "POST /capture-modes/tls-intercept");
 });
