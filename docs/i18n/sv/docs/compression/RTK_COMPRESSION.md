@@ -27,24 +27,24 @@ Staplat:        1 - (1 - 0.80) * (1 - 0.46) = 89.2% besparing
 Intervall:      1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Vad som komprimeras
+## Vad den komprimerar
 
-Den inbyggda katalogen innehåller för närvarande 49 filter inom dessa kategorier:
+Den inbyggda katalogen levereras för närvarande med 56 filter fördelade på dessa kategorier:
 
-| Kategori  | Exempel                                                         |
-| --------- | --------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`               |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go-tester, Cargo-tester       |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx   |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler   |
-| `shell`   | `ls`, `find`, `grep`, generiska skalloggar                      |
-| `docker`  | `docker ps`, Docker-loggar                                      |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                         |
-| `generic` | JSON-utdata, stackspårningar, generell reservlösning för utdata |
+| Kategori  | Exempel                                                       |
+| --------- | ------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo-tester   |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
+| `shell`   | `ls`, `find`, `grep`, generiska skalloggar                    |
+| `docker`  | `docker ps`, Docker-loggar                                    |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
+| `generic` | JSON-utdata, stackspårningar, generisk fallback för utdata    |
 
 Detektorn i `open-sse/services/compression/engines/rtk/commandDetector.ts` klassificerar utdata
-innan filter väljs. Filter kan också matcha efter kommandomönster eller reguljära uttryck för utdata när en
-kommandoklass inte är tillräcklig.
+innan filtervalet. Filter kan även matcha på kommandomönster eller utdata-regex när en
+kommandoklass inte räcker till.
 
 ## Filtermatchning
 
@@ -356,15 +356,15 @@ node --import tsx/esm --test \
 
 ## Intensitetsnivåer (v3.8.16+)
 
-RTK stöder **3 intensitetsnivåer** som balanserar **komprimeringsaggressivitet** mot **säkerhet**. Nivån anges via `config.intensity` i motorkonfigurationen.
+RTK stödjer **3 intensitetsnivåer** som balanserar mellan **aggressiv komprimering** och **säkerhet**. Nivån ställs in via `config.intensity` i motorns konfiguration.
 
 ### De 3 nivåerna
 
-| Nivå                       | Tröskel för trunkering | Tokenbesparing | Risk       | Bäst för                              |
-| -------------------------- | ---------------------- | -------------- | ---------- | ------------------------------------- |
-| `minimal`                  | 24 rader per avsnitt   | ~20-40%        | Mycket låg | Produktion med kritisk kontext        |
-| `standard` (standardvärde) | 24 rader per avsnitt   | ~50-70%        | Låg        | Dagliga kodningssessioner             |
-| `aggressive`               | 16 rader per avsnitt   | ~70-90%        | Medelhög   | Långa sessioner, maximala besparingar |
+| Nivå                     | Trunkeringströskel   | Tokenbesparing | Risk       | Bäst för                           |
+| ------------------------ | -------------------- | -------------- | ---------- | ---------------------------------- |
+| `minimal`                | 24 rader per sektion | ~20-40%        | Mycket låg | Produktion med kritisk kontext     |
+| `standard` (standardval) | 24 rader per sektion | ~50-70%        | Låg        | Dagliga kodningssessioner          |
+| `aggressive`             | 16 rader per sektion | ~70-90%        | Medel      | Långa sessioner, maximal besparing |
 
 ### Var trunkeringen sker
 
@@ -376,24 +376,24 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Både **början** och **slutet** av varje avsnitt bevaras; innehåll i mitten tas bort när trunkeringen aktiveras.
+Både **början** och **slutet** av varje sektion bevaras; innehållet i mitten tas bort när trunkeringen aktiveras.
 
-### Vad som bevaras respektive tas bort
+### Vad som behålls respektive vad som tas bort
 
-| Innehåll                         | minimal        | standard       | aggressive     |
-| -------------------------------- | -------------- | -------------- | -------------- |
-| Fel/stackspårningar              | ✅ bevaras     | ✅ bevaras     | ✅ bevaras     |
-| Testfel                          | ✅ bevaras     | ✅ bevaras     | ✅ bevaras     |
-| Byggfel                          | ✅ bevaras     | ✅ bevaras     | ✅ bevaras     |
-| Godkända tester (utförliga)      | ✅ bevaras     | 🟡 komprimeras | 🟡 komprimeras |
-| Rutinutdata (informationsloggar) | 🟡 komprimeras | 🟡 komprimeras | ❌ tas bort    |
-| Förloppsindikatorer              | 🟡 komprimeras | ❌ tas bort    | ❌ tas bort    |
-| Banderoll/ASCII-konst            | 🟡 komprimeras | ❌ tas bort    | ❌ tas bort    |
+| Innehåll                         | minimal       | standard      | aggressive    |
+| -------------------------------- | ------------- | ------------- | ------------- |
+| Fel / stackspårningar            | ✅ bevaras    | ✅ bevaras    | ✅ bevaras    |
+| Misslyckade tester               | ✅ bevaras    | ✅ bevaras    | ✅ bevaras    |
+| Byggfel                          | ✅ bevaras    | ✅ bevaras    | ✅ bevaras    |
+| Godkända tester (utförliga)      | ✅ bevaras    | 🟡 fälls ihop | 🟡 fälls ihop |
+| Rutinutdata (informationsloggar) | 🟡 fälls ihop | 🟡 fälls ihop | ❌ tas bort   |
+| Förloppsindikatorer              | 🟡 fälls ihop | ❌ tas bort   | ❌ tas bort   |
+| Banderoll / ASCII-grafik         | 🟡 fälls ihop | ❌ tas bort   | ❌ tas bort   |
 
 ### Välja rätt intensitet
 
 ```
-                  Är förlust av kontext katastrofal?
+            Är det katastrofalt att förlora kontext?
                   │
       ┌───────────┼───────────┐
       │           │           │
@@ -403,9 +403,9 @@ Både **början** och **slutet** av varje avsnitt bevaras; innehåll i mitten ta
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Hur kritisk är  Prova `standard` först
-      │      genomströmningen? (fungerar i 80 % av
-      │           │           fallen)
+      │    Hur kritisk är   Prova `standard` först
+      │    genomströmning?  (fungerar i 80% av
+      │         │            fallen)
       │      ┌────┴────┐
       │      │         │
       │     LÅG       HÖG
@@ -418,7 +418,7 @@ Både **början** och **slutet** av varje avsnitt bevaras; innehåll i mitten ta
 
 ### Konfigurera intensitet
 
-**Per kombination** (i kombinationskonfigurationen):
+**Per kombo** (i kombokonfigurationen):
 
 ```json
 {
@@ -434,8 +434,8 @@ Både **början** och **slutet** av varje avsnitt bevaras; innehåll i mitten ta
 **Programmatiskt**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) är en
-`CompressionEngine` och har ingen `updateConfig`-metod. Uppdatera en motors konfiguration
-via registerhjälpfunktionen i stället:
+`CompressionEngine` och har ingen `updateConfig`-metod. Uppdatera en motors
+konfiguration via registerhjälpen i stället:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -445,14 +445,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Verifiera effekten
 
-Använd **verifieringsgrinden** (se nedan) för att bekräfta att filtret är säkert vid den valda intensiteten:
+Använd **Verify Gate** (se nedan) för att bekräfta att ditt filter är säkert vid den intensitet du har valt:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filtren misslyckades vid aggressiv intensitet");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

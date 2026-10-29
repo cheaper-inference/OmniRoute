@@ -328,6 +328,9 @@ export const updateSettingsSchema = z.object({
       z.object({
         fallbackStrategy: accountFallbackStrategySchema.optional(),
         stickyRoundRobinLimit: z.number().int().min(1).max(1000).optional(),
+        planWeights: z
+          .record(z.string().trim().min(1).max(40), z.number().finite().min(0.01).max(100))
+          .optional(),
       })
     )
     .optional(),
@@ -379,6 +382,12 @@ export const updateSettingsSchema = z.object({
   connectionAwareExpansion: z.boolean().optional(),
   // Global cap on per-target expansion; the per-combo value wins when set.
   connectionAwareExpansionMaxPerTarget: z.coerce.number().int().min(1).max(64).optional(),
+  /**
+   * Keep combo targets whose known output ceiling sits below the request's
+   * max_tokens instead of dropping them. The combo resolver already honours this
+   * key; without it in the schema the only way to set it was per combo.
+   */
+  outputLimitAdvisory: z.boolean().optional(),
   /** Keep eligible combo targets close to the provider-side prompt cache. */
   promptCacheAffinityEnabled: z.boolean().optional(),
   /**
@@ -446,6 +455,8 @@ export const updateSettingsSchema = z.object({
   stripModelPrefix: z.boolean().optional(),
   // Cache control preservation mode
   alwaysPreserveClientCache: z.enum(["auto", "always", "never"]).optional(),
+  // Gemini through Antigravity only; default off and no explicit cache resources.
+  geminiPromptCacheMode: z.enum(["off", "implicit"]).optional(),
   antigravitySignatureCacheMode: z.enum(signatureCacheModeValues).optional(),
   // Adaptive Volume Routing
   adaptiveVolumeRouting: z.boolean().optional(),

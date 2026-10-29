@@ -10,7 +10,10 @@ import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts
 import { getModelsByProviderId } from "@/shared/constants/models";
 import { resolveAlibabaProviderModelsUrl } from "@/shared/constants/alibabaProviderRegions";
 import { getStaticModelsForProvider } from "@/lib/providers/staticModels";
-import { providerUsesCuratedModelsOnly } from "@/lib/providers/modelListingCapability";
+import {
+  isDiscoveryImportedCustomSource,
+  providerUsesCuratedModelsOnly,
+} from "@/lib/providers/modelListingCapability";
 import { mergeModelsWithCustomPrecedence } from "@/lib/providers/modelMetadataPrecedence";
 import { addModelsSuffix } from "@/lib/providers/validation/urlHelpers";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
@@ -36,6 +39,7 @@ import {
 import { getStaticQoderModels } from "@omniroute/open-sse/services/qoderCli.ts";
 import { getCodexDiscoveryMode } from "@/shared/services/codexDiscoveryPolicy";
 import { deriveConfigFromRegistryModelsUrl } from "./discoveryConfig";
+import { recordDiscoveryOutcome } from "./discovery/discoveryOutcome";
 import {
   buildTokenPlanCatalogRequest,
   isTokenPlanCatalogProvider,
@@ -233,12 +237,19 @@ export async function GET(
     // over discovered metadata for the same id.
     let customModelsForProvider: Array<Record<string, unknown> & { id: string; name?: string }> =
       [];
-    if (!excludeCustom && !usesCuratedModelsOnly) {
+    if (!excludeCustom) {
       try {
         const custom = await getCustomModels(provider);
         if (Array.isArray(custom)) {
+          // #18018 keeps operator rows on curated providers; rows a discovery sync
+          // imported are stale there and stay out (#8451).
           customModelsForProvider = custom.flatMap((model) =>
-            model && typeof model === "object" && typeof model.id === "string" ? [model] : []
+            model &&
+            typeof model === "object" &&
+            typeof model.id === "string" &&
+            !(usesCuratedModelsOnly && isDiscoveryImportedCustomSource(model.source))
+              ? [model]
+              : []
           );
         }
       } catch {
@@ -273,7 +284,12 @@ export async function GET(
       // The single place where a discovery response gets its public shape: the
       // internal reason is dropped and the response is flagged as degraded only
       // when the payload really is a degraded discovery.
-      return NextResponse.json(applyDiscoveryDegradation(payload), statusConfig);
+      const publicPayload = applyDiscoveryDegradation(payload);
+      // Keep the outcome of this discovery: the response carrying it is gone on
+      // the next read. The outcome is read from the public payload, so it
+      // carries the same reason the caller sees.
+      recordDiscoveryOutcome(publicPayload);
+      return NextResponse.json(publicPayload, statusConfig);
     };
 
     const connectionId = typeof connection.id === "string" ? connection.id : id;

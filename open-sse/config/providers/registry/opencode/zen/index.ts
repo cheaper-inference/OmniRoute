@@ -197,13 +197,16 @@ export const opencode_zenProvider: RegistryEntry = {
       contextLength: 330000,
       maxOutputTokens: 128000,
     },
-    { id: "mimo-v2.5-free", name: "MiMo V2.5 Free", contextLength: 1048576 },
     // MiMo V2.6 Flash Free ships a 1M window upstream (same as V2.5); without
     // this row it falls through to the 200000 provider default and clients
     // compact far too early.
+    // 2026-10-21 sync: mimo-v2.5-free was deprecated upstream (410 "Model
+    // mimo-v2.5-free has been deprecated. Use mimo-v2.6-flash-free instead.") and
+    // replaced by mimo-v2.6-flash-free; keep the old id as a compatibility alias.
     {
       id: "mimo-v2.6-flash-free",
       name: "MiMo V2.6 Flash Free",
+      aliases: ["mimo-v2.5-free"],
       contextLength: 1048576,
       maxOutputTokens: 131072,
     },

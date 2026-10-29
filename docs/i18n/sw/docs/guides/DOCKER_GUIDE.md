@@ -645,27 +645,29 @@ sudo systemctl enable --now omniroute-update.path
 Huduma huondoa ombi kabla ya kufanya pull ili utekelezaji ulioshindwa usijirudie mfululizo. Bila
 `DOCKER_UPDATE_TRIGGER_FILE`, dashibodi huendelea kutumia mtiririko wa amri wa kutekelezwa mwenyewe.
 
-## Upatikanaji: SQLite ya chaguo-msingi hutumia replica moja
+## Upatikanaji: SQLite chaguo-msingi ni nakala moja
 
-OmniRoute ya kawaida ya Docker / Kubernetes ni **mchakato mmoja wa Node + mwandishi mmoja wa SQLite**. Upatikanaji wa juu **hautumiki** kwenye topolojia hiyo.
+Hisa Docker / Kubernetes OmniRoute ni** Mchakato wa Node moja + SQLite mwandishi mmoja** . Upatikanaji wa juu ni** haijaungwa mkono** juu ya topolojia hiyo.
 
-| Kizuizi                                     | Matokeo                                                                                                                                                                                                                                                                                                                                                      |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Mwandishi mmoja                             | **Usiendeshe** replica nyingi dhidi ya faili moja ya SQLite. Hilo huharibu DB.                                                                                                                                                                                                                                                                               |
-| Recreate / restart / kuuliwa na HEALTHCHECK | **Kukatika kabisa** kwa SSE zinazoendelea, vipindi vya dashibodi na hali iliyohifadhiwa kwenye kumbukumbu. Kila mteja aliyeunganishwa hukatika. Maombi mapya wakati hakuna endpoint hupokea **`502 Bad Gateway: Unknown error`** kutoka kwa reverse proxy, si JSON ya OmniRoute — wateja hawawezi kutofautisha hali hii na hitilafu ya mtoa huduma (#11015). |
-| Event loop sawa na `/healthz`               | Mzunguko wenye shughuli nyingi wa katalogi au ukandamizaji unaweza kuchelewesha probes; timeout fupi kisha huanzisha upya replica **pekee**.                                                                                                                                                                                                                 |
+| Kizuizi                                       | Matokeo                                                                                                                                                                                                                                                                                                                                         |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mwandishi mmoja                               | Fanya** sivyo** endesha nakala nyingi dhidi ya faili moja SQLite. Hiyo inaharibu DB.                                                                                                                                                                                                                                                            |
+| Tengeneza upya / anza upya / HEALTHCHECK kill | **Kukatika kabisa** ya ndani ya ndege SSE, vipindi vya dashibodi, na hali ya kumbukumbu. Kila mteja aliyeunganishwa huanguka. Maombi mapya wakati wa kidirisha cha mwisho-tupu hupata wakala wa kurudi nyuma**`502 Bad Gateway: Unknown error`** , si OmniRoute JSON — wateja hawawezi kutofautisha hili na kutofaulu kwa mtoa huduma (#11015). |
+| Kitanzi cha tukio sawa na `/healthz`          | Katalogi yenye shughuli nyingi au tiki ya kukandamiza inaweza kuchelewesha uchunguzi; muda mfupi wa kuisha kisha inaanza upya** pekee** nakala.                                                                                                                                                                                                 |
 
-**Jedwali la probes** (angalia pia [mapendekezo ya probes za Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Matrix ya uchunguzi** (tazama pia [mapendekezo ya uchunguzi wa Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Probe           | Lengo                                                               | Usitumie                                                           |
-| --------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Uhai            | TCP kwenye `PORT` (chaguo-msingi `20128`), au HTTP laini `/healthz` | `/api/monitoring/health`                                           |
-| Utayari         | HTTP `GET /healthz`                                                 | Timeout fupi zinazochukulia event loop yenye shughuli kuwa imekufa |
-| Kina / wanadamu | `/api/monitoring/health`                                            | Liveness ya kubelet inayojiendesha kiotomatiki                     |
+| Chunguza        | Lengo                                                               | Usitumie                                                                    |
+| --------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Uhai            | TCP kwenye `PORT` (chaguo-msingi `20128`), au laini HTTP `/healthz` | `/api/monitoring/health`                                                    |
+| Utayari         | HTTP `GET /healthz`                                                 | Muda mgumu ambao hushughulikia shughuli ya kitanzi cha tukio kama iliyokufa |
+| Kina / wanadamu | `/api/monitoring/health`                                            | Utendaji wa kubelet otomatiki                                               |
 
-**Masasisho:** tarajia kila kipindi kukatika. Ondoa wateja taratibu ukiweza; hakuna rolling update kwenye SQLite ya chaguo-msingi. Compose `restart: unless-stopped` pamoja na Docker `HEALTHCHECK` pia vitabadilisha mchakato pekee kontena linapokuwa Unhealthy — athari zake ni zilezile.
+**Maboresho:** tarajia kila kikao kitashuka. Futa wateja ikiwa unaweza; hakuna sasisho linaloendelea kwenye chaguo-msingi SQLite. Tunga `restart: unless-stopped` pamoja na Docker `HEALTHCHECK` pia itachukua nafasi ya mchakato pekee wakati chombo hakina Afya - radius sawa ya mlipuko.
 
-Kijisehemu cha Kubernetes kwa **replica moja** (Recreate inahitajika; usiongeze `replicas` dhidi ya faili moja ya SQLite):
+Maonyesho yaliyo tayari na chati ya Helm inaishi katika `deploy/kubernetes/` na `deploy/helm/omniroute/` - angalia [mwongozo wa uwekaji wa Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kijisehemu cha Kubernetes cha a** replica moja** (Uundaji upya unahitajika; usipandishe `replicas` dhidi ya faili moja SQLite ):
 
 ```yaml
 spec:
@@ -692,9 +694,9 @@ spec:
             periodSeconds: 20
 ```
 
-Kusubiri kwa `preStop` kunaruhusu kube kuondoa vituo vya mwisho vya Service kabla ya SIGTERM ili trafiki **mpya** iache kufikia mchakato unaozimwa. SSE ya `/v1/responses` inayoendelea hukamilishwa kwa hadi `SHUTDOWN_TIMEOUT_MS` (chaguo-msingi sekunde 30) kupitia ruhusa nzito za udahili (#11015). Maombi mapya ambayo bado yanafikia mchakato hupata `503` + `Retry-After: 5`. Pengo la kutokuwa na kituo cha mwisho la Recreate hadi mbadala awe Ready linaendelea kuwa hitilafu kamili — hiyo ni topolojia ya SQLite, si usanidi usio sahihi wa probe.
+`preStop` kulala huruhusu kube kuacha Vituo vya huduma kabla ya SIGTERM hivyo** mpya** trafiki huacha kupiga mchakato wa kufa. `/v1/responses` SSE ndani ya ndege hutolewa hadi `SHUTDOWN_TIMEOUT_MS` (chaguo-msingi ya 30s) kupitia ukodishaji wa uandikishaji wa uzani mzito (#11015). Maombi mapya ambayo bado yanafikia mchakato huo pata `503` + `Retry-After: 5`. Tengeneza upya pengo la sehemu tupu hadi kibadilisho kiwe Tayari kinasalia kuwa tatizo kubwa - hiyo ni topolojia SQLite, si usanidi usiofaa wa uchunguzi.
 
-Postgres ya nje / HA yenye waandishi wengi **si** njia ya kawaida iliyorekodiwa. Ikiwa unahitaji HA, tumia replica moja au endesha topolojia ambayo mradi umeijaribu na kuirekodi kando. Kazi ya Postgres/MySQL ipo katika [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Hadi hiyo itolewe, njia pekee inayotumika ya kuzidisha uwezo wa `/v1/responses` **mkubwa** ni michakato N inayojitegemea (sehemu inayofuata), si `replicas > 1` kwenye volume moja.
+Postgres ya nje / waandishi wengi HA ni** sivyo** njia ya hisa iliyoandikwa. Ikiwa unahitaji HA, weka nakala moja au endesha topolojia ambayo mradi umejaribu na kurekodi tofauti. Kazi ya Postgres/MySQL inaishi [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Hadi meli hizo, njia pekee inayotumika ya kuzidisha** kubwa** uwezo wa `/v1/responses` ni michakato inayojitegemea ya N (sehemu inayofuata), sio `replicas > 1` kwenye juzuu moja.
 
 ## Upanuzi mlalo: michakato N huru
 

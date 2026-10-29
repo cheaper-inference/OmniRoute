@@ -20,6 +20,7 @@ import {
 import { providerText } from "../providerPageHelpers";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Button, Checkbox, FilterPills } from "@/shared/components";
+import ModelComboBadge from "./ModelComboBadge";
 import ModelCompatPopover from "./ModelCompatPopover";
 import ModelEndpointTagsEditor, { type ModelEndpointEditorInfo } from "./ModelEndpointTagsEditor";
 
@@ -250,6 +251,8 @@ export interface ModelRowProps {
   fullModel: string;
   provider: string;
   alias?: string;
+  /** Combo names that reference this model, for the "used in combo" badge. */
+  combos?: string[];
   copied?: string;
   onCopy: (text: string, key: string) => void;
   onSetAlias?: (alias: string) => void;
@@ -274,6 +277,7 @@ export default function ModelRow({
   fullModel,
   provider,
   alias,
+  combos,
   copied,
   onCopy,
   onSetAlias,
@@ -359,6 +363,7 @@ export default function ModelRow({
       {/* Line 2 (never wraps): source, alias (truncates) and the actions, in the name's column. */}
       <div className="flex min-w-0 items-center gap-2 pl-6">
         <ModelSourceBadge source={model.source} />
+        {combos && combos.length > 0 && <ModelComboBadge combos={combos} t={t} />}
         {onSetAlias && (
           <span className="flex min-w-0 flex-1 items-center text-[10px] gap-1">
             {editing ? (
