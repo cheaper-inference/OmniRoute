@@ -192,15 +192,15 @@ JSON-RPC endpoint `/a2a` नै आधिकारिक A2A प्रवेश 
 
 ## नयाँ Skill थप्ने
 
-1. **Skill file सिर्जना गर्नुहोस्:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Skill फाइल सिर्जना गर्नुहोस्:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   एउटा async function `(task: A2ATask) => Promise<{ artifacts, metadata }>` export गर्नुहोस्। `smartRouting.ts` जस्ता विद्यमान skill हरूको संरचना अनुसरण गर्नुहोस्।
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` async function निर्यात गर्नुहोस्। `smartRouting.ts` जस्ता विद्यमान skills को संरचना अनुसरण गर्नुहोस्।
 
 2. **Handler दर्ता गर्नुहोस्:** `src/lib/a2a/taskExecution.ts` मा, `A2A_SKILL_HANDLERS` मा एउटा entry थप्नुहोस्:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...विद्यमान skill हरू
+     // ...विद्यमान skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -208,21 +208,21 @@ JSON-RPC endpoint `/a2a` नै आधिकारिक A2A प्रवेश 
    };
    ```
 
-3. **Agent Card मा उपलब्ध गराउनुहोस्:** `src/app/.well-known/agent.json/route.ts` मा, `skills` array मा थप्नुहोस्:
+3. **Agent Card मा उपलब्ध गराउनुहोस्:** `src/lib/a2a/agentCardMetadata.ts` मा (`/.well-known/agent.json` र `/.well-known/agent-card.json` दुवैले साझा रूपमा प्रयोग गर्ने), `skills` array मा थप्नुहोस्:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
+     "name": "तपाईंको Skill",
+     "description": "आशयमा केन्द्रित छोटो विवरण",
      "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "examples": ["प्राकृतिक भाषामा गरिएको नमुना आह्वान"]
    }
    ```
 
-4. **Test हरू लेख्नुहोस्:** `tests/unit/a2a-<your-skill>.test.ts`। सफल अवस्था + त्रुटि अवस्था समेट्नुहोस्।
+4. **Tests लेख्नुहोस्:** `tests/unit/a2a-<your-skill>.test.ts`। सफल अवस्था + त्रुटि अवस्था समेट्नुहोस्।
 
-5. यस file को `Available Skills` table मा नयाँ skill लाई **दस्तावेजीकरण गर्नुहोस्**।
+5. यो फाइलको `Available Skills` table मा नयाँ skill लाई **दस्तावेजीकरण गर्नुहोस्**।
 
 ---
 

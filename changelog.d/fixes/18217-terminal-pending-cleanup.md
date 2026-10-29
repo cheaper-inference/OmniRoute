@@ -1,0 +1,1 @@
+- **fix(usage):** Release terminal pending requests even when completion bookkeeping or completed-detail retention throws, preserving concurrent requests and their counters ([#18217](https://github.com/cheaper-inference/OmniRoute/pull/18217), [@AiCaptain357](https://github.com/AiCaptain357)).

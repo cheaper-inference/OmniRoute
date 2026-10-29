@@ -197,17 +197,17 @@ JSON-RPC අන්ත ලක්ෂ්යය වන `/a2a`, සම්මත A2A �
 
 ---
 
-## නව කුසලතාවක් එක් කිරීම
+## නව Skill එකක් එක් කිරීම
 
-1. **කුසලතා ගොනුව සාදන්න:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Skill ගොනුව සාදන්න:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` ආකාරයේ async ශ්රිතයක් export කරන්න. `smartRouting.ts` වැනි පවතින කුසලතාවල ව්යුහය අනුගමනය කරන්න.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` ආකාරයේ async function එකක් export කරන්න. `smartRouting.ts` වැනි පවතින skillsවල ව්යුහය අනුගමනය කරන්න.
 
-2. **හසුරුවනය ලියාපදිංචි කරන්න:** `src/lib/a2a/taskExecution.ts` තුළ, `A2A_SKILL_HANDLERS` වෙත ඇතුළත් කිරීමක් එක් කරන්න:
+2. **Handler එක ලියාපදිංචි කරන්න:** `src/lib/a2a/taskExecution.ts` තුළ, `A2A_SKILL_HANDLERS` වෙත entry එකක් එක් කරන්න:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...පවතින කුසලතා
+     // ...පවතින skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ JSON-RPC අන්ත ලක්ෂ්යය වන `/a2a`, සම්මත A2A �
    };
    ```
 
-3. **Agent Card හි නිරාවරණය කරන්න:** `src/app/.well-known/agent.json/route.ts` තුළ, `skills` අරාවට එක් කරන්න:
+3. **Agent Card එකෙහි නිරාවරණය කරන්න:** `src/lib/a2a/agentCardMetadata.ts` තුළ (`/.well-known/agent.json` සහ `/.well-known/agent-card.json` විසින් හවුලේ භාවිත කරනු ලැබේ), `skills` array එකට පහත දෑ එක් කරන්න:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
+     "name": "ඔබගේ Skill එක",
+     "description": "අභිප්රාය කේන්ද්ර කරගත් කෙටි විස්තරයක්",
      "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "examples": ["ස්වාභාවික භාෂාවෙන් සිදු කරන ආදර්ශ invocation එකක්"]
    }
    ```
 
-4. **පරීක්ෂණ ලියන්න:** `tests/unit/a2a-<your-skill>.test.ts`. සාර්ථක මාර්ගය + දෝෂ මාර්ගය ආවරණය කරන්න.
+4. **Tests ලියන්න:** `tests/unit/a2a-<your-skill>.test.ts`. සාර්ථක මාර්ගය සහ දෝෂ මාර්ගය ආවරණය කරන්න.
 
-5. මෙම ගොනුවේ `Available Skills` වගුවෙහි නව කුසලතාව **ලේඛනගත කරන්න**.
+5. මෙම ගොනුවේ `Available Skills` වගුව තුළ නව skill එක **ලේඛනගත කරන්න**.
 
 ---
 

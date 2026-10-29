@@ -177,19 +177,19 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-15), {
       fromVersion: "194",
       fromName: "api_key_self_service_settings",
-      toVersion: "218",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-14), {
       fromVersion: "197",
       fromName: "api_key_self_service_settings",
-      toVersion: "218",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-13), {
       fromVersion: "207",
       fromName: "api_key_self_service_settings",
-      toVersion: "218",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-12), {
@@ -201,7 +201,7 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-11), {
       fromVersion: "213",
       fromName: "api_key_self_service_settings",
-      toVersion: "218",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     // #14833 agent-session builds (190/191 through 214/215) now live at 219/220

@@ -190,17 +190,17 @@ A JSON-RPC `/a2a` végpont a kanonikus A2A belépési pont. Az alábbi REST-vég
 
 ---
 
-## Új képesség hozzáadása
+## Új skill hozzáadása
 
-1. **Képességfájl létrehozása:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Skillfájl létrehozása:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportáljon egy `(task: A2ATask) => Promise<{ artifacts, metadata }>` aszinkron függvényt. Kövesse a meglévő képességek, például a `smartRouting.ts` felépítését.
+   Exportáljon egy `(task: A2ATask) => Promise<{ artifacts, metadata }>` aszinkron függvényt. Kövesse a meglévő skillek, például a `smartRouting.ts` felépítését.
 
 2. **Kezelő regisztrálása:** a `src/lib/a2a/taskExecution.ts` fájlban adjon hozzá egy bejegyzést az `A2A_SKILL_HANDLERS` objektumhoz:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...meglévő képességek
+     // ...meglévő skillek
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -208,7 +208,7 @@ A JSON-RPC `/a2a` végpont a kanonikus A2A belépési pont. Az alábbi REST-vég
    };
    ```
 
-3. **Közzététel az Ügynökkártyán:** a `src/app/.well-known/agent.json/route.ts` fájlban fűzze hozzá a következőt a `skills` tömbhöz:
+3. **Közzététel az Agent Cardban:** a `src/lib/a2a/agentCardMetadata.ts` fájlban (amelyet a `/.well-known/agent.json` és a `/.well-known/agent-card.json` közösen használ) fűzze hozzá a következőt a `skills` tömbhöz:
 
    ```json
    {
@@ -220,9 +220,9 @@ A JSON-RPC `/a2a` végpont a kanonikus A2A belépési pont. Az alábbi REST-vég
    }
    ```
 
-4. **Tesztek írása:** `tests/unit/a2a-<your-skill>.test.ts`. Fedje le a sikeres végrehajtási és a hibakezelési útvonalat.
+4. **Tesztek írása:** `tests/unit/a2a-<your-skill>.test.ts`. Fedje le a sikeres és a hibás végrehajtási útvonalat.
 
-5. **Dokumentálja** az új képességet e fájl `Available Skills` táblázatában.
+5. **Dokumentálja** az új skillt ennek a fájlnak az `Available Skills` táblázatában.
 
 ---
 
