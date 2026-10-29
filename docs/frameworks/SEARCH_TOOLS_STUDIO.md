@@ -1,7 +1,7 @@
 ---
 title: "Search Tools Studio"
-version: 3.8.40
-lastUpdated: 2026-06-28
+version: 3.8.53
+lastUpdated: 2026-10-21
 ---
 
 # Search Tools Studio
@@ -101,6 +101,36 @@ Runs the same query/URL across up to **4 providers in parallel** (D22):
 ---
 
 ## Provider Catalog
+
+### DeepSeek Search and Fetch
+
+The **DeepSeek Search** card belongs under **Search Providers** at `/dashboard/providers`,
+with both Search and Fetch capabilities. It uses the standalone DeepSeek tools APIs,
+independently of the DeepSeek chat model. Add a DeepSeek API key to `deepseek-search`,
+or let the search and fetch routes reuse an active `deepseek` chat connection. API-key
+connection restrictions still apply to that fallback.
+
+Use `provider: "deepseek-search"` with `POST /v1/search` or `POST /v1/web/fetch`
+(also available through the existing MCP web tools). Search additionally accepts the
+request alias `deepseek`. Search supports web results, 1–50 results, and queries of
+1–128 Unicode characters including filters. `domain_filter`, `language`, and
+day/week/month/year `time_range` map to query operators. Existing query operators are
+preserved. `provider_options` supports `need_content`, `ori_question`, and IP-based
+`localization`; `content_options.full_page` also enables `need_content`.
+
+Country, pagination offset, hourly ranges, and `content_options.max_characters` are
+rejected rather than silently ignored. Fetch accepts HTTP(S) URLs without embedded
+credentials, returns Markdown only, caps returned content at 100,000 characters, and
+does not support crawl depth or waiting for selectors. Both upstream endpoints are
+fixed and redirects are disabled to protect the API key.
+
+Each successful non-empty upstream request costs **$0.00075**, independent of result
+count. Empty search results and failures cost zero; cached search responses do not
+make another upstream call. This is standalone API pricing; the temporary free
+server-side tools promotion in DeepSeek coding clients is a separate offer.
+See the [official Search & Fetch guide](https://api-docs.deepseek.com/guides/search/).
+
+### Catalog response
 
 `ProviderCatalog.tsx` exposes the full provider list from `GET /api/search/providers`
 (extended in F4 to include fetch providers):

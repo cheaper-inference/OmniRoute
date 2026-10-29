@@ -2,6 +2,7 @@
 // …). Extracted from validation.ts (god-file decomposition) — top-level functions/data with no
 // dispatcher-state captures; behavior is byte-identical to the original inline defs.
 import { SAFE_OUTBOUND_FETCH_PRESETS, safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
+import { DEEPSEEK_SEARCH_URL } from "@omniroute/open-sse/config/deepseekSearch.ts";
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { withCustomUserAgent } from "./headers";
 import { toValidationErrorResult, validationWrite } from "./transport";
@@ -56,6 +57,15 @@ export const SEARCH_VALIDATOR_CONFIGS: Record<
   string,
   (apiKey: string, providerSpecificData?: any) => { url: string; init: RequestInit }
 > = {
+  "deepseek-search": (apiKey) => ({
+    url: DEEPSEEK_SEARCH_URL,
+    init: {
+      method: "POST",
+      redirect: "error",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({ query: "DeepSeek", count: 1 }),
+    },
+  }),
   "serper-search": (apiKey) => ({
     url: "https://google.serper.dev/search",
     init: {

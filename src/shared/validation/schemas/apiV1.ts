@@ -727,6 +727,7 @@ export const v1WebFetchSchema = z.object({
       "nimble-search",
       "anysearch-search",
       "parallel-search",
+      "deepseek-search",
     ])
     .optional(),
   format: z.enum(["markdown", "html", "links", "screenshot"]).default("markdown"),

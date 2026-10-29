@@ -272,3 +272,27 @@ test("auto-select returns 400 when no web-fetch provider is configured", async (
   assert.equal(response.status, 400);
   assert.ok((body.error?.message ?? "").includes("No credentials configured"));
 });
+
+for (const [upstreamStatus, expectedStatus] of [
+  [402, 429],
+  [403, 403],
+]) {
+  test(`DeepSeek Fetch ${upstreamStatus} is ${upstreamStatus === 402 ? "pool exhaustion" : "a policy rejection"}`, async () => {
+    await seedConnection("deepseek", { apiKey: "deepseek-test-key" });
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (url) => {
+      assert.equal(String(url), "https://api.deepseek.com/v1/tools/fetch");
+      return new Response(JSON.stringify({ error: { message: "upstream failure" } }), {
+        status: upstreamStatus,
+      });
+    };
+    try {
+      // With no other usable provider, insufficient balance exhausts the pool.
+      // A Fetch security-policy denial must remain 403, not become quota exhaustion.
+      assert.equal((await postWebFetch({})).status, expectedStatus);
+      assert.equal((await postWebFetch({ provider: "deepseek-search" })).status, upstreamStatus);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+}

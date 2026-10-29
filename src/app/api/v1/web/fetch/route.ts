@@ -26,6 +26,7 @@ import {
   type WebFetchProviderId,
 } from "@omniroute/open-sse/handlers/webFetch.ts";
 import * as log from "@/sse/utils/logger";
+import { getSearchCredentialFallbacks } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
 import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { enforceApiKeyPolicyWithScope } from "@/app/api/v1/_shared/keyScopedRoute";
@@ -84,10 +85,19 @@ async function resolveCredentials(
   allowedConnections: string[] | null
 ): Promise<CredentialsLookup> {
   try {
-    const creds = withoutKeyScopeBlocked(
-      await getProviderCredentialsWithQuotaPreflight(providerId, null, allowedConnections)
-    );
-    return (creds as CredentialsLookup) ?? null;
+    const providerIds =
+      providerId === "deepseek-search"
+        ? [providerId, ...getSearchCredentialFallbacks(providerId)]
+        : [providerId];
+    let limited: RateLimitedCredentials | null = null;
+    for (const id of providerIds) {
+      const creds = withoutKeyScopeBlocked(
+        await getProviderCredentialsWithQuotaPreflight(id, null, allowedConnections)
+      );
+      if (creds && !isAllRateLimitedCredentials(creds)) return creds as WebFetchCredentials;
+      if (isAllRateLimitedCredentials(creds)) limited = creds;
+    }
+    return limited;
   } catch {
     return null;
   }
@@ -96,6 +106,7 @@ async function resolveCredentials(
 /** A request-time upstream status that means "try the next provider" instead of giving up. */
 function isRetryableWebFetchStatus(providerId: WebFetchProviderId, status?: number): boolean {
   if (status === HTTP_STATUS.RATE_LIMITED) return true;
+  if (providerId === "deepseek-search" && status === HTTP_STATUS.PAYMENT_REQUIRED) return true;
   if (status === HTTP_STATUS.PAYMENT_REQUIRED || status === HTTP_STATUS.FORBIDDEN) {
     return QUOTA_STATUS_PROVIDERS.has(providerId);
   }

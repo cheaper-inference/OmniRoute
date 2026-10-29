@@ -11,6 +11,7 @@
  */
 
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
+import { DEEPSEEK_SEARCH_URL, DEEPSEEK_TOOL_COST_USD } from "./deepseekSearch.ts";
 
 export interface SearchProviderConfig {
   id: string;
@@ -55,6 +56,8 @@ export interface SearchProviderConfig {
   /** Results included in the per-call price; each one above it adds `extraResultCost`. */
   includedResults?: number;
   extraResultCost?: number;
+  /** Empty successful responses are not billable for this provider. */
+  chargeForEmptyResults?: boolean;
   /**
    * Bill `costPerQuery` (or the mode price) once per started block of this many
    * returned results, with at least one block per call (Firecrawl: 2 credits per
@@ -69,6 +72,22 @@ export interface SearchProviderConfig {
 }
 
 export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
+  "deepseek-search": {
+    id: "deepseek-search",
+    name: "DeepSeek Search",
+    baseUrl: DEEPSEEK_SEARCH_URL,
+    method: "POST",
+    authType: "apikey",
+    authHeader: "bearer",
+    costPerQuery: DEEPSEEK_TOOL_COST_USD,
+    chargeForEmptyResults: false,
+    freeMonthlyQuota: 0,
+    searchTypes: ["web"],
+    defaultMaxResults: 5,
+    maxMaxResults: 50,
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+  },
   "serper-search": {
     id: "serper-search",
     name: "Serper Search",
@@ -496,6 +515,7 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
  * from a related provider (e.g., perplexity-search uses the same API key as perplexity chat).
  */
 export const SEARCH_CREDENTIAL_FALLBACKS: Record<string, string | string[]> = {
+  "deepseek-search": "deepseek",
   "perplexity-search": "perplexity",
   "ollama-search": "ollama-cloud",
   "zai-search": "zai",
@@ -517,6 +537,7 @@ export function getSearchCredentialFallbacks(providerId: string): string[] {
  * catalog treat jina-ai as a search-only card (searchTypes → "web").
  */
 export const SEARCH_PROVIDER_ALIASES: Record<string, string> = {
+  deepseek: "deepseek-search",
   "jina-ai": "jina-search",
   jina: "jina-search",
   brave: "brave-search",

@@ -51,6 +51,11 @@ test("webFetchInput accepts a valid minimal request (URL only)", () => {
   assert.equal(parsed.include_metadata, false); // default
 });
 
+test("webFetchInput accepts the standalone DeepSeek provider", () => {
+  const parsed = webFetchInput.parse({ url: "https://example.com", provider: "deepseek-search" });
+  assert.equal(parsed.provider, "deepseek-search");
+});
+
 test("webFetchInput accepts all optional fields", () => {
   const parsed = webFetchInput.parse({
     url: "https://example.com",

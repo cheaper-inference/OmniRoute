@@ -27,6 +27,13 @@ interface FetchProviderDef {
 
 const FETCH_PROVIDERS: FetchProviderDef[] = [
   {
+    id: "deepseek-search",
+    name: "DeepSeek Fetch",
+    costPerQuery: 0.00075,
+    freeMonthlyQuota: 0,
+    fetchFormats: ["markdown"],
+  },
+  {
     id: "firecrawl",
     name: "Firecrawl",
     costPerQuery: 0.002,
@@ -176,7 +183,7 @@ export async function GET(request: Request) {
     // -----------------------------------------------------------------------
     const fetchProviderStatuses = await Promise.all(
       FETCH_PROVIDERS.map((fp) =>
-        resolveProviderStatus(fp.id, false).then((status) => ({ fp, status }))
+        resolveProviderStatus(fp.id, fp.id === "deepseek-search").then((status) => ({ fp, status }))
       )
     );
 
