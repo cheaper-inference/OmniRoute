@@ -115,13 +115,11 @@
 4. `tests/unit/ui/adapters/<name>.test.tsx` එක් කරන්න හෝ යාවත්කාලීන කරන්න. callers ගණනාවක් ඇති ඇඩැප්ටරයක් සඳහා,
    වෙනසට පෙර සහ පසු render වූ markup සංසන්දනය කරන්න — padding හෝ wrapper වෙනස්කම් සෑම තිරයකටම පැතිරෙයි.
 
-## 5. kit එක යාවත්කාලීන කිරීම
+## 5. කට්ටලය යාවත්කාලීන කිරීම
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` එම commit එකේ ඇති upstream `src/` `packages/ui-kit/src` වෙත
-පිටපත් කර අවසර ලත් එකම පරිවර්තනය යොදයි (එය relative imports වලින් `.js` පසුටැල්ල ඉවත් කරයි). ඉන්පසු:
-`git diff packages/ui-kit` සමාලෝචනය කරන්න, තේමා දෙකෙහිම providers, settings, combos, usage සහ endpoint මත
-දෘශ්ය පරීක්ෂාවක් කරන්න, `npm run check:ui-kit-snapshot` සහ `npm run test:vitest:ui` ධාවනය කරන්න, සහ
-upstream changelog එක සමඟ PR එක විවෘත කරන්න.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` හි අමුණා ඇති අනුවාදය upstream repo හි නවතම `v*` ටැගය සමඟ සංසන්දනය කර නිකුතුවක් අවසන් වූ විට සමමුහුර්ත විධානය මුද්‍රණය කරයි. සතිපතා `UI Kit upstream watch` කාර්ය ප්‍රවාහය (`.github/workflows/ui-kit-upstream-watch.yml`) එකම චෙක්පත ක්‍රියාත්මක කරන අතර පින් එක පිටුපස ඇති විට එක් ලුහුබැඳීමේ ගැටලුවක් විවෘතව තබයි; upstream repo පුද්ගලිකයි, එබැවින් වැඩ ප්‍රවාහයට `UI_KIT_READ_TOKEN` රහසේ කියවීමට පමණක් ටෝකනයක් අවශ්‍ය වන අතර එය නොමැතිව නිෂ්ක්‍රීයව පවතී.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` එම කැපවීමේදී upstream `src/` (`latest` = නවතම `v*` ටැගය) `packages/ui-kit/src` වෙත පිටපත් කරයි, තනි අවසර ලත් පරිවර්තනය යොදයි (එය සාපේක්ෂ ආයාතවලින් `.js` උපසර්ගය පහත දමයි), සහ `packages/ui-kit/package.json` සහ `package-lock.json` හි වැඩ අවකාශය අනුවාදය උඩුගං බලා සකසයි. ඉන්පසු: `git diff packages/ui-kit` සමාලෝචනය කරන්න, තේමා දෙකෙහිම සපයන්නන්, සැකසීම්, සංයෝජන, භාවිතය සහ අන්ත ලක්ෂ්‍යය පිළිබඳ දෘශ්‍ය ප්‍රවේශයක් කරන්න, `npm run check:ui-kit-snapshot` සහ `npm run test:vitest:ui` ධාවනය කරන්න, සහ upstream changelog සමඟ PR විවෘත කරන්න.
 
 ## 6. README රූප සටහන්
 

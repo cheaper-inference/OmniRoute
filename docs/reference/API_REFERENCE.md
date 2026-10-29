@@ -882,12 +882,20 @@ The generic fields always win: `query`, `max_results`, `filters` (domains), `cou
 topic derived from `search_type`. On Exa, `search_type: "news"` keeps `category: "news"`.
 Tavily also accepts `search_type: "finance"` (`topic: "finance"`).
 
+Firecrawl search cost is recorded per started block of 10 returned results, at $0.002 (2
+credits) a block and at least one block per call
+([Firecrawl billing](https://docs.firecrawl.dev/billing)): 11 results cost $0.004.
+
 The generic `time_range` now reaches both providers: Exa gets `startPublishedDate` (ISO
 timestamp) and Tavily gets `start_date` (`YYYY-MM-DD`). An explicit date in `provider_options`
 overrides the mapped one.
 
 Exa results keep `id`, `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
 `provider_raw`. Tavily results keep `images` and `favicon`.
+
+Linkup search cost is recorded at $0.005 for `depth` `fast` and `standard` and $0.05 for
+`deep` ([Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing)),
+whether `depth` comes from `provider_options` or the connection's settings.
 
 Exa `type: "lite"` (Exa 3.0) accepts a smaller set of fields and rejects the whole request
 when any other field is set. For lite, `additionalQueries`, `systemPrompt` and every
