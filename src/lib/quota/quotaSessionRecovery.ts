@@ -81,14 +81,12 @@ export async function isTerminalQuotaResponse(response: Response): Promise<boole
   );
 }
 
-export async function maybeQueueQuotaSessionRecovery(input: {
-  request: Request;
-  body: unknown;
-  response: Response;
-  endpoint: RecoverableEndpoint;
-}): Promise<Response> {
-  const { request, body, response, endpoint } = input;
-  if (request.headers.get("x-omniroute-quota-recovery") !== "auto") return response;
+type RecoveryTurn = { sessionId: string; turnId: string; body: Record<string, unknown> };
+type RecoveryOwner = { apiKey: string; apiKeyId: string };
+
+/** Opt-in headers and a replay-safe body; anything else passes the original response through. */
+function readOptInRecoveryTurn(request: Request, body: unknown): RecoveryTurn | null {
+  if (request.headers.get("x-omniroute-quota-recovery") !== "auto") return null;
   const sessionId = request.headers.get("x-omniroute-session")?.trim() ?? "";
   const turnId = request.headers.get("x-omniroute-recovery-turn")?.trim() ?? "";
   if (
@@ -98,12 +96,15 @@ export async function maybeQueueQuotaSessionRecovery(input: {
     request.headers.has("x-omniroute-connection") ||
     !isSafeQuotaRecoveryBody(body)
   ) {
-    return response;
+    return null;
   }
-  if (!(await isTerminalQuotaResponse(response))) return response;
-  if (!isEncryptionEnabled()) return response;
+  return { sessionId, turnId, body };
+}
+
+/** Only an active, unbanned, logging-enabled key may own a durable recovery ticket. */
+async function resolveRecoveryOwner(request: Request): Promise<RecoveryOwner | null> {
   const apiKey = extractApiKey(request, { allowUrl: false });
-  if (!apiKey || !(await isValidApiKey(apiKey))) return response;
+  if (!apiKey || !(await isValidApiKey(apiKey))) return null;
   const metadata = await getApiKeyMetadata(apiKey);
   if (
     !metadata?.id ||
@@ -111,25 +112,12 @@ export async function maybeQueueQuotaSessionRecovery(input: {
     metadata.isBanned === true ||
     metadata.noLog === true
   ) {
-    return response;
+    return null;
   }
+  return { apiKey, apiKeyId: metadata.id };
+}
 
-  const payload = JSON.stringify({ apiKey, sessionId, body } satisfies StoredRequest);
-  if (Buffer.byteLength(payload) > MAX_REQUEST_BYTES) return response;
-  const now = Date.now();
-  let ticket: QuotaRecoveryTicket;
-  try {
-    ticket = enqueueQuotaRecoveryTicket({
-      apiKeyId: metadata.id,
-      turnKey: `${sessionId}:${turnId}`,
-      endpoint,
-      requestPayload: payload,
-      nextAttemptAt: new Date(now + quotaRecoveryDelayMs(response, now)).toISOString(),
-      expiresAt: new Date(now + TICKET_TTL_MS).toISOString(),
-    });
-  } catch {
-    return response;
-  }
+function buildRecoveryAcceptedResponse(ticket: QuotaRecoveryTicket): Response {
   return new Response(
     JSON.stringify({
       recovery: {
@@ -144,6 +132,44 @@ export async function maybeQueueQuotaSessionRecovery(input: {
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     }
   );
+}
+
+export async function maybeQueueQuotaSessionRecovery(input: {
+  request: Request;
+  body: unknown;
+  response: Response;
+  endpoint: RecoverableEndpoint;
+}): Promise<Response> {
+  const { request, body, response, endpoint } = input;
+  const turn = readOptInRecoveryTurn(request, body);
+  if (!turn) return response;
+  if (!(await isTerminalQuotaResponse(response))) return response;
+  if (!isEncryptionEnabled()) return response;
+  const owner = await resolveRecoveryOwner(request);
+  if (!owner) return response;
+
+  const { sessionId, turnId } = turn;
+  const payload = JSON.stringify({
+    apiKey: owner.apiKey,
+    sessionId,
+    body: turn.body,
+  } satisfies StoredRequest);
+  if (Buffer.byteLength(payload) > MAX_REQUEST_BYTES) return response;
+  const now = Date.now();
+  let ticket: QuotaRecoveryTicket;
+  try {
+    ticket = enqueueQuotaRecoveryTicket({
+      apiKeyId: owner.apiKeyId,
+      turnKey: `${sessionId}:${turnId}`,
+      endpoint,
+      requestPayload: payload,
+      nextAttemptAt: new Date(now + quotaRecoveryDelayMs(response, now)).toISOString(),
+      expiresAt: new Date(now + TICKET_TTL_MS).toISOString(),
+    });
+  } catch {
+    return response;
+  }
+  return buildRecoveryAcceptedResponse(ticket);
 }
 
 async function dispatchTicket(ticket: QuotaRecoveryTicket): Promise<void> {
