@@ -39,11 +39,11 @@ Objektivna primerjava lastnosti v primerjavi s priljubljenimi odprtokodnimi usme
 
 ## Kdaj izbrati OmniRoute
 
-- Samostojno gostujete in želite **najširšo pokritost ponudnikov** (375 ponudnikov, 155 brezplačnih vnosov v katalogu brez avtentikacije)
-- Potrebujete **vgrajen strežnik MCP** (orodja LLM, pomnilnik in veščine, izpostavljene kot orodja)
-- Potrebujete **protokol A2A** za poteke dela med agenti
-- Želite **neopaznost prstnih odtisov** (JA3/JA4), da se izognete zaznavanju s strani CAPTCHA preverjanj na virih
-- Potrebujete **funkcije za podjetja** (varnostne omejitve, evalvacije, revizijska sled) brez računa za SaaS
+- Sami gostite in želite** največja pokritost ponudnika** (377 ponudnikov, 155 kataloških vnosov free/no-auth )
+- Potrebujete a** vgrajen strežnik MCP** (LLM orodja, spomin, spretnosti, izpostavljene kot orodja)
+- Potrebujete** protokol A2A** za poteke dela od agenta do agenta
+- hočeš** prikriti prstni odtis** (JA3/JA4), da bi se izognili odkrivanju z zgornjim CAPTCHAs
+- Potrebujete** funkcije podjetja** (zaščitne ograje, evals, revizijska sled) brez računa SaaS
 
 ## Kdaj izbrati LiteLLM
 

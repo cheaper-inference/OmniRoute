@@ -69,7 +69,7 @@ Di bawah ambang, provider **tidak** dianggap sedang cooldown; keberhasilan mengh
 
 - Menandai tidak tersedia: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Pemilihan: `getProviderCredentials*` di file yang sama
-- Perhitungan cooldown: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Kalkulasi cooldown: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Pengaturan: `src/lib/resilience/settings.ts`
 
 **Field per koneksi:**
@@ -81,103 +81,116 @@ Di bawah ambang, provider **tidak** dianggap sedang cooldown; keberhasilan mengh
 
 **Cooldown default:**
 
-- Dasar OAuth: 5 detik
-- Dasar API-key: 3 detik
-- API-key 429: memprioritaskan header `Retry-After`/reset dari upstream/teks reset yang dapat di-parse
+- Basis OAuth: 5s
+- Basis API-key: 3s
+- API-key 429: lebih memilih header `Retry-After`/reset upstream/teks reset yang dapat di-parse
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
 
-**Perlindungan anti-thundering-herd:** mencegah kegagalan bersamaan memperpanjang cooldown secara berlebihan atau menambah `backoffLevel` dua kali.
+**Pelindung anti-thundering-herd:** mencegah kegagalan konkuren memperpanjang cooldown secara berlebihan atau menaikkan `backoffLevel` dua kali.
 
 **429 batas konkurensi tidak menaiki tangga backoff.** Sebuah `429` yang body-nya melaporkan
 batas konkurensi ("too many concurrent requests", "concurrency limit", "parallel request
-limit", GLM `并发数过高`) berarti akun sehat tetapi sibuk.
-`checkFallbackError()` mengembalikan alasan `concurrency_limited`: segera fail over ke
-koneksi berikutnya, dinginkan koneksi ini selama `CONCURRENCY_LIMIT_COOLDOWN_MS` tetap (1 detik) atau
-sesuai petunjuk retry dari upstream, biarkan `backoffLevel` tidak berubah, dan setel `skipProviderBreaker`.
-Body kuota eksplisit tetap menang, sehingga body yang juga cocok dengan pola kuota tetap menjadi
-verdict kuota. Deteksi: `looksLikeConcurrencyLimit()` di `src/shared/utils/classify429.ts`;
-verdict: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (`FailureKind`
-milik breaker) tidak berubah dan tetap membaca `rate_limit` untuk body seperti ini.
+limit", GLM `并发数过高`) berarti akun tersebut sehat tetapi sibuk.
+`checkFallbackError()` mengembalikan reason `concurrency_limited`: lakukan failover ke
+koneksi berikutnya sekarang, dinginkan koneksi ini selama `CONCURRENCY_LIMIT_COOLDOWN_MS`
+tetap (1s) atau sesuai petunjuk retry upstream, biarkan `backoffLevel` tidak berubah, dan
+atur `skipProviderBreaker`. Body kuota eksplisit tetap menang, sehingga body yang juga
+cocok dengan pola kuota tetap menjadi verdict kuota. Deteksi: `looksLikeConcurrencyLimit()`
+di `src/shared/utils/classify429.ts`; verdict: `open-sse/services/accountFallback/concurrencyLimit429.ts`.
+`classify429()` (`FailureKind` milik breaker) tidak berubah dan tetap membaca `rate_limit`
+untuk body semacam ini.
 
 **Stall konten stream tidak mendinginkan akun.** Ketika watchdog stall konten
-(`open-sse/utils/streamHandler.ts`) menyerah pada stream yang tidak mengirim output model tepat
-waktu, `markAccountUnavailable()` mencatat error pada koneksi tetapi tidak menetapkan
-cooldown: stall tersebut milik request itu, paling sering berupa giliran reasoning panjang tanpa
-output. Operator dapat mengaktifkan kembali dengan `resilienceSettings.streamStallCooldown.enabled`
-(default `false`).
+(`open-sse/utils/streamHandler.ts`) menyerah pada stream yang tidak mengirim output model
+tepat waktu, `markAccountUnavailable()` mencatat error pada koneksi tetapi tidak menetapkan
+cooldown: stall tersebut milik permintaan itu, paling sering berupa giliran reasoning panjang
+yang belum menghasilkan output. Operator dapat mengaktifkannya kembali dengan
+`resilienceSettings.streamStallCooldown.enabled` (default `false`).
 
-**Frame reasoning memulai ulang anggaran stall konten.** Model reasoning dapat berpikir selama
-beberapa menit sebelum token terlihat pertamanya: Claude melakukan streaming frame `thinking_delta`
-yang teks thinking-nya mungkin kosong, dan Responses API melakukan streaming satu item reasoning
-demi satu. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) mengenali
-frame-frame ini, dan watchdog memulai ulang anggarannya pada setiap frame alih-alih membatalkan
-giliran. Frame tersebut tetap bukan output model, sehingga giliran yang berakhir hanya dengan reasoning
-tetap dilaporkan kosong, dan giliran yang berhenti melakukan reasoning dan hanya mengirim heartbeat
-tetap memicu watchdog.
+**Sinyal latensi opt-in untuk pemilihan akun `p2c`.** Setiap percobaan yang dikirim mencatat
+time-to-first-byte dan hasilnya per koneksi (dan per koneksi + model) dalam jendela bergulir
+di memori: 20 sampel terakhir dalam 15 menit
+(`open-sse/services/connectionLatencyTracker.ts`, dicatat dari `safeLogEvents()` di
+`src/sse/handlers/chatHelpers.ts`). Ketika `resilienceSettings.p2cLatency.weight` di atas `0`
+(rentang 0-20, default `0` = mati), `compareP2CConnections()` di `src/sse/services/auth.ts`
+menambahkan hingga `weight` poin ke setiap kandidat dari pasangan tersebut. Separuhnya berasal
+dari latensi sebagai rasio terhadap kandidat yang lebih cepat (dua kali lebih lambat mengambil
+separuh penuh) dan separuhnya dari tingkat error bergulir. Komponen ini hanya berlaku ketika
+kedua kandidat memiliki setidaknya 3 sampel, sehingga akun baru tidak dihukum, dan batas
+atasnya tetap di bawah penalti quota-blocked dan quota-exhausted. Ia tidak menambahkan
+circuit tersendiri: akun yang gagal tetap ditangani oleh lapisan cooldown, lockout, dan
+breaker. Atur dengan `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-Frame biner `reasoningContentEvent` milik Kiro dengan signature non-kosong mempertahankan
-aktivitas reasoning ini melalui executor sebagai delta `reasoning_content` kosong. Signature
-tidak diteruskan. Metadata, frame tidak lengkap, dan signature kosong tidak memulai ulang
-anggaran konten; timeout active-stream yang independen dan pembatalan klien tetap
-berlaku (`open-sse/executors/kiro/reasoning.ts`).
+**Frame reasoning memulai ulang anggaran stall konten.** Model reasoning dapat berpikir
+selama beberapa menit sebelum token terlihat pertamanya: Claude mengalirkan frame
+`thinking_delta` yang teks thinking-nya mungkin kosong, dan Responses API mengalirkan satu
+item reasoning demi satu. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`)
+mengenali frame-frame ini, dan watchdog memulai ulang anggarannya pada setiap frame
+alih-alih membatalkan giliran tersebut. Frame-frame ini tetap bukan output model, sehingga
+giliran yang berakhir hanya dengan reasoning tetap dilaporkan kosong, dan giliran yang
+berhenti melakukan reasoning dan hanya mengirim heartbeat tetap memicu watchdog.
+
+Frame biner `reasoningContentEvent` milik Kiro dengan signature yang tidak kosong
+mempertahankan aktivitas reasoning ini melalui executor sebagai delta `reasoning_content`
+kosong. Signature tidak diteruskan. Metadata, frame yang tidak lengkap, dan signature kosong
+tidak memulai ulang anggaran konten; timeout active-stream yang independen dan pembatalan
+klien tetap berlaku (`open-sse/executors/kiro/reasoning.ts`).
 
 **Status terminal (BUKAN cooldown):**
 
-- `banned` — disetel oleh deteksi kata kunci terlarang / pemblokiran akun (lihat [BAN_DETECTION](../security/BAN_DETECTION.md)), dan oleh tiga penolakan per-request berturut-turut dari upstream (`request_rejected`, misalnya Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); satu penolakan saja hanya mendinginkan koneksi
+- `banned` — ditetapkan oleh deteksi kata kunci terlarang / pemblokiran akun (lihat [BAN_DETECTION](../security/BAN_DETECTION.md)), dan oleh tiga penolakan per-permintaan upstream berturut-turut (`request_rejected`, mis. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); satu penolakan hanya mendinginkan koneksi
 - `expired` (bertransisi ke terminal setelah percobaan ulang terbatas — `EXPIRED_RETRY_MAX = 3` dengan exponential backoff — sehingga error OAuth sementara dapat pulih sendiri sebelum akun dinonaktifkan secara permanen)
 - `credits_exhausted`
 
 Status ini bertahan hingga kredensial berubah atau operator meresetnya. Jangan menimpa status terminal dengan status cooldown sementara.
 
-**Pemulihan malas (lazy recovery):** ketika `rateLimitedUntil` telah lewat, koneksi menjadi memenuhi syarat lagi. Saat berhasil digunakan, `clearAccountError()` membersihkan semua field error.
+**Pemulihan lazy:** ketika `rateLimitedUntil` telah lewat, koneksi menjadi eligible lagi. Setelah penggunaan berhasil, `clearAccountError()` membersihkan semua field error.
 
 ### Tembok penggunaan Claude OAuth: jalur prioritas lebih rendah + reset batas sesi
 
 **Cakupan:** satu koneksi langganan Claude (OAuth). Kedua fitur bersifat **opt-in per
 koneksi** (Edit koneksi → bagian Claude → `lowPriorityMode` / `autoLimitReset` di
-`providerSpecificData`, keduanya default nonaktif) dan mencerminkan perintah `/low-priority` dan
-`/limit-reset` milik Claude Code (kontrak wire ditangkap dari Claude Code 2.1.263).
+`providerSpecificData`, keduanya default mati) dan mencerminkan perintah `/low-priority` dan
+`/limit-reset` milik Claude Code (kontrak wire yang ditangkap dari Claude Code 2.1.263).
 
 **Implementasi:**
 
 - State machine + klasifikasi respons: `open-sse/services/claudeLowPriority.ts`
-- Klien status/klaim reset: `open-sse/services/claudeLimitReset.ts`
-- Hook executor (injeksi header + retry akun yang sama): `open-sse/executors/base.ts::execute()`
+- Klien reset status/klaim: `open-sse/services/claudeLimitReset.ts`
+- Hook executor (injeksi header + percobaan ulang akun yang sama): `open-sse/executors/base.ts::execute()`
 - Persistensi opt-in: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Pemicu:** tembok penggunaan 5 jam — sebuah `429` yang header-nya membawa
+**Pemicu:** wall penggunaan 5 jam — sebuah `429` yang headernya membawa
 `anthropic-ratelimit-unified-status: rejected` dan, ketika akun memenuhi syarat,
-`anthropic-ratelimit-unified-slow-offer: treatment`. Tidak ada yang dikirim sebelum 429 tembok
-pertama itu; 429 burst tanpa header unified melewati jalur cooldown normal.
+`anthropic-ratelimit-unified-slow-offer: treatment`. Tidak ada yang dikirim sebelum wall
+429 pertama itu; 429 burst tanpa header unified melewati jalur cooldown normal.
 
-**Jalur prioritas lebih rendah** (`lowPriorityMode`):
+**Jalur prioritas rendah** (`lowPriorityMode`):
 
-- Pada wall 429, executor menerima tawaran itu dan langsung mencoba ulang akun yang **sama**
-  dengan `anthropic-usage-limit: slow`; jalur tetap aktif hingga `anthropic-ratelimit-unified-reset`
-  yang diumumkan (masa tenggang +60 detik) dan setiap permintaan dalam jendela itu membawa
-  header tersebut. 429 yang dicegat tidak pernah mencapai `handleChatCore`, sehingga koneksi
-  **tidak** dimasukkan ke cooldown dan tidak dirotasi.
+- Saat wall 429, executor menerima tawaran dan langsung mencoba ulang akun yang **sama**
+  dengan `anthropic-usage-limit: slow`; jalur tetap aktif hingga
+  `anthropic-ratelimit-unified-reset` yang diumumkan (+masa tenggang 60 detik) dan setiap permintaan
+  dalam jendela itu membawa header tersebut. 429 yang disadap tidak pernah mencapai `handleChatCore`,
+  sehingga koneksi **tidak** dimasukkan ke cooldown dan tidak dirotasi ke koneksi lain.
 - `anthropic-ratelimit-unified-slow-status` pada respons berikutnya: `active` / `not_needed`
   mempertahankan jalur; `slot_busy` (429) atau `529` menunggu
-  `anthropic-ratelimit-unified-slow-retry-after` dari server (default 20 detik, clamp 5–600 detik,
-  jitter ±30%) lalu mencoba ulang, dibatasi oleh `anthropic-ratelimit-unified-slow-max-wait`
-  (default 20 menit, clamp 1 menit–6 jam) — melewati itu jalur berakhir dan jeda pendinginan
-  10 menit memblokir penerimaan ulang. Waktu tunggu juga dibatasi oleh sisa timeout
-  upstream-start milik permintaan itu sendiri (`resolveFetchStartTimeout`, default 10 menit)
-  dikurangi margin 5 detik: tanpa batas itu, max-wait default 20 menit akan hidup lebih lama
-  dari permintaan dan sleep akan dibatalkan di tengah penantian, memunculkan `TimeoutError`
-  alih-alih akhir `max_wait` yang mulus + jeda pendinginan.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, rollover jendela 5 jam, atau
+  `anthropic-ratelimit-unified-slow-retry-after` dari server (default 20 detik, dibatasi 5–600 detik,
+  jitter ±30%) lalu mencoba ulang, dibatasi oleh `anthropic-ratelimit-unified-slow-max-wait` (default
+  20 menit, dibatasi 1 menit–6 jam) — melewati itu jalur berakhir dan cool-off 10 menit memblokir
+  penerimaan ulang. Penantian juga dibatasi oleh sisa timeout mulai-upstream milik permintaan itu
+  sendiri (`resolveFetchStartTimeout`, default 10 menit) dikurangi margin 5 detik: tanpa batas itu,
+  max-wait default 20 menit akan hidup lebih lama daripada permintaan dan sleep akan dibatalkan
+  di tengah penantian, memunculkan `TimeoutError` alih-alih akhir `max_wait` yang mulus + cool-off.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, pergantian jendela 5 jam, atau
   `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (yang mengakhirinya sebagai
-  `extra_usage` pada status apa pun, karena overage berbayar kini menanggung wall) mengakhiri
-  jalur; respons kemudian mengalir ke jalur cooldown normal. `budget_exhausted` diingat hingga
+  `extra_usage` pada status apa pun, karena overage berbayar kini menanggung wall) mengakhiri jalur;
+  respons kemudian mengalir ke jalur cooldown normal. `budget_exhausted` diingat hingga
   reset anggaran yang diumumkan (≤ 8 hari).
-- Pemeriksaan wall berjalan setelah percobaan ulang intra-attempt milik executor sendiri yang
-  dipicu 400 (penyuntingan konteks, clamp thinking/effort, auto-learn parameter), sehingga wall
-  429 yang hanya muncul pada salah satu percobaan ulang itu tetap dicegat alih-alih mencapai
+- Pemeriksaan wall berjalan setelah percobaan ulang intra-attempt milik executor sendiri yang dipicu
+  400 (penyuntingan konteks, pembatasan thinking/effort, pembelajaran otomatis parameter), sehingga
+  wall 429 yang baru muncul pada salah satu percobaan ulang itu tetap disadap alih-alih mencapai
   jalur cooldown.
-- State disimpan di memori per koneksi (restart membutuhkan satu wall 429 tambahan untuk
-  menerima ulang).
+- State disimpan di memori per koneksi (restart memerlukan satu wall 429 ekstra untuk menerima ulang).
 
 **Reset batas sesi** (`autoLimitReset`, dicoba sebelum jalur ketika keduanya aktif):
 
@@ -186,19 +199,18 @@ pertama itu; 429 burst tanpa header unified melewati jalur cooldown normal.
   `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` dengan
   `{ "program": "juniper_tide" }` (UUID organisasi dari
   `providerSpecificData.organizationUUID`, fallback bootstrap).
-- `result: reset|not_limited` → permintaan dicoba ulang dengan kecepatan penuh (tanpa header
-  slow). `already_used` / `not_offered` memoisasi `next_available_at` (default satu minggu);
-  kegagalan apa pun memicu backoff 15 menit. Reset dilakukan sekali seminggu dan tetap dihitung
-  terhadap batas mingguan.
+- `result: reset|not_limited` → permintaan dicoba ulang dengan kecepatan penuh (tanpa header slow).
+  `already_used` / `not_offered` memoisasi `next_available_at` (default satu minggu); kegagalan apa
+  pun menunda 15 menit. Reset hanya sekali seminggu dan tetap dihitung terhadap batas mingguan.
 
 Penjaga regresi: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
 ### Afinitas sesi (#7274)
 
-**Cakupan:** satu sesi klien (header `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`) disematkan ke satu koneksi, untuk provider **apa pun**.
+**Cakupan:** satu sesi klien (header `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`) di-pin ke satu koneksi, untuk provider **mana pun**.
 
-**Tujuan:** menjaga agen multi-turn (Claude Code, aider, agen kustom) tetap pada akun yang sama di seluruh permintaan, mengurangi kehilangan konteks lintas akun dan 429 cold-start berulang pada provider dengan state sesi per akun.
+**Tujuan:** menjaga agen multi-turn (Claude Code, aider, agen kustom) tetap pada akun yang sama di seluruh permintaan, mengurangi hilangnya konteks lintas akun dan 429 cold-start berulang pada provider dengan state sesi per akun.
 
 **Implementasi:**
 
@@ -206,48 +218,32 @@ Penjaga regresi: `tests/unit/claude-low-priority-mode.test.ts`,
 - Pemilihan/pembuatan pin: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
 - Ekstraksi header (generik, provider apa pun): `src/sse/services/auth.ts::extractSessionAffinityKey()`
 - Tabel pin yang dipersistensikan: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Pengaturan: `sessionAffinityTtlMs` (TTL global dalam ms, `0` menonaktifkan) — `src/lib/db/settings.ts`. Diganti namanya dari `codexSessionAffinityTtlMs` yang khusus Codex oleh migrasi `124_generic_session_affinity_ttl.sql`, yang mewariskan TTL Codex yang dikonfigurasi sebelumnya sebagai default baru.
+- Pengaturan: `sessionAffinityTtlMs` (TTL global dalam ms, `0` menonaktifkan) — `src/lib/db/settings.ts`. Diganti namanya dari `codexSessionAffinityTtlMs` yang khusus Codex oleh migrasi `124_generic_session_affinity_ttl.sql`, yang membawa TTL Codex yang sebelumnya dikonfigurasi sebagai default baru.
 
-Sebelum #7274, `resolveSessionAffinityTtlMs()` langsung mengembalikan `0` untuk setiap provider kecuali `codex`, sehingga pengaturan TTL (dan header sesi) tidak berpengaruh di tempat lain meskipun mekanisme penyematan dan ekstraksi header sudah agnostik provider. Perbaikan itu menghapus early-return tersebut; TTL kini berlaku seragam untuk setiap provider setelah diatur secara global di atas `0`.
+Sebelum #7274, `resolveSessionAffinityTtlMs()` langsung keluar dengan `0` untuk setiap provider kecuali `codex`, sehingga pengaturan TTL (dan header sesi) tidak berpengaruh di tempat lain meskipun mekanisme pinning dan ekstraksi header sudah provider-agnostik. Perbaikan menghapus early-return tersebut; TTL kini berlaku seragam untuk setiap provider setelah diatur secara global di atas `0`.
 
-Ketiga header afinitas sesi tidak pernah diteruskan ke upstream — executor membangun header upstream mereka sendiri dari awal alih-alih meneruskan header klien, sehingga ini tetap menjadi id korelasi internal semata.
+Ketiga header afinitas sesi tidak pernah diteruskan ke upstream — executor membangun header upstream-nya sendiri dari awal alih-alih meneruskan header klien, sehingga ini tetap menjadi id korelasi internal saja.
 
-### Lease koneksi sesi terkelola eksklusif
+### Sewa koneksi sesi terkelola eksklusif
 
-**Cakupan:** satu klien/sesi HTTP terkelola yang aktif memiliki satu koneksi OmniRoute yang eligible.
+**Cakupan:** satu klien/sesi HTTP terkelola yang aktif memiliki satu koneksi OmniRoute yang memenuhi syarat.
 
 **Tujuan:** menyediakan kepemilikan koneksi eksklusif yang tahan lama bagi klien yang membutuhkan
-pagar routing tegas di seluruh permintaan. Ini berbeda dari afinitas sesi, yang merupakan
-preferensi kontinuitas lunak: lease eksklusif mempersistensikan state siklus hidup di SQLite,
-menegakkan keunikan pemilik aktif dan koneksi aktif secara global, serta menolak generasi basi
-sebelum dispatch provider.
+pagar routing yang tegas di seluruh permintaan. Ini berbeda dari afinitas sesi, yang merupakan preferensi
+kontinuitas yang lunak: sewa eksklusif mempersistensikan state siklus hidup di SQLite, menegakkan
+keunikan pemilik-aktif dan koneksi-aktif secara global, serta menolak generasi basi sebelum dispatch provider.
 
-Fitur ini opt-in per API key. Kunci terkelola harus memiliki scope `lease:exclusive` dan daftar
-`allowedConnections` eksplisit yang tidak kosong. Klien HTTP apa pun dapat menggunakan endpoint
-siklus hidup; tidak ada nama klien, user-agent, provider, metode OAuth, atau model yang
-diwajibkan. Lease memiliki koneksi, bukan model, sehingga perubahan model mempertahankan ikatan
-selama koneksi tetap eligible secara normal. Aturan model, kuota, kesehatan, cooldown, dan
-allowlist normal tetap menjadi acuan utama dan dapat mengalihkan generasi yang sama ke koneksi
-lain yang bebas dan eligible.
+Fitur ini bersifat opt-in untuk setiap kunci API. Kunci terkelola harus memiliki cakupan `lease:exclusive` dan daftar `allowedConnections` eksplisit yang tidak kosong. Klien HTTP apa pun dapat menggunakan endpoint siklus hidup; nama klien, user-agent, penyedia, metode OAuth, atau model tidak diwajibkan. Lease memiliki koneksi, bukan model, sehingga perubahan model mempertahankan binding selama koneksi tetap memenuhi syarat secara normal. Aturan normal terkait model, kuota, kesehatan, cooldown, dan allowlist tetap berlaku secara otoritatif dan dapat mengalihkan generasi yang sama ke koneksi lain yang bebas dan memenuhi syarat.
 
-Siklus hidupnya adalah `POST /api/v1/session-leases` dengan aksi JSON `acquire`, `renew`, dan `release`.
-Permintaan inferensi terkelola menyertakan nilai opak `X-OmniRoute-Lease-Owner` dan nilai
-`X-OmniRoute-Lease-Generation` yang persis. Owner menggunakan `vlo_` diikuti 43 karakter base64url; hanya
-hash SHA-256-nya yang disimpan. Setiap fence dispatch akhir juga mengikat ID API key terautentikasi dan
-ID koneksi aktif. Header kontrol lease dihapus dari log, snapshot permintaan yang disimpan, dan
-header executor upstream.
+Siklus hidup menggunakan `POST /api/v1/session-leases` dengan tindakan JSON `acquire`, `renew`, dan `release`. Permintaan inferensi terkelola menyertakan nilai buram `X-OmniRoute-Lease-Owner` dan nilai persis `X-OmniRoute-Lease-Generation`. Owner menggunakan awalan `vlo_` yang diikuti 43 karakter base64url; hanya hash SHA-256-nya yang disimpan. Setiap fence dispatch final juga mengikat ID kunci API yang diautentikasi dan ID koneksi aktif. Header kontrol lease dihapus dari log, snapshot permintaan yang disimpan, dan header eksekutor upstream.
 
-Jika routing biasa memiliki kandidat terkelola yang memenuhi syarat tetapi setiap kandidat bebas
-ditempati oleh lease aktif asing, OmniRoute mengembalikan HTTP `429`, kode
-lease-capacity-unavailable, status waiting-for-capacity, dan `Retry-After` terbatas yang diturunkan
-dari waktu kedaluwarsa relevan yang paling awal. Eligibilitas kosong biasa bukanlah kontensi lease
-dan mempertahankan semantik error routing yang sudah ada.
+Jika routing normal memiliki kandidat terkelola yang memenuhi syarat, tetapi setiap kandidat bebas sedang ditempati oleh lease aktif milik pihak lain, OmniRoute mengembalikan HTTP `429`, kode lease-capacity-unavailable, status menunggu kapasitas, dan `Retry-After` terbatas yang diturunkan dari waktu kedaluwarsa relevan paling awal. Tidak adanya kelayakan secara normal bukanlah konflik lease dan tetap menggunakan semantik error routing yang sudah ada.
 
 Mekanisme terkait tetap terpisah:
 
-- Okupansi sesi OAuth adalah distribusi lunak lokal proses untuk akun OAuth.
+- Okupansi sesi OAuth adalah distribusi lunak lokal-proses untuk akun OAuth.
 - Semaphore akun memberikan izin konkurensi permintaan dan berakhir saat permintaan selesai.
-- Lease sesi terkelola eksklusif adalah kepemilikan siklus hidup yang tahan lama dengan fence generasi.
+- Lease sesi terkelola eksklusif adalah kepemilikan siklus hidup yang persisten dengan fence generasi.
 
 ---
 

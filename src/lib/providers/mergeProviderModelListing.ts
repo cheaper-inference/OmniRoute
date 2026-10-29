@@ -8,6 +8,7 @@ import { appendSyncedEffortVariants } from "@omniroute/open-sse/utils/syncedEffo
 import { ensureCursorAutoCatalogEntry } from "@/lib/providerModels/cursorAutoCatalog";
 import { mergeModelsWithCustomPrecedence } from "@/lib/providers/modelMetadataPrecedence";
 import {
+  isDiscoveryImportedCustomSource,
   providerUsesCuratedModelsOnly,
   providerUsesExclusiveSyncedListing,
 } from "@/lib/providers/modelListingCapability";
@@ -61,7 +62,13 @@ export function mergeProviderModelListing(
   const curated =
     input.usesCuratedModelsOnly === true || providerUsesCuratedModelsOnly(input.providerId);
   const synced = curated ? [] : input.syncedModels.filter((m) => m?.id);
-  const custom = curated ? [] : input.customModels.filter((m) => m?.id);
+  // Curated only means "no upstream discovery endpoint" — the registry catalog is the
+  // whole lineup and there is nothing to sync. It does NOT mean the operator may not add
+  // ids by hand, so operator rows are kept for every provider (#18018); only rows a
+  // discovery sync imported are dropped on a curated provider (#8451).
+  const custom = input.customModels.filter(
+    (m) => m?.id && !(curated && isDiscoveryImportedCustomSource(m.source))
+  );
 
   const exclusive =
     !curated &&

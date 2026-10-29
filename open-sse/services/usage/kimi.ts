@@ -29,6 +29,23 @@ const KIMI_CONFIG = {
   apiVersion: "2023-06-01",
 };
 
+export function resolveKimiUsageUrl(providerSpecificData?: JsonRecord): string {
+  const customBaseUrl =
+    typeof providerSpecificData?.baseUrl === "string" ? providerSpecificData.baseUrl.trim() : "";
+  if (customBaseUrl) {
+    try {
+      const url = new URL(customBaseUrl);
+      const host = url.hostname.toLowerCase();
+      if (host === "api.kimi.ai" || host === "api.kimi.com") {
+        return `https://${host}/coding/v1/usages`;
+      }
+    } catch {
+      // fall back to default
+    }
+  }
+  return KIMI_CONFIG.usageUrl;
+}
+
 const KIMI_BOOSTER_FIXED_POINT_PER_CENT = 1_000_000;
 
 function toInteger(value: unknown): number | null {
@@ -154,11 +171,16 @@ function applyKimiMembershipRatios(quotas: Record<string, UsageQuota>, usages: u
   const mapping: Array<[string, string, string]> = [
     ["limit_7d", "code_7d", "Code · 7d"],
     ["limit_5h", "code_5h", "Code · 5h"],
+    ["limit_month_total", "monthly", "Monthly"],
   ];
   for (const [source, key, displayName] of mapping) {
     const quota = createKimiRatioQuota(rec[source]);
     if (!quota) continue;
-    quotas[key] = { ...quota, displayName };
+    quotas[key] = {
+      ...quota,
+      displayName,
+      ...(key === "monthly" ? { isPercentageOnly: true } : {}),
+    };
   }
 }
 
@@ -237,7 +259,8 @@ export async function getKimiUsage(
       };
 
   try {
-    const response = await fetch(KIMI_CONFIG.usageUrl, {
+    const usageUrl = resolveKimiUsageUrl(providerSpecificData);
+    const response = await fetch(usageUrl, {
       method: "GET",
       headers: {
         ...authHeaders,
@@ -268,9 +291,8 @@ export async function getKimiUsage(
     const dataObj = toRecord(data);
     const billing = buildKimiBillingStatus(dataObj.boosterWallet ?? dataObj.booster_wallet);
 
-    // The managed Kimi Code API reports the Code 7-day quota in `usage`.
-    // The website's separate shared-membership total/Kimi split comes from a
-    // Web-session-only endpoint and cannot be read with a Coding OAuth token.
+    // Older plans report a Code 7-day count in `usage`; newer responses also
+    // include explicit membership ratio windows in `usages`.
     const weeklyQuota = createKimiCountQuota(dataObj.usage);
     if (weeklyQuota) {
       quotas.code_7d = { ...weeklyQuota, displayName: "Code · 7d" };

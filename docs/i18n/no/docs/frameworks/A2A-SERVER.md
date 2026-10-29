@@ -152,22 +152,22 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Tilgjengelige ferdigheter
 
-OmniRoute eksponerer 6 A2A-ferdigheter konfigurert i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Hver ferdighetsmodul ligger i `src/lib/a2a/skills/`.
+OmniRoute avslører 6 A2A ferdigheter kablet i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Hver ferdighetsmodul lever i `src/lib/a2a/skills/`.
 
-| Ferdighet            | ID                   | Beskrivelse                                                                                                                                                       | Tagger                     | Eksempler                              |
-| :------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------- |
-| Smart ruting         | `smart-routing`      | Ruter en prompt gjennom optimal leverandør/kombinasjon ved hjelp av OmniRoutes kombinasjonsmotor + poengberegning                                                 | routing, providers         | "Route this prompt via the best model" |
-| Kvotestyring         | `quota-management`   | Rapporterer kvotestatus per leverandør, hjelper kallere med å avgjøre når de skal strupe/bytte                                                                    | quota, providers           | "Check quota for anthropic"            |
-| Leverandøroppdagelse | `provider-discovery` | Lister installerte leverandører med egenskaper, flagg for gratisnivå og OAuth-status                                                                              | providers, discovery       | "What providers are available?"        |
-| Kostnadsanalyse      | `cost-analysis`      | Estimerer kostnaden for en forespørsel/samtale gitt katalogen + nylig bruk                                                                                        | cost, usage                | "Estimate cost for this conversation"  |
-| Helse rapport        | `health-report`      | Samler status for circuit breaker, nedkjøling og utestenging per leverandør                                                                                       | health, resilience         | "Show health status of all providers"  |
-| List egenskaper      | `list-capabilities`  | Returnerer hele Agent Skills-katalogen med 45 oppføringer (23 API + 21 CLI + 1 konfigurasjon) som en markdown-tabell med rå SKILL.md-URL-er for kontekstinjeksjon | catalog, discovery, skills | "List all OmniRoute capabilities"      |
+| Ferdighet          | ID                   | Beskrivelse                                                                                                                                             | Tagger                           | Eksempler                                        |
+| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------- | :----------------------------------------------- |
+| Smart ruting       | `smart-routing`      | Ruter en ledetekst gjennom den optimale provider/combo ved hjelp av OmniRoute kombinasjonsmotor + scoring                                               | ruting, tilbydere                | "Rut denne forespørselen via den beste modellen" |
+| Kvotestyring       | `quota-management`   | Rapporterer kvotestatus per leverandør, hjelper innringere å bestemme når de skal throttle/switch                                                       | kvote, tilbydere                 | "Sjekk kvote for antropisk"                      |
+| Provider Discovery | `provider-discovery` | Viser installerte tilbydere med muligheter, frittstående flagg, OAuth status                                                                            | tilbydere, oppdagelse            | "Hvilke leverandører er tilgjengelige?"          |
+| Kostnadsanalyse    | `cost-analysis`      | Anslår kostnaden for en request/conversation gitt katalogen + nylig bruk                                                                                | kostnad, bruk                    | "Estimer kostnadene for denne samtalen"          |
+| Helserapport       | `health-report`      | Aggregerer effektbryter, nedkjøling, låsetilstand per leverandør                                                                                        | helse, motstandskraft            | "Vis helsestatus for alle leverandører"          |
+| Liste evner        | `list-capabilities`  | Returnerer hele 45-oppførings Agent Skills-katalogen (23 API + 21 CLI + 1 config) som en nedjusteringstabell med rå SKILL.md URLs for kontekstinjeksjon | katalog, oppdagelse, ferdigheter | "List opp alle OmniRoute -funksjoner"            |
 
-> Agent-kortet bør holdes i synk med den levende katalogen over 375 leverandører; antall leverandører og metadata om gratis/uten autentisering hentes fra kjøringsmiljøets register.
+> Agentkortet bør holdes på linje med 377-leverandørkatalogen. leverandørtellinger og free/no-auth metadata hentes fra kjøretidsregistret.
 
-### Detaljer for ferdigheten `list-capabilities`
+### `list-capabilities` Ferdighetsdetalj
 
-Ferdigheten `list-capabilities` er spesielt nyttig for eksterne agenter som trenger å oppdage hva OmniRoute eksponerer før de sender API-kall. Den returnerer en strukturert markdown-tabell som artefakt:
+`list-capabilities` ferdigheten er spesielt nyttig for eksterne agenter som trenger å oppdage hva OmniRoute avslører før de sender API -anrop. Den returnerer en strukturert markdown-tabellartefakt:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ Ferdigheten `list-capabilities` er spesielt nyttig for eksterne agenter som tren
 ...
 ```
 
-Hver rad inkluderer kolonnen `rawUrl` slik at agenter umiddelbart kan hente hele SKILL.md. Feltet `metadata.totalSkills` gjenspeiler katalogstørrelsen (45 i dag). Implementasjon: `src/lib/a2a/skills/listCapabilities.ts`. Se også [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Hver rad inkluderer `rawUrl` kolonnen slik at agenter umiddelbart kan hente hele SKILL.md. `metadata.totalSkills` feltet gjenspeiler katalogstørrelsen (45 i dag). Implementering: `src/lib/a2a/skills/listCapabilities.ts`. Se også [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -201,7 +201,7 @@ JSON-RPC-endepunktet `/a2a` er det kanoniske A2A-startpunktet. REST-endepunktene
 
 1. **Opprett ferdighetsfil:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksporter en asynkron funksjon `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Følg strukturen til eksisterende ferdigheter, som `smartRouting.ts`.
+   Eksporter en asynkron funksjon `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Følg strukturen til eksisterende ferdigheter, for eksempel `smartRouting.ts`.
 
 2. **Registrer håndterer:** Legg til en oppføring i `A2A_SKILL_HANDLERS` i `src/lib/a2a/taskExecution.ts`:
 
@@ -215,7 +215,7 @@ JSON-RPC-endepunktet `/a2a` er det kanoniske A2A-startpunktet. REST-endepunktene
    };
    ```
 
-3. **Eksponer i agentkortet:** Legg til et element i `skills`-matrisen i `src/app/.well-known/agent.json/route.ts`:
+3. **Gjør tilgjengelig i Agent Card:** Legg til et element i `skills`-matrisen i `src/lib/a2a/agentCardMetadata.ts` (som deles av `/.well-known/agent.json` og `/.well-known/agent-card.json`):
 
    ```json
    {
@@ -227,7 +227,7 @@ JSON-RPC-endepunktet `/a2a` er det kanoniske A2A-startpunktet. REST-endepunktene
    }
    ```
 
-4. **Skriv tester:** `tests/unit/a2a-<your-skill>.test.ts`. Dekk både vellykket kjøring og feilhåndtering.
+4. **Skriv tester:** `tests/unit/a2a-<your-skill>.test.ts`. Dekk både normalflyt og feilflyt.
 
 5. **Dokumenter** den nye ferdigheten i tabellen `Available Skills` i denne filen.
 
@@ -266,9 +266,9 @@ innsendt → pågår → fullført
 
 ---
 
-## Integrasjonseksempler
+## Eksempler på integrering
 
-### Python (requests)
+### Python (forespørsler)
 
 ```python
 import requests
@@ -287,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (hente)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

@@ -175,18 +175,18 @@ Obsegi (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 ## Izvajanje testov
 
 ```bash
-# Vsi testi (enotski + vitest + ekosistem + e2e)
+# Vsi testi (enote + vitest + ekosistem + e2e)
 npm run test:all
 
 # Posamezna testna datoteka (izvorni izvajalnik testov Node.js — uporablja ga večina testov)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Samo enotski testi, na katere vpliva vaša sprememba (isti izbirnik TIA kot pri kontrolni točki CI, #8084)
-npm run test:scoped            # spremembe v zadnjem commitu (ali delovnem drevesu)
-npm run test:scoped:staged     # samo pripravljene spremembe — dobro se ujema z izvajanjem pred commitom
-npm run test:scoped:full       # najprej znova zgradi preslikavo grafa uvozov (po dodajanju/premikanju datotek)
-# Izhod 1 + »run the full suite« pomeni, da se je spremenila osrednja datoteka (tsconfig, package.json, …) ali
-# nepreslikana izvorna koda — izbirnik varno odpove in nikoli ničesar tiho ne preskoči.
+# Samo testi enot, na katere vpliva vaša sprememba (isti izbirnik TIA kot pri preverjanju CI, #8084)
+npm run test:scoped            # spremembe v zadnji potrditvi (ali delovnem drevesu)
+npm run test:scoped:staged     # samo pripravljene spremembe — dobro se ujema z zagonom pred potrditvijo
+npm run test:scoped:full       # najprej znova zgradi zemljevid grafa uvozov (po dodajanju/premikanju datotek)
+# Izhod 1 + "zaženite celoten nabor" pomeni, da se je spremenila osrednja datoteka (tsconfig, package.json, …) ali
+# nepreslikan izvor — izbirnik varno odpove in nikoli tiho ne preskoči testov.
 
 # Vitest (strežnik MCP, autoCombo, predpomnilnik)
 npm run test:vitest
@@ -194,64 +194,65 @@ npm run test:vitest
 # Testi E2E (zahtevajo Playwright)
 npm run test:e2e
 
-# E2E odjemalcev protokolov (transporti MCP, A2A)
+# E2E za odjemalce protokolov (transporti MCP, A2A)
 npm run test:protocols:e2e
 
 # Testi združljivosti ekosistema
 npm run test:ecosystem
 
-# Kontrolna točka pokritosti: 60 % stavkov/vrstic/funkcij/vej
+# Prag pokritosti: 60 % stavkov/vrstic/funkcij/vej
 npm run test:coverage
 npm run coverage:report
 
-# Preverjanje lintinga in oblikovanja
+# Preverjanje lintanja in oblikovanja
 npm run lint
 npm run check
 
-# Nadzorovani preizkus kombinacije z resničnimi zunanjimi sistemi (zahteva dostop do VPS-a in dobroimetje pri resničnem ponudniku)
-# Uporablja RESNIČNE ponudnike — povzroči majhen strošek. NIKOLI se ne izvaja v CI-ju. Brez kontrolnega pogoja se čisto preskoči.
-# Potrebuje: dostop ssh root@192.168.0.15 (naloži posnetek podatkovne zbirke samo za branje iz VPS-a).
+# Nadzorovani preizkus delovanja kombinacij z dejanskimi ponudniki (zahteva dostop do VPS-a + dobroimetje pri dejanskih ponudnikih)
+# Uporablja DEJANSKE ponudnike — nastane majhen strošek. NIKOLI se ne izvaja v CI. Brez nadzorne spremenljivke se pravilno preskoči.
+# Zahteva: dostop ssh root@192.168.0.15 (iz VPS-a naloži posnetek podatkovne zbirke samo za branje).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Preizkus delovanja 3. faze v živo na VPS-u — navadni skripti Node ESM, ki neposredno uporabljajo strežnik .15 v živo.
+# Preizkus delovanja v živo na VPS-u za 3. fazo — navadni skripti Node ESM, ki neposredno uporabljajo dejanski strežnik .15.
 # Zahteva: dostop ssh root@192.168.0.15 (kombinacije se ustvarijo/odstranijo prek SSH sqlite).
-# Uporablja RESNIČNE ponudnike (majhen strošek). Ustvari/izbriše samo kombinacije __live_test__*. NIKOLI se ne izvaja v CI-ju.
-# REQUIRE_API_KEY=false na .15, zato ključ API ni potreben, vendar upošteva COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY, če sta nastavljena.
-npm run test:combo:live:vps              # 7 scenarijev HTTP (prednostni/krožni/uteženi/stroškovni/fuzijski/samodejni + stanje)
-npm run test:combo:live:vps:failover     # doda resnični scenarij preklopa med ponudniki ob napaki (skupaj 8)
+# Uporablja DEJANSKE ponudnike (majhen strošek). Ustvari/izbriše samo kombinacije __live_test__*. NIKOLI se ne izvaja v CI.
+# Na .15 je REQUIRE_API_KEY=false, zato ključ API ni potreben, vendar upošteva COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY, če sta nastavljena.
+npm run test:combo:live:vps              # 7 scenarijev HTTP (prednost/krožno/uteženo/strošek/združevanje/samodejno + stanje)
+npm run test:combo:live:vps:failover     # doda dejanski scenarij preklopa med ponudniki (skupaj 8)
 ```
 
 Opombe o pokritosti:
 
-- `npm run test:coverage` meri pokritost izvorne kode za glavni nabor enotskih testov, izključuje `tests/**` in vključuje `open-sse/**`
-- Zahteve za spojitev morajo ohraniti kontrolno točko pokritosti na **60 % ali več** stavkov/vrstic/funkcij/vej
+- `npm run test:coverage` meri pokritost izvorne kode za glavni nabor testov enot, izključi `tests/**` in vključi `open-sse/**`
+- Zahtevki za združitev morajo ohraniti prag pokritosti **60 %+** za stavke/vrstice/funkcije/veje
 - Če PR spremeni produkcijsko kodo v `src/`, `open-sse/`, `electron/` ali `bin/`, mora v istem PR-ju dodati ali posodobiti avtomatizirane teste
-- `npm run coverage:report` izpiše podrobno poročilo po posameznih datotekah iz zadnjega izvajanja pokritosti
-- `npm run test:coverage:legacy` ohrani starejšo metriko za zgodovinsko primerjavo
-- Glejte `docs/ops/COVERAGE_PLAN.md` za fazni načrt izboljševanja pokritosti
+- `npm run coverage:report` izpiše podrobno poročilo po posameznih datotekah iz zadnjega preverjanja pokritosti
+- `npm run test:coverage:legacy` ohranja starejšo metriko za zgodovinsko primerjavo
+- Za načrt postopnega izboljševanja pokritosti glejte `docs/ops/COVERAGE_PLAN.md`
 
-### Zahteve za zahteve za spojitev
+### Zahteve za zahtevek za združitev
 
 Preden odprete PR, uporabite
-[zlato pot prispevanja](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), da izvedete osredotočeno zanko za
-to, kar ste spremenili. Za celoten nabor enotskih testov (4 segmenti CI), Vitest, kontrolno točko
-pokritosti **60 % ali več** in produkcijsko gradnjo je odgovoren CI — lokalno izvajanje ne zagotavlja
-dodatnih informacij, ki jih preverjanja PR-ja ne bi že podala, na manjših računalnikih pa lahko preobremeni gostitelja (#8084):
+[Zlato pot za prispevanje](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), da izvedete ciljni cikel za
+svoje spremembe. Za celoten nabor testov enot (4 razdelki CI), Vitest, prag pokritosti **60 %+** in
+produkcijsko gradnjo je odgovoren CI — njihovo lokalno izvajanje ne zagotovi dodatnih informacij, ki jih
+preverjanja PR-ja ne bi že podala, na manj zmogljivih računalnikih pa lahko preobremeni gostitelja (#8084):
 
 - Zaženite testne datoteke, ki pokrivajo vašo spremembo: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Zaženite `npm run lint`
-- Ob vsaki spremembi produkcijske kode vključite ali posodobite avtomatizirane teste v istem PR-ju
-- Ko se spremeni produkcijska koda, v opis PR-ja vključite spremenjene ali dodane testne datoteke
-- Ko so skrivnosti projekta konfigurirane v CI-ju, preverite rezultat SonarQube v PR-ju
+- Kadar se spremeni produkcijska koda, v istem PR-ju vključite ali posodobite avtomatizirane teste
+- V datotekah `node:test` postavite vsak `await` na najvišji ravni (na primer `await import(...)`) pred prvi `test()` / `describe()`: pri uporabi `--test-force-exit` se lahko testi, registrirani za njim, tiho nikoli ne izvedejo (#18045; zagotavlja `npm run check:test-tla-order`)
+- Kadar se je spremenila produkcijska koda, v opis PR-ja vključite spremenjene ali dodane testne datoteke
+- Ko so skrivnosti projekta konfigurirane v CI, preverite rezultat SonarQube za PR
 
-Trenutno stanje testov: **122 datotek enotskih testov**, ki pokrivajo:
+Trenutno stanje testov: **122 datotek s testi enot**, ki pokrivajo:
 
 - Prevajalnike ponudnikov in pretvorbo formatov
-- Omejevanje pogostosti, odklopnik in odpornost
-- Semantični predpomnilnik, idempotentnost in spremljanje napredka
+- Omejevanje hitrosti, odklopnik in odpornost
+- Semantični predpomnilnik, idempotentnost in sledenje napredku
 - Operacije podatkovne zbirke in shemo (21 modulov DB)
-- Tokove OAuth in avtentikacijo
-- Preverjanje končnih točk API (Zod v4)
+- Tokove OAuth in preverjanje pristnosti
+- Preverjanje veljavnosti končnih točk API (Zod v4)
 - Orodja strežnika MCP in uveljavljanje obsegov
 - Sistema Memory in Skills
 

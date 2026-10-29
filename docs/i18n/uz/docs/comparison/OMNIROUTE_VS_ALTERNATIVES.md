@@ -37,13 +37,13 @@ Ommabop ochiq kodli AI routerlarga nisbatan obyektiv xususiyatlar taqqoslanishi.
 | **Tunnel qo'llab-quvvatlash (Cloudflared, Tailscale, Ngrok)** |                       ✅                       |         ❌         |        n/a        |    n/a    |
 | **Litsenziya**                                                |                      MIT                       |        MIT         |      mulkiy       |  mulkiy   |
 
-## OmniRoute-ni qachon tanlash kerak
+## Qachon OmniRoute tanlash kerak
 
-- Self-host qilasiz va **maksimal provayder qamrovi** kerak (375 ta provayder, 155 ta bepul/avtorizatsiyasiz katalog yozuvlari)
-- **Ichki MCP serveri** kerak (vositalar sifatida taqdim etiladigan LLM vositalari, xotira, koʻnikmalar)
-- Agentlararo ish jarayonlari uchun **A2A protokoli** kerak
-- Upstream CAPTCHA'lar tomonidan aniqlanishdan qochish uchun **fingerprint yashirish** (JA3/JA4) kerak
-- SaaS toʻlovisiz **korporativ imkoniyatlar** (guardrails, evals, audit trail) kerak
+- Siz o'zingizni mezbonlik qilasiz va xohlaysiz** maksimal provayder qamrovi** (377 ta provayder, 155 free/no-auth katalog yozuvlari)
+- Sizga kerak a** o'rnatilgan MCP serveri** (LLM vositalari, xotira, asboblar sifatida ko'rsatilgan ko'nikmalar)
+- Sizga kerak**A2A protokoli** agentdan agentga ish oqimlari uchun
+- Siz xohlaysiz** barmoq izlari yashirin** (JA3/JA4) yuqori oqim CAPTCHAs tomonidan aniqlanmaslik uchun
+- Sizga kerak** korxona xususiyatlari** (qo'riqchilar, evals, audit trail) SaaS hisobisiz
 
 ## LiteLLM’ni qachon tanlash kerak
 

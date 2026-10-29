@@ -20,6 +20,13 @@
 import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles.ts";
 import { isRetiredGitHubCopilotModelId } from "../config/providers/registry/github/retiredModels.ts";
 
+/**
+ * Why the GHE live catalog was not used: a code of the closed vocabulary, or an
+ * HTTP status. Never a message, a body or an URL — the reason is published to
+ * the operator, so it must not carry what the upstream sent.
+ */
+type DiscoveryFailure = { status?: number; code?: string };
+
 export const GITHUB_COPILOT_MODELS_URL = "https://api.githubcopilot.com/models";
 
 // Static fallback catalog. Used ONLY when live discovery is unavailable
@@ -204,10 +211,53 @@ export type GitHubCopilotModelsResult = {
   models: GitHubCopilotModel[];
   /** "api" = live discovery; "fallback" = static catalog (offline/unauthed/error). */
   source: "api" | "fallback";
+  /** Safe, structured reason why live discovery fell back. Never carries credentials/body text. */
+  failure?: GitHubCopilotDiscoveryFailure;
 };
 
+export type GitHubCopilotDiscoveryFailureKind =
+  "missing_token" | "http_status" | "invalid_json" | "empty_catalog" | "network";
+
+export type GitHubCopilotDiscoveryFailure = {
+  kind: GitHubCopilotDiscoveryFailureKind;
+  upstreamStatus?: number;
+  contentType?: string;
+  bodyShape?: string;
+};
+
+function safeContentType(response: Response): string | undefined {
+  const mediaType = (response.headers.get("content-type") || "")
+    .split(";", 1)[0]!
+    .trim()
+    .toLowerCase();
+  // Content-Type is upstream-controlled. Preserve only a normal media type and
+  // cap its size so diagnostics cannot become a header/body-text exfiltration path.
+  if (mediaType.length > 128) return undefined;
+  return /^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/.test(mediaType) ? mediaType : undefined;
+}
+
+function bodyShapeFromHeaders(response: Response, contentType?: string): string | undefined {
+  if (response.headers.get("content-length")?.trim() === "0") return "empty";
+  if (contentType?.endsWith("/json") || contentType?.endsWith("+json")) return "json";
+  if (contentType?.startsWith("text/")) return "text";
+  if (contentType) return "binary";
+  return undefined;
+}
+
+function jsonBodyShape(data: unknown): string {
+  if (Array.isArray(data)) return "array";
+  if (data === null) return "null";
+  if (typeof data !== "object") return typeof data;
+  const payload = data as RawRecord;
+  if (Array.isArray(payload.data)) return "object.data_array";
+  if (Array.isArray(payload.models)) return "object.models_array";
+  if ("data" in payload || "models" in payload) return "object.catalog_non_array";
+  return "object";
+}
+
 function toFallbackResult(
-  fallbackModels: Array<{ id: string; name?: string }> | undefined
+  fallbackModels: Array<{ id: string; name?: string }> | undefined,
+  failure: GitHubCopilotDiscoveryFailure
 ): GitHubCopilotModelsResult {
   const models = (fallbackModels || [])
     .map((model) => {
@@ -217,7 +267,7 @@ function toFallbackResult(
       return { id, name: toNonEmptyString(model.name) || id, owned_by: "github" };
     })
     .filter((model): model is GitHubCopilotModel => Boolean(model));
-  return { models, source: "fallback" };
+  return { models, source: "fallback", failure };
 }
 
 /**
@@ -230,32 +280,55 @@ export async function fetchGitHubCopilotModels(
   const { token, fetchImpl = fetch, fallbackModels } = options;
 
   if (!toNonEmptyString(token)) {
-    return toFallbackResult(fallbackModels);
+    return toFallbackResult(fallbackModels, { kind: "missing_token" });
   }
 
+  let response: Response;
   try {
-    const response = await fetchImpl(GITHUB_COPILOT_MODELS_URL, {
+    response = await fetchImpl(GITHUB_COPILOT_MODELS_URL, {
       method: "GET",
       headers: {
         ...getGitHubCopilotChatHeaders("application/json"),
         Authorization: `Bearer ${token}`,
       },
     });
-
-    if (!response.ok) {
-      return toFallbackResult(fallbackModels);
-    }
-
-    const data = await response.json();
-    const models = parseGitHubCopilotModels(data);
-    if (models.length === 0) {
-      return toFallbackResult(fallbackModels);
-    }
-    return { models, source: "api" };
   } catch {
-    // Network/parse failure — never break the import flow.
-    return toFallbackResult(fallbackModels);
+    return toFallbackResult(fallbackModels, { kind: "network" });
   }
+
+  const contentType = safeContentType(response);
+  if (!response.ok) {
+    const bodyShape = bodyShapeFromHeaders(response, contentType);
+    return toFallbackResult(fallbackModels, {
+      kind: "http_status",
+      upstreamStatus: response.status,
+      ...(contentType ? { contentType } : {}),
+      ...(bodyShape ? { bodyShape } : {}),
+    });
+  }
+
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    return toFallbackResult(fallbackModels, {
+      kind: "invalid_json",
+      upstreamStatus: response.status,
+      ...(contentType ? { contentType } : {}),
+      bodyShape: "unparseable",
+    });
+  }
+
+  const models = parseGitHubCopilotModels(data);
+  if (models.length === 0) {
+    return toFallbackResult(fallbackModels, {
+      kind: "empty_catalog",
+      upstreamStatus: response.status,
+      ...(contentType ? { contentType } : {}),
+      bodyShape: jsonBodyShape(data),
+    });
+  }
+  return { models, source: "api" };
 }
 
 /**
@@ -329,13 +402,15 @@ export type FetchGheCopilotModelsOptions = {
  * Discover the GHE Copilot model catalog live from `<apiUrl>/models`.
  * Returns an empty list (no fallback catalog) when discovery is unavailable —
  * GHE model IDs are enterprise-specific, so a static fallback would be wrong.
+ * The reason of the empty list is reported next to it.
  */
 export async function fetchGheCopilotModels(
   options: FetchGheCopilotModelsOptions
-): Promise<GitHubCopilotModel[]> {
+): Promise<{ models: GitHubCopilotModel[]; failure?: DiscoveryFailure }> {
   const { apiUrl, token, fetchImpl = fetch } = options;
   const base = toNonEmptyString(apiUrl);
-  if (!base || !toNonEmptyString(token)) return [];
+  if (!base) return { models: [], failure: { code: "NO_ENDPOINT" } };
+  if (!toNonEmptyString(token)) return { models: [], failure: { code: "NO_CREDENTIAL" } };
 
   try {
     const response = await fetchImpl(`${base.replace(/\/+$/, "")}/models`, {
@@ -346,10 +421,12 @@ export async function fetchGheCopilotModels(
       },
     });
 
-    if (!response.ok) return [];
+    if (!response.ok) return { models: [], failure: { status: response.status } };
     const data = await response.json();
-    return parseGheCopilotModels(data);
+    const models = parseGheCopilotModels(data);
+    if (models.length === 0) return { models: [], failure: { code: "EMPTY_CATALOG" } };
+    return { models };
   } catch {
-    return [];
+    return { models: [], failure: {} };
   }
 }

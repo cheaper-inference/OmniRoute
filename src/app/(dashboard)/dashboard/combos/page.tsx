@@ -79,12 +79,18 @@ import {
 } from "@/lib/combos/builderDraft";
 import { normalizeComboConfigMode } from "@/shared/constants/comboConfigMode";
 import AutoComboCatalog from "./AutoComboCatalog";
-import { AutoComboTruncatedNote, getI18nOrFallback } from "./comboPageHelpers";
+import {
+  AutoComboTruncatedNote,
+  getComboStepKindLabel,
+  getI18nOrFallback,
+} from "./comboPageHelpers";
+import ComboStepTestButton from "./ComboStepTestButton";
 import KimiComboPresetCard from "./KimiComboPresetCard";
 import { KIMI_CODING_PRESET, hasKimiCodingPreset } from "./kimiComboPreset";
 import BuilderIntelligentStep from "./BuilderIntelligentStep";
 import IntelligentComboPanel from "./IntelligentComboPanel";
 import { ComboSortSelect } from "./ComboSortSelect";
+import { StaleModelBadge, buildStaleModelSet, isStaleComboStep } from "./StaleModelBadge";
 import {
   sortComboStepsSync,
   sortComboStepsByScore,
@@ -108,6 +114,7 @@ import { resolveProviderAlias } from "@omniroute/open-sse/services/providerAlias
 import { resolveServerErrorMessage } from "@/lib/api/serverErrorMessage";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
+import { strategyBadgeClass } from "./strategyPalette";
 
 const ModelSelectModal = dynamic(() => import("@/shared/components/ModelSelectModal"), {
   ssr: false,
@@ -600,22 +607,9 @@ function getStrategyDescription(t, strategy) {
   );
 }
 
-// Categorical strategy hues from the kit chart palette (--ci-chart-*) plus the status tokens;
-// chart-1 (lime) is skipped because lime text is unreadable on the light surface.
-const STRATEGY_BADGE_CLASS = {
-  weighted: "bg-warning/15 text-warning",
-  "round-robin": "bg-chart-4/15 text-chart-4",
-  "context-relay": "bg-chart-5/15 text-chart-5",
-  random: "bg-chart-3/15 text-chart-3",
-  "least-used": "bg-chart-2/15 text-chart-2",
-  "cost-optimized": "bg-success/15 text-success",
-  "reset-aware": "bg-chart-5/15 text-chart-5",
-  "fill-first": "bg-warning/15 text-warning",
-  p2c: "bg-chart-3/15 text-chart-3",
-};
-
+// Strategy badge colour: one shared palette on the kit chart tokens (strategyPalette.ts, P8).
 function getStrategyBadgeClass(strategy) {
-  return STRATEGY_BADGE_CLASS[strategy] || "bg-info/15 text-info";
+  return strategyBadgeClass(strategy);
 }
 
 function moveArrayItem(items, fromIndex, toIndex) {
@@ -2172,6 +2166,7 @@ function ComboFormModal({
   const [modelAliases, setModelAliases] = useState({});
   const [providerNodes, setProviderNodes] = useState([]);
   const [builderOptions, setBuilderOptions] = useState({ providers: [], comboRefs: [] });
+  const [staleModels, setStaleModels] = useState<Set<string>>(() => new Set());
   const [builderLoading, setBuilderLoading] = useState(false);
   const [builderProviderId, setBuilderProviderId] = useState("");
   const [builderModelId, setBuilderModelId] = useState("");
@@ -2538,9 +2533,11 @@ function ComboFormModal({
         providers: builderData.providers || [],
         comboRefs: builderData.comboRefs || [],
       });
+      setStaleModels(buildStaleModelSet(builderData.staleComboRefs));
     } catch (error) {
       console.error("Error fetching modal data:", error);
       setBuilderOptions({ providers: [], comboRefs: [] });
+      setStaleModels(new Set());
     } finally {
       setBuilderLoading(false);
     }
@@ -3850,31 +3847,22 @@ function ComboFormModal({
 
                       {/* Model display */}
                       <div className="flex-1 min-w-0 px-1">
-                        <div className="text-xs text-text-main truncate">
-                          {formatModelDisplay(entry)}
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <div className="text-xs text-text-main truncate">
+                            {formatModelDisplay(entry)}
+                          </div>
+                          {isStaleComboStep(entry, staleModels) && (
+                            <StaleModelBadge
+                              label={getI18nOrFallback(
+                                t,
+                                "builderStaleModel",
+                                "Not in live catalog"
+                              )}
+                            />
+                          )}
                         </div>
                         <div className="text-[10px] text-text-muted truncate">
-                          {entry.kind === "combo-ref"
-                            ? getI18nOrFallback(t, "builderComboRefStep", "Nested combo reference")
-                            : entry.kind === "provider-wildcard"
-                              ? getI18nOrFallback(
-                                  t,
-                                  "builderProviderWildcard",
-                                  "All matching provider models"
-                                )
-                              : entry.connectionId
-                                ? getI18nOrFallback(t, "builderPinnedAccount", "Pinned account")
-                                : entry.providerId
-                                  ? getI18nOrFallback(
-                                      t,
-                                      "builderDynamicAccountShort",
-                                      "Dynamic account"
-                                    )
-                                  : getI18nOrFallback(
-                                      t,
-                                      "builderLegacyEntry",
-                                      "Legacy model entry"
-                                    )}
+                          {getComboStepKindLabel(t, entry)}
                         </div>
                       </div>
 
@@ -3932,6 +3920,8 @@ function ComboFormModal({
                           <Icon name="arrow_downward" size={12} />
                         </Button>
                       </div>
+
+                      <ComboStepTestButton entry={entry} />
 
                       {/* Remove */}
                       <Button
@@ -4938,31 +4928,7 @@ function ComboFormModal({
                               {formatModelDisplay(entry)}
                             </p>
                             <p className="text-[10px] text-text-muted mt-0.5">
-                              {entry.kind === "combo-ref"
-                                ? getI18nOrFallback(
-                                    t,
-                                    "builderComboRefStep",
-                                    "Nested combo reference"
-                                  )
-                                : entry.kind === "provider-wildcard"
-                                  ? getI18nOrFallback(
-                                      t,
-                                      "builderProviderWildcard",
-                                      "All matching provider models"
-                                    )
-                                  : entry.connectionId
-                                    ? getI18nOrFallback(t, "builderPinnedAccount", "Pinned account")
-                                    : entry.providerId
-                                      ? getI18nOrFallback(
-                                          t,
-                                          "builderDynamicAccountShort",
-                                          "Dynamic account"
-                                        )
-                                      : getI18nOrFallback(
-                                          t,
-                                          "builderLegacyEntry",
-                                          "Legacy model entry"
-                                        )}
+                              {getComboStepKindLabel(t, entry)}
                               {strategy === "weighted" && entry.weight > 0
                                 ? ` · ${entry.weight}%`
                                 : ""}
