@@ -486,11 +486,11 @@ Aceasta înseamnă că **adăugarea unui furnizor nou cu `auto/*` activat extind
 
 **Nu există un endpoint dedicat `POST /api/combos/auto`** — Auto-Combo este utilizat în două moduri:
 
-1. **Fără configurare (recomandat):** Trimiteți orice cerere de completare a conversației cu `model: "auto"` sau `model: "auto/<variant>"`. Fabrica virtuală construiește combinația pentru fiecare cerere — fără persistență și fără apeluri API suplimentare.
+1. **Fără configurare (recomandat):** Trimiteți orice cerere de finalizare a conversației cu `model: "auto"` sau `model: "auto/<variant>"`. Fabrica virtuală construiește combinația pentru fiecare cerere — nu sunt necesare persistență sau apeluri API.
 
-2. **Combinație persistentă cu `strategy: "auto"`:** Creați o combinație obișnuită prin `POST /api/combos` și setați `strategy: "auto"`, împreună cu `config.auto.weights` / `config.auto.candidatePool`. Este utilizat același motor de punctare; combinația este stocată în `combos` și poate fi reutilizată după ID.
+2. **Combinație persistentă cu `strategy: "auto"`:** Creați o combinație obișnuită prin `POST /api/combos` și setați `strategy: "auto"`, împreună cu `config.auto.weights` / `config.auto.candidatePool`. Este utilizat același motor de evaluare; combinația este stocată în `combos` și poate fi reutilizată după ID.
 
-Pentru descoperire, `GET /api/combos/auto` listează fiecare variantă împreună cu grupul de candidați rezolvat, plus `context_length` / `max_output_tokens` — valoarea MAXIMĂ dintre ferestrele grupului de candidați. Clienții (de exemplu, pluginul opencode) trebuie să publice aceste valori în loc de `0`: un context zero dezactivează complet compactarea automată din opencode, permițând sesiunilor să crească până când eliminarea istoricului de către gateway distruge contextul. Este sigur să fie publicată valoarea MAXIMĂ, deoarece prefiltrul de context al combinației automate direcționează cererile supradimensionate către candidați cu ferestre mari.
+Pentru descoperire, `GET /api/combos/auto` listează fiecare variantă împreună cu grupul său de candidați rezolvat și cu `context_length` / `max_output_tokens` — valoarea MAXIMĂ dintre ferestrele grupului de candidați. Clienții (de exemplu, pluginul opencode) trebuie să publice aceste valori în loc de `0`: un context zero dezactivează complet compactarea automată din opencode, permițând sesiunilor să crească până când eliminarea istoricului de către gateway distruge contextul. Este sigur să fie publicată valoarea MAXIMĂ, deoarece prefiltrul de context al combinației automate direcționează cererile supradimensionate către candidați cu ferestre mari.
 
 ```bash
 # Utilizare fără configurare (fără crearea unei combinații)
@@ -507,33 +507,33 @@ curl -X POST http://localhost:20128/api/combos \
 
 ### Strategii ale routerului automat
 
-Combinațiile persistente cu `strategy: "auto"` pot seta `config.routerStrategy` (sau vechiul
+Combinațiile persistente cu `strategy: "auto"` pot seta `config.routerStrategy` (sau opțiunea veche
 `config.auto.routerStrategy`) la una dintre următoarele valori:
 
-- `rules` — punctare ponderată implicită
-- `score` — selectează cel mai mare scor ponderat configurat. Egalitățile exacte păstrează ordinea
-  configurată a candidaților; parametrul existent `explorationRate` eșantionează din întregul grup clasificat.
-- `cost` / `eco` — cel mai ieftin furnizor sănătos
+- `rules` — evaluare ponderată implicită
+- `score` — selectează cel mai mare scor ponderat configurat. Egalitățile exacte păstrează ordinea configurată
+  a candidaților; parametrul existent `explorationRate` eșantionează din întregul grup clasificat.
+- `cost` / `eco` — cel mai ieftin furnizor funcțional
 - `latency` / `fast` — cea mai mică latență p95, cu penalizare pentru fiabilitate
-- `sla-aware` / `sla` — preferă candidații care respectă obiectivele SLO privind latența p95, rata de eroare și, opțional,
+- `sla-aware` / `sla` — preferă candidații care îndeplinesc SLO-urile privind latența p95, rata de eroare și, opțional,
   costul
-- `lkgp` — ultimul furnizor cunoscut ca fiind funcțional, primul
-- `nadir` — solicită API-ului decizional al [Nadir](https://getnadir.com) să stabilească modelul din grup de care are nevoie
-  promptul; necesită activare explicită și, în caz de eroare, revine la `rules`
+- `lkgp` — mai întâi, ultimul furnizor cunoscut ca fiind funcțional
+- `nadir` — solicită API-ului de decizie [Nadir](https://getnadir.com) să stabilească modelul din grup de care are
+  nevoie promptul; necesită activare explicită și revine la `rules` în caz de eroare
 
 ### Strategiile routerului în detaliu
 
-Motorul de combinații automate expune 7 implementări **RouterStrategy** interschimbabile,
-pe care le puteți schimba prin `config.routerStrategy` (sau vechiul `config.auto.routerStrategy`).
-Fiecare strategie alege un furnizor din grupul de candidați, pe baza unui `RoutingContext`
-(tipul sarcinii, indicii privind instrumentele/viziunea, estimarea numărului de tokenuri, politica SLA opțională, ultimul
+Motorul de combinații automate oferă 7 implementări **RouterStrategy** interschimbabile prin
+`config.routerStrategy` (sau opțiunea veche `config.auto.routerStrategy`).
+Fiecare strategie selectează un furnizor din grupul de candidați, pe baza unui `RoutingContext`
+(tipul sarcinii, indicii privind instrumentele/viziunea, estimarea tokenurilor, politica SLA opțională, ultimul
 furnizor cunoscut ca fiind funcțional, opțional).
 
-#### 1. `rules` (implicit) — punctare ponderată pe baza a 16 factori
+#### 1. `rules` (implicit) — evaluare ponderată cu 16 factori
 
-Încapsulează motorul de punctare existent. Filtrează candidații cu circuit breaker în starea `OPEN`,
+Încapsulează motorul de evaluare existent. Filtrează candidații cu disjunctorul în starea `OPEN`,
 apoi execută `scorePool()` cu tipul curent al sarcinii și `getTaskFitness()`,
-alegând furnizorul cu cel mai mare scor.
+selectând furnizorul cu cel mai mare scor.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -559,10 +559,10 @@ class RulesStrategyImpl implements RouterStrategy {
 
 ---
 
-#### 2. `cost` / `eco` — cel mai ieftin furnizor sănătos
+#### 2. `cost` / `eco` — cel mai ieftin furnizor funcțional
 
-Sortează grupul de candidați după `costPer1MTokens` (crescător) și îl alege pe cel mai ieftin.
-Filtrează mai întâi candidații în starea `OPEN`.
+Sortează grupul de candidați după `costPer1MTokens` (crescător) și îl selectează pe cel mai ieftin.
+Filtrează mai întâi candidații cu starea `OPEN`.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -577,7 +577,7 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Când se utilizează**: Sarcini de lucru sensibile la costuri, procesare în loturi sau operațiuni în fundal.
+**Când se utilizează**: Sarcini sensibile la costuri, procesare în loturi sau activități în fundal.
 
 **Aliasuri**: `cost`, `eco`
 
@@ -586,7 +586,7 @@ class CostStrategyImpl implements RouterStrategy {
 #### 3. `latency` / `fast` — cea mai mică latență p95, cu penalizare pentru fiabilitate
 
 Sortează după `p95LatencyMs + (errorRate * 1000)`. Penalizarea ratei de eroare asigură
-clasarea mai slabă a furnizorilor nesiguri, chiar dacă latența lor nominală este redusă.
+clasarea mai slabă a furnizorilor nefiabili, chiar dacă latența lor nominală este redusă.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -603,16 +603,16 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Când se utilizează**: Sarcini de lucru sensibile la latență, precum conversațiile în timp real, completarea automată sau
-asistenții interactivi de programare.
+**Când se utilizează**: Sarcini sensibile la latență, precum conversațiile în timp real, completarea automată sau
+asistenții interactivi pentru programare.
 
 **Aliasuri**: `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — respectarea obiectivelor SLO privind latența/erorile/costul
+#### 4. `sla-aware` / `sla` — conformitate cu SLO-urile privind latența/erorile/costurile
 
-Acordă fiecărui candidat un scor în funcție de cât de bine respectă politica SLO configurată:
+Evaluează fiecare candidat în funcție de cât de bine respectă politica SLO configurată:
 
 | Factor              | Pondere | Formulă                                           |
 | ------------------- | ------- | ------------------------------------------------- |
@@ -620,7 +620,7 @@ Acordă fiecărui candidat un scor în funcție de cât de bine respectă politi
 | Scor de eroare      | 35%     | `threshold / max(value, ε)`                       |
 | Scor de sănătate    | 15%     | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
 | Scor de cost        | 10%     | `threshold / max(value, ε)` sau invers normalizat |
-| Scor de stabilitate | 5%      | abaterea standard a latenței, normalizată invers  |
+| Scor de stabilitate | 5%      | abaterea standard normalizată invers a latenței   |
 
 Când `hardConstraints: true`, candidații sunt sortați în principal după **scorul de încălcare**
 (cu cât depășesc orice SLO), apoi după scorul compozit. În caz contrar, se folosește doar
@@ -633,7 +633,7 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... evaluează fiecare candidat în raport cu politica: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... punctează fiecare candidat în raport cu politica: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
@@ -653,16 +653,16 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Când se utilizează**: Sarcini de lucru de producție cu bugete stricte de latență, rată de eroare sau cost.
+**Când se utilizează**: Sarcini de lucru de producție cu bugete stricte pentru latență, rată de eroare sau costuri.
 
 **Aliasuri**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — ultimul furnizor cunoscut ca fiind bun este încercat primul
+#### 5. `lkgp` — ultimul furnizor cunoscut ca fiind funcțional este încercat primul
 
-Încearcă mai întâi **ultimul furnizor cunoscut ca fiind bun** (dacă este setat), apoi revine la
-strategia `rules`. Util pentru afinitatea sesiunii — același furnizor gestionează
+Încearcă mai întâi **ultimul furnizor cunoscut ca fiind funcțional** (dacă este setat), apoi revine la
+strategia `rules`. Este utilă pentru afinitatea sesiunii — același furnizor gestionează
 solicitările ulterioare dintr-o conversație.
 
 ```ts
@@ -684,14 +684,14 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Revine la strategia rules
+    // Revenire la strategia rules
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
 **Când se utilizează**: Conversații cu mai multe schimburi în care doriți ca același furnizor să gestioneze
-solicitările ulterioare (de exemplu, pentru memorare în cache, continuitatea contextului sau consecvența prețurilor).
+solicitările ulterioare (de exemplu, pentru memorare în cache, continuitatea contextului sau consecvența tarifării).
 
 **Alias**: `lkgp` (fără alias)
 
@@ -700,10 +700,10 @@ solicitările ulterioare (de exemplu, pentru memorare în cache, continuitatea c
 #### 6. `nadir` — alegerea modelului în funcție de prompt prin Nadir
 
 Fiecare strategie de mai sus clasifică candidații pe baza propriei telemetrii; niciuna dintre ele nu citește
-solicitarea. `nadir` trimite către API-ul decizional al
-[Nadir](https://getnadir.com) (`POST /v1/bucket`) ultimul mesaj al utilizatorului împreună cu ID-urile modelelor din grup și direcționează solicitarea către modelul
-selectat de Nadir din acel meniu (`simple` → cel mai ieftin model capabil, `complex` → modelul
-de vârf). Conexiunea care deservește modelul respectiv este selectată în continuare de `rules`, astfel încât cota,
+solicitarea. `nadir` trimite ultimul mesaj al utilizatorului, împreună cu ID-urile modelelor din grup, către
+API-ul decizional al [Nadir](https://getnadir.com) (`POST /v1/bucket`) și direcționează solicitarea către modelul
+pe care Nadir îl selectează din acel meniu (`simple` → cel mai ieftin model capabil, `complex` → modelul
+de frontieră). Conexiunea care deservește modelul respectiv este în continuare aleasă de `rules`, astfel încât cota,
 starea de sănătate și costul continuă să determine contul utilizat.
 
 ```json
@@ -720,29 +720,32 @@ starea de sănătate și costul continuă să determine contul utilizat.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` și `OMNIROUTE_NADIR_BASE_URL` sunt valori alternative din mediul de execuție pentru cele două
-șiruri. `baseUrl` este necesar numai pentru o instanță Nadir găzduită local (un `/v1` final este acceptat).
-Apelurile fără cheie ajung la nivelul anonim al Nadir, care are o limită de solicitări per IP.
+`OMNIROUTE_NADIR_API_KEY` și `OMNIROUTE_NADIR_BASE_URL` sunt valorile de rezervă din mediul de execuție pentru cele două
+șiruri. `baseUrl` este necesar doar pentru o instanță Nadir găzduită local (un `/v1` final este acceptat).
+Apelurile fără cheie ajung la nivelul anonim Nadir, care are o limită de rată per IP. Cu o cheie
+([creați una](https://app.getnadir.com/dashboard/api-keys)), fiecare decizie este
+înregistrată în panoul dvs. Nadir. Configurare și verificare complete:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
 Ce părăsește sistemul: textul ultimului mesaj al utilizatorului (primele 16.000 de caractere), ID-urile
 modelelor candidate și o etichetă de canal `source: "omniroute"`. Nu sunt trimise promptul de sistem, istoricul, instrumentele sau
-anteturile.
+antetele.
 
 Comportamentul în caz de eroare este de tip fail-open: un timeout (implicit 2000 ms), un răspuns non-2xx, o gazdă
-inaccesibilă, un răspuns incorect formatat sau o selecție din afara grupului determină folosirea deciziei `rules`,
+inaccesibilă, un răspuns incorect format sau o selecție din afara grupului determină utilizarea deciziei `rules`,
 iar motivul primește prefixul `NadirStrategy: fallback (…)`. După un apel eșuat,
-strategia omite accesarea rețelei timp de 30 s, astfel încât o întrerupere produce un singur timeout la fiecare 30 s, în loc de
-unul pentru fiecare solicitare. Evenimentele de rutare raportează `strategy: "nadir"` numai atunci când Nadir a făcut efectiv
+strategia omite rețeaua timp de 30 s, astfel încât o întrerupere generează un singur timeout la fiecare 30 s, în loc de
+unul pentru fiecare solicitare. Evenimentele de rutare raportează `strategy: "nadir"` numai când Nadir a făcut efectiv
 alegerea.
 
-**Când se utilizează**: trafic cu dificultate variabilă într-un grup care acoperă mai multe niveluri de modele (un model mic, unul mediu
-și unul de vârf), când doriți să reduceți costul utilizării permanente a modelului de vârf.
+**Când se utilizează**: trafic cu niveluri mixte de dificultate într-un grup care acoperă mai multe niveluri de modele (un model mic, unul
+mediu și unul de frontieră), când doriți să reduceți costul utilizării permanente a modelului de frontieră.
 
 **Alias**: `nadir` (fără alias)
 
 ---
 
-### Strategii de rutare personalizate
+### Strategii personalizate de rutare
 
 Puteți înregistra propria implementare `RouterStrategy` prin intermediul API-ului public:
 
@@ -785,18 +788,18 @@ Apoi utilizați-o:
 
 ---
 
-### Ghid de selectare a strategiei de rutare
+### Ghid pentru selectarea strategiei de rutare
 
 | Caz de utilizare            | Strategie   | Motiv                                         |
 | --------------------------- | ----------- | --------------------------------------------- |
-| Sarcină echilibrată         | `rules`     | Implicită — ia în considerare toți factorii   |
-| Minimizarea costului        | `cost`      | Alege întotdeauna opțiunea cea mai ieftină    |
+| Volum de lucru echilibrat   | `rules`     | Implicită — ia în considerare toți factorii   |
+| Minimizarea costurilor      | `cost`      | Alege întotdeauna cea mai ieftină opțiune     |
 | Minimizarea latenței        | `latency`   | Alege cel mai rapid furnizor fiabil           |
 | SLO-uri stricte             | `sla-aware` | Filtrează după pragurile p95/eroare/cost      |
-| Chat cu mai multe schimburi | `lkgp`      | Afinitatea sesiunii                           |
+| Chat cu mai multe schimburi | `lkgp`      | Persistența sesiunii                          |
 | Dificultate variabilă       | `nadir`     | Alege nivelul modelului pentru fiecare prompt |
 
-Câmpuri pentru strategia bazată pe SLA:
+Câmpuri pentru strategia compatibilă cu SLA:
 
 ```json
 {

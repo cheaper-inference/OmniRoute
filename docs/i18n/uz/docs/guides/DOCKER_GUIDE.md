@@ -648,27 +648,29 @@ sudo systemctl enable --now omniroute-update.path
 
 Xizmat olishdan oldin soʻrovni oʻchiradi, shu sababli muvaffaqiyatsiz bajarilish siklga tushib qolmaydi. `DOCKER_UPDATE_TRIGGER_FILE` belgilanmasa, boshqaruv paneli qoʻlda bajariladigan buyruq jarayonidan foydalanishda davom etadi.
 
-## Mavjudlik: standart SQLite faqat bitta replikani qoʻllab-quvvatlaydi
+## Mavjudligi: standart SQLite bitta nusxali
 
-Standart Docker / Kubernetes OmniRoute topologiyasi — **bitta Node jarayoni + bitta SQLite yozuvchisi**. Bu topologiyada yuqori mavjudlik **qoʻllab-quvvatlanmaydi**.
+Birja Docker / Kubernetes OmniRoute hisoblanadi** bitta tugun jarayoni + bitta SQLite yozuvchi** . Mavjudligi yuqori** qo'llab-quvvatlanmaydi** bu topologiyada.
 
-| Cheklov                                                                   | Oqibat                                                                                                                                                                                                                                                                                                                                            |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bitta yozuvchi                                                            | Bitta SQLite fayli bilan bir nechta replikani **ishga tushirmang**. Bu maʼlumotlar bazasini buzadi.                                                                                                                                                                                                                                               |
-| Qayta yaratish / qayta ishga tushirish / HEALTHCHECK tomonidan toʻxtatish | Jarayondagi SSE, boshqaruv paneli seanslari va xotiradagi holatning **toʻliq uzilishi**. Barcha ulangan mijozlar aloqani yoʻqotadi. Endpoint mavjud boʻlmagan oraliqda yangi soʻrovlar OmniRoute JSON javobi oʻrniga reverse-proxyʼdan **`502 Bad Gateway: Unknown error`** oladi — mijozlar buni provayder nosozligidan ajrata olmaydi (#11015). |
-| `/healthz` bilan bir xil event loop                                       | Band katalog yoki siqish sikli tekshiruvlarni kechiktirishi mumkin; qisqa timeout esa **yagona** replikani qayta ishga tushiradi.                                                                                                                                                                                                                 |
+| Cheklov                                                        | Natija                                                                                                                                                                                                                                                                                                     |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Yagona yozuvchi                                                | Do** emas** bir xil SQLite fayliga qarshi bir nechta replikalarni ishga tushiring. Bu DB ni buzadi.                                                                                                                                                                                                        |
+| Qayta yaratish / qayta ishga tushirish / HEALTHCHECK o'ldirish | **To'liq uzilish** parvozdagi SSE, asboblar paneli seanslari va xotira holati. Har bir ulangan mijoz tushadi. Bo'sh so'nggi nuqta oynasidagi yangi so'rovlar teskari proksini oladi**`502 Bad Gateway: Unknown error`** , OmniRoute JSON emas — mijozlar buni provayder xatosidan ajrata olmaydi (#11015). |
+| `/healthz` bilan bir xil hodisa tsikli                         | Band bo'lgan katalog yoki siqish belgisi probalarni kechiktirishi mumkin; qisqa vaqt tugashidan so'ng uni qayta ishga tushiradi** faqat** replika.                                                                                                                                                         |
 
-**Tekshiruvlar matritsasi** (shuningdek, [Kubernetes tekshiruvlari boʻyicha tavsiyalar](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ga qarang):
+**Prob matritsasi** (shuningdek qarang: [Kubernetes tekshiruvi tavsiyalari](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Tekshiruv               | Maqsad                                                            | Ishlatmang                                                               |
-| ----------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Faollik                 | `PORT` orqali TCP (standart `20128`) yoki yumshoq HTTP `/healthz` | `/api/monitoring/health`                                                 |
-| Tayyorlik               | HTTP `GET /healthz`                                               | Event loop bandligini ishlamay qolish deb hisoblaydigan qisqa timeoutlar |
-| Chuqur / insonlar uchun | `/api/monitoring/health`                                          | Avtomatlashtirilgan kubelet faollik tekshiruvi                           |
+| Prob             | Maqsad                                                        | foydalanmang                                                   |
+| ---------------- | ------------------------------------------------------------- | -------------------------------------------------------------- |
+| Jonlilik         | TCP da `PORT` (standart `20128`) yoki yumshoq HTTP `/healthz` | `/api/monitoring/health`                                       |
+| Tayyorlik        | HTTP `GET /healthz`                                           | Hodisa-loop bandini o'lik deb hisoblaydigan qattiq taym-autlar |
+| Chuqur / odamlar | `/api/monitoring/health`                                      | Avtomatlashtirilgan kubelet jonliligi                          |
 
-**Yangilashlar:** har bir seans uzilishini kuting. Imkon boʻlsa, mijozlarni bosqichma-bosqich uzing; standart SQLite bilan rolling update mavjud emas. Composeʼdagi `restart: unless-stopped` va Docker `HEALTHCHECK` ham konteyner Unhealthy holatiga oʻtganda yagona jarayonni almashtiradi — taʼsir koʻlami bir xil.
+**Yangilanishlar:** har bir seans tushishini kuting. Iloji bo'lsa, mijozlarni to'kib tashlang; standart SQLite hech qanday yangilanish yo'q. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` konteyner nosog‘lom bo‘lganda ham yagona jarayonni almashtiradi — bir xil portlash radiusi.
 
-**Bitta replika** uchun Kubernetes parchasi (Recreate talab qilinadi; bitta SQLite fayli bilan `replicas` sonini oshirmang):
+Tayyor manifestlar va Helm diagrammasi `deploy/kubernetes/` va `deploy/helm/omniroute/` -da yashaydi — [Kubernetesni joylashtirish bo'yicha qo'llanmaga](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) qarang.
+
+a uchun Kubernetes parchasi** bitta nusxa** (Qayta yaratish kerak; bitta SQLite faylga nisbatan `replicas` ko'tarmang):
 
 ```yaml
 spec:
@@ -695,9 +697,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` kutishi kubeʼga SIGTERM yuborilishidan oldin Service endpointlarini olib tashlash imkonini beradi, shunda **yangi** trafik toʻxtatilayotgan jarayonga yoʻnaltirilmaydi. Jarayondagi `/v1/responses` SSE soʻrovlari ogʻir vaznli qabul qilish ijaralari (#11015) orqali `SHUTDOWN_TIMEOUT_MS`gacha (standart qiymati 30 soniya) yakunlanishi kutiladi. Jarayonga baribir yetib kelgan yangi soʻrovlar `503` + `Retry-After: 5` javobini oladi. Oʻrinbosar Ready holatiga kelguniga qadar davom etadigan Recreateʼning endpointsiz oraligʻi toʻliq uzilish boʻlib qoladi — bu probeʼning notoʻgʻri sozlanishi emas, balki SQLite topologiyasining xususiyatidir.
+`preStop` uyqusi kube xizmatining so'nggi nuqtalarini SIGTERM oldin tushirishga imkon beradi** yangi** trafik o'lish jarayoniga urishni to'xtatadi. Parvozdagi `/v1/responses` SSE og'ir vaznli kirish ijarasi (#11015) orqali `SHUTDOWN_TIMEOUT_MS` gacha (standart 30s) sarflanadi. Jarayonga yetib boradigan yangi so'rovlar `503` + `Retry-After: 5` oladi. O'zgartirish tayyor bo'lgunga qadar qayta yaratish bo'sh nuqta bo'shlig'i qiyin uzilish bo'lib qoladi - bu zond noto'g'ri konfiguratsiyasi emas, balki SQLite topologiyasi.
 
-Tashqi Postgres / bir nechta yozuvchili HA — hujjatlashtirilgan standart yoʻl **emas**. Agar sizga HA kerak boʻlsa, bitta replikadan foydalaning yoki loyiha alohida sinovdan oʻtkazgan va hujjatlashtirgan topologiyani ishga tushiring. Postgres/MySQL bilan bogʻliq ishlar [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)da olib borilmoqda. Bu imkoniyat chiqarilmaguncha, **katta** `/v1/responses` sigʻimini oshirishning qoʻllab-quvvatlanadigan yagona usuli — bitta volumeʼda `replicas > 1` ishlatish emas, balki N ta mustaqil jarayonni ishga tushirishdir (keyingi boʻlim).
+Tashqi Postgres / ko'p yozuvchi HA hisoblanadi** emas** hujjatlashtirilgan zaxira yo'li. Agar sizga HA kerak bo'lsa, bitta nusxani saqlang yoki loyiha sinovdan o'tkazgan va alohida hujjatlashtirilgan topologiyani ishga tushiring. Postgres/MySQL ishi [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) da yashaydi. Bu kemalar qadar, ko'paytirishning yagona qo'llab-quvvatlanadigan usuli** katta** `/v1/responses` sig'imi N mustaqil jarayon (keyingi bo'lim), bir jilddagi `replicas > 1` emas.
 
 ## Gorizontal masshtablash: N ta mustaqil jarayon
 

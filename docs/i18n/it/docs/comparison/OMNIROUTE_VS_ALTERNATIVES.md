@@ -39,11 +39,11 @@ Confronto oggettivo delle funzionalità rispetto ai più diffusi router AI open-
 
 ## Quando scegliere OmniRoute
 
-- Fai self-hosting e vuoi la **massima copertura di provider** (375 provider, 155 voci di catalogo gratuite/senza autenticazione)
-- Hai bisogno di un **server MCP integrato** (strumenti LLM, memoria, skill esposte come strumenti)
-- Hai bisogno del **protocollo A2A** per flussi di lavoro agente-a-agente
-- Vuoi lo **stealth delle fingerprint** (JA3/JA4) per evitare il rilevamento da parte dei CAPTCHA a monte
-- Hai bisogno di **funzionalità enterprise** (guardrail, evals, audit trail) senza una fattura SaaS
+- Ti ospiti da solo e vuoi** massima copertura del fornitore** (377 fornitori, 155 voci di catalogo free/no-auth )
+- Hai bisogno di un** server MCP integrato** (strumenti LLM, memoria, abilità esposte come strumenti)
+- Ne hai bisogno** protocollo A2A** per i flussi di lavoro da agente ad agente
+- Vuoi** furtività delle impronte digitali** (JA3/JA4) per evitare il rilevamento da parte CAPTCHAs a monte
+- Ne hai bisogno** funzionalità aziendali** (guardrail, valutazioni, pista di controllo) senza fattura SaaS
 
 ## Quando scegliere LiteLLM
 
