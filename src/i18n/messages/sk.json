@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Vytvorte internú integráciu na",
     "notionIntegrationToken": "Notion Interný Integračný Token",
     "notionNotConnected": "Nie je pripojené",
-    "notionTokenConfigured": "Token je nakonfigurovaný. Nástroje Notion sú dostupné cez MCP."
+    "notionTokenConfigured": "Token je nakonfigurovaný. Nástroje Notion sú dostupné cez MCP.",
+    "categorySystemOne": "Rozhodovacie modely System One",
+    "systemOneIntro": "Rozhodovacie modely, nie chatovacie modely: odošlete stav a typované otázky a získate typované odpovede s pravdepodobnosťami. Požiadavky sa sprostredkúvajú cez OpenRouter, takže na inferenciu potrebujete aktívne pripojenie k OpenRouter.",
+    "systemOneDecide": "Typované rozhodnutia",
+    "systemOneDecideDesc": "Odošlite model, stav a otázky; vráti odpovede s pravdepodobnosťami.",
+    "systemOneConnected": "Pripojenie k OpenRouter je aktívne",
+    "systemOneNeedsConnection": "Vyžaduje pripojenie k OpenRouter",
+    "systemOneConnect": "Pripojiť OpenRouter",
+    "systemOneExample": "Ukážková požiadavka",
+    "systemOneModels": "Rozhodovacie modely",
+    "systemOneModelsDesc": "Aktuálny zoznam OpenRouter s presnými ID modelov a cenami od poskytovateľov. Zobrazenie zoznamu nevyžaduje kľúč OpenRouter.",
+    "systemOneModelsUnavailable": "Nepodarilo sa načítať zoznam modelov z OpenRouter.",
+    "systemOneModelsAndPricing": "ID modelov a ceny",
+    "systemOnePricePerMillion": "{price} / 1 mil. vstupných tokenov"
   },
   "endpoints": {
     "tabProxy": "Proxy koncového bodu",

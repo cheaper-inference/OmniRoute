@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Ṣẹ̀dá Ìṣọ̀kan Abẹ́nú ní",
     "notionIntegrationToken": "Tókìnù Ìṣọ̀kan Abẹ́nú Notion",
     "notionNotConnected": "Kò sopọ̀",
-    "notionTokenConfigured": "A ti ṣètò tókìnù. Àwọn irinṣẹ́ Notion wà nípasẹ̀ MCP."
+    "notionTokenConfigured": "A ti ṣètò tókìnù. Àwọn irinṣẹ́ Notion wà nípasẹ̀ MCP.",
+    "categorySystemOne": "Àwọn àwòṣe ìpinnu System One",
+    "systemOneIntro": "Àwọn àwòṣe ìpinnu ni, kì í ṣe àwọn àwòṣe ìjíròrò: o fi ìpínlẹ̀ àti àwọn ìbéèrè tí a tẹ irú wọn síṣẹ́ ránṣẹ́, o sì gba àwọn ìdáhùn tí a tẹ irú wọn síṣẹ́ pẹ̀lú àwọn iṣeeṣe. A máa ń fi àwọn ìbéèrè ránṣẹ́ sí OpenRouter, nítorí náà ìsopọ̀ OpenRouter tó ń ṣiṣẹ́ ni a nílò láti ṣe ìṣírò.",
+    "systemOneDecide": "Àwọn ìpinnu tí a tẹ irú wọn síṣẹ́",
+    "systemOneDecideDesc": "Fi àwòṣe, ìpínlẹ̀ àti àwọn ìbéèrè ránṣẹ́; ó máa dá àwọn ìdáhùn pẹ̀lú àwọn iṣeeṣe padà.",
+    "systemOneConnected": "Ìsopọ̀ OpenRouter ń ṣiṣẹ́",
+    "systemOneNeedsConnection": "Ó nílò ìsopọ̀ OpenRouter",
+    "systemOneConnect": "Sopọ̀ OpenRouter",
+    "systemOneExample": "Àpẹẹrẹ ìbéèrè",
+    "systemOneModels": "Àwọn àwòṣe ìpinnu",
+    "systemOneModelsDesc": "Àkójọ OpenRouter tó wà lọ́wọ́lọ́wọ́ pẹ̀lú àwọn ID àwòṣe orísun gangan àti iye owó. Kò nílò kọ́kọ́rọ́ OpenRouter láti ṣe àkójọ.",
+    "systemOneModelsUnavailable": "A kò lè ṣàgbékalẹ̀ àkójọ àwòṣe láti OpenRouter.",
+    "systemOneModelsAndPricing": "Àwọn ID àwòṣe àti iye owó",
+    "systemOnePricePerMillion": "{price} / mílíọ̀nù àmì àbáwọlé"
   },
   "endpoints": {
     "tabProxy": "Aṣojú Ibi Ìparí",

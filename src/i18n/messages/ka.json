@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "შექმენით შიდა ინტეგრაცია მისამართზე",
     "notionIntegrationToken": "Notion-ის შიდა ინტეგრაციის ტოკენი",
     "notionNotConnected": "დაკავშირებული არ არის",
-    "notionTokenConfigured": "ტოკენი კონფიგურირებულია. Notion-ის ხელსაწყოები ხელმისაწვდომია MCP-ის მეშვეობით."
+    "notionTokenConfigured": "ტოკენი კონფიგურირებულია. Notion-ის ხელსაწყოები ხელმისაწვდომია MCP-ის მეშვეობით.",
+    "categorySystemOne": "System One-ის გადაწყვეტილების მოდელები",
+    "systemOneIntro": "გადაწყვეტილების მოდელები და არა ჩატის მოდელები: თქვენ აგზავნით მდგომარეობასა და ტიპიზებულ კითხვებს და იღებთ ტიპიზებულ პასუხებს ალბათობებთან ერთად. მოთხოვნები პროქსირდება OpenRouter-ზე, ამიტომ დასკვნის მისაღებად საჭიროა OpenRouter-თან აქტიური კავშირი.",
+    "systemOneDecide": "ტიპიზებული გადაწყვეტილებები",
+    "systemOneDecideDesc": "გააგზავნეთ მოდელი, მდგომარეობა და კითხვები; მიიღებთ პასუხებს ალბათობებთან ერთად.",
+    "systemOneConnected": "OpenRouter-თან კავშირი აქტიურია",
+    "systemOneNeedsConnection": "საჭიროა OpenRouter-თან კავშირი",
+    "systemOneConnect": "OpenRouter-თან დაკავშირება",
+    "systemOneExample": "მოთხოვნის მაგალითი",
+    "systemOneModels": "გადაწყვეტილების მოდელები",
+    "systemOneModelsDesc": "OpenRouter-ის მოდელების განახლებული სია, ზუსტი upstream მოდელის ID-ებითა და ფასებით. სიის სანახავად OpenRouter-ის გასაღები საჭირო არ არის.",
+    "systemOneModelsUnavailable": "OpenRouter-იდან მოდელების სიის ჩატვირთვა ვერ მოხერხდა.",
+    "systemOneModelsAndPricing": "მოდელის ID-ები და ფასები",
+    "systemOnePricePerMillion": "{price} / 1 მლნ შეყვანის ტოკენი"
   },
   "endpoints": {
     "tabProxy": "საბოლოო წერტილის პროქსი",

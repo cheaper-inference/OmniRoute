@@ -109,6 +109,8 @@
 - [`POST /api/v1/responses/{path}`](#post-apiv1responsespath)
 - [`GET /api/v1/search/analytics`](#get-apiv1searchanalytics)
 - [`POST /api/v1/segment`](#post-apiv1segment)
+- [`POST /api/v1/systemone`](#post-apiv1systemone)
+- [`GET /api/v1/systemone/models`](#get-apiv1systemonemodels)
 - [`GET /api/v1/video-bridge/drilldown`](#get-apiv1video-bridgedrilldown)
 - [`DELETE /api/v1/video-bridge/drilldown`](#delete-apiv1video-bridgedrilldown)
 - [`GET /api/v1/videos/generations`](#get-apiv1videosgenerations)
@@ -1294,6 +1296,30 @@ curl -X POST http://localhost:20128/api/v1/segment \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
+```
+
+### POST /api/v1/systemone
+
+POST systemone
+
+Typed decision models (`noul` / `choice` / `score` questions about a `state`). The first `model` prefix selects the connection that serves the request: `typesafe/jev-latest` calls TypeSafe directly, `openrouter/typesafe/jev-1.13` goes through OpenRouter, and `ollama-local/<model>` uses a configured local Ollama (0.35 or later). An unqualified id such as `jev-latest` keeps using OpenRouter. There is no fallback from a missing direct connection to a gateway.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/systemone \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/v1/systemone/models
+
+GET systemone models
+
+Decision models offered by the configured TypeSafe, OpenRouter and local Ollama connections, as `{ object: "list", data }`. Each `id` is the gateway-qualified model accepted by `POST /v1/systemone`. The `X-OmniRoute-Catalog-Status` header reports `complete`, `partial` or `unconfigured`. API-key endpoint category `systemone`, connection, budget, rate-limit and model rules apply.
+
+```bash
+curl http://localhost:20128/api/v1/systemone/models \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
 ### GET /api/v1/video-bridge/drilldown

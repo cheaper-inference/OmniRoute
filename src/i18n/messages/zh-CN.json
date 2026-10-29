@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "在创建内部集成时",
     "notionIntegrationToken": "Notion 内部集成令牌",
     "notionNotConnected": "未连接",
-    "notionTokenConfigured": "令牌已配置。Notion 工具可通过 MCP 使用。"
+    "notionTokenConfigured": "令牌已配置。Notion 工具可通过 MCP 使用。",
+    "categorySystemOne": "System One 决策模型",
+    "systemOneIntro": "决策模型，而非聊天模型：发送状态和类型化问题，即可获得带概率的类型化答案。请求会通过代理发送至 OpenRouter，因此推理需要有效的 OpenRouter 连接。",
+    "systemOneDecide": "类型化决策",
+    "systemOneDecideDesc": "发送模型、状态和问题；返回带概率的答案。",
+    "systemOneConnected": "OpenRouter 连接已启用",
+    "systemOneNeedsConnection": "需要 OpenRouter 连接",
+    "systemOneConnect": "连接 OpenRouter",
+    "systemOneExample": "请求示例",
+    "systemOneModels": "决策模型",
+    "systemOneModelsDesc": "实时 OpenRouter 列表，包含准确的上游模型 ID 和定价。查看列表无需 OpenRouter 密钥。",
+    "systemOneModelsUnavailable": "无法从 OpenRouter 加载模型列表。",
+    "systemOneModelsAndPricing": "模型 ID 和定价",
+    "systemOnePricePerMillion": "每 100 万个输入 token {price}"
   },
   "endpoints": {
     "tabProxy": "端点代理",

@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "内部統合を作成する at",
     "notionIntegrationToken": "Notion内部統合トークン",
     "notionNotConnected": "接続されていません",
-    "notionTokenConfigured": "トークンが設定されました。NotionツールはMCPを介して利用可能です。"
+    "notionTokenConfigured": "トークンが設定されました。NotionツールはMCPを介して利用可能です。",
+    "categorySystemOne": "System Oneの意思決定モデル",
+    "systemOneIntro": "チャットモデルではなく、意思決定モデルです。状態と型付きの質問を送ると、確率付きの型付き回答が返されます。リクエストはOpenRouter経由でプロキシされるため、推論には有効なOpenRouter接続が必要です。",
+    "systemOneDecide": "型付きの意思決定",
+    "systemOneDecideDesc": "モデル、状態、質問を送信すると、確率付きの回答が返されます。",
+    "systemOneConnected": "OpenRouter接続が有効です",
+    "systemOneNeedsConnection": "OpenRouter接続が必要です",
+    "systemOneConnect": "OpenRouterを接続",
+    "systemOneExample": "リクエストの例",
+    "systemOneModels": "意思決定モデル",
+    "systemOneModelsDesc": "OpenRouterの最新リスト。正確な上流モデルIDと料金を表示します。リストの表示にOpenRouterキーは不要です。",
+    "systemOneModelsUnavailable": "OpenRouterからモデルリストを読み込めませんでした。",
+    "systemOneModelsAndPricing": "モデルIDと料金",
+    "systemOnePricePerMillion": "入力トークン100万件あたり{price}"
   },
   "endpoints": {
     "tabProxy": "エンドポイント プロキシ",

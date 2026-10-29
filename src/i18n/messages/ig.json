@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Mepụta Internal Integration na",
     "notionIntegrationToken": "Token Internal Integration nke Notion",
     "notionNotConnected": "Ejikọtaghị",
-    "notionTokenConfigured": "Ahazila token. Ngwaọrụ Notion dị site na MCP."
+    "notionTokenConfigured": "Ahazila token. Ngwaọrụ Notion dị site na MCP.",
+    "categorySystemOne": "Ụdị mkpebi System One",
+    "systemOneIntro": "Ụdị mkpebi, ọ bụghị ụdị nkata: ị na-eziga ọnọdụ na ajụjụ ndị e depụtara ụdị ha, a na-eweghachikwa azịza ndị e depụtara ụdị ha na ohere omume ha. A na-ebufe arịrịọ site na OpenRouter, ya mere ịkọwa ihe chọrọ njikọ OpenRouter na-arụ ọrụ.",
+    "systemOneDecide": "Mkpebi ndị e depụtara ụdị ha",
+    "systemOneDecideDesc": "Zipu ụdị, ọnọdụ na ajụjụ; ọ ga-eweghachi azịza na ohere omume ha.",
+    "systemOneConnected": "Njikọ OpenRouter na-arụ ọrụ",
+    "systemOneNeedsConnection": "Achọrọ njikọ OpenRouter",
+    "systemOneConnect": "Jikọọ OpenRouter",
+    "systemOneExample": "Arịrịọ atụ",
+    "systemOneModels": "Ụdị mkpebi",
+    "systemOneModelsDesc": "Ndepụta OpenRouter dị ugbu a nwere NJ kọmputa ụdị dị kpọmkwem nke onye na-enye ya na ọnụahịa. Ịdepụta ha achọghị igodo OpenRouter.",
+    "systemOneModelsUnavailable": "Enweghị ike ibudata ndepụta ụdị ahụ na OpenRouter.",
+    "systemOneModelsAndPricing": "NJ kọmputa ụdị na ọnụahịa",
+    "systemOnePricePerMillion": "{price} / token ntinye 1M"
   },
   "endpoints": {
     "tabProxy": "Proxy Ebe Njedebe",

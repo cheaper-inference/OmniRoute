@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Buat Integrasi Dalaman di",
     "notionIntegrationToken": "Token Integrasi Dalaman Notion",
     "notionNotConnected": "Tidak disambungkan",
-    "notionTokenConfigured": "Token telah dikonfigurasikan. Alat Notion boleh didapati melalui MCP."
+    "notionTokenConfigured": "Token telah dikonfigurasikan. Alat Notion boleh didapati melalui MCP.",
+    "categorySystemOne": "Model keputusan System One",
+    "systemOneIntro": "Model keputusan, bukan model sembang: anda menghantar keadaan dan soalan bertip, lalu mendapat jawapan bertip dengan kebarangkalian. Permintaan diproksikan kepada OpenRouter, jadi inferens memerlukan sambungan OpenRouter yang aktif.",
+    "systemOneDecide": "Keputusan bertip",
+    "systemOneDecideDesc": "Hantar model, keadaan dan soalan; menerima jawapan dengan kebarangkalian.",
+    "systemOneConnected": "Sambungan OpenRouter aktif",
+    "systemOneNeedsConnection": "Memerlukan sambungan OpenRouter",
+    "systemOneConnect": "Sambungkan OpenRouter",
+    "systemOneExample": "Contoh permintaan",
+    "systemOneModels": "Model keputusan",
+    "systemOneModelsDesc": "Senarai langsung OpenRouter dengan ID model huluan dan harga yang tepat. Penyenaraian tidak memerlukan kunci OpenRouter.",
+    "systemOneModelsUnavailable": "Tidak dapat memuatkan senarai model daripada OpenRouter.",
+    "systemOneModelsAndPricing": "ID model dan harga",
+    "systemOnePricePerMillion": "{price} / 1J token input"
   },
   "endpoints": {
     "tabProxy": "Proksi Titik Akhir",

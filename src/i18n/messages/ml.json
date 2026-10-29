@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "ഇവിടെ ഒരു ആന്തരിക ഇന്റഗ്രേഷൻ സൃഷ്ടിക്കുക",
     "notionIntegrationToken": "Notion ആന്തരിക ഇന്റഗ്രേഷൻ ടോക്കൺ",
     "notionNotConnected": "കണക്റ്റ് ചെയ്തിട്ടില്ല",
-    "notionTokenConfigured": "ടോക്കൺ കോൺഫിഗർ ചെയ്തു. Notion ടൂളുകൾ MCP വഴി ലഭ്യമാണ്."
+    "notionTokenConfigured": "ടോക്കൺ കോൺഫിഗർ ചെയ്തു. Notion ടൂളുകൾ MCP വഴി ലഭ്യമാണ്.",
+    "categorySystemOne": "System One തീരുമാന മാതൃകകൾ",
+    "systemOneIntro": "ചാറ്റ് മാതൃകകളല്ല, തീരുമാന മാതൃകകൾ: നിങ്ങൾ ഒരു സ്റ്റേറ്റും തരംതിരിച്ച ചോദ്യങ്ങളും അയയ്ക്കുന്നു; സാധ്യതകളോടുകൂടിയ തരംതിരിച്ച ഉത്തരങ്ങൾ ലഭിക്കുന്നു. അഭ്യർത്ഥനകൾ OpenRouter വഴി പ്രോക്സി ചെയ്യുന്നതിനാൽ, ഇൻഫറൻസിന് സജീവമായ OpenRouter കണക്ഷൻ ആവശ്യമാണ്.",
+    "systemOneDecide": "തരംതിരിച്ച തീരുമാനങ്ങൾ",
+    "systemOneDecideDesc": "മാതൃകയും സ്റ്റേറ്റും ചോദ്യങ്ങളും അയയ്ക്കുക; സാധ്യതകളോടുകൂടിയ ഉത്തരങ്ങൾ ലഭിക്കും.",
+    "systemOneConnected": "OpenRouter കണക്ഷൻ സജീവമാണ്",
+    "systemOneNeedsConnection": "OpenRouter കണക്ഷൻ ആവശ്യമാണ്",
+    "systemOneConnect": "OpenRouter ബന്ധിപ്പിക്കുക",
+    "systemOneExample": "ഉദാഹരണ അഭ്യർത്ഥന",
+    "systemOneModels": "തീരുമാന മാതൃകകൾ",
+    "systemOneModelsDesc": "കൃത്യമായ അപ്‌സ്ട്രീം മാതൃകാ ഐഡികളും വിലനിർണ്ണയവുമുള്ള തത്സമയ OpenRouter പട്ടിക. പട്ടിക കാണാൻ OpenRouter കീ ആവശ്യമില്ല.",
+    "systemOneModelsUnavailable": "OpenRouter-ൽ നിന്ന് മാതൃകാ പട്ടിക ലോഡ് ചെയ്യാനായില്ല.",
+    "systemOneModelsAndPricing": "മാതൃകാ ഐഡികളും വിലനിർണ്ണയവും",
+    "systemOnePricePerMillion": "1M ഇൻപുട്ട് ടോക്കണുകൾക്ക് {price}"
   },
   "endpoints": {
     "tabProxy": "എൻഡ്പോയിന്റ് പ്രോക്സി",

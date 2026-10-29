@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Maak een interne integratie aan bij",
     "notionIntegrationToken": "Notion Interne Integratietoken",
     "notionNotConnected": "Niet verbonden",
-    "notionTokenConfigured": "Token geconfigureerd. Notion-tools zijn beschikbaar via MCP."
+    "notionTokenConfigured": "Token geconfigureerd. Notion-tools zijn beschikbaar via MCP.",
+    "categorySystemOne": "System One-beslissingsmodellen",
+    "systemOneIntro": "Beslissingsmodellen, geen chatmodellen: je stuurt een toestand en getypeerde vragen en krijgt getypeerde antwoorden met waarschijnlijkheden. Verzoeken worden doorgestuurd naar OpenRouter, dus voor inferentie is een actieve OpenRouter-verbinding nodig.",
+    "systemOneDecide": "Getypeerde beslissingen",
+    "systemOneDecideDesc": "Stuur een model, toestand en vragen; ontvang antwoorden met waarschijnlijkheden.",
+    "systemOneConnected": "OpenRouter-verbinding actief",
+    "systemOneNeedsConnection": "Vereist een OpenRouter-verbinding",
+    "systemOneConnect": "OpenRouter verbinden",
+    "systemOneExample": "Voorbeeldverzoek",
+    "systemOneModels": "Beslissingsmodellen",
+    "systemOneModelsDesc": "Actuele OpenRouter-lijst met exacte upstream-model-ID's en prijzen. Voor de lijst is geen OpenRouter-sleutel nodig.",
+    "systemOneModelsUnavailable": "De modellijst van OpenRouter kon niet worden geladen.",
+    "systemOneModelsAndPricing": "Model-ID's en prijzen",
+    "systemOnePricePerMillion": "{price} / 1M invoertokens"
   },
   "endpoints": {
     "tabProxy": "Endpointproxy",

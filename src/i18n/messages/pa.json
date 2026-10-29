@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "ਇੱਥੇ ਇੱਕ ਅੰਦਰੂਨੀ ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਬਣਾਓ",
     "notionIntegrationToken": "Notion ਅੰਦਰੂਨੀ ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਟੋਕਨ",
     "notionNotConnected": "ਕਨੈਕਟ ਨਹੀਂ ਹੈ",
-    "notionTokenConfigured": "ਟੋਕਨ ਕੌਂਫਿਗਰ ਕੀਤਾ ਗਿਆ ਹੈ। Notion ਟੂਲ MCP ਰਾਹੀਂ ਉਪਲਬਧ ਹਨ।"
+    "notionTokenConfigured": "ਟੋਕਨ ਕੌਂਫਿਗਰ ਕੀਤਾ ਗਿਆ ਹੈ। Notion ਟੂਲ MCP ਰਾਹੀਂ ਉਪਲਬਧ ਹਨ।",
+    "categorySystemOne": "System One ਫੈਸਲਾ ਮਾਡਲ",
+    "systemOneIntro": "ਚੈਟ ਮਾਡਲ ਨਹੀਂ, ਫੈਸਲਾ ਮਾਡਲ: ਤੁਸੀਂ ਇੱਕ ਸਥਿਤੀ ਅਤੇ ਨਿਰਧਾਰਤ ਕਿਸਮ ਦੇ ਸਵਾਲ ਭੇਜਦੇ ਹੋ, ਅਤੇ ਸੰਭਾਵਨਾਵਾਂ ਸਮੇਤ ਨਿਰਧਾਰਤ ਕਿਸਮ ਦੇ ਜਵਾਬ ਪ੍ਰਾਪਤ ਕਰਦੇ ਹੋ। ਬੇਨਤੀਆਂ OpenRouter ਰਾਹੀਂ ਭੇਜੀਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਇਸ ਲਈ ਇਨਫਰੈਂਸ ਲਈ ਇੱਕ ਸਰਗਰਮ OpenRouter ਕਨੈਕਸ਼ਨ ਲੋੜੀਂਦਾ ਹੈ।",
+    "systemOneDecide": "ਨਿਰਧਾਰਤ ਕਿਸਮ ਦੇ ਫੈਸਲੇ",
+    "systemOneDecideDesc": "ਮਾਡਲ, ਸਥਿਤੀ ਅਤੇ ਸਵਾਲ ਭੇਜੋ; ਸੰਭਾਵਨਾਵਾਂ ਸਮੇਤ ਜਵਾਬ ਮਿਲਣਗੇ।",
+    "systemOneConnected": "OpenRouter ਕਨੈਕਸ਼ਨ ਸਰਗਰਮ ਹੈ",
+    "systemOneNeedsConnection": "OpenRouter ਕਨੈਕਸ਼ਨ ਲੋੜੀਂਦਾ ਹੈ",
+    "systemOneConnect": "OpenRouter ਨਾਲ ਕਨੈਕਟ ਕਰੋ",
+    "systemOneExample": "ਬੇਨਤੀ ਦੀ ਉਦਾਹਰਨ",
+    "systemOneModels": "ਫੈਸਲਾ ਮਾਡਲ",
+    "systemOneModelsDesc": "ਸਹੀ ਅੱਪਸਟ੍ਰੀਮ ਮਾਡਲ ID ਅਤੇ ਕੀਮਤਾਂ ਵਾਲੀ OpenRouter ਦੀ ਲਾਈਵ ਸੂਚੀ। ਸੂਚੀ ਦੇਖਣ ਲਈ OpenRouter ਕੁੰਜੀ ਦੀ ਲੋੜ ਨਹੀਂ।",
+    "systemOneModelsUnavailable": "OpenRouter ਤੋਂ ਮਾਡਲਾਂ ਦੀ ਸੂਚੀ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀ।",
+    "systemOneModelsAndPricing": "ਮਾਡਲ ID ਅਤੇ ਕੀਮਤਾਂ",
+    "systemOnePricePerMillion": "1M ਇਨਪੁੱਟ ਟੋਕਨਾਂ ਲਈ {price}"
   },
   "endpoints": {
     "tabProxy": "ਐਂਡਪੌਇੰਟ ਪ੍ਰਾਕਸੀ",

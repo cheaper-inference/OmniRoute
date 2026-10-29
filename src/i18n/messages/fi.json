@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Luo sisäinen integraatio kohdassa",
     "notionIntegrationToken": "Notionin sisäinen integraatiotunnus",
     "notionNotConnected": "Ei yhdistetty",
-    "notionTokenConfigured": "Token on määritetty. Notion-työkalut ovat saatavilla MCP:n kautta."
+    "notionTokenConfigured": "Token on määritetty. Notion-työkalut ovat saatavilla MCP:n kautta.",
+    "categorySystemOne": "System One -päätösmallit",
+    "systemOneIntro": "Päätösmalleja, ei keskustelumalleja: lähetät tilan ja tyypitettyjä kysymyksiä ja saat tyypitettyjä vastauksia todennäköisyyksineen. Pyynnöt välitetään OpenRouteriin, joten päättely edellyttää aktiivista OpenRouter-yhteyttä.",
+    "systemOneDecide": "Tyypitetyt päätökset",
+    "systemOneDecideDesc": "Lähetä malli, tila ja kysymykset; saat vastaukset todennäköisyyksineen.",
+    "systemOneConnected": "OpenRouter-yhteys aktiivinen",
+    "systemOneNeedsConnection": "Edellyttää OpenRouter-yhteyttä",
+    "systemOneConnect": "Yhdistä OpenRouter",
+    "systemOneExample": "Esimerkkipyyntö",
+    "systemOneModels": "Päätösmallit",
+    "systemOneModelsDesc": "Reaaliaikainen OpenRouter-luettelo, jossa ovat tarkat upstream-mallitunnukset ja hinnoittelu. Luettelon näyttäminen ei edellytä OpenRouter-avainta.",
+    "systemOneModelsUnavailable": "Malliluettelon lataaminen OpenRouterista epäonnistui.",
+    "systemOneModelsAndPricing": "Mallien tunnukset ja hinnoittelu",
+    "systemOnePricePerMillion": "{price} / 1 milj. syötetokenia"
   },
   "endpoints": {
     "tabProxy": "Päätepisteen välityspalvelin",

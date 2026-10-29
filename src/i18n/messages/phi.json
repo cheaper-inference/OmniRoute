@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Gumawa ng Panloob na Pagsasama sa",
     "notionIntegrationToken": "Token ng Notion Internal Integration",
     "notionNotConnected": "Hindi nakakonekta",
-    "notionTokenConfigured": "Naka-configure ang token. Ang mga tool ng Notion ay available sa pamamagitan ng MCP."
+    "notionTokenConfigured": "Naka-configure ang token. Ang mga tool ng Notion ay available sa pamamagitan ng MCP.",
+    "categorySystemOne": "Mga modelo ng pagpapasya sa System One",
+    "systemOneIntro": "Mga modelo ng pagpapasya, hindi mga modelo ng chat: magpadala ng estado at mga tanong na may uri, at makakuha ng mga sagot na may uri at mga posibilidad. Ipinapadaan ang mga kahilingan sa OpenRouter, kaya kailangan ng aktibong koneksyon sa OpenRouter para makapaghinuha.",
+    "systemOneDecide": "Mga pagpapasyang may uri",
+    "systemOneDecideDesc": "Magpadala ng modelo, estado at mga tanong; ibinabalik ang mga sagot na may mga posibilidad.",
+    "systemOneConnected": "Aktibo ang koneksyon sa OpenRouter",
+    "systemOneNeedsConnection": "Nangangailangan ng koneksyon sa OpenRouter",
+    "systemOneConnect": "Ikonekta ang OpenRouter",
+    "systemOneExample": "Halimbawang kahilingan",
+    "systemOneModels": "Mga modelo ng pagpapasya",
+    "systemOneModelsDesc": "Live na listahan mula sa OpenRouter na may eksaktong mga upstream model ID at pagpepresyo. Hindi kailangan ng OpenRouter key para makita ang listahan.",
+    "systemOneModelsUnavailable": "Hindi ma-load ang listahan ng mga modelo mula sa OpenRouter.",
+    "systemOneModelsAndPricing": "Mga model ID at pagpepresyo",
+    "systemOnePricePerMillion": "{price} / 1M input token"
   },
   "endpoints": {
     "tabProxy": "Proxy ng Endpoint",

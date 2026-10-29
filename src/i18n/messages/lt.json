@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Sukurkite vidinę integraciją adresu",
     "notionIntegrationToken": "Notion vidinės integracijos prieigos raktas",
     "notionNotConnected": "Neprijungta",
-    "notionTokenConfigured": "Raktas sukonfigūruotas. Notion įrankiai pasiekiami per MCP."
+    "notionTokenConfigured": "Raktas sukonfigūruotas. Notion įrankiai pasiekiami per MCP.",
+    "categorySystemOne": "System One sprendimų modeliai",
+    "systemOneIntro": "Sprendimų modeliai, ne pokalbių modeliai: pateikiate būseną ir tipizuotus klausimus, o gaunate tipizuotus atsakymus su tikimybėmis. Užklausos siunčiamos per OpenRouter, todėl išvadoms reikia aktyvaus OpenRouter ryšio.",
+    "systemOneDecide": "Tipizuoti sprendimai",
+    "systemOneDecideDesc": "Pateikite modelį, būseną ir klausimus; gausite atsakymus su tikimybėmis.",
+    "systemOneConnected": "OpenRouter ryšys aktyvus",
+    "systemOneNeedsConnection": "Reikalingas OpenRouter ryšys",
+    "systemOneConnect": "Prijungti OpenRouter",
+    "systemOneExample": "Užklausos pavyzdys",
+    "systemOneModels": "Sprendimų modeliai",
+    "systemOneModelsDesc": "Tiesiogiai iš OpenRouter pateikiamas modelių sąrašas su tiksliais pirminiais modelių ID ir kainomis. Norint peržiūrėti sąrašą, OpenRouter rakto nereikia.",
+    "systemOneModelsUnavailable": "Nepavyko įkelti modelių sąrašo iš OpenRouter.",
+    "systemOneModelsAndPricing": "Modelių ID ir kainos",
+    "systemOnePricePerMillion": "{price} / 1 mln. įvesties žetonų"
   },
   "endpoints": {
     "tabProxy": "Galinio taško proxy",

@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "આંતરિક એકીકરણ બનાવો પર",
     "notionIntegrationToken": "Notion આંતરિક ઇન્ટિગ્રેશન ટોકન",
     "notionNotConnected": "જોડાયેલ નથી",
-    "notionTokenConfigured": "ટોકન કન્ફિગર કરાયું છે. Notion ટૂલ્સ MCP દ્વારા ઉપલબ્ધ છે."
+    "notionTokenConfigured": "ટોકન કન્ફિગર કરાયું છે. Notion ટૂલ્સ MCP દ્વારા ઉપલબ્ધ છે.",
+    "categorySystemOne": "System One નિર્ણય મોડલ્સ",
+    "systemOneIntro": "ચેટ મોડલ્સ નહીં, નિર્ણય મોડલ્સ: તમે સ્થિતિ અને ટાઇપ કરેલા પ્રશ્નો મોકલો છો, અને સંભાવનાઓ સાથે ટાઇપ કરેલા જવાબો મેળવો છો. વિનંતીઓ OpenRouter મારફતે પ્રોક્સી થાય છે, તેથી અનુમાન માટે સક્રિય OpenRouter કનેક્શન જરૂરી છે.",
+    "systemOneDecide": "ટાઇપ કરેલા નિર્ણયો",
+    "systemOneDecideDesc": "મોડલ, સ્થિતિ અને પ્રશ્નો મોકલો; સંભાવનાઓ સાથે જવાબો મેળવો.",
+    "systemOneConnected": "OpenRouter કનેક્શન સક્રિય છે",
+    "systemOneNeedsConnection": "OpenRouter કનેક્શન જરૂરી છે",
+    "systemOneConnect": "OpenRouter કનેક્ટ કરો",
+    "systemOneExample": "વિનંતીનું ઉદાહરણ",
+    "systemOneModels": "નિર્ણય મોડલ્સ",
+    "systemOneModelsDesc": "ચોક્કસ અપસ્ટ્રીમ મોડલ IDs અને કિંમતો સાથેની લાઇવ OpenRouter યાદી. યાદી જોવા માટે OpenRouter કીની જરૂર નથી.",
+    "systemOneModelsUnavailable": "OpenRouter પરથી મોડલ યાદી લોડ કરી શકાઈ નથી.",
+    "systemOneModelsAndPricing": "મોડલ IDs અને કિંમતો",
+    "systemOnePricePerMillion": "1M ઇનપુટ ટોકન દીઠ {price}"
   },
   "endpoints": {
     "tabProxy": "એન્ડપોઇન્ટ પ્રૉક્સી",

@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Unda Uunganisho wa Ndani katika",
     "notionIntegrationToken": "Token ya Msingi wa Ndani wa Notion",
     "notionNotConnected": "Haujaunganishwa",
-    "notionTokenConfigured": "Token imewekwa. Zana za Notion zinapatikana kupitia MCP."
+    "notionTokenConfigured": "Token imewekwa. Zana za Notion zinapatikana kupitia MCP.",
+    "categorySystemOne": "Modeli za maamuzi za System One",
+    "systemOneIntro": "Modeli za maamuzi, si modeli za mazungumzo: unatuma hali na maswali yenye aina maalum, kisha unapata majibu yenye aina maalum na uwezekano. Maombi hutumwa kupitia OpenRouter, kwa hivyo utabiri unahitaji muunganisho wa OpenRouter ulio hai.",
+    "systemOneDecide": "Maamuzi yenye aina maalum",
+    "systemOneDecideDesc": "Tuma modeli, hali na maswali; utapata majibu yenye uwezekano.",
+    "systemOneConnected": "Muunganisho wa OpenRouter uko hai",
+    "systemOneNeedsConnection": "Inahitaji muunganisho wa OpenRouter",
+    "systemOneConnect": "Unganisha OpenRouter",
+    "systemOneExample": "Ombi la mfano",
+    "systemOneModels": "Modeli za maamuzi",
+    "systemOneModelsDesc": "Orodha ya moja kwa moja kutoka OpenRouter yenye vitambulisho halisi vya modeli za upstream na bei. Kuonyesha orodha hakuhitaji ufunguo wa OpenRouter.",
+    "systemOneModelsUnavailable": "Imeshindwa kupakia orodha ya modeli kutoka OpenRouter.",
+    "systemOneModelsAndPricing": "Vitambulisho vya modeli na bei",
+    "systemOnePricePerMillion": "{price} / tokeni za ingizo milioni 1"
   },
   "endpoints": {
     "tabProxy": "Proksi ya Endpoint",

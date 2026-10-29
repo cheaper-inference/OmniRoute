@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "లో ఒక అంతర్గత సమీకరణను సృష్టించండి",
     "notionIntegrationToken": "Notion అంతర్గత ఇంటిగ్రేషన్ టోకెన్",
     "notionNotConnected": "కనెక్ట్ కాలేదు",
-    "notionTokenConfigured": "టోకెన్ కాన్ఫిగర్ చేయబడింది. Notion టూల్స్ MCP ద్వారా అందుబాటులో ఉన్నాయి."
+    "notionTokenConfigured": "టోకెన్ కాన్ఫిగర్ చేయబడింది. Notion టూల్స్ MCP ద్వారా అందుబాటులో ఉన్నాయి.",
+    "categorySystemOne": "సిస్టమ్ వన్ నిర్ణయ నమూనాలు",
+    "systemOneIntro": "చాట్ నమూనాలు కాదు, నిర్ణయ నమూనాలు: మీరు ఒక స్థితిని, టైప్ చేసిన ప్రశ్నలను పంపితే, సంభావ్యతలతో కూడిన టైప్ చేసిన సమాధానాలు అందుతాయి. అభ్యర్థనలు OpenRouter ద్వారా ప్రాక్సీ చేయబడతాయి, కాబట్టి ఇన్‌ఫరెన్స్‌కు క్రియాశీల OpenRouter కనెక్షన్ అవసరం.",
+    "systemOneDecide": "టైప్ చేసిన నిర్ణయాలు",
+    "systemOneDecideDesc": "నమూనా, స్థితి, ప్రశ్నలను పంపండి; సంభావ్యతలతో కూడిన సమాధానాలు అందుతాయి.",
+    "systemOneConnected": "OpenRouter కనెక్షన్ క్రియాశీలంగా ఉంది",
+    "systemOneNeedsConnection": "OpenRouter కనెక్షన్ అవసరం",
+    "systemOneConnect": "OpenRouterకు కనెక్ట్ చేయండి",
+    "systemOneExample": "ఉదాహరణ అభ్యర్థన",
+    "systemOneModels": "నిర్ణయ నమూనాలు",
+    "systemOneModelsDesc": "ఖచ్చితమైన అప్‌స్ట్రీమ్ మోడల్ IDలు, ధరలతో కూడిన ప్రత్యక్ష OpenRouter జాబితా. జాబితాను చూడటానికి OpenRouter కీ అవసరం లేదు.",
+    "systemOneModelsUnavailable": "OpenRouter నుంచి మోడల్ జాబితాను లోడ్ చేయలేకపోయాం.",
+    "systemOneModelsAndPricing": "మోడల్ IDలు, ధరలు",
+    "systemOnePricePerMillion": "1M ఇన్‌పుట్ టోకెన్‌లకు {price}"
   },
   "endpoints": {
     "tabProxy": "ఎండ్పాయింట్ ప్రాక్సీ",

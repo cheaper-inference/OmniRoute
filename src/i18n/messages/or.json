@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "ଏଠାରେ ଏକ ଆଭ୍ୟନ୍ତରୀଣ ଇଣ୍ଟିଗ୍ରେସନ୍ ସୃଷ୍ଟି କରନ୍ତୁ",
     "notionIntegrationToken": "Notion ଆଭ୍ୟନ୍ତରୀଣ ଇଣ୍ଟିଗ୍ରେସନ୍ ଟୋକନ୍",
     "notionNotConnected": "ସଂଯୁକ୍ତ ନୁହେଁ",
-    "notionTokenConfigured": "ଟୋକନ୍ ବିନ୍ୟାସିତ ହୋଇଛି। Notion ଟୁଲ୍ଗୁଡ଼ିକ MCP ମାଧ୍ୟମରେ ଉପଲବ୍ଧ।"
+    "notionTokenConfigured": "ଟୋକନ୍ ବିନ୍ୟାସିତ ହୋଇଛି। Notion ଟୁଲ୍ଗୁଡ଼ିକ MCP ମାଧ୍ୟମରେ ଉପଲବ୍ଧ।",
+    "categorySystemOne": "System One ନିଷ୍ପତ୍ତି ମଡେଲ୍‌ଗୁଡ଼ିକ",
+    "systemOneIntro": "ଚାଟ୍ ମଡେଲ୍ ନୁହେଁ, ନିଷ୍ପତ୍ତି ମଡେଲ୍: ଆପଣ ଏକ ଅବସ୍ଥା ଏବଂ ପ୍ରକାରଭିତ୍ତିକ ପ୍ରଶ୍ନ ପଠାନ୍ତି, ଏବଂ ସମ୍ଭାବନା ସହିତ ପ୍ରକାରଭିତ୍ତିକ ଉତ୍ତର ପାଆନ୍ତି। ଅନୁରୋଧଗୁଡ଼ିକ OpenRouter ମାଧ୍ୟମରେ ପ୍ରକ୍ସି କରାଯାଏ, ତେଣୁ ଅନୁମାନ ପାଇଁ ଏକ ସକ୍ରିୟ OpenRouter ସଂଯୋଗ ଆବଶ୍ୟକ।",
+    "systemOneDecide": "ପ୍ରକାରଭିତ୍ତିକ ନିଷ୍ପତ୍ତି",
+    "systemOneDecideDesc": "ମଡେଲ୍, ଅବସ୍ଥା ଏବଂ ପ୍ରଶ୍ନ ପଠାନ୍ତୁ; ଏହା ସମ୍ଭାବନା ସହିତ ଉତ୍ତର ଫେରାଏ।",
+    "systemOneConnected": "OpenRouter ସଂଯୋଗ ସକ୍ରିୟ",
+    "systemOneNeedsConnection": "ଏକ OpenRouter ସଂଯୋଗ ଆବଶ୍ୟକ",
+    "systemOneConnect": "OpenRouter ସଂଯୋଗ କରନ୍ତୁ",
+    "systemOneExample": "ଅନୁରୋଧର ଉଦାହରଣ",
+    "systemOneModels": "ନିଷ୍ପତ୍ତି ମଡେଲ୍‌ଗୁଡ଼ିକ",
+    "systemOneModelsDesc": "ସଠିକ୍ ଅପଷ୍ଟ୍ରିମ୍ ମଡେଲ୍ ID ଏବଂ ମୂଲ୍ୟ ସହିତ ସଜୀବ OpenRouter ତାଲିକା। ତାଲିକା ଦେଖିବା ପାଇଁ OpenRouter କି ଆବଶ୍ୟକ ନାହିଁ।",
+    "systemOneModelsUnavailable": "OpenRouterରୁ ମଡେଲ୍ ତାଲିକା ଲୋଡ୍ କରିହେଲା ନାହିଁ।",
+    "systemOneModelsAndPricing": "ମଡେଲ୍ ID ଏବଂ ମୂଲ୍ୟ",
+    "systemOnePricePerMillion": "ପ୍ରତି 1M ଇନ୍‌ପୁଟ୍ ଟୋକେନ୍ ପାଇଁ {price}"
   },
   "endpoints": {
     "tabProxy": "ଏଣ୍ଡପଏଣ୍ଟ ପ୍ରକ୍ସି",

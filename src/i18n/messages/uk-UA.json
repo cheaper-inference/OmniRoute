@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Створити внутрішню інтеграцію на",
     "notionIntegrationToken": "Токен внутрішньої інтеграції Notion",
     "notionNotConnected": "Не підключено",
-    "notionTokenConfigured": "Токен налаштовано. Інструменти Notion доступні через MCP."
+    "notionTokenConfigured": "Токен налаштовано. Інструменти Notion доступні через MCP.",
+    "categorySystemOne": "Моделі прийняття рішень System One",
+    "systemOneIntro": "Моделі прийняття рішень, а не чат-моделі: ви надсилаєте стан і типізовані запитання та отримуєте типізовані відповіді з імовірностями. Запити передаються через OpenRouter, тож для інференсу потрібне активне підключення до OpenRouter.",
+    "systemOneDecide": "Типізовані рішення",
+    "systemOneDecideDesc": "Надішліть модель, стан і запитання — у відповідь отримаєте відповіді з імовірностями.",
+    "systemOneConnected": "Підключення до OpenRouter активне",
+    "systemOneNeedsConnection": "Потрібне підключення до OpenRouter",
+    "systemOneConnect": "Підключити OpenRouter",
+    "systemOneExample": "Приклад запиту",
+    "systemOneModels": "Моделі прийняття рішень",
+    "systemOneModelsDesc": "Актуальний список OpenRouter із точними ідентифікаторами моделей і цінами від провайдера. Для перегляду списку ключ OpenRouter не потрібен.",
+    "systemOneModelsUnavailable": "Не вдалося завантажити список моделей з OpenRouter.",
+    "systemOneModelsAndPricing": "Ідентифікатори моделей і ціни",
+    "systemOnePricePerMillion": "{price} / 1 млн вхідних токенів"
   },
   "endpoints": {
     "tabProxy": "Проксі кінцевих точок",

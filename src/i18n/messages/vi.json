@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Tạo một Tích hợp nội bộ tại",
     "notionIntegrationToken": "Token tích hợp nội bộ Notion",
     "notionNotConnected": "Chưa kết nối",
-    "notionTokenConfigured": "Đã cấu hình token. Các công cụ Notion khả dụng qua MCP."
+    "notionTokenConfigured": "Đã cấu hình token. Các công cụ Notion khả dụng qua MCP.",
+    "categorySystemOne": "Các mô hình ra quyết định System One",
+    "systemOneIntro": "Mô hình ra quyết định, không phải mô hình trò chuyện: bạn gửi trạng thái và các câu hỏi có kiểu dữ liệu, rồi nhận câu trả lời có kiểu dữ liệu kèm xác suất. Yêu cầu được chuyển tiếp qua OpenRouter, vì vậy cần có kết nối OpenRouter đang hoạt động để suy luận.",
+    "systemOneDecide": "Quyết định có kiểu dữ liệu",
+    "systemOneDecideDesc": "Gửi mô hình, trạng thái và câu hỏi; nhận câu trả lời kèm xác suất.",
+    "systemOneConnected": "Kết nối OpenRouter đang hoạt động",
+    "systemOneNeedsConnection": "Yêu cầu kết nối OpenRouter",
+    "systemOneConnect": "Kết nối OpenRouter",
+    "systemOneExample": "Yêu cầu mẫu",
+    "systemOneModels": "Mô hình ra quyết định",
+    "systemOneModelsDesc": "Danh sách OpenRouter trực tiếp với ID mô hình và giá chính xác từ nhà cung cấp. Không cần khóa OpenRouter để xem danh sách.",
+    "systemOneModelsUnavailable": "Không thể tải danh sách mô hình từ OpenRouter.",
+    "systemOneModelsAndPricing": "ID mô hình và giá",
+    "systemOnePricePerMillion": "{price} / 1M token đầu vào"
   },
   "endpoints": {
     "tabProxy": "Điểm cuối proxy",

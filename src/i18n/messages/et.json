@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Loo sisemine integratsioon aadressil",
     "notionIntegrationToken": "Notioni sisemise integratsiooni tunnusluba",
     "notionNotConnected": "Ühendus puudub",
-    "notionTokenConfigured": "Tunnusluba on seadistatud. Notioni tööriistad on saadaval MCP kaudu."
+    "notionTokenConfigured": "Tunnusluba on seadistatud. Notioni tööriistad on saadaval MCP kaudu.",
+    "categorySystemOne": "System One otsustusmudelid",
+    "systemOneIntro": "Otsustusmudelid, mitte vestlusmudelid: saada olek ja tüübistatud küsimused ning saad tüübistatud vastused koos tõenäosustega. Päringud suunatakse OpenRouteri kaudu, seega vajab järeldamine aktiivset OpenRouteri ühendust.",
+    "systemOneDecide": "Tüübistatud otsused",
+    "systemOneDecideDesc": "Saada mudel, olek ja küsimused; vastu saad vastused koos tõenäosustega.",
+    "systemOneConnected": "OpenRouteri ühendus on aktiivne",
+    "systemOneNeedsConnection": "Vajab OpenRouteri ühendust",
+    "systemOneConnect": "Ühenda OpenRouter",
+    "systemOneExample": "Päringu näide",
+    "systemOneModels": "Otsustusmudelid",
+    "systemOneModelsDesc": "OpenRouteri ajakohane loend täpsete teenusepakkuja mudeli-ID-de ja hindadega. Loendi vaatamiseks pole OpenRouteri võtit vaja.",
+    "systemOneModelsUnavailable": "OpenRouteri mudeliloendi laadimine ebaõnnestus.",
+    "systemOneModelsAndPricing": "Mudeli-ID-d ja hinnad",
+    "systemOnePricePerMillion": "{price} / 1 miljon sisendtokenit"
   },
   "endpoints": {
     "tabProxy": "Lõpp-punkti puhverserver",

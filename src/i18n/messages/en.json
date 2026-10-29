@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "Create an Internal Integration at",
     "notionIntegrationToken": "Notion Internal Integration Token",
     "notionNotConnected": "Not connected",
-    "notionTokenConfigured": "Token configured. Notion tools are available via MCP."
+    "notionTokenConfigured": "Token configured. Notion tools are available via MCP.",
+    "categorySystemOne": "System One decision models",
+    "systemOneIntro": "Decision models, not chat models: you send a state and typed questions, and get typed answers with probabilities. Requests are proxied to OpenRouter, so inference needs an active OpenRouter connection.",
+    "systemOneDecide": "Typed decisions",
+    "systemOneDecideDesc": "Send model, state and questions; returns answers with probabilities.",
+    "systemOneConnected": "OpenRouter connection active",
+    "systemOneNeedsConnection": "Requires an OpenRouter connection",
+    "systemOneConnect": "Connect OpenRouter",
+    "systemOneExample": "Example request",
+    "systemOneModels": "Decision models",
+    "systemOneModelsDesc": "Live OpenRouter list with exact upstream model IDs and pricing. Listing needs no OpenRouter key.",
+    "systemOneModelsUnavailable": "Could not load the model list from OpenRouter.",
+    "systemOneModelsAndPricing": "Model IDs and pricing",
+    "systemOnePricePerMillion": "{price} / 1M input tokens"
   },
   "endpoints": {
     "tabProxy": "Endpoint Proxy",

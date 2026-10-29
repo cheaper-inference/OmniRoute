@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Δημιουργήστε μια εσωτερική ενσωμάτωση στο",
     "notionIntegrationToken": "Διακριτικό εσωτερικής ενσωμάτωσης Notion",
     "notionNotConnected": "Μη συνδεδεμένο",
-    "notionTokenConfigured": "Το διακριτικό έχει διαμορφωθεί. Τα εργαλεία Notion είναι διαθέσιμα μέσω MCP."
+    "notionTokenConfigured": "Το διακριτικό έχει διαμορφωθεί. Τα εργαλεία Notion είναι διαθέσιμα μέσω MCP.",
+    "categorySystemOne": "Μοντέλα αποφάσεων System One",
+    "systemOneIntro": "Μοντέλα αποφάσεων, όχι μοντέλα συνομιλίας: στέλνετε μια κατάσταση και ερωτήσεις με καθορισμένους τύπους και λαμβάνετε απαντήσεις με καθορισμένους τύπους και πιθανότητες. Τα αιτήματα προωθούνται μέσω του OpenRouter, επομένως για την εξαγωγή συμπερασμάτων απαιτείται ενεργή σύνδεση OpenRouter.",
+    "systemOneDecide": "Αποφάσεις με καθορισμένους τύπους",
+    "systemOneDecideDesc": "Στείλτε το μοντέλο, την κατάσταση και τις ερωτήσεις· λαμβάνετε απαντήσεις με πιθανότητες.",
+    "systemOneConnected": "Η σύνδεση OpenRouter είναι ενεργή",
+    "systemOneNeedsConnection": "Απαιτείται σύνδεση OpenRouter",
+    "systemOneConnect": "Σύνδεση στο OpenRouter",
+    "systemOneExample": "Παράδειγμα αιτήματος",
+    "systemOneModels": "Μοντέλα αποφάσεων",
+    "systemOneModelsDesc": "Ζωντανή λίστα OpenRouter με τα ακριβή αναγνωριστικά μοντέλων upstream και τις τιμές. Για την προβολή της λίστας δεν απαιτείται κλειδί OpenRouter.",
+    "systemOneModelsUnavailable": "Δεν ήταν δυνατή η φόρτωση της λίστας μοντέλων από το OpenRouter.",
+    "systemOneModelsAndPricing": "Αναγνωριστικά μοντέλων και τιμές",
+    "systemOnePricePerMillion": "{price} / 1 εκατομμύριο διακριτικά εισόδου"
   },
   "endpoints": {
     "tabProxy": "Διαμεσολαβητής τελικού σημείου",

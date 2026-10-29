@@ -73,6 +73,12 @@ export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
     prefixes: ["/v1/rerank"],
   },
   {
+    id: "systemone",
+    label: "System One",
+    description: "Decision inference: typed answers and configured model list",
+    prefixes: ["/v1/systemone"],
+  },
+  {
     id: "models",
     label: "Models",
     description: "List available models (read-only)",

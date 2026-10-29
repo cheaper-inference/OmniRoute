@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Crie uma Integração Interna em",
     "notionIntegrationToken": "Token de Integração Interna do Notion",
     "notionNotConnected": "Desconectado",
-    "notionTokenConfigured": "Token configurado. As ferramentas do Notion estão disponíveis via MCP."
+    "notionTokenConfigured": "Token configurado. As ferramentas do Notion estão disponíveis via MCP.",
+    "categorySystemOne": "Modelos de decisão System One",
+    "systemOneIntro": "Modelos de decisão, não modelos de chat: você envia um estado e perguntas tipadas e recebe respostas tipadas com probabilidades. As solicitações são encaminhadas por proxy ao OpenRouter, então a inferência requer uma conexão ativa com o OpenRouter.",
+    "systemOneDecide": "Decisões tipadas",
+    "systemOneDecideDesc": "Envie o modelo, o estado e as perguntas; receba respostas com probabilidades.",
+    "systemOneConnected": "Conexão com o OpenRouter ativa",
+    "systemOneNeedsConnection": "Requer uma conexão com o OpenRouter",
+    "systemOneConnect": "Conectar ao OpenRouter",
+    "systemOneExample": "Exemplo de solicitação",
+    "systemOneModels": "Modelos de decisão",
+    "systemOneModelsDesc": "Lista atualizada do OpenRouter com IDs exatos dos modelos upstream e preços. A listagem não requer uma chave do OpenRouter.",
+    "systemOneModelsUnavailable": "Não foi possível carregar a lista de modelos do OpenRouter.",
+    "systemOneModelsAndPricing": "IDs e preços dos modelos",
+    "systemOnePricePerMillion": "{price} / 1 milhão de tokens de entrada"
   },
   "endpoints": {
     "tabProxy": "Endpoint de proxy",

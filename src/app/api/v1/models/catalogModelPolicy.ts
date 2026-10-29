@@ -14,10 +14,8 @@ export function isUnifiedChatSourceModelSelectable(
   model: CatalogModelPolicyInput
 ): boolean {
   if (!isModelSelectable(provider, model.id)) return false;
-  if (
-    getModelEndpointDecision(provider, model.id, model.supportedEndpoints).reason ===
-    "provider-policy"
-  )
+  const endpointDecision = getModelEndpointDecision(provider, model.id, model.supportedEndpoints);
+  if (endpointDecision.kind === "decision" || endpointDecision.reason === "provider-policy")
     return false;
 
   // #16929 (opt-in, MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED): a discovered tag is a

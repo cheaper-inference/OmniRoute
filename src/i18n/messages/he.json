@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "צור אינטגרציה פנימית ב",
     "notionIntegrationToken": "אסימון אינטגרציה פנימית של Notion",
     "notionNotConnected": "לא מחובר",
-    "notionTokenConfigured": "האסימון הוגדר. כלים של Notion זמינים דרך MCP."
+    "notionTokenConfigured": "האסימון הוגדר. כלים של Notion זמינים דרך MCP.",
+    "categorySystemOne": "מודלי החלטה של מערכת אחת",
+    "systemOneIntro": "מודלי החלטה, לא מודלי צ׳אט: שולחים מצב ושאלות מטיפוסים מוגדרים, ומקבלים תשובות מטיפוסים מוגדרים עם הסתברויות. הבקשות מועברות דרך OpenRouter, לכן ההסקה דורשת חיבור פעיל ל-OpenRouter.",
+    "systemOneDecide": "החלטות שהוקלדו",
+    "systemOneDecideDesc": "שלחו מודל, מצב ושאלות; קבלו תשובות עם הסתברויות.",
+    "systemOneConnected": "החיבור ל-OpenRouter פעיל",
+    "systemOneNeedsConnection": "נדרש חיבור ל-OpenRouter",
+    "systemOneConnect": "התחברות ל-OpenRouter",
+    "systemOneExample": "בקשה לדוגמה",
+    "systemOneModels": "מודלים לקבלת החלטות",
+    "systemOneModelsDesc": "רשימת OpenRouter חיה עם מזהי מודלים ומחירים מדויקים כפי שמופיעים אצל הספק. אין צורך במפתח OpenRouter כדי להציג את הרשימה.",
+    "systemOneModelsUnavailable": "לא ניתן לטעון את רשימת המודלים מ-OpenRouter.",
+    "systemOneModelsAndPricing": "מזהי מודלים ומחירים",
+    "systemOnePricePerMillion": "{price} לכל מיליון טוקני קלט"
   },
   "endpoints": {
     "tabProxy": "פרוקסי לנקודת קצה",

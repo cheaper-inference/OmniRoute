@@ -32,6 +32,7 @@ import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { applyConnectionCustomHeaders } from "./connectionCustomHeaders";
 import { buildChatPlaygroundModelsDiscoveryEntry } from "@omniroute/open-sse/services/chatplaygroundModels.ts";
 import { normalizeOpenAiLikeModelsResponse, normalizeWorkbuddyModelsResponse } from "./normalizers";
+import { applyDecisionModelCapabilities } from "@omniroute/open-sse/handlers/systemOneCatalog.ts";
 
 /**
  * `type` values AI/ML API uses for models routable through /v1/chat/completions.
@@ -676,7 +677,7 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     headers: { "Content-Type": "application/json" },
     authHeader: "Authorization",
     authPrefix: "Bearer ",
-    parseResponse: (data) => data.data || [],
+    parseResponse: (data) => (data.data || []).map(applyDecisionModelCapabilities),
   },
   aimlapi: {
     // #5570: AI/ML API's live catalog lives at the public, auth-free /models

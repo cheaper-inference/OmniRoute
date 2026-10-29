@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "បង្កើតការរួមបញ្ចូលផ្ទៃក្នុងនៅ",
     "notionIntegrationToken": "ថូខឹនការរួមបញ្ចូលផ្ទៃក្នុងរបស់ Notion",
     "notionNotConnected": "មិនបានតភ្ជាប់",
-    "notionTokenConfigured": "បានកំណត់ថូខឹនរួចហើយ។ ឧបករណ៍ Notion អាចប្រើបានតាមរយៈ MCP។"
+    "notionTokenConfigured": "បានកំណត់ថូខឹនរួចហើយ។ ឧបករណ៍ Notion អាចប្រើបានតាមរយៈ MCP។",
+    "categorySystemOne": "ម៉ូដែលសម្រេចចិត្ត System One",
+    "systemOneIntro": "ម៉ូដែលសម្រេចចិត្ត មិនមែនម៉ូដែលជជែកទេ៖ អ្នកផ្ញើស្ថានភាព និងសំណួរដែលមានប្រភេទ ហើយទទួលបានចម្លើយដែលមានប្រភេទ និងប្រូបាប៊ីលីតេ។ សំណើត្រូវបានបញ្ជូនបន្តទៅ OpenRouter ដូច្នេះការសន្និដ្ឋានត្រូវការការតភ្ជាប់ OpenRouter ដែលសកម្ម។",
+    "systemOneDecide": "ការសម្រេចចិត្តដែលមានប្រភេទ",
+    "systemOneDecideDesc": "ផ្ញើម៉ូដែល ស្ថានភាព និងសំណួរ; វានឹងត្រឡប់ចម្លើយដែលមានប្រូបាប៊ីលីតេ។",
+    "systemOneConnected": "ការតភ្ជាប់ OpenRouter សកម្ម",
+    "systemOneNeedsConnection": "តម្រូវឱ្យមានការតភ្ជាប់ OpenRouter",
+    "systemOneConnect": "ភ្ជាប់ OpenRouter",
+    "systemOneExample": "សំណើឧទាហរណ៍",
+    "systemOneModels": "ម៉ូដែលសម្រេចចិត្ត",
+    "systemOneModelsDesc": "បញ្ជី OpenRouter ផ្ទាល់ដែលមានលេខសម្គាល់ម៉ូដែលដើម និងតម្លៃពិតប្រាកដ។ មិនចាំបាច់មានសោ OpenRouter ដើម្បីមើលបញ្ជីទេ។",
+    "systemOneModelsUnavailable": "មិនអាចផ្ទុកបញ្ជីម៉ូដែលពី OpenRouter បានទេ។",
+    "systemOneModelsAndPricing": "លេខសម្គាល់ម៉ូដែល និងតម្លៃ",
+    "systemOnePricePerMillion": "{price} / 1M ថូខិនបញ្ចូល"
   },
   "endpoints": {
     "tabProxy": "ប្រូកស៊ីចំណុចបញ្ចប់",

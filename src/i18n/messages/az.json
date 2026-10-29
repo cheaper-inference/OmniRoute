@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "İç İnteqrasiya Yaradın at",
     "notionIntegrationToken": "Notion Daxili İnteqrasiya Tokeni",
     "notionNotConnected": "Bağlı deyil",
-    "notionTokenConfigured": "Token konfiqurasiya edilib. Notion alətləri MCP vasitəsilə mövcuddur."
+    "notionTokenConfigured": "Token konfiqurasiya edilib. Notion alətləri MCP vasitəsilə mövcuddur.",
+    "categorySystemOne": "System One qərar modelləri",
+    "systemOneIntro": "Çat modelləri deyil, qərar modelləri: vəziyyət və tipləşdirilmiş suallar göndərirsiniz, tipləşdirilmiş cavabları isə ehtimallarla alırsınız. Sorğular OpenRouter üzərindən yönləndirilir, buna görə inferens üçün aktiv OpenRouter bağlantısı lazımdır.",
+    "systemOneDecide": "Tipləşdirilmiş qərarlar",
+    "systemOneDecideDesc": "Modeli, vəziyyəti və sualları göndərin; cavabları ehtimallarla alacaqsınız.",
+    "systemOneConnected": "OpenRouter bağlantısı aktivdir",
+    "systemOneNeedsConnection": "OpenRouter bağlantısı tələb olunur",
+    "systemOneConnect": "OpenRouter-ə qoşulun",
+    "systemOneExample": "Sorğu nümunəsi",
+    "systemOneModels": "Qərar modelləri",
+    "systemOneModelsDesc": "Dəqiq upstream model ID-ləri və qiymətləri ilə OpenRouter-in canlı siyahısı. Siyahıya baxmaq üçün OpenRouter açarı lazım deyil.",
+    "systemOneModelsUnavailable": "OpenRouter-dən model siyahısını yükləmək mümkün olmadı.",
+    "systemOneModelsAndPricing": "Model ID-ləri və qiymətləri",
+    "systemOnePricePerMillion": "1M giriş tokeni üçün {price}"
   },
   "endpoints": {
     "tabProxy": "Son nöqtə proksisi",

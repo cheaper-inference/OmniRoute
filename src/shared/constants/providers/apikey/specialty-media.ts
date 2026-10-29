@@ -171,7 +171,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   // by any future System One passthrough (#13987).
   typesafe: {
     id: "typesafe",
-    serviceKinds: [],
+    serviceKinds: ["decision"],
     alias: "typesafe",
     name: "TypeSafe AI",
     icon: "psychology",

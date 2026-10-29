@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "Създайте вътрешна интеграция на",
     "notionIntegrationToken": "Токен за вътрешна интеграция на Notion",
     "notionNotConnected": "Не е свързано",
-    "notionTokenConfigured": "Токенът е конфигуриран. Инструментите на Notion са налични чрез MCP."
+    "notionTokenConfigured": "Токенът е конфигуриран. Инструментите на Notion са налични чрез MCP.",
+    "categorySystemOne": "Модели за вземане на решения System One",
+    "systemOneIntro": "Модели за вземане на решения, а не чат модели: изпращате състояние и типизирани въпроси и получавате типизирани отговори с вероятности. Заявките се пренасочват през OpenRouter, затова за извеждане е необходима активна връзка с OpenRouter.",
+    "systemOneDecide": "Типизирани решения",
+    "systemOneDecideDesc": "Изпратете модел, състояние и въпроси; получавате отговори с вероятности.",
+    "systemOneConnected": "Връзката с OpenRouter е активна",
+    "systemOneNeedsConnection": "Изисква връзка с OpenRouter",
+    "systemOneConnect": "Свързване с OpenRouter",
+    "systemOneExample": "Примерна заявка",
+    "systemOneModels": "Модели за вземане на решения",
+    "systemOneModelsDesc": "Актуален списък от OpenRouter с точните идентификатори на моделите при доставчика и цените. За показване на списъка не е необходим ключ за OpenRouter.",
+    "systemOneModelsUnavailable": "Списъкът с модели от OpenRouter не можа да бъде зареден.",
+    "systemOneModelsAndPricing": "Идентификатори на моделите и цени",
+    "systemOnePricePerMillion": "{price} / 1 млн. входни токена"
   },
   "endpoints": {
     "tabProxy": "Прокси за крайни точки",

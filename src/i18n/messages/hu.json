@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Hozzon létre egy belső integrációt itt",
     "notionIntegrationToken": "Notion Belső Integrációs Token",
     "notionNotConnected": "Nincs csatlakoztatva",
-    "notionTokenConfigured": "A token konfigurálva van. A Notion eszközök elérhetők az MCP-n keresztül."
+    "notionTokenConfigured": "A token konfigurálva van. A Notion eszközök elérhetők az MCP-n keresztül.",
+    "categorySystemOne": "Rendszer 1 döntési modellek",
+    "systemOneIntro": "Döntési modellek, nem csevegőmodellek: egy állapotot és típusos kérdéseket küld, és típusos válaszokat kap valószínűségekkel. A kérések az OpenRouteren keresztül vannak továbbítva, ezért a következtetéshez aktív OpenRouter-kapcsolat szükséges.",
+    "systemOneDecide": "Gépelt döntések",
+    "systemOneDecideDesc": "Modell, állapot és kérdések küldése; válaszokat ad valószínűségekkel.",
+    "systemOneConnected": "Az OpenRouter-kapcsolat aktív",
+    "systemOneNeedsConnection": "OpenRouter-kapcsolat szükséges",
+    "systemOneConnect": "OpenRouter csatlakoztatása",
+    "systemOneExample": "Példakérés",
+    "systemOneModels": "Döntési modellek",
+    "systemOneModelsDesc": "Élő OpenRouter-lista a pontos upstream modellazonosítókkal és árakkal. A listázáshoz nincs szükség OpenRouter-kulcsra.",
+    "systemOneModelsUnavailable": "Nem sikerült betölteni a modellek listáját az OpenRouterről.",
+    "systemOneModelsAndPricing": "Modellazonosítók és árak",
+    "systemOnePricePerMillion": "{price} / 1M bemeneti token"
   },
   "endpoints": {
     "tabProxy": "Végpontproxy",

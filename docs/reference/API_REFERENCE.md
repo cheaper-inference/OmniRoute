@@ -725,6 +725,8 @@ Upstream contracts: [sound effects](https://elevenlabs.io/docs/api-reference/tex
 | POST   | `/v1/rerank`                              | Cohere/Voyage-style rerank         |
 | POST   | `/v1/classify`                            | Jina classify (`api.jina.ai`)      |
 | POST   | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`) |
+| POST   | `/v1/systemone`                           | Decision models (System One)       |
+| GET    | `/v1/systemone/models`                    | Decision model list                |
 | POST   | `/v1/moderations`                         | OpenAI Moderations                 |
 | GET    | `/v1/models`                              | OpenAI                             |
 | POST   | `/v1/models/query`                        | Filtered model shortlist           |
@@ -752,6 +754,14 @@ POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."
 
 # Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
+
+# Decision models (System One). The first model prefix picks the connection:
+#   typesafe/jev-latest              -> TypeSafe direct
+#   openrouter/typesafe/jev-1.13     -> through OpenRouter
+#   ollama-local/<model>             -> local Ollama >= 0.35
+# An unqualified id such as jev-latest keeps using OpenRouter. TypeSafe SDKs work with baseURL = OmniRoute.
+POST /v1/systemone   { "model": "typesafe/jev-latest", "state": "...", "questions": { "q": { "type": "noul", "instructions": "..." } } }
+GET  /v1/systemone/models   # models of the configured backends: { object: "list", data: [{ id, name, pricing, ... }] }
 
 # Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }

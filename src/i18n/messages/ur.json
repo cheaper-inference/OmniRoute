@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "ایک داخلی انضمام بنائیں",
     "notionIntegrationToken": "Notion داخلی انضمام ٹوکن",
     "notionNotConnected": "منسلک نہیں ہے",
-    "notionTokenConfigured": "ٹوکین ترتیب دیا گیا ہے۔ نوٹیشن کے ٹولز MCP کے ذریعے دستیاب ہیں۔"
+    "notionTokenConfigured": "ٹوکین ترتیب دیا گیا ہے۔ نوٹیشن کے ٹولز MCP کے ذریعے دستیاب ہیں۔",
+    "categorySystemOne": "System One فیصلہ ساز ماڈلز",
+    "systemOneIntro": "چیٹ ماڈلز نہیں، فیصلہ ساز ماڈلز: آپ ایک حالت اور مخصوص اقسام کے سوالات بھیجتے ہیں، اور احتمالات کے ساتھ مخصوص اقسام کے جوابات حاصل کرتے ہیں۔ درخواستیں OpenRouter کے ذریعے بھیجی جاتی ہیں، اس لیے اندازہ کاری کے لیے OpenRouter کا فعال کنکشن درکار ہے۔",
+    "systemOneDecide": "مخصوص اقسام کے فیصلے",
+    "systemOneDecideDesc": "ماڈل، حالت اور سوالات بھیجیں؛ احتمالات کے ساتھ جوابات حاصل کریں۔",
+    "systemOneConnected": "OpenRouter کنکشن فعال ہے",
+    "systemOneNeedsConnection": "OpenRouter کنکشن درکار ہے",
+    "systemOneConnect": "OpenRouter سے منسلک ہوں",
+    "systemOneExample": "درخواست کی مثال",
+    "systemOneModels": "فیصلہ ساز ماڈلز",
+    "systemOneModelsDesc": "عین اپ اسٹریم ماڈل IDs اور قیمتوں کے ساتھ OpenRouter کی تازہ فہرست۔ فہرست دیکھنے کے لیے OpenRouter کی کلید درکار نہیں۔",
+    "systemOneModelsUnavailable": "OpenRouter سے ماڈلز کی فہرست لوڈ نہیں ہو سکی۔",
+    "systemOneModelsAndPricing": "ماڈل IDs اور قیمتیں",
+    "systemOnePricePerMillion": "1M ان پٹ ٹوکنز کے لیے {price}"
   },
   "endpoints": {
     "tabProxy": "اینڈ پوائنٹ پراکسی",

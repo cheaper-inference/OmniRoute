@@ -8,6 +8,7 @@
 
 export type ServiceKind =
   | "llm"
+  | "decision"
   | "embedding"
   | "image"
   | "imageToText"
@@ -21,6 +22,7 @@ export type ServiceKind =
 
 export const SERVICE_KIND_VALUES: readonly ServiceKind[] = [
   "llm",
+  "decision",
   "embedding",
   "image",
   "imageToText",

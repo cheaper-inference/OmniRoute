@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Skapa en Intern Integration på",
     "notionIntegrationToken": "Notion Interna Integrations Token",
     "notionNotConnected": "Inte ansluten",
-    "notionTokenConfigured": "Token konfigurerad. Notion-verktyg är tillgängliga via MCP."
+    "notionTokenConfigured": "Token konfigurerad. Notion-verktyg är tillgängliga via MCP.",
+    "categorySystemOne": "Beslutsmodeller från System One",
+    "systemOneIntro": "Beslutsmodeller, inte chattmodeller: du skickar ett tillstånd och typade frågor och får typade svar med sannolikheter. Förfrågningar förmedlas via OpenRouter, så inferens kräver en aktiv OpenRouter-anslutning.",
+    "systemOneDecide": "Typade beslut",
+    "systemOneDecideDesc": "Skicka modell, tillstånd och frågor; få svar med sannolikheter.",
+    "systemOneConnected": "OpenRouter-anslutning aktiv",
+    "systemOneNeedsConnection": "Kräver en OpenRouter-anslutning",
+    "systemOneConnect": "Anslut OpenRouter",
+    "systemOneExample": "Exempelförfrågan",
+    "systemOneModels": "Beslutsmodeller",
+    "systemOneModelsDesc": "Aktuell lista från OpenRouter med exakta modell-ID:n från upstream och priser. Listan kan hämtas utan en OpenRouter-nyckel.",
+    "systemOneModelsUnavailable": "Det gick inte att läsa in modellistan från OpenRouter.",
+    "systemOneModelsAndPricing": "Modell-ID:n och priser",
+    "systemOnePricePerMillion": "{price} / 1M indatatoken"
   },
   "endpoints": {
     "tabProxy": "Slutpunktsproxy",

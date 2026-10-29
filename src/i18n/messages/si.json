@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "මෙහි Internal Integration එකක් සාදන්න:",
     "notionIntegrationToken": "Notion Internal Integration ටෝකනය",
     "notionNotConnected": "සම්බන්ධ වී නැත",
-    "notionTokenConfigured": "ටෝකනය වින්යාස කර ඇත. Notion මෙවලම් MCP හරහා ලබා ගත හැකිය."
+    "notionTokenConfigured": "ටෝකනය වින්යාස කර ඇත. Notion මෙවලම් MCP හරහා ලබා ගත හැකිය.",
+    "categorySystemOne": "System One තීරණ ආකෘති",
+    "systemOneIntro": "චැට් ආකෘති නොව තීරණ ආකෘති: ඔබ තත්ත්වයක් සහ වර්ගීකරණය කළ ප්‍රශ්න යවන අතර, සම්භාවිතා සමඟ වර්ගීකරණය කළ පිළිතුරු ලබා ගනී. ඉල්ලීම් OpenRouter වෙත ප්‍රොක්සි කරන බැවින්, අනුමානය සඳහා සක්‍රිය OpenRouter සම්බන්ධතාවයක් අවශ්‍ය වේ.",
+    "systemOneDecide": "වර්ගීකරණය කළ තීරණ",
+    "systemOneDecideDesc": "ආකෘතිය, තත්ත්වය සහ ප්‍රශ්න යවන්න; සම්භාවිතා සමඟ පිළිතුරු ලැබේ.",
+    "systemOneConnected": "OpenRouter සම්බන්ධතාවය සක්‍රියයි",
+    "systemOneNeedsConnection": "OpenRouter සම්බන්ධතාවයක් අවශ්‍යයි",
+    "systemOneConnect": "OpenRouter සම්බන්ධ කරන්න",
+    "systemOneExample": "ඉල්ලීම් උදාහරණය",
+    "systemOneModels": "තීරණ ආකෘති",
+    "systemOneModelsDesc": "නිශ්චිත ඉහළ මට්ටමේ ආකෘති ID සහ මිල ගණන් සහිත සජීවී OpenRouter ලැයිස්තුව. ලැයිස්තුව බැලීමට OpenRouter යතුරක් අවශ්‍ය නොවේ.",
+    "systemOneModelsUnavailable": "OpenRouter වෙතින් ආකෘති ලැයිස්තුව පූරණය කළ නොහැකි විය.",
+    "systemOneModelsAndPricing": "ආකෘති ID සහ මිල ගණන්",
+    "systemOnePricePerMillion": "ආදාන ටෝකන මිලියන 1කට {price}"
   },
   "endpoints": {
     "tabProxy": "අන්ත ලක්ෂ්ය ප්රොක්සිය",

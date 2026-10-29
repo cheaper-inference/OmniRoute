@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "ಇಲ್ಲಿ ಆಂತರಿಕ ಇಂಟಿಗ್ರೇಶನ್ ರಚಿಸಿ",
     "notionIntegrationToken": "Notion ಆಂತರಿಕ ಇಂಟಿಗ್ರೇಶನ್ ಟೋಕನ್",
     "notionNotConnected": "ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ",
-    "notionTokenConfigured": "ಟೋಕನ್ ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ. Notion ಪರಿಕರಗಳು MCP ಮೂಲಕ ಲಭ್ಯವಿವೆ."
+    "notionTokenConfigured": "ಟೋಕನ್ ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ. Notion ಪರಿಕರಗಳು MCP ಮೂಲಕ ಲಭ್ಯವಿವೆ.",
+    "categorySystemOne": "System One ನಿರ್ಧಾರ ಮಾದರಿಗಳು",
+    "systemOneIntro": "ಚಾಟ್ ಮಾದರಿಗಳಲ್ಲ, ನಿರ್ಧಾರ ಮಾದರಿಗಳು: ನೀವು ಸ್ಥಿತಿ ಮತ್ತು ಟೈಪ್ ಮಾಡಲಾದ ಪ್ರಶ್ನೆಗಳನ್ನು ಕಳುಹಿಸಿದರೆ, ಸಂಭವನೀಯತೆಗಳೊಂದಿಗೆ ಟೈಪ್ ಮಾಡಲಾದ ಉತ್ತರಗಳು ಸಿಗುತ್ತವೆ. ವಿನಂತಿಗಳನ್ನು OpenRouter ಮೂಲಕ ಪ್ರಾಕ್ಸಿ ಮಾಡಲಾಗುತ್ತದೆ; ಆದ್ದರಿಂದ ನಿರ್ಣಯಕ್ಕೆ ಸಕ್ರಿಯ OpenRouter ಸಂಪರ್ಕದ ಅಗತ್ಯವಿದೆ.",
+    "systemOneDecide": "ಟೈಪ್ ಮಾಡಲಾದ ನಿರ್ಧಾರಗಳು",
+    "systemOneDecideDesc": "ಮಾದರಿ, ಸ್ಥಿತಿ ಮತ್ತು ಪ್ರಶ್ನೆಗಳನ್ನು ಕಳುಹಿಸಿ; ಸಂಭವನೀಯತೆಗಳೊಂದಿಗೆ ಉತ್ತರಗಳು ಸಿಗುತ್ತವೆ.",
+    "systemOneConnected": "OpenRouter ಸಂಪರ್ಕ ಸಕ್ರಿಯವಾಗಿದೆ",
+    "systemOneNeedsConnection": "OpenRouter ಸಂಪರ್ಕದ ಅಗತ್ಯವಿದೆ",
+    "systemOneConnect": "OpenRouter ಸಂಪರ್ಕಿಸಿ",
+    "systemOneExample": "ಉದಾಹರಣೆ ವಿನಂತಿ",
+    "systemOneModels": "ನಿರ್ಧಾರ ಮಾದರಿಗಳು",
+    "systemOneModelsDesc": "ನಿಖರವಾದ ಅಪ್‌ಸ್ಟ್ರೀಮ್ ಮಾದರಿ IDಗಳು ಮತ್ತು ಬೆಲೆಗಳಿರುವ ಲೈವ್ OpenRouter ಪಟ್ಟಿ. ಪಟ್ಟಿ ವೀಕ್ಷಿಸಲು OpenRouter ಕೀ ಅಗತ್ಯವಿಲ್ಲ.",
+    "systemOneModelsUnavailable": "OpenRouterನಿಂದ ಮಾದರಿ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
+    "systemOneModelsAndPricing": "ಮಾದರಿ IDಗಳು ಮತ್ತು ಬೆಲೆಗಳು",
+    "systemOnePricePerMillion": "1M ಇನ್‌ಪುಟ್ ಟೋಕನ್‌ಗಳಿಗೆ {price}"
   },
   "endpoints": {
     "tabProxy": "ಎಂಡ್ಪಾಯಿಂಟ್ ಪ್ರಾಕ್ಸಿ",

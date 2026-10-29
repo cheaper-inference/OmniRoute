@@ -6144,6 +6144,29 @@
       "stream": "https://api2.twinmind.com/api/v3"
     }
   },
+  "typesafe": {
+    "format": "systemone",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.typesafe.ai/v1/systemone",
+      "stream": "https://api.typesafe.ai/v1/systemone"
+    }
+  },
   "typhoon": {
     "format": "openai",
     "headers": {

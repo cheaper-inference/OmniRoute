@@ -12,6 +12,7 @@ const OLLAMA_CAPABILITY_TO_ENDPOINT: Readonly<Record<string, string>> = {
   completion: "chat",
   embedding: "embeddings",
   image: "images",
+  decision: "systemone",
 };
 
 const MAX_CONCURRENT_SHOW_REQUESTS = 4;
@@ -49,7 +50,9 @@ export function applyOllamaShowCapabilities(model: unknown, showResponse: unknow
     ? "chat-completions"
     : supportedEndpoints.includes("embeddings")
       ? "embeddings"
-      : "images-generations";
+      : supportedEndpoints.includes("images")
+        ? "images-generations"
+        : "systemone";
 
   return {
     ...record,

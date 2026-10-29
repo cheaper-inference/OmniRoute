@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Cruthaigh Comhtháthú Inmheánach ag",
     "notionIntegrationToken": "Tóicín Comhtháthaithe Inmheánaigh Notion",
     "notionNotConnected": "Níl sé ceangailte",
-    "notionTokenConfigured": "Tóicín cumraithe. Tá uirlisí Notion ar fáil trí MCP."
+    "notionTokenConfigured": "Tóicín cumraithe. Tá uirlisí Notion ar fáil trí MCP.",
+    "categorySystemOne": "Samhlacha cinnteoireachta System One",
+    "systemOneIntro": "Samhlacha cinnteoireachta, ní samhlacha comhrá: seolann tú staid agus ceisteanna clóscríofa, agus faigheann tú freagraí clóscríofa le dóchúlachtaí. Cuirtear iarratais ar aghaidh chuig OpenRouter, mar sin teastaíonn nasc gníomhach OpenRouter chun tátal a bhaint.",
+    "systemOneDecide": "Cinntí clóscríofa",
+    "systemOneDecideDesc": "Seol samhail, staid agus ceisteanna; tugtar freagraí le dóchúlachtaí ar ais.",
+    "systemOneConnected": "Nasc OpenRouter gníomhach",
+    "systemOneNeedsConnection": "Nasc OpenRouter riachtanach",
+    "systemOneConnect": "Ceangail OpenRouter",
+    "systemOneExample": "Sampla d’iarratas",
+    "systemOneModels": "Samhlacha cinnteoireachta",
+    "systemOneModelsDesc": "Liosta beo OpenRouter ina bhfuil aitheantóirí cruinne na samhlacha ón soláthraí agus praghsanna. Ní theastaíonn eochair OpenRouter chun an liosta a thaispeáint.",
+    "systemOneModelsUnavailable": "Níorbh fhéidir liosta na samhlacha a luchtú ó OpenRouter.",
+    "systemOneModelsAndPricing": "Aitheantóirí samhlacha agus praghsanna",
+    "systemOnePricePerMillion": "{price} / 1M comhartha ionchuir"
   },
   "endpoints": {
     "tabProxy": "Seachfhreastalaí Críochphointe",

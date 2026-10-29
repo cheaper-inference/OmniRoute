@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "إنشاء تكامل داخلي في",
     "notionIntegrationToken": "رمز تكامل Notion الداخلي",
     "notionNotConnected": "غير متصل",
-    "notionTokenConfigured": "تم تكوين الرمز. أدوات Notion متاحة عبر MCP."
+    "notionTokenConfigured": "تم تكوين الرمز. أدوات Notion متاحة عبر MCP.",
+    "categorySystemOne": "نماذج اتخاذ القرارات من System One",
+    "systemOneIntro": "نماذج لاتخاذ القرارات، وليست نماذج دردشة: أرسل حالة وأسئلة محددة الأنواع، وستحصل على إجابات محددة الأنواع مع احتمالات. تُمرَّر الطلبات عبر OpenRouter، لذا يتطلب الاستدلال اتصالًا نشطًا بـ OpenRouter.",
+    "systemOneDecide": "قرارات محددة الأنواع",
+    "systemOneDecideDesc": "أرسل النموذج والحالة والأسئلة؛ وستُعاد الإجابات مع الاحتمالات.",
+    "systemOneConnected": "اتصال OpenRouter نشط",
+    "systemOneNeedsConnection": "يتطلب اتصالًا بـ OpenRouter",
+    "systemOneConnect": "الاتصال بـ OpenRouter",
+    "systemOneExample": "مثال على طلب",
+    "systemOneModels": "نماذج اتخاذ القرارات",
+    "systemOneModelsDesc": "قائمة OpenRouter مباشرة تتضمن معرّفات النماذج والأسعار المطابقة تمامًا للمصدر. لا تتطلب القائمة مفتاح OpenRouter.",
+    "systemOneModelsUnavailable": "تعذّر تحميل قائمة النماذج من OpenRouter.",
+    "systemOneModelsAndPricing": "معرّفات النماذج والأسعار",
+    "systemOnePricePerMillion": "{price} / مليون رمز إدخال"
   },
   "endpoints": {
     "tabProxy": "بروكسي نقطة النهاية",

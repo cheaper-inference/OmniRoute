@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "สร้างการรวมภายในที่",
     "notionIntegrationToken": "โทเค็นการรวมภายใน Notion",
     "notionNotConnected": "ไม่ได้เชื่อมต่อ",
-    "notionTokenConfigured": "กำหนดค่าโทเค็นแล้ว เครื่องมือ Notion สามารถใช้งานได้ผ่าน MCP."
+    "notionTokenConfigured": "กำหนดค่าโทเค็นแล้ว เครื่องมือ Notion สามารถใช้งานได้ผ่าน MCP.",
+    "categorySystemOne": "โมเดลตัดสินใจ System One",
+    "systemOneIntro": "โมเดลตัดสินใจ ไม่ใช่โมเดลแชต: คุณส่งสถานะและคำถามแบบระบุชนิด แล้วจะได้รับคำตอบแบบระบุชนิดพร้อมความน่าจะเป็น คำขอจะถูกส่งต่อผ่าน OpenRouter ดังนั้นการประมวลผลอนุมานต้องมีการเชื่อมต่อ OpenRouter ที่ใช้งานอยู่",
+    "systemOneDecide": "การตัดสินใจแบบระบุชนิด",
+    "systemOneDecideDesc": "ส่งโมเดล สถานะ และคำถาม แล้วรับคำตอบพร้อมความน่าจะเป็น",
+    "systemOneConnected": "การเชื่อมต่อ OpenRouter ใช้งานอยู่",
+    "systemOneNeedsConnection": "ต้องมีการเชื่อมต่อ OpenRouter",
+    "systemOneConnect": "เชื่อมต่อ OpenRouter",
+    "systemOneExample": "คำขอตัวอย่าง",
+    "systemOneModels": "โมเดลตัดสินใจ",
+    "systemOneModelsDesc": "รายการ OpenRouter แบบเรียลไทม์ พร้อมรหัสโมเดลต้นทางและราคาอย่างถูกต้อง การแสดงรายการไม่ต้องใช้คีย์ OpenRouter",
+    "systemOneModelsUnavailable": "โหลดรายการโมเดลจาก OpenRouter ไม่ได้",
+    "systemOneModelsAndPricing": "รหัสโมเดลและราคา",
+    "systemOnePricePerMillion": "{price} / 1M โทเค็นอินพุต"
   },
   "endpoints": {
     "tabProxy": "พร็อกซีปลายทาง",

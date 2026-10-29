@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "Kreirajte Internu Integraciju na",
     "notionIntegrationToken": "Notion Interni Integracijski Token",
     "notionNotConnected": "Nije povezano",
-    "notionTokenConfigured": "Token konfigurisan. Notion alati su dostupni putem MCP-a."
+    "notionTokenConfigured": "Token konfigurisan. Notion alati su dostupni putem MCP-a.",
+    "categorySystemOne": "System One modeli za odlučivanje",
+    "systemOneIntro": "Modeli za odlučivanje, a ne modeli za razgovor: šaljete stanje i tipizirana pitanja, a dobijate tipizirane odgovore s vjerovatnoćama. Zahtjevi se prosljeđuju putem OpenRoutera, pa je za inferenciju potrebna aktivna OpenRouter veza.",
+    "systemOneDecide": "Tipizirane odluke",
+    "systemOneDecideDesc": "Pošaljite model, stanje i pitanja; vraća odgovore s vjerovatnoćama.",
+    "systemOneConnected": "OpenRouter veza je aktivna",
+    "systemOneNeedsConnection": "Potrebna je OpenRouter veza",
+    "systemOneConnect": "Poveži OpenRouter",
+    "systemOneExample": "Primjer zahtjeva",
+    "systemOneModels": "Modeli za odlučivanje",
+    "systemOneModelsDesc": "Aktuelna lista s OpenRoutera s tačnim ID-ovima modela i cijenama. Za prikaz liste nije potreban OpenRouter ključ.",
+    "systemOneModelsUnavailable": "Nije moguće učitati listu modela s OpenRoutera.",
+    "systemOneModelsAndPricing": "ID-ovi modela i cijene",
+    "systemOnePricePerMillion": "{price} / 1M ulaznih tokena"
   },
   "endpoints": {
     "tabProxy": "Proxy krajnje tačke",

@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Ստեղծեք ներքին ինտեգրում՝",
     "notionIntegrationToken": "Notion ներքին ինտեգրման թոքեն",
     "notionNotConnected": "Միացված չէ",
-    "notionTokenConfigured": "Թոքենը կազմաձևված է։ Notion-ի գործիքները հասանելի են MCP-ի միջոցով։"
+    "notionTokenConfigured": "Թոքենը կազմաձևված է։ Notion-ի գործիքները հասանելի են MCP-ի միջոցով։",
+    "categorySystemOne": "System One որոշումների մոդելներ",
+    "systemOneIntro": "Որոշումների մոդելներ են, ոչ թե չաթի մոդելներ․ ուղարկում եք վիճակ և տիպավորված հարցեր, ստանում տիպավորված պատասխաններ՝ հավանականություններով։ Հարցումները փոխանցվում են OpenRouter-ին, ուստի եզրակացությունների համար անհրաժեշտ է ակտիվ OpenRouter կապ։",
+    "systemOneDecide": "Տիպավորված որոշումներ",
+    "systemOneDecideDesc": "Ուղարկեք մոդելը, վիճակն ու հարցերը․ կվերադարձվեն հավանականություններով պատասխաններ։",
+    "systemOneConnected": "OpenRouter կապն ակտիվ է",
+    "systemOneNeedsConnection": "Պահանջվում է OpenRouter կապ",
+    "systemOneConnect": "Միացնել OpenRouter-ը",
+    "systemOneExample": "Հարցման օրինակ",
+    "systemOneModels": "Որոշումների մոդելներ",
+    "systemOneModelsDesc": "OpenRouter-ի մոդելների թարմացված ցանկ՝ ճշգրիտ upstream մոդելների ID-ներով և գնագոյացմամբ։ Ցանկը դիտելու համար OpenRouter բանալի պետք չէ։",
+    "systemOneModelsUnavailable": "Չհաջողվեց բեռնել OpenRouter-ի մոդելների ցանկը։",
+    "systemOneModelsAndPricing": "Մոդելների ID-ներն ու գնագոյացումը",
+    "systemOnePricePerMillion": "{price} / 1 միլիոն մուտքային թոքեն"
   },
   "endpoints": {
     "tabProxy": "Վերջնակետի պրոքսի",

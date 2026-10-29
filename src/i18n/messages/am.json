@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "የውስጥ ውህደት ከዚህ ይፍጠሩ፦",
     "notionIntegrationToken": "የNotion ውስጣዊ ውህደት ቶከን",
     "notionNotConnected": "አልተገናኘም",
-    "notionTokenConfigured": "ቶከኑ ተዋቅሯል። የNotion መሣሪያዎች በMCP በኩል ይገኛሉ።"
+    "notionTokenConfigured": "ቶከኑ ተዋቅሯል። የNotion መሣሪያዎች በMCP በኩል ይገኛሉ።",
+    "categorySystemOne": "System One шийдвэрийн загварууд",
+    "systemOneIntro": "Чат загвар биш, шийдвэрийн загварууд: та төлөв болон төрөлжүүлсэн асуултууд илгээж, магадлалтай төрөлжүүлсэн хариултууд авна. Хүсэлтүүд OpenRouter-оор дамждаг тул дүгнэлт гаргахад идэвхтэй OpenRouter холболт шаардлагатай.",
+    "systemOneDecide": "Төрөлжүүлсэн шийдвэрүүд",
+    "systemOneDecideDesc": "Загвар, төлөв болон асуултуудыг илгээнэ; магадлалтай хариултууд буцаана.",
+    "systemOneConnected": "OpenRouter холболт идэвхтэй",
+    "systemOneNeedsConnection": "OpenRouter холболт шаардлагатай",
+    "systemOneConnect": "OpenRouter-ийг холбоно уу",
+    "systemOneExample": "Хүсэлтийн жишээ",
+    "systemOneModels": "Шийдвэрийн загварууд",
+    "systemOneModelsDesc": "Яг дээд талын загварын ID болон үнийн мэдээллийг харуулсан OpenRouter-ийн шууд жагсаалт. Жагсаалтыг харахад OpenRouter түлхүүр шаардлагагүй.",
+    "systemOneModelsUnavailable": "OpenRouter-оос загварын жагсаалтыг ачаалж чадсангүй.",
+    "systemOneModelsAndPricing": "Загварын ID болон үнэ",
+    "systemOnePricePerMillion": "1 сая оролтын токен тутамд {price}"
   },
   "endpoints": {
     "tabProxy": "የመገናኛ ነጥብ ፕሮክሲ",

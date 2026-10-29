@@ -8,7 +8,7 @@
  */
 
 export type ModelEndpointKind =
-  "chat" | "image" | "video" | "embedding" | "rerank" | "non-chat" | "unknown";
+  "chat" | "image" | "video" | "embedding" | "rerank" | "decision" | "non-chat" | "unknown";
 
 export type ModelEndpointDecision = {
   kind: ModelEndpointKind;
@@ -45,6 +45,9 @@ function classifyExplicitEndpoints(
   const endpoints = supportedEndpoints.map(normalizeEndpoint).filter(Boolean);
   if (endpoints.some((endpoint) => CHAT_ENDPOINTS.has(endpoint))) {
     return { kind: "chat", chatSelectable: true, reason: "explicit-endpoints" };
+  }
+  if (endpoints.includes("systemone")) {
+    return { kind: "decision", chatSelectable: false, reason: "explicit-endpoints" };
   }
   if (endpoints.some((endpoint) => EMBEDDING_ENDPOINTS.has(endpoint))) {
     return { kind: "embedding", chatSelectable: false, reason: "explicit-endpoints" };
@@ -113,6 +116,9 @@ export function getModelEndpointDecision(
   supportedEndpoints?: readonly string[]
 ): ModelEndpointDecision {
   const explicit = classifyExplicitEndpoints(supportedEndpoints);
+  if (provider?.trim().toLowerCase() === "typesafe") {
+    return { kind: "decision", chatSelectable: false, reason: "provider-policy" };
+  }
   if (provider?.trim().toLowerCase() === "openrouter") {
     // Unconditional, unlike the OpenAI branch below: there is no "batch"
     // endpoint name an upstream could declare alongside a chat one, and the

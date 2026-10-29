@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "یک ادغام داخلی در",
     "notionIntegrationToken": "توکن ادغام داخلی نوتیون",
     "notionNotConnected": "متصل نیستید",
-    "notionTokenConfigured": "توکن پیکربندی شده است. ابزارهای Notion از طریق MCP در دسترس هستند."
+    "notionTokenConfigured": "توکن پیکربندی شده است. ابزارهای Notion از طریق MCP در دسترس هستند.",
+    "categorySystemOne": "مدل‌های تصمیم‌گیری System One",
+    "systemOneIntro": "مدل‌های تصمیم‌گیری، نه مدل‌های چت: یک وضعیت و پرسش‌های دارای نوع مشخص می‌فرستید و پاسخ‌های دارای نوع مشخص را همراه با احتمال دریافت می‌کنید. درخواست‌ها از طریق OpenRouter پروکسی می‌شوند، بنابراین برای استنتاج به اتصال فعال OpenRouter نیاز است.",
+    "systemOneDecide": "تصمیم‌های دارای نوع مشخص",
+    "systemOneDecideDesc": "مدل، وضعیت و پرسش‌ها را بفرستید؛ پاسخ‌ها را همراه با احتمال دریافت کنید.",
+    "systemOneConnected": "اتصال OpenRouter فعال است",
+    "systemOneNeedsConnection": "به اتصال OpenRouter نیاز دارد",
+    "systemOneConnect": "اتصال به OpenRouter",
+    "systemOneExample": "درخواست نمونه",
+    "systemOneModels": "مدل‌های تصمیم‌گیری",
+    "systemOneModelsDesc": "فهرست زنده OpenRouter با شناسه‌های دقیق مدل در سرویس بالادستی و قیمت‌گذاری. برای نمایش فهرست به کلید OpenRouter نیاز نیست.",
+    "systemOneModelsUnavailable": "بارگیری فهرست مدل‌ها از OpenRouter ممکن نشد.",
+    "systemOneModelsAndPricing": "شناسه‌های مدل و قیمت‌گذاری",
+    "systemOnePricePerMillion": "{price} به‌ازای هر ۱ میلیون توکن ورودی"
   },
   "endpoints": {
     "tabProxy": "پروکسی نقطه پایانی",

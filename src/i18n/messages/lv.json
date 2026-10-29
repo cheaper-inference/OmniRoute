@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Izveidojiet iekšēju integrāciju vietnē",
     "notionIntegrationToken": "Notion iekšējās integrācijas pilnvara",
     "notionNotConnected": "Nav savienots",
-    "notionTokenConfigured": "Pilnvara konfigurēta. Notion rīki ir pieejami, izmantojot MCP."
+    "notionTokenConfigured": "Pilnvara konfigurēta. Notion rīki ir pieejami, izmantojot MCP.",
+    "categorySystemOne": "System One lēmumu modeļi",
+    "systemOneIntro": "Lēmumu modeļi, nevis tērzēšanas modeļi: nosūtiet stāvokli un tipizētus jautājumus, un saņemiet tipizētas atbildes ar varbūtībām. Pieprasījumi tiek pārsūtīti caur OpenRouter, tāpēc secināšanai nepieciešams aktīvs OpenRouter savienojums.",
+    "systemOneDecide": "Tipizēti lēmumi",
+    "systemOneDecideDesc": "Nosūtiet modeli, stāvokli un jautājumus; tiek atgrieztas atbildes ar varbūtībām.",
+    "systemOneConnected": "OpenRouter savienojums ir aktīvs",
+    "systemOneNeedsConnection": "Nepieciešams OpenRouter savienojums",
+    "systemOneConnect": "Savienot OpenRouter",
+    "systemOneExample": "Pieprasījuma piemērs",
+    "systemOneModels": "Lēmumu modeļi",
+    "systemOneModelsDesc": "Aktuāls OpenRouter modeļu saraksts ar precīziem sākotnējā pakalpojuma modeļu ID un cenām. Saraksta apskatei OpenRouter atslēga nav nepieciešama.",
+    "systemOneModelsUnavailable": "Neizdevās ielādēt modeļu sarakstu no OpenRouter.",
+    "systemOneModelsAndPricing": "Modeļu ID un cenas",
+    "systemOnePricePerMillion": "{price} / 1 milj. ievades tokenu"
   },
   "endpoints": {
     "tabProxy": "Galapunkta starpniekserveris",

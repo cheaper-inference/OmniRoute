@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "Internal Integration တစ်ခုကို ဤနေရာတွင် ဖန်တီးပါ",
     "notionIntegrationToken": "Notion Internal Integration တိုကင်",
     "notionNotConnected": "ချိတ်ဆက်မထားပါ",
-    "notionTokenConfigured": "တိုကင်ကို စီစဉ်သတ်မှတ်ပြီးပါပြီ။ Notion ကိရိယာများကို MCP မှတစ်ဆင့် အသုံးပြုနိုင်ပါပြီ။"
+    "notionTokenConfigured": "တိုကင်ကို စီစဉ်သတ်မှတ်ပြီးပါပြီ။ Notion ကိရိယာများကို MCP မှတစ်ဆင့် အသုံးပြုနိုင်ပါပြီ။",
+    "categorySystemOne": "System One ဆုံးဖြတ်ချက်ချမော်ဒယ်များ",
+    "systemOneIntro": "စကားပြောမော်ဒယ်များမဟုတ်ဘဲ ဆုံးဖြတ်ချက်ချမော်ဒယ်များဖြစ်သည်။ အခြေအနေနှင့် အမျိုးအစားသတ်မှတ်ထားသော မေးခွန်းများကို ပေးပို့ပါက ဖြစ်နိုင်ခြေများပါဝင်သည့် အမျိုးအစားသတ်မှတ်ထားသော အဖြေများကို ရရှိမည်ဖြစ်သည်။ တောင်းဆိုမှုများကို OpenRouter မှတစ်ဆင့် ပို့ဆောင်သဖြင့် ခန့်မှန်းတွက်ချက်ရန် အသုံးပြုနေသော OpenRouter ချိတ်ဆက်မှု လိုအပ်သည်။",
+    "systemOneDecide": "အမျိုးအစားသတ်မှတ်ထားသော ဆုံးဖြတ်ချက်များ",
+    "systemOneDecideDesc": "မော်ဒယ်၊ အခြေအနေနှင့် မေးခွန်းများကို ပေးပို့ပါ။ ဖြစ်နိုင်ခြေများပါဝင်သော အဖြေများကို ပြန်လည်ရရှိမည်ဖြစ်သည်။",
+    "systemOneConnected": "OpenRouter ချိတ်ဆက်မှု အသက်ဝင်နေသည်",
+    "systemOneNeedsConnection": "OpenRouter ချိတ်ဆက်မှု လိုအပ်သည်",
+    "systemOneConnect": "OpenRouter ချိတ်ဆက်ရန်",
+    "systemOneExample": "တောင်းဆိုမှု ဥပမာ",
+    "systemOneModels": "ဆုံးဖြတ်ချက်ချမော်ဒယ်များ",
+    "systemOneModelsDesc": "အတိအကျ upstream မော်ဒယ် ID များနှင့် ဈေးနှုန်းများပါဝင်သော OpenRouter စာရင်းတိုက်ရိုက်။ စာရင်းကြည့်ရန် OpenRouter key မလိုအပ်ပါ။",
+    "systemOneModelsUnavailable": "OpenRouter မှ မော်ဒယ်စာရင်းကို ဖွင့်၍မရပါ။",
+    "systemOneModelsAndPricing": "မော်ဒယ် ID များနှင့် ဈေးနှုန်းများ",
+    "systemOnePricePerMillion": "ထည့်သွင်းတိုကင် 1M လျှင် {price}"
   },
   "endpoints": {
     "tabProxy": "Endpoint ပရောက်စီ",

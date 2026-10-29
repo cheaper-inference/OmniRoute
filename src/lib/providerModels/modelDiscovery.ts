@@ -580,13 +580,21 @@ export function normalizeDiscoveredModels(
     // Only non-chat modalities are stamped on the synced row. Chat models keep the
     // tip's exact shape (no `modelType`/`supportedInputTypes` defaults) so the
     // import-mode diff stays stable and existing catalog snapshots do not churn.
-    const modelType = modality.isEmbedding
-      ? "embedding"
-      : modality.isRerank
-        ? "rerank"
-        : modality.isImage
-          ? "image"
-          : undefined;
+    const decisionOnly =
+      Array.isArray(record.supportedEndpoints) &&
+      record.supportedEndpoints.includes("systemone") &&
+      !record.supportedEndpoints.some(
+        (endpoint) => typeof endpoint === "string" && CHAT_ENDPOINT_HINTS.has(endpoint)
+      );
+    const modelType = decisionOnly
+      ? "decision"
+      : modality.isEmbedding
+        ? "embedding"
+        : modality.isRerank
+          ? "rerank"
+          : modality.isImage
+            ? "image"
+            : undefined;
     const explicitInputTypes = Array.isArray(record.supportedInputTypes);
 
     const supportedEndpoints = Array.isArray(record.supportedEndpoints)

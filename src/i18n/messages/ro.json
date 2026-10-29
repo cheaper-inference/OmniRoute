@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Creează o integrare internă la",
     "notionIntegrationToken": "Token Intern de Integrare Notion",
     "notionNotConnected": "Neconectat",
-    "notionTokenConfigured": "Token configurat. Instrumentele Notion sunt disponibile prin MCP."
+    "notionTokenConfigured": "Token configurat. Instrumentele Notion sunt disponibile prin MCP.",
+    "categorySystemOne": "Modele de decizie System One",
+    "systemOneIntro": "Modele de decizie, nu modele de chat: trimiți o stare și întrebări tipizate și primești răspunsuri tipizate cu probabilități. Cererile sunt direcționate prin OpenRouter, așadar inferența necesită o conexiune OpenRouter activă.",
+    "systemOneDecide": "Decizii tipizate",
+    "systemOneDecideDesc": "Trimite modelul, starea și întrebările; primești răspunsuri cu probabilități.",
+    "systemOneConnected": "Conexiune OpenRouter activă",
+    "systemOneNeedsConnection": "Necesită o conexiune OpenRouter",
+    "systemOneConnect": "Conectează OpenRouter",
+    "systemOneExample": "Exemplu de cerere",
+    "systemOneModels": "Modele de decizie",
+    "systemOneModelsDesc": "Listă OpenRouter în timp real, cu ID-urile exacte ale modelelor din sursă și prețurile. Listarea nu necesită o cheie OpenRouter.",
+    "systemOneModelsUnavailable": "Nu s-a putut încărca lista de modele din OpenRouter.",
+    "systemOneModelsAndPricing": "ID-uri și prețuri ale modelelor",
+    "systemOnePricePerMillion": "{price} / 1 mil. de tokenuri de intrare"
   },
   "endpoints": {
     "tabProxy": "Proxy pentru endpointuri",

@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "आतील एकत्रीकरण तयार करा येथे",
     "notionIntegrationToken": "Notion आंतरिक एकत्रीकरण टोकन",
     "notionNotConnected": "कनेक्ट केलेले नाही",
-    "notionTokenConfigured": "टोकन कॉन्फिगर केले आहे. Notion साधने MCP द्वारे उपलब्ध आहेत."
+    "notionTokenConfigured": "टोकन कॉन्फिगर केले आहे. Notion साधने MCP द्वारे उपलब्ध आहेत.",
+    "categorySystemOne": "System One निर्णय मॉडेल्स",
+    "systemOneIntro": "चॅट मॉडेल्स नव्हे, तर निर्णय मॉडेल्स: तुम्ही स्थिती आणि विशिष्ट प्रकारचे प्रश्न पाठवता आणि संभाव्यतांसह विशिष्ट प्रकारची उत्तरे मिळवता. विनंत्या OpenRouter द्वारे प्रॉक्सी केल्या जातात, त्यामुळे अनुमानासाठी सक्रिय OpenRouter कनेक्शन आवश्यक आहे.",
+    "systemOneDecide": "विशिष्ट प्रकारचे निर्णय",
+    "systemOneDecideDesc": "मॉडेल, स्थिती आणि प्रश्न पाठवा; संभाव्यतांसह उत्तरे मिळवा.",
+    "systemOneConnected": "OpenRouter कनेक्शन सक्रिय आहे",
+    "systemOneNeedsConnection": "OpenRouter कनेक्शन आवश्यक आहे",
+    "systemOneConnect": "OpenRouter कनेक्ट करा",
+    "systemOneExample": "उदाहरण विनंती",
+    "systemOneModels": "निर्णय मॉडेल्स",
+    "systemOneModelsDesc": "अचूक upstream मॉडेल ID आणि किंमतींसह OpenRouter ची थेट यादी. यादी पाहण्यासाठी OpenRouter की आवश्यक नाही.",
+    "systemOneModelsUnavailable": "OpenRouter वरून मॉडेल यादी लोड करता आली नाही.",
+    "systemOneModelsAndPricing": "मॉडेल ID आणि किंमती",
+    "systemOnePricePerMillion": "1M इनपुट टोकन्ससाठी {price}"
   },
   "endpoints": {
     "tabProxy": "एंडपॉइंट प्रॉक्सी",

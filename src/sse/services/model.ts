@@ -39,6 +39,7 @@ import {
 import { commonChatGptWebRetirementResponse } from "@/lib/providers/chatgptWebRetirementResponse";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
+import { decisionOnlyChatRejection } from "@/lib/providerModels/decisionOnlyChatGuard";
 
 export { parseModel, stripContextWindowSuffix };
 
@@ -119,6 +120,8 @@ type RuntimeModelMeta = {
   // Threaded through to `handleChatCore` -> `applyDefaultReasoningEffort` so the suffix
   // becomes `reasoning_effort` only when the request itself carries no reasoning field.
   resolvedThinkingEffort?: string;
+  /** Set only for System One capable rows, so the chat guard needs no second catalog scan. */
+  supportedEndpoints?: string[];
 };
 
 // Providers that already own a native `-{effort}` suffix mechanism — never
@@ -360,6 +363,10 @@ function buildRuntimeModelMeta(
   const metadata = resolveRuntimeFormats(customMatch, syncedMatch, compatOverrideMatch);
   copyRegistryThinkingMetadata(metadata, registryMatch);
   copySyncedThinkingMetadata(metadata, syncedMatch);
+  const endpoints = [customMatch, syncedMatch]
+    .map((match) => match?.supportedEndpoints)
+    .find((value): value is string[] => Array.isArray(value));
+  if (endpoints?.includes("systemone")) metadata.supportedEndpoints = [...endpoints];
   return metadata;
 }
 
@@ -664,7 +671,9 @@ export async function getModelInfo(modelStr) {
 
 export async function getModelInfoOrRetirementResponse(modelId: string) {
   try {
-    return await getModelInfo(modelId);
+    const info = await getModelInfo(modelId);
+    const rejection = await decisionOnlyChatRejection(info);
+    return rejection ? { error: rejection } : info;
   } catch (error) {
     if (isMicrosoftDesignerWebProviderRetiredError(error)) {
       return { error: errorResponse(HTTP_STATUS.GONE, error.message) };

@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "내부 통합을 생성합니다.",
     "notionIntegrationToken": "Notion 내부 통합 토큰",
     "notionNotConnected": "연결되지 않음",
-    "notionTokenConfigured": "토큰이 구성되었습니다. Notion 도구는 MCP를 통해 사용할 수 있습니다."
+    "notionTokenConfigured": "토큰이 구성되었습니다. Notion 도구는 MCP를 통해 사용할 수 있습니다.",
+    "categorySystemOne": "System One 의사결정 모델",
+    "systemOneIntro": "채팅 모델이 아닌 의사결정 모델입니다. 상태와 유형이 지정된 질문을 보내면 확률이 포함된 유형별 답변을 받습니다. 요청은 OpenRouter로 프록시되므로 추론하려면 OpenRouter에 연결되어 있어야 합니다.",
+    "systemOneDecide": "유형별 의사결정",
+    "systemOneDecideDesc": "모델, 상태, 질문을 보내면 확률이 포함된 답변을 반환합니다.",
+    "systemOneConnected": "OpenRouter 연결 활성화됨",
+    "systemOneNeedsConnection": "OpenRouter에 연결해야 합니다",
+    "systemOneConnect": "OpenRouter 연결",
+    "systemOneExample": "요청 예시",
+    "systemOneModels": "의사결정 모델",
+    "systemOneModelsDesc": "정확한 업스트림 모델 ID와 가격이 표시된 OpenRouter 실시간 목록입니다. 목록을 확인하는 데 OpenRouter 키는 필요하지 않습니다.",
+    "systemOneModelsUnavailable": "OpenRouter에서 모델 목록을 불러올 수 없습니다.",
+    "systemOneModelsAndPricing": "모델 ID 및 가격",
+    "systemOnePricePerMillion": "입력 토큰 100만 개당 {price}"
   },
   "endpoints": {
     "tabProxy": "엔드포인트 프록시",

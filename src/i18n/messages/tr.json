@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "İç Entegrasyon Oluşturun at",
     "notionIntegrationToken": "Notion Dahili Entegrasyon Tokeni",
     "notionNotConnected": "Bağlı değil",
-    "notionTokenConfigured": "Token yapılandırıldı. Notion araçları MCP üzerinden mevcuttur."
+    "notionTokenConfigured": "Token yapılandırıldı. Notion araçları MCP üzerinden mevcuttur.",
+    "categorySystemOne": "System One karar modelleri",
+    "systemOneIntro": "Sohbet modelleri değil, karar modelleri: bir durum ve türü belirlenmiş sorular gönderirsiniz, model de olasılıklarıyla birlikte türü belirlenmiş yanıtlar verir. İstekler OpenRouter üzerinden iletilir; bu nedenle çıkarım için etkin bir OpenRouter bağlantısı gerekir.",
+    "systemOneDecide": "Türü belirlenmiş kararlar",
+    "systemOneDecideDesc": "Modeli, durumu ve soruları gönderin; model olasılıklarla birlikte yanıtları döndürür.",
+    "systemOneConnected": "OpenRouter bağlantısı etkin",
+    "systemOneNeedsConnection": "OpenRouter bağlantısı gerekir",
+    "systemOneConnect": "OpenRouter'a bağlan",
+    "systemOneExample": "Örnek istek",
+    "systemOneModels": "Karar modelleri",
+    "systemOneModelsDesc": "Tam yukarı akış model kimliklerini ve fiyatlandırmayı içeren canlı OpenRouter listesi. Listeleme için OpenRouter anahtarı gerekmez.",
+    "systemOneModelsUnavailable": "OpenRouter'dan model listesi yüklenemedi.",
+    "systemOneModelsAndPricing": "Model kimlikleri ve fiyatlandırma",
+    "systemOnePricePerMillion": "1 milyon giriş belirteci başına {price}"
   },
   "endpoints": {
     "tabProxy": "Uç Nokta Proxy",

@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "உள்ளக ஒருங்கிணைப்பை உருவாக்கவும்",
     "notionIntegrationToken": "Notion உள்நாட்டு ஒருங்கிணைப்பு டோக்கன்",
     "notionNotConnected": "இணைக்கப்படவில்லை",
-    "notionTokenConfigured": "டோக்கன் கட்டமைக்கப்பட்டுள்ளது. Notion கருவிகள் MCP மூலம் கிடைக்கின்றன."
+    "notionTokenConfigured": "டோக்கன் கட்டமைக்கப்பட்டுள்ளது. Notion கருவிகள் MCP மூலம் கிடைக்கின்றன.",
+    "categorySystemOne": "System One முடிவு மாதிரிகள்",
+    "systemOneIntro": "அரட்டை மாதிரிகள் அல்ல, முடிவு மாதிரிகள்: நீங்கள் ஒரு நிலை மற்றும் வகைப்படுத்தப்பட்ட கேள்விகளை அனுப்பினால், நிகழ்தகவுகளுடன் வகைப்படுத்தப்பட்ட பதில்களைப் பெறுவீர்கள். கோரிக்கைகள் OpenRouter வழியாக அனுப்பப்படுகின்றன, எனவே அனுமானத்திற்கு செயலில் உள்ள OpenRouter இணைப்பு தேவை.",
+    "systemOneDecide": "வகைப்படுத்தப்பட்ட முடிவுகள்",
+    "systemOneDecideDesc": "மாதிரி, நிலை மற்றும் கேள்விகளை அனுப்புங்கள்; நிகழ்தகவுகளுடன் பதில்கள் கிடைக்கும்.",
+    "systemOneConnected": "OpenRouter இணைப்பு செயலில் உள்ளது",
+    "systemOneNeedsConnection": "OpenRouter இணைப்பு தேவை",
+    "systemOneConnect": "OpenRouter-ஐ இணைக்கவும்",
+    "systemOneExample": "கோரிக்கை எடுத்துக்காட்டு",
+    "systemOneModels": "முடிவு மாதிரிகள்",
+    "systemOneModelsDesc": "சரியான upstream மாதிரி IDகள் மற்றும் விலைகளுடன் கூடிய நேரடி OpenRouter பட்டியல். பட்டியலைப் பார்க்க OpenRouter திறவுகோல் தேவையில்லை.",
+    "systemOneModelsUnavailable": "OpenRouter-இலிருந்து மாதிரிப் பட்டியலை ஏற்ற முடியவில்லை.",
+    "systemOneModelsAndPricing": "மாதிரி IDகள் மற்றும் விலைகள்",
+    "systemOnePricePerMillion": "1M உள்ளீட்டு டோக்கன்களுக்கு {price}"
   },
   "endpoints": {
     "tabProxy": "இறுதிப்புள்ளி ப்ராக்ஸி",

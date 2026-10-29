@@ -92,14 +92,6 @@ type APIPageClientProps = {
   machineId: string;
 };
 
-type EndpointProviderSummary = {
-  id: string;
-  provider: {
-    name: string;
-    alias?: string;
-  };
-};
-
 type EndpointModelSummary = {
   id: string;
   owned_by?: string;
@@ -147,6 +139,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   // Endpoints / models state
   const [allModels, setAllModels] = useState([]);
   const [modelsLoading, setModelsLoading] = useState(true);
+  const [systemOneModels, setSystemOneModels] = useState<EndpointModelSummary[] | null>(null);
+  const [systemOneModelsLoading, setSystemOneModelsLoading] = useState(true);
 
   // Cloud sync state
   const [cloudEnabled, setCloudEnabled] = useState(false);
@@ -157,7 +151,6 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   const [cloudStatus, setCloudStatus] = useState(null);
   const [syncStep, setSyncStep] = useState(""); // "syncing" | "verifying" | "disabling" | "done" | ""
   const [modalSuccess, setModalSuccess] = useState(false); // show success state in modal before closing
-  const [selectedProvider, setSelectedProvider] = useState(null); // for provider models popup
   const [cloudBaseUrl, setCloudBaseUrl] = useState(BUILD_TIME_CLOUD_URL); // dynamic cloud URL from API response
   const [cloudConfigured, setCloudConfigured] = useState(Boolean(BUILD_TIME_CLOUD_URL));
   const [_mcpStatus, setMcpStatus] = useState<any>(null);
@@ -329,6 +322,20 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
     }
   };
 
+  const fetchSystemOneModels = async () => {
+    try {
+      const res = await fetch("/v1/systemone/models");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.data)) setSystemOneModels(data.data);
+      }
+    } catch (error) {
+      console.log("Error fetching System One models:", error);
+    } finally {
+      setSystemOneModelsLoading(false);
+    }
+  };
+
   const fetchProtocolStatus = async () => {
     try {
       const [mcpRes, a2aRes] = await Promise.allSettled([
@@ -489,6 +496,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
       setLoading(false);
 
       runEndpointBackgroundTask("models", fetchModels);
+      runEndpointBackgroundTask("systemone-models", fetchSystemOneModels);
       runEndpointBackgroundTask("protocol-status", fetchProtocolStatus);
       runEndpointBackgroundTask("search-providers", fetchSearchProviders);
       runEndpointBackgroundTask("network-info", async () => {
@@ -2041,6 +2049,47 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           </div>
         )}
 
+        <section className="mb-5" aria-labelledby="systemone-endpoints-heading">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="material-symbols-outlined text-sm text-pink-400" aria-hidden="true">
+              fact_check
+            </span>
+            <h3
+              id="systemone-endpoints-heading"
+              className="text-xs font-semibold text-text-muted uppercase tracking-wider"
+            >
+              {t("categorySystemOne")}
+            </h3>
+            <div className="flex-1 h-px bg-border/50" />
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+            <EndpointCard
+              icon="fact_check"
+              iconColor="text-pink-500"
+              iconBg="bg-pink-500/10"
+              title={t("systemOneDecide")}
+              path="/v1/systemone"
+              models={systemOneModels}
+              modelsLoading={systemOneModelsLoading}
+              copy={copy}
+              copied={copied}
+              baseUrl={currentEndpoint}
+            />
+            <EndpointCard
+              icon="list"
+              iconColor="text-teal-500"
+              iconBg="bg-teal-500/10"
+              title={t("systemOneModels")}
+              path="/v1/systemone/models"
+              models={systemOneModels}
+              modelsLoading={systemOneModelsLoading}
+              copy={copy}
+              copied={copied}
+              baseUrl={currentEndpoint}
+            />
+          </div>
+        </section>
+
         {/* Utility & Management */}
         <div>
           <div className="flex items-center gap-2 mb-3">
@@ -2343,107 +2392,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           </div>
         </div>
       </Modal>
-      {/* Provider Models Popup */}
-      {selectedProvider && (
-        <ProviderModelsModal
-          provider={selectedProvider}
-          models={allModels}
-          copy={copy}
-          copied={copied}
-          onClose={() => setSelectedProvider(null)}
-        />
-      )}
     </div>
-  );
-}
-
-// -- Sub-component: Provider Models Modal ------------------------------------------
-
-function ProviderModelsModal({
-  provider,
-  models,
-  copy,
-  copied,
-  onClose,
-}: Readonly<{
-  provider: EndpointProviderSummary;
-  models: EndpointModelSummary[];
-  copy: CopyHandler;
-  copied?: string | null;
-  onClose: () => void;
-}>) {
-  const t = useTranslations("endpoint");
-  const tc = useTranslations("common");
-  // Get provider alias for matching models
-  // Filter out parent models (models with parent field set) to avoid showing duplicates
-  const providerAlias = provider.provider.alias || provider.id;
-  const providerModels = useMemo(() => {
-    return models.filter(
-      (m) => !m.parent && (m.owned_by === providerAlias || m.owned_by === provider.id)
-    );
-  }, [models, providerAlias, provider.id]);
-
-  const chatModels = providerModels.filter((m) => !m.type);
-  const embeddingModels = providerModels.filter((m) => m.type === "embedding");
-  const imageModels = providerModels.filter((m) => m.type === "image");
-
-  const renderModelGroup = (title, icon, groupModels) => {
-    if (groupModels.length === 0) return null;
-    return (
-      <div className="mb-4">
-        <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-          <Icon name={icon} className="text-sm" />
-          {title} ({groupModels.length})
-        </h4>
-        <div className="flex flex-col gap-1">
-          {groupModels.map((m) => {
-            const copyKey = `modal-${m.id}`;
-            return (
-              <div
-                key={m.id}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-surface/60 group"
-              >
-                <code className="text-sm font-mono flex-1 truncate">{m.id}</code>
-                {m.custom && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
-                    {t("custom")}
-                  </span>
-                )}
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => copy(m.id, copyKey)}
-                  className="text-text-muted opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
-                  title={tc("copy")}
-                  aria-label={`${tc("copy")} ${m.id}`}
-                  icon={copied === copyKey ? "check" : "content_copy"}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <Modal
-      isOpen
-      onClose={onClose}
-      title={t("providerModelsTitle", { provider: provider.provider.name })}
-    >
-      <div className="max-h-[60vh] overflow-y-auto">
-        {providerModels.length === 0 ? (
-          <p className="text-sm text-text-muted py-4 text-center">{t("noModelsForProvider")}</p>
-        ) : (
-          <>
-            {renderModelGroup(t("chat"), "chat", chatModels)}
-            {renderModelGroup(t("embedding"), "data_array", embeddingModels)}
-            {renderModelGroup(t("image"), "image", imageModels)}
-          </>
-        )}
-      </div>
-    </Modal>
   );
 }
 

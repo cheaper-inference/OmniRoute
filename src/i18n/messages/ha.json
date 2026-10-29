@@ -4448,7 +4448,20 @@
     "notionIntegrationHelp": "Ƙirƙiri Internal Integration a",
     "notionIntegrationToken": "Alamar Internal Integration ta Notion",
     "notionNotConnected": "Ba a haɗa ba",
-    "notionTokenConfigured": "An saita alama. Ana samun kayan aikin Notion ta hanyar MCP."
+    "notionTokenConfigured": "An saita alama. Ana samun kayan aikin Notion ta hanyar MCP.",
+    "categorySystemOne": "Samfuran yanke shawara na System One",
+    "systemOneIntro": "Samfuran yanke shawara ne, ba samfuran hira ba: kuna aika yanayi da tambayoyi masu tsararren nau'i, sai a dawo muku da amsoshi masu tsararren nau'i tare da yiwuwar faruwarsu. Ana tura buƙatu ta OpenRouter, don haka yin hasashe yana buƙatar haɗin OpenRouter mai aiki.",
+    "systemOneDecide": "Yanke shawara mai tsararren nau'i",
+    "systemOneDecideDesc": "Aika samfurin, yanayi da tambayoyi; za a dawo da amsoshi tare da yiwuwar faruwarsu.",
+    "systemOneConnected": "Haɗin OpenRouter yana aiki",
+    "systemOneNeedsConnection": "Ana buƙatar haɗin OpenRouter",
+    "systemOneConnect": "Haɗa OpenRouter",
+    "systemOneExample": "Misalin buƙata",
+    "systemOneModels": "Samfuran yanke shawara",
+    "systemOneModelsDesc": "Jerin OpenRouter na kai tsaye tare da ainihin ID na samfurin upstream da farashi. Ba a buƙatar maɓallin OpenRouter don nuna jerin.",
+    "systemOneModelsUnavailable": "An kasa loda jerin samfura daga OpenRouter.",
+    "systemOneModelsAndPricing": "ID na samfura da farashi",
+    "systemOnePricePerMillion": "{price} / kowace alamar shigarwa miliyan 1"
   },
   "endpoints": {
     "tabProxy": "Wakilin Endpoint",

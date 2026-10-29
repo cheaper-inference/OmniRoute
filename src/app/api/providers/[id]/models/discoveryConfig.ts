@@ -1,5 +1,6 @@
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import type { ProviderModelsConfigEntry } from "./discovery/providerModelsConfig";
+import { parseTypeSafeModels } from "@omniroute/open-sse/handlers/systemOneCatalog.ts";
 
 function parseRegistryModelsResponse(data: unknown): unknown[] {
   const response = data as { data?: unknown; models?: unknown } | null;
@@ -32,7 +33,7 @@ export function deriveConfigFromRegistryModelsUrl(
       authHeader: "Authorization",
       authPrefix: "Bearer ",
       headers: { "Content-Type": "application/json" },
-      parseResponse: parseRegistryModelsResponse,
+      parseResponse: provider === "typesafe" ? parseTypeSafeModels : parseRegistryModelsResponse,
     };
   }
   return undefined;

@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "Oħloq Integrazzjoni Interna fuq",
     "notionIntegrationToken": "Token tal-Integrazzjoni Interna ta’ Notion",
     "notionNotConnected": "Mhux konness",
-    "notionTokenConfigured": "It-token ġie kkonfigurat. L-għodod ta’ Notion huma disponibbli permezz tal-MCP."
+    "notionTokenConfigured": "It-token ġie kkonfigurat. L-għodod ta’ Notion huma disponibbli permezz tal-MCP.",
+    "categorySystemOne": "Mudelli ta' deċiżjoni System One",
+    "systemOneIntro": "Mudelli ta' deċiżjoni, mhux mudelli taċ-chat: tibgħat stat u mistoqsijiet b'tipi definiti, u tirċievi tweġibiet b'tipi definiti u probabbiltajiet. It-talbiet jgħaddu minn OpenRouter, għalhekk l-inferenza teħtieġ konnessjoni attiva ma' OpenRouter.",
+    "systemOneDecide": "Deċiżjonijiet b'tipi definiti",
+    "systemOneDecideDesc": "Ibgħat mudell, stat u mistoqsijiet; tirċievi tweġibiet bi probabbiltajiet.",
+    "systemOneConnected": "Konnessjoni ma' OpenRouter attiva",
+    "systemOneNeedsConnection": "Teħtieġ konnessjoni ma' OpenRouter",
+    "systemOneConnect": "Ikkonnettja ma' OpenRouter",
+    "systemOneExample": "Talba ta' eżempju",
+    "systemOneModels": "Mudelli ta' deċiżjoni",
+    "systemOneModelsDesc": "Lista attwali minn OpenRouter bl-ID eżatti tal-mudelli upstream u l-prezzijiet. Il-lista ma teħtieġx ċavetta ta' OpenRouter.",
+    "systemOneModelsUnavailable": "Ma setgħetx titgħabba l-lista tal-mudelli minn OpenRouter.",
+    "systemOneModelsAndPricing": "ID tal-mudelli u prezzijiet",
+    "systemOnePricePerMillion": "{price} / 1M tokens tad-dħul"
   },
   "endpoints": {
     "tabProxy": "Proxy tal-Endpoint",

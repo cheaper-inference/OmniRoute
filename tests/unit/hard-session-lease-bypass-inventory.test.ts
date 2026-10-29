@@ -77,6 +77,7 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/v1/search/route.ts": 2,
     "src/app/api/v1/segment/route.ts": 1,
     "src/app/api/v1/session-leases/route.ts": 1,
+    "src/app/api/v1/systemone/route.ts": 1,
     "src/app/api/v1/videos/generations/route.ts": 2,
     // #13788: Codex native web search (/v1/alpha/search) — same quota-preflight credential
     // lookup as web/fetch (class B).
@@ -126,6 +127,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/services/quotaAutoPing.ts": 1,
   },
   connection: {
+    "src/app/api/v1/systemone/route.ts": 1,
+    "open-sse/handlers/systemOneModels.ts": 1,
     // The read-only auto-candidate inspector no longer re-resolves connections one by one
     // (getProviderConnectionById, 1->0): it reads one narrow, credential-free state projection
     // (id, rate_limited_until, test_status) through getRawProviderConnections for the whole
@@ -354,6 +357,8 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
     Object.keys(EXPECTED.connection).map((file) => [
       file,
       [
+        "src/app/api/v1/systemone/route.ts",
+        "open-sse/handlers/systemOneModels.ts",
         "open-sse/handlers/chatCore.ts",
         "open-sse/handlers/chatCore/streamingResponse.ts",
         "open-sse/services/alibabaFreeTier.ts",

@@ -4525,7 +4525,20 @@
     "notionIntegrationHelp": "একটি অভ্যন্তরীণ ইন্টিগ্রেশন তৈরি করুন at",
     "notionIntegrationToken": "নোটশন অভ্যন্তরীণ ইন্টিগ্রেশন টোকেন",
     "notionNotConnected": "সংযুক্ত নয়",
-    "notionTokenConfigured": "টোকেন কনফিগার করা হয়েছে। Notion টুলগুলি MCP এর মাধ্যমে উপলব্ধ।"
+    "notionTokenConfigured": "টোকেন কনফিগার করা হয়েছে। Notion টুলগুলি MCP এর মাধ্যমে উপলব্ধ।",
+    "categorySystemOne": "System One সিদ্ধান্ত মডেল",
+    "systemOneIntro": "চ্যাট মডেল নয়, সিদ্ধান্ত মডেল: আপনি একটি অবস্থা ও টাইপযুক্ত প্রশ্ন পাঠান, আর সম্ভাবনাসহ টাইপযুক্ত উত্তর পান। অনুরোধগুলো OpenRouter-এর মাধ্যমে পাঠানো হয়, তাই ইনফারেন্সের জন্য একটি সক্রিয় OpenRouter সংযোগ প্রয়োজন।",
+    "systemOneDecide": "টাইপযুক্ত সিদ্ধান্ত",
+    "systemOneDecideDesc": "মডেল, অবস্থা ও প্রশ্ন পাঠান; সম্ভাবনাসহ উত্তর ফেরত পাবেন।",
+    "systemOneConnected": "OpenRouter সংযোগ সক্রিয়",
+    "systemOneNeedsConnection": "একটি OpenRouter সংযোগ প্রয়োজন",
+    "systemOneConnect": "OpenRouter সংযোগ করুন",
+    "systemOneExample": "উদাহরণ অনুরোধ",
+    "systemOneModels": "সিদ্ধান্ত মডেল",
+    "systemOneModelsDesc": "সঠিক upstream মডেল ID ও মূল্যসহ OpenRouter-এর লাইভ তালিকা। তালিকা দেখতে OpenRouter key লাগে না।",
+    "systemOneModelsUnavailable": "OpenRouter থেকে মডেল তালিকা লোড করা যায়নি।",
+    "systemOneModelsAndPricing": "মডেল ID ও মূল্য",
+    "systemOnePricePerMillion": "প্রতি 1M ইনপুট টোকেনে {price}"
   },
   "endpoints": {
     "tabProxy": "এন্ডপয়েন্ট প্রক্সি",
