@@ -114,12 +114,11 @@
 3. Hanyoyin kaucewa ga gibunan kit suna zaune a cikin adapter (ko a cikin `globals.css` `@layer components` idan gyaran salon ne), ba taɓa a `packages/ui-kit/src` ba.
 4. Ƙara ko sabunta `tests/unit/ui/adapters/<name>.test.tsx`. Ga adapter mai masu kira da yawa, kwatanta markup da aka render kafin da bayan canjin — canje-canjen padding ko wrapper suna yaɗuwa zuwa kowane allo.
 
-## 5. Sabunta kit
+## 5. Ana sabunta kayan aiki
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` yana kwafe `src/` na upstream a wannan commit zuwa cikin
-`packages/ui-kit/src` kuma yana aiwatar da canji guda ɗaya kawai da aka yarda da shi (yana cire suffix na
-`.js` daga relative imports). Sa'an nan: duba `git diff packages/ui-kit`, yi dubawa ta gani a kan providers, settings, combos, usage da endpoint a cikin themes biyu duka, gudanar da `npm run check:ui-kit-snapshot` da `npm run test:vitest:ui`, kuma
-buɗe PR tare da changelog na upstream.
+`npm run check:ui-kit-upstream` yana kwatanta sigar da aka liƙa a cikin `packages/ui-kit/UPSTREAM.md` tare da sabuwar alamar `v*` na repo na sama kuma yana buga umarnin daidaitawa lokacin da sakin ya fito. Gudun aikin `UI Kit upstream watch` na mako-mako (`.github/workflows/ui-kit-upstream-watch.yml`) yana gudanar da rajistan guda ɗaya kuma yana buɗe batun bin diddigin guda ɗaya yayin da fil ɗin yana baya; repo na sama mai zaman kansa ne, don haka gudanawar aiki yana buƙatar alamar karantawa kawai a cikin sirrin `UI_KIT_READ_TOKEN` kuma yana tsayawa ba tare da shi ba.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` tana kwafin `src/` na sama a waccan ƙaddamarwa (`latest` = sabuwar `v*` tag) zuwa `packages/ui-kit/src`, tana aiwatar da sauyi ɗaya da aka yarda (yana sauke ƙarar `.js` daga shigo da dangi), kuma ya saita sigar filin aiki a cikin `packages/ui-kit/package.json` da `package-lock.json` zuwa na sama. Sa'an nan: sake duba `git diff packages/ui-kit`, yi izinin gani akan masu samarwa, saituna, combos, amfani da ƙarshen duka a cikin jigogi biyu, gudanar da `npm run check:ui-kit-snapshot` da `npm run test:vitest:ui`, kuma buɗe PR tare da canjin canji na sama.
 
 ## 6. README zane-zane
 

@@ -114,13 +114,11 @@
 4. Přidejte nebo aktualizujte `tests/unit/ui/adapters/<name>.test.tsx`. U adaptéru s mnoha volajícími porovnejte
    vykreslené HTML před změnou a po ní — změny paddingu nebo wrapperů se rozlejí do každé obrazovky.
 
-## 5. Aktualizace kitu
+## 5. Aktualizace sady
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` zkopíruje upstreamový adresář `src/` z daného commitu do
-`packages/ui-kit/src` a aplikuje jedinou povolenou transformaci (odstraní příponu `.js` z relativních
-importů). Poté: zkontrolujte `git diff packages/ui-kit`, vizuálně projděte poskytovatele, nastavení, kombinace,
-využití a endpoint v obou motivech, spusťte `npm run check:ui-kit-snapshot` a `npm run test:vitest:ui` a
-otevřete PR s upstreamovým changelogem.
+`npm run check:ui-kit-upstream` porovná verzi připojenou v `packages/ui-kit/UPSTREAM.md` s nejnovější značkou `v*` upstream repo a vytiskne příkaz synchronizace, když je vydání k dispozici. Týdenní pracovní postup `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) spouští stejnou kontrolu a udržuje jeden problém se sledováním otevřený, zatímco je pin pozadu; upstream repo je soukromý, takže pracovní postup potřebuje token pouze pro čtení v tajném klíči `UI_KIT_READ_TOKEN` a bez něj zůstane nečinný.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` zkopíruje upstream `src/` při tomto odevzdání (`latest` = nejnovější tag `v*` ) do `packages/ui-kit/src`, použije jedinou povolenou transformaci (vypustí příponu `.js` z relativních importů) a nastaví verzi pracovního prostoru v `packages/ui-kit/package.json` a `package-lock.json` na upstream. Poté: zkontrolujte `git diff packages/ui-kit`, proveďte vizuální předání poskytovatelů, nastavení, komba, použití a koncového bodu v obou tématech, spusťte `npm run check:ui-kit-snapshot` a `npm run test:vitest:ui` a otevřete PR pomocí upstream changelogu.
 
 ## 6. README diagramy
 

@@ -60,8 +60,9 @@ import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
 import {
   isFallbackWorthy,
-  isQuotaLike,
   llmCircuit,
+  noteLlmFailure,
+  noteLlmSuccess,
   resolveModelChain,
   translationEngine as sharedTranslationEngine,
   googleFallbackEnabled as sharedGoogleFallbackEnabled,
@@ -1126,12 +1127,11 @@ export async function translateBody(body, localeEntry, backend) {
           call: backend.callChat ?? callChat,
           label,
         });
+        noteLlmSuccess();
       } catch (err) {
         if (!fallback) throw err;
-        if (isQuotaLike(err) && !llmCircuit.open) {
-          // quota / credits / auth: the backend will not recover mid-run, so stop asking it
-          llmCircuit.open = true;
-          llmCircuit.reason = String(err?.message ?? err).slice(0, 160);
+        // quota / credits / auth, or LLM_FAILURE_LIMIT failures in a row: stop asking the LLM
+        if (noteLlmFailure(err)) {
           logWarn(
             `  LLM backend unavailable (${llmCircuit.reason}) — the rest of this run uses Google`
           );
