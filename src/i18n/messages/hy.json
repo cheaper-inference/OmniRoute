@@ -1925,7 +1925,14 @@
     "readinessStep3": "Պատճենեք ձեր վերջնակետը",
     "readinessStep4": "Ուղարկեք փորձնական հարցում",
     "readinessContinue": "Շարունակել կարգավորումը",
-    "readinessDismiss": "Առայժմ փակել"
+    "readinessDismiss": "Առայժմ փակել",
+    "unpricedUsageTitle": "{count, plural, one {# մոդել} other {# մոդելներ}} որոնք ունեցել են վերջին օգտագործում, բայց գինը սահմանված չէ",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API բանալի՝ օգտագործման սահմանով} other {# API բանալիներ՝ օգտագործման սահմանով}} օգտագործել են այս մոդելները վերջին 8 օրվա ընթացքում. Երբ այդ օգտագործումը ընկած է բանալիի օրական կամ շաբաթական պատուհանի մեջ, բանալին համարվում է քվոտան անցած և նրա հարցումները արգելվում են (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Այս օգտագործումը հաշվվում է որպես $0՝ բանալիի օգտագործման սահմանների համար (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# հարցում} other {# հարցումներ}}, {keys, plural, one {# սահմանափակ բանալի} other {# սահմանափակ բանալիներ}}",
+    "unpricedUsageMore": "…և ևս {count}",
+    "unpricedUsageConfigure": "Կարգավորել գները",
+    "unpricedUsageDismiss": "Փակել"
   },
   "analytics": {
     "title": "Վերլուծություն",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw — ձեռքով կազմաձևում",
     "clineManualConfiguration": "Cline-ի ձեռքով կազմաձևում",
     "kiloManualConfiguration": "Kilo Code-ի ձեռքով կազմաձևում",
+    "piManualConfiguration": "Pi - Ձեռնարկի կարգավորում",
+    "piConfigInvalidTitle": "Pi models.json անընթեռնելի է",
+    "piOmnirouteConfigured": "OmniRoute կազմաձևված է որպես Pi մաքսային մատակարար",
+    "piModelHelp": "Pi-ն ինքնաբերաբար չի հայտնաբերում մոդելներ հատուկ վերջնակետերի համար — ձեր ընտրած մոդելը բացահայտորեն գրված է models.json ում:",
+    "piManualConfigTitle": "Կամ խմբագրել ~/.pi/agent/models.json ձեռքով",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Այնուհետև գործարկեք Pi-ն և ընտրեք omniroute մատակարարին: Սահմանեք PI_CODING_AGENT_DIR ՝ տեղափոխելու ողջ գործակալի գրացուցակը:",
+    "piUnownedNote": "Այս գրառումն ավելացվել է OmniRoute դուրս (օրինակ՝ pi-gui-ի Հատուկ վերջնակետերը): Դիմելը կընդունի այն; Վերակայումը հեռացնում է միայն OmniRoute գրած գրառումները:",
     "whenToUseLabel": "Երբ օգտագործել",
     "openToolDocs": "Բացել գործիքի փաստաթղթերը",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI կոդավորման գործակալ՝ հատուկ մատակարարների աջակցությամբ",
       "droid": "Factory Droid AI օգնական",
       "openclaw": "Open Claw AI օգնական",
+      "openclaude": "OpenClaude կոդավորման գործակալի CLI՝ OpenAI-համատեղելի մատակարարի աջակցությամբ",
       "cline": "Cline AI կոդավորման օգնականի CLI",
       "kilo": "Kilo Code AI օգնականի CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Թարմացնել",
     "cliproxyapiUpdateAvailable": "Հասանելի է թարմացում՝ v{current} → v{latest}",
     "cliproxyapiVersion": "Տարբերակ",
+    "piInstallTitle": "Տեղադրեք Pi կոդավորման գործակալը",
+    "piInstallInstructions": "Տեղադրեք Pi CLI, այնուհետև վերադարձեք այստեղ՝ այն OmniRoute ին միացնելու համար:",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Օգտագործեք URL, որը հասանելի է Pi-ն աշխատող մեքենայից: OpenAI-ի հետ համատեղելի /v1 վերջնակետը ավելացվում է ավտոմատ կերպով:",
+    "piManualMergeHint": "Միայն նախադիտում: Միավորեք այս providers.omniroute մուտքը models.json ին, որպեսզի ձեր մյուս մատակարարներն ու կարգավորումները մնան անփոփոխ:",
     "removeMapping": "Հեռացնել համապատասխանեցումը"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "Հարցումը ձախողվեց HTTP {status} կոդով",
     "testFailedNoDetail": "Թեստը ձախողվեց առանց սխալի հաղորդագրության",
     "additionalCapabilities": "Լրացուցիչ հնարավորություններ՝ {list}",
-    "comboRefMember": "Համակցություն → {name}"
+    "comboRefMember": "Համակցություն → {name}",
+    "keyAccessButton": "API բանալու հասանելիություն",
+    "allowedInKeys": "Թույլատրված է՝ {count, plural, one {# բանալիում} other {# բանալիներում}}",
+    "keysLoading": "API բանալիների բեռնում…",
+    "keysRetry": "Կրկնել բանալիների բեռնումը",
+    "accessViaPattern": "{pattern}-ի միջոցով",
+    "accessBlocked": "Արգելափակված է {pattern}-ի կողմից",
+    "editKeyAccess": "Խմբագրել բանալու հասանելիությունը",
+    "toggleKeyAccess": "Թույլատրել {item}-ը {name}-ում",
+    "resultNetworkError": "Նշանակումը ձախողվեց",
+    "resultWouldEmptyModels": "Այս բանալին կմնա առանց թույլատրված մոդելների — փոխարենը խմբագրեք բանալու մուտքի իրավունքները",
+    "resultWouldEmptyCombos": "Այս բանալին կմնա առանց թույլատրված կոմբոների — փոխարենը խմբագրեք բանալու մուտքի իրավունքները",
+    "keyUpdatePending": "{name}-ը դեռ թարմացվում է: Փորձեք կրկին մի փոքր ուշ:",
+    "assignToKeys": "Նշանակել API բանալիներին…",
+    "assignApply": "Կիրառել փոփոխությունները",
+    "assignComplete": "API բանալու հասանելիությունը թարմացված է",
+    "assignFailed": "API բանալիների որոշ թարմացումներ ձախողվեցին",
+    "assignNoChanges": "API բանալու հասանելիության որևէ փոփոխություն չի կատարվել",
+    "selectedAccessItems": "Ընտրված տարրեր՝ {count}",
+    "assignExcludedCombos": "{count, plural, one {Ընտրված # կոմբո տողը մոդել չէ և այստեղ բաց կթողնվի} other {Ընտրված # կոմբո տողերը մոդել չեն և այստեղ բաց կթողնվեն}}: Նշանակեք կոմբոները Combos ներդիրից:",
+    "assignActionAdd": "Ավելացնել",
+    "assignActionRemove": "Հեռացնել",
+    "searchKeys": "Փնտրել API բանալիներ",
+    "selectApiKey": "Ընտրել API բանալի {name}",
+    "allModelsAccess": "Բոլոր մոդելները",
+    "allCombosAccess": "Բոլոր համակցությունները",
+    "modelAccessCount": "Մոդելներ՝ {count}",
+    "comboAccessCount": "Համակցություններ՝ {count}",
+    "keyInactive": "Ոչ ակտիվ",
+    "keyBanned": "Արգելափակված",
+    "keyRevoked": "Հետկանչված",
+    "switchRestrictedConfirm": "Այս բանալին փոխարկել սահմանափակ հասանելիության. կթույլատրվեն միայն ընտրված տարրերը",
+    "removeNoChangeHint": "Այս բանալին թույլատրում է ամեն ինչ. ընտրված տարրերի հեռացումը ոչ մի փոփոխություն չի կատարի",
+    "removeStaysAllowedHint": "Դեռևս թույլատրված է այս բանալու վրա {patterns}-ի միջոցով",
+    "resultChanged": "Փոփոխված է",
+    "resultUnchanged": "Անփոփոխ",
+    "resultSkipped": "Բաց թողնված",
+    "resultNeedsSwitch": "Պահանջվում է անցում սահմանափակի"
   },
   "combos": {
     "title": "Կոմբինացիաներ",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Ներբեռնել CSV ձևանմուշը",
     "importFromFileMoreErrors": "+ևս {count}",
     "importFromFileSchemaHint": "CSV սյունակները դիրքային են՝ provider, name, apiKey, baseUrl (ըստ ցանկության), priority (ըստ ցանկության)։ Մատակարարի սյունակը պետք է պարունակի կառավարվող առկա մատակարարի id կամ արդեն գրանցված OpenAI/Anthropic-ի հետ համատեղելի հանգույցի id. այս ներմուծումը վերջնակետի նոր հանգույցներ չի ստեղծում։",
+    "importOAuthExport": "Ներմուծել OAuth արտահանումը",
+    "oauthExportTitle": "Ներմուծել հաշիվների կառավարչի արտահանումը",
+    "oauthExportDescription": "Վերբեռնեք հաշիվների կառավարչից պարզ տեքստով արտահանում (օր.՝ Antigravity Manager-ի cloud-accounts արտահանումը)։ Թոքենները թարմացվում են սերվերում, և յուրաքանչյուր հաշիվ դառնում է OAuth կապ — կրկնօրինակները թարմացվում են տեղում։",
+    "oauthExportProviderLabel": "Մատակարար",
+    "oauthExportChoose": "Ընտրել ֆայլ",
+    "oauthExportFileAria": "Հաշիվների արտահանման JSON ֆայլ",
+    "oauthExportSchemaHint": "Ընդունվում է՝ \"accounts\" զանգվածով փաստաթուղթ, պարզ զանգված կամ մեկ գրառում։ Թոքենները կարող են լինել ներդրված token օբյեկտում կամ անմիջապես գրառման մեջ։",
+    "oauthExportDetected": "Հայտնաբերվել է {count} հաշիվ",
+    "oauthExportSelectAll": "Ընտրել բոլոր հաշիվները",
+    "oauthExportSelectAccount": "Ընտրել {index} հաշիվը",
+    "oauthExportColEmail": "Էլ. փոստ",
+    "oauthExportColProvider": "Մատակարար",
+    "oauthExportColRefresh": "Թարմացման թոքեն",
+    "oauthExportNoEmail": "(էլ. փոստ չկա)",
+    "oauthExportYes": "այո",
+    "oauthExportNo": "ոչ",
+    "oauthExportImporting": "Ներմուծվում է…",
+    "oauthExportImport": "Ներմուծել {count} հաշիվ",
+    "oauthExportResult": "Ներմուծվել է {imported}/{total} — {failed} ձախողվել է",
+    "oauthExportParseError": "Այս ֆայլից ոչ մի հաշիվ հնարավոր չեղավ կարդալ։",
+    "oauthExportUnknownError": "անհայտ սխալ",
     "adaptaTutorial": {
       "title": "Ինչպես միացնել Adapta Web-ը",
       "introPrefix": "Adapta-ն նույնականացումն իրականացնում է Clerk-ի միջոցով։ Թոքենը",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Հոսթ",
     "qdrantCollection": "Հավաքածու",
     "catalogVisibilityHint": "Թաքցված մոդելների նույնացուցիչները շարունակում են հասանելի լինել կանչերի համար նույն մուտքի թույլտվություններով։",
+    "exposeCombosOnly": "/v1/models-ում ցուցադրել միայն կոմբինացիաները",
+    "exposeCombosOnlyDesc": "Մոդելներն ավտոմատ հայտնաբերող հաճախորդները մատակարարների հում մոդելների փոխարեն տեսնում են ձեր կոմբինացիաները (և auto/*-ը, եթե թաքցված չեն): Բացահայտ provider/model նույնացուցիչները շարունակում են երթուղավորվել:",
     "catalogScopeTitle": "Models API-ի ցանկ",
     "catalogScopeDesc": "Ինչ է GET /v1/models-ը ցուցադրում այս բանալիի համար։ Ցանկի սահմանափակումը երբեք չի փոխում այն, թե ինչ կարող է կանչել բանալին։",
     "catalogScopeAll": "Երկուսն էլ",
@@ -12184,7 +12266,11 @@
       "viewConversation": "դիտել զրույցը",
       "openConversation": "Բացել {id} զրույցը"
     },
-    "tableLabel": "Հարցումների մատյաններ"
+    "tableLabel": "Հարցումների մատյաններ",
+    "throughputPostFirstToken": "Առաջին թոքենից հետո",
+    "throughputEndToEnd": "Ծայրից ծայր",
+    "throughputRate": "{value} թոքեն/վրկ",
+    "throughputExplanation": "Երկու արագություններն էլ հիմնվում են ելքի և դատողության թոքենների քանակներից ավելի մեծի վրա։ «Առաջին թոքենից հետո» ցուցանիշը բացառում է վավեր TTFT-ն. հակառակ դեպքում օգտագործվում է ամբողջ տևողությունը։ «Ծայրից ծայր» ցուցանիշը միշտ օգտագործում է ամբողջ տևողությունը։ Բուֆերացված պատասխանը կարող է ունենալ առաքման բարձր պոռթկային արագություն՝ առանց մոդելի ավելի արագ գեներացիայի։"
   },
   "proxyLogger": {
     "filterAll": "Բոլորը",
@@ -13773,7 +13859,9 @@
       "disabled": "Ապաակտիվացված",
       "dual": "Երկակի",
       "alias": "Այլանուն",
-      "canonical": "Կանոնական"
+      "canonical": "Կանոնական",
+      "fail_closed": "Արգելափակել (fail_closed)",
+      "count_as_zero": "Հաշվել որպես $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13920,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Պաշտպանված առաջնահերթության ենթակառուցվածքային դադարները՝ որպես 502",
         "description": "503-ի փոխարեն պատասխանել 502-ով, երբ միայն քվոտայի պատճառով պահուստային տարբերակ հանդիսացող առաջնահերթ թիրախը դադարեցնում է համակցությունը մի պատճառով, որն ապացուցելիորեն կապված չէ քվոտայի հետ՝ մատակարարի բաց շղթայի անջատիչ կամ կանխատեսվող ուշացման պատճառով բացթողում։"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Գին չունեցող օգտագործման բյուջեի քաղաքականություն",
+        "description": "Ինչպես են բանալուն առանձին օրական/շաբաթական USD սահմանները վերաբերվում հաջողված օգտագործմանը, որի մատակարարի/մոդելի համար գին չի նշված։ fail_closed (լռային) նշում է, որ պատուհանը գերազանցվել է, այնպես որ անհայտ ծախսը երբեւէ չի կարող անցնել խիստ սահմանը։ count_as_zero հաշվարկում է այդ օգտագործումը որպես $0 և շարունակում կիրառել գինով հաշվարկվող ծախսը։ Անգին մոդելները ցանկացած պարագայում ցուցադրվում են վահանակի գլխավոր էջում."
       }
     }
   },

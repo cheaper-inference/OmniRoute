@@ -1925,7 +1925,14 @@
     "readinessStep3": "Nukopijuokite savo galinį tašką",
     "readinessStep4": "Išsiųskite testinę užklausą",
     "readinessContinue": "Tęsti sąranką",
-    "readinessDismiss": "Kol kas paslėpti"
+    "readinessDismiss": "Kol kas paslėpti",
+    "unpricedUsageTitle": "{count, plural, one {# modelis} few {# modeliai} many {# modelių} other {# modelių}} su nesenu naudojimu, bet be nustatytos kainos",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API raktas su naudojimo limitu} few {# API raktai su naudojimo limitu} many {# API raktų su naudojimo limitu} other {# API raktų su naudojimo limitu}} naudojo šiuos modelius per paskutines 8 dienas. Kol tas naudojimas patenka į rakto dieninio arba savaitinio lango ribas, raktas laikomas viršijus kvotą ir jo užklausos blokuojamos (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Šis naudojimas skaičiuojamas kaip $0 į kiekvieno rakto naudojimo limitus (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# užklausa} few {# užklausos} many {# užklausų} other {# užklausų}}, {keys, plural, one {# ribotas raktas} few {# riboti raktai} many {# ribotų raktų} other {# ribotų raktų}}",
+    "unpricedUsageMore": "…ir dar {count}",
+    "unpricedUsageConfigure": "Nustatyti kainodarą",
+    "unpricedUsageDismiss": "Atmesti"
   },
   "analytics": {
     "title": "Analitika",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw – rankinė konfigūracija",
     "clineManualConfiguration": "Cline rankinė konfigūracija",
     "kiloManualConfiguration": "Kilo Code rankinė konfigūracija",
+    "piManualConfiguration": "Pi – rankinis konfigūravimas",
+    "piConfigInvalidTitle": "Pi models.json yra neįskaitomas",
+    "piOmnirouteConfigured": "OmniRoute sukonfigūruotas kaip pasirinktinis Pi teikėjas",
+    "piModelHelp": "Pi automatiškai neatranda modelių, skirtų pasirinktiniams galutiniams taškams — jūsų pasirinktas modelis yra aiškiai įrašytas į models.json.",
+    "piManualConfigTitle": "Arba redaguokite ~/.pi/agent/models.json rankiniu būdu",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Tada paleiskite Pi ir pasirinkite omniroute teikėją. Nustatykite PI_CODING_AGENT_DIR, kad perkeltumėte visą agento katalogą.",
+    "piUnownedNote": "Šis įrašas buvo įtrauktas už OmniRoute ribų (pvz., Pi-gui pasirinktiniai galutiniai taškai). Prašymas jį priims; Reset pašalina tik įrašus, kuriuos parašė OmniRoute.",
     "whenToUseLabel": "Kada naudoti",
     "openToolDocs": "Atidaryti įrankio dokumentaciją",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI kodavimo agentas su pasirinktinio teikėjo palaikymu",
       "droid": "Factory Droid AI asistentas",
       "openclaw": "Open Claw AI asistentas",
+      "openclaude": "OpenClaude programavimo agento CLI su OpenAI suderinamo teikėjo palaikymu",
       "cline": "Cline AI kodavimo asistento CLI",
       "kilo": "Kilo Code AI asistento CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Atnaujinti",
     "cliproxyapiUpdateAvailable": "Yra atnaujinimas: v{current} → v{latest}",
     "cliproxyapiVersion": "Versija",
+    "piInstallTitle": "Įdiekite „Pi“ kodavimo agentą",
+    "piInstallInstructions": "Įdiekite Pi CLI, tada grįžkite čia, kad prijungtumėte jį prie OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Naudokite URL pasiekiamą iš mašinos, kurioje veikia Pi. Su OpenAI suderinamas /v1 galutinis taškas pridedamas automatiškai.",
+    "piManualMergeHint": "Tik peržiūra. Sujunkite šį providers.omniroute įrašą su models.json, kad kiti teikėjai ir nustatymai liktų nepakitę.",
     "removeMapping": "Pašalinti susiejimą"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "Užklausa nepavyko su HTTP {status}",
     "testFailedNoDetail": "Testas nepavyko be klaidos pranešimo",
     "additionalCapabilities": "Papildomos galimybės: {list}",
-    "comboRefMember": "Derinys → {name}"
+    "comboRefMember": "Derinys → {name}",
+    "keyAccessButton": "API rakto prieiga",
+    "allowedInKeys": "Leidžiama: {count, plural, one {# rakte} few {# raktuose} other {# raktų}}",
+    "keysLoading": "Įkeliami API raktai…",
+    "keysRetry": "Bandyti įkelti raktus iš naujo",
+    "accessViaPattern": "per {pattern}",
+    "accessBlocked": "Užblokuota pagal {pattern}",
+    "editKeyAccess": "Redaguoti rakto prieigą",
+    "toggleKeyAccess": "Leisti {item} ties {name}",
+    "resultNetworkError": "Priskyrimas nepavyko",
+    "resultWouldEmptyModels": "Šis raktas liktų be leidžiamų modelių – verčiau redaguokite rakto prieigą",
+    "resultWouldEmptyCombos": "Šis raktas liktų be leidžiamų kombinacijų – verčiau redaguokite rakto prieigą",
+    "keyUpdatePending": "{name} vis dar atnaujinamas. Bandykite dar kartą po akimirkos.",
+    "assignToKeys": "Priskirti API raktams…",
+    "assignApply": "Taikyti pakeitimus",
+    "assignComplete": "API rakto prieiga atnaujinta",
+    "assignFailed": "Kai kurių API raktų atnaujinti nepavyko",
+    "assignNoChanges": "API rakto prieiga nepakeista",
+    "selectedAccessItems": "Pasirinkti elementai: {count}",
+    "assignExcludedCombos": "{count, plural, one {# pasirinkta kombinacijos eilutė nėra modelis ir čia bus praleista} few {# pasirinktos kombinacijų eilutės nėra modeliai ir čia bus praleistos} other {# pasirinktų kombinacijų eilučių nėra modeliai ir čia bus praleista}}. Priskirkite kombinacijas skirtuke „Combos“.",
+    "assignActionAdd": "Pridėti",
+    "assignActionRemove": "Pašalinti",
+    "searchKeys": "Ieškoti API raktų",
+    "selectApiKey": "Pasirinkti API raktą {name}",
+    "allModelsAccess": "Visi modeliai",
+    "allCombosAccess": "Visi deriniai",
+    "modelAccessCount": "Modeliai: {count}",
+    "comboAccessCount": "Deriniai: {count}",
+    "keyInactive": "Neaktyvus",
+    "keyBanned": "Užblokuotas",
+    "keyRevoked": "Atšaukta",
+    "switchRestrictedConfirm": "Perjungti šį raktą į ribotą prieigą: bus leidžiami tik pasirinkti elementai",
+    "removeNoChangeHint": "Šis raktas leidžia viską; pašalinus pasirinktus elementus niekas nepasikeis",
+    "removeStaysAllowedHint": "Vis dar leidžiama šiam raktui per {patterns}",
+    "resultChanged": "Pakeista",
+    "resultUnchanged": "Be pakeitimų",
+    "resultSkipped": "Praleista",
+    "resultNeedsSwitch": "Reikia perjungti į ribotą"
   },
   "combos": {
     "title": "Kombinacijos",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Atsisiųsti CSV šabloną",
     "importFromFileMoreErrors": "+ dar {count}",
     "importFromFileSchemaHint": "CSV stulpelių tvarka yra fiksuota: provider, name, apiKey, baseUrl (pasirinktinis), priority (pasirinktinis). Stulpelyje provider turi būti esamo valdomo teikėjo ID arba jau užregistruoto su OpenAI/Anthropic suderinamo mazgo ID — šis importavimas nekuria naujų galinių taškų mazgų.",
+    "importOAuthExport": "Importuoti OAuth eksportą",
+    "oauthExportTitle": "Importuoti paskyrų tvarkyklės eksportą",
+    "oauthExportDescription": "Įkelkite paskyrų tvarkyklės eksportą paprastu tekstu (pvz., Antigravity Manager cloud-accounts eksportą). Žetonai atnaujinami serveryje, o kiekviena paskyra tampa OAuth ryšiu — dublikatai atnaujinami vietoje.",
+    "oauthExportProviderLabel": "Teikėjas",
+    "oauthExportChoose": "Pasirinkti failą",
+    "oauthExportFileAria": "Paskyrų eksporto JSON failas",
+    "oauthExportSchemaHint": "Priimama: dokumentas su \"accounts\" masyvu, paprastas masyvas arba vienas įrašas. Žetonai gali būti įdėtame token objekte arba tiesiai įraše.",
+    "oauthExportDetected": "Aptikta paskyrų: {count}",
+    "oauthExportSelectAll": "Pažymėti visas paskyras",
+    "oauthExportSelectAccount": "Pažymėti paskyrą {index}",
+    "oauthExportColEmail": "El. paštas",
+    "oauthExportColProvider": "Teikėjas",
+    "oauthExportColRefresh": "Atnaujinimo žetonas",
+    "oauthExportNoEmail": "(nėra el. pašto)",
+    "oauthExportYes": "taip",
+    "oauthExportNo": "ne",
+    "oauthExportImporting": "Importuojama…",
+    "oauthExportImport": "Importuoti paskyras ({count})",
+    "oauthExportResult": "Importuota {imported}/{total} — nepavyko {failed}",
+    "oauthExportParseError": "Iš šio failo nepavyko nuskaityti nė vienos paskyros.",
+    "oauthExportUnknownError": "nežinoma klaida",
     "adaptaTutorial": {
       "title": "Kaip prisijungti prie Adapta Web",
       "introPrefix": "Adapta autentifikuojama per Clerk. Prieigos raktas",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Pagrindinis kompiuteris",
     "qdrantCollection": "Rinkinys",
     "catalogVisibilityHint": "Paslėptus modelių ID ir toliau galima iškviesti turint tas pačias prieigos teises.",
+    "exposeCombosOnly": "/v1/models sąraše rodyti tik derinius",
+    "exposeCombosOnlyDesc": "Klientai, automatiškai aptinkantys modelius, matys jūsų derinius (ir auto/*, jei jie nepaslėpti), o ne neapdorotus tiekėjų modelius. Aiškiai nurodyti provider/model ID ir toliau nukreipiami.",
     "catalogScopeTitle": "Models API sąrašas",
     "catalogScopeDesc": "Ką GET /v1/models nurodo šiam raktui. Sąrašo susiaurinimas niekada nekeičia, ką raktas gali iškviesti.",
     "catalogScopeAll": "Abu",
@@ -12184,7 +12266,11 @@
       "viewConversation": "Peržiūrėti pokalbį",
       "openConversation": "Atidaryti pokalbį {id}"
     },
-    "tableLabel": "Užklausų žurnalai"
+    "tableLabel": "Užklausų žurnalai",
+    "throughputPostFirstToken": "Po pirmojo tokeno",
+    "throughputEndToEnd": "Nuo pradžios iki pabaigos",
+    "throughputRate": "{value} tokenų/s",
+    "throughputExplanation": "Abi spartos apskaičiuojamos pagal didesnį iš išvesties ir samprotavimo tokenų skaičių. Skaičiuojant spartą po pirmojo tokeno, galiojanti TTFT neįtraukiama; kitu atveju naudojama visa trukmė. Skaičiuojant spartą nuo pradžios iki pabaigos, visada naudojama visa trukmė. Buferinis atsakas gali būti pateikiamas dideliu momentiniu greičiu, nors modelis nėra generuojamas greičiau."
   },
   "proxyLogger": {
     "filterAll": "Visi",
@@ -13773,7 +13859,9 @@
       "disabled": "Išjungta",
       "dual": "Dvigubas",
       "alias": "Pseudonimas",
-      "canonical": "Kanoninis"
+      "canonical": "Kanoninis",
+      "fail_closed": "Blokuoti (fail_closed)",
+      "count_as_zero": "Skaičiuoti kaip $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13920,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Apsaugoto prioriteto infrastruktūros sustabdymai pateikiami kaip 502",
         "description": "Grąžinti 502, o ne 503, kai prioritetinis tik atsarginiam perėjimui dėl kvotos skirtas tikslas sustabdo derinį dėl priežasties, kuri akivaizdžiai nesusijusi su kvota: atviro teikėjo grandinės pertraukiklio arba praleidimo dėl prognozuojamos delsos."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Neįkainoto naudojimo biudžeto politika",
+        "description": "Kaip kiekvieno rakto dieniniai/savaitiniai USD limitai traktuoja sėkmingą naudojimą, kurio tiekėjas ar modelis neturi kainos įrašo. fail_closed (numatytasis) pažymi langą kaip viršytą, todėl nežinoma kaina niekada nepraslys per griežtą ribą. count_as_zero skaičiuoja tą naudojimą kaip $0 ir toliau taiko apribojimus pagal apibrėžtas kainas. Neįkainoti modeliai bet kuriuo atveju yra išvardyti pagrindiniame informacijos suvestinės puslapyje."
       }
     }
   },

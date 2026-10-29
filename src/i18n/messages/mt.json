@@ -2002,7 +2002,14 @@
     "readinessStep3": "Ikkopja l-endpoint tiegħek",
     "readinessStep4": "Ibgħat talba ta’ prova",
     "readinessContinue": "Kompli l-konfigurazzjoni",
-    "readinessDismiss": "Agħlaq għalissa"
+    "readinessDismiss": "Agħlaq għalissa",
+    "unpricedUsageTitle": "{count, plural, one {# modell} other {# mudelli}} b’użu reċenti iżda mingħajr prezz kkonfigurat",
+    "unpricedUsageFailClosed": "{keys, plural, one {# ċavetta API b’limitu ta’ użu} other {# ċwievet API b’limitu ta’ użu}} użaw dawn il-mudelli fl-aħħar 8 ijiem. Waqt li dak l-użu huwa fil-perjodu ta’ kuljum jew ta’ kull ġimgħa tal-ċavetta, iċ-ċavetta titqies bħala mgħaddija mill-limitu u t-talbiet tagħha jiġu mblukkati (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Dak l-użu jinżel bħala $0 lejn il-limiti ta’ użu għal kull ċavetta (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# talba} other {# talbiet}}, {keys, plural, one {# ċavetta limitata} other {# ċwievet limitati}}",
+    "unpricedUsageMore": "…u {count} aktar",
+    "unpricedUsageConfigure": "Ikkonfigura prezzijiet",
+    "unpricedUsageDismiss": "Għalaq"
   },
   "analytics": {
     "title": "Analitika",
@@ -3039,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw - Konfigurazzjoni Manwali",
     "clineManualConfiguration": "Konfigurazzjoni Manwali ta’ Cline",
     "kiloManualConfiguration": "Konfigurazzjoni Manwali ta’ Kilo Code",
+    "piManualConfiguration": "Pi - Konfigurazzjoni Manwali",
+    "piConfigInvalidTitle": "Pi models.json ma tinqarax",
+    "piOmnirouteConfigured": "OmniRoute huwa kkonfigurat bħala fornitur tad-dwana Pi",
+    "piModelHelp": "Pi ma jiskoprix awtomatikament mudelli għal endpoints personalizzati — il-mudell li tagħżel huwa miktub models.json b'mod espliċitu.",
+    "piManualConfigTitle": "Jew edit ~/.pi/agent/models.json manwalment",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Imbagħad ibda Pi u agħżel il-fornitur omniroute. Issettja PI_CODING_AGENT_DIR biex iċċaqlaq id-direttorju kollu tal-aġent.",
+    "piUnownedNote": "Din l-entrata ġiet miżjuda barra OmniRoute (eż. l-endpoints Custom ta' pi-gui). L-applikazzjoni se tadottaha; Ir-reset tneħħi biss l-entrati li kiteb OmniRoute.",
     "whenToUseLabel": "Meta għandek tużah",
     "openToolDocs": "Iftaħ id-dokumentazzjoni tal-għodda",
     "toolUseCases": {
@@ -3068,6 +3083,7 @@
       "grok-build": "Aġent tal-kodifikazzjoni xAI Grok Build TUI b’appoġġ għal fornitur personalizzat",
       "droid": "Assistent tal-IA Factory Droid",
       "openclaw": "Assistent tal-IA Open Claw",
+      "openclaude": "CLI tal-aġent tal-kodifikazzjoni OpenClaude b'appoġġ għal fornitur kompatibbli ma' OpenAI",
       "cline": "Cline AI Coding Assistant CLI",
       "kilo": "Kilo Code AI Assistant CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3357,6 +3373,12 @@
     "cliproxyapiUpdate": "Aġġorna",
     "cliproxyapiUpdateAvailable": "Aġġornament disponibbli: v{current} → v{latest}",
     "cliproxyapiVersion": "Verżjoni",
+    "piInstallTitle": "Installa Pi Coding Agent",
+    "piInstallInstructions": "Installa l-Pi CLI, imbagħad erġa' lura hawn biex tqabbadha ma' OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Uża l- URL li tintlaħaq mill-magna li taħdem Pi. L-endpoint /v1 kompatibbli mal-OpenAI huwa miżjud awtomatikament.",
+    "piManualMergeHint": "Preview biss. Għaqqad din id-dħul providers.omniroute models.json sabiex il-fornituri l-oħra tiegħek u s-settings jibqgħu intatti.",
     "removeMapping": "Neħħi l-immappjar"
   },
   "modelCatalog": {
@@ -3488,7 +3510,44 @@
     "httpError": "It-talba falliet b'HTTP {status}",
     "testFailedNoDetail": "It-test falla mingħajr messaġġ ta' żball",
     "additionalCapabilities": "Kapaċitajiet addizzjonali: {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "Aċċess għaċ-ċavetta tal-API",
+    "allowedInKeys": "Permess fi: {count, plural, one {# ċavetta} other {# ċwievet}}",
+    "keysLoading": "Qed jitgħabbew iċ-ċwievet tal-API…",
+    "keysRetry": "Erġa' pprova għabbi ċ-ċwievet",
+    "accessViaPattern": "permezz ta' {pattern}",
+    "accessBlocked": "Imblukkat minn {pattern}",
+    "editKeyAccess": "Editja l-aċċess taċ-ċavetta",
+    "toggleKeyAccess": "Ippermetti {item} fuq {name}",
+    "resultNetworkError": "L-assenjazzjoni ma rnexxietx",
+    "resultWouldEmptyModels": "Iħalli din iċ-ċavetta mingħajr l-ebda mudell permess — minflok editja l-aċċess taċ-ċavetta",
+    "resultWouldEmptyCombos": "Iħalli din iċ-ċavetta mingħajr l-ebda combo permessa — minflok editja l-aċċess taċ-ċavetta",
+    "keyUpdatePending": "{name} għadu qed jiġi aġġornat. Erġa' pprova fi ftit ħin.",
+    "assignToKeys": "Assenja lil ċwievet tal-API…",
+    "assignApply": "Applika l-bidliet",
+    "assignComplete": "L-aċċess għaċ-ċavetta tal-API ġie aġġornat",
+    "assignFailed": "Xi aġġornamenti taċ-ċwievet tal-API ma rnexxewx",
+    "assignNoChanges": "L-ebda aċċess għaċ-ċavetta tal-API ma nbidel",
+    "selectedAccessItems": "Oġġetti magħżula: {count}",
+    "assignExcludedCombos": "{count, plural, one {# ringiela tal-combo magħżula mhijiex mudell u se tinqabeż hawnhekk} other {# ringieli tal-combo magħżula mhumiex mudelli u se jinqabżu hawnhekk}}. Assenja combos mit-tab Combos.",
+    "assignActionAdd": "Żid",
+    "assignActionRemove": "Neħħi",
+    "searchKeys": "Fittex ċwievet tal-API",
+    "selectApiKey": "Agħżel iċ-ċavetta tal-API {name}",
+    "allModelsAccess": "Il-mudelli kollha",
+    "allCombosAccess": "Il-combos kollha",
+    "modelAccessCount": "Mudelli: {count}",
+    "comboAccessCount": "Combos: {count}",
+    "keyInactive": "Mhux attiv",
+    "keyBanned": "Ipprojbit",
+    "keyRevoked": "Revokat",
+    "switchRestrictedConfirm": "Aqleb din iċ-ċavetta għal aċċess ristrett: l-oġġetti magħżula biss se jkunu permessi",
+    "removeNoChangeHint": "Din iċ-ċavetta tippermetti kollox; it-tneħħija tal-oġġetti magħżula mhu se tagħmel l-ebda bidla",
+    "removeStaysAllowedHint": "Għadu permess fuq din iċ-ċavetta permezz ta' {patterns}",
+    "resultChanged": "Mibdul",
+    "resultUnchanged": "L-ebda bidla",
+    "resultSkipped": "Inqabeż",
+    "resultNeedsSwitch": "Jeħtieġ bidla għal ristrett"
   },
   "combos": {
     "title": "Kombinazzjonijiet",
@@ -5431,6 +5490,27 @@
     "importFromFileDownloadTemplate": "Niżżel il-mudell CSV",
     "importFromFileMoreErrors": "+{count} oħra",
     "importFromFileSchemaHint": "Il-kolonni CSV huma pożizzjonali: provider, name, apiKey, baseUrl (mhux obbligatorju), priority (mhux obbligatorju). Il-kolonna provider trid tkun id ta’ fornitur ġestit eżistenti jew id ta’ nodu diġà rreġistrat kompatibbli ma’ OpenAI/Anthropic — din l-importazzjoni ma toħloqx nodi endpoint ġodda.",
+    "importOAuthExport": "Importa esportazzjoni OAuth",
+    "oauthExportTitle": "Importa esportazzjoni minn maniġer tal-kontijiet",
+    "oauthExportDescription": "Tella’ esportazzjoni f’test sempliċi minn maniġer tal-kontijiet (eż. l-esportazzjoni cloud-accounts ta’ Antigravity Manager). It-tokens jiġu aġġornati fuq is-server u kull kont isir konnessjoni OAuth — id-duplikati jiġu aġġornati f’posthom.",
+    "oauthExportProviderLabel": "Fornitur",
+    "oauthExportChoose": "Agħżel fajl",
+    "oauthExportFileAria": "Fajl JSON tal-esportazzjoni tal-kontijiet",
+    "oauthExportSchemaHint": "Aċċettat: dokument b’array \"accounts\", array sempliċi, jew rekord wieħed. It-tokens jistgħu jkunu f’oġġett token imdaħħal jew direttament fuq ir-rekord.",
+    "oauthExportDetected": "Instabu {count} kont(ijiet)",
+    "oauthExportSelectAll": "Agħżel il-kontijiet kollha",
+    "oauthExportSelectAccount": "Agħżel il-kont {index}",
+    "oauthExportColEmail": "Posta elettronika",
+    "oauthExportColProvider": "Fornitur",
+    "oauthExportColRefresh": "Token tal-aġġornament",
+    "oauthExportNoEmail": "(l-ebda posta elettronika)",
+    "oauthExportYes": "iva",
+    "oauthExportNo": "le",
+    "oauthExportImporting": "Qed jiġu importati…",
+    "oauthExportImport": "Importa {count} kont(ijiet)",
+    "oauthExportResult": "Ġew importati {imported}/{total} — {failed} fallew",
+    "oauthExportParseError": "Ma setax jinqara l-ebda kont minn dan il-fajl.",
+    "oauthExportUnknownError": "żball mhux magħruf",
     "adaptaTutorial": {
       "title": "Kif tikkonnettja Adapta Web",
       "introPrefix": "Adapta jawtentika permezz ta’ Clerk. It-token",
@@ -6913,7 +6993,7 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
     "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "usedInComboTooltip": "Użat f'{count} kombinazzjoni/jiet: {combos}",
+    "usedInComboTooltip": "Użat f''{count} kombinazzjoni/jiet: {combos}",
     "openComboTooltip": "Iftaħ il-Kombinazzjonijiet — użat minn {combo}"
   },
   "settings": {
@@ -8898,6 +8978,8 @@
     "qdrantHost": "Ospitant",
     "qdrantCollection": "Kollezzjoni",
     "catalogVisibilityHint": "L-IDs tal-mudelli moħbija jibqgħu jistgħu jissejħu bl-istess permessi ta’ aċċess.",
+    "exposeCombosOnly": "Elenka biss kombinazzjonijiet f'/v1/models",
+    "exposeCombosOnlyDesc": "Il-klijenti li jiskopru l-mudelli awtomatikament jaraw il-kombinazzjonijiet tiegħek (u auto/* sakemm ma jkunux moħbija) minflok il-mudelli mhux ipproċessati tal-fornituri. L-IDs espliċiti provider/model ikomplu jiġu mgħoddija.",
     "catalogScopeTitle": "Elenkar tal-Models API",
     "catalogScopeDesc": "Dak li GET /v1/models jiddikjara għal din iċ-ċavetta. It-tidjiq tal-lista qatt ma jibdel dak li ċ-ċavetta tista' ssejjaħ.",
     "catalogScopeAll": "It-tnejn",
@@ -12261,7 +12343,11 @@
       "viewConversation": "ara l-konverżazzjoni",
       "openConversation": "Iftaħ il-konverżazzjoni {id}"
     },
-    "tableLabel": "Reġistri tat-talbiet"
+    "tableLabel": "Reġistri tat-talbiet",
+    "throughputPostFirstToken": "Wara l-ewwel token",
+    "throughputEndToEnd": "Mit-tarf għat-tarf",
+    "throughputRate": "{value} tokens/sec",
+    "throughputExplanation": "Iż-żewġ rati jużaw l-akbar fost l-għadd ta' tokens tal-output u tar-raġunament. Il-metrika 'Wara l-ewwel token' teskludi TTFT validu; inkella tuża t-tul sħiħ. Mit-tarf għat-tarf dejjem juża t-tul sħiħ. Risposta b'buffer tista' jkollha rata għolja ta' twassil f'daqqa mingħajr ġenerazzjoni aktar mgħaġġla mill-mudell."
   },
   "proxyLogger": {
     "filterAll": "Kollha",
@@ -13850,7 +13936,9 @@
       "disabled": "Diżattivat",
       "dual": "Doppju",
       "alias": "Isem alternattiv",
-      "canonical": "Kanoniku"
+      "canonical": "Kanoniku",
+      "fail_closed": "Imblokka (fail_closed)",
+      "count_as_zero": "Ikkontabilizza bħala $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13997,6 +14085,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Waqfiet tal-Infrastruttura bi Prijorità Protetta bħala 502",
         "description": "Wieġeb b’502 minflok 503 meta mira ta’ prijorità b’fallback għall-kwota biss twaqqaf il-combo għal kawża li jista’ jiġi ppruvat li mhijiex relatata mal-kwota: circuit breaker miftuħ tal-fornitur jew qbiż predittiv minħabba l-latenza."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika tal-baġit għall-użu mingħajr prezz",
+        "description": "Kif il-limiti USD ta’ kuljum/ta’ kull ġimgħa għal kull ċavetta jitrattaw użu b’suċċess li l-fornitur/mudell tiegħu m’għandux riga ta’ prezz. fail_closed (predefinit) jimmarka l-perjodu bħala mgħaddija mill-limitu, sabiex spiża mhux magħrufa qatt ma tista’ tgħaddi mill-limitu strett. count_as_zero jikkontabilizza dak l-użu bħala $0 u jkompli jissalvagwardja l-ispejjeż b’prezz. Il-mudelli mingħajr prezz huma elenkati fil-paġna ewlenija tad-dashboard f’kull każ."
       }
     }
   },

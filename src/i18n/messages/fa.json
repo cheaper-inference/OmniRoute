@@ -1925,7 +1925,14 @@
     "readinessStep3": "نقطه پایانی خود را کپی کنید",
     "readinessStep4": "ارسال درخواست آزمایشی",
     "readinessContinue": "ادامه راهاندازی",
-    "readinessDismiss": "فعلاً نادیده بگیرید"
+    "readinessDismiss": "فعلاً نادیده بگیرید",
+    "unpricedUsageTitle": "{count, plural, one {# مدل} other {# مدل‌ها}} با استفادهٔ اخیر اما بدون قیمت پیکربندی‌شده",
+    "unpricedUsageFailClosed": "{keys, plural, one {# کلید API با محدودیت استفاده} other {# کلیدهای API با محدودیت استفاده}} در 8 روز گذشته از این مدل‌ها استفاده شده است. وقتی آن استفاده داخل پنجرهٔ روزانه یا هفتگی کلید باشد، کلید به‌عنوان مصرف بیش‌ازحد در نظر گرفته می‌شود و درخواست‌های آن مسدود می‌شوند (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "این استفاده به‌عنوان $0 در محدودیت‌های استفادهٔ هر کلید محاسبه می‌شود (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# درخواست} other {# درخواست‌ها}}, {keys, plural, one {# کلید API محدود} other {# کلیدهای API محدود}}",
+    "unpricedUsageMore": "…و {count} مورد دیگر",
+    "unpricedUsageConfigure": "پیکربندی قیمت‌گذاری",
+    "unpricedUsageDismiss": "بستن"
   },
   "analytics": {
     "title": "تحلیلها",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - پیکربندی دستی",
     "clineManualConfiguration": "پیکربندی دستی Cline",
     "kiloManualConfiguration": "پیکربندی دستی Kilo Code",
+    "piManualConfiguration": "Pi - پیکربندی دستی",
+    "piConfigInvalidTitle": "پی models.json ناخوانا است",
+    "piOmnirouteConfigured": "OmniRoute به عنوان یک ارائه دهنده سفارشی Pi پیکربندی شده است",
+    "piModelHelp": "Pi مدلها را برای نقاط پایانی سفارشی کشف نمیکند. — مدلی که انتخاب میکنید به صراحت در models.json نوشته شده است.",
+    "piManualConfigTitle": "یا ~/.pi/agent/models.json به صورت دستی ویرایش کنید",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "سپس Pi را راه اندازی کنید و ارائه دهنده omniroute را انتخاب کنید. PI_CODING_AGENT_DIR برای جابجایی کل فهرست عامل تنظیم کنید.",
+    "piUnownedNote": "این ورودی خارج از OmniRoute اضافه شد (مثلاً نقاط پایانی سفارشی pi-gui). درخواست آن را اتخاذ می کند. بازنشانی فقط ورودی هایی را که OmniRoute نوشته است حذف می کند.",
     "whenToUseLabel": "زمان استفاده",
     "openToolDocs": "باز کردن مستندات ابزار",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "عامل کدنویسی TUI برای xAI Grok Build با پشتیبانی از ارائه‌دهنده سفارشی",
       "droid": "دستیار هوش مصنوعی Factory Droid",
       "openclaw": "دستیار هوش مصنوعی Open Claw",
+      "openclaude": "CLI عامل کدنویسی OpenClaude با پشتیبانی از ارائه‌دهنده سازگار با OpenAI",
       "cline": "رابط خط فرمان دستیار کدنویسی هوش مصنوعی Cline",
       "kilo": "رابط خط فرمان دستیار هوش مصنوعی Kilo Code",
       "qwen": "Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "به‌روزرسانی",
     "cliproxyapiUpdateAvailable": "به‌روزرسانی موجود است: v{current} → v{latest}",
     "cliproxyapiVersion": "نسخه",
+    "piInstallTitle": "Pi Coding Agent را نصب کنید",
+    "piInstallInstructions": "Pi CLI را نصب کنید، سپس به اینجا برگردید تا آن را به OmniRoute متصل کنید.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "از URL قابل دسترسی از دستگاهی که Pi را اجرا می کند استفاده کنید. نقطه پایانی /v1 سازگار با OpenAI به طور خودکار اضافه می شود.",
+    "piManualMergeHint": "فقط پیش نمایش این ورودی providers.omniroute را در models.json ادغام کنید تا سایر ارائه دهندگان و تنظیمات شما دست نخورده بمانند.",
     "removeMapping": "حذف نگاشت"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "درخواست با HTTP {status} ناموفق بود",
     "testFailedNoDetail": "آزمایش بدون پیام خطا با شکست مواجه شد",
     "additionalCapabilities": "قابلیت‌های اضافی: {list}",
-    "comboRefMember": "ترکیب → {name}"
+    "comboRefMember": "ترکیب → {name}",
+    "keyAccessButton": "دسترسی کلید API",
+    "allowedInKeys": "مجاز در: {count, plural, one {# کلید} other {# کلید}}",
+    "keysLoading": "در حال بارگذاری کلیدهای API…",
+    "keysRetry": "تلاش مجدد برای بارگذاری کلیدها",
+    "accessViaPattern": "از طریق {pattern}",
+    "accessBlocked": "مسدودشده توسط {pattern}",
+    "editKeyAccess": "ویرایش دسترسی کلید",
+    "toggleKeyAccess": "مجاز کردن {item} در {name}",
+    "resultNetworkError": "تخصیص ناموفق بود",
+    "resultWouldEmptyModels": "باعث می‌شود این کلید هیچ مدل مجازی نداشته باشد — به‌جای آن دسترسی کلید را ویرایش کنید",
+    "resultWouldEmptyCombos": "باعث می‌شود این کلید هیچ ترکیب (combo) مجازی نداشته باشد — به‌جای آن دسترسی کلید را ویرایش کنید",
+    "keyUpdatePending": "{name} هنوز در حال به‌روزرسانی است. چند لحظه دیگر دوباره تلاش کنید.",
+    "assignToKeys": "تخصیص به کلیدهای API…",
+    "assignApply": "اعمال تغییرات",
+    "assignComplete": "دسترسی کلید API به‌روزرسانی شد",
+    "assignFailed": "به‌روزرسانی برخی از کلیدهای API ناموفق بود",
+    "assignNoChanges": "هیچ تغییری در دسترسی کلید API ایجاد نشد",
+    "selectedAccessItems": "موارد انتخاب‌شده: {count}",
+    "assignExcludedCombos": "{count, plural, one {# ردیف ترکیب انتخاب‌شده مدل نیست و در اینجا نادیده گرفته می‌شود} other {# ردیف ترکیب انتخاب‌شده مدل نیستند و در اینجا نادیده گرفته می‌شوند}}. ترکیب‌ها را از تب Combos اختصاص دهید.",
+    "assignActionAdd": "افزودن",
+    "assignActionRemove": "حذف",
+    "searchKeys": "جستجوی کلیدهای API",
+    "selectApiKey": "انتخاب کلید API {name}",
+    "allModelsAccess": "همه مدل‌ها",
+    "allCombosAccess": "همه ترکیب‌ها",
+    "modelAccessCount": "مدل‌ها: {count}",
+    "comboAccessCount": "ترکیب‌ها: {count}",
+    "keyInactive": "غیرفعال",
+    "keyBanned": "مسدودشده",
+    "keyRevoked": "باطل‌شده",
+    "switchRestrictedConfirm": "تغییر این کلید به دسترسی محدود: فقط موارد انتخاب‌شده مجاز خواهند بود",
+    "removeNoChangeHint": "این کلید همه موارد را مجاز می‌داند؛ حذف موارد انتخاب‌شده تغییری ایجاد نخواهد کرد",
+    "removeStaysAllowedHint": "همچنان از طریق {patterns} روی این کلید مجاز است",
+    "resultChanged": "تغییریافته",
+    "resultUnchanged": "بدون تغییر",
+    "resultSkipped": "نادیده‌گرفته‌شده",
+    "resultNeedsSwitch": "نیازمند تغییر به حالت محدود"
   },
   "combos": {
     "title": "ترکیبها",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "دانلود الگوی CSV",
     "importFromFileMoreErrors": "‏+{count} مورد دیگر",
     "importFromFileSchemaHint": "ستونهای CSV ترتیبی هستند: provider، name، apiKey، baseUrl (اختیاری)، priority (اختیاری). ستون provider باید شناسهٔ یک ارائهدهندهٔ مدیریتشدهٔ موجود یا شناسهٔ یک گرهٔ سازگار با OpenAI/Anthropic باشد که از قبل ثبت شده است — این درونریزی گرههای نقطهٔ پایانی جدید ایجاد نمیکند.",
+    "importOAuthExport": "درون‌ریزی خروجی OAuth",
+    "oauthExportTitle": "درون‌ریزی خروجی مدیر حساب",
+    "oauthExportDescription": "یک خروجی متن ساده از یک مدیر حساب بارگذاری کنید (مثلاً خروجی cloud-accounts از Antigravity Manager). توکن‌ها در سمت سرور تازه‌سازی می‌شوند و هر حساب به یک اتصال OAuth تبدیل می‌شود — موارد تکراری در همان جا تازه‌سازی می‌شوند.",
+    "oauthExportProviderLabel": "ارائه‌دهنده",
+    "oauthExportChoose": "انتخاب فایل",
+    "oauthExportFileAria": "فایل JSON خروجی حساب",
+    "oauthExportSchemaHint": "قابل قبول: سندی با آرایه \"accounts\"، یک آرایه ساده یا یک رکورد واحد. توکن‌ها می‌توانند داخل یک شیء token تودرتو یا مستقیماً روی رکورد باشند.",
+    "oauthExportDetected": "{count} حساب شناسایی شد",
+    "oauthExportSelectAll": "انتخاب همه حساب‌ها",
+    "oauthExportSelectAccount": "انتخاب حساب {index}",
+    "oauthExportColEmail": "ایمیل",
+    "oauthExportColProvider": "ارائه‌دهنده",
+    "oauthExportColRefresh": "توکن تازه‌سازی",
+    "oauthExportNoEmail": "(بدون ایمیل)",
+    "oauthExportYes": "بله",
+    "oauthExportNo": "خیر",
+    "oauthExportImporting": "در حال درون‌ریزی…",
+    "oauthExportImport": "درون‌ریزی {count} حساب",
+    "oauthExportResult": "{imported}/{total} درون‌ریزی شد — {failed} ناموفق",
+    "oauthExportParseError": "هیچ حسابی از این فایل خوانده نشد.",
+    "oauthExportUnknownError": "خطای ناشناخته",
     "adaptaTutorial": {
       "title": "نحوه اتصال به Adapta Web",
       "introPrefix": "Adapta از طریق Clerk احراز هویت می‌کند. توکن",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "میزبان",
     "qdrantCollection": "مجموعه",
     "catalogVisibilityHint": "شناسه‌های مدل پنهان همچنان با همان مجوزهای دسترسی قابل فراخوانی هستند.",
+    "exposeCombosOnly": "فقط ترکیب‌ها در /v1/models فهرست شوند",
+    "exposeCombosOnlyDesc": "کلاینت‌هایی که مدل‌ها را خودکار کشف می‌کنند به‌جای مدل‌های خام ارائه‌دهندگان، ترکیب‌های شما (و auto/* اگر پنهان نباشند) را می‌بینند. شناسه‌های صریح provider/model همچنان مسیریابی می‌شوند.",
     "catalogScopeTitle": "فهرست Models API",
     "catalogScopeDesc": "مواردی که GET /v1/models برای این کلید اعلام میکند. محدود کردن فهرست هرگز مدلهایی را که کلید میتواند فراخوانی کند تغییر نمیدهد.",
     "catalogScopeAll": "هر دو",
@@ -12184,7 +12266,11 @@
       "viewConversation": "مشاهده مکالمه",
       "openConversation": "باز کردن مکالمه {id}"
     },
-    "tableLabel": "گزارشهای درخواست"
+    "tableLabel": "گزارشهای درخواست",
+    "throughputPostFirstToken": "پس از نخستین توکن",
+    "throughputEndToEnd": "سرتاسری",
+    "throughputRate": "{value} توکن/ثانیه",
+    "throughputExplanation": "هر دو نرخ از بزرگترِ تعداد توکنهای خروجی و استدلال استفاده میکنند. نرخ پس از نخستین توکن، یک TTFT معتبر را کنار میگذارد؛ در غیر این صورت از کل مدت استفاده میکند. نرخ سرتاسری همیشه از کل مدت استفاده میکند. یک پاسخ بافرشده میتواند نرخ تحویل انفجاری بالایی داشته باشد بدون آنکه تولید مدل سریعتر شود."
   },
   "proxyLogger": {
     "filterAll": "همه",
@@ -13773,7 +13859,9 @@
       "disabled": "غیرفعال",
       "dual": "دوگانه",
       "alias": "نام مستعار",
-      "canonical": "کانونیکال"
+      "canonical": "کانونیکال",
+      "fail_closed": "مسدود (fail_closed)",
+      "count_as_zero": "محاسبه به‌عنوان $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13920,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "توقفهای زیرساختی با اولویت محافظتشده بهصورت 502",
         "description": "هنگامی که یک مقصد اولویتدار که فقط در صورت اتمام سهمیه به آن رجوع میشود، ترکیب را به علتی متوقف میکند که اثباتاً مربوط به سهمیه نیست—یعنی باز بودن قطعکنندهٔ مدار ارائهدهنده یا رد پیشبینانه بهدلیل تأخیر—بهجای 503، پاسخ 502 بدهید."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "سیاست بودجهٔ استفادهٔ بدون قیمت",
+        "description": "نحوهٔ رفتار محدودیت‌های USD روزانه/هفتگی به‌ازای هر کلید با استفادهٔ موفقی که ارائه‌دهنده/مدل آن ردیف قیمت ندارد. fail_closed (پیش‌فرض) پنجرهٔ بازه را به‌عنوان صرف‌شدهٔ فراتر از سقف علامت‌گذاری می‌کند، بنابراین یک هزینهٔ ناشناخته هرگز از یک سقف سخت عبور نمی‌کند. count_as_zero آن استفاده را به‌عنوان $0 حساب می‌کند و اجرای هزینه‌های دارای قیمت را ادامه می‌دهد. مدل‌های بدون قیمت در هر صورت در صفحهٔ اصلی داشبورد فهرست می‌شوند."
       }
     }
   },

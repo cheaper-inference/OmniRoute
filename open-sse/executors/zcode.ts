@@ -13,6 +13,7 @@ import { executeZcodeGateway } from "./zcode/gateway.ts";
 import { readZcodeIndividualCodingPlanApiKey } from "./zcode/profileAuth.ts";
 import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
 import { MAX_CURSOR_IMAGES, resolveCursorImages } from "../utils/cursorImages.ts";
+import { isInstanceDraining as isDraining } from "../utils/drainStatus.ts";
 
 const ZCODE_URL = "zcode://app-server/stdio";
 const ACCOUNT_PROVIDER_ID = "account:zai-individual-coding-plan";
@@ -24,6 +25,23 @@ const BUILTIN_PROVIDER_ID = "builtin:zai-coding-plan";
 const DEFAULT_TURN_TIMEOUT_MS = 600_000;
 const ZCODE_MODEL_ALLOWLIST = new Set(ZCODE_MODELS.map((model) => model.id));
 const DEFAULT_ZCODE_MODEL = ZCODE_MODELS[0]?.id || "glm-5.2";
+/**
+ * The official ZCode app-server reports an attempt-level cancellation with the
+ * structured code `model_request_cancelled` and the message
+ * "Model request was cancelled." (its ModelRequestCancelled error shape).
+ * The request itself was fine — the ZCode server dropped THIS attempt while
+ * other ZCode requests keep succeeding in parallel — so the failure must not
+ * be recorded against the model (lockout) or the provider (breaker / cooldown).
+ */
+const ZCODE_REQUEST_CANCELLED_CODE = "model_request_cancelled";
+const ZCODE_REQUEST_CANCELLED_MESSAGE = "Model request was cancelled.";
+/**
+ * Request-scoped marker attached to a cancelled attempt so every downstream
+ * resilience consumer (model lockout, provider breaker, provider cooldown)
+ * classifies it as request-scoped instead of as an upstream failure. Registered
+ * in REQUEST_SCOPED_UPSTREAM_ERROR_CODES (comboPredicates.ts).
+ */
+const UPSTREAM_REQUEST_CANCELLED_CODE = "upstream_request_cancelled";
 type JsonRecord = Record<string, unknown>;
 type ZcodeCommand = { command: string; args: string[] };
 type ZcodeModelResolution = { ok: true; model: string } | { ok: false; error: string };
@@ -396,6 +414,111 @@ function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+/**
+ * Whether a native failure is the ZCode server's attempt-level cancellation.
+ *
+ * Matched NARROWLY and POSITIVELY — the server's own structured code
+ * (`model_request_cancelled`) or its exact cancellation sentence. A broad
+ * "cancel" substring would also catch unrelated conditions the server reports
+ * (the transport-level "Request was cancelled." DOMException, the protocol's
+ * own "ZCode RPC request canceled"), which are NOT model-request cancellations.
+ */
+function isZcodeRequestCancelled(error: unknown): boolean {
+  if (errorText(error).trim() === ZCODE_REQUEST_CANCELLED_MESSAGE) return true;
+  const nativeError = asRecord(error);
+  const data = asRecord(nativeError.data);
+  return [nativeError, data, asRecord(data.error)].some(
+    (detail) =>
+      typeof detail.code === "string" &&
+      detail.code.trim().toLowerCase() === ZCODE_REQUEST_CANCELLED_CODE
+  );
+}
+
+/** The exact native Coding Plan weekly/monthly quota refusal (ZCode app-server error text). */
+const ZCODE_NATIVE_QUOTA_REFUSAL =
+  /^\[1310\]\[Weekly\/Monthly Limit Exhausted(?:\. Your limit will reset at [^\]\r\n]+)?\](?:\[[A-Za-z0-9_-]+\])?$/i;
+const CONTRADICTORY_ERROR_IDENTITY =
+  /auth|unauthor|forbidden|network|econn|etimed|timeout|abort|cancel|bad_gateway|service_unavailable|internal_error/i;
+
+function isNon429HttpErrorStatus(status: unknown): boolean {
+  const value = Number(status);
+  return Number.isInteger(value) && value >= 400 && value <= 599 && value !== 429;
+}
+
+/**
+ * Whether a native failure carries auth/network/cancellation/HTTP-status evidence
+ * that contradicts reading its text as a quota refusal.
+ */
+function hasContradictoryZcodeErrorEvidence(error: unknown): boolean {
+  const nativeError = asRecord(error);
+  const data = asRecord(nativeError.data);
+  const details = [
+    nativeError,
+    data,
+    asRecord(data.error),
+    asRecord(nativeError.cause),
+    asRecord(nativeError.response),
+    asRecord(data.response),
+  ];
+  return details.some((detail) => {
+    const code = typeof detail.code === "string" ? detail.code : "";
+    const name = typeof detail.name === "string" ? detail.name : "";
+    return (
+      CONTRADICTORY_ERROR_IDENTITY.test(`${code} ${name}`) ||
+      [detail.status, detail.statusCode, detail.httpStatus].some(isNon429HttpErrorStatus)
+    );
+  });
+}
+
+/**
+ * The HTTP error a failed native app-server turn is answered with: the exact
+ * native quota refusal becomes a typed terminal-quota 429, the server's own
+ * attempt cancellation stays request-scoped, and anything else is a 502 (499
+ * when the caller aborted or the instance is draining).
+ */
+function zcodeAppServerFailureResponse(
+  error: unknown,
+  message: string,
+  scope: { aborted: boolean; nativeQuotaScope: boolean }
+): Response {
+  const exactQuota =
+    scope.nativeQuotaScope &&
+    !scope.aborted &&
+    !hasContradictoryZcodeErrorEvidence(error) &&
+    ZCODE_NATIVE_QUOTA_REFUSAL.test(errorText(error));
+  if (exactQuota) {
+    // Terminal provider quota evidence, not proof that the native input was
+    // never accepted — do not attach pre-admission/replay flags.
+    return errorResponse(429, message, {
+      type: "rate_limit_error",
+      code: "insufficient_quota",
+      reason: "quota_exhausted",
+    });
+  }
+  if (isZcodeRequestCancelled(error)) {
+    // The ZCode server cancelled THIS attempt (the request itself was fine;
+    // other ZCode requests keep succeeding in parallel). It says nothing
+    // about the model or the provider, so the failure stays request-scoped:
+    // no model lockout, no provider circuit-breaker failure, no cooldown.
+    //
+    // Keep the status at 502 (never 499): 499 means "client disconnected" and
+    // STOPS the whole combo loop (#1681), turning a fall-over to the next
+    // leg into a failed request. 499 stays reserved for our own client-side
+    // abort, where nobody is listening anymore.
+    return errorResponse(scope.aborted ? 499 : 502, message, {
+      type: UPSTREAM_REQUEST_CANCELLED_CODE,
+      code: UPSTREAM_REQUEST_CANCELLED_CODE,
+    });
+  }
+  // A graceful shutdown disposes the ZCode protocol client while requests are
+  // still in flight, so the upstream model is never actually asked — the
+  // failure is self-inflicted, not evidence about the model's health. Answer
+  // 499 (client_disconnected), like an aborted caller does: 499 is in neither
+  // the model-lockout error-code list nor the transient-retry list, so it can
+  // neither lock the model out nor be retried as an upstream fault.
+  return errorResponse(scope.aborted || isDraining() ? 499 : 502, message);
+}
+
 async function prepareZcodeRequest(
   body: unknown,
   model: string,
@@ -492,6 +615,7 @@ export class ZcodeExecutor extends BaseExecutor {
     request: JsonRecord
   ): Promise<ExecutorExecuteResult> {
     const client = this.createClient();
+    let nativeQuotaScope = false;
     try {
       const cwd = resolve(this.workingDirectory());
       const workspace = { workspacePath: cwd, workspaceIdentity: cwd };
@@ -507,6 +631,10 @@ export class ZcodeExecutor extends BaseExecutor {
       );
       input.log?.info?.("ZCODE", `native model request model=${model}`);
       boundMaxOutputTokens(request, nativeMaxTokens);
+      // Scope quota evidence to this native Coding Plan inference RPC.
+      nativeQuotaScope =
+        [ACCOUNT_PROVIDER_ID, BUILTIN_PROVIDER_ID].includes(selection.providerId) &&
+        /^glm-/i.test(model);
       const result = asRecord(
         await withAbort(
           client.call("zcode-agent", "generateWorkspaceText", [
@@ -537,7 +665,10 @@ export class ZcodeExecutor extends BaseExecutor {
       input.log?.warn?.("ZCODE", message);
       // No stream has started: retain a real HTTP error, not a 200 error-only SSE
       // that the readiness guard rewrites into STREAM_EARLY_EOF.
-      return errorResponse(input.signal?.aborted ? 499 : 502, message);
+      return zcodeAppServerFailureResponse(error, message, {
+        aborted: Boolean(input.signal?.aborted),
+        nativeQuotaScope,
+      });
     } finally {
       await client.close().catch(() => undefined);
     }

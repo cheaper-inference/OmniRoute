@@ -1925,7 +1925,14 @@
     "readinessStep3": "Αντιγράψτε το endpoint σας",
     "readinessStep4": "Στείλτε ένα δοκιμαστικό αίτημα",
     "readinessContinue": "Συνεχίστε τη ρύθμιση",
-    "readinessDismiss": "Απόκρυψη προς το παρόν"
+    "readinessDismiss": "Απόκρυψη προς το παρόν",
+    "unpricedUsageTitle": "{count, plural, one {# μοντέλο} other {# μοντέλα}} με πρόσφατη χρήση αλλά χωρίς ρυθμισμένη τιμή",
+    "unpricedUsageFailClosed": "{keys, plural, one {# κλειδί API με όριο χρήσης χρησιμοποίησε αυτά τα μοντέλα τις τελευταίες 8 ημέρες. Ενώ αυτή η χρήση είναι εντός της ημερήσιας ή εβδομαδιαίας περιόδου του κλειδιού, το κλειδί θεωρείται ότι έχει υπερβεί το όριο και τα αιτήματά του αποκλείονται (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).} other {# κλειδιά API με όριο χρήσης χρησιμοποίησαν αυτά τα μοντέλα τις τελευταίες 8 ημέρες. Ενώ αυτή η χρήση είναι εντός της ημερήσιας ή εβδομαδιαίας περιόδου των κλειδιών, τα κλειδιά θεωρούνται ότι έχουν υπερβεί τα όρια και τα αιτήματά τους αποκλείονται (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).}}",
+    "unpricedUsageCountAsZero": "Αυτή η χρήση λογίζεται ως $0 προς τα ανά-κλειδί όρια χρήσης (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# αίτημα} other {# αιτήματα}}, {keys, plural, one {# κλειδί με όριο} other {# κλειδιά με όριο}}",
+    "unpricedUsageMore": "…και {count} ακόμη",
+    "unpricedUsageConfigure": "Ρύθμιση τιμών",
+    "unpricedUsageDismiss": "Απόρριψη"
   },
   "analytics": {
     "title": "Αναλυτικά στοιχεία",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Χειροκίνητη διαμόρφωση",
     "clineManualConfiguration": "Χειροκίνητη διαμόρφωση του Cline",
     "kiloManualConfiguration": "Χειροκίνητη διαμόρφωση του Kilo Code",
+    "piManualConfiguration": "Pi - Μη αυτόματη διαμόρφωση",
+    "piConfigInvalidTitle": "Το Pi models.json δεν είναι αναγνώσιμο",
+    "piOmnirouteConfigured": "OmniRoute έχει ρυθμιστεί ως προσαρμοσμένος πάροχος Pi",
+    "piModelHelp": "Το Pi δεν ανακαλύπτει αυτόματα μοντέλα για προσαρμοσμένα τελικά σημεία. — το μοντέλο που επιλέγετε είναι γραμμένο ρητά στο models.json.",
+    "piManualConfigTitle": "Ή επεξεργαστείτε ~/.pi/agent/models.json χειροκίνητα",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Στη συνέχεια, ξεκινήστε το Pi και επιλέξτε τον πάροχο omniroute. Ρυθμίστε PI_CODING_AGENT_DIR για να μετακινήσετε ολόκληρο τον κατάλογο πρακτόρων.",
+    "piUnownedNote": "Αυτή η καταχώρηση προστέθηκε εκτός OmniRoute (π.χ. προσαρμοσμένα τελικά σημεία του pi-gui). Η εφαρμογή θα το υιοθετήσει. Η επαναφορά αφαιρεί μόνο καταχωρήσεις που έγραψε OmniRoute.",
     "whenToUseLabel": "Πότε να χρησιμοποιείται",
     "openToolDocs": "Άνοιγμα τεκμηρίωσης εργαλείου",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "Πράκτορας προγραμματισμού TUI xAI Grok Build με υποστήριξη προσαρμοσμένου παρόχου",
       "droid": "Βοηθός ΤΝ Factory Droid",
       "openclaw": "Βοηθός ΤΝ Open Claw",
+      "openclaude": "CLI πράκτορα προγραμματισμού OpenClaude με υποστήριξη παρόχου συμβατού με OpenAI",
       "cline": "Βοηθός προγραμματισμού ΤΝ Cline για CLI",
       "kilo": "Βοηθός ΤΝ Kilo Code για CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Ενημέρωση",
     "cliproxyapiUpdateAvailable": "Διαθέσιμη ενημέρωση: v{current} → v{latest}",
     "cliproxyapiVersion": "Έκδοση",
+    "piInstallTitle": "Εγκαταστήστε το Pi Coding Agent",
+    "piInstallInstructions": "Εγκαταστήστε το Pi CLI και μετά επιστρέψτε εδώ για να το συνδέσετε στο OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Χρησιμοποιήστε το URL που είναι προσβάσιμο από το μηχάνημα που λειτουργεί με το Pi. Το τελικό σημείο /v1 συμβατό με OpenAI προστίθεται αυτόματα.",
+    "piManualMergeHint": "Μόνο προεπισκόπηση. Συγχωνεύστε αυτήν την είσοδο providers.omniroute στο models.json, ώστε οι άλλοι πάροχοι και οι ρυθμίσεις σας να παραμείνουν ανέπαφες.",
     "removeMapping": "Κατάργηση αντιστοίχισης"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "Το αίτημα απέτυχε με HTTP {status}",
     "testFailedNoDetail": "Η δοκιμή απέτυχε χωρίς μήνυμα σφάλματος",
     "additionalCapabilities": "Πρόσθετες δυνατότητες: {list}",
-    "comboRefMember": "Συνδυασμός → {name}"
+    "comboRefMember": "Συνδυασμός → {name}",
+    "keyAccessButton": "Πρόσβαση κλειδιού API",
+    "allowedInKeys": "Επιτρέπεται σε: {count, plural, one {# κλειδί} other {# κλειδιά}}",
+    "keysLoading": "Φόρτωση κλειδιών API…",
+    "keysRetry": "Επανάληψη φόρτωσης κλειδιών",
+    "accessViaPattern": "μέσω {pattern}",
+    "accessBlocked": "Αποκλείστηκε από {pattern}",
+    "editKeyAccess": "Επεξεργασία πρόσβασης κλειδιού",
+    "toggleKeyAccess": "Να επιτρέπεται το {item} στο {name}",
+    "resultNetworkError": "Η ανάθεση απέτυχε",
+    "resultWouldEmptyModels": "Θα άφηνε αυτό το κλειδί χωρίς επιτρεπόμενα μοντέλα — επεξεργαστείτε την πρόσβαση του κλειδιού αντ' αυτού",
+    "resultWouldEmptyCombos": "Θα άφηνε αυτό το κλειδί χωρίς επιτρεπόμενα combos — επεξεργαστείτε την πρόσβαση του κλειδιού αντ' αυτού",
+    "keyUpdatePending": "Το {name} ενημερώνεται ακόμη. Δοκιμάστε ξανά σε λίγο.",
+    "assignToKeys": "Ανάθεση σε κλειδιά API…",
+    "assignApply": "Εφαρμογή αλλαγών",
+    "assignComplete": "Η πρόσβαση κλειδιού API ενημερώθηκε",
+    "assignFailed": "Ορισμένες ενημερώσεις κλειδιών API απέτυχαν",
+    "assignNoChanges": "Δεν άλλαξε καμία πρόσβαση κλειδιού API",
+    "selectedAccessItems": "Επιλεγμένα στοιχεία: {count}",
+    "assignExcludedCombos": "{count, plural, one {# επιλεγμένη γραμμή combo δεν είναι μοντέλο και θα παραλειφθεί εδώ} other {# επιλεγμένες γραμμές combo δεν είναι μοντέλα και θα παραλειφθούν εδώ}}. Αντιστοιχίστε combos από την καρτέλα Combos.",
+    "assignActionAdd": "Προσθήκη",
+    "assignActionRemove": "Αφαίρεση",
+    "searchKeys": "Αναζήτηση κλειδιών API",
+    "selectApiKey": "Επιλογή κλειδιού API {name}",
+    "allModelsAccess": "Όλα τα μοντέλα",
+    "allCombosAccess": "Όλοι οι συνδυασμοί",
+    "modelAccessCount": "Μοντέλα: {count}",
+    "comboAccessCount": "Συνδυασμοί: {count}",
+    "keyInactive": "Ανενεργό",
+    "keyBanned": "Αποκλεισμένο",
+    "keyRevoked": "Ανακλήθηκε",
+    "switchRestrictedConfirm": "Αλλαγή αυτού του κλειδιού σε περιορισμένη πρόσβαση: θα επιτρέπονται μόνο τα επιλεγμένα στοιχεία",
+    "removeNoChangeHint": "Αυτό το κλειδί επιτρέπει τα πάντα· η αφαίρεση επιλεγμένων στοιχείων δεν θα επιφέρει καμία αλλαγή",
+    "removeStaysAllowedHint": "Εξακολουθεί να επιτρέπεται σε αυτό το κλειδί μέσω {patterns}",
+    "resultChanged": "Τροποποιήθηκε",
+    "resultUnchanged": "Χωρίς αλλαγή",
+    "resultSkipped": "Παραλείφθηκε",
+    "resultNeedsSwitch": "Απαιτείται μετάβαση σε περιορισμένη"
   },
   "combos": {
     "title": "Συνδυασμοί",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Λήψη προτύπου CSV",
     "importFromFileMoreErrors": "+{count} ακόμη",
     "importFromFileSchemaHint": "Οι στήλες CSV είναι βάσει θέσης: provider, name, apiKey, baseUrl (προαιρετικό), priority (προαιρετικό). Η στήλη provider πρέπει να είναι ένα υπάρχον αναγνωριστικό διαχειριζόμενου παρόχου ή ένα ήδη καταχωρισμένο αναγνωριστικό κόμβου συμβατού με OpenAI/Anthropic — αυτή η εισαγωγή δεν δημιουργεί νέους κόμβους τελικών σημείων.",
+    "importOAuthExport": "Εισαγωγή εξαγωγής OAuth",
+    "oauthExportTitle": "Εισαγωγή εξαγωγής διαχειριστή λογαριασμών",
+    "oauthExportDescription": "Ανεβάστε μια εξαγωγή απλού κειμένου από έναν διαχειριστή λογαριασμών (π.χ. την εξαγωγή cloud-accounts του Antigravity Manager). Τα tokens ανανεώνονται στον διακομιστή και κάθε λογαριασμός γίνεται σύνδεση OAuth — τα διπλότυπα ανανεώνονται επιτόπου.",
+    "oauthExportProviderLabel": "Πάροχος",
+    "oauthExportChoose": "Επιλογή αρχείου",
+    "oauthExportFileAria": "Αρχείο JSON εξαγωγής λογαριασμών",
+    "oauthExportSchemaHint": "Αποδεκτά: έγγραφο με πίνακα \"accounts\", σκέτος πίνακας ή μία μεμονωμένη εγγραφή. Τα tokens μπορεί να βρίσκονται σε ένθετο αντικείμενο token ή απευθείας στην εγγραφή.",
+    "oauthExportDetected": "Εντοπίστηκαν {count} λογαριασμοί",
+    "oauthExportSelectAll": "Επιλογή όλων των λογαριασμών",
+    "oauthExportSelectAccount": "Επιλογή λογαριασμού {index}",
+    "oauthExportColEmail": "Ηλ. ταχυδρομείο",
+    "oauthExportColProvider": "Πάροχος",
+    "oauthExportColRefresh": "Token ανανέωσης",
+    "oauthExportNoEmail": "(χωρίς ηλ. ταχυδρομείο)",
+    "oauthExportYes": "ναι",
+    "oauthExportNo": "όχι",
+    "oauthExportImporting": "Εισαγωγή…",
+    "oauthExportImport": "Εισαγωγή {count} λογαριασμών",
+    "oauthExportResult": "Εισήχθησαν {imported}/{total} — {failed} απέτυχαν",
+    "oauthExportParseError": "Δεν ήταν δυνατή η ανάγνωση λογαριασμών από αυτό το αρχείο.",
+    "oauthExportUnknownError": "άγνωστο σφάλμα",
     "adaptaTutorial": {
       "title": "Πώς να συνδέσετε το Adapta Web",
       "introPrefix": "Το Adapta χρησιμοποιεί το Clerk για έλεγχο ταυτότητας. Το token",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Κεντρικός υπολογιστής",
     "qdrantCollection": "Συλλογή",
     "catalogVisibilityHint": "Τα κρυφά αναγνωριστικά μοντέλων παραμένουν διαθέσιμα για κλήση με τα ίδια δικαιώματα πρόσβασης.",
+    "exposeCombosOnly": "Εμφάνιση μόνο συνδυασμών στο /v1/models",
+    "exposeCombosOnlyDesc": "Οι πελάτες που ανακαλύπτουν αυτόματα μοντέλα βλέπουν τους συνδυασμούς σας (και τα auto/*, εκτός αν είναι κρυφά) αντί για τα ακατέργαστα μοντέλα παρόχων. Τα ρητά αναγνωριστικά provider/model συνεχίζουν να δρομολογούνται.",
     "catalogScopeTitle": "Λίστα API μοντέλων",
     "catalogScopeDesc": "Τι εμφανίζει το GET /v1/models για αυτό το κλειδί. Ο περιορισμός της λίστας δεν αλλάζει ποτέ τα μοντέλα που μπορεί να καλέσει το κλειδί.",
     "catalogScopeAll": "Και τα δύο",
@@ -12184,7 +12266,11 @@
       "viewConversation": "προβολή συνομιλίας",
       "openConversation": "Άνοιγμα συνομιλίας {id}"
     },
-    "tableLabel": "Αρχεία καταγραφής αιτημάτων"
+    "tableLabel": "Αρχεία καταγραφής αιτημάτων",
+    "throughputPostFirstToken": "Μετά το πρώτο token",
+    "throughputEndToEnd": "Από άκρη σε άκρη",
+    "throughputRate": "{value} token/δευτ.",
+    "throughputExplanation": "Και οι δύο ρυθμοί χρησιμοποιούν τον μεγαλύτερο από τους αριθμούς token εξόδου και συλλογισμού. Το «Μετά το πρώτο token» εξαιρεί ένα έγκυρο TTFT· διαφορετικά χρησιμοποιεί τη συνολική διάρκεια. Το «Από άκρη σε άκρη» χρησιμοποιεί πάντα τη συνολική διάρκεια. Μια αποθηκευμένη απάντηση μπορεί να έχει υψηλό ρυθμό παράδοσης κατά ριπές χωρίς ταχύτερη παραγωγή από το μοντέλο."
   },
   "proxyLogger": {
     "filterAll": "Όλα",
@@ -13773,7 +13859,9 @@
       "disabled": "Απενεργοποιημένο",
       "dual": "Διπλό",
       "alias": "Ψευδώνυμο",
-      "canonical": "Κανονικό"
+      "canonical": "Κανονικό",
+      "fail_closed": "Αποκλεισμός (fail_closed)",
+      "count_as_zero": "Λογίζεται ως $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13920,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Διακοπές υποδομής προστατευμένης προτεραιότητας ως 502",
         "description": "Απαντήστε με 502 αντί για 503 όταν ένας στόχος προτεραιότητας με εναλλακτική μόνο λόγω εξάντλησης ποσόστωσης διακόπτει το combo για αιτία που αποδεδειγμένα δεν σχετίζεται με την ποσόστωση: έναν ανοικτό διακόπτη κυκλώματος παρόχου ή μια προγνωστική παράλειψη λόγω καθυστέρησης."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Πολιτική προϋπολογισμού για μη τιμολογημένη χρήση",
+        "description": "Πώς τα ανά-κλειδί ημερήσια/εβδομαδιαία όρια σε USD χειρίζονται επιτυχημένη χρήση για την οποία ο πάροχος/μοντέλο δεν έχει γραμμή τιμολόγησης. fail_closed (προεπιλογή) σημειώνει ότι η περίοδος έχει ξεπεραστεί, ώστε ένα άγνωστο κόστος να μην μπορεί ποτέ να παρακάμψει το αυστηρό όριο. count_as_zero λογίζει αυτή τη χρήση ως $0 και συνεχίζει να επιβάλλει το τιμολογημένο κόστος. Τα μη τιμολογημένα μοντέλα εμφανίζονται στην αρχική σελίδα του πίνακα ελέγχου ούτως ή άλλως."
       }
     }
   },

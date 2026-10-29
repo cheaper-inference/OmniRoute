@@ -1925,7 +1925,14 @@
     "readinessStep3": "คัดลอกเอ็นด์พอยต์ของคุณ",
     "readinessStep4": "ส่งคำขอทดสอบ",
     "readinessContinue": "ดำเนินการตั้งค่าต่อ",
-    "readinessDismiss": "ปิดไว้ก่อน"
+    "readinessDismiss": "ปิดไว้ก่อน",
+    "unpricedUsageTitle": "{count, plural, one {# โมเดล} other {# โมเดล}} ที่มีการใช้งานล่าสุดแต่ยังไม่ได้กำหนดราคา",
+    "unpricedUsageFailClosed": "{keys, plural, one {# คีย์ API ที่มีขีดจำกัดการใช้งาน} other {# คีย์ API ที่มีขีดจำกัดการใช้งาน}} ใช้โมเดลเหล่านี้ในช่วง 8 วันที่ผ่านมา ขณะที่การใช้งานนั้นอยู่ในหน้าต่างรายวันหรือรายสัปดาห์ของคีย์ คีย์จะถูกมองว่าเกินโควต้าและคำขอของมันจะถูกบล็อก (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "การใช้งานนี้จะถูกนับเป็น $0 ต่อขีดจำกัดการใช้งานต่อคีย์ (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# คำขอ} other {# คำขอ}}, {keys, plural, one {# คีย์ที่มีขีดจำกัด} other {# คีย์ที่มีขีดจำกัด}}",
+    "unpricedUsageMore": "…และอีก {count} รายการ",
+    "unpricedUsageConfigure": "ตั้งค่าราคา",
+    "unpricedUsageDismiss": "ปิด"
   },
   "analytics": {
     "title": "การวิเคราะห์",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - การกำหนดค่าด้วยตนเอง",
     "clineManualConfiguration": "การกำหนดค่าด้วยตนเองของไคลน์",
     "kiloManualConfiguration": "การกำหนดค่าด้วยตนเองของรหัสกิโล",
+    "piManualConfiguration": "Pi - การกำหนดค่าด้วยตนเอง",
+    "piConfigInvalidTitle": "Pi models.json ไม่สามารถอ่านได้",
+    "piOmnirouteConfigured": "OmniRoute ได้รับการกำหนดค่าเป็นผู้ให้บริการแบบกำหนดเองของ Pi",
+    "piModelHelp": "Pi จะไม่ค้นหาโมเดลโดยอัตโนมัติสำหรับจุดสิ้นสุดที่กำหนดเอง — โมเดลที่คุณเลือกจะถูกเขียนลงใน models.json อย่างชัดเจน",
+    "piManualConfigTitle": "หรือแก้ไข ~/.pi/agent/models.json ด้วยตนเอง",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "จากนั้นเริ่ม Pi และเลือกผู้ให้บริการ omniroute ตั้งค่า PI_CODING_AGENT_DIR เพื่อย้ายไดเร็กทอรีตัวแทนทั้งหมด",
+    "piUnownedNote": "รายการนี้ถูกเพิ่มภายนอก OmniRoute (เช่น จุดสิ้นสุดที่กำหนดเองของ pi-gui) การสมัครจะนำมาใช้ รีเซ็ตจะลบเฉพาะรายการ OmniRoute ที่เขียน",
     "whenToUseLabel": "เมื่อจะใช้",
     "openToolDocs": "เปิดเอกสารเครื่องมือ",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "เอเจนต์เขียนโค้ด xAI Grok Build TUI ที่รองรับผู้ให้บริการแบบกำหนดเอง",
       "droid": "ผู้ช่วย AI จากโรงงาน Droid",
       "openclaw": "เปิดผู้ช่วย AI ของ Claw",
+      "openclaude": "CLI เอเจนต์เขียนโค้ด OpenClaude ที่รองรับผู้ให้บริการที่เข้ากันได้กับ OpenAI",
       "cline": "Cline AI ผู้ช่วยเข้ารหัส CLI",
       "kilo": "กิโลโค้ด AI Assistant CLI",
       "qwen": "Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "อัปเดต",
     "cliproxyapiUpdateAvailable": "มีการอัปเดต: v{current} → v{latest}",
     "cliproxyapiVersion": "เวอร์ชัน",
+    "piInstallTitle": "ติดตั้ง Pi Coding Agent",
+    "piInstallInstructions": "ติดตั้ง Pi CLI จากนั้นกลับมาที่นี่เพื่อเชื่อมต่อกับ OmniRoute",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "ใช้ URL ที่สามารถเข้าถึงได้จากเครื่องที่ใช้ Pi ตำแหน่งข้อมูล /v1 ที่เข้ากันได้กับ OpenAI จะถูกเพิ่มโดยอัตโนมัติ",
+    "piManualMergeHint": "ดูตัวอย่างเท่านั้น รวมรายการ providers.omniroute นี้เข้ากับ models.json เพื่อให้ผู้ให้บริการและการตั้งค่าอื่นๆ ของคุณไม่เสียหาย",
     "removeMapping": "นำการแมปออก"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "คำขอไม่สำเร็จด้วย HTTP {status}",
     "testFailedNoDetail": "การทดสอบล้มเหลวโดยไม่มีข้อความแสดงข้อผิดพลาด",
     "additionalCapabilities": "ความสามารถเพิ่มเติม: {list}",
-    "comboRefMember": "คอมโบ → {name}"
+    "comboRefMember": "คอมโบ → {name}",
+    "keyAccessButton": "สิทธิ์การเข้าถึงคีย์ API",
+    "allowedInKeys": "อนุญาตใน: {count, plural, one {# คีย์} other {# คีย์}}",
+    "keysLoading": "กำลังโหลดคีย์ API…",
+    "keysRetry": "ลองโหลดคีย์อีกครั้ง",
+    "accessViaPattern": "ผ่าน {pattern}",
+    "accessBlocked": "ถูกบล็อกโดย {pattern}",
+    "editKeyAccess": "แก้ไขสิทธิ์การเข้าถึงคีย์",
+    "toggleKeyAccess": "อนุญาต {item} บน {name}",
+    "resultNetworkError": "การมอบหมายล้มเหลว",
+    "resultWouldEmptyModels": "จะทำให้คีย์นี้ไม่มีโมเดลที่ได้รับอนุญาต — แก้ไขสิทธิ์เข้าถึงของคีย์แทน",
+    "resultWouldEmptyCombos": "จะทำให้คีย์นี้ไม่มีคอมโบที่ได้รับอนุญาต — แก้ไขสิทธิ์เข้าถึงของคีย์แทน",
+    "keyUpdatePending": "กำลังอัปเดต {name} อยู่ โปรดลองอีกครั้งในอีกสักครู่",
+    "assignToKeys": "มอบหมายไปยังคีย์ API…",
+    "assignApply": "นำการเปลี่ยนแปลงไปใช้",
+    "assignComplete": "อัปเดตสิทธิ์การเข้าถึงคีย์ API แล้ว",
+    "assignFailed": "การอัปเดตคีย์ API บางรายการล้มเหลว",
+    "assignNoChanges": "ไม่มีการเปลี่ยนแปลงสิทธิ์การเข้าถึง API key",
+    "selectedAccessItems": "รายการที่เลือก: {count}",
+    "assignExcludedCombos": "{count, plural, one {# แถวคอมโบที่เลือกไม่ใช่โมเดลและจะถูกข้ามไป} other {# แถวคอมโบที่เลือกไม่ใช่โมเดลและจะถูกข้ามไป}} กำหนดคอมโบได้จากแท็บ Combos",
+    "assignActionAdd": "เพิ่ม",
+    "assignActionRemove": "นำออก",
+    "searchKeys": "ค้นหาคีย์ API",
+    "selectApiKey": "เลือกคีย์ API {name}",
+    "allModelsAccess": "โมเดลทั้งหมด",
+    "allCombosAccess": "คอมโบทั้งหมด",
+    "modelAccessCount": "โมเดล: {count}",
+    "comboAccessCount": "คอมโบ: {count}",
+    "keyInactive": "ไม่ได้ใช้งาน",
+    "keyBanned": "ถูกแบน",
+    "keyRevoked": "เพิกถอนแล้ว",
+    "switchRestrictedConfirm": "เปลี่ยนคีย์นี้เป็นแบบจำกัดการเข้าถึง: จะอนุญาตเฉพาะรายการที่เลือกเท่านั้น",
+    "removeNoChangeHint": "คีย์นี้อนุญาตทุกอย่าง การนำรายการที่เลือกออกจะไม่เกิดการเปลี่ยนแปลงใดๆ",
+    "removeStaysAllowedHint": "ยังคงได้รับอนุญาตในคีย์นี้ผ่าน {patterns}",
+    "resultChanged": "เปลี่ยนแปลงแล้ว",
+    "resultUnchanged": "ไม่มีการเปลี่ยนแปลง",
+    "resultSkipped": "ข้ามแล้ว",
+    "resultNeedsSwitch": "ต้องเปลี่ยนเป็นแบบจำกัดสิทธิ์"
   },
   "combos": {
     "title": "คอมโบ",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "ดาวน์โหลดเทมเพลต CSV",
     "importFromFileMoreErrors": "+{count} รายการเพิ่มเติม",
     "importFromFileSchemaHint": "คอลัมน์ CSV เรียงตามตำแหน่งดังนี้: provider, name, apiKey, baseUrl (ไม่บังคับ), priority (ไม่บังคับ) คอลัมน์ provider ต้องเป็น ID ของผู้ให้บริการที่มีการจัดการอยู่แล้ว หรือ ID โหนดที่เข้ากันได้กับ OpenAI/Anthropic และลงทะเบียนไว้แล้ว — การนำเข้านี้จะไม่สร้างโหนดปลายทางใหม่",
+    "importOAuthExport": "นำเข้าไฟล์ส่งออก OAuth",
+    "oauthExportTitle": "นำเข้าไฟล์ส่งออกจากตัวจัดการบัญชี",
+    "oauthExportDescription": "อัปโหลดไฟล์ส่งออกแบบข้อความธรรมดาจากตัวจัดการบัญชี (เช่น ไฟล์ส่งออก cloud-accounts ของ Antigravity Manager) โทเค็นจะถูกรีเฟรชฝั่งเซิร์ฟเวอร์ และแต่ละบัญชีจะกลายเป็นการเชื่อมต่อ OAuth — บัญชีที่ซ้ำกันจะถูกรีเฟรชในที่เดิม",
+    "oauthExportProviderLabel": "ผู้ให้บริการ",
+    "oauthExportChoose": "เลือกไฟล์",
+    "oauthExportFileAria": "ไฟล์ JSON ส่งออกบัญชี",
+    "oauthExportSchemaHint": "รองรับ: เอกสารที่มีอาร์เรย์ \"accounts\" อาร์เรย์ล้วน หรือระเบียนเดียว โทเค็นอาจอยู่ในออบเจ็กต์ token ที่ซ้อนอยู่ หรืออยู่บนระเบียนโดยตรง",
+    "oauthExportDetected": "ตรวจพบ {count} บัญชี",
+    "oauthExportSelectAll": "เลือกบัญชีทั้งหมด",
+    "oauthExportSelectAccount": "เลือกบัญชี {index}",
+    "oauthExportColEmail": "อีเมล",
+    "oauthExportColProvider": "ผู้ให้บริการ",
+    "oauthExportColRefresh": "รีเฟรชโทเค็น",
+    "oauthExportNoEmail": "(ไม่มีอีเมล)",
+    "oauthExportYes": "ใช่",
+    "oauthExportNo": "ไม่",
+    "oauthExportImporting": "กำลังนำเข้า…",
+    "oauthExportImport": "นำเข้า {count} บัญชี",
+    "oauthExportResult": "นำเข้าแล้ว {imported}/{total} — ล้มเหลว {failed}",
+    "oauthExportParseError": "ไม่สามารถอ่านบัญชีใดๆ จากไฟล์นี้ได้",
+    "oauthExportUnknownError": "ข้อผิดพลาดที่ไม่ทราบสาเหตุ",
     "adaptaTutorial": {
       "title": "วิธีเชื่อมต่อ Adapta Web",
       "introPrefix": "Adapta ยืนยันตัวตนผ่าน Clerk โทเค็น",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "โฮสต์",
     "qdrantCollection": "การรวบรวม",
     "catalogVisibilityHint": "ยังเรียกใช้รหัสโมเดลที่ซ่อนไว้ได้ด้วยสิทธิ์การเข้าถึงเดิม",
+    "exposeCombosOnly": "แสดงเฉพาะคอมโบใน /v1/models",
+    "exposeCombosOnlyDesc": "ไคลเอนต์ที่ค้นหาโมเดลอัตโนมัติจะเห็นคอมโบของคุณ (และ auto/* หากไม่ได้ซ่อนไว้) แทนโมเดลดิบของผู้ให้บริการ ID แบบ provider/model ที่ระบุชัดเจนยังคงถูกกำหนดเส้นทางตามปกติ",
     "catalogScopeTitle": "รายการ Models API",
     "catalogScopeDesc": "สิ่งที่ GET /v1/models แสดงสำหรับคีย์นี้ การจำกัดรายการให้แคบลงจะไม่เปลี่ยนแปลงสิ่งที่คีย์สามารถเรียกใช้ได้",
     "catalogScopeAll": "ทั้งสองอย่าง",
@@ -12184,7 +12266,11 @@
       "viewConversation": "ดูการสนทนา",
       "openConversation": "เปิดการสนทนา {id}"
     },
-    "tableLabel": "บันทึกคำขอ"
+    "tableLabel": "บันทึกคำขอ",
+    "throughputPostFirstToken": "หลังโทเคนแรก",
+    "throughputEndToEnd": "ตั้งแต่ต้นจนจบ",
+    "throughputRate": "{value} โทเคน/วินาที",
+    "throughputExplanation": "อัตราทั้งสองใช้จำนวนที่มากกว่าระหว่างจำนวนโทเคนเอาต์พุตและจำนวนโทเคนการให้เหตุผล อัตราหลังโทเคนแรกจะหัก TTFT ที่ถูกต้องออก มิฉะนั้นจะใช้ระยะเวลาทั้งหมด ส่วนอัตราตั้งแต่ต้นจนจบจะใช้ระยะเวลาทั้งหมดเสมอ การตอบกลับแบบบัฟเฟอร์อาจมีอัตราการส่งแบบเบิร์สต์สูงได้โดยที่โมเดลไม่ได้สร้างเร็วขึ้น"
   },
   "proxyLogger": {
     "filterAll": "ทั้งหมด",
@@ -13773,7 +13859,9 @@
       "disabled": "ปิดใช้งาน",
       "dual": "แบบคู่",
       "alias": "นามแฝง",
-      "canonical": "มาตรฐาน"
+      "canonical": "มาตรฐาน",
+      "fail_closed": "บล็อก (fail_closed)",
+      "count_as_zero": "นับเป็น $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13920,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "การหยุดจากโครงสร้างพื้นฐานของลำดับความสำคัญแบบมีการป้องกันเป็น 502",
         "description": "ตอบกลับด้วย 502 แทน 503 เมื่อเป้าหมายแบบมีลำดับความสำคัญซึ่งจะใช้ทางเลือกสำรองเฉพาะเมื่อเกิดปัญหาโควตาหยุดคอมโบด้วยสาเหตุที่พิสูจน์ได้ว่าไม่เกี่ยวกับโควตา ได้แก่ เซอร์กิตเบรกเกอร์ของผู้ให้บริการที่เปิดอยู่ หรือการข้ามตามการคาดการณ์เวลาแฝง"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "นโยบายงบประมาณการใช้งานที่ไม่มีราคา",
+        "description": "วิธีที่ขีดจำกัด USD ต่อคีย์รายวัน/รายสัปดาห์จัดการกับการใช้งานที่สำเร็จซึ่งผู้ให้บริการ/โมเดลไม่มีแถวราคากำหนดไว้ โดย fail_closed (ค่าเริ่มต้น) จะทำเครื่องหมายว่าหน้าต่างถูกเกินโควต้า ดังนั้นต้นทุนที่ไม่ทราบจะไม่สามารถหลุดผ่านเพดานแบบแข็งได้ ส่วน count_as_zero จะนับการใช้งานนั้นเป็น $0 และยังคงบังคับใช้การใช้จ่ายที่มีราคา โมเดลที่ไม่มีราคาจะยังคงถูกแสดงในหน้าหลักของแดชบอร์ดทั้งสองกรณี."
       }
     }
   },

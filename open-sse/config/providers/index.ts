@@ -287,6 +287,7 @@ import { tabitokenProvider } from "./registry/tabitoken/index.ts";
 import { logfareProvider } from "./registry/logfare/index.ts";
 import { seekaiProvider } from "./registry/seekai/index.ts";
 import { tokenmarketProvider } from "./registry/tokenmarket/index.ts";
+import { tokenharborProvider } from "./registry/tokenharbor/index.ts";
 import { twinmindProvider } from "./registry/twinmind/index.ts";
 import { syntxProvider } from "./registry/syntx/index.ts";
 import { daoxeProvider } from "./registry/daoxe/index.ts";
@@ -582,6 +583,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   logfare: logfareProvider,
   seekai: seekaiProvider,
   tokenmarket: tokenmarketProvider,
+  tokenharbor: tokenharborProvider,
   twinmind: twinmindProvider,
   syntx: syntxProvider,
   daoxe: daoxeProvider,

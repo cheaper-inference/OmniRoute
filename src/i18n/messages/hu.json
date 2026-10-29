@@ -1925,7 +1925,14 @@
     "readinessStep3": "Másolja ki a végpontot",
     "readinessStep4": "Küldjön tesztkérést",
     "readinessContinue": "Beállítás folytatása",
-    "readinessDismiss": "Egyelőre bezárás"
+    "readinessDismiss": "Egyelőre bezárás",
+    "unpricedUsageTitle": "{count, plural, one {# modellt a közelmúltban használták, de nincs árazás beállítva} other {# modelleket a közelmúltban használták, de nincs árazás beállítva}}",
+    "unpricedUsageFailClosed": "{keys, plural, one {# használati korláttal rendelkező API-kulcs az elmúlt 8 napban használta ezeket a modelleket. Amíg ez a használat a kulcs napi vagy heti időablakán belül esik, a kulcs túllépettnek számít és a kérései blokkolva lesznek (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).} other {# használati korláttal rendelkező API-kulcsok az elmúlt 8 napban használták ezeket a modelleket. Amíg ez a használat egy kulcs napi vagy heti időablakán belül esik, a kulcsokat túllépettnek tekintik és a kéréseiket blokkolják (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).}}",
+    "unpricedUsageCountAsZero": "Ez a használat $0-ként számít a kulcsonkénti használati korlátok felé (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# kérés} other {# kérések}}, {keys, plural, one {# korlátozott kulcs} other {# korlátozott kulcsok}}",
+    "unpricedUsageMore": "…és még {count} további",
+    "unpricedUsageConfigure": "Árazás beállítása",
+    "unpricedUsageDismiss": "Bezárás"
   },
   "analytics": {
     "title": "Analitika",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw – Manuális konfiguráció",
     "clineManualConfiguration": "Cline kézi konfiguráció",
     "kiloManualConfiguration": "Kiló kód kézi konfiguráció",
+    "piManualConfiguration": "Pi - Kézi konfiguráció",
+    "piConfigInvalidTitle": "A Pi models.json olvashatatlan",
+    "piOmnirouteConfigured": "OmniRoute egyéni Pi szolgáltatóként van konfigurálva",
+    "piModelHelp": "A Pi nem fedezi fel automatikusan a modelleket az egyéni végpontokhoz — a kiválasztott modell kifejezetten models.json be van írva.",
+    "piManualConfigTitle": "Vagy szerkesztheti ~/.pi/agent/models.json manuálisan",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Ezután indítsa el a Pi-t, és válassza ki az omniroute szolgáltatót. Állítsa be PI_CODING_AGENT_DIR a teljes ügynökkönyvtár áthelyezéséhez.",
+    "piUnownedNote": "Ez a bejegyzés OmniRoute kívül lett hozzáadva (pl. a pi-gui egyéni végpontjain). A jelentkezés elfogadja azt; A Reset csak OmniRoute által írt bejegyzéseket távolítja el.",
     "whenToUseLabel": "Mikor kell használni",
     "openToolDocs": "Nyissa meg az eszközdokumentumokat",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI kódoló ágens egyéni szolgáltató támogatásával",
       "droid": "Gyári Droid AI-asszisztens",
       "openclaw": "Nyissa meg a Claw AI Assistant alkalmazást",
+      "openclaude": "OpenClaude kódoló ágens CLI OpenAI-kompatibilis szolgáltató támogatással",
       "cline": "Cline AI Coding Assistant CLI",
       "kilo": "Kilo Code AI Assistant CLI",
       "qwen": "Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Frissítés",
     "cliproxyapiUpdateAvailable": "Frissítés elérhető: v{current} → v{latest}",
     "cliproxyapiVersion": "Verzió",
+    "piInstallTitle": "Telepítse a Pi kódoló ügynököt",
+    "piInstallInstructions": "Telepítse a Pi CLI, majd térjen vissza ide, hogy csatlakoztassa OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Használja a Pi-t futtató gépről elérhető URL. Az OpenAI-kompatibilis /v1 végpont automatikusan hozzáadódik.",
+    "piManualMergeHint": "Csak előnézet. Egyesítse ezt a providers.omniroute bejegyzést models.json így a többi szolgáltató és beállításai érintetlenek maradnak.",
     "removeMapping": "Leképezés eltávolítása"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "A kérés meghiúsult HTTP {status} hibakóddal",
     "testFailedNoDetail": "A teszt hibaüzenet nélkül hiúsult meg",
     "additionalCapabilities": "További képességek: {list}",
-    "comboRefMember": "Kombináció → {name}"
+    "comboRefMember": "Kombináció → {name}",
+    "keyAccessButton": "API-kulcs hozzáférés",
+    "allowedInKeys": "Engedélyezve itt: {count, plural, one {# kulcs} other {# kulcs}}",
+    "keysLoading": "API-kulcsok betöltése…",
+    "keysRetry": "Kulcsok betöltésének újrakísérlése",
+    "accessViaPattern": "{pattern} útján",
+    "accessBlocked": "Blokkolva a következő által: {pattern}",
+    "editKeyAccess": "Kulcshozzáférés szerkesztése",
+    "toggleKeyAccess": "{item} engedélyezése ezen: {name}",
+    "resultNetworkError": "A hozzárendelés sikertelen",
+    "resultWouldEmptyModels": "Ez a kulcs engedélyezett modellek nélkül maradna — módosítsa inkább a kulcs hozzáférését",
+    "resultWouldEmptyCombos": "Ez a kulcs engedélyezett kombók nélkül maradna — módosítsa inkább a kulcs hozzáférését",
+    "keyUpdatePending": "{name} frissítése még folyamatban van. Próbálja újra egy pillanat múlva.",
+    "assignToKeys": "Hozzárendelés API-kulcsokhoz…",
+    "assignApply": "Módosítások alkalmazása",
+    "assignComplete": "API-kulcs hozzáférés frissítve",
+    "assignFailed": "Néhány API-kulcs frissítése sikertelen",
+    "assignNoChanges": "Egyetlen API-kulcs hozzáférése sem változott",
+    "selectedAccessItems": "Kiválasztott elemek: {count}",
+    "assignExcludedCombos": "{count, plural, one {# kiválasztott kombósor nem modell, ezért át lesz ugorva} other {# kiválasztott kombósor nem modell, ezért át lesz ugorva}}. Rendeljen hozzá kombókat a Combos lapon.",
+    "assignActionAdd": "Hozzáadás",
+    "assignActionRemove": "Eltávolítás",
+    "searchKeys": "API-kulcsok keresése",
+    "selectApiKey": "{name} API-kulcs kiválasztása",
+    "allModelsAccess": "Összes modell",
+    "allCombosAccess": "Összes kombináció",
+    "modelAccessCount": "Modellek: {count}",
+    "comboAccessCount": "Kombinációk: {count}",
+    "keyInactive": "Inaktív",
+    "keyBanned": "Kitiltva",
+    "keyRevoked": "Visszavonva",
+    "switchRestrictedConfirm": "Kulcs átváltása korlátozott hozzáférésre: csak a kiválasztott elemek lesznek engedélyezve",
+    "removeNoChangeHint": "Ez a kulcs mindent engedélyez; a kiválasztott elemek eltávolítása nem hoz változást",
+    "removeStaysAllowedHint": "Továbbra is engedélyezve van ezen a kulcson a következő révén: {patterns}",
+    "resultChanged": "Módosítva",
+    "resultUnchanged": "Nincs változás",
+    "resultSkipped": "Kihagyva",
+    "resultNeedsSwitch": "Korlátozottra váltás szükséges"
   },
   "combos": {
     "title": "Kombók",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "CSV-sablon letöltése",
     "importFromFileMoreErrors": "+ további {count}",
     "importFromFileSchemaHint": "A CSV-oszlopok sorrendje kötött: provider, name, apiKey, baseUrl (nem kötelező), priority (nem kötelező). A provider oszlopnak egy meglévő felügyelt szolgáltatói azonosítót vagy egy már regisztrált, OpenAI/Anthropic-kompatibilis csomópontazonosítót kell tartalmaznia — ez az importálás nem hoz létre új végpontcsomópontokat.",
+    "importOAuthExport": "OAuth-export importálása",
+    "oauthExportTitle": "Fiókkezelő exportjának importálása",
+    "oauthExportDescription": "Töltsön fel egy fiókkezelőből származó egyszerű szöveges exportot (pl. az Antigravity Manager cloud-accounts exportját). A tokenek a szerveren frissülnek, és minden fiókból OAuth-kapcsolat lesz — az ismétlődők helyben frissülnek.",
+    "oauthExportProviderLabel": "Szolgáltató",
+    "oauthExportChoose": "Fájl kiválasztása",
+    "oauthExportFileAria": "Fiókexport JSON-fájl",
+    "oauthExportSchemaHint": "Elfogadott: \"accounts\" tömböt tartalmazó dokumentum, csupasz tömb vagy egyetlen rekord. A tokenek beágyazott token objektumban vagy közvetlenül a rekordon lehetnek.",
+    "oauthExportDetected": "{count} fiók észlelve",
+    "oauthExportSelectAll": "Összes fiók kijelölése",
+    "oauthExportSelectAccount": "{index}. fiók kijelölése",
+    "oauthExportColEmail": "E-mail",
+    "oauthExportColProvider": "Szolgáltató",
+    "oauthExportColRefresh": "Frissítési token",
+    "oauthExportNoEmail": "(nincs e-mail)",
+    "oauthExportYes": "igen",
+    "oauthExportNo": "nem",
+    "oauthExportImporting": "Importálás…",
+    "oauthExportImport": "{count} fiók importálása",
+    "oauthExportResult": "Importálva: {imported}/{total} — {failed} sikertelen",
+    "oauthExportParseError": "Ebből a fájlból egyetlen fiók sem olvasható be.",
+    "oauthExportUnknownError": "ismeretlen hiba",
     "adaptaTutorial": {
       "title": "Az Adapta Web csatlakoztatása",
       "introPrefix": "Az Adapta a Clerk segítségével hitelesít. A token",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Gazda",
     "qdrantCollection": "Gyűjtemény",
     "catalogVisibilityHint": "A rejtett modellazonosítók továbbra is hívhatók ugyanazokkal a hozzáférési jogosultságokkal.",
+    "exposeCombosOnly": "Csak kombinációk listázása a /v1/models alatt",
+    "exposeCombosOnlyDesc": "A modelleket automatikusan felderítő kliensek a nyers szolgáltatói modellek helyett a kombinációidat (és az auto/* elemeket, ha nincsenek elrejtve) látják. A kifejezett provider/model azonosítók továbbra is továbbításra kerülnek.",
     "catalogScopeTitle": "A Models API listája",
     "catalogScopeDesc": "Amit a GET /v1/models ennél a kulcsnál elérhetőként jelez. A lista szűkítése soha nem módosítja, hogy a kulcs mely modelleket hívhatja meg.",
     "catalogScopeAll": "Mindkettő",
@@ -12184,7 +12266,11 @@
       "viewConversation": "beszélgetés megtekintése",
       "openConversation": "A(z) {id} beszélgetés megnyitása"
     },
-    "tableLabel": "Kérésnaplók"
+    "tableLabel": "Kérésnaplók",
+    "throughputPostFirstToken": "Első token utáni",
+    "throughputEndToEnd": "Végponttól végpontig",
+    "throughputRate": "{value} token/mp",
+    "throughputExplanation": "Mindkét arány a kimeneti és a reasoning tokenszám közül a nagyobbat használja. Az első token utáni érték kizárja az érvényes TTFT-t; egyébként a teljes időtartamot használja. A végponttól végpontig érték mindig a teljes időtartamot használja. Egy puffereit válasz nagy burst átviteli sebességgel is rendelkezhet anélkül, hogy a modell gyorsabban generálna."
   },
   "proxyLogger": {
     "filterAll": "Összes",
@@ -13773,7 +13859,9 @@
       "disabled": "Letiltva",
       "dual": "Kettős",
       "alias": "Álnév",
-      "canonical": "Kanonikus"
+      "canonical": "Kanonikus",
+      "fail_closed": "Blokkolás (fail_closed)",
+      "count_as_zero": "$0-ként számol (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13920,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Védett prioritású infrastruktúra-leállások 502-es hibaként",
         "description": "503 helyett 502-es választ adjon, amikor egy csak kvóta esetén tartalékként használt prioritási cél olyan okból állítja le a kombinációt, amely bizonyíthatóan nem kvótával kapcsolatos: nyitott szolgáltatói megszakító vagy prediktív késleltetés miatti kihagyás."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Árazatlan használati költségpolitika",
+        "description": "Hogyan kezelik a kulcsonkénti napi/hetentei USD-korlátok a sikeres használatot, amelynél a szolgáltatónál vagy a modellnél nincs árazási bejegyzés. fail_closed (alapértelmezett) a periódust túllépettnek jelöli, így egy ismeretlen költség soha nem kerülhet át a kemény plafonon. count_as_zero ezt a használatot $0-ként számolja, és továbbra is érvényesíti a beárazott költést. Az árazatlan modelleket mindenesetre listázza a műszerfal kezdőlapja."
       }
     }
   },

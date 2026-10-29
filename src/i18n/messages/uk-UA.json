@@ -1925,7 +1925,14 @@
     "readinessStep3": "Скопіюйте свою кінцеву точку",
     "readinessStep4": "Надішліть тестовий запит",
     "readinessContinue": "Продовжити налаштування",
-    "readinessDismiss": "Поки що закрити"
+    "readinessDismiss": "Поки що закрити",
+    "unpricedUsageTitle": "{count, plural, one {# модель} few {# моделі} many {# моделей} other {# моделей}} з нещодавнім використанням, але без налаштованої ціни",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-ключ із лімітом використання} few {# API-ключі із лімітом використання} many {# API-ключів із лімітом використання} other {# API-ключів із лімітом використання}} використовували ці моделі за останні 8 днів. Якщо це використання припадає на добове або тижневе вікно ключа, ключ вважається таким, що перевищив квоту, і його запити блокуються (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Це використання зараховується як $0 до лімітів використання по ключу (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# запит} few {# запити} many {# запитів} other {# запитів}}, {keys, plural, one {# ключ із лімітом} few {# ключі із лімітом} many {# ключів із лімітом} other {# ключів із лімітом}}",
+    "unpricedUsageMore": "…та ще {count}",
+    "unpricedUsageConfigure": "Налаштувати ціни",
+    "unpricedUsageDismiss": "Закрити"
   },
   "analytics": {
     "title": "Аналітика",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - налаштування вручну",
     "clineManualConfiguration": "Ручне налаштування Cline",
     "kiloManualConfiguration": "Налаштування коду кіло вручну",
+    "piManualConfiguration": "Pi - ручна конфігурація",
+    "piConfigInvalidTitle": "Pi models.json не читається",
+    "piOmnirouteConfigured": "OmniRoute налаштовано як власний постачальник Pi",
+    "piModelHelp": "Pi не виявляє автоматично моделі для користувацьких кінцевих точок — вибрана вами модель записується в models.json явно.",
+    "piManualConfigTitle": "Або відредагуйте ~/.pi/agent/models.json вручну",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Потім запустіть Pi і виберіть постачальника omniroute. Налаштуйте PI_CODING_AGENT_DIR для переміщення всього каталогу агента.",
+    "piUnownedNote": "Цей запис було додано поза OmniRoute (наприклад, призначені для користувача кінцеві точки pi-gui). Заявка прийме його; Скидання видаляє лише записи, написані OmniRoute.",
     "whenToUseLabel": "Коли використовувати",
     "openToolDocs": "Відкрийте документацію інструмента",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "TUI-агент для кодування xAI Grok Build із підтримкою користувацьких провайдерів",
       "droid": "ШІ-помічник Factory Droid",
       "openclaw": "ШІ-помічник Open Claw",
+      "openclaude": "CLI агента для кодування OpenClaude з підтримкою OpenAI-сумісного провайдера",
       "cline": "CLI ШІ-помічника для програмування Cline",
       "kilo": "Кіло Код AI Assistant CLI",
       "qwen": "CLI Qwen Code",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Оновити",
     "cliproxyapiUpdateAvailable": "Доступне оновлення: v{current} → v{latest}",
     "cliproxyapiVersion": "Версія",
+    "piInstallTitle": "Встановіть Pi Coding Agent",
+    "piInstallInstructions": "Встановіть Pi CLI, потім поверніться сюди, щоб підключити його до OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Використовуйте URL доступний з машини, на якій працює Pi. Кінцева точка /v1, сумісна з OpenAI, додається автоматично.",
+    "piManualMergeHint": "Тільки попередній перегляд. Об’єднайте цей запис providers.omniroute у models.json, щоб ваші інші постачальники та налаштування залишилися без змін.",
     "removeMapping": "Видалити зіставлення"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "Запит завершився помилкою HTTP {status}",
     "testFailedNoDetail": "Тест завершився помилкою без повідомлення про помилку",
     "additionalCapabilities": "Додаткові можливості: {list}",
-    "comboRefMember": "Комбінація → {name}"
+    "comboRefMember": "Комбінація → {name}",
+    "keyAccessButton": "Доступ API-ключа",
+    "allowedInKeys": "Дозволено у: {count, plural, one {# ключі} few {# ключах} many {# ключах} other {# ключах}}",
+    "keysLoading": "Завантаження API-ключів…",
+    "keysRetry": "Повторити завантаження ключів",
+    "accessViaPattern": "через {pattern}",
+    "accessBlocked": "Заблоковано {pattern}",
+    "editKeyAccess": "Редагувати доступ ключа",
+    "toggleKeyAccess": "Дозволити {item} для {name}",
+    "resultNetworkError": "Не вдалося призначити",
+    "resultWouldEmptyModels": "Це залишить цей ключ без дозволених моделей — натомість змініть доступ до ключа",
+    "resultWouldEmptyCombos": "Це залишить цей ключ без дозволених комбо — натомість змініть доступ до ключа",
+    "keyUpdatePending": "{name} все ще оновлюється. Спробуйте знову за мить.",
+    "assignToKeys": "Призначити для API-ключів…",
+    "assignApply": "Застосувати зміни",
+    "assignComplete": "Доступ API-ключа оновлено",
+    "assignFailed": "Не вдалося оновити деякі API-ключі",
+    "assignNoChanges": "Доступ до API-ключа не змінено",
+    "selectedAccessItems": "Вибрано елементів: {count}",
+    "assignExcludedCombos": "{count, plural, one {# вибраний рядок комбо не є моделлю і буде пропущений тут} few {# вибрані рядки комбо не є моделями і будуть пропущені тут} many {# вибраних рядків комбо не є моделями і будуть пропущені тут} other {# вибраних рядків комбо не є моделями і будуть пропущені тут}}. Призначайте комбо на вкладці Combos.",
+    "assignActionAdd": "Додати",
+    "assignActionRemove": "Видалити",
+    "searchKeys": "Пошук API-ключів",
+    "selectApiKey": "Вибрати API-ключ {name}",
+    "allModelsAccess": "Усі моделі",
+    "allCombosAccess": "Усі комбінації",
+    "modelAccessCount": "Моделі: {count}",
+    "comboAccessCount": "Комбінації: {count}",
+    "keyInactive": "Неактивний",
+    "keyBanned": "Заблокований",
+    "keyRevoked": "Відкликано",
+    "switchRestrictedConfirm": "Перемкнути цей ключ на обмежений доступ: буде дозволено лише вибрані елементи",
+    "removeNoChangeHint": "Цей ключ дозволяє все; видалення вибраних елементів нічого не змінить",
+    "removeStaysAllowedHint": "Все ще дозволено для цього ключа через {patterns}",
+    "resultChanged": "Змінено",
+    "resultUnchanged": "Без змін",
+    "resultSkipped": "Пропущено",
+    "resultNeedsSwitch": "Потрібно перемкнути на обмежений доступ"
   },
   "combos": {
     "title": "Комбо",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Завантажити шаблон CSV",
     "importFromFileMoreErrors": "Ще {count}",
     "importFromFileSchemaHint": "Стовпці CSV є позиційними: provider, name, apiKey, baseUrl (необов’язково), priority (необов’язково). Стовпець provider має містити ідентифікатор наявного керованого провайдера або вже зареєстрований ідентифікатор вузла, сумісного з OpenAI/Anthropic. Цей імпорт не створює нових вузлів кінцевих точок.",
+    "importOAuthExport": "Імпорт експорту OAuth",
+    "oauthExportTitle": "Імпорт експорту з менеджера облікових записів",
+    "oauthExportDescription": "Завантажте експорт у вигляді відкритого тексту з менеджера облікових записів (напр., експорт cloud-accounts з Antigravity Manager). Токени оновлюються на сервері, і кожен обліковий запис стає OAuth-підключенням — дублікати оновлюються на місці.",
+    "oauthExportProviderLabel": "Провайдер",
+    "oauthExportChoose": "Вибрати файл",
+    "oauthExportFileAria": "JSON-файл експорту облікових записів",
+    "oauthExportSchemaHint": "Підтримується: документ із масивом \"accounts\", простий масив або один запис. Токени можуть бути у вкладеному об’єкті token або безпосередньо в записі.",
+    "oauthExportDetected": "Виявлено облікових записів: {count}",
+    "oauthExportSelectAll": "Вибрати всі облікові записи",
+    "oauthExportSelectAccount": "Вибрати обліковий запис {index}",
+    "oauthExportColEmail": "Електронна пошта",
+    "oauthExportColProvider": "Провайдер",
+    "oauthExportColRefresh": "Токен оновлення",
+    "oauthExportNoEmail": "(немає електронної пошти)",
+    "oauthExportYes": "так",
+    "oauthExportNo": "ні",
+    "oauthExportImporting": "Імпортування…",
+    "oauthExportImport": "Імпортувати облікові записи ({count})",
+    "oauthExportResult": "Імпортовано {imported}/{total} — з помилкою: {failed}",
+    "oauthExportParseError": "Не вдалося прочитати жодного облікового запису з цього файлу.",
+    "oauthExportUnknownError": "невідома помилка",
     "adaptaTutorial": {
       "title": "Як підключити Adapta Web",
       "introPrefix": "Adapta автентифікується через Clerk. Токен",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Хост",
     "qdrantCollection": "Колекція",
     "catalogVisibilityHint": "Приховані ідентифікатори моделей і далі можна викликати з тими самими правами доступу.",
+    "exposeCombosOnly": "Показувати в /v1/models лише комбінації",
+    "exposeCombosOnlyDesc": "Клієнти, які автоматично виявляють моделі, бачитимуть ваші комбінації (і auto/*, якщо їх не приховано) замість сирих моделей провайдерів. Явні ідентифікатори provider/model і далі маршрутизуються.",
     "catalogScopeTitle": "Список Models API",
     "catalogScopeDesc": "Що GET /v1/models показує для цього ключа. Звуження списку ніколи не змінює того, які моделі може викликати ключ.",
     "catalogScopeAll": "Обидва",
@@ -12184,7 +12266,11 @@
       "viewConversation": "переглянути розмову",
       "openConversation": "Відкрити розмову {id}"
     },
-    "tableLabel": "Журнали запитів"
+    "tableLabel": "Журнали запитів",
+    "throughputPostFirstToken": "Після першого токена",
+    "throughputEndToEnd": "Наскрізна",
+    "throughputRate": "{value} токенів/с",
+    "throughputExplanation": "Обидва показники використовують більшу з кількостей токенів виводу та міркування. «Після першого токена» не враховує дійсний TTFT; інакше використовується повна тривалість. «Наскрізна» завжди використовує повну тривалість. Буферизована відповідь може мати високу швидкість пакетної доставки без швидшої генерації моделі."
   },
   "proxyLogger": {
     "filterAll": "Усі",
@@ -13773,7 +13859,9 @@
       "disabled": "Вимкнено",
       "dual": "Подвійний",
       "alias": "Псевдонім",
-      "canonical": "Канонічний"
+      "canonical": "Канонічний",
+      "fail_closed": "Блокувати (fail_closed)",
+      "count_as_zero": "Зарахувати як $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13920,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Зупинки інфраструктури із захищеним пріоритетом як 502",
         "description": "Повертати відповідь 502 замість 503, коли пріоритетна ціль із резервним перемиканням лише в разі вичерпання квоти зупиняє комбінацію з причини, яка доведено не пов’язана з квотою: розімкнений автоматичний вимикач провайдера або пропуск через прогнозовану затримку."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Політика бюджету для використання без ціни",
+        "description": "Як добові/тижневі ліміти в USD для кожного ключа трактують успішні виклики, провайдер/модель яких не має запису про ціноутворення. fail_closed (за замовчуванням) позначає вікно як перевищене, тому невідома вартість ніколи не може обійти жорсткий ліміт. count_as_zero зараховує таке використання як $0 і продовжує застосовувати платне витрачання. Непрайсовані моделі в будь‑якому разі відображаються на головній сторінці панелі."
       }
     }
   },

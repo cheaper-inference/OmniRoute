@@ -1925,7 +1925,14 @@
     "readinessStep3": "Kopiera din slutpunkt",
     "readinessStep4": "Skicka en testförfrågan",
     "readinessContinue": "Fortsätt konfigurationen",
-    "readinessDismiss": "Avfärda tills vidare"
+    "readinessDismiss": "Avfärda tills vidare",
+    "unpricedUsageTitle": "{count, plural, one {# modell} other {# modeller}} med nylig användning men utan konfigurerat pris",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-nyckel med en användningsgräns} other {# API-nycklar med en användningsgräns}} använde dessa modeller de senaste 8 dagarna. Medan den användningen ligger inom en nyckels dagliga eller veckovisa period betraktas nyckeln som över kvoten och dess förfrågningar blockeras (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Denna användning räknas som $0 mot per-nyckel användningsgränser (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# begäran} other {# begäranden}}, {keys, plural, one {# begränsad nyckel} other {# begränsade nycklar}}",
+    "unpricedUsageMore": "…och {count} till",
+    "unpricedUsageConfigure": "Konfigurera prissättning",
+    "unpricedUsageDismiss": "Stäng"
   },
   "analytics": {
     "title": "Analys",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Öppna Claw - Manuell konfiguration",
     "clineManualConfiguration": "Cline manuell konfiguration",
     "kiloManualConfiguration": "Kilokod manuell konfiguration",
+    "piManualConfiguration": "Pi - Manuell konfiguration",
+    "piConfigInvalidTitle": "Pi models.json är oläslig",
+    "piOmnirouteConfigured": "OmniRoute är konfigurerad som en anpassad Pi-leverantör",
+    "piModelHelp": "Pi upptäcker inte automatiskt modeller för anpassade slutpunkter — modellen du väljer skrivs explicit in i models.json.",
+    "piManualConfigTitle": "Eller redigera ~/.pi/agent/models.json manuellt",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Starta sedan Pi och välj omniroute-leverantören. Ställ in PI_CODING_AGENT_DIR för att flytta hela agentkatalogen.",
+    "piUnownedNote": "Denna post lades till utanför OmniRoute (t.ex. pi-guis anpassade slutpunkter). Ansökan kommer att anta den; Återställ tar bara bort poster OmniRoute skrev.",
     "whenToUseLabel": "När du ska använda",
     "openToolDocs": "Öppna verktygsdokument",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI-kodningsagent med stöd för anpassad leverantör",
       "droid": "Factory Droid AI-assistent",
       "openclaw": "Öppna Claw AI Assistant",
+      "openclaude": "OpenClaude CLI-kodningsagent med stöd för OpenAI-kompatibel leverantör",
       "cline": "Cline AI-kodningsassistent för CLI",
       "kilo": "Kilokod AI Assistant CLI",
       "qwen": "Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Uppdatera",
     "cliproxyapiUpdateAvailable": "Uppdatering tillgänglig: v{current} → v{latest}",
     "cliproxyapiVersion": "Version",
+    "piInstallTitle": "Installera Pi Coding Agent",
+    "piInstallInstructions": "Installera Pi CLI och gå sedan tillbaka hit för att ansluta den till OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Använd URL som kan nås från maskinen som kör Pi. Den OpenAI-kompatibla /v1-slutpunkten läggs till automatiskt.",
+    "piManualMergeHint": "Endast förhandsgranskning. Slå samman detta providers.omniroute-inträde till models.json så att dina andra leverantörer och inställningar förblir intakta.",
     "removeMapping": "Ta bort mappning"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "Förfrågan misslyckades med HTTP {status}",
     "testFailedNoDetail": "Testet misslyckades utan något felmeddelande",
     "additionalCapabilities": "Ytterligare förmågor: {list}",
-    "comboRefMember": "Kombination → {name}"
+    "comboRefMember": "Kombination → {name}",
+    "keyAccessButton": "API-nyckelåtkomst",
+    "allowedInKeys": "Tillåten i: {count, plural, one {# nyckel} other {# nycklar}}",
+    "keysLoading": "Läser in API-nycklar…",
+    "keysRetry": "Försök läsa in nycklar igen",
+    "accessViaPattern": "via {pattern}",
+    "accessBlocked": "Blockerad av {pattern}",
+    "editKeyAccess": "Redigera nyckelåtkomst",
+    "toggleKeyAccess": "Tillåt {item} på {name}",
+    "resultNetworkError": "Tilldelning misslyckades",
+    "resultWouldEmptyModels": "Skulle lämna denna nyckel utan tillåtna modeller — redigera nyckelåtkomst istället",
+    "resultWouldEmptyCombos": "Skulle lämna denna nyckel utan tillåtna kombinationer — redigera nyckelåtkomst istället",
+    "keyUpdatePending": "{name} uppdateras fortfarande. Försök igen om ett ögonblick.",
+    "assignToKeys": "Tilldela till API-nycklar…",
+    "assignApply": "Tillämpa ändringar",
+    "assignComplete": "API-nyckelåtkomst uppdaterad",
+    "assignFailed": "Vissa uppdateringar av API-nycklar misslyckades",
+    "assignNoChanges": "Ingen API-nyckelåtkomst ändrades",
+    "selectedAccessItems": "Valda objekt: {count}",
+    "assignExcludedCombos": "{count, plural, one {# vald kombinationsrad är inte en modell och kommer att hoppas över här} other {# valda kombinationsrader är inte modeller och kommer att hoppas över här}}. Tilldela kombinationer från fliken Combos.",
+    "assignActionAdd": "Lägg till",
+    "assignActionRemove": "Ta bort",
+    "searchKeys": "Sök API-nycklar",
+    "selectApiKey": "Välj API-nyckel {name}",
+    "allModelsAccess": "Alla modeller",
+    "allCombosAccess": "Alla kombinationer",
+    "modelAccessCount": "Modeller: {count}",
+    "comboAccessCount": "Kombinationer: {count}",
+    "keyInactive": "Inaktiv",
+    "keyBanned": "Spärrad",
+    "keyRevoked": "Återkallad",
+    "switchRestrictedConfirm": "Växla denna nyckel till begränsad åtkomst: endast de valda objekten kommer att tillåtas",
+    "removeNoChangeHint": "Denna nyckel tillåter allt; att ta bort valda objekt medför ingen förändring",
+    "removeStaysAllowedHint": "Fortfarande tillåten på denna nyckel via {patterns}",
+    "resultChanged": "Ändrad",
+    "resultUnchanged": "Ingen ändring",
+    "resultSkipped": "Överhoppad",
+    "resultNeedsSwitch": "Kräver växling till begränsad"
   },
   "combos": {
     "title": "Kombinationer",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Ladda ned CSV-mall",
     "importFromFileMoreErrors": "+{count} ytterligare",
     "importFromFileSchemaHint": "CSV-kolumnerna är positionsbaserade: provider, name, apiKey, baseUrl (valfritt), priority (valfritt). Kolumnen provider måste innehålla ett befintligt ID för en hanterad leverantör eller ett redan registrerat nod-ID som är kompatibelt med OpenAI/Anthropic — den här importen skapar inga nya slutpunktsnoder.",
+    "importOAuthExport": "Importera OAuth-export",
+    "oauthExportTitle": "Importera export från kontohanterare",
+    "oauthExportDescription": "Ladda upp en export i klartext från en kontohanterare (t.ex. cloud-accounts-exporten från Antigravity Manager). Token uppdateras på servern och varje konto blir en OAuth-anslutning — dubbletter uppdateras på plats.",
+    "oauthExportProviderLabel": "Leverantör",
+    "oauthExportChoose": "Välj fil",
+    "oauthExportFileAria": "JSON-fil med kontoexport",
+    "oauthExportSchemaHint": "Godkänns: ett dokument med en \"accounts\"-array, en ren array eller en enskild post. Token kan ligga i ett nästlat token-objekt eller direkt på posten.",
+    "oauthExportDetected": "{count} konto(n) hittades",
+    "oauthExportSelectAll": "Markera alla konton",
+    "oauthExportSelectAccount": "Markera konto {index}",
+    "oauthExportColEmail": "E-post",
+    "oauthExportColProvider": "Leverantör",
+    "oauthExportColRefresh": "Uppdateringstoken",
+    "oauthExportNoEmail": "(ingen e-post)",
+    "oauthExportYes": "ja",
+    "oauthExportNo": "nej",
+    "oauthExportImporting": "Importerar…",
+    "oauthExportImport": "Importera {count} konto(n)",
+    "oauthExportResult": "Importerade {imported}/{total} — {failed} misslyckades",
+    "oauthExportParseError": "Det gick inte att läsa några konton från den här filen.",
+    "oauthExportUnknownError": "okänt fel",
     "adaptaTutorial": {
       "title": "Hur du ansluter Adapta Web",
       "introPrefix": "Adapta autentiserar genom Clerk. Tokenen",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Värd",
     "qdrantCollection": "Samling",
     "catalogVisibilityHint": "Dolda modell-ID:n kan fortfarande anropas med samma åtkomstbehörigheter.",
+    "exposeCombosOnly": "Visa endast kombinationer i /v1/models",
+    "exposeCombosOnlyDesc": "Klienter som upptäcker modeller automatiskt ser dina kombinationer (och auto/* om de inte är dolda) i stället för leverantörernas råa modeller. Explicita provider/model-id:n fortsätter att routas.",
     "catalogScopeTitle": "Modellista i API:et",
     "catalogScopeDesc": "Vad GET /v1/models visar för denna nyckel. Att begränsa listan ändrar aldrig vad nyckeln kan anropa.",
     "catalogScopeAll": "Båda",
@@ -12184,7 +12266,11 @@
       "viewConversation": "visa konversation",
       "openConversation": "Öppna konversation {id}"
     },
-    "tableLabel": "Förfrågningsloggar"
+    "tableLabel": "Förfrågningsloggar",
+    "throughputPostFirstToken": "Efter första token",
+    "throughputEndToEnd": "End-to-end",
+    "throughputRate": "{value} tokens/sek",
+    "throughputExplanation": "Båda hastigheterna använder det största av antalet output- och reasoning-tokens. Efter första token bortser från en giltig TTFT; i övrigt används hela varaktigheten. End-to-end använder alltid hela varaktigheten. Ett buffrat svar kan ha en hög burst-leveranshastighet utan att modellgenereringen är snabbare."
   },
   "proxyLogger": {
     "filterAll": "Alla",
@@ -13773,7 +13859,9 @@
       "disabled": "Inaktiverad",
       "dual": "Dubbel",
       "alias": "Alias",
-      "canonical": "Kanonisk"
+      "canonical": "Kanonisk",
+      "fail_closed": "Blockera (fail_closed)",
+      "count_as_zero": "Räkna som $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13920,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Infrastrukturstopp för skyddad prioritet som 502",
         "description": "Svara med 502 i stället för 503 när ett prioritetsmål med en reserv som endast används vid kvotfel stoppar kombinationen av en orsak som bevisligen inte är kvotrelaterad: en öppen kretsbrytare hos leverantören eller ett prediktivt latensbaserat överhopp."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Policy för oprissad användningsbudget",
+        "description": "Hur per-nyckel dagliga/veckovisa USD-gränser behandlar lyckad användning vars leverantör/modell inte har någon prisrad. fail_closed (standard) markerar perioden som överskriden, så att en okänd kostnad aldrig kan smyga förbi ett hårt tak. count_as_zero räknar den användningen som $0 och fortsätter att tillämpa den prissatta förbrukningen. Oprissatta modeller listas på instrumentpanelens startsida i båda fallen."
       }
     }
   },

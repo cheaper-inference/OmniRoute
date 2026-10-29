@@ -2002,7 +2002,14 @@
     "readinessStep3": "Копирайте крайната си точка",
     "readinessStep4": "Изпратете тестова заявка",
     "readinessContinue": "Продължете настройката",
-    "readinessDismiss": "Скрийте засега"
+    "readinessDismiss": "Скрийте засега",
+    "unpricedUsageTitle": "{count, plural, one {# модел} other {# модела}} с скорошна употреба, но без конфигурирана цена",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API ключ с лимит на използване} other {# API ключа с лимит на използване}} използваха тези модели през последните 8 дни. Докато тази употреба е в рамките на дневния или седмичния прозорец на ключа, ключът се смята за надвишил квотата и заявките му се блокират (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Тази употреба се зачита като $0 към лимитите за използване на ключа (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# заявка} other {# заявки}}, {keys, plural, one {# ограничен ключ} other {# ограничени ключа}}",
+    "unpricedUsageMore": "…и още {count}",
+    "unpricedUsageConfigure": "Настрой ценообразуването",
+    "unpricedUsageDismiss": "Отхвърли"
   },
   "analytics": {
     "title": "Анализ",
@@ -3039,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw - Ръчна конфигурация",
     "clineManualConfiguration": "Ръчна конфигурация на Cline",
     "kiloManualConfiguration": "Ръчна конфигурация на Kilo Code",
+    "piManualConfiguration": "Pi - Ръчна конфигурация",
+    "piConfigInvalidTitle": "Pi models.json не се чете",
+    "piOmnirouteConfigured": "OmniRoute е конфигуриран като потребителски доставчик на Pi",
+    "piModelHelp": "Pi не открива автоматично модели за персонализирани крайни точки — избраният от вас модел се записва изрично в models.json.",
+    "piManualConfigTitle": "Или редактирайте ~/.pi/agent/models.json ръчно",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "След това стартирайте Pi и изберете доставчика на omniroute. Задайте PI_CODING_AGENT_DIR да премести цялата директория на агента.",
+    "piUnownedNote": "Този запис беше добавен извън OmniRoute (напр. потребителски крайни точки на pi-gui). Кандидатстването ще го приеме; Нулирането премахва само записи, написани от OmniRoute.",
     "whenToUseLabel": "Кога да използвате",
     "openToolDocs": "Отворете документите на инструмента",
     "toolUseCases": {
@@ -3068,6 +3083,7 @@
       "grok-build": "xAI Grok Build TUI агент за програмиране с поддръжка на персонализиран доставчик",
       "droid": "Фабричен Droid AI Assistant",
       "openclaw": "Open Claw AI асистент",
+      "openclaude": "OpenClaude CLI агент за програмиране с поддръжка на OpenAI-съвместим доставчик",
       "cline": "Cline — CLI AI асистент за програмиране",
       "kilo": "Kilo Code — CLI AI асистент",
       "qwen": "Qwen Code CLI",
@@ -3357,6 +3373,12 @@
     "cliproxyapiUpdate": "Актуализиране",
     "cliproxyapiUpdateAvailable": "Налична актуализация: v{current} → v{latest}",
     "cliproxyapiVersion": "Версия",
+    "piInstallTitle": "Инсталирайте Pi Coding Agent",
+    "piInstallInstructions": "Инсталирайте Pi CLI, след което се върнете тук, за да го свържете към OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Използвайте URL, достъпен от машината, работеща с Pi. Съвместимата с OpenAI крайна точка /v1 се добавя автоматично.",
+    "piManualMergeHint": "Само преглед. Обединете този запис providers.omniroute в models.json така че другите ви доставчици и настройки да останат непокътнати.",
     "removeMapping": "Премахване на съпоставянето"
   },
   "modelCatalog": {
@@ -3488,7 +3510,44 @@
     "httpError": "Заявката е неуспешна с HTTP {status}",
     "testFailedNoDetail": "Тестът е неуспешен без съобщение за грешка",
     "additionalCapabilities": "Допълнителни възможности: {list}",
-    "comboRefMember": "Комбинация → {name}"
+    "comboRefMember": "Комбинация → {name}",
+    "keyAccessButton": "Достъп на API ключ",
+    "allowedInKeys": "Разрешено в: {count, plural, one {# ключ} other {# ключа}}",
+    "keysLoading": "Зареждане на API ключове…",
+    "keysRetry": "Повторен опит за зареждане на ключове",
+    "accessViaPattern": "чрез {pattern}",
+    "accessBlocked": "Блокирано от {pattern}",
+    "editKeyAccess": "Редактиране на достъпа на ключа",
+    "toggleKeyAccess": "Разрешаване на {item} за {name}",
+    "resultNetworkError": "Присвояването е неуспешно",
+    "resultWouldEmptyModels": "Това би оставило този ключ без разрешени модели — вместо това редактирайте достъпа на ключа",
+    "resultWouldEmptyCombos": "Това би оставило този ключ без разрешени комбинации — вместо това редактирайте достъпа на ключа",
+    "keyUpdatePending": "{name} все още се актуализира. Опитайте отново след малко.",
+    "assignToKeys": "Присвояване към API ключове…",
+    "assignApply": "Прилагане на промените",
+    "assignComplete": "Достъпът на API ключа е актуализиран",
+    "assignFailed": "Някои актуализации на API ключове бяха неуспешни",
+    "assignNoChanges": "Няма променен достъп до API ключ",
+    "selectedAccessItems": "Избрани елементи: {count}",
+    "assignExcludedCombos": "{count, plural, one {# избран ред с комбинация не е модел и ще бъде пропуснат тук} other {# избрани реда с комбинации не са модели и ще бъдат пропуснати тук}}. Задайте комбинации от раздела Combos.",
+    "assignActionAdd": "Добавяне",
+    "assignActionRemove": "Премахване",
+    "searchKeys": "Търсене на API ключове",
+    "selectApiKey": "Избиране на API ключ {name}",
+    "allModelsAccess": "Всички модели",
+    "allCombosAccess": "Всички комбинации",
+    "modelAccessCount": "Модели: {count}",
+    "comboAccessCount": "Комбинации: {count}",
+    "keyInactive": "Неактивен",
+    "keyBanned": "Блокиран",
+    "keyRevoked": "Анулиран",
+    "switchRestrictedConfirm": "Превключване на този ключ към ограничен достъп: ще бъдат разрешени само избраните елементи",
+    "removeNoChangeHint": "Този ключ разрешава всичко; премахването на избраните елементи няма да доведе до промяна",
+    "removeStaysAllowedHint": "Все още разрешено за този ключ чрез {patterns}",
+    "resultChanged": "Променено",
+    "resultUnchanged": "Без промяна",
+    "resultSkipped": "Пропуснато",
+    "resultNeedsSwitch": "Изисква превключване към ограничен"
   },
   "combos": {
     "title": "Комбота",
@@ -5431,6 +5490,27 @@
     "importFromFileDownloadTemplate": "Изтегляне на CSV шаблон",
     "importFromFileMoreErrors": "+още {count}",
     "importFromFileSchemaHint": "CSV колоните са позиционни: provider, name, apiKey, baseUrl (незадължително), priority (незадължително). Колоната provider трябва да съдържа идентификатор на съществуващ управляван доставчик или на вече регистриран възел, съвместим с OpenAI/Anthropic — това импортиране не създава нови възли на крайни точки.",
+    "importOAuthExport": "Импортиране на OAuth експорт",
+    "oauthExportTitle": "Импортиране на експорт от мениджър на акаунти",
+    "oauthExportDescription": "Качете експорт в обикновен текст от мениджър на акаунти (напр. експорта cloud-accounts на Antigravity Manager). Токените се опресняват на сървъра и всеки акаунт става OAuth връзка — дубликатите се опресняват на място.",
+    "oauthExportProviderLabel": "Доставчик",
+    "oauthExportChoose": "Избор на файл",
+    "oauthExportFileAria": "JSON файл с експорт на акаунти",
+    "oauthExportSchemaHint": "Приема се: документ с масив \"accounts\", обикновен масив или единичен запис. Токените може да са във вложен обект token или директно в записа.",
+    "oauthExportDetected": "Открити акаунти: {count}",
+    "oauthExportSelectAll": "Избери всички акаунти",
+    "oauthExportSelectAccount": "Избери акаунт {index}",
+    "oauthExportColEmail": "Имейл",
+    "oauthExportColProvider": "Доставчик",
+    "oauthExportColRefresh": "Токен за опресняване",
+    "oauthExportNoEmail": "(няма имейл)",
+    "oauthExportYes": "да",
+    "oauthExportNo": "не",
+    "oauthExportImporting": "Импортиране…",
+    "oauthExportImport": "Импортиране на {count} акаунт(а)",
+    "oauthExportResult": "Импортирани {imported}/{total} — {failed} неуспешни",
+    "oauthExportParseError": "Не можаха да се прочетат акаунти от този файл.",
+    "oauthExportUnknownError": "неизвестна грешка",
     "adaptaTutorial": {
       "title": "Как да свържете Adapta Web",
       "introPrefix": "Adapta се удостоверява чрез Clerk. Токенът",
@@ -8898,6 +8978,8 @@
     "qdrantHost": "Хост",
     "qdrantCollection": "Колекция",
     "catalogVisibilityHint": "Скритите идентификатори на модели остават достъпни за извикване със същите права за достъп.",
+    "exposeCombosOnly": "Показване само на комбинации в /v1/models",
+    "exposeCombosOnlyDesc": "Клиентите, които откриват моделите автоматично, виждат вашите комбинации (и auto/*, освен ако не са скрити) вместо суровите модели на доставчиците. Изричните идентификатори provider/model продължават да се маршрутизират.",
     "catalogScopeTitle": "Списък на Models API",
     "catalogScopeDesc": "Какво обявява GET /v1/models за този ключ. Ограничаването на списъка никога не променя какво може да извиква ключът.",
     "catalogScopeAll": "И двете",
@@ -12261,7 +12343,11 @@
       "viewConversation": "преглед на разговора",
       "openConversation": "Отваряне на разговор {id}"
     },
-    "tableLabel": "Регистри на заявките"
+    "tableLabel": "Регистри на заявките",
+    "throughputPostFirstToken": "След първия токен",
+    "throughputEndToEnd": "От край до край",
+    "throughputRate": "{value} токена/сек",
+    "throughputExplanation": "И двете скорости използват по-голямата стойност от броя на изходните и разсъждаващите токени. „След първия токен“ изключва валидно TTFT; в противен случай използва пълната продължителност. „От край до край“ винаги използва пълната продължителност. Буфериран отговор може да има висока скорост на доставяне на порции, без моделът да генерира по-бързо."
   },
   "proxyLogger": {
     "filterAll": "Всички",
@@ -13850,7 +13936,9 @@
       "disabled": "Деактивирано",
       "dual": "Двоен",
       "alias": "Псевдоним",
-      "canonical": "Каноничен"
+      "canonical": "Каноничен",
+      "fail_closed": "Блокирай (fail_closed)",
+      "count_as_zero": "Считай като $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13997,6 +14085,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Инфраструктурни спирания със защитен приоритет като 502",
         "description": "Връщайте 502 вместо 503, когато цел с приоритет и резервен вариант само при изчерпана квота спре комбинацията по причина, за която може да се докаже, че не е свързана с квота: отворен прекъсвач на веригата на доставчика или прогнозно пропускане поради латентност."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Политика за бюджет при употреба без цена",
+        "description": "Как дневните/седмични USD лимити за ключ третират успешната употреба, чийто доставчик/модел няма запис с цена. fail_closed (по подразбиране) маркира прозореца като превишен, така че неизвестна цена никога не може да заобиколи твърдия лимит. count_as_zero отчита тази употреба като $0 и продължава да прилага ограниченията за разходи с конфигурирана цена. Моделите без цена се показват на началната страница на таблото във всеки случай."
       }
     }
   },

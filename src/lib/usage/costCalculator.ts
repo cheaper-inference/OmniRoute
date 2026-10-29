@@ -318,7 +318,11 @@ export interface CostCalculationResult {
   costUsd: number;
   /** false when no pricing row (direct, normalized, or codex-effortless) was found. */
   priced: boolean;
-  /** A lookup error is not evidence that the model lacks a price. */
+  /**
+   * true when the lookup or calculation itself threw (pricing store unreadable,
+   * malformed row). Distinct from a genuinely missing price: callers that relax
+   * enforcement for unpriced models must still fail closed on this.
+   */
   failed?: boolean;
 }
 

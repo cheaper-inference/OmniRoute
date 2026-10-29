@@ -1925,7 +1925,14 @@
     "readinessStep3": "Skopiuj punkt końcowy",
     "readinessStep4": "Wyślij żądanie testowe",
     "readinessContinue": "Kontynuuj konfigurację",
-    "readinessDismiss": "Na razie pomiń"
+    "readinessDismiss": "Na razie pomiń",
+    "unpricedUsageTitle": "{count, plural, one {# model} few {# modele} many {# modeli} other {# modeli}} z niedawnym użyciem, ale bez skonfigurowanej ceny",
+    "unpricedUsageFailClosed": "{keys, plural, one {# klucz API z limitem użycia} few {# klucze API z limitem użycia} many {# kluczy API z limitem użycia} other {# kluczy API z limitem użycia}} użyto tych modeli w ciągu ostatnich 8 dni. Gdy to użycie mieści się w dziennym lub tygodniowym oknie klucza, klucz jest traktowany jako przekraczający limit i jego żądania są blokowane (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "To użycie jest liczone jako $0 względem limitów użycia na klucz (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# żądanie} few {# żądania} many {# żądań} other {# żądań}}, {keys, plural, one {# klucz z limitem} few {# klucze z limitem} many {# kluczy z limitem} other {# kluczy z limitem}}",
+    "unpricedUsageMore": "…i jeszcze {count} więcej",
+    "unpricedUsageConfigure": "Skonfiguruj ceny",
+    "unpricedUsageDismiss": "Zamknij"
   },
   "analytics": {
     "title": "Analityka",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - konfiguracja ręczna",
     "clineManualConfiguration": "Cline - konfiguracja ręczna",
     "kiloManualConfiguration": "Kilo Code - konfiguracja ręczna",
+    "piManualConfiguration": "Pi – konfiguracja ręczna",
+    "piConfigInvalidTitle": "Pi models.json jest nieczytelna",
+    "piOmnirouteConfigured": "OmniRoute jest skonfigurowana jako niestandardowy dostawca Pi",
+    "piModelHelp": "Pi nie wykrywa automatycznie modeli dla niestandardowych punktów końcowych. — wybrany model jest jawnie zapisywany w models.json.",
+    "piManualConfigTitle": "Lub edytuj ~/.pi/agent/models.json ręcznie",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Następnie uruchom Pi i wybierz dostawcę omniroute. Ustaw PI_CODING_AGENT_DIR, aby przenieść cały katalog agenta.",
+    "piUnownedNote": "Ten wpis został dodany poza OmniRoute (np. niestandardowe punkty końcowe pi-gui). Złożenie wniosku zaadoptuje to; Resetuj usuwa tylko wpisy napisane OmniRoute.",
     "whenToUseLabel": "Kiedy używać",
     "openToolDocs": "Otwórz dokumentację narzędzia",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "Agent programistyczny TUI xAI Grok Build z obsługą niestandardowych dostawców",
       "droid": "Asystent AI Factory Droid",
       "openclaw": "Asystent AI Open Claw",
+      "openclaude": "CLI agenta programistycznego OpenClaude z obsługą dostawcy zgodnego z OpenAI",
       "cline": "Cline — CLI asystenta programowania AI",
       "kilo": "Kilo Code — CLI asystenta AI",
       "qwen": "Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Aktualizuj",
     "cliproxyapiUpdateAvailable": "Dostępna aktualizacja: v{current} → v{latest}",
     "cliproxyapiVersion": "Wersja",
+    "piInstallTitle": "Zainstaluj agenta kodującego Pi",
+    "piInstallInstructions": "Zainstaluj Pi CLI, a następnie wróć tutaj, aby podłączyć go do OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Użyj URL dostępnego z komputera z uruchomionym Pi. Punkt końcowy /v1 zgodny z OpenAI jest dodawany automatycznie.",
+    "piManualMergeHint": "Tylko podgląd. Połącz ten wpis providers.omniroute z models.json, aby inni dostawcy i ustawienia pozostały nienaruszone.",
     "removeMapping": "Usuń mapowanie"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "Żądanie nie powiodło się z kodem HTTP {status}",
     "testFailedNoDetail": "Test zakończył się niepowodzeniem bez komunikatu o błędzie",
     "additionalCapabilities": "Dodatkowe możliwości: {list}",
-    "comboRefMember": "Kombinacja → {name}"
+    "comboRefMember": "Kombinacja → {name}",
+    "keyAccessButton": "Dostęp klucza API",
+    "allowedInKeys": "Dozwolone w: {count, plural, one {# kluczu} other {# kluczach}}",
+    "keysLoading": "Wczytywanie kluczy API…",
+    "keysRetry": "Ponów wczytywanie kluczy",
+    "accessViaPattern": "przez {pattern}",
+    "accessBlocked": "Zablokowane przez {pattern}",
+    "editKeyAccess": "Edytuj dostęp klucza",
+    "toggleKeyAccess": "Zezwól na {item} w {name}",
+    "resultNetworkError": "Przypisanie nie powiodło się",
+    "resultWouldEmptyModels": "Pozostawiłoby ten klucz bez dozwolonych modeli — zamiast tego edytuj dostęp do klucza",
+    "resultWouldEmptyCombos": "Pozostawiłoby ten klucz bez dozwolonych combo — zamiast tego edytuj dostęp do klucza",
+    "keyUpdatePending": "{name} jest nadal aktualizowany. Spróbuj ponownie za chwilę.",
+    "assignToKeys": "Przypisz do kluczy API…",
+    "assignApply": "Zastosuj zmiany",
+    "assignComplete": "Zaktualizowano dostęp klucza API",
+    "assignFailed": "Aktualizacja niektórych kluczy API nie powiodła się",
+    "assignNoChanges": "Nie zmieniono dostępu do klucza API",
+    "selectedAccessItems": "Wybrane elementy: {count}",
+    "assignExcludedCombos": "{count, plural, one {# zaznaczony wiersz combo nie jest modelem i zostanie tutaj pominięty} other {# zaznaczonych wierszy combo nie jest modelami i zostanie tutaj pominiętych}}. Przypisz combo z karty Combos.",
+    "assignActionAdd": "Dodaj",
+    "assignActionRemove": "Usuń",
+    "searchKeys": "Szukaj kluczy API",
+    "selectApiKey": "Wybierz klucz API {name}",
+    "allModelsAccess": "Wszystkie modele",
+    "allCombosAccess": "Wszystkie kombinacje",
+    "modelAccessCount": "Modele: {count}",
+    "comboAccessCount": "Kombinacje: {count}",
+    "keyInactive": "Nieaktywny",
+    "keyBanned": "Zablokowany",
+    "keyRevoked": "Unieważniony",
+    "switchRestrictedConfirm": "Przełącz ten klucz na dostęp ograniczony: dozwolone będą tylko wybrane elementy",
+    "removeNoChangeHint": "Ten klucz zezwala na wszystko; usunięcie wybranych elementów niczego nie zmieni",
+    "removeStaysAllowedHint": "Nadal dozwolone na tym kluczu przez {patterns}",
+    "resultChanged": "Zmieniono",
+    "resultUnchanged": "Bez zmian",
+    "resultSkipped": "Pominięto",
+    "resultNeedsSwitch": "Wymaga przełączenia na dostęp ograniczony"
   },
   "combos": {
     "title": "Kombinacje",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Pobierz szablon CSV",
     "importFromFileMoreErrors": "+{count} więcej",
     "importFromFileSchemaHint": "Kolumny CSV są pozycyjne: provider, name, apiKey, baseUrl (opcjonalnie), priority (opcjonalnie). Kolumna provider musi zawierać identyfikator istniejącego zarządzanego dostawcy lub identyfikator już zarejestrowanego węzła zgodnego z OpenAI/Anthropic — ten import nie tworzy nowych węzłów punktów końcowych.",
+    "importOAuthExport": "Importuj eksport OAuth",
+    "oauthExportTitle": "Importuj eksport z menedżera kont",
+    "oauthExportDescription": "Prześlij eksport w postaci zwykłego tekstu z menedżera kont (np. eksport cloud-accounts z Antigravity Manager). Tokeny są odświeżane po stronie serwera, a każde konto staje się połączeniem OAuth — duplikaty są odświeżane na miejscu.",
+    "oauthExportProviderLabel": "Dostawca",
+    "oauthExportChoose": "Wybierz plik",
+    "oauthExportFileAria": "Plik JSON z eksportem kont",
+    "oauthExportSchemaHint": "Akceptowane: dokument z tablicą \"accounts\", sama tablica lub pojedynczy rekord. Tokeny mogą znajdować się w zagnieżdżonym obiekcie token lub bezpośrednio w rekordzie.",
+    "oauthExportDetected": "Wykryto kont: {count}",
+    "oauthExportSelectAll": "Zaznacz wszystkie konta",
+    "oauthExportSelectAccount": "Zaznacz konto {index}",
+    "oauthExportColEmail": "E-mail",
+    "oauthExportColProvider": "Dostawca",
+    "oauthExportColRefresh": "Token odświeżania",
+    "oauthExportNoEmail": "(brak e-maila)",
+    "oauthExportYes": "tak",
+    "oauthExportNo": "nie",
+    "oauthExportImporting": "Importowanie…",
+    "oauthExportImport": "Importuj konta ({count})",
+    "oauthExportResult": "Zaimportowano {imported}/{total} — nieudane: {failed}",
+    "oauthExportParseError": "Nie udało się odczytać żadnych kont z tego pliku.",
+    "oauthExportUnknownError": "nieznany błąd",
     "adaptaTutorial": {
       "title": "Jak połączyć Adapta Web",
       "introPrefix": "Adapta uwierzytelnia się przez Clerk. Token",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Host",
     "qdrantCollection": "Kolekcja",
     "catalogVisibilityHint": "Ukryte identyfikatory modeli nadal można wywoływać z tymi samymi uprawnieniami dostępu.",
+    "exposeCombosOnly": "Wyświetlaj w /v1/models tylko kombinacje",
+    "exposeCombosOnlyDesc": "Klienci, którzy automatycznie wykrywają modele, zobaczą Twoje kombinacje (oraz auto/*, o ile nie są ukryte) zamiast surowych modeli dostawców. Jawne identyfikatory provider/model nadal są routowane.",
     "catalogScopeTitle": "Lista interfejsu API modeli",
     "catalogScopeDesc": "Modele udostępniane dla tego klucza przez GET /v1/models. Zawężenie listy nie zmienia modeli, które można wywołać za pomocą klucza.",
     "catalogScopeAll": "Oba",
@@ -12184,7 +12266,11 @@
       "viewConversation": "wyświetl rozmowę",
       "openConversation": "Otwórz rozmowę {id}"
     },
-    "tableLabel": "Dzienniki żądań"
+    "tableLabel": "Dzienniki żądań",
+    "throughputPostFirstToken": "Po pierwszym tokenie",
+    "throughputEndToEnd": "Od początku do końca",
+    "throughputRate": "{value} tokenów/s",
+    "throughputExplanation": "Obie wartości tempa wykorzystują większą z liczb tokenów wyjściowych i tokenów rozumowania. Tempo po pierwszym tokenie pomija prawidłowy TTFT; w przeciwnym razie używa pełnego czasu trwania. Tempo od początku do końca zawsze używa pełnego czasu trwania. Buforowana odpowiedź może mieć wysokie chwilowe tempo dostarczania bez szybszego generowania przez model."
   },
   "proxyLogger": {
     "filterAll": "Wszystkie",
@@ -13773,7 +13859,9 @@
       "disabled": "Wyłączone",
       "dual": "Podwójne",
       "alias": "Alias",
-      "canonical": "Kanoniczne"
+      "canonical": "Kanoniczne",
+      "fail_closed": "Zablokuj (fail_closed)",
+      "count_as_zero": "Liczyć jako $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13920,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Zatrzymania infrastruktury o chronionym priorytecie jako 502",
         "description": "Zwracaj 502 zamiast 503, gdy priorytetowy cel z mechanizmem rezerwowym wyłącznie na wypadek wyczerpania limitu zatrzymuje combo z przyczyny, która w sposób możliwy do udowodnienia nie jest związana z limitem: otwarty wyłącznik obwodu dostawcy lub predykcyjne pominięcie z powodu opóźnienia."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Polityka budżetu dla użycia bez ceny",
+        "description": "Jak dzienne/tygodniowe limity USD na klucz traktują udane użycie, dla którego dostawca/model nie ma wiersza cenowego. fail_closed (domyślnie) oznacza okno jako przekroczone, więc nieznany koszt nie może ominąć twardego limitu. count_as_zero liczy to użycie jako $0 i nadal egzekwuje wydatki wycenione. Modele bez ceny i tak są wymienione na stronie głównej panelu."
       }
     }
   },

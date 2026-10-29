@@ -1925,7 +1925,14 @@
     "readinessStep3": "엔드포인트 복사",
     "readinessStep4": "테스트 요청 보내기",
     "readinessContinue": "설정 계속하기",
-    "readinessDismiss": "지금은 닫기"
+    "readinessDismiss": "지금은 닫기",
+    "unpricedUsageTitle": "{count, plural, one {#개 모델} other {#개 모델}}에 최근 사용이 있으나 가격이 설정되어 있지 않습니다",
+    "unpricedUsageFailClosed": "{keys, plural, one {#개의 사용량 제한이 있는 API 키} other {#개의 사용량 제한이 있는 API 키}}가 지난 8일 동안 이 모델들을 사용했습니다. 해당 사용이 키의 일간 또는 주간 기간에 해당하면, 키는 할당량 초과로 간주되어 요청이 차단됩니다 (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "이 사용량은 키별 사용 한도에 대해 $0로 계산됩니다 (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {#건 요청} other {#건 요청}}, {keys, plural, one {#개의 제한된 키} other {#개의 제한된 키}}",
+    "unpricedUsageMore": "…그리고 {count}개 더",
+    "unpricedUsageConfigure": "가격 구성",
+    "unpricedUsageDismiss": "닫기"
   },
   "analytics": {
     "title": "분석",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - 수동 구성",
     "clineManualConfiguration": "Cline 수동 구성",
     "kiloManualConfiguration": "Kilo Code 수동 구성",
+    "piManualConfiguration": "Pi - 수동 구성",
+    "piConfigInvalidTitle": "Pi models.json 읽을 수 없습니다.",
+    "piOmnirouteConfigured": "OmniRoute 는 Pi 사용자 정의 공급자로 구성됩니다.",
+    "piModelHelp": "Pi는 사용자 정의 엔드포인트 — 에 대한 모델을 자동 검색하지 않습니다. 선택한 모델은 models.json 에 명시적으로 기록됩니다.",
+    "piManualConfigTitle": "또는 ~/.pi/agent/models.json 수동으로 편집하세요",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "그런 다음 Pi를 시작하고 omniroute 공급자를 선택하십시오. 전체 에이전트 디렉토리를 이동하려면 PI_CODING_AGENT_DIR 설정하십시오.",
+    "piUnownedNote": "이 항목은 OmniRoute 외부에 추가되었습니다(예: pi-gui의 사용자 정의 엔드포인트). 신청하면 채택됩니다. 재설정은 OmniRoute 쓴 항목만 제거합니다.",
     "whenToUseLabel": "언제 사용하나요?",
     "openToolDocs": "도구 문서 열기",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "사용자 정의 제공자 지원 기능이 포함된 xAI Grok Build TUI 코딩 에이전트",
       "droid": "Factory Droid AI 어시스턴트",
       "openclaw": "Open Claw AI 어시스턴트",
+      "openclaude": "OpenAI 호환 공급자를 지원하는 OpenClaude 코딩 에이전트 CLI",
       "cline": "Cline AI 코딩 어시스턴트 CLI",
       "kilo": "Kilo Code AI 어시스턴트 CLI",
       "qwen": "Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "업데이트",
     "cliproxyapiUpdateAvailable": "업데이트 가능: v{current} → v{latest}",
     "cliproxyapiVersion": "버전",
+    "piInstallTitle": "Pi 코딩 에이전트 설치",
+    "piInstallInstructions": "Pi CLI 를 설치한 다음 여기로 돌아와서 OmniRoute 에 연결하세요.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi를 실행하는 머신에서 연결할 수 있는 URL 사용하세요. OpenAI 호환 /v1 엔드포인트가 자동으로 추가됩니다.",
+    "piManualMergeHint": "미리보기만 가능합니다. 이 providers.omniroute 항목을 models.json 에 병합하면 다른 공급자와 설정이 그대로 유지됩니다.",
     "removeMapping": "매핑 제거"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "HTTP {status} 오류로 요청 실패",
     "testFailedNoDetail": "오류 메시지 없이 테스트 실패",
     "additionalCapabilities": "추가 기능: {list}",
-    "comboRefMember": "조합 → {name}"
+    "comboRefMember": "조합 → {name}",
+    "keyAccessButton": "API 키 액세스",
+    "allowedInKeys": "허용 대상: {count, plural, one {#개 키} other {#개 키}}",
+    "keysLoading": "API 키 불러오는 중…",
+    "keysRetry": "키 다시 불러오기",
+    "accessViaPattern": "{pattern} 경유",
+    "accessBlocked": "{pattern}에 의해 차단됨",
+    "editKeyAccess": "키 액세스 수정",
+    "toggleKeyAccess": "{name}에서 {item} 허용",
+    "resultNetworkError": "할당 실패",
+    "resultWouldEmptyModels": "이 키에 허용된 모델이 남지 않게 됩니다. 대신 키 액세스를 수정하세요",
+    "resultWouldEmptyCombos": "이 키에 허용된 콤보가 남지 않게 됩니다. 대신 키 액세스를 수정하세요",
+    "keyUpdatePending": "{name}이(가) 아직 업데이트 중입니다. 잠시 후 다시 시도해 주세요.",
+    "assignToKeys": "API 키에 할당…",
+    "assignApply": "변경 사항 적용",
+    "assignComplete": "API 키 액세스가 업데이트되었습니다",
+    "assignFailed": "일부 API 키 업데이트 실패",
+    "assignNoChanges": "변경된 API 키 액세스가 없습니다",
+    "selectedAccessItems": "선택된 항목: {count}개",
+    "assignExcludedCombos": "{count, plural, one {선택한 #개의 콤보 행은 모델이 아니므로 건너뜁니다} other {선택한 #개의 콤보 행은 모델이 아니므로 건너뜁니다}}. Combos 탭에서 콤보를 할당하세요.",
+    "assignActionAdd": "추가",
+    "assignActionRemove": "제거",
+    "searchKeys": "API 키 검색",
+    "selectApiKey": "API 키 {name} 선택",
+    "allModelsAccess": "모든 모델",
+    "allCombosAccess": "모든 콤보",
+    "modelAccessCount": "모델: {count}",
+    "comboAccessCount": "콤보: {count}",
+    "keyInactive": "비활성",
+    "keyBanned": "차단됨",
+    "keyRevoked": "취소됨",
+    "switchRestrictedConfirm": "이 키를 제한된 액세스로 전환: 선택한 항목만 허용됩니다",
+    "removeNoChangeHint": "이 키는 모든 항목을 허용하므로 선택한 항목을 제거해도 변경되지 않습니다",
+    "removeStaysAllowedHint": "{patterns}을(를) 통해 이 키에서 계속 허용됨",
+    "resultChanged": "변경됨",
+    "resultUnchanged": "변경 없음",
+    "resultSkipped": "건너뜀",
+    "resultNeedsSwitch": "제한된 액세스로 전환 필요"
   },
   "combos": {
     "title": "콤보",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "CSV 템플릿 다운로드",
     "importFromFileMoreErrors": "외 {count}개",
     "importFromFileSchemaHint": "CSV 열은 provider, name, apiKey, baseUrl(선택 사항), priority(선택 사항) 순서로 배치해야 합니다. provider 열에는 기존의 관리형 제공자 ID 또는 이미 등록된 OpenAI/Anthropic 호환 노드 ID를 입력해야 합니다. 이 가져오기 작업으로 새 엔드포인트 노드가 생성되지는 않습니다.",
+    "importOAuthExport": "OAuth 내보내기 가져오기",
+    "oauthExportTitle": "계정 관리자 내보내기 가져오기",
+    "oauthExportDescription": "계정 관리자의 일반 텍스트 내보내기 파일을 업로드하세요(예: Antigravity Manager의 cloud-accounts 내보내기). 토큰은 서버에서 갱신되며 각 계정은 OAuth 연결이 됩니다 — 중복 계정은 그 자리에서 갱신됩니다.",
+    "oauthExportProviderLabel": "공급자",
+    "oauthExportChoose": "파일 선택",
+    "oauthExportFileAria": "계정 내보내기 JSON 파일",
+    "oauthExportSchemaHint": "허용 형식: \"accounts\" 배열이 있는 문서, 배열만 있는 형태 또는 단일 레코드. 토큰은 중첩된 token 객체 안이나 레코드에 바로 있을 수 있습니다.",
+    "oauthExportDetected": "계정 {count}개 감지됨",
+    "oauthExportSelectAll": "모든 계정 선택",
+    "oauthExportSelectAccount": "계정 {index} 선택",
+    "oauthExportColEmail": "이메일",
+    "oauthExportColProvider": "공급자",
+    "oauthExportColRefresh": "리프레시 토큰",
+    "oauthExportNoEmail": "(이메일 없음)",
+    "oauthExportYes": "예",
+    "oauthExportNo": "아니요",
+    "oauthExportImporting": "가져오는 중…",
+    "oauthExportImport": "계정 {count}개 가져오기",
+    "oauthExportResult": "{imported}/{total}개 가져옴 — {failed}개 실패",
+    "oauthExportParseError": "이 파일에서 계정을 읽을 수 없습니다.",
+    "oauthExportUnknownError": "알 수 없는 오류",
     "adaptaTutorial": {
       "title": "Adapta Web 연결 방법",
       "introPrefix": "Adapta는 Clerk을 통해 인증합니다. 토큰은",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "호스트",
     "qdrantCollection": "컬렉션",
     "catalogVisibilityHint": "숨겨진 모델 ID도 동일한 접근 권한으로 계속 호출할 수 있습니다.",
+    "exposeCombosOnly": "/v1/models에 콤보만 표시",
+    "exposeCombosOnlyDesc": "모델을 자동으로 검색하는 클라이언트는 원시 공급자 모델 대신 콤보(숨기지 않았다면 auto/* 포함)를 보게 됩니다. 명시적인 provider/model ID는 계속 라우팅됩니다.",
     "catalogScopeTitle": "Models API 목록",
     "catalogScopeDesc": "GET /v1/models가 이 키에 대해 표시하는 항목입니다. 목록을 제한해도 키가 호출할 수 있는 대상은 변경되지 않습니다.",
     "catalogScopeAll": "둘 다",
@@ -12184,7 +12266,11 @@
       "viewConversation": "대화 보기",
       "openConversation": "대화 {id} 열기"
     },
-    "tableLabel": "요청 로그"
+    "tableLabel": "요청 로그",
+    "throughputPostFirstToken": "첫 토큰 이후",
+    "throughputEndToEnd": "전체 구간",
+    "throughputRate": "{value} 토큰/초",
+    "throughputExplanation": "두 속도 모두 출력 토큰 수와 추론 토큰 수 중 더 큰 값을 사용합니다. 첫 토큰 이후 속도는 유효한 TTFT를 제외하며, 그렇지 않은 경우에는 전체 소요 시간을 사용합니다. 전체 구간 속도는 항상 전체 소요 시간을 사용합니다. 버퍼링된 응답은 모델 생성 속도가 더 빠르지 않아도 높은 순간 전달 속도를 보일 수 있습니다."
   },
   "proxyLogger": {
     "filterAll": "전체",
@@ -13773,7 +13859,9 @@
       "disabled": "비활성화됨",
       "dual": "이중",
       "alias": "별칭",
-      "canonical": "정규"
+      "canonical": "정규",
+      "fail_closed": "차단 (fail_closed)",
+      "count_as_zero": "$0로 계산 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13920,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "보호된 우선순위 인프라 중단을 502로 처리",
         "description": "할당량 전용 폴백 우선순위 대상이 할당량 문제가 아님을 입증할 수 있는 원인, 즉 열린 공급자 회로 차단기 또는 예측적 지연 시간 건너뛰기로 인해 콤보를 중단하는 경우 503 대신 502로 응답합니다."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "가격 미설정 사용량 예산 정책",
+        "description": "공급자/모델에 가격 항목이 없는 성공적인 사용량을 키별 일간/주간 USD 한도가 어떻게 처리하는지 설명합니다. fail_closed (기본값)은 해당 기간을 초과한 것으로 표시하여 알 수 없는 비용이 하드 한도를 통과하지 못하게 합니다. count_as_zero는 해당 사용량을 $0으로 계산하고 가격이 설정된 지출을 계속 적용합니다. 가격 미설정 모델은 어떤 경우든 대시보드 홈 페이지에 나열됩니다."
       }
     }
   },

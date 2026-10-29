@@ -1925,7 +1925,14 @@
     "readinessStep3": "Kopieer je eindpunt",
     "readinessStep4": "Verstuur een testverzoek",
     "readinessContinue": "Doorgaan met configureren",
-    "readinessDismiss": "Voorlopig sluiten"
+    "readinessDismiss": "Voorlopig sluiten",
+    "unpricedUsageTitle": "{count, plural, one {# model} other {# modellen}} met recent gebruik maar geen geconfigureerde prijs",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-sleutel met een gebruikslimiet heeft deze modellen in de afgelopen 8 dagen gebruikt. Terwijl dat gebruik binnen het dagelijkse of wekelijkse venster van de sleutel valt, wordt de sleutel als over quota behandeld en worden de verzoeken geblokkeerd (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).} other {# API-sleutels met een gebruikslimiet hebben deze modellen in de afgelopen 8 dagen gebruikt. Terwijl dat gebruik binnen het dagelijkse of wekelijkse venster van de sleutels valt, worden de sleutels als over quota behandeld en worden de verzoeken geblokkeerd (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).}}",
+    "unpricedUsageCountAsZero": "Dit gebruik telt als $0 mee voor de per-sleutel gebruikslimieten (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# verzoek} other {# verzoeken}}, {keys, plural, one {# beperkte API-sleutel} other {# beperkte API-sleutels}}",
+    "unpricedUsageMore": "…en nog {count} meer",
+    "unpricedUsageConfigure": "Prijzen configureren",
+    "unpricedUsageDismiss": "Sluiten"
   },
   "analytics": {
     "title": "Analyses",
@@ -2962,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Handmatige configuratie",
     "clineManualConfiguration": "Cline handmatige configuratie",
     "kiloManualConfiguration": "Kilocode handmatige configuratie",
+    "piManualConfiguration": "Pi - Handmatige configuratie",
+    "piConfigInvalidTitle": "Pi models.json is onleesbaar",
+    "piOmnirouteConfigured": "OmniRoute is geconfigureerd als een aangepaste Pi-provider",
+    "piModelHelp": "Pi ontdekt niet automatisch modellen voor aangepaste eindpunten. — Het model dat u kiest, wordt expliciet in models.json geschreven.",
+    "piManualConfigTitle": "Of bewerk ~/.pi/agent/models.json handmatig",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Start vervolgens Pi en selecteer de omniroute-provider. Stel PI_CODING_AGENT_DIR om de hele agentmap te verplaatsen.",
+    "piUnownedNote": "Deze invoer is buiten OmniRoute toegevoegd (bijvoorbeeld de aangepaste eindpunten van pi-gui). Door te solliciteren wordt het overgenomen; Reset verwijdert alleen de vermeldingen OmniRoute heeft geschreven.",
     "whenToUseLabel": "Wanneer te gebruiken",
     "openToolDocs": "Gereedschapsdocumentatie openen",
     "toolUseCases": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI-codeeragent met ondersteuning voor aangepaste providers",
       "droid": "Factory Droid AI-assistent",
       "openclaw": "Open Claw AI-assistent",
+      "openclaude": "OpenClaude codeeragent-CLI met ondersteuning voor OpenAI-compatibele providers",
       "cline": "Cline AI Coderingsassistent CLI",
       "kilo": "Kilocode AI Assistent CLI",
       "qwen": "Qwen Code CLI",
@@ -3280,6 +3296,12 @@
     "cliproxyapiUpdate": "Bijwerken",
     "cliproxyapiUpdateAvailable": "Update beschikbaar: v{current} → v{latest}",
     "cliproxyapiVersion": "Versie",
+    "piInstallTitle": "Installeer Pi-coderingsagent",
+    "piInstallInstructions": "Installeer de Pi CLI en keer dan hier terug om hem aan te sluiten op OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Gebruik de URL die bereikbaar is vanaf de machine waarop Pi draait. Het OpenAI-compatibele /v1-eindpunt wordt automatisch toegevoegd.",
+    "piManualMergeHint": "Alleen voorbeeld. Voeg deze providers.omniroute-vermelding samen in models.json, zodat uw andere providers en instellingen intact blijven.",
     "removeMapping": "Toewijzing verwijderen"
   },
   "modelCatalog": {
@@ -3411,7 +3433,44 @@
     "httpError": "Verzoek mislukt met HTTP {status}",
     "testFailedNoDetail": "Test mislukt zonder foutmelding",
     "additionalCapabilities": "Aanvullende mogelijkheden: {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "API-sleuteltoegang",
+    "allowedInKeys": "Toegestaan in: {count, plural, one {# sleutel} other {# sleutels}}",
+    "keysLoading": "API-sleutels laden…",
+    "keysRetry": "Sleutels laden opnieuw proberen",
+    "accessViaPattern": "via {pattern}",
+    "accessBlocked": "Geblokkeerd door {pattern}",
+    "editKeyAccess": "Sleuteltoegang bewerken",
+    "toggleKeyAccess": "{item} toestaan op {name}",
+    "resultNetworkError": "Toewijzing mislukt",
+    "resultWouldEmptyModels": "Zou deze sleutel zonder toegestane modellen achterlaten — bewerk in plaats daarvan sleuteltoegang",
+    "resultWouldEmptyCombos": "Zou deze sleutel zonder toegestane combo's achterlaten — bewerk in plaats daarvan sleuteltoegang",
+    "keyUpdatePending": "{name} wordt nog bijgewerkt. Probeer het over een ogenblik opnieuw.",
+    "assignToKeys": "Toewijzen aan API-sleutels…",
+    "assignApply": "Wijzigingen toepassen",
+    "assignComplete": "API-sleuteltoegang bijgewerkt",
+    "assignFailed": "Bijwerken van sommige API-sleutels is mislukt",
+    "assignNoChanges": "Geen API-sleuteltoegang gewijzigd",
+    "selectedAccessItems": "Geselecteerde items: {count}",
+    "assignExcludedCombos": "{count, plural, one {# geselecteerde combo-rij is geen model en wordt hier overgeslagen} other {# geselecteerde combo-rijen zijn geen modellen en worden hier overgeslagen}}. Wijs combo's toe via het tabblad Combos.",
+    "assignActionAdd": "Toevoegen",
+    "assignActionRemove": "Verwijderen",
+    "searchKeys": "API-sleutels zoeken",
+    "selectApiKey": "API-sleutel {name} selecteren",
+    "allModelsAccess": "Alle modellen",
+    "allCombosAccess": "Alle combo's",
+    "modelAccessCount": "Modellen: {count}",
+    "comboAccessCount": "Combo's: {count}",
+    "keyInactive": "Inactief",
+    "keyBanned": "Geblokkeerd",
+    "keyRevoked": "Ingetrokken",
+    "switchRestrictedConfirm": "Schakel deze sleutel over naar beperkte toegang: alleen de geselecteerde items worden toegestaan",
+    "removeNoChangeHint": "Deze sleutel staat alles toe; het verwijderen van geselecteerde items brengt geen wijziging teweeg",
+    "removeStaysAllowedHint": "Nog steeds toegestaan op deze sleutel via {patterns}",
+    "resultChanged": "Gewijzigd",
+    "resultUnchanged": "Geen wijziging",
+    "resultSkipped": "Overgeslagen",
+    "resultNeedsSwitch": "Overschakeling naar beperkt vereist"
   },
   "combos": {
     "title": "Combo's",
@@ -5354,6 +5413,27 @@
     "importFromFileDownloadTemplate": "CSV-sjabloon downloaden",
     "importFromFileMoreErrors": "+{count} meer",
     "importFromFileSchemaHint": "CSV-kolommen zijn positioneel: provider, name, apiKey, baseUrl (optioneel), priority (optioneel). De kolom provider moet een bestaande beheerde provider-id of een reeds geregistreerde OpenAI/Anthropic-compatibele node-id bevatten — met deze import worden geen nieuwe endpointnodes aangemaakt.",
+    "importOAuthExport": "OAuth-export importeren",
+    "oauthExportTitle": "Export van accountbeheerder importeren",
+    "oauthExportDescription": "Upload een export in platte tekst van een accountbeheerder (bijv. de cloud-accounts-export van Antigravity Manager). Tokens worden op de server vernieuwd en elk account wordt een OAuth-verbinding — duplicaten worden ter plekke vernieuwd.",
+    "oauthExportProviderLabel": "Aanbieder",
+    "oauthExportChoose": "Bestand kiezen",
+    "oauthExportFileAria": "JSON-bestand met accountexport",
+    "oauthExportSchemaHint": "Geaccepteerd: een document met een \"accounts\"-array, een losse array of één record. Tokens kunnen in een genest token-object staan of direct op het record.",
+    "oauthExportDetected": "{count} account(s) gevonden",
+    "oauthExportSelectAll": "Alle accounts selecteren",
+    "oauthExportSelectAccount": "Account {index} selecteren",
+    "oauthExportColEmail": "E-mail",
+    "oauthExportColProvider": "Aanbieder",
+    "oauthExportColRefresh": "Vernieuwingstoken",
+    "oauthExportNoEmail": "(geen e-mail)",
+    "oauthExportYes": "ja",
+    "oauthExportNo": "nee",
+    "oauthExportImporting": "Importeren…",
+    "oauthExportImport": "{count} account(s) importeren",
+    "oauthExportResult": "{imported}/{total} geïmporteerd — {failed} mislukt",
+    "oauthExportParseError": "Er konden geen accounts uit dit bestand worden gelezen.",
+    "oauthExportUnknownError": "onbekende fout",
     "adaptaTutorial": {
       "title": "Hoe Adapta Web te verbinden",
       "introPrefix": "Adapta authenticeert via Clerk. Het token",
@@ -8821,6 +8901,8 @@
     "qdrantHost": "Host",
     "qdrantCollection": "Verzameling",
     "catalogVisibilityHint": "Verborgen model-ID’s kunnen nog steeds worden aangeroepen met dezelfde toegangsrechten.",
+    "exposeCombosOnly": "Alleen combo's tonen in /v1/models",
+    "exposeCombosOnlyDesc": "Clients die modellen automatisch ontdekken zien je combo's (en auto/*, tenzij verborgen) in plaats van de ruwe providermodellen. Expliciete provider/model-id's worden nog steeds gerouteerd.",
     "catalogScopeTitle": "Vermelding in Models API",
     "catalogScopeDesc": "Wat GET /v1/models voor deze sleutel weergeeft. Het beperken van de lijst verandert nooit welke modellen met de sleutel kunnen worden aangeroepen.",
     "catalogScopeAll": "Beide",
@@ -12184,7 +12266,11 @@
       "viewConversation": "gesprek bekijken",
       "openConversation": "Gesprek {id} openen"
     },
-    "tableLabel": "Aanvraaglogboeken"
+    "tableLabel": "Aanvraaglogboeken",
+    "throughputPostFirstToken": "Na eerste token",
+    "throughputEndToEnd": "End-to-end",
+    "throughputRate": "{value} tokens/sec",
+    "throughputExplanation": "Beide snelheden gebruiken het hoogste van de output- en reasoning-tokentellingen. Na eerste token sluit een geldige TTFT uit; anders wordt de volledige duur gebruikt. End-to-end gebruikt altijd de volledige duur. Een gebufferde respons kan een hoge piekleveringssnelheid hebben zonder dat het model sneller genereert."
   },
   "proxyLogger": {
     "filterAll": "Alles",
@@ -13773,7 +13859,9 @@
       "disabled": "Uitgeschakeld",
       "dual": "Dubbel",
       "alias": "Alias",
-      "canonical": "Canoniek"
+      "canonical": "Canoniek",
+      "fail_closed": "Blokkeren (fail_closed)",
+      "count_as_zero": "Tel als $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13920,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Infrastructuurstops met beschermde prioriteit als 502",
         "description": "Antwoord met 502 in plaats van 503 wanneer een prioriteitsdoel met uitsluitend quota als fallback de combo stopt vanwege een oorzaak waarvan aantoonbaar is dat die niet quotagerelateerd is: een open circuitbreaker van een provider of het overslaan vanwege voorspelde latentie."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Budgetbeleid voor ongeprijsd gebruik",
+        "description": "Hoe per-sleutel dagelijkse/wekelijkse USD-limieten succesvol gebruik behandelen waarvan de provider of het model geen prijsregel heeft. fail_closed (standaard) markeert het venster als overschreden, zodat een onbekende kost nooit langs een harde limiet kan glippen. count_as_zero telt dat gebruik als $0 en blijft de geprijsde uitgaven afdwingen. Ongeprijsde modellen worden in beide gevallen op de startpagina van het dashboard vermeld."
       }
     }
   },
