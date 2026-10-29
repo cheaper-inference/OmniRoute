@@ -543,13 +543,28 @@ test("GHSA-3w2r combos: the per-target model gate follows chat's combo policy", 
   assert.ok(gate);
   assert.equal(await gate(target), false, "a target the key blocks is never dispatched");
 
-  // A stored combo granted by allowedCombos grants its own targets (#14197).
+  // A stored combo granted by allowedCombos grants its own targets past the
+  // allow-list (#14197), but blockedModels still applies (R9-8).
   const granted = createComboTargetKeyGate(
-    { apiKey: "sk-x", apiKeyInfo: { blockedModels: [target], allowedCombos: ["combo/*"] } },
+    {
+      apiKey: "sk-x",
+      apiKeyInfo: {
+        modelAccessMode: "restricted",
+        allowedModels: ["gemini/*"],
+        allowedCombos: ["combo/*"],
+      },
+    },
     "my-combo"
   );
   assert.ok(granted);
   assert.equal(await granted(target), true);
+
+  const grantedButBlocked = createComboTargetKeyGate(
+    { apiKey: "sk-x", apiKeyInfo: { blockedModels: [target], allowedCombos: ["combo/*"] } },
+    "my-combo"
+  );
+  assert.ok(grantedButBlocked);
+  assert.equal(await grantedButBlocked(target), false);
 });
 
 // ── keyless / zero-config providers (chat's #9057 rule) ─────────────────────

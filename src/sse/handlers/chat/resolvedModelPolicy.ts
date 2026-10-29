@@ -8,8 +8,11 @@
  */
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
-import { isModelAllowedForKey } from "@/lib/db/apiKeys";
+import { isModelAllowedForKey, isModelBlockedByPatterns } from "@/lib/db/apiKeys";
 import { resolveEnforcedPolicyKey } from "@/shared/utils/apiKeyPolicy";
+import { getProviderSearchPool } from "@omniroute/open-sse/services/providerConnectionPool.ts";
+import { getCachedProviderNodes } from "@/lib/db/readCache";
+import { getProviderById, resolveProviderId } from "@/shared/constants/providers";
 import { withHiddenModelGate } from "./hiddenModelGate.ts";
 import {
   checkResolvedModelPermission,
@@ -31,8 +34,9 @@ export function resolveAuthorizationContextModel(
 }
 
 /**
- * An explicitly allowed stored combo authorizes its own target (#14197); any
- * other model a connection/reasoning override swaps in is still checked.
+ * An explicitly allowed stored combo authorizes its own target past the
+ * allow-list (#14197); blockedModels still applies to it. Any other model a
+ * connection/reasoning override swaps in gets the full check.
  */
 export function comboGrantedTargetSet(
   comboGrantsTargets: boolean | undefined,
@@ -71,6 +75,48 @@ export function effectivePolicyTargets(
   return targets;
 }
 
+/**
+ * A granted target and a provider-node blockedModels entry can name the same
+ * model in two forms: node prefix (`mock/x`, how an alias target reaches the
+ * gate) and node id (`${node.id}/x`). Check both. The prefix expands to the
+ * provider ids dispatch searches for it (built-in providers never pick up a
+ * node that reuses their name); a node id maps back to its own prefix unless
+ * that prefix names a built-in provider.
+ */
+async function blockedModelForms(resolvedModel: string): Promise<string[]> {
+  const forms = new Set([resolvedModel]);
+  const slash = resolvedModel.indexOf("/");
+  if (slash <= 0 || slash === resolvedModel.length - 1) return [...forms];
+  const provider = resolvedModel.slice(0, slash);
+  const model = resolvedModel.slice(slash + 1);
+  for (const id of await getProviderSearchPool(provider)) {
+    if (id) forms.add(`${id}/${model}`);
+  }
+  for (const node of await getCachedProviderNodes()) {
+    const prefix = typeof node?.prefix === "string" ? node.prefix.trim() : "";
+    if (node?.id === provider && prefix && !getProviderById(resolveProviderId(prefix))) {
+      forms.add(`${prefix}/${model}`);
+    }
+  }
+  return [...forms];
+}
+
+/** A combo-granted target skips the allow-list, never the key's blockedModels. */
+async function grantedTargetPermission(
+  blockedModels: string[] | null | undefined,
+  resolvedModel: string
+): Promise<"allowed" | "denied" | "unavailable"> {
+  try {
+    if (!blockedModels?.length) return "allowed";
+    for (const form of await blockedModelForms(resolvedModel)) {
+      if (await isModelBlockedByPatterns(blockedModels, form)) return "denied";
+    }
+    return "allowed";
+  } catch {
+    return "unavailable";
+  }
+}
+
 /** Returns a marked local policy rejection for the first target the key does not admit. */
 export async function rejectUnauthorizedResolvedModels(opts: {
   hasApiKeyMetadata: boolean;
@@ -78,18 +124,20 @@ export async function rejectUnauthorizedResolvedModels(opts: {
   requestedModel: string;
   resolvedModels: Iterable<string>;
   grantedTargets?: Set<string> | null;
+  blockedModels?: string[] | null;
 }): Promise<Response | null> {
   for (const resolvedModel of opts.resolvedModels) {
-    if (opts.grantedTargets?.has(resolvedModel)) continue;
-    const permission = await checkResolvedModelPermission(
-      {
-        hasApiKeyMetadata: opts.hasApiKeyMetadata,
-        apiKey: opts.apiKey,
-        requestedModel: opts.requestedModel,
-        resolvedModel,
-      },
-      isModelAllowedForKey
-    );
+    const permission = opts.grantedTargets?.has(resolvedModel)
+      ? await grantedTargetPermission(opts.blockedModels, resolvedModel)
+      : await checkResolvedModelPermission(
+          {
+            hasApiKeyMetadata: opts.hasApiKeyMetadata,
+            apiKey: opts.apiKey,
+            requestedModel: opts.requestedModel,
+            resolvedModel,
+          },
+          isModelAllowedForKey
+        );
     if (permission === "allowed") continue;
     return markLocalModelPolicyResponse(
       errorResponse(
@@ -109,8 +157,9 @@ export function comboAuthorizationOptions(
   requestedModelStr: string
 ): { authorizationContextModel: string; comboGrantsTargets: boolean } {
   return {
-    // The preflight admits the originally requested combo or alias; every
-    // resolved target stays subject to its own blocked/group/publication checks.
+    // The preflight admits the originally requested combo or alias. Targets of
+    // a non-granted combo get the full per-target check; granted ones are
+    // still checked against blockedModels.
     authorizationContextModel: requestedModelStr,
     // #14197: a stored combo named in allowedCombos grants its own targets.
     comboGrantsTargets: isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr),
@@ -134,6 +183,11 @@ async function resolveGateApiKey(request: Request | null | undefined): Promise<s
   }
 }
 
+function blockedModelsOf(apiKeyInfo: unknown): string[] | null {
+  const blocked = (apiKeyInfo as { blockedModels?: unknown } | null | undefined)?.blockedModels;
+  return Array.isArray(blocked) ? blocked.filter((p): p is string => typeof p === "string") : null;
+}
+
 /** Per-request gate: returns a rejection for the first resolved model the key does not admit. */
 export function createResolvedModelGate(opts: {
   apiKeyInfo: unknown;
@@ -155,6 +209,7 @@ export function createResolvedModelGate(opts: {
       opts.model,
       opts.modelStr
     ),
+    blockedModels: blockedModelsOf(opts.apiKeyInfo),
   };
   return async (resolvedModels) => {
     if (hasApiKeyMetadata) apiKey ??= resolveGateApiKey(opts.request);

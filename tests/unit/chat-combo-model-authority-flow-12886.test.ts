@@ -125,8 +125,9 @@ test("named-combo allow-list reaches its configured concrete target through hand
 });
 
 // A stored combo named in the key's allowedCombos (default `combo/*`) grants its
-// own targets, overriding blockedModels (#14197 — see the next test). The
-// live-test marker must still grant nothing when the combo is NOT granted.
+// own targets past allowedModels (#14197), never past blockedModels (see the
+// next test). The live-test marker must still grant nothing when the combo is
+// NOT granted.
 test("live-test marker does not let a non-granted named combo dispatch a blocked target", async () => {
   const key = await seedNamedComboKey();
   await apiKeysDb.updateApiKeyPermissions(key.id, {
@@ -147,7 +148,7 @@ test("live-test marker does not let a non-granted named combo dispatch a blocked
   assert.equal(upstreamCalls, 0);
 });
 
-test("allowedCombos still grants a combo's blocked direct-model target at dispatch (#14197)", async () => {
+test("allowedCombos does not grant a combo's blocked direct-model target at dispatch", async () => {
   const key = await seedNamedComboKey();
   await apiKeysDb.updateApiKeyPermissions(key.id, {
     modelAccessMode: "restricted",
@@ -158,15 +159,13 @@ test("allowedCombos still grants a combo's blocked direct-model target at dispat
   let upstreamCalls = 0;
   globalThis.fetch = async () => {
     upstreamCalls += 1;
-    return upstreamResponse("explicit combo grant");
+    return upstreamResponse("must not dispatch");
   };
 
   const response = await handleChat(comboRequest(key.key));
-  const body = (await response.json()) as {
-    choices: Array<{ message: { content: string } }>;
-  };
+  const body = (await response.json()) as { error?: { message?: string } };
 
-  assert.equal(response.status, 200);
-  assert.equal(upstreamCalls, 1);
-  assert.equal(body.choices[0].message.content, "explicit combo grant");
+  assert.notEqual(response.status, 200);
+  assert.equal(upstreamCalls, 0);
+  assert.ok(body.error?.message, "the rejection carries an error message");
 });
