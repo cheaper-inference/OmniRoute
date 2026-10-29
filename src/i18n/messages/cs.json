@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Použito v kombech ({count}): {combos}",
+    "openComboTooltip": "Otevřít Komba — používá {combo}"
   },
   "settings": {
     "title": "Nastavení",
@@ -9015,7 +9017,9 @@
         "financial": "Finanční",
         "brazilian": "Brazilská",
         "usa": "USA",
-        "full": "Úplná"
+        "full": "Úplná",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Jihoafrická republika)"
       },
       "builtinTypes": "Vestavěné typy",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "Adresy IPv4",
         "ipv6_address": "Adresy IPv6",
         "aws_key": "Přístupové klíče AWS",
-        "api_key_generic": "Klíče API a tokeny"
+        "api_key_generic": "Klíče API a tokeny",
+        "iban": "čísla bankovních účtů IBAN",
+        "eu_vat": "EU VAT čísla",
+        "es_dni_nie": "Španělské DNI / NIE",
+        "it_codice_fiscale": "Italský Codice Fiscale",
+        "pl_pesel": "polská PESEL",
+        "nl_bsn": "holandská BSN",
+        "de_steuer_id": "Německý Steuer-ID",
+        "se_personnummer": "švédské personnummer",
+        "za_id": "Jihoafrická čísla ID",
+        "za_phone": "Jihoafrická telefonní čísla",
+        "za_vat": "Jihoafrická čísla VAT",
+        "za_tax_ref": "Jihoafrické daňové odkazy"
       },
       "customPatterns": "Vlastní vzory",
       "customPatternsDesc": "Shody se nahrazují za [CUSTOM_REDACTED]. Nejvýše {max} vzorů. Vzory s rizikem katastrofického backtrackingu se odmítají.",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth není nakonfigurován. Zaregistrujte OAuth aplikaci na {applicationsUrl} s přesměrovací URI {redirectUri} a rozsahy \"{scopes}\", poté nastavte {clientIdEnv} (a volitelně {clientSecretEnv}) a restartujte.",
     "gitlabDuoSetupDescription": "Po registraci aplikace a nastavení proměnných prostředí na této instanci OmniRoute klikněte na Pokračovat pro zahájení přihlášení pomocí OAuth.",
     "continue": "Pokračovat",
+    "copilotPolicyTitle": "Experimentální poskytovatel: stav zásad je nejednoznačný",
+    "copilotPolicyLine1": "OmniRoute se připojuje přes api.githubcopilot.com, který GitHub nepublikoval jako obecný závěr třetí strany API. Tato integrace je experimentální a může se změnit bez upozornění.",
+    "copilotPolicyLine2": "Může být připojen pouze váš vlastní účet GitHub. Nikdy nesdílejte přihlašovací údaje, nepokoušejte se překročit limity vašeho plánu.",
+    "copilotPolicyLine3": "Uživatelé bezplatných a studentských tarifů obdrží pouze automatický výběr modelu. Podmínky vašeho plánu Copilot a omezení používání zůstávají vaší odpovědností.",
+    "copilotPolicyAcknowledge": "Rozumím, spojte se",
     "tabPasteSetupToken": "Token z nastavení",
     "claudeSetupTokenDescription": "Spusťte v terminálu `claude setup-token` a vložte token, který vypíše. Platí jeden rok a nemá obnovovací token. OmniRoute před uložením odešle do Anthropic jeden testovací požadavek.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "Statistiky poskytovatelů",
     "description": "Provoz, latence a míry úspěšnosti podle poskytovatelů a modelů",
     "combo": "Kombinace",
-    "toggleModels": "Zobrazit modely poskytovatele {provider}"
+    "toggleModels": "Zobrazit modely poskytovatele {provider}",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Serverless relay proxy",

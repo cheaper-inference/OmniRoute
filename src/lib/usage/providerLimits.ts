@@ -995,9 +995,9 @@ async function fetchLiveProviderLimitsWithOptions(
           allowRotatingRefresh: true,
           force: true,
         });
-        if (forced.refreshed) {
+        if (forced.refreshed || forced.adopted) {
           conn = forced.connection;
-          await syncToCloudIfEnabled();
+          if (forced.refreshed) await syncToCloudIfEnabled();
           usageData = sanitizeUsageQuotasForProvider(
             conn.provider,
             (await getUsageForProvider(conn as unknown as JsonRecord, options)) as JsonRecord,

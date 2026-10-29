@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} ಕಾಂಬೋಗಳಲ್ಲಿ ಬಳಸಲಾಗಿದೆ: {combos}",
+    "openComboTooltip": "ಕಾಂಬೋಗಳನ್ನು ತೆರೆಯಿರಿ — {combo} ಬಳಸುತ್ತಿದೆ"
   },
   "settings": {
     "title": "ಸೆಟ್ಟಿಂಗ್ಗಳು",
@@ -8938,7 +8940,9 @@
         "financial": "ಹಣಕಾಸು",
         "brazilian": "ಬ್ರೆಜಿಲಿಯನ್",
         "usa": "ಅಮೆರಿಕ",
-        "full": "ಪೂರ್ಣ"
+        "full": "ಪೂರ್ಣ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (ದಕ್ಷಿಣ ಆಫ್ರಿಕಾ)"
       },
       "builtinTypes": "ಅಂತರ್ನಿರ್ಮಿತ ಪ್ರಕಾರಗಳು",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 ವಿಳಾಸಗಳು",
         "ipv6_address": "IPv6 ವಿಳಾಸಗಳು",
         "aws_key": "AWS ಪ್ರವೇಶ ಕೀಗಳು",
-        "api_key_generic": "API ಕೀಗಳು ಮತ್ತು ಟೋಕನ್‌ಗಳು"
+        "api_key_generic": "API ಕೀಗಳು ಮತ್ತು ಟೋಕನ್‌ಗಳು",
+        "iban": "IBAN ಬ್ಯಾಂಕ್ ಖಾತೆ ಸಂಖ್ಯೆಗಳು",
+        "eu_vat": "EU VAT ಸಂಖ್ಯೆಗಳು",
+        "es_dni_nie": "ಸ್ಪ್ಯಾನಿಷ್ DNI / NIE",
+        "it_codice_fiscale": "ಇಟಾಲಿಯನ್ ಕೋಡಿಸ್ ಫಿಸ್ಕೇಲ್",
+        "pl_pesel": "ಪೋಲಿಷ್ PESEL",
+        "nl_bsn": "ಡಚ್ BSN",
+        "de_steuer_id": "ಜರ್ಮನ್ ಸ್ಟೀಯರ್-ID",
+        "se_personnummer": "ಸ್ವೀಡಿಷ್ ವ್ಯಕ್ತಿ",
+        "za_id": "ದಕ್ಷಿಣ ಆಫ್ರಿಕಾದ ID ಸಂಖ್ಯೆಗಳು",
+        "za_phone": "ದಕ್ಷಿಣ ಆಫ್ರಿಕಾದ ಫೋನ್ ಸಂಖ್ಯೆಗಳು",
+        "za_vat": "ದಕ್ಷಿಣ ಆಫ್ರಿಕಾದ VAT ಸಂಖ್ಯೆಗಳು",
+        "za_tax_ref": "ದಕ್ಷಿಣ ಆಫ್ರಿಕಾದ ತೆರಿಗೆ ಉಲ್ಲೇಖಗಳು"
       },
       "customPatterns": "ಕಸ್ಟಮ್ ಮಾದರಿಗಳು",
       "customPatternsDesc": "ಹೊಂದಾಣಿಕೆಗಳನ್ನು [CUSTOM_REDACTED] ನಿಂದ ಬದಲಾಯಿಸಲಾಗುತ್ತದೆ. ಗರಿಷ್ಠ {max} ಮಾದರಿಗಳು. ವಿನಾಶಕಾರಿ ಬ್ಯಾಕ್‌ಟ್ರ್ಯಾಕಿಂಗ್ ಅಪಾಯವಿರುವ ಮಾದರಿಗಳನ್ನು ತಿರಸ್ಕರಿಸಲಾಗುತ್ತದೆ.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿಲ್ಲ. ಮರುನಿರ್ದೇಶನ URI {redirectUri} ಮತ್ತು \"{scopes}\" ಸ್ಕೋಪ್ಗಳೊಂದಿಗೆ {applicationsUrl} ನಲ್ಲಿ OAuth ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ನೋಂದಾಯಿಸಿ, ನಂತರ {clientIdEnv} ಅನ್ನು (ಮತ್ತು ಐಚ್ಛಿಕವಾಗಿ {clientSecretEnv} ಅನ್ನು) ಹೊಂದಿಸಿ ಮತ್ತು ಮರುಪ್ರಾರಂಭಿಸಿ.",
     "gitlabDuoSetupDescription": "ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ನೋಂದಾಯಿಸಿ ಮತ್ತು ಈ OmniRoute ಇನ್ಸ್ಟನ್ಸ್ನಲ್ಲಿ ಪರಿಸರ ವೇರಿಯೇಬಲ್ಗಳನ್ನು ಹೊಂದಿಸಿದ ನಂತರ, OAuth ಲಾಗಿನ್ ಪ್ರಾರಂಭಿಸಲು ಮುಂದುವರಿಸಿ ಕ್ಲಿಕ್ ಮಾಡಿ.",
     "continue": "ಮುಂದುವರಿಸಿ",
+    "copilotPolicyTitle": "ಪ್ರಾಯೋಗಿಕ ಪೂರೈಕೆದಾರ: ನೀತಿಯ ಸ್ಥಿತಿ ಅಸ್ಪಷ್ಟವಾಗಿದೆ",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com ಮೂಲಕ ಸಂಪರ್ಕಿಸುತ್ತದೆ, ಇದನ್ನು GitHub ಸಾಮಾನ್ಯ ಮೂರನೇ ವ್ಯಕ್ತಿಯ ತೀರ್ಮಾನವಾಗಿ ಪ್ರಕಟಿಸಿಲ್ಲ API. ಈ ಏಕೀಕರಣವು ಪ್ರಾಯೋಗಿಕವಾಗಿದೆ ಮತ್ತು ಸೂಚನೆಯಿಲ್ಲದೆ ಬದಲಾಗಬಹುದು.",
+    "copilotPolicyLine2": "ನಿಮ್ಮ ಸ್ವಂತ GitHub ಖಾತೆಯನ್ನು ಮಾತ್ರ ಸಂಪರ್ಕಿಸಬಹುದು. ಎಂದಿಗೂ ರುಜುವಾತುಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಬೇಡಿ, ಖಾತೆಗಳನ್ನು ಪೂಲ್ ಮಾಡಬೇಡಿ ಅಥವಾ ನಿಮ್ಮ ಯೋಜನೆ ಮಿತಿಗಳನ್ನು ಮೀರಲು ಪ್ರಯತ್ನಿಸಬೇಡಿ.",
+    "copilotPolicyLine3": "ಉಚಿತ ಮತ್ತು ವಿದ್ಯಾರ್ಥಿ ಯೋಜನೆ ಬಳಕೆದಾರರು ಸ್ವಯಂಚಾಲಿತ ಮಾದರಿ ಆಯ್ಕೆಯನ್ನು ಮಾತ್ರ ಸ್ವೀಕರಿಸುತ್ತಾರೆ. ನಿಮ್ಮ Copilot ಯೋಜನೆ ನಿಯಮಗಳು ಮತ್ತು ಯಾವುದೇ ಬಳಕೆಯ ಮಿತಿಗಳು ನಿಮ್ಮ ಜವಾಬ್ದಾರಿಯಾಗಿವೆ.",
+    "copilotPolicyAcknowledge": "ನಾನು ಅರ್ಥಮಾಡಿಕೊಂಡಿದ್ದೇನೆ, ಸಂಪರ್ಕಿಸಿ",
     "tabPasteSetupToken": "ಸೆಟಪ್ ಟೋಕನ್",
     "claudeSetupTokenDescription": "ಟರ್ಮಿನಲ್‌ನಲ್ಲಿ `claude setup-token` ಅನ್ನು ಚಲಾಯಿಸಿ ಮತ್ತು ಅದು ಮುದ್ರಿಸುವ ಟೋಕನ್ ಅನ್ನು ಅಂಟಿಸಿ. ಇದು ಒಂದು ವರ್ಷ ಮಾನ್ಯವಾಗಿರುತ್ತದೆ ಮತ್ತು ರಿಫ್ರೆಶ್ ಟೋಕನ್ ಹೊಂದಿಲ್ಲ. ಉಳಿಸುವ ಮೊದಲು OmniRoute Anthropic ಗೆ ಒಂದು ಪರೀಕ್ಷಾ ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸುತ್ತದೆ.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "ಪ್ರೊವೈಡರ್ ಅಂಕಿಅಂಶಗಳು",
     "description": "ಪ್ರತಿ ಪ್ರೊವೈಡರ್ ಮತ್ತು ಪ್ರತಿ ಮಾಡೆಲ್ನ ಟ್ರಾಫಿಕ್, ಲೇಟೆನ್ಸಿ ಮತ್ತು ಯಶಸ್ಸಿನ ದರಗಳು",
     "combo": "ಸಂಯೋಜನೆ",
-    "toggleModels": "{provider} ಗಾಗಿ ಮಾಡೆಲ್ಗಳನ್ನು ತೋರಿಸಿ"
+    "toggleModels": "{provider} ಗಾಗಿ ಮಾಡೆಲ್ಗಳನ್ನು ತೋರಿಸಿ",
+    "windowSince": "{date} ಇಂದ"
   },
   "relay": {
     "title": "ಸರ್ವರ್ಲೆಸ್ ರಿಲೇ ಪ್ರಾಕ್ಸಿಗಳು",
