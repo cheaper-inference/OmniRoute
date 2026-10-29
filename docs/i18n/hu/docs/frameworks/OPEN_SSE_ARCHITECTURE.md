@@ -484,17 +484,17 @@ Ez a következőket kezeli:
 
 ## Konfiguráció
 
-Az `open-sse/config/` könyvtár tartalmazza a konfigurációs réteget:
+`open-sse/config/` tartalmazza a konfigurációs réteget:
 
-| Fájl                            | Funkció                                                               |
-| ------------------------------- | --------------------------------------------------------------------- |
-| `providerRegistry.ts`           | Chatmodelleket nyilvántartó regiszter a 375 szolgáltatós katalógushoz |
-| `providerModels.ts`             | Modellaliaszok, formátumleképezés                                     |
-| `constants.ts`                  | Időtúllépések, korlátok, státuszkódok                                 |
-| `defaultThinkingSignature.ts`   | Alapértelmezett Claude thinking-aláírás                               |
-| `modelStrip.ts` (a servicesben) | Szolgáltatónkénti mezőeltávolítás                                     |
+| Fájl                                | Cél                                                                   |
+| ----------------------------------- | --------------------------------------------------------------------- |
+| `providerRegistry.ts`               | Chat-modell regisztrációja a 377-es szolgáltató katalógusán keresztül |
+| `providerModels.ts`                 | Modell álnevek, formátumleképezés                                     |
+| `constants.ts`                      | Időtúllépések, korlátok, állapotkódok                                 |
+| `defaultThinkingSignature.ts`       | Alapértelmezett Claude gondolkodó aláírás                             |
+| `modelStrip.ts` (szolgáltatásokban) | Szolgáltatónkénti mezőcsupaszítás                                     |
 
-### A Provider Registry sémája
+### Szolgáltatói regisztrációs séma
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-A Zod-validáció a modul betöltésekor biztosítja, hogy minden szolgáltatókonfiguráció érvényes legyen.
+Zod érvényesítés a modul betöltésekor biztosítja, hogy minden szolgáltatói konfiguráció érvényes legyen.
 
 ---
 

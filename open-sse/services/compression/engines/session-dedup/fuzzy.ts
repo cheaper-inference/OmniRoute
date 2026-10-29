@@ -83,10 +83,16 @@ export interface FuzzyPassOptions {
   maxBlocks: number;
   minBlockChars: number;
   principalId?: string;
+  boundary?: number;
 }
 export interface FuzzyPassResult {
   messages: MessageLike[];
   fuzzyCount: number;
+}
+
+/** True when `index` lies before the live-turn `boundary` (always true without a boundary). */
+function isBeforeBoundary(index: number, boundary?: number): boolean {
+  return boundary === undefined || index < boundary;
 }
 
 /**
@@ -106,7 +112,13 @@ export function applyFuzzyPass(messages: MessageLike[], opts: FuzzyPassOptions):
     }
     if (blocks.length < 2) return { messages, fuzzyCount: 0 };
 
-    const nearDups = findNearDuplicates(blocks, opts.minJaccard, opts.maxBlocks, opts.shingleSize);
+    // Blocks at/after the live-turn boundary are never rewritten.
+    const nearDups = findNearDuplicates(
+      blocks,
+      opts.minJaccard,
+      opts.maxBlocks,
+      opts.shingleSize
+    ).filter((nd) => isBeforeBoundary(nd.block.index, opts.boundary));
     if (nearDups.length === 0) return { messages, fuzzyCount: 0 };
 
     const replacements = new Map<number, string>();
@@ -137,7 +149,8 @@ export function runFuzzyPass(
   stepConfig: Record<string, unknown>,
   minBlockChars: number,
   principalId?: string,
-  callerCanRetrieve = false
+  callerCanRetrieve = false,
+  boundary?: number
 ): FuzzyPassResult {
   const raw = stepConfig["fuzzy"] as
     boolean | { enabled?: boolean; minJaccard?: number; shingleSize?: number } | undefined;
@@ -154,5 +167,6 @@ export function runFuzzyPass(
     maxBlocks: MAX_FUZZY_BLOCKS,
     minBlockChars,
     principalId,
+    boundary,
   });
 }

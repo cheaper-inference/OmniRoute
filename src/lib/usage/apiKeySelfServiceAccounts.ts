@@ -195,23 +195,35 @@ export async function listReachableProviders(
 // Quota normalization
 // ---------------------------------------------------------------------------
 
+function clampPercentage(value: number): number {
+  return roundNumber(Math.min(Math.max(value, 0), 100), 2);
+}
+
+/**
+ * `used` / `remaining` are counts in the provider's own unit (Antigravity counts out of
+ * 1000, GitHub in requests, GLM in credits; Codex and Claude use a total of 100), so a
+ * percentage comes from usedPercentage, else used / total, else 100 - remainingPercentage.
+ * A window with none of them (e.g. a credit balance) has no percentage and is dropped.
+ */
 function quotaWindow(value: unknown) {
   const record = asRecord(value);
   if (!record) return null;
-  const usedPercentage = toNumber(record.usedPercentage ?? record.used, Number.NaN);
-  const remainingPercentage = toNumber(
-    record.remainingPercentage ?? record.remaining,
-    Number.isFinite(usedPercentage) ? 100 - usedPercentage : Number.NaN
-  );
-  if (!Number.isFinite(usedPercentage) && !Number.isFinite(remainingPercentage)) return null;
+  const explicitUsed = toNumber(record.usedPercentage, Number.NaN);
+  const used = toNumber(record.used, Number.NaN);
+  const total = toNumber(record.total, Number.NaN);
+  const explicitRemaining = toNumber(record.remainingPercentage, Number.NaN);
+
+  let usedPercentage = Number.NaN;
+  if (Number.isFinite(explicitUsed)) usedPercentage = explicitUsed;
+  else if (Number.isFinite(used) && total > 0) usedPercentage = (used / total) * 100;
+  else if (Number.isFinite(explicitRemaining)) usedPercentage = 100 - explicitRemaining;
+  if (!Number.isFinite(usedPercentage)) return null;
 
   return {
-    usedPercentage: Number.isFinite(usedPercentage)
-      ? roundNumber(usedPercentage, 2)
-      : roundNumber(100 - remainingPercentage, 2),
-    remainingPercentage: Number.isFinite(remainingPercentage)
-      ? roundNumber(remainingPercentage, 2)
-      : roundNumber(100 - usedPercentage, 2),
+    usedPercentage: clampPercentage(usedPercentage),
+    remainingPercentage: clampPercentage(
+      Number.isFinite(explicitRemaining) ? explicitRemaining : 100 - usedPercentage
+    ),
     resetAt: isoOrNull(record.resetAt as DateLike),
   };
 }

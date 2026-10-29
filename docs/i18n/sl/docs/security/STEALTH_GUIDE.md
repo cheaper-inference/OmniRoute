@@ -16,64 +16,64 @@ Prikrite funkcije obstajajo zato, da lahko OmniRoute deluje kot združljivostna 
 
 ---
 
-## Plast prstnih odtisov TLS
+## Plast prstnega odtisa TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Trajne seje `wreq-js` se ustvarijo leno za vsak obseg računa in razrešeni posredniški strežnik. Procesni
-skladi `TlsClient` vsebujejo največ 128 sej, ki se nadrejenim sistemom za Cloudflare predstavljajo kot
-**Chrome 124 v sistemu macOS**. `TlsClient.fetch()` se varno prekine, kadar izvorno izvajalno okolje
-ni na voljo; klicatelj lahko zunaj tega ovoja izrecno izbere rezervni način.
+Trajne seje `wreq-js` se ustvarijo leno glede na obseg računa in razrešeni posredniški strežnik.
+Procesni `TlsClient` združuje največ 128 sej, ki se izdajajo za **Chrome 124 v sistemu macOS**, za
+zaledne sisteme za omrežjem Cloudflare. `TlsClient.fetch()` varno zavrne zahtevo, kadar izvorno izvajalno
+okolje ni na voljo; klicatelj lahko zunaj tega ovoja izrecno izbere nadomestno možnost.
 
 - Profil seje: `browser: "chrome_124", os: "macos"`
 - Razreševanje posredniškega strežnika (po prednosti): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (tudi z malimi črkami)
 - Časovna omejitev: `TLS_CLIENT_TIMEOUT_MS` (podedovana iz `FETCH_TIMEOUT_MS`, privzeto 600000)
 - Odgovor `wreq-js` je združljiv z vmesnikom fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
 - Nadzornik prvega bajta (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  se razreši takoj, ko prispejo glave nadrejenega sistema, zato `TLS_CLIENT_TIMEOUT_MS` sama ne more omejiti
-  telesa, ki nikoli ne vrne prvega bajta. `guardTlsFirstByte()` tekmuje med prvim `read()` telesa
-  in `TLS_FIRST_BYTE_WATCHDOG_MS` (privzeto `10000`, vrednost `0` ga onemogoči); na zdravo telo
-  ne vpliva, pri zastalem telesu pa prekliče bralnik wreq in omogoči, da obstoječa logika
-  rezervnega načina TLS funkcije `proxyFetch` preide na neposredni/posredniški razpošiljevalnik (zahteva, ki je ni
-  mogoče varno ponovno predvajati, npr. POST s telesom, še vedno sproži napako, namesto da bi bila neopazno ponovljena).
+  se razreši takoj, ko prispejo glave zalednega sistema, zato samo `TLS_CLIENT_TIMEOUT_MS` ne more omejiti
+  telesa, ki nikoli ne vrne prvega bajta. `guardTlsFirstByte()` izvede tekmo med prvim `read()` telesa
+  in `TLS_FIRST_BYTE_WATCHDOG_MS` (privzeto `10000`, vrednost `0` ga onemogoči); zdravo telo ostane
+  nespremenjeno, pri zastalem telesu pa prekliče bralnik wreq in omogoči obstoječi
+  nadomestni logiki TLS v `proxyFetch`, da nadaljuje do neposrednega/posredniškega razpošiljevalnika (zahteva,
+  ki je ni varno ponovno predvajati, npr. POST s telesom, še vedno sproži izjemo namesto tihega ponovnega poskusa).
 
-### Prenos ponudnikov s spletnimi piškotki — wreq-js 3.2.0
+### Prenos ponudnikov spletnih piškotkov — wreq-js 3.2.0
 
 `open-sse/services/tlsClientBase.ts` je skupni prilagojevalnik za spodnjih pet specializiranih
-prenosov s spletnimi piškotki. Vsak tanek ovoj ponudnika izbere profil brskalnika/operacijskega sistema. Prilagojevalnik
-uporablja enotni nalagalnik izvajalnega okolja wreq in sklad prenosov v `open-sse/utils/tlsClient.ts`, ki je določen s
-profilom + operacijskim sistemom + razrešenim posredniškim strežnikom, medtem ko vsaka zahteva uporablja `cookieMode: "ephemeral"`. Računi in
-zahteve si zato delijo povezave na ravni prenosa, vendar nikoli seje wreq ali shrambe piškotkov.
+prenosov spletnih piškotkov. Vsak tanek ovoj ponudnika izbere profil brskalnika/operacijskega sistema. Prilagojevalnik
+uporablja enotni nalagalnik izvajalnega okolja wreq in zalogo prenosov v `open-sse/utils/tlsClient.ts`, indeksirano
+po profilu + operacijskem sistemu + razrešenem posredniškem strežniku, medtem ko vsaka zahteva uporablja `cookieMode: "ephemeral"`. Računi in
+zahteve si zato delijo povezave na ravni prenosa, nikoli pa seje wreq ali shrambe piškotkov.
 
-| Ponudnik   | Profil        | Emulirani OS | Pravilnik za EOF toka                   |
-| ---------- | ------------- | ------------ | --------------------------------------- |
-| Claude     | `chrome_146`  | Linux        | vključi `[DONE]`                        |
-| Perplexity | `firefox_148` | macOS        | vključi `event: end_of_stream`          |
-| Grok       | `chrome_146`  | Linux        | izključi `[DONE]`                       |
-| Notion     | `chrome_146`  | Windows      | vključi `[DONE]`                        |
-| LMArena    | `chrome_146`  | Windows      | brez označevalca; zapri ob izvornem EOF |
+| Ponudnik   | Profil        | Emulirani OS | Pravilnik EOF toka                    |
+| ---------- | ------------- | ------------ | ------------------------------------- |
+| Claude     | `chrome_146`  | Linux        | vključi `[DONE]`                      |
+| Perplexity | `firefox_151` | macOS        | vključi `event: end_of_stream`        |
+| Grok       | `chrome_146`  | Linux        | izključi `[DONE]`                     |
+| Notion     | `chrome_146`  | Windows      | vključi `[DONE]`                      |
+| LMArena    | `chrome_146`  | Windows      | brez stražarja; zapri ob izvornem EOF |
 
-- Pretočno prenašanje neposredno uporablja `ReadableStream` izvornega odgovora; ne ustvari se nobena začasna datoteka ali
-  stranski proces.
-- Pred razkritjem toka se pregleda do 256 začetnih bajtov. Ponudniki SSE medpomnijo napake, ki niso SSE;
+- Pretočni prenos neposredno uporablja `ReadableStream` izvornega odgovora; začasna datoteka ali pomožni
+  proces se ne ustvari.
+- Pred izpostavitvijo toka se pregleda do 256 začetnih bajtov. Ponudniki SSE medpomnijo napake, ki niso SSE;
   Grok/LMArena preslikata izzive Cloudflare v `403`, vmesne strani HTML pa v `502`.
-- Časovna omejitev izvorne zahteve ostane obdana z absolutnim skrajnim rokom JS. Zastoj razveljavi
+- Časovna omejitev izvorne zahteve ostane ovita z absolutnim skrajnim rokom JS. Obvisel proces razveljavi
   in zapre samo prizadeti prenos profila/operacijskega sistema/posredniškega strežnika, preden ga naslednja zahteva znova ustvari.
 - Prednost razreševanja posredniškega strežnika je `proxyUrl` posameznega klica → kontekst računa/nadzorne plošče z obsegom zahteve →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (vključno z različicami z malimi črkami). Napake pri razreševanju povzročijo
-  varno prekinitev, namesto da bi razkrile neposredno povezavo. LMArena namenoma razrešuje glede na `arena.ai`.
-- `byteResponse` vrne URL `data:`, opredeljen z vrsto vsebine, brez okvare UTF-8.
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (vključno z različicami z malimi črkami). Napake razreševanja varno
+  zavrnejo zahtevo, namesto da bi dopustile uhajanje neposredne povezave. LMArena namerno razrešuje glede na `arena.ai`.
+- `byteResponse` vrne URL `data:` z določeno vrsto vsebine brez poškodovanja kodiranja UTF-8.
 - Napake so `TlsClientUnavailableError` (paket/dodatek ni na voljo), `TlsClientHangError`
-  (skrajni rok je presežen) in `WreqTransportCapacityError` (skupna koda napake zaradi zmogljivosti seje),
-  kadar je vseh 128 omejenih mest profila/operacijskega sistema/posredniškega strežnika dejavnih ali v postopku zapiranja.
+  (skrajni rok je presežen) in `WreqTransportCapacityError` (skupna koda napake zmogljivosti sej),
+  kadar je vseh 128 omejenih mest profila/operacijskega sistema/posredniškega strežnika aktivnih ali se zapirajo.
 
 Zgornja splošna seja `TlsClient` ostaja specializirana za trajno stanje piškotkov, podprto z brskalnikom.
-Obe poti znova uporabita en predpomnjeni nalagalnik modula wreq in kavelj življenjskega cikla procesa; njuna sklada ostajata
-ločena, ker se njune življenjske dobe piškotkov namenoma razlikujejo.
+Obe poti ponovno uporabita en predpomnjeni nalagalnik modula wreq in kavelj življenjskega cikla procesa; njuni zalogi ostajata
+ločeni, ker sta življenjski dobi njunih piškotkov namenoma različni.
 
-Pripeti paket podpira profile, vendar se dejansko sprejemanje požarnega zidu WAF lahko spremeni neodvisno
-od lokalnih pogodbenih testov. Spremembe prstnih odtisov preverite z izrecno pooblaščenim živim računom,
-preden trdite, da je dosežena enakovrednost z nadrejenim brskalnikom.
+Pripeti paket podpira profile, vendar se lahko dejansko sprejemanje s strani WAF spreminja neodvisno
+od lokalnih pogodbenih preizkusov. Spremembe prstnega odtisa preverite z izrecno pooblaščenim računom v živo,
+preden razglasite enakovrednost z brskalnikom zalednega sistema.
 
 ---
 

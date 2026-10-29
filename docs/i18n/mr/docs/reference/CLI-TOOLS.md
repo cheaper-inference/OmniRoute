@@ -4,17 +4,17 @@
 
 ---
 
-शेवटचे अद्यतन: 2026-08-23
+शेवटचे अपडेट: 23-08-2026
 
-OmniRoute तीन स्वतंत्र डॅशबोर्ड पृष्ठांवर विभागलेल्या CLI साधनांच्या तीन श्रेणींसोबत एकत्रित होते:
+OmniRoute तीन समर्पित डॅशबोर्ड पृष्ठांवर पसरलेल्या CLI साधनांच्या तीन श्रेणींसह एकत्रित करते:
 
-| पृष्ठ          | मार्ग                   | संकल्पना                                                                                 | संख्या        |
-| -------------- | ----------------------- | ---------------------------------------------------------------------------------------- | ------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | तुम्ही OmniRoute कडे निर्देशित केलेली कोडिंग साधने (क्लायंट → CLI → OmniRoute → प्रदाता) | 26            |
-| **CLI Agents** | `/dashboard/cli-agents` | तुम्ही OmniRoute कडे निर्देशित केलेले स्वायत्त एजंट (समान प्रवाह, व्यापक कार्यक्षेत्र)   | 10            |
-| **ACP Agents** | `/dashboard/acp-agents` | stdio/ACP द्वारे OmniRoute जी CLI बॅकएंड म्हणून सुरू करते (उलट प्रवाह)                   | रजिस्ट्री पहा |
+| पान           | मार्ग                   | संकल्पना                                                                            | मोजा           |
+| ------------- | ----------------------- | ----------------------------------------------------------------------------------- | -------------- |
+| **CLI कोडचा** | `/dashboard/cli-code`   | कोडिंग टूल्स तुम्ही OmniRoute (क्लायंट → CLI → OmniRoute → प्रदाता) वर निर्देश करता | 26             |
+| **CLI एजंट**  | `/dashboard/cli-agents` | स्वायत्त एजंट जे तुम्ही OmniRoute कडे निर्देश करता (समान प्रवाह, व्यापक व्याप्ती)   | 11             |
+| **ACP एजंट**  | `/dashboard/acp-agents` | CLIs जो OmniRoute बॅकएंड म्हणून stdio/ACP (उलटा प्रवाह) द्वारे उगवतो                | रेजिस्ट्री पहा |
 
-जुने मार्ग 308 द्वारे पुनर्निर्देशित होतात: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+लेगसी मार्ग 308 द्वारे पुनर्निर्देशित करतात: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,9 +43,9 @@ ACP Agents (उलट सुरू करण्याचा प्रवाह):
 
 ---
 
-## `setup-*` वापरून स्वयंचलित कॉन्फिगरेशन
+## `setup-*` सह स्वयं-कॉन्फिगर करा
 
-तुम्हाला प्रत्येक साधनाचे कॉन्फिगरेशन हाताने लिहिण्याची आवश्यकता नाही. OmniRoute प्रत्येक समर्थित CLI साठी एक `setup-*` कमांड पुरवते, जी चालू असलेल्या OmniRoute (स्थानिक किंवा रिमोट) मधून **लाइव्ह** मॉडेल कॅटलॉग वाचते आणि तुमच्या मशीनवर त्या साधनाचे स्वतःचे कॉन्फिगरेशन लिहिते:
+तुम्हाला प्रत्येक टूलची कॉन्फिगरेशन हाताने लिहायची गरज नाही. OmniRoute प्रति समर्थित CLI एक `setup-*` कमांड पाठवते जी वाचते** जगणे** चालू असलेल्या OmniRoute (स्थानिक किंवा रिमोट) वरून मॉडेल कॅटलॉग आणि आपल्या मशीनवर टूलचे स्वतःचे कॉन्फिगरेशन लिहितो:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -53,20 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-प्रत्येक कमांड `--remote <url> --api-key <key>` (स्थानिक साधनाला रिमोट OmniRoute सोबत कॉन्फिगर करणे), `--dry-run` (काहीही न लिहिता पूर्वावलोकन करणे) आणि `--port` स्वीकारते. मॉडेलचे स्वयंचलित शोधकार्य नसलेली साधने (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) `--model <id>` (आणि नॉन-इंटरॅक्टिव्ह रनसाठी `--yes`) स्वीकारतात. `$HOME` अंतर्गत न लिहिणारी एकमेव रेसिपी म्हणजे `setup-5dive`: ती फ्लीट होस्टवर root-मालकीचे प्रमाणीकरण प्रोफाइल लिहून 5dive एजंट फ्लीट कॉन्फिगर करते, त्यामुळे ती `sudo` द्वारे स्वतःला पुन्हा कार्यान्वित करते आणि तिचा स्वतःचा रिमोट मोड नाही. योग्य env अंतर्भूत करून आणि कोणतेही कॉन्फिगरेशन अजिबात न लिहिता CLI सुरू करण्यासाठी, सर्वसाधारण `omniroute run <target>` लाँचर वापरा (claude, codex, aider, goose, opencode, qwen, gemini — लक्ष्ये आणि उपनावे `bin/cli/cli-manifest.mjs` मधून येतात); जुने प्रत्येक-साधनासाठीचे लाँचर `omniroute launch` (Claude Code) आणि `omniroute launch-codex` (Codex) अद्याप उपलब्ध आहेत. Gemini CLI केवळ लाँच करण्यासाठी आहे: ते `omniroute run` लक्ष्य आहे, परंतु त्यासाठी कोणतीही `setup-*`/`configure` रेसिपी नाही.
+प्रत्येक `--remote <url> --api-key <key>` (रिमोट OmniRoute विरुद्ध स्थानिक साधन कॉन्फिगर करा), `--dry-run` (लेखनाशिवाय पूर्वावलोकन), आणि `--port` स्वीकारतो. मॉडेल ऑटो-डिस्कव्हरी नसलेली साधने (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) `--model <id>` (आणि गैर-परस्परसंवादी धावांसाठी `--yes` ) घेतात. `setup-5dive` ही एक रेसिपी आहे जी `$HOME` खाली लिहित नाही : ती फ्लीट होस्टवर रूट-मालकीचे प्रमाणीकरण प्रोफाइल लिहून 5dive एजंट फ्लीट कॉन्फिगर करते, त्यामुळे ते `sudo` द्वारे पुन्हा कार्यान्वित होते आणि त्याचा स्वतःचा कोणताही रिमोट मोड नाही. योग्य env इंजेक्ट केलेले आणि अजिबात लिहिलेले कॉन्फिग नसलेले CLI लाँच करण्यासाठी, जेनेरिक `omniroute run <target>` लाँचर वापरा (क्लॉड, कोडेक्स, एडर, हंस, ओपनकोड, क्वेन, जेमिनी, व्हायकोड — लक्ष्य आणि उपनावे `bin/cli/cli-manifest.mjs` वरून येतात); लीगेसी प्रति-टूल लाँचर्स `omniroute launch` (Claude कोड) आणि `omniroute launch-codex` (Codex) उपलब्ध आहेत. Gemini CLI केवळ लॉन्च आहे: हे `omniroute run` लक्ष्य आहे परंतु `setup-*`/`configure` रेसिपी नाही.
 
-> **संपूर्ण संदर्भ:** मुख्य तक्ता — प्रत्येक कमांड काय लिहिते, प्रत्येक फ्लॅग,
-> स्थानिक विरुद्ध रिमोट, आणि कोणत्या साधनांना `/v1` प्रत्यय आवश्यक आहे —
-> **[CLI एकत्रीकरणे](../guides/CLI-INTEGRATIONS.md)** येथे उपलब्ध आहे.
+> **संपूर्ण संदर्भ:** मास्टर टेबल — प्रत्येक कमांड काय लिहितो, प्रत्येक ध्वज, स्थानिक विरुद्ध रिमोट, आणि कोणत्या साधनांना `/v1` प्रत्यय हवा आहे — राहतो** [CLI एकत्रीकरण](../guides/CLI-INTEGRATIONS.md)** .
 
-### या कमांड कंटेनरमध्ये चालवणे
+### हे एका कंटेनरच्या आत चालवणे
 
-OmniRoute कंटेनरमध्ये कार्यान्वित केलेली `setup-*` कमांड कंटेनरच्या स्वतःच्या होममध्ये लिहिते, जे कोणतेही होस्ट CLI वाचत नाही आणि जे कंटेनरसह नाहीसे होते. OmniRoute ही परिस्थिती ओळखते आणि काहीही लिहिण्याऐवजी सूचनांसह `2` एक्झिट कोडने बंद होते. पुढे जाण्याचे दोन समर्थित मार्ग आहेत — होस्टवर CLI स्थापित करून कंटेनरशी `omniroute connect` करणे, किंवा कॉन्फिगरेशन डिरेक्टरी bind-mount करून `CLI_CONFIG_HOME` सेट करणे (compose `host` प्रोफाइल). कंटेनरची स्वतःची CLI साधने कॉन्फिगर करणे हाच तुमचा प्रत्यक्ष हेतू असल्यास, प्रत्येक `setup-*` कमांड तसेच `omniroute configure` आणि `omniroute config set`, `--allow-container-write` स्वीकारतात; सर्व्हरसाठी `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` हेच कार्य करते. पाहा:
-[Docker मार्गदर्शक → होस्ट CLI साधने कॉन्फिगर करणे](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+OmniRoute कंटेनरच्या आत अंमलात आणलेली `setup-*` कमांड कंटेनरच्या स्वतःच्या घरात लिहिते, जे कोणतेही होस्ट CLI वाचत नाही आणि जे कंटेनरसह अदृश्य होते. OmniRoute ते शोधते आणि `2` लिहिण्याऐवजी निर्देशांसह बाहेर पडते. पुढे दोन समर्थित मार्ग — होस्टवर CLI स्थापित करा आणि कंटेनरवर `omniroute connect`, किंवा कॉन्फिग डायरर्स बांधून ठेवा आणि `CLI_CONFIG_HOME` (कम्पोज `host` प्रोफाइल) सेट करा. कंटेनरचे स्वतःचे CLIs कॉन्फिगर करताना प्रत्येक `setup-*` कमांड, अधिक `omniroute configure` आणि `omniroute config set`, `--allow-container-write` स्वीकारते, जे तुम्हाला खरोखर म्हणायचे होते; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` सर्व्हरसाठी असेच करते. [Docker मार्गदर्शक → होस्ट CLI साधने कॉन्फिगर करणे](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker) पहा.
 
-डॅशबोर्डचे **लागू करण्याचे एंडपॉइंट** (`POST /api/cli-tools/apply`) हाच प्रतिबंध लागू करते: कंटेनरमध्ये, ज्याचे लक्ष्य होस्टवरून bind-mount केलेले नाही अशी लेखन विनंती **`422`** सह प्रतिसाद देते, ज्यामध्ये `containerEphemeralTarget: true`, सुरक्षित त्रुटी मजकूर आणि — होस्ट रेसिपी असलेल्या साधनांसाठी (claude, codex, opencode, cline, kilo, continue) — त्याऐवजी होस्टवर चालवण्यासाठी `hostSetupCommand` (उदा. `omniroute setup-opencode`) असते; काहीही लिहिले जात नाही. कंटेनर मोडमध्ये `dryRun: true` कार्यरत राहते आणि डिस्कला स्पर्श न करता संवेदनशील माहिती लपवलेले पूर्वावलोकन + लक्ष्य पथ परत करते. पूर्वावलोकनातील मजकूर हा कॉपी किंवा आयात करण्यासाठीचे क्रेडेन्शियल असलेले कॉन्फिगरेशन नाही. मूळ साधन/base URL/API key/मॉडेल इनपुटसह होस्टवर लागू करा किंवा दर्शवलेली होस्ट-साइड सेटअप कमांड वापरा. पूर्वावलोकन हेडर आणि विनंती करारासाठी [CLI कॉन्फिगरेशन सुरक्षा](../security/CLI-CONFIGURATION.md) पाहा. हे वर्तन हेतुपुरस्सर आहे आणि `tests/unit/api/cli-tools/apply-container-guard.test.ts` द्वारे रिग्रेशनपासून संरक्षित आहे — प्रतिबंध काढून टाकून `422` कधीही "दुरुस्त" करू नका.
+डॅशबोर्डचा** एंडपॉइंट लागू करा** (`POST /api/cli-tools/apply`) समान रक्षकाची अंमलबजावणी करते: कंटेनरमध्ये, एक लेखन ज्याचे लक्ष्य यजमान उत्तरांमधून बाइंड-माउंट केलेले नाही**`422`** `containerEphemeralTarget: true` सह , सुरक्षित त्रुटी मजकूर आणि — होस्ट रेसिपी असलेल्या साधनांसाठी (क्लॉड, कोडेक्स, ओपनकोड, क्लाइन, किलो, सुरू ठेवा) — त्याऐवजी होस्टवर चालविण्यासाठी `hostSetupCommand` (उदा. `omniroute setup-opencode`); काहीही लिहिलेले नाही. `dryRun: true` कंटेनर मोडमध्ये काम करत राहते आणि डिस्कला स्पर्श न करता पुनर्संचयित पूर्वावलोकन + लक्ष्य मार्ग परत करते. पूर्वावलोकन सामग्री कॉपी किंवा आयात करण्यासाठी क्रेडेन्शियल-बेअरिंग कॉन्फिगरेशन नाही. होस्टवर मूळ tool/base URL/API key/model इनपुटसह अर्ज करा किंवा सूचित होस्ट-साइड सेटअप कमांड वापरा. पूर्वावलोकन शीर्षलेख आणि विनंती करारासाठी [CLI कॉन्फिगरेशन सुरक्षा](../security/CLI-CONFIGURATION.md) पहा. हे वर्तन हेतुपुरस्सर आहे आणि `tests/unit/api/cli-tools/apply-container-guard.test.ts` द्वारे प्रतिगमन-संरक्षित आहे — गार्ड काढून 422 कधीही "निश्चित" करू नका.
 
 ---
 
@@ -109,59 +107,60 @@ OmniRoute कंटेनरमध्ये कार्यान्वित �
 
 ---
 
-## 1. CLI Code ची साधन-सूची (27 साधने)
+## 1. CLI कोडचा कॅटलॉग (27 साधने)
 
-`/dashboard/cli-code` मध्ये दिसणारी सर्व साधने. `baseUrlSupport: none` असलेली साधने सानुकूल बेस URL ऐवजी MITM किंवा मॅन्युअल मार्गदर्शिकेद्वारे जोडलेली आहेत:
+`/dashboard/cli-code` मध्ये दिसणारी सर्व साधने. `baseUrlSupport: none` असलेल्यांना कस्टम बेस URL ऐवजी MITM किंवा मॅन्युअल गाइडद्वारे वायर्ड केले जाते:
 
-| id           | नाव                     | विक्रेता            | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| आयडी          | नाव                      | विक्रेता             | baseUrlSupport | configType   | acpSpawnable |
+| ------------- | ------------------------ | -------------------- | -------------- | ------------ | ------------ |
+| क्लॉड         | Claude कोड               | Anthropic            | पूर्ण          | env          | खरे          |
+| कोडेक्स       | OpenAI Codex CLI         | OpenAI               | पूर्ण          | सानुकूल      | खरे          |
+| zcode         | ZCode (GLM कोडिंग योजना) | Z.ai                 | काहीही नाही    | सानुकूल      | खोटे         |
+| cline         | Cline                    | OSS (माजी-क्लॉड देव) | पूर्ण          | सानुकूल      | खरे          |
+| किलो          | किलो कोड                 | किलो-ऑर्ग            | पूर्ण          | सानुकूल      | खोटे         |
+| roo           | रू कोड                   | रु (OSS)             | पूर्ण          | मार्गदर्शक   | खोटे         |
+| सुरू ठेवा     | चालू ठेवा                | सुरू ठेवा.देव        | पूर्ण          | मार्गदर्शक   | खोटे         |
+| मदत करणारा    | मदतनीस                   | OSS (पी. गौथियर)     | पूर्ण          | मार्गदर्शक   | खरे          |
+| बनावट         | ForgeCode                | अँटिनोमी HQ          | पूर्ण          | सानुकूल      | खरे          |
+| jcode         | jcode                    | 1जेहुआंग (OSS)       | पूर्ण          | सानुकूल      | खोटे         |
+| deepseek-tui  | DeepSeek TUI             | हंटर बाऊन (OSS)      | पूर्ण          | सानुकूल      | खोटे         |
+| कोडव्हेल      | CodeWhale                | Hmbown (OSS)         | पूर्ण          | सानुकूल      | खोटे         |
+| ओपनकोड        | OpenCode                 | विसंगती (माजी SST)   | पूर्ण          | मार्गदर्शक   | खरे          |
+| droid         | फॅक्टरी Droid            | कारखाना AI           | आंशिक          | मार्गदर्शक   | खोटे         |
+| सहपायलट       | GitHub Copilot CLI       | GitHub/MS            | पूर्ण          | सानुकूल      | खोटे         |
+| cursor-cli    | Cursor CLI               | कोठेही               | आंशिक          | मार्गदर्शक   | खरे          |
+| smelt         | स्मेल्ट                  | लिओनार्डसेर (OSS)    | पूर्ण          | सानुकूल      | खोटे         |
+| pi            | Pi (pi-कोडिंग-एजंट)      | एम. झेकनर (OSS)      | पूर्ण          | सानुकूल      | खोटे         |
+| grok-बिल्ड    | Grok बिल्ड               | xAI                  | पूर्ण          | सानुकूल      | खोटे         |
+| क्रश          | क्रश                     | OSS (मोहकता)         | पूर्ण          | सानुकूल      | खोटे         |
+| क्वेन         | Qwen कोड                 | Alibaba              | पूर्ण          | मार्गदर्शक   | खरे          |
+| zed           | Zed                      | Zed इंडस्ट्रीज       | पूर्ण          | मार्गदर्शक   | खोटे         |
+| कर्सर         | Cursor                   | कोठेही               | काहीही नाही    | मार्गदर्शक   | खोटे         |
+| गुरुत्वाकर्षण | Antigravity              | Google               | काहीही नाही    | mitm         | खोटे         |
+| हर्मीस        | हर्मीस                   | Nous संशोधन          | काहीही नाही    | मार्गदर्शक   | खोटे         |
+| किरो          | Kiro AI                  | Amazon               | काहीही नाही    | mitm         | खोटे         |
+| सानुकूल       | सानुकूल CLI              | —                    | पूर्ण          | कस्टम-बिल्डर | खोटे         |
 
-`baseUrlSupport: "partial"` असलेली साधने डॅशबोर्ड कार्डवर "⚠ आंशिक बेस URL" हा बॅज दाखवतात.
+`baseUrlSupport: "partial"` असलेली साधने डॅशबोर्ड कार्डमध्ये "⚠ बेस URL parcial" बॅज दाखवतात.
 ---
 
-## 2. CLI एजंट्सची सूची (10 साधने)
+## 2. CLI एजंट कॅटलॉग (11 साधने)
 
-`/dashboard/cli-agents` मध्ये दिसणारे स्वायत्त एजंट्स:
+स्वायत्त एजंट जे `/dashboard/cli-agents` मध्ये दिसतात:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| आयडी        | नाव         | विक्रेता               | baseUrlSupport | acpSpawnable |
+| ----------- | ----------- | ---------------------- | -------------- | ------------ |
+| हर्मीस-एजंट | हर्मीस एजंट | Nous संशोधन            | पूर्ण          | खोटे         |
+| ओपनक्लॉ     | OpenClaw    | OSS (पी. स्टीनबर्गर)   | पूर्ण          | खरे          |
+| हंस         | हंस         | ब्लॉक / Linux फाउंडेशन | पूर्ण          | खरे          |
+| दुभाषी      | दुभाषी उघडा | OSS                    | पूर्ण          | खरे          |
+| ताना        | Warp AI     | Warp Inc.              | आंशिक          | खरे          |
+| एजंट-डेक    | एजंट डेक    | अशेषगोपलानी (OSS)      | पूर्ण          | खोटे         |
+| omp         | अरे माय पाय | OSS                    | पूर्ण          | खरे          |
+| letta       | CLI         | लेटा                   | पूर्ण          | खोटे         |
+| प्रमुख-एजंट | प्राइम एजंट | प्राइम बुद्धी (OSS)    | पूर्ण          | खोटे         |
+| 5 डुबकी     | 5 डुबकी     | OSS (5dive-ai)         | पूर्ण          | खोटे         |
+| का कोड      | WhyCodes    | कॉर्पोरेशन का          | पूर्ण          | खोटे         |
 
 ---
 

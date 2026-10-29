@@ -175,18 +175,18 @@ refactor(db): consolidate rate limit tables
 ## 執行測試
 
 ```bash
-# 所有測試（單元 + vitest + ecosystem + e2e）
+# 所有測試（單元 + vitest + 生態系統 + e2e）
 npm run test:all
 
-# 單一測試檔案（Node.js 原生測試執行器 — 大多數測試使用這個）
+# 單一測試檔案（Node.js 原生測試執行器——大多數測試使用此方式）
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# 只執行受你的變更影響的單元測試（與 CI 閘門相同的 TIA 選擇器，#8084）
-npm run test:scoped            # 最後一次提交（或工作區）中的變更
-npm run test:scoped:staged     # 僅限已暫存的變更 — 很適合搭配 pre-commit 執行
-npm run test:scoped:full       # 先重建 import-graph 映射（在新增/移動檔案之後）
-# 結束碼 1 +「run the full suite」表示中樞檔案（tsconfig、package.json、…）或
-# 未對應的原始碼已變更 — 選擇器會安全地失敗，絕不會默默略過。
+# 僅執行受你變更影響的單元測試（與 CI 閘門使用相同的 TIA 選擇器，#8084）
+npm run test:scoped            # 上一次提交（或工作樹）中的變更
+npm run test:scoped:staged     # 僅限已暫存的變更——很適合搭配提交前執行
+npm run test:scoped:full       # 先重新建置匯入圖對應表（新增／移動檔案後）
+# 結束碼 1 +「執行完整測試套件」表示某個中樞檔案（tsconfig、package.json、……）或未對應的
+# 原始碼發生變更——選擇器會以安全方式失敗，絕不會無聲略過。
 
 # Vitest（MCP 伺服器、autoCombo、快取）
 npm run test:vitest
@@ -194,13 +194,13 @@ npm run test:vitest
 # E2E 測試（需要 Playwright）
 npm run test:e2e
 
-# 協定用戶端 E2E（MCP 傳輸、A2A）
+# 通訊協定用戶端 E2E（MCP 傳輸、A2A）
 npm run test:protocols:e2e
 
 # 生態系統相容性測試
 npm run test:ecosystem
 
-# 覆蓋率閘門：60% 語句/行/函式/分支
+# 覆蓋率閘門：陳述式／行／函式／分支均為 60%
 npm run test:coverage
 npm run coverage:report
 
@@ -208,45 +208,46 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# 有閘門的真實上游 combo 煙霧測試（需要 VPS 存取 + 真實 provider 額度）
-# 會實際呼叫真實 provider — 會有一點成本。絕不在 CI 中執行。沒有閘門時會乾淨地略過。
-# 需要：ssh root@192.168.0.15 存取權（會從 VPS 取得唯讀 DB 快照）。
+# 受閘門控制、使用真實上游服務的組合冒煙測試（需要 VPS 存取權限 + 真實提供者點數）
+# 會呼叫真實提供者——需少量費用。絕不會在 CI 中執行。未啟用閘門時會正常略過。
+# 需要：ssh root@192.168.0.15 存取權限（從 VPS 載入唯讀 DB 快照）。
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# 第 3 階段 VPS 即時煙霧測試 — 純 Node ESM 指令碼，直接呼叫線上的 .15 伺服器。
-# 需要：ssh root@192.168.0.15 存取權（combo 會透過 SSH sqlite 建立/拆除）。
-# 會實際呼叫真實 provider（小幅成本）。只會建立/刪除 __live_test__* combo。絕不在 CI 中執行。
-# .15 上的 REQUIRE_API_KEY=false，因此不需要 API 金鑰，但若已設定，仍會採用 COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY。
-npm run test:combo:live:vps              # 7 個 HTTP 情境（priority/round-robin/weighted/cost/fusion/auto + health）
-npm run test:combo:live:vps:failover     # 新增真實的跨 provider 容錯移轉情境（共 8 個）
+# 第 3 階段 VPS 即時冒煙測試——純 Node ESM 指令碼，直接呼叫即時 .15 伺服器。
+# 需要：ssh root@192.168.0.15 存取權限（透過 SSH sqlite 建立／移除組合）。
+# 會呼叫真實提供者（少量費用）。僅建立／刪除 __live_test__* 組合。絕不會在 CI 中執行。
+# .15 上的 REQUIRE_API_KEY=false，因此不需要 API 金鑰，但若有設定，仍會採用 COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY。
+npm run test:combo:live:vps              # 7 個 HTTP 情境（優先順序／循環／加權／成本／融合／自動 + 健康狀態）
+npm run test:combo:live:vps:failover     # 新增真實的跨提供者容錯移轉情境（共 8 個）
 ```
 
 覆蓋率注意事項：
 
-- `npm run test:coverage` 會測量主要單元測試套件的原始碼覆蓋率，排除 `tests/**`，並包含 `open-sse/**`
-- Pull Request 必須讓覆蓋率閘門維持在 **60%+** 語句/行/函式/分支
-- 如果 PR 變更了 `src/`、`open-sse/`、`electron/` 或 `bin/` 中的正式程式碼，就必須在同一個 PR 中新增或更新自動化測試
-- `npm run coverage:report` 會列印最近一次覆蓋率執行的詳細逐檔報告
-- `npm run test:coverage:legacy` 會保留舊指標，以供歷史比較
-- 請參閱 `docs/ops/COVERAGE_PLAN.md` 以了解分階段的覆蓋率改善藍圖
+- `npm run test:coverage` 會測量主要單元測試套件的原始碼覆蓋率、排除 `tests/**`，並包含 `open-sse/**`
+- Pull Request 必須維持陳述式／行／函式／分支的覆蓋率閘門在 **60%+**
+- 如果 PR 變更了 `src/`、`open-sse/`、`electron/` 或 `bin/` 中的正式環境程式碼，則必須在同一個 PR 中新增或更新自動化測試
+- `npm run coverage:report` 會輸出最近一次覆蓋率執行結果的逐檔詳細報告
+- `npm run test:coverage:legacy` 會保留較舊的指標，以供歷史比較
+- 分階段改善覆蓋率的路線圖請參閱 `docs/ops/COVERAGE_PLAN.md`
 
 ### Pull Request 要求
 
-在開啟 PR 之前，請使用
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) 針對
-你所變更的內容執行聚焦循環。完整單元測試套件（4 個 CI 分片）、Vitest、**60%+** 覆蓋率閘門，以及
-正式建置都是 CI 的責任 — 在本機執行它們不會帶來 PR
-檢查不會提供的額外訊號，而且在較小的機器上可能會讓主機飽和（#8084）：
+開啟 PR 前，請使用
+[貢獻黃金路徑](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)，針對你所做的變更執行聚焦迴圈。
+完整單元測試套件（4 個 CI 分片）、Vitest、**60%+** 覆蓋率閘門，以及
+正式環境建置均由 CI 負責——在本機執行它們不會提供 PR 檢查之外的額外訊號，
+而且在較小型的機器上可能會耗盡主機資源（#8084）：
 
-- 執行涵蓋你變更的測試檔案：`node --import tsx/esm --test tests/unit/<file>.test.ts`
+- 執行涵蓋你所做變更的測試檔案：`node --import tsx/esm --test tests/unit/<file>.test.ts`
 - 執行 `npm run lint`
-- 每當正式程式碼變更時，請在同一個 PR 中包含或更新自動化測試
-- 當正式程式碼變更時，請在 PR 描述中包含變更或新增的測試檔案
-- 當 CI 中已設定專案密鑰時，請檢查 PR 上的 SonarQube 結果
+- 每當正式環境程式碼有所變更時，請在同一個 PR 中加入或更新自動化測試
+- 在 `node:test` 檔案中，請將每個頂層 `await`（例如 `await import(...)`）放在第一個 `test()` / `describe()` 之前：使用 `--test-force-exit` 時，在其後註冊的測試可能會無聲地完全不執行（#18045；由 `npm run check:test-tla-order` 強制檢查）
+- 正式環境程式碼變更時，請在 PR 說明中列出已變更或新增的測試檔案
+- 若 CI 中已設定專案密鑰，請檢查 PR 上的 SonarQube 結果
 
-目前測試狀態：**122 個單元測試檔案**，涵蓋：
+目前的測試狀態：**122 個單元測試檔案**，涵蓋：
 
-- Provider 轉譯器與格式轉換
+- 提供者轉譯器與格式轉換
 - 速率限制、斷路器與韌性
 - 語意快取、冪等性、進度追蹤
 - 資料庫操作與結構描述（21 個 DB 模組）

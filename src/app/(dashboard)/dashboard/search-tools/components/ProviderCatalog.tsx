@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import type { SearchProviderCatalogItem } from "@/shared/schemas/searchTools";
 
 interface ProviderCatalogProps {
@@ -179,12 +181,7 @@ export default function ProviderCatalog({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8" data-testid="catalog-loading">
-        <span
-          className="material-symbols-outlined text-[20px] text-primary animate-spin"
-          aria-hidden="true"
-        >
-          progress_activity
-        </span>
+        <Icon name="progress_activity" size={20} className="text-primary animate-spin" />
       </div>
     );
   }
@@ -202,14 +199,11 @@ export default function ProviderCatalog({
       {/* Filter tabs */}
       <div className="flex gap-1">
         {(["all", "search", "fetch"] as const).map((kind) => (
-          <button
+          <Button
             key={kind}
-            className={[
-              "text-[10px] px-2.5 py-1 rounded-md font-medium transition-colors",
-              filterKind === kind
-                ? "bg-primary/15 text-primary"
-                : "bg-black/5 dark:bg-white/5 text-text-muted hover:text-text-main",
-            ].join(" ")}
+            size="sm"
+            variant={filterKind === kind ? "secondary" : "ghost"}
+            aria-pressed={filterKind === kind}
             onClick={() => setFilterKind(kind)}
             data-testid={`filter-${kind}`}
           >
@@ -218,7 +212,7 @@ export default function ProviderCatalog({
               : kind === "search"
                 ? `Search (${searchCount})`
                 : `Fetch (${fetchCount})`}
-          </button>
+          </Button>
         ))}
       </div>
 

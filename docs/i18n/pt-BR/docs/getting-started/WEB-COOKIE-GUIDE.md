@@ -4,15 +4,15 @@
 
 ---
 
-Os provedores de Cookie da Web permitem que o OmniRoute use um serviço de IA por meio da sua sessão existente no navegador, em vez de uma chave de API. Eles são úteis quando você já tem acesso a um serviço pelo site e deseja que o OmniRoute use a mesma sessão autenticada.
+Os provedores de Cookie da Web permitem que o OmniRoute use um serviço de IA por meio da sua sessão existente no navegador, em vez de uma chave de API. Eles são úteis quando você já tem acesso a um serviço por meio do site dele e deseja que o OmniRoute use a mesma sessão autenticada.
 
-Diferentemente dos provedores que usam chave de API, os provedores de Cookie da Web se autenticam usando as credenciais que seu navegador envia ao site.
+Diferentemente dos provedores com chave de API, os provedores de Cookie da Web fazem a autenticação usando as credenciais que seu navegador envia ao site.
 
 ---
 
 # Antes de Começar
 
-> **Importante:** Sempre copie as credenciais de uma **requisição de rede ativa**, **não** do armazenamento de cookies do navegador.
+> **Importante:** Sempre copie as credenciais de uma **requisição de rede ativa**, e **não** do armazenamento de cookies do seu navegador.
 
 Muitos problemas de autenticação são causados pela cópia de cookies do local errado.
 
@@ -30,9 +30,9 @@ Embora esses cookies pareçam corretos, eles podem estar:
 
 - desatualizados
 - incompletos
-- sem cookies que são enviados somente em requisições autenticadas
+- sem cookies que são enviados apenas em requisições autenticadas
 
-Usar esses valores pode causar falhas de autenticação, mesmo que pareçam válidos.
+O uso desses valores pode causar falhas de autenticação, mesmo que eles pareçam válidos.
 
 ## Copie de uma Requisição Ativa
 
@@ -76,7 +76,7 @@ As credenciais exatas necessárias dependem do provedor.
 
 # Formatos de Credenciais dos Provedores
 
-Sites diferentes armazenam a autenticação de formas distintas. Alguns exigem apenas cookies, enquanto outros podem exigir cabeçalhos ou tokens adicionais.
+Sites diferentes armazenam a autenticação de maneiras distintas. Alguns exigem apenas cookies, enquanto outros podem exigir cabeçalhos ou tokens adicionais.
 
 | Provedor                        | Formato das Credenciais                 | Guia do Provedor                 |
 | ------------------------------- | --------------------------------------- | -------------------------------- |
@@ -84,7 +84,7 @@ Sites diferentes armazenam a autenticação de formas distintas. Alguns exigem a
 | ChatGPT Web (Codex)             | Cabeçalho Cookie completo               | `docs/providers/CHATGPT_WEB.md`  |
 | Gemini Web                      | _(verificar)_                           |                                  |
 | Copilot Web                     | _(verificar)_                           | `docs/providers/COPILOT-M365.md` |
-| Microsoft 365 Copilot (BizChat) | WS access_token + chathubPath           | `docs/providers/COPILOT-M365.md` |
+| Microsoft 365 Copilot (BizChat) | access_token do WS + chathubPath        | `docs/providers/COPILOT-M365.md` |
 | Grok Web                        | _(verificar)_                           |                                  |
 | ...                             | ...                                     | ...                              |
 
@@ -92,17 +92,17 @@ Sites diferentes armazenam a autenticação de formas distintas. Alguns exigem a
 
 ## NoTrack (notrack-web)
 
-NoTrack ([notrack.ai](https://notrack.ai)) é uma plataforma gratuita de chat para consumidores que não exige cadastro — a sessão é criada anonimamente na primeira visita e persiste por meio de três cookies: `uid`, `si_usr_id` e `si_ses_id`. O OmniRoute encaminha o mesmo endpoint `/api/dispatch` por meio de um único ID de modelo (`notrack-c`, alias `ntw`).
+NoTrack ([notrack.ai](https://notrack.ai)) é uma plataforma gratuita de chat para consumidores que não exige cadastro — a sessão é criada anonimamente na primeira visita e persiste por meio de três cookies: `uid`, `si_usr_id` e `si_ses_id`. O OmniRoute atua como proxy para o mesmo endpoint `/api/dispatch` por meio de um único ID de modelo (`notrack-c`, alias `ntw`).
 
 ### Etapas para conectar
 
-1. Abra [notrack.ai](https://notrack.ai) no navegador e aguarde a definição do cookie da sessão anônima.
+1. Abra [notrack.ai](https://notrack.ai) no seu navegador e permita que o cookie da sessão anônima seja definido.
 2. Abra **DevTools → Network**, atualize a página e clique em qualquer solicitação `/api`.
 3. Em **Request Headers**, copie o valor completo do cabeçalho `Cookie`.
 4. No OmniRoute, acesse **Providers → Add Provider → NoTrack Web (Free)**.
 5. Cole a string do cookie no campo `apiKey` e clique em **Save**.
 
-O OmniRoute extrai `uid`, `si_usr_id` e `si_ses_id` da string colada e recria um cabeçalho `Cookie` limpo somente com esses pares — além de `nt_session` (o token `ntk_…` definido para contas autenticadas), quando presente. Se algum dos três estiver ausente, a string bruta colada será encaminhada sem alterações, para que os operadores possam testar formatos alternativos.
+O OmniRoute extrai `uid`, `si_usr_id` e `si_ses_id` da string colada e reconstrói um cabeçalho `Cookie` limpo somente com esses pares — além de `nt_session` (o token `ntk_…` definido para contas autenticadas), quando presente. Se algum dos três estiver ausente, a string original colada será encaminhada sem alterações para que os operadores possam experimentar formatos alternativos.
 
 ### IDs de modelo
 
@@ -124,54 +124,54 @@ O executor aceita estes campos opcionais no corpo da solicitação:
 | `notrack_mode`        | `usual` | Modo de despacho (string de formato livre; o upstream aceita `usual`, …)         |
 | `notrack_max_turns`   | `6`     | Número de turnos internos que o upstream pode realizar antes de responder.       |
 | `notrack_chat_id`     | `null`  | Retoma um chat upstream existente (omita para iniciar um novo chat).             |
-| `notrack_attachments` | `[]`    | Array de descritores de anexos upstream repassado sem alterações.                |
+| `notrack_attachments` | `[]`    | Array de passagem direta de descritores de anexos do upstream.                   |
 | `notrack_regenerate`  | `false` | Defina como `true` para solicitar uma resposta regenerada para o turno anterior. |
 
 ### Recursos
 
 - Conclusões de chat **com e sem streaming**.
-- **Chamadas de ferramentas** — defina `tools: [...]` na solicitação; o executor as serializa em um contrato de envelope de chamada de ferramenta e converte as respostas do modelo de volta para `tool_calls` da OpenAI.
-- **`response_format`** — há suporte para `json_object` e `json_schema`. O executor extrai o primeiro objeto JSON da resposta do modelo e o converte em string antes de retorná-lo.
+- **Chamada de ferramentas** — defina `tools: [...]` na solicitação; o executor as serializa em um contrato de envelope de chamada de ferramenta e analisa as respostas do modelo de volta para `tool_calls` da OpenAI.
+- **`response_format`** — há suporte a `json_object` e `json_schema`. O executor extrai o primeiro objeto JSON da resposta do modelo e o converte em string antes de retorná-lo.
 - **Indicação de raciocínio** — o executor emite um delta `reasoning` quando o upstream envia um evento `thinking`.
 
 ### Limitações
 
-- O upstream aplica cotas de uso anônimo — quando elas são excedidas, o executor retorna um erro 429 com uma mensagem amigável.
+- O upstream impõe cotas de uso anônimo — quando elas são excedidas, o executor retorna um erro 429 com uma mensagem amigável.
 - Todos os IDs de modelo são resolvidos para o mesmo modelo de despacho upstream; não há seleção por modelo.
-- O executor não chama o endpoint `/api/chats` do upstream, portanto o histórico do chat e as sessões não são gerenciados automaticamente. Use `notrack_chat_id` para retomar um chat upstream existente.
+- O executor não chama o endpoint `/api/chats` do upstream, portanto o histórico e as sessões de chat não são gerenciados automaticamente. Use `notrack_chat_id` para retomar um chat upstream existente.
 
 ---
 
-# O que os provedores de cookies da web podem e não podem fazer
+# O que os provedores de cookies da Web podem e não podem fazer
 
-Os provedores de cookies da web reutilizam a interface de chat de um site. Eles **não** oferecem os mesmos recursos que as APIs oficiais.
+Os provedores de cookies da Web reutilizam a interface de chat de um site. Eles **não** oferecem os mesmos recursos que as APIs oficiais.
 
 ## Compatível
 
 - Autenticação usando sua sessão existente do navegador
-- Acesso aos modelos disponíveis em sua conta
+- Acesso aos modelos disponíveis por meio da sua conta
 - Transmissão contínua das respostas do chat
 - Nenhuma chave de API necessária
 
 ## Não compatível
 
-- Chamadas de funções
-- Chamadas de ferramentas
+- Chamada de funções
+- Chamada de ferramentas
 - Edição automática de arquivos
 - Fluxos de trabalho de IDE com agentes
 - Recursos exclusivos da API
 
 Esse é o comportamento esperado e **não** é um bug.
 
-Se você precisar executar ferramentas, editar arquivos automaticamente ou usar outros fluxos de trabalho com agentes, use um **provedor com chave de API** em vez de um provedor de cookies da Web.
+Se você precisar de execução de ferramentas, edição automática de arquivos ou outros fluxos de trabalho com agentes, use um **provedor com chave de API** em vez de um provedor de Web Cookie.
 
 ---
 
 # Ressalva sobre a validação
 
-Um **Teste de conexão** bem-sucedido ou uma validação de cookies bem-sucedida apenas verifica se as credenciais fornecidas parecem estar no formato esperado.
+Um **Test Connection** bem-sucedido ou uma validação de cookie bem-sucedida apenas confirma que as credenciais fornecidas parecem estar no formato esperado.
 
-Até que o Issue #7857 seja resolvido, uma validação bem-sucedida **não garante** que o provedor conseguirá realizar a autenticação.
+Até que a Issue #7857 seja resolvida, uma validação bem-sucedida **não garante** que o provedor conseguirá realizar a autenticação.
 
 Se a autenticação ainda falhar, verifique se você copiou as credenciais de uma solicitação de rede ativa, e não do armazenamento de cookies do navegador.
 
@@ -184,15 +184,15 @@ Se a autenticação ainda falhar, verifique se você copiou as credenciais de um
 Verifique se as credenciais foram copiadas de:
 
 ```
-Rede
-→ Cabeçalhos da solicitação
+Network
+→ Request Headers
 → Cookie
 ```
 
 e **não** de:
 
 ```
-Aplicativo
+Application
 → Cookies
 ```
 
@@ -200,7 +200,7 @@ Aplicativo
 
 ## O cookie funciona no navegador, mas não no OmniRoute
 
-Alguns provedores incluem cookies que só são enviados durante solicitações autenticadas.
+Alguns provedores incluem cookies que são enviados apenas durante solicitações autenticadas.
 
 Copie novamente as credenciais de uma nova solicitação de rede após abrir uma conversa com sucesso.
 
@@ -208,34 +208,51 @@ Copie novamente as credenciais de uma nova solicitação de rede após abrir uma
 
 ## Sessão expirada
 
-Os provedores de cookies da Web usam sua sessão existente do navegador.
+Os provedores de Web Cookie usam sua sessão existente do navegador.
 
-Se a sessão do navegador expirar ou você sair da sua conta, será necessário copiar um novo conjunto de credenciais. Para automatizar a renovação de cookies para provedores da Web compatíveis, consulte a ferramenta complementar [Extensão de sincronização da sessão do navegador](../guides/SESSION-SYNC-EXTENSION.md).
+Se a sessão do navegador expirar ou você sair da conta, será necessário copiar um novo conjunto de credenciais. Para automatizar a renovação de cookies em provedores web compatíveis, consulte a ferramenta complementar [Extensão de sincronização da sessão do navegador](../guides/SESSION-SYNC-EXTENSION.md).
 
 ---
 
-## O teste de conexão é bem-sucedido, mas as solicitações falham
+## O teste de conexão é aprovado, mas as solicitações falham
 
-Até que o Issue #7857 seja resolvido, ser aprovado na validação não garante que a solicitação de autenticação será bem-sucedida.
+Até que a Issue #7857 seja resolvida, a aprovação na validação não garante que a solicitação de autenticação será bem-sucedida.
 
-Copie novamente suas credenciais de uma nova solicitação autenticada antes de continuar com a solução de problemas.
+Copie novamente suas credenciais de uma nova solicitação autenticada antes de continuar a solução de problemas.
+
+---
+
+## O ChatGPT Web falha com "Unsupported ChatGPT integrity dependency"
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+A credencial está correta — esse erro vem da ponte, não da sessão. O chatgpt.com atribui os
+IDs dos módulos a cada implantação, e a ponte fixava o ID do auxiliar Sentinel que ela instancia; portanto,
+uma recompilação do chatgpt.com que renomeou o auxiliar interrompeu todas as interações, embora o cookie continuasse válido. Autorizar
+novamente a conexão não corrige o problema.
+
+As compilações que resolvem o módulo por meio do próprio runtime da página não fixam nenhum ID e não apresentam esse problema. Se você encontrar esse
+erro, atualize o OmniRoute e execute novamente a verificação da conexão.
 
 ---
 
 # Exemplo de provedor
 
-Para obter um passo a passo completo e específico de um provedor, consulte:
+Para ver um passo a passo completo específico de um provedor, consulte:
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
-O guia do Claude Web demonstra o processo completo de configuração de um provedor de cookies da Web e serve como implementação de referência.
+O guia do Claude Web demonstra o processo completo de configuração de um provedor de Web Cookie e serve como implementação de referência.
 
 ---
 
 # Práticas recomendadas
 
-- Copie as credenciais de uma nova solicitação autenticada.
+- Copie as credenciais de uma solicitação autenticada recente.
 - Evite reutilizar cookies antigos.
-- Mantenha a sessão do navegador ativa enquanto estiver usando provedores de cookies da Web.
+- Mantenha sua sessão do navegador ativa enquanto estiver usando provedores de Web Cookie.
 - Trate os cookies copiados como credenciais confidenciais.
 - Use provedores com chave de API quando precisar de chamadas de funções ou fluxos de trabalho com agentes.

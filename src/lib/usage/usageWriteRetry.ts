@@ -15,6 +15,7 @@
  */
 
 import { getDbInstance } from "../db/core";
+import { resolveBillingTeamIdForApiKeyAt } from "../db/teams";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
   resolveOrphanedUsageAccountIdentity,
@@ -112,6 +113,7 @@ type PreparedEntry = {
   entry: UsageEntry;
   timestamp: string;
   serviceTier: string;
+  billingTeamId: string | null;
   tokensInput: number;
   tokensOutput: number;
   agentSession: AgentSessionUsage | null;
@@ -136,6 +138,9 @@ function prepareEntry(
     entry,
     timestamp,
     serviceTier: normalizeServiceTier(entry.serviceTier ?? entry.service_tier),
+    // Ordinary terminal writes always resolve ownership from effective history.
+    // Historical snapshot restoration belongs to the authenticated JSON importer.
+    billingTeamId: resolveBillingTeamIdForApiKeyAt(entry.apiKeyId, timestamp),
     tokensInput: getLoggedInputTokens(entry.tokens),
     tokensOutput: getLoggedOutputTokens(entry.tokens),
     agentSession,
@@ -166,7 +171,15 @@ function insertUnlessDuplicate(
 }
 
 function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEntry): void {
-  const { entry, timestamp, serviceTier, tokensInput, tokensOutput, accountIdentity } = prepared;
+  const {
+    entry,
+    timestamp,
+    serviceTier,
+    billingTeamId,
+    tokensInput,
+    tokensOutput,
+    accountIdentity,
+  } = prepared;
   const { providerCredits, providerCostUsd } = readReportedCost(entry.provider, entry.tokens);
   // Only a row that is actually inserted counts toward its session (dedup no-ops do not).
   // A lock fails the whole write, so the deferred retry replays the row and its session.
@@ -174,11 +187,11 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
   db.prepare(
     `
     INSERT INTO usage_history (provider, model, connection_id, account_key, account_label,
-      account_label_priority, api_key_id, api_key_name, tokens_input, tokens_output,
-      tokens_cache_read, tokens_cache_creation, tokens_reasoning, service_tier, status, success,
-      latency_ms, ttft_ms, error_code, combo_strategy, endpoint, cpa_auth_index, agent_session_id,
-      timestamp, provider_credits, provider_cost_usd)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      account_label_priority, api_key_id, api_key_name, billing_team_id,
+      tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning,
+      service_tier, status, success, latency_ms, ttft_ms, error_code, combo_strategy, endpoint,
+      cpa_auth_index, agent_session_id, timestamp, provider_credits, provider_cost_usd)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
   ).run(
     entry.provider ? resolveProviderId(entry.provider) : null,
@@ -189,6 +202,7 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     accountIdentity.accountLabelPriority,
     entry.apiKeyId || null,
     entry.apiKeyName || null,
+    billingTeamId,
     tokensInput,
     tokensOutput,
     getPromptCacheReadTokens(entry.tokens),

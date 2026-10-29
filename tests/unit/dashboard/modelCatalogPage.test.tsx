@@ -1,7 +1,17 @@
 // @vitest-environment jsdom
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 import enMessages from "@/i18n/messages/en.json";
 
@@ -93,7 +103,7 @@ describe("ModelCatalogPage", () => {
     });
     await flush();
 
-    expect(fetch).toHaveBeenCalledWith("/api/models/catalog", expect.anything());
+    expect(fetch).toHaveBeenCalledWith("/api/models/catalog?includeHidden=1", expect.anything());
     expect(container.textContent).toContain("Alpha Labs");
     expect(container.textContent).toContain("Beta AI");
     expect(container.textContent).toContain("Free");

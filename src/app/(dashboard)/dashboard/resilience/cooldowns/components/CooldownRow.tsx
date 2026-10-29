@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { TableCell, TableRow } from "@omniroute/ui-kit/table";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Checkbox from "@/shared/components/Checkbox";
@@ -52,35 +53,33 @@ export default function CooldownRow({
   const lockedModels = connection.lockouts.map((lockout) => lockout.model).join(", ");
 
   return (
-    <tr className="border-t border-border">
-      <td className="px-3 py-2">
+    <TableRow>
+      <TableCell>
         <Checkbox
           checked={selected}
           disabled={!clearable}
-          aria-label={t("list.select")}
+          aria-label={`${t("list.select")} ${connection.name ?? connection.id.slice(0, 8)}`}
           onChange={(event) => onToggle(connection.id, event.target.checked)}
         />
-      </td>
-      <td className="px-3 py-2">
+      </TableCell>
+      <TableCell>
         <div className="font-medium text-text-main">
           {connection.name ?? connection.id.slice(0, 8)}
         </div>
         <div className="text-xs text-text-muted">{connection.authType}</div>
-      </td>
-      <td className="px-3 py-2">{connection.provider}</td>
-      <td className="px-3 py-2">
+      </TableCell>
+      <TableCell>{connection.provider}</TableCell>
+      <TableCell>
         <Badge variant={STATUS_VARIANT[connection.status]} size="sm">
           {t(`status.${connection.status}`)}
         </Badge>
-      </td>
-      <td className="px-3 py-2">{remaining > 0 ? formatRemaining(remaining) : "-"}</td>
-      <td className="px-3 py-2" title={lockedModels}>
-        {connection.lockouts.length}
-      </td>
-      <td className="px-3 py-2 text-text-muted">
+      </TableCell>
+      <TableCell>{remaining > 0 ? formatRemaining(remaining) : "-"}</TableCell>
+      <TableCell title={lockedModels}>{connection.lockouts.length}</TableCell>
+      <TableCell className="text-text-muted">
         <LastError connection={connection} />
-      </td>
-      <td className="px-3 py-2 text-right">
+      </TableCell>
+      <TableCell className="text-right">
         <Button
           size="sm"
           variant="secondary"
@@ -89,7 +88,7 @@ export default function CooldownRow({
         >
           {t("list.clear")}
         </Button>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }

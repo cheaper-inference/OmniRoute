@@ -6,6 +6,8 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ProviderTransferPanel from "@/app/(dashboard)/dashboard/settings/components/ProviderTransferPanel";
+// The decision picker is the shared Select in kit mode (KEA-7886): a Radix combobox, no <select>.
+import { chooseKitSelectValue, kitSelectTriggers, kitSelectValue } from "../../helpers/kitSelect";
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
@@ -192,14 +194,11 @@ describe("ProviderTransferPanel", () => {
 
     await click(button("previewButton"));
     expect(document.body.textContent).toContain("statusConflict");
-    const select = document.body.querySelector<HTMLSelectElement>("select");
-    expect(select?.value).toBe("skip");
-    await act(async () => {
-      if (select) {
-        select.value = "replace";
-        select.dispatchEvent(new Event("change", { bubbles: true }));
-      }
-    });
+    const [select] = kitSelectTriggers(document.body);
+    expect(select).toBeTruthy();
+    expect(kitSelectValue(select)).toBe("skip");
+    chooseKitSelectValue(select, "replace");
+    await flush();
 
     await click(button("importButton"));
     const importCall = calls.find((call) => call.url.endsWith("/import"));

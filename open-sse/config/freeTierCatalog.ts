@@ -55,6 +55,16 @@ export const FREE_TIER_TOS: Record<string, TosVerdict> = {
   ai21: "avoid",
   iflytek: "avoid",
   coze: "avoid",
+  // GitHub Copilot: OmniRoute uses api.githubcopilot.com endpoints that are not
+  // published as a general third-party inference API. Personal use via a self-hosted
+  // proxy is neither expressly permitted nor expressly forbidden in GitHub's terms
+  // (GitHub Terms for Additional Products and Features — GitHub Copilot section,
+  // effective 2026-04-27). Classified "ambiguous" pending explicit authorization.
+  // Source: github.com/customer-terms/github-copilot-product-specific-terms
+  // and docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features
+  // (accessed 2026-09-02).
+  github: "ambiguous",
+  "ghe-copilot": "ambiguous",
 };
 
 export interface FreeTierTotals {

@@ -36,6 +36,14 @@ export function sortToolsByName<T>(tools: T[]): T[] {
   return [...tools].sort((a, b) => getToolName(a).localeCompare(getToolName(b)));
 }
 
+// #12234: injected tools (memory / skills) are sorted by name so the prompt-cache prefix
+// is deterministic; they follow the client's tools, which keep the client's own order.
+function orderToolsForCaching<T>(tools: T[], clientToolNames: Set<string>): T[] {
+  const fromClient = tools.filter((tool) => clientToolNames.has(getToolName(tool)));
+  const injected = tools.filter((tool) => !clientToolNames.has(getToolName(tool)));
+  return [...fromClient, ...sortToolsByName(injected)];
+}
+
 export function getSkillsProviderForFormat(
   format: string
 ): "openai" | "anthropic" | "google" | "other" {
@@ -72,6 +80,11 @@ export async function injectMemoryAndSkills({
     ? await getMemorySettings().catch(() => DEFAULT_MEMORY_SETTINGS)
     : null;
 
+  // Tools the client sent keep their order: a later cap (upstreamBody) keeps the head of
+  // the list, so sorting client tools alphabetically made it drop the built-ins (#18120).
+  const clientToolNames = new Set(
+    Array.isArray(body.tools) ? body.tools.map((tool) => getToolName(tool)) : []
+  );
   const builtinOwnerSet: string[] = [];
   const injectedCustomSkillNames: string[] = [];
 
@@ -257,7 +270,7 @@ export async function injectMemoryAndSkills({
   if (Array.isArray(body.tools) && body.tools.length > 1) {
     body = {
       ...body,
-      tools: sortToolsByName(body.tools),
+      tools: orderToolsForCaching(body.tools, clientToolNames),
     };
   }
 
