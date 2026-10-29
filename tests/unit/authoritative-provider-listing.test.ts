@@ -111,6 +111,23 @@ test("authoritative membership and manual metadata precedence are provider-indep
   }
 });
 
+test("CodeBuddy CN's synced roster hides static models removed upstream", () => {
+  const models = mergeProviderModelListing({
+    providerId: "codebuddy-cn",
+    registryModels: [
+      { id: "minimax-m3", name: "MiniMax-M3" },
+      { id: "minimax-m3-pay", name: "MiniMax-M3" },
+    ],
+    syncedModels: [{ id: "minimax-m3-pay", name: "MiniMax-M3" }],
+    customModels: [{ id: "minimax-m3", source: "imported" }],
+  });
+
+  assert.deepEqual(
+    models.map((model) => model.id),
+    ["minimax-m3-pay"]
+  );
+});
+
 test("curated-only catalogs cannot be emptied or extended by a live-catalog flag", () => {
   for (const providerId of ["kimi-web", "zai-web", "chatgpt-web"]) {
     const models = mergeProviderModelListing({
@@ -147,6 +164,28 @@ test("curated-only providers still accept operator-defined custom models", () =>
     const manual = models.find((m) => m.id === "manual");
     assert.equal(manual?.source, "custom");
     assert.equal(manual?.name, "My model");
+  }
+});
+
+test("curated-only providers drop custom rows a discovery sync imported", () => {
+  // #18018 keeps operator rows; a curated provider has no upstream catalog, so a row
+  // with an import source is a stale leftover of a retired discovery path (#8451).
+  for (const providerId of ["kimi-web", "zai-web", "chatgpt-web", "codebuddy-intl"]) {
+    const models = mergeProviderModelListing({
+      ...input,
+      providerId,
+      customModels: [
+        { id: "retired-import", source: "imported" },
+        { id: "api-synced", source: "api-sync" },
+        { id: "auto-synced", source: "auto-sync" },
+        { id: "manual", name: "My model", source: "manual" },
+      ],
+    });
+    assert.deepEqual(
+      models.map((m) => m.id),
+      ["retired", "live", "manual"],
+      providerId
+    );
   }
 });
 

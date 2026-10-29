@@ -87,6 +87,18 @@ const chatBody = {
 };
 
 test("an Antigravity 429 is returned once, not restarted by the cooldown-aware retry", async () => {
+  // Warm the chat pipeline first: the first handleChat in a process pays the cold module/DB
+  // initialisation, which under a loaded runner alone exceeds the 4 s budget below and would make
+  // the timing assertion measure start-up instead of a cooldown wait. State is reset afterwards,
+  // so the measured request starts exactly like the original single call.
+  await seedAgyConnection();
+  stubCloudCode429();
+  await handleChat(buildRequest({ body: chatBody }));
+  await resetStorage();
+  clearAllModelLockouts();
+  resetAntigravity429GuardForTests();
+  await settingsDb.updateSettings({ requestRetry: 3, maxRetryIntervalSec: 30 });
+
   await seedAgyConnection();
   const counter = stubCloudCode429();
 

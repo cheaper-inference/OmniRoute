@@ -112,9 +112,11 @@ variant="primary"` on kitin `default`-nappi (`--ci-button-primary-*`: kääntein
 3. Kitin puutteiden kiertotavat sijaitsevat sovittimessa (tai tiedoston `globals.css` osassa `@layer components`, kun korjaus on tyylillinen), ei koskaan hakemistossa `packages/ui-kit/src`.
 4. Lisää tai päivitä `tests/unit/ui/adapters/<name>.test.tsx`. Jos sovittimella on monia kutsujia, vertaile renderöityä HTML:ää ennen muutosta ja sen jälkeen — täyte- tai wrapper-muutokset leviävät jokaiseen näkymään.
 
-## 5. Kitin päivittäminen
+## 5. Sarjan päivittäminen
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopioi kyseisessä commitissa olevan upstreamin `src/`-hakemiston kohteeseen `packages/ui-kit/src` ja soveltaa ainoan sallitun muunnoksen (se pudottaa `.js`-päätteen suhteellisista importeista). Tämän jälkeen: käy läpi `git diff packages/ui-kit`, tee visuaalinen tarkistus providers-, settings-, combos-, usage- ja endpoint-näkymille molemmissa teemoissa, aja `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ja avaa PR, johon liität upstreamin muutoslokin.
+`npm run check:ui-kit-upstream` vertaa `packages/ui-kit/UPSTREAM.md` kiinnitettyä versiota ylävirran repon uusimpaan `v*` tunnisteeseen ja tulostaa synkronointikomennon, kun julkaisu on julkaistu. Viikoittainen `UI Kit upstream watch` -työnkulku (`.github/workflows/ui-kit-upstream-watch.yml`) suorittaa saman tarkistuksen ja pitää yhden seurantaongelman auki, kun nasta on takana. ylävirran repo on yksityinen, joten työnkulku tarvitsee vain luku -tunnuksen `UI_KIT_READ_TOKEN` salaisuuteen ja pysyy inerttinä ilman sitä.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopioi ylävirran `src/` kyseisessä vahvistuksessa (`latest` = uusin `v*` tunniste) `packages/ui-kit/src` ksi, käyttää yksittäistä sallittua muunnosta (poistaa `.js` liitteen suhteellisista tuonnista) ja asettaa työtilan version `packages/ui-kit/package.json` :ssa ja `package-lock.json` ssä ylävirran versioksi. Sitten: tarkista `git diff packages/ui-kit`, tee visuaalinen välitys palveluntarjoajille, asetuksille, yhdistelmälle, käytölle ja päätepisteelle molemmissa teemoissa, suorita `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ja avaa PR ylävirran muutoslokin avulla.
 
 ## 6. README kaaviot
 

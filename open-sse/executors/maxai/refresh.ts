@@ -6,8 +6,8 @@
  * `/oauth/refresh_access_token` (web-app chunk 86042, `refreshAccessToken`). That
  * endpoint carries the SAME per-request `X-Authorization` signature as every other
  * MaxAI call (see ./signing.ts) — it is NOT a browser-only OAuth hop. A residential
- * Firefox-TLS client (wreq-js firefox_150, the OmniRoute egress overlay) passes the
- * TLS gate, so OmniRoute mints fresh access tokens itself with no browser.
+ * wreq-js TLS client (the OmniRoute egress overlay) passes the TLS gate, so
+ * OmniRoute mints fresh access tokens itself with no browser.
  *
  * The refresh token is minted out-of-band, once, by the browser Google-OAuth flow
  * (see maxaiBrowserLogin) and only needs re-minting when it itself expires (~yearly).
@@ -85,7 +85,11 @@ export async function maxaiRefreshAccessToken(
   // returns the current-best; on a fetch miss it returns whatever's already stored.
   const constants = await refreshMaxaiConstants({ fetchImpl: doFetch, signal: input.signal });
   if (!constants) {
-    return { ok: false, status: 0, error: "MaxAI signing constants unavailable (extraction failed)" };
+    return {
+      ok: false,
+      status: 0,
+      error: "MaxAI signing constants unavailable (extraction failed)",
+    };
   }
 
   const signed = buildMaxaiSignedHeaders(

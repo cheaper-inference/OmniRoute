@@ -29,9 +29,11 @@ import { isModelNotFound404 } from "../accountFallback/perModelFailureScope.ts";
 import { isRequestScoped400 } from "../accountFallback/requestScoped400.ts";
 import { isResourceNotFoundResponse } from "../errorClassifier.ts";
 import { isOpencodeFreeTierRefusal } from "../../executors/opencodeGeoBlock.ts";
+import { isChatGptWebBridgeFailure } from "../../utils/chatgptWebBridgeFailure.ts";
 import { getTrustedLocalRateLimitResponse } from "../rateLimitManager/errors.ts";
 import { TRANSLATION_FAILURE_CODE } from "../../handlers/chatCore/translationFailure.ts";
 import { isLocalModelPolicyResponse } from "../resolvedModelAccess.ts";
+import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 import {
   classifyComboOutcome,
@@ -283,6 +285,14 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   context_window_exceeded: true,
   upstream_empty_response: true,
   upstream_response_failed: true,
+  // The upstream cancelled THIS attempt (the request itself was fine, the
+  // provider is healthy — other requests to the same provider succeed in
+  // parallel). The ZCode app-server reports it as `model_request_cancelled`
+  // / "Model request was cancelled."; the executor re-tags it as
+  // `upstream_request_cancelled` so every resilience consumer below sees one
+  // request-scoped marker: no model lockout, no provider circuit-breaker
+  // failure, no provider cooldown, and no same-connection target skip.
+  upstream_request_cancelled: true,
   // Local combo per-target timer (targetTimeoutRunner) — not a connection health signal.
   combo_target_timeout: true,
   // Local limiter queue-capacity codes — not a provider/connection health signal.
@@ -355,11 +365,18 @@ export function isComboTargetTimeoutFailure(error?: {
  * lock that model so the next request does not spend another gate wait on it.
  * Other request-scoped failures (context length, local queue) stay unlocked.
  * The provider breaker still uses the request-scoped flag and does not see this.
+ * While the instance is draining (graceful shutdown), no failure is recorded as
+ * a model lockout at all — a self-inflicted teardown is not a model-health signal.
  */
 export function shouldRecordModelLockoutForComboFailure(
   requestScopedFailure: boolean,
   error?: { code?: string | null; type?: string | null }
 ): boolean {
+  // A graceful shutdown tears down provider clients while requests are still in
+  // flight. The resulting failure is evidence about OUR shutdown, not about the
+  // model's health, so it must never lock the model out of every later combo.
+  // The drain flag is read live on every call — it never latches.
+  if (isDraining()) return false;
   if (!requestScopedFailure) return true;
   return isComboTargetTimeoutFailure(error);
 }
@@ -487,6 +504,8 @@ export function shouldSkipConnDisable(
     (isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) &&
       !(provider === "cursor" && isModelNotFound404(result.status, errorText))) ||
     isSelfInflictedUpstreamTimeout(result.status, result.errorType, provider) ||
+    // #14948: a ChatGPT Web browser-bridge failure is local, not an account failure.
+    isChatGptWebBridgeFailure(provider, result.error) ||
     isReqScoped400
   );
 }

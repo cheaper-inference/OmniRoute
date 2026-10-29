@@ -66,6 +66,17 @@ export function computeLogTps(
   return tokens / (generationMs / 1000);
 }
 
+/** End-to-end throughput: the same output-token estimate over the full request. */
+export function computeLogE2eTps(
+  tokensOut: number | null | undefined,
+  tokensReasoning: number | null | undefined,
+  durationMs: number | null | undefined
+): number {
+  const tokens = resolveTpsOutputTokens(tokensOut, tokensReasoning);
+  const duration = nonNegative(durationMs);
+  return duration > 0 ? tokens / (duration / 1000) : 0;
+}
+
 /**
  * Tooltip for the TPS cell (#13130): exposes the generation-time breakdown so
  * thinking-model rows (long TTFT / prefill) explain why their TPS differs from

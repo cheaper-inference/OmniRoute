@@ -197,17 +197,17 @@ Punctul final JSON-RPC `/a2a` este punctul de intrare A2A canonic. Punctele fina
 
 ---
 
-## Adăugarea unei competențe noi
+## Adăugarea unei abilități noi
 
-1. **Creați fișierul competenței:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Creați fișierul abilității:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportați o funcție asincronă `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Urmați structura competențelor existente, precum `smartRouting.ts`.
+   Exportați o funcție asincronă `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Urmați structura abilităților existente, precum `smartRouting.ts`.
 
-2. **Înregistrați gestionarul:** în `src/lib/a2a/taskExecution.ts`, adăugați o intrare în `A2A_SKILL_HANDLERS`:
+2. **Înregistrați handlerul:** în `src/lib/a2a/taskExecution.ts`, adăugați o intrare în `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...competențe existente
+     // ...abilități existente
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,13 +215,13 @@ Punctul final JSON-RPC `/a2a` este punctul de intrare A2A canonic. Punctele fina
    };
    ```
 
-3. **Expuneți în Fișa agentului:** în `src/app/.well-known/agent.json/route.ts`, adăugați la sfârșitul matricei `skills`:
+3. **Expuneți abilitatea în fișa agentului:** în `src/lib/a2a/agentCardMetadata.ts` (partajat de `/.well-known/agent.json` și `/.well-known/agent-card.json`), adăugați următorul obiect în matricea `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Competența dvs.",
-     "description": "Descriere scurtă, axată pe intenție",
+     "name": "Abilitatea dvs.",
+     "description": "Descriere succintă, axată pe intenție",
      "tags": ["rutare", "cotă"],
      "examples": ["Exemplu de invocare în limbaj natural"]
    }
@@ -229,7 +229,7 @@ Punctul final JSON-RPC `/a2a` este punctul de intrare A2A canonic. Punctele fina
 
 4. **Scrieți teste:** `tests/unit/a2a-<your-skill>.test.ts`. Acoperiți scenariul reușit și scenariul de eroare.
 
-5. **Documentați** noua competență în tabelul `Competențe disponibile` din acest fișier.
+5. **Documentați** noua abilitate în tabelul `Available Skills` din acest fișier.
 
 ---
 
