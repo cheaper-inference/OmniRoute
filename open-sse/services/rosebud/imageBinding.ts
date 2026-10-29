@@ -71,3 +71,41 @@ export function scopedRosebudKey(scope: string, key: string) {
 export function matchesRosebudPin(pinned: string | undefined, selected: string | undefined) {
   return !pinned || pinned === selected;
 }
+
+/** The route uses this boundary so soft selector fallback cannot escape a paid binding. */
+function selectedConnectionId(value: unknown): string | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const id = (value as { connectionId?: unknown }).connectionId;
+  return typeof id === "string" ? id : undefined;
+}
+
+export async function selectRosebudImageCredentials<T>(options: {
+  pinned?: string;
+  eligible: string[];
+  lookup: (ids: string[], forced?: string) => Promise<T>;
+  bind: (candidate: string) => Promise<string | undefined>;
+  usable: (credentials: NonNullable<T>) => boolean;
+}) {
+  let pinned = options.pinned;
+  let selected = await options.lookup(pinned ? [pinned] : options.eligible, pinned);
+  const verify = (value: T, expected?: string): NonNullable<T> => {
+    const id = selectedConnectionId(value);
+    if (
+      !value ||
+      !id ||
+      !matchesRosebudPin(expected, id) ||
+      !options.eligible.includes(id) ||
+      !options.usable(value)
+    )
+      throw new RosebudError("original_connection_unavailable", 409);
+    return value;
+  };
+  let credentials = verify(selected, pinned);
+  const candidateId = selectedConnectionId(credentials)!;
+  pinned = await options.bind(candidateId);
+  if (pinned && candidateId !== pinned) {
+    selected = await options.lookup([pinned], pinned);
+    credentials = verify(selected, pinned);
+  }
+  return { credentials, pinned };
+}

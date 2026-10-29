@@ -8,6 +8,7 @@ import {
   rosebudImageBinding,
   scopedRosebudKey,
   matchesRosebudPin,
+  selectRosebudImageCredentials,
 } from "../../open-sse/services/rosebud/imageBinding.ts";
 import { RosebudRuntime } from "../../open-sse/services/rosebud/runtime.ts";
 import { RosebudError } from "../../open-sse/services/rosebud/cli.ts";
@@ -256,4 +257,51 @@ test("soft-dropping a pinned account must not authorize a second paid account", 
   assert.equal(matchesRosebudPin("account-a", "account-b"), false);
   assert.equal(matchesRosebudPin("account-a", undefined), false);
   assert.equal(matchesRosebudPin("account-a", "account-a"), true);
+});
+
+test("route selection rejects soft pin fallback, null credentials and a lost binding race", async () => {
+  for (const value of [{ connectionId: "b" }, null]) {
+    let bound = false;
+    await assert.rejects(
+      selectRosebudImageCredentials({
+        pinned: "a",
+        eligible: ["a", "b"],
+        lookup: async (ids) => {
+          assert.deepEqual(ids, ["a"]);
+          return value;
+        },
+        bind: async () => {
+          bound = true;
+          return "a";
+        },
+        usable: () => true,
+      }),
+      /original_connection_unavailable/
+    );
+    assert.equal(bound, false);
+  }
+  let lookups = 0;
+  const selected = await selectRosebudImageCredentials({
+    eligible: ["a", "b"],
+    lookup: async (ids, forced) => {
+      lookups++;
+      if (lookups === 1) return { connectionId: "b" };
+      assert.deepEqual(ids, ["a"]);
+      assert.equal(forced, "a");
+      return { connectionId: "a" };
+    },
+    bind: async () => "a",
+    usable: () => true,
+  });
+  assert.equal(selected.credentials.connectionId, "a");
+  assert.equal(lookups, 2);
+  await assert.rejects(
+    selectRosebudImageCredentials({
+      eligible: ["a", "b"],
+      lookup: async () => ({ connectionId: "b" }),
+      bind: async () => "a",
+      usable: () => true,
+    }),
+    /original_connection_unavailable/
+  );
 });
