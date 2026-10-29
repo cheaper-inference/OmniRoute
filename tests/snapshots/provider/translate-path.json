@@ -4852,6 +4852,29 @@
       "stream": "https://opencode.ai/zen/go/v1"
     }
   },
+  "opencode-server": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "http://127.0.0.1:4096",
+      "stream": "http://127.0.0.1:4096"
+    }
+  },
   "opencode-zen": {
     "format": "openai",
     "headers": {

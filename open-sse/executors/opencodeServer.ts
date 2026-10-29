@@ -371,6 +371,11 @@ export class OpencodeServerExecutor extends BaseExecutor {
     return `${serverBaseUrl()}/session`;
   }
 
+  /**
+   * @executorRecovery native
+   * @executorRecoveryReason The body never reaches an OpenAI/Claude/Gemini upstream: it is rebuilt into an opencode session turn (POST /session/:id/message parts), which has no reasoning-effort enum, known-field 400/422 or Gemini thinking-budget surface for the base recovery loop to repair.
+   * @executorRecoveryTest tests/unit/opencode-server-executor.test.ts
+   */
   override async execute(input: ExecuteInput): Promise<{ response: Response }> {
     const body =
       input.body && typeof input.body === "object" && !Array.isArray(input.body)

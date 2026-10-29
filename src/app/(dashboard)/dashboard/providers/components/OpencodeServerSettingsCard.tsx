@@ -20,9 +20,7 @@ function StatusBanner({ ok, text }: { ok: boolean; text: string }) {
   return (
     <div
       className={`flex items-center gap-1.5 mb-3 px-2 py-1.5 rounded text-xs ${
-        ok
-          ? "bg-green-500/10 text-green-600 dark:text-green-400"
-          : "bg-red-500/10 text-red-600 dark:text-red-400"
+        ok ? "bg-success/10 text-success" : "bg-error/10 text-error"
       }`}
     >
       <Icon name={ok ? "check_circle" : "error"} size={12} />
@@ -94,8 +92,8 @@ export default function OpencodeServerSettingsCard() {
   return (
     <Card padding="md">
       <div className="flex items-center gap-3 mb-4">
-        <div className="size-8 rounded-lg flex items-center justify-center bg-amber-500/10">
-          <Icon name="terminal" size={20} className="text-amber-500" />
+        <div className="size-8 rounded-lg flex items-center justify-center bg-warning/10">
+          <Icon name="terminal" size={20} className="text-warning" />
         </div>
         <div>
           <h3 className="font-medium text-sm">{t("opencodeServerConnection")}</h3>
