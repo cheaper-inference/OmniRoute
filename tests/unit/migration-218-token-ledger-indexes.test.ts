@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "token-ledger-indexes-213-"));
+const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "token-ledger-indexes-218-"));
 // Static imports would evaluate src/lib/db/core.ts before DATA_DIR points at the temp dir,
 // binding the singleton to the developer's real database.
 process.env.DATA_DIR = dataDir;
@@ -31,7 +31,7 @@ after(() => {
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("migration 213 created one index per direction", () => {
+test("migration 218 created one index per direction", () => {
   const names = (db.prepare("PRAGMA index_list(token_ledger)").all() as Array<{ name: string }>)
     .map((row) => row.name)
     .filter((name) => name.startsWith("idx_token_ledger_"))

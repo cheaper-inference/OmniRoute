@@ -1,1 +1,1 @@
-- **db:** index `token_ledger` (migration 213) and collapse the gamification `getBalance` read to a single statement with two indexed subqueries, removing the full-table scans from the write-transaction path of `transferTokens` (#17908, thanks @oyi77)
+- **db:** index `token_ledger` (migration 218) and collapse the gamification `getBalance` read to a single statement with two indexed subqueries, removing the full-table scans from the write-transaction path of `transferTokens` (#17908, thanks @oyi77)
