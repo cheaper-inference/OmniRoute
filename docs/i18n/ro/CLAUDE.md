@@ -11,17 +11,18 @@ asistent AI (arhitectură, convenții, testare, praguri de calitate, flux de luc
 învățăminte privind PII). Citiți-l integral; nu adăugați din nou regulile proiectului aici. Tot ce urmează se aplică NUMAI
 pentru Claude Code — îmbunătățiri operaționale ale regulilor deja definite în `AGENTS.md`.
 
-## Izolarea worktree-urilor — particularități Claude Code
+## Izolarea worktree-urilor — aspecte specifice Claude Code
 
-Protocolul complet și obligatoriu pentru worktree-uri (confirmarea ramurii de bază, calea canonică
-`.claude/worktrees/`, `cp -al` pentru node_modules, regulile de eliminare) se află în `AGENTS.md` → Flux de lucru Git → „Izolarea
-worktree-urilor”. Aspecte specifice Claude Code:
+Protocolul complet obligatoriu privind worktree-urile (confirmarea branch-ului de bază, calea
+canonică `.claude/worktrees/`, `cp -al` node_modules, regulile de teardown) se află în
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (rezumat în `AGENTS.md` →
+Flux de lucru Git → „Izolarea worktree-urilor"). Aspecte specifice Claude Code:
 
-- Confirmați ramura de bază cu operatorul prin `AskUserQuestion` (Regula strictă #19), cu excepția cazului în care
-  v-a comunicat-o deja.
-- Preferați instrumentul nativ `EnterWorktree` — acesta creează deja worktree-uri în
-  `.claude/worktrees/` (calea canonică). Creați worktree-ul folosind comanda documentată `git
-worktree add`, apoi apelați `EnterWorktree` cu parametrul său `path`.
+- Confirmă branch-ul de bază cu operatorul prin `AskUserQuestion` (Regula strictă nr. 19), cu
+  excepția cazului în care ți-a spus deja.
+- Preferă instrumentul nativ `EnterWorktree` — acesta creează deja worktree-uri sub
+  `.claude/worktrees/` (calea canonică). Creează worktree-ul cu comanda documentată `git
+worktree add`, apoi apelează `EnterWorktree` cu parametrul său `path`.
 
 ## Siguranță între sesiuni — particularități Claude Code
 

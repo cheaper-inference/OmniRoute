@@ -15,13 +15,7 @@ export default function QuotaMiniBar({ percent, size = "xs", className }: Props)
   const colors = getBarColor(percent);
   const heightCls = size === "sm" ? "h-1.5" : "h-1";
   return (
-    <div
-      className={cn(
-        "rounded-full overflow-hidden bg-black/[0.06] dark:bg-white/[0.06]",
-        heightCls,
-        className
-      )}
-    >
+    <div className={cn("rounded-full overflow-hidden bg-surface-2", heightCls, className)}>
       <div
         className="h-full rounded-full transition-[width] duration-300 ease-out"
         style={{

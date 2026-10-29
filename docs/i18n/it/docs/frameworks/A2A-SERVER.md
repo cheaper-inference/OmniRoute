@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Per `smart-routing`, `metadata.combo` è una sostituzione esplicita di
+`metadata.model` per la richiesta al gateway; viene inviato come `model` effettivo,
+non come campo JSON `x-combo` ignorato. Continuano ad applicarsi le normali regole del gateway
+per la chiave API e l'autorizzazione per ciascuna destinazione. Una combo non valida o vuota viene rifiutata.
+
+Il risultato espone `requested_combo` (intento del chiamante), `dispatched_model`
+(la richiesta effettiva al gateway), `response_model` (risposta del gateway) e
+`confirmed_combo`. Quest'ultimo campo è `null`, a meno che il gateway non
+identifichi esplicitamente una combo. I log decisionali A2A attribuiscono l'esecuzione solo a una
+combo confermata, mantenendo una richiesta non confermata come `requestedCombo`.
+
 **Risposta:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Streaming SSE
 
-Funziona come `message/send`, ma restituisce Server-Sent Events per lo streaming in tempo reale.
+Come `message/send`, ma restituisce eventi Server-Sent Events per lo streaming in tempo reale.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Verifica dello stato di un'attività
+### `tasks/get` — Consultare lo stato dell'attività
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Annullamento di un'attività
+### `tasks/cancel` — Annullare un'attività
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Skill disponibili
+## Competenze disponibili
 
-OmniRoute espone 6 skill A2A configurate in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Ciascun modulo di skill si trova in `src/lib/a2a/skills/`.
+OmniRoute espone 6 abilità A2A cablate in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Ogni modulo di abilità risiede in `src/lib/a2a/skills/`.
 
-| Skill                     | ID                   | Descrizione                                                                                                                                                        | Tag                      | Esempi                                               |
-| :------------------------ | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------- | :--------------------------------------------------- |
-| Instradamento smart       | `smart-routing`      | Instrada un prompt tramite il provider o la combinazione ottimale utilizzando il motore di combinazione e il sistema di punteggio di OmniRoute                     | instradamento, provider  | "Instrada questo prompt tramite il modello migliore" |
-| Gestione delle quote      | `quota-management`   | Segnala lo stato delle quote per ciascun provider e aiuta i chiamanti a decidere quando limitare le richieste o cambiare provider                                  | quote, provider          | "Controlla la quota per anthropic"                   |
-| Ricerca dei provider      | `provider-discovery` | Elenca i provider installati con funzionalità, indicatori del piano gratuito e stato OAuth                                                                         | provider, ricerca        | "Quali provider sono disponibili?"                   |
-| Analisi dei costi         | `cost-analysis`      | Stima il costo di una richiesta o conversazione in base al catalogo e all'utilizzo recente                                                                         | costi, utilizzo          | "Stima il costo di questa conversazione"             |
-| Rapporto sullo stato      | `health-report`      | Aggrega lo stato di circuit breaker, cooldown e blocco per ciascun provider                                                                                        | stato, resilienza        | "Mostra lo stato di tutti i provider"                |
-| Elenco delle funzionalità | `list-capabilities`  | Restituisce il catalogo completo di 45 Agent Skills (23 API + 21 CLI + 1 configurazione) come tabella markdown con URL SKILL.md raw per l'inserimento del contesto | catalogo, ricerca, skill | "Elenca tutte le funzionalità di OmniRoute"          |
+| Abilità                 | ID                   | Descrizione                                                                                                                                                                                         | Tag                            | Esempi                                                   |
+| :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :------------------------------------------------------- |
+| Itinerario intelligente | `smart-routing`      | Instrada un prompt attraverso lo provider/combo ottimale utilizzando il punteggio + del motore combinato di OmniRoute                                                                               | instradamento, fornitori       | "Indirizza questa richiesta tramite il modello migliore" |
+| Gestione delle quote    | `quota-management`   | Riporta lo stato della quota per fornitore e aiuta i chiamanti a decidere quando throttle/switch                                                                                                    | quota, fornitori               | "Verifica quota antropica"                               |
+| Scoperta del fornitore  | `provider-discovery` | Elenca i provider installati con funzionalità, flag di livello gratuito e stato OAuth                                                                                                               | fornitori, scoperta            | "Quali fornitori sono disponibili?"                      |
+| Analisi dei costi       | `cost-analysis`      | Stima del costo di uno request/conversation dato l'utilizzo recente del catalogo +                                                                                                                  | costo, utilizzo                | "Costo stimato per questa conversazione"                 |
+| Rapporto sulla salute   | `health-report`      | Aggrega interruttore automatico, raffreddamento e stato di blocco per fornitore                                                                                                                     | salute, resilienza             | "Mostra lo stato di salute di tutti i fornitori"         |
+| Elenco capacità         | `list-capabilities`  | Restituisce il catalogo completo delle competenze dell'agente a 45 voci (23 API + 21 CLI + 1 configurazione) come tabella di ribasso con SKILL.md URLs non elaborato per l'inserimento del contesto | catalogo, scoperta, competenze | "Elenca tutte le funzionalità OmniRoute "                |
 
-> La Scheda agente deve essere mantenuta allineata con il catalogo attivo di 374 provider; il numero di provider e i metadati relativi all'accesso gratuito/senza autenticazione provengono dal registro di runtime.
+> La Carta Agente deve essere mantenuta allineata al catalogo live del fornitore 377; i conteggi dei provider e i metadati free/no-auth provengono dal registro di runtime.
 
-### Dettagli della skill `list-capabilities`
+### `list-capabilities` Dettaglio abilità
 
-La skill `list-capabilities` è particolarmente utile per gli agenti esterni che devono scoprire cosa espone OmniRoute prima di inviare chiamate API. Restituisce un artefatto strutturato sotto forma di tabella markdown:
+La skill `list-capabilities` è particolarmente utile per gli agenti esterni che hanno bisogno di scoprire cosa espone OmniRoute prima di inviare chiamate API. Restituisce un artefatto della tabella di markdown strutturata:
 
 ```
-| ID | Nome | Categoria | Area | Endpoint/Comandi | URL raw |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autenticazione e sessioni | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Ogni riga include la colonna `rawUrl`, così gli agenti possono recuperare immediatamente il file SKILL.md completo. Il campo `metadata.totalSkills` riflette la dimensione del catalogo (attualmente 45). Implementazione: `src/lib/a2a/skills/listCapabilities.ts`. Vedere anche [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Ogni riga include la colonna `rawUrl` in modo che gli agenti possano recuperare immediatamente l'intero SKILL.md. Il campo `metadata.totalSkills` rispecchia la dimensione del catalogo (45 oggi). Attuazione: `src/lib/a2a/skills/listCapabilities.ts`. Vedi anche [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -199,7 +203,7 @@ L'endpoint JSON-RPC `/a2a` è il punto di ingresso A2A canonico. Gli endpoint RE
 
    Esporta una funzione asincrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Segui la struttura delle skill esistenti, come `smartRouting.ts`.
 
-2. **Registra il gestore:** in `src/lib/a2a/taskExecution.ts`, aggiungi una voce a `A2A_SKILL_HANDLERS`:
+2. **Registra l'handler:** in `src/lib/a2a/taskExecution.ts`, aggiungi una voce a `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -211,7 +215,7 @@ L'endpoint JSON-RPC `/a2a` è il punto di ingresso A2A canonico. Gli endpoint RE
    };
    ```
 
-3. **Esponi nell'Agent Card:** in `src/app/.well-known/agent.json/route.ts`, aggiungi all'array `skills`:
+3. **Esponila nella Agent Card:** in `src/lib/a2a/agentCardMetadata.ts` (condiviso da `/.well-known/agent.json` e `/.well-known/agent-card.json`), aggiungila all'array `skills`:
 
    ```json
    {
@@ -223,7 +227,7 @@ L'endpoint JSON-RPC `/a2a` è il punto di ingresso A2A canonico. Gli endpoint RE
    }
    ```
 
-4. **Scrivi i test:** `tests/unit/a2a-<your-skill>.test.ts`. Copri il percorso corretto e il percorso di errore.
+4. **Scrivi i test:** `tests/unit/a2a-<your-skill>.test.ts`. Copri il percorso corretto e quello di errore.
 
 5. **Documenta** la nuova skill nella tabella `Available Skills` di questo file.
 
@@ -264,7 +268,7 @@ submitted → working → completed
 
 ## Esempi di integrazione
 
-### Python (requests)
+### Python (richieste)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (recuperare)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

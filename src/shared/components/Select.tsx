@@ -1,12 +1,15 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
+import { Select as KitSelect, SelectItem as KitSelectItem } from "@omniroute/ui-kit/select";
 import { cn } from "@/shared/utils/cn";
 
 interface SelectOption {
   value: string;
   label: string;
+  disabled?: boolean;
 }
 
 interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size"> {
@@ -22,10 +25,25 @@ interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>
   compact?: boolean;
 }
 
+// Radix Select reserves the empty string for "no value" (it shows the placeholder), so an
+// option whose value is "" — e.g. "Auto" / "Default" entries — travels under a sentinel and
+// is mapped back to "" before it reaches the caller.
+const EMPTY_VALUE = "__omniroute-select-empty__";
+const fromKitValue = (value: string) => (value === EMPTY_VALUE ? "" : value);
+
+/**
+ * Select — adapter over the kit Field + Select.
+ *
+ * - `options` → the kit (Radix) Select; `onValueChange` is turned into the legacy
+ *   `onChange({ target: { value, name } })` shape every caller reads.
+ * - `<option>` children → a native `<select className="ci-select-native">`, because Radix
+ *   Select has no DOM `<option>`s; the real change event is passed through untouched.
+ */
 export default function Select({
   label,
-  options = [],
+  options,
   value,
+  defaultValue,
   onChange,
   placeholder,
   error,
@@ -37,7 +55,9 @@ export default function Select({
   placeholderDisabled = true,
   compact = false,
   id: externalId,
+  name,
   children,
+  "aria-describedby": callerDescribedBy,
   ...props
 }: SelectProps) {
   const t = useTranslations("common");
@@ -45,86 +65,148 @@ export default function Select({
   const selectId = externalId || generatedId;
   const errorId = error ? `${selectId}-error` : undefined;
   const hintId = hint && !error ? `${selectId}-hint` : undefined;
-  const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined;
+  // A caller's aria-describedby is kept and the hint/error ids are appended (legacy let the
+  // caller's value through; the adapter must not overwrite it).
+  const describedBy = [callerDescribedBy, errorId, hintId].filter(Boolean).join(" ") || undefined;
+  // Uncontrolled kit mode: remember the last pick so the hidden form input stays in sync.
+  const [uncontrolledValue, setUncontrolledValue] = useState(
+    defaultValue == null ? "" : String(defaultValue)
+  );
+  const resolvedPlaceholder = placeholder ?? t("selectOption");
+  const useKit = options !== undefined && children == null;
+
+  let control: React.ReactNode;
+  if (useKit) {
+    const hasEmptyOption = options.some((option) => option.value === "");
+    // Legacy: placeholderDisabled={false} left the placeholder <option value=""> pickable
+    // (e.g. "All providers" resets a filter). The kit needs it as a real item.
+    const pickablePlaceholder = !placeholderDisabled && !hasEmptyOption && !!resolvedPlaceholder;
+    const emptyMapsToItem = hasEmptyOption || pickablePlaceholder;
+    const toKitValue = (raw: unknown): string | undefined => {
+      if (raw === undefined) return undefined;
+      const text = raw == null ? "" : String(raw);
+      return text === "" && emptyMapsToItem ? EMPTY_VALUE : text;
+    };
+    const items = [
+      ...(pickablePlaceholder ? [{ value: "", label: resolvedPlaceholder, disabled: false }] : []),
+      ...options,
+    ];
+    const kitValue = toKitValue(value);
+    control = (
+      <KitSelect
+        // The remaining <select> attributes (aria-*, data-*, title, focus handlers…) land on the
+        // kit root <div>; the kit lifts aria-label/-labelledby/-describedby onto the trigger.
+        {...(props as unknown as React.HTMLAttributes<HTMLDivElement>)}
+        id={selectId}
+        // `name` is not forwarded: Radix's hidden <select> would submit the internal empty-value
+        // sentinel. The adapter renders its own hidden input with the legacy value instead.
+        disabled={disabled}
+        required={required}
+        error={Boolean(error)}
+        size={compact ? "sm" : "md"}
+        placeholder={resolvedPlaceholder}
+        value={kitValue}
+        defaultValue={toKitValue(defaultValue)}
+        // DOM hook mirroring the legacy <select>.value (controlled callers) for e2e/tests.
+        data-value={kitValue === undefined ? undefined : fromKitValue(kitValue)}
+        onValueChange={(next) => {
+          if (value === undefined) setUncontrolledValue(fromKitValue(next));
+          const target = { value: fromKitValue(next), name };
+          onChange?.({
+            target,
+            currentTarget: target,
+          } as unknown as React.ChangeEvent<HTMLSelectElement>);
+        }}
+        aria-describedby={describedBy}
+        className={selectClassName}
+      >
+        {/* Items rendered by hand (not via `options`) so each keeps its legacy value as
+            data-value — the kit Item has no DOM value, unlike the legacy <option>. */}
+        {items.map((option) => (
+          <KitSelectItem
+            key={option.value === "" ? EMPTY_VALUE : option.value}
+            value={option.value === "" ? EMPTY_VALUE : option.value}
+            disabled={option.disabled}
+            data-value={option.value}
+          >
+            {option.label}
+          </KitSelectItem>
+        ))}
+      </KitSelect>
+    );
+    if (name) {
+      const submitted =
+        value === undefined ? uncontrolledValue : value == null ? "" : String(value);
+      control = (
+        <>
+          {control}
+          <input type="hidden" name={name} value={submitted} disabled={disabled} />
+        </>
+      );
+    }
+  } else {
+    control = (
+      <select
+        id={selectId}
+        name={name}
+        value={value}
+        defaultValue={defaultValue}
+        onChange={onChange}
+        disabled={disabled}
+        required={required}
+        aria-required={required || undefined}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy}
+        className={cn(
+          "ci-select-native",
+          compact && "ci-select-native--sm",
+          error && "ci-select-native--error",
+          selectClassName
+        )}
+        {...props}
+      >
+        {!children && resolvedPlaceholder && (
+          <option value="" disabled={placeholderDisabled}>
+            {resolvedPlaceholder}
+          </option>
+        )}
+        {children}
+      </select>
+    );
+  }
+
+  // Same a11y workaround as the Input adapter: the kit Field's asterisk is plain text inside
+  // the <label> and would end up in the control's accessible name ("Mode*").
+  const fieldLabel =
+    label != null && label !== "" ? (
+      <>
+        {label}
+        {required && (
+          <span className="ci-field__required" aria-hidden="true">
+            *
+          </span>
+        )}
+      </>
+    ) : undefined;
 
   return (
-    <div
+    <Field
+      htmlFor={selectId}
+      label={fieldLabel}
+      hint={hint && !error ? <span id={hintId}>{hint}</span> : undefined}
+      error={
+        error ? (
+          <span id={errorId} role="alert">
+            {error}
+          </span>
+        ) : undefined
+      }
       className={cn(
-        compact
-          ? "flex flex-wrap items-center justify-between gap-x-3 gap-y-1"
-          : "flex flex-col gap-1.5",
+        compact ? "flex flex-wrap items-center justify-between gap-x-3 gap-y-1" : "gap-1.5",
         className
       )}
     >
-      {label && (
-        <label
-          htmlFor={selectId}
-          className={cn("font-medium text-text-main", compact ? "text-xs" : "text-sm")}
-        >
-          {label}
-          {required && (
-            <span className="text-red-500 ml-1" aria-hidden="true">
-              *
-            </span>
-          )}
-        </label>
-      )}
-      <div className={cn("relative", compact && "min-w-0 flex-1 sm:flex-none")}>
-        <select
-          id={selectId}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-          required={required}
-          aria-required={required || undefined}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy}
-          className={cn(
-            compact
-              ? "w-full py-1.5 ps-2.5 pe-8 text-sm text-text-main"
-              : "w-full py-2 px-3 pe-10 text-sm text-text-main",
-            "bg-surface border border-black/10 dark:border-white/10 rounded-control appearance-none",
-            "focus:ring-1 focus:ring-accent/30 focus:border-accent/50 focus:outline-none",
-            "transition-all disabled:opacity-50 disabled:cursor-not-allowed",
-            "text-[16px] sm:text-sm",
-            error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : "",
-            selectClassName
-          )}
-          {...props}
-        >
-          {!children && (placeholder ?? t("selectOption")) && (
-            <option value="" disabled={placeholderDisabled} className="bg-surface text-text-muted">
-              {placeholder ?? t("selectOption")}
-            </option>
-          )}
-          {!children &&
-            options.map((option) => (
-              <option key={option.value} value={option.value} className="bg-surface text-text-main">
-                {option.label}
-              </option>
-            ))}
-          {children}
-        </select>
-        <div
-          className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none text-text-muted"
-          aria-hidden="true"
-        >
-          <span className="material-symbols-outlined text-[20px]">expand_more</span>
-        </div>
-      </div>
-      {error && (
-        <p id={errorId} className="text-xs text-red-500 flex items-center gap-1" role="alert">
-          <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-            error
-          </span>
-          {error}
-        </p>
-      )}
-      {hint && !error && (
-        <p id={hintId} className="text-xs text-text-muted">
-          {hint}
-        </p>
-      )}
-    </div>
+      {compact ? <div className="min-w-0 flex-1 sm:flex-none">{control}</div> : control}
+    </Field>
   );
 }

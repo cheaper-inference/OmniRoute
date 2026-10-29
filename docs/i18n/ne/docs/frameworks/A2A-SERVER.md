@@ -47,7 +47,7 @@ JSON-RPC त्रुटि कोड `-32000` सहित HTTP 503 फर्�
 
 ### `message/send` — समकालिक कार्यान्वयन
 
-कुनै स्किललाई सन्देश पठाउँछ र पूर्ण प्रतिक्रियाको प्रतीक्षा गर्छ।
+कुनै स्किलमा सन्देश पठाउँछ र पूर्ण प्रतिक्रियाको प्रतीक्षा गर्छ।
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` का लागि, `metadata.combo` गेटवे अनुरोधमा `metadata.model` को स्पष्ट ओभरराइड हो; यसलाई बेवास्ता गरिएको `x-combo` JSON फिल्डका रूपमा नभई वास्तविक `model` का रूपमा पठाइन्छ। गेटवेको सामान्य API-key र प्रत्येक लक्ष्यानुसारको प्रमाणीकरण अझै पनि लागू हुन्छ। अमान्य वा खाली कम्बो अस्वीकार गरिन्छ।
+
+नतिजाले `requested_combo` (कलरको अभिप्राय), `dispatched_model` (वास्तविक गेटवे अनुरोध), `response_model` (गेटवे प्रतिक्रिया) र `confirmed_combo` देखाउँछ। गेटवेले कुनै कम्बोलाई स्पष्ट रूपमा पहिचान नगरेसम्म अन्तिम फिल्ड `null` हुन्छ। A2A निर्णय लगहरूले कार्यान्वयनलाई पुष्टि गरिएको कम्बोसँग मात्र सम्बद्ध गर्छन् र पुष्टि नभएको अनुरोधलाई `requestedCombo` का रूपमा कायम राख्छन्।
+
 **प्रतिक्रिया:**
 
 ```json
@@ -76,22 +80,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -116,7 +113,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE घटनाहरू:**
+**SSE इभेन्टहरू:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +123,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — कार्य स्थिति सोधपुछ
+### `tasks/get` — टास्कको स्थिति सोध्नुहोस्
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +132,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — कार्य रद्द गर्ने
+### `tasks/cancel` — टास्क रद्द गर्नुहोस्
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,31 +145,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## उपलब्ध सीपहरू
 
-OmniRoute ले `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` मा जडान गरिएका 6 वटा A2A सीपहरू उपलब्ध गराउँछ। प्रत्येक सीप मोड्युल `src/lib/a2a/skills/` मा अवस्थित छ।
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` मा तार भएको 6 A2A कौशलहरू उजागर गर्दछ। प्रत्येक कौशल मोड्युल `src/lib/a2a/skills/` मा रहन्छ।
 
-| सीप               | ID                   | विवरण                                                                                                                                                        | ट्यागहरू             | उदाहरणहरू                                           |
-| :---------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------- | :-------------------------------------------------- |
-| स्मार्ट राउटिङ    | `smart-routing`      | OmniRoute को कम्बो इन्जिन + स्कोरिङ प्रयोग गरेर प्रम्प्टलाई इष्टतम प्रदायक/कम्बोमार्फत रुट गर्छ                                                              | राउटिङ, प्रदायकहरू   | "यो प्रम्प्टलाई उत्कृष्ट मोडेलमार्फत रुट गर्नुहोस्" |
-| कोटा व्यवस्थापन   | `quota-management`   | प्रत्येक प्रदायकको कोटा अवस्था रिपोर्ट गर्छ र कलरहरूलाई कहिले थ्रोटल गर्ने/स्विच गर्ने भन्ने निर्णय गर्न मद्दत गर्छ                                          | कोटा, प्रदायकहरू     | "anthropic को कोटा जाँच गर्नुहोस्"                  |
-| प्रदायक खोज       | `provider-discovery` | क्षमताहरू, निःशुल्क-टियर फ्ल्यागहरू र OAuth स्थितिसहित इन्स्टल गरिएका प्रदायकहरूको सूची दिन्छ                                                                | प्रदायकहरू, खोज      | "कुन-कुन प्रदायकहरू उपलब्ध छन्?"                    |
-| लागत विश्लेषण     | `cost-analysis`      | क्याटलग + हालैको प्रयोगका आधारमा अनुरोध/वार्तालापको लागत अनुमान गर्छ                                                                                         | लागत, प्रयोग         | "यो वार्तालापको लागत अनुमान गर्नुहोस्"              |
-| स्वास्थ्य रिपोर्ट | `health-report`      | प्रत्येक प्रदायकको सर्किट ब्रेकर, कुलडाउन र लकआउट अवस्थालाई समग्र रूपमा प्रस्तुत गर्छ                                                                        | स्वास्थ्य, लचिलोपन   | "सबै प्रदायकहरूको स्वास्थ्य स्थिति देखाउनुहोस्"     |
-| क्षमताहरूको सूची  | `list-capabilities`  | सन्दर्भ इन्जेक्सनका लागि कच्चा SKILL.md URL हरूसहित पूर्ण 45-प्रविष्टिको Agent Skills क्याटलग (23 API + 21 CLI + 1 कन्फिग) मार्कडाउन तालिकाका रूपमा फर्काउँछ | क्याटलग, खोज, सीपहरू | "OmniRoute का सबै क्षमताहरू सूचीबद्ध गर्नुहोस्"     |
+| सीप               | ID                   | विवरण                                                                                                                                                                | ट्यागहरू          | उदाहरणहरू                                       |
+| :---------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------- | :---------------------------------------------- |
+| स्मार्ट रूटिङ     | `smart-routing`      | OmniRoute को कम्बो इन्जिन + स्कोरिङ प्रयोग गरेर इष्टतम provider/combo मार्फत प्रम्प्टलाई रुट गर्दछ                                                                   | मार्ग, प्रदायकहरू | "उत्तम मोडेल मार्फत यो प्रम्प्ट रुट गर्नुहोस्"  |
+| कोटा व्यवस्थापन   | `quota-management`   | प्रति-प्रदायक कोटा स्थिति रिपोर्ट गर्दछ, कलरहरूलाई कहिले throttle/switch गर्ने निर्णय गर्न मद्दत गर्दछ                                                               | कोटा, प्रदायकहरू  | "एन्थ्रोपिक कोटा जाँच गर्नुहोस्"                |
+| प्रदायक खोज       | `provider-discovery` | क्षमताहरू, फ्री-टियर झण्डाहरू, OAuth स्थितिको साथ स्थापित प्रदायकहरू सूचीबद्ध गर्नुहोस्                                                                              | प्रदायक, खोज      | "कस्ता प्रदायकहरू उपलब्ध छन्?"                  |
+| लागत विश्लेषण     | `cost-analysis`      | क्याटलग + भर्खरको प्रयोगको आधारमा request/conversation को अनुमानित लागत                                                                                              | लागत, उपयोग       | "यो कुराकानीको लागि अनुमानित लागत"              |
+| स्वास्थ्य रिपोर्ट | `health-report`      | कुल सर्किट ब्रेकर, कूलडाउन, प्रति प्रदायक लकआउट स्थिति                                                                                                               | स्वास्थ्य, लचकता  | "सबै प्रदायकहरूको स्वास्थ्य स्थिति देखाउनुहोस्" |
+| सूची क्षमताहरू    | `list-capabilities`  | कन्टेक्स्ट इन्जेक्सनको लागि कच्चा SKILL.md URLs सहितको मार्कडाउन तालिकाको रूपमा पूर्ण ४५-प्रविष्टि एजेन्ट स्किल्स क्याटलग (२३ API + 21 CLI + 1 कन्फिगरेसन) फर्काउँछ। | सूची, खोज, कौशल   | "सबै OmniRoute क्षमताहरू सूचीबद्ध गर्नुहोस्"    |
 
-> Agent Card लाई प्रत्यक्ष 374-प्रदायक क्याटलगसँग समक्रमित राख्नुपर्छ; प्रदायक सङ्ख्या र निःशुल्क/प्रमाणीकरण-नचाहिने मेटाडेटा रनटाइम रजिस्ट्रीबाट प्राप्त गरिन्छ।
+> एजेन्ट कार्डलाई प्रत्यक्ष 377-प्रदायक सूचीसँग पङ्क्तिबद्ध राख्नुपर्छ; प्रदायक गणना र free/no-auth मेटाडेटा रनटाइम रजिस्ट्रीबाट प्राप्त गरिन्छ।
 
-### `list-capabilities` सीपको विवरण
+### `list-capabilities` कौशल विवरण
 
-`list-capabilities` सीप विशेष गरी ती बाह्य एजेन्टहरूका लागि उपयोगी छ, जसले API कलहरू पठाउनुअघि OmniRoute ले के-के उपलब्ध गराउँछ भनेर पत्ता लगाउन आवश्यक हुन्छ। यसले संरचित मार्कडाउन तालिका आर्टिफ्याक्ट फर्काउँछ:
+`list-capabilities` सीप विशेष गरी बाह्य एजेन्टहरूका लागि उपयोगी छ जसले API कलहरू पठाउनु अघि OmniRoute के खुलासा गर्छ भनेर पत्ता लगाउन आवश्यक छ। यसले संरचित मार्कडाउन तालिका कलाकृति फर्काउँछ:
 
 ```
-| ID | नाम | श्रेणी | क्षेत्र | एन्डपोइन्टहरू/कमाण्डहरू | कच्चा URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | प्रमाणीकरण र सेसनहरू | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-प्रत्येक पङ्क्तिमा `rawUrl` स्तम्भ समावेश हुन्छ, जसले गर्दा एजेन्टहरूले तत्काल पूर्ण SKILL.md प्राप्त गर्न सक्छन्। `metadata.totalSkills` फिल्डले क्याटलगको आकार (आज 45) प्रतिबिम्बित गर्छ। कार्यान्वयन: `src/lib/a2a/skills/listCapabilities.ts`। [AGENT-SKILLS.md](./AGENT-SKILLS.md) पनि हेर्नुहोस्।
+प्रत्येक पङ्क्तिमा `rawUrl` स्तम्भ समावेश हुन्छ ताकि एजेन्टहरूले तुरुन्तै पूर्ण SKILL.md ल्याउन सक्छन्। `metadata.totalSkills` फिल्डले क्याटलग साइज (45 आज) लाई मिरर गर्छ। कार्यान्वयन: `src/lib/a2a/skills/listCapabilities.ts`। [AGENT-SKILLS.md](./AGENT-SKILLS.md) पनि हेर्नुहोस्।
 
 ---
 
@@ -195,15 +192,15 @@ JSON-RPC endpoint `/a2a` नै आधिकारिक A2A प्रवेश 
 
 ## नयाँ Skill थप्ने
 
-1. **Skill file सिर्जना गर्नुहोस्:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Skill फाइल सिर्जना गर्नुहोस्:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   एउटा async function `(task: A2ATask) => Promise<{ artifacts, metadata }>` export गर्नुहोस्। `smartRouting.ts` जस्ता विद्यमान skill हरूको संरचना अनुसरण गर्नुहोस्।
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` async function निर्यात गर्नुहोस्। `smartRouting.ts` जस्ता विद्यमान skills को संरचना अनुसरण गर्नुहोस्।
 
 2. **Handler दर्ता गर्नुहोस्:** `src/lib/a2a/taskExecution.ts` मा, `A2A_SKILL_HANDLERS` मा एउटा entry थप्नुहोस्:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...विद्यमान skill हरू
+     // ...विद्यमान skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -211,21 +208,21 @@ JSON-RPC endpoint `/a2a` नै आधिकारिक A2A प्रवेश 
    };
    ```
 
-3. **Agent Card मा उपलब्ध गराउनुहोस्:** `src/app/.well-known/agent.json/route.ts` मा, `skills` array मा थप्नुहोस्:
+3. **Agent Card मा उपलब्ध गराउनुहोस्:** `src/lib/a2a/agentCardMetadata.ts` मा (`/.well-known/agent.json` र `/.well-known/agent-card.json` दुवैले साझा रूपमा प्रयोग गर्ने), `skills` array मा थप्नुहोस्:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
+     "name": "तपाईंको Skill",
+     "description": "आशयमा केन्द्रित छोटो विवरण",
      "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "examples": ["प्राकृतिक भाषामा गरिएको नमुना आह्वान"]
    }
    ```
 
-4. **Test हरू लेख्नुहोस्:** `tests/unit/a2a-<your-skill>.test.ts`। सफल अवस्था + त्रुटि अवस्था समेट्नुहोस्।
+4. **Tests लेख्नुहोस्:** `tests/unit/a2a-<your-skill>.test.ts`। सफल अवस्था + त्रुटि अवस्था समेट्नुहोस्।
 
-5. यस file को `Available Skills` table मा नयाँ skill लाई **दस्तावेजीकरण गर्नुहोस्**।
+5. यो फाइलको `Available Skills` table मा नयाँ skill लाई **दस्तावेजीकरण गर्नुहोस्**।
 
 ---
 
@@ -262,9 +259,9 @@ JSON-RPC endpoint `/a2a` नै आधिकारिक A2A प्रवेश 
 
 ---
 
-## एकीकरणका उदाहरणहरू
+## एकीकरण उदाहरणहरू
 
-### Python (requests)
+### पाइथन (अनुरोधहरू)
 
 ```python
 import requests
@@ -283,7 +280,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (फेच)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

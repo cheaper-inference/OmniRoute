@@ -21,20 +21,28 @@ function supportedProfiles() {
   return new Set([...union.matchAll(/'([^']+)'/g)].map((match) => match[1]));
 }
 
-const TRANSPORT_PROFILES = {
-  "open-sse/utils/tlsClient.ts": ["chrome_124", "macos"],
-  "open-sse/services/claudeTlsClient.ts": ["chrome_146", "linux"],
-  "open-sse/services/perplexityTlsClient.ts": ["firefox_148", "macos"],
-  "open-sse/services/grokTlsClient.ts": ["chrome_146", "linux"],
-  "open-sse/services/notionTlsClient.ts": ["chrome_146", "windows"],
-  "open-sse/services/lmarenaTlsClient.ts": ["chrome_146", "windows"],
+// Service clients must resolve the profile dynamically (never a frozen
+// literal) and pin only the emulation OS.
+const TRANSPORT_CLIENTS = {
+  "open-sse/services/claudeTlsClient.ts": { family: "chrome", os: "linux" },
+  "open-sse/services/perplexityTlsClient.ts": { family: "firefox", os: "macos" },
+  "open-sse/services/grokTlsClient.ts": { family: "chrome", os: "linux" },
+  "open-sse/services/notionTlsClient.ts": { family: "chrome", os: "windows" },
+  "open-sse/services/lmarenaTlsClient.ts": { family: "chrome", os: "windows" },
 };
 
-// Other source files that hand a browser profile directly to wreq-js.
+// Source files that hand a browser profile directly to wreq-js — scanned for
+// literal profiles, and the executors among them must resolve dynamically.
 const SOURCES = [
   "src/app/api/internal/codex-responses-ws/route.ts",
+  "open-sse/executors/codex.ts",
+  "open-sse/executors/codex/appServerClient.ts",
+  "open-sse/executors/grok-web.ts",
+  "open-sse/executors/notion-web.ts",
+  "open-sse/utils/proxyFetch.ts",
   "scripts/dev/responses-ws-proxy.mjs",
-  ...Object.keys(TRANSPORT_PROFILES),
+  "open-sse/utils/tlsClient.ts",
+  ...Object.keys(TRANSPORT_CLIENTS),
 ];
 
 // Strip comments before scanning — explanatory comments may name the bad
@@ -62,19 +70,48 @@ test("#5591 all configured browser TLS profiles exist in pinned wreq-js", () => 
     });
   }
 
-  for (const [rel, [profile, os]] of Object.entries(TRANSPORT_PROFILES)) {
-    const source = fs.readFileSync(path.join(ROOT, rel), "utf8");
-    assert.ok(supported.has(profile), `${rel} expected unsupported ${profile}`);
+  // Executors must not freeze a profile literal. A version the library ships
+  // still passes the check above, so this one rejects the literal itself.
+  // grok-web / notion-web are intentionally absent: they delegate to their
+  // *TlsClient services and never hand a profile to wreq-js directly.
+  const NO_LITERAL = [
+    "open-sse/executors/codex.ts",
+    "open-sse/executors/codex/appServerClient.ts",
+    "open-sse/utils/proxyFetch.ts",
+  ];
+  for (const rel of NO_LITERAL) {
+    const source = fs
+      .readFileSync(path.join(ROOT, rel), "utf8")
+      .split("\n")
+      .map(stripComments)
+      .join("\n");
+    assert.doesNotMatch(
+      source,
+      /(?:browser|tlsProfile):\s*["'](?:chrome|firefox)_/,
+      `${rel} freezes a browser profile instead of reading the library`
+    );
+  }
 
-    if (rel.endsWith("claudeTlsClient.ts")) {
-      assert.match(source, /CLAUDE_TLS_BROWSER_MAJOR_VERSION = "146"/);
-      assert.match(source, /tlsProfile: `chrome_\$\{CLAUDE_TLS_BROWSER_MAJOR_VERSION\}`/);
-    } else if (rel.endsWith("utils\/tlsClient.ts")) {
-      assert.match(source, /browser: "chrome_124"/);
-      assert.match(source, /os: "macos"/);
-    } else {
-      assert.match(source, new RegExp(`tlsProfile: ["']${profile}["']`));
-      assert.match(source, new RegExp(`emulationOs: ["']${os}["']`));
-    }
+  // The default session in tlsClient.ts resolves dynamically.
+  const tlsClientSrc = fs.readFileSync(path.join(ROOT, "open-sse/utils/tlsClient.ts"), "utf8");
+  assert.match(tlsClientSrc, /newestChromeProfile\(\)/);
+  assert.match(tlsClientSrc, /os: "macos"/);
+
+  // Service clients resolve dynamically and pin only the emulation OS; no
+  // client may fall back to a frozen tlsProfile literal.
+  for (const [rel, { family, os }] of Object.entries(TRANSPORT_CLIENTS)) {
+    const source = fs.readFileSync(path.join(ROOT, rel), "utf8");
+    const resolver = family === "chrome" ? "newestChromeProfile" : "newestFirefoxProfile";
+    assert.match(
+      source,
+      new RegExp(`tlsProfile: ${resolver},`),
+      `${rel} must resolve its TLS profile via ${resolver}() instead of a literal`
+    );
+    assert.match(source, new RegExp(`emulationOs: ["']${os}["']`));
+    assert.doesNotMatch(
+      source,
+      /tlsProfile:\s*["'](?:chrome|firefox)_/,
+      `${rel} freezes a browser profile instead of reading the library`
+    );
   }
 });

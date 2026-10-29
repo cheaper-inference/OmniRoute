@@ -47,7 +47,7 @@ JSON-RPC কলগুলো JSON-RPC ত্রুটি কোড `-32000`-স�
 
 ### `message/send` — সিঙ্ক্রোনাস এক্সিকিউশন
 
-একটি স্কিলে বার্তা পাঠায় এবং সম্পূর্ণ প্রতিক্রিয়ার জন্য অপেক্ষা করে।
+কোনো স্কিলে একটি বার্তা পাঠায় এবং সম্পূর্ণ প্রতিক্রিয়ার জন্য অপেক্ষা করে।
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,16 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing`-এর ক্ষেত্রে, গেটওয়ে অনুরোধের জন্য `metadata.combo` হলো
+`metadata.model`-এর একটি সুস্পষ্ট ওভাররাইড; এটি উপেক্ষিত `x-combo` JSON ফিল্ড হিসেবে নয়,
+প্রকৃত `model` হিসেবে পাঠানো হয়। গেটওয়ের স্বাভাবিক API-কী এবং
+লক্ষ্যভিত্তিক অনুমোদন এখনও প্রযোজ্য। কোনো অবৈধ বা খালি কম্বো প্রত্যাখ্যান করা হয়।
+
+ফলাফলে `requested_combo` (কলকারীর অভিপ্রায়), `dispatched_model`
+(প্রকৃত গেটওয়ে অনুরোধ), `response_model` (গেটওয়ে প্রতিক্রিয়া) এবং
+`confirmed_combo` প্রকাশ করা হয়। গেটওয়ে স্পষ্টভাবে কোনো কম্বো শনাক্ত না করলে শেষ ফিল্ডটি `null`
+থাকে। A2A সিদ্ধান্তের লগ কেবল নিশ্চিত করা কম্বোর সঙ্গেই এক্সিকিউশনকে সংযুক্ত করে এবং অনিশ্চিত অনুরোধকে `requestedCombo` হিসেবে ধরে রাখে।
+
 **প্রতিক্রিয়া:**
 
 ```json
@@ -76,22 +86,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +102,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE স্ট্রিমিং
 
-`message/send`-এর মতোই, তবে রিয়েল-টাইম স্ট্রিমিংয়ের জন্য Server-Sent Events ফেরত দেয়।
+`message/send`-এর মতোই, তবে রিয়েল-টাইম স্ট্রিমিংয়ের জন্য Server-Sent Events প্রদান করে।
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +129,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — টাস্কের স্ট্যাটাস অনুসন্ধান
+### `tasks/get` — টাস্কের স্থিতি অনুসন্ধান
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +138,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — একটি টাস্ক বাতিল করুন
+### `tasks/cancel` — একটি টাস্ক বাতিল করা
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -146,33 +149,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## উপলভ্য স্কিলসমূহ
+## উপলব্ধ দক্ষতা
 
-OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`-এ সংযুক্ত 6টি A2A স্কিল প্রকাশ করে। প্রতিটি স্কিল মডিউল `src/lib/a2a/skills/`-এ রয়েছে।
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` এ তারযুক্ত 6 A2A দক্ষতা প্রকাশ করে। প্রতিটি দক্ষতা মডিউল `src/lib/a2a/skills/` এ থাকে।
 
-| স্কিল               | ID                   | বিবরণ                                                                                                                                                   | ট্যাগ                     | উদাহরণ                                       |
-| :------------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------ | :------------------------------------------- |
-| স্মার্ট রাউটিং      | `smart-routing`      | OmniRoute-এর কম্বো ইঞ্জিন + স্কোরিং ব্যবহার করে সর্বোত্তম প্রোভাইডার/কম্বোর মাধ্যমে একটি প্রম্পট রাউট করে                                               | রাউটিং, প্রোভাইডার        | "সেরা মডেলের মাধ্যমে এই প্রম্পটটি রাউট করুন" |
-| কোটা ব্যবস্থাপনা    | `quota-management`   | প্রতিটি প্রোভাইডারের কোটা অবস্থা জানায় এবং কখন থ্রটল/সুইচ করতে হবে তা নির্ধারণে কলারদের সহায়তা করে                                                    | কোটা, প্রোভাইডার          | "anthropic-এর কোটা পরীক্ষা করুন"             |
-| প্রোভাইডার আবিষ্কার | `provider-discovery` | সক্ষমতা, ফ্রি-টিয়ার ফ্ল্যাগ এবং OAuth অবস্থা-সহ ইনস্টল করা প্রোভাইডারগুলোর তালিকা দেয়                                                                 | প্রোভাইডার, আবিষ্কার      | "কোন কোন প্রোভাইডার উপলভ্য?"                 |
-| খরচ বিশ্লেষণ        | `cost-analysis`      | ক্যাটালগ + সাম্প্রতিক ব্যবহারের ভিত্তিতে একটি অনুরোধ/কথোপকথনের আনুমানিক খরচ নির্ধারণ করে                                                                | খরচ, ব্যবহার              | "এই কথোপকথনের খরচ অনুমান করুন"               |
-| স্বাস্থ্য প্রতিবেদন | `health-report`      | প্রতিটি প্রোভাইডারের সার্কিট ব্রেকার, কুলডাউন এবং লকআউট অবস্থা একত্রিত করে                                                                              | স্বাস্থ্য, স্থিতিস্থাপকতা | "সব প্রোভাইডারের স্বাস্থ্যগত অবস্থা দেখান"   |
-| সক্ষমতার তালিকা     | `list-capabilities`  | প্রসঙ্গ ইনজেকশনের জন্য raw SKILL.md URL-সহ সম্পূর্ণ 45-এন্ট্রির Agent Skills ক্যাটালগ (23 API + 21 CLI + 1 কনফিগ) একটি markdown টেবিল হিসেবে প্রদান করে | ক্যাটালগ, আবিষ্কার, স্কিল | "OmniRoute-এর সব সক্ষমতার তালিকা দিন"        |
+| দক্ষতা              | ID                   | বর্ণনা                                                                                                                                                           | ট্যাগ                      | উদাহরণ                                       |
+| :------------------ | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------- |
+| স্মার্ট রাউটিং      | `smart-routing`      | OmniRoute এর কম্বো ইঞ্জিন + স্কোরিং ব্যবহার করে সর্বোত্তম provider/combo এর মাধ্যমে একটি প্রম্পট রুট করে                                                         | রাউটিং, প্রদানকারী         | "সেরা মডেলের মাধ্যমে এই প্রম্পটটি রুট করুন"  |
+| কোটা ব্যবস্থাপনা    | `quota-management`   | প্রতি-প্রোভাইডার কোটা স্টেট রিপোর্ট করে, কলকারীদের কখন throttle/switch করতে হবে তা সিদ্ধান্ত নিতে সাহায্য করে                                                    | কোটা, প্রদানকারী           | "নৃবিজ্ঞানের জন্য কোটা পরীক্ষা করুন"         |
+| প্রদানকারী আবিষ্কার | `provider-discovery` | সক্ষমতা, ফ্রি-টায়ার পতাকা, OAuth স্ট্যাটাস সহ ইনস্টল করা প্রদানকারীদের তালিকা করুন                                                                              | প্রদানকারী, আবিষ্কার       | "কি প্রদানকারী পাওয়া যায়?"                 |
+| খরচ বিশ্লেষণ        | `cost-analysis`      | ক্যাটালগ + সাম্প্রতিক ব্যবহার অনুযায়ী একটি request/conversation এর মূল্য অনুমান করে                                                                             | খরচ, ব্যবহার               | "এই কথোপকথনের জন্য আনুমানিক খরচ"             |
+| স্বাস্থ্য রিপোর্ট   | `health-report`      | সার্কিট ব্রেকার, কুলডাউন, প্রদানকারী প্রতি লকআউট অবস্থা                                                                                                          | স্বাস্থ্য, স্থিতিস্থাপকতা  | "সমস্ত প্রদানকারীর স্বাস্থ্যের অবস্থা দেখান" |
+| তালিকা ক্ষমতা       | `list-capabilities`  | প্রসঙ্গ ইনজেকশনের জন্য কাঁচা SKILL.md URLs সহ একটি মার্কডাউন টেবিল হিসাবে সম্পূর্ণ 45-এন্ট্রি এজেন্ট দক্ষতা ক্যাটালগ (23 API + 21 CLI + 1 কনফিগারেশন) প্রদান করে | ক্যাটালগ, আবিষ্কার, দক্ষতা | "সমস্ত OmniRoute ক্ষমতা তালিকাভুক্ত করুন"    |
 
-> Agent Card-কে সক্রিয় 374-প্রোভাইডারের ক্যাটালগের সঙ্গে সামঞ্জস্যপূর্ণ রাখতে হবে; প্রোভাইডারের সংখ্যা এবং ফ্রি/নো-অথ মেটাডেটা রানটাইম রেজিস্ট্রি থেকে নেওয়া হয়।
+> এজেন্ট কার্ডটি লাইভ 377-প্রদানকারীর ক্যাটালগের সাথে সারিবদ্ধ রাখা উচিত; প্রদানকারীর সংখ্যা এবং free/no-auth মেটাডেটা রানটাইম রেজিস্ট্রি থেকে নেওয়া হয়।
 
-### `list-capabilities` স্কিলের বিস্তারিত
+### `list-capabilities` দক্ষতা বিস্তারিত
 
-`list-capabilities` স্কিলটি বিশেষভাবে সেইসব বহিরাগত এজেন্টের জন্য উপযোগী, যাদের API কল পাঠানোর আগে OmniRoute কী কী প্রকাশ করে তা জানতে হয়। এটি একটি কাঠামোবদ্ধ markdown টেবিল আর্টিফ্যাক্ট প্রদান করে:
+`list-capabilities` দক্ষতা বিশেষত বহিরাগত এজেন্টদের জন্য উপযোগী যাদের API কল পাঠানোর আগে OmniRoute কী প্রকাশ করে তা আবিষ্কার করতে হবে। এটি একটি কাঠামোগত মার্কডাউন টেবিল আর্টিফ্যাক্ট প্রদান করে:
 
 ```
-| ID | নাম | বিভাগ | ক্ষেত্র | এন্ডপয়েন্ট/কমান্ড | Raw URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | অথেন্টিকেশন ও সেশন | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-প্রতিটি সারিতে `rawUrl` কলামটি থাকে, যাতে এজেন্টরা তাৎক্ষণিকভাবে সম্পূর্ণ SKILL.md আনতে পারে। `metadata.totalSkills` ফিল্ডটি ক্যাটালগের আকার প্রতিফলিত করে (বর্তমানে 45)। বাস্তবায়ন: `src/lib/a2a/skills/listCapabilities.ts`। আরও দেখুন [AGENT-SKILLS.md](./AGENT-SKILLS.md)।
+প্রতিটি সারিতে `rawUrl` কলাম থাকে যাতে এজেন্টরা অবিলম্বে সম্পূর্ণ SKILL.md আনতে পারে। `metadata.totalSkills` ক্ষেত্রটি ক্যাটালগের আকারকে প্রতিফলিত করে (45 আজ)। বাস্তবায়ন: `src/lib/a2a/skills/listCapabilities.ts`। এছাড়াও [AGENT-SKILLS.md](./AGENT-SKILLS.md) দেখুন।
 
 ---
 
@@ -193,17 +196,17 @@ JSON-RPC এন্ডপয়েন্ট `/a2a` হলো প্রামা�
 
 ---
 
-## নতুন স্কিল যোগ করা
+## নতুন Skill যোগ করা
 
-1. **স্কিল ফাইল তৈরি করুন:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Skill ফাইল তৈরি করুন:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   একটি async ফাংশন `(task: A2ATask) => Promise<{ artifacts, metadata }>` এক্সপোর্ট করুন। `smartRouting.ts`-এর মতো বিদ্যমান স্কিলগুলোর কাঠামো অনুসরণ করুন।
+   একটি async function `(task: A2ATask) => Promise<{ artifacts, metadata }>` export করুন। `smartRouting.ts`-এর মতো বিদ্যমান skills-এর কাঠামো অনুসরণ করুন।
 
-2. **হ্যান্ডলার নিবন্ধন করুন:** `src/lib/a2a/taskExecution.ts`-এ `A2A_SKILL_HANDLERS`-এ একটি এন্ট্রি যোগ করুন:
+2. **Handler নিবন্ধন করুন:** `src/lib/a2a/taskExecution.ts`-এ `A2A_SKILL_HANDLERS`-এ একটি entry যোগ করুন:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...বিদ্যমান স্কিলগুলো
+     // ...বিদ্যমান skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -211,21 +214,21 @@ JSON-RPC এন্ডপয়েন্ট `/a2a` হলো প্রামা�
    };
    ```
 
-3. **Agent Card-এ প্রকাশ করুন:** `src/app/.well-known/agent.json/route.ts`-এ `skills` অ্যারেতে যোগ করুন:
+3. **Agent Card-এ প্রকাশ করুন:** `src/lib/a2a/agentCardMetadata.ts`-এ (`/.well-known/agent.json` এবং `/.well-known/agent-card.json` উভয়ের জন্য ব্যবহৃত), `skills` array-তে যোগ করুন:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
-     "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "name": "আপনার Skill",
+     "description": "সংক্ষিপ্ত, অভিপ্রায়-কেন্দ্রিক বিবরণ",
+     "tags": ["রাউটিং", "কোটা"],
+     "examples": ["স্বাভাবিক ভাষায় নমুনা invocation"]
    }
    ```
 
-4. **টেস্ট লিখুন:** `tests/unit/a2a-<your-skill>.test.ts`। সফলতার পথ + ত্রুটির পথ কভার করুন।
+4. **Tests লিখুন:** `tests/unit/a2a-<your-skill>.test.ts`। সফল path এবং error path উভয়ই অন্তর্ভুক্ত করুন।
 
-5. **এই ফাইলের `Available Skills` টেবিলে** নতুন স্কিলটি নথিভুক্ত করুন।
+5. **নথিভুক্ত করুন:** এই ফাইলের `Available Skills` table-এ নতুন skill-টি যোগ করুন।
 
 ---
 
@@ -262,9 +265,9 @@ JSON-RPC এন্ডপয়েন্ট `/a2a` হলো প্রামা�
 
 ---
 
-## ইন্টিগ্রেশনের উদাহরণ
+## ইন্টিগ্রেশন উদাহরণ
 
-### Python (requests)
+### পাইথন (অনুরোধ)
 
 ```python
 import requests
@@ -283,7 +286,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (আনয়ন)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

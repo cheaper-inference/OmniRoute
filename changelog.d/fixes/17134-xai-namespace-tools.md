@@ -1,0 +1,1 @@
+- **fix(xai):** Codex MCP `namespace` tools are flattened before xAI `/v1/responses` (no more 422 `unknown variant namespace`), and 422 body-shape errors no longer cool down the account ([#17134](https://github.com/diegosouzapw/OmniRoute/pull/17134)) — thanks @yaman0786

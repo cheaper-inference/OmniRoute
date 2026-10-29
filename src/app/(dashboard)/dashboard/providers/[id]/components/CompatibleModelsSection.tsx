@@ -1,5 +1,4 @@
 "use client";
-import { filterUnavailableModelRows } from "@/lib/providers/mergeProviderModelListing";
 /**
  * CompatibleModelsSection — Issue #3501 Phase 1e
  *
@@ -9,7 +8,9 @@ import { filterUnavailableModelRows } from "@/lib/providers/mergeProviderModelLi
  * Never imports from ProviderDetailPageClient.
  */
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Button } from "@/shared/components";
+import { filterUnavailableModelRows } from "@/lib/providers/mergeProviderModelListing";
+import { sortModelsFreeFirst, isModelFreeBadge } from "@/shared/utils/freeModels";
+import { Button, Input } from "@/shared/components";
 import {
   matchesModelCatalogQuery,
   normalizeModelCatalogSource,
@@ -24,8 +25,8 @@ import {
   type CompatModelRow,
 } from "../providerPageHelpers";
 import { ModelVisibilityToolbar } from "./ModelRow";
-import { sortModelsFreeFirst, isModelFreeBadge } from "@/shared/utils/freeModels";
 import { useStrictFreeBadge } from "./useStrictFreeBadge";
+import { useModelVisionOverrides } from "../hooks/useModelVisionOverrides";
 import { useModelOutputOverrides } from "../hooks/useModelOutputOverrides";
 import PassthroughModelRow, { type PassthroughModelRowProps } from "./PassthroughModelRow";
 
@@ -44,6 +45,8 @@ export interface CompatibleModelsSectionProps {
   providerStorageAlias: string;
   providerDisplayAlias: string;
   modelAliases: Record<string, string>;
+  /** model id → combo names that reference it, for the "used in combo" badge. */
+  comboUsage?: Record<string, string[]>;
   availableModels?: CompatModelRow[];
   syncedCatalogAuthoritative?: boolean;
   customModels?: CompatModelRow[];
@@ -114,6 +117,7 @@ export default function CompatibleModelsSection({
   providerStorageAlias,
   providerDisplayAlias,
   modelAliases,
+  comboUsage,
   availableModels = [],
   syncedCatalogAuthoritative = false,
   customModels = [],
@@ -161,6 +165,7 @@ export default function CompatibleModelsSection({
 
   const notify = useNotificationStore();
   const outputOverrides = useModelOutputOverrides(providerStorageAlias, t);
+  const visionOverrides = useModelVisionOverrides(providerStorageAlias, t, onModelsChanged);
 
   // #14337: context-window overrides for rows that have no customModels entry.
   // GET /api/provider-models returns them per provider; without this the value a
@@ -477,23 +482,15 @@ export default function CompatibleModelsSection({
       <p className="text-sm text-text-muted">{description}</p>
 
       <div className="flex items-end gap-2 flex-wrap">
-        <div className="flex-1 min-w-[240px]">
-          <label
-            htmlFor="new-compatible-model-input"
-            className="text-xs text-text-muted mb-1 block"
-          >
-            {inputLabel}
-          </label>
-          <input
-            id="new-compatible-model-input"
-            type="text"
-            value={newModel}
-            onChange={(e) => setNewModel(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-            placeholder={inputPlaceholder}
-            className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
-          />
-        </div>
+        <Input
+          id="new-compatible-model-input"
+          label={inputLabel}
+          value={newModel}
+          onChange={(e) => setNewModel(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+          placeholder={inputPlaceholder}
+          className="flex-1 min-w-[240px]"
+        />
         <Button size="sm" icon="add" onClick={handleAdd} disabled={!newModel.trim() || adding}>
           {adding ? t("adding") : t("add")}
         </Button>
@@ -591,6 +588,7 @@ export default function CompatibleModelsSection({
                     source={source}
                     isFree={isFree}
                     isHidden={isHidden}
+                    combos={comboUsage?.[modelId]}
                     copied={copied}
                     onCopy={onCopy}
                     onDeleteAlias={
@@ -614,7 +612,10 @@ export default function CompatibleModelsSection({
                     testStatus={modelTestStatus?.[modelId] || null}
                     testingModel={testingModelId === modelId}
                     provider={providerStorageAlias}
-                    supportsVision={supportsVision}
+                    supportsVision={visionOverrides.overrides[modelId] ?? supportsVision}
+                    visionOverride={visionOverrides.overrides[modelId]}
+                    onSaveVisionOverride={visionOverrides.save}
+                    savingVisionOverride={visionOverrides.savingModelId !== null}
                     maxOutputTokenOverride={outputOverrides.overrides[modelId] ?? null}
                     onSaveMaxOutputTokenOverride={outputOverrides.save}
                     savingOutputOverride={outputOverrides.savingModelId === modelId}

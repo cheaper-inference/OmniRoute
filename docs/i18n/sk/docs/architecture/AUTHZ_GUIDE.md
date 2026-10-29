@@ -15,44 +15,116 @@ OmniRoute má autorizačný pipeline, ktorý je citlivý na trasy a stráži ka�
 
 ## Dva režimy autentifikácie
 
-### 1. API kľúč (Bearer)
+### 1. Kľúč API (Bearer)
 
-Používa sa pre klientske API kompatibilné s OpenAI/Anthropic/Gemini a pre niekoľko správcovských trás, keď má kľúč rozsah `manage`.
+Používa sa pre klientske API kompatibilné s OpenAI/Anthropic/Gemini a niekoľko trás správy, keď má kľúč rozsah `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Overuje sa pomocou `isValidApiKey()` / `extractApiKey()` v `src/sse/services/auth.ts` a znovu sa exportuje cez `src/shared/utils/apiAuth.ts`. Validátor tiež akceptuje premenné prostredia `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` ako trvalé kľúče na preposielanie (issue #1350).
+Overuje sa pomocou `isValidApiKey()` / `extractApiKey()` v `src/sse/services/auth.ts` a opätovne sa exportuje cez `src/shared/utils/apiAuth.ts`. Validátor tiež akceptuje premenné prostredia `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` ako trvalé kľúče na priame odovzdanie (problém č. 1350).
 
-### 2. Relácia panela (cookie auth_token)
+### 2. Relácia ovládacieho panela (súbor cookie auth_token)
 
-Pre stránky panela a administratívne operácie.
+Pre stránky ovládacieho panela a operácie správcu.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Cookie je reláciou iba vtedy, keď JWT prejde overením **a** obsahuje `authenticated: true` (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Každý príjemca cookie (strážca trás panela (`isDashboardSessionAuthenticated()`), obnovenie v authz pipeline, WebSocket handshake, živý server, `/api/settings/require-login`, `/api/auth/status`) prechádza týmto pomocníkom. Existujú aj iné JWT podpísané `JWT_SECRET` — passthrough CLI Cursor vydáva držiteľom kľúča tokeny `iss "omniroute" / aud "cursor-cli"` — a nikdy nie sú reláciami (#13298).
+Súbor cookie predstavuje reláciu iba vtedy, keď je JWT overený **a** obsahuje `authenticated: true`
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Každý
+spotrebiteľ súboru cookie (ochrana trasy ovládacieho panela (`isDashboardSessionAuthenticated()`), obnovenie autorizačného kanála, nadviazanie spojenia WebSocket, živý
+server, `/api/settings/require-login`, `/api/auth/status`) používa túto pomocnú funkciu.
+Existujú aj iné JWT podpísané pomocou `JWT_SECRET` — priame odovzdanie cez Cursor CLI vytvára
+pre držiteľov kľúčov tokeny `iss "omniroute" / aud "cursor-cli"` — a tie nikdy nepredstavujú relácie
+(č. 13298).
 
-Overuje sa pomocou `isDashboardSessionAuthenticated()` v `src/shared/utils/apiAuth.ts`. Pipeline automaticky obnoví JWT, keď mu zostáva menej ako 7 dní z jeho 30-dňovej platnosti.
+Overuje sa pomocou `isDashboardSessionAuthenticated()` v `src/shared/utils/apiAuth.ts`. Kanál automaticky obnoví JWT, keď do konca jeho 30-dňovej platnosti zostáva menej ako 7 dní.
 
-Relácia môže skončiť skôr ako po 30 dňoch, pretože každý vydavateľ prechádza cez `mintDashboardSessionToken` (čas vydania `iat` a identifikátor `jti`) a overovateľ kontroluje dve nastavenia: `sessionsValidAfter`, ktoré nastaví zmena hesla, takže každá relácia vydaná pred ňou prestane platiť (prehliadač, ktorý heslo zmenil, dostane nové cookie), a `revokedDashboardSessions`, do ktorého `POST /api/auth/logout` pridá `jti` odhlásenej relácie. Relácie vydané staršou verziou tieto nároky nemajú a zostávajú platné až do prvej zmeny hesla. Ak sa nastavenia nedajú prečítať, relácia sa nepovažuje za dôveryhodnú.
+Relácia sa môže skončiť aj pred uplynutím 30 dní, pretože každé vytvorenie tokenu prechádza cez `mintDashboardSessionToken` (čas vydania `iat` a identifikátor `jti`) a overovateľ kontroluje dve nastavenia: `sessionsValidAfter`, ktoré sa nastaví pri zmene hesla, takže sa prestanú overovať všetky relácie vydané pred touto zmenou (prehliadač, v ktorom bolo heslo zmenené, dostane nový súbor cookie), a `revokedDashboardSessions`, do ktorého `POST /api/auth/logout` pridá `jti` odhlásenej relácie. Relácie vytvorené staršou verziou neobsahujú ani jeden z týchto nárokov a zostanú platné až do prvej zmeny hesla. Ak nastavenia nemožno načítať, relácia sa nepovažuje za dôveryhodnú.
 
-Niektoré správcovské trasy akceptujú **buď** režim: cookie ALEBO `Bearer <key>`, keď má API kľúč rozsah `manage` (alebo `admin`). Práve to umožňuje pracovný postup „konfigurovateľné cez API volania“ pridaný vo verzii v3.8.
+Niektoré trasy správy akceptujú **ktorýkoľvek** režim: súbor cookie ALEBO `Bearer <key>`, keď má kľúč API rozsah `manage` (alebo `admin`). To umožňuje pracovný postup „konfigurovateľné prostredníctvom volaní API“, ktorý bol pridaný vo verzii v3.8.
 
-#### Voliteľná brána prihlásenia OIDC (#6973)
+#### Voliteľná prihlasovacia brána OIDC (č. 6973)
 
-Administrátorské prihlásenie do panela podporuje aj voliteľný tok OIDC (OpenID Connect) popri predvolenom prihlásení heslom — prihlásenie heslom sa nikdy neodstraňuje, iba sa dopĺňa:
+Prihlásenie správcu do ovládacieho panela podporuje popri predvolenom prihlasovaní heslom aj **voliteľný** postup OIDC (OpenID Connect) — prihlasovanie heslom sa nikdy neodstráni, iba
+doplní:
 
-- Vypnuté, pokiaľ `settings.oidcEnabled === true` **a** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` nie sú všetky nastavené (Settings → Auth). `GET /api/auth/oidc/login` inak vracia `400`.
-- `GET /api/auth/oidc/login` zistí `authorization_endpoint` z `/.well-known/openid-configuration` vydavateľa (inak použije `<issuer>/authorize`), zostaví redirect URI z prichádzajúcej požiadavky (rešpektuje `x-forwarded-proto`) a presmeruje na IdP s náhodným `state` uloženým v cookie `oidc_state` s príznakom `httpOnly`.
-- `GET /api/auth/oidc/callback` overí `state`, vymení autorizačný kód a overí podpis ID tokenu cez JWKS vydavateľa (`createRemoteJWKSet` z `jose`, cache na URI JWKS) s kontrolou `issuer`/`audience`. Zoznam `oidcAllowedSubjects` je povinný: porovnáva sa s claimom `sub` tokenu alebo s claimom `email` — claim e-mailu sa uplatní iba vtedy, keď `email_verified === true`, takže neoverený e-mail u IdP nikdy neprejde bránou — a bez položiek callback odmietne každé prihlásenie (`not_configured`).
-- Po úspechu vydá **presne rovnaký** 30-dňový JWT `auth_token`, aký vydáva prihlásenie heslom (`src/app/api/auth/login/route.ts`), takže zvyšok pipeline relácie panela (automatické obnovenie, príznaky cookie) zostáva nezmenený — OIDC mení iba spôsob vydania cookie, nie to, čo udeľuje.
-- Každé nastavenie `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) je v `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` vracia `400 PASSWORD_REQUIRED`, pokiaľ telo požiadavky neobsahuje heslo správy ako `currentPassword` (`401 PASSWORD_MISMATCH`, ak je zlé). `oidcDisablePasswordLogin` zakáže _prihlásenie_ heslom (`POST /api/auth/login`), ale ponechá uložený hash hesla, a opätovné overenie stále kontroluje `currentPassword` oproti nemu.
-- `corsOrigins` a `bruteForceProtection` sú tiež v `SECURITY_IMPACTING_SETTINGS_KEYS`: ich uvoľnenie oslabuje obranu prihlásenia, preto vyžadujú rovnaké opätovné overenie `currentPassword` (záložka Security sa na ňu pýta) a import JSON ich vynecháva.
-- Každý kľúč bezpečnostnej politiky — položky `SECURITY_IMPACTING_SETTINGS_KEYS`, každý kľúč `oidc*` a stav relácie panela — je **iba pre operátora** v `PATCH /api/settings`: kľúč API s rozsahom manage alebo prístupový token `oma_` dostane `403`, aj keď pošle správne `currentPassword`, a odmietnutie sa audituje ako `settings.update_failed` s `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` v `src/lib/api/operatorCredential.ts`). Bežné nastavenia (téma, predvoľby zobrazenia) zostávajú zapisovateľné pre kľúč `manage` alebo prístupový token `admin`. Každá zmena samotného `/api/settings` (a tiež `/api/settings/require-login`) vyžaduje aj rozsah prístupového tokenu `admin` (`ADMIN_MUTATION_EXACT_PATHS` v `src/server/authz/accessScopes.ts`, presná zhoda cesty); `GET` zostáva `read` a ostatné podcesty `/api/settings/*` (proxy, predvolené nastavenia combo, aliasy modelov, kompresia, čistenia…) si ponechávajú rozsah `write` odvodený z metódy.
-- `POST /api/settings/import-json` toto opätovné overenie preskakuje, preto pred zápisom odstráni každý kľúč z `IMPORT_STRIPPED_SETTINGS_KEYS` (rovnaký súbor): heslo a `currentPassword`, každú položku `SECURITY_IMPACTING_SETTINGS_KEYS` a stav relácie panela (`sessionsValidAfter`, `revokedDashboardSessions`). Import staršej zálohy tak nemôže oživiť reláciu, ktorú ukončila zmena hesla alebo odhlásenie.
+- Zakázané, pokiaľ `settings.oidcEnabled === true` **a zároveň** nie sú nakonfigurované
+  všetky položky `oidcIssuer` / `oidcClientId` / `oidcClientSecret` (Nastavenia → Overovanie).
+  V opačnom prípade `GET /api/auth/oidc/login` vráti `400`.
+- `GET /api/auth/oidc/login` zistí `authorization_endpoint` z konfigurácie
+  vydavateľa `/.well-known/openid-configuration` (ako náhradné riešenie použije
+  `<issuer>/authorize`), zostaví URI presmerovania z prichádzajúcej požiadavky
+  (s podporou `x-forwarded-proto`) a presmeruje na IdP s náhodným parametrom `state`
+  uloženým v súbore cookie `oidc_state` s príznakom `httpOnly`.
+- `GET /api/auth/oidc/callback` overí `state`, vymení autorizačný
+  kód a overí podpis ID tokenu prostredníctvom JWKS vydavateľa
+  (`createRemoteJWKSet` z balíka `jose`, ukladané do vyrovnávacej pamäte podľa URI JWKS)
+  s kontrolami `issuer`/`audience`. Prístup k ovládaciemu panelu vyžaduje neprázdny
+  zoznam `oidcAllowedSubjects`, politiku `oidcAdmissionClaim` alebo oboje. Zoznam
+  subjektov porovnáva `sub` alebo `email`, pričom `email` iba vtedy, keď
+  `email_verified === true`. Voliteľná politika deklarácie používa cestu
+  k deklarácii ID tokenu oddelenú bodkami (napríklad `realm_access.roles`) a
+  pole akceptovaných hodnôt; výsledná deklarácia musí byť poľom reťazcov
+  obsahujúcim aspoň jednu akceptovanú hodnotu. Ak sú nakonfigurované obe
+  politiky, obe musia uspieť. Chýbajúce alebo nesprávne deklarácie vedú
+  k bezpečnému odmietnutiu a bez ktorejkoľvek z politík spätné volanie odmietne
+  prihlásenie (`not_configured`). Existujúce konfigurácie založené iba na
+  subjekte naďalej fungujú bez zmeny.
+- Keycloak zvyčajne mapuje roly realm do prístupových tokenov, nie nevyhnutne
+  do ID tokenov. Ak chcete vyžadovať rolu realm `admin`, nakonfigurujte pre
+  tohto klienta mapovač protokolu, ktorý zahrnie `realm_access.roles` do jeho
+  **ID tokenu**, a potom nastavte `oidcAdmissionClaim` na
+  `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Pred povolením prístupu založeného iba na role skontrolujte skutočnú deklaráciu
+  ID tokenu pre tohto klienta; aplikácia nečíta roly z prístupového tokenu.
+  Odmietnutie tokenu na strane IdP môže túto kontrolu na strane aplikácie doplniť,
+  ale nenahrádza ju.
+- Pri úspechu vytvorí **presne rovnaký** JWT `auth_token` s platnosťou 30 dní,
+  aký vydáva prihlásenie heslom (`src/app/api/auth/login/route.ts`), takže zvyšok
+  mechanizmu relácie ovládacieho panela (automatické obnovovanie, príznaky súborov
+  cookie) zostáva nezmenený — OIDC nahrádza iba spôsob vytvorenia súboru cookie,
+  nie oprávnenia, ktoré udeľuje. Zmeny rolí alebo skupín v IdP nezneplatnia
+  existujúce relácie OmniRoute; ich životnosť naďalej riadi odhlásenie, zmena
+  hesla alebo uplynutie platnosti relácie.
+- Každé nastavenie `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) sa nachádza v
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  odpovie `400 PASSWORD_REQUIRED`, pokiaľ telo neobsahuje správcovské
+  heslo ako `currentPassword` (`401 PASSWORD_MISMATCH`, ak je nesprávne).
+  `oidcDisablePasswordLogin` odmietne _prihlásenie_ heslom (`POST /api/auth/login`),
+  ale zachová uložený haš hesla a opätovné overenie naďalej kontroluje
+  `currentPassword` voči tomuto hašu.
+- `corsOrigins` a `bruteForceProtection` sa tiež nachádzajú v
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: zmiernenie ktoréhokoľvek z nich oslabuje
+  ochranu prihlásenia, preto vyžadujú rovnaké opätovné overenie pomocou
+  `currentPassword` (karta Zabezpečenie si ho vyžiada) a import JSON ich vynechá.
+- Každý kľúč bezpečnostnej politiky — položky `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  každý kľúč `oidc*` a stav relácie ovládacieho panela — je pri
+  `PATCH /api/settings` dostupný **iba operátorovi**: kľúč API s rozsahom `manage`
+  alebo prístupový token `oma_` je odmietnutý s kódom `403`, aj keď odošle správne
+  `currentPassword`, a odmietnutie sa zaznamená do auditu ako
+  `settings.update_failed` s `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` v `src/lib/api/operatorCredential.ts`).
+  Bežné nastavenia (téma, predvoľby zobrazenia) zostávajú zapisovateľné pomocou
+  kľúča s rozsahom `manage` alebo prístupového tokenu `admin`. Každá zmena
+  samotnej cesty `/api/settings` (a tiež `/api/settings/require-login`) vyžaduje
+  aj rozsah prístupového tokenu `admin` (`ADMIN_MUTATION_EXACT_PATHS` v
+  `src/server/authz/accessScopes.ts`, presná zhoda cesty); `GET` zostáva v rozsahu
+  `read` a ostatné podradené trasy `/api/settings/*` (proxy, predvolené kombinácie,
+  aliasy modelov, kompresia, vymazania…) si zachovávajú rozsah `write` odvodený
+  od metódy.
+- `POST /api/settings/import-json` preskočí toto opätovné overenie, preto pred
+  zápisom odstráni každý kľúč v `IMPORT_STRIPPED_SETTINGS_KEYS` (rovnaký súbor):
+  heslo a `currentPassword`, každú položku `SECURITY_IMPACTING_SETTINGS_KEYS`
+  a stav relácie ovládacieho panela (`sessionsValidAfter`, `revokedDashboardSessions`).
+  Import staršej zálohy preto nemôže obnoviť reláciu, ktorú už ukončila zmena
+  hesla alebo odhlásenie.
 
 ## Triedy trás
 

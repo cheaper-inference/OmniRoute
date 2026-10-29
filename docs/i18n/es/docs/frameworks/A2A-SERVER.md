@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Para `smart-routing`, `metadata.combo` es una anulación explícita de
+`metadata.model` para la solicitud al gateway; se envía como el `model` real,
+no como un campo JSON `x-combo` ignorado. Se siguen aplicando la clave de API normal del gateway y
+la autorización por destino. Un combo no válido o vacío se rechaza.
+
+El resultado expone `requested_combo` (intención del solicitante), `dispatched_model`
+(la solicitud real al gateway), `response_model` (respuesta del gateway) y
+`confirmed_combo`. El último campo es `null` a menos que el gateway identifique
+explícitamente un combo. Los registros de decisiones de A2A atribuyen la ejecución solo a un
+combo confirmado y conservan una solicitud no confirmada como `requestedCombo`.
+
 **Respuesta:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Habilidades disponibles
 
-OmniRoute expone 6 habilidades A2A conectadas en `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Cada módulo de habilidad se encuentra en `src/lib/a2a/skills/`.
+OmniRoute expone 6 habilidades A2A conectadas en `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Cada módulo de habilidad reside en `src/lib/a2a/skills/`.
 
-| Habilidad                     | ID                   | Descripción                                                                                                                                                                                       | Etiquetas                             | Ejemplos                                      |
-| :---------------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------ | :-------------------------------------------- |
-| Enrutamiento inteligente      | `smart-routing`      | Enruta un prompt mediante el proveedor o la combinación óptimos utilizando el motor de combinaciones y el sistema de puntuación de OmniRoute                                                      | enrutamiento, proveedores             | "Enruta este prompt mediante el mejor modelo" |
-| Gestión de cuotas             | `quota-management`   | Informa del estado de las cuotas por proveedor y ayuda a quienes realizan llamadas a decidir cuándo limitarlas o cambiar de proveedor                                                             | cuotas, proveedores                   | "Comprueba la cuota de anthropic"             |
-| Descubrimiento de proveedores | `provider-discovery` | Enumera los proveedores instalados junto con sus capacidades, indicadores de nivel gratuito y estado de OAuth                                                                                     | proveedores, descubrimiento           | "¿Qué proveedores están disponibles?"         |
-| Análisis de costes            | `cost-analysis`      | Estima el coste de una solicitud o conversación según el catálogo y el uso reciente                                                                                                               | costes, uso                           | "Estima el coste de esta conversación"        |
-| Informe de estado             | `health-report`      | Agrega el estado del disyuntor, el periodo de espera y el bloqueo por proveedor                                                                                                                   | estado, resiliencia                   | "Muestra el estado de todos los proveedores"  |
-| Enumeración de capacidades    | `list-capabilities`  | Devuelve el catálogo completo de 45 habilidades de agente (23 de API + 21 de CLI + 1 de configuración) como una tabla Markdown con las URL sin procesar de SKILL.md para la inyección de contexto | catálogo, descubrimiento, habilidades | "Enumera todas las capacidades de OmniRoute"  |
+| Habilidad                     | ID                   | Descripción                                                                                                                                                                             | Etiquetas                             | Ejemplos                                           |
+| :---------------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------ | :------------------------------------------------- |
+| Enrutamiento inteligente      | `smart-routing`      | Enruta un mensaje a través del provider/combo óptimo utilizando la puntuación + del motor combinado de OmniRoute                                                                        | enrutamiento, proveedores             | "Enrutar este mensaje a través del mejor modelo"   |
+| Gestión de cuotas             | `quota-management`   | Informa el estado de la cuota por proveedor y ayuda a las personas que llaman a decidir cuándo hacer throttle/switch                                                                    | cuota, proveedores                    | "Consultar cuota para antrópicos"                  |
+| Descubrimiento de proveedores | `provider-discovery` | Enumera los proveedores instalados con capacidades, indicadores de nivel gratuito y estado OAuth                                                                                        | proveedores, descubrimiento           | "¿Qué proveedores están disponibles?"              |
+| Análisis de costos            | `cost-analysis`      | Estima el costo de un request/conversation dado el uso reciente del catálogo +                                                                                                          | costo, uso                            | "Estimar el costo de esta conversación"            |
+| Informe de salud              | `health-report`      | Agrega disyuntor, enfriamiento y estado de bloqueo por proveedor                                                                                                                        | salud, resiliencia                    | "Mostrar estado de salud de todos los proveedores" |
+| Capacidades de lista          | `list-capabilities`  | Devuelve el catálogo completo de habilidades del agente de 45 entradas (23 API + 21 CLI + 1 config) como una tabla de rebajas con SKILL.md URLs sin formato para inyección de contexto. | catálogo, descubrimiento, habilidades | "Enumere todas las capacidades OmniRoute "         |
 
-> La tarjeta del agente debe mantenerse sincronizada con el catálogo activo de 374 proveedores; los recuentos de proveedores y los metadatos de gratuidad o ausencia de autenticación se obtienen del registro en tiempo de ejecución.
+> La Tarjeta de Agente debe mantenerse alineada con el catálogo de proveedores 377 en vivo; Los recuentos de proveedores y los metadatos free/no-auth se obtienen del registro de tiempo de ejecución.
 
-### Detalles de la habilidad `list-capabilities`
+### Detalle de habilidad `list-capabilities`
 
-La habilidad `list-capabilities` resulta especialmente útil para agentes externos que necesitan descubrir qué expone OmniRoute antes de enviar llamadas a la API. Devuelve un artefacto de tabla Markdown estructurada:
+La habilidad `list-capabilities` es particularmente útil para agentes externos que necesitan descubrir qué expone OmniRoute antes de enviar llamadas API. Devuelve un artefacto de tabla de rebajas estructurada:
 
 ```
-| ID | Nombre | Categoría | Área | Endpoints/Comandos | URL sin procesar |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autenticación y sesiones | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Cada fila incluye la columna `rawUrl` para que los agentes puedan obtener inmediatamente el archivo SKILL.md completo. El campo `metadata.totalSkills` refleja el tamaño del catálogo (45 actualmente). Implementación: `src/lib/a2a/skills/listCapabilities.ts`. Véase también [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Cada fila incluye la columna `rawUrl` para que los agentes puedan recuperar inmediatamente el SKILL.md completo. El campo `metadata.totalSkills` refleja el tamaño del catálogo (45 en la actualidad). Implementación: `src/lib/a2a/skills/listCapabilities.ts`. Véase también [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -197,9 +201,9 @@ El endpoint JSON-RPC `/a2a` es el punto de entrada canónico de A2A. Los siguien
 
 1. **Cree el archivo de la habilidad:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exporte una función asíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga la estructura de habilidades existentes como `smartRouting.ts`.
+   Exporte una función asíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga la estructura de las habilidades existentes, como `smartRouting.ts`.
 
-2. **Registre el controlador:** en `src/lib/a2a/taskExecution.ts`, añada una entrada a `A2A_SKILL_HANDLERS`:
+2. **Registre el manejador:** en `src/lib/a2a/taskExecution.ts`, añada una entrada a `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -211,7 +215,7 @@ El endpoint JSON-RPC `/a2a` es el punto de entrada canónico de A2A. Los siguien
    };
    ```
 
-3. **Expóngala en la tarjeta del agente:** en `src/app/.well-known/agent.json/route.ts`, añádala al array `skills`:
+3. **Exponga la habilidad en la tarjeta del agente:** en `src/lib/a2a/agentCardMetadata.ts` (compartido por `/.well-known/agent.json` y `/.well-known/agent-card.json`), añádala al array `skills`:
 
    ```json
    {
@@ -223,7 +227,7 @@ El endpoint JSON-RPC `/a2a` es el punto de entrada canónico de A2A. Los siguien
    }
    ```
 
-4. **Escriba pruebas:** `tests/unit/a2a-<your-skill>.test.ts`. Cubra el caso exitoso y el caso de error.
+4. **Escriba pruebas:** `tests/unit/a2a-<your-skill>.test.ts`. Cubra el flujo correcto y el flujo de error.
 
 5. **Documente** la nueva habilidad en la tabla `Available Skills` de este archivo.
 
@@ -264,7 +268,7 @@ submitted → working → completed
 
 ## Ejemplos de integración
 
-### Python (requests)
+### Python (solicitudes)
 
 ```python
 import requests
@@ -274,7 +278,7 @@ resp = requests.post("http://localhost:20128/a2a", json={
     "method": "message/send",
     "params": {
         "skill": "smart-routing",
-        "messages": [{"role": "user", "content": "Hola"}]
+        "messages": [{"role": "user", "content": "Hello"}]
     }
 }, headers={"Authorization": "Bearer YOUR_KEY"})
 
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (buscar)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {
@@ -298,7 +302,7 @@ const resp = await fetch("http://localhost:20128/a2a", {
     method: "message/send",
     params: {
       skill: "smart-routing",
-      messages: [{ role: "user", content: "Hola" }],
+      messages: [{ role: "user", content: "Hello" }],
     },
   }),
 });

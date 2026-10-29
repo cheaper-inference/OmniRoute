@@ -1,0 +1,1 @@
+- **fix(api):** a key restricted to `cc/*` no longer lists other providers' `claude-*` models (`dva/…`, `ddgw/…`) in `/v1/models` that it cannot call, and now lists the `no-think/` variants it can call ([#17261](https://github.com/diegosouzapw/OmniRoute/pull/17261)) — thanks @aminHZDEV

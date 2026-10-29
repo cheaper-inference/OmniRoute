@@ -25,22 +25,24 @@ Kombinált:       1 - (1 - 0.80) * (1 - 0.46) = 89.2% megtakarítás
 Tartomány:       1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Mit tömörít?
+## Mit tömörít
 
-A beépített katalógus jelenleg 49 szűrőt tartalmaz a következő kategóriákban:
+A beépített katalógus jelenleg 56 szűrőt tartalmaz a következő kategóriákban:
 
-| Kategória | Példák                                                            |
-| --------- | ----------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                 |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go-tesztek, Cargo-tesztek       |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx     |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler     |
-| `shell`   | `ls`, `find`, `grep`, általános shellnaplók                       |
-| `docker`  | `docker ps`, Docker-naplók                                        |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                           |
-| `generic` | JSON-kimenet, veremkövetések, általános kimeneti tartalékmegoldás |
+| Kategória | Példák                                                               |
+| --------- | -------------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                    |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo tesztek         |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx        |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler        |
+| `shell`   | `ls`, `find`, `grep`, általános shell-naplók                         |
+| `docker`  | `docker ps`, Docker-naplók                                           |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                              |
+| `generic` | JSON-kimenet, veremnyomok (stack trace), általános kimeneti tartalék |
 
-Az `open-sse/services/compression/engines/rtk/commandDetector.ts` fájlban található érzékelő a szűrő kiválasztása előtt osztályozza a kimenetet. A szűrők parancsminta vagy kimeneti reguláris kifejezés alapján is illeszkedhetnek, ha egy parancsosztály önmagában nem elegendő.
+Az `open-sse/services/compression/engines/rtk/commandDetector.ts` fájlban található detektor a
+szűrő kiválasztása előtt osztályozza a kimenetet. A szűrők parancsminta vagy kimeneti reguláris
+kifejezés alapján is illeszkedhetnek, ha a parancsosztály önmagában nem elegendő.
 
 ## Szűrőfeloldás
 
@@ -326,59 +328,60 @@ node --import tsx/esm --test \
 
 ## Intenzitási szintek (v3.8.16+)
 
-Az RTK **3 intenzitási szintet** támogat, amelyek különböző kompromisszumot kínálnak a **tömörítés agresszivitása** és a **biztonság** között. A szint a motor konfigurációjának `config.intensity` beállításával adható meg.
+Az RTK **3 intenzitási szintet** támogat, amelyek a **tömörítés agresszivitása** és a **biztonság** között egyensúlyoznak. A szint a motor konfigurációjában a `config.intensity` beállítással adható meg.
 
 ### A 3 szint
 
-| Szint                  | Csonkítási küszöb    | Tokenmegtakarítás | Kockázat        | Leginkább ehhez ajánlott                    |
-| ---------------------- | -------------------- | ----------------- | --------------- | ------------------------------------------- |
-| `minimal`              | 24 sor szakaszonként | ~20-40%           | Nagyon alacsony | Éles környezet kritikus kontextussal        |
-| `standard` (alapérték) | 24 sor szakaszonként | ~50-70%           | Alacsony        | Mindennapi kódolási munkamenetek            |
-| `aggressive`           | 16 sor szakaszonként | ~70-90%           | Közepes         | Hosszú munkamenetek, maximális megtakarítás |
+| Szint                        | Csonkítási küszöbérték | Token-megtakarítás | Kockázat        | Ajánlott felhasználás                       |
+| ---------------------------- | ---------------------- | ------------------ | --------------- | ------------------------------------------- |
+| `minimal`                    | 24 sor szekciónként    | ~20-40%            | Nagyon alacsony | Kritikus kontextust igénylő éles környezet  |
+| `standard` (alapértelmezett) | 24 sor szekciónként    | ~50-70%            | Alacsony        | Napi kódolási munkamenetek                  |
+| `aggressive`                 | 16 sor szekciónként    | ~70-90%            | Közepes         | Hosszú munkamenetek, maximális megtakarítás |
 
 ### Hol történik a csonkítás
 
-A csonkítási küszöb a `lineFilter.ts` működésére van hatással:
+A csonkítási küszöbérték a `lineFilter.ts`-re van hatással:
 
 ```ts
-// Az open-sse/services/compression/engines/rtk/index.ts:329-330 fájlból
+// Forrás: open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Minden szakasz **eleje** és **vége** megmarad; a középső tartalom kiesik, amikor a csonkítás életbe lép.
+Minden szekció **eleje** és **vége** megmarad; a középső tartalom kerül eldobásra, amikor a csonkítás életbe lép.
 
-### Mi marad meg, és mi kerül eltávolításra
+### Mi marad meg és mi kerül kivágásra
 
-| Tartalom                                | minimal       | standard      | aggressive    |
-| --------------------------------------- | ------------- | ------------- | ------------- |
-| Hibák / veremkövetések                  | ✅ megmarad   | ✅ megmarad   | ✅ megmarad   |
-| Sikertelen tesztek                      | ✅ megmarad   | ✅ megmarad   | ✅ megmarad   |
-| Buildelési hibák                        | ✅ megmarad   | ✅ megmarad   | ✅ megmarad   |
-| Sikeres tesztek (részletes)             | ✅ megmarad   | 🟡 összevonva | 🟡 összevonva |
-| Rutinszerű kimenet (információs naplók) | 🟡 összevonva | 🟡 összevonva | ❌ eldobva    |
-| Folyamatjelző sávok                     | 🟡 összevonva | ❌ eldobva    | ❌ eldobva    |
-| Fejléc / ASCII-grafika                  | 🟡 összevonva | ❌ eldobva    | ❌ eldobva    |
+| Tartalom                    | minimal        | standard       | aggressive     |
+| --------------------------- | -------------- | -------------- | -------------- |
+| Hibák / stack trace-ek      | ✅ megmarad    | ✅ megmarad    | ✅ megmarad    |
+| Teszthibák                  | ✅ megmarad    | ✅ megmarad    | ✅ megmarad    |
+| Build-hibák                 | ✅ megmarad    | ✅ megmarad    | ✅ megmarad    |
+| Sikeres tesztek (részletes) | ✅ megmarad    | 🟡 összecsukva | 🟡 összecsukva |
+| Rutin kimenet (info naplók) | 🟡 összecsukva | 🟡 összecsukva | ❌ eldobva     |
+| Folyamatjelző sávok         | 🟡 összecsukva | ❌ eldobva     | ❌ eldobva     |
+| Banner / ASCII-grafika      | 🟡 összecsukva | ❌ eldobva     | ❌ eldobva     |
 
 ### A megfelelő intenzitás kiválasztása
 
 ```
-                  Katasztrofális lenne a kontextus elvesztése?
+              Katasztrofális a kontextus elvesztése?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    IGEN         NEM       NEM BIZTOS
+    IGEN         NEM      NEM BIZTOS
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Mennyire fontos  Először próbáld a `standard`
-      │      az áteresztés?   szintet (az esetek 80%-ában
-      │           │          működik)
+      │      Mennyire kritikus  Próbáld ki először
+      │      az átbocsátó-      a `standard` szintet
+      │      képesség?          (az esetek 80%-ában
+      │           │             működik)
       │      ┌────┴────┐
       │      │         │
-      │  ALACSONY    MAGAS
+      │   ALACSONY   MAGAS
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -388,7 +391,7 @@ Minden szakasz **eleje** és **vége** megmarad; a középső tartalom kiesik, a
 
 ### Az intenzitás konfigurálása
 
-**Kombinációnként** (a kombináció konfigurációjában):
+**Kombónként** (a kombó konfigurációjában):
 
 ```json
 {
@@ -403,9 +406,9 @@ Minden szakasz **eleje** és **vége** megmarad; a középső tartalom kiesik, a
 
 **Programozottan**:
 
-Az `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) egy
-`CompressionEngine`, és nem rendelkezik `updateConfig` metódussal. Ehelyett a regisztrációs segédfüggvényen keresztül
-frissítsd a motor konfigurációját:
+A `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) egy
+`CompressionEngine`, és nem rendelkezik `updateConfig` metódussal. A motor
+konfigurációját helyette a registry segédfüggvényen keresztül frissítsd:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -415,14 +418,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### A hatás ellenőrzése
 
-Használd az **ellenőrzési kaput** (lásd alább) annak megerősítéséhez, hogy a szűrő biztonságos a kiválasztott intenzitással:
+Használd a **Verify Gate**-et (lásd lent), hogy meggyőződj arról, hogy a szűrő biztonságos a választott intenzitáson:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("A szűrők meghiúsultak agresszív intenzitás mellett");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

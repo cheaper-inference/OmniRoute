@@ -65,6 +65,19 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` için `metadata.combo`, ağ geçidi isteğindeki
+`metadata.model` değerini açıkça geçersiz kılar; yok sayılan bir `x-combo`
+JSON alanı olarak değil, gerçek `model` olarak gönderilir. Ağ geçidinin normal
+API anahtarı ve hedef başına yetkilendirme kuralları yine geçerlidir. Geçersiz
+veya boş bir combo reddedilir.
+
+Sonuç; `requested_combo` (çağıranın amacı), `dispatched_model`
+(gerçek ağ geçidi isteği), `response_model` (ağ geçidi yanıtı) ve
+`confirmed_combo` alanlarını sunar. Ağ geçidi bir combo'yu açıkça
+tanımlamadığı sürece son alan `null` olur. A2A karar günlükleri, yürütmeyi
+yalnızca doğrulanmış bir combo ile ilişkilendirir ve doğrulanmamış bir isteği
+`requestedCombo` olarak saklar.
+
 **Yanıt:**
 
 ```json
@@ -76,22 +89,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +105,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE Akışı
 
-`message/send` ile aynıdır ancak gerçek zamanlı akış için Sunucu Tarafından Gönderilen Olaylar döndürür.
+`message/send` ile aynıdır, ancak gerçek zamanlı akış için Sunucu Tarafından Gönderilen Olaylar döndürür.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -135,7 +141,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Bir Görevi İptal Etme
+### `tasks/cancel` — Görevi İptal Etme
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -146,33 +152,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Kullanılabilir Beceriler
+## Mevcut Beceriler
 
-OmniRoute, `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` içinde bağlanmış 6 A2A becerisi sunar. Her beceri modülü `src/lib/a2a/skills/` içinde yer alır.
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ile bağlantılı 6 A2A becerisini ortaya koyuyor. Her beceri modülü `src/lib/a2a/skills/` bulunur.
 
-| Beceri               | ID                   | Açıklama                                                                                                                                                                  | Etiketler                   | Örnekler                                     |
-| :------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------- | :------------------------------------------- |
-| Akıllı Yönlendirme   | `smart-routing`      | OmniRoute'un kombinasyon motoru ve puanlama sistemini kullanarak bir istemi en uygun sağlayıcı/kombinasyon üzerinden yönlendirir                                          | yönlendirme, sağlayıcılar   | "Bu istemi en iyi model üzerinden yönlendir" |
-| Kota Yönetimi        | `quota-management`   | Sağlayıcı başına kota durumunu bildirir, çağrı yapanların ne zaman hız sınırlaması uygulayacağına/sağlayıcı değiştireceğine karar vermesine yardımcı olur                 | kota, sağlayıcılar          | "anthropic için kotayı kontrol et"           |
-| Sağlayıcı Keşfi      | `provider-discovery` | Yüklü sağlayıcıları yetenekleri, ücretsiz katman bayrakları ve OAuth durumlarıyla listeler                                                                                | sağlayıcılar, keşif         | "Hangi sağlayıcılar kullanılabilir?"         |
-| Maliyet Analizi      | `cost-analysis`      | Katalog ve son kullanıma göre bir isteğin/konuşmanın maliyetini tahmin eder                                                                                               | maliyet, kullanım           | "Bu konuşmanın maliyetini tahmin et"         |
-| Sistem Durumu Raporu | `health-report`      | Sağlayıcı başına devre kesici, bekleme süresi ve kilitlenme durumlarını toplar                                                                                            | sistem durumu, dayanıklılık | "Tüm sağlayıcıların durumunu göster"         |
-| Yetenekleri Listele  | `list-capabilities`  | Bağlam ekleme amacıyla ham SKILL.md URL'leri içeren bir markdown tablosu olarak 45 girdilik Agent Skills kataloğunun tamamını (23 API + 21 CLI + 1 yapılandırma) döndürür | katalog, keşif, beceriler   | "Tüm OmniRoute yeteneklerini listele"        |
+| Yetenek             | ID                   | Tanım                                                                                                                                                      | Etiketler                 | Örnekler                                        |
+| :------------------ | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------ | :---------------------------------------------- |
+| Akıllı Yönlendirme  | `smart-routing`      | OmniRoute kombo motoru + puanlamasını kullanarak bir istemi en uygun provider/combo yönlendirir                                                            | yönlendirme, sağlayıcılar | "Bu istemi en iyi model aracılığıyla yönlendir" |
+| Kota Yönetimi       | `quota-management`   | Sağlayıcı başına kota durumu raporu, arayanların ne zaman throttle/switch yapacaklarına karar vermelerine yardımcı olur                                    | kota, sağlayıcılar        | "Antropik kotayı kontrol edin"                  |
+| Sağlayıcı Keşfi     | `provider-discovery` | Yetenekleri, ücretsiz katman işaretlerini ve OAuth durumunu içeren yüklü sağlayıcıları listeler                                                            | sağlayıcılar, keşif       | "Hangi sağlayıcılar mevcut?"                    |
+| Maliyet Analizi     | `cost-analysis`      | Katalog + son kullanımına göre bir request/conversation maliyetini tahmin eder                                                                             | maliyet, kullanım         | "Bu görüşmenin maliyetini tahmin edin"          |
+| Sağlık Raporu       | `health-report`      | Sağlayıcı başına devre kesiciyi, bekleme süresini ve kilitleme durumunu toplar                                                                             | sağlık, dayanıklılık      | "Tüm sağlayıcıların sağlık durumunu göster"     |
+| Yetenekleri Listele | `list-capabilities`  | 45 girişli tam Ajan Becerileri kataloğunu (23 API + 21 CLI + 1 config), bağlam ekleme için ham SKILL.md URLs içeren bir işaretleme tablosu olarak döndürür | katalog, keşif, beceriler | "Tüm OmniRoute yeteneklerini listele"           |
 
-> Agent Card, güncel 374 sağlayıcılı katalogla uyumlu tutulmalıdır; sağlayıcı sayıları ve ücretsiz/kimlik doğrulamasız kullanım meta verileri çalışma zamanı kayıt defterinden alınır.
+> Temsilci Kartı, canlı 377 sağlayıcı kataloğuyla uyumlu tutulmalıdır; sağlayıcı sayıları ve free/no-auth meta verileri çalışma zamanı kayıt defterinden alınır.
 
-### `list-capabilities` Beceri Ayrıntıları
+### `list-capabilities` Beceri Detayı
 
-`list-capabilities` becerisi, API çağrıları göndermeden önce OmniRoute'un neler sunduğunu keşfetmesi gereken harici aracılar için özellikle kullanışlıdır. Yapılandırılmış bir markdown tablo yapıtı döndürür:
+`list-capabilities` becerisi, API çağrılarını göndermeden önce OmniRoute neyi açığa çıkardığını keşfetmesi gereken harici aracılar için özellikle kullanışlıdır. Yapılandırılmış bir işaretleme tablosu yapıtı döndürür:
 
 ```
-| ID | Ad | Kategori | Alan | Uç Noktalar/Komutlar | Ham URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Kimlik Doğrulama ve Oturumlar | api | kimlik doğrulama | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Her satır, aracıların SKILL.md dosyasının tamamını hemen getirebilmesi için `rawUrl` sütununu içerir. `metadata.totalSkills` alanı, katalog boyutunu yansıtır (bugün 45). Uygulama: `src/lib/a2a/skills/listCapabilities.ts`. Ayrıca bkz. [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Her satır `rawUrl` sütununu içerir, böylece aracılar SKILL.md tamamını anında alabilir. `metadata.totalSkills` alanı katalog boyutunu yansıtır (bugün 45). Uygulama: `src/lib/a2a/skills/listCapabilities.ts`. Ayrıca bkz. [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -193,17 +199,17 @@ JSON-RPC uç noktası `/a2a`, standart A2A giriş noktasıdır. Aşağıdaki RES
 
 ---
 
-## Yeni Bir Yetenek Ekleme
+## Yeni Bir Beceri Ekleme
 
-1. **Yetenek dosyasını oluşturun:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Beceri dosyasını oluşturun:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` biçiminde bir async fonksiyon dışa aktarın. `smartRouting.ts` gibi mevcut yeteneklerin yapısını izleyin.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` biçiminde bir async fonksiyon dışa aktarın. `smartRouting.ts` gibi mevcut becerilerin yapısını izleyin.
 
-2. **İşleyiciyi kaydedin:** `src/lib/a2a/taskExecution.ts` içinde `A2A_SKILL_HANDLERS` öğesine bir girdi ekleyin:
+2. **İşleyiciyi kaydedin:** `src/lib/a2a/taskExecution.ts` dosyasında `A2A_SKILL_HANDLERS` içine bir girdi ekleyin:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...mevcut yetenekler
+     // ...mevcut beceriler
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -211,21 +217,21 @@ JSON-RPC uç noktası `/a2a`, standart A2A giriş noktasıdır. Aşağıdaki RES
    };
    ```
 
-3. **Agent Card içinde kullanıma sunun:** `src/app/.well-known/agent.json/route.ts` içinde `skills` dizisine ekleyin:
+3. **Agent Card'da kullanıma sunun:** `src/lib/a2a/agentCardMetadata.ts` dosyasında (`/.well-known/agent.json` ve `/.well-known/agent-card.json` tarafından paylaşılır), `skills` dizisine şunu ekleyin:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Yeteneğiniz",
-     "description": "Kısa, amaca odaklı açıklama",
-     "tags": ["yönlendirme", "kota"],
-     "examples": ["Örnek doğal dil çağrısı"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
 4. **Testleri yazın:** `tests/unit/a2a-<your-skill>.test.ts`. Başarılı senaryoyu ve hata senaryosunu kapsayın.
 
-5. Yeni yeteneği bu dosyadaki `Kullanılabilir Yetenekler` tablosunda **belgeleyin**.
+5. **Yeni beceriyi** bu dosyanın `Available Skills` tablosunda belgeleyin.
 
 ---
 
@@ -264,7 +270,7 @@ gönderildi → çalışıyor → tamamlandı
 
 ## Entegrasyon Örnekleri
 
-### Python (requests)
+### Python (istekler)
 
 ```python
 import requests
@@ -283,7 +289,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (getir)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

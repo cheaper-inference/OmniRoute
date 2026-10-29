@@ -14,36 +14,36 @@ AgentBridge ialah proksi MITM (Man-in-the-Middle) OmniRoute yang memintas trafik
 
 ## §1 Gambaran Keseluruhan
 
-### Apakah itu AgentBridge?
+### Apa itu AgentBridge?
 
-Apabila ejen IDE (cth., GitHub Copilot, Cursor, Claude Code) membuat panggilan API, ia bersambung secara langsung kepada penyedia AI huluan (OpenAI, Anthropic, dll.). AgentBridge memintas sambungan tersebut secara telus pada peringkat TLS — tanpa memerlukan sebarang perubahan konfigurasi ejen — dan menulis semula permintaan melalui OmniRoute.
+Apabila ejen IDE (cth, GitHub Copilot, Cursor, Claude Code) membuat panggilan API, ia bersambung terus kepada penyedia AI huluan (OpenAI, Anthropic, dsb.). AgentBridge memintas sambungan itu secara telus pada tahap TLS — tanpa memerlukan sebarang perubahan konfigurasi ejen — dan menulis semula permintaan melalui OmniRoute.
 
 Ini bermakna anda boleh:
 
-- **Menghalakan semula mana-mana ejen kepada mana-mana penyedia**: Copilot berkomunikasi dengan OpenAI? Halakan semula kepada Anthropic Claude, Gemini, atau mana-mana daripada 374 penyedia OmniRoute.
-- **Menggunakan pemetaan model**: `gemini-3-flash` → `claude-sonnet-4.7` secara telus pada peringkat pengendali.
-- **Memantau semua trafik ejen**: setiap permintaan yang dipintas diterbitkan kepada [Pemeriksa Trafik](./TRAFFIC_INSPECTOR.md).
-- **Menggunakan daya tahan OmniRoute**: penghalaan gabungan, pemutus litar, sandaran, dan penjejakan kos turut berfungsi untuk trafik ejen IDE.
+- **Halakan semula mana-mana ejen kepada mana-mana pembekal** : Copilot bercakap dengan OpenAI? Ubah hala ke Anthropic Claude, Gemini, atau mana-mana pembekal 377 OmniRoute.
+- **Gunakan pemetaan model** : `gemini-3-flash` → `claude-sonnet-4.7` secara telus di peringkat pengendali.
+- **Perhatikan semua trafik ejen** : setiap permintaan yang dipintas diterbitkan kepada [Pemeriksa Trafik](./TRAFFIC_INSPECTOR.md).
+- **Terapkan ketahanan OmniRoute** : penghalaan kombo, pemutus litar, sandaran dan kerja pengesanan kos untuk trafik ejen IDE juga.
 
 ### Kedudukan berbanding pasaran
 
-| Ciri                 | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| -------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity          |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot       |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)           |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex         |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE           |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries       |    —    |    ✓     |        —        |             ✓             |
-| Claude Code          |    —    |    —     |        ✓        |             ✓             |
-| Open Code            |    —    |    —     |        ✓        |             ✓             |
-| Trae                 |    —    |    —     |        —        |    🔍 Sedang disiasat     |
-| UI papan pemuka      |    ✓    |    ✗     |        ✗        |             ✓             |
-| Pemeriksa Trafik     |    ✗    |    ✗     |        ✓        |             ✓             |
-| Penghalaan OmniRoute |    ✗    |    ✗     |        ✗        |             ✓             |
-| UI pemetaan model    |    ✗    |    ✗     |        ✗        |             ✓             |
-| Senarai pintasan     |    ✗    |    ✗     |        ✓        |             ✓             |
-| Sijil CA huluan      |    ✗    |    ✗     |        ✓        |             ✓             |
+| Ciri                 | 9penghala | anti-api | llm-pemintas | **OmniRoute AgentBridge** |
+| -------------------- | :-------: | :------: | :----------: | :-----------------------: |
+| Antigravity          |     ✓     |    ✓     |      —       |             ✓             |
+| GitHub Copilot       |     ✓     |    ✓     |      —       |             ✓             |
+| Kiro (AWS)           |     ✓     |    ✓     |      —       |             ✓             |
+| OpenAI Codex         |     —     |    ✓     |      —       |             ✓             |
+| Cursor IDE           |     ✓     |    ✓     |      —       |             ✓             |
+| Zed Industries       |     —     |    ✓     |      —       |             ✓             |
+| Kod Claude           |     —     |    —     |      ✓       |             ✓             |
+| Buka Kod             |     —     |    —     |      ✓       |             ✓             |
+| Trae                 |     —     |    —     |      —       |       🔍 Menyiasat        |
+| Papan pemuka UI      |     ✓     |    ✗     |      ✗       |             ✓             |
+| Pemeriksa Trafik     |     ✗     |    ✗     |      ✓       |             ✓             |
+| penghalaan OmniRoute |     ✗     |    ✗     |      ✗       |             ✓             |
+| Pemetaan model UI    |     ✗     |    ✗     |      ✗       |             ✓             |
+| Senarai pintasan     |     ✗     |    ✗     |      ✓       |             ✓             |
+| Sijil CA hulu        |     ✗     |    ✗     |      ✓       |             ✓             |
 
 ---
 

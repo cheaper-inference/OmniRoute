@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button, Card, Toggle } from "@/shared/components";
-import { useTheme } from "@/shared/hooks/useTheme";
-import useThemeStore, { COLOR_THEMES } from "@/store/themeStore";
-import { cn } from "@/shared/utils/cn";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
+import { Button, Card, Input, Toggle } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
+import { useTheme } from "@/shared/hooks/useTheme";
 import { useIsElectron } from "@/shared/hooks/useElectron";
 import {
   COMBO_CONFIG_MODE_SETTING_KEY,
@@ -16,11 +16,12 @@ import AccountEmailVisibilitySetting from "./AccountEmailVisibilitySetting";
 
 export default function AppearanceTab() {
   const { theme, setTheme, isDark } = useTheme();
-  const { colorTheme, customColor, setColorTheme, setCustomColorTheme } = useThemeStore();
   const t = useTranslations("settings");
 
   const isElectron = useIsElectron();
   const [autostartEnabled, setAutostartEnabled] = useState(false);
+  const logoFileRef = useRef<HTMLInputElement>(null);
+  const faviconFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isElectron && window.electronAPI) {
@@ -33,10 +34,6 @@ export default function AppearanceTab() {
     target: "logo" | "favicon";
     message: string;
   } | null>(null);
-  const [customThemeColor, setCustomThemeColor] = useState(customColor || "#3b82f6");
-  const isValidHex = /^#([0-9a-fA-F]{6})$/.test(
-    customThemeColor.startsWith("#") ? customThemeColor : `#${customThemeColor}`
-  );
   const showQuickStartOnHome = settings.showQuickStartOnHome !== false;
   const showProviderTopologyOnHome = settings.showProviderTopologyOnHome !== false;
   const autoRefreshProviderQuota = settings.autoRefreshProviderQuota === true;
@@ -52,15 +49,6 @@ export default function AppearanceTab() {
 
   const getSettingsLabel = (key: string, fallback: string) =>
     typeof t.has === "function" && t.has(key) ? t(key) : fallback;
-
-  useEffect(() => {
-    const unsubscribe = useThemeStore.subscribe((state) => {
-      if (state.customColor && state.customColor !== customThemeColor) {
-        setCustomThemeColor(state.customColor);
-      }
-    });
-    return unsubscribe;
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const themeOptionLabels: Record<string, string> = {
     light: t("themeLight"),
@@ -98,16 +86,6 @@ export default function AppearanceTab() {
     }
   };
 
-  const presetThemes = [
-    { id: "coral", color: COLOR_THEMES.coral, label: t("themeCoral") },
-    { id: "blue", color: COLOR_THEMES.blue, label: t("themeBlue") },
-    { id: "red", color: COLOR_THEMES.red, label: t("themeRed") },
-    { id: "green", color: COLOR_THEMES.green, label: t("themeGreen") },
-    { id: "violet", color: COLOR_THEMES.violet, label: t("themeViolet") },
-    { id: "orange", color: COLOR_THEMES.orange, label: t("themeOrange") },
-    { id: "cyan", color: COLOR_THEMES.cyan, label: t("themeCyan") },
-  ];
-
   const comboConfigModeOptions: Array<{
     id: ComboConfigMode;
     icon: string;
@@ -139,50 +117,50 @@ export default function AppearanceTab() {
     : 180;
 
   return (
-    <Card>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            palette
-          </span>
-        </div>
-        <h3 className="text-lg font-semibold">{t("appearance")}</h3>
-      </div>
+    <Card title={t("appearance")} icon="palette">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="font-medium">{t("darkMode")}</p>
             <p className="text-sm text-text-muted">{t("switchThemes")}</p>
           </div>
-          <Toggle checked={isDark} onChange={() => setTheme(isDark ? "light" : "dark")} />
+          <Toggle
+            checked={isDark}
+            onChange={() => setTheme(isDark ? "light" : "dark")}
+            ariaLabel={t("darkMode")}
+          />
         </div>
 
         <div className="pt-4 border-t border-border">
-          <div
-            role="tablist"
+          <RadioGroup
             aria-label={t("themeSelectionAria")}
-            className="inline-flex p-1 rounded-lg bg-black/5 dark:bg-white/5"
+            orientation="horizontal"
+            value={theme}
+            onValueChange={(next) => setTheme(next)}
           >
             {["light", "dark", "system"].map((option) => (
-              <button
+              <RadioGroupItem
                 key={option}
-                role="tab"
-                aria-selected={theme === option}
-                onClick={() => setTheme(option)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all",
-                  theme === option
-                    ? "bg-white dark:bg-white/10 text-text-main shadow-sm"
-                    : "text-text-muted hover:text-text-main"
-                )}
-              >
-                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                  {option === "light" ? "light_mode" : option === "dark" ? "dark_mode" : "contrast"}
-                </span>
-                <span>{themeOptionLabels[option] || option}</span>
-              </button>
+                card
+                value={option}
+                label={
+                  <span className="flex items-center gap-2">
+                    <Icon
+                      name={
+                        option === "light"
+                          ? "light_mode"
+                          : option === "dark"
+                            ? "dark_mode"
+                            : "contrast"
+                      }
+                      size={18}
+                    />
+                    {themeOptionLabels[option] || option}
+                  </span>
+                }
+              />
             ))}
-          </div>
+          </RadioGroup>
         </div>
 
         <div className="pt-4 border-t border-border">
@@ -207,6 +185,7 @@ export default function AppearanceTab() {
                 </div>
                 <Toggle
                   checked={showQuickStartOnHome}
+                  ariaLabel={getSettingsLabel("homeQuickStart", "Quick Start")}
                   onChange={async (checked) => {
                     await updateSetting("showQuickStartOnHome", checked);
                   }}
@@ -228,6 +207,7 @@ export default function AppearanceTab() {
                 </div>
                 <Toggle
                   checked={showProviderTopologyOnHome}
+                  ariaLabel={getSettingsLabel("homeProviderTopology", "Provider Topology")}
                   onChange={async (checked) => {
                     await updateSetting("showProviderTopologyOnHome", checked);
                   }}
@@ -266,6 +246,7 @@ export default function AppearanceTab() {
               </div>
               <Toggle
                 checked={showCloudflaredTunnel}
+                ariaLabel={getSettingsLabel("showCloudflareTunnel", "Cloudflare Quick Tunnel")}
                 onChange={(checked) => updateSetting("hideEndpointCloudflaredTunnel", !checked)}
                 disabled={loading}
               />
@@ -285,6 +266,7 @@ export default function AppearanceTab() {
               </div>
               <Toggle
                 checked={showTailscaleFunnel}
+                ariaLabel={getSettingsLabel("showTailscaleFunnel", "Tailscale Funnel")}
                 onChange={(checked) => updateSetting("hideEndpointTailscaleFunnel", !checked)}
                 disabled={loading}
               />
@@ -302,6 +284,7 @@ export default function AppearanceTab() {
               </div>
               <Toggle
                 checked={showNgrokTunnel}
+                ariaLabel={getSettingsLabel("showNgrokTunnel", "ngrok Tunnel")}
                 onChange={(checked) => updateSetting("hideEndpointNgrokTunnel", !checked)}
                 disabled={loading}
               />
@@ -322,46 +305,28 @@ export default function AppearanceTab() {
             </p>
           </div>
 
-          <div
-            role="radiogroup"
+          <RadioGroup
             aria-label={getSettingsLabel("comboConfigMode", "Combo configuration mode")}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-2"
+            orientation="horizontal"
+            value={comboConfigMode}
+            onValueChange={(next) => updateSetting(COMBO_CONFIG_MODE_SETTING_KEY, next)}
+            disabled={loading}
           >
-            {comboConfigModeOptions.map((option) => {
-              const active = comboConfigMode === option.id;
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={active}
-                  disabled={loading}
-                  onClick={() => updateSetting(COMBO_CONFIG_MODE_SETTING_KEY, option.id)}
-                  className={cn(
-                    "flex items-start gap-3 rounded-lg border p-3 text-left transition-colors disabled:opacity-60",
-                    active
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-surface/40 text-text-main hover:border-primary/40"
-                  )}
-                >
-                  <span className="material-symbols-outlined mt-0.5 text-[20px]" aria-hidden="true">
-                    {option.icon}
+            {comboConfigModeOptions.map((option) => (
+              <RadioGroupItem
+                key={option.id}
+                card
+                value={option.id}
+                label={
+                  <span className="flex items-center gap-2">
+                    <Icon name={option.icon} size={18} />
+                    {option.title}
                   </span>
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold">{option.title}</span>
-                    <span
-                      className={cn(
-                        "mt-0.5 block text-xs",
-                        active ? "text-primary/80" : "text-text-muted"
-                      )}
-                    >
-                      {option.description}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                }
+                description={option.description}
+              />
+            ))}
+          </RadioGroup>
         </div>
 
         <div className="pt-4 border-t border-border">
@@ -392,6 +357,7 @@ export default function AppearanceTab() {
               </div>
               <Toggle
                 checked={autoRefreshProviderQuota}
+                ariaLabel={getSettingsLabel("providerQuotaAutoRefreshToggle", "Automatic refresh")}
                 onChange={async (checked) => {
                   if (checked && !settings.autoRefreshProviderQuotaInterval) {
                     await updateSetting("autoRefreshProviderQuotaInterval", 180);
@@ -415,8 +381,12 @@ export default function AppearanceTab() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <input
+                <Input
                   type="number"
+                  aria-label={getSettingsLabel(
+                    "providerQuotaAutoRefreshInterval",
+                    "Refresh interval"
+                  )}
                   min={10}
                   max={3600}
                   step={10}
@@ -426,7 +396,7 @@ export default function AppearanceTab() {
                     await updateSetting("autoRefreshProviderQuotaInterval", next);
                   }}
                   disabled={loading || !autoRefreshProviderQuota}
-                  className="h-10 w-28 px-3 rounded-lg bg-surface border border-border text-sm text-text-main focus:outline-none focus:border-primary disabled:opacity-50"
+                  className="w-28 shrink-0"
                 />
                 <span className="text-xs text-text-muted">{t("seconds")}</span>
               </div>
@@ -444,6 +414,7 @@ export default function AppearanceTab() {
             </div>
             <Toggle
               checked={settings.hideHealthCheckLogs === true}
+              ariaLabel={t("hideHealthLogs")}
               onChange={() => updateSetting("hideHealthCheckLogs", !settings.hideHealthCheckLogs)}
               disabled={loading}
             />
@@ -451,64 +422,10 @@ export default function AppearanceTab() {
         </div>
 
         <div className="pt-4 border-t border-border">
-          <p className="font-medium mb-1">{t("themeAccent")}</p>
-          <p className="text-sm text-text-muted mb-3">{t("themeAccentDesc")}</p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
-            {presetThemes.map((item) => {
-              const active = colorTheme === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setColorTheme(item.id)}
-                  className={cn(
-                    "flex items-center justify-between gap-2 p-2 rounded-lg border transition-colors",
-                    active
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border hover:bg-surface/50 text-text-main"
-                  )}
-                >
-                  <span className="flex items-center gap-2">
-                    <span
-                      className="size-4 rounded-full border border-black/10 dark:border-white/20"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="text-sm font-medium">{item.label}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={customThemeColor}
-              onChange={(e) => setCustomThemeColor(e.target.value)}
-              className="h-10 w-12 rounded border border-border bg-surface cursor-pointer"
-              aria-label={t("themeCustom")}
-            />
-            <input
-              type="text"
-              value={customThemeColor}
-              onChange={(e) => setCustomThemeColor(e.target.value)}
-              placeholder="#3b82f6"
-              maxLength={7}
-              className={`flex-1 h-10 px-3 rounded-lg bg-surface border text-sm text-text-main focus:outline-none ${isValidHex ? "border-border focus:border-primary" : "border-red-400 focus:border-red-500"}`}
-            />
-            <Button onClick={() => setCustomColorTheme(customThemeColor)} disabled={!isValidHex}>
-              {t("themeCreate")}
-            </Button>
-          </div>
-        </div>
-
-        <div className="pt-4 border-t border-border">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-              <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                badge
-              </span>
-            </div>
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-bg-subtle text-text-muted">
+              <Icon name="badge" size={20} />
+            </span>
             <div>
               <h4 className="font-semibold">{t("whitelabeling")}</h4>
               <p className="text-sm text-text-muted">{t("whitelabelingDesc")}</p>
@@ -521,13 +438,14 @@ export default function AppearanceTab() {
                 <p className="font-medium">{t("appName")}</p>
                 <p className="text-sm text-text-muted">{t("appNameDesc")}</p>
               </div>
-              <input
+              <Input
                 type="text"
+                aria-label={t("appName")}
                 value={settings.instanceName || "OmniRoute"}
                 onChange={(e) => updateSetting("instanceName", e.target.value)}
                 placeholder="OmniRoute"
                 maxLength={100}
-                className="h-10 px-3 rounded-lg bg-surface border border-border text-sm text-text-main focus:outline-none focus:border-primary w-48"
+                className="w-48 shrink-0"
               />
             </div>
 
@@ -537,11 +455,12 @@ export default function AppearanceTab() {
                 <p className="text-sm text-text-muted">{t("customLogoDesc")}</p>
               </div>
               <div className="flex items-center gap-2">
-                <input
+                <Input
                   type="text"
+                  aria-label={t("customLogo")}
                   value={settings.customLogoUrl || ""}
                   onChange={(e) => updateSetting("customLogoUrl", e.target.value)}
-                  className="flex-1 h-10 px-3 rounded-lg bg-surface border border-border text-sm text-text-main focus:outline-none focus:border-primary"
+                  className="flex-1"
                   placeholder="https://example.com/logo.png"
                   maxLength={2000}
                 />
@@ -561,45 +480,51 @@ export default function AppearanceTab() {
             <div className="flex flex-col gap-2">
               <p className="font-medium">{t("uploadLogo")}</p>
               <div className="flex items-center gap-2">
-                <label className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border text-sm text-text-main cursor-pointer hover:bg-surface/80 transition-colors">
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/svg+xml,image/gif,image/webp"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        if (file.size > 500 * 1024) {
-                          setUploadError({ target: "logo", message: t("logoFileTooLarge") });
-                          return;
-                        }
-                        const validTypes = [
-                          "image/png",
-                          "image/jpeg",
-                          "image/svg+xml",
-                          "image/gif",
-                          "image/webp",
-                        ];
-                        if (!validTypes.includes(file.type)) {
-                          setUploadError({ target: "logo", message: t("invalidLogoFileType") });
-                          return;
-                        }
-                        setUploadError(null);
-                        const reader = new FileReader();
-                        reader.onerror = () => {
-                          setUploadError({ target: "logo", message: t("failedToReadFile") });
-                        };
-                        reader.onload = (event) => {
-                          const base64 = event.target?.result as string;
-                          updateSetting("customLogoBase64", base64);
-                        };
-                        reader.readAsDataURL(file);
+                <Input
+                  ref={logoFileRef}
+                  type="file"
+                  aria-label={t("uploadLogo")}
+                  accept="image/png,image/jpeg,image/svg+xml,image/gif,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 500 * 1024) {
+                        setUploadError({ target: "logo", message: t("logoFileTooLarge") });
+                        return;
                       }
-                    }}
-                    className="hidden"
-                  />
-                  <span className="material-symbols-outlined text-[18px]">upload</span>
-                  <span>{t("uploadLogo")}</span>
-                </label>
+                      const validTypes = [
+                        "image/png",
+                        "image/jpeg",
+                        "image/svg+xml",
+                        "image/gif",
+                        "image/webp",
+                      ];
+                      if (!validTypes.includes(file.type)) {
+                        setUploadError({ target: "logo", message: t("invalidLogoFileType") });
+                        return;
+                      }
+                      setUploadError(null);
+                      const reader = new FileReader();
+                      reader.onerror = () => {
+                        setUploadError({ target: "logo", message: t("failedToReadFile") });
+                      };
+                      reader.onload = (event) => {
+                        const base64 = event.target?.result as string;
+                        updateSetting("customLogoBase64", base64);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="hidden"
+                  tabIndex={-1}
+                />
+                <Button
+                  variant="outline"
+                  icon="upload"
+                  onClick={() => logoFileRef.current?.click()}
+                >
+                  {t("uploadLogo")}
+                </Button>
                 <Button
                   variant="secondary"
                   onClick={() => {
@@ -611,10 +536,12 @@ export default function AppearanceTab() {
                 </Button>
               </div>
               {uploadError?.target === "logo" && (
-                <p className="text-sm text-red-500">{uploadError.message}</p>
+                <p role="alert" className="text-sm text-error">
+                  {uploadError.message}
+                </p>
               )}
               {(settings.customLogoBase64 || settings.customLogoUrl) && (
-                <div className="mt-2 p-3 bg-black/5 dark:bg-white/5 rounded-lg">
+                <div className="mt-2 p-3 bg-bg-subtle rounded-lg">
                   <p className="text-xs text-text-muted mb-2">{t("logoPreview")}</p>
                   <img
                     src={settings.customLogoBase64 || settings.customLogoUrl}
@@ -631,11 +558,12 @@ export default function AppearanceTab() {
                 <p className="text-sm text-text-muted">{t("customFaviconDesc")}</p>
               </div>
               <div className="flex items-center gap-2">
-                <input
+                <Input
                   type="text"
+                  aria-label={t("customFavicon")}
                   value={settings.customFaviconUrl || ""}
                   onChange={(e) => updateSetting("customFaviconUrl", e.target.value)}
-                  className="flex-1 h-10 px-3 rounded-lg bg-surface border border-border text-sm text-text-main focus:outline-none focus:border-primary"
+                  className="flex-1"
                   placeholder="https://example.com/favicon.ico"
                   maxLength={2000}
                 />
@@ -655,51 +583,57 @@ export default function AppearanceTab() {
             <div className="flex flex-col gap-2">
               <p className="font-medium">{t("uploadFavicon")}</p>
               <div className="flex items-center gap-2">
-                <label className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border text-sm text-text-main cursor-pointer hover:bg-surface/80 transition-colors">
-                  <input
-                    type="file"
-                    accept="image/png,image/x-icon,image/svg+xml,image/gif,image/webp"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        if (file.size > 50 * 1024) {
-                          setUploadError({
-                            target: "favicon",
-                            message: t("faviconFileTooLarge"),
-                          });
-                          return;
-                        }
-                        const validTypes = [
-                          "image/png",
-                          "image/x-icon",
-                          "image/svg+xml",
-                          "image/gif",
-                          "image/webp",
-                        ];
-                        if (!validTypes.includes(file.type)) {
-                          setUploadError({
-                            target: "favicon",
-                            message: t("invalidFaviconFileType"),
-                          });
-                          return;
-                        }
-                        setUploadError(null);
-                        const reader = new FileReader();
-                        reader.onerror = () => {
-                          setUploadError({ target: "favicon", message: t("failedToReadFile") });
-                        };
-                        reader.onload = (event) => {
-                          const base64 = event.target?.result as string;
-                          updateSetting("customFaviconBase64", base64);
-                        };
-                        reader.readAsDataURL(file);
+                <Input
+                  ref={faviconFileRef}
+                  type="file"
+                  aria-label={t("uploadFavicon")}
+                  accept="image/png,image/x-icon,image/svg+xml,image/gif,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 50 * 1024) {
+                        setUploadError({
+                          target: "favicon",
+                          message: t("faviconFileTooLarge"),
+                        });
+                        return;
                       }
-                    }}
-                    className="hidden"
-                  />
-                  <span className="material-symbols-outlined text-[18px]">upload</span>
-                  <span>{t("uploadFavicon")}</span>
-                </label>
+                      const validTypes = [
+                        "image/png",
+                        "image/x-icon",
+                        "image/svg+xml",
+                        "image/gif",
+                        "image/webp",
+                      ];
+                      if (!validTypes.includes(file.type)) {
+                        setUploadError({
+                          target: "favicon",
+                          message: t("invalidFaviconFileType"),
+                        });
+                        return;
+                      }
+                      setUploadError(null);
+                      const reader = new FileReader();
+                      reader.onerror = () => {
+                        setUploadError({ target: "favicon", message: t("failedToReadFile") });
+                      };
+                      reader.onload = (event) => {
+                        const base64 = event.target?.result as string;
+                        updateSetting("customFaviconBase64", base64);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="hidden"
+                  tabIndex={-1}
+                />
+                <Button
+                  variant="outline"
+                  icon="upload"
+                  onClick={() => faviconFileRef.current?.click()}
+                >
+                  {t("uploadFavicon")}
+                </Button>
                 <Button
                   variant="secondary"
                   onClick={() => {
@@ -711,10 +645,12 @@ export default function AppearanceTab() {
                 </Button>
               </div>
               {uploadError?.target === "favicon" && (
-                <p className="text-sm text-red-500">{uploadError.message}</p>
+                <p role="alert" className="text-sm text-error">
+                  {uploadError.message}
+                </p>
               )}
               {(settings.customFaviconBase64 || settings.customFaviconUrl) && (
-                <div className="mt-2 p-3 bg-black/5 dark:bg-white/5 rounded-lg">
+                <div className="mt-2 p-3 bg-bg-subtle rounded-lg">
                   <p className="text-xs text-text-muted mb-2">{t("faviconPreview")}</p>
                   <img
                     src={settings.customFaviconBase64 || settings.customFaviconUrl}
@@ -733,6 +669,7 @@ export default function AppearanceTab() {
                 </div>
                 <Toggle
                   checked={autostartEnabled}
+                  ariaLabel={t("startOnLogin")}
                   onChange={async (checked) => {
                     if (checked) {
                       const success = await window.electronAPI?.enableAutostart();

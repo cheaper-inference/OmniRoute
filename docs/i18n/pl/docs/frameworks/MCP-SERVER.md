@@ -72,6 +72,16 @@ curl -i \
 
 Klucz bez zakresu `manage` (lub brak uwierzytelnienia Bearer) powoduje zwrócenie `403 LOCAL_ONLY`. Powiązanego prefiksu `/api/cli-tools/runtime/*` celowo nie można obejść — zobacz [Warstwy ochrony tras — wyjątek dla zakresu manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Walidacja Origin
+
+Po uwierzytelnieniu każde żądanie do `/api/mcp/*` — transportów i tras zarządzania, takich jak `status`, `tools`, `audit`, `restart` — ma walidowany nagłówek `Origin`, niezależnie od wywołującego (klucz API, token CLI, sesja dashboardu lub anonimowy loopback przy wyłączonym logowaniu). To ochrona przed DNS rebinding wymagana przez specyfikację MCP Streamable HTTP.
+
+- **Brak nagłówka `Origin`** → dozwolone. CLI OmniRoute, SDK i klienci IDE go nie wysyłają.
+- **Dozwolony `Origin`** → `localhost` / `127.0.0.1` / `[::1]` na dowolnym porcie lub publiczny origin samego OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin przekazany przez zaufany reverse proxy (`OMNIROUTE_TRUST_PROXY`, tylko gdy nie ustawiono base URL) albo bezpośrednio używany host IP loopback/LAN. Sam nagłówek `Host` nigdy nie czyni originu zaufanym.
+- **Każdy inny `Origin`, w tym `null`** → `403` z treścią błędu JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Sesja dashboardu z prawidłowym tokenem CSRF nadal jest akceptowana, tak jak przy innych zapisach dashboardu.
+
+Przeglądarkowy klient MCP serwowany za reverse proxy wymaga `OMNIROUTE_PUBLIC_BASE_URL`; nie ma listy dozwolonych innych originów. Zapytanie wstępne CORS (`OPTIONS`) nie jest sprawdzane pod kątem Origin; następujące po nim żądanie — tak.
+
 ## Konfiguracja IDE
 
 Zobacz [Konfiguracja klienta MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration), aby skonfigurować Claude Desktop,
@@ -292,193 +302,185 @@ Transporty SSE i strumieniowy HTTP są blokowane do czasu włączenia serwera MC
 
 ## Uwierzytelnianie i zakresy
 
-Wywołania narzędzi MCP odczytują ciągi zakresów od wywołującego. To sprawdzenie należy do jednej z trzech
-niezależnych przestrzeni nazw. Pomyślne przejście jednej kontroli nie oznacza pomyślnego przejścia pozostałych.
-Reguły opisano w sekcji [Trzy przestrzenie nazw zakresów](#three-scope-namespaces).
-Katalog narzędzi znajduje się w sekcji [Zakresy narzędzi MCP](#mcp-tool-scopes).
+Wywołania narzędzi MCP odczytują ciągi zakresów od wywołującego. To sprawdzenie jest jednym z trzech niezależnych przestrzeni nazw.
+Zatwierdzenie przez jeden mechanizm kontroli nie oznacza zatwierdzenia przez pozostałe.
+Reguły opisuje sekcja [Trzy przestrzenie nazw zakresów](#three-scope-namespaces).
+Katalog narzędzi opisuje sekcja [Zakresy narzędzi MCP](#mcp-tool-scopes).
 
 ### Trzy przestrzenie nazw zakresów
 
-`manage` w kluczu API, `read:compression` w narzędziu MCP oraz `read` w
-tokenie dostępu `oma_live_…` to trzy różne uprawnienia. Wywołujący, którzy wysyłają token dostępu
-`read` do trasy zarządzania wykonującej mutacje, otrzymują HTTP 403:
+`manage` dla klucza API, `read:compression` dla narzędzia MCP oraz `read` dla tokenu dostępu `oma_live_…` to trzy różne uprawnienia. Wywołujący, który wysyła token dostępu `read` do trasy zarządzania zmieniającej stan, otrzymuje HTTP 403
 `Access token scope 'read' is insufficient; 'write' required.`
-Za tę hierarchię odpowiada `scopeSatisfies`. Nie korzysta on z tabeli MCP, a mechanizm
-dopasowywania MCP nie korzysta z niego.
+Ta ranga to `scopeSatisfies`. Nie sięga ona do tabeli MCP, a dopasowanie MCP nie sięga do niej.
 
-| Przestrzeń nazw              | Poświadczenie                                                                       | Mechanizm sprawdzający    | Co umożliwia pomyślna kontrola                                |
-| :--------------------------- | :---------------------------------------------------------------------------------- | :------------------------ | :------------------------------------------------------------ |
-| Zarządzanie kluczami API     | `api_keys.scopes`                                                                   | `hasManageScope`          | Zarządzający interfejs REST dla danego klucza Bearer          |
-| Dodatkowe zakresy klucza API | ta sama tablica, jeden dokładny ciąg                                                | pomocnik wskazany poniżej | Tylko tę jedną funkcję                                        |
-| Zakresy narzędzi MCP         | ta sama tablica, w przeciwnym razie `_meta` MCP, a następnie `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | Dane narzędzie, gdy wymuszanie jest włączone                  |
-| Token dostępu                | `oma_live_…`                                                                        | `scopeSatisfies`          | Trasę zarządzania, której metoda i ścieżka wymagają tej rangi |
+| Przestrzeń nazw              | Poświadczenie                                                                                               | Mechanizm kontroli       | Zatwierdzenie pozwala na                                      |
+| :--------------------------- | :---------------------------------------------------------------------------------------------------------- | :----------------------- | :------------------------------------------------------------ |
+| Zarządzanie kluczami API     | `api_keys.scopes`                                                                                           | `hasManageScope`         | Zarządzanie REST dla tego klucza Bearer                       |
+| Dodatkowe zakresy klucza API | ta sama tablica, jeden dokładny ciąg                                                                        | pomocnik nazwany poniżej | Tylko ta jedna możliwość                                      |
+| Zakresy narzędzi MCP         | ta sama tablica, w przeciwnym razie MCP `_meta` (tylko HTTP/SSE), w przeciwnym razie `OMNIROUTE_MCP_SCOPES` | `scopeMatches`           | To narzędzie, po włączeniu egzekwowania                       |
+| Token dostępu                | `oma_live_…`                                                                                                | `scopeSatisfies`         | Trasa zarządzania, której metoda i ścieżka wymagają tej rangi |
 
-Tworzenie każdego poświadczenia opisano w sekcji
+Wystawianie każdego poświadczenia opisuje
 [Uwierzytelnianie zarządzania](../guides/MANAGEMENT-AUTH.md).
 
 #### Zakresy kluczy API
 
-Jedna tablica `api_keys.scopes` służy dwóm zadaniom. Używają one różnych funkcji.
+Jedna tablica `api_keys.scopes` obsługuje dwa zadania. Korzystają z różnych funkcji.
 
-**Zarządzający interfejs REST.** `manage` i `admin` są elementami
+**Zarządzanie REST.** `manage` i `admin` są elementami
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-To `hasManageScope` autoryzuje trasy zarządzania dla danego klucza. `admin`
-zapewnia na tych trasach uprawnienia do zarządzania. Słowo `admin` nie oznacza tutaj
-rangi tokenu dostępu i nie jest rozwijane do zakresów narzędzi MCP.
+`hasManageScope` to mechanizm autoryzujący trasy zarządzania dla danego klucza. `admin` daje
+uprawnienia zarządzania na tych trasach. Słowo `admin` w tym miejscu nie jest
+rangą tokenu dostępu i nie rozprzestrzenia się na zakresy narzędzi MCP.
 
-**Ciągi dodatkowe.** Każdy z nich jest sprawdzany pod kątem dokładnej przynależności i każdy pozostaje
+**Dodatkowe ciągi.** Każdy z nich jest dokładnym testem przynależności i każdy pozostaje
 poza `MANAGEMENT_API_KEY_SCOPES`.
 
-| Zakres                         | Co umożliwia pomyślna kontrola                                                                                                                                               |
-| :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Wyłącznie wyjątek LOCAL_ONLY dla `/api/mcp/` spoza interfejsu loopback (`hasMcpConnectOrManageScope`). Klucz z zakresem `manage` lub `admin` również przechodzi tę kontrolę. |
-| `self:usage`                   | `GET /api/v1/me/status` dla tego klucza (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` dodaje ten zakres podczas tworzenia (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Limity konta dostawcy upstream w tym ładunku stanu (`src/lib/usage/apiKeySelfService.ts`). Trasa stanu nadal wymaga `self:usage`.                                            |
-| `policy:bypass-provider-quota` | Wywołania inferencji z użyciem tego klucza pomijają zasadę limitu dostawcy (`hasProviderQuotaBypassScope` w `src/sse/handlers/chat.ts`).                                     |
+| Zakres                         | Zatwierdzenie pozwala na                                                                                                                                                  |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mcp:connect`                  | Wyłącznie wyjątek LOCAL_ONLY dla `/api/mcp/` spoza loopbacku (`hasMcpConnectOrManageScope`). Klucz z `manage` lub `admin` nadal przechodzi ten wyjątek.                   |
+| `self:usage`                   | `GET /api/v1/me/status` dla tego klucza (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` dodaje ten zakres przy tworzeniu (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Limity konta upstream w ładunku tego statusu (`src/lib/usage/apiKeySelfService.ts`). Trasa statusu nadal wymaga `self:usage`.                                             |
+| `policy:bypass-provider-quota` | Wywołania wnioskowania tego klucza pomijają politykę limitu dostawcy (`hasProviderQuotaBypassScope` w `src/sse/handlers/chat.ts`).                                        |
 
-#### Dopasowywanie
+#### Dopasowanie
 
-Katalogiem jest tabela w sekcji [Zakresy narzędzi MCP](#mcp-tool-scopes). Nie należy
-traktować `MCP_SCOPE_LIST` w `src/shared/constants/mcpScopes.ts` jako tego katalogu:
-jest to pierwotny typowany podzbiór. Późniejsze narzędzia deklarują obok niego kolejne zakresy
-(`read:notion`, `read:skills`, `read:local-corpus` oraz pozostałe zakresy z tabeli).
+Katalogiem jest tabela w sekcji [Zakresy narzędzi MCP](#mcp-tool-scopes). Nie
+traktuj `MCP_SCOPE_LIST` w `src/shared/constants/mcpScopes.ts` jako tego katalogu:
+to pierwotny, typowany podzbiór. Późniejsze narzędzia deklarują obok niego kolejne
+zakresy (`read:notion`, `read:skills`, `read:local-corpus` i reszta tabeli).
 
-`evaluateToolScopes` w `open-sse/mcp-server/scopeEnforcement.ts` zezwala na wywołanie,
-gdy każdy wymagany zakres pasuje do któregoś z przyznanych zakresów:
+`evaluateToolScopes` w `open-sse/mcp-server/scopeEnforcement.ts` dopuszcza wywołanie,
+gdy każdy wymagany zakres odpowiada jakiemuś przyznanemu zakresowi:
 
-- `*` pasuje do każdego wymaganego zakresu.
-- Przyznany zakres kończący się znakiem `*` pasuje do wymaganego zakresu, który zaczyna się
-  prefiksem poprzedzającym gwiazdkę. `read:*` pasuje do `read:compression`.
-- Każdy inny przyznany zakres pasuje wyłącznie do identycznego wymaganego ciągu.
+- `*` odpowiada każdemu wymaganemu zakresowi.
+- Przyznany zakres kończący się na `*` odpowiada wymaganemu zakresowi, który zaczyna się
+  od prefiksu sprzed gwiazdki. `read:*` odpowiada `read:compression`.
+- Każdy inny przyznany zakres odpowiada wyłącznie identycznemu wymaganemu ciągowi.
 
-Klucz, którego zakresy to `["manage"]`, nie przechodzi kontroli `scopeMatches` dla `read:compression`.
-To samo wywołanie nie przechodzi kontroli dla `admin`, `mcp:connect`, `read` ani `write`, gdy są one
-jedynymi przyznanymi ciągami. Poza końcowym znakiem `*` nie istnieje żadna hierarchia zakresów
-narzędzi MCP.
+Klucz, którego zakresy to `["manage"]`, nie przechodzi `scopeMatches` dla `read:compression`.
+To samo wywołanie nie przechodzi dla `admin`, `mcp:connect`, `read` i `write`, gdy są
+to jedyne przyznane ciągi. Wśród zakresów narzędzi MCP nie ma hierarchii poza
+końcowym `*`.
 
-Wymuszanie jest wyłączone, chyba że `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (wartość domyślna:
-`false`). Gdy jest wyłączone, `evaluateToolScopes` zezwala na wywołanie i pomija
+Egzekwowanie jest wyłączone, chyba że `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (domyślnie
+`false`). Gdy jest wyłączone, `evaluateToolScopes` dopuszcza wywołanie i pomija
 katalog. Gdy jest włączone, HTTP używa `api_keys.scopes` klucza Bearer jako
-`authInfo` (zobacz [Powiązanie zakresów HTTP z poszczególnymi kluczami](#per-key-http-scope-binding-7895)).
-Jeśli nie uda się rozpoznać żadnych zakresów klucza, zestaw przyznanych zakresów przechodzi do `_meta` MCP, a następnie
-do `OMNIROUTE_MCP_SCOPES`.
+`authInfo` (zob. [Przypisanie zakresów HTTP per klucz](#per-key-http-scope-binding-7895)).
+Gdy żadne zakresy klucza nie zostaną rozwiązane, przyznany zestaw przechodzi do MCP `_meta` (honorowane wyłącznie
+dla wywołujących HTTP/SSE, w kontekście uwierzytelniania HTTP; `_meta` wywołującego stdio jest ignorowane,
+ponieważ kontroluje je klient i nie niesie ono tożsamości wywołującego), a następnie
+`OMNIROUTE_MCP_SCOPES`.
 
 #### Zakresy tokenów dostępu
 
-Tokeny `oma_live_…` (`src/lib/accessTokens/scopes.ts`) zawierają `read`, `write`
-lub `admin`. `scopeSatisfies` stosuje hierarchię rang: `admin` obejmuje `write` i `read`, a
-`write` obejmuje `read`. Nieznane zakresy nie obejmują żadnych uprawnień.
+Tokeny `oma_live_…` (`src/lib/accessTokens/scopes.ts`) noszą `read`, `write`
+lub `admin`. `scopeSatisfies` operuje rangami: `admin` obejmuje `write` i `read`, a
+`write` obejmuje `read`. Nieznane zakresy nie obejmują niczego.
 
 `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) porównuje tę
-rangę z wynikiem `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+rangę z `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD` i `OPTIONS` wymagają `read`.
 - Każda inna metoda wymaga `write`.
-- Ścieżki w `ADMIN_SCOPE_PREFIXES` wymagają `admin` dla każdej metody. `/api/mcp`
-  znajduje się na tej liście, więc token dostępu `write` nadal nie może wywoływać powierzchni HTTP
-  MCP.
-- Ścieżki w `ADMIN_MUTATION_PREFIXES` wymagają `admin` wyłącznie w przypadku mutacji.
-- Ścieżki w `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) wymagają `admin` wyłącznie w przypadku mutacji i tylko dla
-  tej dokładnej ścieżki — inne trasy podrzędne `/api/settings/*` nadal wymagają `write`.
+- Ścieżki w `ADMIN_SCOPE_PREFIXES` wymagają `admin` dla każdej metody. `/api/mcp` znajduje się na tej liście, więc token dostępu `write` nadal nie może wywołać interfejsu HTTP MCP.
+- Ścieżki w `ADMIN_MUTATION_PREFIXES` wymagają `admin` tylko dla mutacji.
+- Ścieżki w `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) wymagają `admin` tylko dla mutacji i tylko na tej dokładnej ścieżce — pozostałe podścieżki `/api/settings/*` zachowują `write`.
 
-`PATCH /api/keys/{id}` jest mutacją i nie znajduje się na tych listach administracyjnych, dlatego token
-`read` otrzymuje odpowiedź 403:
+`PATCH /api/keys/{id}` jest mutacją i nie znajduje się na tych listach admina, więc token `read` otrzymuje 403
 `Access token scope 'read' is insufficient; 'write' required.`
-Token dostępu `write` lub `admin` spełnia wymagania tej trasy. JWT panelu,
-token machine-id interfejsu CLI działającego przez loopback oraz klucz API z uprawnieniem `manage` lub `admin`
-przechodzą przez inne gałęzie i nie są ograniczane przez tę rangę.
+Token dostępu `write` lub `admin` spełnia wymagania tej trasy. Token JWT pulpitu nawigacyjnego, token machine-id CLI w trybie loopback oraz klucz API z `manage` lub `admin` przechodzą innymi gałęziami i nie są ograniczane przez ten ranking.
 
-Token dostępu, który przejdzie `scopeSatisfies` dla `/api/mcp`, przeszedł
-jedynie bramę zarządzania. Wywołania narzędzi nadal wykonują `scopeMatches` względem zakresów
-klucza API. Ranga tokenu dostępu nie jest danymi wejściowymi dla `scopeMatches`.
+An access token that passes `scopeSatisfies` for `/api/mcp` has cleared the management gate only. Tool calls still run `scopeMatches` against API-key scopes. The access-token rank is not an input to `scopeMatches`.
 
 ### Zakresy narzędzi MCP
 
-Egzekwowanie zakresów jest scentralizowane w `open-sse/mcp-server/scopeEnforcement.ts`.
-Każde narzędzie wymaga określonych zakresów:
+Egzekwowanie zakresów jest scentralizowane w `open-sse/mcp-server/scopeEnforcement.ts`. Każde narzędzie wymaga określonych zakresów:
 
-| Zakres                | Narzędzia                                                                                                                                                                             |
-| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                     |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                             |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                                |
-| `read:quota`          | `check_quota`                                                                                                                                                                         |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                                |
-| `read:models`         | `list_models_catalog`                                                                                                                                                                 |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                         |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                                 |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                                    |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                           |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                        |
-| `read:cache`          | `cache_stats`                                                                                                                                                                         |
-| `write:cache`         | `cache_flush`                                                                                                                                                                         |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                            |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                     |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                                 |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                      |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                                |
-| `read:memory`         | `memory_search`                                                                                                                                                                       |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                          |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                    |
-| `write:skills`        | `skills_enable`                                                                                                                                                                       |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                      |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                      |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                               |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                             |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                      |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                        |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                    |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                       |
-| `read:obsidian`       | 13 narzędzi do odczytu — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 narzędzi do zapisu — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                 |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                     |
+| Zakres                | Narzędzia                                                                                                                                                                          |
+| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                  |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                          |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                             |
+| `read:quota`          | `check_quota`                                                                                                                                                                      |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                             |
+| `read:models`         | `list_models_catalog`                                                                                                                                                              |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                      |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                              |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                                 |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                        |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                     |
+| `read:cache`          | `cache_stats`                                                                                                                                                                      |
+| `write:cache`         | `cache_flush`                                                                                                                                                                      |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                         |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                  |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                              |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                   |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                             |
+| `read:memory`         | `memory_search`                                                                                                                                                                    |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                       |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                 |
+| `write:skills`        | `skills_enable`                                                                                                                                                                    |
+| `execute:skills`      | `skills_execute`                                                                                                                                                                   |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                   |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                            |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                          |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                   |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                     |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                 |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                    |
+| `read:obsidian`       | 13 narzędzi odczytu — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 narzędzi zapisu — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                 |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                  |
 
-Obsługiwane są zakresy z symbolami wieloznacznymi: `read:*` przyznaje wszystkie zakresy odczytu, a `*` przyznaje pełny dostęp.
+Symbole wieloznaczne są obsługiwane: `read:*` przyznaje wszystkie zakresy odczytu, `*` przyznaje pełny dostęp.
 
-### `mcp:connect` — wąskie uprawnienie do trasy (#7895)
+### `mcp:connect` — wąski zakres uprawnień trasy (#7895)
 
-Dostęp do transportu HTTP/SSE MCP (`/api/mcp/*`) spoza interfejsu loopback wymaga wyjątku
-LOCAL_ONLY dla `/api/mcp/` (zobacz `docs/security/ROUTE_GUARD_TIERS.md`). Wcześniej
-ten wyjątek akceptował wyłącznie klucz API z pełnym zakresem `manage`/`admin` — zbyt szerokim
-dla klienta, który potrzebuje jedynie komunikować się z MCP. `src/shared/constants/managementScopes.ts`
-eksportuje teraz `MCP_CONNECT_SCOPE = "mcp:connect"`: dodatkowy, wąski zakres (zgodnie z precedensem
-`SELF_USAGE_SCOPE`), który autoryzuje WYŁĄCZNIE ominięcie ograniczenia `/api/mcp/` w
-`src/server/authz/policies/management.ts` — nie przyznaje dostępu do żadnych innych tras zarządzania
-i celowo NIE został uwzględniony w `MANAGEMENT_API_KEY_SCOPES`. Klucz posiadający zakres `manage`/`admin`
-nadal korzysta z wyjątku bez zmian; `mcp:connect` stanowi alternatywę o niższych uprawnieniach dla
-zdalnych klientów korzystających wyłącznie z MCP, weryfikowaną za pomocą `hasMcpConnectOrManageScope()`.
+Uzyskanie dostępu do transportu HTTP/SSE MCP (`/api/mcp/*`) z sieci innej niż loopback wymaga
+wyjątku `/api/mcp/` LOCAL_ONLY (patrz `docs/security/ROUTE_GUARD_TIERS.md`). Historycznie ten
+wyjątek akceptował wyłącznie klucz API o pełnym zakresie `manage`/`admin` — zbyt szeroki dla
+wywołującego, który potrzebuje jedynie komunikacji z MCP. `src/shared/constants/managementScopes.ts`
+eksportuje teraz `MCP_CONNECT_SCOPE = "mcp:connect"`: addytywny, wąski zakres (ten sam precedens co
+`SELF_USAGE_SCOPE`), który autoryzuje WYŁĄCZNIE obejście `/api/mcp/` w
+`src/server/authz/policies/management.ts` — nie przyznaje dostępu do żadnej innej trasy
+zarządzania i celowo pozostaje POZA `MANAGEMENT_API_KEY_SCOPES`. Klucz posiadający
+`manage`/`admin` nadal przechodzi wyjątek bez zmian; `mcp:connect` to alternatywa o niższych
+uprawnieniach dla zdalnych wywołujących korzystających wyłącznie z MCP, sprawdzana za pomocą
+`hasMcpConnectOrManageScope()`.
 
-### Powiązanie zakresów HTTP z poszczególnymi kluczami (#7895)
+### Przypisanie zakresów HTTP do poszczególnych kluczy (#7895)
 
-W przypadku HTTP/SSE plik `open-sse/mcp-server/httpTransport.ts` rozpoznaje teraz rzeczywiste
-`api_keys.scopes` klienta za pomocą `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-i przekazuje je do `transport.handleRequest(req, { authInfo })` zestawu SDK MCP, dzięki czemu
-`extra.authInfo.scopes` docierające do każdego wywołania narzędzia odzwierciedlają zakresy należące
-do klucza Bearer. Funkcja `resolveCallerScopeContext()` z `scopeEnforcement.ts` już wcześniej
-nadawała `authInfo` wyższy priorytet niż `_meta` i mechanizm rezerwowy zmiennej środowiskowej
-`OMNIROUTE_MCP_SCOPES` — ta zmiana jedynie wypełnia pierwsze źródło o najwyższym priorytecie,
-które wcześniej nie było zasilane przez HTTP. Gdy nie zostanie rozpoznany żaden klucz API
-(brak nagłówka, nieprawidłowy klucz), `authInfo` pozostaje `undefined`, a rozpoznawanie przechodzi
-do istniejącego łańcucha `meta`/zmiennej środowiskowej bez zmian. stdio nie ma tożsamości osobnej
-dla każdego klienta (zobacz `mcpCallerIdentity.ts`) i ta zmiana go nie dotyczy — nadal korzysta
-z rezerwowego łańcucha `_meta`/zmiennej środowiskowej.
+W przypadku HTTP/SSE `open-sse/mcp-server/httpTransport.ts` rozpoznaje teraz rzeczywiste
+`api_keys.scopes` wywołującego za pomocą `resolveMcpCallerAuthInfo()`
+(`open-sse/mcp-server/httpAuthContext.ts`) i przekazuje je do SDK MCP w postaci
+`transport.handleRequest(req, { authInfo })`, dzięki czemu `extra.authInfo.scopes` docierające
+do każdego wywołania narzędzia odzwierciedlają własne zakresy klucza Bearer.
+`scopeEnforcement.ts` — jego `resolveCallerScopeContext()` już priorytetowo traktował `authInfo`
+wobec `_meta` oraz zapasowego źródła env `OMNIROUTE_MCP_SCOPES` — powyższa zmiana jedynie
+zapełnia to pierwsze, najwyżej priorytetyzowane źródło, które wcześniej pozostawało
+niezasilone w HTTP. Gdy nie rozpoznano żadnego klucza API (brak nagłówka, nieprawidłowy
+klucz), `authInfo` pozostaje `undefined`, a rozpoznawanie przechodzi niezmienionym istniejącym
+łańcuchem `meta`/env. stdio nie ma tożsamości wywołującego (patrz `mcpCallerIdentity.ts`)
+i nie jest objęte przypisaniem do kluczy — pomija krok `_meta` (`_meta` jest respektowany
+wyłącznie wewnątrz kontekstu uwierzytelniania HTTP, #15159) i rozpoznaje wyłącznie na
+podstawie klucza env `OMNIROUTE_MCP_SCOPES`.
 
-**Egzekwowanie zakresów jest wymuszane dla klientów HTTP/SSE o wąskich zakresach niezależnie od
-`OMNIROUTE_MCP_ENFORCE_SCOPES`.** Domyślna wartość `false` dla `OMNIROUTE_MCP_ENFORCE_SCOPES` jest
-bezpieczna wyłącznie w lokalnym przepływie stdio obsługiwanym przez jednego operatora, w którym
-nie istnieje tożsamość poszczególnych klientów, względem której można ograniczać zakres. Funkcja
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` bezwarunkowo włącza egzekwowanie zakresów
-dla poszczególnych narzędzi (`shouldForceScopeEnforcement()` w `scopeEnforcement.ts`), gdy
-`resolveCallerScopeContext()` rozpozna
-`source === "authInfo"` (tj. rzeczywisty nagłówek HTTP Authorization przypisany do konkretnego klucza,
-dostępny wyłącznie przez HTTP/SSE) ORAZ klucz ten nie ma pełnego zakresu `manage`/`admin`. Eliminuje
-to lukę, przez którą klucz posiadający WYŁĄCZNIE wąski zakres obejścia `mcp:connect` — opisany powyżej
-jako autoryzujący jedynie wyjątek LOCAL_ONLY dla `/api/mcp/` — mógłby w przeciwnym razie wywoływać
-każde narzędzie MCP po włączeniu przez operatora zdalnego dostępu do MCP spoza interfejsu loopback,
-wyłącznie dlatego, że `OMNIROUTE_MCP_ENFORCE_SCOPES` jest domyślnie dostarczane z wartością `false`.
-Klucz z pełnym zakresem `manage`/`admin` używany przez HTTP oraz każdy klient stdio/lokalny zachowują
-bez zmian dotychczasowe zachowanie kontrolowane przez `OMNIROUTE_MCP_ENFORCE_SCOPES`.
+**Wymuszanie jest włączane dla wywołujących HTTP/SSE z wąskimi zakresami niezależnie od
+`OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` ustawione domyślnie na `false`
+jest bezpieczne wyłącznie dla lokalnego przepływu stdio z jednym operatorem, w którym nie ma
+tożsamości wywołującego, do której można by się odnieść.
+`open-sse/mcp-server/server.ts::withScopeEnforcement()` bezwarunkowo włącza wymuszanie zakresów
+na poziomie narzędzi (`shouldForceScopeEnforcement()` w `scopeEnforcement.ts`), gdy tylko
+`resolveCallerScopeContext()` rozpoznał `source === "authInfo"` (czyli rzeczywisty nagłówek
+HTTP Authorization przypisany do klucza, wyłącznie HTTP/SSE) ORAZ ten klucz nie posiada
+pełnego zakresu `manage`/`admin`. Zamyka to lukę, w której klucz posiadający WYŁĄCZNIE wąski
+zakres obejścia `mcp:connect` — udokumentowany powyżej jako autoryzujący wyłącznie wyjątek
+`/api/mcp/` LOCAL_ONLY — mógłby w przeciwnym razie wywołać każde narzędzie MCP, gdy tylko
+operator włączył zdalny/nie-loopback dostęp do MCP, po prostu dlatego, że
+`OMNIROUTE_MCP_ENFORCE_SCOPES` domyślnie ma wartość `false`. Pełny klucz `manage`/`admin`
+przez HTTP oraz każdy wywołujący stdio/lokalny zachowują niezmienione dotychczasowe zachowanie
+sterowane `OMNIROUTE_MCP_ENFORCE_SCOPES`.
 
 ---
 

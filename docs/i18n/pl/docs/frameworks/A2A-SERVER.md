@@ -45,7 +45,7 @@ A2A jest kontrolowane za pomocą przełącznika **Endpoints → A2A** i domyśln
 
 ## Metody JSON-RPC 2.0
 
-### `message/send` — wykonywanie synchroniczne
+### `message/send` — Wykonanie synchroniczne
 
 Wysyła wiadomość do umiejętności i oczekuje na pełną odpowiedź.
 
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+W przypadku `smart-routing` wartość `metadata.combo` jawnie zastępuje
+`metadata.model` w żądaniu do bramy; jest wysyłana jako rzeczywisty `model`,
+a nie jako ignorowane pole JSON `x-combo`. Nadal obowiązują standardowy klucz API bramy
+oraz autoryzacja dla poszczególnych elementów docelowych. Nieprawidłowa lub pusta kombinacja jest odrzucana.
+
+Wynik udostępnia pola `requested_combo` (intencja wywołującego), `dispatched_model`
+(rzeczywiste żądanie do bramy), `response_model` (odpowiedź bramy) oraz
+`confirmed_combo`. Ostatnie pole ma wartość `null`, chyba że brama jawnie
+wskaże kombinację. Dzienniki decyzji A2A przypisują wykonanie wyłącznie do
+potwierdzonej kombinacji, zachowując niepotwierdzone żądanie jako `requestedCombo`.
+
 **Odpowiedź:**
 
 ```json
@@ -76,28 +87,21 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — strumieniowanie SSE
+### `message/stream` — Strumieniowanie SSE
 
 Działa tak samo jak `message/send`, ale zwraca zdarzenia Server-Sent Events, umożliwiając strumieniowanie w czasie rzeczywistym.
 
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — sprawdzanie statusu zadania
+### `tasks/get` — Sprawdzanie stanu zadania
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — anulowanie zadania
+### `tasks/cancel` — Anulowanie zadania
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Dostępne umiejętności
 
-OmniRoute udostępnia 6 umiejętności A2A powiązanych w `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Każdy moduł umiejętności znajduje się w `src/lib/a2a/skills/`.
+OmniRoute ujawnia 6 umiejętności A2A podłączonych do `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Każdy moduł umiejętności znajduje się w `src/lib/a2a/skills/`.
 
-| Umiejętność             | ID                   | Opis                                                                                                                                                                 | Tagi                              | Przykłady                                  |
-| :---------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------- | :----------------------------------------- |
-| Inteligentne trasowanie | `smart-routing`      | Kieruje prompt do optymalnego dostawcy/zestawu przy użyciu silnika zestawów i mechanizmu oceny OmniRoute                                                             | trasowanie, dostawcy              | „Skieruj ten prompt do najlepszego modelu” |
-| Zarządzanie limitami    | `quota-management`   | Raportuje stan limitów poszczególnych dostawców i pomaga wywołującym zdecydować, kiedy ograniczyć ruch lub zmienić dostawcę                                          | limity, dostawcy                  | „Sprawdź limit dla anthropic”              |
-| Wykrywanie dostawców    | `provider-discovery` | Wyświetla zainstalowanych dostawców wraz z możliwościami, oznaczeniami bezpłatnych planów i stanem OAuth                                                             | dostawcy, wykrywanie              | „Jacy dostawcy są dostępni?”               |
-| Analiza kosztów         | `cost-analysis`      | Szacuje koszt żądania/konwersacji na podstawie katalogu i ostatniego użycia                                                                                          | koszt, użycie                     | „Oszacuj koszt tej konwersacji”            |
-| Raport kondycji         | `health-report`      | Agreguje stan bezpiecznika, okresu wyciszenia i blokady dla poszczególnych dostawców                                                                                 | kondycja, odporność               | „Pokaż stan kondycji wszystkich dostawców” |
-| Lista możliwości        | `list-capabilities`  | Zwraca pełny, 45-elementowy katalog Agent Skills (23 API + 21 CLI + 1 konfiguracja) jako tabelę markdown z surowymi adresami URL SKILL.md do wstrzykiwania kontekstu | katalog, wykrywanie, umiejętności | „Wyświetl wszystkie możliwości OmniRoute”  |
+| Umiejętność                   | ID                   | Opis                                                                                                                                                                          | Tagi                            | Przykłady                                    |
+| :---------------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :------------------------------------------- |
+| Inteligentne wyznaczanie tras | `smart-routing`      | Kieruje monit przez optymalną provider/combo przy użyciu punktacji + silnika combo OmniRoute                                                                                  | routing, dostawcy               | „Przekieruj ten monit przez najlepszy model” |
+| Zarządzanie kwotami           | `quota-management`   | Raportuje stan limitu dla każdego dostawcy, pomaga dzwoniącym zdecydować, kiedy throttle/switch                                                                               | kontyngent, dostawcy            | „Sprawdź kwotę antropiczną”                  |
+| Wykrywanie dostawcy           | `provider-discovery` | Wyświetla listę zainstalowanych dostawców z możliwościami, flagami poziomu bezpłatnego i statusem OAuth                                                                       | dostawcy, odkrycie              | „Jaki dostawcy są dostępni?”                 |
+| Analiza kosztów               | `cost-analysis`      | Szacuje koszt request/conversation biorąc pod uwagę niedawne użycie katalogu +                                                                                                | koszt, zużycie                  | „Oszacuj koszt tej rozmowy”                  |
+| Raport o stanie zdrowia       | `health-report`      | Łączy wyłącznik automatyczny, czas odnowienia i stan blokady według dostawcy                                                                                                  | zdrowie, odporność              | „Pokaż stan zdrowia wszystkich dostawców”    |
+| Lista możliwości              | `list-capabilities`  | Zwraca pełny katalog umiejętności agenta składający się z 45 wpisów (23 API + 21 CLI + 1 konfiguracja) jako tabelę przecen z surowym SKILL.md URLs do wstrzykiwania kontekstu | katalog, odkrycie, umiejętności | „Wyświetl wszystkie możliwości OmniRoute ”   |
 
-> Karta agenta powinna być zgodna z aktualnym katalogiem 374 dostawców; liczba dostawców oraz metadane dotyczące dostępu bezpłatnego/niewymagającego uwierzytelniania pochodzą z rejestru środowiska uruchomieniowego.
+> Karta agenta powinna być zgodna z aktualnym katalogiem dostawców 377; liczba dostawców i metadane free/no-auth pochodzą z rejestru wykonawczego.
 
-### Szczegóły umiejętności `list-capabilities`
+### `list-capabilities` Szczegóły umiejętności
 
-Umiejętność `list-capabilities` jest szczególnie przydatna dla zewnętrznych agentów, które muszą ustalić, co udostępnia OmniRoute, zanim wyślą wywołania API. Zwraca ona artefakt w postaci ustrukturyzowanej tabeli markdown:
+Umiejętność `list-capabilities` jest szczególnie przydatna dla agentów zewnętrznych, którzy muszą odkryć, co ujawnia OmniRoute przed wysłaniem wywołań API. Zwraca ustrukturyzowany artefakt tabeli przecen:
 
 ```
-| ID | Nazwa | Kategoria | Obszar | Endpointy/polecenia | Surowy URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Uwierzytelnianie i sesje | api | uwierzytelnianie | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Każdy wiersz zawiera kolumnę `rawUrl`, dzięki czemu agenci mogą natychmiast pobrać pełny plik SKILL.md. Pole `metadata.totalSkills` odpowiada rozmiarowi katalogu (obecnie 45). Implementacja: `src/lib/a2a/skills/listCapabilities.ts`. Zobacz także [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Każdy wiersz zawiera kolumnę `rawUrl`, dzięki czemu agenci mogą natychmiast pobrać pełny SKILL.md. Pole `metadata.totalSkills` odzwierciedla rozmiar katalogu (obecnie 45). Implementacja: `src/lib/a2a/skills/listCapabilities.ts`. Zobacz także [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -211,21 +215,21 @@ Punkt końcowy JSON-RPC `/a2a` jest kanonicznym punktem wejścia A2A. Poniższe 
    };
    ```
 
-3. **Udostępnij na Karcie agenta:** w pliku `src/app/.well-known/agent.json/route.ts` dołącz wpis do tablicy `skills`:
+3. **Udostępnij w karcie agenta:** w pliku `src/lib/a2a/agentCardMetadata.ts` (współdzielonym przez `/.well-known/agent.json` i `/.well-known/agent-card.json`) dodaj element do tablicy `skills`:
 
    ```json
    {
      "id": "your-skill",
      "name": "Twoja umiejętność",
-     "description": "Krótki opis skoncentrowany na przeznaczeniu",
+     "description": "Krótki opis skoncentrowany na intencji",
      "tags": ["routing", "quota"],
      "examples": ["Przykładowe wywołanie w języku naturalnym"]
    }
    ```
 
-4. **Napisz testy:** `tests/unit/a2a-<your-skill>.test.ts`. Uwzględnij poprawny przebieg i ścieżkę błędu.
+4. **Napisz testy:** `tests/unit/a2a-<your-skill>.test.ts`. Uwzględnij ścieżkę poprawnego działania i ścieżkę błędu.
 
-5. **Udokumentuj** nową umiejętność w tabeli `Dostępne umiejętności` w tym pliku.
+5. **Udokumentuj** nową umiejętność w tabeli `Available Skills` w tym pliku.
 
 ---
 
@@ -264,7 +268,7 @@ przesłane → w toku → ukończone
 
 ## Przykłady integracji
 
-### Python (requests)
+### Python (żądania)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (przynieś)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

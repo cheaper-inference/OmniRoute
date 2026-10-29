@@ -47,7 +47,7 @@ A2A は **Endpoints → A2A** トグルで制御され、デフォルトでは�
 
 ### `message/send` — 同期実行
 
-スキルにメッセージを送信し、完全なレスポンスが返されるまで待機します。
+スキルにメッセージを送信し、完全なレスポンスを待機します。
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,7 +65,18 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**レスポンス：**
+`smart-routing` の場合、`metadata.combo` はゲートウェイリクエストにおいて
+`metadata.model` を明示的に上書きします。無視される `x-combo` JSON フィールドとしてではなく、
+実際の `model` として送信されます。ゲートウェイの通常の API キー認証および
+ターゲットごとの認可は引き続き適用されます。無効または空のコンボは拒否されます。
+
+結果には、`requested_combo`（呼び出し元の意図）、`dispatched_model`
+（実際のゲートウェイリクエスト）、`response_model`（ゲートウェイのレスポンス）、
+および `confirmed_combo` が含まれます。最後のフィールドは、ゲートウェイがコンボを明示的に
+識別しない限り `null` です。A2A の決定ログでは、実行は確認済みのコンボにのみ帰属され、
+未確認のリクエストは `requestedCombo` として保持されます。
+
+**レスポンス:**
 
 ```json
 {
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE イベント：**
+**SSE イベント:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## 利用可能なスキル
 
-OmniRoute は、`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` に接続された 6 つの A2A スキルを公開しています。各スキルモジュールは `src/lib/a2a/skills/` にあります。
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`に接続された 6 つのA2Aスキルを公開します。各スキル モジュールは`src/lib/a2a/skills/`に存在します。
 
-| スキル               | ID                   | 説明                                                                                                                                                             | タグ                       | 例                                                 |
-| :------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------------- |
-| スマートルーティング | `smart-routing`      | OmniRoute のコンボエンジンとスコアリングを使用して、最適なプロバイダー／コンボにプロンプトをルーティングします                                                   | routing, providers         | 「このプロンプトを最適なモデルにルーティングして」 |
-| クォータ管理         | `quota-management`   | プロバイダーごとのクォータ状態を報告し、呼び出し元がスロットリング／切り替えのタイミングを判断できるよう支援します                                               | quota, providers           | 「anthropic のクォータを確認して」                 |
-| プロバイダー検出     | `provider-discovery` | インストール済みプロバイダーを、機能、無料枠フラグ、OAuth ステータスとともに一覧表示します                                                                       | providers, discovery       | 「利用可能なプロバイダーは？」                     |
-| コスト分析           | `cost-analysis`      | カタログと最近の使用状況に基づいて、リクエスト／会話のコストを見積もります                                                                                       | cost, usage                | 「この会話のコストを見積もって」                   |
-| ヘルスレポート       | `health-report`      | プロバイダーごとのサーキットブレーカー、クールダウン、ロックアウトの状態を集約します                                                                             | health, resilience         | 「すべてのプロバイダーのヘルス状態を表示して」     |
-| 機能一覧             | `list-capabilities`  | 45 エントリの Agent Skills カタログ全体（API 23 件 + CLI 21 件 + config 1 件）を、コンテキスト注入用の未加工 SKILL.md URL を含む markdown テーブルとして返します | catalog, discovery, skills | 「OmniRoute の全機能を一覧表示して」               |
+| スキル               | ID                   | 説明                                                                                                                                                                            | タグ                       | 例                                                       |
+| :------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :------------------------------------------------------- |
+| スマートルーティング | `smart-routing`      | OmniRouteのコンボ エンジン+スコアリングを使用して、最適なprovider/comboを介してプロンプトをルーティングします。                                                                 | ルーティング、プロバイダー | 「このプロンプトを最適なモデル経由でルーティングします」 |
+| クォータ管理         | `quota-management`   | プロバイダーごとのクォータ状態をレポートし、発信者がいつthrottle/switch実行するかを決定するのに役立ちます                                                                       | クォータ、プロバイダー     | 「人族の割り当てを確認してください」                     |
+| プロバイダーの検出   | `provider-discovery` | インストールされているプロバイダーと機能、無料利用枠フラグ、 OAuthステータスをリストします。                                                                                    | プロバイダー、検出         | 「どんなプロバイダーが利用できるの？」                   |
+| コスト分析           | `cost-analysis`      | カタログ+の最近の使用状況を考慮してrequest/conversationのコストを見積もります                                                                                                   | 費用、使い方               | 「この会話にかかる費用を見積もってください」             |
+| 健康レポート         | `health-report`      | プロバイダーごとにサーキット ブレーカー、クールダウン、ロックアウト状態を集約します                                                                                             | 健康、回復力               | 「すべてのプロバイダーの健康状態を表示」                 |
+| リスト機能           | `list-capabilities`  | 完全な 45 エントリのエージェント スキル カタログ (23 API + 21 CLI + 1 config) を、コンテキスト インジェクション用の生のSKILL.md URLsを含むマークダウン テーブルとして返します。 | カタログ、発見、スキル     | 「すべてのOmniRoute機能をリストする」                    |
 
-> Agent Card は、稼働中の 374 プロバイダーカタログと常に一致するよう維持する必要があります。プロバイダー数および無料／認証不要のメタデータは、ランタイムレジストリから取得されます。
+> エージェント カードは、ライブ 377 プロバイダー カタログと一致させておく必要があります。プロバイダー数とfree/no-authメタデータは、ランタイム レジストリから取得されます。
 
-### `list-capabilities` スキルの詳細
+### `list-capabilities`スキル詳細
 
-`list-capabilities` スキルは、API 呼び出しを送信する前に OmniRoute が公開している機能を検出する必要がある外部エージェントにとって、特に有用です。構造化された markdown テーブルのアーティファクトを返します。
+`list-capabilities`スキルは、 API呼び出しを送信する前にOmniRouteが公開しているものを検出する必要がある外部エージェントに特に役立ちます。構造化されたマークダウン テーブル アーティファクトを返します。
 
 ```
-| ID | 名前 | カテゴリ | 領域 | エンドポイント／コマンド | 未加工 URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | 認証とセッション | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-各行には `rawUrl` 列が含まれているため、エージェントは完全な SKILL.md をすぐに取得できます。`metadata.totalSkills` フィールドはカタログサイズ（現在は 45）を反映します。実装: `src/lib/a2a/skills/listCapabilities.ts`。併せて [AGENT-SKILLS.md](./AGENT-SKILLS.md) も参照してください。
+各行には`rawUrl`列が含まれるため、エージェントは完全なSKILL.mdすぐにフェッチできます。 `metadata.totalSkills`フィールドはカタログ サイズ (現在は 45) を反映しています。実装: `src/lib/a2a/skills/listCapabilities.ts`。 [AGENT-SKILLS.md](./AGENT-SKILLS.md)も参照してください。
 
 ---
 
@@ -195,11 +199,11 @@ JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイ�
 
 ## 新しいスキルの追加
 
-1. **スキルファイルを作成：** `src/lib/a2a/skills/<your-skill>.ts`
+1. **スキルファイルを作成:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   非同期関数 `(task: A2ATask) => Promise<{ artifacts, metadata }>` をエクスポートします。`smartRouting.ts` などの既存スキルの構成に従ってください。
+   非同期関数 `(task: A2ATask) => Promise<{ artifacts, metadata }>` をエクスポートします。`smartRouting.ts` など、既存のスキルの形式に従ってください。
 
-2. **ハンドラーを登録：** `src/lib/a2a/taskExecution.ts` で、`A2A_SKILL_HANDLERS` にエントリを追加します。
+2. **ハンドラーを登録:** `src/lib/a2a/taskExecution.ts` で、`A2A_SKILL_HANDLERS` にエントリを追加します。
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -211,7 +215,7 @@ JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイ�
    };
    ```
 
-3. **Agent Card で公開：** `src/app/.well-known/agent.json/route.ts` で、`skills` 配列に追加します。
+3. **Agent Card で公開:** `src/lib/a2a/agentCardMetadata.ts`（`/.well-known/agent.json` と `/.well-known/agent-card.json` で共有）で、`skills` 配列に以下を追加します。
 
    ```json
    {
@@ -223,9 +227,9 @@ JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイ�
    }
    ```
 
-4. **テストを作成：** `tests/unit/a2a-<your-skill>.test.ts`。正常系とエラー系をカバーします。
+4. **テストを作成:** `tests/unit/a2a-<your-skill>.test.ts`。正常系とエラー系を網羅してください。
 
-5. このファイルの `利用可能なスキル` テーブルに新しいスキルを**記載**します。
+5. **ドキュメント化:** このファイルの `Available Skills` テーブルに新しいスキルを追加してください。
 
 ---
 
@@ -264,7 +268,7 @@ JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイ�
 
 ## 統合例
 
-### Python（requests）
+### Python (リクエスト)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript（fetch）
+### TypeScript (フェッチ)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

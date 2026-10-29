@@ -47,7 +47,7 @@ A2A 由 **Endpoints → A2A** 切換開關控制，預設為停用。停用時�
 
 ### `message/send` — 同步執行
 
-將訊息傳送給技能，並等待完整回應。
+將訊息傳送至技能，並等待完整回應。
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,16 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+對於 `smart-routing`，`metadata.combo` 是閘道請求中對
+`metadata.model` 的明確覆寫；它會作為真正的 `model` 傳送，
+而不是作為被忽略的 `x-combo` JSON 欄位。閘道的一般 API 金鑰與
+各目標授權仍然適用。無效或空白的組合會被拒絕。
+
+結果會公開 `requested_combo`（呼叫者意圖）、`dispatched_model`
+（實際的閘道請求）、`response_model`（閘道回應）以及
+`confirmed_combo`。除非閘道明確識別出某個組合，否則最後一個欄位會是 `null`。
+A2A 決策日誌只會將執行歸因於已確認的組合，並將未確認的請求保留為 `requestedCombo`。
+
 **回應：**
 
 ```json
@@ -76,22 +86,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -148,31 +151,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## 可用技能
 
-OmniRoute 公開了 6 項 A2A 技能，並在 `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` 中完成連接。每個技能模組都位於 `src/lib/a2a/skills/`。
+OmniRoute公開了`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`中的 6 個A2A技能。每個技能模組都位於`src/lib/a2a/skills/`。
 
-| 技能         | ID                   | 說明                                                                                                                           | 標籤             | 範例                          |
-| :----------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------- | :--------------- | :---------------------------- |
-| 智慧路由     | `smart-routing`      | 使用 OmniRoute 的組合引擎與評分機制，透過最佳提供者／組合路由提示詞                                                            | 路由、提供者     | 「透過最佳模型路由此提示詞」  |
-| 配額管理     | `quota-management`   | 回報各提供者的配額狀態，協助呼叫端決定何時限流／切換                                                                           | 配額、提供者     | 「檢查 anthropic 的配額」     |
-| 提供者探索   | `provider-discovery` | 列出已安裝的提供者及其功能、免費方案標記與 OAuth 狀態                                                                          | 提供者、探索     | 「有哪些可用的提供者？」      |
-| 成本分析     | `cost-analysis`      | 根據目錄與近期使用量，估算請求／對話的成本                                                                                     | 成本、使用量     | 「估算此對話的成本」          |
-| 健康狀態報告 | `health-report`      | 彙總各提供者的斷路器、冷卻與鎖定狀態                                                                                           | 健康狀態、韌性   | 「顯示所有提供者的健康狀態」  |
-| 列出功能     | `list-capabilities`  | 以 markdown 表格傳回完整的 45 項 Agent Skills 目錄（23 項 API、21 項 CLI 與 1 項設定），並附上原始 SKILL.md URL 以供注入上下文 | 目錄、探索、技能 | 「列出 OmniRoute 的所有功能」 |
+| 技能       | ID                   | 描述                                                                                                        | 標籤             | 範例                       |
+| :--------- | :------------------- | :---------------------------------------------------------------------------------------------------------- | :--------------- | :------------------------- |
+| 智慧路由   | `smart-routing`      | 使用OmniRoute的組合引擎+評分透過最佳provider/combo路由提示                                                  | 路由、提供者     | “透過最佳模型路由此提示”   |
+| 配額管理   | `quota-management`   | 報告每個提供者的配額狀態，幫助呼叫者決定何時進行throttle/switch                                             | 配額、提供者     | “檢查人類配額”             |
+| 提供者發現 | `provider-discovery` | 列出已安裝的提供者及其功能、免費層標誌、 OAuth狀態                                                          | 提供者、發現     | “有哪些提供者可用？”       |
+| 成本分析   | `cost-analysis`      | 根據目錄+最近的使用情況估計request/conversation的成本                                                       | 成本、使用量     | “估計這次對話的成本”       |
+| 健康報告   | `health-report`      | 聚合每個提供者的斷路器、冷卻時間、鎖定狀態                                                                  | 健康、韌性       | “顯示所有提供者的健康狀況” |
+| 列出能力   | `list-capabilities`  | 返回完整的 45 條目代理技能目錄（23 API + 21 CLI + 1 配置）作為降價表，並使用原始SKILL.md URLs進行上下文注入 | 目錄、發現、技能 | “列出所有OmniRoute功能”    |
 
-> Agent Card 應與即時的 374 個提供者目錄保持一致；提供者數量與免費／免驗證中繼資料皆取自執行階段登錄檔。
+> 代理卡應與即時 377 提供者目錄保持一致；提供者計數和free/no-auth資料源自運行時註冊表。
 
-### `list-capabilities` 技能詳細資訊
+### `list-capabilities`技能詳情
 
-`list-capabilities` 技能對於需要先探索 OmniRoute 所公開內容，再傳送 API 呼叫的外部代理程式特別實用。它會傳回結構化的 markdown 表格成品：
+`list-capabilities`技能對於需要在發送API呼叫之前發現OmniRoute公開的內容的外部代理特別有用。它傳回一個結構化的 Markdown 表工件：
 
 ```
-| ID | 名稱 | 類別 | 領域 | 端點／命令 | 原始 URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | 驗證與工作階段 | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-每一列都包含 `rawUrl` 欄位，讓代理程式可立即擷取完整的 SKILL.md。`metadata.totalSkills` 欄位會反映目錄大小（目前為 45）。實作：`src/lib/a2a/skills/listCapabilities.ts`。另請參閱 [AGENT-SKILLS.md](./AGENT-SKILLS.md)。
+每行都包含`rawUrl`列，因此代理可以立即取得完整的SKILL.md。 `metadata.totalSkills`欄位反映了目錄大小（今天為 45）。實作： `src/lib/a2a/skills/listCapabilities.ts`。另請參見[AGENT-SKILLS.md](./AGENT-SKILLS.md) 。
 
 ---
 
@@ -195,11 +198,11 @@ JSON-RPC 端點 `/a2a` 是標準的 A2A 進入點。以下 REST 端點為儀表�
 
 ## 新增技能
 
-1. **建立技能檔案：**`src/lib/a2a/skills/<your-skill>.ts`
+1. **建立技能檔案：** `src/lib/a2a/skills/<your-skill>.ts`
 
-   匯出非同步函式 `(task: A2ATask) => Promise<{ artifacts, metadata }>`。請依循現有技能（例如 `smartRouting.ts`）的結構。
+   匯出一個非同步函式 `(task: A2ATask) => Promise<{ artifacts, metadata }>`。請遵循現有技能的結構，例如 `smartRouting.ts`。
 
-2. **註冊處理常式：**在 `src/lib/a2a/taskExecution.ts` 中，新增項目至 `A2A_SKILL_HANDLERS`：
+2. **註冊處理常式：** 在 `src/lib/a2a/taskExecution.ts` 中，新增一個項目至 `A2A_SKILL_HANDLERS`：
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -211,21 +214,21 @@ JSON-RPC 端點 `/a2a` 是標準的 A2A 進入點。以下 REST 端點為儀表�
    };
    ```
 
-3. **公開於 Agent Card：**在 `src/app/.well-known/agent.json/route.ts` 中，附加至 `skills` 陣列：
+3. **公開於代理卡片中：** 在 `src/lib/a2a/agentCardMetadata.ts`（由 `/.well-known/agent.json` 與 `/.well-known/agent-card.json` 共用）中，將以下內容附加至 `skills` 陣列：
 
    ```json
    {
      "id": "your-skill",
      "name": "您的技能",
-     "description": "以意圖為重點的簡短說明",
+     "description": "簡短且聚焦於意圖的描述",
      "tags": ["路由", "配額"],
-     "examples": ["自然語言呼叫範例"]
+     "examples": ["自然語言叫用範例"]
    }
    ```
 
-4. **撰寫測試：**`tests/unit/a2a-<your-skill>.test.ts`。涵蓋成功路徑與錯誤路徑。
+4. **撰寫測試：** `tests/unit/a2a-<your-skill>.test.ts`。涵蓋成功路徑與錯誤路徑。
 
-5. **記錄**此檔案之 `Available Skills` 表格中的新技能。
+5. **記錄** 此檔案的 `Available Skills` 表格中的新技能。
 
 ---
 
@@ -264,7 +267,7 @@ JSON-RPC 端點 `/a2a` 是標準的 A2A 進入點。以下 REST 端點為儀表�
 
 ## 整合範例
 
-### Python（requests）
+### Python（請求）
 
 ```python
 import requests
@@ -283,7 +286,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript（fetch）
+### TypeScript （取得）
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

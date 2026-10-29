@@ -12,7 +12,20 @@ import { useTranslations } from "next-intl";
 
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { formatComboSuccessRate } from "@/lib/usage/providerStatsFormatters";
-import { Card } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { SortableTableHead } from "@omniroute/ui-kit/data-table-shell";
+import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
+import { Stat, StatRow } from "@omniroute/ui-kit/stat";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { Button, Card } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 interface ProviderStat {
   provider: string;
@@ -47,23 +60,17 @@ type SortKey =
   | "avgGapAfterToolMs";
 type SortDir = "asc" | "desc";
 
-// Hoisted out of the page component so a stable component type survives re-renders
-// (react-hooks/static-components).
-function SortIcon({
-  column,
-  sortKey,
-  sortDir,
-}: {
-  column: SortKey;
-  sortKey: SortKey;
-  sortDir: SortDir;
-}) {
-  if (sortKey !== column) return null;
-  return (
-    <span className="material-symbols-outlined text-[14px] ml-1 align-middle text-primary">
-      {sortDir === "desc" ? "arrow_downward" : "arrow_upward"}
-    </span>
-  );
+function rateTone(rate: number): string {
+  if (rate >= 99) return "text-success";
+  if (rate >= 95) return "text-warning";
+  return "text-error";
+}
+
+/** Latency for the summary Stat: seconds from 1 s up, whole milliseconds below. */
+function latencyStat(ms: number): { value: number; suffix: string; digits: number } {
+  return ms >= 1000
+    ? { value: ms / 1000, suffix: "s", digits: 1 }
+    : { value: Math.round(ms), suffix: "ms", digits: 0 };
 }
 
 function formatNumber(n: number | null): string {
@@ -79,13 +86,9 @@ function formatLatency(ms: number | null): string {
   return `${Math.round(ms)}ms`;
 }
 
-function successRate(successful: number, total: number): string {
-  if (total === 0) return "—";
-  return `${((successful / total) * 100).toFixed(1)}%`;
-}
-
 export default function ProviderStatsPage() {
   const t = useTranslations("providerStats");
+  const tc = useTranslations("common");
   const nodeMap = useProviderNodeMap();
   const [data, setData] = useState<{
     providers: ProviderStat[];
@@ -93,6 +96,7 @@ export default function ProviderStatsPage() {
     comboMetrics: Record<string, unknown>;
     telemetry: Record<string, unknown>;
     toolLatency: Record<string, ToolLatencyStat>;
+    windowSince?: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
@@ -118,18 +122,25 @@ export default function ProviderStatsPage() {
     void (async () => {
       await fetchData();
     })();
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
+    // Skip ticks while the tab is hidden; a hidden tab gets nothing from a
+    // refetch, so the poll only costs the server. The interval keeps running —
+    // hosts that report a permanent "hidden" state without ever firing a
+    // visibilitychange still refresh, and a real background tab stops costing
+    // a computation every tick.
+    const interval = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      void fetchData();
+    }, 30000);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      void fetchData();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [fetchData]);
-
-  const handleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir(sortDir === "desc" ? "asc" : "desc");
-    } else {
-      setSortKey(key);
-      setSortDir("desc");
-    }
-  };
 
   // Compute summary stats
   const totalRequests = data?.providers.reduce((s, p) => s + (p.totalRequests || 0), 0) ?? 0;
@@ -165,308 +176,266 @@ export default function ProviderStatsPage() {
   if (!data && !error) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        <div className="text-center" role="status" aria-live="polite">
+          <Icon
+            name="progress_activity"
+            size={32}
+            className="mx-auto animate-spin text-text-muted"
+          />
           <p className="text-text-muted mt-4">{t("loading")}</p>
         </div>
       </div>
     );
   }
 
+  // Header (title + refresh) is shared by the error-only state and the data view, so a
+  // dismissed error never leaves a blank page.
+  const pageHeader = (
+    <PageHeader
+      compact
+      title={t("title")}
+      description={t("description")}
+      actions={
+        <div className="flex items-center gap-3">
+          {lastRefresh && (
+            <span className="text-xs text-text-muted">
+              {t("updated", { time: lastRefresh.toLocaleTimeString() })}
+            </span>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            icon="refresh"
+            onClick={fetchData}
+            title={t("refresh")}
+            aria-label={t("refresh")}
+          />
+        </div>
+      }
+    />
+  );
+
   if (error && !data) {
     return (
-      <div>
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
-          <span className="material-symbols-outlined text-red-500 text-[32px] mb-2">error</span>
-          <p className="text-red-400">{t("loadFailed", { error })}</p>
-          <button
-            onClick={fetchData}
-            className="mt-4 px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-colors"
-          >
-            {t("retry")}
-          </button>
-        </div>
+      <div className="space-y-6">
+        {pageHeader}
+        {/* Re-keyed on the message: a new failure re-shows a dismissed alert. The header's
+            refresh button stays as the retry affordance after a dismiss. */}
+        <Alert
+          key={error}
+          variant="critical"
+          icon={<Icon name="error" size={20} />}
+          title={t("loadFailed", { error })}
+          dismissLabel={tc("close")}
+          actions={
+            <Button variant="secondary" size="sm" icon="refresh" onClick={fetchData}>
+              {t("retry")}
+            </Button>
+          }
+        />
       </div>
     );
   }
 
+  const sortHead = (key: SortKey, label: string) => (
+    <SortableTableHead
+      align="right"
+      direction={sortKey === key ? sortDir : undefined}
+      onDirectionChange={(direction) => {
+        setSortKey(key);
+        setSortDir(direction);
+      }}
+    >
+      {label}
+    </SortableTableHead>
+  );
+  const latency = latencyStat(avgLatency);
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-end gap-3">
-        {lastRefresh && (
-          <span className="text-xs text-text-muted">
-            {t("updated", { time: lastRefresh.toLocaleTimeString() })}
-          </span>
-        )}
-        <button
-          onClick={fetchData}
-          className="p-2 rounded-lg bg-surface hover:bg-surface/80 text-text-muted hover:text-text-main transition-colors"
-          title={t("refresh")}
-        >
-          <span className="material-symbols-outlined text-[18px]">refresh</span>
-        </button>
-      </div>
+      {pageHeader}
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-primary/10 text-primary">
-              <span className="material-symbols-outlined text-[18px]">analytics</span>
-            </div>
-            <span className="text-sm text-text-muted">{t("totalRequests")}</span>
-          </div>
-          <p className="text-xl font-semibold text-text-main">{formatNumber(totalRequests)}</p>
-        </Card>
-
-        <Card className="p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-blue-500/10 text-blue-500">
-              <span className="material-symbols-outlined text-[18px]">timer</span>
-            </div>
-            <span className="text-sm text-text-muted">{t("avgLatency")}</span>
-          </div>
-          <p className="text-xl font-semibold text-text-main">{formatLatency(avgLatency)}</p>
-        </Card>
-
-        <Card className="p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-green-500/10 text-green-500">
-              <span className="material-symbols-outlined text-[18px]">check_circle</span>
-            </div>
-            <span className="text-sm text-text-muted">{t("successRate")}</span>
-          </div>
-          <p className="text-xl font-semibold text-text-main">
-            {successRate(totalSuccessful, totalRequests)}
-          </p>
-        </Card>
-
-        <Card className="p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-purple-500/10 text-purple-500">
-              <span className="material-symbols-outlined text-[18px]">dns</span>
-            </div>
-            <span className="text-sm text-text-muted">{t("activeProviders")}</span>
-          </div>
-          <p className="text-xl font-semibold text-text-main">{activeProviders}</p>
-        </Card>
-      </div>
+      {/* Summary */}
+      <StatRow columns={4}>
+        <Stat
+          label={t("totalRequests")}
+          icon={<Icon name="analytics" size={18} />}
+          value={totalRequests}
+          format="compact"
+        />
+        <Stat
+          label={t("avgLatency")}
+          icon={<Icon name="timer" size={18} />}
+          value={latency.value}
+          suffix={latency.suffix}
+          numberFormatOptions={{ maximumFractionDigits: latency.digits }}
+        />
+        <Stat
+          label={t("successRate")}
+          icon={<Icon name="check_circle" size={18} />}
+          value={totalRequests > 0 ? totalSuccessful / totalRequests : null}
+          format="percent"
+          numberFormatOptions={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }}
+        />
+        <Stat
+          label={t("activeProviders")}
+          icon={<Icon name="dns" size={18} />}
+          value={activeProviders}
+        />
+      </StatRow>
 
       {/* Provider Table */}
       <Card className="p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
-            <span className="material-symbols-outlined text-[20px] text-primary">table_chart</span>
-            {t("providerBreakdown")}
-          </h2>
-          <span className="text-xs text-text-muted">
-            {t("providerCount", { count: activeProviders })}
-          </span>
-        </div>
+        <SectionHeader
+          className="mb-4"
+          title={t("providerBreakdown")}
+          description={
+            data.windowSince
+              ? t("windowSince", {
+                  date: new Date(data.windowSince).toLocaleDateString(),
+                })
+              : undefined
+          }
+          actions={
+            <span className="text-xs text-text-muted">
+              {t("providerCount", { count: activeProviders })}
+            </span>
+          }
+        />
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2 px-3 text-text-muted font-medium">{t("provider")}</th>
-                <th
-                  className="text-right py-2 px-3 text-text-muted font-medium cursor-pointer hover:text-text-main transition-colors select-none"
-                  onClick={() => handleSort("totalRequests")}
-                >
-                  {t("requests")}{" "}
-                  <SortIcon column="totalRequests" sortKey={sortKey} sortDir={sortDir} />
-                </th>
-                <th
-                  className="text-right py-2 px-3 text-text-muted font-medium cursor-pointer hover:text-text-main transition-colors select-none"
-                  onClick={() => handleSort("successfulRequests")}
-                >
-                  {t("success")}{" "}
-                  <SortIcon column="successfulRequests" sortKey={sortKey} sortDir={sortDir} />
-                </th>
-                <th className="text-right py-2 px-3 text-text-muted font-medium">{t("rate")}</th>
-                <th
-                  className="text-right py-2 px-3 text-text-muted font-medium cursor-pointer hover:text-text-main transition-colors select-none"
-                  onClick={() => handleSort("avgLatencyMs")}
-                >
-                  {t("avgLatency")}{" "}
-                  <SortIcon column="avgLatencyMs" sortKey={sortKey} sortDir={sortDir} />
-                </th>
-                <th
-                  className="text-right py-2 px-3 text-text-muted font-medium cursor-pointer hover:text-text-main transition-colors select-none"
-                  onClick={() => handleSort("totalTokensIn")}
-                >
-                  {t("tokensIn")}{" "}
-                  <SortIcon column="totalTokensIn" sortKey={sortKey} sortDir={sortDir} />
-                </th>
-                <th
-                  className="text-right py-2 px-3 text-text-muted font-medium cursor-pointer hover:text-text-main transition-colors select-none"
-                  onClick={() => handleSort("totalTokensOut")}
-                >
-                  {t("tokensOut")}{" "}
-                  <SortIcon column="totalTokensOut" sortKey={sortKey} sortDir={sortDir} />
-                </th>
-                <th
-                  className="text-right py-2 px-3 text-text-muted font-medium cursor-pointer hover:text-text-main transition-colors select-none"
-                  onClick={() => handleSort("avgTtftAfterToolMs")}
-                >
-                  {t("ttftAfterTool")}{" "}
-                  <SortIcon column="avgTtftAfterToolMs" sortKey={sortKey} sortDir={sortDir} />
-                </th>
-                <th
-                  className="text-right py-2 px-3 text-text-muted font-medium cursor-pointer hover:text-text-main transition-colors select-none"
-                  onClick={() => handleSort("avgGapAfterToolMs")}
-                >
-                  {t("gapAfterTool")}{" "}
-                  <SortIcon column="avgGapAfterToolMs" sortKey={sortKey} sortDir={sortDir} />
-                </th>
-                <th className="py-2 px-3 w-8" />
-              </tr>
-            </thead>
-            <tbody>
-              {sortedProviders.map((p) => {
-                const isExpanded = expandedProvider === p.provider;
-                const models = modelsByProvider.get(p.provider) ?? [];
-                const rate =
-                  p.totalRequests > 0 ? (p.successfulRequests / p.totalRequests) * 100 : 0;
-                return (
-                  <Fragment key={p.provider}>
-                    <tr
-                      className="border-b border-border/50 hover:bg-surface/50 transition-colors cursor-pointer"
-                      onClick={() =>
-                        setExpandedProvider(
-                          isExpanded ? null : models.length > 0 ? p.provider : null
-                        )
-                      }
-                    >
-                      <td className="py-2.5 px-3 font-medium text-text-main">
-                        {resolveProviderName(p.provider, nodeMap)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-text-main">
-                        {formatNumber(p.totalRequests)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-text-main">
-                        {formatNumber(p.successfulRequests)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums">
-                        <span
-                          className={
-                            rate >= 99
-                              ? "text-green-500"
-                              : rate >= 95
-                                ? "text-amber-500"
-                                : "text-red-500"
-                          }
+        <Table scrollbarLabel={t("providerBreakdown")}>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("provider")}</TableHead>
+              {sortHead("totalRequests", t("requests"))}
+              {sortHead("successfulRequests", t("success"))}
+              <TableHead className="text-right">{t("rate")}</TableHead>
+              {sortHead("avgLatencyMs", t("avgLatency"))}
+              {sortHead("totalTokensIn", t("tokensIn"))}
+              {sortHead("totalTokensOut", t("tokensOut"))}
+              {sortHead("avgTtftAfterToolMs", t("ttftAfterTool"))}
+              {sortHead("avgGapAfterToolMs", t("gapAfterTool"))}
+              <TableHead className="w-8">
+                <span className="sr-only">{t("model")}</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedProviders.map((p) => {
+              const isExpanded = expandedProvider === p.provider;
+              const models = modelsByProvider.get(p.provider) ?? [];
+              const rate = p.totalRequests > 0 ? (p.successfulRequests / p.totalRequests) * 100 : 0;
+              const providerName = resolveProviderName(p.provider, nodeMap);
+              const toggle = () =>
+                setExpandedProvider(isExpanded ? null : models.length > 0 ? p.provider : null);
+              return (
+                <Fragment key={p.provider}>
+                  <TableRow
+                    className={models.length > 0 ? "cursor-pointer" : undefined}
+                    onClick={toggle}
+                  >
+                    <TableCell className="font-medium text-text-main">{providerName}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatNumber(p.totalRequests)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatNumber(p.successfulRequests)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      <span className={rateTone(rate)}>{rate.toFixed(1)}%</span>
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatLatency(p.avgLatencyMs)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums text-text-muted">
+                      {formatNumber(p.totalTokensIn)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums text-text-muted">
+                      {formatNumber(p.totalTokensOut)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatLatency(data?.toolLatency?.[p.provider]?.avgTtftAfterToolMs ?? null)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatLatency(data?.toolLatency?.[p.provider]?.avgGapAfterToolMs ?? null)}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {models.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-expanded={isExpanded}
+                          aria-label={t("toggleModels", { provider: providerName })}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            toggle();
+                          }}
                         >
-                          {rate.toFixed(1)}%
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-text-main">
-                        {formatLatency(p.avgLatencyMs)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-text-muted">
-                        {formatNumber(p.totalTokensIn)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-text-muted">
-                        {formatNumber(p.totalTokensOut)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-text-main">
-                        {formatLatency(data?.toolLatency?.[p.provider]?.avgTtftAfterToolMs ?? null)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-text-main">
-                        {formatLatency(data?.toolLatency?.[p.provider]?.avgGapAfterToolMs ?? null)}
-                      </td>
-                      <td className="py-2.5 px-3 text-center">
-                        {models.length > 0 && (
-                          <span
-                            className={`material-symbols-outlined text-[16px] text-text-muted transition-transform ${
-                              isExpanded ? "rotate-90" : ""
-                            }`}
-                          >
-                            chevron_right
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                    {isExpanded && models.length > 0 && (
-                      <tr key={`${p.provider}-models`}>
-                        <td colSpan={10} className="p-0">
-                          <div className="bg-black/[0.02] dark:bg-white/[0.02] border-b border-border/30">
-                            <table className="w-full text-xs">
-                              <thead>
-                                <tr className="text-text-muted">
-                                  <th className="text-left py-1.5 px-6 pl-12 font-medium">
-                                    {t("model")}
-                                  </th>
-                                  <th className="text-right py-1.5 px-3 font-medium">
-                                    {t("requests")}
-                                  </th>
-                                  <th className="text-right py-1.5 px-3 font-medium">
-                                    {t("success")}
-                                  </th>
-                                  <th className="text-right py-1.5 px-3 font-medium">
-                                    {t("rate")}
-                                  </th>
-                                  <th className="text-right py-1.5 px-3 font-medium">
-                                    {t("avgLatency")}
-                                  </th>
-                                  <th className="px-3 w-8" />
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {models.map((m) => {
-                                  const mRate =
-                                    m.requests > 0 ? (m.successfulRequests / m.requests) * 100 : 0;
-                                  return (
-                                    <tr key={m.model} className="border-t border-border/20">
-                                      <td className="py-1.5 px-6 pl-12 font-mono text-text-main">
-                                        {m.model}
-                                      </td>
-                                      <td className="py-1.5 px-3 text-right tabular-nums text-text-main">
-                                        {formatNumber(m.requests)}
-                                      </td>
-                                      <td className="py-1.5 px-3 text-right tabular-nums text-text-main">
-                                        {formatNumber(m.successfulRequests)}
-                                      </td>
-                                      <td className="py-1.5 px-3 text-right tabular-nums">
-                                        <span
-                                          className={
-                                            mRate >= 99
-                                              ? "text-green-500"
-                                              : mRate >= 95
-                                                ? "text-amber-500"
-                                                : "text-red-500"
-                                          }
-                                        >
-                                          {mRate.toFixed(1)}%
-                                        </span>
-                                      </td>
-                                      <td className="py-1.5 px-3 text-right tabular-nums text-text-main">
-                                        {formatLatency(m.avgLatencyMs)}
-                                      </td>
-                                      <td className="px-3 w-8" />
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
-                );
-              })}
-              {sortedProviders.length === 0 && (
-                <tr>
-                  <td colSpan={10} className="py-8 text-center text-text-muted">
-                    {t("noProviderData")}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                          <Icon
+                            name="chevron_right"
+                            size={16}
+                            className={`transition-transform ${isExpanded ? "rotate-90" : ""}`}
+                          />
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  {isExpanded && models.length > 0 && (
+                    <TableRow key={`${p.provider}-models`} className="hover:bg-transparent">
+                      <TableCell colSpan={10} className="bg-bg-subtle p-0">
+                        <Table
+                          className="min-w-0 text-xs"
+                          persistentScrollbars={false}
+                          containerClassName="rounded-none border-0"
+                        >
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="pl-12">{t("model")}</TableHead>
+                              <TableHead className="text-right">{t("requests")}</TableHead>
+                              <TableHead className="text-right">{t("success")}</TableHead>
+                              <TableHead className="text-right">{t("rate")}</TableHead>
+                              <TableHead className="text-right">{t("avgLatency")}</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {models.map((m) => {
+                              const mRate =
+                                m.requests > 0 ? (m.successfulRequests / m.requests) * 100 : 0;
+                              return (
+                                <TableRow key={m.model}>
+                                  <TableCell className="pl-12 font-mono">{m.model}</TableCell>
+                                  <TableCell className="text-right tabular-nums">
+                                    {formatNumber(m.requests)}
+                                  </TableCell>
+                                  <TableCell className="text-right tabular-nums">
+                                    {formatNumber(m.successfulRequests)}
+                                  </TableCell>
+                                  <TableCell className="text-right tabular-nums">
+                                    <span className={rateTone(mRate)}>{mRate.toFixed(1)}%</span>
+                                  </TableCell>
+                                  <TableCell className="text-right tabular-nums">
+                                    {formatLatency(m.avgLatencyMs)}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </Fragment>
+              );
+            })}
+            {sortedProviders.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={10} className="py-8 text-center text-text-muted">
+                  {t("noProviderData")}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </Card>
 
       {/* In-Memory Metrics */}
@@ -477,51 +446,38 @@ export default function ProviderStatsPage() {
           icon="speed"
           className="p-5"
         >
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 px-3 text-text-muted font-medium">Combo</th>
-                  <th className="text-right py-2 px-3 text-text-muted font-medium">
-                    {t("requests")}
-                  </th>
-                  <th className="text-right py-2 px-3 text-text-muted font-medium">
-                    {t("avgTtft")}
-                  </th>
-                  <th className="text-right py-2 px-3 text-text-muted font-medium">
-                    {t("avgTotal")}
-                  </th>
-                  <th className="text-right py-2 px-3 text-text-muted font-medium">
-                    {t("success")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(data.comboMetrics).map(([name, m]: [string, any]) => (
-                  <tr
-                    key={name}
-                    className="border-b border-border/50 hover:bg-surface/50 transition-colors"
-                  >
-                    <td className="py-2 px-3 font-medium text-text-main">{name}</td>
-                    <td className="py-2 px-3 text-right tabular-nums text-text-main">
-                      {formatNumber(m.requestCount ?? m.totalRequests ?? 0)}
-                    </td>
-                    <td className="py-2 px-3 text-right tabular-nums text-text-main">
-                      {formatLatency(m.avgTtft ?? m.ttftMs ?? null)}
-                    </td>
-                    <td className="py-2 px-3 text-right tabular-nums text-text-main">
-                      {formatLatency(m.avgLatency ?? m.avgTotalMs ?? null)}
-                    </td>
-                    <td className="py-2 px-3 text-right tabular-nums">
-                      {typeof m.successRate === "number"
-                        ? formatComboSuccessRate(m.successRate)
-                        : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table scrollbarLabel={t("comboMetrics")}>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("combo")}</TableHead>
+                <TableHead className="text-right">{t("requests")}</TableHead>
+                <TableHead className="text-right">{t("avgTtft")}</TableHead>
+                <TableHead className="text-right">{t("avgTotal")}</TableHead>
+                <TableHead className="text-right">{t("success")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Object.entries(data.comboMetrics).map(([name, m]: [string, any]) => (
+                <TableRow key={name}>
+                  <TableCell className="font-medium text-text-main">{name}</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatNumber(m.requestCount ?? m.totalRequests ?? 0)}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatLatency(m.avgTtft ?? m.ttftMs ?? null)}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatLatency(m.avgLatency ?? m.avgTotalMs ?? null)}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {typeof m.successRate === "number"
+                      ? formatComboSuccessRate(m.successRate)
+                      : "—"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </Card>
       )}
 
@@ -537,10 +493,8 @@ export default function ProviderStatsPage() {
             {Object.entries(data.telemetry).map(([key, val]: [string, any]) => {
               if (val == null || typeof val === "object") return null;
               return (
-                <div key={key} className="rounded-lg border border-border/40 bg-surface/30 p-3">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">
-                    {key.replace(/([A-Z])/g, " $1").replace(/_/g, " ")}
-                  </p>
+                <div key={key} className="rounded-control border border-border bg-bg-subtle p-3">
+                  <p className="ci-eyebrow">{key.replace(/([A-Z])/g, " $1").replace(/_/g, " ")}</p>
                   <p className="text-lg font-semibold text-text-main mt-1 tabular-nums">
                     {typeof val === "number" ? formatNumber(val) : String(val)}
                   </p>

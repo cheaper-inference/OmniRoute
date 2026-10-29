@@ -248,7 +248,7 @@ export function getAggregatedSnapshots(opts: {
     const sql = `
       WITH per_window AS (
         SELECT
-          datetime((strftime('%s', created_at) / ${bucketSeconds}) * ${bucketSeconds}, 'unixepoch') as bucket,
+          strftime('%Y-%m-%dT%H:%M:%SZ', (strftime('%s', created_at) / ${bucketSeconds}) * ${bucketSeconds}, 'unixepoch') as bucket,
           ${selectKey},
           AVG(remaining_percentage) as remainingPct,
           MAX(is_exhausted) as isExhausted,

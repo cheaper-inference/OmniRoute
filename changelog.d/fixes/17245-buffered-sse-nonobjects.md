@@ -1,0 +1,1 @@
+- **fix(sse):** ignore non-object events in buffered OpenAI SSE. ([#17245](https://github.com/diegosouzapw/OmniRoute/pull/17245)) — thanks @pacocartones
