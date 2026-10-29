@@ -1,4 +1,4 @@
--- 218_api_key_self_service_settings.sql
+-- 229_api_key_self_service_settings.sql
 -- Per-API-key self-service settings, kept in their own table instead of new
 -- api_keys columns.
 --
