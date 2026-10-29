@@ -79,6 +79,33 @@ test("native image dispatch requires locality and uses the selected connected ac
       signal: controller.signal,
     });
     assert.equal(cancelled.status, 408);
+    const { RosebudError } = await import("../../open-sse/services/rosebud/cli.ts");
+    context.mock.method(rosebudRuntime, "read", async () => ({
+      ...job,
+      id: "b".repeat(64),
+      status: "failed",
+      unpaidFailure: true,
+      actualCredits: undefined,
+    }));
+
+    for (const [code, status] of [
+      ["insufficient_credits", 402],
+      ["throttled", 429],
+      ["key_expired", 401],
+    ] as const) {
+      context.mock.method(rosebudRuntime, "generate", async () => {
+        const error = new RosebudError(code, status);
+        error.jobId = "b".repeat(64);
+        throw error;
+      });
+      const rejected = await handleRosebudImageGeneration({
+        body: { model: "rosebud/test-image", prompt: "test" },
+        peerLocality: "lan",
+        credentials: { connectionId: String(connection.id) },
+      });
+      assert.equal(rejected.status, status);
+      assert.equal(rejected.rosebudUsage, undefined);
+    }
     const unsupported = await handleRosebudImageGeneration({
       body: { model: "rosebud/test-image", rosebud_inputs: { output_format: "svg" } },
       peerLocality: "lan",
