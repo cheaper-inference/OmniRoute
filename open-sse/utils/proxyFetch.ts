@@ -18,6 +18,7 @@ import { maybeReapDispatcherPool } from "./proxyDispatcherReap.ts";
 import tlsClient, { type TlsFetchOptions, guardTlsFirstByte } from "./tlsClient.ts";
 import { withUpstreamStatusCapture } from "./upstreamStatusCapture.ts";
 import { stampOwnListenerSelfHop } from "./selfHop.ts";
+import { sanitizeHeaderValues } from "./headerSanitize.ts";
 import { tlsFingerprintProviderAllowed } from "./tlsFingerprintExclusions.ts";
 import { describeFallbackFailure, redactProxyDetailsInMessage } from "./proxyFetchRedaction.ts";
 import { recordFinalTransportOutcome, recordProxiedSuccess } from "./proxyTransportOutcome.ts";
@@ -713,6 +714,10 @@ async function patchedFetchUnrecorded(
   options: FetchWithDispatcherOptions = {},
   deps: ProxyFetchDeps = {}
 ) {
+  // Drop invisible characters (ZWSP, BOM, stray controls) a pasted key can carry;
+  // undici would otherwise reject every request. Clean headers keep the same object.
+  const cleanHeaders = options?.headers ? sanitizeHeaderValues(options.headers) : undefined;
+  if (cleanHeaders !== options?.headers) options = { ...options, headers: cleanHeaders };
   // #13593: a hop back to this listener carries the process self-hop token
   // so admission does not shed it with public traffic.
   stampOwnListenerSelfHop(input, options);

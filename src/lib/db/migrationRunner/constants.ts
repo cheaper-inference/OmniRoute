@@ -166,6 +166,45 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "081",
     toName: "inspector_custom_hosts",
   },
+  // PR #10409 circulated through these draft slots before the current release
+  // claimed them. The name guard is mandatory: canonical migrations using the
+  // same numbers must never be rehomed as Team state.
+  {
+    fromVersion: "153",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "154",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "155",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "161",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "163",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "164",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
   {
     fromVersion: "134",
     fromName: "ccr_blocks",
@@ -227,21 +266,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // Early self-service stack builds occupied the upstream attempt-timing slot.
     fromVersion: "194",
     fromName: "api_key_self_service_settings",
-    toVersion: "213",
+    toVersion: "218",
     toName: "api_key_self_service_settings",
   },
   {
     // Later self-service stack builds (#14771) used 197, now proxy_subscription_core_config.
     fromVersion: "197",
     fromName: "api_key_self_service_settings",
-    toVersion: "213",
+    toVersion: "218",
     toName: "api_key_self_service_settings",
   },
   {
     // #14771 builds then used 207, now remove_opencode_free_provider.
     fromVersion: "207",
     fromName: "api_key_self_service_settings",
-    toVersion: "213",
+    toVersion: "218",
     toName: "api_key_self_service_settings",
   },
   {
@@ -251,6 +290,13 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "recreate_turn_nodes_content_hash_index",
     toVersion: "211",
     toName: "recreate_turn_nodes_content_hash_index",
+  },
+  {
+    // #14771 builds on release/v3.8.53 then used 213, now api_key_preferred_connections.
+    fromVersion: "213",
+    fromName: "api_key_self_service_settings",
+    toVersion: "218",
+    toName: "api_key_self_service_settings",
   },
 ] as const;
 

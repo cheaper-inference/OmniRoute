@@ -2,11 +2,13 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
 import {
+  buildChatGptWebIntegrityResolutionSource,
   collectChatGptWebFirstPartyAssetCandidates,
   executeChatGptWebFirstPartyTurn,
   extractChatGptWebFirstPartyAssetReferences,
   parseChatGptWebFirstPartyModuleContract,
   type ChatGptWebFirstPartyModuleContract,
+  type ChatGptWebFirstPartyRequest,
 } from "../../open-sse/utils/chatgptWebFirstParty.ts";
 import type { ChatGptWebResolvedAttachment } from "../../open-sse/utils/chatgptWebAttachments.ts";
 
@@ -119,6 +121,138 @@ describe("ChatGPT Web first-party module contract discovery", () => {
 });
 
 describe("ChatGPT Web first-party request execution", () => {
+  // Regression: the sentinel headers are what authenticate `/f/conversation`. A bridge
+  // without them used to be ignored silently, so the request went out unsigned and
+  // ChatGPT answered with a redirect to the app shell (~600KB of HTML) instead of SSE.
+  test("never posts an unsigned request when the challenge bridge is incomplete", async () => {
+    const root = globalThis as typeof globalThis & Record<string, unknown>;
+    const previousBridge = root[BRIDGE_KEY];
+    let posted = false;
+    // safePost exists so a bug that skips the header check would still reach the network.
+    root[BRIDGE_KEY] = {
+      requestClient: {
+        safePost: async () => {
+          posted = true;
+          return new Response("{}");
+        },
+      },
+    };
+    try {
+      await assert.rejects(() =>
+        executeChatGptWebFirstPartyTurn(createDirectPage(), {
+          prompt: "unsigned probe",
+          attachments: [],
+          selection: { kind: "free", thinkEnabled: false },
+        })
+      );
+      assert.equal(posted, false, "an unsigned conversation request must never be sent");
+    } finally {
+      if (previousBridge === undefined) delete root[BRIDGE_KEY];
+      else root[BRIDGE_KEY] = previousBridge;
+    }
+  });
+
+  test("stops reading once a complete client tool envelope is available", async () => {
+    let cancelled = false;
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(
+          new TextEncoder().encode(
+            'event: delta\\ndata: {"v":"<tool>{\\"name\\":\\"write\\"}</tool>"}\\n\\n'
+          )
+        );
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    const restoreBridge = installFirstPartyBridge(async (path) => {
+      if (path === "/f/conversation") return new Response(stream, { status: 200 });
+      throw new Error(`Unexpected first-party path: ${path}`);
+    });
+
+    try {
+      const body = await executeChatGptWebFirstPartyTurn(createDirectPage(), {
+        prompt: "tool probe",
+        attachments: [],
+        selection: { kind: "free", thinkEnabled: false },
+      });
+      assert.match(body, /<tool>/);
+      assert.equal(cancelled, true);
+    } finally {
+      restoreBridge();
+    }
+  });
+
+  async function captureConversationBody(
+    selection: ChatGptWebFirstPartyRequest["selection"]
+  ): Promise<Record<string, unknown>> {
+    let conversationOptions: Record<string, unknown> | null = null;
+    const restoreBridge = installFirstPartyBridge(async (path, options) => {
+      if (path !== "/f/conversation") throw new Error(`Unexpected first-party path: ${path}`);
+      conversationOptions = options;
+      return new Response("data: [DONE]\n\n", { status: 200 });
+    });
+    try {
+      await executeChatGptWebFirstPartyTurn(createDirectPage(), {
+        prompt: "hello",
+        attachments: [],
+        selection,
+      });
+    } finally {
+      restoreBridge();
+    }
+    return conversationOptions!.requestBody as Record<string, unknown>;
+  }
+
+  test("sends the picker lane as a thinking slug plus its own effort field", async () => {
+    // The ability slider used to be flattened into `system_hints`, so every
+    // position produced an identical request. The effort now travels as
+    // `thinking_effort`, and only the Free Think toggle keeps the hint.
+    const thinking = await captureConversationBody({
+      kind: "picker",
+      modelLabel: "GPT-6 Sol",
+      effortIndex: 3,
+    });
+    assert.equal(thinking.model, "gpt-6-thinking");
+    assert.equal(thinking.thinking_effort, "max");
+    assert.deepEqual(thinking.system_hints, []);
+
+    const medium = await captureConversationBody({
+      kind: "picker",
+      modelLabel: "GPT-5.6 Sol",
+      effortIndex: 1,
+    });
+    assert.equal(medium.model, "gpt-5-6-thinking");
+    assert.equal(medium.thinking_effort, "standard");
+
+    const instant = await captureConversationBody({
+      kind: "picker",
+      modelLabel: "GPT-6 Sol",
+      effortIndex: 0,
+    });
+    assert.equal(instant.model, "gpt-6");
+    assert.equal("thinking_effort" in instant, false);
+  });
+
+  test("keeps the Pro lane a distinct slug with the captured effort depth", async () => {
+    const gpt6Pro = await captureConversationBody({
+      kind: "picker",
+      modelLabel: "GPT-6 Sol",
+      effortIndex: 4,
+    });
+    assert.equal(gpt6Pro.model, "gpt-6-pro");
+    assert.equal(gpt6Pro.thinking_effort, "standard");
+
+    const gpt55Pro = await captureConversationBody({
+      kind: "picker",
+      modelLabel: "GPT-5.5",
+      effortIndex: 4,
+    });
+    assert.equal(gpt55Pro.model, "gpt-5-5-pro");
+    assert.equal(gpt55Pro.thinking_effort, "extended");
+  });
+
   test("uploads image and file inputs before submitting the observed conversation body", async () => {
     const originalFetch = globalThis.fetch;
     const uploadedTypes: string[] = [];
@@ -250,5 +384,121 @@ describe("ChatGPT Web first-party request execution", () => {
     } finally {
       restoreBridge();
     }
+  });
+});
+
+describe("ChatGPT Web integrity module resolution", () => {
+  const names = { resolveIntegrityModule: "lXE", resolveIntegrity: "f" };
+
+  interface ResolutionBindings {
+    resolveIntegrity(proof: unknown): Promise<unknown>;
+    loadIntegrityModule(): Promise<Record<string, unknown>>;
+  }
+
+  let chunkImporterCount = 0;
+
+  // The generated snippet runs inside the bridge module, so the test evaluates it as a real
+  // ES module with the same two bindings the bridge provides: `names` and `importChunk`.
+  async function runResolution(
+    source: string,
+    importChunk: (url: string) => Promise<Record<string, unknown>>
+  ): Promise<ResolutionBindings> {
+    chunkImporterCount += 1;
+    const importerKey = `__chatGptTestImportChunk${chunkImporterCount}`;
+    const root = globalThis as typeof globalThis & Record<string, unknown>;
+    root[importerKey] = importChunk;
+    const code = [
+      `const names = ${JSON.stringify(names)};`,
+      `const importChunk = url => globalThis[${JSON.stringify(importerKey)}](url);`,
+      source,
+      `export { resolveIntegrity, loadIntegrityModule };`,
+    ].join("\n");
+    const url = `data:text/javascript;base64,${Buffer.from(code).toString("base64")}`;
+    return (await import(url)) as ResolutionBindings;
+  }
+
+  test("requires the module through the page runtime instead of stubbing its dependencies", async () => {
+    const resolveIntegrityHandler = async (proof: unknown) => ({ proof });
+    const imported: string[] = [];
+    const source = buildChatGptWebIntegrityResolutionSource([
+      "https://chatgpt.com/cdn/assets/plain-chunk.js",
+      "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+    ]);
+
+    // No minified dependency id is pinned anymore: the previous shim hardcoded the uuid
+    // helper id ("TI"), which chatgpt.com has since renamed, failing every turn.
+    assert.doesNotMatch(source, /crypto\.randomUUID/);
+    // Top-level await would settle after the installer's `script.onload` check rejects.
+    assert.doesNotMatch(source, /^\s*await /);
+
+    const bindings = await runResolution(source, async (url) => {
+      imported.push(url);
+      if (url.endsWith("runtime-chunk.js")) {
+        return {
+          __webpack_require__: (id: string) =>
+            id === "lXE" ? { f: resolveIntegrityHandler } : { f: () => "wrong module" },
+        };
+      }
+      return { __webpack_modules__: { lXE: () => ({ f: () => "stubbed" }) } };
+    });
+
+    assert.deepEqual(await bindings.resolveIntegrity("proof"), { proof: "proof" });
+    assert.deepEqual(imported, [
+      "https://chatgpt.com/cdn/assets/plain-chunk.js",
+      "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+    ]);
+  });
+
+  test("skips chunks that fail to import and keeps looking for the runtime", async () => {
+    const source = buildChatGptWebIntegrityResolutionSource([
+      "https://chatgpt.com/cdn/assets/broken.js",
+      "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+    ]);
+
+    const bindings = await runResolution(source, async (url) => {
+      if (url.endsWith("broken.js")) throw new Error("chunk failed to evaluate");
+      return { __webpack_require__: () => ({ f: () => "headers" }) };
+    });
+
+    assert.equal(await bindings.resolveIntegrity("proof"), "headers");
+  });
+
+  test("names the module id when no loaded chunk exposes the page runtime", async () => {
+    const source = buildChatGptWebIntegrityResolutionSource([
+      "https://chatgpt.com/cdn/assets/plain-chunk.js",
+    ]);
+    const bindings = await runResolution(source, async () => ({ __webpack_modules__: {} }));
+
+    await assert.rejects(
+      bindings.resolveIntegrity("proof"),
+      /integrity module lXE is not registered in the page runtime \(1 chunks loaded\)/
+    );
+  });
+
+  test("rejects a resolved module that does not export the resolver", async () => {
+    const source = buildChatGptWebIntegrityResolutionSource([
+      "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+    ]);
+    const bindings = await runResolution(source, async () => ({
+      __webpack_require__: () => ({ a: () => "other" }),
+    }));
+
+    await assert.rejects(bindings.resolveIntegrity("proof"), /integrity resolver is unavailable/);
+  });
+
+  test("drops non-first-party and duplicate chunk URLs", () => {
+    const source = buildChatGptWebIntegrityResolutionSource([
+      "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+      "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+      "https://evil.example/cdn/assets/runtime-chunk.js",
+      "https://chatgpt.com/cdn/assets/not-a-chunk.css",
+    ]);
+
+    assert.equal(
+      source.match(/"https:\/\/chatgpt\.com\/cdn\/assets\/runtime-chunk\.js"/g)?.length,
+      1
+    );
+    assert.doesNotMatch(source, /evil\.example/);
+    assert.doesNotMatch(source, /not-a-chunk\.css/);
   });
 });

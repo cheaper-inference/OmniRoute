@@ -597,7 +597,7 @@ export async function registerNodejs(): Promise<void> {
   // that cause every connection to be skipped by getProviderCredentials(), making
   // all subsequent requests time out at Bottleneck's maxWaitMs (120 s default).
   // Terminal states (banned / expired / credits_exhausted) are intentionally kept.
-  // See: https://github.com/diegosouzapw/OmniRoute/issues/3625 (Part A)
+  // See: https://github.com/cheaper-inference/OmniRoute/issues/3625 (Part A)
   try {
     const { clearStaleCrashCooldowns } = await import("@/lib/db/providers");
     const { cleared } = clearStaleCrashCooldowns();
@@ -668,6 +668,9 @@ export async function registerNodejs(): Promise<void> {
     console.log("[STARTUP] Quota cache background refresh started");
     startProviderLimitsSyncScheduler();
     console.log("[STARTUP] Provider limits sync scheduler started");
+    const { startQuotaSessionRecovery } = await import("@/lib/quota/quotaSessionRecovery");
+    startQuotaSessionRecovery();
+    console.log("[STARTUP] Quota session recovery scheduler started (opt-in)");
     const { startQuotaAutoPing } = await import("@/lib/services/quotaAutoPing");
     startQuotaAutoPing();
     console.log("[STARTUP] Quota auto-ping scheduler started (opt-in, no-op until enabled)");

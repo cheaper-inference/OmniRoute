@@ -104,6 +104,23 @@ function stripPlaceholderFromField(target: JsonRecord, field: string): boolean {
   return false;
 }
 
+function cleanReasoningDetails(details: unknown[]): JsonRecord[] {
+  const cleaned: JsonRecord[] = [];
+  for (const detail of details) {
+    const next: JsonRecord = { ...asReasoningRecord(detail) };
+    // Non-text details (e.g. encrypted reasoning) must survive even without text/content.
+    const hadText = typeof next.text === "string";
+    const hadContent = typeof next.content === "string";
+    stripPlaceholderFromField(next, "text");
+    stripPlaceholderFromField(next, "content");
+    const textGone = next.text === undefined;
+    const contentGone = next.content === undefined;
+    if ((hadText || hadContent) && textGone && contentGone) continue;
+    cleaned.push(next);
+  }
+  return cleaned;
+}
+
 export function copyOpenAICompatibleReasoningFields(source: JsonRecord, target: JsonRecord) {
   if (source.reasoning_content !== undefined) target.reasoning_content = source.reasoning_content;
   if (source.reasoning !== undefined) target.reasoning = source.reasoning;
@@ -132,22 +149,7 @@ export function copyOpenAICompatibleReasoningFields(source: JsonRecord, target: 
     stripPlaceholderFromField(target, field);
   }
   if (Array.isArray(target.reasoning_details)) {
-    const cleaned: unknown[] = [];
-    for (const detail of target.reasoning_details) {
-      const record = asReasoningRecord(detail);
-      const next: JsonRecord = { ...record };
-      // Track whether the item originally carried text/content at all so
-      // non-text details (e.g. `reasoning.encrypted` carrying only `data`)
-      // survive untouched.
-      const hadText = typeof next.text === "string";
-      const hadContent = typeof next.content === "string";
-      stripPlaceholderFromField(next, "text");
-      stripPlaceholderFromField(next, "content");
-      const textGone = next.text === undefined;
-      const contentGone = next.content === undefined;
-      if ((hadText || hadContent) && textGone && contentGone) continue;
-      cleaned.push(next);
-    }
+    const cleaned = cleanReasoningDetails(target.reasoning_details);
     if (cleaned.length === 0) delete target.reasoning_details;
     else target.reasoning_details = cleaned;
   }

@@ -1,5 +1,8 @@
 "use client";
+
 import { useLocale, useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 
 /**
  * Shared status badge for CLI tool cards.
@@ -45,32 +48,16 @@ export default function CliStatusBadge({
   // Determine badge from effectiveConfigStatus or batchStatus
   const status = effectiveConfigStatus || batchStatus?.configStatus || null;
 
-  const badges = {
-    configured: {
-      dotClass: "bg-green-500",
-      badgeClass: "bg-green-500/10 text-green-600 dark:text-green-400",
-      text: t("configured"),
-    },
-    not_configured: {
-      dotClass: "bg-yellow-500",
-      badgeClass: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
-      text: t("notConfigured"),
-    },
-    not_installed: {
-      dotClass: "bg-zinc-400 dark:bg-zinc-500",
-      badgeClass: "bg-zinc-500/10 text-zinc-500 dark:text-zinc-400",
-      text: t("notInstalled"),
-    },
-    other: {
-      dotClass: "bg-blue-500",
-      badgeClass: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-      text: t("custom"),
-    },
-    unknown: {
-      dotClass: "bg-zinc-400 dark:bg-zinc-500",
-      badgeClass: "bg-zinc-500/10 text-zinc-500 dark:text-zinc-400",
-      text: t("unknown"),
-    },
+  // Status → kit Badge tone (the dot comes from the Badge adapter's `dot`).
+  const badges: Record<
+    string,
+    { variant: "success" | "warning" | "info" | "default"; text: string }
+  > = {
+    configured: { variant: "success", text: t("configured") },
+    not_configured: { variant: "warning", text: t("notConfigured") },
+    not_installed: { variant: "default", text: t("notInstalled") },
+    other: { variant: "info", text: t("custom") },
+    unknown: { variant: "default", text: t("unknown") },
   };
 
   const badge = status ? badges[status] || badges.unknown : null;
@@ -78,24 +65,21 @@ export default function CliStatusBadge({
   return (
     <>
       {badge && (
-        <span
-          className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full ${badge.badgeClass}`}
-        >
-          <span className={`size-1.5 rounded-full ${badge.dotClass}`} />
+        <Badge variant={badge.variant} size="sm" dot className="text-[11px]">
           {badge.text}
-        </span>
+        </Badge>
       )}
       {lastConfiguredAt ? (
         <span
           className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-text-muted"
           title={t("lastSavedAt", { date: new Date(lastConfiguredAt).toLocaleString(locale) })}
         >
-          <span className="material-symbols-outlined text-[12px]">schedule</span>
+          <Icon name="schedule" size={12} />
           {formatRelativeTime(lastConfiguredAt, t)}
         </span>
       ) : status && status !== "not_installed" ? (
         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-text-muted">
-          <span className="material-symbols-outlined text-[12px]">schedule</span>
+          <Icon name="schedule" size={12} />
           {t("never")}
         </span>
       ) : null}

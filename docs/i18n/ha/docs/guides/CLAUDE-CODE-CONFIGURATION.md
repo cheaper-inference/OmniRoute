@@ -48,15 +48,11 @@ kawai zai yi aiki), yana duba lafiyar sabar, sannan yana aiwatar da `claude`.
 
 ---
 
-## Laƙabban ganowa — nuna samfuran da ba na Claude ba a cikin zaɓen `/model`
+## Laƙabin gano — nuna samfuran da ba Claude ba a cikin zaɓin `/model`
 
-Gano samfuran gateway na Claude Code yana jera ids da ke farawa da `claude`
-ko `anthropic` kawai, don haka idan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
-zaɓen asali na `/model` yawanci yana nuna **kawai** samfuran Claude/Anthropic na OmniRoute —
-`kimi/kimi-k2.6` ko `glm/glm-5.2` ba zai taɓa bayyana ba, ko da yake routing ɗinsa yana aiki yadda ya kamata.
+Binciken samfurin ƙofa (gateway) na Claude Code yana lissafa kawai ids waɗanda ke farawa da `claude` ko `anthropic`, don haka tare da `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` zaɓin `/model` na asali yawanci yana nuna **kawai** samfuran Claude/Anthropic na OmniRoute — `kimi/kimi-k2.6` ko `glm/glm-5.2` bai taɓa bayyana, ko da yake yana tura buƙatu da kyau.
 
-OmniRoute na iya kwafin kowane samfuri da aka kunna (da combo) a ƙarƙashin id na `claude/…` domin ya
-wuce wannan tacewa kuma ya bayyana a cikin zaɓen:
+OmniRoute na iya yin madubin kowane samfuri da aka kunna (da combo) a ƙarƙashin id na `claude/…` domin ya wuce wannan tace kuma ya bayyana a cikin zaɓin:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,32 +60,21 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Lokacin da ka zaɓi ɗaya daga cikin waɗannan a Claude Code, OmniRoute yana cire murfin `claude/`
-ya mayar da shi zuwa ainihin id kafin routing — ainihin id na `claude/<real-claude-model>`
-(wato ainihin mai samar da Claude OAuth) koyaushe ana barin sa yadda yake.
+Idan ka zaɓi ɗayan waɗannan a Claude Code, OmniRoute yana cire murfin `claude/` yana maidowa zuwa ainihin id kafin ya tura buƙatar — ainihin id na `claude/<real-claude-model>` (masu samar da Claude OAuth na hakika) ana barin shi yadda yake koyaushe.
 
-**Wannan a kashe yake ta tsohuwa** kuma ƙofa mai matakai uku ce ke sarrafa shi (mafi takamaiman
-shi ke rinjaye), don haka OmniRoute na yau da kullum ba zai ninka katalog ɗinsa ga clients da ba sa amfani da
-Claude Code ba:
+Ta tsaitsaye, ana yin madubin kawai ainihin ids. Da tutar fasali `CATALOG_MIRROR_REFINEMENTS_ENABLED` da ake kunna ta zaɓi, nau'ikan matakin ƙoƙarin hujja waɗanda katalog ɗin ya riga ya lissafa (misali `codex/gpt-6-sol-high`) ana yin madubinsu kamar kowane id, don haka Claude Code na iya zaɓar matakin ƙoƙari bayyananne, kuma ainihin `auto/*` ids waɗanda hanyar buƙata ba za ta iya samarwa ba ba a yin madubinsu. Ko akwai nau'ikan ƙoƙari a jerin ko a'a, har yanzu `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` ne ke mulkin hakan — madubin bai taɓa ƙara nau'in da katalog na asali bashi da shi.
 
-| Mataki    | Inda yake                                                                          |
-| --------- | ---------------------------------------------------------------------------------- |
-| Samfuri   | Shafin bayanan provider → toggle na kowane samfuri mai suna "Nuna a Claude Code"   |
-| Provider  | Shafin bayanan provider → toggle na matakin provider (ya shafi dukkan samfuransa)  |
-| Gaba ɗaya | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (a kashe yake ta tsohuwa) |
+**Wannan yana a kashe ta tsaitsaye** kuma ana sarrafa shi ta ƙofa ta matakai uku (wanda ya fi takamaimi ya ci nasara), don haka OmniRoute na yau da kullum bai taɓa ninka katalog ɗinsa ga abokan ciniki waɗanda ba su amfani da Claude Code:
 
-Environment variable na `EXPOSE_CC_DISCOVERY_ALIASES` yana tilasta kunna matakin gaba ɗaya
-kuma yana rinjayar saitin dashboard (allon Feature Flags yana nuna bayanin
-"yana aiki ta hanyar environment variable" idan haka ne). Toggles na kowane provider da
-na kowane samfuri suna ƙara tacewa daga nan — misali, idan na gaba ɗaya a kashe yake amma na Kimi provider a kunne,
-samfuran Kimi kawai za a nuna.
+| Mataki      | A ina                                                                                               |
+| ----------- | --------------------------------------------------------------------------------------------------- |
+| Samfuri     | Shafin cikakkun bayanai na mai samarwa → maɓallin "Fitarwa a Claude Code" na kowane samfuri         |
+| Mai samarwa | Shafin cikakkun bayanai na mai samarwa → maɓallin matakin mai samarwa (yana rufe dukkan samfuransa) |
+| Duniya      | Saituna → Tutocin Fasali → `EXPOSE_CC_DISCOVERY_ALIASES` (a kashe ta tsaitsaye)                     |
 
-> ⚠️ **Rashin daidaiton window a samfuran da ba na Claude ba.** Claude Code yana ɗauka cewa akwai context
-> window na 200K ga duk id da bai gane ba (ba zai iya karanta ainihin window daga
-> `/v1/models` ba). Ga samfuri mai window mafi girma (misali Kimi K2 mai 256K), saita
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` zuwa ƙimar da ke ƙasa da ainihin window na samfurin domin
-> kada auto-compaction ya kunna da wuri. Bayanan martaba da aka ƙirƙira a sama sun riga sun
-> yi wannan ga kowane samfuri.
+Mai canjin muhalli `EXPOSE_CC_DISCOVERY_ALIASES` yana tilasta kunna matakin duniya kuma yana da fifiko a kan wucewar dashboard (allon Tutocin Fasali yana nuna bayanin "yana aiki ta mai canjin muhalli" idan hakan ya faru). Maɓallan kowane mai samarwa da kowane samfuri suna ci gaba da fasaltawa daga nan — misali duniya a kashe + mai samar Kimi a kunne yana fitar da samfuran Kimi kawai.
+
+> ⚠️ **Bambancin taga a kan samfuran da ba Claude ba.** Claude Code yana daukar tagar mahallin 200K ga kowane id da bai gane ba (bai iya karanta ainihin taga daga `/v1/models`). Don samfurin da yake da taga mafi girma (misali 256K na Kimi K2), saita `CLAUDE_CODE_AUTO_COMPACT_WINDOW` zuwa ƙimar da take ƙasa da ainihin tagar samfurin domin kada auto-compaction ya fara aiki da wuri. Bayanan martaba da aka samar a sama sun riga sun yi hakan ga kowane samfuri.
 
 ---
 

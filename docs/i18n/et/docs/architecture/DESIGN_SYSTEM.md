@@ -4,229 +4,84 @@
 
 ---
 
-> **Olek:** viitedokument — siin kirjeldatud standardimine on **rakendatud** (etapid 1–6: ruudustiktaust, primitiivid, olekuvärvide tsentraliseerimine, monosammkirja token, DataTable’i tokenite migratsioon, fookusrõngas → aktsentvärv, Checkbox/Textarea primitiivid, `cn()` → tailwind-merge, ruudustik igal eraldiseisval kuval, paindlik 4K sisuümbris, läbipaistmatud andmetabeli pinnad). See dokument on töölaua kujundustokenite, komponentide ja konventsioonide kanooniline kirjeldus; alltoodud etappide jaotus on säilitatud iga otsuse põhjendusena.
-> **Ulatus:** OmniRoute’i töölaud (`src/`) ja turundussait (`_mono_repo/omnirouteSite/`) jagavad **üht visuaalset identiteeti** — sama millimeetripaberi ruudustiktaust (32px), samad värvitokenid, standarditud komponendid.
->
-> Praktilised märkused hooldajatele:
->
-> - Mitmed allesjäänud püsikodeeritud kuueteistkümnendväärtused on **taotluslikud** (alati tume konsooliterminal, ReactFlow’ SVG-jooned) ning neid **EI TOHI** tokenitega asendada.
-> - Töötavas eksemplaris kuvatav „suurem” ruudustik tuleneb aegunud järgust, mitte koodist — ruudustiku suurus on 32px, täpselt nagu saidil.
-> - Tumeda teema `--table-*` väärtused on baidi tasemel identsed migratsioonieelsete püsikodeeritud rgba-väärtustega; hele teema parandati (vigaste, mittetoimivate `var()` varuväärtuste tõttu oli see alati tume).
+> **Olek:** armatuurlaud on ehitatud** Keak CI UI komplekt** (`@keak/cheaper-inference-ui-kit`), tarnitakse tööruumina `packages/ui-kit` (`@omniroute/ui-kit`; ülesvoolu hetktõmmis on kinnitatud faili `packages/ui-kit/UPSTREAM.md` ja seda kaitseb `npm run check:ui-kit-snapshot`). Valgus on kanooniline teema; vaikeeelistus on `system`. Aktsent on Keak laim (`--ci-color-accent`). Switzer on UI, kuva- ja kooditeksti (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` lahendavad selle) üksikperekond, mida ise hostib komplekt ise (`packages/ui-kit/src/ci-fonts.css`, impordib `ci-tokens.css`). Iga ikoon on Lucide'i glüüf.
 
----
+## 1. Kus asjad asuvad
 
-## 1. Eesmärk
+- **Kit.** `packages/ui-kit/src` on ülemvoolu `src/` bait-baidi täpne koopia `packages/ui-kit/UPSTREAM.md`-is fikseeritud commit'i seisust (see salvestab ka litsentsiloa); `PATCHES.md` loetleb kohalikud paigad (neid pole). Seda tarbitakse lähtekoodina, ilma eraldi ehituseta: `next.config.mjs` transpillerib selle ja `tsconfig.json` seob `@omniroute/ui-kit` → `packages/ui-kit/src` ning `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (sama aliast kannavad ka `vitest.config.ts` ja `vitest.mcp.config.ts`). Kit-i komponenti imporditakse selle alamtee kaudu (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), mitte kunagi läbi `@omniroute/ui-kit` barrel-faili: barrel tõmbab iga komponendi (sealhulgas kuupäevavalija) igasse importijasse. Kit-i stiilileht tuleb sisse läbi `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Tokenid.** `packages/ui-kit/src/ci-tokens.css` deklareerib `--ci-*`-tokenid; `src/app/globals.css` sillutab need OmniRoute'i pärandnimedega (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), nii et olemasolevad `var(--color-*)`-lugemised ja Tailwindi utiliidid jätkavad töötamist. Uus kood kasutab Tailwindi utiliite (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) või kit-i klasse — mitte kunagi heksaväärtust (`tests/unit/design-kit-bridge.test.ts` jõustab sillutuse). `text-primary` lahendub `--text-color-primary` kaudu väärtuseks `--color-primary-ink` (heledas teemas lime-800, tumedas teemas laimiaktsent), nii et primaarne tekst püsib loetav, samal ajal kui `bg-primary`/`border-primary` säilitavad laimipinna. Diagrammiseeriad kasutavad `--color-chart-1` … `--color-chart-5`.
+- **Teemad.** `<html className="ci-theme">` (`src/app/layout.tsx`) lülitab dokumendi kit-i teemasse. Eelistus on `light`, `dark` või `system` (`THEME_CONFIG.defaultTheme = "system"` failis `src/shared/constants/appConfig.ts`; `system` järgib `prefers-color-scheme`-i). `applyTheme()` failis `src/store/themeStore.ts` (mida peegeldab `src/app/layout.tsx`-i tekstisisene alglaadimisskript, mis käivitub enne hüdratatsiooni) määrab `data-theme="dark"|"light"` ja lülitab koos sellega `<html>`-elemendil `.dark`-klassi. Kit-i tumedate tokenite kogum aktiveeritakse `data-theme="dark"` alusel (`packages/ui-kit/src/ci-tokens.css`); OmniRoute'i enda tumedad ülekirjutused (`globals.css`-i `.dark`-plokk) ja Tailwindi pärand-`dark:`-utiliidid aktiveeruvad `.dark`-klassi alusel. Aktsentvärvi eelseadistusi pole: aktsent tuleb alati kit-ist ja vanemast ehitusest pärit püsisalvestatud eelseadistus visatakse store'i laadimisel ära.
+- **Komponendid (adapterid).** `src/shared/components/index.tsx` säilitab OmniRoute'i komponentide API (samad nimed, vaikimisi ekspordid ja props'id) ning selle taga olevad primitiivid on kit-i kohal ehitatud adapterid: vormid (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ülekatted ja tagasiside (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), struktuur (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) ja tabelid (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter impordib kit-i komponendi alamtee kaudu ja peegeldab pärandpropsid sellele — näiteks `Button variant="primary"` on kit-i `default`-nupp (`--ci-button-primary-*`: heledas teemas inverteeritud pind, tumedas teemas aktsent koos oma `--ci-color-accent-foreground`-tindivärviga), `danger` on `destructive` ja `warning` on `outline` pluss `.ci-button--warning`-laiendus. `globals.css`-i lõpus (`@layer components`) asuvad `.ci-button--warning`- ja `.ci-badge[data-tone]`-reeglid on OmniRoute'i laiendused kit-i klasside peal. `tests/unit/ui/adapters/*.test.tsx` fikseerivad iga adapteri.
+- **Kest.** `src/app/(dashboard)/layout.tsx` renderdab `DashboardLayout`-i, mis renderdab `src/shared/components/layouts/DashboardShell.tsx`: kit-i `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), kusjuures OmniRoute'i navigeerimisloogika paikneb `src/shared/components/Sidebar.tsx`-is. Esimene fokuseeritav element on `"skip to content"`-link, mis osutab elemendile `#main-content`. `src/shared/components/Header.tsx` sisaldab kit-i `SidebarTrigger`-it (kesta ainsat külgriba lülitit), Keak'i `ProductSwitcher`-it ja käsupaleti avajat; see kuvab marsruudi pealkirja ainult siis, kui `#main-content`-i sees pole monteeritud ühtegi kit-i `PageHeader`-it (`.ci-page-header`), nii et lehel, millel on oma `PageHeader`, on üksainus `h1`. `src/shared/components/CommandPalette.tsx` on kit-i `Dialog`.
+- **Ikoonid.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) lahendab nime (ekraanide kasutatav Material Symbols'i sõnavara) `ICON_MAP`-i (`src/shared/constants/iconMap.ts`) kaudu Lucide'i glüüfiks. Material Symbols'i font ja pakett on eemaldatud: kaardistusest puuduv nimi renderdab neutraalse kohatäiteglüühi (`data-icon-missing="true"`) ja logib väljaspool toodangut konsoolihoiatuse. `npm run gen:icon-map` prindib kasutuses olevad nimed, mis kaardistusest puuduvad (`tests/unit/icon-map-coverage.test.ts` ebaõnnestub iga nime juures, millel pole Lucide'i ikooni; `tests/unit/icon-map-object-values.test.ts` hõlmab otsinguobjektidesse salvestatud nimesid); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` kirjutab literaalsed `<span className="material-symbols-outlined">`-span'id ümber `<Icon>`-elementideks.
+- **Bränd.** `src/shared/components/OmniRouteLogo.tsx` moodustab kit-i ümbrise: vaikimisi eksport `OmniRouteLogo` renderdab `ProductIcon product="omniroute" variant="glyph"` (inline-SVG, `basePath`-ohutu) ja `OmniRouteLockup` renderdab `ProductLockup product="omniroute"` (juurdepääsetav nimi "Keak OmniRoute") või white-label-operaatorite puhul nende enda `name`/`logoSrc`. Tootevahetaja sihtkohad asuvad failis `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Iseisvad ekraanid — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` ja `src/shared/components/ErrorPageScaffold.tsx` — kuvavad lockup'i; `tests/unit/brand-pages-static.test.ts` valvab selle üle.
 
-Turundussait (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) ja toote töölaud peaksid välja nägema nagu **üks toode**. Sait laenas oma paleti juba töölaualt — selle failis `css/tokens.css` on isegi kirjas _„Palett peegeldab OmniRoute’i töölauda (src/app/globals.css)”_. Seega on need kaks värvide tasandil juba ligikaudu 80% ulatuses ühtlustatud. Töölaual on puudu:
+## 2. Reeglid
 
-1. **Millimeetripaberi ruudustiktaust**, mida sait kasutab igal lehel.
-2. Mõned **jagatud kujundustokenid**, mis on saidil olemas, kuid töölaual puuduvad (raadiuseskaala, brändigradient, `surface-2`, monosammkiri).
-3. **Komponenditaseme järjepidevus** — mitu töölaua komponenti eiravad teematokeneid ning kasutavad püsikodeeritud hex-/rgba-väärtusi.
+1. Märgid, mitte kunagi literaalid. Erandid on sihilikult hoitud: alati tume konsooliterminal ja `STATUS_HEX` (`src/shared/constants/statusColors.ts`), komplekti olekupaleti lahendatud kuueteistkümnendkujuline peegel helistajatele, kes vajavad sõnasõnalist kuueteistkümnendikku. Kategoorilised paletid pole enam erand: need sõidavad komplekti viiel diagrammimärgil (`--color-chart-1..5`) kuni `src/shared/utils/categoricalPalette.ts` ja marsruutimisstrateegiate puhul `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow servad ja orkestratsioonilõuend loevad teemateadlikke `--orch-status-*` muutujaid (`src/shared/components/flow/edgeStyles.ts`).
+2. Ärge kunagi lapige `packages/ui-kit/src` käsitsi: sünkroonige `scripts/dev/sync-ui-kit.sh <commit>` ga ; pre-commit värav `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ebaõnnestub mis tahes baidil, mis erineb kinnitatud ülesvoolu kinnipidamisest (see jätab vahele hoiatusega, kui ülesvoolu kloon `UI_KIT_CLONE` või `_references/cheaper-inference-ui-kit` puudub). Kui komplektis on midagi puudu, liikuge sellest adapteris või ekraanil ümber ja küsige seda ülesvoolu.
+3. Komplekti teksti vaikeseaded on inglise keel (`label = "Loading"`, `loadingLabel = "Loading table"`…) – edastage `useTranslations(...)` st tõlgitud stringid alati, kui komplekti komponent teksti renderdab.
+4. Tailwindi utiliidid võidavad komplekti komponentide klassid (komplekt deklareerib `@layer theme, base, components, utilities` ja selle reeglid kehtivad `components`) — kasutage utiliite vahede ja paigutuse jaoks, mitte komplekti komponentide värvimiseks.
+5. Pealkirjad: `.ci-heading` lehtede ja jaotiste pealkirjade jaoks; `.ci-dashboard-display` ainult suure ja hõreda kuvatava teksti jaoks, näiteks vealehe olekukood. Mõlemad kasutavad Switzerit.
+6. `tests/unit/dashboard-kit-sweep.test.ts` kaitseb komplekti kasutuselevõttu: `src/app` või `src/shared/components` all pole materjali ligatuuri ulatust; armatuurlaua puus (`src/app/(dashboard)` ja `src/shared/components`) ei ole töötlemata `<select>`, `<textarea>` või `<table>` ega käsitsi rullitud `role="dialog"` väljaspool loetletud erandeid ( `Select` adapteri algne haru `RequestLoggerDetail`); iga töötlemata `<button>` või `<input>` vajab kommentaari, mis sisaldab `kit-exception:` (koos põhjusega), mis lõpeb maksimaalselt 3 rida selle kohal; paleti toonid ja `dark:` variandid ainult testinimekirjades.
+7. Enne PR (ekraanipildid) kontrollige nii teemasid kui ka 390 px vaateava; `tests/e2e/a11y.spec.ts` jookseb kirvest.
 
-See dokument sisaldab analüüsi ja plaani.
+## 3. Ekraani lisamine
 
----
+1. Ava leht kiti `PageHeader`-iga (`@omniroute/ui-kit/page-header`, dashboard'i sees `compact`) —
+   pealkiri, kirjeldus ja `actions`. Shelli päis jätab seejärel oma pealkirja ära.
+2. Ehita juhtelemendid `@/shared/components` põhjal (adapterid) ja kasuta kiti komponente alamteede
+   kaudu seal, kus adapter puudub (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`,
+   `RadioGroup`, `Slider`…).
+3. Ikoonid: `<Icon name="…" />`. Uus nimi lisatakse `ICON_MAP`-i koos semantiliselt sobiva Lucide'i
+   komponendiga; `npm run gen:icon-map` loetleb veel puuduvad nimed.
+4. Värvid: semantilised utiliitklassid (`text-success`, `bg-warning-bg`, `border-border`…) ja
+   `var(--color-chart-N)` diagrammiseeriate jaoks; mitte heksväärtusi ega `dark:` variante, mis
+   lihtsalt kordavad värvi.
+5. Tekst: iga string, sealhulgas sildid, mille kiti komponentidele edastad, peab tulema
+   `useTranslations`-ist. Uued võtmed lisatakse failidesse `src/i18n/messages/en.json`, `pt-BR.json` ja
+   `vi.json` (vietnami paarsustest kinnitab iga ingliskeelse võtme); ülejäänud lokaadid täidab i18n-i
+   sünkroniseerimine.
+6. Käivita valvekontrollid enne PR-i: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (ainus kontroll, mis tabab `iconMap.ts`-is dubleeritud impordi),
+   `npm run check:ui-icu` ja ekraani enda testid.
 
-## 2. Põhimõtted
+## 4. Adapteri lisamine või muutmine
 
-- **Üks tõeallikas = `src/app/globals.css`.** Sait peegeldab töölauda, mitte kunagi vastupidi. Uued tokenid lisatakse esmalt faili `globals.css`.
-- **Tokenid, mitte kunagi literaalid.** Komponendid kasutavad semantilisi tokeneid (`bg-surface`, `text-primary`, `border-border`), mitte toorest `#hex`-väärtust.
-- **Tagasihoidlik, mitte pealetükkiv.** Ruudustik on õrn taustamuster, mis paikneb sisu taga — see ei tohi kunagi vähendada teksti kontrasti ega kasutajaliidesega visuaalselt võistelda.
-- **Teemateadlik.** Kõik toimib nii `.dark`-teemas (toote tunnuslik välimus) kui ka heledas teemas.
-- **Kirurgiline juurutamine.** Esmalt tarnitakse ruudustik ja tokenid (väike risk, suur nähtavus), seejärel korrastatakse komponendid järk-järgult.
+1. Säilita faili `src/shared/components/index.tsx` avalik API: samad ekspordinimed, vaikeeksport ja aktsepteeritud propsid. Seo pärandpropsid adapteri sees kit'i vastetega (vt `Button.tsx`: `VARIANT_TO_KIT`, `SIZE_TO_KIT`).
+2. Impordi kit alamtee kaudu (`@omniroute/ui-kit/<component>`).
+3. Kit'i puuduste ümbersõidud asuvad adapteris (või `globals.css`-i kihis `@layer components`, kui parandus on stiililine), mitte kunagi kaustas `packages/ui-kit/src`.
+4. Lisa või uuenda faili `tests/unit/ui/adapters/<name>.test.tsx`. Paljude kutsujatega adapteri puhul võrdle renderdatud märgistust enne ja pärast muudatust — polsterduse või ümbrise muudatused levivad igale ekraanile.
 
----
+## 5. Komplekti värskendamine
 
-## 3. Praegune olek — mis on juba ühtlustatud ja mis mitte
+`npm run check:ui-kit-upstream` võrdleb `packages/ui-kit/UPSTREAM.md` kinnitatud versiooni ülesvoolu repo uusima `v*` sildiga ja prindib sünkroonimiskäsu, kui väljalase on välja antud. Iganädalane `UI Kit upstream watch` töövoog (`.github/workflows/ui-kit-upstream-watch.yml`) teostab sama kontrolli ja hoiab ühe jälgimisprobleemi avatuna, kui nööpnõel on taga; ülesvoolu repo on privaatne, seega vajab töövoog `UI_KIT_READ_TOKEN` saladuses kirjutuskaitstud luba ja jääb ilma selleta inertseks.
 
-### 3.1 Värvid — juba ühtlustatud ✅
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopeerib ülesvoolu `src/` sellel kinnitusel (`latest` = uusim `v*` silt) `packages/ui-kit/src`, rakendab ühe lubatud teisenduse (see jätab suhtelisest impordist välja `.js` järelliide) ja seab tööruumi versiooni `packages/ui-kit/package.json` ja `package-lock.json` ülesvoolu versiooniks. Seejärel vaadake üle `git diff packages/ui-kit`, tehke visuaalne ülekanne mõlema teema pakkujate, sätete, kombinatsioonide, kasutuse ja lõpp-punkti kohta, käivitage `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ning avage PR ülesvoolu muudatuste logiga.
 
-Kõik brändivärvid ja pinnad vastavad saidile juba **väärtuse poolest** (erinevad ainult nimed — töölaual on eesliide `--color-`). Kontrollitud failis `src/app/globals.css:30-128`:
+## 6. README diagrammid
 
-| Mõiste                    | Saidi token (`tokens.css`)                  | Töölaua token (`globals.css`)   | Vastavus             |
-| ------------------------- | ------------------------------------------- | ------------------------------- | -------------------- |
-| põhivärv                  | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅                   |
-| põhivärv hõljutamisel     | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅                   |
-| aktsentvärv               | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅                   |
-| aktsentvärv 2             | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅ (ümber nimetatud) |
-| aktsentvärv 3             | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅ (ümber nimetatud) |
-| edu / hoiatus / viga      | `#22c55e / #f59e0b / #ef4444`               | identne                         | ✅                   |
-| valgusfoorivärvid         | `#ff5f56 / #ffbd2e / #27c93f`               | identne                         | ✅                   |
-| tume taust / pind / ääris | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | identne                         | ✅                   |
-| hele taust / pind / tekst | `#f9f9fb / #fff / #1a1a2e`                  | identne                         | ✅                   |
+Kaksteist skeemi, mille juur `README.md` manustab (`docs/diagrams/*.svg`), on komplekt, mida rakendatakse staatilisele kujutisele ja need genereeritakse, mitte ei joonista käsitsi: 13 generaatorifaili `scripts/docs/gen-readme-*.mjs` (kaksteist diagrammi pluss `gen-readme-diagrams.mjs` draiver) ja 12 aegumise testi `tests/unit/docs/readme-*-svg.test.ts`, üks diagrammi kohta, iga baits-faili koos väljundi `test-unit` genereerimisega.
 
-**Järeldus:** värvimigratsiooni pole vaja teha. Identiteet on juba ühine; me _viime selle lõpule_, mitte ei ehita seda uuesti.
+- **Tokenid.** `scripts/docs/readme-diagram-theme.mjs` kopeerib paleti `packages/ui-kit/src/ci-tokens.css` -st (selle faili külge kinnitas `tests/unit/docs/readme-diagram-theme.test.ts`) ja määratleb tekstirollid komplekti varasematel külgedel – Instrument Serif kuvamiseks, Inter UI teksti jaoks, IBM Plex Mono jooniste ja koodi jaoks – `@fontsource` pakettidest (armatuurlaud ise kasutab komplekti Swit6-st alates komplekti Swit6.0.0). Heledad väärtused asuvad failis `:root`, tumedad väärtused `prefers-color-scheme: dark` taga, nii et iga pilt järgib vaataja skeemi GitHub.
+- **Fondid.** `scripts/docs/readme-fonts.mjs` jagab need woff2-failid glüüfideks, mida iga diagramm joonistab, ja manustab need `@font-face` `data:` URIs vormingus – ainus viis, kuidas komplekti tüpograafia jõuab README pildini, kuna GitHub Markdown ei kanna CSS ja kamopuhverserver blokeerib iga välise toomise. Alamhulgad on ainult ladina keeles; sümbolite glüüfid, mis langevad tagasi süsteemivirna, on ükshaaval lubatud `SYMBOL_FALLBACKS` ja mis tahes muus katmata glüüfiviskes.
+- **Regenereerida.** `npm run docs:readme-diagrams` kirjutab kõik kaksteist ümber README järjekorras ja prindib ühe rea faili kohta koos selle suurusega. Üks generaator töötab ka iseseisvalt (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` vajab `node --import tsx/esm` kuna selle arvud pärinevad reaalajas kataloogilaadurist `open-sse/config/freeModelCatalog.ts`; kataloogi muutmise CI tagajärg on `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Ühendage generaator ja SVG koos.
+- **Tõestus.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderdab faili nii, nagu GitHub seda teenindab ( `<img>` silt, camo's `Content-Security-Policy`, `image/svg+xml`), jäädvustab heleda ja tumeda raami ning teatab välise fondi päringutest lehe tehtud (peab olema 0).
+- **Eelarve.** Alla 200 KB faili kohta (iga aegumise test kinnitab seda); 500 KB on mis tahes README kujutise kõvapiir ( SVG studio validaatori reegel).
+- **Kopeeri muutmata kujul, loeb väravast.** Rebränd muutis tüüpi ja paletti, mitte sõnu: iga generaator kannab oma diagrammi koopiat `*_COPY` konstandis (või koostab selle reaalajas kataloogist), mis on nii joonistatud tekst kui ka fondi alamhulga sisend. Kanoonilised figuurid jäävad `<text>` sõlmedesse, loeb `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); Gate'i loetavate diagrammide aegumise testid käivitavad genereeritud failis ka oma valideerijad, nii et koodist triiviv kujund läbib testi – parandage allikas, mida värav loeb, mitte kunagi generaatoris olevat numbrit.
 
-### 3.2 Puudujäägid — mis töölaual puudub
+## 7. Viideregister
 
-| Puudujääk               | Saidil on                                                                           | Töölaual                                                              | Tegevus                |
-| ----------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ---------------------- |
-| **Ruudustikuga taust**  | `body::before` millimeeterpaber, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ lisatud (1. etapp)**                                             | **Osa A**              |
-| **Raadiuste skaala**    | `--radius 14px`, `--radius-sm 9px`                                                  | `--radius 14px` lisatud; `-sm` + komponentide ümberviitamine on ootel | **Osa B / 2. etapp**   |
-| **Brändi gradient**     | `--grad-brand 135deg primary→accent-3`                                              | **✅ muutujanimi lisatud (1. etapp)**; kasutatakse 2. etapis          | **Osa B**              |
-| **Pesastatud pind**     | `--surface-2 #1c2230`                                                               | **✅ lisatud (1. etapp)**                                             | **Osa B**              |
-| **Püsisammuga font**    | `--font-mono` (ui-monospace'i fontide pinu)                                         | ootel (4. etapp, koos kasutuskohtadega)                               | **Osa B**              |
-| **`text-muted` (tume)** | `#8b8b9e`                                                                           | `#a1a1aa` (zinc-400)                                                  | ühtlustada — **Osa B** |
-
-### 3.3 Teemade toimemehhanismid (et me midagi ei lõhuks)
-
-- **Tailwind v4, CSS-keskne** (`tailwind.config.*` puudub). Muutujanimed määratletakse plokkides `:root`/`.dark` ja tehakse utiliitidele kättesaadavaks direktiivi `@theme inline` kaudu (`globals.css:130-179`).
-- **Tume teema `.dark` klassi kaudu** elemendil `<html>` (`@custom-variant dark` failis `globals.css:22`), mida lülitab kohandatud Zustand-pood (`src/store/themeStore.ts`); vaiketeema = `system` (`src/shared/constants/appConfig.ts:11`). Sait kasutab selle asemel atribuuti `html[data-theme="light"]` — **mehhanismid erinevad, kuid ei puutu kunagi kokku** (eraldi päritolud), seega konflikti pole. Säilitame töölaua `.dark` mehhanismi.
-- **Käitusajal muudetav põhivärv** on olemas (`themeStore.ts:85-97`, eelseaded muutujas `COLOR_THEMES`) — kasutajad saavad `--color-primary` väärtust vahetada. Iga uus muutujanimi (gradient jne), mis viitab muutujale `--color-primary`, pärib need muudatused automaatselt. ✅
-- **Tailwind v4 reserveeritud raadiuste nimed:** `--radius-sm/md/lg/...` on utiliitide `rounded-*` aluseks. Nende ümberdefineerimine muudab tagasiulatuvalt kõiki olemasolevaid `rounded-*` klasse (nt `rounded-sm` on kasutusel 12 failis). Seetõttu lükatakse väikese raadiuse väärtus ja komponentide ümberviitamine teadlikult 2. etappi, kus kasutuskohad muudetakse korraga.
-
----
-
-## 4. Osa A — millimeetripaberi ruudustikuga taust (põhisoov) — RAKENDATUD (1. etapp)
-
-### 4.1 Mis see on
-
-Saidi täpne lahendus (`_mono_repo/omnirouteSite/css/base.css`): **fikseeritud, kogu vaateava kattev pseudoelement**, mis joonistab kaks 1px joongradienti ning paikneb kogu sisu taga väärtusega `z-index:-1`.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Miks see töötab isegi siis, kui elemendil `body` on läbipaistmatu `background-color`:** pseudoelement `::before` väärtusega `z-index:-1` joonistatakse _elemendi enda tausta kohale_, kuid _selle tavavoos oleva sisu alla_. Seega on `--color-bg` alustäide, ruudustik paigutatakse selle peale ning rakendus renderdatakse ruudustiku kohal.
-
-### 4.2 Koodibaasis juba olemasolev eeskuju
-
-`src/app/landing/page.tsx:16-26` **rakendab juba lehepõhiselt sama ruudustikku**, kuid **punaste** joontega (`#E54D5E`, läbipaistmatus `0.06`), sammuga **50px** ja koos animeeritud valguskeradega. Seega on lahendus tootes juba tõestatud; selle tööga muudetakse see **globaalseks ja teemaga kohanduvaks** taustapildiks.
-
-### 4.3 Lisatud tokenid (failis `globals.css`)
-
-```css
-:root {
-  /* hele — ruudustiku läbipaistmatust on võrreldes saidi väärtusega 0.045 suurendatud,
-     et taustapilt oleks tihedal töölaual ka tegelikult nähtav (kaardid ja liidese raamistik
-     katavad suurema osa vaateavast) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* tume — samal põhjusel suurendatud võrreldes väärtusega 0.035 */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Ainus takistus — eemaldatud
-
-Ruudustik on oma ülesehituselt globaalne (see katab korraga paneeli, `auth`/`login`-lehed, vealehed — kõik marsruudid). Paneeli sees varjas seda täpselt **üks** element:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — välimine ümbris joonistas läbipaistmatu `bg-bg` tausta. Kõik selle all olev on juba läbipaistev (`<main>`, kerimiskonteiner ja sisemine `max-w-7xl`), seega võimaldab **`bg-bg` eemaldamine** keha ruudustikul sisualast läbi paista (keha `--color-bg` jääb alustäiteks).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Liidese raamistiku koostoime (külgriba / päis)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) ja `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) jäävad **läbipaistmatuks** → ruudustik kuvatakse **ainult sisualal**, mida raamib ühevärviline liidese raamistik. Rahulik vaikeseade, mis vastab sellele, kuidas sait eraldab liidese raamistiku lõuendist (otsus D3 = ühevärviline).
-
-### 4.6 Sisselogimis-, autentimis- ja vealehed
-
-Need renderdatakse otse elemendi `<body>` all (ilma paneeli raamistikuta), seega peaks globaalne ruudustik ilmuma nende taha automaatselt. **5. etapp — VALMIS:** eraldiseisvad täisekraaniümbrised olid tegelikult läbipaistmatud (`min-h-screen … bg-bg`, kus `bg-bg` on sama ühevärviline täide nagu elemendil `<body>`), mistõttu oli ruudustik peidetud kõigil töölauavälistel kuvadel, mitte ainult sisselogimislehel. Kõik need on nüüd läbipaistvad, et ühine taustapilt läbi paistaks: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` ja `ErrorPageScaffold` (hõlmab veakoode `400`/`401`). Sellega lõpetatakse **D4** (laiendatud ainult sisselogimislehelt kõigile eraldiseisvatele kuvadele). Seda kaitseb `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Maandumisleht
-
-`landing/page.tsx` säilitab oma rikkalikuma animeeritud tausta (valguskerad + vinjett) — see on selle enda turunduslik avalehekujundus (otsus D5 = jätta muutmata).
-
----
-
-## 5. Osa B — Tokenite ühtlustamine
-
-1. etapp lisab passiivsed, konfliktivabad identiteeditokenid (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). 2. etapp ühendab raadiuseskaala Tailwindiga ja suunab komponendid ümber; 4. etapp lisab `--font-mono` koos selle kasutajatega.
-
-| Token                       | Põhjus                                                                  | Etapp                                         |
-| --------------------------- | ----------------------------------------------------------------------- | --------------------------------------------- |
-| `--radius` / `--radius-sm`  | Üks raadiuseskaala (14/9), mitte juhuslikud 6/8/12 väärtused            | 1 (väärtus) / 2 (ühendamine + ümbersuunamine) |
-| `--grad-brand`              | Brändigradient peamistele CTA-dele (punane→violetne), kooskõlas saidiga | 1 (token) / 2 (Button)                        |
-| `--surface-2`               | Pesastatud paneelid / tabelipäised / taandega read                      | 1                                             |
-| `--font-mono`               | Koodiplokid, terminal, ID-d, lõpp-punktid                               | 4                                             |
-| `--text-muted` ühtlustamine | Valige üks väärtus saidi↔paneeli vahel (soovitatav `#a1a1aa`)           | 2                                             |
-
-**D2 (text-muted):** sait `#8b8b9e` vs juhtpaneel `#a1a1aa`. Soovitus on säilitada **juhtpaneeli `#a1a1aa`** ja värskendada _sait_ sellega vastavaks. Kosmeetiline muudatus.
-
----
-
-## 6. Osa C — Komponentide standardimine (etapid 2–4)
-
-Kohandatud komponendid (ilma shadcn-i/Radixita), Tailwind v4, semantilised tokenid on **suures osas** kasutusele võetud (195 faili impordivad jagatud barrel-failist). Töö seisneb **möödaviikude** eemaldamises. Asukoht: `src/shared/components/`.
-
-| #   | Üksus                                                     | Fail(id)                                                                                                                     | Probleem → Siht                                                                                                                                      | Etapp |
-| --- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| C1  | **Raadiuste joondamine**                                  | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                    | läbisegi 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                                  | 2     |
-| C2  | **Nupu gradient + variant `accent`**                      | `Button.tsx:5-12`                                                                                                            | peamine variant on ühetooniline punane→punane; joondada väärtusega `--grad-brand`; lisada puuduv variant `accent`. ~195 importijat — suurim nähtavus | 2     |
-| C3  | **Tabelid**                                               | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                          | 100% tekstisisesed jäigalt kodeeritud rgba-väärtused + olematud muutujad; migreerida tokenitele, eemaldada lahknevad stiilid                         | 3     |
-| C4  | **Olekute värvide tsentraliseerimine**                    | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 abimoodulit | 6+ koopiat samadest kuueteistkümnendväärtustest → üks moodul, mis põhineb väärtustel `--color-success/warning/error`                                 | 3     |
-| C5  | **Kaardi ääris**                                          | `Card.tsx:39`                                                                                                                | `border-white/5` → brändi `/8`                                                                                                                       | 2     |
-| C6  | **Fookuserõnga ühtlustamine** ✅ TEHTUD                   | `globals.css` `--focus-ring` (aktsent) vs vormijuhtelementide `ring-primary/30`                                              | ühtlustatud **aktsendile (violetne)**, et sobituda globaalse rõngaga ja eristuda punasest veateaterõngast; viga jääb punaseks                        | 4     |
-| C7  | **`Checkbox` + `Textarea` lisamine**                      | töötlemata `<input>`/`<textarea>` tekstisisese väärtusega `accentColor:#6366f1`                                              | tokenipõhised primitiivid                                                                                                                            | 4     |
-| C8  | **Jäigalt kodeeritud kuueteistkümnendväärtuste puhastus** | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, modaali täpid, ~14 diagrammifaili                                     | literaalid → tokenid                                                                                                                                 | 4     |
-| C9  | **`cn()` → clsx + tailwind-merge**                        | `src/shared/utils/cn.ts`                                                                                                     | vastuolulised klassid kuhjuvad; vajalik C1 ülekirjutuste jaoks                                                                                       | 2     |
-
-**Juba brändiga kooskõlas (tokenipõhine, vajab ainult raadiust):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Juurutusplaan
-
-- **1. etapp — ruudustik + identiteedi tokenid (SEE PR).** `globals.css`-i ruudustik + tokenid `--surface-2`/`--grad-brand`/`--radius`; taustapilt `body::before`; eemaldada blokeerija `bg-bg`; staatiline kaitsetest. Väike risk, ühe commit’iga tagasipööratav.
-- **2. etapp — primitiivid (C1, C2, C5) — SELLES PR-IS TEHTUD.** Semantilised raadiuse utiliidid `rounded-card` (14px) / `rounded-control` (9px), mis lisati `@theme` kaudu (kohandatud nimed, seega vaikimisi `rounded-sm/md/lg/xl` jäävad puutumata — puudub 400 faili hõlmav muudatus); Card/Modal → 14px, Button/Input/Select → 9px; Button primary → `--grad-brand` (punane→violetne) + uus variant `accent`; Card-i äärised → token `border-border` (0.08). **Edasi lükatud:** `cn()`→tailwind-merge (C9) vajab uusi sõltuvusi; juhuslike `rounded-lg` kasutuskohtade läbivaatamine (326 faili) jäetakse praegusel kujul alles, sest primitiivid katavad suurema osa pindadest.
-- **3. etapp — olekuvärvid + tabelid (C3, C4) — SELLES PR-IS TEHTUD.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` ainsa allikana; `flow/edgeStyles.ts` + `TokenHealthBadge` suunati sellele ümber, muutmata/täpselt samad kuueteistkümnendvärvid). ✅ Token **`--font-mono`**. ✅ **C3 (DataTable)** — iga koodisisene rgba ning kasutud `var(--bg-table-header)` / `var(--text-secondary)` varuvariandid asendati tokenikomplektiga `--table-*` (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`), mille **tumeda teema väärtused on täpselt võrdsed vanade koodisiseste rgba-väärtustega** (tumeda teema baitidentne tulemus) ja mille heleda teema väärtused parandavad varem alati tumedana kuvatud heleda teema. Päise ääris → `--color-border`, teisene tekst → `--color-text-muted`. **Vajab enne ühendamist visuaalset ülevaatust.** (Ei muudetud: `logTableStyles.ts` ja pärand-Ant-i `.ant-table` reeglid — eraldiseisev, madalama prioriteediga töö.)
-- **4. etapp — korrastus (C6, C7, C9 tehtud; C8 ootel).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge lisati sõltuvustena) — kutsuja `className` _asendab_ nüüd korrektselt primitiivi vastuolulise klassi, selle asemel et klasse kuhjata. ✅ **C7** uued primitiivid `Checkbox` + `Textarea` (tokenipõhised, eksporditud barrel-failist; lisanduvad muudatused — 32 toore checkbox’i / 41 toore textarea kasutuselevõtt saab toimuda järk-järgult). ✅ **C6** fookuserõnga ühtlustamine — vormijuhtelemendid (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) kasutavad nüüd fookuses **aktsentvärvi (violetset)** rõngast, et sobituda globaalse `--focus-ring` väärtusega ja vältida konflikti punase veateate rõngaga; punane veaolek jäi muutmata. ⏳ **C8 kuueteistkümnendvärvide läbivaatus EI OLE pime otsi-ja-asenda** — kinnitatud erandid, mis on _taotluslikud_ ja peavad alles jääma: `ConsoleLogViewer.tsx:240` (alati tume terminal), `TokenHealthBadge` hüpikaken, ReactFlow SVG-jooned. Migreerida tuleb ainult need kuueteistkümnendvärvid, mis peaksid tõepoolest teemaga kohanduma.
-
-Igas etapis: `npm run lint` + `npm run typecheck:core` + visuaalne ülevaatus.
-
----
-
-## 8. Lahtised otsused (soovitused)
-
-- **D1 — Button primary:** kas jätta punane→punane või vahetada **punane→violetne `--grad-brand`** vastu? Soovitus: **punane→violetne** (2. etapp).
-- **D2 — ruudustiku joone värv:** **neutraalne** (saidi stiil) — valitud — või brändipunane. Suurus **32px** (omaniku tagasiside põhjal vähendatud algsest 46px-st ~30% — 46px lahtrid tundusid töölaua paigutuses liiga suured).
-- **D3 — kasutajaliidese kroomi erksus:** külgriba/päis **ühtlane** — valitud.
-- **D4 — autentimise/sisselogimise ruudustik:** ✅ **TEHTUD (5. etapp)** — läbipaistmatu `bg-bg` eemaldati kõigist eraldiseisvatest täisekraani ümbristest (mitte ainult sisselogimisest), nii et ruudustik on nähtav kõigil ekraanidel. Vt §4.6.
-- **D5 — maandumisleht:** jätta animeeritud avakuva muutmata. Valitud.
-- **D6 — raadiused 14/9 kogu tootes:** soovitus: jah (2. etapp).
-- **D7 — 1. etapp tarnitakse esimesena:** valitud.
-- **D8 — paigutuse laius (5. etapp):** töölaua sisuümbrise laius oli piiratud väärtusega `max-w-7xl` (1280px), mis paigutas selle keskele ning jättis suurtel monitoridel külgedele laiad tühjad veerised. ✅ **TEHTUD** — suurendatud paindliku väärtuseni `max-w-[3840px]` (tegelik 4K): sisu järgib nüüd vaateava laiust kuni ~4K-ni ja paigutatakse keskele alles sellest suuremal laiusel (`DashboardLayout.tsx`). Taotluslikult kitsad lehed jäävad disaini järgi kitsaks (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — läbipaistmatud andmetabelid (6. etapp):** kuna töölaua sisuala on nüüd läbipaistev (et ruudustiku taustapilt paistaks läbi, 5. etapp), lasid andmetabelid, mille konteiner _ei olnud_ läbipaistmatu pind, ruudustikul paista läbi läbipaistvate paarisridade / väikese alfaga sebramustri. ✅ **TEHTUD** — iga ilma Card-ita tabel kasutab nüüd tausta `bg-surface` (või primitiivi `<DataTable>` puhul kerimiskonteineril `background: var(--color-surface)`). Parandatud: `DataTable` (primitiiv), `ProxyLogger`/`RequestLoggerV2` (nende `<Card>`-i toon `bg-black/5 dark:bg-black/20` alistas tailwind-merge’i kaudu Card-i `bg-surface` tausta → ~95% läbipaistev), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable` ning kaks CSS-ruudustikuga „tabelit” vahemäluvaadetes (`bg-surface/35` → `bg-surface`). Tabelid, mis olid juba `<Card>`-i/Modal-i sees, kinnitati läbipaistmatuks ja jäeti taotluslikult puutumata (`bg-surface` oleks seal üleliigne ja tulemust mitte mõjutav). Ruudustik ise **ei vajanud muudatusi** — töölaua `body::before` on saidiga bait-baidilt identne (`--grid-size: 32px`); töötavas instantsis nähtav võimalik „suurem ruudustik” pärineb aegunud, versioonile `#4143` eelnevast järgust, mitte koodist. Kaitstud testiga `tests/unit/design-grid-background.test.ts` (6. etapi plokk).
-
----
-
-## 9. Ulatusest väljas / riskid
-
-- **Värvipaletti ei muudeta** — värvid juba ühtivad; lisame ainult puuduvad tokenid. Toote värvide muutmise risk puudub.
-- **Teemamootorit ei muudeta** — säilitame `.dark` + Zustand store'i.
-- **Raadiuse muutmine (2. etapp) on laiaulatuslik** — mõjutab iga kaarti/nuppu/sisendit; vaadake tiheda sisuga kuvasid (tabelid, modaalaknad) enne ühendamist visuaalselt üle.
-- **Tabelid (C3)** sisaldavad kõige rohkem jäigalt määratud stiile ja neil on suurim regressioonioht — eraldage need omaette PR-i.
-
----
-
-## 10. Viidete register
-
-| Valdkond                               | Tee                                                                                                                  |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Töölaua tokenid                        | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Teemasalv                              | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Paneeli kest (ruudustik avatakse siin) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Kasutajaliidese raam                   | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Ruudustiku eeskuju                     | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Primitiivid                            | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Olekute värvide allikad                | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| Utiliit `cn`                           | `src/shared/utils/cn.ts`                                                                                             |
-| 1. etapi kontrolltest                  | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Saidi viide                            | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — tokenite sild, `.dark` ülekirjutused, OmniRoute `@layer components` laiendused
+- `packages/ui-kit/UPSTREAM.md` — kinnitatud ülesvoo commit ja litsentsi volitus; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` ja selle kõrval olevad adapterid; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
