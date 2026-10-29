@@ -251,6 +251,7 @@ export function buildCfToolReminder(tools: ChatCompletionTool[]): string {
     "- **Keys:** `name` holds the tool name, and `arguments` holds that tool's declared argument keys.",
     `- **Nonce:** every call carries \`"_nonce": "${nonce}"\`, including each item inside an array.`,
     '- **JSON escaping:** inside string values, write each double quote as \\" and each line break as \\n.',
+    `- **make sure you follow the exact rule for json schema.** and your output must be valid json object or array - **no** syntext errors.`,
     "- **No tool needed:** answer in plain prose.",
   ].join("\n");
 }
