@@ -15,7 +15,7 @@ Kwatancen fasaloli cikin adalci da shahararrun mashiga AI na buɗaɗɗen tushe.
 | **Shigarwar katalog kyauta/ba tare da shiga ba**       |                   **155**                   |     n/a     |    passthrough    |     n/a     |
 | **Ana iya masaukin kai**                               |                     ✅                      |     ✅      |        ❌         | ⚠ mai biya  |
 | **Shigarwar katalog ta OAuth**                         |                   **23**                    | ɗan ɓangare |        ❌         |     ❌      |
-| **Haɗe-haɗen fallback ta atomatik**                    |               **dabarori 20**               | bisa fifiko |   bisa matakai    |  mai nauyi  |
+| **Haɗe-haɗen fallback ta atomatik**                    |               **dabarori 21**               | bisa fifiko |   bisa matakai    |  mai nauyi  |
 | **Fusion (panel daidaitacce + haɗa hukunci)**          |                     ✅                      |     ❌      |        ❌         |     ❌      |
 | **Fallback na Tier 1/2/3 (biya→araha→kyauta)**         |                   ✅ + UI                   |  da hannu   |        n/a        |  da hannu   |
 | **Matattarar token**                                   | tarin injuna 12 (RTK + Caveman + LLMLingua) |    babu     |       babu        |    babu     |

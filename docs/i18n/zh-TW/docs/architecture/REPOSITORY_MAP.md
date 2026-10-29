@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`：螢幕使用的圖示名稱→ Lucide 元件 (`<Icon>`)                                   |
 | `constants/providers.ts`         | **377 提供者**透過Zod驗證（事實來源）                                                    |
 | `constants/cliTools.ts`          | 外部CLI工具註冊表                                                                        |
-| `constants/routingStrategies.ts` | **20種路由策略**有優先事項                                                               |
+| `constants/routingStrategies.ts` | **21種路由策略**有優先事項                                                               |
 | `constants/publicApiRoutes.ts`   | 需要承載（與管理）身份驗證的路由                                                         |
 | `constants/upstreamHeaders.ts`   | 上游請求的標頭拒絕列表                                                                   |
 | `validation/schemas.ts`          | ~ 80 Zod模式（ API合約的單一事實來源）                                                   |

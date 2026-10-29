@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ਸਕ੍ਰੀਨਾਂ ਦੁਆਰਾ ਵਰਤੇ ਜਾਣ ਵਾਲੇ ਆਈਕਨ ਨਾਮ → ਲੂਸਾਈਡ ਕੰਪੋਨੈਂਟਸ (`<Icon>`)                  |
 | `constants/providers.ts`         | **377 ਪ੍ਰਦਾਤਾ** Zod ਪ੍ਰਮਾਣਿਕਤਾ ਦੇ ਨਾਲ (ਸੱਚ ਦਾ ਸਰੋਤ)                                              |
 | `constants/cliTools.ts`          | ਬਾਹਰੀ CLI ਟੂਲ ਰਜਿਸਟਰੀ                                                                            |
-| `constants/routingStrategies.ts` | **20 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ** ਤਰਜੀਹਾਂ ਦੇ ਨਾਲ                                                            |
+| `constants/routingStrategies.ts` | **21 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ** ਤਰਜੀਹਾਂ ਦੇ ਨਾਲ                                                            |
 | `constants/publicApiRoutes.ts`   | ਰੂਟ ਜਿਨ੍ਹਾਂ ਲਈ ਬੇਅਰਰ (ਬਨਾਮ ਪ੍ਰਬੰਧਨ) ਪ੍ਰਮਾਣਿਕਤਾ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ                                   |
 | `constants/upstreamHeaders.ts`   | ਅੱਪਸਟ੍ਰੀਮ ਬੇਨਤੀਆਂ ਲਈ ਸਿਰਲੇਖ ਅਸਵੀਕਾਰ                                                              |
 | `validation/schemas.ts`          | ~ 80 Zod ਸਕੀਮਾ ( API ਕੰਟਰੈਕਟਸ ਲਈ ਸੱਚਾਈ ਦਾ ਸਿੰਗਲ ਸਰੋਤ)                                            |

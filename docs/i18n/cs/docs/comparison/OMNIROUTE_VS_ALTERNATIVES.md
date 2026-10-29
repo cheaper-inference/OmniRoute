@@ -15,7 +15,7 @@ Objektivní srovnání funkcí s populárními open-source AI routery.
 | **Bezplatné položky katalogu bez autentizace**      |                   **155**                   |         n/a         |   přímé předání   |     n/a      |
 | **Self-hostovatelné**                               |                     ✅                      |         ✅          |        ❌         |  ⚠ placené   |
 | **Položky katalogu OAuth**                          |                   **23**                    |      částečné       |        ❌         |      ❌      |
-| **Kombinace automatického fallbacku**               |              **20 strategií**               | na základě priority | na základě úrovní |    vážené    |
+| **Kombinace automatického fallbacku**               |              **21 strategií**               | na základě priority | na základě úrovní |    vážené    |
 | **Fúze (paralelní panel + syntéza rozhodčím)**      |                     ✅                      |         ❌          |        ❌         |      ❌      |
 | **Fallback úrovní 1/2/3 (předplatné→levné→zdarma)** |                   ✅ + UI                   |        ruční        |        n/a        |    ruční     |
 | **Komprese tokenů**                                 | Stack 12 enginů (RTK + Caveman + LLMLingua) |        žádná        |       žádná       |    žádná     |

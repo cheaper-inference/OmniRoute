@@ -369,7 +369,7 @@ Kombo Otomatis secara dinamis menilai dan memilih target perutean pada waktu per
 
 Kemampuan utama:
 
-- **20 strategi perutean** (prioritas, berbobot, isi terlebih dahulu, round-robin, P2C, acak, paling jarang digunakan, dioptimalkan biaya, sadar-reset, jendela-reset, ruang kepala, tertimbang kuota, acak-ketat,** mobil** , lkgp, dioptimalkan konteks, dioptimalkan cache, relai konteks,** fusi** , pipeline) — auto adalah tambahan judul di v3.8.0; `fusion` (sintesis juri + fan-out panel, `open-sse/services/fusion.ts`) baru di v3.8.36.
+- **21 strategi perutean** (prioritas, berbobot, isi terlebih dahulu, round-robin, P2C, acak, paling jarang digunakan, dioptimalkan biaya, sadar-reset, jendela-reset, kedaluwarsa dulu, ruang kepala, tertimbang kuota, acak-ketat,** mobil** , lkgp, dioptimalkan konteks, dioptimalkan cache, relai konteks,** fusi** , pipeline) — auto adalah tambahan judul di v3.8.0; `fusion` (sintesis juri + fan-out panel, `open-sse/services/fusion.ts`) baru di v3.8.36.
 - **penilaian 16 faktor** : kuota, kesehatan, biaya terbalik, latensi terbalik, kesesuaian tugas, dan sepuluh lainnya. Tabel kanonik faktor-faktor dan bobot defaultnya berada di [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) —, menyatakannya kembali di sini akan menjadikannya tabel kedua yang akan menjadi basi.
 - **Pabrik maya** mewujudkan kombo sementara ketika tidak ada kombo bernama yang cocok, mengambil kandidat dari koneksi penyedia aktif yang sehat.
 - **Awalan otomatis** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — masing-masing didukung oleh profil bobot yang disetel.

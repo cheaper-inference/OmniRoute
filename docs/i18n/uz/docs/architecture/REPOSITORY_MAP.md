@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlar tomonidan ishlatiladigan piktogramma nomlari → Lucide komponentlari (`<Icon>`)                |
 | `constants/providers.ts`         | **377 ta provayder** Zod validation bilan (haqiqat manbai)                                                         |
 | `constants/cliTools.ts`          | Tashqi CLI vositalari reestri                                                                                      |
-| `constants/routingStrategies.ts` | **20 marshrutlash strategiyasi** ustuvorliklar bilan                                                               |
+| `constants/routingStrategies.ts` | **21 marshrutlash strategiyasi** ustuvorliklar bilan                                                               |
 | `constants/publicApiRoutes.ts`   | Bearer (boshqaruvga qarshi) autentsiyasi talab qilinadigan marshrutlar                                             |
 | `constants/upstreamHeaders.ts`   | Yuqori oqim soʻrovlari uchun sarlavha rad etish roʻyxati                                                           |
 | `validation/schemas.ts`          | ~ 80 Zod sxemalari ( API shartnomalari uchun yagona haqiqat manbai)                                                |

@@ -15,7 +15,7 @@ Objektivno poređenje funkcija u odnosu na popularne AI rutere otvorenog koda.
 | **Besplatne stavke kataloga bez autentifikacije**          |                     **155**                     |         n/a          |  prosljeđivanje   |     n/a     |
 | **Mogućnost samostalnog hostovanja**                       |                       ✅                        |          ✅          |        ❌         |  ⚠ plaćeno  |
 | **OAuth stavke kataloga**                                  |                     **23**                      |      djelimično      |        ❌         |     ❌      |
-| **Kombinacije automatskog fallbacka**                      |                **20 strategija**                | na osnovu prioriteta |  na osnovu nivoa  | ponderisano |
+| **Kombinacije automatskog fallbacka**                      |                **21 strategija**                | na osnovu prioriteta |  na osnovu nivoa  | ponderisano |
 | **Fuzija (paralelni panel + sinteza ocjenjivača)**         |                       ✅                        |          ❌          |        ❌         |     ❌      |
 | **Fallback nivoa 1/2/3 (pretplata→jeftino→besplatno)**     |                     ✅ + UI                     |        ručno         |        n/a        |    ručno    |
 | **Kompresija tokena**                                      | stack od 12 enginea (RTK + Caveman + LLMLingua) |         nema         |       nema        |    nema     |

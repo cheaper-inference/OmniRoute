@@ -359,7 +359,7 @@ Auto Combo scoort en kiest op verzoek dynamisch routeringsdoelen, in plaats van 
 
 Belangrijkste mogelijkheden:
 
-- **20 routeringsstrategieën** (prioriteit, gewogen, eerst vullen, round-robin, P2C, willekeurig, minst gebruikt, kostengeoptimaliseerd, reset-bewust, reset-venster, vrije ruimte, quota-gewogen, strikt willekeurig,** auto** , lkgp, context-geoptimaliseerd, cache-geoptimaliseerd, context-relay,** fusie** , pipeline) — auto is de belangrijkste toevoeging in v3.8.0; `fusion` (panel fan-out + rechter synthese, `open-sse/services/fusion.ts`) is nieuw in v3.8.36.
+- **21 routeringsstrategieën** (prioriteit, gewogen, eerst vullen, round-robin, P2C, willekeurig, minst gebruikt, kostengeoptimaliseerd, reset-bewust, reset-venster, vervaldatum eerst, vrije ruimte, quota-gewogen, strikt willekeurig,** auto** , lkgp, context-geoptimaliseerd, cache-geoptimaliseerd, context-relay,** fusie** , pipeline) — auto is de belangrijkste toevoeging in v3.8.0; `fusion` (panel fan-out + rechter synthese, `open-sse/services/fusion.ts`) is nieuw in v3.8.36.
 - **Scoren met 16 factoren** : quota, gezondheid, inverse kosten, inverse latentie, taakgeschiktheid en nog tien meer. De canonieke tabel van factoren en hun standaardgewichten leeft in [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — Als u deze hier herhaalt, zou deze op de tweede plaats komen te staan.
 - **Virtuele fabriek** materialiseert kortstondige combo's wanneer er geen overeenkomende benoemde combo bestaat, waarbij kandidaten worden gezocht uit gezonde, actieve providerverbindingen.
 - **Automatische voorvoegsels** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — elk ondersteund door een afgestemd gewichtsprofiel.

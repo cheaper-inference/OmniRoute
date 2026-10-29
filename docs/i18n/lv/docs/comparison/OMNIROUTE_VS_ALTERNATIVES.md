@@ -15,7 +15,7 @@ Objektīvs funkciju salīdzinājums ar populāriem atvērtā pirmkoda AI maršru
 | **Bezmaksas/bez autentifikācijas kataloga ieraksti**                  |                     **155**                      |          n/a          |     caurlaide     |     n/a     |
 | **Iespējams mitināt pašam**                                           |                        ✅                        |          ✅           |        ❌         |  ⚠ maksas   |
 | **OAuth kataloga ieraksti**                                           |                      **23**                      |        daļēji         |        ❌         |     ❌      |
-| **Automātiskās rezerves pārslēgšanās kombinācijas**                   |                **20 stratēģijas**                | prioritātes balstītas | līmeņos balstītas |   svērtās   |
+| **Automātiskās rezerves pārslēgšanās kombinācijas**                   |                **21 stratēģija**                 | prioritātes balstītas | līmeņos balstītas |   svērtās   |
 | **Fūzija (paralēlais panels + vērtētāja sintēze)**                    |                        ✅                        |          ❌           |        ❌         |     ❌      |
 | **1./2./3. līmeņa rezerves pārslēgšanās (abonements→lēts→bezmaksas)** |                     ✅ + UI                      |        manuāli        |        n/a        |   manuāli   |
 | **Tokenu saspiešana**                                                 | 12 dzinēju komplekts (RTK + Caveman + LLMLingua) |          nav          |        nav        |     nav     |

@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: icon sunayen da allon ke amfani da → Lucide components (`<Icon>`)                      |
 | `constants/providers.ts`         | **377 masu bayarwa** tare da ingancin Zod (tushen gaskiya)                                         |
 | `constants/cliTools.ts`          | Wurin yin rajistar kayan aikin CLI na waje                                                         |
-| `constants/routingStrategies.ts` | **20 dabaru dabaru** tare da fifiko                                                                |
+| `constants/routingStrategies.ts` | **21 dabaru dabaru** tare da fifiko                                                                |
 | `constants/publicApiRoutes.ts`   | Hanyoyin da ke buƙatar mai ba da izini ( vs management) auth                                       |
 | `constants/upstreamHeaders.ts`   | Ƙin lissafin rubutun kan buƙatun sama                                                              |
 | `validation/schemas.ts`          | ~ 80 Zod schemas (tushen gaskiya guda ɗaya don kwangilar API )                                     |

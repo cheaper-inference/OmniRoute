@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ainmneacha deilbhín a úsáideann na scáileáin → Comhpháirteanna Lucide (`<Icon>`)           |
 | `constants/providers.ts`         | **377 soláthraí** le bailíochtú Zod (foinse na fírinne)                                                |
 | `constants/cliTools.ts`          | Clár seachtrach CLI uirlisí                                                                            |
-| `constants/routingStrategies.ts` | **20 straitéis ródaithe** le tosaíochtaí                                                               |
+| `constants/routingStrategies.ts` | **21 straitéis ródaithe** le tosaíochtaí                                                               |
 | `constants/publicApiRoutes.ts`   | Bealaí óna dteastaíonn údar Iompróra (vs bainistíocht).                                                |
 | `constants/upstreamHeaders.ts`   | Liosta diúltaithe ceanntásc d'iarratais réamhtheachtacha                                               |
 | `validation/schemas.ts`          | scéimeanna ~ 80 Zod (foinse amháin fírinne le haghaidh conarthaí API )                                 |

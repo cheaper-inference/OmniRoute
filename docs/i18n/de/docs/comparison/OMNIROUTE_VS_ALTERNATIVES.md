@@ -15,7 +15,7 @@ Objektiver Funktionsvergleich mit beliebten Open-Source-KI-Routern.
 | **Kostenlose Katalogeinträge ohne Authentifizierung**    |                   **155**                   |        n/a        |    Passthrough    |        n/a         |
 | **Selbst hostbar**                                       |                     ✅                      |        ✅         |        ❌         | ⚠ kostenpflichtig  |
 | **OAuth-Katalogeinträge**                                |                   **23**                    |     teilweise     |        ❌         |         ❌         |
-| **Auto-Fallback-Kombinationen**                          |              **20 Strategien**              | prioritätsbasiert |   stufenbasiert   |     gewichtet      |
+| **Auto-Fallback-Kombinationen**                          |              **21 Strategien**              | prioritätsbasiert |   stufenbasiert   |     gewichtet      |
 | **Fusion (paralleles Panel + Judge-Synthese)**           |                     ✅                      |        ❌         |        ❌         |         ❌         |
 | **Stufe-1/2/3-Fallback (Abo→günstig→kostenlos)**         |                   ✅ + UI                   |      manuell      |        n/a        |      manuell       |
 | **Token-Komprimierung**                                  | 12-Engine-Stack (RTK + Caveman + LLMLingua) |       keine       |       keine       |       keine        |

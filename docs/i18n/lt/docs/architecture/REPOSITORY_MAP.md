@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranuose naudojami piktogramų pavadinimai → Lucide komponentai (`<Icon>`)                          |
 | `constants/providers.ts`         | **377 teikėjai** su Zod patvirtinimu (tiesos šaltinis)                                                          |
 | `constants/cliTools.ts`          | Išorinis CLI įrankių registras                                                                                  |
-| `constants/routingStrategies.ts` | **20 maršruto parinkimo strategijų** su prioritetais                                                            |
+| `constants/routingStrategies.ts` | **21 maršruto parinkimo strategija** su prioritetais                                                            |
 | `constants/publicApiRoutes.ts`   | Maršrutai, kuriems reikalingas nešiklio (prieš valdymą) autentifikavimas                                        |
 | `constants/upstreamHeaders.ts`   | Ankstesnių užklausų antraštės atmetimo sąrašas                                                                  |
 | `validation/schemas.ts`          | ~ 80 Zod schemos (vienas tiesos šaltinis API sutartims)                                                         |

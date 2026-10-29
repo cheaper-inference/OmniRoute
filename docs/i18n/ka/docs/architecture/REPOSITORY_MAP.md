@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ეკრანის მიერ გამოყენებული ხატების სახელები → Lucide კომპონენტები (`<Icon>`)               |
 | `constants/providers.ts`         | **377 პროვაიდერი** Zod დადასტურებით (სიმართლის წყარო)                                                 |
 | `constants/cliTools.ts`          | გარე CLI ინსტრუმენტის რეესტრი                                                                         |
-| `constants/routingStrategies.ts` | **მარშრუტიზაციის 20 სტრატეგია** პრიორიტეტებით                                                         |
+| `constants/routingStrategies.ts` | **მარშრუტიზაციის 21 სტრატეგია** პრიორიტეტებით                                                         |
 | `constants/publicApiRoutes.ts`   | მარშრუტები, რომლებიც საჭიროებენ Bearer (მმართველობის წინააღმდეგ) ავტორიზაციას                         |
 | `constants/upstreamHeaders.ts`   | ზედა ნაკადის მოთხოვნების სათაურის უარყოფა                                                             |
 | `validation/schemas.ts`          | ~ 80 Zod სქემები (სიმართლის ერთი წყარო API კონტრაქტებისთვის)                                          |

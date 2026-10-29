@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: اسکرینز کے ذریعے استعمال ہونے والے آئیکن کے نام → Lucide اجزاء (`<Icon>`)         |
 | `constants/providers.ts`         | **377 فراہم کرنے والے** Zod توثیق کے ساتھ (سچائی کا ذریعہ)                                    |
 | `constants/cliTools.ts`          | بیرونی CLI ٹول رجسٹری                                                                         |
-| `constants/routingStrategies.ts` | **20 روٹنگ کی حکمت عملی** ترجیحات کے ساتھ                                                     |
+| `constants/routingStrategies.ts` | **21 روٹنگ کی حکمت عملی** ترجیحات کے ساتھ                                                     |
 | `constants/publicApiRoutes.ts`   | وہ راستے جن کے لیے بیئرر (بمقابلہ مینجمنٹ) تصنیف کی ضرورت ہوتی ہے۔                            |
 | `constants/upstreamHeaders.ts`   | اپ اسٹریم درخواستوں کے لیے ہیڈر کی انکاری فہرست                                               |
 | `validation/schemas.ts`          | ~ 80 Zod اسکیماس ( API معاہدوں کے لیے سچائی کا واحد ذریعہ)                                    |

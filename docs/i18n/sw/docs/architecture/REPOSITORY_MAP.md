@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: majina ya ikoni yanayotumiwa na skrini → vipengele vya Lucide (`<Icon>`)                   |
 | `constants/providers.ts`         | **377 watoa huduma** na uthibitisho wa Zod (chanzo cha ukweli)                                         |
 | `constants/cliTools.ts`          | Usajili wa zana za CLI za nje                                                                          |
-| `constants/routingStrategies.ts` | **Mikakati 20 ya uelekezaji** na vipaumbele                                                            |
+| `constants/routingStrategies.ts` | **Mikakati 21 ya uelekezaji** na vipaumbele                                                            |
 | `constants/publicApiRoutes.ts`   | Njia zinazohitaji Bearer (dhidi ya usimamizi) auth                                                     |
 | `constants/upstreamHeaders.ts`   | Orodha ya kukataa kwa kichwa kwa maombi ya juu ya mkondo                                               |
 | `validation/schemas.ts`          | ~ 80 Zod schemas (chanzo kimoja cha ukweli kwa mikataba ya API )                                       |

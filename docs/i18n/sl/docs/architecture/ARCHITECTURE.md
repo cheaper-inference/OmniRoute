@@ -369,7 +369,7 @@ Auto Combo dinamično oceni in izbere cilje usmerjanja ob času zahteve, namesto
 
 Ključne zmogljivosti:
 
-- **20 strategij usmerjanja** (prioritetno, tehtano, najprej izpolni, krožno, P2C, naključno, najmanj uporabljeno, stroškovno optimizirano, zaznavanje ponastavitve, okno za ponastavitev, prostor za višino, uteženo glede na kvoto, strogo naključno,** avto** , lkgp, kontekstno optimizirano, predpomnilnik optimizirano, kontekstno posredovanje,** fuzija** , cevovod) — auto je dodatek naslova v v3.8.0; `fusion` (panel fan-out + sodnik sinteza, `open-sse/services/fusion.ts`) je nov v v3.8.36.
+- **21 strategij usmerjanja** (prioritetno, tehtano, najprej izpolni, krožno, P2C, naključno, najmanj uporabljeno, stroškovno optimizirano, zaznavanje ponastavitve, okno za ponastavitev, najprej potekajoče, prostor za višino, uteženo glede na kvoto, strogo naključno,** avto** , lkgp, kontekstno optimizirano, predpomnilnik optimizirano, kontekstno posredovanje,** fuzija** , cevovod) — auto je dodatek naslova v v3.8.0; `fusion` (panel fan-out + sodnik sinteza, `open-sse/services/fusion.ts`) je nov v v3.8.36.
 - **16-faktorsko točkovanje** : kvota, zdravje, inverzni stroški, inverzna zakasnitev, prileganje nalogi in še deset drugih. Kanonična tabela faktorjev in njihovih privzetih uteži živi v [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) —, če bi jo ponovili tukaj, bi ji dali drugo mesto, da bi zastarela.
 - **Virtualna tovarna** materializira efemerne kombinacije, ko ne obstaja nobena ujemajoča se poimenovana kombinacija, pri čemer pridobi kandidate iz zdravih aktivnih povezav ponudnika.
 - **Samodejne predpone** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — vsak podprt z nastavljenim profilom teže.

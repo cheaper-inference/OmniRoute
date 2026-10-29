@@ -369,7 +369,7 @@ Auto Combo menjaringkan dan memilih sasaran penghalaan secara dinamik pada masa 
 
 Keupayaan utama:
 
-- **20 strategi laluan** (keutamaan, wajaran, isikan dahulu, round-robin, P2C, rawak, paling kurang digunakan, dioptimumkan kos, sedar semula, tetingkap set semula, ruang kepala, wajaran kuota, rawak ketat,** auto** , lkgp, dioptimumkan konteks, dioptimumkan cache, penyampai konteks,** gabungan** , saluran paip) — auto ialah tambahan tajuk dalam v3.8.0; `fusion` (sintesis hakim + kipas keluar panel, `open-sse/services/fusion.ts`) baharu dalam v3.8.36.
+- **21 strategi laluan** (keutamaan, wajaran, isikan dahulu, round-robin, P2C, rawak, paling kurang digunakan, dioptimumkan kos, sedar semula, tetingkap set semula, luput dahulu, ruang kepala, wajaran kuota, rawak ketat,** auto** , lkgp, dioptimumkan konteks, dioptimumkan cache, penyampai konteks,** gabungan** , saluran paip) — auto ialah tambahan tajuk dalam v3.8.0; `fusion` (sintesis hakim + kipas keluar panel, `open-sse/services/fusion.ts`) baharu dalam v3.8.36.
 - **Pemarkahan 16 faktor** : kuota, kesihatan, kos songsang, kependaman songsang, kesesuaian tugas dan sepuluh lagi. Jadual kanonik faktor dan pemberat lalainya tinggal dalam [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — yang menyatakannya semula di sini akan memberikannya tempat kedua untuk menjadi basi.
 - **Kilang maya** merealisasikan gabungan sementara apabila tiada kombo bernama padanan wujud, mendapatkan calon daripada sambungan penyedia aktif yang sihat.
 - **Awalan automatik** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — setiap satu disokong oleh profil berat yang ditala.

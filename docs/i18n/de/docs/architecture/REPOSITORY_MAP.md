@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: Von den Bildschirmen verwendete Symbolnamen → Lucide-Komponenten (`<Icon>`)               |
 | `constants/providers.ts`         | **377 Anbieter** mit Zod -Validierung (Quelle der Wahrheit)                                           |
 | `constants/cliTools.ts`          | Externe CLI Tool-Registrierung                                                                        |
-| `constants/routingStrategies.ts` | **20 Routing-Strategien** mit Prioritäten                                                             |
+| `constants/routingStrategies.ts` | **21 Routing-Strategien** mit Prioritäten                                                             |
 | `constants/publicApiRoutes.ts`   | Routen, die eine Bearer-Authentifizierung (vs. Management-Authentifizierung) erfordern                |
 | `constants/upstreamHeaders.ts`   | Header-Denylist für Upstream-Anfragen                                                                 |
 | `validation/schemas.ts`          | ~ 80 Zod -Schemata (Single Source of Truth für API Verträge)                                          |

@@ -368,7 +368,7 @@ Ngwakọta akpaaka na-agbakọ akara ma na-ahọrọ ebumnuche ụzọ n'oge ar�
 
 Ikike isi:
 
-- **20 ụzọ aghụghọ** (ihe dị mkpa, arọ, njupụta-mbụ, okirikiri, P2C, random, obere-ejiri, ọnụ ahịa kacha mma, nrụpụta-mmata, windo nrụpụta, isi ụlọ, oke arọ, oke-random,** akpaaka** , lkgp, okirikiri nhọrọ ukwuu, cache-kachasị mma, okirikiri nhọrọ ukwuu,** ngwakọta** , pipeline) — auto bụ isiokwu mgbakwunye na v3.8.0; `fusion` (panel fan-out + ọkàikpe njikọ, `open-sse/services/fusion.ts`) dị ọhụrụ na v3.8.36.
+- **21 ụzọ aghụghọ** (ihe dị mkpa, arọ, njupụta-mbụ, okirikiri, P2C, random, obere-ejiri, ọnụ ahịa kacha mma, nrụpụta-mmata, windo nrụpụta, expiry-first, isi ụlọ, oke arọ, oke-random,** akpaaka** , lkgp, okirikiri nhọrọ ukwuu, cache-kachasị mma, okirikiri nhọrọ ukwuu,** ngwakọta** , pipeline) — auto bụ isiokwu mgbakwunye na v3.8.0; `fusion` (panel fan-out + ọkàikpe njikọ, `open-sse/services/fusion.ts`) dị ọhụrụ na v3.8.36.
 - **Isi ihe iri na isii** : oke, ahụike, ọnụ ahịa mgbanwe, mgbagha azụ, ọrụ dabara na iri ndị ọzọ. Tebụl nke akwụkwọ akụkọ na oke ibu ha na-ebi na [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — na-eweghachi ya ebe a ga-enye ya ebe nke abụọ ọ ga-aga stale.
 - **Ụlọ ọrụ mmepụta ihe** na-emepụta combos ephemeral mgbe enweghị ngwakọta aha ya bụ nke dabara na ya, na-ewepụta ndị na-aga ime site na njikọ ndị na-eweta ọrụ dị mma.
 - **prefixes akpaaka** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — nke ọ bụla na-akwado site na profaịlụ ịdị arọ emeziri.

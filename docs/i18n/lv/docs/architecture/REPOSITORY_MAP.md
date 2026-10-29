@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonu nosaukumi , ko izmanto ekrāni → Lucide komponenti (`<Icon>`)                                            |
 | `constants/providers.ts`         | **377 pakalpojumu sniedzēji** ar Zod apstiprinājumu (patiesības avots)                                                    |
 | `constants/cliTools.ts`          | Ārējais CLI rīku reģistrs                                                                                                 |
-| `constants/routingStrategies.ts` | **20 maršrutēšanas stratēģijas** ar prioritātēm                                                                           |
+| `constants/routingStrategies.ts` | **21 maršrutēšanas stratēģija** ar prioritātēm                                                                            |
 | `constants/publicApiRoutes.ts`   | Maršruti, kuriem nepieciešama nesēja (pret vadību) autentifikācija                                                        |
 | `constants/upstreamHeaders.ts`   | Augšupējo pieprasījumu galvenes noraidīšanas saraksts                                                                     |
 | `validation/schemas.ts`          | ~ 80 Zod shēmas (viens patiesības avots API līgumiem)                                                                     |

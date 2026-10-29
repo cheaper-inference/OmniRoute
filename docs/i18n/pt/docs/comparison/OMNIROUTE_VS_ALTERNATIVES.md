@@ -15,7 +15,7 @@ Comparação objetiva de funcionalidades face a routers de IA open-source popula
 | **Entradas de catálogo gratuitas/sem autenticação**          |                     **155**                     |          n/a          |    passthrough    |     n/a      |
 | **Autoalojável**                                             |                       ✅                        |          ✅           |        ❌         |    ⚠ pago    |
 | **Entradas de catálogo OAuth**                               |                     **23**                      |        parcial        |        ❌         |      ❌      |
-| **Combinações de fallback automático**                       |               **20 estratégias**                | baseado em prioridade | baseado em níveis |  ponderado   |
+| **Combinações de fallback automático**                       |               **21 estratégias**                | baseado em prioridade | baseado em níveis |  ponderado   |
 | **Fusão (painel paralelo + síntese por juiz)**               |                       ✅                        |          ❌           |        ❌         |      ❌      |
 | **Fallback de níveis 1/2/3 (subscrição→económico→gratuito)** |                     ✅ + UI                     |        manual         |        n/a        |    manual    |
 | **Compressão de tokens**                                     | Stack de 12 motores (RTK + Caveman + LLMLingua) |        nenhum         |      nenhum       |    nenhum    |

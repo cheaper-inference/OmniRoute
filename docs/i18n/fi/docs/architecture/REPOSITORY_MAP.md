@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: näyttöjen käyttämät kuvakkeiden nimet → Lucide - komponentit (`<Icon>`)                          |
 | `constants/providers.ts`         | **377 palveluntarjoajaa** Zod -validaatiolla (totuuden lähde)                                                |
 | `constants/cliTools.ts`          | Ulkoinen CLI -työkalurekisteri                                                                               |
-| `constants/routingStrategies.ts` | **20 reititysstrategiaa** prioriteettien kanssa                                                              |
+| `constants/routingStrategies.ts` | **21 reititysstrategiaa** prioriteettien kanssa                                                              |
 | `constants/publicApiRoutes.ts`   | Reitit, jotka vaativat siirtotietodennuksen (vs. hallinta).                                                  |
 | `constants/upstreamHeaders.ts`   | Ylävirran pyyntöjen otsikon estoluettelo                                                                     |
 | `validation/schemas.ts`          | ~ 80 Zod -skeemaa (yksi totuuden lähde API -sopimuksille)                                                    |

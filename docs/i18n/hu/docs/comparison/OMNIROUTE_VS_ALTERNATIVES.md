@@ -15,7 +15,7 @@ Objektív funkcióösszehasonlítás népszerű nyílt forráskódú AI-routerek
 | **Ingyenes/hitelesítés nélküli katalógusbejegyzések**  |                   **155**                    |      n/a       |    áteresztés     |    n/a     |
 | **Önhosztolható**                                      |                      ✅                      |       ✅       |        ❌         | ⚠ fizetős  |
 | **OAuth katalógusbejegyzések**                         |                    **23**                    |   részleges    |        ❌         |     ❌     |
-| **Automatikus fallback-kombinációk**                   |               **20 stratégia**               | prioritásalapú |    szintalapú     | súlyozott  |
+| **Automatikus fallback-kombinációk**                   |               **21 stratégia**               | prioritásalapú |    szintalapú     | súlyozott  |
 | **Fúzió (párhuzamos panel + bírálószintézis)**         |                      ✅                      |       ❌       |        ❌         |     ❌     |
 | **1/2/3. szintű fallback (előfizetés→olcsó→ingyenes)** |                   ✅ + UI                    |      kézi      |        n/a        |    kézi    |
 | **Token-tömörítés**                                    | 12 motoros stack (RTK + Caveman + LLMLingua) |     nincs      |       nincs       |   nincs    |

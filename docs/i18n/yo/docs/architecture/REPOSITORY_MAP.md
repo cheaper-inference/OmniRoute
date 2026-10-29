@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: aami awọn orukọ ti a lo nipasẹ awọn iboju → Lucide irinše (`<Icon>`)                    |
 | `constants/providers.ts`         | **377 olupese** pẹlu afọwọsi Zod (orisun otitọ)                                                     |
 | `constants/cliTools.ts`          | Iforukọsilẹ irinṣẹ CLI ita                                                                          |
-| `constants/routingStrategies.ts` | **20 afisona ogbon** pẹlu ayo                                                                       |
+| `constants/routingStrategies.ts` | **21 afisona ogbon** pẹlu ayo                                                                       |
 | `constants/publicApiRoutes.ts`   | Awọn ipa-ọna ti o nilo Olutọju (la iṣakoso) auth                                                    |
 | `constants/upstreamHeaders.ts`   | Akokọ akọsori fun awọn ibeere oke                                                                   |
 | `validation/schemas.ts`          | ~ 80 Zod schemas (orisun kan ti otitọ fun awọn adehun API )                                         |

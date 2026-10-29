@@ -17098,6 +17098,7 @@ components:
             - cost-optimized
             - reset-aware
             - reset-window
+            - expiry-first
             - headroom
             - strict-random
             - auto

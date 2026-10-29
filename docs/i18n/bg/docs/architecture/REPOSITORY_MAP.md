@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: имена на икони, използвани от екраните → Lucide компоненти (`<Icon>`)                      |
 | `constants/providers.ts`         | **377 доставчици** със Zod валидиране (източник на истината)                                           |
 | `constants/cliTools.ts`          | Външен регистър CLI инструменти                                                                        |
-| `constants/routingStrategies.ts` | **20 стратегии за маршрутизиране** с приоритети                                                        |
+| `constants/routingStrategies.ts` | **21 стратегии за маршрутизиране** с приоритети                                                        |
 | `constants/publicApiRoutes.ts`   | Маршрути, които изискват удостоверяване на носител (срещу управление).                                 |
 | `constants/upstreamHeaders.ts`   | Списък за отказ на заглавки за заявки нагоре по веригата                                               |
 | `validation/schemas.ts`          | ~ 80 Zod схеми (единствен източник на истина за API договори)                                          |

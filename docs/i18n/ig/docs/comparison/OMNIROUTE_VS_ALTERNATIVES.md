@@ -15,7 +15,7 @@ Ntụnyere atụmatụ ziri ezi megide AI routers open-source ama ama.
 | **Ndepụta n'efu/enweghị njirimara**                     |                   **155**                   |        n/a         |    passthrough    |        n/a        |
 | **Nke a nwere ike ibu n'onwe**                          |                     ✅                      |         ✅         |        ❌         | ⚠ a na-akwụ ụgwọ  |
 | **Ndepụta OAuth**                                       |                   **23**                    |   n'ụzọ dị ụfọdụ   |        ❌         |        ❌         |
-| **Ngwakọta auto-fallback**                              |               **atụmatụ 20**                | dabere na prịoritị |  dabere na tier   |   nke e ji ibu    |
+| **Ngwakọta auto-fallback**                              |               **atụmatụ 21**                | dabere na prịoritị |  dabere na tier   |   nke e ji ibu    |
 | **Fusion (panel paralel + nchikota onye ikpe)**         |                     ✅                      |         ❌         |        ❌         |        ❌         |
 | **Tier 1/2/3 fallback (ndebanye ego→dị ọnụ ala→n'efu)** |                   ✅ + UI                   |     site n'aka     |        n/a        |    site n'aka     |
 | **Mgbukota token**                                      | 12-engine stack (RTK + Caveman + LLMLingua) |      enweghị       |      enweghị      |      enweghị      |

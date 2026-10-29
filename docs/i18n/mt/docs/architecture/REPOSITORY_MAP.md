@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ismijiet tal-ikoni użati mill-iskrins → komponenti Lucide (`<Icon>`)                       |
 | `constants/providers.ts`         | **377 fornitur** bil-validazzjoni Zod (sors tal-verità)                                                |
 | `constants/cliTools.ts`          | Reġistru estern tal-għodda CLI                                                                         |
-| `constants/routingStrategies.ts` | **20 strateġija ta' rotta** bi prijoritajiet                                                           |
+| `constants/routingStrategies.ts` | **21 strateġija ta' rotta** bi prijoritajiet                                                           |
 | `constants/publicApiRoutes.ts`   | Rotot li jeħtieġu awtifikazzjoni Bearer (vs management).                                               |
 | `constants/upstreamHeaders.ts`   | Lista taċ-ċaħda tal-header għal talbiet upstream                                                       |
 | `validation/schemas.ts`          | ~ 80 skemi Zod (sors uniku tal-verità għal kuntratti API )                                             |

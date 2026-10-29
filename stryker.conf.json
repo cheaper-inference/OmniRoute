@@ -675,7 +675,8 @@
       "tests/unit/chat-antigravity-429-budget.test.ts",
       "tests/unit/combo-retry-cut-stream.test.ts",
       "tests/unit/combo/combo-set-retry-durable-exhaustion.test.ts",
-      "tests/unit/sse-cut-tool-call-arguments.test.ts"
+      "tests/unit/sse-cut-tool-call-arguments.test.ts",
+      "tests/unit/expiry-first-combo-ordering.test.ts"
     ],
     "nodeArgs": [
       "--import",

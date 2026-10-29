@@ -15,7 +15,7 @@ Paragun oġġettiv tal-karatteristiċi ma' routers tal-AI open-source popolari.
 | **Entries tal-katalogu b'xejn/bla auth**                |                      **155**                      |         n/a          |    passthrough    |     n/a      |
 | **Ospitabbli b'mod proprju**                            |                        ✅                         |          ✅          |        ❌         |  ⚠ bi ħlas   |
 | **Entries tal-katalogu OAuth**                          |                      **23**                       |       parzjali       |        ❌         |      ❌      |
-| **Kombinazzjonijiet ta' fallback awtomatiku**           |                 **20 strateġija**                 | bbażat fuq prijorità | bbażat fuq tiers  | bim-piżijiet |
+| **Kombinazzjonijiet ta' fallback awtomatiku**           |                 **21 strateġija**                 | bbażat fuq prijorità | bbażat fuq tiers  | bim-piżijiet |
 | **Fusion (panel parallel + sintesi tal-ġudikant)**      |                        ✅                         |          ❌          |        ❌         |      ❌      |
 | **Fallback Tier 1/2/3 (abbonament→irħis→b'xejn)**       |                      ✅ + UI                      |       manwali        |        n/a        |   manwali    |
 | **Kompressjoni tat-tokens**                             | Stack ta' 12-il magna (RTK + Caveman + LLMLingua) |        l-ebda        |      l-ebda       |    l-ebda    |

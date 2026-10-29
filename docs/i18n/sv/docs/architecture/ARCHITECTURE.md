@@ -369,7 +369,7 @@ Auto Combo gör dynamiskt poäng och väljer routingmål vid begäran, snarare �
 
 Nyckelfunktioner:
 
-- **20 routingstrategier** (prioritet, viktad, fyll först, round-robin, P2C, random, minst använda, kostnadsoptimerad, reset-aware, reset-window, headroom, quota-weighted, strict-random,** bil** , lkgp, kontextoptimerad, cacheoptimerad, kontextrelä,** fusion** , pipeline) — auto är rubriktillägget i v3.8.0; `fusion` (panelfan-out + domaresynthesis, `open-sse/services/fusion.ts`) är nytt i v3.8.36.
+- **21 routingstrategier** (prioritet, viktad, fyll först, round-robin, P2C, random, minst använda, kostnadsoptimerad, reset-aware, reset-window, utgång först, headroom, quota-weighted, strict-random,** bil** , lkgp, kontextoptimerad, cacheoptimerad, kontextrelä,** fusion** , pipeline) — auto är rubriktillägget i v3.8.0; `fusion` (panelfan-out + domaresynthesis, `open-sse/services/fusion.ts`) är nytt i v3.8.36.
 - **16-faktors poäng** : kvot, hälsa, omvänd kostnad, omvänd latens, uppgiftspassning och tio till. Den kanoniska tabellen över faktorer och deras standardvikter lever i [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — om den omräknas här skulle ge den en andra plats att bli inaktuell.
 - **Virtuell fabrik** materialiserar tillfälliga kombinationer när det inte finns någon matchande namngiven kombination, hämtar kandidater från sunda aktiva leverantörsanslutningar.
 - **Auto prefix** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — var och en uppbackad av en avstämd viktprofil.

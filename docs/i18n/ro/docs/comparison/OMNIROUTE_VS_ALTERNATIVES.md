@@ -15,7 +15,7 @@ Comparație obiectivă a funcționalităților față de routere AI open-source 
 | **Intrări de catalog gratuite/fără autentificare**         |                     **155**                     |         n/a         |    passthrough    |    n/a     |
 | **Auto-găzduibil**                                         |                       ✅                        |         ✅          |        ❌         |  ⚠ plătit  |
 | **Intrări de catalog OAuth**                               |                     **23**                      |       parțial       |        ❌         |     ❌     |
-| **Combinații de fallback automat**                         |               **20 de strategii**               | bazat pe prioritate | bazat pe niveluri |  ponderat  |
+| **Combinații de fallback automat**                         |               **21 de strategii**               | bazat pe prioritate | bazat pe niveluri |  ponderat  |
 | **Fuziune (panou paralel + sinteză prin judge)**           |                       ✅                        |         ❌          |        ❌         |     ❌     |
 | **Fallback pe niveluri 1/2/3 (abonament→ieftin→gratuit)**  |                     ✅ + UI                     |       manual        |        n/a        |   manual   |
 | **Compresie a tokenilor**                                  | Stivă de 12 motoare (RTK + Caveman + LLMLingua) |       niciuna       |      niciuna      |  niciuna   |

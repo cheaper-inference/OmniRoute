@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: نام نمادهای مورد استفاده در صفحه نمایش اجزای → Lucide (`<Icon>`)                            |
 | `constants/providers.ts`         | **377 ارائه دهنده** با اعتبار Zod (منبع حقیقت)                                                          |
 | `constants/cliTools.ts`          | رجیستری ابزار CLI خارجی                                                                                 |
-| `constants/routingStrategies.ts` | **20 استراتژی مسیریابی** با اولویت ها                                                                   |
+| `constants/routingStrategies.ts` | **21 استراتژی مسیریابی** با اولویت ها                                                                   |
 | `constants/publicApiRoutes.ts`   | مسیرهایی که به مجوز حامل (در مقابل مدیریت) نیاز دارند                                                   |
 | `constants/upstreamHeaders.ts`   | فهرست رد سرصفحه برای درخواستهای بالادستی                                                                |
 | `validation/schemas.ts`          | طرحوارههای ~ 80 Zod (منبع منفرد حقیقت برای قراردادهای API )                                             |

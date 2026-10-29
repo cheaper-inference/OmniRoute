@@ -359,7 +359,7 @@ Auto Combo bewertet und wählt Routing-Ziele dynamisch zum Zeitpunkt der Anfrage
 
 Hauptfunktionen:
 
-- **20 Routing-Strategien** (Priorität, gewichtet, zuerst füllen, Round-Robin, P2C, zufällig, am wenigsten verwendet, kostenoptimiert, rücksetzbar, Rücksetzfenster, Spielraum, quotengewichtet, strikt zufällig,** Auto** , lkgp, kontextoptimiert, Cache-optimiert, Kontextweiterleitung,** Fusion** , Pipeline) — auto ist die Headline-Ergänzung in v3.8.0; `fusion` (Panel Fan-Out + Judge Synthesis, `open-sse/services/fusion.ts`) ist neu in Version 3.8.36.
+- **21 Routing-Strategien** (Priorität, gewichtet, zuerst füllen, Round-Robin, P2C, zufällig, am wenigsten verwendet, kostenoptimiert, rücksetzbar, Rücksetzfenster, Ablauf zuerst, Spielraum, quotengewichtet, strikt zufällig,** Auto** , lkgp, kontextoptimiert, Cache-optimiert, Kontextweiterleitung,** Fusion** , Pipeline) — auto ist die Headline-Ergänzung in v3.8.0; `fusion` (Panel Fan-Out + Judge Synthesis, `open-sse/services/fusion.ts`) ist neu in Version 3.8.36.
 - **16-Faktor-Bewertung** : Quote, Gesundheit, inverse Kosten, inverse Latenz, Aufgabenanpassung und zehn mehr. Die kanonische Tabelle der Faktoren und ihrer Standardgewichte befindet sich in [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — Eine Wiederholung hier würde ihr einen zweiten Platz verschaffen, um veraltet zu sein.
 - **Virtuelle Fabrik** Verwirklicht kurzlebige Kombinationen, wenn keine passende benannte Kombination vorhanden ist, und sucht Kandidaten aus gesunden, aktiven Anbieterverbindungen.
 - **Automatische Präfixe** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — jeweils unterstützt durch ein abgestimmtes Gewichtsprofil.

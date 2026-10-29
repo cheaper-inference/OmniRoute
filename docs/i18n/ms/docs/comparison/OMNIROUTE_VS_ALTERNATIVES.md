@@ -15,7 +15,7 @@ Perbandingan ciri objektif berbanding penghala AI sumber terbuka popular.
 | **Entri katalog percuma/tanpa pengesahan**            |                    **155**                    |         n/a          |    passthrough    |     n/a     |
 | **Boleh dihos sendiri**                               |                      ✅                       |          ✅          |        ❌         | ⚠ berbayar  |
 | **Entri katalog OAuth**                               |                    **23**                     |        separa        |        ❌         |     ❌      |
-| **Kombo fallback automatik**                          |                **20 strategi**                | berasaskan keutamaan |  berasaskan tier  | berwajaran  |
+| **Kombo fallback automatik**                          |                **21 strategi**                | berasaskan keutamaan |  berasaskan tier  | berwajaran  |
 | **Fusion (panel selari + sintesis hakim)**            |                      ✅                       |          ❌          |        ❌         |     ❌      |
 | **Fallback Tier 1/2/3 (langganan→murah→percuma)**     |                    ✅ + UI                    |        manual        |        n/a        |   manual    |
 | **Mampatan token**                                    | tindanan 12 enjin (RTK + Caveman + LLMLingua) |        tiada         |       tiada       |    tiada    |

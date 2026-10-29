@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: 화면에서 사용되는 아이콘 이름 → Lucide 구성 요소(`<Icon>`)                           |
 | `constants/providers.ts`         | **377개 제공자** Zod 검증 포함(진실의 출처)                                                      |
 | `constants/cliTools.ts`          | 외부 CLI 도구 레지스트리                                                                         |
-| `constants/routingStrategies.ts` | **20가지 라우팅 전략** 우선순위가 있는                                                           |
+| `constants/routingStrategies.ts` | **21가지 라우팅 전략** 우선순위가 있는                                                           |
 | `constants/publicApiRoutes.ts`   | Bearer(관리 대비) 인증이 필요한 경로                                                             |
 | `constants/upstreamHeaders.ts`   | 업스트림 요청에 대한 헤더 거부 목록                                                              |
 | `validation/schemas.ts`          | ~ 80 Zod 스키마( API 계약에 대한 단일 진실 소스)                                                 |

@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: nazwy ikon używane na ekranach → Komponenty Lucide (`<Icon>`)                                    |
 | `constants/providers.ts`         | **377 dostawców** z walidacją Zod (źródło prawdy)                                                            |
 | `constants/cliTools.ts`          | Zewnętrzny rejestr narzędzi CLI                                                                              |
-| `constants/routingStrategies.ts` | **20 strategii routingu** z priorytetami                                                                     |
+| `constants/routingStrategies.ts` | **21 strategii routingu** z priorytetami                                                                     |
 | `constants/publicApiRoutes.ts`   | Trasy wymagające uwierzytelnienia okaziciela (w porównaniu z zarządzaniem).                                  |
 | `constants/upstreamHeaders.ts`   | Lista odrzuconych nagłówków dla żądań nadrzędnych                                                            |
 | `validation/schemas.ts`          | schematy ~ 80 Zod (pojedyncze źródło prawdy dla kontraktów API )                                             |

@@ -15,7 +15,7 @@ Objektiivne funktsioonide võrdlus populaarsete avatud lähtekoodiga AI-ruuterit
 | **Tasuta/autentimiseta kataloogikirjed**                   |                      **155**                      |         –         |     läbilase      |       –       |
 | **Ise majutatav**                                          |                        ✅                         |        ✅         |        ❌         |  ⚠ tasuline   |
 | **OAuthi kataloogikirjed**                                 |                      **23**                       |      osaline      |        ❌         |      ❌       |
-| **Automaatse tagavaralülituse kombinatsioonid**            |                **20 strateegiat**                 | prioriteedipõhine |   tasemepõhine    |   kaalutud    |
+| **Automaatse tagavaralülituse kombinatsioonid**            |                **21 strateegiat**                 | prioriteedipõhine |   tasemepõhine    |   kaalutud    |
 | **Fusioon (paralleelne paneel + hindaja süntees)**         |                        ✅                         |        ❌         |        ❌         |      ❌       |
 | **1./2./3. taseme tagavaralülitus (tellimus→odav→tasuta)** |                      ✅ + UI                      |      käsitsi      |         –         |    käsitsi    |
 | **Tokenite tihendamine**                                   | 12 mootoriga komplekt (RTK + Caveman + LLMLingua) |      puudub       |      puudub       |    puudub     |

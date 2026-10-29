@@ -368,7 +368,7 @@ Auto Combo statik kombin tərifinə etibar etmək əvəzinə, sorğu zamanı yö
 
 Əsas imkanlar:
 
-- **20 marşrutlaşdırma strategiyası** (prioritet, ölçülmüş, birinci doldurma, round-robin, P2C, təsadüfi, ən az istifadə olunan, xərc optimallaşdırılmış, sıfırlama xəbərdarlığı, sıfırlama pəncərəsi, boşluq, kvota ilə ölçülmüş, ciddi təsadüfi,** avto** , lkgp, kontekst üçün optimallaşdırılmış, keş-optimallaşdırılmış, kontekst-rele,** birləşmə** , boru kəməri) — auto v3.8.0-da başlıq əlavəsidir; `fusion` (panel fan-out + hakim sintezi, `open-sse/services/fusion.ts`) v3.8.36-da yenidir.
+- **21 marşrutlaşdırma strategiyası** (prioritet, ölçülmüş, birinci doldurma, round-robin, P2C, təsadüfi, ən az istifadə olunan, xərc optimallaşdırılmış, sıfırlama xəbərdarlığı, sıfırlama pəncərəsi, müddəti bitənə üstünlük, boşluq, kvota ilə ölçülmüş, ciddi təsadüfi,** avto** , lkgp, kontekst üçün optimallaşdırılmış, keş-optimallaşdırılmış, kontekst-rele,** birləşmə** , boru kəməri) — auto v3.8.0-da başlıq əlavəsidir; `fusion` (panel fan-out + hakim sintezi, `open-sse/services/fusion.ts`) v3.8.36-da yenidir.
 - **16 faktorlu xal** : kvota, sağlamlıq, tərs xərc, tərs gecikmə, tapşırıq uyğunluğu və daha çox. Faktorların kanonik cədvəli və onların standart çəkiləri [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — -də yaşayır, burada onu təkrarlamaq ona köhnəlmək üçün ikinci yer verəcəkdir.
 - **Virtual fabrik** heç bir uyğunluq adlı kombo olmadıqda efemer kombinasiyaları reallaşdırır, sağlam aktiv provayder bağlantılarından namizədlər əldə edir.
 - **Avtomatik prefikslər** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — hər biri tənzimlənmiş çəki profili ilə dəstəklənir.

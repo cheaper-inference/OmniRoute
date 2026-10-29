@@ -369,7 +369,7 @@ Auto Combo scorer dynamisk og velger rutemål på forespørselstidspunktet, i st
 
 Nøkkelegenskaper:
 
-- **20 rutingstrategier** (prioritet, vektet, fyll først, round-robin, P2C, tilfeldig, minst brukt, kostnadsoptimalisert, reset-aware, reset-vindu, takhøyde, kvotevektet, strengt-tilfeldig,** auto** , lkgp, kontekstoptimalisert, hurtigbufferoptimalisert, kontekst-relé,** fusjon** , pipeline) — auto er overskriften tillegg i v3.8.0; `fusion` (panel fan-out + dommersyntese, `open-sse/services/fusion.ts`) er ny i v3.8.36.
+- **21 rutingstrategier** (prioritet, vektet, fyll først, round-robin, P2C, tilfeldig, minst brukt, kostnadsoptimalisert, reset-aware, reset-vindu, utløp først, takhøyde, kvotevektet, strengt-tilfeldig,** auto** , lkgp, kontekstoptimalisert, hurtigbufferoptimalisert, kontekst-relé,** fusjon** , pipeline) — auto er overskriften tillegg i v3.8.0; `fusion` (panel fan-out + dommersyntese, `open-sse/services/fusion.ts`) er ny i v3.8.36.
 - **16-faktor scoring** : kvote, helse, invers kostnad, invers latens, oppgavetilpasning og ti til. Den kanoniske tabellen over faktorer og deres standardvekter lever i [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ved å omarbeide den her, ville gi den et andre sted å bli foreldet.
 - **Virtuell fabrikk** materialiserer flyktige kombinasjoner når ingen samsvarende navngitt kombinasjon eksisterer, henter kandidater fra sunne aktive leverandørforbindelser.
 - **Auto-prefikser** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — hver støttet av en avstemt vektprofil.

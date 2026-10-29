@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: စခရင်များ → Lucide အစိတ်အပိုင်းများ (`<Icon>`) အသုံးပြုသည့် အိုင်ကွန်အမည်များ                       |
 | `constants/providers.ts`         | **377 ပံ့ပိုးပေးသည်။** Zod မှန်ကန်မှု (အမှန်တရားအရင်းအမြစ်) နှင့်အတူ                                            |
 | `constants/cliTools.ts`          | ပြင်ပ CLI ကိရိယာ မှတ်ပုံတင်ခြင်း                                                                                |
-| `constants/routingStrategies.ts` | **လမ်းကြောင်း ဗျူဟာ 20** ဦးစားပေးများဖြင့်                                                                      |
+| `constants/routingStrategies.ts` | **လမ်းကြောင်း ဗျူဟာ 21** ဦးစားပေးများဖြင့်                                                                      |
 | `constants/publicApiRoutes.ts`   | Bearer (vs စီမံခန့်ခွဲမှု) auth လိုအပ်သောလမ်းကြောင်းများ                                                        |
 | `constants/upstreamHeaders.ts`   | အထက်စီးကြောင်း တောင်းဆိုချက်များ အတွက် ခေါင်းစီး ငြင်းဆိုစာရင်း                                                 |
 | `validation/schemas.ts`          | ~ 80 Zod schemas ( API စာချုပ်များအတွက် အမှန်တရား၏ တစ်ခုတည်းသောအရင်းအမြစ်)                                      |

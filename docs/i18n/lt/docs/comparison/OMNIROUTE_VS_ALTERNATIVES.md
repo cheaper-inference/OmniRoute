@@ -15,7 +15,7 @@ Objektyvus funkcijų palyginimas su populiariausiais atvirojo kodo AI maršrutiz
 | **Nemokami / be autentifikacijos katalogo įrašai**                   |                     **155**                      |       n/a        |    perdavimas     |     n/a      |
 | **Savarankiškas talpinimas**                                         |                        ✅                        |        ✅        |        ❌         |   ⚠ mokama   |
 | **OAuth katalogo įrašai**                                            |                      **23**                      |     dalinis      |        ❌         |      ❌      |
-| **Automatinio atsarginio perjungimo kombinacijos**                   |                **20 strategijų**                 | pagal prioritetą |   pagal lygius    |  svertinės   |
+| **Automatinio atsarginio perjungimo kombinacijos**                   |                **21 strategija**                 | pagal prioritetą |   pagal lygius    |  svertinės   |
 | **Suliejimas (lygiagreti panelė + vertintojo sintezė)**              |                        ✅                        |        ❌        |        ❌         |      ❌      |
 | **1/2/3 lygio atsarginis perjungimas (prenumerata→pigiau→nemokama)** |                     ✅ + UI                      |     rankinis     |        n/a        |   rankinis   |
 | **Žetonų suspaudimas**                                               | 12 variklių rinkinys (RTK + Caveman + LLMLingua) |       nėra       |       nėra        |     nėra     |

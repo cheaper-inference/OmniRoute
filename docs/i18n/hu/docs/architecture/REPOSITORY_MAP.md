@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: a képernyők által használt ikonnevek → Lucide összetevők (`<Icon>`)                         |
 | `constants/providers.ts`         | **377 szolgáltató** Zod érvényesítéssel (az igazság forrása)                                            |
 | `constants/cliTools.ts`          | Külső CLI eszköznyilvántartás                                                                           |
-| `constants/routingStrategies.ts` | **20 útválasztási stratégia** prioritásokkal                                                            |
+| `constants/routingStrategies.ts` | **21 útválasztási stratégia** prioritásokkal                                                            |
 | `constants/publicApiRoutes.ts`   | Útvonalak, amelyek hordozó hitelesítést igényelnek (vs menedzsment)                                     |
 | `constants/upstreamHeaders.ts`   | Fejléc-megtagadó lista az upstream kérésekhez                                                           |
 | `validation/schemas.ts`          | ~ 80 Zod séma (az igazság egyetlen forrása API szerződésekhez)                                          |

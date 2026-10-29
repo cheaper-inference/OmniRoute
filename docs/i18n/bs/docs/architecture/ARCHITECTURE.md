@@ -369,7 +369,7 @@ Automatska kombinacija dinamički boduje i bira ciljeve usmjeravanja u trenutku 
 
 Ključne mogućnosti:
 
-- **20 strategija rutiranja** (prioritetno, ponderisano, prvo popunjavanje, kružno, P2C, nasumično, najmanje korišteno, optimizirano za troškove, svjestan resetovanja, prozor za poništavanje, prostor za visinu, ponderisano kvotom, strogo nasumično,** auto** , lkgp, kontekstualno optimiziran, cache-optimiziran, kontekstni relej,** fuzija** , pipeline) — auto je dodatak naslovu u v3.8.0; `fusion` (panel fan-out + sudačka sinteza, `open-sse/services/fusion.ts`) je novo u v3.8.36.
+- **21 strategija rutiranja** (prioritetno, ponderisano, prvo popunjavanje, kružno, P2C, nasumično, najmanje korišteno, optimizirano za troškove, svjestan resetovanja, prozor za poništavanje, prvo ističuće, prostor za visinu, ponderisano kvotom, strogo nasumično,** auto** , lkgp, kontekstualno optimiziran, cache-optimiziran, kontekstni relej,** fuzija** , pipeline) — auto je dodatak naslovu u v3.8.0; `fusion` (panel fan-out + sudačka sinteza, `open-sse/services/fusion.ts`) je novo u v3.8.36.
 - **Bodovanje sa 16 faktora** : kvota, zdravlje, inverzna cijena, inverzna latencija, uklapanje zadatka i još deset. Kanonska tabela faktora i njihovih zadanih težina živi u [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ako bi je ponovo ponovili ovdje, dalo bi joj drugo mjesto za zastarjelo.
 - **Virtuelna fabrika** materijalizira efemerne kombinacije kada ne postoji odgovarajuća imenovana kombinacija, nabavljajući kandidate iz zdravih aktivnih veza provajdera.
 - **Automatski prefiksi** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — svaki podržan podešenim profilom težine.

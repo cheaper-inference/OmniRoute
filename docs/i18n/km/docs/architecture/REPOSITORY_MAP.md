@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ឈ្មោះរូបតំណាងដែលប្រើដោយអេក្រង់ → Lucide components (`<Icon>`)                                |
 | `constants/providers.ts`         | **អ្នកផ្គត់ផ្គង់ 377** ជាមួយនឹងការបញ្ជាក់ Zod (ប្រភពនៃការពិត)                                            |
 | `constants/cliTools.ts`          | បញ្ជីឈ្មោះឧបករណ៍ CLI ខាងក្រៅ                                                                             |
-| `constants/routingStrategies.ts` | **យុទ្ធសាស្ត្រកំណត់ផ្លូវចំនួន 20** ជាមួយនឹងអាទិភាព                                                       |
+| `constants/routingStrategies.ts` | **យុទ្ធសាស្ត្រកំណត់ផ្លូវចំនួន 21** ជាមួយនឹងអាទិភាព                                                       |
 | `constants/publicApiRoutes.ts`   | ផ្លូវដែលទាមទារសិទ្ធិ Bearer (ទល់នឹងការគ្រប់គ្រង)                                                         |
 | `constants/upstreamHeaders.ts`   | បញ្ជីបដិសេធបឋមកថាសម្រាប់សំណើខាងលើ                                                                        |
 | `validation/schemas.ts`          | ~ 80 Zod គ្រោងការណ៍ (ប្រភពតែមួយនៃសេចក្តីពិតសម្រាប់កិច្ចសន្យា API )                                       |

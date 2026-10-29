@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: назви піктограм, які використовуються компонентами екранів → Lucide (`<Icon>`)                    |
 | `constants/providers.ts`         | **377 провайдерів** з перевіркою Zod (джерело правди)                                                         |
 | `constants/cliTools.ts`          | Зовнішній реєстр інструментів CLI                                                                             |
-| `constants/routingStrategies.ts` | **20 стратегій маршрутизації** з пріоритетами                                                                 |
+| `constants/routingStrategies.ts` | **21 стратегія маршрутизації** з пріоритетами                                                                 |
 | `constants/publicApiRoutes.ts`   | Маршрути, які вимагають автентифікації носія (проти керування).                                               |
 | `constants/upstreamHeaders.ts`   | Список заборонених заголовків для висхідних запитів                                                           |
 | `validation/schemas.ts`          | ~ 80 схем Zod (єдине джерело правди для контрактів API )                                                      |

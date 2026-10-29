@@ -369,7 +369,7 @@ Tự động kết hợp tự động ghi điểm và chọn mục tiêu định
 
 Các khả năng chính:
 
-- **20 chiến lược định tuyến** (ưu tiên, có trọng số, điền trước, quay vòng, P2C, ngẫu nhiên, ít được sử dụng nhất, tối ưu hóa chi phí, nhận biết lại, cửa sổ đặt lại, khoảng trống, trọng số hạn ngạch, ngẫu nhiên nghiêm ngặt,** tự động** , lkgp, tối ưu hóa theo ngữ cảnh, tối ưu hóa bộ đệm, chuyển tiếp ngữ cảnh,** sự hợp nhất** , đường dẫn) — auto là phần bổ sung tiêu đề trong v3.8.0; `fusion` (tổng hợp đánh giá + phân bổ bảng điều khiển, `open-sse/services/fusion.ts`) là tính năng mới trong v3.8.36.
+- **21 chiến lược định tuyến** (ưu tiên, có trọng số, điền trước, quay vòng, P2C, ngẫu nhiên, ít được sử dụng nhất, tối ưu hóa chi phí, nhận biết lại, cửa sổ đặt lại, hết hạn trước, khoảng trống, trọng số hạn ngạch, ngẫu nhiên nghiêm ngặt,** tự động** , lkgp, tối ưu hóa theo ngữ cảnh, tối ưu hóa bộ đệm, chuyển tiếp ngữ cảnh,** sự hợp nhất** , đường dẫn) — auto là phần bổ sung tiêu đề trong v3.8.0; `fusion` (tổng hợp đánh giá + phân bổ bảng điều khiển, `open-sse/services/fusion.ts`) là tính năng mới trong v3.8.36.
 - **Chấm điểm 16 yếu tố** : hạn ngạch, tình trạng, chi phí nghịch đảo, độ trễ nghịch đảo, mức độ phù hợp với nhiệm vụ và hơn thế nữa. Bảng chính tắc gồm các thừa số và trọng số mặc định của chúng nằm trong [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) —, việc trình bày lại nó ở đây sẽ khiến nó trở thành cũ kỹ.
 - **Nhà máy ảo** hiện thực hóa các tổ hợp phù du khi không có tổ hợp có tên phù hợp nào tồn tại, tìm nguồn cung ứng ứng viên từ các kết nối nhà cung cấp hoạt động lành mạnh.
 - **Tiền tố tự động** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — mỗi cái được hỗ trợ bởi một cấu hình trọng số đã điều chỉnh.

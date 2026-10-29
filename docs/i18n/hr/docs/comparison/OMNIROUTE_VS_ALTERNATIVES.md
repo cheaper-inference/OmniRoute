@@ -15,7 +15,7 @@ Objektivna usporedba značajki s popularnim open-source AI usmjerivačima.
 | **Besplatne stavke kataloga bez autentifikacije**          |                     **155**                     |          n/a          |    passthrough    |      n/a       |
 | **Mogućnost samostalnog hostanja**                         |                       ✅                        |          ✅           |        ❌         | ⚠ uz plaćanje  |
 | **OAuth stavke kataloga**                                  |                     **23**                      |      djelomično       |        ❌         |       ❌       |
-| **Kombinacije automatskog fallbacka**                      |                **20 strategija**                | na temelju prioriteta | na temelju razina |  ponderirano   |
+| **Kombinacije automatskog fallbacka**                      |                **21 strategija**                | na temelju prioriteta | na temelju razina |  ponderirano   |
 | **Fuzija (paralelni panel + sinteza sudca)**               |                       ✅                        |          ❌           |        ❌         |       ❌       |
 | **Fallback razine 1/2/3 (pretplata→jeftino→besplatno)**    |                     ✅ + UI                     |         ručno         |        n/a        |     ručno      |
 | **Kompresija tokena**                                      | stack od 12 enginea (RTK + Caveman + LLMLingua) |         nema          |       nema        |      nema      |

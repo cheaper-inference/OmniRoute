@@ -15,7 +15,7 @@ So sánh tính năng khách quan với các bộ định tuyến AI mã nguồn 
 | **Mục catalog miễn phí/không yêu cầu xác thực**        |                   **155**                   |       n/a       |    chuyển tiếp    |      n/a      |
 | **Có thể tự host**                                     |                     ✅                      |       ✅        |        ❌         |   ⚠ trả phí   |
 | **Mục catalog OAuth**                                  |                   **23**                    |    một phần     |        ❌         |      ❌       |
-| **Tổ hợp fallback tự động**                            |              **20 chiến lược**              | theo độ ưu tiên |     theo tầng     | theo trọng số |
+| **Tổ hợp fallback tự động**                            |              **21 chiến lược**              | theo độ ưu tiên |     theo tầng     | theo trọng số |
 | **Fusion (chạy panel song song + tổng hợp bởi judge)** |                     ✅                      |       ❌        |        ❌         |      ❌       |
 | **Fallback theo tầng 1/2/3 (gói đăng ký→rẻ→miễn phí)** |                   ✅ + UI                   |    thủ công     |        n/a        |   thủ công    |
 | **Nén token**                                          | stack 12 engine (RTK + Caveman + LLMLingua) |      không      |       không       |     không     |

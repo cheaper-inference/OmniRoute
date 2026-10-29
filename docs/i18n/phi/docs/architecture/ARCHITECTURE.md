@@ -369,7 +369,7 @@ Ang Auto Combo ay dynamic na nagmamarka at pumipili ng mga target sa pagruruta s
 
 Mga pangunahing kakayahan:
 
-- **20 mga diskarte sa pagruruta** (priyoridad, weighted, fill-first, round-robin, P2C, random, hindi gaanong ginagamit, cost-optimized, reset-aware, reset-window, headroom, quota-weighted, strict-random,** sasakyan** , lkgp, context-optimized, cache-optimized, context-relay,** pagsasanib** , pipeline) — auto ay ang karagdagan ng headline sa v3.8.0; `fusion` (panel fan-out + judge synthesis, `open-sse/services/fusion.ts`) ay bago sa v3.8.36.
+- **21 mga diskarte sa pagruruta** (priyoridad, weighted, fill-first, round-robin, P2C, random, hindi gaanong ginagamit, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted, strict-random,** sasakyan** , lkgp, context-optimized, cache-optimized, context-relay,** pagsasanib** , pipeline) — auto ay ang karagdagan ng headline sa v3.8.0; `fusion` (panel fan-out + judge synthesis, `open-sse/services/fusion.ts`) ay bago sa v3.8.36.
 - **16-factor na pagmamarka** : quota, kalusugan, inverse cost, inverse latency, task fit at sampu pa. Ang kanonikal na talahanayan ng mga salik at ang kanilang mga default na timbang ay nabubuhay sa [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — na muling ipinahayag dito ay magbibigay ito ng pangalawang lugar upang maging lipas.
 - **Virtual na pabrika** nagpapatupad ng mga ephemeral combo kapag walang tumutugmang pinangalanang combo, na kumukuha ng mga kandidato mula sa malusog na aktibong koneksyon sa provider.
 - **Mga awtomatikong prefix** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — bawat isa na sinusuportahan ng nakatutok na profile ng timbang.

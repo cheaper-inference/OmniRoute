@@ -6,7 +6,7 @@
 //   node scripts/docs/gen-readme-tier-cascade.mjs [--out path.svg]
 //
 // Everything the diagram draws lives in TIER_CASCADE_COPY: it is both the drawn text and the
-// subset input for the embedded fonts. "20 routing strategies" stays in <text> because
+// subset input for the embedded fonts. "21 routing strategies" stays in <text> because
 // scripts/check/check-docs-counts-sync.mjs reads it from the raw file. One 16 s cycle, four acts
 // (request → 429 → reroute → success): act 1 0–.23, act 2 .25–.48, act 3 .50–.73, act 4
 // .75–.985 — the windows below are the beats of the previous hand-written file. SMIL never
@@ -31,7 +31,7 @@ export const TIER_CASCADE_COPY = {
     "OmniRoute — Smart Router",
     "RTK + Caveman compression",
     " · ",
-    "20 routing strategies",
+    "21 routing strategies",
     "Circuit breakers · TLS stealth · MCP · A2A · Guardrails",
   ],
   tiers: TIERS.map((t) => t.kicker),

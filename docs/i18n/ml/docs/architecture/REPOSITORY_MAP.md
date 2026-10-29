@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: സ്ക്രീനുകൾ ഉപയോഗിക്കുന്ന ഐക്കൺ പേരുകൾ → ലൂസൈഡ് ഘടകങ്ങൾ (`<Icon>`)                                   |
 | `constants/providers.ts`         | **377 ദാതാക്കൾ** Zod മൂല്യനിർണ്ണയത്തോടെ (സത്യത്തിൻ്റെ ഉറവിടം)                                                   |
 | `constants/cliTools.ts`          | ബാഹ്യ CLI ടൂൾ രജിസ്ട്രി                                                                                         |
-| `constants/routingStrategies.ts` | **20 റൂട്ടിംഗ് തന്ത്രങ്ങൾ** മുൻഗണനകളോടെ                                                                         |
+| `constants/routingStrategies.ts` | **21 റൂട്ടിംഗ് തന്ത്രങ്ങൾ** മുൻഗണനകളോടെ                                                                         |
 | `constants/publicApiRoutes.ts`   | Bearer (vs management) ഓത്ത് ആവശ്യമുള്ള റൂട്ടുകൾ                                                                |
 | `constants/upstreamHeaders.ts`   | അപ്സ്ട്രീം അഭ്യർത്ഥനകൾക്കുള്ള തലക്കെട്ട് നിരാകരണം                                                               |
 | `validation/schemas.ts`          | ~ 80 Zod സ്കീമകൾ ( API കരാറുകൾക്കുള്ള സത്യത്തിൻ്റെ ഏക ഉറവിടം)                                                   |

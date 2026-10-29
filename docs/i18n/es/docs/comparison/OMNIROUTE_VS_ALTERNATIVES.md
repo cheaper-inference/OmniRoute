@@ -15,7 +15,7 @@ Comparación objetiva de características frente a routers de IA de código abie
 | **Entradas de catálogo gratuitas/sin autenticación**           |                    **155**                     |         n/a         |    passthrough    |     n/a     |
 | **Autoalojable**                                               |                       ✅                       |         ✅          |        ❌         |  ⚠ de pago  |
 | **Entradas de catálogo OAuth**                                 |                     **23**                     |       parcial       |        ❌         |     ❌      |
-| **Combinaciones de fallback automático**                       |               **20 estrategias**               | basado en prioridad | basado en niveles |  ponderado  |
+| **Combinaciones de fallback automático**                       |               **21 estrategias**               | basado en prioridad | basado en niveles |  ponderado  |
 | **Fusión (panel paralelo + síntesis con juez)**                |                       ✅                       |         ❌          |        ❌         |     ❌      |
 | **Fallback de nivel 1/2/3 (suscripción→económico→gratuito)**   |                    ✅ + UI                     |       manual        |        n/a        |   manual    |
 | **Compresión de tokens**                                       | Pila de 12 motores (RTK + Caveman + LLMLingua) |       ninguno       |      ninguno      |   ninguno   |

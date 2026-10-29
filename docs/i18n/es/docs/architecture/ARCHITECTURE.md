@@ -369,7 +369,7 @@ Auto Combo puntúa y selecciona dinámicamente objetivos de enrutamiento en el m
 
 Capacidades clave:
 
-- **20 estrategias de enrutamiento** (prioridad, ponderado, llenado primero, round-robin, P2C, aleatorio, menos utilizado, de costo optimizado, con reconocimiento de reinicio, ventana de reinicio, margen, ponderado por cuota, aleatorio estricto,** auto** , lkgp, optimizado para contexto, optimizado para caché, retransmisión de contexto,** fusión** , pipeline) — auto es la adición principal en v3.8.0; `fusion` (panel de síntesis de jueces +, `open-sse/services/fusion.ts`) es nuevo en v3.8.36.
+- **21 estrategias de enrutamiento** (prioridad, ponderado, llenado primero, round-robin, P2C, aleatorio, menos utilizado, de costo optimizado, con reconocimiento de reinicio, ventana de reinicio, vencimiento primero, margen, ponderado por cuota, aleatorio estricto,** auto** , lkgp, optimizado para contexto, optimizado para caché, retransmisión de contexto,** fusión** , pipeline) — auto es la adición principal en v3.8.0; `fusion` (panel de síntesis de jueces +, `open-sse/services/fusion.ts`) es nuevo en v3.8.36.
 - **Puntuación de 16 factores** : cuota, salud, costo inverso, latencia inversa, ajuste de tareas y diez más. La tabla canónica de factores y sus pesos predeterminados se encuentra en [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — Reformularla aquí le daría un segundo lugar para volverse obsoleta.
 - **Fábrica virtual** materializa combos efímeros cuando no existe ningún combo con nombre coincidente, obteniendo candidatos de conexiones de proveedores activas y saludables.
 - **Prefijos automáticos** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — cada uno respaldado por un perfil de peso ajustado.

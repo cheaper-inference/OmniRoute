@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: स्क्रिनहरू द्वारा प्रयोग गरिएको आइकन नामहरू → लुसाइड कम्पोनेन्टहरू (`<Icon>`)                   |
 | `constants/providers.ts`         | **377 प्रदायकहरू** Zod प्रमाणीकरणको साथ (सत्यको स्रोत)                                                      |
 | `constants/cliTools.ts`          | बाह्य CLI उपकरण रजिस्ट्री                                                                                   |
-| `constants/routingStrategies.ts` | **20 मार्ग रणनीतिहरू** प्राथमिकताहरु संग                                                                    |
+| `constants/routingStrategies.ts` | **21 मार्ग रणनीतिहरू** प्राथमिकताहरु संग                                                                    |
 | `constants/publicApiRoutes.ts`   | बियरर (बनाम व्यवस्थापन) प्रमाणीकरण आवश्यक पर्ने मार्गहरू                                                    |
 | `constants/upstreamHeaders.ts`   | अपस्ट्रीम अनुरोधहरूको लागि हेडर अस्वीकारसूची                                                                |
 | `validation/schemas.ts`          | ~ 80 Zod योजनाहरू ( API अनुबंधहरूको लागि सत्यको एकल स्रोत)                                                  |

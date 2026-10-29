@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: સ્ક્રીનો દ્વારા ઉપયોગમાં લેવાતા આઇકોન નામો → લ્યુસાઇડ ઘટકો (`<Icon>`)          |
 | `constants/providers.ts`         | **377 પ્રદાતાઓ** Zod માન્યતા સાથે (સત્યનો સ્ત્રોત)                                         |
 | `constants/cliTools.ts`          | બાહ્ય CLI ટૂલ રજિસ્ટ્રી                                                                    |
-| `constants/routingStrategies.ts` | **20 રૂટીંગ વ્યૂહરચના** પ્રાથમિકતાઓ સાથે                                                   |
+| `constants/routingStrategies.ts` | **21 રૂટીંગ વ્યૂહરચના** પ્રાથમિકતાઓ સાથે                                                   |
 | `constants/publicApiRoutes.ts`   | રૂટ્સ કે જેને બેરર (વિ મેનેજમેન્ટ) ઓથની જરૂર હોય છે                                        |
 | `constants/upstreamHeaders.ts`   | અપસ્ટ્રીમ વિનંતીઓ માટે હેડર નામંજૂર                                                        |
 | `validation/schemas.ts`          | ~ 80 Zod સ્કીમા ( API કોન્ટ્રાક્ટ માટે સત્યનો એક જ સ્ત્રોત)                                |

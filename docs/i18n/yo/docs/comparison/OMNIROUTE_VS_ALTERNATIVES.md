@@ -15,7 +15,7 @@
 | **Àwọn ìtẹsílẹ̀ katalọ̀gù ọ̀fẹ́/láìní ìjẹ́rìsí**          |                 **155**                  |      n/a       |    passthrough    |   n/a    |
 | **Tó lè ṣe ìgbéra fúnra rẹ̀**                         |                    ✅                    |       ✅       |        ❌         | ⚠ sanwó  |
 | **Àwọn ìtẹsílẹ̀ katalọ̀gù OAuth**                      |                  **23**                  |    apá kan     |        ❌         |    ❌    |
-| **Àwọn àdápọ̀ ìpàdàsẹ̀yìn àdáṣe**                      |             **20 àwọn ọ̀nà**              | dá lórí pàtàkì |   dá lórí ìpele   |   ìwọ̀n   |
+| **Àwọn àdápọ̀ ìpàdàsẹ̀yìn àdáṣe**                      |             **21 àwọn ọ̀nà**              | dá lórí pàtàkì |   dá lórí ìpele   |   ìwọ̀n   |
 | **Ìsopọ̀ (pánẹ́ẹ̀lì tó ń ṣiṣẹ́ pọ̀ + ìṣàkópọ̀ onídájọ́)**   |                    ✅                    |       ❌       |        ❌         |    ❌    |
 | **Ìpàdàsẹ̀yìn ìpele 1/2/3 (ìforúkọsílẹ̀→owó díẹ̀→ọ̀fẹ́)** |                 ✅ + UI                  |    àfọwọ́ṣe     |        n/a        | àfọwọ́ṣe  |
 | **Ìtípa token**                                      | àkópọ̀ ẹ̀rọ 12 (RTK + Caveman + LLMLingua) |     kò sí      |       kò sí       |  kò sí   |

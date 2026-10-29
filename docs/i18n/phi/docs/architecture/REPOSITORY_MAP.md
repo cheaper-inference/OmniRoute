@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: mga pangalan ng icon na ginagamit ng mga screen → Lucide component (`<Icon>`)                          |
 | `constants/providers.ts`         | **377 provider** may Zod validation (pinagmulan ng katotohanan)                                                    |
 | `constants/cliTools.ts`          | Panlabas na CLI tool registry                                                                                      |
-| `constants/routingStrategies.ts` | **20 mga diskarte sa pagruruta** may mga priyoridad                                                                |
+| `constants/routingStrategies.ts` | **21 mga diskarte sa pagruruta** may mga priyoridad                                                                |
 | `constants/publicApiRoutes.ts`   | Mga ruta na nangangailangan ng Bearer (vs management) auth                                                         |
 | `constants/upstreamHeaders.ts`   | Header denylist para sa upstream na mga kahilingan                                                                 |
 | `validation/schemas.ts`          | ~ 80 Zod schemas (iisang pinagmumulan ng katotohanan para sa mga kontrata API )                                    |

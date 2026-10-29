@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ସ୍କ୍ରିନ୍ ଦ୍ୱାରା ବ୍ୟବହୃତ ଆଇକନ୍ ନାମ → ଲୁସିଡ୍ ଉପାଦାନଗୁଡିକ (`<Icon>`)                           |
 | `constants/providers.ts`         | **377 ପ୍ରଦାନକାରୀ \|** Zod valid ଧତା ସହିତ (ସତ୍ୟର ଉତ୍ସ)                                                   |
 | `constants/cliTools.ts`          | ବାହ୍ୟ CLI ଉପକରଣ ରେଜିଷ୍ଟ୍ରି \|                                                                           |
-| `constants/routingStrategies.ts` | **20 ରାଉଟିଙ୍ଗ୍ ରଣନୀତି \|** ପ୍ରାଥମିକତା ସହିତ \|                                                           |
+| `constants/routingStrategies.ts` | **21 ରାଉଟିଙ୍ଗ୍ ରଣନୀତି \|** ପ୍ରାଥମିକତା ସହିତ \|                                                           |
 | `constants/publicApiRoutes.ts`   | ମାର୍ଗଗୁଡିକ ଯାହା ବିୟର (ବନାମ ପରିଚାଳନା) auth ଆବଶ୍ୟକ କରେ \|                                                 |
 | `constants/upstreamHeaders.ts`   | ଅପଷ୍ଟ୍ରିମ ଅନୁରୋଧ ପାଇଁ ହେଡର୍ ଅସ୍ୱୀକାର ତାଲିକା \|                                                          |
 | `validation/schemas.ts`          | ~ 80 Zod ସ୍କିମା ( API ଚୁକ୍ତି ପାଇଁ ସତ୍ୟର ଏକକ ଉତ୍ସ)                                                       |

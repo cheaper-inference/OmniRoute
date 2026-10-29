@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlar tərəfindən istifadə edilən ikon adları → Lucide komponentləri (`<Icon>`)              |
 | `constants/providers.ts`         | **377 provayder** Zod təsdiqi ilə (həqiqət mənbəyi)                                                        |
 | `constants/cliTools.ts`          | Xarici CLI alət reyestri                                                                                   |
-| `constants/routingStrategies.ts` | **20 marşrutlaşdırma strategiyası** prioritetləri ilə                                                      |
+| `constants/routingStrategies.ts` | **21 marşrutlaşdırma strategiyası** prioritetləri ilə                                                      |
 | `constants/publicApiRoutes.ts`   | Daşıyıcının (idarəçiyə qarşı) auth tələb edən marşrutlar                                                   |
 | `constants/upstreamHeaders.ts`   | Yuxarı sorğular üçün başlıq rədd siyahısı                                                                  |
 | `validation/schemas.ts`          | ~ 80 Zod sxemləri ( API müqavilələri üçün tək həqiqət mənbəyi)                                             |

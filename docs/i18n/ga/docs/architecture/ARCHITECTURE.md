@@ -368,7 +368,7 @@ Déanann Auto Combo scóir dinimiciúil agus piocann sé spriocanna ródaithe ag
 
 Príomhchumais:
 
-- **20 straitéis ródaithe** (tosaíocht, ualaithe, líonadh an chéad, bhabhta-robín, P2C, randamach, is lú úsáid, optamaithe ó thaobh costais, ath-fheasach, athshocrú-fhuinneog, spás cloigeann, cuóta-ualaithe, docht-randamach,** gluaisteán** , lkgp, optamaithe le comhthéacs, optamaithe le taisce, sealaíocht comhthéacs,** comhleá** , píblíne) is é — auto an ceannlíne breise i v3.8.0; Tá `fusion` (lucht leanúna painéil sintéis breitheamh +, `open-sse/services/fusion.ts`) nua in v3.8.36.
+- **21 straitéis ródaithe** (tosaíocht, ualaithe, líonadh an chéad, bhabhta-robín, P2C, randamach, is lú úsáid, optamaithe ó thaobh costais, ath-fheasach, athshocrú-fhuinneog, éag ar dtús, spás cloigeann, cuóta-ualaithe, docht-randamach,** gluaisteán** , lkgp, optamaithe le comhthéacs, optamaithe le taisce, sealaíocht comhthéacs,** comhleá** , píblíne) is é — auto an ceannlíne breise i v3.8.0; Tá `fusion` (lucht leanúna painéil sintéis breitheamh +, `open-sse/services/fusion.ts`) nua in v3.8.36.
 - **Scóráil 16-fachtóir** : cuóta, sláinte, costas inbhéartach, latency inbhéartach, feistiú tascanna agus deich gcinn eile. Sa tábla canónach fachtóirí agus a gcuid meáchain réamhshocraithe, is i [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — é a athlua anseo thabharfadh sé an dara háit le dul i léig.
 - **Monarcha fíorúil** éiríonn sé teaglama gearrshaolacha nuair nach bhfuil aon teaglama ainmnithe meaitseála ann, agus iarrthóirí á bhfoinsiú ó naisc shláintiúla soláthraithe gníomhacha.
 - **Réimíreanna uathoibríocha** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — gach ceann acu tacaithe ag próifíl meáchain tiúnta.

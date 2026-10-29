@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: имена икона које користе екрани → Луциде компоненте (`<Icon>`)                                     |
 | `constants/providers.ts`         | **377 провајдера** са Zod валидацијом (извор истине)                                                           |
 | `constants/cliTools.ts`          | Екстерни регистар CLI алата                                                                                    |
-| `constants/routingStrategies.ts` | **20 стратегија рутирања** са приоритетима                                                                     |
+| `constants/routingStrategies.ts` | **21 стратегија рутирања** са приоритетима                                                                     |
 | `constants/publicApiRoutes.ts`   | Руте које захтевају ауторизацију носиоца (у односу на управљање).                                              |
 | `constants/upstreamHeaders.ts`   | Листа одбијених заглавља за упстреам захтеве                                                                   |
 | `validation/schemas.ts`          | ~ 80 Zod шеме (један извор истине за API уговоре)                                                              |

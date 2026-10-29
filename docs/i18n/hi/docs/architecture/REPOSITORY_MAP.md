@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: स्क्रीन द्वारा उपयोग किए जाने वाले आइकन नाम → ल्यूसिड घटक (`<Icon>`)            |
 | `constants/providers.ts`         | **377 प्रदाता** Zod सत्यापन के साथ (सच्चाई का स्रोत)                                        |
 | `constants/cliTools.ts`          | बाहरी CLI टूल रजिस्ट्री                                                                     |
-| `constants/routingStrategies.ts` | **20 रूटिंग रणनीतियाँ** प्राथमिकताओं के साथ                                                 |
+| `constants/routingStrategies.ts` | **21 रूटिंग रणनीतियाँ** प्राथमिकताओं के साथ                                                 |
 | `constants/publicApiRoutes.ts`   | वे रूट जिनके लिए बियरर (बनाम प्रबंधन) प्रमाणीकरण की आवश्यकता होती है                        |
 | `constants/upstreamHeaders.ts`   | अपस्ट्रीम अनुरोधों के लिए हेडर अस्वीकरण सूची                                                |
 | `validation/schemas.ts`          | ~ 80 Zod स्कीमा ( API अनुबंधों के लिए सत्य का एकल स्रोत)                                    |

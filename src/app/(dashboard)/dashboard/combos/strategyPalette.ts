@@ -9,13 +9,13 @@ import { categoricalSlot, type CategoricalSlot } from "@/shared/utils/categorica
  * kit's five chart tokens (KEA-7886, P8). The index is the strategy's position in
  * ROUTING_STRATEGY_VALUES (then the internal ones), so `chart-(index % 5 + 1)`:
  *
- *   chart-1 priority · p2c · reset-window · lkgp · quota-share
- *   chart-2 weighted · random · headroom · context-optimized
- *   chart-3 round-robin · least-used · quota-weighted · cache-optimized
- *   chart-4 context-relay · cost-optimized · strict-random · fusion
- *   chart-5 fill-first · reset-aware · auto · pipeline
+ *   chart-1 priority · p2c · reset-window · auto · pipeline
+ *   chart-2 weighted · random · expiry-first · lkgp · quota-share
+ *   chart-3 round-robin · least-used · headroom · context-optimized
+ *   chart-4 context-relay · cost-optimized · quota-weighted · cache-optimized
+ *   chart-5 fill-first · reset-aware · strict-random · fusion
  *
- * Twenty strategies share five colours, so the colour is only a grouping cue: every badge and
+ * Twenty-one strategies share five colours, so the colour is only a grouping cue: every badge and
  * node prints the strategy name in neutral ink (the chart tokens have no `-foreground` pair and
  * lime/pink text fails contrast on the light surface). Unknown strategies get no token.
  */

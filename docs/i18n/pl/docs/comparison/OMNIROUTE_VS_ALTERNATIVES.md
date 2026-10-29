@@ -15,7 +15,7 @@ Obiektywne porównanie funkcji z popularnymi routerami AI open-source.
 | **Darmowe wpisy katalogowe bez uwierzytelniania**     |                   **155**                    |          n/d           |     passthrough     |     n/d      |
 | **Możliwość self-hostingu**                           |                      ✅                      |           ✅           |         ❌          |   ⚠ płatne   |
 | **Wpisy katalogowe OAuth**                            |                    **23**                    |       częściowe        |         ❌          |      ❌      |
-| **Automatyczne kombinacje fallback**                  |               **20 strategii**               | oparte na priorytetach | oparte na poziomach |    ważone    |
+| **Automatyczne kombinacje fallback**                  |               **21 strategii**               | oparte na priorytetach | oparte na poziomach |    ważone    |
 | **Fuzja (równoległy panel + synteza oceniająca)**     |                      ✅                      |           ❌           |         ❌          |      ❌      |
 | **Fallback Tier 1/2/3 (subskrypcja→tanie→darmowe)**   |                   ✅ + UI                    |         ręczne         |         n/d         |    ręczne    |
 | **Kompresja tokenów**                                 | stos 12 silników (RTK + Caveman + LLMLingua) |          brak          |        brak         |     brak     |

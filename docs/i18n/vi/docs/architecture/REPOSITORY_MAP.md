@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: tên biểu tượng được sử dụng bởi màn hình → Các thành phần Lucide (`<Icon>`)                       |
 | `constants/providers.ts`         | **377 nhà cung cấp** với xác nhận Zod (nguồn sự thật)                                                         |
 | `constants/cliTools.ts`          | Đăng ký công cụ CLI bên ngoài                                                                                 |
-| `constants/routingStrategies.ts` | **20 chiến lược định tuyến** với những ưu tiên                                                                |
+| `constants/routingStrategies.ts` | **21 chiến lược định tuyến** với những ưu tiên                                                                |
 | `constants/publicApiRoutes.ts`   | Các tuyến yêu cầu xác thực Bearer (so với quản lý)                                                            |
 | `constants/upstreamHeaders.ts`   | Danh sách từ chối tiêu đề cho các yêu cầu ngược dòng                                                          |
 | `validation/schemas.ts`          | Lược đồ ~ 80 Zod (nguồn sự thật duy nhất cho các hợp đồng API )                                               |

@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: 画面で使用されるアイコン名→ Lucide コンポーネント (`<Icon>`)                                      |
 | `constants/providers.ts`         | **377 プロバイダー**Zod検証あり (信頼できる情報源)                                                            |
 | `constants/cliTools.ts`          | 外部CLIツール レジストリ                                                                                      |
-| `constants/routingStrategies.ts` | **20 のルーティング戦略**優先順位を付けて                                                                     |
+| `constants/routingStrategies.ts` | **21 のルーティング戦略**優先順位を付けて                                                                     |
 | `constants/publicApiRoutes.ts`   | ベアラー (管理ではなく) 認証が必要なルート                                                                    |
 | `constants/upstreamHeaders.ts`   | アップストリームリクエストのヘッダー拒否リスト                                                                |
 | `validation/schemas.ts`          | ~ 80 Zodスキーマ ( APIコントラクトの信頼できる唯一の情報源)                                                   |

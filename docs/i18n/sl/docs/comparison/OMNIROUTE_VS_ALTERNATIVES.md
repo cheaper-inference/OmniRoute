@@ -15,7 +15,7 @@ Objektivna primerjava lastnosti v primerjavi s priljubljenimi odprtokodnimi usme
 | **Brezplačni kataloški vnosi brez avtentikacije**       |                   **155**                    |          n/a          |    posredovanje    |     n/a      |
 | **Možnost samostojnega gostovanja**                     |                      ✅                      |          ✅           |         ❌         | ⚠ plačljivo  |
 | **Kataloški vnosi OAuth**                               |                    **23**                    |         delno         |         ❌         |      ❌      |
-| **Kombinacije samodejnega preklopa**                    |               **20 strategij**               | na podlagi prioritete | na podlagi nivojev |   uteženo    |
+| **Kombinacije samodejnega preklopa**                    |               **21 strategij**               | na podlagi prioritete | na podlagi nivojev |   uteženo    |
 | **Fuzija (vzporedni panel + sinteza ocenjevalca)**      |                      ✅                      |          ❌           |         ❌         |      ❌      |
 | **Preklop nivojev 1/2/3 (naročnina→poceni→brezplačno)** |                   ✅ + UI                    |         ročno         |        n/a         |    ročno     |
 | **Stiskanje žetonov**                                   | sklop 12 pogonov (RTK + Caveman + LLMLingua) |          ni           |         ni         |      ni      |
