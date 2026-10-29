@@ -197,17 +197,17 @@ Ebe njedebe JSON-RPC `/a2a` bụ ebe ntinye A2A izizi. Ebe njedebe REST ndị d�
 
 ---
 
-## Ịgbakwunye Nkà Ọhụrụ
+## Ịgbakwunye Nka Ọhụrụ
 
-1. **Mepụta faịlụ nkà:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Mepụta faịlụ nka:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Bupụ function async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Soro nhazi nke nkà ndị dị ugbu a dịka `smartRouting.ts`.
+   Bupụ ọrụ async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Soro nhazi nka ndị dị ugbu a dịka `smartRouting.ts`.
 
-2. **Debanye handler aha:** n'ime `src/lib/a2a/taskExecution.ts`, tinye ntinye na `A2A_SKILL_HANDLERS`:
+2. **Debanye onye njikwa:** n'ime `src/lib/a2a/taskExecution.ts`, tinye ntinye na `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...nkà ndị dị ugbu a
+     // ...nka ndị dị ugbu a
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ Ebe njedebe JSON-RPC `/a2a` bụ ebe ntinye A2A izizi. Ebe njedebe REST ndị d�
    };
    ```
 
-3. **Gosipụta ya na Kaadị Agent:** n'ime `src/app/.well-known/agent.json/route.ts`, gbakwunye na njedebe array `skills`:
+3. **Gosipụta ya na Kaadị Agent:** n'ime `src/lib/a2a/agentCardMetadata.ts` (nke `/.well-known/agent.json` na `/.well-known/agent-card.json` na-ejikọta ọnụ), gbakwunye ya na ndepụta `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Nkà Gị",
-     "description": "Nkọwa dị nkenke nke lekwasịrị anya na ebumnuche",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Ihe atụ nke ịkpọ ya n'asụsụ mmadụ"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Dee ule:** `tests/unit/a2a-<your-skill>.test.ts`. Kpuchie ụzọ ihe si aga nke ọma + ụzọ njehie.
+4. **Dee ule:** `tests/unit/a2a-<your-skill>.test.ts`. Kpuchie ụzọ nke ọma + ụzọ njehie.
 
-5. **Detuo nkọwa** nke nkà ọhụrụ ahụ na tebụl `Available Skills` nke faịlụ a.
+5. **Detuo nkọwa** nka ọhụrụ ahụ na tebụl `Available Skills` nke faịlụ a.
 
 ---
 

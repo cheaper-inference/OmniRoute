@@ -1,4 +1,4 @@
-// 219 creates agent_sessions; 220 links usage_history rows to it. They are separate files because
+// 230 creates agent_sessions; 231 links usage_history rows to it. They are separate files because
 // the runner records a file as applied when an ALTER hits "duplicate column name" and rolls the
 // rest of that file back: a database that already has the column must still get the table.
 import test from "node:test";
@@ -12,10 +12,10 @@ const repoMigrations = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   "../../../src/lib/db/migrations"
 );
-const MIGRATION_FILES = ["219_agent_sessions.sql", "220_usage_history_agent_session_id.sql"];
+const MIGRATION_FILES = ["230_agent_sessions.sql", "231_usage_history_agent_session_id.sql"];
 const scratchDir = process.env.DATA_DIR || path.resolve("_artifacts/tests");
 fs.mkdirSync(scratchDir, { recursive: true });
-const migrationsDir = fs.mkdtempSync(path.join(scratchDir, "omniroute-migration-219-"));
+const migrationsDir = fs.mkdtempSync(path.join(scratchDir, "omniroute-migration-230-"));
 for (const file of MIGRATION_FILES) {
   fs.copyFileSync(path.join(repoMigrations, file), path.join(migrationsDir, file));
 }
@@ -67,7 +67,7 @@ test("an older database gains agent_sessions and usage_history.agent_session_id;
     assert.ok(tableExists(db, "agent_sessions"));
     assert.ok(usageColumns(db).includes("agent_session_id"));
     assert.equal(runMigrations(db, { isNewDb: true }), 0);
-    assert.deepEqual(appliedVersions(db), ["219", "220"]);
+    assert.deepEqual(appliedVersions(db), ["230", "231"]);
   } finally {
     db.close();
   }
@@ -79,13 +79,13 @@ test("a database that already has the column still gets the agent_sessions table
     assert.equal(runMigrations(db, { isNewDb: true }), 2);
     assert.ok(tableExists(db, "agent_sessions"));
     assert.equal(usageColumns(db).filter((name) => name === "agent_session_id").length, 1);
-    assert.deepEqual(appliedVersions(db), ["219", "220"]);
+    assert.deepEqual(appliedVersions(db), ["230", "231"]);
   } finally {
     db.close();
   }
 });
 
-test("220 does not duplicate the (api_key_id, timestamp) index that 051 already creates", () => {
+test("231 does not duplicate the (api_key_id, timestamp) index that 051 already creates", () => {
   const db = openDb(false);
   try {
     // 051_hot_path_db_indexes already ships this exact index on every install.

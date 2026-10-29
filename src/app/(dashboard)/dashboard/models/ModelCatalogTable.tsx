@@ -330,6 +330,7 @@ function ModelCatalogTableRow({
   activeTestingKeys,
   providerHealthMap,
   onToggleSelect,
+  renderKeyAccess,
   onTestModel,
   bulkRunning,
   onToggleVisibility,
@@ -342,6 +343,7 @@ function ModelCatalogTableRow({
   activeTestingKeys: ReadonlySet<string>;
   providerHealthMap: Record<string, ProviderHealth>;
   onToggleSelect?: (id: string) => void;
+  renderKeyAccess?: (model: CatalogModelRow) => import("react").ReactNode;
   onTestModel?: (providerId: string, modelId: string) => void;
   bulkRunning: boolean;
   onToggleVisibility?: (model: CatalogModelRow) => void;
@@ -392,7 +394,8 @@ function ModelCatalogTableRow({
         <CatalogTestBadge result={result} loading={isTesting} />
       </TableCell>
       {onTestModel && (
-        <TableCell className="h-auto px-4 py-3 text-right align-top">
+        <TableCell className="h-auto whitespace-nowrap px-4 py-3 text-right align-top">
+          {renderKeyAccess?.(model)}
           <Button
             variant="secondary"
             size="sm"
@@ -427,6 +430,7 @@ interface ModelCatalogTableProps {
   onToggleSelectAll?: () => void;
   testResults?: Record<string, CatalogTestResult>;
   activeTestingKeys?: ReadonlySet<string>;
+  renderKeyAccess?: (model: CatalogModelRow) => import("react").ReactNode;
   onTestModel?: (providerId: string, modelId: string) => void;
   providerHealthMap?: Record<string, "healthy" | "degraded" | "down">;
   /** A bulk run owns the runner; per-row tests wait until it ends. */
@@ -454,6 +458,7 @@ export default function ModelCatalogTable({
   onToggleSelectAll,
   testResults = {},
   activeTestingKeys = new Set<string>(),
+  renderKeyAccess,
   onTestModel,
   providerHealthMap = {},
   bulkRunning = false,
@@ -499,6 +504,7 @@ export default function ModelCatalogTable({
                 activeTestingKeys={activeTestingKeys}
                 providerHealthMap={providerHealthMap}
                 onToggleSelect={onToggleSelect}
+                renderKeyAccess={renderKeyAccess}
                 onTestModel={onTestModel}
                 bulkRunning={bulkRunning}
                 onToggleVisibility={onToggleVisibility}

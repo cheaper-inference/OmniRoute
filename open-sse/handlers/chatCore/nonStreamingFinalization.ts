@@ -9,7 +9,7 @@ import type {
   ServerOwnedToolLoopResult,
 } from "@/lib/skills/toolLoopTypes.ts";
 import type { PersistAttemptLogsArgs } from "./attemptLogging.ts";
-import type { PendingRequestMetadata } from "@/lib/usage/usageHistory.ts";
+import type { PendingRequestIdentity, PendingRequestMetadata } from "@/lib/usage/usageHistory.ts";
 import { type FailureUsageAggregate, toFailureUsageAggregate } from "./failureUsage.ts";
 
 export type NonStreamingFinalizationPlan =
@@ -99,9 +99,9 @@ export async function finalizeToolLoopError(input: {
     connectionId?: string,
     isPending?: boolean,
     metadata?: PendingRequestMetadata,
-    pendingRequestId?: string
+    pendingRequestId?: PendingRequestIdentity
   ) => void;
-  pendingRequestId?: string;
+  pendingRequestId?: PendingRequestIdentity;
 }): Promise<ChatCoreErrorResult> {
   const plan = buildNonStreamingFinalizationPlan(input.loop);
   const err = plan.kind === "failure" ? plan.error : missingError();
