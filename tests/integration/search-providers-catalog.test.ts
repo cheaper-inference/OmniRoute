@@ -48,10 +48,11 @@ const route = await import("../../src/app/api/search/providers/route.ts");
 // Constants
 // ---------------------------------------------------------------------------
 
-// 21 search-kind providers: serper, brave, perplexity, exa, tavily, nimble-search, firecrawl,
+// 23 search-kind providers: serper, brave, perplexity, exa, tavily, nimble-search, firecrawl,
 // google-pse, linkup, searchapi, youcom, searxng, ollama, zai, jina-search, anysearch-search,
-// context7 (#11140), duckduckgo-free, x-search, xquik-search, parallel-search, kimi-search.
-const EXPECTED_SEARCH_COUNT = 22;
+// context7 (#11140), duckduckgo-free, x-search, xquik-search, parallel-search, kimi-search,
+// codex-search.
+const EXPECTED_SEARCH_COUNT = 23;
 const EXPECTED_FETCH_COUNT = 7;
 const EXPECTED_TOTAL = EXPECTED_SEARCH_COUNT + EXPECTED_FETCH_COUNT;
 
@@ -417,4 +418,14 @@ test("search-providers-catalog: perplexity-search uses credential fallback", asy
     "configured",
     "perplexity-search should be 'configured' via fallback to perplexity credentials"
   );
+});
+
+test("search-providers-catalog: codex-search is configured via a connected Codex account", async () => {
+  await seedActiveConnection("codex");
+  const res = await route.GET(await buildAuthRequest());
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  const codex = body.providers.find((p: { id: string }) => p.id === "codex-search");
+  assert.equal(codex?.status, "configured");
+  assert.deepEqual(codex.searchTypes, ["web", "news"]);
 });

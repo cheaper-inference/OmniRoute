@@ -259,6 +259,7 @@
       "tests/unit/codex-quota-selection-hydration.test.ts",
       "tests/unit/codex-responses-to-chat-9161.test.ts",
       "tests/unit/codex-same-account-transport-retry-9708.test.ts",
+      "tests/unit/codex-search-isolation.test.ts",
       "tests/unit/codex-session-affinity-reset-aware-5903.test.ts",
       "tests/unit/codex-stream-false.test.ts",
       "tests/unit/codex-turn-state.test.ts",

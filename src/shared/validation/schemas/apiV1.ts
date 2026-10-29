@@ -588,6 +588,7 @@ export const v1SearchSchema = z.preprocess(
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) return raw;
     const o = { ...(raw as Record<string, unknown>) };
     if (o.provider === "x_search") o.provider = "x-search";
+    if (o.provider === "codex_search") o.provider = "codex-search";
     if (o.provider === "xquik" || o.provider === "xquik_search") o.provider = "xquik-search";
     if (o.provider === "anysearch" || o.provider === "anysearch_search")
       o.provider = "anysearch-search";

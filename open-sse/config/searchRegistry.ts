@@ -489,6 +489,25 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     includedResults: 10,
     extraResultCost: 0.001,
   },
+
+  // Subscription-backed, not free: auto-selected as a credentialed last resort only when
+  // CODEX_SEARCH_AUTO_FALLBACK_ENABLED is on (src/lib/search/codexSearchAutoFallback.ts).
+  "codex-search": {
+    id: "codex-search",
+    name: "Codex Web Search (ChatGPT)",
+    baseUrl: "https://chatgpt.com/backend-api/codex/responses",
+    method: "POST",
+    authType: "apikey",
+    authHeader: "bearer",
+    costPerQuery: 0,
+    freeMonthlyQuota: 0,
+    searchTypes: ["web", "news"],
+    defaultMaxResults: 5,
+    maxMaxResults: 10,
+    timeoutMs: 60_000,
+    cacheTTLMs: 10 * 60 * 1000,
+    fallbackOnly: true,
+  },
 };
 
 /**
@@ -501,6 +520,7 @@ export const SEARCH_CREDENTIAL_FALLBACKS: Record<string, string | string[]> = {
   "zai-search": "zai",
   "jina-search": "jina-ai",
   "x-search": ["xai-oauth", "xao", "xai"],
+  "codex-search": ["codex"],
 };
 
 export function getSearchCredentialFallbacks(providerId: string): string[] {
@@ -543,6 +563,7 @@ export const SEARCH_PROVIDER_ALIASES: Record<string, string> = {
   anysearch: "anysearch-search",
   anysearch_search: "anysearch-search",
   parallel: "parallel-search",
+  codex_search: "codex-search",
 };
 
 export function resolveSearchProviderId(providerId: string): string {
