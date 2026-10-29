@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { rosebudTools } from "../../open-sse/mcp-server/tools/rosebudTools.ts";
+import { rosebudTools, rosebudToolResult } from "../../open-sse/mcp-server/tools/rosebudTools.ts";
 import { rosebudArtifactType } from "../../open-sse/services/rosebud/artifact.ts";
 import { isLocalOnlyPath } from "../../src/server/authz/routeGuard.ts";
 
@@ -29,4 +29,13 @@ test("download validation rejects a file in the wrong modality", () => {
     () => rosebudArtifactType(Buffer.from("not an asset"), "image"),
     /invalid_artifact/
   );
+});
+
+test("MCP binary downloads survive text accessibility truncation", () => {
+  const artifact = Buffer.alloc(100000, 42).toString("base64");
+  const result = rosebudToolResult({ b64_data: artifact, mime_type: "image/png" });
+  assert.equal(result.structuredContent?.b64_data, artifact);
+  assert.ok(result.content[0].text.length < 1000);
+  assert.equal(JSON.parse(result.content[0].text).artifactField, "structuredContent.b64_data");
+  assert.equal(rosebudToolResult({ balance: 10 }).structuredContent, undefined);
 });

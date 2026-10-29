@@ -157,3 +157,5 @@ Use an account without concurrent external generation when comparing balances.
 The private job directory is owned by one OmniRoute server process; sharing it
 between independently running servers is unsupported. A missing or malformed
 crashed-worker lease requires operator reconciliation rather than guessed retries.
+
+MCP artifact downloads place intact Base64 data in `structuredContent.b64_data`; the text block contains only metadata so accessibility text shortening cannot corrupt the artifact. HTTP downloads return their existing Base64 JSON field.

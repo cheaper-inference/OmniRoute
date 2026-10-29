@@ -1,4 +1,4 @@
-import { rosebudTools } from "./tools/rosebudTools.ts";
+import { rosebudTools, rosebudToolResult } from "./tools/rosebudTools.ts";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { APP_CONFIG } from "@/shared/constants/appConfig";
@@ -957,9 +957,7 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
         tool.name,
         async (args) => {
           try {
-            return {
-              content: [{ type: "text" as const, text: JSON.stringify(await tool.handler(args)) }],
-            };
+            return rosebudToolResult(await tool.handler(args));
           } catch (error) {
             return {
               isError: true,
