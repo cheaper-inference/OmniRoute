@@ -1,3 +1,4 @@
+import { findRosebudImageConnection } from "@/lib/rosebud/provider";
 import { rosebudImageBinding } from "@omniroute/open-sse/services/rosebud/imageBinding.ts";
 import { RosebudError } from "@omniroute/open-sse/services/rosebud/cli.ts";
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
@@ -310,6 +311,10 @@ async function postHandler(request, context) {
   if (provider === "rosebud") {
     try {
       rosebudPinned = await bindRosebud();
+      if (!rosebudPinned && typeof body.idempotency_key === "string") {
+        const legacy = await findRosebudImageConnection(body.idempotency_key, allowedConnections);
+        if (legacy) rosebudPinned = await bindRosebud(legacy);
+      }
     } catch (error) {
       return errorResponse(
         error instanceof RosebudError ? error.status : 503,

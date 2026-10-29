@@ -147,7 +147,16 @@ export class RosebudRuntime {
     if (job.profile !== profile) throw new RosebudError("job_not_found", 404);
     return job;
   }
-  async generate(profile: string, raw: unknown): Promise<RosebudJob> {
+  async jobForKey(profile: string, key: string): Promise<RosebudJob | undefined> {
+    await rosebudProfile(profile);
+    try {
+      return await this.read(profile, hash(JSON.stringify([profile, key])));
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+      throw error;
+    }
+  }
+  async generate(profile: string, raw: unknown, signal?: AbortSignal | null): Promise<RosebudJob> {
     const request = generationInput.parse(raw);
     const modelId = request.model.replace(/^rosebud\//, "");
     const model = (await this.models(profile)).find((entry) => entry.id === modelId);
@@ -203,6 +212,7 @@ export class RosebudRuntime {
       if (typeof quote.credits === "number") job.estimatedCredits = quote.credits;
       await writeFile(join(folder, "input.json"), JSON.stringify(input), { mode: 0o600 });
       await this.save(job);
+      if (signal?.aborted) throw new RosebudError("request_cancelled", 408);
       await mkdir(join(rosebudRoot(), "pending"), { recursive: true, mode: 0o700 });
       try {
         await writeFile(claim, job.id, { flag: "wx", mode: 0o600 });

@@ -60,6 +60,8 @@ test("durable jobs reuse a paid submission, bind account, and reject changed inp
     const runtime = new RosebudRuntime(runner);
     const request = { model: "test-image", input: { prompt: "sprite" }, idempotencyKey: "one" };
     const first = await runtime.generate("account-a", request);
+    assert.equal((await runtime.jobForKey("account-a", "one"))?.id, first.id);
+    assert.equal(await runtime.jobForKey("account-b", "one"), undefined);
     const resumed = await new RosebudRuntime(runner).generate("account-a", request);
     assert.equal(first.id, resumed.id);
     assert.equal(resumed.status, "succeeded");

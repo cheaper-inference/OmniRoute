@@ -58,11 +58,16 @@ export async function handleRosebudImageGeneration(options: {
       throw new RosebudError("use_asset_tool_for_non_raster_output", 400);
     }
     if (options.signal?.aborted) throw new RosebudError("request_cancelled", 408);
-    job = await generateRosebud(id, profile, {
-      model: body.model,
-      input,
-      idempotencyKey: body.idempotency_key,
-    });
+    job = await generateRosebud(
+      id,
+      profile,
+      {
+        model: body.model,
+        input,
+        idempotencyKey: body.idempotency_key,
+      },
+      options.signal
+    );
     recordRosebudJob(id, job);
     const deadline = Date.now() + 600000;
     while (!["succeeded", "failed", "cancelled"].includes(job.status)) {
