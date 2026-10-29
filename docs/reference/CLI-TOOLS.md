@@ -148,7 +148,7 @@ one surface without the others fails the suite instead of drifting silently.
 
 ---
 
-## 1. CLI Code's Catalog (27 tools)
+## 1. CLI Code's Catalog (28 tools)
 
 All tools that appear in `/dashboard/cli-code`. Those with `baseUrlSupport: none` are wired through MITM or a manual guide instead of a custom base URL:
 
@@ -175,6 +175,7 @@ All tools that appear in `/dashboard/cli-code`. Those with `baseUrlSupport: none
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |

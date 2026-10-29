@@ -299,88 +299,118 @@ Transport SSE dan HTTP yang dapat dialirkan sama-sama diblokir hingga server MCP
 
 ---
 
-## Autentikasi & Cakupan
+# Autentikasi & Cakupan
 
-Pemanggilan alat MCP membaca string cakupan dari pemanggil. Pemeriksaan tersebut merupakan salah satu dari tiga namespace independen. Kelulusan dari satu pemeriksa bukan berarti lulus dari pemeriksa lainnya. Aturannya terdapat di [Tiga namespace cakupan](#three-scope-namespaces).
-Katalog alat terdapat di [Cakupan alat MCP](#mcp-tool-scopes).
+Panggilan alat MCP membaca string cakupan dari pemanggil. Pemeriksaan itu adalah
+satu dari tiga namespace yang independen. Kelulusan dari satu pemeriksa bukan
+berarti kelulusan dari pemeriksa lainnya.
+Aturannya ada di [Tiga namespace cakupan](#three-scope-namespaces).
+Katalog alatnya ada di [Cakupan alat MCP](#mcp-tool-scopes).
 
-### Tiga namespace cakupan
+## Tiga namespace cakupan
 
-`manage` pada kunci API, `read:compression` pada alat MCP, dan `read` pada token akses `oma_live_…` merupakan tiga pemberian izin yang berbeda. Pemanggil yang mengirim token akses `read` ke rute pengelolaan yang melakukan mutasi akan mendapatkan HTTP 403
+`manage` pada sebuah API key, `read:compression` pada sebuah alat MCP, dan `read` pada
+access token `oma_live_…` adalah tiga hibah yang berbeda. Pemanggil yang mengirim access token `read`
+ke rute manajemen yang mengubah state akan mendapat HTTP 403
 `Access token scope 'read' is insufficient; 'write' required.`
-Peringkat tersebut adalah `scopeSatisfies`. Fungsi ini tidak memeriksa tabel MCP, dan pencocok MCP juga tidak memeriksanya.
+Tingkat itu adalah `scopeSatisfies`. Fungsi ini tidak mengacu pada tabel MCP, dan
+pencocok MCP juga tidak mengacu padanya.
 
-| Namespace             | Kredensial                                                                         | Pemeriksa                         | Kelulusan mengizinkan                                                   |
-| :-------------------- | :--------------------------------------------------------------------------------- | :-------------------------------- | :---------------------------------------------------------------------- |
-| Pengelolaan kunci API | `api_keys.scopes`                                                                  | `hasManageScope`                  | REST pengelolaan untuk kunci Bearer tersebut                            |
-| Aditif kunci API      | array yang sama, satu string persis                                                | pembantu yang disebutkan di bawah | Hanya satu kapabilitas tersebut                                         |
-| Cakupan alat MCP      | array yang sama, jika tidak ada MCP `_meta`, jika tidak ada `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                    | Alat tersebut, setelah penerapan diaktifkan                             |
-| Token akses           | `oma_live_…`                                                                       | `scopeSatisfies`                  | Rute pengelolaan yang metode dan path-nya memerlukan peringkat tersebut |
+| Namespace         | Credential                                                                                          | Checker                 | A pass allows                                                |
+| :---------------- | :-------------------------------------------------------------------------------------------------- | :---------------------- | :----------------------------------------------------------- |
+| Manajemen API key | `api_keys.scopes`                                                                                   | `hasManageScope`        | REST manajemen untuk Bearer key tersebut                     |
+| API key aditif    | array yang sama, satu string persis                                                                 | helper bernama di bawah | Hanya satu kapabilitas itu saja                              |
+| Cakupan alat MCP  | array yang sama, jika tidak ada `_meta` MCP (hanya HTTP/SSE), jika tidak ada `OMNIROUTE_MCP_SCOPES` | `scopeMatches`          | Alat tersebut, setelah penegakan aktif                       |
+| Access token      | `oma_live_…`                                                                                        | `scopeSatisfies`        | Rute manajemen yang method dan path-nya menuntut tingkat itu |
 
-Penerbitan setiap kredensial dibahas dalam
-[Autentikasi Pengelolaan](../guides/MANAGEMENT-AUTH.md).
+Penerbitan tiap kredensial dijelaskan di
+[Autentikasi Manajemen](../guides/MANAGEMENT-AUTH.md).
 
-#### Cakupan kunci API
+### Cakupan API key
 
-Satu array `api_keys.scopes` digunakan untuk dua tugas. Keduanya menggunakan fungsi yang berbeda.
+Satu array `api_keys.scopes` melayani dua kebutuhan. Keduanya memakai fungsi yang berbeda.
 
-**REST pengelolaan.** `manage` dan `admin` adalah anggota
+**REST manajemen.** `manage` dan `admin` adalah anggota dari
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` adalah fungsi yang mengotorisasi rute pengelolaan untuk kunci tersebut. `admin` memiliki kapabilitas pengelolaan pada rute-rute tersebut. Kata `admin` di sini bukan peringkat token akses dan tidak diperluas menjadi cakupan alat MCP.
+`hasManageScope` itulah yang mengotorisasi rute manajemen untuk key tersebut. `admin`
+berkemampuan manajemen pada rute-rute itu. Kata `admin` di sini bukan
+tingkat access token dan tidak meluas menjadi cakupan alat MCP.
 
-**String aditif.** Masing-masing merupakan pengujian keanggotaan persis, dan masing-masing tetap berada di luar `MANAGEMENT_API_KEY_SCOPES`.
+**String aditif.** Masing-masing adalah uji keanggotaan yang persis, dan masing-masing tetap berada
+di luar `MANAGEMENT_API_KEY_SCOPES`.
 
-| Cakupan                        | Kelulusan mengizinkan                                                                                                                                                           |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mcp:connect`                  | Hanya pengecualian LOCAL_ONLY `/api/mcp/` non-loopback (`hasMcpConnectOrManageScope`). Kunci dengan `manage` atau `admin` tetap lolos pengecualian tersebut.                    |
-| `self:usage`                   | `GET /api/v1/me/status` untuk kunci ini (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` menambahkan cakupan ini saat pembuatan (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Kuota akun upstream di dalam payload status tersebut (`src/lib/usage/apiKeySelfService.ts`). Rute status tetap memerlukan `self:usage`.                                         |
-| `policy:bypass-provider-quota` | Pemanggilan inferensi kunci ini melewati kebijakan kuota penyedia (`hasProviderQuotaBypassScope` dalam `src/sse/handlers/chat.ts`).                                             |
+| Cakupan                        | Kelulusan mengizinkan                                                                                                                                                         |
+| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Hanya pengecualian LOCAL_ONLY untuk `/api/mcp/` non-loopback (`hasMcpConnectOrManageScope`). Key dengan `manage` atau `admin` tetap lolos melalui pengecualian itu.           |
+| `self:usage`                   | `GET /api/v1/me/status` untuk key ini (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` menambahkan cakupan ini saat pembuatan (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Kuota akun upstream di dalam payload status tersebut (`src/lib/usage/apiKeySelfService.ts`). Rute status tetap menuntut `self:usage`.                                         |
+| `policy:bypass-provider-quota` | Panggilan inferensi milik key ini melewati kebijakan kuota provider (`hasProviderQuotaBypassScope` di `src/sse/handlers/chat.ts`).                                            |
 
-#### Pencocokan
+### Pencocokan
 
-Katalognya adalah tabel di bawah [Cakupan alat MCP](#mcp-tool-scopes). Jangan menganggap `MCP_SCOPE_LIST` dalam `src/shared/constants/mcpScopes.ts` sebagai katalog tersebut: itu adalah subset bertipe yang asli. Alat-alat yang ditambahkan kemudian mendeklarasikan cakupan tambahan di sampingnya (`read:notion`, `read:skills`, `read:local-corpus`, dan cakupan lainnya dalam tabel).
+Katalognya adalah tabel di bawah [Cakupan alat MCP](#mcp-tool-scopes). Jangan
+perlakukan `MCP_SCOPE_LIST` di `src/shared/constants/mcpScopes.ts` sebagai katalog
+tersebut: itu adalah subset bertipe asli. Alat yang lebih baru mendeklarasikan
+cakupan tambahan di sampingnya (`read:notion`, `read:skills`, `read:local-corpus`, dan
+sisa tabel).
 
-`evaluateToolScopes` dalam `open-sse/mcp-server/scopeEnforcement.ts` mengizinkan pemanggilan ketika setiap cakupan yang diperlukan cocok dengan suatu cakupan yang diberikan:
+`evaluateToolScopes` di `open-sse/mcp-server/scopeEnforcement.ts` mengizinkan suatu
+panggilan bila setiap cakupan yang diperlukan cocok dengan salah satu cakupan yang
+diberikan:
 
 - `*` cocok dengan setiap cakupan yang diperlukan.
-- Cakupan yang diberikan dan berakhiran `*` cocok dengan cakupan yang diperlukan jika cakupan tersebut diawali dengan prefiks sebelum tanda bintang. `read:*` cocok dengan `read:compression`.
-- Setiap cakupan lain yang diberikan hanya cocok dengan string persis yang diperlukan.
+- Cakupan yang diberikan dan berakhir dengan `*` cocok dengan cakupan yang diperlukan
+  dan diawali prefiks sebelum bintangnya. `read:*` cocok dengan `read:compression`.
+- Cakupan yang diberikan lainnya hanya cocok dengan string yang diperlukan yang identik.
 
-Kunci dengan cakupan `["manage"]` gagal dalam `scopeMatches` untuk `read:compression`.
-Pemanggilan yang sama gagal untuk `admin`, `mcp:connect`, `read`, dan `write` jika string tersebut merupakan satu-satunya cakupan yang diberikan. Tidak ada hierarki di antara cakupan alat MCP selain wildcard `*` di akhir.
+Key dengan cakupan `["manage"]` gagal pada `scopeMatches` untuk `read:compression`.
+Panggilan yang sama gagal untuk `admin`, `mcp:connect`, `read`, dan `write` ketika
+string-string itulah satu-satunya yang diberikan. Tidak ada hierarki di antara cakupan
+alat MCP selain `*` di akhir.
 
-Penerapan dinonaktifkan kecuali `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (nilai default
-`false`). Saat dinonaktifkan, `evaluateToolScopes` mengizinkan pemanggilan dan melewati katalog. Saat diaktifkan, HTTP menggunakan `api_keys.scopes` milik kunci Bearer sebagai `authInfo` (lihat [Pengikatan cakupan HTTP per kunci](#per-key-http-scope-binding-7895)).
-Jika tidak ada cakupan kunci yang dapat ditentukan, kumpulan cakupan yang diberikan akan beralih ke MCP `_meta`, lalu ke `OMNIROUTE_MCP_SCOPES`.
+Penegakan mati kecuali `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (bawaan
+`false`). Saat mati, `evaluateToolScopes` mengizinkan panggilan dan melewati
+katalog. Saat aktif, HTTP memakai `api_keys.scopes` milik Bearer key sebagai
+`authInfo` (lihat [Pengikatan cakupan HTTP per-key](#per-key-http-scope-binding-7895)).
+Ketika tidak ada cakupan key yang ter-resolve, himpunan yang diberikan jatuh ke `_meta` MCP (hanya dihormati
+untuk pemanggil HTTP/SSE, di dalam konteks autentikasi HTTP; `_meta` milik pemanggil stdio diabaikan
+karena dikendalikan klien dan tidak membawa identitas per-pemanggil), lalu
+`OMNIROUTE_MCP_SCOPES`.
 
-#### Cakupan token akses
+### Cakupan access token
 
-Token `oma_live_…` (`src/lib/accessTokens/scopes.ts`) membawa `read`, `write`, atau `admin`. `scopeSatisfies` adalah suatu peringkat: `admin` mencakup `write` dan `read`, sedangkan `write` mencakup `read`. Cakupan yang tidak dikenal tidak mencakup apa pun.
+Token `oma_live_…` (`src/lib/accessTokens/scopes.ts`) membawa `read`, `write`,
+atau `admin`. `scopeSatisfies` adalah sebuah tingkat: `admin` mencakup `write` dan
+`read`, dan `write` mencakup `read`. Cakupan yang tidak dikenal tidak mencakup apa pun.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) membandingkan peringkat tersebut dengan `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) membandingkan tingkat
+tersebut dengan `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD`, dan `OPTIONS` memerlukan `read`.
 - Setiap metode lainnya memerlukan `write`.
-- Path dalam `ADMIN_SCOPE_PREFIXES` memerlukan `admin` untuk setiap metode. `/api/mcp` termasuk dalam daftar tersebut, sehingga token akses `write` tetap tidak dapat memanggil permukaan HTTP MCP.
-- Path dalam `ADMIN_MUTATION_PREFIXES` hanya memerlukan `admin` untuk mutasi.
-- Path dalam `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) hanya memerlukan `admin` untuk mutasi, dan hanya pada path persis tersebut — sub-rute `/api/settings/*` lainnya tetap memerlukan `write`.
+- Path di dalam `ADMIN_SCOPE_PREFIXES` memerlukan `admin` untuk setiap metode. `/api/mcp`
+  berada di dalam daftar tersebut, sehingga access token `write` tetap tidak dapat
+  memanggil permukaan HTTP MCP.
+- Path di dalam `ADMIN_MUTATION_PREFIXES` memerlukan `admin` hanya untuk mutasi.
+- Path di dalam `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
+  `/api/settings/require-login`) memerlukan `admin` hanya untuk mutasi, dan hanya pada
+  path persis tersebut — sub-route `/api/settings/*` lainnya tetap memakai `write`.
 
-`PATCH /api/keys/{id}` adalah mutasi dan tidak tercantum dalam daftar admin tersebut, sehingga token
+`PATCH /api/keys/{id}` merupakan mutasi dan tidak terdapat dalam daftar admin tersebut, sehingga token
 `read` menerima 403
 `Access token scope 'read' is insufficient; 'write' required.`
-Token akses `write` atau `admin` memenuhi persyaratan rute tersebut. JWT dasbor, token machine-id CLI
-loopback, dan kunci API dengan `manage` atau `admin` mengambil
-cabang lain dan tidak dibatasi oleh peringkat ini.
+Access token `write` atau `admin` memenuhi route tersebut. JWT dashboard, token
+machine-id CLI loopback, serta API key dengan `manage` atau `admin` mengambil cabang
+lain dan tidak dipersempit oleh rank ini.
 
-Token akses yang lolos `scopeSatisfies` untuk `/api/mcp` hanya telah melewati
-gerbang manajemen. Panggilan alat tetap menjalankan `scopeMatches` terhadap cakupan
-kunci API. Peringkat token akses bukan merupakan input untuk `scopeMatches`.
+Access token yang lolos `scopeSatisfies` untuk `/api/mcp` baru melewati gerbang
+manajemen. Panggilan tool tetap menjalankan `scopeMatches` terhadap scope API key.
+Rank access token bukan merupakan input untuk `scopeMatches`.
 
-### Cakupan alat MCP
+### Scope tool MCP
 
-Penerapan cakupan dipusatkan di `open-sse/mcp-server/scopeEnforcement.ts`.
-Setiap alat memerlukan cakupan tertentu:
+Penegakan scope dipusatkan di `open-sse/mcp-server/scopeEnforcement.ts`.
+Setiap tool memerlukan scope tertentu:
 
 | Cakupan               | Alat                                                                                                                                                                        |
 | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -418,49 +448,17 @@ Setiap alat memerlukan cakupan tertentu:
 | `write:obsidian`      | 9 alat tulis — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …               |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                           |
 
-Cakupan wildcard didukung: `read:*` memberikan semua cakupan baca, sedangkan `*` memberikan akses penuh.
+Wildcard scope didukung: `read:*` memberi seluruh scope baca, `*` memberi akses penuh.
 
-### `mcp:connect` — kapabilitas rute terbatas (#7895)
+### `mcp:connect` — kapabilitas rute sempit (#7895)
 
-Mengakses transport MCP HTTP/SSE (`/api/mcp/*`) dari alamat non-loopback memerlukan
-pengecualian LOCAL_ONLY `/api/mcp/` (lihat `docs/security/ROUTE_GUARD_TIERS.md`). Sebelumnya,
-pengecualian tersebut hanya menerima kunci API dengan cakupan penuh `manage`/`admin` — terlalu luas bagi
-pemanggil yang hanya perlu berkomunikasi dengan MCP. `src/shared/constants/managementScopes.ts` kini
-mengekspor `MCP_CONNECT_SCOPE = "mcp:connect"`: cakupan tambahan yang terbatas (mengikuti preseden yang sama seperti
-`SELF_USAGE_SCOPE`) yang HANYA mengizinkan bypass `/api/mcp/` dalam
-`src/server/authz/policies/management.ts` — cakupan ini tidak memberikan akses ke rute manajemen lainnya
-dan sengaja TIDAK disertakan dalam `MANAGEMENT_API_KEY_SCOPES`. Kunci yang memiliki cakupan `manage`/`admin`
-tetap lolos dari pengecualian tersebut tanpa perubahan; `mcp:connect` merupakan alternatif dengan hak akses lebih rendah bagi
-pemanggil jarak jauh yang hanya menggunakan MCP, yang diperiksa melalui `hasMcpConnectOrManageScope()`.
+Menjangkau transport MCP HTTP/SSE (`/api/mcp/*`) dari non-loopback memerlukan pengecualian (carve-out) LOCAL_ONLY `/api/mcp/` (lihat `docs/security/ROUTE_GUARD_TIERS.md`). Secara historis, pengecualian tersebut hanya menerima API key dengan scope penuh `manage`/`admin` — terlalu luas untuk pemanggil yang hanya perlu berkomunikasi dengan MCP. Sekarang `src/shared/constants/managementScopes.ts` mengekspor `MCP_CONNECT_SCOPE = "mcp:connect"`: scope tambahan yang sempit (preseden yang sama dengan `SELF_USAGE_SCOPE`) yang HANYA mengotorisasi bypass `/api/mcp/` di `src/server/authz/policies/management.ts` — hal ini tidak memberi akses ke rute manajemen lain dan sengaja dijaga DI LUAR dari `MANAGEMENT_API_KEY_SCOPES`. API key yang memegang `manage`/`admin` tetap melewati pengecualian tersebut apa adanya; `mcp:connect` merupakan alternatif dengan hak akses lebih rendah untuk pemanggil MCP jarak jauh khusus, diperiksa melalui `hasMcpConnectOrManageScope()`.
 
-### Pengikatan cakupan HTTP per kunci (#7895)
+### Pengikatan scope HTTP per-key (#7895)
 
-Melalui HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` kini menyelesaikan
-`api_keys.scopes` aktual milik pemanggil melalui `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-dan meneruskannya ke `transport.handleRequest(req, { authInfo })` milik SDK MCP, sehingga
-`extra.authInfo.scopes` yang diterima oleh setiap pemanggilan alat mencerminkan cakupan milik kunci Bearer itu sendiri.
-`resolveCallerScopeContext()` dalam `scopeEnforcement.ts` telah memprioritaskan `authInfo` daripada
-fallback `_meta` dan variabel lingkungan `OMNIROUTE_MCP_SCOPES` — perubahan ini hanya mengisi sumber pertama
-dengan prioritas tertinggi tersebut, yang sebelumnya tidak terisi melalui HTTP. Ketika tidak ada kunci API yang dapat ditemukan
-(tidak ada header atau kunci tidak valid), `authInfo` tetap `undefined` dan proses resolusi beralih ke
-rantai meta/variabel lingkungan yang sudah ada tanpa perubahan. stdio tidak memiliki identitas per pemanggil (lihat
-`mcpCallerIdentity.ts`) dan tidak terpengaruh — stdio tetap menggunakan rantai fallback `_meta`/variabel lingkungan.
+Melalui HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` kini menyelesaikan scope asli `api_keys.scopes` milik pemanggil melalui `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) dan meneruskannya ke `transport.handleRequest(req, { authInfo })` milik MCP SDK, sehingga `extra.authInfo.scopes` yang mencapai setiap pemanggilan tool mencerminkan scope milik key Bearer itu sendiri. Fungsi `resolveCallerScopeContext()` di `scopeEnforcement.ts` sudah memprioritaskan `authInfo` di atas fallback `_meta` dan env `OMNIROUTE_MCP_SCOPES` — perubahan ini hanya mengisi sumber pertama yang berprioritas tertinggi tersebut, yang sebelumnya tidak terisi melalui HTTP. Ketika tidak ada API key yang dapat diselesaikan (tidak ada header, key tidak valid), `authInfo` tetap `undefined` dan resolusi jatuh ke rantai `meta`/env yang ada tanpa perubahan. stdio tidak memiliki identitas per-pemanggil (lihat `mcpCallerIdentity.ts`) dan tidak terpengaruh oleh pengikatan per-key — stdio melewati langkah `_meta` (`_meta` hanya dihormati di dalam konteks autentikasi HTTP, #15159) dan menyelesaikan dari env key `OMNIROUTE_MCP_SCOPES` saja.
 
-**Penerapan cakupan dipaksakan untuk pemanggil HTTP/SSE bercakupan terbatas, terlepas dari
-`OMNIROUTE_MCP_ENFORCE_SCOPES`.** Nilai default `false` untuk `OMNIROUTE_MCP_ENFORCE_SCOPES` hanya
-aman bagi alur operator tunggal lokal/stdio, yang tidak memiliki identitas per pemanggil untuk dijadikan dasar
-pembatasan cakupan. `open-sse/mcp-server/server.ts::withScopeEnforcement()` mengaktifkan penerapan
-cakupan per alat tanpa syarat (`shouldForceScopeEnforcement()` dalam `scopeEnforcement.ts`)
-setiap kali `resolveCallerScopeContext()` menghasilkan
-`source === "authInfo"` (yaitu header HTTP Authorization per kunci yang nyata, khusus HTTP/SSE) DAN kunci tersebut
-tidak memiliki cakupan penuh `manage`/`admin`. Hal ini menutup celah yang memungkinkan kunci yang HANYA memiliki
-cakupan bypass terbatas `mcp:connect` — yang didokumentasikan di atas sebagai tidak mengizinkan apa pun selain
-pengecualian LOCAL_ONLY `/api/mcp/` — untuk memanggil setiap alat MCP setelah operator
-mengaktifkan akses MCP jarak jauh/non-loopback, hanya karena `OMNIROUTE_MCP_ENFORCE_SCOPES` secara default
-dikirim dengan nilai `false`. Kunci penuh `manage`/`admin` melalui HTTP, serta setiap pemanggil stdio/lokal, tetap
-mempertahankan perilaku yang dikendalikan oleh `OMNIROUTE_MCP_ENFORCE_SCOPES` tanpa perubahan.
-
----
+**Penegakan dipaksa aktif untuk pemanggil HTTP/SSE dengan scope sempit, apa pun nilai `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Nilai default `OMNIROUTE_MCP_ENFORCE_SCOPES` sebesar `false` hanya aman untuk alur lokal/stdio dengan satu operator, di mana tidak ada identitas per-pemanggil yang bisa dijadikan acuan scope. `open-sse/mcp-server/server.ts::withScopeEnforcement()` menyalakan penegakan scope per-tool secara tanpa syarat (`shouldForceScopeEnforcement()` di `scopeEnforcement.ts`) setiap kali `resolveCallerScopeContext()` menyelesaikan `source === "authInfo"` (yaitu header Authorization HTTP per-key yang sesungguhnya, khusus HTTP/SSE) DAN key tersebut tidak memegang scope penuh `manage`/`admin`. Ini menutup celah di mana key yang HANYA memegang scope bypass sempit `mcp:connect` — yang di atas didokumentasikan sebagai otoritasi tidak selain pengecualian LOCAL_ONLY `/api/mcp/` — sebenarnya bisa memanggil setiap tool MCP begitu operator mengaktifkan akses MCP jarak jauh/non-loopback, semata-mata karena `OMNIROUTE_MCP_ENFORCE_SCOPES` dikirim dengan default `false`. Key `manage`/`admin` penuh melalui HTTP, serta setiap pemanggil stdio/lokal, mempertahankan perilaku yang dikendalikan oleh `OMNIROUTE_MCP_ENFORCE_SCOPES` tanpa perubahan.
 
 ## Variabel Lingkungan
 

@@ -1,0 +1,1 @@
+- **feat(antigravity):** add `gemini_4_argon` (`argon`) quota family, weekly quota summary normalization (`gemini_4_argon_weekly` / `argon_weekly`), `detectAntigravityArgonEligibility` entitlement sync, and 404 retry short-circuiting for Gemini 4 Argon models ([#18026](https://github.com/cheaper-inference/OmniRoute/pull/18026))

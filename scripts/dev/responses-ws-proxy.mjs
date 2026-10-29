@@ -20,6 +20,36 @@ function getWebSocketTransport() {
   return _websocketFn;
 }
 
+// Newest plain chrome profile the installed wreq-js ships, mirroring
+// newestChromeProfile() in open-sse/utils/tlsClient.ts (kept dependency-free
+// here because this dev proxy is plain .mjs).
+let _newestChrome = null;
+function newestChromeBrowser() {
+  if (_newestChrome) return _newestChrome;
+  let best = null;
+  let bestVersion = -1;
+  try {
+    const mod = _wreqRequire("wreq-js");
+    const profiles = typeof mod.getProfiles === "function" ? mod.getProfiles() : [];
+    for (const profile of profiles) {
+      if (!profile.startsWith("chrome_")) continue;
+      const versionStr = profile.slice("chrome_".length);
+      const version = Number(versionStr);
+      if (versionStr !== "" && Number.isInteger(version) && version > bestVersion) {
+        best = profile;
+        bestVersion = version;
+      }
+    }
+  } catch (err) {
+    throw new Error(`wreq-js browser profiles unavailable: ${err?.message ?? err}`);
+  }
+  if (best === null) {
+    throw new Error("wreq-js exposes no chrome_* browser profiles");
+  }
+  _newestChrome = best;
+  return _newestChrome;
+}
+
 export const RESPONSES_WS_PUBLIC_PATHS = new Set([
   "/responses",
   "/v1/responses",
@@ -741,9 +771,9 @@ class ResponsesWsSession {
       const prepared = await this.runPrepare(firstMessage, responseBody);
 
       const wsOptions = {
-        // #5591: chrome_149 is not a wreq-js 2.3.1 profile (max chrome_147); the
-        // prepare route now sends chrome_142, this fallback matches it.
-        browser: prepared.json.browser || "chrome_142",
+        // Match the prepare route (src/app/api/internal/codex-responses-ws/route.ts),
+        // which resolves the newest profile from the installed wreq-js catalog.
+        browser: prepared.json.browser || newestChromeBrowser(),
         os: prepared.json.os || "windows",
         headers: prepared.json.headers || {},
       };
