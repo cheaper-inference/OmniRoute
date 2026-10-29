@@ -1,0 +1,1 @@
+- **fix(providers):** Route `gpt-6-astra`, `gpt-6.1-sol`, and `gpt-5.6-sol` through AgentRouter's Responses endpoint by default while preserving explicit connection protocol settings
