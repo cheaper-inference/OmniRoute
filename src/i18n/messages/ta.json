@@ -6663,7 +6663,8 @@
       "kiro": "இலவச அடுக்கு: 50 கிரெடிட்கள்/மாதம் (~25K–100K டோக்கன்கள்). ⚠️ Kiro ToS மூன்றாம் தரப்பு proxy/harness பயன்பாட்டைத் தடைசெய்கிறது.",
       "codex": "தற்போதுள்ள OAuth செயல்முறையுடன் OpenAI Codex-ஐ இணைக்கவும்.",
       "qwen": "தற்போதுள்ள OAuth செயல்முறையுடன் Qwen Code-ஐ இணைக்கவும்.",
-      "github-models": "github.com/settings/tokens இல் 'models: read' வரம்புடன் ஒரு GitHub PAT ஐ உருவாக்கவும்"
+      "github-models": "github.com/settings/tokens இல் 'models: read' வரம்புடன் ஒரு GitHub PAT ஐ உருவாக்கவும்",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} வழங்குநரின் சொந்த மாதிரி ஐடிகளை ஏற்றுக்கொள்கிறது. /மாடல்களில் இருந்து இறக்குமதி செய்யவும் அல்லது ரூட்டிங் செய்ய தனிப்பயன் ஐடிகளைச் சேர்க்கவும்.",
     "bedrockModelsDescription": "அமேசான் பெட்ராக் மாதிரிகள் AWS பிராந்தியத்தால் ஸ்கோப் செய்யப்படுகின்றன. /மாடல்களில் இருந்து இறக்குமதி செய்யவும் அல்லது தேர்ந்தெடுக்கப்பட்ட பகுதியில் செயல்படுத்தப்பட்ட பெட்ராக் மாடல் ஐடிகளைச் சேர்க்கவும்.",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "தவறான JSON.",
     "mappingMustBeObject": "மேப்பிங் ஒரு JSON பொருளாக இருக்க வேண்டும், வரிசை அல்லது எளிய மதிப்பாக இருக்கக்கூடாது.",
     "mappingValueMustBeString": "“{key}” விசைக்கான மதிப்பு ஒரு சரமாக இருக்க வேண்டும்.",
-    "save": "சேமி"
+    "save": "சேமி",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

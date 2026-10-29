@@ -6663,7 +6663,8 @@
       "kiro": "Nemokamas planas: 50 kreditų per mėnesį (~25K–100K žetonų). ⚠️ Kiro ToS draudžia naudoti trečiųjų šalių tarpinius serverius ar valdymo įrankius.",
       "codex": "Prijunkite OpenAI Codex naudodami esamą OAuth procesą.",
       "qwen": "Prijunkite Qwen Code naudodami esamą OAuth procesą.",
-      "github-models": "Sukurkite GitHub PAT su „models: read“ aprėptimi adresu github.com/settings/tokens"
+      "github-models": "Sukurkite GitHub PAT su „models: read“ aprėptimi adresu github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} priima teikėjui būdingus modelių ID. Importuokite juos iš /models arba pridėkite pasirinktinius ID maršrutizavimui.",
     "bedrockModelsDescription": "Amazon Bedrock modeliai susieti su AWS regionu. Importuokite juos iš /models arba pridėkite pasirinktame regione įgalintų Bedrock modelių ID.",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "Netinkamas JSON.",
     "mappingMustBeObject": "Susiejimas turi būti JSON objektas, o ne masyvas ar primityvioji reikšmė.",
     "mappingValueMustBeString": "Rakto „{key}“ reikšmė turi būti eilutė.",
-    "save": "Išsaugoti"
+    "save": "Išsaugoti",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

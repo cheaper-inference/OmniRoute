@@ -495,6 +495,11 @@
       "configSource": "opencode-go",
       "provider": "opencode-go"
     },
+    "opencode-server": {
+      "className": "OpencodeServerExecutor",
+      "configSource": "opencode-server",
+      "provider": "opencode-server"
+    },
     "opencode-zen": {
       "className": "OpencodeExecutor",
       "configSource": "opencode-zen",
@@ -701,6 +706,6 @@
       "provider": "zai-web"
     }
   },
-  "keyCount": 140,
+  "keyCount": 141,
   "sharedInstances": []
 }

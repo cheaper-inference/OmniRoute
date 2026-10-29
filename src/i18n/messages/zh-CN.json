@@ -6740,7 +6740,8 @@
       "kiro": "免费层：50 积分/月（约 25K–100K 令牌）。⚠️ Kiro 服务条款禁止使用第三方代理/测试框架。",
       "codex": "使用现有的 OAuth 流程连接 OpenAI Codex。",
       "qwen": "使用现有的 OAuth 流程连接 Qwen Code。",
-      "github-models": "在 github.com/settings/tokens 创建具有 'models: read' 作用域的 GitHub PAT"
+      "github-models": "在 github.com/settings/tokens 创建具有 'models: read' 作用域的 GitHub PAT",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} 接受供应商本机模型 ID。从 /models 导入或添加用于路由的自定义 ID。",
     "bedrockModelsDescription": "Amazon Bedrock 模型的范围按 AWS 区域划分。从 /models 导入或添加在所选区域中启用的基岩模型 ID。",
@@ -9578,7 +9579,11 @@
     "mappingInvalidJson": "无效的 JSON。",
     "mappingMustBeObject": "映射必须是一个 JSON 对象，不能是数组或原始值。",
     "mappingValueMustBeString": "键 “{key}” 的值必须是字符串。",
-    "save": "保存"
+    "save": "保存",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "原始人引擎",

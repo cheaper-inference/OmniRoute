@@ -6740,7 +6740,8 @@
       "kiro": "Pulsuz səviyyə: ayda 50 kredit (~25K–100K token). ⚠️ Kiro istifadə şərtləri üçüncü tərəf proksi və ya harness istifadəsini qadağan edir.",
       "codex": "OpenAI Codex-i mövcud OAuth axını ilə qoşun.",
       "qwen": "Qwen Code-u mövcud OAuth axını ilə qoşun.",
-      "github-models": "github.com/settings/tokens ünvanında 'models: read' əhatə dairəsi ilə GitHub PAT yaradın"
+      "github-models": "github.com/settings/tokens ünvanında 'models: read' əhatə dairəsi ilə GitHub PAT yaradın",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} provayderin yerli model identifikatorlarını qəbul edir. /modellərdən idxal edin və ya marşrutlaşdırma üçün fərdi identifikatorlar əlavə edin.",
     "bedrockModelsDescription": "Amazon Bedrock modelləri AWS bölgəsi tərəfindən əhatə olunur. /modellərdən idxal edin və ya seçilmiş regionda aktivləşdirilmiş Bedrock model ID-lərini əlavə edin.",
@@ -9578,7 +9579,11 @@
     "mappingInvalidJson": "Yanlış JSON.",
     "mappingMustBeObject": "Uyğunlaşdırma massiv və ya primitiv dəyər deyil, JSON obyekti olmalıdır.",
     "mappingValueMustBeString": "“{key}” açarının dəyəri sətir olmalıdır.",
-    "save": "Saxla"
+    "save": "Saxla",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

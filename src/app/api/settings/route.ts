@@ -505,6 +505,22 @@ export async function PATCH(request: Request) {
       clearCliproxyapiUrlCache();
     }
 
+    // Same validation for the opencode server URL. The saved value reaches the
+    // executor through applyRuntimeSettings() (run by updateSettings), so an edit,
+    // including clearing it back to the default, applies at once. Only the URL is a
+    // setting; the CLI binary is env-only (see services/opencodeServerSettings.ts).
+    const ocsUrl = rawBody.opencode_server_url as string | undefined;
+    if (typeof ocsUrl === "string" && ocsUrl.trim() !== "") {
+      const urlValidation = validateProxyUrl(ocsUrl.trim());
+      if (urlValidation.valid === false) {
+        emitSettingsFailureAudit(request, actor, "OPENCODE_SERVER_URL_INVALID", attemptedKeys);
+        return NextResponse.json(
+          { error: `Invalid opencode server URL: ${urlValidation.error}` },
+          { status: 400 }
+        );
+      }
+    }
+
     const cpaModelMapping = rawBody.cliproxyapi_model_mapping as Record<string, string> | undefined;
 
     if (cpaFallback !== undefined || cpaUrl !== undefined || cpaModelMapping !== undefined) {

@@ -6663,7 +6663,8 @@
       "kiro": "Libreng tier: 50 credits/buwan (~25K–100K tokens). ⚠️ Ipinagbabawal ng Kiro ToS ang paggamit ng third-party proxy/harness.",
       "codex": "Ikonekta ang OpenAI Codex gamit ang umiiral na OAuth flow.",
       "qwen": "Ikonekta ang Qwen Code gamit ang umiiral na OAuth flow.",
-      "github-models": "Gumawa ng GitHub PAT na may 'models: read' na scope sa github.com/settings/tokens"
+      "github-models": "Gumawa ng GitHub PAT na may 'models: read' na scope sa github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "Tumatanggap ang {provider} ng mga provider-native na model ID. Mag-import mula sa /models o magdagdag ng mga custom na ID para sa pagruruta.",
     "bedrockModelsDescription": "Ang mga modelo ng Amazon Bedrock ay saklaw ng rehiyon ng AWS. Mag-import mula sa /models o magdagdag ng mga Bedrock model ID na pinagana sa napiling rehiyon.",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "Hindi wastong JSON.",
     "mappingMustBeObject": "Ang mapping ay dapat na isang JSON object, hindi isang array o primitive value.",
     "mappingValueMustBeString": "Ang value para sa key na “{key}” ay dapat na isang string.",
-    "save": "I-save"
+    "save": "I-save",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

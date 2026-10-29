@@ -6663,7 +6663,8 @@
       "kiro": "Besplatni plan: 50 kredita/mjesec (~25K–100K tokena). ⚠️ Uvjeti korištenja za Kiro zabranjuju upotrebu proxyja/alata trećih strana.",
       "codex": "Povežite OpenAI Codex putem postojećeg OAuth tijeka.",
       "qwen": "Povežite Qwen Code putem postojećeg OAuth tijeka.",
-      "github-models": "Kreirajte GitHub PAT s opsegom 'models: read' na github.com/settings/tokens"
+      "github-models": "Kreirajte GitHub PAT s opsegom 'models: read' na github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} prihvaća ID-ove modela izvorne za pružatelja. Uvezite iz /models ili dodajte prilagođene ID-ove za usmjeravanje.",
     "bedrockModelsDescription": "Amazon Bedrock modeli ograničeni su na određenu AWS regiju. Uvezite ih iz /models ili dodajte ID-ove Bedrock modela omogućenih u odabranoj regiji.",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "Nevažeći JSON.",
     "mappingMustBeObject": "Mapiranje mora biti JSON objekt, a ne niz ili primitivna vrijednost.",
     "mappingValueMustBeString": "Vrijednost za ključ „{key}” mora biti znakovni niz.",
-    "save": "Spremi"
+    "save": "Spremi",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Pećinski čovjek Engine",

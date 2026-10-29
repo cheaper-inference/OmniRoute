@@ -6740,7 +6740,8 @@
       "kiro": "ਮੁਫ਼ਤ ਟੀਅਰ: 50 ਕ੍ਰੈਡਿਟ/ਮਹੀਨਾ (~25K–100K ਟੋਕਨ)। ⚠️ Kiro ToS ਵਿੱਚ ਤੀਜੀ-ਧਿਰ ਪ੍ਰਾਕਸੀ/ਹਾਰਨੈੱਸ ਦੀ ਵਰਤੋਂ ਦੀ ਮਨਾਹੀ ਹੈ।",
       "codex": "ਮੌਜੂਦਾ OAuth ਫ਼ਲੋ ਨਾਲ OpenAI Codex ਨੂੰ ਕਨੈਕਟ ਕਰੋ।",
       "qwen": "ਮੌਜੂਦਾ OAuth ਫ਼ਲੋ ਨਾਲ Qwen Code ਨੂੰ ਕਨੈਕਟ ਕਰੋ।",
-      "github-models": "github.com/settings/tokens ਉੱਤੇ 'models: read' ਸਕੋਪ ਵਾਲਾ GitHub PAT ਬਣਾਓ"
+      "github-models": "github.com/settings/tokens ਉੱਤੇ 'models: read' ਸਕੋਪ ਵਾਲਾ GitHub PAT ਬਣਾਓ",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} ਪ੍ਰਦਾਤਾ-ਮੂਲ ਮਾਡਲ IDs ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ। /models ਤੋਂ ਇੰਪੋਰਟ ਕਰੋ ਜਾਂ ਰੂਟਿੰਗ ਲਈ ਕਸਟਮ IDs ਸ਼ਾਮਲ ਕਰੋ।",
     "bedrockModelsDescription": "Amazon Bedrock ਮਾਡਲਾਂ ਦਾ ਦਾਇਰਾ AWS ਖੇਤਰ ਅਨੁਸਾਰ ਹੁੰਦਾ ਹੈ। /models ਤੋਂ ਇੰਪੋਰਟ ਕਰੋ ਜਾਂ ਚੁਣੇ ਹੋਏ ਖੇਤਰ ਵਿੱਚ ਸਮਰੱਥ ਕੀਤੀਆਂ Bedrock ਮਾਡਲ IDs ਸ਼ਾਮਲ ਕਰੋ।",
@@ -9578,7 +9579,11 @@
     "mappingInvalidJson": "ਅਵੈਧ JSON।",
     "mappingMustBeObject": "ਮੈਪਿੰਗ ਇੱਕ JSON ਆਬਜੈਕਟ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ, ਐਰੇ ਜਾਂ ਪ੍ਰਿਮਿਟਿਵ ਮੁੱਲ ਨਹੀਂ।",
     "mappingValueMustBeString": "ਕੁੰਜੀ “{key}” ਲਈ ਮੁੱਲ ਇੱਕ ਸਤਰ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।",
-    "save": "ਸੁਰੱਖਿਅਤ ਕਰੋ"
+    "save": "ਸੁਰੱਖਿਅਤ ਕਰੋ",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

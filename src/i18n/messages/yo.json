@@ -6663,7 +6663,8 @@
       "kiro": "Ìpele ọ̀fẹ́: kírẹ́díìtì 50/oṣù (~25K–100K tokens). ⚠️ Àwọn ToS Kiro kọ lílo proxy/harness ẹni-kẹta.",
       "codex": "So OpenAI Codex pọ̀ pẹ̀lú ìṣàn OAuth tó wà tẹ́lẹ̀.",
       "qwen": "So Qwen Code pọ̀ pẹ̀lú ìṣàn OAuth tó wà tẹ́lẹ̀.",
-      "github-models": "Ṣẹ̀dá GitHub PAT kan pẹ̀lú àyè 'models: read' ní github.com/settings/tokens"
+      "github-models": "Ṣẹ̀dá GitHub PAT kan pẹ̀lú àyè 'models: read' ní github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} ń gba àwọn ID model abinibi-provider. Gbé wọlé láti /models tàbí fi àwọn ID àdáni kún un fún ìdarí ipa-ọ̀nà.",
     "bedrockModelsDescription": "Àwọn model Amazon Bedrock jẹ́ dídín mọ́ agbègbè AWS. Gbé wọlé láti /models tàbí fi àwọn ID model Bedrock tí a ti mú ṣiṣẹ́ ní agbègbè tí a yàn kún un.",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "JSON kò tọ́.",
     "mappingMustBeObject": "Ìbáramu náà gbọ́dọ̀ jẹ́ ohun JSON, kì í ṣe àkójọpọ̀ tàbí iye ìpilẹ̀.",
     "mappingValueMustBeString": "Iye fún kọ́kọ́rọ́ “{key}” gbọ́dọ̀ jẹ́ ọ̀rọ̀.",
-    "save": "Fipamọ́"
+    "save": "Fipamọ́",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

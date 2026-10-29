@@ -6663,7 +6663,8 @@
       "kiro": "Ọkwa efu: kredit 50 kwa ọnwa (~token 25K–100K). ⚠️ ToS Kiro machibidoro ojiji proxy/harness nke ndị ọzọ.",
       "codex": "Jikọọ OpenAI Codex site na usoro OAuth dị ugbu a.",
       "qwen": "Jikọọ Qwen Code site na usoro OAuth dị ugbu a.",
-      "github-models": "Mepụta GitHub PAT nwere scope 'models: read' na github.com/settings/tokens"
+      "github-models": "Mepụta GitHub PAT nwere scope 'models: read' na github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} na-anabata ID ụdị nke provider n’onwe ya. Bubata ha site na /models ma ọ bụ tinye ID ahaziri iche maka routing.",
     "bedrockModelsDescription": "A na-ekewa ụdị Amazon Bedrock dịka mpaghara AWS si dị. Bubata ha site na /models ma ọ bụ tinye ID ụdị Bedrock enyere ikike na mpaghara ahọpụtara.",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "JSON ezighi ezi.",
     "mappingMustBeObject": "Njikọ ahụ ga-abụrịrị ihe JSON, ọ bụghị usoro ma ọ bụ uru dị mfe.",
     "mappingValueMustBeString": "Uru maka igodo “{key}” ga-abụrịrị eriri ederede.",
-    "save": "Chekwaa"
+    "save": "Chekwaa",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

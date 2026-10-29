@@ -6663,7 +6663,8 @@
       "kiro": "Sraith saor in aisce: 50 creidmheas/mí (~25K–100K comharthaí). ⚠️ Cuireann ToS Kiro cosc ar úsáid proxy/harness tríú páirtí.",
       "codex": "Ceangail OpenAI Codex leis an sreabhadh OAuth atá ann cheana.",
       "qwen": "Ceangail Qwen Code leis an sreabhadh OAuth atá ann cheana.",
-      "github-models": "Cruthaigh PAT GitHub le scóip 'models: read' ag github.com/settings/tokens"
+      "github-models": "Cruthaigh PAT GitHub le scóip 'models: read' ag github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "Glacann {provider} le haitheantais samhlacha atá dúchasach don soláthraí. Iompórtáil ó /models nó cuir aitheantais shaincheaptha leis le haghaidh ródaithe.",
     "bedrockModelsDescription": "Tá samhlacha Amazon Bedrock teoranta de réir réigiún AWS. Iompórtáil ó /models nó cuir aitheantais samhlacha Bedrock atá cumasaithe sa réigiún roghnaithe leis.",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "JSON neamhbhailí.",
     "mappingMustBeObject": "Ní mór don mhapáil a bheith ina hoibiacht JSON, ní ina heagar ná ina luach prímitíoch.",
     "mappingValueMustBeString": "Ní mór gur teaghrán é an luach don eochair “{key}”.",
-    "save": "Sábháil"
+    "save": "Sábháil",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Inneall Caveman",

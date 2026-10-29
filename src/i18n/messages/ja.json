@@ -6663,7 +6663,8 @@
       "kiro": "無料枠: 50クレジット/月（約25K〜100Kトークン）。⚠️ Kiroの利用規約（ToS）は、サードパーティのプロキシやハーネスの使用を禁止しています。",
       "codex": "既存のOAuthフローを使用してOpenAI Codexに接続します。",
       "qwen": "既存のOAuthフローを使用してQwen Codeに接続します。",
-      "github-models": "github.com/settings/tokens で 'models: read' スコープを持つGitHub PATを作成"
+      "github-models": "github.com/settings/tokens で 'models: read' スコープを持つGitHub PATを作成",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} は、プロバイダーネイティブのモデル ID を受け入れます。 /models からインポートするか、ルーティング用のカスタム ID を追加します。",
     "bedrockModelsDescription": "Amazon Bedrock モデルは、AWS リージョンによって範囲が定められています。 /models からインポートするか、選択したリージョンで有効になっている Bedrock モデル ID を追加します。",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "無効なJSONです。",
     "mappingMustBeObject": "マッピングは配列やプリミティブ値ではなく、JSONオブジェクトである必要があります。",
     "mappingValueMustBeString": "キー“{key}”の値は文字列である必要があります。",
-    "save": "保存"
+    "save": "保存",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

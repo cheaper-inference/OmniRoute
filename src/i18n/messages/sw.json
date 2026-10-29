@@ -6663,7 +6663,8 @@
       "kiro": "Kiwango cha bure: mikopo 50/mwezi (~tokeni 25K–100K). ⚠️ Kiro ToS inakataza matumizi ya proksi/harness ya wahusika wengine.",
       "codex": "Unganisha OpenAI Codex na mtiririko uliopo wa OAuth.",
       "qwen": "Unganisha Qwen Code na mtiririko uliopo wa OAuth.",
-      "github-models": "Unda PAT ya GitHub yenye upeo wa 'models: read' kwenye github.com/settings/tokens"
+      "github-models": "Unda PAT ya GitHub yenye upeo wa 'models: read' kwenye github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} inakubali vitambulisho vya asili vya mtoa huduma. Ingiza kutoka /miundo au ongeza vitambulisho maalum vya kuelekeza.",
     "bedrockModelsDescription": "Mitindo ya Amazon Bedrock inatolewa na eneo la AWS. Ingiza kutoka /miundo au ongeza vitambulisho vya muundo wa Bedrock vilivyowezeshwa katika eneo lililochaguliwa.",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "JSON si sahihi.",
     "mappingMustBeObject": "Ulinganishaji lazima uwe kitu cha JSON, si safu au thamani ya kimsingi.",
     "mappingValueMustBeString": "Thamani ya ufunguo “{key}” lazima iwe string.",
-    "save": "Hifadhi"
+    "save": "Hifadhi",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

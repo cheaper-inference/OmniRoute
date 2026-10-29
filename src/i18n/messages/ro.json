@@ -6663,7 +6663,8 @@
       "kiro": "Nivel gratuit: 50 de credite/lună (~25K–100K tokenuri). ⚠️ Kiro ToS interzice utilizarea de proxy/harness terțe.",
       "codex": "Conectați OpenAI Codex cu fluxul OAuth existent.",
       "qwen": "Conectați Qwen Code cu fluxul OAuth existent.",
-      "github-models": "Creați un GitHub PAT cu scope-ul 'models: read' la github.com/settings/tokens"
+      "github-models": "Creați un GitHub PAT cu scope-ul 'models: read' la github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} acceptă ID-uri de model native ale furnizorului. Importați din /modele sau adăugați ID-uri personalizate pentru rutare.",
     "bedrockModelsDescription": "Modelele Amazon Bedrock sunt acoperite de regiunea AWS. Importați din /modele sau adăugați ID-uri de model Bedrock activate în regiunea selectată.",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "JSON nevalid.",
     "mappingMustBeObject": "Maparea trebuie să fie un obiect JSON, nu un tablou sau o valoare primitivă.",
     "mappingValueMustBeString": "Valoarea pentru cheia „{key}” trebuie să fie un șir de caractere.",
-    "save": "Salvați"
+    "save": "Salvați",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Motorul Caveman",

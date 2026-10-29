@@ -1,5 +1,6 @@
 import { clearHealthCheckLogCache } from "@/lib/tokenHealthCheck";
 import { setCustomBannedSignals } from "@omniroute/open-sse/services/accountFallback.ts";
+import { setOpencodeServerSettings } from "@omniroute/open-sse/services/opencodeServerSettings.ts";
 import {
   setOperatorProviderErrorRules,
   type OperatorProviderErrorRule,
@@ -24,7 +25,8 @@ export type RuntimeReloadSection =
   | "systemTransforms"
   | "systemPrompt"
   | "authzBypass"
-  | "bannedSignals";
+  | "bannedSignals"
+  | "opencodeServer";
 
 export interface RuntimeReloadChange {
   section: RuntimeReloadSection;
@@ -54,6 +56,7 @@ interface RuntimeSettingsSnapshot {
   authzBypass: AuthzBypassSnapshot;
   customBannedSignals: string[];
   providerErrorRules: Record<string, OperatorProviderErrorRule[]> | null;
+  opencodeServerUrl: string;
 }
 
 // Default bypass policy: kill-switch on, `/api/mcp/` bypassable. Mirrors the
@@ -82,6 +85,7 @@ const DEFAULT_RUNTIME_SETTINGS_SNAPSHOT: RuntimeSettingsSnapshot = {
   authzBypass: DEFAULT_AUTHZ_BYPASS_SNAPSHOT,
   customBannedSignals: [],
   providerErrorRules: null,
+  opencodeServerUrl: "",
 };
 
 let lastAppliedSnapshot: RuntimeSettingsSnapshot | null = null;
@@ -311,6 +315,8 @@ export function buildRuntimeSettingsSnapshot(
     authzBypass: normalizeAuthzBypass(settings),
     customBannedSignals: normalizeStringArray(settings.customBannedSignals),
     providerErrorRules: normalizeOperatorProviderErrorRules(settings.providerErrorRules),
+    opencodeServerUrl:
+      typeof settings.opencode_server_url === "string" ? settings.opencode_server_url.trim() : "",
   };
 }
 
@@ -632,6 +638,11 @@ export async function applyRuntimeSettings(
     hasChanged(currentSnapshot.providerErrorRules, previousSnapshot.providerErrorRules)
   ) {
     setOperatorProviderErrorRules(currentSnapshot.providerErrorRules ?? undefined);
+  }
+
+  if (force || hasChanged(currentSnapshot.opencodeServerUrl, previousSnapshot.opencodeServerUrl)) {
+    setOpencodeServerSettings({ url: currentSnapshot.opencodeServerUrl });
+    markChanged("opencodeServer");
   }
 
   lastAppliedSnapshot = currentSnapshot;

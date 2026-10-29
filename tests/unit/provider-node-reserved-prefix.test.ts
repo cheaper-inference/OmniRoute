@@ -218,7 +218,11 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 431.
   // The current catalog removes the Free provider id and oc alias (432 -> 430).
   // ainetcafe (#13862) registers id "ainetcafe" with the same alias — one more (432 -> 433).
-  assert.equal(RESERVED_PREFIX_COUNT, 433);
+  // opencode-server (#16995) registers id "opencode-server" plus the distinct alias "ocs" —
+  // two more (433 -> 435). Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 435.
+  assert.equal(RESERVED_PREFIX_COUNT, 435);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("opencode-server"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("ocs"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
 });
 

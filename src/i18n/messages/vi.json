@@ -6656,7 +6656,8 @@
       "codex": "Kết nối OpenAI Codex bằng luồng OAuth hiện có.",
       "qwen": "Kết nối Qwen Code bằng luồng OAuth hiện có.",
       "github-models": "Tạo GitHub PAT với phạm vi 'models: read' tại github.com/settings/tokens",
-      "apmix": "Kết nối Apmix bằng khóa API từ apmix.ai/dashboard — một gói đăng ký, nhiều mô hình."
+      "apmix": "Kết nối Apmix bằng khóa API từ apmix.ai/dashboard — một gói đăng ký, nhiều mô hình.",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} chấp nhận ID mô hình gốc của nhà cung cấp. Nhập từ /models hoặc thêm ID tùy chỉnh để định tuyến.",
     "bedrockModelsDescription": "Các mô hình Amazon Bedrock được giới hạn theo vùng AWS. Nhập từ /models hoặc thêm ID mô hình Bedrock được bật trong vùng đã chọn.",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "JSON không hợp lệ.",
     "mappingMustBeObject": "Ánh xạ phải là một đối tượng JSON, không được là mảng hoặc giá trị nguyên thủy.",
     "mappingValueMustBeString": "Giá trị của khóa “{key}” phải là chuỗi.",
-    "save": "Lưu"
+    "save": "Lưu",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Công cụ Caveman",

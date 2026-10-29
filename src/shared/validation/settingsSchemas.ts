@@ -570,6 +570,26 @@ export const updateSettingsSchema = z.object({
     )
     .optional(),
   cliproxyapi_fallback_codes: z.string().max(200).optional(),
+  // opencode server (the headless server of the opencode CLI, `opencode serve`).
+  // Empty = fall back to OPENCODE_SERVER_URL / http://127.0.0.1:4096. The
+  // executor interpolates this into fetch(`${url}/...`), so restrict to http(s)
+  // like headroomUrl above. There is intentionally NO setting for the CLI binary:
+  // it is resolved from the environment only (OPENCODE_SERVER_BIN), never from a
+  // DB value that the request path would hand to spawn().
+  opencode_server_url: z
+    .string()
+    .trim()
+    .pipe(
+      z.union([
+        z.literal(""),
+        z
+          .string()
+          .url()
+          .max(500)
+          .refine((value) => isHttpUrl(value), "must be an http(s) URL"),
+      ])
+    )
+    .optional(),
   // #7645: dedicated CLIProxyAPI credential. CLIProxyAPI requires its own
   // separately-configured `api-keys:` credential and rejects any other token
   // with 401 — without this field, the fallback/passthrough legs had no way

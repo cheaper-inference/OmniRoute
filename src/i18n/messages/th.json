@@ -6663,7 +6663,8 @@
       "kiro": "ระดับฟรี: 50 เครดิต/เดือน (~25K–100K โทเค็น) ⚠️ ToS ของ Kiro ห้ามใช้พร็อกซี/harness ของบุคคลที่สาม",
       "codex": "เชื่อมต่อ OpenAI Codex ด้วยโฟลว์ OAuth ที่มีอยู่",
       "qwen": "เชื่อมต่อ Qwen Code ด้วยโฟลว์ OAuth ที่มีอยู่",
-      "github-models": "สร้าง GitHub PAT ที่มีขอบเขต 'models: read' ที่ github.com/settings/tokens"
+      "github-models": "สร้าง GitHub PAT ที่มีขอบเขต 'models: read' ที่ github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} ยอมรับ ID โมเดลดั้งเดิมของผู้ให้บริการ นำเข้าจาก /models หรือเพิ่ม ID ที่กำหนดเองสำหรับการกำหนดเส้นทาง",
     "bedrockModelsDescription": "โมเดล Amazon Bedrock มีการกำหนดขอบเขตตามภูมิภาค AWS นำเข้าจาก /models หรือเพิ่มรหัสรุ่น Bedrock ที่เปิดใช้งานในภูมิภาคที่เลือก",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "JSON ไม่ถูกต้อง",
     "mappingMustBeObject": "การจับคู่ต้องเป็นออบเจกต์ JSON ไม่ใช่อาร์เรย์หรือค่าพื้นฐาน",
     "mappingValueMustBeString": "ค่าสำหรับคีย์ “{key}” ต้องเป็นสตริง",
-    "save": "บันทึก"
+    "save": "บันทึก",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

@@ -6663,7 +6663,8 @@
       "kiro": "Tingkat gratis: 50 kredit/bulan (~25K–100K token). ⚠️ ToS Kiro melarang penggunaan proksi/harness pihak ketiga.",
       "codex": "Hubungkan OpenAI Codex dengan alur OAuth yang ada.",
       "qwen": "Hubungkan Qwen Code dengan alur OAuth yang ada.",
-      "github-models": "Buat GitHub PAT dengan cakupan 'models: read' di github.com/settings/tokens"
+      "github-models": "Buat GitHub PAT dengan cakupan 'models: read' di github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} menerima ID model asli penyedia. Impor dari /models atau tambahkan ID khusus untuk perutean.",
     "bedrockModelsDescription": "Model Amazon Bedrock dicakup berdasarkan wilayah AWS. Impor dari /models atau tambahkan ID model Batuan Dasar yang diaktifkan di wilayah yang dipilih.",
@@ -9501,7 +9502,11 @@
     "mappingInvalidJson": "JSON tidak valid.",
     "mappingMustBeObject": "Pemetaan harus berupa objek JSON, bukan array atau nilai primitif.",
     "mappingValueMustBeString": "Nilai untuk kunci “{key}” harus berupa string.",
-    "save": "Simpan"
+    "save": "Simpan",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Mesin Caveman",
