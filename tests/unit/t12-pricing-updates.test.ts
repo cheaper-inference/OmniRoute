@@ -66,6 +66,11 @@ test("T12: pricing table includes MiniMax-M3 (canonical + lowercase alias)", () 
     assert.equal(pricing.minimax[key].input, 0.3, `${key} input`);
     assert.equal(pricing.minimax[key].output, 1.2, `${key} output`);
     assert.equal(pricing.minimax[key].cached, 0.06, `${key} cached`);
+    // The pricing page lists no separate reasoning or cache-write tariff for M3, so both
+    // rows are deliberately absent: reasoning tokens bill at the output price and cache
+    // writes at the input price (costCalculator fallbacks).
+    assert.equal(pricing.minimax[key].reasoning, undefined, `${key} reasoning`);
+    assert.equal(pricing.minimax[key].cache_creation, undefined, `${key} cache_creation`);
   }
 });
 
