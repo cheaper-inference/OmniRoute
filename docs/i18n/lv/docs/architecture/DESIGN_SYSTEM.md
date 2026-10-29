@@ -111,7 +111,9 @@ gen:icon-map` izdrukā lietotos nosaukumus, kuru kartē nav (`tests/unit/icon-ma
 
 ## 5. Komplekta atjaunināšana
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` nokopē augšupgaitas `src/` pie norādītā komita uz `packages/ui-kit/src` un pielieto vienīgo atļauto transformāciju (tā noņem `.js` sufiksu no relatīvajiem importiem). Pēc tam: pārskatiet `git diff packages/ui-kit`, vizuāli pārbaudiet nodrošinātāju, iestatījumu, kombināciju, lietojuma un galapunkta ekrānus abās tēmās, palaidiet `npm run check:ui-kit-snapshot` un `npm run test:vitest:ui` un atveriet PR ar augšupgaitas izmaiņu žurnālu.
+`npm run check:ui-kit-upstream` salīdzina `packages/ui-kit/UPSTREAM.md` piesprausto versiju ar jaunāko iepriekšējā repo `v*` tagu un izdrukā sinhronizācijas komandu, kad laidiens ir izdots. Iknedēļas `UI Kit upstream watch` darbplūsma (`.github/workflows/ui-kit-upstream-watch.yml`) veic to pašu pārbaudi un atstāj vienu izsekošanas problēmu atvērtu, kamēr tapa ir aiz muguras; augšupējais repo ir privāts, tāpēc darbplūsmai ir nepieciešams tikai lasāms pilnvaras `UI_KIT_READ_TOKEN` noslēpumā, un tā paliek inerta bez tā.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopē augšupvērsto `src/` šajā apstiprinājumā (`latest` = jaunākais `v*` tags) `packages/ui-kit/src`, lieto vienu atļauto transformāciju (atmet `.js` sufiksu no relatīvā importa) un iestata darbvietas versiju `packages/ui-kit/package.json` un `package-lock.json` uz augšupējo versiju. Pēc tam: pārskatiet `git diff packages/ui-kit`, vizuāli pārskatiet pakalpojumu sniedzējus, iestatījumus, kombinācijas, lietojumu un beigu punktu abās tēmās, palaidiet `npm run check:ui-kit-snapshot` un `npm run test:vitest:ui` un atveriet PR, izmantojot augšējo izmaiņu žurnālu.
 
 ## 6. README diagrammas
 

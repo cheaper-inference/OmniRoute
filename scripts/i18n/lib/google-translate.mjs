@@ -28,7 +28,11 @@ const DEFAULT_ENDPOINT = "https://translate.googleapis.com/translate_a/t";
 const OFFICIAL_ENDPOINT = "https://translation.googleapis.com/language/translate/v2";
 const BATCH_CHARS = 4500;
 const BATCH_ITEMS = 100;
-const MAX_TRIES = 5;
+// The keyless endpoint drops ~1% of requests with a connection reset ("fetch failed") under a
+// 66-locale run (2026-10-28: 13 of 132 locales once, 1 of 198 another time); seven tries with a
+// capped, jittered backoff (~1 min in total) ride that out instead of failing the locale.
+const MAX_TRIES = 7;
+const MAX_BACKOFF_MS = 20000;
 
 // OmniRoute locale code → Google language code (identity when absent).
 const GOOGLE_LANG = {
@@ -97,6 +101,9 @@ const INLINE_PATTERNS = [
   /!\[[^\]\n]*\]\([^)\n]*\)/y, // images: keep whole
   /\[[^\]\n]*\]\[[^\]\n]*\]/y, // reference links: keep whole
   /<https?:\/\/[^>\s]+>/y, // autolinks
+  // An HTML code span is a literal like a backtick span: the WHOLE element (tags and content)
+  // is one token, so the translator never sees `<code>any</code>`'s "any" (am translated it).
+  /<(code|kbd|samp)\b[^>]*>[\s\S]*?<\/\1\s*>/iy,
   /<!--[\s\S]*?-->|<\/?[A-Za-z][^>\n]*>/y, // HTML comments / tags
   /https?:\/\/[^\s)<>\]]+/y, // bare URLs
   /\{[^{}\n]{1,80}\}|\$\{[^}\n]+\}|%[sd]|\$[A-Z_][A-Z0-9_]*/y, // ICU / shell placeholders
@@ -106,6 +113,13 @@ const INLINE_PATTERNS = [
   /(?<![\w-])--?[a-z][\w-]*(?![\w-])/y, // CLI flags
   /&[a-z]+;|&#\d+;/y, // literal entities in the source
   /[\p{Sm}\p{So}\uFE0F]+/uy, // math symbols / emoji (ko turned ∞ into a word; tests pin ∅ (∞))
+  // the em dash anchors README's database-row counts (check-docs reads the text after "—");
+  // de rewrote it to an en dash and the row failed the check
+  /\u2014/y,
+  // hyphenated identifiers carrying a digit: better-sqlite3 (am wrote የተሻለ-sqlite3), gpt-4o
+  /(?<![\w-])(?=[\w-]*\d)[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)+(?![\w-])/y,
+  /(?<![\w-])[A-Z]{2,}[a-z][A-Za-z0-9]*(?![\w-])/y, // capitals then lower case: SQLite, JSONata
+  /(?<![\w-])[a-z]+[A-Z][A-Za-z0-9]*(?![\w-])/y, // lower-camel identifiers: macOS, iPhone, npmScripts
   /(?<![\w-])[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]*)+(?![\w-])/y, // CamelCase brands: CodeBuddy, OpenAI, DeepSeek
   /(?<![\w-])[A-Z]{2,}[0-9]*s?(?![\w-])/y, // acronyms: TTL, PII, APIs
 ];
@@ -165,7 +179,26 @@ export const BRAND_TERMS = [
   "Obsidian",
   "Jules",
   "Devin",
+  "SQLite",
+  "LowDB",
+  "better-sqlite3",
+  "TypeScript",
+  "JavaScript",
+  "Tailwind",
+  "Turbopack",
+  "Electron",
+  "Docker",
+  "Playwright",
+  "Vitest",
 ];
+
+// A masked token that is a real HTML tag (not an autolink, not a whole code element). The
+// translator may move a code span or a product name, but never an HTML tag relative to another:
+// ja moved `</b>` past `</code>` and the row came back mis-nested.
+const isHtmlTagToken = (raw) =>
+  /^<\/?[A-Za-z][\w-]*(?=[\s/>])/.test(raw) && !/^<(?:code|kbd|samp)\b/i.test(raw);
+// A token id that escaped its span (ja echoed `zqi` / `zqo` as plain words).
+const BARE_TOKEN_ID = /(?<!\p{L})zq[a-z]+(?!\p{L})/u;
 const LINK = /\[([^\]\n]+)\]\(([^)\n]+)\)/y;
 const EMPHASIS = /\*\*|__|~~|\*/y;
 
@@ -264,6 +297,7 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
     let out = String(translated);
     // 1. tokens → private-use placeholders, keeping only source-side whitespace
     const seen = new Set();
+    const order = []; // token indices in the order the translator returned them
     out = out.replace(
       /(\s*)<span translate=\\?"no\\?"\s*>\s*(zq[a-z]+)\s*<\/span>(\s*)/g,
       (all, pre, id, post, offset, whole) => {
@@ -271,6 +305,7 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
         const t = tokens[i];
         if (!t) return all;
         seen.add(i);
+        order.push(i);
         const ph = String.fromCharCode(PUA_BASE + i);
         // Keep the translator's whitespace only where the source had some, or where it now
         // separates the token from a word (the translator dropped the punctuation between).
@@ -281,7 +316,13 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
         return before + ph + after;
       }
     );
-    if (seen.size !== tokens.length) return null;
+    // every token exactly once: a missing one loses source text, a duplicate invents some
+    if (seen.size !== tokens.length || order.length !== tokens.length) return null;
+    // HTML tags keep their source order, so the rebuilt markup nests like the source
+    const tagOrder = order.filter((i) => isHtmlTagToken(tokens[i].raw));
+    if (tagOrder.some((i, k) => k > 0 && i < tagOrder[k - 1])) return null;
+    // the translator echoed a token id outside its span: the answer is corrupt, not prose
+    if (BARE_TOKEN_ID.test(out) && !BARE_TOKEN_ID.test(text)) return null;
     // 2. links and emphasis back to markdown
     out = out.replace(/<a href=\\?"#L(\d+)\\?"\s*>([\s\S]*?)<\/a>/g, (all, k, inner) => {
       const url = links[Number(k)];
@@ -351,9 +392,36 @@ export function splitCells(row) {
   return cells;
 }
 
+// Splits one HTML line into its tags (kept verbatim) and the text runs between them, which are
+// the only thing translated. A whole `<code>` / `<kbd>` / `<samp>` element stays INSIDE its run
+// and is masked there as one token. Before this the line was sent whole and every tag was a
+// movable token: the translator could swap them (ja) and rewrite code-span content (am).
+const HTML_PIECE =
+  /<!--[\s\S]*?-->|<(code|kbd|samp)\b[^>]*>[\s\S]*?<\/\1\s*>|<\/?[A-Za-z][\w-]*(?=[\s/>])[^>]*>/gi;
+export function splitHtmlLine(line) {
+  const pieces = [];
+  let text = "";
+  let last = 0;
+  for (const m of line.matchAll(HTML_PIECE)) {
+    text += line.slice(last, m.index);
+    last = m.index + m[0].length;
+    if (m[1]) {
+      text += m[0];
+      continue;
+    }
+    if (text) pieces.push({ text });
+    text = "";
+    pieces.push(m[0]);
+  }
+  text += line.slice(last);
+  if (text) pieces.push({ text });
+  return pieces;
+}
+
 /**
  * Turns a markdown chunk into ordered parts: verbatim strings, `{ pre, text, post }`
- * templates whose `text` is translated, or `{ cells }` table rows. Joining the rebuilt
+ * templates whose `text` is translated, `{ cells }` table rows, or `{ html }` lines whose
+ * text runs are translated between verbatim tags. Joining the rebuilt
  * parts with "\n" reproduces the chunk's structure. Soft-wrapped paragraph lines are
  * joined into one line (a sentence split across lines would otherwise be translated in
  * two halves).
@@ -448,7 +516,7 @@ export function segmentMarkdown(markdown) {
     }
     if (/^\s*</.test(line)) {
       flush();
-      parts.push({ pre: line.match(/^\s*/)[0], text: line.trim(), post: "" });
+      parts.push({ html: splitHtmlLine(line) });
       continue;
     }
     if (para && !para.quote && (/^\s+\S/.test(line) || para.pre.trim() === "")) {
@@ -547,7 +615,8 @@ async function requestBatch(htmlList, target, { fetchImpl, apiKey, timeoutMs, ba
         (err?.status ?? 0) >= 500 ||
         /fetch failed|ECONN|ENOTFOUND|network/i.test(String(err?.cause ?? err?.message));
       if (!retryable || attempt === MAX_TRIES) break;
-      await sleep(backoffMs * 2 ** (attempt - 1));
+      const wait = Math.min(MAX_BACKOFF_MS, backoffMs * 2 ** (attempt - 1));
+      await sleep(wait + Math.floor(Math.random() * Math.min(wait, 1000) * 0.25));
     } finally {
       clearTimeout(timer);
     }
@@ -600,6 +669,7 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
   for (const p of parts) {
     if (typeof p === "string") continue;
     if (p.cells) p.cells.forEach((c) => want(c.trim()));
+    else if (p.html) p.html.forEach((x) => typeof x !== "string" && want(x.text.trim()));
     else want(p.text);
   }
   // a segment made only of masked tokens / markup needs no request
@@ -635,18 +705,17 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
     }
     return r;
   };
+  // a cell or HTML text run: translated core, source whitespace around it
+  const pickPadded = (c) => {
+    if (!c.trim()) return c;
+    const lead = c.match(/^\s*/)[0];
+    const trail = c.match(/\s*$/)[0];
+    return lead + pick(c.trim()) + trail;
+  };
   const out = parts.map((p) => {
     if (typeof p === "string") return p;
-    if (p.cells) {
-      return p.cells
-        .map((c) => {
-          if (!c.trim()) return c;
-          const lead = c.match(/^\s*/)[0];
-          const trail = c.match(/\s*$/)[0];
-          return lead + pick(c.trim()) + trail;
-        })
-        .join("|");
-    }
+    if (p.cells) return p.cells.map(pickPadded).join("|");
+    if (p.html) return p.html.map((x) => (typeof x === "string" ? x : pickPadded(x.text))).join("");
     return p.pre + pick(p.text) + p.post;
   });
   const total = masks.size;

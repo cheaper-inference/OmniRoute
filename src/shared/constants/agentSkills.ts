@@ -55,7 +55,7 @@ export const CURATED_SKILLS: CuratedSkillEntry[] = [
     id: "omni-providers",
     name: "Providers",
     description:
-      "Manage provider connections, API keys, OAuth flows, and connection tests via the REST API. List, add, update, remove, and test AI provider integrations across OmniRoute's 376-provider catalog.",
+      "Manage provider connections, API keys, OAuth flows, and connection tests via the REST API. List, add, update, remove, and test AI provider integrations across OmniRoute's 377-provider catalog.",
     category: "api",
     area: "providers",
     icon: "key",
