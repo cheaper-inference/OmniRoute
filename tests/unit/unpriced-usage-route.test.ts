@@ -8,6 +8,10 @@ const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-unpriced-route-
 process.env.DATA_DIR = dataDir;
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 process.env.INITIAL_PASSWORD = "isolated-unpriced-route-password";
+// Hermetic secret: API key creation needs API_KEY_SECRET for its CRC, and the
+// train/CI shells do not export one. Restore the caller's value in test.after.
+const originalApiKeySecret = process.env.API_KEY_SECRET;
+process.env.API_KEY_SECRET = "unpriced-route-isolated-api-key-secret";
 
 const core = await import("../../src/lib/db/core.ts");
 const keys = await import("../../src/lib/db/apiKeys.ts");
@@ -27,6 +31,8 @@ test.after(() => {
   core.resetDbInstance();
   keys.resetApiKeyState();
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  if (originalApiKeySecret === undefined) delete process.env.API_KEY_SECRET;
+  else process.env.API_KEY_SECRET = originalApiKeySecret;
 });
 
 test("unpriced report rejects anonymous and inference-only keys, accepts management credentials", async () => {

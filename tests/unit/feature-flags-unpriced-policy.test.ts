@@ -8,6 +8,11 @@ import { NextRequest } from "next/server";
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-flag-policy-"));
 process.env.DATA_DIR = dataDir;
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
+// Hermetic secrets: API key creation needs API_KEY_SECRET for its CRC, and the
+// train/CI shells do not export one. Restore the caller's values in test.after.
+const originalApiKeySecret = process.env.API_KEY_SECRET;
+const originalJwtSecret = process.env.JWT_SECRET;
+process.env.API_KEY_SECRET = "flag-policy-isolated-api-key-secret";
 process.env.JWT_SECRET = "flag-policy-isolated-session-secret";
 
 const core = await import("../../src/lib/db/core.ts");
@@ -137,7 +142,14 @@ test.after(() => {
   core.resetDbInstance();
   keys.resetApiKeyState();
   fs.rmSync(dataDir, { recursive: true, force: true });
+  restoreEnv("API_KEY_SECRET", originalApiKeySecret);
+  restoreEnv("JWT_SECRET", originalJwtSecret);
 });
+
+function restoreEnv(name: string, value: string | undefined): void {
+  if (value === undefined) delete process.env[name];
+  else process.env[name] = value;
+}
 
 for (const source of ["db", "env"] as const) {
   for (const value of ["true", "1", "yes", "false", "TRUE", "", "invalid"]) {
