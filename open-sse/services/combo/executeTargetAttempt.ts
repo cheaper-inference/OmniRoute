@@ -66,7 +66,7 @@ import {
   isModelScoped400,
   requestScopedReplayKey,
 } from "./comboPredicates.ts";
-import { isDraining } from "../../../src/lib/gracefulShutdown.ts";
+import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
 import { buildBudgetExhaustedResponse } from "./budgetExhaustion.ts";
 import { advanceNativeCodexTurnGeneration, pinNativeCodexTurn } from "./nativeCodexTurnPin.ts";

@@ -13,7 +13,7 @@ import { executeZcodeGateway } from "./zcode/gateway.ts";
 import { readZcodeIndividualCodingPlanApiKey } from "./zcode/profileAuth.ts";
 import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
 import { MAX_CURSOR_IMAGES, resolveCursorImages } from "../utils/cursorImages.ts";
-import { isDraining } from "../../src/lib/gracefulShutdown.ts";
+import { isInstanceDraining as isDraining } from "../utils/drainStatus.ts";
 
 const ZCODE_URL = "zcode://app-server/stdio";
 const ACCOUNT_PROVIDER_ID = "account:zai-individual-coding-plan";
@@ -434,6 +434,91 @@ function isZcodeRequestCancelled(error: unknown): boolean {
   );
 }
 
+/** The exact native Coding Plan weekly/monthly quota refusal (ZCode app-server error text). */
+const ZCODE_NATIVE_QUOTA_REFUSAL =
+  /^\[1310\]\[Weekly\/Monthly Limit Exhausted(?:\. Your limit will reset at [^\]\r\n]+)?\](?:\[[A-Za-z0-9_-]+\])?$/i;
+const CONTRADICTORY_ERROR_IDENTITY =
+  /auth|unauthor|forbidden|network|econn|etimed|timeout|abort|cancel|bad_gateway|service_unavailable|internal_error/i;
+
+function isNon429HttpErrorStatus(status: unknown): boolean {
+  const value = Number(status);
+  return Number.isInteger(value) && value >= 400 && value <= 599 && value !== 429;
+}
+
+/**
+ * Whether a native failure carries auth/network/cancellation/HTTP-status evidence
+ * that contradicts reading its text as a quota refusal.
+ */
+function hasContradictoryZcodeErrorEvidence(error: unknown): boolean {
+  const nativeError = asRecord(error);
+  const data = asRecord(nativeError.data);
+  const details = [
+    nativeError,
+    data,
+    asRecord(data.error),
+    asRecord(nativeError.cause),
+    asRecord(nativeError.response),
+    asRecord(data.response),
+  ];
+  return details.some((detail) => {
+    const code = typeof detail.code === "string" ? detail.code : "";
+    const name = typeof detail.name === "string" ? detail.name : "";
+    return (
+      CONTRADICTORY_ERROR_IDENTITY.test(`${code} ${name}`) ||
+      [detail.status, detail.statusCode, detail.httpStatus].some(isNon429HttpErrorStatus)
+    );
+  });
+}
+
+/**
+ * The HTTP error a failed native app-server turn is answered with: the exact
+ * native quota refusal becomes a typed terminal-quota 429, the server's own
+ * attempt cancellation stays request-scoped, and anything else is a 502 (499
+ * when the caller aborted or the instance is draining).
+ */
+function zcodeAppServerFailureResponse(
+  error: unknown,
+  message: string,
+  scope: { aborted: boolean; nativeQuotaScope: boolean }
+): Response {
+  const exactQuota =
+    scope.nativeQuotaScope &&
+    !scope.aborted &&
+    !hasContradictoryZcodeErrorEvidence(error) &&
+    ZCODE_NATIVE_QUOTA_REFUSAL.test(errorText(error));
+  if (exactQuota) {
+    // Terminal provider quota evidence, not proof that the native input was
+    // never accepted — do not attach pre-admission/replay flags.
+    return errorResponse(429, message, {
+      type: "rate_limit_error",
+      code: "insufficient_quota",
+      reason: "quota_exhausted",
+    });
+  }
+  if (isZcodeRequestCancelled(error)) {
+    // The ZCode server cancelled THIS attempt (the request itself was fine;
+    // other ZCode requests keep succeeding in parallel). It says nothing
+    // about the model or the provider, so the failure stays request-scoped:
+    // no model lockout, no provider circuit-breaker failure, no cooldown.
+    //
+    // Keep the status at 502 (never 499): 499 means "client disconnected" and
+    // STOPS the whole combo loop (#1681), turning a fall-over to the next
+    // leg into a failed request. 499 stays reserved for our own client-side
+    // abort, where nobody is listening anymore.
+    return errorResponse(scope.aborted ? 499 : 502, message, {
+      type: UPSTREAM_REQUEST_CANCELLED_CODE,
+      code: UPSTREAM_REQUEST_CANCELLED_CODE,
+    });
+  }
+  // A graceful shutdown disposes the ZCode protocol client while requests are
+  // still in flight, so the upstream model is never actually asked — the
+  // failure is self-inflicted, not evidence about the model's health. Answer
+  // 499 (client_disconnected), like an aborted caller does: 499 is in neither
+  // the model-lockout error-code list nor the transient-retry list, so it can
+  // neither lock the model out nor be retried as an upstream fault.
+  return errorResponse(scope.aborted || isDraining() ? 499 : 502, message);
+}
+
 async function prepareZcodeRequest(
   body: unknown,
   model: string,
@@ -548,8 +633,8 @@ export class ZcodeExecutor extends BaseExecutor {
       boundMaxOutputTokens(request, nativeMaxTokens);
       // Scope quota evidence to this native Coding Plan inference RPC.
       nativeQuotaScope =
-        [ACCOUNT_PROVIDER_ID, DEFAULT_PROVIDER_ID].includes(selection.providerId) &&
-        /^glm-/i.test(resolution.model);
+        [ACCOUNT_PROVIDER_ID, BUILTIN_PROVIDER_ID].includes(selection.providerId) &&
+        /^glm-/i.test(model);
       const result = asRecord(
         await withAbort(
           client.call("zcode-agent", "generateWorkspaceText", [
@@ -580,70 +665,10 @@ export class ZcodeExecutor extends BaseExecutor {
       input.log?.warn?.("ZCODE", message);
       // No stream has started: retain a real HTTP error, not a 200 error-only SSE
       // that the readiness guard rewrites into STREAM_EARLY_EOF.
-      const nativeError = asRecord(error);
-      const data = asRecord(nativeError.data);
-      const details = [
-        nativeError,
-        data,
-        asRecord(data.error),
-        asRecord(nativeError.cause),
-        asRecord(nativeError.response),
-        asRecord(data.response),
-      ];
-      const contradictoryError = details.some((detail) => {
-        const code = typeof detail.code === "string" ? detail.code : "";
-        const name = typeof detail.name === "string" ? detail.name : "";
-        return (
-          /auth|unauthor|forbidden|network|econn|etimed|timeout|abort|cancel|bad_gateway|service_unavailable|internal_error/i.test(
-            `${code} ${name}`
-          ) ||
-          [detail.status, detail.statusCode, detail.httpStatus].some(
-            (status) =>
-              Number.isInteger(Number(status)) &&
-              Number(status) >= 400 &&
-              Number(status) <= 599 &&
-              Number(status) !== 429
-          )
-        );
+      return zcodeAppServerFailureResponse(error, message, {
+        aborted: Boolean(input.signal?.aborted),
+        nativeQuotaScope,
       });
-      const exactQuota =
-        nativeQuotaScope &&
-        !contradictoryError &&
-        !input.signal?.aborted &&
-        /^\[1310\]\[Weekly\/Monthly Limit Exhausted(?:\. Your limit will reset at [^\]\r\n]+)?\](?:\[[A-Za-z0-9_-]+\])?$/i.test(
-          errorText(error)
-        );
-      if (exactQuota) {
-        // Terminal provider quota evidence, not proof that the native input was
-        // never accepted — do not attach pre-admission/replay flags.
-        return errorResponse(429, message, {
-          type: "rate_limit_error",
-          code: "insufficient_quota",
-          reason: "quota_exhausted",
-        });
-      }
-      if (isZcodeRequestCancelled(error)) {
-        // The ZCode server cancelled THIS attempt (the request itself was fine;
-        // other ZCode requests keep succeeding in parallel). It says nothing
-        // about the model or the provider, so the failure stays request-scoped:
-        // no model lockout, no provider circuit-breaker failure, no cooldown.
-        //
-        // Keep the status at 502 (never 499): 499 means "client disconnected" and
-        // STOPS the whole combo loop (#1681), turning a fall-over to the next
-        // leg into a failed request. 499 stays reserved for our own client-side
-        // abort, where nobody is listening anymore.
-        return errorResponse(input.signal?.aborted ? 499 : 502, message, {
-          type: UPSTREAM_REQUEST_CANCELLED_CODE,
-          code: UPSTREAM_REQUEST_CANCELLED_CODE,
-        });
-      }
-      // A graceful shutdown disposes the ZCode protocol client while requests are
-      // still in flight, so the upstream model is never actually asked — the
-      // failure is self-inflicted, not evidence about the model's health. Answer
-      // 499 (client_disconnected), like an aborted caller does: 499 is in neither
-      // the model-lockout error-code list nor the transient-retry list, so it can
-      // neither lock the model out nor be retried as an upstream fault.
-      return errorResponse(input.signal?.aborted || isDraining() ? 499 : 502, message);
     } finally {
       await client.close().catch(() => undefined);
     }

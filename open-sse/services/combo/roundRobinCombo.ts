@@ -108,7 +108,7 @@ import {
   requestScopedReplayKey,
   resolvePersistedConnectionCooldownSkipReason,
 } from "./comboPredicates.ts";
-import { isDraining } from "../../../src/lib/gracefulShutdown.ts";
+import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import { handlePreContentStreamRetry } from "./executeTargetClassify.ts";
 import {
   handleEmptyContentRetry,
