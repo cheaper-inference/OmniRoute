@@ -67,3 +67,7 @@ export function scopedRosebudKey(scope: string, key: string) {
       .digest("hex")
   );
 }
+
+export function matchesRosebudPin(pinned: string | undefined, selected: string | undefined) {
+  return !pinned || pinned === selected;
+}

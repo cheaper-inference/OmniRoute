@@ -15,11 +15,17 @@ import {
 } from "@omniroute/open-sse/services/rosebud/cli.ts";
 import { rosebudCatalogEntry } from "@omniroute/open-sse/services/rosebud/catalog.ts";
 
+function providerData(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
 export async function rosebudConnection(id: string) {
   const connection = await getProviderConnectionById(id);
   if (!connection || connection.provider !== "rosebud")
     throw new RosebudError("connection_not_found", 404);
-  const data = (connection.providerSpecificData || {}) as Record<string, unknown>;
+  const data = providerData(connection.providerSpecificData);
   const profile = data.rosebudProfile;
   if (typeof profile !== "string") throw new RosebudError("profile_not_configured", 409);
   await rosebudProfile(profile);
@@ -29,6 +35,7 @@ export async function rosebudConnection(id: string) {
 export async function rosebudModelConnections(model: string, allowed: string[] | null) {
   const ids: string[] = [];
   for (const connection of await getProviderConnections({ provider: "rosebud" })) {
+    if (typeof connection.id !== "string") continue;
     if (!connection.isActive || (allowed?.length && !allowed.includes(connection.id))) continue;
     let data = connection.providerSpecificData as Record<string, unknown> | undefined;
     if (
@@ -77,7 +84,7 @@ export async function rosebudAccount(id: string) {
     isActive: account.status === "active",
     testStatus: account.status === "active" ? "active" : "expired",
     providerSpecificData: {
-      ...((latest?.providerSpecificData as Record<string, unknown>) || {}),
+      ...providerData(latest?.providerSpecificData),
       rosebudAccount: account,
       rosebudLastChecked: new Date().toISOString(),
     },
@@ -96,7 +103,7 @@ export async function discoverRosebud(id: string) {
   const connection = await getProviderConnectionById(id);
   await updateProviderConnection(id, {
     providerSpecificData: {
-      ...(connection?.providerSpecificData || {}),
+      ...providerData(connection?.providerSpecificData),
       rosebudModels: models,
       rosebudModelsChecked: new Date().toISOString(),
     },

@@ -7,6 +7,7 @@ import { randomUUID } from "node:crypto";
 import {
   rosebudImageBinding,
   scopedRosebudKey,
+  matchesRosebudPin,
 } from "../../open-sse/services/rosebud/imageBinding.ts";
 import { RosebudRuntime } from "../../open-sse/services/rosebud/runtime.ts";
 import { RosebudError } from "../../open-sse/services/rosebud/cli.ts";
@@ -250,3 +251,9 @@ test("unsupported output formats are rejected before a paid submission", async (
     );
     assert.equal(submissions, 0);
   }));
+
+test("soft-dropping a pinned account must not authorize a second paid account", () => {
+  assert.equal(matchesRosebudPin("account-a", "account-b"), false);
+  assert.equal(matchesRosebudPin("account-a", undefined), false);
+  assert.equal(matchesRosebudPin("account-a", "account-a"), true);
+});

@@ -1,3 +1,4 @@
+import { requireRosebudAccess } from "@/lib/rosebud/authorization";
 import { rosebudAccount } from "@/lib/rosebud/provider";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -1200,6 +1201,11 @@ export async function testSingleConnection(
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    const target = await getCachedProviderConnectionById(id);
+    if (target?.provider === "rosebud") {
+      const denied = await requireRosebudAccess(request, id);
+      if (denied) return denied;
+    }
 
     let rawBody: unknown = {};
     try {

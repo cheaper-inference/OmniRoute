@@ -193,3 +193,10 @@ Accounts are selected only from model-capable connections. A newly introduced
 artifact format without a supported signature is rejected before submission,
 not charged and discarded afterward. Retrying jobs made by pre-release versions
 without caller-scoped keys requires their original job IDs.
+
+MCP generation tools require a stable `idempotencyKey`; reuse it when retrying
+that operation. Image models listing both raster and non-raster output formats
+require an explicit raster `rosebud_inputs.output_format` for the native image
+endpoint. Prompt-free transforms remain available through the specialized tools.
+For a retained `reclaim` directory, verify that no worker owns the operation and
+reconcile its upstream state before an operator removes the stale marker.
