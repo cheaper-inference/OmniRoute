@@ -1,3 +1,4 @@
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { handleMusicGeneration } from "@omniroute/open-sse/handlers/musicGeneration.ts";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import {
@@ -8,11 +9,11 @@ import { parseMusicModel, getMusicProvider } from "@omniroute/open-sse/config/mu
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import * as log from "@/sse/utils/logger";
-import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import { resolveLocalOverrideCredentials } from "@/app/api/v1/_shared/videoModelResolution";
 import {
-  isAllRateLimitedCredentials,
-  rateLimitedProviderResponse,
-} from "@/app/api/v1/_shared/rateLimit";
+  enforceApiKeyPolicyWithScope,
+  unusableCredentialsResponse,
+} from "@/app/api/v1/_shared/keyScopedRoute";
 import {
   failedMediaGenerationResponse,
   mediaGenerationOptionsResponse,
@@ -43,18 +44,6 @@ export async function GET(request?: Request) {
 }
 
 /**
- * #6928: best-effort per-connection base-URL override lookup for local no-auth
- * media providers (ComfyUI). Returns null instead of failing when no connection
- * exists — local providers must keep working with zero configuration.
- */
-async function resolveLocalOverrideCredentials(provider) {
-  const localCredentials = await getProviderCredentialsWithQuotaPreflight(provider);
-  return localCredentials && !isAllRateLimitedCredentials(localCredentials)
-    ? localCredentials
-    : null;
-}
-
-/**
  * POST /v1/music/generations — generate music
  */
 async function postHandler(request, context) {
@@ -69,8 +58,13 @@ async function postHandler(request, context) {
   if (promptError) return promptError;
 
   // Enforce API key policies (model restrictions + budget limits)
-  const policy = await enforceApiKeyPolicy(request, body.model);
-  if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: credential selection stays inside the key's connection scope,
+  // the same scope chat applies.
+  const scope = await enforceApiKeyPolicyWithScope(request, body.model);
+  if (scope.rejection) return scope.rejection;
+  // Respect the authenticated API key's credential scope before checking model capabilities.
+  const mismatch = await getRequestedModelEndpointMismatch(body.model, "music");
+  if (mismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, mismatch);
 
   // Parse model to get provider
   const { provider } = parseMusicModel(body.model);
@@ -87,21 +81,28 @@ async function postHandler(request, context) {
   // Get credentials — skip for local providers (authType: "none")
   let credentials = null;
   if (providerConfig && providerConfig.authType !== "none") {
-    credentials = await getProviderCredentialsWithQuotaPreflight(provider);
+    credentials = await getProviderCredentialsWithQuotaPreflight(
+      provider,
+      null,
+      scope.allowedConnections
+    );
     if (!credentials) {
       return errorResponse(
         HTTP_STATUS.BAD_REQUEST,
         `No credentials for music provider: ${provider}`
       );
     }
-    if (isAllRateLimitedCredentials(credentials)) {
-      return rateLimitedProviderResponse(provider, credentials);
-    }
+    const unusable = unusableCredentialsResponse(provider, credentials);
+    if (unusable) return unusable;
   } else if (providerConfig?.authType === "none") {
-    credentials = await resolveLocalOverrideCredentials(provider);
+    // #6928 + GHSA-3w2r: the shared local-override lookup (also used by the
+    // video route) keeps the override and the zero-config default in scope.
+    const local = await resolveLocalOverrideCredentials(provider, scope.allowedConnections);
+    if (local.rejection) return local.rejection;
+    credentials = local.credentials;
   }
 
-  const result = await handleMusicGeneration({ body, credentials, log });
+  const result = await handleMusicGeneration({ body, credentials, log, signal: request.signal });
 
   if (result.success) {
     await clearRecoveredProviderState(credentials);
@@ -112,6 +113,7 @@ async function postHandler(request, context) {
       model: body.model,
       startTime,
       duration: body.duration,
+      apiKeyId: scope.policy.apiKeyInfo?.id,
     });
   }
 

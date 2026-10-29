@@ -123,7 +123,9 @@
       "maxCostOpt": "Maximální náklady za den (USD)",
       "allowedModelsOpt": "Čárkami oddělený seznam povolených modelů",
       "nothingToSet": "Nebyla zadána žádná pole zásad. Použijte --rate-limit, --max-cost nebo --allowed-models.",
-      "updated": "Zásady byly aktualizovány."
+      "updated": "Zásady byly aktualizovány.",
+      "modelAccessModeOpt": "Režim přístupu k modelům (all | restricted)",
+      "unrestrictedOpt": "Povolit všechny modely (--model-access-mode all)"
     },
     "expiration": {
       "title": "Vypršení platnosti klíče",
@@ -254,6 +256,7 @@
     "log": "Zobrazovat protokoly serveru přímo ve výstupu",
     "no_recovery": "Zakázat automatické restartování po pádu (režim ladění)",
     "max_restarts": "Maximální počet restartů po pádu během 30 s před ukončením pokusů (výchozí: 2)",
+    "headless": "Spustit pouze proxy jádro: řídicí panel vypnut (404), volitelné subsystémy přeskočeny (nastaví OMNIROUTE_HEADLESS=1)",
     "tray": "Spustit v systémové liště (pouze pro počítače, volitelné)",
     "no_tray": "Zakázat ikonu v systémové liště",
     "ready_timeout": "Časový limit kontroly připravenosti v ms (také OMNIROUTE_READY_TIMEOUT_MS, výchozí 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Synchronizovat konfiguraci mezi instancemi OmniRoute",
     "push": {
-      "description": "Odeslat konfiguraci do cloudu nebo vzdálené instance",
-      "target": "Cíl (cloud nebo context:name)",
-      "bundle": "Části balíčku k synchronizaci",
-      "dryRun": "Zobrazit náhled bez použití změn"
+      "description": "Odeslat konfiguraci do cloudu nebo vzdálené instance"
     },
     "pull": {
-      "description": "Načíst konfiguraci z cloudu nebo vzdálené instance",
-      "source": "Zdroj (cloud nebo context:name)",
-      "merge": "Sloučit se stávající konfigurací",
-      "replace": "Nahradit stávající konfiguraci",
-      "dryRun": "Zobrazit náhled bez použití změn"
-    },
-    "diff": {
-      "source": "Zdrojový kontext",
-      "target": "Cílový kontext"
+      "description": "Načíst konfiguraci z cloudu nebo vzdálené instance"
     },
     "bundle": {
       "description": "Exportovat konfiguraci jako soubor balíčku",
-      "include": "Části, které mají být zahrnuty (oddělené čárkami)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Importovat soubor balíčku",
       "dryRun": "Ověřit bez použití změn"
-    },
-    "initialize": {
-      "fromCloud": "Inicializovat z cloudové zálohy"
     },
     "tokens": {
       "description": "Spravovat synchronizační tokeny",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Přeskočit potvrzení"
       }
-    },
-    "resolve": {
-      "description": "Interaktivně vyřešit konflikty synchronizace"
     }
   },
   "config": {

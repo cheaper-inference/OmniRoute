@@ -108,69 +108,59 @@ export default function ProviderSummaryCard({
   testingMode,
 }: ProviderSummaryCardProps) {
   const categories = [
-    { key: null, color: null, label: t("providerSummaryAll"), stat: summaryStats.all },
-    { key: "oauth", color: "bg-blue-500", label: t("oauthLabel"), stat: summaryStats.oauth },
+    { key: null, label: t("providerSummaryAll"), stat: summaryStats.all },
+    { key: "oauth", label: t("oauthLabel"), stat: summaryStats.oauth },
     {
       key: "ide",
-      color: "bg-cyan-500",
       label: providerText(t, "categoryIde", "IDE"),
       stat: summaryStats.ide,
     },
     {
       key: "free",
-      color: "bg-green-500",
       label: t("freeTier"),
       stat: summaryStats.free,
       title: t("freeAggregated"),
     },
-    { key: "no-auth", color: "bg-stone-500", label: t("noAuthLabel"), stat: summaryStats.noauth },
+    { key: "no-auth", label: t("noAuthLabel"), stat: summaryStats.noauth },
     {
       key: "upstream-proxy",
-      color: "bg-indigo-500",
       label: t("upstreamProxyLabel"),
       stat: summaryStats.upstreamproxy,
     },
-    { key: "apikey", color: "bg-amber-500", label: t("apiKeyLabel"), stat: summaryStats.apikey },
+    { key: "apikey", label: t("apiKeyLabel"), stat: summaryStats.apikey },
     {
       key: "compatible",
-      color: "bg-orange-500",
       label: t("compatibleLabel"),
       stat: summaryStats.compatible,
     },
     {
       key: "webcookie",
-      color: "bg-purple-500",
       label: providerText(t, "categoryWebCookie", "Web Cookie"),
       stat: summaryStats.webcookie,
     },
     {
       key: "search",
-      color: "bg-teal-500",
       label: providerText(t, "categorySearch", "Search"),
       stat: summaryStats.search,
     },
     {
       key: "webfetch",
-      color: "bg-orange-500",
       label: t("webFetch"),
       stat: summaryStats.webfetch,
       title: t("webFetchTooltip"),
     },
     {
       key: "audio",
-      color: "bg-rose-500",
       label: providerText(t, "categoryAudio", "Audio"),
       stat: summaryStats.audio,
     },
     {
       key: "local",
-      color: "bg-emerald-500",
       label: providerText(t, "categoryLocal", "Local"),
       stat: summaryStats.local,
     },
     {
       key: "cloudagent",
-      color: "bg-violet-500",
       label: providerText(t, "categoryCloudAgent", "Cloud Agent"),
       stat: summaryStats.cloudagent,
     },
@@ -190,13 +180,14 @@ export default function ProviderSummaryCard({
               inputClassName={searchQuery ? "pr-9" : ""}
             />
             {searchQuery && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                icon="close"
                 onClick={() => setSearchQuery("")}
-                className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-text-muted hover:text-text-primary transition-colors"
+                className="absolute right-1 top-1/2 -translate-y-1/2 text-text-muted"
                 aria-label={tc("clear")}
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
+              />
             )}
           </div>
           <div className="relative flex-1 min-w-[160px]">
@@ -209,13 +200,14 @@ export default function ProviderSummaryCard({
               inputClassName={modelSearchQuery ? "pr-9" : ""}
             />
             {modelSearchQuery && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                icon="close"
                 onClick={() => setModelSearchQuery("")}
-                className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-text-muted hover:text-text-primary transition-colors"
+                className="absolute right-1 top-1/2 -translate-y-1/2 text-text-muted"
                 aria-label={tc("clear")}
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
+              />
             )}
           </div>
           <ProviderDisplayModeControl
@@ -230,24 +222,20 @@ export default function ProviderSummaryCard({
           <Button size="sm" variant="secondary" icon="upload_file" onClick={onImportFromFile}>
             {providerText(t, "importFromFile", "Import from file")}
           </Button>
-          <button
+          <Button
+            size="sm"
+            variant="outline"
+            icon="play_arrow"
+            loading={testingMode === "all"}
             onClick={() => onBatchTest("all")}
             disabled={!!testingMode}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-              testingMode === "all"
-                ? "bg-primary/20 border-primary/40 text-primary animate-pulse"
-                : "bg-bg-subtle border-border text-text-muted hover:text-text-primary hover:border-primary/40"
-            }`}
             title={t("testAll")}
           >
-            <span className="material-symbols-outlined text-[14px]">
-              {testingMode === "all" ? "sync" : "play_arrow"}
-            </span>
             {testingMode === "all" ? t("testing") : t("testAll")}
-          </button>
+          </Button>
         </div>
 
-        <div className="border-t border-border pt-3 flex flex-wrap items-center gap-2">
+        <div className="border-t border-border pt-3 flex flex-wrap items-center gap-2 [&>button]:grow [&>button]:justify-center sm:[&>button]:grow-0">
           {categories.map((cat) => {
             const isActive =
               (cat.key === null && !activeCategory && !showFreeOnly) ||
@@ -257,56 +245,57 @@ export default function ProviderSummaryCard({
                 !showFreeOnly &&
                 activeCategory === cat.key);
             return (
-              <button
+              <Button
                 key={cat.key ?? "all"}
+                size="sm"
+                variant={isActive ? "secondary" : "ghost"}
+                aria-pressed={isActive}
                 onClick={() => onCategoryChange(cat.key, cat.key === "free")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors ${
-                  isActive
-                    ? "bg-primary text-white border-primary"
-                    : "bg-bg-subtle border-border text-text-muted hover:text-text-primary hover:border-primary/30"
-                }`}
+                className="gap-1.5"
                 title={cat.title || cat.label}
               >
-                {cat.color && <CategoryDot color={cat.color} label={cat.label} />}
+                {cat.key && <CategoryDot category={cat.key} label={cat.label} />}
                 <span>{cat.label}</span>
-                <span className={`text-[11px] ${isActive ? "text-white/80" : "text-text-muted"}`}>
+                {/* Full-opacity muted ink: the old opacity-70 "/total" fell to 3.28:1 on the kit
+                    button (axe color-contrast, F4). */}
+                <span className="text-[11px] text-text-muted">
                   {cat.stat.configured}
-                  <span className="opacity-70">/{cat.stat.total}</span>
+                  <span>/{cat.stat.total}</span>
                 </span>
-              </button>
+              </Button>
             );
           })}
         </div>
 
-        <div className="border-t border-border pt-3 flex flex-wrap items-center gap-2">
+        <div className="border-t border-border pt-3 flex flex-wrap items-center gap-2 [&>button]:grow [&>button]:justify-center sm:[&>button]:grow-0">
           <span className="text-[11px] font-medium uppercase tracking-wide text-text-muted mr-1">
             {providerText(t, "filterByMedia", "Media")}
           </span>
           {SERVICE_KIND_CHIPS.map((chip) => {
             const isActive = activeServiceKind === chip.key;
             return (
-              <button
+              <Button
                 key={chip.key}
+                size="sm"
+                variant={isActive ? "secondary" : "ghost"}
+                icon={chip.icon}
                 onClick={() => onServiceKindChange(isActive ? null : chip.key)}
                 aria-pressed={isActive}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors ${
-                  isActive
-                    ? "bg-primary text-white border-primary"
-                    : "bg-bg-subtle border-border text-text-muted hover:text-text-primary hover:border-primary/30"
-                }`}
+                className="gap-1.5"
               >
-                <span className="material-symbols-outlined text-[14px]">{chip.icon}</span>
                 <span>{providerText(t, chip.labelKey, chip.fallback)}</span>
-              </button>
+              </Button>
             );
           })}
           {activeServiceKind && (
-            <button
+            <Button
+              size="sm"
+              variant="ghost"
               onClick={() => onServiceKindChange(null)}
-              className="text-[11px] text-text-muted hover:text-text-primary underline-offset-2 hover:underline"
+              className="text-text-muted underline-offset-2 hover:underline"
             >
               {providerText(t, "clearMediaFilter", "Clear")}
-            </button>
+            </Button>
           )}
         </div>
       </div>

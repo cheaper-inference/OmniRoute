@@ -68,6 +68,7 @@ export type NonStreamingProviderLegResult =
   | {
       kind: "error";
       result: ChatCoreErrorResult;
+      upstreamDiagnostic?: Record<string, unknown>;
       receipt: ProviderLegReceipt;
       usage: ProviderLegUsage | null;
     };
@@ -183,14 +184,28 @@ export interface NonStreamingClientTranslateInput {
   model: string;
   requestBody: Record<string, unknown>;
   /**
+   * The ORIGINAL client request body (before translation to the provider format).
+   * Used to honor client intent that translation drops — e.g. `response_format`
+   * is turned into a system instruction for Claude targets, so only the client
+   * body still says JSON mode was requested. Falls back to `requestBody`.
+   */
+  clientRequestBody?: Record<string, unknown> | null;
+  /**
    * Transcript used for no-tool_calls reasoning replay (#1628).
    * Must be the client-translated Chat `messages` (parent: `translatedBody.messages`),
-   * not `finalBody` — Responses-shaped `finalBody` has `input`, not `messages`.
+   * not `finalBody` — Responses-shaped `finalBody` has `input`, not `messages`. For a
+   * Responses-shaped body the parent passes the pivot transcript `translateRequest`
+   * reports through `onReasoningReplayHistory` instead.
    */
   historyMessages?: unknown[] | null;
+  /** Connection+family scoped Gemini thought-signature namespace (#17912). */
+  signatureNamespace?: string | null;
   responseToolNameMap: Map<string, string> | null;
+  customToolNames?: ReadonlySet<string>;
   requestToolIdentityMap: Map<string, { namespace?: string; name: string }> | null;
   reasoningCacheScope: string | null;
+  /** Never retain reasoning from a response that may echo video transcript cues. */
+  videoTranscriptSensitive?: boolean;
   clientHeaders: Headers | Record<string, unknown> | null;
   isClaudeCodeCompatible: boolean;
   /**

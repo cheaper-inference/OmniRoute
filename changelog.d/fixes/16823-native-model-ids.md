@@ -1,0 +1,1 @@
+- fix(sse): preserve provider-native model IDs such as Ollama Cloud `gpt-oss:120b` in explicit routes and local aliases while retaining foreign-dialect compatibility (refs #16823).

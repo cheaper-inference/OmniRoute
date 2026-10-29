@@ -46,19 +46,20 @@ export const AUTO_ROUTING_STRATEGY_VALUES = [
   "sla-aware",
   "sla",
   "lkgp",
+  "nadir",
 ] as const;
 
 export type AutoRoutingStrategyValue = (typeof AUTO_ROUTING_STRATEGY_VALUES)[number];
 
 export const ACCOUNT_FALLBACK_STRATEGY_VALUES = [
   "priority",
-  "weighted",
   "fill-first",
   "round-robin",
   "p2c",
   "random",
   "least-used",
   "cost-optimized",
+  "expiry-first",
   "strict-random",
 ] as const;
 

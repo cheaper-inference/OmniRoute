@@ -16,14 +16,25 @@ import {
   clearRecoveredProviderState,
 } from "@/sse/services/auth";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
+import {
+  isKeyScopeBlockedCredentials,
+  scopeComboTargetsForKey,
+  type ComboKeyScope,
+} from "@omniroute/open-sse/services/comboKeyScope.ts";
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { calculateModalCost } from "@/lib/usage/costCalculator";
+import { runImageRequestWithAccounting } from "@/lib/usage/imageRequestAccounting";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import * as logger from "@/sse/utils/logger";
+import {
+  isTerminalMediaFailure,
+  narrowMediaConnectionScope,
+  pinnedConnectionIds,
+} from "./mediaComboFallback.ts";
 
 /**
  * Caller-facing shape of handleImageGeneration(). The handler is untyped and
@@ -37,6 +48,8 @@ type ImageGenerationResult =
 /** Minimum shape a combo target must expose to be iterated. */
 export interface ImageComboTarget {
   modelStr: string;
+  connectionId?: string | null;
+  allowedConnectionIds?: string[] | null;
 }
 
 /** Normalized per-target dispatch result (success or classified failure). */
@@ -89,7 +102,8 @@ export interface RunImageComboTargetsOptions<T extends ImageComboTarget> {
  *
  *  - missing credentials, DB errors, and rate-limited accounts are skipped
  *    (fall through to the next target) rather than terminating the request;
- *  - a 400/401/403 from an actual dispatch attempt is terminal (stop iterating);
+ *  - a 400/401/403 from an actual dispatch attempt advances only when a later
+ *    target uses a distinct provider/account; otherwise it is terminal;
  *  - any other dispatch failure (429/5xx) is non-terminal (try the next target);
  *  - the first success wins.
  *
@@ -105,7 +119,8 @@ export async function runImageComboTargets<T extends ImageComboTarget>(
   let lastError: { status: number; error: string } | null = null;
   let fallbackCount = 0;
 
-  for (const target of targets) {
+  for (let targetIndex = 0; targetIndex < targets.length; targetIndex += 1) {
+    const target = targets[targetIndex];
     const { provider, model } = opts.resolveProvider(target);
     if (!provider) {
       lastError = { status: 400, error: `Invalid image model: ${target.modelStr}` };
@@ -126,6 +141,14 @@ export async function runImageComboTargets<T extends ImageComboTarget>(
 
     if (!credentials) {
       lastError = { status: 400, error: `No credentials for image provider: ${provider}` };
+      fallbackCount += 1;
+      continue;
+    }
+
+    // GHSA-3w2r: every connection of this provider is outside the caller key's
+    // scope — the sentinel carries no secret and must never be dispatched.
+    if (isKeyScopeBlockedCredentials(credentials)) {
+      lastError = { status: 403, error: `[${provider}] No connection allowed for this API key` };
       fallbackCount += 1;
       continue;
     }
@@ -156,9 +179,21 @@ export async function runImageComboTargets<T extends ImageComboTarget>(
     const status = result.status || 500;
     const error = typeof result.error === "string" ? result.error : failureLabel;
 
-    // Terminal failures (400 bad model, 403 banned, etc.) — stop iterating
-    // Non-terminal failures (429, 5xx) — try next target
-    if (status === 400 || status === 403 || status === 401) {
+    // Bad-model/auth failures are local to the provider account that handled
+    // the attempt. A genuinely different provider/account may still succeed;
+    // retrying the same unpinned account would only duplicate the failure.
+    if (
+      isTerminalMediaFailure({
+        status,
+        provider,
+        credentials,
+        target,
+        remaining: targets.slice(targetIndex + 1).map((candidate) => ({
+          target: candidate,
+          provider: opts.resolveProvider(candidate).provider,
+        })),
+      })
+    ) {
       return { outcome: "terminal", provider, status, error, fallbackCount };
     }
 
@@ -167,6 +202,62 @@ export async function runImageComboTargets<T extends ImageComboTarget>(
   }
 
   return { outcome: "exhausted", fallbackCount, lastError };
+}
+
+/** Credentials for one image combo target, honouring the key scope and the target's account pin. */
+function resolveImageTargetCredentials(
+  provider: string,
+  target: ImageComboTarget,
+  allowedConnections: string[] | null
+) {
+  return getProviderCredentialsWithQuotaPreflight(
+    provider,
+    null,
+    narrowMediaConnectionScope(allowedConnections, pinnedConnectionIds(target)),
+    parseImageModel(target.modelStr).model
+  );
+}
+
+/**
+ * Steps 1–2 of {@link executeImageCombo}: the combo's images-capable targets the
+ * caller key may use, with the key's connection scope — or the error response.
+ */
+async function resolveImageComboTargets(comboName: string, keyScope: ComboKeyScope | undefined) {
+  const combo = await getComboByName(comboName);
+  if (!combo) {
+    // Model name is not a combo; the caller should handle this as a direct model
+    return { response: errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`) };
+  }
+
+  const allCombos = await getCombos();
+  const targets = resolveComboTargets(combo as never, allCombos as never);
+  if (!targets || targets.length === 0) {
+    return {
+      response: errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `Combo "${comboName}" has no usable targets`
+      ),
+    };
+  }
+
+  // Images-capable targets, then those the caller key's model policy admits.
+  const capableTargets = targets.filter((t) => {
+    if (!t.modelStr) return false;
+    const entry = getImageModelEntry(t.modelStr);
+    return entry !== null;
+  });
+  const scoped = await scopeComboTargetsForKey(capableTargets, keyScope, comboName);
+  if (scoped.rejection) return { response: scoped.rejection };
+
+  if (scoped.targets.length === 0) {
+    return {
+      response: errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `No images-capable targets in combo "${comboName}"`
+      ),
+    };
+  }
+  return { targets: scoped.targets, allowedConnections: scoped.allowedConnections };
 }
 
 /**
@@ -184,36 +275,16 @@ export async function executeImageCombo(
   auth: {
     request: Request;
     policy: { apiKeyInfo?: { id?: string; name?: string } | null };
+    /** GHSA-3w2r: the caller key's scope; omitted = unrestricted (unchanged). */
+    keyScope?: ComboKeyScope;
   },
   startTime: number,
   log: typeof logger
 ): Promise<Response> {
-  // 1. Resolve combo targets
-  const combo = await getComboByName(comboName);
-  if (!combo) {
-    // Model name is not a combo; the caller should handle this as a direct model
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
-  }
-
-  const allCombos = await getCombos();
-  const targets = resolveComboTargets(combo as never, allCombos as never);
-  if (!targets || targets.length === 0) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
-  }
-
-  // 2. Filter to images-capable targets
-  const imageTargets = targets.filter((t) => {
-    if (!t.modelStr) return false;
-    const entry = getImageModelEntry(t.modelStr);
-    return entry !== null;
-  });
-
-  if (imageTargets.length === 0) {
-    return errorResponse(
-      HTTP_STATUS.BAD_REQUEST,
-      `No images-capable targets in combo "${comboName}"`
-    );
-  }
+  // 1–2. Resolve combo targets, filtered to images-capable ones the key may use
+  const resolved = await resolveImageComboTargets(comboName, auth.keyScope);
+  if ("response" in resolved) return resolved.response;
+  const { targets: imageTargets, allowedConnections } = resolved;
 
   // 3. Iterate targets in priority order (first healthy target wins).
   //    The skip / terminal classification lives in the shared runImageComboTargets
@@ -221,14 +292,27 @@ export async function executeImageCombo(
   //    /v1/images/edits can reuse the exact same iteration semantics (#12547).
   const run = await runImageComboTargets(imageTargets, {
     resolveProvider: (target) => parseImageModel(target.modelStr),
-    resolveCredentials: (provider) => getProviderCredentialsWithQuotaPreflight(provider),
-    dispatch: async ({ target, credentials }) =>
-      (await handleImageGeneration({
-        body: { ...body, model: target.modelStr },
-        credentials,
-        log,
-        signal: auth.request?.signal || null,
-      })) as ImageGenerationResult,
+    resolveCredentials: (provider, target) =>
+      resolveImageTargetCredentials(provider, target, allowedConnections),
+    dispatch: async ({ target, provider, model, credentials }) =>
+      (await runImageRequestWithAccounting(
+        {
+          endpoint: "/v1/images/generations",
+          provider,
+          model,
+          apiKeyInfo: auth.policy?.apiKeyInfo,
+          credentials,
+          startTime,
+          comboStrategy: "priority",
+        },
+        () =>
+          handleImageGeneration({
+            body: { ...body, model: target.modelStr },
+            credentials,
+            log,
+            signal: auth.request?.signal || null,
+          })
+      )) as ImageGenerationResult,
     onSuccess: async (credentials) => {
       await clearRecoveredProviderState(credentials as never);
     },

@@ -15,18 +15,11 @@ import {
   recordModelLockoutFailure,
   recordProviderFailure,
   recordProviderSuccess,
-  retryHintBypassesMaxCooldownMs,
   selectLockoutCooldownMs,
 } from "../accountFallback.ts";
-import {
-  errorResponse,
-  errorResponseWithComboDiagnostics,
-  logRetryHintUnreadable,
-  readProseRetryAfter,
-} from "../../utils/error.ts";
+import { errorResponse, isContentPolicyRefusalComboStopEnabled } from "../../utils/error.ts";
 import { recordComboFailure, clearComboFailureTracking } from "./failureTracker.ts";
-import { buildRecoveryHint } from "./pinRecovery.ts";
-import { formatExhaustedConnectionKey } from "./comboDiagFormat.ts";
+import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { recordComboRequest, getComboMetrics } from "../comboMetrics.ts";
 import {
   expandComboSystemPromptIfPresent,
@@ -54,24 +47,28 @@ import { recordStickyBinding } from "./sessionStickiness.ts";
 import { recordStickyWeightedSuccess } from "./rrState.ts";
 import { resolveReasoningBufferedMaxTokens, toPositiveInteger } from "../reasoningTokenBuffer.ts";
 import { parseModel } from "../model.ts";
+import { getNextComboFamilyFallback } from "../modelFamilyFallbackPolicy.ts";
 import type { ProviderProfile } from "../accountFallback.ts";
 import {
   MAX_FALLBACK_WAIT_MS,
+  classifyQualityFailure,
   clampGlobalAttempts,
   shouldSkipForPredictedTtft,
   shouldRecordProviderBreakerFailure,
+  isProviderCircuitOpenResult,
   isComboRequestScopedFailure as isScopedFailure,
-  isStreamReadinessFailureErrorBody,
-  isStreamEarlyEofErrorBody,
-  isTokenLimitBreachErrorBody,
+  shouldRecordModelLockoutForComboFailure,
+  isLocalKeyPolicyBreachErrorBody,
   isLocalQueueCapacityErrorBody,
   toRecordedTarget,
   resolveDelayMs,
   resolvePersistedConnectionCooldownSkipReason,
   isModelScoped400,
+  requestScopedReplayKey,
 } from "./comboPredicates.ts";
 import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
-import { pinNativeCodexTurn } from "./nativeCodexTurnPin.ts";
+import { buildBudgetExhaustedResponse } from "./budgetExhaustion.ts";
+import { advanceNativeCodexTurnGeneration, pinNativeCodexTurn } from "./nativeCodexTurnPin.ts";
 import { recordComboDecision } from "./decisionTrace.ts";
 import { recordProviderCooldown } from "../providerCooldownTracker.ts";
 import {
@@ -79,42 +76,52 @@ import {
   releaseQualityClone,
   releaseRejectedQualityResponse,
 } from "./validateQuality.ts";
+import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
 import {
-  isQuotaExhaustionResponse,
+  isTruncatedComboAttempt,
+  recordTruncatedStreamAttempt,
+} from "./truncatedStreamFailover.ts";
+import {
+  isQuotaExhaustionFailure,
   recordQuotaExhaustionClassification,
 } from "./quotaExhaustion.ts";
 import { markAccountExhaustedFromCredits } from "../../../src/domain/quotaCache.ts";
 import { classifyComboOutcome, redactConnectionLabel } from "./comboErrorAggregation.ts";
 import { readConnectionForCooldownGate } from "./executeTargetGates.ts";
+import { recordLkgpPin } from "./recordLkgpPin.ts";
 import {
   handlePreContentStreamRetry,
   qualityValidationFailure,
   remainderIsHomogeneous,
   shouldAbortOnInputBoundFailure,
   shouldSurfaceBodySpecific400,
+  stopProtectedPriorityTarget,
 } from "./executeTargetClassify.ts";
 import type { CompressionMode } from "../compression/types.ts";
-import type { AttemptLoopDeps, AttemptLoopState, ExecuteTargetResult } from "./attemptLoopTypes.ts";
-import type { ComboDiagnostics } from "../../utils/error.ts";
-import type { ComboErrorBody, ComboRetryAfter, ResolvedComboTarget } from "./types.ts";
+import type { ExecuteTargetResult, ExecuteTargetAttemptOptions } from "./attemptLoopTypes.ts";
+import { readAttemptFailure, resolveAttemptRetryAfter } from "./attemptFailure.ts";
 import type { ResponseValidationConfig } from "./responseValidation.ts";
 import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
-import { protectedPriorityStopStatus } from "./protectedPriorityStopStatus.ts";
 import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.ts";
+import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
+import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
+import { getStrategyTraits } from "./strategyRegistry.ts";
+import {
+  handleEmptyContentRetry,
+  isEmptyContentResponse,
+  isEarlyEofResponse,
+  isReadinessFailure,
+} from "./emptyContentRetry.ts";
+import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
 
-export async function executeTargetAttempt(opts: {
-  index: number;
-  state: AttemptLoopState;
-  deps: AttemptLoopDeps;
-  targetForAttempt: ResolvedComboTarget;
-  profile: unknown;
-  protectedPriorityTarget: boolean;
-}): Promise<ExecuteTargetResult> {
+export async function executeTargetAttempt(
+  opts: ExecuteTargetAttemptOptions
+): Promise<ExecuteTargetResult> {
   const { index: i, state, deps, targetForAttempt, protectedPriorityTarget } = opts;
   const profile = opts.profile as ProviderProfile | undefined;
   const target = state.orderedTargets[i];
-  const modelStr = target.modelStr;
-  const rawModel = parseModel(modelStr).model || modelStr;
+  let modelStr = target.modelStr;
+  let rawModel = parseModel(modelStr).model || modelStr;
   const provider = target.provider;
   const allowRateLimitedConnection =
     Boolean(provider && provider !== "unknown") &&
@@ -123,30 +130,21 @@ export async function executeTargetAttempt(opts: {
   const retryDelayMs = resolveDelayMs(deps.config.retryDelayMs, 2000);
   const fallbackDelayMs = resolveDelayMs(deps.config.fallbackDelayMs, 0);
   const universalHandoffConfig = deps.universalHandoffConfig ?? DEFAULT_UNIVERSAL_HANDOFF_CONFIG;
+  const stopTarget = (message: string, cause?: ProtectedPriorityStopCause) =>
+    stopProtectedPriorityTarget({
+      protectedPriorityTarget,
+      state,
+      deps,
+      target,
+      message,
+      cause,
+    });
 
-  const stopProtectedPriorityTarget = (message: string, cause?: ProtectedPriorityStopCause) => {
-    state.observeFailure(false, target.executionKey);
-    deps.clearStaleLKGP(deps.combo.name, target.executionKey, deps.combo.id, deps.log, "COMBO");
-    return protectedPriorityTarget
-      ? { ok: false as const, response: errorResponse(protectedPriorityStopStatus(cause), message) }
-      : null;
-  };
-
-  const buildComboDiag = (
-    terminalReason: string,
-    retryAfterSeconds?: number
-  ): ComboDiagnostics => ({
-    poolSize: state.orderedTargets.length,
-    attempted: state.recordedAttempts,
-    excluded: [
-      ...[...state.exhaustedProviders].map((p) => ({ provider: p, reason: "exhausted" })),
-      ...[...state.exhaustedConnections].map((c) => formatExhaustedConnectionKey(String(c))),
-    ],
-    attemptOrder: state.comboAttemptOrder,
-    terminalReason,
-    recovery: buildRecoveryHint(terminalReason, retryAfterSeconds),
-  });
-
+  const familyTried = new Set<string>();
+  // #16438 opt-in (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): an empty_content turn spends
+  // this loop's existing retry on a sibling connection with no lockout. Off = release path.
+  const emptyStreamSiblingRecovery = isEmptyStreamSiblingRecoveryEnabled();
+  let emptyTurnConnectionId: string | null = null;
   // Retry loop for transient errors
   for (let retry = 0; retry <= deps.maxRetries; retry++) {
     // Fix #1681: Bail out immediately if the client has disconnected
@@ -160,26 +158,13 @@ export async function executeTargetAttempt(opts: {
         "COMBO",
         `Maximum combo attempts (${maxGlobalAttempts}) exceeded across all targets and fallbacks. Terminating loop to prevent runaway background requests.`
       );
-      // Actionable failure instead of an opaque 503 when every candidate
-      // failed the same recoverable way. If the dominant cause was reasoning
-      // models exhausting a too-small max_tokens budget (no content output),
-      // retrying other models can't help — tell the caller to raise max_tokens.
-      // Silent-stop fix: bump the consecutive-failure counter for this session-combo pair
-      // so the pin gets cleared on the 3rd attempt (recovery.next_step tells the client).
-      const reasoningExhausted = /reasoning consumed \d+\/\d+ tokens/.test(state.lastError || "");
-      const failureReason = reasoningExhausted
-        ? "reasoning_budget_exhausted"
-        : "max_attempts_exceeded";
+      // Actionable failure instead of an opaque 503 (reasoning budget exhausted /
+      // context overflow — see budgetExhaustion.ts). Silent-stop fix: bump the
+      // consecutive-failure counter so the pin gets cleared on the 3rd attempt.
       recordComboFailure(deps.effectiveSessionId, deps.combo.name);
       return {
         ok: false,
-        response: errorResponseWithComboDiagnostics(
-          503,
-          reasoningExhausted
-            ? "All combo candidates exhausted their token budget on reasoning without producing content. Increase max_tokens — reasoning models need a larger budget to emit content."
-            : "Maximum combo retry limit reached",
-          buildComboDiag(failureReason)
-        ),
+        response: buildBudgetExhaustedResponse(state, deps.traceInvocationId),
       };
     }
     // Predictive TTFT Circuit Breaker (skip slow models)
@@ -204,10 +189,7 @@ export async function executeTargetAttempt(opts: {
             decision: "skipped_before_dispatch",
             reason: "predictive_ttft",
           });
-          return stopProtectedPriorityTarget(
-            `Predictive latency check rejected ${modelStr}`,
-            "predictive_ttft"
-          );
+          return stopTarget(`Predictive latency check rejected ${modelStr}`, "predictive_ttft");
         }
       }
     }
@@ -244,7 +226,7 @@ export async function executeTargetAttempt(opts: {
       );
       if (persistedRetrySkip) {
         deps.log.info("COMBO", persistedRetrySkip);
-        if (i > 0) state.fallbackCount++;
+        state.fallbackCount++;
         return null;
       }
     }
@@ -369,12 +351,26 @@ export async function executeTargetAttempt(opts: {
     }
     const result = await deps.handleSingleModelWithTimeout(attemptBody, modelStr, {
       ...targetForAttempt,
+      emptyTurnConnectionId,
       effectiveComboStrategy: deps.strategy,
       failoverBeforeRetry: deps.config.failoverBeforeRetry,
     });
 
     // Success — validate response quality before returning
     if (result.ok) {
+      // #18460 follow-up — a cut buffered stream is a retryable attempt failure.
+      if (isTruncatedComboAttempt(result, deps, protectedPriorityTarget)) {
+        recordTruncatedStreamAttempt({
+          result,
+          modelStr,
+          provider,
+          targetIndex: i,
+          target,
+          state,
+          deps,
+        });
+        return null;
+      }
       const selectedConnectionId =
         result.headers?.get("X-OmniRoute-Selected-Connection-Id") ||
         result.headers?.get("x-omniroute-selected-connection-id") ||
@@ -394,7 +390,9 @@ export async function executeTargetAttempt(opts: {
         qualityClone,
         deps.clientRequestedStream,
         deps.log,
-        deps.config.responseValidation as ResponseValidationConfig | null | undefined
+        deps.config.responseValidation as ResponseValidationConfig | null | undefined,
+        null,
+        await isTrustedEmptyTurn(provider, result, target.connectionId)
       );
       releaseQualityClone(qualityClone, result, quality);
       if (!quality.valid) {
@@ -407,6 +405,17 @@ export async function executeTargetAttempt(opts: {
         // unhealthy, so the sticky pin's lazy headroom recheck would never
         // catch it either — release it here, on the failing response.
         deps.releaseStickyPinOnFailure(deps.sticky.messageHash, effectiveConnectionId);
+        // #919: a quality-rejected 200 leaves the same stale LKGP pin as a
+        // classic failure — clear it so the next request re-resolves.
+        deps.clearStaleLKGP(
+          deps.combo.name,
+          target.executionKey,
+          deps.combo.id,
+          deps.log,
+          "COMBO",
+          undefined,
+          target
+        );
         recordComboRequest(deps.combo.name, modelStr, {
           success: false,
           latencyMs: Date.now() - deps.startTime,
@@ -417,27 +426,36 @@ export async function executeTargetAttempt(opts: {
         state.recordedAttempts++;
         // Fix #1707: Set terminal state so the fallback doesn't emit
         // misleading ALL_ACCOUNTS_INACTIVE when the real issue is quality.
+        const qualityFailure = classifyQualityFailure(quality);
         state.lastError = `Upstream response failed quality validation: ${quality.reason}`;
-        state.lastStatus = 502;
+        state.lastStatus = qualityFailure.status;
         // #10314: record quality failures as a FIRST-CLASS per-target outcome
         // so a quality reason is never silently dropped from the aggregated
         // terminal message when a later sibling overwrites lastError.
         state.comboErrors.push({
           model: modelStr,
-          status: 502,
+          status: qualityFailure.status,
           error: quality.reason || "upstream response failed quality validation",
-          kind: "quality",
+          kind: qualityFailure.kind,
         });
-        if (i > 0) state.fallbackCount++;
-        if (provider && rawModel) {
+        state.fallbackCount++;
+        state.requestScopedFailureSeen ||= qualityFailure.requestScoped;
+        if (qualityFailure.requestScoped)
+          state.requestScopedRejectedModelKeys?.add(requestScopedReplayKey(modelStr));
+        if (
+          provider &&
+          rawModel &&
+          !qualityFailure.requestScoped &&
+          !(emptyStreamSiblingRecovery && quality.upstreamFailure?.emptyContent)
+        ) {
           const mlSettings = resolveModelLockoutSettings(deps.settings);
-          if (mlSettings.enabled && mlSettings.errorCodes.includes(502)) {
+          if (mlSettings.enabled && mlSettings.errorCodes.includes(qualityFailure.status)) {
             recordModelLockoutFailure(
               provider,
               target.connectionId || "",
               rawModel,
               "quality_failure",
-              502,
+              qualityFailure.status,
               mlSettings.baseCooldownMs,
               profile,
               {
@@ -456,17 +474,59 @@ export async function executeTargetAttempt(opts: {
           latencyMs: Date.now() - deps.startTime,
         });
         state.observeFailure(false, target.executionKey);
-        if (handlePreContentStreamRetry(quality, retry, deps, modelStr)) continue;
-        return protectedPriorityTarget ? qualityValidationFailure() : null;
+        if (handlePreContentStreamRetry(quality, retry, deps, modelStr)) {
+          if (emptyStreamSiblingRecovery && quality.upstreamFailure?.emptyContent) {
+            emptyTurnConnectionId = effectiveConnectionId || null;
+          }
+          continue;
+        }
+        // #15917 (opt-in): return a content-policy refusal instead of routing around it.
+        if (
+          isContentPolicyRefusal(quality.upstreamFailure) &&
+          isContentPolicyRefusalComboStopEnabled()
+        )
+          return qualityValidationFailure(quality);
+        familyTried.add(modelStr);
+        const familyNext = await getNextComboFamilyFallback({
+          model: modelStr,
+          tried: familyTried,
+          provider,
+          connectionId: effectiveConnectionId,
+          headers: deps.requestHeaders,
+          requestScoped: quality.upstreamFailure?.requestScoped,
+        });
+        if (familyNext && familyNext !== modelStr) {
+          deps.log.info("COMBO", `Quality fail ${modelStr} -> family sibling ${familyNext}`);
+          modelStr = familyNext;
+          rawModel = parseModel(modelStr).model || modelStr;
+          retry--;
+          continue;
+        }
+        return protectedPriorityTarget ? qualityValidationFailure(quality) : null;
       }
 
       if (Boolean(deps.clientManagedResponsesContext) && effectiveConnectionId) {
-        pinNativeCodexTurn({
-          body: deps.body,
-          comboName: deps.combo.name,
-          target,
-          connectionId: effectiveConnectionId,
-        });
+        if (deps.nativeCodexAutoResume) {
+          const nextGen = advanceNativeCodexTurnGeneration(deps.body, deps.combo.name);
+          deps.log.info(
+            "COMBO",
+            `Native Codex auto-resume routed: new provider/model=${target.modelStr} on connection ${effectiveConnectionId.slice(0, 8)} (logical turn generation ${nextGen})`
+          );
+          pinNativeCodexTurn({
+            body: deps.body,
+            comboName: deps.combo.name,
+            target,
+            connectionId: effectiveConnectionId,
+            generation: nextGen ?? undefined,
+          });
+        } else {
+          pinNativeCodexTurn({
+            body: deps.body,
+            comboName: deps.combo.name,
+            target,
+            connectionId: effectiveConnectionId,
+          });
+        }
       }
 
       // Success decay: a healthy response walks the model's lockout failure
@@ -506,9 +566,19 @@ export async function executeTargetAttempt(opts: {
 
       // Reset cooldown on success
       if (provider && provider !== "unknown") {
-        recordProviderSuccess(provider, effectiveConnectionId || undefined);
+        recordProviderSuccess(
+          provider,
+          effectiveConnectionId || undefined,
+          {
+            providerProbeSettled: isProviderProbeResponse(result),
+          },
+          deps.log
+        );
       }
-      if (deps.strategy === "weighted" && (deps.stickyWeightedLimit ?? 0) > 1) {
+      if (
+        getStrategyTraits(deps.strategy).stickyPin === "weighted" &&
+        (deps.stickyWeightedLimit ?? 0) > 1
+      ) {
         const stickySuccessKey = deps.getWeightedStepKeyForTarget?.(target);
         if (stickySuccessKey) {
           recordStickyWeightedSuccess(
@@ -608,7 +678,7 @@ export async function executeTargetAttempt(opts: {
       // combo.ts decides whether a successful turn should generate a handoff,
       // while chat.ts injects the handoff after the real connectionId is resolved.
       if (
-        deps.strategy === "context-relay" &&
+        getStrategyTraits(deps.strategy).contextRelay &&
         deps.relayOptions?.sessionId &&
         deps.relayConfig &&
         (deps.relayConfig.handoffProviders ?? []).includes(provider) &&
@@ -650,75 +720,23 @@ export async function executeTargetAttempt(opts: {
         recordStickyBinding(deps.sticky.messageHash, target.connectionId); // LKGP (#919):
       if (provider) {
         const connId = effectiveConnectionId || undefined;
-        void (async () => {
-          try {
-            const { setLKGP } = await import("@/lib/db/settings");
-            await Promise.all([
-              setLKGP(deps.combo.name, target.executionKey, provider, connId),
-              setLKGP(deps.combo.name, deps.combo.id || deps.combo.name, provider, connId),
-            ]);
-          } catch (err) {
-            deps.log.warn(
-              "COMBO",
-              "Failed to record Last Known Good Provider. This is non-fatal.",
-              {
-                err,
-              }
-            );
-          }
-        })();
+        recordLkgpPin({
+          comboName: deps.combo.name,
+          executionKey: target.executionKey,
+          comboId: deps.combo.id,
+          provider,
+          connectionId: connId,
+          log: deps.log,
+          tag: "COMBO",
+        });
       }
 
       return { ok: true, response: result };
     }
 
-    // Extract error info from response
-    let errorText = result.statusText || "";
-    let errorBody: ComboErrorBody = null;
-    let retryAfter: ComboRetryAfter | null = null;
-    let bodyText = "";
-    try {
-      const cloned = result.clone();
-      try {
-        const text = await cloned.text();
-        bodyText = text;
-        if (text) {
-          errorText = text.substring(0, 500);
-          errorBody = JSON.parse(text);
-          const parsedError = errorBody?.error;
-          errorText =
-            (typeof parsedError === "object" && parsedError?.message) ||
-            (typeof parsedError === "string" ? parsedError : null) ||
-            errorBody?.message ||
-            errorText;
-          // Live incident (log id 1784457764961-73 follow-up): the pre-dispatch
-          // "all credentials cooling down" rejection (buildModelCooldownBody /
-          // handleNoCredentials in src/sse/handlers/chatHelpers.ts) nests its
-          // retry hint as error.retry_after (ISO string) / error.reset_seconds
-          // (seconds), not the top-level `retryAfter` every other 429 shape
-          // uses. Without this fallback, lastStatus gets recorded (fixed above)
-          // but earliestRetryAfter stays null, so the final check falls through
-          // to the generic "all combo models unavailable" error instead of ever
-          // reaching the cooldown-wait decision — same class of bug, different
-          // response shape.
-          const nestedRetryAfter =
-            typeof parsedError === "object" ? (parsedError?.retry_after ?? null) : null;
-          const nestedResetSeconds =
-            typeof parsedError === "object" ? (parsedError?.reset_seconds ?? null) : null;
-          retryAfter =
-            errorBody?.retryAfter ||
-            nestedRetryAfter ||
-            (typeof nestedResetSeconds === "number" && nestedResetSeconds > 0
-              ? new Date(Date.now() + nestedResetSeconds * 1000).toISOString()
-              : null);
-        }
-      } catch {
-        logRetryHintUnreadable(deps.log, "COMBO", modelStr, result.status, "unparseable body");
-      }
-    } catch {
-      logRetryHintUnreadable(deps.log, "COMBO", modelStr, result.status, "clone failed");
-    }
-    retryAfter ||= readProseRetryAfter(bodyText); // #13672 opt-in prose retry hints
+    const failure = await readAttemptFailure(result, { log: deps.log, modelStr });
+    const { errorText, errorBody, structuredError } = failure;
+    const retryAfter = resolveAttemptRetryAfter(failure);
 
     // Track earliest retryAfter
     if (
@@ -728,25 +746,46 @@ export async function executeTargetAttempt(opts: {
       state.earliestRetryAfter = retryAfter;
     }
 
-    // Normalize error text
-    if (typeof errorText !== "string") {
-      try {
-        errorText = JSON.stringify(errorText);
-      } catch {
-        errorText = String(errorText);
-      }
+    if (isProviderCircuitOpenResult(result, errorText)) {
+      const refusal = recordLocalCircuitRefusal({
+        comboName: deps.combo.name,
+        modelStr,
+        result,
+        errorText,
+        startTime: deps.startTime,
+        fallbackCount: state.fallbackCount,
+        strategy: deps.strategy,
+        target,
+      });
+      state.recordedAttempts++;
+      state.lastError = refusal.error;
+      state.lastStatus = refusal.status;
+      state.comboErrors.push(refusal.outcome);
+      state.fallbackCount++;
+      return null;
     }
 
-    const isStreamReadinessFailure =
-      (result.status === 502 || result.status === 504) &&
-      isStreamReadinessFailureErrorBody(errorBody);
-    // An early EOF is an upstream failure, not a readiness probe — the breaker must
-    // see it even though the transient-retry path below treats both codes alike.
-    const isStreamEarlyEof =
-      (result.status === 502 || result.status === 504) && isStreamEarlyEofErrorBody(errorBody);
+    if (emptyStreamSiblingRecovery && isEmptyContentResponse(result, errorBody)) {
+      const emptyContentRetry = handleEmptyContentRetry({
+        response: result,
+        errorText,
+        modelStr,
+        retry,
+        protectedPriorityTarget,
+        target,
+        state,
+        deps,
+      });
+      emptyTurnConnectionId = emptyContentRetry.connectionId;
+      if (emptyContentRetry.shouldRetry === true) continue;
+      return emptyContentRetry.result;
+    }
 
-    // FIX 5: a local per-API-key token-limit 429 must not cool shared accounts.
-    const isTokenLimitBreach = result.status === 429 && isTokenLimitBreachErrorBody(errorBody);
+    const isStreamReadinessFailure = isReadinessFailure(result, errorBody);
+    const isStreamEarlyEof = isEarlyEofResponse(result, errorBody);
+
+    // FIX 5: a local per-API-key policy 429 (token limit, budget) must not cool shared accounts.
+    const isTokenLimitBreach = result.status === 429 && isLocalKeyPolicyBreachErrorBody(errorBody);
     const isLocalQueueCapacity = isLocalQueueCapacityErrorBody(errorBody);
 
     // Fix #1681: Status 499 means client disconnected — stop combo loop immediately.
@@ -779,7 +818,8 @@ export async function executeTargetAttempt(opts: {
         target: toRecordedTarget(target),
       });
       state.recordedAttempts++;
-      if (i > 0) state.fallbackCount++;
+      // Terminal stop — the combo does not advance to another target, so no
+      // fallback was attempted here whatever the index of the failing target is.
       return { ok: false, response: result };
     }
 
@@ -787,25 +827,6 @@ export async function executeTargetAttempt(opts: {
     // treated as local to that target and the combo continues to the next target.
     // Error classification is retained only for retry/cooldown pacing; it must
     // not decide whether fallback happens, including for generic 400 responses.
-    const rawError = errorBody?.error;
-    const structuredError =
-      rawError && typeof rawError === "object"
-        ? {
-            // Upstream JSON may carry a numeric `code`/`type` (e.g. {"code":40001}).
-            // Coerce to string if present instead of discarding, so downstream string
-            // ops (.toLowerCase, .startsWith) can run safely without type crashes.
-            code:
-              (rawError as Record<string, unknown>).code !== undefined &&
-              (rawError as Record<string, unknown>).code !== null
-                ? String((rawError as Record<string, unknown>).code)
-                : undefined,
-            type:
-              (rawError as Record<string, unknown>).type !== undefined &&
-              (rawError as Record<string, unknown>).type !== null
-                ? String((rawError as Record<string, unknown>).type)
-                : undefined,
-          }
-        : undefined;
     const scopedFailure = isScopedFailure(result, errorText, structuredError);
 
     // #8375: input-bound request-scoped failures (context_length_exceeded) are
@@ -818,7 +839,14 @@ export async function executeTargetAttempt(opts: {
     // let that case fall through, so only short-circuit when every remaining
     // target is the same model (the "retrying will fail identically" premise
     // only holds within a homogeneous same-model pool).
-    const remainderHomogeneous = remainderIsHomogeneous(state.orderedTargets, i, modelStr);
+    // #15917: with CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED on, a content-policy refusal
+    // stops the combo even with different models remaining.
+    const remainderHomogeneous =
+      remainderIsHomogeneous(state.orderedTargets, i, modelStr) &&
+      // Earlier heterogeneous attempts can still be pending in a hedge.
+      // Preserve suffix short-circuiting for serial dispatch.
+      (!(deps.config.zeroLatencyOptimizationsEnabled && deps.config.hedging) ||
+        state.orderedTargets.every((candidate) => candidate.modelStr === modelStr));
     const isInputBoundFailure = shouldAbortOnInputBoundFailure({
       structuredError,
       remainderIsHomogeneous: remainderHomogeneous,
@@ -826,7 +854,7 @@ export async function executeTargetAttempt(opts: {
     if (isInputBoundFailure) {
       deps.log.warn(
         "COMBO",
-        `Input-bound request failure from ${modelStr} — aborting combo (same input will fail identically on every account)`
+        `Input-bound request failure from ${modelStr} — stopping combo and returning the refusal`
       );
       recordComboRequest(deps.combo.name, modelStr, {
         success: false,
@@ -836,7 +864,8 @@ export async function executeTargetAttempt(opts: {
         target: toRecordedTarget(target),
       });
       state.recordedAttempts++;
-      if (i > 0) state.fallbackCount++;
+      // Terminal stop: the same input would fail identically on every account, so
+      // the combo aborts instead of moving on — no fallback happened.
       return { ok: false, response: result };
     }
     const fallbackResult = checkFallbackError(
@@ -852,34 +881,7 @@ export async function executeTargetAttempt(opts: {
       await resolveComboDailyReset(provider)
     );
     const { cooldownMs } = fallbackResult;
-    // #6863: a parsed upstream quota reset (e.g. Antigravity "Resets in 92h27m28s")
-    // arrives in `quotaResetHintMs` — it bypasses the operator-gated
-    // `useUpstreamRetryHints` connection-cooldown setting. Mirror the
-    // single-model path (src/sse/services/auth.ts): when the retry hint was
-    // already honored, `cooldownMs` IS the upstream value; otherwise prefer the
-    // parsed quota reset — even when it is SHORTER than the fallback cooldown
-    // (e.g. subscription-quota 1h default vs a real "resets in 10m").
-    // `selectLockoutCooldownMs` still ignores hints at/below the base cooldown,
-    // so absent/tiny hints keep the #1308 exponential-backoff behavior.
-    const lockoutHintMs =
-      fallbackResult.usedUpstreamRetryHint === true
-        ? cooldownMs
-        : (fallbackResult.quotaResetHintMs ?? 0);
-    // Only a transport header or google.rpc.RetryInfo is authoritative enough
-    // to bypass maxCooldownMs. Prose and generic JSON remain useful exact hints,
-    // but the operator cap still bounds them.
-    const lockoutHintVerified = retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource);
-    const selectedConnectionId =
-      result.headers?.get("X-OmniRoute-Selected-Connection-Id") ||
-      result.headers?.get("x-omniroute-selected-connection-id") ||
-      undefined;
-    const targetWithConnection = selectedConnectionId
-      ? { ...target, connectionId: selectedConnectionId }
-      : target;
-
-    // #1731 / #1731v2: classify the upstream error and update the exhaustion sets
-    // (shared with handleRoundRobinCombo). Returns whether the provider is fully exhausted.
-    const providerExhausted = applyComboTargetExhaustion(targetWithConnection, {
+    const targetFailure = applyComboTargetExhaustion(target, {
       result,
       fallbackResult,
       errorText,
@@ -897,16 +899,45 @@ export async function executeTargetAttempt(opts: {
       exhaustedLogLevel: "info",
       structuredError,
     });
+    const {
+      target: targetWithConnection,
+      providerExhausted,
+      durableExhaustion,
+      isModelScopedClaudeQuota,
+      isConnectionScopedClaudeQuota,
+      modelScopedClaudeCooldownMs,
+      lockoutHintMs,
+      lockoutHintVerified,
+    } = targetFailure;
     // #6692: this connection was just classified as provider/connection-level
     // exhausted — if it's the currently sticky-bound one, release the pin now
     // rather than waiting for the next turn's lazy headroom/status recheck.
+    // Record the durable exhaustion so the next set retry skips the same
+    // provider or connection instead of replaying a dead call.
+    if (durableExhaustion) {
+      if (durableExhaustion.scope === "connection") {
+        (state.durableExhaustedConnections ??= new Set()).add(
+          `${durableExhaustion.provider}:${durableExhaustion.connectionId}`
+        );
+      } else {
+        (state.durableExhaustedProviders ??= new Set()).add(durableExhaustion.provider);
+      }
+    }
     deps.releaseStickyPinOnFailure(deps.sticky.messageHash, targetWithConnection.connectionId);
     if (
       providerExhausted ||
       state.exhaustedConnections.has(`${provider}:${targetWithConnection.connectionId}`) ||
       (provider && state.exhaustedProviders.has(provider))
     ) {
-      deps.clearStaleLKGP(deps.combo.name, target.executionKey, deps.combo.id, deps.log, "COMBO");
+      deps.clearStaleLKGP(
+        deps.combo.name,
+        target.executionKey,
+        deps.combo.id,
+        deps.log,
+        "COMBO",
+        undefined,
+        target
+      );
     }
 
     // #2101: Prevent infinite fallback loops with 400 Bad Request errors that are genuinely
@@ -944,11 +975,21 @@ export async function executeTargetAttempt(opts: {
         status: result.status,
         error: errorText || String(result.status),
         kind: classifyComboOutcome(result.status, errorText),
+        code: structuredError?.code,
       });
       state.lastStatus = result.status;
-      if (i > 0) state.fallbackCount++;
+      // Terminal stop ("stopping combo"): no later target is tried, so this is not
+      // a fallback even when the failing target is not the first one.
       deps.log.warn("COMBO", `Model ${modelStr} failed with body-specific error, stopping combo`);
-      deps.clearStaleLKGP(deps.combo.name, target.executionKey, deps.combo.id, deps.log, "COMBO");
+      deps.clearStaleLKGP(
+        deps.combo.name,
+        target.executionKey,
+        deps.combo.id,
+        deps.log,
+        "COMBO",
+        undefined,
+        target
+      );
       // #4279: surface the 400 via the {ok,response} contract so the OUTER
       // target loop resolves the combo and stops. A bare `break` here only
       // exits the inner retry loop; executeTarget then returns null, which
@@ -996,6 +1037,7 @@ export async function executeTargetAttempt(opts: {
         requestScopedFailure: scopedFailure,
         error: errorText,
         isProxyUnreachable: structuredError?.code === "proxy_unreachable",
+        providerCircuitOpen: isProviderCircuitOpenResult(result, errorText),
       })
     ) {
       const isQueueTimeout =
@@ -1004,15 +1046,25 @@ export async function executeTargetAttempt(opts: {
       recordProviderFailure(provider, deps.log, targetWithConnection.connectionId, profile, {
         isQueueTimeout,
         isNetworkError: structuredError?.code === "proxy_unreachable",
+        providerProbeSettled: isProviderProbeResponse(result),
       });
     }
 
-    const quotaExhausted = await isQuotaExhaustionResponse(result, provider, rawModel, profile);
+    const quotaExhausted = isQuotaExhaustionFailure(failure, provider, rawModel, profile);
     recordQuotaExhaustionClassification(result, quotaExhausted);
     // Balance exhaustion is upstream truth about credits, and it outranks the
     // stored snapshot — which can be hours stale and still claim headroom. Mark
-    // it so the next quota-weighted draw stops picking this connection.
-    if (quotaExhausted && result.status === 402 && targetWithConnection.connectionId && provider) {
+    // it so the next quota-weighted / fill-first draw stops preferring this
+    // connection. Include HTTP 403: some upstreams signal durable wallet
+    // exhaustion as 403 AUTHZ_INSUFFICIENT_BALANCE / "Insufficient account
+    // balance" instead of 402 (#10966 classifier; same-request hop still
+    // advances via the failure path below).
+    if (
+      quotaExhausted &&
+      (result.status === 402 || result.status === 403) &&
+      targetWithConnection.connectionId &&
+      provider
+    ) {
       markAccountExhaustedFromCredits(targetWithConnection.connectionId, provider);
     }
     state.observeFailure(quotaExhausted, target.executionKey);
@@ -1065,14 +1117,21 @@ export async function executeTargetAttempt(opts: {
         // was just observed. Recording it here mirrors the "done retrying" path.
         state.lastError = errorText || String(result.status);
         state.lastStatus = result.status;
-        if (i > 0) state.fallbackCount++;
+        state.fallbackCount++;
         return null;
       }
       // Record model lockout immediately on the first transient failure —
       // once the model is cooling down, retrying it would waste an upstream
       // call and extend the cooldown via exponential backoff.
       let lockoutRecorded = false;
-      if (!protectedPriorityTarget && provider && rawModel && retry === 0 && !scopedFailure) {
+      if (
+        !protectedPriorityTarget &&
+        provider &&
+        rawModel &&
+        retry === 0 &&
+        shouldRecordModelLockoutForComboFailure(scopedFailure, structuredError) &&
+        !isConnectionScopedClaudeQuota
+      ) {
         const mlSettings = resolveModelLockoutSettings(deps.settings);
         if (mlSettings.enabled && mlSettings.errorCodes.includes(result.status)) {
           recordModelLockoutFailure(
@@ -1087,8 +1146,9 @@ export async function executeTargetAttempt(opts: {
               // #1308/#6863: honor a long upstream reset (e.g. "Resets in 160h") over
               // the short base cooldown / exponential backoff when present. #7940's
               // maxCooldownMs cap only applies to synthetic values — a verified
-              // upstream reset (lockoutHintVerified) bypasses it.
-              exactCooldownMs: selectLockoutCooldownMs(lockoutHintMs, mlSettings),
+              // upstream reset (including a cached Claude reset) bypasses it.
+              exactCooldownMs:
+                modelScopedClaudeCooldownMs ?? selectLockoutCooldownMs(lockoutHintMs, mlSettings),
               maxCooldownMs: mlSettings.maxCooldownMs,
               // Preserve authoritative structured/header resets; clamp body prose.
               exactCooldownIsUpstreamReset: lockoutHintVerified,
@@ -1103,7 +1163,7 @@ export async function executeTargetAttempt(opts: {
         // first-failure lockout path, so lastStatus needs recording here too.
         state.lastError = errorText || String(result.status);
         state.lastStatus = result.status;
-        if (i > 0) state.fallbackCount++;
+        state.fallbackCount++;
         return null;
       }
       continue; // Retry same model (transient error, no lockout recorded)
@@ -1137,7 +1197,15 @@ export async function executeTargetAttempt(opts: {
     // *next* separate request. Circuit breaker / model lockout deliberately
     // don't react to request-scoped failure classes (see scopedFailure below),
     // so nothing else clears this stale pin.
-    deps.clearStaleLKGP(deps.combo.name, target.executionKey, deps.combo.id, deps.log, "COMBO");
+    deps.clearStaleLKGP(
+      deps.combo.name,
+      target.executionKey,
+      deps.combo.id,
+      deps.log,
+      "COMBO",
+      undefined,
+      target
+    );
     state.recordedAttempts++;
     state.lastError = errorText || String(result.status);
     state.comboErrors.push({
@@ -1145,12 +1213,18 @@ export async function executeTargetAttempt(opts: {
       status: result.status,
       error: errorText || String(result.status),
       kind: classifyComboOutcome(result.status, errorText),
+      code: structuredError?.code,
     });
     state.lastStatus = result.status;
-    if (i > 0) state.fallbackCount++;
+    state.fallbackCount++;
     // Wire combo failures into the resilience dashboard (model-level lockout)
     // alongside the provider-level cooldown below — they govern different scopes.
-    if (provider && rawModel && !scopedFailure) {
+    if (
+      provider &&
+      rawModel &&
+      shouldRecordModelLockoutForComboFailure(scopedFailure, structuredError) &&
+      !isConnectionScopedClaudeQuota
+    ) {
       const mlSettings = resolveModelLockoutSettings(deps.settings);
       if (mlSettings.enabled && mlSettings.errorCodes.includes(result.status)) {
         recordModelLockoutFailure(
@@ -1164,8 +1238,9 @@ export async function executeTargetAttempt(opts: {
           {
             // #1308/#6863: honor a long upstream reset over base/exponential cooldown.
             // #7940's maxCooldownMs cap only applies to synthetic values — a verified
-            // upstream reset (lockoutHintVerified) bypasses it.
-            exactCooldownMs: selectLockoutCooldownMs(lockoutHintMs, mlSettings),
+            // upstream reset (including a cached Claude reset) bypasses it.
+            exactCooldownMs:
+              modelScopedClaudeCooldownMs ?? selectLockoutCooldownMs(lockoutHintMs, mlSettings),
             maxCooldownMs: mlSettings.maxCooldownMs,
             // Preserve authoritative structured/header resets; clamp body prose.
             exactCooldownIsUpstreamReset: lockoutHintVerified,
@@ -1187,6 +1262,7 @@ export async function executeTargetAttempt(opts: {
       provider &&
       provider !== "unknown" &&
       !scopedFailure &&
+      !isModelScopedClaudeQuota &&
       !((result.status === 500 || result.status === 429) && hasPerModelQuota(provider, rawModel))
     ) {
       recordProviderCooldown(

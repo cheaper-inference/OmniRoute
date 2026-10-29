@@ -60,21 +60,43 @@ function setInputValue(el: HTMLTextAreaElement | HTMLInputElement, value: string
   el.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
-const { DEFAULT_PARAMS } = await import(
-  "../../../src/app/(dashboard)/dashboard/playground/components/ParamSliders"
-);
-const { default: ChatTab } = await import(
-  "../../../src/app/(dashboard)/dashboard/playground/components/tabs/ChatTab"
-);
+const { DEFAULT_PARAMS } =
+  await import("../../../src/app/(dashboard)/dashboard/playground/components/ParamSliders");
+const { default: ChatTab } =
+  await import("../../../src/app/(dashboard)/dashboard/playground/components/tabs/ChatTab");
 
-function makeConfig(systemPrompt = "You are a helpful assistant.") {
+function makeConfig(
+  systemPrompt = "You are a helpful assistant.",
+  endpoint: "chat.completions" | "images" = "chat.completions"
+) {
   return {
-    endpoint: "chat.completions" as const,
+    endpoint,
     baseUrl: "http://localhost:20128",
     model: "openai/gpt-4o",
     systemPrompt,
     params: { ...DEFAULT_PARAMS },
   };
+}
+
+function buildImageResultResponse(status: number, body: string): Response {
+  const payload = JSON.stringify({
+    status,
+    body,
+    headers: { "content-type": "application/json" },
+  });
+  return new Response(
+    new ReadableStream({
+      start(controller) {
+        controller.enqueue(
+          new TextEncoder().encode(
+            `: keepalive\n\nevent: playground.image.result\ndata: ${payload}\n\n`
+          )
+        );
+        controller.close();
+      },
+    }),
+    { status: 200, headers: { "content-type": "text/event-stream" } }
+  );
 }
 
 function buildSseResponse(content: string) {
@@ -109,9 +131,7 @@ function renderChatTab(
   document.body.appendChild(el);
   const root = createRoot(el);
   act(() => {
-    root.render(
-      <ChatTab configState={config} onMetricsUpdate={onMetricsUpdate} />
-    );
+    root.render(<ChatTab configState={config} onMetricsUpdate={onMetricsUpdate} />);
   });
   containers.push({ root, el });
   return el;
@@ -129,8 +149,9 @@ async function waitFor(fn: () => boolean, timeout = 3000): Promise<void> {
 
 describe("ChatTab", () => {
   beforeEach(() => {
-    (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean })
-      .IS_REACT_ACT_ENVIRONMENT = true;
+    (
+      globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
+    ).IS_REACT_ACT_ENVIRONMENT = true;
   });
 
   afterEach(() => {
@@ -163,9 +184,9 @@ describe("ChatTab", () => {
   });
 
   it("sends message and renders assistant response with markdown", async () => {
-    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      buildSseResponse("Hello from assistant!")
-    );
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(buildSseResponse("Hello from assistant!"));
 
     const el = renderChatTab();
     const textarea = el.querySelector("textarea") as HTMLTextAreaElement;
@@ -175,8 +196,8 @@ describe("ChatTab", () => {
     });
 
     // Find and click send button
-    const sendBtn = Array.from(el.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Send")
+    const sendBtn = Array.from(el.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Send")
     ) as HTMLButtonElement | undefined;
 
     await act(async () => {
@@ -188,6 +209,148 @@ describe("ChatTab", () => {
     const markdown = el.querySelector("[data-testid='markdown-content']");
     expect(markdown).toBeTruthy();
 
+    fetchSpy.mockRestore();
+  });
+
+  it("opts image requests into the bounded stream and restores the JSON body", async () => {
+    let capturedHeaders: Record<string, string> | undefined;
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async (_url, init) => {
+      capturedHeaders = init?.headers as Record<string, string>;
+      return buildImageResultResponse(
+        200,
+        JSON.stringify({ data: [{ url: "https://cdn.example.com/chat-image.png" }] })
+      );
+    });
+    const config = makeConfig("You are a helpful assistant.", "images");
+    config.model = "openai/gpt-image-2";
+    const el = renderChatTab(config);
+    const textarea = el.querySelector("textarea") as HTMLTextAreaElement;
+    act(() => setInputValue(textarea, "Draw a lighthouse"));
+    const sendBtn = Array.from(el.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Send")
+    );
+
+    await act(async () => sendBtn?.click());
+    // #16006 renders image results inline as <img>, not as JSON text.
+    await waitFor(() => el.querySelector("img") !== null);
+
+    expect((el.querySelector("img") as HTMLImageElement).getAttribute("src")).toBe(
+      "https://cdn.example.com/chat-image.png"
+    );
+    expect(capturedHeaders?.["X-OmniRoute-Playground-Stream"]).toBe("1");
+    expect(el.textContent).not.toContain("playground.image.result");
+    fetchSpy.mockRestore();
+  });
+
+  it("uses the restored image status for existing error handling", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        buildImageResultResponse(
+          422,
+          JSON.stringify({ error: { message: "Image prompt was rejected" } })
+        )
+      );
+    const config = makeConfig("You are a helpful assistant.", "images");
+    config.model = "openai/gpt-image-2";
+    const el = renderChatTab(config);
+    const textarea = el.querySelector("textarea") as HTMLTextAreaElement;
+    act(() => setInputValue(textarea, "Rejected prompt"));
+    const sendBtn = Array.from(el.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Send")
+    );
+
+    await act(async () => sendBtn?.click());
+    await waitFor(() => el.textContent?.includes("Image prompt was rejected") === true);
+
+    expect(el.textContent).toContain("Image prompt was rejected");
+    fetchSpy.mockRestore();
+  });
+
+  it("uses native Responses protocol for ChatGPT Web Codex models", async () => {
+    let capturedUrl = "";
+    let capturedInit: RequestInit | undefined;
+    const encoder = new TextEncoder();
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async (url, init) => {
+      capturedUrl = String(url);
+      capturedInit = init;
+      return new Response(
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ type: "response.output_text.delta", delta: "Native response" })}\n\n`
+              )
+            );
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ type: "response.completed", response: { usage: { input_tokens: 2, output_tokens: 3 } } })}\n\n`
+              )
+            );
+            controller.close();
+          },
+        }),
+        { status: 200, headers: { "content-type": "text/event-stream" } }
+      );
+    });
+    const config = makeConfig();
+    config.model = "cgpt-codex/luna";
+    const el = renderChatTab(config);
+    const textarea = el.querySelector("textarea") as HTMLTextAreaElement;
+    act(() => setInputValue(textarea, "Test native Codex"));
+    const sendBtn = Array.from(el.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Send")
+    );
+
+    await act(async () => sendBtn?.click());
+    await waitFor(() => el.textContent?.includes("Native response") === true);
+
+    expect(capturedUrl).toBe("/api/v1/responses");
+    expect((capturedInit?.headers as Record<string, string>).Originator).toBe(
+      "codex_omniroute_playground"
+    );
+    const body = JSON.parse(String(capturedInit?.body)) as Record<string, any>;
+    expect(body.model).toBe("cgpt-codex/luna");
+    expect(body.input.at(-1).internal_chat_message_metadata_passthrough.turn_id).toBeTruthy();
+    const turn = JSON.parse(body.client_metadata["x-codex-turn-metadata"]);
+    expect(turn.thread_id).toBeTruthy();
+    expect(turn.turn_id).toBe(body.input.at(-1).internal_chat_message_metadata_passthrough.turn_id);
+    fetchSpy.mockRestore();
+  });
+
+  it("keeps native Codex Responses traffic out of the image stream protocol", async () => {
+    let capturedHeaders: Record<string, string> | undefined;
+    const encoder = new TextEncoder();
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async (_url, init) => {
+      capturedHeaders = init?.headers as Record<string, string>;
+      return new Response(
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ type: "response.output_text.delta", delta: "Native image model response" })}\n\n`
+              )
+            );
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+            controller.close();
+          },
+        }),
+        { status: 200, headers: { "content-type": "text/event-stream" } }
+      );
+    });
+    const config = makeConfig("You are a helpful assistant.", "images");
+    config.model = "cgpt-codex/luna";
+    const el = renderChatTab(config);
+    const textarea = el.querySelector("textarea") as HTMLTextAreaElement;
+    act(() => setInputValue(textarea, "Use the native route"));
+    const sendBtn = Array.from(el.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Send")
+    );
+
+    await act(async () => sendBtn?.click());
+    await waitFor(() => el.textContent?.includes("Native image model response") === true);
+
+    expect(capturedHeaders?.["X-OmniRoute-Playground-Stream"]).toBeUndefined();
     fetchSpy.mockRestore();
   });
 
@@ -207,8 +370,8 @@ describe("ChatTab", () => {
       setInputValue(textarea, "Test message");
     });
 
-    const sendBtn = Array.from(el.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Send")
+    const sendBtn = Array.from(el.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Send")
     ) as HTMLButtonElement | undefined;
 
     await act(async () => {
@@ -224,9 +387,9 @@ describe("ChatTab", () => {
   });
 
   it("calls onMetricsUpdate after stream completes", async () => {
-    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      buildSseResponse("Some response text")
-    );
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(buildSseResponse("Some response text"));
     const onMetricsUpdate = vi.fn();
 
     const el = renderChatTab(makeConfig(), onMetricsUpdate);
@@ -236,8 +399,8 @@ describe("ChatTab", () => {
       setInputValue(textarea, "Hello");
     });
 
-    const sendBtn = Array.from(el.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Send")
+    const sendBtn = Array.from(el.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Send")
     ) as HTMLButtonElement | undefined;
 
     await act(async () => {
@@ -251,9 +414,9 @@ describe("ChatTab", () => {
   });
 
   it("shows regenerate button after first response", async () => {
-    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      buildSseResponse("Assistant response")
-    );
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(buildSseResponse("Assistant response"));
 
     const el = renderChatTab();
     const textarea = el.querySelector("textarea") as HTMLTextAreaElement;
@@ -262,8 +425,8 @@ describe("ChatTab", () => {
       setInputValue(textarea, "Generate something");
     });
 
-    const sendBtn = Array.from(el.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Send")
+    const sendBtn = Array.from(el.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Send")
     ) as HTMLButtonElement | undefined;
 
     await act(async () => {
@@ -272,8 +435,8 @@ describe("ChatTab", () => {
 
     await waitFor(() => el.querySelector("[data-testid='markdown-content']") !== null);
 
-    const regenBtn = Array.from(el.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Regenerate")
+    const regenBtn = Array.from(el.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Regenerate")
     );
     expect(regenBtn).toBeTruthy();
 
@@ -294,8 +457,8 @@ describe("ChatTab", () => {
       setInputValue(textarea, "Hello");
     });
 
-    const sendBtn = Array.from(el.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Send")
+    const sendBtn = Array.from(el.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Send")
     ) as HTMLButtonElement | undefined;
 
     await act(async () => {
@@ -306,8 +469,8 @@ describe("ChatTab", () => {
 
     const countBefore = fetchCount;
 
-    const regenBtn = Array.from(el.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Regenerate")
+    const regenBtn = Array.from(el.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Regenerate")
     ) as HTMLButtonElement | undefined;
 
     await act(async () => {

@@ -1,74 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import {
-  runNonStreamingProviderLeg,
-  type ChatCoreExecutorResult,
-  type ProviderLegInput,
-} from "../../open-sse/handlers/chatCore/nonStreamingProviderLeg.ts";
+import { runNonStreamingProviderLeg } from "../../open-sse/handlers/chatCore/nonStreamingProviderLeg.ts";
 import {
   buildAssistantMessageCacheKey,
   clearReasoningCacheAll,
   lookupReasoning,
 } from "../../open-sse/services/reasoningCache.ts";
-
-/* -- helpers --------------------------------------------------------------- */
-
-function makeResponse(
-  body: string | object,
-  status = 200,
-  headers: Record<string, string> = {}
-): Response {
-  const text = typeof body === "string" ? body : JSON.stringify(body);
-  return {
-    ok: status >= 200 && status < 300,
-    status,
-    statusText: status === 200 ? "OK" : "Error",
-    headers: new Headers({ "content-type": "application/json", ...headers }),
-    text: async () => text,
-    clone() {
-      return { ...this, text: async () => text } as unknown as Response;
-    },
-    body: null,
-  } as unknown as Response;
-}
-
-function makeExecutorResult(
-  responseBody: unknown,
-  status = 200,
-  headers: Record<string, string> = {}
-): ChatCoreExecutorResult {
-  return {
-    response: makeResponse(responseBody, status, headers),
-    url: "https://api.openai.com/v1/chat/completions",
-    headers: {},
-    transformedBody: responseBody,
-  };
-}
-
-function baseInput(overrides: Partial<ProviderLegInput> = {}): ProviderLegInput {
-  return {
-    phase: "initial",
-    sourceBody: {
-      model: "gpt-4o",
-      messages: [{ role: "user", content: "hi" }],
-    },
-    expectedConnectionId: undefined,
-    allowAccountRotation: true,
-    allowModelFallback: true,
-    executeProviderRequest: async () =>
-      makeExecutorResult({
-        id: "chatcmpl-test",
-        choices: [{ message: { role: "assistant", content: "Hello!" }, finish_reason: "stop" }],
-        usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
-      }),
-    setRequestWireState: () => {},
-    provider: "openai",
-    model: "gpt-4o",
-    connectionId: "conn-test",
-    ...overrides,
-  };
-}
+import { baseInput, makeExecutorResult } from "./_helpers/nonStreamingProviderLegFixtures.ts";
 
 /* -- characterization tests ------------------------------------------------ */
 
@@ -82,6 +21,54 @@ test("200 JSON: returns ok with usage and receipt", async () => {
   assert.equal(result.usage!.completion_tokens, 5);
   assert.equal(result.receipt.httpStatus, 200);
   assert.equal(result.receipt.termination, "completed");
+});
+
+test("Responses custom tool metadata survives request-body translation in provider leg", async () => {
+  const upstreamBody = {
+    id: "resp_custom",
+    object: "response",
+    status: "completed",
+    output: [
+      {
+        id: "fc_call_1",
+        type: "function_call",
+        call_id: "call_1",
+        name: "functions__exec",
+        arguments: '{"input":"printf \'nonstream-ok\\\\n\'"}',
+      },
+    ],
+    usage: { input_tokens: 10, output_tokens: 5, total_tokens: 15 },
+  };
+  const result = await runNonStreamingProviderLeg(
+    baseInput({
+      // Request conversion has already downgraded the source declaration by this seam.
+      sourceBody: {
+        model: "gpt-5.6-sol",
+        tools: [{ type: "function", function: { name: "functions__exec" } }],
+      },
+      sourceFormat: "openai-responses",
+      targetFormat: "openai-responses",
+      clientResponseFormat: "openai-responses",
+      translatedBody: { model: "gpt-5.6-sol" },
+      customToolNames: new Set(["functions__exec"]),
+      requestToolIdentityMap: new Map([
+        ["functions__exec", { namespace: "functions", name: "exec" }],
+      ]),
+      executeProviderRequest: async () => makeExecutorResult(upstreamBody),
+    })
+  );
+
+  assert.equal(result.kind, "ok");
+  if (result.kind !== "ok") return;
+  assert.deepEqual(result.response.output[0], {
+    id: "fc_call_1",
+    type: "custom_tool_call",
+    call_id: "call_1",
+    name: "exec",
+    input: "printf 'nonstream-ok\\n'",
+    status: "completed",
+    namespace: "functions",
+  });
 });
 
 test("runProviderExecution is called once with policy; first send skips executeProviderRequest", async () => {
@@ -442,6 +429,7 @@ test("setRequestWireState receives updated body on fallback", async () => {
   const wireStates: Array<{ translatedBody: Record<string, unknown>; effectiveModel: string }> = [];
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -595,6 +583,7 @@ test("empty content initial with fallback enabled -> retries with next model", a
   let executorCallCount = 0;
   const executedModels: string[] = [];
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -756,6 +745,7 @@ test("upstream error type is preserved in ChatCoreErrorResult", async () => {
 test("connection mismatch before fallback -> 409, no fallback executor call", async () => {
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -787,6 +777,7 @@ test("connection mismatch before fallback -> 409, no fallback executor call", as
 test("connection mismatch after fallback -> 409, fallback result discarded", async () => {
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -860,11 +851,7 @@ test("dynamic connection: ID changes between initial and retry -> 409 on retry p
     assert.equal(result.result.status, 409);
     assert.equal(result.result.errorCode, "LEASE_CONNECTION_MISMATCH");
   }
-  assert.equal(
-    executorCallCount,
-    1,
-    "retry executor must not run after the lease already moved"
-  );
+  assert.equal(executorCallCount, 1, "retry executor must not run after the lease already moved");
 });
 
 /* -- fallback with real parsed response ----------------------------------- */
@@ -872,6 +859,7 @@ test("dynamic connection: ID changes between initial and retry -> 409 on retry p
 test("model-unavailable fallback returns real parsed response, usage, headers, winning connection/model", async () => {
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -917,6 +905,7 @@ test("model-unavailable fallback returns real parsed response, usage, headers, w
 test("empty content fallback returns real parsed response, usage, headers", async () => {
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -956,6 +945,7 @@ test("setRequestWireState is called before initial, retry, and fallback executor
   const wireStates: string[] = [];
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -1041,6 +1031,7 @@ test("empty-content fallback with invalid SSE body is 502, not 200 empty", async
   const sseBody = 'data: {"error":{"message":"Devin CLI not found"}}\n\n';
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -1070,7 +1061,11 @@ test("empty-content fallback with invalid SSE body is 502, not 200 empty", async
   });
   const result = await runNonStreamingProviderLeg(input);
   assert.ok(executorCallCount >= 2, "should attempt fallback");
-  assert.equal(result.kind, "error", "invalid SSE on fallback must not finishOk the empty original");
+  assert.equal(
+    result.kind,
+    "error",
+    "invalid SSE on fallback must not finishOk the empty original"
+  );
   if (result.kind !== "error") return;
   assert.equal(result.result.status, 502);
   assert.equal(result.result.errorCode, "invalid_sse_payload");

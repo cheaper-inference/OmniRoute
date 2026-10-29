@@ -177,18 +177,18 @@ export function getGroupMembers(groupId: string): KeyGroupMember[] {
   return rows.map(rowToMember);
 }
 
-export function getKeyGroupsForApiKey(keyId: string): KeyGroup[] {
+export function getKeyGroupsForApiKey(keyId: string, includeInactive = false): KeyGroup[] {
   const db = getDbInstance() as any;
   const rows = db
     .prepare(
       `
     SELECT g.* FROM key_groups g
     INNER JOIN key_group_members m ON g.id = m.group_id
-    WHERE m.key_id = ? AND g.is_active = 1
+    WHERE m.key_id = ? AND (? = 1 OR g.is_active = 1)
     ORDER BY g.name ASC
   `
     )
-    .all(keyId) as any[];
+    .all(keyId, includeInactive ? 1 : 0) as any[];
   return rows.map(rowToGroup);
 }
 
@@ -236,14 +236,15 @@ export interface ModelAccessCheck {
 
 /**
  * Check if an API key has access to a specific model.
- * Deny rules override allow rules. If no rules match, access is allowed by default.
+ * All member groups retain deny rules, but only active groups grant access.
+ * Membership requires an explicit allow; keys without groups remain unrestricted.
  */
 export function checkKeyModelAccess(
   keyId: string,
   model: string,
   provider?: string
 ): ModelAccessCheck {
-  const groups = getKeyGroupsForApiKey(keyId);
+  const groups = getKeyGroupsForApiKey(keyId, true);
   if (groups.length === 0) {
     // No groups = no restrictions
     return { allowed: true, matchedRules: [], deniedBy: null };
@@ -277,10 +278,12 @@ export function checkKeyModelAccess(
     return { allowed: false, matchedRules: permissions, deniedBy: denyRules[0] };
   }
 
-  // Check allow rules
+  // Deactivation pauses grants without removing membership restrictions or denies.
+  const activeGroupIds = new Set(groups.filter((group) => group.isActive).map((group) => group.id));
   const allowRules = permissions.filter(
     (p) =>
       p.accessType === "allow" &&
+      activeGroupIds.has(p.groupId) &&
       matchesModelPattern(p.modelPattern, model) &&
       (!p.provider || p.provider === provider)
   );

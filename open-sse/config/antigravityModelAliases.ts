@@ -1,7 +1,4 @@
-import {
-  ANTIGRAVITY_SHARED_MODELS,
-  buildSurfaceCatalog,
-} from "./antigravitySharedModels.ts";
+import { ANTIGRAVITY_SHARED_MODELS, buildSurfaceCatalog } from "./antigravitySharedModels.ts";
 
 export const ANTIGRAVITY_PUBLIC_MODELS = buildSurfaceCatalog(ANTIGRAVITY_SHARED_MODELS, {
   add: [], // IDE-only models (currently none)
@@ -15,6 +12,14 @@ export const ANTIGRAVITY_MODEL_ALIASES = Object.freeze({
   "gemini-3.7-flash-high": "gemini-3.7-flash-tiered",
   "gemini-3.7-flash-medium": "gemini-3.7-flash-tiered",
   "gemini-3.7-flash-low": "gemini-3.7-flash-tiered",
+  // Gemini 3.8 Flash tiers are served DIRECTLY by the live Cloud Code upstream
+  // (v1internal:streamGenerateContent) at their own tier ids — unlike 3.7, there is no
+  // shared "-tiered" endpoint for 3.8. -high/-medium/-low are accepted verbatim; only
+  // the bare display id needs a default-tier alias.
+  "gemini-3.8-flash": "gemini-3.8-flash-high",
+  "gemini-3.8-flash-tiered": "gemini-3.8-flash-high",
+  // Gemini 4 Argon is served only at its tier ids; the bare id defaults to medium.
+  "gemini-4-argon": "gemini-4-argon-medium",
   "gpt-oss-120b": "gpt-oss-120b-medium",
   // gemini-3.1-pro-low is not aliased: the upstream accepts it verbatim.
   // gemini-3.1-pro-high: the discovery slot returns HTTP 400 on v1internal;
@@ -81,9 +86,23 @@ const ANTIGRAVITY_NON_CHAT_MODEL_IDS = new Set([
   "tab_jump_flash_lite_preview",
 ]);
 
+// Non-chat models that still expose user-facing quota buckets. Keep these out of
+// chat discovery while allowing Provider Limits to surface their live quota.
+export const ANTIGRAVITY_QUOTA_VISIBLE_NON_CHAT_MODEL_IDS: ReadonlySet<string> = new Set([
+  "gemini-3-pro-image-preview",
+  "gemini-3.1-flash-image",
+]);
+
 const ANTIGRAVITY_RETIRED_MODEL_IDS = new Set([
   "gemini-3-pro-preview",
   "gemini-3.1-pro",
+  // Per-tier 3.7 ids are absent from the live roster (discussion #15568) and alias onto the
+  // shared "-tiered" id. `gemini-3.7-flash-tiered`, `gemini-3.6-flash-tiered` and
+  // `gemini-3-flash` ARE still served live, so they are deliberately NOT retired here.
+  "gemini-3.7-flash",
+  "gemini-3.7-flash-high",
+  "gemini-3.7-flash-medium",
+  "gemini-3.7-flash-low",
   "gemini-3.6-flash-high",
   "gemini-3.6-flash-medium",
   "gemini-3.6-flash-low",
@@ -156,8 +175,29 @@ export function isUserCallableAntigravityModelId(modelId: string): boolean {
  */
 export function isDiscoverableAntigravityModelId(modelId: string): boolean {
   const id = modelId.trim();
-  if (!id || ANTIGRAVITY_NON_CHAT_MODEL_IDS.has(id) || ANTIGRAVITY_RETIRED_MODEL_IDS.has(id)) {
+  if (
+    !id ||
+    id.startsWith("chat_") ||
+    id.startsWith("tab_") ||
+    id.endsWith("_weekly") ||
+    ANTIGRAVITY_NON_CHAT_MODEL_IDS.has(id) ||
+    ANTIGRAVITY_RETIRED_MODEL_IDS.has(id)
+  ) {
     return false;
   }
   return !ANTIGRAVITY_NON_CHAT_MODEL_PATTERN.test(id);
+}
+
+/**
+ * Return whether an Antigravity model quota should be visible to users. Quota
+ * visibility is intentionally broader than chat discovery: image-only models
+ * are callable through /v1/images/generations and have their own live quota
+ * buckets, but must remain excluded from the chat model catalog.
+ */
+export function isUserVisibleAntigravityQuotaModelId(modelId: string): boolean {
+  const id = modelId.trim();
+  if (!id) return false;
+  return (
+    isDiscoverableAntigravityModelId(id) || ANTIGRAVITY_QUOTA_VISIBLE_NON_CHAT_MODEL_IDS.has(id)
+  );
 }

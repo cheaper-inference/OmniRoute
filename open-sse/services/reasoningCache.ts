@@ -23,6 +23,7 @@ import {
   getReasoningCacheStats,
   setReasoningCache,
 } from "../../src/lib/db/reasoningCache.ts";
+import { isFeatureFlagEnabled } from "../../src/shared/utils/featureFlags.ts";
 import { isInternalReasoningPlaceholder } from "../utils/reasoningPlaceholder.ts";
 
 // ──────────────── Provider/Model Detection ────────────────
@@ -143,6 +144,7 @@ type AssistantMessageLike = {
 type AssistantMessageCacheContext = {
   scope?: string;
   historyMessages?: AssistantMessageLike[];
+  videoTranscriptSensitive?: boolean;
 };
 
 type ToolCallLike = {
@@ -202,13 +204,17 @@ export function cacheReasoning(
   cacheReasoningByKey(toolCallId, provider, model, reasoning);
 }
 
+function isReasoningReplayEnabled(): boolean {
+  return isFeatureFlagEnabled("REASONING_REPLAY_ENABLED");
+}
+
 export function cacheReasoningByKey(
   key: string,
   provider: string,
   model: string,
   reasoning: string
 ): void {
-  if (!key || !reasoning) return;
+  if (!isReasoningReplayEnabled() || !key || !reasoning) return;
   // ponytail: never store the internal replay placeholder — models echo it
   // and it poisons the cache (upstream echo loop, OmniRoute #9573).
   if (isInternalReasoningPlaceholder(reasoning)) return;
@@ -337,6 +343,7 @@ export function cacheReasoningFromAssistantMessage(
   model: string,
   context?: AssistantMessageCacheContext
 ): number {
+  if (context?.videoTranscriptSensitive) return 0;
   if (!message || message.role !== "assistant") {
     return 0;
   }
@@ -359,7 +366,11 @@ export function cacheReasoningFromAssistantMessage(
   if (toolCallIds.length === 0) {
     const scope = context?.scope?.trim();
     const historyMessages = context?.historyMessages;
-    if (!scope || !Array.isArray(historyMessages)) return 0;
+    // A real request always has at least one prior message (the user turn), so an
+    // empty history means the caller could not recover the transcript the read
+    // side keys on (e.g. a Responses-shaped body with `input` and no reported
+    // pivot). Writing a one-message digest then can never match — skip it.
+    if (!scope || !Array.isArray(historyMessages) || historyMessages.length === 0) return 0;
 
     const messages = [...historyMessages, message];
     const cacheKey = buildAssistantMessageCacheKey(scope, messages, messages.length - 1);
@@ -378,6 +389,11 @@ export function cacheReasoningFromAssistantMessage(
  * Memory first → DB fallback → null (miss).
  */
 export function lookupReasoning(toolCallId: string): string | null {
+  if (!isReasoningReplayEnabled()) return null;
+  return lookupStoredReasoning(toolCallId);
+}
+
+function lookupStoredReasoning(toolCallId: string): string | null {
   if (!toolCallId) {
     misses++;
     return null;

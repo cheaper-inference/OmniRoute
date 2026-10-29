@@ -1,6 +1,11 @@
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { createErrorResponseFromUnknown } from "@/lib/api/errorResponse";
 import {
+  readSelectorEarlyReasons,
+  selectorEarlyReasonsForDisplay,
+} from "@/lib/proxySubscription/selectorEarlyReasons";
+import { isProxySkipRecentlyFailedEnabled } from "@/shared/utils/featureFlags";
+import {
   listSubscriptions,
   createSubscription,
   startSubscriptionScheduler,
@@ -27,7 +32,13 @@ export async function GET(request: Request) {
     const items = await listSubscriptions();
     // Redact credentials in the subscription URL before sending to the client.
     const safe = items.map((it) => ({ ...it, url: redactSubscriptionUrl(it.url) }));
-    return Response.json({ items: safe });
+    // In-memory skip counters (reset on restart); present only when a count
+    // concerns a configured selector, so default setups see nothing new.
+    const earlyReasons = selectorEarlyReasonsForDisplay(readSelectorEarlyReasons(), {
+      selectorEnabled: isProxySkipRecentlyFailedEnabled(),
+      subscriptions: items,
+    });
+    return Response.json(earlyReasons ? { items: safe, earlyReasons } : { items: safe });
   } catch (error) {
     return createErrorResponseFromUnknown(error, "Failed to list proxy subscriptions");
   }

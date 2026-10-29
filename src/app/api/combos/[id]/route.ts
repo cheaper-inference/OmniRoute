@@ -5,7 +5,9 @@ import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud } from "@/lib/cloudSync";
 import { validateCompositeTiersConfig } from "@/lib/combos/compositeTiers";
 import { normalizeComboModels } from "@/lib/combos/steps";
+import { buildComboConnectionLabels } from "@/lib/combos/controlCenterAccountLabels";
 import { validateComboDAG, clampComboDepth } from "@omniroute/open-sse/services/combo.ts";
+import { resolveCanonicalProviderModel } from "@omniroute/open-sse/services/model.ts";
 import { updateComboSchema } from "@/shared/validation/schemas";
 import { requiresQuotaOnlyComboRefExecute } from "@/shared/validation/schemas/combo";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -46,7 +48,20 @@ export async function GET(request, { params }) {
       return comboErrorResponse("COMBO_007", 404, { id }, request);
     }
 
-    return NextResponse.json(combo);
+    // #17393: the control center renders the account each target is pinned to.
+    // The browser cannot read the connection table, so resolve the current
+    // account display names here and ship them next to the combo row.
+    // The labels are cosmetic: a failed lookup must not turn the whole combo
+    // read into a 500, so fall back to no labels (the client then shows the
+    // step label or the full connection id).
+    let connectionLabels: Record<string, string> = {};
+    try {
+      connectionLabels = buildComboConnectionLabels(combo);
+    } catch (error) {
+      console.warn("Failed to resolve combo connection labels:", error);
+    }
+
+    return NextResponse.json({ ...combo, connectionLabels });
   } catch (error) {
     console.log("Error fetching combo:", error);
     return comboErrorResponse("INTERNAL_001", 500, undefined, request);
@@ -123,6 +138,11 @@ export async function PUT(request, { params }) {
     if (normalizedUpdate.config && typeof normalizedUpdate.config === "object") {
       normalizedUpdate.config = stripDeadComboConfigKeys(normalizedUpdate.config);
     }
+    // #15251: the runtime reads `universal_handoff` before the camelCase alias,
+    // so a stale stored alias must not shadow a validated update (or null-clear).
+    if (normalizedUpdate.universal_handoff !== undefined) {
+      normalizedUpdate.universalHandoff = undefined;
+    }
 
     const body = normalizedUpdate.models
       ? {
@@ -137,6 +157,32 @@ export async function PUT(request, { params }) {
           }),
         }
       : normalizedUpdate;
+
+    if (body.overrideAllowedProviders === true) {
+      delete body.overrideAllowedProviders;
+      const currentProviders = Array.isArray(currentCombo.allowedProviders)
+        ? currentCombo.allowedProviders
+        : [];
+      // Only widen an EXISTING restriction (#13951/COMBO_008). When the combo
+      // currently has no allowedProviders restriction, currentProviders is
+      // empty and unioning it with the new step providers would synthesize a
+      // brand-new allowlist out of nothing — the opposite of "no restriction".
+      if (body.models && body.allowedProviders === undefined && currentProviders.length > 0) {
+        const stepProviders = (
+          body.models as Array<{ providerId?: string; provider?: string; model?: string }>
+        )
+          .map((m) => {
+            if (m.providerId) return m.providerId;
+            if (m.provider) return m.provider;
+            if (typeof m.model !== "string" || !m.model.includes("/")) return "";
+            const [aliasOrProvider, ...rest] = m.model.split("/");
+            return resolveCanonicalProviderModel(aliasOrProvider, rest.join("/")).provider || "";
+          })
+          .filter((p): p is string => Boolean(p));
+        body.allowedProviders = Array.from(new Set([...currentProviders, ...stepProviders]));
+      }
+    }
+
     const nextComboState = {
       ...currentCombo,
       ...body,

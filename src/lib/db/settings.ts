@@ -15,12 +15,14 @@ import { isProxySkipRecentlyFailedEnabled } from "@/shared/utils/featureFlags";
 import { invalidateDbCache } from "./readCache";
 import { encrypt, decrypt } from "./encryption";
 import { getProxyRegistryGeneration, resolveProxyForScopeFromRegistry } from "./proxies";
+import { isEgressBucketedLockScope } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { getComboModelProvider as getComboEntryProvider } from "@/lib/combos/steps";
 import { requestBodyLimitMbFromEnv } from "@/shared/constants/bodySize";
 import { DEFAULT_RESPONSES_PREVIOUS_RESPONSE_ID_MODE } from "@/shared/constants/responsesPreviousResponseId";
 import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { type JsonRecord, toRecord } from "./settings/shared";
 import { resolveNoAuthSharedProviderProxy } from "./settings/noAuthProxyFallback";
+import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
 
 type ProxyValue = JsonRecord | string | null;
 type ProxyResolutionResult = {
@@ -152,7 +154,7 @@ export async function getSettings() {
   const db = getDbInstance();
   const rows = db.prepare("SELECT key, value FROM key_value WHERE namespace = 'settings'").all();
   const settings: Record<string, unknown> = {
-    cloudEnabled: true,
+    cloudEnabled: false,
     tailscaleEnabled: false,
     tailscaleUrl: "",
     stickyRoundRobinLimit: 3,
@@ -160,6 +162,7 @@ export async function getSettings() {
     // Global connection-aware expansion fallback for group-B combo strategies is opt-in.
     connectionAwareExpansion: false,
     promptCacheAffinityEnabled: true,
+    geminiPromptCacheMode: "off",
     comboStrategy: "fallback",
     comboStickyRoundRobinLimit: null, // null = inherit stickyRoundRobinLimit (a literal default here shadows the documented batched-rotation default of 3 — #6678 regression caught by the v3.8.47 release CI)
     providerStrategies: {},
@@ -169,6 +172,9 @@ export async function getSettings() {
     // ProviderLimits/utils.tsx) — this is a personal view preference, not an
     // admin model-catalog edit. Ported from upstream decolua/9router#2371.
     quotaVisibility: {},
+    // #13917: operator-configurable ceiling for POST /api/settings/proxies/bulk-import.
+    // Resolved through resolveProxyBulkImportLimit at both enforcement points.
+    proxyBulkImportLimit: PROXY_BULK_IMPORT_LIMIT_DEFAULT,
     requestRetry: 3,
     maxRetryIntervalSec: 30,
     antigravitySignatureCacheMode: "enabled",
@@ -181,6 +187,7 @@ export async function getSettings() {
     oidcScopes: ["openid", "profile", "email"],
     oidcRedirectPath: "/api/auth/oidc/callback",
     oidcAllowedSubjects: [], // optional sub or email whitelist
+    oidcAdmissionClaim: null, // optional ID-token role/group admission policy
     mcpEnabled: false,
     a2aEnabled: false,
     hiddenSidebarItems: [],
@@ -209,6 +216,7 @@ export async function getSettings() {
       enabled: false,
       supportedModels: [
         "claude-fable-5",
+        "claude-opus-5-5",
         "claude-opus-5",
         "claude-opus-4-8",
         "claude-opus-4-7",
@@ -254,7 +262,9 @@ export async function getSettings() {
     // live hard-stop-guaranteed quota check for non-keyless free candidates.
     // See open-sse/services/autoCombo/strictZeroCostFilter.ts.
     freeAccessPolicy: "off",
-    excludeTosAvoid: false,
+    // #15059: ON by default — providers whose curated verdict is `tos: "avoid"` (e.g. Antigravity)
+    // must not receive `auto` traffic on a fresh install. Opt out with PATCH /api/settings.
+    excludeTosAvoid: true,
     // #9418: Opt-in filter that hides auto/* virtual combos from the /v1/models catalog.
     // User-defined combos are unaffected; routing still works for hidden ids sent explicitly.
     hideAutoCombos: false,
@@ -527,6 +537,41 @@ function isCachedPoolMemberSetAside(entry: ProxyResolutionCacheEntry): boolean {
   return isProxySkipRecentlyFailedEnabled();
 }
 
+// Providers that need a STABLE egress across requests, never rotated under them by this
+// cache-invalidation path (#13575): opencode's free-tier quota is bucketed by egress IP
+// (EGRESS_BUCKETED_LOCK_PROVIDERS — rotating would fragment one connection's quota across
+// several IPs), and grok-web's cf_clearance cookie is pinned to the IP/User-Agent/TLS
+// fingerprint that earned it (src/shared/providers/webSessionCredentials.ts "grok-web" —
+// rotating the egress would turn every subsequent request into a Cloudflare 403).
+function requiresStableEgress(provider: string | null): boolean {
+  if (!provider) return false;
+  return isEgressBucketedLockScope(provider) || provider.toLowerCase() === "grok-web";
+}
+
+// The chat-path cache (below) exists so a hot connection does not pay the full resolution
+// cascade on every request, but it must not FREEZE a rotating pool's choice: the registry
+// resolver (resolveProxyForScopeFromRegistry, called directly by every #6365 rotation test)
+// re-runs its strategy on every call and rotates correctly, while the cache here returned
+// the same first-resolved member forever (#13575). A cached member is stale whenever it came
+// from a live scope pool (source: "registry") and the connection is not in the two populations
+// above that need a pinned egress instead: the caller then falls through to the full cascade,
+// which re-invokes resolveProxyForScopeFromRegistry and applies the pool's own selection
+// strategy (round-robin advances, sticky holds until its window elapses, random reshuffles) —
+// no new strategy is introduced here.
+function isCachedPoolMemberDue(
+  entry: ProxyResolutionCacheEntry,
+  db: ReturnType<typeof getDbInstance>,
+  connectionId: string
+): boolean {
+  const { result } = entry;
+  if (result.source !== "registry" || result.proxy == null) return false;
+  const row = db
+    .prepare("SELECT provider FROM provider_connections WHERE id = ?")
+    .get(connectionId) as { provider?: string } | undefined;
+  const provider = typeof row?.provider === "string" ? row.provider : null;
+  return !requiresStableEgress(provider);
+}
+
 export async function resolveProxyForConnection(
   connectionId: string,
   apiKeyId?: string,
@@ -542,17 +587,17 @@ export async function resolveProxyForConnection(
     registryGeneration: getProxyRegistryGeneration(),
     refusalSeq: getProxyRefusalSeq(),
   };
+  const db = getDbInstance();
   const cached = proxyResolutionCache.get(cacheKey);
   if (
     cached &&
     cached.generation === stamp.generation &&
     cached.registryGeneration === stamp.registryGeneration &&
-    !isCachedPoolMemberSetAside(cached)
+    !isCachedPoolMemberSetAside(cached) &&
+    !isCachedPoolMemberDue(cached, db, connectionId)
   ) {
     return cached.result;
   }
-
-  const db = getDbInstance();
 
   // Step 1: Check global proxyEnabled setting
   // Read only the proxyEnabled key for performance instead of loading all settings.
@@ -757,7 +802,7 @@ export async function resolveProxyForConnection(
     }
   }
 
-  // Step 8.5 (#6272): no-auth providers (mimocode, opencode, ...) share a single
+  // Step 8.5 (#6272): no-auth providers share a single
   // synthetic connectionId that never matches a `provider_connections` row, so
   // `connectionRecord` above is null and Steps 5-8 (which require it) never run for
   // them — a provider-level proxy assigned to a no-auth provider was silently

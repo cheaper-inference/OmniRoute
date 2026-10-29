@@ -15,7 +15,15 @@ export async function POST(request: NextRequest) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
 
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid JSON body" },
+      { status: 400, headers: CORS_HEADERS }
+    );
+  }
   const schema = z.object({
     scope: z.enum(["weekly", "monthly"]),
   });

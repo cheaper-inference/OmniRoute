@@ -1,6 +1,6 @@
 # OmniRoute A2A Server Documentation (ગુજરાતી)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
 
 ---
 
@@ -44,9 +44,9 @@ A2Aને **Endpoints → A2A** ટૉગલ દ્વારા નિયંત�
 
 ## JSON-RPC 2.0 પદ્ધતિઓ
 
-### `message/send` — સિંક્રોનસ એક્ઝિક્યુશન
+### `message/send` — સમકાલીન અમલીકરણ
 
-કોઈ કૌશલ્યને સંદેશ મોકલે છે અને સંપૂર્ણ પ્રતિસાદની રાહ જુએ છે.
+કોઈ સ્કિલને સંદેશ મોકલે છે અને સંપૂર્ણ પ્રતિસાદની રાહ જુએ છે.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -64,6 +64,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` માટે, ગેટવે વિનંતીમાં `metadata.combo` એ
+`metadata.model`નું સ્પષ્ટ ઓવરરાઇડ છે; તેને અવગણવામાં આવતા `x-combo` JSON ફીલ્ડ તરીકે નહીં,
+પરંતુ વાસ્તવિક `model` તરીકે મોકલવામાં આવે છે. ગેટવેની સામાન્ય API-કી અને
+દરેક ટાર્ગેટ માટેની અધિકૃતતા હજુ પણ લાગુ પડે છે. અમાન્ય અથવા ખાલી કોમ્બો નકારવામાં આવે છે.
+
+પરિણામ `requested_combo` (કૉલરનો આશય), `dispatched_model`
+(વાસ્તવિક ગેટવે વિનંતી), `response_model` (ગેટવે પ્રતિસાદ) અને
+`confirmed_combo` દર્શાવે છે. ગેટવે સ્પષ્ટપણે કોઈ કોમ્બોને ઓળખાવે નહીં ત્યાં સુધી છેલ્લું ફીલ્ડ `null`
+રહે છે. A2A નિર્ણય લૉગ્સ અમલીકરણને માત્ર પુષ્ટિ થયેલા
+કોમ્બો સાથે સાંકળે છે અને અપુષ્ટ વિનંતીને `requestedCombo` તરીકે જાળવી રાખે છે.
+
 **પ્રતિસાદ:**
 
 ```json
@@ -75,22 +86,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -125,7 +129,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — ટાસ્કની સ્થિતિ પૂછો
+### `tasks/get` — ટાસ્કની સ્થિતિ જાણો
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -145,33 +149,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## ઉપલબ્ધ સ્કિલ્સ
+## ઉપલબ્ધ કૌશલ્યો
 
-OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`માં જોડાયેલી 6 A2A સ્કિલ્સ ઉપલબ્ધ કરાવે છે. દરેક સ્કિલ મોડ્યુલ `src/lib/a2a/skills/`માં આવેલું છે.
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` માં વાયર્ડ 6 A2A કૌશલ્યોનો પર્દાફાશ કરે છે. દરેક કૌશલ્ય મોડ્યુલ `src/lib/a2a/skills/` માં રહે છે.
 
-| સ્કિલ             | ID                   | વર્ણન                                                                                                                                               | ટૅગ્સ                  | ઉદાહરણો                                     |
-| :---------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------- | :------------------------------------------ |
-| સ્માર્ટ રાઉટિંગ   | `smart-routing`      | OmniRouteના કોમ્બો એન્જિન + સ્કોરિંગનો ઉપયોગ કરીને પ્રોમ્પ્ટને શ્રેષ્ઠ પ્રદાતા/કોમ્બો મારફતે રૂટ કરે છે                                             | રાઉટિંગ, પ્રદાતાઓ      | "આ પ્રોમ્પ્ટને શ્રેષ્ઠ મોડલ મારફતે રૂટ કરો" |
-| ક્વોટા વ્યવસ્થાપન | `quota-management`   | દરેક પ્રદાતાની ક્વોટા સ્થિતિનો અહેવાલ આપે છે અને ક્યારે થ્રોટલ કરવું/બદલવું તે નક્કી કરવામાં કૉલર્સને મદદ કરે છે                                    | ક્વોટા, પ્રદાતાઓ       | "anthropic માટે ક્વોટા તપાસો"               |
-| પ્રદાતા શોધ       | `provider-discovery` | ઇન્સ્ટોલ કરેલા પ્રદાતાઓને તેમની ક્ષમતાઓ, ફ્રી-ટિયર ફ્લૅગ્સ અને OAuth સ્થિતિ સાથે સૂચિબદ્ધ કરે છે                                                    | પ્રદાતાઓ, શોધ          | "કયા પ્રદાતાઓ ઉપલબ્ધ છે?"                   |
-| ખર્ચ વિશ્લેષણ     | `cost-analysis`      | કૅટલૉગ + તાજેતરના વપરાશના આધારે વિનંતી/વાતચીતના ખર્ચનો અંદાજ લગાવે છે                                                                               | ખર્ચ, વપરાશ            | "આ વાતચીત માટે ખર્ચનો અંદાજ લગાવો"          |
-| આરોગ્ય અહેવાલ     | `health-report`      | દરેક પ્રદાતા માટે સર્કિટ બ્રેકર, કૂલડાઉન અને લૉકઆઉટ સ્થિતિને એકત્રિત કરે છે                                                                         | આરોગ્ય, સ્થિતિસ્થાપકતા | "બધા પ્રદાતાઓની આરોગ્ય સ્થિતિ બતાવો"        |
-| ક્ષમતાઓની સૂચિ    | `list-capabilities`  | સંદર્ભ ઇન્જેક્શન માટે raw SKILL.md URLs સાથે સંપૂર્ણ 45-એન્ટ્રી Agent Skills કૅટલૉગ (23 API + 21 CLI + 1 config)ને markdown કોષ્ટક તરીકે પરત કરે છે | કૅટલૉગ, શોધ, સ્કિલ્સ   | "OmniRouteની બધી ક્ષમતાઓની સૂચિ આપો"        |
+| કૌશલ્ય            | ID                   | વર્ણન                                                                                                                                                | ટૅગ્સ                  | ઉદાહરણો                                      |
+| :---------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------- | :------------------------------------------- |
+| સ્માર્ટ રૂટીંગ    | `smart-routing`      | OmniRoute ના કોમ્બો એન્જિન + સ્કોરિંગનો ઉપયોગ કરીને શ્રેષ્ઠ provider/combo દ્વારા પ્રોમ્પ્ટને રૂટ કરે છે                                             | રૂટીંગ, પ્રદાતાઓ       | "શ્રેષ્ઠ મોડેલ દ્વારા આ પ્રોમ્પ્ટને રૂટ કરો" |
+| ક્વોટા મેનેજમેન્ટ | `quota-management`   | પ્રતિ-પ્રદાતા ક્વોટા રાજ્યની જાણ કરે છે, કોલર્સને ક્યારે throttle/switch કરવું તે નક્કી કરવામાં મદદ કરે છે                                           | ક્વોટા, પ્રદાતાઓ       | "એન્થ્રોપિક માટે ક્વોટા તપાસો"               |
+| પ્રદાતા ડિસ્કવરી  | `provider-discovery` | ક્ષમતાઓ, ફ્રી-ટાયર ફ્લેગ્સ, OAuth સ્ટેટસ સાથે સ્થાપિત પ્રદાતાઓની સૂચિ બનાવે છે                                                                       | પ્રદાતાઓ, શોધ          | "કયા પ્રદાતાઓ ઉપલબ્ધ છે?"                    |
+| ખર્ચ વિશ્લેષણ     | `cost-analysis`      | કેટલોગ + તાજેતરના વપરાશને જોતાં request/conversation ની કિંમતનો અંદાજ કાઢે છે                                                                        | ખર્ચ, વપરાશ            | "આ વાર્તાલાપ માટે અંદાજિત ખર્ચ"              |
+| આરોગ્ય અહેવાલ     | `health-report`      | પ્રદાતા દીઠ એકંદર સર્કિટ બ્રેકર, કૂલડાઉન, લોકઆઉટ સ્થિતિ                                                                                              | આરોગ્ય, સ્થિતિસ્થાપકતા | "તમામ પ્રદાતાઓની આરોગ્ય સ્થિતિ બતાવો"        |
+| સૂચિ ક્ષમતાઓ      | `list-capabilities`  | સંદર્ભ ઇન્જેક્શન માટે કાચા SKILL.md URLs સાથે માર્કડાઉન ટેબલ તરીકે સંપૂર્ણ 45-એન્ટ્રી એજન્ટ સ્કિલ્સ કૅટેલોગ (23 API + 21 CLI + 1 રૂપરેખા) પરત કરે છે | સૂચિ, શોધ, કુશળતા      | "બધી OmniRoute ક્ષમતાઓની સૂચિ બનાવો"         |
 
-> Agent Cardને લાઇવ 352-પ્રદાતા કૅટલૉગ સાથે સુસંગત રાખવું જોઈએ; પ્રદાતાઓની સંખ્યા અને ફ્રી/નો-ઑથ મેટાડેટા રનટાઇમ રજિસ્ટ્રીમાંથી મેળવવામાં આવે છે.
+> એજન્ટ કાર્ડને લાઇવ 377-પ્રદાતા કેટેલોગ સાથે સંરેખિત રાખવું જોઈએ; પ્રદાતાની ગણતરીઓ અને free/no-auth મેટાડેટા રનટાઇમ રજિસ્ટ્રીમાંથી મેળવવામાં આવે છે.
 
-### `list-capabilities` સ્કિલની વિગતો
+### `list-capabilities` કૌશલ્ય વિગતો
 
-`list-capabilities` સ્કિલ એવા બાહ્ય એજન્ટ્સ માટે ખાસ ઉપયોગી છે, જેમને API કૉલ્સ મોકલતાં પહેલાં OmniRoute શું ઉપલબ્ધ કરાવે છે તે શોધવાની જરૂર હોય. તે સંરચિત markdown કોષ્ટક આર્ટિફેક્ટ પરત કરે છે:
+`list-capabilities` કૌશલ્ય ખાસ કરીને બાહ્ય એજન્ટો માટે ઉપયોગી છે જેમને API કૉલ્સ મોકલતા પહેલા OmniRoute શું બહાર પાડે છે તે શોધવાની જરૂર છે. તે સ્ટ્રક્ચર્ડ માર્કડાઉન ટેબલ આર્ટિફેક્ટ પરત કરે છે:
 
 ```
-| ID | નામ | શ્રેણી | ક્ષેત્ર | એન્ડપૉઇન્ટ્સ/કમાન્ડ્સ | Raw URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | ઑથ અને સેશન્સ | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-દરેક પંક્તિમાં `rawUrl` કૉલમ શામેલ હોય છે, જેથી એજન્ટ્સ તરત જ સંપૂર્ણ SKILL.md મેળવી શકે. `metadata.totalSkills` ફીલ્ડ કૅટલૉગના કદને પ્રતિબિંબિત કરે છે (આજે 45). અમલીકરણ: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md) પણ જુઓ.
+દરેક પંક્તિમાં `rawUrl` કૉલમનો સમાવેશ થાય છે જેથી એજન્ટો તરત જ સંપૂર્ણ SKILL.md મેળવી શકે. `metadata.totalSkills` ફીલ્ડ કેટલોગના કદને પ્રતિબિંબિત કરે છે (45 આજે). અમલીકરણ: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md) પણ જુઓ.
 
 ---
 
@@ -261,9 +265,9 @@ JSON-RPC એન્ડપોઇન્ટ `/a2a` પ્રમાણભૂત A2A �
 
 ---
 
-## ઇન્ટિગ્રેશન ઉદાહરણો
+## એકીકરણ ઉદાહરણો
 
-### Python (requests)
+### પાયથોન (વિનંતી)
 
 ```python
 import requests
@@ -282,7 +286,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (આવવું)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

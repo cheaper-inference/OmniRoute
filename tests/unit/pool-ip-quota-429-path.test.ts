@@ -65,14 +65,14 @@ async function twoMemberPool() {
       host: "10.4.1.1",
       port,
     });
-    await proxiesDb.addProxyToScopePool("provider", "opencode", proxy.id);
+    await proxiesDb.addProxyToScopePool("provider", "opencode-go", proxy.id);
     members.push({ type: "http", host: "10.4.1.1", port });
   }
   return members;
 }
 
 async function pickPort() {
-  const resolved = await proxiesDb.resolveProxyForScopeFromRegistry("provider", "opencode");
+  const resolved = await proxiesDb.resolveProxyForScopeFromRegistry("provider", "opencode-go");
   return (resolved as { proxy: { port: number } }).proxy.port;
 }
 
@@ -114,7 +114,7 @@ async function chatRequest(
 test("a received refusal through a pool member makes the next pick skip it", async () => {
   const [first, second] = await twoMemberPool();
   assert.equal(await pickPort(), first.port);
-  await chatRequest("opencode", first, 429);
+  await chatRequest("opencode-go", first, 429);
   assert.equal(proxyLogger.getProxyLogs()[0].upstreamStatus, 429);
   assert.deepEqual([await pickPort(), await pickPort()], [second.port, second.port]);
 });
@@ -122,17 +122,17 @@ test("a received refusal through a pool member makes the next pick skip it", asy
 test("the member is set aside as soon as the log call returns, not when the log settles", async () => {
   const [first, second] = await twoMemberPool();
   let avoidedAtCallSite: boolean | null = null;
-  await chatRequest("opencode", first, 429, () => {
+  await chatRequest("opencode-go", first, 429, () => {
     avoidedAtCallSite = memory.isProxyAvoided(memory.proxyEgressKey(first));
   });
   assert.equal(avoidedAtCallSite, true, "a concurrent pick must already skip the refused member");
   assert.deepEqual([await pickPort(), await pickPort()], [second.port, second.port]);
 });
 
-test("with the flag at its default (off) a received refusal leaves the member in rotation", async () => {
+test("with the flag opted out a received refusal leaves the member in rotation", async () => {
   const [first, second] = await twoMemberPool();
-  delete process.env.PROXY_SKIP_RECENTLY_FAILED;
-  await chatRequest("opencode", first, 429);
+  process.env.PROXY_SKIP_RECENTLY_FAILED = "false";
+  await chatRequest("opencode-go", first, 429);
   assert.equal(proxyLogger.getProxyLogs()[0].upstreamStatus, 429);
   assert.equal(memory.__proxyRefusalMemorySizeForTesting(), 0);
   assert.deepEqual([await pickPort(), await pickPort()], [first.port, second.port]);
@@ -140,7 +140,7 @@ test("with the flag at its default (off) a received refusal leaves the member in
 
 test("a locally generated failure (no dispatch) leaves the member in rotation", async () => {
   const [first, second] = await twoMemberPool();
-  await chatRequest("opencode", first, null);
+  await chatRequest("opencode-go", first, null);
   assert.equal(proxyLogger.getProxyLogs()[0].upstreamStatus, null);
   assert.deepEqual([await pickPort(), await pickPort()], [first.port, second.port]);
 });

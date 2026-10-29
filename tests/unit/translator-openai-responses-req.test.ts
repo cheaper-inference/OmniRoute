@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createResponsesAssistantTurnInput } from "../fixtures/responsesAssistantTurn.ts";
 
 const { openaiResponsesToOpenAIRequest, openaiToOpenAIResponsesRequest } =
   await import("../../open-sse/translator/request/openai-responses.ts");
@@ -75,10 +76,12 @@ test("Responses -> Chat converts instructions, inputs, function calls, outputs, 
         name: "read_file",
         description: "Read",
         parameters: { type: "object" },
-        strict: undefined,
       },
     },
   ]);
+  // An undeclared Responses `strict` must not leak into Chat as a `strict` key.
+  const firstTool = (result as { tools: Array<{ function: object }> }).tools[0];
+  assert.equal("strict" in firstTool.function, false);
   (assert as any).deepEqual((result as any).tool_choice, {
     type: "function",
     function: { name: "read_file" },
@@ -88,22 +91,7 @@ test("Responses -> Chat converts instructions, inputs, function calls, outputs, 
 test("Responses -> Chat keeps assistant text, reasoning, and function calls in one turn", () => {
   const result = openaiResponsesToOpenAIRequest(
     "gpt-4o",
-    {
-      input: [
-        {
-          type: "reasoning",
-          content: [{ type: "reasoning_text", text: "Inspect first" }],
-        },
-        {
-          type: "message",
-          role: "assistant",
-          content: [{ type: "output_text", text: "I will inspect" }],
-        },
-        { type: "function_call", call_id: "call_1", name: "read_file", arguments: "{}" },
-        { type: "function_call", call_id: "call_2", name: "search", arguments: "{}" },
-        { type: "function_call_output", call_id: "call_1", output: "contents" },
-      ],
-    },
+    createResponsesAssistantTurnInput(),
     false,
     { _preserveReasoningContent: true }
   ) as { messages: Array<Record<string, unknown>> };
@@ -249,10 +237,16 @@ test("Responses -> Chat filters orphan tool outputs and supports role-based mess
     null
   );
 
-  assert.equal((result as any).messages.length, 3);
+  // An orphan output is never sent as `role:"tool"`; its content is kept as labelled
+  // user context (same label the Claude reconciliation uses) instead of being dropped.
+  assert.equal((result as any).messages.length, 4);
   assert.equal((result as any).messages[0].role, "user");
-  assert.equal((result as any).messages[1].tool_calls[0].id, "call_2");
-  (assert as any).deepEqual((result as any).messages[2], {
+  assert.deepEqual((result as { messages: unknown[] }).messages[1], {
+    role: "user",
+    content: "[Unpaired tool result orphan]\nskip",
+  });
+  assert.equal((result as any).messages[2].tool_calls[0].id, "call_2");
+  (assert as any).deepEqual((result as any).messages[3], {
     role: "tool",
     tool_call_id: "call_2",
     content: "found",

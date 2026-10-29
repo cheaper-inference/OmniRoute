@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Button } from "@/shared/components";
-import { matchesSearch } from "@/shared/utils/turkishText";
+import { EmptyState } from "@omniroute/ui-kit/empty-state";
+import { Badge, Card, Button, Input, Select } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import {
+  filterModelOverrideTargets,
   toModelOverrideTargets,
   type PricingCatalogProvider,
 } from "@/lib/modelCapabilityOverrideTargets";
@@ -15,11 +17,6 @@ type ModelOverrideValue = number | string[];
 type StatusTone = "success" | "error" | "info";
 
 type ModelOverrideTarget = import("@/lib/modelCapabilityOverrideTargets").ModelOverrideTarget;
-
-interface PricingCatalogModel {
-  id: string;
-  name: string;
-}
 
 interface ModelCapabilityOverride {
   target: string;
@@ -33,9 +30,9 @@ interface StatusMessage {
 }
 
 function statusClassName(tone: StatusTone) {
-  if (tone === "success") return "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
-  if (tone === "error") return "bg-red-500/10 border-red-500/20 text-red-400";
-  return "bg-sky-500/10 border-sky-500/20 text-sky-400";
+  if (tone === "success") return "bg-success/10 border-success/20 text-success";
+  if (tone === "error") return "bg-error/10 border-error/20 text-error";
+  return "bg-info/10 border-info/20 text-info";
 }
 
 function useModelCapabilityOverridesData() {
@@ -191,17 +188,9 @@ function ModelCapabilityOverridesPanel({
 }
 
 function useFilteredTargets(targets: ModelOverrideTarget[], search: string) {
-  return useMemo(() => {
-    const query = search.trim();
-    const source = query
-      ? targets.filter((entry) =>
-          [entry.label, entry.target, entry.provider, entry.modelId].some((candidate) =>
-            matchesSearch(candidate, query)
-          )
-        )
-      : targets;
-    return source.slice(0, 80);
-  }, [search, targets]);
+  // Filter + relevance ranking live in the lib (pure, unit-tested); see
+  // filterModelOverrideTargets for the scoring contract.
+  return useMemo(() => filterModelOverrideTargets(targets, search), [search, targets]);
 }
 
 function ModelOverridesHeader({ count }: { count: number }) {
@@ -210,14 +199,14 @@ function ModelOverridesHeader({ count }: { count: number }) {
     <div className="flex items-start justify-between gap-3 mb-3">
       <div>
         <h3 className="text-sm font-bold flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px] text-primary">tune</span>
+          <Icon name="tune" size={18} className="text-primary" />
           {t("modelOverridesTitle")}
         </h3>
         <p className="text-xs text-text-muted mt-1">{t("modelOverridesDesc")}</p>
       </div>
-      <span className="text-[10px] px-2 py-1 rounded-md border border-border bg-bg-subtle text-text-muted">
+      <Badge size="sm">
         {count} {t("configured")}
-      </span>
+      </Badge>
     </div>
   );
 }
@@ -241,12 +230,13 @@ function ModelOverrideTargetList({
   return (
     <div className="rounded-lg border border-border/50 overflow-hidden">
       <div className="p-2 border-b border-border/50 bg-bg-subtle/40">
-        <input
-          type="text"
+        <Input
+          type="search"
+          icon="search"
+          aria-label={t("searchModelOverrideTargets")}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder={t("searchModelOverrideTargets")}
-          className="w-full px-3 py-2 text-xs bg-bg-base border border-border rounded-md focus:outline-none focus:border-primary"
         />
       </div>
       <div className="max-h-56 overflow-y-auto divide-y divide-border/40">
@@ -276,20 +266,22 @@ function ModelOverrideTargetButton({
   onSelect: (target: string) => void;
 }) {
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="sm"
+      aria-pressed={active}
       onClick={() => onSelect(entry.target)}
-      className={`w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 hover:bg-bg-hover/50 ${
+      className={`h-auto w-full justify-between gap-2 rounded-none px-3 py-2 text-left text-xs font-normal ${
         active ? "bg-primary/10 text-primary" : "text-text-main"
       }`}
     >
       <span className="truncate font-mono">{entry.label}</span>
       {count > 0 && (
-        <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400">
+        <Badge size="sm" variant="warning" className="shrink-0">
           {count}
-        </span>
+        </Badge>
       )}
-    </button>
+    </Button>
   );
 }
 
@@ -339,17 +331,23 @@ function ModelOverrideForm({
 
   return (
     <div className="flex flex-col sm:flex-row gap-2">
-      <select
+      <Select
+        aria-label={t("modelOverrideKey")}
         value={key}
         onChange={(event) => setKey(event.target.value as ModelOverrideKey)}
-        className="sm:w-40 px-2 py-2 text-xs bg-bg-base border border-border rounded-md focus:outline-none focus:border-primary"
+        className="sm:w-44"
       >
         <option value="context_length">context_length</option>
         <option value="max_input_tokens">max_input_tokens</option>
         <option value="max_output_tokens">max_output_tokens</option>
         <option value="reasoning_efforts">reasoning_efforts</option>
-      </select>
-      <input
+      </Select>
+      <Input
+        aria-label={t(
+          isReasoningEfforts
+            ? "modelOverrideReasoningEffortsPlaceholder"
+            : "modelOverrideValuePlaceholder"
+        )}
         type={isReasoningEfforts ? "text" : "number"}
         min={isReasoningEfforts ? undefined : "1"}
         step={isReasoningEfforts ? undefined : "1"}
@@ -360,7 +358,7 @@ function ModelOverrideForm({
             ? "modelOverrideReasoningEffortsPlaceholder"
             : "modelOverrideValuePlaceholder"
         )}
-        className="flex-1 px-3 py-2 text-xs bg-bg-base border border-border rounded-md focus:outline-none focus:border-primary"
+        className="flex-1"
       />
       <Button
         variant="primary"
@@ -388,7 +386,7 @@ function ModelOverrideRows({
   return (
     <div className="rounded-md border border-border/40 overflow-hidden">
       {activeOverrides.length === 0 ? (
-        <div className="px-3 py-4 text-xs text-text-muted text-center">{t("noModelOverrides")}</div>
+        <EmptyState compact icon={<Icon name="tune" size={20} />} title={t("noModelOverrides")} />
       ) : (
         <div className="divide-y divide-border/40">
           {activeOverrides.map((override) => (
@@ -420,13 +418,14 @@ function ModelOverrideRow({
           {Array.isArray(override.value) ? override.value.join(", ") : override.value}
         </span>
       </div>
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => onRemove(override.target, override.key)}
-        className="text-red-400 hover:bg-red-500/10 rounded px-2 py-1"
+        className="text-error"
       >
         {t("remove")}
-      </button>
+      </Button>
     </div>
   );
 }

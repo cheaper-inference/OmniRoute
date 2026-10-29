@@ -40,7 +40,8 @@ function render(node: ModalNode, onSave?: ModalProps["onSave"]) {
   };
   renderProps({});
   containers.push({ root, el });
-  return { el, rerender: renderProps };
+  // Queries go through document.body: the dialog is portaled there (KEA-7886).
+  return { el: document.body, rerender: renderProps };
 }
 
 function inputByLabel(el: Element, label: string): HTMLInputElement {

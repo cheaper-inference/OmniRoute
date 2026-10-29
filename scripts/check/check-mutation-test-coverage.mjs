@@ -25,6 +25,7 @@
 
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 
 /** 3-segment path suffix without extension (unique enough; matches relative + alias imports). */
 export function moduleFragment(modulePath) {
@@ -67,14 +68,16 @@ export function findCoverageDrift({ mutate, tapTestFiles, unitTests }) {
 function listUnitTests() {
   // Static argv — no shell, no interpolation.
   const out = execFileSync("git", ["ls-files", "tests/unit"], { encoding: "utf8" });
-  return out
-    .split("\n")
-    .filter((f) => /\.test\.ts$/.test(f))
-    // Exclude tests/unit/build/: these test the build TOOLING (scripts/), not the
-    // mutated runtime modules. They legitimately embed module paths as fixture
-    // strings (e.g. this gate's own test), which would otherwise false-match.
-    .filter((f) => !f.startsWith("tests/unit/build/"))
-    .map((path) => ({ path, content: fs.readFileSync(path, "utf8") }));
+  return (
+    out
+      .split("\n")
+      .filter((f) => /\.test\.ts$/.test(f))
+      // Exclude tests/unit/build/: these test the build TOOLING (scripts/), not the
+      // mutated runtime modules. They legitimately embed module paths as fixture
+      // strings (e.g. this gate's own test), which would otherwise false-match.
+      .filter((f) => !f.startsWith("tests/unit/build/"))
+      .map((path) => ({ path, content: fs.readFileSync(path, "utf8") }))
+  );
 }
 
 function main() {
@@ -118,4 +121,4 @@ function main() {
   process.exit(0);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();

@@ -3,10 +3,12 @@
   "description": "Provider-specific integration guides",
   "pages": [
     "ALIBABA-QWEN-PROVIDER-FAMILIES",
+    "CLAUDE_CODE_SETUP_TOKEN",
     "CLAUDE_WEB",
     "CHATGPT_WEB",
     "COPILOT-M365",
     "AGENTROUTER",
+    "DEMON_ROUTE",
     "ZED-DOCKER",
     "CURSOR-DOCKER",
     "CURSOR-API-KEY-AND-CLI",

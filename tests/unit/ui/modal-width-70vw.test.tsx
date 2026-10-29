@@ -29,7 +29,9 @@ function renderModal(props: Partial<React.ComponentProps<typeof Modal>> = {}) {
     act(() => root.unmount());
     container.remove();
   });
-  return container.querySelector('[role="dialog"]') as HTMLElement;
+  // The kit Dialog (Radix) portals its content to <body>, outside `container`.
+  const dialogs = document.body.querySelectorAll<HTMLElement>('[role="dialog"]');
+  return dialogs[dialogs.length - 1];
 }
 
 afterEach(() => {
@@ -39,8 +41,11 @@ afterEach(() => {
 describe("Modal width", () => {
   it("defaults (md) to ~70% of the viewport from the sm breakpoint, full width below", () => {
     const dialog = renderModal();
-    expect(dialog.className).toContain("w-full");
+    // Below `sm` the kit Dialog's own `calc(100vw - 3rem)` width applies (mobile gutter);
+    // `max-w-none` lifts its 30rem cap so the dialog spans the full width minus the gutter.
+    expect(dialog.className).toContain("max-w-none");
     expect(dialog.className).toContain("sm:w-[70vw]");
+    expect(dialog.className).toContain("sm:max-w-[70vw]");
     expect(dialog.className).not.toContain("max-w-md");
   });
 
@@ -48,6 +53,9 @@ describe("Modal width", () => {
     for (const size of ["lg", "xl", "full"] as const) {
       const dialog = renderModal({ size });
       expect(dialog.className, size).toContain("sm:w-[70vw]");
+      expect(dialog.className, size).toContain("sm:max-w-[70vw]");
+      expect(dialog.className, size).not.toMatch(/(^|\s)max-w-(md|lg|xl|4xl)(\s|$)/);
+      cleanups.pop()!();
     }
   });
 

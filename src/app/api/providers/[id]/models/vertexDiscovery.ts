@@ -6,10 +6,13 @@ import { SAFE_OUTBOUND_FETCH_PRESETS, safeOutboundFetch } from "@/shared/network
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import type { VertexMetadataModel } from "@/lib/providerModels/vertexModelMetadata";
 import { asRecord, mergeLocalCatalogModels, toNonEmptyString } from "./discovery/helpers";
+import type { DiscoveryFailure } from "@/shared/discovery/degradedCause";
 
 interface DiscoveryWarnings {
   cacheWarning?: string;
   localWarning?: string;
+  /** Why the discovery failed — a code or an HTTP status, never a message. */
+  failure?: DiscoveryFailure;
 }
 
 interface VertexDiscoveryRouteOptions {
@@ -98,6 +101,14 @@ async function resolveVertexDiscoveryAuth(options: {
   return { queryKey: credential, bearerToken: null };
 }
 
+function buildExpressDiscoveryWarning(discovery: { failureStatus?: number }): string {
+  return (
+    (discovery.failureStatus
+      ? `Vertex model listing rejected the API key (HTTP ${discovery.failureStatus}). `
+      : "") + "No live catalog available for this API key — using curated Express catalog"
+  );
+}
+
 async function handleVertexApiKeyCatalog(
   options: VertexDiscoveryRouteOptions,
   queryKey: string,
@@ -105,17 +116,22 @@ async function handleVertexApiKeyCatalog(
 ): Promise<Response> {
   const { discoverVertexModelsWithApiKey } =
     await import("@/lib/providerModels/vertexModelDiscovery");
+  const { isVertexExpressModel } = await import("@omniroute/open-sse/config/vertexModels.ts");
   const discovery = await discoverVertexModelsWithApiKey({
     apiKey: queryKey,
     fetchImpl: vertexFetch(options.proxy),
+    curatedModels: catalog.filter((model) => isVertexExpressModel(model.id)),
   });
 
   if (discovery.models.length === 0 && discovery.unavailable) {
     const warning = "Vertex model discovery temporarily unavailable — using local catalog";
+    // The live listing rejected the key: its status is the reason.
+    const failure: DiscoveryFailure = { status: discovery.failureStatus };
     return (
       options.buildDiscoveryFallbackResponse({
         cacheWarning: "Vertex model discovery temporarily unavailable — using cached catalog",
         localWarning: warning,
+        failure,
       }) ??
       options.buildResponse({
         provider: options.provider,
@@ -123,6 +139,7 @@ async function handleVertexApiKeyCatalog(
         models: [],
         source: "local_catalog",
         warning,
+        failure,
       })
     );
   }
@@ -138,7 +155,6 @@ async function handleVertexApiKeyCatalog(
     await updateProviderConnection(options.connectionId, { projectId });
   }
 
-  const { isVertexExpressModel } = await import("@omniroute/open-sse/config/vertexModels.ts");
   if (projectId) {
     const liveGeminiModels = asNamedModels(discovery.models);
     const projectCatalog = mergeLocalCatalogModels(liveGeminiModels, catalog);
@@ -156,6 +172,7 @@ async function handleVertexApiKeyCatalog(
       intentional: true,
       projectIdAutoDetected,
       catalogMode: "curated_project",
+      warning: buildExpressDiscoveryWarning(discovery),
     });
   }
 
@@ -169,10 +186,7 @@ async function handleVertexApiKeyCatalog(
     models: catalog.filter((model) => isVertexExpressModel(model.id)),
     source: "local_catalog",
     intentional: true,
-    warning:
-      (discovery.failureStatus
-        ? `Generative Language model listing rejected the API key (HTTP ${discovery.failureStatus}). `
-        : "") + "No live catalog available for this API key — using curated Express catalog",
+    warning: buildExpressDiscoveryWarning(discovery),
   });
 }
 
@@ -208,6 +222,7 @@ export async function maybeHandleVertexModelDiscovery(
     const fallback = options.buildDiscoveryFallbackResponse({
       cacheWarning: "No usable Vertex credential — using cached catalog",
       localWarning: "No usable Vertex credential — using local catalog",
+      failure: { code: "NO_CREDENTIAL" },
     });
     if (fallback) return fallback;
     return NextResponse.json(
@@ -249,6 +264,8 @@ export async function maybeHandleVertexModelDiscovery(
   const fallback = options.buildDiscoveryFallbackResponse({
     cacheWarning: "Vertex model catalogs unavailable — using cached catalog",
     localWarning: "Vertex model catalogs unavailable — using local catalog",
+    // The live catalog answered with nothing usable.
+    failure: { code: "EMPTY_CATALOG" },
   });
   if (fallback) return fallback;
   return options.buildResponse({

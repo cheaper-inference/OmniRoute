@@ -1,7 +1,22 @@
 "use client";
 
 import { useState, useEffect, useCallback, type ReactNode } from "react";
-import { Card, Button, EmptyState } from "@/shared/components";
+import { Progress } from "@omniroute/ui-kit/progress";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import EmptyState from "@/shared/components/EmptyState";
+import Icon from "@/shared/components/Icon";
+import { Skeleton } from "@/shared/components/Loading";
+import SegmentedControl from "@/shared/components/SegmentedControl";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useTranslations } from "next-intl";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
@@ -88,17 +103,12 @@ function StatCard({
     <div
       className={
         isHero
-          ? "rounded-3xl border border-border/30 bg-gradient-to-br from-surface-raised via-surface-raised/80 to-surface/30 p-5"
-          : "rounded-2xl border border-border/30 bg-surface-raised/70 p-4"
+          ? "rounded-xl border border-border bg-bg-subtle p-5"
+          : "rounded-lg border border-border bg-bg-subtle p-4"
       }
     >
       <div className="flex items-center gap-1.5 text-xs text-text-muted">
-        <span
-          className={`material-symbols-outlined leading-none ${isHero ? "text-[18px]" : "text-base"}`}
-          aria-hidden="true"
-        >
-          {icon}
-        </span>
+        <Icon name={icon} size={isHero ? 18 : 16} />
         <span>{label}</span>
       </div>
       <div
@@ -120,50 +130,25 @@ function SectionBadge({
   children: ReactNode;
   tone?: "neutral" | "green" | "amber";
 }) {
-  const toneClass =
-    tone === "green"
-      ? "border-green-500/20 bg-green-500/10 text-green-300"
-      : tone === "amber"
-        ? "border-amber-400/20 bg-amber-400/10 text-amber-300"
-        : "border-border/40 bg-surface/50 text-text-muted";
+  const variant = tone === "green" ? "success" : tone === "amber" ? "warning" : "default";
 
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.12em] ${toneClass}`}
-    >
-      <span className="material-symbols-outlined text-sm leading-none" aria-hidden="true">
-        {icon}
-      </span>
+    <Badge variant={variant} icon={<Icon name={icon} size={14} />}>
       {children}
-    </span>
+    </Badge>
   );
 }
 
-function LinearMeter({
-  label,
-  value,
-  tone = "green",
-  helper,
-}: {
-  label: string;
-  value: number;
-  tone?: "green" | "blue" | "amber";
-  helper?: string;
-}) {
-  const colorClass =
-    tone === "blue" ? "bg-blue-400" : tone === "amber" ? "bg-amber-400" : "bg-emerald-500";
-
+function LinearMeter({ label, value, helper }: { label: string; value: number; helper?: string }) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-3 text-xs">
         <span className="text-text-muted">{label}</span>
         <span className="font-semibold tabular-nums text-text-main">{value.toFixed(1)}%</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-surface/60">
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${colorClass}`}
-          style={{ width: `${Math.min(value, 100)}%` }}
-        />
+      {/* Kit Progress does not forward aria-label: the visible value above is the text. */}
+      <div aria-hidden="true">
+        <Progress value={Math.min(value, 100)} />
       </div>
       {helper && <div className="text-[11px] text-text-muted">{helper}</div>}
     </div>
@@ -180,7 +165,7 @@ function DetailStat({
   accent?: string;
 }) {
   return (
-    <div className="rounded-xl bg-surface/45 px-3 py-2.5">
+    <div className="rounded-lg bg-bg-subtle px-3 py-2.5">
       <div className="text-[11px] uppercase tracking-[0.12em] text-text-muted">{label}</div>
       <div className={`mt-1 text-sm font-semibold tabular-nums ${accent}`}>{value}</div>
     </div>
@@ -190,12 +175,7 @@ function DetailStat({
 function InfoRow({ icon, children }: { icon: string; children: ReactNode }) {
   return (
     <div className="flex gap-2 text-sm text-text-muted">
-      <span
-        className="material-symbols-outlined shrink-0 text-base leading-5 text-blue-400"
-        aria-hidden="true"
-      >
-        {icon}
-      </span>
+      <Icon name={icon} size={16} className="mt-0.5 text-info" />
       <span>{children}</span>
     </div>
   );
@@ -240,11 +220,9 @@ function PromptTrendPanel({
 }) {
   if (trend.length === 0) {
     return (
-      <div className="rounded-3xl border border-border/30 bg-surface/20 p-5">
+      <div className="rounded-xl border border-border bg-bg-subtle p-5">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-base text-text-muted" aria-hidden="true">
-            timeline
-          </span>
+          <Icon name="timeline" size={16} className="text-text-muted" />
           <h3 className="text-sm font-medium text-text-main">{title}</h3>
         </div>
         <p className="mt-2 text-sm text-text-muted">{noDataLabel}</p>
@@ -265,16 +243,11 @@ function PromptTrendPanel({
   const maxRequests = Math.max(1, ...trend.map((point) => point.requests));
 
   return (
-    <div className="w-full self-start rounded-3xl border border-border/30 bg-surface/20 p-5">
+    <div className="w-full self-start rounded-xl border border-border bg-bg-subtle p-5">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span
-              className="material-symbols-outlined text-base text-text-muted"
-              aria-hidden="true"
-            >
-              timeline
-            </span>
+            <Icon name="timeline" size={16} className="text-text-muted" />
             <h3 className="text-sm font-medium text-text-main">{title}</h3>
           </div>
           <p className="mt-2 text-sm text-text-muted">{description}</p>
@@ -290,18 +263,24 @@ function PromptTrendPanel({
         <DetailStat
           label={peakCacheRateLabel}
           value={`${((peakCacheRatePoint.cachedRequests / Math.max(peakCacheRatePoint.requests, 1)) * 100).toFixed(1)}%`}
-          accent="text-emerald-500"
+          accent="text-success"
         />
       </div>
 
-      <div className="mt-5 overflow-hidden rounded-2xl border border-border/25 bg-surface">
-        <div className="grid grid-cols-[84px_minmax(0,1fr)_92px_120px] gap-3 border-b border-border/20 px-4 py-3 text-[11px] font-medium uppercase tracking-[0.12em] text-text-muted">
-          <span>{hourLabel}</span>
-          <span>{activityLabel}</span>
-          <span>{cacheRateLabel}</span>
-          <span>{cachedTokensLabel}</span>
-        </div>
-        <div className="max-h-80 overflow-y-auto">
+      <Table
+        className="text-sm"
+        containerClassName="mt-5 max-h-80 overflow-y-auto"
+        scrollbarLabel={title}
+      >
+        <TableHeader className="sticky top-0 z-10 bg-surface">
+          <TableRow>
+            <TableHead className="w-[84px]">{hourLabel}</TableHead>
+            <TableHead>{activityLabel}</TableHead>
+            <TableHead className="w-[92px]">{cacheRateLabel}</TableHead>
+            <TableHead className="w-[120px]">{cachedTokensLabel}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {trend
             .slice()
             .reverse()
@@ -311,35 +290,34 @@ function PromptTrendPanel({
               const volumeWidth = Math.max(8, (point.requests / maxRequests) * 100);
 
               return (
-                <div
-                  key={point.timestamp}
-                  className="grid grid-cols-[84px_minmax(0,1fr)_92px_120px] gap-3 border-b border-border/15 px-4 py-3 last:border-b-0"
-                >
-                  <div className="text-sm font-medium tabular-nums text-text-main">
+                <TableRow key={point.timestamp}>
+                  <TableCell className="font-medium tabular-nums text-text-main">
                     {formatHour(point.timestamp)}
-                  </div>
-                  <div className="space-y-1.5">
-                    <div className="h-2 overflow-hidden rounded-full bg-surface/60">
-                      <div
-                        className="h-full rounded-full bg-emerald-500/85"
-                        style={{ width: `${volumeWidth}%` }}
-                      />
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1.5">
+                      <div className="h-2 overflow-hidden rounded-full bg-border/60">
+                        <div
+                          className="h-full rounded-full bg-chart-1"
+                          style={{ width: `${volumeWidth}%` }}
+                        />
+                      </div>
+                      <div className="text-xs text-text-muted">
+                        {point.requests.toLocaleString()} {requestsLabel.toLowerCase()}
+                      </div>
                     </div>
-                    <div className="text-xs text-text-muted">
-                      {point.requests.toLocaleString()} {requestsLabel.toLowerCase()}
-                    </div>
-                  </div>
-                  <div className="text-sm font-semibold tabular-nums text-text-main">
+                  </TableCell>
+                  <TableCell className="font-semibold tabular-nums text-text-main">
                     {cacheRate.toFixed(1)}%
-                  </div>
-                  <div className="text-sm font-semibold tabular-nums text-cyan-400">
+                  </TableCell>
+                  <TableCell className="font-semibold tabular-nums text-chart-2">
                     {point.cachedTokens.toLocaleString()}
-                  </div>
-                </div>
+                  </TableCell>
+                </TableRow>
               );
             })}
-        </div>
-      </div>
+        </TableBody>
+      </Table>
     </div>
   );
 }
@@ -445,48 +423,20 @@ export default function CachePage() {
         </Button>
       </div>
 
-      <div className="flex w-fit gap-1 rounded-lg bg-black/5 p-1 dark:bg-white/5">
-        <button
-          type="button"
-          onClick={() => setActiveView("prompt")}
-          aria-pressed={activeView === "prompt"}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-            activeView === "prompt"
-              ? "bg-white dark:bg-white/10 text-text-main shadow-sm"
-              : "text-text-muted hover:text-text-main"
-          }`}
-        >
-          {t("promptCache")}
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveView("semantic")}
-          aria-pressed={activeView === "semantic"}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-            activeView === "semantic"
-              ? "bg-white dark:bg-white/10 text-text-main shadow-sm"
-              : "text-text-muted hover:text-text-main"
-          }`}
-        >
-          {t("semanticCache")}
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveView("reasoning")}
-          aria-pressed={activeView === "reasoning"}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-            activeView === "reasoning"
-              ? "bg-white dark:bg-white/10 text-text-main shadow-sm"
-              : "text-text-muted hover:text-text-main"
-          }`}
-        >
-          {t("reasoningCache")}
-        </button>
-      </div>
+      <SegmentedControl
+        aria-label={t("viewSwitcherAria")}
+        value={activeView}
+        onChange={(next) => setActiveView(next as CacheView)}
+        options={[
+          { value: "prompt", label: t("promptCache") },
+          { value: "semantic", label: t("semanticCache") },
+          { value: "reasoning", label: t("reasoningCache") },
+        ]}
+      />
 
       {loading && (
         <div className="grid grid-cols-1 gap-6" aria-busy="true" aria-label={t("loadingCacheAria")}>
-          <div className="h-96 rounded-3xl bg-surface-raised animate-pulse" />
+          <Skeleton className="h-96 w-full rounded-xl" />
         </div>
       )}
 
@@ -530,7 +480,7 @@ export default function CachePage() {
                     label={t("cacheRate")}
                     value={`${promptCacheRate.toFixed(1)}%`}
                     sub={`${pc.requestsWithCacheControl.toLocaleString()} / ${pc.totalRequests.toLocaleString()} ${t("requests").toLowerCase()}`}
-                    accent="text-emerald-500"
+                    accent="text-success"
                     size="hero"
                   />
                   <StatCard
@@ -538,7 +488,7 @@ export default function CachePage() {
                     label={t("cacheReuseRatio")}
                     value={`${promptReuseRatio.toFixed(1)}%`}
                     sub={t("cacheReuseRatioDesc")}
-                    accent="text-blue-400"
+                    accent="text-info"
                     size="hero"
                   />
                   <StatCard
@@ -546,7 +496,7 @@ export default function CachePage() {
                     label={t("cachedTokens")}
                     value={pc.totalCachedTokens.toLocaleString()}
                     sub={t("cachedTokensRead")}
-                    accent="text-cyan-400"
+                    accent="text-chart-2"
                     size="hero"
                   />
                   <StatCard
@@ -554,7 +504,7 @@ export default function CachePage() {
                     label={t("cacheCreationTokens")}
                     value={pc.totalCacheCreationTokens.toLocaleString()}
                     sub={t("cacheCreationWrite")}
-                    accent="text-purple-400"
+                    accent="text-chart-4"
                     size="hero"
                   />
                   <StatCard
@@ -562,82 +512,78 @@ export default function CachePage() {
                     label={t("estCostSaved")}
                     value={`$${pc.estimatedCostSaved.toFixed(4)}`}
                     sub={t("promptCache")}
-                    accent="text-green-500"
+                    accent="text-success"
                     size="hero"
                   />
                 </div>
 
-                <div className="w-full rounded-3xl border border-border/30 bg-surface/20 p-5">
+                <div className="w-full rounded-xl border border-border bg-bg-subtle p-5">
                   <div>
                     <h3 className="text-sm font-medium text-text-main">{t("byProvider")}</h3>
                     <p className="mt-1 text-sm text-text-muted">{t("providerCacheRateDesc")}</p>
                   </div>
 
                   {providerEntries.length > 0 ? (
-                    <div className="mt-3 overflow-x-auto rounded-2xl border border-border/20 bg-surface">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-border/20 text-left text-[11px] uppercase tracking-[0.12em] text-text-muted">
-                            <th className="px-4 py-3">{t("provider")}</th>
-                            <th className="px-4 py-3">{t("inputTokens")}</th>
-                            <th className="px-4 py-3">{t("cachedTokensCol")}</th>
-                            <th className="px-4 py-3">{t("cacheCreation")}</th>
-                            <th className="px-4 py-3">{t("cacheReuseRatio")}</th>
-                            <th className="px-4 py-3">{t("cacheRate")}</th>
-                            <th className="px-4 py-3">{t("cachedRequests")}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {providerEntries.map(([provider, data]) => {
-                            const cachedRequests = data.cachedRequests ?? data.requests;
-                            const totalRequests = data.totalRequests ?? cachedRequests;
-                            const cacheRate =
-                              totalRequests > 0 ? (cachedRequests / totalRequests) * 100 : 0;
-                            const reuseRatio =
-                              data.inputTokens > 0
-                                ? (data.cachedTokens / data.inputTokens) * 100
-                                : 0;
+                    <Table
+                      className="text-sm"
+                      containerClassName="mt-3"
+                      scrollbarLabel={t("byProvider")}
+                    >
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>{t("provider")}</TableHead>
+                          <TableHead>{t("inputTokens")}</TableHead>
+                          <TableHead>{t("cachedTokensCol")}</TableHead>
+                          <TableHead>{t("cacheCreation")}</TableHead>
+                          <TableHead>{t("cacheReuseRatio")}</TableHead>
+                          <TableHead>{t("cacheRate")}</TableHead>
+                          <TableHead>{t("cachedRequests")}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {providerEntries.map(([provider, data]) => {
+                          const cachedRequests = data.cachedRequests ?? data.requests;
+                          const totalRequests = data.totalRequests ?? cachedRequests;
+                          const cacheRate =
+                            totalRequests > 0 ? (cachedRequests / totalRequests) * 100 : 0;
+                          const reuseRatio =
+                            data.inputTokens > 0 ? (data.cachedTokens / data.inputTokens) * 100 : 0;
 
-                            return (
-                              <tr
-                                key={provider}
-                                className="border-b border-border/15 last:border-b-0"
-                              >
-                                <td className="px-4 py-3">
-                                  <div className="font-medium text-text-main">
-                                    {resolveProviderName(provider, nodeMap)}
-                                  </div>
-                                  <div className="mt-1 text-xs text-text-muted">
-                                    {totalRequests.toLocaleString()} {t("requests").toLowerCase()}
-                                  </div>
-                                </td>
-                                <td className="px-4 py-3 tabular-nums text-text-main">
-                                  {data.inputTokens.toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3 tabular-nums text-cyan-400">
-                                  {data.cachedTokens.toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3 tabular-nums text-purple-400">
-                                  {data.cacheCreationTokens.toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3 font-semibold tabular-nums text-blue-400">
-                                  {reuseRatio.toFixed(1)}%
-                                </td>
-                                <td className="px-4 py-3 font-semibold tabular-nums text-emerald-500">
-                                  {cacheRate.toFixed(1)}%
-                                </td>
-                                <td className="px-4 py-3 tabular-nums text-text-main">
-                                  {cachedRequests.toLocaleString()} /{" "}
-                                  {totalRequests.toLocaleString()}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
+                          return (
+                            <TableRow key={provider}>
+                              <TableCell>
+                                <div className="font-medium text-text-main">
+                                  {resolveProviderName(provider, nodeMap)}
+                                </div>
+                                <div className="mt-1 text-xs text-text-muted">
+                                  {totalRequests.toLocaleString()} {t("requests").toLowerCase()}
+                                </div>
+                              </TableCell>
+                              <TableCell className="tabular-nums text-text-main">
+                                {data.inputTokens.toLocaleString()}
+                              </TableCell>
+                              <TableCell className="tabular-nums text-chart-2">
+                                {data.cachedTokens.toLocaleString()}
+                              </TableCell>
+                              <TableCell className="tabular-nums text-chart-4">
+                                {data.cacheCreationTokens.toLocaleString()}
+                              </TableCell>
+                              <TableCell className="font-semibold tabular-nums text-info">
+                                {reuseRatio.toFixed(1)}%
+                              </TableCell>
+                              <TableCell className="font-semibold tabular-nums text-success">
+                                {cacheRate.toFixed(1)}%
+                              </TableCell>
+                              <TableCell className="tabular-nums text-text-main">
+                                {cachedRequests.toLocaleString()} / {totalRequests.toLocaleString()}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
                   ) : (
-                    <div className="mt-3 rounded-2xl border border-dashed border-border/40 bg-surface/10 px-4 py-6 text-sm text-text-muted">
+                    <div className="mt-3 rounded-lg border border-dashed border-border px-4 py-6 text-sm text-text-muted">
                       {t("noPromptCacheData")}
                     </div>
                   )}
@@ -660,7 +606,7 @@ export default function CachePage() {
                 />
               </>
             ) : (
-              <div className="rounded-2xl border border-dashed border-border/40 bg-surface/10 px-4 py-6 text-sm text-text-muted">
+              <div className="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-text-muted">
                 {t("noPromptCacheData")}
               </div>
             )}
@@ -709,7 +655,7 @@ export default function CachePage() {
             </div>
 
             {!semanticCacheEnabled && (
-              <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+              <div className="rounded-lg border border-warning/30 bg-warning-bg px-4 py-3 text-sm text-warning">
                 {t("semanticCacheDisabledDesc")}
               </div>
             )}
@@ -732,19 +678,19 @@ export default function CachePage() {
                 label={t("cacheHits")}
                 value={sc?.hits ?? 0}
                 sub={t("cacheHitsSub", { total: semanticTotalRequests })}
-                accent="text-green-500"
+                accent="text-success"
               />
               <StatCard
                 icon="token"
                 label={t("tokensSaved")}
                 value={(sc?.tokensSaved ?? 0).toLocaleString()}
                 sub={t("tokensSavedSub")}
-                accent="text-blue-400"
+                accent="text-info"
               />
             </div>
 
             <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-              <div className="rounded-2xl border border-border/30 bg-surface/20 p-5">
+              <div className="rounded-xl border border-border bg-bg-subtle p-5">
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <h3 className="text-sm font-medium text-text-main">{t("performance")}</h3>
@@ -753,7 +699,7 @@ export default function CachePage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <div className="text-3xl font-semibold tabular-nums text-emerald-500">
+                    <div className="text-3xl font-semibold tabular-nums text-success">
                       {semanticHitRate.toFixed(1)}%
                     </div>
                     <div className="text-xs text-text-muted">{t("hitRate")}</div>
@@ -772,19 +718,19 @@ export default function CachePage() {
                   <DetailStat
                     label={t("hits")}
                     value={(sc?.hits ?? 0).toLocaleString()}
-                    accent="text-green-500"
+                    accent="text-success"
                   />
                   <DetailStat
                     label={t("misses")}
                     value={(sc?.misses ?? 0).toLocaleString()}
-                    accent="text-red-400"
+                    accent="text-error"
                   />
                   <DetailStat label={t("total")} value={semanticTotalRequests.toLocaleString()} />
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="rounded-2xl border border-border/30 bg-surface/20 p-5">
+                <div className="rounded-xl border border-border bg-bg-subtle p-5">
                   <h3 className="text-sm font-medium text-text-main">{t("behavior")}</h3>
                   <div className="mt-4 grid gap-3">
                     <InfoRow icon="info">{t("behaviorDeterministic")}</InfoRow>
@@ -798,14 +744,9 @@ export default function CachePage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-border/30 bg-surface/20 p-5">
+                <div className="rounded-xl border border-border bg-bg-subtle p-5">
                   <div className="flex items-center gap-2">
-                    <span
-                      className="material-symbols-outlined text-base text-text-muted"
-                      aria-hidden="true"
-                    >
-                      fingerprint
-                    </span>
+                    <Icon name="fingerprint" size={16} className="text-text-muted" />
                     <h3 className="text-sm font-medium text-text-main">{t("idempotency")}</h3>
                   </div>
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -816,14 +757,14 @@ export default function CachePage() {
                     <DetailStat
                       label={t("dedupWindow")}
                       value={idp ? `${(idp.windowMs / 1000).toFixed(0)}s` : "0s"}
-                      accent="text-amber-300"
+                      accent="text-warning"
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-border/30 bg-surface/20 p-5">
+            <div className="rounded-xl border border-border bg-bg-subtle p-5">
               <div className="mb-4 flex flex-col gap-1">
                 <h3 className="text-sm font-medium text-text-main">{t("entries")}</h3>
                 <p className="text-sm text-text-muted">{t("semanticEntriesDesc")}</p>
@@ -835,7 +776,7 @@ export default function CachePage() {
       )}
 
       {activeView === "reasoning" && (
-        <Card className="border border-border/30 bg-surface-raised/40 backdrop-blur-sm rounded-3xl overflow-hidden">
+        <Card className="overflow-hidden">
           <div className="p-6">
             <ReasoningCacheTab />
           </div>

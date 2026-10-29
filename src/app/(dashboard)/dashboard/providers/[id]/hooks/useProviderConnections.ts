@@ -21,11 +21,15 @@
  * providers constants) — never from ProviderDetailPageClient.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useNotificationStore } from "@/store/notificationStore";
 import { isClaudeCodeCompatibleProvider } from "@/shared/constants/providers";
 import type { ConnectionRowConnection } from "../components/ConnectionRow";
+import {
+  buildSwapPriorityUpdates,
+  persistPriorityUpdates,
+} from "../components/connectionRowHelpers";
 import {
   connectionBelongsToProviderPage,
   getProviderConnectionsRequestUrl,
@@ -33,6 +37,7 @@ import {
 import { normalizeCodexLimitPolicy, providerText } from "../providerPageHelpers";
 import { useProviderQuotaVisibility } from "./useProviderQuotaVisibility";
 import { useReorderByAvailability } from "./useReorderByAvailability";
+import { useCodexPaidCreditsToggle } from "./useCodexPaidCreditsToggle";
 import {
   useConnectionDeleteConfirm,
   type ConnectionDeleteConfirmState,
@@ -191,6 +196,7 @@ export interface UseProviderConnectionsReturn {
   // Connection fetch
   fetchConnections: () => Promise<void>;
   fetchProxyConfig: () => Promise<void>;
+  refreshProxyState: () => Promise<void>;
 
   // Single-connection handlers
   deleteConfirm: ConnectionDeleteConfirmState;
@@ -198,6 +204,7 @@ export interface UseProviderConnectionsReturn {
   handleToggleRateLimit: (connectionId: string, enabled: boolean) => Promise<void>;
   handleToggleQuotaVisibility: (connectionId: string, visible: boolean) => Promise<void>;
   handleToggleClaudeExtraUsage: (connectionId: string, enabled: boolean) => Promise<void>;
+  handleToggleCodexPaidCredits: (connectionId: string, enabled: boolean) => Promise<void>;
   handleToggleCodexLimit: (connectionId: string, field: string, enabled: boolean) => Promise<void>;
   handleToggleCliproxyapiMode: (connectionId: string, enabled: boolean) => Promise<void>;
   handleSetUpstreamProxyMode: (
@@ -293,6 +300,13 @@ export function useProviderConnections(
     Record<string, { proxy: any; level: string } | null>
   >({});
 
+  // Latest connections, readable from a stable callback without making that
+  // callback (and every consumer prop depending on it) change every fetch.
+  const connectionsRef = useRef<ConnectionRowConnection[]>(connections);
+  useEffect(() => {
+    connectionsRef.current = connections;
+  }, [connections]);
+
   // ── Upstream proxy routing state (native / CLIProxyAPI / Dario / fallback) ─
   const [upstreamProxyMode, setUpstreamProxyModeState] = useState<UpstreamProxyMode>("native");
   const [upstreamProxyFallbackBackend, setUpstreamProxyFallbackBackendState] =
@@ -314,6 +328,28 @@ export function useProviderConnections(
     if (result) setProxyConfig(result.config);
   }, []);
 
+  /**
+   * Refresh every proxy view the page renders after a proxy assignment is
+   * written elsewhere (ProxyConfigModal saves/clears through
+   * `/api/settings/proxies/assignments`).
+   *
+   * Two independent sources back those views and BOTH must be re-read:
+   *  - `proxyConfig`   ← GET /api/settings/proxy          (provider-level chip)
+   *  - `connProxyMap`  ← GET /api/settings/proxy?resolve= (per-connection badges)
+   *
+   * The `connProxyMap` effect below is keyed on [loading, connections], and a
+   * proxy save changes neither, so without this callback the account-row
+   * badges keep showing pre-save state until a manual reload.
+   */
+  const refreshProxyState = useCallback(async () => {
+    const [configResult, map] = await Promise.all([
+      loadProxyConfigData(),
+      resolveConnectionProxies(connectionsRef.current),
+    ]);
+    if (configResult) setProxyConfig(configResult.config);
+    if (map) setConnProxyMap(map);
+  }, []);
+
   const fetchConnections = useCallback(async () => {
     const result = await loadProviderConnectionsData(providerId, isCompatible);
     if (result) {
@@ -329,8 +365,10 @@ export function useProviderConnections(
   // every setState below runs after an await.
 
   useEffect(() => {
+    let active = true;
     const run = async () => {
       const result = await loadProviderConnectionsData(providerId, isCompatible);
+      if (!active) return;
       if (result) {
         if (result.connections) setConnections(result.connections);
         if (result.nodeResolved) setProviderNode(result.node);
@@ -340,9 +378,13 @@ export function useProviderConnections(
     void run();
     const runProxyConfig = async () => {
       const result = await loadProxyConfigData();
+      if (!active) return;
       if (result) setProxyConfig(result.config);
     };
     void runProxyConfig();
+    return () => {
+      active = false;
+    };
   }, [providerId, isCompatible]);
 
   // Per-connection proxy (handles registry assignments)
@@ -515,6 +557,15 @@ export function useProviderConnections(
       );
     }
   };
+
+  // Codex paid-credits toggle — extracted to its own hook (see
+  // useCodexPaidCreditsToggle.ts) to keep this file under the file-size cap.
+  const { handleToggleCodexPaidCredits } = useCodexPaidCreditsToggle({
+    connections,
+    setConnections,
+    notify,
+    t,
+  });
 
   const handleToggleCodexLimit = async (connectionId: string, field: string, enabled: boolean) => {
     try {
@@ -757,35 +808,13 @@ export function useProviderConnections(
   const handleSwapPriority = async (conn1: any, conn2: any) => {
     if (!conn1 || !conn2) return;
     try {
-      let p1 = conn2.priority;
-      let p2 = conn1.priority;
-
-      if (p1 === p2) {
-        const isConn1MovingUp =
-          (connections as any[]).indexOf(conn1) > (connections as any[]).indexOf(conn2);
-        if (isConn1MovingUp) {
-          p1 = conn2.priority - 0.5;
-        } else {
-          p1 = conn2.priority + 0.5;
-        }
-      }
-
-      await Promise.all([
-        fetch(`/api/providers/${conn1.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ priority: p1 }),
-        }),
-        fetch(`/api/providers/${conn2.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ priority: p2 }),
-        }),
-      ]);
-      await fetchConnections();
+      // 1-based integer writes only — a tie used to send `priority ± 0.5` (400).
+      await persistPriorityUpdates(buildSwapPriorityUpdates(connections, conn1, conn2));
     } catch (error) {
       console.log("Error swapping priority:", error);
+      notify.error(t("failedSaveConnectionRetry"));
     }
+    await fetchConnections();
   };
 
   // Reorder-by-availability toolbar action — extracted to its own hook
@@ -1108,6 +1137,7 @@ export function useProviderConnections(
     // Fetch
     fetchConnections,
     fetchProxyConfig,
+    refreshProxyState,
 
     // Single-connection handlers
     deleteConfirm,
@@ -1115,6 +1145,7 @@ export function useProviderConnections(
     handleToggleRateLimit,
     handleToggleQuotaVisibility,
     handleToggleClaudeExtraUsage,
+    handleToggleCodexPaidCredits,
     handleToggleCodexLimit,
     handleToggleCliproxyapiMode,
     handleSetUpstreamProxyMode,

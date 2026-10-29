@@ -46,7 +46,8 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     textIcon: "OF",
     website: "https://openference.com",
     hasFree: true,
-    freeNote: "Free plan: 3-day trial with open-source models — no credit card required",
+    freeNote:
+      "Free tier: includes Qwen3.8 27b and Llama 3.2 3B — see openference.com/pricing for current terms",
   },
   poolside: {
     id: "poolside",
@@ -60,9 +61,9 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     website: "https://poolside.ai",
     hasFree: true,
     freeNote:
-      "Laguna S 2.1 and XS 2.1 are free during Preview; no public numeric quota is published.",
+      "Preview ending: direct Poolside Platform inference shuts down on 2026-10-31. Laguna S 2.1 and XS 2.1 are free during Preview; no public numeric quota is published.",
     apiHint:
-      "Create a free developer API key, then use https://inference.poolside.ai/v1 as the OpenAI-compatible base URL.",
+      "Direct Poolside Platform inference shuts down on 2026-10-31; see https://platform.poolside.ai/ for the announcement and self-hosting option. Existing keys use https://inference.poolside.ai/v1.",
   },
   fireworks: {
     id: "fireworks",

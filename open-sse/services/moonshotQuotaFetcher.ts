@@ -11,14 +11,23 @@
  */
 
 import { toNumber } from "@/shared/utils/numeric";
-import { registerQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
+import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
+import { isUrlHostOrSubdomain } from "../utils/urlHost.ts";
 import {
+  isKimiCodingBaseUrl,
+  isKimiCodingConnection,
   isMoonshotOpenPlatformConnection,
   moonshotBalanceUrl,
   resolveMoonshotOrigin,
 } from "./usage/moonshotOpenPlatform.ts";
+import { getKimiUsage } from "./usage/kimi.ts";
 import type { UsageQuota } from "./usage/quota.ts";
 
 const CACHE_TTL_MS = 60_000;
@@ -32,7 +41,7 @@ export interface MoonshotQuota extends QuotaInfo {
 }
 
 interface CacheEntry {
-  quota: MoonshotQuota;
+  quota: QuotaInfo | null;
   fetchedAt: number;
 }
 
@@ -83,8 +92,49 @@ function parseMoonshotQuotaResponse(data: unknown, origin: string): MoonshotQuot
 }
 
 function connectionApiKey(connection?: Record<string, unknown>): string | null {
-  const apiKey = connection?.apiKey;
-  return typeof apiKey === "string" && apiKey.trim().length > 0 ? apiKey : null;
+  const value = connection?.apiKey;
+  return typeof value === "string" && value.trim().length > 0 ? value : null;
+}
+
+function percentUsedFromRemaining(remainingPercentage: unknown): number | null {
+  if (typeof remainingPercentage !== "number" || !Number.isFinite(remainingPercentage)) return null;
+  return (100 - Math.max(0, Math.min(100, remainingPercentage))) / 100;
+}
+
+async function fetchKimiCodingQuotaAsPreflight(
+  connection?: Record<string, unknown>
+): Promise<QuotaInfo | null> {
+  const usage = (await getKimiUsage(
+    typeof connection?.accessToken === "string" ? connection.accessToken : undefined,
+    typeof connection?.apiKey === "string" ? connection.apiKey : undefined,
+    toRecord(connection?.providerSpecificData)
+  )) as { quotas?: Record<string, UsageQuota> };
+  const quotas = usage?.quotas;
+  if (!quotas) return null;
+
+  const windows: NonNullable<QuotaInfo["windows"]> = {};
+  for (const [name, quota] of Object.entries(quotas)) {
+    const percentUsed = percentUsedFromRemaining(quota.remainingPercentage);
+    if (percentUsed === null) continue;
+    windows[name] = { percentUsed, resetAt: quota.resetAt ?? null };
+  }
+  const ranked = Object.values(windows);
+  const first = ranked[0];
+  if (!first) return null;
+  const worst = ranked.reduce((a, b) => (a.percentUsed > b.percentUsed ? a : b), first);
+
+  const window5h = windows.code_5h;
+  const window7d = windows.code_7d;
+  return {
+    used: 0,
+    total: 0,
+    percentUsed: worst.percentUsed,
+    resetAt: worst.resetAt,
+    windows,
+    window5h,
+    window7d,
+    limitReached: worst.percentUsed >= 1 - 1e-9,
+  };
 }
 
 export async function fetchMoonshotQuota(
@@ -94,6 +144,22 @@ export async function fetchMoonshotQuota(
   const cached = quotaCache.get(connectionId);
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
     return cached.quota;
+  }
+
+  const codingConn = {
+    provider: typeof connection?.provider === "string" ? connection.provider : undefined,
+    providerSpecificData: connection?.providerSpecificData,
+  };
+  if (isKimiCodingConnection(codingConn)) {
+    try {
+      await throttleQuotaFetch();
+      const codingQuota = await fetchKimiCodingQuotaAsPreflight(connection);
+      quotaCache.set(connectionId, { quota: codingQuota, fetchedAt: Date.now() });
+      return codingQuota;
+    } catch {
+      quotaCache.set(connectionId, { quota: null, fetchedAt: Date.now() });
+      return null;
+    }
   }
 
   const apiKey = connectionApiKey(connection);
@@ -110,7 +176,7 @@ export async function fetchMoonshotQuota(
 
   try {
     await throttleQuotaFetch();
-    const response = await fetch(url, {
+    const response = await fetchWithConnectionProxy(connectionId, url, {
       method: "GET",
       headers: {
         Authorization: authHeader,
@@ -119,6 +185,7 @@ export async function fetchMoonshotQuota(
       },
       signal: AbortSignal.timeout(8_000),
     });
+    if (!response) return null;
 
     if (response.status === 401 || response.status === 403) {
       quotaCache.delete(connectionId);
@@ -147,9 +214,7 @@ export type MoonshotUsageConnection = {
   providerSpecificData?: unknown;
 };
 
-export async function getMoonshotOpenPlatformUsage(
-  connection: MoonshotUsageConnection
-): Promise<{
+export async function getMoonshotOpenPlatformUsage(connection: MoonshotUsageConnection): Promise<{
   plan?: string;
   quotas?: Record<string, UsageQuota>;
   message?: string;
@@ -167,7 +232,7 @@ export async function getMoonshotOpenPlatformUsage(
   if (!quota) {
     return { message: "Moonshot API key not available. Add a key to view usage." };
   }
-  const domestic = origin.includes("moonshot.cn");
+  const domestic = isUrlHostOrSubdomain(origin, "moonshot.cn");
   return {
     plan: domestic ? "Kimi 开放平台（国内）" : "Kimi Open Platform",
     quotas: buildMoonshotBalanceQuotas(quota, domestic ? "CNY" : "USD"),
@@ -202,6 +267,8 @@ function buildMoonshotBalanceQuotas(
 export function registerMoonshotQuotaFetcher(): void {
   registerQuotaFetcher("moonshot", fetchMoonshotQuota);
   registerQuotaFetcher("kimi", fetchMoonshotQuota);
+  registerQuotaCacheInvalidator("moonshot", invalidateMoonshotQuotaCache);
+  registerQuotaCacheInvalidator("kimi", invalidateMoonshotQuotaCache);
   registerMonitorFetcher("moonshot", fetchMoonshotQuota);
   registerMonitorFetcher("kimi", fetchMoonshotQuota);
 }
@@ -211,13 +278,15 @@ export function registerMoonshotFetchersForNodes(
 ): void {
   for (const node of nodes) {
     const origin = resolveMoonshotOrigin({}, node.baseUrl);
-    if (!origin) continue;
+    if (!origin && !isKimiCodingBaseUrl(node.baseUrl)) continue;
     if (typeof node.id === "string" && node.id) {
       registerQuotaFetcher(node.id, fetchMoonshotQuota);
+      registerQuotaCacheInvalidator(node.id, invalidateMoonshotQuotaCache);
       registerMonitorFetcher(node.id, fetchMoonshotQuota);
     }
     if (typeof node.prefix === "string" && node.prefix) {
       registerQuotaFetcher(node.prefix, fetchMoonshotQuota);
+      registerQuotaCacheInvalidator(node.prefix, invalidateMoonshotQuotaCache);
       registerMonitorFetcher(node.prefix, fetchMoonshotQuota);
     }
   }

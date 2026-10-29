@@ -1,3 +1,5 @@
+import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
+
 /**
  * Embedding Provider Registry
  *
@@ -9,8 +11,15 @@
  */
 
 export type EmbeddingModality = "text" | "image" | "audio" | "video" | "document";
-export type StructuredEmbeddingProtocol = "jina-v1" | "gemini-embed-content";
+export type StructuredEmbeddingProtocol = "jina-v1" | "gemini-embed-content" | "llama-cpp-mtmd";
 export type SingleTextEmbeddingProtocol = "clova-v2";
+/**
+ * Providers reached through a non-OpenAI, model-specific invoke API rather than
+ * an OpenAI-compatible `/v1/embeddings` endpoint. The request body and response
+ * shape are chosen per MODEL family, not per provider — see
+ * `open-sse/handlers/embeddings.ts` for the four Bedrock shapes.
+ */
+export type NativeInvokeEmbeddingProtocol = "bedrock-invoke";
 
 export interface EmbeddingModel {
   id: string;
@@ -36,12 +45,25 @@ export interface EmbeddingProvider {
   /** Provider-native serializer required for canonical structured input. */
   structuredInputProtocol?: StructuredEmbeddingProtocol;
   /**
+   * Structured input modalities accepted for models that are NOT listed in `models`
+   * (passthrough providers such as llama.cpp, whose model list is whatever the local
+   * server loaded). The upstream still rejects a modality the loaded model lacks.
+   */
+  passthroughModalities?: EmbeddingModality[];
+  /**
    * Set when the endpoint embeds exactly ONE text per request (`{"text": …}` →
    * one vector) instead of accepting OpenAI's `input` array. A batched
    * `/v1/embeddings` call is then fanned out into N sequential upstream calls and
    * merged back into a single OpenAI list response.
    */
   singleTextProtocol?: SingleTextEmbeddingProtocol;
+  /**
+   * Set when the provider is NOT OpenAI-compatible and each model family has its
+   * own invoke body/response shape (Amazon Bedrock). `baseUrl` is then a URL
+   * TEMPLATE containing `{region}` and `{model}` placeholders rather than a
+   * ready-to-use endpoint.
+   */
+  nativeInvokeProtocol?: NativeInvokeEmbeddingProtocol;
 }
 
 export interface EmbeddingProviderNodeRow {
@@ -74,6 +96,71 @@ export function buildDynamicEmbeddingProvider(node: EmbeddingProviderNodeRow): E
 }
 
 export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
+  /**
+   * Amazon Bedrock — reached through the model-specific `InvokeModel` REST API,
+   * not an OpenAI-compatible endpoint, so it carries `nativeInvokeProtocol`.
+   *
+   * `baseUrl` is a template: `{region}` is filled from the connection's
+   * `providerSpecificData.region` (via `resolveBedrockRegion`, shared with the
+   * Bedrock chat executor) and `{model}` from the requested model id.
+   *
+   * Model availability is REGION-dependent and deliberately not encoded here —
+   * an unavailable model returns Bedrock's own
+   * `The provided model identifier is invalid.` / `on-demand throughput isn't
+   * supported` message, which is relayed verbatim. Verified 2026-09-10:
+   * `titan-embed-image-v1` is absent in ap-northeast-1/ap-southeast-1, and
+   * `cohere.embed-v4:0` rejects on-demand invokes outside
+   * us-east-1/eu-west-1/ap-northeast-1.
+   */
+  bedrock: {
+    id: "bedrock",
+    baseUrl: "https://bedrock-runtime.{region}.amazonaws.com/model/{model}/invoke",
+    authType: "apikey",
+    authHeader: "bearer",
+    nativeInvokeProtocol: "bedrock-invoke",
+    models: [
+      // Titan text — one text per request, fanned out for batched input.
+      {
+        id: "amazon.titan-embed-text-v2:0",
+        name: "Titan Text Embeddings V2",
+        dimensions: 1024,
+        modalities: ["text"],
+      },
+      {
+        id: "amazon.titan-embed-text-v1",
+        name: "Titan Text Embeddings G1",
+        dimensions: 1536,
+        modalities: ["text"],
+      },
+      // Titan multimodal — accepts inputText and/or inputImage.
+      {
+        id: "amazon.titan-embed-image-v1",
+        name: "Titan Multimodal Embeddings G1",
+        dimensions: 1024,
+        modalities: ["text", "image"],
+      },
+      // Cohere — batched texts[] or images[] per request.
+      {
+        id: "cohere.embed-v4:0",
+        name: "Cohere Embed v4",
+        dimensions: 1536,
+        modalities: ["text", "image"],
+      },
+      {
+        id: "cohere.embed-english-v3",
+        name: "Cohere Embed English v3",
+        dimensions: 1024,
+        modalities: ["text", "image"],
+      },
+      {
+        id: "cohere.embed-multilingual-v3",
+        name: "Cohere Embed Multilingual v3",
+        dimensions: 1024,
+        modalities: ["text", "image"],
+      },
+    ],
+  },
+
   cohere: {
     id: "cohere",
     baseUrl: "https://api.cohere.com/v2/embed",
@@ -372,6 +459,30 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
     models: [],
   },
 
+  // llama.cpp — local OpenAI-compatible server (llama-server).
+  // API key optional. Models are passthrough (empty models array).
+  "llama-cpp": {
+    id: "llama-cpp",
+    baseUrl: "http://127.0.0.1:8080/v1/embeddings",
+    authType: "none",
+    authHeader: "bearer",
+    models: [],
+    // llama-server with --mmproj embeds images/audio/video via `content` parts.
+    structuredInputProtocol: "llama-cpp-mtmd",
+    passthroughModalities: ["text", "image", "audio", "video"],
+  },
+
+  // Lemonade Server — local OpenAI-compatible AI runtime backed by llama.cpp.
+  // API key optional (defaults to bearer auth if key configured).
+  // Includes harrier-oss-v1-0.6b (1024-dim GGUF) as a curated model.
+  lemonade: {
+    id: "lemonade",
+    baseUrl: "http://localhost:13305/v1/embeddings",
+    authType: "none",
+    authHeader: "bearer",
+    models: [{ id: "harrier-oss-v1-0.6b", name: "Harrier OSS v1 0.6B", dimensions: 1024 }],
+  },
+
   // Ollama Local — OpenAI-compatible embeddings endpoint. Ollama exposes its
   // own model catalog, but these common embedding models are useful defaults
   // for model selection and validation.
@@ -429,6 +540,13 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
     ],
   },
 
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/embeddings",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [{ id: "qwen3-embedding", name: "Qwen3 Embedding", dimensions: 4096 }],
+  },
 };
 
 const EMBEDDING_PROVIDER_ALIASES: Record<string, string> = {
@@ -439,6 +557,8 @@ const EMBEDDING_PROVIDER_ALIASES: Record<string, string> = {
   // (#11233). Alias the dashboard id so "lm-studio/<model>" resolves instead
   // of failing with an unknown-provider 400.
   "lm-studio": "lmstudio",
+  llamacpp: "llama-cpp",
+  "llama.cpp": "llama-cpp",
 };
 
 /** Family name used by clients; Jina's public SKU is omni-small. */
@@ -563,9 +683,7 @@ export function deriveEmbeddingProviderForChatProvider(
   chatEntry: { id?: string; baseUrl?: string | string[] } | null | undefined
 ): EmbeddingProvider | null {
   if (!chatEntry) return null;
-  const rawBase = Array.isArray(chatEntry.baseUrl)
-    ? chatEntry.baseUrl[0]
-    : chatEntry.baseUrl;
+  const rawBase = Array.isArray(chatEntry.baseUrl) ? chatEntry.baseUrl[0] : chatEntry.baseUrl;
   if (!rawBase || typeof rawBase !== "string") return null;
   // stripTrailingSlashes-equivalent without importing open-sse utils here:
   const base = rawBase.replace(/\/+$/, "");
@@ -587,7 +705,7 @@ export function parseEmbeddingModel(
   modelStr: string | null,
   dynamicProviders?: EmbeddingProvider[]
 ): { provider: string | null; model: string | null } {
-  if (!modelStr) return { provider: null, model: null };
+  if (!modelStr || hasUnsafeModelIdSyntax(modelStr)) return { provider: null, model: null };
   modelStr = applyEmbeddingModelAliases(modelStr);
 
   // Check for "provider/model" format
@@ -654,7 +772,8 @@ export function getEmbeddingModelModalities(
   modelId: string | null
 ): EmbeddingModality[] | undefined {
   if (!providerConfig || !modelId) return undefined;
-  return providerConfig.models.find((model) => model.id === modelId)?.modalities;
+  const model = providerConfig.models.find((entry) => entry.id === modelId);
+  return model ? model.modalities : providerConfig.passthroughModalities;
 }
 
 /**

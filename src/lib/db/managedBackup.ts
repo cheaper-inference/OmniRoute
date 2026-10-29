@@ -1,13 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { SqliteAdapter } from "./adapters/types";
-import {
-  MAX_DB_BACKUPS,
-  DEFAULT_DB_BACKUP_RETENTION_DAYS,
-  parsePositiveInt,
-  parseNonNegativeInt,
-  pruneBackupDirectory,
-} from "./backupRetention";
+import { pruneBackupDirectory, resolveDbBackupRetention } from "./backupRetention";
+import { chmodQuiet, DB_SECRET_DIR_MODE, DB_SECRET_FILE_MODE } from "./filePermissions";
 
 interface SqlJsSnapshotDatabase {
   constructor: unknown;
@@ -49,7 +44,7 @@ export function createManagedDbBackup(
 ): boolean {
   try {
     if (!fs.existsSync(backupDir)) {
-      fs.mkdirSync(backupDir, { recursive: true });
+      fs.mkdirSync(backupDir, { recursive: true, mode: DB_SECRET_DIR_MODE });
     }
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
@@ -74,23 +69,19 @@ export function createManagedDbBackup(
       }
     } else {
       db.exec(`VACUUM INTO '${escapedBackupPath}'`);
+      // SQLite creates the VACUUM INTO target itself, so it inherits the umask.
+      chmodQuiet(backupPath, DB_SECRET_FILE_MODE);
     }
     console.log(`[DB] Backup created (${reason}): ${backupPath}`);
 
     // Prune old backups to prevent the directory from growing without bound.
     // This mirrors the post-backup pruning in backup.ts but avoids a circular
-    // dependency by importing directly from backupRetention.ts.
+    // dependency by importing directly from backupRetention.ts. Resolving
+    // through resolveDbBackupRetention() (not an env-only inline fallback)
+    // means the persisted Storage-page setting is honored here too, not just
+    // for manual/API/auto backups (#13308).
     try {
-      const maxFiles = process.env.DB_BACKUP_MAX_FILES
-        ? parsePositiveInt(process.env.DB_BACKUP_MAX_FILES, MAX_DB_BACKUPS)
-        : MAX_DB_BACKUPS;
-      const retentionDays = process.env.DB_BACKUP_RETENTION_DAYS
-        ? parseNonNegativeInt(
-            process.env.DB_BACKUP_RETENTION_DAYS,
-            DEFAULT_DB_BACKUP_RETENTION_DAYS
-          )
-        : DEFAULT_DB_BACKUP_RETENTION_DAYS;
-      pruneBackupDirectory({ backupDir, maxFiles, retentionDays });
+      pruneBackupDirectory({ backupDir, ...resolveDbBackupRetention(db) });
     } catch {
       // Retention is best-effort; never let a pruning failure obscure the backup result.
     }

@@ -2,6 +2,9 @@ import { createHash } from "crypto";
 
 import { getProviderConnections, updateProviderConnection } from "@/lib/db/providers";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
+import { isRetestAutoDisabledEnabled } from "@/lib/credentialHealth/retestAutoDisabledFlag";
+import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
+import { toNumberOrNull } from "@/shared/utils/numeric";
 import { clearProviderFailure, clearModelLock } from "@omniroute/open-sse/services/accountFallback";
 import { resolveProviderAlias } from "@omniroute/open-sse/services/model";
 
@@ -103,10 +106,6 @@ export interface ExecuteProviderAutopilotActionInput {
 const TERMINAL_STATUSES = new Set(["banned", "expired", "credits_exhausted"]);
 const OPEN_BREAKER_STATES = new Set(["OPEN", "HALF_OPEN"]);
 
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function toString(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
@@ -114,15 +113,6 @@ function toString(value: unknown): string | null {
 function canonicalProviderId(value: unknown): string | null {
   const provider = toString(value);
   return provider ? (resolveProviderAlias(provider) ?? provider) : null;
-}
-
-function toNumber(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string" && value.trim()) {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return null;
 }
 
 function parseTimeMs(value: unknown): number | null {
@@ -308,7 +298,7 @@ export async function buildProviderHealthAutopilotReport(
   }
   if (providerFilter) providerIds.add(providerFilter);
 
-  const providers: ProviderAutopilotProvider[] = [];
+  const allProviders: ProviderAutopilotProvider[] = [];
   for (const provider of [...providerIds].sort()) {
     const providerConnections = connections.filter(
       (connection) => canonicalProviderId(connection.provider) === provider
@@ -328,8 +318,8 @@ export async function buildProviderHealthAutopilotReport(
       const target = { provider: toString(breaker.name) ?? provider };
       const evidence = {
         state: breaker.state,
-        failureCount: toNumber(breaker.failureCount) ?? 0,
-        retryAfterMs: toNumber(breaker.retryAfterMs) ?? 0,
+        failureCount: toNumberOrNull(breaker.failureCount) ?? 0,
+        retryAfterMs: toNumberOrNull(breaker.retryAfterMs) ?? 0,
         lastFailureTime: breaker.lastFailureTime ?? null,
       };
       const isOpen = breaker.state === "OPEN";
@@ -467,8 +457,8 @@ export async function buildProviderHealthAutopilotReport(
       };
       const evidence = {
         reason: lockout.reason ?? null,
-        remainingMs: toNumber(lockout.remainingMs) ?? 0,
-        failureCount: toNumber(lockout.failureCount) ?? 0,
+        remainingMs: toNumberOrNull(lockout.remainingMs) ?? 0,
+        failureCount: toNumberOrNull(lockout.failureCount) ?? 0,
         lockedAt: lockout.lockedAt ?? null,
         until: lockout.until ?? null,
         connectionExists: Boolean(connection),
@@ -531,28 +521,53 @@ export async function buildProviderHealthAutopilotReport(
     const staleErrors = providerConnections.filter((connection) =>
       hasStaleConnectionError(connection, now)
     ).length;
+    const retainedDisabledInventory =
+      providerConnections.length > 0 && activeConnections.length === 0;
+    const routingConnections = retainedDisabledInventory ? [] : activeConnections;
+    const routingCooldownCount = routingConnections.filter((connection) =>
+      isConnectionInCooldown(connection, now)
+    ).length;
+    const routingTerminalCount = routingConnections.filter(isTerminalConnection).length;
+    const routingStaleErrors = routingConnections.filter((connection) =>
+      hasStaleConnectionError(connection, now)
+    ).length;
+    const routingLockoutCount = retainedDisabledInventory
+      ? 0
+      : providerLockouts.filter((lockout) => {
+          const connectionId = toString(lockout.connectionId);
+          const connection = providerConnections.find((entry) => entry.id === connectionId);
+          return !connection || connection.isActive !== false;
+        }).length;
     const breakerPenalty =
       breaker?.state === "OPEN" ? 0.35 : breaker?.state === "HALF_OPEN" ? 0.2 : 0;
-    const total = Math.max(1, providerConnections.length);
+    const total = Math.max(1, routingConnections.length);
     const score = Math.max(
       0,
       Math.min(
         1,
         1 -
-          breakerPenalty -
-          (cooldownCount / total) * 0.25 -
-          (terminalCount / total) * 0.35 -
-          Math.min(0.2, providerLockouts.length * 0.05) -
-          Math.min(0.1, staleErrors * 0.03)
+          (retainedDisabledInventory ? 0 : breakerPenalty) -
+          (routingCooldownCount / total) * 0.25 -
+          (routingTerminalCount / total) * 0.35 -
+          Math.min(0.2, routingLockoutCount * 0.05) -
+          Math.min(0.1, routingStaleErrors * 0.03)
       )
     );
-    const hasCritical = issues.some((issue) => issue.severity === "critical");
-    const state: ProviderAutopilotState =
-      hasCritical || (providerConnections.length > 0 && activeConnections.length === 0)
-        ? "down"
-        : issues.length > 0
-          ? "degraded"
-          : "healthy";
+    const routingIssues = retainedDisabledInventory
+      ? []
+      : issues.filter((issue) => {
+          const connectionId = issue.target.connectionId;
+          if (!connectionId) return true;
+          const connection = providerConnections.find((entry) => entry.id === connectionId);
+          return !connection || connection.isActive !== false;
+        });
+    const hasCritical = routingIssues.some((issue) => issue.severity === "critical");
+    const hasWarning = routingIssues.some((issue) => issue.severity === "warning");
+    const state: ProviderAutopilotState = hasCritical
+      ? "down"
+      : hasWarning
+        ? "degraded"
+        : "healthy";
 
     const item: ProviderAutopilotProvider = {
       provider,
@@ -581,33 +596,44 @@ export async function buildProviderHealthAutopilotReport(
               warning: providerQuota.filter((snapshot) => snapshot.status === "warning").length,
               exhausted: providerQuota.filter((snapshot) => snapshot.status === "exhausted").length,
               errors: providerQuota.filter((snapshot) => snapshot.status === "error").length,
+              monitoredConnectionIds: Array.from(
+                new Set(
+                  providerQuota.flatMap((snapshot) => {
+                    const accountId = toString(snapshot.accountId);
+                    return accountId ? [accountId] : [];
+                  })
+                )
+              ).sort(),
             }
           : null,
       },
       issues,
     };
 
-    if (includeHealthy || item.issues.length > 0) providers.push(item);
+    allProviders.push(item);
   }
 
-  const issueCount = providers.reduce((count, provider) => count + provider.issues.length, 0);
-  const actionableCount = providers.reduce(
+  const issueCount = allProviders.reduce((count, provider) => count + provider.issues.length, 0);
+  const actionableCount = allProviders.reduce(
     (count, provider) =>
       count + provider.issues.reduce((sum, issue) => sum + issue.actions.length, 0),
     0
   );
-  const healthyCount = providers.filter((provider) => provider.state === "healthy").length;
-  const status: ProviderAutopilotStatus = providers.some((provider) => provider.state === "down")
+  const healthyCount = allProviders.filter((provider) => provider.state === "healthy").length;
+  const status: ProviderAutopilotStatus = allProviders.some((provider) => provider.state === "down")
     ? "critical"
-    : providers.some((provider) => provider.state === "degraded")
+    : allProviders.some((provider) => provider.state === "degraded")
       ? "warning"
       : "healthy";
+  const providers = includeHealthy
+    ? allProviders
+    : allProviders.filter((provider) => provider.issues.length > 0);
 
   return {
     status,
     checkedAt,
     summary: {
-      providerCount: providers.length,
+      providerCount: allProviders.length,
       connectionCount: connections.length,
       healthyCount,
       issueCount,
@@ -740,7 +766,22 @@ export async function executeProviderHealthAutopilotAction(
         return { status: 409, body: { success: false, error: "terminal connection state" } };
       }
       const isActive = input.type === "reactivate_connection";
-      await updateProviderConnection(connectionId, { isActive });
+      // With CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, this operator action is recorded like
+      // the connection toggle, so the credential-health retest (and the connection test) never
+      // switch a connection the operator disabled here back on (#16190). Flag off: the
+      // pre-#16190 write, isActive only.
+      await updateProviderConnection(
+        connectionId,
+        isRetestAutoDisabledEnabled()
+          ? {
+              isActive,
+              providerSpecificData: applyOperatorActivationIntent(
+                connection.providerSpecificData,
+                isActive
+              ),
+            }
+          : { isActive }
+      );
       changed = { isActive };
       break;
     }

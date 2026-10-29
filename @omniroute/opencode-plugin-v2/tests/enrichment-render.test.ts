@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { applyEnrichment } from "../src/shared/enrich.js";
-import type { Model as ModelV2 } from "@opencode-ai/sdk/v2";
+import type { LegacyModel as ModelV2 } from "../src/legacy-model.js";
 
 function model(id: string, name = id): ModelV2 {
   return {
@@ -60,5 +60,33 @@ describe("the enrichment overlay reaches the picker", () => {
     const m = applyEnrichment(model("x"), { pricing: { input: 3, output: 15 } });
     assert.equal(m.cost.input, 3);
     assert.equal(m.cost.output, 15);
+  });
+});
+
+describe("free budget under alias and without cap", () => {
+  it("renders the budget of an alias-served model", () => {
+    const m = applyEnrichment(model("cf/@cf/meta/llama-3.3-70b-instruct-fp8-fast"), {
+      name: "Llama 3.3 70B",
+      providerDisplayName: "Cloudflare",
+      providerAlias: "cf",
+      freeType: "recurring-monthly" as const,
+      monthlyTokens: 1_000_000,
+    });
+    assert.equal(m.name, "[Free] Cloudflare - Llama 3.3 70B · 1M tokens/month");
+  });
+
+  it("renders the uncapped label with no counters", () => {
+    const m = applyEnrichment(model("cf/open-m"), {
+      name: "Open Model",
+      providerDisplayName: "Cloudflare",
+      providerAlias: "cf",
+      freeType: "recurring-uncapped" as const,
+    });
+    assert.match(m.name, /\(uncapped\)/);
+  });
+
+  it("renders nothing extra when the budget is unknown", () => {
+    const m = applyEnrichment(model("cf/open-m"), { name: "Open Model" });
+    assert.ok(!m.name.includes("·"));
   });
 });

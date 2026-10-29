@@ -88,6 +88,7 @@ export const ROUTER_STRATEGY_OPTIONS = [
   { id: "latency", label: "Latency Optimized" },
   { id: "sla-aware", label: "SLA-aware" },
   { id: "lkgp", label: "Last Known Good Provider" },
+  { id: "nadir", label: "Nadir (route by prompt complexity)" },
 ] as const;
 
 export const FACTOR_LABELS: Record<keyof IntelligentRoutingWeights, string> = {
@@ -227,4 +228,26 @@ export function buildIntelligentProviderScores(combo: {
     score: baseScore,
     factors: weights,
   }));
+}
+
+/** Manual factor edits select custom scoring; unrelated edits preserve the preset. */
+export function applyIntelligentRoutingConfigPatch(
+  config: Record<string, unknown>,
+  patch: Record<string, unknown>
+): Record<string, unknown> & IntelligentRoutingConfig {
+  const normalized = normalizeIntelligentRoutingConfig(config);
+  const weightPatch = isRecord(patch.weights) ? patch.weights : null;
+  return {
+    ...config,
+    ...normalized,
+    ...patch,
+    modePack:
+      weightPatch !== null
+        ? "custom"
+        : ((patch.modePack as string | undefined) ?? normalized.modePack),
+    weights: {
+      ...normalized.weights,
+      ...(weightPatch ?? {}),
+    },
+  };
 }

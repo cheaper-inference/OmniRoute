@@ -54,7 +54,7 @@ function buildAuthHeader(providerConfig, token) {
       model: body.model,
       query: { text: body.query },
       passages: (body.documents || []).map((doc) => ({
-        text: typeof doc === "string" ? doc : doc.text || "",
+        text: typeof doc === "string" ? doc : doc?.text || "",
       })),
       top_n: body.top_n,
     };
@@ -65,7 +65,7 @@ function buildAuthHeader(providerConfig, token) {
     return {
       queries: [body.query],
       documents: (body.documents || []).map((doc) =>
-        typeof doc === "string" ? doc : doc.text || ""
+        typeof doc === "string" ? doc : doc?.text || ""
       ),
     };
   }
@@ -92,8 +92,35 @@ function buildAuthHeader(providerConfig, token) {
       return_documents: false,
     };
   }
+  // qwen3-rerank's /compatible-api/v1/reranks endpoint is flat like
+  // Cohere, but does not accept Cohere's return_documents request field.
+  if (providerConfig.format === "alibaba-qwen3") {
+    const compatibleBody = {
+      ...body,
+      documents: (body.documents || []).map((doc) =>
+        typeof doc === "string" ? doc : doc?.text || ""
+      ),
+    };
+    delete compatibleBody.return_documents;
+    return compatibleBody;
+  }
   // Default: Cohere-compatible format (used by Together, Fireworks, Cohere, SiliconFlow)
   return body;
+}
+
+function transformAlibabaQwen3Response(data, options: RerankResponseOptions) {
+  if (!Array.isArray(data.results)) return data;
+  const documents = Array.isArray(options.documents) ? options.documents : [];
+  const returnDocuments = options.return_documents !== false;
+  return {
+    ...data,
+    results: data.results.map((entry) => {
+      if (!returnDocuments || entry.document) return entry;
+      const doc = documents[entry.index];
+      const text = typeof doc === "string" ? doc : doc?.text || "";
+      return { ...entry, document: { text } };
+    }),
+  };
 }
 
 /**
@@ -179,6 +206,9 @@ function buildAuthHeader(providerConfig, token) {
       },
     };
   }
+  if (providerConfig.format === "alibaba-qwen3") {
+    return transformAlibabaQwen3Response(data, options);
+  }
   return data;
 }
 
@@ -193,6 +223,10 @@ function buildAuthHeader(providerConfig, token) {
  * @param {boolean} [options.return_documents] - Whether to include document text in results
  * @param {Object} options.credentials - Provider credentials { apiKey, accessToken }
  * @param {string} [options.connectionId] - Connection ID for per-connection proxy resolution
+ * @param {Object} [options.resolvedProvider] - Runtime provider config for dynamic endpoints
+ * @param {string} [options.resolvedModel] - Model ID after removing a dynamic provider prefix
+ * @param {function} [options.onPricedCall] - Receives `{ provider, model, costUsd }` after a
+ *   successful priced call so the caller can charge the key's budget
  * @returns {Response}
  */
 /** @returns {Promise<unknown>} */
@@ -207,6 +241,10 @@ export async function handleRerank({
   apiKeyId = null,
   apiKeyName = null,
   resolvedProvider = null,
+  resolvedModel = null,
+  onPricedCall = null,
+  requestedModel = null,
+  comboName = null,
 }) {
   const startTime = Date.now();
   if (!model) return errorResponse(400, "model is required");
@@ -215,9 +253,9 @@ export async function handleRerank({
     return errorResponse(400, "documents must be a non-empty array");
   }
 
-  const { provider: providerId, model: modelId } = parseRerankModel(model);
-  const providerConfig =
-    resolvedProvider || (providerId ? getRerankProvider(providerId) : null);
+  const { provider: providerId, model: parsedModelId } = parseRerankModel(model);
+  const modelId = resolvedModel ?? parsedModelId;
+  const providerConfig = resolvedProvider || (providerId ? getRerankProvider(providerId) : null);
 
   if (!providerConfig) {
     const availableProviders = Object.keys(RERANK_PROVIDERS).join(", ");
@@ -294,6 +332,8 @@ export async function handleRerank({
         error: errorMessage,
         apiKeyId: apiKeyId || undefined,
         apiKeyName: apiKeyName || undefined,
+        requestedModel: requestedModel || model,
+        comboName: comboName || undefined,
       }).catch(() => {});
       return errorResponse(res.status, errorMessage);
     }
@@ -306,7 +346,11 @@ export async function handleRerank({
     });
 
     const searchUnits = Number(result?.meta?.billed_units?.search_units) || 0;
-    const costUsd = await calculateModalCost("rerank", effectiveProviderId, modelId, { searchUnits });
+    const costUsd = await calculateModalCost("rerank", effectiveProviderId, modelId, {
+      searchUnits,
+    });
+    // The caller charges the priced call to the key's budget (injected: no open-sse → src edge).
+    onPricedCall?.({ provider: effectiveProviderId, model: modelId, costUsd });
 
     saveCallLog({
       method: "POST",
@@ -321,6 +365,8 @@ export async function handleRerank({
       responseBody: result,
       apiKeyId: apiKeyId || undefined,
       apiKeyName: apiKeyName || undefined,
+      requestedModel: requestedModel || model,
+      comboName: comboName || undefined,
     }).catch(() => {});
 
     const headers = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json" });
@@ -333,6 +379,21 @@ export async function handleRerank({
     });
     return new Response(JSON.stringify(result), { status: 200, headers });
   } catch (err) {
+    saveCallLog({
+      method: "POST",
+      path: "/v1/rerank",
+      status: 500,
+      model: `${effectiveProviderId}/${modelId}`,
+      provider: effectiveProviderId,
+      connectionId: connectionId || undefined,
+      duration: Date.now() - startTime,
+      error: err instanceof Error ? err.message : String(err),
+      requestBody,
+      apiKeyId: apiKeyId || undefined,
+      apiKeyName: apiKeyName || undefined,
+      requestedModel: requestedModel || model,
+      comboName: comboName || undefined,
+    }).catch(() => {});
     return errorResponse(500, `Rerank request failed: ${err.message}`);
   }
 }

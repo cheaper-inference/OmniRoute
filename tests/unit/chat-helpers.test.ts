@@ -463,6 +463,58 @@ test("handleNoCredentials still leaks 404 (combo fall-through) only when combo",
   assert.notEqual(single.status, 404);
 });
 
+test("handleNoCredentials tags a provider with no connected account as provider_not_configured", async () => {
+  // A provider that has no connected account is an operator/dashboard problem, not
+  // an invalid OmniRoute API key (single-model 401) nor an unknown model (combo
+  // 404). The status stays the fall-through/auth signal; only the body code changes.
+  const single = handleNoCredentials(
+    null,
+    null,
+    "openai",
+    "gpt-4o-mini",
+    null,
+    null,
+    [],
+    /* isCombo */ false
+  );
+  assert.equal(single.status, 401);
+  const singleJson = (await single.json()) as ApiErrorJson;
+  assert.equal(singleJson.error?.code, "provider_not_configured");
+  assert.equal(singleJson.error?.type, "authentication_error");
+  assert.match(singleJson.error?.message ?? "", /No active credentials for provider: openai/);
+
+  const combo = handleNoCredentials(
+    null,
+    null,
+    "openai",
+    "gpt-4o-mini",
+    null,
+    null,
+    [],
+    /* isCombo */ true
+  );
+  assert.equal(combo.status, 404);
+  const comboJson = (await combo.json()) as ApiErrorJson;
+  assert.equal(comboJson.error?.code, "provider_not_configured");
+  assert.equal(comboJson.error?.type, "invalid_request_error");
+
+  // An empty provider is not "not configured" — it keeps the 503 status defaults.
+  const unknown = handleNoCredentials(null, null, "", "gpt-4o-mini", null, null, [], false);
+  assert.equal(unknown.status, 503);
+  const unknownJson = (await unknown.json()) as ApiErrorJson;
+  assert.notEqual(unknownJson.error?.code, "provider_not_configured");
+});
+
+test("buildErrorBody keeps provider_not_configured and leaves the 404 default alone", async () => {
+  const { buildErrorBody } = await import("../../open-sse/utils/error.ts");
+  assert.equal(
+    buildErrorBody(404, "x", undefined, { code: "provider_not_configured" }).error.code,
+    "provider_not_configured"
+  );
+  assert.equal(buildErrorBody(404, "x").error.code, "model_not_found");
+  assert.equal(buildErrorBody(401, "x").error.code, "invalid_api_key");
+});
+
 test("handleNoCredentials returns Retry-After when every account is rate limited", async () => {
   const retryAfter = new Date(Date.now() + 45_000).toISOString();
   const response = handleNoCredentials(
@@ -786,7 +838,11 @@ test("handleNoCredentials names the API key's connection allowlist as the reason
   // is indistinguishable from "never configured" — the reporter had a key that
   // passed /test and synced 82 models, and no message ever mentioned the allowlist.
   const blocked = handleNoCredentials(
-    { blockedByKeyPolicy: true, blockedCount: 2 },
+    {
+      blockedByKeyPolicy: true,
+      blockedCount: 2,
+      connectionRestrictionSources: ["api_key_allowlist"],
+    },
     null,
     "nvidia",
     "nvidia/nemotron",

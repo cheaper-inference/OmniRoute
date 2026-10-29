@@ -248,6 +248,7 @@ test("deleting the final provider connection removes imported models but preserv
       id: "manual-model",
       name: "Manual",
       source: "manual",
+      endpointCapabilitySource: "operator",
       apiFormat: "chat-completions",
       supportedEndpoints: ["chat"],
     },
