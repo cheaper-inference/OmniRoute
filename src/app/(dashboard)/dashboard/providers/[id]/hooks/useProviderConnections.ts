@@ -194,7 +194,7 @@ export interface UseProviderConnectionsReturn {
   setProviderNode: (node: any) => void;
 
   // Connection fetch
-  fetchConnections: () => Promise<void>;
+  fetchConnections: () => Promise<boolean>;
   fetchProxyConfig: () => Promise<void>;
   refreshProxyState: () => Promise<void>;
 
@@ -350,14 +350,21 @@ export function useProviderConnections(
     if (map) setConnProxyMap(map);
   }, []);
 
+  const connectionsGeneration = useRef(0);
   const fetchConnections = useCallback(async () => {
+    const generation = ++connectionsGeneration.current;
     const result = await loadProviderConnectionsData(providerId, isCompatible);
+    if (generation !== connectionsGeneration.current) return false;
     if (result) {
       if (result.connections) setConnections(result.connections);
       if (result.nodeResolved) setProviderNode(result.node);
     }
     setLoading(false);
+    return result?.connections !== null && result?.connections !== undefined;
   }, [providerId, isCompatible]);
+  const refreshConnectionsWithoutResult = useCallback(async () => {
+    await fetchConnections();
+  }, [fetchConnections]);
 
   // ── effects ──────────────────────────────────────────────────────────────
   // The async work is defined INSIDE each effect (a component-scope loader
@@ -367,13 +374,9 @@ export function useProviderConnections(
   useEffect(() => {
     let active = true;
     const run = async () => {
-      const result = await loadProviderConnectionsData(providerId, isCompatible);
-      if (!active) return;
-      if (result) {
-        if (result.connections) setConnections(result.connections);
-        if (result.nodeResolved) setProviderNode(result.node);
-      }
-      setLoading(false);
+      // fetchConnections' generation counter drops an obsolete connection load (#17253):
+      // the cleanup below bumps it, so a response for a previous provider is ignored.
+      await fetchConnections();
     };
     void run();
     const runProxyConfig = async () => {
@@ -384,8 +387,9 @@ export function useProviderConnections(
     void runProxyConfig();
     return () => {
       active = false;
+      connectionsGeneration.current += 1;
     };
-  }, [providerId, isCompatible]);
+  }, [fetchConnections]);
 
   // Per-connection proxy (handles registry assignments)
   useEffect(() => {
@@ -444,7 +448,7 @@ export function useProviderConnections(
   // Single-connection handlers
   // ────────────────────────────────────────────────────────────────────────
 
-  const deleteConfirm = useConnectionDeleteConfirm(fetchConnections, notify);
+  const deleteConfirm = useConnectionDeleteConfirm(refreshConnectionsWithoutResult, notify);
 
   const handleUpdateConnectionStatus = async (id: string, isActive: boolean) => {
     try {
@@ -822,7 +826,7 @@ export function useProviderConnections(
   const { reorderingByAvailability, handleReorderByAvailability } = useReorderByAvailability({
     connections,
     setConnections,
-    fetchConnections,
+    fetchConnections: refreshConnectionsWithoutResult,
     notify,
     t,
   });
