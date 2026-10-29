@@ -1,0 +1,434 @@
+@import "./ci-fonts.css";
+
+/* ========================================================================== */
+/* Cheaper Inference design tokens                                             */
+/*                                                                            */
+/* Reference policy                                                           */
+/* - "Observed" values below come directly from Figma frame 6:79.             */
+/* - Scales, states, statuses, elevation, and dashboard semantics are derived. */
+/* - Semantic light and dark themes share one primitive palette. Inverse       */
+/*   tokens remain reserved for dark technical panels in either theme.         */
+/* ========================================================================== */
+
+:root,
+.ci-theme {
+  color-scheme: light;
+
+  /* --- observed brand seeds ------------------------------------------------ */
+  --ci-observed-canvas: #fbfbf8;
+  --ci-observed-ink: #040d10;
+  --ci-observed-body: #031a1b;
+  --ci-observed-muted: #575f5f;
+  --ci-observed-inverse: #f1f7f7;
+
+  /* --- primitive palette --------------------------------------------------- */
+  --ci-lime-50: #fbffe6;
+  --ci-lime-100: #f5ffc2;
+  --ci-lime-200: #ecff85;
+  --ci-lime-300: #e3ff4d;
+  --ci-lime-400: #d8ff00;
+  --ci-lime-500: #c2e600;
+  --ci-lime-600: #9bb800;
+  --ci-lime-700: #728700;
+  --ci-lime-800: #4d5c00;
+  --ci-lime-900: #303a00;
+  --ci-lime-950: #1b2100;
+
+  --ci-neutral-0: #ffffff;
+  --ci-neutral-25: #fbfbf8;
+  --ci-neutral-50: #f7f7f2;
+  --ci-neutral-100: #eeeee8;
+  --ci-neutral-200: #dfe2dc;
+  --ci-neutral-300: #c7cbc5;
+  --ci-neutral-400: #9ca39f;
+  --ci-neutral-500: #737b78;
+  --ci-neutral-600: #575f5f;
+  --ci-neutral-700: #394446;
+  --ci-neutral-800: #1e2c2f;
+  --ci-neutral-900: #0d191c;
+  --ci-neutral-950: #040d10;
+
+  /* --- semantic color ------------------------------------------------------ */
+  --ci-color-background: var(--ci-neutral-25);
+  --ci-color-canvas: var(--ci-color-background);
+  --ci-color-surface: var(--ci-neutral-0);
+  --ci-color-surface-subtle: var(--ci-neutral-50);
+  --ci-color-surface-muted: var(--ci-neutral-100);
+  --ci-color-surface-inverse: var(--ci-neutral-950);
+  --ci-color-foreground: var(--ci-observed-body);
+  --ci-color-text: var(--ci-color-foreground);
+  --ci-color-heading: var(--ci-observed-ink);
+  --ci-color-brand-mark: #000000;
+  --ci-color-text-muted: var(--ci-neutral-600);
+  /* Small technical labels use this token throughout the product. Keep it at
+     the observed muted ink so 10–12px copy remains AA on both white and the
+     warm canvas. */
+  --ci-color-text-subtle: var(--ci-neutral-600);
+  --ci-color-text-inverse: var(--ci-observed-inverse);
+  --ci-color-accent: var(--ci-lime-400);
+  --ci-color-accent-hover: var(--ci-lime-300);
+  --ci-color-accent-active: var(--ci-lime-500);
+  --ci-color-accent-foreground: var(--ci-neutral-950);
+  --ci-color-accent-surface-subtle: var(--ci-lime-50);
+  --ci-color-accent-surface-strong: var(--ci-lime-100);
+  --ci-color-accent-surface-range: rgb(216 255 0 / 0.22);
+  --ci-color-control-active-bg: var(--ci-color-surface-inverse);
+  --ci-color-control-active-fg: var(--ci-color-text-inverse);
+  --ci-color-control-thumb: var(--ci-color-foreground);
+  --ci-color-control-thumb-checked: var(--ci-color-accent-foreground);
+  /* Two deliberate divider levels: structural boundaries and dense rows. */
+  --ci-color-border-subtle: rgb(4 13 16 / 0.09);
+  --ci-color-border: rgb(4 13 16 / 0.24);
+  --ci-color-border-strong: rgb(4 13 16 / 0.48);
+  /* Focus indicators need at least 3:1 contrast against the light canvas. */
+  --ci-color-focus: var(--ci-lime-700);
+  --ci-color-focus-ring: var(--ci-color-focus);
+  --ci-color-selection: rgb(216 255 0 / 0.42);
+  --ci-color-selection-foreground: var(--ci-color-heading);
+  --ci-color-overlay: rgb(4 13 16 / 0.48);
+  --ci-color-track: rgb(4 13 16 / 0.14);
+  --ci-color-neutral-tint: rgb(4 13 16 / 0.04);
+  --ci-color-loading-cell-muted: rgb(4 13 16 / 0.42);
+
+  /* --- status and data visualization (derived) ---------------------------- */
+  --ci-color-live: #cff331;
+  --ci-color-success: #087a4f;
+  --ci-color-success-bg: #e8f7f0;
+  --ci-color-warning: #a75a00;
+  --ci-color-warning-bg: #fff3df;
+  --ci-color-danger: #bf3636;
+  --ci-color-danger-bg: #ffeded;
+  --ci-color-danger-foreground: var(--ci-neutral-0);
+  --ci-color-info: #2869d8;
+  --ci-color-info-bg: #edf4ff;
+  --ci-chart-1: #9bb800;
+  --ci-chart-2: #2869d8;
+  --ci-chart-3: #7d4fc7;
+  --ci-chart-4: #087a4f;
+  --ci-chart-5: #c15588;
+
+  /* Approved muted tints for illustrated announcement surfaces (both themes). */
+  --ci-color-announcement-info: #689ed7;
+  --ci-color-announcement-accent: #bdcc42;
+  --ci-color-announcement-success: #54b995;
+  --ci-color-announcement-violet: #9570e3;
+  --ci-color-announcement-warning: #d7a255;
+
+  /* --- typography ---------------------------------------------------------- */
+  /* All text, including technical content, uses the same self-hosted family. */
+  --ci-font-ui: "Switzer", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-display: var(--ci-font-ui);
+  --ci-font-mono: var(--ci-font-ui);
+  --ci-font-code: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --ci-font-size-xs: 0.75rem;
+  --ci-font-size-sm: 0.875rem;
+  --ci-font-size-md: 1rem;
+  --ci-font-size-base: var(--ci-font-size-md);
+  --ci-font-size-lg: 1.125rem;
+  --ci-font-size-xl: 1.25rem;
+  --ci-font-size-2xl: 1.5rem;
+  --ci-font-size-3xl: 1.875rem;
+  --ci-font-size-4xl: 2.25rem;
+  --ci-font-size-5xl: 3rem;
+  --ci-font-size-6xl: 3.75rem;
+  --ci-font-size-7xl: 4.5rem;
+  --ci-font-size-100: 6.25rem;
+  --ci-font-size-hero: clamp(4rem, 7vw, 6.25rem);
+
+  --ci-font-weight-regular: 400;
+  --ci-font-weight-medium: 500;
+  --ci-font-weight-semibold: 600;
+  --ci-font-weight-bold: 600;
+
+  --ci-line-height-tight: 0.9;
+  --ci-line-height-heading: 1.1;
+  --ci-line-height-ui: 1.2;
+  --ci-line-height-body: 1.3;
+  --ci-line-height-relaxed: 1.5;
+  --ci-letter-spacing-display: -0.05em;
+  --ci-letter-spacing-ui: 0.01em;
+  --ci-letter-spacing-caps: 0.01em;
+
+  /* Public role tokens do not set sizes. Heading bands follow the computed
+     font size, including existing clamp() and responsive size utilities. */
+  --ci-type-heading-leading: 1.1;
+  --ci-type-heading-tracking: -0.02em;
+  --ci-type-body-leading: 1.3;
+  --ci-type-body-tracking: 0em;
+  --ci-type-reading-leading: 1.5;
+  --ci-type-reading-tracking: 0em;
+  --ci-type-control-leading: 1.2;
+  --ci-type-control-tracking: 0.01em;
+  --ci-type-data-leading: 1.25;
+  --ci-type-data-tracking: 0em;
+  --ci-type-caption-leading: 1.3;
+  --ci-type-caption-tracking: 0.01em;
+  --ci-type-metric-leading: 1.1;
+  --ci-type-metric-tracking: -0.02em;
+
+  /* --- semantic typography ------------------------------------------------ */
+  --ci-type-body-family: var(--ci-font-ui);
+  --ci-type-body-size: var(--ci-font-size-md);
+  --ci-type-body-weight: var(--ci-font-weight-regular);
+  --ci-type-ui-family: var(--ci-font-ui);
+  --ci-type-ui-size: var(--ci-font-size-sm);
+  --ci-type-ui-weight: var(--ci-font-weight-medium);
+  --ci-type-ui-leading: var(--ci-line-height-ui);
+  --ci-type-display-family: var(--ci-font-display);
+  --ci-type-display-weight: var(--ci-font-weight-medium);
+  --ci-type-display-leading: var(--ci-type-heading-leading);
+  --ci-type-dashboard-display-family: var(--ci-font-display);
+  --ci-type-dashboard-display-size: var(--ci-font-size-5xl);
+  --ci-type-dashboard-display-weight: var(--ci-font-weight-medium);
+  --ci-type-dashboard-display-leading: var(--ci-type-heading-leading);
+  /* Approved compact summary geometry for dashboard stat cards. */
+  --ci-type-stat-eyebrow-size: 0.625rem;
+  --ci-type-stat-eyebrow-value-size: 2.125rem;
+  --ci-stat-eyebrow-icon-stroke-width: 1.75;
+  /* App-owned headers/canvases can share the documented appearance contract. */
+  --ci-page-title-size: clamp(3rem, 6vw, 5.5rem);
+  --ci-page-title-compact-size: clamp(2.25rem, 4vw, 3.5rem);
+  --ci-page-title-weight: var(--ci-font-weight-medium);
+  --ci-page-title-leading: var(--ci-type-heading-leading);
+  --ci-dashboard-canvas-image: none;
+  --ci-dashboard-canvas-overlay: none;
+
+  /* --- spacing: 4px base with useful half steps --------------------------- */
+  --ci-space-0: 0;
+  --ci-space-0-5: 0.125rem;
+  --ci-space-1: 0.25rem;
+  --ci-space-1-5: 0.375rem;
+  --ci-space-2: 0.5rem;
+  --ci-space-3: 0.75rem;
+  --ci-space-4: 1rem;
+  --ci-space-5: 1.25rem;
+  --ci-space-6: 1.5rem;
+  --ci-space-7: 1.75rem;
+  --ci-space-8: 2rem;
+  --ci-space-9: 2.25rem;
+  --ci-space-10: 2.5rem;
+  --ci-space-12: 3rem;
+  --ci-space-16: 4rem;
+  --ci-space-20: 5rem;
+  --ci-space-24: 6rem;
+  --ci-space-30: 7.5rem;
+  --ci-space-32: 8rem;
+  --ci-space-40: 10rem;
+
+  /* --- sizing and layout --------------------------------------------------- */
+  --ci-control-height-sm: 2rem;
+  --ci-control-height-md: 2.25rem;
+  --ci-control-height-lg: 2.5rem;
+  --ci-control-height-xl: 3rem;
+  --ci-badge-height: 1.5rem;
+  --ci-icon-size-sm: 1rem;
+  --ci-icon-size-xs: 0.75rem;
+  --ci-icon-size-md: 1.25rem;
+  --ci-icon-size-lg: 1.5rem;
+  --ci-layout-content: 75rem;
+  --ci-layout-reading: 45rem;
+  --ci-layout-sidebar: 15rem;
+  --ci-layout-gutter: clamp(1rem, 4vw, 3rem);
+  --ci-field-width-compact: 18rem;
+  --ci-field-width-standard: 28rem;
+  --ci-field-width-wide: 42rem;
+
+  /* --- radius, borders, elevation ----------------------------------------- */
+  --ci-radius-none: 0;
+  --ci-radius-sm: 0.25rem;
+  --ci-radius-md: 0.5rem;
+  --ci-radius-lg: 0.75rem;
+  --ci-radius-xl: 1rem;
+  --ci-radius-2xl: 1.5rem;
+  --ci-radius-full: 9999px;
+  --ci-radius-control: var(--ci-radius-md);
+  --ci-radius-surface: var(--ci-radius-sm);
+  --ci-radius-pill: var(--ci-radius-full);
+  --ci-border-hairline: 1px;
+  --ci-border-default: 1px;
+  --ci-border-strong: 2px;
+  --ci-icon-stroke-width: 2;
+  --ci-icon-library: lucide;
+  --ci-ring-field-error: 0 0 0 3px color-mix(in srgb, var(--ci-color-danger) 15%, transparent), 0 0 14px color-mix(in srgb, var(--ci-color-danger) 12%, transparent);
+  --ci-shadow-xs: 0 1px 2px rgb(4 13 16 / 0.06);
+  --ci-shadow-sm:
+    0 1px 2px rgb(4 13 16 / 0.05), 0 4px 12px rgb(4 13 16 / 0.05);
+  --ci-shadow-md:
+    0 2px 4px rgb(4 13 16 / 0.05), 0 12px 30px rgb(4 13 16 / 0.08);
+  --ci-shadow-lg:
+    0 4px 8px rgb(4 13 16 / 0.05), 0 24px 60px rgb(4 13 16 / 0.12);
+  --ci-shadow-xl:
+    0 8px 16px rgb(4 13 16 / 0.08), 0 32px 80px rgb(4 13 16 / 0.16);
+  --ci-focus-ring-width: 2px;
+  --ci-field-focus-ring-width: 1px;
+  --ci-focus-ring-offset: 2px;
+  --ci-ring-focus:
+    0 0 0 var(--ci-focus-ring-width) var(--ci-color-focus);
+  --ci-ring-field-focus:
+    0 0 0 var(--ci-field-focus-ring-width) var(--ci-color-focus);
+
+  /* --- motion and layering ------------------------------------------------ */
+  --ci-duration-fast: 120ms;
+  --ci-duration-base: 180ms;
+  --ci-duration-slow: 280ms;
+  --ci-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ci-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Flyouts stay above modal content so controls remain usable in dialogs. */
+  --ci-z-dropdown: 1350;
+  --ci-z-sticky: 1100;
+  --ci-z-overlay: 1200;
+  --ci-z-modal: 1300;
+  --ci-z-toast: 1400;
+
+  /* --- component aliases -------------------------------------------------- */
+  --ci-button-primary-bg: var(--ci-color-surface-inverse);
+  --ci-button-primary-fg: var(--ci-color-text-inverse);
+  --ci-button-primary-hover: var(--ci-neutral-800);
+  --ci-button-accent-bg: var(--ci-color-accent);
+  --ci-button-accent-fg: var(--ci-color-accent-foreground);
+  --ci-field-bg: var(--ci-color-surface);
+  --ci-field-fg: var(--ci-color-foreground);
+  --ci-field-placeholder: var(--ci-color-text-subtle);
+  --ci-field-border: var(--ci-color-border);
+  --ci-card-bg: var(--ci-color-surface);
+  --ci-card-border: var(--ci-color-border);
+  --ci-sidebar-bg: var(--ci-color-background);
+  --ci-sidebar-fg: var(--ci-color-foreground);
+  --ci-sidebar-active-bg: var(--ci-color-surface-inverse);
+  --ci-sidebar-active-fg: var(--ci-color-text-inverse);
+
+  /* --- shadcn-compatible aliases ------------------------------------------ */
+  --background: var(--ci-color-background);
+  --foreground: var(--ci-color-foreground);
+  --card: var(--ci-color-surface);
+  --card-foreground: var(--ci-color-foreground);
+  --popover: var(--ci-color-surface);
+  --popover-foreground: var(--ci-color-foreground);
+  --primary: var(--ci-color-surface-inverse);
+  --primary-foreground: var(--ci-color-text-inverse);
+  --secondary: var(--ci-color-surface-muted);
+  --secondary-foreground: var(--ci-color-foreground);
+  --muted: var(--ci-color-surface-subtle);
+  --muted-foreground: var(--ci-color-text-muted);
+  --accent: var(--ci-color-accent);
+  --accent-foreground: var(--ci-color-accent-foreground);
+  --destructive: var(--ci-color-danger);
+  --destructive-foreground: var(--ci-color-danger-foreground);
+  --border: var(--ci-color-border);
+  --input: var(--ci-field-border);
+  --ring: var(--ci-color-focus);
+  --radius: var(--ci-radius-md);
+  --font-sans: var(--ci-font-ui);
+  --font-serif: var(--ci-font-display);
+  --font-mono: var(--ci-font-mono);
+}
+
+/* Explicit dark mode keeps technical inverse panels dark while moving normal
+   controls onto stepped dark surfaces. Accent surfaces always retain dark ink
+   for readable lime buttons, selections, and active states. */
+:root[data-theme="dark"],
+.ci-theme[data-theme="dark"],
+[data-theme="dark"] .ci-theme {
+  color-scheme: dark;
+
+  --ci-color-background: var(--ci-neutral-950);
+  --ci-color-canvas: var(--ci-color-background);
+  --ci-color-surface: var(--ci-neutral-900);
+  --ci-color-surface-subtle: var(--ci-neutral-800);
+  --ci-color-surface-muted: var(--ci-neutral-700);
+  --ci-color-surface-inverse: var(--ci-neutral-950);
+  --ci-color-foreground: var(--ci-observed-inverse);
+  --ci-color-text: var(--ci-color-foreground);
+  --ci-color-heading: var(--ci-neutral-0);
+  --ci-color-brand-mark: #ffffff;
+  --ci-color-text-muted: var(--ci-neutral-300);
+  --ci-color-text-subtle: var(--ci-neutral-400);
+  --ci-color-text-inverse: var(--ci-observed-inverse);
+  --ci-color-accent: var(--ci-lime-400);
+  --ci-color-accent-hover: var(--ci-lime-300);
+  --ci-color-accent-active: var(--ci-lime-500);
+  --ci-color-accent-foreground: var(--ci-neutral-950);
+  --ci-color-accent-surface-subtle: rgb(216 255 0 / 0.08);
+  --ci-color-accent-surface-strong: rgb(216 255 0 / 0.14);
+  --ci-color-accent-surface-range: rgb(216 255 0 / 0.12);
+  --ci-color-control-active-bg: var(--ci-color-accent);
+  --ci-color-control-active-fg: var(--ci-color-accent-foreground);
+  --ci-color-control-thumb: var(--ci-color-foreground);
+  --ci-color-control-thumb-checked: var(--ci-color-accent-foreground);
+  --ci-color-border-subtle: rgb(241 247 247 / 0.1);
+  --ci-color-border: rgb(241 247 247 / 0.24);
+  --ci-color-border-strong: rgb(241 247 247 / 0.46);
+  --ci-color-focus: var(--ci-lime-600);
+  --ci-color-focus-ring: var(--ci-color-focus);
+  --ci-color-selection: rgb(216 255 0 / 0.18);
+  --ci-color-selection-foreground: var(--ci-observed-inverse);
+  --ci-color-overlay: rgb(0 0 0 / 0.72);
+  --ci-color-track: rgb(241 247 247 / 0.2);
+  --ci-color-neutral-tint: rgb(241 247 247 / 0.05);
+  --ci-color-loading-cell-muted: var(--ci-color-text-muted);
+
+  --ci-color-live: var(--ci-lime-400);
+  --ci-color-success: #5dd6a5;
+  --ci-color-success-bg: #0f3328;
+  --ci-color-warning: #f4cf8b;
+  --ci-color-warning-bg: #38280f;
+  --ci-color-danger: #ff8f8f;
+  --ci-color-danger-bg: #3b1919;
+  --ci-color-danger-foreground: var(--ci-neutral-950);
+  --ci-color-info: #8fbaff;
+  --ci-color-info-bg: #142b4f;
+  --ci-chart-1: var(--ci-lime-300);
+  --ci-chart-2: #8fbaff;
+  --ci-chart-3: #d0a8ff;
+  --ci-chart-4: #5dd6a5;
+  --ci-chart-5: #f3a6c9;
+
+  --ci-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.34);
+  --ci-shadow-sm:
+    0 1px 2px rgb(0 0 0 / 0.28), 0 4px 12px rgb(0 0 0 / 0.26);
+  --ci-shadow-md:
+    0 2px 4px rgb(0 0 0 / 0.3), 0 12px 30px rgb(0 0 0 / 0.34);
+  --ci-shadow-lg:
+    0 4px 8px rgb(0 0 0 / 0.34), 0 24px 60px rgb(0 0 0 / 0.42);
+  --ci-shadow-xl:
+    0 8px 16px rgb(0 0 0 / 0.38), 0 32px 80px rgb(0 0 0 / 0.5);
+
+  --ci-button-primary-bg: var(--ci-color-accent);
+  --ci-button-primary-fg: var(--ci-color-accent-foreground);
+  --ci-button-primary-hover: var(--ci-color-accent-hover);
+  --ci-sidebar-active-bg: var(--ci-color-accent);
+  --ci-sidebar-active-fg: var(--ci-color-accent-foreground);
+
+  --primary: var(--ci-color-accent);
+  --primary-foreground: var(--ci-color-accent-foreground);
+  --destructive-foreground: var(--ci-color-danger-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  .ci-theme {
+    --ci-duration-fast: 0ms;
+    --ci-duration-base: 0ms;
+    --ci-duration-slow: 0ms;
+  }
+}
+
+/* Inclusive boundaries: min(1, 1 + sign(size - boundary)) is 0 below
+   the boundary and 1 at/above it. em resolves on each consuming element.
+   Browsers without sign() retain the readable section-heading fallback. */
+@supports (line-height: calc(1em * sign(1em))) {
+  :root,
+  .ci-theme {
+    --ci-type-heading-leading: calc(1.2em
+      - 0.05em * min(1, calc(1 + sign(1em - 16px)))
+      - 0.05em * min(1, calc(1 + sign(1em - 20px)))
+      - 0.05em * min(1, calc(1 + sign(1em - 32px)))
+      - 0.15em * min(1, calc(1 + sign(1em - 48px))));
+    --ci-type-heading-tracking: calc(0.01em
+      - 0.02em * min(1, calc(1 + sign(1em - 16px)))
+      - 0.01em * min(1, calc(1 + sign(1em - 20px)))
+      - 0.02em * min(1, calc(1 + sign(1em - 32px)))
+      - 0.01em * min(1, calc(1 + sign(1em - 48px))));
+  }
+}

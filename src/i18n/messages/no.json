@@ -25,8 +25,10 @@
     "confirm": "Er du sikker?",
     "refresh": "Oppdater",
     "close": "Lukk",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Forrige side",
     "nextPage": "Neste side",
+    "pagination": "Paginering",
     "capsLockOn": "Caps Lock er på",
     "dismissNotification": "Avvis varsel",
     "toggleColumns": "Veksle kolonner",
@@ -182,6 +184,7 @@
     "combos": "Kombinasjoner",
     "noModelsFound": "Ingen modeller funnet",
     "clear": "Tøm",
+    "clearFilters": "Tøm filtre",
     "done": "Ferdig",
     "selectAll": "Velg alle",
     "unselectAll": "Fjern alle valg",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Brukt av {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "Forhåndsvisning",
     "batchFilePreviewTruncated": "Viser de første {shown} linjene ({total} totalt linjer)",
-    "batchFileDownloadFull": "Last ned full fil"
+    "batchFileDownloadFull": "Last ned full fil",
+    "tokensPageTitle": "Tokener",
+    "tokensPageDescription": "Send tokener mellom API-nøkler, del invitasjonskoder og koble til fellesskapsservere.",
+    "tokensServerUrlLabel": "Server-URL"
   },
   "disabled": "Deaktivert",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Rut forespørsler med oppbrukt budsjett til gratis reserveleverandør/-modell for nødstilfeller.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Proxy-serveren er stoppet eller starter på nytt.",
     "expandSidebar": "Utvid sidefeltet",
     "collapseSidebar": "Skjul sidefeltet",
-    "themes": "Temaer",
-    "presetColors": "Populære farger",
     "createTheme": "Opprett tema",
     "chooseColor": "Velg én farge",
-    "themeCoral": "Korall",
-    "themeBlue": "Blå",
-    "themeRed": "Rød",
-    "themeGreen": "Grønn",
-    "themeViolet": "Fiolett",
-    "themeOrange": "Oransje",
-    "themeCyan": "Cyan",
     "cliToolsShort": "Verktøy",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Temasystem",
     "whitelabelingDesc": "Beskrivelse av hvitmerking",
     "switchThemes": "Bytt tema",
-    "themeAccentDesc": "Beskrivelse av temaets aksentfarge",
     "uploadFavicon": "Last opp favicon",
     "themeDark": "Mørkt tema",
     "customLogoDesc": "Beskrivelse av egendefinert logo",
     "sidebarVisibilityToggle": "Veksle sidefeltets synlighet",
-    "themeAccent": "Temaets aksentfarge",
     "resetFavicon": "Tilbakestill favicon",
     "whitelabeling": "Egen profilering",
     "darkMode": "Mørk modus",
@@ -1122,10 +1117,8 @@
     "customLogo": "Egendefinert logo",
     "appearance": "Utseende",
     "themeSelectionAria": "ARIA-etikett for temavalg",
-    "themeCreate": "Opprett tema",
     "customFaviconDesc": "Beskrivelse av egendefinert favicon",
     "logoPreview": "Forhåndsvisning av logo",
-    "themeCustom": "Egendefinert tema",
     "hideHealthLogsDesc": "Beskrivelse av skjuling av helsesjekklogger",
     "faviconPreview": "Forhåndsvisning av favicon",
     "changelog": "Endringslogg",
@@ -1352,7 +1345,9 @@
       "open": "åpne",
       "close": "lukk"
     },
-    "noResults": "Ingen resultater"
+    "noResults": "Ingen resultater",
+    "costsTeams": "Team",
+    "costsTeamsSubtitle": "Kostnadssteder for team"
   },
   "webhooks": {
     "title": "Webhooker",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 eller @channelname",
       "chatIdHint": "Den unike numeriske identifikatoren eller det offentlige brukernavnet til chatten/kanalen.",
       "tutorial": "Slik konfigurerer du Telegram-webhook:"
-    }
+    },
+    "copy": "Kopier",
+    "copied": "Kopiert!",
+    "expandDetails": "Vis detaljer",
+    "collapseDetails": "Skjul detaljer"
   },
   "compliance": {
     "auditTitle": "Revisjon",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Anrop (24t)",
     "mcpMetricSuccessRate": "Suksessrate",
     "mcpMetricAvgDuration": "Gjennomsnittlig varighet",
-    "mcpMetricTopTool": "Topp verktøy"
-  },
-  "themesPage": {
-    "title": "Temaer",
-    "description": "Velg et forhåndsinnstilt tema, eller lag ditt eget med én enkelt farge",
-    "presetColors": "Populære farger",
-    "customTheme": "Egendefinert tema",
-    "customThemeDesc": "Klikk på «Opprett tema» og velg én farge",
-    "createTheme": "Opprett tema",
-    "activePreset": "Aktivt tema"
+    "mcpMetricTopTool": "Topp verktøy",
+    "dismissError": "Lukk feilmelding"
   },
   "header": {
     "logout": "Logg ut",
     "quickNavigation": "Hurtignavigasjon",
     "quickNavigationTitle": "Hurtignavigasjon (⌘K / Ctrl+K)",
     "openQuickNavigation": "Åpne hurtignavigasjon",
+    "openMenu": "Åpne meny",
+    "products": "Keak-produkter",
     "switchToLightMode": "Bytt til lys modus",
     "switchToDarkMode": "Bytt til mørk modus",
     "language": "Språk",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Antropisk kompatibel",
     "media": "Medier",
     "mediaDescription": "Generer bilder, videoer og musikk",
-    "themes": "Temaer",
-    "themesDescription": "Velg et fargetema for hele dashbordpanelet",
     "costsDescription": "Spor kostnader, analyser trender og administrer AI-budsjettet ditt på tvers av alle leverandører",
     "cacheDescription": "Overvåk effektiviteten til leverandørenes hurtigbuffer for prompter og lokal semantisk gjenbruk av svar.",
     "limitsDescription": "Konfigurer frekvensgrenser og kvoter per API-nøkkel og leverandør",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Avanserte nyttelastregler, forespørselsgrenser og API-innstillinger for proxy",
     "mitmProxyDescription": "Konfigurer MITM-proxyinnstillinger for inspeksjon og feilsøking av trafikk",
     "oneProxyDescription": "Konfigurer 1Proxy-innstillinger for avansert proxykjeding",
-    "omniSkillsDescription": "Installer og administrer sandkasseferdigheter for automatisert prompt- og verktøykjøring"
+    "omniSkillsDescription": "Installer og administrer sandkasseferdigheter for automatisert prompt- og verktøykjøring",
+    "teamsDescription": "Teamkostnadsestimater og delte myke budsjetter"
   },
   "cloudSyncStatus": {
     "synced": "Synkronisert",
@@ -2495,7 +2487,12 @@
     "onlySelectedConnections": "Bare valgte tilkoblinger",
     "selectAtLeastOneConnection": "Velg minst én tilkobling, eller velg Alle tilkoblinger.",
     "allConnectionsDesc": "Denne nøkkelen kan bruke en hvilken som helst aktiv tilkobling.",
-    "restrictedToConnections": "Begrenset til {count, plural, one {# tilkobling} other {# tilkoblinger}}."
+    "restrictedToConnections": "Begrenset til {count, plural, one {# tilkobling} other {# tilkoblinger}}.",
+    "preferredConnections": "Foretrukne tilkoblinger",
+    "preferredConnectionsDesc": "Prioriteringsrekkefølge per nøkkel. Hvis en foretrukken tilkobling ikke er tilgjengelig, faller rutingen tilbake til den neste kvalifiserte.",
+    "preferredConnectionsNone": "Ingen preferanse angitt — standard rutingstrategi brukes.",
+    "preferredConnectionsClear": "Tøm",
+    "removeSelection": "Fjern {name}"
   },
   "auditLog": {
     "title": "Revisjonslogg",
@@ -2607,7 +2604,9 @@
     "imageToTextBridgeCta": "Konfigurer Image→Text-broen i Modality Bridge-innstillingene",
     "sttBridgeCta": "Konfigurer Tale→Tekst-broen i Modality Bridge-innstillinger",
     "existingConnection": "Eksisterende tilkobling",
-    "openrouterSttDescription": "OpenRouter tale-til-tekst modeller bruker din konfigurerte OpenRouter-tilkobling. Ingen separate legitimasjon er nødvendig."
+    "openrouterSttDescription": "OpenRouter tale-til-tekst modeller bruker din konfigurerte OpenRouter-tilkobling. Ingen separate legitimasjon er nødvendig.",
+    "modalityTabsAria": "Medietype",
+    "serviceKindsAria": "Tjenestetype"
   },
   "search": {
     "searchQuery": "Søkeforespørsel",
@@ -2982,6 +2981,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Bruk når du trenger en lett terminal-native AI-assistent for raske oppgaver.",
       "hermes-agent": "Bruk når du trenger Hermes Agent (av Nousresearch) med standard-, delegasjons-, visjons- og hjelpemodeller rutet gjennom OmniRoute.",
+      "whycodes": "Bruk når du vil ha WhyCodes som en allsidig autonom CLI-agent (TUI, navngitte agenter, minne, swarm) rettet mot OmniRoute.",
       "custom": "Bruk for tilpassede verktøyimplementeringer eller generiske OpenAI-kompatible konfigurasjoner."
     },
     "toolDescriptions": {
@@ -3022,6 +3022,7 @@
       "warp": "Warp AI-terminal med støtte for tilpasset leverandør",
       "agent-deck": "Agent Deck multi-agent-orkestrator",
       "5dive": "5dive — selvhostet flåte av kodeagenter; én auth-profil peker dem alle mot OmniRoute",
+      "whycodes": "WhyCodes autonom CLI-agent med OpenAI-kompatibel base-URL",
       "zed": "Zed-koderedigerer — innebygd agent via en OpenAI-kompatibel leverandør"
     },
     "guides": {
@@ -3278,7 +3279,8 @@
     "cliproxyapiUnknown": "Ukjent",
     "cliproxyapiUpdate": "Oppdater",
     "cliproxyapiUpdateAvailable": "Oppdatering tilgjengelig: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versjon"
+    "cliproxyapiVersion": "Versjon",
+    "removeMapping": "Fjern tilordning"
   },
   "modelCatalog": {
     "title": "Modeller og kombinasjoner",
@@ -3342,6 +3344,18 @@
     "maxMembersPlaceholder": "f.eks. 10",
     "testSelected": "Test valgte ({count})",
     "testAllFiltered": "Test alle filtrerte ({count})",
+    "visibility": "Synlighet",
+    "allVisibility": "Synlige og skjulte",
+    "visibleOnly": "Synlige",
+    "hiddenOnly": "Skjulte",
+    "visibleColumn": "Synlig",
+    "hideModel": "Skjul {name} fra /v1/models",
+    "showModel": "Vis {name} i /v1/models",
+    "hiddenBadge": "Skjult",
+    "hideFiltered": "Skjul filtrerte ({count})",
+    "showFiltered": "Vis filtrerte ({count})",
+    "visibilityCounts": "{visible} synlige · {hidden} skjulte · {total} totalt",
+    "visibilityUpdateFailed": "Kunne ikke oppdatere modellens synlighet",
     "cancel": "Avbryt",
     "clearResults": "Tøm resultater",
     "testing": "Tester...",
@@ -3400,13 +3414,13 @@
     "comboRefMember": "Kombinasjon → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Inkluder leverandører merket ToS: avoid i auto",
-    "autoTosDescription": "Av som standard. Gjelder alle auto-kombinasjoner, ikke bare én konto. Tilkobling av en leverandør slår ikke på dette valget.",
-    "autoTosSaveError": "Kunne ikke lagre ToS-policyen. Den forrige innstillingen vises fortsatt. Prøv igjen.",
-    "autoTosLoadError": "Kunne ikke laste ToS-policyen. Prøv igjen før du endrer den.",
     "title": "Kombinasjoner",
     "description": "Lag modellkombinasjoner med vektet ruting og reservestøtte",
     "autoCatalogTitle": "Automatisk rutekatalog",
+    "autoTosLoadError": "Kunne ikke laste ToS-policyen. Prøv igjen før du endrer den.",
+    "autoTosSaveError": "Kunne ikke lagre ToS-policyen. Den forrige innstillingen vises fortsatt. Prøv igjen.",
+    "autoTosIncludeLabel": "Inkluder leverandører merket ToS: avoid i auto",
+    "autoTosDescription": "Av som standard. Gjelder alle auto-kombinasjoner, ikke bare én konto. Tilkobling av en leverandør slår ikke på dette valget.",
     "autoCatalogTemplateCount": "{count} maler",
     "autoCatalogDescription": "Innebygde auto/*-kombinasjoner løst dynamisk fra tilkoblede leverandører. Bruk en av disse ID-ene som modellfelt – ingen oppsett er nødvendig.",
     "autoCatalogExpand": "Utvid katalogen for automatisk ruting",
@@ -3518,6 +3532,9 @@
     "moveUp": "Flytt opp",
     "moveDown": "Flytt ned",
     "removeModel": "Fjern",
+    "testStep": "Test denne modellen",
+    "testStepRunning": "Tester…",
+    "testStepNotTestable": "Bare trinn med én modell kan testes",
     "saving": "Lagrer...",
     "liveNoProviders": "Ingen leverandører observert ennå.",
     "liveFleetDataHint": "Flåtedata ankommer via live combo-hendelser.",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "Ingen komboer er konfigurert ennå.",
     "playgroundCreateFirst": "Opprett en først",
     "weighted": "Vektet",
+    "weightPercent": "Vekt (%)",
     "leastUsed": "Minst brukt",
     "costOpt": "Kostnadsoptimalisering",
     "strategyGuideTitle": "Slik bruker du denne strategien",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# konto} other {# kontoer}}",
     "builderGlobalAdded": "Lagt til",
     "builderGlobalAdd": "Legg til",
+    "clearSearch": "Tøm søk",
     "manualModel": "Manuell modell",
     "manualModelInvalid": "Angi en modell som leverandør/modell.",
     "manualModelUnknownProvider": "Ukjent leverandørprefiks.",
@@ -3936,6 +3955,7 @@
     "builderComboRefStep": "Legg til kombinasjonsreferanse",
     "builderPinnedAccount": "Festet konto",
     "builderLegacyEntry": "Eldre oppføring",
+    "builderStaleModel": "Ikke i live-katalogen",
     "reviewName": "Navn",
     "reviewStrategy": "Strategi",
     "reviewSteps": "Trinn",
@@ -3973,6 +3993,10 @@
     "responseValidationMinLength": "Minimum innholdslengde (tegn)",
     "responseValidationJsonPaths": "JSON-path-kontroller",
     "responseValidationAddCheck": "+ Legg til kontroll",
+    "responseValidationRemoveCheck": "Fjern kontroll",
+    "responseValidationPath": "JSON-bane",
+    "responseValidationCondition": "Betingelse",
+    "responseValidationValue": "Forventet verdi",
     "agentFeaturesSystemMessageOverride": "Overstyr systemmelding",
     "agentFeaturesSystemMessagePlaceholder": "Du er en ekspertassistent...",
     "agentFeaturesSystemMessageHint": "Systemmeldingsoverstyring for agenter",
@@ -5288,7 +5312,8 @@
         "skipped": "allerede konfigurert",
         "failed": "mislyktes"
       }
-    }
+    },
+    "stepProgress": "Oppsettsfremdrift"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Denne leverandøren er som standard utelatt fra auto",
@@ -5579,6 +5604,7 @@
     "allModelsAlreadyImported": "Alle modeller er allerede importert",
     "noNewModelsToImport": "Ingen nye modeller å importere — alle modeller finnes allerede i registeret eller listen over egendefinerte modeller",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Modell oppdagelse mislyktes {time}",
     "skippingExistingModels": "Hopper over {count} eksisterende modeller",
     "autoSync": "Auto-synkronisering",
     "autoSyncShort": "Synkronisering",
@@ -6056,10 +6082,10 @@
     "apiFormatLabel": "Etikett for API-format",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "Kina som API-region",
-    "apiRegionHint": "Tips for API-region",
-    "apiRegionInternational": "Internasjonal API-region",
-    "apiRegionLabel": "Etikett for API-region",
+    "apiRegionChina": "Fastlands-Kina",
+    "apiRegionHint": "Velg endepunktsregionen som brukes for API-tilgang og kvotesporing.",
+    "apiRegionInternational": "Internasjonal",
+    "apiRegionLabel": "API-region",
     "apikey": "API-nøkkel",
     "audio": "Lyd",
     "audioProvidersHeading": "Overskrift for lydleverandører",
@@ -6080,6 +6106,13 @@
     "claudeLowPriorityModeDescription": "Når denne kontoen når bruksgrensen på 5 timer og Anthropic tilbyr køen med lavere prioritet, godtar OmniRoute dette og fortsetter å sende forespørsler med anthropic-usage-limit: slow til tidsvinduet tilbakestilles, i stedet for å la forbindelsen kjøles ned. Ukesgrensen gjelder fortsatt, og svar må kanskje vente på ledig kapasitet.",
     "claudeAutoLimitResetLabel": "Tilbakestill øktgrensen automatisk (én gang i uken)",
     "claudeAutoLimitResetDescription": "Når denne kontoen når bruksgrensen på 5 timer og en tilbakestilling av øktgrensen er tilgjengelig, aktiverer OmniRoute den automatisk og prøver på nytt med full hastighet. Dette bruker kontoens ukentlige tilbakestilling og teller fortsatt mot ukesgrensen.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Hopp over den forbigående nedkjølingen slik at denne tilkoblingen forblir kvalifisert selv etter gjenopprettelige feil (sluttilstander som utestengt/utløpt gjelder fortsatt).",
     "disableCoolingLabel": "Deaktiver nedkjøling for denne tilkoblingen",
     "bulkPasteAdded": "{count, plural, one {1 nøkkel lagt til} other {# nøkler lagt til}}",
@@ -6533,6 +6566,7 @@
       "monsterapi": "Hent API-nøkkel på monsterapi.ai",
       "moonshot": "Koble til Moonshot AI med en API-nøkkel.",
       "morph": "Gratisnivå: 250K kreditter/måned, $0",
+      "apmix": "Koble Apmix med en API-nøkkel fra apmix.ai/dashboard — ett abonnement, mange modeller.",
       "nanogpt": "Koble til NanoGPT med en API-nøkkel.",
       "nebius": "~$1 prøvekreditt ved registrering for API-testing",
       "nlpcloud": "NLP Cloud bruker et proprietært chatbot-API i stedet for OpenAI chat/completions. OmniRoute tilpasser OpenAI-meldinger til input/kontekst/historikk og tilbyr en lokal katalog over støttede chatbot-modeller.",
@@ -6621,7 +6655,7 @@
       "claude": "Koble til Claude Code med den eksisterende OAuth-flyten.",
       "cline": "Koble til Cline med den eksisterende OAuth-flyten.",
       "cursor": "Koble til Cursor IDE med den eksisterende OAuth-flyten.",
-      "cursor-api": "Koble til Cursor med en bruker-API-nøkkel (crsr_...) fra cursor.com/dashboard/api; ingen IDE-økt er nødvendig.",
+      "cursor-api": "Koble til Cursor med en bruker-API-nøkkel (crsr_... eller grok_...) fra cursor.com/dashboard/api; ingen IDE-økt nødvendig.",
       "github": "Koble til GitHub Copilot med den eksisterende OAuth-flyten.",
       "gitlab-duo": "OAuth-applikasjon med ai_features + read_user-scopes. Konfigurer GITLAB_DUO_OAUTH_CLIENT_ID og eventuelt GITLAB_DUO_OAUTH_CLIENT_SECRET på denne OmniRoute-instansen.",
       "kilocode": "Koble til Kilo Code med den eksisterende OAuth-flyten.",
@@ -6629,8 +6663,7 @@
       "kiro": "Gratisnivå: 50 kreditter/måned (~25K–100K tokens). ⚠️ Kiros brukervilkår forbyr bruk av tredjeparts proxy/harness.",
       "codex": "Koble til OpenAI Codex med den eksisterende OAuth-flyten.",
       "qwen": "Koble til Qwen Code med den eksisterende OAuth-flyten.",
-      "github-models": "Opprett et GitHub PAT med 'models: read'-omfang på github.com/settings/tokens",
-      "apmix": "Koble Apmix med en API-nøkkel fra apmix.ai/dashboard — ett abonnement, mange modeller."
+      "github-models": "Opprett et GitHub PAT med 'models: read'-omfang på github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} godtar leverandør-native modell-ID-er. Importer fra /models eller legg til egendefinerte ID-er for ruting.",
     "bedrockModelsDescription": "Amazon Bedrock-modeller er omfattet av AWS-regionen. Importer fra /models eller legg til berggrunnsmodell-IDer aktivert i den valgte regionen.",
@@ -6802,14 +6835,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Innstillinger",
@@ -7105,16 +7131,6 @@
     "settingsSidebarDesc": "Velg hvilke elementer som skal vises i sidefeltet. «Grunnleggende» gjør at avanserte verktøy fortsatt kan søkes opp.",
     "hideHealthLogs": "Skjul helsesjekklogger",
     "hideHealthLogsDesc": "Når PÅ, undertrykk [HealthCheck]-meldinger i serverkonsollen",
-    "themeAccent": "Temafarge",
-    "themeAccentDesc": "Velg en forhåndsinnstilt farge eller lag ditt eget tema med én farge",
-    "themeCreate": "Opprett tema",
-    "themeCustom": "Egendefinert tema",
-    "themeBlue": "Blå",
-    "themeRed": "Rød",
-    "themeGreen": "Grønn",
-    "themeViolet": "Fiolett",
-    "themeOrange": "Oransje",
-    "themeCyan": "Cyan",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Tilpass applikasjonsnavnet og logoen",
     "appName": "Applikasjonsnavn",
@@ -7255,7 +7271,7 @@
       "nextSwitchNow": "Nå",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7282,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Søkesti til kjernebinærfilen",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Valgfritt: verifiserer den genererte filen med kjernebinærfilen før den adopterte filen erstattes. La stå tomt for å fortsette å skrive ved siden av. Mappen opprettes hvis den mangler."
+      "coreBinaryPathHelp": "Valgfritt: verifiserer den genererte filen med kjernebinærfilen før den adopterte filen erstattes. La stå tomt for å fortsette å skrive ved siden av. Mappen opprettes hvis den mangler.",
+      "urlFeedlessHint": "La stå tom for et kun velger-abonnement: angi en kontroll-URL nedenfor, ingen feed hentes, oppdateres eller bindes."
     },
     "bulkHealthcheck": "Samlet tilstandskontroll",
     "bulkHealthcheckDesc": "Test alle konfigurerte proxyer mot en mål-URL for å finne ut hvilke som fungerer.",
@@ -7707,6 +7724,7 @@
     "configured": "konfigurert",
     "none": "Ingen",
     "modelOverrideValuePlaceholder": "Numerisk verdi",
+    "modelOverrideKey": "Overstyringsnøkkel",
     "modelOverrideReasoningEffortsPlaceholder": "Engelske kommaseparerte verdier, f.eks. low, medium, high",
     "addKeyValue": "Legg til nøkkelverdi",
     "noModelOverrides": "Ingen overstyringer er konfigurert for denne modellen.",
@@ -7755,7 +7773,6 @@
     "customPricingNote": "Du kan overstyre standardpriser for spesifikke modeller. Egendefinerte overstyringer prioriteres fremfor automatisk oppdagede priser.",
     "editPricing": "Rediger priser",
     "viewFullDetails": "Se alle detaljer",
-    "themeCoral": "Korall",
     "adaptiveVolumeRouting": "Adaptiv volumruting",
     "adaptiveVolumeRoutingDesc": "Skaler tilkoblinger dynamisk basert på nyttelastvolum og kapasitetspress.",
     "lkgpToggleTitle": "Sist fungerende leverandør (LKGP)",
@@ -7850,6 +7867,8 @@
     "compressionDesc": "Reduser tokenbruken ved å komprimere ledetekster før de sendes til leverandører",
     "autoCombosTitle": "Automatiske kombinasjoner",
     "autoCombosDesc": "Tillat at denne nøkkelen bruker de innebygde auto/*-kombinasjonene, som automatisk velger en modell fra hver konfigurerte leverandør",
+    "ccDiscoveryAliasesTitle": "Claude Code-oppdagelsesaliaser",
+    "ccDiscoveryAliasesDesc": "Annonser claude/...-kompatibilitetsspeilinger for modeller og kombinasjoner som denne nøkkelen allerede har tilgang til",
     "compressionGuidanceFullGuideLink": "Fullstendig komprimeringsveiledning",
     "compressionGuidanceShow": "Detaljer",
     "compressionGuidanceHide": "Skjul detaljer",
@@ -9035,7 +9054,8 @@
     "tomlTestPassed": "Bestått",
     "tomlTestFailed": "Feilet",
     "tomlImportError": "Kunne ikke behandle RTK TOML-filen.",
-    "tomlFileReadError": "Kunne ikke lese den valgte TOML-filen."
+    "tomlFileReadError": "Kunne ikke lese den valgte TOML-filen.",
+    "viewMode": "Visningsmodus"
   },
   "compressionEngineConfig": {
     "loading": "Laster inn…",
@@ -9257,7 +9277,8 @@
     "languagePacksList": "Språkpakker: {packs}",
     "dragToReorder": "Dra for å endre rekkefølge på trinn",
     "engine": "Motor",
-    "intensity": "Intensitet"
+    "intensity": "Intensitet",
+    "compressionOverride": "Overstyring av komprimering"
   },
   "compressionStudio": {
     "noRun": "Ingen komprimeringskjøring tilgjengelig.",
@@ -9317,7 +9338,8 @@
     "encoderWinner": "vinner: {winner}",
     "encoder": "koder",
     "bytes": "byte",
-    "tokensCl100k": "tokener (cl100k)"
+    "tokensCl100k": "tokener (cl100k)",
+    "studioViews": "Studio-visninger"
   },
   "omniglyph": {
     "preview": "Forhåndsvisning",
@@ -9523,7 +9545,9 @@
     "tooltipMinLength": "Meldinger som er kortere enn dette, komprimeres ikke. Lavere = mer kompresjon.",
     "tooltipMinSavings": "Komprimer bare hvis det sparer minst så mange tokens.",
     "ultraSettings": "Ultra-innstillinger",
-    "ultraSettingsDesc": "SLM-drevet semantisk komprimering"
+    "ultraSettingsDesc": "SLM-drevet semantisk komprimering",
+    "defaultLanguage": "Standardspråk",
+    "viewMode": "Visningsmodus"
   },
   "translator": {
     "title": "Oversetter",
@@ -9835,6 +9859,9 @@
     "streamTransformFailed": "Kunne ikke transformere strømmen"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kvoten er brukt opp; ekstra bruk er tillatt, så tjenesten fortsetter.",
+    "healthPaidCreditsBypass": "Kvoten er brukt opp; tilgjengelige betalte kreditter gjør at tjenesten kan fortsette.",
+    "healthFilteringBypass": "Kvoten er brukt opp; lokal kvotefiltrering er deaktivert, så tjenesten fortsetter.",
     "title": "Bruk",
     "grokExtraUsageCredits": "Ekstra Brukskreditter",
     "grokAutoTopUp": "Automatisk Påfylling",
@@ -9998,6 +10025,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Leverandørgrenser",
     "noProviders": "Ingen leverandører tilkoblet",
+    "quotaAuthRequired": "Autentisering kreves – logg på kontrollpanelet",
+    "quotaAuthRequiredHint": "Leverandørtilkoblinger kunne ikke lastes inn fordi kontrollpaneløkten mangler eller er utløpt. Logg på og oppdater for å se kvotegrensene dine.",
     "connectProvidersForQuota": "Koble til leverandører med OAuth for å spore API-kvotegrenser og bruk.",
     "accountsCount": "{count, plural, one {# konto} other {# kontoer}}",
     "filteredFromCount": "(filtrert fra {count})",
@@ -10047,9 +10076,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Ukjent",
     "statTotal": "Totalt",
-    "statCritical": "Kritisk",
-    "statAlert": "Varsel",
-    "statHealthy": "Frisk",
     "filterPurchaseTypeLabel": "Type",
     "filterTierLabel": "Nivå",
     "purchaseAll": "Alle",
@@ -10288,10 +10314,64 @@
     "lastRefreshed": "Sist oppdatert",
     "providerQuota": "Leverandørkvote",
     "providerQuotaHomeHint": "Sanntidsstatus på tvers av tilkoblede kontoer",
+    "claudeResetCreditDefaultTitle": "Tilbakestilling av Claude-grense",
+    "confirmRedeemClaudeResetCredit": "Innløsing tilbakestiller umiddelbart de kvalifiserte Claude-bruksgrensene og forbruker denne kreditten permanent.",
+    "claudeResetCreditsModalTitle": "Claude-tilbakestillingskreditter",
+    "claudeResetCreditsModalExplainer": "Tilgjengelige Claude-tilbakestillingskreditter og ukentlige økttilbakestillinger for denne kontoen.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Basert på nylige observasjoner, ikke en direkte test. Velg en konto for detaljer.",
+    "healthRecovery": "Forventet gjenoppretting",
+    "healthAvailable": "Tilgjengelig",
+    "healthRestricted": "Delvis begrenset",
+    "healthUnavailable": "Utilgjengelig",
+    "healthPeakHourProtection": "Beskyttelse i rushtiden",
+    "healthCooldown": "Ventetid",
+    "healthQuotaExhausted": "Kvoten er oppbrukt",
+    "healthOverview": "Oversikt",
+    "layoutFull": "Full",
+    "layoutCompact": "Kompakt",
+    "healthQuotaError": "Kunne ikke lese kvoten",
+    "healthNoRuntime": "Driftsstatus er utilgjengelig",
+    "healthPreviousSnapshot": "Siste oppdatering mislyktes; viser forrige resultat",
+    "healthPreviousFailure": "Siste forespørsel mislyktes; ventetiden er over",
+    "healthAwaitingSync": "Nullstillingstiden er passert; venter på synkronisering",
+    "healthVerdictUnavailable": "Tilgjengelighetskontrollen er utilgjengelig; viser bare kvotenivåer",
+    "healthSummaryFailed": "Kunne ikke lese driftsoversikten; modellåser kan mangle",
+    "healthRuntimeObserved": "Status oppdatert {time}",
+    "healthQuotaObserved": "Kvote observert {time}",
+    "healthOldestQuota": "Eldste kvoteøyeblikksbilde: {time}",
+    "healthRecoveryUnknown": "Gjenopprettingstid ukjent",
+    "healthDetailsHint": "Klikk for detaljer og handlinger",
+    "healthFiveHour": "5 timer",
+    "healthOverall": "Samlet",
+    "healthAction": "Handling kreves",
+    "healthTitle": "Kontotilgjengelighet",
+    "healthDrag": "Dra for å sortere leverandører",
+    "healthDragPosition": "{provider}, {count, plural, one {plassering {position, number} av #} other {plassering {position, number} av #}}",
+    "healthResetOrder": "Gjenopprett standardrekkefølge",
+    "healthPool": "{name}-gruppe",
+    "healthOtherPool": "Samme konto · {pool}: {status} ({remaining} igjen)",
+    "healthIncluded": "{count, plural, one {Inkludert # delvis begrenset konto} other {Inkludert # delvis begrensede kontoer}}",
+    "healthBannerUnavailable": "{count, plural, one {# konto er midlertidig utilgjengelig} other {# kontoer er midlertidig utilgjengelige}}",
+    "healthBannerAvailable": "{count, plural, one {# konto er tilgjengelig} other {Alle # kontoer er tilgjengelige}}",
+    "healthLegendHide": "Skjul tegnforklaring",
+    "healthLegendShow": "Vis tegnforklaring",
+    "healthLegendOk": "Heldekkende = gjenværende kvote; gjennomskinnelig = brukt.",
+    "healthLegendCooldown": "Kvoten for {window} er brukt opp. Heldekkende = ventet tid; gjennomskinnelig = gjenværende ventetid.",
+    "healthLegendAction": "Tilgang utløpt eller konto sperret; venting hjelper ikke.",
+    "healthLegendPartial": "Fortsatt brukbar. Gul topp = modell eller gruppe begrenset.",
+    "healthWaited": "Ventet: {percent}",
+    "healthWait": "Ytterligere {duration} (gjenoppretting {time})",
+    "healthFastest": "Tidligste gjenoppretting om {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} tilgjengelig} other {# / {active, number} tilgjengelige}}",
+    "healthCd5": "5 timer · Ventetid",
+    "healthCdw": "Ukentlig · Ventetid",
+    "healthRecentSuccessBypass": "Rutingen tillater kontoen fordi en forespørsel nylig lyktes.",
+    "healthPurchasedBalanceBypass": "Kjøpt saldo kan brukes når den inkluderte kvoten er brukt opp.",
+    "healthCutoffAtRequest": "Kvoteterskler i sanntid kontrolleres når en forespørsel rutes."
   },
   "modals": {
     "waitingAuth": "Venter på autorisasjon",
@@ -11078,7 +11158,8 @@
       "message": "Melding",
       "error": "Feil",
       "completion": "Fullføring"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Enkel chat",
@@ -11259,7 +11340,8 @@
     "minutesAgo": "{minutes}m siden",
     "hoursAgo": "{hours}t siden",
     "daysAgo": "{days}d siden",
-    "entries": "Oppføringer"
+    "entries": "Oppføringer",
+    "viewSwitcherAria": "Hurtigbuffervisning"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globalt",
@@ -11447,6 +11529,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Flere handlinger",
     "test": "Test",
     "edit": "Rediger",
     "delete": "Slett",
@@ -11526,7 +11609,7 @@
     "bulkImportNoValidEntries": "Ingen gyldige oppføringer funnet. Sjekk formatet og prøv igjen.",
     "bulkImportSuccess": "Import fullført: {created} opprettet, {updated} oppdatert, {failed} mislyktes",
     "bulkImportErrorLine": "Linje {line}: {reason}",
-    "bulkImportMaxExceeded": "Maksimalt 100 fullmakter per import",
+    "bulkImportMaxExceeded": "Maksimalt {max} fullmakter per import",
     "bulkImportPreview": "Forhåndsvisning",
     "clearAssignment": "(klar oppdrag)",
     "bulkProxyAssignment": "Bulk proxy-tildeling",
@@ -11587,6 +11670,7 @@
     "poolSetAsideKindIpQuota429": "IP-hastighetsbegrensning (429)",
     "poolSetAsideKindSlow": "trege svar",
     "poolSetAsideKindGeoBlocked": "region-blokkert (403/451)",
+    "poolSetAsideKindOperatorReported": "avbrudd rapportert av operatør",
     "poolSetAsideUntil": "Tilbake i rotasjon {endsAt}",
     "poolSetAsideRepeat": "Satt til side {count, plural, one {# gang} other {# ganger}}",
     "poolUnknownAddress": "Ukjent adresse",
@@ -11696,7 +11780,6 @@
     "exportCodeTitle": "Eksporter kode",
     "exportShort": "Eksporter",
     "noStateToExport": "Det finnes ingen playground-tilstand å eksportere.",
-    "closeExportModal": "Lukk eksportmodal",
     "close": "Lukk",
     "exportRealKeyWarning": "Sikkerhetsadvarsel: eksport blokkert — en ekte API-nøkkel ble oppdaget i utdataene. Vennligst tilbakestill API-nøkkelen din og prøv igjen.",
     "placeholderHintPrefix": "Erstatt",
@@ -11809,7 +11892,8 @@
       "nextButton": "Neste",
       "runButton": "Kjør",
       "promptPlaceholder": "Skriv inn meldingen din… (Enter for å sende, Shift+Enter for ny linje)"
-    }
+    },
+    "playgroundTabs": "Playground-moduser"
   },
   "miniPlayground": {
     "endpoint": "Endepunkt",
@@ -11880,7 +11964,8 @@
     "assistant": "Assistent",
     "errorLabel": "Feil",
     "requestFailed": "Forespørsel mislyktes",
-    "stop": "Stopp"
+    "stop": "Stopp",
+    "messageInputAria": "Melding"
   },
   "requestLogger": {
     "recording": "Registrerer",
@@ -12067,8 +12152,18 @@
       "resilienceRotations": "{count} kontorotasjoner",
       "resilienceRetried": "Tom tur forsøkt på nytt",
       "resilienceContinued": "Gjenopptatt midt i strømmen",
-      "resilienceRecovered": "Gjenopprettet av en robusthetshandling"
-    }
+      "resilienceRecovered": "Gjenopprettet av en robusthetshandling",
+      "conversationContext": "Samtalekontekst",
+      "goToBottom": "Gå til bunnen",
+      "liveRefreshOn": "Direkteoppdatering: på",
+      "liveRefreshOff": "Direkteoppdatering: av",
+      "liveRefresh": "Direkteoppdatering",
+      "continuesFromParent": "fortsetter fra overordnet",
+      "continuesFrom": "Fortsetter fra {id}",
+      "viewConversation": "vis samtale",
+      "openConversation": "Åpne samtale {id}"
+    },
+    "tableLabel": "Forespørselslogger"
   },
   "proxyLogger": {
     "filterAll": "Alle",
@@ -12113,7 +12208,9 @@
     "colServedBy": "Tjenestet av",
     "filterTraffic": "Trafikk",
     "filterTests": "Tester",
-    "filterSource": "Kilde"
+    "filterSource": "Kilde",
+    "tableLabel": "Proxylogger",
+    "sortLogs": "Sorter logger"
   },
   "endpointOptions": {
     "speech": "Tale",
@@ -12198,7 +12295,8 @@
     "statusExhausted": "OPPBRUKT",
     "statusAlerting": "VARSLER",
     "statusError": "FEIL",
-    "moreSuffix": "+{count} til"
+    "moreSuffix": "+{count} til",
+    "feedFilterLabel": "Filtrer hendelser"
   },
   "quotaShare": {
     "weightPercent": "Vekt %",
@@ -12365,7 +12463,10 @@
     "ungroupedTitle": "Ugruppert",
     "ungroupedHint": "Disse poolene er ikke tilordnet en kjent gruppe. Rediger en pool for å flytte den til en reell gruppe.",
     "removeFailed": "Kunne ikke fjerne denne poolen.",
-    "dismiss": "Lukk"
+    "dismiss": "Lukk",
+    "allocationsHeading": "Tildelinger",
+    "wizardRemoveDimension": "Fjern dimensjon",
+    "wizardRemoveKey": "Fjern nøkkel"
   },
   "plugins": {
     "title": "Programtillegg",
@@ -12523,7 +12624,8 @@
       "settingsUpdateFailed": "Oppdatering av innstillinger mislyktes",
       "serviceRevealApiKey": "{actor} viste API-nøkkel for {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Avvis feil"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12758,21 @@
       "goNow": "Gå nå",
       "message": "MITM-proxyen ligger nå under AgentBridge.",
       "title": "Denne siden har flyttet"
-    }
+    },
+    "dnsOn": "DNS på",
+    "dnsOff": "DNS av",
+    "showServerSettings": "Vis serverinnstillinger",
+    "hideServerSettings": "Skjul serverinnstillinger",
+    "upstreamCaTesting": "Tester…",
+    "removeMapping": "Fjern tilordning",
+    "mappingSourcePlaceholder": "f.eks. gemini-3.6-flash-medium, eller * for alle som ikke er tilordnet",
+    "mappingWildcardHint": "Bruk * som kilde for å rute alle modeller uten en eksplisitt tilordning gjennom OmniRoute til det valgte målet. Eksakte kildetreff prioriteres alltid fremfor *.",
+    "wizardDetectingModels": "Oppdager modeller i oppfanget trafikk...",
+    "wizardDetectedModels": "Fant {count, plural, one {# modell} other {# modeller}} i oppfanget trafikk. Velg dem du vil legge til:",
+    "wizardSelectedModels": "{count, plural, one {# modell} other {# modeller}} valgt. Du tilordner dem til OmniRoute-modeller i neste skjermbilde.",
+    "wizardAddModels": "Legg til {count, plural, one {# modell} other {# modeller}}",
+    "wizardNoModelsDetected": "Ingen modeller er oppdaget ennå. Bruk {agent} til å sende en forespørsel, og kjør deretter denne veiviseren på nytt for å oppdage modeller automatisk fra trafikken.",
+    "wizardNoModelsHint": "Du kan også lukke denne veiviseren og legge til tilordninger manuelt i agentkortet."
   },
   "providerStats": {
     "unknownError": "Ukjent feil",
@@ -12686,7 +12802,11 @@
     "avgTtft": "Snitt TTFT",
     "avgTotal": "Snitt totalt",
     "requestTelemetry": "Forespørselstelemetri",
-    "requestTelemetryDescription": "7-fase pipeline-fordeling (siste 5 minutter)"
+    "requestTelemetryDescription": "7-fase pipeline-fordeling (siste 5 minutter)",
+    "title": "Leverandørstatistikk",
+    "description": "Trafikk, ventetid og suksessrater per leverandør og modell",
+    "combo": "Kombinasjon",
+    "toggleModels": "Vis modeller for {provider}"
   },
   "relay": {
     "title": "Serverløse relé-proxyer",
@@ -12847,7 +12967,18 @@
     "noRequestBody": "Ingen forespørselsbody.",
     "noResponseBody": "Ingen responsbody.",
     "formatted": "Formatert",
-    "raw": "Rå"
+    "raw": "Rå",
+    "requestCount": "{count, plural, one {# forespørsel} other {# forespørsler}}",
+    "expandList": "Utvid liste",
+    "collapseList": "Skjul liste",
+    "snippetLanguage": "Språk for kodeutdrag",
+    "headersTable": "Hodefelt",
+    "showSecrets": "Vis hemmeligheter",
+    "maskSecrets": "Masker hemmeligheter",
+    "llmNotAvailable": "LLM-metadata er ikke tilgjengelig for denne forespørselen.",
+    "llmStreamYes": "ja (SSE)",
+    "llmStreamNo": "nei",
+    "llmTotalTokens": "Totalt: {count} tokener"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13437,8 @@
     "colReliabilityHelp": "Andelen kall som denne leverandøren faktisk besvarte i løpet av de siste 24 timene. En strek betyr at den håndterte for lite trafikk til å angi en rate.",
     "reliabilitySample": "{successes} av {requests} kall lyktes i løpet av de siste {hours} t",
     "reliabilityTooFew": "Bare {requests} kall i løpet av de siste {hours} t — for få til å angi en rate",
-    "reliabilityNoTraffic": "Ingen kall registrert i løpet av de siste 24 t"
+    "reliabilityNoTraffic": "Ingen kall registrert i løpet av de siste 24 t",
+    "categoryFilter": "Oppgavekategori"
   },
   "discovery": {
     "title": "Leverandøroppdagelse",
@@ -13331,7 +13463,11 @@
     "method": "Metode",
     "auth": "Autentisering",
     "feasibility": "Gjennomførbarhet",
-    "models": "Modeller"
+    "models": "Modeller",
+    "provider": "Leverandør",
+    "status": "Status",
+    "endpoint": "Endepunkt",
+    "actions": "Handlinger"
   },
   "noAuthProvider": {
     "title": "Ingen autentisering kreves",
@@ -13380,7 +13516,8 @@
     "ownProxy": "Egen proxy",
     "freeTierPause": "Modell {model} pauset (429), tilbake kl. {time}",
     "freeTierPauseProvider": "Pauset (429), tilbake kl. {time}",
-    "freeTierPauseNote": "Pause i prosessen på denne forekomsten"
+    "freeTierPauseNote": "Pause i prosessen på denne forekomsten",
+    "proxyType": "Proxytype"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13690,10 @@
         "description": "En skjult prestasjon venter...",
         "criteria": "Fullfør den skjulte prestasjonen for å avsløre dette merket."
       }
-    }
+    },
+    "leaderboardTitle": "Resultatliste",
+    "leaderboardDescription": "Rangeringer og prestasjoner på tvers av API-nøklene dine",
+    "badgeLocked": "Låst"
   },
   "featureFlags": {
     "title": "Funksjonsflagg",
@@ -13794,6 +13934,7 @@
     "latency": "Latens",
     "quota": "Kvote",
     "rangeWindow": "{range}-vindu",
+    "timeRange": "Tidsrom",
     "runtimeHealthBlend": "kjøretids-/helseblanding",
     "averageResponseTime": "gjennomsnittlig responstid",
     "worstQuota": "Verste kvote",
@@ -13995,7 +14136,11 @@
     "learnMore": "Finn ut mer",
     "changelogLoadFailed": "Kunne ikke laste inn endringsloggen. Prøv igjen senere.",
     "retry": "Prøv igjen",
-    "viewFullHistory": "Vis hele historikken på GitHub"
+    "viewFullHistory": "Vis hele historikken på GitHub",
+    "title": "Nyheter og endringslogg",
+    "description": "Kunngjøringer fra OmniRoute-teamet og de nyeste versjonsmerknadene",
+    "viewLabel": "Vis",
+    "loadingNews": "Laster inn kunngjøringer..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14691,9 @@
       "circuitBreakerState": "Leverandør Kretsbryterstatus",
       "lastUpdate": "Siste oppdatering: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours}t {minutes}m"
+      "uptimeHoursMinutes": "{hours}t {minutes}m",
+      "breakerClosed": "Lukket",
+      "breakerNotClosed": "Åpen eller halvåpen"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14768,9 @@
         "primaryAction": "Vedlikeholdsdetaljer",
         "secondaryAction": "Systemstatus"
       }
+    },
+    "miniapp": {
+      "askAnything": "Spør om hva som helst…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14961,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} synlige / {total} totalt",
+    "modeLabel": "Visningsmodus",
+    "jumpToNow": "Gå til gjeldende tidspunkt. NÅ-linjen tilbakestilles til posisjon {position} %",
+    "laneReuse": "Gjenbruk av rad",
+    "laneReuseLabel": "Tidsvindu for gjenbruk av rad (minutter)",
+    "laneReuseHint": "Forespørsler som deler en samtale-ID, forblir på samme tidslinjerad så lenge intervallet mellom dem er kortere enn dette antallet minutter.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Automatisk oppdatering",
+    "autoRefreshLabel": "Intervall for automatisk oppdatering (sekunder)",
+    "autoRefreshHint": "Hvor ofte tidslinjen henter forespørselslisten fra serveren på nytt.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Zoom ut",
+    "zoomIn": "Zoom inn"
   },
   "metadata": {
     "compressionTitle": "Komprimering",
@@ -15015,6 +15178,83 @@
     "dismissAriaLabel": "Lukk"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Deaktiver generering av varianter for resonneringsnivå (f.eks. -low, -medium, -high) i /v1/models-katalogen.",
+  "teamCosts": {
+    "title": "Teamkostnader",
+    "subtitle": "Administrer delte myke budsjetter og katalogens kostnadsestimater.",
+    "refresh": "Oppdater",
+    "create": "Opprett team",
+    "edit": "Rediger team",
+    "archive": "Arkiver",
+    "selectTeam": "Team",
+    "searchTeams": "Søk i team",
+    "statusFilter": "Teamstatus",
+    "active": "Aktiv",
+    "archived": "Arkivert · skrivebeskyttet",
+    "allTeams": "Alle team",
+    "noTeams": "Ingen samsvarende team.",
+    "selectHint": "Opprett eller velg et team for å se kostnader.",
+    "loading": "Laster teamkostnader…",
+    "budgetTitle": "Gjeldende mykt budsjett",
+    "budgetSubtitle": "Vellykket bokført bruk · glidende vindu · uavhengig av rapportdatoer",
+    "archivedBudget": "Arkivert: budsjetthåndhevingen er inaktiv. Historiske rapporter er fortsatt tilgjengelige.",
+    "unlimited": "Ubegrenset – ingen delt mykt budsjett er konfigurert.",
+    "budgetUnavailable": "Budsjettstatus er utilgjengelig. Oppdater for å prøve igjen.",
+    "used": "Vellykket bruk",
+    "maximum": "Budsjettmaksimum",
+    "remaining": "Kjent rest",
+    "resets": "Tilbakestilles",
+    "unpricedBudget": "En del av den vellykkede bruken har ukjent pris. Den kjente summen er ufullstendig; budsjetthåndhevingen behandler dette vinduet som overskredet.",
+    "overBudget": "Budsjettet er nådd eller overskredet · {amount} over",
+    "reportTitle": "Bruksrapport",
+    "reportSubtitle": "Alle forsøk · katalogestimat i USD, ikke en faktura · hele UTC-datoer",
+    "reportPeriod": "Rapportperiode",
+    "day1": "1 dag",
+    "day7": "7 dager",
+    "day30": "30 dager",
+    "allTime": "All tid",
+    "reportSpend": "Estimert rapportutgift",
+    "requests": "Forespørsler",
+    "assignedKeys": "Tildelte nøkler",
+    "unpricedReport": "Denne rapporten inneholder ukjente priser. Den estimerte utgiften er ufullstendig.",
+    "breakdown": "Kostnad per API-nøkkel",
+    "noUsage": "Ingen bruk i denne rapportperioden.",
+    "keyName": "Navn på API-nøkkel",
+    "tokens": "Input- + output-tokens",
+    "unnamedKey": "Navnløs eller slettet nøkkel",
+    "unpriced": "Ukjent pris",
+    "members": "Medlemskap",
+    "memberSubtitle": "Endring av medlemskap lar historiske utgifter bli hos det opprinnelige teamet.",
+    "searchKeys": "Søk etter nøkler eller nåværende eiere",
+    "chooseKey": "Velg en API-nøkkel",
+    "unassigned": "Ikke tildelt",
+    "ownership": "Gjeldende faktureringsteam: {team}",
+    "assign": "Tildel",
+    "remove": "Fjern",
+    "noMembers": "Ingen nåværende medlemmer. Historisk bruk kan fortsatt telle mot budsjettet.",
+    "assignedAt": "Tildelt {date} (UTC)",
+    "name": "Teamnavn",
+    "description": "Beskrivelse",
+    "enableBudget": "Aktiver delt mykt budsjett",
+    "amount": "Budsjettbeløp (USD)",
+    "duration": "Glidende budsjettvindu",
+    "cancel": "Avbryt",
+    "save": "Lagre",
+    "confirm": "Bekreft",
+    "transferTitle": "Bekreft nøkkeloverføring",
+    "transferMessage": "Flytte denne nøkkelen fra «{source}» til «{destination}»? Historiske utgifter blir værende hos det opprinnelige teamet.",
+    "removeTitle": "Fjern nøkkeltildeling",
+    "removeMessage": "Fjerne denne nøkkelen fra «{team}»? Historiske utgifter blir værende i dette teamet.",
+    "archiveTitle": "Arkiver team",
+    "archiveMessage": "Arkivere «{team}»? Alle gjeldende koblinger lukkes, og budsjetthåndhevingen stopper. Historiske rapporter er fortsatt tilgjengelige.",
+    "invalidName": "Skriv inn et navn (1–200 tegn) og en beskrivelse på høyst 2000 tegn.",
+    "invalidAmount": "Skriv inn et endelig budsjettbeløp større enn null.",
+    "unauthorized": "Logg inn på administrasjonspanelet for å fortsette.",
+    "forbidden": "Du har ikke tillatelse til å administrere team. Inndataene dine er bevart.",
+    "notFound": "Dette teamet eller denne tildelingen finnes ikke lenger.",
+    "conflict": "Tildelingen eller teamet er endret. Oppdater og bekreft gjeldende eierskap før du prøver igjen.",
+    "failed": "Forespørselen mislyktes. Inndataene dine er bevart; prøv igjen.",
+    "partialBudget": "Noen bevarte daglige bøtter overlapper vindusgrensen og kan ikke fordeles nøyaktig. Viste utgifter er ufullstendige; gjenstående rom er utilgjengelig. Gjeldende policy for mykt budsjett er uendret."
+  },
   "connectionTest": {
     "title": "Testmelding",
     "description": "Send én reell forespørsel gjennom denne kontoen. Dette bruker en liten del av kvoten og kan starte et bruksvindu, avhengig av leverandøren.",
@@ -15074,5 +15314,8 @@
     "importButton": "Importer",
     "importFailed": "Importen mislyktes.",
     "importSuccess": "Importerte {connections} kontoer og {nodes} leverandørnoder; {skipped} hoppet over."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Start fra gjeldende posisjon (hopp over eksisterende logger)"
   }
 }

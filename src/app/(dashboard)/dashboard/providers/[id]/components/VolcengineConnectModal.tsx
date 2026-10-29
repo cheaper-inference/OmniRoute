@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Input, Modal } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import { providerText, type ProviderMessageTranslator } from "../providerPageHelpers";
 import { extractErrorMessage } from "@/shared/utils/upstreamError";
 
@@ -450,22 +451,16 @@ export default function VolcengineConnectModal({
             {phase === "identity_required" && session?.identityOptions?.length ? (
               <div className="space-y-2">
                 {session.identityOptions.map((option) => (
-                  <button
+                  <Button
                     key={option.index}
-                    type="button"
+                    variant="outline"
                     disabled={selectingIdentity}
+                    loading={selectingIdentity}
                     onClick={() => handleSelectIdentity(option.index)}
-                    className="w-full rounded-lg border border-border p-3 text-left text-sm transition-colors hover:bg-sidebar disabled:cursor-not-allowed disabled:opacity-60"
+                    className="h-auto w-full justify-start whitespace-normal p-3 text-left font-normal"
                   >
-                    {selectingIdentity ? (
-                      <span className="flex items-center gap-2">
-                        <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                        {option.label}
-                      </span>
-                    ) : (
-                      option.label
-                    )}
-                  </button>
+                    {option.label}
+                  </Button>
                 ))}
               </div>
             ) : (
@@ -511,7 +506,7 @@ export default function VolcengineConnectModal({
                   maxLength={6}
                 />
 
-                {session?.error && <p className="text-sm text-red-500">{session.error}</p>}
+                {session?.error && <p className="text-sm text-error">{session.error}</p>}
 
                 <div className="flex items-center justify-between">
                   <Button
@@ -546,7 +541,7 @@ export default function VolcengineConnectModal({
 
         {showPolling && (
           <div className="flex items-center gap-3 py-2">
-            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <Icon name="progress_activity" size={16} className="animate-spin text-text-muted" />
             <p className="text-sm text-text-muted">
               {phase === "submitting"
                 ? providerText(
@@ -561,11 +556,11 @@ export default function VolcengineConnectModal({
 
         {done && phase === "success" && (
           <div className="space-y-3">
-            <p className="text-sm font-medium text-green-600">
+            <p className="text-sm font-medium text-success">
               {providerText(t, "volcLoginSuccess", "Logged in to the Volcano Engine console")}
             </p>
             {bindingError ? (
-              <p className="text-sm text-red-500">
+              <p className="text-sm text-error">
                 {providerText(t, "volcBindError", "Plan binding failed: {error}", {
                   error: bindingError,
                 })}
@@ -574,7 +569,7 @@ export default function VolcengineConnectModal({
               <div className="space-y-1 text-sm">
                 {connectedPlans.length > 0 ? (
                   connectedPlans.map((item) => (
-                    <p key={item.plan} className="text-green-600">
+                    <p key={item.plan} className="text-success">
                       ✓ {item.plan} plan connected
                     </p>
                   ))
@@ -599,7 +594,7 @@ export default function VolcengineConnectModal({
 
         {done && phase !== "success" && (
           <div className="space-y-3">
-            <p className="text-sm text-red-500">
+            <p className="text-sm text-error">
               {session?.error ||
                 (phase === "timeout"
                   ? providerText(t, "volcTimeout", "Login timed out")

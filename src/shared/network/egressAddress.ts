@@ -9,6 +9,10 @@
 // `proxies/rotation.ts` (bundled near the provider registry) both use it, and
 // the browser bundle cannot resolve `node:net` (#11122). Classification parity
 // with `node:net#isIP` comes from `ipVersion` in `./privateHost.ts`.
+//
+// The ranking key of a pool member also lives here: `egressKeyForAddresses`
+// turns the addresses observed for a member into the key it is ranked under —
+// one exact address, or the /16 range a host rotates its exits inside.
 import { ipVersion, isPrivateHost } from "./privateHost";
 
 // Expand an IPv6 literal to its eight 16-bit groups, or null when malformed.
@@ -47,6 +51,59 @@ export function normalizeEgressAddress(input: unknown): string | null {
     .slice(0, 4)
     .map((group) => group.toString(16))
     .join(":")}`;
+}
+
+/**
+ * Range key of an IPv4 address: the /16 it belongs to, read from its two
+ * first bytes (`203.0.113.7` -> `r16:203.0.0.0/16`, `203.0.114.9` ->
+ * `r16:203.0.0.0/16` too). Members behind one host rotating its exits inside
+ * a single range share that range, so the range is the key they are ranked
+ * under. Null for anything that is not IPv4.
+ *
+ * Module-private: the rule reads one key per member, so the range key is only
+ * ever built here.
+ */
+function egressIpv4RangeKey(address: string): string | null {
+  if (ipVersion(address) !== 4) return null;
+  const parts = address.split(".");
+  return `r16:${parts[0]}.${parts[1]}.0.0/16`;
+}
+
+/**
+ * The key one member is ranked under, from the addresses observed for it.
+ *
+ * Contract: the addresses are already normalized by `normalizeEgressAddress`
+ * (a whole IPv4 address, or an IPv6 /64 key). They are used as they are —
+ * a single address is returned as it is, without a second validation.
+ *
+ * - no address: null (the member reads as unknown);
+ * - one address: that address's own key;
+ * - several addresses inside one IPv4 /16: that range's key (a host rotating
+ *   its exits inside one range);
+ * - addresses crossing two ranges: null.
+ * IPv6 keeps its /64 key: two addresses of one /64 already normalize to the
+ * same key, so two distinct IPv6 keys are two ranges.
+ *
+ * `truncated` says the read was cut by the read ceiling: the window may hold
+ * more addresses than were read, so it cannot be shown to stay inside one
+ * range and the member reads as unknown.
+ */
+export function egressKeyForAddresses(
+  addresses: Iterable<string>,
+  options?: { truncated?: boolean }
+): string | null {
+  if (options?.truncated) return null;
+  const distinct = new Set(addresses);
+  if (distinct.size === 0) return null;
+  if (distinct.size === 1) return [...distinct][0];
+  let range: string | null = null;
+  for (const address of distinct) {
+    const key = egressIpv4RangeKey(address);
+    if (key === null) return null; // another family: another range
+    if (range === null) range = key;
+    else if (range !== key) return null; // two ranges: the member reads as unknown
+  }
+  return range;
 }
 
 /**

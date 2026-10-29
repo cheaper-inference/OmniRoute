@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import Icon from "./Icon";
 import type { GoogleLoopbackHint } from "@/lib/oauth/utils/googleLoopbackHint";
 import type { PkceLoopbackMismatchHint } from "@/lib/oauth/utils/pkceLoopbackWarning";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
@@ -70,7 +71,7 @@ export function OAuthDeviceCodePanel({
               className="mt-3 flex items-center justify-center gap-1 text-xs text-text-muted"
               aria-label={t("deviceCodeWaiting")}
             >
-              <span className="material-symbols-outlined text-sm">schedule</span>
+              <Icon name="schedule" size={14} />
               <span>{formatDeviceCodeRemaining(secondsRemaining)}</span>
             </div>
           )}
@@ -78,7 +79,7 @@ export function OAuthDeviceCodePanel({
       </div>
       {polling && (
         <div className="flex items-center justify-center gap-2 text-sm text-text-muted">
-          <span className="material-symbols-outlined animate-spin">progress_activity</span>
+          <Icon name="progress_activity" className="animate-spin" />
           {t("deviceCodeWaiting")}
         </div>
       )}
@@ -140,8 +141,8 @@ export function OAuthLoopbackMismatchPanel({
     <>
       <div className="space-y-4">
         <div className="flex items-start gap-3">
-          <div className="size-10 shrink-0 rounded-full bg-amber-500/15 flex items-center justify-center">
-            <span className="material-symbols-outlined text-xl text-amber-500">lan</span>
+          <div className="size-10 shrink-0 rounded-full bg-warning/15 flex items-center justify-center">
+            <Icon name="lan" size={20} className="text-warning" />
           </div>
           <div>
             <h3 className="text-base font-semibold">{t("loopbackMismatchTitle")}</h3>
@@ -151,8 +152,8 @@ export function OAuthLoopbackMismatchPanel({
           </div>
         </div>
 
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-500 mb-1">
+        <div className="rounded-lg border border-warning/30 bg-warning/10 p-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-warning mb-1">
             {t("loopbackMismatchWhatHappened")}
           </p>
           <p className="text-sm text-text-muted">
@@ -232,10 +233,10 @@ function OAuthGoogleLoopbackNotice({ hint }: { hint: GoogleLoopbackHint }) {
   );
 
   return (
-    <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 space-y-3">
+    <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 space-y-3">
       <div>
-        <p className="text-sm font-semibold text-amber-500">
-          <span className="material-symbols-outlined text-sm align-middle mr-1">warning</span>
+        <p className="text-sm font-semibold text-warning">
+          <Icon name="warning" size={14} className="align-middle mr-1" />
           {t("googleLoopbackTitle")}
         </p>
         <p className="text-xs text-text-muted mt-1">
@@ -304,8 +305,8 @@ function OAuthRemoteAccessNotices({
   }
 
   return (
-    <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-3 text-xs text-blue-200">
-      <span className="material-symbols-outlined text-sm align-middle mr-1">info</span>
+    <div className="rounded-lg border border-info/30 bg-info/10 p-3 text-xs text-info">
+      <Icon name="info" size={14} className="align-middle mr-1" />
       {t("remoteAccessInfo")}
     </div>
   );
@@ -370,7 +371,7 @@ export function OAuthManualInputPanel({
             })}
           </p>
           {provider === "zed-hosted" && (
-            <p className="text-xs text-amber-500 mb-2">
+            <p className="text-xs text-warning mb-2">
               After signing in, Zed redirects to a local address like{" "}
               <code className="font-mono">http://127.0.0.1:&lt;port&gt;/?user_id=...</code> which
               the browser may show as unreachable — that is expected. Copy the FULL URL from the

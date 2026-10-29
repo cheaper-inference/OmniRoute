@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import { FieldLabelWithHelp } from "./parts";
 import {
   describeStickyRoundRobinLimit,
@@ -33,11 +35,6 @@ type Props = {
   t: TranslationFn;
   showHelp?: boolean;
 };
-
-const INPUT_CLASS =
-  "w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none";
-const SELECT_CLASS =
-  "w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-surface-1 focus:border-primary focus:outline-none";
 
 const FALLBACK_SETTINGS: RoutingSettings = {
   stickyRoundRobinLimit: 3,
@@ -110,7 +107,7 @@ export default function ComboRrLegibilityFields({
             showHelp={showHelp}
             htmlFor="combo-sticky-round-robin-limit"
           />
-          <input
+          <Input
             id="combo-sticky-round-robin-limit"
             data-testid="combo-sticky-round-robin-limit"
             type="number"
@@ -124,12 +121,8 @@ export default function ComboRrLegibilityFields({
                 stickyRoundRobinLimit: parseStickyLimitInput(e.target.value),
               })
             }
-            className={INPUT_CLASS}
           />
-          <p
-            data-testid="combo-sticky-limit-effective"
-            className="mt-1 text-[10px] text-text-muted"
-          >
+          <p data-testid="combo-sticky-limit-effective" className="mt-1 text-xs text-text-muted">
             {getI18nOrFallback(t, "stickyLimitEffective", "Effective {value} ({source})", {
               value: sticky.value,
               source: sourceLabel(t, sticky.source),
@@ -149,7 +142,7 @@ export default function ComboRrLegibilityFields({
             showHelp={showHelp}
             htmlFor="combo-connection-aware-expansion"
           />
-          <select
+          <Select
             id="combo-connection-aware-expansion"
             data-testid="combo-connection-aware-expansion"
             value={triStateFromOptionalBoolean(config.connectionAwareExpansion)}
@@ -159,25 +152,16 @@ export default function ComboRrLegibilityFields({
                 connectionAwareExpansion: optionalBooleanFromTriState(e.target.value),
               })
             }
-            className={SELECT_CLASS}
-          >
-            <option value="inherit">
-              {getI18nOrFallback(t, "triStateInherit", "inherit")}
-            </option>
-            <option value="on">
-              {getI18nOrFallback(t, "connectionAwareExpansionOn", "On")}
-            </option>
-            <option value="off">
-              {getI18nOrFallback(t, "connectionAwareExpansionOff", "Off")}
-            </option>
-          </select>
+            options={[
+              { value: "inherit", label: getI18nOrFallback(t, "triStateInherit", "inherit") },
+              { value: "on", label: getI18nOrFallback(t, "connectionAwareExpansionOn", "On") },
+              { value: "off", label: getI18nOrFallback(t, "connectionAwareExpansionOff", "Off") },
+            ]}
+          />
         </div>
       )}
       {showAffinityHint && (
-        <p
-          data-testid="combo-prompt-cache-affinity-hint"
-          className="text-[10px] text-text-muted"
-        >
+        <p data-testid="combo-prompt-cache-affinity-hint" className="text-xs text-text-muted">
           {getI18nOrFallback(
             t,
             "promptCacheAffinityHint",

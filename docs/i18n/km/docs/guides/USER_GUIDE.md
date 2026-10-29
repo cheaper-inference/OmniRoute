@@ -611,126 +611,131 @@ post_install() {
 <details>
 <summary><b>មើលម៉ូដែលដែលមានទាំងអស់</b></summary>
 
-> បញ្ជីខាងក្រោមត្រូវបានជ្រើសរើស និងរៀបចំពី `open-sse/config/providerRegistry.ts` សម្រាប់ v3.8.0។ កាតាឡុកលើក្លោដ (Gemini, OpenRouter ជាដើម) ត្រូវបានធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ — ដើម្បីមើលកាតាឡុកពេញលេញបច្ចុប្បន្ន សូមបើក **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → [provider] → ម៉ូដែលដែលមាន** ឬហៅ `GET /api/models/catalog`។
+> បញ្ជីខាងក្រោមត្រូវបានរៀបចំឡើងពី `open-sse/config/providerRegistry.ts` សម្រាប់ v3.8.0។ កាតាឡុកក្លោដ (Gemini, OpenRouter ជាដើម) ត្រូវបានធ្វើសមកាលកម្មដោយថាមវន្ត — សម្រាប់កាតាឡុកផ្ទាល់ពេញលេញ សូមបើក **Dashboard → Providers → [provider] → Available Models** ឬហៅ `GET /api/models/catalog`។
 >
-> ប្រសិនបើបញ្ជីដែលភ្ជាប់មកជាមួយរបស់អ្នកផ្តល់សេវាលែងត្រូវគ្នានឹងបញ្ជីបច្ចុប្បន្ន សូមប្រើ **នាំចូលពី /models** នៅលើទំព័រនោះ (ឬបើក **ធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ**) ដើម្បីទាញយកកាតាឡុកបច្ចុប្បន្នពីប្រភពដើម។ ចំណុចនេះត្រូវបានផ្ទៀងផ្ទាត់ក្នុង v3.8.50 សម្រាប់ LLM7.io (`gemini-3.1-flash-lite`) និង UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ការចូលប្រើ Pollinations ដោយអនាមិកនៅតែត្រូវបានកម្រិតដោយប្រភពដើម ក្នុងអំឡុងពេលធ្វើតេស្តដូចគ្នា។
+> បើបញ្ជីដែលមានស្រាប់របស់អ្នកផ្តល់សេវាបានខ្វែងពីការពិត សូមប្រើ **Import from /models** នៅលើទំព័រនោះ (ឬបើក **Auto-Sync**) ដើម្បីទាញយកកាតាឡុកផ្ទាល់ពី upstream។ រឿងនេះត្រូវបានផ្ទៀងផ្ទាត់ក្នុង v3.8.50 សម្រាប់ LLM7.io (`gemini-3.1-flash-lite`) និង UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ចំណែកការចូលប្រើអនាមិករបស់ Pollinations នៅតែមានកម្រិតដោយ upstream ក្នុងអំឡុងការសាកល្បងដដែល។
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ កម្រិតការប្រឹងប្រែង: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ កម្រិត effort៖ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth ឥតគិតថ្លៃ: ប្រើកាតាឡុកបច្ចុប្បន្នដែលបង្ហាញនៅក្រោម **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → Kiro → ម៉ូដែលដែលមាន**។ ភាពអាចប្រើបានអាស្រ័យលើគណនី និងគម្រោង។
+**Kiro (`kr/`)** — OAuth ឥតគិតថ្លៃ៖ សូមប្រើកាតាឡុកផ្ទាល់ដែលបង្ហាញនៅក្រោម **Dashboard → Providers → Kiro → Available Models**។ ភាពអាចរកបានអាស្រ័យលើគណនី និងផែនការ។
 
-**Qoder (`if/`)** — OAuth ឥតគិតថ្លៃ: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth ឥតគិតថ្លៃ៖ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M៖ `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M៖ `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ខែ ថ្លៃថេរ ឬបង់តាមការប្រើប្រាស់: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ខែ តម្លៃថេរ ឬបង់តាមការប្រើប្រាស់៖ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — កូនសោ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — កូនសោ API៖ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — ល្បឿនលឿនខ្លាំង: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — លឿនបំផុត៖ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok ដើម: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok ដើម៖ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — បង្ហោះនៅសហភាពអឺរ៉ុប: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — ហោសនៅ EU៖ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — បន្ថែមសមត្ថភាពដោយការស្វែងរក: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — បំពាក់បន្ថែមដោយការស្វែងរក៖ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ប្រភពបើកចំហ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ឥតគិតថ្លៃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — កូដចំហ៖ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ឥតគិតថ្លៃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — ការអនុមានលឿន: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — inference លឿន៖ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — មាត្រដ្ឋានវេហ្វឺរ: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — មាត្រដ្ឋាន wafer៖ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — ផ្តោតលើ RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — ផ្តោតលើ RAG៖ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — សម្រាប់សហគ្រាស: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — សម្រាប់សហគ្រាស៖ `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: ធ្វើសមកាលកម្មបច្ចុប្បន្នតាមកូនសោ API ពី Google — មិនមានបញ្ជីថេរទេ។ ភ្ជាប់កូនសោមួយនៅក្នុង **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា** បន្ទាប់មកប្រើ **ម៉ូដែលដែលមាន** ដើម្បីនាំចូលកាតាឡុកបច្ចុប្បន្ន (ឧ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)។
+**Gemini (Google Cloud `gemini/`)**៖ ធ្វើសមកាលកម្មផ្ទាល់តាមកូនសោ API នីមួយៗពី Google — គ្មានបញ្ជីថេរទេ។ ភ្ជាប់កូនសោនៅក្នុង **Dashboard → Providers** រួចប្រើ **Available Models** ដើម្បីនាំចូលកាតាឡុកបច្ចុប្បន្ន (ឧ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)។
 
-**អ្នកផ្តល់សេវាដែលត្រូវគ្នាផ្សេងទៀត** (បានជ្រើសរើស): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (តាមរយៈ `aws-bedrock`), `azure-ai`, `openrouter` (កាតាឡុកឆ្លងកាត់ដោយផ្ទាល់), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`។ អ្នកផ្តល់សេវានីមួយៗរក្សាបញ្ជីម៉ូដែលផ្ទាល់ខ្លួននៅក្នុង `providerRegistry.ts` ហើយអាចធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ នៅពេលអ្នកផ្តល់សេវាបង្ហាញ endpoint `/models`។
+**អ្នកផ្តល់សេវាដែលឆ្គួតគ្នាផ្សេងទៀត** (ជម្រើស)៖ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (តាមរយៈ `aws-bedrock`), `azure-ai`, `openrouter` (កាតាឡុក passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`។ នីមួយៗរក្សាបញ្ជីម៉ូដែលផ្ទាល់ខ្លួននៅក្នុង `providerRegistry.ts` ហើយអាចធ្វើសមកាលកម្មស្វ័យប្រវត្តិបាន នៅពេលអ្នកផ្តល់សេវាបង្ហាញ endpoint `/models`។
 
-**កំណត់ចំណាំអំពីលេខសម្គាល់ម៉ូដែល:** OmniRoute ប្រើលេខសម្គាល់ដើមរបស់អ្នកផ្តល់សេវា (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)។ លេខសម្គាល់ខ្លះមានកំណែប្រើសញ្ញាចុច ពីព្រោះ API ប្រភពដើមតម្រូវឱ្យប្រើទម្រង់នោះ។ ប្រសិនបើម៉ូដែលមួយមិនមានក្នុងបញ្ជីខាងលើ សូមដំណើរការ `omniroute models --search <term>` ឬហៅ `GET /api/models/catalog` ដើម្បីបញ្ជាក់ភាពអាចប្រើបាន។
+**ចំណាំអំពី ID ម៉ូដែល៖** OmniRoute ប្រើ ID ជាក់លាក់របស់អ្នកផ្តល់សេវា (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)។ ID ខ្លះមានកំណែដែលមានចុច ព្រោះនោះជារបៀបដែល API upstream រំពឹងទុក។ បើម៉ូដែលមិនមានក្នុងបញ្ជីខាងលើទេ សូមដំណើរការ `omniroute models --search <term>` ឬហៅ `GET /api/models/catalog` ដើម្បីបញ្ជាក់ភាពអាចរកបាន។
 
 </details>
 
 ---
 
-## 🧩 មុខងារកម្រិតខ្ពស់
+## 🧩 លក្ខណៈពិសេសកម្រិតខ្ពស់
 
 ### ម៉ូដែលផ្ទាល់ខ្លួន
 
-បន្ថែម model ID ណាមួយទៅ provider ណាមួយ ដោយមិនចាំបាច់រង់ចាំការអាប់ដេតកម្មវិធី៖
+បន្ថែម ID គំរូណាមួយទៅកាន់អ្នកផ្តល់សេវាណាមួយដោយមិនរង់ចាំការធ្វើបច្ចុប្បន្នភាពកម្មវិធី៖
 
 ```bash
-# តាមរយៈ API
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# បញ្ជី៖ curl http://localhost:20128/api/provider-models?provider=openai
-# លុប៖ curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-ឬប្រើ Dashboard៖ **Providers → [Provider] → Custom Models**។
+ឬប្រើផ្ទាំងគ្រប់គ្រង៖** អ្នកផ្តល់ → [អ្នកផ្តល់] → គំរូផ្ទាល់ខ្លួន** .
 
-ចំណាំ៖
+កំណត់ចំណាំ៖
 
-- Provider ដែលឆបគ្នាជាមួយ OpenRouter និង OpenAI/Anthropic ត្រូវបានគ្រប់គ្រងតែពី **Available Models** ប៉ុណ្ណោះ។ ការបន្ថែមដោយដៃ ការនាំចូល និងការធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ សុទ្ធតែត្រូវបញ្ចូលទៅក្នុងបញ្ជីម៉ូដែលដែលអាចប្រើបានដូចគ្នា ដូច្នេះមិនមានផ្នែក Custom Models ដាច់ដោយឡែកសម្រាប់ provider ទាំងនោះទេ។
-- ផ្នែក **Custom Models** ត្រូវបានបម្រុងសម្រាប់ provider ដែលមិនផ្តល់ការនាំចូលម៉ូដែលដែលអាចប្រើបាន និងមានការគ្រប់គ្រង។
+- អ្នកផ្តល់សេវាOpenRouter និង OpenAI/Anthropic-compatible ត្រូវបានគ្រប់គ្រងពី** ម៉ូដែលដែលមាន** តែប៉ុណ្ណោះ។ បន្ថែម នាំចូល និងធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិនូវដីទាំងអស់នៅក្នុងបញ្ជីគំរូដែលមានដូចគ្នា ដូច្នេះមិនមានផ្នែកគំរូផ្ទាល់ខ្លួនដាច់ដោយឡែកសម្រាប់អ្នកផ្តល់សេវាទាំងនោះទេ។
+- នេះ។** ម៉ូដែលផ្ទាល់ខ្លួន** ផ្នែកត្រូវបានបម្រុងទុកសម្រាប់អ្នកផ្តល់សេវាដែលមិនបង្ហាញការនាំចូលម៉ូដែលដែលមានការគ្រប់គ្រង។
 
-### Provider ផ្ទាល់ខ្លួនដែលឆបគ្នាជាមួយ OpenAI
+### អ្នកផ្តល់សេវាដែលត្រូវគ្នានឹង OpenAI ផ្ទាល់ខ្លួន
 
-Gateway ណាមួយដែលប្រើ OpenAI API (proxy ដែល host ដោយខ្លួនឯង, vLLM ឬ aggregator របស់ភាគីទីបី)
-អាចត្រូវបានបន្ថែមជាថ្នាំង provider ដាច់ដោយឡែករបស់វា៖
+ច្រកផ្លូវណាមួយដែលនិយាយ OpenAI API (ប្រូកស៊ីបង្ហោះដោយខ្លួនឯង vLLM ដែលជាអ្នកប្រមូលផ្តុំភាគីទីបី) អាចត្រូវបានបន្ថែមជាថ្នាំងអ្នកផ្តល់សេវាផ្ទាល់ខ្លួនរបស់វា៖
 
-1. **Providers → Add OpenAI Compatible**។
-2. **Name**៖ ស្លាកបង្ហាញសម្រាប់ថ្នាំង។
-3. **Prefix**៖ ឈ្មោះសម្រាប់ routing។ Client ហៅម៉ូដែលក្នុងទម្រង់ `<prefix>/<model>` ដូច្នេះថ្នាំងដែលមាន
-   prefix `mygw` នឹងបម្រើ `mygw/gpt-4o-mini`។ តម្រូវឱ្យមាន ហើយមិនមានការដាក់កម្រិតលើតួអក្សរទេ។
-4. **API Type**៖ ក្រុម endpoint ដែល gateway ផ្តល់ជូន (Chat Completions, Responses,
-   Embeddings, audio, images)។
-5. **Base URL**៖ ឫស API រហូតដល់ និងរួមបញ្ចូល `/v1` (ឧទាហរណ៍
-   `https://gateway.example.com/v1`) មិនមែន path `/chat/completions` ពេញលេញទេ។ Gateway ដែលមាន
-   path មិនស្តង់ដារ ត្រូវកំណត់វានៅក្រោម **Advanced Settings** (chat path, models path)។
-6. វាល **API Key (for Check)** គ្រាន់តែសាកល្បងការតភ្ជាប់ប៉ុណ្ណោះ។ បន្ទាប់ពីបង្កើតថ្នាំងរួច
-   បើកវា ហើយប្រើ **Add Connection** ដើម្បីរក្សាទុក key ដែល request នឹងប្រើ។
+1. **អ្នកផ្តល់ → បន្ថែម OpenAI ឆបគ្នា។** .
+2. **ឈ្មោះ** ៖ ស្លាកបង្ហាញសម្រាប់ថ្នាំង។
+3. **បុព្វបទ** ៖ ឈ្មោះផ្លូវ។ អតិថិជនហៅម៉ូដែលថា `<prefix>/<model>` ដូច្នេះថ្នាំងដែលមានបុព្វបទ `mygw` បម្រើ `mygw/gpt-4o-mini`។ ទាមទារ; មិនមានការរឹតបន្តឹងតួអក្សរទេ។
+4. **ប្រភេទ API** ៖ គ្រួសារចុងដែលច្រកចេញចូលបម្រើ (ការបញ្ចប់ការជជែក ការឆ្លើយតប ការបង្កប់ អូឌីយ៉ូ រូបភាព)។
+5. **មូលដ្ឋាន URL** ៖ ឫស API រហូតដល់ និងរួមទាំង `/v1` (ឧទាហរណ៍ `https://gateway.example.com/v1`) មិនមែនជាផ្លូវ `/chat/completions` ពេញលេញទេ។ ច្រកផ្លូវដែលមានផ្លូវមិនស្តង់ដារកំណត់ពួកវា** ការកំណត់កម្រិតខ្ពស់** (ផ្លូវជជែក, ផ្លូវគំរូ) ។
+6. នេះ។**API សោ (សម្រាប់ពិនិត្យ)** វាលគ្រាន់តែសាកល្បងការតភ្ជាប់ប៉ុណ្ណោះ។ បន្ទាប់ពីបង្កើតថ្នាំងសូមបើកវាហើយប្រើ** បន្ថែមការតភ្ជាប់** ដើម្បីរក្សាទុកសោដែលសំណើនឹងប្រើ។
 
-ថ្នាំងនឹងទទួលបាន ID ខាងក្នុងក្នុងទម្រង់ `openai-compatible-<apiType>-<uuid>`; អ្នកមិនចាំបាច់
-វាយវាទេ ព្រោះ prefix គឺជាឈ្មោះសាធារណៈ។
+ថ្នាំងទទួលបានលេខសម្គាល់ខាងក្នុងនៃទម្រង់ `openai-compatible-<apiType>-<uuid>`; អ្នកមិនចាំបាច់វាយវាទេ បុព្វបទគឺជាឈ្មោះសាធារណៈ។
 
-#### Prefix ដែលបានបម្រុងទុក
+#### បុព្វបទដែលបានបម្រុងទុក
 
-Prefix មិនអាចជា ID ឬ alias របស់ provider ដែលមានស្រាប់ក្នុងប្រព័ន្ធ (ឧទាហរណ៍ `openai`, `cf`) ឬ
-ID របស់ provider ដែលបានឈប់ប្រើនោះទេ។ កម្មវិធីដោះស្រាយម៉ូដែលពិនិត្យ ID និង alias ដែលមានស្រាប់ក្នុងប្រព័ន្ធ មុន
-ថ្នាំងផ្ទាល់ខ្លួន ដូច្នេះថ្នាំងដែលប្រើ prefix មួយក្នុងចំណោម prefix ទាំងនោះ នឹងមិនទទួលបាន traffic ឡើយ៖
-`<prefix>/model` នឹងទៅកាន់ provider ដែលមានស្រាប់ក្នុងប្រព័ន្ធជំនួសវិញ ឬបរាជ័យដោយបិទជិត ប្រសិនបើ provider នោះ
-ត្រូវបានឈប់ប្រើ។ ការបង្កើត ឬកែសម្រួលថ្នាំងដោយប្រើ prefix បែបនេះ នឹងត្រូវបានបដិសេធជាមួយ៖
+បុព្វបទមិនអាចជាលេខសម្គាល់ ឬឈ្មោះក្លែងក្លាយរបស់អ្នកផ្តល់សេវាដែលភ្ជាប់មកជាមួយទេ (ឧទាហរណ៍ `openai`, `cf`) ឬលេខសម្គាល់របស់អ្នកផ្តល់សេវាចូលនិវត្តន៍។ អ្នកដោះស្រាយគំរូពិនិត្យលេខសម្គាល់ដែលភ្ជាប់មកជាមួយ និងឈ្មោះក្លែងក្លាយមុនថ្នាំងផ្ទាល់ខ្លួន ដូច្នេះថ្នាំងដែលប្រើបុព្វបទមួយក្នុងចំណោមបុព្វបទទាំងនោះនឹងមិនទទួលបានចរាចរណ៍ទេ៖ `<prefix>/model` នឹងទៅកាន់អ្នកផ្តល់សេវាដែលភ្ជាប់មកជាមួយជំនួសវិញ ឬបរាជ័យបិទប្រសិនបើអ្នកផ្តល់សេវានោះចូលនិវត្តន៍។ ការបង្កើត ឬកែសម្រួលថ្នាំងដែលមានបុព្វបទបែបនេះត្រូវបានបដិសេធដោយ៖
 
 ```text
-prefix: "<prefix>" គឺជា prefix របស់ provider ដែលបានបម្រុងទុក — សូមជ្រើសរើស prefix ផ្សេង (ID/alias ដែលបានបម្រុងទុក មិនអាចប្រើសម្រាប់ថ្នាំងផ្ទាល់ខ្លួនបានទេ ពីព្រោះ request ដូចជា <prefix>/model ត្រូវបាន route ទៅកាន់ provider ដែលមានស្រាប់ក្នុងប្រព័ន្ធ ឬបរាជ័យដោយបិទជិត នៅពេលវាត្រូវបានឈប់ប្រើ)
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-ជ្រើសរើស prefix ដាច់ដោយឡែក (`mygw`, `acme-proxy`)។ ប្រសិនបើ request ទៅកាន់ថ្នាំងផ្ទាល់ខ្លួនបរាជ័យជាមួយ
-កំហុសដែលបង្ហាញឈ្មោះ provider ដែលមានស្រាប់ក្នុងប្រព័ន្ធ ឬព័ត៌មានសម្គាល់អត្តសញ្ញាណរបស់វា សូមពិនិត្យថាតើ prefix របស់ថ្នាំងនោះ
-ត្រូវបានបម្រុងទុកឬអត់៖ ថ្នាំងដែលបានរក្សាទុក មុនពេលមានច្បាប់នេះ នៅតែត្រូវបានរក្សាទុក ប៉ុន្តែ prefix របស់វាត្រូវបាន route ទៅកាន់
-provider ដែលមានស្រាប់ក្នុងប្រព័ន្ធ។ កែសម្រួលថ្នាំង ហើយផ្តល់ prefix ថ្មីឱ្យវា។
+ជ្រើសរើសបុព្វបទជាក់លាក់ (`mygw`, `acme-proxy`) ។ ប្រសិនបើសំណើទៅកាន់ថ្នាំងផ្ទាល់ខ្លួនបរាជ័យជាមួយនឹងកំហុសដែលដាក់ឈ្មោះអ្នកផ្តល់សេវាដែលភ្ជាប់មកជាមួយ ឬលិខិតសម្គាល់របស់វា សូមពិនិត្យមើលថាតើបុព្វបទរបស់ថ្នាំងត្រូវបានបម្រុងទុកឬអត់៖ ថ្នាំងដែលបានរក្សាទុកមុនពេលមានច្បាប់នេះនៅតែត្រូវបានរក្សាទុក ប៉ុន្តែបុព្វបទផ្លូវរបស់ពួកគេទៅកាន់អ្នកផ្តល់សេវាដែលភ្ជាប់មកជាមួយ។ កែសម្រួលថ្នាំង និងផ្តល់ឱ្យវានូវបុព្វបទថ្មី។
 
-### ការតភ្ជាប់ OmniRoute Peer ជាខ្សែសង្វាក់
+#### ជម្រើសច្រកផ្លូវតភ្ជាប់
 
-OmniRoute gateway មួយទៀតអាចត្រូវបានបន្ថែមជា provider **Custom OpenAI-compatible**។ ប្រើ
-base URL `/v1` របស់ peer និង API key ដាច់ដោយឡែកដែលមានសិទ្ធិតិចបំផុត ដែលចេញដោយ peer នោះ។
+គ្រាប់ចុចទាំងនេះចូលទៅក្នុង `providerSpecificData` នៃការតភ្ជាប់ (ឧទាហរណ៍តាមរយៈ `PUT /api/providers/{id}`):
 
-សម្រាប់ខ្សែសង្វាក់តបតគ្នា ឬច្រើនតំណ សូមបើក loop guard ដែលត្រូវជ្រើសរើសបើកដោយចេតនា នៅលើ gateway នីមួយៗ៖
+- `toolNameMaxLength` (ចំនួនគត់, 1–1024) — សម្រាប់ការតភ្ជាប់ដែលត្រូវគ្នានឹងទម្រង់ការជជែក OpenAI ដែលច្រកផ្លូវបដិសេធឈ្មោះឧបករណ៍វែង។ ឈ្មោះវែងជាងត្រូវបានផ្ញើជាឈ្មោះក្លែងក្លាយខ្លី ហើយត្រូវបានស្ដារឡើងវិញក្នុងការឆ្លើយតប។
+- `quotaEndpoint` — ចំណុចបញ្ចប់ quota/credits របស់ច្រកចេញចូល អានសម្រាប់បន្ទះកូតានៃផ្ទាំងគ្រប់គ្រង និងការកំណត់ផ្លូវដែលដឹងអំពីកូតា។ ដំណើរការទាំងការភ្ជាប់ OpenAI- និង Anthropic-compatible; រូបរាងពេញលេញត្រូវបានចងក្រងជាឯកសារ `open-sse/services/usage/openaiCompatible.ts`។
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### ខ្សែសង្វាក់ OmniRoute Peers
+
+ច្រកផ្លូវ OmniRoute មួយផ្សេងទៀតអាចត្រូវបានបន្ថែមជា** ផ្ទាល់ខ្លួន OpenAI ដែលឆបគ្នា។** អ្នកផ្តល់សេវា។ ប្រើ `/v1` មូលដ្ឋាន URL របស់មិត្តភ័ក្តិ និងកូនសោ API ដែលមានឯកសិទ្ធិតិចបំផុតដែលចេញដោយមិត្តភក្ដិនោះ។
+
+សម្រាប់ខ្សែសង្វាក់ចំរុះ ឬពហុហប សូមបើកមុខងារការពាររង្វិលជុំជ្រើសរើសនៅគ្រប់ច្រកចេញចូល៖
 
 ```bash
 # gateway-a
@@ -746,18 +751,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-មានតែ request ដែលបានផ្ញើទៅកាន់ URL របស់ peer ដែលបានអនុញ្ញាតយ៉ាងច្បាស់ប៉ុណ្ណោះ ទើបទទួលបាន header
-`X-OmniRoute-Peer-Trace`។ Gateway នឹងបដិសេធ instance ID ដែលកើតឡើងម្តងទៀត ឬចំនួនតំណដែលបានប្រើអស់
-ដោយប្រើ HTTP `508 Loop Detected`; provider upstream ធម្មតាមិនទទួលបាន metadata របស់ peer ទេ។
+មានតែសំណើដែលបានផ្ញើទៅ URL មិត្តភ័ក្តិក្នុងបញ្ជីដែលអនុញ្ញាតច្បាស់លាស់ប៉ុណ្ណោះដែលទទួលបានបឋមកថា `X-OmniRoute-Peer-Trace` ។ ច្រកផ្លូវបដិសេធឧទាហរណ៍ម្តងហើយម្តងទៀត ID ឬថវិកាហបហប់ជាមួយ HTTP `508 Loop Detected`; អ្នកផ្តល់សេវាចរន្តធម្មតាមិនទទួលបានទិន្នន័យមេតារបស់មិត្តភ័ក្តិទេ។
 
-ការតភ្ជាប់ peer ជាខ្សែសង្វាក់ មិនមែនជាការចម្លង database ឬ failover របស់ host ទេ។ Gateway នីមួយៗរក្សា
-ស្ថានភាព SQLite, cache, counter កម្រិតប្រើប្រាស់ និង session ដោយឯករាជ្យ។ ប្រើ reverse proxy ដែលមានការពិនិត្យសុខភាព ឬ client
-failover សម្រាប់ភាពអាចប្រើបានបែប active/passive ឬ active/active ហើយកុំ mount database SQLite មួយ
-ទៅក្នុង instance OmniRoute ច្រើនដែលកំពុងដំណើរការ។
+ខ្សែសង្វាក់មិត្តភ័ក្តិមិនមែនជាការចម្លងមូលដ្ឋានទិន្នន័យ ឬម៉ាស៊ីនបរាជ័យនោះទេ។ ច្រកចេញចូលនីមួយៗរក្សារដ្ឋ SQLite ឯករាជ្យ ឃ្លាំងសម្ងាត់ រាប់អត្រា និងវគ្គ។ ប្រើប្រូកស៊ីបញ្ច្រាសដែលបានពិនិត្យសុខភាព ឬម៉ាស៊ីនភ្ញៀវបរាជ័យសម្រាប់ភាពអាចរកបាន active/passive ឬ active/active ហើយកុំដំឡើងមូលដ្ឋានទិន្នន័យ SQLite ទៅក្នុងឧទាហរណ៍ OmniRoute ដែលដំណើរការច្រើន។
 
-### Route សម្រាប់ Provider ជាក់លាក់
+### ផ្លូវអ្នកផ្តល់សេវាពិសេស
 
-បញ្ជូន request ដោយផ្ទាល់ទៅកាន់ provider ជាក់លាក់ ជាមួយការផ្ទៀងផ្ទាត់ម៉ូដែល៖
+ផ្លូវស្នើសុំដោយផ្ទាល់ទៅកាន់អ្នកផ្តល់សេវាជាក់លាក់ដែលមានសុពលភាពគំរូ៖
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -765,140 +765,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Prefix របស់ provider នឹងត្រូវបានបន្ថែមដោយស្វ័យប្រវត្តិ ប្រសិនបើវាបាត់។ ម៉ូដែលដែលមិនត្រូវគ្នានឹងត្រឡប់ `400`។
+បុព្វបទអ្នកផ្តល់សេវាត្រូវបានបន្ថែមដោយស្វ័យប្រវត្តិប្រសិនបើបាត់។ ម៉ូដែលមិនត្រូវគ្នាត្រឡប់ `400`។
 
-### ការកំណត់រចនាសម្ព័ន្ធ Network Proxy
+### ការកំណត់រចនាសម្ព័ន្ធប្រូកស៊ីបណ្តាញ
 
 ```bash
-# កំណត់ proxy សកល
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Proxy សម្រាប់ provider នីមួយៗ
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# សាកល្បង proxy
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**លំដាប់អាទិភាព៖** ជាក់លាក់តាម Key → ជាក់លាក់តាម Combo → ជាក់លាក់តាម Provider → សកល → Environment។
+**អាទិភាព៖** zqa ជាក់លាក់ → បន្សំ → ជាក់លាក់អ្នកផ្តល់សេវា → សកល → បរិស្ថាន។
 
-### API កាតាឡុកម៉ូដែល
+### API គំរូ
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-ត្រឡប់ម៉ូដែលដែលបានដាក់ជាក្រុមតាម provider ជាមួយប្រភេទ (`chat`, `embedding`, `image`)។
+ត្រឡប់គំរូដែលដាក់ជាក្រុមតាមអ្នកផ្តល់សេវាជាមួយនឹងប្រភេទ (`chat`, `embedding`, `image`) ។
 
-### ការធ្វើសមកាលកម្ម Cloud
+### Cloud សមកាលកម្ម
 
-- ធ្វើសមកាលកម្ម provider, combo និងការកំណត់ រវាងឧបករណ៍នានា
-- ធ្វើសមកាលកម្មផ្ទៃខាងក្រោយដោយស្វ័យប្រវត្តិ ជាមួយ timeout + fail-fast
-- នៅក្នុង production គួរប្រើ `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` ខាង server
+- ធ្វើសមកាលកម្មអ្នកផ្តល់សេវា បន្សំ និងការកំណត់នៅលើឧបករណ៍នានា
+- ការធ្វើសមកាលកម្មផ្ទៃខាងក្រោយដោយស្វ័យប្រវត្តិជាមួយនឹងការអស់ពេល + បរាជ័យលឿន
+- ចូលចិត្ត `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` ខាងម៉ាស៊ីនមេនៅក្នុងផលិតកម្ម
 
-### Cloudflare Quick Tunnel
+### Cloudflare ផ្លូវរូងក្រោមដីរហ័ស
 
-- មាននៅក្នុង **Dashboard → Endpoints** សម្រាប់ Docker និងការដាក់ឱ្យដំណើរការដែលបង្ហោះដោយខ្លួនឯងផ្សេងទៀត
-- បង្កើត URL `https://*.trycloudflare.com` បណ្ដោះអាសន្ន ដែលបញ្ជូនបន្តទៅកាន់ endpoint `/v1` ដែលឆបគ្នាជាមួយ OpenAI បច្ចុប្បន្នរបស់អ្នក
-- ការបើកប្រើលើកដំបូងនឹងដំឡើង `cloudflared` តែនៅពេលចាំបាច់ប៉ុណ្ណោះ; ការចាប់ផ្ដើមឡើងវិញនៅពេលក្រោយនឹងប្រើ binary ដែលបានគ្រប់គ្រងដដែលឡើងវិញ
-- Quick Tunnels មិនត្រូវបានស្ដារឡើងវិញដោយស្វ័យប្រវត្តិបន្ទាប់ពីការចាប់ផ្ដើម OmniRoute ឬ container ឡើងវិញទេ; សូមបើកពួកវាឡើងវិញពី dashboard នៅពេលចាំបាច់
-- URL របស់ tunnel មានលក្ខណៈបណ្ដោះអាសន្ន និងផ្លាស់ប្ដូររាល់ពេលដែលអ្នកបញ្ឈប់/ចាប់ផ្ដើម tunnel
-- Managed Quick Tunnels ប្រើការបញ្ជូនតាម HTTP/2 ជាលំនាំដើម ដើម្បីជៀសវាងការព្រមានរំខានអំពី QUIC UDP buffer នៅក្នុង container ដែលមានធនធានកំណត់
-- កំណត់ `CLOUDFLARED_PROTOCOL=quic` ឬ `auto` ប្រសិនបើអ្នកចង់កំណត់ជម្រើសការបញ្ជូនដែលបានគ្រប់គ្រងឡើងវិញ
-- កំណត់ `CLOUDFLARED_BIN` ប្រសិនបើអ្នកចង់ប្រើ binary `cloudflared` ដែលបានដំឡើងជាមុន ជំនួសឱ្យការទាញយកដែលបានគ្រប់គ្រង
-- ផ្ទាំង Cloudflare Quick Tunnel, Tailscale Funnel និង ngrok Tunnel អាចបង្ហាញ ឬលាក់បាននៅក្នុង **Settings → Appearance**។ ការលាក់ផ្ទាំងមិនបញ្ឈប់ tunnel ដែលកំពុងដំណើរការទេ។
+- មាននៅក្នុង** ផ្ទាំងគ្រប់គ្រង → ចំណុចបញ្ចប់** សម្រាប់ Docker និងការដាក់ពង្រាយដែលបង្ហោះដោយខ្លួនឯងផ្សេងទៀត។
+- បង្កើត `https://*.trycloudflare.com` URL បណ្តោះអាសន្នដែលបញ្ជូនបន្តទៅចំណុចបញ្ចប់ `/v1` ដែលត្រូវគ្នានឹង OpenAI បច្ចុប្បន្នរបស់អ្នក។
+- ដំបូងបើកការដំឡើង `cloudflared` តែនៅពេលចាំបាច់។ ចាប់ផ្តើមឡើងវិញនៅពេលក្រោយ ប្រើប្រព័ន្ធគោលពីរដែលបានគ្រប់គ្រងដូចគ្នា។
+- Quick Tunnels មិនត្រូវបានស្ដារឡើងវិញដោយស្វ័យប្រវត្តិបន្ទាប់ពីការចាប់ផ្ដើម OmniRoute ឬកុងតឺន័រឡើងវិញទេ។ បើកពួកវាឡើងវិញពីផ្ទាំងគ្រប់គ្រងនៅពេលចាំបាច់
+- ផ្លូវរូងក្រោមដី URLs មានភាពច្របូកច្របល់ និងផ្លាស់ប្តូររាល់ពេលដែលអ្នក stop/start ផ្លូវរូងក្រោមដី
+- Managed Quick Tunnels លំនាំដើមសម្រាប់ការដឹកជញ្ជូន HTTP/2 ដើម្បីជៀសវាងការព្រមានសតិបណ្ដោះអាសន្ន QUIC UDP ដែលគ្មានសំលេងរំខាននៅក្នុងធុងផ្ទុក
+- កំណត់ `CLOUDFLARED_PROTOCOL=quic` ឬ `auto` ប្រសិនបើអ្នកចង់បដិសេធជម្រើសដឹកជញ្ជូនដែលបានគ្រប់គ្រង
+- កំណត់ `CLOUDFLARED_BIN` ប្រសិនបើអ្នកចូលចិត្តប្រើប្រព័ន្ធគោលពីរ `cloudflared` ដែលបានដំឡើងជាមុនជំនួសឱ្យការទាញយកដែលបានគ្រប់គ្រង
+- Cloudflare Quick Tunnel, Tailscale Funnel, និង ngrok Tunnel អាចបង្ហាញ ឬលាក់នៅក្នុង** ការកំណត់ → រូបរាង** . ការលាក់បន្ទះមិនបញ្ឈប់ផ្លូវរូងក្រោមដីដែលកំពុងដំណើរការនោះទេ។
 
-### ភាពឆ្លាតវៃរបស់ LLM Gateway (ដំណាក់កាលទី 9)
+### LLM Gateway Intelligence (ដំណាក់កាលទី 9)
 
-- **ឃ្លាំងសម្ងាត់តាមអត្ថន័យ** — រក្សាទុកជាស្វ័យប្រវត្តិនូវ response ដែលមិនមែនជា streaming និងមាន temperature=0 (រំលងដោយប្រើ `X-OmniRoute-No-Cache: true`)
-- **ភាពមិនផ្លាស់ប្ដូរលទ្ធផលនៃសំណើ** — លុបសំណើស្ទួនក្នុងរយៈពេល 5 វិនាទី តាមរយៈ header `Idempotency-Key` ឬ `X-Request-Id`
-- **ការតាមដានវឌ្ឍនភាព** — ជ្រើសរើសប្រើព្រឹត្តិការណ៍ SSE `event: progress` តាមរយៈ header `X-OmniRoute-Progress: true`
+- **ឃ្លាំងសម្ងាត់ Semantic** - ឃ្លាំងសម្ងាត់ដោយស្វ័យប្រវត្តិដែលមិនស្ទ្រីម, សីតុណ្ហភាព = 0 ការឆ្លើយតប (ឆ្លងកាត់ជាមួយ `X-OmniRoute-No-Cache: true`)
+- **ស្នើសុំ Ideempotency** - សំណើស្ទួនក្នុងរយៈពេល 5s តាមរយៈបឋមកថា `Idempotency-Key` ឬ `X-Request-Id`
+- **ការតាមដានវឌ្ឍនភាព** - ជ្រើសរើសព្រឹត្តិការណ៍ SSE `event: progress` តាមរយៈបឋមកថា `X-OmniRoute-Progress: true`
 
 ---
 
-### កន្លែងសាកល្បងកម្មវិធីបកប្រែ
+### កន្លែងលេងអ្នកបកប្រែ
 
-ចូលប្រើតាមរយៈ **Dashboard → Translator**។ ស្វែងរកកំហុស និងមើលជារូបភាពពីរបៀបដែល OmniRoute បកប្រែសំណើ API រវាង provider នានា។
+ការចូលប្រើតាមរយៈ** Dashboard → អ្នកបកប្រែ** . បំបាត់កំហុស និងមើលឃើញពីរបៀបដែល OmniRoute បកប្រែសំណើ API រវាងអ្នកផ្តល់សេវា។
 
-| របៀប                     | គោលបំណង                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------- |
-| **កន្លែងសាកល្បង**        | ជ្រើសរើសទម្រង់ប្រភព/គោលដៅ បិទភ្ជាប់សំណើ ហើយមើលលទ្ធផលដែលបានបកប្រែភ្លាមៗ            |
-| **ឧបករណ៍សាកល្បងការជជែក** | ផ្ញើសារជជែកផ្ទាល់តាមរយៈ proxy និងពិនិត្យវដ្ដសំណើ/ការឆ្លើយតបទាំងមូល                |
-| **កន្លែងតេស្ត**          | ដំណើរការតេស្តជាបាច់លើបន្សំទម្រង់ជាច្រើន ដើម្បីផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវនៃការបកប្រែ |
-| **កម្មវិធីតាមដានផ្ទាល់** | មើលការបកប្រែតាមពេលវេលាជាក់ស្ដែង ខណៈដែលសំណើឆ្លងកាត់ proxy                          |
+| របៀប                     | គោលបំណង                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| **សួនកុមារ**             | ជ្រើសរើសទម្រង់ source/target បិទភ្ជាប់សំណើ និងមើលលទ្ធផលដែលបានបកប្រែភ្លាមៗ                   |
+| **អ្នកសាកល្បងជជែក**      | ផ្ញើសារជជែកផ្ទាល់តាមរយៈប្រូកស៊ី និងពិនិត្យមើលវដ្ត request/response ពេញលេញ                   |
+| **កៅអីសាកល្បង**          | ដំណើរការការធ្វើតេស្តជាបាច់លើការផ្សំទ្រង់ទ្រាយច្រើនដើម្បីផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវនៃការបកប្រែ |
+| **កម្មវិធីតាមដានផ្ទាល់** | មើលការបកប្រែតាមពេលវេលាជាក់ស្តែង នៅពេលដែលសំណើហូរតាមប្រូកស៊ី                                  |
 
-**ករណីប្រើប្រាស់:**
+**ករណីប្រើប្រាស់៖**
 
-- ស្វែងរកមូលហេតុដែលបន្សំ client/provider ជាក់លាក់មួយបរាជ័យ
-- ផ្ទៀងផ្ទាត់ថា thinking tags, tool calls និង system prompts ត្រូវបានបកប្រែយ៉ាងត្រឹមត្រូវ
-- ប្រៀបធៀបភាពខុសគ្នានៃទម្រង់រវាងទម្រង់ OpenAI, Claude, Gemini និង Responses API
+- បំបាត់កំហុសថាហេតុអ្វីបានជាការរួមបញ្ចូលគ្នា client/provider ជាក់លាក់មួយបរាជ័យ
+- ផ្ទៀងផ្ទាត់ថាការគិតស្លាក ការហៅឧបករណ៍ និងប្រព័ន្ធជំរុញឱ្យបកប្រែត្រឹមត្រូវ។
+- ប្រៀបធៀបភាពខុសគ្នានៃទម្រង់រវាង OpenAI, Claude, Gemini, និងការឆ្លើយតប API formats
 
 ---
 
 ### យុទ្ធសាស្ត្រកំណត់ផ្លូវ
 
-កំណត់រចនាសម្ព័ន្ធតាមរយៈ **Dashboard → Settings → Routing**។ dashboard បង្ហាញយុទ្ធសាស្ត្រដែលប្រើញឹកញាប់បំផុតចំនួនប្រាំមួយ; combos និង auto-router គាំទ្រសំណុំធំជាងនេះនៅខាងក្នុង។
+កំណត់រចនាសម្ព័ន្ធតាមរយៈ** ផ្ទាំងគ្រប់គ្រង → ការកំណត់ → កំណត់ផ្លូវ** . ផ្ទៃតាប្លូបង្ហាញយុទ្ធសាស្រ្តចំនួនប្រាំមួយដែលត្រូវបានប្រើប្រាស់ច្រើនបំផុត; combos និង auto-router ខាងក្នុងគាំទ្រសំណុំធំទូលាយ។
 
-**យុទ្ធសាស្ត្រដែលបង្ហាញក្នុង dashboard (ការកំណត់ផ្លូវកម្រិត account):**
+**យុទ្ធសាស្ត្រដែលអាចមើលឃើញនៅលើផ្ទាំងគ្រប់គ្រង (ការកំណត់កម្រិតគណនី)៖**
 
-| យុទ្ធសាស្ត្រ               | ការពិពណ៌នា                                                                                                                 |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **បំពេញមួយមុន**            | ប្រើ account តាមលំដាប់អាទិភាព — account ចម្បងដោះស្រាយសំណើទាំងអស់ រហូតដល់មិនអាចប្រើបាន                                      |
-| **ប្ដូរវេនជុំគ្នា**        | ប្ដូរវេនឆ្លងកាត់ account ទាំងអស់ ដោយមានកម្រិត sticky ដែលអាចកំណត់រចនាសម្ព័ន្ធបាន (លំនាំដើម៖ 3 calls ក្នុងមួយ account)       |
-| **P2C (អំណាចនៃជម្រើសពីរ)** | ជ្រើស account ចៃដន្យចំនួន 2 ហើយកំណត់ផ្លូវទៅកាន់ account ដែលមានស្ថានភាពល្អជាង — ធ្វើឱ្យបន្ទុកមានតុល្យភាពដោយគិតគូរពីស្ថានភាព |
-| **ចៃដន្យ**                 | ជ្រើស account ដោយចៃដន្យសម្រាប់សំណើនីមួយៗ ដោយប្រើ Fisher-Yates shuffle                                                      |
-| **ប្រើតិចបំផុត**           | កំណត់ផ្លូវទៅកាន់ account ដែលមាន timestamp `lastUsedAt` ចាស់បំផុត ដោយចែកចាយ traffic ឱ្យស្មើគ្នា                             |
-| **បង្កើនប្រសិទ្ធភាពតម្លៃ** | កំណត់ផ្លូវទៅកាន់ account ដែលមានតម្លៃអាទិភាពទាបបំផុត ដើម្បីបង្កើនប្រសិទ្ធភាពសម្រាប់ provider ដែលមានតម្លៃទាបបំផុត            |
+| យុទ្ធសាស្ត្រ                 | ការពិពណ៌នា                                                                                              |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **បំពេញដំបូង**               | ប្រើគណនីតាមលំដាប់អាទិភាព — គណនីចម្បងគ្រប់គ្រងសំណើទាំងអស់រហូតដល់មិនអាចប្រើបាន                            |
+| **ជុំរ៉ូប៊ីន**               | ធ្វើដំណើរតាមគ្រប់គណនីទាំងអស់ដោយមានកម្រិតស្អិតដែលអាចកំណត់បាន (លំនាំដើម៖ ការហៅទូរសព្ទ 3 ដងក្នុងមួយគណនី)   |
+| **P2C (អំណាចនៃជម្រើសពីរ)**   | ជ្រើសរើសគណនីចៃដន្យចំនួន 2 និងផ្លូវទៅកាន់អ្នកដែលមានសុខភាពល្អជាងមុន — តុល្យភាពផ្ទុកដោយការយល់ដឹងអំពីសុខភាព |
+| **ចៃដន្យ**                   | ជ្រើសរើសគណនីដោយចៃដន្យសម្រាប់សំណើនីមួយៗដោយប្រើការសាប់ Fisher-Yates                                       |
+| **ប្រើតិចបំផុត។**            | ផ្លូវទៅកាន់គណនីដែលមានត្រាពេលវេលា `lastUsedAt` ចាស់បំផុត ចែកចាយចរាចរណ៍ស្មើៗគ្នា។                         |
+| **ការចំណាយបានធ្វើឱ្យប្រសើរ** | ផ្លូវទៅកាន់គណនីជាមួយនឹងតម្លៃអាទិភាពទាបបំផុត បង្កើនប្រសិទ្ធភាពសម្រាប់អ្នកផ្តល់សេវាដែលមានតម្លៃទាបបំផុត។   |
 
-**យុទ្ធសាស្ត្រ combo និង auto កម្រិតខ្ពស់** (អាចកំណត់រចនាសម្ព័ន្ធតាម combo នីមួយៗ ឬតាមរយៈ prefix `auto/*` — សូមមើល [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+**បន្សំកម្រិតខ្ពស់ និងយុទ្ធសាស្ត្រស្វ័យប្រវត្តិ** (អាចកំណត់រចនាសម្ព័ន្ធបានក្នុងមួយបន្សំ ឬតាមរយៈបុព្វបទ `auto/*` — សូមមើល [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — លំដាប់តឹងរ៉ឹង មិនប្ដូរវេនជុំគ្នាឡើយ
-- `weighted` — បែងចែក traffic តាមសមាមាត្រដោយផ្អែកលើទម្ងន់របស់ model នីមួយៗ
-- `fill-first` — ប្រើ model ទីមួយរហូតដល់ដល់កម្រិតកំណត់
+- `priority` - លំដាប់តឹងរ៉ឹង មិនដែលវិលជុំ
+- `weighted` - ចរាចរណ៍សមាមាត្របែងចែកដោយទម្ងន់តាមគំរូ
+- `fill-first` - បង្ហូរម៉ូដែលទីមួយរហូតដល់ដែនកំណត់ឈានដល់
 - `round-robin` / `strict-random` / `random`
 - `p2c` (អំណាចនៃជម្រើសពីរ)
 - `least-used` និង `cost-optimized`
-- `auto` — ផ្អែកលើពិន្ទុក្នុងចំណោមបេក្ខភាពទាំងអស់
-- `lkgp` (Provider ដែលដំណើរការល្អចុងក្រោយ) — ភ្ជាប់ទៅនឹង provider ដែលជោគជ័យចុងក្រោយ បន្ទាប់មកប្រើច្បាប់បម្រុង
-- `context-optimized` — ជ្រើស model ដែលមាន context window ទំនេរធំបំផុត
-- `context-relay` — តភ្ជាប់ model ដែលមាន context វែងជាបន្តបន្ទាប់ សម្រាប់វេនបន្ទាប់
+- `auto` — ពិន្ទុជំរុញលើបេក្ខជនទាំងអស់។
+- `lkgp` (អ្នកផ្តល់សេវាល្អដែលស្គាល់ចុងក្រោយ) — ភ្ជាប់ទៅអ្នកផ្តល់សេវាដែលទទួលបានជោគជ័យចុងក្រោយ បន្ទាប់មកត្រឡប់ទៅរកច្បាប់វិញ។
+- `context-optimized` — ជ្រើសរើសម៉ូដែលដែលមានបង្អួចបរិបទឥតគិតថ្លៃធំបំផុត
+- `context-relay` — ខ្សែសង្វាក់គំរូបរិបទវែងសម្រាប់វេនតាមដាន
 
-#### Header សម័យ Sticky ខាងក្រៅ
+#### បឋមកថាសម័យស្អិតខាងក្រៅ
 
-សម្រាប់ភាពជាប់គ្នានៃ session ខាងក្រៅ (ឧទាហរណ៍ ភ្នាក់ងារ Claude Code/Codex ដែលនៅពីក្រោយ reverse proxy) សូមផ្ញើ៖
+សម្រាប់ភាពស្និទ្ធស្នាលសម័យខាងក្រៅ (ឧទាហរណ៍ ភ្នាក់ងារ Claude Code/Codex នៅពីក្រោយប្រូកស៊ីបញ្ច្រាស) សូមផ្ញើ៖
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute ក៏ទទួលយក `x_session_id` ហើយត្រឡប់ session key ដែលមានប្រសិទ្ធភាពនៅក្នុង `X-OmniRoute-Session-Id` ផងដែរ។
+OmniRoute ក៏ទទួលយក `x_session_id` ហើយត្រឡប់សោសម័យដែលមានប្រសិទ្ធភាពក្នុង `X-OmniRoute-Session-Id`។
 
-ប្រសិនបើអ្នកប្រើ Nginx និងផ្ញើ header ដែលមានទម្រង់ underscore សូមបើក៖
+ប្រសិនបើអ្នកប្រើ Nginx ហើយផ្ញើបឋមកថាទម្រង់ដាក់ពិន្ទុ សូមបើក៖
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### ឈ្មោះក្លែងក្លាយរបស់ Model បែប Wildcard
+#### ឈ្មោះក្លែងក្លាយនៃគំរូជំនួស
 
-បង្កើតលំនាំ wildcard ដើម្បីកំណត់ឈ្មោះ model ឡើងវិញ៖
-
-```
-លំនាំ: claude-sonnet-*     →  គោលដៅ: cc/claude-sonnet-4-6
-លំនាំ: gpt-*               →  គោលដៅ: gh/gpt-5.3-codex
-```
-
-Wildcard គាំទ្រ `*` (តួអក្សរណាមួយ) និង `?` (តួអក្សរតែមួយ)។
-
-#### ខ្សែសង្វាក់បម្រុង
-
-កំណត់ខ្សែសង្វាក់បម្រុងសកល ដែលអនុវត្តចំពោះសំណើទាំងអស់៖
+បង្កើតគំរូអក្សរជំនួស ដើម្បីកំណត់ឈ្មោះគំរូឡើងវិញ៖
 
 ```
-ខ្សែសង្វាក់: production-fallback
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+```
+
+អក្សរជំនួសគាំទ្រ `*` (តួអក្សរណាមួយ) និង `?` (តួអក្សរតែមួយ) ។
+
+#### ខ្សែសង្វាក់ថយក្រោយ
+
+កំណត់ខ្សែសង្វាក់ជំនួសសកលដែលអនុវត្តលើសំណើទាំងអស់៖
+
+```
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -906,22 +906,22 @@ Wildcard គាំទ្រ `*` (តួអក្សរណាមួយ) និង
 
 ---
 
-### បន្សំ Provider និងលំនាំកំណត់ផ្លូវដែលប្រើជាទូទៅ
+### ការរួមបញ្ចូលគ្នារវាងអ្នកផ្តល់សេវាទូទៅ & លំនាំផ្លូវ
 
-ខាងក្រោមនេះជាលំនាំឧទាហរណ៍សម្រាប់បញ្ចូល provider ច្រើន និងកំណត់ផ្លូវរវាងពួកវានៅក្នុង OmniRoute៖
+នេះគឺជាគំរូគំរូសម្រាប់ការរួមបញ្ចូលគ្នារវាងអ្នកផ្តល់សេវាច្រើន និងការកំណត់ផ្លូវរវាងពួកគេនៅក្នុង OmniRoute៖
 
-#### 1. Combo សម្រាប់ភ្នាក់ងារសរសេរកូដ៖ ការវែកញែកកម្រិតខ្ពស់ជាមួយជម្រើសបម្រុងតាមតម្លៃ/ល្បឿន
+#### 1. Coding Agent Combo: High-End Reasoning with Cost/Speed Fallback
 
-សមស្របសម្រាប់ភ្នាក់ងារសរសេរកូដ (OpenCode, Claude Code, Cursor, Cline)។ កំណត់ផ្លូវដំបូងទៅកាន់ model វែកញែកឈានមុខគេ ហើយប្ដូរទៅ model សរសេរកូដលឿន នៅពេល quota អស់ ឬមានកំហុស។
+ល្អបំផុតសម្រាប់ភ្នាក់ងារសរសេរកូដ (OpenCode, Claude Code , Cursor, Cline)។ ផ្លូវដំបូងឆ្ពោះទៅរកគំរូហេតុផលព្រំដែន ដោយត្រលប់ទៅគំរូសរសេរកូដលឿននៅលើការអស់កូតា ឬកំហុស។
 
-- **Dashboard**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
-- **Models**:
-  1. `claude/claude-sonnet-4-6` (ភ្នាក់ងារសរសេរកូដចម្បង)
-  2. `openai/gpt-4o` (ជម្រើសបម្រុងដែលមានសមត្ថភាពខ្ពស់ទីពីរ)
-  3. `deepseek/deepseek-v4-flash` (ជម្រើសបម្រុងដែលមានប្រសិទ្ធភាពខ្ពស់ និងសន្សំសំចៃតម្លៃ)
+- **ផ្ទាំងគ្រប់គ្រង** : Combos → New Combo → Name: `agent-coding` → យុទ្ធសាស្រ្ត: `Priority`
+- **ម៉ូដែល** :
+  1. `claude/claude-sonnet-4-6` (ភ្នាក់ងារសរសេរកូដបឋម)
+  2. `openai/gpt-4o` (ការថយក្រោយដែលមានសមត្ថភាពខ្ពស់បន្ទាប់បន្សំ)
+  3. `deepseek/deepseek-v4-flash` (ប្រសិទ្ធភាពខ្ពស់ ប្រសិទ្ធភាពចំណាយតិច)
 
 ```bash
-# ឧទាហរណ៍តាមរយៈ API
+# Example via API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -936,183 +936,179 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Combo ប្ដូរដោយស្វ័យប្រវត្តិសម្រាប់កម្រិតឥតគិតថ្លៃ
+#### 2. Free-Tier Auto Failover Combo
 
-ភ្ជាប់អ្នកផ្តល់សេវាកម្រិតឥតគិតថ្លៃ និងមិនត្រូវការសោជាច្រើន ដើម្បីបង្កើនពេលវេលាដំណើរការឱ្យបានអតិបរមាដោយមិនមានការចំណាយលើ API។
+ខ្សែសង្វាក់អ្នកផ្តល់សេវាថ្នាក់ឥតគិតថ្លៃ និងគ្មានសោច្រើន ដើម្បីបង្កើនម៉ោងធ្វើការដោយមិនចាំបាច់ចំណាយ API ។
 
-- **យុទ្ធសាស្ត្រ**៖ `Least Used` ឬ `Round Robin` (ចែកចាយបន្ទុកឆ្លងកាត់កូតា)
-- **ម៉ូដែល**៖
+- **យុទ្ធសាស្ត្រ** : `Least Used` ឬ `Round Robin` (ចែកចាយបន្ទុកឆ្លងកាត់កូតា)
+- **ម៉ូដែល** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# ឧទាហរណ៍តាមរយៈ CLI
+# Example via CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. ខ្សែដំណើរការពហុមធ្យោបាយ / ចក្ខុវិស័យ និងអត្ថបទ
+#### 3. Multimodal / Vision & Text Pipeline
 
-ផ្គូផ្គងម៉ូដែលចក្ខុវិស័យឯកទេសជាមួយនឹងការបង្កើតអត្ថបទល្បឿនលឿន សម្រាប់លំហូរការងារដែលពាក់ព័ន្ធនឹងការយល់ដឹងអំពីរូបភាព និងការបង្កើតកូដ។
+ការផ្គូផ្គងគំរូចក្ខុវិស័យឯកទេសជាមួយនឹងការបង្កើតអត្ថបទល្បឿនលឿនសម្រាប់ដំណើរការការងារដែលពាក់ព័ន្ធនឹងការយល់ដឹងរូបភាព និងការបង្កើតកូដ។
 
-- **លំនាំ**៖ Combo `Priority` ដែលរាយម៉ូដែលមានសមត្ថភាពចក្ខុវិស័យមុនគេ ហើយដាក់ម៉ូដែលអត្ថបទ/កូដដែលមានសមត្ថភាពដំណើរការខ្ពស់នៅចុងក្រោយ។
-- **ម៉ូដែល**៖
-  1. `gemini/gemini-2.5-pro` (ការយល់ដឹងរូបភាព/ពហុមធ្យោបាយដ៏ខ្លាំង)
-  2. `openai/gpt-4o` (ចក្ខុវិស័យ និងការប្រើប្រាស់ឧបករណ៍មានតុល្យភាព)
-  3. `deepseek/deepseek-v4-flash` (ការបង្កើតអត្ថបទ/កូដ)
-
----
-
-### ភាពធន់ និងឧបករណ៍កាត់ផ្តាច់សៀគ្វី
-
-កំណត់រចនាសម្ព័ន្ធតាមរយៈ **Dashboard → Settings → Resilience**។
-
-OmniRoute អនុវត្តភាពធន់នៅកម្រិតអ្នកផ្តល់សេវាដោយមានសមាសភាគចំនួនប្រាំ៖
-
-1. **ជួរសំណើ និងការកំណត់ចង្វាក់** — ការរៀបចំសំណើនៅកម្រិតប្រព័ន្ធ៖
-   - **សំណើក្នុងមួយនាទី (RPM)** — ចំនួនសំណើអតិបរមាក្នុងមួយនាទីសម្រាប់គណនីនីមួយៗ
-   - **រយៈពេលអប្បបរមារវាងសំណើ** — ចន្លោះពេលអប្បបរមាគិតជាមិល្លីវិនាទីរវាងសំណើ
-   - **សំណើដំណាលគ្នាអតិបរមា** — ចំនួនសំណើដំណាលគ្នាអតិបរមាសម្រាប់គណនីនីមួយៗ
-
-2. **រយៈពេលសម្រាកការតភ្ជាប់** — ការកំណត់រចនាសម្ព័ន្ធតាមប្រភេទការផ្ទៀងផ្ទាត់ សម្រាប់ការតភ្ជាប់តែមួយបន្ទាប់ពីការបរាជ័យដែលអាចព្យាយាមម្តងទៀត៖
-   - **រយៈពេលសម្រាកមូលដ្ឋាន** — ចន្លោះពេលសម្រាកលំនាំដើមសម្រាប់ការបរាជ័យពីប្រភពខាងលើដែលអាចព្យាយាមម្តងទៀត
-   - **ប្រើការណែនាំអំពីការព្យាយាមម្តងទៀតពីប្រភពខាងលើ** — គោរពតាម `Retry-After` ដែលមានសុពលភាព ឬការណែនាំអំពីការកំណត់ឡើងវិញ នៅពេលមានផ្តល់ជូន
-   - **ចំនួនជំហានពន្យារអតិបរមា** — កម្រិតពន្យារតាមអិចស្ប៉ូណង់ស្យែលអតិបរមាសម្រាប់ការបរាជ័យដដែលៗ
-
-3. **ឧបករណ៍កាត់ផ្តាច់សៀគ្វីរបស់អ្នកផ្តល់សេវា** — តាមដានការបរាជ័យរបស់អ្នកផ្តល់សេវាពីដើមដល់ចប់ សម្គាល់អ្នកផ្តល់សេវាថាមានការថយចុះនៅកម្រិតព្រមានដែលបានកំណត់ និងបើកឧបករណ៍កាត់ផ្តាច់នៅពេលឈានដល់កម្រិតបរាជ័យដែលបានកំណត់៖
-   - **កម្រិតនៃការថយចុះ** — ចំនួនការបរាជ័យជាប់គ្នារបស់អ្នកផ្តល់សេវា មុនពេលចូលទៅស្ថានភាព `DEGRADED`
-   - **កម្រិតបរាជ័យ** — ចំនួនការបរាជ័យជាប់គ្នារបស់អ្នកផ្តល់សេវា មុនពេលចូលទៅស្ថានភាព `OPEN`
-   - **អស់ពេលកំណត់ឡើងវិញ** — ចន្លោះពេលមុនពេលអ្នកផ្តល់សេវាត្រូវបានសាកល្បងម្តងទៀត
-   - **CLOSED** (ដំណើរការល្អ) — សំណើដំណើរការជាធម្មតា
-   - **DEGRADED** — សំណើនៅតែដំណើរការ ខណៈពេលការបរាជ័យកើនឡើងត្រូវបានតាមដាន
-   - **OPEN** — អ្នកផ្តល់សេវាត្រូវបានរារាំងជាបណ្តោះអាសន្ន បន្ទាប់ពីការបរាជ័យដដែលៗ
-   - **HALF_OPEN** — កំពុងសាកល្បងថាតើអ្នកផ្តល់សេវាបានស្ដារឡើងវិញឬនៅ
-
-   ដែនកំណត់អត្រា `429` ដែលមានវិសាលភាពត្រឹមការតភ្ជាប់ នឹងនៅក្នុង **រយៈពេលសម្រាកការតភ្ជាប់** ហើយមិនត្រូវបានរាប់បញ្ចូលក្នុងឧបករណ៍កាត់ផ្តាច់របស់អ្នកផ្តល់សេវាទេ។
-
-   ស្ថានភាពពេលដំណើរការរបស់ឧបករណ៍កាត់ផ្តាច់របស់អ្នកផ្តល់សេវា ត្រូវបានបង្ហាញតែនៅលើ **Dashboard → Health** ប៉ុណ្ណោះ។
-
-4. **រង់ចាំរយៈពេលសម្រាក** — ប្រសិនបើការតភ្ជាប់ដែលជាបេក្ខភាពទាំងអស់កំពុងសម្រាករួចហើយ OmniRoute អាចរង់ចាំរហូតដល់រយៈពេលសម្រាកដែលបញ្ចប់មុនគេ ហើយព្យាយាមសំណើដដែលរបស់កម្មវិធីអតិថិជនឡើងវិញដោយស្វ័យប្រវត្តិ។
-
-5. **ការរកឃើញដែនកំណត់អត្រាដោយស្វ័យប្រវត្តិ** — នៅពេលអ្នកផ្តល់សេវាខាងលើត្រឡប់ចន្លោះពេលរង់ចាំជាក់លាក់ ការណែនាំទាំងនោះនឹងជំនួសរយៈពេលសម្រាកការតភ្ជាប់មូលដ្ឋាន នៅពេលការកំណត់នេះត្រូវបានបើក។
-
-**គន្លឹះពីអ្នកជំនាញ៖** ប្រើទំព័រ **Health** ដើម្បីត្រួតពិនិត្យ និងកំណត់ឡើងវិញនូវឧបករណ៍កាត់ផ្តាច់របស់អ្នកផ្តល់សេវាដែលកំពុងដំណើរការ បន្ទាប់ពីការដាច់សេវា។ ទំព័រ Resilience ផ្លាស់ប្តូរតែការកំណត់រចនាសម្ព័ន្ធប៉ុណ្ណោះ។
+- **លំនាំ** ៖ បន្សំ `Priority` ដែលរាយម៉ូដែលដែលអាចមើលឃើញមុនគេ និងម៉ូដែល text/code ដែលមានល្បឿនលឿនចុងក្រោយ។
+- **ម៉ូដែល** :
+  1. `gemini/gemini-2.5-pro` (ការយល់ដឹង image/multimodal ខ្លាំង)
+  2. `openai/gpt-4o` (ចក្ខុវិស័យប្រកបដោយតុល្យភាព និងការប្រើប្រាស់ឧបករណ៍)
+  3. `deepseek/deepseek-v4-flash` (ជំនាន់Text/code )
 
 ---
 
-### ការនាំចេញ / នាំចូលមូលដ្ឋានទិន្នន័យ
+### ភាពធន់ និងឧបករណ៍បំបែកសៀគ្វី
 
-គ្រប់គ្រងការបម្រុងទុកមូលដ្ឋានទិន្នន័យនៅក្នុង **Dashboard → Settings → System & Storage**។
+កំណត់រចនាសម្ព័ន្ធតាមរយៈ** ផ្ទាំងគ្រប់គ្រង → ការកំណត់ → ភាពធន់** .
 
-| សកម្មភាព                    | សេចក្ដីពិពណ៌នា                                                                                                                                                     |
+OmniRoute អនុវត្តភាពធន់នឹងកម្រិតអ្នកផ្តល់សេវាជាមួយនឹងសមាសភាគប្រាំ:
+
+1. **ស្នើសុំជួរ & ល្បឿន** - ទម្រង់សំណើកម្រិតប្រព័ន្ធ៖
+   - **សំណើក្នុងមួយនាទី (RPM)** - សំណើអតិបរមាក្នុងមួយនាទីក្នុងមួយគណនី
+   - **ពេលវេលាអប្បបរមារវាងសំណើ** - គម្លាតអប្បបរមាគិតជាមិល្លីវិនាទីរវាងសំណើ
+   - **សំណើស្របគ្នាអតិបរមា** - សំណើក្នុងពេលដំណាលគ្នាអតិបរមាក្នុងមួយគណនី
+
+2. **ការតភ្ជាប់ Cooldown** - ការកំណត់រចនាសម្ព័ន្ធ per-auth-type សម្រាប់ការតភ្ជាប់តែមួយបន្ទាប់ពីការបរាជ័យដែលអាចសាកល្បងឡើងវិញបាន៖
+   - **មូលដ្ឋាន Cooldown** - បង្អួច cooldown លំនាំដើមសម្រាប់ការបរាជ័យខាងលើដែលអាចសាកល្បងបាន។
+   - **ប្រើការណែនាំអំពីការព្យាយាមឡើងវិញនៅខាងលើ** - ផ្តល់កិត្តិយសដល់ `Retry-After` ដែលមានការអនុញ្ញាត ឬកំណត់ការណែនាំឡើងវិញនៅពេលដែលបានផ្តល់
+   - **ជំហានថយក្រោយអតិបរមា** - កម្រិតអិចស្ប៉ូណង់ស្យែលថយក្រោយអតិបរមាសម្រាប់ការបរាជ័យម្តងហើយម្តងទៀត
+
+3. **អ្នកផ្តល់សេវាបំបែកសៀគ្វី** - តាមដានការបរាជ័យរបស់អ្នកផ្តល់សេវាពីចុងដល់ចប់ សម្គាល់អ្នកផ្តល់សេវាដែលត្រូវបានបន្ទាបបន្ថោកនៅកម្រិតព្រមានដែលបានកំណត់រចនាសម្ព័ន្ធ ហើយបើកឧបករណ៍បំបែកនៅពេលដែលឈានដល់កម្រិតកំណត់ការបរាជ័យដែលបានកំណត់រចនាសម្ព័ន្ធ៖
+   - **កម្រិតនៃការរិចរិល** - ការបរាជ័យរបស់អ្នកផ្តល់សេវាជាប់គ្នាមុនពេលចូល `DEGRADED`
+   - **កម្រិតនៃការបរាជ័យ** - ការបរាជ័យរបស់អ្នកផ្តល់សេវាជាប់គ្នាមុនពេលចូល `OPEN`
+   - **កំណត់ការអស់ពេលឡើងវិញ** - ចន្លោះពេលមុនពេលអ្នកផ្តល់សេវាត្រូវបានសាកល្បងម្តងទៀត
+   - **CLOSED** (មានសុខភាពល្អ) - សំណើដំណើរការជាធម្មតា
+   - **DEGRADED** - សំណើនៅតែហូរខណៈពេលដែលការបរាជ័យកើនឡើងត្រូវបានតាមដាន
+   - **OPEN** - អ្នកផ្តល់សេវាត្រូវបានរារាំងជាបណ្តោះអាសន្ន បន្ទាប់ពីបរាជ័យម្តងហើយម្តងទៀត
+   - **HALF_OPEN** - ការធ្វើតេស្តប្រសិនបើអ្នកផ្តល់សេវាបានជាសះស្បើយ
+
+   ដែនកំណត់អត្រា `429` ដែលមានវិសាលភាពនៃការតភ្ជាប់ស្ថិតនៅ** ការតភ្ជាប់ Cooldown** ហើយកុំរាប់បញ្ចូលអ្នកបំបែកអ្នកផ្តល់សេវា។
+
+   ស្ថានភាពពេលដំណើរការរបស់ឧបករណ៍បំបែកអ្នកផ្តល់សេវាត្រូវបានបង្ហាញនៅលើ** ផ្ទាំង → សុខភាព** តែប៉ុណ្ណោះ។
+
+4. **រង់ចាំ Cooldown** - ប្រសិនបើរាល់ការភ្ជាប់របស់បេក្ខជនទាំងអស់កំពុងត្រជាក់ចុះ OmniRoute អាចរង់ចាំការ cooldown ដំបូងបំផុត ហើយព្យាយាមម្តងទៀតនូវសំណើអតិថិជនដូចគ្នាដោយស្វ័យប្រវត្តិ។
+
+5. **កំណត់អត្រាការរកឃើញដោយស្វ័យប្រវត្តិ** — នៅពេលដែលអ្នកផ្តល់សេវាចរន្តទឹកត្រលប់មកវិញនូវបង្អួចរង់ចាំយ៉ាងច្បាស់លាស់ ការណែនាំទាំងនោះបដិសេធការចុះត្រជាក់នៃការតភ្ជាប់ក្នុងតំបន់ នៅពេលដែលការកំណត់ត្រូវបានបើក។
+
+**គន្លឹះគាំទ្រ៖** ប្រើ** សុខភាព** ទំព័រដើម្បីពិនិត្យ និងកំណត់អ្នកបំបែកអ្នកផ្តល់សេវាបន្តផ្ទាល់ឡើងវិញ បន្ទាប់ពីមានការដាច់ភ្លើង។ ទំព័រ Resilience ផ្លាស់ប្តូរតែការកំណត់រចនាសម្ព័ន្ធប៉ុណ្ណោះ។
+
+---
+
+### មូលដ្ឋានទិន្នន័យនាំចេញ/នាំចូល
+
+គ្រប់គ្រងការបម្រុងទុកមូលដ្ឋានទិន្នន័យនៅក្នុង** ផ្ទាំងគ្រប់គ្រង → ការកំណត់ → ប្រព័ន្ធ និងការផ្ទុក** .
+
+| សកម្មភាព                    | ការពិពណ៌នា                                                                                                                                                         |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **នាំចេញមូលដ្ឋានទិន្នន័យ**  | ទាញយកមូលដ្ឋានទិន្នន័យ SQLite បច្ចុប្បន្នជាឯកសារ `.sqlite`                                                                                                          |
-| **នាំចេញទាំងអស់ (.tar.gz)** | ទាញយកប័ណ្ណសារបម្រុងទុកពេញលេញ ដែលរួមមាន៖ មូលដ្ឋានទិន្នន័យ ការកំណត់ combos ការតភ្ជាប់អ្នកផ្តល់សេវា (គ្មានព័ត៌មានសម្ងាត់) និងទិន្នន័យមេតារបស់ API key                 |
+| **នាំចេញទាំងអស់ (.tar.gz)** | ទាញយកបណ្ណសារបម្រុងទុកពេញលេញ រួមមានៈ មូលដ្ឋានទិន្នន័យ ការកំណត់ បន្សំ ការតភ្ជាប់អ្នកផ្តល់សេវា (គ្មានព័ត៌មានសម្ងាត់) ទិន្នន័យមេតាគន្លឹះ API                           |
 | **នាំចូលមូលដ្ឋានទិន្នន័យ**  | ផ្ទុកឡើងឯកសារ `.sqlite` ដើម្បីជំនួសមូលដ្ឋានទិន្នន័យបច្ចុប្បន្ន។ ការបម្រុងទុកមុនពេលនាំចូលត្រូវបានបង្កើតដោយស្វ័យប្រវត្តិ លុះត្រាតែ `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API៖ នាំចេញមូលដ្ឋានទិន្នន័យ
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API៖ នាំចេញទាំងអស់ (ប័ណ្ណសារពេញលេញ)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API៖ នាំចូលមូលដ្ឋានទិន្នន័យ
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**ការផ្ទៀងផ្ទាត់ការនាំចូល៖** ឯកសារដែលបាននាំចូលត្រូវបានផ្ទៀងផ្ទាត់ចំពោះភាពត្រឹមត្រូវ (ការត្រួតពិនិត្យ pragma របស់ SQLite) តារាងដែលតម្រូវឱ្យមាន (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) និងទំហំ (អតិបរមា 100MB)។
+**សុពលភាពនាំចូល៖** ឯកសារដែលបាននាំចូលមានសុពលភាពសម្រាប់ភាពសុចរិត (SQLite pragma check) តារាងដែលត្រូវការ (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) និងទំហំ (អតិបរមា 100MB)។
 
 **ករណីប្រើប្រាស់៖**
 
-- ផ្ទេរ OmniRoute រវាងម៉ាស៊ីន
-- បង្កើតការបម្រុងទុកខាងក្រៅសម្រាប់ការសង្គ្រោះពីគ្រោះមហន្តរាយ
-- ចែករំលែកការកំណត់រចនាសម្ព័ន្ធរវាងសមាជិកក្រុម (នាំចេញទាំងអស់ → ចែករំលែកប័ណ្ណសារ)
+- ផ្លាស់ទី OmniRoute រវាងម៉ាស៊ីន
+- បង្កើតការបម្រុងទុកខាងក្រៅសម្រាប់ការសង្គ្រោះគ្រោះមហន្តរាយ
+- ចែករំលែកការកំណត់រចនាសម្ព័ន្ធរវាងសមាជិកក្រុម (នាំចេញប័ណ្ណសារចែករំលែក → ទាំងអស់)
 
 ---
 
 ### ផ្ទាំងគ្រប់គ្រងការកំណត់
 
-ទំព័រការកំណត់ត្រូវបានរៀបចំជា **7 ផ្ទាំង** ដើម្បីងាយស្រួលក្នុងការរុករក៖
+ទំព័រការកំណត់ត្រូវបានរៀបចំជា** 7 ផ្ទាំង** សម្រាប់ការរុករកងាយស្រួល៖
 
-| ផ្ទាំង            | មាតិកា                                                                                                                                                                     |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **ទូទៅ**          | ឧបករណ៍ផ្ទុកទិន្នន័យប្រព័ន្ធ ឥរិយាបថលំនាំដើម និងការមើលឃើញ Endpoint tunnel                                                                                                   |
-| **រូបរាង**        | ការគ្រប់គ្រងរូបរាង (ភ្លឺ/ងងឹត/ប្រព័ន្ធ) ការមើលឃើញរបារចំហៀង និងប៊ូតុងបិទបើកផ្ទាំងសម្រាប់កាត tunnel របស់ Cloudflare/Tailscale/ngrok                                          |
-| **AI**            | កម្រិតគិត (passthrough / auto-strip / custom / adaptive — សូមមើល [THINKING_BUDGET.md](./THINKING_BUDGET.md)) system prompt សកល និងស្ថិតិ prompt cache                      |
-| **សុវត្ថិភាព**    | ការកំណត់ការចូលប្រើ/ពាក្យសម្ងាត់ ការគ្រប់គ្រងការចូលប្រើតាម IP ការផ្ទៀងផ្ទាត់ API សម្រាប់ `/models` ការទប់ស្កាត់ Provider និងការការពារការបញ្ចូល prompt ដោយបំពាន              |
-| **ការកំណត់ផ្លូវ** | យុទ្ធសាស្ត្រកំណត់ផ្លូវសកល (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized) ឈ្មោះក្លែងក្លាយម៉ូដែលបែប wildcard ខ្សែសង្វាក់ fallback និងលំនាំដើម combo |
-| **ភាពធន់**        | ជួរសំណើ រយៈពេល cooldown នៃការតភ្ជាប់ ការកំណត់ provider breaker និងឥរិយាបថរង់ចាំ cooldown                                                                                   |
-| **កម្រិតខ្ពស់**   | ការកំណត់ proxy សកល (HTTP/SOCKS5) និងការកំណត់ proxy ជំនួសតាម provider នីមួយៗ                                                                                                |
+| ផ្ទាំង          | មាតិកា                                                                                                                                                                |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ទូទៅ**        | ឧបករណ៍ផ្ទុកប្រព័ន្ធ ឥរិយាបទលំនាំដើម លទ្ធភាពមើលឃើញផ្លូវរូងក្រោមដីនៃចំណុចបញ្ចប់                                                                                         |
+| **រូបរាង**      | ការគ្រប់គ្រងស្បែក (light/dark/system) ភាពមើលឃើញរបារចំហៀង បន្ទះបិទបើកសម្រាប់កាតផ្លូវរូងក្រោមដី Cloudflare/Tailscale/ngrok                                              |
+| **AI**          | ការគិតថវិកា (ឆ្លងកាត់ / ស្វ័យប្រឌិត / ផ្ទាល់ខ្លួន / អាដាប់ធ័រ — សូមមើល [THINKING_BUDGET.md](./THINKING_BUDGET.md) ) ប្រអប់បញ្ចូលប្រព័ន្ធសកល ស្ថិតិឃ្លាំងសម្ងាត់ភ្លាមៗ |
+| **សន្តិសុខ**    | ការកំណត់Login/Password, IP Access Control, API auth for `/models`, Provider Blocking, prompt-injection guard                                                          |
+| **ការនាំផ្លូវ** | យុទ្ធសាស្ត្រកំណត់ផ្លូវជាសកល (បំពេញដំបូង / ជុំ Robin / P2C / ចៃដន្យ / ប្រើតិចបំផុត / ធ្វើឱ្យប្រសើរថ្លៃដើម) គំរូជំនួសឈ្មោះជំនួស ខ្សែសង្វាក់ជំនួស លំនាំដើមបន្សំ          |
+| **ភាពធន់**      | ស្នើសុំជួរ ការចុះត្រជាក់នៃការតភ្ជាប់ ការកំណត់រចនាសម្ព័ន្ធកម្មវិធីបំបែកអ្នកផ្តល់សេវា និងឥរិយាបថរង់ចាំសម្រាប់ត្រជាក់                                                    |
+| **កម្រិតខ្ពស់** | ការកំណត់រចនាសម្ព័ន្ធប្រូកស៊ីសកល (HTTP/SOCKS5) ការបដិសេធប្រូកស៊ីតាមអ្នកផ្តល់សេវា                                                                                       |
 
-ផ្នែកទូទៅលែងបង្ហាញកំណត់សម្គាល់អំពី logging និង cache ដែលបានតែអានស្ទួនទៀតហើយ។ ការកំណត់រយៈពេលរក្សាទុកទិន្នន័យក្នុង database និង
-ការបង្កើនប្រសិទ្ធភាពត្រូវបានរក្សាទុកតាមរយៈ `/api/settings/database`; ការសម្អាត cache ដោយដៃប្រើ
-`DELETE /api/cache`។ ចំនួនអតិបរមានៃជួរទិន្នន័យក្នុងកំណត់ហេតុសំណើ និង proxy ត្រូវបានគ្រប់គ្រងដោយ
-`CALL_LOGS_TABLE_MAX_ROWS` និង `PROXY_LOGS_TABLE_MAX_ROWS`។
+ទូទៅលែងចម្លងការកត់ត្រាដែលបានតែអាន និងកំណត់ចំណាំក្នុងឃ្លាំងសម្ងាត់ទៀតហើយ។ ការរក្សាទុកមូលដ្ឋានទិន្នន័យ និងការកំណត់ការបង្កើនប្រសិទ្ធភាពត្រូវបានបន្តតាមរយៈ `/api/settings/database`; ការសម្អាតឃ្លាំងសម្ងាត់ដោយដៃប្រើ `DELETE /api/cache`។ សំណើ និងប្រូកស៊ី ជួរ ដេក លេខ កូដ ត្រូវ បាន គ្រប់គ្រង ដោយ `CALL_LOGS_TABLE_MAX_ROWS` និង `PROXY_LOGS_TABLE_MAX_ROWS`។
 
 ---
 
-### ការគ្រប់គ្រងថ្លៃចំណាយ និងថវិកា
+### ការចំណាយ និងការគ្រប់គ្រងថវិកា
 
-ចូលប្រើតាមរយៈ **ផ្ទាំងគ្រប់គ្រង → ថ្លៃចំណាយ**។
+ការចូលប្រើតាមរយៈ** Dashboard → តម្លៃ** .
 
-| ផ្ទាំង    | គោលបំណង                                                                                         |
-| --------- | ----------------------------------------------------------------------------------------------- |
-| **ថវិកា** | កំណត់ដែនកំណត់ចំណាយសម្រាប់ API key នីមួយៗ ដោយមានថវិកាប្រចាំថ្ងៃ/សប្ដាហ៍/ខែ និងការតាមដានជាក់ស្ដែង |
-| **តម្លៃ** | មើល និងកែសម្រួលធាតុតម្លៃរបស់ម៉ូដែល — ថ្លៃក្នុង 1K input/output tokens សម្រាប់ provider នីមួយៗ   |
+| ផ្ទាំង    | គោលបំណង                                                                                            |
+| --------- | -------------------------------------------------------------------------------------------------- |
+| **ថវិកា** | កំណត់ការចំណាយក្នុងមួយគ្រាប់ចុច API ជាមួយនឹងថវិកា daily/weekly/monthly និងការតាមដានពេលវេលាជាក់ស្តែង |
+| **តម្លៃ** | មើល និងកែសម្រួលធាតុតម្លៃគំរូ — ចំណាយក្នុង 1K input/output tokens ក្នុងមួយអ្នកផ្តល់សេវា             |
 
 ```bash
-# API៖ កំណត់ថវិកា
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API៖ ទទួលយកស្ថានភាពថវិកាបច្ចុប្បន្ន
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**ការតាមដានថ្លៃចំណាយ៖** រាល់សំណើទាំងអស់កត់ត្រាការប្រើប្រាស់ token និងគណនាថ្លៃចំណាយដោយប្រើតារាងតម្លៃ។ មើលការបែងចែកក្នុង **ផ្ទាំងគ្រប់គ្រង → ការប្រើប្រាស់** តាម provider ម៉ូដែល និង API key។
+**ការតាមដានតម្លៃ៖** រាល់ការស្នើសុំកត់ត្រាការប្រើប្រាស់សញ្ញាសម្ងាត់ និងគណនាតម្លៃដោយប្រើតារាងតម្លៃ។ មើលការវិភាគនៅក្នុង** ការប្រើប្រាស់ → គ្រប់គ្រង** ដោយអ្នកផ្តល់សេវា ម៉ូដែល និងគ្រាប់ចុច API ។
 
 ---
 
-### ការចម្លងសំឡេងទៅជាអត្ថបទ
+### ប្រតិចារិកសំឡេង
 
-OmniRoute គាំទ្រការចម្លងសំឡេងទៅជាអត្ថបទតាមរយៈ endpoint ដែលឆបគ្នាជាមួយ OpenAI៖
+OmniRoute គាំទ្រការចម្លងសំឡេងតាមរយៈចំណុចបញ្ចប់ដែលត្រូវគ្នាជាមួយ OpenAI៖
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# ឧទាហរណ៍ជាមួយ curl
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` គឺជាផ្លូវ Deepgram ដើម និងត្រូវការ Deepgram API key។
-ប្រសិនបើបានកំណត់រចនាសម្ព័ន្ធតែ OpenRouter សូមប្រើ `openrouter/deepgram/nova-3`។
+`deepgram/nova-3` គឺជាផ្លូវ Deepgram ដើម ហើយត្រូវការកូនសោ Deepgram API ។ ប្រសិនបើមានតែ OpenRouter ប៉ុណ្ណោះដែលត្រូវបានកំណត់ ប្រើ `openrouter/deepgram/nova-3`។
 
-provider សម្រាប់ **ការបំប្លែងសំឡេងទៅជាអត្ថបទ (ការចម្លង)**៖
+**ការនិយាយទៅអត្ថបទ (ប្រតិចារឹក)** អ្នកផ្តល់សេវា៖
 
-- `openai/` (ឆបគ្នាជាមួយ whisper)
+- `openai/` (ខ្សឹប - ឆបគ្នា)
 - `groq/` (Groq Whisper Turbo)
-- `deepgram/` (ក្រុម Nova)
+- `deepgram/` (គ្រួសារ Nova)
 - `assemblyai/`
 - `nvidia/` (Parakeet, Canary)
-- `huggingface/` (កំណែផ្សេងៗនៃ whisper)
+- `huggingface/` (ខ្សឹបខ្សៀវ)
 - `qwen/`
 
-provider សម្រាប់ **ការបំប្លែងអត្ថបទទៅជាសំឡេង (`POST /v1/audio/speech`)**៖
+**អត្ថបទទៅការនិយាយ (`POST /v1/audio/speech`)** អ្នកផ្តល់សេវា៖
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
 - `deepgram/` (Aura)
-- `nvidia/` (Magpie TTS)
+- `nvidia/` ( Magpie TTS)
 - `elevenlabs/`
 - `huggingface/`
 - `inworld/`
@@ -1124,56 +1120,45 @@ provider សម្រាប់ **ការបំប្លែងអត្ថប�
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-ទម្រង់សំឡេងដែលគាំទ្រសម្រាប់ការចម្លង៖ `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`។ ទម្រង់លទ្ធផល TTS អាស្រ័យលើ provider (mp3, wav, opus, pcm, mulaw)។
+ទម្រង់អូឌីយ៉ូដែលគាំទ្រសម្រាប់ការចម្លង៖ `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`។ ទ្រង់ទ្រាយលទ្ធផល TTS អាស្រ័យលើអ្នកផ្តល់សេវា (mp3, wav, opus, pcm, mulaw) ។
 
 ---
 
-### យុទ្ធសាស្ត្រតុល្យភាព Combo
+### យុទ្ធសាស្ត្រតុល្យភាពបន្សំ
 
-កំណត់រចនាសម្ព័ន្ធតុល្យភាពតាម combo នីមួយៗក្នុង **ផ្ទាំងគ្រប់គ្រង → Combos → បង្កើត/កែសម្រួល → យុទ្ធសាស្ត្រ**។
+កំណត់រចនាសម្ព័ន្ធសមតុល្យក្នុងមួយបន្សំក្នុង** ផ្ទាំងគ្រប់គ្រង → Combos → Create/Edit → យុទ្ធសាស្ត្រ** .
 
-| យុទ្ធសាស្ត្រ                   | ការពិពណ៌នា                                                           |
-| ------------------------------ | -------------------------------------------------------------------- |
-| **Round-Robin**                | ប្ដូរតាមលំដាប់រវាងម៉ូដែលនានា                                         |
-| **អាទិភាព**                    | តែងតែសាកល្បងម៉ូដែលទីមួយ ហើយ fallback តែនៅពេលមានកំហុស                 |
-| **ចៃដន្យ**                     | ជ្រើសរើសម៉ូដែលចៃដន្យមួយពី combo សម្រាប់សំណើនីមួយៗ                    |
-| **មានទម្ងន់**                  | កំណត់ផ្លូវតាមសមាមាត្រដោយផ្អែកលើទម្ងន់ដែលបានកំណត់សម្រាប់ម៉ូដែលនីមួយៗ  |
-| **ប្រើតិចបំផុត**               | កំណត់ផ្លូវទៅម៉ូដែលដែលមានសំណើថ្មីៗតិចបំផុត (ប្រើរង្វាស់ combo)        |
-| **បង្កើនប្រសិទ្ធភាពថ្លៃចំណាយ** | កំណត់ផ្លូវទៅម៉ូដែលដែលមានតម្លៃថោកបំផុត និងអាចប្រើបាន (ប្រើតារាងតម្លៃ) |
+| យុទ្ធសាស្ត្រ                       | ការពិពណ៌នា                                                    |
+| ---------------------------------- | ------------------------------------------------------------- |
+| **ជុំ-រ៉ូប៊ីន**                    | បង្វិលតាមគំរូតាមលំដាប់លំដោយ                                   |
+| **អាទិភាព**                        | តែងតែព្យាយាមម៉ូដែលដំបូង; ត្រឡប់មកវិញដោយសារតែកំហុស             |
+| **ចៃដន្យ**                         | ជ្រើសរើសគំរូចៃដន្យពីបន្សំសម្រាប់សំណើនីមួយៗ                    |
+| **មានទម្ងន់**                      | ផ្លូវតាមសមាមាត្រដោយផ្អែកលើទម្ងន់ដែលបានកំណត់ក្នុងមួយម៉ូដែល     |
+| **ប្រើតិចបំផុត។**                  | ផ្លូវទៅកាន់គំរូជាមួយនឹងសំណើថ្មីៗតិចតួចបំផុត (ប្រើម៉ែត្របន្សំ) |
+| **ការចំណាយដែលបានធ្វើឱ្យប្រសើរឡើង** | ផ្លូវទៅកាន់ម៉ូដែលដែលមានតំលៃថោកបំផុត (ប្រើតារាងតម្លៃ)          |
 
-លំនាំដើម combo សកលអាចកំណត់បានក្នុង **ផ្ទាំងគ្រប់គ្រង → ការកំណត់ → ការកំណត់ផ្លូវ → លំនាំដើម Combo**។
-តាមលំនាំដើម រយៈពេល timeout របស់គោលដៅ combo ទទួលបន្តពីរយៈពេល timeout របស់សំណើបច្ចុប្បន្ន។ ប្រើ **រយៈពេល timeout របស់គោលដៅ
-(វិនាទី)** លើលំនាំដើម combo ឬ combo នីមួយៗ តែនៅពេលដែនកំណត់ខ្លីជាងសម្រាប់គោលដៅនីមួយៗគួរតែ
-បើកដំណើរការ fallback ឱ្យលឿនជាងមុន។
+លំនាំដើមបន្សំសកលអាចត្រូវបានកំណត់** ផ្ទាំងគ្រប់គ្រង → ការកំណត់ → កំណត់ផ្លូវ → បន្សំលំនាំដើម** . ការអស់ពេលកំណត់គោលដៅបន្សំបានទទួលការអស់ពេលនៃសំណើបច្ចុប្បន្នតាមលំនាំដើម។ ប្រើ** អស់ពេលកំណត់គោលដៅ (វិនាទី)** តាមលំនាំដើមបន្សំ ឬបន្សំនីមួយៗ លុះត្រាតែកម្រិតកំណត់ក្នុងមួយគោលដៅខ្លីជាង គួរតែធ្វើឱ្យថយក្រោយលឿនជាងមុន។
 
-ការបង្កើនប្រសិទ្ធភាព combo ដែលមាន latency សូន្យគឺត្រូវបើកប្រើដោយខ្លួនឯង។ ទុក **ការបង្កើនប្រសិទ្ធភាព latency សូន្យ** ឱ្យបិទ ដើម្បី
-ការពារមុខងារ latency ទាំងនេះពីការប្រជែងជាមួយគោលដៅ fallback ការរំលងគោលដៅដោយផ្អែកលើប្រវត្តិ TTFT
-ឬការបង្រួមសំណើ fallback; ការបើកវាអនុញ្ញាតឱ្យមាន hedging ដែលបានកំណត់ ការរំលងតាមការព្យាករណ៍ TTFT
-និងការបង្រួម fallback ជាមុន ដើម្បីប្ដូរភាពសុក្រឹតនៃការកំណត់ផ្លូវ/សំណើ ជាមួយនឹង tail
-latency ដែលទាបជាងមុន។
+ការបង្កើនប្រសិទ្ធភាពបន្សំភាពយឺតយ៉ាវសូន្យគឺត្រូវបានជ្រើសរើសចូល។ ចាកចេញ** ការបង្កើនប្រសិទ្ធភាពភាពយឺតយ៉ាវសូន្យ** បានបិទ ដើម្បីការពារលក្ខណៈនៃភាពយឺតយ៉ាវទាំងនេះពីការប្រណាំងគោលដៅធ្លាក់ចុះ រំលងគោលដៅដោយផ្អែកលើប្រវត្តិ TTFT ឬការបង្ហាប់សំណើធ្លាក់ចុះ។ ការបើកដំណើរការវាអនុញ្ញាតឱ្យមានការទប់ស្កាត់ដែលបានកំណត់រចនាសម្ព័ន្ធ ការរំលង TTFT ព្យាករណ៍ និងការបង្ហាប់ថយក្រោយយ៉ាងសកម្មដើម្បីជួញដូរ routing/request fidelity សម្រាប់ភាពយឺតនៃកន្ទុយទាប។
 
-បិទ **អង្គចងចាំបណ្ដោះអាសន្នសម្រាប់ថូខឹនវែកញែក** នៅពេលក្រុមហ៊ុនផ្ដល់សេវាខាងលើទាមទារដែនកំណត់
-`max_tokens` / `maxOutputTokens` ដ៏តឹងរ៉ឹង។ នៅពេលបើកដំណើរការ ការកំណត់ផ្លូវបែបបន្សំនឹងបន្ថែមតែចន្លោះបម្រុងសម្រាប់ម៉ូដែលវែកញែក
-ចំពោះម៉ូដែលដែលមានដែនកំណត់លទ្ធផលដែលគេស្គាល់ប៉ុណ្ណោះ ហើយរក្សាដែនកំណត់ថូខឹនរបស់ម៉ាស៊ីនភ្ញៀវឱ្យនៅដដែល នៅពេលតម្លៃដែលបានបន្ថែមចន្លោះបម្រុងដោយសុវត្ថិភាព
-លើសពីដែនកំណត់នោះ។ ប្រសិនបើដែនកំណត់របស់ម៉ាស៊ីនភ្ញៀវខ្ពស់ជាងដែនកំណត់ដែលគេស្គាល់រួចហើយ
-OmniRoute នឹងកាត់បន្ថយវាឱ្យស្មើនឹងដែនកំណត់នោះ មុនពេលផ្ញើសំណើទៅក្រុមហ៊ុនផ្ដល់សេវាខាងលើ។
+បិទ** សតិបណ្ដោះអាសន្នសញ្ញាសម្ងាត់ហេតុផល** នៅពេលដែលអ្នកផ្តល់សេវាចរន្តត្រូវការដែនកំណត់ `max_tokens` / `maxOutputTokens` តឹងរឹង។ នៅពេលបើកដំណើរការ combo routing បន្ថែមតែ headroom គំរូហេតុផលសម្រាប់ម៉ូដែលដែលមានមួកទិន្នផលដែលគេស្គាល់ ហើយទុកដែនកំណត់នៃសញ្ញាសម្ងាត់អតិថិជនមិនផ្លាស់ប្តូរនៅពេលដែលតម្លៃសតិបណ្ដោះអាសន្ននឹងលើសពីមួកនោះ។ ប្រសិនបើដែនកំណត់របស់អតិថិជនគឺលើសពីមួកដែលបានស្គាល់រួចហើយ OmniRoute តោងវាទៅមួកនោះ មុនពេលផ្ញើសំណើខាងលើ។
 
 ---
 
-### ផ្ទាំងគ្រប់គ្រងសុខភាពប្រព័ន្ធ
+### ផ្ទាំងគ្រប់គ្រងសុខភាព
 
-ចូលប្រើតាមរយៈ **ផ្ទាំងគ្រប់គ្រង → សុខភាពប្រព័ន្ធ**។ ទិដ្ឋភាពទូទៅនៃសុខភាពប្រព័ន្ធតាមពេលវេលាជាក់ស្ដែង ដែលមានកាតចំនួន 6៖
+ការចូលប្រើតាមរយៈ** ផ្ទាំង → សុខភាព** . ទិដ្ឋភាពទូទៅនៃសុខភាពប្រព័ន្ធតាមពេលវេលាជាក់ស្តែងជាមួយនឹង 6 សន្លឹក៖
 
-| កាត                            | អ្វីដែលវាបង្ហាញ                                                    |
-| ------------------------------ | ------------------------------------------------------------------ |
-| **ស្ថានភាពប្រព័ន្ធ**           | រយៈពេលដំណើរការ កំណែ ការប្រើប្រាស់អង្គចងចាំ ថតទិន្នន័យ              |
-| **សុខភាពក្រុមហ៊ុនផ្ដល់សេវា**   | ស្ថានភាពពេលដំណើរការរបស់ឧបករណ៍ផ្ដាច់សៀគ្វីសកលរបស់ក្រុមហ៊ុនផ្ដល់សេវា |
-| **ដែនកំណត់អត្រា**              | រយៈពេលផ្អាកការតភ្ជាប់សកម្មក្នុងមួយគណនី ព្រមទាំងពេលវេលាដែលនៅសល់     |
-| **ការចាក់សោសកម្ម**             | ការចាក់សោសកម្មតាមម៉ូដែល និងការដកចេញជាបណ្ដោះអាសន្ន                  |
-| **ឃ្លាំងសម្ងាត់ហត្ថលេខា**      | ស្ថិតិឃ្លាំងសម្ងាត់សម្រាប់លុបទិន្នន័យស្ទួន (សោសកម្ម អត្រារកឃើញ)    |
-| **ទិន្នន័យតេឡេមេទ្រីនៃភាពយឺត** | ការបូកសរុបភាពយឺត p50/p95/p99 ក្នុងមួយក្រុមហ៊ុនផ្ដល់សេវា            |
+| កាត                       | អ្វីដែលវាបង្ហាញ                                               |
+| ------------------------- | ------------------------------------------------------------- |
+| **ស្ថានភាពប្រព័ន្ធ**      | ពេលវេលាដំណើរការ កំណែ ការប្រើប្រាស់អង្គចងចាំ ថតទិន្នន័យ        |
+| **សុខភាពអ្នកផ្តល់សេវា**   | ស្ថានភាពនៃរយៈពេលរត់របស់អ្នកផ្តល់សេវាសាកល                      |
+| **ដែនកំណត់អត្រា**         | ការតភ្ជាប់សកម្ម cooldowns ក្នុងមួយគណនីជាមួយនឹងពេលវេលាដែលនៅសល់ |
+| **ការចាក់សោសកម្ម**        | ការចាក់សោរដែលមានវិសាលភាពតាមគំរូសកម្ម និងការបដិសេធបណ្ដោះអាសន្ន |
+| **ឃ្លាំងសម្ងាត់ហត្ថលេខា** | ស្ថិតិឃ្លាំងសម្ងាត់ផ្ដាច់ (គ្រាប់ចុចសកម្ម អត្រាបុក)           |
+| **Latency Telemetry**     | p50/p95/p99 សរុប latency ក្នុងមួយអ្នកផ្តល់សេវា                |
 
-**គន្លឹះសម្រាប់អ្នកជំនាញ៖** ទំព័រសុខភាពប្រព័ន្ធធ្វើឱ្យស្រស់ឡើងវិញដោយស្វ័យប្រវត្តិរៀងរាល់ 10 វិនាទី។ ប្រើកាតឧបករណ៍ផ្ដាច់សៀគ្វីដើម្បីកំណត់ថា ក្រុមហ៊ុនផ្ដល់សេវាណាខ្លះកំពុងជួបបញ្ហា។
+**គន្លឹះគាំទ្រ៖** ទំព័រសុខភាពធ្វើឱ្យស្រស់ដោយស្វ័យប្រវត្តិរៀងរាល់ 10 វិនាទី។ ប្រើកាតបំបែកសៀគ្វីដើម្បីកំណត់អត្តសញ្ញាណអ្នកផ្តល់សេវាណាមួយកំពុងជួបប្រទះបញ្ហា។
 
 ---
 

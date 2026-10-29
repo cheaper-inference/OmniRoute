@@ -37,13 +37,13 @@ Objektiv funktionsjämförelse mot populära AI-routrar med öppen källkod.
 | **Tunnelstöd (Cloudflared, Tailscale, Ngrok)**        |                        ✅                        |        ❌         |        n/a        |    n/a     |
 | **Licens**                                            |                       MIT                        |        MIT        |    proprietär     | proprietär |
 
-## När du ska välja OmniRoute
+## När ska man välja OmniRoute
 
-- Du kör self-hosted och vill ha **maximal leverantörstäckning** (375 leverantörer, 155 kostnadsfria katalogposter utan autentisering)
-- Du behöver en **inbyggd MCP-server** (LLM-verktyg, minne och färdigheter exponerade som verktyg)
-- Du behöver **A2A-protokoll** för arbetsflöden mellan agenter
-- Du vill ha **fingeravtrycksstealth** (JA3/JA4) för att undvika upptäckt av CAPTCHA:er uppströms
-- Du behöver **företagsfunktioner** (guardrails, evals, revisionsspår) utan en SaaS-faktura
+- Du är självvärd och vill** maximal leverantörstäckning** (377 leverantörer, 155 free/no-auth -katalogposter)
+- Du behöver en** inbyggd MCP server** (LLM verktyg, minne, färdigheter exponerade som verktyg)
+- Du behöver**A2A protokoll** för agent-till-agent-arbetsflöden
+- Du vill** fingeravtryck smygande** (JA3/JA4) för att undvika upptäckt av uppströms CAPTCHAs
+- Du behöver** företagsfunktioner** (räcke, evals, revisionsspår) utan en SaaS -sedel
 
 ## När du bör välja LiteLLM
 

@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { Button, Card, ConfirmModal } from "@/shared/components";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Button, Card, ConfirmModal, EmptyState, Skeleton } from "@/shared/components";
 import CatalogBulkActionBar from "./CatalogBulkActionBar";
 import {
   BULK_CONFIRM_COMBO_THRESHOLD,
@@ -14,6 +15,7 @@ import {
   type ModelTestTarget,
 } from "./catalogBulkUtils";
 import CatalogTabs, { catalogPanelId, catalogTabId } from "./CatalogTabs";
+import { countCatalogVisibility } from "./catalogVisibility";
 import ComboCatalogFiltersComponent from "./ComboCatalogFilters";
 import ComboCatalogTable from "./ComboCatalogTable";
 import {
@@ -53,6 +55,7 @@ import {
   type CatalogTab,
 } from "./catalogUrlState";
 import { useCatalogTestRunner } from "./useCatalogTestRunner";
+import { useCatalogVisibility } from "./useCatalogVisibility";
 
 const PAGE_SIZE = 50;
 
@@ -208,7 +211,9 @@ function useCatalogPageLoading(state: ReturnType<typeof useCatalogPageState>) {
     // Load models
     const fetchModels = async () => {
       try {
-        const response = await fetch("/api/models/catalog", { signal: controller.signal });
+        const response = await fetch("/api/models/catalog?includeHidden=1", {
+          signal: controller.signal,
+        });
         if (!response.ok) throw new Error("catalog request failed");
         const payload: unknown = await response.json();
         const catalog =
@@ -590,6 +595,33 @@ function useCatalogPageBulkActions(
 
   return { confirmPendingBulkRun, handleTestSelected, handleTestAllFiltered };
 }
+/** Hide/show controls, offered once the catalog carries visibility data (`includeHidden`). */
+function useCatalogPageVisibility(
+  state: ReturnType<typeof useCatalogPageState>,
+  loading: ReturnType<typeof useCatalogPageLoading>,
+  actions: ReturnType<typeof useCatalogPageActions>
+) {
+  const { models, t } = state;
+  const { visibilityBusy, applyVisibility } = useCatalogVisibility(
+    loading.loadData,
+    t("visibilityUpdateFailed")
+  );
+  if (!models.some((model) => model.visibility)) return { visibilityBusy };
+  const filtered = countCatalogVisibility(actions.visibleModels.filter((m) => m.visibility));
+  return {
+    visibilityBusy,
+    visibilityCounts: countCatalogVisibility(models),
+    visibilityActions: {
+      hideCount: filtered.visible,
+      showCount: filtered.hidden,
+      busy: visibilityBusy,
+      onHideFiltered: () => void applyVisibility(actions.visibleModels, true),
+      onShowFiltered: () => void applyVisibility(actions.visibleModels, false),
+    },
+    toggleModelVisibility: (row: CatalogModelRow) =>
+      void applyVisibility([row], row.hidden !== true),
+  };
+}
 function useCatalogPageContext() {
   const state = useCatalogPageState();
   useCatalogUrlRead(state);
@@ -597,12 +629,14 @@ function useCatalogPageContext() {
   const options = useCatalogPageOptions(state);
   const actions = useCatalogPageActions(state, options);
   const bulk = useCatalogPageBulkActions(state, actions);
+  const visibility = useCatalogPageVisibility(state, loading, actions);
   return {
     ...state,
     ...loading,
     ...options,
     ...actions,
     ...bulk,
+    ...visibility,
     hasModelFiltersActive: hasActiveModelFilters(options.modelFilters),
     hasComboFiltersActive: hasActiveComboFilters(options.comboFilters),
     hasTestResults: Object.keys(state.testResults).length > 0,
@@ -612,23 +646,30 @@ type CatalogPageContext = ReturnType<typeof useCatalogPageContext>;
 function CatalogHeader({ context }: { context: CatalogPageContext }) {
   const { t, refreshAll, switchTab, activeTab, models, modelsLoading, combos, combosLoading } =
     context;
+  const { visibilityCounts } = context;
   return (
     <>
-      <header className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold text-text-main">{t("title")}</h1>
-            <p className="mt-1 max-w-3xl text-sm text-text-muted">{t("subtitle")}</p>
-          </div>
-          <Button
-            variant="secondary"
-            icon="refresh"
-            loading={modelsLoading || combosLoading}
-            onClick={refreshAll}
-          >
-            {t("refresh")}
-          </Button>
-        </div>
+      <div className="flex flex-col gap-2">
+        <PageHeader
+          compact
+          title={t("title")}
+          description={t("subtitle")}
+          actions={
+            <Button
+              variant="secondary"
+              icon="refresh"
+              loading={modelsLoading || combosLoading}
+              onClick={refreshAll}
+            >
+              {t("refresh")}
+            </Button>
+          }
+        />
+        {visibilityCounts && (
+          <p className="text-xs text-text-muted" data-testid="catalog-visibility-counts">
+            {t("visibilityCounts", visibilityCounts)}
+          </p>
+        )}
 
         <CatalogTabs
           activeTab={activeTab}
@@ -639,7 +680,7 @@ function CatalogHeader({ context }: { context: CatalogPageContext }) {
             combos: `${t("combosTab")} (${combos.length})`,
           }}
         />
-      </header>
+      </div>
     </>
   );
 }
@@ -709,6 +750,7 @@ function CatalogModelsBulkActions({ context }: { context: CatalogPageContext }) 
     progress,
     cancelTest,
     clearResults,
+    visibilityActions,
   } = context;
   return (
     <>
@@ -722,6 +764,7 @@ function CatalogModelsBulkActions({ context }: { context: CatalogPageContext }) 
         onTestFiltered={handleTestAllFiltered}
         onCancel={cancelTest}
         onClearResults={clearResults}
+        visibilityActions={visibilityActions}
       />
     </>
   );
@@ -733,12 +776,12 @@ function CatalogModelsContent({ context }: { context: CatalogPageContext }) {
   return (
     <>
       {modelsLoading && models.length === 0 ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="flex min-h-64 items-center justify-center p-8 text-sm text-text-muted"
-        >
-          {t("loading")}
+        <div role="status" aria-live="polite" className="flex min-h-64 flex-col gap-2 p-4">
+          {/* Skeleton rows (CSS only): the kit TableLoadingState brand loader animates on timers. */}
+          <span className="ci-sr-only">{t("loading")}</span>
+          {Array.from({ length: 6 }, (_, i) => (
+            <Skeleton key={i} className="h-9 w-full" />
+          ))}
         </div>
       ) : modelsError && models.length === 0 ? (
         <div
@@ -752,19 +795,13 @@ function CatalogModelsContent({ context }: { context: CatalogPageContext }) {
           </Button>
         </div>
       ) : visibleModels.length === 0 ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-2 p-8 text-center">
-          <span className="material-symbols-outlined text-3xl text-text-muted" aria-hidden="true">
-            search_off
-          </span>
-          <p className="font-medium text-text-main">
-            {models.length === 0 ? t("noModelsAvailable") : t("noModelsMatch")}
-          </p>
-          {models.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearModelFilters}>
-              {t("clearFilters")}
-            </Button>
-          )}
-        </div>
+        <EmptyState
+          className="min-h-64"
+          icon="search_off"
+          title={models.length === 0 ? t("noModelsAvailable") : t("noModelsMatch")}
+          actionLabel={models.length > 0 ? t("clearFilters") : ""}
+          onAction={models.length > 0 ? clearModelFilters : null}
+        />
       ) : (
         <CatalogModelsResults context={context} />
       )}
@@ -792,6 +829,8 @@ function CatalogModelsResults({ context }: { context: CatalogPageContext }) {
     running,
     activeItemKeys,
     testSingleModel,
+    toggleModelVisibility,
+    visibilityBusy,
   } = context;
   return (
     <ModelCatalogTable
@@ -834,6 +873,8 @@ function CatalogModelsResults({ context }: { context: CatalogPageContext }) {
       onTestModel={testSingleModel}
       providerHealthMap={providerHealthMap}
       bulkRunning={running}
+      onToggleVisibility={toggleModelVisibility}
+      visibilityBusy={visibilityBusy}
     />
   );
 }
@@ -921,12 +962,12 @@ function CatalogCombosContent({ context }: { context: CatalogPageContext }) {
   return (
     <>
       {combosLoading && combos.length === 0 ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="flex min-h-64 items-center justify-center p-8 text-sm text-text-muted"
-        >
-          {t("loading")}
+        <div role="status" aria-live="polite" className="flex min-h-64 flex-col gap-2 p-4">
+          {/* Skeleton rows (CSS only): the kit TableLoadingState brand loader animates on timers. */}
+          <span className="ci-sr-only">{t("loading")}</span>
+          {Array.from({ length: 6 }, (_, i) => (
+            <Skeleton key={i} className="h-9 w-full" />
+          ))}
         </div>
       ) : combosError && combos.length === 0 ? (
         <div
@@ -940,19 +981,13 @@ function CatalogCombosContent({ context }: { context: CatalogPageContext }) {
           </Button>
         </div>
       ) : visibleCombos.length === 0 ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-2 p-8 text-center">
-          <span className="material-symbols-outlined text-3xl text-text-muted" aria-hidden="true">
-            search_off
-          </span>
-          <p className="font-medium text-text-main">
-            {combos.length === 0 ? t("noCombosAvailable") : t("noCombosMatch")}
-          </p>
-          {combos.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearComboFilters}>
-              {t("clearFilters")}
-            </Button>
-          )}
-        </div>
+        <EmptyState
+          className="min-h-64"
+          icon="search_off"
+          title={combos.length === 0 ? t("noCombosAvailable") : t("noCombosMatch")}
+          actionLabel={combos.length > 0 ? t("clearFilters") : ""}
+          onAction={combos.length > 0 ? clearComboFilters : null}
+        />
       ) : (
         <CatalogCombosResults context={context} />
       )}

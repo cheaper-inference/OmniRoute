@@ -486,15 +486,15 @@ Questo gestisce:
 
 `open-sse/config/` contiene il livello di configurazione:
 
-| File                          | Scopo                                                     |
-| ----------------------------- | --------------------------------------------------------- |
-| `providerRegistry.ts`         | Registro dei modelli di chat sul catalogo di 375 provider |
-| `providerModels.ts`           | Alias dei modelli, mappatura dei formati                  |
-| `constants.ts`                | Timeout, limiti, codici di stato                          |
-| `defaultThinkingSignature.ts` | Firma di thinking predefinita di Claude                   |
-| `modelStrip.ts` (in services) | Rimozione dei campi per provider                          |
+| File                          | Scopo                                                      |
+| ----------------------------- | ---------------------------------------------------------- |
+| `providerRegistry.ts`         | Registro del modello di chat sul catalogo del provider 377 |
+| `providerModels.ts`           | Alias del modello, mappatura del formato                   |
+| `constants.ts`                | Timeout, limiti, codici di stato                           |
+| `defaultThinkingSignature.ts` | Firma di pensiero Claude predefinita                       |
+| `modelStrip.ts` (nei servizi) | Eliminazione dei campi per provider                        |
 
-### Schema del registro dei provider
+### Schema del registro dei fornitori
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-La validazione Zod al caricamento del modulo garantisce che tutte le configurazioni dei provider siano valide.
+La convalida Zod al caricamento del modulo garantisce che tutte le configurazioni del provider siano valide.
 
 ---
 
