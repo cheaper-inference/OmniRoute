@@ -1,3 +1,4 @@
+import type { TextToolResult } from "../toolResult.ts";
 import { hasMcpHttpAuthContext, getMcpHttpPeerLocality } from "../httpAuthContext.ts";
 import { z } from "zod";
 import { rosebudPublishInput } from "../../services/rosebud/publishing.ts";
@@ -127,3 +128,28 @@ export const rosebudTools = [
     })
   ),
 ];
+
+// Keep binary data out of text blocks, which the accessibility layer may shorten.
+export function rosebudToolResult(value: unknown): TextToolResult {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const result = value as Record<string, unknown>;
+    if (typeof result.b64_data === "string") {
+      const { b64_data: artifact, ...metadata } = result;
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({
+              ...metadata,
+              artifactEncoding: "base64",
+              artifactField: "structuredContent.b64_data",
+              encodedLength: artifact.length,
+            }),
+          },
+        ],
+        structuredContent: result,
+      };
+    }
+  }
+  return { content: [{ type: "text", text: JSON.stringify(value) }] };
+}
