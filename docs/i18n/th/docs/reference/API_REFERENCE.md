@@ -849,47 +849,40 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## API การค้นหา
+## ค้นหา API
 
-เลเยอร์นามธรรมสำหรับผู้ให้บริการเว็บ/การค้นหา (Tavily, Brave, Exa, Serper เป็นต้น)
+นามธรรมของผู้ให้บริการ Web/search (Tavily, Brave, Exa, Serper ฯลฯ )
 
-| เมธอด | พาธ                    | คำอธิบาย                                                                                      |
-| ----- | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | แสดงรายการผู้ให้บริการค้นหาที่กำหนดค่าไว้พร้อมความสามารถ                                      |
-| POST  | `/v1/search`           | ดำเนินการคำค้นหา — เนื้อหาคำขอได้รับการตรวจสอบโดย `v1SearchSchema` และรองรับการแคช/การรวมคำขอ |
-| GET   | `/v1/search/analytics` | สถิติการพบข้อมูล/เวลาแฝง/แคชแยกตามผู้ให้บริการ                                                |
+| วิธี | เส้นทาง                | คำอธิบาย                                                                        |
+| ---- | ---------------------- | ------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | แสดงรายการความสามารถ + ของผู้ให้บริการการค้นหาที่กำหนดค่าไว้                    |
+| POST | `/v1/search`           | เรียกใช้คำค้นหา — body ที่ตรวจสอบโดย `v1SearchSchema` รองรับ caching/coalescing |
+| GET  | `/v1/search/analytics` | สถิติ hit/latency/cache ต่อผู้ให้บริการ                                         |
 
-**การยืนยันตัวตน:** คีย์ API แบบ Bearer (`extractApiKey` + `isValidApiKey`) นโยบายการค้นหาบังคับใช้ผ่าน `enforceApiKeyPolicy`
+**รับรองความถูกต้อง:** ผู้ถือคีย์ API (`extractApiKey` + `isValidApiKey`) นโยบายการค้นหาบังคับใช้ผ่าน `enforceApiKeyPolicy`
 
-### `provider_options` ของ Exa และ Tavily
+### Exa และ Tavily `provider_options`
 
-Exa และ Tavily อ่านฟิลด์เฉพาะของผู้ให้บริการจากออบเจ็กต์แบบแยกเนมสเปซ:
-`provider_options.exa` (หรือ `provider_options["exa-search"]`) และ `provider_options.tavily`
-(หรือ `provider_options["tavily-search"]`) ระบบจะส่งต่อเฉพาะคีย์ด้านล่าง แต่ละคีย์จะได้รับ
-การตรวจสอบกับสคีมา Zod ของตนเองใน `open-sse/handlers/search/providerOptionsPassthrough.ts`
-และคีย์ที่มีชนิดไม่ถูกต้องจะถูกตัดทิ้ง คีย์อื่นทั้งหมดจะถูกละเว้น รวมถึงข้อมูลยืนยันตัวตน, URL ฐาน,
-`stream` และ `outputSchema` คีย์แบบแบนที่ผู้ให้บริการรายอื่นใช้ (`cx`, `depth`, ...) ยังคงทำงาน
-เหมือนเดิม
+Exa และ Tavily อ่านฟิลด์เฉพาะผู้ให้บริการจากกระเป๋าเนมสเปซ: `provider_options.exa` (หรือ `provider_options["exa-search"]`) และ `provider_options.tavily` (หรือ `provider_options["tavily-search"]`) เฉพาะคีย์ด้านล่างเท่านั้นที่จะถูกส่งต่อ แต่ละรายการจะถูกตรวจสอบกับ Zod schema ของตัวเองใน `open-sse/handlers/search/providerOptionsPassthrough.ts` และคีย์ที่มีประเภทไม่ถูกต้องจะถูกละทิ้ง คีย์อื่นๆ จะถูกละเว้น รวมถึง auth, base URL, `stream` และ `outputSchema` ปุ่มแบนที่ใช้โดยผู้ให้บริการรายอื่น (`cx`, `depth`, ... ) ทำงานเหมือนเมื่อก่อน
 
-| ผู้ให้บริการ | ฟิลด์ระดับบนสุด                                                                                                                                                                                                                                                                                                                                                           | ฟิลด์ซ้อน                                                                                                                                                    |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ค่าพื้นฐานแบบแบน), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ผสานทับค่าเริ่มต้น `{ text: true, highlights: true }` |
-| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                            |
+| ผู้ให้บริการ | ฟิลด์ระดับบนสุด                                                                                                                                                                                                                                                                                                                                                           | ซ้อนกัน                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| สอบ          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ดั้งเดิมแบน), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                  | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ถูกรวมเข้ากับ `{ text: true, highlights: true }` เริ่มต้น |
+| ทาวิลี่      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                       |
 
-ฟิลด์ทั่วไปจะมีลำดับความสำคัญเหนือกว่าเสมอ ได้แก่ `query`, `max_results`, `filters` (โดเมน), `country` และ
-หัวข้อที่ได้มาจาก `search_type` สำหรับ Exa ค่า `search_type: "news"` จะคง `category: "news"` ไว้
-นอกจากนี้ Tavily ยังยอมรับ `search_type: "finance"` (`topic: "finance"`) ด้วย
+ช่องทั่วไปจะชนะเสมอ: `query`, `max_results`, `filters` (โดเมน), `country` และหัวข้อที่ได้มาจาก `search_type` บน Exa นั้น `search_type: "news"` จะเก็บ `category: "news"` ไว้ Tavily ยังยอมรับ `search_type: "finance"` (`topic: "finance"`)
 
-ขณะนี้ `time_range` แบบทั่วไปจะถูกส่งไปยังผู้ให้บริการทั้งสอง: Exa จะได้รับ `startPublishedDate` (การประทับเวลา
-แบบ ISO) และ Tavily จะได้รับ `start_date` (`YYYY-MM-DD`) วันที่ที่ระบุไว้อย่างชัดเจนใน `provider_options`
-จะมีลำดับความสำคัญเหนือกว่าค่าที่แมปไว้
+ค่าใช้จ่ายในการค้นหา Firecrawl จะถูกบันทึกต่อบล็อกเริ่มต้นของผลลัพธ์ที่ส่งคืน 10 รายการ ที่ 0.002 ดอลลาร์ (2 เครดิต) ต่อบล็อกและอย่างน้อยหนึ่งบล็อกต่อการโทร ( [การเรียกเก็บเงินของ Firecrawl](https://docs.firecrawl.dev/billing) ): ผลลัพธ์ 11 รายการมีราคา 0.004 ดอลลาร์
 
-ผลลัพธ์ของ Exa จะเก็บ `id`, `highlight_scores`, `summary`, `subpages`, `entities` และ `extras` ไว้ใน
-`provider_raw` ส่วนผลลัพธ์ของ Tavily จะเก็บ `images` และ `favicon`
+ขณะนี้ `time_range` ทั่วไปเข้าถึงผู้ให้บริการทั้งสองรายแล้ว: Exa ได้รับ `startPublishedDate` (ISO timestamp) และ Tavily ได้รับ `start_date` (`YYYY-MM-DD`) วันที่ที่ชัดเจนใน `provider_options` จะแทนที่วันที่ที่แมปไว้
 
-การคำนวณค่าใช้จ่ายยังคงใช้รีจิสทรีแบบแบน `costPerQuery` Tavily เรียกเก็บเครดิตต่อการเรียกใช้สำหรับ
-`search_depth: "advanced"` มากกว่า และความแตกต่างดังกล่าวจะไม่แสดงอยู่ใน
-`usage.search_cost_usd`
+ผลลัพธ์ Exa เก็บ `id`, `highlight_scores`, `summary`, `subpages`, `entities` และ `extras` ใน `provider_raw` ผลลัพธ์ Tavily ให้ `images` และ `favicon`
+
+ค่าใช้จ่ายในการค้นหาลิงก์อัปจะถูกบันทึกไว้ที่ 0.005 ดอลลาร์สำหรับ `depth` `fast` และ `standard` และ 0.05 ดอลลาร์สำหรับ `deep` ( [การกำหนดราคาลิงก์อัป](https://docs.linkup.so/pages/documentation/development/pricing) ) ไม่ว่า `depth` จะมาจาก `provider_options` หรือการตั้งค่าของการเชื่อมต่อก็ตาม
+
+Exa `type: "lite"` (Exa 3.0) ยอมรับชุดฟิลด์ที่เล็กกว่าและปฏิเสธคำขอทั้งหมดเมื่อมีการตั้งค่าฟิลด์อื่น สำหรับ lite, `additionalQueries`, `systemPrompt` และทุกคีย์ `contents` ยกเว้น `text` และ `highlights` จะถูกละทิ้งก่อนการโทร `subpages`, `subpageTarget`, `highlights.numSentences` และ `highlights.highlightsPerUrl` ที่เลิกใช้แล้วจะไม่ถูกส่งต่ออีกต่อไป
+
+การบัญชีต้นทุนเป็นแบบแฟลตรีจีสทรี `costPerQuery` ยกเว้น Exa ซึ่งเป็นไปตามราคาของ Exa เอง: 0.007 ดอลลาร์ต่อการเรียก `auto` (และ `fast` แบบเดิม) หรือ 0.004 ดอลลาร์สำหรับ `lite` (และ `instant` แบบเดิม) ครอบคลุม 10 ผลลัพธ์ $0.001 สำหรับผลลัพธ์เพิ่มเติมแต่ละรายการ และ 0.001 ดอลลาร์ต่อผลลัพธ์ที่ส่งคืนเมื่อตั้งค่า `contents.summary` Tavily ได้รับการบันทึกที่ 1 เครดิต ($0.008) สำหรับ `search_depth` `basic`, `fast` และ `ultra-fast` และ 2 เครดิต ($0.016) สำหรับ `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ) การโทรด้วย `auto_parameters: true` ที่ Tavily อัปเกรดเป็นขั้นสูงจะยังคงบันทึกไว้ที่ 1 เครดิต
 
 ---
 

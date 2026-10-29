@@ -201,7 +201,7 @@ Is é críochphointe JSON-RPC `/a2a` an pointe iontrála canónta A2A. Soláthra
 
 1. **Cruthaigh comhad scile:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Easpórtáil feidhm async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Lean struchtúr na scileanna atá ann cheana, amhail `smartRouting.ts`.
+   Easpórtáil feidhm aisioncronach `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Lean struchtúr na scileanna atá ann cheana, amhail `smartRouting.ts`.
 
 2. **Cláraigh an láimhseálaí:** in `src/lib/a2a/taskExecution.ts`, cuir iontráil le `A2A_SKILL_HANDLERS`:
 
@@ -215,7 +215,7 @@ Is é críochphointe JSON-RPC `/a2a` an pointe iontrála canónta A2A. Soláthra
    };
    ```
 
-3. **Nocht sa Chárta Gníomhaire é:** in `src/app/.well-known/agent.json/route.ts`, cuir leis an eagar `skills` é:
+3. **Nocht i gCárta an Ghníomhaire é:** in `src/lib/a2a/agentCardMetadata.ts` (atá comhroinnte ag `/.well-known/agent.json` agus `/.well-known/agent-card.json`), cuir leis an eagar `skills`:
 
    ```json
    {
@@ -227,7 +227,7 @@ Is é críochphointe JSON-RPC `/a2a` an pointe iontrála canónta A2A. Soláthra
    }
    ```
 
-4. **Scríobh tástálacha:** `tests/unit/a2a-<your-skill>.test.ts`. Clúdaigh an cás rathúil + an cás earráide.
+4. **Scríobh tástálacha:** `tests/unit/a2a-<your-skill>.test.ts`. Clúdaigh an cás rathúil agus an cás earráide.
 
 5. **Doiciméadaigh** an scil nua i dtábla `Available Skills` an chomhaid seo.
 

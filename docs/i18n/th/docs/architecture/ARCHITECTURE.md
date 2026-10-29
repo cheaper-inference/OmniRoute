@@ -358,161 +358,122 @@ OmniRoute สามารถติดตั้ง กำกับดูแล �
 
 ## ระบบย่อยหลัก (v3.8.0)
 
-### A. กลไก Auto Combo
+### ก. เครื่องยนต์ออโต้คอมโบ
 
-Auto Combo จะให้คะแนนและเลือกเป้าหมายการกำหนดเส้นทางแบบไดนามิก ณ เวลาที่มีคำขอ แทนการพึ่งพาคำจำกัดความคอมโบแบบคงที่ โดยเป็นกลไกเบื้องหลังตระกูลคำนำหน้าโมเดล `auto/*`
+คอมโบอัตโนมัติจะให้คะแนนและเลือกเป้าหมายการกำหนดเส้นทางตามเวลาที่ร้องขอ แทนที่จะอาศัยคำจำกัดความของคอมโบแบบคงที่ โดยจะขับเคลื่อนกลุ่มคำนำหน้าโมเดล `auto/*`
 
-- จุดเริ่มต้นของกลไก: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- ตัวแก้ไข: `src/domain/comboResolver.ts` (ตรวจจับคำนำหน้า `auto/` โดยอัตโนมัติ)
+- รายการเครื่องยนต์: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- ตัวแก้ไข: `src/domain/comboResolver.ts` (การตรวจจับคำนำหน้า `auto/` อัตโนมัติ)
 - แดชบอร์ด: `/dashboard/auto-combo`
-- เทเลเมทรี: ตาราง SQLite `auto_combo_decisions`
+- การวัดและส่งข้อมูลทางไกล: ตาราง `auto_combo_decisions` SQLite
 
-ความสามารถหลัก:
+ความสามารถที่สำคัญ:
 
-- **กลยุทธ์การกำหนดเส้นทาง 20 แบบ** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
-  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
-  pipeline) —
-  auto เป็นฟีเจอร์เด่นที่เพิ่มเข้ามาใน v3.8.0 ส่วน `fusion` (กระจายคำขอไปยังพาเนล + สังเคราะห์ผลโดยผู้ตัดสิน,
-  `open-sse/services/fusion.ts`) เพิ่มเข้ามาใหม่ใน v3.8.36
-- **การให้คะแนนด้วย 16 ปัจจัย**: โควตา, สถานะความพร้อม, ส่วนกลับของต้นทุน, ส่วนกลับของเวลาแฝง, ความเหมาะสมกับงาน และ
-  อีกสิบปัจจัย ตารางอ้างอิงหลักของปัจจัยและน้ำหนักเริ่มต้นอยู่ใน
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — การระบุซ้ำที่นี่จะทำให้เกิดอีกจุดหนึ่งที่ข้อมูลอาจล้าสมัย
-- **Virtual factory** สร้างคอมโบชั่วคราวเมื่อไม่มีคอมโบที่ตั้งชื่อไว้ตรงกัน
-  โดยดึงตัวเลือกจากการเชื่อมต่อผู้ให้บริการที่ทำงานอยู่และมีสถานะพร้อมใช้งาน
-- **คำนำหน้า Auto**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — แต่ละรายการรองรับด้วยโปรไฟล์น้ำหนักที่ปรับแต่งไว้
-- **ชุดโหมด 6 แบบ**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` และ `chaos-mode` — การกำหนดค่าน้ำหนักสำเร็จรูปที่เรียกใช้ได้จาก
-  แดชบอร์ด (อย่าสับสนกับคำนำหน้า `auto/*` ข้างต้น ซึ่งเป็น
-  ตัวแปรที่ใช้ ณ เวลาที่มีคำขอ)
+- **20 กลยุทธ์การกำหนดเส้นทาง** (ลำดับความสำคัญ, ถ่วงน้ำหนัก, เติมก่อน, ปัดเศษ, P2C, สุ่ม, ใช้น้อยที่สุด, ปรับต้นทุนให้เหมาะสม, รับรู้การรีเซ็ต, รีเซ็ตหน้าต่าง, ห้องว่าง, ถ่วงน้ำหนักโควต้า, สุ่มเข้มงวด,** อัตโนมัติ** , lkgp, ปรับบริบทให้เหมาะสม, ปรับแคชให้เหมาะสม, ถ่ายทอดบริบท,** ฟิวชั่น** , ไปป์ไลน์) — auto คือการเพิ่มพาดหัวใน v3.8.0; `fusion` (การสังเคราะห์ผู้พิพากษา + ของแผง fan-out, `open-sse/services/fusion.ts`) เป็นสิ่งใหม่ใน v3.8.36
+- **การให้คะแนน 16 ปัจจัย** : โควต้า สุขภาพ ต้นทุนผกผัน เวลาแฝงผกผัน ความพอดีของงาน และอื่นๆ อีกสิบรายการ ตารางปัจจัยที่เป็นที่ยอมรับและน้ำหนักเริ่มต้นอยู่ใน [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — การทำซ้ำที่นี่จะทำให้เป็นสถานที่ที่สองที่จะล้าสมัย
+- **โรงงานเสมือนจริง** ทำให้เกิดคอมโบชั่วคราวเมื่อไม่มีคอมโบที่มีชื่อตรงกัน จัดหาผู้สมัครจากการเชื่อมต่อผู้ให้บริการที่ดี
+- **คำนำหน้าอัตโนมัติ** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — แต่ละรายการได้รับการสนับสนุนโดยโปรไฟล์น้ำหนักที่ปรับแล้ว
+- **6 โหมดแพ็ค** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` และ `chaos-mode` — การกำหนดค่าน้ำหนักที่ตั้งไว้ล่วงหน้าสามารถเรียกได้จากแดชบอร์ด (อย่าสับสนกับคำนำหน้า `auto/*` ด้านบน ซึ่งเป็นตัวแปรตามเวลาร้องขอ)
 
-สำหรับรายละเอียดทั้งหมดของอัลกอริทึม (สูตรปัจจัยและการปรับแต่งน้ำหนัก) โปรดดู
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)
+สำหรับรายละเอียดอัลกอริธึมแบบเต็ม (สูตรแฟกเตอร์ การปรับน้ำหนัก) โปรดดู [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)
 
-### B. Cloud Agents
+### B. ตัวแทนระบบคลาวด์
 
-Cloud Agents ครอบแพลตฟอร์มเอเจนต์เขียนโค้ดแบบโฮสต์โดยบุคคลที่สาม (Codex Cloud, Devin,
-Jules) ไว้เบื้องหลังวงจรชีวิตงานที่มีรูปแบบเดียวกันและรองรับด้วยฐานข้อมูล ปลายทางทั้งหมดสำหรับการสร้าง/ตรวจสอบงาน
-ต้องใช้การยืนยันตัวตนระดับการจัดการ
+Cloud Agents ล้อมแพลตฟอร์มโค้ดเอเจนต์ที่โฮสต์โดยบุคคลที่สาม (Codex Cloud, Devin, Jules) ไว้เบื้องหลังวงจรงานที่ได้รับการสนับสนุนจาก DB ที่เป็นหนึ่งเดียวกัน ตำแหน่งข้อมูล creation/inspection ของงานทั้งหมดจำเป็นต้องมีการตรวจสอบสิทธิ์การจัดการ
 
-- รากของโมดูล: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts` รวมถึงไดเรกทอรีย่อยของแต่ละเอเจนต์ภายใต้ `agents/`)
-- การนำไปใช้สำหรับแต่ละเอเจนต์: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- ปลายทางสาธารณะ: `/api/v1/agents/tasks/*` (แสดงรายการ/สร้าง/เรียกดู/ยกเลิก)
-- ปลายทางการจัดการ: `/api/cloud/*` (การจัดเตรียม, สถานะ, การประมวลผลแบบกลุ่ม)
+- รูทโมดูล: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, plus per-agent subdirectories ภายใต้ `agents/`)
+- การใช้งานต่อเอเจนต์: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- จุดสิ้นสุดสาธารณะ: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- จุดสิ้นสุดการจัดการ: `/api/cloud/*` (การจัดเตรียม สถานะ แบทช์)
 - แดชบอร์ด: `/dashboard/cloud-agents`
-- พื้นที่จัดเก็บ: ตาราง `cloud_agent_tasks`
+- ที่เก็บของ: โต๊ะ `cloud_agent_tasks`
 
-สำหรับรายละเอียดเฉพาะของการจัดเตรียมและ OAuth ของแต่ละเอเจนต์ โปรดดู
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md)
+สำหรับการจัดเตรียมต่อเอเจนต์และข้อมูลเฉพาะของ OAuth โปรดดูที่ [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md)
 
-### C. Guardrails
+### ค. ราวกันตก
 
-โมดูล guardrails เป็นเลเยอร์มิดเดิลแวร์ที่โหลดซ้ำได้แบบทันที ซึ่งตรวจสอบคำขอ
-และการตอบกลับเพื่อหา PII, การแทรกพรอมต์ และเนื้อหาภาพที่ไม่ปลอดภัย การละเมิด
-จะยุติคำขอทันทีด้วย HTTP **503** พร้อมรหัสข้อผิดพลาดที่มีโครงสร้าง ทำให้
-ผู้เรียกปลายทางสามารถลองใหม่หรือแยกเส้นทางการทำงานได้
+โมดูล Guardrails เป็นเลเยอร์มิดเดิลแวร์ที่สามารถรีโหลดได้ทันที ซึ่งจะตรวจสอบคำขอและการตอบกลับสำหรับ PII การแทรกพร้อมท์ และเนื้อหาการมองเห็นที่ไม่ปลอดภัย การละเมิดลัดวงจรคำขอด้วย HTTP** 503** พร้อมรหัสข้อผิดพลาดที่มีโครงสร้าง ช่วยให้ผู้โทรดาวน์สตรีมลองใหม่หรือแยกสาขาได้
 
-- รากของโมดูล: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- การโหลดซ้ำแบบทันที: รีจิสทรีเฝ้าดูการเปลี่ยนแปลงการกำหนดค่าและสร้างเชนใหม่แทนที่เดิม
-- จุดเชื่อมต่อ: ทางเข้าแฮนด์เลอร์แชต, แฮนด์เลอร์การสร้างรูปภาพ, ตัวกรองการตอบกลับ
-- ข้อตกลง HTTP: การละเมิดจะแสดงเป็น `503` พร้อม `error.code = "GUARDRAIL_VIOLATION"`
+- รูทโมดูล: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- โหลดซ้ำด่วน: รีจิสทรีคอยดูการเปลี่ยนแปลงการกำหนดค่าและสร้างห่วงโซ่ใหม่
+- จุดเชื่อมต่อ: การเข้าสู่ตัวจัดการแชท, ตัวจัดการการสร้างรูปภาพ, เครื่องมือฆ่าเชื้อในการตอบกลับ
+- สัญญา HTTP : การละเมิดปรากฏเป็น `503` กับ `error.code = "GUARDRAIL_VIOLATION"`
 
-สำหรับการสร้างชุดกฎและการปรับแต่งค่าเกณฑ์ โปรดดู
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md)
+สำหรับการเขียนชุดกฎและการปรับแต่งเกณฑ์ โปรดดู [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md)
 
 ### D. เลเยอร์โดเมน
 
-เนมสเปซ `src/domain/` รวมศูนย์การตัดสินใจตามนโยบาย เพื่อให้แฮนด์เลอร์เส้นทางไม่จำเป็นต้อง
-ประกอบตรรกะการล็อกเอาต์/งบประมาณ/การใช้ตัวสำรองด้วยตนเอง
+เนมสเปซ `src/domain/` รวมศูนย์การตัดสินใจนโยบาย ดังนั้นตัวจัดการเส้นทางจึงไม่จำเป็นต้องประกอบตรรกะ lockout/budget/fallback ด้วยตนเอง
 
-- กลไกนโยบาย: `src/domain/policyEngine.ts` — จุดเข้าถึงเดียวสำหรับ
-  การประเมินก่อนดำเนินการ (ล็อกเอาต์ → งบประมาณ → ลำดับการใช้ตัวสำรอง)
+- กลไกจัดการนโยบาย: `src/domain/policyEngine.ts` — จุดเข้าเดียวสำหรับการประเมินก่อนดำเนินการ (ล็อกเอาต์งบประมาณ → ลำดับสำรอง → )
 - กฎต้นทุน: `src/domain/costRules.ts`
-- นโยบายการใช้ตัวสำรอง: `src/domain/fallbackPolicy.ts`
-- นโยบายล็อกเอาต์: `src/domain/lockoutPolicy.ts`
+- นโยบายสำรอง: `src/domain/fallbackPolicy.ts`
+- นโยบายการล็อก: `src/domain/lockoutPolicy.ts`
 - การกำหนดเส้นทางตามแท็ก: `src/domain/tagRouter.ts`
-- ตัวแก้ไขคอมโบ: `src/domain/comboResolver.ts` — แปลงชื่อคอมโบ, คำนำหน้า auto/\*
-  และเป้าหมายโมเดลแบบไวลด์การ์ดให้เป็นแผนการดำเนินงานที่เป็นรูปธรรม
-- ตัวเชื่อมกฎการเชื่อมต่อ/โมเดล: `src/domain/connectionModelRules.ts`
+- ตัวแก้ไขคำสั่งผสม: `src/domain/comboResolver.ts` — แก้ไขชื่อคำสั่งผสม คำนำหน้า auto/\* และเป้าหมายโมเดลไวด์การ์ดเพื่อแผนการดำเนินการที่เป็นรูปธรรม
+- ตัวเชื่อมกฎ Connection/model : `src/domain/connectionModelRules.ts`
 - สแนปช็อตความพร้อมใช้งานของโมเดล: `src/domain/modelAvailability.ts`
 - การติดตามการหมดอายุของผู้ให้บริการ: `src/domain/providerExpiration.ts`
-- แคชโควตา: `src/domain/quotaCache.ts`
-- สถานะการลดระดับการทำงาน: `src/domain/degradation.ts`
+- แคชโควต้า: `src/domain/quotaCache.ts`
+- สถานะการย่อยสลาย: `src/domain/degradation.ts`
 - การตรวจสอบการกำหนดค่า: `src/domain/configAudit.ts`
-- ตัวสร้างเมทาดาทาการตอบกลับ OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- ระบบย่อยการประเมิน: `src/domain/assessment/` — งานประเมินผลตามรอบเวลา
+- ตัวสร้างข้อมูลเมตาการตอบกลับ OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- ระบบย่อยการประเมิน: `src/domain/assessment/` — งานการประเมินเป็นระยะ
 
-### E. ไปป์ไลน์การอนุญาต
+### E. ช่องทางการอนุญาต
 
-ไปป์ไลน์การอนุญาตจะจำแนกคำขอขาเข้าทุกรายการและใช้
-เชนนโยบายที่เหมาะสมก่อนส่งต่อไปประมวลผล
+ไปป์ไลน์การอนุญาตจะจัดประเภททุกคำขอที่เข้ามาและใช้ห่วงโซ่นโยบายที่เหมาะสมก่อนส่ง
 
-- จุดเริ่มต้นของไปป์ไลน์: `src/server/authz/pipeline.ts`
-- ตัวจำแนกคำขอ: `src/server/authz/classify.ts` — แยกความแตกต่างระหว่างเส้นทางความเข้ากันได้
-  แบบสาธารณะกับเส้นทางการจัดการ
-- รายการเส้นทางสาธารณะ: `src/shared/constants/publicApiRoutes.ts`
-- นโยบาย: `src/server/authz/policies/` — เพรดิเคตที่ประกอบร่วมกันได้
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` ฯลฯ)
-- ยูทิลิตีส่วนหัว: `src/server/authz/headers.ts`
-- ตัวช่วยการยืนยันเงื่อนไข: `src/server/authz/assertAuth.ts`
+- รายการไปป์ไลน์: `src/server/authz/pipeline.ts`
+- ตัวแยกประเภทคำขอ: `src/server/authz/classify.ts` — แยกเส้นทางความเข้ากันได้สาธารณะจากเส้นทางการจัดการ
+- สินค้าคงคลังเส้นทางสาธารณะ: `src/shared/constants/publicApiRoutes.ts`
+- นโยบาย: เพรดิเคตที่ประกอบได้ `src/server/authz/policies/` — (`requireApiKey`, `requireManagement`, `requireFreshAuth` ฯลฯ )
+- ยูทิลิตี้ส่วนหัว: `src/server/authz/headers.ts`
+- ผู้ช่วยยืนยัน: `src/server/authz/assertAuth.ts`
 - บริบทคำขอ: `src/server/authz/context.ts`
 
-เส้นทางสาธารณะและเส้นทางการจัดการมีขอบเขตแบ่งแยกที่ชัดเจน: API ของเอเจนต์/ช่วงพักการใช้งาน และ
-การแก้ไขผู้ให้บริการต้องใช้การยืนยันตัวตนระดับการจัดการ (HTTP 401 หากไม่มี)
+เส้นทางสาธารณะและการจัดการนั้นเป็นขอบเขตที่ยาก: agent/cooldown APIs และการกลายพันธุ์ของผู้ให้บริการจำเป็นต้องมีการตรวจสอบสิทธิ์การจัดการ (HTTP 401 หากหายไป)
 
-สำหรับกฎการจำแนกเส้นทางทั้งหมด โปรดดู
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md)
+สำหรับกฎการแบ่งประเภทเส้นทางทั้งหมด โปรดดู [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md)
 
-### F. Workflow FSM และเราเตอร์ที่รับรู้บริบทของงาน
+### F. เวิร์กโฟลว์ FSM และเราเตอร์ Task-Aware
 
-เราเตอร์ที่ขับเคลื่อนด้วยเครื่องสถานะแบบจำกัด ซึ่งวางซ้อนอยู่เหนือการเลือกคอมโบเพื่อกำหนดทิศทาง
-ทราฟฟิกตามขั้นตอนเวิร์กโฟลว์ที่ตรวจพบ (การวางแผน, การดำเนินการ,
-การตรวจสอบ) และความสัมพันธ์กับงานเบื้องหลัง
+เราเตอร์ที่ขับเคลื่อนด้วยไฟไนต์สเตทซึ่งวางอยู่เหนือการเลือกคอมโบเพื่อกำหนดทิศทางการรับส่งข้อมูลตามขั้นตอนเวิร์กโฟลว์ที่ตรวจพบ (การวางแผน การดำเนินการ การตรวจสอบ) และความสัมพันธ์ของงานเบื้องหลัง
 
-- FSM ของเวิร์กโฟลว์: `open-sse/services/workflowFSM.ts`
-- เราเตอร์ที่รับรู้บริบทของงาน: `open-sse/services/taskAwareRouter.ts`
-- ตัวตรวจจับงานเบื้องหลัง: `open-sse/services/backgroundTaskDetector.ts`
-- ตัวจำแนกเจตนา: `open-sse/services/intentClassifier.ts`
+- เวิร์กโฟลว์ FSM: `open-sse/services/workflowFSM.ts`
+- เราเตอร์ที่รับรู้งาน: `open-sse/services/taskAwareRouter.ts`
+- เครื่องตรวจจับงานพื้นหลัง: `open-sse/services/backgroundTaskDetector.ts`
+- ตัวแยกประเภทเจตนา: `open-sse/services/intentClassifier.ts`
 
-การเปลี่ยนสถานะของ FSM จะถูกนำไปใช้ในการให้คะแนนของ Auto Combo โดยให้น้ำหนักกับโมเดลที่มีต้นทุนต่ำกว่าสำหรับงานเบื้องหลัง/งานอัตโนมัติ และให้น้ำหนักกับโมเดลที่มีความสามารถสูงกว่าสำหรับรอบการวางแผน/ตรวจทานแบบโต้ตอบ
+การเปลี่ยนผ่าน FSM จะป้อนเข้าสู่การให้คะแนนของ Auto Combo โดยมุ่งไปที่โมเดลที่ถูกกว่าสำหรับงาน background/automation และไปสู่โมเดลที่แข็งแกร่งกว่าสำหรับการเปลี่ยน planning/review แบบโต้ตอบ
 
-### G. ความยืดหยุ่นเฉพาะผู้ให้บริการ
+### G. ความยืดหยุ่นเฉพาะของผู้ให้บริการ
 
-ผู้ให้บริการหลายรายมาพร้อมโมดูลเฉพาะด้านความยืดหยุ่นและการพรางตัว ซึ่งทำงานร่วมกับชั้น circuit breaker / การพักการเชื่อมต่อ / การล็อกโมเดลส่วนกลาง:
+ผู้ให้บริการหลายรายจัดส่งโมดูลความยืดหยุ่นและการซ่อนตัวโดยเฉพาะซึ่งเชื่อมต่อเข้ากับเซอร์กิตเบรกเกอร์ส่วนกลาง / คูลดาวน์การเชื่อมต่อ / ชั้นล็อคโมเดล:
 
-- กลไกจัดการ 429 ของ Antigravity: `open-sse/services/antigravity429Engine.ts` (หมุนเวียนข้อมูลระบุตัวตน ล้างส่วนหัวการตอบกลับ และจัดการการติดตามเครดิต/เวอร์ชันผ่าน
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- นโยบายโควตาของ ModelScope: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
-  รวมถึง `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- การปรับแต่งลายนิ้วมือของ Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
-- การอำพรางของ Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
+- เครื่องยนต์Antigravity 429: `open-sse/services/antigravity429Engine.ts` (หมุนข้อมูลประจำตัว, ขัดส่วนหัวการตอบสนอง, ขับเคลื่อนการติดตาม credits/version ผ่าน `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (งบประมาณต่อคำขอของอัปสตรีม 429s ทั่วทั้งโฮสต์ `ANTIGRAVITY_MAX_429_ATTEMPTS` การส่งซ้ำที่เหมือนกันของเนื้อหาที่ถูกปฏิเสธจะได้รับคำตอบในเครื่อง `src/sse/handlers/chat.ts` จะไม่รีสตาร์ทคำขอดังกล่าวผ่านการลองอีกครั้งโดยคำนึงถึงคูลดาวน์)
+- นโยบายโควต้า ModelScope : `open-sse/services/modelscopePolicy.ts`
+- รหัส Claude CCH (การจับมือช่องสัญญาณที่เข้ากันได้): `open-sse/services/claudeCodeCCH.ts`, บวก `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- การสร้างลายนิ้วมือรหัส Claude : `open-sse/services/claudeCodeFingerprint.ts`
+- รหัส Claude ทำให้สับสน: `open-sse/services/claudeCodeObfuscation.ts`
 
-สำหรับคู่มือการพรางตัวฉบับเต็มและแนวทางการดำเนินงาน โปรดดู
-`docs/security/STEALTH_GUIDE.md` (git; ไม่ได้คอมไพล์ไว้ใน `/docs`)
+สำหรับ Playbook การลักลอบฉบับเต็มและคำแนะนำในการปฏิบัติงาน โปรดดูที่ `docs/security/STEALTH_GUIDE.md` (git; ไม่ได้คอมไพล์เป็น `/docs`)
 
-### H. Webhooks, แคชการใช้เหตุผล, แคชการอ่าน
+### H. Webhooks, แคชเหตุผล, อ่านแคช
 
-- **Webhooks** — การส่งข้อมูลขาออกสำหรับเหตุการณ์ของผู้ให้บริการ/บัญชี/งาน
-  - ตัวจัดส่ง: `src/lib/webhookDispatcher.ts`
-  - พื้นที่จัดเก็บ: ตาราง SQLite `webhooks` (ผ่าน `src/lib/db/webhooks.ts`)
-  - แดชบอร์ด: `/dashboard/webhooks` (การสมัครรับข้อมูล ข้อมูลลับ ประวัติการลองใหม่)
-  - สำหรับการจัดหมวดหมู่เหตุการณ์และความหมายของการลองใหม่ โปรดดู [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md)
-- **แคชการใช้เหตุผล** — บล็อกการใช้เหตุผลที่สามารถเล่นซ้ำได้สำหรับผู้ให้บริการที่ส่งโทเค็นการคิด
-  (Claude, GLMT ฯลฯ) เพื่อให้รอบการโต้ตอบที่ต่อเนื่องกันสามารถข้ามการคิดซ้ำได้
-  - ชั้น DB: `src/lib/db/reasoningCache.ts`
+- **เว็บฮุค** การจัดส่งขาออก — สำหรับกิจกรรม provider/account/task
+  - ผู้จัดส่ง: `src/lib/webhookDispatcher.ts`
+  - ที่เก็บข้อมูล: ตาราง `webhooks` SQLite (ผ่าน `src/lib/db/webhooks.ts`)
+  - แดชบอร์ด: `/dashboard/webhooks` (การสมัครสมาชิก ข้อมูลลับ ประวัติการลองใหม่)
+  - สำหรับอนุกรมวิธานเหตุการณ์และลองความหมายอีกครั้ง ดูที่ [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md)
+- **แคชเหตุผล** บล็อกการใช้เหตุผลแบบเล่นซ้ำได้ — สำหรับผู้ให้บริการที่ปล่อยโทเค็นการคิด (Claude, GLMT ฯลฯ ) เพื่อให้การผลัดกันติดต่อกันสามารถข้ามการคิดใหม่ได้
+  - เลเยอร์DB : `src/lib/db/reasoningCache.ts`
   - ชั้นบริการ: `open-sse/services/reasoningCache.ts`
-  - สำหรับความหมายของการเล่นซ้ำ โปรดดู [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md)
-- **แคชการอ่าน** — แคชการตอบกลับอายุสั้นที่ใช้ลายเซ็นเป็นคีย์ และใช้เพื่อ
-  รวมการลองใหม่ที่เหมือนกันจาก SDK ต้นทางที่ทำงานผิดปกติ
-  - ชั้น DB: `src/lib/db/readCache.ts`
-  - เอนด์พอยต์สถิติ: `GET /api/cache/stats`, แดชบอร์ดที่ `/dashboard/cache`
+  - สำหรับความหมายการเล่นซ้ำ ดูที่ [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md)
+- **อ่านแคช** แคชการตอบสนองอายุสั้น — คีย์โดยลายเซ็น และใช้เพื่อยุบการลองซ้ำที่เหมือนกันจากอัพสตรีมที่เสียหาย SDKs
+  - เลเยอร์DB : `src/lib/db/readCache.ts`
+  - จุดสิ้นสุดสถิติ: `GET /api/cache/stats` แดชบอร์ดที่ `/dashboard/cache`
 
 ## 3) เลเยอร์การจัดเก็บข้อมูลถาวร
 

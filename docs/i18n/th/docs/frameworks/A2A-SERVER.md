@@ -201,9 +201,9 @@ OmniRoute เปิดเผย 6 ทักษะ A2A แบบมีสาย�
 
 1. **สร้างไฟล์สกิล:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   ส่งออกฟังก์ชัน async `(task: A2ATask) => Promise<{ artifacts, metadata }>` ให้เป็นไปตามโครงสร้างของสกิลที่มีอยู่ เช่น `smartRouting.ts`
+   ส่งออกฟังก์ชัน async `(task: A2ATask) => Promise<{ artifacts, metadata }>` โดยใช้โครงสร้างเดียวกับสกิลที่มีอยู่ เช่น `smartRouting.ts`
 
-2. **ลงทะเบียนแฮนด์เลอร์:** ใน `src/lib/a2a/taskExecution.ts` ให้เพิ่มรายการลงใน `A2A_SKILL_HANDLERS`:
+2. **ลงทะเบียนตัวจัดการ:** ใน `src/lib/a2a/taskExecution.ts` ให้เพิ่มรายการลงใน `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,19 +215,19 @@ OmniRoute เปิดเผย 6 ทักษะ A2A แบบมีสาย�
    };
    ```
 
-3. **แสดงใน Agent Card:** ใน `src/app/.well-known/agent.json/route.ts` ให้เพิ่มต่อท้ายอาร์เรย์ `skills`:
+3. **เปิดเผยใน Agent Card:** ใน `src/lib/a2a/agentCardMetadata.ts` (ซึ่งใช้ร่วมกันโดย `/.well-known/agent.json` และ `/.well-known/agent-card.json`) ให้เพิ่มรายการต่อท้ายอาร์เรย์ `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "สกิลของคุณ",
-     "description": "คำอธิบายสั้น ๆ ที่มุ่งเน้นเจตนา",
-     "tags": ["การกำหนดเส้นทาง", "โควตา"],
-     "examples": ["ตัวอย่างการเรียกใช้ด้วยภาษาธรรมชาติ"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **เขียนการทดสอบ:** `tests/unit/a2a-<your-skill>.test.ts` ให้ครอบคลุมทั้งกรณีสำเร็จ + กรณีข้อผิดพลาด
+4. **เขียนการทดสอบ:** `tests/unit/a2a-<your-skill>.test.ts` โดยครอบคลุมทั้งกรณีสำเร็จและกรณีเกิดข้อผิดพลาด
 
 5. **จัดทำเอกสาร** สำหรับสกิลใหม่ในตาราง `Available Skills` ของไฟล์นี้
 

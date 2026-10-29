@@ -1,0 +1,36 @@
+@layer components {
+  .ci-loading-screen {
+    display: grid;
+    min-height: 100svh;
+    place-items: center;
+    overflow: hidden;
+    padding: 2rem 1.5rem;
+    background: var(--ci-color-background);
+    color: var(--ci-color-foreground);
+    font-family: var(--ci-font-ui);
+    text-align: center;
+  }
+  .ci-loading-screen__content { width: min(100%, 28rem); }
+  .ci-loading-screen__art { position: relative; display: grid; width: clamp(6rem, 25svh, 12rem); aspect-ratio: 1; margin: 0 auto 1.75rem; place-items: center; color: var(--ci-color-accent); }
+  .ci-loading-screen__halo { position: absolute; inset: -3rem; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--ci-color-accent) 13%, transparent), transparent 68%); animation: ci-loading-breathe 4s ease-in-out infinite; }
+  .ci-loading-screen__orbit { position: absolute; inset: 0; border: 1px solid color-mix(in srgb, var(--ci-color-accent) 16%, transparent); border-radius: 50%; animation: ci-spin 9s linear infinite; }
+  .ci-loading-screen__orbit > span { position: absolute; top: -3px; left: calc(50% - 3px); width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 14px color-mix(in srgb, var(--ci-color-accent) 45%, transparent); }
+  .ci-loading-screen__orbit--inner { inset: 1rem; border-style: dashed; border-color: color-mix(in srgb, var(--ci-color-accent) 10%, transparent); animation-duration: 14s; animation-direction: reverse; }
+  .ci-loading-screen__orbit--inner > span { width: 4px; height: 4px; top: -2px; opacity: .5; }
+  .ci-loading-screen__mark { position: relative; width: 36%; animation: ci-loading-breathe 4s ease-in-out infinite; }
+  .ci-loading-screen__mark svg { display: block; width: 100%; height: auto; }
+  .ci-loading-screen__title { margin: 0 0 1.25rem; color: var(--ci-color-heading); font-size: 1rem; font-weight: var(--ci-font-weight-semibold); letter-spacing: -.025em; }
+  .ci-loading-screen__copy { min-height: 6rem; }
+  .ci-loading-screen__message { animation: ci-loading-reveal .45s ease-out both; }
+  .ci-loading-screen__label { margin: 0; font-size: 1.125rem; font-weight: var(--ci-font-weight-medium); line-height: 1.5; letter-spacing: -.02em; text-wrap: balance; }
+  .ci-loading-screen__description { margin: .5rem 0 0; color: var(--ci-color-text-muted); font-size: .8125rem; line-height: 1.6; text-wrap: balance; }
+  .ci-loading-screen__track { width: 8rem; height: 2px; margin: 1.5rem auto; overflow: hidden; border-radius: 2px; background: color-mix(in srgb, var(--ci-color-accent) 15%, transparent); }
+  .ci-loading-screen__track > span { display: block; width: 45%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, transparent, var(--ci-color-accent), transparent); animation: ci-loading-sweep 1.8s ease-in-out infinite; }
+  @keyframes ci-loading-breathe { 0%, 100% { opacity: .75; transform: scale(.97); } 50% { opacity: 1; transform: scale(1.03); } }
+  @keyframes ci-loading-reveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes ci-loading-sweep { from { transform: translateX(-110%); } to { transform: translateX(330%); } }
+  @media (prefers-reduced-motion: reduce) {
+    .ci-loading-screen__halo, .ci-loading-screen__orbit, .ci-loading-screen__mark, .ci-loading-screen__message, .ci-loading-screen__track > span { animation: none; }
+    .ci-loading-screen__track > span { margin-inline: auto; }
+  }
+}

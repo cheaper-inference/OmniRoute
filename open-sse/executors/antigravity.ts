@@ -14,6 +14,13 @@ import {
   getAntigravityOAuthUserAgent,
 } from "../services/antigravityHeaders.ts";
 import { classify429, decide429, type Decision } from "../services/antigravity429Engine.ts";
+import {
+  buildAntigravityRefusalReplayResponse,
+  fingerprintAntigravityRequest,
+  getActiveAntigravityRefusal,
+  getAntigravity429AttemptBudget,
+  rememberAntigravity429Refusal,
+} from "../services/antigravity429Guard.ts";
 import { parseRetryFromErrorText, type RetryHintProvenance } from "../services/accountFallback.ts";
 import { parseDetailedRetryHintFromJsonBody } from "../services/retryAfterJson.ts";
 import {
@@ -569,12 +576,27 @@ type AntigravityAttemptContext = {
   fallbackCount: number;
   physicalSendCounter: AntigravityPhysicalSendCounter;
   correlationId: string | null;
+  /** Per-request upstream-429 budget across ALL hosts (antigravity429Guard.ts). */
+  rateLimitBudget: AntigravityRateLimitBudget;
+};
+
+/**
+ * Upstream 429s seen for this request across every host. Once `count` reaches `max`
+ * the 429 goes back to the caller instead of being retried, and the request body
+ * (`fingerprint`) is remembered so an identical re-send is answered locally.
+ */
+type AntigravityRateLimitBudget = {
+  max: number;
+  count: number;
+  fingerprint: string | null;
 };
 
 /** Context threaded through the 429/503 handling helpers — adds the sent response. */
 type AntigravityRateLimitContext = AntigravityAttemptContext & {
   response: Response;
   finalHeaders: Record<string, string>;
+  /** This response spent the request's 429 budget: no more retries on any host. */
+  budget429Spent: boolean;
 };
 
 /**
@@ -599,7 +621,14 @@ export class AntigravityExecutor extends BaseExecutor {
     super("antigravity", PROVIDERS.antigravity);
   }
 
-  override shouldRetry(status: number, urlIndex: number): boolean {
+  override shouldRetry(status: number, urlIndex: number, model?: string): boolean {
+    if (
+      status === HTTP_STATUS.NOT_FOUND &&
+      typeof model === "string" &&
+      /argon|gemini-4/i.test(model)
+    ) {
+      return false;
+    }
     return (
       (status === HTTP_STATUS.RATE_LIMITED ||
         status === HTTP_STATUS.NOT_FOUND ||
@@ -623,10 +652,14 @@ export class AntigravityExecutor extends BaseExecutor {
 
   buildHeaders(credentials: AntigravityCredentials, _stream = true): Record<string, string> {
     const clientProfile = getAntigravityClientProfile(credentials);
-    const raw = {
+    const raw: Record<string, string> = {
       ...getAntigravityContentHeaders(clientProfile, credentials.accessToken),
-      Accept: "text/event-stream",
     };
+    // The native Go CLI requests SSE through `?alt=sse` alone and sends no Accept header;
+    // only the IDE/Electron profile advertises `text/event-stream`.
+    if (clientProfile !== "cli") {
+      raw.Accept = "text/event-stream";
+    }
     // Scrub proxy/fingerprint headers that reveal non-native traffic
     return scrubProxyAndFingerprintHeaders(raw);
   }
@@ -1342,6 +1375,13 @@ export class AntigravityExecutor extends BaseExecutor {
     const creditsMode = getCreditsMode();
     const useCreditsFirst = shouldUseCreditsFirst(credentials?.accessToken || "", creditsMode);
     const creditsRetryState: AntigravityCreditsRetryState = { attempted: false };
+    // Upstream 429s for this request across ALL hosts; once the budget is spent the 429
+    // goes back to the caller instead of being retried (antigravity429Guard.ts).
+    const rateLimitBudget: AntigravityRateLimitBudget = {
+      max: getAntigravity429AttemptBudget(),
+      count: 0,
+      fingerprint: null,
+    };
 
     for (let urlIndex = 0; urlIndex < fallbackCount; urlIndex++) {
       const url = this.buildUrl(model, upstreamStream, urlIndex);
@@ -1361,6 +1401,25 @@ export class AntigravityExecutor extends BaseExecutor {
       }
 
       const transformedBody = finalizeAntigravityRequestBody(transformed, useCreditsFirst, l);
+
+      // A body that already spent its 429 budget is answered locally until the block
+      // expires — the client re-sending it must not reach Google again.
+      if (rateLimitBudget.fingerprint === null) {
+        rateLimitBudget.fingerprint = fingerprintAntigravityRequest(accountId, transformedBody);
+        const activeRefusal = getActiveAntigravityRefusal(rateLimitBudget.fingerprint);
+        if (activeRefusal) {
+          l.warn(
+            "AG_429_BUDGET",
+            `Not resending a request Antigravity refused with 429 (repeat ${activeRefusal.strikes}, ${Math.ceil(activeRefusal.remainingMs / 1000)}s left) — answered locally`
+          );
+          return {
+            response: buildAntigravityRefusalReplayResponse(activeRefusal),
+            url,
+            headers,
+            transformedBody,
+          };
+        }
+      }
 
       // Initialize retry counter for this URL
       if (!retryAttemptsByUrl[urlIndex]) {
@@ -1385,6 +1444,7 @@ export class AntigravityExecutor extends BaseExecutor {
           fallbackCount,
           physicalSendCounter,
           correlationId,
+          rateLimitBudget,
         });
 
         if (outcome.action === "return") return outcome.result;
@@ -1451,6 +1511,7 @@ export class AntigravityExecutor extends BaseExecutor {
       retryAttemptsByUrl,
       physicalSendCounter,
       correlationId,
+      rateLimitBudget,
     } = ctx;
 
     const { response, finalHeaders } = await sendAntigravityRequest(
@@ -1469,15 +1530,21 @@ export class AntigravityExecutor extends BaseExecutor {
     );
 
     let retryMs: number | null = null;
+    let budget429Spent = false;
 
     if (
       response.status === HTTP_STATUS.RATE_LIMITED ||
       response.status === HTTP_STATUS.SERVICE_UNAVAILABLE
     ) {
+      if (response.status === HTTP_STATUS.RATE_LIMITED) {
+        rateLimitBudget.count += 1;
+        budget429Spent = rateLimitBudget.count >= rateLimitBudget.max;
+      }
       const rateLimitOutcome = await this.handleAntigravityRateLimit({
         ...ctx,
         response,
         finalHeaders,
+        budget429Spent,
       });
 
       if (rateLimitOutcome.action === "return") {
@@ -1492,7 +1559,7 @@ export class AntigravityExecutor extends BaseExecutor {
       retryMs = rateLimitOutcome.retryMs;
     }
 
-    if (this.shouldRetry(response.status, urlIndex)) {
+    if (!budget429Spent && this.shouldRetry(response.status, urlIndex, model)) {
       log.debug("RETRY", `${response.status} on ${url}, trying fallback ${urlIndex + 1}`);
       return { action: "retry", sameUrl: false, lastStatus: response.status };
     }
@@ -1578,10 +1645,13 @@ export class AntigravityExecutor extends BaseExecutor {
   async handleAntigravityRateLimit(
     ctx: AntigravityRateLimitContext
   ): Promise<AntigravityRateLimitOutcome> {
-    const { response, log, urlIndex, retryAttemptsByUrl, fallbackCount } = ctx;
+    const { response, log, urlIndex, retryAttemptsByUrl, fallbackCount, budget429Spent } = ctx;
+    const { rateLimitBudget } = ctx;
 
     // Try to get retry time from headers first
     let retryMs: number | null = this.parseRetryHeaders(response.headers);
+    // What Google itself stated, before decide429 fills in its defaults.
+    let upstreamRetryHintMs: number | null = retryMs;
 
     // If no retry time in headers, try to parse from error message body
     let switchAuth = false;
@@ -1590,6 +1660,22 @@ export class AntigravityExecutor extends BaseExecutor {
       if (resolved.kind === "return") return { action: "return", result: resolved.result };
       retryMs = resolved.retryMs;
       switchAuth = resolved.switchAuth;
+      upstreamRetryHintMs = resolved.upstreamRetryHintMs;
+    }
+
+    if (budget429Spent) {
+      if (rateLimitBudget.fingerprint) {
+        const refusal = rememberAntigravity429Refusal(
+          rateLimitBudget.fingerprint,
+          upstreamRetryHintMs
+        );
+        log.warn(
+          "AG_429_BUDGET",
+          `${rateLimitBudget.count} upstream 429s for this request (budget ${rateLimitBudget.max}) — returning it; identical re-sends are answered locally for ${Math.ceil(refusal.blockMs / 1000)}s`
+        );
+      }
+      // No same-host retry, no next host: the 429 goes back to the caller.
+      return { action: "fallthrough", retryMs, lastStatus: response.status };
     }
 
     // Bounded short-retry: a non-null retryAfterMs ≤ 60s covers nearly every
@@ -1653,11 +1739,15 @@ export class AntigravityExecutor extends BaseExecutor {
    * credits retry. Returns the resolved retryMs, or an early "return" result
    * when the credits retry itself produced a response to hand back to the client.
    */
-  private async tryResolveRetryFromErrorBody(
-    ctx: AntigravityRateLimitContext
-  ): Promise<
+  private async tryResolveRetryFromErrorBody(ctx: AntigravityRateLimitContext): Promise<
     | { kind: "return"; result: SsePassthroughResult }
-    | { kind: "resolved"; retryMs: number | null; switchAuth: boolean }
+    | {
+        kind: "resolved";
+        retryMs: number | null;
+        switchAuth: boolean;
+        /** Retry hint parsed from the body, before decide429 applied its defaults. */
+        upstreamRetryHintMs: number | null;
+      }
   > {
     const {
       response,
@@ -1728,13 +1818,14 @@ export class AntigravityExecutor extends BaseExecutor {
         kind: "resolved",
         retryMs,
         switchAuth: decision.kind === "short_cooldown_switch_auth",
+        upstreamRetryHintMs: parsedRetryMs,
       };
     } catch (error) {
       if (signal?.aborted || isAbortError(error)) {
         throw signal?.reason ?? error;
       }
       // Ignore parse errors, will fall back to exponential backoff
-      return { kind: "resolved", retryMs: null, switchAuth: false };
+      return { kind: "resolved", retryMs: null, switchAuth: false, upstreamRetryHintMs: null };
     }
   }
 

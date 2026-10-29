@@ -182,3 +182,134 @@ test("curated catalog includes Muse Spark subscription models", () => {
   assert.equal(museCode.config.mintUrl, MUSE_CODE_MINT_URL);
   assert.equal(MUSE_CODE_DEVICE_GRANT, "urn:ietf:params:oauth:grant-type:device_code");
 });
+
+// ── #14267: device-flow input sanitization ────────────────────────────────────
+
+function mockDeviceGrant(payload: Record<string, unknown>, status = 200) {
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify(payload), {
+      status,
+      headers: { "Content-Type": "application/json" },
+    });
+}
+
+const VALID_GRANT = {
+  device_code: "dev-1",
+  user_code: "USER-1",
+  verification_uri: "https://auth.meta.com/oauth/device/",
+  verification_uri_complete: "https://auth.meta.com/oauth/device/?user_code=USER-1",
+  expires_in: 600,
+  interval: 5,
+};
+
+test("#14267 requestDeviceCode accepts a pinned auth.meta.com authorization URL", async () => {
+  mockDeviceGrant(VALID_GRANT);
+  const grant = await museCode.requestDeviceCode(MUSE_CODE_CONFIG);
+  assert.equal(grant.device_code, "dev-1");
+  assert.equal(grant.verification_uri_complete, VALID_GRANT.verification_uri_complete);
+});
+
+test("#14267 requestDeviceCode rejects an off-origin authorization URL", async () => {
+  mockDeviceGrant({
+    ...VALID_GRANT,
+    verification_uri_complete: "https://evil.example.com/device/?user_code=USER-1",
+  });
+  // The device-response validation now lives in museCodeDeviceResponse.ts (#15869), which
+  // reports every rejected authorization URL (off-origin or with credentials) as invalid.
+  await assert.rejects(
+    () => museCode.requestDeviceCode(MUSE_CODE_CONFIG),
+    /invalid authorization URL/
+  );
+});
+
+test("#14267 requestDeviceCode rejects embedded credentials in the authorization URL", async () => {
+  mockDeviceGrant({
+    ...VALID_GRANT,
+    verification_uri_complete: "https://user:pass@auth.meta.com/oauth/device/",
+  });
+  // The device-response validation now lives in museCodeDeviceResponse.ts (#15869), which
+  // reports every rejected authorization URL (off-origin or with credentials) as invalid.
+  await assert.rejects(
+    () => museCode.requestDeviceCode(MUSE_CODE_CONFIG),
+    /invalid authorization URL/
+  );
+});
+
+test("#14267 requestDeviceCode rejects a device code expiry beyond 24h", async () => {
+  mockDeviceGrant({ ...VALID_GRANT, expires_in: 100000 });
+  await assert.rejects(
+    () => museCode.requestDeviceCode(MUSE_CODE_CONFIG),
+    /invalid device code expiry/
+  );
+});
+
+test("#14267 pollToken maps pending codes to fixed messages, discarding upstream text", async () => {
+  mockDeviceGrant(
+    { error: "authorization_pending", error_description: "free-text with dca:secret" },
+    400
+  );
+  const pending = await museCode.pollToken(MUSE_CODE_CONFIG, "dev-1");
+  assert.equal(pending.ok, false);
+  assert.deepEqual(pending.data, {
+    error: "authorization_pending",
+    error_description: "Authorization pending.",
+  });
+});
+
+test("#14267 pollToken maps unknown errors to invalid_response", async () => {
+  mockDeviceGrant({ error: "weird_new_code", error_description: "upstream free text" }, 400);
+  const result = await museCode.pollToken(MUSE_CODE_CONFIG, "dev-1");
+  assert.deepEqual(result.data, { error: "invalid_response" });
+});
+
+test("#14267 pollToken allowlists success fields", async () => {
+  mockDeviceGrant({
+    access_token: "dca:abc",
+    expires_in: 1800,
+    token_type: "Bearer",
+    scope: "should-drop",
+    refresh_token: "should-drop",
+  });
+  const result = await museCode.pollToken(MUSE_CODE_CONFIG, "dev-1");
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.data, {
+    access_token: "dca:abc",
+    expires_in: 1800,
+    token_type: "Bearer",
+  });
+});
+
+test("#14267 pollToken reports network_error on transport failure", async () => {
+  globalThis.fetch = async () => {
+    throw new TypeError("fetch failed");
+  };
+  const result = await museCode.pollToken(MUSE_CODE_CONFIG, "dev-1");
+  assert.deepEqual(result, { ok: false, data: { error: "network_error" } });
+});
+
+// ── #14138: mint-failure contract ─────────────────────────────────────────────
+
+test("#14138 refreshMuseCodeToken forces re-login on mint 401 (dead OIDC)", async () => {
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ error: "unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  const result = await refreshMuseCodeToken("dca:dead", null, null);
+  assert.deepEqual(result, { error: "unrecoverable_refresh_error", code: "invalid_oidc_token" });
+});
+
+test("#14138 refreshMuseCodeToken keeps the stored key on mint 429 (transient)", async () => {
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ error: "slow down" }), {
+      status: 429,
+      headers: { "Content-Type": "application/json" },
+    });
+  const result = await refreshMuseCodeToken("dca:live", null, null);
+  assert.equal(result, null);
+});
+
+test("#14138 refreshMuseCodeToken forces re-login when no DCA token is stored", async () => {
+  const result = await refreshMuseCodeToken("not-a-dca", null, null);
+  assert.deepEqual(result, { error: "unrecoverable_refresh_error", code: "no_refresh_token" });
+});

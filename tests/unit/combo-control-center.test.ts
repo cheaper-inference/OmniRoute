@@ -5,6 +5,7 @@ import {
   extractComboRuntimeConfig,
   getComboControlCenterTargets,
   getResolvedComboControlCenterTargets,
+  getVirtualComboResolvedTargets,
   summarizeComboControlCenter,
 } from "../../src/lib/combos/controlCenter.ts";
 
@@ -151,6 +152,70 @@ test("resolved targets and runtime config helpers are defensive", () => {
   assert.deepEqual(getResolvedComboControlCenterTargets(null), []);
   assert.deepEqual(extractComboRuntimeConfig({ config: null }), {});
   assert.deepEqual(extractComboRuntimeConfig({ config: { maxRetries: 2 } }), { maxRetries: 2 });
+});
+
+test("extractComboRuntimeConfig unwraps the nested `auto` config on virtual combos", () => {
+  const autoConfig = {
+    candidatePool: ["openai", "groq"],
+    weights: { quota: 0.14, health: 0.16 },
+    explorationRate: 0.05,
+    routerStrategy: "lkgp",
+  };
+  // The whole point: the `auto` key no longer renders one giant JSON blob.
+  assert.deepEqual(
+    extractComboRuntimeConfig({ type: "auto", config: { auto: autoConfig } }),
+    autoConfig
+  );
+  // Sibling keys survive the unwrap (e.g. the chaos panel config on auto/chaos).
+  assert.deepEqual(
+    extractComboRuntimeConfig({
+      type: "auto",
+      config: { auto: { routerStrategy: "lkgp" }, chaos: { enabled: true } },
+    }),
+    { routerStrategy: "lkgp", chaos: { enabled: true } }
+  );
+  // Persisted combos keep config verbatim — even an `auto` key stays nested.
+  assert.deepEqual(
+    extractComboRuntimeConfig({ config: { auto: { nested: true }, maxRetries: 2 } }),
+    { auto: { nested: true }, maxRetries: 2 }
+  );
+});
+
+test("getVirtualComboResolvedTargets synthesizes rows from materialized models", () => {
+  const resolved = getVirtualComboResolvedTargets({
+    name: "auto/fast",
+    type: "auto",
+    models: [
+      {
+        id: "virtual-auto-default-1-openai",
+        kind: "model",
+        providerId: "openai",
+        model: "openai/gpt-4.1-mini",
+        connectionId: "conn-1234567890",
+        weight: 0.9,
+        label: "openai",
+      },
+      "groq/llama-3.3-70b-versatile",
+    ],
+  });
+
+  assert.equal(resolved.length, 2);
+  assert.equal(resolved[0].stepId, "virtual-auto-default-1-openai");
+  assert.equal(resolved[0].model, "openai/gpt-4.1-mini");
+  assert.equal(resolved[0].provider, "openai");
+  assert.equal(resolved[0].connectionId, "conn-1234567890");
+  // No fabricated metrics — health fields stay absent, quotaScope "none".
+  assert.equal(resolved[0].requests, undefined);
+  assert.equal(resolved[0].successRate, undefined);
+  assert.equal(resolved[0].quotaScope, "none");
+  // String entries normalize too (provider parsed from the `provider/model` prefix).
+  assert.equal(resolved[1].model, "groq/llama-3.3-70b-versatile");
+  assert.equal(resolved[1].provider, "groq");
+});
+
+test("getVirtualComboResolvedTargets is defensive on empty shapes", () => {
+  assert.deepEqual(getVirtualComboResolvedTargets({}), []);
+  assert.deepEqual(getVirtualComboResolvedTargets({ type: "auto", models: [] }), []);
 });
 
 /**

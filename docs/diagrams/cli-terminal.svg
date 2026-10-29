@@ -48,7 +48,7 @@
   <text x="40" y="154" class="term-lg" style="fill:var(--inv-muted)">8c2d5b1a  codex       Codex Pro (team)  <tspan style="fill:var(--inv-ok)">active</tspan></text>
   <text x="40" y="180" class="term-lg" style="fill:var(--inv-muted)">f4e0a97b  glm         GLM Coding Plan   <tspan style="fill:var(--inv-ok)">active</tspan></text>
   <text x="40" y="206" class="term-lg" style="fill:var(--inv-muted)">03bd6e5f  kimi        Kimi K2 free      <tspan style="fill:var(--inv-ok)">active</tspan></text>
-  <text x="40" y="232" class="term-lg" style="fill:var(--inv-muted)" fill-opacity="0.65">… 372 more providers</text>
+  <text x="40" y="232" class="term-lg" style="fill:var(--inv-muted)" fill-opacity="0.65">… 373 more providers</text>
   </g>
   <g opacity="1">
   <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.315;0.33;1" dur="18s" repeatCount="indefinite"/>
@@ -63,7 +63,7 @@
   <text x="40" y="154" class="term-lg" style="fill:var(--inv-muted)" opacity="0"><animate attributeName="opacity" calcMode="discrete" values="0;0;1" keyTimes="0;0.061;0.063" dur="18s" repeatCount="indefinite"/>8c2d5b1a  codex       Codex Pro (team)  <tspan style="fill:var(--inv-ok)">active</tspan></text>
   <text x="40" y="180" class="term-lg" style="fill:var(--inv-muted)" opacity="0"><animate attributeName="opacity" calcMode="discrete" values="0;0;1" keyTimes="0;0.069;0.071" dur="18s" repeatCount="indefinite"/>f4e0a97b  glm         GLM Coding Plan   <tspan style="fill:var(--inv-ok)">active</tspan></text>
   <text x="40" y="206" class="term-lg" style="fill:var(--inv-muted)" opacity="0"><animate attributeName="opacity" calcMode="discrete" values="0;0;1" keyTimes="0;0.077;0.079" dur="18s" repeatCount="indefinite"/>03bd6e5f  kimi        Kimi K2 free      <tspan style="fill:var(--inv-ok)">active</tspan></text>
-  <text x="40" y="232" class="term-lg" style="fill:var(--inv-muted)" fill-opacity="0.65" opacity="0"><animate attributeName="opacity" calcMode="discrete" values="0;0;1" keyTimes="0;0.085;0.087" dur="18s" repeatCount="indefinite"/>… 372 more providers</text>
+  <text x="40" y="232" class="term-lg" style="fill:var(--inv-muted)" fill-opacity="0.65" opacity="0"><animate attributeName="opacity" calcMode="discrete" values="0;0;1" keyTimes="0;0.085;0.087" dur="18s" repeatCount="indefinite"/>… 373 more providers</text>
   </g>
   <g opacity="0">
   <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.333;0.348;0.648;0.663;1" dur="18s" repeatCount="indefinite"/>
@@ -92,7 +92,7 @@
   <text x="40" y="128" class="term-lg" style="fill:var(--inv-muted)" opacity="0"><animate attributeName="opacity" calcMode="discrete" values="0;0;1" keyTimes="0;0.719;0.721" dur="18s" repeatCount="indefinite"/>  Status: <tspan style="fill:var(--inv-ok)">healthy</tspan>   Uptime: 4d 12h 33m</text>
   <text x="40" y="154" class="term-lg" style="fill:var(--inv-muted)" opacity="0"><animate attributeName="opacity" calcMode="discrete" values="0;0;1" keyTimes="0;0.727;0.729" dur="18s" repeatCount="indefinite"/>  Requests (24h): 18,412   p95: 412ms</text>
   <text x="40" y="180" class="term-lg" style="fill:var(--inv-muted)" opacity="0"><animate attributeName="opacity" calcMode="discrete" values="0;0;1" keyTimes="0;0.735;0.737" dur="18s" repeatCount="indefinite"/>  Breakers: <tspan style="fill:var(--inv-ok)">● 24 closed</tspan>  <tspan style="fill:var(--inv-warn)">◒ 1 half-open</tspan>  <tspan style="fill:var(--inv-err)">○ 0 open</tspan></text>
-  <text x="40" y="206" class="term-lg" style="fill:var(--inv-muted)" opacity="0"><animate attributeName="opacity" calcMode="discrete" values="0;0;1" keyTimes="0;0.743;0.745" dur="18s" repeatCount="indefinite"/>  Providers: 376 registered   150+ free tiers</text>
+  <text x="40" y="206" class="term-lg" style="fill:var(--inv-muted)" opacity="0"><animate attributeName="opacity" calcMode="discrete" values="0;0;1" keyTimes="0;0.743;0.745" dur="18s" repeatCount="indefinite"/>  Providers: 377 registered   150+ free tiers</text>
   <text x="40" y="232" class="term-lg" style="fill:var(--inv-muted)" fill-opacity="0.65" opacity="0"><animate attributeName="opacity" calcMode="discrete" values="0;0;1" keyTimes="0;0.751;0.753" dur="18s" repeatCount="indefinite"/>… live: /dashboard · omniroute status</text>
   </g>
   <path d="M 0.5 300.5 L 1199.5 300.5" style="stroke:var(--inverse-text)" stroke-opacity="0.12" stroke-width="1"/>

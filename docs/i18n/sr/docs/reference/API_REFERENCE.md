@@ -849,47 +849,40 @@ OpenAI-компатибилна пакетна обрада.
 
 ---
 
-## API за претрагу
+## Сеарцх API
 
-Апстракција добављача веб-претраге (Tavily, Brave, Exa, Serper итд.).
+апстракција Web/search провајдера (Тавили, Браве, Ека, Серпер, итд.).
 
-| Метод | Путања                 | Опис                                                                                           |
-| ----- | ---------------------- | ---------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Наводи конфигурисане добављаче претраге и њихове могућности                                    |
-| POST  | `/v1/search`           | Покреће упит за претрагу — тело се валидира помоћу `v1SearchSchema`, подржава кеширање/спајање |
-| GET   | `/v1/search/analytics` | Статистика погодака/кашњења/кеша по добављачу                                                  |
+| Метод | Пут                    | Опис                                                                                                |
+| ----- | ---------------------- | --------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Наведите + могућности конфигурисаних добављача претраге                                             |
+| POST  | `/v1/search`           | Покрените упит за претрагу — тело потврђено од стране `v1SearchSchema`, подржава caching/coalescing |
+| GET   | `/v1/search/analytics` | hit/latency/cache статистика по провајдеру                                                          |
 
-**Аутентификација:** Bearer API кључ (`extractApiKey` + `isValidApiKey`). Политика претраге се примењује помоћу `enforceApiKeyPolicy`.
+**Аутх:** Носилац API кључа (`extractApiKey` + `isValidApiKey`). Политика претраге се спроводи преко `enforceApiKeyPolicy`.
 
-### Exa и Tavily `provider_options`
+### Ека и Тавили `provider_options`
 
-Exa и Tavily читају поља специфична за добављача из простора имена:
-`provider_options.exa` (или `provider_options["exa-search"]`) и `provider_options.tavily`
-(или `provider_options["tavily-search"]`). Прослеђују се само кључеви наведени у наставку. Сваки од њих
-се проверава према сопственој Zod шеми у `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-а кључ погрешног типа се одбацује. Сви остали кључеви се занемарују, укључујући аутентификацију, основни URL,
-`stream` и `outputSchema`. Равни кључеви које користе други добављачи (`cx`, `depth`, ...) функционишу
-као и раније.
+Ека и Тавили читају поља специфична за провајдера из врећице са простором за имена: `provider_options.exa` (или `provider_options["exa-search"]`) и `provider_options.tavily` (или `provider_options["tavily-search"]`). Само доле наведени кључеви се прослеђују. Сваки се проверава у односу на своју Zod шему у `open-sse/handlers/search/providerOptionsPassthrough.ts`, а кључ погрешног типа се испушта. Било који други кључ се игнорише, укључујући аутх, басе URL, `stream` и `outputSchema`. Равни тастери које користе други провајдери (`cx`, `depth`, ...) раде као и раније.
 
-| Добављач | Поља највишег нивоа                                                                                                                                                                                                                                                                                                                                                       | Угнежђена                                                                                                                                                              |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (равне примитивне вредности), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                   | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` спојено преко подразумеваног `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                      |
+| Провајдер | Поља највишег нивоа                                                                                                                                                                                                                                                                                                                                                       | Нестед                                                                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ека       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (равни примитиви), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` спојен преко подразумеваног `{ text: true, highlights: true }` |
+| Тавили    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                            |
 
-Генеричка поља увек имају предност: `query`, `max_results`, `filters` (домени), `country` и
-тема изведена из `search_type`. Код Exa добављача, `search_type: "news"` задржава `category: "news"`.
-Tavily такође прихвата `search_type: "finance"` (`topic: "finance"`).
+Генеричка поља увек побеђују: `query`, `max_results`, `filters` (домени), `country` и тема изведена из `search_type`. На Ека, `search_type: "news"` задржава `category: "news"`. Тавили такође прихвата `search_type: "finance"` (`topic: "finance"`).
 
-Генеричко поље `time_range` сада стиже до оба добављача: Exa добија `startPublishedDate` (ISO
-временска ознака), а Tavily добија `start_date` (`YYYY-MM-DD`). Експлицитни датум у `provider_options`
-има предност над мапираним датумом.
+Трошкови Фирецравл претраге се евидентирају по започетом блоку од 10 враћених резултата, по 0,002 УСД (2 кредита) по блоку и најмање једном блоку по позиву ( [Фирецравл наплата](https://docs.firecrawl.dev/billing) ): 11 резултата кошта 0,004 УСД.
 
-Exa резултати задржавају `id`, `highlight_scores`, `summary`, `subpages`, `entities` и `extras` у
-`provider_raw`. Tavily резултати задржавају `images` и `favicon`.
+Генерички `time_range` сада стиже до оба провајдера: Ека добија `startPublishedDate` (ISO временску ознаку) и Тавили добија `start_date` (`YYYY-MM-DD`). Експлицитни датум у `provider_options` замењује мапирани.
 
-Обрачун трошкова и даље користи равни регистар `costPerQuery`. Tavily наплаћује
-`search_depth: "advanced"` са више кредита по позиву, а та разлика није приказана у
-`usage.search_cost_usd`.
+Ека резултати задржавају `id`, `highlight_scores`, `summary`, `subpages`, `entities` и `extras` у `provider_raw`. Тавили резултати задржавају `images` и `favicon`.
+
+Цена претраге везе је 0,005 УСД за `depth` `fast` и `standard` и 0,05 УСД за `deep` ( [цене везе](https://docs.linkup.so/pages/documentation/development/pricing) ), без обзира да ли `depth` долази из `provider_options` или подешавања везе.
+
+Ека `type: "lite"` (Ека 3.0) прихвата мањи скуп поља и одбија цео захтев када се постави било које друго поље. За лите, `additionalQueries`, `systemPrompt` и сваки `contents` тастер осим `text` и `highlights` се испуштају пре позива. Застарели `subpages`, `subpageTarget`, `highlights.numSentences` и `highlights.highlightsPerUrl` се више не прослеђују.
+
+Рачуноводство трошкова је равни регистар `costPerQuery`, осим за Ека, који прати Ека-е сопствене цене: 0,007 долара по позиву за `auto` (и застарели `fast`) или 0,004 долара за `lite` (и застарели `instant`), покривајући 10 резултата; 0,001 $ за сваки даљи резултат; и 0,001 $ по враћеном резултату када је `contents.summary` подешен. Тавили је забележен на 1 кредит (0,008 УСД) за `search_depth` `basic`, `fast` и `ultra-fast` и 2 кредита (0,016 УСД) за `advanced` ( [Тавили API кредити](https://docs.tavily.com/documentation/api-credits) ). Позив са `auto_parameters: true` који Тавили надогради на напредни и даље се снима на 1 кредит.
 
 ---
 

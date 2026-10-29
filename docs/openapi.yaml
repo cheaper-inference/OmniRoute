@@ -4200,6 +4200,90 @@ paths:
         "200":
           description: Connection usage data
 
+  /api/v0/management/auth-files:
+    get:
+      tags: [Usage]
+      summary: CLIProxyAPI-compatible OAuth account list
+      description: >-
+        CLIProxyAPI management compatibility (also served at `/v0/management/auth-files`).
+        Lists the Claude and Codex OAuth connections as `{ files: [{ id, auth_index, provider,
+        email, disabled, id_token }] }`. Never includes tokens. Requires a dashboard session or
+        a `manage`-scoped API key, even when login is disabled.
+      x-always-protected: true
+      responses:
+        "200":
+          description: "`{ files }`"
+        "401":
+          description: Authentication required
+        "403":
+          description: API key lacks the `manage` scope
+
+  /api/v0/management/api-call:
+    post:
+      tags: [Usage]
+      summary: CLIProxyAPI-compatible upstream usage call
+      description: >-
+        CLIProxyAPI management compatibility (also served at `/v0/management/api-call`). Sends
+        one allowlisted request (Claude `GET /api/oauth/usage`; Codex `GET /backend-api/wham/usage`,
+        `GET /backend-api/wham/rate-limit-reset-credits`, `POST .../consume`) with the
+        connection's OAuth token injected server-side, and returns the raw upstream
+        `{ status_code, body }`. Any other method, URL or provider is refused with 403.
+      x-always-protected: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [auth_index, method, url]
+              properties:
+                auth_index:
+                  type: string
+                method:
+                  type: string
+                  enum: [GET, POST]
+                url:
+                  type: string
+                header:
+                  type: object
+                  additionalProperties:
+                    type: string
+                data:
+                  type: string
+                  description: JSON-encoded request body (POST only)
+      responses:
+        "200":
+          description: "`{ status_code, body }`"
+        "403":
+          description: Request not allowlisted, or API key lacks the `manage` scope
+        "404":
+          description: Unknown auth_index
+
+  /api/v0/management/reset-quota:
+    post:
+      tags: [Usage]
+      summary: CLIProxyAPI-compatible cooldown reset
+      description: >-
+        CLIProxyAPI management compatibility (also served at `/v0/management/reset-quota`).
+        Lifts the connection cooldown and model lockouts of one Claude or Codex OAuth account
+        (and the Codex per-scope cooldowns). Terminal states are left alone.
+      x-always-protected: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [auth_index]
+              properties:
+                auth_index:
+                  type: string
+      responses:
+        "200":
+          description: "`{ ok, auth_index, cleared, lockouts_cleared, skipped_terminal }`"
+        "404":
+          description: Unknown auth_index
+
   /api/usage/history:
     get:
       tags: [Usage]
@@ -4481,6 +4565,24 @@ paths:
       responses:
         "200":
           description: Per-model pricing data
+
+  /api/pricing/unpriced-usage:
+    get:
+      tags: [Pricing]
+      summary: List recent usage with no configured price
+      description: >-
+        Successful usage in the last 8 days whose provider/model has no pricing row,
+        with request counts, affected API keys (and how many of those have a per-key
+        USD limit enabled), and the active UNPRICED_USAGE_BUDGET_POLICY. Under the
+        default `fail_closed` policy those limited keys are blocked until the model
+        is priced or the window rolls over.
+      responses:
+        "200":
+          description: Unpriced usage report
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
 
   # ─── Translator ────────────────────────────────────────────────
 
@@ -7321,6 +7423,58 @@ paths:
       responses:
         "200":
           description: Health status
+
+  /api/monitoring/model-health:
+    get:
+      tags: [System]
+      summary: Get per-model health states
+      description: >-
+        Management-only report that classifies every synced model on every provider
+        connection as HEALTHY, DEGRADED, RATE_LIMITED, AUTH_FAILED, PROVIDER_DOWN,
+        CONNECTION_BLOCKED, MODEL_LOCKED or UNKNOWN, from the connection state, the
+        provider circuit breaker and the per-model lockout. Includes connection ids
+        and names, so it requires a management principal.
+      parameters:
+        - name: provider
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Only report this provider id
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              [
+                HEALTHY,
+                DEGRADED,
+                RATE_LIMITED,
+                AUTH_FAILED,
+                PROVIDER_DOWN,
+                CONNECTION_BLOCKED,
+                MODEL_LOCKED,
+                UNKNOWN,
+              ]
+          description: Only report models in this state
+        - name: unhealthy
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ["1"]
+          description: Set to `1` to omit HEALTHY models
+      responses:
+        "200":
+          description: >-
+            `{ timestamp, summary, providers }` — `summary` counts models per state;
+            `providers[]` carries `circuitBreakerState`, `canExecute`, optional
+            `retryAfterMs` and `connections[]` with their `models[]`
+        "401":
+          description: Not a management principal
+        "500":
+          description: Health report failed (sanitized message)
 
   /api/monitoring/compression:
     get:
@@ -11588,6 +11742,123 @@ paths:
       responses:
         "200":
           description: OK
+  /api/oauth/{provider}/import-export:
+    post:
+      tags:
+        - Oauth
+      summary: Import OAuth accounts from a third-party account-manager export
+      description: >
+        Bulk-imports OAuth accounts from a plaintext account-manager export (for example
+        Antigravity Manager's cloud-accounts export). The body is the export document itself:
+        `{ "accounts": [...] }`, a bare array, or a single record, with at most 100 accounts and
+        at most 5 MiB. Tokens may live under a nested `token` object or flat on the record, in
+        snake_case or camelCase. Each record is refreshed and finalized through the same path as
+        `paste-credentials`, only an upstream-verified account email takes part in de-duplication,
+        and re-importing refreshes an existing connection in place. Supported providers are those
+        accepted by `paste-credentials` (`antigravity`, `agy`). Requires management authentication.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - antigravity
+              - agy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  properties:
+                    accounts:
+                      type: array
+                      maxItems: 100
+                      items:
+                        type: object
+                        additionalProperties: true
+                - type: array
+                  maxItems: 100
+                  items:
+                    type: object
+                    additionalProperties: true
+                - type: object
+                  additionalProperties: true
+      responses:
+        "200":
+          description: Per-record import summary (also returned when some or all records failed)
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - imported
+                  - failed
+                  - total
+                  - results
+                properties:
+                  success:
+                    type: boolean
+                    description: True only when no record failed.
+                  imported:
+                    type: integer
+                  failed:
+                    type: integer
+                  total:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - index
+                        - ok
+                      properties:
+                        index:
+                          type: integer
+                        email:
+                          type: string
+                        ok:
+                          type: boolean
+                        connectionId:
+                          type: string
+                        connectionEmail:
+                          type: string
+                        error:
+                          type: string
+        "400":
+          description: Unsupported provider, invalid or empty JSON body, or no accounts in the payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "401":
+          description: Missing or invalid management credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "413":
+          description: Account export exceeds the 5 MiB request body limit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
   /api/oauth/cliproxy-import:
     get:
       tags:
@@ -14605,6 +14876,55 @@ paths:
       responses:
         "200":
           description: OK
+  /api/v1/quota-recoveries/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+        description: Recovery ticket id returned in the `202` body of an opted-in request.
+    get:
+      tags:
+        - V1 Quota Recoveries
+      summary: Poll a quota recovery ticket
+      description: >-
+        Opt-in recovery of a non-streaming `POST /api/v1/chat/completions` or
+        `POST /api/v1/responses` turn that failed with a terminal quota error. A request
+        opts in with `x-omniroute-quota-recovery: auto`, `x-omniroute-session` and
+        `x-omniroute-recovery-turn` (each `[A-Za-z0-9._:-]{1,128}`); it must be
+        `stream: false`, carry no tools / tool history / `previous_response_id`, and not pin a
+        connection. Recovery needs `STORAGE_ENCRYPTION_KEY` (the request is stored encrypted for
+        up to 24 h). Instead of the quota error the caller then receives `202` with
+        `recovery.poll` pointing here. Tickets are visible only to the API key that created them.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: >-
+            Completed: the recovered upstream response body (header
+            `X-OmniRoute-Recovery-State: completed`). Other final states (`failed`,
+            `needs_confirmation`, `cancelled`, `expired`) return `{ recovery }`.
+        "202":
+          description: "Still `pending` or `running`; body is `{ recovery }`."
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: No ticket with this id for the calling API key.
+    delete:
+      tags:
+        - V1 Quota Recoveries
+      summary: Cancel a quota recovery ticket
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: 'Cancelled; body is `{ recovery: { id, state: "cancelled" } }`.'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: No ticket with this id for the calling API key.
+        "409":
+          description: "Only `pending` or `needs_confirmation` tickets can be cancelled."
   /api/v1/quotas/check:
     get:
       tags:
@@ -16854,6 +17174,9 @@ components:
       description: >-
         Per-model pause state. `ok` means no pause observed by this instance;
         `unknown` marks ids that resolve to no routable provider model.
+        `none_honored` reports whether reasoning_effort=none was honored in
+        the trailing call_logs window (`true` honored, `false` not honored,
+        `null` unknown when the sample is empty or too small).
       properties:
         id:
           type: string
@@ -16867,6 +17190,16 @@ components:
         observed_at:
           type: string
           format: date-time
+        none_honored:
+          type: boolean
+          nullable: true
+          description: Whether reasoning_effort=none was honored; null when unknown.
+        none_sample_size:
+          type: integer
+          description: Number of none requests counted in the window.
+        none_window_hours:
+          type: integer
+          description: Trailing window in hours backing none_honored.
 
     Model:
       type: object

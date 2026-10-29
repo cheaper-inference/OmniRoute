@@ -55,6 +55,7 @@ import {
 } from "@/lib/db/readCache";
 import { getCompatibleFallbackModels } from "@/lib/providers/managedAvailableModels";
 import {
+  isDiscoveryImportedCustomSource,
   providerUsesCuratedModelsOnly,
   providerUsesExclusiveSyncedListing,
 } from "@/lib/providers/modelListingCapability";
@@ -182,12 +183,32 @@ export type { CachedCatalog, BackgroundRefreshScheduler } from "./catalogCache";
  */
 export type CatalogResponseOptions = {
   scheduleBackgroundRefresh?: BackgroundRefreshScheduler;
+  /** Management-only build that keeps operator-hidden models (`/api/models/catalog`). */
+  revealHidden?: boolean;
+  /** Management/lookup callers keep provider rows even when `exposeCombosOnly` is on. */
+  ignoreExposeCombosOnly?: boolean;
+};
+
+/** Build-time switches forwarded from {@link getUnifiedModelsResponse} to the catalog builder. */
+type CatalogBuildFlags = {
+  /** Keep operator-hidden model rows (management catalog only, #16749). */
+  revealHidden?: boolean;
+  /** Advertise only combos (`settings.exposeCombosOnly`). */
+  combosOnly?: boolean;
 };
 
 const BUILTIN_AUTO_YIELD_INTERVAL = 2;
 
 function yieldCatalogBuildTurn(): Promise<void> {
   return new Promise((resolve) => setImmediate(resolve));
+}
+
+/** `exposeCombosOnly` trims the public catalog; management/lookup callers opt out. */
+function resolveCombosOnly(
+  settings: Record<string, unknown> | null | undefined,
+  options: CatalogResponseOptions
+): boolean {
+  return settings?.exposeCombosOnly === true && options.ignoreExposeCombosOnly !== true;
 }
 
 /**
@@ -202,7 +223,7 @@ function yieldCatalogBuildTurn(): Promise<void> {
 export async function getUnifiedModelsResponse(
   request: Request,
   corsHeaders: Record<string, string> = {},
-  options: { scheduleBackgroundRefresh?: BackgroundRefreshScheduler } = {}
+  options: CatalogResponseOptions = {}
 ) {
   const diagnosticHeaders = getCatalogDiagnosticsHeaders({ request });
 
@@ -232,11 +253,15 @@ export async function getUnifiedModelsResponse(
     incrementCcDiscoveryHitCount();
   }
 
+  const buildFlags: CatalogBuildFlags = {
+    combosOnly: resolveCombosOnly(settingsForAuth, options),
+    revealHidden: options.revealHidden === true,
+  };
   try {
     return await resolveCachedCatalogResponse(
       request,
       { corsHeaders, diagnosticHeaders },
-      buildCatalogPayload,
+      (req) => buildCatalogPayload(req, buildFlags),
       {
         // #10831: a disabled router hides auto/* just as hideAutoCombos does, so
         // the two collapse into one cache dimension — the resulting catalogs are
@@ -244,7 +269,9 @@ export async function getUnifiedModelsResponse(
         hideAutoCombos:
           settingsForAuth?.hideAutoCombos === true || settingsForAuth?.autoRoutingEnabled === false,
         hideNoThinkVariants: settingsForAuth?.hideNoThinkVariants === true,
+        exposeCombosOnly: buildFlags.combosOnly,
         scheduleBackgroundRefresh: options.scheduleBackgroundRefresh,
+        revealHidden: buildFlags.revealHidden,
       }
     );
   } catch (err) {
@@ -263,9 +290,10 @@ export async function getUnifiedModelsResponse(
 }
 
 async function buildCatalogPayload(
-  request: Request
+  request: Request,
+  flags: CatalogBuildFlags = {}
 ): Promise<{ body: string; headers: Record<string, string>; status: number; cacheTTL: number }> {
-  const built = await buildUnifiedModelsResponseCore(request);
+  const built = await buildUnifiedModelsResponseCore(request, {}, flags);
   const body = await built.text();
   const headers: Record<string, string> = {};
   built.headers.forEach((value, key) => {
@@ -291,8 +319,11 @@ async function buildCatalogPayload(
  */
 async function buildUnifiedModelsResponseCore(
   request: Request,
-  corsHeaders: Record<string, string> = {}
+  corsHeaders: Record<string, string> = {},
+  flags: CatalogBuildFlags = {}
 ) {
+  const combosOnly = flags.combosOnly === true;
+  const revealHidden = flags.revealHidden === true;
   const diagnosticHeaders = getCatalogDiagnosticsHeaders({ request });
   // #9147: this builder walks connections + model registries at catalog scale with no
   // event-loop yield, so a large deployment pins the single Node.js thread for the
@@ -446,7 +477,7 @@ async function buildUnifiedModelsResponseCore(
     // diverged. Check every key a model could plausibly have been hidden under:
     // the raw key passed in, its resolved canonical provider id, that canonical id's
     // alias, and the compatible-provider-node prefix for either.
-    const isModelHiddenBulk = (
+    const isModelHiddenStrict = (
       providerKey: string | null | undefined,
       modelId: string,
       canonicalProviderId?: string | null,
@@ -465,6 +496,9 @@ async function buildUnifiedModelsResponseCore(
       const isHidden = getHiddenModelsForModality(modality);
       return keysToCheck.some((key) => isHidden(key, modelId));
     };
+    // `revealHidden` (management catalog only) keeps hidden model rows; combos still drop hidden targets.
+    const isModelHiddenBulk: typeof isModelHiddenStrict = (...args) =>
+      !revealHidden && isModelHiddenStrict(...args);
 
     // Get combos
     let combos = [];
@@ -1008,7 +1042,7 @@ async function buildUnifiedModelsResponseCore(
       ) as ComboCatalogTarget[];
       const visibleTargets = comboTargets.filter((target) => {
         const resolved = getComboTargetModelId(target);
-        return resolved ? !isModelHiddenBulk(resolved.providerId, resolved.modelId) : true;
+        return resolved ? !isModelHiddenStrict(resolved.providerId, resolved.modelId) : true;
       });
       if (visibleTargets.length === 0) continue;
 
@@ -1719,7 +1753,10 @@ async function buildUnifiedModelsResponseCore(
       const customModelsMap = (await getAllCustomModels()) as Record<string, unknown>;
       for (const [providerId, rawProviderCustomModels] of Object.entries(customModelsMap)) {
         await maybeYieldCatalogBuild();
-        if (providerUsesCuratedModelsOnly(providerId)) continue;
+        // Curated providers publish no upstream catalog, but an operator-added id is a
+        // local decision: it must reach /v1/models or it is unusable for routing (#18018).
+        // Rows a discovery sync imported are stale on those providers and stay out (#8451).
+        const curatedProvider = providerUsesCuratedModelsOnly(providerId);
         // Skip Gemini — handled by syncedAvailableModels above
         if (providerId === "gemini") continue;
         if (providerId === "reka") continue;
@@ -1751,9 +1788,10 @@ async function buildUnifiedModelsResponseCore(
           await maybeYieldCatalogBuild();
           const modelId = typeof model.id === "string" ? model.id : null;
           if (!modelId) continue;
+          if (curatedProvider && isDiscoveryImportedCustomSource(model.source)) continue;
           if (!isUnifiedChatSourceModelSelectable(canonicalProviderId, { ...model, id: modelId }))
             continue;
-          if (model.isHidden === true) continue;
+          if (model.isHidden === true && !revealHidden) continue;
           if (isModelHiddenBulk(providerId, modelId, canonicalProviderId)) continue;
           if (isExcludedByProviderConnections(canonicalProviderId, modelId)) continue;
           // #6328: apply hidePaidModels to user-defined custom rows too. A local custom
@@ -2047,7 +2085,9 @@ async function buildUnifiedModelsResponseCore(
 
     // Filter by API key permissions if requested
     const apiKey = extractApiKey(request);
-    let finalModels = models;
+    // exposeCombosOnly: same row test as the per-key `catalogScope: "combos"`; the
+    // per-key filter below then intersects with it.
+    let finalModels = combosOnly ? models.filter((m) => m.owned_by === "combo") : models;
     if (apiKey) {
       const apiKeyPermissions = await import("@/lib/db/apiKeys");
       const { filterCatalogModelsForKey } = await import("./catalogKeyFilter");
@@ -2075,7 +2115,7 @@ async function buildUnifiedModelsResponseCore(
       } else {
         finalModels = await filterCatalogModelsForKey(
           apiKey,
-          models,
+          finalModels,
           keyMeta,
           apiKeyPermissions,
           maybeYieldCatalogBuild
