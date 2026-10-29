@@ -25,6 +25,7 @@ import { getAuthzBypassSnapshot } from "@/lib/config/runtimeSettings";
 import {
   SPAWN_CAPABLE_PREFIXES,
   SPAWN_CAPABLE_PATTERNS,
+  isSpawnCapableBypassPrefix,
 } from "@/shared/constants/spawnCapablePrefixes";
 import { VNC_ROUTE_PREFIX } from "@/lib/vncSession/manifest";
 
@@ -39,7 +40,37 @@ export const LOCAL_ONLY_API_PREFIXES: ReadonlyArray<string> = [
   "/api/cli-tools/forge-settings", // spawns via getCliRuntimeStatus() to detect the `forge` CLI install (Hard Rules #15 + #17, #7263)
   "/api/cli-tools/jcode-settings", // spawns via getCliRuntimeStatus() to detect the `jcode` CLI install (Hard Rules #15 + #17, #7263)
   "/api/cli-tools/qwen-settings", // GET probes the local `qwen` binary; writes target ~/.qwen config files (Hard Rules #15 + #17)
+  // GHSA-35fw-cv32-2373: the 14 cli-tools routes below reach the SAME spawn as their six
+  // gated siblings above — getCliRuntimeStatus() -> locateCommand() -> runProcess("sh", -c
+  // 'command -v -- "$1"') -> spawn() — but sat on Tier 3 MANAGEMENT only, which
+  // requireManagementAuth() waives under requireLogin=false (incl. the fresh-install window).
+  // Exact entries on purpose: a blanket "/api/cli-tools/" prefix would also lock the
+  // non-spawning apply/backups/config/guide-settings/hermes-agent-settings/keys/logs/
+  // openclaw/auto-order routes that tunnel-served dashboards legitimately use.
+  "/api/cli-tools/all-statuses", // GET calls getCliRuntimeStatus() per CLI_TOOL_IDS entry (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/claude-settings", // spawns via getCliRuntimeStatus() to detect the `claude` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/cline-settings", // spawns via getCliRuntimeStatus() to detect the `cline` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/codewhale-settings", // spawns via getCliRuntimeStatus() to detect the `codewhale` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/codex-settings", // spawns via getCliRuntimeStatus() to detect the `codex` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/crush-settings", // spawns via getCliRuntimeStatus() to detect the `crush` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/deepseek-tui-settings", // spawns via getCliRuntimeStatus() to detect the `deepseek-tui` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/detect", // GET calls detectAllTools() -> execFile(binary, --version) + execFile("which") per tool (src/lib/cli-helper/tool-detector.ts) (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/droid-settings", // spawns via getCliRuntimeStatus() to detect the `droid` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/kilo-settings", // spawns via getCliRuntimeStatus() to detect the `kilo` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/openclaw-settings", // spawns via getCliRuntimeStatus() to detect the `openclaw` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373). Does NOT cover the non-spawning sibling /api/cli-tools/openclaw/auto-order (different segment).
+  "/api/providers/devin-cli-agentic/auth-status", // GET spawns `devin auth status` via getDevinAgenticAuthStatus() (src/lib/providers/devinAgenticAuthStatus.ts) — RCE-via-tunnel surface (Hard Rules #15 + #17, #15446). Narrow-scoped like /api/providers/cursor/agent-availability.
+  "/api/cli-tools/pi-settings", // spawns via getCliRuntimeStatus() to detect the `pi` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/smelt-settings", // spawns via getCliRuntimeStatus() to detect the `smelt` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/status", // GET calls getCliRuntimeStatus() per CLI_TOOL_IDS entry (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/whycodes-settings", // spawns via getCliRuntimeStatus() to detect the `whycodes` CLI install (Hard Rules #15 + #17, #14107)
   "/api/services/", // T-10: embedded service lifecycle (spawn child processes)
+  "/api/version-manager/", // downloads, unpacks and runs the CLIProxyAPI binary, the same work as /api/services/cliproxy/ (Hard Rules #15 + #17); read-only GETs exempted below
+  "/api/tunnels/cloudflared", // POST installs/starts/stops cloudflared; safe methods are exempted below
+  "/api/tunnels/tailscale/disable", // stops Funnel and may stop tailscaled/Tailscale service
+  "/api/tunnels/tailscale/enable", // starts tailscaled/login/funnel subprocesses
+  "/api/tunnels/tailscale/install", // downloads/installs Tailscale and starts its daemon
+  "/api/tunnels/tailscale/login", // spawns `tailscale up`
+  "/api/tunnels/tailscale/start-daemon", // starts tailscaled/Tailscale service
   "/dashboard/providers/services/", // T-07: reverse proxy to embedded service UIs
   "/api/copilot/", // unauthenticated LLM driver — CLI-only by default; admins can opt-in to remote access via manage-scope bypass
   "/api/tools/agent-bridge/", // AgentBridge: spawns MITM server + DNS edits (Hard Rules #15 + #17)
@@ -52,6 +83,7 @@ export const LOCAL_ONLY_API_PREFIXES: ReadonlyArray<string> = [
   "/api/middleware/", // SECURITY_AUDIT M8: middleware hooks compile+run arbitrary JS via new vm.Script (src/lib/middleware/registry.ts) on the request hot path — same code-exec class as /api/plugins/, so loopback-gate it for parity (Hard Rules #15 + #17)
   "/api/system/version", // auto-update: spawns git checkout + npm install — RCE-via-tunnel surface (Hard Rules #15 + #17, found by 6A.8 route-guard gate)
   "/api/db-backups/exportAll", // spawns tar for export archive (Hard Rules #15 + #17, found by 6A.8 route-guard gate)
+  "/api/db/health", // runManagedDbHealthCheck() forks native diagnostics into a child process via healthCheckRunner.ts (Hard Rules #15 + #17, #13717)
   "/api/local/", // T-12: 1-click local service launchers (Redis today; spawns podman/docker) — loopback-enforced by isLocalRequestAllowed() in src/lib/security/localEndpoints.ts (Hard Rules #15 + #17)
   "/api/headroom/start", // Headroom token-saver proxy lifecycle: spawns headroom-ai python CLI (Hard Rules #15 + #17)
   "/api/headroom/stop", // Headroom token-saver proxy lifecycle: sends SIGTERM/SIGKILL to managed PID (Hard Rules #15 + #17)
@@ -59,13 +91,15 @@ export const LOCAL_ONLY_API_PREFIXES: ReadonlyArray<string> = [
   "/api/jobs/", // sub-paths: /api/jobs/:id/{runs,enable,disable,run-now} (the bare `/api/jobs` above matches the list route; this matches children)
   "/api/oauth/cursor/auto-import", // spawns execFile("which", argv-array-of-one-arg "cursor") to verify a local Cursor install before importing creds — RCE-via-tunnel surface (Hard Rules #15 + #17, found by 6A.8 route-guard gate). Specific path only: the rest of /api/oauth/ (browser redirect/callback flows) must stay remote-reachable. Note: this comment intentionally avoids a literal closing square bracket character — check-openapi-security-tiers.mjs's naive regex parser for this array stops at the first one it finds, silently truncating its view of every entry after this one.
   "/api/oauth/kiro/auto-import", // reads host-local Kiro credential files (homedir kiro-cli data) — must reach the loopback-only gate, not the PUBLIC /api/oauth/ prefix (GHSA-wgwc-crjm-pmwv, GHSA-gxv4-955v-v6cm). Excluded from PUBLIC in publicApiRoutes.ts.
-  "/api/oauth/raycast/auto-import", // reads host-local Raycast credential files — same loopback-only rationale as the kiro and cursor auto-import routes above.
   "/api/skills/collect/", // Skill Collector CLI detection: GET .../detect probes getCliRuntimeStatus() per CLI_TOOL_IDS entry, which spawns a child process to check each tool — RCE-via-tunnel surface (Hard Rules #15 + #17, PR #6294 review).
+  "/api/skills/install", // POST stores the request's handlerCode verbatim as the skill handler with no allowlist; a value equal to the built-in `execute_command` / `eval_code` name aliases the real sandboxed built-in (src/lib/skills/executor.ts -> builtins.ts -> sandbox.ts childProcess.spawn). Transitive spawn the 6A.8 source-scan cannot see. Same class as /api/acp/agents (Hard Rules #15 + #17, GHSA-jx89-f37j-pq89)
+  "/api/skills/executions", // POST runs skillExecutor.execute() on any global/system skill with caller-chosen input — reaches the container spawn in src/lib/skills/sandbox.ts; only isAuthenticated()-gated, which requireLogin=false waives (Hard Rules #15 + #17, GHSA-jx89-f37j-pq89). Registry list/delete, marketplace and skillssh stay remote-reachable.
   "/api/discovery/", // Discovery tool (opt-in provider scanner): the scan route makes outbound probes to provider endpoints (SSRF-adjacent) and the whole surface is an admin research tool — strict-loopback only, no manage-scope bypass (NOT in LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES). See _tasks/features-v3.8.42/gaps/DISCOVERY_TOOL_DESIGN.md.
   VNC_ROUTE_PREFIX, // #7892: /api/vnc-session/* spawns Docker containers via child_process.spawn (src/lib/vncSession/service.ts) — RCE-via-tunnel surface (Hard Rules #15 + #17), same CVE class (GHSA-fhh6-4qxv-rpqj).
   "/api/acp/agents", // ACP custom-agent registry: POST registers a client-chosen `binary`; GET / POST {action:"refresh"} runs detectInstalledAgents() -> execFileSync(probe.command, probe.args, { shell }) transitively (src/lib/acp/registry.ts) — RCE-via-tunnel surface (Hard Rules #15 + #17, #7948)
   "/api/resilience/connections", // Per-account resilience state. NOTE: prefix matching also gates future /api/resilience/connections-* paths.
-  "/dashboard/resilience/connections", // Per-account resilience state. NOTE: this endpoint is READ-ONLY (no child process spawn, unlike every other entry in this list); gated because it exposes per-account operational state (cooldown/breaker/lockout). Do not treat as precedent for non-spawning routes.
+  // Dashboard HTML stays out of this list: a reverse proxy is not loopback, so
+  // gating the page logged the session out. The JSON API above stays local-only.
   "/api/providers/cursor/agent-availability", // credential-free dashboard-nudge check: spawns `cursor-agent status --format json` via checkCursorAgentAvailability()/getCachedCursorAgentAvailability() (src/lib/cursor/renewal.ts) — RCE-via-tunnel surface (Hard Rules #15 + #17). Narrow-scoped like /login and /refresh-cursor, not the whole /api/providers/ tree. Placed under /api/providers/ rather than /api/oauth/ because /api/oauth/ is PUBLIC-classified and never reaches this LOCAL_ONLY gate.
   "/api/modality-bridge/video/", // Video Bridge status + extraction broker; fixed ffmpeg/ffprobe subprocesses, strict loopback only (Hard Rules #15 + #17)
 ];
@@ -98,6 +132,25 @@ export const LOCAL_ONLY_API_PATTERNS: ReadonlyArray<RegExp> = [
   /^\/api\/providers\/volcengine-plan\/connect(\/.*)?$/, // manual headful flow + session-based phone/SMS auto-login (both spawn Playwright)
   /^\/api\/providers\/[^/]+\/refresh-cursor\/?$/,
   /^\/api\/providers\/[^/]+\/chatgpt-web-codex-doctor\/?$/,
+  // S-01 (#15159): spawn(bin, ["acp", "--agent-type", "summarizer"], …) in
+  // src/lib/providers/validation/webProvidersB.ts:535 — fixed binary list + fixed argv (not
+  // caller-controlled RCE) but Hard Rules #15 + #17 still require loopback enforcement before
+  // any auth check.
+  //
+  // S-01 (#15159): spawn-capable branch of /api/providers/{validate,import,bulk} is
+  // gated INSIDE each route (allowLocalSpawn from the trusted peer-locality header,
+  // #15766 shape), not by a path pattern — a blanket LOCAL_ONLY regex here locked
+  // remote/reverse-proxied dashboards (docker + nginx deployments) out of key
+  // validation for EVERY provider while only the devin CLI-key fallback can spawn.
+  // The routes must keep threading allowLocalSpawn; see
+  // tests/unit/authz/route-guard-providers-spawn-local-only.test.ts.
+  // S-01 (#15159) second hop is deliberately NOT a path pattern: /api/providers/{id}/models
+  // resolves `{id}` to an arbitrary CONNECTION id, and the spawn
+  // (src/lib/providerModels/cursorAgent.ts:17, via fetchCursorAgentModels) only runs on the
+  // `provider === "cursor"` branch of that route. A `[^/]+/models` pattern would lock remote
+  // model discovery for EVERY provider — the over-broadening the /login precedent above
+  // exists to avoid. Instead the route gates the spawn on the trusted peer-locality header,
+  // mirroring cursorAgentImage.ts (see the guard in src/app/api/providers/[id]/models/route.ts).
 ];
 
 // `SPAWN_CAPABLE_PREFIXES` / `SPAWN_CAPABLE_PATTERNS` (the spawn-capable
@@ -135,6 +188,97 @@ export const ALWAYS_PROTECTED_API_PATHS: ReadonlyArray<string> = [
   // which is false under requireLogin=false. (GHSA-v7g9-7f55-5g46)
   "/api/settings/export-json",
   "/api/settings/import-json",
+  // Selective provider-account transfer: export hands out the selected accounts'
+  // credentials (passphrase-sealed) and import writes connections. Same tier as
+  // the -json siblings above; the prefix covers catalog/export/preview/import.
+  "/api/settings/transfer",
+  // Bulk log export: call_logs carries prompts and responses, proxy_logs carries
+  // client/public IPs, and the handler only calls requireManagementAuth() with no
+  // alwaysRequireAuth. Found sweeping the GHSA-5926-2w35-7h4q class.
+  "/api/logs/export",
+  // Codex CLI profile store. GET leaks the operator's account label; PUT writes
+  // attacker-supplied auth.json + config.toml straight into the operator's Codex
+  // CLI config (ensureCliConfigWriteAllowed() only checks CLI_ALLOW_CONFIG_WRITES,
+  // which defaults to true), so a POST+PUT pair repoints the CLI at attacker
+  // credentials or an attacker base URL. Found sweeping the same class.
+  "/api/cli-tools/codex-profiles",
+  // Writes into ~/.gemini/antigravity-cli/antigravity-oauth-token. Same family
+  // as the {claude,codex}-auth/apply-local pattern below; a plain path because
+  // it carries no dynamic segment.
+  "/api/providers/agy-auth/apply-local",
+  // Obsidian integration. POST /webdav points the WebDAV file service — served by
+  // the custom Node layer BEFORE Next.js, outside this pipeline — at a
+  // caller-chosen root and echoes freshly minted, reusable Basic credentials;
+  // DELETE /webdav rotates/clears them; the parent POST stores the Obsidian REST
+  // API token. GHSA-62vw only masked the GET password reveal, leaving credential
+  // *issuance* on the fail-open tier: with requireLogin flipped off during the
+  // bootstrap window, an anonymous caller stood up a file server over DATA_DIR
+  // and read JWT_SECRET out of server.env (GHSA-7pq4-8pvv-rx7r). Prefix covers
+  // the /webdav child. ALWAYS_PROTECTED rather than LOCAL_ONLY so an operator
+  // driving the dashboard through a tunnel keeps the feature.
+  "/api/settings/obsidian",
+  // GET spreads every provider_connections row verbatim, so the lazy-decrypt
+  // proxy returns each connection's apiKey / accessToken / refreshToken /
+  // idToken in plaintext, and the route has no auth call of its own. Left on the
+  // fail-open MANAGEMENT tier it served all of them anonymously under
+  // requireLogin=false (GHSA-qxg2-rm3h-4cxp). The dashboard consumers send the
+  // session cookie, so ALWAYS_PROTECTED keeps them working through a tunnel.
+  "/api/providers/client",
+  // Relay token management. POST mints a reusable inference credential and
+  // returns it in clear once, GET lists every token's id/prefix/limits, and the
+  // [id] child edits, toggles or revokes one. Credential issuance stays
+  // authenticated in open mode (requireLogin=false), like the WebDAV credentials
+  // above: "anonymous" is never the right audience for "mint me a token". The
+  // dashboard sends the session cookie and automation a manage-scoped key, so
+  // both keep working; the plain prefix covers the /{id} child routes.
+  "/api/relay/tokens",
+  // Sync token management. POST mints a token that opens GET /api/sync/bundle,
+  // which returns decrypted provider credentials and plaintext API keys — the
+  // material /api/settings/export-json above hands out — GET lists the tokens
+  // and the [id] child revokes one. Issuance already needed a dashboard session
+  // or the local CLI when login is on; in open mode it fell back to "anyone".
+  // The bundle itself stays a public route: it authenticates with the token.
+  "/api/sync/tokens",
+  // Host CLI config writers. /apply overwrites the operator's CLI config (for Claude the
+  // whole ~/.claude/settings.json) with a caller-supplied base URL and token, repointing
+  // the operator's CLI at that endpoint; guide-settings and hermes-agent-settings write
+  // the same kind of config and backups restores one. The handlers only call
+  // requireCliToolsAuth() and guardCliConfigWrite() (CLI_ALLOW_CONFIG_WRITES defaults to
+  // true), so with login disabled they were anonymous while their sibling
+  // /api/cli-tools/codex-profiles above was not. Read-only CLI tool routes stay as is.
+  "/api/cli-tools/apply",
+  "/api/cli-tools/guide-settings",
+  "/api/cli-tools/hermes-agent-settings",
+  "/api/cli-tools/backups",
+  // Log export destinations: a destination is a caller-chosen BigQuery project with its
+  // own service account, and /[id]/run ships call_logs (prompts, responses, key names)
+  // into it. Same data as /api/logs/export above; the prefix covers destinations, their
+  // run/test children, status and types.
+  "/api/log-export",
+  // SIGTERMs the process, like its twin /api/shutdown above.
+  "/api/restart",
+];
+
+/**
+ * ALWAYS_PROTECTED routes whose path carries a dynamic segment, so the plain
+ * exact/prefix list above cannot express them: a `/api/providers/` prefix would
+ * hard-gate the entire provider surface and break every keyless local-first
+ * install. Mirrors LOCAL_ONLY_API_PATTERNS.
+ *
+ * The Claude/Codex OAuth export routes return the connection's raw
+ * access_token / refresh_token (and the Codex id_token) and gate only on
+ * `requireManagementAuth(request)` with no `alwaysRequireAuth`, which fails open
+ * under requireLogin=false (GHSA-5926-2w35-7h4q). They are the siblings that
+ * both GHSA-mghq-58h3-qcqj and GHSA-v7g9-7f55-5g46 missed.
+ */
+export const ALWAYS_PROTECTED_API_PATTERNS: ReadonlyArray<RegExp> = [
+  // `export` hands the caller the raw token; `apply-local` writes it into the
+  // host's CLI config (~/.codex/auth.json and the Claude equivalent). The second
+  // does not disclose the credential, but "anonymous" is still the wrong
+  // audience for it. ALWAYS_PROTECTED rather than LOCAL_ONLY on purpose: it
+  // closes the anonymous hole without breaking an operator driving the dashboard
+  // through a tunnel.
+  /^\/api\/providers\/[^/]+\/(claude|codex)-auth\/(export|apply-local)\/?$/,
 ];
 
 export function isLoopbackHost(hostHeader: string | null): boolean {
@@ -206,14 +350,42 @@ export function isPrivateLanHost(hostHeader: string | null): boolean {
  * non-loopback clients when the request method is GET, HEAD, or OPTIONS.
  *
  * Rule: a path belongs here only when the read methods perform NO child-process
- * spawn and expose NO privileged mutation — only the write methods do.
+ * spawn for a non-local caller and expose NO privileged mutation — only the write
+ * methods do. A read handler that probes the host for loopback/LAN callers must
+ * gate that probe at its call site on `getRequestPeerLocality()`.
  *
  * Current exemptions:
  *   /api/system/version — GET reads package.json + npm registry; only POST
  *   triggers the auto-update flow (spawns git checkout + npm install + pm2).
  *   Hard Rules #15/#17 still apply to POST.
+ *   /api/tunnels/cloudflared — GET reports tunnel status; only POST starts/stops
+ *   the cloudflared process (#11531). The status read resolves the binary with a
+ *   PATH lookup (`which cloudflared`), which runs only for loopback/LAN callers:
+ *   a remote caller gets the unprobed status (`probed: false`) with no spawn
+ *   (GHSA-35fw-cv32-2373 class, GHSA-jmq6-8j86-8xqj call-site gate).
+ *   /api/services/cliproxy/status — GET returns lifecycle/version metadata only;
+ *   its latest-version lookup is an HTTPS release query, never a child process.
+ *   Lifecycle mutations remain LOCAL_ONLY through the parent /api/services/
+ *   prefix. The other service status routes are deliberately NOT exempt:
+ *   bifrost/dario/mux/openwa call `getLatestVersion()` → `npm view` (execFile) on
+ *   a cache miss, which a remote caller must never trigger (Hard Rules #15/#17),
+ *   and 9router also supports `?reveal=key` (plaintext service credential).
  */
-export const LOCAL_ONLY_API_GET_EXEMPTIONS: ReadonlySet<string> = new Set(["/api/system/version"]);
+export const LOCAL_ONLY_API_GET_EXEMPTIONS: ReadonlySet<string> = new Set([
+  "/api/system/version",
+  // The two read-only version-manager routes only report state; every other route under
+  // /api/version-manager/ installs or spawns the CLIProxyAPI binary.
+  "/api/version-manager/status",
+  "/api/version-manager/check-update",
+  "/api/tunnels/cloudflared",
+  // GET /api/mcp/audit and /stats are read-only SQLite queries behind
+  // requireManagementAuth. The rest of /api/mcp/* stays local-only because
+  // SSE/stream can spawn. Without this exemption a tunnel-served dashboard
+  // 403s the timeline MCP poll forever (#13941).
+  "/api/mcp/audit",
+  "/api/mcp/audit/stats",
+  "/api/services/cliproxy/status",
+]);
 
 /** Safe HTTP methods that can be exempted for read-only paths. */
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
@@ -251,9 +423,10 @@ export function isLocalOnlyPath(path: string, method?: string): boolean {
  *   - returns false if the global kill-switch is off
  *     (`localOnlyManageScopeBypassEnabled === false`),
  *   - returns true iff `path` matches one of the live bypass prefixes AND
- *     that prefix is not in `SPAWN_CAPABLE_PREFIXES` (defence-in-depth: the
- *     zod schema already rejects spawn-capable entries, but a malformed DB
- *     row should not be able to grant a bypass).
+ *     that prefix does not overlap `SPAWN_CAPABLE_PREFIXES` /
+ *     `SPAWN_CAPABLE_PATTERN_ANCESTORS` (defence-in-depth: the zod schema and
+ *     the snapshot loader already reject spawn-capable entries, but a
+ *     malformed DB row should not be able to grant a bypass).
  *
  * O(1) (no I/O, no async). Hot-reload SLA: <50 ms — satisfied structurally.
  */
@@ -269,21 +442,20 @@ export function isLocalOnlyBypassableByManageScope(path: string): boolean {
   if (!snapshot.enabled) return false;
   return snapshot.prefixes.some((p) => {
     // Defence-in-depth: reject a bypass prefix that is the same as, child of,
-    // OR PARENT of any spawn-capable prefix. The parent case catches e.g.
-    // `/api/cli-tools/` (parent of `/api/cli-tools/runtime/`) — a request to
-    // `/api/cli-tools/runtime/foo` would otherwise satisfy `path.startsWith(p)`
-    // and reach the spawn-capable surface without a loopback check.
-    if (
-      SPAWN_CAPABLE_PREFIXES.some(
-        (spawn) => p === spawn || p.startsWith(spawn) || spawn.startsWith(p)
-      )
-    ) {
-      return false;
-    }
+    // OR PARENT of any spawn-capable prefix (or pattern ancestor). The parent
+    // case catches e.g. `/api/cli-tools/` (parent of `/api/cli-tools/runtime/`)
+    // — a request to `/api/cli-tools/runtime/foo` would otherwise satisfy
+    // `path.startsWith(p)` and reach the spawn-capable surface without a
+    // loopback check. `normalizeAuthzBypass` already drops these entries when
+    // the snapshot is built; this re-check covers any other snapshot writer.
+    if (isSpawnCapableBypassPrefix(p)) return false;
     return path === p || path.startsWith(p);
   });
 }
 
 export function isAlwaysProtectedPath(path: string): boolean {
-  return ALWAYS_PROTECTED_API_PATHS.some((p) => path === p || path.startsWith(p));
+  return (
+    ALWAYS_PROTECTED_API_PATHS.some((p) => path === p || path.startsWith(p)) ||
+    ALWAYS_PROTECTED_API_PATTERNS.some((re) => re.test(path))
+  );
 }

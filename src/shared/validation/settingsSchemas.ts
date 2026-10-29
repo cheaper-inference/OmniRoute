@@ -6,8 +6,14 @@
  * at runtime (see: https://github.com/vercel/next.js/issues/12557).
  */
 import { z } from "zod";
+import { oidcAdmissionClaimSchema } from "@/shared/utils/oidcAdmissionClaim";
+import { CONNECTION_TEST_PROMPT_MAX_LENGTH } from "@/shared/constants/connectionTest";
 import { COMBO_CONFIG_MODES } from "@/shared/constants/comboConfigMode";
 import { MAX_REQUEST_BODY_LIMIT_MB, MIN_REQUEST_BODY_LIMIT_MB } from "@/shared/constants/bodySize";
+import {
+  PROXY_BULK_IMPORT_LIMIT_MAX,
+  PROXY_BULK_IMPORT_LIMIT_MIN,
+} from "@/shared/constants/proxyBulkImport";
 import { HIDEABLE_SIDEBAR_GROUP_IDS } from "@/shared/constants/sidebarGroupVisibility";
 import { HIDEABLE_SIDEBAR_ITEM_IDS, SIDEBAR_SECTIONS } from "@/shared/constants/sidebarVisibility";
 import { ACCOUNT_FALLBACK_STRATEGY_VALUES } from "@/shared/constants/routingStrategies";
@@ -19,12 +25,15 @@ import {
 // Import from the server-free constants leaf, NOT from `@/server/authz/routeGuard`:
 // this schema is reachable from client components (dashboard onboarding wizard), and
 // routeGuard drags in server runtime (→ ioredis) that breaks the client/CLI build.
-import {
-  SPAWN_CAPABLE_PREFIXES,
-  SPAWN_CAPABLE_PATTERN_ANCESTORS,
-} from "@/shared/constants/spawnCapablePrefixes";
+import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
+import { isHttpUrl } from "@/shared/validation/schemas/misc";
 
 const signatureCacheModeValues = ["enabled", "bypass", "bypass-strict"] as const;
+
+// Legacy account "weighted" always ran fill-first; accept old settings without offering it.
+const accountFallbackStrategySchema = z
+  .enum([...ACCOUNT_FALLBACK_STRATEGY_VALUES, "weighted"])
+  .transform((value) => (value === "weighted" ? "fill-first" : value));
 
 const transformDropParagraphIfContainsSchema = z.object({
   kind: z.literal("drop_paragraph_if_contains"),
@@ -99,6 +108,14 @@ const transformObfuscateWordsSchema = z.object({
 });
 
 export const updateSettingsSchema = z.object({
+  connectionTestPrompt: z.string().trim().min(1).max(CONNECTION_TEST_PROMPT_MAX_LENGTH).optional(),
+  /** #13917: per-request proxy bulk-import ceiling; resolved by resolveProxyBulkImportLimit. */
+  proxyBulkImportLimit: z
+    .number()
+    .int()
+    .min(PROXY_BULK_IMPORT_LIMIT_MIN)
+    .max(PROXY_BULK_IMPORT_LIMIT_MAX)
+    .optional(),
   /** #7784: opt-in optimistic concurrency — must match GET settingsRevision / ETag. */
   expectedRevision: z.number().int().nonnegative().optional(),
   newPassword: z.string().min(1).max(200).optional(),
@@ -115,6 +132,7 @@ export const updateSettingsSchema = z.object({
   oidcScopes: z.array(z.string().max(100)).optional(),
   oidcRedirectPath: z.string().max(500).optional(),
   oidcAllowedSubjects: z.array(z.string().max(200)).optional(),
+  oidcAdmissionClaim: oidcAdmissionClaimSchema.nullable().optional(),
   enableSocks5Proxy: z.boolean().optional(),
   instanceName: z.string().max(100).optional(),
   customLogoUrl: z.string().max(2000).optional(),
@@ -128,6 +146,12 @@ export const updateSettingsSchema = z.object({
   blockedProviders: z.array(z.string().max(100)).optional(),
   noAuthFallbackDisabledProviders: z.array(z.string().max(100)).optional(),
   hidePaidModels: z.boolean().optional(),
+  // #9418/#13562: catalog/auto-combo already consume both flags (open-sse
+  // autoCombo + /v1/models catalog), but neither was ever added here — Zod
+  // silently strips unknown keys on a plain z.object, so PATCH /api/settings
+  // answered 200 while dropping both before they reached the DB.
+  hideAutoCombos: z.boolean().optional(),
+  hideNoThinkVariants: z.boolean().optional(),
   // STRICT_ZERO_COST (opt-in, default "off"): stricter than hidePaidModels — a
   // candidate must be keyless (no credential exists, so no request against it
   // can ever be billed) OR pass a live, fresh, hard-stop-guaranteed quota
@@ -138,6 +162,34 @@ export const updateSettingsSchema = z.object({
   // curated `tos` verdict is "avoid" (proxy/self-hosted use conflicts with the
   // provider's own terms) — a contractual concern, not an economic one.
   excludeTosAvoid: z.boolean().optional(),
+  // #11481: Opt-in explicit model exposure allow/deny list for `/v1/models` AND
+  // the `auto/*` combo candidate pool (mirror in
+  // open-sse/services/autoCombo/modelExposureFilter.ts — #6512 already proved a
+  // catalog-only filter still leaks into combo routing). Entries are exact
+  // "provider/model" (or bare "model") ids, or a glob pattern via the shared
+  // globToRegex matcher (src/shared/utils/modelExposureList.ts). Independent of
+  // hidePaidModels — this is operator curation, not a cost signal. Default
+  // empty arrays = no-op (Hard Rule #20 spirit).
+  modelVisibilityAllowlist: z.array(z.string().max(200)).max(500).optional(),
+  modelVisibilityDenylist: z.array(z.string().max(200)).max(500).optional(),
+  // Subscription-first routing tuning (`auto/subscription`, `auto/thrifty`).
+  // TUNING ONLY — there is deliberately no `enabled` flag: both ids are opt-in
+  // by being requested, and a toggle able to switch them off would leave
+  // `auto/subscription` silently serving paid capacity under a name that
+  // promises the opposite. See open-sse/services/autoCombo/subscriptionLadder.ts.
+  subscriptionLadder: z
+    .object({
+      // Remaining-% at or below which a plan-included connection counts as
+      // exhausted. Matches quotaPreflight.defaultThresholdPercent's default.
+      exitCutoffPercent: z.number().min(0).max(100).optional(),
+      // Remaining-% a connection must EXCEED to be re-admitted after having
+      // been exhausted. The gap above exitCutoffPercent is the hysteresis band
+      // that stops a connection hovering at the cutoff from oscillating.
+      reentryMinRemainingPercent: z.number().min(0).max(100).optional(),
+      // Per-rung spend ceiling in USD. 0 disables a rung outright.
+      rungBudgetUsd: z.record(z.string().max(32), z.number().min(0)).optional(),
+    })
+    .optional(),
   hideHealthCheckLogs: z.boolean().optional(),
   hideEndpointCloudflaredTunnel: z.boolean().optional(),
   hideEndpointTailscaleFunnel: z.boolean().optional(),
@@ -155,11 +207,13 @@ export const updateSettingsSchema = z.object({
   showProviderTopologyOnHome: z.boolean().optional(),
   localOnlyManageScopeBypassEnabled: z.boolean().optional(),
   // Layer 1 of the spawn-capable guard (Hard Rules #15/#17): reject any bypass
-  // prefix that reaches a SPAWN_CAPABLE_PREFIXES path, or a
+  // prefix that overlaps a SPAWN_CAPABLE_PREFIXES path or a
   // SPAWN_CAPABLE_PATTERN_ANCESTORS ancestor (e.g. /api/providers/, the
   // shared ancestor of the dynamic-segment routes in SPAWN_CAPABLE_PATTERNS
-  // such as /login and /refresh-cursor), at PATCH time, with the
-  // BYPASS_PREFIX_NOT_ALLOWED code the settings route handler translates.
+  // such as /login and /refresh-cursor) — as a child OR as a covering parent —
+  // at PATCH time, with the BYPASS_PREFIX_NOT_ALLOWED code the settings route
+  // handler translates. Same predicate as the runtime layers
+  // (isSpawnCapableBypassPrefix), so the three checks cannot drift apart.
   // Layer 2 (isLocalOnlyBypassableByManageScope) still refuses spawn paths at
   // runtime even if a malformed DB row claims otherwise. This refine was in the
   // routeGuard.ts contract docs but missing from the live schema — restored by
@@ -169,19 +223,10 @@ export const updateSettingsSchema = z.object({
       z
         .string()
         .max(200)
-        .refine(
-          (prefix) => {
-            const normalized = prefix.endsWith("/") ? prefix : `${prefix}/`;
-            return (
-              !SPAWN_CAPABLE_PREFIXES.some((sp) => normalized.startsWith(sp)) &&
-              !SPAWN_CAPABLE_PATTERN_ANCESTORS.some((sp) => normalized.startsWith(sp))
-            );
-          },
-          {
-            message:
-              "BYPASS_PREFIX_NOT_ALLOWED: spawn-capable prefixes cannot be added to the manage-scope bypass list",
-          }
-        )
+        .refine((prefix) => !isSpawnCapableBypassPrefix(prefix.trim()), {
+          message:
+            "BYPASS_PREFIX_NOT_ALLOWED: spawn-capable prefixes cannot be added to the manage-scope bypass list",
+        })
     )
     .optional(),
   customBannedSignals: z.array(z.string().max(200)).optional(),
@@ -193,7 +238,25 @@ export const updateSettingsSchema = z.object({
   probeCanDisable: z.boolean().optional(),
   debugMode: z.boolean().optional(),
   logToolSources: z.boolean().optional(),
+  // Opt-in (absent = off): keep only the `maxTools` client tools most relevant to the
+  // current user turn (BM25) before the provider tool cap. See open-sse/utils/toolDisclosure.ts.
+  toolDisclosure: z
+    .object({
+      enabled: z.boolean(),
+      maxTools: z.number().int().min(1).max(500).optional(),
+      alwaysInclude: z.array(z.string().min(1).max(256)).max(500).optional(),
+      // "zeroOverlap" drops only tools sharing no word with recent messages (bounded below).
+      mode: z.enum(["topK", "zeroOverlap"]).optional(),
+      minTools: z.number().int().min(1).max(500).optional(),
+      keepRatio: z.number().min(0).max(1).optional(),
+      dropCap: z.number().min(0).max(1).optional(),
+    })
+    .strict()
+    .optional(),
   hiddenSidebarItems: z.array(z.enum(HIDEABLE_SIDEBAR_ITEM_IDS)).optional(),
+  hiddenSidebarSections: z
+    .array(z.enum(SIDEBAR_SECTIONS.map((s) => s.id) as [string, ...string[]]))
+    .optional(),
   hiddenSidebarGroupLabels: z.array(z.enum(HIDEABLE_SIDEBAR_GROUP_IDS)).optional(),
   sidebarSectionOrder: z
     .array(z.enum(SIDEBAR_SECTIONS.map((s) => s.id) as [string, ...string[]]))
@@ -204,6 +267,12 @@ export const updateSettingsSchema = z.object({
     .nullable()
     .optional(),
   comboConfigMode: z.enum(COMBO_CONFIG_MODES).optional(),
+  // Opt-in combo sticky promote (#4852). Stored/read by getSettings + autoPromote.ts,
+  // but was never listed here — Zod silently strips unknown keys on PATCH /api/settings,
+  // so clients got HTTP 200 while comboAutoPromoteEnabled never persisted (same class of
+  // bug as hideAutoCombos in #13562 / #13800). Without this, operators cannot turn the
+  // flag off via API once it is true, and priority combos keep promoting last-success to #1.
+  comboAutoPromoteEnabled: z.boolean().optional(),
   codexServiceTier: z
     .object({
       enabled: z.boolean().optional(),
@@ -247,18 +316,21 @@ export const updateSettingsSchema = z.object({
     .optional(),
   responsesPreviousResponseIdMode: z.enum(RESPONSES_PREVIOUS_RESPONSE_ID_MODES).optional(),
   // Routing settings (#134)
-  fallbackStrategy: z.enum(ACCOUNT_FALLBACK_STRATEGY_VALUES).optional(),
+  fallbackStrategy: accountFallbackStrategySchema.optional(),
   wildcardAliases: z.array(z.object({ pattern: z.string(), target: z.string() })).optional(),
   stickyRoundRobinLimit: z.number().int().min(0).max(1000).optional(),
   /** 9router parity: global combo expansion strategy (fallback vs round-robin). */
   comboStrategy: z.enum(["fallback", "round-robin"]).optional(),
-  comboStickyRoundRobinLimit: z.number().int().min(1).max(100).nullable().optional(),
+  comboStickyRoundRobinLimit: z.number().int().min(1).max(1000).nullable().optional(),
   providerStrategies: z
     .record(
       z.string().trim().min(1),
       z.object({
-        fallbackStrategy: z.enum(ACCOUNT_FALLBACK_STRATEGY_VALUES).optional(),
+        fallbackStrategy: accountFallbackStrategySchema.optional(),
         stickyRoundRobinLimit: z.number().int().min(1).max(1000).optional(),
+        planWeights: z
+          .record(z.string().trim().min(1).max(40), z.number().finite().min(0.01).max(100))
+          .optional(),
       })
     )
     .optional(),
@@ -306,6 +378,10 @@ export const updateSettingsSchema = z.object({
     }),
   // #6168: global session-stickiness opt-out (per-combo config overrides this).
   disableSessionStickiness: z.boolean().optional(),
+  // Global connection-aware expansion fallback for group-B combo strategies is opt-in.
+  connectionAwareExpansion: z.boolean().optional(),
+  // Global cap on per-target expansion; the per-combo value wins when set.
+  connectionAwareExpansionMaxPerTarget: z.coerce.number().int().min(1).max(64).optional(),
   /** Keep eligible combo targets close to the provider-side prompt cache. */
   promptCacheAffinityEnabled: z.boolean().optional(),
   /**
@@ -373,6 +449,8 @@ export const updateSettingsSchema = z.object({
   stripModelPrefix: z.boolean().optional(),
   // Cache control preservation mode
   alwaysPreserveClientCache: z.enum(["auto", "always", "never"]).optional(),
+  // Gemini through Antigravity only; default off and no explicit cache resources.
+  geminiPromptCacheMode: z.enum(["off", "implicit"]).optional(),
   antigravitySignatureCacheMode: z.enum(signatureCacheModeValues).optional(),
   // Adaptive Volume Routing
   adaptiveVolumeRouting: z.boolean().optional(),
@@ -434,6 +512,10 @@ export const updateSettingsSchema = z.object({
     .min(VIDEO_BRIDGE_TIMEOUT_MIN_MS)
     .max(VIDEO_BRIDGE_TIMEOUT_MAX_MS)
     .optional(),
+  // Operator half of the FU-06 dual opt-in (#11654) for server-orchestrated
+  // Audio Bridge STT over Video Bridge audio extraction — defaults false
+  // (Hard Rule #20). A request-side opt-in is required in addition to this.
+  modalityBridgeVideoAudioTranscriptionEnabled: z.boolean().optional(),
   modalityBridgeCacheEnabled: z.boolean().optional(),
   modalityBridgeCacheTtlMinutes: z.number().int().min(1).max(1440).optional(),
   modalityBridgeCacheMaxEntries: z.number().int().min(10).max(5000).optional(),
@@ -447,6 +529,14 @@ export const updateSettingsSchema = z.object({
   // the default (for providers that don't implement Anthropic's web_search server tool).
   // Empty/unset = disabled. Value is a model string ("provider,model" / alias / combo).
   webSearchRouteModel: z.string().max(200).optional(),
+  // Whole-request budget for /v1/search, in ms. Unset keeps the 15s constant.
+  // The floor matches the handler's minimum; the ceiling stops a typo from
+  // holding a worker for hours.
+  searchTimeoutMs: z.number().int().min(1_000).max(120_000).optional(),
+  // Per-provider timeout overrides in ms, keyed by search provider id.
+  searchProviderTimeoutsMs: z
+    .record(z.string().max(60), z.number().int().min(1).max(120_000))
+    .optional(),
   backgroundDegradation: z.unknown().optional(),
   bruteForceProtection: z.boolean().optional(),
   // Auto-routing settings
@@ -459,6 +549,26 @@ export const updateSettingsSchema = z.object({
   // CLIProxyAPI connection settings
   cliproxyapi_fallback_enabled: z.boolean().optional(),
   cliproxyapi_url: z.string().url().max(500).optional(),
+  // #12306: external Headroom proxy URL. Empty = fall back to HEADROOM_URL / localhost:8787.
+  // Status/start already read this key; without the schema field PATCH strips it.
+  // Trim first so a padded URL matches the client (isValidHeadroomUrl trims)
+  // and whitespace-only becomes the empty fallback, not "Invalid URL".
+  // z.string().url() also accepts javascript:/data:/file:. probeProxyRunning
+  // interpolates this into fetch(`${url}/health`), so restrict to http(s).
+  headroomUrl: z
+    .string()
+    .trim()
+    .pipe(
+      z.union([
+        z.literal(""),
+        z
+          .string()
+          .url()
+          .max(500)
+          .refine((value) => isHttpUrl(value), "must be an http(s) URL"),
+      ])
+    )
+    .optional(),
   cliproxyapi_fallback_codes: z.string().max(200).optional(),
   // #7645: dedicated CLIProxyAPI credential. CLIProxyAPI requires its own
   // separately-configured `api-keys:` credential and rejects any other token
@@ -532,11 +642,16 @@ export const databaseSettingsSchema = z
       quotaSnapshots: z.number().int().min(1).max(3650), // Max 10 years
       compressionAnalytics: z.number().int().min(1).max(365),
       mcpAudit: z.number().int().min(1).max(365),
+      configAudit: z.number().int().min(1).max(365).optional(),
       a2aEvents: z.number().int().min(1).max(365),
       callLogs: z.number().int().min(1).max(3650),
+      conversationTurnNodes: z.number().int().min(1).max(3650).optional(),
       usageHistory: z.number().int().min(1).max(3650),
       memoryEntries: z.number().int().min(1).max(3650),
+      domainCostHistory: z.number().int().min(1).max(365).optional(),
+      compressionCacheStats: z.number().int().min(1).max(365).optional(),
       xpAuditLog: z.number().int().min(1).max(365),
+      compressionRunTelemetry: z.number().int().min(1).max(365).optional(),
       autoCleanupEnabled: z.boolean(),
     }),
 

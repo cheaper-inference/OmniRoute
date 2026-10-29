@@ -3,12 +3,19 @@ import { getAnthropicCompatHeaders, type RegistryEntry } from "../../shared.ts";
 export const deepseekProvider: RegistryEntry = {
   id: "deepseek",
   alias: "ds",
-  format: "openai-responses",
+  format: "openai",
   executor: "default",
-  baseUrl: "https://api.deepseek.com/responses",
+  baseUrl: "https://api.deepseek.com/chat/completions",
   authType: "apikey",
+  defaultContextLength: 1_000_000,
   authHeader: "bearer",
   alternateFormats: [
+    {
+      format: "openai-responses",
+      baseUrl: "https://api.deepseek.com/responses",
+      authHeader: "bearer",
+      label: "Responses-compatible",
+    },
     {
       format: "claude",
       baseUrl: "https://api.deepseek.com/anthropic/v1/messages",
@@ -35,6 +42,19 @@ export const deepseekProvider: RegistryEntry = {
       supportsReasoning: true,
       supportedThinkingEfforts: ["none", "low", "high", "max"],
       toolCalling: true,
+      // Flash reads images on the official API; v4-pro stays text-only.
+      supportsVision: true,
+    },
+    {
+      id: "deepseek-flash",
+      name: "DeepSeek V4.1 Flash",
+      aliases: ["deepseek-v4.1-flash", "deepseek-4.1-flash"],
+      contextLength: 1_000_000,
+      maxOutputTokens: 384_000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["none", "low", "high", "max"],
+      toolCalling: true,
+      supportsVision: true,
     },
   ],
 };

@@ -1,373 +1,450 @@
 # User Guide (Dansk)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../docs/USER_GUIDE.md) · 🇸🇦 [ar](../../ar/docs/USER_GUIDE.md) · 🇧🇬 [bg](../../bg/docs/USER_GUIDE.md) · 🇧🇩 [bn](../../bn/docs/USER_GUIDE.md) · 🇨🇿 [cs](../../cs/docs/USER_GUIDE.md) · 🇩🇰 [da](../../da/docs/USER_GUIDE.md) · 🇩🇪 [de](../../de/docs/USER_GUIDE.md) · 🇪🇸 [es](../../es/docs/USER_GUIDE.md) · 🇮🇷 [fa](../../fa/docs/USER_GUIDE.md) · 🇫🇮 [fi](../../fi/docs/USER_GUIDE.md) · 🇫🇷 [fr](../../fr/docs/USER_GUIDE.md) · 🇮🇳 [gu](../../gu/docs/USER_GUIDE.md) · 🇮🇱 [he](../../he/docs/USER_GUIDE.md) · 🇮🇳 [hi](../../hi/docs/USER_GUIDE.md) · 🇭🇺 [hu](../../hu/docs/USER_GUIDE.md) · 🇮🇩 [id](../../id/docs/USER_GUIDE.md) · 🇮🇹 [it](../../it/docs/USER_GUIDE.md) · 🇯🇵 [ja](../../ja/docs/USER_GUIDE.md) · 🇰🇷 [ko](../../ko/docs/USER_GUIDE.md) · 🇮🇳 [mr](../../mr/docs/USER_GUIDE.md) · 🇲🇾 [ms](../../ms/docs/USER_GUIDE.md) · 🇳🇱 [nl](../../nl/docs/USER_GUIDE.md) · 🇳🇴 [no](../../no/docs/USER_GUIDE.md) · 🇵🇭 [phi](../../phi/docs/USER_GUIDE.md) · 🇵🇱 [pl](../../pl/docs/USER_GUIDE.md) · 🇵🇹 [pt](../../pt/docs/USER_GUIDE.md) · 🇧🇷 [pt-BR](../../pt-BR/docs/USER_GUIDE.md) · 🇷🇴 [ro](../../ro/docs/USER_GUIDE.md) · 🇷🇺 [ru](../../ru/docs/USER_GUIDE.md) · 🇸🇰 [sk](../../sk/docs/USER_GUIDE.md) · 🇸🇪 [sv](../../sv/docs/USER_GUIDE.md) · 🇰🇪 [sw](../../sw/docs/USER_GUIDE.md) · 🇮🇳 [ta](../../ta/docs/USER_GUIDE.md) · 🇮🇳 [te](../../te/docs/USER_GUIDE.md) · 🇹🇭 [th](../../th/docs/USER_GUIDE.md) · 🇹🇷 [tr](../../tr/docs/USER_GUIDE.md) · 🇺🇦 [uk-UA](../../uk-UA/docs/USER_GUIDE.md) · 🇵🇰 [ur](../../ur/docs/USER_GUIDE.md) · 🇻🇳 [vi](../../vi/docs/USER_GUIDE.md) · 🇨🇳 [zh-CN](../../zh-CN/docs/USER_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/USER_GUIDE.md) · 🇪🇹 [am](../../../am/docs/guides/USER_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/guides/USER_GUIDE.md) · 🇦🇿 [az](../../../az/docs/guides/USER_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/guides/USER_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/guides/USER_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/guides/USER_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/guides/USER_GUIDE.md) · 🇩🇪 [de](../../../de/docs/guides/USER_GUIDE.md) · 🇬🇷 [el](../../../el/docs/guides/USER_GUIDE.md) · 🇪🇸 [es](../../../es/docs/guides/USER_GUIDE.md) · 🇪🇪 [et](../../../et/docs/guides/USER_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/guides/USER_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/guides/USER_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/guides/USER_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/guides/USER_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/guides/USER_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/guides/USER_GUIDE.md) · 🇮🇱 [he](../../../he/docs/guides/USER_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/guides/USER_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/guides/USER_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/guides/USER_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/guides/USER_GUIDE.md) · 🇮🇩 [id](../../../id/docs/guides/USER_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/guides/USER_GUIDE.md) · 🇮🇹 [it](../../../it/docs/guides/USER_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/guides/USER_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/guides/USER_GUIDE.md) · 🇰🇭 [km](../../../km/docs/guides/USER_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/guides/USER_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/guides/USER_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/guides/USER_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/guides/USER_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/guides/USER_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/guides/USER_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/guides/USER_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/guides/USER_GUIDE.md) · 🇲🇲 [my](../../../my/docs/guides/USER_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/guides/USER_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/guides/USER_GUIDE.md) · 🇳🇴 [no](../../../no/docs/guides/USER_GUIDE.md) · 🇮🇳 [or](../../../or/docs/guides/USER_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/guides/USER_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/guides/USER_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/guides/USER_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/guides/USER_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/USER_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/guides/USER_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/guides/USER_GUIDE.md) · 🇱🇰 [si](../../../si/docs/guides/USER_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/guides/USER_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/guides/USER_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/guides/USER_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/guides/USER_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/guides/USER_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/guides/USER_GUIDE.md) · 🇮🇳 [te](../../../te/docs/guides/USER_GUIDE.md) · 🇹🇭 [th](../../../th/docs/guides/USER_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/guides/USER_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/USER_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/guides/USER_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/guides/USER_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/guides/USER_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/guides/USER_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/USER_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/USER_GUIDE.md)
 
 ---
 
-Complete guide for configuring providers, creating combos, integrating CLI tools, and deploying OmniRoute.
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/USER_GUIDE.md) · 🇪🇹 [am](../../../am/docs/guides/USER_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/guides/USER_GUIDE.md) · 🇦🇿 [az](../../../az/docs/guides/USER_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/guides/USER_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/guides/USER_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/guides/USER_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/guides/USER_GUIDE.md) · 🇩🇪 [de](../../../de/docs/guides/USER_GUIDE.md) · 🇬🇷 [el](../../../el/docs/guides/USER_GUIDE.md) · 🇪🇸 [es](../../../es/docs/guides/USER_GUIDE.md) · 🇪🇪 [et](../../../et/docs/guides/USER_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/guides/USER_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/guides/USER_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/guides/USER_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/guides/USER_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/guides/USER_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/guides/USER_GUIDE.md) · 🇮🇱 [he](../../../he/docs/guides/USER_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/guides/USER_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/guides/USER_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/guides/USER_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/guides/USER_GUIDE.md) · 🇮🇩 [id](../../../id/docs/guides/USER_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/guides/USER_GUIDE.md) · 🇮🇹 [it](../../../it/docs/guides/USER_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/guides/USER_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/guides/USER_GUIDE.md) · 🇰🇭 [km](../../../km/docs/guides/USER_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/guides/USER_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/guides/USER_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/guides/USER_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/guides/USER_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/guides/USER_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/guides/USER_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/guides/USER_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/guides/USER_GUIDE.md) · 🇲🇲 [my](../../../my/docs/guides/USER_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/guides/USER_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/guides/USER_GUIDE.md) · 🇳🇴 [no](../../../no/docs/guides/USER_GUIDE.md) · 🇮🇳 [or](../../../or/docs/guides/USER_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/guides/USER_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/guides/USER_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/guides/USER_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/guides/USER_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/USER_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/guides/USER_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/guides/USER_GUIDE.md) · 🇱🇰 [si](../../../si/docs/guides/USER_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/guides/USER_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/guides/USER_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/guides/USER_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/guides/USER_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/guides/USER_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/guides/USER_GUIDE.md) · 🇮🇳 [te](../../../te/docs/guides/USER_GUIDE.md) · 🇹🇭 [th](../../../th/docs/guides/USER_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/guides/USER_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/USER_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/guides/USER_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/guides/USER_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/guides/USER_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/guides/USER_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/USER_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/USER_GUIDE.md)
+
+Komplet vejledning til konfiguration af udbydere, oprettelse af kombinationer, integration af CLI-værktøjer og implementering af OmniRoute.
 
 ---
 
-## Table of Contents
+## Indholdsfortegnelse
 
-- [Pricing at a Glance](#-pricing-at-a-glance)
-- [Use Cases](#-use-cases)
-- [Provider Setup](#-provider-setup)
-- [CLI Integration](#-cli-integration)
-- [Deployment](#-deployment)
-- [Available Models](#-available-models)
-- [Advanced Features](#-advanced-features)
-
----
-
-## 💰 Pricing at a Glance
-
-| Tier                | Provider          | Cost        | Quota Reset    | Best For             |
-| ------------------- | ----------------- | ----------- | -------------- | -------------------- |
-| **💳 SUBSCRIPTION** | Claude Code (Pro) | $20/mo      | 5h + weekly    | Already subscribed   |
-|                     | Codex (Plus/Pro)  | $20-200/mo  | 5h + weekly    | OpenAI users         |
-|                     | GitHub Copilot    | $10-19/mo   | Monthly        | GitHub users         |
-| **🔑 API KEY**      | DeepSeek          | Pay per use | None           | Cheap reasoning      |
-|                     | Groq              | Pay per use | None           | Ultra-fast inference |
-|                     | xAI (Grok)        | Pay per use | None           | Grok 4 reasoning     |
-|                     | Mistral           | Pay per use | None           | EU-hosted models     |
-|                     | Perplexity        | Pay per use | None           | Search-augmented     |
-|                     | Together AI       | Pay per use | None           | Open-source models   |
-|                     | Fireworks AI      | Pay per use | None           | Fast FLUX images     |
-|                     | Cerebras          | Pay per use | None           | Wafer-scale speed    |
-|                     | Cohere            | Pay per use | None           | Command R+ RAG       |
-|                     | NVIDIA NIM        | Pay per use | None           | Enterprise models    |
-| **💰 CHEAP**        | GLM-4.7           | $0.6/1M     | Daily 10AM     | Budget backup        |
-|                     | MiniMax M2.1      | $0.2/1M     | 5-hour rolling | Cheapest option      |
-|                     | Kimi K2           | $9/mo flat  | 10M tokens/mo  | Predictable cost     |
-| **🆓 FREE**         | Qoder             | $0          | Provider limits apply | Verify current catalog        |
-|                     | Qwen              | $0          | Provider limits apply | Verify current catalog        |
-|                     | Kiro              | $0          | Provider limits apply | Claude free          |
+- [Priser i korte træk](#-pricing-at-a-glance)
+- [Anvendelsestilfælde](#-use-cases)
+- [Opsætning af udbyder](#-provider-setup)
+- [CLI-integration](#-cli-integration)
+- [Implementering](#-deployment)
+- [Tilgængelige modeller](#-available-models)
+- [Avancerede funktioner](#-advanced-features)
+- [Automatisk routing (uden konfiguration)](#-auto-routing-zero-config)
+- [MCP- og A2A-integration](#-mcp--a2a-integration)
+- [Færdighedssystem](#-skills-system)
+- [Hukommelsessystem](#-memory-system)
+- [Webhooks](#-webhooks)
+- [Cloud-agenter](#-cloud-agents)
+- [Programmatisk administration](#-programmatic-management)
+- [Intern CLI](#-internal-cli)
+- [Desktopapplikation (Electron)](#-desktop-application-electron)
 
 ---
 
-## 🎯 Use Cases
+## 💰 Priser i korte træk
 
-### Case 1: "I have Claude Pro subscription"
+| Niveau            | Udbyder           | Pris              | Nulstilling af kvote      | Bedst til                        |
+| ----------------- | ----------------- | ----------------- | ------------------------- | -------------------------------- |
+| **💳 ABONNEMENT** | Claude Code (Pro) | $20/md.           | 5 t. + ugentligt          | Allerede eksisterende abonnenter |
+|                   | Codex (Plus/Pro)  | $20-200/md.       | 5 t. + ugentligt          | OpenAI-brugere                   |
+|                   | GitHub Copilot    | $10-19/md.        | Månedligt                 | GitHub-brugere                   |
+| **🔑 API-NØGLE**  | DeepSeek          | Betaling pr. brug | Ingen                     | Billig ræsonnering               |
+|                   | Groq              | Betaling pr. brug | Ingen                     | Ultrahurtig inferens             |
+|                   | xAI (Grok)        | Betaling pr. brug | Ingen                     | Grok 4-ræsonnering               |
+|                   | Mistral           | Betaling pr. brug | Ingen                     | EU-hostede modeller              |
+|                   | Perplexity        | Betaling pr. brug | Ingen                     | Søgeforstærket                   |
+|                   | Together AI       | Betaling pr. brug | Ingen                     | Open source-modeller             |
+|                   | Fireworks AI      | Betaling pr. brug | Ingen                     | Hurtige FLUX-billeder            |
+|                   | Cerebras          | Betaling pr. brug | Ingen                     | Hastighed på waferskala          |
+|                   | Cohere            | Betaling pr. brug | Ingen                     | Command R+ RAG                   |
+|                   | NVIDIA NIM        | Betaling pr. brug | Ingen                     | Virksomhedsmodeller              |
+|                   | Baidu Qianfan     | Betaling pr. brug | Ingen                     | ERNIE-modeller                   |
+| **💰 BILLIG**     | GLM-4.7           | $0.6/1M           | Dagligt kl. 10            | Billig reserve                   |
+|                   | MiniMax M2.1      | $0.2/1M           | Rullende hver 5. time     | Billigste mulighed               |
+|                   | Kimi K2           | Fast $9/md.       | 10M tokens/md.            | Forudsigelig pris                |
+| **🆓 GRATIS**     | Qoder             | $0                | Udbyderens grænser gælder | Kontrollér det aktuelle katalog  |
+|                   | Kiro              | $0                | ~50 kreditter/md.         | Gratis Claude                    |
 
-**Problem:** Quota expires unused, rate limits during heavy coding
+---
 
-```
-Combo: "maximize-claude"
-  1. cc/claude-opus-4-7        (use subscription fully)
-  2. glm/glm-4.7               (cheap backup when quota out)
-  3. if/kimi-k2-thinking       (free emergency fallback)
+## 🎯 Anvendelsestilfælde
 
-Monthly cost: $20 (subscription) + ~$5 (backup) = $25 total
-vs. $20 + hitting limits = frustration
-```
+### Tilfælde 1: "Jeg har et Claude Pro-abonnement"
 
-### Case 2: "I want zero cost"
-
-**Problem:** Can't afford subscriptions, need reliable AI coding
-
-```
-Combo: "free-tier-fallback"
-  1. if/kimi-k2-thinking       (no published token cap; limits apply)
-  2. qw/qwen3-coder-plus       (no published token cap; limits apply)
-
-Monthly cost: $0
-Quality: verify the model, limits, privacy, and SLA for your workload
-```
-
-### Case 3: "I need 24/7 coding, no interruptions"
-
-**Problem:** Deadlines, can't afford downtime
-
-```
-Combo: "always-on"
-  1. cc/claude-opus-4-7        (best quality)
-  2. cx/gpt-5.2-codex          (second subscription)
-  3. glm/glm-4.7               (cheap, resets daily)
-  4. minimax/MiniMax-M2.1      (cheapest, 5h reset)
-  5. if/kimi-k2-thinking       (free unlimited)
-
-Result: 5 fallback layers broaden resilience; upstream availability is not guaranteed
-Monthly cost: $20-200 (subscriptions) + $10-20 (backup)
-```
-
-### Case 4: "I want FREE AI in OpenClaw"
-
-**Problem:** Need AI assistant in messaging apps, completely free
+**Problem:** Kvoten udløber ubrugt, og hastighedsgrænser nås under intensiv kodning
 
 ```
-Combo: "openclaw-free"
-  1. if/glm-4.7                (no published token cap; limits apply)
-  2. if/minimax-m2.1           (no published token cap; limits apply)
-  3. if/kimi-k2-thinking       (no published token cap; limits apply)
+Kombination: "maximize-claude"
+  1. cc/claude-opus-4-7        (udnyt abonnementet fuldt ud)
+  2. glm/glm-4.7               (billig reserve, når kvoten er opbrugt)
+  3. if/qwen3.8-max-preview       (gratis nødløsning)
 
-Monthly cost: $0
-Access via: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
+Månedlig pris: $20 (abonnement) + ~$5 (reserve) = $25 i alt
+mod $20 + at ramme grænserne = frustration
+```
+
+### Tilfælde 2: "Jeg vil have nul omkostninger"
+
+**Problem:** Har ikke råd til abonnementer og har brug for pålidelig AI-kodning
+
+```
+Kombination: "zero-cost"
+  1. if/kimi-k2.7-code          (angivet som gratis adgang; hastighedsgrænser kan gælde)
+  2. kr/qwen3-coder-next        (gratis Kiro-reserve)
+
+Månedlig pris: $0
+Kvalitet: Kontrollér modellen, grænserne, privatlivsvilkårene og SLA'en for din arbejdsbelastning
+```
+
+### Tilfælde 3: "Jeg har brug for kodning døgnet rundt uden afbrydelser"
+
+**Problem:** Deadlines og ingen mulighed for at tolerere nedetid
+
+```
+Kombination: "always-on"
+  1. cc/claude-opus-4-7        (bedste kvalitet)
+  2. cx/gpt-5.5                (andet abonnement)
+  3. glm/glm-4.7               (billig, nulstilles dagligt)
+  4. minimax/MiniMax-M2.1      (billigst, nulstilles efter 5 t.)
+  5. if/deepseek-v4-flash       (angivet som gratis adgang; hastighedsgrænser kan gælde)
+
+Resultat: 5 reservelag giver større robusthed; tilgængelighed hos upstream-udbydere er ikke garanteret
+Månedlig pris: $20-200 (abonnementer) + $10-20 (reserve)
+```
+
+### Tilfælde 4: "Jeg vil have GRATIS AI i OpenClaw"
+
+**Problem:** Har brug for en AI-assistent i beskedapps, helt gratis
+
+```
+Kombination: "openclaw-free"
+  1. if/qwen3.8-max-preview     (angivet som gratis adgang; hastighedsgrænser kan gælde)
+  2. if/deepseek-v4-flash       (angivet som gratis adgang; hastighedsgrænser kan gælde)
+  3. if/kimi-k2.7-code          (angivet som gratis adgang; hastighedsgrænser kan gælde)
+
+Månedlig pris: $0
+Adgang via: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 ```
 
 ---
 
-## 📖 Provider Setup
+## 📖 Opsætning af udbydere
 
-### 🔐 Subscription Providers
+Hvis du vil massetilføje forbindelser med API-nøgler fra en CSV- eller JSON-fil, skal du bruge **Kontrolpanel → Udbydere → Importér fra fil**. Kolonnerne er positionsbestemte (`provider,name,apiKey,baseUrl,priority`); `provider` skal allerede eksistere som en administreret udbyder eller en kompatibel node. Se [Importér udbydere fra en CSV- eller JSON-fil](../providers/CSV-IMPORT.md).
+
+### 🔐 Abonnementsudbydere
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Connect Claude Code
-→ OAuth login → Auto token refresh
-→ 5-hour + weekly quota tracking
+Kontrolpanel → Udbydere → Tilslut Claude Code
+→ OAuth-login → Automatisk opdatering af token
+→ Sporing af 5-timerskvote og ugentlig kvote
 
-Models:
+Modeller:
   cc/claude-opus-4-7
-  cc/claude-sonnet-4-5-20250929
+  cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**Pro Tip:** Use Opus for complex tasks, Sonnet for speed. OmniRoute tracks quota per model!
+**Pro-tip:** Brug Opus til komplekse opgaver og Sonnet, når hastighed er vigtig. OmniRoute sporer kvoten for hver model!
+
+Ingen browser på OmniRoute-værten? Kør `claude setup-token` et hvilket som helst sted, hvor Claude Code er logget ind, og indsæt det etårige token på fanen **Setup Token**. Se [Claude Code med et setup-token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+
+Ruter, der er kompatible med Claude og Claude Code, bevarer tænkeindsatsen `max` for Opus- og Sonnet-modeller. Haiku-modeller accepterer ikke indsatsniveauet `max`, så OmniRoute nedgraderer denne anmodning til et højt tænkebudget, før den sendes videre til upstream-udbyderen.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Connect Codex
-→ OAuth login (port 1455)
-→ 5-hour + weekly reset
+Kontrolpanel → Udbydere → Tilslut Codex
+→ OAuth-login (port 1455)
+→ Nulstilling hver 5. time og ugentligt
 
-Models:
-  cx/gpt-5.2-codex
-  cx/gpt-5.1-codex-max
+Modeller:
+  cx/gpt-5.5
+  cx/gpt-5.4
+  cx/gpt-5.3-codex
+  cx/gpt-5.3-codex-spark
 ```
 
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → Connect GitHub
+Kontrolpanel → Udbydere → Tilslut GitHub
 → OAuth via GitHub
-→ Monthly reset (1st of month)
+→ Månedlig nulstilling (den 1. i måneden)
 
-Models:
-  gh/gpt-5
-  gh/claude-4.5-sonnet
+Modeller:
+  gh/gpt-5.5
+  gh/gpt-5.4
+  gh/claude-sonnet-4.6
+  gh/claude-opus-4.7
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Cheap Providers
+### 💰 Billige udbydere
 
-#### GLM-4.7 (Daily reset, $0.6/1M)
+#### GLM-4.7 (Daglig nulstilling, $0.6/1M)
 
-1. Sign up: [Zhipu AI](https://open.bigmodel.cn/)
-2. Get API key from Coding Plan
-3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
+1. Tilmeld dig: [Zhipu AI](https://open.bigmodel.cn)
+2. Hent en API-nøgle fra Coding Plan
+3. Kontrolpanel → Tilføj API-nøgle: Udbyder: `glm`, API-nøgle: `your-key`
 
-**Use:** `glm/glm-4.7` — **Pro Tip:** Coding Plan offers 3× quota at 1/7 cost! Reset daily 10:00 AM.
+**Brug:** `glm/glm-4.7` — **Pro-tip:** Coding Plan giver 3× kvote til 1/7 af prisen! Nulstilles dagligt kl. 10.00.
 
-#### MiniMax M2.1 (5h reset, $0.20/1M)
+#### MiniMax M2.1 (Nulstilling hver 5. time, $0.20/1M)
 
-1. Sign up: [MiniMax](https://www.minimax.io/)
-2. Get API key → Dashboard → Add API Key
+1. Tilmeld dig: [MiniMax](https://www.minimax.io)
+2. Hent en API-nøgle → Kontrolpanel → Tilføj API-nøgle
 
-**Use:** `minimax/MiniMax-M2.1` — **Pro Tip:** Cheapest option for long context (1M tokens)!
+**Brug:** `minimax/MiniMax-M2.1` — **Pro-tip:** Den billigste mulighed til lang kontekst (1M tokens)!
 
-#### Kimi K2 ($9/month flat)
+#### Kimi K2 ($9/måned fast pris)
 
-1. Subscribe: [Moonshot AI](https://platform.moonshot.ai/)
-2. Get API key → Dashboard → Add API Key
+1. Abonnér: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. Hent en API-nøgle → Kontrolpanel → Tilføj API-nøgle
 
-**Use:** `kimi/kimi-latest` — **Pro Tip:** Fixed $9/month for 10M tokens = $0.90/1M effective cost!
+**Brug:** `kimi/kimi-k2.5` — **Pro-tip:** Fast pris på $9/måned for 10M tokens = en effektiv pris på $0.90/1M!
 
-### 🆓 FREE Providers
+#### Baidu Qianfan / ERNIE
 
-#### Qoder (8 FREE models)
+1. Tilmeld dig: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. Opret en Qianfan API-nøgle → Kontrolpanel → Tilføj API-nøgle: Udbyder: `qianfan`
+
+**Brug:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` eller et andet Qianfan-model-id, der er kompatibelt med OpenAI.
+
+### 🆓 GRATIS udbydere
+
+Gratis udbydere uden godkendelse har en kontakt ud for **Ingen godkendelse påkrævet** på deres udbyderside.
+Hvis den slås fra, deaktiveres udbyderen, den fjernes fra de konfigurerede og kompakte visninger under Udbydere, og
+dens modeller fjernes fra `/v1/models`.
+
+#### Qoder (9 GRATIS modeller)
 
 ```bash
-Dashboard → Connect Qoder → OAuth login → Access is subject to current provider limits
+Kontrolpanel → Tilslut Qoder → OAuth-login → Adgangen er underlagt udbyderens aktuelle begrænsninger
 
-Models: if/kimi-k2-thinking, if/qwen3-coder-plus, if/glm-4.7, if/minimax-m2, if/deepseek-r1
+Modeller: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Qwen (3 FREE models)
+#### Kiro (Claude GRATIS)
 
 ```bash
-Dashboard → Connect Qwen → Device code auth → Access is subject to current provider limits
+Kontrolpanel → Tilslut Kiro → AWS Builder ID eller Google/GitHub → ~50 kreditter/måned
 
-Models: qw/qwen3-coder-plus, qw/qwen3-coder-flash
-```
-
-#### Kiro (Claude FREE)
-
-```bash
-Dashboard → Connect Kiro → AWS Builder ID or Google/GitHub → Unlimited
-
-Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Modeller: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
 
-## 🎨 Combos
+## 🎨 Kombinationer
 
-You can reorder combo cards directly in **Dashboard → Combos** by dragging the handle on each card. The order is stored in SQLite and restored on reload.
+Du kan ændre rækkefølgen af kombinationskort direkte i **Instrumentpanel → Kombinationer** ved at trække i håndtaget på hvert kort. Rækkefølgen gemmes i SQLite og gendannes ved genindlæsning.
 
-### Example 1: Maximize Subscription → Cheap Backup
-
-```
-Dashboard → Combos → Create New
-
-Name: premium-coding
-Models:
-  1. cc/claude-opus-4-7 (Subscription primary)
-  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
-  3. minimax/MiniMax-M2.1 (Cheapest fallback, $0.20/1M)
-
-Use in CLI: premium-coding
-```
-
-### Example 2: Free-Only (Zero Cost)
+### Eksempel 1: Maksimer abonnement → Billig backup
 
 ```
-Name: free-combo
-Models:
-  1. if/kimi-k2-thinking (no published token cap; provider limits may apply)
-  2. qw/qwen3-coder-plus (no published token cap; provider limits may apply)
+Instrumentpanel → Kombinationer → Opret ny
 
-Cost: currently listed as $0; terms and availability may change
+Navn: premium-coding
+Modeller:
+  1. cc/claude-opus-4-7 (Primært abonnement)
+  2. glm/glm-4.7 (Billig backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Billigste reserveløsning, $0.3/1M)
+
+Brug i CLI: premium-coding
+```
+
+### Eksempel 2: Kun gratis (ingen omkostninger)
+
+```
+Navn: free-combo
+Modeller:
+  1. if/kimi-k2.7-code (angivet med gratis adgang; udbyderbegrænsninger kan være gældende)
+  2. kr/qwen3-coder-next (gratis Kiro-reserveløsning)
+
+Omkostning: aktuelt angivet som $0; vilkår og tilgængelighed kan ændre sig
 ```
 
 ---
 
-## 🔧 CLI Integration
+## 🔧 CLI-integration
 
 ### Cursor IDE
 
+**Brug af Cursor som OmniRoute-klient** (diriger Cursor-chat gennem OmniRoute):
+
 ```
-Settings → Models → Advanced:
-  OpenAI API Base URL: http://localhost:20128/v1
-  OpenAI API Key: [from omniroute dashboard]
+Indstillinger → Modeller → Avanceret:
+  OpenAI API-basis-URL: http://localhost:20128/v1
+  OpenAI API-nøgle: [fra OmniRoute-instrumentpanelet]
   Model: cc/claude-opus-4-7
 ```
 
+**Brug af OmniRoute som Cursor-udbyder** (OmniRoute kalder Cursor opstrøms): Brug helst
+**Instrumentpanel → Udbydere → Cursor → Log ind med Cursor**. For Docker henvises til
+[`docs/providers/CURSOR-DOCKER.md`](../providers/CURSOR-DOCKER.md).
+
 ### Claude Code
 
-Edit `~/.claude/config.json`:
+Rediger `~/.claude/settings.json`:
 
 ```json
 {
-  "anthropic_api_base": "http://localhost:20128/v1",
-  "anthropic_api_key": "your-omniroute-api-key"
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://localhost:20128",
+    "ANTHROPIC_AUTH_TOKEN": "din-omniroute-api-nøgle"
+  }
 }
 ```
+
+Brug det Claude-kompatible rodslutpunkt her. Føj ikke `/v1` til `ANTHROPIC_BASE_URL`.
 
 ### Codex CLI
 
 ```bash
 export OPENAI_BASE_URL="http://localhost:20128"
-export OPENAI_API_KEY="your-omniroute-api-key"
-codex "your prompt"
+export OPENAI_API_KEY="din-omniroute-api-nøgle"
+codex "din prompt"
 ```
 
 ### OpenClaw
 
-Edit `~/.openclaw/openclaw.json`:
+Rediger `~/.openclaw/openclaw.json`:
 
 ```json
 {
   "agents": {
     "defaults": {
-      "model": { "primary": "omniroute/if/glm-4.7" }
+      "model": { "primary": "omniroute/if/kimi-k2.7-code" }
     }
   },
   "models": {
     "providers": {
       "omniroute": {
         "baseUrl": "http://localhost:20128/v1",
-        "apiKey": "your-omniroute-api-key",
+        "apiKey": "din-omniroute-api-nøgle",
         "api": "openai-completions",
-        "models": [{ "id": "if/glm-4.7", "name": "glm-4.7" }]
+        "models": [{ "id": "if/kimi-k2.7-code", "name": "Kimi K2.7 Code" }]
       }
     }
   }
 }
 ```
 
-**Or use Dashboard:** CLI Tools → OpenClaw → Auto-config
+**Eller brug instrumentpanelet:** CLI-værktøjer → OpenClaw → Automatisk konfiguration
 
 ### Cline / Continue / RooCode
 
 ```
-Provider: OpenAI Compatible
-Base URL: http://localhost:20128/v1
-API Key: [from dashboard]
+Udbyder: OpenAI-kompatibel
+Basis-URL: http://localhost:20128/v1
+API-nøgle: [fra instrumentpanelet]
 Model: cc/claude-opus-4-7
 ```
 
 ---
 
-## Udrulning
+## 🚀 Implementering
 
-### Global npm install (Recommended)
+### Global npm-installation (anbefalet)
 
 ```bash
 npm install -g omniroute
 
-# Create config directory
+# Opret konfigurationsmappe
 mkdir -p ~/.omniroute
 
-# Create .env file (see .env.example)
+# Opret .env-fil (se .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Start server
+# Start serveren
 omniroute
-# Or with custom port:
+# Eller med en brugerdefineret port:
 omniroute --port 3000
 ```
 
-The CLI automatically loads `.env` from `~/.omniroute/.env` or `./.env`.
+CLI'en indlæser automatisk `.env` fra `~/.omniroute/.env` eller `./.env`.
 
-### Uninstalling
+### Systembakketilstand
 
-When you no longer need OmniRoute, we provide two quick scripts for a clean removal:
+Start OmniRoute i systembakken:
 
-| Command                  | Action                                                                              |
-| ------------------------ | ----------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Removes the system app but **keeps your DB and configurations** in `~/.omniroute`.  |
-| `npm run uninstall:full` | Removes the app AND permanently **erases all configurations, keys, and databases**. |
+```bash
+omniroute serve --tray
+```
 
-> Note: To run these commands, navigate to the OmniRoute project folder (if you cloned it) and run them. Alternatively, if globally installed, you can simply run `npm uninstall -g omniroute`.
+Kommandoen afsluttes, når serveren og systembakkeikonet er klar.
 
-### VPS Deployment
+Serveren fortsætter uden terminalen.
+
+Systembakketilstand understøtter macOS, Windows og grafiske Linux-sessioner. Systembakketilstand åbner ikke instrumentpanelet automatisk.
+
+Brug systembakkemenuen til disse handlinger:
+
+- Åbn instrumentpanelet.
+- Åbn `/dashboard/logs`.
+- Skift automatisk start.
+- Stop OmniRoute.
+
+Kombiner ikke `--tray` med disse indstillinger:
+
+- `--daemon`
+- `--log`
+- `--no-recovery`
+
+Disse tilstande kræver forskelligt procesejerskab.
+
+Aktivér opstart ved næste login på maskinen:
+
+```bash
+omniroute autostart enable
+```
+
+Automatisk start bruger systembakketilstand på macOS, Windows og i grafiske Linux-sessioner. Linux uden grafisk brugerflade anvender den eksisterende systemd-brugertjeneste.
+
+Deaktivér opstart ved login:
+
+```bash
+omniroute autostart disable
+```
+
+### Afinstallation
+
+Når du ikke længere har brug for OmniRoute, tilbyder vi to hurtige scripts til en ren fjernelse:
+
+| Kommando                 | Handling                                                                                     |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Fjerner systemappen, men **beholder din database og dine konfigurationer** i `~/.omniroute`. |
+| `npm run uninstall:full` | Fjerner appen OG **sletter alle konfigurationer, nøgler og databaser permanent**.            |
+
+> Bemærk: For at køre disse kommandoer skal du navigere til OmniRoute-projektmappen (hvis du har klonet den) og køre dem. Hvis den er installeret globalt, kan du alternativt blot køre `npm uninstall -g omniroute`.
+
+### VPS-implementering
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
-export JWT_SECRET="your-secure-secret-change-this"
-export INITIAL_PASSWORD="your-password"
+export JWT_SECRET="din-sikre-hemmelighed-skift-denne"
+export INITIAL_PASSWORD="din-adgangskode"
 export DATA_DIR="/var/lib/omniroute"
 export PORT="20128"
 export HOSTNAME="0.0.0.0"
 export NODE_ENV="production"
 export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
-export API_KEY_SECRET="endpoint-proxy-api-key-secret"
+export API_KEY_SECRET="endpoint-proxy-api-nøglehemmelighed"
 
 npm run start
-# Or: pm2 start npm --name omniroute -- start
+# Eller: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 Deployment (Low Memory)
+### PM2-implementering (lavt hukommelsesforbrug)
 
-For servers with limited RAM, use the memory limit option:
+For servere med begrænset RAM skal du bruge indstillingen for hukommelsesgrænse:
 
 ```bash
-# With 512MB limit (default)
+# Med en grænse på 512 MB (standard)
 pm2 start npm --name omniroute -- start
 
-# Or with custom memory limit
+# Eller med en brugerdefineret hukommelsesgrænse
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Or using ecosystem.config.js
+# Eller ved hjælp af ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Create `ecosystem.config.js`:
+Opret `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -379,8 +456,8 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         OMNIROUTE_MEMORY_MB: "512",
-        JWT_SECRET: "your-secret",
-        INITIAL_PASSWORD: "your-password",
+        JWT_SECRET: "din-hemmelighed",
+        INITIAL_PASSWORD: "din-adgangskode",
       },
       node_args: "--max-old-space-size=512",
       max_memory_restart: "300M",
@@ -392,30 +469,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Build image (default = runner-cli with codex/claude/droid preinstalled)
+# Byg image (standard = runner-cli med codex/claude/droid forudinstalleret)
 docker build -t omniroute:cli .
 
-# Portable mode (recommended)
+# Portabel tilstand (anbefalet)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-For host-integrated mode with CLI binaries, see the Docker section in the main docs.
+For værtsintegreret tilstand med CLI-binære filer henvises til Docker-afsnittet i hoveddokumentationen.
 
 ### Void Linux (xbps-src)
 
-Void Linux users can package and install OmniRoute natively using the `xbps-src` cross-compilation framework. This automates the Node.js standalone build along with the required `better-sqlite3` native bindings.
+Void Linux-brugere kan pakke og installere OmniRoute direkte ved hjælp af krydskompileringsframeworket `xbps-src`. Dette automatiserer den selvstændige Node.js-build sammen med de nødvendige native `better-sqlite3`-bindinger.
 
 <details>
-<summary><b>View xbps-src template</b></summary>
+<summary><b>Vis xbps-src-skabelon</b></summary>
 
 ```bash
-# Template file for 'omniroute'
+# Skabelonfil for 'omniroute'
 pkgname=omniroute
-version=3.2.4
+version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universal AI gateway with smart routing for multiple LLM providers"
+short_desc="Universel AI-gateway med intelligent routing til flere LLM-udbydere"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -430,7 +507,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Determine target CPU arch for node-gyp
+	# Bestem mål-CPU-arkitekturen for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -439,29 +516,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Install all deps – skip scripts
+	# 1) Installer alle afhængigheder – spring scripts over
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Build the Next.js standalone bundle
+	# 2) Byg den selvstændige Next.js-pakke
 	npm run build
 
-	# 3) Copy static assets into standalone
+	# 3) Kopiér statiske aktiver til den selvstændige pakke
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Compile better-sqlite3 native binding
+	# 4) Kompilér den native better-sqlite3-binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Place the compiled binding into the standalone bundle
+	# 5) Placér den kompilerede binding i den selvstændige pakke
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Remove arch-specific sharp bundles
+	# 6) Fjern arkitekturspecifikke sharp-pakker
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Copy pino runtime deps omitted by Next.js static analysis:
+	# 7) Kopiér pino-kørselsafhængigheder, som Next.js' statiske analyse udelod:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -475,7 +552,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Prevent removal of empty Next.js app router dirs by the post-install hook
+	# Undgå, at tomme Next.js-app-routermapper fjernes af efterinstallations-hooket
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -501,106 +578,187 @@ post_install() {
 
 </details>
 
-### Environment Variables
+### Miljøvariabler
 
-| Variable                                | Default                              | Description                                                                                               |
-| --------------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT signing secret (**change in production**)                                                             |
-| `INITIAL_PASSWORD`                      | `123456`                             | First login password                                                                                      |
-| `DATA_DIR`                              | `~/.omniroute`                       | Data directory (db, usage, logs)                                                                          |
-| `PORT`                                  | framework default                    | Service port (`20128` in examples)                                                                        |
-| `HOSTNAME`                              | framework default                    | Bind host (Docker defaults to `0.0.0.0`)                                                                  |
-| `NODE_ENV`                              | runtime default                      | Set `production` for deploy                                                                               |
-| `BASE_URL`                              | `http://localhost:20128`             | Server-side internal base URL                                                                             |
-| `CLOUD_URL`                             | `https://omniroute.dev`              | Cloud sync endpoint base URL                                                                              |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC secret for generated API keys                                                                        |
-| `REQUIRE_API_KEY`                       | `false`                              | Enforce Bearer API key on `/v1/*`                                                                         |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Allow Api Manager to copy full API keys on demand                                                         |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Server-side refresh cadence for cached Provider Limits data; UI refresh buttons still trigger manual sync |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Disable automatic SQLite snapshots before writes/import/restore; manual backups still work                |
-| `APP_LOG_TO_FILE`                       | `true`                               | Enables application and audit log output to disk                                                          |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Force `Secure` auth cookie (behind HTTPS reverse proxy)                                                   |
-| `CLOUDFLARED_BIN`                       | unset                                | Use an existing `cloudflared` binary instead of managed download                                          |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transport for managed Quick Tunnels (`http2`, `quic`, or `auto`)                                          |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js heap limit in MB                                                                                  |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Max prompt cache entries                                                                                  |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Max semantic cache entries                                                                                |
+| Variabel                                | Standardværdi                        | Beskrivelse                                                                                                                                             |
+| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Hemmelighed til JWT-signering (**skal ændres i produktion**)                                                                                            |
+| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Adgangskode til første login                                                                                                                            |
+| `DATA_DIR`                              | `~/.omniroute`                       | Datamappe (database, forbrug, logfiler)                                                                                                                 |
+| `PORT`                                  | frameworkets standardværdi           | Tjenesteport (`20128` i eksempler)                                                                                                                      |
+| `HOSTNAME`                              | frameworkets standardværdi           | Vært, der bindes til (Docker bruger som standard `0.0.0.0`)                                                                                             |
+| `NODE_ENV`                              | kørselstidens standardværdi          | Indstil til `production` ved implementering                                                                                                             |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Offentlig basis-URL, der vises i kontrolpanelet og eksponeres for serveren (erstatter det ældre `BASE_URL`)                                             |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Basis-URL for cloudsynkroniseringens slutpunkt (erstatter det ældre `CLOUD_URL`)                                                                        |
+| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC-hemmelighed til genererede API-nøgler                                                                                                              |
+| `REQUIRE_API_KEY`                       | `false`                              | Kræv Bearer-API-nøgle på `/v1/*`                                                                                                                        |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Tillad godkendte kontrolpanelbrugere at få vist komplette gemte API-nøgleværdier efter behov                                                            |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Serverbaseret opdateringsinterval for cachelagrede data om udbydergrænser; opdateringsknapper i brugergrænsefladen udløser stadig manuel synkronisering |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Deaktiver automatiske SQLite-snapshots før skrivning/import/gendannelse; manuelle sikkerhedskopier fungerer stadig                                      |
+| `APP_LOG_TO_FILE`                       | `true`                               | Aktiverer lagring af applikations- og revisionslogfiler på disken                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                              | Gennemtving `Secure`-attributten for godkendelsescookien (bag en HTTPS-reverse proxy)                                                                   |
+| `CLOUDFLARED_BIN`                       | ikke angivet                         | Brug en eksisterende `cloudflared`-binærfil i stedet for den administrerede download                                                                    |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transportprotokol for administrerede Quick Tunnels (`http2`, `quic` eller `auto`)                                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js-heapgrænse i MB                                                                                                                                 |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Maksimalt antal poster i promptcachen                                                                                                                   |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Maksimalt antal poster i den semantiske cache                                                                                                           |
 
-For the full environment variable reference, see the [README](../README.md).
+Se [README](../README.md) for den komplette oversigt over miljøvariabler.
 
 ---
 
-## 📊 Available Models
+## 📊 Tilgængelige modeller
 
 <details>
-<summary><b>View all available models</b></summary>
+<summary><b>Se alle tilgængelige modeller</b></summary>
 
-**Claude Code (`cc/`)** — Pro/Max: `cc/claude-opus-4-7`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+> Listen nedenfor er udvalgt fra `open-sse/config/providerRegistry.ts` for v3.8.0. Cloud-kataloger (Gemini, OpenRouter osv.) synkroniseres dynamisk — for at se hele live-kataloget åbn **Dashboard → Udbydere → [udbyder] → Tilgængelige modeller** eller kald `GET /api/models/catalog`.
+>
+> Hvis en udbyders indbyggede liste er kommet ud af trit, kan du bruge **Importér fra /models** på den pågældende side (eller aktivere **Automatisk synkronisering**) for at hente det aktuelle upstream-katalog. Dette blev verificeret i v3.8.50 for LLM7.io (`gemini-3.1-flash-lite`) og UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonym adgang til Pollinations forblev begrænset fra upstreams side under samme testrunde.
 
-**Codex (`cx/`)** — Plus/Pro: `cx/gpt-5.2-codex`, `cx/gpt-5.1-codex-max`
+**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**GitHub Copilot (`gh/`)**: `gh/gpt-5`, `gh/claude-4.5-sonnet`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort-niveauer: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
-**GLM (`glm/`)** — $0.6/1M: `glm/glm-4.7`
+**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**MiniMax (`minimax/`)** — $0.2/1M: `minimax/MiniMax-M2.1`
+**Kiro (`kr/`)** — GRATIS OAuth: Brug live-kataloget, der vises under **Dashboard → Udbydere → Kiro → Tilgængelige modeller**. Tilgængeligheden afhænger af kontoen og abonnementet.
 
-**Qoder (`if/`)** — FREE: `if/kimi-k2-thinking`, `if/qwen3-coder-plus`, `if/deepseek-r1`
+**Qoder (`if/`)** — GRATIS OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**Qwen (`qw/`)** — FREE: `qw/qwen3-coder-plus`, `qw/qwen3-coder-flash`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**Kiro (`kr/`)** — FREE: `kr/claude-sonnet-4.5`, `kr/claude-haiku-4.5`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**DeepSeek (`ds/`)**: `ds/deepseek-chat`, `ds/deepseek-reasoner`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/md. fast pris eller pr. brug: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**Groq (`groq/`)**: `groq/llama-3.3-70b-versatile`, `groq/llama-4-maverick-17b-128e-instruct`
+**DeepSeek (`ds/`)** — API-nøgle: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**xAI (`xai/`)**: `xai/grok-4`, `xai/grok-4-0709-fast-reasoning`, `xai/grok-code-mini`
+**Groq (`groq/`)** — Ultra-hurtig: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**Mistral (`mistral/`)**: `mistral/mistral-large-2501`, `mistral/codestral-2501`
+**xAI (`xai/`)** — Grok-nativ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Perplexity (`pplx/`)**: `pplx/sonar-pro`, `pplx/sonar`
+**Mistral (`mistral/`)** — EU-hostet: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Together AI (`together/`)**: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo`
+**Perplexity (`pplx/`)** — Søgeunderstøttet: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Fireworks AI (`fireworks/`)**: `fireworks/accounts/fireworks/models/deepseek-v3p1`
+**Together AI (`together/`)** — Open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Cerebras (`cerebras/`)**: `cerebras/llama-3.3-70b`
+**Fireworks AI (`fireworks/`)** — Hurtig inferens: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cohere (`cohere/`)**: `cohere/command-r-plus-08-2024`
+**Cerebras (`cerebras/`)** — Wafer-skala: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**NVIDIA NIM (`nvidia/`)**: `nvidia/nvidia/llama-3.3-70b-instruct`
+**Cohere (`cohere/`)** — RAG-fokuseret: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+
+**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+
+**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
+
+**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+
+**Gemini (Google Cloud `gemini/`)**: Synkroniseres live pr. API-nøgle fra Google — ingen statisk liste. Tilføj en nøgle under **Dashboard → Udbydere**, og brug derefter **Tilgængelige modeller** til at importere det aktuelle katalog (f.eks. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+
+**Andre kompatible udbydere** (udvalgte): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough-katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hver enkelt vedligeholder sin egen modelliste i `providerRegistry.ts` og kan autosynkroniseres, når udbyderen eksponerer et `/models`-endpoint.
+
+**Bemærkning om model-ID'er:** OmniRoute bruger udbyder-native ID'er (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Nogle ID'er indeholder versioner med punktummer, fordi det er sådan, upstream-API'et forventer dem. Hvis en model ikke er anført ovenfor, kør `omniroute models --search <term>` eller kald `GET /api/models/catalog` for at bekræfte tilgængeligheden.
 
 </details>
 
 ---
 
-## 🧩 Advanced Features
+## 🧩 avancerede funktioner
 
-### Custom Models
+### Brugerdefinerede modeller
 
-Add any model ID to any provider without waiting for an app update:
+Tilføj enhver model ID til enhver udbyder uden at vente på en appopdatering:
 
 ```bash
 # Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
-  -d '{"provider": "openai", "modelId": "gpt-4.5-preview", "modelName": "GPT-4.5 Preview"}'
+  -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
 # List: curl http://localhost:20128/api/provider-models?provider=openai
-# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-4.5-preview"
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Or use Dashboard: **Providers → [Provider] → Custom Models**.
+Eller brug Dashboard:** Udbydere → [Provider] → brugerdefinerede modeller** .
 
-Notes:
+Bemærkninger:
 
-- OpenRouter and OpenAI/Anthropic-compatible providers are managed from **Available Models** only. Manual add, import, and auto-sync all land in the same available-model list, so there is no separate Custom Models section for those providers.
-- The **Custom Models** section is intended for providers that do not expose managed available-model imports.
+- OpenRouter og OpenAI/Anthropic-compatible -udbydere administreres fra** Tilgængelige modeller** kun. Manuel tilføjelse, import og automatisk synkronisering lander alle på den samme tilgængelige modelliste, så der er ingen separat sektion med tilpassede modeller for disse udbydere.
+- De** Brugerdefinerede modeller** sektionen er beregnet til udbydere, der ikke eksponerer administreret import af tilgængelige modeller.
 
-### Dedicated Provider Routes
+### Brugerdefinerede OpenAI-kompatible udbydere
 
-Route requests directly to a specific provider with model validation:
+Enhver gateway, der taler OpenAI API (en selvhostet proxy, vLLM, en tredjepartsaggregator) kan tilføjes som sin egen udbyderknude:
+
+1. **Udbydere → Tilføj OpenAI kompatibel** .
+2. **Navn** : en displayetiket for noden.
+3. **Præfiks** : rutenavnet. Klienter kalder modeller som `<prefix>/<model>`, så en node med præfikset `mygw` tjener `mygw/gpt-4o-mini`. Påkrævet; der er ingen tegnbegrænsning.
+4. **API type** : den endepunktsfamilie, som gatewayen betjener (chatafslutninger, svar, indlejringer, lyd, billeder).
+5. **Base URL** : API roden, op til og med `/v1` (for eksempel `https://gateway.example.com/v1`), ikke den fulde `/chat/completions` sti. Gateways med ikke-standardstier sætter dem under** Avancerede indstillinger** (chat-sti, modeller-sti).
+6. De**API nøgle (til check)** felt tester kun forbindelsen. Når du har oprettet noden, skal du åbne den og bruge** Tilføj forbindelse** for at gemme den nøgle, som anmodninger vil bruge.
+
+Noden får et internt id af formen `openai-compatible-<apiType>-<uuid>`; du behøver aldrig at skrive det, præfikset er det offentlige navn.
+
+#### Reserverede præfikser
+
+Et præfiks kan ikke være id eller alias for en indbygget udbyder (f.eks. `openai`, `cf`) eller id for en pensioneret udbyder. Model-resolveren tjekker indbyggede id'er og aliaser før brugerdefinerede noder, så en node, der bruger et af disse præfikser, ville aldrig modtage trafik: `<prefix>/model` ville gå til den indbyggede udbyder i stedet eller mislykkes lukket, hvis denne udbyder blev trukket tilbage. Oprettelse eller redigering af en node med et sådant præfiks afvises med:
+
+```text
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+```
+
+Vælg et særskilt præfiks (`mygw`, `acme-proxy`). Hvis anmodninger til en brugerdefineret node mislykkes med en fejl, der navngiver en indbygget udbyder eller dens legitimationsoplysninger, skal du kontrollere, om nodens præfiks er reserveret: noder gemt, før denne regel eksisterede, gemmes stadig, men deres præfiks ruter til den indbyggede udbyder. Rediger noden og giv den et nyt præfiks.
+
+#### Per-forbindelse gateway muligheder
+
+Disse taster går i en forbindelses `providerSpecificData` (for eksempel via `PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (heltal, 1–1024) — for OpenAI chat-format-kompatible forbindelser, hvis gateway afviser lange værktøjsnavne. Længere navne sendes som korte aliaser og gendannes i svaret.
+- `quotaEndpoint` — gatewayens quota/credits endepunkt, læs for dashboard-kvotestrimmel og kvotebevidst routing. Virker på både OpenAI- og Anthropic-kompatible forbindelser; den fulde form er dokumenteret i `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### Kæde OmniRoute Peers
+
+En anden OmniRoute gateway kan tilføjes som en** Brugerdefineret OpenAI-kompatibel** udbyder. Brug peerens `/v1` base URL og en dedikeret API nøgle med mindst privilegium udstedt af denne peer.
+
+For gensidige eller multi-hop kæder, aktiver opt-in loop guard på hver gateway:
+
+```bash
+# gateway-a
+OMNIROUTE_INSTANCE_ID=gateway-a
+OMNIROUTE_PEER_URLS=http://gateway-b:20128/v1
+OMNIROUTE_PEER_MAX_HOPS=4
+```
+
+```bash
+# gateway-b
+OMNIROUTE_INSTANCE_ID=gateway-b
+OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
+OMNIROUTE_PEER_MAX_HOPS=4
+```
+
+Kun anmodninger sendt til en eksplicit godkendt peer URL modtager `X-OmniRoute-Peer-Trace` headeren. En gateway afviser en gentaget forekomst ID eller opbrugt hop budget med HTTP `508 Loop Detected`; almindelige upstream-udbydere modtager ingen peer-metadata.
+
+Peer-chaining er ikke databasereplikering eller host-failover. Hver gateway holder uafhængig SQLite tilstand, caches, hastighedstællere og sessioner. Brug en sundhedstjekket omvendt proxy eller klient-failover for active/passive eller active/active tilgængelighed, og monter aldrig én SQLite database i flere kørende OmniRoute instanser.
+
+### Dedikerede udbyderruter
+
+Rut anmodninger direkte til en specifik udbyder med modelvalidering:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -608,9 +766,9 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-The provider prefix is auto-added if missing. Mismatched models return `400`.
+Udbyderpræfikset tilføjes automatisk, hvis det mangler. Uoverensstemmende modeller returnerer `400`.
 
-### Network Proxy Configuration
+### Konfiguration af netværksproxy
 
 ```bash
 # Set global proxy
@@ -626,157 +784,234 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Precedence:** Key-specific → Combo-specific → Provider-specific → Global → Environment.
+**Forrang:** Nøglespecifik → Combo-specifik → Udbyderspecifik → Global → miljø.
 
-### Model Catalog API
+### Modelkatalog API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Returns models grouped by provider with types (`chat`, `embedding`, `image`).
+Returnerer modeller grupperet efter udbyder med typer (`chat`, `embedding`, `image`).
 
 ### Cloud Sync
 
-- Sync providers, combos, and settings across devices
-- Automatic background sync with timeout + fail-fast
-- Prefer server-side `BASE_URL`/`CLOUD_URL` in production
+- Synkroniser udbydere, kombinationer og indstillinger på tværs af enheder
+- Automatisk baggrundssynkronisering med timeout + fail-hurtig
+- Foretrækker server-side `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` i produktion
 
 ### Cloudflare Quick Tunnel
 
-- Available in **Dashboard → Endpoints** for Docker and other self-hosted deployments
-- Creates a temporary `https://*.trycloudflare.com` URL that forwards to your current OpenAI-compatible `/v1` endpoint
-- First enable installs `cloudflared` only when needed; later restarts reuse the same managed binary
-- Quick Tunnels are not auto-restored after an OmniRoute or container restart; re-enable them from the dashboard when needed
-- Tunnel URLs are ephemeral and change every time you stop/start the tunnel
-- Managed Quick Tunnels default to HTTP/2 transport to avoid noisy QUIC UDP buffer warnings in constrained containers
-- Set `CLOUDFLARED_PROTOCOL=quic` or `auto` if you want to override the managed transport choice
-- Set `CLOUDFLARED_BIN` if you prefer using a preinstalled `cloudflared` binary instead of the managed download
+- Tilgængelig i** Dashboard → Endpoints** til Docker og andre selv-hostede implementeringer
+- Opretter en midlertidig `https://*.trycloudflare.com` URL, der videresender til dit nuværende OpenAI-kompatible `/v1` slutpunkt
+- Aktiver først installerer `cloudflared`, når det er nødvendigt; senere genstarter genbrug den samme administrerede binære
+- Hurtige tunneler gendannes ikke automatisk efter en OmniRoute eller containergenstart; genaktiver dem fra dashboardet, når det er nødvendigt
+- Tunnel URLs er flygtige og ændrer sig hver gang du stop/start i tunnelen
+- Managed Quick Tunnels er som standard HTTP/2 -transport for at undgå støjende QUIC UDP bufferadvarsler i begrænsede containere
+- Indstil `CLOUDFLARED_PROTOCOL=quic` eller `auto` hvis du vil tilsidesætte det administrerede transportvalg
+- Indstil `CLOUDFLARED_BIN` hvis du foretrækker at bruge en forudinstalleret `cloudflared` binær i stedet for den administrerede download
+- Cloudflare Quick Tunnel, Tailscale Funnel og ngrok Tunnel paneler kan vises eller skjules i** Indstillinger → Udseende** . At skjule et panel stopper ikke en løbende tunnel.
 
-### LLM Gateway Intelligence (Phase 9)
+### LLM Gateway Intelligence (fase 9)
 
-- **Semantic Cache** — Auto-caches non-streaming, temperature=0 responses (bypass with `X-OmniRoute-No-Cache: true`)
-- **Request Idempotency** — Deduplicates requests within 5s via `Idempotency-Key` or `X-Request-Id` header
-- **Progress Tracking** — Opt-in SSE `event: progress` events via `X-OmniRoute-Progress: true` header
-
----
-
-### Translator Playground
-
-Access via **Dashboard → Translator**. Debug and visualize how OmniRoute translates API requests between providers.
-
-| Mode             | Purpose                                                                                |
-| ---------------- | -------------------------------------------------------------------------------------- |
-| **Playground**   | Select source/target formats, paste a request, and see the translated output instantly |
-| **Chat Tester**  | Send live chat messages through the proxy and inspect the full request/response cycle  |
-| **Test Bench**   | Run batch tests across multiple format combinations to verify translation correctness  |
-| **Live Monitor** | Watch real-time translations as requests flow through the proxy                        |
-
-**Use cases:**
-
-- Debug why a specific client/provider combination fails
-- Verify that thinking tags, tool calls, and system prompts translate correctly
-- Compare format differences between OpenAI, Claude, Gemini, and Responses API formats
+- **Semantisk cache** — Auto-cacher ikke-streaming, temperatur = 0 svar (omgå med `X-OmniRoute-No-Cache: true`)
+- **Anmod om idempotens** — Deduplikerer anmodninger inden for 5s via `Idempotency-Key` eller `X-Request-Id` header
+- **Sporing af fremskridt** — Opt-in SSE `event: progress` begivenheder via `X-OmniRoute-Progress: true` header
 
 ---
 
-### Routing Strategies
+### Oversætter legeplads
 
-Configure via **Dashboard → Settings → Routing**.
+Adgang via** Dashboard → Oversætter** . Debug og visualiser, hvordan OmniRoute oversætter API -anmodninger mellem udbydere.
 
-| Strategy                       | Description                                                                                      |
-| ------------------------------ | ------------------------------------------------------------------------------------------------ |
-| **Fill First**                 | Uses accounts in priority order — primary account handles all requests until unavailable         |
-| **Round Robin**                | Cycles through all accounts with a configurable sticky limit (default: 3 calls per account)      |
-| **P2C (Power of Two Choices)** | Picks 2 random accounts and routes to the healthier one — balances load with awareness of health |
-| **Random**                     | Randomly selects an account for each request using Fisher-Yates shuffle                          |
-| **Least Used**                 | Routes to the account with the oldest `lastUsedAt` timestamp, distributing traffic evenly        |
-| **Cost Optimized**             | Routes to the account with the lowest priority value, optimizing for lowest-cost providers       |
+| Mode             | Formål                                                                                        |
+| ---------------- | --------------------------------------------------------------------------------------------- |
+| **Legeplads**    | Vælg source/target -formater, indsæt en anmodning, og se det oversatte output med det samme   |
+| **Chat tester**  | Send live chatbeskeder gennem proxyen og inspicer den fulde request/response cyklus           |
+| **Test bænk**    | Kør batchtest på tværs af flere formatkombinationer for at bekræfte oversættelsens korrekthed |
+| **Live Monitor** | Se oversættelser i realtid, mens anmodninger strømmer gennem proxyen                          |
 
-#### External Sticky Session Header
+**Brugstilfælde:**
 
-For external session affinity (for example, Claude Code/Codex agents behind reverse proxies), send:
+- Fejlfinding, hvorfor en specifik client/provider -kombination mislykkes
+- Bekræft, at tankemærker, værktøjskald og systemprompter oversættes korrekt
+- Sammenlign formatforskelle mellem OpenAI, Claude, Gemini og Responses API -formater
+
+---
+
+### Routing strategier
+
+Konfigurer via** Dashboard → Indstillinger → Routing** . Dashboardet afslører de seks mest anvendte strategier; combos og auto-routeren understøtter internt et bredere sæt.
+
+**Dashboard-synlige strategier (routing på kontoniveau):**
+
+| Strategi                       | Beskrivelse                                                                                                     |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| **Fyld først**                 | Bruger konti i prioriteret rækkefølge - primær konto håndterer alle anmodninger, indtil de ikke er tilgængelige |
+| **Round Robin**                | Går gennem alle konti med en konfigurerbar sticky grænse (standard: 3 opkald pr. konto)                         |
+| **P2C (Power of Two Choices)** | Vælger 2 tilfældige konti og ruter til den sundere - balancerer belastning med bevidsthed om sundhed            |
+| **Tilfældig**                  | Vælger tilfældigt en konto for hver anmodning ved hjælp af Fisher-Yates shuffle                                 |
+| **Mindst brugt**               | Ruter til kontoen med det ældste `lastUsedAt` tidsstempel, der fordeler trafikken jævnt                         |
+| **Omkostningsoptimeret**       | Ruter til kontoen med den laveste prioritetsværdi, der optimerer til de billigste udbydere                      |
+
+**Avancerede kombinations- og autostrategier** (kan konfigureres pr. kombination eller via `auto/*` præfikser - se [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+
+- `priority` — streng orden, aldrig round-robins
+- `weighted` — proportional trafik opdelt efter vægt pr. model
+- `fill-first` — dræn den første model, indtil grænserne rammer
+- `round-robin` / `strict-random` / `random`
+- `p2c` (Power of Two Choices)
+- `least-used` og `cost-optimized`
+- `auto` — scoredrevet på tværs af alle kandidater
+- `lkgp` (Last Known Good Provider) — pins til den sidste succesrige udbyder, og falder derefter tilbage til reglerne
+- `context-optimized` — vælger modellen med det største frie kontekstvindue
+- `context-relay` — kæder langkontekstmodeller til opfølgende vendinger
+
+#### Ekstern Sticky Session Header
+
+For ekstern sessionsaffinitet (f.eks. Claude Code/Codex agenter bag omvendte proxyer), send:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute also accepts `x_session_id` and returns the effective session key in `X-OmniRoute-Session-Id`.
+OmniRoute accepterer også `x_session_id` og returnerer den effektive sessionsnøgle i `X-OmniRoute-Session-Id`.
 
-If you use Nginx and send underscore-form headers, enable:
+Hvis du bruger Nginx og sender overskrifter i understregningsform, skal du aktivere:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Wildcard Model Aliases
+#### Wildcard-modelaliaser
 
-Create wildcard patterns to remap model names:
+Opret jokertegnmønstre for at omdanne modelnavne:
 
 ```
-Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-5-20250929
-Pattern: gpt-*               →  Target: gh/gpt-5.1-codex
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-Wildcards support `*` (any characters) and `?` (single character).
+Jokertegn understøtter `*` (alle tegn) og `?` (enkelt tegn).
 
-#### Fallback Chains
+#### Fallback kæder
 
-Define global fallback chains that apply across all requests:
+Definer globale reservekæder, der gælder på tværs af alle anmodninger:
 
 ```
 Chain: production-fallback
   1. cc/claude-opus-4-7
-  2. gh/gpt-5.1-codex
+  2. gh/gpt-5.3-codex
   3. glm/glm-4.7
 ```
 
 ---
 
-### Resilience & Circuit Breakers
+### Almindelige udbyderkombinationer og rutemønstre
 
-Configure via **Dashboard → Settings → Resilience**.
+Her er eksempler på mønstre til at kombinere flere udbydere og routing mellem dem i OmniRoute:
 
-OmniRoute implements provider-level resilience with five components:
+#### 1. Coding Agent Combo: High-End Reasoning med Cost/Speed Fallback
 
-1. **Request Queue & Pacing** — System-level request shaping:
-   - **Requests Per Minute (RPM)** — Maximum requests per minute per account
-   - **Min Time Between Requests** — Minimum gap in milliseconds between requests
-   - **Max Concurrent Requests** — Maximum simultaneous requests per account
+Ideel til kodningsmidler (OpenCode, Claude Code, Cursor, Cline). Ruter til at begynde med til frontier-ræsonneringsmodeller, falder tilbage til hurtige kodningsmodeller om kvoteopbrug eller fejl.
 
-2. **Connection Cooldown** — Per-auth-type configuration for a single connection after retryable failures:
-   - **Base Cooldown** — Default cooldown window for retryable upstream failures
-   - **Use Upstream Retry Hints** — Honors authoritative `Retry-After` or reset hints when provided
-   - **Max Backoff Steps** — Maximum exponential backoff level for repeated failures
+- **Dashboard** : Combos → Ny Combo → Navn: `agent-coding` → Strategi: `Priority`
+- **Modeller** :
+  1. `claude/claude-sonnet-4-6` (Primær kodningsagent)
+  2. `openai/gpt-4o` (sekundær fallback med høj kapacitet)
+  3. `deepseek/deepseek-v4-flash` (Højeffektiv, omkostningseffektiv fallback)
 
-3. **Provider Circuit Breaker** — Tracks end-to-end provider failures and automatically opens the breaker when the configured threshold is reached:
-   - **Failure Threshold** — Consecutive provider failures before opening the breaker
-   - **Reset Timeout** — Time window before the provider is tested again
-   - **CLOSED** (Healthy) — Requests flow normally
-   - **OPEN** — Provider is temporarily blocked after repeated failures
-   - **HALF_OPEN** — Testing if provider has recovered
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
 
-   Connection-scoped `429` rate limits stay in **Connection Cooldown** and do not count toward the provider breaker.
+#### 2. Free-Tier Auto Failover Combo
 
-   The provider breaker runtime state is shown on **Dashboard → Health** only.
+Kæder flere free-tier og nøglefri udbydere for at maksimere oppetiden uden API omkostninger.
 
-4. **Wait For Cooldown** — If every candidate connection is already cooling down, OmniRoute can wait for the earliest cooldown and retry the same client request automatically.
+- **Strategi** : `Least Used` eller `Round Robin` (fordeler belastning på tværs af kvoter)
+- **Modeller** :
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
 
-5. **Rate Limit Auto-Detection** — When upstream providers return explicit wait windows, those hints override the local connection cooldown when the setting is enabled.
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
 
-**Pro Tip:** Use the **Health** page to inspect and reset live provider breakers after an outage. The Resilience page only changes configuration.
+#### 3. Multimodal / Vision & Text Pipeline
+
+Parring af specialiserede visionsmodeller med højhastighedstekstgenerering til arbejdsgange, der involverer billedforståelse og kodegenerering.
+
+- **Mønster** : En `Priority` kombination, der viser vision-kompatible modeller først og en high-throughput text/code model sidst.
+- **Modeller** :
+  1. `gemini/gemini-2.5-pro` (stærk image/multimodal forståelse)
+  2. `openai/gpt-4o` (Balanceret syn og brug af værktøj)
+  3. `deepseek/deepseek-v4-flash` (Text/code generation)
 
 ---
 
-### Database Export / Import
+### Modstandsdygtighed og strømafbrydere
 
-Manage database backups in **Dashboard → Settings → System & Storage**.
+Konfigurer via** Dashboard → Indstillinger → Resilience** .
 
-| Action                   | Description                                                                                                                                    |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Export Database**      | Downloads the current SQLite database as a `.sqlite` file                                                                                      |
-| **Export All (.tar.gz)** | Downloads a full backup archive including: database, settings, combos, provider connections (no credentials), API key metadata                 |
-| **Import Database**      | Upload a `.sqlite` file to replace the current database. A pre-import backup is automatically created unless `DISABLE_SQLITE_AUTO_BACKUP=true` |
+OmniRoute implementerer modstandsdygtighed på udbyderniveau med fem komponenter:
+
+1. **Anmod om kø og tempo** — Anmodningsformning på systemniveau:
+   - **Forespørgsler pr. minut (RPM)** — Maksimalt antal anmodninger pr. minut pr. konto
+   - **Minimum tid mellem anmodninger** — Minimum mellemrum i millisekunder mellem anmodninger
+   - **Maks. samtidige anmodninger** — Maksimalt antal samtidige anmodninger pr. konto
+
+2. **Forbindelse Nedkøling** — Per-auth-type konfiguration for en enkelt forbindelse efter gentagelsesfejl:
+   - **Grundafkøling** — Standard nedkølingsvindue for opstrømsfejl, der kan prøves igen
+   - **Brug Upstream-tip igen** — Hæderer autoritative `Retry-After` eller nulstil tip, når de leveres
+   - **Max Backoff Steps** — Maksimalt eksponentielt backoff-niveau for gentagne fejl
+
+3. **Udbyder strømafbryder** — Sporer ende-til-ende udbyderfejl, markerer en udbyder forringet ved den konfigurerede advarselstærskel og åbner afbryderen, når den konfigurerede fejltærskel er nået:
+   - **Nedbrydningstærskel** — Konsekutive udbyderfejl, før du går ind i `DEGRADED`
+   - **Fejltærskel** — Konsekutive udbyderfejl, før du går ind i `OPEN`
+   - **Nulstil timeout** — Tidsvindue før udbyderen testes igen
+   - **CLOSED** (Sund) — Anmodninger flyder normalt
+   - **DEGRADED** — Anmodninger flyder stadig, mens forhøjede fejl spores
+   - **OPEN** — Udbyderen er midlertidigt blokeret efter gentagne fejl
+   - **HALF_OPEN** — Test af, om udbyderen er kommet sig
+
+   Forbindelsesbestemte `429` -hastighedsgrænser forbliver inden for** Forbindelse Nedkøling** og tæller ikke med i udbyderafbryderen.
+
+   Udbyderafbryderens køretidstilstand vises på** Dashboard → Health** kun.
+
+4. **Vent på nedkøling** — Hvis alle kandidatforbindelser allerede er ved at køle ned, kan OmniRoute vente på den tidligste nedkøling og automatisk prøve den samme klientanmodning igen.
+
+5. **Rate Limit Auto-detektion** — Når upstream-udbydere returnerer eksplicitte ventevinduer, tilsidesætter disse tip den lokale forbindelsesnedkøling, når indstillingen er aktiveret.
+
+**Pro tip:** Brug** Sundhed** side for at inspicere og nulstille live-udbyderafbrydere efter en strømafbrydelse. Siden Resilience ændrer kun konfigurationen.
+
+---
+
+### Databaseeksport/import
+
+Administrer backup af databaser i** Dashboard → Indstillinger → System & Storage** .
+
+| Handling                     | Beskrivelse                                                                                                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Eksporter database**       | Downloader den aktuelle SQLite database som en `.sqlite` fil                                                                                                       |
+| **Eksporter alle (.tar.gz)** | Downloader et komplet backup-arkiv inklusive: database, indstillinger, kombinationer, udbyderforbindelser (ingen legitimationsoplysninger), API -nøglemetadata     |
+| **Importer database**        | Upload en `.sqlite` -fil for at erstatte den nuværende database. En forhåndsimport-sikkerhedskopi oprettes automatisk, medmindre `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
 # API: Export database
@@ -790,39 +1025,42 @@ curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Import Validation:** The imported file is validated for integrity (SQLite pragma check), required tables (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), and size (max 100MB).
+**Importvalidering:** Den importerede fil er valideret for integritet (SQLite pragma check), påkrævede tabeller (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) og størrelse (maks. 100MB).
 
-**Use Cases:**
+**Brugstilfælde:**
 
-- Migrate OmniRoute between machines
-- Create external backups for disaster recovery
-- Share configurations between team members (export all → share archive)
-
----
-
-### Settings Dashboard
-
-The settings page is organized into 6 tabs for easy navigation:
-
-| Tab            | Contents                                                                                     |
-| -------------- | -------------------------------------------------------------------------------------------- |
-| **General**    | System storage tools, appearance settings, theme controls, and per-item sidebar visibility   |
-| **Security**   | Login/Password settings, IP Access Control, API auth for `/models`, and Provider Blocking    |
-| **Routing**    | Global routing strategy (6 options), wildcard model aliases, fallback chains, combo defaults |
-| **Resilience** | Request queue, connection cooldown, provider breaker config, and wait-for-cooldown behavior  |
-| **AI**         | Thinking budget configuration, global system prompt injection, prompt cache stats            |
-| **Advanced**   | Global proxy configuration (HTTP/SOCKS5)                                                     |
+- Migrer OmniRoute mellem maskiner
+- Opret eksterne sikkerhedskopier til katastrofegendannelse
+- Del konfigurationer mellem teammedlemmer (eksporter alt → -delingsarkiv)
 
 ---
 
-### Costs & Budget Management
+### Indstillinger Dashboard
 
-Access via **Dashboard → Costs**.
+Indstillingssiden er organiseret i** 7 faner** for nem navigation:
 
-| Tab         | Purpose                                                                                  |
-| ----------- | ---------------------------------------------------------------------------------------- |
-| **Budget**  | Set spending limits per API key with daily/weekly/monthly budgets and real-time tracking |
-| **Pricing** | View and edit model pricing entries — cost per 1K input/output tokens per provider       |
+| Tab                    | Indhold                                                                                                                                                              |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Generel**            | Systemlagerværktøjer, standardadfærd, Synlighed for endepunkttunnel                                                                                                  |
+| **Udseende**           | Temakontrolelementer (light/dark/system), sidebjælkesynlighed, panelskift til Cloudflare/Tailscale/ngrok tunnelkort                                                  |
+| **AI**                 | Tænkende budget (passthrough / auto-strip / brugerdefineret / adaptiv — se [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), global systemprompt, prompt cache-statistik |
+| **Sikkerhed**          | Login/Password indstillinger, IP adgangskontrol, API auth for `/models`, Provider Blocking, prompt-injection guard                                                   |
+| **Routing**            | Global routingstrategi (Fill First / Round Robin / P2C / Random / Mindst brugt / Cost Optimized), jokertegn-modelaliaser, reservekæder, kombinationsstandarder       |
+| **Modstandsdygtighed** | Anmodningskø, nedkøling af forbindelse, konfiguration af udbyderafbryder og opførsel af vente-på-afkøling                                                            |
+| **Fremskreden**        | Global proxy-konfiguration (HTTP/SOCKS5), proxy-tilsidesættelser pr. udbyder                                                                                         |
+
+Generelt dublerer ikke længere skrivebeskyttet logning og cache-noter. Databaseopbevaring og optimeringsindstillinger opretholdes gennem `/api/settings/database`; manuel cacherydning bruger `DELETE /api/cache`. Forespørgsels- og proxylogrækkelofter styres af `CALL_LOGS_TABLE_MAX_ROWS` og `PROXY_LOGS_TABLE_MAX_ROWS`.
+
+---
+
+### Omkostninger & Budgetstyring
+
+Adgang via** Dashboard → Omkostninger** .
+
+| Tab             | Formål                                                                                         |
+| --------------- | ---------------------------------------------------------------------------------------------- |
+| **Budget**      | Indstil forbrugsgrænser pr. API -nøgle med daily/weekly/monthly budgetter og sporing i realtid |
+| **Prissætning** | Se og rediger modelprisangivelser - pris pr. 1K input/output tokens pr. udbyder                |
 
 ```bash
 # API: Set a budget
@@ -834,13 +1072,13 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Cost Tracking:** Every request logs token usage and calculates cost using the pricing table. View breakdowns in **Dashboard → Usage** by provider, model, and API key.
+**Omkostningssporing:** Hver anmodning logger tokenbrug og beregner omkostninger ved hjælp af pristabellen. Se opdelinger i** Dashboard → Brug** efter udbyder, model og API nøgle.
 
 ---
 
-### Audio Transcription
+### Lydtransskription
 
-OmniRoute supports audio transcription via the OpenAI-compatible endpoint:
+OmniRoute understøtter lydtransskription via det OpenAI-kompatible slutpunkt:
 
 ```bash
 POST /v1/audio/transcriptions
@@ -851,72 +1089,283 @@ Content-Type: multipart/form-data
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
-  -F "model=deepgram/nova-3"
+  -F "model=openai/whisper-1"
 ```
 
-Available providers: **Deepgram** (`deepgram/`), **AssemblyAI** (`assemblyai/`).
+`deepgram/nova-3` er den oprindelige Deepgram-rute og har brug for en Deepgram API -nøgle. Hvis kun OpenRouter er konfigureret, skal du bruge `openrouter/deepgram/nova-3`.
 
-Supported audio formats: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+**Tale-til-tekst (transskription)** udbydere:
 
----
+- `openai/` (hviskekompatibel)
+- `groq/` (Groq Whisper Turbo)
+- `deepgram/` (Nova familie)
+- `assemblyai/`
+- `nvidia/` (parakit, kanarisk)
+- `huggingface/` (hviskevarianter)
+- `qwen/`
 
-### Combo Balancing Strategies
+**Tekst-til-tale (`POST /v1/audio/speech`)** udbydere:
 
-Configure per-combo balancing in **Dashboard → Combos → Create/Edit → Strategy**.
+- `openai/` (tts-1, tts-1-hd)
+- `hyperbolic/`
+- `deepgram/` (Aura)
+- `nvidia/` (Magpie TTS)
+- `elevenlabs/`
+- `huggingface/`
+- `inworld/`
+- `cartesia/`
+- `playht/`
+- `kie/`
+- `aws-polly/`
+- `xiaomi-mimo/`
+- `coqui/`, `tortoise/`
+- `qwen/`
 
-| Strategy           | Description                                                              |
-| ------------------ | ------------------------------------------------------------------------ |
-| **Round-Robin**    | Rotates through models sequentially                                      |
-| **Priority**       | Always tries the first model; falls back only on error                   |
-| **Random**         | Picks a random model from the combo for each request                     |
-| **Weighted**       | Routes proportionally based on assigned weights per model                |
-| **Least-Used**     | Routes to the model with the fewest recent requests (uses combo metrics) |
-| **Cost-Optimized** | Routes to the cheapest available model (uses pricing table)              |
-
-Global combo defaults can be set in **Dashboard → Settings → Routing → Combo Defaults**.
-
----
-
-### Health Dashboard
-
-Access via **Dashboard → Health**. Real-time system health overview with 6 cards:
-
-| Card                  | What It Shows                                               |
-| --------------------- | ----------------------------------------------------------- |
-| **System Status**     | Uptime, version, memory usage, data directory               |
-| **Provider Health**   | Global provider circuit breaker runtime state               |
-| **Rate Limits**       | Active connection cooldowns per account with remaining time |
-| **Active Lockouts**   | Active model-scoped lockouts and temporary exclusions       |
-| **Signature Cache**   | Deduplication cache stats (active keys, hit rate)           |
-| **Latency Telemetry** | p50/p95/p99 latency aggregation per provider                |
-
-**Pro Tip:** The Health page auto-refreshes every 10 seconds. Use the circuit breaker card to identify which providers are experiencing issues.
+Understøttede lydformater til transskription: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS outputformater afhænger af udbyderen (mp3, wav, opus, pcm, mulaw).
 
 ---
 
-## 🖥️ Desktop Application (Electron)
+### Kombinationsbalanceringsstrategier
 
-OmniRoute is available as a native desktop application for Windows, macOS, and Linux.
+Konfigurer per-combo indbalancering** Dashboard → Combos → Create/Edit → Strategi** .
 
-### Installer
+| Strategi                 | Beskrivelse                                                                   |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| **Round-Robin**          | Roterer gennem modeller sekventielt                                           |
+| **Prioritet**            | Prøver altid den første model; falder kun tilbage på fejl                     |
+| **Tilfældig**            | Vælger en tilfældig model fra kombinationen for hver anmodning                |
+| **Vægtet**               | Ruter proportionalt baseret på tildelte vægte pr. model                       |
+| **Mindst brugt**         | Ruter til modellen med de færreste seneste anmodninger (bruger combo-metrics) |
+| **Omkostningsoptimeret** | Ruter til den billigste tilgængelige model (bruger pristabel)                 |
+
+Globale kombinationsstandarder kan indstilles** Dashboard → Indstillinger → Routing → Combo Standarder** . Kombinerede måltimeouter arver som standard den aktuelle anmodningstimeout. Bruge** Mål timeout (sekunder)** på kombinationsstandarder eller en individuel kombination kun, når en kortere per-mål-grænse skulle udløse hurtigere fallback.
+
+Kombinationsoptimeringer uden latens er tilvalg. Forlade** Optimeringer uden latens** deaktiveret for at forhindre disse latency-funktioner i at køre over fallback-mål, springe over mål baseret på TTFT historik eller komprimere fallback-anmodninger; aktiverer det tillader konfigureret afdækning, forudsigende TTFT overspring og proaktiv fallback-komprimering for at handle routing/request fidelity for lavere hale latency.
+
+Deaktiver** Begrundelse token buffer** når upstream-udbydere kræver strenge `max_tokens` / `maxOutputTokens` -grænser. Når den er aktiveret, tilføjer combo routing kun rum til ræsonnement-model for modeller med et kendt output cap og lader klienttokengrænsen være uændret, når den sikre bufferværdi ville overstige dette loft. Hvis klientgrænsen allerede er over en kendt cap, klemmer OmniRoute den ned til den cap, før den sender upstream-anmodningen.
+
+---
+
+### Sundhed Dashboard
+
+Adgang via** Dashboard → Health** . Oversigt over systemets tilstand i realtid med 6 kort:
+
+| Kort                  | Hvad det viser                                               |
+| --------------------- | ------------------------------------------------------------ |
+| **Systemstatus**      | Oppetid, version, hukommelsesforbrug, datakatalog            |
+| **Udbyder sundhed**   | Global udbyders afbryderdriftstilstand                       |
+| **Satsgrænser**       | Aktiv forbindelsesnedkøling pr. konto med resterende tid     |
+| **Aktive lockouts**   | Aktive lockouts med modelomfang og midlertidige udelukkelser |
+| **Signatur cache**    | Deduplikeringscache-statistikker (aktive nøgler, hitrate)    |
+| **Latency Telemetri** | p50/p95/p99 latenstid aggregering pr. udbyder                |
+
+**Pro tip:** Sundhedssiden opdateres automatisk hvert 10. sekund. Brug afbryderkortet til at identificere, hvilke udbydere der oplever problemer.
+
+---
+
+## 🤖 Automatisk routing (nul konfiguration)
+
+OmniRoute leveres med en **scoringsdrevet automatisk router**, der vælger den bedste model til hver anmodning på tværs af alle tilsluttede udbydere — uden en kombination, der skal vedligeholdes. Send blot anmodningen med et af `auto/*`-præfikserne, så sammensætter OmniRoute dynamisk en virtuel kombination ved at score kandidater ud fra latenstid, omkostninger, succesrate, kontekstmatch, modellens egnethed til opgaven, nylige fejl, kvote og circuit breaker-tilstand.
+
+| Præfiks        | Optimerer for                                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `auto`         | Balanceret standardvalg (latenstid × omkostninger × succesrate)                                                     |
+| `auto/coding`  | Kodningsopgaver: foretrækker Claude, GPT-5, GLM, Kimi, Qwen Coder og DeepSeek-kodningsmodeller                      |
+| `auto/cheap`   | Laveste $/token, accepterer højere latenstid                                                                        |
+| `auto/fast`    | Laveste latenstid, ignorerer omkostninger                                                                           |
+| `auto/offline` | Kun lokale udbydere (Ollama, vLLM, llama.cpp) — nyttigt til isolerede miljøer                                       |
+| `auto/smart`   | Ræsonneringskvalitet først (Opus, GPT-5 xhigh, R1, GLM 5.1-ræsonnering)                                             |
+| `auto/lkgp`    | "Senest kendte fungerende udbyder" — fastholder den senest succesfulde udbyder og falder derefter tilbage på regler |
+
+Eksempel:
 
 ```bash
-# From the electron directory:
+curl -X POST http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer $OMNIROUTE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "auto/coding",
+    "messages": [{ "role": "user", "content": "Refaktorer denne Python-funktion" }],
+    "stream": true
+  }'
+```
+
+Den automatiske router er fuldt beskrevet i [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — herunder hvordan du finjusterer scoringsvægte, sortlister udbydere og inspicerer routingbeslutninger i **Kontrolpanel → Automatisk kombination**.
+
+---
+
+## 🔌 MCP- og A2A-integration
+
+OmniRoute er både en **MCP-server** (Model Context Protocol) og en **A2A-server** (Agent-to-Agent JSON-RPC 2.0). Enhver MCP-kompatibel IDE eller agentvært kan kalde OmniRoute-værktøjer direkte — uden behov for en ekstra wrapper.
+
+### MCP-transporter
+
+- **SSE**: `http://localhost:20128/api/mcp/sse`
+- **HTTP med streaming**: `http://localhost:20128/api/mcp/stream`
+- **stdio**: `omniroute --mcp` (til IDE-plugins, der foretrækker stdio)
+
+### Forbind Claude Desktop
+
+Rediger `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) eller den tilsvarende fil på Windows/Linux:
+
+```json
+{
+  "mcpServers": {
+    "omniroute": {
+      "command": "omniroute",
+      "args": ["--mcp"]
+    }
+  }
+}
+```
+
+### Forbind Cursor / Continue / VS Code MCP
+
+Brug SSE-URL'en `http://localhost:20128/api/mcp/sse` og en Bearer API-nøgle, der er genereret i **Kontrolpanel → API-nøgler**.
+
+### Omfang
+
+MCP definerer i øjeblikket 32 navngivne omfang. Hver Bearer-nøgle kan begrænses til specifikke omfang — se [MCP-SERVER.md](../frameworks/MCP-SERVER.md) for den autoritative oversigt over omfang og værktøjer samt [A2A-SERVER.md](../frameworks/A2A-SERVER.md) for JSON-RPC-skemaet.
+
+---
+
+## 🧠 Færdighedssystem
+
+OmniRoute tilbyder en udvidelig **færdighedsramme** (`src/lib/skills/`), så agenter og A2A-slutpunktet kan køre domænespecifikke rutiner (f.eks. `code-review`, `summarize`, `extract-facts`, `web-research`).
+
+- **Markedspladsgrænseflade** — Gennemse og installer færdigheder via **Kontrolpanel → Færdigheder**
+- **Omfang pr. nøgle** — Begræns, hvilke API-nøgler der kan aktivere hvilke færdigheder
+- **Brugerdefinerede færdigheder** — Placer en TypeScript-fil i `src/lib/a2a/skills/`, registrer den, og den kan straks aktiveres via A2A
+
+Fuld dokumentation: [SKILLS.md](../frameworks/SKILLS.md).
+
+---
+
+## 💾 Hukommelsessystem
+
+OmniRoute gemmer **langsigtet samtalehukommelse** med hybrid hentning:
+
+- **SQLite FTS5** til søgeordssøgning på tværs af tidligere samtalerunder
+- **Qdrant-vektorlager** (valgfrit) til semantisk genkaldelse
+- **Automatisk udtrækning af fakta** — entiteter, præferencer og beslutninger opsummeres efter hver session og gemmes i tabellen `memory_facts`
+- Hukommelser afgrænses pr. API-nøgle og pr. session
+
+Administrer hukommelser under **Kontrolpanel → Hukommelse** (søg, rediger, eksportér, ryd). HTTP-grænsefladen (`/api/memory/*`) lader agenter tilføje og forespørge fakta programmatisk — se [MEMORY.md](../frameworks/MEMORY.md).
+
+---
+
+## 🔔 Webhooks
+
+Abonner på OmniRoute-hændelser med henblik på overvågning og automatisering i realtid.
+
+- Opret en webhook under **Kontrolpanel → Webhooks** med mål-URL og en hemmelig HMAC-signeringsnøgle
+- Tilgængelige hændelser: `request.completed`, `request.failed`, `provider.unavailable`, `budget.exceeded`, `combo.switched`, `circuit_breaker.opened`, `circuit_breaker.closed`
+- Hver nyttelast indeholder `X-OmniRoute-Signature` (HMAC-SHA256) til verificering
+- Gentagne forsøg: 3 forsøg med eksponentiel ventetid og derefter en kø til meddelelser, der ikke kunne leveres
+
+Det fulde skema findes i [WEBHOOKS.md](../frameworks/WEBHOOKS.md).
+
+---
+
+## ☁️ Cloudagenter
+
+OmniRoute integrerer med cloudbaserede kodeagenter (**OpenAI Codex Cloud**, **Devin**, **Jules**, **Antigravity**), så du kan sende langvarige opgaver fra det samme kontrolpanel, som håndterer din lokale routing.
+
+- Opret opgaver under **Kontrolpanel → Cloudagenter** eller via `POST /api/v1/agents/tasks`
+- Følg status, logfiler og artefakter for hver opgave
+- Brug din egen API-nøgle for hver udbyder — legitimationsoplysninger forlader aldrig OmniRoute-instansen
+
+Fuld dokumentation: [CLOUD_AGENT.md](../frameworks/CLOUD_AGENT.md).
+
+---
+
+## 🛠️ Programmatisk administration
+
+Du kan administrere alle OmniRoute-ressourcer (udbydere, kombinationer, nøgler og indstillinger) via HTTP ved hjælp af en **Bearer-nøgle med omfanget `manage`**.
+
+Generér nøglen under **Kontrolpanel → API-nøgler → Ny nøgle → Omfang: manage**, og kør derefter:
+
+```bash
+# Vis udbydere
+curl http://localhost:20128/api/providers \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
+
+# Tilføj en udbyderforbindelse
+curl -X POST http://localhost:20128/api/providers \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
+
+# Opret en kombination
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
+
+# Vis/opret API-nøgler
+curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
+curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -d '{ "name": "ci-bot", "scopes": ["chat"] }'
+```
+
+Se [API_REFERENCE.md](../reference/API_REFERENCE.md) for det komplette katalog over slutpunkter samt skemaer for anmodninger og svar.
+
+---
+
+## 💻 Intern CLI
+
+OmniRoute leveres med en intern CLI (`omniroute …`) til opsætning, diagnosticering og styring under kørsel. Denne er **adskilt fra siden "CLI-værktøjer" i kontrolpanelet**, som konfigurerer tredjeparts-CLI'er (Claude Code, Cursor, Codex, Cline, …), så de kan kommunikere med OmniRoute.
+
+```bash
+omniroute setup                    # Interaktiv guide (adgangskode, udbydere, kombinationer)
+omniroute setup --non-interactive  # Velegnet til CI
+omniroute doctor                   # Sundhedsdiagnosticering (datamappe, database, udbydere, porte)
+omniroute providers available      # Vis understøttede udbydere
+omniroute providers list           # Vis konfigurerede forbindelser
+omniroute providers test <id>      # Test en udbyderforbindelse direkte
+omniroute combos list              # Vis kombinationer
+omniroute combos switch <name>     # Angiv standardkombination
+omniroute models                   # Vis tilgængelige modeller (--json, --search)
+omniroute keys add | list | remove # Administrer API-nøgler fra terminalen
+omniroute backup                   # Opret øjebliksbillede af konfiguration og database
+omniroute restore [<timestamp>]    # Gendan fra et øjebliksbillede
+omniroute health                   # Detaljeret sundhedsstatus (afbrydere, cache, hukommelse)
+omniroute quota                    # Brug af udbyderkvoter
+omniroute mcp status               # Status for MCP-server
+omniroute a2a status               # Status for A2A-server
+omniroute tunnel list|create|stop  # Cloudflare-/Tailscale-/ngrok-tunneler
+omniroute reset-password           # Nulstil administratoradgangskoden
+omniroute --mcp                    # Start MCP-serveren via stdio
+omniroute --port 3000              # Start serveren på en brugerdefineret port
+```
+
+Tip: Kombiner `omniroute doctor --json` med dit overvågningsværktøj for at modtage advarsler om usunde udbyderforbindelser.
+
+---
+
+## 🖥️ Desktopapplikation (Electron)
+
+OmniRoute er tilgængelig som en integreret desktopapplikation til Windows, macOS og Linux.
+
+### Installation
+
+```bash
+# Fra electron-mappen:
 cd electron
 npm install
 
-# Development mode (connect to running Next.js dev server):
+# Udviklingstilstand (opret forbindelse til en kørende Next.js-udviklingsserver):
 npm run dev
 
-# Production mode (uses standalone build):
+# Produktionstilstand (bruger en selvstændig build):
 npm start
 ```
 
-### Building Installers
+### Bygning af installationsprogrammer
 
 ```bash
 cd electron
-npm run build          # Current platform
+npm run build          # Aktuel platform
 npm run build:win      # Windows (.exe NSIS)
 npm run build:mac      # macOS (.dmg universal)
 npm run build:linux    # Linux (.AppImage)
@@ -924,22 +1373,22 @@ npm run build:linux    # Linux (.AppImage)
 
 Output → `electron/dist-electron/`
 
-### Key Features
+### Vigtigste funktioner
 
-| Feature                     | Description                                          |
-| --------------------------- | ---------------------------------------------------- |
-| **Server Readiness**        | Polls server before showing window (no blank screen) |
-| **System Tray**             | Minimize to tray, change port, quit from tray menu   |
-| **Port Management**         | Change server port from tray (auto-restarts server)  |
-| **Content Security Policy** | Restrictive CSP via session headers                  |
-| **Single Instance**         | Only one app instance can run at a time              |
-| **Offline Mode**            | Bundled Next.js server works without internet        |
+| Funktion                      | Beskrivelse                                                  |
+| ----------------------------- | ------------------------------------------------------------ |
+| **Serverparathed**            | Tjekker serveren, før vinduet vises (ingen tom skærm)        |
+| **Systembakke**               | Minimer til systembakken, skift port, afslut fra bakkemenuen |
+| **Portstyring**               | Skift serverport fra bakken (genstarter serveren automatisk) |
+| **Indholdssikkerhedspolitik** | Restriktiv CSP via sessionsheadere                           |
+| **Enkelt instans**            | Kun én appinstans kan køre ad gangen                         |
+| **Offlinetilstand**           | Den medfølgende Next.js-server fungerer uden internet        |
 
-### Environment Variables
+### Miljøvariabler
 
-| Variable              | Default | Description                      |
-| --------------------- | ------- | -------------------------------- |
-| `OMNIROUTE_PORT`      | `20128` | Server port                      |
-| `OMNIROUTE_MEMORY_MB` | `512`   | Node.js heap limit (64–16384 MB) |
+| Variabel              | Standard | Beskrivelse                      |
+| --------------------- | -------- | -------------------------------- |
+| `OMNIROUTE_PORT`      | `20128`  | Serverport                       |
+| `OMNIROUTE_MEMORY_MB` | `512`    | Node.js-heapgrænse (64–16384 MB) |
 
-📖 Full documentation: [`electron/README.md`](../electron/README.md)
+📖 Fuld dokumentation: [`electron/README.md`](../../electron/README.md)

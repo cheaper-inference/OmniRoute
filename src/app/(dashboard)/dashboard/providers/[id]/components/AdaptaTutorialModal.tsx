@@ -7,10 +7,9 @@ type AdaptaTutorialModalProps = {
   onClose: () => void;
 };
 
-// The Adapta CTA href points at https://link.omniroute.online/adapta (our own
-// shortener, the `adapta` slug) so the click lands in our Kutt metrics. The visible
-// link text intentionally stays the real domain (agent.adapta.one/agentic-chat) so
-// users still see where they are going.
+// The Adapta CTA href used to go through our own link.omniroute.online shortener
+// for click metrics, but that domain no longer resolves after the move to
+// omniskill.online, so href and visible text are the real destination again.
 export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProps) {
   const t = useTranslations("providers.adaptaTutorial");
 
@@ -25,7 +24,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
 
         <ol className="flex flex-col gap-4 list-none">
           <li className="flex gap-3">
-            <span className="flex-none w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">
+            <span className="flex-none w-6 h-6 rounded-full bg-primary text-accent-foreground text-xs font-bold flex items-center justify-center">
               1
             </span>
             <div>
@@ -33,7 +32,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
               <p className="text-text-muted mt-0.5">
                 {t("step1DescPrefix")}{" "}
                 <a
-                  href="https://link.omniroute.online/adapta"
+                  href="https://agent.adapta.one/agentic-chat"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline text-primary"
@@ -46,7 +45,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
           </li>
 
           <li className="flex gap-3">
-            <span className="flex-none w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">
+            <span className="flex-none w-6 h-6 rounded-full bg-primary text-accent-foreground text-xs font-bold flex items-center justify-center">
               2
             </span>
             <div>
@@ -64,7 +63,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
           </li>
 
           <li className="flex gap-3">
-            <span className="flex-none w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">
+            <span className="flex-none w-6 h-6 rounded-full bg-primary text-accent-foreground text-xs font-bold flex items-center justify-center">
               3
             </span>
             <div>
@@ -82,7 +81,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
           </li>
 
           <li className="flex gap-3">
-            <span className="flex-none w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">
+            <span className="flex-none w-6 h-6 rounded-full bg-primary text-accent-foreground text-xs font-bold flex items-center justify-center">
               4
             </span>
             <div>
@@ -100,7 +99,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
           </li>
 
           <li className="flex gap-3">
-            <span className="flex-none w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">
+            <span className="flex-none w-6 h-6 rounded-full bg-primary text-accent-foreground text-xs font-bold flex items-center justify-center">
               5
             </span>
             <div>
@@ -114,10 +113,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
           </li>
         </ol>
 
-        <div
-          className="rounded-lg p-3 text-xs text-text-muted"
-          style={{ backgroundColor: "rgba(110,58,211,0.08)", borderLeft: "3px solid #6E3AD3" }}
-        >
+        <div className="rounded-lg border-l-[3px] border-info bg-info/10 p-3 text-xs text-text-muted">
           <strong>{t("tipLabel")}</strong> {t("tipPrefix")}{" "}
           <code className="font-mono">__client</code> {t("tipSuffix")}
         </div>

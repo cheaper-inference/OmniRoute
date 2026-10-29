@@ -1,149 +1,192 @@
 # OmniRoute Architecture (Magyar)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../docs/ARCHITECTURE.md) · 🇸🇦 [ar](../../ar/docs/ARCHITECTURE.md) · 🇧🇬 [bg](../../bg/docs/ARCHITECTURE.md) · 🇧🇩 [bn](../../bn/docs/ARCHITECTURE.md) · 🇨🇿 [cs](../../cs/docs/ARCHITECTURE.md) · 🇩🇰 [da](../../da/docs/ARCHITECTURE.md) · 🇩🇪 [de](../../de/docs/ARCHITECTURE.md) · 🇪🇸 [es](../../es/docs/ARCHITECTURE.md) · 🇮🇷 [fa](../../fa/docs/ARCHITECTURE.md) · 🇫🇮 [fi](../../fi/docs/ARCHITECTURE.md) · 🇫🇷 [fr](../../fr/docs/ARCHITECTURE.md) · 🇮🇳 [gu](../../gu/docs/ARCHITECTURE.md) · 🇮🇱 [he](../../he/docs/ARCHITECTURE.md) · 🇮🇳 [hi](../../hi/docs/ARCHITECTURE.md) · 🇭🇺 [hu](../../hu/docs/ARCHITECTURE.md) · 🇮🇩 [id](../../id/docs/ARCHITECTURE.md) · 🇮🇹 [it](../../it/docs/ARCHITECTURE.md) · 🇯🇵 [ja](../../ja/docs/ARCHITECTURE.md) · 🇰🇷 [ko](../../ko/docs/ARCHITECTURE.md) · 🇮🇳 [mr](../../mr/docs/ARCHITECTURE.md) · 🇲🇾 [ms](../../ms/docs/ARCHITECTURE.md) · 🇳🇱 [nl](../../nl/docs/ARCHITECTURE.md) · 🇳🇴 [no](../../no/docs/ARCHITECTURE.md) · 🇵🇭 [phi](../../phi/docs/ARCHITECTURE.md) · 🇵🇱 [pl](../../pl/docs/ARCHITECTURE.md) · 🇵🇹 [pt](../../pt/docs/ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../pt-BR/docs/ARCHITECTURE.md) · 🇷🇴 [ro](../../ro/docs/ARCHITECTURE.md) · 🇷🇺 [ru](../../ru/docs/ARCHITECTURE.md) · 🇸🇰 [sk](../../sk/docs/ARCHITECTURE.md) · 🇸🇪 [sv](../../sv/docs/ARCHITECTURE.md) · 🇰🇪 [sw](../../sw/docs/ARCHITECTURE.md) · 🇮🇳 [ta](../../ta/docs/ARCHITECTURE.md) · 🇮🇳 [te](../../te/docs/ARCHITECTURE.md) · 🇹🇭 [th](../../th/docs/ARCHITECTURE.md) · 🇹🇷 [tr](../../tr/docs/ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../uk-UA/docs/ARCHITECTURE.md) · 🇵🇰 [ur](../../ur/docs/ARCHITECTURE.md) · 🇻🇳 [vi](../../vi/docs/ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../zh-CN/docs/ARCHITECTURE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../architecture/ARCHITECTURE.md) · 🇪🇹 [am](../../../am/docs/architecture/ARCHITECTURE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/ARCHITECTURE.md) · 🇦🇿 [az](../../../az/docs/architecture/ARCHITECTURE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/ARCHITECTURE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/ARCHITECTURE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/ARCHITECTURE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/ARCHITECTURE.md) · 🇩🇰 [da](../../../da/docs/architecture/ARCHITECTURE.md) · 🇩🇪 [de](../../../de/docs/architecture/ARCHITECTURE.md) · 🇬🇷 [el](../../../el/docs/architecture/ARCHITECTURE.md) · 🇪🇸 [es](../../../es/docs/architecture/ARCHITECTURE.md) · 🇪🇪 [et](../../../et/docs/architecture/ARCHITECTURE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/ARCHITECTURE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/ARCHITECTURE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/ARCHITECTURE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/ARCHITECTURE.md) · 🇮🇱 [he](../../../he/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/ARCHITECTURE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/ARCHITECTURE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/ARCHITECTURE.md) · 🇮🇩 [id](../../../id/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/ARCHITECTURE.md) · 🇮🇹 [it](../../../it/docs/architecture/ARCHITECTURE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/ARCHITECTURE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/ARCHITECTURE.md) · 🇰🇭 [km](../../../km/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/ARCHITECTURE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/ARCHITECTURE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/ARCHITECTURE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/ARCHITECTURE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/ARCHITECTURE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/ARCHITECTURE.md) · 🇲🇲 [my](../../../my/docs/architecture/ARCHITECTURE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/ARCHITECTURE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/ARCHITECTURE.md) · 🇳🇴 [no](../../../no/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [or](../../../or/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/ARCHITECTURE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/ARCHITECTURE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/ARCHITECTURE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/ARCHITECTURE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/ARCHITECTURE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/ARCHITECTURE.md) · 🇱🇰 [si](../../../si/docs/architecture/ARCHITECTURE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/ARCHITECTURE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/ARCHITECTURE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/ARCHITECTURE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/ARCHITECTURE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [te](../../../te/docs/architecture/ARCHITECTURE.md) · 🇹🇭 [th](../../../th/docs/architecture/ARCHITECTURE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/ARCHITECTURE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/ARCHITECTURE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/ARCHITECTURE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/ARCHITECTURE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/ARCHITECTURE.md)
 
 ---
 
-_Last updated: 2026-04-15_
+🌐 **Languages:** 🇺🇸 [English](../../../../architecture/ARCHITECTURE.md) · 🇪🇹 [am](../../../am/docs/architecture/ARCHITECTURE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/ARCHITECTURE.md) · 🇦🇿 [az](../../../az/docs/architecture/ARCHITECTURE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/ARCHITECTURE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/ARCHITECTURE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/ARCHITECTURE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/ARCHITECTURE.md) · 🇩🇰 [da](../../../da/docs/architecture/ARCHITECTURE.md) · 🇩🇪 [de](../../../de/docs/architecture/ARCHITECTURE.md) · 🇬🇷 [el](../../../el/docs/architecture/ARCHITECTURE.md) · 🇪🇸 [es](../../../es/docs/architecture/ARCHITECTURE.md) · 🇪🇪 [et](../../../et/docs/architecture/ARCHITECTURE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/ARCHITECTURE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/ARCHITECTURE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/ARCHITECTURE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/ARCHITECTURE.md) · 🇮🇱 [he](../../../he/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/ARCHITECTURE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/ARCHITECTURE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/ARCHITECTURE.md) · 🇮🇩 [id](../../../id/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/ARCHITECTURE.md) · 🇮🇹 [it](../../../it/docs/architecture/ARCHITECTURE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/ARCHITECTURE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/ARCHITECTURE.md) · 🇰🇭 [km](../../../km/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/ARCHITECTURE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/ARCHITECTURE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/ARCHITECTURE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/ARCHITECTURE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/ARCHITECTURE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/ARCHITECTURE.md) · 🇲🇲 [my](../../../my/docs/architecture/ARCHITECTURE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/ARCHITECTURE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/ARCHITECTURE.md) · 🇳🇴 [no](../../../no/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [or](../../../or/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/ARCHITECTURE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/ARCHITECTURE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/ARCHITECTURE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/ARCHITECTURE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/ARCHITECTURE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/ARCHITECTURE.md) · 🇱🇰 [si](../../../si/docs/architecture/ARCHITECTURE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/ARCHITECTURE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/ARCHITECTURE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/ARCHITECTURE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/ARCHITECTURE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [te](../../../te/docs/architecture/ARCHITECTURE.md) · 🇹🇭 [th](../../../th/docs/architecture/ARCHITECTURE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/ARCHITECTURE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/ARCHITECTURE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/ARCHITECTURE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/ARCHITECTURE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/ARCHITECTURE.md)
 
-## Executive Summary
+_Utolsó frissítés: 2026-06-28_
 
-OmniRoute is a local AI routing gateway and dashboard built on Next.js.
-It provides a single OpenAI-compatible endpoint (`/v1/*`) and routes traffic across multiple upstream providers with translation, fallback, token refresh, and usage tracking.
+## Vezetői összefoglaló
 
-Core capabilities:
+OmniRoute egy helyi AI útválasztási átjáró és műszerfal, amely Next.js re épül. Egyetlen OpenAI-kompatibilis végpontot (`/v1/*`) biztosít, és a forgalmat több upstream szolgáltató között irányítja át fordítással, tartalékkal, tokenfrissítéssel és használat követéssel.
 
-- OpenAI-compatible API surface for CLI/tools (329 provider catalog entries, 89 executor implementation modules)
-- Request/response translation across provider formats
-- Model combo fallback (multi-model sequence)
-- Structured combo steps (`provider + model + connection`) with runtime ordering by `compositeTiers`
-- Account-level fallback (multi-account per provider)
-- Quota preflight and quota-aware P2C account selection in the main chat path
-- OAuth + API-key provider connection management (23 OAuth catalog entries backed by 21 provider modules)
-- Embedding generation via `/v1/embeddings` (6 providers, 9 models)
-- Image generation via `/v1/images/generations` (10+ providers, 20+ models)
-- Audio transcription via `/v1/audio/transcriptions` (7 providers)
-- Text-to-speech via `/v1/audio/speech` (10 providers)
-- Video generation via `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Music generation via `/v1/music/generations` (ComfyUI)
-- Web search via `/v1/search` (12 providers)
-- Moderations via `/v1/moderations`
-- Reranking via `/v1/rerank`
-- Think tag parsing (`<think>...</think>`) for reasoning models
-- Response sanitization for strict OpenAI SDK compatibility
-- Role normalization (developer→system, system→user) for cross-provider compatibility
-- Structured output conversion (json_schema → Gemini responseSchema)
-- Local persistence for providers, keys, aliases, combos, settings, pricing (110 top-level DB modules)
-- Usage/cost tracking and request logging
-- Optional cloud sync for multi-device/state sync
-- IP allowlist/blocklist for API access control
-- Thinking budget management (passthrough/auto/custom/adaptive)
-- Global system prompt injection
-- Session tracking and fingerprinting
-- Per-account enhanced rate limiting with provider-specific profiles
-- Circuit breaker pattern for provider resilience
-- Anti-thundering herd protection with mutex locking
-- Signature-based request deduplication cache
-- Domain layer: cost rules, fallback policy, lockout policy
-- Context Relay: session handoff summaries for account rotation continuity
-- Domain state persistence (SQLite write-through cache for fallbacks, budgets, lockouts, circuit breakers)
-- Policy engine for centralized request evaluation (lockout → budget → fallback)
-- Request telemetry with p50/p95/p99 latency aggregation
-- Combo target telemetry and historical combo target health via `combo_execution_key` / `combo_step_id`
-- Correlation ID (X-Request-Id) for end-to-end tracing
-- Compliance audit logging with opt-out per API key
-- Eval framework for LLM quality assurance
-- Health dashboard with real-time provider circuit breaker status
-- MCP Server (107 unique tools, 32 scopes) with 3 transports (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) with skills and task lifecycle
-- Memory system (extraction, injection, retrieval, summarization)
-- Skills system (registry, executor, sandbox, built-in skills)
-- MITM proxy with certificate management and DNS handling
-- Prompt injection guard middleware
-- ACP (Agent Communication Protocol) registry
-- Modular OAuth providers (21 implementation modules under `src/lib/oauth/providers/`)
-- Uninstall/full-uninstall scripts
-- OAuth environment repair action
-- WebSocket bridge for OpenAI-compatible WS clients (`/v1/ws`)
-- Sync token management (issue/revoke, ETag-versioned config bundle download)
-- GLM Thinking (`glmt`) first-class provider preset
-- Hybrid token counting (provider-side `/messages/count_tokens` with estimation fallback)
-- Model alias auto-seeding (30+ cross-proxy dialect normalizations at startup)
-- Safe outbound fetch with SSRF guard, private URL blocking, and configurable retry
-- Cooldown-aware chat retries with configurable `requestRetry` and `maxRetryIntervalSec`
-- Runtime environment validation with Zod at startup
-- Compliance audit v2 with pagination, provider CRUD events, and SSRF-blocked validation logging
+Alapvető képességek:
 
-Primary runtime model:
+- OpenAI-kompatibilis API felület CLI/tools (377 szolgáltató, 156 végrehajtó modul)
+- Request/response fordítás a szolgáltatói formátumok között
+- Modell kombinált tartalék (több modell sorozat)
+- Strukturált kombinált lépések (`provider + model + connection`) `compositeTiers` futásidejű sorrendjével
+- Fiókszintű tartalék (szolgáltatónként több fiók)
+- Kvóta előzetes ellenőrzése és kvóta-tudatos P2C -fiók kiválasztása a fő csevegési útvonalon
+- OAuth + API-kulcs szolgáltató kapcsolatkezelés (27 OAuth szolgáltató modul)
+- Generálás beágyazása `/v1/embeddings` keresztül (18 szolgáltató)
+- Képgenerálás `/v1/images/generations` keresztül (10 + szolgáltató, 20 + modell)
+- Hang átírása `/v1/audio/transcriptions` keresztül (18 szolgáltató)
+- Szövegfelolvasó `/v1/audio/speech` keresztül (24 beépített szolgáltató)
+- Videó generálása `/v1/videos/generations` segítségével (ComfyUI + SD WebUI)
+- Zenegenerálás `/v1/music/generations` keresztül (ComfyUI)
+- Internetes keresés `/v1/search` keresztül (20 szolgáltató)
+- Moderálás `/v1/moderations` keresztül
+- Újrasorolás `/v1/rerank` keresztül
+- Gondoljon a címkeelemzésre (`<think>...</think>`) az érvelési modellekhez
+- Válasz fertőtlenítés a szigorú OpenAI SDK kompatibilitás érdekében
+- Szerepkör normalizálás (fejlesztői → rendszer, rendszer → felhasználó) a szolgáltatók közötti kompatibilitás érdekében
+- Strukturált kimenet átalakítás (json_schema → Gemini responseSchema)
+- Helyi megmaradás a szolgáltatók, kulcsok, álnevek, kombinációk, beállítások, árképzés számára (122 DB modul)
+- Usage/cost követés és kérésnaplózás
+- Opcionális felhőszinkronizálás multi-device/state szinkronizáláshoz
+- IP allowlist/blocklist API hozzáférés-vezérléshez
+- Gondolkodó költségvetés-menedzsment (passthrough/auto/custom/adaptive)
+- Globális rendszer azonnali befecskendezése
+- Munkamenet-követés és ujjlenyomatvétel
+- Fiókonként továbbfejlesztett díjkorlátozás szolgáltató-specifikus profilokkal
+- Megszakító minta a szolgáltatói rugalmasság érdekében
+- Mennydörgés elleni állományvédelem mutex zárral
+- Aláírás-alapú kérés deduplikációs gyorsítótár
+- Domain réteg: költségszabályok, tartalék házirend, kizárási szabályzat
+- Context Relay: munkamenet-átadási összefoglalók a fiókrotáció folytonosságához
+- Tartomány állapotának fennmaradása (SQLite átírási gyorsítótár tartalékok, költségvetések, zárolások, árammegszakítók számára)
+- Házirend motor a kérelmek központosított kiértékeléséhez (lockout → budget → backback)
+- Telemetria kérése p50/p95/p99 késleltetési összesítéssel
+- Kombinált céltelemetria és történelmi kombinált célállapot `combo_execution_key` / `combo_step_id` segítségével
+- Korreláció ID (X-Request-Id) a végpontok közötti nyomkövetéshez
+- Megfelelőségi audit naplózás API kulcsonkénti leiratkozással
+- Eval keretrendszer LLM minőségbiztosításhoz
+- Egészségügyi műszerfal valós idejű szolgáltatói megszakító állapottal
+- MCP szerver (110 eszköz) 3 átvitellel (stdio/SSE/Streamable HTTP)
+- A2A szerver (JSON-RPC 2.0 + SSE) készségekkel és feladatok életciklusával
+- Memóriarendszer (kivonás, injekció, előhívás, összegzés)
+- Skills rendszer (nyilvántartó, végrehajtó, homokozó, beépített készségek)
+- MITM proxy tanúsítványkezeléssel és DNS kezeléssel
+- Azonnali befecskendezésvédő köztes szoftver
+- Gyors tömörítési folyamat Cavemannel, RTK, halmozott folyamatokkal, tömörítési kombókkal, nyelvi csomagokkal és elemzésekkel
+- ACP (Agent Communication Protocol) nyilvántartás
+- Moduláris OAuth szolgáltatók (22 egyedi modul a `src/lib/oauth/providers/` alatt)
+- Uninstall/full-uninstall szkriptek
+- OAuth környezetvédelmi javítási akció
+- WebSocket híd OpenAI-kompatibilis WS kliensekhez (`/v1/ws`)
+- Szinkron tokenkezelés (issue/revoke, ETag-verziójú konfigurációs csomag letöltése)
+- GLM Thinking (`glmt`) első osztályú szolgáltató előre beállított
+- Hibrid token számlálás (szolgáltató oldali `/messages/count_tokens` becslési tartalékkal)
+- Modell alias automatikus vetés (30 + proxy dialektusok közötti normalizálás indításkor)
+- Biztonságos kimenő letöltés SSRF védelemmel, privát URL blokkolással és konfigurálható újrapróbálkozással
+- Lehűlés-tudatos csevegési próbálkozások konfigurálható `requestRetry` és `maxRetryIntervalSec` segítségével
+- Futási környezet ellenőrzése Zod val indításkor
+- Megfelelőségi audit v2 oldalszámozással, szolgáltatói CRUD eseményekkel és SSRF által blokkolt érvényesítési naplózással
 
-- Next.js app routes under `src/app/api/*` implement both dashboard APIs and compatibility APIs
-- A shared SSE/routing core in `src/sse/*` + `open-sse/*` handles provider execution, translation, streaming, fallback, and usage
+Elsődleges futásidejű modell:
 
-## Scope and Boundaries
+- A Next.js alkalmazásútvonalai `src/app/api/*` alatt mind a műszerfali APIs, mind a kompatibilitási APIs megvalósítják
+- A `src/sse/*` + `open-sse/*` megosztott SSE/routing magja kezeli a szolgáltató végrehajtását, fordítását, adatfolyamát, visszaállítását és használatát
 
-### In Scope
+## Referenciadiagramok
 
-- Local gateway runtime
-- Dashboard management APIs
-- Provider authentication and token refresh
-- Request translation and SSE streaming
-- Local state + usage persistence
-- Optional cloud sync orchestration
+A v3.8.0 platform kanonikus, verziókövetett Mermaid-forrásai a
+[`docs/diagrams/`](../diagrams/README.md) könyvtárban találhatók. A tájékozódás megkönnyítésére kettőt alább is bemutatunk;
+a többi a saját szakterületéhez tartozó útmutatóból érhető el.
 
-### Out of Scope
+![Kérésfeldolgozási folyamat (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
 
-- Cloud service implementation behind `NEXT_PUBLIC_CLOUD_URL`
-- Provider SLA/control plane outside local process
-- External CLI binaries themselves (Claude CLI, Codex CLI, etc.)
+> Forrás: [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
 
-## Dashboard Surface (Current)
+![Háromrétegű rezilienciamodell](../diagrams/exported/resilience-3layers.svg)
 
-Main pages under `src/app/(dashboard)/dashboard/`:
+> Forrás: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) — hivatkozás található rá továbbá a
+> [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) fájlban és a `CLAUDE.md` rezilienciával kapcsolatos referenciájában.
 
-- `/dashboard` — quick start + provider overview
-- `/dashboard/endpoint` — endpoint proxy + MCP + A2A + API endpoint tabs
-- `/dashboard/providers` — provider connections and credentials
-- `/dashboard/combos` — combo strategies, templates, step-based builder, model routing rules, manual persisted ordering
-- `/dashboard/costs` — cost aggregation and pricing visibility
-- `/dashboard/analytics` — usage analytics, evaluations, combo target health
-- `/dashboard/limits` — quota/rate controls
-- `/dashboard/cli-tools` — CLI onboarding, runtime detection, config generation
-- `/dashboard/agents` — detected ACP agents + custom agent registration
-- `/dashboard/media` — image/video/music playground
-- `/dashboard/search-tools` — search provider testing and history
-- `/dashboard/health` — uptime, circuit breakers, rate limits, quota-monitored sessions
-- `/dashboard/logs` — request/proxy/audit/console logs
-- `/dashboard/settings` — system settings tabs (general, routing, combo defaults, etc.)
-- `/dashboard/api-manager` — API key lifecycle and model permissions
+## Hatókör és korlátok
 
-## High-Level System Context
+### A hatókör része
+
+- Helyi átjáró futtatókörnyezete
+- Az irányítópult felügyeleti API-jai
+- Szolgáltatói hitelesítés és tokenfrissítés
+- Kérések átalakítása és SSE-adatfolyamok továbbítása
+- Helyi állapot és használati adatok tartós tárolása
+- Opcionális felhőszinkronizáció vezénylése
+
+### Nem része a hatókörnek
+
+- A `NEXT_PUBLIC_CLOUD_URL` mögötti felhőszolgáltatás megvalósítása
+- A helyi folyamaton kívüli szolgáltatói SLA/vezérlősík
+- Maguk a külső CLI-binárisok (Claude CLI, Codex CLI stb.)
+
+## Irányítópult-felület (jelenlegi)
+
+Fő oldalak a `src/app/(dashboard)/dashboard/` alatt:
+
+- `/dashboard` — gyors kezdés és szolgáltatói áttekintés
+- `/dashboard/endpoint` — végpontproxy, valamint MCP-, A2A- és API-végpontfülek
+- `/dashboard/providers` — szolgáltatói kapcsolatok és hitelesítő adatok
+- `/dashboard/combos` — kombinációs stratégiák, sablonok, lépésalapú összeállító, modellútválasztási szabályok és kézzel beállított, tartós sorrend
+- `/dashboard/auto-combo` — Auto Combo Engine: pontozási súlyok, módcsomagok, virtuális gyári előbeállítások és telemetria
+- `/dashboard/costs` — költségösszesítés és árképzési áttekinthetőség
+- `/dashboard/analytics` — használati analitika, kiértékelések és a kombinációs célok állapota
+- `/dashboard/limits` — kvóta- és sebességkorlátozási vezérlők
+- `/dashboard/cli-tools` — CLI-bevezetés, futtatókörnyezet-észlelés és konfigurációgenerálás
+- `/dashboard/agents` — észlelt ACP-ügynökök és egyéni ügynökök regisztrációja
+- `/dashboard/cloud-agents` — felhőben futtatott ügynökfeladatok (Codex Cloud, Devin, Jules) és a feladatok életciklusa
+- `/dashboard/skills` — A2A-képességjegyzék, homokozókörnyezetben történő végrehajtás és beépített képességkatalógus
+- `/dashboard/memory` — tartós társalgási memória vizsgálata és visszakeresése
+- `/dashboard/webhooks` — kimenő webhook-előfizetések, titokkulcs-rotáció és újrapróbálkozási statisztikák
+- `/dashboard/batch` — kötegelt feladatok beküldése és előrehaladása
+- `/dashboard/cache` — átengedéses és következtetési gyorsítótár statisztikái, valamint kiürítési vezérlők
+- `/dashboard/playground` — interaktív csevegési tesztkörnyezet bármely konfigurált kombinációval vagy modellel
+- `/dashboard/changelog` — alkalmazáson belüli változásnapló-megjelenítő (a `CHANGELOG.md` fájlt rendereli)
+- `/dashboard/system` — futtatókörnyezeti diagnosztika, verzióinformációk és környezet-ellenőrzési felület
+- `/dashboard/onboarding` — első futtatási beállítóvarázsló új telepítésekhez
+- `/dashboard/media` — kép-, videó- és zenetesztkörnyezet
+- `/dashboard/search-tools` — keresési szolgáltatók tesztelése és előzmények
+- `/dashboard/health` — rendelkezésre állás, megszakítók, sebességkorlátok és kvótafigyelt munkamenetek
+- `/dashboard/logs` — kérés-, proxy-, audit- és konzolnaplók
+- `/dashboard/settings` — rendszerbeállítási fülek (általános, útválasztás, kombinációs alapértelmezések stb.)
+- `/dashboard/context/caveman` — Caveman tömörítési szabályok, nyelvi csomagok, előnézet és kimeneti mód
+- `/dashboard/context/rtk` — RTK parancskimeneti szűrők, előnézet és futásidejű biztonsági beállítások
+- `/dashboard/context/combos` — útválasztási kombinációkhoz rendelt, elnevezett tömörítési folyamatláncok
+- `/dashboard/translator` — fordítóvizsgálat és kérésformátum-konverziós előnézet
+- `/dashboard/audit` — megfelelőségi auditnaplók lapozható böngészője strukturált metaadatokkal
+- `/dashboard/usage` — kérésenkénti használati böngésző a `usage_history` adataihoz kapcsolva
+- `/dashboard/compression` — tömörítési analitika, statisztikák és folyamatlánc-hozzárendelés
+- `/dashboard/api-manager` — API-kulcsok életciklusa és modellengedélyek
+
+Felhasználói felületi réteg: minden oldal egyetlen kereten belül jelenik meg — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (a készlet
+`SidebarProvider`/`SidebarInset` elemei, valamint az OmniRoute `Sidebar.tsx` és `Header.tsx` fájljai). Az oldalak az
+építőelemeiket a `@/shared/components` modulból (a `packages/ui-kit` alatt szállított Keak CI UI Kit adapterei)
+vagy a készlet komponens-alútvonalairól (`@omniroute/ui-kit/table`, `…/page-header`) importálják, az ikonokat pedig
+az `<Icon>` elemen keresztül (`ICON_MAP` → Lucide). A téma (alapértelmezés szerint `system`, világos/sötét) és a tokenek
+a készletből származnak a `src/app/globals.css` fájlban található hídon keresztül. Részletek: `docs/architecture/DESIGN_SYSTEM.md`.
+
+## Magas szintű rendszerkörnyezet
 
 ```mermaid
 flowchart LR
-    subgraph Clients[Developer Clients]
+    subgraph Clients[Fejlesztői kliensek]
         C1[Claude Code]
         C2[Codex CLI]
         C3[OpenClaw / Droid / Cline / Continue / Roo]
-        C4[Custom OpenAI-compatible clients]
-        BROWSER[Browser Dashboard]
+        C4[Egyedi OpenAI-kompatibilis kliensek]
+        BROWSER[Böngészőalapú irányítópult]
     end
 
-    subgraph Router[OmniRoute Local Process]
-        API[V1 Compatibility API\n/v1/*]
-        DASH[Dashboard + Management API\n/api/*]
-        CORE[SSE + Translation Core\nopen-sse + src/sse]
+    subgraph Router[OmniRoute helyi folyamat]
+        API[V1 kompatibilitási API\n/v1/*]
+        DASH[Irányítópult + felügyeleti API\n/api/*]
+        CORE[SSE + fordítási mag\nopen-sse + src/sse]
         DB[(storage.sqlite)]
-        UDB[(usage tables + log artifacts)]
+        UDB[(használati táblák + naplóösszetevők)]
     end
 
-    subgraph Upstreams[Upstream Providers]
-        P1[OAuth Providers\nClaude/Codex/Gemini/Qwen/Qoder/GitHub/Kiro/Cursor/Antigravity]
-        P2[API Key Providers\nOpenAI/Anthropic/OpenRouter/GLM/Kimi/MiniMax\nDeepSeek/Groq/xAI/Mistral/Perplexity\nTogether/Fireworks/Cerebras/Cohere/NVIDIA]
-        P3[Compatible Nodes\nOpenAI-compatible / Anthropic-compatible]
+    subgraph Upstreams[Forrásoldali szolgáltatók]
+        P1[OAuth-szolgáltatók\nClaude/Codex/Gemini/Qoder/GitHub/Kiro/Cursor/Antigravity]
+        P2[API-kulcsos szolgáltatók\nOpenAI/Anthropic/OpenRouter/GLM/Kimi/MiniMax\nDeepSeek/Groq/xAI/Mistral/Perplexity\nTogether/Fireworks/Cerebras/Cohere/NVIDIA]
+        P3[Kompatibilis csomópontok\nOpenAI-kompatibilis / Anthropic-kompatibilis]
     end
 
-    subgraph Cloud[Optional Cloud Sync]
-        CLOUD[Cloud Sync Endpoint\nNEXT_PUBLIC_CLOUD_URL]
+    subgraph Cloud[Opcionális felhőszinkronizálás]
+        CLOUD[Felhőszinkronizálási végpont\nNEXT_PUBLIC_CLOUD_URL]
     end
 
     C1 --> API
@@ -164,313 +207,460 @@ flowchart LR
     DASH --> CLOUD
 ```
 
-## Core Runtime Components
+## Alapvető futásidejű összetevők
 
-## 1) API and Routing Layer (Next.js App Routes)
+## 1) API- és útválasztási réteg (Next.js alkalmazásútvonalak)
 
-Main directories:
+Fő könyvtárak:
 
-- `src/app/api/v1/*` and `src/app/api/v1beta/*` for compatibility APIs
-- `src/app/api/*` for management/configuration APIs
-- Next rewrites in `next.config.mjs` map `/v1/*` to `/api/v1/*`
+- `src/app/api/v1/*` és `src/app/api/v1beta/*` a kompatibilitási API-khoz
+- `src/app/api/*` a felügyeleti és konfigurációs API-khoz
+- A `next.config.mjs` fájlban található Next-átírások a `/v1/*` útvonalakat az `/api/v1/*` útvonalakra képezik le
 
-Important compatibility routes:
+Fontos kompatibilitási útvonalak:
 
 - `src/app/api/v1/chat/completions/route.ts`
 - `src/app/api/v1/messages/route.ts`
 - `src/app/api/v1/responses/route.ts`
-- `src/app/api/v1/models/route.ts` — includes custom models with `custom: true`
-- `src/app/api/v1/embeddings/route.ts` — embedding generation (6 providers)
-- `src/app/api/v1/images/generations/route.ts` — image generation (4+ providers incl. Antigravity/Nebius)
+- `src/app/api/v1/models/route.ts` — tartalmazza a `custom: true` értékkel rendelkező egyedi modelleket
+- `src/app/api/v1/embeddings/route.ts` — embeddingek generálása (6 szolgáltató)
+- `src/app/api/v1/images/generations/route.ts` — képgenerálás (több mint 4 szolgáltató, beleértve az Antigravity/Nebius szolgáltatókat)
 - `src/app/api/v1/messages/count_tokens/route.ts`
-- `src/app/api/v1/providers/[provider]/chat/completions/route.ts` — dedicated per-provider chat
-- `src/app/api/v1/providers/[provider]/embeddings/route.ts` — dedicated per-provider embeddings
-- `src/app/api/v1/providers/[provider]/images/generations/route.ts` — dedicated per-provider images
+- `src/app/api/v1/providers/[provider]/chat/completions/route.ts` — szolgáltatónként elkülönített csevegési végpont
+- `src/app/api/v1/providers/[provider]/embeddings/route.ts` — szolgáltatónként elkülönített embeddingvégpont
+- `src/app/api/v1/providers/[provider]/images/generations/route.ts` — szolgáltatónként elkülönített képgenerálási végpont
 - `src/app/api/v1beta/models/route.ts`
 - `src/app/api/v1beta/models/[...path]/route.ts`
 
-Management domains:
+Felügyeleti területek:
 
-- Auth/settings: `src/app/api/auth/*`, `src/app/api/settings/*`
-- Providers/connections: `src/app/api/providers*`
-- Provider nodes: `src/app/api/provider-nodes*`
-- Custom models: `src/app/api/provider-models` (GET/POST/DELETE)
-- Model catalog: `src/app/api/models/route.ts` (GET)
-- Proxy config: `src/app/api/settings/proxy` (GET/PUT/DELETE) + `src/app/api/settings/proxy/test` (POST)
+- Hitelesítés/beállítások: `src/app/api/auth/*`, `src/app/api/settings/*`
+- Szolgáltatók/kapcsolatok: `src/app/api/providers*`
+- Szolgáltatói csomópontok: `src/app/api/provider-nodes*`
+- Egyedi modellek: `src/app/api/provider-models` (GET/POST/DELETE)
+- Modellkatalógus: `src/app/api/models/route.ts` (GET)
+- Proxykonfiguráció: `src/app/api/settings/proxy` (GET/PUT/DELETE) + `src/app/api/settings/proxy/test` (POST)
 - OAuth: `src/app/api/oauth/*`
-- Keys/aliases/combos/pricing: `src/app/api/keys*`, `src/app/api/models/alias`, `src/app/api/combos*`, `src/app/api/pricing`
-- Usage: `src/app/api/usage/*`
-- Sync/cloud: `src/app/api/sync/*`, `src/app/api/cloud/*`
-- CLI tooling helpers: `src/app/api/cli-tools/*`
-- IP filter: `src/app/api/settings/ip-filter` (GET/PUT)
-- Thinking budget: `src/app/api/settings/thinking-budget` (GET/PUT)
-- System prompt: `src/app/api/settings/system-prompt` (GET/PUT)
-- Sessions: `src/app/api/sessions` (GET)
-- Rate limits: `src/app/api/rate-limits` (GET)
-- Resilience: `src/app/api/resilience` (GET/PATCH) — request queue, connection cooldown, provider breaker, wait-for-cooldown config
-- Resilience reset: `src/app/api/resilience/reset` (POST) — reset provider breakers
-- Cache stats: `src/app/api/cache/stats` (GET/DELETE)
-- Telemetry: `src/app/api/telemetry/summary` (GET)
-- Budget: `src/app/api/usage/budget` (GET/POST)
-- Fallback chains: `src/app/api/fallback/chains` (GET/POST/DELETE)
-- Compliance audit: `src/app/api/compliance/audit-log` (GET, with pagination + structured metadata)
-- Evals: `src/app/api/evals` (GET/POST), `src/app/api/evals/[suiteId]` (GET)
-- Policies: `src/app/api/policies` (GET/POST)
-- Sync tokens: `src/app/api/sync/tokens` (GET/POST), `src/app/api/sync/tokens/[id]` (GET/DELETE)
-- Config bundle: `src/app/api/sync/bundle` (GET, ETag-versioned snapshot of settings/providers/combos/keys)
-- WebSocket: `src/app/api/v1/ws/route.ts` — Upgrade handler for OpenAI-compatible WS clients
+- Kulcsok/álnevek/kombinációk/árképzés: `src/app/api/keys*`, `src/app/api/models/alias`, `src/app/api/combos*`, `src/app/api/pricing`
+- Használat: `src/app/api/usage/*`
+- Szinkronizálás/felhő: `src/app/api/sync/*`, `src/app/api/cloud/*`
+- CLI-eszközök segédfunkciói: `src/app/api/cli-tools/*`
+- IP-szűrő: `src/app/api/settings/ip-filter` (GET/PUT)
+- Gondolkodási keret: `src/app/api/settings/thinking-budget` (GET/PUT)
+- Rendszerüzenet: `src/app/api/settings/system-prompt` (GET/PUT)
+- Tömörítés: `src/app/api/settings/compression`, `src/app/api/compression/*`, valamint
+  `src/app/api/context/*`
+- Munkamenetek: `src/app/api/sessions` (GET)
+- Sebességkorlátok: `src/app/api/rate-limits` (GET)
+- Hibatűrés: `src/app/api/resilience` (GET/PATCH) — kérési várólista, kapcsolat-visszahűtés, szolgáltatói megszakító és visszahűtésre várási konfiguráció
+- Hibatűrés alaphelyzetbe állítása: `src/app/api/resilience/reset` (POST) — a szolgáltatói megszakítók alaphelyzetbe állítása
+- Gyorsítótár-statisztikák: `src/app/api/cache/stats` (GET/DELETE)
+- Telemetria: `src/app/api/telemetry/summary` (GET)
+- Költségkeret: `src/app/api/usage/budget` (GET/POST)
+- Tartalék láncok: `src/app/api/fallback/chains` (GET/POST/DELETE)
+- Megfelelőségi audit: `src/app/api/compliance/audit-log` (GET, lapozással + strukturált metaadatokkal)
+- Kiértékelések: `src/app/api/evals` (GET/POST), `src/app/api/evals/[suiteId]` (GET)
+- Szabályzatok: `src/app/api/policies` (GET/POST)
+- Szinkronizálási tokenek: `src/app/api/sync/tokens` (GET/POST), `src/app/api/sync/tokens/[id]` (GET/DELETE)
+- Konfigurációs csomag: `src/app/api/sync/bundle` (GET, a beállításokról/szolgáltatókról/kombinációkról/kulcsokról készült, ETag-verziózott pillanatkép)
+- WebSocket: `src/app/api/v1/ws/route.ts` — Upgrade-kezelő OpenAI-kompatibilis WS-kliensekhez
 
-## 2) SSE + Translation Core
+## 2) SSE + fordítási mag
 
-Main flow modules:
+A fő folyamat moduljai:
 
-- Entry: `src/sse/handlers/chat.ts`
-- Core orchestration: `open-sse/handlers/chatCore.ts`
-- Provider execution adapters: `open-sse/executors/*`
-- Format detection/provider config: `open-sse/services/provider.ts`
-- Model parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Account fallback logic: `open-sse/services/accountFallback.ts`
-- Translation registry: `open-sse/translator/index.ts`
-- Stream transformations: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Usage extraction/normalization: `open-sse/utils/usageTracking.ts`
-- Think tag parser: `open-sse/utils/thinkTagParser.ts`
-- Embedding handler: `open-sse/handlers/embeddings.ts`
-- Embedding provider registry: `open-sse/config/embeddingRegistry.ts`
-- Image generation handler: `open-sse/handlers/imageGeneration.ts`
-- Image provider registry: `open-sse/config/imageRegistry.ts`
-- Response sanitization: `open-sse/handlers/responseSanitizer.ts`
-- Role normalization: `open-sse/services/roleNormalizer.ts`
+- Belépési pont: `src/sse/handlers/chat.ts`
+- Alapvető vezérlés: `open-sse/handlers/chatCore.ts`
+- Szolgáltatói végrehajtási adapterek: `open-sse/executors/*`
+- Formátumfelismerés/szolgáltatói konfiguráció: `open-sse/services/provider.ts`
+- Modell feldolgozása/feloldása: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Fiók-visszaállási logika: `open-sse/services/accountFallback.ts`
+- Fordítási nyilvántartás: `open-sse/translator/index.ts`
+- Adatfolyam-átalakítások: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Használati adatok kinyerése/normalizálása: `open-sse/utils/usageTracking.ts`
+- Think-címke elemzője: `open-sse/utils/thinkTagParser.ts`
+- Beágyazáskezelő: `open-sse/handlers/embeddings.ts`
+- Beágyazási szolgáltatók nyilvántartása: `open-sse/config/embeddingRegistry.ts`
+- Képgenerálási kezelő: `open-sse/handlers/imageGeneration.ts`
+- Képszolgáltatók nyilvántartása: `open-sse/config/imageRegistry.ts`
+- Válaszok megtisztítása: `open-sse/handlers/responseSanitizer.ts`
+- Szerepkörök normalizálása: `open-sse/services/roleNormalizer.ts`
 
-Services (business logic):
+Szolgáltatások (üzleti logika):
 
-- Account selection/scoring: `open-sse/services/accountSelector.ts`
-- Context lifecycle management: `open-sse/services/contextManager.ts`
-- IP filter enforcement: `open-sse/services/ipFilter.ts`
-- Session tracking: `open-sse/services/sessionManager.ts`
-- Request deduplication: `open-sse/services/signatureCache.ts`
-- System prompt injection: `open-sse/services/systemPrompt.ts`
-- Thinking budget management: `open-sse/services/thinkingBudget.ts`
-- Wildcard model routing: `open-sse/services/wildcardRouter.ts`
-- Rate limit management: `open-sse/services/rateLimitManager.ts`
-- Circuit breaker: `open-sse/services/circuitBreaker.ts`
-- Context handoff: `open-sse/services/contextHandoff.ts` — handoff summary generation and injection for context-relay strategy
-- Codex quota fetcher: `open-sse/services/codexQuotaFetcher.ts` — fetches Codex quota for context-relay handoff decisions
-- Cooldown-aware retry: `src/sse/services/cooldownAwareRetry.ts` — per-model cooldown retries with configurable `requestRetry` / `maxRetryIntervalSec`
-- Safe outbound fetch: `src/shared/network/safeOutboundFetch.ts` — guarded provider/model fetch with SSRF guard, private-URL blocking, retry, and timeout
-- Outbound URL guard: `src/shared/network/outboundUrlGuard.ts` — validates provider URLs against private/localhost CIDR ranges
-- Provider request defaults: `open-sse/services/providerRequestDefaults.ts` — provider-level `maxTokens`, `temperature`, `thinkingBudgetTokens` defaults
-- GLM provider constants: `open-sse/config/glmProvider.ts` — shared GLM models, quota URLs, GLMT timeout/defaults
-- Antigravity upstream: `open-sse/config/antigravityUpstream.ts` — base URL and discovery path constants
-- Codex client constants: `open-sse/config/codexClient.ts` — versioned user-agent and client-version values
-- Model alias seed: `src/lib/modelAliasSeed.ts` — seeds 30+ cross-proxy dialect aliases at startup
+- Fiókkiválasztás/pontozás: `open-sse/services/accountSelector.ts`
+- A kontextus életciklusának kezelése: `open-sse/services/contextManager.ts`
+- IP-szűrés kikényszerítése: `open-sse/services/ipFilter.ts`
+- Munkamenetek követése: `open-sse/services/sessionManager.ts`
+- Kérések deduplikációja: `open-sse/services/signatureCache.ts`
+- Rendszerprompt beszúrása: `open-sse/services/systemPrompt.ts`
+- Gondolkodási keret kezelése: `open-sse/services/thinkingBudget.ts`
+- Helyettesítő karakteres modellútválasztás: `open-sse/services/wildcardRouter.ts`
+- Sebességkorlátozás kezelése: `open-sse/services/rateLimitManager.ts`
+- Megszakító: `src/shared/utils/circuitBreaker.ts`
+- Kontextusátadás: `open-sse/services/contextHandoff.ts` — átadási összefoglaló létrehozása és beszúrása a kontextusközvetítési stratégiához
+- Tömörítés: `open-sse/services/compression/*` — proaktív tömörítés a szolgáltatói fordítás előtt;
+  tartalmazza a Caveman-szabályokat, RTK-szűrőket, egymásra épülő feldolgozási láncokat, tömörítési kombinációkat, statisztikákat és ellenőrzést
+- Codex-kvótalekérő: `open-sse/services/codexQuotaFetcher.ts` — lekéri a Codex-kvótát a kontextusközvetítési átadási döntésekhez
+- Várakozási időt figyelembe vevő újrapróbálkozás: `src/sse/services/cooldownAwareRetry.ts` — modellenkénti, várakozási idővel működő újrapróbálkozások konfigurálható `requestRetry` / `maxRetryIntervalSec` értékekkel
+- Biztonságos kimenő lekérés: `src/shared/network/safeOutboundFetch.ts` — védett szolgáltató-/modell-lekérés SSRF-védelemmel, privát URL-ek blokkolásával, újrapróbálkozással és időtúllépéssel
+- Kimenő URL-ek védelme: `src/shared/network/outboundUrlGuard.ts` — gazdagép-ellenőrzések a szolgáltatói URL-eken; a `src/shared/network/outboundUrlGuardPolicy.ts` az `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, az `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` és a hozzájuk tartozó irányítópulti kapcsolók alapján választja ki a módot (lásd: `docs/reference/ENVIRONMENT.md`)
+- Szolgáltatói kérések alapértelmezett értékei: `open-sse/services/providerRequestDefaults.ts` — szolgáltatói szintű `maxTokens`, `temperature`, `thinkingBudgetTokens` alapértékek
+- GLM szolgáltatói konstansok: `open-sse/config/glmProvider.ts` — megosztott GLM-modellek, kvóta-URL-ek, GLMT-időtúllépési és alapértelmezett értékek
+- Antigravity felsőbb réteg: `open-sse/config/antigravityUpstream.ts` — alap-URL és felderítési útvonal konstansai
+- Codex-klienskonstansok: `open-sse/config/codexClient.ts` — verziózott felhasználóiügynök- és kliensverzió-értékek
+- Modellaliasok kiinduló adatai: `src/lib/modelAliasSeed.ts` — indításkor több mint 30, proxy-dialektusok közötti aliast tölt be
 
-Domain layer modules:
+A tartományi réteg moduljai:
 
-- Cost rules/budgets: `src/lib/domain/costRules.ts`
-- Fallback policy: `src/lib/domain/fallbackPolicy.ts`
-- Combo resolver: `src/lib/domain/comboResolver.ts`
-- Lockout policy: `src/lib/domain/lockoutPolicy.ts`
-- Policy engine: `src/domain/policyEngine.ts` — centralized lockout → budget → fallback evaluation
-- Error codes catalog: `src/lib/domain/errorCodes.ts`
-- Request ID: `src/lib/domain/requestId.ts`
-- Fetch timeout: `src/lib/domain/fetchTimeout.ts`
-- Request telemetry: `src/lib/domain/requestTelemetry.ts`
-- Compliance/audit: `src/lib/domain/compliance/index.ts`
-- Eval runner: `src/lib/domain/evalRunner.ts`
-- Domain state persistence: `src/lib/db/domainState.ts` — SQLite CRUD for fallback chains, budgets, cost history, lockout state, circuit breakers
+- Költségszabályok/keretek: `src/domain/costRules.ts`
+- Visszaállási szabályzat: `src/domain/fallbackPolicy.ts`
+- Kombinációfeloldó: `src/domain/comboResolver.ts`
+- Kizárási szabályzat: `src/domain/lockoutPolicy.ts`
+- Szabályzatmotor: `src/domain/policyEngine.ts` — központosított kizárás → keret → visszaállás kiértékelés
+- Hibakód-katalógus: `src/shared/constants/errorCodes.ts`
+- Kérésazonosító: `src/shared/utils/requestId.ts`
+- Lekérési időtúllépés: `src/shared/utils/fetchTimeout.ts`
+- Kéréstelemetria: `src/shared/utils/requestTelemetry.ts`
+- Megfelelőség/audit: `src/lib/compliance/index.ts`
+- Kiértékelés-futtató: `src/lib/evals/evalRunner.ts`
+- Tartományi állapot tartós tárolása: `src/lib/db/domainState.ts` — SQLite CRUD a visszaállási láncokhoz, keretekhez, költségelőzményekhez, kizárási állapothoz és megszakítókhoz
 
-OAuth provider modules (21 implementation modules under `src/lib/oauth/providers/`):
+OAuth-szolgáltatói modulok (27 különálló fájl a `src/lib/oauth/providers/` alatt):
 
-- Registry index: `src/lib/oauth/providers/index.ts`
-- Individual providers: `claude.ts`, `codex.ts`, `gemini.ts`, `antigravity.ts`, `qoder.ts`, `qwen.ts`, `kimi-coding.ts`, `github.ts`, `kiro.ts`, `cursor.ts`, `kilocode.ts`, `cline.ts`
-- Thin wrapper: `src/lib/oauth/providers.ts` — re-exports from individual modules
+- Nyilvántartási index: `src/lib/oauth/providers/index.ts`
+- Egyedi szolgáltatók: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Megosztott segédfüggvények: `codebuddyDeviceAuth.ts` (CodeBuddy CN/nemzetközi eszközfolyamat), `museCodeDeviceResponse.ts`
+- Vékony burkolómodul: `src/lib/oauth/providers.ts` — újraexportál az egyedi modulokból
 
-## 3) Persistence Layer
+## 5) Beágyazott szolgáltatások (v3.8.4)
 
-Primary state DB (SQLite):
+Az OmniRoute képes telepíteni, felügyelni és útválasztási célként használni a helyben futó, **beágyazott szolgáltatásoknak** nevezett AI-eszközfolyamatokat. Öt ilyen szolgáltatást tartalmaz: 9Router, CLIProxyAPI, Bifrost, Mux és Dario.
 
-- Core infra: `src/lib/db/core.ts` (better-sqlite3, migrations, WAL)
-- Re-export facade: `src/lib/localDb.ts` (thin compatibility layer for callers)
-- file: `${DATA_DIR}/storage.sqlite` (or `$XDG_CONFIG_HOME/omniroute/storage.sqlite` when set, else `~/.omniroute/storage.sqlite`)
-- entities (tables + KV namespaces): providerConnections, providerNodes, modelAliases, combos, apiKeys, settings, pricing, **customModels**, **proxyConfig**, **ipFilter**, **thinkingBudget**, **systemPrompt**
+Architekturális rétegek:
 
-Usage persistence:
+- **Felhasználói felület** (`/dashboard/providers/services`) — kétlapos oldal életciklus-vezérlőkkel,
+  élő naplóközvetítéssel, API-kulcsok kezelésével, valamint (a 9Router esetében) egy belső
+  fordított proxyn keresztül beágyazott natív felhasználói felülettel.
+- **API** (`/api/services/{name}/*`) — 11 végpont a 9Routerhez, 10 a CLIProxyAPI-hoz, valamint egyenként 8 a Bifrost / Mux / Dario szolgáltatásokhoz,
+  valamennyi **LOCAL_ONLY** besorolással (17. szigorú szabály). Egy megosztott `GET /api/services/[name]/logs`
+  SSE-végpont szolgálja ki mindkét szolgáltatást.
+- **Felügyelő** (`src/lib/services/`) — az általános `ServiceSupervisor` osztály a
+  `child_process.spawn` köré épül, egy 5 MB-os körkörös puffert tart fenn az SSE-naplóközvetítéshez, továbbá állapotellenőrzési
+  ciklust, atomi műveleti zárolást és SIGTERM→SIGKILL szabályos leállítást biztosít.
+  A `bootstrap.ts` a folyamat indításakor csatlakoztatja az összes konfigurált szolgáltatást.
+- **Szolgáltató/végrehajtó** (`open-sse/executors/ninerouter.ts`) — a 9Router valódi
+  szolgáltatóként érhető el. A modellek `9router/{sub}/{model}` előtagot kapnak, és 5 percenként
+  szinkronizálódnak a 9Router `/v1/models` végpontjáról.
 
-- facade: `src/lib/usageDb.ts` (decomposed modules in `src/lib/usage/*`)
-- SQLite tables in `storage.sqlite`: `usage_history`, `call_logs`, `proxy_logs`
-- optional file artifacts remain for compatibility/debug (`${DATA_DIR}/log.txt`, `${DATA_DIR}/call_logs/`, `<repo>/logs/...`)
-- legacy JSON files are migrated to SQLite by startup migrations when present
+Részletes leírás: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-Domain State DB (SQLite):
+## Főbb alrendszerek (v3.8.0)
 
-- `src/lib/db/domainState.ts` — CRUD operations for domain state
-- Tables (created in `src/lib/db/core.ts`): `domain_fallback_chains`, `domain_budgets`, `domain_cost_history`, `domain_lockout_state`, `domain_circuit_breakers`
-- Write-through cache pattern: in-memory Maps are authoritative at runtime; mutations are written synchronously to SQLite; state is restored from DB on cold start
+### A. Automatikus kombinált motor
 
-## 4) Auth + Security Surfaces
+Az Auto Combo dinamikusan pontozza és kiválasztja az útválasztási célokat a kérés időpontjában, ahelyett, hogy statikus kombináció-definícióra hagyatkozna. Ez hajtja a `auto/*` modell előtagcsaládot.
 
-- Dashboard cookie auth: `src/proxy.ts`, `src/app/api/auth/login/route.ts`
-- API key generation/verification: `src/shared/utils/apiKey.ts`
-- Provider secrets persisted in `providerConnections` entries
-- Outbound proxy support via `open-sse/utils/proxyFetch.ts` (env vars) and `open-sse/utils/networkProxy.ts` (configurable per-provider or global)
-- SSRF / outbound URL guard: `src/shared/network/outboundUrlGuard.ts` — blocks private/loopback/link-local ranges for all provider calls
-- Runtime env validation: `src/lib/env/runtimeEnv.ts` — Zod schema for all environment variables, surfaced as startup errors/warnings
-- Sync tokens: `src/lib/db/syncTokens.ts` — scoped tokens for config bundle download endpoints; backed by `sync_tokens` SQLite table (migration `024_create_sync_tokens.sql`)
-- WebSocket handshake auth: `src/lib/ws/handshake.ts` — validates WS upgrade requests via API key or session cookie
+- Motorbemenet: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Feloldó: `src/domain/comboResolver.ts` ( `auto/` előtag automatikus felismerése)
+- Műszerfal: `/dashboard/auto-combo`
+- Telemetria: `auto_combo_decisions` SQLite asztal
 
-## 5) Cloud Sync
+Főbb képességek:
 
-- Scheduler init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Periodic task: `src/shared/services/cloudSyncScheduler.ts`
-- Periodic task: `src/shared/services/modelSyncScheduler.ts`
-- Control route: `src/app/api/sync/cloud/route.ts`
+- **20 útválasztási stratégia** (prioritás, súlyozott, kitöltési sorrend, kör-robin, P2C, véletlenszerű, legkevésbé használt, költségoptimalizált, reset-aware, reset-window, headroom, kvótával súlyozott, szigorú véletlenszerű,** auto** , lkgp, kontextusra optimalizált, gyorsítótárra optimalizált, környezetrelé,** fúzió** , pipeline) — auto a 3.8.0-s v3.8.0 címsor kiegészítése; `fusion` (panel fan-out + bíró szintézis, `open-sse/services/fusion.ts`) új a v3.8.36-ban.
+- **16 faktoros pontozás** : kvóta, egészség, fordított költség, fordított késleltetés, feladat-illesztés és még tíz. A faktorok kanonikus táblázata és alapértelmezett súlyaik [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — -ben élnek, ha itt újra megismételjük, ez egy második helyet adna az elavulásnak.
+- **Virtuális gyár** efemer kombinációkat valósít meg, ha nem létezik megfelelő nevű kombináció, így a jelölteket egészséges aktív szolgáltatói kapcsolatokból szerzi be.
+- **Automatikus előtagok** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — mindegyiket hangolt súlyprofil támogatja.
+- **6 mód csomag** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` és `chaos-mode` — előre beállított súlykonfigurációk, amelyek a műszerfalról hívhatók. (Nem tévesztendő össze a fenti `auto/*` előtagokkal, amelyek kérésidő-változatok.)
 
-## Request Lifecycle (`/v1/chat/completions`)
+A teljes algoritmus részleteit (tényezőképletek, súlyhangolás) lásd: [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+
+### B. Felhőügynökök
+
+A Cloud Agents a harmadik féltől származó kódügynök-platformokat (Codex Cloud, Devin, Jules) egységes, adatbázis-támogatott feladatéletciklus mögé burkolja. Minden feladat creation/inspection végpontja felügyeleti hitelesítést igényel.
+
+- Modul gyökér: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, plusz ügynökönkénti alkönyvtárak `agents/` alatt)
+- Ügynökönkénti megvalósítások: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- Nyilvános végpontok: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- Felügyeleti végpontok: `/api/cloud/*` (kiépítés, állapot, köteg)
+- Műszerfal: `/dashboard/cloud-agents`
+- Tárolás: `cloud_agent_tasks` asztal
+
+Az ügynökönkénti kiépítés és OAuth sajátosságaiért lásd: [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+
+### C. Védőkorlátok
+
+A védőkorlát modul egy üzem közben újratölthető köztes szoftverréteg, amely megvizsgálja a kéréseket és válaszokat PII, a gyors befecskendezés és a nem biztonságos látástartalom szempontjából. A szabálysértések rövidre zárják a kérést HTTP vel** 503** plusz egy strukturált hibakód, amely lehetővé teszi a későbbi hívók számára, hogy újra próbálkozzanak vagy elágazjanak.
+
+- Modul gyökér: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Hot reload: a rendszerleíró adatbázis figyeli a konfigurációs változásokat, és a helyén újraépíti a láncot
+- Bekötési pontok: chatkezelő belépés, képgeneráló kezelő, válaszfertőtlenítő
+- HTTP szerződés: a jogsértések `503` ként jelennek meg `error.code = "GUARDRAIL_VIOLATION"` vel
+
+A szabálykészlet létrehozásáról és a küszöbhangolásról lásd: [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+
+### D. Domain réteg
+
+A `src/domain/` névtér központosítja a politikai döntéseket, így az útvonalkezelőknek nem kell maguknak összeállítaniuk lockout/budget/fallback logikát.
+
+- Irányelvmotor: `src/domain/policyEngine.ts` — egyetlen belépési pont a végrehajtás előtti értékeléshez (zárolási → költségvetési → tartalék rendelés)
+- Költségszabályok: `src/domain/costRules.ts`
+- Tartalék irányelv: `src/domain/fallbackPolicy.ts`
+- Kizárási politika: `src/domain/lockoutPolicy.ts`
+- Címke alapú útválasztás: `src/domain/tagRouter.ts`
+- Kombinált feloldó: `src/domain/comboResolver.ts` — feloldja a kombinált neveket, az auto/\* előtagokat és a helyettesítő karakteres modellcélokat a konkrét végrehajtási tervekhez
+- Connection/model szabálycsatlakozó: `src/domain/connectionModelRules.ts`
+- Modell elérhetőségi pillanatképek: `src/domain/modelAvailability.ts`
+- Szolgáltató lejáratának követése: `src/domain/providerExpiration.ts`
+- Kvóta gyorsítótár: `src/domain/quotaCache.ts`
+- Lebomlási állapot: `src/domain/degradation.ts`
+- Konfiguráció audit: `src/domain/configAudit.ts`
+- OmniRoute válasz metaadat-készítő: `src/domain/omnirouteResponseMeta.ts`
+- Értékelési alrendszer: `src/domain/assessment/` — időszakos értékelési munkák
+
+### E. Engedélyezési folyamat
+
+Az engedélyezési folyamat minden bejövő kérelmet osztályoz, és a megfelelő házirend-láncot alkalmazza a feladás előtt.
+
+- Csővezeték-bevezetés: `src/server/authz/pipeline.ts`
+- Kérelem osztályozója: `src/server/authz/classify.ts` — megkülönbözteti a nyilvános kompatibilitási útvonalakat a kezelési útvonalaktól
+- Közút leltár: `src/shared/constants/publicApiRoutes.ts`
+- Irányelvek: `src/server/authz/policies/` — összeállítható predikátumok (`requireApiKey`, `requireManagement`, `requireFreshAuth` stb.)
+- Fejléc segédprogramok: `src/server/authz/headers.ts`
+- Állítási segéd: `src/server/authz/assertAuth.ts`
+- A kérés szövegkörnyezete: `src/server/authz/context.ts`
+
+A nyilvános és a felügyeleti útvonalak kemény határvonalat jelentenek: agent/cooldown APIs és a szolgáltatói mutációk kezelési hitelesítést igényelnek (HTTP 401, ha hiányzik).
+
+A teljes útvonal-besorolási szabályokat lásd: [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+
+### F. Workflow FSM és Task-Aware Router
+
+Egy véges állapotú gép által vezérelt útválasztó, amely a kombinált kiválasztás fölé rétegezve irányítja a forgalmat az észlelt munkafolyamat szakasza (tervezés, végrehajtás, áttekintés) és a háttérfeladat-affinitás alapján.
+
+- Munkafolyamat FSM: `open-sse/services/workflowFSM.ts`
+- Feladat-tudatos útválasztó: `open-sse/services/taskAwareRouter.ts`
+- Háttérfeladat detektor: `open-sse/services/backgroundTaskDetector.ts`
+- Szándékos osztályozó: `open-sse/services/intentClassifier.ts`
+
+A FSM átmenetek beépülnek az Auto Combo pontozásába, és az olcsóbb modellek felé hajlanak background/automation feladatokhoz, és az erősebb modellek felé az interaktív planning/review fordulatokhoz.
+
+### G. Szolgáltató-specifikus rugalmasság
+
+Számos szolgáltató dedikált rugalmassági és lopakodó modulokat szállít, amelyek visszatartják a globális megszakító / kapcsolat lehűlés / modellzár réteget:
+
+- Antigravity 429 motor: `open-sse/services/antigravity429Engine.ts` (az identitás elforgatása, a válaszfejlécek tisztítása, credits/version nyomon követése `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` segítségével)
+- Antigravity 429 őr: `open-sse/services/antigravity429Guard.ts` (az upstream 429-ek kérésenkénti költségvetése az összes gazdagépen, `ANTIGRAVITY_MAX_429_ATTEMPTS`; a visszautasított test azonos újraküldésére helyileg válaszol; `src/sse/handlers/chat.ts` nem indítja újra az ilyen kérést a lehűlés-tudatos újrapróbálkozáson keresztül)
+- ModelScope kvótapolitika: `open-sse/services/modelscopePolicy.ts`
+- Claude kód CCH (kompatibilitási csatorna kézfogás): `open-sse/services/claudeCodeCCH.ts`, plusz `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Kód ujjlenyomat formázás: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Kódzavarás: `open-sse/services/claudeCodeObfuscation.ts`
+
+A teljes rejtett játékkönyvet és a működési útmutatást lásd `docs/security/STEALTH_GUIDE.md` (git; nincs `/docs`-be fordítva).
+
+### H. Webhooks, érvelési gyorsítótár, olvasási gyorsítótár
+
+- **Webhookok** — kimenő feladás provider/account/task eseményekhez.
+  - Diszpécser: `src/lib/webhookDispatcher.ts`
+  - Tárhely: `webhooks` SQLite asztal ( `src/lib/db/webhooks.ts` n keresztül)
+  - Irányítópult: `/dashboard/webhooks` (előfizetések, titkok, újrapróbálkozási előzmények)
+  - Az eseménytaxonómiával és az újrapróbálkozási szemantikával kapcsolatban lásd [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Érvelési gyorsítótár** — újrajátszható érvelési blokkok olyan szolgáltatók számára, amelyek gondolkodási tokeneket (Claude, GLMT stb.) bocsátanak ki, így az egymást követő fordulatok kihagyhatják az újragondolást.
+  - DB réteg: `src/lib/db/reasoningCache.ts`
+  - Szolgáltatási réteg: `open-sse/services/reasoningCache.ts`
+  - A visszajátszás szemantikáját lásd: [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Olvassa el a gyorsítótárat** — rövid élettartamú válaszgyorsítótár, amelyet aláírással kulcsolnak, és a törött upstream SDKs azonos újrapróbálkozásainak összecsukására használják.
+  - DB réteg: `src/lib/db/readCache.ts`
+  - Statisztikák végpontja: `GET /api/cache/stats`, műszerfal `/dashboard/cache` nél
+
+## 3) Perzisztenciaréteg
+
+Elsődleges állapot-adatbázis (SQLite):
+
+- Alapinfrastruktúra: `src/lib/db/core.ts` (better-sqlite3, migrációk, WAL)
+- Adatbázis-hozzáférés: közvetlenül az egyes `src/lib/db/*` modulokat importálja (a régi `localDb.ts` gyűjtőmodult eltávolították)
+- fájl: `${DATA_DIR}/storage.sqlite` (vagy `$XDG_CONFIG_HOME/omniroute/storage.sqlite`, ha be van állítva, egyébként `~/.omniroute/storage.sqlite`)
+- entitások (táblák + KV-névterek): providerConnections, providerNodes, modelAliases, combos, apiKeys, settings, pricing, **customModels**, **proxyConfig**, **ipFilter**, **thinkingBudget**, **systemPrompt**
+
+Használati adatok perzisztenciája:
+
+- homlokzat: `src/lib/usageDb.ts` (felbontott modulok a `src/lib/usage/*` alatt)
+- SQLite-táblák a `storage.sqlite` fájlban: `usage_history`, `call_logs`, `proxy_logs`
+- az opcionális fájlartefaktumok kompatibilitási és hibakeresési célból megmaradnak (`${DATA_DIR}/log.txt`, `${DATA_DIR}/call_logs/`, `<repo>/logs/...`)
+- a régi JSON-fájlokat az indítási migrációk SQLite-ba migrálják, ha jelen vannak
+
+Tartományi állapotadatbázis (SQLite):
+
+- `src/lib/db/domainState.ts` — CRUD-műveletek a tartományi állapothoz
+- Táblák (létrehozásuk helye: `src/lib/db/core.ts`): `domain_fallback_chains`, `domain_budgets`, `domain_cost_history`, `domain_lockout_state`, `domain_circuit_breakers`
+- Azonnali adatbázisba írást alkalmazó gyorsítótár-minta: futásidőben a memóriabeli Mapek a mérvadók; a módosítások szinkron módon íródnak az SQLite-ba; hidegindításkor az állapot visszaáll az adatbázisból
+
+## 4) Hitelesítés + biztonsági felületek
+
+- Vezérlőpult cookie-alapú hitelesítése: `src/proxy.ts`, `src/app/api/auth/login/route.ts`
+- API-kulcsok létrehozása/ellenőrzése: `src/shared/utils/apiKey.ts`
+- A szolgáltatói titkos adatok a `providerConnections` bejegyzésekben vannak tartósan tárolva
+- Kimenő proxy támogatása az `open-sse/utils/proxyFetch.ts` (környezeti változók) és az `open-sse/utils/networkProxy.ts` (szolgáltatónként vagy globálisan konfigurálható) révén
+- SSRF-/kimenő URL-védelem: `src/shared/network/outboundUrlGuard.ts` — gazdagép-ellenőrzések a szolgáltatói hívásoknál és a webhook-célpontoknál; a módot a `src/shared/network/outboundUrlGuardPolicy.ts` határozza meg (jelzők: `docs/reference/ENVIRONMENT.md`)
+- Futásidejű környezeti ellenőrzés: `src/lib/env/runtimeEnv.ts` — Zod-séma az összes környezeti változóhoz, amely az indítási hibákat/figyelmeztetéseket is megjeleníti
+- Szinkronizálási tokenek: `src/lib/db/syncTokens.ts` — hatókörrel rendelkező tokenek a konfigurációscsomag-letöltési végpontokhoz; a `sync_tokens` SQLite-tábla tárolja őket (`024_create_sync_tokens.sql` migráció)
+- WebSocket-kézfogás hitelesítése: `src/lib/ws/handshake.ts` — API-kulccsal vagy munkamenet-cookie-val ellenőrzi a WS-frissítési kéréseket
+- Az élő vezérlőpult WebSocket-hitelesítése: `src/server/ws/liveServer.ts` — a segédfolyamat (a `LIVE_WS_PORT` porton) vezérlőpult-munkamenet-cookie-t vagy kezelési hatókörrel (`manage`/`admin`) rendelkező Bearer API-kulcsot fogad el; a csak következtetésre jogosító kulcsokat elutasítja. A belső `POST /__omniroute_event` közzétevő végpont csak akkor fogad el loopback társtól érkező kapcsolatot, ha nincs jelen proxyugrást jelző fejléc (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
+
+## 5) Felhőalapú szinkronizálás
+
+- Ütemező inicializálása: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Időszakos feladat: `src/shared/services/cloudSyncScheduler.ts`
+- Időszakos feladat: `src/shared/services/modelSyncScheduler.ts`
+- Vezérlési útvonal: `src/app/api/sync/cloud/route.ts`
+
+## Kérés életciklusa (`/v1/chat/completions`)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Client as CLI/SDK Client
+    participant Client as CLI/SDK-kliens
     participant Route as /api/v1/chat/completions
     participant Chat as src/sse/handlers/chat
     participant Core as open-sse/handlers/chatCore
-    participant Model as Model Resolver
-    participant Auth as Credential Selector
-    participant Exec as Provider Executor
-    participant Prov as Upstream Provider
-    participant Stream as Stream Translator
+    participant Model as Modellfeloldó
+    participant Auth as Hitelesítőadat-kiválasztó
+    participant Exec as Szolgáltatói végrehajtó
+    participant Prov as Felsőbb szintű szolgáltató
+    participant Stream as Adatfolyam-átalakító
     participant Usage as usageDb
 
     Client->>Route: POST /v1/chat/completions
     Route->>Chat: handleChat(request)
-    Chat->>Model: parse/resolve model or combo
+    Chat->>Model: modell vagy kombináció értelmezése/feloldása
 
-    alt Combo model
-        Chat->>Chat: iterate combo models (handleComboChat)
+    alt Kombinált modell
+        Chat->>Chat: végighaladás a kombináció modelljein (handleComboChat)
     end
 
     Chat->>Auth: getProviderCredentials(provider)
-    Auth-->>Chat: active account + tokens/api key
+    Auth-->>Chat: aktív fiók + tokenek/API-kulcs
 
     Chat->>Core: handleChatCore(body, modelInfo, credentials)
-    Core->>Core: detect source format
-    Core->>Core: translate request to target format
+    Core->>Core: forrásformátum észlelése
+    Core->>Core: kérés átalakítása a célformátumra
     Core->>Exec: execute(provider, transformedBody)
-    Exec->>Prov: upstream API call
-    Prov-->>Exec: SSE/JSON response
-    Exec-->>Core: response + metadata
+    Exec->>Prov: felsőbb szintű API-hívás
+    Prov-->>Exec: SSE-/JSON-válasz
+    Exec-->>Core: válasz + metaadatok
 
     alt 401/403
         Core->>Exec: refreshCredentials()
-        Exec-->>Core: updated tokens
-        Core->>Exec: retry request
+        Exec-->>Core: frissített tokenek
+        Core->>Exec: kérés újbóli megkísérlése
     end
 
-    Core->>Stream: translate/normalize stream to client format
-    Stream-->>Client: SSE chunks / JSON response
+    Core->>Stream: adatfolyam átalakítása/normalizálása a kliensformátumra
+    Stream-->>Client: SSE-adatrészletek / JSON-válasz
 
-    Stream->>Usage: extract usage + persist history/log
+    Stream->>Usage: használati adatok kinyerése + előzmények/napló tárolása
 ```
 
-## Combo + Account Fallback Flow
+## Kombinációs + fiók-visszalépési folyamat
 
 ```mermaid
 flowchart TD
-    A[Incoming model string] --> B{Is combo name?}
-    B -- Yes --> C[Load combo models sequence]
-    B -- No --> D[Single model path]
+    A[Beérkező modellkarakterlánc] --> B{Kombinációnév?}
+    B -- Igen --> C[Kombináció modelljeinek sorrendjének betöltése]
+    B -- Nem --> D[Egyetlen modell útvonala]
 
-    C --> E[Try model N]
-    E --> F[Resolve provider/model]
+    C --> E[N. modell kipróbálása]
+    E --> F[Szolgáltató/modell feloldása]
     D --> F
 
-    F --> G[Select account credentials]
-    G --> H{Credentials available?}
-    H -- No --> I[Return provider unavailable]
-    H -- Yes --> J[Execute request]
+    F --> G[Fiók hitelesítő adatainak kiválasztása]
+    G --> H{Elérhetők a hitelesítő adatok?}
+    H -- Nem --> I[Szolgáltató nem érhető el eredmény visszaadása]
+    H -- Igen --> J[Kérés végrehajtása]
 
-    J --> K{Success?}
-    K -- Yes --> L[Return response]
-    K -- No --> M{Fallback-eligible error?}
+    J --> K{Sikeres?}
+    K -- Igen --> L[Válasz visszaadása]
+    K -- Nem --> M{Visszalépésre jogosító hiba?}
 
-    M -- No --> N[Return error]
-    M -- Yes --> O[Mark account unavailable cooldown]
-    O --> P{Another account for provider?}
-    P -- Yes --> G
-    P -- No --> Q{In combo with next model?}
-    Q -- Yes --> E
-    Q -- No --> R[Return all unavailable]
+    M -- Nem --> N[Hiba visszaadása]
+    M -- Igen --> O[Fiók megjelölése átmenetileg nem elérhetőként]
+    O --> P{Van másik fiók a szolgáltatóhoz?}
+    P -- Igen --> G
+    P -- Nem --> Q{Kombinációban van következő modell?}
+    Q -- Igen --> E
+    Q -- Nem --> R[Mindegyik nem érhető el eredmény visszaadása]
 ```
 
-Fallback decisions are driven by `open-sse/services/accountFallback.ts` using status codes and error-message heuristics. Combo routing adds one extra guard: provider-scoped 400s such as upstream content-block and role-validation failures are treated as model-local failures so later combo targets can still run.
+A visszalépési döntéseket az `open-sse/services/accountFallback.ts` vezérli az állapotkódok és a hibaüzenetek heurisztikus elemzése alapján. A kombinációs útválasztás egy további védelmi feltételt ad hozzá: a szolgáltatóhoz kötődő 400-as hibákat, például a felsőbb szintű tartalomblokkolási és szerepkör-ellenőrzési hibákat, modellszintű helyi hibaként kezeli, így a kombináció későbbi célmodelljei továbbra is futtathatók.
 
-## OAuth Onboarding and Token Refresh Lifecycle
+## OAuth-bevezetés és tokenfrissítési életciklus
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant UI as Dashboard UI
+    participant UI as Irányítópult felhasználói felülete
     participant OAuth as /api/oauth/[provider]/[action]
-    participant ProvAuth as Provider Auth Server
+    participant ProvAuth as Szolgáltató hitelesítési kiszolgálója
     participant DB as localDb
     participant Test as /api/providers/[id]/test
-    participant Exec as Provider Executor
+    participant Exec as Szolgáltató-végrehajtó
 
-    UI->>OAuth: GET authorize or device-code
-    OAuth->>ProvAuth: create auth/device flow
-    ProvAuth-->>OAuth: auth URL or device code payload
-    OAuth-->>UI: flow data
+    UI->>OAuth: GET engedélyezés vagy eszközkód
+    OAuth->>ProvAuth: hitelesítési/eszközfolyamat létrehozása
+    ProvAuth-->>OAuth: hitelesítési URL vagy eszközkód-adat
+    OAuth-->>UI: folyamatadatok
 
-    UI->>OAuth: POST exchange or poll
-    OAuth->>ProvAuth: token exchange/poll
-    ProvAuth-->>OAuth: access/refresh tokens
-    OAuth->>DB: createProviderConnection(oauth data)
-    OAuth-->>UI: success + connection id
+    UI->>OAuth: POST csere vagy lekérdezés
+    OAuth->>ProvAuth: tokencsere/lekérdezés
+    ProvAuth-->>OAuth: hozzáférési/frissítési tokenek
+    OAuth->>DB: createProviderConnection(oauth adatok)
+    OAuth-->>UI: siker + kapcsolat azonosítója
 
     UI->>Test: POST /api/providers/[id]/test
-    Test->>Exec: validate credentials / optional refresh
-    Exec-->>Test: valid or refreshed token info
-    Test->>DB: update status/tokens/errors
-    Test-->>UI: validation result
+    Test->>Exec: hitelesítő adatok ellenőrzése / opcionális frissítés
+    Exec-->>Test: érvényes vagy frissített tokeninformációk
+    Test->>DB: állapot/tokenek/hibák frissítése
+    Test-->>UI: ellenőrzési eredmény
 ```
 
-Refresh during live traffic is executed inside `open-sse/handlers/chatCore.ts` via executor `refreshCredentials()`.
+Az élő forgalom közbeni frissítés az `open-sse/handlers/chatCore.ts` fájlban, a végrehajtó `refreshCredentials()` függvényén keresztül történik.
 
-## Cloud Sync Lifecycle (Enable / Sync / Disable)
+## Felhőszinkronizálási életciklus (engedélyezés / szinkronizálás / letiltás)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant UI as Endpoint Page UI
+    participant UI as Végpontoldal felhasználói felülete
     participant Sync as /api/sync/cloud
     participant DB as localDb
-    participant Cloud as External Cloud Sync
+    participant Cloud as Külső felhőszinkronizálás
     participant Claude as ~/.claude/settings.json
 
     UI->>Sync: POST action=enable
-    Sync->>DB: set cloudEnabled=true
-    Sync->>DB: ensure API key exists
-    Sync->>Cloud: POST /sync/{machineId} (providers/aliases/combos/keys)
-    Cloud-->>Sync: sync result
+    Sync->>DB: cloudEnabled=true beállítása
+    Sync->>DB: API-kulcs meglétének biztosítása
+    Sync->>Cloud: POST /sync/{machineId} (szolgáltatók/álnevek/kombinációk/kulcsok)
+    Cloud-->>Sync: szinkronizálási eredmény
     Sync->>Cloud: GET /{machineId}/v1/verify
-    Sync-->>UI: enabled + verification status
+    Sync-->>UI: engedélyezve + ellenőrzési állapot
 
     UI->>Sync: POST action=sync
     Sync->>Cloud: POST /sync/{machineId}
-    Cloud-->>Sync: remote data
-    Sync->>DB: update newer local tokens/status
-    Sync-->>UI: synced
+    Cloud-->>Sync: távoli adatok
+    Sync->>DB: újabb helyi tokenek/állapot frissítése
+    Sync-->>UI: szinkronizálva
 
     UI->>Sync: POST action=disable
-    Sync->>DB: set cloudEnabled=false
+    Sync->>DB: cloudEnabled=false beállítása
     Sync->>Cloud: DELETE /sync/{machineId}
-    Sync->>Claude: switch ANTHROPIC_BASE_URL back to local (if needed)
-    Sync-->>UI: disabled
+    Sync->>Claude: az ANTHROPIC_BASE_URL visszaállítása helyire (ha szükséges)
+    Sync-->>UI: letiltva
 ```
 
-Periodic sync is triggered by `CloudSyncScheduler` when cloud is enabled.
+Az időszakos szinkronizálást a `CloudSyncScheduler` indítja el, amikor a felhő engedélyezve van.
 
-## Data Model and Storage Map
+## Adatmodell és tárolási térkép
 
 ```mermaid
 erDiagram
@@ -571,32 +761,32 @@ erDiagram
     }
 ```
 
-Physical storage files:
+Fizikai tárolófájlok:
 
-- primary runtime DB: `${DATA_DIR}/storage.sqlite`
-- request log lines: `${DATA_DIR}/log.txt` (compat/debug artifact)
-- structured call payload archives: `${DATA_DIR}/call_logs/`
-- optional translator/request debug sessions: `<repo>/logs/...`
+- elsődleges futásidejű adatbázis: `${DATA_DIR}/storage.sqlite`
+- kérésnapló sorai: `${DATA_DIR}/log.txt` (kompatibilitási/hibakeresési melléktermék)
+- strukturált hívásiadat-archívumok: `${DATA_DIR}/call_logs/`
+- opcionális fordítói/kérés-hibakeresési munkamenetek: `<repo>/logs/...`
 
-## Deployment Topology
+## Telepítési topológia
 
 ```mermaid
 flowchart LR
-    subgraph LocalHost[Developer Host]
-        CLI[CLI Tools]
-        Browser[Dashboard Browser]
+    subgraph LocalHost[Fejlesztői gép]
+        CLI[CLI-eszközök]
+        Browser[Vezérlőpult böngészője]
     end
 
-    subgraph ContainerOrProcess[OmniRoute Runtime]
-        Next[Next.js Server\nPORT=20128]
-        Core[SSE Core + Executors]
+    subgraph ContainerOrProcess[OmniRoute futtatókörnyezet]
+        Next[Next.js-kiszolgáló\nPORT=20128]
+        Core[SSE-mag + végrehajtók]
         MainDB[(storage.sqlite)]
-        UsageDB[(usage tables + log artifacts)]
+        UsageDB[(használati táblák + naplózási melléktermékek)]
     end
 
-    subgraph External[External Services]
-        Providers[AI Providers]
-        SyncCloud[Cloud Sync Service]
+    subgraph External[Külső szolgáltatások]
+        Providers[MI-szolgáltatók]
+        SyncCloud[Felhőszinkronizálási szolgáltatás]
     end
 
     CLI --> Next
@@ -609,279 +799,327 @@ flowchart LR
     Next --> SyncCloud
 ```
 
-## Module Mapping (Decision-Critical)
+## Modulok leképezése (döntéskritikus)
 
-### Route and API Modules
+### Útvonal- és API-modulok
 
-- `src/app/api/v1/*`, `src/app/api/v1beta/*`: compatibility APIs
-- `src/app/api/v1/providers/[provider]/*`: dedicated per-provider routes (chat, embeddings, images)
-- `src/app/api/providers*`: provider CRUD, validation, testing
-- `src/app/api/provider-nodes*`: custom compatible node management
-- `src/app/api/provider-models`: custom model management (CRUD)
-- `src/app/api/models/route.ts`: model catalog API (aliases + custom models)
-- `src/app/api/oauth/*`: OAuth/device-code flows
-- `src/app/api/keys*`: local API key lifecycle
-- `src/app/api/models/alias`: alias management
-- `src/app/api/combos*`: fallback combo management
-- `src/app/api/pricing`: pricing overrides for cost calculation
-- `src/app/api/settings/proxy`: proxy configuration (GET/PUT/DELETE)
-- `src/app/api/settings/proxy/test`: outbound proxy connectivity test (POST)
-- `src/app/api/usage/*`: usage and logs APIs
-- `src/app/api/sync/*` + `src/app/api/cloud/*`: cloud sync and cloud-facing helpers
-- `src/app/api/cli-tools/*`: local CLI config writers/checkers
-- `src/app/api/settings/ip-filter`: IP allowlist/blocklist (GET/PUT)
-- `src/app/api/settings/thinking-budget`: thinking token budget config (GET/PUT)
-- `src/app/api/settings/system-prompt`: global system prompt (GET/PUT)
-- `src/app/api/sessions`: active session listing (GET)
-- `src/app/api/rate-limits`: per-account rate limit status (GET)
-- `src/app/api/sync/tokens`: sync token CRUD (GET/POST)
-- `src/app/api/sync/tokens/[id]`: sync token get/delete (GET/DELETE)
-- `src/app/api/sync/bundle`: config bundle download (GET, ETag versioning)
-- `src/app/api/v1/ws`: WebSocket upgrade handler for OpenAI-compatible WS clients
+- `src/app/api/v1/*`, `src/app/api/v1beta/*`: kompatibilitási API-k
+- `src/app/api/v1/providers/[provider]/*`: szolgáltatónként elkülönített útvonalak (csevegés, beágyazások, képek)
+- `src/app/api/providers*`: szolgáltatók CRUD-műveletei, ellenőrzése és tesztelése
+- `src/app/api/provider-nodes*`: egyéni kompatibilis csomópontok kezelése
+- `src/app/api/provider-models`: egyéni modellek kezelése (CRUD)
+- `src/app/api/models/route.ts`: modellkatalógus API-ja (álnevek + egyéni modellek)
+- `src/app/api/oauth/*`: OAuth-/eszközkód-folyamatok
+- `src/app/api/keys*`: helyi API-kulcsok életciklusa
+- `src/app/api/models/alias`: álnevek kezelése
+- `src/app/api/combos*`: tartalék kombinációk kezelése
+- `src/app/api/pricing`: árképzési felülbírálások a költségszámításhoz
+- `src/app/api/settings/proxy`: proxykonfiguráció (GET/PUT/DELETE)
+- `src/app/api/settings/proxy/test`: kimenő proxy kapcsolatának tesztelése (POST)
+- `src/app/api/usage/*`: használati és naplózási API-k
+- `src/app/api/sync/*` + `src/app/api/cloud/*`: felhőszinkronizálás és felhőorientált segédfunkciók
+- `src/app/api/cli-tools/*`: helyi CLI-konfigurációk írói/ellenőrzői
+- `src/app/api/settings/ip-filter`: IP-engedélyezési/tiltási lista (GET/PUT)
+- `src/app/api/settings/thinking-budget`: gondolkodási tokenkeret konfigurációja (GET/PUT)
+- `src/app/api/settings/system-prompt`: globális rendszerprompt (GET/PUT)
+- `src/app/api/settings/compression`: globális tömörítési beállítások (GET/PUT)
+- `src/app/api/compression/*`: tömörítési előnézet, szabálymetaadatok és nyelvi csomagok
+- `src/app/api/context/caveman/config`: Caveman-beállítások álneve (GET/PUT)
+- `src/app/api/context/rtk/*`: RTK-konfiguráció, szűrőkatalógus, tesztvégpont és nyers kimenet helyreállítása
+- `src/app/api/context/combos*`: tömörítési kombinációk CRUD-műveletei és útválasztási kombinációk hozzárendelései
+- `src/app/api/context/analytics`: tömörítéselemzési álnév
+- `src/app/api/sessions`: aktív munkamenetek listázása (GET)
+- `src/app/api/rate-limits`: fiókonkénti sebességkorlátozási állapot (GET)
+- `src/app/api/sync/tokens`: szinkronizálási tokenek CRUD-műveletei (GET/POST)
+- `src/app/api/sync/tokens/[id]`: szinkronizálási token lekérése/törlése (GET/DELETE)
+- `src/app/api/sync/bundle`: konfigurációs csomag letöltése (GET, ETag-verziókezelés)
+- `src/app/api/v1/ws`: WebSocket-frissítés kezelője OpenAI-kompatibilis WS-kliensekhez
 
-### Routing and Execution Core
+### Útválasztási és végrehajtási mag
 
-- `src/sse/handlers/chat.ts`: request parse, combo handling, account selection loop
-- `open-sse/handlers/chatCore.ts`: translation, executor dispatch, retry/refresh handling, stream setup
-- `open-sse/executors/*`: provider-specific network and format behavior
+- `src/sse/handlers/chat.ts`: kérés feldolgozása, kombinációk kezelése, fiókkiválasztási ciklus
+- `open-sse/handlers/chatCore.ts`: fordítás, végrehajtó kiválasztása, újrapróbálkozás/frissítés kezelése, adatfolyam beállítása
+- `open-sse/executors/*`: szolgáltatóspecifikus hálózati és formátumkezelési viselkedés
 
-### Translation Registry and Format Converters
+### Fordítási nyilvántartás és formátumkonverterek
 
-- `open-sse/translator/index.ts`: translator registry and orchestration
-- Request translators: `open-sse/translator/request/*`
-- Response translators: `open-sse/translator/response/*`
-- Format constants: `open-sse/translator/formats.ts`
+- `open-sse/translator/index.ts`: fordítóregiszter és vezérlés
+- Kérésfordítók: `open-sse/translator/request/*` (9 modul — `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`)
+- Válaszfordítók: `open-sse/translator/response/*` (11 modul — `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`, `openai-to-gemini`, `openai-to-gemini-sse`, `responsesToolItem`)
+- Segédmodulok: `open-sse/translator/helpers/*` (12 modul — `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `jsonUtil`, `markdownBoundary`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `strictSystemHoist`, `toolCallHelper`, `toolCallShim`)
+- Formátumkonstansok: `open-sse/translator/formats.ts`
+- Rendszerindítás és regiszter: `open-sse/translator/bootstrap.ts`, `open-sse/translator/registry.ts`
+- Képformátum-segédmodulok: `open-sse/translator/image/`
 
-### Persistence
+### Perzisztencia
 
-- `src/lib/db/*`: persistent config/state and domain persistence on SQLite
-- `src/lib/localDb.ts`: compatibility re-export for DB modules
-- `src/lib/usageDb.ts`: usage history/call logs facade on top of SQLite tables
+- `src/lib/db/*`: tartós konfiguráció-/állapottárolás és tartományi perzisztencia SQLite-on
+- `src/lib/db/*`: az egyes modulokat közvetlenül importáld — nincs gyűjtőmodul (a régi `localDb.ts` újraexportáló réteget eltávolították)
+- `src/lib/usageDb.ts`: használati előzmények és hívásnaplók homlokzata az SQLite-táblák felett
 
-## Provider Executor Coverage (Strategy Pattern)
+## Szolgáltatói végrehajtók lefedettsége (stratégiaminta)
 
-Each provider has a specialized executor extending `BaseExecutor` (in `open-sse/executors/base.ts`), which provides URL building, header construction, retry with exponential backoff, credential refresh hooks, and the `execute()` orchestration method.
+Minden szolgáltató rendelkezik egy specializált, a `BaseExecutor` osztályt kiterjesztő végrehajtóval (az `open-sse/executors/base.ts` fájlban), amely biztosítja az URL-ek összeállítását, a fejlécek létrehozását, az exponenciális késleltetésű újrapróbálkozást, a hitelesítő adatok frissítéséhez szükséges hookokat, valamint az `execute()` vezénylési metódust.
 
-| Executor               | Provider(s)                                                                                                                                                 | Special Handling                                                     |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `DefaultExecutor`      | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, etc. | Dynamic URL/header config per provider                               |
-| `AntigravityExecutor`  | Google Antigravity                                                                                                                                          | Custom project/session IDs, Retry-After parsing                      |
-| `CliProxyApiExecutor`  | CLIProxyAPI-compatible providers                                                                                                                            | Custom auth and protocol handling                                    |
-| `CloudflareAiExecutor` | Cloudflare Workers AI                                                                                                                                       | Account ID injection, Neurons-based usage tracking                   |
-| `CodexExecutor`        | OpenAI Codex                                                                                                                                                | Injects system instructions, forces reasoning effort                 |
-| `CursorExecutor`       | Cursor IDE                                                                                                                                                  | ConnectRPC protocol, Protobuf encoding, request signing via checksum |
-| `GithubExecutor`       | GitHub Copilot                                                                                                                                              | Copilot token refresh, VSCode-mimicking headers                      |
-| `KiroExecutor`         | AWS CodeWhisperer/Kiro                                                                                                                                      | AWS EventStream binary format → SSE conversion                       |
-| `OpenCodeExecutor`     | OpenCode                                                                                                                                                    | AI SDK compatible provider setup                                     |
-| `PollinationsExecutor` | Pollinations AI                                                                                                                                             | No API key required, rate-limited requests                           |
-| `QoderExecutor`        | Qoder AI                                                                                                                                                    | PAT and OAuth support, multi-model free tier                         |
-| `VertexExecutor`       | Google Vertex AI                                                                                                                                            | Service account auth, region-based endpoints                         |
+| Végrehajtó                | Szolgáltató(k)                                                                                                                                             | Speciális kezelés                                                                      |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA stb. | Dinamikus URL-/fejléc-konfiguráció szolgáltatónként                                    |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | Egyéni projekt-/munkamenet-azonosítók, Retry-After feldolgozása, 429-es hibák elfedése |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | Telepítésalapú útválasztás, az api-version lekérdezési paraméter kikényszerítése       |
+| `BlackboxWebExecutor`     | Blackbox AI (webes mód)                                                                                                                                    | Webes munkamenet visszafejtése TLS-ujjlenyomat-emulációval                             |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH-útvonal)                                                                                                                                    | Korlátozási és eszköz-újraleképezési folyamatok, ujjlenyomat-formálás                  |
+| `CliProxyApiExecutor`     | CLIProxyAPI-kompatibilis szolgáltatók                                                                                                                      | Egyéni hitelesítés- és protokollkezelés                                                |
+| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | Fiókazonosító beillesztése, Neurons-alapú használatkövetés                             |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | Rendszerutasításokat illeszt be, kikényszeríti az érvelési erőfeszítés szintjét        |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | Böngésző-munkamenetes Responses API-híd szál-/fordulórögzítéssel                       |
+| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth és munkamenetenkénti fejlécrotáció                                               |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | ConnectRPC protokoll, Protobuf-kódolás, kérések aláírása ellenőrzőösszeggel            |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | A Devin-feladatok életciklusának összekapcsolása felhőügynök-modulon keresztül         |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | Copilot-token frissítése, VSCode-ot utánzó fejlécek                                    |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth és projekthatókörű útválasztás                                            |
+| `GlmExecutor`             | Z.AI GLM (beleértve a `glmt` előbeállítást)                                                                                                                | Gondolkodási keretet figyelembe vevő működés, GLMT előbeállítási állandók              |
+| `GrokWebExecutor`         | xAI Grok web                                                                                                                                               | Webes munkamenet visszafejtése, módválasztás (gondolkodó/normál)                       |
+| `KieExecutor`             | KIE                                                                                                                                                        | Egyéni tokenkibocsátás változó munkamenet-horgonyokkal                                 |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | AWS EventStream bináris formátum → SSE-konverzió                                       |
+| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                           | Webes munkamenet visszafejtése képüzenetek áthidalásával                               |
+| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | Szolgáltatóspecifikus kérés-törzsstruktúra                                             |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | AI SDK-kompatibilis szolgáltató-beállítás                                              |
+| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                             | Webes munkamenet visszafejtése a csevegés folytatásához                                |
+| `PetalsExecutor`          | Petals elosztott inferencia                                                                                                                                | Decentralizált rajalapú útválasztás                                                    |
+| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | Nem igényel API-kulcsot, sebességkorlátozott kérések                                   |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                   | PAT- és OAuth-támogatás, többmodelles ingyenes csomag                                  |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | Szolgáltatásfiók-alapú hitelesítés, régióalapú végpontok                               |
+| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | Importált API-kulcs és Connect-protobuf csevegésstreamelés                             |
 
-All other providers (including custom compatible nodes) use the `DefaultExecutor`.
+Minden más szolgáltató (beleértve az egyéni kompatibilis csomópontokat is) a `DefaultExecutor` végrehajtót használja.
 
-## Provider Compatibility Matrix
+## Szolgáltatói kompatibilitási mátrix
 
-| Provider         | Format           | Auth                  | Stream           | Non-Stream | Token Refresh | Usage API          |
-| ---------------- | ---------------- | --------------------- | ---------------- | ---------- | ------------- | ------------------ |
-| Claude           | claude           | API Key / OAuth       | ✅               | ✅         | ✅            | ⚠️ Admin only      |
-| Gemini           | gemini           | API Key / OAuth       | ✅               | ✅         | ✅            | ⚠️ Cloud Console   |
-| Antigravity      | antigravity      | OAuth                 | ✅               | ✅         | ✅            | ✅ Full quota API  |
-| OpenAI           | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Codex            | openai-responses | OAuth                 | ✅ forced        | ❌         | ✅            | ✅ Rate limits     |
-| GitHub Copilot   | openai           | OAuth + Copilot Token | ✅               | ✅         | ✅            | ✅ Quota snapshots |
-| Cursor           | cursor           | Custom checksum       | ✅               | ✅         | ❌            | ❌                 |
-| Kiro             | kiro             | AWS SSO OIDC          | ✅ (EventStream) | ❌         | ✅            | ✅ Usage limits    |
-| Qwen             | openai           | OAuth                 | ✅               | ✅         | ✅            | ⚠️ Per request     |
-| Qoder            | openai           | OAuth / PAT           | ✅               | ✅         | ✅            | ⚠️ Per request     |
-| Kilo Code        | openai           | OAuth                 | ✅               | ✅         | ✅            | ❌                 |
-| Cline            | openai           | OAuth                 | ✅               | ✅         | ✅            | ❌                 |
-| Kimi Coding      | openai           | OAuth                 | ✅               | ✅         | ✅            | ❌                 |
-| OpenRouter       | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| GLM/Kimi/MiniMax | claude           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| DeepSeek         | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Groq             | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| xAI (Grok)       | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Mistral          | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Perplexity       | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Together AI      | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Fireworks AI     | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Cerebras         | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Cohere           | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| NVIDIA NIM       | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Cloudflare AI    | openai           | API Token + Acct ID   | ✅               | ✅         | ❌            | ❌                 |
-| Pollinations     | openai           | None (no key)         | ✅               | ✅         | ❌            | ❌                 |
-| Scaleway AI      | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| LongCat          | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Ollama Cloud     | openai           | API Key (optional)    | ✅               | ✅         | ❌            | ❌                 |
-| HuggingFace      | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Nebius           | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| SiliconFlow      | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Hyperbolic       | openai           | API Key               | ✅               | ✅         | ❌            | ❌                 |
-| Vertex AI        | gemini           | Service Account       | ✅               | ✅         | ✅            | ⚠️ Cloud Console   |
+> **Megjegyzés:** Az alábbi mátrix az OmniRoute v3.8.0 rendszerben regisztrált 351 szolgáltató reprezentatív mintája.
+> A hiteles és folyamatosan frissített listát lásd az
+> [`docs/reference/PROVIDER_REFERENCE.md`](../reference/PROVIDER_REFERENCE.md) (automatikusan generált) fájlban, vagy a mérvadó
+> `src/shared/constants/providers.ts` forrásban (betöltéskor Zod által validálva).
 
-## Format Translation Coverage
+| Szolgáltató         | Formátum         | Hitelesítés               | Streamelés       | Nem streamelt | Tokenfrissítés | Használati API              |
+| ------------------- | ---------------- | ------------------------- | ---------------- | ------------- | -------------- | --------------------------- |
+| Claude              | claude           | API-kulcs / OAuth         | ✅               | ✅            | ✅             | ⚠️ Csak adminisztrátoroknak |
+| Gemini              | gemini           | API-kulcs / OAuth         | ✅               | ✅            | ✅             | ⚠️ Cloud Console            |
+| Antigravity         | antigravity      | OAuth                     | ✅               | ✅            | ✅             | ✅ Teljes kvóta-API         |
+| OpenAI              | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Codex               | openai-responses | OAuth                     | ✅ kötelező      | ❌            | ✅             | ✅ Sebességkorlátok         |
+| ChatGPT Web (Codex) | openai-responses | Böngésző-munkamenet       | ✅ kötelező      | ❌            | ❌             | ❌                          |
+| GitHub Copilot      | openai           | OAuth + Copilot-token     | ✅               | ✅            | ✅             | ✅ Kvótapillanatképek       |
+| Cursor              | cursor           | Egyéni ellenőrzőösszeg    | ✅               | ✅            | ❌             | ❌                          |
+| Kiro                | kiro             | AWS SSO OIDC              | ✅ (EventStream) | ❌            | ✅             | ✅ Használati korlátok      |
+| Qoder               | openai           | OAuth / PAT               | ✅               | ✅            | ✅             | ⚠️ Kérésenként              |
+| Kilo Code           | openai           | OAuth                     | ✅               | ✅            | ✅             | ❌                          |
+| Cline               | openai           | OAuth                     | ✅               | ✅            | ✅             | ❌                          |
+| Kimi Coding         | openai           | OAuth                     | ✅               | ✅            | ✅             | ❌                          |
+| OpenRouter          | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| GLM/Kimi/MiniMax    | claude           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| DeepSeek            | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Groq                | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| xAI (Grok)          | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Mistral             | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Perplexity          | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Together AI         | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Fireworks AI        | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Cerebras            | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Cohere              | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| NVIDIA NIM          | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Cloudflare AI       | openai           | API-token + fiókazonosító | ✅               | ✅            | ❌             | ❌                          |
+| Pollinations        | openai           | Nincs (nem kell kulcs)    | ✅               | ✅            | ❌             | ❌                          |
+| Scaleway AI         | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| LongCat             | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Ollama Cloud        | openai           | API-kulcs (opcionális)    | ✅               | ✅            | ❌             | ❌                          |
+| HuggingFace         | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Nebius              | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| SiliconFlow         | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Hyperbolic          | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Vertex AI           | gemini           | Szolgáltatásfiók          | ✅               | ✅            | ✅             | ⚠️ Cloud Console            |
+| Command Code        | openai           | OAuth                     | ✅               | ✅            | ✅             | ⚠️ Kérésenként              |
+| Z.AI / GLM          | openai           | API-kulcs / OAuth         | ✅               | ✅            | ❌             | ❌                          |
+| GLMT (előbeállítás) | claude           | API-kulcs                 | ✅               | ✅            | ❌             | ⚠️ Kérésenként              |
+| Kimi Coding         | openai           | OAuth / API-kulcs         | ✅               | ✅            | ✅             | ❌                          |
+| KIE                 | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Devin Desktop       | openai           | Importált API-kulcs       | ✅ (Connect→SSE) | ✅            | ❌             | ⚠️ Kérésenként              |
+| GitLab Duo          | openai           | OAuth (GitLab)            | ✅               | ✅            | ✅             | ❌                          |
+| Devin CLI           | openai           | Helyi CLI-bejelentkezés   | ✅               | ✅            | ❌             | ✅ Feladat-API              |
+| Codex Cloud         | openai-responses | OAuth                     | ✅               | ❌            | ✅             | ✅ Sebességkorlátok         |
+| Jules               | openai           | OAuth                     | ✅               | ✅            | ✅             | ✅ Feladat-API              |
+| AgentRouter         | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Grok-Web            | openai           | Munkamenetsüti            | ✅               | ✅            | ❌             | ❌                          |
+| Perplexity-Web      | openai           | Munkamenetsüti            | ✅               | ✅            | ❌             | ❌                          |
+| BlackBox-Web        | openai           | Munkamenetsüti + TLS      | ✅               | ✅            | ❌             | ❌                          |
+| Muse-Spark-Web      | openai           | Munkamenetsüti            | ✅               | ✅            | ❌             | ❌                          |
+| ModelScope          | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ⚠️ Kvótaszabályzat          |
+| BazaarLink          | openai           | API-kulcs                 | ✅               | ✅            | ❌             | ❌                          |
+| Petals              | openai           | Nincs                     | ✅               | ✅            | ❌             | ❌                          |
+| Qoder               | openai           | OAuth / PAT               | ✅               | ✅            | ✅             | ⚠️ Kérésenként              |
+| OpenCode (Go/Zen)   | openai           | OAuth                     | ✅               | ✅            | ✅             | ❌                          |
+| CLIProxyAPI         | openai           | Egyéni                    | ✅               | ✅            | ❌             | ❌                          |
 
-Detected source formats include:
+## Formátumfordítási lefedettség
+
+Az észlelt forrásformátumok:
 
 - `openai`
 - `openai-responses`
 - `claude`
 - `gemini`
 
-Target formats include:
+A célformátumok:
 
 - OpenAI chat/Responses
 - Claude
-- Gemini/Antigravity envelope
+- Gemini/Antigravity-boríték
 - Kiro
 - Cursor
 
-Translations use **OpenAI as the hub format** — all conversions go through OpenAI as intermediate:
+A fordítások **az OpenAI-t használják központi formátumként** — minden konverzió az OpenAI-on mint köztes formátumon keresztül történik:
 
 ```
-Source Format → OpenAI (hub) → Target Format
+Forrásformátum → OpenAI (központ) → Célformátum
 ```
 
-Translations are selected dynamically based on source payload shape and provider target format.
+A fordítások kiválasztása dinamikusan, a forrásadat-struktúra alakja és a célszolgáltató formátuma alapján történik.
 
-Additional processing layers in the translation pipeline:
+További feldolgozási rétegek a fordítási folyamatban:
 
-- **Response sanitization** — Strips non-standard fields from OpenAI-format responses (both streaming and non-streaming) to ensure strict SDK compliance
-- **Role normalization** — Converts `developer` → `system` for non-OpenAI targets; merges `system` → `user` for models that reject the system role (GLM, ERNIE)
-- **Think tag extraction** — Parses `<think>...</think>` blocks from content into `reasoning_content` field
-- **Structured output** — Converts OpenAI `response_format.json_schema` to Gemini's `responseMimeType` + `responseSchema`
+- **Válaszok tisztítása** — Eltávolítja a nem szabványos mezőket az OpenAI-formátumú válaszokból (streamelt és nem streamelt válaszokból egyaránt), így biztosítva az SDK-k szigorú követelményeinek való megfelelést
+- **Szerepkörök normalizálása** — A nem OpenAI-célok esetén a `developer` szerepkört `system` szerepkörré alakítja; a rendszerszerepkört elutasító modelleknél (GLM, ERNIE) a `system` szerepkört a `user` szerepkörbe egyesíti
+- **Think címkék kinyerése** — A tartalomban található `<think>...</think>` blokkokat feldolgozza, és a `reasoning_content` mezőbe helyezi
+- **Strukturált kimenet** — Az OpenAI `response_format.json_schema` formátumát a Gemini `responseMimeType` + `responseSchema` formátumára alakítja
 
-## Supported API Endpoints
+## Támogatott API-végpontok
 
-| Endpoint                                           | Format             | Handler                                                             |
-| -------------------------------------------------- | ------------------ | ------------------------------------------------------------------- |
-| `POST /v1/chat/completions`                        | OpenAI Chat        | `src/sse/handlers/chat.ts`                                          |
-| `POST /v1/messages`                                | Claude Messages    | Same handler (auto-detected)                                        |
-| `POST /v1/responses`                               | OpenAI Responses   | `open-sse/handlers/responsesHandler.ts`                             |
-| `POST /v1/embeddings`                              | OpenAI Embeddings  | `open-sse/handlers/embeddings.ts`                                   |
-| `GET /v1/embeddings`                               | Model listing      | API route                                                           |
-| `POST /v1/images/generations`                      | OpenAI Images      | `open-sse/handlers/imageGeneration.ts`                              |
-| `GET /v1/images/generations`                       | Model listing      | API route                                                           |
-| `POST /v1/providers/{provider}/chat/completions`   | OpenAI Chat        | Dedicated per-provider with model validation                        |
-| `POST /v1/providers/{provider}/embeddings`         | OpenAI Embeddings  | Dedicated per-provider with model validation                        |
-| `POST /v1/providers/{provider}/images/generations` | OpenAI Images      | Dedicated per-provider with model validation                        |
-| `POST /v1/messages/count_tokens`                   | Claude Token Count | API route                                                           |
-| `GET /v1/models`                                   | OpenAI Models list | API route (chat + embedding + image + custom models)                |
-| `GET /api/models/catalog`                          | Catalog            | All models grouped by provider + type                               |
-| `POST /v1beta/models/*:streamGenerateContent`      | Gemini native      | API route                                                           |
-| `GET/PUT/DELETE /api/settings/proxy`               | Proxy Config       | Network proxy configuration                                         |
-| `POST /api/settings/proxy/test`                    | Proxy Connectivity | Proxy health/connectivity test endpoint                             |
-| `GET/POST/DELETE /api/provider-models`             | Provider Models    | Provider model metadata backing custom and managed available models |
+| Végpont                                            | Formátum              | Kezelő                                                                         |
+| -------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------ |
+| `POST /v1/chat/completions`                        | OpenAI Chat           | `src/sse/handlers/chat.ts`                                                     |
+| `POST /v1/messages`                                | Claude Messages       | Ugyanaz a kezelő (automatikusan észlelve)                                      |
+| `POST /v1/responses`                               | OpenAI Responses      | `open-sse/handlers/responsesHandler.ts`                                        |
+| `POST /v1/embeddings`                              | OpenAI Embeddings     | `open-sse/handlers/embeddings.ts`                                              |
+| `GET /v1/embeddings`                               | Modelllista           | API-útvonal                                                                    |
+| `POST /v1/images/generations`                      | OpenAI Images         | `open-sse/handlers/imageGeneration.ts`                                         |
+| `GET /v1/images/generations`                       | Modelllista           | API-útvonal                                                                    |
+| `POST /v1/providers/{provider}/chat/completions`   | OpenAI Chat           | Dedikált szolgáltatónkénti végpont modellvalidációval                          |
+| `POST /v1/providers/{provider}/embeddings`         | OpenAI Embeddings     | Dedikált szolgáltatónkénti végpont modellvalidációval                          |
+| `POST /v1/providers/{provider}/images/generations` | OpenAI Images         | Dedikált szolgáltatónkénti végpont modellvalidációval                          |
+| `POST /v1/messages/count_tokens`                   | Claude tokenszámlálás | API-útvonal                                                                    |
+| `GET /v1/models`                                   | OpenAI modelllista    | API-útvonal (chat-, beágyazási, kép- és egyéni modellek)                       |
+| `GET /api/models/catalog`                          | Katalógus             | Az összes modell szolgáltató és típus szerint csoportosítva                    |
+| `POST /v1beta/models/*:streamGenerateContent`      | Natív Gemini          | API-útvonal                                                                    |
+| `GET/PUT/DELETE /api/settings/proxy`               | Proxykonfiguráció     | Hálózati proxy konfigurációja                                                  |
+| `POST /api/settings/proxy/test`                    | Proxykapcsolat        | A proxy állapotát és kapcsolódását ellenőrző végpont                           |
+| `GET/POST/DELETE /api/provider-models`             | Szolgáltatói modellek | Az egyéni és felügyelt elérhető modellek mögötti szolgáltatói modellmetaadatok |
 
-## Bypass Handler
+## Megkerülési kezelő
 
-The bypass handler (`open-sse/utils/bypassHandler.ts`) intercepts known "throwaway" requests from Claude CLI — warmup pings, title extractions, and token counts — and returns a **fake response** without consuming upstream provider tokens. This is triggered only when `User-Agent` contains `claude-cli`.
+A megkerülési kezelő (`open-sse/utils/bypassHandler.ts`) elfogja a Claude CLI ismert „eldobható” kéréseit — a bemelegítő pingeket, a címkinyeréseket és a tokenszámlálásokat —, és egy **hamis választ** ad vissza anélkül, hogy felhasználná a felsőbb szintű szolgáltató tokenjeit. Ez csak akkor aktiválódik, ha a `User-Agent` tartalmazza a `claude-cli` értéket.
 
-## Request Logging and Artifacts
+## Kérések naplózása és műtermékek
 
-The older file-based request logger (`open-sse/utils/requestLogger.ts`) is retained only for
-legacy compatibility. The current runtime contract uses:
+A régebbi, fájlalapú kérésnaplózó (`open-sse/utils/requestLogger.ts`) csak a visszamenőleges kompatibilitás érdekében maradt meg. A jelenlegi futásidejű szerződés a következőket használja:
 
-- `APP_LOG_TO_FILE=true` for application and audit logs written under `<repo>/logs/`
-- SQLite-backed call log records in `call_logs`
-- `${DATA_DIR}/call_logs/YYYY-MM-DD/...` artifacts when the call log pipeline is enabled
+- `APP_LOG_TO_FILE=true` az alkalmazás- és auditnaplókhoz, amelyek a `<repo>/logs/` alatt kerülnek tárolásra
+- SQLite-alapú hívásnapló-rekordok a `call_logs` táblában
+- `${DATA_DIR}/call_logs/YYYY-MM-DD/...` műtermékek, ha a hívásnaplózási folyamat engedélyezve van
 
-## Failure Modes and Resilience
+## Hibamódok és ellenálló képesség
 
-## 1) Account/Provider Availability
+## 1) Fiók-/szolgáltató-elérhetőség
 
-- connection cooldown on retryable upstream failures
-- account fallback before failing request
-- combo model fallback when current model/provider path is exhausted
+- kapcsolati várakozási idő az újrapróbálható felsőbb szintű hibák után
+- tartalék fiók használata a kérés sikertelen lezárása előtt
+- kombinált modellre való tartalék átváltás, amikor az aktuális modell-/szolgáltatói útvonal lehetőségei kimerültek
 
-## 2) Token Expiry
+## 2) Token lejárata
 
-- pre-check and refresh with retry for refreshable providers
-- 401/403 retry after refresh attempt in core path
+- előzetes ellenőrzés és frissítés újrapróbálással a frissíthető szolgáltatóknál
+- 401/403 esetén újrapróbálás a frissítési kísérlet után az alapvető feldolgozási útvonalon
 
-## 3) Stream Safety
+## 3) Adatfolyam-biztonság
 
-- disconnect-aware stream controller
-- translation stream with end-of-stream flush and `[DONE]` handling
-- usage estimation fallback when provider usage metadata is missing
+- kapcsolatbontást figyelembe vevő adatfolyam-vezérlő
+- fordítási adatfolyam az adatfolyam végi pufferürítés és a `[DONE]` kezelésével
+- tartalék használatbecslés, ha a szolgáltató használati metaadatai hiányoznak
 
-## 4) Cloud Sync Degradation
+## 4) Felhőszinkronizálás korlátozott működése
 
-- sync errors are surfaced but local runtime continues
-- scheduler has retry-capable logic, but periodic execution currently calls single-attempt sync by default
+- a szinkronizálási hibák megjelennek, de a helyi futtatókörnyezet tovább működik
+- az ütemező újrapróbálásra képes logikával rendelkezik, de az időszakos végrehajtás jelenleg alapértelmezés szerint egyszeri szinkronizálási kísérletet indít
 
-## 5) Data Integrity
+## 5) Adatintegritás
 
-- SQLite schema migrations and auto-upgrade hooks at startup
-- legacy JSON → SQLite migration compatibility path
+- SQLite-sémamigrációk és automatikus frissítési horgok indításkor
+- visszamenőleges kompatibilitási útvonal a régi JSON → SQLite migrációhoz
 
-## 6) SSRF / Outbound URL Guard
+## 6) SSRF / kimenő URL-ek védelme
 
-- `src/shared/network/outboundUrlGuard.ts` blocks all private/loopback/link-local target URLs before they reach provider executors
-- Provider model discovery and validation routes use `src/shared/network/safeOutboundFetch.ts` which applies the guard before every outbound request
-- Guard errors surface as `URL_GUARD_BLOCKED` with HTTP 422 and are logged to the compliance audit trail via `providerAudit.ts`
+- a `src/shared/network/outboundUrlGuard.ts` blokkol minden privát, visszacsatolási és helyi kapcsolati cél-URL-t, mielőtt azok elérnék a szolgáltatói végrehajtókat
+- a szolgáltatói modellek felderítési és ellenőrzési útvonalai a `src/shared/network/safeOutboundFetch.ts` fájlt használják, amely minden kimenő kérés előtt alkalmazza a védelmet
+- a védelmi hibák `URL_GUARD_BLOCKED` hibakóddal és HTTP 422-es állapotkóddal jelennek meg, és a `providerAudit.ts` segítségével bekerülnek a megfelelőségi auditnaplóba
 
-## Observability and Operational Signals
+## Megfigyelhetőség és üzemeltetési jelzések
 
-Runtime visibility sources:
+A futásidejű láthatóság forrásai:
 
-- console logs from `src/sse/utils/logger.ts`
-- per-request usage aggregates in SQLite (`usage_history`, `call_logs`, `proxy_logs`)
-- four-stage detailed payload captures in SQLite (`request_detail_logs`) when `settings.detailed_logs_enabled=true`
-- textual request status log in `log.txt` (optional/compat)
-- optional application log files under `logs/` when `APP_LOG_TO_FILE=true`
-- optional request artifacts under `${DATA_DIR}/call_logs/` when the call log pipeline is enabled
-- dashboard usage endpoints (`/api/usage/*`) for UI consumption
+- konzolnaplók a `src/sse/utils/logger.ts` fájlból
+- kérésenkénti összesített használati adatok az SQLite-ban (`usage_history`, `call_logs`, `proxy_logs`)
+- négyszakaszos, részletes adattartalom-rögzítés az SQLite-ban (`request_detail_logs`), ha `settings.detailed_logs_enabled=true`
+- szöveges kérésállapot-napló a `log.txt` fájlban (opcionális/kompatibilitási)
+- opcionális alkalmazásnapló-fájlok a `logs/` alatt, ha `APP_LOG_TO_FILE=true`
+- opcionális kérésműtermékek a `${DATA_DIR}/call_logs/` alatt, ha a hívásnaplózási folyamat engedélyezve van
+- irányítópulti használati végpontok (`/api/usage/*`) a felhasználói felület számára
 
-Detailed request payload capture stores up to four JSON payload stages per routed call:
+A részletes kérés-adattartalom rögzítése irányított hívásonként legfeljebb négy JSON-adattartalmi szakaszt tárol:
 
-- raw request received from the client
-- translated request actually sent upstream
-- provider response reconstructed as JSON; streamed responses are compacted to the final summary plus stream metadata
-- final client response returned by OmniRoute; streamed responses are stored in the same compact summary form
+- a klienstől fogadott nyers kérés
+- a ténylegesen a felsőbb szintre küldött, átalakított kérés
+- a szolgáltató JSON-ként rekonstruált válasza; az adatfolyamban továbbított válaszok a végső összefoglalóra és az adatfolyam metaadataira tömörítve kerülnek tárolásra
+- az OmniRoute által visszaadott végső kliensválasz; az adatfolyamban továbbított válaszok ugyanebben a tömörített összefoglaló-formában kerülnek tárolásra
 
-## Security-Sensitive Boundaries
+## Biztonsági szempontból érzékeny határok
 
-- JWT secret (`JWT_SECRET`) secures dashboard session cookie verification/signing
-- Initial password bootstrap (`INITIAL_PASSWORD`) should be explicitly configured for first-run provisioning
-- API key HMAC secret (`API_KEY_SECRET`) secures generated local API key format
-- Provider secrets (API keys/tokens) are persisted in local DB and should be protected at filesystem level
-- Cloud sync endpoints rely on API key auth + machine id semantics
+- A JWT-titok (`JWT_SECRET`) biztosítja az irányítópult munkamenetsütijének ellenőrzését/aláírását
+- A kezdeti jelszó rendszerindítási beállítását (`INITIAL_PASSWORD`) explicit módon kell konfigurálni az első futtatáskor történő kiépítéshez
+- Az API-kulcs HMAC-titka (`API_KEY_SECRET`) biztosítja a generált helyi API-kulcs formátumát
+- A szolgáltatói titkok (API-kulcsok/tokenek) a helyi adatbázisban vannak tárolva, és fájlrendszerszinten kell védeni őket
+- A felhőszinkronizálási végpontok API-kulcsos hitelesítésre és gépazonosító-szemantikára támaszkodnak
 
-## Environment and Runtime Matrix
+## Környezeti és futtatási mátrix
 
-Environment variables actively used by code:
+A kód által aktívan használt környezeti változók:
 
-- App/auth: `JWT_SECRET`, `INITIAL_PASSWORD`
-- Storage: `DATA_DIR`
-- Compatible node behavior: `ALLOW_MULTI_CONNECTIONS_PER_COMPAT_NODE`
-- Optional storage base override (Linux/macOS when `DATA_DIR` unset): `XDG_CONFIG_HOME`
-- Security hashing: `API_KEY_SECRET`, `MACHINE_ID_SALT`
-- Logging: `APP_LOG_TO_FILE`, `APP_LOG_RETENTION_DAYS`, `CALL_LOG_RETENTION_DAYS`
-- Sync/cloud URLing: `NEXT_PUBLIC_BASE_URL`, `NEXT_PUBLIC_CLOUD_URL`
-- Outbound proxy: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` and lowercase variants
-- SOCKS5 feature flags: `ENABLE_SOCKS5_PROXY`, `NEXT_PUBLIC_ENABLE_SOCKS5_PROXY`
-- Platform/runtime helpers (not app-specific config): `APPDATA`, `NODE_ENV`, `PORT`, `HOSTNAME`
+- Alkalmazás/hitelesítés: `JWT_SECRET`, `INITIAL_PASSWORD`
+- Tárolás: `DATA_DIR`
+- Opcionális tárolásialap-felülbírálás (Linux/macOS rendszeren, ha a `DATA_DIR` nincs beállítva): `XDG_CONFIG_HOME`
+- Biztonsági kivonatolás: `API_KEY_SECRET`, `MACHINE_ID_SALT`
+- Naplózás: `APP_LOG_TO_FILE`, `APP_LOG_RETENTION_DAYS`, `CALL_LOG_RETENTION_DAYS`
+- Szinkronizálási/felhőbeli URL-kezelés: `NEXT_PUBLIC_BASE_URL`, `NEXT_PUBLIC_CLOUD_URL`
+- Kimenő proxy: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` és kisbetűs változataik
+- SOCKS5-funkciójelzők: `ENABLE_SOCKS5_PROXY`, `NEXT_PUBLIC_ENABLE_SOCKS5_PROXY`
+- Platform-/futtatókörnyezet-segédváltozók (nem alkalmazásspecifikus konfiguráció): `APPDATA`, `NODE_ENV`, `PORT`, `HOSTNAME`
 
-## Known Architectural Notes
+## Ismert architekturális megjegyzések
 
-1. `usageDb` and `localDb` share the same base directory policy (`DATA_DIR` -> `XDG_CONFIG_HOME/omniroute` -> `~/.omniroute`) with legacy file migration.
-2. `/api/v1/route.ts` delegates to the same unified catalog builder used by `/api/v1/models` (`src/app/api/v1/models/catalog.ts`) to avoid semantic drift.
-3. Request logger writes full headers/body when enabled; treat log directory as sensitive.
-4. Cloud behavior depends on correct `NEXT_PUBLIC_BASE_URL` and cloud endpoint reachability.
-5. The `open-sse/` directory is published as the `@omniroute/open-sse` **npm workspace package**. Source code imports it via `@omniroute/open-sse/...` (resolved by Next.js `transpilePackages`). File paths in this document still use the directory name `open-sse/` for consistency.
-6. Charts in the dashboard use **Recharts** (SVG-based) for accessible, interactive analytics visualizations (model usage bar charts, provider breakdown tables with success rates).
-7. E2E tests use **Playwright** (`tests/e2e/`), run via `npm run test:e2e`. Unit tests use **Node.js test runner** (`tests/unit/`), run via `npm run test:unit`. Source code under `src/` is **TypeScript** (`.ts`/`.tsx`); the `open-sse/` workspace remains JavaScript (`.js`).
-8. Settings page is organized into 7 tabs: General, Appearance, AI, Security, Routing, Resilience, Advanced. The Resilience page only configures request queue, connection cooldown, provider breaker, and wait-for-cooldown behavior; live breaker runtime state is shown on the Health page.
-9. **Context Relay** strategy (`context-relay`) is split across two layers: `combo.ts` decides if a handoff should be generated, `chat.ts` injects the handoff after account resolution. Handoff data lives in `context_handoffs` SQLite table. This split is intentional because only `chat.ts` knows whether the actual account changed.
-10. **Proxy enforcement** is now comprehensive: `tokenHealthCheck.ts` resolves proxy per connection, `/api/providers/validate` uses `runWithProxyContext`, and `proxyFetch.ts` uses `undici.fetch()` to maintain dispatcher compatibility on Node 22.
-11. **Node.js runtime policy detection**: `/api/settings/require-login` returns `nodeVersion` and `nodeCompatible` fields. The login page renders a warning banner when the runtime falls outside the supported secure Node.js lines.
+1. A `usageDb` és a `localDb` ugyanazt az alapkönyvtár-házirendet használja (`DATA_DIR` -> `XDG_CONFIG_HOME/omniroute` -> `~/.omniroute`), a régi fájlok migrációjával.
+2. A `/api/v1/route.ts` ugyanarra az egységes katalóguskészítőre delegál, amelyet a `/api/v1/models` is használ (`src/app/api/v1/models/catalog.ts`), így elkerülhető a szemantikai eltérés.
+3. A kérésnaplózó engedélyezés esetén a teljes fejlécet és törzset kiírja; a naplókönyvtárat érzékeny adatként kell kezelni.
+4. A felhőbeli működés a `NEXT_PUBLIC_BASE_URL` helyes beállításától és a felhővégpont elérhetőségétől függ.
+5. Az `open-sse/` könyvtár `@omniroute/open-sse` **npm workspace csomagként** van közzétéve. A forráskód a `@omniroute/open-sse/...` útvonalon importálja (a Next.js `transpilePackages` oldja fel). A dokumentumban szereplő fájlútvonalak a következetesség érdekében továbbra is az `open-sse/` könyvtárnevet használják.
+6. Az irányítópult diagramjai **Recharts** (SVG-alapú) használatával biztosítanak akadálymentes, interaktív analitikai vizualizációkat (modellhasználati oszlopdiagramok, szolgáltatói bontást és sikerességi arányokat tartalmazó táblázatok).
+7. Az E2E-tesztek **Playwright** használatával készülnek (`tests/e2e/`), és az `npm run test:e2e` paranccsal futtathatók. Az egységtesztek a **Node.js test runner** használatával készülnek (`tests/unit/`), és az `npm run test:unit` paranccsal futtathatók. A `src/` alatti forráskód **TypeScript** (`.ts`/`.tsx`); az `open-sse/` workspace továbbra is JavaScript (`.js`).
+8. A beállítások oldala 7 lapra tagolódik: Általános, Megjelenés, MI, Biztonság, Útválasztás, Hibatűrés, Speciális. A Hibatűrés oldal kizárólag a kérési sort, a kapcsolat-várakoztatást, a szolgáltatói megszakítót és a lehűlés kivárásának viselkedését konfigurálja; a megszakító élő futásidejű állapota az Állapot oldalon jelenik meg.
+9. A **Context Relay** stratégia (`context-relay`) két réteg között oszlik meg: a `combo.ts` dönti el, hogy kell-e átadást generálni, a `chat.ts` pedig a fiók feloldása után illeszti be az átadást. Az átadási adatok a `context_handoffs` SQLite-táblában találhatók. Ez a felosztás szándékos, mert csak a `chat.ts` tudja, hogy a tényleges fiók megváltozott-e.
+10. A **proxykényszerítés** immár átfogó: a `tokenHealthCheck.ts` kapcsolatonként oldja fel a proxyt, az `/api/providers/validate` a `runWithProxyContext` használatával működik, a `proxyFetch.ts` pedig az `undici.fetch()` függvényt használja a diszpécser-kompatibilitás fenntartásához Node 22 alatt.
+11. **Node.js futtatókörnyezet-házirend észlelése**: az `/api/settings/require-login` végpont `nodeVersion` és `nodeCompatible` mezőket ad vissza. A bejelentkezési oldal figyelmeztető sávot jelenít meg, ha a futtatókörnyezet kívül esik a támogatott, biztonságos Node.js-verzióvonalakon.
 
-## Operational Verification Checklist
+## Üzemeltetési ellenőrzőlista
 
-- Build from source: `npm run build`
-- Build Docker image: `docker build -t omniroute .`
-- Start service and verify:
+- Fordítás forráskódból: `npm run build`
+- Docker-kép létrehozása: `docker build -t omniroute .`
+- Indítsa el a szolgáltatást, és ellenőrizze a következőket:
 - `GET /api/settings`
 - `GET /api/v1/models`
-- CLI target base URL should be `http://<host>:20128/v1` when `PORT=20128`
+- A CLI céljának alap URL-je `http://<host>:20128/v1` legyen, ha `PORT=20128`

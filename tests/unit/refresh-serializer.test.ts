@@ -18,6 +18,7 @@ import {
   rotationGroupFor,
   wasRefreshTokenRotated,
   __resetRefreshSerializerForTest,
+  setRefreshLaneMaxMsForTest,
 } from "../../open-sse/services/refreshSerializer.ts";
 
 // These tests assert serialization ORDERING (concurrency=1 per group); the
@@ -111,4 +112,148 @@ test("wasRefreshTokenRotated: true only when the DB token changed to a non-empty
   assert.equal(wasRefreshTokenRotated(undefined, undefined), false);
   assert.equal(wasRefreshTokenRotated("rt-old", { token: "rt-new" }), false);
   assert.equal(wasRefreshTokenRotated(42, "rt-new"), false);
+});
+
+// Amazon Q dispatches to the same refresh backend as kiro, and Openference
+// rotates one-time-use refresh tokens on its own endpoint: both need lanes.
+test("amazon-q shares the kiro rotation lane", () => {
+  const lane = rotationGroupFor("amazon-q");
+  assert.notEqual(lane, null, "amazon-q must be a rotating provider with a lane");
+  assert.equal(
+    lane,
+    rotationGroupFor("kiro"),
+    "amazon-q dispatches to the same refresh backend as kiro"
+  );
+});
+
+test("openference gets its own rotation lane", () => {
+  const lane = rotationGroupFor("openference");
+  assert.notEqual(lane, null, "openference must be a rotating provider with a lane");
+  assert.notEqual(
+    lane,
+    rotationGroupFor("kiro"),
+    "openference has its own endpoint, not the kiro backend"
+  );
+  assert.notEqual(lane, rotationGroupFor("codex"));
+});
+
+test("two amazon-q refreshes never overlap in the shared kiro lane", async () => {
+  __resetRefreshSerializerForTest();
+  let active = 0;
+  let maxActive = 0;
+  const refresh = (provider: string) =>
+    serializeRefresh(provider, async () => {
+      active++;
+      maxActive = Math.max(maxActive, active);
+      await delay(20);
+      active--;
+    });
+  await Promise.all([refresh("amazon-q"), refresh("amazon-q")]);
+  assert.equal(maxActive, 1, "two amazon-q refreshes in the kiro lane must serialize");
+  let crossActive = 0;
+  let crossMax = 0;
+  const cross = (provider: string) =>
+    serializeRefresh(provider, async () => {
+      crossActive++;
+      crossMax = Math.max(crossMax, crossActive);
+      await delay(20);
+      crossActive--;
+    });
+  await Promise.all([cross("amazon-q"), cross("openference")]);
+  assert.equal(crossMax, 2, "amazon-q and openference are independent lanes");
+});
+
+test("two openference refreshes never overlap in their own lane", async () => {
+  __resetRefreshSerializerForTest();
+  let active = 0;
+  let maxActive = 0;
+  const refresh = (provider: string) =>
+    serializeRefresh(provider, async () => {
+      active++;
+      maxActive = Math.max(maxActive, active);
+      await delay(20);
+      active--;
+    });
+  await Promise.all([refresh("openference"), refresh("openference")]);
+  assert.equal(maxActive, 1, "two openference refreshes in their own lane must serialize");
+  let crossActive = 0;
+  let crossMax = 0;
+  const cross = (provider: string) =>
+    serializeRefresh(provider, async () => {
+      crossActive++;
+      crossMax = Math.max(crossMax, crossActive);
+      await delay(20);
+      crossActive--;
+    });
+  await Promise.all([cross("openference"), cross("amazon-q")]);
+  assert.equal(crossMax, 2, "openference and amazon-q are independent lanes");
+});
+
+test("a nested refresh in the same group runs inside the held lane instead of deadlocking", async () => {
+  // refreshAndUpdateCredentials serializes executor.refreshCredentials(), and the
+  // Codex/Claude executors call getAccessToken(), which serializes again on the
+  // same group. Before the fix the inner call queued behind its own caller until
+  // the lane bound fired, and the outer call resolved null.
+  __resetRefreshSerializerForTest();
+  setRefreshLaneMaxMsForTest(500);
+  try {
+    const started = Date.now();
+    const result = await serializeRefresh("codex", () =>
+      serializeRefresh("codex", async () => "inner-refreshed")
+    );
+    assert.equal(result, "inner-refreshed");
+    assert.ok(Date.now() - started < 400, "nested call must not wait for the lane bound");
+  } finally {
+    setRefreshLaneMaxMsForTest(null);
+  }
+});
+
+test("reentrancy is scoped to the call chain: a sibling still waits for the held lane", async () => {
+  __resetRefreshSerializerForTest();
+  const order: string[] = [];
+  const outer = serializeRefresh("claude", async () => {
+    order.push("outer:start");
+    await delay(30);
+    await serializeRefresh("claude", async () => {
+      order.push("nested");
+    });
+    order.push("outer:end");
+  });
+  const sibling = serializeRefresh("claude", async () => {
+    order.push("sibling");
+  });
+  await Promise.all([outer, sibling]);
+  assert.deepEqual(order, ["outer:start", "nested", "outer:end", "sibling"]);
+});
+
+test("holding one group's lane does not bypass another group's lane", async () => {
+  __resetRefreshSerializerForTest();
+  const order: string[] = [];
+  let releaseKiro!: () => void;
+  const kiroHeld = serializeRefresh(
+    "kiro",
+    () =>
+      new Promise<void>((resolve) => {
+        order.push("kiro:start");
+        releaseKiro = () => {
+          order.push("kiro:end");
+          resolve();
+        };
+      })
+  );
+  await delay(5);
+  const codexThenKiro = serializeRefresh("codex", async () => {
+    await serializeRefresh("kiro", async () => {
+      order.push("codex->kiro");
+    });
+  });
+  await delay(20);
+  assert.deepEqual(
+    order,
+    ["kiro:start"],
+    "the nested kiro call must queue behind the held kiro lane"
+  );
+  releaseKiro();
+  await Promise.all([kiroHeld, codexThenKiro]);
+  assert.deepEqual(order, ["kiro:start", "kiro:end", "codex->kiro"]);
 });

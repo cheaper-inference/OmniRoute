@@ -4,13 +4,20 @@ import { GLM_SHARED_MODELS } from "../../../glmProvider.ts";
 const GLM_EXECUTOR_EFFORT_ALIASES = new Set([
   "glm-5.3-high",
   "glm-5.3-low",
+  "glm-5.3-flash-high",
+  "glm-5.3-flash-low",
+  "glm-5.3-flash-max",
   "glm-5.2-high",
   "glm-5.2-max",
 ]);
 
 export const ZCODE_MODELS = GLM_SHARED_MODELS.filter(
   (model) => !GLM_EXECUTOR_EFFORT_ALIASES.has(model.id)
-).map((model) => ({ ...model, supportedThinkingEfforts: [] }));
+).map((model) => ({
+  ...model,
+  supportedThinkingEfforts: [],
+  supportsVision: Boolean(model.supportsVision),
+}));
 
 /**
  * Local ZCode app-server backend. Authentication remains in the user's local

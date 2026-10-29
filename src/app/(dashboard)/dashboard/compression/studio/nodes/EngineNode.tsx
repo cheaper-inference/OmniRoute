@@ -2,17 +2,19 @@
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { StatusDot } from "@/shared/components/flow/StatusDot";
+import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
+import { categoricalSlotFor } from "@/shared/utils/categoricalPalette";
 
-// ── Layer pill color map (10-layer model) ─────────────────────────────────
+// ── Layer pill colours (10-layer model) ───────────────────────────────────
+// Kit chart tokens (KEA-7886 P8), deterministic by position in LAYER_ORDER (chart-(i % 5 + 1));
+// L9 shares chart-1 with L1 — the pill always prints the layer id, so colour is only a cue.
+const LAYER_ORDER = ["L1", "L3", "L4", "L5", "L6", "L9"] as const; // prose, tool, code, MCP, history, pruning
 
-const LAYER_COLORS: Record<string, string> = {
-  L1: "#3b82f6", // prose — blue
-  L3: "#f97316", // tool — orange
-  L4: "#22c55e", // code — green
-  L5: "#a855f7", // MCP — purple
-  L6: "#9ca3af", // history — gray
-  L9: "#ec4899", // pruning — pink
-};
+/**
+ * In-flight engine step. Mirrors the Phase-2 orchestration mapping `running ->
+ * var(--orch-status-warning)` (`orchestrationTypes.ts::STATE_VAR`).
+ */
+const RUNNING_COLOR = "var(--orch-status-warning)";
 
 /** Map engine name → layer tags for the pill display */
 const ENGINE_LAYER_MAP: Record<string, string[]> = {
@@ -28,10 +30,15 @@ const ENGINE_LAYER_MAP: Record<string, string[]> = {
   "rtk:standard": ["L3", "L4"],
 };
 
+/**
+ * Savings quality ramp — good / mediocre / none. Theme-aware `--orch-status-*` tokens
+ * (light values in `:root`, dark values in `.dark` of `src/app/globals.css`); the dark
+ * values are the previous hexes, so dark mode is byte-identical.
+ */
 function getSavingsColor(savingsPercent: number): string {
-  if (savingsPercent >= 30) return "#22c55e";
-  if (savingsPercent >= 15) return "#f59e0b";
-  return "#6b7280";
+  if (savingsPercent >= 30) return "var(--orch-status-success)";
+  if (savingsPercent >= 15) return "var(--orch-status-warning)";
+  return "var(--orch-status-muted)";
 }
 
 // ── Node data shape ───────────────────────────────────────────────────────
@@ -72,14 +79,18 @@ export function EngineNode({ data }: NodeProps) {
   const tokOut = compressedTokens as number;
   const techniques = (techniquesUsed as string[]).slice(0, 2);
 
-  const borderColor = skipped ? "var(--color-border)" : running ? "#f59e0b" : color;
+  const borderColor = skipped ? "var(--color-border)" : running ? RUNNING_COLOR : color;
 
   return (
     <div
       className="rounded-lg border-2 bg-bg transition-all duration-300 min-w-[150px] max-w-[180px]"
       style={{
         borderColor,
-        boxShadow: running ? `0 0 14px #f59e0b40` : skipped ? "none" : `0 0 10px ${color}30`,
+        boxShadow: running
+          ? `0 0 14px ${flowColorAlpha(RUNNING_COLOR, 25)}`
+          : skipped
+            ? "none"
+            : `0 0 10px ${flowColorAlpha(color, 19)}`,
       }}
     >
       <Handle
@@ -98,17 +109,19 @@ export function EngineNode({ data }: NodeProps) {
         className="flex items-center gap-1.5 px-2.5 pt-2 pb-1"
         style={{ borderBottom: "1px solid var(--color-border)" }}
       >
-        {running && <StatusDot color="#f59e0b" sizeClass="size-1.5" />}
+        {running && <StatusDot color={RUNNING_COLOR} sizeClass="size-1.5" />}
         <span className="text-xs font-semibold truncate flex-1" title={engine as string}>
           {engine as string}
         </span>
-        {skipped && <span className="text-[10px] text-muted px-1 rounded bg-muted/10">skip</span>}
+        {skipped && (
+          <span className="text-[10px] text-text-muted px-1 rounded bg-bg-subtle">skip</span>
+        )}
       </div>
 
       {/* Body — token bar */}
       {!skipped && (
         <div className="px-2.5 py-1.5">
-          <div className="flex justify-between text-[10px] text-muted mb-0.5">
+          <div className="flex justify-between text-[10px] text-text-muted mb-0.5">
             <span>{tokIn.toLocaleString()}</span>
             <span>→</span>
             <span>{tokOut.toLocaleString()}</span>
@@ -134,14 +147,14 @@ export function EngineNode({ data }: NodeProps) {
         )}
         {techniques.length > 0 && (
           <span
-            className="text-[9px] text-muted truncate"
+            className="text-[9px] text-text-muted truncate"
             title={(techniquesUsed as string[]).join(", ")}
           >
             {techniques.join(", ")}
           </span>
         )}
         {durationMs != null && (
-          <span className="text-[9px] text-muted">{(durationMs as number).toFixed(1)}ms</span>
+          <span className="text-[9px] text-text-muted">{(durationMs as number).toFixed(1)}ms</span>
         )}
         {/* Layer pills */}
         {layers.length > 0 && (
@@ -149,10 +162,12 @@ export function EngineNode({ data }: NodeProps) {
             {layers.map((layer) => (
               <span
                 key={layer}
-                className="text-[9px] px-1 rounded-sm font-medium"
+                className="text-[9px] px-1 rounded-sm font-medium text-text-main"
                 style={{
-                  backgroundColor: `${LAYER_COLORS[layer] ?? "#6b7280"}22`,
-                  color: LAYER_COLORS[layer] ?? "#6b7280",
+                  backgroundColor: flowColorAlpha(
+                    categoricalSlotFor(LAYER_ORDER, layer)?.colorVar ?? "var(--color-text-muted)",
+                    20
+                  ),
                 }}
               >
                 {layer}

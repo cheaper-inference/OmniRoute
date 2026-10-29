@@ -1,0 +1,438 @@
+# Contributing to OmniRoute (Lietuvių)
+
+🌐 **Languages:** 🇺🇸 [English](../../../CONTRIBUTING.md) · 🇪🇹 [am](../am/CONTRIBUTING.md) · 🇸🇦 [ar](../ar/CONTRIBUTING.md) · 🇦🇿 [az](../az/CONTRIBUTING.md) · 🇧🇬 [bg](../bg/CONTRIBUTING.md) · 🇧🇩 [bn](../bn/CONTRIBUTING.md) · 🇧🇦 [bs](../bs/CONTRIBUTING.md) · 🇨🇿 [cs](../cs/CONTRIBUTING.md) · 🇩🇰 [da](../da/CONTRIBUTING.md) · 🇩🇪 [de](../de/CONTRIBUTING.md) · 🇬🇷 [el](../el/CONTRIBUTING.md) · 🇪🇸 [es](../es/CONTRIBUTING.md) · 🇪🇪 [et](../et/CONTRIBUTING.md) · 🇮🇷 [fa](../fa/CONTRIBUTING.md) · 🇫🇮 [fi](../fi/CONTRIBUTING.md) · 🇫🇷 [fr](../fr/CONTRIBUTING.md) · 🇮🇪 [ga](../ga/CONTRIBUTING.md) · 🇮🇳 [gu](../gu/CONTRIBUTING.md) · 🇳🇬 [ha](../ha/CONTRIBUTING.md) · 🇮🇱 [he](../he/CONTRIBUTING.md) · 🇮🇳 [hi](../hi/CONTRIBUTING.md) · 🇭🇷 [hr](../hr/CONTRIBUTING.md) · 🇭🇺 [hu](../hu/CONTRIBUTING.md) · 🇦🇲 [hy](../hy/CONTRIBUTING.md) · 🇮🇩 [id](../id/CONTRIBUTING.md) · 🇳🇬 [ig](../ig/CONTRIBUTING.md) · 🇮🇹 [it](../it/CONTRIBUTING.md) · 🇯🇵 [ja](../ja/CONTRIBUTING.md) · 🇬🇪 [ka](../ka/CONTRIBUTING.md) · 🇰🇭 [km](../km/CONTRIBUTING.md) · 🇮🇳 [kn](../kn/CONTRIBUTING.md) · 🇰🇷 [ko](../ko/CONTRIBUTING.md) · 🇱🇻 [lv](../lv/CONTRIBUTING.md) · 🇮🇳 [ml](../ml/CONTRIBUTING.md) · 🇮🇳 [mr](../mr/CONTRIBUTING.md) · 🇲🇾 [ms](../ms/CONTRIBUTING.md) · 🇲🇹 [mt](../mt/CONTRIBUTING.md) · 🇲🇲 [my](../my/CONTRIBUTING.md) · 🇳🇵 [ne](../ne/CONTRIBUTING.md) · 🇳🇱 [nl](../nl/CONTRIBUTING.md) · 🇳🇴 [no](../no/CONTRIBUTING.md) · 🇮🇳 [or](../or/CONTRIBUTING.md) · 🇮🇳 [pa](../pa/CONTRIBUTING.md) · 🇵🇭 [phi](../phi/CONTRIBUTING.md) · 🇵🇱 [pl](../pl/CONTRIBUTING.md) · 🇵🇹 [pt](../pt/CONTRIBUTING.md) · 🇧🇷 [pt-BR](../pt-BR/CONTRIBUTING.md) · 🇷🇴 [ro](../ro/CONTRIBUTING.md) · 🇷🇺 [ru](../ru/CONTRIBUTING.md) · 🇱🇰 [si](../si/CONTRIBUTING.md) · 🇸🇰 [sk](../sk/CONTRIBUTING.md) · 🇸🇮 [sl](../sl/CONTRIBUTING.md) · 🇷🇸 [sr](../sr/CONTRIBUTING.md) · 🇸🇪 [sv](../sv/CONTRIBUTING.md) · 🇰🇪 [sw](../sw/CONTRIBUTING.md) · 🇮🇳 [ta](../ta/CONTRIBUTING.md) · 🇮🇳 [te](../te/CONTRIBUTING.md) · 🇹🇭 [th](../th/CONTRIBUTING.md) · 🇹🇷 [tr](../tr/CONTRIBUTING.md) · 🇺🇦 [uk-UA](../uk-UA/CONTRIBUTING.md) · 🇵🇰 [ur](../ur/CONTRIBUTING.md) · 🇺🇿 [uz](../uz/CONTRIBUTING.md) · 🇻🇳 [vi](../vi/CONTRIBUTING.md) · 🇳🇬 [yo](../yo/CONTRIBUTING.md) · 🇨🇳 [zh-CN](../zh-CN/CONTRIBUTING.md) · 🇹🇼 [zh-TW](../zh-TW/CONTRIBUTING.md)
+
+---
+
+Dėkojame, kad domitės galimybe prisidėti! Šiame vadove rasite viską, ko reikia norint pradėti.
+
+Oficiali darbo eiga, taikoma kiekvienam pakeitimui, aprašyta
+[Indėlio auksiniame kelyje](docs/ops/CONTRIBUTION_GOLDEN_PATH.md). Jame tiekėjų, maršruto parinkimo,
+UI/UX, i18n, CLI, duomenų bazės ir kūrimo / diegimo pakeitimai susiejami su jų sutartimis, tiksliniais testais, CI
+aprėptimi ir suderinimo veiksmais.
+
+---
+
+## Kūrimo aplinkos parengimas
+
+### Būtinosios sąlygos
+
+- **Node.js** `>=22.22.2 <23` arba `>=24.0.0 <27` (rekomenduojama: 24 LTS)
+- **npm** 10+
+
+> **npm v11+ naudotojams (Node 24+):** paleidę `npm install`, patikrinkite, ar buvo įdiegti savieji moduliai:
+> `node -e "require('better-sqlite3')"`. Jei komanda nepavyksta ir pateikiama klaida `MODULE_NOT_FOUND`,
+> paleiskite `npm approve-scripts better-sqlite3 && npm install`. Žr.
+> [Trikčių šalinimas](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+
+- **Git**
+
+### Klonavimas ir diegimas
+
+```bash
+git clone https://github.com/diegosouzapw/OmniRoute.git
+cd OmniRoute
+npm install
+```
+
+### Aplinkos kintamieji
+
+```bash
+# Sukurkite savo .env pagal šabloną
+cp .env.example .env
+
+# Sugeneruokite būtinus slaptuosius raktus
+echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
+echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
+```
+
+Pagrindiniai kūrimo aplinkos kintamieji:
+
+| Kintamasis             | Numatytoji kūrimo reikšmė | Aprašymas                        |
+| ---------------------- | ------------------------- | -------------------------------- |
+| `PORT`                 | `20128`                   | Serverio prievadas               |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | Bazinis sąsajos URL              |
+| `JWT_SECRET`           | (sugeneruokite anksčiau)  | JWT pasirašymo slaptasis raktas  |
+| `INITIAL_PASSWORD`     | `CHANGEME`                | Pirmojo prisijungimo slaptažodis |
+| `APP_LOG_LEVEL`        | `info`                    | Žurnalų išsamumo lygis           |
+
+### Valdymo skydelio nustatymai
+
+Valdymo skydelyje pateikiami funkcijų jungikliai, kuriuos taip pat galima konfigūruoti naudojant aplinkos kintamuosius:
+
+| Nustatymo vieta        | Jungiklis                 | Aprašymas                                   |
+| ---------------------- | ------------------------- | ------------------------------------------- |
+| Nustatymai → Išsamiau  | Derinimo režimas          | Įjungti derinimo užklausų žurnalus (sąsaja) |
+| Nustatymai → Bendrieji | Šoninės juostos matomumas | Rodyti / slėpti šoninės juostos skiltis     |
+
+Šie nustatymai saugomi duomenų bazėje ir išlieka po paleidimo iš naujo, o juos nustačius jie pakeičia numatytąsias aplinkos kintamųjų reikšmes.
+
+### Paleidimas vietoje
+
+```bash
+# Kūrimo režimas (automatinis perkrovimas)
+npm run dev
+
+# Produkcinė komponuotė
+npm run build    # next build → .build/next/, tada assembleStandalone → dist/
+npm run start
+
+# Spartus tik vidinės sistemos / API kompiliavimas bendraautorių pakeitimams
+npm run build:contributor
+
+# Leidimo komponuotė (švari komponuotė iš naujo + HEAD kontrolinis failas — būtina diegimui)
+npm run build:release   # rm -rf .build dist && komponuoja + įrašo dist/BUILD_SHA
+
+# Įprasta prievado konfigūracija
+PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
+```
+
+Bendraautorių komponuotė atlieka tik kompiliavimo patikrą: ji nesurenka autonominio
+platinimo paketo ir nekomponuoja pasirenkamų savųjų pakavimo išteklių. Naudokite įprastą produkcinę komponuotę, kai
+reikia patikrinti platinimui paruoštą paketą.
+
+### Komponuotės išvesties struktūra
+
+| Katalogas | Turinys                                                                             | Sekamas |
+| --------- | ----------------------------------------------------------------------------------- | ------- |
+| `src/`    | Programos pirminis kodas (TypeScript / TSX)                                         | Taip    |
+| `.build/` | Tarpiniai failai — `next build` išvestis (git ignoruojama, `distDir = .build/next`) | Ne      |
+| `dist/`   | Platinamas paketas — surenkamas naudojant `assembleStandalone` (git ignoruojamas)   | Ne      |
+
+Komponavimo procesas atliekamas vienu etapu:
+
+```
+npm run build
+  └─ next build → .build/next/standalone  (Next.js išvestis)
+  └─ assembleStandalone()                 (nukopijuoja standalone + static + public + savuosius išteklius)
+       └─ išvestis: dist/                 (server.js, .next/static/, public/, node_modules/)
+```
+
+`npm run build:release` taip pat pirmiausia išvalo abu katalogus ir įrašo
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kaip diegimo vientisumo kontrolinį failą.
+
+`npm run build:contributor` naudoja tik vidinei sistemai skirtą komponavimo profilį. Komponuojant jis laikinai pakeičia
+valdymo skydelio sąsajos failus imitaciniais failais, išsaugo API maršrutų apdorojimo priemones ir po komponavimo atkuria originalius failus.
+Naudokite `npm run build` pakeitimams, kurie turi įtakos valdymo skydelio sąsajai, arba visapusei
+leidimo patikrai; bendraautorių profilis nepakeičia leidimo komponuotės.
+
+> **Pastaba dėl diegimo VPS:** nuotolinis atvaizdo katalogas `/usr/lib/node_modules/omniroute/app/`
+> nepasikeitė. Diegimo įrankiai naudodami rsync nukopijuoja `dist/` turinį į jį.
+> Pasikeitė tik saugykloje esantis komponuotės išvesties kelias (`app/` → `dist/`).
+
+Numatytieji URL:
+
+- **Valdymo skydelis**: `http://localhost:20128/dashboard`
+- **API**: `http://localhost:20128/v1`
+
+---
+
+## Git darbo eiga
+
+> ⚠️ **NIEKADA neįrašykite pakeitimų tiesiogiai į `main`.** Visada naudokite funkcionalumo šakas.
+>
+> **PR bazė:** pasirinkite aktyvią `release/vX.Y.Z` šaką (ne `main`). Išleidimo šakų ir
+> išleidimo metu kuriamų žymų modelis aprašytas
+> [`docs/ops/BRANCHING_MODEL.md`](docs/ops/BRANCHING_MODEL.md).
+
+```bash
+# Sukurkite šaką nuo aktyvios leidimo šakos viršūnės (pavyzdys: release/v3.8.49)
+git fetch origin
+git checkout -b feat/your-feature-name origin/release/v3.8.49
+# ... atlikite pakeitimus ...
+git commit -m "feat: describe your change"
+git push -u origin feat/your-feature-name
+# Atidarykite Pull Request, kurio bazė = release/v3.8.49
+```
+
+### Šakų pavadinimai
+
+| Priešdėlis  | Paskirtis                      |
+| ----------- | ------------------------------ |
+| `feat/`     | Naujos funkcijos               |
+| `fix/`      | Klaidų taisymai                |
+| `refactor/` | Kodo pertvarkymas              |
+| `docs/`     | Dokumentacijos pakeitimai      |
+| `test/`     | Testų papildymai ir pataisymai |
+| `chore/`    | Įrankiai, CI, priklausomybės   |
+
+### Įrašų pranešimai
+
+Laikykitės [„Conventional Commits“](https://www.conventionalcommits.org/) standarto:
+
+```
+feat: add circuit breaker for provider calls
+fix: resolve JWT secret validation edge case
+docs: update SECURITY.md with PII protection
+test: add observability unit tests
+refactor(db): consolidate rate limit tables
+```
+
+Sritys (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`.
+
+---
+
+## Testų vykdymas
+
+```bash
+# Visi testai (modulių + vitest + ekosistemos + e2e)
+npm run test:all
+
+# Vienas testo failas (įtaisytasis Node.js testų vykdiklis — jį naudoja dauguma testų)
+node --import tsx/esm --test tests/unit/your-file.test.ts
+
+# Tik jūsų pakeitimo paveikti modulių testai (tas pats TIA parinkiklis kaip ir CI patikroje, #8084)
+npm run test:scoped            # paskutinio patvirtinimo (arba darbinio medžio) pakeitimai
+npm run test:scoped:staged     # tik paruošti pakeitimai — patogu naudoti prieš patvirtinimą
+npm run test:scoped:full       # pirmiausia iš naujo sukuria importų grafiko žemėlapį (pridėjus ar perkėlus failus)
+# Išėjimo kodas 1 + "run the full suite" reiškia, kad pasikeitė centrinis failas (tsconfig, package.json, …) arba
+# nesusietas šaltinio failas — parinkiklis saugiai nutraukia darbą ir niekada tyliai nepraleidžia testų.
+
+# Vitest (MCP serveris, autoCombo, podėlis)
+npm run test:vitest
+
+# E2E testai (reikalingas Playwright)
+npm run test:e2e
+
+# Protokolų klientų E2E testai (MCP transportai, A2A)
+npm run test:protocols:e2e
+
+# Ekosistemos suderinamumo testai
+npm run test:ecosystem
+
+# Aprėpties slenkstis: 60 % sakinių / eilučių / funkcijų / šakų
+npm run test:coverage
+npm run coverage:report
+
+# Kodo analizė + formatavimo patikra
+npm run lint
+npm run check
+
+# Sąlyginiu būdu vykdomas realių išorinių paslaugų derinio bazinis testas (reikalinga VPS prieiga + tikrų teikėjų kreditai)
+# Kreipiasi į TIKRUS teikėjus — šiek tiek kainuoja. NIEKADA nevykdomas CI. Jei sąlyga neįvykdyta, korektiškai praleidžiamas.
+# Reikalinga: ssh root@192.168.0.15 prieiga (iš VPS paimama tik skaitoma DB momentinė kopija).
+RUN_COMBO_LIVE=1 npm run test:combo:live
+
+# 3 etapo VPS tiesioginis bazinis testas — paprasti Node ESM scenarijai, tiesiogiai kreipiasi į veikiantį .15 serverį.
+# Reikalinga: ssh root@192.168.0.15 prieiga (deriniai sukuriami ir pašalinami per SSH sqlite).
+# Kreipiasi į TIKRUS teikėjus (nedidelė kaina). Sukuria ir pašalina tik __live_test__* derinius. NIEKADA nevykdomas CI.
+# .15 serveryje nustatyta REQUIRE_API_KEY=false, todėl API rakto nereikia, tačiau, jei nustatyti, naudojami COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY.
+npm run test:combo:live:vps              # 7 HTTP scenarijai (prioritetinis / ciklinis / svertinis / kainos / sintezės / automatinis + būklė)
+npm run test:combo:live:vps:failover     # prideda realų perjungimo tarp teikėjų scenarijų (iš viso 8)
+```
+
+Pastabos apie aprėptį:
+
+- `npm run test:coverage` matuoja pagrindinio modulių testų rinkinio šaltinio kodo aprėptį, neįtraukia `tests/**` ir įtraukia `open-sse/**`
+- Ištraukimo užklausose turi būti išlaikytas **60%+** sakinių / eilučių / funkcijų / šakų aprėpties slenkstis
+- Jei PR pakeičia gamybinį kodą kataloguose `src/`, `open-sse/`, `electron/` arba `bin/`, toje pačioje PR turi būti pridėti arba atnaujinti automatiniai testai
+- `npm run coverage:report` išveda naujausio aprėpties vykdymo išsamią kiekvieno failo ataskaitą
+- `npm run test:coverage:legacy` išsaugo ankstesnę metriką istoriniam palyginimui
+- Etapinis aprėpties gerinimo planas pateiktas `docs/ops/COVERAGE_PLAN.md`
+
+### Ištraukimo užklausos reikalavimai
+
+Prieš atidarydami PR, vadovaukitės
+[rekomenduojama indėlio teikimo eiga](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), kad atliktumėte tikslinį
+pakeistos dalies patikrinimo ciklą. Už visą modulių testų rinkinį (4 CI dalys), Vitest, **60%+** aprėpties slenkstį ir
+gamybinį komponavimą atsakinga CI — jų vykdymas vietoje nesuteikia jokios papildomos informacijos, kurios
+dar nepateiks PR patikros, o mažesnio pajėgumo įrenginiuose tai gali visiškai apkrauti sistemą (#8084):
+
+- Vykdykite jūsų pakeitimą tikrinančius testų failus: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Vykdykite `npm run lint`
+- Pasikeitus gamybiniam kodui, toje pačioje PR pridėkite arba atnaujinkite automatinius testus
+- `node:test` failuose kiekvieną aukščiausio lygio `await` (pvz., `await import(...)`) pateikite prieš pirmąjį `test()` / `describe()`: naudojant `--test-force-exit`, po jo užregistruoti testai gali tyliai likti neįvykdyti (#18045; tai užtikrina `npm run check:test-tla-order`)
+- Pasikeitus gamybiniam kodui, PR apraše nurodykite pakeistus arba pridėtus testų failus
+- Kai CI sukonfigūruotos projekto paslaptys, patikrinkite PR SonarQube rezultatą
+
+Dabartinė testų būsena: **122 modulių testų failai**, apimantys:
+
+- Teikėjų transformavimo priemones ir formatų konvertavimą
+- Užklausų dažnio ribojimą, grandinės pertraukiklį ir atsparumą
+- Semantinį podėlį, idempotentiškumą ir eigos stebėjimą
+- Duomenų bazės operacijas ir schemą (21 DB modulis)
+- OAuth eigas ir tapatybės nustatymą
+- API galinių taškų validavimą (Zod v4)
+- MCP serverio įrankius ir aprėpties taikymą
+- Atminties ir įgūdžių sistemas
+
+---
+
+## Kodo stilius
+
+- **ESLint** — prieš patvirtindami pakeitimus paleiskite `npm run lint`
+- **Prettier** — patvirtinant pakeitimus automatiškai formatuojama per `lint-staged` (2 tarpai, kabliataškiai, dvigubos kabutės, 100 simbolių eilutės plotis, es5 baigiamieji kableliai)
+- **TypeScript** — visas `src/` kodas naudoja `.ts`/`.tsx`; `open-sse/` naudoja `.ts`/`.js`; dokumentuokite naudodami TSDoc (`@param`, `@returns`, `@throws`)
+- **Jokio `eval()`** — ESLint užtikrina `no-eval`, `no-implied-eval`, `no-new-func`
+- **Zod validavimas** — visų API įvesčių validavimui naudokite Zod v4 schemas
+- **Pavadinimai**: failai = camelCase/kebab-case, komponentai = PascalCase, konstantos = UPPER_SNAKE
+
+### Klaidų apdorojimas / tušti catch blokai
+
+Niekada nepalikite `catch` be paaiškinimo. Priskirkite jį vienai iš dviejų kategorijų (taip praktiškai
+įgyvendinama griežta taisyklė „SSE srautuose niekada tyliai nepraleisti klaidų“):
+
+- **Tyčinis (mūsų pačių neprivalomas valymas / telemetrija)** — gedimas čia yra tikėtinas ir
+  nekenksmingas; pridėkite vienos eilutės paaiškinamąjį komentarą, bet neregistruokite žurnale (registravimas
+  kiekvienai užklausai sukeltų triukšmą, kurio šiuo susitarimu siekiama išvengti).
+
+  ```ts
+  } catch {} // po kliento atsijungimo tikėtina, kad bus uždaromas jau uždarytas valdiklis
+  ```
+
+- **Reikėtų registruoti žurnale (išorinis / kvietėjo pateiktas kodas arba klaidos praleidimas pakeičia valdymo eigą)** — palikite
+  catch bloką (niekada neleiskite jam nutraukti srauto), bet pateikite kontekstinį `console.debug`/`warn`, kad
+  gedimą būtų galima aptikti.
+
+  ```ts
+  } catch (e) {
+    console.debug("[STREAM] onFailure callback klaida:", e);
+  }
+  ```
+
+Pritaikymo pavyzdžių rasite `open-sse/utils/stream.ts` ir `open-sse/utils/streamHandler.ts`.
+
+---
+
+## Projekto struktūra
+
+```
+src/                        # TypeScript (.ts / .tsx)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Valdymo skydelio puslapiai (23 skyriai)
+│   ├── api/                # API maršrutai (51 katalogas)
+│   └── login/              # Autentifikavimo puslapiai (.tsx)
+├── domain/                 # Politikų variklis (policyEngine, comboResolver, costRules ir t. t.)
+├── lib/                    # Pagrindinė verslo logika (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protokolo serveris
+│   ├── acp/                # Agent Communication Protocol registras
+│   ├── compliance/         # Atitikties politikų variklis
+│   ├── db/                 # SQLite domeno moduliai + 130 migracijų
+│   ├── memory/             # Išliekamoji pokalbių atmintis
+│   ├── oauth/              # OAuth teikėjai, paslaugos ir pagalbinės priemonės
+│   ├── skills/             # Išplečiama įgūdžių sistema
+│   ├── usage/              # Naudojimo stebėjimas ir išlaidų skaičiavimas
+│   └── localDb.ts          # Tik pakartotinio eksportavimo sluoksnis — niekada čia nepridėkite logikos
+├── middleware/              # Užklausų tarpinė programinė įranga (promptInjectionGuard)
+├── mitm/                   # MITM tarpinis serveris (sertifikatai, DNS, paskirties maršrutizavimas)
+├── shared/
+│   ├── components/         # React komponentai (.tsx)
+│   ├── constants/          # Teikėjų apibrėžtys (329), MCP aprėptys, 20 maršrutizavimo strategijų
+│   ├── utils/              # Grandinės pertraukiklis, valymo priemonė, autentifikavimo pagalbinės funkcijos
+│   └── validation/         # Zod v4 schemos
+└── sse/                    # SSE tarpinio serverio konvejeris
+
+open-sse/                   # @omniroute/open-sse darbo sritis
+├── executors/              # 150 vykdytojų modulių (vykdytojų klasės + kiekvieno teikėjo pagalbinės priemonės)
+├── handlers/               # 11 užklausų apdorojimo programų (chat, responses, embeddings, images ir t. t.)
+├── mcp-server/             # MCP serveris (110 unikalių įrankių, 3 transportai, 33 aprėptys)
+├── services/               # 178 aukščiausio lygio paslaugos (combo, autoCombo, rateLimitManager ir t. t.)
+├── translator/             # Formatų keitikliai (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformavimo priemonė
+└── utils/                  # 22 pagalbinių priemonių moduliai (stream, TLS, proxy, logging)
+
+electron/                   # Electron darbalaukio programa (kelioms platformoms)
+
+tests/
+├── unit/                   # Node.js testų vykdyklė (1 574 testų failai)
+├── integration/            # Integraciniai testai
+├── e2e/                    # Playwright testai
+├── security/               # Saugumo testai
+├── translator/             # Keitikliui skirti testai
+└── load/                   # Apkrovos testai
+
+docs/
+├── adr/                     # Architektūros sprendimų įrašai
+├── architecture/            # Sistemos architektūra ir atsparumas
+├── comparison/              # OmniRoute ir alternatyvų palyginimas
+├── compression/             # Glaudinimo vadovai ir taisyklės
+├── dev/                     # Kūrimo vadovai
+├── diagrams/                # Architektūros diagramos
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Naudotojo vadovas, Docker, sąranka, trikčių šalinimas
+├── i18n/                    # Internacionalizuoti README vertimai
+├── marketing/               # Rinkodaros medžiaga
+├── ops/                     # Diegimas, tarpinis serveris, aprėptis, leidimai
+├── providers/               # Konkretiems teikėjams skirta dokumentacija
+├── reference/               # API žinynas, aplinkos kintamieji, CLI įrankiai, nemokami planai
+├── releases/                # Leidimų pastabos
+├── routing/                 # Automatinio derinių sudarymo variklis, samprotavimo pakartojimas
+├── screenshots/             # Valdymo skydelio ekrano kopijos
+├── security/                # Apsaugos priemonės, atitiktis, slaptumas, prieigos raktai
+└── specs/                   # Projektavimo specifikacijos
+```
+
+---
+
+## Naujo teikėjo pridėjimas
+
+### 1 veiksmas: užregistruokite teikėjo konstantas
+
+Pridėkite jas į `src/shared/constants/providers.ts` — įkeliant modulį jos patikrinamos naudojant Zod.
+
+### 2 veiksmas: pridėkite vykdyklę (jei reikalinga pasirinktinė logika)
+
+Sukurkite vykdyklę faile `open-sse/executors/your-provider.ts`, išplėsdami bazinę vykdyklę.
+
+### 3 veiksmas: pridėkite transformatorių (jei naudojamas ne OpenAI formatas)
+
+Sukurkite užklausų ir atsakymų transformatorius kataloge `open-sse/translator/`.
+
+### 4 veiksmas: pridėkite OAuth konfigūraciją (jei naudojamas OAuth)
+
+Pridėkite OAuth prisijungimo duomenis faile `src/lib/oauth/constants/oauth.ts`, o paslaugą — kataloge `src/lib/oauth/services/`.
+
+Jei pirminis teikėjas platina viešą OAuth `client_id` / paslaptį arba Firebase Web API raktą savo viešame CLI / naršyklės pakete, **neįterpkite** jo kaip eilutės literalo. Naudokite `resolvePublicCred()` iš `open-sse/utils/publicCreds.ts` ir pridėkite užmaskuotų baitų įrašą į `EMBEDDED_DEFAULTS`. Visa privaloma darbo eiga aprašyta dokumente [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md).
+
+Apdorojimo funkcijose / vykdyklėse klientą pasiekiantys klaidų pranešimai turi būti apdorojami naudojant `buildErrorBody()` / `sanitizeErrorMessage()` iš `open-sse/utils/error.ts` — niekada nedėkite neapdoroto `err.stack` ar `err.message` į Response turinį. Žr. [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md).
+
+### 5 veiksmas: užregistruokite modelius
+
+Pridėkite modelių aprašus faile `open-sse/config/providerRegistry.ts`.
+
+### 6 veiksmas: pridėkite testus
+
+Parašykite vienetinius testus kataloge `tests/unit/`, kurie apimtų bent:
+
+- Teikėjo registravimą
+- Užklausų / atsakymų transformavimą
+- Klaidų tvarkymą
+
+---
+
+## „Pull Request“ kontrolinis sąrašas
+
+- [ ] Testai sėkmingi (`npm test`)
+- [ ] Statinė analizė sėkminga (`npm run lint`)
+- [ ] Kompiliavimas sėkmingas (`npm run build`)
+- [ ] Naujoms viešosioms funkcijoms ir sąsajoms pridėti TypeScript tipai
+- [ ] Nėra kode tiesiogiai įrašytų paslapčių ar atsarginių reikšmių
+- [ ] Vieši išorinės sistemos prisijungimo duomenys įterpiami naudojant `resolvePublicCred()` (žr. [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), niekada nenaudojant literalų
+- [ ] Klaidų atsakymai apdorojami per `buildErrorBody()` / `sanitizeErrorMessage()` — atsakymų turinyje nėra neapdorotų dėklo trasų (žr. [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
+- [ ] Apvalkalo komandos (`exec` / `spawn`) vykdymo reikšmes perduoda per `env`, o ne naudodamos eilučių interpoliaciją
+- [ ] Visos įvestys patikrintos naudojant Zod schemas
+- [ ] Naudotojams matomiems pakeitimams pridėtas pakeitimų žurnalo **fragmentas**, esantis `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` (žr. [`changelog.d/README.md`](./changelog.d/README.md)) — **neredaguokite** `CHANGELOG.md` tiesiogiai; fragmentai sujungiami leidimo metu ir niekada nesukelia konfliktų tarp „Pull Request“ užklausų
+- [ ] Dokumentacija atnaujinta (jei taikoma)
+- [ ] Neatsirado naujų CodeQL / Secret-Scanning įspėjimų arba kiekvienas jų atmestas pateikus techninį pagrindimą su nuoroda į atitinkamą `docs/security/` dokumentą
+- [ ] Maršrutai, paleidžiantys antrinius procesus (`/api/mcp/`, `/api/cli-tools/runtime/`), faile `src/server/authz/routeGuard.ts` klasifikuoti kaip `isLocalOnlyPath()` — žr. [griežtą taisyklę Nr. 15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Įvykdymo pranešimuose nėra DI / robotų `Co-authored-by` užbaigiamųjų eilučių (griežta taisyklė Nr. 16) — žmonės bendradarbiai, kurių darbas panaudojamas pakartotinai, nurodomi standartinėmis `Co-authored-by: Name <email>` užbaigiamosiomis eilutėmis
+
+---
+
+## Leidimų publikavimas
+
+Leidimai valdomi naudojant `/generate-release` darbo eigą. Sukūrus naują GitHub leidimą, paketas per GitHub Actions **automatiškai publikuojamas npm**.
+
+Diegimams VPS aplinkoje naudokite `npm run build:release` (ne `npm run build`) — ši komanda atlieka švarų
+perkompiliavimą, suformuoja paketą kataloge `dist/` ir įrašo kontrolinį failą `dist/BUILD_SHA`.
+Tada naudokite `/deploy-vps-*-cc` įgūdžius, kurie per rsync nukopijuoja `dist/` į nuotolinį katalogą `app/`.
+
+---
+
+## Pagalbos gavimas
+
+- **Architektūra**: žr. [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API žinynas**: žr. [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Saugumo dokumentacija**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Eksploatavimo dokumentacija**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Problemos**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

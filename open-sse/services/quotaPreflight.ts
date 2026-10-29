@@ -20,13 +20,40 @@
 
 import { isCompatibleProviderConnectionId } from "@/shared/utils/compatibleProviderId";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
-import { fetchNewApiAggregatorQuota } from "./newApiAggregatorQuotaFetcher.ts";
+import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
+import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
+// #14359 — import the leaf, NOT "@/domain/quotaCache": quotaCache → usage.ts → usage/openrouter.ts →
+// openrouterQuotaFetcher.ts → this file, so importing quotaCache here closes an ESM init cycle
+// that deadlocks the esbuild MCP bundle (tests/unit/build/mcp-bundle-startup.test.ts).
+import { isQuotaHealthy } from "@/domain/quotaCacheState";
+import {
+  hasCodexPaidCredits,
+  isCodexPaidCreditsEnabled,
+  type CodexPaidCredits,
+} from "@/lib/providers/codexPaidCredits";
+import {
+  fetchNewApiAggregatorQuota,
+  invalidateNewApiAggregatorQuotaCache,
+} from "./newApiAggregatorQuotaFetcher.ts";
+import {
+  isAntigravityQuotaProvider,
+  selectAntigravityQuotaWindowNames,
+} from "./antigravityQuotaFamily.ts";
 
 export interface PreflightQuotaResult {
   proceed: boolean;
   reason?: string;
   quotaPercent?: number;
   resetAt?: string | null;
+  windowName?: string | null;
+}
+
+export interface QuotaCutoffScope {
+  provider?: string | null;
+  requestedModel?: string | null;
+  providerSpecificData?: unknown;
+  // #14359 — recent successful dispatch stands the cutoff down for this connection.
+  connectionId?: string | null;
 }
 
 export interface QuotaWindowInfo {
@@ -35,6 +62,8 @@ export interface QuotaWindowInfo {
 }
 
 export interface QuotaInfo {
+  /** Raw account plan identifier from the live usage fetch, when reported. */
+  plan?: string;
   used: number;
   total: number;
   /** Worst-case percentUsed across all known windows (legacy, single-signal). */
@@ -48,8 +77,27 @@ export interface QuotaInfo {
    * (e.g. "session", "weekly", "monthly").
    */
   windows?: Record<string, QuotaWindowInfo>;
+  /**
+   * Structural, canonical window snapshots used by reset-aware / reset-window
+   * scoring. Providers that expose time-based windows (5h, weekly, monthly)
+   * populate these in addition to the provider-native `windows` map so the
+   * scorer does not need to know every provider's key naming convention.
+   */
+  window5h?: QuotaWindowInfo;
+  window7d?: QuotaWindowInfo;
+  windowWeekly?: QuotaWindowInfo;
+  windowMonthly?: QuotaWindowInfo;
   /** True when the upstream usage endpoint explicitly reports exhausted quota. */
   limitReached?: boolean;
+  /** Separate from subscription percentages and banked quota-reset coupons. */
+  paidCredits?: CodexPaidCredits;
+  /**
+   * True when the provider reports NO cap at all (every reported window is unlimited). It is
+   * a real, known reading of full headroom, not a failed one: `null` from a quota fetcher
+   * means "could not read it", so unlimited plans are marked here instead of returning null
+   * (#15347). `percentUsed` is 0 on such a snapshot.
+   */
+  unlimited?: boolean;
 }
 
 export type QuotaFetcher = (
@@ -93,8 +141,48 @@ export function registerQuotaFetcher(provider: string, fetcher: QuotaFetcher): v
   quotaFetcherRegistry.set(provider, fetcher);
 }
 
+export function getRegisteredQuotaFetchers(): ReadonlyMap<string, QuotaFetcher> {
+  return new Map(quotaFetcherRegistry);
+}
+
 export function getQuotaFetcher(provider: string): QuotaFetcher | undefined {
   return quotaFetcherRegistry.get(provider) || quotaFetcherRegistry.get(provider.toLowerCase());
+}
+
+/**
+ * Per-provider cache invalidators used by the upstream-429 path. Each bespoke
+ * quota fetcher registers here how to drop its cached snapshot for one
+ * connection, under the same provider ids (aliases included) it passes to
+ * `registerQuotaFetcher`. `invalidateQuotaCacheOnStatus` resolves the
+ * invalidator per request; the generic quota cache stays the fallback for
+ * providers without one.
+ */
+type QuotaCacheInvalidator = (connectionId: string) => void;
+
+const quotaCacheInvalidatorRegistry = new Map<string, QuotaCacheInvalidator>();
+
+export function registerQuotaCacheInvalidator(
+  provider: string,
+  invalidator: QuotaCacheInvalidator
+): void {
+  quotaCacheInvalidatorRegistry.set(provider, invalidator);
+}
+
+export function getQuotaCacheInvalidator(provider: string): QuotaCacheInvalidator | undefined {
+  return (
+    quotaCacheInvalidatorRegistry.get(provider) ||
+    quotaCacheInvalidatorRegistry.get(provider.toLowerCase())
+  );
+}
+
+/** Test-only: drop every entry so a suite cannot leak registrations. */
+export function __resetQuotaCacheInvalidatorsForTests(): void {
+  quotaCacheInvalidatorRegistry.clear();
+}
+
+/** Test-only: entry count, so a storage-size test can assert no growth. */
+export function __quotaCacheInvalidatorCountForTests(): number {
+  return quotaCacheInvalidatorRegistry.size;
 }
 
 export function isQuotaPreflightEnabled(connection: Record<string, unknown>): boolean {
@@ -120,6 +208,8 @@ export interface PreflightQuotaThresholds {
    * point.
    */
   resolveWarnRemainingPercent?: (window: string | null) => number;
+  /** Whether this window's cutoff is an operator-configured policy, not the factory fallback. */
+  isConfiguredCutoff?: (window: string | null) => boolean;
 }
 
 function resolveOrDefault(
@@ -146,13 +236,34 @@ function isRemainingAtOrBelowThreshold(
   return remainingPercent <= thresholdPercent + REMAINING_PERCENT_EPSILON;
 }
 
-function exhaustedResult(quotaPercent: number, resetAt: string | null): PreflightQuotaResult {
+function exhaustedResult(
+  quotaPercent: number,
+  resetAt: string | null,
+  windowName?: string | null
+): PreflightQuotaResult {
   return {
     proceed: false,
     reason: "quota_exhausted",
     quotaPercent,
     resetAt,
+    windowName: windowName ?? null,
   };
+}
+
+export function windowsForScope(
+  windows: NonNullable<QuotaInfo["windows"]>,
+  scope?: QuotaCutoffScope
+): NonNullable<QuotaInfo["windows"]> {
+  if (!scope?.requestedModel || !isAntigravityQuotaProvider(scope.provider ?? null)) {
+    return windows;
+  }
+  const selected = selectAntigravityQuotaWindowNames(Object.keys(windows), scope.requestedModel);
+  if (selected.length === 0) return windows;
+  const scoped: NonNullable<QuotaInfo["windows"]> = {};
+  for (const name of selected) {
+    if (windows[name]) scoped[name] = windows[name];
+  }
+  return Object.keys(scoped).length > 0 ? scoped : windows;
 }
 
 function limitReachedResult(quota: QuotaInfo): PreflightQuotaResult {
@@ -162,36 +273,89 @@ function limitReachedResult(quota: QuotaInfo): PreflightQuotaResult {
   );
 }
 
+function isEntryExhausted(
+  windowName: string,
+  percentUsed: number,
+  thresholds?: PreflightQuotaThresholds
+): boolean {
+  const minRemainingPercent = resolveOrDefault(
+    thresholds?.resolveMinRemainingPercent,
+    windowName,
+    DEFAULT_MIN_REMAINING_PERCENT
+  );
+  return isRemainingAtOrBelowThreshold(remainingPercentFrom(percentUsed), minRemainingPercent);
+}
+
+function evaluateQuotaGroup(
+  entries: Array<[string, QuotaWindowInfo]>,
+  thresholds?: PreflightQuotaThresholds
+): {
+  exhausted: boolean;
+  worstPercent: number;
+  worstWindow: string | null;
+  worstResetAt: string | null;
+} {
+  let exhausted = true;
+  let worstPercent = -1;
+  let worstWindow: string | null = null;
+  let worstResetAt: string | null = null;
+  for (const [windowName, windowInfo] of entries) {
+    if (!isEntryExhausted(windowName, windowInfo.percentUsed, thresholds)) {
+      exhausted = false;
+    }
+    if (windowInfo.percentUsed > worstPercent) {
+      worstPercent = windowInfo.percentUsed;
+      worstWindow = windowName;
+      worstResetAt = windowInfo.resetAt ?? null;
+    }
+  }
+  return { exhausted, worstPercent: Math.max(0, worstPercent), worstWindow, worstResetAt };
+}
+
+export function groupQuotaWindowsByBase(
+  windows: NonNullable<QuotaInfo["windows"]>
+): Map<string, Array<[string, QuotaWindowInfo]>> {
+  const groups = new Map<string, Array<[string, QuotaWindowInfo]>>();
+  for (const [windowName, windowInfo] of Object.entries(windows)) {
+    if (!Number.isFinite(windowInfo.percentUsed)) continue;
+    const base = windowName.endsWith("_freetrial") ? windowName.slice(0, -10) : windowName;
+    const list = groups.get(base);
+    if (list) list.push([windowName, windowInfo]);
+    else groups.set(base, [[windowName, windowInfo]]);
+  }
+  return groups;
+}
+
 function quotaWindowCutoffResult(
   windows: NonNullable<QuotaInfo["windows"]>,
   thresholds?: PreflightQuotaThresholds
 ): PreflightQuotaResult | null {
-  let worstUsedPercent = 0;
-  let worstWindow: string | null = null;
-  let worstResetAt: string | null = null;
+  const groups = groupQuotaWindowsByBase(windows);
+  if (groups.size === 0) return null;
 
-  for (const [windowName, windowInfo] of Object.entries(windows)) {
-    if (!Number.isFinite(windowInfo.percentUsed)) continue;
-    const minRemainingPercent = resolveOrDefault(
-      thresholds?.resolveMinRemainingPercent,
-      windowName,
-      DEFAULT_MIN_REMAINING_PERCENT
+  let worstExhaustedPercent = 0;
+  let worstExhaustedWindow: string | null = null;
+  let worstExhaustedResetAt: string | null = null;
+  let hasExhaustedGroup = false;
+
+  for (const entries of groups.values()) {
+    const { exhausted, worstPercent, worstWindow, worstResetAt } = evaluateQuotaGroup(
+      entries,
+      thresholds
     );
-    if (
-      !isRemainingAtOrBelowThreshold(
-        remainingPercentFrom(windowInfo.percentUsed),
-        minRemainingPercent
-      )
-    ) {
-      continue;
+    if (exhausted) {
+      hasExhaustedGroup = true;
+      if (worstPercent > worstExhaustedPercent || worstExhaustedWindow === null) {
+        worstExhaustedPercent = worstPercent;
+        worstExhaustedWindow = worstWindow;
+        worstExhaustedResetAt = worstResetAt;
+      }
     }
-    if (windowInfo.percentUsed <= worstUsedPercent && worstWindow !== null) continue;
-    worstUsedPercent = windowInfo.percentUsed;
-    worstWindow = windowName;
-    worstResetAt = windowInfo.resetAt ?? null;
   }
 
-  return worstWindow === null ? null : exhaustedResult(worstUsedPercent, worstResetAt);
+  return hasExhaustedGroup
+    ? exhaustedResult(worstExhaustedPercent, worstExhaustedResetAt, worstExhaustedWindow)
+    : null;
 }
 
 function quotaPercentCutoffResult(
@@ -212,26 +376,118 @@ function quotaPercentCutoffResult(
 }
 
 /**
+ * Opt-in paid-credits short-circuit for evaluateQuotaCutoff, isolated so the
+ * caller's cyclomatic/cognitive complexity stays under the ratchet limit.
+ * Returns null when the gate does not apply (caller falls through to the
+ * normal subscription-quota evaluation).
+ */
+function resolveCodexPaidCreditsGate(
+  quota: QuotaInfo | null | undefined,
+  scope?: QuotaCutoffScope
+): PreflightQuotaResult | null {
+  const paidCreditsEnabled = isCodexPaidCreditsEnabled(
+    scope?.provider,
+    scope?.providerSpecificData,
+    scope?.requestedModel
+  );
+  if (!paidCreditsEnabled) return null;
+  if (!quota) return { proceed: false, reason: "quota_unavailable" };
+  if (hasCodexPaidCredits(quota.paidCredits)) {
+    return { proceed: true, quotaPercent: quota.percentUsed };
+  }
+  return null;
+}
+
+/**
+ * Per-window cutoff branch of evaluateQuotaCutoff, isolated so the caller's
+ * cyclomatic complexity stays under the ratchet limit. Returns null when the
+ * quota has no per-window data (caller falls through to the legacy path).
+ */
+function windowedQuotaCutoffResult(
+  quota: QuotaInfo,
+  thresholds: PreflightQuotaThresholds | undefined,
+  scope: QuotaCutoffScope | undefined
+): PreflightQuotaResult | null {
+  const windows = quota.windows;
+  if (!windows || Object.keys(windows).length === 0) return null;
+
+  const scopedWindows = windowsForScope(windows, scope);
+  const cutoff = quotaWindowCutoffResult(scopedWindows, thresholds);
+  if (cutoff) return cutoff;
+  if (isAntigravityQuotaProvider(scope?.provider ?? null) && scope?.requestedModel) {
+    return { proceed: true, quotaPercent: quota.percentUsed };
+  }
+  if (quota.limitReached === true) return limitReachedResult(quota);
+  return { proceed: true, quotaPercent: quota.percentUsed };
+}
+
+/**
  * Pure cutoff evaluator used by routing paths that already fetched quota.
  * Mirrors preflightQuota threshold semantics without performing I/O or logging.
  */
-export function evaluateQuotaCutoff(
-  quota: QuotaInfo | null | undefined,
-  thresholds?: PreflightQuotaThresholds
-): PreflightQuotaResult {
-  if (!quota) return { proceed: true };
-  if (quota.limitReached === true) return limitReachedResult(quota);
+function configuredCurrentWindows(
+  windows: NonNullable<QuotaInfo["windows"]>,
+  configured: (window: string | null) => boolean
+): NonNullable<QuotaInfo["windows"]> {
+  const groups = groupQuotaWindowsByBase(windows);
+  const selected: NonNullable<QuotaInfo["windows"]> = {};
+  for (const entries of groups.values()) {
+    if (!entries.some(([name]) => configured(name))) continue;
+    for (const [name, info] of entries) {
+      if (!info.resetAt || new Date(info.resetAt).getTime() > Date.now()) {
+        selected[name] = info;
+      }
+    }
+  }
+  return selected;
+}
 
+function healthyQuotaCutoffResult(
+  quota: QuotaInfo,
+  thresholds: PreflightQuotaThresholds | undefined,
+  scope: QuotaCutoffScope | undefined
+): PreflightQuotaResult {
+  const configured = thresholds?.isConfiguredCutoff;
+  if (!configured) return { proceed: true, quotaPercent: quota.percentUsed };
   const windows = quota.windows;
   if (windows && Object.keys(windows).length > 0) {
-    return (
-      quotaWindowCutoffResult(windows, thresholds) ?? {
-        proceed: true,
-        quotaPercent: quota.percentUsed,
-      }
+    const scoped = windowsForScope(windows, scope);
+    const cutoff = quotaWindowCutoffResult(
+      configuredCurrentWindows(scoped, configured),
+      thresholds
     );
+    return cutoff ?? { proceed: true, quotaPercent: quota.percentUsed };
+  }
+  return configured(null) && (!quota.resetAt || new Date(quota.resetAt).getTime() > Date.now())
+    ? quotaPercentCutoffResult(quota, thresholds)
+    : { proceed: true, quotaPercent: quota.percentUsed };
+}
+
+export function evaluateQuotaCutoff(
+  quota: QuotaInfo | null | undefined,
+  thresholds?: PreflightQuotaThresholds,
+  scope?: QuotaCutoffScope
+): PreflightQuotaResult {
+  const paidCreditsGate = resolveCodexPaidCreditsGate(quota, scope);
+  if (paidCreditsGate) return paidCreditsGate;
+  if (!quota) return { proceed: true };
+  // Explicit local quota opt-outs leave billing eligibility to the upstream service.
+  if (
+    isClaudeExtraUsageAllowed(scope?.provider, scope?.providerSpecificData) ||
+    isCodexQuotaFilteringDisabled(scope?.provider, scope?.providerSpecificData)
+  ) {
+    return { proceed: true, quotaPercent: quota.percentUsed };
+  }
+  // #14359 — a recent success discounts default exhaustion hints. Explicit
+  // cutoffs are still evaluated against their measured windows (#17879).
+  if (scope?.connectionId && isQuotaHealthy(scope.connectionId)) {
+    return healthyQuotaCutoffResult(quota, thresholds, scope);
   }
 
+  const windowedResult = windowedQuotaCutoffResult(quota, thresholds, scope);
+  if (windowedResult) return windowedResult;
+
+  if (quota.limitReached === true) return limitReachedResult(quota);
   return quotaPercentCutoffResult(quota, thresholds);
 }
 
@@ -255,6 +511,10 @@ export function resolveDynamicQuotaFetcher(
   // Feature flag must be enabled
   if (!isFeatureFlagEnabled("NEWAPI_AGGREGATOR_BALANCE")) return undefined;
 
+  // The aggregator fetcher has no static registrar, so its invalidator is
+  // registered on the first dynamic resolution — the same moment the fetcher's
+  // cache can first be populated. Re-registering the same key is an overwrite.
+  registerQuotaCacheInvalidator(provider, invalidateNewApiAggregatorQuotaCache);
   return fetchNewApiAggregatorQuota;
 }
 
@@ -264,6 +524,14 @@ export async function preflightQuota(
   connection: Record<string, unknown>,
   thresholds?: PreflightQuotaThresholds
 ): Promise<PreflightQuotaResult> {
+  const requestedModel =
+    typeof connection.requestedModel === "string" ? connection.requestedModel : null;
+  const scope: QuotaCutoffScope = {
+    provider,
+    requestedModel,
+    providerSpecificData: connection.providerSpecificData,
+    connectionId,
+  };
   // No legacy enable-flag gate here — the caller decides when to invoke us
   // (see file-level docstring). When there's no fetcher we proceed silently.
   let fetcher = getQuotaFetcher(provider);
@@ -272,7 +540,7 @@ export async function preflightQuota(
     // aggregator flag + feature flag, use the generalized New-API fetcher.
     fetcher = resolveDynamicQuotaFetcher(provider, connection);
     if (!fetcher) {
-      return { proceed: true };
+      return evaluateQuotaCutoff(null, thresholds, scope);
     }
   }
 
@@ -280,102 +548,64 @@ export async function preflightQuota(
   try {
     quota = await fetcher(connectionId, connection);
   } catch {
-    return { proceed: true };
+    return evaluateQuotaCutoff(null, thresholds, scope);
   }
 
   if (!quota) {
-    return { proceed: true };
+    return evaluateQuotaCutoff(null, thresholds, scope);
   }
 
-  if (quota.limitReached === true) {
-    return limitReachedResult(quota);
-  }
-
-  // Per-window evaluation — only when the fetcher surfaces a windows map.
-  // We block as soon as ANY single window's remaining quota drops to its
-  // configured cutoff or below; warnings are logged independently per window.
-  if (quota.windows && Object.keys(quota.windows).length > 0) {
-    let worstUsedPercent = 0;
-    let worstWindow: string | null = null;
-    let worstResetAt: string | null = null;
-    for (const [windowName, windowInfo] of Object.entries(quota.windows)) {
-      const minRemainingPercent = resolveOrDefault(
-        thresholds?.resolveMinRemainingPercent,
-        windowName,
-        DEFAULT_MIN_REMAINING_PERCENT
-      );
+  const windows = quota.windows;
+  if (windows && Object.keys(windows).length > 0) {
+    const scopedWindows = windowsForScope(windows, scope);
+    for (const [windowName, windowInfo] of Object.entries(scopedWindows)) {
       const warnRemainingPercent = resolveOrDefault(
         thresholds?.resolveWarnRemainingPercent,
         windowName,
         DEFAULT_WARN_REMAINING_PERCENT
       );
       const remainingPercent = remainingPercentFrom(windowInfo.percentUsed);
-
-      if (isRemainingAtOrBelowThreshold(remainingPercent, minRemainingPercent)) {
-        // Track the most-depleted blocking window so the response can name it.
-        if (windowInfo.percentUsed > worstUsedPercent) {
-          worstUsedPercent = windowInfo.percentUsed;
-          worstWindow = windowName;
-          worstResetAt = windowInfo.resetAt ?? null;
-        } else if (worstWindow === null) {
-          worstWindow = windowName;
-          worstResetAt = windowInfo.resetAt ?? null;
-        }
-      } else if (isRemainingAtOrBelowThreshold(remainingPercent, warnRemainingPercent)) {
+      if (isRemainingAtOrBelowThreshold(remainingPercent, warnRemainingPercent)) {
         console.warn(
           `[QuotaPreflight] ${provider}/${connectionId} ${windowName}: ${remainingPercent.toFixed(1)}% remaining — approaching cutoff`
         );
       }
     }
-
-    if (worstWindow !== null) {
-      const worstRemaining = remainingPercentFrom(worstUsedPercent);
-      console.info(
-        `[QuotaPreflight] ${provider}/${connectionId} ${worstWindow}: ${worstRemaining.toFixed(1)}% remaining — switching`
-      );
-      return {
-        proceed: false,
-        reason: "quota_exhausted",
-        quotaPercent: worstUsedPercent,
-        resetAt: worstResetAt,
-      };
-    }
-
-    return { proceed: true, quotaPercent: quota.percentUsed };
   }
 
-  // Legacy single-signal path for fetchers that don't expose per-window data.
-  const minRemainingPercent = resolveOrDefault(
-    thresholds?.resolveMinRemainingPercent,
-    null,
-    DEFAULT_MIN_REMAINING_PERCENT
-  );
-  const warnRemainingPercent = resolveOrDefault(
-    thresholds?.resolveWarnRemainingPercent,
-    null,
-    DEFAULT_WARN_REMAINING_PERCENT
-  );
-
-  const { percentUsed } = quota;
-  const remainingPercent = remainingPercentFrom(percentUsed);
-
-  if (isRemainingAtOrBelowThreshold(remainingPercent, minRemainingPercent)) {
+  const decision = evaluateQuotaCutoff(quota, thresholds, scope);
+  if (!decision.proceed) {
+    const windowLabel = decision.windowName ? ` ${decision.windowName}` : "";
+    const remaining = Number.isFinite(decision.quotaPercent)
+      ? remainingPercentFrom(decision.quotaPercent as number).toFixed(1)
+      : "?";
     console.info(
-      `[QuotaPreflight] ${provider}/${connectionId}: ${remainingPercent.toFixed(1)}% remaining — switching (cutoff ${minRemainingPercent}%)`
+      `[QuotaPreflight] ${provider}/${connectionId}${windowLabel}: ${remaining}% remaining - switching`
     );
-    return {
-      proceed: false,
-      reason: "quota_exhausted",
-      quotaPercent: percentUsed,
-      resetAt: quota.resetAt ?? null,
-    };
+    return decision;
+  }
+  if (
+    (windows && Object.keys(windows).length > 0) ||
+    (isCodexPaidCreditsEnabled(provider, connection.providerSpecificData, requestedModel) &&
+      hasCodexPaidCredits(quota.paidCredits))
+  ) {
+    return decision;
   }
 
-  if (isRemainingAtOrBelowThreshold(remainingPercent, warnRemainingPercent)) {
-    console.warn(
-      `[QuotaPreflight] ${provider}/${connectionId}: ${remainingPercent.toFixed(1)}% remaining — approaching cutoff`
+  // Legacy single-signal warning; the evaluator already made the cutoff decision.
+  if (Number.isFinite(quota.percentUsed)) {
+    const warnRemainingPercent = resolveOrDefault(
+      thresholds?.resolveWarnRemainingPercent,
+      null,
+      DEFAULT_WARN_REMAINING_PERCENT
     );
+    const remainingPercent = remainingPercentFrom(quota.percentUsed);
+    if (isRemainingAtOrBelowThreshold(remainingPercent, warnRemainingPercent)) {
+      console.warn(
+        `[QuotaPreflight] ${provider}/${connectionId}: ${remainingPercent.toFixed(1)}% remaining — approaching cutoff`
+      );
+    }
   }
 
-  return { proceed: true, quotaPercent: percentUsed };
+  return decision;
 }

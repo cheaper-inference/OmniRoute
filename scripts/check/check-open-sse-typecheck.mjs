@@ -18,92 +18,18 @@
 //   node scripts/check/check-open-sse-typecheck.mjs
 //   node scripts/check/check-open-sse-typecheck.mjs --update   # re-freeze baseline
 
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { runScopedTypecheck } from "./run-scoped-typecheck.mjs";
+import { diffAgainstBaseline, parseTscOutput } from "./typecheckBaseline.mjs";
+
+export { diffAgainstBaseline, parseTscOutput } from "./typecheckBaseline.mjs";
 
 const ROOT = process.cwd();
 const TSCONFIG = path.join(ROOT, "open-sse", "tsconfig.json");
 const BASELINE_PATH = path.join(ROOT, "config/quality/open-sse-typecheck-baseline.json");
 const UPDATE = process.argv.includes("--update");
-
-// Matches tsc --pretty false output lines, e.g.:
-//   src/app/api/v1/chat/route.ts(12,7): error TS2304: Cannot find name 'bar'.
-//   open-sse/handlers/chatCore.ts(45,3): error TS7053: Element implicitly has an 'any'...
-const TSC_ERROR_LINE = /^(.+?)\((\d+),(\d+)\): error (TS\d+):/;
-
-/**
- * Parses raw `tsc --pretty false` stdout into a nested count map:
- *   { "<relative file path>": { "<TS code>": <count> } }
- *
- * Pure/exported for unit testing against synthetic tsc output — no child
- * process involved here.
- */
-export function parseTscOutput(raw) {
-  const counts = {};
-  const lines = String(raw).split("\n");
-  for (const line of lines) {
-    const match = TSC_ERROR_LINE.exec(line);
-    if (!match) continue;
-    const [, file, , , code] = match;
-    if (!counts[file]) counts[file] = {};
-    counts[file][code] = (counts[file][code] || 0) + 1;
-  }
-  return counts;
-}
-
-/**
- * Compares live (file, TS code) error counts against a frozen baseline.
- * Returns `{ regressions, improvements }`:
- *   - regressions: entries where live count > baselined count (or the pair is
- *     entirely new/unbaselined) — these fail the gate.
- *   - improvements: entries where live count < baselined count — informational,
- *     do not fail (use --update to ratchet the baseline down).
- *
- * Exported for unit testing.
- */
-export function diffAgainstBaseline(live, baseline) {
-  const regressions = [];
-  const improvements = [];
-
-  for (const [file, codes] of Object.entries(live)) {
-    for (const [code, liveCount] of Object.entries(codes)) {
-      const baselineCount = (baseline[file] && baseline[file][code]) || 0;
-      if (liveCount > baselineCount) {
-        regressions.push({ file, code, liveCount, baselineCount });
-      } else if (liveCount < baselineCount) {
-        improvements.push({ file, code, liveCount, baselineCount });
-      }
-    }
-  }
-
-  for (const [file, codes] of Object.entries(baseline)) {
-    for (const [code, baselineCount] of Object.entries(codes)) {
-      const liveCount = (live[file] && live[file][code]) || 0;
-      if (liveCount === 0 && baselineCount > 0) {
-        improvements.push({ file, code, liveCount: 0, baselineCount });
-      }
-    }
-  }
-
-  return { regressions, improvements };
-}
-
-function runTsc() {
-  try {
-    const stdout = execFileSync(
-      process.platform === "win32" ? "npx.cmd" : "npx",
-      ["tsc", "--pretty", "false", "--noEmit", "-p", TSCONFIG],
-      { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, cwd: ROOT }
-    );
-    return stdout;
-  } catch (err) {
-    // tsc exits non-zero when there are type errors — stdout still has the report.
-    if (err.stdout) return String(err.stdout);
-    throw err;
-  }
-}
 
 function loadBaseline() {
   if (!fs.existsSync(BASELINE_PATH)) return {};
@@ -121,7 +47,7 @@ function main() {
   }
 
   console.log("[open-sse-typecheck] Running tsc scoped to open-sse/ workspace…");
-  const stdout = runTsc();
+  const stdout = runScopedTypecheck(ROOT, TSCONFIG);
   const live = parseTscOutput(stdout);
   const baseline = loadBaseline();
   const { regressions, improvements } = diffAgainstBaseline(live, baseline);
@@ -143,7 +69,9 @@ function main() {
       `[open-sse-typecheck] ${improvements.length} baselined error(s) no longer present ` +
         `— run 'node scripts/check/check-open-sse-typecheck.mjs --update' to ratchet the baseline down:\n` +
         improvements
-          .map((i) => `  - ${i.file} ${i.code} (baseline ${i.baselineCount} -> live ${i.liveCount})`)
+          .map(
+            (i) => `  - ${i.file} ${i.code} (baseline ${i.baselineCount} -> live ${i.liveCount})`
+          )
           .join("\n")
     );
   }

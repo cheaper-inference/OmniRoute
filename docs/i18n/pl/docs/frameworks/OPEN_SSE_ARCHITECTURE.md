@@ -1,4 +1,9 @@
+# open-sse Architecture (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇪🇹 [am](../../../am/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇦🇿 [az](../../../az/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇩🇰 [da](../../../da/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇩🇪 [de](../../../de/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇬🇷 [el](../../../el/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇪🇸 [es](../../../es/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇪🇪 [et](../../../et/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇱 [he](../../../he/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇩 [id](../../../id/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇹 [it](../../../it/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇰🇭 [km](../../../km/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇲🇲 [my](../../../my/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇴 [no](../../../no/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [or](../../../or/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇱🇰 [si](../../../si/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [te](../../../te/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇹🇭 [th](../../../th/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OPEN_SSE_ARCHITECTURE.md)
+
 ---
+
 title: "Architektura open-sse"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -32,30 +37,30 @@ lastUpdated: 2026-06-28
 
 ```
 open-sse/
-├── index.ts              # Public entry point
-├── types.d.ts            # Public type exports
+├── index.ts              # Publiczny punkt wejścia
+├── types.d.ts            # Publiczne eksporty typów
 ├── package.json          # @omniroute/open-sse
-├── config/               # Provider configs, constants, registries
-├── executors/            # Per-provider HTTP executors (67 + base.ts/index.ts)
-├── handlers/             # Request handlers (chatCore, responses, etc.)
-├── lib/                  # Internal utilities
-├── mcp-server/           # Model Context Protocol server
-├── services/             # ~298 service modules
-├── transformer/          # Responses API format transformer
-├── translator/           # Format translation (OpenAI ↔ Claude ↔ Gemini)
-└── utils/                # Shared utilities (logging, error, stream, etc.)
+├── config/               # Konfiguracje dostawców, stałe, rejestry
+├── executors/            # Moduły wykonawcze HTTP dla poszczególnych dostawców (150 modułów + base.ts/index.ts)
+├── handlers/             # Procedury obsługi żądań (chatCore, responses itp.)
+├── lib/                  # Narzędzia wewnętrzne
+├── mcp-server/           # Serwer Model Context Protocol
+├── services/             # Około 298 modułów usług
+├── transformer/          # Transformator formatu Responses API
+├── translator/           # Translacja formatów (OpenAI ↔ Claude ↔ Gemini)
+└── utils/                # Współdzielone narzędzia (rejestrowanie, błędy, strumienie itp.)
 ```
 
-### Liczby modułów
+### Liczba modułów
 
 | Katalog | Pliki | Przeznaczenie |
-| `executors/` | 68 | Executory HTTP per-provider (ujednolicone przez fabrykę DefaultExecutor) |
-| `handlers/` | 16 | Punkty wejścia żądań (chatCore, responses, embeddings) |
-| `services/` | ~298 | Routing, caching, rate limiting, refresh itd. |
-| `translator/` | ~27 | Konwersja formatów (OpenAI ↔ Claude ↔ Gemini) |
-| `mcp-server/` | 32 | Narzędzia i transporty MCP |
-| `utils/` | ~65 | Narzędzia przekrojowe (logging, error, stream) |
-| `config/` | ~10 | Konfiguracje providerów, stałe, rejestry |
+| `executors/` | 167 | Moduły wykonawcze HTTP dla poszczególnych dostawców (ujednolicone za pomocą fabryki DefaultExecutor) |
+| `handlers/` | 157 | Punkty wejścia żądań (chatCore, responses, embeddings) |
+| `services/` | ~536 | Routing, buforowanie, ograniczanie częstotliwości, odświeżanie itp. |
+| `translator/` | 56 | Konwersja formatów (OpenAI ↔ Claude ↔ Gemini) |
+| `mcp-server/` | 44 | Narzędzia i transporty MCP |
+| `utils/` | ~108 | Narzędzia przekrojowe (rejestrowanie, błędy, strumienie) |
+| `config/` | ~339 | Konfiguracje dostawców, stałe, rejestry |
 
 ---
 
@@ -167,30 +172,30 @@ Artefakty call log (jeśli włączone) trafiają do `${DATA_DIR}/call_logs/`.
 
 ---
 
-## Kluczowe pliki — deep-dive
+## Szczegółowa analiza kluczowych plików
 
 ### chatCore.ts (5977 linii)
 
-**Główny handler żądań**. Mimo rozmiaru ma przejrzystą strukturę:
+**Główny handler żądań**. Pomimo swoich rozmiarów ma przejrzystą strukturę:
 
 ```ts
-// Pseudo-structure of chatCore.ts
+// Pseudo-struktura chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // 1. Auth + CORS
+  // 1. Uwierzytelnianie + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Body validation
+  // 2. Walidacja treści żądania
   const body = await parseRequestBody(request);
 
-  // 3. Format detection + translation
+  // 3. Wykrywanie formatu + translacja
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Combo routing
+  // 4. Routing combo
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -198,20 +203,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Continue to next target
+      // Przejdź do następnego celu
     }
   }
 
-  // 5. Emergency fallback
+  // 5. Awaryjny fallback
   return await emergencyFallback(body);
 }
 ```
 
-Mimo że to jedna wielka funkcja, jest zorganizowana w **sekcje z komentarzami**, które mapują się na 5-etapowy pipeline.
+Mimo że to jedna wielka funkcja, jest zorganizowana w **opatrzone komentarzami sekcje**, które odpowiadają 5-etapowemu pipeline'owi.
 
-### combo.ts (4456 LOC)
+### combo.ts (4456 linii kodu)
 
-**Silnik routingu**, który rozwiązuje combo do uporządkowanej listy targetów.
+**Silnik routingu**, który rozwiązuje combo do uporządkowanej listy celów.
 
 ```ts
 // services/combo.ts
@@ -228,49 +233,49 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Obsługuje **19 publicznych strategii routingu** (zob. `src/shared/constants/routingStrategies.ts`):
+Obsługuje **20 strategii routingu** (zobacz `src/shared/constants/routingStrategies.ts`):
 
-| Strategia           | Zachowanie                                                            |
-| ------------------- | --------------------------------------------------------------------- |
-| `priority`          | Uporządkowana lista first-target                                      |
-| `weighted`          | Probabilistycznie według wagi per-target                              |
-| `round-robin`       | Cykl przez targety w kolejności                                       |
-| `context-relay`     | Przekazywanie kontekstu między targetami                              |
-| `fill-first`        | Wypełnij quota przed przejściem do następnego                         |
-| `p2c`               | Power of two choices                                                  |
-| `random`            | Losowy jednostajny                                                    |
-| `least-used`        | Wybierz ten z najmniejszą liczbą ostatnich użyć                       |
-| `cost-optimized`    | Najtańszy healthy target najpierw                                     |
-| `reset-aware`       | Świadomy okien resetu providera                                       |
-| `reset-window`      | Routing oparty o okno resetu                                          |
-| `headroom`          | Najpierw największy pozostały headroom quota                          |
-| `strict-random`     | Prawdziwie jednostajny (bez ważenia jakości)                          |
-| `auto`              | Scoring 13-czynnikowy (`autoCombo/`)                                  |
-| `lkgp`              | Last known good provider najpierw                                     |
-| `context-optimized` | Najlepszy dla żądań long-context                                      |
-| `cache-optimized`   | Preferuj target z najlepszym dopasowaniem prompt cache                |
-| `fusion`            | Fan-out do panelu równolegle, potem synteza przez judge (`fusion.ts`) |
-| `pipeline`          | Sekwencyjnie przekazuj output każdego kroku do następnego             |
+| Strategia           | Zachowanie                                                                                            |
+| ------------------- | ----------------------------------------------------------------------------------------------------- |
+| `priority`          | Lista uporządkowana — od pierwszego celu                                                              |
+| `weighted`          | Probabilistycznie, według wagi przypisanej każdemu celowi                                             |
+| `round-robin`       | Cykliczne przechodzenie przez cele po kolei                                                           |
+| `context-relay`     | Przekazywanie kontekstu między celami                                                                 |
+| `fill-first`        | Wypełnienie limitu przed przejściem do następnego celu                                                |
+| `p2c`               | Power of two choices (wybór z dwóch losowych opcji)                                                   |
+| `random`            | Losowanie jednostajne                                                                                 |
+| `least-used`        | Wybiera cel z najmniejszą liczbą ostatnich użyć                                                       |
+| `cost-optimized`    | Najpierw najtańszy sprawny cel                                                                        |
+| `reset-aware`       | Uwzględnia okna resetowania dostawców                                                                 |
+| `reset-window`      | Routing oparty na oknach resetowania                                                                  |
+| `headroom`          | Najpierw cel z największym zapasem pozostałego limitu                                                 |
+| `quota-weighted`    | Pomija wyczerpane konta, a następnie losuje według pozostałego limitu ÷ bieżącego obciążenia          |
+| `strict-random`     | W pełni jednostajny (bez wag jakościowych)                                                            |
+| `auto`              | Używa 16-czynnikowej punktacji (`autoCombo/`)                                                         |
+| `lkgp`              | Najpierw ostatni znany działający dostawca                                                            |
+| `context-optimized` | Najlepszy dla żądań z długim kontekstem                                                               |
+| `cache-optimized`   | Przypina każdy wielokrotnie używany prefiks promptu do tego samego konta (trafienia cache'a promptów) |
+| `fusion`            | Rozsyła równolegle do panelu, a następnie syntetyzuje wyniki przez sędziego (`fusion.ts`)             |
+| `pipeline`          | Łączy kroki w łańcuch — wynik każdego celu zasila następny                                            |
 
-### base.ts (1170 LOC)
+### base.ts (1170 linii kodu)
 
-**Abstrakcyjny executor**, po którym dziedziczą moduły implementacji executorów. Katalog ma
-obecnie 89 top-level modułów implementacji. Zawiera:
+**Abstrakcyjny executor**, który rozszerza każda klasa executora (bezpośrednio lub przez `DefaultExecutor` i inne klasy pochodne). Zawiera:
 
-- `buildUrl()` — domyślna konstrukcja URL (podklasy nadpisują dla custom)
-- `buildHeaders()` — domyślne nagłówki (auth, content-type)
-- `transformRequest()` — domyślnie pass-through
-- `execute()` — główna pętla HTTP z retry/backoff/breaker
+- `buildUrl()` — domyślna konstrukcja URL (klasy pochodne nadpisują ją dla własnych potrzeb)
+- `buildHeaders()` — domyślne nagłówki (uwierzytelnianie, content-type)
+- `transformRequest()` — domyślnie przekazuje dane bez zmian
+- `execute()` — główna pętla HTTP z mechanizmami retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Handles all OpenAI/Anthropic-compatible providers
-  // Providers register configurations (URL, auth, headers) but share executor logic
+  // Obsługuje wszystkich dostawców zgodnych z OpenAI/Anthropic
+  // Dostawcy rejestrują konfiguracje (URL, auth, nagłówki), ale współdzielą logikę executora
 }
 ```
 
-Zachowanie specyficzne dla providera (auth headers, base URL, version headers) jest konfigurowane przez provider registry, a nie przez osobne klasy executorów.
+Zachowania specyficzne dla dostawcy (nagłówki uwierzytelniające, bazowy URL, nagłówki wersji) są konfigurowane przez rejestr dostawców, a nie przez osobne klasy executorów.
 
 ````
 
@@ -278,86 +283,86 @@ Zachowanie specyficzne dla providera (auth headers, base URL, version headers) j
 
 ## Serwisy (117 modułów)
 
-Serwisy to **skupione, jednozadaniowe moduły**, które handlery komponują ze sobą. Główne kategorie:
+Serwisy to **skoncentrowane, jednozadaniowe moduły**, komponowane przez handlery. Główne kategorie:
 
-### Routing i Combo
+### Routing i combo
 
-- `combo.ts` — punkt wejścia dla żądań routowanych przez combo
-- `services/autoCombo/` — scoring 13-czynnikowy, warianty i mode packs auto-routingu
-- `wildcardRouter.ts` — dopasowanie wildcard routes (`gpt-*`)
-- `modelFamilyFallback.ts` — fallback T5 wewnątrz rodziny modeli
+- `combo.ts` — punkt wejścia dla żądań kierowanych przez combo
+- `services/autoCombo/` — ocena oparta na 16 czynnikach, 8 strategii automatycznego routingu
+- `wildcardRouter.ts` — dopasowuje trasy wieloznaczne (`gpt-*`)
+- `modelFamilyFallback.ts` — fallback T5 w obrębie rodziny
 
-### Rate limiting i quota
+### Limity żądań i przydziały
 
-- `rateLimitManager.ts` — token bucket per key+provider
-- `usage.ts` — zapis usage
-- `quotaCache.ts` — migawki quota w pamięci
+- `rateLimitManager.ts` — token bucket na kombinację klucz+dostawca
+- `usage.ts` — rejestrowanie zużycia
+- `quotaCache.ts` — migawki przydziałów przechowywane w pamięci
 
-### Account i token
+### Konta i tokeny
 
-- `tokenRefresh.ts` — odświeżanie OAuth przy 401
-- `accountFallback.ts` — przełączenie na alternatywne konto
-- `sessionManager.ts` — stan sesji multi-turn
+- `tokenRefresh.ts` — odświeżanie OAuth przy błędzie 401
+- `accountFallback.ts` — przełączenie na konto alternatywne
+- `sessionManager.ts` — stan sesji wieloturowej
 
-### Intelligence
+### Inteligencja
 
 - `intentClassifier.ts` — klasyfikacja intencji żądania
 - `taskAwareRouter.ts` — routing według typu zadania
-- `thinkingBudget.ts` — alokacja thinking tokens
+- `thinkingBudget.ts` — przydzielanie tokenów myślenia
 - `contextManager.ts` — wstrzykiwanie kontekstu routingu
 
-### Resilience
+### Odporność
 
-- `resilience.ts` — orkiestracja retry, backoff, breaker
-- `emergencyFallback.ts` — fallback ostateczności
-- `modelDeprecation.ts` — auto-routing do modeli-następców
+- `resilience.ts` — orkiestracja ponowień, backoffu i wyłącznika (breaker)
+- `emergencyFallback.ts` — fallback ostatniej szansy
+- `modelDeprecation.ts` — automatyczne kierowanie do modeli następców
 
-### State
+### Stan
 
 - `signatureCache.ts` — deduplikacja po sygnaturze żądania
-- `volumeDetector.ts` — load shedding
+- `volumeDetector.ts` — odrzucanie obciążenia (load shedding)
 - `contextHandoff.ts` — serializacja sesji
 
-### Compression
+### Kompresja
 
-- `compression/` (podkatalog) — pełny pipeline kompresji
-- 39 plików obejmujących engines, rule packs, adapters
+- `compression/` (podkatalog) — pełny potok kompresji
+- 39 plików obejmujących silniki, pakiety reguł i adaptery
 
-### Skills
+### Umiejętności
 
 - (opisane w [SKILLS.md](./SKILLS.md))
 
-### Memory
+### Pamięć
 
 - (opisane w [MEMORY.md](./MEMORY.md))
 
 ---
 
-## Executory (75+ plików)
+## Egzekutory (150 modułów)
 
-Jeden plik na providera. Wszystkie dziedziczą po `BaseExecutor` i nadpisują to, co się różni.
+Przeważnie jeden plik na dostawcę. Wszystkie klasy egzekutorów rozszerzają `BaseExecutor` i nadpisują tylko to, co się różni; pozostałe moduły to helpery per dostawca (schematy narzędzi, adaptery fetch/TTS, handlery osobliwości).
 
 ### Wspólne wzorce
 
-Providery są rozwiązywane przez `getExecutor(providerId)`, które zwraca skonfigurowany executor. Providery kompatybilne z OpenAI/Anthropic używają `DefaultExecutor` (`executors/default.ts`). Zachowanie specyficzne dla providera (base URL, auth headers, API version) jest konfigurowane w `open-sse/config/providers/`, a transformacje body żądania obsługuje `open-sse/translator/`.
+Dostawcy są rozwiązywani przez `getExecutor(providerId)`, które zwraca skonfigurowany egzekutor. Dostawcy zgodni z OpenAI/Anthropic korzystają z `DefaultExecutor` (`executors/default.ts`). Zachowanie specyficzne dla dostawcy (bazowy URL, nagłówki uwierzytelniania, wersja API) konfiguruje się w `open-sse/config/providers/`, natomiast transformacje treści żądań są obsługiwane w `open-sse/translator/`.
 
-**Custom URL** ustawia się przez konfigurację providera:
+**Niestandardowy URL** ustawia się w konfiguracji dostawcy:
 
 ```ts
-// Provider config in open-sse/config/providers/
+// Konfiguracja dostawcy w open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**Custom auth** jest obsługiwany przez konfigurację auth w provider registry (API key, OAuth, profile nagłówków).
+**Niestandardowe uwierzytelnianie** jest obsługiwane przez konfigurację auth w rejestrze dostawców (klucz API, OAuth, profile nagłówków).
 
-**Custom body żądania** — transformacje (np. Anthropic oddzielające `system` od `messages`) są rejestrowane per-provider w `open-sse/translator/`.
+Transformacje **niestandardowej treści żądania** (np. oddzielanie `system` od `messages` w Anthropic) są rejestrowane per dostawca w `open-sse/translator/`.
 
 ````
 
-### Fabryka executorów
+### Fabryka egzekutorów
 
 `executors/index.ts` eksportuje `getExecutor(providerId)`:
 
@@ -371,7 +376,7 @@ const result = await executor.execute({
 });
 ````
 
-Fabryka korzysta z katalogu 329 wpisów providerów oraz wspólnych wartości domyślnych i 89 modułów implementacji executorów.
+Rozwiązywanie odbywa się przez `ExecutorRegistry` (`executors/registry.ts`): każdy wyspecjalizowany egzekutor jest zadeklarowany we wbudowanej tabeli w `executors/index.ts` i rejestrowany przez `registerExecutor(alias, instance)` przy ładowaniu modułu; `getExecutor()` odpytuje rejestr, a dla każdego dostawcy bez wyspecjalizowanego wpisu powraca do memoizowanego `DefaultExecutor`. Pełne mapowanie alias → egzekutor opisuje golden test `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -486,17 +491,17 @@ Obsługuje:
 
 ## Konfiguracja
 
-`open-sse/config/` to warstwa konfiguracji:
+`open-sse/config/` przechowuje warstwę konfiguracyjną:
 
-| Plik                          | Przeznaczenie                      |
-| ----------------------------- | ---------------------------------- |
-| `providerRegistry.ts`         | Wspólna konfiguracja rejestru providerów |
-| `providerModels.ts`           | Aliasy modeli, mapowanie formatów  |
-| `constants.ts`                | Timeouty, limity, kody statusu     |
-| `defaultThinkingSignature.ts` | Domyślna sygnatura thinking Claude |
-| `modelStrip.ts` (w services)  | Stripowanie pól per-provider       |
+| Plik                          | Zamiar                                            |
+| ----------------------------- | ------------------------------------------------- |
+| `providerRegistry.ts`         | Rejestracja modelu czatu w katalogu 377 dostawców |
+| `providerModels.ts`           | Aliasy modeli, mapowanie formatów                 |
+| `constants.ts`                | Limity czasu, limity, kody stanu                  |
+| `defaultThinkingSignature.ts` | Domyślny podpis myślenia Claude                   |
+| `modelStrip.ts` (w usługach)  | Usuwanie pól dla każdego dostawcy                 |
 
-### Schemat Provider Registry
+### Schemat rejestru dostawcy
 
 ```ts
 interface ProviderConfig {
@@ -511,7 +516,7 @@ interface ProviderConfig {
 }
 ```
 
-Walidacja Zod przy ładowaniu modułu zapewnia, że wszystkie konfiguracje providerów są poprawne.
+Sprawdzanie poprawności Zod przy ładowaniu modułu zapewnia, że wszystkie konfiguracje dostawcy są prawidłowe.
 
 ---
 

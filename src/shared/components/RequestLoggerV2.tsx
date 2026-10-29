@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import {
   useState,
   useEffect,
@@ -9,44 +11,54 @@ import {
   forwardRef,
   useImperativeHandle,
 } from "react";
+import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import Card from "./Card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { DataTableShell, SortableTableHead } from "@omniroute/ui-kit/data-table-shell";
+import { TableLoadingState } from "@omniroute/ui-kit/table-loading";
+import { cn } from "@/shared/utils/cn";
+import Badge from "./Badge";
+import Button from "./Button";
+import ColumnToggle from "./ColumnToggle";
+import EmptyState from "./EmptyState";
+import Input from "./Input";
+import Select from "./Select";
 import RequestLoggerDetail from "./RequestLoggerDetail";
 import { copyToClipboard } from "@/shared/utils/clipboard";
-import {
-  PROVIDER_COLORS,
-  getHttpStatusStyle as getStatusStyle,
-  getProtocolColor,
-} from "@/shared/constants/colors";
+import { PROVIDER_COLORS, getProtocolColor } from "@/shared/constants/colors";
 import {
   formatTime,
   formatDuration,
   maskAccount,
   stableAccountSuffix,
   formatApiKeyLabel,
+  formatCachePercentage,
 } from "@/shared/utils/formatting";
 import { getProviderDisplayLabel } from "@/shared/utils/providerDisplayLabel";
+import { mergeLogFilterOptions } from "@/shared/utils/logFilterOptions";
+import { buildLogTpsTitle, computeLogTps } from "@/shared/utils/logTps";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import {
   computeLogsSignature,
   shouldAutoRefresh,
   shouldTriggerInfiniteScroll,
 } from "./requestLoggerSignature";
+import { getResilienceBadges } from "./requestLoggerResilience";
 import {
   DEFAULT_REFRESH_INTERVAL_SEC,
   clampRefreshIntervalSec,
   readSavedRefreshIntervalSec,
   writeSavedRefreshIntervalSec,
 } from "./requestLoggerPreferences";
-import {
-  LOG_TABLE_CLASS,
-  LOG_TABLE_HEAD_CLASS,
-  LOG_TABLE_HEADER_BG_STYLE,
-  LOG_TABLE_HEADER_CELL_CLASS,
-  LOG_TABLE_HEADER_CELL_RIGHT_CLASS,
-  LOG_TABLE_ROW_CLASS,
-} from "./logTableStyles";
 
 // Number of call-log rows fetched per page. The viewer grows its window by this
 // amount on "Load more" / infinite scroll so users can browse past the first
@@ -54,15 +66,37 @@ import {
 // Reduced from 300 → 50 to avoid browser freeze and network saturation.
 const PAGE_SIZE = 50;
 
+const relatedLogsSchema = z.array(
+  z
+    .object({
+      id: z.string().min(1),
+      correlationId: z.string().min(1),
+      timestamp: z.string(),
+      status: z.number(),
+      active: z.boolean().optional(),
+      completed: z.boolean().optional(),
+      detailState: z.string().nullable().optional(),
+    })
+    .passthrough()
+);
+
+// Column sort toggle mapping: clicking a column header toggles asc/desc.
+const COLUMN_SORT_MAP = {
+  status: { desc: "status_desc", asc: "status_asc" },
+  model: { desc: "model_desc", asc: "model_asc" },
+  tokens: { desc: "tokens_desc", asc: "tokens_asc" },
+  tps: { desc: "tps_desc", asc: "tps_asc" },
+  duration: { desc: "duration_desc", asc: "duration_asc" },
+  time: { desc: "newest", asc: "oldest" },
+} as const;
+
 function getLogTotalTokens(log) {
   return (log?.tokens?.in || 0) + (log?.tokens?.out || 0);
 }
 
+// #13130: generation-time TPS (duration - TTFT, reasoning-aware); see logTps.ts.
 function getLogTps(log): number {
-  const tokensOut = log?.tokens?.out || 0;
-  const durationMs = log?.duration || 0;
-  if (tokensOut <= 0 || durationMs <= 0) return 0;
-  return tokensOut / (durationMs / 1000);
+  return computeLogTps(log?.tokens?.out, log?.tokens?.reasoning, log?.duration, log?.ttft);
 }
 
 function formatTps(tps: number): string {
@@ -73,17 +107,18 @@ function formatTps(tps: number): string {
 
 function getCacheSourceMeta(cacheSource: unknown) {
   if (cacheSource === "semantic") {
-    return {
-      key: "semantic",
-      className:
-        "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30",
-    };
+    return { key: "semantic", variant: "success" as const };
   }
+  return { key: "upstream", variant: "info" as const };
+}
 
-  return {
-    key: "upstream",
-    className: "bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30",
-  };
+// HTTP status → kit Badge tone (2xx success, 4xx warning, 5xx error, 0 = pending).
+function httpStatusTone(status: number) {
+  if (status >= 200 && status < 300) return "success" as const;
+  if (status >= 400 && status < 500) return "warning" as const;
+  if (status >= 500) return "error" as const;
+  if (status === 0) return "info" as const;
+  return "default" as const;
 }
 
 export interface RequestLoggerV2Handle {
@@ -91,11 +126,16 @@ export interface RequestLoggerV2Handle {
   getSortedLogs: () => any[];
 }
 
-const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: string }>(
+type RequestLoggerV2InitialProps = {
+  initialSelectedId?: string;
+  initialCorrelationId?: string;
+};
+const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2InitialProps>(
   (props, ref) => {
-    const { initialSelectedId } = props as any;
+    const { initialSelectedId, initialCorrelationId } = props;
     const t = useTranslations("requestLogger");
     const tCache = useTranslations("cache");
+    const tCommon = useTranslations("common");
     const { emailsVisible } = useEmailPrivacyStore();
 
     // Get translated status filters
@@ -123,7 +163,9 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
         { key: "combo", label: t("columns.combo") },
         { key: "tokens", label: t("columns.tokens") },
         { key: "tps", label: t("columns.tps") },
+        { key: "ttft", label: t("columns.ttft") },
         { key: "duration", label: t("columns.duration") },
+        { key: "addedWait", label: t("columns.addedWait") },
         { key: "time", label: t("columns.time") },
         { key: "conversation", label: t("columns.conversation") },
       ],
@@ -141,38 +183,21 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
     const [selectedApiKey, setSelectedApiKey] = useState("");
     const [sortBy, setSortBy] = useState("newest");
     const [selectedLog, setSelectedLog] = useState(null);
-    const [correlationIdFilter, setCorrelationIdFilter] = useState("");
+    const [correlationIdFilter, setCorrelationIdFilter] = useState(
+      () => initialCorrelationId ?? ""
+    );
     const [hoveredCid, setHoveredCid] = useState<string | null>(null);
     const [groupedView, setGroupedView] = useState(false);
     const [detailLoading, setDetailLoading] = useState(false);
 
-    // Column sort toggle: clicking a column header toggles asc/desc
-    const columnSortMap = {
-      status: { desc: "status_desc", asc: "status_asc" },
-      model: { desc: "model_desc", asc: "model_asc" },
-      tokens: { desc: "tokens_desc", asc: "tokens_asc" },
-      tps: { desc: "tps_desc", asc: "tps_asc" },
-      duration: { desc: "duration_desc", asc: "duration_asc" },
-      time: { desc: "newest", asc: "oldest" },
-    };
     const toggleSort = useCallback((column: string) => {
-      const mapping = columnSortMap[column as keyof typeof columnSortMap];
+      const mapping = COLUMN_SORT_MAP[column as keyof typeof COLUMN_SORT_MAP];
       if (!mapping) return;
       setSortBy((prev) => {
         if (prev === mapping.desc) return mapping.asc;
         return mapping.desc;
       });
     }, []);
-    const getSortIndicator = useCallback(
-      (column: string) => {
-        const mapping = columnSortMap[column as keyof typeof columnSortMap];
-        if (!mapping) return "";
-        if (sortBy === mapping.desc) return " ↓";
-        if (sortBy === mapping.asc) return " ↑";
-        return "";
-      },
-      [sortBy]
-    );
     const [detailData, setDetailData] = useState(null);
     const [detailLoggingEnabled, setDetailLoggingEnabled] = useState(false);
     const [detailLoggingLoading, setDetailLoggingLoading] = useState(false);
@@ -184,10 +209,16 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
     const detailRequestRef = useRef("");
     const hasLoadedRef = useRef(false);
     const logsSignatureRef = useRef("");
-    const scrollContainerRef = useRef(null);
+    // The kit Table's container (the table element's parent) is the scroll viewport; it only exists
+    // while rows are rendered, so it is tracked as state for the scroll/observer effects.
+    const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
+    const tableRef = useCallback((table: HTMLTableElement | null) => {
+      setScrollContainer(table?.parentElement ?? null);
+    }, []);
     const loadMoreSentinelRef = useRef(null);
     const hasScrolledRef = useRef(false);
     const [providerNodes, setProviderNodes] = useState([]);
+    const [serverFilterOptions, setServerFilterOptions] = useState(null);
     const visibleRef = useRef(true);
     // Set when handlePrev/handleNext hits the edge of the (possibly stale —
     // list polling pauses while a detail modal is open) in-memory list, so we
@@ -198,6 +229,9 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
 
     const [visibleColumns, setVisibleColumns] = useState(() => {
       const defaultVisible = Object.fromEntries(columns.map((c) => [c.key, true]));
+      // #13130: TTFT is only recorded for streaming calls written after the
+      // ttft_ms migration, so most rows show "—"; opt-in column, not default.
+      defaultVisible.ttft = false;
       if (globalThis.window === undefined) return defaultVisible;
       try {
         const saved = localStorage.getItem("loggerVisibleColumns");
@@ -302,6 +336,17 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
         .catch(() => {});
     }, []);
 
+    // Dropdown options come from the whole call_logs table + configured API keys, not
+    // just the loaded page — otherwise a value with no row in view cannot be picked.
+    useEffect(() => {
+      fetch("/api/usage/call-logs/filters")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (d) setServerFilterOptions(d);
+        })
+        .catch(() => {});
+    }, []);
+
     useEffect(() => {
       fetch("/api/logs/detail?limit=1")
         .then(async (res) => {
@@ -393,20 +438,20 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
     // shouldTriggerInfiniteScroll) — otherwise a sentinel that is already visible on
     // mount fires a "ghost" loadMore and permanently pauses auto-refresh.
     useEffect(() => {
-      const root = scrollContainerRef.current;
+      const root = scrollContainer;
       if (!root) return;
       const onScroll = () => {
         if (root.scrollTop > 0) hasScrolledRef.current = true;
       };
       root.addEventListener("scroll", onScroll, { passive: true });
       return () => root.removeEventListener("scroll", onScroll);
-    }, []);
+    }, [scrollContainer]);
 
     // Infinite scroll: grow the window when the sentinel near the bottom of the
     // scroll container becomes visible — but only after a real user scroll (#4269).
     useEffect(() => {
       const sentinel = loadMoreSentinelRef.current;
-      const root = scrollContainerRef.current;
+      const root = scrollContainer;
       if (!sentinel || !hasMore) return;
       const observer = new IntersectionObserver(
         (entries) => {
@@ -425,7 +470,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
       );
       observer.observe(sentinel);
       return () => observer.disconnect();
-    }, [hasMore, loading, loadMore]);
+    }, [hasMore, loading, loadMore, scrollContainer]);
 
     const filteredLogs = useMemo(() => {
       let arr = logs;
@@ -534,89 +579,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
     // endpoint until the row appears.
     const router = useRouter();
 
-    const openDetail = async (logEntry) => {
-      // Guard: if no valid id provided, close instead of opening an empty modal
-      if (!logEntry?.id) {
-        try {
-          closeDetail();
-        } catch {}
-        return;
-      }
-
-      const requestToken = `${logEntry.id}:${Date.now()}:${Math.random()}`;
-      detailRequestRef.current = requestToken;
-      const isCurrentDetailRequest = () => detailRequestRef.current === requestToken;
-
-      setSelectedLog(logEntry);
-      try {
-        const url = new URL(globalThis.location.href);
-        url.searchParams.set("id", logEntry.id);
-        router.replace(url.pathname + url.search, { scroll: false });
-      } catch (e) {
-        // ignore navigation errors
-      }
-      setDetailLoading(true);
-      setDetailData(null);
-      try {
-        const res = await fetch(`/api/logs/${logEntry.id}`, { cache: "no-store" });
-        if (res.ok) {
-          const data = await res.json();
-          if (!isCurrentDetailRequest()) return;
-          const dataHasPipeline =
-            data?.pipelinePayloads && Object.keys(data.pipelinePayloads || {}).length > 0;
-          setDetailData((prev: { pipelinePayloads: any }) => ({
-            ...prev,
-            ...data,
-            pipelinePayloads: dataHasPipeline ? data.pipelinePayloads : prev?.pipelinePayloads,
-          }));
-          // ensure the modal summary reflects the fetched call log summary
-          if (data && typeof data === "object") {
-            setSelectedLog((prev: any) => ({
-              ...prev,
-              ...data,
-              active: data.active === true,
-            }));
-          }
-        } else {
-          // A deep-linked id can legitimately 404 while the request is still
-          // finalizing. Keep the modal open and poll /api/logs/[id] instead of
-          // falling back to an in-memory active-request endpoint.
-          if (!isCurrentDetailRequest()) return;
-          if (res.status === 404) {
-            if (logEntry.pendingLookup || logEntry.active) {
-              setSelectedLog((prev: { method: any; path: any }) => ({
-                ...prev,
-                id: logEntry.id,
-                status: 0,
-                method: prev?.method,
-                path: prev?.path || "",
-              }));
-              setDetailData({ detailState: "pending" });
-              return;
-            }
-            try {
-              console.warn("Log not found:", logEntry.id);
-            } catch {}
-            try {
-              closeDetail();
-            } catch {}
-            return;
-          }
-          // other errors: show a minimal error indicator by setting detailData to an error object
-          try {
-            const body = await res.text().catch(() => null);
-            if (!isCurrentDetailRequest()) return;
-            setDetailData({ error: `Failed to fetch log (status ${res.status})`, body });
-          } catch {}
-        }
-      } catch (error) {
-        console.error("Failed to fetch log detail:", error);
-      } finally {
-        if (isCurrentDetailRequest()) setDetailLoading(false);
-      }
-    };
-
-    const closeDetail = () => {
+    const closeDetail = useCallback(() => {
       detailRequestRef.current = "";
       setSelectedLog(null);
       setDetailData(null);
@@ -625,10 +588,95 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
         const url = new URL(globalThis.location.href);
         url.searchParams.delete("id");
         router.replace(url.pathname + url.search, { scroll: false });
-      } catch (e) {
+      } catch {
         // ignore navigation errors
       }
-    };
+    }, [router]);
+
+    const openDetail = useCallback(
+      async (logEntry) => {
+        // Guard: if no valid id provided, close instead of opening an empty modal
+        if (!logEntry?.id) {
+          try {
+            closeDetail();
+          } catch {}
+          return;
+        }
+
+        const requestToken = `${logEntry.id}:${Date.now()}:${Math.random()}`;
+        detailRequestRef.current = requestToken;
+        const isCurrentDetailRequest = () => detailRequestRef.current === requestToken;
+
+        setSelectedLog(logEntry);
+        try {
+          const url = new URL(globalThis.location.href);
+          url.searchParams.set("id", logEntry.id);
+          router.replace(url.pathname + url.search, { scroll: false });
+        } catch {
+          // ignore navigation errors
+        }
+        setDetailLoading(true);
+        setDetailData(null);
+        try {
+          const res = await fetch(`/api/logs/${logEntry.id}`, { cache: "no-store" });
+          if (res.ok) {
+            const data = await res.json();
+            if (!isCurrentDetailRequest()) return;
+            const dataHasPipeline =
+              data?.pipelinePayloads && Object.keys(data.pipelinePayloads || {}).length > 0;
+            setDetailData((prev: { pipelinePayloads: any }) => ({
+              ...prev,
+              ...data,
+              pipelinePayloads: dataHasPipeline ? data.pipelinePayloads : prev?.pipelinePayloads,
+            }));
+            // ensure the modal summary reflects the fetched call log summary
+            if (data && typeof data === "object") {
+              setSelectedLog((prev: any) => ({
+                ...prev,
+                ...data,
+                active: data.active === true,
+              }));
+            }
+          } else {
+            // A deep-linked id can legitimately 404 while the request is still
+            // finalizing. Keep the modal open and poll /api/logs/[id] instead of
+            // falling back to an in-memory active-request endpoint.
+            if (!isCurrentDetailRequest()) return;
+            if (res.status === 404) {
+              if (logEntry.pendingLookup || logEntry.active) {
+                setSelectedLog((prev: { method: any; path: any }) => ({
+                  ...prev,
+                  id: logEntry.id,
+                  status: 0,
+                  method: prev?.method,
+                  path: prev?.path || "",
+                }));
+                setDetailData({ detailState: "pending" });
+                return;
+              }
+              try {
+                console.warn("Log not found:", logEntry.id);
+              } catch {}
+              try {
+                closeDetail();
+              } catch {}
+              return;
+            }
+            // other errors: show a minimal error indicator by setting detailData to an error object
+            try {
+              const body = await res.text().catch(() => null);
+              if (!isCurrentDetailRequest()) return;
+              setDetailData({ error: `Failed to fetch log (status ${res.status})`, body });
+            } catch {}
+          }
+        } catch (error) {
+          console.error("Failed to fetch log detail:", error);
+        } finally {
+          if (isCurrentDetailRequest()) setDetailLoading(false);
+        }
+      },
+      [closeDetail, router]
+    );
 
     const sortedLogsForNav = useMemo(() => sortedLogs, [sortedLogs]);
 
@@ -653,7 +701,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
             console.error("Failed to open initial log id:", error_);
           });
       }
-    }, [initialSelectedId]);
+    }, [initialSelectedId, openDetail]);
 
     useEffect(() => {
       const isActive = selectedLog?.active === true;
@@ -704,29 +752,44 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
       const cid = selectedLog?.correlationId;
       if (!selectedLog?.id || !cid) return;
       let cancelled = false;
+      let inFlight = false;
       const interval = setInterval(async () => {
-        if (document.visibilityState !== "visible") return;
+        if (document.visibilityState !== "visible" || inFlight) return;
+        const requestToken = detailRequestRef.current;
+        const isCurrent = () => !cancelled && detailRequestRef.current === requestToken;
+        inFlight = true;
         try {
           const res = await fetch(`/api/usage/call-logs?correlationId=${encodeURIComponent(cid)}`, {
             cache: "no-store",
           });
-          if (cancelled || !res.ok) return;
-          const cidLogs = await res.json();
-          if (!Array.isArray(cidLogs) || cidLogs.length === 0) return;
+          if (!isCurrent() || !res.ok) return;
+          const snapshot = relatedLogsSchema.safeParse(await res.json());
+          if (!isCurrent() || !snapshot.success) return;
+          // The API matches correlation substrings; reconcile only this exact request.
+          const cidLogs = snapshot.data.filter((log) => log.correlationId === cid);
+          const byId = new Map(cidLogs.map((log) => [log.id, log]));
           setLogs((prev) => {
-            const ids = new Set(cidLogs.map((l: any) => l.id));
+            if (!isCurrent()) return prev;
             let changed = false;
-            const merged = prev.map((l: any) => {
-              const updated = cidLogs.find((c: any) => c.id === l.id);
+            const merged = prev.flatMap((log: any) => {
+              if (log.correlationId !== cid) return [log];
+              const updated = byId.get(log.id);
               if (updated) {
                 changed = true;
-                return { ...l, ...updated };
+                return [updated];
               }
-              return l;
+              // All live previews are included, but persisted rows are paginated.
+              if (log.active || log.completed || log.detailState === "in-memory") {
+                changed = true;
+                return [];
+              }
+              return [log];
             });
-            for (const cl of cidLogs) {
-              if (!merged.some((m: any) => m.id === cl.id)) {
-                merged.push(cl);
+            const ids = new Set(prev.map((log: any) => log.id));
+            for (const log of cidLogs) {
+              if (!ids.has(log.id)) {
+                merged.push(log);
+                ids.add(log.id);
                 changed = true;
               }
             }
@@ -734,6 +797,8 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
           });
         } catch {
           /* poll failed — non-critical */
+        } finally {
+          inFlight = false;
         }
       }, 3000);
       return () => {
@@ -764,7 +829,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
         pendingBoundaryNavRef.current = "prev";
         fetchLogs(false);
       }
-    }, [currentLogIndex, sortedLogsForNav, fetchLogs]);
+    }, [currentLogIndex, sortedLogsForNav, fetchLogs, openDetail]);
 
     const handleNext = useCallback(() => {
       const idx = currentLogIndex;
@@ -780,7 +845,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
         pendingBoundaryNavRef.current = "next";
         fetchLogs(false);
       }
-    }, [currentLogIndex, sortedLogsForNav, fetchLogs]);
+    }, [currentLogIndex, sortedLogsForNav, fetchLogs, openDetail]);
 
     // Resolves a pending boundary nav (see handlePrev/handleNext) once a
     // triggered fetchLogs() resync has landed in sortedLogsForNav. Only fires
@@ -833,38 +898,24 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
       }
     };
 
-    const sourceLogsForDropdowns = logs;
-
-    // Unique accounts and providers for dropdowns
-
-    const uniqueAccounts = useMemo(
-      () => [
-        ...new Set(sourceLogsForDropdowns.map((l) => l.account).filter((a) => a && a !== "-")),
-      ],
-      [sourceLogsForDropdowns]
+    const filterOptions = useMemo(
+      () => mergeLogFilterOptions(serverFilterOptions, serverFilterOptions?.configuredKeys, logs),
+      [serverFilterOptions, logs]
     );
-    const uniqueModels = useMemo(
-      () =>
-        [
-          ...new Set(
-            sourceLogsForDropdowns.flatMap((l) => [l.model, l.requestedModel]).filter(Boolean)
-          ),
-        ].sort(),
-      [sourceLogsForDropdowns]
+    const uniqueAccounts = filterOptions.accounts;
+    const uniqueModels = filterOptions.models;
+    const uniqueProviders = filterOptions.providers;
+    // Quick-filter chips stay on the loaded rows: one chip per provider ever logged
+    // (including deleted compatible nodes) would flood the toolbar.
+    const loadedProviders = useMemo(
+      () => mergeLogFilterOptions(null, null, logs).providers,
+      [logs]
     );
-    const uniqueProviders = useMemo(
-      () =>
-        [
-          ...new Set(sourceLogsForDropdowns.map((l) => l.provider).filter((p) => p && p !== "-")),
-        ].sort(),
-      [sourceLogsForDropdowns]
-    );
+    const apiKeyOptions = filterOptions.apiKeys;
+    // The "N keys" stat describes the loaded rows, not the dropdown.
     const uniqueApiKeys = useMemo(
-      () =>
-        [
-          ...new Set(sourceLogsForDropdowns.map((l) => l.apiKeyId || l.apiKeyName).filter(Boolean)),
-        ].sort(),
-      [sourceLogsForDropdowns]
+      () => [...new Set(logs.map((l) => l.apiKeyId || l.apiKeyName).filter(Boolean))],
+      [logs]
     );
 
     // Stats (memoized to avoid re-computation on every render)
@@ -880,215 +931,122 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
       [filteredLogs, logs, uniqueApiKeys]
     );
 
+    const sortDirection = (column: string): "asc" | "desc" | undefined => {
+      const mapping = COLUMN_SORT_MAP[column as keyof typeof COLUMN_SORT_MAP];
+      if (!mapping) return undefined;
+      if (sortBy === mapping.desc) return "desc";
+      if (sortBy === mapping.asc) return "asc";
+      return undefined;
+    };
+    const visibleColumnCount = Math.max(1, columns.filter((c) => visibleColumns[c.key]).length);
+    // Sortable header: COLUMN_SORT_MAP owns the flip rule (first click = desc); the kit only
+    // renders the control, its direction icon and aria-sort.
+    const sortableHead = (column: string, label: string, align: "left" | "right" = "right") => (
+      <SortableTableHead
+        align={align}
+        className="px-3"
+        direction={sortDirection(column)}
+        onDirectionChange={() => toggleSort(column)}
+      >
+        {label}
+      </SortableTableHead>
+    );
+
     return (
       <div className="flex flex-col gap-4">
         {/* Header Bar */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Recording Toggle */}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
+            aria-pressed={recording}
             onClick={() => setRecording(!recording)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-              recording
-                ? "bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400"
-                : "bg-bg-subtle border-border text-text-muted"
-            }`}
+            className={cn(
+              "rounded-full",
+              recording ? "border-error/30 bg-error/10 text-error" : "text-text-muted"
+            )}
           >
             <span
-              className={`w-2 h-2 rounded-full ${recording ? "bg-red-500 animate-pulse" : "bg-text-muted"}`}
+              aria-hidden="true"
+              className={cn(
+                "size-2 rounded-full",
+                recording ? "bg-error animate-pulse" : "bg-text-muted"
+              )}
             />
             {recording ? t("recording") : t("paused")}
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="outline"
+            size="sm"
+            aria-pressed={detailLoggingEnabled}
             onClick={toggleDetailLogging}
             disabled={detailLoggingLoading}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors disabled:opacity-60 ${
+            className={cn(
+              "rounded-full",
               detailLoggingEnabled
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300"
-                : "bg-bg-subtle border-border text-text-muted"
-            }`}
+                ? "border-warning/30 bg-warning/10 text-warning"
+                : "text-text-muted"
+            )}
             title={t("capturePipeline")}
           >
             <span
-              className={`w-2 h-2 rounded-full ${detailLoggingEnabled ? "bg-amber-500" : "bg-text-muted"}`}
+              aria-hidden="true"
+              className={cn(
+                "size-2 rounded-full",
+                detailLoggingEnabled ? "bg-warning" : "bg-text-muted"
+              )}
             />
             {detailLoggingLoading
               ? t("updatingPipelineLogs")
               : detailLoggingEnabled
                 ? t("pipelineLogsOn")
                 : t("pipelineLogsOff")}
-          </button>
-
-          {/* Search */}
-          <div className="flex-1 min-w-[200px] relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">
-              search
-            </span>
-            <input
-              type="text"
-              placeholder={t("searchPlaceholder")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary"
-            />
-          </div>
-
-          {/* Correlation ID Filter */}
-          <div className="min-w-[180px] relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[16px]">
-              tag
-            </span>
-            <input
-              type="text"
-              placeholder={t("correlationId")}
-              value={correlationIdFilter}
-              onChange={(e) => setCorrelationIdFilter(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary font-mono placeholder:text-text-muted focus:outline-none focus:border-primary"
-            />
-          </div>
-
-          {/* Group by CID toggle */}
-          <button
-            onClick={() => setGroupedView((v) => !v)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
-              groupedView
-                ? "bg-violet-500/15 border-violet-500/30 text-violet-700 dark:text-violet-300"
-                : "bg-bg-subtle border-border text-text-muted hover:text-text-primary"
-            }`}
-            title={groupedView ? t("group.showAllRows") : t("group.showLatestPerCorrelation")}
-          >
-            <span className="material-symbols-outlined text-[16px]">
-              {groupedView ? "unfold_less" : "unfold_more"}
-            </span>
-            {groupedView ? t("group.grouped") : t("statusFilters.all")}
-          </button>
-
-          {/* Provider Dropdown */}
-          <select
-            value={selectedProvider}
-            onChange={(e) => setSelectedProvider(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary focus:outline-none focus:border-primary appearance-none cursor-pointer min-w-[140px]"
-          >
-            <option value="">{t("allProviders")}</option>
-            {uniqueProviders.map((p) => {
-              const compatLabel = getProviderDisplayLabel(p, providerNodes);
-              const pc = PROVIDER_COLORS[p];
-              return (
-                <option key={p} value={p}>
-                  {compatLabel || pc?.label || p.toUpperCase()}
-                </option>
-              );
-            })}
-          </select>
-
-          {/* Model Dropdown */}
-          <select
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary focus:outline-none focus:border-primary appearance-none cursor-pointer min-w-[180px]"
-          >
-            <option value="">{t("allModels")}</option>
-            {uniqueModels.map((model) => (
-              <option key={model} value={model}>
-                {model}
-              </option>
-            ))}
-          </select>
-
-          {/* Account Dropdown */}
-          <select
-            value={selectedAccount}
-            onChange={(e) => setSelectedAccount(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary focus:outline-none focus:border-primary appearance-none cursor-pointer min-w-[140px]"
-          >
-            <option value="">{t("allAccounts")}</option>
-            {uniqueAccounts.map((a) => (
-              <option key={a} value={a}>
-                {emailsVisible ? a : `${maskAccount(a, false)} · #${stableAccountSuffix(a)}`}
-              </option>
-            ))}
-          </select>
-
-          {/* API Key Dropdown */}
-          <select
-            value={selectedApiKey}
-            onChange={(e) => setSelectedApiKey(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary focus:outline-none focus:border-primary appearance-none cursor-pointer min-w-[160px]"
-          >
-            <option value="">{t("allApiKeys")}</option>
-            {uniqueApiKeys.map((value) => {
-              const matched = logs.find((l) => (l.apiKeyId || l.apiKeyName) === value);
-              const label = formatApiKeyLabel(matched?.apiKeyName, matched?.apiKeyId);
-              return (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              );
-            })}
-          </select>
+          </Button>
 
           {/* Stats */}
-          <div className="flex items-center gap-2 text-xs text-text-muted">
-            <span className="px-2 py-1 rounded bg-bg-subtle border border-border font-mono">
+          <div className="flex flex-wrap items-center gap-1.5 font-mono">
+            <Badge size="sm">
               {totalCount} {t("total")}
-            </span>
+            </Badge>
             {runningCount > 0 && (
-              <span className="px-2 py-1 rounded bg-amber-500/10 text-amber-700 dark:text-amber-400 font-mono">
+              <Badge size="sm" variant="warning">
                 {runningCount} {t("running")}
-              </span>
+              </Badge>
             )}
-            <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-mono">
+            <Badge size="sm" variant="success">
               {okCount} {t("ok")}
-            </span>
+            </Badge>
             {errorCount > 0 && (
-              <span className="px-2 py-1 rounded bg-red-500/10 text-red-700 dark:text-red-400 font-mono">
+              <Badge size="sm" variant="error">
                 {errorCount} {t("err")}
-              </span>
+              </Badge>
             )}
             {comboCount > 0 && (
-              <span className="px-2 py-1 rounded bg-violet-500/10 text-violet-700 dark:text-violet-400 font-mono">
+              <Badge size="sm" className="border-chart-3/30 bg-chart-3/10 text-chart-3">
                 {comboCount} {t("combo")}
-              </span>
+              </Badge>
             )}
             {apiKeyCount > 0 && (
-              <span className="px-2 py-1 rounded bg-primary/10 text-primary font-mono">
+              <Badge size="sm" variant="primary">
                 {apiKeyCount} {t("keys")}
-              </span>
+              </Badge>
             )}
-            <span className="px-2 py-1 rounded bg-bg-subtle border border-border font-mono">
-              {sortedLogs.length} {t("shown")}
-            </span>
           </div>
 
-          {/* Sort Dropdown */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary focus:outline-none focus:border-primary appearance-none cursor-pointer min-w-[150px]"
-            title={t("sortLogs")}
-          >
-            <option value="newest">{t("sortNewest")}</option>
-            <option value="oldest">{t("sortOldest")}</option>
-            <option value="tokens_desc">{t("sortTokensDesc")}</option>
-            <option value="tokens_asc">{t("sortTokensAsc")}</option>
-            <option value="duration_desc">{t("sortDurationDesc")}</option>
-            <option value="duration_asc">{t("sortDurationAsc")}</option>
-            <option value="status_desc">{t("sortStatusDesc")}</option>
-            <option value="status_asc">{t("sortStatusAsc")}</option>
-            <option value="model_asc">{t("sortModelAsc")}</option>
-            <option value="model_desc">{t("sortModelDesc")}</option>
-          </select>
-
-          {/* Refresh interval */}
-          <div className="flex items-center gap-1">
-            <button
+          <div className="ms-auto flex items-center gap-1">
+            {/* Refresh interval */}
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => updateRefreshIntervalSec((v) => v - 1)}
-              className="w-6 h-6 flex items-center justify-center rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors text-sm font-bold"
               title={t("interval.decrease")}
+              aria-label={t("interval.decrease")}
             >
-              −
-            </button>
-            <input
+              <Icon name="remove" size={14} />
+            </Button>
+            <Input
               type="number"
               min={1}
               max={300}
@@ -1097,579 +1055,686 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
                 const v = Number.parseInt(e.target.value, 10);
                 if (!Number.isNaN(v)) updateRefreshIntervalSec(v);
               }}
-              className="w-12 text-center text-[11px] bg-transparent border border-border rounded px-1 py-0.5 text-text-primary [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               title={t("interval.title")}
+              aria-label={t("interval.title")}
+              className="w-auto min-w-0"
+              inputClassName="h-8 min-h-8 w-14 px-1 text-center text-xs [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => updateRefreshIntervalSec((v) => v + 1)}
-              className="w-6 h-6 flex items-center justify-center rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors text-sm font-bold"
               title={t("interval.increase")}
+              aria-label={t("interval.increase")}
             >
-              +
-            </button>
+              <Icon name="add" size={14} />
+            </Button>
             <span className="text-[10px] text-text-muted">s</span>
+
+            {/* Refresh */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => fetchLogs(false)}
+              title={t("refresh")}
+              aria-label={t("refresh")}
+            >
+              <Icon name="refresh" size={18} />
+            </Button>
+          </div>
+        </div>
+
+        <DataTableShell
+          filterAlignment="end"
+          resultCount={sortedLogs.length}
+          resultLabel={(count) => `${count} ${t("shown")}`}
+          filters={
+            <>
+              {/* Search */}
+              <Input
+                type="text"
+                icon="search"
+                placeholder={t("searchPlaceholder")}
+                aria-label={t("searchPlaceholder")}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full sm:w-72"
+              />
+
+              {/* Correlation ID Filter */}
+              <Input
+                type="text"
+                icon="tag"
+                placeholder={t("correlationId")}
+                aria-label={t("correlationId")}
+                value={correlationIdFilter}
+                onChange={(e) => setCorrelationIdFilter(e.target.value)}
+                className="w-full sm:w-48"
+                inputClassName="font-mono"
+              />
+
+              {/* Group by CID toggle */}
+              <Button
+                variant="outline"
+                aria-pressed={groupedView}
+                onClick={() => setGroupedView((v) => !v)}
+                className={cn(groupedView && "border-chart-3/30 bg-chart-3/15 text-chart-3")}
+                title={groupedView ? t("group.showAllRows") : t("group.showLatestPerCorrelation")}
+              >
+                <Icon name={groupedView ? "unfold_less" : "unfold_more"} size={16} />
+                {groupedView ? t("group.grouped") : t("statusFilters.all")}
+              </Button>
+
+              {/* Provider Dropdown */}
+              <Select
+                className="w-auto"
+                value={selectedProvider}
+                onChange={(e) => setSelectedProvider(e.target.value)}
+                aria-label={t("columns.provider")}
+                selectClassName="min-w-[140px]"
+              >
+                <option value="">{t("allProviders")}</option>
+                {uniqueProviders.map((p) => {
+                  const compatLabel = getProviderDisplayLabel(p, providerNodes);
+                  const pc = PROVIDER_COLORS[p];
+                  return (
+                    <option key={p} value={p}>
+                      {compatLabel || pc?.label || p.toUpperCase()}
+                    </option>
+                  );
+                })}
+              </Select>
+
+              {/* Model Dropdown */}
+              <Select
+                className="w-auto"
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                aria-label={t("columns.model")}
+                selectClassName="min-w-[180px]"
+              >
+                <option value="">{t("allModels")}</option>
+                {uniqueModels.map((model) => (
+                  <option key={model} value={model}>
+                    {model}
+                  </option>
+                ))}
+              </Select>
+
+              {/* Account Dropdown */}
+              <Select
+                className="w-auto"
+                value={selectedAccount}
+                onChange={(e) => setSelectedAccount(e.target.value)}
+                aria-label={t("columns.account")}
+                selectClassName="min-w-[140px]"
+              >
+                <option value="">{t("allAccounts")}</option>
+                {uniqueAccounts.map((a) => (
+                  <option key={a} value={a}>
+                    {emailsVisible ? a : `${maskAccount(a, false)} · #${stableAccountSuffix(a)}`}
+                  </option>
+                ))}
+              </Select>
+
+              {/* API Key Dropdown */}
+              <Select
+                className="w-auto"
+                value={selectedApiKey}
+                onChange={(e) => setSelectedApiKey(e.target.value)}
+                aria-label={t("columns.apiKey")}
+                selectClassName="min-w-[160px]"
+              >
+                <option value="">{t("allApiKeys")}</option>
+                {apiKeyOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {formatApiKeyLabel(option.name, option.id)}
+                  </option>
+                ))}
+              </Select>
+
+              {/* Sort Dropdown */}
+              <Select
+                className="w-auto"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                title={t("sortLogs")}
+                aria-label={t("sortLogs")}
+                selectClassName="min-w-[150px]"
+              >
+                <option value="newest">{t("sortNewest")}</option>
+                <option value="oldest">{t("sortOldest")}</option>
+                <option value="tokens_desc">{t("sortTokensDesc")}</option>
+                <option value="tokens_asc">{t("sortTokensAsc")}</option>
+                <option value="duration_desc">{t("sortDurationDesc")}</option>
+                <option value="duration_asc">{t("sortDurationAsc")}</option>
+                <option value="status_desc">{t("sortStatusDesc")}</option>
+                <option value="status_asc">{t("sortStatusAsc")}</option>
+                <option value="model_asc">{t("sortModelAsc")}</option>
+                <option value="model_desc">{t("sortModelDesc")}</option>
+              </Select>
+
+              {/* Column visibility — kit DropdownMenu checkbox items via the adapter. */}
+              <ColumnToggle columns={columns} visible={visibleColumns} onToggle={toggleColumn} />
+            </>
+          }
+        >
+          {/* Quick Filters */}
+          <div
+            role="group"
+            aria-label={tCommon("filters")}
+            className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2.5"
+          >
+            {/* Status Filters */}
+            {statusFilters.map((f) => (
+              <Button
+                key={f.key}
+                variant="outline"
+                size="sm"
+                aria-pressed={activeFilter === f.key}
+                onClick={() => setActiveFilter(activeFilter === f.key ? "all" : f.key)}
+                className={cn(
+                  "h-7 min-h-7 rounded-full px-3 text-xs",
+                  activeFilter === f.key
+                    ? f.key === "error"
+                      ? "bg-error/20 text-error border-error/40"
+                      : f.key === "ok"
+                        ? "bg-success/20 text-success border-success/40"
+                        : f.key === "combo"
+                          ? "bg-chart-3/20 text-chart-3 border-chart-3/40"
+                          : "bg-primary text-accent-foreground border-primary"
+                    : "text-text-muted"
+                )}
+              >
+                {f.icon && <Icon name={f.icon} size={14} />}
+                {f.label}
+              </Button>
+            ))}
+
+            {/* Divider */}
+            {loadedProviders.length > 0 && (
+              <span aria-hidden="true" className="mx-1 h-5 w-px bg-border" />
+            )}
+
+            {/* Dynamic Provider Quick Filters (from data) */}
+            {loadedProviders.map((p) => {
+              const compatLabel = getProviderDisplayLabel(p, providerNodes);
+              // Provider identity colours (brand palette in constants/colors), not status tones.
+              const pc = PROVIDER_COLORS[p] || {
+                bg: "#374151",
+                text: "#fff",
+                label: compatLabel || p.toUpperCase(),
+              };
+              const displayLabel = compatLabel || pc.label;
+              const isActive = selectedProvider === p;
+              return (
+                <Button
+                  key={p}
+                  variant="ghost"
+                  size="sm"
+                  aria-pressed={isActive}
+                  onClick={() => setSelectedProvider(isActive ? "" : p)}
+                  className={cn(
+                    "h-7 min-h-7 rounded-full border px-3 text-xs font-bold uppercase",
+                    isActive
+                      ? "border-border-strong ring-1 ring-border-strong"
+                      : "border-transparent opacity-70 hover:opacity-100"
+                  )}
+                  style={{
+                    backgroundColor: isActive ? pc.bg : `${pc.bg}33`,
+                    color: isActive ? pc.text : pc.bg,
+                  }}
+                >
+                  {displayLabel}
+                </Button>
+              );
+            })}
           </div>
 
-          {/* Refresh */}
-          <button
-            onClick={() => fetchLogs(false)}
-            className="p-2 rounded-lg hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
-            title={t("refresh")}
-          >
-            <span className="material-symbols-outlined text-[18px]">refresh</span>
-          </button>
-        </div>
-
-        {/* Quick Filters */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Status Filters */}
-          {statusFilters.map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setActiveFilter(activeFilter === f.key ? "all" : f.key)}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all ${
-                activeFilter === f.key
-                  ? f.key === "error"
-                    ? "bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/40"
-                    : f.key === "ok"
-                      ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-500/40"
-                      : f.key === "combo"
-                        ? "bg-violet-500/20 text-violet-700 dark:text-violet-300 border-violet-500/40"
-                        : "bg-primary text-white border-primary"
-                  : "bg-bg-subtle border-border text-text-muted hover:border-text-muted"
-              }`}
+          {/* Table */}
+          {loading && logs.length === 0 ? (
+            <TableLoadingState label={t("loadingLogs")} className="min-h-[460px]" />
+          ) : logs.length === 0 ? (
+            <EmptyState icon="receipt_long" title={t("noLogs")} className="min-h-[460px]" />
+          ) : sortedLogs.length === 0 ? (
+            <EmptyState icon="search_off" title={t("noMatchingLogs")} className="min-h-[460px]" />
+          ) : (
+            <Table
+              ref={tableRef}
+              scrollbarLabel={t("tableLabel")}
+              // The table container is the scroll viewport: infinite scroll, the sticky header
+              // and the user's resize all act on it (opaque bg-surface, #4233).
+              containerClassName="min-h-[460px] resize-y overflow-auto rounded-none border-0 bg-surface"
+              className="text-left text-xs"
             >
-              {f.icon && <span className="material-symbols-outlined text-[14px]">{f.icon}</span>}
-              {f.label}
-            </button>
-          ))}
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow>
+                  {visibleColumns.status && sortableHead("status", t("columns.status"), "left")}
+                  {visibleColumns.cacheSource && (
+                    <TableHead className="px-3">{t("columns.cacheSource")}</TableHead>
+                  )}
+                  {visibleColumns.model && (
+                    <TableHead className="px-3">{t("columns.model")}</TableHead>
+                  )}
+                  {visibleColumns.requestedModel && (
+                    <TableHead className="px-3">{t("columns.requested")}</TableHead>
+                  )}
+                  {visibleColumns.provider && (
+                    <TableHead className="px-3">{t("columns.provider")}</TableHead>
+                  )}
+                  {visibleColumns.protocol && (
+                    <TableHead className="px-3">{t("columns.protocol")}</TableHead>
+                  )}
+                  {visibleColumns.account && (
+                    <TableHead className="px-3">{t("columns.account")}</TableHead>
+                  )}
+                  {visibleColumns.apiKey && (
+                    <TableHead className="px-3">{t("columns.apiKey")}</TableHead>
+                  )}
+                  {visibleColumns.combo && (
+                    <TableHead className="px-3">{t("columns.combo")}</TableHead>
+                  )}
+                  {visibleColumns.tokens && sortableHead("tokens", t("columns.tokens"))}
+                  {visibleColumns.tps && sortableHead("tps", t("columns.tps"))}
+                  {visibleColumns.ttft && (
+                    <TableHead className="ci-table__head--numeric px-3">
+                      {t("columns.ttft")}
+                    </TableHead>
+                  )}
+                  {visibleColumns.duration && sortableHead("duration", t("columns.duration"))}
+                  {visibleColumns.addedWait && (
+                    <TableHead className="ci-table__head--numeric px-3">
+                      {t("columns.addedWait")}
+                    </TableHead>
+                  )}
+                  {visibleColumns.time && sortableHead("time", t("columns.time"))}
+                  {visibleColumns.conversation && (
+                    <TableHead className="px-3">{t("columns.conversation")}</TableHead>
+                  )}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {groupedLogs.map((log) => {
+                  const isActive = log.active === true;
+                  const protocolKey = isActive ? null : log.sourceFormat || log.provider;
+                  const protocol = protocolKey ? getProtocolColor(protocolKey, log.provider) : null;
+                  const compatLabel = getProviderDisplayLabel(log.provider, providerNodes);
+                  const providerColor = PROVIDER_COLORS[log.provider] || {
+                    bg: "#374151",
+                    text: "#fff",
+                    label: compatLabel || (log.provider || "-").toUpperCase(),
+                  };
+                  const providerLabel = log.providerDisplay || compatLabel || providerColor.label;
+                  const isError = !isActive && log.status >= 400;
+                  const cacheSourceMeta = getCacheSourceMeta(log.cacheSource);
+                  const isSemanticCache = cacheSourceMeta?.key === "semantic";
+                  const accountLabel = maskAccount(log.account, emailsVisible);
+                  const isHoveredGroup = !!hoveredCid && log.correlationId === hoveredCid;
 
-          {/* Divider */}
-          {uniqueProviders.length > 0 && <span className="w-px h-5 bg-border mx-1" />}
-
-          {/* Dynamic Provider Quick Filters (from data) */}
-          {uniqueProviders.map((p) => {
-            const compatLabel = getProviderDisplayLabel(p, providerNodes);
-            const pc = PROVIDER_COLORS[p] || {
-              bg: "#374151",
-              text: "#fff",
-              label: compatLabel || p.toUpperCase(),
-            };
-            const displayLabel = compatLabel || pc.label;
-            const isActive = selectedProvider === p;
-            return (
-              <button
-                key={p}
-                onClick={() => setSelectedProvider(isActive ? "" : p)}
-                className={`px-3 py-1 rounded-full text-xs font-bold uppercase border transition-all ${
-                  isActive
-                    ? "border-white/40 ring-1 ring-white/20"
-                    : "border-transparent opacity-70 hover:opacity-100"
-                }`}
-                style={{
-                  backgroundColor: isActive ? pc.bg : `${pc.bg}33`,
-                  color: isActive ? pc.text : pc.bg,
-                }}
-              >
-                {displayLabel}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Column Visibility Toggles */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] text-text-muted uppercase tracking-wider mr-1">
-            {t("columnsLabel")}
-          </span>
-          {columns.map((col) => (
-            <button
-              key={col.key}
-              onClick={() => toggleColumn(col.key)}
-              className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-all ${
-                visibleColumns[col.key]
-                  ? "bg-primary/15 text-primary border-primary/30"
-                  : "bg-bg-subtle text-text-muted border-border opacity-50 hover:opacity-80"
-              }`}
-            >
-              {col.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Table */}
-        <Card padding="none" className="min-h-[460px] resize-y overflow-auto bg-surface">
-          <div
-            ref={scrollContainerRef}
-            className="p-0 overflow-x-auto overflow-y-auto h-full min-h-[460px]"
-          >
-            {loading && logs.length === 0 ? (
-              <div className="p-8 text-center text-text-muted">{t("loadingLogs")}</div>
-            ) : logs.length === 0 ? (
-              <div className="p-8 text-center text-text-muted">
-                <span className="material-symbols-outlined text-[48px] mb-2 block opacity-40">
-                  receipt_long
-                </span>
-                {t("noLogs")}
-              </div>
-            ) : sortedLogs.length === 0 ? (
-              <div className="p-8 text-center text-text-muted">{t("noMatchingLogs")}</div>
-            ) : (
-              <table className={LOG_TABLE_CLASS}>
-                <thead className={LOG_TABLE_HEAD_CLASS} style={LOG_TABLE_HEADER_BG_STYLE}>
-                  <tr className={LOG_TABLE_ROW_CLASS} style={LOG_TABLE_HEADER_BG_STYLE}>
-                    {visibleColumns.status && (
-                      <th
-                        className={`${LOG_TABLE_HEADER_CELL_CLASS} cursor-pointer select-none`}
-                        onClick={() => toggleSort("status")}
-                      >
-                        {t("columns.status")}
-                        {getSortIndicator("status")}
-                      </th>
-                    )}
-                    {visibleColumns.cacheSource && (
-                      <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("columns.cacheSource")}</th>
-                    )}
-                    {visibleColumns.model && (
-                      <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("columns.model")}</th>
-                    )}
-                    {visibleColumns.requestedModel && (
-                      <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("columns.requested")}</th>
-                    )}
-                    {visibleColumns.provider && (
-                      <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("columns.provider")}</th>
-                    )}
-                    {visibleColumns.protocol && (
-                      <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("columns.protocol")}</th>
-                    )}
-                    {visibleColumns.account && (
-                      <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("columns.account")}</th>
-                    )}
-                    {visibleColumns.apiKey && (
-                      <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("columns.apiKey")}</th>
-                    )}
-                    {visibleColumns.combo && (
-                      <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("columns.combo")}</th>
-                    )}
-                    {visibleColumns.tokens && (
-                      <th
-                        className={`${LOG_TABLE_HEADER_CELL_RIGHT_CLASS} cursor-pointer select-none`}
-                        onClick={() => toggleSort("tokens")}
-                      >
-                        {t("columns.tokens")}
-                        {getSortIndicator("tokens")}
-                      </th>
-                    )}
-                    {visibleColumns.tps && (
-                      <th
-                        className={`${LOG_TABLE_HEADER_CELL_RIGHT_CLASS} cursor-pointer select-none`}
-                        onClick={() => toggleSort("tps")}
-                      >
-                        {t("columns.tps")}
-                        {getSortIndicator("tps")}
-                      </th>
-                    )}
-                    {visibleColumns.duration && (
-                      <th
-                        className={`${LOG_TABLE_HEADER_CELL_RIGHT_CLASS} cursor-pointer select-none`}
-                        onClick={() => toggleSort("duration")}
-                      >
-                        {t("columns.duration")}
-                        {getSortIndicator("duration")}
-                      </th>
-                    )}
-                    {visibleColumns.time && (
-                      <th
-                        className={`${LOG_TABLE_HEADER_CELL_RIGHT_CLASS} cursor-pointer select-none`}
-                        onClick={() => toggleSort("time")}
-                      >
-                        {t("columns.time")}
-                        {getSortIndicator("time")}
-                      </th>
-                    )}
-                    {visibleColumns.conversation && (
-                      <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("columns.conversation")}</th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/30">
-                  {groupedLogs.map((log) => {
-                    const isActive = log.active === true;
-                    const statusStyle = isActive ? null : getStatusStyle(log.status);
-                    const protocolKey = isActive ? null : log.sourceFormat || log.provider;
-                    const protocol = protocolKey
-                      ? getProtocolColor(protocolKey, log.provider)
-                      : null;
-                    const compatLabel = getProviderDisplayLabel(log.provider, providerNodes);
-                    const providerColor = PROVIDER_COLORS[log.provider] || {
-                      bg: "#374151",
-                      text: "#fff",
-                      label: compatLabel || (log.provider || "-").toUpperCase(),
-                    };
-                    const providerLabel = log.providerDisplay || compatLabel || providerColor.label;
-                    const isError = !isActive && log.status >= 400;
-                    const cacheSourceMeta = getCacheSourceMeta(log.cacheSource);
-                    const isSemanticCache = cacheSourceMeta?.key === "semantic";
-                    const accountLabel = maskAccount(log.account, emailsVisible);
-
-                    return (
-                      <tr
-                        key={log.id}
-                        onClick={() => openDetail(log)}
-                        data-cid={log.correlationId || undefined}
-                        onMouseEnter={() => log.correlationId && setHoveredCid(log.correlationId)}
-                        onMouseLeave={() => setHoveredCid(null)}
-                        className={
-                          `cursor-pointer transition-colors ` +
-                          `${
-                            isError
-                              ? "bg-red-500/5 hover:bg-red-500/15 dark:hover:bg-red-400/15"
-                              : "hover:bg-sky-500/10 dark:hover:bg-sky-400/10"
-                          } ` +
-                          `${log.isRetry ? "border-l-2 border-l-amber-500/50" : ""} ` +
-                          `${hoveredCid && log.correlationId === hoveredCid ? "bg-violet-500/10 dark:bg-violet-400/10 ring-1 ring-violet-500/20" : ""}`
-                        }
-                        style={
-                          log.isRetry
-                            ? {
-                                backgroundColor:
-                                  hoveredCid && log.correlationId === hoveredCid
-                                    ? undefined
-                                    : "rgba(245,158,11,0.03)",
-                              }
-                            : undefined
-                        }
-                      >
-                        {visibleColumns.status && (
-                          <td className="px-3 py-2">
-                            {isActive ? (
-                              <span
-                                className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-500/15 border border-amber-500/25"
-                                title={t("status.inProgress")}
+                  return (
+                    <TableRow
+                      key={log.id}
+                      onClick={() => openDetail(log)}
+                      data-cid={log.correlationId || undefined}
+                      onMouseEnter={() => log.correlationId && setHoveredCid(log.correlationId)}
+                      onMouseLeave={() => setHoveredCid(null)}
+                      className={cn(
+                        "cursor-pointer transition-colors",
+                        isError ? "bg-error/5 hover:bg-error/15" : "hover:bg-info/10",
+                        log.isRetry && "border-l-2 border-l-warning/50",
+                        log.isRetry && !isHoveredGroup && "bg-warning/[0.03]",
+                        isHoveredGroup && "bg-chart-3/10 ring-1 ring-chart-3/20"
+                      )}
+                    >
+                      {visibleColumns.status && (
+                        <TableCell className="px-3 py-2">
+                          {isActive ? (
+                            <span
+                              className="inline-flex size-7 items-center justify-center rounded-full border border-warning/25 bg-warning/15"
+                              title={t("status.inProgress")}
+                            >
+                              <span className="inline-block size-3 animate-spin rounded-full border-2 border-warning border-t-transparent" />
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1">
+                              <Badge
+                                size="sm"
+                                variant={httpStatusTone(log.status)}
+                                className="min-w-[36px] justify-center font-bold"
                               >
-                                <span className="inline-block h-3 w-3 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1">
-                                <span
-                                  className="inline-block px-2 py-0.5 rounded text-[10px] font-bold min-w-[36px] text-center"
-                                  style={{
-                                    backgroundColor: statusStyle.bg,
-                                    color: statusStyle.text,
+                                {log.status || "..."}
+                              </Badge>
+                              {log.groupStatus === "healed" &&
+                                !log.isRetry &&
+                                log.status >= 400 && (
+                                  <span
+                                    className="text-[11px] text-success"
+                                    title={t("status.recoveredByRetry")}
+                                  >
+                                    ✓
+                                  </span>
+                                )}
+                              {log.isRetry && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  className="ml-0.5 size-5 min-h-5 text-[11px] text-warning"
+                                  title={t("status.goToParent")}
+                                  aria-label={t("status.goToParent")}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const parent = groupedLogs.find(
+                                      (g) => g.correlationId === log.correlationId && !g.isRetry
+                                    );
+                                    if (parent) openDetail(parent);
                                   }}
                                 >
-                                  {log.status || "..."}
-                                </span>
-                                {log.groupStatus === "healed" &&
-                                  !log.isRetry &&
-                                  log.status >= 400 && (
-                                    <span
-                                      className="text-emerald-500 text-[11px]"
-                                      title={t("status.recoveredByRetry")}
-                                    >
-                                      ✓
-                                    </span>
-                                  )}
-                                {log.isRetry && (
-                                  <button
-                                    className="inline-flex items-center text-amber-500 hover:text-amber-400 text-[11px] ml-0.5"
-                                    title={t("status.goToParent")}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      const parent = groupedLogs.find(
-                                        (g) => g.correlationId === log.correlationId && !g.isRetry
-                                      );
-                                      if (parent) openDetail(parent);
-                                    }}
-                                  >
-                                    ↳
-                                  </button>
-                                )}
-                              </span>
-                            )}
-                          </td>
-                        )}
-                        {visibleColumns.cacheSource && (
-                          <td className="px-3 py-2">
-                            {isActive ? (
-                              <span className="text-text-muted text-[10px]">—</span>
-                            ) : (
-                              <span
-                                className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase ${cacheSourceMeta?.className || ""}`}
+                                  ↳
+                                </Button>
+                              )}
+                            </span>
+                          )}
+                        </TableCell>
+                      )}
+                      {visibleColumns.cacheSource && (
+                        <TableCell className="px-3 py-2">
+                          {isActive ? (
+                            <span className="text-[10px] text-text-muted">—</span>
+                          ) : (
+                            <>
+                              <Badge
+                                size="sm"
+                                variant={cacheSourceMeta.variant}
+                                className="text-[9px] font-bold uppercase"
                                 title={
                                   isSemanticCache ? t("semanticCacheHit") : t("upstreamResponse")
                                 }
                               >
                                 {isSemanticCache ? t("semantic") : t("upstream")}
-                              </span>
-                            )}
-                          </td>
-                        )}
-                        {visibleColumns.model && (
-                          <td className="px-3 py-2 font-medium text-primary font-mono text-[11px]">
-                            <div className="flex items-center gap-1.5">
-                              <span>{log.model}</span>
-                              {log.groupStatus === "healed" && !log.isRetry && (
-                                <span
-                                  className="inline-flex items-center gap-0.5 px-1 py-0 rounded text-[8px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25"
-                                  title={t("status.healedTitle", { count: log.groupSize - 1 })}
-                                >
-                                  {t("status.healed")}
+                              </Badge>
+                              {getResilienceBadges(log.resilienceActions, (key, values) =>
+                                t(`detail.${key}`, values)
+                              ).map((badge) => (
+                                // Unstyled span: inherits the cache-source
+                                // badge line; the title carries the detail.
+                                <span key={badge.key} title={badge.title}>
+                                  [{badge.label}]
                                 </span>
-                              )}
-                              {log.groupStatus === "failed" && !log.isRetry && (
-                                <span
-                                  className="inline-flex items-center gap-0.5 px-1 py-0 rounded text-[8px] font-bold bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/25"
-                                  title={t("status.failedTitle", { count: log.groupSize })}
-                                >
-                                  {t("status.failed")}
-                                </span>
-                              )}
-                              {log.modelPinned && (
-                                <span
-                                  className="inline-flex items-center gap-0.5 px-1 py-0 rounded text-[8px] font-bold bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/25"
-                                  title={t("status.pinnedTitle")}
-                                >
-                                  {t("status.pinned")}
-                                </span>
-                              )}
-                            </div>
-                            {log.correlationId && !log.isRetry && log.groupSize > 1 && (
-                              <div
-                                className="text-[9px] text-text-muted font-normal truncate max-w-[120px]"
-                                title={log.correlationId}
-                              >
-                                {log.correlationId.slice(0, 12)}… · {log.groupSize} {t("attempts")}
-                              </div>
-                            )}
-                            {log.correlationId && !log.isRetry && log.groupSize <= 1 && (
-                              <div
-                                className="text-[9px] text-text-muted font-normal truncate max-w-[120px]"
-                                title={log.correlationId}
-                              >
-                                {log.correlationId.slice(0, 12)}…
-                              </div>
-                            )}
-                            {log.correlationId && log.isRetry && (
-                              <div
-                                className="text-[9px] text-amber-500/70 font-normal truncate max-w-[120px]"
-                                title={log.correlationId}
-                              >
-                                {log.correlationId.slice(0, 12)}…
-                              </div>
-                            )}
-                          </td>
-                        )}
-                        {visibleColumns.requestedModel && (
-                          <td className="px-3 py-2 font-mono text-[11px]">
-                            {log.requestedModel ? (
+                              ))}
+                            </>
+                          )}
+                        </TableCell>
+                      )}
+                      {visibleColumns.model && (
+                        <TableCell className="px-3 py-2 font-mono text-[11px] font-medium text-primary">
+                          <div className="flex items-center gap-1.5">
+                            <span>{log.model}</span>
+                            {log.groupStatus === "healed" && !log.isRetry && (
                               <span
-                                className={
-                                  log.requestedModel !== log.model
-                                    ? "text-amber-600 dark:text-amber-400"
-                                    : "text-text-muted"
-                                }
-                                title={
-                                  log.requestedModel !== log.model
-                                    ? t("requestedRoutedTitle", {
-                                        requested: log.requestedModel,
-                                        routed: log.model,
-                                      })
-                                    : log.requestedModel
-                                }
+                                className="inline-flex items-center gap-0.5 rounded border border-success/25 bg-success/15 px-1 py-0 text-[8px] font-bold text-success"
+                                title={t("status.healedTitle", { count: log.groupSize - 1 })}
                               >
-                                {log.requestedModel}
+                                {t("status.healed")}
                               </span>
-                            ) : (
-                              <span className="text-text-muted text-[10px]">—</span>
                             )}
-                          </td>
-                        )}
-                        {visibleColumns.provider && (
-                          <td className="px-3 py-2">
-                            <span
-                              className="inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase"
-                              style={{
-                                backgroundColor: providerColor.bg,
-                                color: providerColor.text,
-                              }}
+                            {log.groupStatus === "failed" && !log.isRetry && (
+                              <span
+                                className="inline-flex items-center gap-0.5 rounded border border-error/25 bg-error/15 px-1 py-0 text-[8px] font-bold text-error"
+                                title={t("status.failedTitle", { count: log.groupSize })}
+                              >
+                                {t("status.failed")}
+                              </span>
+                            )}
+                            {log.modelPinned && (
+                              <span
+                                className="inline-flex items-center gap-0.5 rounded border border-chart-3/25 bg-chart-3/15 px-1 py-0 text-[8px] font-bold text-chart-3"
+                                title={t("status.pinnedTitle")}
+                              >
+                                {t("status.pinned")}
+                              </span>
+                            )}
+                          </div>
+                          {log.correlationId && !log.isRetry && log.groupSize > 1 && (
+                            <div
+                              className="max-w-[120px] truncate text-[9px] font-normal text-text-muted"
+                              title={log.correlationId}
                             >
-                              {providerLabel}
+                              {log.correlationId.slice(0, 12)}… · {log.groupSize} {t("attempts")}
+                            </div>
+                          )}
+                          {log.correlationId && !log.isRetry && log.groupSize <= 1 && (
+                            <div
+                              className="max-w-[120px] truncate text-[9px] font-normal text-text-muted"
+                              title={log.correlationId}
+                            >
+                              {log.correlationId.slice(0, 12)}…
+                            </div>
+                          )}
+                          {log.correlationId && log.isRetry && (
+                            <div
+                              className="max-w-[120px] truncate text-[9px] font-normal text-warning/70"
+                              title={log.correlationId}
+                            >
+                              {log.correlationId.slice(0, 12)}…
+                            </div>
+                          )}
+                        </TableCell>
+                      )}
+                      {visibleColumns.requestedModel && (
+                        <TableCell className="px-3 py-2 font-mono text-[11px]">
+                          {log.requestedModel ? (
+                            <span
+                              className={
+                                log.requestedModel !== log.model
+                                  ? "text-warning"
+                                  : "text-text-muted"
+                              }
+                              title={
+                                log.requestedModel !== log.model
+                                  ? t("requestedRoutedTitle", {
+                                      requested: log.requestedModel,
+                                      routed: log.model,
+                                    })
+                                  : log.requestedModel
+                              }
+                            >
+                              {log.requestedModel}
                             </span>
-                          </td>
-                        )}
-                        {visibleColumns.protocol && (
-                          <td className="px-3 py-2">
-                            {isActive ? (
-                              <span className="text-text-muted text-[10px]">—</span>
-                            ) : (
-                              <span
-                                className="inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase"
-                                style={
-                                  protocol
-                                    ? { backgroundColor: protocol.bg, color: protocol.text }
-                                    : {}
-                                }
-                              >
-                                {protocol?.label || "—"}
-                              </span>
-                            )}
-                          </td>
-                        )}
-                        {visibleColumns.account && (
-                          <td
-                            className="px-3 py-2 text-text-muted truncate max-w-[120px]"
-                            title={accountLabel}
+                          ) : (
+                            <span className="text-[10px] text-text-muted">—</span>
+                          )}
+                        </TableCell>
+                      )}
+                      {visibleColumns.provider && (
+                        <TableCell className="px-3 py-2">
+                          {/* Provider identity colours (brand palette), not a status tone. */}
+                          <span
+                            className="inline-block rounded px-2 py-0.5 text-[9px] font-bold uppercase"
+                            style={{
+                              backgroundColor: providerColor.bg,
+                              color: providerColor.text,
+                            }}
                           >
-                            {accountLabel}
-                          </td>
-                        )}
-                        {visibleColumns.apiKey && (
-                          <td
-                            className="px-3 py-2 text-text-muted truncate max-w-[140px]"
-                            title={log.apiKeyName || log.apiKeyId || t("noApiKey")}
-                          >
-                            {isActive ? (
-                              <span className="text-text-muted text-[10px]">—</span>
-                            ) : (
-                              formatApiKeyLabel(log.apiKeyName, log.apiKeyId)
-                            )}
-                          </td>
-                        )}
-                        {visibleColumns.combo && (
-                          <td className="px-3 py-2">
-                            {isActive ? (
-                              <span className="text-text-muted text-[10px]">—</span>
-                            ) : log.comboName ? (
-                              <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-violet-500/20 text-violet-800 dark:text-violet-300 border border-violet-500/40">
-                                {log.comboName}
+                            {providerLabel}
+                          </span>
+                        </TableCell>
+                      )}
+                      {visibleColumns.protocol && (
+                        <TableCell className="px-3 py-2">
+                          {isActive ? (
+                            <span className="text-[10px] text-text-muted">—</span>
+                          ) : (
+                            <span
+                              className="inline-block rounded px-2 py-0.5 text-[9px] font-bold uppercase"
+                              style={
+                                protocol
+                                  ? { backgroundColor: protocol.bg, color: protocol.text }
+                                  : {}
+                              }
+                            >
+                              {protocol?.label || "—"}
+                            </span>
+                          )}
+                        </TableCell>
+                      )}
+                      {visibleColumns.account && (
+                        <TableCell
+                          className="max-w-[120px] truncate px-3 py-2 text-text-muted"
+                          title={accountLabel}
+                        >
+                          {accountLabel}
+                        </TableCell>
+                      )}
+                      {visibleColumns.apiKey && (
+                        <TableCell
+                          className="max-w-[140px] truncate px-3 py-2 text-text-muted"
+                          title={log.apiKeyName || log.apiKeyId || t("noApiKey")}
+                        >
+                          {isActive ? (
+                            <span className="text-[10px] text-text-muted">—</span>
+                          ) : (
+                            formatApiKeyLabel(log.apiKeyName, log.apiKeyId)
+                          )}
+                        </TableCell>
+                      )}
+                      {visibleColumns.combo && (
+                        <TableCell className="px-3 py-2">
+                          {isActive ? (
+                            <span className="text-[10px] text-text-muted">—</span>
+                          ) : log.comboName ? (
+                            <span className="inline-block rounded-full border border-chart-3/40 bg-chart-3/20 px-2 py-0.5 text-[9px] font-bold text-chart-3">
+                              {log.comboName}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-text-muted">—</span>
+                          )}
+                        </TableCell>
+                      )}
+                      {visibleColumns.tokens && (
+                        <TableCell className="whitespace-nowrap px-3 py-2 text-right">
+                          {isActive ? (
+                            <span className="text-[10px] text-text-muted">—</span>
+                          ) : (
+                            <>
+                              <span className="text-text-muted">TI:</span>{" "}
+                              <span className="text-primary">
+                                {log.tokens?.in?.toLocaleString() || 0}
                               </span>
-                            ) : (
-                              <span className="text-text-muted text-[10px]">—</span>
-                            )}
-                          </td>
-                        )}
-                        {visibleColumns.tokens && (
-                          <td className="px-3 py-2 text-right whitespace-nowrap">
-                            {isActive ? (
-                              <span className="text-text-muted text-[10px]">—</span>
-                            ) : (
-                              <>
-                                <span className="text-text-muted">TI:</span>{" "}
-                                <span className="text-primary">
-                                  {log.tokens?.in?.toLocaleString() || 0}
-                                </span>
-                                <span className="mx-1 text-border">|</span>
-                                <span className="text-text-muted">TO:</span>{" "}
-                                <span className="text-emerald-700 dark:text-emerald-400">
-                                  {log.tokens?.out?.toLocaleString() || 0}
-                                </span>
-                                {log.tokens?.cacheRead != null && log.tokens.cacheRead > 0 && (
-                                  <>
-                                    <span className="mx-1 text-border">|</span>
-                                    <span className="text-text-muted">CR:</span>{" "}
-                                    <span
-                                      className="text-sky-700 dark:text-sky-400"
-                                      title={tCache("cachedTokensCol")}
-                                    >
-                                      {log.tokens.cacheRead.toLocaleString()}
-                                    </span>
-                                  </>
-                                )}
-                                {log.tokens?.cacheWrite != null && log.tokens.cacheWrite > 0 && (
-                                  <>
-                                    <span className="mx-1 text-border">|</span>
-                                    <span className="text-text-muted">CW:</span>{" "}
-                                    <span
-                                      className="text-amber-700 dark:text-amber-400"
-                                      title={tCache("cacheCreation")}
-                                    >
-                                      {log.tokens.cacheWrite.toLocaleString()}
-                                    </span>
-                                  </>
-                                )}
-                                {log.tokens?.compressed != null && log.tokens.compressed > 0 && (
-                                  <>
-                                    <span className="mx-1 text-border">|</span>
-                                    <span
-                                      className="text-purple-500 dark:text-purple-400 font-semibold"
-                                      title={`${log.tokens.compressed.toLocaleString()} tokens compressed`}
-                                    >
-                                      ↓{log.tokens.compressed.toLocaleString()}
-                                    </span>
-                                  </>
-                                )}
-                              </>
-                            )}
-                          </td>
-                        )}
-                        {visibleColumns.tps && (
-                          <td className="px-3 py-2 text-right whitespace-nowrap font-mono">
-                            {isActive ? (
-                              <span className="text-text-muted text-[10px]">—</span>
-                            ) : (
-                              (() => {
-                                const tps = getLogTps(log);
-                                const color =
-                                  tps <= 0
-                                    ? "text-text-muted"
-                                    : tps >= 80
-                                      ? "text-emerald-600 dark:text-emerald-400"
-                                      : tps >= 30
-                                        ? "text-sky-600 dark:text-sky-400"
-                                        : "text-amber-600 dark:text-amber-400";
-                                return (
-                                  <span className={color} title={`${tps.toFixed(2)} tokens/sec`}>
-                                    {formatTps(tps)}
+                              <span className="mx-1 text-border">|</span>
+                              <span className="text-text-muted">TO:</span>{" "}
+                              <span className="text-success">
+                                {log.tokens?.out?.toLocaleString() || 0}
+                              </span>
+                              {log.tokens?.cacheRead != null && log.tokens.cacheRead > 0 && (
+                                <>
+                                  <span className="mx-1 text-border">|</span>
+                                  <span className="text-text-muted">CR:</span>{" "}
+                                  <span className="text-info" title={tCache("cachedTokensCol")}>
+                                    {log.tokens.cacheRead.toLocaleString()} (
+                                    {formatCachePercentage(log.tokens.in, log.tokens.cacheRead)}%)
                                   </span>
-                                );
-                              })()
-                            )}
-                          </td>
-                        )}
-                        {visibleColumns.duration && (
-                          <td className="px-3 py-2 text-right text-text-muted font-mono">
-                            {formatDuration(log.duration)}
-                          </td>
-                        )}
-                        {visibleColumns.time && (
-                          <td className="px-3 py-2 text-right text-text-muted">
-                            {formatTime(log.timestamp)}
-                          </td>
-                        )}
-                        {visibleColumns.conversation && (
-                          <td className="px-3 py-2 font-mono text-[10px] text-text-muted">
-                            {log.sessionTag ? (
-                              <span title={log.sessionTag}>{log.sessionTag.slice(0, 12)}…</span>
-                            ) : (
-                              <span className="text-text-muted">—</span>
-                            )}
-                          </td>
-                        )}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
-
-            {hasMore && sortedLogs.length > 0 && (
-              <div
-                ref={loadMoreSentinelRef}
-                className="flex justify-center py-3 border-t border-border/30"
-              >
-                <button
-                  type="button"
-                  onClick={loadMore}
-                  className="px-4 py-1.5 text-xs rounded-md border border-border bg-bg-subtle hover:bg-bg-muted text-text-muted transition-colors"
-                >
-                  {loading ? t("loadingMore") : t("loadMore")}
-                </button>
-              </div>
-            )}
-          </div>
-        </Card>
-
+                                </>
+                              )}
+                              {log.tokens?.cacheWrite != null && log.tokens.cacheWrite > 0 && (
+                                <>
+                                  <span className="mx-1 text-border">|</span>
+                                  <span className="text-text-muted">CW:</span>{" "}
+                                  <span className="text-warning" title={tCache("cacheCreation")}>
+                                    {log.tokens.cacheWrite.toLocaleString()}
+                                  </span>
+                                </>
+                              )}
+                              {log.tokens?.compressed != null && log.tokens.compressed > 0 && (
+                                <>
+                                  <span className="mx-1 text-border">|</span>
+                                  <span
+                                    className="font-semibold text-chart-3"
+                                    title={`${log.tokens.compressed.toLocaleString()} tokens compressed`}
+                                  >
+                                    ↓{log.tokens.compressed.toLocaleString()}
+                                  </span>
+                                </>
+                              )}
+                            </>
+                          )}
+                        </TableCell>
+                      )}
+                      {visibleColumns.tps && (
+                        <TableCell className="whitespace-nowrap px-3 py-2 text-right font-mono">
+                          {isActive ? (
+                            <span className="text-[10px] text-text-muted">—</span>
+                          ) : (
+                            (() => {
+                              const tps = getLogTps(log);
+                              const color =
+                                tps <= 0
+                                  ? "text-text-muted"
+                                  : tps >= 80
+                                    ? "text-success"
+                                    : tps >= 30
+                                      ? "text-info"
+                                      : "text-warning";
+                              return (
+                                <span
+                                  className={color}
+                                  title={buildLogTpsTitle(log, tps, formatDuration)}
+                                >
+                                  {formatTps(tps)}
+                                </span>
+                              );
+                            })()
+                          )}
+                        </TableCell>
+                      )}
+                      {visibleColumns.ttft && (
+                        <TableCell className="px-3 py-2 text-right font-mono text-text-muted">
+                          {formatDuration(log.ttft > 0 ? log.ttft : null)}
+                        </TableCell>
+                      )}
+                      {visibleColumns.duration && (
+                        <TableCell className="px-3 py-2 text-right font-mono text-text-muted">
+                          {formatDuration(log.duration)}
+                        </TableCell>
+                      )}
+                      {visibleColumns.addedWait && (
+                        <TableCell className="px-3 py-2 text-right font-mono text-text-muted">
+                          {typeof log.addedWaitMs === "number" && log.addedWaitMs > 0
+                            ? `${formatDuration(log.addedWaitMs)}${log.addedWaitCause ? ` (${log.addedWaitCause})` : ""}`
+                            : "—"}
+                        </TableCell>
+                      )}
+                      {visibleColumns.time && (
+                        <TableCell className="px-3 py-2 text-right text-text-muted">
+                          {formatTime(log.timestamp)}
+                        </TableCell>
+                      )}
+                      {visibleColumns.conversation && (
+                        <TableCell className="px-3 py-2 font-mono text-[10px] text-text-muted">
+                          {log.sessionTag ? (
+                            <span title={log.sessionTag}>{log.sessionTag.slice(0, 12)}…</span>
+                          ) : (
+                            <span className="text-text-muted">—</span>
+                          )}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+              {hasMore && (
+                <TableFooter>
+                  <TableRow ref={loadMoreSentinelRef} className="hover:bg-transparent">
+                    <TableCell colSpan={visibleColumnCount} className="py-3 text-center">
+                      <Button variant="outline" size="sm" onClick={loadMore}>
+                        {loading ? t("loadingMore") : t("loadMore")}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
+              )}
+            </Table>
+          )}
+        </DataTableShell>
         <div className="text-[10px] text-text-muted italic">
           {t("callLogsInfo", {
             dataDir: "{DATA_DIR}/call_logs/",

@@ -14,6 +14,14 @@
 
 export type HoistedCacheBoundary = "moved" | "kept" | "dropped";
 
+// Re-exported from its canonical home in claudeCodeConstraints.ts so existing
+// importers of this module keep working.
+import { relocateDirectiveOnlyMessages } from "../../services/claudeCodeConstraints.ts";
+import { resolveClaudeMidConversationSystemPolicy } from "../../services/claudeMidConversationSystem.ts";
+import { FORMATS } from "../../translator/formats.ts";
+
+export { relocateDirectiveOnlyMessages };
+
 /** Effective cache TTL of a `cache_control` value; Anthropic defaults to 5m when `ttl` is absent. */
 function effectiveTtl(marker: unknown): string {
   const ttl = (marker as Record<string, unknown> | null | undefined)?.ttl;
@@ -219,84 +227,45 @@ export function hoistLeadingTextSystemMessages(payload: Record<string, unknown>)
   payload.messages = [...kept, ...messages.slice(i)];
 }
 
+/** Routing context of a native Claude upstream call (the target format is always Claude). */
+export type SystemRoleRoute = {
+  provider?: string | null;
+  sourceFormat?: string | null;
+  /** The client's own `anthropic-beta` header (the beta must be negotiated by the client). */
+  clientAnthropicBeta?: string | null;
+  /** Injected ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM reader; absent/throwing = off. */
+  isMidConversationSystemEnabled?: (() => boolean) | null;
+};
+
 /**
- * Moves a directive-only system message (empty content array + message-level
- * `output_config`, the shape Claude Code clients emit) off `messages[0]`.
- *
- * Anthropic treats `messages[0]` as the initial system prompt position and
- * rejects the directive-only form there ("use the top-level 'system' parameter
- * for the initial system prompt"), while accepting it at any other position.
- * The mid-conversation-system passthrough (provider `claude` + 1M-context beta
- * models) deliberately keeps system-role messages inside `messages[]`, so a
- * directive that arrived first would go upstream unchanged and 400. Relocate it
- * past the first real turn instead; when the conversation has no real turn at
- * all, fold the `output_config` into the top-level parameter (which wins when
- * already present) and drop the now-empty message.
+ * Picks how system/developer turns leave messages[] before a native Claude upstream call.
+ * Upstreams that accept mid-conversation system turns (resolveClaudeMidConversationSystemPolicy:
+ * opt-in flag + client-negotiated beta) only get the leading run hoisted
+ * (and directive-only messages moved off messages[0]), so later turns keep their position
+ * and the cache prefix stays stable. Accepting `system` turns says nothing about OpenAI
+ * `developer` turns, so a body carrying one keeps the full hoist.
  */
-export function relocateDirectiveOnlyMessages(payload: Record<string, unknown>): void {
-  if (!Array.isArray(payload.messages) || payload.messages.length === 0) return;
-  const messages = payload.messages as Array<Record<string, unknown>>;
-  const isSystemRole = (role: unknown): boolean =>
-    typeof role === "string" &&
-    (role.toLowerCase() === "system" || role.toLowerCase() === "developer");
-  const isEmptySystem = (m: Record<string, unknown>): boolean =>
-    m != null &&
-    typeof m === "object" &&
-    isSystemRole(m.role) &&
-    Array.isArray(m.content) &&
-    m.content.length === 0;
-  const isDirectiveOnly = (m: Record<string, unknown>): boolean =>
-    isEmptySystem(m) &&
-    m.output_config != null &&
-    typeof m.output_config === "object" &&
-    !Array.isArray(m.output_config);
-
-  if (!isEmptySystem(messages[0])) {
+export function liftSystemRoleMessages(
+  payload: Record<string, unknown>,
+  route?: SystemRoleRoute
+): void {
+  const preserveMidConversationSystem = resolveClaudeMidConversationSystemPolicy({
+    provider: route?.provider,
+    sourceFormat: route?.sourceFormat,
+    targetFormat: FORMATS.CLAUDE,
+    clientAnthropicBeta: route?.clientAnthropicBeta,
+    isPassthroughEnabled: route?.isMidConversationSystemEnabled,
+  });
+  const messages = Array.isArray(payload.messages)
+    ? (payload.messages as Array<{ role?: unknown }>)
+    : [];
+  const hasDeveloperTurn = messages.some(
+    (m) => typeof m?.role === "string" && m.role.toLowerCase() === "developer"
+  );
+  if (preserveMidConversationSystem && !hasDeveloperTurn) {
+    hoistLeadingTextSystemMessages(payload);
+    relocateDirectiveOnlyMessages(payload);
     return;
   }
-
-  // Collect the whole leading run of empty system messages so consecutive
-  // directives are all relocated in one pass (handling only messages[0] would
-  // leave the second directive at the rejected position).
-  let runEnd = 0;
-  while (runEnd < messages.length && isEmptySystem(messages[runEnd])) {
-    runEnd++;
-  }
-  const lead = messages.slice(0, runEnd);
-  const directives = lead.filter(isDirectiveOnly);
-
-  // First real (user/assistant) turn after the run. System messages with text
-  // content are not safe insertion anchors — keep walking past them, and past
-  // any non-object entries a malformed body may carry.
-  let insertAfter = -1;
-  for (let i = runEnd; i < messages.length; i++) {
-    const candidate = messages[i];
-    if (
-      candidate != null &&
-      typeof candidate === "object" &&
-      !isSystemRole(candidate.role)
-    ) {
-      insertAfter = i;
-      break;
-    }
-  }
-
-  if (insertAfter === -1) {
-    // No real turn to relocate after: fold the first directive's
-    // output_config into the top-level parameter (an explicit top-level value
-    // wins) and drop the whole run.
-    if (payload.output_config == null && directives.length > 0) {
-      payload.output_config = directives[0].output_config;
-    }
-    payload.messages = messages.slice(runEnd);
-    return;
-  }
-
-  // Move the directives (in order) past the first real turn; plain empty
-  // system messages carry nothing and are dropped.
-  payload.messages = [
-    ...messages.slice(runEnd, insertAfter + 1),
-    ...directives,
-    ...messages.slice(insertAfter + 1),
-  ];
+  extractSystemRoleMessages(payload);
 }

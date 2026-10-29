@@ -33,6 +33,13 @@ import { translateRequest } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { createSSETransformStreamWithLogger } from "../utils/stream.ts";
 import { ensureStreamReadiness } from "../utils/streamReadiness.ts";
+import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
+import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
+import { readBodyReasoningEffort, writeBodyReasoningEffort } from "./base/reasoningEffort.ts";
+import {
+  clampToLearned,
+  getLearnedReasoningEffort,
+} from "../services/learnedReasoningEffortCaps.ts";
 import { STREAM_READINESS_TIMEOUT_MS } from "../config/constants.ts";
 import { resolveSuppressThinkClose, THINKING_MARKER_HEADER } from "../utils/thinkCloseMarker.ts";
 
@@ -87,6 +94,12 @@ function parseGlmEffortTier(model: string): GlmEffortTier | null {
       return { baseModel: "glm-5.3", effort: "low", transport: "openai" };
     case "glm-5.3-max":
       return { baseModel: "glm-5.3", effort: "max", transport: "openai" };
+    case "glm-5.3-flash-high":
+      return { baseModel: "glm-5.3-flash", effort: "high", transport: "openai" };
+    case "glm-5.3-flash-low":
+      return { baseModel: "glm-5.3-flash", effort: "low", transport: "openai" };
+    case "glm-5.3-flash-max":
+      return { baseModel: "glm-5.3-flash", effort: "max", transport: "openai" };
     default:
       return null;
   }
@@ -103,6 +116,7 @@ function parseGlmEffortTier(model: string): GlmEffortTier | null {
  * https://docs.z.ai/guides/overview/concept-param
  */
 const GLM_THINKING_MODEL_PATTERN = /^glm-5\.(?:[2-9]|\d{2,})/i;
+const GLM_53_OR_HIGHER_PATTERN = /^glm-5\.(?:[3-9]|\d{2,})/i;
 
 function isGlmThinkingModel(model: string): boolean {
   return GLM_THINKING_MODEL_PATTERN.test(model);
@@ -115,16 +129,24 @@ function isGlmThinkingModel(model: string): boolean {
  */
 const GLM_THINKING_DEFAULT_MAX_TOKENS = 131072;
 
-function applyGlmRequestDefaults(body: unknown, defaults?: JsonRecord | null): unknown {
+function applyGlmRequestDefaults(
+  body: unknown,
+  defaults?: JsonRecord | null,
+  clientThinkingType?: unknown
+): unknown {
   const record = asRecord(body);
   if (!record || !defaults) return body;
 
   const next = { ...(applyProviderRequestDefaults(record, defaults) as JsonRecord) };
   const thinkingType = typeof defaults.thinkingType === "string" ? defaults.thinkingType : null;
 
-  if (thinkingType && next.thinking === undefined) {
-    next.thinking = { type: thinkingType };
-  } else if (thinkingType && asRecord(next.thinking)?.type === "enabled") {
+  // Apply the connection default only when the client did not set a thinking
+  // type of its own; other thinking fields are merged and preserved.
+  if (
+    thinkingType &&
+    clientThinkingType === undefined &&
+    (next.thinking === undefined || asRecord(next.thinking))
+  ) {
     next.thinking = { ...asRecord(next.thinking), type: thinkingType };
   }
 
@@ -155,19 +177,6 @@ function cloneHeaders(headers: Headers): Headers {
 
 function isJsonResponse(response: Response): boolean {
   return (response.headers.get("content-type") || "").toLowerCase().includes("application/json");
-}
-
-async function translateJsonResponse(response: Response): Promise<Response> {
-  const parsed = await response.json().catch(() => null);
-  const translated = translateNonStreamingResponse(parsed, FORMATS.CLAUDE, FORMATS.OPENAI);
-  const headers = cloneHeaders(response.headers);
-  headers.set("content-type", "application/json");
-  headers.delete("content-length");
-  return new Response(JSON.stringify(translated), {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
 }
 
 async function translateAnthropicJsonResponse(response: Response): Promise<Response> {
@@ -209,6 +218,9 @@ function translateAnthropicJsonError(parsed: unknown): JsonRecord {
   };
 }
 
+/** 64 KB queue budget for GLM streaming (#12179, wired through in #12925). */
+const GLM_STREAM_BUFFER_BYTES = 65536;
+
 export function translateSseResponse(
   response: Response,
   provider: string,
@@ -216,6 +228,11 @@ export function translateSseResponse(
   suppressThinkClose: boolean = false
 ): Response {
   if (!response.body) return response;
+  // GLM is a high-throughput provider: a 64 KB queue budget keeps provider ->
+  // client pacing ahead of the model's emission rate. #12179 asked for this by
+  // passing a 16th positional the helper did not take (a TS2554 that never
+  // reached the TransformStream); the helper now accepts it as its last
+  // parameter, so the request finally takes effect (#12925).
   const transform = createSSETransformStreamWithLogger(
     FORMATS.CLAUDE,
     FORMATS.OPENAI,
@@ -229,7 +246,12 @@ export function translateSseResponse(
     null,
     null,
     false,
-    suppressThinkClose
+    suppressThinkClose,
+    undefined,
+    undefined,
+    undefined,
+    null,
+    GLM_STREAM_BUFFER_BYTES
   );
   const headers = cloneHeaders(response.headers);
   headers.set("content-type", "text/event-stream");
@@ -296,8 +318,13 @@ export class GlmExecutor extends DefaultExecutor {
     stream: boolean,
     credentials: ProviderCredentials
   ) {
+    const clientThinkingType = asRecord(asRecord(body)?.thinking)?.type;
     const cleanedBody = super.transformRequest(model, body, stream, credentials);
-    return applyGlmRequestDefaults(cleanedBody, this.config.requestDefaults as JsonRecord | null);
+    return applyGlmRequestDefaults(
+      cleanedBody,
+      this.config.requestDefaults as JsonRecord | null,
+      clientThinkingType
+    );
   }
 
   transformForTransport(
@@ -342,6 +369,15 @@ export class GlmExecutor extends DefaultExecutor {
     }
 
     if (transport === "openai") {
+      // GLM-5.3+ rejects thinking.type "disabled". Ensure thinking is enabled
+      // when targeting GLM-5.3 or higher.
+      if (record && GLM_53_OR_HIGHER_PATTERN.test(effectiveModel)) {
+        const existingThinking = asRecord(record.thinking);
+        if (existingThinking?.type === "disabled") {
+          record.thinking = { ...existingThinking, type: "enabled" };
+        }
+      }
+
       // GLM-5.3 effort tiers: inject the documented `reasoning_effort` param and
       // force thinking on — 5.3 rejects thinking.type "disabled", and an effort
       // tier without thinking would silently drop the selector upstream.
@@ -422,13 +458,27 @@ export class GlmExecutor extends DefaultExecutor {
     applyConfiguredUserAgent(headers, credentials.providerSpecificData);
     mergeUpstreamExtraHeaders(headers, input.upstreamExtraHeaders);
 
-    const transformedBody = this.transformForTransport(
+    let transformedBody = this.transformForTransport(
       input.model,
       input.body,
       input.stream,
       credentials,
       transport
     );
+
+    // Reuse only observed OpenAI capabilities; leave unknown first attempts and
+    // Anthropic's translated thinking/effort contract untouched.
+    if (transport === "openai") {
+      const learnedEfforts = getLearnedReasoningEffort(this.provider, input.model);
+      const requestedEffort = readBodyReasoningEffort(transformedBody);
+      const learnedEffort =
+        learnedEfforts && requestedEffort
+          ? clampToLearned(requestedEffort.toLowerCase(), learnedEfforts)
+          : null;
+      if (learnedEffort) {
+        transformedBody = writeBodyReasoningEffort(transformedBody, learnedEffort);
+      }
+    }
 
     const fetchStartTimeoutMs = this.getTimeoutMs();
     const timeoutController = fetchStartTimeoutMs > 0 ? new AbortController() : null;
@@ -458,6 +508,35 @@ export class GlmExecutor extends DefaultExecutor {
       });
     } finally {
       if (timeoutId) clearTimeout(timeoutId);
+    }
+
+    // #14629: this override never calls super.execute(). Only the OpenAI
+    // transport carries reasoning_effort; the Anthropic transport does not.
+    if (transport === "openai") {
+      const recovery = await applyReasoningEffortRecovery({
+        response,
+        url,
+        provider: this.provider,
+        model: input.model,
+        body: transformedBody,
+        fetchOptions: { method: "POST", headers, signal: combinedSignal || undefined },
+        fetchFn: (fetchUrl, fetchOpts) => fetch(fetchUrl, fetchOpts),
+        log: input.log,
+      });
+      response = recovery.response;
+      transformedBody = recovery.body;
+      response = await applyFieldDowngradeRecovery({
+        response,
+        url,
+        provider: this.provider,
+        model: input.model,
+        body: transformedBody,
+        fetchOptions: { method: "POST", headers, signal: combinedSignal || undefined },
+        fetchFn: (fetchUrl, fetchOpts) => fetch(fetchUrl, fetchOpts),
+        serializeBody: (value) => JSON.stringify(value),
+        strippedFields: new Set<string>(),
+        log: input.log,
+      });
     }
 
     if (input.stream && response.ok) {

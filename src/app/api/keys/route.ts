@@ -3,15 +3,18 @@ import {
   getApiKeys,
   getApiKeysCount,
   createApiKey,
-  isCloudEnabled,
   updateApiKeyPermissions,
-} from "@/lib/localDb";
+} from "@/lib/db/apiKeys";
+import { isCloudEnabled } from "@/lib/db/settings";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud } from "@/lib/cloudSync";
 import { createKeySchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { isApiKeyRevealEnabled, maskStoredApiKey } from "@/lib/apiKeyExposure";
-import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import {
+  requireCredentialForManagementScopedKey,
+  requireManagementAuth,
+} from "@/lib/api/requireManagementAuth";
 import { normalizeSelfServiceScopesForCreate } from "@/shared/constants/selfServiceScopes";
 import * as log from "@/sse/utils/logger";
 
@@ -28,6 +31,31 @@ function parsePagination(request: Request) {
   const offset = Number.isInteger(parsedOffset) && parsedOffset > 0 ? parsedOffset : 0;
 
   return { limit, offset };
+}
+
+/**
+ * The permission flags a create request sets on top of the defaults, or `null` when it sets none
+ * (the key then keeps the defaults and no follow-up update runs).
+ */
+function createPermissionOverrides(data: {
+  noLog?: boolean;
+  allowUsageCommand?: boolean;
+  usageLimitEnabled?: boolean;
+  dailyUsageLimitUsd?: number | null;
+  weeklyUsageLimitUsd?: number | null;
+  chaosModeEnabled?: boolean;
+}) {
+  const overrides = {
+    ...(data.noLog === true && { noLog: true }),
+    ...(data.allowUsageCommand === true && { allowUsageCommand: true }),
+    ...(data.usageLimitEnabled === true && { usageLimitEnabled: true }),
+    ...(data.dailyUsageLimitUsd !== undefined && { dailyUsageLimitUsd: data.dailyUsageLimitUsd }),
+    ...(data.weeklyUsageLimitUsd !== undefined && {
+      weeklyUsageLimitUsd: data.weeklyUsageLimitUsd,
+    }),
+    ...(data.chaosModeEnabled === true && { chaosModeEnabled: true }),
+  };
+  return Object.keys(overrides).length > 0 ? overrides : null;
 }
 
 // GET /api/keys - List API keys
@@ -71,37 +99,37 @@ export async function POST(request) {
     }
     const {
       name,
+      modelAccessMode,
+      allowedModels,
+      allowedCombos,
       noLog,
       scopes,
       allowedConnections,
+      preferredConnections,
       allowUsageCommand,
       usageLimitEnabled,
       dailyUsageLimitUsd,
       weeklyUsageLimitUsd,
       chaosModeEnabled,
+      expiresAt,
     } = validation.data;
+
+    const normalizedScopes = normalizeSelfServiceScopesForCreate(scopes);
+    const scopeAuthError = await requireCredentialForManagementScopedKey(request, normalizedScopes);
+    if (scopeAuthError) return scopeAuthError;
 
     // Always get machineId from server
     const machineId = await getConsistentMachineId();
-    const normalizedScopes = normalizeSelfServiceScopesForCreate(scopes);
-    const apiKey = await createApiKey(name, machineId, normalizedScopes, { allowedConnections });
-    if (
-      noLog === true ||
-      allowUsageCommand === true ||
-      usageLimitEnabled === true ||
-      dailyUsageLimitUsd !== undefined ||
-      weeklyUsageLimitUsd !== undefined ||
-      chaosModeEnabled === true
-    ) {
-      await updateApiKeyPermissions(apiKey.id, {
-        ...(noLog === true && { noLog: true }),
-        ...(allowUsageCommand === true && { allowUsageCommand: true }),
-        ...(usageLimitEnabled === true && { usageLimitEnabled: true }),
-        ...(dailyUsageLimitUsd !== undefined && { dailyUsageLimitUsd }),
-        ...(weeklyUsageLimitUsd !== undefined && { weeklyUsageLimitUsd }),
-        ...(chaosModeEnabled === true && { chaosModeEnabled: true }),
-      });
-    }
+    const apiKey = await createApiKey(name, machineId, normalizedScopes, {
+      modelAccessMode,
+      allowedModels,
+      allowedCombos,
+      allowedConnections,
+      preferredConnections,
+      expiresAt,
+    });
+    const permissionOverrides = createPermissionOverrides(validation.data);
+    if (permissionOverrides) await updateApiKeyPermissions(apiKey.id, permissionOverrides);
 
     // Auto sync to Cloud if enabled — fire-and-forget. Cloud sync is a
     // background side-effect, not part of the key-creation contract, and it
@@ -119,13 +147,18 @@ export async function POST(request) {
         name: apiKey.name,
         id: apiKey.id,
         machineId: apiKey.machineId,
+        modelAccessMode: apiKey.modelAccessMode,
+        allowedModels: apiKey.allowedModels,
+        allowedCombos: apiKey.allowedCombos,
         allowedConnections: apiKey.allowedConnections,
+        preferredConnections: apiKey.preferredConnections,
         noLog: noLog === true,
         allowUsageCommand: allowUsageCommand === true,
         usageLimitEnabled: usageLimitEnabled === true,
         dailyUsageLimitUsd: dailyUsageLimitUsd ?? null,
         weeklyUsageLimitUsd: weeklyUsageLimitUsd ?? null,
         chaosModeEnabled: chaosModeEnabled === true,
+        expiresAt: expiresAt ?? null,
         streamDefaultMode: "legacy",
         compressionEnabled: true,
         cacheDefaultMode: "legacy",

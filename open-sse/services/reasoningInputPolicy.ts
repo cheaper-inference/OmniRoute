@@ -31,6 +31,7 @@ export interface ReasoningStateInspection {
 export interface ReasoningInputPolicyOptions {
   provider?: string | null;
   preserveEncryptedReasoning?: boolean;
+  preserveWebSearchCalls?: boolean;
   onIncompatibleReasoning?: "reject" | "drop";
 }
 
@@ -43,7 +44,19 @@ export function resolveReasoningTransport(
 ): ReasoningTransport {
   const normalized = typeof provider === "string" ? provider.trim().toLowerCase() : "";
   const transport = REASONING_TRANSPORTS.get(normalized);
-  return transport ?? (preserveEncryptedReasoning ? "opaque" : "plaintext");
+  if (transport) return transport;
+  // #12128: Generic Responses-protocol endpoints (e.g. openai-compatible-responses-*,
+  // custom-openai-responses, proxy backends) implement the OpenAI/Codex Responses API
+  // where reasoning input items cannot accept plaintext content (maxItems: 0).
+  if (
+    normalized.startsWith("openai-compatible-responses") ||
+    normalized.startsWith("custom-openai-responses") ||
+    normalized.includes("codex") ||
+    normalized.includes("responses")
+  ) {
+    return "opaque";
+  }
+  return preserveEncryptedReasoning ? "opaque" : "plaintext";
 }
 
 function asRecord(value: unknown): JsonRecord | null {
@@ -246,7 +259,9 @@ function sanitizeResponsesInput(
   input: unknown[],
   transport: ReasoningTransport,
   dropIncompatible: boolean,
-  stripOrphanedSummaries: boolean
+  stripOrphanedSummaries: boolean,
+  preserveWebSearchCalls: boolean,
+  preserveMessageIds: boolean = false
 ): unknown[] {
   const filtered: unknown[] = [];
   for (const item of input) {
@@ -257,6 +272,10 @@ function sanitizeResponsesInput(
       continue;
     }
     if (record.type === "item_reference") continue;
+    if (preserveWebSearchCalls && record.type === "web_search_call") {
+      filtered.push({ ...record });
+      continue;
+    }
 
     if (record.type === "reasoning") {
       const next = dropIncompatible
@@ -288,7 +307,14 @@ function sanitizeResponsesInput(
     // replayed server id, and a malformed one (e.g. `null`, same opencode/zen
     // omission pattern as the reasoning branch above) must not survive either
     // (#11108).
-    if (cloned.id !== undefined) delete cloned.id;
+    // ChatGPT Web binds the native environment and user instruction to these IDs.
+    // Other upstreams retain their existing replay sanitation.
+    const ownedMessageId =
+      preserveMessageIds &&
+      record.type === "message" &&
+      typeof cloned.id === "string" &&
+      cloned.id.startsWith("msg_");
+    if (cloned.id !== undefined && !ownedMessageId) delete cloned.id;
     filtered.push(cloned);
   }
   return filtered;
@@ -339,7 +365,9 @@ export function applyReasoningInputPolicy(
       body.input,
       transport,
       incompatibleReasoning || mixedState,
-      body.store === false
+      body.store === false,
+      options.preserveWebSearchCalls === true,
+      options.provider === "chatgpt-web-codex"
     );
   }
   return { incompatibleReasoning: false };

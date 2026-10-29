@@ -13,7 +13,7 @@ coverage, and reconciliation steps.
 
 ### Prerequisites
 
-- **Node.js** `>=22.22.3 <23`, or `>=24.0.0 <27` (recommended: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, or `>=24.0.0 <27` (recommended: 24 LTS)
 - **npm** 10+
 
 > **npm v11+ users (Node 24+):** After `npm install`, verify native modules were installed:
@@ -73,12 +73,19 @@ npm run dev
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
+# Fast backend/API-only compile for contributor changes
+npm run build:contributor
+
 # Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
+
+The contributor build performs compile-only validation: it does not assemble the standalone
+distribution or build optional native packaging assets. Use the regular production build when
+you need to validate the shippable bundle.
 
 ### Build Output Layout
 
@@ -99,6 +106,11 @@ npm run build
 
 `npm run build:release` additionally cleans both directories first and writes
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) as a deploy integrity sentinel.
+
+`npm run build:contributor` uses the backend-only build profile. It temporarily stubs
+dashboard UI files while building, keeps API route handlers, and restores the original files
+after the build. Use `npm run build` for changes that affect the dashboard UI or for full
+release validation; the contributor profile is not a replacement for the release build.
 
 > **VPS deploy note:** the remote image directory `/usr/lib/node_modules/omniroute/app/`
 > is unchanged. The deploy skills rsync the contents of `dist/` into it.
@@ -165,6 +177,13 @@ npm run test:all
 # Single test file (Node.js native test runner — most tests use this)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
+# Only the unit tests impacted by your change (same TIA selector as the CI gate, #8084)
+npm run test:scoped            # changes in the last commit (or the working tree)
+npm run test:scoped:staged     # staged changes only — pairs well with a pre-commit run
+npm run test:scoped:full       # rebuild the import-graph map first (after adding/moving files)
+# Exit 1 + "run the full suite" means a hub file (tsconfig, package.json, …) or an
+# unmapped source changed — the selector fails safe, it never silently skips.
+
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
@@ -218,6 +237,7 @@ checks will not already give you, and on smaller machines it can saturate the ho
 - Run the test files that cover your change: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Run `npm run lint`
 - Include or update automated tests in the same PR whenever production code changes
+- In `node:test` files, put every top-level `await` (such as `await import(...)`) before the first `test()` / `describe()`: under `--test-force-exit`, tests registered after it can silently never run (#18045; enforced by `npm run check:test-tla-order`)
 - Include the changed or added test files in the PR description when production code changed
 - Check the SonarQube result on the PR when the project secrets are configured in CI
 
@@ -293,15 +313,15 @@ src/                        # TypeScript (.ts / .tsx)
 ├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
 │   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, 19 routing strategies
+│   ├── constants/          # Provider definitions (329), MCP scopes, 20 routing strategies
 │   ├── utils/              # Circuit breaker, sanitizer, auth helpers
 │   └── validation/         # Zod v4 schemas
 └── sse/                    # SSE proxy pipeline
 
 open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
 ├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 unique tools, 3 transports, 32 scopes)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
 ├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
 ├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Responses API transformer
@@ -391,7 +411,7 @@ Write unit tests in `tests/unit/` covering at minimum:
 - [ ] Documentation updated (if applicable)
 - [ ] No new CodeQL / Secret-Scanning alerts opened, or each one dismissed with technical justification referencing the relevant `docs/security/` doc
 - [ ] Routes that spawn child processes (`/api/mcp/`, `/api/cli-tools/runtime/`) classified as `isLocalOnlyPath()` in `src/server/authz/routeGuard.ts` — see [Hard Rule #15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] No `Co-Authored-By` trailers in commit messages — commits must appear solely under the repository owner's Git identity (Hard Rule #16)
+- [ ] No AI/bot `Co-authored-by` trailers in commit messages (Hard Rule #16) — human collaborators whose work is reused are credited with standard `Co-authored-by: Name <email>` trailers
 
 ---
 
@@ -412,4 +432,3 @@ Then use the `/deploy-vps-*-cc` skills which rsync `dist/` to the remote `app/` 
 - **Security docs**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Ops docs**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
 - **Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **ADRs**: See `docs/adr/` for architectural decision records

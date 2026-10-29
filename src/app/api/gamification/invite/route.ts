@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
   const schema = z.object({
     apiKeyId: z.string().min(1),
     serverUrl: z.string().optional(),
-    maxUses: z.number().positive().default(1),
+    maxUses: z.number().int().positive().default(1),
   });
 
   const parsed = schema.safeParse(body);

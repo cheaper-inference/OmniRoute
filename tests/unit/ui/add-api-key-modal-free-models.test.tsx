@@ -3,6 +3,9 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body, so queries start there (the container is a child of body).
+
 // next-intl: return the key so we can assert on stable strings.
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
@@ -11,7 +14,7 @@ vi.mock("next-intl", () => ({
 const { default: AddApiKeyModal } =
   await import("../../../src/app/(dashboard)/dashboard/providers/[id]/components/modals/AddApiKeyModal");
 
-const FREE_TOGGLE = 'button[role="switch"][aria-label="importFreeModelsOnlyLabel"]';
+const FREE_TOGGLE = '[role="switch"][aria-label="importFreeModelsOnlyLabel"]';
 
 const containers: Array<{ root: ReturnType<typeof createRoot>; el: HTMLDivElement }> = [];
 
@@ -30,7 +33,8 @@ function render(props: Record<string, unknown>) {
     );
   });
   containers.push({ root, el });
-  return el;
+  // Queries go through document.body: the dialog is portaled there (KEA-7886).
+  return document.body;
 }
 
 function setInputValue(input: HTMLInputElement, value: string) {
@@ -106,20 +110,18 @@ describe("AddApiKeyModal — import only free models", () => {
 });
 
 describe("AddApiKeyModal — quota scraping fields", () => {
-  it("saves OpenCode Go workspace and auth cookie in providerSpecificData", async () => {
+  it("renders only the API key for OpenCode Go and saves no scraping credentials", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const el = render({ provider: "opencode-go", providerName: "OpenCode Go", onSave });
 
+    expect(el.querySelector('input[name="opencodeGoWorkspaceId"]')).toBeNull();
+    expect(el.querySelector('input[name="opencodeGoAuthCookie"]')).toBeNull();
+    expect(el.querySelectorAll('input[type="password"]')).toHaveLength(1);
+
     const nameInput = el.querySelector<HTMLInputElement>('input[placeholder="productionKey"]')!;
     const apiKeyInput = el.querySelector<HTMLInputElement>('input[type="password"]')!;
-    const workspaceInput = el.querySelector<HTMLInputElement>(
-      'input[name="opencodeGoWorkspaceId"]'
-    )!;
-    const cookieInput = el.querySelector<HTMLInputElement>('input[name="opencodeGoAuthCookie"]')!;
     setInputValue(nameInput, "OpenCode Go");
     setInputValue(apiKeyInput, "sk-opencode-go-test");
-    setInputValue(workspaceInput, "workspace-123");
-    setInputValue(cookieInput, "auth=opencode-cookie");
 
     const saveBtn = Array.from(el.querySelectorAll("button")).find(
       (b) => b.textContent?.trim() === "save"
@@ -130,8 +132,9 @@ describe("AddApiKeyModal — quota scraping fields", () => {
 
     await waitFor(() => onSave.mock.calls.length > 0);
     const payload = onSave.mock.calls[0][0];
-    expect(payload.providerSpecificData?.opencodeGoWorkspaceId).toBe("workspace-123");
-    expect(payload.providerSpecificData?.opencodeGoAuthCookie).toBe("auth=opencode-cookie");
+    expect(payload.apiKey).toBe("sk-opencode-go-test");
+    expect(payload.providerSpecificData ?? {}).not.toHaveProperty("opencodeGoWorkspaceId");
+    expect(payload.providerSpecificData ?? {}).not.toHaveProperty("opencodeGoAuthCookie");
   });
 
   it("saves Ollama Cloud usage cookie in providerSpecificData", async () => {

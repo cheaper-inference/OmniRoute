@@ -2,6 +2,7 @@
 // copilot-web, t3-web, jules, devin (cloud-agent), inner-ai. Extracted from validation.ts (god-file
 // decomposition) — top-level functions with no dispatcher-state captures; behavior is byte-identical
 // to the inline defs.
+import { spawn } from "child_process";
 import { applyCustomUserAgent } from "./headers";
 import {
   isSecurityBlockError,
@@ -11,6 +12,14 @@ import {
 } from "./transport";
 import { SafeOutboundFetchError } from "@/shared/network/safeOutboundFetch";
 import { normalizeSessionCookieHeader } from "@/lib/providers/webCookieAuth";
+import { parseM365PastedCredential } from "@omniroute/open-sse/utils/m365Credentials.ts";
+import { normalizeGeminiValidationCookie } from "@omniroute/open-sse/utils/geminiCookies.ts";
+import {
+  looksLikeJwt,
+  resolveSyntxToken,
+  syntxAuthHeaders,
+} from "@omniroute/open-sse/services/syntxAuth.ts";
+import { SYNTX_MODELS_URL } from "@omniroute/open-sse/services/syntxModels.ts";
 import { buildJulesApiUrl } from "@/lib/cloudAgent/julesApi.ts";
 import {
   META_AI_ASBD_ID,
@@ -213,10 +222,15 @@ export async function validateGeminiWebProvider({ apiKey, providerSpecificData =
       return { valid: false, error: "Paste your __Secure-1PSID cookie from gemini.google.com" };
     }
 
-    // Accept full cookie blob or bare value
-    let cookieHeader = raw;
-    if (!raw.includes("=")) {
-      cookieHeader = `__Secure-1PSID=${raw}`;
+    // Accept full cookie blob, bare value, or browser-export JSON.
+    // #15387: reject credentials without a __Secure-1PSID cookie before any network call.
+    const cookieHeader = normalizeGeminiValidationCookie(raw);
+    if (!cookieHeader) {
+      return {
+        valid: false,
+        error:
+          "No __Secure-1PSID cookie found — paste it from gemini.google.com DevTools → Cookies",
+      };
     }
 
     const response = await validationRead("https://gemini.google.com/app", {
@@ -239,7 +253,17 @@ export async function validateGeminiWebProvider({ apiKey, providerSpecificData =
       };
     }
 
-    // 200/302 = valid, anything < 500 that isn't auth failure is acceptable
+    // #15387: a 200 is only a signed-in session when the page carries the SNlM0e token;
+    // a signed-out landing page also answers 200 for any junk cookie value.
+    if (response.status === 200) {
+      const body = await response.text().catch(() => "");
+      if (/"SNlM0e"\s*:\s*"[^"]+"/.test(body)) return { valid: true, error: null };
+      return {
+        valid: false,
+        error:
+          "Not signed in — the cookie was not accepted by gemini.google.com. Re-paste __Secure-1PSID from DevTools → Cookies",
+      };
+    }
     if (response.status < 500) {
       return { valid: true, error: null };
     }
@@ -281,7 +305,15 @@ export async function validateGeminiWebProvider({ apiKey, providerSpecificData =
           warning: "Cookie accepted. Full verification requires browser test on first chat.",
         };
       }
-      return { valid: true, error: null };
+      // #15387: only Google-owned redirect targets are acceptable; anything else is not a
+      // Gemini session signal.
+      if (/^https:\/\/([a-z0-9-]+\.)*google\.com(\/|$)/i.test(location)) {
+        return { valid: true, error: null };
+      }
+      return {
+        valid: false,
+        error: "Unexpected redirect from gemini.google.com — cookie not verified",
+      };
     }
     return toValidationErrorResult(error);
   }
@@ -346,42 +378,10 @@ export function extractM365CredentialParts(
   raw: string,
   providerSpecificData: Record<string, unknown>
 ) {
-  const text = raw.trim();
-  const parts: Record<string, string> = {};
-
-  for (const segment of text.split(/[;\n]/)) {
-    const index = segment.indexOf("=");
-    if (index <= 0) continue;
-    const key = segment.slice(0, index).trim();
-    const value = segment.slice(index + 1).trim();
-    if (key && value) parts[key] = value;
-  }
-
-  // Accept the current M365 web endpoint (m365.cloud.microsoft, including
-  // regional subdomains) plus the two legacy hosts (substrate.office.com,
-  // copilot.microsoft.com). The path still carries /m365Copilot/Chathub/<tenant>,
-  // so extraction is unchanged. (OmniRoute issue #7078)
-  if (/^wss:\/\//i.test(text)) {
-    try {
-      const url = new URL(text);
-      const hostOk =
-        /^(?:[\w-]+\.)*(?:m365\.cloud\.microsoft|copilot\.microsoft\.com|substrate\.office\.com)$/i.test(
-          url.hostname
-        );
-      if (hostOk && url.pathname.startsWith("/m365Copilot/Chathub/")) {
-        parts.access_token ||= url.searchParams.get("access_token") || "";
-        parts.chathubPath ||= decodeURIComponent(
-          url.pathname.split("/m365Copilot/Chathub/")[1] || ""
-        );
-      }
-    } catch {
-      // Fall through to the structured key/value parser result.
-    }
-  }
+  const parts = parseM365PastedCredential(raw);
 
   return {
     accessToken:
-      parts.access_token ||
       parts.accessToken ||
       (typeof providerSpecificData.access_token === "string"
         ? providerSpecificData.access_token
@@ -391,7 +391,6 @@ export function extractM365CredentialParts(
         : ""),
     chathubPath:
       parts.chathubPath ||
-      parts.userTenant ||
       (typeof providerSpecificData.chathubPath === "string"
         ? providerSpecificData.chathubPath
         : "") ||
@@ -517,11 +516,61 @@ export async function validateJulesProvider({ apiKey }: { apiKey: string }) {
 }
 
 /**
+ * #devin-cli-key: fallback validator for CLI-format Devin keys.
+ *
+ * The devin provider's actual routing path (open-sse/executors/devin-cli.ts)
+ * shells out to the Devin CLI binary and passes the connection's apiKey as
+ * WINDSURF_API_KEY — never touching api.devin.ai. CLI keys (apk_user_…) are
+ * rejected by the HTTP API, so a 401 from the HTTP probe is NOT evidence the
+ * connection is broken. This runs the same probe the executor uses:
+ * `devin acp --agent-type summarizer` with the key in the environment
+ * (`devin models list` does NOT honor WINDSURF_API_KEY). Exit 0 = key works.
+ */
+async function validateDevinCliKeyFallback(
+  apiKey: unknown
+): Promise<{ valid: boolean; error: string | null }> {
+  const bin = process.env.CLI_DEVIN_BIN?.trim() || "devin";
+  return new Promise((resolve) => {
+    try {
+      const child = spawn(bin, ["acp", "--agent-type", "summarizer"], {
+        env: { ...process.env, WINDSURF_API_KEY: String(apiKey || "") },
+        stdio: ["ignore", "pipe", "pipe"],
+        timeout: 30_000,
+      });
+      child.on("error", () =>
+        resolve({ valid: false, error: "Devin CLI not available for fallback validation" })
+      );
+      child.on("close", (code) => {
+        if (code === 0) resolve({ valid: true, error: null });
+        else resolve({ valid: false, error: `Devin CLI key check failed (exit ${code})` });
+      });
+    } catch {
+      resolve({ valid: false, error: "Devin CLI fallback spawn failed" });
+    }
+  });
+}
+
+/**
  * Devin cloud-agent (Cognition) — GET /v1/sessions with Bearer auth
  * (see docs.devin.ai/api-reference/sessions/list-sessions). Distinct from the
  * "devin-cli" LLM provider (ACP), which is already wired via providerRegistry.
  */
-export async function validateDevinCloudAgentProvider({ apiKey }: { apiKey: string }) {
+export async function validateDevinCloudAgentProvider({
+  apiKey,
+  allowLocalSpawn = true,
+}: {
+  apiKey: string;
+  /**
+   * S-01 (#15159): whether this caller may cause the local Devin CLI fallback to
+   * spawn. Defaults to permissive because the direct callers (credential-health
+   * scheduler, VNC harvest — the latter is already loopback-gated) are internal.
+   * Remote-reachable routes MUST pass `false` for non-loopback callers: the
+   * fallback is `spawn(bin, ["acp","--agent-type","summarizer"])`, and Hard Rules
+   * #15/#17 require loopback enforcement before any auth check so a leaked JWT via
+   * tunnel cannot trigger process spawning.
+   */
+  allowLocalSpawn?: boolean;
+}): Promise<{ valid: boolean; error: string | null; warning?: string }> {
   try {
     const response = await validationWrite("https://api.devin.ai/v1/sessions?limit=1", {
       method: "GET",
@@ -531,6 +580,26 @@ export async function validateDevinCloudAgentProvider({ apiKey }: { apiKey: stri
     });
 
     if (response.status === 401 || response.status === 403) {
+      // #devin-cli-key: CLI-format keys (apk_user_…) are rejected by the HTTP API
+      // but are exactly what the devin-cli executor authenticates with (via
+      // WINDSURF_API_KEY). Fall back to probing the CLI itself — the real
+      // routing path — before declaring the key invalid.
+      //
+      // S-01 (#15159): that fallback spawns a child process, so it is skipped
+      // entirely for callers that are not loopback. The HTTP verdict below is
+      // unchanged — a rejected key is still invalid, just not re-probed on the
+      // host on behalf of a remote caller.
+      if (!allowLocalSpawn) {
+        return { valid: false, error: "Invalid API key" };
+      }
+      const cliCheck = await validateDevinCliKeyFallback(apiKey);
+      if (cliCheck.valid) {
+        return {
+          valid: true,
+          error: null,
+          warning: "HTTP API rejected this key; validated via Devin CLI instead",
+        };
+      }
       return { valid: false, error: "Invalid API key" };
     }
 
@@ -599,7 +668,7 @@ export async function validateNotionWebProvider({ apiKey, providerSpecificData =
   }
 }
 
-export async function validateInnerAiProvider({ apiKey, providerSpecificData = {} }: any) {
+export async function validateInnerAiProvider({ apiKey }: any) {
   try {
     const raw = typeof apiKey === "string" ? apiKey.trim() : "";
     if (!raw) {
@@ -707,6 +776,41 @@ export async function validateTinyCmsWebProvider({ apiKey, providerSpecificData 
     }
 
     return { valid: true, error: null };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+export async function validateSyntxProvider({
+  apiKey,
+  providerSpecificData = {},
+  accessToken,
+}: any) {
+  try {
+    const token = resolveSyntxToken({ apiKey, accessToken, providerSpecificData });
+    if (!looksLikeJwt(token)) {
+      return {
+        valid: false,
+        error: "Paste your SYNTX.ai Bearer JWT from syntx.ai DevTools -> Network -> api.syntx.ai",
+      };
+    }
+
+    const response = await validationRead(SYNTX_MODELS_URL, {
+      method: "GET",
+      headers: applyCustomUserAgent(syntxAuthHeaders(token), providerSpecificData),
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      return {
+        valid: false,
+        error: "Invalid or expired SYNTX JWT — re-paste Authorization Bearer from syntx.ai",
+      };
+    }
+    if (response.status >= 500) {
+      return { valid: false, error: `SYNTX unavailable (${response.status})` };
+    }
+    if (response.ok) return { valid: true, error: null };
+    return { valid: false, error: `SYNTX validation failed (${response.status})` };
   } catch (error: any) {
     return toValidationErrorResult(error);
   }

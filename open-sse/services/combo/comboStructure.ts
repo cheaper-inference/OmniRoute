@@ -15,7 +15,11 @@
 
 import { getModelContextLimit } from "../../../src/lib/modelCapabilities";
 import { getHiddenModelsByProvider } from "../../../src/lib/db/models";
-import { getComboModelString, normalizeComboStep } from "../../../src/lib/combos/steps.ts";
+import {
+  getComboModelString,
+  implicitPinAllowlist,
+  normalizeComboStep,
+} from "../../../src/lib/combos/steps.ts";
 import { getProviderByAlias, getProviderById } from "../../../src/shared/constants/providers.ts";
 import { estimateTokens } from "../contextManager.ts";
 import { containsMediaKind } from "../../utils/mediaParts.ts";
@@ -24,7 +28,7 @@ import { parseModel, stripContextWindowSuffix } from "../model.ts";
 import { dedupeTargetsByExecutionKey, isRecord } from "./comboData.ts";
 import { isComboModelVisible } from "./comboVisibility.ts";
 import { getTargetProvider, MAX_COMBO_DEPTH } from "./comboPredicates.ts";
-import { evaluateContextLimit } from "./contextOverrideGate.ts";
+import { evaluateContextLimit, getModelContextOverrideValue } from "./contextOverrideGate.ts";
 import {
   normalizeModelEntry,
   orderTargetsForWeightedFallback,
@@ -46,7 +50,7 @@ import type {
  * #8488 / #5240: web-cookie (and similar) providers honestly advertise
  * registry toolCalling:false but still run the prompt-emulated tool shim.
  * Combo tools filters must keep those targets eligible so fail-closed does
- * not regress emulation-only combos (e.g. all chatgpt-web).
+ * not regress emulation-only web-provider combos.
  */
 export function providerSupportsEmulatedToolCalling(
   providerIdOrAlias: string | null | undefined
@@ -121,6 +125,9 @@ function normalizeRuntimeStep(
   const modelStr = getComboModelString(step);
   if (!modelStr) return null;
 
+  const connectionId = toTrimmedString(step.connectionId);
+  const allowedConnectionIds = implicitPinAllowlist(connectionId, step.allowedConnectionIds);
+
   return {
     kind: "model",
     stepId: step.id,
@@ -128,14 +135,12 @@ function normalizeRuntimeStep(
     modelStr,
     provider: getTargetProvider(modelStr, step.providerId),
     providerId: step.providerId || null,
-    connectionId: step.connectionId || null,
+    connectionId,
     // #3266: a per-step account allowlist scopes round-robin/weighted selection
     // to a subset of the provider's connections. This is the second writer of
     // `allowedConnectionIds` (tag routing is the first); both feed the existing
     // credential-selection filter in auth.ts.
-    ...(Array.isArray(step.allowedConnectionIds) && step.allowedConnectionIds.length > 0
-      ? { allowedConnectionIds: step.allowedConnectionIds }
-      : {}),
+    ...(allowedConnectionIds && allowedConnectionIds.length > 0 ? { allowedConnectionIds } : {}),
     weight,
     label,
     // `prompt` is a per-step pipeline input and only exists on a model step —
@@ -529,24 +534,62 @@ function hasKnownCompatibleContextLimit(
   requirements: RequestCompatibilityRequirements
 ): boolean {
   if (requirements.requiredContextTokens <= 0) return false;
-  const capabilities = getResolvedModelCapabilities(target.modelStr);
+  const capabilities = getResolvedModelCapabilities({
+    provider: target.providerId || target.provider || null,
+    model: target.modelStr,
+  });
   return evaluateContextLimit(capabilities, requirements, target.modelStr) === true;
+}
+
+/**
+ * #13870: how far the required-token estimate exceeds an operator-set
+ * `model_context_override` before that override is no longer trusted as
+ * "probably a chars/4 overestimate, not a real overflow." The issue's own
+ * reproduction measured chars/4 overstating real tokenizer usage ~3.7x on a
+ * repetitive agent-session body; this margin covers that plus headroom while
+ * still bounding how far off an override-rejected target can be trusted.
+ */
+const OVERRIDE_REJECT_TRUST_MARGIN = 5;
+
+/**
+ * A target with an explicit `model_context_override` that fails the context
+ * check, but only because the required-token estimate is within
+ * `OVERRIDE_REJECT_TRUST_MARGIN`x of the override. This is the #13870 case:
+ * the override is operator-verified real capacity, while the chars/4 estimate
+ * that rejected it is a heuristic known to overstate repetitive content by a
+ * similar multiple — so a near-boundary override rejection is more likely
+ * estimate noise than a genuine overflow.
+ */
+function isNearBoundaryOverrideReject(
+  target: ResolvedComboTarget,
+  requirements: RequestCompatibilityRequirements
+): boolean {
+  if (requirements.requiredContextTokens <= 0) return false;
+  const override = getModelContextOverrideValue(target.modelStr);
+  if (override == null || override <= 0) return false;
+  if (override >= requirements.requiredContextTokens) return false;
+  return requirements.requiredContextTokens <= override * OVERRIDE_REJECT_TRUST_MARGIN;
 }
 
 const HARD_COMPAT_REASONS = new Set(["tools", "vision", "structured_output", "output_tokens"]);
 
 /**
- * #8332: vision is a hard requirement, not a soft preference — a target whose vision
- * support is not confirmed can never succeed on an image_url request. Callers
- * reconsidering compat-rejected targets (fallback tiers, degrade-to-unfiltered) MUST
- * exclude these via this predicate.
+ * #8332: rejected fallback tiers must never resurrect a target whose vision
+ * support was not confirmed. #17289 allows unknown support only in the initial
+ * eligible pool, AFTER proven vision targets, not in a rejected-target bypass.
+ * Explicitly unsupported models are never eligible for an image request.
+ * This predicate stays strict (`!== true`) on purpose: it also gates the fusion
+ * panel (dispatchPrelude.ts), which still requires confirmed vision.
  */
 export function isVisionIncompatibleTarget(
   target: ResolvedComboTarget,
   requirements: RequestCompatibilityRequirements
 ): boolean {
   if (!requirements.requiresVision) return false;
-  const capabilities = getResolvedModelCapabilities(target.modelStr);
+  const capabilities = getResolvedModelCapabilities({
+    provider: target.providerId || target.provider || null,
+    model: target.modelStr,
+  });
   return capabilities.supportsVision !== true;
 }
 
@@ -571,7 +614,10 @@ function getTargetCompatibilityFailures(
   target: ResolvedComboTarget,
   requirements: RequestCompatibilityRequirements
 ): string[] {
-  const capabilities = getResolvedModelCapabilities(target.modelStr);
+  const capabilities = getResolvedModelCapabilities({
+    provider: target.providerId || target.provider || null,
+    model: target.modelStr,
+  });
   const failures: string[] = [];
 
   if (
@@ -583,13 +629,10 @@ function getTargetCompatibilityFailures(
     failures.push("tools");
   }
 
-  // For a request that carries an image, only route to a target whose vision
-  // support is *confirmed* (`=== true`). Treat `false` AND `null` (unknown) as
-  // incompatible: an unknown-capability model receiving the image is exactly how
-  // a text-only model (e.g. ministral) ended up answering "image not provided".
-  // #8488: when none qualify the filter fails closed (empty list) unless the
-  // operator opts into compatFilterFailOpen.
-  if (requirements.requiresVision && capabilities.supportsVision !== true) {
+  // #17289: metadata gaps are not proof of incompatibility. Explicit false
+  // remains a hard exclusion; null (unknown) can be tried only after confirmed
+  // vision models, so a provider that accepts images is not wrongly vetoed.
+  if (requirements.requiresVision && capabilities.supportsVision === false) {
     failures.push("vision");
   }
 
@@ -616,7 +659,28 @@ export type CompatFilterOptions = {
    * instead of returning an empty list. Default is fail-closed.
    */
   failOpen?: boolean;
+  /**
+   * Opt-in: a known output ceiling below the request's `max_tokens` no longer
+   * removes the target; it keeps its place in the strategy order (operator
+   * priority wins). Clients like Claude Code send max_tokens as a generous
+   * ceiling (128000), which otherwise strips every 64k-output model from the
+   * combo; translators clamp to the model cap, and a real rejection still falls
+   * through to the next target. Default keeps the hard exclusion.
+   */
+  outputLimitAdvisory?: boolean;
 };
+
+function highestKnownOutputLimit(targets: ResolvedComboTarget[]): number {
+  let ceiling = 0;
+  for (const target of targets) {
+    const limit = getResolvedModelCapabilities({
+      provider: target.providerId || target.provider || null,
+      model: target.modelStr,
+    }).maxOutputTokens;
+    if (typeof limit === "number" && limit > ceiling) ceiling = limit;
+  }
+  return ceiling;
+}
 
 export function hasHardCapabilityFailure(reasons: string[]): boolean {
   return reasons.some((reason) => HARD_COMPAT_REASONS.has(reason));
@@ -658,7 +722,17 @@ export function describeCapabilityFilterExhaustion(
   if (primary === "tools") {
     message = `No target in combo ${name} supports tool calling; request carried ${toolCount} tools`;
   } else if (primary === "vision") {
-    message = `No target in combo ${name} has confirmed vision support for this image request`;
+    message = `No target in combo ${name} accepts image input: every target is explicitly marked non-vision for this image request`;
+  } else if (primary === "output_tokens") {
+    // #12229: name the real reason. Collapsing this into the structured-output
+    // message sent operators chasing response_format when the request's
+    // max_tokens simply exceeded every target's known output ceiling.
+    const ceiling = highestKnownOutputLimit(
+      rejected.filter((entry) => entry.reasons.includes("output_tokens")).map((e) => e.target)
+    );
+    message =
+      `No target in combo ${name} can produce the requested max_tokens=${requirements.requestedOutputTokens}; ` +
+      `the highest known output limit in the pool is ${ceiling}`;
   } else {
     message = `No target in combo ${name} supports structured output for this request`;
   }
@@ -675,6 +749,47 @@ export function describeCapabilityFilterExhaustion(
   };
 }
 
+/**
+ * Stable split of an image request's targets into confirmed-vision (`=== true`)
+ * and unknown-capability tiers (#17289). Neither tier includes explicitly
+ * non-vision targets: the hard filter already removed those. `confirmedCount`
+ * is the length of the confirmed prefix of `targets`, or 0 when no tiering
+ * applies (not an image request, or one of the tiers is empty).
+ */
+export function partitionConfirmedVisionTargets<
+  T extends Pick<ResolvedComboTarget, "provider" | "providerId" | "modelStr">,
+>(
+  targets: T[],
+  requirements: RequestCompatibilityRequirements
+): { targets: T[]; confirmedCount: number } {
+  if (!requirements.requiresVision || targets.length <= 1) return { targets, confirmedCount: 0 };
+  const confirmed: T[] = [];
+  const unknown: T[] = [];
+  for (const target of targets) {
+    const verdict = getResolvedModelCapabilities({
+      provider: target.providerId || target.provider || null,
+      model: target.modelStr,
+    }).supportsVision;
+    if (verdict === true) confirmed.push(target);
+    else unknown.push(target);
+  }
+  if (confirmed.length === 0 || unknown.length === 0) return { targets, confirmedCount: 0 };
+  return { targets: [...confirmed, ...unknown], confirmedCount: confirmed.length };
+}
+
+/**
+ * Keep image-capable targets ahead of unknown-capability fallbacks regardless
+ * of strategy order or context-size tiering. Strategies that rotate the result
+ * afterwards (round-robin) must rotate WITHIN each tier — see
+ * `partitionConfirmedVisionTargets` and roundRobinCombo.ts.
+ */
+function preferConfirmedVisionTargets(
+  targets: ResolvedComboTarget[],
+  requirements: RequestCompatibilityRequirements
+): ResolvedComboTarget[] {
+  return partitionConfirmedVisionTargets(targets, requirements).targets;
+}
+
 export function filterTargetsByRequestCompatibility(
   targets: ResolvedComboTarget[],
   body: Record<string, unknown>,
@@ -683,6 +798,9 @@ export function filterTargetsByRequestCompatibility(
   options?: CompatFilterOptions
 ): ResolvedComboTarget[] {
   if (targets.length === 0) return targets;
+  const outputLimitAdvisory = options?.outputLimitAdvisory === true;
+  const isHardReason = (reason: string) =>
+    HARD_COMPAT_REASONS.has(reason) && !(outputLimitAdvisory && reason === "output_tokens");
   const requirements = deriveRequestCompatibilityRequirements(body);
   const needsFiltering =
     requirements.requiresTools ||
@@ -704,7 +822,7 @@ export function filterTargetsByRequestCompatibility(
   // never remove the only target that could accept the request at runtime.
   const compatible = targets.filter((target) => {
     const reasons = targetReasons.get(target) || [];
-    return !reasons.some((reason) => HARD_COMPAT_REASONS.has(reason));
+    return !reasons.some(isHardReason);
   });
   const hadKnownTooSmallContextTarget = rejected.some((entry) =>
     entry.reasons.includes("context_window")
@@ -717,13 +835,51 @@ export function filterTargetsByRequestCompatibility(
     const knownContextCompatible = compatible.filter((target) =>
       hasKnownCompatibleContextLimit(target, requirements)
     );
-    if (knownContextCompatible.length > 0 && knownContextCompatible.length < compatible.length) {
-      const knownSet = new Set(knownContextCompatible);
-      return [...knownContextCompatible, ...compatible.filter((target) => !knownSet.has(target))];
+    // #13870: an operator-verified override must not be outranked by a
+    // catalog-only "known compatible" target (e.g. a large but unconfirmed
+    // emergency fallback) purely because the chars/4 estimate that rejected
+    // the override is itself known to overstate repetitive content several
+    // -fold. Split the known-compatible tier by override vs. catalog-only —
+    // only the catalog-only subset can be leapfrogged by a near-boundary
+    // override rejection; a target that is ALREADY known-compatible via its
+    // own override (evaluateContextLimit resolves overrides first) keeps its
+    // earned place ahead of every override-rejected target.
+    const overrideVerifiedCompatible = knownContextCompatible.filter(
+      (target) => getModelContextOverrideValue(target.modelStr) != null
+    );
+    const catalogOnlyCompatible = knownContextCompatible.filter(
+      (target) => getModelContextOverrideValue(target.modelStr) == null
+    );
+    const overrideTrustedRejects = compatible.filter(
+      (target) =>
+        !knownContextCompatible.includes(target) &&
+        (targetReasons.get(target) || []).includes("context_window") &&
+        isNearBoundaryOverrideReject(target, requirements)
+    );
+    const preferredTier = [
+      ...overrideVerifiedCompatible,
+      ...overrideTrustedRejects,
+      ...catalogOnlyCompatible,
+    ];
+    if (preferredTier.length > 0) {
+      const preferredSet = new Set(preferredTier);
+      const reordered = [
+        ...preferredTier,
+        ...compatible.filter((target) => !preferredSet.has(target)),
+      ];
+      // Only return when this tiering actually changes the order — e.g. when
+      // every compatible target already lands in `preferredTier` in the same
+      // relative order it started in, `compatible` (built by a single stable
+      // filter over `targets`) is already correct and re-wrapping it would be
+      // a no-op.
+      const changedOrder = reordered.some((target, index) => target !== compatible[index]);
+      if (changedOrder) return preferConfirmedVisionTargets(reordered, requirements);
     }
   }
 
-  if (compatible.length === targets.length) return targets;
+  if (compatible.length === targets.length) {
+    return preferConfirmedVisionTargets(compatible, requirements);
+  }
   if (compatible.length === 0) {
     const hardRejected = rejected.some((entry) => hasHardCapabilityFailure(entry.reasons));
     const failOpen = options?.failOpen === true;
@@ -776,17 +932,49 @@ export function filterTargetsByRequestCompatibility(
     return [];
   }
 
+  // #12273: a sole survivor whose catalog window is known-too-small is a
+  // guaranteed context_length_exceeded. Restore the remaining pool so combo.ts
+  // can still try larger-context targets. Unknown context (`null`) is advisory
+  // and must not resurrect hard-rejected targets (vision / output / tools).
+  if (
+    compatible.length === 1 &&
+    (targetReasons.get(compatible[0]) || []).includes("context_window")
+  ) {
+    // #8332: never restore a confirmed-non-vision target onto an image request.
+    const restored = requirements.requiresVision
+      ? targets.filter((target) => !isVisionIncompatibleTarget(target, requirements))
+      : targets;
+    if (restored.length > compatible.length) {
+      log.warn(
+        "COMBO",
+        `${label}: single compatible target ${compatible[0].modelStr} has known context too small for ${requirements.requiredContextTokens} token request; falling back to full pool (#12273)`
+      );
+      return restored;
+    }
+  }
+
   log.info(
     "COMBO",
     `${label}: kept ${compatible.length}/${targets.length} targets for request requirements`
   );
-  log.debug?.(
-    "COMBO",
-    `${label}: rejected targets ${rejected
-      .map((entry) => `${entry.target.modelStr}(${entry.reasons.join("+")})`)
-      .join(", ")}`
-  );
-  return compatible;
+  // #12273: When pool collapses significantly, log rejection reasons at info
+  // level so the cause is diagnosable without enabling debug logging.
+  if (compatible.length <= 2 && targets.length > 4) {
+    log.info(
+      "COMBO",
+      `${label}: rejected targets ${rejected
+        .map((entry) => `${entry.target.modelStr}(${entry.reasons.join("+")})`)
+        .join(", ")}`
+    );
+  } else {
+    log.debug?.(
+      "COMBO",
+      `${label}: rejected targets ${rejected
+        .map((entry) => `${entry.target.modelStr}(${entry.reasons.join("+")})`)
+        .join(", ")}`
+    );
+  }
+  return preferConfirmedVisionTargets(compatible, requirements);
 }
 
 export function sortTargetsByContextSize(targets: ResolvedComboTarget[]) {

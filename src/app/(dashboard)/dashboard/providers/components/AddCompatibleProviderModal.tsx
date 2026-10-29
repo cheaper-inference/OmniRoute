@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Icon from "@/shared/components/Icon";
+
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Badge, Button, Input, Modal, Select, Toggle } from "@/shared/components";
@@ -27,6 +29,7 @@ interface AddCompatibleProviderModalProps {
 interface CompatibleFormState {
   name: string;
   prefix: string;
+  providerIdSuffix: string;
   apiType: string;
   baseUrl: string;
   chatPath: string;
@@ -85,6 +88,7 @@ function createInitialForm(mode: CompatibleMode): CompatibleFormState {
   return {
     name: "",
     prefix: "",
+    providerIdSuffix: "",
     apiType: "chat",
     baseUrl: defaults.baseUrl,
     chatPath: defaults.chatPath,
@@ -133,15 +137,25 @@ export default function AddCompatibleProviderModal({
     [t]
   );
 
-  useEffect(() => {
-    if (!isOpen) return;
-    setFormData(createInitialForm(mode));
-    setValidationResult(null);
-    setCheckKey("");
-    setShowAdvanced(false);
-    setSaveError(null);
-    setIconUrlError(null);
-  }, [isOpen, mode]);
+  // Fresh form on every open (and on a mode switch while open) — applied as a
+  // render-phase adjustment guarded by the previously initialized mode
+  // (react.dev "adjusting state when a prop changes") instead of a
+  // synchronous-setState effect. Closing clears the marker so the next open
+  // re-initializes again.
+  const [initializedFor, setInitializedFor] = useState<{ mode: CompatibleMode } | null>(null);
+  if (isOpen) {
+    if (initializedFor?.mode !== mode) {
+      setInitializedFor({ mode });
+      setFormData(createInitialForm(mode));
+      setValidationResult(null);
+      setCheckKey("");
+      setShowAdvanced(false);
+      setSaveError(null);
+      setIconUrlError(null);
+    }
+  } else if (initializedFor !== null) {
+    setInitializedFor(null);
+  }
 
   const modalTitle =
     title ||
@@ -216,6 +230,8 @@ export default function AddCompatibleProviderModal({
       if (defaults.hasApiType) body.apiType = formData.apiType;
       if (defaults.hasModelsPath) body.modelsPath = formData.modelsPath || "";
       if (defaults.compatMode) body.compatMode = defaults.compatMode;
+      const providerIdSuffix = formData.providerIdSuffix.trim();
+      if (providerIdSuffix) body.providerIdSuffix = providerIdSuffix;
       body.iconUrl = formData.iconUrl.trim();
       // Merge the selected identity profile's preset headers into the SAME
       // `customHeaders` field the node already persists (see
@@ -251,7 +267,11 @@ export default function AddCompatibleProviderModal({
       });
       const failedCreate = providerText(t, "failedCreate", "Failed to create provider");
       if (!res.ok) {
-        setSaveError(await readFetchErrorMessage(res, failedCreate));
+        setSaveError(
+          res.status === 409
+            ? t("providerIdConflict")
+            : await readFetchErrorMessage(res, failedCreate)
+        );
         return;
       }
 
@@ -311,11 +331,9 @@ export default function AddCompatibleProviderModal({
     <Modal isOpen={isOpen} title={modalTitle} onClose={onClose}>
       <div className="flex flex-col gap-4">
         {defaults.hasWarning && (
-          <div className="rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-sm text-text-muted">
+          <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-sm text-text-muted">
             <div className="flex items-start gap-2">
-              <span className="material-symbols-outlined mt-0.5 text-[18px] text-amber-500">
-                warning
-              </span>
+              <Icon name="warning" size={18} className="mt-0.5 text-warning" />
               <p>{t("ccCompatibleValidationHint")}</p>
             </div>
           </div>
@@ -334,6 +352,13 @@ export default function AddCompatibleProviderModal({
           onChange={(e) => setFormData({ ...formData, prefix: e.target.value })}
           placeholder={prefixPlaceholder}
           hint={prefixHint}
+        />
+        <Input
+          label={t("providerIdSuffixLabel")}
+          value={formData.providerIdSuffix}
+          onChange={(e) => setFormData({ ...formData, providerIdSuffix: e.target.value })}
+          placeholder="team-gateway"
+          hint={t("providerIdSuffixHint")}
         />
         {defaults.hasApiType && (
           <Select
@@ -377,21 +402,21 @@ export default function AddCompatibleProviderModal({
           t={t}
         />
 
-        <button
-          type="button"
-          className="text-sm text-text-muted hover:text-text-primary flex items-center gap-1"
+        <Button
+          variant="ghost"
+          size="sm"
+          className="self-start gap-1 px-1 text-text-muted"
           onClick={() => setShowAdvanced(!showAdvanced)}
           aria-expanded={showAdvanced}
           aria-controls={advancedId}
         >
-          <span
+          <Icon
+            name="chevron_right"
+            size={14}
             className={`transition-transform ${showAdvanced ? "rotate-90" : ""}`}
-            aria-hidden="true"
-          >
-            {">"}
-          </span>
+          />
           {t("advancedSettings")}
-        </button>
+        </Button>
         {showAdvanced && (
           <div id={advancedId} className="flex flex-col gap-3 pl-2 border-l-2 border-border">
             <Input
@@ -452,7 +477,7 @@ export default function AddCompatibleProviderModal({
             </Badge>
             {validationResult.error && (
               <span
-                className={`text-sm ${validationResult.valid ? "text-text-muted" : "text-red-500"}`}
+                className={`text-sm ${validationResult.valid ? "text-text-muted" : "text-error"}`}
               >
                 {validationResult.error}
               </span>
@@ -464,7 +489,7 @@ export default function AddCompatibleProviderModal({
           <div
             role="alert"
             aria-live="assertive"
-            className="text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2"
+            className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2"
           >
             {saveError}
           </div>

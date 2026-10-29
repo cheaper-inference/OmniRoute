@@ -110,7 +110,7 @@ export function useStructuredOutput(): UseStructuredOutput {
 
       return { valid: true };
     },
-    [schema],
+    [schema]
   );
 
   return {

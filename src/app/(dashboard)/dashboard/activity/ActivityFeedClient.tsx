@@ -1,7 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
+import { Skeleton } from "@/shared/components/Loading";
 import type { AuditLogEntry } from "@/lib/compliance/index";
 import ActivityFeed from "./components/ActivityFeed";
 import EventTypeFilter, { type EventCategory, matchesCategory } from "./components/EventTypeFilter";
@@ -14,7 +20,9 @@ export default function ActivityFeedClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<EventCategory>("all");
-  const referenceNowMs = useRef<number>(Date.now());
+  // State (not a ref) because it is rendered: refs cannot be read during
+  // render, and Date.now() cannot run there either — the fetch settles it.
+  const [referenceNowMs, setReferenceNowMs] = useState<number>(0);
 
   const fetchEntries = useCallback(async () => {
     setLoading(true);
@@ -30,7 +38,7 @@ export default function ActivityFeedClient() {
       }
       const data = (await res.json()) as AuditLogEntry[];
       // Reset reference time on fresh load so relative timestamps are stable
-      referenceNowMs.current = Date.now();
+      setReferenceNowMs(Date.now());
       setAllEntries(Array.isArray(data) ? data : []);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t("fetchFailed");
@@ -41,7 +49,9 @@ export default function ActivityFeedClient() {
   }, [t]);
 
   useEffect(() => {
-    fetchEntries();
+    void (async () => {
+      await fetchEntries();
+    })();
   }, [fetchEntries]);
 
   const filtered =
@@ -54,69 +64,50 @@ export default function ActivityFeedClient() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-xl font-bold text-[var(--color-text-main)]">{t("title")}</h1>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">{t("description")}</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => fetchEntries()}
-          disabled={loading}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-main)] hover:bg-[var(--color-bg-alt)] transition-colors disabled:opacity-50"
-          aria-label={t("refreshAria")}
-        >
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <span
-                className="material-symbols-outlined text-[16px] animate-spin"
-                aria-hidden="true"
-              >
-                progress_activity
-              </span>
-              {t("loading")}
-            </span>
-          ) : (
-            <span className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-                refresh
-              </span>
-              {t("refresh")}
-            </span>
-          )}
-        </button>
-      </div>
+      <PageHeader
+        compact
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <Button
+            variant="outline"
+            icon="refresh"
+            loading={loading}
+            onClick={() => fetchEntries()}
+            aria-label={t("refreshAria")}
+          >
+            {loading ? t("loading") : t("refresh")}
+          </Button>
+        }
+      />
 
       {/* Filter */}
       <EventTypeFilter value={category} onChange={setCategory} />
 
       {/* Error */}
       {error && (
-        <div
-          className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
-          role="alert"
-        >
-          {error}
-        </div>
+        <Alert
+          variant="critical"
+          icon={<Icon name="error" size={16} />}
+          dismissLabel={t("dismissError")}
+          onDismiss={() => setError(null)}
+          description={error}
+        />
       )}
 
       {/* Feed */}
-      <div className="rounded-xl border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
+      <Card padding="none" className="overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-20 text-[var(--color-text-muted)]">
-            <span
-              className="material-symbols-outlined text-[32px] animate-spin mr-3"
-              aria-hidden="true"
-            >
-              progress_activity
-            </span>
-            <span className="text-sm">{t("loadingActivity")}</span>
+          <div className="flex flex-col gap-3 p-4" aria-busy="true">
+            <span className="ci-sr-only">{t("loadingActivity")}</span>
+            {Array.from({ length: 5 }, (_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
           </div>
         ) : (
-          <ActivityFeed entries={filtered} referenceNowMs={referenceNowMs.current} />
+          <ActivityFeed entries={filtered} referenceNowMs={referenceNowMs} />
         )}
-      </div>
+      </Card>
     </div>
   );
 }

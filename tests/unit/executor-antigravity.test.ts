@@ -12,6 +12,7 @@ import {
 } from "../../open-sse/services/antigravityVersion.ts";
 import { clearAntigravityProjectCache } from "../../open-sse/services/antigravityProjectBootstrap.ts";
 import { runWithCapture } from "../../open-sse/utils/providerRequestLogging.ts";
+import { resetAntigravity429GuardForTests } from "../../open-sse/services/antigravity429Guard.ts";
 
 type AntigravityTransformResult = Exclude<
   Awaited<ReturnType<AntigravityExecutor["transformRequest"]>>,
@@ -36,6 +37,7 @@ type ChatCompletionPayload = {
     prompt_tokens: number;
     completion_tokens: number;
     total_tokens: number;
+    completion_tokens_details?: { reasoning_tokens: number };
   };
 };
 
@@ -64,6 +66,8 @@ async function withEnv<T>(
 
 test.afterEach(() => {
   clearAntigravityVersionCaches();
+  // The guard remembers bodies that spent their 429 budget; tests reuse the same body.
+  resetAntigravity429GuardForTests();
 });
 
 test("AntigravityExecutor.buildUrl always targets the streaming endpoint", () => {
@@ -482,6 +486,33 @@ test("AntigravityExecutor.collectStreamToResponse turns SSE Gemini chunks into a
   });
 });
 
+test("AntigravityExecutor.collectStreamToResponse preserves upstream thought token usage", async () => {
+  const executor = new AntigravityExecutor();
+  const response = new Response(
+    'data: {"response":{"candidates":[{"content":{"parts":[{"text":"Done"}]},"finishReason":"STOP"}],"usageMetadata":{"promptTokenCount":5,"candidatesTokenCount":3,"thoughtsTokenCount":7,"totalTokenCount":15}}}\n\n',
+    {
+      status: 200,
+      headers: { "Content-Type": "text/event-stream" },
+    }
+  );
+
+  const result = await executor.collectStreamToResponse(
+    response,
+    "gemini-3.7-pro-high",
+    "https://example.com",
+    { Authorization: "Bearer ag-token" },
+    { request: {} }
+  );
+  const payload = (await result.response.json()) as ChatCompletionPayload;
+
+  assert.deepEqual(payload.usage, {
+    prompt_tokens: 5,
+    completion_tokens: 10,
+    total_tokens: 15,
+    completion_tokens_details: { reasoning_tokens: 7 },
+  });
+});
+
 test("AntigravityExecutor.collectStreamToResponse converts textual tool call SSE to structured tool_calls", async () => {
   const executor = new AntigravityExecutor();
   const response = new Response(
@@ -516,7 +547,7 @@ test("AntigravityExecutor.collectStreamToResponse converts textual tool call SSE
 
   const result = await executor.collectStreamToResponse(
     response,
-    "gemini-3.7-flash-low",
+    "gemini-3.8-flash-low",
     "https://example.com",
     { Authorization: "Bearer ag-token" },
     { request: {} }
@@ -843,6 +874,7 @@ test("AntigravityExecutor.execute bounds a persistent short-retry 429 instead of
   const originalFetch = globalThis.fetch;
   const originalSetTimeout = globalThis.setTimeout;
   const calls: string[] = [];
+  const telemetry: string[] = [];
   seedAntigravityIdeVersionCache("2.1.1");
 
   // "rate limited" with no parseable retry hint classifies as rate_limited →
@@ -869,7 +901,13 @@ test("AntigravityExecutor.execute bounds a persistent short-retry 429 instead of
       body: { request: { contents: [] } },
       stream: true,
       credentials: { accessToken: "token", projectId: "project-1" },
-      log: { debug() {}, warn() {} },
+      log: {
+        debug(_scope, message) {
+          telemetry.push(String(message));
+        },
+        warn() {},
+      },
+      correlationId: "prompt194-physical-send-test",
     });
 
     // Returns the 429 rather than hanging.
@@ -878,10 +916,74 @@ test("AntigravityExecutor.execute bounds a persistent short-retry 429 instead of
     // Bounded: switchAuth declines same-URL retries → 2 live runtime endpoints
     // × 1 attempt each = 2 attempts total (#9351).
     assert.equal(calls.length, 2);
+    const physicalSends = telemetry.filter((line) => line.includes("[Antigravity] PhysicalSend"));
+    assert.equal(physicalSends.length, calls.length);
+    assert.match(physicalSends[0] ?? "", /RequestId: prompt194-physical-send-test/);
+    assert.match(physicalSends[0] ?? "", /PhysicalSend: 1/);
+    assert.match(physicalSends[1] ?? "", /PhysicalSend: 2/);
 
     // Tried every distinct live runtime base URL before giving up.
     const distinctHosts = new Set(calls.map((u) => new URL(u).host));
     assert.equal(distinctHosts.size, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+    globalThis.setTimeout = originalSetTimeout;
+  }
+});
+
+test("AntigravityExecutor.execute does not resend a request Antigravity refused with a hintless 429", async () => {
+  const executor = new AntigravityExecutor();
+  const originalFetch = globalThis.fetch;
+  const originalSetTimeout = globalThis.setTimeout;
+  const calls: string[] = [];
+  seedAntigravityIdeVersionCache("2.1.1");
+
+  // Cloud Code answers some requests with no retry hint and no reason, so classify429
+  // says "unknown" (soft retry). That used to cost 4 tries on every host per execute,
+  // and the client re-sending the body paid them again each time.
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return new Response(
+      JSON.stringify({
+        error: {
+          code: 429,
+          message: "Resource has been exhausted (e.g. check quota).",
+          status: "RESOURCE_EXHAUSTED",
+        },
+      }),
+      { status: 429, headers: { "Content-Type": "application/json" } }
+    );
+  };
+  globalThis.setTimeout = ((callback) => {
+    (callback as () => void)();
+    return 0;
+  }) as typeof setTimeout;
+
+  const run = (text: string) =>
+    executor.execute({
+      model: "antigravity/gemini-2.5-flash",
+      body: { request: { contents: [{ role: "user", parts: [{ text }] }] } },
+      stream: true,
+      credentials: { accessToken: "token", projectId: "project-1", connectionId: "conn-429" },
+      log: { debug() {}, warn() {}, info() {} },
+    });
+
+  try {
+    const first = await run("refused body");
+    assert.equal(first.response.status, 429);
+    assert.equal(calls.length, 2, "the call plus one retry, then the 429 goes back");
+
+    // The client re-sends the same body: answered locally, nothing reaches Google.
+    const resend = await run("refused body");
+    assert.equal(resend.response.status, 429);
+    assert.equal(calls.length, 2, "an identical re-send must not reach the upstream");
+    assert.ok(Number(resend.response.headers.get("Retry-After")) > 60);
+    const payload = (await resend.response.json()) as ErrorPayload;
+    assert.match(payload.error.message, /not resending it to Antigravity/);
+
+    // A different request is not blocked by it.
+    await run("another body");
+    assert.equal(calls.length, 4);
   } finally {
     globalThis.fetch = originalFetch;
     globalThis.setTimeout = originalSetTimeout;

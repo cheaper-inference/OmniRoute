@@ -33,6 +33,39 @@ export interface SearchProviderConfig {
    */
   fallbackOnly?: boolean;
   disabled?: boolean;
+  /**
+   * May a CALLER-supplied `provider_options.baseUrl` redirect this provider?
+   *
+   * Only ever true for a keyless, self-hosted provider. For anything with
+   * `authType: "apikey"` the builder attaches the OPERATOR's key to whatever
+   * host the base URL resolves to, so honoring a caller-chosen value hands that
+   * key to the caller's server (GHSA-3f8g-pfh9-j687). The invariant
+   * "never set alongside authType: apikey" is enforced by
+   * tests/unit/search-baseurl-client-override-3f8g.test.ts.
+   */
+  allowClientBaseUrlOverride?: boolean;
+  /**
+   * Per-call price by request mode (the `costModeField` field of the built request
+   * body), for providers whose price depends on it. Unlisted modes use `costPerQuery`.
+   * See computeSearchCostUsd() in open-sse/handlers/search/reportedCost.ts.
+   */
+  costByMode?: Record<string, number>;
+  /** Request-body field that holds the mode priced by `costByMode` (default `"mode"`). */
+  costModeField?: string;
+  /** Results included in the per-call price; each one above it adds `extraResultCost`. */
+  includedResults?: number;
+  extraResultCost?: number;
+  /**
+   * Bill `costPerQuery` (or the mode price) once per started block of this many
+   * returned results, with at least one block per call (Firecrawl: 2 credits per
+   * 10 results, rounded up).
+   */
+  resultBlockSize?: number;
+  /**
+   * Per returned result, added when the request body sets `contents.<key>` to a
+   * truthy value (e.g. Exa bills `contents.summary` per summarized result).
+   */
+  contentsCostPerResult?: Record<string, number>;
 }
 
 export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
@@ -92,6 +125,14 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authType: "apikey",
     authHeader: "x-api-key",
     costPerQuery: 0.007,
+    // Exa 3.0: `type: "lite"` is $4/1k requests vs $7/1k for the default `auto`.
+    // The legacy `instant` type is billed like lite; `fast` like auto (live costDollars).
+    costByMode: { lite: 0.004, instant: 0.004 },
+    costModeField: "type",
+    // Both include 10 results; each extra one and each summary is $0.001 (live costDollars).
+    includedResults: 10,
+    extraResultCost: 0.001,
+    contentsCostPerResult: { summary: 0.001 },
     freeMonthlyQuota: 1000,
     searchTypes: ["web", "news"],
     defaultMaxResults: 5,
@@ -108,8 +149,51 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authType: "apikey",
     authHeader: "bearer",
     costPerQuery: 0.008,
+    // 1 credit ($0.008) for basic / fast / ultra-fast, 2 credits for advanced:
+    // https://docs.tavily.com/documentation/api-credits
+    costByMode: { advanced: 0.016 },
+    costModeField: "search_depth",
     freeMonthlyQuota: 1000,
+    searchTypes: ["web", "news", "finance"],
+    defaultMaxResults: 5,
+    maxMaxResults: 20,
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+  },
+
+  // Nimble also serves POST /v1/web/fetch through the same credential — see
+  // open-sse/executors/nimble-fetch.ts.
+  "nimble-search": {
+    id: "nimble-search",
+    name: "Nimble Search",
+    baseUrl: "https://sdk.nimbleway.com/v1/search",
+    method: "POST",
+    authType: "apikey",
+    authHeader: "bearer",
+    // buildNimbleRequest() always sends search_depth "lite": $1.10 per 1K
+    // (standard is $5.00). https://docs.nimbleway.com/nimble-sdk/admin/pricing
+    costPerQuery: 0.0011,
+    freeMonthlyQuota: 0,
     searchTypes: ["web", "news"],
+    defaultMaxResults: 5,
+    maxMaxResults: 100,
+    // Kept below GLOBAL_TIMEOUT_MS (handlers/search.ts) so a stalled Nimble call
+    // still leaves budget for the failover provider instead of burning the whole
+    // request window.
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+  },
+
+  "kimi-search": {
+    id: "kimi-search",
+    name: "Kimi Search",
+    baseUrl: "https://api.moonshot.ai/v1/tools/search",
+    method: "POST",
+    authType: "apikey",
+    authHeader: "bearer",
+    costPerQuery: 0.005, // $0.005 per successful non-empty call — platform.kimi.ai/docs/pricing/tools
+    freeMonthlyQuota: 0,
+    searchTypes: ["web"],
     defaultMaxResults: 5,
     maxMaxResults: 20,
     timeoutMs: 10_000,
@@ -124,6 +208,9 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authType: "apikey",
     authHeader: "bearer",
     costPerQuery: 0.002,
+    // 2 credits per 10 results, rounded up (https://docs.firecrawl.dev/billing);
+    // $0.002 is those 2 credits at $0.001 each.
+    resultBlockSize: 10,
     freeMonthlyQuota: 1000,
     searchTypes: ["web", "news"],
     defaultMaxResults: 5,
@@ -156,6 +243,10 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authType: "apikey",
     authHeader: "bearer",
     costPerQuery: 0.005,
+    // searchResults output: fast / standard $0.005, deep $0.05 per call:
+    // https://docs.linkup.so/pages/documentation/development/pricing
+    costByMode: { deep: 0.05 },
+    costModeField: "depth",
     freeMonthlyQuota: 1000,
     searchTypes: ["web"],
     defaultMaxResults: 5,
@@ -211,6 +302,11 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     timeoutMs: 10_000,
     cacheTTLMs: 3 * 60 * 1000,
     fallbackOnly: true,
+    // Keyless and self-hosted by definition: the caller names their own SearXNG
+    // instance and no operator credential travels with the request. This is a
+    // documented flow (tests/unit/search-route.test.ts). Still block-metadata
+    // guarded, so IMDS stays unreachable.
+    allowClientBaseUrlOverride: true,
   },
 
   "ollama-search": {
@@ -330,6 +426,69 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     timeoutMs: 60_000,
     cacheTTLMs: 5 * 60 * 1000,
   },
+
+  // Direct X API search through Xquik. Keep it fallback-only so the existing
+  // SuperGrok provider remains the default for search_type "x".
+  "xquik-search": {
+    id: "xquik-search",
+    name: "Xquik X Search",
+    baseUrl: "https://xquik.com/api/v1/x/tweets/search",
+    method: "GET",
+    authType: "apikey",
+    authHeader: "x-api-key",
+    costPerQuery: 0.00075,
+    freeMonthlyQuota: 0,
+    searchTypes: ["x"],
+    defaultMaxResults: 5,
+    maxMaxResults: 20,
+    timeoutMs: 15_000,
+    cacheTTLMs: 5 * 60 * 1000,
+    fallbackOnly: true,
+  },
+
+  // Free public web search for AI agents (https://anysearch.com). fallback-only:
+  // a cost-0 provider never overrides configured paid providers in automatic
+  // selection. max_results is capped at 10 upstream.
+  "anysearch-search": {
+    id: "anysearch-search",
+    name: "AnySearch",
+    baseUrl: "https://api.anysearch.com/v1/search",
+    method: "POST",
+    authType: "apikey",
+    authHeader: "bearer",
+    costPerQuery: 0,
+    freeMonthlyQuota: 0, // free tier is 1000 req/day (daily reset, not monthly) — 0 matches the xquik convention; the daily figure lives in the UI catalog authHint
+    searchTypes: ["web"],
+    defaultMaxResults: 5,
+    maxMaxResults: 10,
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+    fallbackOnly: true,
+  },
+
+  // Parallel (https://parallel.ai): the same API key also serves POST /v1/web/fetch
+  // through the Extract API — see open-sse/executors/parallel-fetch.ts. The key is
+  // only ever sent to this fixed host (the builder ignores base URL overrides and
+  // refuses redirects). Price depends on the processor mode, plus a per-result
+  // charge above 10 results.
+  "parallel-search": {
+    id: "parallel-search",
+    name: "Parallel Search",
+    baseUrl: "https://api.parallel.ai/v1/search",
+    method: "POST",
+    authType: "apikey",
+    authHeader: "x-api-key",
+    costPerQuery: 0.001,
+    freeMonthlyQuota: 0,
+    searchTypes: ["web"],
+    defaultMaxResults: 5,
+    maxMaxResults: 20,
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+    costByMode: { turbo: 0.001, fast: 0.001, basic: 0.005, advanced: 0.005 },
+    includedResults: 10,
+    extraResultCost: 0.001,
+  },
 };
 
 /**
@@ -377,6 +536,13 @@ export const SEARCH_PROVIDER_ALIASES: Record<string, string> = {
   c7: "context7",
   x_search: "x-search",
   x: "x-search",
+  xquik: "xquik-search",
+  xquik_search: "xquik-search",
+  kimi: "kimi-search",
+  moonshot: "kimi-search",
+  anysearch: "anysearch-search",
+  anysearch_search: "anysearch-search",
+  parallel: "parallel-search",
 };
 
 export function resolveSearchProviderId(providerId: string): string {

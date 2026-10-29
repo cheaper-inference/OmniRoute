@@ -1,3 +1,4 @@
+import { API_KEY_CODEX_SERVICE_MODES } from "../../constants/codexServiceMode";
 import { z } from "zod";
 import {
   ACCOUNT_FALLBACK_STRATEGY_VALUES,
@@ -18,9 +19,13 @@ import { accessScheduleSchema } from "./misc.ts";
 
 // ──── API Key Schemas ────
 
-const requireExclusiveLeaseConnections = (value: {
-  scopes?: string[]; allowedConnections?: string[];
-}, ctx: z.RefinementCtx) => {
+const requireExclusiveLeaseConnections = (
+  value: {
+    scopes?: string[];
+    allowedConnections?: string[];
+  },
+  ctx: z.RefinementCtx
+) => {
   if (value.scopes?.includes("lease:exclusive") && !value.allowedConnections?.length)
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -29,22 +34,85 @@ const requireExclusiveLeaseConnections = (value: {
     });
 };
 
+const requireConsistentModelAccess = (
+  value: {
+    modelAccessMode?: "all" | "restricted";
+    allowedModels?: string[];
+  },
+  ctx: z.RefinementCtx
+) => {
+  if (value.modelAccessMode === "all" && value.allowedModels && value.allowedModels.length > 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "allowedModels must be empty when modelAccessMode is 'all'",
+      path: ["allowedModels"],
+    });
+  }
+};
+
 export const createKeySchema = z
   .object({
     name: z.string().min(1, "Name is required").max(200),
+    modelAccessMode: z.enum(["all", "restricted"]).optional(),
+    allowedModels: z.array(z.string().trim().min(1)).max(1000).optional(),
+    allowedCombos: z.array(z.string().trim().min(1).max(200)).max(500).optional(),
     noLog: z.boolean().optional(),
     allowUsageCommand: z.boolean().optional(),
     usageLimitEnabled: z.boolean().optional(),
     dailyUsageLimitUsd: z.coerce.number().min(0).optional().nullable(),
     weeklyUsageLimitUsd: z.coerce.number().min(0).optional().nullable(),
     chaosModeEnabled: z.boolean().optional(),
+    expiresAt: z.string().datetime().nullable().optional(),
     scopes: z.array(z.string().trim().min(1).max(64)).max(32).optional(),
     allowedConnections: z.array(z.string().uuid()).min(1).max(100).optional(),
+    preferredConnections: z.array(z.string().uuid()).max(100).optional(),
   })
-  .superRefine(requireExclusiveLeaseConnections);
+  .superRefine((value, ctx) => {
+    requireConsistentModelAccess(value, ctx);
+    requireExclusiveLeaseConnections(value, ctx);
+    if (value.allowedConnections?.length && value.preferredConnections?.length) {
+      const allowed = new Set(value.allowedConnections);
+      if (value.preferredConnections.some((id) => !allowed.has(id))) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "preferredConnections must be a subset of allowedConnections",
+          path: ["preferredConnections"],
+        });
+      }
+    }
+  });
+
+const SYNC_TOKEN_TTL_UNIT_MS = { s: 1_000, m: 60_000, h: 3_600_000, d: 86_400_000 } as const;
+/** Longest lifetime a sync token may be issued with. There is no "never expires". */
+export const MAX_SYNC_TOKEN_TTL_MS = 365 * SYNC_TOKEN_TTL_UNIT_MS.d;
+
+/** `30d`, `12h`, `90m`, `3600s` → milliseconds; null when the value is not such a duration. */
+export function parseSyncTokenTtlMs(ttl: string): number | null {
+  const match = /^([1-9]\d{0,6})([smhd])$/.exec(ttl.trim());
+  if (!match) return null;
+  return Number(match[1]) * SYNC_TOKEN_TTL_UNIT_MS[match[2] as keyof typeof SYNC_TOKEN_TTL_UNIT_MS];
+}
 
 export const createSyncTokenSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(200),
+  // Same shape the CLI already sends (`omniroute sync tokens create --ttl 30d`).
+  ttl: z
+    .string()
+    .trim()
+    .refine((value) => {
+      const ms = parseSyncTokenTtlMs(value);
+      return ms !== null && ms <= MAX_SYNC_TOKEN_TTL_MS;
+    }, "ttl must be a duration like 30d, 12h or 90m, at most 365d")
+    .optional(),
+});
+
+export const setKeyQuotaSchema = z.object({
+  apiKeyId: z.string().trim().min(1, "apiKeyId is required"),
+  // 0/null means unlimited for the dimension (KISS: NULL stores unlimited).
+  // Negative values are rejected.
+  tpmLimit: z.coerce.number().min(0).optional().nullable(),
+  rpmLimit: z.coerce.number().min(0).optional().nullable(),
+  monthlyAmountUsd: z.coerce.number().min(0).optional().nullable(),
 });
 
 export const setBudgetSchema = z.object({
@@ -97,9 +165,12 @@ export const updateKeyPermissionsSchema = z
   .object({
     name: z.string().trim().min(1).max(200).optional(),
     modelAccessMode: z.enum(["all", "restricted"]).optional(),
+    connectionAccessMode: z.enum(["all", "restricted"]).optional(),
     allowedModels: z.array(z.string().trim().min(1)).max(1000).optional(),
+    blockedModels: z.array(z.string().trim().min(1)).max(1000).optional(),
     allowedCombos: z.array(z.string().trim().min(1).max(200)).max(500).optional(),
     allowedConnections: z.array(z.string().uuid()).max(100).optional(),
+    preferredConnections: z.array(z.string().uuid()).max(100).optional(),
     noLog: z.boolean().optional(),
     autoResolve: z.boolean().optional(),
     isActive: z.boolean().optional(),
@@ -122,6 +193,12 @@ export const updateKeyPermissionsSchema = z
     allowedEndpoints: z.array(z.string().trim().min(1).max(64)).max(20).optional(),
     streamDefaultMode: z.enum(["legacy", "json"]).optional(),
     compressionEnabled: z.boolean().optional(),
+    codexServiceMode: z.enum(API_KEY_CODEX_SERVICE_MODES).optional(),
+    allowAutoCombos: z.boolean().optional(),
+    allowCcDiscoveryAliases: z.boolean().optional(),
+    catalogScope: z.enum(["all", "combos", "models"]).optional(),
+    // Per-key enforced routing target; null (or blank) clears the pin.
+    forcedModel: z.string().trim().max(300).nullable().optional(),
     cacheDefaultMode: z.enum(["legacy", "bypass"]).optional(),
     disableNonPublicModels: z.boolean().optional(),
     allowUsageCommand: z.boolean().optional(),
@@ -139,11 +216,35 @@ export const updateKeyPermissionsSchema = z
       });
     }
     if (
+      value.connectionAccessMode === "restricted" &&
+      (!value.allowedConnections || value.allowedConnections.length === 0)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "allowedConnections must not be empty when connectionAccessMode is 'restricted'",
+        path: ["allowedConnections"],
+      });
+    }
+    if (
+      value.connectionAccessMode === "all" &&
+      value.allowedConnections &&
+      value.allowedConnections.length > 0
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "allowedConnections must be empty when connectionAccessMode is 'all'",
+        path: ["allowedConnections"],
+      });
+    }
+    if (
       value.name === undefined &&
       value.modelAccessMode === undefined &&
+      value.connectionAccessMode === undefined &&
       value.allowedModels === undefined &&
+      value.blockedModels === undefined &&
       value.allowedCombos === undefined &&
       value.allowedConnections === undefined &&
+      value.preferredConnections === undefined &&
       value.noLog === undefined &&
       value.autoResolve === undefined &&
       value.isActive === undefined &&
@@ -157,6 +258,11 @@ export const updateKeyPermissionsSchema = z
       value.allowedEndpoints === undefined &&
       value.streamDefaultMode === undefined &&
       value.compressionEnabled === undefined &&
+      value.codexServiceMode === undefined &&
+      value.allowAutoCombos === undefined &&
+      value.allowCcDiscoveryAliases === undefined &&
+      value.catalogScope === undefined &&
+      value.forcedModel === undefined &&
       value.cacheDefaultMode === undefined &&
       value.disableNonPublicModels === undefined &&
       value.allowUsageCommand === undefined &&
@@ -174,4 +280,49 @@ export const updateKeyPermissionsSchema = z
     if (value.scopes !== undefined && value.allowedConnections !== undefined) {
       requireExclusiveLeaseConnections(value, ctx);
     }
+    if (value.allowedConnections?.length && value.preferredConnections?.length) {
+      const allowed = new Set(value.allowedConnections);
+      if (value.preferredConnections.some((id) => !allowed.has(id))) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "preferredConnections must be a subset of allowedConnections",
+          path: ["preferredConnections"],
+        });
+      }
+    }
   });
+
+const accessListSchema = z.object({
+  models: z.array(z.string().trim().min(1)).max(1000).optional(),
+  combos: z.array(z.string().trim().min(1).max(200)).max(500).optional(),
+});
+
+type AccessList = z.infer<typeof accessListSchema>;
+
+const isNonEmptyList = (list: string[] | undefined) => (list?.length ?? 0) > 0;
+
+const hasAccessListEntries = (list: AccessList | undefined) =>
+  isNonEmptyList(list?.models) || isNonEmptyList(list?.combos);
+
+const requireAccessAssignEntries = (
+  data: { add?: AccessList; remove?: AccessList },
+  ctx: z.RefinementCtx
+) => {
+  if (!hasAccessListEntries(data.add) && !hasAccessListEntries(data.remove)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "At least one non-empty list of models or combos must be provided to add or remove",
+      path: ["add"],
+    });
+  }
+};
+
+export const apiKeyAccessAssignSchema = z
+  .object({
+    add: accessListSchema.optional(),
+    remove: accessListSchema.optional(),
+    switchToRestricted: z.boolean().optional(),
+  })
+  .superRefine(requireAccessAssignEntries);
+
+export type ApiKeyAccessAssignInput = z.infer<typeof apiKeyAccessAssignSchema>;

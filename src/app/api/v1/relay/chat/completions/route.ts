@@ -7,6 +7,7 @@
  */
 
 import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
+import { stripSensitiveResponseHeaders } from "@omniroute/open-sse/utils/upstreamResponseHeaders";
 import { handleChat } from "@/sse/handlers/chat";
 import { withChatAdmission } from "@/shared/middleware/withChatAdmission";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -44,7 +45,10 @@ import type { RelayToken } from "@/lib/db/relayProxies";
 
 const JSON_CORS_HEADERS = { ...CORS_HEADERS, "Content-Type": "application/json" } as const;
 
-const injectionGuard = createInjectionGuard();
+// `logger: null` — this relay forwards to handleChat, where the guardrail registry
+// re-evaluates the request with the pino logger (#11936 dedupe). The bifrost sibling
+// route keeps the default logger: it skips handleChat entirely.
+const injectionGuard = createInjectionGuard({ logger: null });
 
 type RelayUsageStatus = "success" | "error";
 
@@ -106,7 +110,9 @@ async function forwardToBifrost(
       signal: ac.signal,
     });
 
-    const headers = new Headers(upstream.headers);
+    // Same strip as the bifrost sibling: an echoed upstream credential or
+    // set-cookie must not reach the relay-token holder (GHSA-9m72-44hg-w32g).
+    const headers = stripSensitiveResponseHeaders(upstream.headers);
     headers.set("X-Routed-By", "bifrost");
     headers.set("X-Routing-Backend", "bifrost");
     headers.set("X-Relay-Token", token.tokenPrefix + "...");
@@ -202,7 +208,7 @@ export async function OPTIONS() {
 
 async function postHandler(request: Request) {
   const startTime = Date.now();
-  const clientIp = getClientIp(request);
+  const { forensic: clientIp, throttleKey } = getClientIp(request);
   const userAgent = sanitizeForensicHeader(request.headers.get("user-agent"));
 
   try {
@@ -241,7 +247,7 @@ async function postHandler(request: Request) {
     }
 
     // 2a. Per-(token,IP) gate — bounds the blast radius of a leaked token.
-    const ipCheck = checkIpRateLimit(token.id, clientIp);
+    const ipCheck = checkIpRateLimit(token.id, throttleKey);
     if (!ipCheck.allowed) {
       recordRelayUsage(token.id, {
         requestId: request.headers.get("x-request-id") || undefined,

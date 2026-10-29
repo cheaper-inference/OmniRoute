@@ -1,12 +1,46 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import Icon from "@/shared/components/Icon";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import Image from "next/image";
 import CliStatusBadge from "./CliStatusBadge";
 import { useTranslations } from "next-intl";
+import { cn } from "@/shared/utils/cn";
+import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 
 const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
+
+// (#523) Default to the first available key while the user hasn't picked one.
+const defaultKeyId = (selectedId, apiKeys) =>
+  selectedId || (apiKeys?.length > 0 ? apiKeys[0].id : "");
+
+/**
+ * One-time form initialization from ~/.openclaw/openclaw.json, applied right
+ * after a status fetch resolves: mirror the primary model into the form and
+ * re-select the API key whose masked value matches the stored one.
+ */
+function initOpenclawFormFromSettings(data, apiKeys, onSelectModel, onSelectKeyId) {
+  const provider = data.settings?.models?.providers?.["omniroute"];
+  if (!provider) return;
+
+  const primaryModel = data.settings?.agents?.defaults?.model?.primary;
+  if (primaryModel) onSelectModel(primaryModel.replace("omniroute/", ""));
+
+  // (#523) Keys from /api/keys are masked (first 8 + "****" + last 4).
+  // Match by prefix/suffix instead of exact comparison.
+  // apiKey may be a structured secret reference (object) rather than a
+  // plaintext string, e.g. OpenClaw SecretRefs. Only match on strings.
+  if (typeof provider.apiKey !== "string" || !provider.apiKey) return;
+  const fileKeyPrefix = provider.apiKey.slice(0, 8);
+  const fileKeySuffix = provider.apiKey.slice(-4);
+  const matchedKey = apiKeys?.find(
+    (k) => k.key && k.key.startsWith(fileKeyPrefix) && k.key.endsWith(fileKeySuffix)
+  );
+  if (matchedKey) onSelectKeyId(matchedKey.id);
+}
 
 export default function OpenClawToolCard({
   tool,
@@ -57,22 +91,12 @@ export default function OpenClawToolCard({
   const effectiveConfigStatus = configStatus || batchStatus?.configStatus || null;
 
   // (#523) Store the key *id* (not the masked string) so the backend can
-  // resolve the real secret from DB before writing to config files.
-  useEffect(() => {
-    if (apiKeys?.length > 0 && !selectedApiKeyId) {
-      setSelectedApiKeyId(apiKeys[0].id);
-    }
-  }, [apiKeys, selectedApiKeyId]);
+  // resolve the real secret from DB before writing to config files. Derived
+  // during render instead of synced through an effect
+  // (react-hooks/set-state-in-effect).
+  const effectiveApiKeyId = defaultKeyId(selectedApiKeyId, apiKeys);
 
-  useEffect(() => {
-    if (isExpanded && !openclawStatus) {
-      checkOpenclawStatus();
-      fetchModelAliases();
-      fetchBackups();
-    }
-  }, [isExpanded, openclawStatus]);
-
-  const fetchModelAliases = async () => {
+  const fetchModelAliases = useCallback(async () => {
     try {
       const res = await fetch("/api/models/alias");
       const data = await res.json();
@@ -80,46 +104,47 @@ export default function OpenClawToolCard({
     } catch (error) {
       console.log("Error fetching model aliases:", error);
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    if (openclawStatus?.installed && !hasInitializedModel.current) {
-      hasInitializedModel.current = true;
-      const provider = openclawStatus.settings?.models?.providers?.["omniroute"];
-      if (provider) {
-        const primaryModel = openclawStatus.settings?.agents?.defaults?.model?.primary;
-        if (primaryModel) {
-          const modelId = primaryModel.replace("omniroute/", "");
-          setSelectedModel(modelId);
-        }
-        // (#523) Keys from /api/keys are masked (first 8 + "****" + last 4).
-        // Match by prefix/suffix instead of exact comparison.
-        // apiKey may be a structured secret reference (object) rather than a
-        // plaintext string, e.g. OpenClaw SecretRefs. Only match on strings.
-        if (typeof provider.apiKey === "string" && provider.apiKey) {
-          const fileKeyPrefix = provider.apiKey.slice(0, 8);
-          const fileKeySuffix = provider.apiKey.slice(-4);
-          const matchedKey = apiKeys?.find(
-            (k) => k.key && k.key.startsWith(fileKeyPrefix) && k.key.endsWith(fileKeySuffix)
-          );
-          if (matchedKey) setSelectedApiKeyId(matchedKey.id);
-        }
-      }
+  // ── Backups ──
+  const fetchBackups = useCallback(async () => {
+    try {
+      const res = await fetch("/api/cli-tools/backups?tool=openclaw");
+      const data = await res.json();
+      if (res.ok) setBackups(data.backups || []);
+    } catch (error) {
+      console.log("Error fetching backups:", error);
     }
-  }, [openclawStatus, apiKeys]);
+  }, []);
 
-  const checkOpenclawStatus = async () => {
+  const checkOpenclawStatus = useCallback(async () => {
     setCheckingOpenclaw(true);
     try {
       const res = await fetch("/api/cli-tools/openclaw-settings");
       const data = await res.json();
       setOpenclawStatus(data);
+      // One-time form initialization from the settings file, right after the
+      // fetch resolves (was a separate openclawStatus effect — moved here so
+      // no setState runs synchronously inside an effect body).
+      if (data?.installed && !hasInitializedModel.current) {
+        hasInitializedModel.current = true;
+        initOpenclawFormFromSettings(data, apiKeys, setSelectedModel, setSelectedApiKeyId);
+      }
     } catch (error) {
       setOpenclawStatus({ installed: false, error: error.message });
     } finally {
       setCheckingOpenclaw(false);
     }
-  };
+  }, [apiKeys]);
+
+  useEffect(() => {
+    if (!(isExpanded && !openclawStatus)) return;
+    // Load in an async continuation so every setState happens after an await
+    // (react-hooks/set-state-in-effect: no synchronous setState in effect bodies).
+    void (async () => {
+      await Promise.all([checkOpenclawStatus(), fetchModelAliases(), fetchBackups()]);
+    })();
+  }, [isExpanded, openclawStatus, checkOpenclawStatus, fetchModelAliases, fetchBackups]);
 
   const getEffectiveBaseUrl = () => {
     const url = customBaseUrl || baseUrl;
@@ -137,7 +162,7 @@ export default function OpenClawToolCard({
     try {
       // (#523) Prefer keyId lookup so the backend writes the real key to disk.
       const selectedKeyId =
-        selectedApiKeyId?.trim() || (apiKeys?.length > 0 ? apiKeys[0].id : null);
+        effectiveApiKeyId?.trim() || (apiKeys?.length > 0 ? apiKeys[0].id : null);
 
       const res = await fetch("/api/cli-tools/openclaw-settings", {
         method: "POST",
@@ -199,17 +224,6 @@ export default function OpenClawToolCard({
     setModalOpen(false);
   };
 
-  // ── Backups ──
-  const fetchBackups = async () => {
-    try {
-      const res = await fetch("/api/cli-tools/backups?tool=openclaw");
-      const data = await res.json();
-      if (res.ok) setBackups(data.backups || []);
-    } catch (error) {
-      console.log("Error fetching backups:", error);
-    }
-  };
-
   const handleRestoreBackup = async (backupId) => {
     setRestoringBackup(backupId);
     setMessage(null);
@@ -241,7 +255,7 @@ export default function OpenClawToolCard({
 
   const getManualConfigs = () => {
     // (#523) Look up the key object by id to get the masked display value.
-    const selectedKeyObj = apiKeys?.find((k) => k.id === selectedApiKeyId);
+    const selectedKeyObj = apiKeys?.find((k) => k.id === effectiveApiKeyId);
     const keyToDisplay =
       selectedKeyObj?.key || (!cloudEnabled ? "sk_omniroute" : "<API_KEY_FROM_DASHBOARD>");
 
@@ -280,8 +294,11 @@ export default function OpenClawToolCard({
 
   return (
     <Card padding="sm" className="overflow-hidden">
-      <div className="flex items-center justify-between hover:cursor-pointer" onClick={onToggle}>
-        <div className="flex items-center gap-3">
+      <div
+        className={cn("flex items-center justify-between hover:cursor-pointer", CARD_TOGGLE_CLASS)}
+        {...cardToggleProps(isExpanded, onToggle)}
+      >
+        <div className="flex min-w-0 items-center gap-3">
           <div className="size-8 flex items-center justify-center shrink-0">
             <Image
               src="/providers/openclaw.svg"
@@ -307,27 +324,27 @@ export default function OpenClawToolCard({
             <p className="text-xs text-text-muted truncate">{t("toolDescriptions.openclaw")}</p>
           </div>
         </div>
-        <span
-          className={`material-symbols-outlined text-text-muted text-[20px] transition-transform ${isExpanded ? "rotate-180" : ""}`}
-        >
-          expand_more
-        </span>
+        <Icon
+          name="expand_more"
+          size={20}
+          className={cn("text-text-muted transition-transform", isExpanded && "rotate-180")}
+        />
       </div>
 
       {isExpanded && (
         <div className="mt-4 pt-4 border-t border-border flex flex-col gap-4">
           {checkingOpenclaw && (
             <div className="flex items-center gap-2 text-text-muted">
-              <span className="material-symbols-outlined animate-spin">progress_activity</span>
+              <Icon name="progress_activity" className="animate-spin" />
               <span>{t("checkingCli", { tool: "Open Claw" })}</span>
             </div>
           )}
 
           {!checkingOpenclaw && openclawStatus && !cliReady && (
-            <div className="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-              <span className="material-symbols-outlined text-yellow-500">warning</span>
+            <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/30 rounded-lg">
+              <Icon name="warning" className="text-warning" />
               <div className="flex-1">
-                <p className="font-medium text-yellow-600 dark:text-yellow-400">
+                <p className="font-medium text-warning">
                   {openclawStatus.installed
                     ? t("cliNotRunnable", { tool: "Open Claw" })
                     : t("cliNotInstalled", { tool: "Open Claw" })}
@@ -348,7 +365,7 @@ export default function OpenClawToolCard({
                 not on the server. Upstream report: #579.
               */}
               <Button variant="ghost" size="sm" onClick={() => setShowManualConfigModal(true)}>
-                <span className="material-symbols-outlined text-[14px] mr-1">content_copy</span>
+                <Icon name="content_copy" size={14} className="mr-1" />
                 {t("manualConfig")}
               </Button>
             </div>
@@ -363,9 +380,7 @@ export default function OpenClawToolCard({
                     <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                       {t("current")}
                     </span>
-                    <span className="material-symbols-outlined text-text-muted text-[14px]">
-                      arrow_forward
-                    </span>
+                    <Icon name="arrow_forward" size={14} className="text-text-muted" />
                     <span className="flex-1 px-2 py-1.5 text-xs text-text-muted truncate">
                       {openclawStatus.settings.models.providers["omniroute"].baseUrl}
                     </span>
@@ -377,24 +392,26 @@ export default function OpenClawToolCard({
                   <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                     {t("baseUrl")}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px]">
-                    arrow_forward
-                  </span>
-                  <input
-                    type="text"
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                  <Input
                     value={getDisplayUrl()}
                     onChange={(e) => setCustomBaseUrl(e.target.value)}
                     placeholder={t("baseUrlPlaceholder")}
-                    className="flex-1 px-2 py-1.5 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    aria-label={t("baseUrl")}
+                    className="min-w-0 w-auto flex-1"
+                    inputClassName="text-xs"
                   />
                   {customBaseUrl && customBaseUrl !== baseUrl && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => setCustomBaseUrl("")}
-                      className="p-1 text-text-muted hover:text-primary rounded transition-colors"
                       title={t("resetToDefault")}
+                      aria-label={t("resetToDefault")}
+                      className="text-text-muted hover:text-primary"
                     >
-                      <span className="material-symbols-outlined text-[14px]">restart_alt</span>
-                    </button>
+                      <Icon name="restart_alt" size={14} />
+                    </Button>
                   )}
                 </div>
 
@@ -403,21 +420,21 @@ export default function OpenClawToolCard({
                   <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                     {t("apiKey")}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px]">
-                    arrow_forward
-                  </span>
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
                   {apiKeys.length > 0 ? (
-                    <select
-                      value={selectedApiKeyId}
+                    <Select
+                      value={effectiveApiKeyId}
                       onChange={(e) => setSelectedApiKeyId(e.target.value)}
-                      className="flex-1 px-2 py-1.5 bg-surface rounded text-xs border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      aria-label={t("apiKey")}
+                      className="min-w-0 w-auto flex-1"
+                      selectClassName="text-xs"
                     >
                       {apiKeys.map((key) => (
                         <option key={key.id} value={key.id}>
                           {key.key}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   ) : (
                     <span className="flex-1 text-xs text-text-muted px-2 py-1.5">
                       {cloudEnabled ? t("noApiKeysCreateOne") : t("defaultOmnirouteKey")}
@@ -430,42 +447,44 @@ export default function OpenClawToolCard({
                   <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                     {t("model")}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px]">
-                    arrow_forward
-                  </span>
-                  <input
-                    type="text"
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                  <Input
                     value={selectedModel}
                     onChange={(e) => setSelectedModel(e.target.value)}
                     placeholder={t("providerModelPlaceholder")}
-                    className="flex-1 px-2 py-1.5 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    aria-label={t("model")}
+                    className="min-w-0 w-auto flex-1"
+                    inputClassName="text-xs"
                   />
-                  <button
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => setModalOpen(true)}
                     disabled={!hasActiveProviders}
-                    className={`px-2 py-1.5 rounded border text-xs transition-colors shrink-0 whitespace-nowrap ${hasActiveProviders ? "bg-surface border-border text-text-main hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed border-border"}`}
+                    className="shrink-0 whitespace-nowrap text-xs"
                   >
                     {t("selectModel")}
-                  </button>
+                  </Button>
                   {selectedModel && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => setSelectedModel("")}
-                      className="p-1 text-text-muted hover:text-red-500 rounded transition-colors"
                       title={t("clear")}
+                      aria-label={t("clear")}
+                      className="text-text-muted hover:text-error"
                     >
-                      <span className="material-symbols-outlined text-[14px]">close</span>
-                    </button>
+                      <Icon name="close" size={14} />
+                    </Button>
                   )}
                 </div>
               </div>
 
               {message && (
                 <div
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
                 >
-                  <span className="material-symbols-outlined text-[14px]">
-                    {message.type === "success" ? "check_circle" : "error"}
-                  </span>
+                  <Icon name={message.type === "success" ? "check_circle" : "error"} size={14} />
                   <span>{message.text}</span>
                 </div>
               )}
@@ -478,7 +497,7 @@ export default function OpenClawToolCard({
                   disabled={!selectedModel}
                   loading={applying}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">save</span>
+                  <Icon name="save" size={14} className="mr-1" />
                   {t("apply")}
                 </Button>
                 <Button
@@ -488,11 +507,11 @@ export default function OpenClawToolCard({
                   disabled={!openclawStatus?.hasOmniRoute}
                   loading={restoring}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">restore</span>
+                  <Icon name="restore" size={14} className="mr-1" />
                   {t("reset")}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setShowManualConfigModal(true)}>
-                  <span className="material-symbols-outlined text-[14px] mr-1">content_copy</span>
+                  <Icon name="content_copy" size={14} className="mr-1" />
                   {t("manualConfig")}
                 </Button>
                 <div className="flex-1" />
@@ -504,7 +523,7 @@ export default function OpenClawToolCard({
                     if (!showBackups) fetchBackups();
                   }}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">history</span>
+                  <Icon name="history" size={14} className="mr-1" />
                   {t("backups")}
                   {backups.length > 0 && ` (${backups.length})`}
                 </Button>
@@ -513,7 +532,7 @@ export default function OpenClawToolCard({
               {showBackups && (
                 <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
                   <h4 className="text-xs font-semibold text-text-main mb-2 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">history</span>
+                    <Icon name="history" size={14} />
                     {t("configBackups")}
                   </h4>
                   {backups.length === 0 ? (
@@ -523,24 +542,24 @@ export default function OpenClawToolCard({
                       {backups.map((b) => (
                         <div
                           key={b.id}
-                          className="flex items-center gap-2 px-2 py-1.5 bg-black/5 dark:bg-white/5 rounded text-xs"
+                          className="flex items-center gap-2 px-2 py-1.5 bg-bg-subtle rounded text-xs"
                         >
-                          <span className="material-symbols-outlined text-[14px] text-text-muted">
-                            description
-                          </span>
+                          <Icon name="description" size={14} className="text-text-muted" />
                           <span className="flex-1 truncate font-mono" title={b.id}>
                             {b.id}
                           </span>
                           <span className="text-text-muted whitespace-nowrap">
                             {new Date(b.createdAt).toLocaleString()}
                           </span>
-                          <button
+                          <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={() => handleRestoreBackup(b.id)}
                             disabled={restoringBackup === b.id}
-                            className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-medium hover:bg-primary/20 transition-colors disabled:opacity-50"
+                            className="h-6 px-2 text-[10px]"
                           >
                             {restoringBackup === b.id ? "..." : t("restore")}
-                          </button>
+                          </Button>
                         </div>
                       ))}
                     </div>

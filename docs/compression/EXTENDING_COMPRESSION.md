@@ -338,7 +338,6 @@ Or place in a recognized location:
 
 ```
 ~/.omniroute/compression/rules/hi/filler.json  # User-level
-<project>/.compression/rules/hi/filler.json   # Project-level
 ```
 
 ### Best Practices for Language Packs
@@ -583,7 +582,7 @@ persistence and telemetry all enumerate the catalog — there is no other list t
    The instruction text must be **static and deterministic** per
    `(id, level, language)` — `${SHARED_BOUNDARIES}` is the only interpolation allowed.
 2. **Translate it.** Ship at least a `pt-BR` block under `i18n`; `ponytail` and
-   `i-have-adhd` (en, pt-BR, vi, ja, id) are the reference shape. A deliberately
+   `i-have-adhd` (en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi) are the reference shape. A deliberately
    single-language style sets `locale` instead (like `terse-cjk` → `zh`) and is then
    only offered under that locale.
 3. **Update the matrix guard** — add the style's languages to `BASELINE_LANGUAGES` in

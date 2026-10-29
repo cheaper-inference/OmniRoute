@@ -3,16 +3,21 @@ import { z } from "zod";
 import { validateBody, isValidationFailure } from "@/shared/validation/helpers";
 import { GLOBAL_SKILL_OWNER_ID, skillRegistry } from "@/lib/skills/registry";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
-import { fetchSkillMd } from "@/lib/skills/skillssh";
+import {
+  fetchSkillMd,
+  SkillsShSourceSchema,
+  SkillsShSkillIdSchema,
+  SkillsShVersionSchema,
+} from "@/lib/skills/skillssh";
 import { getSkillsProviderSetting } from "@/lib/skills/providerSettings";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 
 const skillsshInstallSchema = z.object({
   name: z.string().min(1).max(64),
   description: z.string().min(1).max(1024),
-  source: z.string().min(1),
-  skillId: z.string().min(1),
-  version: z.string().default("1.0.0"),
+  source: SkillsShSourceSchema,
+  skillId: SkillsShSkillIdSchema,
+  version: SkillsShVersionSchema,
 });
 
 export async function POST(request: Request) {
@@ -31,7 +36,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const rawBody = await request.json();
+    let rawBody: unknown;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
     const validation = validateBody(skillsshInstallSchema, rawBody);
     if (isValidationFailure(validation)) {
       return NextResponse.json(validation.error, { status: 400 });

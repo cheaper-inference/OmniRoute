@@ -22,8 +22,49 @@ import path from "node:path";
  */
 export function isTransientProbeError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  return /SQLITE_BUSY|SQLITE_PROTOCOL|SQLITE_IOERR|ENOENT/i.test(message);
+  // #12423 widened the message side: SQLite also reports "database table is
+  // locked", "database schema is locked" and "database is busy" for the same
+  // transient contention that "database is locked" covers.
+  if (
+    /SQLITE_BUSY|SQLITE_PROTOCOL|SQLITE_IOERR|ENOENT|database(?: table| schema)? is (?:locked|busy)/i.test(
+      message
+    )
+  ) {
+    return true;
+  }
+  // The real drivers do not put the result-code name in the message: both
+  // report plain "database is locked" for SQLITE_BUSY. better-sqlite3 carries
+  // the name in `code`, node:sqlite the numeric primary code in `errcode`
+  // (5 BUSY, 10 IOERR, 15 PROTOCOL; extended codes live in the high bits).
+  // Without this, a transient lock during the probe was classified as
+  // corruption and the database was renamed away.
+  if (typeof error !== "object" || error === null) return false;
+  const { code, errcode } = error as { code?: unknown; errcode?: unknown };
+  if (typeof code === "string" && /^SQLITE_(BUSY|PROTOCOL|IOERR)/.test(code)) return true;
+  return typeof errcode === "number" && [5, 10, 15].includes(errcode & 0xff);
 }
+
+export type ProbeFailureKind = "readonly" | "transient" | "corrupt-or-unknown";
+
+/**
+ * Classifies a probe error. SQLITE_READONLY ("attempt to write a readonly
+ * database", e.g. a WAL `-shm` that cannot be written under a readonly
+ * connection) is an environment problem, not corruption (#17995).
+ */
+export function classifyProbeFailure(error: unknown): ProbeFailureKind {
+  const message = error instanceof Error ? error.message : String(error);
+  let readonly = /attempt to write a readonly database|SQLITE_READONLY/i.test(message);
+  if (!readonly && typeof error === "object" && error !== null) {
+    const { code, errcode } = error as { code?: unknown; errcode?: unknown };
+    readonly =
+      (typeof code === "string" && /^SQLITE_READONLY/.test(code)) ||
+      (typeof errcode === "number" && (errcode & 0xff) === 8);
+  }
+  if (readonly) return "readonly";
+  return isTransientProbeError(error) ? "transient" : "corrupt-or-unknown";
+}
+
+export type ProbeRetryResult = "recovered" | "transient_exhausted" | "readonly" | "not_transient";
 
 /**
  * Synchronous sleep that blocks the event loop for `ms` milliseconds.
@@ -66,16 +107,19 @@ type OpenDbFn = (
  * @param sqliteFile - Path to the SQLite database file
  * @param openDb - Function to open the database (normally openSqliteDatabase)
  * @param closeDb - Function to safely close the probe adapter
- * @returns true if the retry succeeded (transient condition resolved)
- *          false if all retries were exhausted or error is non-transient
+ * @returns "recovered" if a retry succeeded, "transient_exhausted" if all retries
+ *          failed (NOT proof of corruption), "readonly" for SQLITE_READONLY (not
+ *          retried, not corruption), "not_transient" for genuine/unknown errors.
  */
 export function retryProbeIfTransient(
   sqliteFile: string,
   probeError: unknown,
   openDb: OpenDbFn,
   closeDb: (adapter: { driver: string; open: boolean; close(): void } | null | undefined) => void
-): boolean {
-  if (!isTransientProbeError(probeError)) return false;
+): ProbeRetryResult {
+  const kind = classifyProbeFailure(probeError);
+  if (kind === "readonly") return "readonly";
+  if (kind !== "transient") return "not_transient";
 
   const retryDelays = [500, 1000, 2000];
   for (let i = 0; i < retryDelays.length; i++) {
@@ -83,14 +127,14 @@ export function retryProbeIfTransient(
     try {
       const retryAdapter = openDb(sqliteFile, { readonly: true });
       closeDb(retryAdapter);
-      return true;
+      return "recovered";
     } catch {
       // Retry failed, try next delay
     }
   }
 
   console.warn(
-    `[DB] All ${retryDelays.length} transient probe retries exhausted — declaring corruption`
+    `[DB] All ${retryDelays.length} transient probe retries exhausted — NOT declaring corruption`
   );
-  return false;
+  return "transient_exhausted";
 }

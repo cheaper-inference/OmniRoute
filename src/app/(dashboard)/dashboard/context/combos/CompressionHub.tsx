@@ -7,8 +7,15 @@
 // in the named-combo editor. Here we expose a single active-profile selector
 // (Default-from-panel | a named combo) + a read-only preview.
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
+import { Skeleton } from "@/shared/components/Loading";
+import Select from "@/shared/components/Select";
+import Toggle from "@/shared/components/Toggle";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -29,52 +36,67 @@ interface NamedCombo {
   pipeline: { engine: string; intensity?: string }[];
 }
 
-// ── Sub-components ──────────────────────────────────────────────────────────────
+// A settings PUT with no answer within this time counts as failed, so one stalled request cannot
+// hold up the saves queued behind it.
+const SAVE_TIMEOUT_MS = 15_000;
 
-function Toggle({
-  checked,
-  onChange,
-  ariaLabel,
-}: {
-  checked: boolean;
-  onChange: () => void;
-  ariaLabel: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={ariaLabel}
-      onClick={onChange}
-      className={`relative w-10 h-5 rounded-full transition-colors ${
-        checked ? "bg-green-500" : "bg-border"
-      }`}
-    >
-      <span
-        className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-          checked ? "left-5" : "left-0.5"
-        }`}
-      />
-    </button>
-  );
+const FALLBACK_SETTINGS: CompressionSettings = {
+  enabled: false,
+  defaultMode: "off",
+  contextEditing: { enabled: false },
+};
+
+// Every mounted Hub in this tab shares one save queue: a Hub that unmounts with saves still
+// queued keeps sending them, and a Hub mounted afterwards loads and saves behind them, so it
+// shows what the server stored and an older value never lands after a newer one. Another tab
+// has its own queue and its own last-saved copy, so it can still overwrite the server behind
+// this one.
+let saveQueue: Promise<void> = Promise.resolve();
+
+// A save still queued or in flight is lost if the page unloads, so the browser asks before
+// leaving while any save is pending.
+let pendingSaves = 0;
+function confirmLeave(event: BeforeUnloadEvent) {
+  event.preventDefault();
+  // Chrome and Edge before 119 show the prompt only when returnValue is set.
+  event.returnValue = true;
 }
+
+// ── Sub-components ──────────────────────────────────────────────────────────────
 
 // ── Main component ──────────────────────────────────────────────────────────────
 
 export default function CompressionHub() {
   const t = useTranslations("contextCombos");
+  const tSettings = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const [settings, setSettings] = useState<CompressionSettings | null>(null);
   const [combos, setCombos] = useState<NamedCombo[]>([]);
   const [loading, setLoading] = useState(true);
+  // A failed settings load must not show the default-profile view: its select and
+  // Context Editing toggle would save the defaults over the stored row. A retry
+  // re-runs the load; answers that arrive for the run it replaced are ignored.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // The Hub shows the last saved settings plus its saves still queued, so a failed save rolls
+  // back only its own fields and never undoes a newer save.
+  const savedRef = useRef(FALLBACK_SETTINGS);
+  const queuedRef = useRef<Partial<CompressionSettings>[]>([]);
+  // The fields whose latest save failed; the error shows while any remain.
+  const failedRef = useRef(new Set<string>());
 
   // ── Initial load (parallel) ──────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
+      await saveQueue;
+      // The queue can hold a stalled save for up to the save timeout; a Hub unmounted during
+      // that wait must not fetch.
+      if (cancelled) return;
       const asJson = (r: Response) => (r.ok ? r.json() : null);
       const [settingsData, combosData] = await Promise.all([
         fetch("/api/settings/compression")
@@ -85,11 +107,14 @@ export default function CompressionHub() {
           .catch(() => null),
       ]);
       if (cancelled) return;
+      // A failed GET must not paint the default profile: its controls would save those
+      // defaults over the stored row (#15583). A successful GET becomes the base the
+      // save queue overlays (#15593).
       if (settingsData) {
-        setSettings(settingsData as CompressionSettings);
-      } else {
-        setSettings({ enabled: false, defaultMode: "off", contextEditing: { enabled: false } });
+        savedRef.current = settingsData as CompressionSettings;
+        setSettings(savedRef.current);
       }
+      setLoadFailed(!settingsData);
       if (Array.isArray(combosData?.combos)) {
         setCombos(combosData.combos as NamedCombo[]);
       }
@@ -99,44 +124,94 @@ export default function CompressionHub() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadAttempt]);
 
   // ── Settings mutations ───────────────────────────────────────────────────────
   const saveSettings = useCallback(
-    async (patch: Partial<CompressionSettings>) => {
-      if (!settings) return;
-      const next = { ...settings, ...patch };
-      setSettings(next);
+    (patch: Partial<CompressionSettings>) => {
+      const showQueued = () =>
+        setSettings(
+          queuedRef.current.reduce<CompressionSettings>(
+            (shown, queued) => ({ ...shown, ...queued }),
+            savedRef.current
+          )
+        );
+      queuedRef.current.push(patch);
+      showQueued();
+      failedRef.current.clear();
       setError(null);
-      try {
-        // Send only the changed fields (patch), not the full merged settings.
-        // The API schema is designed for partial updates; sending the full
-        // CompressionConfig round-trips fields unknown to the schema and causes
-        // a 400 strict-validation failure (e.g. contextBudget, pipeline engines
-        // added after the schema was written). CompressionPanel already does this.
-        const res = await fetch("/api/settings/compression", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(patch),
-        });
-        if (!res.ok) {
-          setSettings(settings); // revert
-          setError(t("saveSettingsFailed"));
+      if (pendingSaves++ === 0) window.addEventListener("beforeunload", confirmLeave);
+      saveQueue = saveQueue.then(async () => {
+        // A later queued save that carries every key of this one replaces it on the server, so
+        // skip this one.
+        const replaced = queuedRef.current
+          .slice(1)
+          .some((later) => Object.keys(patch).every((key) => key in later));
+        if (!replaced) {
+          let ok = false;
+          try {
+            // Send only the changed fields (patch), not the full merged settings.
+            // The API schema is designed for partial updates; sending the full
+            // CompressionConfig round-trips fields unknown to the schema and causes
+            // a 400 strict-validation failure (e.g. contextBudget, pipeline engines
+            // added after the schema was written). CompressionPanel already does this.
+            const res = await fetch("/api/settings/compression", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(patch),
+              signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
+            });
+            ok = res.ok;
+          } catch {
+            // A network error or the timeout counts as a failed save.
+          }
+          // The error stays up until the next edit, or until later saves store every field that
+          // failed, so a later save of another field cannot hide the field this one rolled back.
+          for (const key of Object.keys(patch)) {
+            if (ok) failedRef.current.delete(key);
+            else failedRef.current.add(key);
+          }
+          if (ok) savedRef.current = { ...savedRef.current, ...patch };
+          setError(failedRef.current.size > 0 ? t("saveSettingsFailed") : null);
         }
-      } catch {
-        setSettings(settings);
-        setError(t("saveSettingsFailed"));
-      }
+        queuedRef.current.shift();
+        showQueued();
+        if (--pendingSaves === 0) window.removeEventListener("beforeunload", confirmLeave);
+      });
     },
-    [settings, t]
+    [t]
   );
 
   // ── Derived state ─────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-10 text-sm text-text-muted">
-        {t("loading")}
+      <div className="flex flex-col gap-3 p-4" aria-busy="true">
+        <span className="ci-sr-only">{t("loading")}</span>
+        <Skeleton className="h-32 w-full" />
       </div>
+    );
+  }
+
+  if (loadFailed) {
+    return (
+      <Card padding="sm" className="flex flex-col gap-5 border-primary/30">
+        <div className="flex items-center justify-between gap-4">
+          <p role="alert" className="text-sm text-error">
+            {tSettings("compressionTitle")}: {tCommon("failedToLoad")}
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setLoading(true);
+              setLoadAttempt((attempt) => attempt + 1);
+            }}
+            className="shrink-0"
+          >
+            {tSettings("retry")}
+          </Button>
+        </div>
+      </Card>
     );
   }
 
@@ -146,29 +221,31 @@ export default function CompressionHub() {
     : "";
 
   return (
-    <section className="flex flex-col gap-5 rounded-xl border border-primary/30 bg-surface p-5">
+    <Card padding="sm" className="flex flex-col gap-5 border-primary/30">
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-[26px] text-primary" aria-hidden="true">
-            hub
-          </span>
+          <Icon name="hub" size={26} className="text-primary" />
           <div>
             <h1 className="text-xl font-bold text-text-main">{t("hubTitle")}</h1>
             <p className="text-sm text-text-muted">{t("hubDescription")}</p>
           </div>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => setExplainerOpen((v) => !v)}
-          className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs text-text-main hover:bg-bg"
+          aria-expanded={explainerOpen}
+          className="shrink-0"
         >
           {explainerOpen ? t("hideExplanation") : t("howItWorks")}
-        </button>
+        </Button>
       </div>
 
       {error && (
-        <p className="rounded border border-danger/40 px-3 py-2 text-xs text-danger">{error}</p>
+        <p role="alert" className="rounded border border-error/40 px-3 py-2 text-xs text-error">
+          {error}
+        </p>
       )}
 
       {/* ── Explainer ── */}
@@ -206,18 +283,13 @@ export default function CompressionHub() {
 
       {/* ── Active profile ── */}
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg p-4">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="active-profile" className="text-sm font-semibold text-text-main">
-            {t("activeProfile")}
-          </label>
-          <p className="text-xs text-text-muted">{t("activeProfileDescription")}</p>
-        </div>
-        <select
+        <Select
           id="active-profile"
+          label={t("activeProfile")}
+          hint={t("activeProfileDescription")}
           data-testid="active-profile-select"
           value={settings?.activeComboId ?? ""}
           onChange={(e) => saveSettings({ activeComboId: e.target.value || null })}
-          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main"
         >
           <option value="">{t("defaultFromPanel")}</option>
           {combos.map((c) => (
@@ -225,7 +297,7 @@ export default function CompressionHub() {
               {c.name}
             </option>
           ))}
-        </select>
+        </Select>
         <div
           data-testid="active-profile-preview"
           className="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-text-muted"
@@ -262,11 +334,13 @@ export default function CompressionHub() {
             ariaLabel={t("contextEditingAria")}
           />
         </div>
-        <div className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-500">
-          <span className="material-symbols-outlined text-[16px]">info</span>
-          <span>{t("contextEditingNote")}</span>
-        </div>
+        <Alert
+          variant="warning"
+          icon={<Icon name="info" size={16} />}
+          className="[&>.ci-alert__dismiss]:hidden"
+          description={t("contextEditingNote")}
+        />
       </div>
-    </section>
+    </Card>
   );
 }

@@ -21,6 +21,7 @@ import { getUpscaleProvider, parseUpscaleModel } from "../config/upscaleRegistry
 import { handleAdobeFireflyImageUpscale } from "./imageUpscale/adobeFirefly.ts";
 import { handleStabilityImageUpscale } from "./imageUpscale/stability.ts";
 import { handleTopazImageUpscale } from "./imageUpscale/topaz.ts";
+import { handleSyntxImageUpscale } from "./imageUpscale/syntx.ts";
 import type {
   UpscaleCredentials,
   UpscaleHandlerResult,
@@ -34,11 +35,13 @@ export async function handleImageUpscale({
   credentials,
   log,
   fetchImpl,
+  signal = null,
 }: {
   body: Record<string, unknown>;
   credentials: UpscaleCredentials | null;
   log?: UpscaleLogger;
   fetchImpl?: typeof fetch;
+  signal?: AbortSignal | null;
 }): Promise<UpscaleHandlerResult> {
   const requestedModel = typeof body.model === "string" ? body.model : "";
   const { provider, model } = parseUpscaleModel(requestedModel);
@@ -69,42 +72,39 @@ export async function handleImageUpscale({
   }
 
   const resolvedCredentials = credentials ?? {};
+  const args = {
+    model,
+    provider,
+    providerConfig,
+    body,
+    credentials: resolvedCredentials,
+    log,
+    signal,
+    ...(fetchImpl ? { fetchImpl } : {}),
+  };
+  return dispatchUpscaleFormat(providerConfig.format, args);
+}
 
-  switch (providerConfig.format) {
-    case "adobe-firefly-upscale":
-      return handleAdobeFireflyImageUpscale({
-        model,
-        provider,
-        body,
-        credentials: resolvedCredentials,
-        log,
-        ...(fetchImpl ? { fetchImpl } : {}),
-      });
-    case "stability-upscale":
-      return handleStabilityImageUpscale({
-        model,
-        provider,
-        providerConfig,
-        body,
-        credentials: resolvedCredentials,
-        log,
-        ...(fetchImpl ? { fetchImpl } : {}),
-      });
-    case "topaz-upscale":
-      return handleTopazImageUpscale({
-        model,
-        provider,
-        providerConfig,
-        body,
-        credentials: resolvedCredentials,
-        log,
-        ...(fetchImpl ? { fetchImpl } : {}),
-      });
-    default:
-      return {
-        success: false,
-        status: 400,
-        error: `Upscale is not implemented for provider format: ${providerConfig.format}`,
-      };
+function dispatchUpscaleFormat(
+  format: string,
+  args: {
+    model: string;
+    provider: string;
+    providerConfig: NonNullable<ReturnType<typeof getUpscaleProvider>>;
+    body: Record<string, unknown>;
+    credentials: UpscaleCredentials;
+    log?: UpscaleLogger;
+    signal: AbortSignal | null;
+    fetchImpl?: typeof fetch;
   }
+): Promise<UpscaleHandlerResult> {
+  if (format === "adobe-firefly-upscale") return handleAdobeFireflyImageUpscale(args);
+  if (format === "stability-upscale") return handleStabilityImageUpscale(args);
+  if (format === "topaz-upscale") return handleTopazImageUpscale(args);
+  if (format === "syntx-upscale") return handleSyntxImageUpscale(args);
+  return Promise.resolve({
+    success: false,
+    status: 400,
+    error: `Upscale is not implemented for provider format: ${format}`,
+  });
 }

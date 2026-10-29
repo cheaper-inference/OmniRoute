@@ -1,14 +1,14 @@
-import { spawn } from "child_process";
 import crypto from "crypto";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { getLookupEnv } from "@/shared/services/cliRuntime";
 import { qoderProvider } from "../config/providers/registry/qoder/index.ts";
-import { buildQoderCliNotFoundHint, resolveQoderCliInvocation } from "./qoderCliResolve";
+import { buildQoderCliNotFoundHint } from "./qoderCliResolve";
+import { isQoderAcpTransportEnabled, runQoderAcpPrompt, type QoderAcpModel } from "./qoderCliAcp";
+import { runWithQoderCliSlot, spawnQoderCli, type QoderCliRunResult } from "./qoderCliSpawn";
 export { getQoderCliCommand } from "./qoderCliResolve"; // #6263 public entry point
+export type { QoderCliRunResult } from "./qoderCliSpawn";
 
-const DEFAULT_TIMEOUT_MS = 45_000;
 const DEFAULT_MODELS_TIMEOUT_MS = 20_000;
 const QODER_DEFAULT_MODEL = "qwen3.8-max-preview";
 const QODER_MODEL_LEVELS = {
@@ -38,19 +38,11 @@ type QoderCliRunOptions = {
   timeoutMs?: number;
 };
 
-type QoderCliRunResult = {
-  ok: boolean;
-  code: number | null;
-  stdout: string;
-  stderr: string;
-  timedOut: boolean;
-  error: string | null;
-};
-
 type QoderCliFailure = {
   status: number;
   message: string;
   code: string;
+  retryAfterSeconds?: number;
 };
 
 function asRecord(value: unknown): JsonRecord {
@@ -101,135 +93,26 @@ function ensureQoderCliConfigDir(): string {
   return dir;
 }
 
-type SpawnQoderCliOptions = {
-  args: string[];
-  token?: string | null;
-  stdin?: string | null;
-  signal?: AbortSignal | null;
-  timeoutMs?: number;
-  command?: string | null;
-  cwd?: string | null;
-};
-
-/**
- * Low-level qodercli spawn. The PAT (if any) is passed via the
- * `QODER_PERSONAL_ACCESS_TOKEN` env var — the only env var the official CLI
- * honors for headless PAT auth — and the prompt is piped through stdin so no
- * untrusted value is ever interpolated into a shell command (Hard Rule #13).
- */
-async function spawnQoderCli(options: SpawnQoderCliOptions): Promise<QoderCliRunResult> {
-  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-  // #6263: resolve the real qodercli command (absolute .cmd/.exe on Windows) and
-  // whether it needs a shell, then spawn with the cliRuntime-enriched env (PATH +
-  // PATHEXT + APPDATA) so the npm `.cmd` wrapper under %APPDATA%\npm is found.
-  const { command, useShell } = await resolveQoderCliInvocation(options.command);
-  const env: NodeJS.ProcessEnv = { ...getLookupEnv() };
-  const token = String(options.token || "").trim();
-  if (token) env.QODER_PERSONAL_ACCESS_TOKEN = token;
-
-  return new Promise<QoderCliRunResult>((resolve) => {
-    let stdout = "";
-    let stderr = "";
-    let settled = false;
-    let timedOut = false;
-
-    let child: ReturnType<typeof spawn>;
-    try {
-      child = spawn(command, options.args, {
-        env,
-        cwd: options.cwd || undefined,
-        stdio: ["pipe", "pipe", "pipe"],
-        windowsHide: true,
-        ...(useShell ? { shell: true } : {}),
-      });
-    } catch (err) {
-      resolve({
-        ok: false,
-        code: null,
-        stdout: "",
-        stderr: "",
-        timedOut: false,
-        error: (err as Error).message,
-      });
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      timedOut = true;
-      try {
-        child.kill("SIGKILL");
-      } catch {
-        /* already gone */
-      }
-    }, timeoutMs);
-    timer.unref?.();
-
-    const onAbort = () => {
-      try {
-        child.kill("SIGKILL");
-      } catch {
-        /* already gone */
-      }
-    };
-    if (options.signal) {
-      if (options.signal.aborted) onAbort();
-      else options.signal.addEventListener("abort", onAbort, { once: true });
-    }
-
-    const finish = (result: QoderCliRunResult) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      options.signal?.removeEventListener?.("abort", onAbort);
-      resolve(result);
-    };
-
-    child.on("error", (err: Error) => {
-      finish({ ok: false, code: null, stdout, stderr, timedOut, error: err.message });
-    });
-    // If qodercli exits or closes stdin before we finish writing the prompt, the
-    // write/end below can emit an ASYNC EPIPE/EINVAL on the stream (not caught by
-    // the surrounding try/catch). Without a listener that becomes an unhandled
-    // 'error' event that crashes the whole process — attach no-op handlers.
-    child.stdin?.on("error", () => {});
-    child.stdout?.on("error", () => {});
-    child.stderr?.on("error", () => {});
-    // Decode with a stateful UTF-8 reader so a multi-byte character (e.g. Chinese,
-    // common in Qoder output) split across two chunks is not corrupted — Buffer
-    // per-chunk toString() would mangle the boundary bytes.
-    child.stdout?.setEncoding("utf8");
-    child.stderr?.setEncoding("utf8");
-    child.stdout?.on("data", (chunk: string) => {
-      stdout += chunk;
-    });
-    child.stderr?.on("data", (chunk: string) => {
-      stderr += chunk;
-    });
-    child.on("close", (code: number | null) => {
-      finish({
-        ok: code === 0 && !timedOut,
-        code,
-        stdout,
-        stderr,
-        timedOut,
-        error: timedOut ? "qodercli timed out" : null,
-      });
-    });
-
-    try {
-      if (options.stdin != null) child.stdin?.write(options.stdin);
-      child.stdin?.end();
-    } catch {
-      /* stdin closed early — the child will surface its own error */
-    }
-  });
-}
-
 /**
  * Run a single non-interactive chat turn through qodercli. Returns the raw
  * process result; use {@link parseQoderCliResult} to extract the reply text.
  */
 export async function runQoderCli(options: QoderCliRunOptions): Promise<QoderCliRunResult> {
+  if (isQoderAcpTransportEnabled()) {
+    const configDir = ensureQoderCliConfigDir();
+    return runWithQoderCliSlot(options.signal, () =>
+      runQoderAcpPrompt({
+        token: options.token,
+        prompt: options.prompt,
+        configDir,
+        cwd: String(options.workspace || "").trim() || configDir,
+        pickModelId: (available) => pickQoderAcpModelId(options.model, available),
+        command: options.command,
+        signal: options.signal,
+        timeoutMs: options.timeoutMs,
+      })
+    );
+  }
   const level = await resolveQoderCliModel(options.model, options.token, {
     command: options.command,
     signal: options.signal,
@@ -358,6 +241,27 @@ async function getCachedQoderCliModelNames(
     qoderModelNamesPending.set(key, pending);
   }
   return pending;
+}
+
+/**
+ * Pick the ACP `modelId` for a requested OmniRoute model: a modelId or display
+ * name match first, then the static level key. Null keeps the session default.
+ */
+export function pickQoderAcpModelId(
+  requested: string | null | undefined,
+  available: QoderAcpModel[]
+): string | null {
+  const normalized = normalizeQoderModelKey(requested);
+  if (!normalized) return null;
+  const byName = available.find(
+    (model) =>
+      normalizeQoderModelKey(model.modelId) === normalized ||
+      normalizeQoderModelKey(String(model.name || "").replace(/\(default\)/i, "")) === normalized
+  );
+  if (byName) return byName.modelId;
+  const level = mapQoderModelToLevel(requested);
+  if (!level || level === "auto") return null;
+  return available.find((model) => model.modelId.toLowerCase() === level)?.modelId ?? null;
 }
 
 /** Async resolver: matches the request against the live (cached) `--list-models`. */
@@ -702,7 +606,42 @@ export function parseQoderCliFailure(stderrText: string, stdoutText = ""): Qoder
     return { status: 504, message: combined, code: "timeout" };
   }
 
+  // Qoder answers a temporarily throttled account with a queued/busy envelope
+  // (upstream code 10605) instead of an HTTP error. Classifying it as a generic
+  // 502 upstream_error parked the connection on the long failure cooldown, so a
+  // brief upstream hiccup made whole PAT pools look dead. 503 maps to the short
+  // serviceUnavailable cooldown, which lets routing retry or fail over at once.
+  if (isQoderUpstreamBusy(combined)) {
+    return { status: 503, message: combined, code: "upstream_busy" };
+  }
+
   return { status: 502, message: combined, code: "upstream_error" };
+}
+
+/**
+ * True when a Qoder error text is the temporary queued/busy throttle (upstream
+ * code 10605) rather than an auth/quota failure. Shared by the CLI failure
+ * parser and the HTTP SSE envelope unwrapper so both classify it the same way.
+ */
+export function isQoderUpstreamBusy(text: string): boolean {
+  const normalized = String(text || "").toLowerCase();
+  return (
+    normalized.includes("10605") ||
+    normalized.includes("queued") ||
+    normalized.includes("is busy") ||
+    normalized.includes("server busy")
+  );
+}
+
+/**
+ * Extracts `retryAfterSeconds` from a (possibly multiply JSON-escaped) Qoder
+ * queue-throttle body. Returns undefined when absent or not a positive number.
+ */
+export function parseQoderRetryAfterSeconds(text: string): number | undefined {
+  const match = /retryAfterSeconds[\\"]*\s*:\s*(\d+)/.exec(String(text || ""));
+  if (!match) return undefined;
+  const seconds = Number(match[1]);
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : undefined;
 }
 
 export function createQoderErrorResponse(failure: QoderCliFailure): Response {
@@ -718,6 +657,7 @@ export function createQoderErrorResponse(failure: QoderCliFailure): Response {
       status: failure.status,
       headers: {
         "Content-Type": "application/json",
+        ...(failure.retryAfterSeconds ? { "Retry-After": String(failure.retryAfterSeconds) } : {}),
       },
     }
   );
@@ -786,6 +726,10 @@ const QODER_JOB_TOKEN_EXCHANGE_URL = "https://openapi.qoder.sh/api/v1/jobToken/e
 // Refresh a little before the ~24h expiry to avoid using a just-expired token.
 const QODER_JOB_TOKEN_DEFAULT_TTL_MS = 23 * 60 * 60 * 1000;
 const QODER_JOB_TOKEN_MIN_TTL_MS = 60 * 1000;
+// 9router#4516: never trust the upstream TTL beyond the documented ~24h job-token life.
+const QODER_JOB_TOKEN_MAX_TTL_MS = 24 * 60 * 60 * 1000;
+// An `expires_in` above this is a millisecond value (1e7 s ≈ 115 days is no sane TTL).
+const QODER_JOB_TOKEN_MS_THRESHOLD = 1e7;
 
 type QoderJobTokenCacheEntry = { jobToken: string; expiresAt: number };
 const qoderJobTokenCache = new Map<string, QoderJobTokenCacheEntry>();
@@ -824,9 +768,21 @@ export function parseQoderJobTokenResponse(json: unknown): {
   const expiresRaw = [root.expires_in, root.expiresIn, data.expires_in, data.expiresIn].find(
     (v) => typeof v === "number" && Number.isFinite(v) && (v as number) > 0
   ) as number | undefined;
-  // Qoder reports expiry in seconds; fall back to the default ~24h window.
-  const expiresInMs = expiresRaw ? expiresRaw * 1000 : QODER_JOB_TOKEN_DEFAULT_TTL_MS;
-  return { jobToken, expiresInMs: Math.max(expiresInMs, QODER_JOB_TOKEN_MIN_TTL_MS) };
+  // Unit-agnostic (9router#4516): Qoder documents seconds, but some responses carry
+  // milliseconds (86400000). Fall back to the default ~24h window when absent, and cap
+  // at 24h so a misread unit can never pin a dead token in the cache for months.
+  const expiresInMs = expiresRaw
+    ? expiresRaw > QODER_JOB_TOKEN_MS_THRESHOLD
+      ? expiresRaw
+      : expiresRaw * 1000
+    : QODER_JOB_TOKEN_DEFAULT_TTL_MS;
+  return {
+    jobToken,
+    expiresInMs: Math.min(
+      Math.max(expiresInMs, QODER_JOB_TOKEN_MIN_TTL_MS),
+      QODER_JOB_TOKEN_MAX_TTL_MS
+    ),
+  };
 }
 
 /** Exchange a `pt-*` PAT for a short-lived `jt-*` job token (no caching). */
@@ -882,6 +838,17 @@ export async function resolveQoderJobToken(
     expiresAt: now + exchanged.expiresInMs,
   });
   return exchanged.jobToken;
+}
+
+/**
+ * Drop the cached `jt-*` for a PAT after the upstream rejected it (401 / expired
+ * token), so the next resolve performs a fresh PAT→jt exchange instead of reusing a
+ * dead token until the process restarts (9router#4516). No-op for non-PAT tokens.
+ */
+export function invalidateQoderJobToken(token: string): void {
+  const trimmed = (token || "").trim();
+  if (!isQoderPatToken(trimmed)) return;
+  qoderJobTokenCache.delete(trimmed);
 }
 
 /** Test-only: clear the job-token cache so unit tests don't leak state. */
@@ -967,8 +934,13 @@ export async function validateQoderCliPat({
     };
   }
 
-  // A successful `--list-models` prints the catalog (a table headed by "MODEL").
-  if (run.ok && normalized.includes("model")) {
+  // A successful `--list-models` exits 0 and prints the catalog (a table headed
+  // by "MODEL"). Trust the exit code plus the parsed catalog instead of the
+  // literal header string: the header is not part of the CLI contract, so a
+  // table-format change, a localized header, or an alias/JSON-producing build
+  // made valid PATs fail validation while the CLI itself reported success.
+  const catalog = parseQoderCliModelNames(run.stdout);
+  if (run.ok && catalog.length > 0 && !/error|failed/i.test(normalized)) {
     return { valid: true, error: null, unsupported: false };
   }
 

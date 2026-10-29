@@ -58,6 +58,56 @@ updates:
       # on the VPS — so keep auto-bumps frozen (no update-types = ignore every version).
       # Migrate it intentionally, not via dependabot (#4050).
       - dependency-name: "@huggingface/transformers"
+      # onnxruntime-node is the OTHER HALF of the @huggingface/transformers pair frozen
+      # above: the hoisted copy must equal the exact version transformers pins, or npm
+      # nests a second ABI-incompatible native copy (contract test
+      # tests/unit/onnxruntime-single-copy.test.ts, pair established in #9962). A solo
+      # bump can never be correct — it only ever moves together with transformers, in
+      # the same deliberate migration PR. Freezing it keeps the production group PRs
+      # (e.g. #12219) from being born red on the pair contract.
+      - dependency-name: "onnxruntime-node"
+      # eslint-plugin-react-hooks is pinned to 7.0.1 by a contract test
+      # (tests/unit/eslint-react-hooks-version-pinned.test.ts) until the 7.1.1 rule set
+      # is adopted deliberately — that adoption needs a full cold lint run and its own
+      # PR (the #12146 react-hooks migration finished on 2026-09-01, so the path is
+      # open; the bump still must not ride a dependabot group, where it reds the
+      # development group PRs, e.g. #12220). Remove this ignore in the adoption PR
+      # together with the pin test.
+      - dependency-name: "eslint-plugin-react-hooks"
+      # The four entries below came out of the development group #17197 (26 updates),
+      # which could not land because these bumps break contracts or need a migration.
+      # Each one has to move in its own PR; the rest of the group stays automatic.
+      #
+      # promptfoo is an exact pin mirrored by the nightly LLM-security workflow
+      # (`npx --yes promptfoo@X.Y.Z` in nightly-llm-security.yml). The contract test
+      # tests/unit/build/llm-security-nightly-promptfoo-pin.test.ts requires the workflow
+      # pin to equal package.json and rejects releases proven broken (KNOWN_BROKEN:
+      # 0.123.1 and 0.124.1, promptfoo/promptfoo#10866 — the guard-validation step exits
+      # 100 on the guard's 4xx JSON body). Dependabot only edits package.json, so every
+      # bump reds that test. Bump by hand: package.json + workflow pin together, after
+      # re-running guard-validation against the new release.
+      - dependency-name: "promptfoo"
+      # fumadocs-mdx 15.4.7 imports `embedSource` from fumadocs-core/mdx-plugins/stringifier,
+      # which the fumadocs-core on this branch (16.15.x) does not export yet: the Build job
+      # dies loading next.config.mjs (#17197). fumadocs-core/fumadocs-ui ride the
+      # production group and fumadocs-mdx the development group, so dependabot can never
+      # move them together. Remove this ignore in the PR that bumps fumadocs-core,
+      # fumadocs-ui and fumadocs-mdx as one set.
+      - dependency-name: "fumadocs-mdx"
+        versions: [">=15.4.7"]
+      # @playwright/test must equal the runtime `playwright` / `playwright-core` exact pin
+      # (one Playwright in the tree — tests/unit/playwright-runner-args.test.ts). The
+      # runtime pair is a production dependency and @playwright/test a development one,
+      # so a solo bump from the development group always breaks that contract. Bump it by
+      # hand in the same PR that moves playwright and playwright-core.
+      - dependency-name: "@playwright/test"
+      # bun is an exact devDependency pin documented in AGENTS.md (Environment) and
+      # docs/ops/BUILD_WARNINGS.md: it runs only allow-listed gate/generator scripts, and
+      # any new Bun version must be validated byte-identical against the
+      # `node --import tsx` output first. @types/bun is its paired type package and moves
+      # with it. Bump both by hand, together with the docs that name the version.
+      - dependency-name: "bun"
+      - dependency-name: "@types/bun"
 
   - package-ecosystem: "github-actions"
     directory: "/"
