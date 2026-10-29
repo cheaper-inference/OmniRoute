@@ -4,228 +4,146 @@
 
 ---
 
-> **Status:** referensi — standardisasi yang dijelaskan di sini telah **diimplementasikan** (fase 1–6: wallpaper grid, primitive, sentralisasi warna status, token mono, migrasi token DataTable, focus-ring → accent, primitive Checkbox/Textarea, `cn()` → tailwind-merge, grid pada setiap layar mandiri, shell konten 4K yang fleksibel, permukaan tabel data opak). Dokumen ini merupakan deskripsi kanonis mengenai token desain, komponen, dan konvensi dashboard; pembagian fase di bawah ini dipertahankan sebagai landasan bagi setiap keputusan.
-> **Cakupan:** dashboard OmniRoute (`src/`) dan situs pemasaran (`_mono_repo/omnirouteSite/`) memiliki **satu identitas visual** — latar belakang grid seperti kertas grafik yang sama (32px), token warna yang sama, serta komponen yang distandardisasi.
->
-> Catatan praktis untuk pengelola:
->
-> - Beberapa nilai hex hardcode yang tersisa memang **disengaja** (terminal konsol yang selalu gelap, stroke SVG ReactFlow) dan **TIDAK** boleh dipindahkan ke token secara menyeluruh.
-> - Grid yang "lebih besar" pada instans yang sedang berjalan menandakan build usang, bukan masalah kode — ukuran grid adalah 32px, identik dengan situs.
-> - Nilai `--table-*` tema gelap identik byte demi byte dengan rgba hardcode sebelum migrasi; tema terang telah diperbaiki (sebelumnya bermasalah karena selalu gelap akibat fallback `var()` yang tidak pernah digunakan).
+> **Status:** dasbor dibangun di atas** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), dijual sebagai ruang kerja `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream disematkan di `packages/ui-kit/UPSTREAM.md` dan dijaga oleh `npm run check:ui-kit-snapshot`). Terang adalah tema kanonik; preferensi defaultnya adalah `system`. Aksennya adalah kapur keak (`--ci-color-accent`). Switzer adalah keluarga tunggal untuk UI, tampilan dan teks kode (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` memutuskan untuk itu), dihosting sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimpor oleh `ci-tokens.css`). Setiap ikon adalah mesin terbang Lucide.
 
----
+## 1. Di mana semuanya berada
 
-## 1. Tujuan
+- **Kit.** `packages/ui-kit/src` adalah salinan byte-for-byte dari `src/` upstream pada commit yang disematkan di
+  `packages/ui-kit/UPSTREAM.md` (yang juga mencatat otorisasi lisensi); `PATCHES.md` mencantumkan patch
+  lokal (tidak ada). Kit ini dikonsumsi sebagai source, tanpa build: `next.config.mjs` mentranspilasinya, dan
+  `tsconfig.json` memetakan `@omniroute/ui-kit` → `packages/ui-kit/src` dan `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (`vitest.config.ts` dan `vitest.mcp.config.ts` membawa alias yang sama). Impor
+  komponen kit melalui subpath-nya (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), jangan pernah
+  melalui barrel `@omniroute/ui-kit`: barrel menarik setiap komponen (termasuk date picker)
+  ke setiap pengimpor. Stylesheet kit masuk melalui `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Tokens.** `packages/ui-kit/src/ci-tokens.css` mendeklarasikan token `--ci-*`; `src/app/globals.css`
+  menjembatani mereka ke nama OmniRoute lawas (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), sehingga pembacaan `var(--color-*)` yang ada dan utility
+  Tailwind tetap berfungsi. Kode baru menggunakan utility Tailwind (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) atau kelas kit — tidak pernah nilai hex
+  (`tests/unit/design-kit-bridge.test.ts` menegakkan bridge tersebut). `text-primary` meresolusi ke
+  `--color-primary-ink` melalui `--text-color-primary` (lime-800 di mode light, aksen lime di mode dark), sehingga
+  teks primary tetap terbaca sementara `bg-primary`/`border-primary` mempertahankan surface lime. Seri chart menggunakan
+  `--color-chart-1` … `--color-chart-5`.
+- **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) mengikutsertakan dokumen ke dalam tema kit.
+  Preferensinya adalah `light`, `dark` atau `system` (`THEME_CONFIG.defaultTheme = "system"` di
+  `src/shared/constants/appConfig.ts`; `system` mengikuti `prefers-color-scheme`). `applyTheme()` di
+  `src/store/themeStore.ts` (dicerminkan oleh skrip bootstrap inline di `src/app/layout.tsx`, yang berjalan
+  sebelum hydration) mengatur `data-theme="dark"|"light"` dan mengaktifkan/menonaktifkan kelas `.dark` pada `<html>` secara bersamaan.
+  Set token dark kit dikunci pada `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
+  override dark milik OmniRoute sendiri (blok `.dark` di `globals.css`) dan utility Tailwind lawas `dark:`
+  dikunci pada kelas `.dark`. Tidak ada preset warna aksen: aksen selalu berasal dari
+  kit, dan preset yang tersimpan dari build lama dibuang saat store dimuat.
+- **Komponen (adapter).** `src/shared/components/index.tsx` mempertahankan API komponen OmniRoute (nama
+  yang sama, default export, dan props), dan primitif di belakangnya adalah adapter di atas kit: form
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlay dan feedback
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  struktur (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) dan tabel
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Sebuah adapter mengimpor
+  komponen kit melalui subpath dan memetakan props lawas ke komponen tersebut — misalnya `Button variant="primary"` adalah
+  tombol `default` kit (`--ci-button-primary-*`: surface terbalik di mode light, aksen dengan ink
+  `--ci-color-accent-foreground`-nya di mode dark), `danger` adalah `destructive`, dan `warning` adalah `outline` ditambah
+  ekstensi `.ci-button--warning`. Aturan `.ci-button--warning` dan `.ci-badge[data-tone]` di
+  akhir `globals.css` (`@layer components`) adalah ekstensi OmniRoute di atas kelas kit.
+  `tests/unit/ui/adapters/*.test.tsx` menyematkan setiap adapter.
+- **Shell.** `src/app/(dashboard)/layout.tsx` me-render `DashboardLayout`, yang me-render
+  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` /
+  `SidebarInset` kit (`packages/ui-kit/src/sidebar.tsx`), dengan logika navigasi OmniRoute di
+  `src/shared/components/Sidebar.tsx`. Tautan "skip to content" ke `#main-content` adalah elemen
+  pertama yang dapat difokuskan. `src/shared/components/Header.tsx` memegang `SidebarTrigger` kit (satu-satunya
+  toggle sidebar milik shell), `ProductSwitcher` Keak, dan pembuka command palette; ia menampilkan judul rute hanya selama
+  tidak ada `PageHeader` kit (`.ci-page-header`) yang ter-mount di dalam `#main-content`, sehingga halaman dengan
+  `PageHeader`-nya sendiri memiliki satu `h1`. `src/shared/components/CommandPalette.tsx` adalah `Dialog` kit.
+- **Ikon.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) meresolusi nama (kosakata
+  Material Symbols yang digunakan layar) melalui `ICON_MAP` (`src/shared/constants/iconMap.ts`) ke
+  glyph Lucide. Font dan paket Material Symbols sudah tidak ada: nama yang tidak ada di map me-render
+  glyph placeholder netral (`data-icon-missing="true"`) dan mencatat peringatan konsol di luar produksi.
+  `npm run gen:icon-map` mencetak nama-nama yang digunakan tetapi tidak ada di map
+  (`tests/unit/icon-map-coverage.test.ts` gagal pada nama apa pun tanpa ikon Lucide;
+  `tests/unit/icon-map-object-values.test.ts` mencakup nama yang disimpan dalam objek lookup);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` menulis ulang span literal
+  `<span className="material-symbols-outlined">` menjadi `<Icon>`.
+- **Brand.** `src/shared/components/OmniRouteLogo.tsx` membungkus kit: default export `OmniRouteLogo`
+  me-render `ProductIcon product="omniroute" variant="glyph"` (SVG inline, aman terhadap `basePath`) dan
+  `OmniRouteLockup` me-render `ProductLockup product="omniroute"` (nama aksesibel "Keak OmniRoute") atau, untuk
+  operator white-label, `name`/`logoSrc` mereka sendiri. Tujuan product-switcher berada di
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Layar-layar
+  standalone — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` dan `src/shared/components/ErrorPageScaffold.tsx`
+  — menampilkan lockup; `tests/unit/brand-pages-static.test.ts` menjaganya.
 
-Situs pemasaran (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) dan dashboard produk harus terlihat seperti **satu produk**. Situs tersebut telah mengadopsi palet dari dashboard — bahkan `css/tokens.css` menyatakan _"Palet mencerminkan dashboard OmniRoute (src/app/globals.css)"_. Jadi, keduanya sudah sekitar 80% selaras pada tingkat warna. Hal-hal yang masih belum tersedia pada dashboard:
+## 2. Aturan
 
-1. **Wallpaper grid seperti kertas grafik** yang digunakan situs pada setiap halaman.
-2. Sejumlah **token desain bersama** yang tersedia di situs tetapi belum dimiliki dashboard (skala radius, gradien merek, `surface-2`, font mono).
-3. **Konsistensi pada tingkat komponen** — sejumlah komponen dashboard mengabaikan token tema dengan menggunakan nilai hex/rgba hardcode.
+1. Token, tidak pernah literal. Pengecualian sengaja dibuat: terminal konsol yang selalu gelap dan `STATUS_HEX` (`src/shared/constants/statusColors.ts`), cermin hex terselesaikan dari palet status kit untuk pemanggil yang memerlukan hex literal. Palet kategoris tidak terkecuali lagi: mereka menggunakan lima token grafik kit (`--color-chart-1..5`) melalui `src/shared/utils/categoricalPalette.ts` dan, untuk strategi perutean, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edge dan kanvas orkestrasi membaca variabel `--orch-status-*` yang sadar tema (`src/shared/components/flow/edgeStyles.ts`).
+2. Jangan pernah menambal `packages/ui-kit/src` dengan tangan: sinkronkan dengan `scripts/dev/sync-ui-kit.sh <commit>`; gerbang pra-komit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) gagal pada byte apa pun yang berbeda dari komit upstream yang disematkan (dilompati dengan peringatan ketika klon upstream, `UI_KIT_CLONE` atau `_references/cheaper-inference-ui-kit`, tidak ada). Jika kit kekurangan sesuatu, selesaikan hal tersebut di adaptor atau layar dan mintalah di bagian hulu.
+3. Default teks kit adalah bahasa Inggris (`label = "Loading"`, `loadingLabel = "Loading table"`…) — meneruskan string yang diterjemahkan dari `useTranslations(...)` setiap kali komponen kit merender teks.
+4. Utilitas tailwind memenangkan kelas komponen kit (kit menyatakan `@layer theme, base, components, utilities` dan aturannya ada di `components`) — gunakan utilitas untuk spasi dan tata letak, bukan untuk mewarnai ulang komponen kit.
+5. Judul: `.ci-heading` untuk judul halaman dan bagian; `.ci-dashboard-display` hanya untuk teks tampilan yang besar dan jarang seperti kode status halaman kesalahan. Keduanya menggunakan Swisser.
+6. `tests/unit/dashboard-kit-sweep.test.ts` menjaga adopsi kit: tidak ada rentang pengikat Material di bawah `src/app` atau `src/shared/components`; di pohon dasbor (`src/app/(dashboard)` dan `src/shared/components`) tidak ada `<select>`, `<textarea>` atau `<table>` mentah dan tidak ada `role="dialog"` linting tangan di luar pengecualian yang terdaftar (cabang asli adaptor `Select`, `RequestLoggerDetail`); setiap `<button>` atau `<input>` mentah perlu komentar yang berisi `kit-exception:` (beserta alasannya) berakhiran paling banyak 3 baris di atasnya; warna palet dan varian `dark:` hanya di file daftar pengujian.
+7. Verifikasi tema dan area pandang 390 px sebelum PR (tangkapan layar); `tests/e2e/a11y.spec.ts` menjalankan kapak.
 
-Dokumen ini berisi analisis dan rencana implementasinya.
+## 3. Menambahkan layar
 
----
+1. Mulai halaman dengan `PageHeader` kit (`@omniroute/ui-kit/page-header`, `compact` di dalam
+   dashboard) — judul, deskripsi, dan `actions`. Header shell kemudian menghilangkan judulnya sendiri.
+2. Bangun kontrol dari `@/shared/components` (para adapter) dan gunakan komponen kit lewat subpath jika
+   belum ada adapter (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`,
+   `RadioGroup`, `Slider`…).
+3. Ikon: `<Icon name="…" />`. Nama baru dimasukkan ke `ICON_MAP` dengan komponen Lucide yang cocok
+   secara semantik; `npm run gen:icon-map` mencantumkan nama yang masih belum ada.
+4. Warna: utilitas semantik (`text-success`, `bg-warning-bg`, `border-border`…) dan
+   `var(--color-chart-N)` untuk seri chart; tanpa nilai hex dan tanpa varian `dark:` yang sekadar
+   mengulang warna.
+5. Teks: setiap string, termasuk label yang Anda berikan ke komponen kit, berasal dari
+   `useTranslations`. Kunci baru masuk ke `src/i18n/messages/en.json`, `pt-BR.json` dan `vi.json` (tes
+   paritas bahasa Vietnam mengunci setiap kunci bahasa Inggris); locale lainnya diisi oleh sinkronisasi
+   i18n.
+6. Jalankan semua penjaga sebelum PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (satu-satunya pemeriksaan yang mendeteksi import ganda di
+   `iconMap.ts`), `npm run check:ui-icu`, dan tes milik layar itu sendiri.
 
-## 2. Prinsip
+## 4. Menambahkan atau mengubah adapter
 
-- **Sumber kebenaran tunggal = `src/app/globals.css`.** Situs mencerminkan dashboard, bukan sebaliknya. Token baru harus ditambahkan ke `globals.css` terlebih dahulu.
-- **Gunakan token, bukan literal.** Komponen menggunakan token semantik (`bg-surface`, `text-primary`, `border-border`), bukan nilai mentah `#hex`.
-- **Halus, bukan mencolok.** Grid merupakan wallpaper samar yang berada di belakang konten — grid tidak boleh mengurangi kontras teks atau mengganggu antarmuka.
-- **Peka terhadap tema.** Semuanya berfungsi baik dalam `.dark` (tampilan khas produk) maupun tema terang.
-- **Peluncuran bertahap dan terarah.** Rilis grid + token terlebih dahulu (risiko rendah, visibilitas tinggi), lalu lakukan pembersihan komponen secara bertahap.
+1. Pertahankan API publik `src/shared/components/index.tsx`: nama ekspor yang sama, ekspor default, dan
+   props yang diterima. Petakan props lawas ke kit di dalam adapter (lihat `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. Impor kit melalui subpath (`@omniroute/ui-kit/<component>`).
+3. Workaround untuk celah kit berada di adapter (atau di `globals.css` `@layer components` ketika
+   perbaikannya berupa style), tidak pernah di `packages/ui-kit/src`.
+4. Tambahkan atau perbarui `tests/unit/ui/adapters/<name>.test.tsx`. Untuk adapter dengan banyak pemanggil,
+   bandingkan markup yang dirender sebelum dan sesudah perubahan — perubahan padding atau wrapper menyebar
+   ke setiap layar.
 
----
+## 5. Memperbarui kit
 
-## 3. Kondisi saat ini — apa yang sudah selaras dan apa yang belum
+`npm run check:ui-kit-upstream` membandingkan versi yang disematkan di `packages/ui-kit/UPSTREAM.md` dengan tag `v*` terbaru dari repo upstream dan mencetak perintah sinkronisasi ketika rilis keluar. Alur kerja `UI Kit upstream watch` mingguan (`.github/workflows/ui-kit-upstream-watch.yml`) menjalankan pemeriksaan yang sama dan membiarkan satu masalah pelacakan tetap terbuka saat pin berada di belakang; repo upstream bersifat pribadi, sehingga alur kerja memerlukan token baca-saja dalam rahasia `UI_KIT_READ_TOKEN` dan tetap inert tanpanya.
 
-### 3.1 Warna — sudah terpadu ✅
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` menyalin `src/` upstream pada commit tersebut (`latest` = tag `v*` terbaru) ke `packages/ui-kit/src`, menerapkan transformasi tunggal yang diizinkan (ini menghilangkan akhiran `.js` dari impor relatif), dan menyetel versi ruang kerja di `packages/ui-kit/package.json` dan `package-lock.json` ke versi upstream. Kemudian: tinjau `git diff packages/ui-kit`, lakukan penyampaian visual pada penyedia, pengaturan, kombo, penggunaan dan titik akhir di kedua tema, jalankan `npm run check:ui-kit-snapshot` dan `npm run test:vitest:ui`, dan buka PR dengan log perubahan upstream.
 
-Setiap warna merek dan permukaan sudah cocok dengan situs **berdasarkan nilainya** (hanya namanya yang berbeda — dashboard menggunakan prefiks `--color-`). Telah diverifikasi dalam `src/app/globals.css:30-128`:
+## 6. diagram README
 
-| Konsep                          | Token situs (`tokens.css`)                  | Token dashboard (`globals.css`) | Kecocokan         |
-| ------------------------------- | ------------------------------------------- | ------------------------------- | ----------------- |
-| primer                          | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅                |
-| primer-hover                    | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅                |
-| aksen                           | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅                |
-| aksen-2                         | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅ (diganti nama) |
-| aksen-3                         | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅ (diganti nama) |
-| berhasil / peringatan / galat   | `#22c55e / #f59e0b / #ef4444`               | identik                         | ✅                |
-| lampu lalu lintas               | `#ff5f56 / #ffbd2e / #27c93f`               | identik                         | ✅                |
-| latar / permukaan / batas gelap | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | identik                         | ✅                |
-| latar / permukaan / teks terang | `#f9f9fb / #fff / #1a1a2e`                  | identik                         | ✅                |
+Dua belas diagram yang disematkan oleh root `README.md` (`docs/diagrams/*.svg`) adalah kit yang diterapkan pada gambar statis, dan diagram tersebut dihasilkan, bukan digambar dengan tangan: 13 file generator di `scripts/docs/gen-readme-*.mjs` (dua belas diagram ditambah driver `gen-readme-diagrams.mjs` ) dan 12 tes staleness di `tests/unit/docs/readme-*-svg.test.ts`, satu per diagram, setiap byte membandingkan file yang dikomit dengan output generatornya (pekerjaan `test-unit`).
 
-**Kesimpulan:** tidak ada migrasi warna yang perlu dilakukan. Identitasnya sudah digunakan bersama; kita sedang _menyempurnakannya_, bukan membangunnya kembali.
+- **Token.** `scripts/docs/readme-diagram-theme.mjs` menyalin palet dari `packages/ui-kit/src/ci-tokens.css` (disematkan pada file itu oleh `tests/unit/docs/readme-diagram-theme.test.ts`) dan mendefinisikan peran teks pada wajah kit sebelumnya — Instrumen Serif untuk tampilan, Inter untuk teks UI, IBM Plex Mono untuk gambar dan kode — dari paket `@fontsource` (dasbornya sendiri menggunakan Switzer kit sejak kit 0.0.66). Nilai terang berada di `:root`, nilai gelap di belakang `prefers-color-scheme: dark`, di dalam file, sehingga setiap gambar mengikuti skema pemirsa di GitHub.
+- **font.** `scripts/docs/readme-fonts.mjs` mengelompokkan file woff2 tersebut ke mesin terbang yang digambar setiap diagram dan menyematkannya sebagai `@font-face` `data:` URIs — satu-satunya cara tipografi kit mencapai gambar README, karena GitHub Markdown tidak membawa CSS dan proxy kamuflase memblokir setiap pengambilan eksternal. Subsetnya hanya dalam bahasa Latin; mesin terbang simbol yang kembali ke tumpukan sistem diperbolehkan satu per satu di `SYMBOL_FALLBACKS`, dan lemparan mesin terbang lain yang tidak tertutup.
+- **Diperbarui.** `npm run docs:readme-diagrams` menulis ulang kedua belas dalam urutan README dan mencetak satu baris per file dengan ukurannya. Generator tunggal juga berjalan sendiri (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` membutuhkan `node --import tsx/esm` karena angkanya berasal dari pemuat katalog langsung di `open-sse/config/freeModelCatalog.ts`; CI konsekuensi dari perubahan katalog ada di `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Komit generator dan SVG bersama-sama.
+- **Bukti.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` merender file dengan cara GitHub menyajikannya (tag `<img>`, `Content-Security-Policy` camo, `image/svg+xml`), menangkap bingkai terang dan gelap dan melaporkan permintaan font eksternal yang dibuat halaman (harus 0).
+- **Anggaran.** Di bawah 200 KB per file (setiap tes staleness menyatakannya); 500 KB adalah batasan maksimum untuk gambar README apa pun (aturan validator studio SVG ).
+- **Salinan tidak berubah, dihitung dari gerbang.** Perubahan merek tersebut mengubah jenis dan palet, bukan kata-kata: setiap generator membawa salinan diagramnya dalam konstanta `*_COPY` (atau membuatnya dari katalog langsung) yang merupakan teks yang digambar dan masukan subset font. Angka kanonik tetap berada di node `<text>`, dibaca oleh `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); pengujian staleness diagram yang dibaca gerbang juga menjalankan validatornya pada file yang dihasilkan, sehingga gambar yang menyimpang dari kode gagal dalam pengujian - perbaiki sumber yang dibaca gerbang, bukan nomor di generator.
 
-### 3.2 Kesenjangan — hal-hal yang belum tersedia pada dashboard
+## 7. Indeks referensi
 
-| Kesenjangan              | Yang dimiliki situs                                                              | Dashboard                                                         | Tindakan                  |
-| ------------------------ | -------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------- |
-| **Wallpaper grid**       | kertas grafik `body::before`, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ ditambahkan (Fase 1)**                                       | **Bagian A**              |
-| **Skala radius**         | `--radius 14px`, `--radius-sm 9px`                                               | `--radius 14px` ditambahkan; `-sm` + pengalihan komponen tertunda | **Bagian B / Fase 2**     |
-| **Gradien merek**        | `--grad-brand 135deg primary→accent-3`                                           | **✅ token ditambahkan (Fase 1)**; digunakan pada Fase 2          | **Bagian B**              |
-| **Permukaan bersarang**  | `--surface-2 #1c2230`                                                            | **✅ ditambahkan (Fase 1)**                                       | **Bagian B**              |
-| **Font mono**            | `--font-mono` (tumpukan ui-monospace)                                            | tertunda (Fase 4, bersama penggunaannya)                          | **Bagian B**              |
-| **`text-muted` (gelap)** | `#8b8b9e`                                                                        | `#a1a1aa` (zinc-400)                                              | selaraskan — **Bagian B** |
-
-### 3.3 Mekanisme tema (agar tidak merusak apa pun)
-
-- **Tailwind v4, berbasis CSS** (tanpa `tailwind.config.*`). Token didefinisikan dalam `:root`/`.dark` dan diekspos ke utilitas melalui `@theme inline` (`globals.css:130-179`).
-- **Mode gelap melalui class `.dark`** pada `<html>` (`@custom-variant dark` di `globals.css:22`), dialihkan oleh store Zustand khusus (`src/store/themeStore.ts`), tema default = `system` (`src/shared/constants/appConfig.ts:11`). Situs menggunakan `html[data-theme="light"]` sebagai gantinya — **mekanismenya berbeda tetapi tidak pernah berinteraksi** (origin terpisah), sehingga tidak ada konflik. Kita mempertahankan mekanisme `.dark` milik dashboard.
-- **Override primary saat runtime** tersedia (`themeStore.ts:85-97`, preset di `COLOR_THEMES`) — pengguna dapat mengganti `--color-primary`. Setiap token baru (gradien, dll.) yang mereferensikan `--color-primary` akan otomatis mewarisi override tersebut. ✅
-- **Nama radius khusus Tailwind v4:** `--radius-sm/md/lg/...` mendasari utilitas `rounded-*`. Mendefinisikan ulang nilai tersebut secara retroaktif akan mengubah setiap `rounded-*` yang sudah ada (misalnya, `rounded-sm` digunakan dalam 12 file). Karena itu, nilai radius kecil dan pengalihan komponen sengaja ditunda hingga Fase 2, saat komponen yang menggunakannya diubah bersamaan.
-
----
-
-## 4. Bagian A — Latar belakang kisi kertas grafik (permintaan utama) — DIIMPLEMENTASIKAN (Fase 1)
-
-### 4.1 Apa itu
-
-Resep yang sama persis dari situs (`_mono_repo/omnirouteSite/css/base.css`): sebuah **pseudo-element tetap berukuran satu viewport penuh** yang menggambar dua gradien garis 1px, ditempatkan pada `z-index:-1` di belakang seluruh konten.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Mengapa ini berfungsi meskipun `body` memiliki `background-color` yang opak:** sebuah `::before` dengan `z-index:-1` digambar _di atas_ latar belakang elemen itu sendiri, tetapi _di bawah_ konten dalam alurnya. Jadi, `--color-bg` menjadi warna isian dasar, kisi dilapiskan di atasnya, dan aplikasi dirender di atas kisi.
-
-### 4.2 Preseden yang sudah ada di basis kode
-
-`src/app/landing/page.tsx:16-26` **sudah mengimplementasikan kisi yang sama ini untuk tiap halaman** — tetapi dengan garis **merah** (`#E54D5E`, opasitas `0.06`) berukuran **50px**, ditambah orb animasi. Jadi, pola ini telah terbukti dalam produk; pekerjaan ini menjadikannya wallpaper **global yang menyesuaikan tema**.
-
-### 4.3 Token yang ditambahkan (di `globals.css`)
-
-```css
-:root {
-  /* terang — opasitas kisi dinaikkan dari 0.045 milik situs agar wallpaper
-     benar-benar terlihat pada dasbor yang padat (kartu/chrome menutupi sebagian besar viewport) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* gelap — dinaikkan dari 0.035 untuk alasan yang sama */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Satu-satunya penghambat — dihapus
-
-Kisi bersifat global berdasarkan konstruksinya (mencakup panel, `auth`/`login`, halaman galat — seluruh rute — sekaligus). Tepat **satu** elemen menyembunyikannya di dalam panel:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — pembungkus terluar menggambar `bg-bg` yang opak. Semua elemen di bawahnya sudah transparan (`<main>`, kontainer gulir, bagian dalam `max-w-7xl`), sehingga **menghapus `bg-bg`** memungkinkan kisi pada body terlihat melalui area konten (`--color-bg` milik body tetap menjadi warna isian dasar).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Interaksi chrome (bilah samping / header)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) dan `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) tetap **opak** → kisi hanya terlihat di **area konten**, dengan chrome solid yang membingkainya. Tampilan default yang tenang, sesuai dengan cara situs memisahkan chrome dari kanvas (keputusan D3 = solid).
-
-### 4.6 Halaman login / autentikasi / galat
-
-Halaman-halaman ini dirender langsung di bawah `<body>` (tanpa chrome panel), sehingga kisi global seharusnya muncul di belakangnya secara otomatis. **Fase 5 — SELESAI:** pembungkus layar penuh mandiri tersebut ternyata opak (`min-h-screen … bg-bg`, dengan `bg-bg` berupa warna isian solid yang sama seperti `<body>`), sehingga menyembunyikan kisi pada setiap layar non-dasbor — bukan hanya login. Semuanya kini transparan agar wallpaper bersama terlihat: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding`, dan `ErrorPageScaffold` (mencakup `400`/`401`). Ini menuntaskan **D4** (diperluas dari hanya login menjadi setiap layar mandiri). Dijaga oleh `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Halaman landing
-
-`landing/page.tsx` mempertahankan latar belakang animasinya yang lebih kaya (orb + vignette) — splash pemasarannya sendiri (keputusan D5 = biarkan apa adanya).
-
----
-
-## 5. Bagian B — Penyatuan token
-
-Fase 1 menambahkan token identitas yang inert dan bebas konflik (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Fase 2 menghubungkan skala radius ke Tailwind dan mengarahkan ulang komponen; Fase 4 menambahkan `--font-mono` beserta komponen yang menggunakannya.
-
-| Token                       | Alasan                                                             | Fase                                   |
-| --------------------------- | ------------------------------------------------------------------ | -------------------------------------- |
-| `--radius` / `--radius-sm`  | Satu skala radius (14/9), bukan nilai ad-hoc 6/8/12                | 1 (nilai) / 2 (hubungkan + arah ulang) |
-| `--grad-brand`              | Gradien merek untuk CTA utama (merah→violet), selaras dengan situs | 1 (token) / 2 (Button)                 |
-| `--surface-2`               | Panel bersarang / header tabel / baris inset                       | 1                                      |
-| `--font-mono`               | Blok kode, terminal, ID, endpoint                                  | 4                                      |
-| Penyelarasan `--text-muted` | Pilih satu nilai antara situs↔panel (`#a1a1aa` direkomendasikan)   | 2                                      |
-
-**D2 (text-muted):** situs `#8b8b9e` vs dasbor `#a1a1aa`. Disarankan untuk mempertahankan **`#a1a1aa` milik dasbor** dan memperbarui _situs_ agar sesuai. Bersifat kosmetik.
-
----
-
-## 6. Bagian C — Standardisasi komponen (Fase 2–4)
-
-Komponen kustom (tanpa shadcn/Radix), Tailwind v4, token semantik **sebagian besar** telah diadopsi (195 file mengimpor barrel bersama). Pekerjaannya adalah menghapus **jalur pintas**. Lokasi utama: `src/shared/components/`.
-
-| #   | Item                                   | File                                                                                                                    | Masalah → Target                                                                                                                                    | Fase |
-| --- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| C1  | **Penyelarasan radius**                | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                               | campuran 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                                 | 2    |
-| C2  | **Gradien tombol + varian `accent`**   | `Button.tsx:5-12`                                                                                                       | primer berupa merah→merah datar; selaraskan dengan `--grad-brand`; tambahkan varian `accent` yang belum ada. ~195 pengimpor — visibilitas tertinggi | 2    |
-| C3  | **Tabel**                              | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                     | 100% inline dengan rgba yang di-hardcode + variabel yang tidak ada; migrasikan ke token, hentikan gaya yang menyimpang                              | 3    |
-| C4  | **Sentralisasi warna status**          | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 helper | 6+ salinan hex yang sama → satu modul berbasis `--color-success/warning/error`                                                                      | 3    |
-| C5  | **Border Card**                        | `Card.tsx:39`                                                                                                           | `border-white/5` → merek `/8`                                                                                                                       | 2    |
-| C6  | **Penyelarasan focus ring** ✅ SELESAI | `globals.css` `--focus-ring` (accent) vs `ring-primary/30` milik kontrol formulir                                       | disatukan ke **accent (violet)** agar sesuai dengan ring global + membedakannya dari ring error merah; error tetap merah                            | 4    |
-| C7  | **Tambahkan `Checkbox` + `Textarea`**  | `<input>`/`<textarea>` mentah dengan `accentColor:#6366f1` inline                                                       | primitive berbasis token                                                                                                                            | 4    |
-| C8  | **Penyisiran hex yang di-hardcode**    | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, titik-titik Modal, ~14 file chart                                | literal → token                                                                                                                                     | 4    |
-| C9  | **`cn()` → clsx + tailwind-merge**     | `src/shared/utils/cn.ts`                                                                                                | class yang berkonflik menumpuk; diperlukan untuk override C1                                                                                        | 2    |
-
-**Sudah sesuai merek (berbasis token, hanya memerlukan radius):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Rencana peluncuran
-
-- **Fase 1 — Grid + token identitas (PR INI).** Grid `globals.css` + token `--surface-2`/`--grad-brand`/`--radius`; wallpaper `body::before`; hapus penghalang `bg-bg`; pengujian guard statis. Risiko rendah, dapat dibatalkan dalam satu commit.
-- **Fase 2 — Primitif (C1, C2, C5) — SELESAI dalam PR ini.** Utilitas radius semantik `rounded-card` (14px) / `rounded-control` (9px) ditambahkan melalui `@theme` (nama khusus, sehingga `rounded-sm/md/lg/xl` bawaan tetap tidak tersentuh — tidak berdampak sekaligus pada 400 file); Card/Modal → 14px, Button/Input/Select → 9px; Button utama → `--grad-brand` (merah→violet) + varian `accent` baru; border Card → token `border-border` (0.08). **Ditunda:** `cn()`→tailwind-merge (C9) memerlukan dependensi baru; penyisiran `rounded-lg` ad hoc (326 file) dibiarkan apa adanya karena komponen primitif mencakup sebagian besar permukaan.
-- **Fase 3 — Warna status + tabel (C3, C4) — SELESAI dalam PR ini.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` sebagai sumber tunggal; `flow/edgeStyles.ts` + `TokenHealthBadge` diarahkan ulang, tetap akurat/hex yang sama). ✅ Token **`--font-mono`**. ✅ **C3 (DataTable)** — mengganti setiap rgba inline + fallback mati `var(--bg-table-header)` / `var(--text-secondary)` dengan rangkaian token `--table-*` (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`) yang **nilai mode gelapnya sama persis dengan rgba hardcoded lama** (byte-identik dalam mode gelap) dan nilai mode terangnya memperbaiki tema terang yang sebelumnya selalu gelap. Border header → `--color-border`, teks sekunder → `--color-text-muted`. **Memerlukan pemeriksaan visual sebelum digabungkan.** (Tidak disentuh: `logTableStyles.ts` dan aturan Ant `.ant-table` lama — terpisah, prioritas lebih rendah.)
-- **Fase 4 — Pembersihan (C6, C7, C9 selesai; C8 tertunda).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge ditambahkan sebagai dependensi) — `className` milik pemanggil kini dengan benar _menggantikan_ class primitif yang berkonflik, alih-alih menumpuknya. ✅ **C7** primitif `Checkbox` + `Textarea` baru (berbasis token, diekspor dari barrel; bersifat aditif — adopsi 32 checkbox mentah / 41 textarea mentah dapat dilakukan secara bertahap). ✅ **C6** penyelarasan focus-ring — kontrol formulir (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) kini saat fokus menggunakan ring **accent (violet)** agar sesuai dengan `--focus-ring` global dan tidak lagi berbenturan dengan ring kesalahan berwarna merah; status kesalahan merah tidak berubah. ⏳ **Penyisiran hex C8 BUKAN find/replace membabi buta** — pelanggar terkonfirmasi yang memang _disengaja_ dan harus dipertahankan: `ConsoleLogViewer.tsx:240` (terminal selalu gelap), popover `TokenHealthBadge`, stroke SVG ReactFlow. Hanya migrasikan hex yang memang dimaksudkan agar peka terhadap tema.
-
-Setiap fase: `npm run lint` + `npm run typecheck:core` + pemeriksaan visual.
-
----
-
-## 8. Keputusan terbuka (rekomendasi)
-
-- **D1 — Button utama:** pertahankan merah→merah atau beralih ke **merah→violet `--grad-brand`**? Rekomendasi: **merah→violet** (Fase 2).
-- **D2 — Warna garis grid:** **netral** (gaya situs) — dipilih — vs merah merek. Ukuran **32px** (diperkecil ~30% dari ukuran awal 46px berdasarkan masukan pemilik — sel 46px terlihat terlalu besar pada tata letak dashboard).
-- **D3 — Vibransi chrome:** sidebar/header **solid** — dipilih.
-- **D4 — Grid autentikasi/login:** ✅ **SELESAI (Fase 5)** — `bg-bg` buram dihapus dari setiap wrapper layar penuh mandiri (bukan hanya login), sehingga grid terlihat di semua layar. Lihat §4.6.
-- **D5 — Halaman landing:** biarkan splash animasi apa adanya. Dipilih.
-- **D6 — Radius 14/9 di seluruh produk:** Rekomendasi: ya (Fase 2).
-- **D7 — Fase 1 dirilis terlebih dahulu:** Dipilih.
-- **D8 — Lebar tata letak (Fase 5):** shell konten dashboard sebelumnya dibatasi pada `max-w-7xl` (1280px), membuatnya berada di tengah dengan gutter samping kosong yang lebar pada monitor besar. ✅ **SELESAI** — dinaikkan menjadi `max-w-[3840px]` yang fluid (4K sesungguhnya): konten kini mengikuti viewport hingga ~4K dan hanya berada di tengah setelah melewatinya (`DashboardLayout.tsx`). Halaman yang sengaja dibuat sempit tetap sempit sesuai desain (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Tabel data buram (Fase 6):** karena area konten dashboard kini transparan (agar wallpaper grid terlihat, Fase 5), tabel data yang containernya _bukan_ permukaan buram membuat grid menembus baris genap transparan / zebra ber-alpha rendah. ✅ **SELESAI** — setiap tabel tanpa card kini menggunakan `bg-surface` (atau, untuk primitif `<DataTable>`, `background: var(--color-surface)` pada container scroll-nya). Yang diperbaiki: `DataTable` (primitif), `ProxyLogger`/`RequestLoggerV2` (tint `bg-black/5 dark:bg-black/20` pada `<Card>` mereka mengalahkan `bg-surface` milik Card melalui tailwind-merge → ~95% transparan), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, serta dua "tabel" CSS-grid dalam tampilan cache (`bg-surface/35` → `bg-surface`). Tabel yang sudah berada di dalam `<Card>`/Modal telah diverifikasi buram dan sengaja dibiarkan tidak tersentuh (`bg-surface` di sana adalah no-op yang redundan). Grid itu sendiri **tidak memerlukan perubahan** — `body::before` dashboard identik secara byte dengan situs (`--grid-size: 32px`); "grid lebih besar" yang terlihat pada instance yang sedang berjalan berasal dari build sebelum `#4143` yang sudah kedaluwarsa, bukan dari kode. Dijaga oleh `tests/unit/design-grid-background.test.ts` (blok Fase 6).
-
----
-
-## 9. Di luar cakupan / risiko
-
-- **Tidak ada perubahan palet** — warna sudah sesuai; kami hanya menambahkan token yang belum tersedia. Tidak ada risiko perubahan warna produk.
-- **Tidak ada perubahan mesin tema** — pertahankan `.dark` + store Zustand.
-- **Perubahan radius (Fase 2) berskala luas** — memengaruhi setiap kartu/tombol/input; periksa secara visual layar yang padat (tabel, modal) sebelum penggabungan.
-- **Tabel (C3)** memiliki paling banyak styling yang di-hardcode dan area regresi terbesar — pisahkan ke dalam PR tersendiri.
-
----
-
-## 10. Indeks referensi
-
-| Area                              | Path                                                                                                                 |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Token dasbor                      | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Store tema                        | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Shell panel (grid dibuka di sini) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chrome                            | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Preseden grid                     | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Komponen dasar                    | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Sumber warna status               | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| Utilitas `cn`                     | `src/shared/utils/cn.ts`                                                                                             |
-| Pengujian penjaga Fase 1          | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Referensi situs                   | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — jembatan token, penimpaan `.dark`, ekstensi `@layer components` OmniRoute
+- `packages/ui-kit/UPSTREAM.md` — commit upstream yang dikunci dan otorisasi lisensi; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` dan adaptor di sebelahnya; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

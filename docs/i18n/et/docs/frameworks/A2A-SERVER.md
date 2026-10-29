@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Saadaolevad oskused
+## Olemasolevad oskused
 
-OmniRoute pakub 6 A2A-oskust, mis on seotud kohas `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Iga oskuse moodul asub kataloogis `src/lib/a2a/skills/`.
+OmniRoute paljastab 6 A2A oskust, mis on ühendatud `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Iga oskuste moodul asub `src/lib/a2a/skills/`.
 
-| Oskus              | ID                   | Kirjeldus                                                                                                                                                  | Sildid                     | Näited                                     |
-| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :----------------------------------------- |
-| Smart Routing      | `smart-routing`      | Marsruudib prompti optimaalse pakkuya/kombo kaudu, kasutades OmniRoute'i kombo-mootorit ja skoorimist                                                      | routing, providers         | "Marsruudi see prompt parima mudeli kaudu" |
-| Quota Management   | `quota-management`   | Annab ülevaate pakkujapõhisest kvoodiseisundist ja aitab kutsujal otsustada, millal piirata või vahetada                                                   | quota, providers           | "Kontrolli anthropic'i kvooti"             |
-| Provider Discovery | `provider-discovery` | Loetleb installitud pakkujad koos võimekuste, tasuta taseme lippude ja OAuth-i olekuga                                                                     | providers, discovery       | "Millised pakkujad on saadaval?"           |
-| Cost Analysis      | `cost-analysis`      | Hindab päringu/vestluse maksumust kataloogi ja hiljutise kasutuse põhjal                                                                                   | cost, usage                | "Hinda selle vestluse maksumust"           |
-| Health Report      | `health-report`      | Koondab pakkujapõhiselt circuit-breakeri, cooldowni ja lockouti oleku                                                                                      | health, resilience         | "Näita kõigi pakkujate terviseolekut"      |
-| List Capabilities  | `list-capabilities`  | Tagastab täieliku 45-kirjelise Agent Skillsi kataloogi (23 API + 21 CLI + 1 config) markdown-tabelina koos toorete SKILL.md URL-idega konteksti lisamiseks | catalog, discovery, skills | "Loetle kõik OmniRoute'i võimekused"       |
+| Oskus                 | ID                   | Kirjeldus                                                                                                                                                                            | Sildid                     | Näited                                          |
+| :-------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :---------------------------------------------- |
+| Nutikas marsruutimine | `smart-routing`      | Suunab viipa läbi optimaalse provider/combo, kasutades OmniRoute kombineeritud mootori + hindamist                                                                                   | marsruutimine, pakkujad    | "Route this prompt through the best model"      |
+| Kvoodi haldamine      | `quota-management`   | Teatab teenusepakkuja kvoodi olekust, aitab helistajatel otsustada, millal throttle/switch                                                                                           | kvoot, pakkujad            | "Check quot for anthropic"                      |
+| Pakkuja avastamine    | `provider-discovery` | Loetleb installitud pakkujad, millel on võimalused, vaba taseme lipud ja OAuth olek                                                                                                  | pakkujad, avastus          | "Millised pakkujad on saadaval?"                |
+| Kulude analüüs        | `cost-analysis`      | Hinnanguline request/conversation maksumus, võttes arvesse kataloogi + hiljutist kasutamist                                                                                          | kulu, kasutus              | "Selle vestluse hinnanguline maksumus"          |
+| Tervisearuanne        | `health-report`      | Agregeerib kaitselülitit, jahtumist, lukustuse olekut pakkuja kohta                                                                                                                  | tervis, vastupidavus       | "Kuva kõigi teenuseosutajate tervislik seisund" |
+| Loetlege võimalused   | `list-capabilities`  | Tagastab täieliku 45 kirjest koosneva agendioskuste kataloogi (23 API + 21 CLI + 1 konfiguratsioon) allahindluste tabelina koos töötlemata SKILL.md URLs iga konteksti sisestamiseks | kataloog, avastus, oskused | "Loetlege kõik OmniRoute võimalused"            |
 
-> Agent Card tuleks hoida kooskõlas reaalajas 375 pakkujaga kataloogiga; pakkujate arv ning tasuta/autentimisvabad metaandmed pärinevad käitusaja registrist.
+> Agendikaarti tuleks hoida vastavuses reaalajas 377-pakkujakataloogiga; pakkujate arv ja free/no-auth metaandmed pärinevad käitusaja registrist.
 
-### `list-capabilities` oskuse üksikasjad
+### `list-capabilities` oskuste üksikasjad
 
-Oskus `list-capabilities` on eriti kasulik välistele agentidele, kes peavad enne API-kõnede tegemist selgitama, mida OmniRoute pakub. See tagastab struktureeritud markdown-tabeli artefaktina:
+`list-capabilities` oskus on eriti kasulik välisagentidele, kes peavad enne API -kõnede saatmist avastama, mida OmniRoute paljastab. See tagastab struktureeritud allahindluste tabeli artefakti:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ Oskus `list-capabilities` on eriti kasulik välistele agentidele, kes peavad enn
 ...
 ```
 
-Iga rida sisaldab veergu `rawUrl`, et agendid saaksid kohe hankida kogu SKILL.md sisu. Väli `metadata.totalSkills` peegeldab kataloogi suurust (täna 45). Implementatsioon: `src/lib/a2a/skills/listCapabilities.ts`. Vaata ka [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Iga rida sisaldab veergu `rawUrl`, et agendid saaksid kohe kogu SKILL.md laadida. `metadata.totalSkills` väli peegeldab kataloogi suurust (täna 45). Rakendamine: `src/lib/a2a/skills/listCapabilities.ts`. Vaata ka [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -266,9 +266,9 @@ esitatud → töös → valmis
 
 ---
 
-## Integratsiooninäited
+## Integratsiooni näited
 
-### Python (requests)
+### Python (päringud)
 
 ```python
 import requests
@@ -287,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (tooma)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

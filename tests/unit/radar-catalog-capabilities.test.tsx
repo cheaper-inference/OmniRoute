@@ -12,6 +12,13 @@ vi.mock("next/link", () => ({
 
 import { RadarCatalogTable } from "../../src/app/(dashboard)/dashboard/radar/RadarCatalogTable";
 
+// The kit Table measures itself with ResizeObserver (persistent scrollbar); jsdom lacks it.
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as unknown as typeof ResizeObserver;
+
 describe("Radar catalog capability knowledge", () => {
   let root: Root | undefined;
   let container: HTMLElement;

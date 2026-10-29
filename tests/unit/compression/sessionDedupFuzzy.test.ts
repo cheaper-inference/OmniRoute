@@ -16,6 +16,7 @@ test("fuzzy enabled: a near-duplicate message becomes a recoverable CCR marker",
     messages: [
       { role: "user", content: A },
       { role: "user", content: Aprime },
+      { role: "assistant", content: "acknowledged" },
     ],
     tools: [{ type: "function", function: { name: "omniroute_ccr_retrieve" } }],
   };
@@ -37,6 +38,7 @@ test("fuzzy ABSENT: byte-identical legacy (near-dup untouched, only exact dedup 
     messages: [
       { role: "user", content: A },
       { role: "user", content: Aprime },
+      { role: "assistant", content: "acknowledged" },
     ],
   };
   const res = sessionDedupEngine.apply(body, { stepConfig: {}, principalId: "p1" });
@@ -54,6 +56,7 @@ test("fuzzy enabled but below threshold → untouched", () => {
         content:
           "completely unrelated content with no shared three word windows whatsoever here ok",
       },
+      { role: "assistant", content: "acknowledged" },
     ],
   };
   const res = sessionDedupEngine.apply(body, {
@@ -76,6 +79,7 @@ test("fuzzy as a bare boolean true also fires (schema advertises type:boolean)",
     messages: [
       { role: "user", content: A },
       { role: "user", content: Aprime },
+      { role: "assistant", content: "acknowledged" },
     ],
     tools: [{ type: "function", function: { name: "omniroute_ccr_retrieve" } }],
   };
@@ -88,7 +92,7 @@ test("fuzzy as a bare boolean true also fires (schema advertises type:boolean)",
 // The fuzzy pass stores the near-duplicate in the CCR store and replaces the
 // message with a [CCR retrieve] marker. A caller that does not advertise
 // omniroute_ccr_retrieve has no way to expand that marker, so the replacement
-// strands the text. Fuzzy must skip entirely for such callers; exact dedup
+// strands the text. Fuzzy must skip entirely for them; exact dedup
 // (the [dedup:ref] marker, which the model resolves by looking back) is
 // unaffected because it does not need a tool.
 test("fuzzy enabled but caller has no retrieve tool: near-duplicate stays verbatim", () => {
@@ -97,6 +101,7 @@ test("fuzzy enabled but caller has no retrieve tool: near-duplicate stays verbat
     messages: [
       { role: "user", content: A },
       { role: "user", content: Aprime },
+      { role: "assistant", content: "acknowledged" },
     ],
     tools: [{ type: "function", function: { name: "get_weather" } }],
   };
@@ -115,6 +120,7 @@ test("fuzzy enabled and caller advertises the retrieve tool: marker still writte
     messages: [
       { role: "user", content: A },
       { role: "user", content: Aprime },
+      { role: "assistant", content: "acknowledged" },
     ],
     tools: [{ type: "function", function: { name: "omniroute_ccr_retrieve" } }],
   };

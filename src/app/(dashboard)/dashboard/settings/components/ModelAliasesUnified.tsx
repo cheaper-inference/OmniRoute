@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, Input } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import { Button, Card, Collapsible, Input, SegmentedControl } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 interface WildcardAlias {
   pattern: string;
@@ -118,10 +119,7 @@ export default function ModelAliasesUnified() {
       const currentWildcards = Array.isArray(settingsData.wildcardAliases)
         ? settingsData.wildcardAliases
         : wildcardAliases;
-      const updated = [
-        ...currentWildcards,
-        { pattern: fromValue.trim(), target: toValue.trim() },
-      ];
+      const updated = [...currentWildcards, { pattern: fromValue.trim(), target: toValue.trim() }];
       const res = await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -181,10 +179,8 @@ export default function ModelAliasesUnified() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            swap_horiz
-          </span>
+        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <Icon name="swap_horiz" size={20} />
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold">
@@ -201,20 +197,22 @@ export default function ModelAliasesUnified() {
         {status.message && (
           <span
             className={`text-xs font-medium flex items-center gap-1 ${
-              status.type === "success" ? "text-emerald-500" : "text-red-500"
+              status.type === "success" ? "text-success" : "text-error"
             }`}
           >
-            <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-              {status.type === "success" ? "check_circle" : "error"}
-            </span>
+            <Icon name={status.type === "success" ? "check_circle" : "error"} size={14} />
             {status.message}
           </span>
         )}
       </div>
 
       <div className="mb-5 rounded-lg border border-border/30 bg-surface/20 p-4">
-        <div className="flex flex-wrap gap-2 mb-3">
-          {[
+        <SegmentedControl
+          className="mb-3"
+          size="sm"
+          value={aliasMode}
+          onChange={(value) => setAliasMode(value as AliasMode)}
+          options={[
             {
               value: "exact",
               label: translateOrFallback(t, "exactMatchMode", "Exact Match"),
@@ -223,21 +221,8 @@ export default function ModelAliasesUnified() {
               value: "wildcard",
               label: translateOrFallback(t, "wildcardPatternMode", "Wildcard Pattern"),
             },
-          ].map((mode) => (
-            <button
-              key={mode.value}
-              type="button"
-              onClick={() => setAliasMode(mode.value as AliasMode)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                aliasMode === mode.value
-                  ? "bg-white dark:bg-white/10 text-text-main shadow-sm"
-                  : "bg-black/5 dark:bg-white/5 text-text-muted hover:text-text-main"
-              }`}
-            >
-              {mode.label}
-            </button>
-          ))}
-        </div>
+          ]}
+        />
 
         <p className="text-xs text-text-muted mb-3">
           {aliasMode === "exact"
@@ -265,9 +250,7 @@ export default function ModelAliasesUnified() {
             disabled={loading || saving}
           />
           <div className="hidden md:flex items-center justify-center pb-2 text-text-muted">
-            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-              arrow_forward
-            </span>
+            <Icon name="arrow_forward" size={16} />
           </div>
           <Input
             label={aliasMode === "exact" ? t("newModelId") : t("targetModel")}
@@ -305,19 +288,18 @@ export default function ModelAliasesUnified() {
           ) : (
             customEntries.map(([from, to]) => (
               <div key={from} className="flex items-center gap-3 px-4 py-2.5">
-                <code className="text-xs text-red-400/80 flex-1 truncate">{from}</code>
-                <span className="material-symbols-outlined text-[14px] text-text-muted">
-                  arrow_forward
-                </span>
-                <code className="text-xs text-emerald-400/80 flex-1 truncate">{to}</code>
-                <button
-                  type="button"
+                <code className="text-xs text-text-muted flex-1 truncate">{from}</code>
+                <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                <code className="text-xs text-text-main flex-1 truncate">{to}</code>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  icon="close"
                   onClick={() => void removeExactAlias(from)}
                   disabled={saving}
-                  className="p-1 rounded hover:bg-red-500/10 text-text-muted hover:text-red-400 transition-all"
-                >
-                  <span className="material-symbols-outlined text-[16px]">close</span>
-                </button>
+                  aria-label={t("remove")}
+                  title={t("remove")}
+                />
               </div>
             ))
           )}
@@ -343,45 +325,39 @@ export default function ModelAliasesUnified() {
                 key={`${alias.pattern}-${alias.target}-${index}`}
                 className="flex items-center gap-3 px-4 py-2.5"
               >
-                <code className="text-xs text-purple-400 flex-1 truncate">{alias.pattern}</code>
-                <span className="material-symbols-outlined text-[14px] text-text-muted">
-                  arrow_forward
-                </span>
-                <code className="text-xs text-emerald-400/80 flex-1 truncate">{alias.target}</code>
-                <button
-                  type="button"
+                <code className="text-xs text-text-muted flex-1 truncate">{alias.pattern}</code>
+                <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                <code className="text-xs text-text-main flex-1 truncate">{alias.target}</code>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  icon="close"
                   onClick={() => void removeWildcardAlias(index)}
                   disabled={saving}
-                  className="p-1 rounded hover:bg-red-500/10 text-text-muted hover:text-red-400 transition-all"
-                >
-                  <span className="material-symbols-outlined text-[16px]">close</span>
-                </button>
+                  aria-label={t("remove")}
+                  title={t("remove")}
+                />
               </div>
             ))
           )}
         </div>
       </div>
 
-      <details className="group">
-        <summary className="text-xs font-medium text-text-muted uppercase tracking-wider cursor-pointer flex items-center gap-1 mb-2">
-          <span className="material-symbols-outlined text-[14px] group-open:rotate-90 transition-transform">
-            chevron_right
-          </span>
-          {translateOrFallback(t, "builtInAliases", "Built-in Aliases")} ({builtInEntries.length})
-        </summary>
+      <Collapsible
+        variant="inline"
+        title={`${translateOrFallback(t, "builtInAliases", "Built-in Aliases")} (${builtInEntries.length})`}
+      >
         <div className="rounded-lg border border-border/30 divide-y divide-border/20 max-h-60 overflow-y-auto">
           {builtInEntries.map(([from, to]) => (
             <div key={from} className="flex items-center gap-3 px-4 py-2 opacity-60">
-              <code className="text-xs text-red-400/60 flex-1 truncate">{from}</code>
-              <span className="material-symbols-outlined text-[14px] text-text-muted">
-                arrow_forward
-              </span>
-              <code className="text-xs text-emerald-400/60 flex-1 truncate">{to}</code>
-              <span className="material-symbols-outlined text-[14px] text-text-muted">lock</span>
+              <code className="text-xs text-text-muted flex-1 truncate">{from}</code>
+              <Icon name="arrow_forward" size={14} className="text-text-muted" />
+              <code className="text-xs text-text-main flex-1 truncate">{to}</code>
+              <Icon name="lock" size={14} className="text-text-muted" />
             </div>
           ))}
         </div>
-      </details>
+      </Collapsible>
     </Card>
   );
 }

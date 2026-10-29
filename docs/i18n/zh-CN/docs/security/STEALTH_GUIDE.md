@@ -18,57 +18,58 @@ OmniRoute 与一些提供者集成，这些提供者的边缘服务会主动识�
 
 ## TLS 指纹层
 
-### `open-sse/utils/tlsClient.ts` — wreq-js（Chrome 124）
+### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-持久化 `wreq-js` 会话会按账户作用域和已解析代理进行惰性创建。进程级 `TlsClient` 池最多容纳 128 个会话；针对受 Cloudflare 保护的上游，这些会话会模拟 **macOS 上的 Chrome 124**。当原生运行时不可用时，`TlsClient.fetch()` 会以关闭方式失败；调用方可以在此封装器之外显式选择回退方案。
+系统会按账户作用域和解析出的代理延迟创建持久化 `wreq-js` 会话。进程级 `TlsClient`
+最多池化 128 个会话，这些会话会模拟 **macOS 上的 Chrome 124**，用于访问受 Cloudflare
+保护的上游。当原生运行时不可用时，`TlsClient.fetch()` 会以默认拒绝方式失败；调用方可以在此封装器之外显式选择回退方案。
 
 - 会话配置：`browser: "chrome_124", os: "macos"`
-- 代理解析（按优先级）：`HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY`（也包括小写形式）
+- 代理解析（按优先级）：`HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY`（也支持小写形式）
 - 超时：`TLS_CLIENT_TIMEOUT_MS`（继承自 `FETCH_TIMEOUT_MS`，默认值为 600000）
 - `wreq-js` Response 与 fetch 兼容（`headers`、`text()`、`json()`、`clone()`、`body`）。
 - 首字节看门狗（`open-sse/utils/tlsFirstByteWatchdog.ts`，#12656）：`TlsClient.fetch()`
-  会在上游响应头到达后立即完成，因此仅靠 `TLS_CLIENT_TIMEOUT_MS` 无法限制一个始终不返回首字节的
-  响应体。`guardTlsFirstByte()` 会让响应体的首次 `read()` 与
-  `TLS_FIRST_BYTE_WATCHDOG_MS`（默认值为 `10000`，设为 `0` 可禁用）进行竞速；正常的响应体
-  不受影响，而停滞的响应体会取消 wreq 读取器，并使 `proxyFetch` 的现有
-  TLS 回退逻辑继续转入直连/代理分发器（不可安全重放的请求，例如
-  带有请求体的 POST，仍会抛出错误，而不会被静默重试）。
+  会在上游响应头到达后立即完成，因此仅靠 `TLS_CLIENT_TIMEOUT_MS` 无法限制始终不产生首字节的
+  响应体。`guardTlsFirstByte()` 会让响应体的第一次 `read()` 与
+  `TLS_FIRST_BYTE_WATCHDOG_MS`（默认值为 `10000`，设为 `0` 可禁用）竞争；正常的响应体
+  不受影响，而停滞的响应体会取消 wreq 读取器，并让 `proxyFetch` 现有的
+  TLS 回退逻辑继续转入直连/代理调度器（不可安全重放的请求，例如带响应体的 POST，
+  仍会抛出错误，而不会被静默重试）。
 
 ### Web Cookie 提供者传输层 — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` 是下述五种专用
-Web Cookie 传输的共享适配器。每个轻量级提供者封装器都会选择浏览器/操作系统配置。该适配器
-使用 `open-sse/utils/tlsClient.ts` 中唯一的 wreq 运行时加载器和传输池，并按
-配置 + 操作系统 + 已解析代理建立键值，同时每个请求都使用 `cookieMode: "ephemeral"`。因此，账户和
-请求会共享传输层连接，但绝不会共享 wreq 会话或 Cookie Jar。
+`open-sse/services/tlsClientBase.ts` 是以下五种专用 Web Cookie 传输的共享适配器。
+每个轻量提供者封装器都会选择一种浏览器/操作系统配置。该适配器使用
+`open-sse/utils/tlsClient.ts` 中唯一的 wreq 运行时加载器和传输池，并以
+配置 + 操作系统 + 解析出的代理作为键，而每个请求都使用 `cookieMode: "ephemeral"`。
+因此，账户和请求会共享传输层连接，但绝不会共享 wreq 会话或 Cookie Jar。
 
-| 提供者     | 配置          | 模拟的操作系统 | 流 EOF 策略                   |
-| ---------- | ------------- | -------------- | ----------------------------- |
-| Claude     | `chrome_146`  | Linux          | 包含 `[DONE]`                 |
-| Perplexity | `firefox_148` | macOS          | 包含 `event: end_of_stream`   |
-| Grok       | `chrome_146`  | Linux          | 排除 `[DONE]`                 |
-| Notion     | `chrome_146`  | Windows        | 包含 `[DONE]`                 |
-| LMArena    | `chrome_146`  | Windows        | 无哨兵标记；在原生 EOF 时关闭 |
+| 提供者     | 配置          | 模拟的操作系统 | 流 EOF 策略                 |
+| ---------- | ------------- | -------------- | --------------------------- |
+| Claude     | `chrome_146`  | Linux          | 包含 `[DONE]`               |
+| Perplexity | `firefox_151` | macOS          | 包含 `event: end_of_stream` |
+| Grok       | `chrome_146`  | Linux          | 排除 `[DONE]`               |
+| Notion     | `chrome_146`  | Windows        | 包含 `[DONE]`               |
+| LMArena    | `chrome_146`  | Windows        | 无哨兵值；在原生 EOF 时关闭 |
 
-- 流式处理直接消费原生响应的 `ReadableStream`；不会创建临时文件或伴随进程。
-- 在向外暴露流之前，最多会检查起始的 256 个字节。SSE 提供者会缓冲非 SSE
+- 流式处理会直接消费原生响应 `ReadableStream`；不会创建临时文件或辅助进程。
+- 在公开流之前，最多检查最初的 256 个字节。SSE 提供者会缓冲非 SSE
   错误；Grok/LMArena 会将 Cloudflare 质询映射为 `403`，并将 HTML 中间页映射为 `502`。
-- 原生请求超时仍由绝对的 JS 硬性截止时间封装。发生挂起时，只会使受影响的配置/操作系统/代理传输
-  失效并关闭；下一次请求会重新创建该传输。
-- 代理解析优先级为：每次调用的 `proxyUrl` → 请求作用域的账户/控制面板上下文 →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY`（包括小写变体）。解析错误会以关闭方式失败，
-  而不是泄漏直连连接。LMArena 会特意基于 `arena.ai` 进行解析。
-- `byteResponse` 会返回带有内容类型的 `data:` URL，且不会造成 UTF-8 损坏。
-- 错误类型包括 `TlsClientUnavailableError`（软件包/插件不可用）、`TlsClientHangError`
-  （超过截止时间），以及当所有 128 个有界配置/操作系统/代理槽位均处于活动或关闭过程中时抛出的
-  `WreqTransportCapacityError`（共享会话容量错误码）。
+- 原生请求超时仍由一个绝对的 JS 硬截止时间封装。发生挂起时，只会使受影响的
+  配置/操作系统/代理传输失效并将其关闭，下一次请求会重新创建该传输。
+- 代理解析优先级为：每次调用的 `proxyUrl` → 请求范围的账户/仪表板上下文 →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY`（包括小写变体）。解析错误会以默认拒绝方式失败，
+  而不会泄漏直连连接。LMArena 会特意针对 `arena.ai` 进行解析。
+- `byteResponse` 会返回具有正确内容类型的 `data:` URL，且不会发生 UTF-8 损坏。
+- 错误类型包括：`TlsClientUnavailableError`（软件包/插件不可用）、
+  `TlsClientHangError`（超过截止时间），以及当全部 128 个有界配置/操作系统/代理槽位
+  都处于活动或关闭过程中时的 `WreqTransportCapacityError`（共享的会话容量错误代码）。
 
-上述通用 `TlsClient` 会话仍专用于持久化、由浏览器支持的 Cookie
-状态。两条路径会复用同一个已缓存的 wreq 模块加载器和进程生命周期钩子；由于二者的 Cookie 生命周期
-有意设计为不同，其池仍保持分离。
+上述通用 `TlsClient` 会话仍专用于持久化的、由浏览器支持的 Cookie 状态。两条路径会复用同一个
+缓存的 wreq 模块加载器和进程生命周期钩子；但由于其 Cookie 生命周期有意设计为不同，两者的池仍保持分离。
 
-固定版本的软件包支持这些配置，但真实 WAF 的接受情况可能会独立于本地契约测试发生变化。
-在声称与上游浏览器具有同等能力之前，请使用经过明确授权的真实账户验证指纹变更。
+固定版本的软件包支持这些配置，但真实 WAF 的接受情况可能独立于本地契约测试而发生变化。
+在声称与上游浏览器一致之前，请使用明确授权的真实账户验证指纹变更。
 
 ---
 

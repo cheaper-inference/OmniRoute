@@ -22,7 +22,11 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const args = process.argv.slice(2);
-const MAX = Number(args[args.indexOf("--max") + 1]) || 12000;
+// Ceiling raised 12000 → 13500 on 2026-10-28 (#17219): the in-scope count reached 12267 from
+// legitimate test growth (tests/ went 7841 → 8296 files between 10-21 and 10-28), not a leak.
+// A leaked worktree or vendored checkout adds roughly a full tree (~12k files), so 13500 still
+// catches it while leaving about a month of organic headroom at the current rate.
+const MAX = Number(args[args.indexOf("--max") + 1]) || 13500;
 const JSON_OUT = args.includes("--json");
 
 const EXT = new Set([".ts", ".tsx", ".js", ".jsx"]);
@@ -36,8 +40,13 @@ try {
   console.error("[build-scope] could not read tsconfig.json exclude — aborting");
   process.exit(2);
 }
-// Always skip VCS + the exclude dirs (normalise to bare top-level names).
-const SKIP_DIRS = new Set([".git", ...exclude.map((e) => e.replace(/^\.\//, "").replace(/\/.*$/, ""))]);
+// Always skip VCS + the exclude dirs, matched as root-relative paths: a nested entry such as
+// `packages/browser-pool` skips only that subdir — collapsing it to its top-level name would
+// silently drop the rest of `packages/` (the vendored kit) from the count.
+const SKIP_DIRS = new Set([
+  ".git",
+  ...exclude.map((e) => e.replace(/^\.\//, "").replace(/\/+$/, "")),
+]);
 
 let count = 0;
 const byTop = {};
@@ -52,6 +61,7 @@ function walk(dir, top) {
     if (e.isSymbolicLink()) continue; // don't follow symlinks (e.g. node_modules)
     const full = path.join(dir, e.name);
     if (e.isDirectory()) {
+      if (SKIP_DIRS.has(path.relative(ROOT, full).split(path.sep).join("/"))) continue;
       walk(full, top);
     } else if (EXT.has(path.extname(e.name))) {
       count++;

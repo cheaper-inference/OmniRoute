@@ -19,7 +19,7 @@ export function TierFlowDiagram() {
         width={800}
         height={420}
         priority
-        className="w-full max-w-2xl rounded-lg border border-white/[0.06]"
+        className="w-full max-w-2xl rounded-lg border border-border"
       />
       <p className="mx-auto max-w-md text-xs leading-relaxed text-text-muted text-center text-balance">
         {t("flowCaption")}
