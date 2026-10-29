@@ -4,7 +4,7 @@ import fs from "node:fs";
 import Database from "better-sqlite3";
 
 const migration = fs.readFileSync(
-  new URL("../../../src/lib/db/migrations/217_codex_connection_fences.sql", import.meta.url),
+  new URL("../../../src/lib/db/migrations/218_codex_connection_fences.sql", import.meta.url),
   "utf8"
 );
 const schema = `CREATE TABLE provider_connections (
@@ -15,12 +15,13 @@ const schema = `CREATE TABLE provider_connections (
   rate_limited_until TEXT, name TEXT, priority INTEGER, synced_models_at TEXT
 );
 CREATE TABLE key_value (namespace TEXT, key TEXT, value TEXT, PRIMARY KEY(namespace, key))`;
-test("owner fences keep a distinct migration slot after the release team-cost migrations", () => {
+test("owner fences keep a distinct slot after Teams and quota recovery", () => {
   const files = fs.readdirSync(new URL("../../../src/lib/db/migrations/", import.meta.url));
-  assert.deepEqual(files.filter((name) => /^(215|216|217)_/.test(name)).sort(), [
+  assert.deepEqual(files.filter((name) => /^(215|216|217|218)_/.test(name)).sort(), [
     "215_team_cost_centers.sql",
     "216_team_cost_shapes.sql",
-    "217_codex_connection_fences.sql",
+    "217_quota_recovery_tickets.sql",
+    "218_codex_connection_fences.sql",
   ]);
 });
 
@@ -39,7 +40,7 @@ function insert(db: Database.Database, provider = "codex") {
 }
 
 for (const upgrade of [false, true]) {
-  test(`migration 217 is idempotent on ${upgrade ? "upgrade with existing connections" : "a fresh schema"}`, () => {
+  test(`migration 218 is idempotent on ${upgrade ? "upgrade with existing connections" : "a fresh schema"}`, () => {
     const db = new Database(":memory:");
     try {
       db.exec(schema);

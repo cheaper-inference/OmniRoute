@@ -114,13 +114,11 @@
 4. Thêm hoặc cập nhật `tests/unit/ui/adapters/<name>.test.tsx`. Với một adapter có nhiều caller, hãy so sánh
    markup được render trước và sau khi thay đổi — các thay đổi về padding hoặc wrapper sẽ lan ra mọi màn hình.
 
-## 5. Cập nhật kit
+## 5. Cập nhật bộ sản phẩm
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` sao chép `src/` từ upstream tại commit đó vào
-`packages/ui-kit/src` và áp dụng phép biến đổi duy nhất được phép (nó loại bỏ hậu tố `.js` khỏi các import
-tương đối). Sau đó: rà soát `git diff packages/ui-kit`, kiểm tra trực quan các trang providers, settings,
-combos, usage và endpoint ở cả hai theme, chạy `npm run check:ui-kit-snapshot` và `npm run test:vitest:ui`,
-rồi mở PR kèm theo changelog của upstream.
+`npm run check:ui-kit-upstream` so sánh phiên bản được ghim trong `packages/ui-kit/UPSTREAM.md` với thẻ `v*` mới nhất của repo ngược dòng và in lệnh đồng bộ hóa khi hết bản phát hành. Quy trình làm việc `UI Kit upstream watch` hàng tuần (`.github/workflows/ui-kit-upstream-watch.yml`) chạy cùng một quy trình kiểm tra và giữ một vấn đề theo dõi ở trạng thái mở trong khi mã pin ở phía sau; kho lưu trữ ngược dòng là riêng tư, vì vậy quy trình làm việc cần có mã thông báo chỉ đọc trong bí mật `UI_KIT_READ_TOKEN` và vẫn trơ nếu không có mã thông báo đó.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` sao chép `src/` ngược dòng tại cam kết đó (`latest` = thẻ `v*` mới nhất) vào `packages/ui-kit/src`, áp dụng phép biến đổi duy nhất được phép (nó loại bỏ hậu tố `.js` khỏi các lần nhập tương đối) và đặt phiên bản không gian làm việc trong `packages/ui-kit/package.json` và `package-lock.json` thành phiên bản ngược dòng. Sau đó: xem lại `git diff packages/ui-kit`, thực hiện chuyển đổi trực quan về nhà cung cấp, cài đặt, kết hợp, cách sử dụng và điểm cuối trong cả hai chủ đề, chạy `npm run check:ui-kit-snapshot` và `npm run test:vitest:ui` và mở PR bằng nhật ký thay đổi ngược dòng.
 
 ## 6. sơ đồ README
 

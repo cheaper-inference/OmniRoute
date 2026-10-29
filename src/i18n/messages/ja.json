@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "モデルごとの同時実行上限",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "任意: 1 行に 1 つ model=cap を指定します。アップストリームのモデル ID と完全一致で照合されます。超過したリクエストはローカルで待機します。空欄の場合、モデルごとの上限はありません。",
-    "rateLimitOverridesModelConcurrencyInvalid": "モデルごとの同時実行の指定「{entry}」が無効です — model=cap の形式で、cap は 1 から {max} までの整数にしてください。"
+    "rateLimitOverridesModelConcurrencyInvalid": "モデルごとの同時実行の指定「{entry}」が無効です — model=cap の形式で、cap は 1 から {max} までの整数にしてください。",
+    "usedInComboTooltip": "{count} 件のコンボで使用中: {combos}",
+    "openComboTooltip": "コンボを開く — {combo} で使用中"
   },
   "settings": {
     "title": "設定",
@@ -8938,7 +8940,9 @@
         "financial": "金融",
         "brazilian": "ブラジル",
         "usa": "米国",
-        "full": "すべて"
+        "full": "すべて",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (南アフリカ)"
       },
       "builtinTypes": "組み込みタイプ",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 アドレス",
         "ipv6_address": "IPv6 アドレス",
         "aws_key": "AWS アクセスキー",
-        "api_key_generic": "API キーとトークン"
+        "api_key_generic": "API キーとトークン",
+        "iban": "IBAN 銀行口座番号",
+        "eu_vat": "EU VAT 番号",
+        "es_dni_nie": "スペインの DNI / NIE",
+        "it_codice_fiscale": "イタリアの Codice Fiscale",
+        "pl_pesel": "ポーランドの PESEL",
+        "nl_bsn": "オランダの BSN",
+        "de_steuer_id": "ドイツの Steuer-ID",
+        "se_personnummer": "スウェーデンの personnummer",
+        "za_id": "南アフリカの ID 番号",
+        "za_phone": "南アフリカの電話番号",
+        "za_vat": "南アフリカの VAT 番号",
+        "za_tax_ref": "南アフリカの税務参照番号"
       },
       "customPatterns": "カスタムパターン",
       "customPatternsDesc": "一致した部分は [CUSTOM_REDACTED] に置き換えられます。パターンは最大 {max} 件です。壊滅的なバックトラックの恐れがあるパターンは拒否されます。",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuthが構成されていません。{applicationsUrl}でOAuthアプリケーションを登録し、リダイレクトURI {redirectUri}とスコープ\"{scopes}\"を設定してください。その後、{clientIdEnv}（オプションで{clientSecretEnv}も）を設定し、再起動してください。",
     "gitlabDuoSetupDescription": "アプリケーションが登録され、環境変数がこのOmniRouteインスタンスに設定された後、続行をクリックしてOAuthログインを開始します。",
     "continue": "続ける",
+    "copilotPolicyTitle": "実験的なプロバイダー: ポリシーのステータスがあいまいです",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com 経由で接続しますが、 GitHub一般的なサードパーティ推論APIとして公開していません。この統合は実験的なものであり、予告なく変更される場合があります。",
+    "copilotPolicyLine2": "接続できるのは自分のGitHubアカウントのみです。資格情報を共有したり、アカウントをプールしたり、プランの制限を超えたりしないでください。",
+    "copilotPolicyLine3": "無料および学生プランのユーザーは、自動モデル選択のみを受け取ります。 Copilotプランの規約と使用制限は、お客様の責任となります。",
+    "copilotPolicyAcknowledge": "わかりました、接続します",
     "tabPasteSetupToken": "セットアップトークン",
     "claudeSetupTokenDescription": "ターミナルで `claude setup-token` を実行し、表示されたトークンを貼り付けてください。有効期間は1年で、リフレッシュトークンはありません。OmniRoute は保存前に Anthropic へテストリクエストを1件送信します。",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "プロバイダー統計",
     "description": "プロバイダー別およびモデル別のトラフィック、レイテンシー、成功率",
     "combo": "コンボ",
-    "toggleModels": "{provider} のモデルを表示"
+    "toggleModels": "{provider} のモデルを表示",
+    "windowSince": "{date}以降"
   },
   "relay": {
     "title": "サーバーレスリレープロキシ",

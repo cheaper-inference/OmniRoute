@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Folosit în {count} combo-uri: {combos}",
+    "openComboTooltip": "Deschide Combo-uri — folosit de {combo}"
   },
   "settings": {
     "title": "Setări",
@@ -8938,7 +8940,9 @@
         "financial": "Financiar",
         "brazilian": "Brazilian",
         "usa": "SUA",
-        "full": "Complet"
+        "full": "Complet",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Africa de Sud)"
       },
       "builtinTypes": "Tipuri încorporate",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Adrese IPv4",
         "ipv6_address": "Adrese IPv6",
         "aws_key": "Chei de acces AWS",
-        "api_key_generic": "Chei API și tokenuri"
+        "api_key_generic": "Chei API și tokenuri",
+        "iban": "IBAN numere de cont bancar",
+        "eu_vat": "EU VAT numere",
+        "es_dni_nie": "Spaniolă DNI / NIE",
+        "it_codice_fiscale": "Codice Fiscale italian",
+        "pl_pesel": "PESEL polonez",
+        "nl_bsn": "BSN olandez",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "personnummer suedez",
+        "za_id": "Numerele ID din Africa de Sud",
+        "za_phone": "numere de telefon din Africa de Sud",
+        "za_vat": "Numerele VAT din Africa de Sud",
+        "za_tax_ref": "Referințe fiscale din Africa de Sud"
       },
       "customPatterns": "Modele personalizate",
       "customPatternsDesc": "Potrivirile sunt înlocuite cu [CUSTOM_REDACTED]. Până la {max} modele. Modelele cu risc de backtracking catastrofal sunt refuzate.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth nu este configurat. Înregistrează o aplicație OAuth la {applicationsUrl} cu URI de redirecționare {redirectUri} și scope-uri \"{scopes}\", apoi setează {clientIdEnv} (și opțional {clientSecretEnv}) și repornește.",
     "gitlabDuoSetupDescription": "După ce aplicația este înregistrată și variabilele de mediu sunt setate pe această instanță OmniRoute, faceți clic pe Continuare pentru a începe autentificarea OAuth.",
     "continue": "Continuă",
+    "copilotPolicyTitle": "Furnizor experimental: statutul politicii este ambiguu",
+    "copilotPolicyLine1": "OmniRoute se conectează prin api.githubcopilot.com, pe care GitHub nu l-a publicat ca o concluzie generală a terților API. Această integrare este experimentală și se poate modifica fără notificare.",
+    "copilotPolicyLine2": "Numai propriul cont GitHub poate fi conectat. Nu partajați niciodată acreditările, conturile de grup și nu încercați să depășiți limitele planului.",
+    "copilotPolicyLine3": "Utilizatorii planului gratuit și Studenți primesc doar selecția automată a modelului. Termenii planului dvs. Copilot și orice limite de utilizare rămân responsabilitatea dvs.",
+    "copilotPolicyAcknowledge": "Am înțeles, conectează-te",
     "tabPasteSetupToken": "Token de configurare",
     "claudeSetupTokenDescription": "Rulați `claude setup-token` într-un terminal și lipiți tokenul afișat. Este valabil un an și nu are token de reîmprospătare. OmniRoute trimite o cerere de test către Anthropic înainte de a-l salva.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Statistici despre furnizori",
     "description": "Trafic, latență și rate de succes pentru fiecare furnizor și model",
     "combo": "Combinație",
-    "toggleModels": "Afișează modelele pentru {provider}"
+    "toggleModels": "Afișează modelele pentru {provider}",
+    "windowSince": "Din {date}"
   },
   "relay": {
     "title": "Proxy-uri relay serverless",

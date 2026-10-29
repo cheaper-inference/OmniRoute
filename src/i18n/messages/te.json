@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} కాంబోలలో ఉపయోగించబడింది: {combos}",
+    "openComboTooltip": "కాంబోలను తెరవండి — {combo} ఉపయోగిస్తోంది"
   },
   "settings": {
     "title": "సెట్టింగ్లు",
@@ -8938,7 +8940,9 @@
         "financial": "ఆర్థిక",
         "brazilian": "బ్రెజిలియన్",
         "usa": "అమెరికా",
-        "full": "పూర్తి"
+        "full": "పూర్తి",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (దక్షిణాఫ్రికా)"
       },
       "builtinTypes": "అంతర్నిర్మిత రకాలు",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 చిరునామాలు",
         "ipv6_address": "IPv6 చిరునామాలు",
         "aws_key": "AWS యాక్సెస్ కీలు",
-        "api_key_generic": "API కీలు మరియు టోకెన్‌లు"
+        "api_key_generic": "API కీలు మరియు టోకెన్‌లు",
+        "iban": "IBAN బ్యాంక్ ఖాతా నంబర్లు",
+        "eu_vat": "EU VAT సంఖ్యలు",
+        "es_dni_nie": "స్పానిష్ DNI / NIE",
+        "it_codice_fiscale": "ఇటాలియన్ కోడిస్ ఫిస్కేల్",
+        "pl_pesel": "పోలిష్ PESEL",
+        "nl_bsn": "డచ్ BSN",
+        "de_steuer_id": "జర్మన్ స్టీయర్-ID",
+        "se_personnummer": "స్వీడిష్ వ్యక్తి సంఖ్య",
+        "za_id": "దక్షిణాఫ్రికా ID సంఖ్యలు",
+        "za_phone": "దక్షిణాఫ్రికా ఫోన్ నంబర్లు",
+        "za_vat": "దక్షిణాఫ్రికా VAT సంఖ్యలు",
+        "za_tax_ref": "దక్షిణాఫ్రికా పన్ను సూచనలు"
       },
       "customPatterns": "అనుకూల ప్యాటర్న్‌లు",
       "customPatternsDesc": "సరిపోలికలు [CUSTOM_REDACTED] తో భర్తీ చేయబడతాయి. గరిష్ఠంగా {max} ప్యాటర్న్‌లు. విపత్కర బ్యాక్‌ట్రాకింగ్ ప్రమాదం ఉన్న ప్యాటర్న్‌లు తిరస్కరించబడతాయి.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth కాన్ఫిగర్ చేయబడలేదు. {applicationsUrl} వద్ద ఒక OAuth అప్లికేషన్ నమోదు చేయండి, దిశా URI {redirectUri} మరియు స్కోప్స్ \"{scopes}\" తో, తరువాత {clientIdEnv} (మరియు ఐచ్ఛికంగా {clientSecretEnv}) సెట్ చేసి పునఃప్రారంభించండి.",
     "gitlabDuoSetupDescription": "అప్లికేషన్ నమోదు చేసిన తర్వాత మరియు ఈ OmniRoute ఉదాహరణపై env vars సెట్ చేసిన తర్వాత, OAuth లాగిన్ ప్రారంభించడానికి కొనసాగించు పై క్లిక్ చేయండి.",
     "continue": "కొనసాగించు",
+    "copilotPolicyTitle": "ప్రయోగాత్మక ప్రొవైడర్: పాలసీ స్థితి అస్పష్టంగా ఉంది",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com ద్వారా కనెక్ట్ అవుతుంది, ఇది GitHub సాధారణ మూడవ పక్ష అనుమితిగా ప్రచురించబడలేదు API. ఈ ఏకీకరణ ప్రయోగాత్మకమైనది మరియు నోటీసు లేకుండానే మారవచ్చు.",
+    "copilotPolicyLine2": "మీ స్వంత GitHub ఖాతా మాత్రమే కనెక్ట్ చేయబడి ఉండవచ్చు. ఆధారాలను, ఖాతాలను పూల్ చేయవద్దు లేదా మీ ప్లాన్ పరిమితులను అధిగమించడానికి ప్రయత్నించవద్దు.",
+    "copilotPolicyLine3": "ఉచిత మరియు విద్యార్థి ప్లాన్ వినియోగదారులు ఆటోమేటిక్ మోడల్ ఎంపికను మాత్రమే స్వీకరిస్తారు. మీ Copilot ప్లాన్ నిబంధనలు మరియు ఏవైనా వినియోగ పరిమితులు మీ బాధ్యతగా ఉంటాయి.",
+    "copilotPolicyAcknowledge": "నేను అర్థం చేసుకున్నాను, కనెక్ట్ చేయండి",
     "tabPasteSetupToken": "సెటప్ టోకెన్",
     "claudeSetupTokenDescription": "టెర్మినల్‌లో `claude setup-token` ను అమలు చేసి, అది ముద్రించే టోకెన్‌ను అతికించండి. ఇది ఒక సంవత్సరం చెల్లుబాటు అవుతుంది మరియు దీనికి రిఫ్రెష్ టోకెన్ లేదు. సేవ్ చేయడానికి ముందు OmniRoute Anthropic కు ఒక పరీక్ష అభ్యర్థనను పంపుతుంది.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "ప్రొవైడర్ గణాంకాలు",
     "description": "ప్రతి ప్రొవైడర్ మరియు ప్రతి మోడల్కు సంబంధించిన ట్రాఫిక్, లేటెన్సీ మరియు విజయ రేట్లు",
     "combo": "కాంబో",
-    "toggleModels": "{provider} కోసం మోడల్లను చూపండి"
+    "toggleModels": "{provider} కోసం మోడల్లను చూపండి",
+    "windowSince": "{date} నుండి"
   },
   "relay": {
     "title": "సర్వర్‌లెస్ రిలే ప్రాక్సీలు",

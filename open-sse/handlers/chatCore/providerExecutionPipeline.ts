@@ -1,3 +1,4 @@
+import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 import type { ChatCoreErrorResult, ProviderLegUsage } from "@/lib/skills/toolLoopTypes.ts";
 import type { getProviderCredentials } from "@/sse/services/auth.ts";
 import type { updateFromHeaders, updateFromResponseBody } from "../../services/rateLimitManager.ts";
@@ -378,6 +379,26 @@ export async function runProviderExecutionPipeline(
     }
   };
 
+  const tryAuthenticationRefresh = async (response: Response): Promise<boolean> => {
+    if (
+      authRefreshed ||
+      (response.status !== 401 && response.status !== 403) ||
+      typeof connection.refreshCredentials !== "function" ||
+      (await shouldSkipCredentialRefresh(target.provider, response))
+    )
+      return false;
+    if (isPassiveCodex(target.provider)) recordRejectedToken(connection.getCredentials());
+    const refreshed = await runWithCodexResponseFence(response, () =>
+      connection.refreshCredentials!(connection.getCredentials())
+    );
+    if (!refreshed || (!refreshed.accessToken && !refreshed.copilotToken)) return false;
+    connection.replaceCredentials({ ...connection.getCredentials(), ...refreshed });
+    await connection.onCredentialsRefreshed(refreshed);
+    authRefreshed = true;
+    authRefreshPending = true;
+    return true;
+  };
+
   while (
     attempts < maxAttempts ||
     antigravityByopRotationPending ||
@@ -394,6 +415,12 @@ export async function runProviderExecutionPipeline(
     lastAttempt = attempt;
     const state = bindCodexResponseCallbacks(attempt.response, baseState);
     if (!isCodexResponseCurrent(attempt.response)) {
+      // A passive replica may reread a newer token for the same owner. The
+      // refresh adapter validates that adoption; the stale response still
+      // cannot run rate-limit, health or other mutation callbacks.
+      if (isPassiveCodex(target.provider) && (await tryAuthenticationRefresh(attempt.response))) {
+        continue;
+      }
       return toOutcome(
         attempt,
         wire.currentModel,
@@ -497,23 +524,7 @@ export async function runProviderExecutionPipeline(
       }
     }
 
-    if (
-      !authRefreshed &&
-      (status === 401 || status === 403) &&
-      typeof connection.refreshCredentials === "function" &&
-      !(await shouldSkipCredentialRefresh(target.provider, attempt.response))
-    ) {
-      const refreshed = await runWithCodexResponseFence(attempt.response, () =>
-        connection.refreshCredentials!(connection.getCredentials())
-      );
-      if (refreshed && (refreshed.accessToken || refreshed.copilotToken)) {
-        connection.replaceCredentials({ ...connection.getCredentials(), ...refreshed });
-        await connection.onCredentialsRefreshed(refreshed);
-        authRefreshed = true;
-        authRefreshPending = true;
-        continue;
-      }
-    }
+    if (await tryAuthenticationRefresh(attempt.response)) continue;
 
     {
       let signatureMessage = attempt.response.statusText || "upstream error";

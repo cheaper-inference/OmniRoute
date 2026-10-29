@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} કોમ્બોમાં વપરાયેલ: {combos}",
+    "openComboTooltip": "કોમ્બોઝ ખોલો — {combo} દ્વારા વપરાયેલ"
   },
   "settings": {
     "title": "સેટિંગ્સ",
@@ -8938,7 +8940,9 @@
         "financial": "નાણાકીય",
         "brazilian": "બ્રાઝિલિયન",
         "usa": "યુએસએ",
-        "full": "સંપૂર્ણ"
+        "full": "સંપૂર્ણ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (દક્ષિણ આફ્રિકા)"
       },
       "builtinTypes": "બિલ્ટ-ઇન પ્રકારો",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 સરનામાં",
         "ipv6_address": "IPv6 સરનામાં",
         "aws_key": "AWS ઍક્સેસ કી",
-        "api_key_generic": "API કી અને ટોકન"
+        "api_key_generic": "API કી અને ટોકન",
+        "iban": "IBAN બેંક એકાઉન્ટ નંબર",
+        "eu_vat": "EU VAT નંબરો",
+        "es_dni_nie": "સ્પેનિશ DNI / NIE",
+        "it_codice_fiscale": "ઇટાલિયન કોડિસ ફિસ્કેલ",
+        "pl_pesel": "પોલિશ PESEL",
+        "nl_bsn": "ડચ BSN",
+        "de_steuer_id": "જર્મન Steuer-ID",
+        "se_personnummer": "સ્વીડિશ વ્યક્તિ સંખ્યા",
+        "za_id": "દક્ષિણ આફ્રિકાના ID નંબરો",
+        "za_phone": "દક્ષિણ આફ્રિકાના ફોન નંબર",
+        "za_vat": "દક્ષિણ આફ્રિકાના VAT નંબરો",
+        "za_tax_ref": "દક્ષિણ આફ્રિકાના કર સંદર્ભો"
       },
       "customPatterns": "કસ્ટમ પેટર્ન",
       "customPatternsDesc": "મેળ [CUSTOM_REDACTED] થી બદલાય છે. વધુમાં વધુ {max} પેટર્ન. વિનાશક બેકટ્રેકિંગના જોખમવાળા પેટર્ન નકારવામાં આવે છે.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth કન્ફિગર નથી કરવામાં આવ્યું. {applicationsUrl} પર એક OAuth એપ્લિકેશન નોંધણી કરો જેમાં રીડાયરેક્ટ URI {redirectUri} અને સ્કોપ્સ \"{scopes}\" છે, પછી {clientIdEnv} (અને વૈકલ્પિક રીતે {clientSecretEnv}) સેટ કરો અને પુનઃપ્રારંભ કરો.",
     "gitlabDuoSetupDescription": "આ એપ્લિકેશન નોંધણી થયા પછી અને આ OmniRoute ઉદાહરણ પર env vars સેટ થયા પછી, OAuth લોગિન શરૂ કરવા માટે ચાલુ રાખવા માટે ક્લિક કરો.",
     "continue": "ચાલુ રાખો",
+    "copilotPolicyTitle": "પ્રાયોગિક પ્રદાતા: નીતિની સ્થિતિ અસ્પષ્ટ છે",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com દ્વારા જોડાય છે, જે GitHub એ સામાન્ય તૃતીય-પક્ષ અનુમાન API તરીકે પ્રકાશિત કર્યું નથી. આ એકીકરણ પ્રાયોગિક છે અને સૂચના વિના બદલાઈ શકે છે.",
+    "copilotPolicyLine2": "ફક્ત તમારું પોતાનું GitHub એકાઉન્ટ જ કનેક્ટ થઈ શકે છે. ઓળખપત્રો, પૂલ એકાઉન્ટ્સ ક્યારેય શેર કરશો નહીં અથવા તમારી યોજનાની મર્યાદા ઓળંગવાનો પ્રયાસ કરશો નહીં.",
+    "copilotPolicyLine3": "ફ્રી અને સ્ટુડન્ટ પ્લાન યુઝર્સ માત્ર ઓટોમેટિક મોડલ સિલેક્શન મેળવે છે. તમારી Copilot યોજનાની શરતો અને કોઈપણ ઉપયોગ મર્યાદા તમારી જવાબદારી રહે છે.",
+    "copilotPolicyAcknowledge": "હું સમજું છું, કનેક્ટ કરો",
     "tabPasteSetupToken": "સેટઅપ ટોકન",
     "claudeSetupTokenDescription": "ટર્મિનલમાં `claude setup-token` ચલાવો અને તે જે ટોકન છાપે તે પેસ્ટ કરો. તે એક વર્ષ માટે માન્ય છે અને તેમાં કોઈ રિફ્રેશ ટોકન નથી. સાચવતા પહેલાં OmniRoute Anthropic ને એક પરીક્ષણ વિનંતી મોકલે છે.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "પ્રદાતા આંકડા",
     "description": "પ્રતિ-પ્રદાતા અને પ્રતિ-મોડલ ટ્રાફિક, વિલંબ અને સફળતા દર",
     "combo": "કોમ્બો",
-    "toggleModels": "{provider} માટે મોડલ્સ બતાવો"
+    "toggleModels": "{provider} માટે મોડલ્સ બતાવો",
+    "windowSince": "{date} થી"
   },
   "relay": {
     "title": "સર્વરલેસ રિલે પ્રોક્સીઝ",

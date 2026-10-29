@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "בשימוש ב-{count} שילובים: {combos}",
+    "openComboTooltip": "פתח שילובים — בשימוש על ידי {combo}"
   },
   "settings": {
     "title": "הגדרות",
@@ -8938,7 +8940,9 @@
         "financial": "פיננסי",
         "brazilian": "ברזילאי",
         "usa": "ארה״ב",
-        "full": "מלא"
+        "full": "מלא",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (דרום אפריקה)"
       },
       "builtinTypes": "סוגים מובנים",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "כתובות IPv4",
         "ipv6_address": "כתובות IPv6",
         "aws_key": "מפתחות גישה של AWS",
-        "api_key_generic": "מפתחות API ואסימונים"
+        "api_key_generic": "מפתחות API ואסימונים",
+        "iban": "מספרי חשבון בנק IBAN",
+        "eu_vat": "מספרי EU VAT",
+        "es_dni_nie": "DNI / NIE ספרדית",
+        "it_codice_fiscale": "Codice Fiscale האיטלקי",
+        "pl_pesel": "PESEL פולנית",
+        "nl_bsn": "BSN הולנדי",
+        "de_steuer_id": "גרמנית Steuer-ID",
+        "se_personnummer": "מספר אישי שוודי",
+        "za_id": "מספרי ID דרום אפריקאים",
+        "za_phone": "מספרי טלפון בדרום אפריקה",
+        "za_vat": "מספרי VAT דרום אפריקאים",
+        "za_tax_ref": "אסמכתאות מס בדרום אפריקה"
       },
       "customPatterns": "תבניות מותאמות אישית",
       "customPatternsDesc": "התאמות מוחלפות ב-[CUSTOM_REDACTED]. עד {max} תבניות. תבניות בסיכון לחזרה לאחור קטסטרופלית נדחות.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth לא מוגדר. רישום אפליקציית OAuth ב-{applicationsUrl} עם URI הפניה {redirectUri} וסקופים \"{scopes}\", ואז הגדר את {clientIdEnv} (ואופציונלית את {clientSecretEnv}) והפעל מחדש.",
     "gitlabDuoSetupDescription": "לאחר שהיישום נרשם והמשתנים הסביבתיים הוגדרו על מופע ה-OmniRoute הזה, לחץ על המשך כדי להתחיל את הכניסה באמצעות OAuth.",
     "continue": "להמשיך",
+    "copilotPolicyTitle": "ספק ניסיוני: סטטוס הפוליסה אינו ברור",
+    "copilotPolicyLine1": "OmniRoute מתחבר דרך api.githubcopilot.com, אשר GitHub לא פרסמה כהסקת צד שלישי כללית API. שילוב זה הוא ניסיוני ועשוי להשתנות ללא הודעה מוקדמת.",
+    "copilotPolicyLine2": "רק חשבון GitHub משלך יכול להיות מחובר. לעולם אל תשתף אישורים, חשבונות מאגר, או תנסה לחרוג ממגבלות התוכנית שלך.",
+    "copilotPolicyLine3": "משתמשי חינם ותוכנית סטודנטים מקבלים בחירת דגם אוטומטית בלבד. תנאי תוכנית Copilot שלך וכל מגבלת שימוש נשארים באחריותך.",
+    "copilotPolicyAcknowledge": "אני מבין, תתחבר",
     "tabPasteSetupToken": "אסימון הגדרה",
     "claudeSetupTokenDescription": "הריצו `claude setup-token` במסוף והדביקו את האסימון שהוא מדפיס. הוא תקף לשנה אחת ואין לו אסימון רענון. OmniRoute שולח בקשת בדיקה אחת ל-Anthropic לפני שמירתו.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "סטטיסטיקות ספקים",
     "description": "תעבורה, זמני השהיה ושיעורי הצלחה לפי ספק ולפי מודל",
     "combo": "משולב",
-    "toggleModels": "הצגת מודלים עבור {provider}"
+    "toggleModels": "הצגת מודלים עבור {provider}",
+    "windowSince": "מאז {date}"
   },
   "relay": {
     "title": "פרוקסי Relay ללא שרת",

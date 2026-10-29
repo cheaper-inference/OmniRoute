@@ -166,12 +166,18 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "081",
     toName: "inspector_custom_hosts",
   },
-  // This PR's earlier head used 215 before the release reserved it for Teams.
-  // Rehome only the exact Codex ledger row; canonical Team rows must stay at 215.
+  // Earlier PR heads used 215 and 217 before Teams and quota recovery landed.
+  // Rehome only exact Codex ledger rows; both canonical release features keep their slots.
   {
     fromVersion: "215",
     fromName: "codex_connection_fences",
-    toVersion: "217",
+    toVersion: "218",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "217",
+    fromName: "codex_connection_fences",
+    toVersion: "218",
     toName: "codex_connection_fences",
   },
   // PR #10409 circulated through these draft slots before the current release

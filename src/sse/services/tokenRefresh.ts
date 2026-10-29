@@ -1,8 +1,11 @@
 // Re-export from open-sse with local logger
 import * as log from "../utils/logger";
+import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
 import {
   captureCodexConnectionFence,
+  captureCodexConnectionOwnerFence,
+  adoptCodexConnectionFence,
   runWithCodexConnectionFence,
   getCodexOperationFence,
   isCodexConnectionFenceCurrent,
@@ -91,7 +94,9 @@ export const refreshAccessToken = async (
   refreshToken: string,
   credentials: any
 ) => {
-  const proxy = await resolveProxyForCredentials(provider, credentials);
+  const proxy = passive.isPassiveCodex(provider)
+    ? null
+    : await resolveProxyForCredentials(provider, credentials);
   return _refreshAccessToken(provider, refreshToken, credentials, log, proxy);
 };
 
@@ -112,6 +117,7 @@ export const refreshGoogleToken = async (
 };
 
 export const refreshCodexToken = async (refreshToken: string, credentials?: any) => {
+  if (passive.isPassiveCodex("codex")) return passive.resolvePassiveCodex(credentials);
   const proxy = await resolveProxyForCredentials("codex", credentials);
   return _refreshCodexToken(refreshToken, log, proxy);
 };
@@ -159,12 +165,16 @@ export const getAccessToken = async (
   credentials: any,
   onPersist?: (result: any) => Promise<void>
 ) => {
-  const proxy = await resolveProxyForCredentials(provider, credentials);
+  const proxy = passive.isPassiveCodex(provider)
+    ? null
+    : await resolveProxyForCredentials(provider, credentials);
   return _getAccessToken(provider, credentials, log, proxy, onPersist);
 };
 
 export const refreshTokenByProvider = async (provider: string, credentials: any) => {
-  const proxy = await resolveProxyForCredentials(provider, credentials);
+  const proxy = passive.isPassiveCodex(provider)
+    ? null
+    : await resolveProxyForCredentials(provider, credentials);
   return _refreshTokenByProvider(provider, credentials, log, proxy);
 };
 
@@ -278,7 +288,12 @@ export async function updateProviderCredentials(
 
 // Local-specific: Check and refresh token proactively
 export async function checkAndRefreshToken(provider: string, credentials: any) {
-  const fence = provider === "codex" ? captureCodexConnectionFence(credentials) : null;
+  const fence =
+    provider === "codex"
+      ? (passive.isPassiveCodex(provider)
+          ? captureCodexConnectionOwnerFence
+          : captureCodexConnectionFence)(credentials)
+      : null;
   return runWithCodexConnectionFence(fence, () => checkAndRefreshTokenInner(provider, credentials));
 }
 async function checkAndRefreshTokenInner(provider: string, credentials: any) {
@@ -337,7 +352,14 @@ async function checkAndRefreshTokenInner(provider: string, credentials: any) {
       const newCredentials = await getAccessToken(provider, updatedCredentials, persistCallback);
 
       if (newCredentials && newCredentials.accessToken) {
-        adoptCommittedRefresh(newCredentials);
+        if (passive.isPassiveCodex(provider)) {
+          resultFence = adoptCodexConnectionFence(resultFence, updatedCredentials, {
+            ...updatedCredentials,
+            ...newCredentials,
+          });
+        } else {
+          adoptCommittedRefresh(newCredentials);
+        }
         // For the no-connectionId path (no mutex, no onPersist), persist here as before.
         if (!connectionId) {
           await updateProviderCredentials(updatedCredentials.connectionId, newCredentials);
@@ -345,6 +367,7 @@ async function checkAndRefreshTokenInner(provider: string, credentials: any) {
 
         updatedCredentials = {
           ...updatedCredentials,
+          ...(passive.isPassiveCodex(provider) ? newCredentials : {}),
           accessToken: newCredentials.accessToken,
           refreshToken: newCredentials.refreshToken || updatedCredentials.refreshToken,
           expiresAt: newCredentials.expiresAt

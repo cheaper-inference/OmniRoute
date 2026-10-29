@@ -25,6 +25,7 @@ import GheConfigStep from "@/shared/components/oauthModal/GheConfigStep";
 import GitlabDuoSetupStep from "@/shared/components/oauthModal/GitlabDuoSetupStep";
 import OAuthErrorStep from "@/shared/components/oauthModal/OAuthErrorStep";
 import OAuthWaitingStep from "@/shared/components/oauthModal/OAuthWaitingStep";
+import CopilotPolicyStep from "@/shared/components/oauthModal/CopilotPolicyStep";
 import { getPasteTokenCopyKeys } from "@/shared/components/oauthModal/pasteTokenCopy";
 import { parseGrokCliPasteToken } from "@/lib/oauth/utils/grokCliAuthJson";
 import { buildGoogleLoopbackHint } from "@/lib/oauth/utils/googleLoopbackHint";
@@ -53,6 +54,7 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "kimi-coding",
   "kilocode",
   "codebuddy-cn",
+  "freebuff",
   "codebuddy-intl",
   "ghe-copilot",
   "grok-cli",
@@ -168,6 +170,9 @@ export default function OAuthModal({
   // DEVICE_CODE_PROVIDERS); flipping this to true routes startOAuthFlow through
   // the browser PKCE / PKCE_CALLBACK_SERVER_PROVIDERS branch instead.
   const [grokBrowserMode, setGrokBrowserMode] = useState(false);
+  // github only: gate the device-code flow behind the policy-ambiguous disclosure.
+  // Flipped to true when the user clicks "I understand — Connect" in CopilotPolicyStep.
+  const [copilotPolicyAcknowledged, setCopilotPolicyAcknowledged] = useState(false);
   // #8046 follow-up: structured diagnosis for the LAN-IP loopback mismatch, rendered
   // by its own step instead of as prose inside the generic red error step.
   const [loopbackHint, setLoopbackHint] = useState<PkceLoopbackMismatchHint | null>(null);
@@ -404,6 +409,12 @@ export default function OAuthModal({
           setIsDeviceCode(true);
           setDeviceData(null);
           setStep("waiting");
+
+          // GitHub Copilot: show policy-ambiguous disclosure before requesting credentials.
+          if (provider === "github" && !copilotPolicyAcknowledged) {
+            setStep("copilot-policy");
+            return;
+          }
 
           // GHE Copilot needs the enterprise URL collected first (see ghe-config step)
           if (provider === "ghe-copilot" && !gheUrl.trim()) {
@@ -646,6 +657,7 @@ export default function OAuthModal({
       gheUrl,
       invalidateDeviceFlow,
       grokBrowserMode,
+      copilotPolicyAcknowledged,
       t,
     ]
   );
@@ -1095,6 +1107,17 @@ export default function OAuthModal({
         {/* OAuth flow steps — hidden when paste-token mode is active */}
         {(!supportsTokenPaste || !showPasteToken) && (
           <>
+            {/* GitHub Copilot: policy-ambiguous disclosure before device-code flow */}
+            {provider === "github" && step === "copilot-policy" && (
+              <CopilotPolicyStep
+                startOAuthFlow={() => {
+                  setCopilotPolicyAcknowledged(true);
+                  void startOAuthFlow();
+                }}
+                onClose={handleClose}
+              />
+            )}
+
             {/* GHE Copilot: collect the GitHub Enterprise base URL before starting */}
             {provider === "ghe-copilot" && step === "ghe-config" && (
               <GheConfigStep

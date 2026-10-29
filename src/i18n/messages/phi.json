@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Ginagamit sa {count} combo: {combos}",
+    "openComboTooltip": "Buksan ang Mga combo — ginagamit ng {combo}"
   },
   "settings": {
     "title": "Mga setting",
@@ -8938,7 +8940,9 @@
         "financial": "Pampinansiyal",
         "brazilian": "Pang-Brazil",
         "usa": "Estados Unidos",
-        "full": "Kumpleto"
+        "full": "Kumpleto",
+        "gdpr": "GDPR (Unyong Europeo)",
+        "popia": "POPIA (Timog Aprika)"
       },
       "builtinTypes": "Mga built-in na uri",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Mga IPv4 address",
         "ipv6_address": "Mga IPv6 address",
         "aws_key": "Mga access key ng AWS",
-        "api_key_generic": "Mga API key at token"
+        "api_key_generic": "Mga API key at token",
+        "iban": "Mga numero ng bank account (IBAN)",
+        "eu_vat": "Mga numero ng VAT ng EU",
+        "es_dni_nie": "DNI / NIE ng Espanya",
+        "it_codice_fiscale": "Codice Fiscale ng Italya",
+        "pl_pesel": "PESEL ng Poland",
+        "nl_bsn": "BSN ng Netherlands",
+        "de_steuer_id": "Steuer-ID ng Alemanya",
+        "se_personnummer": "Personnummer ng Sweden",
+        "za_id": "Mga numero ng ID sa Timog Aprika",
+        "za_phone": "Mga numero ng telepono sa Timog Aprika",
+        "za_vat": "Mga numero ng VAT sa Timog Aprika",
+        "za_tax_ref": "Mga reperensya sa buwis sa Timog Aprika"
       },
       "customPatterns": "Mga custom na pattern",
       "customPatternsDesc": "Ang mga tugma ay papalitan ng [CUSTOM_REDACTED]. Hanggang {max} pattern. Tinatanggihan ang mga pattern na may panganib ng sakunang backtracking.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "Hindi naka-configure ang GitLab Duo OAuth. Magrehistro ng isang OAuth application sa {applicationsUrl} na may redirect URI na {redirectUri} at mga scope na \"{scopes}\", pagkatapos ay itakda ang {clientIdEnv} (at opsyonal na {clientSecretEnv}) at i-restart.",
     "gitlabDuoSetupDescription": "Matapos mairehistro ang aplikasyon at ma-set ang mga env vars sa instance na ito ng OmniRoute, i-click ang Magpatuloy upang simulan ang OAuth login.",
     "continue": "Magpatuloy",
+    "copilotPolicyTitle": "Eksperimental na provider: ang katayuan ng patakaran ay hindi maliwanag",
+    "copilotPolicyLine1": "kumokonekta ang OmniRoute sa pamamagitan ng api.githubcopilot.com, na hindi nai-publish ng GitHub bilang pangkalahatang third-party na hinuha API. Ang pagsasamang ito ay pang-eksperimento at maaaring magbago nang walang abiso.",
+    "copilotPolicyLine2": "Tanging ang iyong sariling GitHub account ang maaaring konektado. Huwag kailanman magbahagi ng mga kredensyal, pool account, o subukang lumampas sa mga limitasyon ng iyong plano.",
+    "copilotPolicyLine3": "Ang mga gumagamit ng libre at Student plan ay tumatanggap lamang ng awtomatikong pagpili ng modelo. Ang iyong mga tuntunin sa Copilot plan at anumang limitasyon sa paggamit ay mananatiling responsibilidad mo.",
+    "copilotPolicyAcknowledge": "Naiintindihan ko, kumonekta",
     "tabPasteSetupToken": "Setup token",
     "claudeSetupTokenDescription": "Patakbuhin ang `claude setup-token` sa isang terminal at i-paste ang token na ipi-print nito. Valid ito sa loob ng isang taon at walang refresh token. Nagpapadala ang OmniRoute ng isang test request sa Anthropic bago ito i-save.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Mga istatistika ng provider",
     "description": "Trapiko, latency, at mga rate ng tagumpay kada provider at kada modelo",
     "combo": "Kombinasyon",
-    "toggleModels": "Ipakita ang mga modelo para sa {provider}"
+    "toggleModels": "Ipakita ang mga modelo para sa {provider}",
+    "windowSince": "Mula {date}"
   },
   "relay": {
     "title": "Mga Serverless Relay Proxy",

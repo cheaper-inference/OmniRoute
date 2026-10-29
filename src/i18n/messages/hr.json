@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Koristi se u {count} kombinacija: {combos}",
+    "openComboTooltip": "Otvori Kombinacije — koristi {combo}"
   },
   "settings": {
     "title": "Postavke",
@@ -8938,7 +8940,9 @@
         "financial": "Financijski",
         "brazilian": "Brazilski",
         "usa": "SAD",
-        "full": "Potpuni"
+        "full": "Potpuni",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Južna Afrika)"
       },
       "builtinTypes": "Ugrađene vrste",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 adrese",
         "ipv6_address": "IPv6 adrese",
         "aws_key": "AWS pristupni ključevi",
-        "api_key_generic": "API ključevi i tokeni"
+        "api_key_generic": "API ključevi i tokeni",
+        "iban": "IBAN brojevi bankovnih računa",
+        "eu_vat": "EU VAT brojevi",
+        "es_dni_nie": "španjolski DNI / NIE",
+        "it_codice_fiscale": "talijanski Codice Fiscale",
+        "pl_pesel": "poljski PESEL",
+        "nl_bsn": "nizozemski BSN",
+        "de_steuer_id": "njemački Steuer-ID",
+        "se_personnummer": "švedski personnummer",
+        "za_id": "Južnoafrički ID brojevi",
+        "za_phone": "Južnoafrički telefonski brojevi",
+        "za_vat": "Južnoafrički VAT brojevi",
+        "za_tax_ref": "Južnoafričke porezne reference"
       },
       "customPatterns": "Prilagođeni uzorci",
       "customPatternsDesc": "Podudaranja se zamjenjuju s [CUSTOM_REDACTED]. Najviše {max} uzoraka. Uzorci s rizikom katastrofalnog vraćanja se odbijaju.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth nije konfiguriran. Registrirajte OAuth aplikaciju na {applicationsUrl} s URI-jem za preusmjeravanje {redirectUri} i opsezima \"{scopes}\", zatim postavite {clientIdEnv} (i po želji {clientSecretEnv}) te ponovno pokrenite.",
     "gitlabDuoSetupDescription": "Nakon što registrirate aplikaciju i postavite varijable okoline na ovoj instanci sustava OmniRoute, kliknite Nastavi kako biste pokrenuli OAuth prijavu.",
     "continue": "Nastavi",
+    "copilotPolicyTitle": "Eksperimentalni pružatelj: status pravila je dvosmislen",
+    "copilotPolicyLine1": "OmniRoute se povezuje putem api.githubcopilot.com, što GitHub nije objavio kao opći zaključak treće strane API. Ova je integracija eksperimentalna i može se promijeniti bez prethodne najave.",
+    "copilotPolicyLine2": "Samo vaš vlastiti GitHub račun može biti povezan. Nikada ne dijelite vjerodajnice, skupljajte račune niti pokušavajte premašiti ograničenja plana.",
+    "copilotPolicyLine3": "Korisnici besplatnog i studentskog paketa dobivaju samo automatski odabir modela. Vaši uvjeti Copilot plana i sva ograničenja upotrebe ostaju vaša odgovornost.",
+    "copilotPolicyAcknowledge": "Razumijem, povežite se",
     "tabPasteSetupToken": "Token za postavljanje",
     "claudeSetupTokenDescription": "Pokrenite `claude setup-token` u terminalu i zalijepite token koji ispiše. Vrijedi godinu dana i nema token za osvježavanje. OmniRoute šalje jedan testni zahtjev Anthropicu prije nego što ga spremi.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Statistika pružatelja",
     "description": "Promet, latencija i stope uspješnosti po pružatelju i modelu",
     "combo": "Kombinirano",
-    "toggleModels": "Prikaži modele za {provider}"
+    "toggleModels": "Prikaži modele za {provider}",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Relejni proxyji bez poslužitelja",

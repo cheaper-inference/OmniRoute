@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Ana amfani da shi a cikin haɗe-haɗe {count}: {combos}",
+    "openComboTooltip": "Buɗe Haɗe-haɗe — {combo} na amfani da shi"
   },
   "settings": {
     "title": "Saituna",
@@ -8938,7 +8940,9 @@
         "financial": "Na kuɗi",
         "brazilian": "Na Brazil",
         "usa": "Amurka",
-        "full": "Cikakke"
+        "full": "Cikakke",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Afirka ta kudu)"
       },
       "builtinTypes": "Nau'ikan da aka gina",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Adiresoshin IPv4",
         "ipv6_address": "Adiresoshin IPv6",
         "aws_key": "Maɓallan shiga na AWS",
-        "api_key_generic": "Maɓallan API da alamomi"
+        "api_key_generic": "Maɓallan API da alamomi",
+        "iban": "IBAN lambobin asusun banki",
+        "eu_vat": "VAT EU",
+        "es_dni_nie": "Mutanen Espanya DNI / NIE",
+        "it_codice_fiscale": "Italian Codece Fiscale",
+        "pl_pesel": "Yaren mutanen Poland PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "Jamus Steuer-ID",
+        "se_personnummer": "ma'aikacin Sweden",
+        "za_id": "Lambobin ID na Afirka ta Kudu",
+        "za_phone": "Lambobin wayar Afirka ta Kudu",
+        "za_vat": "Lambobin VAT na Afirka ta Kudu",
+        "za_tax_ref": "Bayanan haraji na Afirka ta Kudu"
       },
       "customPatterns": "Tsare-tsaren al'ada",
       "customPatternsDesc": "Ana maye gurbin abubuwan da suka dace da [CUSTOM_REDACTED]. Har zuwa tsari {max}. Ana ƙin tsare-tsaren da ke da haɗarin koma-baya mai muni.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "Ba a saita GitLab Duo OAuth ba. Yi rajistar manhajar OAuth a {applicationsUrl} tare da URI na turawa {redirectUri} da scopes \"{scopes}\", sannan saita {clientIdEnv} (da kuma {clientSecretEnv} idan ana so) kuma sake kunnawa.",
     "gitlabDuoSetupDescription": "Bayan an yi rajistar manhajar kuma an saita environment variables a wannan shigarwar OmniRoute, danna Ci gaba don fara shiga ta OAuth.",
     "continue": "Ci gaba",
+    "copilotPolicyTitle": "Mai ba da gwaji: Matsayin manufofin ba shi da tabbas",
+    "copilotPolicyLine1": "OmniRoute yana haɗi ta hanyar api.githubcopilot.com, wanda GitHub bai buga ba a matsayin babban fa'ida na ɓangare na uku API. Wannan haɗin gwiwar gwaji ne kuma yana iya canzawa ba tare da sanarwa ba.",
+    "copilotPolicyLine2": "Za a iya haɗa asusun GitHub naka kawai. Kada ku taɓa raba takaddun shaida, asusun ajiya, ko ƙoƙarin wuce iyakokin shirinku.",
+    "copilotPolicyLine3": "Masu amfani da shirin kyauta da ɗalibi suna karɓar zaɓin ƙira ta atomatik kawai. Sharuɗɗan shirin Copilot ɗinku da kowane iyakokin amfani sun kasance alhakinku.",
+    "copilotPolicyAcknowledge": "Na fahimta, haɗa",
     "tabPasteSetupToken": "Alamar saitin",
     "claudeSetupTokenDescription": "Gudanar da `claude setup-token` a cikin tasha kuma liƙa alamar da ya buga. Tana aiki na shekara ɗaya kuma ba ta da alamar sabuntawa. OmniRoute yana aika buƙatar gwaji ɗaya zuwa Anthropic kafin ya adana ta.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Ƙididdigar masu samarwa",
     "description": "Zirga-zirga, jinkiri da ƙimar nasara ta kowane mai samarwa da kowane samfuri",
     "combo": "Haɗaka",
-    "toggleModels": "Nuna samfura na {provider}"
+    "toggleModels": "Nuna samfura na {provider}",
+    "windowSince": "Tun {date}"
   },
   "relay": {
     "title": "Proxies na Relay Marasa Sabar",

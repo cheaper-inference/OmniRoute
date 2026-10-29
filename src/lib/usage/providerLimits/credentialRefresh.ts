@@ -1,8 +1,11 @@
 import { updateProviderConnection } from "@/lib/db/providers";
 import {
   captureCodexConnectionFence,
+  captureCodexConnectionOwnerFence,
+  adoptCodexConnectionFence,
   StaleCodexOperationError,
 } from "@/lib/db/codexConnectionFences";
+import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import type { BaseExecutor } from "@omniroute/open-sse/executors/base";
 import {
   isUnrecoverableRefreshError,
@@ -108,13 +111,15 @@ export async function refreshAndUpdateCredentialsWithResolver(
   connection: ProviderConnectionLike,
   resolveExecutor: CredentialExecutorResolver,
   opts: CredentialRefreshOptions = {}
-) {
+): Promise<{ connection: ProviderConnectionLike; refreshed: boolean; adopted?: boolean }> {
   if (!shouldAttemptRotatingRefresh(connection.provider, opts.allowRotatingRefresh)) {
     return { connection, refreshed: false };
   }
   const fence =
     connection.provider === "codex"
-      ? captureCodexConnectionFence(connection as unknown as JsonRecord, connection.id)
+      ? (passive.isPassiveCodex(connection.provider)
+          ? captureCodexConnectionOwnerFence
+          : captureCodexConnectionFence)(connection as unknown as JsonRecord, connection.id)
       : null;
   const executor = await resolveExecutor(connection.provider);
   const credentials = {
@@ -129,6 +134,21 @@ export async function refreshAndUpdateCredentialsWithResolver(
 
   if (!opts.force && !executor.needsRefresh(credentials)) {
     return { connection, refreshed: false };
+  }
+
+  if (passive.isPassiveCodex(connection.provider)) {
+    const adopted = await passive.adoptPassiveCodex(connection);
+    adoptCodexConnectionFence(
+      fence,
+      connection as unknown as JsonRecord,
+      adopted as unknown as JsonRecord,
+      connection.id
+    );
+    return {
+      connection: adopted,
+      refreshed: false,
+      adopted: adopted.accessToken !== connection.accessToken,
+    };
   }
 
   const refreshResult = (await serializeRefresh(connection.provider, () =>

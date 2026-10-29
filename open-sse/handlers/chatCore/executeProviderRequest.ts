@@ -41,6 +41,8 @@ import {
   bindCodexResponseFence,
   inheritCodexResponseFence,
   isCodexConnectionFenceCurrent,
+  isCodexResponseCurrent,
+  runWithCodexResponseFence,
   StaleCodexOperationError,
 } from "@/lib/db/codexConnectionFences";
 import { invalidateQuotaCacheOnStatus } from "../../services/genericQuotaFetcher.ts";
@@ -206,6 +208,28 @@ export async function executeProviderRequest(
     userAgent: _userAgent,
   } = deps;
   const body = rawBody;
+  const recordResponseKeyHealth = (
+    response: Response,
+    creds: Record<string, unknown>,
+    transport?: string,
+    failureDetail = ""
+  ) => {
+    if (!isCodexResponseCurrent(response, response.ok)) return;
+    runWithCodexResponseFence(
+      response,
+      () =>
+        recordKeyHealthStatus(
+          response.status,
+          creds,
+          transport,
+          failureDetail,
+          response.status === HTTP_STATUS.RATE_LIMITED
+            ? parseRetryAfterMs(response.headers.get("retry-after"))
+            : null
+        ),
+      response.ok
+    );
+  };
   const execute = async () => {
     // Upstream body preparation extracted to chatCore/upstreamBody.ts (#3501 — first internal
     // sub-slice of executeProviderRequest); produces the body sent upstream (payload rules +
@@ -475,15 +499,7 @@ export async function executeProviderRequest(
                     .clone()
                     .text()
                     .catch(() => "");
-              recordKeyHealthStatus(
-                res.response.status,
-                execCreds,
-                res.transport,
-                failureDetail,
-                res.response.status === HTTP_STATUS.RATE_LIMITED
-                  ? parseRetryAfterMs(res.response.headers.get("retry-after"))
-                  : null
-              );
+              recordResponseKeyHealth(res.response, execCreds, res.transport, failureDetail);
             }
 
             if (isModelScope() && res.response.status === 429 && attempts < maxAttempts - 1) {
@@ -656,13 +672,16 @@ export async function executeProviderRequest(
               return {
                 ...res,
                 _executionCredentials: execCreds,
-                response: inheritEmptyTurnPolicy(
+                response: inheritCodexResponseFence(
                   res.response,
-                  new Response(clientBody, {
-                    status: res.response.status,
-                    statusText: res.response.statusText,
-                    headers: new Headers(normalizeHeaders(res.response.headers)),
-                  })
+                  inheritEmptyTurnPolicy(
+                    res.response,
+                    new Response(clientBody, {
+                      status: res.response.status,
+                      statusText: res.response.statusText,
+                      headers: new Headers(normalizeHeaders(res.response.headers)),
+                    })
+                  )
                 ),
               };
             }
@@ -717,14 +736,11 @@ export async function executeProviderRequest(
         rawResult._executionCredentials?.connectionId &&
         (rawResult._executionCredentials.apiKey || rawResult._executionCredentials.accessToken)
       ) {
-        recordKeyHealthStatus(
-          status,
+        recordResponseKeyHealth(
+          rawResult.response,
           rawResult._executionCredentials,
           rawResult.transport,
-          status >= 400 ? payload : "",
-          status === HTTP_STATUS.RATE_LIMITED
-            ? parseRetryAfterMs(responseHeaders.get("retry-after"))
-            : null
+          status >= 400 ? payload : ""
         );
       }
       releaseRawResultAccountSemaphore();

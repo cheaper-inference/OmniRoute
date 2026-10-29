@@ -8,6 +8,7 @@ export interface CodexConnectionFence {
   readonly ownerEpoch: string;
   readonly credentialRevision: number;
   readonly failureRevision: number;
+  readonly connectionBinding: string;
 }
 type Operation = Readonly<{ fence: CodexConnectionFence; recovery: boolean }>;
 // Immutable per-operation scopes, never a mutable connection-id -> current-owner map.
@@ -35,6 +36,7 @@ function fenceFor(row: RecordValue): CodexConnectionFence {
     ownerEpoch: String(row.fenceOwnerEpoch),
     credentialRevision: Number(row.fenceCredentialRevision),
     failureRevision: Number(row.fenceFailureRevision),
+    connectionBinding: JSON.stringify([row.isActive, row.proxyEnabled, row.perKeyProxyEnabled]),
   });
 }
 export class StaleCodexOperationError extends Error {
@@ -68,6 +70,36 @@ export function captureCodexConnectionFence(
       throw new StaleCodexOperationError();
   }
   return fenceFor(row);
+}
+/** Owner-only preflight for passive reads; never authorizes a dispatch or write by itself. */
+export function captureCodexConnectionOwnerFence(
+  credentials: RecordValue,
+  id?: string
+): CodexConnectionFence | null {
+  const owner = { ...credentials };
+  delete owner.accessToken;
+  delete owner.refreshToken;
+  return captureCodexConnectionFence(owner, id);
+}
+/** Adopt only a current synchronized token for the same uninterrupted owner/binding. */
+export function adoptCodexConnectionFence(
+  previous: CodexConnectionFence | null,
+  credentials: RecordValue,
+  adopted: RecordValue,
+  id?: string
+): CodexConnectionFence | null {
+  const current = captureCodexConnectionFence(adopted, id);
+  if (
+    previous &&
+    (!current ||
+      current.ownerEpoch !== previous.ownerEpoch ||
+      current.failureRevision !== previous.failureRevision ||
+      current.connectionBinding !== previous.connectionBinding ||
+      (current.credentialRevision !== previous.credentialRevision &&
+        (!adopted.accessToken || adopted.accessToken === credentials.accessToken)))
+  )
+    throw new StaleCodexOperationError();
+  return current;
 }
 /** Internal durable version read; callers bind this to their own write inside its transaction. */
 export function readCodexQuotaOwner(id: string): { epoch: string; replaced: boolean } | null {

@@ -1,4 +1,5 @@
 import { finalizeTranslatedRequest } from "./chatCore/translatedRequestFinalize.ts";
+import { isPassiveCodex, adoptPassiveCodex } from "../services/tokenRefresh/passiveCodex.ts";
 import {
   injectMemoryAndSkills,
   mergeInjectedFallbackOwnerNames,
@@ -304,6 +305,8 @@ import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
 import {
   captureCodexConnectionFence,
+  captureCodexConnectionOwnerFence,
+  adoptCodexConnectionFence,
   runWithCodexConnectionFence,
   bindCodexResponseFence,
   getCodexOperationFence,
@@ -351,8 +354,17 @@ export async function handleChatCore(args: Parameters<typeof handleChatCoreInner
   // One immutable owner snapshot for this invocation, including delayed stream callbacks.
   let fence: CodexConnectionFence | null = null;
   try {
-    if (args.modelInfo?.provider === "codex")
-      fence = captureCodexConnectionFence(args.credentials ?? {}, args.connectionId);
+    if (args.modelInfo?.provider === "codex") {
+      if (isPassiveCodex("codex")) {
+        const credentials = args.credentials ?? {};
+        fence = captureCodexConnectionOwnerFence(credentials, args.connectionId);
+        const adopted = await adoptPassiveCodex(credentials);
+        fence = adoptCodexConnectionFence(fence, credentials, adopted, args.connectionId);
+        if (args.credentials) Object.assign(args.credentials, adopted);
+      } else {
+        fence = captureCodexConnectionFence(args.credentials ?? {}, args.connectionId);
+      }
+    }
   } catch (error) {
     if (error instanceof StaleCodexOperationError)
       return createErrorResult(409, error.message, null, error.code);
@@ -398,6 +410,7 @@ async function handleChatCoreInner({
   managedLease = null,
   // Trusted management validation only; never populated from request body/headers.
   validationExecutorFence = null,
+  beforeUpstreamAttempt = undefined,
   // #12150 P1b: additive, optional video-bridge log/Memory shadow — shape is
   // VideoBridgeLogParam (defined near the top of this file). Built once in chat.ts from
   // preCallGuardrails.results (video-bridge guardrail meta) and threaded here
@@ -2448,8 +2461,8 @@ async function handleChatCoreInner({
   }
   // Get executor for this provider (with optional upstream proxy routing)
   const executor = await resolveExecutorWithProxy(provider);
-  const getExecutionCredentials = () =>
-    withApiKeyCodexServiceMode(
+  const getExecutionCredentials = () => {
+    const executionCredentials = withApiKeyCodexServiceMode(
       provider,
       withReasoningRuleContext(
         resolveExecutionCredentialsFor({
@@ -2466,6 +2479,9 @@ async function handleChatCoreInner({
       ),
       apiKeyCodexServiceMode
     );
+    beforeUpstreamAttempt?.(executionCredentials);
+    return executionCredentials;
+  };
 
   let onPipelineStreamError: streamFailure.PipelineStreamErrorHandler | null = null;
   let onClientDisconnectFinalize:
@@ -2706,6 +2722,19 @@ async function handleChatCoreInner({
     )) as null | Record<string, unknown>;
 
     if (newCredentials?.accessToken || newCredentials?.copilotToken) {
+      if (isPassiveCodex(provider)) {
+        try {
+          adoptCodexConnectionFence(
+            refreshFence, targetCredentials, { ...targetCredentials, ...newCredentials }
+          );
+        } catch (error) {
+          if (error instanceof StaleCodexOperationError) return null;
+          throw error;
+        }
+        Object.assign(targetCredentials, newCredentials);
+        Object.assign(credentials, newCredentials);
+        return newCredentials;
+      }
       if (refreshFence) {
         const persisted = await updateProviderConnection(refreshFence.connectionId, newCredentials, { expectedCodexFence: refreshFence });
         if (!persisted) return null;
@@ -2720,7 +2749,7 @@ async function handleChatCoreInner({
         Object.assign(credentials, newCredentials);
       }
       const errorConnectionId = String(getCurrentConnectionId() || connectionId || "");
-      if (errorConnectionId) {
+      if (errorConnectionId && !isPassiveCodex(provider)) {
         updateProviderConnection(errorConnectionId, newCredentials).catch(() => {});
       }
       return newCredentials;
@@ -2730,6 +2759,7 @@ async function handleChatCoreInner({
 
   const handleCredentialsRefreshed = async (refreshed: Record<string, unknown>) => {
     Object.assign(credentials, refreshed);
+    if (isPassiveCodex(provider)) return;
     if (!credentialRefreshPersistRan && onCredentialsRefreshed) {
       credentialRefreshPersistRan = true;
       const targetConnectionId =
@@ -2751,6 +2781,8 @@ async function handleChatCoreInner({
       }
     }
   };
+
+  if (isPassiveCodex(provider)) executeProviderRequestDeps.onCredentialsRefreshed = handleCredentialsRefreshed;
 
   const applyProviderFailureClassification = async ({
     statusCode,

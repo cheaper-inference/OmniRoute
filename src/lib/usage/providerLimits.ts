@@ -1,6 +1,7 @@
 import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
 import {
   captureCodexConnectionFence,
+  adoptCodexConnectionFence,
   runWithCodexConnectionFence,
   assertCodexOperationCurrent,
   isCodexConnectionFenceCurrent,
@@ -986,8 +987,15 @@ async function fetchLiveProviderLimitsWithOptions(
       });
       conn = result.connection;
       wasRefreshed = result.refreshed;
-      if (codexFence && wasRefreshed) {
-        codexFence = captureCodexConnectionFence(conn as unknown as JsonRecord, connectionId);
+      if (codexFence && (wasRefreshed || result.adopted)) {
+        codexFence = result.adopted
+          ? adoptCodexConnectionFence(
+              codexFence,
+              connection as unknown as JsonRecord,
+              conn as unknown as JsonRecord,
+              connectionId
+            )
+          : captureCodexConnectionFence(conn as unknown as JsonRecord, connectionId);
       }
 
       if (wasRefreshed) {
@@ -1010,11 +1018,22 @@ async function fetchLiveProviderLimitsWithOptions(
           allowRotatingRefresh: true,
           force: true,
         });
-        if (forced.refreshed) {
+        if (forced.refreshed || forced.adopted) {
+          if (codexFence) {
+            codexFence = forced.adopted
+              ? adoptCodexConnectionFence(
+                  codexFence,
+                  conn as unknown as JsonRecord,
+                  forced.connection as unknown as JsonRecord,
+                  connectionId
+                )
+              : captureCodexConnectionFence(
+                  forced.connection as unknown as JsonRecord,
+                  connectionId
+                );
+          }
           conn = forced.connection;
-          if (codexFence)
-            codexFence = captureCodexConnectionFence(conn as unknown as JsonRecord, connectionId);
-          await syncToCloudIfEnabled();
+          if (forced.refreshed) await syncToCloudIfEnabled();
           usageData = sanitizeUsageQuotasForProvider(
             conn.provider,
             (await getUsageForProvider(conn as unknown as JsonRecord, options)) as JsonRecord,

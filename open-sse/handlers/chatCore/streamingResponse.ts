@@ -1,4 +1,5 @@
 import { projectFailureUsageErrorCode } from "./failureUsage.ts";
+import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 
 export { extractSystemRoleMessages, relocateDirectiveOnlyMessages } from "./claudeSystemRole.ts";
 
@@ -13,7 +14,7 @@ import {
 import { recoverAnthropicThinkingSignature } from "../chatCore/thinkingSignatureRecovery.ts";
 import { runProviderExecutionPipeline } from "../chatCore/providerExecutionPipeline.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
-import { deleteSessionAccountAffinity } from "@/lib/db/sessionAccountAffinity";
+import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { buildStreamingResponseHeaders, stripStaleForwardingHeaders } from "./responseHeaders.ts";
 
 // Re-export the previously inline-defined helpers so existing importers of these
@@ -33,12 +34,7 @@ import { FORMATS } from "../../translator/formats.ts";
 
 import { COLORS } from "../../utils/stream.ts";
 
-import {
-  refreshWithRetry,
-  isUnrecoverableRefreshError,
-  runWithOnPersist,
-  runWithCasGuard,
-} from "../../services/tokenRefresh.ts";
+import * as tokens from "../../services/tokenRefresh.ts";
 
 import { runWithCapture } from "../../utils/providerRequestLogging.ts";
 
@@ -107,6 +103,11 @@ import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { createRequestFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
+import {
+  inheritCodexResponseFence,
+  isCodexResponseCurrent,
+  runWithCodexResponseFence,
+} from "@/lib/db/codexConnectionFences";
 
 /**
  * Core chat handler - shared between SSE and Worker
@@ -135,6 +136,14 @@ type Loose = any;
 export type StreamingDeps = Record<string, Loose>;
 
 export async function runStreamingResponse(deps: StreamingDeps) {
+  const result = await runStreamingResponseInner(deps);
+  if (result?.carry?.providerResponse && result.response?.response) {
+    inheritCodexResponseFence(result.carry.providerResponse, result.response.response);
+  }
+  return result;
+}
+
+async function runStreamingResponseInner(deps: StreamingDeps) {
   const {
     apiKeyInfo,
     persistAttemptLogs,
@@ -292,11 +301,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
             extractSessionAffinityKey(body, clientRawRequest?.headers) ||
             null;
           if (!key) return;
-          try {
-            deleteSessionAccountAffinity(key, "codex");
-          } catch {
-            // best-effort
-          }
+          deleteSessionAccountAffinityBestEffort(key, "codex");
         },
         onAuditAccountRotation: (params) => {
           logAuditEvent({
@@ -354,23 +359,25 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       providerUrl,
       stage: "provider_response_started",
     });
-    // Update rate limiter from response headers (learn limits dynamically)
-    updateFromHeaders(
-      provider,
-      responseConnectionId,
-      providerResponse.headers,
-      providerResponse.status,
-      model
-    );
+    // Ignore observations belonging to an obsolete Codex owner/credential.
+    if (isCodexResponseCurrent(providerResponse, providerResponse.ok))
+      updateFromHeaders(
+        provider,
+        responseConnectionId,
+        providerResponse.headers,
+        providerResponse.status,
+        model
+      );
 
     // Store rate-limit headers for quota saturation signals
     try {
       const { storeRateLimitHeaders } = await import("@/lib/quota/saturationSignals");
-      storeRateLimitHeaders(
-        responseConnectionId,
-        provider,
-        providerResponse.headers as Record<string, string>
-      );
+      if (isCodexResponseCurrent(providerResponse, providerResponse.ok))
+        storeRateLimitHeaders(
+          responseConnectionId,
+          provider,
+          providerResponse.headers as Record<string, string>
+        );
     } catch {
       // fail-open: saturation signal is best-effort
     }
@@ -613,9 +620,12 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     (providerResponse.status === HTTP_STATUS.UNAUTHORIZED ||
       providerResponse.status === HTTP_STATUS.FORBIDDEN) &&
     !hadStreamOptions && // Skip refresh if failure may be from stream_options removal, not auth
+    // Codex recovery already ran through the owner-checked pipeline. Never bypass it here.
+    !(pipelineRecovered && provider === "codex") &&
     !(await shouldIsolateProbeFailures()) &&
     !(await shouldSkipCredentialRefresh(provider, providerResponse))
   ) {
+    if (isPassiveCodex(provider)) recordRejectedToken(credentials);
     // Fix A: wrap refreshCredentials in runWithOnPersist so the persist callback
     // executes INSIDE the per-connection mutex held by getAccessToken. This makes
     // [network refresh + DB write + outer-state mutation] one atomic step and
@@ -656,11 +666,12 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         }
       : null;
 
-    const newCredentials = (await refreshWithRetry(
+    const newCredentials = (await tokens.refreshWithRetry(
       () =>
-        runWithCasGuard(
+        tokens.runWithCasGuard(
           casReread ? { expectedRefreshToken: attemptedRefreshToken, reread: casReread } : null,
-          () => runWithOnPersist(persistFn, () => executor.refreshCredentials(credentials, log))
+          () =>
+            tokens.runWithOnPersist(persistFn, () => executor.refreshCredentials(credentials, log))
         ),
       3,
       log,
@@ -685,7 +696,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       // mutation already happened atomically inside the mutex.
       if (!persistFnRan) {
         Object.assign(credentials, newCredentials);
-        if (onCredentialsRefreshed) {
+        if (onCredentialsRefreshed && !isPassiveCodex(provider)) {
           await onCredentialsRefreshed(newCredentials);
         }
       }
@@ -722,7 +733,9 @@ export async function runStreamingResponse(deps: StreamingDeps) {
               upstreamExtraHeaders: buildUpstreamHeadersForExecute(retryModelId),
               clientHeaders: getExecutorClientHeaders(),
               clientResponseFormat,
-              onCredentialsRefreshed,
+              onCredentialsRefreshed: isPassiveCodex(provider)
+                ? handleCredentialsRefreshed
+                : onCredentialsRefreshed,
               skipUpstreamRetry: isCombo,
               contextEditing: { enabled: contextEditingEnabled },
               correlationId,
@@ -776,7 +789,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       }
     } else {
       log?.warn?.("TOKEN", `${provider?.toUpperCase()} | refresh failed`);
-      if (isUnrecoverableRefreshError(newCredentials) && onCredentialsRefreshed) {
+      if (tokens.isUnrecoverableRefreshError(newCredentials) && onCredentialsRefreshed) {
         // Front 3 (reuse-race tolerance): before deactivating, re-read the DB.
         // If a sibling/concurrent refresh already rotated this connection's
         // refresh_token (common for Codex/OpenAI under one shared Auth0 client),
@@ -964,14 +977,16 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     }
 
     const errorConnectionId = getCurrentConnectionId() || connectionId;
-    await applyProviderFailureClassification({
-      statusCode,
-      message,
-      headers: providerResponse.headers,
-      upstreamErrorBody,
-      retryAfterMs,
-      targetModel: currentModel,
-    });
+    await runWithCodexResponseFence(providerResponse, () =>
+      applyProviderFailureClassification({
+        statusCode,
+        message,
+        headers: providerResponse.headers,
+        upstreamErrorBody,
+        retryAfterMs,
+        targetModel: currentModel,
+      })
+    );
 
     appendRequestLog({
       model,

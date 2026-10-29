@@ -37,6 +37,8 @@
   "plugins": ["@stryker-mutator/tap-runner"],
   "tap": {
     "testFiles": [
+      "tests/unit/muse-session-ownership.test.ts",
+      "tests/unit/muse-empty-response-retry.test.ts",
       "tests/unit/deepseek-api-flash-vision.test.ts",
       "tests/unit/provider-limits-recovery.test.ts",
       "tests/unit/veoaifree-optional-credentials.test.ts",
@@ -521,6 +523,8 @@
       "tests/unit/services/bifrost-route-guard.test.ts",
       "tests/unit/services/combo-metrics-memory.test.ts",
       "tests/unit/session-affinity-generic-7274.test.ts",
+      "tests/unit/session-affinity-prefetch-recheck.test.ts",
+      "tests/unit/session-affinity-redis-store.test.ts",
       "tests/unit/settings/authz-bypass.test.ts",
       "tests/unit/skip-provider-breaker-consumer-2743.test.ts",
       "tests/unit/sse-auth-antigravity-credits.test.ts",

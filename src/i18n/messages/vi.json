@@ -6835,7 +6835,9 @@
     "codexPaidCreditsDisabled": "Đã tắt tín dụng trả phí của Codex",
     "failedUpdateCodexPaidCredits": "Không thể cập nhật chính sách tín dụng trả phí của Codex",
     "allowCodexPaidCreditsLabel": "Cho phép tín dụng trả phí của Codex",
-    "allowCodexPaidCreditsDescription": "Cho phép tài khoản này sử dụng tín dụng trả phí sau khi hạn mức gói đăng ký đạt đến ngưỡng cắt. Yêu cầu có tín dụng khả dụng do OpenAI báo cáo; có thể phát sinh phí. Giới hạn Spark và thời gian chờ (cooldown) từ upstream vẫn được áp dụng. Tính khả dụng của tín dụng được kiểm tra ngay cả khi tính năng preflight hạn mức bị tắt."
+    "allowCodexPaidCreditsDescription": "Cho phép tài khoản này sử dụng tín dụng trả phí sau khi hạn mức gói đăng ký đạt đến ngưỡng cắt. Yêu cầu có tín dụng khả dụng do OpenAI báo cáo; có thể phát sinh phí. Giới hạn Spark và thời gian chờ (cooldown) từ upstream vẫn được áp dụng. Tính khả dụng của tín dụng được kiểm tra ngay cả khi tính năng preflight hạn mức bị tắt.",
+    "usedInComboTooltip": "Được dùng trong {count} combo: {combos}",
+    "openComboTooltip": "Mở Combo — được dùng bởi {combo}"
   },
   "settings": {
     "title": "Cài đặt",
@@ -8938,7 +8940,9 @@
         "financial": "Tài chính",
         "brazilian": "Brazil",
         "usa": "Hoa Kỳ",
-        "full": "Đầy đủ"
+        "full": "Đầy đủ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Nam Phi)"
       },
       "builtinTypes": "Loại tích hợp sẵn",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Địa chỉ IPv4",
         "ipv6_address": "Địa chỉ IPv6",
         "aws_key": "Khóa truy cập AWS",
-        "api_key_generic": "Khóa API và token"
+        "api_key_generic": "Khóa API và token",
+        "iban": "số tài khoản ngân hàng IBAN",
+        "eu_vat": "số EU VAT",
+        "es_dni_nie": "DNI / NIE tiếng Tây Ban Nha",
+        "it_codice_fiscale": "Codice Fiscale của Ý",
+        "pl_pesel": "PESEL Lan",
+        "nl_bsn": "BSN Hà Lan",
+        "de_steuer_id": "Steuer-ID tiếng Đức",
+        "se_personnummer": "người Thụy Điển",
+        "za_id": "Số ID Nam Phi",
+        "za_phone": "Số điện thoại Nam Phi",
+        "za_vat": "Số VAT Nam Phi",
+        "za_tax_ref": "Tài liệu tham khảo thuế Nam Phi"
       },
       "customPatterns": "Mẫu tùy chỉnh",
       "customPatternsDesc": "Các kết quả khớp được thay bằng [CUSTOM_REDACTED]. Tối đa {max} mẫu. Mẫu có nguy cơ quay lui thảm họa sẽ bị từ chối.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth chưa được cấu hình. Hãy đăng ký ứng dụng OAuth tại {applicationsUrl} với redirect URI {redirectUri} và các scope \"{scopes}\", sau đó đặt {clientIdEnv} (và tùy chọn {clientSecretEnv}) rồi khởi động lại.",
     "gitlabDuoSetupDescription": "Sau khi ứng dụng được đăng ký và các biến môi trường được đặt trên phiên bản OmniRoute này, hãy nhấp vào Tiếp tục để bắt đầu đăng nhập OAuth.",
     "continue": "Tiếp tục",
+    "copilotPolicyTitle": "Nhà cung cấp thử nghiệm — trạng thái chính sách chưa rõ ràng",
+    "copilotPolicyLine1": "OmniRoute kết nối qua api.githubcopilot.com, một API mà GitHub chưa công bố là API suy luận công khai dành cho bên thứ ba. Tích hợp này mang tính thử nghiệm và có thể thay đổi mà không cần thông báo trước.",
+    "copilotPolicyLine2": "Chỉ có thể kết nối tài khoản GitHub của chính bạn. Không bao giờ chia sẻ thông tin đăng nhập, dùng chung tài khoản theo nhóm hoặc cố gắng vượt quá giới hạn của gói của bạn.",
+    "copilotPolicyLine3": "Người dùng gói Free và Student chỉ nhận được lựa chọn mô hình tự động. Các điều khoản gói Copilot của bạn và mọi giới hạn sử dụng vẫn là trách nhiệm của bạn.",
+    "copilotPolicyAcknowledge": "Tôi hiểu — Kết nối",
     "tabPasteSetupToken": "Token thiết lập",
     "claudeSetupTokenDescription": "Chạy `claude setup-token` trong terminal và dán token mà lệnh in ra. Token có hiệu lực một năm và không có token làm mới. OmniRoute gửi một yêu cầu thử nghiệm đến Anthropic trước khi lưu.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Thống kê nhà cung cấp",
     "description": "Lưu lượng, độ trễ và tỷ lệ thành công theo nhà cung cấp và mô hình",
     "combo": "Combo",
-    "toggleModels": "Hiện các mô hình của {provider}"
+    "toggleModels": "Hiện các mô hình của {provider}",
+    "windowSince": "Kể từ {date}"
   },
   "relay": {
     "title": "Relay Proxy không máy chủ",
