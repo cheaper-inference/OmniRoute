@@ -1,4 +1,4 @@
--- 218_token_ledger_balance_indexes.sql
+-- 228_token_ledger_balance_indexes.sql
 -- token_ledger was created in 060 with no index at all. Both balance reads and
 -- the history read filter on one of two columns and sort by created_at, so every
 -- call full-scanned the table and then sorted. The table is append-only, so the
