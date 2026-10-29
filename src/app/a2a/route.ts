@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTaskManager } from "@/lib/a2a/taskManager";
 import { logRoutingDecision } from "@/lib/a2a/routingLogger";
+import { resolveA2AComboAttribution } from "@/lib/a2a/resolveComboAttribution";
 import { createA2AStream, SSE_HEADERS } from "@/lib/a2a/streaming";
 import { A2A_SKILL_HANDLERS, executeA2ATaskWithState } from "@/lib/a2a/taskExecution";
 import { getSettings } from "@/lib/db/settings";
@@ -221,14 +222,24 @@ export async function POST(req: NextRequest) {
         if (skill === "smart-routing" && result.metadata) {
           const smartMetadata = result.metadata as {
             routing_explanation?: string;
+            requested_combo?: string | null;
+            confirmed_combo?: string | null;
+            dispatched_model?: string;
+            response_model?: string;
             cost_envelope?: { actual?: number };
           };
+          const attribution = resolveA2AComboAttribution(smartMetadata);
           logRoutingDecision({
             taskType: (params?.metadata?.role as string) || "general",
-            comboId: (params?.metadata?.combo as string) || "default",
+            comboId: attribution.comboId,
+            requestedCombo: attribution.requestedCombo,
             providerSelected:
               smartMetadata.routing_explanation?.match(/"([^"]+)"/)?.[1] || "unknown",
-            modelUsed: (params?.metadata?.model as string) || "auto",
+            modelUsed:
+              smartMetadata.response_model ||
+              smartMetadata.dispatched_model ||
+              (params?.metadata?.model as string) ||
+              "auto",
             score: 1,
             factors: [],
             fallbacksTriggered: [],

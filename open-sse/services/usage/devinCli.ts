@@ -29,6 +29,7 @@
  */
 
 import { parseResetTime, type UsageQuota } from "./quota.ts";
+import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 
 const SEAT_MANAGEMENT_API_BASE =
   process.env.DEVIN_SEAT_API_URL?.trim() || "https://server.codeium.com";
@@ -211,29 +212,39 @@ function percentQuota(
 
 // ─── Fetcher ─────────────────────────────────────────────────────────────────
 
-export async function getDevinCliUsage(token: string | null | undefined) {
+export async function getDevinCliUsage(token: string | null | undefined, connectionId?: string) {
   if (!token?.trim()) {
     return { message: "Devin token not available. Import a Devin token to view usage." };
   }
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  let response: Response;
+  const seatInit: RequestInit = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/proto",
+      "Connect-Protocol-Version": CONNECT_PROTOCOL_VERSION,
+      Authorization: `Basic ${token}-${token}`,
+    },
+    body: new Uint8Array(buildGetUserStatusRequest(token.trim())),
+    signal: controller.signal,
+  };
+  let response: Response | null;
   try {
-    response = await fetch(`${SEAT_MANAGEMENT_API_BASE}${GET_USER_STATUS_PATH}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/proto",
-        "Connect-Protocol-Version": CONNECT_PROTOCOL_VERSION,
-        Authorization: `Basic ${token}-${token}`,
-      },
-      body: new Uint8Array(buildGetUserStatusRequest(token.trim())),
-      signal: controller.signal,
-    });
+    response = connectionId
+      ? await fetchWithConnectionProxy(
+          connectionId,
+          `${SEAT_MANAGEMENT_API_BASE}${GET_USER_STATUS_PATH}`,
+          seatInit
+        )
+      : await globalThis.fetch(`${SEAT_MANAGEMENT_API_BASE}${GET_USER_STATUS_PATH}`, seatInit);
   } catch (error) {
     return { message: `Devin usage error: ${(error as Error).message}` };
   } finally {
     clearTimeout(timer);
+  }
+  if (!response) {
+    return { message: "Devin quota response could not be parsed." };
   }
 
   if (!response.ok) {

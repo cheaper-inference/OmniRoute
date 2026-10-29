@@ -19,8 +19,8 @@
  *
  * Cache: 60s in-memory TTL keyed by connectionId.
  *
- * Registration: registerXaiOauthQuotaFetcher() via quotaTrackersBatch side-effect
- * import (before registerGenericQuotaFetchers).
+ * Registration: registerXaiOauthQuotaFetcher() via registerQuotaTrackersBatch()
+ * (before registerGenericQuotaFetchers). Not a module-load side effect.
  */
 
 import {
@@ -28,7 +28,12 @@ import {
   grokBillingSnapshotToQuotaInfo,
   GROK_WINDOW_WEEKLY,
 } from "./grokQuotaFetcher.ts";
-import { registerQuotaFetcher, registerQuotaWindows, type QuotaInfo } from "./quotaPreflight.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  registerQuotaWindows,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
 
@@ -106,7 +111,7 @@ export async function fetchXaiOauthQuota(
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
-      const snap = await fetchGrokBillingWithToken(accessToken, controller.signal);
+      const snap = await fetchGrokBillingWithToken(accessToken, controller.signal, connectionId);
       const quota = grokBillingSnapshotToQuotaInfo(snap);
       quotaCache.set(connectionId, { quota, fetchedAt: Date.now() });
       return quota;
@@ -132,6 +137,7 @@ export function invalidateXaiOauthQuotaCache(connectionId: string): void {
 export function registerXaiOauthQuotaFetcher(): void {
   for (const provider of XAI_OAUTH_PROVIDER_IDS) {
     registerQuotaFetcher(provider, fetchXaiOauthQuota);
+    registerQuotaCacheInvalidator(provider, invalidateXaiOauthQuotaCache);
     registerMonitorFetcher(provider, fetchXaiOauthQuota);
     registerQuotaWindows(provider, [GROK_WINDOW_WEEKLY]);
   }

@@ -33,8 +33,10 @@ export type UsageQuota = {
    * still prove that the quota blocks routing.
    */
   fractionReported?: boolean;
-  quotaSource?: "retrieveUserQuota" | "fetchAvailableModels" | "localUsageHistory";
+  quotaSource?:
+    "retrieveUserQuota" | "retrieveUserQuotaSummary" | "fetchAvailableModels" | "localUsageHistory";
   displayName?: string;
+  isPercentageOnly?: boolean;
   details?: Array<{
     name: string;
     used: number;

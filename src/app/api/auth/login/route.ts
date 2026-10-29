@@ -10,9 +10,15 @@ import {
   verifyManagementPassword,
 } from "@/lib/auth/managementPassword";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isNextBuildPhase } from "@/lib/buildPhase";
 import { loginSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
-import { checkLoginGuard, clearLoginAttempts, recordLoginFailure } from "@/server/auth/loginGuard";
+import {
+  beginLoginAttempt,
+  clearLoginAttempts,
+  endLoginAttempt,
+  recordLoginFailure,
+} from "@/server/auth/loginGuard";
 import { AUTHZ_HEADER_TRUSTED_PEER_IP } from "@/server/authz/headers";
 import {
   getDashboardJwtSecret,
@@ -25,18 +31,34 @@ import {
 } from "@/server/auth/loginPeer";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 
+/**
+ * Whether the module-level missing-JWT_SECRET warning should fire. It is
+ * suppressed while `next build` imports this route to collect page data, where
+ * the secret is legitimately absent (the operator supplies it at container
+ * start) and the FATAL wording is misleading rather than actionable (#16320).
+ * The POST handler still fails closed when the secret is missing at runtime.
+ */
+function shouldWarnMissingJwtSecret(): boolean {
+  return !process.env.JWT_SECRET && !isNextBuildPhase();
+}
+
 // SECURITY: No hardcoded fallback — JWT_SECRET must be configured.
-if (!process.env.JWT_SECRET) {
+if (shouldWarnMissingJwtSecret()) {
   console.error("[SECURITY] FATAL: JWT_SECRET is not set. Login authentication is disabled.");
 }
 
 // Test seam for cookie store injection without affecting runtime behavior.
 export const authRouteInternals = {
   getCookieStore: cookies,
+  /** True when the module-level missing-JWT_SECRET warning should fire (#16320). */
+  shouldWarnMissingJwtSecret,
 };
 
 export async function POST(request: NextRequest) {
   const auditContext = getAuditRequestContext(request);
+  // Slot reserved by the guard while the password is verified; released on every exit.
+  let heldSlotKey: string | null | undefined;
+  let holdsSlot = false;
 
   try {
     // Fail-fast if JWT_SECRET is not configured
@@ -113,7 +135,7 @@ export async function POST(request: NextRequest) {
 
     const bruteForceEnabled = settings.bruteForceProtection !== false;
 
-    const guardCheck = checkLoginGuard(lockoutKey, { enabled: bruteForceEnabled });
+    const guardCheck = beginLoginAttempt(lockoutKey, { enabled: bruteForceEnabled });
     if (!guardCheck.allowed) {
       logAuditEvent({
         action: "auth.login.locked",
@@ -133,6 +155,9 @@ export async function POST(request: NextRequest) {
         }
       );
     }
+
+    holdsSlot = true;
+    heldSlotKey = lockoutKey;
 
     const passwordState = await ensurePersistentManagementPasswordHash({
       settings,
@@ -282,5 +307,7 @@ export async function POST(request: NextRequest) {
       },
     });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } finally {
+    if (holdsSlot) endLoginAttempt(heldSlotKey);
   }
 }

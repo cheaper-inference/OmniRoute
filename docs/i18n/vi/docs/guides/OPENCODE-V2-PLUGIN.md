@@ -72,24 +72,32 @@ nêu rõ endpoint và những gì bị thiếu — nhờ đó, một trình ch�
 
 ## Tùy chọn
 
-| Khóa                             | Mặc định                                                     | Ghi chú                                                                                                                |
-| -------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                                                | id provider, id tích hợp và tiền tố mà các model xuất hiện bên dưới                                                    |
-| `baseURL`                        | bắt buộc                                                     | Gốc gateway, chỉ hỗ trợ `http(s)`; hậu tố `/v1` được thêm vào khi cần                                                  |
-| `apiKey`                         | thông tin xác thực đã kết nối, sau đó là `OMNIROUTE_API_KEY` | Khóa chat cho `/v1/*`                                                                                                  |
-| `managementReadToken`            | dùng `apiKey` làm phương án dự phòng                         | Khóa cho `/api/*` — thường **không** phải cùng một khóa                                                                |
-| `displayName`                    | `"OmniRoute"`                                                | Tên provider trong trình chọn                                                                                          |
-| `timeoutMs`                      | `10000`                                                      | Thời gian chờ khi tải trên mỗi endpoint (auto-combo sử dụng 5 giây)                                                    |
-| `modelCacheTtlMs`                | `300000`                                                     | TTL bộ nhớ đệm danh mục; ảnh chụp nhanh trên đĩa giúp tăng tốc khởi động nguội                                         |
-| `timeouts`                       | dùng `timeoutMs` làm phương án dự phòng                      | Ngân sách thời gian theo từng endpoint, tính bằng ms: `models`, `combos`, `autoCombos`, `enrichment`                   |
-| `enrichment`                     | `true`                                                       | Tải tên, giá và hạn mức gói miễn phí                                                                                   |
-| `providerTag`                    | `true`                                                       | Thêm tiền tố là provider thượng nguồn mà nó định tuyến tới vào tên hiển thị                                            |
-| `usableOnly`                     | `false`                                                      | Chỉ giữ lại các provider mà gateway báo cáo là đã được cấp phát                                                        |
-| `visibleModels` / `hiddenModels` | `[]`                                                         | Danh sách cho phép theo khớp chính xác hoặc hậu tố; quy tắc từ chối được ưu tiên                                       |
-| `geminiSanitization`             | `true`                                                       | Loại bỏ các từ khóa JSON-Schema mà Gemini từ chối khỏi schema công cụ (các công cụ `$ref` được chuyển tiếp nguyên vẹn) |
-| `apiFormat.allowAnthropic`       | `false`                                                      | Định tuyến các id trong danh sách cho phép qua khối API Anthropic                                                      |
-| `apiFormat.anthropicModels`      | `[]`                                                         | Các id model đầy đủ được định tuyến tới Anthropic                                                                      |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                             | Mức độ chi tiết của trình ghi nhật ký                                                                                  |
+| Khóa                             | Mặc định                                                     | Ghi chú                                                                                                                                      |
+| -------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                                | ID nhà cung cấp, ID tích hợp và tiền tố dùng để hiển thị các mô hình                                                                         |
+| `baseURL`                        | bắt buộc                                                     | URL gốc của gateway, chỉ hỗ trợ `http(s)`; hậu tố `/v1` được thêm vào khi cần                                                                |
+| `apiKey`                         | thông tin xác thực đã kết nối, sau đó là `OMNIROUTE_API_KEY` | Khóa trò chuyện cho `/v1/*`                                                                                                                  |
+| `managementReadToken`            | dùng `apiKey` làm giá trị dự phòng                           | Khóa cho `/api/*` — thường **không** giống khóa trên                                                                                         |
+| `displayName`                    | `"OmniRoute"`                                                | Tên nhà cung cấp trong bộ chọn                                                                                                               |
+| `timeoutMs`                      | `10000`                                                      | Thời gian chờ tìm nạp cho mỗi điểm cuối (các tổ hợp tự động dùng 5 giây)                                                                     |
+| `modelCacheTtlMs`                | `300000`                                                     | TTL của bộ nhớ đệm danh mục; ảnh chụp nhanh trên đĩa giúp tăng tốc các lần khởi động nguội                                                   |
+| `timeouts`                       | dùng `timeoutMs` làm giá trị dự phòng                        | Ngân sách thời gian theo mili giây cho từng điểm cuối: `models`, `combos`, `autoCombos`, `enrichment`                                        |
+| `enrichment`                     | `true`                                                       | Tìm nạp tên, giá và hạn mức gói miễn phí                                                                                                     |
+| `providerTag`                    | `true`                                                       | Thêm tiền tố là nhà cung cấp thượng nguồn mà mô hình được định tuyến đến vào tên hiển thị                                                    |
+| `usableOnly`                     | `false`                                                      | Chỉ giữ lại các nhà cung cấp mà gateway báo cáo là đã được cấp phát                                                                          |
+| `combosSource`                   | `"api"`                                                      | `"models"` bỏ qua `/api/combos` và công bố các hàng tổ hợp từ `/v1/models`; bộ lọc cấp thành viên giữ nguyên `"api"`                         |
+| `showcasePerOwner`               | `10`                                                         | Số mục trong chế độ xem mặc định được giữ lại cho mỗi nhà cung cấp                                                                           |
+| `freshPerOwner`                  | `10`                                                         | Số mục mới trong chế độ xem mặc định được giữ lại cho mỗi nhà cung cấp                                                                       |
+| `freshWindowDays`                | `90`                                                         | Khoảng thời gian tính theo ngày để xác định độ mới cho nhánh mới                                                                             |
+| `usageMemory`                    | `true`                                                       | Khôi phục các mục bị loại bỏ tĩnh có tên trong dữ liệu phân tích mức sử dụng 30 ngày (cần mã thông báo quản lý)                              |
+| `visibleModels` / `hiddenModels` | `[]`                                                         | Danh sách cho phép khớp chính xác hoặc theo hậu tố; quy tắc từ chối được ưu tiên; `*` công bố toàn bộ danh mục (các bộ lọc khác vẫn áp dụng) |
+| `geminiSanitization`             | `true`                                                       | Loại bỏ khỏi lược đồ công cụ các từ khóa JSON-Schema mà Gemini từ chối (các công cụ `$ref` được chuyển tiếp nguyên trạng)                    |
+| `apiFormat.allowAnthropic`       | `false`                                                      | Định tuyến các ID trong danh sách cho phép qua khối API Anthropic                                                                            |
+| `apiFormat.anthropicModels`      | `[]`                                                         | ID mô hình đầy đủ được định tuyến đến Anthropic                                                                                              |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                             | Mức độ chi tiết của trình ghi nhật ký                                                                                                        |
+
+Bộ nhớ sử dụng được bật theo mặc định. Nếu không có mã thông báo quản lý, tính năng này sẽ không hoạt động
+(một thông báo được ghi lại khi khởi động) và không có mục nào được khôi phục.
 
 ## Cách danh mục luôn được cập nhật
 
@@ -114,11 +122,16 @@ tham chiếu sẽ mở rộng schema thành "chấp nhận mọi thứ".
 
 ## Khắc phục sự cố
 
-| Triệu chứng                                | Nguyên nhân                                                                                                 |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| Bộ chọn không hiển thị model OmniRoute     | Không phân giải được khóa (hãy kiểm tra cảnh báo khi khởi động), hoặc không thể kết nối đến gateway         |
-| ID model thô, không có combo, không có giá | Các endpoint quản lý đã từ chối token — hãy đặt `managementReadToken`                                       |
-| Một phiên bị ghim vào `opencode-<id>/…`    | Plugin v1 đã công bố `opencode-<id>`; v2 công bố trực tiếp `<id>`, vì vậy hãy chọn lại model trong `<id>/…` |
+| Triệu chứng                                   | Nguyên nhân                                                                                                                    |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Bộ chọn không hiển thị mô hình OmniRoute      | Không phân giải được khóa nào (hãy kiểm tra cảnh báo khi khởi động), hoặc không thể kết nối tới gateway                        |
+| ID mô hình thô, không có tổ hợp, không có giá | Các endpoint quản lý đã từ chối token — hãy đặt `managementReadToken`                                                          |
+| Danh mục `freeOnly` ngắn hoặc trống           | Không có token quản lý hoặc token bị từ chối — hãy đọc dòng tóm tắt làm mới (số lượng `unmatched-free`) trong nhật ký của host |
+| Một phiên được ghim vào `opencode-<id>/…`     | Plugin v1 đã công bố `opencode-<id>`; v2 công bố trực tiếp `<id>`, vì vậy hãy chọn lại mô hình trong `<id>/…`                  |
+
+Các biến môi trường phải được truyền đến tiến trình máy chủ opencode: khi host
+chạy dưới dạng dịch vụ, shell chạy `opencode models` và môi trường máy chủ
+là khác nhau, vì vậy hãy export khóa tại nơi máy chủ đọc khóa đó.
 
 ## Xem thêm
 

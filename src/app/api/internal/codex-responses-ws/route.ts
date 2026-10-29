@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  applyApiKeyCodexServiceMode,
+  withApiKeyCodexServiceMode,
+} from "@/lib/providers/codexApiKeyServiceMode";
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { CodexExecutor } from "@omniroute/open-sse/executors/codex.ts";
@@ -11,7 +15,8 @@ import { acquireCodexWsLease, releaseCodexWsLease } from "@/sse/services/codexWs
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import { checkAndRefreshToken } from "@/sse/services/tokenRefresh";
 import { resolveCodexWsModelInfo } from "./modelResolution";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
+import { buildHandshakeOriginRequest, isWebSocketOriginAllowed } from "@/server/origin/wsOrigin";
 import { formatMemoryContext } from "@/lib/memory/injection";
 import { retrieveMemories } from "@/lib/memory/retrieval";
 import {
@@ -48,6 +53,7 @@ import {
   isExclusiveLeaseManagedKey,
   LeaseContextError,
 } from "@/sse/services/leaseContext";
+import { applyResponsesWsUpstreamHeaders } from "@omniroute/open-sse/handlers/chatCore/upstreamExecuteHeaders.ts";
 
 const CODEX_RESPONSES_WS_URL = "wss://chatgpt.com/backend-api/codex/responses";
 const executor = new CodexExecutor();
@@ -106,6 +112,7 @@ const bridgePayloadSchema = z
     action: z.string().optional(),
     requestUrl: z.string().optional(),
     headers: z.record(z.string(), z.unknown()).optional(),
+    handshake: z.record(z.string(), z.unknown()).optional(),
     response: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();
@@ -330,15 +337,33 @@ function normalizeUpstreamHeaders(headers: Record<string, string>): Record<strin
   return result;
 }
 
-async function authenticate(body: JsonRecord) {
+function getHandshakeOriginRequest(body: JsonRecord, authRequest: Request): Request {
+  return buildHandshakeOriginRequest(body.handshake, authRequest.headers.get("origin"));
+}
+
+async function authenticate(body: JsonRecord, { checkOrigin = false } = {}) {
   const authRequest = getAuthRequest(body);
-  const auth = await authorizeWebSocketHandshake(authRequest);
+  // REQUIRE_API_KEY applies to this transport exactly as it does to HTTP /v1/responses.
+  const auth = await authorizeWebSocketHandshake(authRequest, {
+    requireAuth: isRequireApiKeyEnabled(),
+  });
   if (!auth.authorized) {
     return jsonError(
       auth.hasCredential ? 403 : 401,
       auth.hasCredential ? "ws_auth_invalid" : "ws_auth_required",
       auth.hasCredential ? "Invalid WebSocket credential" : "WebSocket auth required"
     );
+  }
+
+  // Browsers skip CORS for WebSocket, so a cross-site page must be stopped here. A valid
+  // API key is exempt, matching the HTTP CORS relaxation for token-authenticated calls:
+  // the page cannot know the key. A session cookie is not exempt (browsers attach it).
+  if (
+    checkOrigin &&
+    auth.authType !== "api_key" &&
+    !isWebSocketOriginAllowed(getHandshakeOriginRequest(body, authRequest))
+  ) {
+    return jsonError(403, "ws_origin_forbidden", "WebSocket origin not allowed");
   }
 
   return NextResponse.json({
@@ -701,8 +726,17 @@ async function prepare(body: JsonRecord) {
       model,
       requestId: randomUUID(),
     });
+    responseBodyWithMemory = applyApiKeyCodexServiceMode(
+      provider,
+      responseBodyWithMemory,
+      metadata?.codexServiceMode
+    );
     credentialsWithFingerprint = withCodexFingerprintCredentials(
-      withReasoningRuleContext(refreshedCredentials, reasoningRuleDirective),
+      withApiKeyCodexServiceMode(
+        provider,
+        withReasoningRuleContext(refreshedCredentials, reasoningRuleDirective),
+        metadata?.codexServiceMode
+      ),
       context.clientHeaders,
       responseBodyWithMemory
     );
@@ -729,7 +763,16 @@ async function prepare(body: JsonRecord) {
   let headers: Record<string, string>;
   let proxy: string | undefined;
   try {
-    headers = normalizeUpstreamHeaders(executor.buildHeaders(credentialsWithFingerprint, true));
+    // The HTTP/SSE path merges per-model upstreamHeaders and connection custom headers after the
+    // executor's own headers; without the same merge here a per-model `Version` override that
+    // unlocks a model over HTTP never reaches the WS upgrade (ChatGPT answers model_not_found).
+    headers = normalizeUpstreamHeaders(
+      applyResponsesWsUpstreamHeaders(executor.buildHeaders(credentialsWithFingerprint, true), {
+        provider,
+        model,
+        providerSpecificData: refreshedCredentials.providerSpecificData,
+      })
+    );
 
     // #5611: apply the configured proxy to the upstream Codex Responses
     // WebSocket too. #14531: resolve it through the full per-connection
@@ -790,7 +833,7 @@ export async function POST(request: Request) {
 
   const action = typeof body.action === "string" ? body.action : "";
   if (action === "authenticate") {
-    return authenticate(body);
+    return authenticate(body, { checkOrigin: true });
   }
   if (action === "prepare") {
     return prepare(body);

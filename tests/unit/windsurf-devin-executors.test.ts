@@ -184,3 +184,174 @@ test("devin-cli mapTokens: accepts object {accessToken} and returns string acces
   assert.equal(typeof mapped.accessToken, "string");
   assert.equal(mapped.accessToken, "sk-devin-test-token-1234567890");
 });
+
+// ─── Regression: Devin Desktop tool call arguments arrive fragmented ─────────
+// The Codeium upstream splits tool call arguments across repeated field-3
+// fragments, each inside an id-less field-6 submessage. The old decoder
+// overwrote arguments per fragment and dropped id-less submessages entirely,
+// so OpenAI clients always received `"arguments": ""` (reported as harness
+// errors like "must have required property" on every tool call).
+
+test("Devin Desktop reassembles fragmented tool call arguments", async () => {
+  const executor = await getExecutor("devin-desktop");
+  const enc = new TextEncoder();
+
+  // protobuf helpers: length-delimited string field
+  const pbStr = (field: number, s: string) => [
+    field * 8 + 2,
+    enc.encode(s).length,
+    ...enc.encode(s),
+  ];
+  // response field 6 = toolCall submessage
+  const toolSubmessage = (fields: number[][]) => {
+    const body = fields.flat();
+    return [6 * 8 + 2, body.length, ...body];
+  };
+  // Connect frame: [flags][4-byte big-endian length][payload]
+  const frame = (payload: number[]) => {
+    const len = payload.length;
+    return [0, (len >>> 24) & 255, (len >>> 16) & 255, (len >>> 8) & 255, len & 255, ...payload];
+  };
+
+  const callId = "call_fragmented_test";
+  const argsParts = ["{", '"timezone": "', "Asia", "/Shanghai", '"', "}"];
+  const wire = new Uint8Array([
+    // first submessage: id + name + first argument fragment
+    ...frame(toolSubmessage([pbStr(1, callId), pbStr(2, "get_time"), pbStr(3, argsParts[0])])),
+    // continuation fragments: no id, no name, only argument fragments
+    ...argsParts.slice(1).flatMap((part) => frame(toolSubmessage([pbStr(3, part)]))),
+    // end-stream trailer frame (flags=2, empty JSON error trailer)
+    ...frame([...enc.encode("{}")]).map((b, i) => (i === 0 ? 2 : b)),
+  ]);
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, _init) => {
+    if (String(url).endsWith("/exa.auth_pb.AuthService/GetUserJwt")) {
+      const jwt = enc.encode("test-jwt");
+      return new Response(new Uint8Array([0x0a, jwt.length, ...jwt]));
+    }
+    return new Response(wire, { status: 200 });
+  };
+
+  try {
+    const result = await executor.execute({
+      model: "swe-2-medium",
+      body: {
+        messages: [{ role: "user", content: "call get_time" }],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "get_time",
+              description: "get current time",
+              parameters: { type: "object", properties: { timezone: { type: "string" } } },
+            },
+          },
+        ],
+      },
+      stream: true,
+      credentials: { accessToken: "test-devin-desktop-token" },
+    });
+
+    const response = result instanceof Response ? result : result.response;
+    const sseText = await response.text();
+
+    const argDeltas: string[] = [];
+    let firstDeltaHasIdAndType = false;
+    let fragmentDeltaHasNoId = false;
+    for (const line of sseText.split("\n")) {
+      if (!line.startsWith("data: ") || line.includes("[DONE]")) continue;
+      const chunk = JSON.parse(line.slice(6));
+      for (const choice of chunk.choices ?? []) {
+        for (const tc of choice.delta?.tool_calls ?? []) {
+          if (tc.id) {
+            assert.equal(tc.id, callId);
+            assert.equal(tc.type, "function");
+            firstDeltaHasIdAndType = true;
+          } else {
+            fragmentDeltaHasNoId = true;
+          }
+          if (tc.function?.arguments) argDeltas.push(tc.function.arguments);
+        }
+      }
+    }
+
+    assert.equal(argDeltas.join(""), argsParts.join(""));
+    assert.equal(firstDeltaHasIdAndType, true);
+    assert.equal(fragmentDeltaHasNoId, true);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Devin Desktop folds an id-less fragment that precedes every id'd call into the first call", async () => {
+  const executor = await getExecutor("devin-desktop");
+  const enc = new TextEncoder();
+  const pbStr = (field: number, s: string) => [
+    field * 8 + 2,
+    enc.encode(s).length,
+    ...enc.encode(s),
+  ];
+  const toolSubmessage = (fields: number[][]) => {
+    const body = fields.flat();
+    return [6 * 8 + 2, body.length, ...body];
+  };
+  const frame = (payload: number[]) => {
+    const len = payload.length;
+    return [0, (len >>> 24) & 255, (len >>> 16) & 255, (len >>> 8) & 255, len & 255, ...payload];
+  };
+
+  const callId = "call_orphan_first";
+  const wire = new Uint8Array([
+    // orphan: an argument fragment before any tool call carried an id
+    ...frame(toolSubmessage([pbStr(3, '{"timezone": ')])),
+    ...frame(toolSubmessage([pbStr(1, callId), pbStr(2, "get_time"), pbStr(3, '"UTC"')])),
+    ...frame(toolSubmessage([pbStr(3, "}")])),
+    ...frame([...enc.encode("{}")]).map((b, i) => (i === 0 ? 2 : b)),
+  ]);
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, _init) => {
+    if (String(url).endsWith("/exa.auth_pb.AuthService/GetUserJwt")) {
+      const jwt = enc.encode("test-jwt");
+      return new Response(new Uint8Array([0x0a, jwt.length, ...jwt]));
+    }
+    return new Response(wire, { status: 200 });
+  };
+
+  try {
+    const result = await executor.execute({
+      model: "swe-2-medium",
+      body: { messages: [{ role: "user", content: "call get_time" }] },
+      stream: true,
+      credentials: { accessToken: "test-devin-desktop-token" },
+    });
+    const response = result instanceof Response ? result : result.response;
+    const sseText = await response.text();
+
+    const deltas: Array<{ index: number; id?: string; name?: string; arguments?: string }> = [];
+    for (const line of sseText.split("\n")) {
+      if (!line.startsWith("data: ") || line.includes("[DONE]")) continue;
+      const chunk = JSON.parse(line.slice(6));
+      for (const choice of chunk.choices ?? []) {
+        for (const tc of choice.delta?.tool_calls ?? []) {
+          deltas.push({
+            index: tc.index,
+            id: tc.id,
+            name: tc.function?.name,
+            arguments: tc.function?.arguments,
+          });
+        }
+      }
+    }
+
+    assert.ok(deltas.length > 0, "expected tool_call deltas");
+    // The very first delta must open the call (id + name), never a bare fragment.
+    assert.equal(deltas[0].id, callId);
+    assert.equal(deltas[0].name, "get_time");
+    assert.ok(deltas.every((d) => d.index === 0));
+    assert.equal(deltas.map((d) => d.arguments ?? "").join(""), '{"timezone": "UTC"}');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

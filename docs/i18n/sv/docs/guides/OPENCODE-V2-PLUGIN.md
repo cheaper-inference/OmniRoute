@@ -72,24 +72,32 @@ och anger endpointen och vad som gick förlorat — så en försämrad modellvä
 
 ## Alternativ
 
-| Nyckel                           | Standard                                                  | Anmärkningar                                                                                                       |
-| -------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `providerId`                     | `"omniroute"`                                             | Leverantörs-id, integrations-id och prefixet som modeller visas under                                              |
-| `baseURL`                        | obligatoriskt                                             | Gateway-rot, endast `http(s)`; suffixet `/v1` läggs till där det behövs                                            |
-| `apiKey`                         | ansluten autentiseringsuppgift, sedan `OMNIROUTE_API_KEY` | Chattnyckel för `/v1/*`                                                                                            |
-| `managementReadToken`            | använder `apiKey` som reserv                              | Nyckel för `/api/*` — vanligtvis **inte** samma nyckel                                                             |
-| `displayName`                    | `"OmniRoute"`                                             | Leverantörsnamn i modellväljaren                                                                                   |
-| `timeoutMs`                      | `10000`                                                   | Tidsgräns per endpoint vid hämtning (automatiska kombinationer använder 5 s)                                       |
-| `modelCacheTtlMs`                | `300000`                                                  | TTL för katalogcachen; en ögonblicksbild på disk snabbar upp kallstarter                                           |
-| `timeouts`                       | använder `timeoutMs` som reserv                           | Tidsbudgetar per endpoint i ms: `models`, `combos`, `autoCombos`, `enrichment`                                     |
-| `enrichment`                     | `true`                                                    | Hämta namn, priser och budgetar för kostnadsfria nivåer                                                            |
-| `providerTag`                    | `true`                                                    | Lägg till den vidarebefordrade leverantören som prefix i visningsnamnet                                            |
-| `usableOnly`                     | `false`                                                   | Behåll endast leverantörer som gatewayen rapporterar som konfigurerade                                             |
-| `visibleModels` / `hiddenModels` | `[]`                                                      | Tillåtelselistor med exakt matchning eller suffixmatchning; nekande regler har företräde                           |
-| `geminiSanitization`             | `true`                                                    | Ta bort JSON-Schema-nyckelord som Gemini avvisar från verktygsscheman (`$ref`-verktyg vidarebefordras oförändrade) |
-| `apiFormat.allowAnthropic`       | `false`                                                   | Dirigera tillåtelselistade id:n via Anthropic API-blocket                                                          |
-| `apiFormat.anthropicModels`      | `[]`                                                      | Fullständiga modell-id:n som dirigeras till Anthropic                                                              |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                          | Loggningsnivå                                                                                                      |
+| Nyckel                           | Standardvärde                                             | Anmärkningar                                                                                                                                               |
+| -------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                             | Leverantörs-id, integrations-id och prefixet som modeller visas under                                                                                      |
+| `baseURL`                        | krävs                                                     | Gateway-rot, endast `http(s)`; suffixet `/v1` läggs till där det behövs                                                                                    |
+| `apiKey`                         | ansluten autentiseringsuppgift, sedan `OMNIROUTE_API_KEY` | Chattnyckel för `/v1/*`                                                                                                                                    |
+| `managementReadToken`            | använder `apiKey` som reserv                              | Nyckel för `/api/*` — vanligtvis **inte** samma nyckel                                                                                                     |
+| `displayName`                    | `"OmniRoute"`                                             | Leverantörens namn i väljaren                                                                                                                              |
+| `timeoutMs`                      | `10000`                                                   | Timeout per slutpunkt för hämtning (automatiska kombinationer använder 5 s)                                                                                |
+| `modelCacheTtlMs`                | `300000`                                                  | TTL för katalogcachen; en ögonblicksbild på disk snabbar upp kallstarter                                                                                   |
+| `timeouts`                       | använder `timeoutMs` som reserv                           | Tidsbudgetar per slutpunkt i ms: `models`, `combos`, `autoCombos`, `enrichment`                                                                            |
+| `enrichment`                     | `true`                                                    | Hämta namn, priser och budgetar för kostnadsfria nivåer                                                                                                    |
+| `providerTag`                    | `true`                                                    | Lägg till den uppströmsleverantör som trafiken dirigeras till som prefix i visningsnamnet                                                                  |
+| `usableOnly`                     | `false`                                                   | Behåll endast leverantörer som gatewayen rapporterar som etablerade                                                                                        |
+| `combosSource`                   | `"api"`                                                   | `"models"` hoppar över `/api/combos` och publicerar kombinationsraderna från `/v1/models`; filter på medlemsnivå behåller `"api"`                          |
+| `showcasePerOwner`               | `10`                                                      | Poster i standardvyn som behålls per leverantör                                                                                                            |
+| `freshPerOwner`                  | `10`                                                      | Nya poster i standardvyn som behålls per leverantör                                                                                                        |
+| `freshWindowDays`                | `90`                                                      | Aktualitetsfönster i dagar för grenen med nya poster                                                                                                       |
+| `usageMemory`                    | `true`                                                    | Återställ statiskt bortfiltrerade poster som förekommer i användningsanalysen för de senaste 30 dagarna (kräver en hanteringstoken)                        |
+| `visibleModels` / `hiddenModels` | `[]`                                                      | Tillåtelselistor med exakt matchning eller suffixmatchning; nekande regler har företräde; `*` publicerar hela katalogen (övriga filter gäller fortfarande) |
+| `geminiSanitization`             | `true`                                                    | Ta bort nyckelorden i JSON Schema som Gemini avvisar från verktygsscheman (verktyg med `$ref` vidarebefordras oförändrade)                                 |
+| `apiFormat.allowAnthropic`       | `false`                                                   | Dirigera tillåtelselista­de id:n genom Anthropic API-blocket                                                                                               |
+| `apiFormat.anthropicModels`      | `[]`                                                      | Fullständiga modell-id:n som dirigeras till Anthropic                                                                                                      |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                          | Loggningsnivå                                                                                                                                              |
+
+Användningsminnet är aktiverat som standard. Utan en hanteringstoken förblir det inaktivt
+(ett meddelande loggas vid start) och ingenting återställs.
 
 ## Så hålls katalogen aktuell
 
@@ -118,11 +126,16 @@ Ange `"geminiSanitization": false` för att stänga av detta.
 
 ## Felsökning
 
-| Symptom                                          | Orsak                                                                                                                   |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| Modellväljaren visar ingen OmniRoute-modell      | Ingen nyckel kunde hittas (kontrollera varningen vid start), eller så kan gatewayen inte nås                            |
-| Råa modell-id:n, inga kombinationer, inga priser | Hanteringsslutpunkterna nekade token — ange `managementReadToken`                                                       |
-| En session är låst till `opencode-<id>/…`        | v1-insticksprogrammet publicerade `opencode-<id>`; v2 publicerar enbart `<id>`, så välj modellen på nytt under `<id>/…` |
+| Symptom                                          | Orsak                                                                                                                           |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Modellväljaren visar ingen OmniRoute-modell      | Ingen nyckel kunde hittas (kontrollera startvarningen), eller så går det inte att nå gatewayen                                  |
+| Råa modell-ID:n, inga kombinationer, inga priser | Hanteringsslutpunkterna nekade tokenen — ange `managementReadToken`                                                             |
+| Kort eller tom `freeOnly`-katalog                | Ingen hanteringstoken eller en nekad token — läs sammanfattningsraden för uppdateringen (antalet `unmatched-free`) i värdloggen |
+| En session är fäst vid `opencode-<id>/…`         | v1-pluginprogrammet publicerade `opencode-<id>`; v2 publicerar enbart `<id>`, så välj modellen igen under `<id>/…`              |
+
+Miljövariablerna måste nå opencode-serverprocessen: när värden
+körs som en tjänst är skalet som kör `opencode models` och serverns
+miljö åtskilda, så exportera nyckeln där servern läser den.
 
 ## Se även
 

@@ -20,36 +20,68 @@ Stealth-functies bestaan zodat OmniRoute kan fungeren als compatibiliteitslaag t
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Permanente `wreq-js`-sessies worden per accountscope en opgeloste proxy lazy aangemaakt. De procesbrede `TlsClient`-pool bevat maximaal 128 sessies die zich voordoen als **Chrome 124 op macOS** voor upstreams achter Cloudflare. `TlsClient.fetch()` stopt veilig met een fout wanneer de native runtime niet beschikbaar is; een aanroeper kan buiten deze wrapper expliciet een fallback selecteren.
+Persistente `wreq-js`-sessies worden per accountscope en opgeloste proxy pas aangemaakt wanneer ze nodig zijn. De
+procesbrede `TlsClient` beheert maximaal 128 sessies die zich voordoen als **Chrome 124 op macOS** voor
+upstreams achter Cloudflare. `TlsClient.fetch()` weigert veilig wanneer de native runtime niet
+beschikbaar is; een aanroeper kan buiten deze wrapper expliciet een fallback selecteren.
 
 - Sessieprofiel: `browser: "chrome_124", os: "macos"`
 - Proxyresolutie (prioriteit): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (ook in kleine letters)
 - Time-out: `TLS_CLIENT_TIMEOUT_MS` (overgenomen van `FETCH_TIMEOUT_MS`, standaard 600000)
-- De `wreq-js`-respons is compatibel met fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Watchdog voor de eerste byte (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()` wordt voltooid zodra de upstreamheaders binnenkomen, waardoor `TLS_CLIENT_TIMEOUT_MS` alleen geen grens kan stellen aan een body die nooit een eerste byte oplevert. `guardTlsFirstByte()` laat de eerste `read()` van de body wedijveren met `TLS_FIRST_BYTE_WATCHDOG_MS` (standaard `10000`; `0` schakelt deze uit); een gezonde body blijft onaangetast, terwijl bij een vastgelopen body de wreq-reader wordt geannuleerd en de bestaande TLS-fallbacklogica van `proxyFetch` kan terugvallen op de directe/proxydispatcher (een verzoek dat niet veilig opnieuw kan worden afgespeeld, bijvoorbeeld een POST met een body, genereert nog steeds een fout in plaats van stilzwijgend opnieuw te worden geprobeerd).
+- De Response van `wreq-js` is fetch-compatibel (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Watchdog voor de eerste byte (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
+  wordt afgerond zodra de upstreamheaders arriveren, waardoor alleen `TLS_CLIENT_TIMEOUT_MS` geen
+  bovengrens kan stellen aan een body die nooit een eerste byte oplevert. `guardTlsFirstByte()` laat
+  de eerste `read()` van de body wedijveren met `TLS_FIRST_BYTE_WATCHDOG_MS` (standaard `10000`,
+  `0` schakelt deze uit); een gezonde body wordt niet beïnvloed, terwijl bij een vastgelopen body
+  de wreq-reader wordt geannuleerd en de bestaande TLS-fallbacklogica van `proxyFetch` kan
+  terugvallen op de directe/proxydispatcher (een verzoek dat niet veilig opnieuw kan worden
+  afgespeeld, bijvoorbeeld een POST met een body, genereert nog steeds een fout in plaats van
+  stilzwijgend opnieuw te worden geprobeerd).
 
 ### Transport voor webcookieproviders — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` is de gedeelde adapter voor de vijf gespecialiseerde webcookietransporten hieronder. Elke dunne providerwrapper selecteert een browser-/OS-profiel. De adapter gebruikt de enkele wreq-runtimeloader en transportpool in `open-sse/utils/tlsClient.ts`, gesleuteld op profiel + OS + opgeloste proxy, terwijl elk verzoek `cookieMode: "ephemeral"` gebruikt. Accounts en verzoeken delen daardoor verbindingen op transportniveau, maar nooit een wreq-sessie of cookiejar.
+`open-sse/services/tlsClientBase.ts` is de gedeelde adapter voor de vijf onderstaande
+gespecialiseerde webcookietransports. Elke dunne providerwrapper selecteert een browser-/OS-profiel.
+De adapter gebruikt de ene wreq-runtime-loader en transportpool in `open-sse/utils/tlsClient.ts`,
+gesleuteld op profiel + OS + opgeloste proxy, terwijl elk verzoek `cookieMode: "ephemeral"`
+gebruikt. Accounts en verzoeken delen daardoor verbindingen op transportniveau, maar nooit een
+wreq-sessie of cookiejar.
 
 | Provider   | Profiel       | Geëmuleerd OS | Beleid voor einde van stream        |
 | ---------- | ------------- | ------------- | ----------------------------------- |
 | Claude     | `chrome_146`  | Linux         | neem `[DONE]` op                    |
-| Perplexity | `firefox_148` | macOS         | neem `event: end_of_stream` op      |
+| Perplexity | `firefox_151` | macOS         | neem `event: end_of_stream` op      |
 | Grok       | `chrome_146`  | Linux         | sluit `[DONE]` uit                  |
 | Notion     | `chrome_146`  | Windows       | neem `[DONE]` op                    |
 | LMArena    | `chrome_146`  | Windows       | geen sentinel; sluit bij native EOF |
 
-- Streaming verwerkt de native `ReadableStream` van de respons rechtstreeks; er wordt geen tijdelijk bestand of sidecar aangemaakt.
-- Er worden maximaal 256 initiële bytes geïnspecteerd voordat een stream beschikbaar wordt gesteld. SSE-providers bufferen niet-SSE-fouten; Grok/LMArena zetten Cloudflare-challenges om naar `403` en HTML-tussenpagina's naar `502`.
-- De native time-out van het verzoek blijft ingekapseld door een absolute harde JS-deadline. Een vastgelopen verzoek maakt alleen het betrokken transport voor profiel/OS/proxy ongeldig en sluit dit voordat het bij het volgende verzoek opnieuw wordt aangemaakt.
-- De prioriteit voor proxyresolutie is per aanroep `proxyUrl` → verzoekgebonden account-/dashboardcontext → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (inclusief varianten in kleine letters). Resolutiefouten stoppen veilig met een fout in plaats van een directe verbinding te laten uitlekken. LMArena voert de resolutie bewust uit tegen `arena.ai`.
-- `byteResponse` retourneert een op inhoudstype gebaseerde `data:`-URL zonder UTF-8-corruptie.
-- Fouten zijn `TlsClientUnavailableError` (package/add-on niet beschikbaar), `TlsClientHangError` (deadline overschreden) en `WreqTransportCapacityError` (de gedeelde foutcode voor sessiecapaciteit) wanneer alle 128 begrensde profiel-/OS-/proxyslots actief zijn of worden gesloten.
+- Streaming gebruikt de native `ReadableStream` van de respons rechtstreeks; er wordt geen
+  tijdelijk bestand of sidecar aangemaakt.
+- Maximaal 256 initiële bytes worden geïnspecteerd voordat een stream beschikbaar wordt gesteld.
+  SSE-providers bufferen niet-SSE-fouten; Grok/LMArena wijzen Cloudflare-challenges toe aan `403`
+  en HTML-tussenpagina's aan `502`.
+- De time-out van het native verzoek blijft omgeven door een absolute harde JS-deadline. Bij
+  vastlopen wordt alleen het betrokken profiel-/OS-/proxytransport ongeldig gemaakt en gesloten,
+  waarna het bij het volgende verzoek opnieuw wordt aangemaakt.
+- De prioriteit voor proxyresolutie is `proxyUrl` per aanroep → account-/dashboardcontext binnen het
+  verzoek → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (inclusief varianten in kleine letters).
+  Resolutiefouten leiden tot veilige weigering in plaats van het lekken van een directe verbinding.
+  LMArena voert de resolutie bewust uit ten opzichte van `arena.ai`.
+- `byteResponse` retourneert een `data:`-URL met het juiste inhoudstype, zonder UTF-8-beschadiging.
+- Fouten zijn `TlsClientUnavailableError` (pakket/add-on niet beschikbaar), `TlsClientHangError`
+  (deadline overschreden) en `WreqTransportCapacityError` (de gedeelde foutcode voor
+  sessiecapaciteit) wanneer alle 128 begrensde profiel-/OS-/proxyslots actief zijn of worden
+  gesloten.
 
-De generieke `TlsClient`-sessie hierboven blijft gespecialiseerd voor permanente, browsergestuurde cookiestatus. Beide paden hergebruiken één gecachte wreq-moduleloader en proceslevenscyclushook; hun pools blijven gescheiden omdat hun cookielevensduren bewust verschillen.
+De generieke `TlsClient`-sessie hierboven blijft gespecialiseerd in persistente, browsergebaseerde
+cookiestatus. Beide paden hergebruiken één gecachte wreq-module-loader en proceslevenscyclus-hook;
+hun pools blijven gescheiden omdat hun cookielevensduren bewust van elkaar verschillen.
 
-De profielen worden door het vastgezette package ondersteund, maar daadwerkelijke WAF-acceptatie kan onafhankelijk van lokale contracttests veranderen. Valideer wijzigingen in fingerprints met een expliciet geautoriseerd liveaccount voordat je pariteit met een upstreambrowser claimt.
+De profielen worden ondersteund door het vastgezette pakket, maar daadwerkelijke WAF-acceptatie kan
+onafhankelijk van lokale contracttests veranderen. Valideer wijzigingen in fingerprints met een
+expliciet geautoriseerd liveaccount voordat gelijkwaardigheid met een upstreambrowser wordt
+geclaimd.
 
 ---
 
@@ -98,7 +130,7 @@ Toegepast op: `system`-blokken, alle `messages[].content` en `tools[].descriptio
 
 Voor Anthropic-relays van derden die uitsluitend ‘echt Claude Code’-verkeer accepteren:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` standaard
@@ -222,7 +254,7 @@ Alle MITM-endpoints vereisen beheerauthenticatie (`requireCliToolsAuth`). Het su
 
 | Variabele                | Standaardwaarde                                                 |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

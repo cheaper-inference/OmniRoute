@@ -123,7 +123,9 @@
       "maxCostOpt": "Maksimaalne kulu päevas (USD)",
       "allowedModelsOpt": "Komadega eraldatud lubatud mudelite loend",
       "nothingToSet": "Reeglistiku välju ei esitatud. Kasuta --rate-limit, --max-cost või --allowed-models.",
-      "updated": "Reeglistik on uuendatud."
+      "updated": "Reeglistik on uuendatud.",
+      "modelAccessModeOpt": "Mudelite juurdepääsurežiim (all | restricted)",
+      "unrestrictedOpt": "Luba kõik mudelid (--model-access-mode all)"
     },
     "expiration": {
       "title": "Võtme kehtivusaeg",
@@ -254,6 +256,7 @@
     "log": "Kuva serveri logid otse",
     "no_recovery": "Keela automaatne taaskäivitus krahhi korral (silumisrežiim)",
     "max_restarts": "Maksimaalne krahhijärgsete taaskäivituste arv 30 sekundi jooksul enne alla andmist (vaikimisi: 2)",
+    "headless": "Käivita ainult puhverserveri mootor: juhtpaneel keelatud (404), valikulised alamsüsteemid jäetakse vahele (määrab OMNIROUTE_HEADLESS=1)",
     "tray": "Käivita süsteemisalves (ainult töölaual, valikuline)",
     "no_tray": "Keela süsteemisalve ikoon",
     "ready_timeout": "Valmisolekukontrolli ajalõpp millisekundites (ka OMNIROUTE_READY_TIMEOUT_MS, vaikimisi 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Sünkroonib seadeid OmniRoute'i eksemplaride vahel",
     "push": {
-      "description": "Saada seaded pilve või kaugeksemplari",
-      "target": "Sihtkoht (cloud või context:nimi)",
-      "bundle": "Sünkroonitavad komplekti osad",
-      "dryRun": "Eelvaade rakendamata muudatustega"
+      "description": "Saada seaded pilve või kaugeksemplari"
     },
     "pull": {
-      "description": "Tõmba seaded pilvest või kaugallikast",
-      "source": "Allikas (cloud või context:nimi)",
-      "merge": "Ühenda olemasolevate seadetega",
-      "replace": "Asenda olemasolevad seaded",
-      "dryRun": "Eelvaade rakendamata"
-    },
-    "diff": {
-      "source": "Lähtekontekst",
-      "target": "Sihtkontekst"
+      "description": "Tõmba seaded pilvest või kaugallikast"
     },
     "bundle": {
       "description": "Ekspordi seadistus paketifailina",
-      "include": "Kaasatavad osad (komadega eraldatud)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Impordi paketifail",
       "dryRun": "Valideeri rakendamata"
-    },
-    "initialize": {
-      "fromCloud": "Lähtesta pilvevarukoopiast"
     },
     "tokens": {
       "description": "Halda sünkroonimistoken'eid",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Jäta kinnitus vahele"
       }
-    },
-    "resolve": {
-      "description": "Lahenda sünkroonimiskonfliktid interaktiivselt"
     }
   },
   "config": {

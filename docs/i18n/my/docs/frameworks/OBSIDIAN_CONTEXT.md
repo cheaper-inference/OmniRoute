@@ -33,80 +33,91 @@ Client (`src/lib/obsidian/api.ts`) သည် Local REST API ကို အော�
   **"Obsidian သို့ ဆက်သွယ်၍မရပါ" အကြံပြုချက်**။
 - space/slash များပါဝင်သည့် note path များကို ဘေးကင်းစေရန် vault-relative **path encoding**။
 
-## စတင်ပြင်ဆင်ခြင်း
+## စနစ်ထည့်သွင်းခြင်း
 
 Obsidian token သို့မဟုတ် base URL အတွက် **environment variable မရှိပါ** — နှစ်ခုစလုံးကို
-`src/lib/db/obsidian.ts` မှတစ်ဆင့် SQLite `key_value` table (namespace `obsidian`) ထဲတွင်
-သိမ်းဆည်းထားသည်။ Token ကို **သိမ်းဆည်းထားစဉ် encryption ပြုလုပ်ထားသည်**
-(AES-256-GCM၊ plaintext backward-compat fallback ပါဝင်သည်)။ Endpoint dashboard ၏
+`src/lib/db/obsidian.ts` မှတစ်ဆင့် SQLite `key_value` table (namespace `obsidian`) တွင်
+သိမ်းဆည်းထားသည်။ Token ကို **သိမ်းဆည်းထားစဉ် ကုဒ်ဝှက်ထားသည်** (AES-256-GCM၊
+plaintext နောက်ပြန်လိုက်ဖက်ညီမှု fallback ပါဝင်သည်)။ Endpoint dashboard ၏
 **Context Sources** tab (`ObsidianSourceCard`) မှဖြစ်စေ၊ settings REST API မှတစ်ဆင့်ဖြစ်စေ
-ပြင်ဆင်သတ်မှတ်ပါ။
+စီစဉ်သတ်မှတ်ပါ။
 
 > [!IMPORTANT]
-> **Obsidian Local REST API** plugin ကို ထည့်သွင်းထားပြီး လည်ပတ်နေစေရမည်။ ၎င်း၏ REST
-> interface သည် **HTTP `127.0.0.1:27123`** (မူလ base URL) တွင် ချိတ်ဆက်မှုများကို
-> လက်ခံသည်။ Port `27124` သည် _သီးခြား_ MCP/HTTPS endpoint ဖြစ်ပြီး settings route
-> က ၎င်းကို အတိအလင်း ငြင်းပယ်သည်။ အခြား device တစ်ခုမှ ချိတ်ဆက်ပါက
-> `http://<tailscale-ip>:27123` ကို အသုံးပြုပါ။
+> **Obsidian Local REST API** plugin ကို ထည့်သွင်းပြီး လည်ပတ်နေစေရမည်။ ၎င်း၏ REST
+> interface သည် **HTTP `127.0.0.1:27123`** (မူလ base URL) တွင် နားထောင်သည်။ Port `27124`
+> သည် _သီးခြား_ MCP/HTTPS endpoint တစ်ခုဖြစ်ပြီး settings route က အတိအလင်း ငြင်းပယ်သည်။
+> အခြား device တစ်ခုမှ ချိတ်ဆက်ပါက `http://<tailscale-ip>:27123` ကို အသုံးပြုပါ။
 
-### Configuration key များ (SQLite `key_value`, namespace `obsidian`)
+### စီစဉ်သတ်မှတ်မှု key များ (SQLite `key_value`, namespace `obsidian`)
 
-| Key               | ရည်ရွယ်ချက်                                     | Encryption ပြုလုပ်ထားမှု |
-| ----------------- | ----------------------------------------------- | ------------------------ |
-| `api_key`         | Local REST API bearer token                     | ရှိ                      |
-| `base_url`        | REST base URL (မူလ `http://127.0.0.1:27123`)    | မရှိ                     |
-| `vault_path`      | vault directory သို့ absolute path (sync အတွက်) | မရှိ                     |
-| `webdav_username` | ထုတ်ပေးထားသော WebDAV username (vault sync)      | မရှိ                     |
-| `webdav_password` | ထုတ်ပေးထားသော WebDAV password (vault sync)      | ရှိ                      |
-| `webdav_enabled`  | WebDAV vault sync ကို ဖွင့်ထားခြင်း ရှိ/မရှိ    | မရှိ                     |
+| Key               | ရည်ရွယ်ချက်                                     | ကုဒ်ဝှက်ထားမှု |
+| ----------------- | ----------------------------------------------- | -------------- |
+| `api_key`         | Local REST API bearer token                     | ဟုတ်သည်        |
+| `base_url`        | REST base URL (မူလ `http://127.0.0.1:27123`)    | မဟုတ်ပါ        |
+| `vault_path`      | Vault directory သို့ absolute path (sync အတွက်) | မဟုတ်ပါ        |
+| `webdav_username` | ထုတ်ပေးထားသော WebDAV username (vault sync)      | မဟုတ်ပါ        |
+| `webdav_password` | ထုတ်ပေးထားသော WebDAV password (vault sync)      | ဟုတ်သည်        |
+| `webdav_enabled`  | WebDAV vault sync ကို ဖွင့်ထားခြင်း ရှိ၊ မရှိ   | မဟုတ်ပါ        |
 
-### REST မှတစ်ဆင့် ပြင်ဆင်သတ်မှတ်ခြင်း
+### REST မှတစ်ဆင့် စီစဉ်သတ်မှတ်ခြင်း
 
 ```bash
-# Local REST API token ကို သိမ်းဆည်းပြီး အတည်ပြုပါ (POST သည် status စစ်ဆေးခြင်းဖြင့် အတည်ပြုသည်)
+# Local REST API token ကို သိမ်းဆည်းပြီး စစ်ဆေးပါ (POST သည် status စစ်ဆေးမှုမှတစ်ဆင့် အတည်ပြုသည်)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
 
-# ချိတ်ဆက်မှု status ကို စစ်ဆေးပါ (connected, hasToken, baseUrl, vaultPath တို့ကို ပြန်ပေးသည်)
+# ချိတ်ဆက်မှုအခြေအနေကို စစ်ဆေးပါ (connected, hasToken, baseUrl, vaultPath ကို ပြန်ပေးသည်)
 curl http://localhost:20128/api/settings/obsidian
 
 # ချိတ်ဆက်မှုဖြုတ်ပါ (သိမ်းဆည်းထားသော token ကို ရှင်းလင်းသည်)
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Method အားလုံးအတွက် dashboard authentication လိုအပ်သည်။ `POST` သည် port `27124`
-ပေါ်ရှိ မည်သည့် URL ကိုမဆို ငြင်းပယ်ပြီး သိမ်းဆည်းခြင်းမပြုမီ Local REST API status endpoint
-ကို ခေါ်ခြင်းဖြင့် token ကို အတည်ပြုသည်။
+Method အားလုံးသည် dashboard authentication လိုအပ်သည်။ `POST` သည် port `27124` ရှိ
+မည်သည့် URL ကိုမဆို ငြင်းပယ်ပြီး သိမ်းဆည်းခြင်းမပြုမီ Local REST API status endpoint ကို
+ခေါ်ဆိုခြင်းဖြင့် token ကို အတည်ပြုသည်။
 
 ### WebDAV vault sync
 
-`src/app/api/settings/obsidian/webdav/route.ts` သည် `src/lib/obsidianSync.ts` ဖြင့်
-မောင်းနှင်သော ရွေးချယ်နိုင်သည့် WebDAV-backed vault sync ကို စီမံသည်။ ၎င်းကို ဖွင့်ထားပါက
-OmniRoute ကို local vault directory တစ်ခုသို့ ညွှန်ပြပြီး ကျပန်း WebDAV username/password
-တစ်စုံကို ထုတ်ပေးသည်-
+`src/app/api/settings/obsidian/webdav/route.ts` သည် ရွေးချယ်အသုံးပြုနိုင်သော WebDAV အခြေပြု
+vault sync ကို စီမံသည် (`src/lib/obsidianSync.ts` က လုပ်ဆောင်ပေးသည်)။ ၎င်းကို ဖွင့်ခြင်းဖြင့်
+OmniRoute ကို local vault directory တစ်ခုသို့ ညွှန်ပေးပြီး ကျပန်း WebDAV username/password
+အတွဲတစ်ခုကို ထုတ်ပေးသည်-
 
 ```bash
-# vault directory တစ်ခုအတွက် WebDAV sync ကို ဖွင့်ပါ (username/password ထုတ်ပေးသည်)
+# Vault directory တစ်ခုအတွက် WebDAV sync ကို ဖွင့်ပါ (username/password ထုတ်ပေးသည်)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
 
-# WebDAV sync status ကို ရယူပါ (ဖွင့်ထားသည့်အချိန်တွင်သာ credentials များကို ပြန်ပေးသည်)
+# WebDAV sync အခြေအနေကို ရယူပါ (ဖွင့်ထားချိန်တွင်သာ credentials ကို ပြန်ပေးသည်)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# WebDAV sync ကို ပိတ်ပါ (credentials + စီမံထားသော .stignore ကို ရှင်းလင်းသည်)
+# WebDAV sync ကို ပိတ်ပါ (credentials နှင့် စီမံထားသော .stignore ကို ရှင်းလင်းသည်)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
 ### API key တစ်ခုချင်းစီအလိုက် context source (ရွေးချယ်နိုင်သည်)
 
 Obsidian config ကို `api_key_context_sources` table
-(`src/lib/db/apiKeyContextSources.ts`) မှတစ်ဆင့် **API key တစ်ခုချင်းစီအလိုက်** scope
-သတ်မှတ်နိုင်သည်။ MCP call တစ်ခုတွင် authentication ပြုလုပ်ထားသော API key id ပါရှိသည့်အခါ
+(`src/lib/db/apiKeyContextSources.ts`) မှတစ်ဆင့် **API key တစ်ခုချင်းစီအလိုက်** သတ်မှတ်နိုင်သည်။
+MCP call တစ်ခုတွင် authentication အတည်ပြုပြီးသော API key id ပါရှိသည့်အခါ
 `getObsidianConfigForApiKey()` သည် ထို key ၏ ကိုယ်ပိုင် token/base-URL/vault-path
-(`source: "api_key"`) ကို ဦးစားပေးပြီး မရှိပါက global config (`source: "global"`) ကို
+(`source: "api_key"`) ကို ဦးစားပေးပြီး၊ မရှိပါက global config (`source: "global"`) ကို
 fallback အဖြစ် အသုံးပြုသည်။
+
+Sync မဟုတ်သော MCP tool များသည် ဤ configuration ကို မဖတ်မီ ခေါ်ဆိုသူ၏ identity ကို
+ဖြေရှင်းသတ်မှတ်ထားရန် လိုအပ်သည်။ Identity မရှိသော ခေါ်ဆိုသူသည်
+`Obsidian API token not configured` ကို လက်ခံရရှိပြီး vault request ကို ပေးပို့မည်မဟုတ်ပါ။
+HTTP ခေါ်ဆိုသူများ၏ identity ကို ၎င်းတို့၏ request credentials မှတစ်ဆင့် ဖြေရှင်းသည်။
+stdio ခေါ်ဆိုသူများအတွက် `OMNIROUTE_API_KEY` သို့မဟုတ် `ROUTER_API_KEY` မှတစ်ဆင့်
+ဖြေရှင်းနိုင်သည်။ Identity ကို မဖြေရှင်းနိုင်သော HTTP ခေါ်ဆိုသူသည် server ၏ environment
+identity ကို ဆက်ခံအသုံးပြု၍ မရပါ။ Placeholder ID များသက်သက်ဖြင့် access ကို ခွင့်ပြုမည်
+မဟုတ်ပါ။ `env-key` သို့ resolve လုပ်ပေးနိုင်သော အကျုံးဝင်သည့် environment credential ကိုမူ
+ဆက်လက် ပံ့ပိုးထားသည်။ API key တစ်ခုချင်းစီအလိုက် Obsidian configuration မရှိသော
+authenticated key များသည် global fallback ကို ဆက်လက်အသုံးပြုသည်။ `obsidian_sync_*`
+tool လေးခုသည် ၎င်းတို့၏ သီးခြား sync-token လုပ်ဆောင်ပုံကို ဆက်လက်အသုံးပြုသည်။
 
 ## MCP ကိရိယာများ (22)
 

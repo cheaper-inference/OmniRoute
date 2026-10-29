@@ -6,7 +6,6 @@
 // dependency back on ../proxies.ts — mutators that also need to bump the registry
 // generation counter (addProxyToScopePool, removeProxyFromScopePool,
 // setScopeRotationStrategy) stay in ../proxies.ts and import the pure helpers here.
-import { isIP } from "node:net";
 import { randomInt } from "crypto";
 import { getDbInstance } from "../core";
 import { pickByLatency } from "../proxyLatency";
@@ -18,11 +17,14 @@ import {
 import { isEgressBucketedLockScope } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { maybeEmitPoolExhausted } from "@/lib/proxyEvents/proxyTransitionBridge";
 import {
+  isOperatorEgressEnabled,
   isProxySkipRecentlyFailedEnabled,
   isProxyPoolSharedEgressOrderEnabled,
 } from "@/shared/utils/featureFlags";
 import { getCachedProxyHealth } from "@/lib/proxyHealth";
-import { getRecentEgressIpsForProxy } from "../proxyLogs";
+import { getRecentEgressIpForProxy, getRecentEgressIpsForProxy } from "../proxyLogs";
+import { egressKeyForAddresses, normalizeEgressAddress } from "@/shared/network/egressAddress";
+import { readOperatorEgressForMember } from "../proxyOperatorEgress";
 import type { JsonRecord, ProxyScope, ProxyRotationStrategy } from "./types";
 import { PROXY_ROTATION_STRATEGIES, DEFAULT_PROXY_ROTATION_STRATEGY } from "./types";
 import {
@@ -147,14 +149,72 @@ function getOrCreateRotationRow(
 // keep the plain behavior: nothing set aside, every member set aside (an all-failed pool
 // keeps today's selection and its #6246 fail-closed contract), or PROXY_SKIP_RECENTLY_FAILED
 // off. The flag is read last, only when skipping would actually change the pick.
-function eligibleMemberIndexes(candidates: unknown[]): number[] | null {
+// With an egress-bucketed provider scope, a refusal on one entry also sets aside
+// the entries sharing one of its observed egress addresses for that scope; other
+// scopes and a null provider keep the entry-level behavior. The scope gate is
+// isEgressBucketedLockScope (case-insensitive, the same gate as
+// buildHotEgressPredicate). Model and endpoint stay reserved and are never compared.
+function eligibleMemberIndexes(
+  candidates: unknown[],
+  provider?: string | null,
+  nowMs: number = Date.now()
+): number[] | null {
   if (!hasProxyRefusals()) return null;
+  const addressScope = addressScopeFor(provider, candidates, nowMs);
   const eligible: number[] = [];
   candidates.forEach((row, index) => {
-    if (!isProxyAvoided(proxyEgressKey(row))) eligible.push(index);
+    if (!isProxyAvoided(proxyEgressKey(row), nowMs) && !addressScope.isShared(row))
+      eligible.push(index);
   });
   if (eligible.length === 0 || eligible.length === candidates.length) return null;
   return isProxySkipRecentlyFailedEnabled() ? eligible : null;
+}
+
+// Observed egress keys (an exact address, or the range an exit rotates inside) seeded
+// only from members the refusal memory already sets aside; matches
+// buildHotEgressPredicate's seed discipline. Only scopes in the egress-bucketed lock
+// set expand: a refusal for one bucketed scope never sets aside members picked for
+// another scope.
+function addressScopeFor(
+  provider: string | null | undefined,
+  candidates: unknown[],
+  nowMs: number
+): { isShared: (row: unknown) => boolean; isAvoidedKey: (key: string | null) => boolean } {
+  const none = {
+    isShared: () => false,
+    isAvoidedKey: (key: string | null) => isProxyAvoided(key, nowMs),
+  };
+  if (provider == null) return none;
+  if (!isEgressBucketedLockScope(provider)) return none;
+  const hot = new Set<string>();
+  for (const row of candidates) {
+    if (!isProxyAvoided(proxyEgressKey(row), nowMs)) continue;
+    for (const key of readEgressKeysForMember(row, nowMs).keys) hot.add(key);
+  }
+  if (hot.size === 0) return none;
+  const byKey = new Map<string, unknown>();
+  for (const row of candidates) {
+    const key = proxyEgressKey(row);
+    if (key !== null) byKey.set(key, row);
+  }
+  return {
+    isShared: (row: unknown) => {
+      for (const key of readEgressKeysForMember(row, nowMs).keys) {
+        if (hot.has(key)) return true;
+      }
+      return false;
+    },
+    isAvoidedKey: (key: string | null) => {
+      if (isProxyAvoided(key, nowMs)) return true;
+      if (key === null) return false;
+      const row = byKey.get(key);
+      if (row === undefined) return false;
+      for (const key of readEgressKeysForMember(row, nowMs).keys) {
+        if (hot.has(key)) return true;
+      }
+      return false;
+    },
+  };
 }
 
 // True once the sticky window elapsed (or never started): the held member is due
@@ -240,25 +300,6 @@ function candidateProbeUrl(row: unknown): string | null {
   return `${type}://${auth}${bracketIpv6Host(host)}:${port}${marker}`;
 }
 
-// Expand an IPv6 literal to its eight 16-bit groups, or null when malformed.
-// `::` supplies the missing zero groups; anything else must list all eight.
-function expandIpv6ToGroups(text: string): number[] | null {
-  const halves = text.split("::");
-  if (halves.length > 2) return null;
-  const head = halves[0] ? halves[0].split(":") : [];
-  const tail = halves[1] ? halves[1].split(":") : [];
-  if (halves.length === 1 && head.length !== 8) return null;
-  if (halves.length === 2 && head.length + tail.length > 7) return null;
-  if ([...head, ...tail].some((part) => !/^[0-9a-f]{1,4}$/.test(part))) return null;
-  const groups = [
-    ...head.map((part) => parseInt(part, 16)),
-    ...new Array(halves.length === 2 ? 8 - head.length - tail.length : 0).fill(0),
-    ...tail.map((part) => parseInt(part, 16)),
-  ];
-  if (groups.length !== 8 || groups.some((group) => !Number.isInteger(group))) return null;
-  return groups;
-}
-
 /**
  * Normalize an observed egress address for pool ranking: a whole IPv4 address
  * (`203.0.113.7`), an IPv4-mapped IPv6 form demapped to IPv4
@@ -266,20 +307,13 @@ function expandIpv6ToGroups(text: string): number[] | null {
  * behind one shared /64 consume one quota. Anything else (zone ids
  * `fe80::1%eth0`, unparseable input) gives null so the caller falls back to
  * today's order instead of guessing.
+ *
+ * Thin alias over the shared normalizer (same verdicts: `ipVersion` matches
+ * `node:net#isIP` per #11122) so both this module and the operator-egress
+ * store normalize identically without a server-only import cycle.
  */
 export function normalizeEgressAddressForRanking(ip: unknown): string | null {
-  if (typeof ip !== "string") return null;
-  const text = ip.trim().toLowerCase();
-  if (!text || text.includes("%")) return null;
-  const mapped = text.startsWith("::ffff:") ? text.slice("::ffff:".length) : text;
-  if (isIP(mapped) === 4) return mapped;
-  if (isIP(text) !== 6) return null;
-  const groups = expandIpv6ToGroups(text);
-  if (groups === null) return null;
-  return `v6:${groups
-    .slice(0, 4)
-    .map((group) => group.toString(16))
-    .join(":")}`;
+  return normalizeEgressAddress(ip);
 }
 
 // Short-lived cache of the last observed egress address per pool entry point
@@ -288,15 +322,18 @@ export function normalizeEgressAddressForRanking(ip: unknown): string | null {
 const HOT_EGRESS_CACHE_TTL_MS = 30_000;
 const HOT_EGRESS_CACHE_MAX_ENTRIES = 200;
 
-const hotEgressCache = new Map<string, { at: number; value: string | null }>();
+const hotEgressCache = new Map<string, { at: number; value: MemberEgressObservation }>();
 
-function readHotEgressCache(key: string, nowMs: number): { hit: boolean; value: string | null } {
+function readHotEgressCache(
+  key: string,
+  nowMs: number
+): { hit: boolean; value: MemberEgressObservation | null } {
   const hit = hotEgressCache.get(key);
   if (!hit || nowMs - hit.at >= HOT_EGRESS_CACHE_TTL_MS) return { hit: false, value: null };
   return { hit: true, value: hit.value };
 }
 
-function writeHotEgressCache(key: string, value: string | null, nowMs: number): void {
+function writeHotEgressCache(key: string, value: MemberEgressObservation, nowMs: number): void {
   if (!hotEgressCache.has(key) && hotEgressCache.size >= HOT_EGRESS_CACHE_MAX_ENTRIES) {
     const oldest = hotEgressCache.keys().next().value;
     if (oldest !== undefined) hotEgressCache.delete(oldest);
@@ -326,43 +363,154 @@ function hotEgressCacheKey(row: unknown): string | null {
 }
 
 // Observation window for the shared-egress ranking signal: an entry that
-// showed two or more distinct egress addresses within the window is opaque
-// (a gateway or core switching behind one port) and reads as unknown.
+// showed several distinct egress addresses within the window is read under
+// the key those addresses share (one address, or the range they stay inside).
 const EGRESS_RANKING_WINDOW_MS = 30 * 60_000;
 
-// Last normalized egress address observed through a pool entry point, or null.
-// Best-effort by design: a cold probe cache yields no observation and the caller
-// keeps today's order. An entry that showed two or more distinct egress
-// addresses within the window is opaque (a gateway or core switching behind
-// one port): treated as unknown, never ranked.
-function readNormalizedEgressForMember(row: unknown, nowMs: number): string | null {
+// Read ceiling for the ranking signal: the journal reader returns at most this
+// many distinct addresses per member and the sample is not ordered, so a
+// window holding more addresses than that cannot be shown to stay inside one
+// range.
+const EGRESS_RANKING_ADDRESS_LIMIT = 10;
+
+/**
+ * What the journal showed for one pool member inside the ranking window.
+ * Read-only: the observation is shared by reference through the cache, so the
+ * whole observation is frozen — a consumer must never mutate it.
+ */
+type MemberEgressObservation = {
+  /** Distinct normalized addresses observed in the window (frozen). */
+  readonly addresses: readonly string[];
+  /** The key the member is ranked under: exact address, range key, or null. */
+  readonly key: string | null;
+};
+
+const EMPTY_EGRESS_OBSERVATION: MemberEgressObservation = Object.freeze({
+  addresses: Object.freeze([]),
+  key: null,
+});
+
+/**
+ * What the journal showed for one pool member inside the ranking window: the
+ * distinct normalized addresses it was seen on, and the key it is ranked
+ * under. Best-effort by design: a cold probe cache yields no observation and
+ * the caller keeps today's order.
+ */
+function readMemberEgressObservation(row: unknown, nowMs: number): MemberEgressObservation {
   const record = row as Record<string, unknown>;
   const host = typeof record.host === "string" ? record.host : "";
   const port = Number(record.port);
-  if (!host || !Number.isInteger(port) || port < 1 || port > 65535) return null;
+  if (!host || !Number.isInteger(port) || port < 1 || port > 65535) {
+    return EMPTY_EGRESS_OBSERVATION;
+  }
   const key = hotEgressCacheKey(row);
-  if (key === null) return null;
+  if (key === null) return EMPTY_EGRESS_OBSERVATION;
   const cached = readHotEgressCache(key, nowMs);
-  if (cached.hit) return cached.value;
-  let value: string | null = null;
+  if (cached.hit && cached.value !== null) return cached.value;
+  let observation: MemberEgressObservation = EMPTY_EGRESS_OBSERVATION;
   try {
     const sinceIso = new Date(nowMs - EGRESS_RANKING_WINDOW_MS).toISOString();
-    const observed = getRecentEgressIpsForProxy(host, port, sinceIso, 3);
+    const observed = getRecentEgressIpsForProxy(host, port, sinceIso, EGRESS_RANKING_ADDRESS_LIMIT);
     const distinct = new Set<string>();
     for (const ip of observed) {
       const normalized = normalizeEgressAddressForRanking(ip);
       if (normalized !== null) distinct.add(normalized);
     }
-    // One value: that value. Zero or two-or-more: null — an entry that
-    // showed two or more distinct egress addresses within the window is
-    // opaque (a gateway or core switching behind one port): treated as
-    // unknown, never ranked.
-    value = distinct.size === 1 ? [...distinct][0] : null;
+    observation = Object.freeze({
+      // Frozen: the cache shares the observation by reference, a consumer that
+      // mutated the array would corrupt it for every other reader.
+      addresses: Object.freeze([...distinct]),
+      // The query is cut at the read ceiling (DISTINCT … LIMIT, no ORDER BY):
+      // when it returned as many rows as the ceiling, the window may hold
+      // more addresses than we read, so the member cannot be shown to stay
+      // inside one range — it reads unknown. The count is the number of rows
+      // the query returned, not the number of normalized keys: one IPv6 /64
+      // key stands for several rows.
+      key: egressKeyForAddresses(distinct, {
+        truncated: observed.length >= EGRESS_RANKING_ADDRESS_LIMIT,
+      }),
+    });
   } catch {
-    value = null;
+    observation = EMPTY_EGRESS_OBSERVATION;
   }
-  writeHotEgressCache(key, value, nowMs);
-  return value;
+  writeHotEgressCache(key, observation, nowMs);
+  return observation;
+}
+
+/** Egress keys of one pool member: the exact addresses observed plus, for an
+ *  exit rotating inside one range, that range's key. `freshest` is the most
+ *  recent observation across both sources. */
+export type EgressKeySet = {
+  keys: Set<string>;
+  freshest: { address: string; at: string } | null;
+};
+
+/**
+ * Every observed egress key for a pool entry point. Flag off: the journal
+ * single address or empty, with zero operator DB read — byte-identical to the
+ * base behavior. Flag on: the union of the fresh operator rows (direct read,
+ * never cached) and the journal key, which is the single observed address or,
+ * when the journal window stays inside one range, that range's key; a journal
+ * window crossing two ranges never contributes. `freshest` is the most recent
+ * observation across both sources — a 20 h operator row loses to a 2 min
+ * probe, and wins when the probe is the older one.
+ */
+export function readEgressKeysForMember(row: unknown, nowMs: number = Date.now()): EgressKeySet {
+  const observation = readMemberEgressObservation(row, nowMs);
+  // The journal's freshest observation stays an exact address: it is what the
+  // observation screen shows. A member rotating inside one range has no
+  // single address, so it has no journal freshest (as before).
+  const single = observation.addresses.length === 1 ? observation.addresses[0] : null;
+  const journalFreshest =
+    single !== null ? { address: single, at: journalFreshestAt(row, nowMs) } : null;
+  if (!isOperatorEgressEnabled()) {
+    return {
+      keys: observation.key !== null ? new Set([observation.key]) : new Set(),
+      freshest: journalFreshest,
+    };
+  }
+  const record = row as Record<string, unknown>;
+  const host = typeof record.host === "string" ? record.host : "";
+  const port = Number(record.port);
+  const operator = readOperatorEgressForMemberSafe(host, port, nowMs);
+  const keys = new Set<string>(operator.addresses);
+  if (observation.key !== null) keys.add(observation.key);
+  let freshest = operator.freshest;
+  if (
+    journalFreshest !== null &&
+    (freshest === null || Date.parse(journalFreshest.at) > Date.parse(freshest.at))
+  ) {
+    freshest = journalFreshest;
+  }
+  return { keys, freshest };
+}
+
+function journalFreshestAt(row: unknown, nowMs: number): string {
+  try {
+    const record = row as Record<string, unknown>;
+    const host = typeof record.host === "string" ? record.host : "";
+    const port = Number(record.port);
+    if (!host || !Number.isInteger(port) || port < 1 || port > 65535) {
+      return new Date(nowMs).toISOString();
+    }
+    const recent = getRecentEgressIpForProxy(host, port);
+    if (recent?.at) return recent.at;
+  } catch {
+    // Best-effort: fall through to nowMs.
+  }
+  return new Date(nowMs).toISOString();
+}
+
+function readOperatorEgressForMemberSafe(
+  host: string,
+  port: number,
+  nowMs: number
+): { addresses: Set<string>; freshest: { address: string; at: string } | null } {
+  try {
+    return readOperatorEgressForMember(host, port, nowMs);
+  } catch {
+    return { addresses: new Set(), freshest: null };
+  }
 }
 
 /**
@@ -388,13 +536,17 @@ export function buildHotEgressPredicate(
   const hot = new Set<string>();
   for (const row of candidates) {
     if (!isAvoided(proxyEgressKey(row))) continue;
-    const egress = readNormalizedEgressForMember(row, nowMs);
-    if (egress !== null) hot.add(egress);
+    // Avoided members seed from the journal AND the fresh operator rows:
+    // either source can name the refused key. The journal contributes when
+    // its window stays inside one range (one address, or one range key).
+    for (const key of readEgressKeysForMember(row, nowMs).keys) hot.add(key);
   }
   if (hot.size === 0) return none;
   return (candidate: unknown) => {
-    const egress = readNormalizedEgressForMember(candidate, nowMs);
-    return egress !== null && hot.has(egress);
+    for (const key of readEgressKeysForMember(candidate, nowMs).keys) {
+      if (hot.has(key)) return true;
+    }
+    return false;
   };
 }
 
@@ -437,10 +589,15 @@ type RotationPickState = {
 
 // A held sticky member is served untouched (replaced for this pick only when set
 // aside): no extra write, no ranking. Returns undefined when not held.
-function pickHeldStickyMember<T>(state: RotationPickState, candidates: T[]): T | undefined {
+function pickHeldStickyMember<T>(
+  state: RotationPickState,
+  candidates: T[],
+  provider?: string | null,
+  nowMs: number = Date.now()
+): T | undefined {
   if (state.strategy !== "sticky" || isStickyExpired(state)) return undefined;
   const idx = ((state.cursor % candidates.length) + candidates.length) % candidates.length;
-  const eligible = eligibleMemberIndexes(candidates);
+  const eligible = eligibleMemberIndexes(candidates, provider, nowMs);
   return candidates[eligible ? firstEligibleFrom(idx, eligible, candidates.length) : idx];
 }
 
@@ -542,18 +699,22 @@ function pickFromCandidates<T>(
 ): T {
   // Pool-exhausted check first: a single-member pool set aside is exhausted
   // too, and this runs before the length-1 early return below. Flag-gated
-  // inside (zero cost when off), rebound window shared with the bridge.
+  // inside (zero cost when off), rebound window shared with the bridge. The
+  // check shares the selection predicate: a pool whose every address is set
+  // aside emits like an all-set-aside legacy pool.
+  const nowMs = Date.now();
+  const addressScope = addressScopeFor(provider, candidates, nowMs);
   maybeEmitPoolExhausted(
     normalizedScope,
     candidates,
     (row) => proxyEgressKey(row),
-    (key) => isProxyAvoided(key)
+    (key) => addressScope.isAvoidedKey(key)
   );
   if (candidates.length === 1) return candidates[0];
 
   const state = getOrCreateRotationRow(db, normalizedScope, rotationScopeId);
 
-  const held = pickHeldStickyMember(state, candidates);
+  const held = pickHeldStickyMember(state, candidates, provider, nowMs);
   if (held !== undefined) return held;
 
   // Sticky past its window and every other strategy rank normally; a held sticky
@@ -561,7 +722,7 @@ function pickFromCandidates<T>(
   // ranked list, so a set-aside member stays skipped while another is eligible and
   // the cursor advances past the member actually served.
   const ranked = rankCandidatesForPick(candidates, provider);
-  const eligible = eligibleMemberIndexes(ranked);
+  const eligible = eligibleMemberIndexes(ranked, provider, nowMs);
 
   if (state.strategy === "random") return pickRandomCandidate(ranked, eligible);
   if (state.strategy === "latency") return pickLatencyCandidate(db, ranked, eligible);

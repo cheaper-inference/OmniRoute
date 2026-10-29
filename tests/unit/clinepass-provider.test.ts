@@ -92,6 +92,10 @@ test("Cline fallback owns recommended/free models and excludes the ClinePass nam
     "openai/gpt-5.6-sol",
     "moonshotai/kimi-k3",
     "anthropic/claude-opus-4.8",
+    "cline-free/deepseek-v4.1-flash",
+    "cline-free/mimo-v2.6-flash",
+    "cline-free/muse-spark-1.3-contributor",
+    "stealth/space-bunny-alpha",
     "openrouter/free",
     "deepseek/deepseek-v4-flash",
     "tencent/hy3:free",
@@ -129,6 +133,36 @@ test("unwrapClinepassEnvelope: nested error.message extracted", () => {
     "clinepass"
   );
   assert.equal(error?.message, "quota exceeded");
+});
+
+test("unwrapClinepassEnvelope: preserves error-message precedence and status types", () => {
+  for (const [rawError, expected] of [
+    ["", ""],
+    ["direct", "direct"],
+    [{ message: "nested" }, "nested"],
+    [{ message: "" }, "fallback"],
+    [null, "fallback"],
+  ]) {
+    assert.deepEqual(
+      unwrapClinepassEnvelope(
+        {
+          success: false,
+          error: rawError,
+          message: "fallback",
+          statusCode: "502",
+        },
+        "clinepass"
+      ),
+      { body: null, error: { message: expected, status: null } }
+    );
+  }
+  assert.deepEqual(
+    unwrapClinepassEnvelope({ success: false, message: "", statusCode: 0 }, "clinepass"),
+    {
+      body: null,
+      error: { message: "Upstream error", status: 0 },
+    }
+  );
 });
 
 test("unwrapClinepassEnvelope: non-clinepass provider passes through untouched", () => {

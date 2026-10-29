@@ -18,10 +18,14 @@ import { resolveProviderId } from "../../../src/shared/constants/providers.ts";
 
 const RESET_AWARE_SESSION_WINDOW_MS = 5 * 60 * 60 * 1000;
 const RESET_AWARE_WEEKLY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const RESET_AWARE_MONTHLY_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 const RESET_AWARE_SESSION_REMAINING_WEIGHT = 0.45;
 const RESET_AWARE_SESSION_RESET_PRESSURE_WEIGHT = 0.55;
 const RESET_AWARE_WEEKLY_REMAINING_WEIGHT = 0.25;
 const RESET_AWARE_WEEKLY_RESET_PRESSURE_WEIGHT = 0.75;
+const RESET_AWARE_MONTHLY_WEIGHT = 0.25;
+const RESET_AWARE_MONTHLY_REMAINING_WEIGHT = 0.25;
+const RESET_AWARE_MONTHLY_RESET_PRESSURE_WEIGHT = 0.75;
 const RESET_AWARE_DEFAULTS = {
   sessionWeight: 0.35,
   weeklyWeight: 0.65,
@@ -152,7 +156,7 @@ function normalizeResetAt(value: unknown): string | null {
   return null;
 }
 
-function parseResetTimeMs(resetAt: string | null | undefined): number {
+export function parseResetTimeMs(resetAt: string | null | undefined): number {
   if (!resetAt) return NaN;
   const resetTime = Date.parse(resetAt);
   if (Number.isFinite(resetTime)) return resetTime;
@@ -231,7 +235,7 @@ function toWindowSnapshot(window: unknown): QuotaWindowSnapshot | null {
  * purpose, and pulling the normal-scope entries back in would rank a request
  * against a window it cannot spend.
  */
-function getQuotaWindowEntries(
+export function getQuotaWindowEntries(
   quota: unknown
 ): Array<{ key: string; window: QuotaWindowSnapshot }> {
   if (!quota || !isRecord(quota) || !isRecord(quota.windows)) return [];
@@ -314,9 +318,8 @@ function scoreQuotaWindow(
 }
 
 /**
- * Fraction of each window still available, 0-1, with the same fallbacks the
- * score uses: a missing window reads the snapshot-wide percentUsed, and a
- * snapshot with no usable number at all reads as half spent.
+ * Session and weekly windows use the same fallback as the score when absent.
+ * Monthly quota participates only when its window is present.
  *
  * Shared by the score and the leftover percent on purpose. If the two ever
  * resolved a window differently, an account could land in one pool while
@@ -326,11 +329,16 @@ function resolveWindowRemaining(quota: Record<string, unknown>) {
   const overallPercentUsed = clamp01(finiteNumberOrNull(quota.percentUsed) ?? 0.5);
   const sessionWindow = resolveQuotaWindowByName(quota, "session");
   const weeklyWindow = resolveQuotaWindowByName(quota, "weekly");
+  const monthlyWindow = resolveQuotaWindowByName(quota, "monthly");
   return {
     sessionWindow,
     weeklyWindow,
+    monthlyWindow,
     sessionRemaining: clamp01(1 - (sessionWindow?.percentUsed ?? overallPercentUsed)),
     weeklyRemaining: clamp01(1 - (weeklyWindow?.percentUsed ?? overallPercentUsed)),
+    monthlyRemaining: monthlyWindow
+      ? clamp01(1 - (monthlyWindow.percentUsed ?? overallPercentUsed))
+      : null,
   };
 }
 
@@ -341,8 +349,14 @@ export function scoreResetAwareQuota(
   if (!quota || !isRecord(quota)) return { score: 0.5 };
   if (quota.limitReached === true) return { score: -Infinity };
 
-  const { sessionWindow, weeklyWindow, sessionRemaining, weeklyRemaining } =
-    resolveWindowRemaining(quota);
+  const {
+    sessionWindow,
+    weeklyWindow,
+    monthlyWindow,
+    sessionRemaining,
+    weeklyRemaining,
+    monthlyRemaining,
+  } = resolveWindowRemaining(quota);
   const sessionScore = scoreQuotaWindow(
     sessionRemaining,
     sessionWindow?.resetAt,
@@ -358,6 +372,16 @@ export function scoreResetAwareQuota(
     RESET_AWARE_WEEKLY_RESET_PRESSURE_WEIGHT
   );
   let score = config.sessionWeight * sessionScore + config.weeklyWeight * weeklyScore;
+  if (monthlyWindow && monthlyRemaining !== null) {
+    const monthlyScore = scoreQuotaWindow(
+      monthlyRemaining,
+      monthlyWindow.resetAt,
+      RESET_AWARE_MONTHLY_WINDOW_MS,
+      RESET_AWARE_MONTHLY_REMAINING_WEIGHT,
+      RESET_AWARE_MONTHLY_RESET_PRESSURE_WEIGHT
+    );
+    score = (1 - RESET_AWARE_MONTHLY_WEIGHT) * score + RESET_AWARE_MONTHLY_WEIGHT * monthlyScore;
+  }
 
   if (config.exhaustionGuard > 0 && sessionRemaining < config.exhaustionGuard) {
     score *= Math.max(0.05, sessionRemaining / config.exhaustionGuard);
@@ -389,14 +413,27 @@ export function resolveExpiryFirstConfig(config: Record<string, unknown> | null 
 
 /**
  * Scores an account for `expiry-first`: how much quota it must spend PER HOUR to
- * avoid losing it at the next reset. Higher score = more urgent to spend here.
+ * avoid losing it at its deadline. Higher score = more urgent to spend here.
  *
- *   score = usable / hoursUntilNearestReset
+ *   legacy score = usable / hoursUntilDeadline
+ *   metric-aware score = max(0, usable - observedBurn * hours) * planCapacityWeight / hours
  *
  * `usable` is the tightest window's remaining fraction, because nested windows
  * (a 5h session inside a weekly cap) all decrement together and an account can
- * never spend more than its most constrained window allows. The deadline is the
- * NEAREST reset for the same reason: that is when the first tranche is lost.
+ * never spend more than its most constrained window allows.
+ *
+ * The deadline is the nearest reset of a window longer than the session (weekly,
+ * monthly) when the account has one. A 5h session refills many times before a
+ * weekly cap resets, so what an account loses is what its longer window still
+ * holds at that reset; the session only caps what can be spent right now. Taking
+ * the session reset as the deadline made two subscription accounts trade places
+ * every few hours and ignore weekly resets two days apart. A session whose reset
+ * has already passed has refilled and caps nothing. The session reset is still
+ * the deadline when it is the only window, or when no longer window reports one.
+ *
+ * With burn telemetry, each window's expiring tranche is projected to its own
+ * reset so a short session window is not scored using weekly burn, while the
+ * tightest-window bound on `usable` is preserved.
  *
  * Deliberately different from `scoreResetAwareQuota`, which ranks mostly on
  * leftover and adds `resetUrgency * (1 - remaining)` — a RECOVERY signal that
@@ -406,53 +443,92 @@ export function resolveExpiryFirstConfig(config: Record<string, unknown> | null 
  * term also saturates to zero outside the nominal window length, so it cannot
  * separate a reset 69h away from one 145h away at all.
  *
- * Returns 0 for an exhausted account so it is never preferred, and falls back to
- * plain leftover when no window reports a reset time.
+ * Returns 0 for an exhausted account so it is never preferred. Optional metrics
+ * subtract observed same-window burn projected through the reset and scale by an
+ * estimated plan-capacity weight. Without metrics the legacy score is unchanged.
+ * When no window reports a reset, it falls back to weighted leftover.
  */
 export function scoreExpiryFirstQuota(
   quota: unknown,
   config: ReturnType<typeof resolveExpiryFirstConfig>,
-  nowMs: number = Date.now()
+  nowMs: number = Date.now(),
+  metrics?: {
+    capacityWeight?: number;
+    burnFractionPerHourByWindow?: Record<string, number>;
+  }
 ): { score: number } {
   if (!quota || !isRecord(quota)) return { score: 0 };
   if (quota.limitReached === true) return { score: 0 };
 
-  const windows: QuotaWindowSnapshot[] = [];
+  const windows: Array<{ key: string; window: QuotaWindowSnapshot; session: boolean }> = [];
   for (const windowName of RESET_WINDOW_NAMES) {
     const window = resolveQuotaWindowByName(quota, windowName);
-    if (window) windows.push(window);
+    if (window) windows.push({ key: windowName, window, session: windowName === "session" });
   }
   if (windows.length === 0) {
-    for (const { window } of getQuotaWindowEntries(quota)) windows.push(window);
+    for (const { key, window } of getQuotaWindowEntries(quota)) {
+      windows.push({ key, window, session: false });
+    }
   }
   if (windows.length === 0) return { score: 0 };
+  const hasLongerWindow = windows.some((entry) => !entry.session);
 
   let usable = 1;
   let msUntilReset = Number.POSITIVE_INFINITY;
-  for (const window of windows) {
-    usable = Math.min(usable, clamp01(1 - (window.percentUsed ?? 0.5)));
+  let msUntilSessionReset = Number.POSITIVE_INFINITY;
+  for (const { window, session } of windows) {
     const resetMs = parseResetTimeMs(window.resetAt);
-    if (Number.isFinite(resetMs)) msUntilReset = Math.min(msUntilReset, resetMs - nowMs);
+    const msLeft = Number.isFinite(resetMs) ? resetMs - nowMs : Number.POSITIVE_INFINITY;
+    const capOnly = session && hasLongerWindow;
+    if (capOnly && msLeft <= 0) continue;
+    usable = Math.min(usable, clamp01(1 - (window.percentUsed ?? 0.5)));
+    if (capOnly) msUntilSessionReset = Math.min(msUntilSessionReset, msLeft);
+    else msUntilReset = Math.min(msUntilReset, msLeft);
   }
+  if (!Number.isFinite(msUntilReset)) msUntilReset = msUntilSessionReset;
 
   if (usable <= config.exhaustedFloor) return { score: 0 };
-  // No reset telemetry at all: the deadline half is unknowable, so rank on
-  // leftover rather than inventing a deadline. Still ordered below any account
-  // that does report one and is under pressure.
-  if (!Number.isFinite(msUntilReset)) return { score: usable };
+  if (!metrics) {
+    if (!Number.isFinite(msUntilReset)) return { score: usable };
+    const legacyHours = Math.max(config.minHours, msUntilReset / (60 * 60 * 1000));
+    return { score: usable / legacyHours };
+  }
+  const configuredWeight = metrics?.capacityWeight;
+  const capacityWeight =
+    typeof configuredWeight === "number" &&
+    Number.isFinite(configuredWeight) &&
+    configuredWeight > 0
+      ? Math.min(100, configuredWeight)
+      : 1;
+  const burnRates = metrics?.burnFractionPerHourByWindow || {};
+  if (!Number.isFinite(msUntilReset)) return { score: usable * capacityWeight };
 
-  // A non-positive delta means the snapshot predates the reset it describes.
-  // Clamping to minHours treats it as maximally urgent, which is the safe side:
-  // a freshly reset window is full, and re-reading it costs nothing.
-  const hours = Math.max(config.minHours, msUntilReset / (60 * 60 * 1000));
-  return { score: usable / hours };
+  let score = 0;
+  let hasReset = false;
+  for (const { key, window } of windows) {
+    const resetMs = parseResetTimeMs(window.resetAt);
+    if (!Number.isFinite(resetMs)) continue;
+    hasReset = true;
+    const hours = Math.max(config.minHours, (resetMs - nowMs) / (60 * 60 * 1000));
+    const remaining = clamp01(1 - (window.percentUsed ?? 0.5));
+    const burnRate = Math.max(0, burnRates[key] ?? 0);
+    const projectedRemaining = Math.max(0, remaining - burnRate * hours);
+    const predictedWaste = Math.min(usable, projectedRemaining);
+    score = Math.max(score, (predictedWaste * capacityWeight) / hours);
+  }
+  if (!hasReset) return { score: usable * capacityWeight };
+  return { score };
 }
 
 export function getResetAwareRemainingPercent(quota: unknown): number {
   if (!quota || !isRecord(quota)) return 100;
   if (quota.limitReached === true) return 0;
-  const { sessionRemaining, weeklyRemaining } = resolveWindowRemaining(quota);
-  return Number((Math.min(sessionRemaining, weeklyRemaining) * 100).toFixed(6));
+  const { sessionRemaining, weeklyRemaining, monthlyRemaining } = resolveWindowRemaining(quota);
+  const remaining =
+    monthlyRemaining === null
+      ? Math.min(sessionRemaining, weeklyRemaining)
+      : Math.min(sessionRemaining, weeklyRemaining, monthlyRemaining);
+  return Number((remaining * 100).toFixed(6));
 }
 
 /**

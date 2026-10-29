@@ -42,7 +42,8 @@ const {
   writeRemoteServerUrl,
   writeCloseBehavior,
 } = require("./lib/remoteServerPreferences");
-const { buildReadinessUrl, waitForServer } = require("./lib/serverReadiness");
+const { buildReadinessUrl, probeServer, waitForServer } = require("./lib/serverReadiness");
+const { shouldRestartHealthCheck } = require("./lib/healthWatchdog");
 const { shouldStartHidden, showOrCreateWindow } = require("./lib/windowLifecycle");
 const {
   CLOSE_BEHAVIOR_KEEP_LOADED,
@@ -214,11 +215,25 @@ function tightenServerEnv(dataDir, serverEnvPath) {
   }
 }
 
+// Mirrors src/lib/dataPaths.ts::getDefaultDataDir (and scripts/build/bootstrap-env.mjs).
+// Electron's main process is CJS and cannot import those ESM modules, so the order is
+// copied verbatim: explicit DATA_DIR → an EXISTING legacy ~/.omniroute → %APPDATA%
+// (Windows) → $XDG_CONFIG_HOME (when set) → ~/.omniroute. Without the legacy check the
+// desktop app persisted server.env under $XDG_CONFIG_HOME while the server it spawns
+// opened ~/.omniroute/storage.sqlite.
 function resolveDataDir(overridePath, env = process.env) {
   if (overridePath && overridePath.trim()) return path.resolve(overridePath);
 
   const configured = env.DATA_DIR?.trim();
   if (configured) return path.resolve(configured);
+
+  // Preserve an existing legacy dir so an upgrade never splits secrets from the database.
+  const legacyDir = path.join(require("os").homedir(), ".omniroute");
+  try {
+    if (fs.statSync(legacyDir).isDirectory()) return legacyDir;
+  } catch {
+    // absent or unreadable — fall through to the platform default
+  }
 
   if (process.platform === "win32") {
     const appData = env.APPDATA || path.join(require("os").homedir(), "AppData", "Roaming");
@@ -228,7 +243,7 @@ function resolveDataDir(overridePath, env = process.env) {
   const xdg = env.XDG_CONFIG_HOME?.trim();
   if (xdg) return path.join(path.resolve(xdg), "omniroute");
 
-  return path.join(require("os").homedir(), ".omniroute");
+  return legacyDir;
 }
 
 function getPreferredEnvFilePath(env = process.env) {
@@ -933,6 +948,63 @@ function stopNextServer() {
   }
 }
 
+// ── Health Watchdog ─────────────────────────────────────────
+// The embedded server can die on its own (OOM kill, user SIGTERM, port stolen by a
+// stale process) and never come back — the tray keeps running with a dead backend
+// and every dashboard call fails. Probe the cheap /api/health/ping on a LOW frequency
+// (5 min — not a hot loop) and restart the server only after N consecutive misses,
+// so one slow/loaded response can never trigger a restart. Remote mode and dev are
+// skipped: the server isn't ours to respawn.
+const HEALTH_WATCHDOG_INTERVAL_MS = 5 * 60 * 1000;
+let healthWatchdogTimer = null;
+let healthWatchdogFailures = 0;
+let lastHealthRestartAt = 0;
+
+async function runHealthWatchdogTick() {
+  if (app.isQuitting || isServerStopped || isDev || remoteServerUrl) return;
+
+  if (await probeServer(getServerReadinessUrl())) {
+    healthWatchdogFailures = 0;
+    return;
+  }
+
+  healthWatchdogFailures += 1;
+  if (
+    !shouldRestartHealthCheck(
+      { consecutiveFailures: healthWatchdogFailures, lastRestartAt: lastHealthRestartAt },
+      { now: Date.now() }
+    )
+  ) {
+    return;
+  }
+  healthWatchdogFailures = 0;
+  lastHealthRestartAt = Date.now();
+
+  console.warn("[Electron] Health check failed — restarting embedded server");
+  sendToRenderer("server-status", { status: "restarting", port: serverPort });
+
+  const serverToStop = nextServer;
+  stopNextServer();
+  await waitForServerExit(serverToStop);
+  startNextServer();
+
+  const ready = await waitForServer(getServerReadinessUrl());
+  sendToRenderer("server-status", {
+    status: ready ? "running" : "error",
+    port: serverPort,
+  });
+  if (ready && mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.reload();
+  }
+}
+
+function startHealthWatchdog() {
+  if (healthWatchdogTimer) return;
+  healthWatchdogTimer = setInterval(() => {
+    void runHealthWatchdogTick();
+  }, HEALTH_WATCHDOG_INTERVAL_MS);
+}
+
 // Linux-specific autostart helpers using standard .desktop entry placement
 function enableLinuxDesktopAutostart() {
   try {
@@ -1166,6 +1238,7 @@ app.whenReady().then(async () => {
 
   setupIpcHandlers();
   setupAutoUpdater();
+  startHealthWatchdog();
 
   // If readiness timed out (e.g. very long first-launch migrations), don't leave the
   // window stuck on a hanging connection — keep polling and reload once it responds (#2460).
@@ -1209,6 +1282,12 @@ app.on("window-all-closed", () => {
 
 // Clean up before quit
 app.on("before-quit", async (event) => {
+  app.isQuitting = true;
+  if (healthWatchdogTimer) {
+    clearInterval(healthWatchdogTimer);
+    healthWatchdogTimer = null;
+  }
+
   if (nextServer && !isServerStopped) {
     event.preventDefault(); // Stop immediate quit
     app.isQuitting = true;

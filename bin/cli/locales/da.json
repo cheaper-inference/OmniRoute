@@ -123,7 +123,9 @@
       "maxCostOpt": "Maks. omkostning pr. dag (USD)",
       "allowedModelsOpt": "Kommaadskilt liste over tilladte modeller",
       "nothingToSet": "Der blev ikke angivet nogen politikfelter. Brug --rate-limit, --max-cost eller --allowed-models.",
-      "updated": "Politikken blev opdateret."
+      "updated": "Politikken blev opdateret.",
+      "modelAccessModeOpt": "Adgangstilstand for modeller (all | restricted)",
+      "unrestrictedOpt": "Tillad alle modeller (--model-access-mode all)"
     },
     "expiration": {
       "title": "Nøgleudløb",
@@ -254,6 +256,7 @@
     "log": "Vis serverlogfiler direkte",
     "no_recovery": "Deaktivér automatisk genstart efter nedbrud (fejlretningstilstand)",
     "max_restarts": "Maksimalt antal genstarter efter nedbrud inden for 30 sek., før der gives op (standard: 2)",
+    "headless": "Kør kun proxy-motoren: dashboard deaktiveret (404), valgfrie undersystemer springes over (sætter OMNIROUTE_HEADLESS=1)",
     "tray": "Start i systembakken (kun desktop, tilvalg)",
     "no_tray": "Deaktivér ikonet i systembakken",
     "ready_timeout": "Timeout for klargøringstest i ms (også OMNIROUTE_READY_TIMEOUT_MS, standard 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Synkroniser konfiguration mellem OmniRoute-instanser",
     "push": {
-      "description": "Send konfiguration til cloud eller fjerninstans",
-      "target": "Mål (cloud eller context:name)",
-      "bundle": "Pakkedele, der skal synkroniseres",
-      "dryRun": "Forhåndsvis uden at anvende"
+      "description": "Send konfiguration til cloud eller fjerninstans"
     },
     "pull": {
-      "description": "Hent konfiguration fra cloud eller fjerninstans",
-      "source": "Kilde (cloud eller context:name)",
-      "merge": "Flet med eksisterende konfiguration",
-      "replace": "Erstat eksisterende konfiguration",
-      "dryRun": "Forhåndsvis uden at anvende"
-    },
-    "diff": {
-      "source": "Kildekontekst",
-      "target": "Målkontekst"
+      "description": "Hent konfiguration fra cloud eller fjerninstans"
     },
     "bundle": {
       "description": "Eksportér konfiguration som en pakkefil",
-      "include": "Dele, der skal medtages (kommasepareret)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Importér en pakkefil",
       "dryRun": "Valider uden at anvende"
-    },
-    "initialize": {
-      "fromCloud": "Initialiser fra cloud-sikkerhedskopi"
     },
     "tokens": {
       "description": "Administrer synkroniseringstokens",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Spring bekræftelse over"
       }
-    },
-    "resolve": {
-      "description": "Løs synkroniseringskonflikter interaktivt"
     }
   },
   "config": {

@@ -16,34 +16,34 @@ AgentBridge yra „OmniRoute“ MITM („Man-in-the-Middle“, tarpininko) tarpi
 
 ### Kas yra AgentBridge?
 
-Kai IDE agentas (pvz., GitHub Copilot, Cursor, Claude Code) atlieka API iškvietimą, jis tiesiogiai prisijungia prie pirminio DI paslaugų teikėjo (OpenAI, Anthropic ir kt.). AgentBridge skaidriai perima šį ryšį TLS lygmeniu — nereikalaujant jokių agento konfigūracijos pakeitimų — ir perrašo užklausą, nukreipdamas ją per „OmniRoute“.
+Kai IDE agentas (pvz., GitHub Copilot, Cursor, Claude kodas) atlieka API skambutį, jis tiesiogiai prisijungia prie AI tiekėjo prieš srovę (OpenAI, Anthropic ir kt.). AgentBridge skaidriai perima tą ryšį TLS lygiu – nereikalaujant jokių agento konfigūracijos pakeitimų – ir perrašo užklausą per OmniRoute.
 
-Tai leidžia:
+Tai reiškia, kad galite:
 
-- **Nukreipti bet kurį agentą į bet kurį paslaugų teikėją**: Copilot palaiko ryšį su OpenAI? Nukreipkite jį į Anthropic Claude, Gemini arba bet kurį iš 352 „OmniRoute“ paslaugų teikėjų.
-- **Taikyti modelių susiejimus**: `gemini-3-flash` → `claude-sonnet-4.7` skaidriai apdorojimo priemonės lygmeniu.
-- **Stebėti visą agentų srautą**: kiekviena perimta užklausa paskelbiama [Srauto inspektoriuje](./TRAFFIC_INSPECTOR.md).
-- **Taikyti „OmniRoute“ atsparumo mechanizmus**: kombinuotas maršruto parinkimas, grandinės pertraukikliai, atsarginiai variantai ir sąnaudų stebėjimas taip pat veikia IDE agentų srautui.
+- **Peradresuokite bet kurį agentą bet kuriam teikėjui** : Copilot kalbi su OpenAI? Nukreipkite jį į Anthropic Claude, Gemini arba bet kurį iš OmniRoute 377 teikėjų.
+- **Taikykite modelių atvaizdus** : `gemini-3-flash` → `claude-sonnet-4.7` skaidriai prižiūrėtojo lygyje.
+- **Stebėkite visą agento srautą** : kiekvienas perimtas prašymas paskelbiamas [eismo inspektoriui](./TRAFFIC_INSPECTOR.md).
+- **Taikykite OmniRoute atsparumą** : kombinuotas maršruto parinkimas, grandinės pertraukikliai, atsarginės dalys ir išlaidų stebėjimo darbai, skirti IDE agentų srautui.
 
-### Pozicionavimas rinkos atžvilgiu
+### Padėties nustatymas prieš rinką
 
-| Funkcija                          | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| --------------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                       |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                    |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                        |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                      |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                        |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                    |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                       |    —    |    —     |        ✓        |             ✓             |
-| Open Code                         |    —    |    —     |        ✓        |             ✓             |
-| Trae                              |    —    |    —     |        —        |        🔍 Tiriama         |
-| Valdymo skydelio sąsaja           |    ✓    |    ✗     |        ✗        |             ✓             |
-| Srauto inspektorius               |    ✗    |    ✗     |        ✓        |             ✓             |
-| „OmniRoute“ maršrutizavimas       |    ✗    |    ✗     |        ✗        |             ✓             |
-| Modelių susiejimo sąsaja          |    ✗    |    ✗     |        ✗        |             ✓             |
-| Apėjimo sąrašas                   |    ✗    |    ✗     |        ✓        |             ✓             |
-| Pirminio serverio CA sertifikatas |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funkcija                       | 9 maršrutizatorius | anti-api | llm-perėmėjas | **OmniRoute AgentBridge** |
+| ------------------------------ | :----------------: | :------: | :-----------: | :-----------------------: |
+| Antigravity                    |         ✓          |    ✓     |       —       |             ✓             |
+| GitHub Copilot                 |         ✓          |    ✓     |       —       |             ✓             |
+| Kiro (AWS)                     |         ✓          |    ✓     |       —       |             ✓             |
+| OpenAI Codex                   |         —          |    ✓     |       —       |             ✓             |
+| Cursor IDE                     |         ✓          |    ✓     |       —       |             ✓             |
+| Zed Industries                 |         —          |    ✓     |       —       |             ✓             |
+| Claude kodas                   |         —          |    —     |       ✓       |             ✓             |
+| Atidaryti kodą                 |         —          |    —     |       ✓       |             ✓             |
+| Trae                           |         —          |    —     |       —       |        🔍 Tiriant         |
+| Prietaisų skydelis UI          |         ✓          |    ✗     |       ✗       |             ✓             |
+| Eismo inspektorius             |         ✗          |    ✗     |       ✓       |             ✓             |
+| OmniRoute maršrutizavimas      |         ✗          |    ✗     |       ✗       |             ✓             |
+| Modelio žemėlapių sudarymas UI |         ✗          |    ✗     |       ✗       |             ✓             |
+| Apėjimo sąrašas                |         ✗          |    ✗     |       ✓       |             ✓             |
+| Prieš srovę CA sertifikatas    |         ✗          |    ✗     |       ✓       |             ✓             |
 
 ---
 
@@ -187,20 +187,20 @@ bendrą tarpinių mazgų / kadravimo draudžiamųjų elementų sąrašą (įskai
 
 ### 3.1 MITM serverio paleidimas / sustabdymas
 
-Naudokite AgentBridge serverio kortelę, esančią `/dashboard/tools/agent-bridge`:
+Naudokite „AgentBridge“ serverio kortelę, esančią `/dashboard/tools/agent-bridge`:
 
-| Veiksmas                         | Aprašymas                                                                        |
-| -------------------------------- | -------------------------------------------------------------------------------- |
-| Paleisti serverį                 | Paleidžia `src/mitm/server.cjs` 443 prievade                                     |
-| Sustabdyti serverį               | Tvarkingai sustabdo antrinį procesą                                              |
-| Paleisti serverį iš naujo        | Sustabdo ir paleidžia (pritaikomi paskirties pakeitimai)                         |
-| Patikėti sertifikatu             | Įdiegia `DATA_DIR/mitm/ca.crt` į OS patikimų sertifikatų saugyklą                |
-| Atsisiųsti sertifikatą           | Atsisiunčia `ca.crt`, kad būtų galima įdiegti rankiniu būdu                      |
-| Iš naujo sugeneruoti sertifikatą | Sukuria naują CA raktų porą (visi esami atskirų agentų sertifikatai nebegalioja) |
+| Veiksmas                         | Aprašymas                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Paleisti serverį                 | Paleidžia `src/mitm/server.cjs` per 443 prievadą. Naudojant šakninės CA modelį, pirmojo paleidimo metu sukuriamas `ca.crt`, o jei pateikiamas sudo slaptažodis, aktyvus sertifikatas pažymimas kaip patikimas                                                                                                                                                                                                                                                        |
+| Sustabdyti serverį               | Tvarkingai sustabdo antrinį procesą                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Paleisti serverį iš naujo        | Sustabdo ir paleidžia iš naujo (pritaikomi paskirties pakeitimai ir iš naujo sugeneruotas sertifikatas)                                                                                                                                                                                                                                                                                                                                                              |
+| Pažymėti sertifikatą patikimu    | Įdiegia aktyvų sertifikatą į OS patikimų sertifikatų saugyklą: `DATA_DIR/mitm/ca.crt`, kai naudojamas šakninės CA modelis, arba `DATA_DIR/mitm/server.crt`, kai naudojamas senasis galutinio sertifikato diegimo būdas                                                                                                                                                                                                                                               |
+| Atsisiųsti sertifikatą           | Atsisiunčia aktyvų sertifikatą, kad jį būtų galima įdiegti rankiniu būdu (`omniroute-mitm-ca.crt` = `ca.crt`, arba `omniroute-mitm.crt` = `server.crt`, kai naudojamas senasis galutinio sertifikato diegimo būdas)                                                                                                                                                                                                                                                  |
+| Sugeneruoti sertifikatą iš naujo | Sertifikato modelis niekada nekeičiamas. Senasis galutinio sertifikato diegimo būdas: sukuriami nauji `server.crt` / `server.key` (paleiskite serverį iš naujo, kad jis juos naudotų). Šakninės CA modelis: pakeičiami `ca.crt` / `ca.key`; tai neleidžiama, kol serveris veikia. Pirmiausia panaikinamas pasitikėjimas senu patikimu CA (reikalingas sudo slaptažodis), antraip keitimas nutraukiamas. Po to klientai turi iš naujo pažymėti naują CA kaip patikimą |
 
 ### 3.2 Pasitikėjimas sertifikatu
 
-Kad IDE priimtų MITM ryšį, AgentBridge CA sertifikatas turi būti patikimas operacinei sistemai.
+Kad IDE priimtų MITM ryšį, OS turi pasitikėti „AgentBridge“ CA sertifikatu.
 
 **Linux (NSS — Chrome/Firefox):**
 
@@ -221,25 +221,36 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-Arba naudokite valdymo skydelio mygtuką „Patikėti sertifikatu“ (jis paleidžia jūsų OS tinkamą komandą ir, jei reikia, parodo sudo užklausą).
+Arba naudokite valdymo skydelio mygtuką „Trust Cert“ (jis paleidžia jūsų OS tinkamą komandą ir, jei reikia, paprašo sudo slaptažodžio).
 
-#### Electron pagrindu veikiančios IDE nepaiso OS patikimų sertifikatų saugyklos (`NODE_EXTRA_CA_CERTS`)
+#### „Electron“ pagrindu veikiančios IDE nepaiso OS patikimų sertifikatų saugyklos (`NODE_EXTRA_CA_CERTS`)
 
-Kai kurios IDE — visų pirma **Antigravity IDE**, taip pat kitos Electron / VS Code pagrindu sukurtos programos — turi savo integruotą Node.js vykdymo aplinką, kuri, vykdydama išeinančias `fetch`/HTTPS užklausas, **nesikreipia į OS patikimų sertifikatų saugyklą**. Pasitikėjimo CA nustatymo OS/NSS lygmeniu pakanka savajai IDE **vidinei sistemai** (pvz., Go kalbos serveriui, kuris naudoja OS CA rinkinį), tačiau **Electron sąsajoje** TLS vis tiek neveiks — tai pasireiškia tuo, kad programa rodo, jog naudotojas yra _atsijungęs_, arba pateikia _„ryšio klaidą“_, nors MITM žurnale matyti, kad vidinės sistemos pradinės užklausos grąžina `200`. Būtina atlikti abu šiuos veiksmus:
+Kai kurios IDE — ypač **Antigravity IDE** ir kitos iš „Electron“ / VS Code kilusios programos — turi
+nuosavą Node.js vykdymo aplinką, kuri siųsdama išorines `fetch` / HTTPS užklausas
+**nesikreipia į OS patikimų sertifikatų saugyklą**. Pasitikėjimo CA nustatymo OS / NSS lygmeniu pakanka IDE savajai **vidinei sistemai**
+(pvz., Go kalbos serveriui, kuris naudoja OS CA rinkinį), tačiau **Electron sąsajoje**
+TLS vis tiek neveiks — tai gali pasireikšti taip, lyg vartotojas būtų _atjungtas_, arba gali būti rodomas
+_"ryšio klaidos"_ pranešimas, nors MITM žurnale matyti, kad vidinės sistemos pradinės užklausos grąžina `200`. Būtina atlikti
+abu toliau nurodytus veiksmus:
 
 1. Aiškiai nurodykite vykdymo aplinkai CA:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
-2. **Paleiskite IDE iš to terminalo apvalkalo.** Paleidus ją darbalaukio piktograma / iš Dock / iš meniu „Pradėti“, terminalo aplinkos eksportai **nepaveldimi**, o `~/.config/environment.d/*.conf` pritaikomas tik iš naujo prisijungus prie grafinės aplinkos. Pirmiausia visiškai uždarykite IDE — Electron vieno egzemplioriaus užraktas reiškia, kad antras paleidimas tik suaktyvina esamą procesą, o naujoji aplinka ignoruojama.
+2. **Paleiskite IDE iš to terminalo apvalkalo.** Paleidus ją darbalaukio piktograma / iš „Dock“ / meniu „Start“,
+   terminalo apvalkalo eksportuoti kintamieji **nepaveldimi**, o `~/.config/environment.d/*.conf` pritaikomas tik
+   iš naujo prisijungus prie grafinės aplinkos. Pirmiausia visiškai uždarykite IDE — dėl „Electron“ vieno egzemplioriaus
+   užrakto antrasis paleidimas tik sufokusuoja esamą procesą, todėl nauja aplinka ignoruojama.
 
-Pirmiau aprašytas pasitikėjimo OS ir NSS veiksmas vis tiek būtinas (kai kuriuose autentifikavimo procesuose naudojamas Chromium tinklo dėklas skaito naudotojo NSS saugyklą ir turi savo statinius `*.googleapis.com` susiejimus, kuriuos vietoje patikimas CA pakeičia). `NODE_EXTRA_CA_CERTS` papildomai apima Node `fetch` kelią.
+Pirmiau aprašytas OS pasitikėjimo + NSS veiksmas vis tiek būtinas (kai kuriuose tapatybės nustatymo
+procesuose naudojamas „Chromium“ tinklo dėklas skaito naudotojo NSS saugyklą ir turi atskirus statinius `*.googleapis.com`
+prisegimus, kuriuos pakeičia vietoje patikimu pažymėtas CA). `NODE_EXTRA_CA_CERTS` papildomai apima Node `fetch` kelią.
 
 ### 3.3 DNS maršruto parinkimas
 
-Kiekvieno agento, kurį norite perimti, API prieglobos serverio vardas (-ai) turi būti susiejamas (-i) su `127.0.0.1`. AgentBridge automatiškai tvarko `/etc/hosts` įrašus, kai sąrankos vediklyje įjungiate arba išjungiate agento DNS.
+Kiekvieno norimo perimti agento API pagrindinis kompiuteris (-iai) turi būti susietas (-i) su `127.0.0.1`. „AgentBridge“ automatiškai tvarko `/etc/hosts` įrašus, kai sąrankos vediklyje įjungiate arba išjungiate agento DNS.
 
-GitHub Copilot skirtų `/etc/hosts` įrašų pavyzdys:
+`/etc/hosts` įrašų, skirtų „GitHub Copilot“, pavyzdys:
 
 ```
 127.0.0.1 api.githubcopilot.com
@@ -248,69 +259,74 @@ GitHub Copilot skirtų `/etc/hosts` įrašų pavyzdys:
 
 ### 3.4 Modelių susiejimas
 
-Norėdami apibrėžti šaltinio → paskirties susiejimus, naudokite kiekvieno agento kortelėje esančią modelių susiejimo lentelę:
+Kiekvieno agento kortelėje esančioje modelių susiejimo lentelėje nustatykite šaltinio → paskirties susiejimus:
 
-| Šaltinio modelis (agentui savasis) | Paskirties modelis (OmniRoute) |
-| ---------------------------------- | ------------------------------ |
-| `gpt-4o`                           | `claude-sonnet-4.7`            |
-| `*` (pakaitos simbolis)            | `claude-haiku-4.7`             |
+| Šaltinio modelis (savasis agento) | Paskirties modelis („OmniRoute“) |
+| --------------------------------- | -------------------------------- |
+| `gpt-4o`                          | `claude-sonnet-4.7`              |
+| `*` (pakaitos simbolis)           | `claude-haiku-4.7`               |
 
-Pakaitos simbolis `*` susieja bet kokį neatpažintą modelį su nurodyta paskirtimi. Duomenys išsaugomi lentelėje `agent_bridge_mappings`.
+Pakaitos simbolis `*` susieja bet kurį neatpažintą modelį su nurodytu paskirties modeliu. Duomenys išsaugomi `agent_bridge_mappings` lentelėje.
 
-> **Patarimas — sužinokite tikruosius agento modelių ID.** IDE gali siųsti modelių pavadinimus, kurie skiriasi nuo jos sąsajoje rodomų žymų ir keičiasi tarp pagrindinių versijų. Pavyzdžiui, **Antigravity 2** ryšiu siunčia `gemini-3.1-pro-low`, `gemini-pro-agent` ir `gemini-3.1-flash-lite`, o ne senesnėje dokumentacijoje rodomą `gemini-2.5-pro`. Išsiųskite vieną pokalbio užklausą nenustatę atitinkančio susiejimo: MITM užregistruos tikslią gaunamą `model:` reikšmę ir praleis užklausą nepakeistą. Susiekite šią tikslią reikšmę — kita užklausa bus perimta ir nukreipta į jūsų pasirinktą paskirtį.
+> **Patarimas — sužinokite tikruosius agento modelių ID.** IDE gali siųsti modelių pavadinimus, kurie skiriasi nuo
+> jos naudotojo sąsajoje rodomų etikečių ir keičiasi tarp pagrindinių versijų. Pavyzdžiui, **Antigravity 2** ryšiu siunčia
+> `gemini-3.1-pro-low`, `gemini-pro-agent` ir `gemini-3.1-flash-lite`, o ne senesnėje dokumentacijoje nurodytą
+> `gemini-2.5-pro`. Išsiųskite vieną pokalbio užklausą, kai nėra jokios atitinkančios susiejimo taisyklės: MITM
+> žurnaluose įrašys tikslią gaunamą `model:` reikšmę ir persiųs užklausą. Susiekite šią pažodinę reikšmę, tada
+> kita užklausa bus perimta ir nukreipta į jūsų pasirinktą tikslą.
 
 ### 3.5 Pranešimas apie riziką
 
-AgentBridge perima prisijungimo duomenis (OAuth prieigos raktus, API raktus), kuriuos IDE naudoja autentifikuodamasi pirminių paslaugų teikėjų sistemose. Prieš įrašant į žurnalą jie yra **užmaskuojami** (žr. §2.7), tačiau lieka matomi OmniRoute MITM sluoksniui. Pirmą kartą aktyvinus kiekvieną agentą rodomas uždaromas modalinis pranešimas apie riziką.
+AgentBridge perima prisijungimo duomenis (OAuth prieigos raktus, API raktus), kuriuos IDE naudoja tapatybei patvirtinti pirminių paslaugų teikėjų sistemose. Prieš įrašant į žurnalą jie yra **užmaskuojami** (žr. §2.7), tačiau juos gali matyti OmniRoute MITM sluoksnis. Pirmą kartą aktyvinant kiekvieną agentą parodomas uždaromas modalinis pranešimas apie riziką.
 
 ### 3.6 Priežiūra ir diagnostika
 
-Valdymo skydelyje pateikiama kortelė **Priežiūra ir diagnostika** (`AgentBridgeMaintenanceCard`, esanti `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`), kurioje rodomi darbiniai MITM maršrutai, anksčiau neturėję naudotojo sąsajos. Jos paantraštė: _„Savarankiškai patikrinkite perėmimo procesą, pašalinkite likusius sistemos būsenos pakeitimus ir perkelkite sąranką iš vieno įrenginio į kitą.“_ Kortelės kliento pagalbinės priemonės yra faile `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
+Valdymo skydelyje pateikiama kortelė **Priežiūra ir diagnostika** (`AgentBridgeMaintenanceCard`, esanti `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`), kurioje rodomi operaciniai MITM maršrutai, anksčiau neturėję naudotojo sąsajos. Jos paantraštė: _„Savarankiškai patikrinkite perėmimo grandinę, panaikinkite likusią sistemos būseną ir perkelkite savo sąranką iš vieno kompiuterio į kitą.“_ Kortelės kliento pagalbinės priemonės yra faile `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
 
-| Mygtukas                      | Maršrutas                              | Ką jis daro                                                                                                                                                                                                                                  |
-| ----------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Diagnozuoti**               | `GET /api/tools/agent-bridge/diagnose` | Paleidžia duomenų fiksavimo konvejerio savitikrą ir parodo kiekvienos patikros ataskaitą (✓/✗ + problemos sprendimo užuomina).                                                                                                               |
-| **Taisyti**                   | `POST /api/tools/agent-bridge/repair`  | Panaikina po strigties ar SIGKILL likusią našlaitinę MITM sistemos būseną (DNS klastojimo įrašus, šakninį CA, sistemos tarpinį serverį). Idempotentinė operacija — kai būsena švari, praneša „Nėra ką taisyti“.                              |
-| **Pašalinti CA**              | `DELETE /api/tools/agent-bridge/cert`  | Atšaukia MITM šakninio CA patikimumą ir pašalina jį iš OS patikimų sertifikatų saugyklos (aiškiai inicijuojama, idempotentinė operacija). Rodoma tik tada, kai CA šiuo metu yra patikimas; būtinas įterptasis patvirtinimas „Pašalinti CA?“. |
-| **Eksportuoti konfigūraciją** | `GET /api/tools/agent-bridge/config`   | Atsisiunčia perkeliamą konfigūracijos JSON (žr. §3.7).                                                                                                                                                                                       |
-| **Importuoti konfigūraciją**  | `POST /api/tools/agent-bridge/config`  | Įkelia anksčiau eksportuotą konfigūracijos JSON (žr. §3.7).                                                                                                                                                                                  |
+| Mygtukas                      | Maršrutas                              | Ką jis atlieka                                                                                                                                                                                                                                 |
+| ----------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Diagnozuoti**               | `GET /api/tools/agent-bridge/diagnose` | Paleidžia perėmimo grandinės savitikrą ir parodo kiekvienos patikros ataskaitą (✓/✗ ir taisymo patarimą).                                                                                                                                      |
+| **Taisyti**                   | `POST /api/tools/agent-bridge/repair`  | Panaikina po strigties ar SIGKILL likusią našlaitinę MITM sistemos būseną (DNS klastojimo įrašus, šakninį CA, sistemos tarpinį serverį). Idempotentinė operacija — kai būsena tvarkinga, praneša „Nėra ką taisyti“.                            |
+| **Pašalinti CA**              | `DELETE /api/tools/agent-bridge/cert`  | Atšaukia pasitikėjimą MITM šakniniu CA ir pašalina jį iš OS patikimų sertifikatų saugyklos (aiškiai inicijuojama, idempotentinė operacija). Rodoma tik tada, kai CA šiuo metu yra patikimas; būtinas įterptinis patvirtinimas „Pašalinti CA?“. |
+| **Eksportuoti konfigūraciją** | `GET /api/tools/agent-bridge/config`   | Atsisiunčia perkeliamą konfigūracijos JSON (žr. §3.7).                                                                                                                                                                                         |
+| **Importuoti konfigūraciją**  | `POST /api/tools/agent-bridge/config`  | Įkelia anksčiau eksportuotą konfigūracijos JSON (žr. §3.7).                                                                                                                                                                                    |
 
-Kiekvienoje agento kortelėje taip pat yra atskiras mygtukas **Atkurti numatytąsias nuostatas** (`POST
-/api/tools/agent-bridge/agents/{id}/reset`) — vienu spustelėjimu atliekamas konkretaus agento pakeitimų atšaukimas, kuris pašalina tik to
-agento pagrindinių kompiuterių klastojimą, išvalo išsaugotas modelių sąsajas ir iš naujo nustato jo `dns_enabled`/`setup_completed`
-būseną, kad visiškai paleidus IDE iš naujo ji vėl jungtųsi prie tikrojo aukštesniojo serverio. Tai **nepaveikia**
-bendrinamo MITM serverio ar šakninio CA (jie vis dar gali būti reikalingi kitiems agentams) — juos galima pasiekti
-per serverio kortelę ir pirmiau nurodytą veiksmą **Pašalinti CA**. Sistemoje Windows taip pat dedamos visos pastangos paleisti
-`ipconfig /flushdns`, nes Windows DNS Client talpina pagrindinių kompiuterių failo įrašus podėlyje ir kitaip nepašalina
-ką tik panaikinto klastojimo.
+Kiekvieno agento kortelėje taip pat yra atskiras mygtukas **Atkurti numatytuosius nustatymus** (`POST
+/api/tools/agent-bridge/agents/{id}/reset`) — vienu spustelėjimu atliekamas konkretaus agento pakeitimų atšaukimas, kuris panaikina tik to
+agento pagrindinių kompiuterių vardų klastojimą, išvalo išsaugotus modelių susiejimus ir iš naujo nustato jo `dns_enabled`/`setup_completed`
+būseną, kad visiškai iš naujo paleista IDE vėl jungtųsi prie tikrosios pirminės paslaugos. Tai **nepaveikia**
+bendrinamo MITM serverio ar šakninio CA (jie vis dar gali būti reikalingi kitiems agentams) — juos ir toliau galima pasiekti
+per serverio kortelę ir pirmiau nurodytą veiksmą **Pašalinti CA**. Windows sistemoje taip pat pagal galimybes paleidžiama
+`ipconfig /flushdns`, nes Windows DNS klientas podėlyje laiko hosts failo įrašus ir kitu atveju nepašalintų
+ką tik panaikinto suklastoto įrašo.
 
-**Diagnostikos patikros** (`summarizeDiagnostics()` faile `src/mitm/inspector/diagnostics.ts`). Maršrutas kiekvienai patikrai paleidžia šalutinį poveikį turintį zondą ir perduoda logines reikšmes grynajai apibendrinimo funkcijai; grąžinamas vienas `healthy` įvertis ir kiekvienos nesėkmės užuomina:
+**Diagnostikos patikros** (`summarizeDiagnostics()` faile `src/mitm/inspector/diagnostics.ts`). Maršrutas kiekvienai patikrai paleidžia šalutinį poveikį turintį bandymą ir perduoda logines reikšmes grynajai apibendrinimo funkcijai; grąžinamas vienas `healthy` įvertinimas ir kiekvieno gedimo taisymo patarimas:
 
-| Patikros pavadinimas | Kas tikrinama                                                              | Užuomina nesėkmės atveju                                                                                                                                                                           |
-| -------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`     | Ar MITM serverio procesas yra aktyvus                                      | „MITM serveris neveikia. Paleiskite jį AgentBridge skirtuke.“                                                                                                                                      |
-| `server-reachable`   | Ar MITM serveris priima ryšius savo prievade (TCP zondas)                  | „MITM serveris nepriima ryšių savo prievade. Patikrinkite, ar prievadas laisvas ir ar turite teises jį susieti.“                                                                                   |
-| `cert-exists`        | Ar MITM sertifikatas sugeneruotas diske                                    | „MITM sertifikatas dar nesugeneruotas. Sugeneruokite jį AgentBridge skirtuke.“                                                                                                                     |
-| `cert-trusted`       | Ar MITM šakninis CA yra OS patikimų sertifikatų saugykloje                 | „OS saugykla nepasitiki MITM šakniniu CA, todėl TLS perėmimas nepavyks. Pažymėkite sertifikatą kaip patikimą AgentBridge skirtuke.“                                                                |
-| `dns-configured`     | Ar tiksliniai pagrindinių kompiuterių vardai klastojami faile `/etc/hosts` | „Tiksliniai pagrindinių kompiuterių vardai nėra klastojami faile /etc/hosts, todėl srautas niekada nepasiekia tarpinio serverio. Įjunkite DNS agentui (-ams), kurio (-ių) srautą norite fiksuoti.“ |
+| Patikros pavadinimas | Ką ji tikrina                                                              | Patarimas nesėkmės atveju                                                                                                                                                                         |
+| -------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`     | Ar MITM serverio procesas yra aktyvus                                      | „MITM serveris neveikia. Paleiskite jį AgentBridge skirtuke.“                                                                                                                                     |
+| `server-reachable`   | Ar MITM serveris priima ryšius savo prievade (TCP bandymas)                | „MITM serveris nepriima ryšių savo prievade. Patikrinkite, ar prievadas laisvas ir ar turite teises jį susieti.“                                                                                  |
+| `cert-exists`        | Ar MITM sertifikatas sugeneruotas diske                                    | „MITM sertifikatas dar nesugeneruotas. Sugeneruokite jį AgentBridge skirtuke.“                                                                                                                    |
+| `cert-trusted`       | Ar MITM šakninis CA yra OS patikimų sertifikatų saugykloje                 | „OS saugykla nepasitiki MITM šakniniu CA, todėl TLS perėmimas nepavyks. Nurodykite pasitikėti sertifikatu AgentBridge skirtuke.“                                                                  |
+| `dns-configured`     | Ar tiksliniai pagrindinių kompiuterių vardai klastojami faile `/etc/hosts` | „Tiksliniai pagrindinių kompiuterių vardai nėra klastojami faile /etc/hosts, todėl srautas niekada nepasiekia tarpinio serverio. Įjunkite DNS agentui (-ams), kurio (-ių) srautą norite perimti.“ |
 
-**Našlaitinės būsenos reklamjuostė:** kai puslapis aptinka po strigties likusią būseną (DNS klastojimą / CA / sistemos tarpinį serverį), kortelėje rodoma gintaro spalvos reklamjuostė — _„Ankstesnė sesija paliko sistemos būseną (DNS klastojimą, CA arba sistemos tarpinį serverį). Paleiskite taisymą, kad ją išvalytumėte.“_ — ir paryškinamas mygtukas **Taisyti**. `Repair` yra ProxyBridge `--cleanup` žymos analogas programos lygmeniu (jis perduoda darbą `repairMitm()` faile `src/mitm/manager.ts`).
+**Našlaitinės būsenos reklamjuostė:** kai puslapis aptinka po strigties likusią būseną (DNS klastojimą / CA / sistemos tarpinį serverį), kortelėje parodoma gintaro spalvos reklamjuostė — _„Ankstesnis seansas paliko sistemos būseną (DNS klastojimą, CA arba sistemos tarpinį serverį). Paleiskite taisymą, kad ją išvalytumėte.“_ — ir paryškinamas mygtukas **Taisyti**. `Repair` yra programos sluoksnio ProxyBridge vėliavėlės `--cleanup` atitikmuo (jis perduoda užduotį `repairMitm()` funkcijai faile `src/mitm/manager.ts`).
 
-> MITM šakninis CA paliekamas įdiegtas sustabdant ir paleidžiant iš naujo, kad nereikėtų kartoti sudo
-> raginimų (taip pat veikia mitmproxy/Charles), todėl jo pašalinimas yra aiškiai inicijuojamas
-> veiksmas **Pašalinti CA**, o ne veiksmas, kuris automatiškai atliekamas sustabdant.
+> MITM šakninė CA lieka įdiegta sustabdžius ir vėl paleidus, kad būtų išvengta pasikartojančių sudo
+> užklausų (tokia pati elgsena kaip mitmproxy/Charles), todėl jos pašalinimas yra aiškiai pasirenkamas
+> veiksmas **Pašalinti CA**, o ne tai, kas automatiškai įvyksta sustabdžius.
 
 ### 3.7 Perkeliamos konfigūracijos importavimas / eksportavimas
 
-AgentBridge gali serializuoti **operatoriaus reguliuojamą** būseną į versijuojamą JSON objektą, kad sąranką būtų galima atkartoti kituose kompiuteriuose. Serializatorius yra `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), o duomenys tikrinami naudojant `AgentBridgeConfigSchema`.
+AgentBridge gali serializuoti **operatoriaus keičiamą** būseną į versijuotą JSON objektą, kad sąranką būtų galima atkartoti kituose kompiuteriuose. Serializatorius yra `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), o validavimas atliekamas naudojant `AgentBridgeConfigSchema`.
 
-Eksportuojamos lygiai trys dalys (integruotos numatytosios nuostatos sąmoningai **NEEKSPORTUOJAMOS**, todėl importuojant jos niekada nedubliuojamos ir su jomis nekyla konfliktų):
+Eksportuojamos tiksliai trys dalys (integruotosios numatytosios reikšmės sąmoningai **NĖRA** eksportuojamos, todėl importuojant jos niekada nedubliuojamos ir su jomis nekonfliktuojama):
 
-| Laukas           | Šaltinis                                                                                | Pastabos                                                                      |
-| ---------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `bypassPatterns` | naudotojo nustatyti apėjimo šablonai (`agent_bridge_bypass`)                            | numatytieji bankų / valstybinių institucijų / „Okta“ šablonai neįtraukiami    |
-| `customHosts`    | „Traffic Inspector“ pasirinktiniai pagrindiniai kompiuteriai (`inspector_custom_hosts`) | kiekvienas: `{ host, kind: "llm"\|"app"\|"custom", label? }`                  |
-| `agentMappings`  | kiekvieno agento modelių susiejimai (`agent_bridge_mappings`)                           | `{ [agentId]: [{ source, target }] }` kiekvienam agentui, turinčiam susiejimų |
+| Laukas           | Šaltinis                                                                              | Pastabos                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `bypassPatterns` | naudotojo apibrėžti apėjimo šablonai (`agent_bridge_bypass`)                          | numatytieji bankų / valstybinių institucijų / okta šablonai neįtraukiami     |
+| `customHosts`    | Traffic Inspector pasirinktiniai pagrindiniai kompiuteriai (`inspector_custom_hosts`) | kiekvienas: `{ host, kind: "llm"\|"app"\|"custom", label? }`                 |
+| `agentMappings`  | kiekvieno agento modelių susiejimai (`agent_bridge_mappings`)                         | `{ [agentId]: [{ source, target }] }` kiekvienam susiejimų turinčiam agentui |
 
 ```jsonc
 // GET /api/tools/agent-bridge/config
@@ -324,13 +340,13 @@ Eksportuojamos lygiai trys dalys (integruotos numatytosios nuostatos sąmoningai
 }
 ```
 
-**Importavimo veikimas** (`POST /api/tools/agent-bridge/config`): apėjimo šablonai ir kiekvieno agento susiejimai **visiškai pakeičiami**; pasirinktiniai pagrindiniai kompiuteriai pridedami **idempotentiškai** (`INSERT OR IGNORE`). Atsakyme nurodoma, kiek kiekvieno tipo elementų buvo pritaikyta:
+**Importavimo elgsena** (`POST /api/tools/agent-bridge/config`): apėjimo šablonai ir kiekvieno agento susiejimai **visiškai pakeičiami**; pasirinktiniai pagrindiniai kompiuteriai pridedami **idempotentiškai** (`INSERT OR IGNORE`). Atsakyme nurodoma, kiek kiekvieno tipo elementų buvo pritaikyta:
 
 ```jsonc
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-Ko konfigūracijoje **NĖRA**: serverio veikimo būsenos, sertifikatų kelių, kiekvieno agento DNS būsenos, aukštesniojo lygmens CA kelio ir TPROXY nustatymų — tai yra pagrindinio kompiuterio / vykdymo aplinkos būsena, o ne perkeliamosios nuostatos.
+Kas **NEĮTRAUKTA** į konfigūraciją: serverio veikimo būsena, sertifikatų keliai, kiekvieno agento DNS būsena, aukštesniojo lygio CA kelias ir TPROXY nustatymai — tai yra pagrindinio kompiuterio / vykdymo aplinkos būsena, o ne perkeliamos nuostatos.
 
 ---
 
@@ -490,40 +506,40 @@ Jei AgentBridge perima užklausas, bet jos visos nepavyksta:
 
 ## §7 API žinynas
 
-Visi maršrutai yra `LOCAL_ONLY` (pasiekiami tik per atgalinio ryšio sąsają; tai užtikrinama prieš autentifikavimą) ir `SPAWN_CAPABLE`. Žr. `src/server/authz/routeGuard.ts`.
+Visi maršrutai yra `LOCAL_ONLY` (pasiekiami tik per grįžtamąją sąsają; tai užtikrinama prieš autentifikavimą) ir `SPAWN_CAPABLE`. Žr. `src/server/authz/routeGuard.ts`.
 
 Bazinis kelias: `/api/tools/agent-bridge/`
 
-| Metodas             | Kelias                                         | Aprašymas                                                                                                                         |
-| ------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | Visuotinė serverio būsena + kiekvieno agento aptikimo informacija / būsena                                                        |
-| GET                 | `/api/tools/agent-bridge/agents`               | Pateikti registruotų agentų sąrašą (ID, pavadinimas, pagrindiniai kompiuteriai, tinkamumas, būsena)                               |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Vieno agento būsena (paskirties konfigūracija + aptikimo informacija + išsaugota būsena)                                          |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Atnaujinti agento `setup_completed`                                                                                               |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Vykdyti agento aptikimo patikrą (`installed`, `version?`, `path?`)                                                                |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Įjungti / išjungti agento DNS (`{enabled: boolean}`)                                                                              |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Agento modelių susiejimai                                                                                                         |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Pakeisti modelių susiejimus                                                                                                       |
-| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Atkurti numatytąją būseną: atšaukti šio agento DNS klastojimą, išvalyti jo susiejimus ir iš naujo nustatyti būseną (žr. §3.6)     |
-| POST                | `/api/tools/agent-bridge/server`               | Paleisti / sustabdyti / paleisti iš naujo serverį (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)         |
-| GET                 | `/api/tools/agent-bridge/cert`                 | Sertifikato būsena (`exists`, `trusted`, `path`)                                                                                  |
-| POST                | `/api/tools/agent-bridge/cert`                 | Pasitikėti MITM šaknine CA (ją įdiegti)                                                                                           |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | Atšaukti pasitikėjimą MITM šaknine CA (ją pašalinti) — idempotentiška operacija (žr. §3.6)                                        |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Iš naujo sugeneruoti savarankiškai pasirašytą MITM sertifikatą                                                                    |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | Srautiniu būdu pateikti PEM sertifikatą atsisiųsti                                                                                |
-| GET                 | `/api/tools/agent-bridge/bypass`               | Pateikti apėjimo šablonų sąrašą (`default` + `user`)                                                                              |
-| POST                | `/api/tools/agent-bridge/bypass`               | Visiškai pakeisti naudotojo apibrėžtus apėjimo šablonus                                                                           |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Pašalinti vieną naudotojo apibrėžtą apėjimo šabloną                                                                               |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | Duomenų perėmimo konvejerio savitikra (žr. §3.6)                                                                                  |
-| POST                | `/api/tools/agent-bridge/repair`               | Atšaukti likutinę MITM sistemos būseną (žr. §3.6)                                                                                 |
-| GET                 | `/api/tools/agent-bridge/config`               | Eksportuoti perkeliamą konfigūraciją JSON formatu (žr. §3.7)                                                                      |
-| POST                | `/api/tools/agent-bridge/config`               | Importuoti perkeliamą konfigūraciją JSON formatu (žr. §3.7)                                                                       |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Gauti sukonfigūruotą aukštesnio lygio CA kelią                                                                                    |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Patikrinti ir išsaugoti aukštesnio lygio CA kelią                                                                                 |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Tik patikrinti (bandomasis vykdymas) aukštesnio lygio CA kelią — jo neišsaugoti                                                   |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY skaidriojo iššifravimo duomenų perėmimo režimas — žr. `docs/security/MITM-TPROXY-DECRYPT.md` (git; neįtraukiama į `/docs`) |
+| Metodas             | Kelias                                         | Aprašymas                                                                                                                                               |
+| ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET                 | `/api/tools/agent-bridge/state`                | Visuotinė serverio būsena + kiekvieno agento aptikimo informacija ir būsena                                                                             |
+| GET                 | `/api/tools/agent-bridge/agents`               | Registruotų agentų sąrašas (ID, pavadinimas, pagrindiniai kompiuteriai, tinkamumas, būsena)                                                             |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Vieno agento būsena (paskirties konfigūracija + aptikimo informacija + išsaugota būsena)                                                                |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Atnaujinti agento `setup_completed`                                                                                                                     |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Paleisti agento aptikimo patikrą (`installed`, `version?`, `path?`)                                                                                     |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Įjungti arba išjungti agento DNS (`{enabled: boolean}`)                                                                                                 |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Agento modelių susiejimai                                                                                                                               |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Pakeisti modelių susiejimus                                                                                                                             |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Atkurti numatytąją būseną: atšaukti šio agento DNS klastojimą, išvalyti jo susiejimus ir iš naujo nustatyti jo būseną (žr. §3.6)                        |
+| POST                | `/api/tools/agent-bridge/server`               | Paleisti, sustabdyti arba paleisti iš naujo serverį (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                             |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Sertifikato būsena (`exists`, `trusted`, `path`)                                                                                                        |
+| POST                | `/api/tools/agent-bridge/cert`                 | Patikėti (įdiegti) MITM šakninę CA                                                                                                                      |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | Atšaukti pasitikėjimą MITM šaknine CA (pašalinti ją) — idempotentinė operacija (žr. §3.6)                                                               |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Iš naujo sugeneruoti aktyvų sertifikatą nekeičiant sertifikato modelio (senasis galutinio subjekto sertifikatas arba šakninės CA rotacija — žr. §3.1)   |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Srautiniu būdu pateikti aktyvų PEM sertifikatą atsisiųsti (`ca.crt` šakninės CA modelyje, `server.crt` senojo galutinio subjekto sertifikato dieginyje) |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Išimčių šablonų sąrašas (`default` + `user`)                                                                                                            |
+| POST                | `/api/tools/agent-bridge/bypass`               | Visiškai pakeisti naudotojo apibrėžtus išimčių šablonus                                                                                                 |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Pašalinti vieną naudotojo apibrėžtą išimties šabloną                                                                                                    |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | Perėmimo konvejerio savitikra (žr. §3.6)                                                                                                                |
+| POST                | `/api/tools/agent-bridge/repair`               | Atšaukti našlaitinę MITM sistemos būseną (žr. §3.6)                                                                                                     |
+| GET                 | `/api/tools/agent-bridge/config`               | Eksportuoti perkeliamą konfigūraciją JSON formatu (žr. §3.7)                                                                                            |
+| POST                | `/api/tools/agent-bridge/config`               | Importuoti perkeliamą konfigūraciją JSON formatu (žr. §3.7)                                                                                             |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Gauti sukonfigūruotą aukštesniojo lygmens CA kelią                                                                                                      |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Patikrinti ir išsaugoti aukštesniojo lygmens CA kelią                                                                                                   |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Tik patikrinti aukštesniojo lygmens CA kelią (bandomasis vykdymas) — neišsaugoma                                                                        |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY skaidraus iššifravimo perėmimo režimas — žr. `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiliuojama į `/docs`)                             |
 
-Visos OpenAPI schemos: `docs/openapi.yaml` → žyma `AgentBridge`.
+Išsamios OpenAPI schemos: `docs/openapi.yaml` → žyma `AgentBridge`.
 
 ---
 

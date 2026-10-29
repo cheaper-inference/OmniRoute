@@ -15,27 +15,71 @@ replication plan of the same system, see the
 
 ---
 
-## Gate Inventory (~90 scripts)
+## Gate inventory and execution profiles
+
+### Candidate admission
+
+The CI and Quality Gates workflows each emit a stable verdict: `Gate / CI` and
+`Gate / Quality`. Their versioned admission policy enumerates every upstream job
+as required or advisory. An applicable required job must succeed: missing,
+cancelled, skipped, pending and unknown results cannot establish PASS. A valid
+docs-only or catalog-only classification can make a code lane inapplicable;
+a draft PR is not an accepted candidate. A `hotfix` label does not waive evidence.
+
+Both workflows cover PRs into main/release branches, pushes to `main`, manual dispatch
+and merge-group events. Push, dispatch and merge-group run the full selection. Pushes to
+`release/**` do not start them (2026-10-18): each change already ran the matrix on its PR
+and the merged combination is Release-Green's job (`docs/ops/RUNNER_BOX.md` → Hosted lane). Forks
+and merge groups use hosted runners for jobs that otherwise select self-hosted
+runners; sufficient hosted capacity must be verified before rollout.
+
+Each JSON receipt identifies the checked-out SHA, workflow run and attempt.
+The CLI rejects a checkout/event SHA mismatch. Workflow tests bind policy membership
+to the verdict job's `needs` list so a new or removed lane cannot silently disappear.
+The receipts cover their own workflow, not publication, deployment, or the internals
+of an existing advisory scanner. Activating both check names in branch rules is a
+separate administrative change; adding these jobs does not itself protect a branch.
+
+### Static scan inventory
+
+The versioned npm-alias inventory and static-scan membership live in
+`config/quality/gate-manifest.json`. Run `npm run check:gate-manifest` to validate
+script names and exact commands against `package.json`; additions, removals and
+command drift fail both the local hook and the change-classification jobs in CI.
+An alias is not a workflow job, matrix instance or test case: these counts must
+not be presented as interchangeable.
+
+Use `npm run quality:scan -- --list` or `npm run quality:scan:fast -- --list`
+to inspect the selected aliases without executing them. The runner invokes the
+npm entrypoint, so its runtime (including Bun where configured) is preserved.
+The manifest records aliases outside those profiles as separately invoked, and
+maintenance commands are forbidden in read-only scan profiles.
+
+These profiles cover the static scan only. They do not certify product tests,
+coverage, packaging, external checks or a candidate's full release acceptance.
+Workflow admission uses the linked `config/quality/admission-policy.json` and
+`scripts/quality/admission-verdict.mjs`. Release-observer profiles remain separate;
+inspect their applicable checks and receipts independently. The prose
+inventory below is a reference, not proof that a gate actually ran.
 
 Scripts live under `scripts/check/` (policy gates) and `scripts/quality/` (ratchet engine).
 The CI source of truth is `.github/workflows/ci.yml`.
 
 ### Release PR fast-path (`quality.yml`)
 
-`.github/workflows/quality.yml` runs on PRs targeting `release/**`. It keeps contributor
-branches moving with path-filtered fast gates, plus one advisory production-build signal for code
-changes:
+`.github/workflows/quality.yml` complements CI on main/release PRs, pushes to `main`,
+dispatch and merge groups. PRs use path-filtered fast checks. The permanently
+disabled duplicate build was removed; the real build/package/boot checks remain in CI.
 
-| Job                                              | Scope                                                                                                                                                                                                            | Blocking                                                                                  |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `Build (advisory)`                               | Non-draft code PRs and Mergify queue branches; Node 24, `npm-ci-retry`, `check:node-runtime`, `npm run build` with `OMNIROUTE_USE_TURBOPACK=1`; no artifact upload because no downstream quality job consumes it | **Advisory** (`continue-on-error: true`; remove after one week of stable release-PR runs) |
-| `Docs Gates (fast-path)`                         | Docs/code PRs; API docs refs and docs-all                                                                                                                                                                        | Yes                                                                                       |
-| `Fast Quality Gates`                             | Code PRs; static checks, typecheck, dashboard typecheck, impacted unit tests                                                                                                                                     | Yes                                                                                       |
-| `Forgotten sibling tests`                        | Code PRs; changed modules traced to static consumers and candidate sibling tests; barrel and dynamic-import paths are reported as advisory diagnostics, with referenced allowlist exceptions                     | **Advisory**                                                                              |
-| `Vitest (fast-path)`                             | Code PRs; fast vitest suite                                                                                                                                                                                      | Yes                                                                                       |
-| `Unit Tests fast-path`                           | Code PRs; 4-shard unit suite                                                                                                                                                                                     | Yes                                                                                       |
-| `No new ESLint warnings`                         | Code PRs; suppressions-aware lint guard                                                                                                                                                                          | Yes for own-origin, advisory for forks                                                    |
-| `Merge integrity (changelog + generated skills)` | Non-draft PRs; changelog and generated skill sync                                                                                                                                                                | Yes for own-origin, advisory for forks                                                    |
+| Job                                              | Scope                                                                                                                                                                                        | Blocking             |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `Docs Gates (fast-path)`                         | Docs/code PRs; API docs refs and docs-all                                                                                                                                                    | Yes                  |
+| `Fast Quality Gates`                             | Code PRs; static checks, typecheck, dashboard typecheck, impacted unit tests                                                                                                                 | Yes                  |
+| `Forgotten sibling tests`                        | Code PRs; changed modules traced to static consumers and candidate sibling tests; barrel and dynamic-import paths are reported as advisory diagnostics, with referenced allowlist exceptions | **Advisory**         |
+| `Vitest (fast-path)`                             | Code PRs; fast vitest suite                                                                                                                                                                  | Yes                  |
+| `Unit Tests fast-path`                           | Code PRs; 4-shard unit suite                                                                                                                                                                 | Yes                  |
+| `No new ESLint warnings`                         | Code PRs; suppressions-aware lint guard                                                                                                                                                      | Yes, including forks |
+| `Merge integrity (changelog + generated skills)` | Non-draft PRs; changelog and generated skill sync                                                                                                                                            | Yes, including forks |
 
 #### Forgotten sibling tests report
 
@@ -60,7 +104,8 @@ Runs on every PR to `main`. Blocks merge on failure.
 | Script (`npm run ...`)            | Validates                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Blocking                                 |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | `check:node-runtime`              | Node.js version is within the supported range                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Yes                                      |
-| `check:cycles`                    | Circular imports — all `src/` + `open-sse/` modules                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Yes                                      |
+| `check:cycles`                    | Circular imports across all of `src/` + `open-sse/` (AST-based, tsconfig `paths` resolved). Bare exits 1 whenever any cycle exists (fail-closed since #15281) and lists the SCCs. `check:cycles:ratchet` (what CI runs) blocks when the count exceeds the `metrics.cycles` ceiling in `quality-baseline.json` — currently 14, `direction: down`, so it can only fall (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                           | Yes (ratchet)                            |
+| `check:boundary`                  | `open-sse → src` coupling: unique file-to-file imports from the engine into the app (`scripts/quality/measure-boundary.mjs`; the edge list is the v4 core/module-split remediation backlog). Bare = advisory report (same as `quality:boundary`). `check:boundary:ratchet` (what CI runs, also in the `quality.yml` fast-gates ratchet loop) blocks when the count exceeds the `metrics.boundaryOpenSseToSrc` ceiling in `quality-baseline.json` — seeded at the measured 771, `direction: down`; `--update` only lowers it; base-relative on PRs (`--base-ref`, see below)                                                                                                                                                                                                                                       | Yes (ratchet)                            |
 | `check:route-validation:t06`      | Zod schemas present on all routes (Tier 6 policy)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Yes                                      |
 | `check:any-budget:t11`            | `@ts-expect-error // any` count does not exceed budget (Tier 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Yes                                      |
 | `check:provider-consistency`      | Every provider in `providers.ts` has a matching entry in `providerRegistry.ts` (and vice-versa, within the allowlist)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Yes                                      |
@@ -73,7 +118,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | `check:tracked-artifacts`         | No build artifacts / committed `node_modules` symlinks (also runs in husky pre-commit; pre-push is intentionally light — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Yes                                      |
 | `check:ai-attribution`            | No AI/bot `Co-Authored-By` trailer or AI-generation footer in PR commits, title or body — Hard Rule #16 (in the `quality.yml` fast-gates loop for PR→`release/**` — reads the event payload, no-op off PRs — and a PR-only step in `ci.yml` lint for PR→`main`; also the husky `commit-msg` hook; human co-authors allowed; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `check:vitest-exclusions`         | Every Vitest exclusion names a tracking issue and appears in `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Yes                                      |
-| `check:file-size`                 | No source file exceeds the per-extension cap (ratchet: frozen large files in `frozen` list)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Yes                                      |
+| `check:file-size`                 | Source files (`.ts`/`.tsx` in `src/`, `open-sse/`, `electron/`, `bin/`) stay within `cap` and test files (`*.test.ts(x)`) within `testCap`; files frozen in `file-size-baseline.json` (`frozen` / `testFrozen`) must not grow past their recorded size                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Yes                                      |
 | `check:error-helper`              | Error responses in executors/handlers use `buildErrorBody()` / `sanitizeErrorMessage()` (Hard Rule #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Yes                                      |
 | `check:migration-numbering`       | Migration SQL files are sequentially numbered, no gaps or duplicates                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Yes                                      |
 | `check:public-creds`              | No literal OAuth `client_id`/`client_secret` or Firebase Web keys outside `publicCreds.ts` (Hard Rule #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Yes                                      |
@@ -81,6 +126,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | `check:known-symbols`             | Provider executors, routing strategies, and translators registered in their dispatch tables match the files on disk — no orphaned or undeclared symbols                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Yes                                      |
 | `check:route-guard-membership`    | Every route that spawns a child process is classified by `isLocalOnlyPath()` (Hard Rules #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Yes                                      |
 | `check:test-discovery`            | Every `*.test.ts` / `*.spec.ts` file in the repo is collected by at least one test runner (ratchet: orphan list in `test-discovery-baseline.json` can only shrink)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Yes                                      |
+| `check:test-tla-order`            | No `node:test` file under `tests/unit` registers a test, hits a top-level `await`, then registers more (#18045; ratchet: `test-tla-order-allowlist.json` can only shrink)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Yes                                      |
 | `check:agent-skills-sync`         | Generated agent-skills artifacts match their source catalog (no drift)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `check:provider-asset-provenance` | Provider logos/assets carry a recorded provenance entry                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `lint:json`                       | JSON config files parse and satisfy the repo lint rules                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
@@ -110,14 +156,14 @@ Entire job is advisory (`continue-on-error: true`). The npm-based ratchets run f
 real; the external scanners install via `gh release download` and self-skip (exit 0)
 when a binary is still absent.
 
-| Script                   | Validates                                                                                                                                                                | Blocking     |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
-| `check:circular-deps`    | No circular dependencies (dpdm)                                                                                                                                          | **Advisory** |
-| `check:bundle-size`      | Bundle size does not exceed the cap                                                                                                                                      | **Advisory** |
-| `check:secrets`          | Secret scanning (gitleaks) — skips if binary absent                                                                                                                      | **Advisory** |
-| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) do not regress — skips if binary absent                                                                                         | **Advisory** |
-| `check:workflows`        | Workflow lint (actionlint + zizmor) — skips if binaries absent                                                                                                           | **Advisory** |
-| `check:openapi-breaking` | Breaking changes to the public API contract (`openapi.yaml`) vs the base branch (oasdiff) — emits `openapiBreaking=N`; skips if oasdiff absent or base spec unresolvable | **Advisory** |
+| Script                   | Validates                                                                                                                                                                                       | Blocking                                          |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `check:circular-deps`    | No circular dependencies (dpdm)                                                                                                                                                                 | **Advisory**                                      |
+| `check:bundle-size`      | Bundle size does not exceed the cap                                                                                                                                                             | **Advisory**                                      |
+| `check:secrets`          | Secret scanning (gitleaks) — skips if binary absent                                                                                                                                             | **Advisory**                                      |
+| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) do not regress — skips if binary absent                                                                                                                | **Advisory**                                      |
+| `check:workflows`        | Workflow lint (actionlint + zizmor); missing/broken scanners, invalid reports or missing ratchet baseline fail as INCOMPLETE. Valid findings follow the selected strict/advisory/ratchet policy | Execution required; zizmor ratchet blocking in CI |
+| `check:openapi-breaking` | Breaking changes to the public API contract (`openapi.yaml`) vs the base branch (oasdiff) — emits `openapiBreaking=N`; skips if oasdiff absent or base spec unresolvable                        | **Advisory**                                      |
 
 ### Job: `docs-sync-strict`
 
@@ -138,6 +184,19 @@ Runs on every PR to `main`. Blocks merge on failure.
 | `check:openapi-routes`         | Every path in `openapi.yaml` resolves to a real `route.ts` (anti-hallucination)                                                                   | Yes                        |
 | `check:docs-symbols`           | Every `/api/...` reference in `docs/**/*.md` resolves to a real `route.ts` (anti-hallucination)                                                   | Yes                        |
 | `i18n translation drift`       | Untranslated keys in i18n locale files — warn only                                                                                                | **Advisory**               |
+
+The twelve README SVGs under `docs/diagrams/` are generated (`scripts/docs/gen-readme-<name>.mjs`;
+`npm run docs:readme-diagrams` regenerates all of them). Each has a byte-compare unit test
+(`tests/unit/docs/readme-*-svg.test.ts`, job `test-unit`) that fails when the committed file is
+stale, and `check:docs-counts` reads canonical numbers from their `<text>` nodes — which is why the
+numbers are never outlined to paths. The SVG canonical-numbers check reads the files listed in
+`SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`,
+`free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`,
+`tier-cascade.svg`, plus `public/images/tier-flow-dark.svg` and `tier-flow-light.svg`; the
+free-forever, catalog-entry, recurring-pool and scoring-factors claims also read
+`promise-pillars.svg`, `free-tier-budget.svg` and `strategies-grid.svg`. `free-tier-budget.svg`
+draws its figures from the live catalog loader, so a change to `FREE_MODEL_BUDGETS` or to a
+provider display name reds CI until that file is regenerated.
 
 ### Job: `i18n-ui-coverage`
 
@@ -232,6 +291,8 @@ These run on a cron schedule (and `workflow_dispatch`), never on PRs. All are ad
 | `nightly-mutation`     | Stryker mutation-testing score over the fast unit lane — surviving mutants surface weak asserts                                                     | **Advisory** |
 | `nightly-compat`       | Node engine compatibility matrix across the supported `engines.node` ranges                                                                         | **Advisory** |
 
+Performance baselines (heap, TTFB, build time) are recorded, not gated: see [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
+
 ---
 
 ## Velocity phase (2026-08-30 → v4.0 LTS): every baseline loosened by 20%
@@ -266,24 +327,39 @@ docs/env contract, i18n parity, unit tests) are unchanged — a red test is stil
   same note.
 - `npm run quality:headroom [-- --only deadExports,fileSize] [--json out.json --md out.md]` —
   measures every numeric gate the way CI does and prints the remaining headroom per gate
-  (`scripts/quality/baseline-headroom.mjs`). The nightly `baseline-headroom` job posts the
-  table to the living issue **📈 Baseline headroom (velocity phase)** and adds the
-  `headroom-alert` label when any gate is within 10% of its cap or already over it. That issue
-  is the early warning: a budget that fills in days means the relaxation is being consumed by
-  a few PRs, not by the whole team — look at the offending gate's `_rebaseline_*` notes.
+  (`scripts/quality/baseline-headroom.mjs`). The nightly `baseline-headroom` job publishes
+  the table in the workflow run summary and uploads its JSON/Markdown report as
+  `baseline-headroom-<run_id>`, retained for 90 days. Warning and critical rows identify gates
+  within 10% of their cap or already over it. Review these reports as the early warning for
+  budgets being consumed; inspect the offending gate's `_rebaseline_*` notes. The job no
+  longer creates or updates a permanent issue; #12149 preserves the earlier report history.
 
 **New-code mode (Clean-as-You-Code) — since 2026-08-30, PR fast-path only**
 
 On `pull_request` events `quality.yml` passes `--base-ref <PR base SHA>` to `check:file-size`,
-`check:complexity-ratchets` and `check:dead-code`. In that mode the gate compares HEAD with the
-merge-base **restricted to the files the PR touched** (`scripts/check/newCodeMode.mjs`: the
-merge-base is materialized in a throwaway `git worktree`, ESLint/knip run there and on HEAD, the
-per-file counts are diffed):
+`check:complexity-ratchets` and `check:dead-code`. For `check:complexity-ratchets` and
+`check:dead-code` the gate compares HEAD with the merge-base **restricted to the files the PR
+touched** (`scripts/check/newCodeMode.mjs`: the merge-base is materialized in a throwaway
+`git worktree`, ESLint/knip run there and on HEAD, the per-file counts are diffed):
 
 - **blocking** — the PR added cyclomatic/cognitive violations or dead exports in files it changed
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` in the log);
 - **advisory** — the global total vs. the frozen baseline. Inherited drift never reds an
   innocent PR; the drift is re-frozen at release reconciliation and watched by the headroom job.
+
+`check:file-size` uses the base ref on its own terms (`scripts/check/check-file-size.mjs`, #8522):
+it checks every source and test file in the tree, reads each one's line count at the PR base
+with `git show`, and fails a file only when it grows past the larger of its baseline ceiling
+(`frozen` / `testFrozen`, or `cap` / `testCap` for a file outside the baseline) and its base
+size. A file that already drifted on the base therefore never reds an innocent PR.
+
+`check:boundary:ratchet` applies the same rule to its single number
+(`scripts/quality/measure-boundary.mjs --ratchet --base-ref <sha>`): on PR events both
+`quality.yml` fast-gates and the `ci.yml` lint job pass the PR base SHA, the base commit is
+measured from a `git archive` export, and the PR fails only when its `open-sse → src` edge
+count exceeds the larger of `metrics.boundaryOpenSseToSrc` and the count on the base. Base drift
+above the ceiling is reported (`base drift herdado`) but never reds an innocent PR; push → main
+keeps the absolute ceiling, and an unresolvable base SHA falls back to it with a warning.
 
 `workflow_dispatch` runs, the release-green sweep and the nightly headroom job have no PR base
 and keep the absolute (global) comparison. Coverage, duplication and type-coverage stay global
@@ -517,7 +593,7 @@ several "obvious" merges turned out to hide debt and are **not** clean drop-ins.
 
 - **`check:docs-sync` runs twice** — standalone in the `lint` job and again inside `check:docs-all` (`docs-sync-strict`) and the husky pre-commit hook. ✅ **DONE** — standalone `lint` invocation removed.
 - **CVE scanning** — ❌ **NOT a clean merge.** `audit:deps` hard-fails on any high/critical CVE; `check:vuln-ratchet` (osv) only fails on a _regression_ vs baseline (currently 1 MODERATE). Different semantics — dropping `audit:deps` would lose the absolute high/critical gate. Keep both.
-- **Cycle detection** — ❌ **NOT a clean merge.** `check:circular-deps` (dpdm) reports **91 cycles** (that is why it is advisory); it cannot be promoted to blocking without first resolving them, and it has a broader scope than the green, curated `check:cycles`. Keep `check:cycles` blocking; resolving the 91 dpdm cycles is its own backlog.
+- **Cycle detection** — ✅ **DONE** (#15159 G-01/G-02). The old text here called `check:cycles` "the green, curated" gate and justified keeping it blocking because `check:circular-deps` (dpdm) reported 91 cycles. That green was a **false green**: `check:cycles` scanned 5 subdirectories (450 files), matched only static `import|export … from`, and dropped every `@/` and `@omniroute/open-sse/` specifier, so it could not see the dynamic-import + alias cycles that dominated the repo. Fixed: the gate now walks `src` + `open-sse` (5023 files), collects specifiers from the TypeScript AST (so `import("…")` counts and type-position `typeof import("…")` does not), and resolves tsconfig `paths`. It finds **14** cycles, not 0. Because 14 pre-existing cycles cannot be fixed in a gate PR, `check:cycles` is now a **ratchet** (`--ratchet`, ceiling `metrics.cycles.value = 14` in `quality-baseline.json`, `direction: down`) — it blocks any _regression_ and the count can only fall. CI runs `npm run check:cycles:ratchet`. Burn-down rides with **A-01**. `check:circular-deps` (dpdm) stays advisory as the broader second opinion.
 - **Complexity** — ✅ **DONE** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): one ESLint walk, counts by ruleId so cyclomatic+max-lines and cognitive baselines stay independent; individual `check:complexity` / `check:cognitive-complexity` remain for local `--update`.
 - **`/api` anti-hallucination** — ✅ **DONE** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): one FS inventory of `src/app/api`, openapi-routes + docs-symbols still report independently; individuals remain for local runs.
 - **`check:node-runtime` runs in 11 jobs** — ⚠️ **low ROI.** Each is a separate runner and the check is <1s; total savings ~10s, against losing a cheap per-job guard. Not worth the churn.

@@ -1,0 +1,1 @@
+- Prepare pinned, checksum-verified actionlint and zizmor binaries before both Release-Green observer lanes; fail setup on invalid downloads or versions and use the immutable workflow revision when auditing older target commits.

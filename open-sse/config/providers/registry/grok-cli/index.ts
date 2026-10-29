@@ -54,15 +54,6 @@ export const grok_cliProvider: RegistryEntry = {
       targetFormat: "openai-responses",
       unsupportedParams: ["presencePenalty", "frequencyPenalty", "logprobs", "topLogprobs"],
     },
-    {
-      id: "grok-composer-2.5-fast",
-      name: "Composer 2.5",
-      contextLength: 200000,
-      supportsReasoning: false,
-      toolCalling: true,
-      targetFormat: "openai-responses",
-      unsupportedParams: ["presencePenalty", "frequencyPenalty", "logprobs", "topLogprobs"],
-    },
   ],
   oauth: {
     clientIdEnv: "GROK_OAUTH_CLIENT_ID",

@@ -131,7 +131,16 @@ export function normalizeChatGptWebStorageState(value: unknown): ChatGptWebStora
   }
   for (const cookie of value.cookies) validateCookie(cookie);
   for (const origin of value.origins) validateOrigin(origin);
-  return structuredClone(value) as unknown as ChatGptWebStorageState;
+  const state = structuredClone(value) as unknown as ChatGptWebStorageState;
+  // `__Host-` cookies must be host-only: no Domain attribute, Path=/, Secure.
+  // Browsers reject them when injected with a leading-dot domain (#15500).
+  for (const cookie of state.cookies) {
+    if (!cookie.name.startsWith("__Host-")) continue;
+    cookie.domain = cookie.domain.replace(/^\./, "");
+    cookie.path = "/";
+    cookie.secure = true;
+  }
+  return state;
 }
 
 export function chatGptWebStorageStateFromCookieHeader(raw: string): ChatGptWebStorageState {
@@ -254,6 +263,19 @@ function resolveSelection(model: string, body: JsonRecord): ChatGptWebUiSelectio
   if (normalized === "gpt-5-6-luna-free-thinking") {
     return { kind: "free", thinkEnabled: true };
   }
+  if (normalized === "gpt-6-pro") {
+    return { kind: "picker", modelLabel: "GPT-6 Sol", effortIndex: 4 };
+  }
+  if (normalized === "gpt-6-instant" || normalized === "gpt-6") {
+    return { kind: "picker", modelLabel: "GPT-6 Sol", effortIndex: 0 };
+  }
+  if (["gpt-6-thinking", "gpt-6-sol"].includes(normalized)) {
+    return {
+      kind: "picker",
+      modelLabel: "GPT-6 Sol",
+      effortIndex: effortIndex(reasoningEffort(body)),
+    };
+  }
   if (normalized === "gpt-5-6-pro") {
     return { kind: "picker", modelLabel: "GPT-5.6 Sol", effortIndex: 4 };
   }
@@ -324,8 +346,10 @@ export function resolveChatGptWebChromeExecutable(
 ): string | undefined {
   const env = deps.env ?? process.env;
   const exists = deps.exists ?? existsSync;
-  const candidates = [
-    explicit,
+  // Only the operator chooses the browser (see detectChromeExecutable in
+  // executors/chatgpt-web-codex.ts): `explicit` is stored connection data and may only
+  // select one of these, never name another program on the host.
+  const operatorChoices = [
     env.CHATGPT_WEB_CHROME_PATH,
     env.CHROME_PATH,
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -342,10 +366,15 @@ export function resolveChatGptWebChromeExecutable(
     ...(env.LOCALAPPDATA
       ? [join(env.LOCALAPPDATA, "Google", "Chrome", "Application", "chrome.exe")]
       : []),
-  ];
-  return candidates.find((candidate): candidate is string =>
-    Boolean(candidate?.trim() && exists(candidate.trim()))
-  );
+  ]
+    .map((candidate) => candidate?.trim())
+    .filter((candidate): candidate is string => Boolean(candidate));
+  const preferred = explicit?.trim();
+  const candidates =
+    preferred && operatorChoices.includes(preferred)
+      ? [preferred, ...operatorChoices]
+      : operatorChoices;
+  return candidates.find((candidate) => exists(candidate));
 }
 
 async function createDefaultSession(

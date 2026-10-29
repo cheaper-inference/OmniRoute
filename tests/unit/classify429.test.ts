@@ -513,3 +513,21 @@ test("classify429: Moonshot engine overloaded stays rate_limit", () => {
     "rate_limit"
   );
 });
+
+test("classify429: a compound Go-style RetryInfo.retryDelay is read as its full duration", () => {
+  // The delay grammar mirrors retryAfterJson.parseDelayString, which accepts compound
+  // durations ("2h7m23s"). Before, "2h7m23s" fell through to parseFloat → 2 seconds.
+  const cases = [
+    ["2h7m23s", "quota_exhausted"],
+    ["45m3s", "rate_limit"],
+  ] as const;
+  for (const [retryDelay, expected] of cases) {
+    const body = {
+      error: {
+        message: "You exceeded your current quota, please check your plan and billing details.",
+        details: [{ "@type": "type.googleapis.com/google.rpc.RetryInfo", retryDelay }],
+      },
+    };
+    assert.equal(classify429({ status: 429, body }), expected, retryDelay);
+  }
+});

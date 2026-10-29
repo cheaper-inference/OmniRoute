@@ -9,7 +9,7 @@ import { CANONICAL_EFFORT_VALUES } from "@/shared/reasoning/effortStandardizatio
 import { isObsoleteKiroModelAlias } from "@omniroute/open-sse/services/kiroModels.ts";
 import { filterSelectableModels } from "@omniroute/open-sse/services/modelLifecycle.ts";
 import { getEmbeddingProvider } from "@omniroute/open-sse/config/embeddingRegistry.ts";
-import { hasPayloadFreeEvidence } from "@/shared/utils/payloadFreeEvidence";
+import { hasPayloadFreeEvidence, hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -65,7 +65,7 @@ function labelsIncludeVision(value: unknown): boolean {
  * Returns false when the upstream exposes no modality info.
  */
 export function detectVisionInput(record: JsonRecord): boolean {
-  if (record.supportsVision === true) return true;
+  if (record.supportsVision === true || record.vision === true) return true;
 
   const architecture = asRecord(record.architecture);
   if (modalitiesIncludeImage(architecture.input_modalities)) return true;
@@ -101,7 +101,7 @@ const reasoningDefaultEffortSchema = z
   .nullable()
   .optional();
 const reasoningSupportedEffortsSchema = z
-  .object({ supported_efforts: z.array(z.string()).optional() })
+  .object({ supported_efforts: z.array(z.unknown()).optional() })
   .partial()
   .nullable()
   .optional();
@@ -112,7 +112,10 @@ const reasoningSupportedEffortsSchema = z
 // the object form; `discovery/codex.ts:140` reads the same `supported_reasoning_levels`
 // key as a bare existence check). Validate with Zod (Hard Rule #7): a malformed ENTRY is
 // dropped individually rather than failing the whole array/record.
-const effortEntrySchema = z.union([z.string(), z.object({ effort: z.string() })]);
+const effortEntrySchema = z.union([
+  z.string(),
+  z.object({ effort: z.string().optional() }).passthrough(),
+]);
 const effortListSchema = z.array(z.unknown());
 
 const supportedReasoningLevelsSchema = z.object({ supported_reasoning_levels: z.unknown() });
@@ -195,6 +198,16 @@ function normalizeSupportedEffort(effort: string): string {
   return EFFORT_SYNONYMS[effort.toLowerCase()] || effort;
 }
 
+// A tier entry is a string, `{ effort }` (CLIProxyAPI), or `{ value, id }`
+// (Grok Build). The first non-empty string wins, in that order.
+function effortNameFromEntry(entry: string | { effort?: string }): string | null {
+  if (typeof entry === "string") return entry;
+  if (typeof entry.effort === "string" && entry.effort.length > 0) return entry.effort;
+  const record = entry as { value?: unknown; id?: unknown };
+  if (typeof record.value === "string" && record.value.length > 0) return record.value;
+  return typeof record.id === "string" && record.id.length > 0 ? record.id : null;
+}
+
 /**
  * #8347: shared parser for the two new upstream shapes (`supported_reasoning_levels`,
  * `thinking.levels`). Accepts a list whose entries are either plain strings or
@@ -202,6 +215,15 @@ function normalizeSupportedEffort(effort: string): string {
  * normalizes survivors onto the canonical vocabulary. Returns `undefined` when nothing
  * usable remains, mirroring `detectSupportedThinkingEfforts`'s existing contract.
  */
+function parseModelsDevEffortOptions(raw: unknown): string[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const values = raw.flatMap((option) => {
+    const record = asRecord(option);
+    return record.type === "effort" && Array.isArray(record.values) ? record.values : [];
+  });
+  return parseEffortList(values);
+}
+
 function parseEffortList(rawList: unknown): string[] | undefined {
   const listParsed = effortListSchema.safeParse(rawList);
   if (!listParsed.success) return undefined;
@@ -212,9 +234,8 @@ function parseEffortList(rawList: unknown): string[] | undefined {
         .map((entry) => {
           const entryParsed = effortEntrySchema.safeParse(entry);
           if (!entryParsed.success) return null;
-          const raw =
-            typeof entryParsed.data === "string" ? entryParsed.data : entryParsed.data.effort;
-          return raw.length > 0 ? normalizeSupportedEffort(raw) : null;
+          const raw = effortNameFromEntry(entryParsed.data);
+          return raw && raw.length > 0 ? normalizeSupportedEffort(raw) : null;
         })
         .filter((effort): effort is string => effort !== null)
     )
@@ -234,7 +255,11 @@ function parseEffortList(rawList: unknown): string[] | undefined {
  */
 export function detectDefaultThinkingEffort(record: JsonRecord): string | undefined {
   if (typeof record.defaultThinkingEffort === "string" && record.defaultThinkingEffort.length > 0) {
-    return normalizeSupportedEffort(record.defaultThinkingEffort);
+    // A native default declared in the same tier list is not a canonical synonym.
+    return Array.isArray(record.supportedThinkingEfforts) &&
+      record.supportedThinkingEfforts.includes(record.defaultThinkingEffort)
+      ? record.defaultThinkingEffort
+      : normalizeSupportedEffort(record.defaultThinkingEffort);
   }
   const parsed = reasoningDefaultEffortSchema.safeParse(record.reasoning);
   if (parsed.success && parsed.data) {
@@ -276,10 +301,7 @@ function hasUsableDeclaredEffortList(record: JsonRecord): boolean {
     const shapeParsed = reasoningSupportedEffortsSchema.safeParse(holder);
     if (!shapeParsed.success || !shapeParsed.data) continue;
     const rawEfforts = shapeParsed.data.supported_efforts;
-    if (
-      Array.isArray(rawEfforts) &&
-      rawEfforts.some((e) => typeof e === "string" && e.length > 0)
-    ) {
+    if (parseEffortList(rawEfforts)) {
       return true;
     }
   }
@@ -296,17 +318,8 @@ function hasUsableDeclaredEffortList(record: JsonRecord): boolean {
 export function detectSupportedThinkingEfforts(record: JsonRecord): string[] | undefined {
   const parsed = reasoningSupportedEffortsSchema.safeParse(record.reasoning);
   if (parsed.success && parsed.data) {
-    const rawEfforts = parsed.data.supported_efforts;
-    if (Array.isArray(rawEfforts)) {
-      const efforts = Array.from(
-        new Set(
-          rawEfforts
-            .filter((effort): effort is string => typeof effort === "string" && effort.length > 0)
-            .map(normalizeSupportedEffort)
-        )
-      );
-      if (efforts.length > 0) return efforts;
-    }
+    const fromReasoning = parseEffortList(parsed.data.supported_efforts);
+    if (fromReasoning) return fromReasoning;
   }
 
   // neuralwatt-style upstreams wrap the same tier data one level deeper under
@@ -317,17 +330,8 @@ export function detectSupportedThinkingEfforts(record: JsonRecord): string[] | u
   const metadataRecord = asRecord(record.metadata);
   const metadataParsed = reasoningSupportedEffortsSchema.safeParse(metadataRecord.reasoning);
   if (metadataParsed.success && metadataParsed.data) {
-    const rawEfforts = metadataParsed.data.supported_efforts;
-    if (Array.isArray(rawEfforts)) {
-      const efforts = Array.from(
-        new Set(
-          rawEfforts
-            .filter((effort): effort is string => typeof effort === "string" && effort.length > 0)
-            .map(normalizeSupportedEffort)
-        )
-      );
-      if (efforts.length > 0) return efforts;
-    }
+    const fromMetadata = parseEffortList(metadataParsed.data.supported_efforts);
+    if (fromMetadata) return fromMetadata;
   }
 
   // Vendor-route catalogs: intersect `effort_values` across vendor routes.
@@ -367,6 +371,11 @@ export function detectSupportedThinkingEfforts(record: JsonRecord): string[] | u
     const fromThinking = parseEffortList(thinkingParsed.data.thinking?.levels);
     if (fromThinking) return fromThinking;
   }
+
+  // models.dev publishes tiers as reasoning_options: [{ type: "effort", values: [...] }].
+  // Read only the effort option; other option types carry unrelated vocabularies.
+  const fromOptions = parseModelsDevEffortOptions(record.reasoning_options);
+  if (fromOptions) return fromOptions;
 
   return undefined;
 }
@@ -596,6 +605,23 @@ export function normalizeDiscoveredModels(
             ? ["images"]
             : undefined;
 
+    // #16929 provenance. Only a parser that genuinely reads the upstream's own
+    // capability declaration (e.g. Gemini supportedGenerationMethods) stamps
+    // "declared" explicitly on the record. A bare supportedEndpoints array is NOT
+    // proof of declaration: OpenAI/OpenRouter/Ollama/codex/compatible parsers fill it
+    // from heuristics or fixed defaults, so it stays unmarked (= defaulted, never
+    // gating). Id/type modality inference applies only when no array was supplied.
+    // "defaulted" is left off the row so chat rows keep the tip's exact shape.
+    const endpointCapabilitySource: SyncedAvailableModel["endpointCapabilitySource"] =
+      record.endpointCapabilitySource === "operator" ||
+      record.endpointCapabilitySource === "declared" ||
+      record.endpointCapabilitySource === "inferred"
+        ? record.endpointCapabilitySource
+        : !Array.isArray(record.supportedEndpoints) &&
+            (modality.isEmbedding || modality.isRerank || modality.isImage)
+          ? "inferred"
+          : undefined;
+
     const apiFormat =
       toNonEmptyString(record.apiFormat) ||
       (modality.isEmbedding
@@ -615,6 +641,9 @@ export function normalizeDiscoveredModels(
     // window as `max_model_len`, the value the engine was actually started with.
     // Without it a vLLM model syncs with no window at all and the resolver hands
     // out the 128K default, understating a 250K deployment by half. #12858
+    // Explicit max fields beat a plain `context_window`: catalogs that send both
+    // use `context_window` as the smaller pricing tier (272K) and
+    // `max_context_window` / `max_model_len` as the usable window.
     // Anthropic Models API reports the window as `max_input_tokens` and the output
     // cap as `max_tokens`. #14159 briefly treated `max_tokens` as a window candidate;
     // that mapped Claude Opus 5 to 128K instead of 1M. Do not put `max_tokens` here.
@@ -625,6 +654,9 @@ export function normalizeDiscoveredModels(
       record.max_model_len,
       record.maxModelLen,
       record.max_context_window,
+      record.context_window,
+      record.context_window_tokens,
+      record.max_context_window_tokens,
       record.max_input_tokens,
       record.maxInputTokens,
       topProvider.context_length
@@ -651,12 +683,22 @@ export function normalizeDiscoveredModels(
     const supportsVision = detectVisionInput(record);
     // Persist only evidence present in this discovery payload. Static catalog
     // membership is intentionally not evidence about this connection's economics.
-    const isFree = hasPayloadFreeEvidence({ ...record, id });
+    const explicitlyPaid = providerId === "siliconflow" && hasPayloadPaidEvidence(record);
+    const isFree = !explicitlyPaid && hasPayloadFreeEvidence({ ...record, id });
 
     deduped.set(id, {
       id,
       name,
       source: "imported",
+      ...(record.visibility === "hide" || record.visibility === "list"
+        ? { visibility: record.visibility }
+        : {}),
+      ...(typeof record.supportedInApi === "boolean"
+        ? { supportedInApi: record.supportedInApi }
+        : {}),
+      ...(toNonEmptyString(record.minimalClientVersion)
+        ? { minimalClientVersion: toNonEmptyString(record.minimalClientVersion)! }
+        : {}),
       ...(apiFormat ? { apiFormat } : {}),
       ...(toNonEmptyString(record.targetFormat)
         ? { targetFormat: toNonEmptyString(record.targetFormat)! }
@@ -665,6 +707,7 @@ export function normalizeDiscoveredModels(
         ? { upstreamProtocol: toNonEmptyString(record.upstreamProtocol)! }
         : {}),
       ...(supportedEndpoints && supportedEndpoints.length > 0 ? { supportedEndpoints } : {}),
+      ...(endpointCapabilitySource ? { endpointCapabilitySource } : {}),
       ...(supportedThinkingEfforts !== undefined ? { supportedThinkingEfforts } : {}),
       ...(defaultThinkingEffort !== undefined ? { defaultThinkingEffort } : {}),
       ...(typeof inputTokenLimit === "number" ? { inputTokenLimit } : {}),
@@ -685,7 +728,9 @@ export function normalizeDiscoveredModels(
       ...(record.alwaysThinking === true ? { alwaysThinking: true } : {}),
       ...(typeof record.supportsTools === "boolean" ? { supportsTools: record.supportsTools } : {}),
       ...(typeof record.supportsVideo === "boolean" ? { supportsVideo: record.supportsVideo } : {}),
-      ...(isFree ? { isFree: true } : {}),
+      // Keep a paid verdict through the cache round trip: dropping false would
+      // let a :free suffix or a prior optimistic flag grant access again.
+      ...(explicitlyPaid ? { isFree: false } : isFree ? { isFree: true } : {}),
       ...(supportsVision ? { supportsVision: true } : {}),
       ...(typeof modality.dimensions === "number" && modality.dimensions > 0
         ? { dimensions: modality.dimensions }

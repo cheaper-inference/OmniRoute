@@ -105,9 +105,9 @@ export function resolveCanonicalProviderId(
  * providerId EXACTLY. Kept strict on purpose: this is the anti-collision
  * guard (catalog.ts, #11433/7db430a3) that stops the catalog from publishing
  * a provider-prefixed model id that would actually route to a DIFFERENT
- * provider at request time — loosening it here would let a self-aliased
- * no-auth provider (e.g. "opencode" -> "opencode-zen") pass a check that was
- * specifically built to fail for it (#13994).
+ * provider at request time — loosening it here would let a provider whose id
+ * collides with a manual alias override pass a check that was specifically
+ * built to fail for it (#13994).
  */
 export function prefixRoutesToProvider(prefix: string, providerId: string): boolean {
   const parsed = parseModel(`${prefix}/__omniroute_probe__`);
@@ -155,6 +155,18 @@ export function getProviderPrefixes(
   );
 }
 
+function normalizeProviderNodeModelPrefix(
+  modelStr: string,
+  providerId: string,
+  providerNodeIdByPrefix: Record<string, string>
+): string {
+  const slashIndex = modelStr.indexOf("/");
+  if (slashIndex > 0 && providerNodeIdByPrefix[modelStr.slice(0, slashIndex)] === providerId) {
+    return `${providerId}${modelStr.slice(slashIndex)}`;
+  }
+  return modelStr;
+}
+
 /**
  * Strip a provider/alias prefix off a combo target's `modelStr` and resolve its
  * canonical providerId, so downstream registry/spec/synced-capability lookups
@@ -168,7 +180,8 @@ export function getProviderPrefixes(
  */
 export function getComboTargetModelId(
   maps: AliasMaps,
-  target: ProviderPrefixedTarget
+  target: ProviderPrefixedTarget,
+  providerNodeIdByPrefix: Record<string, string> = {}
 ): { providerId: string; modelId: string } | null {
   const rawProvider =
     typeof target.providerId === "string"
@@ -176,8 +189,13 @@ export function getComboTargetModelId(
       : typeof target.provider === "string"
         ? target.provider.trim()
         : "";
-  const modelStr = typeof target.modelStr === "string" ? target.modelStr.trim() : "";
+  let modelStr = typeof target.modelStr === "string" ? target.modelStr.trim() : "";
   if (!rawProvider || rawProvider === "unknown" || !modelStr) return null;
+
+  // Builder steps retain the node ID for connection selection but use its public
+  // model prefix. Normalize only a prefix whose selected node matches that ID.
+  // Keep the model qualified so the existing resolver strips exactly one prefix.
+  modelStr = normalizeProviderNodeModelPrefix(modelStr, rawProvider, providerNodeIdByPrefix);
 
   const providerId = resolveCanonicalProviderId(maps.aliasToProviderId, rawProvider);
   if (!providerId || providerId === "unknown") return null;

@@ -7,6 +7,7 @@
  * @internal — not part of the public combo.ts barrel.
  */
 import type { PerTargetAdmissionHook } from "../admission/types.ts";
+import type { CliproxyManagementHealthCache } from "../../../src/lib/services/cliproxyManagementPreflight.ts";
 import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
 import type { ContextRelayConfig, UniversalHandoffConfig } from "../contextHandoff.ts";
 import type { ComboErrorEntry } from "./comboErrorAggregation.ts";
@@ -32,10 +33,16 @@ export type AttemptLoopState = {
   lastError: string | null;
   lastStatus: number | null;
   earliestRetryAfter: ComboRetryAfter | null;
+  /** Deadline from a target skipped by the credential availability gate. */
+  skippedConnectionCooldownUntil?: number;
   comboExpired: boolean;
   exhaustedProviders: Set<string>;
   exhaustedConnections: Set<string>;
   transientRateLimitedProviders: Set<string>;
+  /** Durable exhaustion carried across set retries (quota, credits, auth). */
+  durableExhaustedProviders?: Set<string>;
+  /** Durable exhaustion carried across set retries, keyed `provider:connectionId`. */
+  durableExhaustedConnections?: Set<string>;
   abortControllers: Map<number, AbortController>;
   dispatchedTargets: Set<string>;
   targetFailureTrust: Map<string, { observedFailure: boolean; allObservedFailuresQuota: boolean }>;
@@ -51,6 +58,11 @@ export type AttemptLoopState = {
   /** Normalized provider/model keys already refused request-scoped this dispatch. */
   requestScopedRejectedModelKeys?: Set<string>;
   observeFailure(quotaExhausted: boolean, targetExecutionKey?: string): void;
+  /**
+   * Last partial result of a target whose stream was cut (#18460 follow-up), returned when
+   * no later target succeeds (`truncatedStreamFailover.ts`).
+   */
+  heldTruncatedResponse?: Response | null;
 };
 
 export type AttemptLoopDeps = {
@@ -81,8 +93,11 @@ export type AttemptLoopDeps = {
   traceInvocationId: string;
   clientRequestedStream: boolean;
   handleSingleModelWithTimeout: HandleSingleModel;
+  requestHeaders?: Headers | Record<string, unknown> | null;
   isModelAvailable?: IsModelAvailable;
   perTargetAdmission?: PerTargetAdmissionHook | null;
+  /** Optional only to permit deterministic management-health gate tests. */
+  cliproxyManagementHealthCache?: CliproxyManagementHealthCache;
   signal?: AbortSignal | null;
   body: Record<string, unknown>;
   startTime: number;
@@ -123,3 +138,12 @@ export type GateDecision =
       profile: unknown;
       protectedPriorityTarget: boolean;
     };
+
+export interface ExecuteTargetAttemptOptions {
+  index: number;
+  state: AttemptLoopState;
+  deps: AttemptLoopDeps;
+  targetForAttempt: ResolvedComboTarget;
+  profile: unknown;
+  protectedPriorityTarget: boolean;
+}

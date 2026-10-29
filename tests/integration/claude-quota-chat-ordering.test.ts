@@ -120,6 +120,7 @@ test("chat preserves an unresolved Claude scoped reset through account fallback"
 
   assert.equal(response.status, 429);
   assert.equal(updated.rateLimitedUntil, resetAt);
+  assert.equal(updated.testStatus, "unavailable");
 });
 
 async function runNormalizedQuota429(
@@ -203,6 +204,7 @@ for (const { label, scope } of [
 
       assert.equal(response.status, 429);
       assert.equal(updated.rateLimitedUntil, activeReset);
+      assert.equal(updated.testStatus, "unavailable");
       assert.equal(
         accountFallback.isModelLocked("claude", connection.id, "claude-fable-5-1"),
         false
@@ -233,6 +235,7 @@ test("chat treats a display-only Claude Opus 4 scope as unresolved for Opus 4.5"
 
   assert.equal(response.status, 429);
   assert.equal(updated.rateLimitedUntil, resetAt);
+  assert.equal(updated.testStatus, "unavailable");
   assert.equal(accountFallback.isModelLocked("claude", connection.id, requestedModel), false);
 });
 
@@ -258,5 +261,142 @@ test("chat keeps a surface-labeled Claude scope connection-scoped", async () => 
 
   assert.equal(response.status, 429);
   assert.equal(updated.rateLimitedUntil, resetAt);
+  assert.equal(updated.testStatus, "unavailable");
   assert.equal(accountFallback.isModelLocked("claude", connection.id, requestedModel), false);
 });
+
+const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
+
+const directCoreScenarios: Array<{
+  label: string;
+  message: string;
+  terminal: boolean;
+  initialStatus?: string;
+  modelScoped?: boolean;
+  activeCooldown?: boolean;
+}> = [
+  { label: "renewing quota", message: EXPLICIT_QUOTA_ERROR, terminal: false },
+  {
+    label: "depleted credits",
+    message: "Your credit balance is too low. Please purchase credits.",
+    terminal: true,
+  },
+  {
+    label: "monthly billing cap",
+    message: "Your monthly spend limit has been reached",
+    terminal: true,
+  },
+  ...["banned", "expired", "deactivated", "credits_exhausted"].map((initialStatus) => ({
+    label: `existing ${initialStatus} status`,
+    message: EXPLICIT_QUOTA_ERROR,
+    terminal: false,
+    initialStatus,
+  })),
+  {
+    label: "model quota scoped",
+    message: EXPLICIT_QUOTA_ERROR,
+    terminal: false,
+    modelScoped: true,
+  },
+  {
+    label: "active cooldown unchanged",
+    message: EXPLICIT_QUOTA_ERROR,
+    terminal: false,
+    activeCooldown: true,
+  },
+];
+
+for (const {
+  label,
+  message,
+  terminal,
+  initialStatus = "active",
+  modelScoped = false,
+  activeCooldown = false,
+} of directCoreScenarios) {
+  test(`direct core keeps ${label} in its correct recovery class`, async () => {
+    const connection = await providersDb.createProviderConnection({
+      provider: "claude",
+      authType: "oauth",
+      name: `direct-${label}`,
+      accessToken: "test-claude-core-token",
+      isActive: true,
+      testStatus: initialStatus,
+    });
+    const previousCooldown = new Date(Date.now() + 60 * 60_000).toISOString();
+    if (activeCooldown) {
+      await providersDb.updateProviderConnection(connection.id, {
+        testStatus: "unavailable",
+        rateLimitedUntil: previousCooldown,
+        lastError: "Earlier concurrent request",
+      });
+    }
+    const resetAt = new Date(Date.now() + 10 * 60_000).toISOString();
+    quotaCache.setQuotaCache(
+      connection.id,
+      "claude",
+      {},
+      {
+        unresolved: {
+          remainingPercentage: 0,
+          resetAt,
+          claudeQuota: {
+            kind: "weekly_scoped",
+            active: true,
+            severity: "critical",
+            scopeKey: modelScoped ? "model:fable" : "model:unknown",
+            modelId: modelScoped ? "claude-fable-5-1" : null,
+            modelDisplayName: null,
+          },
+        },
+      }
+    );
+    globalThis.fetch = async () =>
+      Response.json(
+        {
+          type: "error",
+          error: { type: "rate_limit_error", message },
+        },
+        { status: 429 }
+      );
+    const result = await handleChatCore({
+      body: {
+        model: "claude-fable-5-1",
+        stream: false,
+        messages: [{ role: "user", content: "quota" }],
+      },
+      modelInfo: { provider: "claude", model: "claude-fable-5-1" },
+      credentials: { ...connection, connectionId: connection.id },
+      connectionId: connection.id,
+      log: { debug() {}, info() {}, warn() {}, error() {} },
+      skipUpstreamRetry: true,
+    });
+    assert.equal(result.status, 429);
+    const updated = await providersDb.getProviderConnectionById(connection.id);
+    if (initialStatus !== "active") {
+      assert.equal(updated.testStatus, initialStatus);
+      assert.equal(updated.rateLimitedUntil, undefined);
+      assert.equal(
+        accountFallback.isModelLocked("claude", connection.id, "claude-fable-5-1"),
+        false
+      );
+    } else if (modelScoped) {
+      assert.equal(updated.testStatus, "active");
+      assert.equal(updated.rateLimitedUntil, undefined);
+      assert.equal(
+        accountFallback.isModelLocked("claude", connection.id, "claude-fable-5-1"),
+        true
+      );
+      assert.equal(
+        accountFallback.isModelLocked("claude", connection.id, "claude-sonnet-4-5"),
+        false
+      );
+    } else if (activeCooldown) {
+      assert.equal(updated.rateLimitedUntil, previousCooldown);
+      assert.equal(updated.lastError, "Earlier concurrent request");
+    } else {
+      assert.equal(updated.testStatus, terminal ? "credits_exhausted" : "unavailable");
+      if (!terminal) assert.equal(updated.rateLimitedUntil, resetAt);
+    }
+  });
+}

@@ -18,38 +18,57 @@ OmniRoute 會與邊緣節點主動對非官方用戶端進行指紋辨識（TLS 
 
 ## TLS 指紋辨識層
 
-### `open-sse/utils/tlsClient.ts` — wreq-js（Chrome 124）
+### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-系統會依各帳戶範圍與解析後的代理伺服器，延遲建立持久性 `wreq-js` 工作階段。全程序共用的 `TlsClient` 集區最多容納 128 個工作階段，這些工作階段會針對位於 Cloudflare 後方的上游服務，模擬 **macOS 上的 Chrome 124**。當原生執行階段不可用時，`TlsClient.fetch()` 會採取封閉式失敗；呼叫端可在此包裝器之外明確選擇備援方案。
+系統會依每個帳戶範圍與解析後的代理伺服器，延遲建立持久化 `wreq-js` 工作階段。全程序共用的
+`TlsClient` 最多會彙集 128 個工作階段，對 Cloudflare 後方的上游服務模擬 **macOS 上的 Chrome 124**。
+當原生執行階段無法使用時，`TlsClient.fetch()` 會採封閉式失敗；呼叫端可在此包裝器之外明確選擇備援方案。
 
 - 工作階段設定檔：`browser: "chrome_124", os: "macos"`
 - 代理伺服器解析（優先順序）：`HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY`（亦包含小寫形式）
-- 逾時：`TLS_CLIENT_TIMEOUT_MS`（繼承自 `FETCH_TIMEOUT_MS`，預設值為 600000）
+- 逾時：`TLS_CLIENT_TIMEOUT_MS`（繼承自 `FETCH_TIMEOUT_MS`，預設為 600000）
 - `wreq-js` Response 與 fetch 相容（`headers`、`text()`、`json()`、`clone()`、`body`）。
-- 首位元組監控器（`open-sse/utils/tlsFirstByteWatchdog.ts`，#12656）：上游標頭一抵達，`TlsClient.fetch()` 即會完成解析，因此單靠 `TLS_CLIENT_TIMEOUT_MS` 無法限制始終未產生首位元組的主體。`guardTlsFirstByte()` 會讓主體第一次 `read()` 與 `TLS_FIRST_BYTE_WATCHDOG_MS`（預設值為 `10000`，設為 `0` 可停用）競速；正常主體不受影響，而停滯的主體會取消 wreq 讀取器，並讓 `proxyFetch` 現有的 TLS 備援邏輯繼續轉由直接／代理分派器處理（不可安全重播的請求，例如含有主體的 POST，仍會擲回錯誤，而不會在未告知的情況下重試）。
+- 首位元組看門狗（`open-sse/utils/tlsFirstByteWatchdog.ts`，#12656）：上游標頭一抵達，
+  `TlsClient.fetch()` 就會完成解析，因此僅靠 `TLS_CLIENT_TIMEOUT_MS` 無法限制永遠不產生首位元組的
+  回應主體。`guardTlsFirstByte()` 會讓主體的第一次 `read()` 與 `TLS_FIRST_BYTE_WATCHDOG_MS`
+  競速（預設為 `10000`，設為 `0` 則停用）；正常的回應主體不受影響，而停滯的回應主體會取消
+  wreq 讀取器，並讓 `proxyFetch` 現有的 TLS 備援邏輯繼續轉至直接／代理分派器（無法安全重播的請求，
+  例如含有主體的 POST，仍會擲出錯誤，而不會在未明示的情況下重試）。
 
-### Web Cookie 提供者傳輸層 — wreq-js 3.2.0
+### Web-cookie 提供者傳輸層 — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` 是下列五種專用 Web Cookie 傳輸層共用的配接器。每個精簡的提供者包裝器都會選取瀏覽器／作業系統設定檔。此配接器使用 `open-sse/utils/tlsClient.ts` 中單一的 wreq 執行階段載入器與傳輸集區，並以設定檔 + 作業系統 + 解析後的代理伺服器作為索引鍵；同時，每個請求都使用 `cookieMode: "ephemeral"`。因此，帳戶與請求會共用傳輸層級的連線，但絕不會共用 wreq 工作階段或 Cookie Jar。
+`open-sse/services/tlsClientBase.ts` 是下列五種特製 Web-cookie 傳輸層的共用轉接器。
+每個精簡的提供者包裝器都會選擇瀏覽器／作業系統設定檔。此轉接器使用
+`open-sse/utils/tlsClient.ts` 中單一的 wreq 執行階段載入器與傳輸集區，並以設定檔 + 作業系統 +
+解析後的代理伺服器作為鍵值，而每個請求都會使用 `cookieMode: "ephemeral"`。因此，帳戶與請求會共用
+傳輸層連線，但絕不共用 wreq 工作階段或 Cookie Jar。
 
 | 提供者     | 設定檔        | 模擬的作業系統 | 串流 EOF 政策               |
 | ---------- | ------------- | -------------- | --------------------------- |
 | Claude     | `chrome_146`  | Linux          | 包含 `[DONE]`               |
-| Perplexity | `firefox_148` | macOS          | 包含 `event: end_of_stream` |
+| Perplexity | `firefox_151` | macOS          | 包含 `event: end_of_stream` |
 | Grok       | `chrome_146`  | Linux          | 排除 `[DONE]`               |
 | Notion     | `chrome_146`  | Windows        | 包含 `[DONE]`               |
 | LMArena    | `chrome_146`  | Windows        | 無哨兵值；於原生 EOF 時關閉 |
 
-- 串流會直接取用原生回應的 `ReadableStream`；不會建立暫存檔或輔助程序。
-- 在公開串流前，最多會檢查開頭 256 個位元組。SSE 提供者會緩衝非 SSE 錯誤；Grok/LMArena 會將 Cloudflare 挑戰對應至 `403`，並將 HTML 中介頁面對應至 `502`。
-- 原生請求逾時仍會由絕對的 JS 強制截止時間包裝。發生停滯時，只會使受影響的設定檔／作業系統／代理傳輸失效並關閉，下一個請求才會重新建立該傳輸。
-- 代理伺服器解析的優先順序為：每次呼叫的 `proxyUrl` → 請求範圍的帳戶／儀表板內容 → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY`（包括小寫變體）。解析錯誤會採取封閉式失敗，而不是洩漏直接連線。LMArena 會刻意針對 `arena.ai` 進行解析。
-- `byteResponse` 會回傳包含內容類型的 `data:` URL，且不會造成 UTF-8 損毀。
-- 錯誤包括 `TlsClientUnavailableError`（套件／附加元件不可用）、`TlsClientHangError`（超過截止時間），以及當所有 128 個有上限的設定檔／作業系統／代理插槽皆處於作用中或關閉中狀態時的 `WreqTransportCapacityError`（共用的工作階段容量錯誤代碼）。
+- 串流會直接取用原生回應的 `ReadableStream`；不會建立暫存檔或附屬程序。
+- 在公開串流前，最多會檢查開頭 256 個位元組。SSE 提供者會緩衝非 SSE 錯誤；
+  Grok/LMArena 會將 Cloudflare 挑戰對應為 `403`，並將 HTML 中介頁面對應為 `502`。
+- 原生請求逾時仍由絕對的 JS 硬性期限包裝。發生停滯時，只會使受影響的設定檔／作業系統／代理伺服器
+  傳輸失效並將其關閉，下一個請求會再重新建立該傳輸。
+- 每次呼叫的代理伺服器解析優先順序為 `proxyUrl` → 請求範圍內的帳戶／儀表板情境 →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY`（包含小寫變體）。解析錯誤會採封閉式失敗，而不會洩漏
+  直接連線。LMArena 會刻意針對 `arena.ai` 進行解析。
+- `byteResponse` 會傳回具有內容類型的 `data:` URL，且不會造成 UTF-8 毀損。
+- 錯誤包括 `TlsClientUnavailableError`（套件／附加元件無法使用）、`TlsClientHangError`
+  （超過期限），以及當全部 128 個有界的設定檔／作業系統／代理伺服器槽位皆處於使用中或關閉中時
+  的 `WreqTransportCapacityError`（共用的工作階段容量錯誤代碼）。
 
-上述通用 `TlsClient` 工作階段仍專門用於持久性的瀏覽器支援 Cookie 狀態。兩條路徑會重複使用同一個已快取的 wreq 模組載入器與程序生命週期掛鉤；其集區維持分離，因為兩者的 Cookie 存留期刻意設計為不同。
+上述通用的 `TlsClient` 工作階段仍專門用於持久化、以瀏覽器為基礎的 Cookie 狀態。兩條路徑都會重複使用
+同一個已快取的 wreq 模組載入器與程序生命週期掛鉤；其集區維持分離，因為兩者的 Cookie 生命週期刻意不同。
 
-固定版本的套件支援這些設定檔，但實際的 WAF 接受情況可能獨立於本機契約測試而變更。在宣稱與上游瀏覽器具有同等效果之前，請先使用獲得明確授權的實際帳戶驗證指紋變更。
+固定版本的套件支援這些設定檔，但實際的 WAF 接受度可能會獨立於本機契約測試而改變。在聲稱與上游瀏覽器
+具有同等效果之前，請使用已明確授權的實際帳戶驗證指紋變更。
 
 ---
 
@@ -98,7 +117,7 @@ aider, continue.dev, copilot, avante, codecompanion
 
 供僅接受「真正 Claude Code」流量的第三方 Anthropic 中繼服務使用：
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`（預設）
@@ -222,7 +241,7 @@ interface CliFingerprint {
 
 | 變數                     | 預設值                                                          |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

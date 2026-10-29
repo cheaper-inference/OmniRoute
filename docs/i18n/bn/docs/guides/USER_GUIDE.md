@@ -120,16 +120,16 @@
 
 ## 📖 প্রোভাইডার সেটআপ
 
-CSV বা JSON ফাইল থেকে একসঙ্গে একাধিক API-key সংযোগ যোগ করতে **Dashboard → Providers → Import from file** ব্যবহার করুন। কলামগুলোর অবস্থান নির্দিষ্ট (`provider,name,apiKey,baseUrl,priority`); `provider`-কে আগে থেকেই পরিচালিত প্রোভাইডার বা সামঞ্জস্যপূর্ণ নোড হিসেবে বিদ্যমান থাকতে হবে। [CSV বা JSON ফাইল থেকে প্রোভাইডার ইমপোর্ট করুন](../providers/CSV-IMPORT.md) দেখুন।
+CSV বা JSON ফাইল থেকে একসঙ্গে একাধিক API-key সংযোগ যোগ করতে **Dashboard → Providers → Import from file** ব্যবহার করুন। কলামগুলোর অবস্থান নির্দিষ্ট (`provider,name,apiKey,baseUrl,priority`); `provider`-টি আগে থেকেই একটি পরিচালিত প্রোভাইডার বা সামঞ্জস্যপূর্ণ নোড হিসেবে বিদ্যমান থাকতে হবে। দেখুন [CSV বা JSON ফাইল থেকে প্রোভাইডার ইমপোর্ট করুন](../providers/CSV-IMPORT.md)।
 
 ### 🔐 সাবস্ক্রিপশন প্রোভাইডার
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Connect Claude Code
+Dashboard → Providers → Claude Code সংযুক্ত করুন
 → OAuth লগইন → স্বয়ংক্রিয় টোকেন রিফ্রেশ
-→ ৫-ঘণ্টা + সাপ্তাহিক কোটা ট্র্যাকিং
+→ ৫ ঘণ্টার + সাপ্তাহিক কোটা ট্র্যাকিং
 
 মডেল:
   cc/claude-opus-4-7
@@ -137,16 +137,18 @@ Dashboard → Providers → Connect Claude Code
   cc/claude-haiku-4-5-20251001
 ```
 
-**বিশেষ পরামর্শ:** জটিল কাজের জন্য Opus এবং দ্রুততার জন্য Sonnet ব্যবহার করুন। OmniRoute প্রতিটি মডেলের কোটা আলাদাভাবে ট্র্যাক করে!
+**বিশেষ পরামর্শ:** জটিল কাজের জন্য Opus এবং গতির জন্য Sonnet ব্যবহার করুন। OmniRoute প্রতিটি মডেলের কোটা আলাদাভাবে ট্র্যাক করে!
 
-Claude এবং Claude Code-সামঞ্জস্যপূর্ণ রুটগুলো Opus ও Sonnet মডেলের জন্য `max` চিন্তন প্রচেষ্টা সংরক্ষণ করে। Haiku মডেলগুলো `max` প্রচেষ্টা স্তর গ্রহণ করে না, তাই আপস্ট্রিমে পাঠানোর আগে OmniRoute সেই অনুরোধকে উচ্চ চিন্তন বাজেটে নামিয়ে আনে।
+OmniRoute হোস্টে ব্রাউজার নেই? Claude Code লগইন করা আছে এমন যেকোনো স্থানে `claude setup-token` চালান এবং এক বছরের টোকেনটি **Setup Token** ট্যাবে পেস্ট করুন। দেখুন [সেটআপ টোকেনসহ Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)।
+
+Claude এবং Claude Code-সামঞ্জস্যপূর্ণ রুটগুলো Opus ও Sonnet মডেলের জন্য `max` চিন্তার প্রচেষ্টা সংরক্ষণ করে। Haiku মডেলগুলো `max` প্রচেষ্টা স্তর গ্রহণ করে না, তাই আপস্ট্রিমে পাঠানোর আগে OmniRoute সেই অনুরোধটিকে উচ্চ চিন্তার বাজেটে নামিয়ে আনে।
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Connect Codex
-→ OAuth লগইন (পোর্ট 1455)
-→ ৫-ঘণ্টা + সাপ্তাহিক রিসেট
+Dashboard → Providers → Codex সংযুক্ত করুন
+→ OAuth লগইন (port 1455)
+→ ৫ ঘণ্টার + সাপ্তাহিক রিসেট
 
 মডেল:
   cx/gpt-5.5
@@ -158,9 +160,9 @@ Dashboard → Providers → Connect Codex
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → Connect GitHub
+Dashboard → Providers → GitHub সংযুক্ত করুন
 → GitHub-এর মাধ্যমে OAuth
-→ মাসিক রিসেট (মাসের ১ তারিখ)
+→ মাসিক রিসেট (মাসের ১ম দিন)
 
 মডেল:
   gh/gpt-5.5
@@ -176,47 +178,49 @@ Dashboard → Providers → Connect GitHub
 
 1. সাইন আপ করুন: [Zhipu AI](https://open.bigmodel.cn)
 2. Coding Plan থেকে API key নিন
-3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
+3. Dashboard → API Key যোগ করুন: প্রোভাইডার: `glm`, API Key: `your-key`
 
 **ব্যবহার করুন:** `glm/glm-4.7` — **বিশেষ পরামর্শ:** Coding Plan ১/৭ খরচে ৩× কোটা দেয়! প্রতিদিন সকাল ১০:০০টায় রিসেট হয়।
 
-#### MiniMax M2.1 (৫ ঘণ্টা পর রিসেট, $0.20/1M)
+#### MiniMax M2.1 (৫ ঘণ্টায় রিসেট, $0.20/1M)
 
 1. সাইন আপ করুন: [MiniMax](https://www.minimax.io)
-2. API key নিন → Dashboard → Add API Key
+2. API key নিন → Dashboard → API Key যোগ করুন
 
 **ব্যবহার করুন:** `minimax/MiniMax-M2.1` — **বিশেষ পরামর্শ:** দীর্ঘ কনটেক্সটের জন্য সবচেয়ে সাশ্রয়ী বিকল্প (১M টোকেন)!
 
-#### Kimi K2 (প্রতি মাসে নির্ধারিত $9)
+#### Kimi K2 (নির্দিষ্ট $9/মাস)
 
 1. সাবস্ক্রাইব করুন: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key নিন → Dashboard → Add API Key
+2. API key নিন → Dashboard → API Key যোগ করুন
 
-**ব্যবহার করুন:** `kimi/kimi-k2.5` — **বিশেষ পরামর্শ:** ১০M টোকেনের জন্য প্রতি মাসে নির্ধারিত $9 = কার্যকর খরচ $0.90/1M!
+**ব্যবহার করুন:** `kimi/kimi-k2.5` — **বিশেষ পরামর্শ:** ১০M টোকেনের জন্য নির্দিষ্ট $9/মাস = কার্যকর খরচ $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. সাইন আপ করুন: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. একটি Qianfan API key তৈরি করুন → Dashboard → Add API Key: Provider: `qianfan`
+2. একটি Qianfan API key তৈরি করুন → Dashboard → API Key যোগ করুন: প্রোভাইডার: `qianfan`
 
 **ব্যবহার করুন:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, অথবা অন্য কোনো Qianfan OpenAI-সামঞ্জস্যপূর্ণ মডেল ID।
 
 ### 🆓 বিনামূল্যের প্রোভাইডার
 
-যেসব বিনামূল্যের প্রোভাইডারে প্রমাণীকরণ প্রয়োজন হয় না, তাদের প্রোভাইডার পেজে **No authentication required**-এর পাশে একটি সুইচ থাকে। এটি বন্ধ করলে সেই প্রোভাইডার নিষ্ক্রিয় হয়, Providers-এর কনফিগার করা/সংক্ষিপ্ত ভিউ থেকে সরিয়ে দেওয়া হয় এবং `/v1/models` থেকে এর মডেলগুলো সরিয়ে দেওয়া হয়।
+প্রমাণীকরণবিহীন বিনামূল্যের প্রোভাইডারগুলোর নিজস্ব প্রোভাইডার পেজে **No authentication required**-এর পাশে একটি সুইচ থাকে।
+সুইচটি বন্ধ করলে সেই প্রোভাইডার নিষ্ক্রিয় হয়, Providers-এর কনফিগার করা/সংক্ষিপ্ত ভিউ থেকে সরানো হয় এবং
+`/v1/models` থেকে এর মডেলগুলো সরিয়ে দেওয়া হয়।
 
 #### Qoder (৯টি বিনামূল্যের মডেল)
 
 ```bash
-Dashboard → Connect Qoder → OAuth লগইন → অ্যাক্সেস বর্তমান প্রোভাইডার সীমার অধীন
+Dashboard → Qoder সংযুক্ত করুন → OAuth লগইন → অ্যাক্সেস বর্তমান প্রোভাইডার সীমার অধীন
 
 মডেল: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude বিনামূল্যে)
+#### Kiro (বিনামূল্যের Claude)
 
 ```bash
-Dashboard → Connect Kiro → AWS Builder ID অথবা Google/GitHub → প্রতি মাসে ~৫০ ক্রেডিট
+Dashboard → Kiro সংযুক্ত করুন → AWS Builder ID অথবা Google/GitHub → প্রতি মাসে ~৫০ ক্রেডিট
 
 মডেল: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -603,42 +607,42 @@ post_install() {
 
 ---
 
-## 📊 উপলভ্য মডেলসমূহ
+## 📊 উপলব্ধ মডেল
 
 <details>
-<summary><b>সব উপলভ্য মডেল দেখুন</b></summary>
+<summary><b>সমস্ত উপলব্ধ মডেল দেখুন</b></summary>
 
-> নিচের তালিকাটি v3.8.0-এর `open-sse/config/providerRegistry.ts` থেকে সংকলিত। ক্লাউড ক্যাটালগগুলো (Gemini, OpenRouter ইত্যাদি) গতিশীলভাবে সিঙ্ক করা হয় — সম্পূর্ণ লাইভ ক্যাটালগের জন্য **Dashboard → Providers → [provider] → Available Models** খুলুন অথবা `GET /api/models/catalog` কল করুন।
+> নিচের তালিকাটি `open-sse/config/providerRegistry.ts` থেকে v3.8.0-এর জন্য সংকলিত। ক্লাউড ক্যাটালগ (Gemini, OpenRouter ইত্যাদি) ডাইনামিকভাবে সিঙ্ক হয় — সম্পূর্ণ লাইভ ক্যাটালগের জন্য **ড্যাশবোর্ড → প্রোভাইডার → [provider] → উপলব্ধ মডেল** খুলুন অথবা `GET /api/models/catalog` কল করুন।
 >
-> কোনো প্রোভাইডারের অন্তর্নির্মিত তালিকা পুরোনো হয়ে গেলে, লাইভ আপস্ট্রিম ক্যাটালগ আনতে ওই পৃষ্ঠার **Import from /models** ব্যবহার করুন (অথবা **Auto-Sync** সক্রিয় করুন)। LLM7.io (`gemini-3.1-flash-lite`) এবং UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)-এর ক্ষেত্রে এটি v3.8.50-এ যাচাই করা হয়েছে; একই পরীক্ষার সময় Pollinations-এর বেনামী অ্যাক্সেস আপস্ট্রিমের সীমাবদ্ধতার মধ্যেই ছিল।
+> যদি কোনো প্রোভাইডারের বিল্ট-ইন তালিকা পুরনো হয়ে যায়, তাহলে লাইভ আপস্ট্রিম ক্যাটালগ আনতে সেই পেজে **/models থেকে ইমপোর্ট করুন** ব্যবহার করুন (অথবা **অটো-সিঙ্ক** চালু করুন)। এটি v3.8.50-তে LLM7.io (`gemini-3.1-flash-lite`) এবং UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)-এর জন্য যাচাই করা হয়েছে; একই টেস্ট পাসের সময় Pollinations-এর anonymous access আপস্ট্রিম-সীমাবদ্ধ ছিল।
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ প্রচেষ্টা স্তর: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort টিয়ার: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — বিনামূল্যের OAuth: **Dashboard → Providers → Kiro → Available Models**-এর অধীনে প্রদর্শিত লাইভ ক্যাটালগ ব্যবহার করুন। উপলভ্যতা অ্যাকাউন্ট ও প্ল্যানের ওপর নির্ভর করে।
+**Kiro (`kr/`)** — ফ্রি OAuth: **ড্যাশবোর্ড → প্রোভাইডার → Kiro → উপলব্ধ মডেল**-এ দেখানো লাইভ ক্যাটালগ ব্যবহার করুন। উপলব্ধতা অ্যাকাউন্ট এবং প্ল্যানের উপর নির্ভর করে।
 
-**Qoder (`if/`)** — বিনামূল্যের OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — ফ্রি OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — মাসে নির্দিষ্ট $9 অথবা ব্যবহার অনুযায়ী মূল্য: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/মাস ফ্ল্যাট অথবা ব্যবহার-ভিত্তিক: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API কী: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — অতি দ্রুত: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — আলট্রা-দ্রুত: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — নেটিভ Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — EU-তে হোস্ট করা: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — অনুসন্ধান-বর্ধিত: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — সার্চ-সমৃদ্ধ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ওপেন সোর্স: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (বিনামূল্যে), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ওপেন-সোর্স: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ফ্রি), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — দ্রুত ইনফারেন্স: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
@@ -646,50 +650,93 @@ post_install() {
 
 **Cohere (`cohere/`)** — RAG-কেন্দ্রিক: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — এন্টারপ্রাইজ: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — এন্টারপ্রাইজ: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google থেকে প্রতিটি API কী অনুযায়ী লাইভ সিঙ্ক করা হয় — কোনো স্থির তালিকা নেই। **Dashboard → Providers**-এ একটি কী সংযুক্ত করুন, তারপর বর্তমান ক্যাটালগ ইমপোর্ট করতে **Available Models** ব্যবহার করুন (যেমন `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
+**Gemini (Google Cloud `gemini/`)**: Google থেকে প্রতি API কী অনুযায়ী লাইভ সিঙ্ক হয় — কোনো স্ট্যাটিক তালিকা নেই। **ড্যাশবোর্ড → প্রোভাইডার**-এ একটি কী সংযুক্ত করুন, তারপর বর্তমান ক্যাটালগ ইমপোর্ট করতে **উপলব্ধ মডেল** ব্যবহার করুন (যেমন `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
 
-**অন্যান্য সামঞ্জস্যপূর্ণ প্রোভাইডার** (নির্বাচিত): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock`-এর মাধ্যমে), `azure-ai`, `openrouter` (পাসথ্রু ক্যাটালগ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। প্রতিটি `providerRegistry.ts`-এ নিজস্ব মডেল তালিকা রক্ষণাবেক্ষণ করে এবং প্রোভাইডারটি কোনো `/models` এন্ডপয়েন্ট প্রকাশ করলে স্বয়ংক্রিয়ভাবে সিঙ্ক করা যায়।
+**অন্যান্য সামঞ্জস্যপূর্ণ প্রোভাইডার** (নির্বাচিত): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough ক্যাটালগ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। প্রতিটি `providerRegistry.ts`-এ নিজস্ব মডেল তালিকা রক্ষণ করে এবং প্রোভাইডার যখন `/models` এন্ডপয়েন্ট এক্সপোজ করে তখন অটো-সিঙ্ক করা যায়।
 
-**মডেল ID সম্পর্কে নোট:** OmniRoute প্রোভাইডার-নেটিভ ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ব্যবহার করে। কিছু ID-তে ডটযুক্ত সংস্করণ থাকে, কারণ আপস্ট্রিম API সেগুলো এভাবেই প্রত্যাশা করে। কোনো মডেল ওপরে তালিকাভুক্ত না থাকলে, উপলভ্যতা নিশ্চিত করতে `omniroute models --search <term>` চালান অথবা `GET /api/models/catalog`-এ অনুরোধ পাঠান।
+**মডেল ID সম্পর্কে নোট:** OmniRoute প্রোভাইডার-নেটিভ ID ব্যবহার করে (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)। কিছু ID-তে বিন্দুসহ সংস্করণ থাকে কারণ আপস্ট্রিম API সেভাবেই আশা করে। যদি কোনো মডেল উপরে তালিকাভুক্ত না থাকে, তাহলে উপলব্ধতা নিশ্চিত করতে `omniroute models --search <term>` চালান অথবা `GET /api/models/catalog` কল করুন।
 
 </details>
 
 ---
 
-## 🧩 উন্নত ফিচারসমূহ
+## 🧩 উন্নত বৈশিষ্ট্য
 
 ### কাস্টম মডেল
 
-অ্যাপ আপডেটের জন্য অপেক্ষা না করেই যেকোনো প্রোভাইডারে যেকোনো মডেল ID যোগ করুন:
+একটি অ্যাপ আপডেটের জন্য অপেক্ষা না করে যেকোনো প্রদানকারীর সাথে যেকোনো মডেল ID যোগ করুন:
 
 ```bash
-# API-এর মাধ্যমে
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# তালিকা: curl http://localhost:20128/api/provider-models?provider=openai
-# অপসারণ: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-অথবা Dashboard ব্যবহার করুন: **Providers → [Provider] → Custom Models**।
+অথবা ড্যাশবোর্ড ব্যবহার করুন:** প্রদানকারী → [প্রোভাইডার] → কাস্টম মডেল** .
 
 নোট:
 
-- OpenRouter এবং OpenAI/Anthropic-সামঞ্জস্যপূর্ণ প্রোভাইডারগুলো শুধু **Available Models** থেকে পরিচালিত হয়। ম্যানুয়ালি যোগ করা, ইমপোর্ট এবং স্বয়ংক্রিয় সিঙ্ক—সবই একই উপলভ্য-মডেল তালিকায় যুক্ত হয়, তাই এসব প্রোভাইডারের জন্য আলাদা Custom Models বিভাগ নেই।
-- **Custom Models** বিভাগটি এমন প্রোভাইডারগুলোর জন্য, যেগুলো পরিচালিত উপলভ্য-মডেল ইমপোর্টের সুবিধা দেয় না।
+- OpenRouter এবং OpenAI/Anthropic-compatible প্রদানকারীদের থেকে পরিচালিত হয়** উপলব্ধ মডেল** শুধুমাত্র একই উপলব্ধ-মডেল তালিকায় সমস্ত জমি ম্যানুয়াল যোগ, আমদানি এবং স্বয়ংক্রিয়ভাবে সিঙ্ক করুন, তাই এই সরবরাহকারীদের জন্য আলাদা কাস্টম মডেল বিভাগ নেই।
+- দ** কাস্টম মডেল** বিভাগটি এমন সরবরাহকারীদের জন্য উদ্দিষ্ট যারা পরিচালিত উপলব্ধ-মডেল আমদানি প্রকাশ করে না।
 
-### OmniRoute পিয়ার চেইন করা
+### কাস্টম OpenAI- সামঞ্জস্যপূর্ণ প্রদানকারী
 
-আরেকটি OmniRoute গেটওয়েকে **Custom OpenAI-compatible** প্রোভাইডার হিসেবে যোগ করা যায়। পিয়ারের `/v1` বেস URL এবং সেই পিয়ারের ইস্যু করা একটি নিবেদিত, সর্বনিম্ন-অনুমতিসম্পন্ন API কী ব্যবহার করুন।
+যেকোন গেটওয়ে যা OpenAI API (একটি স্ব-হোস্টেড প্রক্সি, vLLM, একটি তৃতীয় পক্ষের সমষ্টিকারী) কথা বলে তার নিজস্ব প্রদানকারী নোড হিসাবে যোগ করা যেতে পারে:
 
-পারস্পরিক বা মাল্টি-হপ চেইনের জন্য প্রতিটি গেটওয়েতে অপ্ট-ইন লুপ গার্ড সক্রিয় করুন:
+1. **প্রদানকারীরা → যোগ করুন OpenAI সামঞ্জস্যপূর্ণ** .
+2. **নাম** : নোডের জন্য একটি প্রদর্শন লেবেল।
+3. **উপসর্গ** : রাউটিং নাম। ক্লায়েন্ট মডেলগুলিকে `<prefix>/<model>` বলে, তাই `mygw` উপসর্গ সহ একটি নোড `mygw/gpt-4o-mini` পরিবেশন করে। প্রয়োজনীয়; কোন চরিত্রের সীমাবদ্ধতা নেই।
+4. **API প্রকার** : গেটওয়ে যে এন্ডপয়েন্ট পরিবারটি পরিবেশন করে (চ্যাট সমাপ্তি, প্রতিক্রিয়া, এম্বেডিং, অডিও, ছবি)।
+5. **বেস URL** : API রুট, `/v1` পর্যন্ত এবং সহ (উদাহরণস্বরূপ `https://gateway.example.com/v1`), সম্পূর্ণ `/chat/completions` পাথ নয়। অ-মানক পাথ সহ গেটওয়েগুলি তাদের অধীনে সেট করে** উন্নত সেটিংস** (চ্যাট পাথ, মডেল পাথ)।
+6. দ**API কী (চেক করার জন্য)** ক্ষেত্র শুধুমাত্র সংযোগ পরীক্ষা করে। নোড তৈরি করার পরে, এটি খুলুন এবং ব্যবহার করুন** সংযোগ যোগ করুন** অনুরোধগুলি ব্যবহার করবে এমন কী সংরক্ষণ করতে।
+
+নোডটি `openai-compatible-<apiType>-<uuid>` ফর্মের একটি অভ্যন্তরীণ আইডি পায়; আপনাকে কখনই এটি টাইপ করতে হবে না, উপসর্গটি সর্বজনীন নাম।
+
+#### সংরক্ষিত উপসর্গ
+
+একটি উপসর্গ একটি অন্তর্নির্মিত প্রদানকারীর আইডি বা উপনাম হতে পারে না (উদাহরণস্বরূপ `openai`, `cf`), বা অবসরপ্রাপ্ত প্রদানকারীর id হতে পারে না। মডেল সমাধানকারী কাস্টম নোডের আগে অন্তর্নির্মিত আইডি এবং উপনামগুলি পরীক্ষা করে, তাই এই উপসর্গগুলির মধ্যে একটি ব্যবহার করে একটি নোড কখনই ট্র্যাফিক পাবে না: `<prefix>/model` পরিবর্তে বিল্ট-ইন প্রদানকারীর কাছে যাবে, অথবা সেই প্রদানকারী অবসরপ্রাপ্ত হলে বন্ধ হয়ে যাবে। এই জাতীয় উপসর্গ সহ একটি নোড তৈরি বা সম্পাদনা এর সাথে প্রত্যাখ্যান করা হয়:
+
+```text
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+```
+
+একটি স্বতন্ত্র উপসর্গ চয়ন করুন (`mygw`, `acme-proxy`)। যদি একটি কাস্টম নোডের অনুরোধগুলি একটি ত্রুটির সাথে ব্যর্থ হয় যা একটি অন্তর্নির্মিত প্রদানকারী বা তার প্রমাণপত্রের নাম দেয়, নোডের উপসর্গটি সংরক্ষিত কিনা তা পরীক্ষা করে দেখুন: এই নিয়মটি বিদ্যমান থাকার আগে সংরক্ষিত নোডগুলি এখনও সংরক্ষণ করা হয়, তবে বিল্ট-ইন প্রদানকারীর কাছে তাদের প্রিফিক্স রুট। নোডটি সম্পাদনা করুন এবং এটি একটি নতুন উপসর্গ দিন।
+
+#### প্রতি সংযোগ গেটওয়ে বিকল্প
+
+এই কীগুলি একটি সংযোগের `providerSpecificData` তে যায় (উদাহরণস্বরূপ `PUT /api/providers/{id}` এর মাধ্যমে):
+
+- `toolNameMaxLength` (পূর্ণসংখ্যা, 1–1024) — OpenAI চ্যাট-ফরম্যাট সামঞ্জস্যপূর্ণ সংযোগের জন্য যার গেটওয়ে দীর্ঘ টুলের নাম প্রত্যাখ্যান করে। দীর্ঘ নামগুলি ছোট উপনাম হিসাবে পাঠানো হয় এবং প্রতিক্রিয়াতে পুনরুদ্ধার করা হয়।
+- `quotaEndpoint` — গেটওয়ের quota/credits এন্ডপয়েন্ট, ড্যাশবোর্ড কোটা স্ট্রিপ এবং কোটা-সচেতন রাউটিংয়ের জন্য পড়ুন। ওপেনএআই- এবং নৃতাত্ত্বিক-সামঞ্জস্যপূর্ণ সংযোগে কাজ করে; সম্পূর্ণ আকৃতি `open-sse/services/usage/openaiCompatible.ts` এ নথিভুক্ত করা হয়েছে।
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### চেইনিং OmniRoute Peers
+
+আরেকটি OmniRoute গেটওয়ে একটি হিসাবে যোগ করা যেতে পারে** কাস্টম OpenAI- সামঞ্জস্যপূর্ণ** প্রদানকারী পিয়ারের `/v1` বেস URL এবং সেই পিয়ার দ্বারা জারি করা একটি ডেডিকেটেড, ন্যূনতম বিশেষাধিকার API কী ব্যবহার করুন।
+
+পারস্পরিক বা মাল্টি-হপ চেইনের জন্য, প্রতিটি গেটওয়েতে অপ্ট-ইন লুপ গার্ড সক্ষম করুন:
 
 ```bash
 # gateway-a
@@ -705,13 +752,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-শুধু স্পষ্টভাবে অনুমোদিত তালিকাভুক্ত পিয়ার URL-এ পাঠানো অনুরোধগুলোই `X-OmniRoute-Peer-Trace` হেডার পায়। কোনো পুনরাবৃত্ত instance ID বা শেষ হয়ে যাওয়া হপ বাজেট পেলে গেটওয়ে HTTP `508 Loop Detected` দিয়ে অনুরোধ প্রত্যাখ্যান করে; সাধারণ আপস্ট্রিম প্রোভাইডারগুলো কোনো পিয়ার মেটাডেটা পায় না।
+শুধুমাত্র একটি সুস্পষ্টভাবে অনুমোদিত পিয়ার URL কে পাঠানো অনুরোধগুলি `X-OmniRoute-Peer-Trace` হেডার পাবে। একটি গেটওয়ে HTTP `508 Loop Detected` সাথে বারবার ID বা ক্লান্ত হপ বাজেট প্রত্যাখ্যান করে; সাধারণ আপস্ট্রিম প্রদানকারীরা কোন পিয়ার মেটাডেটা পায় না।
 
-পিয়ার চেইনিং ডেটাবেস রেপ্লিকেশন বা হোস্ট ফেইলওভার নয়। প্রতিটি গেটওয়ে স্বতন্ত্র SQLite স্টেট, ক্যাশ, রেট কাউন্টার এবং সেশন বজায় রাখে। অ্যাক্টিভ/প্যাসিভ বা অ্যাক্টিভ/অ্যাক্টিভ উপলভ্যতার জন্য স্বাস্থ্য-পরীক্ষাযুক্ত রিভার্স প্রক্সি বা ক্লায়েন্ট ফেইলওভার ব্যবহার করুন এবং একই SQLite ডেটাবেস কখনোই একাধিক চলমান OmniRoute ইনস্ট্যান্সে মাউন্ট করবেন না।
+পিয়ার চেইনিং ডাটাবেস প্রতিলিপি বা হোস্ট ফেইলওভার নয়। প্রতিটি গেটওয়ে স্বাধীন SQLite স্টেট, ক্যাশে, রেট কাউন্টার এবং সেশন রাখে। active/passive বা active/active উপলব্ধতার জন্য একটি স্বাস্থ্য-পরীক্ষিত বিপরীত প্রক্সি বা ক্লায়েন্ট ফেইলওভার ব্যবহার করুন এবং একাধিক চলমান OmniRoute দৃষ্টান্তে একটি SQLite ডাটাবেস মাউন্ট করবেন না।
 
-### নিবেদিত প্রোভাইডার রুট
+### উত্সর্গীকৃত প্রদানকারী রুট
 
-মডেল যাচাইকরণসহ অনুরোধ সরাসরি নির্দিষ্ট প্রোভাইডারে রাউট করুন:
+মডেলের বৈধতা সহ একটি নির্দিষ্ট প্রদানকারীর কাছে সরাসরি অনুরোধ করুন:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -719,25 +766,25 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-প্রোভাইডার প্রিফিক্স অনুপস্থিত থাকলে তা স্বয়ংক্রিয়ভাবে যোগ করা হয়। অমিল মডেলের ক্ষেত্রে `400` ফেরত আসে।
+অনুপস্থিত থাকলে প্রদানকারী উপসর্গটি স্বয়ংক্রিয়ভাবে যোগ করা হয়। অমিল মডেল `400` ফেরত দেয়।
 
 ### নেটওয়ার্ক প্রক্সি কনফিগারেশন
 
 ```bash
-# গ্লোবাল প্রক্সি সেট করুন
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# প্রতি-প্রোভাইডার প্রক্সি
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# প্রক্সি পরীক্ষা করুন
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**অগ্রাধিকার:** কী-নির্দিষ্ট → কম্বো-নির্দিষ্ট → প্রোভাইডার-নির্দিষ্ট → গ্লোবাল → এনভায়রনমেন্ট।
+**অগ্রাধিকার:** কী-নির্দিষ্ট → কম্বো-নির্দিষ্ট → প্রদানকারী-নির্দিষ্ট → গ্লোবাল → পরিবেশ।
 
 ### মডেল ক্যাটালগ API
 
@@ -745,114 +792,114 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
 curl http://localhost:20128/api/models/catalog
 ```
 
-ধরন (`chat`, `embedding`, `image`) সহ প্রোভাইডার অনুযায়ী গ্রুপ করা মডেল ফেরত দেয়।
+প্রদানকারীর দ্বারা শ্রেণীবদ্ধ করা মডেলগুলি প্রদান করে (`chat`, `embedding`, `image`)।
 
 ### ক্লাউড সিঙ্ক
 
-- বিভিন্ন ডিভাইসে প্রোভাইডার, কম্বো এবং সেটিংস সিঙ্ক করুন
-- টাইমআউট + ফেইল-ফাস্টসহ স্বয়ংক্রিয় ব্যাকগ্রাউন্ড সিঙ্ক
-- প্রোডাকশনে সার্ভার-সাইড `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` অগ্রাধিকার দিন
+- সমস্ত ডিভাইস জুড়ে প্রদানকারী, কম্বো এবং সেটিংস সিঙ্ক করুন
+- টাইমআউট + ব্যর্থ-দ্রুত সহ স্বয়ংক্রিয় পটভূমি সিঙ্ক
+- উৎপাদনে সার্ভার-সাইড `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` পছন্দ করুন
 
-### Cloudflare Quick Tunnel
+### Cloudflare দ্রুত টানেল
 
-- Docker এবং অন্যান্য স্ব-হোস্টেড ডিপ্লয়মেন্টের জন্য **Dashboard → Endpoints**-এ উপলভ্য
-- একটি অস্থায়ী `https://*.trycloudflare.com` URL তৈরি করে, যা আপনার বর্তমান OpenAI-সামঞ্জস্যপূর্ণ `/v1` এন্ডপয়েন্টে ফরওয়ার্ড করে
-- প্রথমবার সক্রিয় করলে শুধু প্রয়োজনের সময় `cloudflared` ইনস্টল হয়; পরবর্তী রিস্টার্টগুলোতে একই পরিচালিত বাইনারি পুনরায় ব্যবহার করা হয়
-- OmniRoute বা কনটেইনার রিস্টার্টের পর Quick Tunnels স্বয়ংক্রিয়ভাবে পুনরুদ্ধার হয় না; প্রয়োজন হলে ড্যাশবোর্ড থেকে আবার সক্রিয় করুন
-- টানেল URL অস্থায়ী এবং প্রতিবার টানেল বন্ধ/চালু করলে পরিবর্তিত হয়
-- সীমাবদ্ধ কনটেইনারে বিরক্তিকর QUIC UDP বাফার সতর্কতা এড়াতে পরিচালিত Quick Tunnels ডিফল্টভাবে HTTP/2 ট্রান্সপোর্ট ব্যবহার করে
-- পরিচালিত ট্রান্সপোর্ট নির্বাচন ওভাররাইড করতে চাইলে `CLOUDFLARED_PROTOCOL=quic` বা `auto` সেট করুন
-- পরিচালিত ডাউনলোডের বদলে আগে থেকে ইনস্টল করা `cloudflared` বাইনারি ব্যবহার করতে চাইলে `CLOUDFLARED_BIN` সেট করুন
-- Cloudflare Quick Tunnel, Tailscale Funnel এবং ngrok Tunnel প্যানেলগুলো **Settings → Appearance**-এ দেখানো বা লুকানো যায়। কোনো প্যানেল লুকালে চলমান টানেল বন্ধ হয় না।
+- পাওয়া যায়** ড্যাশবোর্ড → এন্ডপয়েন্ট** Docker এবং অন্যান্য স্ব-হোস্টেড স্থাপনার জন্য
+- একটি অস্থায়ী `https://*.trycloudflare.com` URL তৈরি করে যা আপনার বর্তমান OpenAI- সামঞ্জস্যপূর্ণ `/v1` এন্ডপয়েন্টে ফরোয়ার্ড করে
+- প্রথমে প্রয়োজন হলেই `cloudflared` ইনস্টল করতে সক্ষম করুন; পরে পুনরায় আরম্ভ করে একই পরিচালিত বাইনারি পুনরায় ব্যবহার করে
+- একটি OmniRoute বা কন্টেইনার পুনরায় চালু করার পরে দ্রুত টানেলগুলি স্বয়ংক্রিয়ভাবে পুনরুদ্ধার করা হয় না; প্রয়োজনে ড্যাশবোর্ড থেকে তাদের পুনরায় সক্রিয় করুন
+- টানেল URLs ক্ষণস্থায়ী এবং আপনি যখনই টানেল stop/start তখন পরিবর্তন হয়
+- সীমাবদ্ধ পাত্রে কোলাহলপূর্ণ QUIC UDP বাফার সতর্কতা এড়াতে HTTP/2 পরিবহনে ডিফল্ট পরিচালিত কুইক টানেল
+- যদি আপনি পরিচালিত পরিবহন পছন্দ ওভাররাইড করতে চান তাহলে `CLOUDFLARED_PROTOCOL=quic` বা `auto` সেট করুন
+- যদি আপনি পরিচালিত ডাউনলোডের পরিবর্তে একটি পূর্ব-ইন্সটল করা `cloudflared` বাইনারি ব্যবহার করতে চান তাহলে `CLOUDFLARED_BIN` সেট করুন
+- Cloudflare কুইক টানেল, Tailscale ফানেল এবং ngrok টানেল প্যানেল দেখানো বা লুকানো যেতে পারে** সেটিংস → চেহারা** . একটি প্যানেল লুকানো একটি চলমান সুড়ঙ্গ বন্ধ করে না.
 
-### LLM গেটওয়ে ইন্টেলিজেন্স (পর্যায় 9)
+### LLM গেটওয়ে ইন্টেলিজেন্স (ফেজ 9)
 
-- **সেমান্টিক ক্যাশ** — নন-স্ট্রিমিং, temperature=0 রেসপন্স স্বয়ংক্রিয়ভাবে ক্যাশ করে (`X-OmniRoute-No-Cache: true` দিয়ে বাইপাস করুন)
-- **অনুরোধ আইডেমপোটেন্সি** — `Idempotency-Key` বা `X-Request-Id` হেডারের মাধ্যমে 5s-এর মধ্যে অনুরোধ ডিডুপ্লিকেট করে
-- **অগ্রগতি ট্র্যাকিং** — `X-OmniRoute-Progress: true` হেডারের মাধ্যমে অপ্ট-ইন SSE `event: progress` ইভেন্ট
-
----
-
-### ট্রান্সলেটর প্লেগ্রাউন্ড
-
-**Dashboard → Translator** দিয়ে অ্যাক্সেস করুন। OmniRoute কীভাবে প্রোভাইডারগুলোর মধ্যে API অনুরোধ অনুবাদ করে, তা ডিবাগ ও ভিজুয়ালাইজ করুন।
-
-| মোড              | উদ্দেশ্য                                                                                          |
-| ---------------- | ------------------------------------------------------------------------------------------------- |
-| **Playground**   | সোর্স/টার্গেট ফরম্যাট নির্বাচন করুন, একটি অনুরোধ পেস্ট করুন এবং তাৎক্ষণিকভাবে অনূদিত আউটপুট দেখুন |
-| **Chat Tester**  | প্রক্সির মাধ্যমে লাইভ চ্যাট বার্তা পাঠান এবং সম্পূর্ণ অনুরোধ/রেসপন্স চক্র পরিদর্শন করুন           |
-| **Test Bench**   | অনুবাদের যথার্থতা যাচাই করতে একাধিক ফরম্যাট সমন্বয়ে ব্যাচ পরীক্ষা চালান                          |
-| **Live Monitor** | প্রক্সির মধ্য দিয়ে অনুরোধ প্রবাহিত হওয়ার সময় রিয়েল-টাইম অনুবাদ পর্যবেক্ষণ করুন                |
-
-**ব্যবহারের ক্ষেত্র:**
-
-- কেন একটি নির্দিষ্ট ক্লায়েন্ট/প্রোভাইডার সমন্বয় ব্যর্থ হয় তা ডিবাগ করুন
-- থিংকিং ট্যাগ, টুল কল এবং সিস্টেম প্রম্পট সঠিকভাবে অনুবাদ হয় কি না যাচাই করুন
-- OpenAI, Claude, Gemini এবং Responses API ফরম্যাটের মধ্যে ফরম্যাটগত পার্থক্য তুলনা করুন
+- **শব্দার্থক ক্যাশে** — অটো-ক্যাশে নন-স্ট্রিমিং, তাপমাত্রা= 0 প্রতিক্রিয়া ( `X-OmniRoute-No-Cache: true` দিয়ে বাইপাস)
+- **অদম্যতা অনুরোধ** — `Idempotency-Key` বা `X-Request-Id` হেডারের মাধ্যমে 5 সেকেন্ডের মধ্যে অনুরোধগুলি নকল করে
+- **অগ্রগতি ট্র্যাকিং** — `X-OmniRoute-Progress: true` হেডারের মাধ্যমে SSE `event: progress` ইভেন্টগুলি বেছে নিন
 
 ---
 
-### রাউটিং কৌশলসমূহ
+### অনুবাদক খেলার মাঠ
 
-**Dashboard → Settings → Routing**-এর মাধ্যমে কনফিগার করুন। ড্যাশবোর্ডে সর্বাধিক ব্যবহৃত ছয়টি কৌশল দেখানো হয়; কম্বো ও অটো-রাউটার অভ্যন্তরীণভাবে আরও বিস্তৃত কৌশল সমর্থন করে।
+মাধ্যমে অ্যাক্সেস** ড্যাশবোর্ড → অনুবাদক** . ডিবাগ এবং ভিজ্যুয়ালাইজ করুন কিভাবে OmniRoute প্রদানকারীদের মধ্যে API অনুরোধ অনুবাদ করে।
 
-**ড্যাশবোর্ডে দৃশ্যমান কৌশলসমূহ (অ্যাকাউন্ট-স্তরের রাউটিং):**
+| মোড               | উদ্দেশ্য                                                                                        |
+| ----------------- | ----------------------------------------------------------------------------------------------- |
+| **খেলার মাঠ**     | source/target বিন্যাস নির্বাচন করুন, একটি অনুরোধ পেস্ট করুন, এবং অবিলম্বে অনুবাদিত আউটপুট দেখুন |
+| **চ্যাট পরীক্ষক** | প্রক্সির মাধ্যমে লাইভ চ্যাট বার্তা পাঠান এবং সম্পূর্ণ request/response চক্র পরিদর্শন করুন       |
+| **টেস্ট বেঞ্চ**   | অনুবাদের সঠিকতা যাচাই করতে একাধিক বিন্যাস সমন্বয় জুড়ে ব্যাচ পরীক্ষা চালান                     |
+| **লাইভ মনিটর**    | রিয়েল-টাইম অনুবাদগুলি প্রক্সির মাধ্যমে প্রবাহিত হওয়ার সাথে সাথে দেখুন৷                        |
 
-| কৌশল                           | বিবরণ                                                                                                                   |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| **Fill First**                 | অগ্রাধিকারের ক্রমে অ্যাকাউন্ট ব্যবহার করে — অনুপলভ্য না হওয়া পর্যন্ত প্রাথমিক অ্যাকাউন্ট সব অনুরোধ পরিচালনা করে        |
-| **Round Robin**                | কনফিগারযোগ্য স্টিকি সীমাসহ সব অ্যাকাউন্ট পর্যায়ক্রমে ব্যবহার করে (ডিফল্ট: প্রতি অ্যাকাউন্টে 3টি কল)                    |
-| **P2C (Power of Two Choices)** | 2টি এলোমেলো অ্যাকাউন্ট বেছে নিয়ে তুলনামূলকভাবে সুস্থটিতে রাউট করে — স্বাস্থ্য বিবেচনায় রেখে লোডের ভারসাম্য বজায় রাখে |
-| **Random**                     | Fisher-Yates শাফল ব্যবহার করে প্রতিটি অনুরোধের জন্য এলোমেলোভাবে একটি অ্যাকাউন্ট নির্বাচন করে                            |
-| **Least Used**                 | সবচেয়ে পুরোনো `lastUsedAt` টাইমস্ট্যাম্পের অ্যাকাউন্টে রাউট করে, ফলে ট্রাফিক সমানভাবে বিতরণ হয়                        |
-| **Cost Optimized**             | সর্বনিম্ন অগ্রাধিকার মানের অ্যাকাউন্টে রাউট করে, যাতে সর্বনিম্ন-খরচের প্রোভাইডারের জন্য অপ্টিমাইজ করা যায়              |
+**ক্ষেত্রে ব্যবহার করুন:**
 
-**উন্নত কম্বো ও অটো কৌশলসমূহ** (প্রতি কম্বোর জন্য অথবা `auto/*` প্রিফিক্সের মাধ্যমে কনফিগারযোগ্য — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) দেখুন):
+- কেন একটি নির্দিষ্ট client/provider সংমিশ্রণ ব্যর্থ হয় তা ডিবাগ করুন
+- যাচাই করুন যে চিন্তা ট্যাগ, টুল কল, এবং সিস্টেম প্রম্পট সঠিকভাবে অনুবাদ করে
+- OpenAI, Claude, Gemini, এবং প্রতিক্রিয়া API ফরম্যাটের মধ্যে বিন্যাসের পার্থক্য তুলনা করুন
 
-- `priority` — কঠোর ক্রম অনুসরণ করে, কখনো রাউন্ড-রবিন করে না
-- `weighted` — প্রতি-মডেল ওজন অনুযায়ী আনুপাতিক ট্রাফিক বিভাজন
-- `fill-first` — সীমায় না পৌঁছানো পর্যন্ত প্রথম মডেলটি ব্যবহার করে
+---
+
+### রাউটিং কৌশল
+
+এর মাধ্যমে কনফিগার করুন** ড্যাশবোর্ড → সেটিংস → রাউটিং** . ড্যাশবোর্ড ছয়টি সর্বাধিক ব্যবহৃত কৌশল প্রকাশ করে; কম্বোস এবং অটো-রাউটার অভ্যন্তরীণভাবে একটি বিস্তৃত সেট সমর্থন করে।
+
+**ড্যাশবোর্ড-দৃশ্যমান কৌশল (অ্যাকাউন্ট-লেভেল রাউটিং):**
+
+| কৌশল                         | বর্ণনা                                                                                                            |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **প্রথমে পূরণ করুন**         | অগ্রাধিকার ক্রমে অ্যাকাউন্ট ব্যবহার করে — প্রাথমিক অ্যাকাউন্ট অনুপলব্ধ না হওয়া পর্যন্ত সমস্ত অনুরোধ পরিচালনা করে |
+| **রাউন্ড রবিন**              | একটি কনফিগারযোগ্য স্টিকি সীমা সহ সমস্ত অ্যাকাউন্টের মাধ্যমে চক্র (ডিফল্ট: প্রতি অ্যাকাউন্টে 3টি কল)               |
+| **P2C (দুই পছন্দের ক্ষমতা)** | 2টি এলোমেলো অ্যাকাউন্ট এবং স্বাস্থ্যকর একটি রুট বেছে নেয় — স্বাস্থ্য সচেতনতার সাথে ভারসাম্য বজায় রাখে           |
+| **এলোমেলো**                  | Fisher-Yates শাফেল ব্যবহার করে প্রতিটি অনুরোধের জন্য এলোমেলোভাবে একটি অ্যাকাউন্ট নির্বাচন করে                     |
+| **সবচেয়ে কম ব্যবহৃত**       | সবচেয়ে পুরনো `lastUsedAt` টাইমস্ট্যাম্প সহ অ্যাকাউন্টে যাওয়ার রুট, ট্রাফিক সমানভাবে বন্টন করে                   |
+| **খরচ অপ্টিমাইজড**           | সর্বনিম্ন অগ্রাধিকার মান সহ অ্যাকাউন্টে রুট, সর্বনিম্ন-খরচ প্রদানকারীদের জন্য অপ্টিমাইজ করা                       |
+
+**উন্নত কম্বো এবং স্বয়ংক্রিয় কৌশল** (প্রতি কম্বো বা `auto/*` উপসর্গের মাধ্যমে কনফিগারযোগ্য — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) দেখুন):
+
+- `priority` — কঠোর আদেশ, কখনও রাউন্ড-রবিন নয়
+- `weighted` — প্রতি-মডেল ওজন দ্বারা আনুপাতিক ট্র্যাফিক বিভক্ত
+- `fill-first` — সীমা আঘাত না হওয়া পর্যন্ত প্রথম মডেলটি নিষ্কাশন করুন
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Power of Two Choices)
+- `p2c` (দুই পছন্দের ক্ষমতা)
 - `least-used` এবং `cost-optimized`
-- `auto` — সব প্রার্থীর মধ্যে স্কোর-চালিত নির্বাচন
-- `lkgp` (Last Known Good Provider) — সর্বশেষ সফল প্রোভাইডারে স্থির থাকে, এরপর নিয়ম অনুযায়ী ফলব্যাক করে
-- `context-optimized` — সবচেয়ে বড় অব্যবহৃত কনটেক্সট উইন্ডোসহ মডেলটি বেছে নেয়
-- `context-relay` — পরবর্তী টার্নগুলোর জন্য দীর্ঘ-কনটেক্সট মডেলগুলোকে শৃঙ্খলিত করে
+- `auto` — সমস্ত প্রার্থীর মধ্যে স্কোর-চালিত
+- `lkgp` (সর্বশেষ পরিচিত ভাল প্রদানকারী) — শেষ সফল প্রদানকারীর সাথে পিন করে, তারপরে নিয়মে ফিরে আসে
+- `context-optimized` — সবচেয়ে বড় মুক্ত প্রসঙ্গ উইন্ডো সহ মডেলটি বেছে নেয়
+- `context-relay` — ফলো-আপ টার্নের জন্য দীর্ঘ-প্রসঙ্গ মডেল চেইন করে
 
-#### বহিরাগত স্টিকি সেশন হেডার
+#### এক্সটার্নাল স্টিকি সেশন হেডার
 
-বহিরাগত সেশন অ্যাফিনিটির জন্য (উদাহরণস্বরূপ, রিভার্স প্রক্সির পেছনে থাকা Claude Code/Codex এজেন্ট), পাঠান:
+বাহ্যিক সেশন অ্যাফিনিটির জন্য (উদাহরণস্বরূপ, বিপরীত প্রক্সির পিছনে Claude Code/Codex এজেন্ট), পাঠান:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute `x_session_id`-ও গ্রহণ করে এবং কার্যকর সেশন কী `X-OmniRoute-Session-Id`-এ ফেরত দেয়।
+OmniRoute এছাড়াও `x_session_id` গ্রহণ করে এবং `X-OmniRoute-Session-Id` এ কার্যকরী সেশন কী ফেরত দেয়।
 
-আপনি যদি Nginx ব্যবহার করেন এবং আন্ডারস্কোর-ফর্ম হেডার পাঠান, তাহলে এটি সক্রিয় করুন:
+আপনি যদি Nginx ব্যবহার করেন এবং আন্ডারস্কোর-ফর্ম হেডার পাঠান, সক্ষম করুন:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### ওয়াইল্ডকার্ড মডেল অ্যালিয়াস
+#### ওয়াইল্ডকার্ড মডেল উপনাম
 
 মডেলের নাম রিম্যাপ করতে ওয়াইল্ডকার্ড প্যাটার্ন তৈরি করুন:
 
 ```
-প্যাটার্ন: claude-sonnet-*     →  লক্ষ্য: cc/claude-sonnet-4-6
-প্যাটার্ন: gpt-*               →  লক্ষ্য: gh/gpt-5.3-codex
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-ওয়াইল্ডকার্ডে `*` (যেকোনো সংখ্যক অক্ষর) এবং `?` (একটি অক্ষর) সমর্থিত।
+ওয়াইল্ডকার্ড `*` (যে কোনো অক্ষর) এবং `?` (একক অক্ষর) সমর্থন করে।
 
 #### ফলব্যাক চেইন
 
-সব অনুরোধের ক্ষেত্রে প্রযোজ্য গ্লোবাল ফলব্যাক চেইন নির্ধারণ করুন:
+সমস্ত অনুরোধ জুড়ে প্রযোজ্য গ্লোবাল ফলব্যাক চেইন সংজ্ঞায়িত করুন:
 
 ```
-চেইন: production-fallback
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -860,153 +907,208 @@ underscores_in_headers on;
 
 ---
 
-### স্থিতিস্থাপকতা ও সার্কিট ব্রেকার
+### কমন প্রোভাইডার কম্বিনেশন এবং রাউটিং প্যাটার্ন
 
-**Dashboard → Settings → Resilience**-এর মাধ্যমে কনফিগার করুন।
+এখানে একাধিক প্রদানকারীকে একত্রিত করার এবং OmniRoute তে তাদের মধ্যে রাউটিং করার উদাহরণ রয়েছে:
 
-OmniRoute পাঁচটি কম্পোনেন্টের মাধ্যমে প্রোভাইডার-স্তরের স্থিতিস্থাপকতা বাস্তবায়ন করে:
+#### 1. কোডিং এজেন্ট কম্বো: Cost/Speed ফলব্যাকের সাথে হাই-এন্ড রিজনিং
 
-1. **অনুরোধের সারি ও গতি নিয়ন্ত্রণ** — সিস্টেম-স্তরের অনুরোধ বিন্যাস:
-   - **প্রতি মিনিটে অনুরোধ (RPM)** — প্রতি অ্যাকাউন্টে প্রতি মিনিটে সর্বোচ্চ অনুরোধের সংখ্যা
-   - **অনুরোধের মধ্যবর্তী ন্যূনতম সময়** — অনুরোধগুলোর মধ্যে ন্যূনতম ব্যবধান, মিলিসেকেন্ডে
-   - **সর্বোচ্চ সমবর্তী অনুরোধ** — প্রতি অ্যাকাউন্টে সর্বোচ্চ একযোগে অনুরোধের সংখ্যা
+কোডিং এজেন্ট (OpenCode, Claude কোড, Cursor, Cline) জন্য আদর্শ। রুট প্রাথমিকভাবে সীমান্ত যুক্তি মডেল, কোটা ক্লান্তি বা ত্রুটি দ্রুত কোডিং মডেল ফিরে পতনশীল.
 
-2. **সংযোগ কুলডাউন** — পুনরায় চেষ্টা করা যায় এমন ব্যর্থতার পর একটি সংযোগের জন্য প্রতি-অথ-টাইপ কনফিগারেশন:
-   - **বেস কুলডাউন** — পুনরায় চেষ্টা করা যায় এমন আপস্ট্রিম ব্যর্থতার জন্য ডিফল্ট কুলডাউন সময়সীমা
-   - **আপস্ট্রিম রিট্রাই হিন্ট ব্যবহার করুন** — প্রোভাইড করা হলে প্রামাণ্য `Retry-After` বা রিসেট হিন্ট মেনে চলে
-   - **সর্বোচ্চ ব্যাকঅফ ধাপ** — পুনরাবৃত্ত ব্যর্থতার জন্য সর্বোচ্চ এক্সপোনেনশিয়াল ব্যাকঅফ স্তর
+- **ড্যাশবোর্ড** : Combos → নতুন কম্বো → নাম: `agent-coding` → কৌশল: `Priority`
+- **মডেল** :
+  1. `claude/claude-sonnet-4-6` (প্রাথমিক কোডিং এজেন্ট)
+  2. `openai/gpt-4o` (সেকেন্ডারি উচ্চ-ক্ষমতা ফলব্যাক)
+  3. `deepseek/deepseek-v4-flash` (উচ্চ-দক্ষতা, খরচ-কার্যকর ফলব্যাক)
 
-3. **প্রোভাইডার সার্কিট ব্রেকার** — প্রোভাইডারের এন্ড-টু-এন্ড ব্যর্থতা ট্র্যাক করে, কনফিগার করা সতর্কতা থ্রেশহোল্ডে কোনো প্রোভাইডারকে অবনমিত হিসেবে চিহ্নিত করে এবং কনফিগার করা ব্যর্থতা থ্রেশহোল্ডে পৌঁছালে ব্রেকার খুলে দেয়:
-   - **অবনমন থ্রেশহোল্ড** — `DEGRADED` অবস্থায় প্রবেশের আগে প্রোভাইডারের ধারাবাহিক ব্যর্থতার সংখ্যা
-   - **ব্যর্থতা থ্রেশহোল্ড** — `OPEN` অবস্থায় প্রবেশের আগে প্রোভাইডারের ধারাবাহিক ব্যর্থতার সংখ্যা
-   - **রিসেট টাইমআউট** — প্রোভাইডারকে আবার পরীক্ষা করার আগের সময়সীমা
-   - **CLOSED** (সুস্থ) — অনুরোধ স্বাভাবিকভাবে প্রবাহিত হয়
-   - **DEGRADED** — উচ্চমাত্রার ব্যর্থতা ট্র্যাক করার সময়ও অনুরোধ প্রবাহিত হতে থাকে
-   - **OPEN** — পুনরাবৃত্ত ব্যর্থতার পর প্রোভাইডার সাময়িকভাবে ব্লক থাকে
-   - **HALF_OPEN** — প্রোভাইডার পুনরুদ্ধার হয়েছে কি না পরীক্ষা করা হচ্ছে
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
 
-   সংযোগ-স্কোপের `429` রেট লিমিট **সংযোগ কুলডাউন**-এই থাকে এবং প্রোভাইডার ব্রেকারের হিসাবে গণনা করা হয় না।
+#### 2. ফ্রি-টায়ার অটো ফেইলওভার কম্বো
 
-   প্রোভাইডার ব্রেকারের রানটাইম অবস্থা শুধু **Dashboard → Health**-এ দেখানো হয়।
+API খরচ ছাড়াই আপটাইম সর্বাধিক করার জন্য একাধিক ফ্রি-টায়ার এবং চাবিহীন প্রদানকারীকে চেইন করে।
 
-4. **কুলডাউনের জন্য অপেক্ষা** — প্রতিটি প্রার্থী সংযোগ ইতিমধ্যেই কুলডাউনে থাকলে, OmniRoute সবচেয়ে আগে শেষ হওয়া কুলডাউন পর্যন্ত অপেক্ষা করতে পারে এবং একই ক্লায়েন্ট অনুরোধ স্বয়ংক্রিয়ভাবে আবার চেষ্টা করতে পারে।
+- **কৌশল** : `Least Used` বা `Round Robin` (কোটা জুড়ে লোড বিতরণ করে)
+- **মডেল** :
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
 
-5. **রেট লিমিট স্বয়ংক্রিয় শনাক্তকরণ** — আপস্ট্রিম প্রোভাইডার স্পষ্ট অপেক্ষার সময়সীমা ফেরত দিলে এবং সেটিংটি সক্রিয় থাকলে, সেই হিন্টগুলো স্থানীয় সংযোগ কুলডাউনকে ওভাররাইড করে।
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
 
-**বিশেষ পরামর্শ:** কোনো আউটেজের পর সক্রিয় প্রোভাইডার ব্রেকার পরিদর্শন ও রিসেট করতে **Health** পেজ ব্যবহার করুন। Resilience পেজ শুধু কনফিগারেশন পরিবর্তন করে।
+#### 3. মাল্টিমোডাল/ভিশন এবং টেক্সট পাইপলাইন
+
+ইমেজ বোঝার এবং কোড জেনারেশন জড়িত ওয়ার্কফ্লোগুলির জন্য উচ্চ-গতির পাঠ্য প্রজন্মের সাথে বিশেষ দৃষ্টি মডেল জোড়া।
+
+- **প্যাটার্ন** : একটি `Priority` কম্বো যা দৃষ্টি-সক্ষম মডেলগুলিকে প্রথমে তালিকাভুক্ত করে এবং একটি উচ্চ-থ্রুপুট text/code মডেল সর্বশেষে৷
+- **মডেল** :
+  1. `gemini/gemini-2.5-pro` (শক্তিশালী image/multimodal বোধগম্যতা)
+  2. `openai/gpt-4o` (সুষম দৃষ্টি এবং টুল ব্যবহার)
+  3. `deepseek/deepseek-v4-flash` (Text/code প্রজন্ম)
 
 ---
 
-### ডেটাবেস এক্সপোর্ট / ইমপোর্ট
+### স্থিতিস্থাপকতা এবং সার্কিট ব্রেকার
 
-**Dashboard → Settings → System & Storage**-এ ডেটাবেস ব্যাকআপ পরিচালনা করুন।
+এর মাধ্যমে কনফিগার করুন** ড্যাশবোর্ড → সেটিংস → স্থিতিস্থাপকতা** .
 
-| অ্যাকশন                         | বিবরণ                                                                                                                                                           |
-| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **ডেটাবেস এক্সপোর্ট করুন**      | বর্তমান SQLite ডেটাবেসটি একটি `.sqlite` ফাইল হিসেবে ডাউনলোড করে                                                                                                 |
-| **সব এক্সপোর্ট করুন (.tar.gz)** | একটি পূর্ণাঙ্গ ব্যাকআপ আর্কাইভ ডাউনলোড করে, যার মধ্যে রয়েছে: ডেটাবেস, সেটিংস, কম্বো, প্রোভাইডার সংযোগসমূহ (ক্রেডেনশিয়াল ছাড়া), API কী মেটাডেটা               |
-| **ডেটাবেস ইমপোর্ট করুন**        | বর্তমান ডেটাবেস প্রতিস্থাপন করতে একটি `.sqlite` ফাইল আপলোড করে। `DISABLE_SQLITE_AUTO_BACKUP=true` না থাকলে ইমপোর্টের আগে স্বয়ংক্রিয়ভাবে একটি ব্যাকআপ তৈরি হয় |
+OmniRoute পাঁচটি উপাদান সহ প্রদানকারী-স্তরের স্থিতিস্থাপকতা প্রয়োগ করে:
+
+1. **অনুরোধ সারি এবং পেসিং** — সিস্টেম-স্তরের অনুরোধ আকার:
+   - **প্রতি মিনিটে অনুরোধ (RPM)** - অ্যাকাউন্ট প্রতি মিনিটে সর্বোচ্চ অনুরোধ
+   - **অনুরোধের মধ্যে ন্যূনতম সময়** — অনুরোধের মধ্যে মিলিসেকেন্ডে ন্যূনতম ব্যবধান
+   - **সর্বোচ্চ সমসাময়িক অনুরোধ** - প্রতি অ্যাকাউন্টে সর্বাধিক একযোগে অনুরোধ
+
+2. **সংযোগ Cooldown** — পুনরায় চেষ্টাযোগ্য ব্যর্থতার পরে একটি একক সংযোগের জন্য প্রতি-প্রমাণ-টাইপ কনফিগারেশন:
+   - **বেস কুলডাউন** — পুনরায় চেষ্টাযোগ্য আপস্ট্রিম ব্যর্থতার জন্য ডিফল্ট কুলডাউন উইন্ডো
+   - **আপস্ট্রিম পুনরায় চেষ্টা ইঙ্গিত ব্যবহার করুন** — প্রদান করা হলে প্রামাণিক `Retry-After` বা রিসেট ইঙ্গিত দেয়
+   - **সর্বোচ্চ ব্যাকঅফ পদক্ষেপ** — বারবার ব্যর্থতার জন্য সর্বাধিক সূচকীয় ব্যাকঅফ স্তর
+
+3. **প্রদানকারী সার্কিট ব্রেকার** — এন্ড-টু-এন্ড প্রদানকারীর ব্যর্থতা ট্র্যাক করে, কনফিগার করা সতর্কতা থ্রেশহোল্ডে অবনমিত একটি প্রদানকারীকে চিহ্নিত করে এবং কনফিগার করা ব্যর্থতার থ্রেশহোল্ডে পৌঁছে গেলে ব্রেকার খোলে:
+   - **অধঃপতন থ্রেশহোল্ড** — `DEGRADED` প্রবেশ করার আগে ক্রমাগত প্রদানকারীর ব্যর্থতা
+   - **ব্যর্থতার থ্রেশহোল্ড** — `OPEN` প্রবেশ করার আগে ক্রমাগত প্রদানকারীর ব্যর্থতা
+   - **টাইমআউট রিসেট করুন** — প্রদানকারীকে আবার পরীক্ষা করার আগে সময় উইন্ডো
+   - **CLOSED** (স্বাস্থ্যকর) - অনুরোধগুলি স্বাভাবিকভাবে প্রবাহিত হয়
+   - **DEGRADED** — উচ্চতর ব্যর্থতাগুলি ট্র্যাক করার সময়ও অনুরোধগুলি প্রবাহিত হয়৷
+   - **OPEN** — বারবার ব্যর্থতার পর সরবরাহকারীকে সাময়িকভাবে অবরুদ্ধ করা হয়েছে
+   - **HALF_OPEN** - প্রদানকারী সুস্থ হয়ে উঠেছে কিনা তা পরীক্ষা করা
+
+   সংযোগ-স্কোপযুক্ত `429` হারের সীমা থাকে** সংযোগ Cooldown** এবং প্রদানকারী ব্রেকার দিকে গণনা করবেন না।
+
+   প্রদানকারী ব্রেকার রানটাইম অবস্থা দেখানো হয়** ড্যাশবোর্ড → স্বাস্থ্য** শুধুমাত্র
+
+4. **কুলডাউনের জন্য অপেক্ষা করুন** — যদি প্রতিটি প্রার্থীর সংযোগ ইতিমধ্যেই ঠান্ডা হয়ে যায়, তাহলে OmniRoute প্রথম দিকের কুলডাউনের জন্য অপেক্ষা করতে পারে এবং একই ক্লায়েন্টের অনুরোধ স্বয়ংক্রিয়ভাবে পুনরায় চেষ্টা করতে পারে।
+
+5. **হার সীমা স্বয়ংক্রিয় সনাক্তকরণ** — যখন আপস্ট্রিম প্রদানকারীরা সুস্পষ্ট অপেক্ষা উইন্ডোগুলি ফেরত দেয়, তখন সেটিং সক্রিয় থাকা অবস্থায় সেই ইঙ্গিতগুলি স্থানীয় সংযোগ কুলডাউনকে ওভাররাইড করে।
+
+**প্রো টিপ:** ব্যবহার করুন** স্বাস্থ্য** বিভ্রাটের পরে লাইভ প্রদানকারী ব্রেকারগুলি পরিদর্শন এবং পুনরায় সেট করতে পৃষ্ঠা৷ স্থিতিস্থাপকতা পৃষ্ঠা শুধুমাত্র কনফিগারেশন পরিবর্তন করে।
+
+---
+
+### ডাটাবেস এক্সপোর্ট/ইমপোর্ট
+
+ডাটাবেস ব্যাকআপ পরিচালনা করুন** ড্যাশবোর্ড → সেটিংস → সিস্টেম এবং স্টোরেজ** .
+
+| অ্যাকশন                       | বর্ণনা                                                                                                                                                          |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ডাটাবেস রপ্তানি করুন**      | একটি `.sqlite` ফাইল হিসাবে বর্তমান SQLite ডাটাবেস ডাউনলোড করে                                                                                                   |
+| **সব রপ্তানি করুন (.tar.gz)** | একটি সম্পূর্ণ ব্যাকআপ সংরক্ষণাগার ডাউনলোড করে যার মধ্যে রয়েছে: ডাটাবেস, সেটিংস, কম্বোস, প্রদানকারী সংযোগ (কোনও শংসাপত্র নেই), API কী মেটাডেটা                  |
+| **ডাটাবেস আমদানি করুন**       | বর্তমান ডাটাবেস প্রতিস্থাপন করতে একটি `.sqlite` ফাইল আপলোড করুন। `DISABLE_SQLITE_AUTO_BACKUP=true` না থাকলে একটি প্রাক-আমদানি ব্যাকআপ স্বয়ংক্রিয়ভাবে তৈরি হয় |
 
 ```bash
-# API: ডেটাবেস এক্সপোর্ট করুন
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: সব এক্সপোর্ট করুন (পূর্ণাঙ্গ আর্কাইভ)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: ডেটাবেস ইমপোর্ট করুন
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**ইমপোর্ট যাচাইকরণ:** ইমপোর্ট করা ফাইলের অখণ্ডতা (SQLite pragma পরীক্ষা), প্রয়োজনীয় টেবিল (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) এবং আকার (সর্বোচ্চ 100MB) যাচাই করা হয়।
+**আমদানি বৈধতা:** আমদানি করা ফাইলটি অখণ্ডতার জন্য যাচাই করা হয়েছে (SQLite pragma চেক), প্রয়োজনীয় টেবিল (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), এবং আকার (সর্বোচ্চ 100MB)।
 
-**ব্যবহারের ক্ষেত্র:**
+**কেস ব্যবহার করুন:**
 
-- এক মেশিন থেকে অন্য মেশিনে OmniRoute স্থানান্তর করা
-- দুর্যোগ-পরবর্তী পুনরুদ্ধারের জন্য বাহ্যিক ব্যাকআপ তৈরি করা
-- টিমের সদস্যদের মধ্যে কনফিগারেশন শেয়ার করা (সব এক্সপোর্ট করুন → আর্কাইভ শেয়ার করুন)
+- মেশিনের মধ্যে OmniRoute স্থানান্তর করুন
+- দুর্যোগ পুনরুদ্ধারের জন্য বাহ্যিক ব্যাকআপ তৈরি করুন
+- দলের সদস্যদের মধ্যে কনফিগারেশন শেয়ার করুন (সমস্ত → শেয়ার সংরক্ষণাগার রপ্তানি করুন)
 
 ---
 
 ### সেটিংস ড্যাশবোর্ড
 
-সহজে নেভিগেশনের জন্য সেটিংস পেজটি **7টি ট্যাবে** বিন্যস্ত:
+সেটিংস পৃষ্ঠার মধ্যে সংগঠিত হয়** 7টি ট্যাব** সহজ নেভিগেশন জন্য:
 
-| ট্যাব              | বিষয়বস্তু                                                                                                                                                                     |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **সাধারণ**         | সিস্টেম স্টোরেজ টুল, ডিফল্ট আচরণ, এন্ডপয়েন্ট টানেলের দৃশ্যমানতা                                                                                                               |
-| **চেহারা**         | থিম নিয়ন্ত্রণ (হালকা/গাঢ়/সিস্টেম), সাইডবারের দৃশ্যমানতা, Cloudflare/Tailscale/ngrok টানেল কার্ডের প্যানেল টগল                                                                |
-| **AI**             | থিংকিং বাজেট (পাসথ্রু / স্বয়ংক্রিয়ভাবে বাদ দেওয়া / কাস্টম / অভিযোজিত — দেখুন [THINKING_BUDGET.md](./THINKING_BUDGET.md)), গ্লোবাল সিস্টেম প্রম্পট, প্রম্পট ক্যাশ পরিসংখ্যান |
-| **নিরাপত্তা**      | লগইন/পাসওয়ার্ড সেটিংস, IP অ্যাক্সেস কন্ট্রোল, `/models`-এর জন্য API প্রমাণীকরণ, প্রোভাইডার ব্লকিং, প্রম্পট-ইনজেকশন প্রতিরোধব্যবস্থা                                           |
-| **রাউটিং**         | গ্লোবাল রাউটিং কৌশল (আগে পূরণ / রাউন্ড রবিন / P2C / র্যান্ডম / সর্বনিম্ন ব্যবহৃত / খরচ-অনুকূলিত), ওয়াইল্ডকার্ড মডেল উপনাম, ফলব্যাক চেইন, কম্বোর ডিফল্ট মান                    |
-| **স্থিতিস্থাপকতা** | রিকোয়েস্ট কিউ, সংযোগ কুলডাউন, প্রোভাইডার ব্রেকার কনফিগারেশন এবং কুলডাউনের জন্য অপেক্ষার আচরণ                                                                                  |
-| **উন্নত**          | গ্লোবাল প্রক্সি কনফিগারেশন (HTTP/SOCKS5), প্রতিটি প্রোভাইডারের জন্য প্রক্সি ওভাররাইড                                                                                           |
+| ট্যাব              | বিষয়বস্তু                                                                                                                                                            |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **সাধারণ**         | সিস্টেম স্টোরেজ টুল, ডিফল্ট আচরণ, এন্ডপয়েন্ট টানেল দৃশ্যমানতা                                                                                                        |
+| **চেহারা**         | থিম নিয়ন্ত্রণ (light/dark/system), সাইডবার দৃশ্যমানতা, Cloudflare/Tailscale/ngrok টানেল কার্ডের জন্য প্যানেল টগল                                                     |
+| **AI**             | চিন্তাভাবনা বাজেট (পাসথ্রু / অটো-স্ট্রিপ / কাস্টম / অভিযোজিত — দেখুন [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), গ্লোবাল সিস্টেম প্রম্পট, প্রম্পট ক্যাশে পরিসংখ্যান |
+| **নিরাপত্তা**      | Login/Password সেটিংস, IP অ্যাক্সেস কন্ট্রোল, `/models` এর জন্য API auth , প্রোভাইডার ব্লকিং, প্রম্পট-ইনজেকশন গার্ড                                                   |
+| **রাউটিং**         | গ্লোবাল রাউটিং কৌশল (প্রথম / রাউন্ড রবিন / P2C / র্যান্ডম / সর্বনিম্ন ব্যবহৃত / খরচ অপ্টিমাইজ করা), ওয়াইল্ডকার্ড মডেল উপনাম, ফলব্যাক চেইন, কম্বো ডিফল্ট              |
+| **স্থিতিস্থাপকতা** | অনুরোধ সারি, সংযোগ কুলডাউন, প্রদানকারী ব্রেকার কনফিগারেশন, এবং অপেক্ষা করার জন্য-কূলডাউন আচরণ                                                                         |
+| **উন্নত**          | গ্লোবাল প্রক্সি কনফিগারেশন (HTTP/SOCKS5), প্রতি-প্রোভাইডার প্রক্সি ওভাররাইড করে                                                                                       |
 
-সাধারণ ট্যাবে আর শুধু-পঠনযোগ্য লগিং ও ক্যাশ-সংক্রান্ত নোটের পুনরাবৃত্তি নেই। ডেটাবেস সংরক্ষণ এবং
-অপ্টিমাইজেশন সেটিংস `/api/settings/database`-এর মাধ্যমে সংরক্ষিত হয়; ম্যানুয়ালি ক্যাশ পরিষ্কার করতে
-`DELETE /api/cache` ব্যবহার করা হয়। রিকোয়েস্ট ও প্রক্সি লগের সর্বোচ্চ সারি সংখ্যা
-`CALL_LOGS_TABLE_MAX_ROWS` এবং `PROXY_LOGS_TABLE_MAX_ROWS` দ্বারা নিয়ন্ত্রিত হয়।
+সাধারণ আর শুধুমাত্র পঠনযোগ্য লগিং এবং ক্যাশে নোটের নকল করে না। ডাটাবেস ধারণ এবং অপ্টিমাইজেশান সেটিংস `/api/settings/database` মাধ্যমে স্থায়ী হয়; ম্যানুয়াল ক্যাশে ক্লিয়ারিং `DELETE /api/cache` ব্যবহার করে। অনুরোধ এবং প্রক্সি লগ সারি ক্যাপগুলি `CALL_LOGS_TABLE_MAX_ROWS` এবং `PROXY_LOGS_TABLE_MAX_ROWS`দ্বারা নিয়ন্ত্রিত হয়।
 
 ---
 
-### খরচ ও বাজেট ব্যবস্থাপনা
+### খরচ এবং বাজেট ব্যবস্থাপনা
 
-**ড্যাশবোর্ড → খরচ** থেকে অ্যাক্সেস করুন।
+মাধ্যমে অ্যাক্সেস** ড্যাশবোর্ড → খরচ** .
 
-| ট্যাব              | উদ্দেশ্য                                                                                                      |
-| ------------------ | ------------------------------------------------------------------------------------------------------------- |
-| **বাজেট**          | দৈনিক/সাপ্তাহিক/মাসিক বাজেট এবং রিয়েল-টাইম ট্র্যাকিংসহ প্রতিটি API কীর জন্য ব্যয়ের সীমা নির্ধারণ করুন       |
-| **মূল্য নির্ধারণ** | মডেলের মূল্য-সংক্রান্ত এন্ট্রি দেখুন ও সম্পাদনা করুন — প্রতিটি প্রোভাইডারের প্রতি 1K ইনপুট/আউটপুট টোকেনের খরচ |
+| ট্যাব              | উদ্দেশ্য                                                                                                   |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| **বাজেট**          | daily/weekly/monthly বাজেট এবং রিয়েল-টাইম ট্র্যাকিং সহ API কী প্রতি ব্যয়ের সীমা সেট করুন                 |
+| **মূল্য নির্ধারণ** | মডেল মূল্যের এন্ট্রিগুলি দেখুন এবং সম্পাদনা করুন — প্রতি প্রদানকারী প্রতি 1K input/output টোকেন প্রতি খরচ৷ |
 
 ```bash
-# API: একটি বাজেট নির্ধারণ করুন
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: বর্তমান বাজেটের অবস্থা দেখুন
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**খরচ ট্র্যাকিং:** প্রতিটি রিকোয়েস্টে টোকেনের ব্যবহার লগ করা হয় এবং মূল্য সারণি ব্যবহার করে খরচ গণনা করা হয়। প্রোভাইডার, মডেল এবং API কী অনুযায়ী বিস্তারিত হিসাব **ড্যাশবোর্ড → ব্যবহার**-এ দেখুন।
+**খরচ ট্র্যাকিং:** প্রতিটি অনুরোধ টোকেন ব্যবহার লগ করে এবং মূল্য সারণী ব্যবহার করে খরচ গণনা করে। মধ্যে ব্রেকডাউন দেখুন** ড্যাশবোর্ড → ব্যবহার** প্রদানকারী, মডেল এবং API কী দ্বারা।
 
 ---
 
 ### অডিও ট্রান্সক্রিপশন
 
-OmniRoute OpenAI-সামঞ্জস্যপূর্ণ এন্ডপয়েন্টের মাধ্যমে অডিও ট্রান্সক্রিপশন সমর্থন করে:
+OmniRoute OpenAI- সামঞ্জস্যপূর্ণ এন্ডপয়েন্টের মাধ্যমে অডিও ট্রান্সক্রিপশন সমর্থন করে:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# curl ব্যবহার করে উদাহরণ
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` হলো নেটিভ Deepgram রুট এবং এর জন্য একটি Deepgram API কী প্রয়োজন।
-শুধু OpenRouter কনফিগার করা থাকলে `openrouter/deepgram/nova-3` ব্যবহার করুন।
+`deepgram/nova-3` হল স্থানীয় Deepgram রুট এবং একটি Deepgram API কী প্রয়োজন। যদি শুধুমাত্র OpenRouter কনফিগার করা হয়, `openrouter/deepgram/nova-3` ব্যবহার করুন।
 
-**স্পিচ-টু-টেক্সট (ট্রান্সক্রিপশন)** প্রোভাইডারসমূহ:
+**স্পিচ-টু-টেক্সট (ট্রান্সক্রিপশন)** প্রদানকারী:
 
-- `openai/` (whisper-সামঞ্জস্যপূর্ণ)
-- `groq/` (Groq Whisper Turbo)
-- `deepgram/` (Nova পরিবার)
+- `openai/` (ফিসফিস-সামঞ্জস্যপূর্ণ)
+- `groq/` (Groq হুইস্পার টার্বো)
+- `deepgram/` (নোভা পরিবার)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Canary)
-- `huggingface/` (whisper ভ্যারিয়েন্ট)
+- `nvidia/` (প্যারাকিট, ক্যানারি)
+- `huggingface/` (ফিসফিস ভেরিয়েন্ট)
 - `qwen/`
 
-**টেক্সট-টু-স্পিচ (`POST /v1/audio/speech`)** প্রোভাইডারসমূহ:
+**টেক্সট টু স্পিচ (`POST /v1/audio/speech`)** প্রদানকারী:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
-- `deepgram/` (Aura)
+- `deepgram/` (আউরা)
 - `nvidia/` (Magpie TTS)
 - `elevenlabs/`
 - `huggingface/`
@@ -1019,54 +1121,45 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-ট্রান্সক্রিপশনের জন্য সমর্থিত অডিও ফরম্যাট: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`। TTS আউটপুট ফরম্যাট প্রোভাইডারের ওপর নির্ভর করে (mp3, wav, opus, pcm, mulaw)।
+ট্রান্সক্রিপশনের জন্য সমর্থিত অডিও ফরম্যাট: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`। TTS আউটপুট বিন্যাস প্রদানকারীর উপর নির্ভর করে (mp3, wav, opus, pcm, mulaw)।
 
 ---
 
 ### কম্বো ব্যালেন্সিং কৌশল
 
-প্রতিটি কম্বোর ব্যালেন্সিং **ড্যাশবোর্ড → কম্বো → তৈরি/সম্পাদনা → কৌশল**-এ কনফিগার করুন।
+প্রতি-কম্বো ব্যালেন্সিং কনফিগার করুন** ড্যাশবোর্ড → কম্বোস → Create/Edit → কৌশল** .
 
-| কৌশল                  | বিবরণ                                                                            |
-| --------------------- | -------------------------------------------------------------------------------- |
-| **রাউন্ড-রবিন**       | ধারাবাহিকভাবে মডেলগুলোর মধ্যে পর্যায়ক্রমে ঘোরে                                  |
-| **অগ্রাধিকার**        | সর্বদা প্রথম মডেলটি চেষ্টা করে; কেবল ত্রুটি ঘটলেই বিকল্পে যায়                   |
-| **এলোমেলো**           | প্রতিটি অনুরোধের জন্য কম্বো থেকে একটি এলোমেলো মডেল বেছে নেয়                     |
-| **ওয়েটেড**           | প্রতিটি মডেলের নির্ধারিত ওজনের ভিত্তিতে আনুপাতিকভাবে রাউট করে                    |
-| **সর্বনিম্ন-ব্যবহৃত** | সাম্প্রতিক অনুরোধ সবচেয়ে কম পাওয়া মডেলে রাউট করে (কম্বো মেট্রিক্স ব্যবহার করে) |
-| **খরচ-অনুকূলিত**      | উপলভ্য সবচেয়ে সস্তা মডেলে রাউট করে (মূল্যতালিকা ব্যবহার করে)                    |
+| কৌশল                   | বর্ণনা                                                                   |
+| ---------------------- | ------------------------------------------------------------------------ |
+| **রাউন্ড-রবিন**        | ক্রমানুসারে মডেলের মাধ্যমে ঘোরে                                          |
+| **অগ্রাধিকার**         | সর্বদা প্রথম মডেল চেষ্টা করে; শুধুমাত্র ভুলের জন্য ফিরে আসে              |
+| **এলোমেলো**            | প্রতিটি অনুরোধের জন্য কম্বো থেকে একটি এলোমেলো মডেল বেছে নেয়             |
+| **ওজনযুক্ত**           | মডেল প্রতি নির্ধারিত ওজনের উপর ভিত্তি করে আনুপাতিকভাবে রুট               |
+| **সবচেয়ে কম ব্যবহৃত** | সবচেয়ে কম সাম্প্রতিক অনুরোধ সহ মডেলের রুট (কম্বো মেট্রিক্স ব্যবহার করে) |
+| **খরচ-অপ্টিমাইজড**     | সবচেয়ে সস্তা উপলব্ধ মডেলের রুট (মূল্য সারণী ব্যবহার করে)                |
 
-গ্লোবাল কম্বোর ডিফল্ট **Dashboard → Settings → Routing → Combo Defaults**-এ সেট করা যায়।
-ডিফল্টভাবে কম্বোর লক্ষ্য টাইমআউট বর্তমান অনুরোধের টাইমআউট অনুসরণ করে। কেবল যখন প্রতিটি লক্ষ্যের জন্য আরও কম সময়সীমা
-দ্রুত বিকল্পে যাওয়া ট্রিগার করবে, তখন কম্বোর ডিফল্ট বা কোনো পৃথক কম্বোতে **Target timeout
-(seconds)** ব্যবহার করুন।
+গ্লোবাল কম্বো ডিফল্ট সেট করা যেতে পারে** ড্যাশবোর্ড → সেটিংস → রাউটিং → কম্বো ডিফল্ট** . কম্বো টার্গেট টাইমআউট ডিফল্টরূপে বর্তমান অনুরোধের সময়সীমার উত্তরাধিকারী হয়। ব্যবহার করুন** টার্গেট টাইমআউট (সেকেন্ড)** কম্বো ডিফল্টে বা একটি স্বতন্ত্র কম্বো শুধুমাত্র তখনই যখন প্রতি-টার্গেটের একটি ছোট সীমা দ্রুত ফলব্যাক ট্রিগার করবে।
 
-জিরো-লেটেন্সি কম্বো অপ্টিমাইজেশনগুলো ঐচ্ছিক। এই লেটেন্সি ফিচারগুলো যাতে বিকল্প লক্ষ্যগুলোর সঙ্গে প্রতিযোগিতা না করে,
-TTFT ইতিহাসের ভিত্তিতে লক্ষ্য এড়িয়ে না যায়, বা বিকল্প অনুরোধগুলো সংকুচিত না করে, সে জন্য **Zero-latency optimizations** নিষ্ক্রিয় রাখুন;
-এটি সক্রিয় করলে কনফিগার করা হেজিং, পূর্বাভাসমূলক TTFT
-স্কিপ এবং প্রোঅ্যাকটিভ বিকল্প সংকোচনের মাধ্যমে কম টেইল লেটেন্সির বিনিময়ে রাউটিং/অনুরোধের যথার্থতা হ্রাসের সুযোগ দেওয়া হয়।
+জিরো-লেটেন্সি কম্বো অপ্টিমাইজেশান অপ্ট-ইন। ছেড়ে দিন** জিরো-লেটেন্সি অপ্টিমাইজেশান** রেসিং ফলব্যাক লক্ষ্য, TTFT ইতিহাসের উপর ভিত্তি করে লক্ষ্যগুলি এড়িয়ে যাওয়া, বা ফলব্যাক অনুরোধগুলি সংকুচিত করা থেকে এই লেটেন্সি বৈশিষ্ট্যগুলিকে প্রতিরোধ করতে অক্ষম করা হয়েছে; এটি সক্রিয় করা কনফিগার করা হেজিং, ভবিষ্যদ্বাণীমূলক TTFT স্কিপস এবং প্রোঅ্যাকটিভ ফলব্যাক কম্প্রেশনকে লোয়ার টেইল লেটেন্সির জন্য routing/request ফিডেলিটি ট্রেড করার অনুমতি দেয়।
 
-আপস্ট্রিম প্রোভাইডারদের কঠোর
-`max_tokens` / `maxOutputTokens` সীমা প্রয়োজন হলে **Reasoning token buffer** নিষ্ক্রিয় করুন। এটি সক্রিয় থাকলে, কম্বো রাউটিং শুধু পরিচিত আউটপুট সীমাসম্পন্ন মডেলগুলোর জন্য রিজনিং-মডেলের
-অতিরিক্ত ধারণক্ষমতা যোগ করে এবং নিরাপদ বাফার করা মানটি সেই সীমা ছাড়িয়ে গেলে ক্লায়েন্টের টোকেন সীমা অপরিবর্তিত রাখে। ক্লায়েন্টের সীমা আগে থেকেই কোনো পরিচিত সীমার চেয়ে বেশি হলে,
-আপস্ট্রিম অনুরোধ পাঠানোর আগে OmniRoute সেটিকে সেই সীমায় নামিয়ে আনে।
+নিষ্ক্রিয় করুন** যুক্তি টোকেন বাফার** যখন আপস্ট্রিম প্রদানকারীদের কঠোর `max_tokens` / `maxOutputTokens` সীমার প্রয়োজন হয়। যখন সক্রিয় থাকে, তখন কম্বো রাউটিং শুধুমাত্র একটি পরিচিত আউটপুট ক্যাপ সহ মডেলগুলির জন্য যুক্তি-মডেল হেডরুম যোগ করে এবং ক্লায়েন্ট টোকেন সীমা অপরিবর্তিত রাখে যখন নিরাপদ বাফার করা মান সেই ক্যাপ অতিক্রম করবে। যদি ক্লায়েন্টের সীমা ইতিমধ্যেই একটি পরিচিত ক্যাপের উপরে থাকে, তাহলে আপস্ট্রিম অনুরোধ পাঠানোর আগে OmniRoute এটিকে সেই ক্যাপে ক্ল্যাম্প করে।
 
 ---
 
-### হেলথ ড্যাশবোর্ড
+### স্বাস্থ্য ড্যাশবোর্ড
 
-**Dashboard → Health**-এর মাধ্যমে অ্যাক্সেস করুন। ৬টি কার্ডসহ রিয়েল-টাইম সিস্টেম হেলথের সারসংক্ষেপ:
+মাধ্যমে অ্যাক্সেস** ড্যাশবোর্ড → স্বাস্থ্য** . 6টি কার্ড সহ রিয়েল-টাইম সিস্টেম স্বাস্থ্য ওভারভিউ:
 
-| কার্ড                   | কী দেখায়                                                 |
-| ----------------------- | --------------------------------------------------------- |
-| **সিস্টেম স্ট্যাটাস**   | আপটাইম, সংস্করণ, মেমোরি ব্যবহার, ডেটা ডিরেক্টরি           |
-| **প্রোভাইডার হেলথ**     | গ্লোবাল প্রোভাইডার সার্কিট ব্রেকারের রানটাইম অবস্থা       |
-| **রেট লিমিট**           | অবশিষ্ট সময়সহ প্রতিটি অ্যাকাউন্টের সক্রিয় সংযোগ কুলডাউন |
-| **সক্রিয় লকআউট**       | সক্রিয় মডেল-স্কোপড লকআউট এবং অস্থায়ী বর্জন              |
-| **সিগনেচার ক্যাশ**      | ডিডুপ্লিকেশন ক্যাশের পরিসংখ্যান (সক্রিয় কী, হিট রেট)     |
-| **লেটেন্সি টেলিমেট্রি** | প্রতিটি প্রোভাইডারের p50/p95/p99 লেটেন্সি অ্যাগ্রিগেশন    |
+| কার্ড                    | এটা কি দেখায়                                              |
+| ------------------------ | ---------------------------------------------------------- |
+| **সিস্টেমের অবস্থা**     | আপটাইম, সংস্করণ, মেমরি ব্যবহার, ডেটা ডিরেক্টরি             |
+| **স্বাস্থ্য প্রদানকারী** | গ্লোবাল প্রদানকারী সার্কিট ব্রেকার রানটাইম অবস্থা          |
+| **হার সীমা**             | অবশিষ্ট সময়ের সাথে অ্যাকাউন্ট প্রতি সক্রিয় সংযোগ কুলডাউন |
+| **সক্রিয় লকআউট**        | সক্রিয় মডেল-স্কোপড লকআউট এবং অস্থায়ী বর্জন               |
+| **স্বাক্ষর ক্যাশে**      | ডিডুপ্লিকেশন ক্যাশে পরিসংখ্যান (সক্রিয় কী, হিট রেট)       |
+| **লেটেন্সি টেলিমেট্রি**  | প্রদানকারী প্রতিp50/p95/p99 লেটেন্সি অ্যাগ্রিগেশন          |
 
-**বিশেষ পরামর্শ:** হেলথ পেজটি প্রতি ১০ সেকেন্ডে স্বয়ংক্রিয়ভাবে রিফ্রেশ হয়। কোন প্রোভাইডারগুলো সমস্যার সম্মুখীন হচ্ছে তা শনাক্ত করতে সার্কিট ব্রেকার কার্ডটি ব্যবহার করুন।
+**প্রো টিপ:** স্বাস্থ্য পৃষ্ঠাটি প্রতি 10 সেকেন্ডে স্বয়ংক্রিয়ভাবে রিফ্রেশ হয়। কোন প্রদানকারীরা সমস্যার সম্মুখীন হচ্ছে তা সনাক্ত করতে সার্কিট ব্রেকার কার্ড ব্যবহার করুন।
 
 ---
 

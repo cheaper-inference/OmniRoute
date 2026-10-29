@@ -66,12 +66,25 @@ export function parseAllowAutoCombos(value: unknown): boolean {
   return true;
 }
 
+export function parseAllowCcDiscoveryAliases(value: unknown): boolean {
+  // DEFAULT 1 — keys predating this column keep the discovery catalog they had.
+  if (value === 0 || value === "0" || value === false) return false;
+  return true;
+}
+
 export type CatalogScope = "all" | "combos" | "models";
 
 export function parseCatalogScope(value: unknown): CatalogScope {
   // DEFAULT 'all' — a key predating this column advertises everything, as before.
   // An unrecognised value must widen to 'all' rather than silently hide rows.
   return value === "combos" || value === "models" ? value : "all";
+}
+
+/** Per-key enforced routing target: a trimmed non-empty string, else null (not pinned). */
+export function parseForcedModel(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 export function parseAccessSchedule(value: unknown): AccessSchedule | null {

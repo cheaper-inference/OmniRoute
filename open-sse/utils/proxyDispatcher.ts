@@ -65,13 +65,25 @@ type ProxyConfigObject = {
   family?: string;
 };
 
-function getDispatcherOptions(hostname?: string) {
-  const timeouts = getUpstreamTimeoutConfig(process.env, (message) => {
+export function isUpstreamHttp2Enabled(
+  env: Record<string, string | undefined> = process.env
+): boolean {
+  const raw = (env.OMNIROUTE_UPSTREAM_HTTP2_ENABLED ?? "").trim().toLowerCase();
+  return !["false", "0", "no", "off"].includes(raw);
+}
+
+export function getDispatcherOptions(
+  hostname?: string,
+  env: Record<string, string | undefined> = process.env
+) {
+  const allowH2 = isUpstreamHttp2Enabled(env);
+  const timeouts = getUpstreamTimeoutConfig(env, (message) => {
     console.warn(`[ProxyDispatcher] ${message}`);
   });
   const localEgress = isLocalEgressHostname(hostname);
 
   return {
+    allowH2,
     headersTimeout: timeouts.fetchHeadersTimeoutMs,
     bodyTimeout: timeouts.fetchBodyTimeoutMs,
     connectTimeout: timeouts.fetchConnectTimeoutMs,
@@ -101,6 +113,7 @@ function getDispatcherOptions(hostname?: string) {
     // IPv6 route to host.docker.internal is dead inside the container (verified
     // 2026-09-21) and the default 1 s wait is pure latency on every healthy request.
     connect: {
+      allowH2,
       autoSelectFamily: true,
       autoSelectFamilyAttemptTimeout: localEgress
         ? LOCAL_AUTO_SELECT_FAMILY_ATTEMPT_TIMEOUT_MS
@@ -127,7 +140,7 @@ export function getProxyDispatcherConnectionLimit(
 }
 
 function getProxyDispatcherOptions(env: Record<string, string | undefined> = process.env) {
-  const options = getDispatcherOptions();
+  const options = getDispatcherOptions(undefined, env);
   // #9100: restore keep-alive on the proxy path. The previous hard-coded
   // keepAliveTimeout: 1 (1ms) destroyed the pooled socket right after every
   // response, forcing a fresh TCP+TLS+CONNECT handshake per request. Proxies
@@ -141,10 +154,12 @@ function getProxyDispatcherOptions(env: Record<string, string | undefined> = pro
   // by the retry-once-with-fresh-socket path in proxyFetch.ts (mirrors the
   // direct-path #4252 fix) instead of by killing all idle sockets after 1ms.
   //
-  // Pipelining 4 lets concurrent SSE streams multiplex over the pooled
-  // connection instead of each opening its own socket (#4163 regression).
+  // HTTP(S) proxies retain pipelining 4; SOCKS HTTP/1.1 is capped below.
   return {
     ...options,
+    // ProxyAgent ignores connect and builds both TLS hops separately (#15313).
+    requestTls: { allowH2: options.allowH2 },
+    proxyTls: { allowH2: options.allowH2 },
     connections: getProxyDispatcherConnectionLimit(env),
     keepAliveTimeout: Math.max(options.keepAliveTimeout, 30_000),
     keepAliveMaxTimeout: Math.max(options.keepAliveMaxTimeout, 60_000),
@@ -170,7 +185,7 @@ export function getDefaultDispatcherConnectionLimit(
 }
 
 function getDefaultDispatcherOptions(env: Record<string, string | undefined> = process.env) {
-  const options = getDispatcherOptions();
+  const options = getDispatcherOptions(undefined, env);
   // #4580 — On the direct egress path, undici's default pipelining (1) let a long
   // SSE stream monopolize the single pooled socket per origin. Keep the public
   // connection-limit option here, but getDefaultDispatcher() fans it out across
@@ -519,7 +534,7 @@ function buildProxyAuthorizationToken(parsed: URL): string | null {
 
 /**
  * Build a ProxyAgent / socks dispatcher for a normalized proxy URL using the
- * given options. Shared by the pooled dispatcher (keep-alive, pipelining 4)
+ * given options. Shared by the pooled dispatcher (keep-alive)
  * and the retry dispatcher (fresh no-keep-alive socket, mirrors #4252).
  */
 function buildProxyDispatcher(
@@ -544,7 +559,10 @@ function buildProxyDispatcher(
     return createSocksDispatcherWithFamily(
       socksOptions as unknown as Parameters<typeof createSocksDispatcherWithFamily>[0],
       family,
-      options
+      // With SOCKS/HTTP1 pipelining, a quota timeout can close the socket
+      // carrying an unrelated active stream. Cap pipelining at 1 to prevent
+      // this, preserving 0 so retries continue to use fresh connections.
+      { ...options, pipelining: Math.min(options.pipelining, 1) }
     );
   }
 
@@ -566,7 +584,13 @@ function buildProxyDispatcher(
     ...options,
     ...(proxyAuthorization ? { token: proxyAuthorization } : {}),
     ...(family !== null
-      ? { proxyTls: { family, autoSelectFamily: false } as ProxyAgent.Options["proxyTls"] }
+      ? {
+          proxyTls: {
+            ...options.proxyTls,
+            family,
+            autoSelectFamily: false,
+          } as ProxyAgent.Options["proxyTls"],
+        }
       : {}),
   });
 }

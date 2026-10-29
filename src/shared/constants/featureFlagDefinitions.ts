@@ -85,7 +85,8 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   {
     key: "OUTBOUND_SSRF_GUARD_ENABLED",
     label: "SSRF Guard",
-    description: "Block outbound requests to private/internal IP ranges",
+    description:
+      "Legacy alias: a value saved on this flag's dashboard toggle is read before the environment; false, 0, no, or off in either turns the outbound URL guard's host checks off like OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS",
     descriptionI18nKey: "featureFlagOutboundSsrfGuardEnabledDescription",
     category: "security",
     defaultValue: "true",
@@ -159,7 +160,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     key: "RERANK_REMOTE_PROVIDER_NODES",
     label: "Remote Rerank Provider Nodes",
     description:
-      "Allow POST /v1/rerank (and the memory engine's rerank step, which calls it over loopback) to use OpenAI-compatible provider nodes hosted outside localhost — a LAN box or Tailscale peer running TEI, Infinity, vLLM, etc. Off by default — routing to a remote host changes egress identity and must be an explicit operator decision. Loopback nodes are always allowed and unaffected. Remote nodes must also pass the provider outbound URL policy (cloud-metadata hosts are never routed to).",
+      "Allow POST /v1/rerank (and the memory engine's rerank step, which calls it over loopback) to use OpenAI-compatible provider nodes hosted outside localhost — a LAN box or Tailscale peer running TEI, Infinity, vLLM, etc. Off by default — routing to a remote host changes egress identity and must be an explicit operator decision. Loopback nodes are always allowed and unaffected. Remote nodes must also pass the provider outbound URL policy.",
     descriptionI18nKey: "settings.featureFlags.rerankRemoteProviderNodes",
     category: "network",
     defaultValue: "false",
@@ -252,6 +253,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "info",
   },
   {
+    key: "PROXY_OPERATOR_EGRESS_ENABLED",
+    label: "Proxy Operator Egress",
+    description:
+      "Accept operator-pushed dated observed addresses per pool member and merge them with the journal read for display and pool order. Off by default: the push route answers 404 and pool reads behave exactly as before.",
+    descriptionI18nKey: "featureFlagProxyOperatorEgressDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "OPENCODE_RESPONSES_STALL_ROTATION",
     label: "OpenCode Responses Stall Rotation",
     description:
@@ -293,6 +306,30 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     description:
       "On translated streaming turns, when the upstream turn carries no usable content (reasoning-only completion or zero valuable chunks), issue bounded retries through the normal credential path (up to `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) before anything is exposed to the client. Off by default: empty turns keep the current behavior (empty 200 or empty-content 502).",
     descriptionI18nKey: "featureFlagFlushEmptyRetryEnabledDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED",
+    label: "Empty Stream Sibling Recovery",
+    description:
+      "Claude/Codex streaming: after the first lifecycle event, briefly probe (up to 1s / 64 KiB) for usable output; a stream that ends with no content becomes an empty_content failure that spends the existing bounded retry on another eligible connection (no cooldown, no model lockout), and round-robin combos stop retrying once the client disconnects. Also treats refusal, pause_turn and model_context_window_exceeded as legitimate empty terminals inside the probe. Off by default: readiness, empty-content handling and combo retries stay exactly as before.",
+    descriptionI18nKey: "featureFlagEmptyStreamSiblingRecoveryEnabledDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "STREAM_LATE_OUTPUT_PROBE_ENABLED",
+    label: "Stream Late Output Probe",
+    description:
+      "Streaming output probe: after the first 64 forwarded chunks keep sampling one chunk in 16 for the first visible output, so output that starts late still marks the stream as having emitted output. A lone 5xx after that point then stays request-scoped instead of recording a model-only lockout, and firstOutputMs is back-filled to the first output chunk of the current sampling gap. Off by default: only the first 64 forwarded chunks are probed, exactly as before.",
+    descriptionI18nKey: "featureFlagStreamLateOutputProbeEnabledDescription",
     category: "network",
     defaultValue: "false",
     type: "boolean",
@@ -348,6 +385,54 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED",
+    label: "OpenCode v2 Client Fingerprint",
+    description:
+      'Send the OpenCode v2 CLI client fingerprint on OpenCode Zen/Go requests (#16571): User-Agent opencode/latest/<2.x>/cli and x-opencode-client cli, a client User-Agent kept only when it is a 2.x OpenCode client, and on gated free-tier requests no x-opencode-request, the session mirrored onto x-opencode-session-id/x-session-affinity/x-session-id, the v2 CLI read/shell schemas on injected placeholder tools and a tool_choice of "none" dropped. Off by default: every OpenCode request keeps the current identity, headers and body byte for byte.',
+    descriptionI18nKey: "featureFlagOpencodeV2ClientFingerprintEnabledDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED",
+    label: "OpenCode Zen Egress-IP Lockout",
+    description:
+      "Add OpenCode Zen (opencode-zen) to the default egress-IP lockout family, so a 429 on one Zen connection also cools every sibling Zen connection that shares its egress IP. Off by default: Zen is keyed and each connection cools down on its own, exactly as before. An explicit OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS value always wins over this flag.",
+    descriptionI18nKey: "featureFlagOpencodeZenEgressIpLockEnabledDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED",
+    label: "OpenCode Full-Text Error Rules",
+    description:
+      'Let the built-in OpenCode error rules (opencode-zen, opencode-go, opencode-cli) match on the full upstream error text, so body markers such as organization_quota_exceeded or "monthly usage limit reached" classify a 429 as quota exhausted with a connection-scoped lock. Off by default: those rules only see the structured error code and such a 429 stays a short rate limit, exactly as before.',
+    descriptionI18nKey: "featureFlagOpencodeFullTextErrorRulesEnabledDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED",
+    label: "Cloudflare Workers AI Full-Text Error Rules",
+    description:
+      'Let the built-in Cloudflare Workers AI error rule match on the full upstream error text, so the 429 "daily free allocation" body is classified as quota exhausted instead of a short rate limit. Off by default: the rule only sees the structured error code, exactly as before.',
+    descriptionI18nKey: "featureFlagCloudflareAiFullTextErrorRulesEnabledDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "MITM_DISABLE_TLS_VERIFY",
     label: "Disable TLS Verify (MITM)",
     description: "Disable TLS certificate verification for MITM proxy",
@@ -361,7 +446,8 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   {
     key: "OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS",
     label: "Allow Private Provider URLs",
-    description: "Allow provider URLs pointing to private/internal networks",
+    description:
+      "Turns off the outbound URL guard's host checks, cloud-metadata block included, on provider URL validation, model discovery, provider-node base URLs, and the proxy-fallback test, and allows private webhook targets. Local and LAN URLs already pass on the validation, discovery, and provider-node paths by default; the proxy-fallback test and webhook targets check only this flag",
     descriptionI18nKey: "featureFlagOmnirouteAllowPrivateProviderUrlsDescription",
     category: "network",
     defaultValue: "false",
@@ -373,7 +459,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     key: "OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS",
     label: "Allow Local Provider URLs",
     description:
-      "Allow adding and validating providers on local/private addresses (127.0.0.1, localhost, LAN, private IP ranges) — needed for local OpenAI-compatible models. Enabled by default (OmniRoute is local-first); turn it OFF to enforce strict public-only blocking if you only use public providers. Cloud-metadata endpoints (e.g. 169.254.169.254) stay blocked either way.",
+      "Allow provider URLs on local/private addresses (127.0.0.1, localhost, LAN). On by default (OmniRoute is local-first): the guard then blocks cloud-metadata endpoints (all of 169.254.0.0/16 plus the known metadata hostnames). Disable for strict public-only blocking: private and loopback hosts are blocked too",
     descriptionI18nKey: "featureFlagOmnirouteAllowLocalProviderUrlsDescription",
     category: "network",
     defaultValue: "true",
@@ -393,7 +479,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "info",
   },
 
-  // ──────────────── Policies (5) ────────────────
+  // ──────────────── Policies (7) ────────────────
   {
     key: "TOOL_POLICY_MODE",
     label: "Tool Policy Mode",
@@ -442,6 +528,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "USAGE_LIMIT_IGNORE_UNPRICED",
+    label: "Ignore Unpriced Usage in USD Quotas",
+    description:
+      "Count usage of models that have no price as $0 in per-key USD usage quotas instead of treating the quota as exceeded. Off by default: an unpriced model or routing alias can hide real spend, so the quota fails closed.",
+    descriptionI18nKey: "featureFlagUsageLimitIgnoreUnpricedDescription",
+    category: "policies",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "RADAR_ENABLED",
     label: "Radar",
     description:
@@ -453,14 +551,38 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
+  {
+    key: "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED",
+    label: "Model Endpoint Capability Gate",
+    description:
+      "Enforce trusted model endpoint tags (declared by the provider catalog, inferred from a specialty model id, or set by the operator): reject a request sent to an endpoint the model does not serve with HTTP 400 before dispatch on /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations and /v1/audio/*; hide models whose tagged endpoints have no OmniRoute adapter from /v1/models; and answer the dashboard model test with 422 for such models. Off by default: endpoint tags stay informational and requests are dispatched exactly as before.",
+    descriptionI18nKey: "featureFlagModelEndpointCapabilityGateEnabledDescription",
+    category: "policies",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
 
-  // ──────────────── Runtime (17) ────────────────
+  // ──────────────── Runtime (18) ────────────────
   {
     key: "UNIVERSAL_CONTEXT_HANDOFF_ENABLED",
     label: "Universal Context Handoff",
     description:
       "Generate and inject conversation summaries when combo routing switches models. Disable to treat model switches independently and prevent background handoff requests for all existing and future combos.",
     descriptionI18nKey: "featureFlagUniversalContextHandoffEnabledDescription",
+    category: "runtime",
+    defaultValue: "true",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "info",
+  },
+  {
+    key: "REASONING_REPLAY_ENABLED",
+    label: "Reasoning Replay",
+    description:
+      "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
+    descriptionI18nKey: "featureFlagReasoningReplayEnabledDescription",
     category: "runtime",
     defaultValue: "true",
     type: "boolean",
@@ -801,6 +923,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED",
+    label: "Auto Combo: Empty Pool Answers 503",
+    description:
+      'When an auto combo\'s candidate pool is already empty before the tool-calling pre-filter runs (every target skipped by cooldowns, lockouts or exhaustion), answer 503 no_eligible_targets instead of the legacy 400 "No target supports tool calling" capability_mismatch. Off by default: the empty pool keeps the legacy 400.',
+    descriptionI18nKey: "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT",
     label: "Mistral Ambiguous 401 Soft Lockout",
     description:
@@ -835,6 +969,115 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     type: "boolean",
     requiresRestart: false,
     warningLevel: "caution",
+  },
+  {
+    key: "COMBO_AUTO_PRUNE_STALE_STEPS",
+    label: "Auto-Prune Stale Combo Steps",
+    description:
+      "After a successful model sync against an authoritative live catalog, remove combo steps pinned to models the catalog no longer lists, with one audit entry per removed step. Never prunes on a failed, degraded or free-only sync, and never empties a combo. Off by default: stale steps are only flagged.",
+    descriptionI18nKey: "featureFlagComboAutoPruneStaleStepsDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED",
+    label: "Claude OAuth Summarized Thinking",
+    description:
+      'Let a Claude OAuth request that asks for readable thinking (thinking.display "summarized") drop the redact-thinking-2026-02-12 Anthropic beta, which otherwise makes Anthropic return empty, signature-only thinking blocks. Off by default: that beta is part of the Claude Code OAuth wire fingerprint, so OAuth requests keep it unchanged. API-key Claude requests already honor summarized thinking without this flag; OMNIROUTE_REDACT_THINKING=false also reaches OAuth only when this flag is on.',
+    descriptionI18nKey: "featureFlagClaudeOauthSummarizedThinkingUnredactedDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "KIRO_TOOL_CALL_REPAIR_ENABLED",
+    label: "Kiro Tool Call Repair",
+    description:
+      "When a streaming Kiro response emits a malformed tool_call wrapper (missing input.name or input.arguments) before any visible output, suppress it and re-send the request once with a corrective instruction instead of ending the turn with invalid_kiro_tool_call. The retry costs one extra Kiro request; a second failure ends the turn with kiro_tool_call_repair_retry_failed. On by default. Set to false to fail the turn on the first malformed wrapper.",
+    descriptionI18nKey: "featureFlagKiroToolCallRepairEnabledDescription",
+    category: "runtime",
+    defaultValue: "true",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "info",
+  },
+  {
+    key: "MODELS_DEV_EFFORT_TIERS_ENABLED",
+    label: "models.dev Effort Tiers",
+    description:
+      'Use the reasoning effort tiers models.dev publishes (narrowed to the known effort vocabulary) when neither an operator override nor the provider registry declares any, and treat a declared empty tier list as "no tiers" in /v1/models effort_tiers and combo tier intersections. Off by default: effort_tiers and resolved supportedThinkingEfforts stay exactly as before.',
+    descriptionI18nKey: "featureFlagModelsDevEffortTiersEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "info",
+  },
+  {
+    key: "LMARENA_SYNTHESIZED_CX_ENABLED",
+    label: "Arena Synthesized cx Telemetry",
+    description:
+      "Attach a synthesized programmatic cx client-interaction blob (the value arena.ai itself sends for a page with no recorded interaction) to every Arena (lmarena) create-evaluation request that has no operator-supplied providerSpecificData.cx. Off by default: the cx field is an Arena anti-automation signal, so OmniRoute only forwards a value the operator captured from a real browser session (providerSpecificData.cx) and otherwise sends no cx at all. Unproven upstream benefit; enable only if Arena starts rejecting requests without cx.",
+    descriptionI18nKey: "featureFlagLmarenaSynthesizedCxEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED",
+    label: "Native Codex Reactive Compaction",
+    description:
+      "Let the reactive (threshold) and last-resort context compaction passes also rewrite native Codex passthrough histories (POST /v1/responses to the codex provider) when they exceed the context budget, using the Responses input[] adapter. Off by default: native Codex histories are owned by the Codex client and are never rewritten by compaction; oversized requests keep failing the context budget check exactly as before. Requires global compression to be on and the model not to be excluded.",
+    descriptionI18nKey: "featureFlagNativeCodexReactiveCompactionEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "QUOTA_WINDOW_BOUNDED_PARK",
+    label: "Quota Window: Honour Bounded Park",
+    description:
+      "Let the per-window quota policy (session/weekly thresholds used by account selection) honour the bounded exhaustion park: once the capped park deadline has passed, or the cached quota observation is older than the park cap, the window stops excluding the account until a fresh quota fetch. Off by default: a cached window keeps blocking on its last reported percentage until its own reset time.",
+    descriptionI18nKey: "featureFlagQuotaWindowBoundedParkDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "IMAGE_GENERATION_LONG_JOBS",
+    label: "Image Generation: Long Jobs",
+    description:
+      "For OpenAI-compatible image generation: use the connection's timeout (providerSpecificData.timeoutMs), else the central upstream fetch timeout (FETCH_TIMEOUT_MS, then REQUEST_TIMEOUT_MS, default 600 s) instead of the fixed 120 s image budget; end a request the caller cancelled with 499; and let the Playground receive long image jobs as an SSE stream with keepalive heartbeats. Off by default: the fixed budget applies and caller cancellation is not propagated. The deadline covering the response body read is always on.",
+    descriptionI18nKey: "featureFlagImageGenerationLongJobsDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+
+  {
+    key: "CATALOG_MIRROR_REFINEMENTS_ENABLED",
+    label: "Catalog Mirror Refinements",
+    description:
+      "Refine the claude/ discovery and functional-gateway mirrors on /v1/models. Off by default: both mirror passes behave exactly as before. On: claude/ discovery mirrors also cover listed reasoning-effort variants (-low/-medium/-high/-xhigh), skip built-in auto/* ids the request path cannot materialize and skip an alias already listed; functional-gateway mirrors skip combos and OmniRoute-synthesized ids (claude/, no-think/), take the owner from owned_by, never use the owner as its own gateway, skip gateways disabled in blockedProviders and models outside a gateway's authoritative live catalog.",
+    descriptionI18nKey: "featureFlagCatalogMirrorRefinementsEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "info",
   },
 
   // ──────────────── CLI (5) ────────────────
@@ -944,6 +1187,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "info",
   },
   {
+    key: "GROK_SUBSCRIPTION_IMAGES_ENABLED",
+    label: "Grok Subscription Images",
+    description:
+      "Register xai-oauth (xao) and grok-cli image routes and map OpenAI quality high/hd to xAI medium. Off by default: the API-key xAI image path stays on the existing OpenAI-compatible request and the subscription routes are not registered.",
+    descriptionI18nKey: "featureFlagGrokSubscriptionImagesEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "info",
+  },
+  {
     key: "XAI_OAUTH_LIVE_MODEL_DISCOVERY",
     label: "xAI OAuth Live Model Discovery",
     description:
@@ -956,12 +1211,132 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM",
+    label: "Anthropic-Compatible Mid-Conversation System Turns",
+    description:
+      "On plain anthropic-compatible-* relays (claude → claude passthrough), keep mid-conversation role:system turns inside messages[] instead of hoisting them into the top-level system parameter, so the cached prompt prefix stays stable across turns. Applies only when the client itself sent the mid-conversation-system-2026-04-07 anthropic-beta (forwarded upstream as-is). Off by default: every system turn is hoisted exactly as before, because relays that do not support the beta reject role:system messages with 400.",
+    descriptionI18nKey: "featureFlagAnthropicCompatibleMidConversationSystemDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED",
     label: "DB Health Check: Defer Startup Scan",
     description:
       "Run the startup DB integrity/health check after the server starts accepting requests (via setImmediate) instead of blocking startup until it completes. Off by default: startup blocks on the check exactly like before #13717, so a corrupt database is still caught before the first request is served. On: startup returns immediately and the check (now bounded/paged and, for a real file-backed DB, isolated in a cancellable child process) runs right after.",
     descriptionI18nKey: "featureFlagDbHealthcheckStartupDeferredEnabledDescription",
     category: "health",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED",
+    label: "OpenCode Published Catalog Routing",
+    description:
+      "Let OpenCode Zen and OpenCode Go models without an explicit registry endpoint take their request surface (Responses for @ai-sdk/openai, Messages for @ai-sdk/anthropic) from the published models.opencode.ai catalog, read in the background every 6 h. Off by default: the endpoint comes from the registry heuristics exactly as before and the catalog is never fetched.",
+    descriptionI18nKey: "featureFlagOpencodePublishedCatalogRoutingEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "info",
+  },
+  {
+    key: "AUTO_REQUEST_RESOLVED_CAPABILITIES",
+    label: "Auto Requests: Resolved Capability Weights",
+    description:
+      "Let auto/* requests (resolveModelOrError and the auto-routing wrapper) build the candidate pool with resolved model capabilities (vision, reasoning, thinking) and observed quality scores, read in one bulk pass like the /v1/models catalog. Off by default: request-time snapshot weights stay exactly as before (capabilities resolve on demand and do not feed the weights). On: those signals feed the snapshot weights, so candidate weights, and therefore selection, can change.",
+    descriptionI18nKey: "featureFlagAutoRequestResolvedCapabilitiesDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "AUTO_COMBO_KEYLESS_TRANSPORT_GATE",
+    label: "Auto-Combo: Keyless Transport Gate",
+    description:
+      "Hold keyless (no-auth) providers whose transport needs a local browser (browserBacked) or a locally installed CLI (isLocalCli) out of the auto/* candidate pool, so a hung member cannot stall an auto request until the per-target timeout (#17036). Off by default: every no-auth provider with emulated tool calling stays in the pool exactly as before. Direct <alias>/<model> calls work either way.",
+    descriptionI18nKey: "featureFlagAutoComboKeylessTransportGateDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "CODEBUDDY_CN_INLINE_REASONING",
+    label: "CodeBuddy CN: Inline Reasoning Replay",
+    description:
+      "For codebuddy-cn thinking models (the DeepSeek-V4 / Kimi-K2 families that need reasoning replay), inline each replayed assistant reasoning_content as a visible <thought> block at the front of the message content, so it survives a gateway that drops the reasoning_content field (#13632). Off by default: codebuddy-cn requests are sent unchanged; the reasoning_content field itself is always kept.",
+    descriptionI18nKey: "featureFlagCodebuddyCnInlineReasoningDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "PROVIDER_SAFETY_STOPS_TERMINAL",
+    label: "Provider Safety Stops: Terminal",
+    description:
+      "Keep an explicit provider safety stop (misalignment_policy_violation, content_policy_violation, or the exact legacy 'blocked by our safety systems' rejection labelled provider_safety_rejection) as a terminal, request-scoped refusal: its code is preserved through HTTP, Responses, WebSocket and completed-stream errors, and a combo stops at it instead of retrying other targets, cancelling admitted siblings (#17049). Off by default: these errors keep their existing handling and combo routing is unchanged.",
+    descriptionI18nKey: "featureFlagProviderSafetyStopsTerminalDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED",
+    label: "Credential Health: Retest Auto-Disabled Connections",
+    description:
+      "Let the credential health sweep retest connections the gateway switched off by itself (marked autoDisabledAt; at most once per 6 h each and 5 per sweep) and switch a connection back on when its retest passes (#16190). Off by default: switched-off connections stay off until an operator re-enables or re-tests them, exactly like before. Operator-disabled connections and connections switched off after a permanent ban are never retested.",
+    descriptionI18nKey: "featureFlagCredentialHealthRetestAutoDisabledDescription",
+    category: "health",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY",
+    label: "Credential Gate: Auth Diagnoses Only",
+    description:
+      "Narrow the combo credential gate so a cached failed credential probe blocks a connection only when its diagnosis proves bad credentials (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Inconclusive failures (timeouts, rate limits, outages, unsupported probes and untyped scheduler errors) are then treated as unknown and the connection keeps receiving traffic. Off by default: any cached probe error blocks the connection for the cache TTL (5 minutes).",
+    descriptionI18nKey: "featureFlagCredentialGateAuthDiagnosesOnlyDescription",
+    category: "health",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED",
+    label: "Combo: Stop on Content-Policy Refusal",
+    description:
+      "When a combo target answers with an exact content-policy refusal (code or type cyber_policy / content_policy_violation), stop the combo and return that refusal even when the remaining targets are different models, instead of advancing to the next target. Off by default: the refusal never cools the account or trips the provider breaker, and the combo advances to its next target exactly as before.",
+    descriptionI18nKey: "featureFlagContentPolicyRefusalComboStopEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED",
+    label: "Cooldown Retry: Skip 403/410 Refusals",
+    description:
+      "When every account is cooling down and the cooldown that ends first was caused by a 403 (access refused) or a 410 (gone), return that refusal at once instead of waiting the cooldown out and re-sending the request; a renewing agentrouter connection-scoped quota 403 is then persisted with errorCode 429 so it stays retryable. Off by default: only a 401 skips the wait, and every refusal is persisted with the status it arrived with.",
+    descriptionI18nKey: "featureFlagCooldownRetrySkipRefusalsEnabledDescription",
+    category: "runtime",
     defaultValue: "false",
     type: "boolean",
     requiresRestart: false,

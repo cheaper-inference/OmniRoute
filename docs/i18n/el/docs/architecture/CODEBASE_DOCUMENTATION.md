@@ -21,49 +21,52 @@
 
 ## 1. Τεχνολογική Στοίβα
 
-| Θέμα            | Επιλογή                                                                                                                  |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Web framework   | **Next.js 16** (App Router, standalone output, χωρίς global middleware)                                                  |
-| Γλώσσα          | **TypeScript 6.0+** — target `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                    |
-| Runtime         | **Node.js** `>=22.22.2 <23` ή `>=24.0.0 <27` (επιβάλλεται μέσω `engines` + `SUPPORTED_NODE_RANGE`)                       |
-| Βάση δεδομένων  | **SQLite** μέσω `better-sqlite3` (singleton, WAL journaling)                                                             |
-| Desktop         | **Electron 41** + `electron-builder` 26.10 (ξεχωριστός χώρος εργασίας στο `electron/`)                                   |
-| Δοκιμές         | **Node native test runner** (unit/integration), **Vitest** (MCP, autoCombo, cache), **Playwright** (e2e + protocols-e2e) |
-| Build           | Next.js standalone μέσω `scripts/build/build-next-isolated.mjs`                                                          |
-| Lint/format     | ESLint flat config + Prettier (`lint-staged` μέσω Husky pre-commit)                                                      |
-| Σύστημα modules | ESM παντού (`"type": "module"`)                                                                                          |
-| Workspaces      | npm workspace — το `open-sse` είναι το μοναδικό υπο-workspace                                                            |
+| Τομέας               | Επιλογή                                                                                                                          |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Web framework        | **Next.js 16** (App Router, αυτόνομη έξοδος, χωρίς καθολικό middleware)                                                          |
+| Γλώσσα               | **TypeScript 6.0+** — στόχος `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                            |
+| Περιβάλλον εκτέλεσης | **Node.js** `>=22.22.2 <23` ή `>=24.0.0 <27` (επιβάλλεται μέσω `engines` + `SUPPORTED_NODE_RANGE`)                               |
+| Βάση δεδομένων       | **SQLite** μέσω `better-sqlite3` (singleton, καταγραφή WAL)                                                                      |
+| Εφαρμογή υπολογιστή  | **Electron 41** + `electron-builder` 26.10 (ξεχωριστό workspace στο `electron/`)                                                 |
+| Δοκιμές              | **Εγγενής test runner του Node** (μονάδων/ενσωμάτωσης), **Vitest** (MCP, autoCombo, cache), **Playwright** (e2e + protocols-e2e) |
+| Build                | Αυτόνομο Next.js μέσω `scripts/build/build-next-isolated.mjs`                                                                    |
+| Lint/μορφοποίηση     | Επίπεδη διαμόρφωση ESLint + Prettier (`lint-staged` μέσω Husky pre-commit)                                                       |
+| Σύστημα modules      | ESM παντού (`"type": "module"`)                                                                                                  |
+| UI πίνακα ελέγχου    | **Tailwind CSS 4** + το ενσωματωμένο **Keak CI UI Kit** (`packages/ui-kit`), εικονίδια Lucide — δείτε το `DESIGN_SYSTEM.md`      |
+| Workspaces           | npm workspaces — `open-sse`, `packages/browser-pool`, `packages/ui-kit`                                                          |
 
 Ψευδώνυμα διαδρομών (`tsconfig.json`):
 
 - `@/*` → `src/*`
 - `@omniroute/open-sse` → `open-sse/index.ts`
 - `@omniroute/open-sse/*` → `open-sse/*`
+- `@omniroute/ui-kit` → `packages/ui-kit/src`, `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`
 
-Προεπιλεγμένη θύρα HTTP: **`20128`** (το API και το dashboard μοιράζονται την ίδια διεργασία). Ο κατάλογος δεδομένων
-ορίζεται από τη μεταβλητή περιβάλλοντος `DATA_DIR`, με προεπιλογή `~/.omniroute/`.
+Προεπιλεγμένη θύρα HTTP: **`20128`** (το API και ο πίνακας ελέγχου μοιράζονται την ίδια διεργασία). Ο κατάλογος
+δεδομένων ορίζεται από τη μεταβλητή περιβάλλοντος `DATA_DIR`, με προεπιλογή το `~/.omniroute/`.
 
 ---
 
-## 2. Δομή Αποθετηρίου
+## 2. Διάταξη Αποθετηρίου
 
 ```
 OmniRoute/
-├── src/                  # Εφαρμογή Next.js (App Router, libs, domain, server, shared)
-├── open-sse/             # Χώρος εργασίας streaming engine (@omniroute/open-sse)
-├── electron/             # Desktop wrapper (Electron 41 main + preload)
-├── bin/                  # Σημεία εισόδου CLI (omniroute, reset-password)
-├── tests/                # Unit, integration, e2e, protocols-e2e, translator, security, fixtures
-├── scripts/              # Σενάρια build, sync, check, migration και runtime helper
-├── docs/                 # Δημόσια τεκμηρίωση (αυτός ο κατάλογος)
-├── public/               # Στατικά assets, PWA manifest, service worker
-├── config/               # Δείγματα ρυθμίσεων runtime
-├── images/               # Assets μάρκετινγκ/στιγμιότυπα οθόνης
-├── _ideia/, _references/, _mono_repo/, _tasks/   # Εσωτερικό scratch / σχεδιασμός (δεν αποστέλλεται)
-├── CLAUDE.md             # Κανόνες αποθετηρίου για το Claude Code
-├── AGENTS.md             # Εκτενής αναφορά αρχιτεκτονικής για agents
-├── package.json          # v3.8.51, ρίζα workspace
-└── tsconfig.json         # Ψευδώνυμα διαδρομών + βασικές επιλογές μεταγλωττιστή
+├── src/                  Εφαρμογή Next.js (App Router, βιβλιοθήκες, domain, server, κοινόχρηστα)
+├── open-sse/             Χώρος εργασίας μηχανής streaming (@omniroute/open-sse)
+├── packages/             Χώροι εργασίας: ui-kit (ενσωματωμένο Keak CI UI Kit), browser-pool
+├── electron/             Περίβλημα επιφάνειας εργασίας (Electron 41 main + preload)
+├── bin/                  Σημεία εισόδου CLI (omniroute, reset-password)
+├── tests/                Unit, integration, e2e, protocols-e2e, translator, security, fixtures
+├── scripts/              Βοηθητικά scripts για build, συγχρονισμό, ελέγχους, migrations και runtime
+├── docs/                 Δημόσια τεκμηρίωση (αυτός ο κατάλογος)
+├── public/               Στατικά στοιχεία, μανιφέστο PWA, service worker
+├── config/               Δείγματα ρυθμίσεων runtime
+├── images/               Υλικό μάρκετινγκ/στιγμιότυπων οθόνης
+├── _ideia/, _references/, _mono_repo/, _tasks/   Εσωτερικά πρόχειρα / σχεδιασμός (δεν διανέμονται)
+├── CLAUDE.md             Κανόνες αποθετηρίου για το Claude Code
+├── AGENTS.md             Αναλυτικότερη αναφορά αρχιτεκτονικής για agents
+├── package.json          v3.8.51, ρίζα χώρου εργασίας
+└── tsconfig.json         Ψευδώνυμα διαδρομών + βασικές επιλογές compiler
 ```
 
 ---
@@ -73,46 +76,46 @@ OmniRoute/
 ```
 src/
 ├── app/                  Σελίδες App Router + διαδρομές API
-├── lib/                  Βασικές βιβλιοθήκες (DB, auth, OAuth, skills, memory, …)
-├── domain/               Καθαρό επίπεδο domain (policy, fallback, cost, lockout, …)
-├── server/               Μόνο-διακομιστή modules (authz, cors, auth)
-├── shared/               Τύποι, σταθερές, επικύρωση, contracts, utils (ασφαλές διαμοιρασμού)
-├── mitm/                 Βοηθητικά man-in-the-middle proxy για ενσωμάτωση CLI
-├── models/               Μεταδεδομένα / aliasing τοπικών μοντέλων
-├── sse/                  Παλαιοί SSE handlers που παραμένουν στο src/ (όχι open-sse/)
-├── store/                Αποθήκες κατάστασης πλευράς πελάτη
-├── middleware/           Βοηθητικά middleware επιπέδου διαδρομής (όχι global middleware του Next.js)
-├── scripts/              Εσωτερικά scripts που μπορούν να εισαχθούν από κώδικα εφαρμογής
-├── types/                Περιβαλλοντικοί και κοινόχρηστοι τύποι TS
-├── i18n/                 Δέσμες locale
-├── instrumentation.ts    Άγκιστρο instrumentation του Next.js
+├── lib/                  Βασικές βιβλιοθήκες (ΒΔ, έλεγχος ταυτότητας, OAuth, δεξιότητες, μνήμη, …)
+├── domain/               Αμιγές επίπεδο τομέα (πολιτική, εφεδρική μετάπτωση, κόστος, κλείδωμα, …)
+├── server/               Αρθρώματα μόνο για τον διακομιστή (εξουσιοδότηση, CORS, έλεγχος ταυτότητας)
+├── shared/               Τύποι, σταθερές, επικύρωση, συμβάσεις, βοηθητικά εργαλεία (ασφαλή μεταξύ ορίων)
+├── mitm/                 Βοηθητικά εργαλεία διαμεσολαβητή man-in-the-middle για ενσωμάτωση CLI
+├── models/               Μεταδεδομένα / ψευδώνυμα τοπικών μοντέλων
+├── sse/                  Παλαιότεροι χειριστές SSE που εξακολουθούν να βρίσκονται στο src/ (όχι στο open-sse/)
+├── store/                Χώροι αποθήκευσης κατάστασης στην πλευρά του πελάτη
+├── middleware/           Βοηθητικά εργαλεία middleware σε επίπεδο διαδρομής (όχι καθολικό middleware του Next.js)
+├── scripts/              Σενάρια εντός του δέντρου που μπορούν να εισαχθούν από τον κώδικα της εφαρμογής
+├── types/                Περιβάλλοντες και κοινόχρηστοι τύποι TS
+├── i18n/                 Πακέτα τοπικών ρυθμίσεων
+├── instrumentation.ts    Άγκιστρο ενοργάνωσης του Next.js
 ├── instrumentation-node.ts
-└── proxy.ts              Βοηθητικό bootstrap proxy ανώτατου επιπέδου
+└── proxy.ts              Βοηθητικό εργαλείο εκκίνησης διαμεσολαβητή ανώτατου επιπέδου
 ```
 
 ### 3.1 `src/app/` — App Router
 
-Το App Router εκθέτει τόσο το UI του πίνακα ελέγχου όσο και το δημόσιο/διαχειριστικό HTTP API.
-Δεν υπάρχει **global middleware** — η παρεμβολή γίνεται ανά διαδρομή.
+Ο App Router εκθέτει τόσο το περιβάλλον εργασίας του πίνακα ελέγχου όσο και το δημόσιο/διαχειριστικό HTTP API.
+Δεν υπάρχει **καθολικό middleware** — η αναχαίτιση πραγματοποιείται ανά διαδρομή.
 
-Τμήματα ανώτατου επιπέδου στο `src/app/`:
+Τμήματα ανώτατου επιπέδου κάτω από το `src/app/`:
 
-| Διαδρομή                                                                      | Σκοπός                                                 |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `api/`                                                                        | Όλες οι διαδρομές HTTP API (δείτε ανάλυση παρακάτω)    |
-| `a2a/`                                                                        | Τελικό σημείο A2A JSON-RPC 2.0 (`POST /a2a`)           |
-| `.well-known/agent.json/`                                                     | Έγγραφο ανακάλυψης A2A Agent Card                      |
-| `(dashboard)/`                                                                | UI πίνακα ελέγχου (ομάδα διαδρομών, χωρίς πρόθεμα URL) |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Ροές αυθεντικοποίησης                                  |
-| `landing/`                                                                    | Σελίδα marketing/landing                               |
-| `docs/`                                                                       | Ενσωματωμένος προβολέας τεκμηρίωσης API                |
-| `status/`, `maintenance/`, `offline/`                                         | Λειτουργικές σελίδες                                   |
-| `privacy/`, `terms/`                                                          | Νομικές σελίδες                                        |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Στατικές σελίδες σφαλμάτων                             |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Όρια σφαλμάτων/φόρτωσης του framework                  |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Ριζικό κέλυφος                                         |
+| Διαδρομή                                                                      | Σκοπός                                                                  |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `api/`                                                                        | Όλες οι διαδρομές HTTP API (δείτε την ανάλυση παρακάτω)                 |
+| `a2a/`                                                                        | Τελικό σημείο A2A JSON-RPC 2.0 (`POST /a2a`)                            |
+| `.well-known/agent.json/`                                                     | Έγγραφο εντοπισμού A2A Agent Card                                       |
+| `(dashboard)/`                                                                | Περιβάλλον εργασίας πίνακα ελέγχου (ομάδα διαδρομών, χωρίς πρόθεμα URL) |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Ροές ελέγχου ταυτότητας                                                 |
+| `landing/`                                                                    | Σελίδα μάρκετινγκ/προορισμού                                            |
+| `docs/`                                                                       | Ενσωματωμένο πρόγραμμα προβολής τεκμηρίωσης API                         |
+| `status/`, `maintenance/`, `offline/`                                         | Σελίδες λειτουργικής κατάστασης                                         |
+| `privacy/`, `terms/`                                                          | Νομικές σελίδες                                                         |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Στατικές σελίδες σφαλμάτων                                              |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Όρια σφαλμάτων/φόρτωσης του framework                                   |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Ριζικό κέλυφος                                                          |
 
-#### 3.1.1 `src/app/(dashboard)/dashboard/` — Σελίδες UI
+#### 3.1.1 `src/app/(dashboard)/dashboard/` — Σελίδες περιβάλλοντος εργασίας
 
 `agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`,
 `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
@@ -177,7 +180,7 @@ src/app/api/
 ├── services/   Διαχείριση ενσωματωμένων υπηρεσιών (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
-├── v1/         Δημόσιο API συμβατό με OpenAI
+├── v1/         Δημόσιο API συμβατό με το OpenAI
 ├── v1beta/     Συμβατότητα τύπου Gemini
 ├── version-manager/
 └── webhooks/
@@ -185,133 +188,133 @@ src/app/api/
 
 #### 3.1.2a `src/app/api/services/` — Διαχείριση ενσωματωμένων υπηρεσιών
 
-Διαδρομές για εγκατάσταση, εκκίνηση, διακοπή και παρακολούθηση 9Router και CLIProxyAPI.
-Όλες οι διαδρομές ταξινομούνται ως **LOCAL_ONLY** (μόνο loopback, αυστηρός κανόνας #17) επειδή
-μπορούν να καλέσουν `npm install` και να δημιουργήσουν θυγατρικές διεργασίες.
+Διαδρομές για την εγκατάσταση, την εκκίνηση, τη διακοπή και την παρακολούθηση των 9Router και CLIProxyAPI.
+Όλες οι διαδρομές ταξινομούνται ως **LOCAL_ONLY** (μόνο loopback, αυστηρός κανόνας #17), επειδή μπορούν
+να εκτελέσουν `npm install` και να δημιουργήσουν θυγατρικές διεργασίες.
 
 ```
 src/app/api/services/
 ├── 9router/
-│   ├── _lib.ts             βοηθητικό getOrInitSupervisor()
+│   ├── _lib.ts             βοήθημα getOrInitSupervisor()
 │   ├── install/route.ts    POST — npm install μέσω execFile
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
 │   ├── update/route.ts     POST — npm install νεότερης έκδοσης
 │   ├── rotate-key/route.ts POST — δημιουργία νέου API key + επανεκκίνηση
-│   ├── status/route.ts     GET  — κατάσταση σε ζωντανό χρόνο + DB + μεταδεδομένα έκδοσης
-│   └── auto-start/route.ts POST — εναλλαγή σημαίας auto_start
+│   ├── status/route.ts     GET  — κατάσταση σε πραγματικό χρόνο + κατάσταση DB + μεταδεδομένα έκδοσης
+│   └── auto-start/route.ts POST — εναλλαγή της σημαίας auto_start
 ├── cliproxy/
-│   ├── _lib.ts             βοηθητικό getOrInitSupervisor()
+│   ├── _lib.ts             βοήθημα getOrInitSupervisor()
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
 │   ├── update/route.ts     POST — npm install νεότερης έκδοσης
-│   ├── status/route.ts     GET  — κατάσταση σε ζωντανό χρόνο + DB + μεταδεδομένα έκδοσης
-│   └── auto-start/route.ts POST — εναλλαγή σημαίας auto_start
+│   ├── status/route.ts     GET  — κατάσταση σε πραγματικό χρόνο + κατάσταση DB + μεταδεδομένα έκδοσης
+│   └── auto-start/route.ts POST — εναλλαγή της σημαίας auto_start
 └── [name]/
-    └── logs/route.ts       GET  — ουρά καταγραφής SSE (κοινόχρηστη από όλες τις υπηρεσίες)
+    └── logs/route.ts       GET  — ουρά καταγραφών SSE (κοινόχρηστη από όλες τις υπηρεσίες)
 ```
 
-Αντίστοιχο UI πίνακα ελέγχου:
+Αντίστοιχο UI του dashboard:
 `src/app/(dashboard)/dashboard/providers/services/` — σελίδα με δύο καρτέλες (CLIProxyAPI + 9Router).
-Αντίστροφο proxy για ενσωματωμένο UI 9Router:
+Αντίστροφος proxy για το ενσωματωμένο UI του 9Router:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-Εις βάθος ανάλυση: `docs/frameworks/EMBEDDED-SERVICES.md`
+Αναλυτική παρουσίαση: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-#### 3.1.3 `src/app/api/v1/` — Δημόσιο API συμβατό με OpenAI
+#### 3.1.3 `src/app/api/v1/` — Δημόσιο API συμβατό με το OpenAI
 
 ```
 v1/
 ├── accounts/[id]/                       αναζήτηση λογαριασμού
-├── agents/tasks/[id]/, agents/tasks/    τελικά σημεία task τύπου A2A
-├── api/                                 εσωτερικά βοηθητικά API εκτεθειμένα στο v1/api
+├── agents/tasks/[id]/, agents/tasks/    endpoints εργασιών τύπου A2A
+├── api/                                 εσωτερικά βοηθήματα API που εκτίθενται στο v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
-├── batches/[id]/{cancel}, batches/      API Batches του OpenAI
-├── chat/completions/                    Chat Completions (το κύριο τελικό σημείο)
-├── completions/                         Παλαιές text completions
-├── embeddings/                          Embeddings
+├── batches/[id]/{cancel}, batches/      OpenAI Batches API
+├── chat/completions/                    Chat Completions (το κύριο endpoint)
+├── completions/                         παλαιού τύπου συμπληρώσεις κειμένου
+├── embeddings/                          ενσωματώσεις
 ├── files/[id]/, files/                  Files API
-├── _helpers/                            Κοινόχρηστα βοηθητικά διαδρομής (χωρίς δημόσιο URL)
-├── images/{edits, generations}/         Δημιουργία + επεξεργασία εικόνων
-├── issues/                              Τελικά σημεία βοηθητικού triage
-├── management/{proxies}/                Διαδρομές εύρους διαχείρισης εντός v1
-├── messages/{count_tokens}/             Συμβατότητα μηνυμάτων τύπου Anthropic
-├── models/                              Καταχώρηση μοντέλων (`route.ts`, `catalog.ts`)
-├── moderations/                         Moderation
-├── music/                               Δημιουργία μουσικής
-├── providers/[provider]/                Λειτουργίες ανά πάροχο
-├── quotas/{check}                       Έλεγχοι ποσοστώσεων
-├── registered-keys/                     Διαχείριση εγγεγραμμένων κλειδιών
-├── rerank/                              Επαναταξινόμηση
-├── responses/[...path]/                 API Responses του OpenAI (catch-all)
-├── search/                              Αναζήτηση στο διαδίκτυο
-├── videos/                              Δημιουργία βίντεο
-├── ws/                                  Γέφυρα WebSocket
-└── route.ts                             Χειριστής ευρετηρίου
+├── _helpers/                            κοινόχρηστα βοηθήματα διαδρομών (χωρίς δημόσιο URL)
+├── images/{edits, generations}/         δημιουργία + επεξεργασία εικόνων
+├── issues/                              βοηθητικά endpoints διαλογής
+├── management/{proxies}/                διαδρομές εμβέλειας διαχείρισης εντός του v1
+├── messages/{count_tokens}/             συμβατότητα μηνυμάτων τύπου Anthropic
+├── models/                              λίστα μοντέλων (`route.ts`, `catalog.ts`)
+├── moderations/                         εποπτεία περιεχομένου
+├── music/                               δημιουργία μουσικής
+├── providers/[provider]/                λειτουργίες ανά πάροχο
+├── quotas/{check}                       έλεγχοι quota
+├── registered-keys/                     διαχείριση καταχωρισμένων κλειδιών
+├── rerank/                              ανακατάταξη
+├── responses/[...path]/                 OpenAI Responses API (catch-all)
+├── search/                              αναζήτηση στον ιστό
+├── videos/                              δημιουργία βίντεο
+├── ws/                                  γέφυρα WebSocket
+└── route.ts                             χειριστής ευρετηρίου
 ```
 
 Κάθε αρχείο διαδρομής ακολουθεί το ίδιο μοτίβο:
 
 ```
-Route → CORS preflight → Επικύρωση Zod body → προαιρετικό auth
-      → Εφαρμογή πολιτικής API key → ανάθεση στον χειριστή (open-sse)
+Διαδρομή → προκαταρκτικός έλεγχος CORS → επικύρωση σώματος με Zod → προαιρετικός έλεγχος ταυτότητας
+         → επιβολή πολιτικής API key → ανάθεση στον χειριστή (open-sse)
 ```
 
-Το `v1beta/` είναι η επιφάνεια συμβατότητας τύπου Gemini (ένας λεπτός wrapper που μεταφράζει στον
-ίδιο αγωγό `open-sse/handlers/`).
+Το `v1beta/` είναι η επιφάνεια συμβατότητας τύπου Gemini (ένα λεπτό περίβλημα που μεταφράζει στο
+ίδιο pipeline `open-sse/handlers/`).
 
 ### 3.2 `src/lib/` — Βασικές βιβλιοθήκες
 
-Πάντα να εισάγετε δεδομένα, sync, OAuth, skill, memory κ.λπ. μέσω αυτών των modules. Ο
-πίνακας ομαδοποιεί τους πραγματικούς καταλόγους και αξιοσημείωτα αρχεία ανώτατου επιπέδου.
+Να εισάγετε πάντα δεδομένα, συγχρονισμό, OAuth, δεξιότητες, μνήμη κ.λπ. μέσω αυτών των modules. Ο
+πίνακας ομαδοποιεί τους πραγματικούς καταλόγους και τα αξιοσημείωτα αρχεία ανώτατου επιπέδου.
 
-| Module            | Σκοπός                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | Διακομιστής πρωτοκόλλου A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 skills: ανάλυση κόστους, αναφορά υγείας, ανακάλυψη παρόχων, διαχείριση ποσοστώσεων, έξυπνη δρομολόγηση, list-capabilities)                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `api/`            | Εσωτερικά βοηθητικά API: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `auth/`           | `managementPassword.ts` (επαναφορά κωδικού / hashing)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `batches/`        | Υπηρεσία API Batches του OpenAI (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `catalog/`        | Συγχρονισμός καταλόγου OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `cloudAgent/`     | Μητρώο cloud agent: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `combos/`         | Βοηθητικά επίλυσης combo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `compliance/`     | Έλεγχος + έλεγχος παρόχου: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `config/`         | Συγκόλληση ρυθμίσεων χρόνου εκτέλεσης                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `db/`             | Modules domain SQLite (βλ. §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `display/`        | Βοηθητικά UI/εμφάνισης που χρησιμοποιούνται από αποκρίσεις API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `embeddings/`     | Μητρώο υπηρεσίας embeddings                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `env/`            | Φόρτωση + επιθεώρηση περιβάλλοντος                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `evals/`          | Χρόνος εκτέλεσης αξιολογήσεων                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `jobs/`           | Εργασίες παρασκηνίου (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `memory/`         | Μόνιμη μνήμη: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `oauth/`          | Modules OAuth/εισαγωγής παρόχων (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, καθώς και `services/`, `utils/`, και `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                |
-| `plugins/`        | Φορτωτής plugin (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `providerModels/` | Διαχειριζόμενος κύκλος ζωής μοντέλου: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `providers/`      | Βοηθητικά παρόχων: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `resilience/`     | `settings.ts` — ρυθμίσεις για circuit breaker, cooldown, lockout                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `runtime/`        | Ανίχνευση χαρακτηριστικών χρόνου εκτέλεσης                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `services/`       | Framework ενσωματωμένων υπηρεσιών: `ServiceSupervisor.ts` (γενικός επιτηρητής θυγατρικής διεργασίας με κλείδωμα λειτουργίας, ring buffer, έλεγχο υγείας), `bootstrap.ts` (εγγραφή επιπέδου διεργασίας και αυτόματη εκκίνηση), `registry.ts` (χαρτογράφηση εργαλείου → επιτηρητή), `apiKey.ts` (αποθήκη κλειδιών AES-256-GCM), `modelSync.ts` (περιοδικός συγχρονισμός μοντέλων), `ringBuffer.ts` (κυκλικό buffer καταγραφής 5 MB), `healthCheck.ts` (ανιχνευτής υγείας HTTP), `types.ts`, `embedWsProxy.ts` (proxy WebSocket), `installers/{ninerouter,cliproxy}.ts`. Βλ. `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                      |
-| `agentSkills/`    | Κατάλογος + γεννήτρια Agent Skills: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → εγγράφει `skills/{id}/SKILL.md`), `openapiParser.ts` (εξάγει τελικά σημεία REST από προδιαγραφή OpenAPI), `cliRegistryParser.ts` (εξάγει υποεντολές CLI από bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Χρησιμοποιείται από διαδρομές REST (`/api/agent-skills/*`), εργαλεία MCP (`omniroute_agent_skills_*`) και A2A skill `list-capabilities`. Βλ. [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | Framework skills: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, καθώς και `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `spend/`          | `batchWriter.ts` (buffer εγγραφής με καθυστέρηση)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `system/`         | Βοηθητικά επιπέδου συστήματος                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `translator/`     | Συγκόλληση μεταφραστή ανώτατου επιπέδου (αναθέτει στο `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `usage/`          | Λογιστική χρήσης: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `versionManager/` | Αυτόματη ενημέρωση + manifest έκδοσης                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `ws/`             | Γέφυρα WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `zed-oauth/`      | Ροή OAuth επεξεργαστή Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Μονάδα            | Σκοπός                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `a2a/`            | Διακομιστής πρωτοκόλλου A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 δεξιότητες: ανάλυση κόστους, αναφορά εύρυθμης λειτουργίας, εντοπισμός παρόχων, διαχείριση ποσοστώσεων, έξυπνη δρομολόγηση, παράθεση δυνατοτήτων)                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `acp/`            | Πρωτόκολλο Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `api/`            | Εσωτερικά βοηθητικά εργαλεία API: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `auth/`           | `managementPassword.ts` (επαναφορά κωδικού πρόσβασης / κατακερματισμός)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `batches/`        | Υπηρεσία OpenAI Batches API (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `catalog/`        | Συγχρονισμός καταλόγου OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `cloudAgent/`     | Μητρώο cloud agent: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `combos/`         | Βοηθητικές λειτουργίες επίλυσης συνδυασμών                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `compliance/`     | Έλεγχος συμμόρφωσης + έλεγχος παρόχου: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `config/`         | Κώδικας διασύνδεσης για τη ρύθμιση παραμέτρων κατά την εκτέλεση                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `db/`             | Αρθρώματα πεδίου SQLite (βλ. §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `display/`        | Βοηθητικές λειτουργίες UI/εμφάνισης που χρησιμοποιούνται από αποκρίσεις API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `embeddings/`     | Μητρώο υπηρεσιών ενσωματώσεων                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `env/`            | Φόρτωση + ενδοσκόπηση μεταβλητών περιβάλλοντος                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `evals/`          | Περιβάλλον εκτέλεσης αξιολογήσεων                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `jobs/`           | Εργασίες παρασκηνίου (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `memory/`         | Μόνιμη μνήμη: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `oauth/`          | Μονάδες παρόχων OAuth/εισαγωγής (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, καθώς και `services/`, `utils/` και `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                          |
+| `plugins/`        | Φόρτωση προσθηκών (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `providerModels/` | Διαχειριζόμενος κύκλος ζωής μοντέλων: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `providers/`      | Βοηθητικά εργαλεία παρόχων: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `resilience/`     | `settings.ts` — ρυθμίσεις για circuit breaker, cooldown και lockout                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `runtime/`        | Εντοπισμός δυνατοτήτων περιβάλλοντος εκτέλεσης                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `services/`       | Πλαίσιο ενσωματωμένων υπηρεσιών: `ServiceSupervisor.ts` (γενικός επόπτης θυγατρικών διεργασιών με κλείδωμα λειτουργιών, δακτυλιοειδή ενδιάμεση μνήμη και έλεγχο εύρυθμης λειτουργίας), `bootstrap.ts` (καταχώριση σε επίπεδο διεργασίας και αυτόματη εκκίνηση), `registry.ts` (αντιστοίχιση εργαλείου → επόπτη), `apiKey.ts` (χώρος αποθήκευσης κλειδιών AES-256-GCM), `modelSync.ts` (περιοδικός συγχρονισμός μοντέλων), `ringBuffer.ts` (κυκλική ενδιάμεση μνήμη αρχείων καταγραφής 5 MB), `healthCheck.ts` (έλεγχος εύρυθμης λειτουργίας μέσω HTTP), `types.ts`, `embedWsProxy.ts` (διακομιστής μεσολάβησης WebSocket), `installers/{ninerouter,cliproxy}.ts`. Δείτε το `docs/frameworks/EMBEDDED-SERVICES.md`              |
+| `agentSkills/`    | Κατάλογος και γεννήτρια Agent Skills: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → εγγράφει στο `skills/{id}/SKILL.md`), `openapiParser.ts` (εξάγει τελικά σημεία REST από την προδιαγραφή OpenAPI), `cliRegistryParser.ts` (εξάγει υποεντολές CLI από το bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Χρησιμοποιείται από διαδρομές REST (`/api/agent-skills/*`), εργαλεία MCP (`omniroute_agent_skills_*`) και τη δεξιότητα A2A `list-capabilities`. Δείτε το [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Πλαίσιο δεξιοτήτων: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, καθώς και `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `spend/`          | `batchWriter.ts` (buffer ετεροχρονισμένης εγγραφής)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Συγχρονισμός Cloud)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `system/`         | Βοηθητικές λειτουργίες επιπέδου συστήματος                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `translator/`     | Κώδικας διασύνδεσης μεταφραστή ανώτατου επιπέδου (αναθέτει στο `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `usage/`          | Καταγραφή χρήσης: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `versionManager/` | Αυτόματη ενημέρωση + μανιφέστο έκδοσης                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `ws/`             | Γέφυρα WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `zed-oauth/`      | Ροή OAuth του επεξεργαστή Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 Αρχεία ανώτατου επιπέδου στο `src/lib/`:
 
-- Το παλαιό barrel `localDb.ts` αφαιρέθηκε — οι καταναλωτές εισάγουν απευθείας συγκεκριμένα modules `src/lib/db/*`.
+- Το παλιό barrel `localDb.ts` καταργήθηκε — οι καταναλωτές εισάγουν απευθείας συγκεκριμένα modules του `src/lib/db/*`.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -325,14 +328,14 @@ Route → CORS preflight → Επικύρωση Zod body → προαιρετι�
 
 #### 3.2.1 `src/lib/db/`
 
-Singleton βάση δεδομένων SQLite (`getDbInstance()` στο `core.ts`, καταγραφή WAL).
-**Μην γράφετε ποτέ raw SQL σε διαδρομές ή χειριστές** — χρησιμοποιήστε αυτά τα modules.
+Μοναδική παρουσία βάσης δεδομένων SQLite (`getDbInstance()` στο `core.ts`, ημερολόγιο WAL).
+**Μην γράφετε ποτέ ανεπεξέργαστη SQL σε routes ή handlers** — χρησιμοποιείτε αυτά τα modules.
 
 ![Επισκόπηση σχήματος βάσης δεδομένων (επιλεγμένοι βασικοί πίνακες)](../diagrams/exported/db-schema-overview.svg)
 
 > Πηγή: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Modules domain (καθένα ανήκει σε έναν ή περισσότερους πίνακες): `apiKeys.ts`, `backup.ts`,
+Modules τομέα (καθένα διαχειρίζεται έναν ή περισσότερους πίνακες): `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -346,10 +349,10 @@ Modules domain (καθένα ανήκει σε έναν ή περισσότερ�
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-Το `migrations/` περιέχει 168 εκδοθέντα αρχεία `.sql` (ιδεμποτεντικά, συναλλακτικά) και εκτελείται
-από το `migrationRunner.ts` κατά την εκκίνηση.
+Το `migrations/` περιέχει 168 αρχεία `.sql` με εκδόσεις (idempotent και transactional) και
+εκτελείται από το `migrationRunner.ts` κατά την εκκίνηση.
 
-Πίνακες που δημιουργήθηκαν στις migrations (123 συνολικά):
+Πίνακες που δημιουργούνται από τα migrations (123 συνολικά):
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -365,51 +368,51 @@ Modules domain (καθένα ανήκει σε έναν ή περισσότερ�
 `routing_decisions`, `semantic_cache`, `session_account_affinity`,
 `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
 `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (καθώς και εικονικοί πίνακες FTS5 για αναζήτηση στη μνήμη).
+`webhooks` (καθώς και εικονικοί πίνακες FTS5 για αναζήτηση μνήμης).
 
-### 3.3 `src/domain/` — Επίπεδο domain
+### 3.3 `src/domain/` — Επίπεδο τομέα
 
-Καθαρή επιχειρηματική λογική, χωρίς I/O. Εισάγεται από διαδρομές και χειριστές.
+Καθαρή επιχειρησιακή λογική, χωρίς I/O. Εισάγεται από routes και handlers.
 
 | Αρχείο                                     | Σκοπός                                             |
 | ------------------------------------------ | -------------------------------------------------- |
-| `policyEngine.ts`                          | Επιλύτης πολιτικής ανώτατου επιπέδου               |
-| `fallbackPolicy.ts`                        | Δέντρο αποφάσεων fallback                          |
+| `policyEngine.ts`                          | Κεντρική επίλυση πολιτικών                         |
+| `fallbackPolicy.ts`                        | Δέντρο αποφάσεων εφεδρικής επιλογής                |
 | `costRules.ts`                             | Κανόνες υπολογισμού κόστους                        |
-| `lockoutPolicy.ts`                         | Αποφάσεις αποκλεισμού μοντέλου                     |
-| `tagRouter.ts`                             | Δρομολόγηση βασισμένη σε tags                      |
-| `comboResolver.ts`                         | Επίλυση combo από αίτημα → λίστα στόχου            |
-| `connectionModelRules.ts`                  | Φίλτρα μοντέλου ανά σύνδεση                        |
+| `lockoutPolicy.ts`                         | Αποφάσεις αποκλεισμού μοντέλων                     |
+| `tagRouter.ts`                             | Δρομολόγηση βάσει ετικετών                         |
+| `comboResolver.ts`                         | Επίλυση συνδυασμού από αίτημα → λίστα προορισμών   |
+| `connectionModelRules.ts`                  | Φίλτρα μοντέλων ανά σύνδεση                        |
 | `modelAvailability.ts`                     | Έλεγχος διαθεσιμότητας μοντέλου                    |
-| `degradation.ts`                           | Μεταβάσεις υποβαθμισμένης λειτουργίας              |
-| `providerExpiration.ts`                    | Ανίχνευση ληγμένου λογαριασμού/κλειδιού            |
-| `quotaCache.ts`                            | Αποθηκευμένες αποφάσεις ποσοστώσεων                |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Βοηθητικά μορφής απόκρισης                         |
-| `configAudit.ts`                           | Έλεγχος αλλαγών ρυθμίσεων                          |
-| `assessment/`                              | Αξιολόγηση μοντέλου (ανά RFC, μερικώς υλοποιημένο) |
-| `types.ts`                                 | Κοινόχρηστοι τύποι domain                          |
+| `degradation.ts`                           | Μεταβάσεις σε υποβαθμισμένη λειτουργία             |
+| `providerExpiration.ts`                    | Εντοπισμός ληγμένων λογαριασμών/κλειδιών           |
+| `quotaCache.ts`                            | Αποθηκευμένες στην cache αποφάσεις ορίων χρήσης    |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Βοηθητικά εργαλεία μορφής αποκρίσεων               |
+| `configAudit.ts`                           | Έλεγχος αλλαγών διαμόρφωσης                        |
+| `assessment/`                              | Αξιολόγηση μοντέλου (ανά RFC, μερικώς υλοποιημένη) |
+| `types.ts`                                 | Κοινόχρηστοι τύποι τομέα                           |
 
-### 3.4 `src/server/` — Μόνο-διακομιστή
+### 3.4 `src/server/` — Μόνο για τον διακομιστή
 
-Δεν μπορεί να εισαχθεί από components πελάτη.
+Δεν μπορεί να εισαχθεί από client components.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Ταξινομεί διαδρομές ως δημόσιες ή διαχειριστικές
-│   ├── assertAuth.ts      Βοηθητικό assertion
+│   ├── classify.ts        Ταξινομεί τα routes ως δημόσια ή διαχείρισης
+│   ├── assertAuth.ts      Βοηθητικό εργαλείο επιβεβαίωσης
 │   ├── context.ts         Περιβάλλον authz ανά αίτημα
 │   ├── headers.ts
-│   ├── pipeline.ts        Αγωγός authz
+│   ├── pipeline.ts        Αλυσίδα authz
 │   ├── policies/          Συγκεκριμένες πολιτικές
 │   └── types.ts
-└── cors/origins.ts        Λίστα επιτρεπόμενων origins CORS
+└── cors/origins.ts        Λίστα επιτρεπόμενων προελεύσεων CORS
 ```
 
-### 3.5 `src/shared/` — Ασφαλές για διαμοιρασμό
+### 3.5 `src/shared/` — Ασφαλές για κοινή χρήση
 
-Χωρισμένο σε εστιασμένους υποκαταλόγους:
+Χωρίζεται σε εστιασμένους υποκαταλόγους:
 
 - `constants/` — `providers.ts` (κατάλογος παρόχων επικυρωμένος με Zod), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
@@ -420,7 +423,7 @@ server/
   `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
 - `validation/` — `schemas.ts` (~80 σχήματα Zod), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — δημόσια contracts API που αποστέλλονται στο npm.
+- `contracts/` — δημόσια συμβόλαια API που διανέμονται στο npm.
 - `types/` — κοινόχρηστοι τύποι TS.
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
@@ -429,148 +432,116 @@ server/
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, καθώς και hooks/components πίνακα ελέγχου στους `services/`, `network/`,
+  `a11yAudit.ts`, καθώς και hooks/στοιχεία του πίνακα ελέγχου στους καταλόγους `services/`, `network/`,
   `middleware/`, `schemas/`, `hooks/`, `components/`.
+- `components/` — το API στοιχείων του πίνακα ελέγχου (`index.tsx` barrel: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). Τα βασικά στοιχεία είναι προσαρμογείς πάνω από το
+  ενσωματωμένο kit (`packages/ui-kit`, το οποίο εισάγεται μέσω υποδιαδρομής στοιχείου, όπως
+  `@omniroute/ui-kit/button`), ώστε οι οθόνες να διατηρούν τις εισαγωγές τους, ενώ η σήμανση να είναι
+  εκείνη του kit. Το κέλυφος είναι `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (`SidebarProvider`/`SidebarInset` του kit) με τα `Sidebar.tsx` και `Header.tsx`· τα εικονίδια περνούν
+  μέσω των `Icon.tsx` και `constants/iconMap.ts`. Δείτε το `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
-## 4. `open-sse/` — Χώρος εργασίας μηχανής streaming
+## 4. `open-sse/` — Χώρος εργασίας του κινητήρα ροής
 
-Ξεχωριστός χώρος εργασίας npm που δημοσιεύεται ως `@omniroute/open-sse`. Διαχειρίζεται την επεξεργασία αιτημάτων, τους εκτελεστές, τους μεταφραστές, τις υπηρεσίες, τον μετασχηματιστή και τον διακομιστή MCP.
+Ξεχωριστός χώρος εργασίας npm που δημοσιεύεται ως `@omniroute/open-sse`. Κατέχει την επεξεργασία αιτημάτων, τους εκτελεστές, τους μεταφραστές, τις υπηρεσίες, τον μετασχηματιστή και τον διακομιστή MCP.
 
 ```
 open-sse/
-├── index.ts                Δημόσιες εξαγωγές
-├── package.json            Μανιφέστο χώρου εργασίας
+├── index.ts                Public exports
+├── package.json            Workspace manifest
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Μητρώα παρόχων, προφίλ κεφαλίδων, ταυτότητα, …
-├── handlers/               Χειριστές αιτημάτων (συνομιλία, embeddings, ήχος, εικόνα, …)
-├── executors/              108 εκτελεστές HTTP ειδικοί για παρόχους
-├── translator/             Μετατροπή μορφών (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Μετασχηματιστής ροής Responses API ↔ Chat Completions
-├── services/               80+ αρθρώματα υπηρεσιών (συνδυασμοί, εναλλακτικές, ποσοστώσεις, ταυτότητα, …)
-├── utils/                  Βοηθητικά streaming, πελάτης TLS, AWS SigV4, λήψη μέσω διακομιστή μεσολάβησης, …
-└── mcp-server/             Διακομιστής MCP (3 μέσα μεταφοράς, 33 πεδία, 110 εργαλεία)
+├── config/                 Provider registries, header profiles, identity, …
+├── handlers/               Request handlers (chat, embeddings, audio, image, …)
+├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Responses API ↔ Chat Completions stream transformer
+├── services/               80+ service modules (combos, fallback, quotas, identity, …)
+├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
+└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Χειριστής               | Σκοπός                                                                                                |
-| ----------------------- | ----------------------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Κύρια ροή επεξεργασίας συνομιλίας (cache, όριο ρυθμού, δρομολόγηση συνδυασμών, αποστολή σε εκτελεστή) |
-| `responsesHandler.ts`   | Σημείο εισόδου του OpenAI Responses API                                                               |
-| `embeddings.ts`         | Embeddings                                                                                            |
-| `imageGeneration.ts`    | Δημιουργία εικόνων                                                                                    |
-| `audioSpeech.ts`        | Μετατροπή κειμένου σε ομιλία                                                                          |
-| `audioTranscription.ts` | Μετατροπή ομιλίας σε κείμενο                                                                          |
-| `videoGeneration.ts`    | Δημιουργία βίντεο                                                                                     |
-| `musicGeneration.ts`    | Δημιουργία μουσικής                                                                                   |
-| `rerank.ts`             | Ανακατάταξη                                                                                           |
-| `moderations.ts`        | Έλεγχος περιεχομένου                                                                                  |
-| `search.ts`             | Αναζήτηση στον ιστό                                                                                   |
-| `sseParser.ts`          | Αναλυτής συμβάντων SSE                                                                                |
-| `usageExtractor.ts`     | Εξαγωγή πλήθους token από upstream ροές                                                               |
-| `responseSanitizer.ts`  | Αφαίρεση θορύβου που αφορά συγκεκριμένους παρόχους                                                    |
-| `responseTranslator.ts` | Συνδετικό επίπεδο μεταξύ της απόκρισης παρόχου και του επιπέδου μετάφρασης                            |
+| Χειριστής               | Σκοπός                                                                                          |
+| ----------------------- | ----------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Κύρια γραμμή συνομιλίας (κρυφή μνήμη, όριο ρυθμού, συνδυαστική δρομολόγηση, αποστολή εκτελεστή) |
+| `responsesHandler.ts`   | OpenAI Απαντήσεις σημείο εισόδου API                                                            |
+| `embeddings.ts`         | Ενσωματώσεις                                                                                    |
+| `imageGeneration.ts`    | Δημιουργία εικόνας                                                                              |
+| `audioSpeech.ts`        | Κείμενο σε ομιλία                                                                               |
+| `audioTranscription.ts` | Ομιλία σε κείμενο                                                                               |
+| `videoGeneration.ts`    | Δημιουργία βίντεο                                                                               |
+| `musicGeneration.ts`    | Μουσική γενιά                                                                                   |
+| `rerank.ts`             | Ανακατάταξη                                                                                     |
+| `moderations.ts`        | Μετριοπάθεια                                                                                    |
+| `search.ts`             | Αναζήτηση στο Web                                                                               |
+| `sseParser.ts`          | Αναλυτής συμβάντων SSE                                                                          |
+| `usageExtractor.ts`     | Τραβήξτε μετρήσεις διακριτικών από ροές ανάντη                                                  |
+| `responseSanitizer.ts`  | Θόρυβος ειδικής παροχής strip                                                                   |
+| `responseTranslator.ts` | Κολλήστε μεταξύ απόκρισης παρόχου και στρώματος μεταφραστή                                      |
 
 ### 4.2 `open-sse/executors/`
 
-108 εκτελεστές παρόχων, καθένας από τους οποίους επεκτείνει το `BaseExecutor` (`base.ts`):
+156 ενότητες εκτελεστών ανώτατου επιπέδου (`*.ts` μείον `base.ts`, `index.ts` και δοκιμές — η μέτρηση `npm run check:docs-counts` μετράει). Κάθε κλάση εκτελεστή επεκτείνεται `BaseExecutor` (`base.ts`), απευθείας ή μέσω `DefaultExecutor` ή άλλου εκτελεστή. οι υπόλοιπες μονάδες είναι βοηθοί ανά πάροχο (σχήματα εργαλείων, προσαρμογείς fetch/TTS, χειριστές ιδιορρυθμιών). Οι εκτελεστές περιλαμβάνουν:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, καθώς και `claudeIdentity.ts`
-(κοινόχρηστο βοηθητικό ταυτότητας) και `index.ts` (μητρώο).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder` `devin-desktop` `vertex` `claudeIdentity.ts` συν ταυτότητα ( `index.ts` )
 
-> Σημείωση: οι πάροχοι που δεν αναφέρονται εδώ εξυπηρετούνται από το `default.ts` μέσω του γενικού
-> εκτελεστή που είναι συμβατός με OpenAI. Ο πλήρης κατάλογος παρόχων (355 πάροχοι) βρίσκεται στο
-> `src/shared/constants/providers.ts`.
+> Σημείωση: οι πάροχοι που δεν αναφέρονται εδώ εξυπηρετούνται από `default.ts` χρησιμοποιώντας τον γενικό εκτελεστή συμβατό με OpenAI. Ο πλήρης κατάλογος παρόχων (377 πάροχοι) ζει στο `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Μετάφραση με αρχιτεκτονική κεντρικού κόμβου και ακτίνων (το OpenAI είναι ο κεντρικός κόμβος).
+Μετάφραση Hub-and-Spoke (το OpenAI είναι το κέντρο).
 
-- **9 μεταφραστές αιτημάτων** (`translator/request/`):
-  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
-  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
-  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 μεταφραστές αποκρίσεων** (`translator/response/`):
-  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
-  `openai-to-claude`.
-- **9 βοηθητικά** (`translator/helpers/`):
-  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, καθώς και
-  δοκιμές βοηθητικών.
-- **Βοηθητικά εικόνων** (`translator/image/sizeMapper.ts`).
+- **9 ζητούν μεταφραστές** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+- **9 μεταφραστές απαντήσεων** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
+- **9 βοηθοί** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, συν βοηθητικές δοκιμές.
+- **Βοηθοί εικόνας** (`translator/image/sizeMapper.ts`).
 - Ανώτατο επίπεδο: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — Μετατροπέας Responses API ↔ Chat
-  Completions βασισμένος σε `TransformStream` (χρησιμοποιείται από την καθολική διαδρομή `responses/`).
+- `responsesTransformer.ts` — `TransformStream` -based Απαντήσεις API ↔ μετατροπέας ολοκλήρωσης συνομιλίας (χρησιμοποιείται από τη διαδρομή `responses/` catch-all).
 
 ### 4.5 `open-sse/services/`
 
-Κυριότερα σημεία (πλήρης λίστα στο `open-sse/services/`):
+Κύρια σημεία (πλήρης λίστα κάτω από `open-sse/services/`):
 
-| Τομέας               | Αρχεία                                                                                                                                                                                                                                                   |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Δρομολόγηση Combo    | `combo.ts` (19 στρατηγικές), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                   |
-| Μηχανή Auto Combo    | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Ανθεκτικότητα        | `accountFallback.ts` (περίοδος αναμονής + κλείδωμα), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                               |
-| Ποσοστώσεις          | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Προσωρινή αποθήκευση | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Ευφυΐα δρομολόγησης  | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Διαχείριση μοντέλων  | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Συμπίεση             | `compression/` — πλήρης διασύνδεση της μηχανής συμπίεσης                                                                                                                                                                                                 |
-| Token + συνεδρία     | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Βαθμίδα / μανιφέστο  | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / δίκτυο          | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Δέσμες               | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| Χρήση                | `usage.ts`                                                                                                                                                                                                                                               |
+| Ανησυχία                | Αρχεία                                                                                                                                                                                                                                                   |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Συνδυαστική δρομολόγηση | `combo.ts` (20 στρατηγικές), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                   |
+| Κινητήρας Auto Combo    | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Ελαστικότητα            | `accountFallback.ts` (κλείδωμα ψύξης + ), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                          |
+| Ποσοστώσεις             | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| Προσωρινή αποθήκευση    | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Ευφυΐα δρομολόγησης     | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Χειρισμός μοντέλου      | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Συμπίεση                | `compression/` — καλωδίωση κινητήρα πλήρους συμπίεσης                                                                                                                                                                                                    |
+| Token + session         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Επίπεδο / εκδήλωση      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / δίκτυο             | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| Παρτίδες                | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Χρήση                   | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 μοναδικά εργαλεία** διασυνδεδεμένα στο `server.ts` (45 κανονικά στο `schemas/tools.ts` +
-  αρθρώματα μνήμης, δεξιοτήτων, δεξιοτήτων GitHub, pool, παιχνιδοποίησης, προσθέτων, Notion, Obsidian,
-  τοπικού corpus και συμπίεσης — η ένωση καταμετράται από το `countUniqueMcpTools`).
-- **3 τρόποι μεταφοράς**: stdio, HTTP Streamable, SSE.
-- **33 πεδία πρόσβασης** επιβάλλονται κατά την εκτέλεση — η βασική λίστα βρίσκεται στο `src/shared/constants/mcpScopes.ts`, ενώ το πλήρες σύνολο είναι η ένωση των πεδίων πρόσβασης που δηλώνονται από κάθε άρθρωμα εργαλείων.
-- Πίνακας ελέγχου: `mcp_tool_audit` (συμπληρώνεται από το `audit.ts`).
-- Αρχεία: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
-  `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
-  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  καθώς και δοκιμές στον κατάλογο `__tests__/`.
-- Δείτε το [MCP-SERVER.md](../frameworks/MCP-SERVER.md) για τον πλήρη κατάλογο εργαλείων.
+- **110 μοναδικά εργαλεία** ενσύρματα σε `server.ts` (45 κανονικές σε `schemas/tools.ts` μνήμη +, δεξιότητες, δεξιότητες GitHub, πισίνα, gamification, πρόσθετο, Notion, Obsidian, τοπικές μονάδες σώματος και συμπίεσης — η ένωση μετράται με `countUniqueMcpTools`).
+- **3 μεταφορες** : stdio, HTTP Streamable, SSE.
+- **33 πεδία** επιβάλλεται κατά το χρόνο εκτέλεσης — η λίστα βάσης στο `src/shared/constants/mcpScopes.ts`, το πλήρες σύνολο είναι η ένωση των πεδίων που δηλώνονται από κάθε λειτουργική μονάδα.
+- Πίνακας ελέγχου: `mcp_tool_audit` (συμπληρωμένο με `audit.ts`).
+- Αρχεία: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, συν δοκιμές κάτω από `__tests__/`.
+- Δείτε [MCP-SERVER.md](../frameworks/MCP-SERVER.md) για τον πλήρη κατάλογο εργαλείων.
 
 ### 4.7 `open-sse/config/`
 
-Μητρώα παρόχων (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), μητρώα μοντέλων ανά μορφή (`audioRegistry.ts`,
-`embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
-`musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-βοηθητικά εργαλεία ταυτότητας (`codexIdentity.ts`, `codexInstructions.ts`,
-`anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
-`cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-βοηθητικά εργαλεία διαπιστευτηρίων (`credentialLoader.ts`, `codexClient.ts`) και προσαρμογείς
-cloud (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
-`maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
-`ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
+Μητρώα παρόχων (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), μητρώα μοντέλων ανά μορφή (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), βοηθοί ταυτότητας (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts` βοηθοί ( `toolCloaking.ts`, `defaultThinkingSignature.ts`) και προσαρμογείς cloud (`credentialLoader.ts`,`azureAi.ts`, `bedrock.ts` `registryUtils.ts` `datarobot.ts`, zqz , `oci.ts`, `glmProvider.ts`, `maritalk.ts`, `runway.ts` `petals.ts` `sap.ts` `codexClient.ts` `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Πρωτογενείς λειτουργίες ροής και βοηθητικά εργαλεία παρόχων: `stream.ts`, `streamHandler.ts`,
-`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
-`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
-`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
-`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
-`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
-`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+Streaming primitives και βοηθοί παρόχων: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `progressTracker.ts`, `cors.ts` `logger.ts` `error.ts` `requestLogger.ts`, `sleep.ts` `ollamaTransform.ts`
 
 ---
 
@@ -655,7 +626,7 @@ bin/
 
 ## 8. `scripts/`
 
-Οργανωμένος σε 6 υποφακέλους ανά σκοπό.
+Οργανωμένο σε 6 υποφακέλους ανά σκοπό.
 
 - **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
   `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
@@ -667,7 +638,11 @@ bin/
   `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
   `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
   `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`.
+  `system-info.mjs`, καθώς και τα βοηθητικά εργαλεία μόνο για ανάγνωση για την παρακολούθηση των PR
+  `ci-discriminate.sh` (ταξινομεί τις υπογραφές των αποτυχημένων ελέγχων ενός PR σε δικές του / κληρονομημένες /
+  άγνωστες, σε σύγκριση με ένα PR αναφοράς ή το ζήτημα base-red) και `audit-worktree.sh`
+  (τροποποιημένα αρχεία, προστατευμένες επιφάνειες, αφαιρεμένα asserts, πλήθος καταστολών, εναπομείναντα
+  προσωρινά tsconfigs, κεφαλή PR έναντι τοπικού HEAD — πριν γίνει αποδεκτό το PR ενός worker).
 - **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
   `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
   `check-deprecated-versions.mjs`, `check-route-validation.mjs`,

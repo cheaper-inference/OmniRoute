@@ -22,10 +22,11 @@ import {
 } from "@omniroute/open-sse/services/antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "@omniroute/open-sse/services/antigravityProjectPersist.ts";
 import { asRecord, toNonEmptyString } from "./helpers";
+import type { DiscoveryFailure } from "@/shared/discovery/degradedCause";
 
 const antigravityDiscoveryInflight = new Map<
   string,
-  Promise<Array<{ id: string; name: string }>>
+  Promise<{ models: Array<{ id: string; name: string }>; failure?: DiscoveryFailure }>
 >();
 
 type AntigravityDiscoveryModel = {
@@ -157,9 +158,10 @@ export async function fetchAntigravityDiscoveryModelsCached(
   proxy: unknown,
   providerSpecificData?: unknown,
   provider: "antigravity" | "agy" = "antigravity"
-): Promise<
-  Array<{ id: string; name: string; inputTokenLimit?: number; outputTokenLimit?: number }>
-> {
+): Promise<{
+  models: Array<{ id: string; name: string; inputTokenLimit?: number; outputTokenLimit?: number }>;
+  failure?: DiscoveryFailure;
+}> {
   const profile = normalizeAntigravityClientProfile(asRecord(providerSpecificData).clientProfile);
   const cacheKey = `${provider}:${connectionId}:${accessToken.substring(0, 16)}:${profile}`;
   const inflight = antigravityDiscoveryInflight.get(cacheKey);
@@ -177,6 +179,9 @@ export async function fetchAntigravityDiscoveryModelsCached(
         asRecord(providerSpecificData)
       );
     }
+
+    // The first attempt that produced no model explains the fallback.
+    let failure: DiscoveryFailure | undefined;
 
     for (const discoveryUrl of [
       ...getAntigravityFetchAvailableModelsUrls(),
@@ -197,6 +202,7 @@ export async function fetchAntigravityDiscoveryModelsCached(
           console.warn(
             `[models] ${provider} discovery failed at ${discoveryUrl} (${response.status}): ${errorText}`
           );
+          failure = failure ?? { status: response.status };
           continue;
         }
 
@@ -205,15 +211,17 @@ export async function fetchAntigravityDiscoveryModelsCached(
           provider
         ).map((model) => mapAntigravityModelForClient(model, provider));
         if (models.length > 0) {
-          return models;
+          return { models };
         }
+        failure = failure ?? { code: "EMPTY_CATALOG" };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         console.warn(`[models] ${provider} discovery threw for ${discoveryUrl}: ${message}`);
+        failure = failure ?? {};
       }
     }
 
-    return [];
+    return { models: [], ...(failure ? { failure } : {}) };
   })().finally(() => {
     antigravityDiscoveryInflight.delete(cacheKey);
   });
@@ -238,6 +246,38 @@ export function normalizeDataRobotCatalogResponse(
       return { id: model, name };
     })
     .filter((value): value is { id: string; name: string } => Boolean(value));
+}
+
+// Upstream fields that declare supported reasoning efforts (#15762). Only these are carried
+// through so the sync extractor sees them; spreading the whole record would alter other flows.
+const OPENAI_LIKE_EFFORT_DECLARATION_KEYS = [
+  "reasoning",
+  "supported_reasoning_levels",
+  "thinking",
+  "metadata",
+  "capabilities",
+  "supportedThinkingEfforts",
+  "reasoning_options",
+  "vendors",
+] as const;
+
+function pickEffortDeclarations(item: Record<string, unknown>): Record<string, unknown> {
+  const picked: Record<string, unknown> = {};
+  for (const key of OPENAI_LIKE_EFFORT_DECLARATION_KEYS) {
+    if (item[key] !== undefined && item[key] !== null) picked[key] = item[key];
+  }
+  return picked;
+}
+
+// SiliconFlow free-only imports rely on live pricing and explicit flags. Keep
+// that evidence through discovery so a paid row cannot become free by losing
+// its veto. Project only the fields consumed by payloadFreeEvidence.
+function pickSiliconFlowPricingEvidence(item: Record<string, unknown>): Record<string, unknown> {
+  const picked: Record<string, unknown> = {};
+  for (const key of ["pricing", "isFree", "is_free", "free", "tags"] as const) {
+    if (item[key] !== undefined && item[key] !== null) picked[key] = item[key];
+  }
+  return picked;
 }
 
 export function normalizeOpenAiLikeModelsResponse(
@@ -266,9 +306,105 @@ export function normalizeOpenAiLikeModelsResponse(
         id;
       const ownedBy =
         toNonEmptyString(item.owned_by) || toNonEmptyString(item.provider) || fallbackOwner;
-      return { id, name, owned_by: ownedBy };
+      return {
+        ...pickEffortDeclarations(item),
+        ...(fallbackOwner === "siliconflow" ? pickSiliconFlowPricingEvidence(item) : {}),
+        id,
+        name,
+        owned_by: ownedBy,
+      };
     })
     .filter((value): value is { id: string; name: string; owned_by: string } => Boolean(value));
+}
+
+/**
+ * WorkBuddy (www.workbuddy.ai) catalogue.
+ *
+ * The gateway answers `GET /v3/config` with `{ code, msg, requestId, data }` and
+ * the roster under `data.models`. An unauthenticated caller gets `data.models:
+ * null`, so a token is required. Observed live (2026-09-19) from the desktop
+ * app's own `CloudProductManager` log, an authenticated fetch returns **22**
+ * models, all of them chat models: `default-model`, `fast-model`,
+ * `balanced-model`, `primary-model`, `deep-model`, `kimi-k2.8-preview`,
+ * `deepseek-v4.1-flash`, `deepseek-v4.1-flash-sg`, `gpt-6-astra`,
+ * `hy4-preview-f`, `hy4-preview`, `hy3`, `gpt-5.6-sol`, `gpt-5.6-terra`,
+ * `gpt-5.6-luna`, `gpt-5.5`, `gpt-5.4`, `gemini-3.5-flash`, `glm-5.3`,
+ * `glm-5.2`, `kimi-k3`, `kimi-k2.6`.
+ *
+ * The item schema (id / name / maxInputTokens / maxOutputTokens /
+ * supportsToolCall / supportsImages / supportsReasoning) is the one WorkBuddy's
+ * own CLI ships in `cli/product.json`, confirmed against the 26-entry catalogue
+ * in the macOS build. That file is a *fallback* layer rather than a base to
+ * merge into. The CLI's `CloudProductProvider` runs `mergeModelsById`, which
+ * indexes the built-in list by id and then maps over the **cloud** array, so
+ * membership comes entirely from the cloud; the built-in layer only supplies
+ * field defaults for ids the cloud also names. The effective roster the CLI logs
+ * bears this out: with the cloud live it is the 22 above plus local overrides,
+ * and the 6 media entries that exist only in `product.json` are absent, while an
+ * instance that could not reach the cloud falls back to the built-in 26. The
+ * field probes stay defensive regardless, and an item without an id is dropped
+ * rather than guessed at.
+ *
+ * An object map is accepted alongside an array because the same config family
+ * ships `relatedModels` keyed by name.
+ *
+ * The built-in catalogue lists image and video models in the same array as chat
+ * models, discriminated only by `tags`. The observed cloud payload contains none
+ * of them, so the exclusion below guards the fallback path and any future
+ * payload that does list them, rather than repairing a live symptom. See
+ * `isWorkbuddyMediaModel`.
+ */
+export function normalizeWorkbuddyModelsResponse(
+  data: unknown
+): Array<{ id: string; name: string; owned_by: string }> {
+  const root = asRecord(data);
+  const inner = asRecord(root.data);
+  const payload = inner.models ?? root.models;
+
+  const items: unknown[] = Array.isArray(payload)
+    ? payload
+    : payload && typeof payload === "object"
+      ? Object.entries(asRecord(payload)).map(([id, value]) => ({ id, ...asRecord(value) }))
+      : [];
+
+  return items
+    .map((value) => {
+      const item = asRecord(value);
+      const id = toNonEmptyString(item.id) || toNonEmptyString(item.model);
+      if (!id) return null;
+      if (isWorkbuddyMediaModel(item)) return null;
+      const name = toNonEmptyString(item.name) || toNonEmptyString(item.displayName) || id;
+      return { id, name, owned_by: "workbuddy" };
+    })
+    .filter((value): value is { id: string; name: string; owned_by: string } => Boolean(value));
+}
+
+/**
+ * Media-generation capabilities, as they appear in an entry's `tags`.
+ *
+ * WorkBuddy lists its image and video models in the same array as its chat
+ * models (`gemini-3.0-pro-image`, `hunyuan-image-v3.0`, `hunyuan-video-art` and
+ * friends in the shipped catalogue), so the tag is the only thing separating
+ * them. They cannot serve a chat completion, so they must not reach a chat
+ * roster.
+ */
+const WORKBUDDY_MEDIA_TAGS = new Set([
+  "text-to-image",
+  "image-to-image",
+  "text-to-video",
+  "image-to-video",
+]);
+
+/**
+ * True when every tag on the entry names a media-generation capability, which
+ * makes it unusable for chat completions. An untagged entry, or one carrying any
+ * other tag (`lite`, `craft`, `custom`), is kept: only a model that is media and
+ * nothing else is dropped.
+ */
+function isWorkbuddyMediaModel(item: Record<string, unknown>): boolean {
+  const tags = item.tags;
+  if (!Array.isArray(tags) || tags.length === 0) return false;
+  return tags.every((tag) => typeof tag === "string" && WORKBUDDY_MEDIA_TAGS.has(tag));
 }
 
 export function normalizeSapModelsResponse(

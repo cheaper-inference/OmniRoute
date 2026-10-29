@@ -18,6 +18,9 @@ const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const featureFlagsDb = await import("../../src/lib/db/featureFlags.ts");
 const modelsDevSync = await import("../../src/lib/modelsDevSync.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
+const contextWindowResolver = await import("../../src/lib/contextWindowResolver.ts");
+const syncedPersistence =
+  await import("../../src/lib/db/models/syncedAvailableModelPersistence.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
@@ -176,11 +179,11 @@ test("v1 models catalog includes display names by default", async () => {
     new Request("http://localhost/api/v1/models")
   );
   const body = (await response.json()) as any;
-  const model = body.data.find((item) => item.id === "oc/big-pickle");
+  const model = body.data.find((item) => item.id === "unc/turboderp/Qwen3.8-27B-exl3");
 
   assert.equal(response.status, 200);
   assert.ok(model);
-  assert.equal(model.name, "Big Pickle");
+  assert.equal(model.name, "Qwen3.8 27B exl3 (🆓 Free)");
 });
 
 test("v1 models catalog omits display names when the feature flag is disabled", async () => {
@@ -191,12 +194,12 @@ test("v1 models catalog omits display names when the feature flag is disabled", 
       new Request("http://localhost/api/v1/models")
     );
     const body = (await response.json()) as any;
-    const model = body.data.find((item) => item.id === "oc/big-pickle");
+    const model = body.data.find((item) => item.id === "unc/turboderp/Qwen3.8-27B-exl3");
 
     assert.equal(response.status, 200);
     assert.ok(model);
     assert.equal("name" in model, false);
-    assert.equal(model.root, "big-pickle");
+    assert.equal(model.root, "turboderp/Qwen3.8-27B-exl3");
   } finally {
     featureFlagsDb.removeFeatureFlagOverride("MODEL_CATALOG_INCLUDE_NAMES");
   }
@@ -629,15 +632,15 @@ test("v1 models catalog exposes refreshed GitHub Copilot aliases and drops retir
     new Request("http://localhost/api/v1/models")
   );
   const body = (await response.json()) as any;
-  const aliasModel = body.data.find((item) => item.id === "gh/gpt-5.4");
-  const providerModel = body.data.find((item) => item.id === "github/gpt-5.4");
-  const codexModel = body.data.find((item) => item.id === "gh/gpt-5.3-codex");
-  const opusModel = body.data.find((item) => item.id === "github/claude-opus-4.7");
+  const aliasModel = body.data.find((item) => item.id === "gh/gpt-6-astra");
+  const providerModel = body.data.find((item) => item.id === "github/gpt-6-astra");
+  const solModel = body.data.find((item) => item.id === "gh/gpt-5.6-sol");
+  const opusModel = body.data.find((item) => item.id === "github/claude-opus-5");
 
   assert.equal(response.status, 200);
   assert.ok(aliasModel);
   assert.ok(providerModel);
-  assert.ok(codexModel);
+  assert.ok(solModel);
   assert.ok(opusModel);
   assert.equal(providerModel.parent, aliasModel.id);
   assert.equal(
@@ -665,7 +668,9 @@ test("v1 models catalog exposes bare Codex-preferred IDs for native Codex client
   const getModel = (id: string) => body.data.find((item) => item.id === id);
 
   assert.equal(response.status, 200);
-  const modelId = "codex-auto-review";
+  // The tip catalog still serves the bare codex-auto-review id.
+  assert.ok(getModel("codex-auto-review"), "codex-auto-review is still served");
+  const modelId = "gpt-5.6-sol";
   const bareModel = getModel(modelId);
   const providerModel = getModel(`codex/${modelId}`);
   const aliasModel = getModel(`cx/${modelId}`);
@@ -697,9 +702,9 @@ test("v1 models catalog exposes current Antigravity aliases without retired mode
   assert.equal(ids.has("antigravity/gemini-3.1-pro"), false);
   assert.equal(ids.has("antigravity/gemini-2.5-computer-use-preview-10-2025"), false);
   assert.equal(ids.has("antigravity/rev19-uic3-1p"), false);
-  assert.ok(ids.has("antigravity/gemini-3.7-flash-high"));
-  assert.ok(ids.has("antigravity/gemini-3.7-flash-medium"));
-  assert.ok(ids.has("antigravity/gemini-3.7-flash-low"));
+  assert.ok(ids.has("antigravity/gemini-3.8-flash-high"));
+  assert.ok(ids.has("antigravity/gemini-3.8-flash-medium"));
+  assert.ok(ids.has("antigravity/gemini-3.8-flash-low"));
   assert.equal(ids.has("antigravity/gemini-3.6-flash-high"), false);
   assert.equal(ids.has("antigravity/gemini-3.6-flash-medium"), false);
   assert.equal(ids.has("antigravity/gemini-3.6-flash-low"), false);
@@ -884,23 +889,16 @@ test("v1 models catalog retains registered effort aliases beside synced OpenCode
   assert.ok(ids.includes("opencode-go/hy3-high"));
 });
 
-test("v1 models catalog advertises GLM-5.2 provider aliases with hosted context limits", async () => {
-  const hfConnection = await seedConnection("huggingface", {
-    name: "huggingface-glm52",
-    apiKey: "hf-key",
+test("v1 models catalog preserves GLM-5.2 limits alongside GitHub Copilot Astra", async () => {
+  await seedConnection("github", {
+    authType: "oauth",
+    accessToken: "github-access",
+    providerSpecificData: { copilotToken: "copilot-token" },
   });
-  const cfConnection = await seedConnection("cloudflare-ai", {
-    name: "cloudflare-glm52",
-    apiKey: "cf-key",
-  });
-  const zenmuxConnection = await seedConnection("zenmux", {
-    name: "zenmux-glm52",
-    apiKey: "zen-key",
-  });
-  await seedConnection("opencode-go", {
-    name: "opencode-go-glm52",
-    apiKey: "go-key",
-  });
+  const hfConnection = await seedConnection("huggingface");
+  const cfConnection = await seedConnection("cloudflare-ai");
+  const zenmuxConnection = await seedConnection("zenmux");
+  await seedConnection("opencode-go");
 
   await modelsDb.replaceSyncedAvailableModelsForConnection(
     "huggingface",
@@ -940,7 +938,6 @@ test("v1 models catalog advertises GLM-5.2 provider aliases with hosted context 
       outputTokenLimit: 128000,
     },
   ]);
-
   try {
     modelsDevSync.saveModelsDevCapabilities({
       huggingface: {
@@ -953,13 +950,23 @@ test("v1 models catalog advertises GLM-5.2 provider aliases with hosted context 
         "z-ai/glm-5.2": capability({ limit_context: 128000, limit_input: 128000 }),
       },
     });
+    // The synced 128K window reaches the catalog through the context-window reconcile
+    // (auto:discovery pin). Since #18048 the post-sync reconcile is a 5 s trailing
+    // debounce instead of setTimeout(0), so settle it explicitly — the state production
+    // reaches once the debounce fires — instead of racing the timer against the build.
+    syncedPersistence.cancelPendingPostSyncReconcile();
+    await contextWindowResolver.runContextWindowReconcile({
+      providers: ["huggingface", "cloudflare-ai", "zenmux"],
+    });
 
     const response = await v1ModelsCatalog.getUnifiedModelsResponse(
       new Request("http://localhost/api/v1/models")
     );
     const body = (await response.json()) as any;
     const byId = new Map(body.data.map((item) => [item.id, item]));
-
+    for (const id of ["github/gpt-6-astra", "gh/gpt-6-astra"]) assert.ok(byId.has(id), id);
+    // GLM-5.2 limits are unchanged by #12759 (no HF/Cloudflare/ZenMux registry change here):
+    // the release tip resolves these routes to the synced 128K window, OpenCode Go to 1M.
     for (const [id, expectedContext] of [
       ["huggingface/zai-org/GLM-5.2", 128000],
       ["cloudflare-ai/@cf/zai-org/glm-5.2", 128000],
@@ -1296,7 +1303,7 @@ test("v1 models catalog lets provider-specific synced limits beat global static 
   try {
     modelsDevSync.saveModelsDevCapabilities({
       github: {
-        "gpt-5.5": {
+        "gpt-5.6-sol": {
           tool_call: true,
           reasoning: true,
           attachment: true,
@@ -1322,12 +1329,12 @@ test("v1 models catalog lets provider-specific synced limits beat global static 
       new Request("http://localhost/api/v1/models")
     );
     const body = (await response.json()) as any;
-    const model = body.data.find((item) => item.id === "gh/gpt-5.5");
+    const model = body.data.find((item) => item.id === "gh/gpt-5.6-sol");
 
     assert.equal(response.status, 200);
     assert.ok(model);
     assert.equal(model.context_length, 400000);
-    assert.equal(model.max_input_tokens, 272000);
+    assert.equal(model.max_input_tokens, 400000);
     assert.equal(model.max_output_tokens, 128000);
   } finally {
     modelsDevSync.saveModelsDevCapabilities({});
@@ -1605,7 +1612,7 @@ test("v1 models catalog computes combo context_length from known targets when so
   );
 });
 
-// Regression test for Issue #2798: noAuth providers (opencode/oc) have no DB connection rows
+// Regression test for Issue #2798: noAuth providers (e.g. uncloseai/unc) have no DB connection rows
 // but their models must still appear in /v1/models.
 test("v1 models catalog includes noAuth provider models when no DB connections exist (#2798)", async () => {
   // No connections seeded — empty DB, simulating a fresh install with no credentials added.
@@ -1616,21 +1623,21 @@ test("v1 models catalog includes noAuth provider models when no DB connections e
   const ids: string[] = body.data.map((item: any) => item.id);
 
   assert.equal(response.status, 200);
-  // opencode (noAuth) models must surface even with zero connection rows.
-  // The registry defines models under alias "oc" (e.g. "oc/big-pickle").
+  // noAuth models must surface even with zero connection rows, under the
+  // provider alias (e.g. "unc/<model>").
   assert.ok(
-    ids.some((id) => id.startsWith("oc/")),
-    `Expected at least one oc/* model in /v1/models but got none. IDs sample: ${ids.slice(0, 10).join(", ")}`
+    ids.some((id) => id.startsWith("unc/")),
+    `Expected at least one unc/* model in /v1/models but got none. IDs sample: ${ids.slice(0, 10).join(", ")}`
   );
   assert.equal(
-    ids.some((id) => id.startsWith("opencode/")),
+    ids.some((id) => id.startsWith("oc/")),
     false,
-    "catalog must not return opencode/* noAuth aliases because opencode/ routes to opencode-zen"
+    "the removed keyless OpenCode provider must not publish oc/* models"
   );
 });
 
 test("v1 models catalog hides disabled noAuth provider models", async () => {
-  await settingsDb.updateSettings({ blockedProviders: ["opencode", "duckduckgo-web"] });
+  await settingsDb.updateSettings({ blockedProviders: ["uncloseai", "duckduckgo-web"] });
 
   const response = await v1ModelsCatalog.getUnifiedModelsResponse(
     new Request("http://localhost/api/v1/models")
@@ -1640,9 +1647,9 @@ test("v1 models catalog hides disabled noAuth provider models", async () => {
 
   assert.equal(response.status, 200);
   assert.equal(
-    ids.some((id) => id.startsWith("oc/")),
+    ids.some((id) => id.startsWith("unc/")),
     false,
-    "OpenCode no-auth models must be hidden while no-auth providers are disabled"
+    "UncloseAI no-auth models must be hidden while no-auth providers are disabled"
   );
   assert.equal(
     ids.some((id) => id.startsWith("ddgw/")),

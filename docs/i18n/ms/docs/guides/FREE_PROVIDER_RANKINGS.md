@@ -11,32 +11,19 @@
 
 ---
 
-## Apakah Ia
+## Apa Itu
 
-OmniRoute mendaftarkan 329 penyedia, termasuk 155 entri katalog yang ditandai sebagai **percuma/tanpa pengesahan**
-(tanpa pengesahan,
-OAuth peringkat percuma atau kunci API peringkat percuma — lihat
-[Panduan Peringkat Percuma](../getting-started/FREE-TIERS-GUIDE.md) dan
-[Direktori Peringkat Percuma](../reference/FREE_TIERS.md) yang lengkap). Namun begitu, kualiti
-model penyedia percuma sangat berbeza-beza. Penyedia tanpa pengesahan yang menawarkan model termaju jauh lebih berguna
-berbanding penyedia yang menawarkan model legasi kecil.
+OmniRoute mendaftarkan 377 pembekal, termasuk 155 entri katalog yang ditanda**free/no-auth** (no-auth, free-tier OAuth, atau free-tier API key — lihat [Panduan Tahap Percuma](../getting-started/FREE-TIERS-GUIDE.md) dan [direktori Tahap Percuma](../reference/FREE_TIERS.md) penuh ). Tangkapan: pembekal percuma berbeza-beza dalam kualiti model. Pembekal tanpa pengesahan yang menyediakan model sempadan jauh lebih berguna daripada penyedia yang menyediakan model lama yang kecil.
 
-**Kedudukan Penyedia Percuma** menjawab "**penyedia percuma manakah yang memberikan model terbaik kepada saya?**" dengan
-menggabungkan katalog setiap penyedia percuma dengan **skor kualiti sumber khalayak** daripada
-**papan pendahulu Arena AI** (ELO keutamaan manusia, konsep yang sama di sebalik arena
-chatbot LMArena). Penyedia kemudiannya disusun mengikut kekuatan **model percuma terbaik** mereka.
+**Kedudukan Pembekal Percuma** jawapan"** penyedia percuma manakah yang memberikan saya model terbaik?** " dengan menyertai setiap katalog pembekal percuma dengan** skor kualiti bersumberkan orang ramai** daripada** Arena AI papan pendahulu** (human-preference ELO, idea yang sama di sebalik arena chatbot LMArena). Penyedia kemudian diberi kedudukan berdasarkan kekuatan mereka** model percuma terbaik** .
 
 Kedudukan dikira daripada tiga sumber sebenar:
 
-1. Senarai penyedia percuma — `NOAUTH_PROVIDERS`, serta entri `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` yang ditandai `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Katalog model setiap penyedia daripada daftaran penyedia
-   (`open-sse/config/providerRegistry.ts`).
-3. Skor kesesuaian tugasan terbitan ELO yang disimpan dalam jadual DB `model_intelligence` oleh
-   enjin penyegerakan ELO Arena (`src/lib/arenaEloSync.ts`).
+1. Penyenaraian percuma — `NOAUTH_PROVIDERS`, serta masukan `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` yang dibenderakan `hasFree` (`src/shared/constants/providers.ts`).
+2. Katalog model setiap pembekal daripada pendaftaran pembekal (`open-sse/config/providerRegistry.ts`).
+3. Skor muat tugasan yang diperolehi oleh ELO disimpan dalam jadual `model_intelligence` DB oleh enjin penyegerakan ELO Arena (`src/lib/arenaEloSync.ts`).
 
-Logik penggabungan terdapat dalam `src/lib/freeProviderRankings.ts`.
+Logik bergabung tinggal di `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -120,14 +107,11 @@ Bentuk respons:
 
 ---
 
-## Cara Skor Berfungsi
+## Bagaimana Skor Berfungsi
 
-### Sumber: papan pendahulu Arena AI
+### Sumber: Papan pendahulu Arena AI
 
-Enjin penyegerakan ELO Arena (`src/lib/arenaEloSync.ts`) mendapatkan dua papan pendahulu — `text`
-dan `code` — daripada API papan pendahulu Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Setiap entri papan pendahulu
-mengandungi nama model, vendor, `score` ELO, selang keyakinan dan bilangan undian.
+Enjin penyegerakan ELO Arena (`src/lib/arenaEloSync.ts`) mengambil dua papan pendahulu — `text` dan `code` — daripada API papan pendahulu Arena AI (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Apabila API itu tidak mengembalikan papan yang boleh digunakan, enjin ini beralih kepada set data rasmi `lmarena-ai/leaderboard-dataset` pada datasets-server Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`, `coding` → `code`); `GET /api/intelligence/sync` melaporkan `activeSource`, `lastError` dan `lastFailedAt`. Setiap entri papan pendahulu membawa nama model, vendor, `score` ELO, selang keyakinan dan kiraan undi.
 
 Kategori papan pendahulu dipetakan kepada kategori tugas OmniRoute:
 
@@ -136,22 +120,21 @@ Kategori papan pendahulu dipetakan kepada kategori tugas OmniRoute:
 | `text`                | `default`, `review`, `documentation`, `debugging` |
 | `code`                | `coding`                                          |
 
-### Penormalan (skor kesesuaian tugas)
+### Normalisasi (skor kesesuaian tugas)
 
-Skor ELO mentah dinormalkan bagi setiap papan pendahulu kepada **nilai kesesuaian tugas dalam `[0.4, 0.98]`**:
+Skor ELO mentah dinormalkan mengikut papan pendahulu kepada **nilai kesesuaian tugas dalam `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Skor tidak pernah mencapai `0` atau `1`, sekali gus menyediakan ruang untuk penggantian oleh pengguna. Ini ialah
-medan `score` yang anda lihat dalam respons API dan label yang dipaparkan pada papan pemuka.
+Skor tidak pernah mencapai `0` atau `1`, supaya ada ruang untuk penggantian pengguna. Inilah medan `score` yang anda lihat dalam respons API dan label yang dipaparkan pada papan pemuka.
 
 ### Keyakinan
 
-Setiap entri diberikan tahap keyakinan berdasarkan bilangan undian Arena:
+Setiap entri diberikan tahap keyakinan berdasarkan kiraan undi Arena:
 
-| Keyakinan | Undian  |
+| Keyakinan | Undi    |
 | --------- | ------- |
 | `high`    | ≥ 5,000 |
 | `medium`  | ≥ 1,000 |
@@ -159,65 +142,51 @@ Setiap entri diberikan tahap keyakinan berdasarkan bilangan undian Arena:
 
 ### Penyimpanan dan kesegaran
 
-Entri yang dinormalkan ditulis ke jadual DB `model_intelligence` dengan
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Entri **luput selepas
-7 hari**, jadi penyedia yang berhenti menyegerak akhirnya akan dikeluarkan dan bukannya menyajikan
-data lapuk.
+Entri yang dinormalkan ditulis ke jadual pangkalan data `model_intelligence` dengan `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Entri **luput selepas 7 hari**, jadi pembekal yang berhenti menyegerak akhirnya akan terkeluar daripada senarai dan bukannya menyajikan data lapuk.
 
-Penyegerakan **diaktifkan secara lalai**:
+Penyegerakan ini **aktif secara lalai**:
 
-- Ia dijalankan sekali semasa pelayan dimulakan dan kemudian mengikut pemasa berkala
-  (`src/lib/arenaEloSync.ts`, disambungkan daripada `src/instrumentation-node.ts`).
-- Ia **tidak menyekat dan tidak pernah menyebabkan kegagalan kritikal** — jika pengambilan daripada sumber huluan gagal, OmniRoute terus
-  berjalan dan kedudukan hanya memaparkan data sah terakhir (atau keadaan kosong).
+- Ia berjalan sekali semasa permulaan pelayan dan kemudian mengikut pemasa berkala (`src/lib/arenaEloSync.ts`, disambungkan dari `src/instrumentation-node.ts`).
+- Ia **tidak menyekat dan tidak pernah membawa maut** — jika pengambilan hulu gagal, OmniRoute terus berjalan dan kedudukan hanya memaparkan data baik yang terakhir (atau keadaan kosong).
 
-Dua pemboleh ubah persekitaran mengawalnya (didokumentasikan dalam
-[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
+Dua pembolehubah persekitaran mengawalnya (didokumentasikan dalam [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Pemboleh ubah             | Lalai         | Tujuan                                                                   |
-| ------------------------- | ------------- | ------------------------------------------------------------------------ |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Tetapkan kepada `false` untuk menarik diri daripada penyegerakan keluar. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24j) | Selang penyegerakan, dalam saat.                                         |
+| Pembolehubah              | Lalai         | Tujuan                                                            |
+| ------------------------- | ------------- | ----------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Tetapkan kepada `false` untuk menyahaktifkan penyegerakan keluar. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Selang penyegerakan, dalam saat.                                  |
 
 ### Penyegerakan manual / status / kosongkan
 
-Untuk pengendali, titik akhir pengurusan yang disahkan menyediakan kawalan manual
-(`src/app/api/intelligence/sync/route.ts` — memerlukan pengesahan pengurusan):
+Untuk pengendali, titik akhir pengurusan yang disahkan mendedahkan kawalan manual (`src/app/api/intelligence/sync/route.ts` — memerlukan pengesahan pengurusan):
 
 ```
 GET    /api/intelligence/sync          # status penyegerakan semasa (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # cetuskan penyegerakan manual; isi: { "dryRun": true } untuk pratonton tanpa menulis
+POST   /api/intelligence/sync          # picu penyegerakan manual; badan: { "dryRun": true } untuk pratonton tanpa menulis
 DELETE /api/intelligence/sync          # kosongkan semua entri kecerdasan arena_elo yang disegerakkan
 ```
 
-Jika halaman kedudukan kosong, `POST /api/intelligence/sync` secara manual (atau hanya
-memulakan semula pelayan) akan mengisinya semula.
+Jika halaman kedudukan kosong, `POST /api/intelligence/sync` manual (atau sekadar memulakan semula pelayan) akan mengisinya semula.
 
 ### Memadankan model dengan papan pendahulu
 
-ID model registri dan nama model Arena tidak semestinya sepadan sepenuhnya. Kedudukan menggunakan
-pemadanan fleksibel (`findMatchingIntelligence` dalam `src/lib/freeProviderRankings.ts`):
+ID model pendaftaran dan nama model Arena tidak semestinya sepadan dengan tepat. Kedudukan menggunakan padanan fleksibel (`findMatchingIntelligence` dalam `src/lib/freeProviderRankings.ts`):
 
 1. Padanan tepat pada ID model yang dinormalkan.
-2. Padanan selepas membuang akhiran versi di hujung (contohnya `kimi-k2.6` → `kimi-k2`).
-3. Padanan awalan (nama model papan pendahulu ialah awalan kepada ID registri).
+2. Padanan selepas membuang akhiran versi di hujung (cth. `kimi-k2.6` → `kimi-k2`).
+3. Padanan awalan (nama model papan pendahulu ialah awalan kepada ID pendaftaran).
 
-Pada bahagian penyegerakan, awalan vendor yang diketahui (`anthropic/`, `openai/`, `google/`, …)
-dibuang dan peta alias kecil mengembangkan nama kanonik kepada varian yang digunakan OmniRoute
-secara dalaman, supaya model kekal boleh ditemukan di bawah sebarang nama.
+Di bahagian penyegerakan, awalan vendor yang diketahui (`anthropic/`, `openai/`, `google/`, …) dibuang dan peta alias kecil mengembangkan nama kanonik kepada varian yang digunakan OmniRoute secara dalaman, supaya model kekal mudah ditemui di bawah sebarang nama.
 
-### Cara penyedia diberi kedudukan
+### Cara pembekal disusun
 
-Bagi setiap penyedia percuma, enjin memberi skor kepada setiap model dalam katalognya, kemudian:
+Untuk setiap pembekal percuma, enjin memberi skor kepada setiap model dalam katalognya, kemudian:
 
-- **Model Teratas** = model penyedia dengan skor tertinggi.
-- **Purata Skor** = skor purata merentas semua model penyedia yang telah diberi skor.
-- **Model** = bilangan model penyedia yang mempunyai skor Arena.
+- **Model Teratas** = model dengan skor tertinggi milik pembekal.
+- **Skor Purata** = skor min merentasi semua model pembekal itu yang mempunyai skor.
+- **Model** = bilangan model pembekal yang mempunyai skor Arena.
 
-Penyedia diisih mengikut **skor model teratas** terlebih dahulu, kemudian mengikut skor purata. Ini memberi ganjaran kepada
-penyedia yang menawarkan sekurang-kurangnya satu model percuma yang kukuh.
-
----
+Pembekal diisih mengikut **skor model teratas** dahulu, kemudian mengikut skor purata. Ini memberi ganjaran kepada pembekal yang menyediakan sekurang-kurangnya satu model percuma yang kukuh.
 
 ## Menggunakannya untuk Memilih Penyedia Percuma
 

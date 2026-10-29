@@ -34,8 +34,10 @@ const ANTHROPIC_BETA_BASE = Object.freeze([
 const CLAUDE_OAUTH_EXTRA_BETAS = Object.freeze(["fine-grained-tool-streaming-2025-05-14"]);
 
 export const ANTHROPIC_BETA_FULL = ANTHROPIC_BETA_BASE.join(",");
+// Plain API-key requests do not use the Claude Code wire protocol or OAuth.
+// Keep those identity betas in the full/OAuth sets, not in the API defaults.
 export const ANTHROPIC_BETA_API_KEY = ANTHROPIC_BETA_BASE.filter(
-  (beta) => beta !== "oauth-2025-04-20"
+  (beta) => beta !== "oauth-2025-04-20" && beta !== "claude-code-20250219"
 ).join(",");
 export const ANTHROPIC_BETA_CLAUDE_OAUTH = [
   ...ANTHROPIC_BETA_BASE.slice(0, 3),
@@ -202,6 +204,19 @@ export function syncSkillsBeta(
   }
 }
 
+/** Anthropic beta that admits `role: "system"` turns inside `messages[]`. */
+export const MID_CONVERSATION_SYSTEM_BETA = "mid-conversation-system-2026-04-07";
+
+/** Whether a Claude body still carries a system-role turn inside `messages[]`. */
+export function hasMidConversationSystemTurn(body: unknown): boolean {
+  const messages = (body as Record<string, unknown> | null | undefined)?.messages;
+  if (!Array.isArray(messages)) return false;
+  return messages.some((message) => {
+    const role = (message as Record<string, unknown> | null)?.role;
+    return typeof role === "string" && role.toLowerCase() === "system";
+  });
+}
+
 /**
  * Client-negotiated `anthropic-beta` values that are safe to forward to the
  * claude.ai backend on top of OmniRoute's own set. Kept to betas the backend
@@ -250,6 +265,28 @@ export function syncSkillsBeta(
  * and `per-message-effort-2026-07-01` as aliases. Those two are deliberately
  * trimmed: no known client sends them, and OmniRoute's Bedrock executor does
  * not negotiate `anthropic_beta` at all.
+ *
+ * `timing-2026-09-09` and `inline-tools-2026-09-15` are the other two per-turn
+ * betas Claude Code puts on the wire, captured from @anthropic-ai/claude-code@2.1.284
+ * (`C("per_turn_timing","timing-2026-09-09")` and
+ * `C("inline_tools","inline-tools-2026-09-15")` in the shipped binary). The
+ * inline-tools beta gates message-level `tool_addition` blocks; without it
+ * upstream rejects the body with a 400 whose message reads
+ * "`tool_addition` blocks require anthropic-beta".
+ *
+ * `server-side-fallback-2026-06-01` and `server-side-fallback-2026-07-01` gate the top-level
+ * `fallbacks` body parameter (server-side model fallback) that Claude Code sends by default on
+ * the models that support it, captured from @anthropic-ai/claude-code@2.1.295
+ * (`R("server_side_fallback","server-side-fallback-2026-06-01")` and
+ * `R("server_side_fallback_category","server-side-fallback-2026-07-01")` in the shipped binary).
+ * The `fallbacks` field travels through the passthrough; without its beta upstream rejects the
+ * body with `400 fallbacks: Extra inputs are not permitted`.
+ *
+ * `fast-mode-2026-02-01` gates the top-level `speed` body parameter (Anthropic Fast Mode) that
+ * Claude Code sends on both `/fast on` and `/fast off`. The `speed` field travels through the
+ * passthrough; without its beta upstream rejects the body with a 400 whose message reads
+ * "To use the `speed` parameter with '<model>', send the `anthropic-beta: fast-mode-2026-02-01`
+ * header".
  */
 export const FORWARDABLE_CLIENT_BETAS = Object.freeze([
   "tool-search-tool-2025-10-19",
@@ -270,6 +307,18 @@ export const FORWARDABLE_CLIENT_BETAS = Object.freeze([
   "thinking-display-updates-2026-08-18",
   "dangerous-tool-use-2026-09-03",
   "afk-mode-2026-01-31",
+  "timing-2026-09-09",
+  "inline-tools-2026-09-15",
+  // Top-level `thread` {type:create|continue,previous_message_id} (#15705), captured from
+  // @anthropic-ai/claude-code@2.1.291 (`v("message_threads","message-threads-2026-08-12")`).
+  // The body field passes through; without this beta upstream 400s "thread: Extra inputs".
+  "message-threads-2026-08-12",
+  // Top-level `fallbacks` (server-side model fallback), captured from
+  // @anthropic-ai/claude-code@2.1.295 — see the doc comment above. The body field passes through;
+  // without these betas upstream 400s "fallbacks: Extra inputs are not permitted".
+  "server-side-fallback-2026-06-01",
+  "server-side-fallback-2026-07-01",
+  "fast-mode-2026-02-01",
 ]);
 
 /**
@@ -344,6 +393,13 @@ export function mergeClientAnthropicBeta(
  * the allowlist still decides what travels and the gateway never invents betas a
  * third-party upstream did not advertise. A merge that survives to nothing leaves
  * the header unset instead of emitting an empty one.
+ *
+ * Same seeded path: with ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM on and the beta
+ * negotiated by the client, chatCore keeps mid-conversation system turns inside messages[]
+ * for these relays (open-sse/services/claudeMidConversationSystem.ts), so the client's own
+ * `mid-conversation-system-2026-04-07` token is forwarded too — never invented, and only
+ * while such a turn is still in the body (with the flag off every turn is hoisted first,
+ * so the header stays exactly as before).
  */
 export function applyClientAnthropicBeta(
   headers: Record<string, string>,
@@ -354,10 +410,14 @@ export function applyClientAnthropicBeta(
   const existingKey = Object.keys(headers).find((key) => key.toLowerCase() === "anthropic-beta");
   const key = existingKey ?? (options.seedWhenAbsent ? "anthropic-beta" : null);
   if (!key) return;
+  const allow =
+    options.seedWhenAbsent && hasMidConversationSystemTurn(options.body)
+      ? [...FORWARDABLE_CLIENT_BETAS, MID_CONVERSATION_SYSTEM_BETA]
+      : undefined;
   const merged = mergeClientAnthropicBeta(
     headers[key] ?? "",
     clientBeta,
-    undefined,
+    allow,
     options.model,
     options.body
   );

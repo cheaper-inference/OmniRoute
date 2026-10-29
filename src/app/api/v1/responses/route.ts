@@ -1,10 +1,13 @@
 import { z } from "zod";
 import { handleChat } from "@/sse/handlers/chat";
+import { logAdmissionRejection } from "@/sse/handlers/admissionRejectionLog";
 import { CORS_HEADERS } from "@/shared/utils/cors";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { resolveResponsesApiModel } from "@/app/api/internal/codex-responses-ws/modelResolution";
 import { getModelInfo, getComboForModel } from "@/sse/services/model";
 import { generateRequestId } from "@/shared/utils/requestId";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
+import { resolveIncomingCorrelationId } from "@/shared/utils/correlationPreserve.ts";
 import {
   admitChatRequest,
   admitChatStructure,
@@ -22,7 +25,10 @@ import {
 } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
 import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
-import { OPENAI_RESPONSES_IN_PROGRESS_FRAME } from "@omniroute/open-sse/utils/sseHeartbeat";
+import {
+  buildKeepaliveResponseId,
+  buildResponsesInProgressFrame,
+} from "@omniroute/open-sse/utils/responsesKeepaliveFrame";
 
 // NOTE: We do NOT call initTranslators() here — the translator registry is
 // bootstrapped at module level inside open-sse/translator/index.ts when it
@@ -98,7 +104,22 @@ export async function withCodexPreferredModel(
  * POST /v1/responses - OpenAI Responses API format
  * Handled by the unified chat handler (openai-responses format auto-detected).
  */
+// #17825: per-request complete frame (stable id, request-time created_at, request model).
+function buildRequestKeepaliveFrame(body: { model?: unknown } | null | undefined) {
+  const model = body?.model;
+  return buildResponsesInProgressFrame({
+    id: buildKeepaliveResponseId(),
+    model: typeof model === "string" ? model : undefined,
+  });
+}
+
 async function postHandler(request: any) {
+  // Defense-in-depth: the authz proxy (src/proxy.ts) is the primary gate, but
+  // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
+  // handler enforces authentication independently.
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
+
   // Keep the framework Request untouched until the route has parsed enough state
   // to know this is a streaming response. Deadline lifecycle belongs to that branch.
   const sessionId = resolveSessionId(request);
@@ -106,7 +127,17 @@ async function postHandler(request: any) {
     sessionId,
     queueMs: CHAT_ADMISSION_QUEUE_MAX_MS,
   });
-  if (admissionResult.admit === false) return admissionResult.response;
+  if (admissionResult.admit === false) {
+    void logAdmissionRejection(admissionResult.response, {
+      path: new URL(request.url).pathname,
+      model: "-",
+      requestBody: null,
+      apiKeyId: null,
+      apiKeyName: null,
+      correlationId: resolveIncomingCorrelationId(request.headers.get("x-correlation-id")),
+    });
+    return admissionResult.response;
+  }
 
   const admission = admissionResult;
   request = admission.request;
@@ -132,6 +163,14 @@ async function postHandler(request: any) {
       signal: request.signal,
     });
     if (structuralAdmission.admit === false) {
+      void logAdmissionRejection(structuralAdmission.response, {
+        path: new URL(request.url).pathname,
+        model: typeof parsedBody?.model === "string" && parsedBody.model ? parsedBody.model : "-",
+        requestBody: parsedBody ?? null,
+        apiKeyId: null,
+        apiKeyName: null,
+        correlationId: resolveIncomingCorrelationId(request.headers.get("x-correlation-id")),
+      });
       admission.lease?.release();
       return finishAdmission(structuralAdmission.response);
     }
@@ -184,10 +223,13 @@ async function postHandler(request: any) {
       parsedBody
     );
     const accept = String(request.headers?.get?.("accept") || "");
+    const correlationId =
+      resolveIncomingCorrelationId(request.headers.get("x-correlation-id")) ??
+      resolveIncomingCorrelationId(request.headers.get("x-request-id")) ??
+      generateRequestId();
     const wantsStreaming = resolveStreamFlag(resolvedBody?.stream, accept, "openai-responses");
     if (wantsStreaming) {
       const thresholdMs = resolveKeepaliveThreshold(resolvedBody?.model);
-      const correlationId = generateRequestId();
       const { signal: streamSignal, deadlineController } = createStreamDeadlineSignal(
         request.signal
       );
@@ -196,21 +238,23 @@ async function postHandler(request: any) {
         admission.lease,
         { signal: streamSignal }
       );
+      const keepaliveFrame = buildRequestKeepaliveFrame(resolvedBody);
       return await withEarlyStreamKeepalive(handlerResponse, {
         signal: streamSignal,
         thresholdMs,
-        startupFrame: OPENAI_RESPONSES_IN_PROGRESS_FRAME,
+        startupFrame: keepaliveFrame,
         applicationKeepalive: {
-          frame: OPENAI_RESPONSES_IN_PROGRESS_FRAME,
+          frame: keepaliveFrame,
           intervalMs: SSE_HEARTBEAT_INTERVAL_MS,
         },
         errorFrame: OPENAI_RESPONSES_ERROR_FRAME,
+        extraHeaders: { "X-Correlation-Id": correlationId },
         correlationId,
         deadlineController,
       });
     }
 
-    return finishAdmission(await handleChat(resolved, null, resolvedBody));
+    return finishAdmission(await handleChat(resolved, null, resolvedBody, correlationId));
   } catch (error) {
     admission.lease?.release();
     throw error;

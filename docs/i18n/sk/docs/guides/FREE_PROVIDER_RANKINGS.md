@@ -13,30 +13,17 @@
 
 ## Čo to je
 
-OmniRoute registruje 329 poskytovateľov vrátane 155 položiek katalógu označených ako **bezplatné/nevyžadujúce overenie**
-(bez overenia,
-OAuth s bezplatnou úrovňou alebo API kľúč s bezplatnou úrovňou — pozrite si
-[Sprievodcu bezplatnými úrovňami](../getting-started/FREE-TIERS-GUIDE.md) a úplný
-[adresár bezplatných úrovní](../reference/FREE_TIERS.md)). Háčik spočíva v tom, že kvalita modelov
-bezplatných poskytovateľov sa výrazne líši. Poskytovateľ bez overenia, ktorý ponúka špičkový model, je oveľa užitočnejší
-než poskytovateľ ponúkajúci malý zastaraný model.
+OmniRoute eviduje 377 poskytovateľov, z toho 155 katalógových záznamov označených**free/no-auth** (kľúč no-auth, free-tier OAuth alebo free-tier API – pozrite si [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) a celý [adresár Free Tiers](../reference/FREE_TIERS.md) ). Háčik: bezplatní poskytovatelia sa veľmi líšia v kvalite modelu. Poskytovateľ bez autorizácie, ktorý poskytuje hraničný model, je oveľa užitočnejší ako ten, ktorý poskytuje malý starý model.
 
-**Rebríček bezplatných poskytovateľov** odpovedá na otázku „**ktorý bezplatný poskytovateľ mi ponúkne najlepší model?**“
-prepojením katalógu každého bezplatného poskytovateľa s **komunitne získanými skóre kvality** z
-**rebríčka Arena AI** (ELO založené na ľudských preferenciách, rovnaký princíp ako pri
-chatbotovej aréne LMArena). Poskytovatelia sú následne zoradení podľa kvality svojho **najlepšieho bezplatného modelu**.
+**Bezplatné hodnotenie poskytovateľov** odpovede"** ktorý bezplatný poskytovateľ mi ponúka najlepší model?** “ pripojením sa do katalógu každého bezplatného poskytovateľa s** davové skóre kvality** z** Rebríček Arena AI** (ľudské preferencie ELO, rovnaká myšlienka stojí za chatbot arénou LMArena). Poskytovatelia sú potom zoradení podľa sily ich** najlepší bezplatný model** .
 
-Rebríček sa vypočítava z troch skutočných zdrojov:
+Poradie je vypočítané z troch reálnych zdrojov:
 
-1. Zoznamy bezplatných poskytovateľov — `NOAUTH_PROVIDERS` a položky `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` označené príznakom `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Katalóg modelov každého poskytovateľa z registra poskytovateľov
-   (`open-sse/config/providerRegistry.ts`).
-3. Skóre vhodnosti pre jednotlivé úlohy odvodené z ELO, ktoré synchronizačný mechanizmus Arena ELO
-   (`src/lib/arenaEloSync.ts`) ukladá do databázovej tabuľky `model_intelligence`.
+1. Zoznamy bezplatných poskytovateľov — `NOAUTH_PROVIDERS` plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` položky označené príznakom `hasFree` (`src/shared/constants/providers.ts`).
+2. Katalóg modelov každého poskytovateľa z registra poskytovateľov (`open-sse/config/providerRegistry.ts`).
+3. Skóre prispôsobenia úloh odvodené od ELO uložené v tabuľke `model_intelligence` DB synchronizačným modulom Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Logika prepájania sa nachádza v `src/lib/freeProviderRankings.ts`.
+Logika spojenia žije v `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -124,10 +111,7 @@ Parametre dopytu (overované pomocou Zod):
 
 ### Zdroj: rebríček Arena AI
 
-Synchronizačný mechanizmus Arena ELO (`src/lib/arenaEloSync.ts`) získava z API rebríčka Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) dva rebríčky — `text`
-a `code`. Každá položka rebríčka obsahuje názov modelu, dodávateľa, ELO `score`,
-interval spoľahlivosti a počet hlasov.
+Synchronizačný engine Arena ELO (`src/lib/arenaEloSync.ts`) získava dva rebríčky — `text` a `code` — z API rebríčka Arena AI (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Keď toto API nevráti žiadny použiteľný rebríček, engine prejde na oficiálny `lmarena-ai/leaderboard-dataset` na datasets-serveri Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`, `coding` → `code`); `GET /api/intelligence/sync` hlási `activeSource`, `lastError` a `lastFailedAt`. Každá položka rebríčka obsahuje názov modelu, dodávateľa, ELO `score`, interval spoľahlivosti a počet hlasov.
 
 Kategórie rebríčka sa mapujú na kategórie úloh OmniRoute:
 
@@ -138,18 +122,17 @@ Kategórie rebríčka sa mapujú na kategórie úloh OmniRoute:
 
 ### Normalizácia (skóre vhodnosti pre úlohu)
 
-Nespracované skóre ELO sa v rámci každého rebríčka normalizuje na **hodnotu vhodnosti pre úlohu v rozsahu `[0.4, 0.98]`**:
+Surové ELO skóre sa v rámci každého rebríčka normalizujú na **hodnotu vhodnosti pre úlohu v intervale `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Skóre nikdy nedosiahne hodnotu `0` ani `1`, čím zostáva priestor na používateľské úpravy. Ide o
-pole `score`, ktoré vidíte v odpovedi API, a označenie zobrazené na ovládacom paneli.
+Skóre nikdy nedosiahne `0` ani `1`, čím zostáva priestor pre používateľské prepísania. Toto je pole `score`, ktoré vidíte v odpovedi API, a označenie zobrazované na informačnom paneli.
 
 ### Spoľahlivosť
 
-Každá položka dostane úroveň spoľahlivosti podľa počtu hlasov v Arena:
+Každá položka dostane úroveň spoľahlivosti na základe počtu hlasov v Arene:
 
 | Spoľahlivosť | Hlasy   |
 | ------------ | ------- |
@@ -157,65 +140,53 @@ Každá položka dostane úroveň spoľahlivosti podľa počtu hlasov v Arena:
 | `medium`     | ≥ 1 000 |
 | `low`        | < 1 000 |
 
-### Ukladanie a aktuálnosť
+### Ukladanie a čerstvosť
 
-Normalizované položky sa zapisujú do databázovej tabuľky `model_intelligence` s
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Platnosť položiek **vyprší po
-7 dňoch**, takže poskytovateľ, ktorý sa prestane synchronizovať, časom vypadne namiesto toho,
-aby poskytoval zastarané údaje.
+Normalizované položky sa zapisujú do databázovej tabuľky `model_intelligence` so `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Platnosť položiek **vyprší po 7 dňoch**, takže poskytovateľ, ktorý prestane synchronizovať, časom z rebríčka vypadne namiesto toho, aby poskytoval zastarané údaje.
 
-Synchronizácia je **predvolene zapnutá**:
+Synchronizácia beží **predvolene zapnutá**:
 
-- Spustí sa raz pri štarte servera a potom pravidelne podľa časovača
-  (`src/lib/arenaEloSync.ts`, zapojené zo súboru `src/instrumentation-node.ts`).
-- Je **neblokujúca a nikdy nie je fatálna** — ak získanie údajov zo vzdialeného zdroja zlyhá, OmniRoute
-  pokračuje v prevádzke a rebríčky jednoducho zobrazujú posledné platné údaje (alebo prázdny stav).
+- Spustí sa raz pri štarte servera a potom na periodickom časovači (`src/lib/arenaEloSync.ts`, zapojené z `src/instrumentation-node.ts`).
+- Je **neblokujúca a nikdy nie fatálna** — ak načítanie z upstreamu zlyhá, OmniRoute beží ďalej a rebríčky jednoducho zobrazujú posledné dobré údaje (alebo prázdny stav).
 
-Ovládajú ju dve premenné prostredia (zdokumentované v
-[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
+Ovládajú ju dve premenné prostredia (zdokumentované v [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
 | Premenná                  | Predvolená hodnota | Účel                                                               |
 | ------------------------- | ------------------ | ------------------------------------------------------------------ |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`             | Nastavením na `false` sa odhlásite z odchádzajúcej synchronizácie. |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`             | Nastavte na `false`, ak chcete zrušiť odchádzajúcu synchronizáciu. |
 | `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h)      | Interval synchronizácie v sekundách.                               |
 
 ### Manuálna synchronizácia / stav / vymazanie
 
-Operátorom poskytuje autentifikovaný koncový bod správy manuálne ovládanie
-(`src/app/api/intelligence/sync/route.ts` — vyžaduje autentifikáciu správy):
+Pre operátorov je k dispozícii autentifikovaný správcovský endpoint s manuálnym ovládaním (`src/app/api/intelligence/sync/route.ts` — vyžaduje správcovskú autentifikáciu):
 
 ```
 GET    /api/intelligence/sync          # aktuálny stav synchronizácie (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # spustenie manuálnej synchronizácie; telo: { "dryRun": true } na náhľad bez zápisu
-DELETE /api/intelligence/sync          # vymazanie všetkých synchronizovaných položiek inteligencie arena_elo
+POST   /api/intelligence/sync          # spustí manuálnu synchronizáciu; telo: { "dryRun": true } pre náhľad bez zápisu
+DELETE /api/intelligence/sync          # vymaže všetky synchronizované záznamy inteligencie arena_elo
 ```
 
-Ak je stránka rebríčka prázdna, manuálny príkaz `POST /api/intelligence/sync` (alebo jednoducho
-reštartovanie servera) ju znova naplní.
+Ak je stránka rebríčkov prázdna, manuálny `POST /api/intelligence/sync` (alebo jednoduchý reštart servera) ju znova naplní.
 
 ### Priraďovanie modelov k rebríčku
 
-ID modelov v registri a názvy modelov Arena sa nie vždy presne zhodujú. Rebríček používa
-flexibilné priraďovanie (`findMatchingIntelligence` v `src/lib/freeProviderRankings.ts`):
+ID modelov v registri a názvy modelov v Arene sa nie vždy presne zhodujú. Hodnotenie používa flexibilné priraďovanie (`findMatchingIntelligence` v `src/lib/freeProviderRankings.ts`):
 
-1. Presná zhoda normalizovaného ID modelu.
+1. Presná zhoda na normalizovanom ID modelu.
 2. Zhoda po odstránení koncovej prípony verzie (napr. `kimi-k2.6` → `kimi-k2`).
-3. Zhoda podľa prefixu (názov modelu v rebríčku je prefixom ID v registri).
+3. Prefixová zhoda (názov modelu v rebríčku je prefixom ID v registri).
 
-Na strane synchronizácie sa odstraňujú známe prefixy dodávateľov (`anthropic/`, `openai/`, `google/`, …)
-a malá mapa aliasov rozširuje kanonické názvy na varianty, ktoré OmniRoute používa
-interne, takže modely zostávajú dohľadateľné pod ľubovoľným názvom.
+Na strane synchronizácie sa odstraňujú známe prefixy dodávateľov (`anthropic/`, `openai/`, `google/`, …) a malá mapa aliasov rozširuje kanonické názvy na varianty, ktoré OmniRoute používa interne, takže modely zostávajú dohľadateľné pod akýmkoľvek názvom.
 
-### Ako sa poskytovateľ umiestňuje v rebríčku
+### Ako je poskytovateľ hodnotený
 
-Pre každého bezplatného poskytovateľa mechanizmus ohodnotí každý model v jeho katalógu a potom:
+Pre každého bezplatného poskytovateľa engine ohodnotí každý model v jeho katalógu a potom:
 
-- **Najlepší model** = model poskytovateľa s najvyšším skóre.
-- **Priemerné skóre** = priemerné skóre všetkých ohodnotených modelov daného poskytovateľa.
-- **Modely** = počet modelov poskytovateľa, ktoré mali skóre Arena.
+- **Najlepší model** = najvyššie hodnotený model poskytovateľa.
+- **Priemerné skóre** = priemer skóre naprieč všetkými hodnotenými modelmi poskytovateľa.
+- **Modely** = koľko modelov poskytovateľa malo skóre v Arene.
 
-Poskytovatelia sa najprv zoradia podľa **skóre najlepšieho modelu** a potom podľa priemerného skóre. Tým sa
-zvýhodní poskytovateľ, ktorý ponúka aspoň jeden kvalitný bezplatný model.
+Poskytovatelia sú zoradení najprv podľa **skóre najlepšieho modelu**, potom podľa priemerného skóre. To odmeňuje poskytovateľa, ktorý ponúka aspoň jeden silný bezplatný model.
 
 ---
 

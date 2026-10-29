@@ -97,7 +97,7 @@ describe("catalog provider template", () => {
       ],
       combosFetcher: async () => [],
     });
-    assert.deepEqual(res, { models: 2, combos: 0, autoCombos: 0 });
+    assert.deepEqual(res, { models: 2, combos: 0 });
     const m = draft.models.get("omniroute/gpt-x");
     assert.ok(m);
     assert.equal(m?.providerID, "omniroute");
@@ -160,7 +160,7 @@ describe("catalog fail-open", () => {
         },
         combosFetcher: async () => [],
       });
-      assert.deepEqual(res, { models: 0, combos: 0, autoCombos: 0 });
+      assert.deepEqual(res, { models: 0, combos: 0 });
     } finally {
       console.warn = origWarn;
     }
@@ -184,12 +184,16 @@ describe("catalog fail-open", () => {
           throw Object.assign(new Error("Not Found"), { status: 404 });
         },
       });
-      assert.deepEqual(res, { models: 1, combos: 0, autoCombos: 0 });
+      assert.deepEqual(res, { models: 1, combos: 0 });
     } finally {
       console.warn = origWarn;
     }
-    assert.equal(warns.length, 1);
-    assert.match(warns[0], /combos fetch failed/);
+    assert.equal(warns.filter((w) => /combos fetch failed/.test(w)).length, 1);
+    assert.match(
+      warns.find((w) => /combos fetch failed/.test(w))!,
+      /combos fetch failed/
+    );
+    assert.ok(warns.some((w) => /catalog refresh:/.test(w)));
     assert.ok(draft.models.has("omniroute/m1"));
   });
 
@@ -210,13 +214,16 @@ describe("catalog fail-open", () => {
           );
         },
       });
-      assert.deepEqual(res, { models: 1, combos: 0, autoCombos: 0 });
+      assert.deepEqual(res, { models: 1, combos: 0 });
     } finally {
       console.warn = origWarn;
     }
-    assert.equal(warns.length, 1);
-    assert.match(warns[0], /combos fetch failed/);
-    assert.match(warns[0], /403/);
+    assert.equal(warns.filter((w) => /combos fetch failed/.test(w)).length, 1);
+    assert.match(
+      warns.find((w) => /combos fetch failed/.test(w))!,
+      /403/
+    );
+    assert.ok(warns.some((w) => /catalog refresh:/.test(w)));
     assert.ok(draft.models.has("omniroute/m1"));
   });
 
@@ -237,13 +244,16 @@ describe("catalog fail-open", () => {
           );
         },
       });
-      assert.deepEqual(res, { models: 1, combos: 0, autoCombos: 0 });
+      assert.deepEqual(res, { models: 1, combos: 0 });
     } finally {
       console.warn = origWarn;
     }
-    assert.equal(warns.length, 1);
-    assert.match(warns[0], /combos fetch failed/);
-    assert.match(warns[0], /500/);
+    assert.equal(warns.filter((w) => /combos fetch failed/.test(w)).length, 1);
+    assert.match(
+      warns.find((w) => /combos fetch failed/.test(w))!,
+      /500/
+    );
+    assert.ok(warns.some((w) => /catalog refresh:/.test(w)));
     assert.ok(draft.models.has("omniroute/m1"));
   });
 
@@ -264,18 +274,22 @@ describe("catalog fail-open", () => {
           throw err;
         },
       });
-      assert.deepEqual(res, { models: 1, combos: 0, autoCombos: 0 });
+      assert.deepEqual(res, { models: 1, combos: 0 });
     } finally {
       console.warn = origWarn;
     }
-    assert.equal(warns.length, 1);
-    assert.match(warns[0], /combos fetch failed/);
+    assert.equal(warns.filter((w) => /combos fetch failed/.test(w)).length, 1);
+    assert.match(
+      warns.find((w) => /combos fetch failed/.test(w))!,
+      /combos fetch failed/
+    );
+    assert.ok(warns.some((w) => /catalog refresh:/.test(w)));
     assert.ok(draft.models.has("omniroute/m1"));
   });
 });
 
 describe("catalog combo vs combo", () => {
-  it("second combo with same id warns only once", async () => {
+  it("two combos sharing an id publish under their own names without colliding", async () => {
     const draft = fakeDraft();
     const warns: string[] = [];
     const origWarn = console.warn;
@@ -299,20 +313,30 @@ describe("catalog combo vs combo", () => {
           },
         ],
       });
-      assert.deepEqual(res, { models: 1, combos: 2, autoCombos: 0 });
+      assert.deepEqual(res, { models: 1, combos: 2 });
     } finally {
       console.warn = origWarn;
     }
-    assert.equal(warns.length, 1);
-    assert.match(warns[0], /collides with a model id; combo wins/);
+    // Under name-based keying the combos publish at their own keys
+    // (`omniroute/Dupe Combo` and `omniroute/Dupe Combo Again`) — they no
+    // longer collide with the model `dupe` at `omniroute/dupe`.
+    assert.deepEqual(
+      warns.filter((w) => !/catalog refresh:/.test(w)),
+      []
+    );
     const m = draft.models.get("omniroute/dupe");
-    assert.ok(m);
-    assert.equal(m?.name, "Dupe Combo Again");
+    assert.ok(m, "raw model remains at its own key");
+    assert.equal(m?.name, "dupe");
+    const combo1 = draft.models.get("omniroute/Dupe Combo");
+    assert.ok(combo1, "first combo published under its name");
+    const combo2 = draft.models.get("omniroute/Dupe Combo Again");
+    assert.ok(combo2, "second combo published under its name");
+    assert.equal(combo2?.name, "Dupe Combo Again");
   });
 });
 
 describe("catalog model bare vs combo", () => {
-  it("bare model id colliding with combo id warns exactly once", async () => {
+  it("bare model id and a same-suffix combo name no longer collide", async () => {
     const draft = fakeDraft();
     const warns: string[] = [];
     const origWarn = console.warn;
@@ -331,12 +355,414 @@ describe("catalog model bare vs combo", () => {
           },
         ],
       });
-      assert.deepEqual(res, { models: 1, combos: 1, autoCombos: 0 });
+      assert.deepEqual(res, { models: 1, combos: 1 });
     } finally {
       console.warn = origWarn;
     }
-    assert.equal(warns.length, 1);
-    assert.match(warns[0], /collides with a model id; combo wins/);
-    assert.match(warns[0], /"omniroute\/dupe"/);
+    // Name-based keying: the combo advertises `Dupe Combo`, so it sits at
+    // `omniroute/Dupe Combo` instead of collapsing onto the raw model's
+    // `omniroute/dupe` key (the accidental-collision class the warn was
+    // written for). Both entries publish; only the refresh summary warns.
+    assert.deepEqual(
+      warns.filter((w) => !/catalog refresh:/.test(w)),
+      []
+    );
+    assert.ok(draft.models.get("omniroute/dupe"), "raw model keeps its id key");
+    assert.ok(draft.models.get("omniroute/Dupe Combo"), "combo published under its name");
+  });
+});
+
+describe("catalog capability presets", () => {
+  function freeOverlay(ids: string[]): Map<string, { freeType: "keyless" }> {
+    return new Map(ids.map((id) => [id, { freeType: "keyless" as const }]));
+  }
+
+  function captureWarns() {
+    const warns: string[] = [];
+    const origWarn = console.warn;
+    console.warn = (...args: unknown[]) => {
+      warns.push(String(args[0]));
+    };
+    return {
+      warns,
+      restore() {
+        console.warn = origWarn;
+      },
+    };
+  }
+
+  it("freeOnly keeps only models with a free-tier enrichment entry", async () => {
+    const draft = fakeDraft();
+    const res = await publishCatalog(
+      draft,
+      { ...baseOpts, freeOnly: true },
+      {
+        fetcher: async () => [{ id: "free-m" }, { id: "paid-m" }],
+        enrichmentFetcher: async () =>
+          new Map([["free-m", { freeType: "recurring-monthly" as const }]]),
+        combosFetcher: async () => [],
+      }
+    );
+    assert.equal(res.models, 1);
+    assert.ok(draft.models.has("omniroute/free-m"));
+    assert.ok(!draft.models.has("omniroute/paid-m"));
+  });
+
+  it("freeOnly without enrichment publishes nothing and warns once", async () => {
+    const draft = fakeDraft();
+    const { warns, restore } = captureWarns();
+    try {
+      const res = await publishCatalog(
+        draft,
+        { ...baseOpts, freeOnly: true },
+        {
+          fetcher: async () => [{ id: "m1" }, { id: "m2" }],
+          enrichmentFetcher: async () => new Map(),
+          combosFetcher: async () => [],
+        }
+      );
+      // #15392 stopped publishing auto combos, so counts no longer include autoCombos.
+      assert.deepEqual(res, { models: 0, combos: 0 });
+    } finally {
+      restore();
+    }
+    assert.equal(warns.filter((w) => /freeOnly.*enrichment|enrichment.*free/i.test(w)).length, 1);
+    assert.match(
+      warns.find((w) => /freeOnly.*enrichment|enrichment.*free/i.test(w))!,
+      /freeOnly.*enrichment|enrichment.*free/i
+    );
+    assert.ok(warns.some((w) => /catalog refresh:/.test(w)));
+  });
+
+  it("freeOnly with enrichment disabled publishes nothing", async () => {
+    const draft = fakeDraft();
+    const { warns, restore } = captureWarns();
+    try {
+      const res = await publishCatalog(
+        draft,
+        { ...baseOpts, freeOnly: true, enrichment: false },
+        {
+          fetcher: async () => [{ id: "m1" }],
+          combosFetcher: async () => [],
+        }
+      );
+      assert.equal(res.models, 0);
+    } finally {
+      restore();
+    }
+    assert.equal(warns.filter((w) => /freeOnly.*enrichment|enrichment.*free/i.test(w)).length, 1);
+    assert.match(
+      warns.find((w) => /freeOnly.*enrichment|enrichment.*free/i.test(w))!,
+      /freeOnly.*enrichment|enrichment.*free/i
+    );
+    assert.ok(warns.some((w) => /catalog refresh:/.test(w)));
+  });
+
+  it("freeOnly publishes a combo whose members are all free", async () => {
+    const draft = fakeDraft();
+    const res = await publishCatalog(
+      draft,
+      { ...baseOpts, freeOnly: true },
+      {
+        fetcher: async () => [{ id: "m1" }, { id: "m2" }, { id: "m3" }],
+        enrichmentFetcher: async () => freeOverlay(["m1", "m2", "m3"]),
+        combosFetcher: async () => [
+          {
+            id: "combo-a",
+            name: "Combo A",
+            models: [
+              { kind: "model", model: "m1" } as never,
+              { kind: "model", model: "m2" } as never,
+              { kind: "model", model: "m3" } as never,
+            ],
+          },
+        ],
+      }
+    );
+    assert.equal(res.models, 3);
+    assert.equal(res.combos, 1);
+    assert.ok(draft.models.has("omniroute/Combo A"));
+  });
+
+  it("toolsOnly keeps only tool-calling models", async () => {
+    const draft = fakeDraft();
+    const res = await publishCatalog(
+      draft,
+      { ...baseOpts, toolsOnly: true },
+      {
+        fetcher: async () => [
+          { id: "with-tools", capabilities: { tool_calling: true } },
+          { id: "no-tools" },
+        ],
+        combosFetcher: async () => [],
+      }
+    );
+    assert.equal(res.models, 1);
+    assert.ok(draft.models.has("omniroute/with-tools"));
+    assert.ok(!draft.models.has("omniroute/no-tools"));
+  });
+
+  it("toolsOnly drops a combo with a member lacking tool calls", async () => {
+    const draft = fakeDraft();
+    const res = await publishCatalog(
+      draft,
+      { ...baseOpts, toolsOnly: true },
+      {
+        fetcher: async () => [{ id: "a", capabilities: { tool_calling: true } }, { id: "b" }],
+        combosFetcher: async () => [
+          {
+            id: "mixed",
+            name: "Mixed",
+            models: [
+              { kind: "model", model: "a" },
+              { kind: "model", model: "b" },
+            ],
+          },
+          { id: "pure", name: "Pure", models: [{ kind: "model", model: "a" }] },
+        ],
+      }
+    );
+    assert.equal(res.combos, 1);
+    assert.ok(draft.models.has("omniroute/Pure"));
+    assert.ok(!draft.models.has("omniroute/Mixed"));
+  });
+
+  it("visionOnly keeps image-input models from either server convention", async () => {
+    const draft = fakeDraft();
+    const res = await publishCatalog(
+      draft,
+      { ...baseOpts, visionOnly: true },
+      {
+        fetcher: async () => [
+          { id: "img", input_modalities: ["text", "image"] },
+          { id: "txt", input_modalities: ["text"] },
+          { id: "vis", capabilities: { vision: true } },
+        ],
+        combosFetcher: async () => [],
+      }
+    );
+    assert.equal(res.models, 2);
+    assert.ok(draft.models.has("omniroute/img"));
+    assert.ok(draft.models.has("omniroute/vis"));
+    assert.ok(!draft.models.has("omniroute/txt"));
+  });
+
+  it("visionOnly drops auto combos (no image input)", async () => {
+    const draft = fakeDraft();
+    const res = await publishCatalog(
+      draft,
+      { ...baseOpts, visionOnly: true },
+      {
+        fetcher: async () => [],
+        combosFetcher: async () => [],
+        autoCombosFetcher: async () => [{ id: "auto", variant: undefined, candidateCount: 3 }],
+      }
+    );
+    // #15392 no longer requests the virtual auto-combo route, so the entry is absent.
+    assert.equal((res as { autoCombos?: number }).autoCombos, undefined);
+    assert.ok(!draft.models.has("omniroute/auto"));
+  });
+
+  it("visibleModels allowlist composes with presets (both subtract)", async () => {
+    const draft = fakeDraft();
+    const res = await publishCatalog(
+      draft,
+      { ...baseOpts, visibleModels: ["a", "b"], toolsOnly: true },
+      {
+        fetcher: async () => [
+          { id: "a", capabilities: { tool_calling: true } },
+          { id: "b" },
+          { id: "c", capabilities: { tool_calling: true } },
+        ],
+        combosFetcher: async () => [],
+      }
+    );
+    assert.equal(res.models, 1);
+    assert.ok(draft.models.has("omniroute/a"));
+  });
+
+  it("hiddenModels deny wins over presets", async () => {
+    const draft = fakeDraft();
+    const res = await publishCatalog(
+      draft,
+      { ...baseOpts, hiddenModels: ["a"], toolsOnly: true },
+      {
+        fetcher: async () => [
+          { id: "a", capabilities: { tool_calling: true } },
+          { id: "b", capabilities: { tool_calling: true } },
+        ],
+        combosFetcher: async () => [],
+      }
+    );
+    assert.equal(res.models, 1);
+    assert.ok(draft.models.has("omniroute/b"));
+  });
+
+  it("usableOnly and presets compose (both subtractive)", async () => {
+    const draft = fakeDraft();
+    const res = await publishCatalog(
+      draft,
+      {
+        ...baseOpts,
+        usableOnly: true,
+        toolsOnly: true,
+        enrichment: new Map([
+          ["cc/good", { providerAlias: "cc", providerCanonical: "claude" }],
+          ["dead/bad", { providerAlias: "dead", providerCanonical: "legacy" }],
+          ["cc/plain", { providerAlias: "cc", providerCanonical: "claude" }],
+        ]),
+      },
+      {
+        fetcher: async () => [
+          { id: "cc/good", capabilities: { tool_calling: true } },
+          { id: "dead/bad", capabilities: { tool_calling: true } },
+          { id: "cc/plain" },
+        ],
+        combosFetcher: async () => [],
+        providersFetcher: async () => [
+          { id: "c1", provider: "claude", isActive: true, testStatus: "active" },
+        ],
+      }
+    );
+    assert.equal(res.models, 1);
+    assert.ok(draft.models.has("omniroute/cc/good"));
+  });
+
+  it("toolsOnly: false opts out and publishes the full catalog", async () => {
+    const draft = fakeDraft();
+    const res = await publishCatalog(
+      draft,
+      { ...baseOpts, toolsOnly: false },
+      {
+        fetcher: async () => [
+          { id: "paid", capabilities: { tool_calling: true }, input_modalities: ["text", "image"] },
+          { id: "plain" },
+        ],
+        combosFetcher: async () => [],
+      }
+    );
+    // #15392 stopped publishing auto combos, so counts no longer include autoCombos.
+    assert.deepEqual(res, { models: 2, combos: 0 });
+  });
+
+  it("freeOnly drops single-use and retired entries but keeps them without the flag", async () => {
+    async function publishWith(freeOnly: boolean) {
+      const draft = fakeDraft();
+      const res = await publishCatalog(
+        draft,
+        { ...baseOpts, freeOnly, visibleModels: ["*"] },
+        {
+          fetcher: async () => [{ id: "cf/one-time-m" }, { id: "cf/retired-m" }],
+          enrichmentFetcher: async () =>
+            new Map([
+              ["cf/one-time-m", { freeType: "one-time-initial" as const }],
+              ["cf/retired-m", { freeType: "discontinued" as const }],
+            ]),
+          combosFetcher: async () => [],
+        }
+      );
+      return { draft, res };
+    }
+    const filtered = await publishWith(true);
+    assert.deepEqual(filtered.res, { models: 0, combos: 0 });
+    const unfiltered = await publishWith(false);
+    assert.equal(unfiltered.res.models, 2);
+    assert.match(String(unfiltered.draft.models.get("omniroute/cf/one-time-m")?.name), /one-time/);
+    assert.match(
+      String(unfiltered.draft.models.get("omniroute/cf/retired-m")?.name),
+      /discontinued/
+    );
+  });
+
+  it("freeOnly keeps uncapped entries with a non-empty budget", async () => {
+    const draft = fakeDraft();
+    const res = await publishCatalog(
+      draft,
+      { ...baseOpts, freeOnly: true, visibleModels: ["*"] },
+      {
+        fetcher: async () => [{ id: "cf/open-m" }],
+        enrichmentFetcher: async () =>
+          new Map([["cf/open-m", { freeType: "recurring-uncapped" as const }]]) as never,
+        combosFetcher: async () => [],
+      }
+    );
+    assert.equal(res.models, 1);
+    assert.match(String(draft.models.get("omniroute/cf/open-m")?.name), /uncapped/);
+  });
+
+  it("freeOnly predicate admits recurring and keyless entries, refuses the rest", async () => {
+    const { passesCapabilityPresets } = await import("../src/capability-presets.js");
+    const { isFreeOnlyFreeType } = (await import("../src/shared/naming.js")) as unknown as {
+      isFreeOnlyFreeType: (v: unknown) => boolean;
+    };
+    const admitted = [
+      "recurring-daily",
+      "recurring-monthly",
+      "recurring-credit",
+      "recurring-uncapped",
+      "keyless",
+    ];
+    for (const freeType of admitted) {
+      assert.equal(isFreeOnlyFreeType(freeType), true);
+      assert.equal(
+        passesCapabilityPresets({} as never, { freeType: freeType as never }, { freeOnly: true }),
+        true
+      );
+    }
+    const refused: unknown[] = ["one-time-initial", "discontinued", "some-future-type", undefined];
+    for (const freeType of refused) {
+      assert.equal(isFreeOnlyFreeType(freeType), false);
+      assert.equal(
+        passesCapabilityPresets(
+          {} as never,
+          freeType === undefined ? undefined : ({ freeType: freeType as never } as never),
+          { freeOnly: true }
+        ),
+        false
+      );
+    }
+  });
+
+  it("presets shrink a large stub catalog below threshold", async () => {
+    const stubModels = async () =>
+      Array.from({ length: 4000 }, (_, i) => ({
+        id: `m${i}`,
+        ...(i % 40 === 0 ? { capabilities: { tool_calling: true } } : {}),
+        ...(i % 25 === 0 ? { input_modalities: ["text", "image"] } : {}),
+      }));
+    const freeEnrichment = async () =>
+      new Map(
+        Array.from({ length: 4000 }, (_, i) =>
+          i % 80 === 0 ? [`m${i}`, { freeType: "recurring-monthly" as const }] : undefined
+        ).filter((x): x is [`m${number}`, { freeType: "recurring-monthly" }] => x !== undefined)
+      );
+    // #15392 caps the default view before capability presets run. The `*`
+    // sentinel publishes every stub id so these counts measure the preset,
+    // not the per-owner showcase slice.
+    const allVisible = { visibleModels: ["*"] };
+    const draftTools = fakeDraft();
+    const resTools = await publishCatalog(
+      draftTools,
+      { ...baseOpts, toolsOnly: true, ...allVisible },
+      { fetcher: stubModels, combosFetcher: async () => [] }
+    );
+    assert.ok(resTools.models < 200, `toolsOnly kept ${resTools.models}`);
+    assert.equal(resTools.models, 100);
+    const draftVision = fakeDraft();
+    const resVision = await publishCatalog(
+      draftVision,
+      { ...baseOpts, visionOnly: true, ...allVisible },
+      { fetcher: stubModels, combosFetcher: async () => [] }
+    );
+    assert.ok(resVision.models < 200, `visionOnly kept ${resVision.models}`);
+    assert.equal(resVision.models, 160);
+    const draftFree = fakeDraft();
+    const resFree = await publishCatalog(
+      draftFree,
+      { ...baseOpts, freeOnly: true, ...allVisible },
+      { fetcher: stubModels, enrichmentFetcher: freeEnrichment, combosFetcher: async () => [] }
+    );
+    assert.ok(resFree.models < 200, `freeOnly kept ${resFree.models}`);
+    assert.equal(resFree.models, 50);
   });
 });

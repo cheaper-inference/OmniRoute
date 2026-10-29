@@ -1,15 +1,15 @@
 # open-sse/services/ — Routing Engine & Cross-Cutting Services
 
-**Purpose**: 255 service modules (top-level) powering request routing, rate limiting, quota management, token refresh, fallback strategies, and runtime state. The combo routing engine (`combo.ts`) is the core; supporting services handle resilience, accounting, and decision-making.
+**Purpose**: 292 service modules (top-level) powering request routing, rate limiting, quota management, token refresh, fallback strategies, and runtime state. The combo routing engine (`combo.ts`) is the core; supporting services handle resilience, accounting, and decision-making.
 
-Live count: `ls open-sse/services/*.ts | wc -l` (currently 255). More including sub-dirs like `autoCombo/` and `compression/`.
+Live count: `ls open-sse/services/*.ts | wc -l` (currently 292). More including sub-dirs like `autoCombo/` and `compression/`.
 
 ---
 
 ## Combo Routing Engine
 
 - **`combo.ts`** — Entry point for multi-model routing. **`handleComboChat()`** iterates through targets in order until success or all fail. **`resolveComboTargets()`** expands combo config into ordered `ResolvedComboTarget[]` (provider + model + account + credentials).
-- **Strategies** (20): `priority`, `weighted`, `round-robin`, `context-relay`, `fill-first`, `p2c`, `random`, `least-used`, `cost-optimized`, `reset-aware`, `reset-window`, `headroom`, `quota-weighted`, `strict-random`, `auto`, `lkgp`, `context-optimized`, `cache-optimized`, `fusion`, `pipeline`. Source: `ROUTING_STRATEGY_VALUES` in `src/shared/constants/routingStrategies.ts`.
+- **Strategies** (20): `priority`, `weighted`, `fill-first`, `round-robin`, `p2c`, `random`, `least-used`, `cost-optimized`, `reset-aware`, `reset-window`, `headroom`, `quota-weighted`, `strict-random`, `auto`, `lkgp`, `context-optimized`, `cache-optimized`, `context-relay`, `fusion`, `pipeline`. Source: `ROUTING_STRATEGY_VALUES` in `src/shared/constants/routingStrategies.ts`. (`quota-share` is deliberately internal — see `INTERNAL_ROUTING_STRATEGY_VALUES`.)
 - Each target calls **`handleSingleModel()`** which wraps `handleChatCore()` with per-target error handling and circuit breaker checks.
 
 ## Key Services
@@ -19,9 +19,11 @@ Live count: `ls open-sse/services/*.ts | wc -l` (currently 255). More including 
 - **`rateLimitManager.ts`** — Token bucket per API key + provider combo. Rejects before dispatch.
 - **`usage.ts`** — Per-request token/cost consumption tracking.
 - **`quotaCache.ts`** — In-memory quota snapshots, pre-loaded at startup.
+- **`ollamaPurchasedCredits.ts`** — Recognizes verified purchased USD balances before included-plan quota enforcement.
 
 ### Account & Token Management
 
+- **`providerConnectionPool.ts`** — Shared alias/custom-node connection pools for direct authentication and combo discovery; preserves node ownership and leaves caller ACL/pin filtering in place.
 - **`tokenRefresh.ts`** — OAuth token expiration detection and refresh.
 - **`accountFallback.ts`** — Account switching on quota/rate-limit. Also houses model lockout.
 - **`sessionManager.ts`** — Request session state across retries.

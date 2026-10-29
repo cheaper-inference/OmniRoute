@@ -38,6 +38,9 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`POST /api/settings/require-login`](references/endpoints.md#post-apisettingsrequire-login)
 - [`GET /api/settings/ip-filter`](references/endpoints.md#get-apisettingsip-filter)
 - [`PUT /api/settings/ip-filter`](references/endpoints.md#put-apisettingsip-filter)
+- [`GET /api/settings/pii`](references/endpoints.md#get-apisettingspii)
+- [`PUT /api/settings/pii`](references/endpoints.md#put-apisettingspii)
+- [`POST /api/settings/pii/test`](references/endpoints.md#post-apisettingspiitest)
 - [`GET /api/settings/system-prompt`](references/endpoints.md#get-apisettingssystem-prompt)
 - [`PUT /api/settings/system-prompt`](references/endpoints.md#put-apisettingssystem-prompt)
 - [`GET /api/settings/thinking-budget`](references/endpoints.md#get-apisettingsthinking-budget)
@@ -62,6 +65,7 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`GET /api/settings/database`](references/endpoints.md#get-apisettingsdatabase)
 - [`PUT /api/settings/database`](references/endpoints.md#put-apisettingsdatabase)
 - [`PATCH /api/settings/database`](references/endpoints.md#patch-apisettingsdatabase)
+- [`POST /api/settings/database/integrity-check`](references/endpoints.md#post-apisettingsdatabaseintegrity-check)
 - [`POST /api/settings/database/refresh-stats`](references/endpoints.md#post-apisettingsdatabaserefresh-stats)
 - [`GET /api/settings/database/vacuum`](references/endpoints.md#get-apisettingsdatabasevacuum)
 - [`POST /api/settings/database/vacuum`](references/endpoints.md#post-apisettingsdatabasevacuum)
@@ -144,6 +148,10 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`PUT /api/settings/task-routing`](references/endpoints.md#put-apisettingstask-routing)
 - [`GET /api/settings/tier-config`](references/endpoints.md#get-apisettingstier-config)
 - [`PUT /api/settings/tier-config`](references/endpoints.md#put-apisettingstier-config)
+- [`GET /api/settings/transfer/catalog`](references/endpoints.md#get-apisettingstransfercatalog)
+- [`POST /api/settings/transfer/export`](references/endpoints.md#post-apisettingstransferexport)
+- [`POST /api/settings/transfer/preview`](references/endpoints.md#post-apisettingstransferpreview)
+- [`POST /api/settings/transfer/import`](references/endpoints.md#post-apisettingstransferimport)
 ## Payloads
 
 See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.yaml` for detailed request/response schemas.

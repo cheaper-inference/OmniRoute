@@ -16,40 +16,64 @@ Maskavimo funkcijos sukurtos tam, kad „OmniRoute“ galėtų veikti kaip suder
 
 ---
 
-## TLS skaitmeninių atspaudų sluoksnis
+## TLS pirštų atspaudų sluoksnis
 
-### `open-sse/utils/tlsClient.ts` — wreq-js („Chrome 124“)
+### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Nuolatinės `wreq-js` sesijos tingiai sukuriamos kiekvienai paskyros aprėpčiai ir nustatytam tarpiniam serveriui. Viso proceso mastu `TlsClient` telkinyje laikoma ne daugiau kaip 128 sesijos, kurios imituoja **„Chrome 124“ naršyklę „macOS“ sistemoje**, skirtą pirminiams serveriams už „Cloudflare“. `TlsClient.fetch()` saugiai nutraukia veikimą, kai vietinė vykdymo aplinka nepasiekiama; iškviečiančioji pusė gali aiškiai pasirinkti atsarginį mechanizmą už šio apgaubo ribų.
+Nuolatinės `wreq-js` sesijos sukuriamos atidėtai kiekvienai paskyros aprėpčiai ir nustatytam tarpiniam serveriui. Viso
+proceso `TlsClient` telkinyje laikoma ne daugiau kaip 128 sesijos, apsimetančios **Chrome 124 naršykle macOS sistemoje**,
+skirtos už Cloudflare esančioms aukštesnio lygio paslaugoms. `TlsClient.fetch()` klaidos atveju neleidžia tęsti darbo, kai
+savoji vykdymo aplinka nepasiekiama; kviečiančioji šalis gali aiškiai pasirinkti atsarginį variantą už šio apvalkalo ribų.
 
 - Sesijos profilis: `browser: "chrome_124", os: "macos"`
 - Tarpinio serverio nustatymas (prioriteto tvarka): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (taip pat mažosiomis raidėmis)
-- Skirtasis laikas: `TLS_CLIENT_TIMEOUT_MS` (paveldimas iš `FETCH_TIMEOUT_MS`, numatytoji reikšmė – 600000)
-- `wreq-js` atsakas yra suderinamas su fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Pirmojo baito stebėjimo mechanizmas (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()` grąžina rezultatą vos gavus pirminio serverio antraštes, todėl vien `TLS_CLIENT_TIMEOUT_MS` negali apriboti atsako turinio, kuris niekada nepateikia pirmojo baito. `guardTlsFirstByte()` vykdo lenktynes tarp pirmojo atsako turinio `read()` ir `TLS_FIRST_BYTE_WATCHDOG_MS` (numatytoji reikšmė – `10000`, `0` jį išjungia); tinkamai veikiantis atsako turinys nepaveikiamas, o užstrigęs atsako turinys atšaukia wreq skaitytuvą ir leidžia esamai `proxyFetch` TLS atsarginio mechanizmo logikai pereiti prie tiesioginio / tarpinio serverio išsiuntimo mechanizmo (pakartotinai siųsti nesaugi užklausa, pvz., POST su turiniu, vis tiek pateikia klaidą, užuot buvusi nepastebimai siunčiama pakartotinai).
+- Skirtasis laikas: `TLS_CLIENT_TIMEOUT_MS` (paveldimas iš `FETCH_TIMEOUT_MS`, numatytoji reikšmė 600000)
+- `wreq-js` Response yra suderinamas su fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Pirmojo baito stebėjimo mechanizmas (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
+  užbaigiamas, kai tik gaunamos aukštesnio lygio paslaugos antraštės, todėl vien `TLS_CLIENT_TIMEOUT_MS` negali apriboti
+  atsako turinio, kuris niekada nepateikia pirmojo baito. `guardTlsFirstByte()` lenktynių principu vykdo pirmąjį atsako turinio `read()`
+  ir `TLS_FIRST_BYTE_WATCHDOG_MS` (numatytoji reikšmė `10000`, `0` jį išjungia); tinkamai veikiantis atsako turinys
+  nepaveikiamas, o užstrigęs atsako turinys atšaukia wreq skaitytuvą ir leidžia `proxyFetch` esamai
+  TLS atsarginio varianto logikai pereiti prie tiesioginio / tarpinio serverio skirstytuvo (pakartotinai saugiai nevykdoma užklausa, pvz.,
+  POST su turiniu, vis tiek pateikia klaidą, užuot buvusi nepastebimai pakartota).
 
-### Žiniatinklio slapukų teikėjo perdavimo mechanizmas — wreq-js 3.2.0
+### Žiniatinklio slapukų teikėjo transportas — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` yra bendras toliau nurodytų penkių specializuotų žiniatinklio slapukų perdavimo mechanizmų adapteris. Kiekvienas paprastas teikėjo apgaubas pasirenka naršyklės / OS profilį. Adapteris naudoja vieną wreq vykdymo aplinkos įkėlimo mechanizmą ir perdavimo mechanizmų telkinį iš `open-sse/utils/tlsClient.ts`, susietą pagal profilį, OS ir nustatytą tarpinį serverį, o kiekvienoje užklausoje naudojama `cookieMode: "ephemeral"`. Todėl paskyros ir užklausos bendrai naudoja perdavimo lygmens ryšius, tačiau niekada nebendrina wreq sesijos ar slapukų saugyklos.
+`open-sse/services/tlsClientBase.ts` yra bendras penkių toliau nurodytų specializuotų
+žiniatinklio slapukų transportų adapteris. Kiekvienas plonas teikėjo apvalkalas pasirenka naršyklės / OS profilį. Adapteris
+naudoja vieną wreq vykdymo aplinkos įkėliklį ir transporto telkinį iš `open-sse/utils/tlsClient.ts`, indeksuojamą pagal
+profilį + OS + nustatytą tarpinį serverį, o kiekvienoje užklausoje naudojama `cookieMode: "ephemeral"`. Todėl paskyros ir
+užklausos bendrina transporto lygmens ryšius, tačiau niekada nebendrina wreq sesijos ar slapukų saugyklos.
 
-| Teikėjas   | Profilis      | Imituojama OS | Srauto EOF politika                      |
-| ---------- | ------------- | ------------- | ---------------------------------------- |
-| Claude     | `chrome_146`  | Linux         | įtraukti `[DONE]`                        |
-| Perplexity | `firefox_148` | macOS         | įtraukti `event: end_of_stream`          |
-| Grok       | `chrome_146`  | Linux         | neįtraukti `[DONE]`                      |
-| Notion     | `chrome_146`  | Windows       | įtraukti `[DONE]`                        |
-| LMArena    | `chrome_146`  | Windows       | nėra žymeklio; užverti gavus vietinį EOF |
+| Teikėjas   | Profilis      | Emuliuojama OS | Srauto EOF strategija                   |
+| ---------- | ------------- | -------------- | --------------------------------------- |
+| Claude     | `chrome_146`  | Linux          | įtraukti `[DONE]`                       |
+| Perplexity | `firefox_151` | macOS          | įtraukti `event: end_of_stream`         |
+| Grok       | `chrome_146`  | Linux          | neįtraukti `[DONE]`                     |
+| Notion     | `chrome_146`  | Windows        | įtraukti `[DONE]`                       |
+| LMArena    | `chrome_146`  | Windows        | nėra žymeklio; užverti gavus savąjį EOF |
 
-- Srautinis perdavimas tiesiogiai naudoja vietinio atsako `ReadableStream`; laikinasis failas ar pagalbinis procesas nesukuriamas.
-- Prieš pateikiant srautą patikrinama iki 256 pradinių baitų. SSE teikėjai buferizuoja ne SSE klaidas; „Grok“ / „LMArena“ susieja „Cloudflare“ patikras su `403`, o HTML tarpinius puslapius – su `502`.
-- Vietinės užklausos skirtajam laikui ir toliau taikomas absoliutus griežtas JS terminas. Užstrigimas panaikina ir užveria tik paveiktą profilio / OS / tarpinio serverio perdavimo mechanizmą, o prieš kitą užklausą jis sukuriamas iš naujo.
-- Tarpinio serverio nustatymo prioritetas: kiekvieno iškvietimo `proxyUrl` → užklausos aprėpties paskyros / valdymo skydelio kontekstas → `HTTPS_PROXY` / `HTTP_PROXY` / `ALL_PROXY` (įskaitant variantus mažosiomis raidėmis). Nustatymo klaidos saugiai nutraukia veikimą ir neleidžia nutekėti tiesioginiam ryšiui. „LMArena“ sąmoningai atlieka nustatymą pagal `arena.ai`.
-- `byteResponse` grąžina pagal turinio tipą pažymėtą `data:` URL be UTF-8 duomenų sugadinimo.
-- Klaidos yra `TlsClientUnavailableError` (paketas / priedas nepasiekiamas), `TlsClientHangError` (viršytas terminas) ir `WreqTransportCapacityError` (bendroji sesijos talpos klaida), kai visi 128 riboti profilio / OS / tarpinio serverio lizdai yra aktyvūs arba užveriami.
+- Srautinis perdavimas tiesiogiai naudoja savosios sistemos atsako `ReadableStream`; laikinasis failas ar pagalbinis
+  procesas nesukuriamas.
+- Prieš pateikiant srautą patikrinama iki 256 pradinių baitų. SSE teikėjai buferizuoja ne SSE
+  klaidas; Grok/LMArena susieja Cloudflare iššūkius su `403`, o HTML tarpinius puslapius – su `502`.
+- Savasis užklausos skirtasis laikas ir toliau apribojamas absoliučiu JS galutiniu terminu. Užstrigus užklausai,
+  anuliuojamas ir užveriamas tik paveiktas profilio / OS / tarpinio serverio transportas, o prieš kitą užklausą jis sukuriamas iš naujo.
+- Tarpinio serverio nustatymo prioritetas: kiekvieno iškvietimo `proxyUrl` → užklausos aprėpties paskyros / valdymo skydelio kontekstas →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (įskaitant variantus mažosiomis raidėmis). Nustatymo klaidos neleidžia tęsti darbo,
+  užuot nutekinusios tiesioginį ryšį. LMArena sąmoningai atlieka nustatymą pagal `arena.ai`.
+- `byteResponse` grąžina pagal turinio tipą suformuotą `data:` URL, nesugadindamas UTF-8.
+- Klaidos yra `TlsClientUnavailableError` (paketas / priedas nepasiekiamas), `TlsClientHangError`
+  (viršytas galutinis terminas) ir `WreqTransportCapacityError` (bendras sesijos talpos klaidos kodas),
+  kai visi 128 apriboti profilio / OS / tarpinio serverio lizdai yra aktyvūs arba uždaromi.
 
-Pirmiau aprašyta bendroji `TlsClient` sesija išlieka specializuota nuolatinei naršyklės palaikomai slapukų būsenai. Abu keliai pakartotinai naudoja vieną podėlyje saugomą wreq modulio įkėlimo mechanizmą ir proceso gyvavimo ciklo apdorojimo mechanizmą; jų telkiniai lieka atskiri, nes jų slapukų gyvavimo trukmė sąmoningai skiriasi.
+Pirmiau aprašytas bendrasis `TlsClient` išlieka specializuotas nuolatinei naršyklės palaikomai slapukų
+būsenai. Abu keliai pakartotinai naudoja vieną podėlyje saugomą wreq modulio įkėliklį ir proceso gyvavimo ciklo kablį; jų telkiniai lieka
+atskiri, nes jų slapukų gyvavimo trukmės sąmoningai skiriasi.
 
-Profilius palaiko užfiksuotos versijos paketas, tačiau realus WAF priimtinumas gali kisti nepriklausomai nuo vietinių sutarties testų. Prieš teigdami, kad pasiektas lygiavertiškumas pirminio teikėjo naršyklei, patikrinkite skaitmeninių atspaudų pakeitimus naudodami aiškiai autorizuotą realią paskyrą.
+Profilius palaiko fiksuotos versijos paketas, tačiau faktinis WAF priėmimas gali kisti nepriklausomai
+nuo vietinių sutarties testų. Prieš teigdami, kad pasiektas lygiavertiškumas su aukštesnio lygio paslaugos naršykle,
+patikrinkite pirštų atspaudų pakeitimus naudodami aiškiai autorizuotą realią paskyrą.
 
 ---
 
@@ -98,7 +122,7 @@ Taikoma: `system` blokams, visam `messages[].content` ir `tools[].description` /
 
 Trečiųjų šalių Anthropic tarpinėms tarnyboms, priimančioms tik „tikrą Claude Code“ srautą:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - Pagal numatytuosius nustatymus `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
@@ -222,7 +246,7 @@ Visuose MITM galiniuose taškuose privalomas valdymo autentifikavimas (`requireC
 
 | Kintamasis               | Numatytoji reikšmė                                              |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

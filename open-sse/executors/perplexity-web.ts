@@ -14,8 +14,13 @@ import {
   type TlsFetchResult,
 } from "../services/perplexityTlsClient.ts";
 import { prepareToolMessages } from "../translator/webTools.ts";
+import { currentAppliedProxySink } from "../utils/proxyFetch.ts";
 import { buildToolModeResponse } from "./chatgptWebTools.ts";
-import { projectPublicErrorIdentifier, sanitizeErrorMessage } from "../utils/error.ts";
+import {
+  buildErrorBody,
+  projectPublicErrorIdentifier,
+  sanitizeErrorMessage,
+} from "../utils/error.ts";
 import { buildSessionCookieHeader, mergeRefreshedCookie } from "../utils/nextAuthCookie.ts";
 import { formatTranslatedStreamError } from "../utils/streamErrorFormat.ts";
 import {
@@ -490,9 +495,16 @@ export class PerplexityWebExecutor extends BaseExecutor {
     } else if (MODEL_MAP[model]) {
       [pplxMode, modelPref] = MODEL_MAP[model];
     } else {
-      pplxMode = "copilot";
-      modelPref = model;
-      log?.info?.("PPLX-WEB", `Unmapped model ${model}, using as raw preference`);
+      const errResp = new Response(
+        JSON.stringify(
+          buildErrorBody(404, `Unknown model: ${model}`, undefined, {
+            type: "invalid_request_error",
+            code: "model_not_found",
+          })
+        ),
+        { status: 404, headers: { "Content-Type": "application/json" } }
+      );
+      return { response: errResp, url: PPLX_SSE_ENDPOINT, headers: {}, transformedBody: body };
     }
 
     // Parse messages and check session continuity
@@ -581,6 +593,9 @@ export class PerplexityWebExecutor extends BaseExecutor {
       );
       return { response: errResp, url: PPLX_SSE_ENDPOINT, headers, transformedBody: pplxBody };
     }
+
+    const sink = currentAppliedProxySink();
+    if (sink && response.status >= 400) sink.upstreamStatus = response.status;
 
     if (response.status !== 200 || (!response.body && !response.text)) {
       const status = response.status;

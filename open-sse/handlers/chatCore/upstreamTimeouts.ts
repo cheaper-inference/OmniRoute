@@ -1,9 +1,14 @@
 import {
+  DEFAULT_STREAM_ACTIVE_TIMEOUT_MS,
   EXECUTOR_CONTRACT_VIOLATION_CODE,
+  ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
   FETCH_TIMEOUT_MS,
   HTTP_STATUS,
+  MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS,
+  MAX_TIMER_TIMEOUT_MS,
 } from "../../config/constants.ts";
 import { getModelTimeoutMs } from "../../config/providerModels.ts";
+import { getRegistryEntry } from "../../config/providerRegistry.ts";
 import {
   getLoggedInputTokens,
   getLoggedOutputTokens,
@@ -47,6 +52,12 @@ export function createUpstreamStartTimeoutError(
     `Upstream request did not return response headers after ${timeoutMs}ms (${provider}/${model})`
   );
   err.name = "TimeoutError";
+  // The outer response-start watchdog and Antigravity executor readiness
+  // watchdog describe the same confirmed pre-response failure. Preserve its
+  // private marker so the non-streaming leg can route away from this account.
+  if (provider === "antigravity") {
+    (err as Error & { code?: string }).code = ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE;
+  }
   return err;
 }
 
@@ -131,6 +142,74 @@ export function getExecutorTimeoutMs(
 }
 
 /**
+ * The budget a target itself declared, in getExecutorTimeoutMs's order: connection
+ * `providerSpecificData.timeoutMs` → registry per-model `timeoutMs` → registry
+ * provider-level `timeoutMs` (e.g. GLM's 50 min). Unlike getExecutorTimeoutMs it
+ * never falls back to FETCH_TIMEOUT_MS: a global default is not a promise about
+ * how long an answer may take. Undefined when nothing is declared.
+ */
+export function resolveDeclaredTargetTimeoutMs(
+  provider: string | null | undefined,
+  model: string | null | undefined,
+  connectionTimeoutMs?: number
+): number | undefined {
+  if (connectionTimeoutMs !== undefined && connectionTimeoutMs > 0) return connectionTimeoutMs;
+  const modelOverride = resolveModelTimeoutOverride(provider ?? undefined, model ?? undefined);
+  if (modelOverride !== undefined && modelOverride > 0) return modelOverride;
+  const providerTimeoutMs = provider ? getRegistryEntry(provider)?.timeoutMs : undefined;
+  if (typeof providerTimeoutMs !== "number" || !Number.isFinite(providerTimeoutMs))
+    return undefined;
+  return providerTimeoutMs > 0 ? Math.floor(providerTimeoutMs) : undefined;
+}
+
+/**
+ * Total-lifetime cap for one stream (#12913). `operatorMs` is the operator's own
+ * STREAM_ACTIVE_TIMEOUT_MS (undefined when unset):
+ * - unset: the default cap, raised for a target that declares a longer budget to
+ *   that budget plus MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS (never lowered);
+ * - positive: a hard cap for every target; a declared budget cannot raise it;
+ * - 0: the watchdog is off.
+ * Clamped to the timer range, since a larger setTimeout delay wraps and fires at once.
+ */
+export function resolveStreamActiveTimeoutMs(
+  operatorMs: number | undefined,
+  declaredTimeoutMs: number | undefined
+): number {
+  if (operatorMs !== undefined) {
+    if (!Number.isFinite(operatorMs) || operatorMs <= 0) return 0;
+    return Math.min(Math.floor(operatorMs), MAX_TIMER_TIMEOUT_MS);
+  }
+  const declaredCapMs =
+    typeof declaredTimeoutMs === "number" &&
+    Number.isFinite(declaredTimeoutMs) &&
+    declaredTimeoutMs > 0
+      ? Math.floor(declaredTimeoutMs) + MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS
+      : 0;
+  return Math.min(Math.max(DEFAULT_STREAM_ACTIVE_TIMEOUT_MS, declaredCapMs), MAX_TIMER_TIMEOUT_MS);
+}
+
+/**
+ * The active cap for the stream a connection is about to serve: the declared
+ * budget comes from the connection's `providerSpecificData.timeoutMs`, then the
+ * model, then the provider (resolveDeclaredTargetTimeoutMs).
+ */
+export function resolveTargetStreamActiveTimeoutMs(
+  operatorMs: number | undefined,
+  provider: string | null | undefined,
+  model: string | null | undefined,
+  credentials: { providerSpecificData?: unknown } | null | undefined
+): number {
+  return resolveStreamActiveTimeoutMs(
+    operatorMs,
+    resolveDeclaredTargetTimeoutMs(
+      provider,
+      model,
+      resolveConnectionTimeoutMs(credentials?.providerSpecificData)
+    )
+  );
+}
+
+/**
  * Cross-realm Response detection (#10360).
  *
  * `instanceof Response` is a NOMINAL check against `globalThis.Response`, and
@@ -194,6 +273,7 @@ export function normalizeExecutorResult(result: unknown): {
   transport?: string;
   /** Wire model id the executor actually sent upstream (undefined if unknown). */
   model?: unknown;
+  upstreamDiagnostic?: Record<string, unknown>;
 } {
   if (isResponseLike(result)) {
     return { response: result, url: "", headers: {}, transformedBody: null };
@@ -213,6 +293,7 @@ export function normalizeExecutorResult(result: unknown): {
     transformedBody?: unknown;
     transport?: string;
     model?: unknown;
+    upstreamDiagnostic?: Record<string, unknown>;
   };
   return {
     response: normalized.response,
@@ -221,6 +302,10 @@ export function normalizeExecutorResult(result: unknown): {
     transformedBody: normalized.transformedBody ?? null,
     transport: normalized.transport,
     model: normalized.model,
+    // Internal-only failure classification (#3229). Travels with the response it
+    // describes so a later retry/recovery/fallback that replaces the response also
+    // replaces (or clears) the diagnostic instead of mislabelling the new one.
+    upstreamDiagnostic: normalized.upstreamDiagnostic,
   };
 }
 

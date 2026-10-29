@@ -512,7 +512,7 @@ Dacă returnează orice altceva decât `ok`, **opriți imediat utilizarea bazei 
 
 ### Scenariul 1: Fișierul WAL a fost pierdut
 
-Fișierul `-wal` lipsește, dar `-shm` și baza de date principală sunt intacte:
+Fișierul `-wal` lipsește, dar fișierul `-shm` și baza de date principală sunt intacte:
 
 ```bash
 # Se recuperează automat la următoarea deschidere
@@ -527,26 +527,29 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Scenariul 2: Fișierul bazei de date principale este corupt
+### Scenariul 2: Fișierul principal al bazei de date este corupt
 
 Restaurați din copia de rezervă:
 
 ```bash
-omniroute sync pull --merge   # sau: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` doar descarcă o arhivă `.tar.gz` completă de pe un server în execuție
+(`GET /api/db-backups/exportAll`, sunt necesare acreditările operatorului); nu restaurează nimic.
 
 ### Scenariul 3: Cheia de criptare a fost pierdută
 
-**Recuperarea nu este posibilă** fără cheie. Câmpurile criptate nu pot fi citite. Adăugați din nou manual toți furnizorii, folosind credențiale noi.
+**Recuperarea nu este posibilă** fără cheie. Câmpurile criptate nu pot fi citite. Adăugați din nou manual toți furnizorii, folosind acreditări noi.
 
-> **Măsură de protecție**: Faceți întotdeauna separat o copie de rezervă a cheii de criptare, de preferat într-un manager de parole sau într-un KMS.
+> **Măsură de protecție**: Efectuați întotdeauna separat o copie de rezervă a cheii de criptare, de preferință într-un manager de parole sau într-un KMS.
 
 ### Scenariul 4: Discul este plin
 
 SQLite va returna erori `SQLITE_FULL`. Eliberați spațiu pe disc, apoi:
 
 ```bash
-# Creați un punct de control WAL pentru a elibera spațiu
+# Efectuați un checkpoint WAL pentru a elibera spațiu
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

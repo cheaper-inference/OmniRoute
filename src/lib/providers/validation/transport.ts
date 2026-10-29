@@ -8,6 +8,7 @@ import {
   getSafeOutboundFetchErrorStatus,
   safeOutboundFetch,
 } from "@/shared/network/safeOutboundFetch";
+import { FetchTimeoutError } from "@/shared/utils/fetchTimeout";
 import { isPrivateHost } from "@/shared/network/outboundUrlGuard";
 import { getProviderValidationGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { selectProxyForValidation } from "@omniroute/open-sse/services/proxyAutoSelector.ts";
@@ -123,11 +124,15 @@ export function isSecurityBlockError(error: unknown): boolean {
 // — so it should degrade to "unsupported" the same way the discovery path already does for
 // REDIRECT_BLOCKED (#6267's buildDiscoveryErrorFallbackResponse).
 //
-// Scoped to `lmarena` only (root-caused and regression-tested for #7542): the other web-cookie
-// providers sharing a POST-only baseUrl shape (doubao-web, huggingchat, yuanbao-web,
-// zenmux-free, zai-web) have not been individually verified to actually redirect on this probe
-// rather than 404/405 — do not add them here without a proven repro per provider (see
-// #7542 plan-file, "Risks").
+// Scoped to `lmarena` only: the other web-cookie providers sharing a POST-only baseUrl shape
+// (doubao-web, huggingchat, yuanbao-web, zenmux-free, zai-web) have not been individually
+// verified to actually redirect on this probe rather than 404/405 — do not add them here
+// without a proven repro per provider (see #7542 plan-file, "Risks").
+//
+// lmarena's validation probe no longer targets `${baseUrl}/models` (it now reads the
+// session-scoped `/api/me/pulse`, see resolveWebCookieProbe in webCookie.ts), so this entry
+// is a defensive fallback: if that probe ever redirects, a blocked redirect is still not a
+// session-expiry signal and should degrade to "unsupported" rather than "Invalid".
 const WEB_COOKIE_PROVIDERS_WITH_UNRELIABLE_MODELS_PROBE = new Set(["lmarena"]);
 
 // #7857 — web-cookie providers whose registry `baseUrl` is a conversation/completion
@@ -141,6 +146,9 @@ const WEB_COOKIE_PROVIDERS_WITH_UNRELIABLE_MODELS_PROBE = new Set(["lmarena"]);
 // branch is short-circuited to the honest "unsupported" result instead of `valid: true`.
 // lmarena is deliberately NOT in this set — it already degrades via the
 // WEB_COOKIE_PROVIDERS_WITH_UNRELIABLE_MODELS_PROBE/REDIRECT_BLOCKED path above (#7542).
+// chatplayground baseUrl is https://app.chatplayground.ai/api/chat; appending /models
+// yields https://app.chatplayground.ai/api/chat/models which 404s regardless of cookie
+// (live auth signal is at GET /api/user or Clerk token endpoint).
 export const WEB_COOKIE_PROVIDERS_WITHOUT_MODELS_API = new Set([
   "huggingchat",
   "grok-web",
@@ -149,6 +157,7 @@ export const WEB_COOKIE_PROVIDERS_WITHOUT_MODELS_API = new Set([
   "yuanbao-web",
   "copilot-web",
   "copilot-m365-web",
+  "chatplayground",
 ]);
 
 // #12107 — web-cookie providers whose registry entry exists to publish a model catalog
@@ -221,7 +230,9 @@ export function toValidationErrorResult(error: unknown) {
   let securityBlocked = false;
   try {
     statusCode = getSafeOutboundFetchErrorStatus(error);
-    timeout = error instanceof SafeOutboundFetchError && error.code === "TIMEOUT";
+    timeout =
+      (error instanceof SafeOutboundFetchError && error.code === "TIMEOUT") ||
+      error instanceof FetchTimeoutError;
     securityBlocked = isSecurityBlockError(error);
   } catch {
     // Classification is advisory; hostile accessors must not escape the safe error boundary.

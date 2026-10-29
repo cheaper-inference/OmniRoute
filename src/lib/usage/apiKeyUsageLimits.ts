@@ -1,7 +1,13 @@
 import { getDbInstance } from "@/lib/db/core";
 import type { ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
 import { getProviderQuotaWindowStartIso } from "@/lib/db/quotaResetEvents";
+import { sumSearchLedgerSpendSince } from "@/lib/db/costLedger";
 import { calculateCostDetailed } from "./costCalculator";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import {
+  calendarWeekWindowMs,
+  isValidIanaTimeZone,
+} from "@omniroute/open-sse/services/dailyQuotaReset.ts";
 import {
   errorResponse,
   resolveRetryAfterInstant,
@@ -53,6 +59,8 @@ export interface ApiKeyUsageLimitDeps {
 }
 
 interface UsageCostRow {
+  storedCost: number | null;
+  unmeteredRequests: number | null;
   provider: string | null;
   model: string | null;
   serviceTier: string | null;
@@ -386,6 +394,64 @@ async function getProviderWeeklyWindow(
   };
 }
 
+export type ApiKeyWeeklyWindowMode = "provider" | "calendar";
+
+export interface ApiKeyWeeklyWindowSetting {
+  mode: ApiKeyWeeklyWindowMode;
+  timeZone: string;
+}
+
+const warnedWeeklyWindowValues = new Set<string>();
+
+function warnWeeklyWindowValueOnce(message: string): void {
+  if (warnedWeeklyWindowValues.has(message)) return;
+  warnedWeeklyWindowValues.add(message);
+  console.warn(`[apiKeyUsageLimits] ${message}`);
+}
+
+function getProcessTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+}
+
+/**
+ * Weekly window used by per-key USD limits.
+ * - `provider` (default): end at the earliest weekly reset among the upstream
+ *   connections the key can reach; rolling 7 days when none is known.
+ * - `calendar`: the local week starting Monday 00:00 in
+ *   OMNIROUTE_API_KEY_WEEKLY_WINDOW_TIMEZONE, or in the process timezone when unset.
+ */
+export function getApiKeyWeeklyWindowSetting(
+  env: Record<string, string | undefined> = process.env
+): ApiKeyWeeklyWindowSetting {
+  const rawMode = (env.OMNIROUTE_API_KEY_WEEKLY_WINDOW ?? "").trim().toLowerCase();
+  if (rawMode && rawMode !== "provider" && rawMode !== "calendar") {
+    warnWeeklyWindowValueOnce(
+      `OMNIROUTE_API_KEY_WEEKLY_WINDOW="${rawMode}" is not provider|calendar; using provider`
+    );
+  }
+  const rawTimeZone = (env.OMNIROUTE_API_KEY_WEEKLY_WINDOW_TIMEZONE ?? "").trim();
+  if (rawTimeZone && !isValidIanaTimeZone(rawTimeZone)) {
+    warnWeeklyWindowValueOnce(
+      `OMNIROUTE_API_KEY_WEEKLY_WINDOW_TIMEZONE="${rawTimeZone}" is not an IANA timezone; using the process timezone`
+    );
+  }
+  return {
+    mode: rawMode === "calendar" ? "calendar" : "provider",
+    timeZone: rawTimeZone && isValidIanaTimeZone(rawTimeZone) ? rawTimeZone : getProcessTimeZone(),
+  };
+}
+
+function getCalendarWeeklyWindow(
+  timeZone: string,
+  nowMs: number
+): { resetAtIso: string; windowStartIso: string } {
+  const { startMs, resetMs } = calendarWeekWindowMs(timeZone, nowMs);
+  return {
+    resetAtIso: new Date(resetMs).toISOString(),
+    windowStartIso: new Date(startMs).toISOString(),
+  };
+}
+
 interface ApiKeyUsdSpend {
   totalUsd: number;
   /** True when at least one (provider, model) group had no pricing row at all (#12341). */
@@ -402,15 +468,17 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
         LOWER(provider) as provider,
         LOWER(model) as model,
         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
-        COALESCE(SUM(tokens_input), 0) as promptTokens,
-        COALESCE(SUM(tokens_output), 0) as completionTokens,
-        COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
-        COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
-        COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens
+        COALESCE(SUM(provider_cost_usd), 0) as storedCost,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN 1 ELSE 0 END), 0) as unmeteredRequests,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END), 0) as promptTokens,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) as completionTokens,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END), 0) as cacheReadTokens,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as cacheCreationTokens,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END), 0) as reasoningTokens
       FROM usage_history
       WHERE api_key_id = @apiKeyId
         AND timestamp >= @sinceIso
-        AND success = 1
+        AND (success = 1 OR provider_cost_usd IS NOT NULL)
       GROUP BY LOWER(provider), LOWER(model), serviceTier
     `
     )
@@ -422,6 +490,12 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
     const provider = typeof row.provider === "string" ? row.provider : "";
     const model = typeof row.model === "string" ? row.model : "";
     if (!provider || !model) continue;
+
+    // A provider-reported exact cost is the billed amount (credit-metered providers,
+    // xAI). Those rows' tokens are excluded above, and they never make the group
+    // unpriced: only rows without a stored cost are priced from tokens.
+    total += toNumber(row.storedCost);
+    if (toNumber(row.unmeteredRequests) === 0) continue;
 
     const { costUsd, priced } = await calculateCostDetailed(
       provider,
@@ -442,13 +516,17 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
     if (!priced) {
       hasUnpricedUsage = true;
       console.warn(
-        `[apiKeyUsageLimits] no pricing found for ${provider}/${model} — usage counted as $0 ` +
-          "and enforcement is failing closed for this window (#12341)"
+        `[apiKeyUsageLimits] no pricing found for ${provider}/${model} — usage counted as $0; ` +
+          "a configured USD quota fails closed for this window unless " +
+          "USAGE_LIMIT_IGNORE_UNPRICED is on (#12341)"
       );
     }
     total += costUsd;
   }
 
+  // Web search spend is not in usage_history; it lives in request_cost_ledger
+  // under the search-only service_tier marker, so chat rows are never re-counted.
+  total += sumSearchLedgerSpendSince(apiKeyId, sinceIso);
   return { totalUsd: roundUsd(total), hasUnpricedUsage };
 }
 
@@ -460,7 +538,11 @@ export async function getApiKeyUsageLimitStatus(
   const now = resolvedDeps.now();
   const dailyWindowStartIso = getFortalezaDayStartIso(now);
   const dailyResetAtIso = getFortalezaDayResetIso(now);
-  const weeklyWindow = await getProviderWeeklyWindow(metadata, resolvedDeps, now);
+  const weeklySetting = getApiKeyWeeklyWindowSetting();
+  const weeklyWindow =
+    weeklySetting.mode === "calendar"
+      ? getCalendarWeeklyWindow(weeklySetting.timeZone, now)
+      : await getProviderWeeklyWindow(metadata, resolvedDeps, now);
   const weeklyResetAtIso = weeklyWindow.resetAtIso;
   const weeklyWindowStartIso = weeklyWindow.windowStartIso
     ? weeklyWindow.windowStartIso
@@ -484,14 +566,17 @@ export async function getApiKeyUsageLimitStatus(
   // as an invisible $0 — treat the limit as exceeded rather than trust an
   // undercounted spend total. A window with no configured limit was never
   // enforced, so unpriced usage there is only logged, not blocking.
+  // USAGE_LIMIT_IGNORE_UNPRICED is the operator opt-out: unpriced usage then
+  // stays at $0 and only priced spend counts toward the limit.
+  const failClosedOnUnpriced = !isFeatureFlagEnabled("USAGE_LIMIT_IGNORE_UNPRICED");
   const dailyExceeded =
     enabled &&
     dailyLimitUsd !== null &&
-    (dailySpentUsd >= dailyLimitUsd || dailySpend.hasUnpricedUsage);
+    (dailySpentUsd >= dailyLimitUsd || (failClosedOnUnpriced && dailySpend.hasUnpricedUsage));
   const weeklyExceeded =
     enabled &&
     weeklyLimitUsd !== null &&
-    (weeklySpentUsd >= weeklyLimitUsd || weeklySpend.hasUnpricedUsage);
+    (weeklySpentUsd >= weeklyLimitUsd || (failClosedOnUnpriced && weeklySpend.hasUnpricedUsage));
 
   return {
     enabled,

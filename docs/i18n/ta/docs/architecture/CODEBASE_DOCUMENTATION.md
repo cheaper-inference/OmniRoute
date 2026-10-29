@@ -19,29 +19,31 @@
 
 ---
 
-## 1. தொழில்நுட்பத் தொகுப்பு
+## 1. தொழில்நுட்ப அடுக்கு
 
-| அம்சம்           | தேர்வு                                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| வலைக் கட்டமைப்பு | **Next.js 16** (App Router, தனித்தியங்கும் வெளியீடு, உலகளாவிய middleware இல்லை)                                          |
-| மொழி             | **TypeScript 6.0+** — இலக்கு `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                    |
-| இயக்கநேரம்       | **Node.js** `>=22.22.2 <23` அல்லது `>=24.0.0 <27` (`engines` + `SUPPORTED_NODE_RANGE` வழியாகக் கட்டாயப்படுத்தப்படுகிறது) |
-| தரவுத்தளம்       | `better-sqlite3` வழியான **SQLite** (singleton, WAL பதிவேடு)                                                              |
-| கணினிப் பயன்பாடு | **Electron 41** + `electron-builder` 26.10 (`electron/`-இல் தனி workspace)                                               |
-| சோதனைகள்         | **Node native test runner** (unit/integration), **Vitest** (MCP, autoCombo, cache), **Playwright** (e2e + protocols-e2e) |
-| கட்டமைப்பு       | `scripts/build/build-next-isolated.mjs` வழியான Next.js standalone                                                        |
-| Lint/வடிவமைப்பு  | ESLint flat config + Prettier (Husky pre-commit வழியாக `lint-staged`)                                                    |
-| தொகுதி அமைப்பு   | எல்லா இடங்களிலும் ESM (`"type": "module"`)                                                                               |
-| Workspaces       | npm workspace — `open-sse` மட்டுமே துணை-workspace                                                                        |
+| அம்சம்          | தேர்வு                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| வலை கட்டமைப்பு  | **Next.js 16** (App Router, தனித்தியங்கும் வெளியீடு, உலகளாவிய middleware இல்லை)                                               |
+| மொழி            | **TypeScript 6.0+** — இலக்கு `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                         |
+| இயக்கச் சூழல்   | **Node.js** `>=22.22.2 <23` அல்லது `>=24.0.0 <27` (`engines` + `SUPPORTED_NODE_RANGE` மூலம் கட்டாயப்படுத்தப்படுகிறது)         |
+| தரவுத்தளம்      | `better-sqlite3` வழியான **SQLite** (singleton, WAL journaling)                                                                |
+| டெஸ்க்டாப்      | **Electron 41** + `electron-builder` 26.10 (`electron/` இல் தனியான பணியிடம்)                                                  |
+| சோதனைகள்        | **Node இயல்புநிலை சோதனை இயக்கி** (unit/integration), **Vitest** (MCP, autoCombo, cache), **Playwright** (e2e + protocols-e2e) |
+| கட்டமைப்பு      | `scripts/build/build-next-isolated.mjs` வழியாக Next.js standalone                                                             |
+| Lint/வடிவமைப்பு | ESLint flat config + Prettier (Husky pre-commit வழியாக `lint-staged`)                                                         |
+| தொகுதி அமைப்பு  | எல்லா இடங்களிலும் ESM (`"type": "module"`)                                                                                    |
+| Dashboard UI    | **Tailwind CSS 4** + உள்ளடக்கப்பட்ட **Keak CI UI Kit** (`packages/ui-kit`), Lucide icons — `DESIGN_SYSTEM.md` ஐப் பார்க்கவும் |
+| பணியிடங்கள்     | npm பணியிடங்கள் — `open-sse`, `packages/browser-pool`, `packages/ui-kit`                                                      |
 
 பாதை மாற்றுப்பெயர்கள் (`tsconfig.json`):
 
 - `@/*` → `src/*`
 - `@omniroute/open-sse` → `open-sse/index.ts`
 - `@omniroute/open-sse/*` → `open-sse/*`
+- `@omniroute/ui-kit` → `packages/ui-kit/src`, `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`
 
-இயல்புநிலை HTTP port: **`20128`** (API மற்றும் dashboard ஆகியவை ஒரே process-ஐப் பகிர்கின்றன). தரவுக்
-கோப்பகம் `DATA_DIR` சூழல் மாறியால் குறிப்பிடப்படுகிறது; அதன் இயல்புநிலை `~/.omniroute/`.
+இயல்புநிலை HTTP port: **`20128`** (API மற்றும் dashboard ஒரே process-ஐப் பகிர்கின்றன). தரவு
+அடைவு `DATA_DIR` env var ஆகும்; அதன் இயல்புநிலை `~/.omniroute/`.
 
 ---
 
@@ -49,21 +51,22 @@
 
 ```
 OmniRoute/
-├── src/                  Next.js பயன்பாடு (App Router, நூலகங்கள், domain, server, பகிரப்பட்டவை)
-├── open-sse/             Streaming engine workspace (@omniroute/open-sse)
-├── electron/             கணினிப் பயன்பாட்டு wrapper (Electron 41 main + preload)
+├── src/                  Next.js பயன்பாடு (App Router, நூலகங்கள், டொமைன், சர்வர், பகிரப்பட்டவை)
+├── open-sse/             ஸ்ட்ரீமிங் எஞ்சின் பணியிடம் (@omniroute/open-sse)
+├── packages/             பணியிடங்கள்: ui-kit (வெண்டர் செய்யப்பட்ட Keak CI UI Kit), browser-pool
+├── electron/             டெஸ்க்டாப் உறை (Electron 41 முதன்மை + preload)
 ├── bin/                  CLI நுழைவுப் புள்ளிகள் (omniroute, reset-password)
-├── tests/                Unit, integration, e2e, protocols-e2e, translator, security, fixtures
-├── scripts/              Build, sync, check, migration மற்றும் runtime உதவி scripts
-├── docs/                 பொது ஆவணங்கள் (இந்தக் கோப்பகம்)
-├── public/               நிலையான assets, PWA manifest, service worker
-├── config/               Runtime config மாதிரிகள்
-├── images/               சந்தைப்படுத்தல்/திரைப்பிடிப்பு assets
-├── _ideia/, _references/, _mono_repo/, _tasks/   உள்புறத் தற்காலிகப் பணிகள் / திட்டமிடல் (வெளியீட்டில் சேர்க்கப்படாது)
-├── CLAUDE.md             Claude Code-க்கான repo விதிகள்
-├── AGENTS.md             Agents-க்கான விரிவான கட்டமைப்புக் குறிப்பு
-├── package.json          v3.8.51, workspace root
-└── tsconfig.json         பாதை மாற்றுப்பெயர்கள் + முதன்மை compiler விருப்பங்கள்
+├── tests/                யூனிட், ஒருங்கிணைப்பு, e2e, protocols-e2e, மொழிபெயர்ப்பான், பாதுகாப்பு, நிலையான சோதனைத் தரவு
+├── scripts/              உருவாக்கம், ஒத்திசைவு, சரிபார்ப்பு, இடம்பெயர்வு மற்றும் இயக்கநேர உதவி ஸ்கிரிப்ட்கள்
+├── docs/                 பொதுவான ஆவணங்கள் (இந்தக் கோப்பகம்)
+├── public/               நிலையான வளங்கள், PWA மேனிஃபெஸ்ட், சேவைப் பணியாளர்
+├── config/               இயக்கநேர உள்ளமைவு மாதிரிகள்
+├── images/               சந்தைப்படுத்தல்/திரைப்பிடிப்பு வளங்கள்
+├── _ideia/, _references/, _mono_repo/, _tasks/   உள் வரைவு / திட்டமிடல் (விநியோகிக்கப்படாது)
+├── CLAUDE.md             Claude Code-க்கான களஞ்சிய விதிகள்
+├── AGENTS.md             முகவர்களுக்கான ஆழமான கட்டமைப்புக் குறிப்பு
+├── package.json          v3.8.51, பணியிட மூலம்
+└── tsconfig.json         பாதை மாற்றுப்பெயர்கள் + மைய கம்பைலர் விருப்பங்கள்
 ```
 
 ---
@@ -75,42 +78,42 @@ src/
 ├── app/                  App Router பக்கங்கள் + API வழித்தடங்கள்
 ├── lib/                  மைய நூலகங்கள் (DB, அங்கீகாரம், OAuth, திறன்கள், நினைவகம், …)
 ├── domain/               தூய டொமைன் அடுக்கு (கொள்கை, மாற்றுவழி, செலவு, பூட்டுதல், …)
-├── server/               சேவையகத்திற்கு மட்டும் உரிய தொகுதிகள் (அங்கீகார அனுமதி, cors, அங்கீகாரம்)
-├── shared/               வகைகள், மாறிலிகள், சரிபார்ப்பு, ஒப்பந்தங்கள், பயன்பாட்டுக் கருவிகள் (எல்லைகளைக் கடந்து பயன்படுத்தப் பாதுகாப்பானவை)
-├── mitm/                 CLI ஒருங்கிணைப்பிற்கான இடைநிலைப் ப்ராக்ஸி உதவியாளர்கள்
+├── server/               சேவையகத்திற்கு மட்டும் உரிய தொகுதிகள் (அணுகல் அங்கீகாரம், cors, அங்கீகாரம்)
+├── shared/               வகைகள், மாறிலிகள், சரிபார்ப்பு, ஒப்பந்தங்கள், பயன்பாட்டுக் கருவிகள் (எல்லைகளைக் கடந்து பாதுகாப்பானவை)
+├── mitm/                 CLI ஒருங்கிணைப்புக்கான நடுவண்-மனிதர் ப்ராக்ஸி உதவிகள்
 ├── models/               உள்ளக மாதிரி மெட்டாடேட்டா / மாற்றுப்பெயரிடல்
-├── sse/                  இன்னும் src/ கீழ் உள்ள மரபுவழி SSE கையாளிகள் (open-sse/ அல்ல)
-├── store/                கிளையன்ட்-பக்க நிலைச் சேமிப்பகங்கள்
-├── middleware/           வழித்தட-நிலை middleware பயன்பாட்டுக் கருவிகள் (Next.js உலகளாவிய middleware அல்ல)
+├── sse/                  இன்னும் src/ கீழ் உள்ள பழைய SSE கையாளிகள் (open-sse/ அல்ல)
+├── store/                கிளையன்ட்-பக்க நிலை சேமிப்பகங்கள்
+├── middleware/           வழித்தட-நிலை மிடில்வேர் பயன்பாட்டுக் கருவிகள் (Next.js உலகளாவிய மிடில்வேர் அல்ல)
 ├── scripts/              பயன்பாட்டுக் குறியீட்டால் இறக்குமதி செய்யக்கூடிய உட்பொதிந்த ஸ்கிரிப்ட்கள்
 ├── types/                சூழமைவு மற்றும் பகிரப்பட்ட TS வகைகள்
-├── i18n/                 மொழி-வட்டாரத் தொகுப்புகள்
-├── instrumentation.ts    Next.js கருவியாக்க hook
+├── i18n/                 மொழிப்பிரதேசத் தொகுப்புகள்
+├── instrumentation.ts    Next.js கருவியாக்க ஹுக்
 ├── instrumentation-node.ts
-└── proxy.ts              உயர்நிலைப் ப்ராக்ஸி தொடக்க உதவியாளர்
+└── proxy.ts              உயர்நிலை ப்ராக்ஸி தொடக்க உதவி
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router, டாஷ்போர்டு UI மற்றும் பொது/நிர்வாக HTTP API ஆகிய இரண்டையும் வெளிப்படுத்துகிறது.
-**உலகளாவிய middleware இல்லை** — இடைமறிப்பு ஒவ்வொரு வழித்தடத்திலும் தனித்தனியாகச் செய்யப்படுகிறது.
+App Router, கட்டுப்பாட்டுப் பலகை UI மற்றும் பொது/மேலாண்மை HTTP API ஆகிய இரண்டையும் வெளிப்படுத்துகிறது.
+**உலகளாவிய மிடில்வேர் எதுவும் இல்லை** — இடைமறிப்பு ஒவ்வொரு வழித்தடத்திலும் தனித்தனியாகச் செய்யப்படுகிறது.
 
-`src/app/`-இன் கீழுள்ள உயர்நிலைப் பிரிவுகள்:
+`src/app/` கீழுள்ள உயர்நிலைப் பிரிவுகள்:
 
-| பாதை                                                                          | நோக்கம்                                                           |
-| ----------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `api/`                                                                        | அனைத்து HTTP API வழித்தடங்களும் (கீழேயுள்ள விவரப் பிரிவைக் காண்க) |
-| `a2a/`                                                                        | A2A JSON-RPC 2.0 முனைப்புள்ளி (`POST /a2a`)                       |
-| `.well-known/agent.json/`                                                     | A2A Agent Card கண்டறிதல் ஆவணம்                                    |
-| `(dashboard)/`                                                                | டாஷ்போர்டு UI (வழித்தடக் குழு, URL முன்னொட்டு இல்லை)              |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | அங்கீகாரச் செயல்பாடுகள்                                           |
-| `landing/`                                                                    | சந்தைப்படுத்தல்/இறங்குப் பக்கம்                                   |
-| `docs/`                                                                       | உட்பொதிக்கப்பட்ட API ஆவணக் காட்சியகம்                             |
-| `status/`, `maintenance/`, `offline/`                                         | செயல்பாட்டுப் பக்கங்கள்                                           |
-| `privacy/`, `terms/`                                                          | சட்டப் பக்கங்கள்                                                  |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | நிலையான பிழைப் பக்கங்கள்                                          |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | கட்டமைப்பின் பிழை/ஏற்றல் எல்லைகள்                                 |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | மூலக் கட்டமைப்பு                                                  |
+| பாதை                                                                          | நோக்கம்                                                                 |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `api/`                                                                        | அனைத்து HTTP API வழித்தடங்களும் (கீழே உள்ள விவரப் பிரிவைப் பார்க்கவும்) |
+| `a2a/`                                                                        | A2A JSON-RPC 2.0 இறுதிப்புள்ளி (`POST /a2a`)                            |
+| `.well-known/agent.json/`                                                     | A2A Agent Card கண்டறிதல் ஆவணம்                                          |
+| `(dashboard)/`                                                                | கட்டுப்பாட்டுப் பலகை UI (வழித்தடக் குழு, URL முன்னொட்டு இல்லை)          |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | அங்கீகாரச் செயலோட்டங்கள்                                                |
+| `landing/`                                                                    | சந்தைப்படுத்தல்/அறிமுகப் பக்கம்                                         |
+| `docs/`                                                                       | உட்பொதிக்கப்பட்ட API ஆவணங்கள் பார்வையாளர்                               |
+| `status/`, `maintenance/`, `offline/`                                         | செயல்பாட்டுப் பக்கங்கள்                                                 |
+| `privacy/`, `terms/`                                                          | சட்டப் பக்கங்கள்                                                        |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | நிலையான பிழைப் பக்கங்கள்                                                |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | கட்டமைப்பின் பிழை/ஏற்றுதல் எல்லைகள்                                     |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | மூல உறை                                                                 |
 
 #### 3.1.1 `src/app/(dashboard)/dashboard/` — UI பக்கங்கள்
 
@@ -118,7 +121,7 @@ App Router, டாஷ்போர்டு UI மற்றும் பொது
 `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
 `costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
 `playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks`, மேலும் மூல `page.tsx`, `HomePageClient.tsx`,
+`translator`, `usage`, `webhooks`, மேலும் மூலத்தில் உள்ள `page.tsx`, `HomePageClient.tsx`,
 `BootstrapBanner.tsx`.
 
 #### 3.1.2 `src/app/api/` — உயர்நிலை API குழுக்கள்
@@ -174,7 +177,7 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   உட்பொதிக்கப்பட்ட சேவை நிர்வாகம் (9router, cliproxy) — LOCAL_ONLY
+├── services/   உட்பொதிக்கப்பட்ட சேவை மேலாண்மை (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
 ├── v1/         OpenAI-இணக்கமான பொது API
@@ -183,10 +186,11 @@ src/app/api/
 └── webhooks/
 ```
 
-#### 3.1.2a `src/app/api/services/` — உட்பொதிக்கப்பட்ட சேவைகள் நிர்வாகம்
+#### 3.1.2a `src/app/api/services/` — உட்பொதிக்கப்பட்ட சேவைகள் மேலாண்மை
 
-9Router மற்றும் CLIProxyAPI-ஐ நிறுவுதல், தொடங்குதல், நிறுத்துதல் மற்றும் கண்காணித்தலுக்கான வழித்தடங்கள்.
-`npm install`-ஐ இயக்கவும் துணைச் செயல்முறைகளை உருவாக்கவும் அவற்றால் முடியும் என்பதால், எல்லாப் பாதைகளும் **LOCAL_ONLY** (loopback மட்டும், கட்டாய விதி #17) என வகைப்படுத்தப்பட்டுள்ளன.
+9Router மற்றும் CLIProxyAPI ஆகியவற்றை நிறுவுதல், தொடங்குதல், நிறுத்துதல் மற்றும் கண்காணித்தலுக்கான வழித்தடங்கள்.
+அவை `npm install`-ஐ இயக்கவும் துணைச் செயல்முறைகளை உருவாக்கவும் முடியும் என்பதால், அனைத்து
+பாதைகளும் **LOCAL_ONLY** (லூப்பேக் மட்டும், கட்டாய விதி #17) என வகைப்படுத்தப்பட்டுள்ளன.
 
 ```
 src/app/api/services/
@@ -210,22 +214,22 @@ src/app/api/services/
 │   ├── status/route.ts     GET  — நேரலை + DB நிலை + பதிப்பு மெட்டாடேட்டா
 │   └── auto-start/route.ts POST — auto_start கொடியை மாற்றுதல்
 └── [name]/
-    └── logs/route.ts       GET  — SSE பதிவின் இறுதிப் பகுதி (அனைத்துச் சேவைகளாலும் பகிரப்படுகிறது)
+    └── logs/route.ts       GET  — SSE பதிவின் இறுதிப் பகுதி (அனைத்து சேவைகளாலும் பகிரப்படுகிறது)
 ```
 
 தொடர்புடைய டாஷ்போர்டு UI:
-`src/app/(dashboard)/dashboard/providers/services/` — இரண்டு தாவல்கள் கொண்ட பக்கம் (CLIProxyAPI + 9Router).
-9Router உட்பொதிக்கப்பட்ட UI-க்கான தலைகீழ் பதிலி:
+`src/app/(dashboard)/dashboard/providers/services/` — இரண்டு-தாவல் பக்கம் (CLIProxyAPI + 9Router).
+9Router உட்பொதிக்கப்பட்ட UI-க்கான தலைகீழ் ப்ராக்ஸி:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-ஆழமான விளக்கம்: `docs/frameworks/EMBEDDED-SERVICES.md`
+விரிவான விளக்கம்: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 #### 3.1.3 `src/app/api/v1/` — OpenAI-இணக்கமான பொது API
 
 ```
 v1/
-├── accounts/[id]/                       கணக்குத் தேடல்
-├── agents/tasks/[id]/, agents/tasks/    A2A-பாணி பணிக்கான முனைப்புள்ளிகள்
+├── accounts/[id]/                       கணக்கு தேடல்
+├── agents/tasks/[id]/, agents/tasks/    A2A-பாணி பணி முனைப்புள்ளிகள்
 ├── api/                                 v1/api-இன் கீழ் வெளிப்படுத்தப்படும் உள் API உதவிச் செயல்பாடுகள்
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
@@ -235,82 +239,82 @@ v1/
 ├── files/[id]/, files/                  Files API
 ├── _helpers/                            பகிரப்பட்ட வழித்தட உதவிச் செயல்பாடுகள் (பொது URL இல்லை)
 ├── images/{edits, generations}/         பட உருவாக்கம் + திருத்தம்
-├── issues/                              முன்னுரிமைப்படுத்தல் உதவி முனைப்புள்ளிகள்
-├── management/{proxies}/                v1-க்குள் மேலாண்மை வரம்புடைய வழித்தடங்கள்
+├── issues/                              ஆரம்ப மதிப்பீட்டு உதவி முனைப்புள்ளிகள்
+├── management/{proxies}/                v1-க்குள் நிர்வாக வரம்புடைய வழித்தடங்கள்
 ├── messages/{count_tokens}/             Anthropic-பாணி செய்திகளுக்கான இணக்கத்தன்மை
 ├── models/                              மாதிரிப் பட்டியல் (`route.ts`, `catalog.ts`)
-├── moderations/                         உள்ளடக்கத் தணிக்கை
+├── moderations/                         உள்ளடக்க நெறிப்படுத்தல்
 ├── music/                               இசை உருவாக்கம்
-├── providers/[provider]/                வழங்குநர் வாரியான செயல்பாடுகள்
+├── providers/[provider]/                வழங்குநர்-வாரியான செயல்பாடுகள்
 ├── quotas/{check}                       ஒதுக்கீட்டுச் சோதனைகள்
-├── registered-keys/                     பதிவுசெய்யப்பட்ட விசைகளின் நிர்வாகம்
+├── registered-keys/                     பதிவுசெய்யப்பட்ட விசை நிர்வாகம்
 ├── rerank/                              மறுதரவரிசைப்படுத்தல்
-├── responses/[...path]/                 OpenAI Responses API (அனைத்தையும் பிடிக்கும்)
+├── responses/[...path]/                 OpenAI Responses API (அனைத்தையும் பொருத்துவது)
 ├── search/                              இணையத் தேடல்
 ├── videos/                              காணொளி உருவாக்கம்
-├── ws/                                  WebSocket இணைப்புப் பாலம்
-└── route.ts                             குறியீட்டுக் கையாளுநர்
+├── ws/                                  WebSocket பாலம்
+└── route.ts                             குறியீட்டு கையாளுநர்
 ```
 
-ஒவ்வொரு வழித்தடக் கோப்பும் ஒரே மாதிரியான வடிவத்தைப் பின்பற்றுகிறது:
+ஒவ்வொரு வழித்தடக் கோப்பும் ஒரே வடிவத்தைப் பின்பற்றுகிறது:
 
 ```
-வழித்தடம் → CORS முன்சோதனை → Zod உடல் சரிபார்ப்பு → விருப்பமான அங்கீகாரம்
-          → API விசைக் கொள்கைச் செயலாக்கம் → கையாளுநரிடம் ஒப்படைத்தல் (open-sse)
+வழித்தடம் → CORS முன்சோதனை → Zod கோரிக்கை உடல் சரிபார்ப்பு → விருப்பத்திற்குரிய அங்கீகாரம்
+          → API விசைக் கொள்கை அமலாக்கம் → கையாளுநர் ஒப்படைப்பு (open-sse)
 ```
 
-`v1beta/` என்பது Gemini-பாணி இணக்கத்தன்மைத் தளமாகும் (அதே
-`open-sse/handlers/` செயலாக்கத் தொடராக மொழிமாற்றம் செய்யும் மெல்லிய உறை).
+`v1beta/` என்பது Gemini-பாணி இணக்கத்தன்மைத் தளம் (அதே
+`open-sse/handlers/` செயலாக்கத் தொடருக்கு மொழிபெயர்க்கும் ஒரு மெல்லிய உறை).
 
 ### 3.2 `src/lib/` — மைய நூலகங்கள்
 
-தரவு, ஒத்திசைவு, OAuth, திறன், நினைவகம் போன்றவற்றை எப்போதும் இந்தத் தொகுதிகள் வழியாக இறக்குமதி செய்யவும்.
-அட்டவணை, நடைமுறையிலுள்ள அடைவுகளையும் குறிப்பிடத்தக்க மேல்நிலைக் கோப்புகளையும் தொகுக்கிறது.
+தரவு, ஒத்திசைவு, OAuth, திறன், நினைவகம் போன்றவற்றை எப்போதும் இந்தத் தொகுதிகள் வழியாக இறக்குமதி செய்யவும். இந்த
+அட்டவணை, உண்மையான கோப்பகங்களையும் குறிப்பிடத்தக்க மேல்நிலைக் கோப்புகளையும் தொகுக்கிறது.
 
-| தொகுதி            | நோக்கம்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A நெறிமுறைச் சேவையகம்: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 திறன்கள்: செலவுப் பகுப்பாய்வு, நிலை அறிக்கை, வழங்குநர் கண்டறிதல், ஒதுக்கீட்டு மேலாண்மை, நுண்ணறிவு வழிப்படுத்தல், திறன்களைப் பட்டியலிடுதல்)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `acp/`            | முகவர்-கட்டுப்பாட்டு-நெறிமுறை: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `api/`            | உள் API உதவியாளர்கள்: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `auth/`           | `managementPassword.ts` (கடவுச்சொல் மீட்டமைப்பு / ஹாஷிங்)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `batches/`        | OpenAI Batches API சேவை (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `catalog/`        | OpenRouter பட்டியல் ஒத்திசைவு (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `cloudAgent/`     | கிளவுட் முகவர் பதிவகம்: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `combos/`         | சேர்க்கைத் தீர்மான உதவியாளர்கள்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `compliance/`     | தணிக்கை + வழங்குநர் தணிக்கை: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `config/`         | இயக்கநேர உள்ளமைப்பு இணைப்பு                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `db/`             | SQLite களத் தொகுதிகள் (§3.2.1-ஐப் பார்க்கவும்)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `display/`        | API பதில்களால் பயன்படுத்தப்படும் UI/காட்சிப்படுத்தல் உதவியாளர்கள்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `embeddings/`     | உட்பொதித்தல் சேவைப் பதிவகம்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `env/`            | சூழல் ஏற்றுதல் + உள்நோக்கல்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `evals/`          | மதிப்பீட்டு இயக்கநேரம்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `jobs/`           | பின்னணிப் பணிகள் (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `memory/`         | நிலையான நினைவகம்: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `oauth/`          | OAuth/இறக்குமதி வழங்குநர் தொகுதிகள் (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, மேலும் `services/`, `utils/`, மற்றும் `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `plugins/`        | செருகுநிரல் ஏற்றி (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `providerModels/` | நிர்வகிக்கப்படும் மாதிரி வாழ்க்கைச் சுழற்சி: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `providers/`      | வழங்குநர் உதவியாளர்கள்: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `resilience/`     | `settings.ts` — சுற்று முறிப்பான், காத்திருப்புக் காலம், பூட்டுதல் ஆகியவற்றுக்கான அமைப்புகள்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `runtime/`        | இயக்கநேர அம்சக் கண்டறிதல்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `services/`       | உட்பொதிக்கப்பட்ட சேவைகள் கட்டமைப்பு: `ServiceSupervisor.ts` (செயல்பாட்டுப் பூட்டு, வளைய இடையகம், நிலைச் சரிபார்ப்பி ஆகியவற்றைக் கொண்ட பொதுவான சேய்-செயல்முறை மேற்பார்வையாளர்), `bootstrap.ts` (செயல்முறை-நிலைப் பதிவு மற்றும் தானியக்கத் தொடக்கம்), `registry.ts` (கருவி → மேற்பார்வையாளர் வரைபடம்), `apiKey.ts` (AES-256-GCM விசைச் சேமிப்பகம்), `modelSync.ts` (காலமுறை மாதிரி ஒத்திசைவு), `ringBuffer.ts` (5 MB வட்டப் பதிவேட்டு இடையகம்), `healthCheck.ts` (HTTP நிலை ஆய்வு), `types.ts`, `embedWsProxy.ts` (WebSocket பதிலாள்), `installers/{ninerouter,cliproxy}.ts`. `docs/frameworks/EMBEDDED-SERVICES.md`-ஐப் பார்க்கவும்                                                                                                                                                            |
-| `agentSkills/`    | முகவர் திறன்கள் பட்டியல் + உருவாக்கி: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → `skills/{id}/SKILL.md`-இல் எழுதுகிறது), `openapiParser.ts` (OpenAPI விவரக்குறிப்பிலிருந்து REST முனைப்புள்ளிகளைப் பிரித்தெடுக்கிறது), `cliRegistryParser.ts` (bin/cli-registry-இலிருந்து CLI துணைக் கட்டளைகளைப் பிரித்தெடுக்கிறது), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). REST வழித்தடங்கள் (`/api/agent-skills/*`), MCP கருவிகள் (`omniroute_agent_skills_*`), மற்றும் A2A திறன் `list-capabilities` ஆகியவற்றால் பயன்படுத்தப்படுகிறது. [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md)-ஐப் பார்க்கவும். |
-| `skills/`         | திறன் கட்டமைப்பு: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, மேலும் `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `spend/`          | `batchWriter.ts` (தாமத-எழுத்து இடையகம்)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `sync/`           | `bundle.ts`, `tokens.ts` (கிளவுட் ஒத்திசைவு)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `system/`         | அமைப்பு-நிலை உதவியாளர்கள்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `translator/`     | உயர்நிலை மொழிபெயர்ப்பாளர் இணைப்பு (`open-sse/translator/`-க்கு ஒப்படைக்கிறது)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `usage/`          | பயன்பாட்டுக் கணக்கீடு: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `versionManager/` | தானியக்கப் புதுப்பிப்பு + பதிப்பு அறிக்கை                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `ws/`             | WebSocket இணைப்புப் பாலம்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `zed-oauth/`      | Zed திருத்தி OAuth ஓட்டம்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| தொகுதி            | நோக்கம்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `a2a/`            | A2A நெறிமுறை சேவையகம்: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 திறன்கள்: செலவுப் பகுப்பாய்வு, நிலை அறிக்கை, வழங்குநர் கண்டறிதல், ஒதுக்கீடு மேலாண்மை, அறிவார்ந்த வழிப்படுத்தல், திறன்களைப் பட்டியலிடுதல்)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `acp/`            | முகவர்-கட்டுப்பாட்டு-நெறிமுறை: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `api/`            | உள் API உதவிகள்: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `auth/`           | `managementPassword.ts` (கடவுச்சொல் மீட்டமைப்பு / ஹாஷிங்)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `batches/`        | OpenAI Batches API சேவை (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `catalog/`        | OpenRouter பட்டியல் ஒத்திசைவு (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `cloudAgent/`     | கிளவுட் ஏஜென்ட் பதிவகம்: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `combos/`         | காம்போ தீர்மான உதவிக்கருவிகள்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `compliance/`     | தணிக்கை + வழங்குநர் தணிக்கை: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `config/`         | இயக்கநேர உள்ளமைவு இணைப்புக் குறியீடு                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `db/`             | SQLite டொமைன் தொகுதிகள் (§3.2.1-ஐப் பார்க்கவும்)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `display/`        | API பதில்கள் பயன்படுத்தும் UI/காட்சிப்படுத்தல் உதவிக்கருவிகள்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `embeddings/`     | உட்பொதித்தல் சேவைப் பதிவகம்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `env/`            | சூழல் ஏற்றுதல் + உள்நோக்குதல்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `evals/`          | Eval இயக்கநேரம்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `jobs/`           | பின்னணிப் பணிகள் (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `memory/`         | நிலையான நினைவகம்: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `oauth/`          | OAuth/இறக்குமதி வழங்குநர் தொகுதிகள் (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, மேலும் `services/`, `utils/`, மற்றும் `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `plugins/`        | செருகுநிரல் ஏற்றி (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `providerModels/` | நிர்வகிக்கப்படும் மாதிரி வாழ்க்கைச்சுழற்சி: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `providers/`      | வழங்குநர் உதவிக்கருவிகள்: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `resilience/`     | `settings.ts` — circuit breaker, cooldown, lockout ஆகியவற்றிற்கான அமைப்புகள்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `runtime/`        | இயக்கநேர அம்சக் கண்டறிதல்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `services/`       | உட்பொதிக்கப்பட்ட சேவைகள் கட்டமைப்பு: `ServiceSupervisor.ts` (செயல்பாட்டுப் பூட்டு, வளைய இடையகம், உடல்நலச் சரிபார்ப்பி ஆகியவற்றைக் கொண்ட பொதுவான துணைச் செயல்முறை மேற்பார்வையாளர்), `bootstrap.ts` (செயல்முறை-நிலைப் பதிவும் தானியங்கு தொடக்கமும்), `registry.ts` (கருவி → மேற்பார்வையாளர் வரைபடம்), `apiKey.ts` (AES-256-GCM விசைச் சேமிப்பகம்), `modelSync.ts` (காலமுறை மாதிரி ஒத்திசைவு), `ringBuffer.ts` (5 MB வட்டப் பதிவு இடையகம்), `healthCheck.ts` (HTTP உடல்நல ஆய்வு), `types.ts`, `embedWsProxy.ts` (WebSocket பதிலாள்), `installers/{ninerouter,cliproxy}.ts`. `docs/frameworks/EMBEDDED-SERVICES.md` ஐப் பார்க்கவும்                                                                                                                                                            |
+| `agentSkills/`    | Agent Skills பட்டியல் + உருவாக்கி: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → `skills/{id}/SKILL.md` இல் எழுதுகிறது), `openapiParser.ts` (OpenAPI விவரக்குறிப்பிலிருந்து REST முனைப்புள்ளிகளைப் பிரித்தெடுக்கிறது), `cliRegistryParser.ts` (bin/cli-registry இலிருந்து CLI துணைக் கட்டளைகளைப் பிரித்தெடுக்கிறது), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). REST வழித்தடங்கள் (`/api/agent-skills/*`), MCP கருவிகள் (`omniroute_agent_skills_*`), மற்றும் A2A திறன் `list-capabilities` ஆகியவற்றால் பயன்படுத்தப்படுகிறது. [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md) ஐப் பார்க்கவும். |
+| `skills/`         | திறன் கட்டமைப்பு: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, மேலும் `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `spend/`          | `batchWriter.ts` (தாமத-எழுதுதல் இடையகம்)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `system/`         | கணினி-நிலை உதவிகள்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `translator/`     | உயர்நிலை மொழிபெயர்ப்பி இணைப்புக் குறியீடு (`open-sse/translator/`-க்கு பொறுப்பை ஒப்படைக்கிறது)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `usage/`          | பயன்பாட்டுக் கணக்கீடு: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `versionManager/` | தானியங்குப் புதுப்பிப்பு + பதிப்பு அறிக்கை                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `ws/`             | WebSocket இணைப்புப் பாலம்                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `zed-oauth/`      | Zed திருத்தியின் OAuth செயல்முறை                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
-`src/lib/`-இல் உள்ள மேல்நிலை கோப்புகள்:
+`src/lib/`-இல் உள்ள உயர்நிலைக் கோப்புகள்:
 
-- பழைய `localDb.ts` barrel அகற்றப்பட்டது — பயன்படுத்துபவர்கள் குறிப்பிட்ட `src/lib/db/*` தொகுதிகளை நேரடியாக import செய்கிறார்கள்.
+- பழைய `localDb.ts` barrel அகற்றப்பட்டது — பயன்படுத்துவோர் குறிப்பிட்ட `src/lib/db/*` தொகுதிகளை நேரடியாக இறக்குமதி செய்கிறார்கள்.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -327,11 +331,11 @@ v1/
 Singleton SQLite தரவுத்தளம் (`core.ts`-இல் `getDbInstance()`, WAL journaling).
 **Routes அல்லது handlers-இல் ஒருபோதும் raw SQL எழுத வேண்டாம்** — இந்தத் தொகுதிகள் வழியாகச் செல்லவும்.
 
-![தரவுத்தள schema மேலோட்டம் (தேர்ந்தெடுக்கப்பட்ட முக்கிய அட்டவணைகள்)](../diagrams/exported/db-schema-overview.svg)
+![தரவுத்தள schema கண்ணோட்டம் (தேர்ந்தெடுக்கப்பட்ட முதன்மை அட்டவணைகள்)](../diagrams/exported/db-schema-overview.svg)
 
 > மூலம்: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Domain தொகுதிகள் (ஒவ்வொன்றும் ஒன்று அல்லது அதற்கு மேற்பட்ட அட்டவணைகளைக் கொண்டிருக்கும்): `apiKeys.ts`, `backup.ts`,
+Domain தொகுதிகள் (ஒவ்வொன்றும் ஒன்று அல்லது அதற்கு மேற்பட்ட அட்டவணைகளுக்குப் பொறுப்பாகும்): `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -345,10 +349,9 @@ Domain தொகுதிகள் (ஒவ்வொன்றும் ஒன்�
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-`migrations/` 168 பதிப்பிடப்பட்ட `.sql` கோப்புகளைக் (idempotent, transactional) கொண்டுள்ளது; அவை
-துவக்கத்தின்போது `migrationRunner.ts` மூலம் இயக்கப்படுகின்றன.
+`migrations/`-இல் version செய்யப்பட்ட 168 `.sql` கோப்புகள் உள்ளன (idempotent, transactional); அவை boot நேரத்தில் `migrationRunner.ts` மூலம் இயக்கப்படுகின்றன.
 
-Migrations முழுவதிலும் உருவாக்கப்பட்ட அட்டவணைகள் (மொத்தம் 123):
+Migrations முழுவதிலும் உருவாக்கப்படும் அட்டவணைகள் (மொத்தம் 123):
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -368,42 +371,42 @@ Migrations முழுவதிலும் உருவாக்கப்ப�
 
 ### 3.3 `src/domain/` — Domain அடுக்கு
 
-I/O இல்லாத தூய business logic. Routes மற்றும் handlers மூலம் import செய்யப்படுகிறது.
+I/O இல்லாத தூய business logic. Routes மற்றும் handlers மூலம் இறக்குமதி செய்யப்படுகிறது.
 
-| கோப்பு                                     | நோக்கம்                                                      |
-| ------------------------------------------ | ------------------------------------------------------------ |
-| `policyEngine.ts`                          | மேல்நிலை policy resolver                                     |
-| `fallbackPolicy.ts`                        | Fallback முடிவு மரம்                                         |
-| `costRules.ts`                             | செலவுக் கணக்கீட்டு விதிகள்                                   |
-| `lockoutPolicy.ts`                         | Model lockout முடிவுகள்                                      |
-| `tagRouter.ts`                             | Tag அடிப்படையிலான routing                                    |
-| `comboResolver.ts`                         | Request → target பட்டியலிலிருந்து combo resolution           |
-| `connectionModelRules.ts`                  | ஒவ்வொரு connection-க்குமான model filters                     |
-| `modelAvailability.ts`                     | Model கிடைக்கும் நிலைச் சரிபார்ப்பு                          |
-| `degradation.ts`                           | Degraded-mode நிலைமாற்றங்கள்                                 |
-| `providerExpiration.ts`                    | காலாவதியான account/key கண்டறிதல்                             |
-| `quotaCache.ts`                            | Cache செய்யப்பட்ட quota முடிவுகள்                            |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Response வடிவமைப்பு helpers                                  |
-| `configAudit.ts`                           | Config மாற்ற audit                                           |
-| `assessment/`                              | Model மதிப்பீடு (RFC-இன் படி, பகுதியளவு செயல்படுத்தப்பட்டது) |
-| `types.ts`                                 | பகிரப்பட்ட domain types                                      |
+| கோப்பு                                     | நோக்கம்                                                        |
+| ------------------------------------------ | -------------------------------------------------------------- |
+| `policyEngine.ts`                          | உயர்நிலை policy resolver                                       |
+| `fallbackPolicy.ts`                        | Fallback முடிவு மரம்                                           |
+| `costRules.ts`                             | செலவுக் கணக்கீட்டு விதிகள்                                     |
+| `lockoutPolicy.ts`                         | Model lockout முடிவுகள்                                        |
+| `tagRouter.ts`                             | Tag அடிப்படையிலான routing                                      |
+| `comboResolver.ts`                         | Request → target பட்டியலிலிருந்து combo resolution             |
+| `connectionModelRules.ts`                  | ஒவ்வொரு connection-க்குமான model filters                       |
+| `modelAvailability.ts`                     | Model கிடைக்கும் நிலைச் சரிபார்ப்பு                            |
+| `degradation.ts`                           | Degraded-mode நிலைமாற்றங்கள்                                   |
+| `providerExpiration.ts`                    | காலாவதியான account/key கண்டறிதல்                               |
+| `quotaCache.ts`                            | Cache செய்யப்பட்ட quota முடிவுகள்                              |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Response வடிவ உதவிக்கருவிகள்                                   |
+| `configAudit.ts`                           | Config மாற்றத் தணிக்கை                                         |
+| `assessment/`                              | Model மதிப்பீடு (RFC-க்கு ஏற்ப, பகுதியளவு செயல்படுத்தப்பட்டது) |
+| `types.ts`                                 | பகிரப்பட்ட domain types                                        |
 
 ### 3.4 `src/server/` — Server-க்கு மட்டும்
 
-Client components-இலிருந்து import செய்ய முடியாது.
+Client components-இலிருந்து இறக்குமதி செய்ய முடியாது.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
 │   ├── classify.ts        Routes-ஐ public அல்லது management என வகைப்படுத்துகிறது
-│   ├── assertAuth.ts      Assertion helper
+│   ├── assertAuth.ts      Assertion உதவிக்கருவி
 │   ├── context.ts         ஒவ்வொரு request-க்குமான authz context
 │   ├── headers.ts
 │   ├── pipeline.ts        Authz pipeline
-│   ├── policies/          உறுதியான policies
+│   ├── policies/          நடைமுறை policies
 │   └── types.ts
-└── cors/origins.ts        CORS origin allowlist
+└── cors/origins.ts        CORS origin அனுமதிப்பட்டியல்
 ```
 
 ### 3.5 `src/shared/` — பகிர்வதற்குப் பாதுகாப்பானது
@@ -428,149 +431,117 @@ server/
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, மேலும் `services/`, `network/`, `middleware/`, `schemas/`,
-  `hooks/`, `components/` ஆகியவற்றின் கீழ் உள்ள டாஷ்போர்டு ஹுக்குகள்/கூறுகள்.
+  `a11yAudit.ts`, மேலும் `services/`, `network/`,
+  `middleware/`, `schemas/`, `hooks/`, `components/` ஆகியவற்றின் கீழ் உள்ள டாஷ்போர்டு ஹுக்குகள்/கூறுகள்.
+- `components/` — டாஷ்போர்டு கூறு API (`index.tsx` பேரல்: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). அடிப்படைக் கூறுகள், திட்டத்துடன் சேர்க்கப்பட்டுள்ள
+  கிட் (`packages/ui-kit`, `@omniroute/ui-kit/button` போன்ற கூறு துணைப்பாதை வழியாக
+  இறக்குமதி செய்யப்படுகிறது) மீதான அடாப்டர்களாக இருப்பதால், திரைகள் தங்களது இறக்குமதிகளைத்
+  தக்கவைத்துக்கொள்ளும் அதேவேளையில் மார்க்அப் கிட்டினுடையதாக இருக்கும். ஷெல் என்பது
+  `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (கிட் `SidebarProvider`/`SidebarInset`), அதனுடன் `Sidebar.tsx` மற்றும் `Header.tsx`;
+  ஐகான்கள் `Icon.tsx` மற்றும் `constants/iconMap.ts` வழியாகச் செல்கின்றன. `docs/architecture/DESIGN_SYSTEM.md`-ஐப் பார்க்கவும்.
 
 ---
 
-## 4. `open-sse/` — ஸ்ட்ரீமிங் என்ஜின் பணியிடம்
+## 4. `open-sse/` - ஸ்ட்ரீமிங் என்ஜின் பணியிடம்
 
-`@omniroute/open-sse` என வெளியிடப்படும் தனியான npm பணியிடம். கோரிக்கை
-செயலாக்கம், இயக்கிகள், மொழிமாற்றிகள், சேவைகள், உருமாற்றி மற்றும் MCP சேவையகத்தை நிர்வகிக்கிறது.
+தனி npm பணியிடம் `@omniroute/open-sse` ஆக வெளியிடப்பட்டது. கோரிக்கை செயலாக்கம், நிறைவேற்றுபவர்கள், மொழிபெயர்ப்பாளர்கள், சேவைகள், மின்மாற்றி மற்றும் MCP சேவையகத்திற்குச் சொந்தமானது.
 
 ```
 open-sse/
-├── index.ts                பொது ஏற்றுமதிகள்
-├── package.json            பணியிட அறிக்கை
+├── index.ts                Public exports
+├── package.json            Workspace manifest
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 வழங்குநர் பதிவகங்கள், தலைப்பு சுயவிவரங்கள், அடையாளம், …
-├── handlers/               கோரிக்கைக் கையாளிகள் (அரட்டை, உட்பொதிவுகள், ஒலி, படம், …)
-├── executors/              வழங்குநர் சார்ந்த 108 HTTP இயக்கிகள்
-├── translator/             வடிவமைப்பு மாற்றம் (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Responses API ↔ Chat Completions ஸ்ட்ரீம் உருமாற்றி
-├── services/               80+ சேவைக் கூறுகள் (கலவைகள், மாற்றுவழி, ஒதுக்கீடுகள், அடையாளம், …)
-├── utils/                  ஸ்ட்ரீமிங் உதவிகள், TLS கிளையண்ட், AWS SigV4, ப்ராக்ஸி பெறுதல், …
-└── mcp-server/             MCP சேவையகம் (3 பரிமாற்ற முறைகள், 33 வரம்புகள், 110 கருவிகள்)
+├── config/                 Provider registries, header profiles, identity, …
+├── handlers/               Request handlers (chat, embeddings, audio, image, …)
+├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Responses API ↔ Chat Completions stream transformer
+├── services/               80+ service modules (combos, fallback, quotas, identity, …)
+├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
+└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| கையாளி                  | நோக்கம்                                                                                                  |
-| ----------------------- | -------------------------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | முதன்மை அரட்டை செயலாக்கத் தொடர் (தற்காலிகச் சேமிப்பு, வீத வரம்பு, கலவை வழிப்படுத்தல், இயக்கி அனுப்புதல்) |
-| `responsesHandler.ts`   | OpenAI Responses API நுழைவுப் புள்ளி                                                                     |
-| `embeddings.ts`         | உட்பொதிவுகள்                                                                                             |
-| `imageGeneration.ts`    | பட உருவாக்கம்                                                                                            |
-| `audioSpeech.ts`        | உரையிலிருந்து பேச்சு                                                                                     |
-| `audioTranscription.ts` | பேச்சிலிருந்து உரை                                                                                       |
-| `videoGeneration.ts`    | காணொளி உருவாக்கம்                                                                                        |
-| `musicGeneration.ts`    | இசை உருவாக்கம்                                                                                           |
-| `rerank.ts`             | மறுதரவரிசைப்படுத்தல்                                                                                     |
-| `moderations.ts`        | உள்ளடக்கக் கட்டுப்பாடு                                                                                   |
-| `search.ts`             | வலைத் தேடல்                                                                                              |
-| `sseParser.ts`          | SSE நிகழ்வு பாகுபடுத்தி                                                                                  |
-| `usageExtractor.ts`     | மேல்நிலை ஸ்ட்ரீம்களிலிருந்து டோக்கன் எண்ணிக்கைகளைப் பிரித்தெடுத்தல்                                      |
-| `responseSanitizer.ts`  | வழங்குநர் சார்ந்த தேவையற்ற தரவை நீக்குதல்                                                                |
-| `responseTranslator.ts` | வழங்குநர் பதிலுக்கும் மொழிமாற்றி அடுக்குக்கும் இடையிலான இணைப்பு                                          |
+| கையாளுபவர்              | நோக்கம்                                                                                 |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | முதன்மை அரட்டை பைப்லைன் (கேச், ரேட் லிமிட், காம்போ ரூட்டிங், எக்ஸிகியூட்டர் டிஸ்பாட்ச்) |
+| `responsesHandler.ts`   | OpenAI பதில்கள் API நுழைவு புள்ளி                                                       |
+| `embeddings.ts`         | உட்பொதிப்புகள்                                                                          |
+| `imageGeneration.ts`    | பட உருவாக்கம்                                                                           |
+| `audioSpeech.ts`        | உரையிலிருந்து பேச்சு                                                                    |
+| `audioTranscription.ts` | பேச்சுக்கு உரை                                                                          |
+| `videoGeneration.ts`    | வீடியோ உருவாக்கம்                                                                       |
+| `musicGeneration.ts`    | இசை தலைமுறை                                                                             |
+| `rerank.ts`             | மறுவரிசைப்படுத்தல்                                                                      |
+| `moderations.ts`        | நிதானம்                                                                                 |
+| `search.ts`             | இணைய தேடல்                                                                              |
+| `sseParser.ts`          | SSE நிகழ்வு பாகுபடுத்தி                                                                 |
+| `usageExtractor.ts`     | அப்ஸ்ட்ரீம் ஸ்ட்ரீம்களில் இருந்து டோக்கன் எண்ணிக்கையை இழுக்கவும்                        |
+| `responseSanitizer.ts`  | ஸ்ட்ரிப் வழங்குநர்-குறிப்பிட்ட சத்தம்                                                   |
+| `responseTranslator.ts` | வழங்குநர் பதில் மற்றும் மொழிபெயர்ப்பாளர் அடுக்கு இடையே பசை                              |
 
 ### 4.2 `open-sse/executors/`
 
-108 வழங்குநர் இயக்கிகள்; ஒவ்வொன்றும் `BaseExecutor` (`base.ts`)-ஐ நீட்டிக்கின்றன:
+156 உயர்மட்ட எக்ஸிகியூட்டர் தொகுதிகள் (`*.ts` கழித்தல் `base.ts`, `index.ts` மற்றும் சோதனைகள் - எண்ணிக்கை `npm run check:docs-counts` அளவீடுகள்). ஒவ்வொரு எக்ஸிகியூட்டர் கிளாஸும் `BaseExecutor` (`base.ts`), நேரடியாகவோ அல்லது `DefaultExecutor` மூலமாகவோ அல்லது மற்றொரு செயல்படுத்துபவர் மூலமாகவோ நீட்டிக்கிறது; மீதமுள்ள தொகுதிகள் ஒவ்வொரு வழங்குநருக்கும் உதவியாளர்கள் (கருவி திட்டங்கள், fetch/TTS அடாப்டர்கள், க்விர்க் ஹேண்ட்லர்கள்). நிறைவேற்றுபவர்கள் அடங்குவர்:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, மேலும் `claudeIdentity.ts`
-(பகிரப்பட்ட அடையாள உதவி) மற்றும் `index.ts` (பதிவகம்).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode` `cursor` `default` `devin-cli` `muse-spark-web` `opencode` `nlpcloud` `perplexity-web` `petals` `pollinations` `qoder` `devin-desktop` `claudeIdentity.ts` பதிவு) `index.ts`
 
-> குறிப்பு: இங்கே பட்டியலிடப்படாத வழங்குநர்கள், பொதுவான
-> OpenAI-இணக்கமான இயக்கியைப் பயன்படுத்தும் `default.ts` மூலம் சேவை செய்யப்படுகின்றனர். முழுமையான வழங்குநர் பட்டியல் (355 வழங்குநர்கள்)
-> `src/shared/constants/providers.ts`-இல் உள்ளது.
+> குறிப்பு: இங்கே பட்டியலிடப்படாத வழங்குநர்கள் பொதுவான OpenAI-இணக்கமான செயல்பாட்டாளரைப் பயன்படுத்தி `default.ts` ஆல் வழங்கப்படுகிறார்கள். முழு வழங்குநர் பட்டியல் (377 வழங்குநர்கள்) `src/shared/constants/providers.ts` இல் உள்ளது.
 
 ### 4.3 `open-sse/translator/`
 
-மையம்-மற்றும்-ஆரங்கள் மொழிமாற்றம் (OpenAI மையமாகும்).
+ஹப் மற்றும் ஸ்போக் மொழிபெயர்ப்பு (OpenAI என்பது மையம்).
 
-- **9 கோரிக்கை மொழிமாற்றிகள்** (`translator/request/`):
-  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
-  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
-  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 பதில் மொழிமாற்றிகள்** (`translator/response/`):
-  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
-  `openai-to-claude`.
-- **9 உதவிகள்** (`translator/helpers/`):
-  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, மேலும்
-  உதவிச் சோதனைகள்.
-- **பட உதவிகள்** (`translator/image/sizeMapper.ts`).
-- மேல் நிலை: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- **9 கோரிக்கை மொழிபெயர்ப்பாளர்கள்** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+- **9 பதில் மொழிபெயர்ப்பாளர்கள்** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
+- **9 உதவியாளர்கள்** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, மேலும் உதவி சோதனைகள்.
+- **பட உதவியாளர்கள்** (`translator/image/sizeMapper.ts`).
+- உயர்நிலை: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream`-அடிப்படையிலான Responses API ↔ Chat
-  Completions மாற்றி (`responses/` வழித்தடத்தின் அனைத்தையும் கையாளும் செயலால் பயன்படுத்தப்படுகிறது).
+- `responsesTransformer.ts` — `TransformStream` -based Responses API ↔ Chat Completions converter ( `responses/` route catch-all மூலம் பயன்படுத்தப்படுகிறது).
 
 ### 4.5 `open-sse/services/`
 
-முக்கிய அம்சங்கள் (முழுப் பட்டியல் `open-sse/services/`-இன் கீழ் உள்ளது):
+சிறப்பம்சங்கள் ( `open-sse/services/` இன் கீழ் முழு பட்டியல்):
 
-| கவலைப் பகுதி               | கோப்புகள்                                                                                                                                                                                                                                                |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| காம்போ வழித்தடம்           | `combo.ts` (19 உத்திகள்), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
-| தானியங்கி காம்போ இயந்திரம் | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| மீட்சித்திறன்              | `accountFallback.ts` (காத்திருப்பு காலம் + பூட்டுதல்), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                             |
-| ஒதுக்கீடுகள்               | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| தற்காலிகச் சேமிப்பு        | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| வழித்தட நுண்ணறிவு          | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| மாதிரிக் கையாளுதல்         | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| சுருக்கம்                  | `compression/` — முழுமையான சுருக்க இயந்திர இணைப்பு                                                                                                                                                                                                       |
-| டோக்கன் + அமர்வு           | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| அடுக்கு / மேனிஃபெஸ்ட்      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / பிணையம்               | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| தொகுப்புகள்                | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| பயன்பாடு                   | `usage.ts`                                                                                                                                                                                                                                               |
+| கவலை                     | கோப்புகள்                                                                                                                                                                                                                                                |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| காம்போ ரூட்டிங்          | `combo.ts` (20 உத்திகள்), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
+| ஆட்டோ காம்போ இயந்திரம்   | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| மீள்தன்மை                | `accountFallback.ts` (கூல்டவுன் + lockout), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                        |
+| ஒதுக்கீடுகள்             | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| கேச்சிங்                 | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| ரூட்டிங் நுண்ணறிவு       | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| மாதிரி கையாளுதல்         | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| சுருக்கம்                | `compression/` - முழு சுருக்க இயந்திர வயரிங்                                                                                                                                                                                                             |
+| டோக்கன் + அமர்வு         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| அடுக்கு / வெளிப்படையானது | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / நெட்வொர்க்          | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| தொகுதிகள்                | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| பயன்பாடு                 | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts`-இல் இணைக்கப்பட்ட **110 தனித்துவமான கருவிகள்** (`schemas/tools.ts`-இல் 45 நிலையானவை +
-  நினைவகம், திறன்கள், GitHub திறன்கள், தொகுப்பு, விளையாட்டுமயமாக்கல், செருகுநிரல், Notion, Obsidian,
-  உள்ளகத் தொகுப்பு மற்றும் சுருக்கத் தொகுதிகள் — `countUniqueMcpTools` மூலம் ஒன்றியம் கணக்கிடப்படுகிறது).
-- **3 போக்குவரத்து முறைகள்**: stdio, HTTP Streamable, SSE.
-- இயக்க நேரத்தில் **33 வரம்புகள்** அமல்படுத்தப்படுகின்றன — அடிப்படைப் பட்டியல் `src/shared/constants/mcpScopes.ts`-இல் உள்ளது; முழுத் தொகுப்பு என்பது ஒவ்வொரு கருவித் தொகுதியும் அறிவித்துள்ள வரம்புகளின் ஒன்றியமாகும்.
-- தணிக்கை அட்டவணை: `mcp_tool_audit` (`audit.ts` மூலம் நிரப்பப்படுகிறது).
-- கோப்புகள்: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
-  `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
-  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  மேலும் `__tests__/`-இன் கீழுள்ள சோதனைகள்.
-- முழுமையான கருவிப் பட்டியலுக்கு [MCP-SERVER.md](../frameworks/MCP-SERVER.md)-ஐப் பார்க்கவும்.
+- **110 தனிப்பட்ட கருவிகள்** `server.ts` இல் கம்பி ( `schemas/tools.ts` + நினைவகம், திறன்கள், கிட்ஹப்-திறன்கள், பூல், கேமிஃபிகேஷன், செருகுநிரல், Notion, Obsidian, லோக்கல்-கார்பஸ் மற்றும் சுருக்க தொகுதிகள் — யூனியன் `countUniqueMcpTools` ஆல் கணக்கிடப்பட்டது)
+- **3 போக்குவரத்து** : stdio, HTTP ஸ்ட்ரீமபிள், SSE.
+- **33 நோக்கங்கள்** இயக்க நேரத்தில் செயல்படுத்தப்படுகிறது - `src/shared/constants/mcpScopes.ts` இல் அடிப்படை பட்டியல், முழு தொகுப்பு என்பது ஒவ்வொரு கருவி தொகுதியாலும் அறிவிக்கப்பட்ட ஸ்கோப்களின் ஒன்றியமாகும்.
+- தணிக்கை அட்டவணை: `mcp_tool_audit` ( `audit.ts` ஆல் மக்கள் தொகை கொண்டது).
+- கோப்புகள்: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, மேலும் `__tests__/` இன் கீழ் சோதனைகள்.
+- முழு கருவி அட்டவணைக்கு [MCP-SERVER.md](../frameworks/MCP-SERVER.md) பார்க்கவும்.
 
 ### 4.7 `open-sse/config/`
 
-வழங்குநர் பதிவகங்கள் (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), ஒவ்வொரு வடிவமைப்பிற்குமான மாதிரிப் பதிவகங்கள் (`audioRegistry.ts`,
-`embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
-`musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-அடையாள உதவிகள் (`codexIdentity.ts`, `codexInstructions.ts`,
-`anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
-`cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-நற்சான்று உதவிகள் (`credentialLoader.ts`, `codexClient.ts`) மற்றும் கிளவுட்
-அடாப்டர்கள் (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
-`maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
-`ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
+வழங்குநர் பதிவேடுகள் `antigravityModelAliases.ts` `providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), ஒரு வடிவ மாதிரி பதிவுகள் (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), அடையாள உதவியாளர்கள் (`codexIdentity.ts`, , `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts` `defaultThinkingSignature.ts` `cliFingerprints.ts`, `errorConfig.ts` உதவியாளர்கள் `toolCloaking.ts` `credentialLoader.ts`, `codexClient.ts`) மற்றும் கிளவுட் அடாப்டர்கள் (`azureAi.ts`, `bedrock.ts` `registryUtils.ts` `datarobot.ts`, `oci.ts`, `petals.ts`, `glmProvider.ts`, `maritalk.ts`, `runway.ts`, `watsonx.ts`, `ollamaModels.ts`, `constants.ts` `sap.ts`.
 
 ### 4.8 `open-sse/utils/`
 
-ஸ்ட்ரீமிங் அடிப்படைக் கூறுகள் மற்றும் வழங்குநர் உதவிகள்: `stream.ts`, `streamHandler.ts`,
-`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
-`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
-`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
-`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
-`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
-`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+ஸ்ட்ரீமிங் பழமையானவர்கள் மற்றும் வழங்குநர் உதவியாளர்கள்: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `progressTracker.ts` `error.ts` `cors.ts` `logger.ts` `requestLogger.ts`, `sleep.ts` `ollamaTransform.ts`
 
 ---
 
@@ -667,7 +638,11 @@ bin/
   `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
   `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
   `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`.
+  `system-info.mjs`, மேலும் படிக்க மட்டும் அனுமதிக்கப்பட்ட PR கண்காணிப்பு உதவிக் கருவிகளான
+  `ci-discriminate.sh` (ஒரு PR-இன் தோல்வியுற்ற சோதனைகளின் கையொப்பங்களை, ஒரு மேற்கோள் PR அல்லது base-red சிக்கலுடன் ஒப்பிட்டு, சொந்தமானவை / மரபாகப் பெறப்பட்டவை /
+  அறியப்படாதவை என வகைப்படுத்துகிறது) மற்றும் `audit-worktree.sh`
+  (அழுக்கான கோப்புகள், பாதுகாக்கப்பட்ட பகுதிகள், அகற்றப்பட்ட assert-கள், தவிர்ப்பு எண்ணிக்கைகள், எஞ்சியுள்ள
+  தற்காலிக tsconfig-கள், PR head மற்றும் உள்ளூர் HEAD இடையிலான ஒப்பீடு — ஒரு பணியாளரின் PR ஏற்கப்படுவதற்கு முன்).
 - **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
   `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
   `check-deprecated-versions.mjs`, `check-route-validation.mjs`,

@@ -24,7 +24,11 @@ import {
   noteProxyRefusal,
   proxyEgressKey,
   recordSlowOverrun,
+  recordSlowServe,
+  transportDestinationKey,
+  type ProxyRefusalKind,
 } from "../utils/proxyRefusalMemory.ts";
+import { stripIpv6Brackets } from "../utils/proxyFamily.ts";
 
 export const DIRECT_EGRESS_SENTINEL = "direct";
 
@@ -112,6 +116,53 @@ export function egressKeyOf(proxy: { host: string; port: number } | null): strin
   return proxyEgressKey(proxy) ?? DIRECT_EGRESS_SENTINEL;
 }
 
+/** Port written in the authority, which `new URL()` drops at the scheme default. */
+function explicitEgressPortOf(url: string): string | null {
+  const start = url.indexOf("://");
+  if (start === -1) return null;
+  const rest = url.slice(start + 3);
+  const slash = rest.indexOf("/");
+  const authority = slash === -1 ? rest : rest.slice(0, slash);
+  const colon = authority.lastIndexOf(":");
+  if (colon === -1 || colon < authority.lastIndexOf("@") || colon < authority.lastIndexOf("]")) {
+    return null;
+  }
+  const port = authority.slice(colon + 1);
+  if (!/^\d+$/.test(port)) return null;
+  const n = Number(port);
+  return n >= 1 && n <= 65535 ? String(n) : null;
+}
+
+/**
+ * Log label for the egress really applied to one attempt: `(proxy <host>:<port>)`
+ * with host and port only, `(proxy direct)` when no proxy applies. Parses the
+ * applied key directly (it already holds `scheme://`); only the extracted
+ * hostname and port are ever printed, so member keys carrying user info cannot
+ * leak. Fail-open: any unusable key reports direct, never throws.
+ */
+export function egressLabel(
+  account: AppliedEgressAccount,
+  readApplied?: AppliedEgressReader | null
+): string {
+  let key: string;
+  try {
+    key = resolveAppliedEgressKey(account, readApplied);
+  } catch {
+    return "(proxy direct)";
+  }
+  if (!key || key === DIRECT_EGRESS_SENTINEL) return "(proxy direct)";
+  try {
+    const bare = key.replace(/\?family=(ipv4|ipv6)$/, "");
+    const parsed = new URL(bare);
+    const port = explicitEgressPortOf(bare) || parsed.port || null;
+    const host = stripIpv6Brackets(parsed.hostname).toLowerCase();
+    if (!host || !port || !/^\d+$/.test(port)) return "(proxy direct)";
+    return `(proxy ${host}:${port})`;
+  } catch {
+    return "(proxy direct)";
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Applied egress key: pool-served accounts without their own proxy share the
 // `direct` sentinel above, although the request actually leaves through the
@@ -160,9 +211,15 @@ export type AppliedProxyResolver = (targetUrl: string) => unknown;
 export interface AppliedEgressTracker {
   readAppliedKey: AppliedEgressReader;
   keyOfMember: (account: AppliedEgressAccount) => string | null;
+  destinationOfRequest: () => string | null;
   resetAttempt: () => void;
   rememberServed: (account: AppliedEgressAccount) => void;
-  noteRefused: (account: AppliedEgressAccount, skipRecentlyFailed: boolean) => number | null;
+  noteRefused: (
+    account: AppliedEgressAccount,
+    skipRecentlyFailed: boolean,
+    kind?: ProxyRefusalKind
+  ) => number | null;
+  noteServed: <T>(account: AppliedEgressAccount, result: T, waitMs: number, enabled: boolean) => T;
 }
 
 /**
@@ -197,11 +254,34 @@ export function createAppliedEgressTracker(
     if (attemptAmbientKey === undefined) attemptAmbientKey = resolveAmbientKey();
     return attemptAmbientKey;
   };
-  const noteRefused = (a: AppliedEgressAccount, skipRecentlyFailed: boolean) =>
-    noteRefusedMember(a.proxy, skipRecentlyFailed, readAppliedKey, a.fingerprint);
+  const noteRefused = (
+    a: AppliedEgressAccount,
+    skipRecentlyFailed: boolean,
+    kind: ProxyRefusalKind = "ip_quota_429"
+  ) => noteRefusedMember(a.proxy, skipRecentlyFailed, readAppliedKey, a.fingerprint, kind);
+  const destinationOfRequest = (): string | null => transportDestinationKey(dispatchUrl);
+  const noteServed = <T>(
+    a: AppliedEgressAccount,
+    result: T,
+    waitMs: number,
+    enabled: boolean
+  ): T => {
+    try {
+      if (!enabled || !(waitMs > 0)) return result;
+      const key = resolveAppliedEgressKey(a, readAppliedKey);
+      if (key === DIRECT_EGRESS_SENTINEL) return result;
+      const destination = destinationOfRequest();
+      if (destination === null) return result;
+      recordSlowServe(key, destination);
+    } catch {
+      /* evidence is best-effort; never break the request path */
+    }
+    return result;
+  };
   return {
     readAppliedKey,
     keyOfMember: (a) => (a.proxy !== null ? proxyEgressKey(a.proxy) : readAppliedKey(a)),
+    destinationOfRequest,
     resetAttempt: () => {
       attemptAmbientKey = undefined;
     },
@@ -212,6 +292,7 @@ export function createAppliedEgressTracker(
       }
     },
     noteRefused,
+    noteServed,
   };
 }
 
@@ -494,7 +575,8 @@ export function noteRefusedMember(
   proxy: { host: string; port: number } | null,
   skipRecentlyFailed: boolean,
   readApplied?: AppliedEgressReader | null,
-  fingerprint?: string
+  fingerprint?: string,
+  kind: ProxyRefusalKind = "ip_quota_429"
 ): number | null {
   if (!skipRecentlyFailed) return null;
   const key =
@@ -502,7 +584,7 @@ export function noteRefusedMember(
       ? proxyEgressKey(proxy)
       : resolveAppliedEgressKey({ proxy, fingerprint }, readApplied);
   if (key === null || key === DIRECT_EGRESS_SENTINEL) return null;
-  return noteProxyRefusal(key, "ip_quota_429");
+  return noteProxyRefusal(key, kind);
 }
 
 /**
@@ -519,20 +601,22 @@ export function noteSlowOverrun(
   account: AppliedEgressAccount,
   skipRecentlyFailed: boolean,
   readApplied?: AppliedEgressReader | null,
-  nowMs: number = Date.now()
+  nowMs: number = Date.now(),
+  opts?: { destination?: string | null }
 ): number | null {
+  const destination = opts?.destination ?? null;
   if (!skipRecentlyFailed) return null;
   if (account.proxy !== null) {
     const key = proxyEgressKey(account.proxy);
     if (key === null) return null;
     recordSlowOverrun(key, nowMs);
-    if (!hasSlowOverrunEvidence(key, nowMs)) return null;
+    if (!hasSlowOverrunEvidence(key, destination, nowMs)) return null;
     return noteProxyRefusal(key, "slow", nowMs);
   }
   const key = resolveAppliedEgressKey(account, readApplied);
   if (key === DIRECT_EGRESS_SENTINEL) return null;
   recordSlowOverrun(key, nowMs);
-  if (!hasSlowOverrunEvidence(key, nowMs)) return null;
+  if (!hasSlowOverrunEvidence(key, destination, nowMs)) return null;
   return noteProxyRefusal(key, "slow", nowMs);
 }
 
@@ -580,6 +664,32 @@ export function releasePacingSlot(release: (() => void) | null): void {
 }
 
 /**
+ * Log one refused-member outcome on the request logger. The wording lives
+ * here so each arm holds one call; the loop control stays at the seam.
+ */
+export function logRefusedOutcome(
+  log: { warn?: (tag: string, message: string) => void } | undefined,
+  cid: string,
+  masked: string,
+  setAsideMs: number | null,
+  refusal: "geo-blocked" | "burst 429",
+  egress = ""
+): void {
+  // Egress label position is pinned by tests/unit/opencode-egress-label.test.ts:
+  // after the account for a burst 429, at the very end for a geo-block.
+  const burst = refusal === "burst 429";
+  log?.warn?.(
+    "OPENCODE",
+    `${cid}${refusal} on account ${masked}` +
+      (burst && egress ? ` ${egress}` : "") +
+      (setAsideMs ? `, member set aside for ${Math.round(setAsideMs / 1000)}s` : "") +
+      ", rotating" +
+      (burst ? " to next" : "") +
+      "…" +
+      (!burst && egress ? ` ${egress}` : "")
+  );
+}
+/**
  * Log one 429 outcome on the request logger. The stop/park/rotate wording
  * lives here so the arm holds one call; the loop control stays at the seam.
  */
@@ -588,22 +698,21 @@ export function log429Outcome(
   cid: string,
   arm: "stop" | "park" | "rotate",
   masked: string,
-  setAsideMs: number | null
+  setAsideMs: number | null,
+  label: string
 ): void {
   if (arm === "stop") {
-    log?.warn?.("OPENCODE", `${cid}rate-limited 429 on account ${masked}, stopping the wave`);
+    log?.warn?.(
+      "OPENCODE",
+      `${cid}rate-limited 429 on account ${masked} ${label}, stopping the wave`
+    );
   } else if (arm === "park") {
     log?.warn?.(
       "OPENCODE",
-      `${cid}fleet backing off: slot budget used, parking (returning last answer)`
+      `${cid}fleet backing off ${label}: slot budget used, parking (returning last answer)`
     );
   } else {
-    log?.warn?.(
-      "OPENCODE",
-      `${cid}burst 429 on account ${masked}` +
-        (setAsideMs ? `, member set aside for ${Math.round(setAsideMs / 1000)}s` : "") +
-        ", rotating to next…"
-    );
+    logRefusedOutcome(log, cid, masked, setAsideMs, "burst 429", label);
   }
 }
 /**
@@ -644,7 +753,7 @@ export interface StallLoopWiring {
   stalled: { attempts: number };
   cooldown: (account: { proxy: { host: string; port: number } | null }) => void;
   markDirect: () => void;
-  slow?: { account: AppliedEgressAccount; enabled: boolean; read: AppliedEgressReader | null };
+  slow?: { account: AppliedEgressAccount; enabled: boolean; egress: AppliedEgressTracker };
 }
 
 /**
@@ -666,7 +775,10 @@ export function settleStalledDispatch(
   const first = loop.stalled.attempts === 0;
   loop.stalled.attempts++;
   const slow = loop.slow;
-  if (slow) noteSlowOverrun(slow.account, slow.enabled, slow.read ?? null);
+  if (slow)
+    noteSlowOverrun(slow.account, slow.enabled, slow.egress.readAppliedKey, Date.now(), {
+      destination: slow.egress.destinationOfRequest(),
+    });
   return first;
 }
 

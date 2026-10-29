@@ -54,6 +54,18 @@ test("isMuseDcaToken and normalizeMuseBaseUrl match CLIProxyAPI helpers", () => 
   assert.equal(normalizeMuseBaseUrl("https://api.meta.ai/v1/"), "https://api.meta.ai/v1");
 });
 
+test("normalizeMuseBaseUrl strips trailing slashes in linear time (CodeQL js/polynomial-redos)", () => {
+  assert.equal(normalizeMuseBaseUrl("https://api.meta.ai/v1///"), "https://api.meta.ai/v1");
+  assert.equal(normalizeMuseBaseUrl("  https://muse.test/v1/  "), "https://muse.test/v1");
+  // `/\/+$/` backtracks quadratically on a long slash run that does not end the string
+  // (~5 s for 50k slashes); the linear scan returns at once.
+  const hostile = `${"/".repeat(50_000)}x`;
+  const started = performance.now();
+  assert.equal(normalizeMuseBaseUrl(hostile), hostile);
+  const elapsedMs = performance.now() - started;
+  assert.ok(elapsedMs < 1000, `normalizeMuseBaseUrl took ${elapsedMs.toFixed(0)} ms`);
+});
+
 test("mintMuseApiKey posts dca_token with Bearer + muse-code UA", async () => {
   globalThis.fetch = async (url, init = {}) => {
     assert.equal(String(url), MUSE_CODE_MINT_URL);
@@ -123,10 +135,13 @@ test("supportsTokenRefresh includes the muse-code remint path", () => {
 test("refreshMuseCodeToken remints from providerSpecificData.dcaToken", async () => {
   globalThis.fetch = async (_url, init = {}) => {
     assert.equal((init.headers as Record<string, string>).Authorization, "Bearer dca:from-data");
-    return new Response(JSON.stringify({ api_key: "LLM|new", base_url: "https://api.meta.ai/v1" }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ api_key: "LLM|new", base_url: "https://api.meta.ai/v1" }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   };
 
   const result = await refreshMuseCodeToken("not-a-dca", { dcaToken: "dca:from-data" }, null);
