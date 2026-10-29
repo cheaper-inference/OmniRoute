@@ -75,40 +75,34 @@ test("serializeCfToolPrompt generates a compact contract block", () => {
   assert.ok(prompt.includes("# Tool Calling Instructions"));
   assert.ok(prompt.includes("bash"));
   assert.ok(prompt.includes("read_file"));
-  // The worked example spells the call with the first declared tool plus a
-  // concrete argument set — a few-shot shape reads better than an abstract
-  // placeholder, which the models kept reproducing as the tag.
-  assert.match(prompt, /<bash>\{"arg": value, "_nonce": "[a-z0-9]+"\}<\/bash>/);
-  // Wrapper shapes stay forbidden even though a real tag is now shown.
-  assert.ok(prompt.includes("Do NOT use markdown code fences"));
-  assert.ok(prompt.includes("attribute-based arguments"));
+  // The worked example is a JSON envelope: name, arguments, nonce.
+  assert.match(
+    prompt,
+    /\{"name": "read", "arguments": \{"path": "package\.json"\}, "_nonce": "[a-z0-9]+"\}/
+  );
+  // The old tag shape is shown as a mistake, not as the format.
+  assert.ok(prompt.includes("❌ WRONG: <read>"));
   assert.ok(prompt.includes("command: string"));
   assert.ok(prompt.includes("path: string"));
   // Compact one-line signatures instead of pretty-printed JSON
   assert.ok(!prompt.includes('"type": "object"'));
-  // The worked + negative examples dominate the fixed preamble (~1.8k for two
-  // tools, ~2.6k for OpenCode's twelve), so the bound tracks the preamble, not
+  // The worked + negative examples dominate the fixed preamble (~2.0k for two
+  // tools, ~2.8k for OpenCode's twelve), so the bound tracks the preamble, not
   // the tool count.
-  assert.ok(prompt.length < 2000, `contract should stay small, got ${prompt.length}`);
+  assert.ok(prompt.length < 2400, `contract should stay small, got ${prompt.length}`);
 });
 
-test("serializeCfToolPrompt says the tool name belongs in the tag, not the JSON", () => {
+test("serializeCfToolPrompt states the JSON envelope and forbids the tag shape", () => {
   const prompt = serializeCfToolPrompt(TEST_TOOLS_OPENAI);
-  assert.ok(
-    prompt.includes("Use exclusively `<tool_name>...</tool_name>`"),
-    'the rule that prevents `<edit>{"arg": "read"}` must be stated'
-  );
-  // The contract names the wrapper shapes it rejects (code fences, `<tool>`,
-  // `<tool_call>`, attribute arguments) now that the example uses a real tag.
-  assert.ok(prompt.includes("Do NOT use markdown code fences"));
+  // The rule that makes the name a field rather than a tag.
+  assert.ok(prompt.includes("`name` is the exact tool name from the list below."));
+  assert.ok(prompt.includes("`arguments` is one JSON object"));
+  // The tag format the contract used to ask for is now an explicit mistake.
+  assert.ok(prompt.includes("XML Tags (the old format)"));
   // Requirement is stated twice: once in the example, once as a rule.
   const nonce = prompt.match(/"_nonce": "([a-z0-9]+)"/)?.[1];
   assert.ok(nonce, "contract should carry a nonce");
-  assert.ok(
-    prompt.includes(
-      `\`"_nonce": "${nonce}"\` exactly as provided. Any mismatch will cause the call to be rejected.`
-    )
-  );
+  assert.ok(prompt.includes(`\`_nonce\` must be copied verbatim: \`"_nonce": "${nonce}"\`.`));
 });
 
 test("serializeCfToolPrompt is stable for one tool set", () => {
@@ -636,6 +630,143 @@ test("parseCfToolCalls handles multiline JSON arguments", () => {
   assert.ok(calls[0].arguments.includes('"args"'));
 });
 
+// ── the JSON protocol (the shape the contract asks for) ──────────────────────
+
+test("parseCfToolCalls reads a bare JSON envelope", () => {
+  const text = '{"name": "bash", "arguments": {"command": "ls -la"}}';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "bash");
+  assert.deepEqual(JSON.parse(calls[0].arguments), { command: "ls -la" });
+  assert.ok(calls[0].id.startsWith("call_"));
+});
+
+test("parseCfToolCalls reads a JSON array as one call per element, in order", () => {
+  const text =
+    '[{"name": "bash", "arguments": {"command": "ls"}}, ' +
+    '{"name": "read_file", "arguments": {"path": "a.ts"}}]';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.deepEqual(
+    calls.map((call) => call.name),
+    ["bash", "read_file"]
+  );
+});
+
+test("parseCfToolCalls reads several JSON objects on separate lines", () => {
+  const text =
+    '{"name": "bash", "arguments": {"command": "ls"}}\n' +
+    '{"name": "read_file", "arguments": {"path": "a.ts"}}';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.deepEqual(
+    calls.map((call) => call.name),
+    ["bash", "read_file"]
+  );
+});
+
+test("parseCfToolCalls reads the flattened form (arguments beside the name)", () => {
+  const calls = parseCfToolCalls('{"name": "bash", "command": "pwd"}', TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "bash");
+  // `name` is envelope metadata, never an argument.
+  assert.deepEqual(JSON.parse(calls[0].arguments), { command: "pwd" });
+});
+
+test("parseCfToolCalls accepts arguments serialized as a JSON string", () => {
+  const text = '{"name": "bash", "arguments": "{\\"command\\": \\"pwd\\"}"}';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.deepEqual(JSON.parse(calls[0].arguments), { command: "pwd" });
+});
+
+test("parseCfToolCalls reads the OpenAI tool_calls / function nesting", () => {
+  const wrapped =
+    '{"tool_calls": [{"function": {"name": "bash", "arguments": {"command": "pwd"}}}]}';
+  const calls = parseCfToolCalls(wrapped, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "bash");
+  assert.deepEqual(JSON.parse(calls[0].arguments), { command: "pwd" });
+});
+
+test("parseCfToolCalls reads a fenced JSON envelope", () => {
+  const text = '```json\n{"name": "bash", "arguments": {"command": "pwd"}}\n```';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "bash");
+});
+
+test("parseCfToolCalls carries the envelope nonce into the arguments for the binding check", () => {
+  const text = '{"name": "bash", "arguments": {"command": "pwd"}, "_nonce": "abcd1234"}';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(JSON.parse(calls[0].arguments)._nonce, "abcd1234");
+});
+
+test("parseCfToolCalls keeps prose around a JSON envelope and still reads the call", () => {
+  const text = 'Reading the file now.\n{"name": "read_file", "arguments": {"path": "a.ts"}}';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "read_file");
+});
+
+test("parseCfToolCalls ignores JSON in prose that does not name a declared tool", () => {
+  // A config snippet, not a call: `my-app` is not a declared tool and there is
+  // no nonce, so treating it as a call would replace a good answer with a retry.
+  const text = 'Here is the config: {"name": "my-app", "scripts": {"build": "tsc"}}';
+  assert.deepEqual(parseCfToolCalls(text, TEST_TOOLS), []);
+});
+
+test("parseCfToolCalls ignores a name-less JSON object without the request nonce", () => {
+  assert.deepEqual(parseCfToolCalls('{"command": "pwd"}', TEST_TOOLS), []);
+});
+
+test("parseCfToolCalls accepts a name-less JSON object bound to the request nonce", () => {
+  const text = '{"command": "pwd", "_nonce": "abcd1234"}';
+  const calls = parseCfToolCalls(text, TEST_TOOLS, { nonce: "abcd1234" });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "bash");
+});
+
+test("parseCfToolCalls rejects a name-less JSON object bound to another nonce", () => {
+  const text = '{"command": "pwd", "_nonce": "deadbeef"}';
+  assert.deepEqual(parseCfToolCalls(text, TEST_TOOLS, { nonce: "abcd1234" }), []);
+});
+
+test("hasMalformedCfToolIntent flags a JSON envelope that names a declared tool but did not parse", () => {
+  const text = '{"name": "bash", "arguments": "not json at all"}';
+  assert.equal(hasMalformedCfToolIntent(text, ["bash", "read_file"], TEST_TOOLS), true);
+});
+
+test("hasMalformedCfToolIntent ignores JSON that is not tool intent", () => {
+  assert.equal(
+    hasMalformedCfToolIntent('The config is {"name": "my-app"}.', ["bash"], TEST_TOOLS),
+    false
+  );
+});
+
+test("a quoted tool schema is prose, not a call", () => {
+  // Explaining a tool must not be mistaken for invoking it: no arguments field,
+  // not the whole reply, and `description` is not one of `read_file`'s arguments.
+  const text =
+    'The read_file tool is declared as {"name": "read_file", "description": "Read a file"}.';
+  assert.deepEqual(parseCfToolCalls(text, TEST_TOOLS), []);
+  assert.equal(hasMalformedCfToolIntent(text, ["bash", "read_file"], TEST_TOOLS), false);
+});
+
+test("a flattened envelope inside prose is executed when it names a declared argument", () => {
+  // Flattened drift still executes: dropping it silently is the failure this
+  // parser exists to prevent.
+  const text = 'Reading it now.\n{"name": "read_file", "path": "a.ts"}';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "read_file");
+});
+
+test("a multi-call array that lost one element is not partially executed", () => {
+  const text =
+    '[{"name": "bash", "arguments": {"command": "ls"}}, {"name": "not_a_tool", "arguments": {}}]';
+  assert.deepEqual(parseCfToolCalls(text, TEST_TOOLS), []);
+  assert.equal(hasMalformedCfToolIntent(text, ["bash", "read_file"], TEST_TOOLS), true);
+});
+
 // ── hasMalformedCfToolIntent ──────────────────────────────────────────────────
 
 test("hasMalformedCfToolIntent returns false for clean text", () => {
@@ -774,9 +905,13 @@ test("compactCfConversation renders replayed tool calls and results", () => {
     { role: "user" as const, content: "newest" },
   ];
   const { block } = compactCfConversation(messages, 1);
-  assert.ok(block!.includes('### ASSISTANT\n<tool name="bash">{"command": "ls"}</tool>'));
   assert.ok(
-    block!.includes('### TOOL RESULT\n<tool_result call_id="call_1">README.md</tool_result>')
+    block!.includes('### ASSISTANT\n{"name":"bash","arguments":{"command":"ls"}}'),
+    "replayed calls use the JSON envelope the contract asks for"
+  );
+  assert.ok(
+    block!.includes('### TOOL RESULT\n{"tool_result":{"call_id":"call_1","content":"README.md"}}'),
+    "replayed results answer the same call id in JSON"
   );
 });
 
@@ -967,15 +1102,17 @@ test("buildCfToolReminder restates the contract with this request's nonce", () =
 
   assert.ok(reminder.includes("# Tool Call Reminder"));
   // Shape line plus a concrete quick example the model can copy.
-  assert.ok(reminder.includes(`<TOOL>{"arg": value, "_nonce": "${nonce}"}</TOOL>`));
-  assert.ok(reminder.includes("Put the tool name in the XML tag itself"));
-  assert.ok(!reminder.includes("<bash>{"), "the reminder must not prime the first tool");
+  assert.ok(
+    reminder.includes(`{"name": "<tool>", "arguments": {"arg": value}, "_nonce": "${nonce}"}`)
+  );
+  assert.ok(reminder.includes("Put the tool name in `name`"));
+  assert.ok(!reminder.includes('{"name": "bash"'), "the reminder must not prime the first tool");
   // The binding is the one the caller validated against, not a fresh one.
   assert.ok(reminder.includes(`"_nonce": "${nonce}"`));
   // Escaping guidance for large bodies — the failure the reminder exists for.
   assert.ok(reminder.includes('escape every double quote as \\" and every newline as \\n'));
-  // Declared tags are listed so an invented tag is not the obvious choice.
-  assert.ok(reminder.includes("<bash> <read_file>"));
+  // Declared names are listed so an invented one is not the obvious choice.
+  assert.ok(reminder.includes("bash, read_file"));
   // The no-tool escape hatch must survive, or the model calls a tool regardless.
   assert.ok(reminder.includes("If no tool call is needed"));
 });
@@ -1079,6 +1216,29 @@ test("buildCfToolConversationPrompt keeps every reminder message under the char 
 });
 
 // ── stripCfToolMarkup ─────────────────────────────────────────────────────────
+
+test("stripCfToolMarkup removes a bare JSON envelope and keeps the prose", () => {
+  const text = 'Reading it now.\n{"name": "bash", "arguments": {"command": "ls"}}';
+  const stripped = stripCfToolMarkup(text, ["bash", "read_file"]);
+  assert.equal(stripped.trim(), "Reading it now.");
+});
+
+test("stripCfToolMarkup removes a JSON array of calls", () => {
+  const text =
+    '[{"name": "bash", "arguments": {"command": "ls"}}, ' +
+    '{"name": "read_file", "arguments": {"path": "a.ts"}}]';
+  assert.equal(stripCfToolMarkup(text, ["bash", "read_file"]), "");
+});
+
+test("stripCfToolMarkup drops a fence emptied by the call it wrapped", () => {
+  const text = '```json\n{"name": "bash", "arguments": {"command": "ls"}}\n```';
+  assert.equal(stripCfToolMarkup(text, ["bash"]), "");
+});
+
+test("stripCfToolMarkup keeps a JSON snippet that is not a call", () => {
+  const text = 'The config is {"name": "my-app", "private": true}.';
+  assert.equal(stripCfToolMarkup(text, ["bash"]), text);
+});
 
 test("stripCfToolMarkup removes <tool>...</tool> tags", () => {
   const text = 'Here is the result: <tool name="bash">{"command": "ls"}</tool> done.';

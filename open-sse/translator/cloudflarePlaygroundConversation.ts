@@ -84,12 +84,33 @@ export function flattenCfMessageContent(content: unknown): string {
   return "";
 }
 
-/** Render an assistant message's `tool_calls` as `<tool name="...">` markup. */
+/**
+ * Render an assistant message's `tool_calls` as the JSON envelope the contract
+ * asks for, so the model's own earlier turns model the shape it must produce.
+ * One call renders as an object, several as an array.
+ */
 export function cfToolCallMarkup(toolCalls: CfMessageLike["tool_calls"]): string {
   if (!Array.isArray(toolCalls) || toolCalls.length === 0) return "";
-  return toolCalls
-    .map((call) => `<tool name="${call?.function?.name}">${call?.function?.arguments}</tool>`)
-    .join("\n");
+  const calls = toolCalls
+    .filter((call) => call && typeof call.function?.name === "string")
+    .map((call) => ({
+      name: call.function!.name as string,
+      arguments: cfArgumentsValue(call.function!.arguments),
+    }));
+  if (calls.length === 0) return "";
+  return JSON.stringify(calls.length === 1 ? calls[0] : calls);
+}
+
+/** `arguments` is a JSON string on the wire; keep it structured when it parses. */
+function cfArgumentsValue(raw: string | undefined): unknown {
+  if (typeof raw !== "string") return {};
+  const trimmed = raw.trim();
+  if (!trimmed) return {};
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return trimmed;
+  }
 }
 
 /**
@@ -105,9 +126,12 @@ export function cfMessageText(message: CfMessageLike): string {
   }
   if (message?.role === "tool") {
     const resultText = text || CF_EMPTY_TOOL_RESULT;
-    text = message.tool_call_id
-      ? `<tool_result call_id="${message.tool_call_id}">${resultText}</tool_result>`
-      : `<tool_result>${resultText}</tool_result>`;
+    // Same protocol as the calls: a JSON object keyed by the call it answers.
+    text = JSON.stringify({
+      tool_result: message.tool_call_id
+        ? { call_id: message.tool_call_id, content: resultText }
+        : { content: resultText },
+    });
   }
   return text;
 }
@@ -166,7 +190,7 @@ function toCfCompactItem(message: CfMessageLike): CfCompactItem | null {
   }
   const text = cfMessageText(message);
   if (!text) return null;
-  // Tool results already carry their `<tool_result ...>` wrapper, so they are
+  // Tool results already carry their own JSON envelope, so they are
   // self-describing inside the block.
   const header =
     message.role === "user"

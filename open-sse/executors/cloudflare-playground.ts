@@ -78,15 +78,17 @@ const BLOCKED_MESSAGE =
 
 /**
  * Re-ask sent to a fresh room when a reply carried tool intent the parser could
- * not read. It restates the contract's three hard requirements (one block per
- * call, tool name as the tag, nonce included verbatim) because the models that
- * invent their own envelope are the same ones that skim the contract.
+ * not read. It restates the contract's three hard requirements (one JSON object
+ * per call, the tool name in `name`, the nonce included verbatim) because the
+ * models that invent their own envelope are the same ones that skim the
+ * contract.
  */
 const CF_TOOL_REPAIR_NOTE =
   "Your previous response contained a tool call that the client could not read, so it was rejected. " +
   "Retry the requested next action from scratch, following the tool contract exactly: " +
-  "one block per call, the tool name as the tag, the arguments as a single JSON object, " +
-  "and the _nonce binding copied verbatim.";
+  "reply with ONLY a JSON object (or an array of them for several calls) shaped like " +
+  '{"name": "<tool>", "arguments": {...}, "_nonce": "<nonce>"}, with the arguments as a single ' +
+  "JSON object and the _nonce binding copied verbatim. No XML tags and no code fences.";
 
 // ── Frame parsing & translation (pure — unit-tested against live captures) ──
 
@@ -645,7 +647,7 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
      */
     const parseAttempt = (text: string): CfParsedToolCall[] | null => {
       if (!hasTools) return [];
-      const parsed = parseCfToolCalls(text, availableTools);
+      const parsed = parseCfToolCalls(text, availableTools, { nonce });
       if (parsed.length === 0) {
         // The real schemas matter: without them a nameless payload looks
         // ambiguous and every such turn would be retried forever.

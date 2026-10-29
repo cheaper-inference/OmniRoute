@@ -239,8 +239,9 @@ test("toCfMessages drops system, replays tool as tool_result, flattens parts, ke
   assert.deepEqual(out[0].parts, [{ type: "text", text: "hi" }]);
   assert.equal(out[1].parts[0].text, "hello");
   assert.equal(out[2].parts[0].text, "a\nb");
-  assert.ok(out[3].parts[0].text.includes("<tool_result>"));
-  assert.ok(out[3].parts[0].text.includes("tool result"));
+  assert.deepEqual(JSON.parse(out[3].parts[0].text), {
+    tool_result: { content: "tool result" },
+  });
   assert.equal(out[0].role, "user");
   assert.equal(out[1].role, "assistant");
   assert.equal(out[3].role, "user"); // tool messages become user messages

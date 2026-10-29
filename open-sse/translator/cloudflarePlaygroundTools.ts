@@ -7,7 +7,15 @@
  * messages and rejects any single message over 6000 chars) and parsing the
  * model's text reply back into OpenAI `tool_calls`.
  *
+ * The contract asks for bare JSON — `{"name": …, "arguments": {…}, "_nonce": …}`,
+ * or an array of those for a multi-call turn — because models reproduce JSON
+ * far more reliably than an invented markup dialect. The tag ladder below is
+ * kept as a recovery net for drift and for history replayed from sessions that
+ * started before the JSON contract.
+ *
  * Real-world shapes observed from the playground:
+ *   - `{"name": "bash", "arguments": {"command": "ls"}}` — the contract's shape
+ *   - `{"name": "bash", "command": "ls"}` — flattened, arguments beside the name
  *   - `<tool>{"command": "ls"}</tool>` — no name field, infer from schema
  *   - `<tool name="bash">{"command": "ls"}</tool>` — explicit name attribute
  *   - `<tool:name>...</tool:name>` — name as the tag suffix
@@ -154,40 +162,41 @@ export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
   if (!tools || tools.length === 0) return "";
 
   const nonce = getToolNonce(tools);
-  const exampleName = tools[0].function.name;
+  const call = (name: string, args: string) =>
+    `{"name": "${name}", "arguments": ${args}, "_nonce": "${nonce}"}`;
   const lines = [
     "# Tool Calling Instructions",
-    "To invoke a tool, output ONLY the custom tag containing a valid JSON object with the required nonce:",
-    `<${exampleName}>{"arg": value, "_nonce": "${nonce}"}</${exampleName}>`,
-    `- Replace \`${exampleName}\` with the exact tool name.`,
-    "- The inner content must be a strict, valid JSON payload with the argument keys and the `_nonce` field.",
+    "To invoke a tool, reply with ONLY a JSON object — no XML tags, no prose, no code fences:",
+    call("<tool_name>", `{"arg": value}`),
+    "- `name` is the exact tool name from the list below.",
+    "- `arguments` is one JSON object holding that tool's declared argument keys.",
+    `- \`_nonce\` must be copied verbatim: \`"_nonce": "${nonce}"\`.`,
     "## Rules",
-    `- **Tag Format:** Use exclusively \`<tool_name>...</tool_name>\`.`,
-    `- **Forbidden Styles:** Do NOT use markdown code fences, \`<tool>\`, \`<tool_call>\`, \`<tool:name>\`, XML argument tags, or attribute-based arguments (e.g., \`name="..."\`).`,
-    `- **Security Nonce:** You must include \`"_nonce": "${nonce}"\` exactly as provided. Any mismatch will cause the call to be rejected.`,
-    `- **Parameter Match:** Argument names must precisely match the tool's declared schema.`,
-    `- **Multiple Calls:** Emit one tag block per call; several blocks may follow sequentially if necessary.`,
+    "- **JSON Only:** One JSON object, or a JSON array of them when several calls are needed. Nothing before or after it.",
+    "- **Parameter Match:** Argument names must precisely match the tool's declared schema.",
+    '- **Multiple Calls:** Put every call in one array: [{"name": ...}, {"name": ...}].',
+    "- **No Call Needed:** Answer normally in prose and emit no JSON object.",
     "",
     "## Examples & Common Mistakes",
     "",
     "### ✅ Correct Example",
     "User: Check the contents of package.json and run the build script.",
-    `Assistant: <read>{"path": "package.json", "_nonce": "${nonce}"}</read>`,
-    `<shell>{"command": "npm run build", "_nonce": "${nonce}"}</shell>`,
+    `Assistant: [${call("read", '{"path": "package.json"}')},`,
+    `${call("shell", '{"command": "npm run build"}')}]`,
     "",
     "### ❌ Incorrect Formats and How to Fix Them",
     "",
-    "1. **Markdown Code Fences:**",
-    `   ❌ WRONG: \`\`\`json\n<read>{"path": "package.json", "_nonce": "${nonce}"}</read>\n\`\`\``,
-    `   ✅ CORRECT: <read>{"path": "package.json", "_nonce": "${nonce}"}</read>`,
+    "1. **XML Tags (the old format):**",
+    `   ❌ WRONG: <read>{"path": "package.json", "_nonce": "${nonce}"}</read>`,
+    `   ✅ CORRECT: ${call("read", '{"path": "package.json"}')}`,
     "",
-    "2. **Generic Tool Tags:**",
-    `   ❌ WRONG: <tool>{"name": "read", "path": "package.json", "_nonce": "${nonce}"}</tool>`,
-    `   ✅ CORRECT: <read>{"path": "package.json", "_nonce": "${nonce}"}</read>`,
+    "2. **Markdown Code Fences:**",
+    `   ❌ WRONG: \`\`\`json\n${call("read", '{"path": "package.json"}')}\n\`\`\``,
+    `   ✅ CORRECT: ${call("read", '{"path": "package.json"}')}`,
     "",
     "3. **Missing Security Nonce:**",
-    '   ❌ WRONG: <read>{"path": "package.json"}</read>',
-    `   ✅ CORRECT: <read>{"path": "package.json", "_nonce": "${nonce}"}</read>`,
+    '   ❌ WRONG: {"name": "read", "arguments": {"path": "package.json"}}',
+    `   ✅ CORRECT: ${call("read", '{"path": "package.json"}')}`,
     "",
     "Tools:",
   ];
@@ -220,18 +229,18 @@ export function buildCfToolReminder(tools: ChatCompletionTool[]): string {
 
   return [
     "# Tool Call Reminder",
-    "To call a tool, reply ONLY with that tool's tag containing a single, valid JSON object:",
-    `<TOOL>{"arg": value, "_nonce": "${nonce}"}</TOOL>`,
+    "To call a tool, reply ONLY with a JSON object:",
+    `{"name": "<tool>", "arguments": {"arg": value}, "_nonce": "${nonce}"}`,
     "",
     "## Quick Example",
-    `<read>{"path": "src/index.js", "_nonce": "${nonce}"}</read>`,
+    `{"name": "read", "arguments": {"path": "src/index.js"}, "_nonce": "${nonce}"}`,
     "",
     "## Rules",
-    `- **Allowed Tags:** Only these tags are read: ${shown.map((name) => `<${name}>`).join(" ")}${more}.`,
-    "- **Tag Name:** Put the tool name in the XML tag itself (e.g. `<read>...</read>`), NEVER inside the JSON payload.",
+    `- **Allowed Tools:** Only these names are read: ${shown.join(", ")}${more}.`,
+    "- **JSON Only:** Put the tool name in `name`, its arguments in `arguments`, and emit no XML tags, code fences or prose around the object.",
     ' - **JSON Escaping:** Inside the JSON, escape every double quote as \\" and every newline as \\n.',
-    `- **Nonce:** Always include \`"_nonce": "${nonce}"\` inside the JSON body.`,
-    "- **Fallback:** If no tool call is needed, answer normally without any tag.",
+    `- **Nonce:** Always include \`"_nonce": "${nonce}"\` inside the object.`,
+    "- **Fallback:** If no tool call is needed, answer normally without any JSON object.",
   ].join("\n");
 }
 /**
@@ -379,7 +388,20 @@ export function hasMalformedCfToolIntent(
       text
     );
 
-  if (!opensABlock && !callIntent) return false;
+  // A JSON envelope that names a declared tool *and* looks like a call attempt
+  // (it carries an arguments field, or it is the whole reply) is tool intent
+  // even when the payload did not survive the parser — a truncated object, a
+  // name the caller does not declare, arguments that are not an object. Prose
+  // that merely quotes a tool's schema (`{"name": "read", "description": …}`)
+  // must not trigger a retry.
+  const jsonIntent =
+    /"tool_calls"\s*:/.test(text) ||
+    (toolNames.some((name) =>
+      new RegExp(`"name"\\s*:\\s*"${escapeRegex(name)}"`, "i").test(text)
+    ) &&
+      (/"arguments"\s*:/.test(text) || isStandaloneCfJsonText(text)));
+
+  if (!opensABlock && !callIntent && !jsonIntent) return false;
 
   // If it has tags but parseCfToolCalls returns empty, it's malformed. The probe
   // list mirrors the real tool set so name inference and the declared-name
@@ -848,7 +870,265 @@ function xmlParamsToArguments(
   return args;
 }
 
-export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfParsedToolCall[] {
+/**
+ * One balanced JSON value found in the reply, with its offsets in the text.
+ *
+ * The JSON protocol means a call arrives as a bare value — a lone object, or an
+ * array of them for a multi-call turn — so the parser has to locate JSON
+ * *values*, not tags. Scanning is string-aware because argument values routinely
+ * contain braces (`{"content": "function f() {}"}`).
+ */
+interface CfJsonSpan {
+  start: number;
+  end: number;
+  raw: string;
+}
+
+/** Index just past the JSON value that opens at `start`, or -1 when unbalanced. */
+function matchJsonEnd(text: string, start: number): number {
+  const open = text[start];
+  const close = open === "{" ? "}" : "]";
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === open) depth++;
+    else if (ch === close) {
+      depth--;
+      if (depth === 0) return i + 1;
+    }
+  }
+  return -1;
+}
+
+/** Every top-level JSON value in the text, in document order. */
+function findCfJsonSpans(text: string): CfJsonSpan[] {
+  const spans: CfJsonSpan[] = [];
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i];
+    if (ch !== "{" && ch !== "[") {
+      i++;
+      continue;
+    }
+    const end = matchJsonEnd(text, i);
+    if (end === -1) {
+      i++;
+      continue;
+    }
+    spans.push({ start: i, end, raw: text.slice(i, end) });
+    i = end;
+  }
+  return spans;
+}
+
+/** Parse one JSON span leniently (the same repairs the tag parser applies). */
+function parseCfJsonPayload(raw: string): unknown {
+  const normalized = normalizeToolArguments(raw);
+  if (!normalized) return null;
+  try {
+    return JSON.parse(normalized);
+  } catch {
+    return null;
+  }
+}
+
+/** The reply with code fences and surrounding whitespace removed. */
+function cfJsonBody(text: string): string {
+  return text
+    .trim()
+    .replace(/^```[a-zA-Z]*\s*/, "")
+    .replace(/```$/, "")
+    .trim();
+}
+
+/** True when the whole reply is a single JSON value (fences allowed). */
+function isStandaloneCfJsonText(text: string): boolean {
+  const body = cfJsonBody(text);
+  if (!/^[[{]/.test(body)) return false;
+  return matchJsonEnd(body, 0) === body.length;
+}
+
+/** Envelope keys a JSON call may use for the tool name. */
+const CF_JSON_NAME_KEYS = ["name", "tool", "tool_name", "toolName"] as const;
+
+/** Envelope keys a JSON call may use for the argument object. */
+const CF_JSON_ARG_KEYS = ["arguments", "args", "parameters", "input"] as const;
+
+/** Envelope keys that are metadata, never arguments. */
+const CF_JSON_META_KEYS = new Set<string>([
+  ...CF_JSON_NAME_KEYS,
+  ...CF_JSON_ARG_KEYS,
+  "function",
+  "tool_calls",
+  "toolCalls",
+  "_nonce",
+]);
+
+/** True when at least one argument key is a property the tool declares. */
+function hasDeclaredArgument(
+  name: string,
+  args: Record<string, unknown>,
+  availableTools: CfToolDef[]
+): boolean {
+  const def = availableTools.find((tool) => tool.name === name);
+  const parameters = (def?.parameters ?? {}) as Record<string, unknown>;
+  const props =
+    parameters.properties && typeof parameters.properties === "object"
+      ? (parameters.properties as Record<string, unknown>)
+      : null;
+  if (!props) return false;
+  return Object.keys(args).some((key) => key !== "_nonce" && key in props);
+}
+
+/**
+ * Turn one parsed JSON value into tool calls.
+ *
+ * Accepts the canonical envelope (`{"name", "arguments", "_nonce"}`), the
+ * OpenAI nesting (`{"function": {"name", "arguments"}}`), the wrapped form
+ * (`{"tool_calls": [...]}`), an array of any of those, and the flattened form
+ * models drift into (`{"name": "read", "path": "a"}` — every non-envelope key
+ * is an argument).
+ *
+ * A bare JSON object is only a call when it *names a declared tool*, or when it
+ * proves it belongs to this request by carrying the nonce. Without that gate any
+ * JSON the model quoted in prose (a config snippet, a schema) would be read as a
+ * call and the answer would be replaced by a bogus retry.
+ */
+function cfCallsFromJsonValue(
+  value: unknown,
+  availableTools: CfToolDef[],
+  nonce: string | undefined,
+  standalone: boolean
+): CfParsedToolCall[] {
+  if (Array.isArray(value)) {
+    // All-or-nothing: a multi-call turn that lost one element must be retried,
+    // not silently executed with the calls that happened to survive.
+    const mapped = value.map((item) =>
+      cfCallsFromJsonValue(item, availableTools, nonce, standalone)
+    );
+    if (mapped.some((calls) => calls.length === 0)) return [];
+    return mapped.flat();
+  }
+  if (!value || typeof value !== "object") return [];
+  const obj = value as Record<string, unknown>;
+
+  // `{"tool_calls": [...]}` — the OpenAI wrapper models reach for first.
+  const nested = obj.tool_calls ?? obj.toolCalls;
+  if (nested !== undefined) {
+    return cfCallsFromJsonValue(nested, availableTools, nonce, standalone);
+  }
+
+  let name: string | null = null;
+  let argsSource: unknown;
+
+  // `{"function": {"name": ..., "arguments": ...}}` — the other OpenAI shape.
+  const fn = obj.function;
+  if (fn && typeof fn === "object" && !Array.isArray(fn)) {
+    const record = fn as Record<string, unknown>;
+    if (typeof record.name === "string") name = record.name;
+    if (record.arguments !== undefined) argsSource = record.arguments;
+  }
+
+  if (name === null) {
+    for (const key of CF_JSON_NAME_KEYS) {
+      if (typeof obj[key] === "string") {
+        name = obj[key] as string;
+        break;
+      }
+    }
+  }
+
+  if (argsSource === undefined) {
+    for (const key of CF_JSON_ARG_KEYS) {
+      if (obj[key] !== undefined) {
+        argsSource = obj[key];
+        break;
+      }
+    }
+  }
+
+  const envelopeNonce = typeof obj._nonce === "string" ? obj._nonce : undefined;
+  let args: Record<string, unknown> | null = null;
+
+  if (argsSource !== undefined) {
+    if (typeof argsSource === "string") {
+      const normalized = normalizeToolArguments(argsSource);
+      args = normalized ? parseLooseJsonObject(normalized) : null;
+    } else if (argsSource && typeof argsSource === "object" && !Array.isArray(argsSource)) {
+      args = { ...(argsSource as Record<string, unknown>) };
+    }
+    if (!args) return [];
+  } else {
+    // Flattened form: every key that is not envelope metadata is an argument.
+    args = {};
+    for (const [key, entry] of Object.entries(obj)) {
+      if (!CF_JSON_META_KEYS.has(key)) args[key] = entry;
+    }
+    if (Object.keys(args).length === 0) return [];
+  }
+
+  // Carry the envelope nonce into the arguments, where the binding check reads
+  // it — the canonical shape keeps it beside `arguments`, not inside.
+  if (envelopeNonce !== undefined && args._nonce === undefined) args._nonce = envelopeNonce;
+
+  const argsJson = JSON.stringify(args);
+  const resolved = applyToolNameHint(name, argsJson, availableTools);
+  if (!resolved) return [];
+  const resolvedName = resolved.name ?? inferToolName(resolved.argsJson, availableTools);
+  if (!resolvedName) return [];
+  const declared = resolveDeclaredToolName(resolvedName, availableTools);
+
+  const boundToRequest = nonce !== undefined && envelopeNonce === nonce;
+  // An unnamed payload is only trustworthy when it carries this request's nonce.
+  if (name === null && !boundToRequest) return [];
+  if (!declared && !boundToRequest) return [];
+  // The flattened form is drift, so it needs a second signal before it is
+  // executed: the whole reply is the envelope, the envelope is bound to this
+  // request, or it carries at least one argument the tool actually declares.
+  // That is what separates `{"name": "read", "path": "a.ts"}` from a schema the
+  // model quoted while explaining (`{"name": "read", "description": …}`).
+  if (argsSource === undefined && !standalone && !boundToRequest) {
+    const named = declared ?? resolvedName;
+    if (!named || !hasDeclaredArgument(named, args, availableTools)) return [];
+  }
+
+  return [
+    {
+      id: `call_${crypto.randomUUID().slice(0, 8)}`,
+      name: declared ?? resolvedName,
+      arguments: resolved.argsJson,
+    },
+  ];
+}
+
+/**
+ * Parse tool calls out of the model's text reply.
+ *
+ * The contract asks for bare JSON (`{"name": …, "arguments": {…}, "_nonce": …}`,
+ * or an array of those), so that is read first-class by Pattern 5b. The XML-tag
+ * ladder below stays as a recovery net: models drift back to tags, and history
+ * replayed from a session that started before the JSON contract still carries
+ * them.
+ *
+ * `options.nonce` is this request's binding: a JSON value that names a declared
+ * tool is accepted without it, while an unnamed one is only trusted when it
+ * carries that exact nonce — which is what keeps prose JSON from being mistaken
+ * for a call.
+ */
+export function parseCfToolCalls(
+  text: string,
+  availableTools: CfToolDef[],
+  options?: { nonce?: string }
+): CfParsedToolCall[] {
   if (!text) return [];
 
   const calls: CfParsedToolCall[] = [];
@@ -1101,6 +1381,23 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
     });
   }
 
+  // Pattern 5b: the JSON protocol — the shape the contract asks for. A call
+  // arrives as a bare JSON value (an object, or an array of them for a
+  // multi-call turn) with no tag to anchor on. Runs after the tag ladder so a
+  // tagged body is still read by the pattern that understands its wrapper, and
+  // before the last-resort recovery so a recovered tag body is never counted
+  // twice.
+  for (const span of findCfJsonSpans(text)) {
+    if (isHandled(span.start, span.end)) continue;
+    const value = parseCfJsonPayload(span.raw);
+    if (value === null) continue;
+    const standalone = cfJsonBody(text) === span.raw;
+    const fromJson = cfCallsFromJsonValue(value, availableTools, options?.nonce, standalone);
+    if (fromJson.length === 0) continue;
+    calls.push(...fromJson);
+    handledSpans.push([span.start, span.end]);
+  }
+
   // Pattern 6 — last resort. An opening tool tag whose JSON body is complete but
   // whose closing tag is wrong (`</path>` instead of `</write>`) or missing
   // entirely. Every pattern above needs a matching closer, so three of the four
@@ -1344,6 +1641,10 @@ export function stripCfToolMarkup(text: string, toolNames: string[] = []): strin
   // XML-style bodies to the paired regexes below.
   let stripped = stripRecoveredBlocks(text, toolNames);
 
+  // The JSON protocol's own shape: a bare envelope the parser read as a call
+  // must not reach the client as prose next to its `tool_calls`.
+  stripped = stripCfJsonCalls(stripped, toolNames);
+
   // Innermost first: a declared tool tag can sit inside a generic wrapper, and
   // removing the wrapper first would leave the inner tag's body behind.
   for (const toolName of toolNames) {
@@ -1380,6 +1681,58 @@ export function stripCfToolMarkup(text: string, toolNames: string[] = []): strin
   return stripped
     .replace(/^---+\s*\n?/m, "") // separator line
     .trimStart(); // only trim leading whitespace, preserve trailing for test
+}
+
+/**
+ * True when a parsed JSON value looks like the call envelope rather than an
+ * ordinary object the model happened to quote: it names a declared tool, is a
+ * `tool_calls` wrapper, or carries the request nonce.
+ */
+function isCfCallJsonValue(value: unknown, declared: Set<string>): boolean {
+  if (Array.isArray(value)) return value.some((item) => isCfCallJsonValue(item, declared));
+  if (!value || typeof value !== "object") return false;
+  const obj = value as Record<string, unknown>;
+  if (obj.tool_calls !== undefined || obj.toolCalls !== undefined) return true;
+  if (typeof obj._nonce === "string") return true;
+  const fn = obj.function;
+  const candidates = [
+    obj.name,
+    obj.tool,
+    obj.tool_name,
+    obj.toolName,
+    fn && typeof fn === "object" ? (fn as Record<string, unknown>).name : undefined,
+  ];
+  return candidates.some(
+    (candidate) => typeof candidate === "string" && declared.has(candidate.toLowerCase())
+  );
+}
+
+/**
+ * Remove bare JSON call envelopes from the text, leaving the model's prose.
+ *
+ * Only call-shaped values are removed (see `isCfCallJsonValue`), so a JSON
+ * snippet the assistant quoted while explaining something survives. An emptied
+ * code fence is dropped with its payload — the contract forbids fences, but the
+ * parser recovers a fenced call, and shipping the empty backticks back to the
+ * client would only re-prime the next turn.
+ */
+function stripCfJsonCalls(text: string, toolNames: string[]): string {
+  const declared = new Set(toolNames.map((name) => name.toLowerCase()));
+  declared.add("shell");
+  const spans = findCfJsonSpans(text);
+  if (spans.length === 0) return text;
+
+  let out = "";
+  let cursor = 0;
+  for (const span of spans) {
+    if (span.start < cursor) continue;
+    const value = parseCfJsonPayload(span.raw);
+    if (value === null || !isCfCallJsonValue(value, declared)) continue;
+    out += text.slice(cursor, span.start);
+    cursor = span.end;
+  }
+  if (cursor === 0) return text;
+  return (out + text.slice(cursor)).replace(/```[a-zA-Z]*\s*```/g, "");
 }
 
 /**

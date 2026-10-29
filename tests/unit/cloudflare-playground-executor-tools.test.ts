@@ -139,6 +139,97 @@ test('executor non-streaming: tool call with <tool name="..."> markup returns fi
   assert.equal(parsed.choices[0].message.content, null);
 });
 
+test("executor non-streaming: a JSON envelope reply returns finish_reason=tool_calls", async () => {
+  const modelResponse = '{"name": "bash", "arguments": {"command": "ls -la"}}';
+  const executor = makeExecutor((chatId) => buildSuccessFrames(chatId, modelResponse));
+  const result = await executor.execute(
+    executeArgs(
+      {
+        model: "test-model",
+        messages: [{ role: "user", content: "list files" }],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "bash",
+              description: "Run a command",
+              parameters: {
+                type: "object",
+                properties: { command: { type: "string" } },
+                required: ["command"],
+              },
+            },
+          },
+        ],
+      },
+      false
+    )
+  );
+
+  assert.equal(result.response.status, 200);
+  const parsed = JSON.parse(await result.response.text()) as {
+    choices: Array<{
+      message: { role: string; content: string | null; tool_calls?: unknown[] };
+      finish_reason: string;
+    }>;
+  };
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.ok(parsed.choices[0].message.tool_calls);
+  assert.equal(parsed.choices[0].message.tool_calls.length, 1);
+  assert.equal(parsed.choices[0].message.tool_calls[0].function.name, "bash");
+  assert.deepEqual(JSON.parse(parsed.choices[0].message.tool_calls[0].function.arguments), {
+    command: "ls -la",
+  });
+  // The envelope itself is not conversational content.
+  assert.equal(parsed.choices[0].message.content, null);
+});
+
+test("executor non-streaming: a JSON array reply returns one tool call per element", async () => {
+  const modelResponse =
+    '[{"name": "bash", "arguments": {"command": "ls"}}, ' +
+    '{"name": "bash", "arguments": {"command": "pwd"}}]';
+  const executor = makeExecutor((chatId) => buildSuccessFrames(chatId, modelResponse));
+  const result = await executor.execute(
+    executeArgs(
+      {
+        model: "test-model",
+        messages: [{ role: "user", content: "look around" }],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "bash",
+              description: "Run a command",
+              parameters: {
+                type: "object",
+                properties: { command: { type: "string" } },
+                required: ["command"],
+              },
+            },
+          },
+        ],
+      },
+      false
+    )
+  );
+
+  assert.equal(result.response.status, 200);
+  const parsed = JSON.parse(await result.response.text()) as {
+    choices: Array<{
+      message: { content: string | null; tool_calls?: Array<{ function: { arguments: string } }> };
+      finish_reason: string;
+    }>;
+  };
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  const calls = parsed.choices[0].message.tool_calls ?? [];
+  assert.equal(calls.length, 2);
+  assert.deepEqual(
+    calls.map((call) => JSON.parse(call.function.arguments).command),
+    ["ls", "pwd"]
+  );
+  assert.equal(parsed.choices[0].message.content, null);
+});
+
 test("executor non-streaming: tool call with <tool>...</tool> (name omitted, single tool) infers name", async () => {
   const modelResponse = '<tool>{"command": "pwd"}</tool>';
   const executor = makeExecutor((chatId) => buildSuccessFrames(chatId, modelResponse));
@@ -420,7 +511,7 @@ test("executor streaming: text response without tools works normally", async () 
 
 // ── Tool replay (conversation history) ────────────────────────────────────────
 
-test("toCfMessages replays assistant tool_calls as <tool> markup", () => {
+test("toCfMessages replays assistant tool_calls as JSON envelopes", () => {
   const messages = [
     { role: "user" as const, content: "hi" },
     {
@@ -437,27 +528,30 @@ test("toCfMessages replays assistant tool_calls as <tool> markup", () => {
   ];
   const out = toCfMessages(messages);
   assert.equal(out.length, 2);
-  assert.ok(out[1].parts[0].text.includes('<tool name="bash">'));
-  assert.ok(out[1].parts[0].text.includes('{"command": "ls"}'));
+  // The replayed call must match the shape the contract asks for, or the model
+  // imitates its own history instead of the contract.
+  assert.equal(out[1].parts[0].text, '{"name":"bash","arguments":{"command":"ls"}}');
 });
 
-test("toCfMessages replays tool results as <tool_result> markup", () => {
+test("toCfMessages replays tool results as a JSON envelope", () => {
   const messages = [
     { role: "user" as const, content: "hi" },
     { role: "tool" as const, content: "file contents here", tool_call_id: "call_1" },
   ];
   const out = toCfMessages(messages);
   assert.equal(out.length, 2);
-  assert.ok(out[1].parts[0].text.includes('<tool_result call_id="call_1">'));
-  assert.ok(out[1].parts[0].text.includes("file contents here"));
+  assert.deepEqual(JSON.parse(out[1].parts[0].text), {
+    tool_result: { call_id: "call_1", content: "file contents here" },
+  });
 });
 
 test("toCfMessages handles tool result without tool_call_id", () => {
   const messages = [{ role: "tool" as const, content: "result" }];
   const out = toCfMessages(messages);
   assert.equal(out.length, 1);
-  assert.ok(out[0].parts[0].text.includes("<tool_result>"));
-  assert.ok(!out[0].parts[0].text.includes("call_id="));
+  const parsed = JSON.parse(out[0].parts[0].text);
+  assert.deepEqual(parsed, { tool_result: { content: "result" } });
+  assert.ok(!out[0].parts[0].text.includes("call_id"));
 });
 
 // ── Conversation cap (10 user messages per conversation) ─────────────────────

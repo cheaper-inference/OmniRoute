@@ -532,20 +532,19 @@ test("D4: markup that is not a recoverable call is left alone", () => {
 test("D8: the contract shows complete worked examples, not a bare tag", () => {
   const prompt = serializeCfToolPrompt(OPENCODE_OPENAI);
   // The original defect was a real tag paired with a body that did not belong to
-  // it (`<edit>{"arg": "read"}`). The contract now leads with worked examples, so
+  // it (`<edit>{"arg": "read"}`). The contract now leads with JSON examples, so
   // what must hold is that every example arrives carrying this request's nonce —
-  // a copy of it is then a complete, bindable call rather than a bare tag.
+  // a copy of it is then a complete, bindable call rather than a bare envelope.
   const nonce = prompt.match(/"_nonce": "([a-z0-9]+)"/)?.[1];
   assert.ok(nonce, "the contract must carry the request nonce");
-  // Wrapper shapes stay forbidden by name, so the example is not read as markup.
-  assert.match(prompt, /Do NOT use markdown code fences/);
-  assert.match(prompt, /attribute-based arguments/);
-  // The tag carries the tool name; the JSON body carries the arguments.
-  assert.match(prompt, /Use exclusively `<tool_name>\.\.\.<\/tool_name>`/);
+  // The tag shape is named as a mistake, not as the format.
+  assert.match(prompt, /XML Tags \(the old format\)/);
+  // The envelope names the tool in a field; nothing relies on a tag any more.
+  assert.match(prompt, /`name` is the exact tool name from the list below\./);
 });
 
 test("D8: the reminder repeats the placeholder, not the caller's first tool", () => {
   const reminder = buildCfToolReminder(OPENCODE_OPENAI);
-  assert.doesNotMatch(reminder, new RegExp(`<${OPENCODE_TOOLS[0].name}>\\{`));
-  assert.match(reminder, /<TOOL>/);
+  assert.doesNotMatch(reminder, new RegExp(`"name": "${OPENCODE_TOOLS[0].name}"`));
+  assert.match(reminder, /"name": "<tool>"/);
 });
