@@ -1,0 +1,1 @@
+- **test(batch):** Exercise forbidden CSV mapping segments with actual mappings and generated-body assertions. ([#17248](https://github.com/diegosouzapw/OmniRoute/pull/17248)) — thanks @pacocartones

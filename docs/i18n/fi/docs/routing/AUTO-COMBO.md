@@ -485,54 +485,54 @@ Tämä tarkoittaa, että **uuden palveluntarjoajan lisääminen niin, että `aut
 
 **Erillistä `POST /api/combos/auto`-päätepistettä ei ole** — Auto-Comboa käytetään kahdella tavalla:
 
-1. **Nollakonfiguraatio (suositeltu):** Lähetä mikä tahansa keskustelun täydennyspyyntö käyttäen arvoa `model: "auto"` tai `model: "auto/<variant>"`. Virtuaalinen tehdas muodostaa kombon jokaiselle pyynnölle — pysyvää tallennusta tai API-kutsuja ei tarvita.
+1. **Ilman määrityksiä (suositus):** Lähetä mikä tahansa chat-täydennyspyyntö arvolla `model: "auto"` tai `model: "auto/<variant>"`. Virtuaalinen tehdas muodostaa kombon pyyntökohtaisesti — pysyvää tallennusta tai API-kutsuja ei tarvita.
 
-2. **Pysyvästi tallennettu kombo käyttäen asetusta `strategy: "auto"`:** Luo tavallinen kombo päätepisteen `POST /api/combos` kautta ja aseta `strategy: "auto"` sekä `config.auto.weights` / `config.auto.candidatePool`. Käytössä on sama pisteytysmoottori; kombo tallennetaan `combos`-kohteeseen, ja sitä voidaan käyttää uudelleen tunnuksen perusteella.
+2. **Tallennettu kombo arvolla `strategy: "auto"`:** Luo tavallinen kombo käyttämällä `POST /api/combos`-päätepistettä ja aseta `strategy: "auto"` sekä `config.auto.weights` / `config.auto.candidatePool`. Käytössä on sama pisteytysmoottori; kombo tallennetaan `combos`-kokoelmaan, ja sitä voidaan käyttää uudelleen tunnuksen perusteella.
 
-Tarkastelua varten `GET /api/combos/auto` luettelee jokaisen variantin sekä sen ratkaistun ehdokasjoukon ja arvot `context_length` / `max_output_tokens` — ehdokasjoukon konteksti-ikkunoiden MAKSIMIARVOT. Asiakasohjelmien (esim. opencode-laajennuksen) on ilmoitettava nämä arvot arvon `0` sijaan: nollan pituinen konteksti poistaa opencoden automaattisen tiivistyksen kokonaan käytöstä, jolloin istunnot kasvavat, kunnes yhdyskäytävän historiatietojen tyhjennys tuhoaa kontekstin. MAKSIMIARVON ilmoittaminen on turvallista, koska Auto-Combon kontekstin esisuodatus reitittää ylisuuret pyynnöt ehdokkaille, joilla on suuret konteksti-ikkunat.
+Saatavilla olevien vaihtoehtojen selvittämistä varten `GET /api/combos/auto` luettelee kaikki variantit sekä niiden ratkaistut ehdokasjoukot ja arvot `context_length` / `max_output_tokens` — nämä ovat ehdokasjoukon ikkunoiden suurimmat arvot. Asiakkaiden (esim. opencode-laajennuksen) on ilmoitettava nämä arvot arvon `0` sijaan: nollan kokoinen konteksti poistaa opencoden automaattisen tiivistyksen kokonaan käytöstä, jolloin istunnot kasvavat, kunnes yhdyskäytävän historian tyhjennys tuhoaa kontekstin. Suurimman arvon ilmoittaminen on turvallista, koska Auto-Combon kontekstin esisuodatus reitittää liian suuret pyynnöt suuren konteksti-ikkunan ehdokkaille.
 
 ```bash
-# Käyttö nollakonfiguraatiolla (komboa ei luoda)
+# Käyttö ilman määrityksiä (komboa ei luoda)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Pysyvästi tallennettu automaattinen kombo tavallisen combos-päätepisteen kautta
+# Tallennettu automaattinen kombo tavallisen kombopäätepisteen kautta
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Automaattisen reitittimen strategiat
+### Automaattireitittimen strategiat
 
-Pysyvästi tallennetuissa `strategy: "auto"`-komboissa `config.routerStrategy`-asetukseksi (tai vanhassa muodossa
-`config.auto.routerStrategy`) voidaan määrittää jokin seuraavista:
+Tallennetut `strategy: "auto"`-kombot voivat asettaa kohteen `config.routerStrategy` (tai vanhan
+`config.auto.routerStrategy`) johonkin seuraavista arvoista:
 
 - `rules` — oletusarvoinen painotettu pisteytys
-- `score` — valitsee suurimman määritetyn painotetun pistemäärän. Täsmällisissä tasatilanteissa säilytetään määritetty
-  ehdokkaiden järjestys; nykyinen `explorationRate` ottaa otoksen koko järjestetystä joukosta.
-- `cost` / `eco` — halvin toimintakuntoinen palveluntarjoaja
-- `latency` / `fast` — pienin p95-viive luotettavuusrangaistus huomioiden
-- `sla-aware` / `sla` — suosi ehdokkaita, jotka täyttävät p95-viivettä, virheprosenttia ja valinnaisia
-  kustannuksia koskevat SLO-tavoitteet
+- `score` — valitsee korkeimman määritetyn painotetun pistemäärän. Täsmälleen samat pistemäärät säilyttävät määritetyn
+  ehdokasjärjestyksen; nykyinen `explorationRate` ottaa näytteitä koko järjestetystä joukosta.
+- `cost` / `eco` — halvin terve palveluntarjoaja
+- `latency` / `fast` — pienin p95-viive luotettavuusrangaistuksella
+- `sla-aware` / `sla` — suosii ehdokkaita, jotka täyttävät p95-viivettä, virheprosenttia ja valinnaisia
+  kustannuksia koskevat SLO-vaatimukset
 - `lkgp` — viimeisin tunnetusti toimiva palveluntarjoaja ensin
 - `nadir` — kysyy [Nadirin](https://getnadir.com) päätös-API:lta, minkä joukon mallin
-  kehote tarvitsee; erikseen käyttöön otettava, ja häiriötilanteessa siirrytään avoimesti `rules`-strategiaan
+  kehote tarvitsee; erikseen käyttöön otettava, ja virhetilanteessa siirrytään avoimesti käyttämään `rules`-strategiaa
 
 ### Reititinstrategiat yksityiskohtaisesti
 
-Auto-Combo-moottori tarjoaa 7 vaihdettavaa **RouterStrategy**-toteutusta, joita
-voidaan vaihtaa `config.routerStrategy`-asetuksella (tai vanhalla `config.auto.routerStrategy`-asetuksella).
-Kukin strategia valitsee ehdokasjoukosta yhden palveluntarjoajan annetun `RoutingContext`-kontekstin perusteella
-(tehtävätyyppi, työkaluihin/näkösyötteeseen liittyvät vihjeet, token-määrän arvio, valinnainen SLA-käytäntö, valinnainen
-viimeisin tunnetusti toimiva palveluntarjoaja).
+Auto-Combo-moottori tarjoaa 7 vaihdettavaa **RouterStrategy**-toteutusta, jotka
+voidaan vaihtaa kohteen `config.routerStrategy` (tai vanhan `config.auto.routerStrategy`) avulla.
+Kukin strategia valitsee ehdokasjoukosta yhden palveluntarjoajan annetun `RoutingContext`-kontekstin
+(tehtävätyyppi, työkalu-/kuvavihjeet, tunniste-estimaatti, valinnainen SLA-käytäntö ja valinnainen
+viimeisin tunnetusti toimiva palveluntarjoaja) perusteella.
 
 #### 1. `rules` (oletus) — 16 tekijän painotettu pisteytys
 
-Käärii nykyisen pisteytysmoottorin. Suodattaa pois `OPEN`-tilassa olevat katkaisijapiirin
-ehdokkaat ja suorittaa sitten `scorePool()`-funktion nykyisellä tehtävätyypillä sekä `getTaskFitness()`-funktiolla
-valiten eniten pisteitä saaneen palveluntarjoajan.
+Käärii nykyisen pisteytysmoottorin. Suodattaa pois ehdokkaat, joiden piirikatkaisijan tila on `OPEN`,
+ja suorittaa sitten funktion `scorePool()` käyttäen nykyistä tehtävätyyppiä ja funktiota `getTaskFitness()`
+sekä valitsee eniten pisteitä saaneen palveluntarjoajan.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -552,16 +552,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Milloin käyttää**: Oletusvalinta. Käytä, kun haluat tasapainoisen kompromissin kaikkien signaalien välillä.
+**Käyttötilanne**: Oletus. Käytä, kun haluat tasapainoisen kompromissin kaikkien signaalien välillä.
 
 **Alias**: `rules` (ei aliasta)
 
 ---
 
-#### 2. `cost` / `eco` — halvin toimintakuntoinen palveluntarjoaja
+#### 2. `cost` / `eco` — halvin terve palveluntarjoaja
 
-Järjestää ehdokasjoukon `costPer1MTokens`-arvon mukaan (nousevasti) ja valitsee halvimman.
-Suodattaa ensin pois `OPEN`-tilassa olevat ehdokkaat.
+Järjestää ehdokasjoukon arvon `costPer1MTokens` mukaan (nousevasti) ja valitsee halvimman.
+Suodattaa ensin pois ehdokkaat, joiden tila on `OPEN`.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -576,16 +576,16 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Milloin käyttää**: Kustannusherkät työkuormat, eräkäsittely tai taustatyöt.
+**Käyttötilanne**: Kustannusherkät työkuormat, eräkäsittely tai taustatyöt.
 
 **Aliakset**: `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — pienin p95-viive luotettavuusrangaistus huomioiden
+#### 3. `latency` / `fast` — pienin p95-viive luotettavuusrangaistuksella
 
 Järjestää arvon `p95LatencyMs + (errorRate * 1000)` mukaan. Virheprosenttiin perustuva rangaistus varmistaa,
-että epäluotettavat palveluntarjoajat sijoittuvat alemmas, vaikka niiden nimellinen viive olisi pieni.
+että epäluotettavat palveluntarjoajat sijoittuvat alemmaksi, vaikka niiden nimellinen viive olisi pieni.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -602,14 +602,14 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Milloin käyttää**: Viiveherkät työkuormat, kuten reaaliaikainen keskustelu, automaattinen täydennys tai
-vuorovaikutteiset koodausavustajat.
+**Käyttötilanne**: Viiveherkät työkuormat, kuten reaaliaikainen chat, automaattinen täydennys tai
+interaktiiviset ohjelmointiassistentit.
 
 **Aliakset**: `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — viive-, virhe- ja kustannus-SLO-vaatimusten täyttäminen
+#### 4. `sla-aware` / `sla` — viive-/virhe-/kustannus-SLO-vaatimusten täyttäminen
 
 Pisteyttää jokaisen ehdokkaan sen perusteella, kuinka hyvin se täyttää määritetyn SLO-käytännön:
 
@@ -622,7 +622,7 @@ Pisteyttää jokaisen ehdokkaan sen perusteella, kuinka hyvin se täyttää mä�
 | Vakauspisteet    | 5%        | käänteisesti normalisoitu viiveen keskihajonta            |
 
 Kun `hardConstraints: true`, ehdokkaat lajitellaan ensisijaisesti **rikkomuspisteiden**
-(miten paljon ne ylittävät jonkin SLO:n) ja sen jälkeen yhdistelmäpisteiden perusteella. Muussa tapauksessa
+(kuinka paljon ne ylittävät jonkin SLO-tavoitteen) ja sen jälkeen yhdistelmäpisteiden perusteella. Muussa tapauksessa
 käytetään vain yhdistelmäpisteitä.
 
 ```ts
@@ -637,7 +637,7 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**SLA-kentät** (määritetään yhdistelmäkonfiguraatiossa):
+**SLA-kentät** (määritetään yhdistelmäkokoonpanossa):
 
 ```json
 {
@@ -652,16 +652,16 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Milloin käyttää**: Tuotantotyökuormissa, joilla on tiukat viive-, virheprosentti- tai kustannusbudjetit.
+**Käyttötilanne**: Tuotantokuormat, joilla on tiukat viive-, virheprosentti- tai kustannusrajat.
 
 **Aliakset**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — viimeksi tunnettu toimiva palveluntarjoaja ensin
+#### 5. `lkgp` — viimeisin tunnetusti toimiva palveluntarjoaja ensin
 
-Kokeilee ensin **viimeksi tunnettua toimivaa palveluntarjoajaa** (jos määritetty) ja käyttää sen jälkeen
-varamenetelmänä `rules`-strategiaa. Hyödyllinen istuntokohtaisen pysyvyyden kannalta — sama palveluntarjoaja käsittelee
+Kokeilee ensin **viimeisintä tunnetusti toimivaa palveluntarjoajaa** (jos määritetty) ja palaa sitten
+`rules`-strategiaan. Hyödyllinen istunnon pysyvyyden kannalta — sama palveluntarjoaja käsittelee
 keskustelun jatkopyynnöt.
 
 ```ts
@@ -683,13 +683,13 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Käytä varamenetelmänä rules-strategiaa
+    // Palaa rules-strategiaan
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Milloin käyttää**: Monivaiheisissa keskusteluissa, joissa haluat saman palveluntarjoajan käsittelevän
+**Käyttötilanne**: Monivaiheiset keskustelut, joissa haluat saman palveluntarjoajan käsittelevän
 jatkopyynnöt (esimerkiksi välimuistin, kontekstin jatkuvuuden tai hinnoittelun yhdenmukaisuuden vuoksi).
 
 **Alias**: `lkgp` (ei aliasta)
@@ -699,11 +699,11 @@ jatkopyynnöt (esimerkiksi välimuistin, kontekstin jatkuvuuden tai hinnoittelun
 #### 6. `nadir` — kehotteen huomioiva mallin valinta Nadirin avulla
 
 Kaikki edellä mainitut strategiat asettavat ehdokkaat järjestykseen oman telemetriansa perusteella; mikään niistä ei lue
-pyyntöä. `nadir` lähettää viimeisimmän käyttäjävuoron sekä joukon mallitunnukset
-[Nadirin](https://getnadir.com) päätöksenteko-API:lle (`POST /v1/bucket`) ja reitittää pyynnön malliin,
-jonka Nadir valitsee kyseisestä valikoimasta (`simple` → halvin kykenevä malli, `complex` → edistynein
+pyyntöä. `nadir` lähettää viimeisimmän käyttäjävuoron sekä poolin mallitunnukset
+[Nadirin](https://getnadir.com) päätösrajapintaan (`POST /v1/bucket`) ja reitittää pyynnön malliin,
+jonka Nadir valitsee tästä valikoimasta (`simple` → halvin soveltuva malli, `complex` → edistynein
 malli). Kyseistä mallia palveleva yhteys valitaan edelleen `rules`-strategialla, joten kiintiö,
-kunto ja kustannukset ratkaisevat edelleen, mitä tiliä käytetään.
+kunto ja kustannukset ratkaisevat yhä käytettävän tilin.
 
 ```json
 {
@@ -719,23 +719,26 @@ kunto ja kustannukset ratkaisevat edelleen, mitä tiliä käytetään.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` ja `OMNIROUTE_NADIR_BASE_URL` ovat ympäristömuuttujapohjaisia varavaihtoehtoja näille kahdelle
-merkkijonolle. `baseUrl` tarvitaan vain itse isännöidylle Nadirille (lopussa oleva `/v1` hyväksytään).
-Ilman avainta tehdyt kutsut ohjautuvat Nadirin anonyymille tasolle, jonka nopeutta rajoitetaan IP-osoitekohtaisesti.
+`OMNIROUTE_NADIR_API_KEY` ja `OMNIROUTE_NADIR_BASE_URL` ovat ympäristömuuttujien varavaihtoehdot näille kahdelle
+merkkijonolle. `baseUrl` tarvitaan vain itse ylläpidetylle Nadirille (lopussa oleva `/v1` hyväksytään).
+Ilman avainta tehdyt kutsut ohjautuvat Nadirin anonyymille tasolle, jonka nopeutta rajoitetaan IP-osoitekohtaisesti. Avainta käytettäessä
+([luo avain](https://app.getnadir.com/dashboard/api-keys)) jokainen päätös
+kirjataan Nadir-hallintapaneeliisi. Täydelliset määritys- ja varmennusohjeet:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Palvelusta lähtevät tiedot: viimeisimmän käyttäjäviestin teksti (ensimmäiset 16 000 merkkiä), ehdokkaiden
+Ympäristöstä lähetetään seuraavat tiedot: viimeisimmän käyttäjäviestin teksti (ensimmäiset 16 000 merkkiä), ehdokkaiden
 mallitunnukset ja `source: "omniroute"`-kanavatunniste. Järjestelmäkehotetta, historiaa, työkaluja tai
 otsakkeita ei lähetetä.
 
-Virhetilanteissa toiminta on avoin: aikakatkaisu (oletusarvoisesti 2000 ms), muu kuin 2xx-vastaus, tavoittamaton
-palvelin, virheellisesti muodostettu vastaus tai joukon ulkopuolinen valinta johtaa `rules`-päätökseen,
-ja syyn alkuun lisätään `NadirStrategy: fallback (…)`. Epäonnistuneen kutsun jälkeen
-strategia ohittaa verkkokutsut 30 sekunnin ajan, joten käyttökatkos aiheuttaa yhden aikakatkaisun 30 sekuntia kohden eikä
+Vikatilanteissa toiminta jatkuu avoimena: aikakatkaisu (oletusarvoisesti 2000 ms), muu kuin 2xx-vastaus, tavoittamaton
+palvelin, virheellisesti muotoiltu vastaus tai poolin ulkopuolinen valinta johtaa `rules`-strategian
+päätökseen, ja syyn alkuun lisätään `NadirStrategy: fallback (…)`. Epäonnistuneen kutsun jälkeen
+strategia ohittaa verkkokutsun 30 sekunnin ajan, joten käyttökatko aiheuttaa yhden aikakatkaisun 30 sekunnissa eikä
 yhtä jokaista pyyntöä kohden. Reititystapahtumat ilmoittavat `strategy: "nadir"` vain, kun Nadir todella teki
 valinnan.
 
-**Milloin käyttää**: Vaikeustasoltaan vaihtelevalle liikenteelle joukossa, joka kattaa useita mallitasoja (pieni, keskitasoinen
-ja edistynein malli), kun haluat vähentää aina edistyneimmän mallin käyttämisestä aiheutuvia kustannuksia.
+**Käyttötilanne**: Vaikeustasoltaan vaihteleva liikenne poolissa, joka sisältää eri tasoisia malleja (pienen, keskitason
+ja edistyneimmän mallin), kun haluat vähentää aina edistyneimmän mallin käyttämisestä aiheutuvia kustannuksia.
 
 **Alias**: `nadir` (ei aliasta)
 
@@ -771,7 +774,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Käytä sitä sitten:
+Käytä sitä sitten näin:
 
 ```json
 {
@@ -786,16 +789,16 @@ Käytä sitä sitten:
 
 ### Reititysstrategian valintaopas
 
-| Käyttötapaus             | Strategia   | Peruste                                            |
-| ------------------------ | ----------- | -------------------------------------------------- |
-| Tasapainoinen työkuorma  | `rules`     | Oletus — huomioi kaikki tekijät                    |
-| Kustannusten minimointi  | `cost`      | Valitsee aina halvimman                            |
-| Viiveen minimointi       | `latency`   | Valitsee nopeimman luotettavan palveluntarjoajan   |
-| Tiukat SLO:t             | `sla-aware` | Suodattaa p95-/virhe-/kustannusrajojen perusteella |
-| Monivaiheinen keskustelu | `lkgp`      | Istuntokohtainen pysyvyys                          |
-| Vaihteleva vaikeustaso   | `nadir`     | Valitsee mallitason kehotekohtaisesti              |
+| Käyttötapaus             | Strategia   | Peruste                                          |
+| ------------------------ | ----------- | ------------------------------------------------ |
+| Tasapainoinen työkuorma  | `rules`     | Oletus — huomioi kaikki tekijät                  |
+| Kustannusten minimointi  | `cost`      | Valitsee aina edullisimman                       |
+| Viiveen minimointi       | `latency`   | Valitsee nopeimman luotettavan palveluntarjoajan |
+| Tiukat SLO:t             | `sla-aware` | Suodattaa p95-/virhe-/kustannuskynnysten mukaan  |
+| Monivuoroinen keskustelu | `lkgp`      | Istunnon pysyvyys                                |
+| Vaihteleva vaikeustaso   | `nadir`     | Valitsee mallitaso kullekin kehotteelle          |
 
-SLA-tietoinen-strategian kentät:
+SLA-tietoinen kentät:
 
 ```json
 {

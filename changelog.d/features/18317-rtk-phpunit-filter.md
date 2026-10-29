@@ -1,0 +1,1 @@
+- **feat(compression):** RTK filter for PHPUnit test output — drops the banner, runtime header and dot progress, keeps failure headings, messages, diffs and the result summary ([#18317](https://github.com/cheaper-inference/OmniRoute/pull/18317)) — thanks @itseasy21

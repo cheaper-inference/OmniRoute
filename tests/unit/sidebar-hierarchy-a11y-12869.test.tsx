@@ -1,25 +1,25 @@
 // @vitest-environment jsdom
 /**
  * #12869 — hermetic stand-in for tests/e2e/sidebar-navigation.spec.ts (which stays in place and
- * still needs a real browser): renders the REAL <Sidebar /> with the real section constants and
- * the real English messages, and drives it with a keyboard (user-event) in jsdom.
+ * still needs a real browser): renders the REAL <Sidebar /> inside the kit SidebarProvider + kit
+ * <Sidebar> (as DashboardShell does) with the real section constants and the real English
+ * messages, and drives it with a keyboard (user-event) in jsdom. The collapsed and mobile states
+ * come from the kit provider (`useSidebar()`), not from Sidebar props.
  *
  * What this proves: the DOM/ARIA contract and keyboard behavior of the component. What it cannot
  * prove: layout/overflow (scrollWidth), colour contrast and focus-ring rendering (jsdom has no
  * layout engine — axe's `color-contrast` rule is therefore disabled), nor the visual direction.
  */
-import React, { useState } from "react";
-import { act, cleanup, render, waitFor, within } from "@testing-library/react";
+import React from "react";
+import { act, cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 // axe-core is the engine behind the declared devDependency @axe-core/playwright (same version).
 import axe from "axe-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import messages from "../../src/i18n/messages/en.json";
-import {
-  SIDEBAR_SECTIONS,
-  getSidebarIconAccent,
-} from "../../src/shared/constants/sidebarVisibility.ts";
+import { SIDEBAR_SECTIONS } from "../../src/shared/constants/sidebarVisibility.ts";
+import { resolveIcon } from "../../src/shared/constants/iconMap.ts";
 
 process.env.NEXT_PUBLIC_OMNIROUTE_E2E_MODE = "1";
 // Cold module transform of the Sidebar tree is slow on a loaded box; behavior, not speed, is tested.
@@ -40,34 +40,76 @@ vi.mock("next/navigation", () => ({
   usePathname: () => nav.pathname,
 }));
 
-async function loadSidebar() {
+type Loaded = {
+  Sidebar: React.ComponentType<any>;
+  kit: typeof import("@omniroute/ui-kit/sidebar");
+};
+
+// The kit is imported after vi.resetModules() together with the Sidebar so both share one
+// SidebarContext instance.
+async function loadSidebar(): Promise<Loaded> {
+  const kit = await import("@omniroute/ui-kit/sidebar");
   const { default: Sidebar } = await import("@/shared/components/Sidebar");
-  return Sidebar;
+  return { Sidebar, kit };
+}
+
+// Below the kit's mobile breakpoint the kit <Sidebar> becomes a Sheet (drawer); jsdom's polyfilled
+// matchMedia never matches, so the mobile rendering is opted into per test.
+const originalMatchMedia = window.matchMedia;
+function emulateMobile() {
+  window.matchMedia = ((query: string) => ({
+    matches: true,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  })) as unknown as typeof window.matchMedia;
+}
+
+// Stand-in for the shell Header's SidebarTrigger, the shell's only collapse/expand control.
+function ShellTrigger({ kit }: Pick<Loaded, "kit">) {
+  const { open } = kit.useSidebar();
+  return <kit.SidebarTrigger aria-label={open ? "Collapse sidebar" : "Expand sidebar"} />;
 }
 
 function Harness({
   Sidebar,
+  kit,
   initiallyCollapsed = false,
+  mobileOpen = false,
   onClose,
-}: {
-  Sidebar: React.ComponentType<any>;
+}: Loaded & {
   initiallyCollapsed?: boolean;
+  mobileOpen?: boolean;
   onClose?: () => void;
 }) {
-  const [collapsed, setCollapsed] = useState(initiallyCollapsed);
+  const { SidebarProvider, Sidebar: KitSidebar } = kit;
   return (
-    <Sidebar
-      collapsed={collapsed}
-      onToggleCollapse={() => setCollapsed((value) => !value)}
-      onClose={onClose}
-    />
+    <SidebarProvider
+      defaultOpen={!initiallyCollapsed}
+      defaultOpenMobile={mobileOpen}
+      onOpenMobileChange={(open) => {
+        if (!open) onClose?.();
+      }}
+    >
+      <KitSidebar collapsible="icon">
+        <Sidebar />
+      </KitSidebar>
+      <main data-slot="sidebar-inset">
+        <ShellTrigger kit={kit} />
+      </main>
+    </SidebarProvider>
   );
 }
 
 const jsonResponse = (body: unknown) => ({ ok: true, status: 200, json: async () => body });
 
-function sidebarElement(container: HTMLElement): HTMLElement {
-  const aside = container.querySelector("aside");
+// The kit renders the <aside>; in the mobile Sheet it is portalled to document.body.
+function sidebarElement(_container?: HTMLElement): HTMLElement {
+  const aside = document.querySelector("aside[data-slot=sidebar]");
   if (!aside) throw new Error("aside not rendered");
   return aside as HTMLElement;
 }
@@ -116,14 +158,15 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
 
   afterEach(() => {
     cleanup();
+    window.matchMedia = originalMatchMedia;
     localStorage.clear();
     vi.unstubAllGlobals();
     vi.resetModules();
   });
 
   it("exposes a labelled navigation landmark with the active page marked aria-current", async () => {
-    const Sidebar = await loadSidebar();
-    const { container } = await mount(<Harness Sidebar={Sidebar} />);
+    const loaded = await loadSidebar();
+    const { container } = await mount(<Harness {...loaded} />);
     const aside = sidebarElement(container);
 
     expect(within(aside).getByRole("navigation", { name: "Main navigation" })).toBeTruthy();
@@ -134,8 +177,8 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
   });
 
   it("moves aria-current and opens the owning group when the route changes", async () => {
-    const Sidebar = await loadSidebar();
-    const view = await mount(<Harness Sidebar={Sidebar} />);
+    const loaded = await loadSidebar();
+    const view = await mount(<Harness {...loaded} />);
     const aside = sidebarElement(view.container);
 
     await openSection(aside, userEvent.setup(), "OmniProxy");
@@ -144,7 +187,7 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
 
     nav.pathname = "/dashboard/context/caveman";
     await act(async () => {
-      view.rerender(<Harness Sidebar={Sidebar} />);
+      view.rerender(<Harness {...loaded} />);
     });
 
     await waitFor(() => {
@@ -161,8 +204,8 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
 
   it("toggles a subgroup with Enter and Space and links aria-controls to its panel", async () => {
     const user = userEvent.setup();
-    const Sidebar = await loadSidebar();
-    const { container } = await mount(<Harness Sidebar={Sidebar} />);
+    const loaded = await loadSidebar();
+    const { container } = await mount(<Harness {...loaded} />);
     const aside = sidebarElement(container);
 
     await openSection(aside, user, "OmniProxy");
@@ -190,8 +233,8 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
 
   it("search reveals a collapsed group's item and restores the collapsed state afterwards", async () => {
     const user = userEvent.setup();
-    const Sidebar = await loadSidebar();
-    const { container } = await mount(<Harness Sidebar={Sidebar} />);
+    const loaded = await loadSidebar();
+    const { container } = await mount(<Harness {...loaded} />);
     const aside = sidebarElement(container);
     await openSection(aside, user, "OmniProxy");
     const group = () => within(aside).queryByRole("button", { name: "Compression Context" });
@@ -208,12 +251,14 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
 
   it("collapses to an icon rail whose links keep accessible names, then expands again", async () => {
     const user = userEvent.setup();
-    const Sidebar = await loadSidebar();
-    const { container } = await mount(<Harness Sidebar={Sidebar} />);
+    const loaded = await loadSidebar();
+    const { container } = await mount(<Harness {...loaded} />);
     const aside = sidebarElement(container);
 
-    await user.click(within(aside).getByRole("button", { name: "Collapse sidebar" }));
-    const expand = within(aside).getByRole("button", { name: "Expand sidebar" });
+    // The collapse/expand toggle is the shell Header's (stand-in in the harness), not the aside's.
+    expect(within(aside).queryByRole("button", { name: /^(Collapse|Expand) sidebar$/ })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Collapse sidebar" }));
+    const expand = screen.getByRole("button", { name: "Expand sidebar" });
     expect(expand.getAttribute("aria-expanded")).toBe("false");
     expect(within(aside).getByRole("link", { name: "Home" })).toBeTruthy();
     expect(within(aside).queryByRole("searchbox")).toBeNull();
@@ -224,14 +269,16 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
     await user.click(expand);
     expect(within(aside).getByRole("searchbox")).toBeTruthy();
     expect(
-      within(aside).getByRole("button", { name: "Collapse sidebar" }).getAttribute("aria-expanded")
+      screen.getByRole("button", { name: "Collapse sidebar" }).getAttribute("aria-expanded")
     ).toBe("true");
   });
 
-  it("keeps a natural Tab order: skip link, brand, collapse toggle, search, then navigation", async () => {
+  // The skip link moved to DashboardShell, before the sidebar (it must exist even when the sidebar
+  // is a closed mobile Sheet); its first-in-DOM position is asserted in dashboard-layout-shell.
+  it("keeps a natural Tab order: brand, search, then navigation", async () => {
     const user = userEvent.setup();
-    const Sidebar = await loadSidebar();
-    const { container } = await mount(<Harness Sidebar={Sidebar} />);
+    const loaded = await loadSidebar();
+    const { container } = await mount(<Harness {...loaded} />);
     const aside = sidebarElement(container);
 
     // No roving tabindex / positive tabindex: Tab follows the DOM order. (The component implements
@@ -241,7 +288,7 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
     ).toHaveLength(0);
 
     const stops: string[] = [];
-    for (let index = 0; index < 5; index += 1) {
+    for (let index = 0; index < 3; index += 1) {
       await user.tab();
       const active = document.activeElement as HTMLElement;
       stops.push(
@@ -251,22 +298,16 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
           active.tagName
       );
     }
-    expect(stops, `tab stops: ${JSON.stringify(stops)}`).toEqual([
-      "Skip to content",
-      "OmniRoute",
-      "Collapse sidebar",
-      "Search",
-      "Home",
-    ]);
-    // The fifth stop is the first item of the navigation landmark.
+    // The collapse toggle left the aside for the shell Header (trilha G), so it is no stop here.
+    expect(stops, `tab stops: ${JSON.stringify(stops)}`).toEqual(["OmniRoute", "Search", "Home"]);
+    // The third stop is the first item of the navigation landmark.
     expect(aside.querySelector("nav")!.contains(document.activeElement)).toBe(true);
   });
 
   it("gives every expandable control state + a resolvable panel, and every control a name", async () => {
     const user = userEvent.setup();
-    const Sidebar = await loadSidebar();
-    const closed = vi.fn();
-    const { container } = await mount(<Harness Sidebar={Sidebar} onClose={closed} />);
+    const loaded = await loadSidebar();
+    const { container } = await mount(<Harness {...loaded} />);
     const aside = sidebarElement(container);
 
     await openSection(aside, user, "OmniProxy");
@@ -297,20 +338,32 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
         control.textContent?.trim();
       expect(name, `${control.tagName} ${control.outerHTML.slice(0, 80)}`).toBeTruthy();
     }
-    // Decorative icon glyphs are hidden from assistive tech.
-    for (const icon of aside.querySelectorAll("nav a .material-symbols-outlined")) {
+    // Decorative icon glyphs (Lucide SVGs via <Icon>) are hidden from assistive tech.
+    const navIcons = aside.querySelectorAll("nav a svg.oi-icon");
+    expect(navIcons.length).toBeGreaterThan(0);
+    for (const icon of navIcons) {
       expect(icon.getAttribute("aria-hidden")).toBe("true");
     }
+  });
 
+  it("closes the mobile drawer from its Close control", async () => {
+    const user = userEvent.setup();
+    const loaded = await loadSidebar();
+    const closed = vi.fn();
+    emulateMobile();
+    await mount(<Harness {...loaded} mobileOpen onClose={closed} />);
+    const aside = sidebarElement();
+
+    // In the drawer the kit SidebarTrigger is the close control (common.close = "Close").
     await user.click(within(aside).getByRole("button", { name: "Close" }));
     expect(closed).toHaveBeenCalledTimes(1);
   });
 
   it("passes axe wcag2a/wcag2aa on the expanded desktop, collapsed and mobile renderings", async () => {
     const user = userEvent.setup();
-    const Sidebar = await loadSidebar();
+    const loaded = await loadSidebar();
 
-    const desktop = await mount(<Harness Sidebar={Sidebar} />);
+    const desktop = await mount(<Harness {...loaded} />);
     const desktopAside = sidebarElement(desktop.container);
     await openSection(desktopAside, user, "OmniProxy");
     await user.click(within(desktopAside).getByRole("button", { name: "Compression Context" }));
@@ -319,13 +372,15 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
     expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.html}`)).toEqual([]);
     desktop.unmount();
 
-    const rail = await mount(<Harness Sidebar={Sidebar} initiallyCollapsed />);
+    const rail = await mount(<Harness {...loaded} initiallyCollapsed />);
     results = await runAxe(sidebarElement(rail.container));
     expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.html}`)).toEqual([]);
     rail.unmount();
 
-    const mobile = await mount(<Harness Sidebar={Sidebar} onClose={() => {}} />);
-    const mobileAside = sidebarElement(mobile.container);
+    emulateMobile();
+    await mount(<Harness {...loaded} mobileOpen onClose={() => {}} />);
+    const mobileAside = sidebarElement();
+    expect(mobileAside.getAttribute("data-mobile")).toBe("true");
     await user.type(within(mobileAside).getByRole("searchbox"), "Caveman");
     results = await runAxe(mobileAside);
     expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.html}`)).toEqual([]);
@@ -334,34 +389,38 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
   });
 
   it("renders navigation icons without per-item accent colours (the redesign's visual contract)", async () => {
-    const Sidebar = await loadSidebar();
-    const { container } = await mount(<Harness Sidebar={Sidebar} />);
+    const loaded = await loadSidebar();
+    const { container } = await mount(<Harness {...loaded} />);
     const aside = sidebarElement(container);
 
-    const icons = aside.querySelectorAll("nav a .material-symbols-outlined");
+    const icons = aside.querySelectorAll("nav a svg.oi-icon");
     expect(icons.length).toBeGreaterThan(0);
     for (const icon of icons) {
-      expect((icon as HTMLElement).style.color, icon.textContent ?? "").toBe("");
+      expect((icon as SVGElement).style.color, icon.getAttribute("data-icon") ?? "").toBe("");
+      // One nav ink: every glyph strokes with the row's text colour.
+      expect(icon.getAttribute("stroke"), icon.getAttribute("data-icon") ?? "").toBe(
+        "currentColor"
+      );
     }
+    // No Material ligature text inside the navigation.
+    expect(aside.querySelector("nav .material-symbols-outlined")).toBeNull();
     // The decorative macOS "traffic light" dots are gone.
     expect(aside.innerHTML).not.toMatch(/#ff5f56|#ffbd2e|#27c93f/i);
   });
 });
 
-describe("getSidebarIconAccent after the redesign (#12869 / #3812)", () => {
-  // Sidebar.tsx no longer calls this helper; it stays exported as a pure public utility, so it
-  // keeps its own contract: every real sidebar item id resolves to a stable #RRGGBB accent.
-  it("returns a valid, stable accent for every sidebar item id", () => {
-    const ids = SIDEBAR_SECTIONS.flatMap((section) =>
+describe("sidebar item icons after the accent retirement (#12869 / #3812 / KEA-7886)", () => {
+  // getSidebarIconAccent / SIDEBAR_ICON_ACCENTS were removed with the kit sidebar (one nav ink,
+  // spec §3.5). Every real sidebar item id must instead resolve to a Lucide glyph via ICON_MAP.
+  it("maps the icon of every sidebar item id to a Lucide component", () => {
+    const items = SIDEBAR_SECTIONS.flatMap((section) =>
       section.children.flatMap((child) =>
         "type" in child && child.type === "group" ? child.items : [child]
       )
-    ).map((item) => item.id);
-    expect(ids.length).toBeGreaterThan(20);
-    for (const id of ids) {
-      const accent = getSidebarIconAccent(id);
-      expect(accent, id).toMatch(/^#[0-9A-Fa-f]{6}$/);
-      expect(getSidebarIconAccent(id)).toBe(accent);
+    );
+    expect(items.length).toBeGreaterThan(20);
+    for (const item of items) {
+      expect(resolveIcon(item.icon), `${item.id} → ${item.icon}`).toBeTruthy();
     }
   });
 });

@@ -27,13 +27,12 @@ Release-Green ולמשימת lint; זיכרון ה־swap של המארח (16 GB)
 | swap      | 16 GB                       | `omniroute-113-5` פועל כאשר swap מושבת (`MemorySwapMax=0`), כך שבנייה שיצאה משליטה נעצרת בגבול שלה במקום לגרום לשרת להשתמש ב־swap                                                                                                                                                                                                                                       |
 | `/tmp`    | **tmpfs של 12 GB = RAM**    | כל דבר שמאוחסן שם צורך זיכרון; שאריות נמחקות לאחר 3 שעות                                                                                                                                                                                                                                                                                                                |
 | CPU       | נצפה עומס של 60 על 32 ליבות | לפני המכסות, בניית Turbopack אחת (כ־1166 % CPU) יחד עם חבילת בדיקות כיסוי באותו שרת מנעו את אותות החיים של המאזינים האחרים (`The self-hosted runner lost communication`,‏ #16853)                                                                                                                                                                                       |
-| runners   | **6 מאזינים**               | 4 של OmniRoute +‏ OmniHeuris +‏ OmniMind;‏ `omniroute-113-3/-4/-7/-8` מושבתים (`systemctl enable --now` מחזירה אחד מהם לפעולה)                                                                                                                                                                                                                                          |
+| runners   | **7 מאזינים** (2026-10-28)  | 5 של OmniRoute +‏ OmniHeuris +‏ OmniMind;‏ `omniroute-113-7` נושא גם את `omni-build`;‏ `omniroute-113-3/-4/-8` נמחקו מהמאגר (2026-10-28)                                                                                                                                                                                                                                |
 
 ההגבלות נמצאות בקובץ `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` של כל יחידה
 (הערכים הקודמים נשמרו בשם `override.conf.bak-20261018`) והוחלו בזמן אמת באמצעות
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ללא הפעלה מחדש, ולכן
-אף משימה פעילה לא הושפעה. התוויות משתנות באמצעות API ה־runners
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+אף משימה פעילה לא הושפעה. התוויות משתנות באמצעות API ה־runners (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), גם כן בזמן אמת.
 
 ## התקנת המנקה (פעם אחת, בשרת)
@@ -42,7 +41,7 @@ Release-Green ולמשימת lint; זיכרון ה־swap של המארח (16 GB)
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): כל 30 דקות, רישום אל /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 נדרש `lsof`: המנקה מוודא שנתיב אינו בשימוש באמצעות תמונת מצב אחת של קבצים
@@ -118,8 +117,9 @@ worker מדווח שהמשימה בוטלה, וה-listener חוזר למצב מ�
   `quality.yml`. ל-`omniroute-113` היה `MemoryHigh=4G` עד 2026-10-18 — בניית promptfoo
   בילתה שם 54 דקות בפינוי זיכרון; 8 GB מבטלים את ההאטה.
 - **פחות listeners בכוונה.** ארבע יחידות OmniRoute הושבתו ב-2026-08-29 — כל listener נוסף
-  הוא צרכן נוסף של תקציב הזיכרון שלעיל. התקרה של ה-janitor היא 6 (`MAX_ACTIVE_RUNNERS=6` ב-cron): הוא סופר
-  כל `Runner.Listener` במכונה, ו-OmniHeuris + OmniMind מוסיפים שניים לארבעה שלנו.
+  הוא צרכן נוסף של תקציב הזיכרון שלעיל. התקרה של ה-janitor היא 8 (`MAX_ACTIVE_RUNNERS=8` ב-cron): הוא סופר
+  כל `Runner.Listener` במכונה, ו-OmniHeuris + OmniMind מוסיפים שניים לחמישה שלנו.
+- **משימות ה-unit וה-Vitest נשארות מתארחות.** `ci.yml` שולח את רסיסי ה-unit שלו ואת משימת ה-Vitest אל `[self-hosted, omni-ci]` רק כאשר משתנה המאגר `vars.USE_VPS_TEST_RUNNER` הוא `true`, וגם אז רק להרצות `pull_request` מאותו מאגר; פיצולים (forks), `merge_group` ודחיפות נשארים על `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). המשתנה הוא `false`. ב-2026-10-28 שלושה מאזיני `omni-ci` בני 4 ליבות נזקקו ל-250–270 שניות עבור `npm ci`, וכל רסיס unit הגיע למגבלת המשימה של 30 דקות, לעומת ~634 שניות לרסיס מתארח, כשהעומס על המכונה היה 17–24. המאזינים נמחקו. אין להפעיל את המשתנה מחדש בלי מאזינים בגודל המתאים לרסיס unit.
 - **לעולם אין לנקות ידנית את `/tmp` או את `_work` בזמן ש-runner כלשהו עסוק.**
   בדיקה ולאחריה מחיקה, עם מרווח בין השתיים, היא הדרך שבה job פעיל של Build איבד את
   `_work` שלו ב-2026-08-27. ה-janitor מבצע את הבדיקה ואת ההסרה בשלב אחד;
@@ -133,8 +133,7 @@ worker מדווח שהמשימה בוטלה, וה-listener חוזר למצב מ�
 
 ## מסלול מתארח (רצים המתארחים ב-GitHub)
 
-החשבון נמצא בתוכנית **Pro**: **40 משימות מתארחות בו-זמנית**, המשותפות לכל בדיקות ה-PR,
-לכל תהליך עבודה שמופעל בדחיפה ולהגדרת ברירת המחדל של CodeQL. במדידה שנערכה ב-2026-10-18 במהלך
+המאגר שייך לארגון `cheaper-inference`, בתוכנית **Team**: **60 משימות מתארחות בו-זמנית**, המשותפות לכל המאגרים בארגון, לכל בדיקות ה-PR, לכל תהליך עבודה שמופעל בדחיפה ולהגדרת ברירת המחדל של CodeQL. הנתונים שלהלן נמדדו בתוכנית **Pro** (40 משימות מתארחות בו-זמנית). במדידה שנערכה ב-2026-10-18 במהלך
 מסע מיזוגים (כ-10 מיזוגים בשעה אל `release/v3.8.52`): **2,500 הרצות של תהליכי עבודה נוצרו בתוך
 24 שעות**, 44 דחיפות לענף בתוך 6 שעות, ו-**106 משימות מתארחות המתינו בתור** בזמן שבדיקות PR המתינו
 שעות ופריטי PR מוזגו בלעדיהן. תשעה תהליכי עבודה הופעלו בכל דחיפה לענף:

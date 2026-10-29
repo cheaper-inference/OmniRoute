@@ -132,6 +132,12 @@ describe("FeatureFlagCard", () => {
   });
 });
 
+// The kit Tabs (Radix) activate a trigger on a primary-button mousedown, not on click.
+function activateTab(tab: HTMLElement): void {
+  tab.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, button: 0 }));
+  tab.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+}
+
 describe("FeatureFlagsGrid — description mode toggle", () => {
   it("hydrates cleanly: SSR always renders clamp mode, and a persisted 'full' preference is applied only after mount, with no React hydration-mismatch warning", async () => {
     window.localStorage.setItem("ff-card-description-mode", "full");
@@ -139,14 +145,17 @@ describe("FeatureFlagsGrid — description mode toggle", () => {
     // Server render never touches localStorage (it's read inside a useEffect), so the
     // SSR markup must reflect the "clamp" default regardless of what is persisted.
     const ssrHtml = renderToString(<FeatureFlagsGrid />);
-    expect(ssrHtml).toContain('aria-checked="true"');
-    const clampButtonMarker = /role="radio" aria-checked="true"[^>]*>On hover</;
-    expect(clampButtonMarker.test(ssrHtml)).toBe(true);
+    // KEA-7886: the mode control is the kit segmented control (capsule Tabs): role="tab" +
+    // aria-selected instead of role="radio" + aria-checked.
+    expect(ssrHtml).toContain('aria-selected="true"');
 
     const container = document.createElement("div");
     container.innerHTML = ssrHtml;
     document.body.appendChild(container);
     containers.push(container);
+    expect(container.querySelector('[role="tab"][aria-selected="true"]')?.textContent).toBe(
+      "On hover"
+    );
 
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     let root: Root | undefined;
@@ -164,10 +173,10 @@ describe("FeatureFlagsGrid — description mode toggle", () => {
     errorSpy.mockRestore();
 
     // After the post-mount effect reads localStorage, the persisted "full" mode applies.
-    const fullButton = Array.from(container.querySelectorAll('button[role="radio"]')).find(
+    const fullButton = Array.from(container.querySelectorAll('button[role="tab"]')).find(
       (el) => el.textContent === "Full text"
     );
-    expect(fullButton?.getAttribute("aria-checked")).toBe("true");
+    expect(fullButton?.getAttribute("aria-selected")).toBe("true");
 
     act(() => root?.unmount());
   });
@@ -186,24 +195,24 @@ describe("FeatureFlagsGrid — description mode toggle", () => {
     // Default is "clamp" and is written on mount too.
     expect(window.localStorage.getItem("ff-card-description-mode")).toBe("clamp");
 
-    const fullButton = Array.from(container.querySelectorAll('button[role="radio"]')).find(
+    const fullButton = Array.from(container.querySelectorAll('button[role="tab"]')).find(
       (el) => el.textContent === "Full text"
     ) as HTMLButtonElement;
     expect(fullButton).toBeTruthy();
 
     await act(async () => {
-      fullButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      activateTab(fullButton);
     });
     await settle();
 
     expect(window.localStorage.getItem("ff-card-description-mode")).toBe("full");
-    expect(fullButton.getAttribute("aria-checked")).toBe("true");
+    expect(fullButton.getAttribute("aria-selected")).toBe("true");
 
-    const clampButton = Array.from(container.querySelectorAll('button[role="radio"]')).find(
+    const clampButton = Array.from(container.querySelectorAll('button[role="tab"]')).find(
       (el) => el.textContent === "On hover"
     ) as HTMLButtonElement;
     await act(async () => {
-      clampButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      activateTab(clampButton);
     });
     await settle();
 

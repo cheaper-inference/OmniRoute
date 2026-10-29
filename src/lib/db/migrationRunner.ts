@@ -18,7 +18,6 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import type { SqliteAdapter } from "./adapters/types";
-import { DEFAULT_DATABASE_SETTINGS } from "@/types/databaseSettings";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import {
   LEGACY_VERSION_SLOT_MIGRATIONS,
@@ -1181,41 +1180,15 @@ export function runMigrations(
     console.log(`[Migration] ${count} migration(s) applied successfully.`);
   }
 
-  // After applying all migrations, insert default settings if we just ran migration 46
-  try {
-    if (appliedRecords.some((m) => m.name.startsWith("051_"))) {
-      insertDefaultDatabaseSettings(db);
-    }
-  } catch (error) {
-    console.error("Error inserting default database settings:", error);
-  }
+  // #17186: the "insert default settings after migration 051" guard that used
+  // to live here was unreachable — `name` is the filename's SECOND capture group
+  // (text after the numeric prefix), so it never starts with "051_". The seeded
+  // defaults were also redundant: the read path (optimizationSettings.ts) merges
+  // DEFAULT_DATABASE_SETTINGS on read, so absent rows are the normal case.
+  // Removed along with the dead insertDefaultDatabaseSettings() helper and its
+  // now-unused import.
 
   return count;
-}
-
-function insertDefaultDatabaseSettings(db: SqliteAdapter) {
-  const tx = db.transaction(() => {
-    // Insert all default settings
-    for (const [section, values] of Object.entries(DEFAULT_DATABASE_SETTINGS)) {
-      for (const [key, value] of Object.entries(values as Record<string, unknown>)) {
-        db.prepare("INSERT OR IGNORE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
-          "databaseSettings",
-          `${section}.${key}`,
-          JSON.stringify(value)
-        );
-      }
-    }
-  });
-
-  // Run in an immediate transaction to avoid nested transactions
-  try {
-    runImmediateTransaction(db, () => {
-      tx();
-    });
-  } catch (error) {
-    console.error("Transaction error inserting default settings:", error);
-    throw error;
-  }
 }
 
 /**

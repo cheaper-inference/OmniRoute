@@ -14,6 +14,8 @@
 import { normalizePayloadForLog } from "@/lib/logPayloads";
 import { extractSSEErrorMessage } from "../sseParser.ts";
 import { readNonStreamingResponseBody } from "./nonStreamingResponseBody.ts";
+import { isTruncatedStreamBody } from "../sseParser/truncation.ts";
+import { markTruncatedStreamResponse } from "../../utils/truncatedStreamPolicy.ts";
 import {
   normalizeNonStreamingEventPayload,
   parseNonStreamingSSEPayload,
@@ -108,6 +110,10 @@ export async function parseNonStreamingResponseBody(opts: {
         normalizedProviderPayload,
       };
     }
+
+    // #18460 follow-up — carry the parser's cut-stream verdict onto the upstream Response
+    // (internal marker, never serialized) so a combo can fail over to its next target.
+    if (isTruncatedStreamBody(parsedFromSSE.body)) markTruncatedStreamResponse(providerResponse);
 
     return {
       kind: "ok",

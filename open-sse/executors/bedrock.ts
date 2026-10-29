@@ -50,14 +50,71 @@ function normalizeRole(role) {
   return "user";
 }
 
+// #17143: Keep tool-use/result IDs compatible with Bedrock Claude. The digest
+// preserves the usual mapping; a request-scoped allocator also reserves valid
+// IDs so an invalid original cannot collide with an existing valid ID.
+const BEDROCK_TOOL_ID_PATTERN = /^[a-zA-Z0-9_-]+$/;
+
+function fnv1a32Hex(value) {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(16).padStart(8, "0");
+}
+
 function normalizeToolUseId(value) {
-  return typeof value === "string" && value.trim() ? value.trim() : null;
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (BEDROCK_TOOL_ID_PATTERN.test(trimmed)) return trimmed;
+  const sanitized = trimmed.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 48);
+  return `${sanitized}_${fnv1a32Hex(trimmed)}`;
+}
+
+function createToolUseIdNormalizer(messages) {
+  const rawIds = [];
+  for (const message of messages) {
+    if (message?.role === "tool") rawIds.push(message.tool_call_id);
+    for (const call of Array.isArray(message?.tool_calls) ? message.tool_calls : []) {
+      rawIds.push(call?.id);
+    }
+    for (const block of Array.isArray(message?.content) ? message.content : []) {
+      if (block?.type === "tool_use") rawIds.push(block.id);
+      if (block?.type === "tool_result") rawIds.push(block.tool_use_id);
+    }
+  }
+  const usedIds = new Set(
+    rawIds
+      .filter((id) => typeof id === "string")
+      .map((id) => id.trim())
+      .filter((id) => BEDROCK_TOOL_ID_PATTERN.test(id))
+  );
+  const mappedIds = new Map();
+  return (value) => {
+    if (typeof value !== "string" || !value.trim()) return null;
+    const original = value.trim();
+    if (BEDROCK_TOOL_ID_PATTERN.test(original)) return original;
+    if (mappedIds.has(original)) return mappedIds.get(original);
+    const base = normalizeToolUseId(original);
+    let candidate = base;
+    let counter = 0;
+    while (usedIds.has(candidate)) {
+      const suffix = `_${++counter}`;
+      candidate = `${base.slice(0, 64 - suffix.length)}${suffix}`;
+    }
+    usedIds.add(candidate);
+    mappedIds.set(original, candidate);
+    return candidate;
+  };
 }
 
 function textBlocksFromContent(content, options = {}) {
   if (typeof content === "string") return content.trim() ? [{ text: content }] : [];
   if (!Array.isArray(content)) return [];
 
+  const normalizeId = options.normalizeId || normalizeToolUseId;
   const blocks = [];
   for (const part of content) {
     if (typeof part === "string") {
@@ -81,12 +138,13 @@ function textBlocksFromContent(content, options = {}) {
       continue;
     }
     if (type === "tool_use" && typeof p.id === "string" && typeof p.name === "string") {
-      const rawId = normalizeToolUseId(p.id);
-      if (rawId && options.skipToolUseIds?.has(rawId)) continue;
-      if (rawId && !options.answeredToolUseIds?.has(rawId)) continue;
+      const rawId = normalizeId(p.id);
+      if (!rawId) continue;
+      if (options.skipToolUseIds?.has(rawId)) continue;
+      if (!options.answeredToolUseIds?.has(rawId)) continue;
       blocks.push({
         toolUse: {
-          toolUseId: rawId || `toolu_${randomUUID()}`,
+          toolUseId: rawId,
           name: p.name,
           input: asRecord(p.input),
         },
@@ -94,9 +152,11 @@ function textBlocksFromContent(content, options = {}) {
       continue;
     }
     if (type === "tool_result" && typeof p.tool_use_id === "string") {
+      const toolUseId = normalizeId(p.tool_use_id);
+      if (!toolUseId) continue;
       blocks.push({
         toolResult: {
-          toolUseId: p.tool_use_id,
+          toolUseId,
           content: [{ text: toText(p.content) }],
           status: p.is_error ? "error" : "success",
         },
@@ -141,19 +201,19 @@ function toolResultContentFromMessage(message) {
   return [{ text: toText(content) || " " }];
 }
 
-function collectAnsweredToolUseIds(messages) {
+function collectAnsweredToolUseIds(messages, normalizeId) {
   const answered = new Set();
   for (const message of messages) {
     if (!message || typeof message !== "object") continue;
     if (message.role === "tool") {
-      const id = normalizeToolUseId(message.tool_call_id);
+      const id = normalizeId(message.tool_call_id);
       if (id) answered.add(id);
     }
     if (!Array.isArray(message.content)) continue;
     for (const part of message.content) {
       const p = asRecord(part);
       if (p.type !== "tool_result") continue;
-      const id = normalizeToolUseId(p.tool_use_id);
+      const id = normalizeId(p.tool_use_id);
       if (id) answered.add(id);
     }
   }
@@ -262,14 +322,15 @@ function sanitizeBedrockToolPairs(messages) {
 function messagesFromOpenAI(messages) {
   const converted = [];
   const pendingToolUseIds = new Set();
-  const answeredToolUseIds = collectAnsweredToolUseIds(messages);
+  const normalizeId = createToolUseIdNormalizer(messages);
+  const answeredToolUseIds = collectAnsweredToolUseIds(messages, normalizeId);
 
   for (const message of messages) {
     if (!message || typeof message !== "object") continue;
     if (message.role === "system" || message.role === "developer") continue;
 
     if (message.role === "tool") {
-      const toolUseId = normalizeToolUseId(message.tool_call_id) || `toolu_${randomUUID()}`;
+      const toolUseId = normalizeId(message.tool_call_id) || `toolu_${randomUUID()}`;
       pendingToolUseIds.delete(toolUseId);
       answeredToolUseIds.add(toolUseId);
       converted.push({
@@ -288,12 +349,11 @@ function messagesFromOpenAI(messages) {
     }
 
     const toolCalls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
-    const toolCallIds = new Set(
-      toolCalls.map((call) => normalizeToolUseId(call?.id)).filter(Boolean)
-    );
+    const toolCallIds = new Set(toolCalls.map((call) => normalizeId(call?.id)).filter(Boolean));
     const content = textBlocksFromContent(message.content, {
       skipToolUseIds: toolCallIds,
       answeredToolUseIds,
+      normalizeId,
     });
     for (const call of toolCalls) {
       const fn = asRecord(call.function);
@@ -304,7 +364,7 @@ function messagesFromOpenAI(messages) {
       } catch {
         input = { arguments: rawArgs };
       }
-      const toolUseId = normalizeToolUseId(call.id) || `toolu_${randomUUID()}`;
+      const toolUseId = normalizeId(call.id) || `toolu_${randomUUID()}`;
       if (pendingToolUseIds.has(toolUseId)) continue;
       if (!answeredToolUseIds.has(toolUseId)) continue;
       pendingToolUseIds.add(toolUseId);

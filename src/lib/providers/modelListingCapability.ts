@@ -32,6 +32,19 @@ export function providerUsesCuratedModelsOnly(providerId: string): boolean {
   return CURATED_MODEL_ONLY_PROVIDERS.has(providerId.trim().toLowerCase());
 }
 
+/** Custom-model sources written by a model sync/import rather than typed by the operator. */
+const DISCOVERY_IMPORTED_CUSTOM_SOURCES = new Set<string>(["imported", "api-sync", "auto-sync"]);
+
+/**
+ * True for a custom-model row that a discovery sync imported (not one the operator typed).
+ * A curated-only provider keeps operator rows (#18018) but drops these: it has no upstream
+ * catalog, so an imported row can only be a stale leftover of a retired discovery path (#8451).
+ */
+export function isDiscoveryImportedCustomSource(source: unknown): boolean {
+  const normalized = typeof source === "string" ? source.trim().toLowerCase() : "";
+  return DISCOVERY_IMPORTED_CUSTOM_SOURCES.has(normalized);
+}
+
 /**
  * Providers whose non-empty synced AvailableModels catalog fully replaces the
  * static registry for dashboard / `/v1/models` / Test All listing. Static rows

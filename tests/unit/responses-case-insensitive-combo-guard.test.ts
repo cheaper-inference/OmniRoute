@@ -7,6 +7,15 @@ import { readFileSync } from "node:fs";
 
 import { resolveResponsesApiModel } from "../../src/app/api/internal/codex-responses-ws/modelResolution.ts";
 
+const TEST_DATA_DIR = fs.mkdtempSync(
+  path.join(os.tmpdir(), "omniroute-responses-ci-" + Date.now())
+);
+process.env.DATA_DIR = TEST_DATA_DIR;
+
+const core = await import("../../src/lib/db/core.ts");
+const combosDb = await import("../../src/lib/db/combos.ts");
+const sseModelService = await import("../../src/sse/services/model.ts");
+
 const resolver = async (modelStr: string) => {
   if (modelStr.startsWith("codex/")) {
     return { provider: "codex", model: modelStr.slice("codex/".length) };
@@ -56,15 +65,6 @@ test("Responses route uses the downstream combo resolver for the Codex rewrite g
   assert.match(source, /async \(name\) => !!\(await getComboForModel\(name\)\)/);
   assert.doesNotMatch(source, /getComboByName\(name\)/);
 });
-
-const TEST_DATA_DIR = fs.mkdtempSync(
-  path.join(os.tmpdir(), "omniroute-responses-ci-" + Date.now())
-);
-process.env.DATA_DIR = TEST_DATA_DIR;
-
-const core = await import("../../src/lib/db/core.ts");
-const combosDb = await import("../../src/lib/db/combos.ts");
-const sseModelService = await import("../../src/sse/services/model.ts");
 
 test.after(() => {
   core.resetDbInstance();

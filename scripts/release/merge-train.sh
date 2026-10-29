@@ -78,7 +78,11 @@ STATIC_GATES=(
   "npm run i18n:check-keys"
   "npm run i18n:check-keys:cli"
   "npm run i18n:check-ratio"
-  "node scripts/i18n/check-translation-drift.mjs"
+  # Docs mirrors are advisory on the train since 2026-10-28 (same policy as the PR CI step in
+  # ci.yml): a doc PR boards without its 66 mirrors and the post-merge `npm run i18n:run`
+  # batch refreshes them. `--warn` still prints every drifted source in the train log; the
+  # release push run, the nightly Release-Green and the release cut keep the strict verdict.
+  "node scripts/i18n/check-translation-drift.mjs --warn"
   # ci.yml:lint family (2026-09-22): the same lesson as the i18n block above, for the
   # rest of the lint job. A 170-PR drain left the tip red on eleven `ci.yml:lint` /
   # `docs-sync-strict` gates the train never ran — every PR was green on its own and

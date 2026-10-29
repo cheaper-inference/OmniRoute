@@ -15,17 +15,17 @@
 
 ## שני מצבי אימות
 
-### 1. מפתח API (Bearer)
+### 1. מפתח API ‏(Bearer)
 
-משמש עבור ממשקי ה-API של הלקוחות התואמים ל-OpenAI/Anthropic/Gemini ולכמה מסלולי ניהול, כאשר למפתח יש את ההיקף `manage`.
+משמש עבור ממשקי ה-API ללקוחות התואמים ל-OpenAI/Anthropic/Gemini ועבור כמה נתיבי ניהול כאשר למפתח יש הרשאת `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-נבדק על ידי `isValidApiKey()` / `extractApiKey()` ב-`src/sse/services/auth.ts` ומיוצא מחדש דרך `src/shared/utils/apiAuth.ts`. המאמת מקבל גם את משתני הסביבה `OMNIROUTE_API_KEY` ו-`ROUTER_API_KEY` כמפתחות מעבר קבועים (issue #1350).
+האימות מתבצע באמצעות `isValidApiKey()` / `extractApiKey()` בקובץ `src/sse/services/auth.ts`, והם מיוצאים מחדש דרך `src/shared/utils/apiAuth.ts`. המאמת מקבל גם את משתני הסביבה `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` כמפתחות מעבר קבועים (בעיה #1350).
 
-### 2. סשן לוח הבקרה (עוגיית auth_token)
+### 2. הפעלת לוח הבקרה (קובץ cookie מסוג auth_token)
 
 עבור דפי לוח הבקרה ופעולות ניהול.
 
@@ -33,28 +33,91 @@ Authorization: Bearer <api-key>
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-העוגייה היא סשן רק כאשר ה-JWT שלה מאומת **וגם** נושא `authenticated: true`
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). כל צרכן של העוגייה — שומר המסלולים של לוח הבקרה (`isDashboardSessionAuthenticated()`), צינור רענון האימות, לחיצת היד של WebSocket, השרת החי, `/api/settings/require-login` ו-`/api/auth/status` — עובר דרך העזר הזה.
-קיימים גם JWT-ים אחרים החתומים עם `JWT_SECRET` — למשל, ה-Cursor CLI passthrough מנפיק לבעלי מפתחות אסימונים עם `iss "omniroute" / aud "cursor-cli"`, והם לעולם אינם סשנים (#13298).
+קובץ cookie נחשב להפעלה רק כאשר ה-JWT מאומת **וגם** מכיל `authenticated: true`
+‏(`src/shared/utils/dashboardSessionToken.ts` ← `verifyDashboardSessionToken`). כל
+צרכן של קובץ ה-cookie (מגן הנתיבים של לוח הבקרה (`isDashboardSessionAuthenticated()`), רענון צינור ההרשאות, לחיצת היד של WebSocket, השרת
+החי, `/api/settings/require-login`, `/api/auth/status`) עובר דרך פונקציית העזר הזו.
+קיימים אסימוני JWT אחרים החתומים באמצעות `JWT_SECRET` — מנגנון המעבר של Cursor CLI מנפיק
+אסימוני `iss "omniroute" / aud "cursor-cli"` למחזיקי מפתחות — והם לעולם אינם נחשבים להפעלות
+(#13298).
 
-הסשן מאומת על ידי `isDashboardSessionAuthenticated()` ב-`src/shared/utils/apiAuth.ts`. הצינור מרענן את ה-JWT אוטומטית כאשר נותרו לו פחות מ-7 ימים מתוך חיי ה-30 יום שלו.
+האימות מתבצע באמצעות `isDashboardSessionAuthenticated()` בקובץ `src/shared/utils/apiAuth.ts`. צינור העיבוד מרענן אוטומטית את ה-JWT כאשר נותרו פחות מ-7 ימים מתוך תקופת החיים שלו, שאורכה 30 יום.
 
-סשן עשוי להסתיים לפני שחלפו 30 ימיו, מכיוון שכל מנפיק עובר דרך `mintDashboardSessionToken` (וכולל זמן הנפקה `iat` ומזהה `jti`), והמאמת בודק שתי הגדרות: `sessionsValidAfter`, שמוגדרת על ידי שינוי סיסמה כך שכל סשן שהונפק לפניה מפסיק להתאמת (הדפדפן ששינה את הסיסמה מקבל עוגייה חדשה), ו-`revokedDashboardSessions`, שאליה `POST /api/auth/logout` מוסיף את ה-`jti` של הסשן שנותק. לסשנים שהונפקו על ידי גרסה ישנה אין אף אחת משתי התביעות, והם נשארים תקפים עד השינוי הראשון של הסיסמה. אם לא ניתן לקרוא את ההגדרות, הסשן אינו נאמן.
+הפעלה יכולה להסתיים גם לפני תום 30 הימים שלה, משום שכל מנפיק עובר דרך `mintDashboardSessionToken` (עם זמן הנפקה `iat` ומזהה `jti`) והמאמת בודק שתי הגדרות: `sessionsValidAfter`, שמוגדרת בעת שינוי סיסמה כך שכל הפעלה שהונפקה לפני כן מפסיקה לעבור אימות (הדפדפן ששינה את הסיסמה מקבל קובץ cookie חדש), ו-`revokedDashboardSessions`, שאליה `POST /api/auth/logout` מוסיף את ה-`jti` של ההפעלה שנותקה. הפעלות שהונפקו על ידי גרסה ישנה יותר אינן מכילות אף אחת מהטענות ונשארות תקפות עד לשינוי הסיסמה הראשון. אם לא ניתן לקרוא את ההגדרות, ההפעלה אינה נחשבת מהימנה.
 
-חלק ממסלולי הניהול מקבלים **אחד משני** המצבים: עוגייה או `Bearer <key>` כאשר למפתח יש את ההיקף `manage` (או `admin`). זה מה שמאפשר את זרימת העבודה "ניתנת להגדרה באמצעות קריאות API" שנוספה בגרסה v3.8.
+חלק מנתיבי הניהול מקבלים **כל אחד** משני המצבים: קובץ cookie או `Bearer <key>` כאשר למפתח ה-API יש הרשאת `manage` (או `admin`). זה מה שמאפשר את תהליך העבודה "ניתן להגדרה באמצעות קריאות API" שנוסף ב-v3.8.
 
-#### שער כניסה OIDC אופציונלי (#6973)
+#### שער התחברות אופציונלי באמצעות OIDC ‏(#6973)
 
-כניסת מנהל לוח הבקרה תומכת גם בזרם OIDC (OpenID Connect) **אופציונלי** לצד כניסת הסיסמה ברירת המחדל — כניסת הסיסמה לעולם אינה מוסרת, אלא רק משלימה:
+התחברות מנהל המערכת ללוח הבקרה תומכת גם בתהליך OIDC ‏(OpenID Connect) **אופציונלי**
+לצד ההתחברות באמצעות סיסמה המוגדרת כברירת מחדל — ההתחברות באמצעות סיסמה לעולם אינה מוסרת, אלא רק
+מתווספת לה אפשרות נוספת:
 
-- מושבת אלא אם `settings.oidcEnabled === true` **וגם** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` מוגדרים כולם (הגדרות ← אימות). `GET /api/auth/oidc/login` מחזיר `400` אחרת.
-- `GET /api/auth/oidc/login` מאתר את `authorization_endpoint` מתוך `/.well-known/openid-configuration` של ה-issuer (ונופל ל-`<issuer>/authorize` אם צריך), בונה את ה-redirect URI מתוך הבקשה הנכנסת (עם תמיכה ב-`x-forwarded-proto`), ומפנה לספק הזהות עם `state` אקראי השמור בעוגיית `oidc_state` עם `httpOnly`.
-- `GET /api/auth/oidc/callback` מאמת את `state`, מחליף את קוד ההרשאה (authorization code), ומאמת את החתימה של ה-ID token דרך ה-JWKS של ה-issuer (`createRemoteJWKSet` של `jose`, עם מטמון לכל כתובת JWKS) עם בדיקות `issuer` ו-`audience`. רשימת ההיתר `oidcAllowedSubjects` חובה: היא מתאימה לתביעה `sub` של הטוקן או לתביעה `email`, והתביעה `email` נלקחת בחשבון רק כאשר `email_verified === true`, כך שכתובת דוא"ל לא מאומתת אצל ספק הזהות לעולם לא תעבור את השער. עם רשימה ריקה, ה-callback דוחה כל כניסה (`not_configured`).
-- בהצלחה הוא מנפיק **את אותה** עוגיית `auth_token` מסוג JWT לתקופה של 30 ימים שכניסת הסיסמה מנפיקה (`src/app/api/auth/login/route.ts`), כך ששאר צינור הסשן של לוח הבקרה (רענון אוטומטי, דגלי עוגייה) נשאר ללא שינוי — OIDC משנה רק את האופן שבו העוגייה נוצרת, לא את מה שהיא מעניקה.
-- כל הגדרות ה-`oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) נמצאות ב-`SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` עונה `400 PASSWORD_REQUIRED` אלא אם הגוף נושא את סיסמת הניהול כ-`currentPassword` (`401 PASSWORD_MISMATCH` כאשר היא שגויה). `oidcDisablePasswordLogin` אוסר _כניסה_ בסיסמה (`POST /api/auth/login`) אך שומר על hash הסיסמה, ואימות ה-re-auth עדיין בודק את `currentPassword` מולו.
-- גם `corsOrigins` ו-`bruteForceProtection` נמצאים ב-`SECURITY_IMPACTING_SETTINGS_KEYS`: הרחבת אחד מהם מחלישה את הגנות הכניסה, ולכן הם דורשים את אותו re-auth עם `currentPassword` (לשונית האבטחה מבקשת אותו), וייבוא ה-JSON מסיר אותם.
-- כל מפתח מדיניות אבטחה — ערכי `SECURITY_IMPACTING_SETTINGS_KEYS`, כל מפתח `oidc*` ומצב הסשן של לוח הבקרה — הוא **למפעיל בלבד** ב-`PATCH /api/settings`: מפתח API בהיקף `manage` או טוקן גישה `oma_` נדחים עם `403` גם כשהם שולחים `currentPassword` נכון, והדחייה נרשמת כ-`settings.update_failed` עם `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` ב-`src/lib/api/operatorCredential.ts`). הגדרות רגילות (ערכת נושא והעדפות תצוגה) נשארות ניתנות לכתיבה עבור מפתח `manage` או טוקן גישה `admin`. כל שינוי של `/api/settings` עצמו (וגם של `/api/settings/require-login`) דורש גם את היקף טוקן הגישה `admin` (`ADMIN_MUTATION_EXACT_PATHS` ב-`src/server/authz/accessScopes.ts`, התאמה מדויקת של הנתיב); `GET` נשאר `read`, ותתי-המסלולים האחרים של `/api/settings/*` (פרוקסים, ברירות מחדל של שילובים, כינויי מודלים, דחיסה, מחיקות...) שומרים על היקף `write` שמוסק משיטת הבקשה.
-- `POST /api/settings/import-json` מדלג על ה-re-auth הזה, לכן הוא מסיר לפני הכתיבה כל מפתח ב-`IMPORT_STRIPPED_SETTINGS_KEYS` (באותו קובץ): הסיסמה ו-`currentPassword`, כל ערך ב-`SECURITY_IMPACTING_SETTINGS_KEYS`, ומצב הסשן של לוח הבקרה (`sessionsValidAfter`, `revokedDashboardSessions`). לכן ייבוא גיבוי ישן לא יכול להחיות סשן שמשינוי סיסמה או מהתנתקות כבר הסתיים.
+- מושבת אלא אם `settings.oidcEnabled === true` **וגם** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` מוגדרים כולם (הגדרות ← אימות).
+  אחרת, `GET /api/auth/oidc/login` מחזיר `400`.
+- `GET /api/auth/oidc/login` מאתר את `authorization_endpoint` מתוך
+  `/.well-known/openid-configuration` של המנפיק (עם חזרה אל
+  `<issuer>/authorize`), בונה את URI ההפניה מחדש מהבקשה הנכנסת
+  (תוך התחשבות ב-`x-forwarded-proto`), ומפנה אל ה-IdP עם `state` אקראי
+  המאוחסן בקובץ cookie מסוג `oidc_state` עם `httpOnly`.
+- `GET /api/auth/oidc/callback` מאמת את `state`, מחליף את קוד ההרשאה,
+  ומאמת את החתימה של אסימון ה-ID באמצעות ה-JWKS של המנפיק
+  (`createRemoteJWKSet` של `jose`, הנשמר במטמון לכל URI של JWKS), עם בדיקות
+  `issuer`/`audience`. קבלה ללוח הבקרה דורשת רשימת `oidcAllowedSubjects`
+  שאינה ריקה, מדיניות `oidcAdmissionClaim`, או את שתיהן. רשימת הנושאים
+  תואמת ל-`sub` או ל-`email` רק כאשר `email_verified === true`. מדיניות
+  התביעה האופציונלית מקבלת נתיב לתביעה באסימון ID המופרד בנקודות (לדוגמה,
+  `realm_access.roles`) ומערך של ערכים מקובלים; התביעה שנמצאה חייבת להיות
+  מערך מחרוזות המכיל לפחות ערך מקובל אחד. אם שתי המדינויות מוגדרות,
+  שתיהן חייבות לעבור. תביעות חסרות או פגומות נדחות כברירת מחדל, ובהיעדר
+  שתי המדינויות, הקריאה החוזרת מסרבת להתחברות (`not_configured`). תצורות
+  קיימות המבוססות על נושא בלבד ממשיכות לפעול ללא שינוי.
+- בדרך כלל, Keycloak ממפה תפקידי realm לאסימוני גישה, ולא בהכרח לאסימוני
+  ID. כדי לדרוש את תפקיד ה-realm‏ `admin`, יש להגדיר ממפה פרוטוקול עבור
+  לקוח זה, הכולל את `realm_access.roles` בתוך **אסימון ה-ID** שלו, ולאחר מכן
+  להגדיר את `oidcAdmissionClaim` לערך `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  יש לבדוק את התביעה בפועל באסימון ה-ID עבור לקוח זה לפני הפעלת קבלה
+  המבוססת על תפקיד בלבד; היישום אינו קורא תפקידים מאסימון הגישה. סירוב
+  לאסימון בצד ה-IdP יכול להשלים בדיקה זו בצד היישום, אך אינו מחליף אותה.
+- במקרה של הצלחה, הוא מנפיק את **אותו** JWT מסוג `auth_token` ל-30 יום
+  שמנפיקה התחברות באמצעות סיסמה (`src/app/api/auth/login/route.ts`), כך ששאר
+  צינור עיבוד ההפעלה של לוח הבקרה (רענון אוטומטי ודגלי cookie) נשאר ללא שינוי —
+  OIDC מחליף רק את אופן הנפקת קובץ ה-cookie, ולא את ההרשאות שהוא מעניק. שינויים
+  בתפקידים או בקבוצות ב-IdP אינם מבטלים הפעלות OmniRoute קיימות; התנתקות,
+  החלפת סיסמה או פקיעת ההפעלה עדיין קובעות את משך חייהן.
+- כל הגדרת `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) נמצאת בתוך `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): הבקשה `PATCH /api/settings`
+  מקבלת תשובת `400 PASSWORD_REQUIRED`, אלא אם גוף הבקשה מכיל את סיסמת הניהול
+  בתור `currentPassword` (`401 PASSWORD_MISMATCH` כאשר היא שגויה).
+  `oidcDisablePasswordLogin` מסרב ל_התחברות_ באמצעות סיסמה (`POST /api/auth/login`),
+  אך שומר את גיבוב הסיסמה המאוחסן, ואימות מחדש עדיין בודק את
+  `currentPassword` מולו.
+- גם `corsOrigins` ו-`bruteForceProtection` נמצאים בתוך `SECURITY_IMPACTING_SETTINGS_KEYS`:
+  הקלה באחד מהם מחלישה את הגנות ההתחברות, ולכן הם דורשים אותו אימות מחדש
+  באמצעות `currentPassword` (לשונית האבטחה מבקשת אותו), וייבוא ה-JSON
+  משמיט אותם.
+- כל מפתח של מדיניות אבטחה — הרשומות של `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  כל מפתח `oidc*` ומצב ההפעלה של לוח הבקרה — הוא **למפעיל בלבד** בעת
+  `PATCH /api/settings`: מפתח API בעל היקף ניהול או אסימון גישה מסוג `oma_`
+  נדחים עם `403`, גם כאשר נשלח `currentPassword` הנכון, והסירוב נרשם ביומן
+  הביקורת בתור `settings.update_failed` עם `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` בתוך `src/lib/api/operatorCredential.ts`).
+  הגדרות רגילות (ערכת נושא והעדפות תצוגה) נשארות ניתנות לכתיבה באמצעות מפתח
+  `manage` או אסימון גישה מסוג `admin`. כל שינוי של `/api/settings` עצמו (ושל
+  `/api/settings/require-login`) דורש גם את היקף אסימון הגישה `admin`
+  (`ADMIN_MUTATION_EXACT_PATHS` בתוך `src/server/authz/accessScopes.ts`, התאמה
+  מדויקת לנתיב); `GET` נשאר `read`, ותת-הנתיבים האחרים של `/api/settings/*`
+  (שרתי proxy, ברירות מחדל משולבות, כינויי מודלים, דחיסה, טיהורים…) שומרים על
+  היקף `write` המוסק מהמתודה.
+- `POST /api/settings/import-json` מדלג על האימות מחדש הזה, ולכן הוא משמיט כל
+  מפתח בתוך `IMPORT_STRIPPED_SETTINGS_KEYS` (באותו קובץ) לפני הכתיבה: הסיסמה
+  ו-`currentPassword`, כל רשומה של `SECURITY_IMPACTING_SETTINGS_KEYS`, ומצב
+  ההפעלה של לוח הבקרה (`sessionsValidAfter`, `revokedDashboardSessions`).
+  לכן, ייבוא גיבוי ישן אינו יכול להחיות הפעלה שכבר הסתיימה בעקבות שינוי
+  סיסמה או התנתקות.
 
 ## מחלקות נתיבים
 

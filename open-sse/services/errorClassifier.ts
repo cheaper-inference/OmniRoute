@@ -14,7 +14,8 @@ import { getProviderCategory, getRegistryEntry } from "../config/providerRegistr
 // successful completion (truncated at the token limit, or a tool-call turn) —
 // NOT a silent "fake success" failure. Used to avoid rewriting a valid HTTP 200
 // (e.g. a Claude Code `max_tokens: 1` connectivity ping) into a synthetic 502.
-const LEGIT_EMPTY_CLAUDE_STOP = new Set(["max_tokens", "tool_use"]);
+// A "refusal" is the model declining under usage policy; the client must see it.
+const LEGIT_EMPTY_CLAUDE_STOP = new Set(["max_tokens", "tool_use", "refusal"]);
 const LEGIT_EMPTY_OPENAI_FINISH = new Set(["length", "tool_calls", "content_filter"]);
 
 // #14160: first-party APIs where an empty completion carrying a NORMAL terminal
@@ -401,7 +402,9 @@ export function classifyProviderError(
 ): ProviderErrorType | null {
   const bodyStr = responseBodyToString(responseBody);
   const creditsExhausted = isCreditsExhausted(bodyStr);
-  const subscriptionQuotaExhausted = isSubscriptionQuotaText(bodyStr.toLowerCase());
+  // Claude's native weekly 429 wording is provider-scoped; omitting provider
+  // silently classified the long-window quota as a short RPM rate limit.
+  const subscriptionQuotaExhausted = isSubscriptionQuotaText(bodyStr.toLowerCase(), provider);
   const accountDeactivated = isAccountDeactivated(bodyStr);
   const oauthInvalid = isOAuthInvalidToken(bodyStr);
   const preserveQuota429 = shouldPreserveQuotaSignalsFor429(provider);

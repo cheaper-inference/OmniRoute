@@ -33,7 +33,7 @@ import type {
   EngineValidationResult,
 } from "../types.ts";
 import type { CompressionResult } from "../../types.ts";
-import { crushMessages, DEFAULT_MIN_ROWS } from "./smartcrusher.ts";
+import { crushMessages, DEFAULT_MIN_ROWS, mapContentPartText } from "./smartcrusher.ts";
 import {
   TABULAR_FENCE_OPEN,
   TABULAR_FENCE_CLOSE,
@@ -207,13 +207,9 @@ export function reconstructHeadroom(body: Record<string, unknown>): Record<strin
     if (Array.isArray(msg.content)) {
       let contentChanged = false;
       const newContent = msg.content.map((part: Record<string, unknown>) => {
-        if (part["type"] !== "text" || typeof part["text"] !== "string") return part;
-        const reconstructed = restoreText(part["text"] as string);
-        if (reconstructed !== part["text"]) {
-          contentChanged = true;
-          return { ...part, text: reconstructed };
-        }
-        return part;
+        const reconstructed = mapContentPartText(part, restoreText);
+        if (reconstructed !== part) contentChanged = true;
+        return reconstructed;
       });
       if (contentChanged) {
         changed = true;

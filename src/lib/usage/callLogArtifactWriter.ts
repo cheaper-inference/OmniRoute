@@ -123,6 +123,9 @@ function notifyCloseWaiters(): void {
 function scheduleIdleTermination(): void {
   clearIdleTimer();
   if (!worker || active || queue.length > 0) return;
+  // An idle worker must not keep the process alive for IDLE_TIMEOUT_MS after its last write
+  // (a CLI or test process would otherwise linger 30 s). pump() refs it again for the next write.
+  worker.unref();
   idleTimer = setTimeout(terminateWorker, IDLE_TIMEOUT_MS);
   idleTimer.unref?.();
 }
@@ -205,7 +208,10 @@ function pump(): void {
   active = next;
   clearIdleTimer();
   try {
-    ensureWorker().postMessage({
+    const current = ensureWorker();
+    // Hold the process open until this write's reply arrives, even if the worker was idle.
+    current.ref();
+    current.postMessage({
       id: next.id,
       artifact: next.artifact,
       environment: next.environment,

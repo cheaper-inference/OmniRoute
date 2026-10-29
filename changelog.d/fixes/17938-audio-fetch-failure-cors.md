@@ -1,0 +1,1 @@
+- **fix(audio):** `/v1/audio/speech`, `/v1/audio/transcriptions` and `/v1/audio/translations` now carry CORS headers on the sanitized 500 returned when the upstream request itself fails (DNS, connection or TLS error), matching their upstream-error responses since #15159 (#17938)

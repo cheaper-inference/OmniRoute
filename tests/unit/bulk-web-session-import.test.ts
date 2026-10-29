@@ -124,6 +124,8 @@ describe("web-session credential helpers", () => {
     assert.equal(requiresWebSessionCredential("grok-web"), true);
     assert.equal(requiresWebSessionCredential("claude-web"), true);
     assert.equal(requiresWebSessionCredential("deepseek-web"), true);
+    assert.equal(requiresWebSessionCredential("veoaifree-web"), true);
+    assert.equal(requiresWebSessionCredential("veo-free"), true);
   });
 
   it("requiresWebSessionCredential returns false for non-web providers", () => {
@@ -153,6 +155,18 @@ describe("web-session credential helpers", () => {
     );
     assert.equal(hasUsableWebSessionCredential("perplexity-web", { cookie: "" }), false);
     assert.equal(hasUsableWebSessionCredential("perplexity-web", {}), false);
+    assert.equal(
+      hasUsableWebSessionCredential("veoaifree-web", {
+        wordpress_logged_in_test: "session_value",
+      }),
+      true
+    );
+    assert.equal(
+      hasUsableWebSessionCredential("veo-free", {
+        cookie: "wordpress_logged_in_test=session_value",
+      }),
+      true
+    );
   });
 
   it("hasUsableWebSessionCredential validates token data correctly", () => {

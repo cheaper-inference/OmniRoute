@@ -11,6 +11,7 @@ import {
 import { filterToOpenAIFormat } from "./helpers/openaiHelper.ts";
 import {
   providerHonorsOpenAIFormatCacheControl,
+  providerAcceptsPromptCacheBreakpoint,
   resolveConnectionCacheOverride,
 } from "../utils/cacheControlPolicy.ts";
 import {
@@ -27,6 +28,7 @@ import {
 import { getRequestTranslator, getResponseTranslator } from "./registry.ts";
 import { bootstrapTranslatorRegistry } from "./bootstrap.ts";
 import { scopeGeminiThoughtSignatureNamespace } from "../services/geminiThoughtSignatureStore.ts";
+import { extractResponsesWebSearchEvidence } from "./response/openai-responses/pureHelpers.ts";
 import { hasThinkingConfig, normalizeThinkingConfig } from "../services/provider.ts";
 import { applyThinkingBudget } from "../services/thinkingBudget.ts";
 import { applyReasoningRuleDirective } from "@/lib/reasoningRouting/policy";
@@ -666,6 +668,7 @@ export function translateRequest(
       preserveCacheControl:
         options?.preserveCacheControl === true &&
         providerHonorsOpenAIFormatCacheControl(provider, connectionCacheOverride),
+      preservePromptCacheBreakpoint: providerAcceptsPromptCacheBreakpoint(provider),
       // #4849 regression guard: keep client reasoning_content for replay providers.
       preserveReasoningContent: isReasoner,
       // Per-provider/model preserveVideoUrl flag from compat overrides.
@@ -924,6 +927,47 @@ export function translateRequest(
   return result;
 }
 
+// Shared per-stream web-search evidence record (created on first use).
+function getResponsesWebSearchEvidence(state) {
+  const existing = state._responsesWebSearchEvidence;
+  const evidence =
+    existing && typeof existing === "object" && Array.isArray(existing.calls)
+      ? existing
+      : { calls: [], citations: [] };
+  state._responsesWebSearchEvidence = evidence;
+  return evidence;
+}
+
+// Merge a call into the recorded ones: a later record for the same id fills in the
+// query / sources instead of duplicating the call.
+function mergeResponsesWebSearchCall(evidence, call) {
+  const previous = evidence.calls.find((entry) => entry.id === call.id);
+  if (!previous) {
+    evidence.calls.push(call);
+    return;
+  }
+  if (call.query) previous.query = call.query;
+  if (call.items.length > 0) previous.items = call.items;
+}
+
+// Accumulate the per-chunk web-search evidence (see extractResponsesWebSearchEvidence)
+// on the shared stream state. `output_item.added` announces a call without its action
+// and `output_item.done` carries the resolved action, so a later record for the same id
+// merges instead of duplicating the call.
+function accumulateResponsesWebSearchEvidence(state, chunk) {
+  if (!state || typeof state !== "object") return;
+  const { call, citations, revokeCallId } = extractResponsesWebSearchEvidence(chunk);
+  if (!call && citations.length === 0 && !revokeCallId) return;
+  const evidence = getResponsesWebSearchEvidence(state);
+  // A call whose `done` reported a non-completed status never ran: drop the entry
+  // the `added` event recorded, so no (empty) search pair is emitted for it.
+  if (revokeCallId) {
+    evidence.calls = evidence.calls.filter((entry) => entry.id !== revokeCallId);
+  }
+  if (call) mergeResponsesWebSearchCall(evidence, call);
+  for (const citation of citations) evidence.citations.push(citation);
+}
+
 // Translate response chunk: target -> openai -> source
 export function translateResponse(targetFormat, sourceFormat, chunk, state) {
   // If same format, return as-is — but never propagate the null/flush signal as a
@@ -935,6 +979,19 @@ export function translateResponse(targetFormat, sourceFormat, chunk, state) {
 
   let results = [chunk];
   let openaiResults = null; // Store OpenAI intermediate results
+
+  // Claude Code WebSearch bridge, record half. A native Responses upstream (Codex)
+  // reports a server-side search as `web_search_call` items + `url_citation`
+  // annotations; accumulate them on the shared state so the OpenAI→Claude step below
+  // can emit the Anthropic server_tool_use + web_search_tool_result pair via the shared
+  // emitter. Recording is silent, so a Chat Completions client's stream is unchanged
+  // (only a CLAUDE client's output differs) and it is a no-op for every other target.
+  // Kept here (the hub entry point) rather than inside the Responses→OpenAI translator,
+  // whose size is frozen by the file-size ratchet; the extractor itself is pure and
+  // lives in that translator's leaf helpers.
+  if (targetFormat === FORMATS.OPENAI_RESPONSES) {
+    accumulateResponsesWebSearchEvidence(state, chunk);
+  }
 
   // Check for direct translation path first (e.g., Gemini → Claude)
   const directTranslator = getResponseTranslator(targetFormat, sourceFormat);

@@ -48,48 +48,33 @@ toimii suoraan), tarkistaa palvelimen kunnon ja suorittaa `claude`-komennon.
 
 ---
 
-## Löytämisaliakset — tuo muut kuin Claude-mallit näkyviin `/model`-valitsimessa
+## Discovery-aliakset — muut kuin Claude-mallit näkyviin `/model`-valitsimeen
 
-Claude Coden yhdyskäytävän mallien etsintä luettelee vain tunnisteet, jotka alkavat merkkijonolla `claude`
-tai `anthropic`. Siksi, kun `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, natiivi
-`/model`-valitsin näyttää tavallisesti **vain** OmniRouten Claude-/Anthropic-mallit —
-`kimi/kimi-k2.6` tai `glm/glm-5.2` ei koskaan näy, vaikka sen reititys toimii oikein.
+Claude Coden gateway-mallidiscovery listaa vain tunnisteet, jotka alkavat `claude`- tai `anthropic`-etuliitteellä, joten kun `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` on asetettu, natiivi `/model`-valitsin näyttää normaalisti **vain** OmniRouten Claude/Anthropic-mallit — esimerkiksi `kimi/kimi-k2.6` tai `glm/glm-5.2` ei koskaan ilmesty listaan, vaikka reititys toimisikin moitteettomasti.
 
-OmniRoute voi peilata minkä tahansa käytössä olevan mallin (ja yhdistelmän) `claude/…`-tunnisteen alle,
-jotta se läpäisee suodatuksen ja näkyy valitsimessa:
+OmniRoute voi peilata minkä tahansa käytössä olevan mallin (ja kombon) `claude/…`-tunnisteen alle, jotta se läpäisee kyseisen suodattimen ja näkyy valitsimessa:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<yhdistelmä "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Kun valitset jonkin näistä Claude Codessa, OmniRoute poistaa `claude/`-kääreen
-ja palauttaa todellisen tunnisteen ennen reititystä — aito `claude/<real-claude-model>`-tunniste
-(varsinainen Claude OAuth -palveluntarjoaja) jätetään aina koskemattomaksi.
+Kun valitset jonkin näistä Claude Codessa, OmniRoute kuorii `claude/`-kääreen pois ja palauttaa todellisen tunnisteen ennen reititystä — aito `claude/<real-claude-model>`-tunniste (varsinainen Claude OAuth -palveluntarjoaja) jätetään aina koskemattomaksi.
 
-**Tämä on oletusarvoisesti pois käytöstä**, ja sitä hallitaan kolmitasoisella portilla (tarkin
-asetus on ensisijainen), joten tavallinen OmniRoute ei koskaan kaksinkertaista luetteloaan asiakkaille,
-jotka eivät käytä Claude Codea:
+Oletuksena vain perustunnisteet peilataan. Kun valinnainen ominaisuuslippu `CATALOG_MIRROR_REFINEMENTS_ENABLED` on päällä, katalogin jo listaamat päättelyteho-variantit (esim. `codex/gpt-6-sol-high`) peilataan kuten muutkin tunnisteet, jolloin Claude Code voi valita eksplisiittisen tehotason, eikä sisäänrakennettuja `auto/*`-tunnisteita, joita pyyntöpolku ei pysty materialisoimaan, peilata. Sitä, listataanko teho-variantteja lainkaan, määrää edelleen `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — peili ei koskaan lisää varianttia, jota peruskatalogissa ei ole.
 
-| Taso     | Sijainti                                                                                     |
-| -------- | -------------------------------------------------------------------------------------------- |
-| Malli    | Palveluntarjoajan tietosivu → mallikohtainen "Näytä Claude Codessa" -valitsin                |
-| Tarjoaja | Palveluntarjoajan tietosivu → tarjoajakohtainen valitsin (koskee kaikkia sen malleja)        |
-| Globaali | Asetukset → Ominaisuusliput → `EXPOSE_CC_DISCOVERY_ALIASES` (oletusarvoisesti pois käytöstä) |
+**Tämä on oletuksena pois päältä**, ja sitä ohjataan kolmitasoisella portilla (tarkin asetus voittaa), jotta tavallinen OmniRoute ei koskaan tuplaa katalogiaan asiakasohjelmille, jotka eivät käytä Claude Codea:
 
-Ympäristömuuttuja `EXPOSE_CC_DISCOVERY_ALIASES` pakottaa globaalin tason käyttöön
-ja ohittaa hallintapaneelin asetuksen (Ominaisuusliput-näyttö näyttää
-huomautuksen "aktiivinen ympäristömuuttujan kautta", kun näin tapahtuu). Tarjoaja- ja
-mallikohtaiset valitsimet tarkentavat asetusta edelleen — esimerkiksi globaali asetus pois käytöstä + Kimi-tarjoaja käytössä tuo
-näkyviin vain Kimin mallit.
+| Taso             | Sijainti                                                                                  |
+| ---------------- | ----------------------------------------------------------------------------------------- |
+| Malli            | Palveluntarjoajan yksityiskohtasivu → mallikohtainen "Expose in Claude Code" -kytkin      |
+| Palveluntarjoaja | Palveluntarjoajan yksityiskohtasivu → palveluntarjoajatason kytkin (kattaa kaikki mallit) |
+| Globaali         | Asetukset → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (oletuksena pois päältä)        |
 
-> ⚠️ **Ikkunakoon ristiriita muissa kuin Claude-malleissa.** Claude Code olettaa 200K:n konteksti-ikkunan
-> kaikille tunnisteille, joita se ei tunnista (se ei voi lukea todellista ikkunakokoa
-> `/v1/models`-päätepisteestä). Jos mallin ikkuna on suurempi (esim. Kimi K2:n 256K), aseta
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` arvoon, joka on mallin todellista ikkunaa pienempi, jotta
-> automaattinen tiivistys ei käynnisty ennenaikaisesti. Edellä luodut profiilit tekevät
-> tämän jo mallikohtaisesti.
+`EXPOSE_CC_DISCOVERY_ALIASES`-ympäristömuuttuja pakottaa globaalin tason päälle ja ohittaa hallintapaneelin asetuksen (Feature Flags -näyttö näyttää tällöin "active via environment variable" -huomautuksen). Palveluntarjoaja- ja mallikohtaiset kytkimet tarkentavat asetusta tästä eteenpäin — esimerkiksi globaali pois päältä + Kimi-palveluntarjoaja päällä paljastaa vain Kimin mallit.
+
+> ⚠️ **Kontekstiikkunan epäsuhta muissa kuin Claude-malleissa.** Claude Code olettaa 200K:n kontekstiikkunan kaikille tunnisteille, joita se ei tunnista (se ei pysty lukemaan todellista ikkunakokoa `/v1/models`-päätepisteestä). Jos mallin ikkuna on suurempi (esim. Kimi K2:n 256K), aseta `CLAUDE_CODE_AUTO_COMPACT_WINDOW` arvoon, joka on pienempi kuin mallin todellinen ikkuna, jotta automaattinen tiivistäminen (auto-compaction) ei käynnisty ennenaikaisesti. Yllä olevat generoidut profiilit tekevät tämän jo mallikohtaisesti.
 
 ---
 

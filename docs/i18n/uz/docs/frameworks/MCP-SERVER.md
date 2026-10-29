@@ -73,6 +73,16 @@ curl -i \
 
 `manage` doirasiga ega bo‘lmagan kalit (yoki Bearer mavjud bo‘lmasa) `403 LOCAL_ONLY` javobini qaytaradi. Yonma-yon joylashgan `/api/cli-tools/runtime/*` prefiksini ataylab chetlab o‘tib bo‘lmaydi — [Marshrut himoyasi darajalari — manage doirasi uchun istisno](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) bo‘limiga qarang.
 
+### Origin tekshiruvi
+
+Autentifikatsiyadan so'ng `/api/mcp/*` manziliga yuborilgan har bir so'rovning — transportlar va `status`, `tools`, `audit`, `restart` kabi boshqaruv yo'nalishlarining — `Origin` sarlavhasi chaqiruvchi kimligidan qat'i nazar (API kaliti, CLI tokeni, dashboard sessiyasi yoki kirish o'chirilganda anonim loopback) tekshiriladi. Bu MCP Streamable HTTP spetsifikatsiyasi talab qiladigan DNS rebinding himoyasidir.
+
+- **`Origin` sarlavhasi yo'q** → ruxsat beriladi. OmniRoute CLI, SDK va IDE mijozlari uni yubormaydi.
+- **Ruxsat etilgan `Origin`** → istalgan portdagi `localhost` / `127.0.0.1` / `[::1]` yoki OmniRoute'ning o'z ommaviy origin'i: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, ishonchli teskari proksi uzatgan origin (`OMNIROUTE_TRUST_PROXY`, faqat base URL o'rnatilmagan bo'lsa) yoki to'g'ridan-to'g'ri murojaat qilingan loopback/LAN IP xost. Faqat `Host` sarlavhasining o'zi hech qachon origin'ni ishonchli qilmaydi.
+- **`null` ham kiradigan boshqa har qanday `Origin`** → JSON-RPC xato tanasi bilan `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Yaroqli CSRF tokenini taqdim etgan dashboard sessiyasi boshqa dashboard yozuvlaridagi kabi qabul qilinishda davom etadi.
+
+Teskari proksi ortida taqdim etiladigan brauzer MCP mijoziga `OMNIROUTE_PUBLIC_BASE_URL` kerak; boshqa origin'lar uchun ruxsat ro'yxati yo'q. CORS dastlabki so'rovi (`OPTIONS`) Origin bo'yicha tekshirilmaydi; undan keyingi so'rov tekshiriladi.
+
 ## IDE konfiguratsiyasi
 
 Claude Desktop, Cursor, Cline va mos MCP mijozlarini sozlash uchun [MCP mijozini sozlash](../guides/SETUP_GUIDE.md#mcp-client-configuration) bo‘limiga qarang.
