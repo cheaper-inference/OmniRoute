@@ -1633,4 +1633,19 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     apiHint:
       "Create an API token at https://daoxe.com/token, then paste it here as a Bearer token. OpenAI-compatible base URL: https://api.daoxe.com/v1.",
   },
+  // Gisoo (https://gisoo.pro) — prepaid multi-model relay. OpenAI-compatible /api/v1;
+  // /api/v1/models is public, so models are discovered live. No free tier.
+  gisoo: {
+    id: "gisoo",
+    serviceKinds: ["llm"],
+    alias: "gisoo",
+    name: "Gisoo",
+    icon: "hub",
+    color: "#FFC700",
+    textIcon: "GS",
+    passthroughModels: true,
+    website: "https://gisoo.pro",
+    apiHint:
+      "Create an API key in your Gisoo account, then paste it here as a Bearer token. OpenAI-compatible base URL: https://gisoo.pro/api/v1. Prepaid credit; no free tier.",
+  },
 };

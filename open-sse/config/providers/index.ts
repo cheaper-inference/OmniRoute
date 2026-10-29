@@ -104,6 +104,7 @@ import { modelscopeProvider } from "./registry/modelscope/index.ts";
 import { sensenovaProvider } from "./registry/sensenova/index.ts";
 import { hyperbolicProvider } from "./registry/hyperbolic/index.ts";
 import { lambda_aiProvider } from "./registry/lambda-ai/index.ts";
+import { runcrateProvider } from "./registry/runcrate/index.ts";
 import { t3_webProvider } from "./registry/t3-web/index.ts";
 import { conol_webProvider } from "./registry/conol-web/index.ts";
 import { chatplaygroundProvider } from "./registry/chatplayground/index.ts";
@@ -291,6 +292,7 @@ import { tokenharborProvider } from "./registry/tokenharbor/index.ts";
 import { twinmindProvider } from "./registry/twinmind/index.ts";
 import { syntxProvider } from "./registry/syntx/index.ts";
 import { daoxeProvider } from "./registry/daoxe/index.ts";
+import { gisooProvider } from "./registry/gisoo/index.ts";
 import { demonrouteProvider } from "./registry/demonroute/index.ts";
 
 export const REGISTRY: Record<string, RegistryEntry> = {
@@ -394,6 +396,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   sensenova: sensenovaProvider,
   hyperbolic: hyperbolicProvider,
   "lambda-ai": lambda_aiProvider,
+  runcrate: runcrateProvider,
   "t3-web": t3_webProvider,
   "conol-web": conol_webProvider,
   chatplayground: chatplaygroundProvider,
@@ -587,5 +590,6 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   twinmind: twinmindProvider,
   syntx: syntxProvider,
   daoxe: daoxeProvider,
+  gisoo: gisooProvider,
   demonroute: demonrouteProvider,
 };
