@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Лимиты параллелизма по моделям",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Необязательно: одна запись model=cap в строке, сопоставляется с точным идентификатором upstream-модели. Лишние запросы ставятся в локальную очередь; пусто — без лимита по модели.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Недопустимая запись параллелизма по модели «{entry}» — используйте model=cap, где cap — целое число от 1 до {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Недопустимая запись параллелизма по модели «{entry}» — используйте model=cap, где cap — целое число от 1 до {max}.",
+    "usedInComboTooltip": "Используется в комбо ({count}): {combos}",
+    "openComboTooltip": "Открыть Комбо — используется в {combo}"
   },
   "settings": {
     "title": "Настройки",
@@ -8938,7 +8940,9 @@
         "financial": "Финансовый",
         "brazilian": "Бразильский",
         "usa": "США",
-        "full": "Полный"
+        "full": "Полный",
+        "gdpr": "GDPR (ЕС)",
+        "popia": "POPIA (ЮАР)"
       },
       "builtinTypes": "Встроенные типы",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4-адреса",
         "ipv6_address": "IPv6-адреса",
         "aws_key": "Ключи доступа AWS",
-        "api_key_generic": "API-ключи и токены"
+        "api_key_generic": "API-ключи и токены",
+        "iban": "Номера банковских счетов IBAN",
+        "eu_vat": "Номера плательщиков НДС в ЕС",
+        "es_dni_nie": "Испанские DNI / NIE",
+        "it_codice_fiscale": "Итальянский Codice Fiscale",
+        "pl_pesel": "Польский PESEL",
+        "nl_bsn": "Нидерландский BSN",
+        "de_steuer_id": "Немецкий Steuer-ID",
+        "se_personnummer": "Шведский personnummer",
+        "za_id": "Номера удостоверений личности ЮАР",
+        "za_phone": "Номера телефонов ЮАР",
+        "za_vat": "Номера НДС ЮАР",
+        "za_tax_ref": "Налоговые номера ЮАР"
       },
       "customPatterns": "Пользовательские шаблоны",
       "customPatternsDesc": "Совпадения заменяются на [CUSTOM_REDACTED]. До {max} шаблонов. Шаблоны с риском катастрофического бэктрекинга отклоняются.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "Не настроен Duo OAuth для GitLab. Зарегистрируйте OAuth-приложение по адресу {applicationsUrl} с URI перенаправления {redirectUri} и областями \"{scopes}\", затем установите {clientIdEnv} (и, при необходимости, {clientSecretEnv}) и перезапустите.",
     "gitlabDuoSetupDescription": "После регистрации приложения и настройки переменных окружения в этом экземпляре OmniRoute нажмите Продолжить, чтобы начать вход через OAuth.",
     "continue": "Продолжить",
+    "copilotPolicyTitle": "Экспериментальный провайдер: статус полиса неоднозначен",
+    "copilotPolicyLine1": "OmniRoute подключается через api.githubcopilot.com, который GitHub не опубликовал как общий сторонний вывод API. Эта интеграция является экспериментальной и может быть изменена без предварительного уведомления.",
+    "copilotPolicyLine2": "Можно подключить только вашу собственную учетную запись GitHub. Никогда не делитесь учетными данными, объединяйте учетные записи и не пытайтесь превысить ограничения вашего плана.",
+    "copilotPolicyLine3": "Пользователи бесплатного и студенческого плана получают только автоматический выбор модели. Условия вашего плана Copilot и любые ограничения на использование остаются под вашей ответственностью.",
+    "copilotPolicyAcknowledge": "Я понял, подключайся",
     "tabPasteSetupToken": "Токен настройки",
     "claudeSetupTokenDescription": "Выполните `claude setup-token` в терминале и вставьте выведенный токен. Он действует один год и не имеет токена обновления. Перед сохранением OmniRoute отправляет в Anthropic один тестовый запрос.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Статистика провайдеров",
     "description": "Трафик, задержка и доля успешных запросов по каждому провайдеру и каждой модели",
     "combo": "Комбинация",
-    "toggleModels": "Показать модели для {provider}"
+    "toggleModels": "Показать модели для {provider}",
+    "windowSince": "С {date}"
   },
   "relay": {
     "title": "Бессерверные прокси-ретрансляторы",

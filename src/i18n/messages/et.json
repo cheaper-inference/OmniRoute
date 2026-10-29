@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Kasutusel {count} kombos: {combos}",
+    "openComboTooltip": "Ava Kombod — kasutab {combo}"
   },
   "settings": {
     "title": "Seaded",
@@ -8938,7 +8940,9 @@
         "financial": "Finants",
         "brazilian": "Brasiilia",
         "usa": "USA",
-        "full": "Täielik"
+        "full": "Täielik",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Lõuna-Aafrika)"
       },
       "builtinTypes": "Sisseehitatud tüübid",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4-aadressid",
         "ipv6_address": "IPv6-aadressid",
         "aws_key": "AWS-i juurdepääsuvõtmed",
-        "api_key_generic": "API-võtmed ja tokenid"
+        "api_key_generic": "API-võtmed ja tokenid",
+        "iban": "IBAN pangakonto numbrid",
+        "eu_vat": "EU VAT numbrid",
+        "es_dni_nie": "hispaania DNI / NIE",
+        "it_codice_fiscale": "Itaalia Codice Fiscale",
+        "pl_pesel": "Poola PESEL",
+        "nl_bsn": "Hollandi BSN",
+        "de_steuer_id": "Saksa Steuer-ID",
+        "se_personnummer": "Rootsi personalinumber",
+        "za_id": "Lõuna-Aafrika ID numbrid",
+        "za_phone": "Lõuna-Aafrika telefoninumbrid",
+        "za_vat": "Lõuna-Aafrika VAT numbrid",
+        "za_tax_ref": "Lõuna-Aafrika maksuviited"
       },
       "customPatterns": "Kohandatud mustrid",
       "customPatternsDesc": "Vasted asendatakse tekstiga [CUSTOM_REDACTED]. Kuni {max} mustrit. Katastroofilise tagasiotsingu ohuga mustrid lükatakse tagasi.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth pole seadistatud. Registreerige OAuthi rakendus aadressil {applicationsUrl}, kasutades ümbersuunamise URI-d {redirectUri} ja ulatusi „{scopes}”, seejärel määrake {clientIdEnv} (ja soovi korral {clientSecretEnv}) ning taaskäivitage.",
     "gitlabDuoSetupDescription": "Kui rakendus on registreeritud ja selle OmniRoute’i eksemplari keskkonnamuutujad määratud, klõpsake OAuthiga sisselogimise alustamiseks nuppu Jätka.",
     "continue": "Jätka",
+    "copilotPolicyTitle": "Eksperimentaalne pakkuja: poliitika olek on mitmetähenduslik",
+    "copilotPolicyLine1": "OmniRoute loob ühenduse saidi api.githubcopilot.com kaudu, mida GitHub ei ole avaldanud üldise kolmanda osapoole järeldusena API. See integreerimine on eksperimentaalne ja võib muutuda ilma ette teatamata.",
+    "copilotPolicyLine2": "Ühendada võib ainult teie enda GitHub konto. Ärge kunagi jagage mandaate, ühendage kontosid ega proovige ületada oma plaani limiite.",
+    "copilotPolicyLine3": "Tasuta ja üliõpilaspaketi kasutajad saavad ainult automaatset mudelivalikut. Teie Copilot plaani tingimused ja kasutuspiirangud jäävad teie vastutusele.",
+    "copilotPolicyAcknowledge": "Ma saan aru, ühendage",
     "tabPasteSetupToken": "Seadistusluba",
     "claudeSetupTokenDescription": "Käivitage terminalis `claude setup-token` ja kleepige selle väljastatud luba. See kehtib ühe aasta ja sellel puudub värskendusluba. OmniRoute saadab enne salvestamist Anthropicule ühe testpäringu.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Teenusepakkujate statistika",
     "description": "Liiklus, latentsus ja edukusmäärad teenusepakkujate ning mudelite kaupa",
     "combo": "Kombinatsioon",
-    "toggleModels": "Kuva teenusepakkuja {provider} mudelid"
+    "toggleModels": "Kuva teenusepakkuja {provider} mudelid",
+    "windowSince": "Alates {date}"
   },
   "relay": {
     "title": "Serverivabad releeproksid",

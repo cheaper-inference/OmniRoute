@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Użat f'{count} kombinazzjoni/jiet: {combos}",
+    "openComboTooltip": "Iftaħ il-Kombinazzjonijiet — użat minn {combo}"
   },
   "settings": {
     "title": "Issettjar",
@@ -9015,7 +9017,9 @@
         "financial": "Finanzjarju",
         "brazilian": "Brażiljan",
         "usa": "Stati Uniti",
-        "full": "Sħiħ"
+        "full": "Sħiħ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Afrika t'Isfel)"
       },
       "builtinTypes": "Tipi integrati",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "Indirizzi IPv4",
         "ipv6_address": "Indirizzi IPv6",
         "aws_key": "Ċwievet tal-aċċess AWS",
-        "api_key_generic": "Ċwievet API u tokens"
+        "api_key_generic": "Ċwievet API u tokens",
+        "iban": "IBAN numri tal-kont bankarju",
+        "eu_vat": "EU VAT numri",
+        "es_dni_nie": "Spanjol DNI / NIE",
+        "it_codice_fiscale": "Codice Fiscale Taljan",
+        "pl_pesel": "Pollakk PESEL",
+        "nl_bsn": "Olandiża BSN",
+        "de_steuer_id": "Ġermaniż Steuer-ID",
+        "se_personnummer": "personnummer Żvediż",
+        "za_id": "Numri ID tal-Afrika t'Isfel",
+        "za_phone": "Numri tat-telefon tal-Afrika t'Isfel",
+        "za_vat": "Numri VAT tal-Afrika t'Isfel",
+        "za_tax_ref": "Referenzi tat-taxxa tal-Afrika t'Isfel"
       },
       "customPatterns": "Mudelli personalizzati",
       "customPatternsDesc": "Il-qbil jiġu sostitwiti b'[CUSTOM_REDACTED]. Sa {max} mudelli. Mudelli b'riskju ta' backtracking katastrofiku jiġu rifjutati.",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth mhuwiex ikkonfigurat. Irreġistra applikazzjoni OAuth f’{applicationsUrl} bl-URI ta' direzzjoni mill-ġdid {redirectUri} u bl-ambiti \"{scopes}\", imbagħad issettja {clientIdEnv} (u, jekk trid, {clientSecretEnv}) u erġa' ibda.",
     "gitlabDuoSetupDescription": "Wara li l-applikazzjoni tiġi rreġistrata u l-varjabbli ambjentali jiġu ssettjati fuq din l-istanza ta' OmniRoute, ikklikkja Kompli biex tibda l-login OAuth.",
     "continue": "Kompli",
+    "copilotPolicyTitle": "Fornitur sperimentali: l-istatus tal-politika huwa ambigwu",
+    "copilotPolicyLine1": "OmniRoute jgħaqqad permezz ta' api.githubcopilot.com, li GitHub ma ppubblikatx bħala inferenza ġenerali ta' parti terza API. Din l-integrazzjoni hija sperimentali u tista' tinbidel mingħajr avviż.",
+    "copilotPolicyLine2": "Il-kont GitHub tiegħek biss jista' jkun konness. Qatt m'għandek taqsam kredenzjali, kontijiet pool, jew tipprova taqbeż il-limiti tal-pjan tiegħek.",
+    "copilotPolicyLine3": "Utenti tal-pjan b'xejn u Student jirċievu għażla awtomatika tal-mudell biss. It-termini tal-pjan Copilot tiegħek u kwalunkwe limitu ta' użu jibqgħu r-responsabbiltà tiegħek.",
+    "copilotPolicyAcknowledge": "Nifhem, qabbad",
     "tabPasteSetupToken": "Token tas-setup",
     "claudeSetupTokenDescription": "Ħaddem `claude setup-token` f'terminal u waħħal it-token li jistampa. Huwa validu għal sena u m'għandux token ta' aġġornament. OmniRoute jibgħat talba waħda ta' test lil Anthropic qabel ma jsalvah.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "Statistika tal-fornituri",
     "description": "Traffiku, latenza u rati ta’ suċċess għal kull fornitur u għal kull mudell",
     "combo": "Kombinazzjoni",
-    "toggleModels": "Uri l-mudelli għal {provider}"
+    "toggleModels": "Uri l-mudelli għal {provider}",
+    "windowSince": "Minn {date}"
   },
   "relay": {
     "title": "Proxies tar-Relay mingħajr server",

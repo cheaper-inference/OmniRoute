@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Bruges i {count} kombination(er): {combos}",
+    "openComboTooltip": "Åbn Kombinationer — bruges af {combo}"
   },
   "settings": {
     "title": "Indstillinger",
@@ -9015,7 +9017,9 @@
         "financial": "Finansiel",
         "brazilian": "Brasiliansk",
         "usa": "USA",
-        "full": "Fuld"
+        "full": "Fuld",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Sydafrika)"
       },
       "builtinTypes": "Indbyggede typer",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "IPv4-adresser",
         "ipv6_address": "IPv6-adresser",
         "aws_key": "AWS-adgangsnøgler",
-        "api_key_generic": "API-nøgler og tokens"
+        "api_key_generic": "API-nøgler og tokens",
+        "iban": "IBAN bankkontonumre",
+        "eu_vat": "EU VAT numre",
+        "es_dni_nie": "Spansk DNI / NIE",
+        "it_codice_fiscale": "Italiensk Codice Fiscale",
+        "pl_pesel": "polsk PESEL",
+        "nl_bsn": "hollandsk BSN",
+        "de_steuer_id": "Tysk Steuer-ID",
+        "se_personnummer": "svensk personnummer",
+        "za_id": "Sydafrikanske ID tal",
+        "za_phone": "Sydafrikanske telefonnumre",
+        "za_vat": "Sydafrikanske VAT tal",
+        "za_tax_ref": "Sydafrikanske skattereferencer"
       },
       "customPatterns": "Egne mønstre",
       "customPatternsDesc": "Match erstattes med [CUSTOM_REDACTED]. Op til {max} mønstre. Mønstre med risiko for katastrofal backtracking afvises.",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth er ikke konfigureret. Registrer en OAuth-applikation på {applicationsUrl} med omdirigerings-URI {redirectUri} og scopes \"{scopes}\", og indstil derefter {clientIdEnv} (og valgfrit {clientSecretEnv}) og genstart.",
     "gitlabDuoSetupDescription": "Når applikationen er registreret, og miljøvariablerne er indstillet på denne OmniRoute-instans, skal du klikke på Fortsæt for at starte OAuth-login.",
     "continue": "Fortsæt",
+    "copilotPolicyTitle": "Eksperimentel udbyder: Politikens status er tvetydig",
+    "copilotPolicyLine1": "OmniRoute forbinder via api.githubcopilot.com, som GitHub ikke har offentliggjort som en generel tredjepartsslutning API. Denne integration er eksperimentel og kan ændres uden varsel.",
+    "copilotPolicyLine2": "Kun din egen GitHub konto må være forbundet. Del aldrig legitimationsoplysninger, puljekonti eller forsøg at overskride dine plangrænser.",
+    "copilotPolicyLine3": "Gratis- og Studentplanbrugere modtager kun automatisk modelvalg. Vilkårene for din Copilot -plan og eventuelle brugsbegrænsninger forbliver dit ansvar.",
+    "copilotPolicyAcknowledge": "Jeg forstår, tilslut",
     "tabPasteSetupToken": "Opsætningstoken",
     "claudeSetupTokenDescription": "Kør `claude setup-token` i en terminal, og indsæt det token, den udskriver. Det er gyldigt i et år og har intet opdateringstoken. OmniRoute sender én testanmodning til Anthropic, før det gemmes.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "Udbyderstatistik",
     "description": "Trafik, svartid og succesrater pr. udbyder og model",
     "combo": "Kombination",
-    "toggleModels": "Vis modeller for {provider}"
+    "toggleModels": "Vis modeller for {provider}",
+    "windowSince": "Siden {date}"
   },
   "relay": {
     "title": "Serverless relay-proxies",

@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Limity współbieżności dla poszczególnych modeli",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Opcjonalne: jeden wpis model=cap w wierszu, dopasowywany do dokładnego identyfikatora modelu upstream. Nadmiarowe żądania są kolejkowane lokalnie; puste oznacza brak limitu dla modelu.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Nieprawidłowy wpis współbieżności dla modelu „{entry}” — użyj model=cap, gdzie cap jest liczbą całkowitą od 1 do {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Nieprawidłowy wpis współbieżności dla modelu „{entry}” — użyj model=cap, gdzie cap jest liczbą całkowitą od 1 do {max}.",
+    "usedInComboTooltip": "Używany w kombinacjach ({count}): {combos}",
+    "openComboTooltip": "Otwórz Kombinacje — używany przez {combo}"
   },
   "settings": {
     "title": "Ustawienia",
@@ -8938,7 +8940,9 @@
         "financial": "Finansowy",
         "brazilian": "Brazylijski",
         "usa": "USA",
-        "full": "Pełny"
+        "full": "Pełny",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Afryka Południowa)"
       },
       "builtinTypes": "Typy wbudowane",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Adresy IPv4",
         "ipv6_address": "Adresy IPv6",
         "aws_key": "Klucze dostępu AWS",
-        "api_key_generic": "Klucze API i tokeny"
+        "api_key_generic": "Klucze API i tokeny",
+        "iban": "numery kont bankowych IBAN",
+        "eu_vat": "EU VAT numery",
+        "es_dni_nie": "Hiszpański DNI / NIE",
+        "it_codice_fiscale": "Włoski kodeks fiskalny",
+        "pl_pesel": "polski PESEL",
+        "nl_bsn": "holenderski BSN",
+        "de_steuer_id": "Niemiecki Steuer-ID",
+        "se_personnummer": "Szwedzki numer personalny",
+        "za_id": "Numery ID Republiki Południowej Afryki",
+        "za_phone": "Numery telefonów w Republice Południowej Afryki",
+        "za_vat": "Numery VAT Republiki Południowej Afryki",
+        "za_tax_ref": "Referencje podatkowe z Republiki Południowej Afryki"
       },
       "customPatterns": "Własne wzorce",
       "customPatternsDesc": "Dopasowania są zastępowane przez [CUSTOM_REDACTED]. Maksymalnie {max} wzorców. Wzorce grożące katastrofalnym backtrackingiem są odrzucane.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth nie jest skonfigurowany. Zarejestruj aplikację OAuth pod adresem {applicationsUrl} z URI przekierowania {redirectUri} i zakresami \"{scopes}\", a następnie ustaw {clientIdEnv} (opcjonalnie {clientSecretEnv}) i uruchom ponownie.",
     "gitlabDuoSetupDescription": "Po zarejestrowaniu aplikacji i ustawieniu zmiennych środowiskowych w tej instancji OmniRoute, kliknij Kontynuuj, aby rozpocząć logowanie OAuth.",
     "continue": "Kontynuuj",
+    "copilotPolicyTitle": "Dostawca eksperymentalny: stan zasad jest niejednoznaczny",
+    "copilotPolicyLine1": "OmniRoute łączy się za pośrednictwem api.githubcopilot.com, którego GitHub nie opublikował jako ogólnego wniosku strony trzeciej API. Ta integracja ma charakter eksperymentalny i może ulec zmianie bez powiadomienia.",
+    "copilotPolicyLine2": "Można podłączyć tylko Twoje własne konto GitHub. Nigdy nie udostępniaj danych uwierzytelniających, nie łącz kont ani nie próbuj przekraczać limitów planu.",
+    "copilotPolicyLine3": "Użytkownicy planów bezpłatnych i studenckich otrzymują wyłącznie automatyczny wybór modelu. Warunki Twojego planu Copilot i wszelkie limity użytkowania pozostają Twoją odpowiedzialnością.",
+    "copilotPolicyAcknowledge": "Rozumiem, połącz",
     "tabPasteSetupToken": "Token konfiguracyjny",
     "claudeSetupTokenDescription": "Uruchom `claude setup-token` w terminalu i wklej wypisany token. Jest ważny przez rok i nie ma tokenu odświeżania. Przed zapisaniem OmniRoute wysyła jedno testowe żądanie do Anthropic.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Statystyki dostawców",
     "description": "Ruch, opóźnienia i wskaźniki powodzenia według dostawców i modeli",
     "combo": "Kombinacja",
-    "toggleModels": "Pokaż modele dla {provider}"
+    "toggleModels": "Pokaż modele dla {provider}",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Bezserwerowe proxy przekaźnikowe",

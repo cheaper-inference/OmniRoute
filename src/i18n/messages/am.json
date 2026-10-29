@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "በ{count} ጥምረት(ዎች) ውስጥ ጥቅም ላይ ውሏል፦ {combos}",
+    "openComboTooltip": "ጥምረቶችን ክፈት — በ{combo} ጥቅም ላይ ውሏል"
   },
   "settings": {
     "title": "ቅንብሮች",
@@ -9015,7 +9017,9 @@
         "financial": "ፋይናንስ",
         "brazilian": "ብራዚላዊ",
         "usa": "አሜሪካ",
-        "full": "ሙሉ"
+        "full": "ሙሉ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (ደቡብ አፍሪካ)"
       },
       "builtinTypes": "አብሮ የተሰሩ ዓይነቶች",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "IPv4 አድራሻዎች",
         "ipv6_address": "IPv6 አድራሻዎች",
         "aws_key": "የAWS መዳረሻ ቁልፎች",
-        "api_key_generic": "የAPI ቁልፎች እና ቶከኖች"
+        "api_key_generic": "የAPI ቁልፎች እና ቶከኖች",
+        "iban": "IBAN የባንክ ሂሳብ ቁጥሮች",
+        "eu_vat": "EU VAT ቁጥሮች",
+        "es_dni_nie": "ስፓኒሽ DNI / NIE",
+        "it_codice_fiscale": "የጣሊያን Codece Fiscale",
+        "pl_pesel": "የፖላንድ PESEL",
+        "nl_bsn": "የደች BSN",
+        "de_steuer_id": "የጀርመን Steuer-መታወቂያ",
+        "se_personnummer": "የስዊድን personnummer",
+        "za_id": "የደቡብ አፍሪካ ID ቁጥሮች",
+        "za_phone": "የደቡብ አፍሪካ ስልክ ቁጥሮች",
+        "za_vat": "የደቡብ አፍሪካ VAT ቁጥሮች",
+        "za_tax_ref": "የደቡብ አፍሪካ የግብር ማጣቀሻዎች"
       },
       "customPatterns": "ብጁ ቅጦች",
       "customPatternsDesc": "ተዛማጆች በ[CUSTOM_REDACTED] ይተካሉ። እስከ {max} ቅጦች። አስከፊ የኋሊት ፍለጋ አደጋ ያላቸው ቅጦች ውድቅ ይደረጋሉ።",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth አልተዋቀረም። በ{applicationsUrl} ላይ OAuth መተግበሪያን፣ የመመለሻ URI {redirectUri} እና \"{scopes}\" ወሰኖችን በመጠቀም ይመዝግቡ፤ ከዚያ {clientIdEnv}ን (እና ከፈለጉ {clientSecretEnv}ን) ያዘጋጁና እንደገና ያስጀምሩ።",
     "gitlabDuoSetupDescription": "መተግበሪያው ከተመዘገበ እና የአካባቢ ተለዋዋጮቹ በዚህ የOmniRoute ኢንስታንስ ላይ ከተዋቀሩ በኋላ፣ የOAuth መግቢያውን ለመጀመር «ቀጥል»ን ጠቅ ያድርጉ።",
     "continue": "ቀጥል",
+    "copilotPolicyTitle": "የሙከራ አቅራቢ፡ የፖሊሲው ሁኔታ አሻሚ ነው።",
+    "copilotPolicyLine1": "OmniRoute በ api.githubcopilot.com በኩል ይገናኛል፣ ይህም GitHub እንደ አጠቃላይ የሶስተኛ ወገን መረጃ API ያልታተመ ነው። ይህ ውህደት የሙከራ ነው እና ያለማሳወቂያ ሊለወጥ ይችላል።",
+    "copilotPolicyLine2": "የእራስዎ GitHub መለያ ብቻ ሊገናኝ ይችላል። ምስክርነቶችን፣ የመዋኛ ሒሳቦችን በጭራሽ አያጋሩ ወይም ከእቅድዎ ገደብ ለማለፍ አይሞክሩ።",
+    "copilotPolicyLine3": "ነፃ እና የተማሪ እቅድ ተጠቃሚዎች አውቶማቲክ ሞዴል ምርጫ ብቻ ይቀበላሉ። የእርስዎ Copilot ዕቅድ ውሎች እና ማንኛውም የአጠቃቀም ገደቦች የእርስዎ ኃላፊነት እንደሆኑ ይቆያሉ።",
+    "copilotPolicyAcknowledge": "ተረድቻለሁ፣ ተገናኝ",
     "tabPasteSetupToken": "የማዋቀሪያ ቶከን",
     "claudeSetupTokenDescription": "በተርሚናል ውስጥ `claude setup-token` ያሂዱ እና የሚያሳየውን ቶከን ይለጥፉ። ለአንድ ዓመት ያገለግላል እና የማደሻ ቶከን የለውም። OmniRoute ከማስቀመጡ በፊት አንድ የሙከራ ጥያቄ ወደ Anthropic ይልካል።",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "የአቅራቢ ስታቲስቲክስ",
     "description": "በእያንዳንዱ አቅራቢና ሞዴል የትራፊክ መጠን፣ መዘግየት እና የስኬት ምጣኔዎች",
     "combo": "ጥምር",
-    "toggleModels": "የ{provider} ሞዴሎችን አሳይ"
+    "toggleModels": "የ{provider} ሞዴሎችን አሳይ",
+    "windowSince": "ከ{date} ወዲህ"
   },
   "relay": {
     "title": "ሰርቨር-አልባ ሪሌይ ፕሮክሲዎች",

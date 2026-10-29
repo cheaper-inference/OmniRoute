@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "استفاده‌شده در {count} ترکیب: {combos}",
+    "openComboTooltip": "باز کردن ترکیب‌ها — استفاده‌شده توسط {combo}"
   },
   "settings": {
     "title": "تنظیمات",
@@ -8938,7 +8940,9 @@
         "financial": "مالی",
         "brazilian": "برزیلی",
         "usa": "آمریکا",
-        "full": "کامل"
+        "full": "کامل",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (آفریقای جنوبی)"
       },
       "builtinTypes": "انواع داخلی",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "نشانی‌های IPv4",
         "ipv6_address": "نشانی‌های IPv6",
         "aws_key": "کلیدهای دسترسی AWS",
-        "api_key_generic": "کلیدهای API و توکن‌ها"
+        "api_key_generic": "کلیدهای API و توکن‌ها",
+        "iban": "شماره حساب های بانکی IBAN",
+        "eu_vat": "EU VAT",
+        "es_dni_nie": "اسپانیایی DNI / NIE",
+        "it_codice_fiscale": "کدیس ایتالیایی Fiscale",
+        "pl_pesel": "PESEL لهستانی",
+        "nl_bsn": "هلندی BSN",
+        "de_steuer_id": "Steuer-ID آلمانی",
+        "se_personnummer": "شماره پرسنل سوئدی",
+        "za_id": "اعداد ID آفریقای جنوبی",
+        "za_phone": "شماره تلفن های آفریقای جنوبی",
+        "za_vat": "اعداد VAT آفریقای جنوبی",
+        "za_tax_ref": "مراجع مالیاتی آفریقای جنوبی"
       },
       "customPatterns": "الگوهای سفارشی",
       "customPatternsDesc": "موارد منطبق با [CUSTOM_REDACTED] جایگزین می‌شوند. حداکثر {max} الگو. الگوهایی که خطر عقبگرد فاجعه‌بار دارند رد می‌شوند.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "پیکربندی OAuth دوگانه GitLab انجام نشده است. یک برنامه OAuth در {applicationsUrl} با URI بازگشت {redirectUri} و دامنه‌های \"{scopes}\" ثبت کنید، سپس {clientIdEnv} (و به‌طور اختیاری {clientSecretEnv}) را تنظیم کرده و دوباره راه‌اندازی کنید.",
     "gitlabDuoSetupDescription": "پس از ثبت‌نام برنامه و تنظیم متغیرهای محیطی در این نمونه OmniRoute، برای شروع ورود به سیستم OAuth روی ادامه کلیک کنید.",
     "continue": "ادامه دهید",
+    "copilotPolicyTitle": "ارائهدهنده آزمایشی: وضعیت خطمشی مبهم است",
+    "copilotPolicyLine1": "OmniRoute از طریق api.githubcopilot.com متصل می شود، که GitHub را به عنوان استنتاج عمومی شخص ثالث API منتشر نکرده است. این ادغام آزمایشی است و ممکن است بدون اطلاع قبلی تغییر کند.",
+    "copilotPolicyLine2": "فقط حساب GitHub خودتان ممکن است متصل باشد. هرگز اعتبارنامه ها، حساب های جمعی را به اشتراک نگذارید، یا سعی نکنید از محدودیت های طرح خود فراتر بروید.",
+    "copilotPolicyLine3": "کاربران طرح دانشجویی و رایگان فقط انتخاب مدل خودکار را دریافت می کنند. شرایط طرح Copilot شما و هرگونه محدودیت استفاده بر عهده شما باقی می ماند.",
+    "copilotPolicyAcknowledge": "فهمیدم، وصل کن",
     "tabPasteSetupToken": "توکن راه‌اندازی",
     "claudeSetupTokenDescription": "دستور `claude setup-token` را در ترمینال اجرا کنید و توکنی را که چاپ می‌کند جای‌گذاری کنید. این توکن یک سال اعتبار دارد و توکن تازه‌سازی ندارد. OmniRoute پیش از ذخیره، یک درخواست آزمایشی به Anthropic می‌فرستد.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "آمار ارائهدهنده",
     "description": "ترافیک، تأخیر و نرخ موفقیت بهتفکیک ارائهدهنده و مدل",
     "combo": "ترکیبی",
-    "toggleModels": "نمایش مدلهای {provider}"
+    "toggleModels": "نمایش مدلهای {provider}",
+    "windowSince": "از {date}"
   },
   "relay": {
     "title": "پروکسی‌های رله بدون سرور",

@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} کومبوز میں استعمال ہوا: {combos}",
+    "openComboTooltip": "کومبوز کھولیں — {combo} کے ذریعے استعمال"
   },
   "settings": {
     "title": "ترتیبات",
@@ -8938,7 +8940,9 @@
         "financial": "مالیاتی",
         "brazilian": "برازیلی",
         "usa": "امریکہ",
-        "full": "مکمل"
+        "full": "مکمل",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (جنوبی افریقہ)"
       },
       "builtinTypes": "بلٹ اِن اقسام",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 پتے",
         "ipv6_address": "IPv6 پتے",
         "aws_key": "AWS رسائی کیز",
-        "api_key_generic": "API کیز اور ٹوکنز"
+        "api_key_generic": "API کیز اور ٹوکنز",
+        "iban": "IBAN بینک اکاؤنٹ نمبر",
+        "eu_vat": "EU VAT نمبرز",
+        "es_dni_nie": "ہسپانوی DNI / NIE",
+        "it_codice_fiscale": "اطالوی کوڈیس مالیاتی",
+        "pl_pesel": "پولش PESEL",
+        "nl_bsn": "ڈچ BSN",
+        "de_steuer_id": "جرمن Steuer-ID",
+        "se_personnummer": "سویڈش شخصی نمبر",
+        "za_id": "جنوبی افریقی ID نمبر",
+        "za_phone": "جنوبی افریقہ کے فون نمبر",
+        "za_vat": "جنوبی افریقی VAT نمبر",
+        "za_tax_ref": "جنوبی افریقہ کے ٹیکس حوالہ جات"
       },
       "customPatterns": "حسب ضرورت پیٹرن",
       "customPatternsDesc": "مماثلتیں [CUSTOM_REDACTED] سے بدل دی جاتی ہیں۔ زیادہ سے زیادہ {max} پیٹرن۔ تباہ کن بیک ٹریکنگ کے خطرے والے پیٹرن مسترد کیے جاتے ہیں۔",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth ترتیب نہیں دیا گیا ہے۔ {applicationsUrl} پر ایک OAuth ایپلیکیشن رجسٹر کریں جس میں ری ڈائریکٹ URI {redirectUri} اور اسکوپس \"{scopes}\" ہوں، پھر {clientIdEnv} (اور اختیاری طور پر {clientSecretEnv}) سیٹ کریں اور دوبارہ شروع کریں۔",
     "gitlabDuoSetupDescription": "جب ایپلیکیشن رجسٹر ہو جائے اور اس OmniRoute انسٹنس پر env vars سیٹ ہو جائیں، تو OAuth لاگ ان شروع کرنے کے لیے Continue پر کلک کریں۔",
     "continue": "جاری رکھیں",
+    "copilotPolicyTitle": "تجرباتی فراہم کنندہ: پالیسی کی حیثیت مبہم ہے۔",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com کے ذریعے جڑتا ہے، جسے GitHub نے تیسرے فریق کے عمومی تخمینہ API کے طور پر شائع نہیں کیا ہے۔ یہ انضمام تجرباتی ہے اور بغیر اطلاع کے تبدیل ہو سکتا ہے۔",
+    "copilotPolicyLine2": "صرف آپ کا اپنا GitHub اکاؤنٹ منسلک ہوسکتا ہے۔ کبھی بھی اسناد، پول اکاؤنٹس، یا اپنے پلان کی حد سے تجاوز کرنے کی کوشش نہ کریں۔",
+    "copilotPolicyLine3": "مفت اور اسٹوڈنٹ پلان کے صارفین صرف خودکار ماڈل کا انتخاب حاصل کرتے ہیں۔ آپ کے Copilot پلان کی شرائط اور استعمال کی کوئی حد آپ کی ذمہ داری بنی ہوئی ہے۔",
+    "copilotPolicyAcknowledge": "میں سمجھتا ہوں، جڑتا ہوں۔",
     "tabPasteSetupToken": "سیٹ اپ ٹوکن",
     "claudeSetupTokenDescription": "ٹرمینل میں `claude setup-token` چلائیں اور اس کا پرنٹ کردہ ٹوکن پیسٹ کریں۔ یہ ایک سال کے لیے درست ہے اور اس کا کوئی ریفریش ٹوکن نہیں ہے۔ محفوظ کرنے سے پہلے OmniRoute، Anthropic کو ایک ٹیسٹ درخواست بھیجتا ہے۔",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "فراہم کنندہ کے اعداد و شمار",
     "description": "فی فراہم کنندہ اور فی ماڈل ٹریفک، تاخیر اور کامیابی کی شرحیں",
     "combo": "کومبو",
-    "toggleModels": "{provider} کے ماڈلز دکھائیں"
+    "toggleModels": "{provider} کے ماڈلز دکھائیں",
+    "windowSince": "{date} سے"
   },
   "relay": {
     "title": "سرور لیس ریلے پراکسیز",

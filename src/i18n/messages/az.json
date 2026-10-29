@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} kombinasiyada istifadə olunur: {combos}",
+    "openComboTooltip": "Kombinasiyaları aç — {combo} tərəfindən istifadə olunur"
   },
   "settings": {
     "title": "Parametrlər",
@@ -9015,7 +9017,9 @@
         "financial": "Maliyyə",
         "brazilian": "Braziliya",
         "usa": "ABŞ",
-        "full": "Tam"
+        "full": "Tam",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Cənubi Afrika)"
       },
       "builtinTypes": "Daxili növlər",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "IPv4 ünvanları",
         "ipv6_address": "IPv6 ünvanları",
         "aws_key": "AWS giriş açarları",
-        "api_key_generic": "API açarları və tokenlər"
+        "api_key_generic": "API açarları və tokenlər",
+        "iban": "IBAN bank hesab nömrələri",
+        "eu_vat": "EU VAT nömrələri",
+        "es_dni_nie": "İspan DNI / NIE",
+        "it_codice_fiscale": "İtalyan Kodeksi Fiscale",
+        "pl_pesel": "Polşa PESEL",
+        "nl_bsn": "holland BSN",
+        "de_steuer_id": "Alman Steuer-ID",
+        "se_personnummer": "İsveçli kadr",
+        "za_id": "Cənubi Afrika ID nömrələri",
+        "za_phone": "Cənubi Afrika telefon nömrələri",
+        "za_vat": "Cənubi Afrika VAT nömrələri",
+        "za_tax_ref": "Cənubi Afrika vergi istinadları"
       },
       "customPatterns": "Fərdi nümunələr",
       "customPatternsDesc": "Uyğunluqlar [CUSTOM_REDACTED] ilə əvəz olunur. Ən çox {max} nümunə. Fəlakətli geri izləmə riski olan nümunələr rədd edilir.",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth konfiqurasiya edilməyib. {applicationsUrl} ünvanında yönləndirmə URI {redirectUri} və \"scopes\" \"{scopes}\" ilə OAuth tətbiqi qeydiyyatdan keçirin, sonra {clientIdEnv} (və istəyə bağlı olaraq {clientSecretEnv}) təyin edin və yenidən başladın.",
     "gitlabDuoSetupDescription": "Tətbiq qeydiyyatdan keçdikdən və bu OmniRoute nümunəsində env dəyişənləri təyin edildikdən sonra, OAuth girişini başlamaq üçün Davam et düyməsini basın.",
     "continue": "Davam et",
+    "copilotPolicyTitle": "Eksperimental təminatçı: siyasət statusu birmənalı deyil",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com vasitəsilə bağlanır, GitHub bunu API üçüncü tərəfin ümumi rəyi kimi dərc etməmişdir. Bu inteqrasiya eksperimentaldır və xəbərdarlıq edilmədən dəyişə bilər.",
+    "copilotPolicyLine2": "Yalnız öz GitHub hesabınız qoşula bilər. Heç vaxt etimadnamələri, hovuz hesablarını paylaşmayın və ya plan limitlərinizi aşmağa cəhd etməyin.",
+    "copilotPolicyLine3": "Pulsuz və Tələbə planı istifadəçiləri yalnız avtomatik model seçimi alırlar. Sizin Copilot plan şərtləriniz və istənilən istifadə limitləri sizin məsuliyyətiniz olaraq qalır.",
+    "copilotPolicyAcknowledge": "başa düşürəm, qoşul",
     "tabPasteSetupToken": "Quraşdırma tokeni",
     "claudeSetupTokenDescription": "Terminalda `claude setup-token` əmrini işə salın və çap etdiyi tokeni yapışdırın. Token bir il etibarlıdır və yeniləmə tokeni yoxdur. OmniRoute onu saxlamazdan əvvəl Anthropic-ə bir test sorğusu göndərir.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "Provayder statistikası",
     "description": "Provayder və model üzrə trafik, gecikmə və uğur göstəriciləri",
     "combo": "Kombinasiya",
-    "toggleModels": "{provider} üçün modelləri göstər"
+    "toggleModels": "{provider} üçün modelləri göstər",
+    "windowSince": "{date} tarixindən"
   },
   "relay": {
     "title": "Serverless Relay proksiləri",

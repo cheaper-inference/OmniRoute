@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Käytössä {count} yhdistelmässä: {combos}",
+    "openComboTooltip": "Avaa Yhdistelmät — käyttää: {combo}"
   },
   "settings": {
     "title": "Asetukset",
@@ -8938,7 +8940,9 @@
         "financial": "Talous",
         "brazilian": "Brasilia",
         "usa": "Yhdysvallat",
-        "full": "Täysi"
+        "full": "Täysi",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Etelä-Afrikka)"
       },
       "builtinTypes": "Sisäänrakennetut tyypit",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4-osoitteet",
         "ipv6_address": "IPv6-osoitteet",
         "aws_key": "AWS-käyttöavaimet",
-        "api_key_generic": "API-avaimet ja tunnisteet"
+        "api_key_generic": "API-avaimet ja tunnisteet",
+        "iban": "IBAN pankkitilinumerot",
+        "eu_vat": "EU VAT numerot",
+        "es_dni_nie": "espanja DNI / NIE",
+        "it_codice_fiscale": "Italialainen Codice Fiscale",
+        "pl_pesel": "Puolan PESEL",
+        "nl_bsn": "hollantilainen BSN",
+        "de_steuer_id": "Saksalainen Steuer-ID",
+        "se_personnummer": "ruotsalainen henkilömäärä",
+        "za_id": "Etelä-Afrikan ID -numerot",
+        "za_phone": "Etelä-Afrikan puhelinnumerot",
+        "za_vat": "Etelä-Afrikan VAT -numerot",
+        "za_tax_ref": "Etelä-Afrikan veroviitteet"
       },
       "customPatterns": "Omat mallit",
       "customPatternsDesc": "Osumat korvataan merkinnällä [CUSTOM_REDACTED]. Enintään {max} mallia. Mallit, joissa on katastrofaalisen takaisinjäljityksen riski, hylätään.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuthia ei ole määritetty. Rekisteröi OAuth-sovellus osoitteessa {applicationsUrl} uudelleenohjaus-URI:lla {redirectUri} ja käyttöoikeusalueilla \"{scopes}\", sitten aseta {clientIdEnv} (ja valinnaisesti {clientSecretEnv}) ja käynnistä uudelleen.",
     "gitlabDuoSetupDescription": "Kun sovellus on rekisteröity ja ympäristömuuttujat on asetettu tälle OmniRoute-instanssille, napsauta Jatka aloittaaksesi OAuth-kirjautumisen.",
     "continue": "Jatka",
+    "copilotPolicyTitle": "Kokeellinen toimittaja: käytännön tila on epäselvä",
+    "copilotPolicyLine1": "OmniRoute muodostaa yhteyden api.githubcopilot.com-sivuston kautta, jota GitHub ei ole julkaissut yleisenä kolmannen osapuolen päätelmänä API. Tämä integrointi on kokeellinen ja voi muuttua ilman erillistä ilmoitusta.",
+    "copilotPolicyLine2": "Vain oma GitHub tilisi voidaan yhdistää. Älä koskaan jaa valtuustietoja, yhdistä tilejä tai yritä ylittää suunnitelmasi rajoja.",
+    "copilotPolicyLine3": "Ilmaisen ja opiskelijapaketin käyttäjät saavat vain automaattisen mallin valinnan. Copilot -suunnitelmasi ehdot ja mahdolliset käyttörajoitukset ovat sinun vastuullasi.",
+    "copilotPolicyAcknowledge": "Ymmärrän, yhdistä",
     "tabPasteSetupToken": "Asetustunnus",
     "claudeSetupTokenDescription": "Suorita `claude setup-token` päätteessä ja liitä sen tulostama tunnus. Se on voimassa vuoden, eikä sillä ole päivitystunnusta. OmniRoute lähettää Anthropicille yhden testipyynnön ennen tallentamista.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Palveluntarjoajien tilastot",
     "description": "Palveluntarjoaja- ja mallikohtainen liikenne, viive ja onnistumisasteet",
     "combo": "Yhdistelmä",
-    "toggleModels": "Näytä palveluntarjoajan {provider} mallit"
+    "toggleModels": "Näytä palveluntarjoajan {provider} mallit",
+    "windowSince": "{date} lähtien"
   },
   "relay": {
     "title": "Serverless-välityspalvelimet",

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { isRuntimeProviderRetirementError } from "@/shared/constants/providerRetirement";
 import { isCommonChatGptWebRetirementError } from "@/shared/constants/chatgptWebRetirement";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
-import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
+import { CORS_HEADERS, credentialRejectionHeaders, handleCorsOptions } from "@/shared/utils/cors";
 import {
   getExclusiveConnectionLeaseStatus,
   releaseExclusiveConnectionLease,
@@ -40,14 +40,23 @@ const actionSchema = z.discriminatedUnion("action", [
   }),
 ]);
 
-const json = (status: number, body: unknown) =>
+const json = (status: number, body: unknown, corsHeaders: Record<string, string> = CORS_HEADERS) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-function error(status: number, code: string, message: string): Response {
-  return json(status, buildErrorBody(status, message, null, { type: "lease_error", code }));
+function error(
+  status: number,
+  code: string,
+  message: string,
+  corsHeaders?: Record<string, string>
+): Response {
+  return json(
+    status,
+    buildErrorBody(status, message, null, { type: "lease_error", code }),
+    corsHeaders
+  );
 }
 
 const lifecycle = (lease: Record<string, unknown>) => {
@@ -60,7 +69,14 @@ export const OPTIONS = async (): Promise<Response> => handleCorsOptions();
 export async function POST(request: Request): Promise<Response> {
   const apiKey = extractApiKey(request);
   if (!apiKey) return error(401, "LEASE_AUTHENTICATION_REQUIRED", "Authentication required");
-  if (!(await isValidApiKey(apiKey))) return error(401, "LEASE_API_KEY_INVALID", "Invalid API key");
+  if (!(await isValidApiKey(apiKey))) {
+    return error(
+      401,
+      "LEASE_API_KEY_INVALID",
+      "Invalid API key",
+      credentialRejectionHeaders(request)
+    );
+  }
   const contentType = request.headers.get("content-type")?.toLowerCase().split(";", 1)[0].trim();
   if (contentType !== "application/json") {
     return error(415, "LEASE_CONTENT_TYPE_REQUIRED", "Content-Type must be application/json");

@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "ขีดจำกัดการทำงานพร้อมกันต่อโมเดล",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "ไม่บังคับ: หนึ่ง model=cap ต่อบรรทัด จับคู่กับ ID โมเดลอัปสตรีมที่ตรงกันทุกตัวอักษร คำขอส่วนเกินจะเข้าคิวในเครื่อง ปล่อยว่างหมายถึงไม่จำกัดต่อโมเดล",
-    "rateLimitOverridesModelConcurrencyInvalid": "รายการการทำงานพร้อมกันต่อโมเดล \"{entry}\" ไม่ถูกต้อง — ใช้ model=cap โดย cap เป็นจำนวนเต็มตั้งแต่ 1 ถึง {max}"
+    "rateLimitOverridesModelConcurrencyInvalid": "รายการการทำงานพร้อมกันต่อโมเดล \"{entry}\" ไม่ถูกต้อง — ใช้ model=cap โดย cap เป็นจำนวนเต็มตั้งแต่ 1 ถึง {max}",
+    "usedInComboTooltip": "ใช้ใน {count} คอมโบ: {combos}",
+    "openComboTooltip": "เปิดคอมโบ — ใช้โดย {combo}"
   },
   "settings": {
     "title": "การตั้งค่า",
@@ -8938,7 +8940,9 @@
         "financial": "การเงิน",
         "brazilian": "บราซิล",
         "usa": "สหรัฐฯ",
-        "full": "ทั้งหมด"
+        "full": "ทั้งหมด",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (แอฟริกาใต้)"
       },
       "builtinTypes": "ประเภทในตัว",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "ที่อยู่ IPv4",
         "ipv6_address": "ที่อยู่ IPv6",
         "aws_key": "คีย์การเข้าถึง AWS",
-        "api_key_generic": "คีย์ API และโทเค็น"
+        "api_key_generic": "คีย์ API และโทเค็น",
+        "iban": "หมายเลขบัญชีธนาคาร IBAN",
+        "eu_vat": "ตัวเลข EU VAT",
+        "es_dni_nie": "ภาษาสเปน DNI / NIE",
+        "it_codice_fiscale": "รหัส Fiscale ของอิตาลี",
+        "pl_pesel": "โปแลนด์ PESEL",
+        "nl_bsn": "ภาษาดัตช์ BSN",
+        "de_steuer_id": "เยอรมัน Steuer-ID",
+        "se_personnummer": "บุคคลชาวสวีเดน",
+        "za_id": "หมายเลข ID ของแอฟริกาใต้",
+        "za_phone": "หมายเลขโทรศัพท์ของแอฟริกาใต้",
+        "za_vat": "หมายเลข VAT ของแอฟริกาใต้",
+        "za_tax_ref": "การอ้างอิงภาษีของแอฟริกาใต้"
       },
       "customPatterns": "รูปแบบที่กำหนดเอง",
       "customPatternsDesc": "ส่วนที่ตรงกันจะถูกแทนที่ด้วย [CUSTOM_REDACTED] ได้สูงสุด {max} รูปแบบ รูปแบบที่เสี่ยงต่อการย้อนรอยแบบหายนะจะถูกปฏิเสธ",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth ยังไม่ได้รับการกำหนดค่า ลงทะเบียนแอปพลิเคชัน OAuth ที่ {applicationsUrl} โดยใช้ URI การเปลี่ยนเส้นทาง {redirectUri} และขอบเขต \"{scopes}\" จากนั้นตั้งค่า {clientIdEnv} (และอาจจะ {clientSecretEnv}) และเริ่มต้นใหม่อีกครั้ง.",
     "gitlabDuoSetupDescription": "หลังจากที่แอปพลิเคชันลงทะเบียนและตั้งค่า env vars บนอินสแตนซ์ OmniRoute นี้แล้ว ให้คลิก Continue เพื่อเริ่มการเข้าสู่ระบบ OAuth.",
     "continue": "ดำเนินการต่อ",
+    "copilotPolicyTitle": "ผู้ให้บริการทดลอง: สถานะนโยบายไม่ชัดเจน",
+    "copilotPolicyLine1": "OmniRoute เชื่อมต่อผ่าน api.githubcopilot.com ซึ่ง GitHub ไม่ได้เผยแพร่เป็นการอนุมานของบุคคลที่สามทั่วไป API การผสานรวมนี้เป็นการทดลองและอาจเปลี่ยนแปลงได้โดยไม่ต้องแจ้งให้ทราบ",
+    "copilotPolicyLine2": "เฉพาะบัญชี GitHub ของคุณเองเท่านั้นที่สามารถเชื่อมต่อได้ อย่าเปิดเผยข้อมูลประจำตัว บัญชีรวม หรือพยายามเกินขีดจำกัดแผนของคุณ",
+    "copilotPolicyLine3": "ผู้ใช้แผนฟรีและแผนนักศึกษาจะได้รับการเลือกรุ่นอัตโนมัติเท่านั้น ข้อกำหนดแผน Copilot ของคุณและขีดจำกัดการใช้งานใดๆ ยังคงเป็นความรับผิดชอบของคุณ",
+    "copilotPolicyAcknowledge": "เข้าใจแล้ว เชื่อมต่อเลย",
     "tabPasteSetupToken": "โทเค็นการตั้งค่า",
     "claudeSetupTokenDescription": "เรียกใช้ `claude setup-token` ในเทอร์มินัลแล้ววางโทเค็นที่แสดงออกมา โทเค็นนี้ใช้ได้หนึ่งปีและไม่มีโทเค็นรีเฟรช OmniRoute จะส่งคำขอทดสอบหนึ่งรายการไปยัง Anthropic ก่อนบันทึก",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "สถิติผู้ให้บริการ",
     "description": "ทราฟฟิก เวลาแฝง และอัตราความสำเร็จแยกตามผู้ให้บริการและโมเดล",
     "combo": "แบบรวม",
-    "toggleModels": "แสดงโมเดลสำหรับ {provider}"
+    "toggleModels": "แสดงโมเดลสำหรับ {provider}",
+    "windowSince": "ตั้งแต่ {date}"
   },
   "relay": {
     "title": "พร็อกซี Serverless Relay",

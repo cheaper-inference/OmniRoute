@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} കോംബോകളിൽ ഉപയോഗിക്കുന്നു: {combos}",
+    "openComboTooltip": "കോംബോകൾ തുറക്കുക — {combo} ഉപയോഗിക്കുന്നു"
   },
   "settings": {
     "title": "ക്രമീകരണങ്ങൾ",
@@ -9015,7 +9017,9 @@
         "financial": "സാമ്പത്തികം",
         "brazilian": "ബ്രസീലിയൻ",
         "usa": "യുഎസ്എ",
-        "full": "പൂർണ്ണം"
+        "full": "പൂർണ്ണം",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (ദക്ഷിണാഫ്രിക്ക)"
       },
       "builtinTypes": "ബിൽറ്റ്-ഇൻ തരങ്ങൾ",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "IPv4 വിലാസങ്ങൾ",
         "ipv6_address": "IPv6 വിലാസങ്ങൾ",
         "aws_key": "AWS ആക്‌സസ് കീകൾ",
-        "api_key_generic": "API കീകളും ടോക്കണുകളും"
+        "api_key_generic": "API കീകളും ടോക്കണുകളും",
+        "iban": "IBAN ബാങ്ക് അക്കൗണ്ട് നമ്പറുകൾ",
+        "eu_vat": "EU VAT നമ്പറുകൾ",
+        "es_dni_nie": "സ്പാനിഷ് DNI / NIE",
+        "it_codice_fiscale": "ഇറ്റാലിയൻ കോഡിസ് ഫിസ്കെയിൽ",
+        "pl_pesel": "പോളിഷ് PESEL",
+        "nl_bsn": "ഡച്ച് BSN",
+        "de_steuer_id": "ജർമ്മൻ സ്റ്റ്യൂവർ-ഐഡി",
+        "se_personnummer": "സ്വീഡിഷ് വ്യക്തി",
+        "za_id": "ദക്ഷിണാഫ്രിക്കൻ ID നമ്പറുകൾ",
+        "za_phone": "ദക്ഷിണാഫ്രിക്കൻ ഫോൺ നമ്പറുകൾ",
+        "za_vat": "ദക്ഷിണാഫ്രിക്കൻ VAT നമ്പറുകൾ",
+        "za_tax_ref": "ദക്ഷിണാഫ്രിക്കൻ നികുതി പരാമർശങ്ങൾ"
       },
       "customPatterns": "ഇഷ്ടാനുസൃത പാറ്റേണുകൾ",
       "customPatternsDesc": "പൊരുത്തങ്ങൾ [CUSTOM_REDACTED] ആയി മാറ്റിസ്ഥാപിക്കുന്നു. പരമാവധി {max} പാറ്റേണുകൾ. വിനാശകരമായ ബാക്ക്‌ട്രാക്കിംഗ് സാധ്യതയുള്ള പാറ്റേണുകൾ നിരസിക്കപ്പെടും.",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth കോൺഫിഗർ ചെയ്തിട്ടില്ല. റീഡയറക്ട് URI {redirectUri}, \"{scopes}\" സ്കോപ്പുകൾ എന്നിവ ഉപയോഗിച്ച് {applicationsUrl}-ൽ ഒരു OAuth ആപ്ലിക്കേഷൻ രജിസ്റ്റർ ചെയ്യുക, തുടർന്ന് {clientIdEnv} (ആവശ്യമെങ്കിൽ {clientSecretEnv}-ഉം) സജ്ജീകരിച്ച് പുനരാരംഭിക്കുക.",
     "gitlabDuoSetupDescription": "ആപ്ലിക്കേഷൻ രജിസ്റ്റർ ചെയ്ത് ഈ OmniRoute ഇൻസ്റ്റൻസിൽ പരിസ്ഥിതി വേരിയബിളുകൾ സജ്ജീകരിച്ച ശേഷം, OAuth ലോഗിൻ ആരംഭിക്കാൻ തുടരുക എന്നതിൽ ക്ലിക്ക് ചെയ്യുക.",
     "continue": "തുടരുക",
+    "copilotPolicyTitle": "പരീക്ഷണാത്മക ദാതാവ്: പോളിസി നില അവ്യക്തമാണ്",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com വഴി ബന്ധിപ്പിക്കുന്നു, ഇത് GitHub ഒരു പൊതു മൂന്നാം കക്ഷി അനുമാനമായി പ്രസിദ്ധീകരിച്ചിട്ടില്ല API. ഈ സംയോജനം പരീക്ഷണാത്മകമാണ് കൂടാതെ അറിയിപ്പ് കൂടാതെ മാറിയേക്കാം.",
+    "copilotPolicyLine2": "നിങ്ങളുടെ സ്വന്തം GitHub അക്കൗണ്ട് മാത്രമേ കണക്റ്റ് ചെയ്തിരിക്കൂ. ഒരിക്കലും ക്രെഡൻഷ്യലുകൾ പങ്കിടരുത്, അക്കൗണ്ടുകൾ ശേഖരിക്കരുത്, അല്ലെങ്കിൽ നിങ്ങളുടെ പ്ലാൻ പരിധികൾ മറികടക്കാൻ ശ്രമിക്കരുത്.",
+    "copilotPolicyLine3": "സൗജന്യ, സ്റ്റുഡൻ്റ് പ്ലാൻ ഉപയോക്താക്കൾക്ക് ഓട്ടോമാറ്റിക് മോഡൽ തിരഞ്ഞെടുക്കൽ മാത്രമേ ലഭിക്കൂ. നിങ്ങളുടെ Copilot പ്ലാൻ നിബന്ധനകളും ഏതെങ്കിലും ഉപയോഗ പരിധികളും നിങ്ങളുടെ ഉത്തരവാദിത്തമായി തുടരും.",
+    "copilotPolicyAcknowledge": "ഞാൻ മനസ്സിലാക്കുന്നു, ബന്ധിപ്പിക്കുക",
     "tabPasteSetupToken": "സജ്ജീകരണ ടോക്കൺ",
     "claudeSetupTokenDescription": "ടെർമിനലിൽ `claude setup-token` പ്രവർത്തിപ്പിച്ച് അത് പ്രിന്റ് ചെയ്യുന്ന ടോക്കൺ ഒട്ടിക്കുക. ഇത് ഒരു വർഷത്തേക്ക് സാധുവാണ്, ഇതിന് റിഫ്രഷ് ടോക്കൺ ഇല്ല. സംരക്ഷിക്കുന്നതിന് മുമ്പ് OmniRoute Anthropic-ലേക്ക് ഒരു ടെസ്റ്റ് അഭ്യർത്ഥന അയയ്ക്കുന്നു.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "പ്രൊവൈഡർ സ്ഥിതിവിവരക്കണക്കുകൾ",
     "description": "ഓരോ പ്രൊവൈഡറിലെയും ഓരോ മോഡലിലെയും ട്രാഫിക്, ലേറ്റൻസി, വിജയനിരക്കുകൾ",
     "combo": "സംയോജനം",
-    "toggleModels": "{provider}-നുള്ള മോഡലുകൾ കാണിക്കുക"
+    "toggleModels": "{provider}-നുള്ള മോഡലുകൾ കാണിക്കുക",
+    "windowSince": "{date} മുതൽ"
   },
   "relay": {
     "title": "സർവർലെസ് റിലേ പ്രോക്സികൾ",

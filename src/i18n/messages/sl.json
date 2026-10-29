@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Uporabljeno v kombinacijah ({count}): {combos}",
+    "openComboTooltip": "Odpri Kombinacije — uporablja {combo}"
   },
   "settings": {
     "title": "Nastavitve",
@@ -8938,7 +8940,9 @@
         "financial": "Finančna",
         "brazilian": "Brazilska",
         "usa": "ZDA",
-        "full": "Popolna"
+        "full": "Popolna",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Južna Afrika)"
       },
       "builtinTypes": "Vgrajene vrste",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Naslovi IPv4",
         "ipv6_address": "Naslovi IPv6",
         "aws_key": "Dostopni ključi AWS",
-        "api_key_generic": "Ključi API in žetoni"
+        "api_key_generic": "Ključi API in žetoni",
+        "iban": "številke bančnih računov IBAN",
+        "eu_vat": "EU VAT številke",
+        "es_dni_nie": "Španščina DNI / NIE",
+        "it_codice_fiscale": "italijanski Codice Fiscale",
+        "pl_pesel": "poljski PESEL",
+        "nl_bsn": "nizozemski BSN",
+        "de_steuer_id": "nemški Steuer-ID",
+        "se_personnummer": "Švedska personnummer",
+        "za_id": "Južnoafriške številke ID",
+        "za_phone": "Južnoafriške telefonske številke",
+        "za_vat": "Južnoafriške številke VAT",
+        "za_tax_ref": "Južnoafriške davčne reference"
       },
       "customPatterns": "Vzorci po meri",
       "customPatternsDesc": "Ujemanja se zamenjajo z [CUSTOM_REDACTED]. Največ {max} vzorcev. Vzorci s tveganjem katastrofalnega vračanja se zavrnejo.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "OAuth za GitLab Duo ni konfiguriran. Registrirajte aplikacijo OAuth na naslovu {applicationsUrl} z URI-jem za preusmeritev {redirectUri} in obsegi »{scopes}«, nato nastavite {clientIdEnv} (in po želji {clientSecretEnv}) ter znova zaženite.",
     "gitlabDuoSetupDescription": "Ko je aplikacija registrirana in so okoljske spremenljivke nastavljene v tej instanci OmniRoute, kliknite Nadaljuj, da začnete prijavo OAuth.",
     "continue": "Nadaljuj",
+    "copilotPolicyTitle": "Eksperimentalni ponudnik: stanje pravilnika je dvoumno",
+    "copilotPolicyLine1": "OmniRoute se poveže prek api.githubcopilot.com, ki ga GitHub ni objavil kot splošni sklep tretje osebe API. Ta integracija je poskusna in se lahko spremeni brez predhodnega obvestila.",
+    "copilotPolicyLine2": "Povezan je lahko le vaš lasten račun GitHub. Nikoli ne delite poverilnic, združite računov ali poskušajte preseči omejitev vašega načrta.",
+    "copilotPolicyLine3": "Uporabniki brezplačnega in študentskega paketa prejmejo samo samodejno izbiro modela. Pogoji vašega načrta Copilot in morebitne omejitve uporabe ostajajo vaša odgovornost.",
+    "copilotPolicyAcknowledge": "Razumem, poveži",
     "tabPasteSetupToken": "Žeton za nastavitev",
     "claudeSetupTokenDescription": "V terminalu zaženite `claude setup-token` in prilepite žeton, ki ga izpiše. Velja eno leto in nima žetona za osvežitev. OmniRoute pred shranjevanjem pošlje eno preizkusno zahtevo na Anthropic.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Statistika ponudnikov",
     "description": "Promet, zakasnitev in stopnje uspešnosti po ponudnikih in modelih",
     "combo": "Kombinacija",
-    "toggleModels": "Prikaži modele za {provider}"
+    "toggleModels": "Prikaži modele za {provider}",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Brezstrežniški relejni posredniški strežniki",

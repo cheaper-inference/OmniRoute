@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "各模型並行上限",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "選填：每行一個 model=cap，與上游模型 ID 完全比對。超出的請求會在本機排隊；留空表示不設各模型上限。",
-    "rateLimitOverridesModelConcurrencyInvalid": "無效的各模型並行項目「{entry}」——請使用 model=cap，其中 cap 為 1 到 {max} 的整數。"
+    "rateLimitOverridesModelConcurrencyInvalid": "無效的各模型並行項目「{entry}」——請使用 model=cap，其中 cap 為 1 到 {max} 的整數。",
+    "usedInComboTooltip": "已在 {count} 個組合中使用：{combos}",
+    "openComboTooltip": "開啟組合 — 由 {combo} 使用"
   },
   "settings": {
     "title": "設定",
@@ -8938,7 +8940,9 @@
         "financial": "金融",
         "brazilian": "巴西",
         "usa": "美國",
-        "full": "完整"
+        "full": "完整",
+        "gdpr": "GDPR（歐盟）",
+        "popia": "POPIA（南非）"
       },
       "builtinTypes": "內建類型",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 位址",
         "ipv6_address": "IPv6 位址",
         "aws_key": "AWS 存取金鑰",
-        "api_key_generic": "API 金鑰與權杖"
+        "api_key_generic": "API 金鑰與權杖",
+        "iban": "IBAN 銀行帳號",
+        "eu_vat": "歐盟加值稅號",
+        "es_dni_nie": "西班牙 DNI / NIE",
+        "it_codice_fiscale": "義大利 Codice Fiscale",
+        "pl_pesel": "波蘭 PESEL",
+        "nl_bsn": "荷蘭 BSN",
+        "de_steuer_id": "德國 Steuer-ID",
+        "se_personnummer": "瑞典 personnummer",
+        "za_id": "南非身分證號碼",
+        "za_phone": "南非電話號碼",
+        "za_vat": "南非加值稅號",
+        "za_tax_ref": "南非稅務參考號"
       },
       "customPatterns": "自訂模式",
       "customPatternsDesc": "符合項目會被替換為 [CUSTOM_REDACTED]。最多 {max} 個模式。具有災難性回溯風險的模式會被拒絕。",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth 尚未配置。在 {applicationsUrl} 註冊一個 OAuth 應用程式，使用重定向 URI {redirectUri} 和範圍 \"{scopes}\"，然後設置 {clientIdEnv}（可選地設置 {clientSecretEnv}）並重新啟動。",
     "gitlabDuoSetupDescription": "在應用程式註冊並在此 OmniRoute 實例上設置環境變數後，點擊繼續以開始 OAuth 登錄。",
     "continue": "繼續",
+    "copilotPolicyTitle": "實驗提供者：政策狀態不明確",
+    "copilotPolicyLine1": "OmniRoute透過 api.githubcopilot.com 連接， GitHub尚未將其發佈為通用第三方推理API。此整合是實驗性的，可能會發生更改，恕不另行通知。",
+    "copilotPolicyLine2": "只能連結您自己的GitHub帳戶。切勿共用憑證、池帳戶或嘗試超出您的方案限制。",
+    "copilotPolicyLine3": "免費和學生計劃用戶只能收到自動模型選擇。您的Copilot計畫條款和任何使用限制仍由您負責。",
+    "copilotPolicyAcknowledge": "我明白了，連接",
     "tabPasteSetupToken": "設定權杖",
     "claudeSetupTokenDescription": "在終端機中執行 `claude setup-token`，然後貼上它輸出的權杖。此權杖有效期為一年，沒有重新整理權杖。OmniRoute 會在儲存前向 Anthropic 發送一次測試請求。",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "提供者統計資料",
     "description": "各提供者與各模型的流量、延遲及成功率",
     "combo": "組合",
-    "toggleModels": "顯示 {provider} 的模型"
+    "toggleModels": "顯示 {provider} 的模型",
+    "windowSince": "自 {date}"
   },
   "relay": {
     "title": "無伺服器 Relay 代理",

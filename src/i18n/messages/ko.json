@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "모델별 동시 실행 상한",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "선택 사항: 한 줄에 model=cap 하나를 입력합니다. 업스트림 모델 ID와 정확히 일치해야 합니다. 초과 요청은 로컬에서 대기하며, 비워 두면 모델별 상한이 없습니다.",
-    "rateLimitOverridesModelConcurrencyInvalid": "모델별 동시 실행 항목 \"{entry}\"이(가) 올바르지 않습니다 — model=cap 형식을 사용하고 cap은 1에서 {max} 사이의 정수여야 합니다."
+    "rateLimitOverridesModelConcurrencyInvalid": "모델별 동시 실행 항목 \"{entry}\"이(가) 올바르지 않습니다 — model=cap 형식을 사용하고 cap은 1에서 {max} 사이의 정수여야 합니다.",
+    "usedInComboTooltip": "{count}개 콤보에서 사용 중: {combos}",
+    "openComboTooltip": "콤보 열기 — {combo}에서 사용 중"
   },
   "settings": {
     "title": "설정",
@@ -8938,7 +8940,9 @@
         "financial": "금융",
         "brazilian": "브라질",
         "usa": "미국",
-        "full": "전체"
+        "full": "전체",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (남아프리카공화국)"
       },
       "builtinTypes": "기본 제공 유형",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 주소",
         "ipv6_address": "IPv6 주소",
         "aws_key": "AWS 액세스 키",
-        "api_key_generic": "API 키 및 토큰"
+        "api_key_generic": "API 키 및 토큰",
+        "iban": "IBAN 은행 계좌 번호",
+        "eu_vat": "EU VAT 번호",
+        "es_dni_nie": "스페인어 DNI / NIE",
+        "it_codice_fiscale": "이탈리아 코디스 피스케일(Codice Fiscale)",
+        "pl_pesel": "폴란드어 PESEL",
+        "nl_bsn": "네덜란드 BSN",
+        "de_steuer_id": "독일 Steuer-ID",
+        "se_personnummer": "스웨덴 사람번호",
+        "za_id": "남아프리카 ID 번호",
+        "za_phone": "남아프리카 전화번호",
+        "za_vat": "남아프리카 VAT 번호",
+        "za_tax_ref": "남아프리카 공화국 세금 참조"
       },
       "customPatterns": "사용자 지정 패턴",
       "customPatternsDesc": "일치 항목은 [CUSTOM_REDACTED](으)로 바뀝니다. 최대 {max}개 패턴. 치명적인 백트래킹 위험이 있는 패턴은 거부됩니다.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth가 구성되지 않았습니다. {applicationsUrl}에서 리디렉션 URI {redirectUri} 및 범위 \"{scopes}\"로 OAuth 애플리케이션을 등록한 다음 {clientIdEnv} (선택적으로 {clientSecretEnv})를 설정하고 재시작하세요.",
     "gitlabDuoSetupDescription": "애플리케이션이 등록되고 이 OmniRoute 인스턴스에 환경 변수가 설정된 후, 계속 진행을 클릭하여 OAuth 로그인을 시작하세요.",
     "continue": "계속하다",
+    "copilotPolicyTitle": "실험 제공업체: 정책 상태가 모호합니다.",
+    "copilotPolicyLine1": "OmniRoute GitHub 일반적인 제3자 추론 API 로 게시하지 않은 api.githubcopilot.com을 통해 연결됩니다. 이 통합은 실험적이며 예고 없이 변경될 수 있습니다.",
+    "copilotPolicyLine2": "귀하의 GitHub 계정만 연결될 수 있습니다. 자격 증명, 풀 계정을 공유하거나 계획 한도를 초과하려고 시도하지 마십시오.",
+    "copilotPolicyLine3": "무료 및 학생 요금제 사용자에게는 자동 모델 선택만 제공됩니다. 귀하의 Copilot 플랜 약관 및 사용 제한은 귀하의 책임입니다.",
+    "copilotPolicyAcknowledge": "이해합니다. 연결하세요.",
     "tabPasteSetupToken": "설정 토큰",
     "claudeSetupTokenDescription": "터미널에서 `claude setup-token`을 실행하고 출력된 토큰을 붙여넣으세요. 이 토큰은 1년간 유효하며 새로 고침 토큰이 없습니다. OmniRoute는 저장하기 전에 Anthropic에 테스트 요청을 한 번 보냅니다.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "제공업체 통계",
     "description": "제공업체별 및 모델별 트래픽, 지연 시간, 성공률",
     "combo": "조합",
-    "toggleModels": "{provider}의 모델 표시"
+    "toggleModels": "{provider}의 모델 표시",
+    "windowSince": "{date} 이후"
   },
   "relay": {
     "title": "서버리스 릴레이 프록시",

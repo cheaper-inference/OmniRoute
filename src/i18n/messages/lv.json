@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Izmantots {count} kombo: {combos}",
+    "openComboTooltip": "Atvērt Kombo — izmanto {combo}"
   },
   "settings": {
     "title": "Iestatījumi",
@@ -8938,7 +8940,9 @@
         "financial": "Finanšu",
         "brazilian": "Brazīlijas",
         "usa": "ASV",
-        "full": "Pilnā"
+        "full": "Pilnā",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Dienvidāfrika)"
       },
       "builtinTypes": "Iebūvētie veidi",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 adreses",
         "ipv6_address": "IPv6 adreses",
         "aws_key": "AWS piekļuves atslēgas",
-        "api_key_generic": "API atslēgas un žetoni"
+        "api_key_generic": "API atslēgas un žetoni",
+        "iban": "IBAN bankas kontu numuri",
+        "eu_vat": "EU VAT cipari",
+        "es_dni_nie": "spāņu DNI / NIE",
+        "it_codice_fiscale": "Itāļu Codice Fiscale",
+        "pl_pesel": "poļu PESEL",
+        "nl_bsn": "Holandiešu BSN",
+        "de_steuer_id": "Vācu Steuer-ID",
+        "se_personnummer": "Zviedru personnummer",
+        "za_id": "Dienvidāfrikas ID skaitļi",
+        "za_phone": "Dienvidāfrikas tālruņu numuri",
+        "za_vat": "Dienvidāfrikas VAT skaitļi",
+        "za_tax_ref": "Dienvidāfrikas nodokļu atsauces"
       },
       "customPatterns": "Pielāgoti šabloni",
       "customPatternsDesc": "Atbilstības tiek aizstātas ar [CUSTOM_REDACTED]. Līdz {max} šabloniem. Šabloni ar katastrofālas atkāpšanās risku tiek noraidīti.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth nav konfigurēts. Reģistrējiet OAuth lietotni {applicationsUrl} ar atsaukuma URI {redirectUri} un tvērumiem \"{scopes}\", tad iestatiet {clientIdEnv} (un pēc izvēles {clientSecretEnv}) un pārstartējiet.",
     "gitlabDuoSetupDescription": "Kad lietotne ir reģistrēta un vides mainīgie ir iestatīti šajā OmniRoute instancē, noklikšķiniet uz Turpināt, lai sāktu OAuth pieteikšanos.",
     "continue": "Turpināt",
+    "copilotPolicyTitle": "Eksperimentālais nodrošinātājs: politikas statuss ir neskaidrs",
+    "copilotPolicyLine1": "OmniRoute savienojas, izmantojot vietni api.githubcopilot.com, ko GitHub nav publicējis kā vispārīgu trešās puses secinājumu API. Šī integrācija ir eksperimentāla un var mainīties bez brīdinājuma.",
+    "copilotPolicyLine2": "Var būt saistīts tikai jūsu GitHub konts. Nekad nekoplietojiet akreditācijas datus, neapkopojiet kontus un nemēģiniet pārsniegt plāna ierobežojumus.",
+    "copilotPolicyLine3": "Bezmaksas un Studentu plāna lietotāji saņem tikai automātisku modeļa izvēli. Jūsu Copilot plāna noteikumi un lietošanas ierobežojumi joprojām ir jūsu atbildība.",
+    "copilotPolicyAcknowledge": "Saprotu, pieslēdzies",
     "tabPasteSetupToken": "Iestatīšanas marķieris",
     "claudeSetupTokenDescription": "Terminālī palaidiet `claude setup-token` un ielīmējiet izdrukāto marķieri. Tas ir derīgs vienu gadu, un tam nav atsvaidzināšanas marķiera. Pirms saglabāšanas OmniRoute nosūta vienu testa pieprasījumu uz Anthropic.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Pakalpojumu sniedzēju statistika",
     "description": "Katra pakalpojumu sniedzēja un modeļa datplūsma, latentums un sekmīgo pieprasījumu īpatsvars",
     "combo": "Kombinēti",
-    "toggleModels": "Rādīt pakalpojumu sniedzēja {provider} modeļus"
+    "toggleModels": "Rādīt pakalpojumu sniedzēja {provider} modeļus",
+    "windowSince": "Kopš {date}"
   },
   "relay": {
     "title": "Bezserveru releju starpniekserveri",

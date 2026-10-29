@@ -12,6 +12,7 @@
 
 import { resolveProxyForRequest } from "../utils/proxyFetch.ts";
 import { Buffer } from "node:buffer";
+import { newestChromeProfile } from "../utils/browserProfiles.ts";
 import {
   createWreqTransportClient,
   WreqRuntimeUnavailableError,
@@ -64,8 +65,9 @@ export interface TlsFetchOptions {
 export interface TlsClientConfig {
   /** Human-readable provider name for logs and error messages. */
   providerName: string;
-  /** Browser profile identifier, for example `chrome_146` or `firefox_148`. */
-  tlsProfile: string;
+  /** Browser profile identifier, for example `chrome_146`, or a function that
+   * resolves one on first use so a missing library fails the request, not import. */
+  tlsProfile: string | (() => string);
   /** Operating system paired with the browser profile. */
   emulationOs?: EmulationOs;
   /** Default upstream domain used by proxy resolution. */
@@ -556,41 +558,46 @@ export interface TlsRequestClient {
 /** Create a provider facade over the shared ephemeral-cookie wreq transport pool. */
 export function createGetClient(config: {
   providerName: string;
-  tlsProfile?: string;
+  tlsProfile?: string | (() => string);
   emulationOs?: EmulationOs;
   wreqRuntimeLoader?: WreqRuntimeLoader;
 }): () => Promise<TlsRequestClient> {
-  const browser = config.tlsProfile ?? "chrome_146";
   const os = config.emulationOs ?? "macos";
-  const wreqClient = createWreqTransportClient({
-    browser,
-    os,
-    runtimeLoader: config.wreqRuntimeLoader,
-  });
-
-  const client: TlsRequestClient = {
-    request(url, options) {
-      const wreqRequest = wreqClient.request(url, options);
-      const adapted = wreqRequest.catch((error: unknown) => {
-        if (!(error instanceof WreqRuntimeUnavailableError)) throw error;
-        throw new TlsClientUnavailableError(
-          `wreq-js 3.2.x is not installed or unsupported on this platform — ` +
-            `cannot start browser transport for ${config.providerName}`
-        );
-      }) as TlsRequestPromise;
-      Object.defineProperties(adapted, {
-        invalidateTransport: {
-          value: () => wreqRequest.invalidateTransport(),
-        },
-        releaseTransport: {
-          value: () => wreqRequest.releaseTransport(),
-        },
-      });
-      return adapted;
-    },
+  let built: TlsRequestClient | null = null;
+  const build = (): TlsRequestClient => {
+    if (built) return built;
+    const profile = config.tlsProfile;
+    const browser = (typeof profile === "function" ? profile() : profile) ?? newestChromeProfile();
+    const wreqClient = createWreqTransportClient({
+      browser,
+      os,
+      runtimeLoader: config.wreqRuntimeLoader,
+    });
+    built = {
+      request(url, options) {
+        const wreqRequest = wreqClient.request(url, options);
+        const adapted = wreqRequest.catch((error: unknown) => {
+          if (!(error instanceof WreqRuntimeUnavailableError)) throw error;
+          throw new TlsClientUnavailableError(
+            `wreq-js 3.2.x is not installed or unsupported on this platform — ` +
+              `cannot start browser transport for ${config.providerName}`
+          );
+        }) as TlsRequestPromise;
+        Object.defineProperties(adapted, {
+          invalidateTransport: {
+            value: () => wreqRequest.invalidateTransport(),
+          },
+          releaseTransport: {
+            value: () => wreqRequest.releaseTransport(),
+          },
+        });
+        return adapted;
+      },
+    };
+    return built;
   };
 
-  return async () => client;
+  return async () => build();
 }
 
 /** Resolve a per-call/provider/dashboard proxy for a browser-transport request. */

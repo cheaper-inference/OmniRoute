@@ -211,7 +211,9 @@ export function hasUsefulStreamContent(text: string, options: UsefulContentOptio
     try {
       if (hasUsefulJsonPayload(JSON.parse(data), options.contentProbe === true)) return true;
     } catch {
-      if (data.length > 0) return true;
+      // A non-JSON `data:` line is not useful stream content: skip it and
+      // inspect the next line instead of failing the whole text.
+      continue;
     }
   }
 

@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} kombóban használva: {combos}",
+    "openComboTooltip": "Kombók megnyitása — használja: {combo}"
   },
   "settings": {
     "title": "Beállítások elemre",
@@ -8938,7 +8940,9 @@
         "financial": "Pénzügyi",
         "brazilian": "Brazil",
         "usa": "USA",
-        "full": "Teljes"
+        "full": "Teljes",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Dél-Afrika)"
       },
       "builtinTypes": "Beépített típusok",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4-címek",
         "ipv6_address": "IPv6-címek",
         "aws_key": "AWS hozzáférési kulcsok",
-        "api_key_generic": "API-kulcsok és tokenek"
+        "api_key_generic": "API-kulcsok és tokenek",
+        "iban": "IBAN bankszámlaszámok",
+        "eu_vat": "EU VAT számok",
+        "es_dni_nie": "spanyol DNI / NIE",
+        "it_codice_fiscale": "Olasz Codice Fiscale",
+        "pl_pesel": "lengyel PESEL",
+        "nl_bsn": "holland BSN",
+        "de_steuer_id": "Német Steuer-ID",
+        "se_personnummer": "svéd személyi szám",
+        "za_id": "Dél-afrikai ID számok",
+        "za_phone": "Dél-afrikai telefonszámok",
+        "za_vat": "Dél-afrikai VAT számok",
+        "za_tax_ref": "Dél-afrikai adóhivatkozások"
       },
       "customPatterns": "Egyéni minták",
       "customPatternsDesc": "A találatokat a rendszer [CUSTOM_REDACTED] értékre cseréli. Legfeljebb {max} minta. A katasztrofális visszalépés kockázatával járó mintákat elutasítja.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "A GitLab Duo OAuth nincs konfigurálva. Regisztráljon egy OAuth alkalmazást a {applicationsUrl} címen a {redirectUri} átirányítási URI-val és a \"{scopes}\" jogosultságokkal, majd állítsa be a {clientIdEnv} (és opcionálisan a {clientSecretEnv}) értékét, és indítsa újra.",
     "gitlabDuoSetupDescription": "Miután az alkalmazás regisztrálva lett és az env változók beállítva lettek ezen az OmniRoute példányon, kattintson a Tovább gombra az OAuth bejelentkezés megkezdéséhez.",
     "continue": "Folytatás",
+    "copilotPolicyTitle": "Kísérleti szolgáltató: az irányelv állapota nem egyértelmű",
+    "copilotPolicyLine1": "OmniRoute az api.githubcopilot.com webhelyen keresztül csatlakozik, amelyet GitHub nem tett közzé általános, harmadik féltől származó API következtetésként. Ez az integráció kísérleti jellegű, és értesítés nélkül változhat.",
+    "copilotPolicyLine2": "Csak a saját GitHub fiókja csatlakoztatható. Soha ne ossza meg hitelesítési adatait, ne gyűjtse össze a fiókokat, és ne próbálja meg túllépni a terv korlátait.",
+    "copilotPolicyLine3": "Az ingyenes és diákcsomag felhasználói csak automatikus modellválasztást kapnak. Copilot -csomag feltételei és a használati korlátozások továbbra is az Ön felelőssége.",
+    "copilotPolicyAcknowledge": "Értem, kapcsolódj",
     "tabPasteSetupToken": "Beállítási token",
     "claudeSetupTokenDescription": "Futtassa a `claude setup-token` parancsot egy terminálban, és illessze be a kiírt tokent. Egy évig érvényes, és nincs frissítési tokenje. Mentés előtt az OmniRoute egy tesztkérést küld az Anthropicnak.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Szolgáltatói statisztikák",
     "description": "Szolgáltatónkénti és modellenkénti forgalom, késleltetés és sikerességi arány",
     "combo": "Kombinált",
-    "toggleModels": "A(z) {provider} modelljeinek megjelenítése"
+    "toggleModels": "A(z) {provider} modelljeinek megjelenítése",
+    "windowSince": "{date} óta"
   },
   "relay": {
     "title": "Szerver nélküli közvetítő proxyk",

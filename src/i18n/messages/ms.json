@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Digunakan dalam {count} kombo: {combos}",
+    "openComboTooltip": "Buka Kombo — digunakan oleh {combo}"
   },
   "settings": {
     "title": "tetapan",
@@ -8938,7 +8940,9 @@
         "financial": "Kewangan",
         "brazilian": "Brazil",
         "usa": "AS",
-        "full": "Penuh"
+        "full": "Penuh",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Afrika Selatan)"
       },
       "builtinTypes": "Jenis terbina dalam",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Alamat IPv4",
         "ipv6_address": "Alamat IPv6",
         "aws_key": "Kunci akses AWS",
-        "api_key_generic": "Kunci API dan token"
+        "api_key_generic": "Kunci API dan token",
+        "iban": "nombor akaun bank IBAN",
+        "eu_vat": "nombor EU VAT",
+        "es_dni_nie": "DNI bahasa Sepanyol / NIE",
+        "it_codice_fiscale": "Fiskal Codice Itali",
+        "pl_pesel": "Poland PESEL",
+        "nl_bsn": "BSN Belanda",
+        "de_steuer_id": "Jerman Steuer-ID",
+        "se_personnummer": "nombor orang Sweden",
+        "za_id": "Nombor ID Afrika Selatan",
+        "za_phone": "Nombor telefon Afrika Selatan",
+        "za_vat": "Nombor VAT Afrika Selatan",
+        "za_tax_ref": "Rujukan cukai Afrika Selatan"
       },
       "customPatterns": "Corak tersuai",
       "customPatternsDesc": "Padanan digantikan dengan [CUSTOM_REDACTED]. Sehingga {max} corak. Corak yang berisiko penjejakan undur katastrofik akan ditolak.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth tidak dikonfigurasikan. Daftarkan aplikasi OAuth di {applicationsUrl} dengan URI pengalihan {redirectUri} dan skop \"{scopes}\", kemudian tetapkan {clientIdEnv} (dan secara pilihan {clientSecretEnv}) dan mulakan semula.",
     "gitlabDuoSetupDescription": "Setelah aplikasi didaftarkan dan pembolehubah env ditetapkan pada instance OmniRoute ini, klik Teruskan untuk memulakan log masuk OAuth.",
     "continue": "Teruskan",
+    "copilotPolicyTitle": "Penyedia percubaan: status dasar adalah samar-samar",
+    "copilotPolicyLine1": "OmniRoute menyambung melalui api.githubcopilot.com, yang GitHub belum diterbitkan sebagai inferens umum pihak ketiga API. Penyepaduan ini adalah percubaan dan mungkin berubah tanpa notis.",
+    "copilotPolicyLine2": "Hanya akaun GitHub anda sendiri boleh disambungkan. Jangan sekali-kali berkongsi bukti kelayakan, kumpulkan akaun atau cuba melebihi had pelan anda.",
+    "copilotPolicyLine3": "Pengguna pelan percuma dan Pelajar menerima pemilihan model automatik sahaja. Syarat pelan Copilot anda dan sebarang had penggunaan tetap menjadi tanggungjawab anda.",
+    "copilotPolicyAcknowledge": "Saya faham, sambung",
     "tabPasteSetupToken": "Token persediaan",
     "claudeSetupTokenDescription": "Jalankan `claude setup-token` dalam terminal dan tampal token yang dicetaknya. Token sah selama satu tahun dan tiada token muat semula. OmniRoute menghantar satu permintaan ujian kepada Anthropic sebelum menyimpannya.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Statistik penyedia",
     "description": "Trafik, kependaman dan kadar kejayaan mengikut penyedia dan model",
     "combo": "Gabungan",
-    "toggleModels": "Tunjukkan model untuk {provider}"
+    "toggleModels": "Tunjukkan model untuk {provider}",
+    "windowSince": "Sejak {date}"
   },
   "relay": {
     "title": "Proksi Geganti Tanpa Pelayan",

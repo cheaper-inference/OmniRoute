@@ -1,6 +1,7 @@
 // Pure Perplexity wire protocol: consts, types, SSE parsing, request/query building,
 // content extraction. Extracted verbatim from perplexity-web.ts. No host state/fetch/auth.
 import { randomUUID } from "crypto";
+import { firefoxUserAgent, newestFirefoxVersion } from "../../utils/browserProfiles.ts";
 
 export const PPLX_SSE_ENDPOINT = "https://www.perplexity.ai/rest/sse/perplexity_ask";
 // Perplexity's current request schema version (sent in params.version). Perplexity rejects
@@ -46,10 +47,11 @@ export const PPLX_SUPPORTED_BLOCK_USE_CASES = [
 // EOF symbol can truncate or hang the Firefox-TLS stream tailer before answer
 // chunks land — which surfaces as "Provider returned empty content".
 export const PPLX_STREAM_EOF_SYMBOL = "event: end_of_stream";
-// Firefox 151 — must match the `firefox_151` TLS profile used by perplexityTlsClient.
+// Must match the Firefox TLS profile perplexityTlsClient resolves from wreq-js.
 // A mismatched UA vs TLS fingerprint is itself a Cloudflare bot signal (issue #2459).
-export const PPLX_USER_AGENT =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:151.0) Gecko/20100101 Firefox/151.0";
+export function pplxUserAgent(): string {
+  return firefoxUserAgent("Macintosh; Intel Mac OS X 10.15", newestFirefoxVersion());
+}
 
 // mode / model_preference pairs — every entry posts mode:"copilot", like the live
 // www.perplexity.ai client does when a model is picked from the catalog.

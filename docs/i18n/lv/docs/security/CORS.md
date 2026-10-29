@@ -59,11 +59,11 @@ gadījumā** viena konkrēta ieviešanas fakta dēļ:
 
 Ko tas nozīmē katrai saskarnei, pat ar `CORS_ALLOW_ALL=true`:
 
-| Saskarne                                    | Autentifikācijas mehānisms   | CORS aizstājējzīmes ietekme                                                                                                                                                                                                                                   |
-| ------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Informācijas panelis / PĀRVALDĪBAS `/api/*` | Sīkdatņu sesija              | Izcelsme tiek atgriezta, taču **bez `Allow-Credentials`** pārlūkprogramma **bloķē** lasīšanu ar akreditācijas datiem. Ļaunprātīga starpizcelsmju vietne **nevar lasīt** jūsu autentificētās informācijas paneļa atbildes, un sesijas sīkdatne netiek atklāta. |
-| Klienta API `/v1/*`, `/v1beta/*`            | Bearer / `x-api-key` galvene | Jau ir atļaujoša **pēc būtības** (`relaxForTokenAuth`): pārlūkprogrammas nekad automātiski nepievieno `Authorization`/`x-api-key`, tāpēc uzbrucēja lapa nevar norādīt jūsu atslēgu. `CORS_ALLOW_ALL` to nepaplašina.                                          |
-| Publiski, tikai lasāmi (`/api/health`, …)   | Nav                          | Nav sensitīvi; aizstājējzīme ir nekaitīga.                                                                                                                                                                                                                    |
+| Saskarne                                    | Autentifikācijas mehānisms   | CORS aizstājējzīmes ietekme                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Informācijas panelis / PĀRVALDĪBAS `/api/*` | Sīkdatņu sesija              | Izcelsme tiek atgriezta, taču **bez `Allow-Credentials`** pārlūkprogramma **bloķē** lasīšanu ar akreditācijas datiem. Ļaunprātīga starpizcelsmju vietne **nevar lasīt** jūsu autentificētās informācijas paneļa atbildes, un sesijas sīkdatne netiek atklāta.                                                                                                            |
+| Klienta API `/v1/*`, `/v1beta/*`            | Bearer / `x-api-key` galvene | Jau ir atļaujoša **pēc būtības** (`relaxForTokenAuth`): pārlūkprogrammas nekad automātiski nepievieno `Authorization`/`x-api-key`, tāpēc uzbrucēja lapa nevar norādīt jūsu atslēgu. Izcelsme tiek atgriezta tikai tad, ja uzrādītā atslēga ir validēta; anonīmās atbildes (`REQUIRE_API_KEY=false`) saglabā atļauto izcelsmju sarakstu. `CORS_ALLOW_ALL` to nepaplašina. |
+| Publiski, tikai lasāmi (`/api/health`, …)   | Nav                          | Nav sensitīvi; aizstājējzīme ir nekaitīga.                                                                                                                                                                                                                                                                                                                               |
 
 Tādējādi `CORS_ALLOW_ALL=true` **atlikušais** apdraudējums aprobežojas ar: (a)
 starpizcelsmju **lasīšanu** bez akreditācijas datiem tādiem datiem, kuri jau nav autentificēti,
@@ -124,11 +124,52 @@ restartēšanas.
 - **Bearer / `x-api-key` (`/v1/*` secinājumu saskarne):** pārlūkprogrammas nekad nepievieno
   tās automātiski. CORS šeit nav nozīmīga barjera — barjera ir API atslēga —,
   tāpēc šī saskarne ir apzināti konfigurēta pielaidīgi, lai pārlūkprogrammu un
-  Electron klienti varētu lasīt atbildes, kurām tiem jau ir piekļuves tiesības.
+  Electron klienti varētu lasīt atbildes, kurām tiem jau ir piekļuves tiesības. Atvieglotā
+  izcelsmes atgriešana seko validētajai atslēgai, nevis tikai galvenes klātbūtnei: ja
+  `REQUIRE_API_KEY=false` apkalpo pieprasījumu anonīmi, tā veiksmīgā atbilde saglabā
+  atļauto izcelsmju sarakstu, kas pēc noklusējuma visu liedz. Autentifikācijas atteikumi
+  (401) paliek nolasāmi, lai klienti varētu parādīt atsauktu vai kļūdaini ievadītu atslēgu
+  (#5242): konveijera paša 401 saglabā izcelsmes atgriešanu, un maršruts, kas pats noraida
+  atslēgu pēc tam, kad konveijers pieprasījumu apkalpojis kā anonīmu (`/v1/models` un
+  `/v1beta/models`, ja ir konfigurēta pārvaldības autentifikācija, īpašniekam piesaistītie
+  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` un auto-combo kandidātu
+  maršruti), pievieno izcelsmes atgriešanu šim 401, izmantojot
+  `credentialRejectionHeaders()`. Izcelsmes atgriešanu nosaka tas, vai pieprasījumā ir
+  akreditācijas datu galvene (`Authorization`, `x-api-key`, `x-goog-api-key` vai sīkfails
+  `auth_token`), nevis tas, kuru no tām maršruts pārbaudīja, un tā nekad netiek apvienota
+  ar `Access-Control-Allow-Credentials`; pamatteksts ir fiksēta kļūdas aploksne.
+  Pārvaldības maršruti zem `/api/v1/`, ko aizsargā `requireManagementAuth()`
+  (`/api/v1/management/*`, `/api/v1/registered-keys`), nepievieno izcelsmes atgriešanu: ar
+  `REQUIRE_API_KEY=false` to 401/403 nav nolasāmi no citas izcelsmes.
 - **Sīkfailu sesija (informācijas panelis):** aizsargāta gan ar pēc noklusējuma slēgtu piekļuvi, **gan**
   ar `Access-Control-Allow-Credentials` neesamību koplietotajā ceļā. Neiekļaujiet
   pārvaldības/informācijas paneļa izcelsmes vietas nevienā pielaidīgā konfigurācijā; tām jāpaliek ar precīzi
   slēgtu piekļuvi.
+
+## WebSocket rokasspiedieni (`/v1/responses`, `/v1/ws`)
+
+Pārlūkprogrammas nepiemēro CORS WebSocket savienojumiem, tāpēc WebSocket transporti, kas
+atgriež secinājumu izvadi, paši pārbauda rokasspiediena `Origin`
+(`src/server/origin/wsOrigin.ts`): Responses WebSocket (`/v1/responses`) un, kad
+OmniRoute darbojas, izmantojot `npm start` / `npm run dev`, tilts `/v1/ws` un
+`/api/v1/ws`, kas straumē `/v1/chat/completions`, `/v1/messages` un `/v1/responses` kā
+kadrus. Tilts lūdz spriedumu no `/api/v1/ws?handshake=1` un atsakās veikt jaunināšanu
+(upgrade), ja vien šis maršruts nav izpildījis pārbaudi. Rokasspiediens tiek pieņemts,
+ja:
+
+- tam nav galvenes `Origin` (Codex CLI, SDK un citi klienti, kas nav pārlūkprogrammas);
+- `Origin` atļauj iepriekš aprakstītais atļauto izcelsmju saraksts
+  (`CORS_ALLOWED_ORIGINS`, iestatījums `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` ir viena no OmniRoute pašas publiskajām izcelsmēm (konfigurētais publiskais
+  bāzes URL, uzticama starpniekservera pārsūtītā izcelsme vai tiešs loopback/LAN
+  resursdators, kas norādīts kā IP literālis vai `localhost` — tie paši kandidāti, ko
+  izmanto informācijas paneļa izmaiņu pārbaude); vai
+- tajā ir derīga API atslēga, kā HTTP saskarnē `/v1/*`.
+
+Viss pārējais saņem `403 ws_origin_forbidden`. Informācijas paneļa sesijas sīkfails
+neatbrīvo svešu `Origin`, jo pārlūkprogramma to pievieno jebkuras lapas ligzdai.
+`localhost` citā portā netiek uzskatīts par to pašu izcelsmi; pievienojiet šādas
+izstrādes izcelsmes `CORS_ALLOWED_ORIGINS`.
 
 ## Piemērs: reversais starpniekserveris OmniRoute priekšā
 
@@ -164,6 +205,7 @@ cilnē Drošība), nevis starpniekserverī.
 | Informācijas paneļa brīdinājuma reklāmkarogs               | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Lauks CORS Allowed Origins                                 | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | Cloud-Agent CORS katram maršrutam (izņēmums)               | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket rokasspiediena `Origin` pārbaude                 | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Skatiet arī
 

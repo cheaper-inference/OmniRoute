@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Limiti di concorrenza per modello",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Facoltativo: un modello=limite per riga, confrontato con l'ID esatto del modello presso il fornitore. Le richieste in eccesso vengono accodate localmente; vuoto significa nessun limite per modello.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Voce di concorrenza per modello non valida \"{entry}\": usa modello=limite con un numero intero da 1 a {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Voce di concorrenza per modello non valida \"{entry}\": usa modello=limite con un numero intero da 1 a {max}.",
+    "usedInComboTooltip": "Usato in {count} combinazione/i: {combos}",
+    "openComboTooltip": "Apri Combinazioni — usato da {combo}"
   },
   "settings": {
     "title": "Impostazioni",
@@ -9015,7 +9017,9 @@
         "financial": "Finanziario",
         "brazilian": "Brasiliano",
         "usa": "USA",
-        "full": "Completo"
+        "full": "Completo",
+        "gdpr": "GDPR (UE)",
+        "popia": "POPIA (Sudafrica)"
       },
       "builtinTypes": "Tipi integrati",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "Indirizzi IPv4",
         "ipv6_address": "Indirizzi IPv6",
         "aws_key": "Chiavi di accesso AWS",
-        "api_key_generic": "Chiavi API e token"
+        "api_key_generic": "Chiavi API e token",
+        "iban": "Numeri di conto bancario IBAN",
+        "eu_vat": "Partite IVA UE",
+        "es_dni_nie": "DNI / NIE spagnolo",
+        "it_codice_fiscale": "Codice Fiscale italiano",
+        "pl_pesel": "PESEL polacco",
+        "nl_bsn": "BSN olandese",
+        "de_steuer_id": "Steuer-ID tedesco",
+        "se_personnummer": "Personnummer svedese",
+        "za_id": "Numeri di identità sudafricani",
+        "za_phone": "Numeri di telefono sudafricani",
+        "za_vat": "Partite IVA sudafricane",
+        "za_tax_ref": "Riferimenti fiscali sudafricani"
       },
       "customPatterns": "Pattern personalizzati",
       "customPatternsDesc": "Le corrispondenze vengono sostituite con [CUSTOM_REDACTED]. Fino a {max} pattern. I pattern a rischio di backtracking catastrofico vengono rifiutati.",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth non è configurato. Registrare un'applicazione OAuth su {applicationsUrl} con URI di reindirizzamento {redirectUri} e ambiti \"{scopes}\", quindi impostare {clientIdEnv} (e facoltativamente {clientSecretEnv}) e riavviare.",
     "gitlabDuoSetupDescription": "Dopo che l'applicazione è stata registrata e le variabili d'ambiente sono state impostate su questa istanza di OmniRoute, fai clic su Continua per avviare il login OAuth.",
     "continue": "Continua",
+    "copilotPolicyTitle": "Fornitore sperimentale: lo stato della politica è ambiguo",
+    "copilotPolicyLine1": "OmniRoute si connette tramite api.githubcopilot.com, che GitHub non ha pubblicato come inferenza generale di terze parti API. Questa integrazione è sperimentale e può cambiare senza preavviso.",
+    "copilotPolicyLine2": "È possibile collegare solo il tuo account GitHub. Non condividere mai credenziali, account di pool o tentare di superare i limiti del tuo piano.",
+    "copilotPolicyLine3": "Gli utenti dei piani Gratuito e Studente ricevono solo la selezione automatica del modello. I termini del tuo piano Copilot e gli eventuali limiti di utilizzo rimangono di tua responsabilità.",
+    "copilotPolicyAcknowledge": "Ho capito, connettiti",
     "tabPasteSetupToken": "Token di configurazione",
     "claudeSetupTokenDescription": "Esegui `claude setup-token` in un terminale e incolla il token che stampa. È valido per un anno e non ha un token di aggiornamento. OmniRoute invia una richiesta di prova ad Anthropic prima di salvarlo.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "Statistiche dei provider",
     "description": "Traffico, latenza e percentuali di successo per provider e per modello",
     "combo": "Combinazione",
-    "toggleModels": "Mostra i modelli di {provider}"
+    "toggleModels": "Mostra i modelli di {provider}",
+    "windowSince": "Dal {date}"
   },
   "relay": {
     "title": "Proxy relay serverless",

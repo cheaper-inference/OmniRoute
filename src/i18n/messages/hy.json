@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Օգտագործվում է {count} համակցությունում՝ {combos}",
+    "openComboTooltip": "Բացել Համակցությունները — օգտագործում է {combo}"
   },
   "settings": {
     "title": "Կարգավորումներ",
@@ -8938,7 +8940,9 @@
         "financial": "Ֆինանսական",
         "brazilian": "Բրազիլական",
         "usa": "ԱՄՆ",
-        "full": "Ամբողջական"
+        "full": "Ամբողջական",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Հարավային Աֆրիկա)"
       },
       "builtinTypes": "Ներկառուցված տեսակներ",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 հասցեներ",
         "ipv6_address": "IPv6 հասցեներ",
         "aws_key": "AWS մուտքի բանալիներ",
-        "api_key_generic": "API բանալիներ և թոքեններ"
+        "api_key_generic": "API բանալիներ և թոքեններ",
+        "iban": "IBAN բանկային հաշվի համարները",
+        "eu_vat": "EU VAT թվեր",
+        "es_dni_nie": "Իսպաներեն DNI / NIE",
+        "it_codice_fiscale": "Իտալական Codice Fiscale",
+        "pl_pesel": "Լեհական PESEL",
+        "nl_bsn": "Հոլանդական BSN",
+        "de_steuer_id": "Գերմանական Steuer-ID",
+        "se_personnummer": "Շվեդական անձ",
+        "za_id": "Հարավաֆրիկյան ID համարներ",
+        "za_phone": "Հարավային Աֆրիկայի հեռախոսահամարներ",
+        "za_vat": "Հարավաֆրիկյան VAT համարներ",
+        "za_tax_ref": "Հարավաֆրիկյան հարկային տեղեկանքներ"
       },
       "customPatterns": "Հատուկ նմուշներ",
       "customPatternsDesc": "Համընկնումները փոխարինվում են [CUSTOM_REDACTED]-ով։ Մինչև {max} նմուշ։ Աղետալի հետընթացի ռիսկ ունեցող նմուշները մերժվում են։",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth-ը կարգավորված չէ։ Գրանցեք OAuth հավելված {applicationsUrl} հասցեում՝ նշելով {redirectUri} վերահղման URI-ն և «{scopes}» տիրույթները, ապա սահմանեք {clientIdEnv}-ը (և ըստ ցանկության՝ {clientSecretEnv}-ը) ու վերագործարկեք։",
     "gitlabDuoSetupDescription": "Հավելվածը գրանցելուց և այս OmniRoute օրինակում միջավայրի փոփոխականները սահմանելուց հետո սեղմեք «Շարունակել»՝ OAuth մուտքը սկսելու համար։",
     "continue": "Շարունակել",
+    "copilotPolicyTitle": "Փորձարարական մատակարար. քաղաքականության կարգավիճակը երկիմաստ է",
+    "copilotPolicyLine1": "OmniRoute միանում է api.githubcopilot.com-ի միջոցով, որը GitHub չի հրապարակել որպես երրորդ կողմի ընդհանուր եզրակացություն API: Այս ինտեգրումը փորձնական է և կարող է փոխվել առանց ծանուցման:",
+    "copilotPolicyLine2": "Միայն ձեր սեփական GitHub հաշիվը կարող է միացված լինել: Երբեք մի համօգտագործեք հավատարմագրերը, միացրեք հաշիվները և մի փորձեք գերազանցել ձեր պլանի սահմանաչափերը:",
+    "copilotPolicyLine3": "Անվճար և Ուսանողական պլանի օգտվողները ստանում են միայն մոդելի ավտոմատ ընտրություն: Ձեր Copilot պլանի պայմանները և օգտագործման ցանկացած սահմանափակում մնում են ձեր պատասխանատվությունը:",
+    "copilotPolicyAcknowledge": "Հասկանում եմ, միացրու",
     "tabPasteSetupToken": "Կարգավորման թոքեն",
     "claudeSetupTokenDescription": "Գործարկեք `claude setup-token`-ը տերմինալում և տեղադրեք այն թոքենը, որը տպում է։ Այն վավեր է մեկ տարի և չունի թարմացման թոքեն։ Պահպանելուց առաջ OmniRoute-ը մեկ փորձնական հարցում է ուղարկում Anthropic-ին։",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Մատակարարների վիճակագրություն",
     "description": "Ըստ մատակարարի և մոդելի տրաֆիկը, հապաղումը և հաջողության ցուցանիշները",
     "combo": "Համակցված",
-    "toggleModels": "Ցույց տալ {provider}-ի մոդելները"
+    "toggleModels": "Ցույց տալ {provider}-ի մոդելները",
+    "windowSince": "{date}-ից սկսած"
   },
   "relay": {
     "title": "Առանց սերվերի ռելե-պրոքսիներ",

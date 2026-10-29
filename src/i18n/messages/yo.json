@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "A lò ó nínú àkópọ̀ {count}: {combos}",
+    "openComboTooltip": "Ṣí Àwọn Àkópọ̀ — {combo} ń lò ó"
   },
   "settings": {
     "title": "Àwọn Ààtò",
@@ -8938,7 +8940,9 @@
         "financial": "Ti ìnáwó",
         "brazilian": "Ti Brazil",
         "usa": "Amẹ́ríkà",
-        "full": "Kíkún"
+        "full": "Kíkún",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Súúsù Áfíríkà)"
       },
       "builtinTypes": "Àwọn irú tí a kọ́ sínú",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Àwọn àdírẹ́sì IPv4",
         "ipv6_address": "Àwọn àdírẹ́sì IPv6",
         "aws_key": "Àwọn kọ́kọ́rọ́ ìwọlé AWS",
-        "api_key_generic": "Àwọn kọ́kọ́rọ́ API àti tókìnì"
+        "api_key_generic": "Àwọn kọ́kọ́rọ́ API àti tókìnì",
+        "iban": "IBAN ifowo iroyin awọn nọmba",
+        "eu_vat": "EU VAT awọn nọmba",
+        "es_dni_nie": "Spani DNI / NIE",
+        "it_codice_fiscale": "Italian Codece Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID awọn nọmba",
+        "za_phone": "Awọn nọmba foonu South Africa",
+        "za_vat": "South African VAT awọn nọmba",
+        "za_tax_ref": "South African-ori to jo"
       },
       "customPatterns": "Àwọn àpẹẹrẹ àdáni",
       "customPatternsDesc": "A ó fi [CUSTOM_REDACTED] rọ́pò àwọn tí ó bá mu. Títí dé àpẹẹrẹ {max}. A ó kọ àwọn àpẹẹrẹ tí ó ní ewu ìpadàsẹ́yìn burúkú.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "A kò tíì ṣètò GitLab Duo OAuth. Forúkọsílẹ̀ ohun èlò OAuth ní {applicationsUrl} pẹ̀lú URI ìpadà {redirectUri} àti àwọn scopes \"{scopes}\", lẹ́yìn náà ṣètò {clientIdEnv} (àti {clientSecretEnv} bí o bá fẹ́) kí o sì tún un bẹ̀rẹ̀.",
     "gitlabDuoSetupDescription": "Lẹ́yìn tí a bá ti forúkọsílẹ̀ ohun èlò náà tí a sì ti ṣètò àwọn env vars lórí instance OmniRoute yìí, tẹ Tẹ̀síwájú láti bẹ̀rẹ̀ ìwọlé OAuth.",
     "continue": "Tẹ̀síwájú",
+    "copilotPolicyTitle": "Olupese esiperimenta: ipo eto imulo jẹ aibikita",
+    "copilotPolicyLine1": "OmniRoute sopọ nipasẹ api.githubcopilot.com, eyiti GitHub ko ti ṣe atẹjade bi itọkasi ẹnikẹta gbogbogbo API. Ibarapọ yii jẹ adanwo ati pe o le yipada laisi akiyesi.",
+    "copilotPolicyLine2": "Akọọlẹ GitHub tirẹ nikan ni o le sopọ. Maṣe pin awọn iwe-ẹri, awọn akọọlẹ adagun-odo, tabi gbiyanju lati kọja awọn opin ero rẹ.",
+    "copilotPolicyLine3": "Ọfẹ ati awọn olumulo ero ọmọ ile-iwe gba yiyan awoṣe adaṣe nikan. Awọn ofin ero Copilot rẹ ati awọn opin lilo eyikeyi jẹ ojuṣe rẹ.",
+    "copilotPolicyAcknowledge": "Mo ye, so",
     "tabPasteSetupToken": "Àmì ìṣètò",
     "claudeSetupTokenDescription": "Ṣiṣẹ́ `claude setup-token` nínú tẹ́mínà kí o sì lẹ àmì tí ó tẹ̀ jáde. Ó wúlò fún ọdún kan kò sì ní àmì ìsọdọ̀tun. OmniRoute ń fi ìbéèrè ìdánwò kan ránṣẹ́ sí Anthropic kí ó tó fi pamọ́.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Àwọn ìṣirò olùpèsè",
     "description": "Ìṣàn, àkókò ìdádúró àti àwọn oṣùwọ̀n àṣeyọrí fún olùpèsè kọ̀ọ̀kan àti àwòṣe kọ̀ọ̀kan",
     "combo": "Àkójọpọ̀",
-    "toggleModels": "Ṣàfihàn àwọn àwòṣe fún {provider}"
+    "toggleModels": "Ṣàfihàn àwọn àwòṣe fún {provider}",
+    "windowSince": "Tió {date}"
   },
   "relay": {
     "title": "Àwọn Prọ́ọ̀sì Relay Aláìní Sẹ́fà",

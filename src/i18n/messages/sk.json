@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Použité v kombách ({count}): {combos}",
+    "openComboTooltip": "Otvoriť kombá — používa {combo}"
   },
   "settings": {
     "title": "Nastavenia",
@@ -8938,7 +8940,9 @@
         "financial": "Finančná",
         "brazilian": "Brazílska",
         "usa": "USA",
-        "full": "Úplná"
+        "full": "Úplná",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Južná Afrika)"
       },
       "builtinTypes": "Vstavané typy",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Adresy IPv4",
         "ipv6_address": "Adresy IPv6",
         "aws_key": "Prístupové kľúče AWS",
-        "api_key_generic": "Kľúče API a tokeny"
+        "api_key_generic": "Kľúče API a tokeny",
+        "iban": "čísla bankových účtov IBAN",
+        "eu_vat": "EU VAT čísla",
+        "es_dni_nie": "španielsky DNI / NIE",
+        "it_codice_fiscale": "Taliansky Codice Fiscale",
+        "pl_pesel": "Poľská PESEL",
+        "nl_bsn": "holandská BSN",
+        "de_steuer_id": "Nemecké Steuer-ID",
+        "se_personnummer": "švédske personnummer",
+        "za_id": "Juhoafrické čísla ID",
+        "za_phone": "telefónne čísla v Južnej Afrike",
+        "za_vat": "Juhoafrické čísla VAT",
+        "za_tax_ref": "Daňové referencie v Južnej Afrike"
       },
       "customPatterns": "Vlastné vzory",
       "customPatternsDesc": "Zhody sa nahrádzajú za [CUSTOM_REDACTED]. Najviac {max} vzorov. Vzory s rizikom katastrofického backtrackingu sa odmietajú.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth nie je nakonfigurovaný. Zaregistrujte OAuth aplikáciu na {applicationsUrl} s URI na presmerovanie {redirectUri} a rozsahmi \"{scopes}\", potom nastavte {clientIdEnv} (a voliteľne {clientSecretEnv}) a reštartujte.",
     "gitlabDuoSetupDescription": "Po registrácii aplikácie a nastavení env premenných na tejto inštancii OmniRoute kliknite na Pokračovať, aby ste začali prihlásenie pomocou OAuth.",
     "continue": "Pokračovať",
+    "copilotPolicyTitle": "Experimentálny poskytovateľ: stav pravidiel je nejednoznačný",
+    "copilotPolicyLine1": "OmniRoute sa pripája cez api.githubcopilot.com, ktorý GitHub nezverejnil ako všeobecnú inferenciu tretej strany API. Táto integrácia je experimentálna a môže sa zmeniť bez upozornenia.",
+    "copilotPolicyLine2": "Môže byť pripojený iba váš vlastný účet GitHub. Nikdy nezdieľajte poverenia, spoločné účty ani sa nepokúšajte prekročiť limity vášho plánu.",
+    "copilotPolicyLine3": "Používatelia bezplatných a študentských programov dostanú iba automatický výber modelu. Podmienky vášho plánu Copilot a akékoľvek obmedzenia používania zostávajú vašou zodpovednosťou.",
+    "copilotPolicyAcknowledge": "Rozumiem, spojte sa",
     "tabPasteSetupToken": "Token z nastavenia",
     "claudeSetupTokenDescription": "Spustite v termináli `claude setup-token` a vložte token, ktorý vypíše. Platí jeden rok a nemá obnovovací token. OmniRoute pred uložením odošle do Anthropic jednu testovaciu požiadavku.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Štatistiky poskytovateľov",
     "description": "Prevádzka, latencia a miera úspešnosti podľa poskytovateľa a modelu",
     "combo": "Kombinácia",
-    "toggleModels": "Zobraziť modely pre {provider}"
+    "toggleModels": "Zobraziť modely pre {provider}",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Serverless relay proxy",

@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "प्रति-मॉडल समवर्तीता सीमाएँ",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "वैकल्पिक: प्रति पंक्ति एक model=cap, अपस्ट्रीम मॉडल आईडी से ठीक-ठीक मिलाया जाता है। अतिरिक्त अनुरोध स्थानीय रूप से कतार में रहते हैं; खाली का अर्थ है कोई प्रति-मॉडल सीमा नहीं।",
-    "rateLimitOverridesModelConcurrencyInvalid": "अमान्य प्रति-मॉडल समवर्तीता प्रविष्टि \"{entry}\" — model=cap का उपयोग करें, जहाँ cap 1 से {max} के बीच की पूर्ण संख्या हो।"
+    "rateLimitOverridesModelConcurrencyInvalid": "अमान्य प्रति-मॉडल समवर्तीता प्रविष्टि \"{entry}\" — model=cap का उपयोग करें, जहाँ cap 1 से {max} के बीच की पूर्ण संख्या हो।",
+    "usedInComboTooltip": "{count} संयोजन(नों) में उपयोग किया गया: {combos}",
+    "openComboTooltip": "संयोजन खोलें — {combo} द्वारा उपयोग किया गया"
   },
   "settings": {
     "title": "सेटिंग्स",
@@ -8938,7 +8940,9 @@
         "financial": "वित्तीय",
         "brazilian": "ब्राज़ीलियाई",
         "usa": "अमेरिका",
-        "full": "पूर्ण"
+        "full": "पूर्ण",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (दक्षिण अफ़्रीका)"
       },
       "builtinTypes": "अंतर्निहित प्रकार",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 पते",
         "ipv6_address": "IPv6 पते",
         "aws_key": "AWS एक्सेस कुंजियाँ",
-        "api_key_generic": "API कुंजियाँ और टोकन"
+        "api_key_generic": "API कुंजियाँ और टोकन",
+        "iban": "IBAN बैंक खाता संख्या",
+        "eu_vat": "EU VAT संख्याएँ",
+        "es_dni_nie": "स्पैनिश DNI / NIE",
+        "it_codice_fiscale": "इटालियन कोडिस फिस्केल",
+        "pl_pesel": "पोलिश PESEL",
+        "nl_bsn": "डच BSN",
+        "de_steuer_id": "जर्मन स्टुअर-आईडी",
+        "se_personnummer": "स्वीडिश व्यक्तिसंख्या",
+        "za_id": "दक्षिण अफ़्रीकी ID संख्याएँ",
+        "za_phone": "दक्षिण अफ़्रीकी फ़ोन नंबर",
+        "za_vat": "दक्षिण अफ़्रीकी VAT संख्याएँ",
+        "za_tax_ref": "दक्षिण अफ़्रीकी कर संदर्भ"
       },
       "customPatterns": "कस्टम पैटर्न",
       "customPatternsDesc": "मिलान [CUSTOM_REDACTED] से बदल दिए जाते हैं। अधिकतम {max} पैटर्न। विनाशकारी बैकट्रैकिंग के जोखिम वाले पैटर्न अस्वीकार किए जाते हैं।",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth कॉन्फ़िगर नहीं किया गया है। {applicationsUrl} पर एक OAuth एप्लिकेशन रजिस्टर करें जिसमें रीडायरेक्ट URI {redirectUri} और स्कोप्स \"{scopes}\" हों, फिर {clientIdEnv} (और वैकल्पिक रूप से {clientSecretEnv}) सेट करें और पुनः प्रारंभ करें।",
     "gitlabDuoSetupDescription": "आवेदन पंजीकृत होने के बाद और इस OmniRoute उदाहरण पर env vars सेट होने के बाद, OAuth लॉगिन शुरू करने के लिए जारी रखें पर क्लिक करें।",
     "continue": "जारी रखें",
+    "copilotPolicyTitle": "प्रायोगिक प्रदाता: पॉलिसी की स्थिति अस्पष्ट है",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com के माध्यम से जुड़ता है, जिसे GitHub ने सामान्य तृतीय-पक्ष अनुमान API के रूप में प्रकाशित नहीं किया है। यह एकीकरण प्रायोगिक है और बिना सूचना के बदला जा सकता है।",
+    "copilotPolicyLine2": "केवल आपका अपना GitHub खाता ही कनेक्ट किया जा सकता है। कभी भी क्रेडेंशियल, पूल खाते साझा न करें, या अपनी योजना सीमा को पार करने का प्रयास न करें।",
+    "copilotPolicyLine3": "निःशुल्क और छात्र योजना उपयोगकर्ताओं को केवल स्वचालित मॉडल चयन प्राप्त होता है। आपकी Copilot योजना की शर्तें और कोई भी उपयोग सीमा आपकी ज़िम्मेदारी बनी रहेगी।",
+    "copilotPolicyAcknowledge": "मैं समझता हूं, कनेक्ट करें",
     "tabPasteSetupToken": "सेटअप टोकन",
     "claudeSetupTokenDescription": "टर्मिनल में `claude setup-token` चलाएँ और वह जो टोकन प्रिंट करता है उसे पेस्ट करें। यह एक वर्ष के लिए मान्य है और इसमें कोई रिफ़्रेश टोकन नहीं है। सहेजने से पहले OmniRoute Anthropic को एक परीक्षण अनुरोध भेजता है।",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "प्रदाता के आँकड़े",
     "description": "प्रत्येक प्रदाता और प्रत्येक मॉडल का ट्रैफ़िक, विलंबता और सफलता दर",
     "combo": "संयोजन",
-    "toggleModels": "{provider} के मॉडल दिखाएँ"
+    "toggleModels": "{provider} के मॉडल दिखाएँ",
+    "windowSince": "{date} से"
   },
   "relay": {
     "title": "सर्वरलेस रिले प्रॉक्सी",

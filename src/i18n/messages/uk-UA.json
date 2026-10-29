@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Ліміти паралельності для окремих моделей",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Необов’язково: один запис model=cap на рядок, зіставляється з точним ідентифікатором моделі upstream. Зайві запити ставляться в локальну чергу; порожнє значення означає відсутність ліміту для моделі.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Недійсний запис паралельності для моделі «{entry}» — використовуйте model=cap, де cap — ціле число від 1 до {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Недійсний запис паралельності для моделі «{entry}» — використовуйте model=cap, де cap — ціле число від 1 до {max}.",
+    "usedInComboTooltip": "Використовується в комбо ({count}): {combos}",
+    "openComboTooltip": "Відкрити Комбо — використовується в {combo}"
   },
   "settings": {
     "title": "Налаштування",
@@ -8938,7 +8940,9 @@
         "financial": "Фінансовий",
         "brazilian": "Бразильський",
         "usa": "США",
-        "full": "Повний"
+        "full": "Повний",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Південна Африка)"
       },
       "builtinTypes": "Вбудовані типи",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4-адреси",
         "ipv6_address": "IPv6-адреси",
         "aws_key": "Ключі доступу AWS",
-        "api_key_generic": "API-ключі та токени"
+        "api_key_generic": "API-ключі та токени",
+        "iban": "IBAN номери банківських рахунків",
+        "eu_vat": "EU VAT числа",
+        "es_dni_nie": "Іспанська DNI / NIE",
+        "it_codice_fiscale": "Італійський Codice Fiscale",
+        "pl_pesel": "Польська PESEL",
+        "nl_bsn": "голландська BSN",
+        "de_steuer_id": "Німецький Steuer-ID",
+        "se_personnummer": "Шведський personnummer",
+        "za_id": "Південноафриканські номери ID",
+        "za_phone": "Номери телефонів Південної Африки",
+        "za_vat": "Південноафриканські номери VAT",
+        "za_tax_ref": "Податкові довідки Південної Африки"
       },
       "customPatterns": "Власні шаблони",
       "customPatternsDesc": "Збіги замінюються на [CUSTOM_REDACTED]. До {max} шаблонів. Шаблони з ризиком катастрофічного бектрекінгу відхиляються.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "Не налаштовано Duo OAuth для GitLab. Зареєструйте OAuth-додаток за адресою {applicationsUrl} з URI перенаправлення {redirectUri} та обсягами \"{scopes}\", потім встановіть {clientIdEnv} (і, за бажанням, {clientSecretEnv}) та перезапустіть.",
     "gitlabDuoSetupDescription": "Після реєстрації програми та налаштування змінних середовища на цьому екземплярі OmniRoute натисніть Продовжити, щоб розпочати вхід через OAuth.",
     "continue": "Продовжити",
+    "copilotPolicyTitle": "Експериментальний постачальник: статус політики неоднозначний",
+    "copilotPolicyLine1": "OmniRoute підключається через api.githubcopilot.com, який GitHub не опублікував як загальний висновок третьої сторони API. Ця інтеграція є експериментальною та може змінюватися без попередження.",
+    "copilotPolicyLine2": "Можна підключити лише власний обліковий запис GitHub. Ніколи не передавайте облікові дані, облікові записи пулів і не намагайтеся перевищити ліміти плану.",
+    "copilotPolicyLine3": "Користувачі безкоштовного та студентського плану отримують лише автоматичний вибір моделі. Ви несете відповідальність за умови вашого плану Copilot та будь-які обмеження на використання.",
+    "copilotPolicyAcknowledge": "Розумію, підключайтесь",
     "tabPasteSetupToken": "Токен налаштування",
     "claudeSetupTokenDescription": "Виконайте `claude setup-token` у терміналі та вставте виведений токен. Він дійсний один рік і не має токена оновлення. Перед збереженням OmniRoute надсилає до Anthropic один тестовий запит.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Статистика постачальників",
     "description": "Трафік, затримка та показники успішності за постачальниками й моделями",
     "combo": "Комбінація",
-    "toggleModels": "Показати моделі для {provider}"
+    "toggleModels": "Показати моделі для {provider}",
+    "windowSince": "Від {date}"
   },
   "relay": {
     "title": "Безсерверні Relay-проксі",

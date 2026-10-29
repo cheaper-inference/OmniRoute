@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Χρησιμοποιείται σε {count} combo: {combos}",
+    "openComboTooltip": "Άνοιγμα Combo — χρησιμοποιείται από {combo}"
   },
   "settings": {
     "title": "Ρυθμίσεις",
@@ -8938,7 +8940,9 @@
         "financial": "Οικονομικό",
         "brazilian": "Βραζιλιάνικο",
         "usa": "ΗΠΑ",
-        "full": "Πλήρες"
+        "full": "Πλήρες",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Νότια Αφρική)"
       },
       "builtinTypes": "Ενσωματωμένοι τύποι",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Διευθύνσεις IPv4",
         "ipv6_address": "Διευθύνσεις IPv6",
         "aws_key": "Κλειδιά πρόσβασης AWS",
-        "api_key_generic": "Κλειδιά API και tokens"
+        "api_key_generic": "Κλειδιά API και tokens",
+        "iban": "Αριθμοί τραπεζικών λογαριασμών IBAN",
+        "eu_vat": "EU VAT αριθμοί",
+        "es_dni_nie": "Ισπανικά DNI / NIE",
+        "it_codice_fiscale": "Ιταλικός Κώδικας Fiscale",
+        "pl_pesel": "Πολωνική PESEL",
+        "nl_bsn": "Ολλανδικά BSN",
+        "de_steuer_id": "Γερμανική Steuer-ID",
+        "se_personnummer": "Σουηδικός αριθμός προσωπικού",
+        "za_id": "Νοτιοαφρικανικοί αριθμοί ID",
+        "za_phone": "Αριθμοί τηλεφώνου της Νότιας Αφρικής",
+        "za_vat": "Νοτιοαφρικανικοί αριθμοί VAT",
+        "za_tax_ref": "φορολογικές αναφορές Νότιας Αφρικής"
       },
       "customPatterns": "Προσαρμοσμένα μοτίβα",
       "customPatternsDesc": "Οι αντιστοιχίες αντικαθίστανται με [CUSTOM_REDACTED]. Έως {max} μοτίβα. Μοτίβα με κίνδυνο καταστροφικής οπισθοδρόμησης απορρίπτονται.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "Το OAuth του GitLab Duo δεν έχει ρυθμιστεί. Καταχωρίστε μια εφαρμογή OAuth στη διεύθυνση {applicationsUrl} με URI ανακατεύθυνσης {redirectUri} και πεδία εφαρμογής \"{scopes}\", έπειτα ορίστε το {clientIdEnv} (και προαιρετικά το {clientSecretEnv}) και πραγματοποιήστε επανεκκίνηση.",
     "gitlabDuoSetupDescription": "Αφού καταχωριστεί η εφαρμογή και οριστούν οι μεταβλητές περιβάλλοντος σε αυτό το στιγμιότυπο του OmniRoute, κάντε κλικ στην επιλογή Συνέχεια για να ξεκινήσετε τη σύνδεση OAuth.",
     "continue": "Συνέχεια",
+    "copilotPolicyTitle": "Πειραματικός πάροχος: η κατάσταση πολιτικής είναι ασαφής",
+    "copilotPolicyLine1": "OmniRoute συνδέεται μέσω του api.githubcopilot.com, το οποίο GitHub δεν έχει δημοσιεύσει ως γενικό συμπέρασμα τρίτου μέρους API. Αυτή η ενσωμάτωση είναι πειραματική και μπορεί να αλλάξει χωρίς προειδοποίηση.",
+    "copilotPolicyLine2": "Μόνο ο δικός σας λογαριασμός GitHub μπορεί να συνδεθεί. Ποτέ μην μοιράζεστε διαπιστευτήρια, ομαδικούς λογαριασμούς και μην επιχειρείτε να υπερβείτε τα όρια του σχεδίου σας.",
+    "copilotPolicyLine3": "Οι χρήστες δωρεάν και Φοιτητικού προγράμματος λαμβάνουν μόνο αυτόματη επιλογή μοντέλου. Οι όροι του προγράμματος Copilot και τυχόν όρια χρήσης παραμένουν δική σας ευθύνη.",
+    "copilotPolicyAcknowledge": "Καταλαβαίνω, συνδεθείτε",
     "tabPasteSetupToken": "Διακριτικό ρύθμισης",
     "claudeSetupTokenDescription": "Εκτελέστε το `claude setup-token` σε ένα τερματικό και επικολλήστε το διακριτικό που εμφανίζει. Ισχύει για ένα έτος και δεν έχει διακριτικό ανανέωσης. Το OmniRoute στέλνει ένα δοκιμαστικό αίτημα στην Anthropic πριν το αποθηκεύσει.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Στατιστικά παρόχων",
     "description": "Κίνηση, καθυστέρηση και ποσοστά επιτυχίας ανά πάροχο και ανά μοντέλο",
     "combo": "Συνδυασμός",
-    "toggleModels": "Εμφάνιση μοντέλων για {provider}"
+    "toggleModels": "Εμφάνιση μοντέλων για {provider}",
+    "windowSince": "Από {date}"
   },
   "relay": {
     "title": "Serverless proxy αναμετάδοσης",

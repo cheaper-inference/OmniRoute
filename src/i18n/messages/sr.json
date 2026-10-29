@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Користи се у комбинацијама ({count}): {combos}",
+    "openComboTooltip": "Отвори Комбинације — користи {combo}"
   },
   "settings": {
     "title": "Подешавања",
@@ -8938,7 +8940,9 @@
         "financial": "Финансијски",
         "brazilian": "Бразилски",
         "usa": "САД",
-        "full": "Потпуни"
+        "full": "Потпуни",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Јужна Африка)"
       },
       "builtinTypes": "Уграђени типови",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 адресе",
         "ipv6_address": "IPv6 адресе",
         "aws_key": "AWS приступни кључеви",
-        "api_key_generic": "API кључеви и токени"
+        "api_key_generic": "API кључеви и токени",
+        "iban": "IBAN бројеви банковних рачуна",
+        "eu_vat": "EU VAT бројеви",
+        "es_dni_nie": "шпански DNI / NIE",
+        "it_codice_fiscale": "Италијански кодекс Фисцале",
+        "pl_pesel": "Полисх PESEL",
+        "nl_bsn": "холандски BSN",
+        "de_steuer_id": "немачки Стеуер-ИД",
+        "se_personnummer": "Сведисх персоннуммер",
+        "za_id": "Јужноафрички ID бројеви",
+        "za_phone": "Јужноафрички бројеви телефона",
+        "za_vat": "Јужноафрички VAT бројеви",
+        "za_tax_ref": "Јужноафричке пореске референце"
       },
       "customPatterns": "Прилагођени обрасци",
       "customPatternsDesc": "Подударања се замењују са [CUSTOM_REDACTED]. Највише {max} образаца. Обрасци са ризиком од катастрофалног враћања се одбијају.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth није подешен. Региструјте OAuth апликацију на {applicationsUrl} са redirect URI {redirectUri} и обимима „{scopes}“, затим подесите {clientIdEnv} (и опционо {clientSecretEnv}) и поново покрените.",
     "gitlabDuoSetupDescription": "Након што апликација буде регистрована и променљиве окружења подешене на овој OmniRoute инстанци, кликните на Настави да покренете OAuth пријаву.",
     "continue": "Настави",
+    "copilotPolicyTitle": "Експериментални добављач: статус политике је двосмислен",
+    "copilotPolicyLine1": "OmniRoute се повезује преко api.githubcopilot.com, који GitHub није објавио као општи закључак треће стране API. Ова интеграција је експериментална и може се променити без претходне најаве.",
+    "copilotPolicyLine2": "Само ваш GitHub налог може бити повезан. Никада не делите акредитиве, скупове налога или покушавајте да прекорачите ограничења плана.",
+    "copilotPolicyLine3": "Корисници бесплатног и студентског плана добијају само аутоматски одабир модела. Услови вашег Copilot плана и сва ограничења коришћења остају ваша одговорност.",
+    "copilotPolicyAcknowledge": "Разумем, повежите се",
     "tabPasteSetupToken": "Токен за подешавање",
     "claudeSetupTokenDescription": "Покрените `claude setup-token` у терминалу и налепите токен који испише. Важи годину дана и нема токен за освежавање. OmniRoute шаље један тестни захтев Anthropic-у пре него што га сачува.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Статистика провајдера",
     "description": "Саобраћај, кашњење и стопе успешности по провајдеру и моделу",
     "combo": "Комбиновано",
-    "toggleModels": "Прикажи моделе за {provider}"
+    "toggleModels": "Прикажи моделе за {provider}",
+    "windowSince": "Од {date}"
   },
   "relay": {
     "title": "Проксији за прослеђивање без сервера",

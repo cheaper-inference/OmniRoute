@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "In úsáid i {count} comhcheangal: {combos}",
+    "openComboTooltip": "Oscail Comhcheangail — in úsáid ag {combo}"
   },
   "settings": {
     "title": "Socruithe",
@@ -8938,7 +8940,9 @@
         "financial": "Airgeadais",
         "brazilian": "Brasaíleach",
         "usa": "SAM",
-        "full": "Iomlán"
+        "full": "Iomlán",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (An Afraic Theas)"
       },
       "builtinTypes": "Cineálacha ionsuite",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Seoltaí IPv4",
         "ipv6_address": "Seoltaí IPv6",
         "aws_key": "Eochracha rochtana AWS",
-        "api_key_generic": "Eochracha API agus comharthaí"
+        "api_key_generic": "Eochracha API agus comharthaí",
+        "iban": "IBAN uimhreacha cuntais bainc",
+        "eu_vat": "EU VAT uimhreacha",
+        "es_dni_nie": "Spáinnis DNI / NIE",
+        "it_codice_fiscale": "Cód Fiscale na hIodáile",
+        "pl_pesel": "Polainnis PESEL",
+        "nl_bsn": "Ollainnis BSN",
+        "de_steuer_id": "Gearmáinis Steuer-ID",
+        "se_personnummer": "pearsanra Sualainnis",
+        "za_id": "Uimhreacha ID Afraic Theas",
+        "za_phone": "Uimhreacha gutháin na hAfraice Theas",
+        "za_vat": "Uimhreacha VAT Afraic Theas",
+        "za_tax_ref": "Tagairtí cánach na hAfraice Theas"
       },
       "customPatterns": "Patrúin shaincheaptha",
       "customPatternsDesc": "Cuirtear [CUSTOM_REDACTED] in ionad na meaitseálacha. Suas le {max} patrún. Diúltaítear do phatrúin a bhfuil baol cúlrianaithe tubaistigh ag baint leo.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "Níl OAuth GitLab Duo cumraithe. Cláraigh feidhmchlár OAuth ag {applicationsUrl} leis an URI atreoraithe {redirectUri} agus na scóip \"{scopes}\", ansin socraigh {clientIdEnv} (agus {clientSecretEnv} go roghnach) agus atosaigh.",
     "gitlabDuoSetupDescription": "Tar éis an feidhmchlár a chlárú agus na hathróga timpeallachta a shocrú ar an ásc seo de OmniRoute, cliceáil Lean ar aghaidh chun logáil isteach OAuth a thosú.",
     "continue": "Lean ar aghaidh",
+    "copilotPolicyTitle": "Soláthraí turgnamhach: tá stádas an bheartais débhríoch",
+    "copilotPolicyLine1": "nascann OmniRoute trí api.githubcopilot.com, rud nach bhfuil foilsithe ag GitHub mar thátal ginearálta tríú páirtí API. Tá an comhtháthú seo turgnamhach agus féadfaidh sé athrú gan fógra.",
+    "copilotPolicyLine2": "Ní féidir ach do chuntas GitHub féin a nascadh. Ná roinn dintiúir, cuntais chomhthiomsaithe ná déan iarracht teorainneacha do phlean a shárú choíche.",
+    "copilotPolicyLine3": "Is é an rogha uathoibritheach samhlacha amháin a fhaigheann úsáideoirí plean In Aisce agus Plean Mac Léinn. Fanann téarmaí do phlean Copilot agus aon teorainneacha úsáide ort.",
+    "copilotPolicyAcknowledge": "Tuigim, ceangail",
     "tabPasteSetupToken": "Comhartha socraithe",
     "claudeSetupTokenDescription": "Rith `claude setup-token` i dteirminéal agus greamaigh an comhartha a phriontálann sé. Tá sé bailí ar feadh bliana agus níl comhartha athnuachana aige. Seolann OmniRoute iarratas tástála amháin chuig Anthropic sula sábhálann sé é.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Staitisticí soláthraithe",
     "description": "Trácht, aga folaigh agus rátaí ratha de réir soláthraí agus de réir samhla",
     "combo": "Teaglaim",
-    "toggleModels": "Taispeáin samhlacha do {provider}"
+    "toggleModels": "Taispeáin samhlacha do {provider}",
+    "windowSince": "Ó {date}"
   },
   "relay": {
     "title": "Seachfhreastalaithe Relé Gan Freastalaí",
