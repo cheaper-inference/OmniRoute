@@ -107,17 +107,18 @@ export function readReportedUsage(
  * `costModeField` (default `mode`; unknown/absent mode → `costPerQuery`), plus
  * `extraResultCost` for every result returned above `includedResults`, plus
  * `contentsCostPerResult[key]` per result for each `contents.<key>` the request
- * sets. Rounded to 6 decimals (no float dust).
+ * sets. With `resultBlockSize`, the base price is charged once per started block
+ * of that many results (at least one). Rounded to 6 decimals (no float dust).
  */
 export function computeSearchCostUsd(
   config: SearchProviderConfig,
   requestBody: unknown,
   resultCount: number
 ): number {
-  if (!config.costByMode) return config.costPerQuery;
+  if (!config.costByMode && !config.resultBlockSize) return config.costPerQuery;
   const parsed = parseRequestBody(requestBody);
   const total =
-    modePrice(config, parsed) +
+    modePrice(config, parsed) * resultBlocks(config, resultCount) +
     extraResultsCost(config, resultCount) +
     contentsCost(config, parsed, resultCount);
   return Math.round(total * 1e6) / 1e6;
@@ -139,6 +140,12 @@ function modePrice(config: SearchProviderConfig, parsed: Record<string, unknown>
   return typeof mode === "string" && Object.hasOwn(byMode, mode)
     ? byMode[mode]
     : config.costPerQuery;
+}
+
+/** Started `resultBlockSize` blocks of results, at least one; 1 without block pricing. */
+function resultBlocks(config: SearchProviderConfig, resultCount: number): number {
+  const blockSize = config.resultBlockSize;
+  return blockSize ? Math.max(1, Math.ceil(resultCount / blockSize)) : 1;
 }
 
 function extraResultsCost(config: SearchProviderConfig, resultCount: number): number {

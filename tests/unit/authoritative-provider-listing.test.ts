@@ -150,6 +150,28 @@ test("curated-only providers still accept operator-defined custom models", () =>
   }
 });
 
+test("curated-only providers drop custom rows a discovery sync imported", () => {
+  // #18018 keeps operator rows; a curated provider has no upstream catalog, so a row
+  // with an import source is a stale leftover of a retired discovery path (#8451).
+  for (const providerId of ["kimi-web", "zai-web", "chatgpt-web", "codebuddy-intl"]) {
+    const models = mergeProviderModelListing({
+      ...input,
+      providerId,
+      customModels: [
+        { id: "retired-import", source: "imported" },
+        { id: "api-synced", source: "api-sync" },
+        { id: "auto-synced", source: "auto-sync" },
+        { id: "manual", name: "My model", source: "manual" },
+      ],
+    });
+    assert.deepEqual(
+      models.map((m) => m.id),
+      ["retired", "live", "manual"],
+      providerId
+    );
+  }
+});
+
 test("Cursor legacy listing retains its synthetic auto entry without affecting other providers", () => {
   const models = mergeProviderModelListing({
     ...input,

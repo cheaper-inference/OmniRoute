@@ -1,6 +1,15 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 import Card from "@/shared/components/Card";
+import Select from "@/shared/components/Select";
 import { money, type Report, type Period } from "./helpers";
 
 type Translate = ReturnType<typeof useTranslations>;
@@ -17,20 +26,17 @@ function PeriodSelect({
   t: Translate;
 }) {
   return (
-    <label className="text-sm">
-      {t("reportPeriod")}
-      <select
-        aria-label={t("reportPeriod")}
-        className="ml-2 rounded-control border border-border bg-bg p-2"
-        value={period}
-        disabled={pending}
-        onChange={(e) => onPeriod(e.target.value as Period)}
-      >
-        <option value="7d">{t("day7")}</option>
-        <option value="30d">{t("day30")}</option>
-        <option value="all">{t("allTime")}</option>
-      </select>
-    </label>
+    <Select
+      label={t("reportPeriod")}
+      compact
+      value={period}
+      disabled={pending}
+      onChange={(e) => onPeriod(e.target.value as Period)}
+    >
+      <option value="7d">{t("day7")}</option>
+      <option value="30d">{t("day30")}</option>
+      <option value="all">{t("allTime")}</option>
+    </Select>
   );
 }
 
@@ -47,36 +53,40 @@ function Breakdown({
 }) {
   if (!report.byApiKey.length) return <p className="text-sm text-text-muted">{t("noUsage")}</p>;
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm text-left">
-        <thead className="text-text-muted">
-          <tr>
-            {["keyName", "requests", "tokens", "reportSpend"].map((key) => (
-              <th key={key} className="p-3 font-medium">
-                {t(key)}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {report.byApiKey.map((key) => (
-            <tr key={key.apiKeyId ?? "deleted"} className="border-t border-border">
-              <td className="p-3 max-w-64 break-words">{key.apiKeyName || t("unnamedKey")}</td>
-              <td className="p-3 tabular-nums">{count(key.requests)}</td>
-              <td className="p-3 tabular-nums">{count(key.inputTokens + key.outputTokens)}</td>
-              <td className="p-3 tabular-nums whitespace-nowrap">
-                {money(key.estimatedListCostUsd, locale)}
-                {key.hasUnpricedUsage && (
-                  <span className="block text-xs text-amber-700 dark:text-amber-400">
-                    {t("unpriced")}
-                  </span>
-                )}
-              </td>
-            </tr>
+    <Table
+      className="text-sm"
+      containerClassName="rounded-none border-0"
+      scrollbarLabel={t("breakdown")}
+    >
+      <TableHeader>
+        <TableRow>
+          {["keyName", "requests", "tokens", "reportSpend"].map((key) => (
+            <TableHead key={key} className="font-medium">
+              {t(key)}
+            </TableHead>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {report.byApiKey.map((key) => (
+          <TableRow key={key.apiKeyId ?? "deleted"}>
+            <TableCell className="max-w-64 break-words">
+              {key.apiKeyName || t("unnamedKey")}
+            </TableCell>
+            <TableCell className="tabular-nums">{count(key.requests)}</TableCell>
+            <TableCell className="tabular-nums">
+              {count(key.inputTokens + key.outputTokens)}
+            </TableCell>
+            <TableCell className="tabular-nums whitespace-nowrap">
+              {money(key.estimatedListCostUsd, locale)}
+              {key.hasUnpricedUsage && (
+                <span className="block text-xs text-warning">{t("unpriced")}</span>
+              )}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }
 
@@ -117,7 +127,7 @@ export default function TeamReport({
         ))}
       </div>
       {report.summary.hasUnpricedUsage && (
-        <p role="status" className="text-sm text-amber-700 dark:text-amber-400">
+        <p role="status" className="text-sm text-warning">
           {t("unpricedReport")}
         </p>
       )}

@@ -7,11 +7,13 @@ export interface CatalogVisibilityPatch {
   modelIds: string[];
 }
 
-export interface CatalogVisibilityCounts {
+// A type alias (not an interface) so the counts can be passed straight to next-intl's t(key, values),
+// which takes a Record with an index signature.
+export type CatalogVisibilityCounts = {
   visible: number;
   hidden: number;
   total: number;
-}
+};
 
 export function countCatalogVisibility(rows: CatalogModelRow[]): CatalogVisibilityCounts {
   const hidden = rows.filter((row) => row.hidden === true).length;
