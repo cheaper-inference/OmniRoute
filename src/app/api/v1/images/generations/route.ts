@@ -294,6 +294,8 @@ async function postHandler(request, context) {
   }
 
   // Get credentials — skip for local providers (authType: "none")
+  if (provider === "rosebud" && request.headers.has("idempotency-key"))
+    body.idempotency_key = request.headers.get("idempotency-key");
   let credentials = null;
   if (providerConfig && providerConfig.authType !== "none") {
     credentials = await getProviderCredentialsWithQuotaPreflight(
@@ -434,8 +436,12 @@ async function postHandler(request, context) {
     // Bill the images actually delivered: a provider that returns fewer than the
     // requested `n` must not be charged for the missing ones (#16398 follow-up).
     const n = (result as { data?: { data?: unknown[] } }).data?.data?.length || 1;
-    const costUsd = await calculateModalCost("image", provider, body.model, { n });
-    recordModalCallCost(policy.apiKeyInfo?.id, { provider, model: body.model, costUsd });
+    const costUsd =
+      provider === "rosebud"
+        ? undefined
+        : await calculateModalCost("image", provider, body.model, { n });
+    if (costUsd !== undefined)
+      recordModalCallCost(policy.apiKeyInfo?.id, { provider, model: body.model, costUsd });
     const headers = new Headers({ "Content-Type": "application/json" });
     attachOmniRouteMetaHeaders(headers, {
       provider,

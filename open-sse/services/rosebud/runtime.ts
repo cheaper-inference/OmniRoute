@@ -1,0 +1,298 @@
+import { createHash, randomUUID } from "node:crypto";
+import { mkdir, readFile, readdir, rename, writeFile, stat, rm } from "node:fs/promises";
+import { join } from "node:path";
+import { z } from "zod";
+import { rosebudArtifactType } from "./artifact.ts";
+import { rosebudModel, validateRosebudInput, type RosebudModel } from "./catalog.ts";
+import {
+  runRosebud,
+  rosebudRoot,
+  rosebudProfile,
+  RosebudError,
+  type RosebudRunner,
+  type JsonObject,
+} from "./cli.ts";
+
+export const generationInput = z
+  .object({
+    model: z.string().regex(/^(?:rosebud\/)?[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/),
+    input: z.record(z.string(), z.unknown()),
+    category: z
+      .enum(["image", "skybox", "model_3d", "sound_effect", "music", "video", "speech"])
+      .optional(),
+    idempotencyKey: z.string().min(1).max(200).optional(),
+    maxCredits: z.number().int().nonnegative().optional(),
+  })
+  .strict();
+export type RosebudJob = {
+  id: string;
+  profile: string;
+  model: string;
+  category: string;
+  input: JsonObject;
+  fingerprint: string;
+  status: string;
+  upstreamId?: string;
+  assetId?: string;
+  estimatedCredits?: number;
+  actualCredits?: number;
+  refundedCredits?: number;
+  maxCredits?: number;
+  error?: string;
+  updatedAt: string;
+};
+const processInstance = randomUUID();
+const ordered = (input: JsonObject) =>
+  Object.fromEntries(Object.entries(input).sort(([a], [b]) => a.localeCompare(b)));
+const hash = (text: string) => createHash("sha256").update(text).digest("hex");
+export class RosebudRuntime {
+  constructor(private run: RosebudRunner = runRosebud) {}
+  async models(profile: string): Promise<RosebudModel[]> {
+    const result = await this.run(profile, ["assets", "models"]);
+    return z
+      .array(rosebudModel)
+      .parse(result.models)
+      .filter((model) => !model.status || model.status === "live");
+  }
+  async account(profile: string) {
+    return this.run(profile, ["whoami"]);
+  }
+  async quote(profile: string, modelId: string, input: JsonObject) {
+    const model = (await this.models(profile)).find(
+      (entry) => entry.id === modelId.replace(/^rosebud\//, "")
+    );
+    if (!model) throw new RosebudError("unknown_model", 400);
+    const validated = validateRosebudInput(model, input);
+    const dir = join(rosebudRoot(), "quotes", randomUUID());
+    await mkdir(dir, { recursive: true, mode: 0o700 });
+    const file = join(dir, "input.json");
+    await writeFile(file, JSON.stringify(validated), { mode: 0o600 });
+    try {
+      return await this.run(profile, [
+        "assets",
+        "quote",
+        "--model",
+        model.id,
+        "--input-json",
+        file,
+      ]);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }
+  private folder(id: string) {
+    if (!/^[a-f0-9]{64}$/.test(id)) throw new RosebudError("invalid_job", 400);
+    return join(rosebudRoot(), "jobs", id);
+  }
+  private async save(job: RosebudJob) {
+    job.updatedAt = new Date().toISOString();
+    const path = join(this.folder(job.id), "job.json"),
+      temporary = path + "." + randomUUID();
+    await writeFile(temporary, JSON.stringify(job), { mode: 0o600 });
+    await rename(temporary, path);
+  }
+  // Reclaim a crashed worker's lease only after proving its process is gone.
+  // A missing/malformed owner stays closed for operator reconciliation.
+  private async lock(id: string): Promise<() => Promise<void>> {
+    const folder = this.folder(id);
+    const lock = join(folder, "lock");
+    const reclaim = join(folder, "reclaim");
+    try {
+      await mkdir(lock);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      try {
+        await mkdir(reclaim);
+      } catch {
+        throw new RosebudError("job_busy", 409);
+      }
+      try {
+        const owner = JSON.parse(await readFile(join(lock, "owner.json"), "utf8"));
+        if (!Number.isInteger(owner.pid) || owner.pid <= 0) throw new Error("invalid owner");
+        let dead =
+          owner.pid === process.pid &&
+          typeof owner.instance === "string" &&
+          owner.instance !== processInstance;
+        try {
+          process.kill(owner.pid, 0);
+        } catch (cause) {
+          dead = (cause as NodeJS.ErrnoException).code === "ESRCH";
+        }
+        if (!dead) throw new RosebudError("job_busy", 409);
+        await rm(lock, { recursive: true });
+        await mkdir(lock);
+      } catch {
+        throw new RosebudError("job_busy", 409);
+      } finally {
+        await rm(reclaim, { recursive: true, force: true });
+      }
+    }
+    await writeFile(
+      join(lock, "owner.json"),
+      JSON.stringify({ pid: process.pid, instance: processInstance }),
+      {
+        mode: 0o600,
+      }
+    );
+    return () => rm(lock, { recursive: true, force: true });
+  }
+  async read(profile: string, id: string): Promise<RosebudJob> {
+    const job = JSON.parse(await readFile(join(this.folder(id), "job.json"), "utf8")) as RosebudJob;
+    if (job.profile !== profile) throw new RosebudError("job_not_found", 404);
+    return job;
+  }
+  async generate(profile: string, raw: unknown): Promise<RosebudJob> {
+    const request = generationInput.parse(raw);
+    const modelId = request.model.replace(/^rosebud\//, "");
+    const model = (await this.models(profile)).find((entry) => entry.id === modelId);
+    if (!model) throw new RosebudError("unknown_model", 400);
+    if (request.category && request.category !== model.category)
+      throw new RosebudError("unsupported_modality", 400);
+    const input = validateRosebudInput(model, request.input);
+    const fingerprint = hash(JSON.stringify([modelId, ordered(input), request.maxCredits ?? null]));
+    const id = hash(JSON.stringify([profile, request.idempotencyKey ?? randomUUID()]));
+    const folder = this.folder(id);
+    await mkdir(folder, { recursive: true, mode: 0o700 });
+    let existing: RosebudJob | undefined;
+    try {
+      existing = await this.read(profile, id);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
+    if (existing && existing.fingerprint !== fingerprint)
+      throw new RosebudError("idempotency_conflict", 409);
+    if (existing) return existing.upstreamId ? this.refresh(profile, id) : existing;
+    const unlock = await this.lock(id);
+    const job: RosebudJob = {
+      id,
+      profile,
+      model: modelId,
+      category: model.category,
+      input,
+      fingerprint,
+      maxCredits: request.maxCredits,
+      status: "submitting",
+      updatedAt: new Date().toISOString(),
+    };
+    try {
+      await this.save(job);
+      const quote = await this.quote(profile, modelId, input);
+      if (typeof quote.credits === "number") job.estimatedCredits = quote.credits;
+      await writeFile(join(folder, "input.json"), JSON.stringify(input), { mode: 0o600 });
+      await this.save(job);
+      return await this.submit(job, request.maxCredits);
+    } catch (error) {
+      job.status = error instanceof RosebudError && error.uncertain ? "uncertain" : "failed";
+      job.error = error instanceof RosebudError ? error.code : "generation_failed";
+      await this.save(job);
+      if (error instanceof RosebudError) error.jobId = job.id;
+      throw error;
+    } finally {
+      await unlock();
+    }
+  }
+  private async submit(job: RosebudJob, maxCredits?: number) {
+    const args = [
+      "assets",
+      "create",
+      "--model",
+      job.model,
+      "--input-json",
+      join(this.folder(job.id), "input.json"),
+      "--no-wait",
+    ];
+    if (maxCredits !== undefined) args.push("--max-credits", String(maxCredits));
+    const result = await this.run(job.profile, args);
+    this.apply(job, result);
+    await this.save(job);
+    return job;
+  }
+  private apply(job: RosebudJob, result: JsonObject) {
+    if (typeof result.id === "string") job.upstreamId = result.id;
+    if (typeof result.status === "string") job.status = result.status;
+    const asset = result.asset as JsonObject | undefined;
+    if (asset && typeof asset.id === "string") job.assetId = asset.id;
+    if (typeof result.credits === "number") job.actualCredits = result.credits;
+    if (typeof result.credits_refunded === "number") job.refundedCredits = result.credits_refunded;
+  }
+  async refresh(profile: string, id: string) {
+    const job = await this.read(profile, id);
+    if (job.upstreamId && !["succeeded", "failed", "cancelled"].includes(job.status)) {
+      this.apply(job, await this.run(profile, ["assets", "status", job.upstreamId]));
+      await this.save(job);
+    }
+    return job;
+  }
+  /** Re-run only the identical CLI command; its durable pending state owns the upstream idempotency key. */
+  async recover(profile: string, id: string) {
+    const job = await this.read(profile, id);
+    if (job.upstreamId) return this.refresh(profile, id);
+    if (!["uncertain", "submitting"].includes(job.status)) return job;
+    const pendingFingerprint = hash(
+      JSON.stringify([
+        job.model,
+        Object.keys(job.input)
+          .sort()
+          .map((key) => [key, job.input[key]]),
+      ])
+    );
+    const folder = await rosebudProfile(profile);
+    let durablePending = false;
+    for (const name of await readdir(folder)) {
+      if (!/^asset-[a-f0-9]+\.json$/.test(name)) continue;
+      const saved = JSON.parse(await readFile(join(folder, name), "utf8"));
+      if (saved.fingerprint === pendingFingerprint && typeof saved.idempotency_key === "string")
+        durablePending = true;
+    }
+    // The CLI may have acknowledged and removed its pending record before its
+    // stdout was lost. Without a durable upstream key, never pay a second time.
+    if (!durablePending) throw new RosebudError("manual_reconciliation_required", 409, true);
+    const unlock = await this.lock(id);
+    try {
+      return await this.submit(job, job.maxCredits);
+    } finally {
+      await unlock();
+    }
+  }
+  async artifact(profile: string, id: string) {
+    const job = await this.refresh(profile, id);
+    if (job.status !== "succeeded" || !job.assetId) throw new RosebudError("asset_not_ready", 409);
+    const file = join(this.folder(id), "artifact");
+    try {
+      await stat(file);
+    } catch {
+      await this.run(profile, ["assets", "download", job.assetId, "--out", file]);
+    }
+    const info = await stat(file);
+    if (!info.isFile() || info.size > 128 * 1024 * 1024)
+      throw new RosebudError("artifact_too_large", 413);
+    const data = await readFile(file);
+    const mime = rosebudArtifactType(data, job.category);
+    return { data, job, mime, sha256: createHash("sha256").update(data).digest("hex") };
+  }
+  async list(profile: string) {
+    return this.run(profile, ["assets", "list"]);
+  }
+  async downloadAsset(profile: string, assetId: string) {
+    z.string().uuid().parse(assetId);
+    const folder = join(rosebudRoot(), "downloads", profile, assetId);
+    await mkdir(folder, { recursive: true, mode: 0o700 });
+    const file = join(folder, "artifact");
+    try {
+      await stat(file);
+    } catch {
+      await this.run(profile, ["assets", "download", assetId, "--out", file]);
+    }
+    const info = await stat(file);
+    if (!info.isFile() || info.size > 128 * 1024 * 1024)
+      throw new RosebudError("artifact_too_large", 413);
+    const data = await readFile(file);
+    return {
+      assetId,
+      b64_data: data.toString("base64"),
+      mime_type: rosebudArtifactType(data, "any"),
+      sha256: createHash("sha256").update(data).digest("hex"),
+    };
+  }
+}
+export const rosebudRuntime = new RosebudRuntime();

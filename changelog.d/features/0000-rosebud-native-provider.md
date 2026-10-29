@@ -1,0 +1,1 @@
+- **feat(sse):** Add a native Rosebud AI provider with dynamic asset models, image generation, specialized MCP tools, isolated CLI authorization and credit accounting.

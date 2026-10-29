@@ -1,3 +1,4 @@
+import { rosebudProvider } from "./registry/rosebud/index.ts";
 import type { RegistryEntry } from "./shared.ts";
 import { unorouterProvider } from "./registry/unorouter/index.ts";
 
@@ -480,6 +481,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "devin-cli": devin_cliProvider,
   "devin-cli-agentic": devin_cli_agenticProvider,
   auggie: auggieProvider,
+  rosebud: rosebudProvider,
   chutes: chutesProvider,
   chenzk: chenzkProvider,
   factory: factoryProvider,

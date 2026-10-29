@@ -1,3 +1,4 @@
+import { discoverRosebud } from "@/lib/rosebud/provider";
 import { NextResponse } from "next/server";
 import {
   getProviderConnectionFamilyIds,
@@ -226,6 +227,11 @@ export async function GET(
     const provider = connectionProvider;
     if (!provider) {
       return NextResponse.json({ error: "Invalid connection provider" }, { status: 400 });
+    }
+    if (provider === "rosebud") {
+      if (!["loopback", "lan"].includes(request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) || ""))
+        return errorResponse(403, "Rosebud discovery requires local or LAN access");
+      return NextResponse.json(await discoverRosebud(id));
     }
     const usesCuratedModelsOnly = providerUsesCuratedModelsOnly(provider);
 
