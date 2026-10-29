@@ -69,6 +69,7 @@ const NO_PKCE_DEVICE_CODE_PROVIDERS = new Set([
   "kilocode",
   "megabrain",
   "codebuddy-cn",
+  "freebuff",
   "codebuddy-intl",
   "workbuddy",
   "grok-cli",

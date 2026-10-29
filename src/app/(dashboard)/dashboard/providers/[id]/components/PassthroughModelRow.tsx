@@ -16,6 +16,7 @@ import { Badge, Button, CapabilityBadge } from "@/shared/components";
 import { parseContextWindowOverrideInput, providerText } from "../providerPageHelpers";
 import ModelCompatPopover from "./ModelCompatPopover";
 import ModelEndpointTagsEditor, { type ModelEndpointEditorInfo } from "./ModelEndpointTagsEditor";
+import ModelComboBadge from "./ModelComboBadge";
 import ModelOutputTokenEditor from "./ModelOutputTokenEditor";
 import { ModelSourceBadge, type ModelCompatSavePatch } from "./ModelRow";
 
@@ -35,6 +36,8 @@ export interface PassthroughModelRowProps {
   source?: string;
   isFree?: boolean;
   isHidden?: boolean;
+  /** Combo names that reference this model, for the "used in combo" badge. */
+  combos?: string[];
   copied?: string;
   onCopy: (text: string, key: string) => void;
   onDeleteAlias?: () => void;
@@ -77,6 +80,7 @@ export default function PassthroughModelRow({
   source,
   isFree,
   isHidden,
+  combos,
   copied,
   onCopy,
   onDeleteAlias,
@@ -243,6 +247,7 @@ export default function PassthroughModelRow({
               {...endpointInfo}
             />
           )}
+          {combos && combos.length > 0 && <ModelComboBadge combos={combos} t={t} />}
           {supportsVision === true && (
             <Badge variant="success" className="shrink-0 px-1.5 py-0 text-[10px]">
               {t("visionCapableLabel")}

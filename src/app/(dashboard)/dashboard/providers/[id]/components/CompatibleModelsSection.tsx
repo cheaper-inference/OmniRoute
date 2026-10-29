@@ -44,6 +44,8 @@ export interface CompatibleModelsSectionProps {
   providerStorageAlias: string;
   providerDisplayAlias: string;
   modelAliases: Record<string, string>;
+  /** model id → combo names that reference it, for the "used in combo" badge. */
+  comboUsage?: Record<string, string[]>;
   availableModels?: CompatModelRow[];
   syncedCatalogAuthoritative?: boolean;
   customModels?: CompatModelRow[];
@@ -114,6 +116,7 @@ export default function CompatibleModelsSection({
   providerStorageAlias,
   providerDisplayAlias,
   modelAliases,
+  comboUsage,
   availableModels = [],
   syncedCatalogAuthoritative = false,
   customModels = [],
@@ -583,6 +586,7 @@ export default function CompatibleModelsSection({
                     source={source}
                     isFree={isFree}
                     isHidden={isHidden}
+                    combos={comboUsage?.[modelId]}
                     copied={copied}
                     onCopy={onCopy}
                     onDeleteAlias={
