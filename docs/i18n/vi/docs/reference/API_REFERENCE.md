@@ -825,47 +825,40 @@ bên gọi không sử dụng phiên (truy xuất, xóa, hủy và bước kiể
 
 ---
 
-## API tìm kiếm
+## Tìm kiếm API
 
-Lớp trừu tượng hóa nhà cung cấp web/tìm kiếm (Tavily, Brave, Exa, Serper, v.v.).
+sự trừu tượng của nhà cung cấp Web/search (Tavily, Brave, Exa, Serper, v.v.).
 
-| Phương thức | Đường dẫn              | Mô tả                                                                                                  |
-| ----------- | ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| GET         | `/v1/search`           | Liệt kê các nhà cung cấp tìm kiếm đã cấu hình cùng các khả năng                                        |
-| POST        | `/v1/search`           | Thực hiện truy vấn tìm kiếm — phần thân được xác thực bởi `v1SearchSchema`, hỗ trợ bộ nhớ đệm/hợp nhất |
-| GET         | `/v1/search/analytics` | Số liệu thống kê lượt truy cập/độ trễ/bộ nhớ đệm theo từng nhà cung cấp                                |
+| Phương pháp | Con đường              | Sự miêu tả                                                                                      |
+| ----------- | ---------------------- | ----------------------------------------------------------------------------------------------- |
+| GET         | `/v1/search`           | Liệt kê các khả năng + của nhà cung cấp dịch vụ tìm kiếm được định cấu hình                     |
+| POST        | `/v1/search`           | Chạy truy vấn tìm kiếm nội dung — được xác thực bởi `v1SearchSchema`, hỗ trợ caching/coalescing |
+| GET         | `/v1/search/analytics` | Số liệu thống kê hit/latency/cache của mỗi nhà cung cấp                                         |
 
-**Xác thực:** Khóa API Bearer (`extractApiKey` + `isValidApiKey`). Chính sách tìm kiếm được thực thi thông qua `enforceApiKeyPolicy`.
+**Xác thực:** Khóa API mang (`extractApiKey` + `isValidApiKey`). Chính sách tìm kiếm được thực thi thông qua `enforceApiKeyPolicy`.
 
-### `provider_options` của Exa và Tavily
+### Exa và Tavily `provider_options`
 
-Exa và Tavily đọc các trường dành riêng cho nhà cung cấp từ một nhóm có không gian tên:
-`provider_options.exa` (hoặc `provider_options["exa-search"]`) và `provider_options.tavily`
-(hoặc `provider_options["tavily-search"]`). Chỉ các khóa bên dưới được chuyển tiếp. Mỗi khóa
-được kiểm tra bằng schema Zod riêng trong `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-và khóa có kiểu không chính xác sẽ bị loại bỏ. Mọi khóa khác đều bị bỏ qua, bao gồm thông tin xác thực, URL cơ sở,
-`stream` và `outputSchema`. Các khóa phẳng được những nhà cung cấp khác sử dụng (`cx`, `depth`, ...) vẫn hoạt động
-như trước đây.
+Exa và Tavily đọc các trường dành riêng cho nhà cung cấp từ một túi được đặt tên: `provider_options.exa` (hoặc `provider_options["exa-search"]`) và `provider_options.tavily` (hoặc `provider_options["tavily-search"]`). Chỉ các phím bên dưới được chuyển tiếp. Mỗi cái được kiểm tra dựa trên lược đồ Zod của chính nó trong `open-sse/handlers/search/providerOptionsPassthrough.ts` và một khóa có loại sai sẽ bị loại bỏ. Bất kỳ khóa nào khác đều bị bỏ qua, bao gồm auth, base URL, `stream` và `outputSchema`. Các phím phẳng được các nhà cung cấp khác sử dụng (`cx`, `depth`, ...) vẫn hoạt động như trước.
 
-| Nhà cung cấp | Các trường cấp cao nhất                                                                                                                                                                                                                                                                                                                                                   | Lồng nhau                                                                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (các giá trị nguyên thủy phẳng), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` được hợp nhất trên giá trị mặc định `{ text: true, highlights: true }` |
-| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                             |
+| nhà cung cấp | Các trường cấp cao nhất                                                                                                                                                                                                                                                                                                                                                   | Lồng nhau                                                                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (nguyên thủy phẳng), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` được hợp nhất trên `{ text: true, highlights: true }` mặc định |
+| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                            |
 
-Các trường chung luôn được ưu tiên: `query`, `max_results`, `filters` (miền), `country` và
-chủ đề được suy ra từ `search_type`. Trên Exa, `search_type: "news"` giữ nguyên `category: "news"`.
-Tavily cũng chấp nhận `search_type: "finance"` (`topic: "finance"`).
+Các trường chung luôn thắng: `query`, `max_results`, `filters` (tên miền), `country` và chủ đề bắt nguồn từ `search_type`. Trên Exa, `search_type: "news"` giữ `category: "news"`. Tavily cũng chấp nhận `search_type: "finance"` (`topic: "finance"`).
 
-Trường `time_range` chung giờ đây được chuyển đến cả hai nhà cung cấp: Exa nhận `startPublishedDate` (dấu thời gian
-ISO) và Tavily nhận `start_date` (`YYYY-MM-DD`). Ngày được chỉ định rõ ràng trong `provider_options`
-sẽ ghi đè ngày được ánh xạ.
+Chi phí tìm kiếm Firecrawl được ghi lại cho mỗi khối bắt đầu gồm 10 kết quả được trả về, ở mức 0,002 USD (2 tín dụng) một khối và ít nhất một khối cho mỗi cuộc gọi ( [Thanh toán Firecrawl](https://docs.firecrawl.dev/billing) ): 11 kết quả có giá 0,004 USD.
 
-Kết quả Exa giữ lại `id`, `highlight_scores`, `summary`, `subpages`, `entities` và `extras` trong
-`provider_raw`. Kết quả Tavily giữ lại `images` và `favicon`.
+`time_range` chung hiện đến tay cả hai nhà cung cấp: Exa nhận được `startPublishedDate` (ISO dấu thời gian) và Tavily nhận được `start_date` (`YYYY-MM-DD`). Ngày rõ ràng trong `provider_options` sẽ ghi đè ngày được ánh xạ.
 
-Việc tính toán chi phí vẫn sử dụng registry phẳng `costPerQuery`. Tavily tính phí
-`search_depth: "advanced"` với nhiều tín dụng hơn cho mỗi lần gọi, và sự chênh lệch đó không được phản ánh trong
-`usage.search_cost_usd`.
+Kết quả Exa giữ `id`, `highlight_scores`, `summary`, `subpages`, `entities` và `extras` trong `provider_raw`. Kết quả rõ ràng giữ `images` và `favicon`.
+
+Chi phí tìm kiếm liên kết được ghi nhận ở mức 0,005 USD cho `depth` `fast` và `standard` và 0,05 USD cho `deep` ( [Giá liên kết](https://docs.linkup.so/pages/documentation/development/pricing) ), cho dù `depth` đến từ `provider_options` hay cài đặt của kết nối.
+
+Exa `type: "lite"` (Exa 3.0) chấp nhận một nhóm trường nhỏ hơn và từ chối toàn bộ yêu cầu khi bất kỳ trường nào khác được đặt. Đối với lite, `additionalQueries`, `systemPrompt` và mọi khóa `contents` ngoại trừ `text` và `highlights` đều bị loại bỏ trước cuộc gọi. `subpages`, `subpageTarget`, `highlights.numSentences` và `highlights.highlightsPerUrl` không được dùng nữa không còn được chuyển tiếp nữa.
+
+Kế toán chi phí là sổ đăng ký cố định `costPerQuery`, ngoại trừ Exa, tuân theo giá riêng của Exa: 0,007 USD mỗi lệnh gọi cho `auto` (và `fast` cũ) hoặc 0,004 USD cho `lite` (và `instant` cũ), bao gồm 10 kết quả; 0,001 USD cho mỗi kết quả tiếp theo; và 0,001 USD cho mỗi kết quả trả về khi `contents.summary` được đặt. Tavily được ghi ở mức 1 tín dụng ($0,008) cho `search_depth` `basic`, `fast` và `ultra-fast` và 2 tín dụng ($0,016) cho `advanced` ( [tín dụng Tavily API](https://docs.tavily.com/documentation/api-credits) ). Cuộc gọi với `auto_parameters: true` mà Tavily nâng cấp lên nâng cao vẫn được ghi ở mức 1 tín dụng.
 
 ---
 

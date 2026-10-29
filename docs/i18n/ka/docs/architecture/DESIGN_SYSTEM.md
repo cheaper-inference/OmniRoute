@@ -117,11 +117,9 @@
 
 ## 5. ნაკრების განახლება
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` აკოპირებს upstream `src/`-ს მითითებული კომიტიდან
-`packages/ui-kit/src`-ში და იყენებს ერთადერთ ნებადართულ ტრანსფორმაციას (შლის `.js` სუფიქსს
-შეფარდებითი იმპორტებიდან). შემდეგ: გადახედეთ `git diff packages/ui-kit`-ს, გაიარეთ ვიზუალური შემოწმება providers-,
-settings-, combos-, usage- და endpoint-გვერდებზე ორივე თემაში, გაუშვით `npm run check:ui-kit-snapshot` და `npm run test:vitest:ui`,
-და გახსენით PR upstream changelog-ით.
+`npm run check:ui-kit-upstream` ადარებს `packages/ui-kit/UPSTREAM.md` ში ჩამაგრებულ ვერსიას ზედა დინების რეპოს უახლეს `v*` ტეგს და ბეჭდავს სინქრონიზაციის ბრძანებას, როდესაც გამოშვება გამოდის. ყოველკვირეული `UI Kit upstream watch` სამუშაო ნაკადი (`.github/workflows/ui-kit-upstream-watch.yml`) აწარმოებს იგივე შემოწმებას და ინახავს ერთ თრექინგის საკითხს ღია, სანამ პინი უკან არის; ზედა დინების რეპო არის პირადი, ამიტომ სამუშაო პროცესს სჭირდება მხოლოდ წაკითხვის ნიშანი `UI_KIT_READ_TOKEN` საიდუმლოში და რჩება ინერტული მის გარეშე.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` აკოპირებს ზემოთ დინებაში `src/` ამ დავალებაში (`latest` = უახლესი `v*` ტეგი) `packages/ui-kit/src` ში, იყენებს ერთ დაშვებულ ტრანსფორმაციას (ის ჩამოაგდებს `.js` სუფიქსს შედარებითი იმპორტიდან) და აყენებს სამუშაო სივრცის ვერსიას `packages/ui-kit/package.json` ში და `package-lock.json` ზე ზემოთ. შემდეგ: გადახედეთ `git diff packages/ui-kit`, გააკეთეთ ვიზუალური საშვი პროვაიდერებზე, პარამეტრებზე, კომბინაციებზე, გამოყენებასა და საბოლოო წერტილზე ორივე თემაში, გაუშვით `npm run check:ui-kit-snapshot` და `npm run test:vitest:ui` და გახსენით PR ზედა ნაკადის ცვლილების ჟურნალით.
 
 ## 6. README დიაგრამები
 

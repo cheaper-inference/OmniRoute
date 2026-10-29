@@ -43,10 +43,11 @@
 3. kit ၏ လစ်လပ်ချက်များအတွက် workaround များကို adapter အတွင်းတွင် (သို့မဟုတ် ပြင်ဆင်ချက်က style ဖြစ်လျှင် `globals.css` `@layer components` အတွင်းတွင်) ထားရှိပါ၊ `packages/ui-kit/src` အတွင်းတွင် လုံးဝ မဟုတ်ပါ။
 4. `tests/unit/ui/adapters/<name>.test.tsx` ကို ထည့်ပါ သို့မဟုတ် update လုပ်ပါ။ caller များ များစွာရှိသော adapter တစ်ခုအတွက် ပြောင်းလဲမှုမပြုလုပ်မီနှင့် ပြုလုပ်ပြီးနောက် render လုပ်ထားသော markup ကို နှိုင်းယှဉ်ပါ — padding သို့မဟုတ် wrapper ပြောင်းလဲမှုများသည် screen တိုင်းသို့ ပျံ့နှံ့သွားသည်။
 
-## 5. kit ကို update လုပ်ခြင်း
+## 5. ပစ္စည်းအစုံကို အပ်ဒိတ်လုပ်ခြင်း။
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` သည် အဆိုပါ commit ရှိ upstream `src/` ကို
-`packages/ui-kit/src` အတွင်းသို့ ကူးယူပြီး ခွင့်ပြုထားသော transformation တစ်ခုတည်းကို apply လုပ်သည် (၎င်းက relative import များမှ `.js` suffix ကို ဖယ်ထုတ်သည်)။ ထို့နောက်: `git diff packages/ui-kit` ကို review လုပ်ပါ၊ theme နှစ်ခုလုံးတွင် providers၊ settings၊ combos၊ usage နှင့် endpoint ကို visual စစ်ဆေးပါ၊ `npm run check:ui-kit-snapshot` နှင့် `npm run test:vitest:ui` ကို run ပါ၊ ပြီးလျှင် upstream changelog နှင့်အတူ PR ကို ဖွင့်ပါ။
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` တွင်ထိုးထားသောဗားရှင်းကို upstream repo ၏နောက်ဆုံးထွက် `v*` tag နှင့် နှိုင်းယှဉ်ပြီး ထွက်ရှိလာသောအခါတွင် ထပ်တူကျသည့်အမိန့်ကို ပရင့်ထုတ်သည်။ အပတ်စဉ် `UI Kit upstream watch` အလုပ်အသွားအလာ (`.github/workflows/ui-kit-upstream-watch.yml`) သည် တူညီသော စစ်ဆေးမှုကို လုပ်ဆောင်ပြီး ပင်နောက်တွင် ရှိနေစဉ် ခြေရာခံခြင်းပြဿနာတစ်ခုကို ဖွင့်ထားပေးသည်။ အထက်ရေစီးကြောင်း repo သည် သီးသန့်ဖြစ်သည်၊ ထို့ကြောင့် အလုပ်အသွားအလာသည် `UI_KIT_READ_TOKEN` လျှို့ဝှက်တွင် ဖတ်ရန်သာ တိုကင်တစ်ခု လိုအပ်ပြီး ၎င်းမပါဘဲ ရပ်တန့်နေပါသည်။
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` `src/` commit တွင် (`latest` = the newest `v*` tag) ကို `packages/ui-kit/src` သို့ ကူးယူသည်၊ ခွင့်ပြုထားသော အသွင်ပြောင်းမှုကို အသုံးပြုသည် (၎င်းသည် `.js` ၏ နောက်ဆက်တွဲကို ဆက်စပ်တင်သွင်းမှုများမှ ရုပ်သိမ်းသွားသည်) နှင့် `packages/ui-kit/package.json` နှင့် `package-lock.json` တွင် workspace ဗားရှင်းကို upstream တစ်ခုသို့ သတ်မှတ်သည်။ ထို့နောက်- `git diff packages/ui-kit` ပြန်လည်သုံးသပ်ပါ၊ ပံ့ပိုးပေးသူများ၊ ဆက်တင်များ၊ ပေါင်းစပ်မှုများ၊ အသုံးပြုမှုနှင့် အဆုံးမှတ်ကို အပြင်အဆင်နှစ်ခုလုံးတွင် ပြုလုပ်ပါ၊ `npm run check:ui-kit-snapshot` နှင့် `npm run test:vitest:ui` ကိုဖွင့်ပါ၊ နှင့် PR ကို upstream changelog ဖြင့်ဖွင့်ပါ။
 
 ## 6. README ပုံချပ်များ
 

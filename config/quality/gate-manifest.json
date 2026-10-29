@@ -712,6 +712,11 @@
       "name": "check:ui-kit-snapshot",
       "command": "node scripts/check/check-ui-kit-snapshot.mjs",
       "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:ui-kit-upstream",
+      "command": "node scripts/check/check-ui-kit-upstream.mjs",
+      "disposition": "separately-invoked"
     }
   ],
   "profiles": {
