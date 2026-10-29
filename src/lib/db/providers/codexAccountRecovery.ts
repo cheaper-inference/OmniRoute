@@ -1,3 +1,4 @@
+import { mergeCodexQuotaObservation } from "@/lib/providers/codexQuotaDisplay";
 import { backupDbFile } from "../backup";
 import { getDbInstance, rowToCamel } from "../core";
 import { invalidateDbCache } from "../readCache";
@@ -83,7 +84,7 @@ export async function syncCodexQuotaObservation(id: string, usage: RecordValue, 
       )
         continue;
       const byScope = { ...toRecord(data.codexQuotaStateByScope) };
-      const snapshot = { ...toRecord(byScope[scope]), observedAt: new Date().toISOString() };
+      const snapshot: RecordValue = { observedAt: new Date().toISOString() };
       for (const [window, suffix] of [
         [session, "5h"],
         [weekly, "7d"],
@@ -95,7 +96,9 @@ export async function syncCodexQuotaObservation(id: string, usage: RecordValue, 
           [`resetAt${suffix}`]: window.resetAt ?? null,
         });
       }
-      byScope[scope] = snapshot;
+      const merged = mergeCodexQuotaObservation(toRecord(byScope[scope]), snapshot);
+      if (!merged) continue;
+      byScope[scope] = merged;
       data.codexQuotaStateByScope = byScope;
       if (
         valid(session) &&

@@ -1115,12 +1115,19 @@ export async function fetchAndPersistProviderLimits(
   usage: JsonRecord;
   cache: ProviderLimitsCacheEntry;
 }> {
+  // Conservative observation ordering: a slow usage poll must not outrank
+  // inference evidence accepted while that poll was in flight.
+  const readStartedAt = new Date().toISOString();
   const { connection, usage } = await fetchLiveProviderLimitsWithOptions(connectionId, {
     forceRefresh: source === "manual",
     allowRotatingRefresh: opts.allowRotatingRefresh,
     includeResetCredits: opts.includeResetCredits,
   });
-  const newCache = toProviderLimitsCacheEntry(usage, source);
+  const newCache = toProviderLimitsCacheEntry(
+    usage,
+    source,
+    connection.provider === "codex" && usage._stale !== true ? readStartedAt : undefined
+  );
   const previous = getProviderLimitsCache(connectionId);
   const cache = mergeProviderLimitsCacheEntry(connection.provider, newCache, previous);
 
@@ -1161,6 +1168,14 @@ export async function fetchAndPersistProviderLimits(
     ...(cache.billing ? { billing: cache.billing } : {}),
   };
   setProviderLimitsCache(connectionId, cache);
+  if (connection.provider === "codex") {
+    const current = getProviderLimitsCache(connectionId) ?? cache;
+    return {
+      connection,
+      usage: { ...mergedUsage, quotas: current.quotas, fetchedAt: current.fetchedAt },
+      cache: current,
+    };
+  }
   return { connection, usage: mergedUsage, cache };
 }
 
@@ -1210,10 +1225,15 @@ export async function syncAllProviderLimits(
     const forceRefresh =
       source === "manual" ||
       shouldRefreshProviderLimitsCache(connection, existingCache || undefined);
+    const readStartedAt = new Date().toISOString();
     const { usage } = await fetchLiveProviderLimitsWithOptions(connection.id, {
       forceRefresh,
     });
-    const nextCache = toProviderLimitsCacheEntry(usage, source);
+    const nextCache = toProviderLimitsCacheEntry(
+      usage,
+      source,
+      connection.provider === "codex" && usage._stale !== true ? readStartedAt : undefined
+    );
     const cache = mergeProviderLimitsCacheEntry(connection.provider, nextCache, existingCache);
     return { connectionId: connection.id, cache };
   };
