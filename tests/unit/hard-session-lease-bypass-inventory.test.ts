@@ -226,6 +226,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/instrumentation-node.ts": 1,
     "src/lib/a2a/skills/providerDiscovery.ts": 1,
     "src/lib/chaos/chaosExecutor.ts": 1,
+    // #17999: CLIProxyAPI management compat (/v0/management/api-call) re-resolves the
+    // connection named by auth_index and sends the allowlisted usage request with its
+    // stored OAuth token, so it is a direct dispatch site (class B) and carries the
+    // exclusive-lease auxiliary fence (see auxiliaryIsolationSources below).
+    "src/lib/cliproxyCompat/managementApi.ts": 1,
     "src/lib/cloudAgent/api.ts": 1,
     "src/lib/cloudSync.ts": 1,
     "src/lib/combos/builderOptions.ts": 1,
@@ -361,6 +366,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
         "open-sse/services/combo/executeTargetGates.ts",
         "open-sse/services/tokenRefresh.ts",
         "src/app/api/translator/send/route.ts",
+        "src/lib/cliproxyCompat/managementApi.ts",
         "src/lib/credentialHealth/scheduler.ts",
         "src/lib/modelValidation/runner.ts",
         "src/lib/providers/volcPlanAutoSyncBackfill.ts",
@@ -475,6 +481,7 @@ test("managed request surfaces are fenced centrally or rejected before independe
     "src/app/api/translator/send/route.ts",
     "src/app/api/translator/translate/route.ts",
     "src/lib/api/modelTestRunner.ts",
+    "src/lib/cliproxyCompat/managementApi.ts",
     "src/lib/modelValidation/runner.ts",
     "src/lib/services/quotaAutoPing.ts",
     "src/lib/services/quotaAutoPingManual.ts",
