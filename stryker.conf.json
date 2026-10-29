@@ -37,6 +37,7 @@
   "plugins": ["@stryker-mutator/tap-runner"],
   "tap": {
     "testFiles": [
+      "tests/unit/deepseek-api-flash-vision.test.ts",
       "tests/unit/provider-limits-recovery.test.ts",
       "tests/unit/veoaifree-optional-credentials.test.ts",
       "tests/unit/16380-opencode-401-model-scope.test.ts",
@@ -667,7 +668,14 @@
       "tests/unit/management-writers-always-protected.test.ts",
       "tests/unit/opencode-410-model-scope.test.ts",
       "tests/unit/p2c-latency-weight.test.ts",
-      "tests/unit/services/service-status-route-guard.test.ts"
+      "tests/unit/services/service-status-route-guard.test.ts",
+      "tests/unit/log-export-otlp-headers.test.ts",
+      "tests/unit/stream-active-timeout-covers-model-budgets.test.ts",
+      "tests/unit/stream-active-timeout-per-target.test.ts",
+      "tests/unit/chat-antigravity-429-budget.test.ts",
+      "tests/unit/combo-retry-cut-stream.test.ts",
+      "tests/unit/combo/combo-set-retry-durable-exhaustion.test.ts",
+      "tests/unit/sse-cut-tool-call-arguments.test.ts"
     ],
     "nodeArgs": [
       "--import",

@@ -21,7 +21,12 @@ test("packages/ui-kit is a private, UNLICENSED workspace pinned to an upstream c
     );
   const upstream = read("packages/ui-kit/UPSTREAM.md");
   assert.match(upstream, /commit:\s*[0-9a-f]{40}/);
-  assert.match(upstream, /version:\s*0\.0\.48/);
+  const pinnedVersion = /^- version:\s*(\d+\.\d+\.\d+)$/m.exec(upstream)?.[1];
+  assert.equal(
+    pinnedVersion,
+    pkg.version,
+    "the workspace version mirrors the pinned upstream version"
+  );
   assert.match(upstream, /license-authorization:/);
 });
 

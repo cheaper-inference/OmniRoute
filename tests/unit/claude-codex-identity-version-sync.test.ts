@@ -130,7 +130,10 @@ function assertGithubFallbackDoesNotPersist() {
   const githubIdx = githubMatch ? githubMatch.index : -1;
   const localMatch = /source:\s*"local_catalog"/.exec(src.slice(githubIdx));
   const localIdx = localMatch ? githubIdx + localMatch.index : -1;
-  const fallbackIdx = src.indexOf("const liveFailed = liveModels === null", liveIdx);
+  // #17342: the live helper now returns { models, failure } (models is never null), so
+  // liveFailed is derived from the failure code; anchor on the declaration, not its RHS.
+  const liveFailedMatch = /const\s+liveFailed\s*=/.exec(src.slice(liveIdx));
+  const fallbackIdx = liveFailedMatch ? liveIdx + liveFailedMatch.index : -1;
   const cacheMatch = /if\s*\(\s*fallbackSource\s*===\s*"cache"/.exec(src.slice(fallbackIdx));
   const cacheIdx = cacheMatch ? fallbackIdx + cacheMatch.index : -1;
   assert.ok(liveIdx > 0, "the live branch must exist");

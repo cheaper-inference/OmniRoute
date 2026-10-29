@@ -11,33 +11,19 @@
 
 ---
 
-## Kaj je to
+## Kaj je
 
-OmniRoute registrira 376 ponudnikov, med katerimi je 155 vnosov v katalogu označenih kot **brezplačno/brez avtentikacije**
-(brez avtentikacije, OAuth z brezplačno ravnjo ali API ključ z brezplačno ravnjo — glejte
-[Vodnik po brezplačnih ravneh](../getting-started/FREE-TIERS-GUIDE.md) in celoten
-[imenik brezplačnih ravni](../reference/FREE_TIERS.md)). Zanka pa je v tem: kakovost modelov
-brezplačnih ponudnikov se zelo razlikuje. Ponudnik brez avtentikacije, ki ponuja vrhunski
-model, je veliko bolj uporaben od tistega, ki ponuja majhen zastarel model.
+OmniRoute registrira 377 ponudnikov, vključno z označenimi 155 kataloškimi vpisi**free/no-auth** (ključ brez avtorizacije, brezplačne ravni OAuth ali brezplačne API ključ — glejte [Vodnik po brezplačnih stopnjah](../getting-started/FREE-TIERS-GUIDE.md) in celoten [imenik brezplačnih stopenj](../reference/FREE_TIERS.md) ). Ulov: brezplačni ponudniki se zelo razlikujejo glede kakovosti modelov. Ponudnik brez avtorizacije, ki služi mejnemu modelu, je veliko bolj uporaben kot tisti, ki služi majhnemu starejšemu modelu.
 
-**Razvrstitve brezplačnih ponudnikov** odgovarjajo na vprašanje »**kateri brezplačni ponudnik mi nudi najboljši model?**«
-tako, da združijo katalog vsakega brezplačnega ponudnika z **množično zbranimi ocenami kakovosti** z
-**lestvice Arena AI** (ELO na podlagi človeških preferenc — ista ideja, ki stoji za areno
-klepetalnih robotov LMArena). Ponudniki so nato razvrščeni glede na moč njihovega
-**najboljšega brezplačnega modela**.
+**Brezplačne lestvice ponudnikov** odgovori "** kateri brezplačni ponudnik mi ponudi najboljši model?** " z včlanitvijo v katalog vsakega brezplačnega ponudnika s** ocene kakovosti, pridobljene iz množice** od** Arena AI lestvica najboljših** (human-preference ELO, ista ideja za LMArena chatbot areno). Ponudniki so nato razvrščeni glede na moč svojih** najboljši brezplačni model** .
 
 Razvrstitev je izračunana iz treh dejanskih virov:
 
-1. Seznamov brezplačnih ponudnikov — `NOAUTH_PROVIDERS`, ter vnosov `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS`, označenih z zastavico `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Kataloga modelov vsakega ponudnika iz registra ponudnikov
-   (`open-sse/config/providerRegistry.ts`).
-3. Ocen primernosti za naloge, izpeljanih iz ELO, ki jih mehanizem za sinhronizacijo Arena
-   ELO shranjuje v tabelo `model_intelligence` v podatkovni bazi
-   (`src/lib/arenaEloSync.ts`).
+1. Seznami brezplačnih ponudnikov — `NOAUTH_PROVIDERS`, plus vnosi `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` z zastavico `hasFree` (`src/shared/constants/providers.ts`).
+2. Katalog modelov vsakega ponudnika iz registra ponudnikov (`open-sse/config/providerRegistry.ts`).
+3. ELO izpeljani rezultati prileganja nalogi, ki jih v tabeli `model_intelligence` DB shrani sinhronizacijski mehanizem Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Logika združevanja se nahaja v `src/lib/freeProviderRankings.ts`.
+Logika združevanja živi v `src/lib/freeProviderRankings.ts`.
 
 ---
 

@@ -805,49 +805,40 @@ OpenAI 互換のバッチ処理です。
 
 ---
 
-## 検索 API
+## API検索
 
-Web/検索プロバイダーの抽象化（Tavily、Brave、Exa、Serper など）。
+Web/searchプロバイダーの抽象化 (Tavily、Brave、Exa、Serper など)。
 
-| メソッド | パス                   | 説明                                                                                                 |
-| -------- | ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| GET      | `/v1/search`           | 設定済みの検索プロバイダーと機能の一覧を取得                                                         |
-| POST     | `/v1/search`           | 検索クエリを実行 — リクエスト本文は `v1SearchSchema` で検証され、キャッシュ/コアレッシングをサポート |
-| GET      | `/v1/search/analytics` | プロバイダーごとのヒット数/レイテンシ/キャッシュ統計                                                 |
+| 方法 | パス                   | 説明                                                                                                    |
+| ---- | ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | 構成された検索プロバイダーの+機能をリストする                                                           |
+| POST | `/v1/search`           | 検索クエリを実行します。 —本体は`v1SearchSchema`によって検証され、 caching/coalescingをサポートします。 |
+| GET  | `/v1/search/analytics` | プロバイダーごとのhit/latency/cache統計                                                                 |
 
-**認証:** Bearer API キー（`extractApiKey` + `isValidApiKey`）。検索ポリシーは `enforceApiKeyPolicy` によって適用されます。
+**認証:**ベアラーAPIキー (`extractApiKey` + `isValidApiKey`)。検索ポリシーは`enforceApiKeyPolicy`経由で適用されます。
 
-### Exa と Tavily の `provider_options`
+### エクサとタヴィリー`provider_options`
 
-Exa と Tavily は、名前空間付きバッグからプロバイダー固有のフィールドを読み取ります:
-`provider_options.exa`（または `provider_options["exa-search"]`）および `provider_options.tavily`
-（または `provider_options["tavily-search"]`）。以下のキーのみが転送されます。各キーは
-`open-sse/handlers/search/providerOptionsPassthrough.ts` 内のそれぞれの Zod スキーマに対して
-検証され、型が誤っているキーは除外されます。認証、ベース URL、`stream`、`outputSchema`
-を含め、それ以外のキーはすべて無視されます。他のプロバイダーで使用されるフラットなキー
-（`cx`、`depth`、...）は従来どおり機能します。
+Exa と Tavily は、名前空間バッグからプロバイダー固有のフィールドを読み取ります: `provider_options.exa` (または`provider_options["exa-search"]`) および`provider_options.tavily` (または`provider_options["tavily-search"]`)。以下のキーのみが転送されます。それぞれが`open-sse/handlers/search/providerOptionsPassthrough.ts`内の独自のZodスキーマに対してチェックされ、間違ったタイプのキーは削除されます。 auth、base URL、 `stream` 、 `outputSchema`などの他のキーは無視されます。他のプロバイダー (`cx`、 `depth`) で使用されるフラット キーは以前と同様に機能します。
 
-| プロバイダー | トップレベルフィールド                                                                                                                                                                                                                                                                                                                                                    | ネスト                                                                                                                                                                    |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa          | `type`、`category`、`userLocation`、`moderation`、`additionalQueries`、`objective`、`systemPrompt`、`compliance`（フラットなプリミティブ）、`startPublishedDate`、`endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` はデフォルトの `{ text: true, highlights: true }` にマージされます |
-| Tavily       | `search_depth`、`chunks_per_source`、`time_range`、`start_date`、`end_date`、`include_published_date`、`filter_by_published_date`、`include_answer`、`include_raw_content`、`include_images`、`include_image_descriptions`、`include_favicon`、`include_domains_mode`、`language`、`filter_by_language`、`auto_parameters`、`exact_match`、`include_usage`、`safe_search` | —                                                                                                                                                                         |
+| プロバイダー | 最上位フィールド                                                                                                                                                                                                                                                                                                                                                          | 入れ子になった                                                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| エクサ       | `type`、 `category`、 `userLocation`、 `moderation`、 `additionalQueries`、 `objective`、 `systemPrompt`、 `compliance` (フラット プリミティブ)、 `startPublishedDate`、 `endPublishedDate`                                                                                                                                                                               | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}`デフォルトの`{ text: true, highlights: true }`上にマージされました |
+| タヴィリー   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
 
-汎用フィールドが常に優先されます: `query`、`max_results`、`filters`（ドメイン）、`country`、
-および `search_type` から導出されるトピックです。Exa では、`search_type: "news"` により
-`category: "news"` が維持されます。Tavily は `search_type: "finance"`（`topic: "finance"`）も
-受け付けます。
+汎用フィールドが常に優先されます: `query`、 `max_results`、 `filters` (ドメイン)、 `country` 、および`search_type`から派生したトピック。 Exa では、 `search_type: "news"` `category: "news"`を保持します。 Tavily は`search_type: "finance"` (`topic: "finance"`) も受け入れます。
 
-汎用の `time_range` が両方のプロバイダーに渡されるようになりました。Exa には
-`startPublishedDate`（ISO タイムスタンプ）が渡され、Tavily には `start_date`
-（`YYYY-MM-DD`）が渡されます。`provider_options` で明示的に指定された日付は、
-マッピングされた日付を上書きします。
+Firecrawl の検索コストは、返された 10 件の結果の開始ブロックごとに記録され、1 ブロックあたり 0.002 ドル (2 クレジット)、呼び出しごとに少なくとも 1 ブロック ( [Firecrawl の請求](https://docs.firecrawl.dev/billing)): 11 件の結果の費用は 0.004 ドルです。
 
-Exa の結果では、`id`、`highlight_scores`、`summary`、`subpages`、`entities`、`extras` が
-`provider_raw` に保持されます。Tavily の結果では、`images` と `favicon` が保持されます。
+汎用`time_range`両方のプロバイダーに到達するようになりました。Exa は`startPublishedDate` (ISOタイムスタンプ) を取得し、Tavily は`start_date` (`YYYY-MM-DD`) を取得します。 `provider_options`内の明示的な日付は、マップされた日付をオーバーライドします。
 
-コスト計算には、引き続きフラットなレジストリ `costPerQuery` が使用されます。Tavily では、
-`search_depth: "advanced"` の場合、呼び出しごとにより多くのクレジットが請求されますが、
-その差は `usage.search_cost_usd` には反映されません。
+Exa の結果は、 `id`、 `highlight_scores`、 `summary`、 `subpages`、 `entities`および`extras`を`provider_raw`に保持します。 Tavily の結果は`images`と`favicon`を維持します。
+
+リンクアップ検索コストは、 `depth` `provider_options`からのものか接続の設定からのものかに関係なく、 `depth` `fast`および`standard`については 0.005 ドル、 `deep`については 0.05 ドル ([リンクアップ価格設定](https://docs.linkup.so/pages/documentation/development/pricing)) で記録されます。
+
+Exa `type: "lite"` (Exa 3.0) は、より小さいフィールドのセットを受け入れ、他のフィールドが設定されている場合はリクエスト全体を拒否します。 lite の場合、 `additionalQueries`、 `systemPrompt` 、および`text`と`highlights`を除くすべての`contents`キーは呼び出し前に削除されます。非推奨の`subpages`、 `subpageTarget`、 `highlights.numSentences`および`highlights.highlightsPerUrl`は転送されなくなりました。
+
+原価計算はフラット レジストリ`costPerQuery`です。ただし Exa は Exa 独自の価格設定に従います。 `auto` (および従来の`fast`) の場合は呼び出しごとに 0.007 ドル、 `lite` (および従来の`instant`) の場合は 0.004 ドルで、10 件の結果がカバーされます。その後の結果ごとに 0.001 ドル。 `contents.summary`が設定されている場合は、返された結果ごとに $0.001 がかかります。 Tavily は、 `search_depth` `basic`、 `fast`および`ultra-fast`の場合は 1 クレジット ($0.008)、 `advanced` ( [Tavily APIクレジット](https://docs.tavily.com/documentation/api-credits)) の場合は 2 クレジット ($0.016) で記録されます。 Tavily がアドバンストにアップグレードした`auto_parameters: true`との通話は、引き続き 1 クレジットで記録されます。
 
 ---
 
@@ -1603,10 +1594,10 @@ GET /api/telemetry/summary
 ## 予算
 
 ```bash
-# すべての API キーの予算状況を取得
+# Get budget status for all API keys
 GET /api/usage/budget
 
-# 予算を設定または更新
+# Set or update a budget
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1620,7 +1611,7 @@ Content-Type: application/json
 }
 ```
 
-> **スキーマに関する注記**（`setBudgetSchema`）：`apiKeyId` は必須です。`dailyLimitUsd`、`weeklyLimitUsd`、`monthlyLimitUsd` のうち、少なくとも 1 つがゼロより大きい必要があります。省略可能なフィールド：`warningThreshold`（0～1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。従来の `{keyId, limit, period}` 形式を使用すると、`400 Bad Request` が返されます。
+> **スキーマノート**(`setBudgetSchema`): `apiKeyId`は必須です。 `dailyLimitUsd`、 `weeklyLimitUsd`、または`monthlyLimitUsd`の少なくとも 1 つはゼロより大きくなければなりません。オプションのフィールド: `warningThreshold` (0–1)、 `resetInterval` (`daily` | `weekly` | `monthly`)、 `resetTime` (`HH:MM`)。従来の`{keyId, limit, period}`シェイプは`400 Bad Request`を返します。
 
 ## トークン制限
 

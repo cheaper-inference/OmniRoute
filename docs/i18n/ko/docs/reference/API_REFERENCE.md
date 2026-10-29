@@ -796,47 +796,40 @@ OpenAI 호환 배치 처리입니다.
 
 ---
 
-## 검색 API
+## API 검색
 
-웹/검색 제공자 추상화 계층(Tavily, Brave, Exa, Serper 등)입니다.
+Web/search 공급자 추상화(Tavily, Brave, Exa, Serper 등).
 
-| 메서드 | 경로                   | 설명                                                               |
-| ------ | ---------------------- | ------------------------------------------------------------------ |
-| GET    | `/v1/search`           | 구성된 검색 제공자 및 기능 목록 조회                               |
-| POST   | `/v1/search`           | 검색 쿼리 실행 — 본문은 `v1SearchSchema`로 검증되며 캐싱/병합 지원 |
-| GET    | `/v1/search/analytics` | 제공자별 적중률/지연 시간/캐시 통계                                |
+| 방법 | 길                     | 설명                                                                                  |
+| ---- | ---------------------- | ------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | 구성된 검색 공급자 + 기능 나열                                                        |
+| POST | `/v1/search`           | `v1SearchSchema` 로 검증된 — 본문 검색 쿼리를 실행하고 caching/coalescing 지원합니다. |
+| GET  | `/v1/search/analytics` | 공급자별 hit/latency/cache 통계                                                       |
 
-**인증:** Bearer API 키(`extractApiKey` + `isValidApiKey`). 검색 정책은 `enforceApiKeyPolicy`를 통해 적용됩니다.
+**인증:** 베어러 API 키(`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` 통해 시행되는 검색 정책.
 
-### Exa 및 Tavily `provider_options`
+### 엑사와 타빌리 `provider_options`
 
-Exa와 Tavily는 네임스페이스가 지정된 객체에서 제공자별 필드를 읽습니다.
-`provider_options.exa`(또는 `provider_options["exa-search"]`) 및 `provider_options.tavily`
-(또는 `provider_options["tavily-search"]`)입니다. 아래 키만 전달됩니다. 각 키는
-`open-sse/handlers/search/providerOptionsPassthrough.ts`의 자체 Zod 스키마를 기준으로
-검사되며, 타입이 잘못된 키는 삭제됩니다. 인증, 기본 URL, `stream`, `outputSchema`를
-포함한 그 외 모든 키는 무시됩니다. 다른 제공자가 사용하는 평면 키(`cx`, `depth`, ...)는
-이전과 동일하게 작동합니다.
+Exa와 Tavily는 네임스페이스 백( `provider_options.exa` (또는 `provider_options["exa-search"]`) 및 `provider_options.tavily` (또는 `provider_options["tavily-search"]`))에서 공급자별 필드를 읽습니다. 아래 키만 전달됩니다. 각각은 `open-sse/handlers/search/providerOptionsPassthrough.ts` 의 자체 Zod 스키마와 비교하여 검사되며 잘못된 유형의 키는 삭제됩니다. auth, base URL, `stream` 및 `outputSchema` 를 포함한 다른 모든 키는 무시됩니다. 다른 공급자(`cx`, `depth`, ...)에서 사용하는 일반 키는 이전과 같이 작동합니다.
 
-| 제공자 | 최상위 필드                                                                                                                                                                                                                                                                                                                                                               | 중첩 필드                                                                                                                                                      |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa    | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance`(평면 기본 타입), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}`가 기본값 `{ text: true, highlights: true }` 위에 병합됨 |
-| Tavily | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                              |
+| 공급자 | 최상위 필드                                                                                                                                                                                                                                                                                                                                                               | 중첩됨                                                                                                                                     |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 엑사   | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (플랫 프리미티브), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` 기본 `{ text: true, highlights: true }` 위에 병합되었습니다. |
+| 타빌리 | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                          |
 
-일반 필드가 항상 우선합니다. 해당 필드는 `query`, `max_results`, `filters`(도메인), `country` 및
-`search_type`에서 파생된 주제입니다. Exa에서 `search_type: "news"`는 `category: "news"`를 유지합니다.
-Tavily는 `search_type: "finance"`(`topic: "finance"`)도 허용합니다.
+일반 필드는 항상 승리합니다: `query`, `max_results`, `filters` (도메인), `country` 및 `search_type` 에서 파생된 주제. Exa에서 `search_type: "news"` `category: "news"` 유지합니다. Tavily는 `search_type: "finance"` (`topic: "finance"`)도 허용합니다.
 
-이제 일반 `time_range`가 두 제공자 모두에 전달됩니다. Exa에는 `startPublishedDate`(ISO
-타임스탬프)가, Tavily에는 `start_date`(`YYYY-MM-DD`)가 전달됩니다. `provider_options`에 명시된 날짜는
-매핑된 날짜를 재정의합니다.
+Firecrawl 검색 비용은 반환된 결과 10개의 시작 블록당 $0.002(2크레딧), 호출당 최소 하나의 블록( [Firecrawl 청구](https://docs.firecrawl.dev/billing) )으로 기록됩니다. 11개 결과 비용은 $0.004입니다.
 
-Exa 결과는 `id`, `highlight_scores`, `summary`, `subpages`, `entities`, `extras`를
-`provider_raw`에 유지합니다. Tavily 결과는 `images`와 `favicon`을 유지합니다.
+일반 `time_range` 이제 두 공급자 모두에 도달합니다. Exa는 `startPublishedDate` (ISO 타임스탬프)를 가져오고 Tavily는 `start_date` (`YYYY-MM-DD`)를 가져옵니다. `provider_options` 의 명시적인 날짜는 매핑된 날짜보다 우선합니다.
 
-비용 계산에는 계속해서 평면 레지스트리인 `costPerQuery`가 사용됩니다. Tavily는
-`search_depth: "advanced"`에 대해 호출당 더 많은 크레딧을 청구하며, 이 차이는
-`usage.search_cost_usd`에 반영되지 않습니다.
+Exa 결과는 `id`, `highlight_scores`, `summary`, `subpages`, `entities` 및 `extras` `provider_raw` 에 유지합니다. Tavily 결과는 `images` 및 `favicon` 유지합니다.
+
+링크업 검색 비용은 `depth` `provider_options` 또는 연결 설정에서 가져온 것인지 여부에 관계없이 `depth` `fast` 및 `standard` 의 경우 $0.005, `deep` 의 경우 $0.05로 기록됩니다( [링크업 가격](https://docs.linkup.so/pages/documentation/development/pricing) ).
+
+Exa `type: "lite"` (Exa 3.0)는 더 작은 필드 집합을 허용하고 다른 필드가 설정되면 전체 요청을 거부합니다. 라이트의 경우 `additionalQueries`, `systemPrompt` 및 `text` 및 `highlights` 제외한 모든 `contents` 키는 호출 전에 삭제됩니다. 더 이상 사용되지 않는 `subpages`, `subpageTarget`, `highlights.numSentences` 및 `highlights.highlightsPerUrl` 는 더 이상 전달되지 않습니다.
+
+비용 계산은 평면 레지스트리 `costPerQuery` 입니다. 단, Exa의 자체 가격을 따르는 Exa는 다음과 같습니다. `auto` (및 레거시 `fast`)의 경우 호출당 $0.007, `lite` (및 레거시 `instant`)의 경우 $0.004, 10개 결과 포함. 추가 결과당 $0.001; `contents.summary` 설정된 경우 반환된 결과당 $0.001입니다. Tavily는 `search_depth` `basic`, `fast` 및 `ultra-fast` 에 대해 1 크레딧($0.008), `advanced` ( [Tavily API 크레딧](https://docs.tavily.com/documentation/api-credits) )에 대해 2 크레딧($0.016)으로 기록됩니다. Tavily가 고급으로 업그레이드한 `auto_parameters: true` 사용한 통화는 여전히 1크레딧으로 기록됩니다.
 
 ---
 
@@ -1577,10 +1570,10 @@ GET /api/telemetry/summary
 ## 예산
 
 ```bash
-# 모든 API 키의 예산 상태 조회
+# Get budget status for all API keys
 GET /api/usage/budget
 
-# 예산 설정 또는 업데이트
+# Set or update a budget
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1594,7 +1587,7 @@ Content-Type: application/json
 }
 ```
 
-> **스키마 참고 사항** (`setBudgetSchema`): `apiKeyId`는 필수이며, `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd` 중 하나 이상은 0보다 커야 합니다. 선택적 필드: `warningThreshold`(0–1), `resetInterval`(`daily` | `weekly` | `monthly`), `resetTime`(`HH:MM`). 기존 `{keyId, limit, period}` 형식은 `400 Bad Request`를 반환합니다.
+> **스키마 메모** (`setBudgetSchema`): `apiKeyId` 필요합니다. `dailyLimitUsd`, `weeklyLimitUsd` 또는 `monthlyLimitUsd` 중 적어도 하나는 0보다 커야 합니다. 선택 필드: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). 레거시 `{keyId, limit, period}` 형태는 `400 Bad Request` 반환합니다.
 
 ## 토큰 제한
 
