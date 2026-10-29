@@ -6913,8 +6913,8 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "اختياري: model=cap واحد في كل سطر، يُطابَق مع معرّف نموذج المنبع بالضبط. تُوضع الطلبات الزائدة في طابور محلي؛ والفراغ يعني عدم وجود حد لكل نموذج.",
     "rateLimitOverridesModelConcurrencyInvalid": "إدخال تزامن لكل نموذج غير صالح \"{entry}\" — استخدم model=cap حيث cap عدد صحيح من 1 إلى {max}.",
-    "usedInComboTooltip": "Used in {count} combo(s): {combos}",
-    "openComboTooltip": "Open Combos — used by {combo}"
+    "usedInComboTooltip": "مستخدم في {count} مجموعة: {combos}",
+    "openComboTooltip": "فتح المجموعات — مستخدم بواسطة {combo}"
   },
   "settings": {
     "title": "الإعدادات",

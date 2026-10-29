@@ -6836,8 +6836,8 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Необязательно: одна запись model=cap в строке, сопоставляется с точным идентификатором upstream-модели. Лишние запросы ставятся в локальную очередь; пусто — без лимита по модели.",
     "rateLimitOverridesModelConcurrencyInvalid": "Недопустимая запись параллелизма по модели «{entry}» — используйте model=cap, где cap — целое число от 1 до {max}.",
-    "usedInComboTooltip": "Used in {count} combo(s): {combos}",
-    "openComboTooltip": "Open Combos — used by {combo}"
+    "usedInComboTooltip": "Используется в комбо ({count}): {combos}",
+    "openComboTooltip": "Открыть Комбо — используется в {combo}"
   },
   "settings": {
     "title": "Настройки",

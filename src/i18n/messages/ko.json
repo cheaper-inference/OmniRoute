@@ -6836,8 +6836,8 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "선택 사항: 한 줄에 model=cap 하나를 입력합니다. 업스트림 모델 ID와 정확히 일치해야 합니다. 초과 요청은 로컬에서 대기하며, 비워 두면 모델별 상한이 없습니다.",
     "rateLimitOverridesModelConcurrencyInvalid": "모델별 동시 실행 항목 \"{entry}\"이(가) 올바르지 않습니다 — model=cap 형식을 사용하고 cap은 1에서 {max} 사이의 정수여야 합니다.",
-    "usedInComboTooltip": "Used in {count} combo(s): {combos}",
-    "openComboTooltip": "Open Combos — used by {combo}"
+    "usedInComboTooltip": "{count}개 콤보에서 사용 중: {combos}",
+    "openComboTooltip": "콤보 열기 — {combo}에서 사용 중"
   },
   "settings": {
     "title": "설정",

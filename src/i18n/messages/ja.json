@@ -6836,8 +6836,8 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "任意: 1 行に 1 つ model=cap を指定します。アップストリームのモデル ID と完全一致で照合されます。超過したリクエストはローカルで待機します。空欄の場合、モデルごとの上限はありません。",
     "rateLimitOverridesModelConcurrencyInvalid": "モデルごとの同時実行の指定「{entry}」が無効です — model=cap の形式で、cap は 1 から {max} までの整数にしてください。",
-    "usedInComboTooltip": "Used in {count} combo(s): {combos}",
-    "openComboTooltip": "Open Combos — used by {combo}"
+    "usedInComboTooltip": "{count} 件のコンボで使用中: {combos}",
+    "openComboTooltip": "コンボを開く — {combo} で使用中"
   },
   "settings": {
     "title": "設定",

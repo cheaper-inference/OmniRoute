@@ -6836,8 +6836,8 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "選填：每行一個 model=cap，與上游模型 ID 完全比對。超出的請求會在本機排隊；留空表示不設各模型上限。",
     "rateLimitOverridesModelConcurrencyInvalid": "無效的各模型並行項目「{entry}」——請使用 model=cap，其中 cap 為 1 到 {max} 的整數。",
-    "usedInComboTooltip": "Used in {count} combo(s): {combos}",
-    "openComboTooltip": "Open Combos — used by {combo}"
+    "usedInComboTooltip": "已在 {count} 個組合中使用：{combos}",
+    "openComboTooltip": "開啟組合 — 由 {combo} 使用"
   },
   "settings": {
     "title": "設定",

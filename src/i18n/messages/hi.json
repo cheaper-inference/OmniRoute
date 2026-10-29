@@ -6836,8 +6836,8 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "वैकल्पिक: प्रति पंक्ति एक model=cap, अपस्ट्रीम मॉडल आईडी से ठीक-ठीक मिलाया जाता है। अतिरिक्त अनुरोध स्थानीय रूप से कतार में रहते हैं; खाली का अर्थ है कोई प्रति-मॉडल सीमा नहीं।",
     "rateLimitOverridesModelConcurrencyInvalid": "अमान्य प्रति-मॉडल समवर्तीता प्रविष्टि \"{entry}\" — model=cap का उपयोग करें, जहाँ cap 1 से {max} के बीच की पूर्ण संख्या हो।",
-    "usedInComboTooltip": "Used in {count} combo(s): {combos}",
-    "openComboTooltip": "Open Combos — used by {combo}"
+    "usedInComboTooltip": "{count} संयोजन(नों) में उपयोग किया गया: {combos}",
+    "openComboTooltip": "संयोजन खोलें — {combo} द्वारा उपयोग किया गया"
   },
   "settings": {
     "title": "सेटिंग्स",

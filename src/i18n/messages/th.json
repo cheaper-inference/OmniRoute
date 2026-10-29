@@ -6836,8 +6836,8 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "ไม่บังคับ: หนึ่ง model=cap ต่อบรรทัด จับคู่กับ ID โมเดลอัปสตรีมที่ตรงกันทุกตัวอักษร คำขอส่วนเกินจะเข้าคิวในเครื่อง ปล่อยว่างหมายถึงไม่จำกัดต่อโมเดล",
     "rateLimitOverridesModelConcurrencyInvalid": "รายการการทำงานพร้อมกันต่อโมเดล \"{entry}\" ไม่ถูกต้อง — ใช้ model=cap โดย cap เป็นจำนวนเต็มตั้งแต่ 1 ถึง {max}",
-    "usedInComboTooltip": "Used in {count} combo(s): {combos}",
-    "openComboTooltip": "Open Combos — used by {combo}"
+    "usedInComboTooltip": "ใช้ใน {count} คอมโบ: {combos}",
+    "openComboTooltip": "เปิดคอมโบ — ใช้โดย {combo}"
   },
   "settings": {
     "title": "การตั้งค่า",

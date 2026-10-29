@@ -55,6 +55,33 @@ function stepModelId(model: unknown): string | null {
   return slashIndex === -1 ? model : model.slice(slashIndex + 1);
 }
 
+/** Trimmed combo name, or "" when the entry is not a usable combo. */
+function comboName(combo: unknown): string {
+  if (!isCombo(combo) || typeof combo.name !== "string") return "";
+  return combo.name.trim();
+}
+
+/** Bare model ids of the combo's `kind: "model"` steps that target `providerId`. */
+function comboModelIdsForProvider(combo: ComboLike, providerId: string): string[] {
+  const steps = Array.isArray(combo.models) ? combo.models : [];
+  const modelIds: string[] = [];
+  for (const step of steps) {
+    if (!isComboStep(step) || step.kind !== "model" || step.providerId !== providerId) continue;
+    const modelId = stepModelId(step.model);
+    if (modelId) modelIds.push(modelId);
+  }
+  return modelIds;
+}
+
+function addComboUsage(usage: ModelComboUsage, modelId: string, name: string): void {
+  const existing = usage[modelId];
+  if (!existing) {
+    usage[modelId] = [name];
+  } else if (!existing.includes(name)) {
+    existing.push(name);
+  }
+}
+
 /**
  * Pure inversion of the combo list into a model-id → combo-names map, scoped to
  * one provider. Exported so the mapping can be unit-tested without a browser.
@@ -65,25 +92,10 @@ export function buildModelComboUsage(combos: unknown, providerId: string): Model
   const usage: ModelComboUsage = {};
 
   for (const combo of combos) {
-    if (!isCombo(combo)) continue;
-    const name = typeof combo.name === "string" ? combo.name.trim() : "";
+    const name = comboName(combo);
     if (!name) continue;
-
-    const steps = Array.isArray(combo.models) ? combo.models : [];
-    for (const step of steps) {
-      if (!isComboStep(step)) continue;
-      if (step.kind !== "model") continue;
-      if (step.providerId !== providerId) continue;
-
-      const modelId = stepModelId(step.model);
-      if (!modelId) continue;
-
-      const existing = usage[modelId];
-      if (existing) {
-        if (!existing.includes(name)) existing.push(name);
-      } else {
-        usage[modelId] = [name];
-      }
+    for (const modelId of comboModelIdsForProvider(combo as ComboLike, providerId)) {
+      addComboUsage(usage, modelId, name);
     }
   }
 
