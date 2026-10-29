@@ -62,6 +62,10 @@ export type PendingRequestDetail = {
     compressed: number | null;
   };
   id: string;
+  /** Actual durable ID, assigned only after a successful insert. */
+  persistedLogId?: string;
+  /** Private identity for each attempt sharing a public preview ID. */
+  attemptGeneration?: string;
   model: string;
   provider: string;
   connectionId: string | null;
@@ -524,6 +528,7 @@ export function trackPendingRequest(
           `${now}-${(globalThis.crypto.randomUUID() as string).replace(/-/g, "").slice(0, 12)}-${(++pendingIdSequence).toString(
             36
           )}`,
+        attemptGeneration: globalThis.crypto.randomUUID(),
         model,
         provider,
         connectionId,
@@ -600,6 +605,21 @@ export function updatePendingRequestById(id: string | null, metadata: PendingReq
   totalPendingDetailBytes += pendingDetailBytes(detail) - before;
   enforcePendingByteCeiling();
   return true;
+}
+
+/** Link the first confirmed insert to its exact preview, before or after finalization. */
+export function markRequestPersistedById(
+  id: unknown,
+  attemptGeneration: unknown,
+  persistedLogId: string
+) {
+  if (typeof id !== "string" || typeof attemptGeneration !== "string") return;
+  const pending = pendingById.get(id);
+  if (pending?.attemptGeneration === attemptGeneration) pending.persistedLogId ??= persistedLogId;
+  const completed = getCompletedDetails().get(id);
+  if (completed?.attemptGeneration === attemptGeneration && !completed.persistedLogId) {
+    storeCompletedDetail({ ...completed, persistedLogId });
+  }
 }
 
 /** Attach scalar usage to the exact attempt, even if its stream already finalized. */
