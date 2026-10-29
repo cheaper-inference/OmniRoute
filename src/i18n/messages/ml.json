@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "ഈ ടെംപ്ലേറ്റുമായി പൊരുത്തപ്പെടുന്ന, നിലവിൽ കണക്റ്റ് ചെയ്തിരിക്കുന്ന പ്രൊവൈഡർമാരുടെയും മോഡലുകളുടെയും ഒരു സ്നാപ്പ്ഷോട്ട് എഡിറ്റ് ചെയ്യാവുന്ന കോംബോയാക്കി മാറ്റും.",
     "duplicateAutoComboFailedPrefix": "ഓട്ടോ-കോംബോ പകർത്തുന്നതിൽ പരാജയപ്പെട്ടു:",
     "duplicateAutoComboUnknownError": "അജ്ഞാത പിശക്",
-    "duplicateAutoComboTitle": "{name}-ൽ നിന്ന് ഒരു സ്റ്റാറ്റിക് കോംബോ സൃഷ്ടിക്കുക"
+    "duplicateAutoComboTitle": "{name}-ൽ നിന്ന് ഒരു സ്റ്റാറ്റിക് കോംബോ സൃഷ്ടിക്കുക",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "സമ്മതിച്ചു: ഇതുവരെ വിലയിരുത്തപ്പെട്ടിട്ടില്ല (തത്സമയ Jev ഒരു ഉപയോക്തൃ സന്ദേശം ആവശ്യമാണ്). യോഗ്യൻ: {models}.",
+    "jevAdmittedNone": "സമ്മതിച്ചു: ഒന്നുമില്ല — എല്ലാ ലക്ഷ്യങ്ങളും Jev-ന് മുമ്പ് തടഞ്ഞിരിക്കുന്നു.",
+    "jevHeld": "തടഞ്ഞുവെച്ചത്: Jev ഒരു തത്സമയ അഭ്യർത്ഥനയിൽ പ്രവർത്തിക്കുന്നത് വരെ (പ്രൊബബിലിറ്റി ഫ്ലോറും ആധിപത്യവും).",
+    "jevBlocked": "തടഞ്ഞു: {models}.",
+    "jevBlockedNone": "തടഞ്ഞു: ഒന്നുമില്ല.",
+    "jevNotConfigured": "Jev കോൺഫിഗർ ചെയ്തിട്ടില്ല",
+    "jevTestSummaryFootnote": "താഴെയുള്ള ടാർഗെറ്റ് വരികൾ സ്വതന്ത്ര ആരോഗ്യ അന്വേഷണങ്ങളാണ്. തത്സമയ Jev പ്രവേശനം ഒരു യഥാർത്ഥ ചാറ്റ് അഭ്യർത്ഥനയുടെ തീരുമാനത്തിൽ രേഖപ്പെടുത്തിയിട്ടുണ്ട്."
   },
   "costs": {
     "title": "ചെലവുകൾ",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "കണക്ഷൻ (രോ അക്കൗണ്ടിനും സ്വന്തം ബ്രേക്കർ ഉണ്ട്)",
     "resilienceTokenRefreshThreshold": "പരാജയങ്ങൾ താൽക്കാലികമായി നിർത്തുന്നതിന് മുമ്പുള്ളവ",
     "resilienceTokenRefreshCooldown": "ട്രിപ്പ് ചെയ്തതിന് ശേഷം വിശ്രമിക്കുക",
+    "jev": "Jev",
     "piiMasking": {
       "title": "വ്യക്തിഗത ഡാറ്റ മറയ്ക്കൽ",
       "description": "ഏതെല്ലാം തരം വ്യക്തിഗത ഡാറ്റ മറയ്ക്കണമെന്ന് തിരഞ്ഞെടുത്ത് നിങ്ങളുടെ സ്വന്തം പാറ്റേണുകൾ ചേർക്കുക. താഴെ കാണിച്ചിരിക്കുന്ന ഫീച്ചർ ഫ്ലാഗുകൾ ഓണാക്കുന്നതുവരെ മറയ്ക്കൽ ഓഫായിരിക്കും.",

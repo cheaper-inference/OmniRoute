@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Déanfaidh sé seo cóip de na soláthraithe/samhlacha atá nasctha faoi láthair agus a mheaitseálann an teimpléad seo, agus cuirfidh sé i gcomhcheangal ineagarthóireachta iad.",
     "duplicateAutoComboFailedPrefix": "Theip ar chóip den chomhcheangal uathoibríoch a chruthú:",
     "duplicateAutoComboUnknownError": "Earráid anaithnid",
-    "duplicateAutoComboTitle": "Cruthaigh comhcheangal statach ó {name}"
+    "duplicateAutoComboTitle": "Cruthaigh comhcheangal statach ó {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Ligthe isteach: gan bhreithiúnas fós (teastaíonn teachtaireacht úsáideora ó Jev beo). Incháilithe: {models}.",
+    "jevAdmittedNone": "Ligthe isteach: níl aon cheann — tá gach sprioc blocáilte roimh Jev.",
+    "jevHeld": "Coinnithe: níl aon cheann go dtí go ritheann Jev ar iarratas beo (urlár dóchúlachta agus ceannasaithe).",
+    "jevBlocked": "Blocáilte: {models}.",
+    "jevBlockedNone": "Blocáilte: níl aon cheann.",
+    "jevNotConfigured": "Níl Jev cumraithe",
+    "jevTestSummaryFootnote": "Is taiscéalaithe sláinte neamhspleácha iad na sraitheanna sprice thíos. Déantar ligean isteach Jev beo a thaifeadadh ar lorg cinniúna iarratais comhrá fíor."
   },
   "costs": {
     "title": "Costais",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Ceangal (tá meitneoir féin ag gach cuntas)",
     "resilienceTokenRefreshThreshold": "Teipimhí roimh an sos",
     "resilienceTokenRefreshCooldown": "Sos tar éis an rith a thosú",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Folú sonraí pearsanta",
       "description": "Roghnaigh na cineálacha sonraí pearsanta a fholófar agus cuir do phatrúin féin leis. Fanann an folú múchta go dtí go gcasann tú air na bratacha gné a thaispeántar thíos.",

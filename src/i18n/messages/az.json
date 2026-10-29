@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "Bu, bu şablona uyğun olan hazırkı qoşulmuş provayderləri/modeləri redaktə oluna bilən kombo kimi saxlayacaq.",
     "duplicateAutoComboFailedPrefix": "Avtokombo kopyalanması uğursuz oldu:",
     "duplicateAutoComboUnknownError": "Naməlum xəta",
-    "duplicateAutoComboTitle": "{name}-dan statik kombo yarat"
+    "duplicateAutoComboTitle": "{name}-dan statik kombo yarat",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Qəbul edildi: hələ mühakimə olunmayıb (canlı Jev istifadəçi mesajına ehtiyac duyur). Uyğundur: {models}.",
+    "jevAdmittedNone": "Qəbul edildi: heç biri — Jev-dan əvvəl hər hədəf bloklanır.",
+    "jevHeld": "Saxlanılır: Jev canlı sorğu üzrə (ehtimal mərtəbəsi və üstünlük təşkil edən) işləməyincə heç biri yoxdur.",
+    "jevBlocked": "Blok edilib: {models}.",
+    "jevBlockedNone": "Bloklandı: heç biri.",
+    "jevNotConfigured": "Jev konfiqurasiya edilməyib",
+    "jevTestSummaryFootnote": "Aşağıdakı hədəf sıralar müstəqil sağlamlıq zondlarıdır. Canlı Jev qəbulu real söhbət sorğusu üçün qərar izində qeyd olunur."
   },
   "costs": {
     "title": "Xərclər",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "Bağlantı (hər hesabın öz açarı var)",
     "resilienceTokenRefreshThreshold": "Fasilə verilmədən əvvəl uğursuzluqlar",
     "resilienceTokenRefreshCooldown": "İşə düşdükdən sonra fasilə",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Şəxsi məlumatların maskalanması",
       "description": "Hansı növ şəxsi məlumatların maskalanacağını seçin və öz nümunələrinizi əlavə edin. Aşağıda göstərilən funksiya bayraqlarını yandırana qədər maskalama söndürülmüş qalır.",

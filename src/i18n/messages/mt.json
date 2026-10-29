@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "Dan se joħloq snapshot tal-fornituri/mudelli konnessi bħalissa li jaqblu ma’ din is-sagoma, f’kombinazzjoni li tista’ tiġi editjata.",
     "duplicateAutoComboFailedPrefix": "Ma rnexxilniex nidduplikaw il-kombinazzjoni awtomatika:",
     "duplicateAutoComboUnknownError": "Żball mhux magħruf",
-    "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}"
+    "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Ammessi: għadhom mhux iġġudikati (Jev live jeħtieġ messaġġ tal-utent). Eliġibbli: {models}.",
+    "jevAdmittedNone": "Ammessi: l-ebda — kull mira hija mblukkata qabel Jev.",
+    "jevHeld": "Miżmuma: l-ebda sakemm Jev ma jmexxix fuq talba live (limitu ta’ probabilità u ddominati).",
+    "jevBlocked": "Imblukkati: {models}.",
+    "jevBlockedNone": "Imblukkati: l-ebda.",
+    "jevNotConfigured": "Jev mhuwiex ikkonfigurat",
+    "jevTestSummaryFootnote": "Ir-ringieli tal-miri hawn taħt huma probes tas-saħħa indipendenti. L-ammissjoni ta’ Jev live hija rreġistrata fuq il-traċċa tad-deċiżjoni ta’ talba chat reali."
   },
   "costs": {
     "title": "Spejjeż",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "Konnessjoni (kull kont għandu l-breaker tiegħu)",
     "resilienceTokenRefreshThreshold": "Fallimenti qabel ma jieqaf",
     "resilienceTokenRefreshCooldown": "Waqqaf wara li tinstab",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Mascherament tad-data personali",
       "description": "Agħżel liema tipi ta' data personali jiġu mgħottija u żid il-mudelli tiegħek. Il-mascherament jibqa' mitfi sakemm tixgħel il-feature flags murija hawn taħt.",

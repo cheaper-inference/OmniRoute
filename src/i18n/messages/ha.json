@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Wannan zai adana kwafin masu samarwa/samfura da aka haɗa a yanzu waɗanda suka dace da wannan samfuri na tsari a matsayin haɗin da za a iya gyarawa.",
     "duplicateAutoComboFailedPrefix": "An kasa yin kwafin haɗin atomatik:",
     "duplicateAutoComboUnknownError": "Kuskuren da ba a sani ba",
-    "duplicateAutoComboTitle": "Ƙirƙiri tsayayyen haɗi daga {name}"
+    "duplicateAutoComboTitle": "Ƙirƙiri tsayayyen haɗi daga {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "An yarda: har yanzu ba a yanke hukunci ba (Jev yana buƙatar saƙon mai amfani). Cancantar: {models}.",
+    "jevAdmittedNone": "An yarda da shi: babu - kowane manufa an toshe shi kafin Jev.",
+    "jevHeld": "Rike: babu kowa har sai Jev yana gudana akan buƙatun rayuwa (yiwuwar bene da mamaye).",
+    "jevBlocked": "An toshe: {models}.",
+    "jevBlockedNone": "An katange: babu.",
+    "jevNotConfigured": "Jev ba a saita shi ba",
+    "jevTestSummaryFootnote": "Layukan da ke ƙasa sune masu binciken lafiya masu zaman kansu. Ana yin rikodin shigar Jev kai tsaye akan hanyar yanke shawara don buƙatar taɗi ta gaske."
   },
   "costs": {
     "title": "Kuɗaɗen kashewa",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Muhuji (kowane asusu na da na'sa na musu)",
     "resilienceTokenRefreshThreshold": "Kuskuren kafin tsayawa",
     "resilienceTokenRefreshCooldown": "Huta bayan kuskuro",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Ɓoye bayanan sirri",
       "description": "Zaɓi irin bayanan sirri da za a ɓoye kuma ka ƙara naka tsarin. Ɓoyewa za ta kasance a kashe har sai ka kunna tutocin fasali da aka nuna a ƙasa.",

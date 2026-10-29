@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Isso irá capturar os provedores/modelos atualmente conectados que correspondem a este modelo em uma combinação editável.",
     "duplicateAutoComboFailedPrefix": "Falha ao duplicar a combinação automática:",
     "duplicateAutoComboUnknownError": "Erro desconhecido",
-    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}"
+    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Admitidos: ainda não julgados (o Jev ao vivo precisa de uma mensagem do usuário). Elegíveis: {models}.",
+    "jevAdmittedNone": "Admitidos: nenhum — todos os alvos estão bloqueados antes do Jev.",
+    "jevHeld": "Em espera: nenhum até o Jev rodar em uma solicitação ao vivo (limite de probabilidade e dominados).",
+    "jevBlocked": "Bloqueados: {models}.",
+    "jevBlockedNone": "Bloqueados: nenhum.",
+    "jevNotConfigured": "O Jev não está configurado",
+    "jevTestSummaryFootnote": "As linhas de alvo abaixo são sondagens de saúde independentes. A admissão do Jev ao vivo é registrada no rastro de decisão de uma solicitação de chat real."
   },
   "costs": {
     "title": "Custos",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Conexão (cada conta tem seu próprio disjuntor)",
     "resilienceTokenRefreshThreshold": "Falhas antes de pausar",
     "resilienceTokenRefreshCooldown": "Pausa após acionamento",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Mascaramento de PII",
       "description": "Escolha quais tipos de dados pessoais são mascarados e adicione seus próprios padrões. O mascaramento fica desligado até você ativar as feature flags mostradas abaixo.",

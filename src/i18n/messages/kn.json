@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "ಈ ಟೆಂಪ್ಲೇಟ್ಗೆ ಹೊಂದಿಕೆಯಾಗುವ ಪ್ರಸ್ತುತ ಸಂಪರ್ಕಿತ ಪೂರೈಕೆದಾರರು/ಮಾಡೆಲ್ಗಳ ಸ್ನ್ಯಾಪ್ಶಾಟ್ ತೆಗೆದು, ಅದನ್ನು ಸಂಪಾದಿಸಬಹುದಾದ ಕಾಂಬೊ ಆಗಿ ರಚಿಸಲಾಗುತ್ತದೆ.",
     "duplicateAutoComboFailedPrefix": "ಸ್ವಯಂ-ಕಾಂಬೊವನ್ನು ನಕಲಿಸಲು ವಿಫಲವಾಗಿದೆ:",
     "duplicateAutoComboUnknownError": "ಅಜ್ಞಾತ ದೋಷ",
-    "duplicateAutoComboTitle": "{name} ನಿಂದ ಸ್ಥಿರ ಕಾಂಬೊವನ್ನು ರಚಿಸಿ"
+    "duplicateAutoComboTitle": "{name} ನಿಂದ ಸ್ಥಿರ ಕಾಂಬೊವನ್ನು ರಚಿಸಿ",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "ಒಪ್ಪಿಕೊಳ್ಳಲಾಗಿದೆ: ಇನ್ನೂ ನಿರ್ಣಯಿಸಲಾಗಿಲ್ಲ (ಲೈವ್ Jev ಗೆ ಬಳಕೆದಾರರ ಸಂದೇಶದ ಅಗತ್ಯವಿದೆ). ಅರ್ಹತೆ: {models}.",
+    "jevAdmittedNone": "ಒಪ್ಪಿಕೊಳ್ಳಲಾಗಿದೆ: ಯಾವುದೂ ಇಲ್ಲ - Jev ಮೊದಲು ಪ್ರತಿ ಗುರಿಯನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ.",
+    "jevHeld": "ಹಿಡಿದಿಟ್ಟುಕೊಳ್ಳಲಾಗಿದೆ: Jev ಲೈವ್ ವಿನಂತಿಯಲ್ಲಿ ರನ್ ಆಗುವವರೆಗೆ ಯಾವುದೂ ಇಲ್ಲ (ಸಂಭವನೀಯತೆ ಮಹಡಿ ಮತ್ತು ಪ್ರಾಬಲ್ಯ).",
+    "jevBlocked": "ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ: {models}.",
+    "jevBlockedNone": "ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ: ಯಾವುದೂ ಇಲ್ಲ.",
+    "jevNotConfigured": "Jev ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿಲ್ಲ",
+    "jevTestSummaryFootnote": "ಕೆಳಗಿನ ಗುರಿ ಸಾಲುಗಳು ಸ್ವತಂತ್ರ ಆರೋಗ್ಯ ಶೋಧಕಗಳಾಗಿವೆ. ಲೈವ್ Jev ಪ್ರವೇಶವನ್ನು ನಿಜವಾದ ಚಾಟ್ ವಿನಂತಿಗಾಗಿ ನಿರ್ಧಾರದ ಟ್ರೇಸ್‌ನಲ್ಲಿ ದಾಖಲಿಸಲಾಗಿದೆ."
   },
   "costs": {
     "title": "ವೆಚ್ಚಗಳು",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "ಸಂಪರ್ಕ (ಪ್ರತಿ ಖಾತೆಗೂ ತನ್ನದೇ ಆದ ಬ್ರೇಕರ್ ಇದೆ)",
     "resilienceTokenRefreshThreshold": "ವಿರಾಮ ತೆಗೆದುಕೊಳ್ಳುವ ಮೊದಲು ವಿಫಲತೆಗಳು",
     "resilienceTokenRefreshCooldown": "ಟ್ರಿಪ್ ಆದ ನಂತರ ವಿರಾಮ",
+    "jev": "Jev",
     "piiMasking": {
       "title": "ವೈಯಕ್ತಿಕ ಡೇಟಾ ಮರೆಮಾಚುವಿಕೆ",
       "description": "ಯಾವ ರೀತಿಯ ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಮರೆಮಾಚಬೇಕು ಎಂಬುದನ್ನು ಆಯ್ಕೆಮಾಡಿ ಮತ್ತು ನಿಮ್ಮದೇ ಮಾದರಿಗಳನ್ನು ಸೇರಿಸಿ. ಕೆಳಗೆ ತೋರಿಸಿರುವ ಫೀಚರ್ ಫ್ಲ್ಯಾಗ್‌ಗಳನ್ನು ಆನ್ ಮಾಡುವವರೆಗೆ ಮರೆಮಾಚುವಿಕೆ ಆಫ್ ಆಗಿರುತ್ತದೆ.",

@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "このテンプレートに一致する現在接続されているプロバイダー/モデルを編集可能なコンボとしてスナップショットします。",
     "duplicateAutoComboFailedPrefix": "オートコンボの複製に失敗しました：",
     "duplicateAutoComboUnknownError": "不明なエラー",
-    "duplicateAutoComboTitle": "{name}から静的コンボを作成"
+    "duplicateAutoComboTitle": "{name}から静的コンボを作成",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "許可済み: まだ判定されていません（ライブ Jev にはユーザーメッセージが必要です）。対象: {models}。",
+    "jevAdmittedNone": "許可済み: なし — すべてのターゲットが Jev の前でブロックされています。",
+    "jevHeld": "保留: ライブリクエストで Jev が実行されるまでなし（確率下限と支配）。",
+    "jevBlocked": "ブロック済み: {models}。",
+    "jevBlockedNone": "ブロック済み: なし。",
+    "jevNotConfigured": "Jev は設定されていません",
+    "jevTestSummaryFootnote": "下のターゲット行は独立したヘルスプローブです。ライブ Jev の許可は、実際のチャットリクエストの決定トレースに記録されます。"
   },
   "costs": {
     "title": "コスト",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "接続（各アカウントにはそれぞれのブレーカーがあります）",
     "resilienceTokenRefreshThreshold": "一時停止までの失敗回数",
     "resilienceTokenRefreshCooldown": "トリップ後の一時停止",
+    "jev": "Jev",
     "piiMasking": {
       "title": "個人情報のマスキング",
       "description": "マスクする個人データの種類を選び、独自のパターンを追加します。下に表示されている機能フラグを有効にするまで、マスキングはオフのままです。",

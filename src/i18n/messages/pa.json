@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "ਇਹ ਇਸ ਟੈਂਪਲੇਟ ਨਾਲ ਮੇਲ ਖਾਂਦੇ ਮੌਜੂਦਾ ਕਨੈਕਟ ਕੀਤੇ ਪ੍ਰਦਾਤਾਵਾਂ/ਮਾਡਲਾਂ ਦਾ ਸਨੈਪਸ਼ਾਟ ਲੈ ਕੇ ਇੱਕ ਸੰਪਾਦਨਯੋਗ ਕੌਂਬੋ ਬਣਾਏਗਾ।",
     "duplicateAutoComboFailedPrefix": "ਆਟੋ-ਕੌਂਬੋ ਦੀ ਨਕਲ ਬਣਾਉਣ ਵਿੱਚ ਅਸਫਲ:",
     "duplicateAutoComboUnknownError": "ਅਣਜਾਣ ਗਲਤੀ",
-    "duplicateAutoComboTitle": "{name} ਤੋਂ ਇੱਕ ਸਥਿਰ ਕੌਂਬੋ ਬਣਾਓ"
+    "duplicateAutoComboTitle": "{name} ਤੋਂ ਇੱਕ ਸਥਿਰ ਕੌਂਬੋ ਬਣਾਓ",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "ਸਵੀਕਾਰ ਕੀਤਾ ਗਿਆ: ਅਜੇ ਨਿਰਣਾ ਨਹੀਂ ਕੀਤਾ ਗਿਆ (ਲਾਈਵ Jev ਨੂੰ ਇੱਕ ਉਪਭੋਗਤਾ ਸੰਦੇਸ਼ ਦੀ ਲੋੜ ਹੈ)। ਯੋਗ: {models}.",
+    "jevAdmittedNone": "ਸਵੀਕਾਰ ਕੀਤਾ ਗਿਆ: ਕੋਈ ਨਹੀਂ — Jev ਤੋਂ ਪਹਿਲਾਂ ਹਰ ਟੀਚੇ ਨੂੰ ਬਲੌਕ ਕੀਤਾ ਗਿਆ ਹੈ।",
+    "jevHeld": "ਹੋਲਡ: ਕੋਈ ਨਹੀਂ ਜਦੋਂ ਤੱਕ Jev ਲਾਈਵ ਬੇਨਤੀ 'ਤੇ ਨਹੀਂ ਚੱਲਦਾ (ਸੰਭਾਵਨਾ ਮੰਜ਼ਿਲ ਅਤੇ ਦਬਦਬਾ)।",
+    "jevBlocked": "ਬਲੌਕ ਕੀਤਾ: {models}.",
+    "jevBlockedNone": "ਬਲੌਕ ਕੀਤਾ: ਕੋਈ ਨਹੀਂ।",
+    "jevNotConfigured": "Jev ਕੌਂਫਿਗਰ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਹੈ",
+    "jevTestSummaryFootnote": "ਹੇਠਾਂ ਦਿੱਤੀਆਂ ਟੀਚੇ ਵਾਲੀਆਂ ਕਤਾਰਾਂ ਸੁਤੰਤਰ ਸਿਹਤ ਜਾਂਚਾਂ ਹਨ। ਲਾਈਵ Jev ਦਾਖਲਾ ਇੱਕ ਅਸਲ ਚੈਟ ਬੇਨਤੀ ਲਈ ਫੈਸਲੇ ਦੇ ਟਰੇਸ 'ਤੇ ਰਿਕਾਰਡ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"
   },
   "costs": {
     "title": "ਲਾਗਤਾਂ",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "ਕਨੈਕਸ਼ਨ (ਹਰ ਖਾਤੇ ਦਾ ਆਪਣਾ ਬ੍ਰੇਕਰ ਹੈ)",
     "resilienceTokenRefreshThreshold": "ਰੋਕਣ ਤੋਂ ਪਹਿਲਾਂ ਅਸਫਲਤਾਵਾਂ",
     "resilienceTokenRefreshCooldown": "ਟ੍ਰਿੱਪ ਹੋਣ ਤੋਂ ਬਾਅਦ ਵਿਰਾਮ ਦਿਓ",
+    "jev": "Jev",
     "piiMasking": {
       "title": "ਨਿੱਜੀ ਡਾਟਾ ਮਾਸਕਿੰਗ",
       "description": "ਚੁਣੋ ਕਿ ਕਿਹੜੀ ਕਿਸਮ ਦਾ ਨਿੱਜੀ ਡਾਟਾ ਮਾਸਕ ਕੀਤਾ ਜਾਵੇ ਅਤੇ ਆਪਣੇ ਪੈਟਰਨ ਸ਼ਾਮਲ ਕਰੋ। ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਹੇਠਾਂ ਦਿਖਾਏ ਫੀਚਰ ਫਲੈਗ ਚਾਲੂ ਨਹੀਂ ਕਰਦੇ, ਮਾਸਕਿੰਗ ਬੰਦ ਰਹਿੰਦੀ ਹੈ।",

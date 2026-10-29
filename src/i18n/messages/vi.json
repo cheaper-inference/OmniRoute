@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Điều này sẽ chụp lại các nhà cung cấp/mô hình đang kết nối hiện tại phù hợp với mẫu này vào một tổ hợp có thể chỉnh sửa.",
     "duplicateAutoComboFailedPrefix": "Không thể sao chép tổ hợp tự động:",
     "duplicateAutoComboUnknownError": "Lỗi không xác định",
-    "duplicateAutoComboTitle": "Tạo tổ hợp tĩnh từ {name}"
+    "duplicateAutoComboTitle": "Tạo tổ hợp tĩnh từ {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Được chấp nhận: chưa được đánh giá (Jev trực tiếp cần tin nhắn người dùng). Đủ điều kiện: {models}.",
+    "jevAdmittedNone": "Được chấp nhận: không — mọi mục tiêu đều bị chặn trước Jev.",
+    "jevHeld": "Đang giữ: không cho đến khi Jev chạy trên yêu cầu trực tiếp (ngưỡng xác suất và bị áp đảo).",
+    "jevBlocked": "Bị chặn: {models}.",
+    "jevBlockedNone": "Bị chặn: không.",
+    "jevNotConfigured": "Jev chưa được cấu hình",
+    "jevTestSummaryFootnote": "Các hàng mục tiêu bên dưới là các đầu dò sức khỏe độc lập. Việc chấp nhận Jev trực tiếp được ghi trên dấu vết quyết định của một yêu cầu trò chuyện thực."
   },
   "costs": {
     "title": "Chi phí",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Kết nối (mỗi tài khoản có cầu chì riêng)",
     "resilienceTokenRefreshThreshold": "Lỗi trước khi tạm dừng",
     "resilienceTokenRefreshCooldown": "Tạm dừng sau khi kích hoạt",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Che giấu dữ liệu cá nhân",
       "description": "Chọn loại dữ liệu cá nhân nào sẽ được che giấu và thêm mẫu của riêng bạn. Việc che giấu vẫn tắt cho đến khi bạn bật các cờ tính năng hiển thị bên dưới.",

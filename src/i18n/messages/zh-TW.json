@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "這將把與此模板匹配的目前連線提供者/模型快照到可編輯的組合中。",
     "duplicateAutoComboFailedPrefix": "複製自動組合失敗：",
     "duplicateAutoComboUnknownError": "未知錯誤",
-    "duplicateAutoComboTitle": "從{name}建立靜態組合"
+    "duplicateAutoComboTitle": "從{name}建立靜態組合",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "已准入：尚未判定（即時 Jev 需要使用者訊息）。合格： {models}。",
+    "jevAdmittedNone": "已准入：無 — 每個目標在 Jev 之前都被封鎖。",
+    "jevHeld": "已暫掛：無，直到 Jev 在即時請求上執行（機率下限與被支配）。",
+    "jevBlocked": "已封鎖： {models}。",
+    "jevBlockedNone": "已封鎖：無。",
+    "jevNotConfigured": "尚未設定 Jev",
+    "jevTestSummaryFootnote": "下方目標列是獨立的健康探測。即時 Jev 准入會記錄在真實聊天請求的決策追蹤中。"
   },
   "costs": {
     "title": "成本",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "連線（每個帳戶各有自己的斷路器）",
     "resilienceTokenRefreshThreshold": "暫停前的失敗次數",
     "resilienceTokenRefreshCooldown": "觸發後暫停",
+    "jev": "Jev",
     "piiMasking": {
       "title": "個人資料遮蔽",
       "description": "選擇要遮蔽的個人資料類型，並新增你自己的模式。在你開啟下方顯示的功能旗標之前，遮蔽會保持關閉。",

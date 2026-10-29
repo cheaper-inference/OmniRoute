@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Это создаст снимок текущих подключенных провайдеров/моделей, соответствующих этому шаблону, в редактируемом комбо.",
     "duplicateAutoComboFailedPrefix": "Не удалось дублировать автоматическое комбо:",
     "duplicateAutoComboUnknownError": "Неизвестная ошибка",
-    "duplicateAutoComboTitle": "Создать статическое комбо из {name}"
+    "duplicateAutoComboTitle": "Создать статическое комбо из {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Допущены: ещё не оценены (живому Jev нужно сообщение пользователя). Подходящие: {models}.",
+    "jevAdmittedNone": "Допущены: нет — каждая цель заблокирована до Jev.",
+    "jevHeld": "Удержаны: нет, пока Jev не выполнится на живом запросе (порог вероятности и доминируемые).",
+    "jevBlocked": "Заблокированы: {models}.",
+    "jevBlockedNone": "Заблокированы: нет.",
+    "jevNotConfigured": "Jev не настроен",
+    "jevTestSummaryFootnote": "Строки целей ниже — независимые проверки работоспособности. Допуск живого Jev записывается в трассе решения реального чат-запроса."
   },
   "costs": {
     "title": "Затраты",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Подключение (у каждого аккаунта свой автоматический выключатель)",
     "resilienceTokenRefreshThreshold": "Количество сбоев до приостановки",
     "resilienceTokenRefreshCooldown": "Пауза после срабатывания",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Маскирование ПДн",
       "description": "Выберите, какие типы персональных данных маскировать, и добавьте свои шаблоны. Маскирование выключено, пока вы не включите флаги функций, показанные ниже.",

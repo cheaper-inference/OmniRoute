@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "यह इस टेम्पलेट से मेल खाने वाले वर्तमान जुड़े प्रदाताओं/मॉडल को संपादन योग्य कॉम्बो में स्नैपशॉट लेगा।",
     "duplicateAutoComboFailedPrefix": "ऑटोकॉम्बो डुप्लिकेट करने में विफल:",
     "duplicateAutoComboUnknownError": "अज्ञात त्रुटि",
-    "duplicateAutoComboTitle": "{name} से एक स्थैतिक कॉम्बो बनाएं"
+    "duplicateAutoComboTitle": "{name} से एक स्थैतिक कॉम्बो बनाएं",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "स्वीकृत: अभी तक निर्णित नहीं (लाइव Jev को उपयोगकर्ता संदेश चाहिए)। योग्य: {models}.",
+    "jevAdmittedNone": "स्वीकृत: कोई नहीं — प्रत्येक लक्ष्य Jev से पहले अवरुद्ध है।",
+    "jevHeld": "रोके गए: कोई नहीं जब तक लाइव अनुरोध पर Jev न चले (संभावना सीमा और अधीन)।",
+    "jevBlocked": "अवरुद्ध: {models}.",
+    "jevBlockedNone": "अवरुद्ध: कोई नहीं।",
+    "jevNotConfigured": "Jev कॉन्फ़िगर नहीं है",
+    "jevTestSummaryFootnote": "नीचे की लक्ष्य पंक्तियाँ स्वतंत्र स्वास्थ्य जाँच हैं। लाइव Jev स्वीकृति वास्तविक चैट अनुरोध के निर्णय ट्रेस पर दर्ज होती है।"
   },
   "costs": {
     "title": "लागत",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "कनेक्शन (प्रत्येक खाते का अपना ब्रेकर है)",
     "resilienceTokenRefreshThreshold": "रोकने से पहले विफलताएँ",
     "resilienceTokenRefreshCooldown": "ट्रिप होने के बाद विराम",
+    "jev": "Jev",
     "piiMasking": {
       "title": "व्यक्तिगत डेटा मास्किंग",
       "description": "चुनें कि किस प्रकार का व्यक्तिगत डेटा मास्क किया जाए और अपने पैटर्न जोड़ें। जब तक आप नीचे दिखाए गए फ़ीचर फ़्लैग चालू नहीं करते, मास्किंग बंद रहती है।",

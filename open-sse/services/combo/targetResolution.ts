@@ -87,6 +87,7 @@ import {
   type ApplyStickinessResult,
 } from "./sessionStickiness.ts";
 import { applyRequestTagRouting } from "./autoStrategy.ts";
+import { orderByJevStrategy } from "./jevPipeline.ts";
 import { getStrategyTraits, type StrategyTraits } from "./strategyRegistry.ts";
 import type {
   ComboCollectionLike,
@@ -99,6 +100,7 @@ import type {
   HiddenModelsByProvider,
   ResolvedComboTarget,
 } from "./types.ts";
+import type { NativeTurnPin } from "./nativeCodexTurnPin.ts";
 
 export interface ResolveComboTargetPipelineDeps {
   body: Record<string, unknown>;
@@ -109,6 +111,8 @@ export interface ResolveComboTargetPipelineDeps {
   allCombos?: ComboCollectionLike;
   relayOptions?: ComboRelayOptions | null;
   signal?: AbortSignal | null;
+  nativeTurnPin?: NativeTurnPin | null;
+  deferContextOverflowWhenCompressible?: boolean;
   apiKeyAllowedConnections: string[] | null;
   log: ComboLogger;
   resilienceSettings: ResilienceSettings;
@@ -121,6 +125,8 @@ export interface ResolveComboTargetPipelineDeps {
    */
   buildAutoCandidates: ResolveAutoStrategyDeps["buildAutoCandidates"];
   hiddenModelsByProvider?: HiddenModelsByProvider;
+  /** #15276: decision-trace id so jev can record holds before the attempt loop. */
+  traceInvocationId?: string | null;
 }
 
 export interface ResolvedComboTargetPipeline {
@@ -449,10 +455,11 @@ function logPipelineFallthrough(pipelineErr: unknown, log: ComboLogger): void {
 }
 
 /**
- * Strategy ordering: the `auto` router for auto combos, the per-strategy chain for
- * everything else. `autoUsedExplicitRouter` is the #4945 guard — when an explicit
- * router (lkgp/cost/…) pinned orderedTargets[0], task-aware reordering below must
- * refine only the fallback order, never override the router's primary choice.
+ * Strategy ordering: the `auto` router for auto combos, the jev judge for jev
+ * combos, the per-strategy chain for everything else. `autoUsedExplicitRouter`
+ * is the #4945 guard — when an explicit router (lkgp/cost/…) pinned
+ * orderedTargets[0], task-aware reordering below must refine only the fallback
+ * order, never override the router's primary choice.
  */
 async function orderByStrategy(
   deps: ResolveComboTargetPipelineDeps,
@@ -464,6 +471,7 @@ async function orderByStrategy(
       orderedTargets: ResolvedComboTarget[];
       autoUsedExplicitRouter: boolean;
       quotaShareRelease: (() => void) | null;
+      stickyOverride?: ApplyStickinessResult;
     }
 > {
   const { strategy, body, combo, settings, config, log } = deps;
@@ -487,6 +495,16 @@ async function orderByStrategy(
       quotaShareRelease: null,
     };
   }
+  if (strategy === "jev") {
+    const result = await orderByJevStrategy(deps, initialOrderedTargets);
+    if ("earlyResponse" in result) return result;
+    return {
+      orderedTargets: result.outcome.targets,
+      autoUsedExplicitRouter: result.outcome.protectHead,
+      quotaShareRelease: null,
+      stickyOverride: result.sticky,
+    };
+  }
   const { orderedTargets, quotaShareRelease } = await applyStrategyOrdering(
     strategy,
     initialOrderedTargets,
@@ -503,6 +521,114 @@ async function orderByStrategy(
   return { orderedTargets, autoUsedExplicitRouter: false, quotaShareRelease };
 }
 
+function preserveJevOrder(
+  preferredOrder: ResolvedComboTarget[],
+  filteredTargets: ResolvedComboTarget[]
+): ResolvedComboTarget[] {
+  const survivingKeys = new Set(filteredTargets.map((target) => target.executionKey));
+  return preferredOrder.filter((target) => survivingKeys.has(target.executionKey));
+}
+
+/** Jev owns the order: a filter may drop targets but never reorder the Jev-admitted list. */
+function applyTargetFilter(
+  orderedTargets: ResolvedComboTarget[],
+  filteredTargets: ResolvedComboTarget[],
+  jevOwnsOrder: boolean
+): ResolvedComboTarget[] {
+  return jevOwnsOrder ? preserveJevOrder(orderedTargets, filteredTargets) : filteredTargets;
+}
+
+function isEnabledInConfigOrSettings(
+  config: unknown,
+  settings: unknown,
+  key: "compatFilterFailOpen" | "outputLimitAdvisory"
+): boolean {
+  return (
+    (config as Record<string, unknown> | null | undefined)?.[key] === true ||
+    (settings as Record<string, unknown> | null | undefined)?.[key] === true
+  );
+}
+
+/** Match handleComboChat: only track failures under context-cache protection pins. */
+function recordContinuityFilterFailure(deps: ResolveComboTargetPipelineDeps): void {
+  const { combo, relayOptions } = deps;
+  const effectiveSessionId: string | null = combo.context_cache_protection
+    ? (relayOptions?.sessionId ?? null)
+    : null;
+  recordComboFailure(effectiveSessionId, combo.name);
+}
+
+/** #8488 / #8494: 400 capability_mismatch when the hard capability filters emptied the pool. */
+function buildCapabilityExhaustionResponse(
+  deps: ResolveComboTargetPipelineDeps,
+  preCompatTargets: ResolvedComboTarget[]
+): Response | null {
+  const exhaustion = describeCapabilityFilterExhaustion(
+    preCompatTargets,
+    deps.body,
+    deps.combo.name
+  );
+  if (!exhaustion) return null;
+  recordContinuityFilterFailure(deps);
+  return errorResponseWithComboDiagnostics(
+    400,
+    exhaustion.message,
+    {
+      poolSize: preCompatTargets.length,
+      attempted: 0,
+      excluded: exhaustion.excluded,
+      attemptOrder: [],
+      terminalReason: exhaustion.terminalReason,
+      recovery: buildRecoveryHint("no_executable_targets"),
+    },
+    { code: "capability_mismatch", type: "invalid_request_error" }
+  );
+}
+
+/** #8786: 404 model_not_found when the context requirements left no survivors. */
+function buildContextExhaustionResponse(
+  deps: ResolveComboTargetPipelineDeps,
+  preContextTargets: ResolvedComboTarget[]
+): Response {
+  recordContinuityFilterFailure(deps);
+  const { message, diagnostics } = buildEmptyComboTargetsPayload(
+    preContextTargets,
+    deps.config.contextRequirements?.minContextWindow
+  );
+  return errorResponseWithComboDiagnostics(404, message, diagnostics, {
+    code: "model_not_found",
+    type: "invalid_request_error",
+  });
+}
+
+/**
+ * Session stickiness for the continuity filters. A caller-supplied override (Jev already
+ * previewed the pin) wins; otherwise stickiness runs unless it is disabled for this combo.
+ */
+async function resolveContinuitySticky(
+  deps: ResolveComboTargetPipelineDeps,
+  initialOrderedTargets: ResolvedComboTarget[],
+  disableSessionStickiness: boolean,
+  stickyOverride: ApplyStickinessResult | undefined
+): Promise<ApplyStickinessResult> {
+  if (stickyOverride) return stickyOverride;
+  if (disableSessionStickiness) {
+    return { targets: initialOrderedTargets, messageHash: null, stuck: false };
+  }
+  return applySessionStickiness(
+    initialOrderedTargets,
+    // #7270: normalize both wire shapes (.messages / Responses-API .input) so the
+    // stickiness key is derivable on the /v1/responses surface, not just Chat Completions.
+    normalizeStickinessMessages(deps.body as { messages?: unknown; input?: unknown }),
+    deps.combo.name,
+    // #15241: priority is an operator-declared failover order. A mid-list
+    // success must not silently become runtime try-slot #1 while the stored
+    // hop list still names another head. Other strategies keep their existing
+    // session-stickiness behavior.
+    { respectDeclaredOrder: getStrategyTraits(deps.strategy).stickinessRespectsDeclaredOrder }
+  );
+}
+
 /**
  * Continuity + eligibility filters: cache-strategy affinity, session stickiness,
  * eval-score ordering, request compatibility and per-combo context requirements.
@@ -515,7 +641,8 @@ async function orderByStrategy(
  */
 async function applyContinuityFilters(
   deps: ResolveComboTargetPipelineDeps,
-  initialOrderedTargets: ResolvedComboTarget[]
+  initialOrderedTargets: ResolvedComboTarget[],
+  stickyOverride?: ApplyStickinessResult
 ): Promise<
   | {
       orderedTargets: ResolvedComboTarget[];
@@ -524,12 +651,14 @@ async function applyContinuityFilters(
     }
   | { earlyResponse: Response }
 > {
-  const { strategy, body, combo, config, settings, log, relayOptions } = deps;
+  const { strategy, body, combo, config, settings, log } = deps;
   const traits = getStrategyTraits(strategy);
   // An explicit cache-optimized combo outranks the global cache-affinity default,
   // but only protects its ordering when this request actually produced a reusable
   // cache key. Cache misses retain the normal session/eval routing behavior.
+  const jevOwnsOrder = strategy === "jev" && stickyOverride !== undefined;
   const cacheStrategyAffinityApplied =
+    strategy !== "jev" &&
     traits.cacheAffinityOwnsOrdering &&
     applyPromptCacheAffinity(initialOrderedTargets, body).applied;
   // #6168: session stickiness opt-out. Per-combo `config.disableSessionStickiness`
@@ -551,39 +680,30 @@ async function applyContinuityFilters(
   if (disableSessionStickiness) {
     clearStickyBindingsForCombo(combo.name);
   }
-  const sticky: ApplyStickinessResult = disableSessionStickiness
-    ? { targets: initialOrderedTargets, messageHash: null, stuck: false }
-    : await applySessionStickiness(
-        initialOrderedTargets,
-        // #7270: normalize both wire shapes (.messages / Responses-API .input) so the
-        // stickiness key is derivable on the /v1/responses surface, not just Chat Completions.
-        normalizeStickinessMessages(body as { messages?: unknown; input?: unknown }),
-        combo.name,
-        // #15241: priority is an operator-declared failover order. A mid-list
-        // success must not silently become runtime try-slot #1 while the stored
-        // hop list still names another head. Other strategies keep their existing
-        // session-stickiness behavior.
-        { respectDeclaredOrder: traits.stickinessRespectsDeclaredOrder }
-      );
-  let orderedTargets = sticky.targets;
-  if (!cacheStrategyAffinityApplied) {
+  const sticky = await resolveContinuitySticky(
+    deps,
+    initialOrderedTargets,
+    disableSessionStickiness,
+    stickyOverride
+  );
+  let orderedTargets = jevOwnsOrder ? initialOrderedTargets : sticky.targets;
+  if (!cacheStrategyAffinityApplied && !jevOwnsOrder) {
     orderedTargets = orderTargetsByEvalScores(orderedTargets, config.evalRouting, log);
   }
   // #8488 / #8494: fail closed when hard capability filters empty the pool.
   // Opt-in escape hatch: combo.config.compatFilterFailOpen OR settings.compatFilterFailOpen.
-  const compatFilterFailOpen =
-    (config as { compatFilterFailOpen?: unknown }).compatFilterFailOpen === true ||
-    (settings as { compatFilterFailOpen?: unknown } | null | undefined)?.compatFilterFailOpen ===
-      true;
-  const outputLimitAdvisory =
-    (config as { outputLimitAdvisory?: unknown }).outputLimitAdvisory === true ||
-    (settings as { outputLimitAdvisory?: unknown } | null | undefined)?.outputLimitAdvisory ===
-      true;
   const preCompatTargets = orderedTargets;
-  orderedTargets = filterTargetsByRequestCompatibility(orderedTargets, body, log, undefined, {
-    failOpen: compatFilterFailOpen,
-    outputLimitAdvisory,
-  });
+  const compatibleTargets = filterTargetsByRequestCompatibility(
+    orderedTargets,
+    body,
+    log,
+    undefined,
+    {
+      failOpen: isEnabledInConfigOrSettings(config, settings, "compatFilterFailOpen"),
+      outputLimitAdvisory: isEnabledInConfigOrSettings(config, settings, "outputLimitAdvisory"),
+    }
+  );
+  orderedTargets = applyTargetFilter(orderedTargets, compatibleTargets, jevOwnsOrder);
   // #6238: keep the targets the compat pre-filter rejected so the dispatch loop
   // can probe them as a last-resort fallback tier when every compat-kept target
   // later turns out runtime-unavailable (mirrors the round-robin path).
@@ -593,49 +713,16 @@ async function applyContinuityFilters(
     body
   );
   if (orderedTargets.length === 0 && preCompatTargets.length > 0) {
-    const exhaustion = describeCapabilityFilterExhaustion(preCompatTargets, body, combo.name);
-    if (exhaustion) {
-      // Match handleComboChat: only track failures under context-cache protection pins.
-      const effectiveSessionId: string | null = combo.context_cache_protection
-        ? (relayOptions?.sessionId ?? null)
-        : null;
-      recordComboFailure(effectiveSessionId, combo.name);
-      return {
-        earlyResponse: errorResponseWithComboDiagnostics(
-          400,
-          exhaustion.message,
-          {
-            poolSize: preCompatTargets.length,
-            attempted: 0,
-            excluded: exhaustion.excluded,
-            attemptOrder: [],
-            terminalReason: exhaustion.terminalReason,
-            recovery: buildRecoveryHint("no_executable_targets"),
-          },
-          { code: "capability_mismatch", type: "invalid_request_error" }
-        ),
-      };
-    }
+    const earlyResponse = buildCapabilityExhaustionResponse(deps, preCompatTargets);
+    if (earlyResponse) return { earlyResponse };
   }
   // #8786: capture pre-filter pool so a strict/minContextWindow wipe can
   // surface context_requirements_exhausted instead of a generic 404.
   const preContextTargets = orderedTargets;
-  orderedTargets = applyContextRequirements(orderedTargets, config.contextRequirements, log);
+  const contextTargets = applyContextRequirements(orderedTargets, config.contextRequirements, log);
+  orderedTargets = applyTargetFilter(orderedTargets, contextTargets, jevOwnsOrder);
   if (orderedTargets.length === 0 && preContextTargets.length > 0) {
-    const effectiveSessionId: string | null = combo.context_cache_protection
-      ? (relayOptions?.sessionId ?? null)
-      : null;
-    recordComboFailure(effectiveSessionId, combo.name);
-    const { message, diagnostics } = buildEmptyComboTargetsPayload(
-      preContextTargets,
-      config.contextRequirements?.minContextWindow
-    );
-    return {
-      earlyResponse: errorResponseWithComboDiagnostics(404, message, diagnostics, {
-        code: "model_not_found",
-        type: "invalid_request_error",
-      }),
-    };
+    return { earlyResponse: buildContextExhaustionResponse(deps, preContextTargets) };
   }
   return { orderedTargets, sticky, compatRejectedTargets };
 }
@@ -685,6 +772,7 @@ function isPromptCacheAffinityEnabled(
   config: ReturnType<typeof resolveComboSetupConfig>,
   settings?: Record<string, unknown> | null
 ): boolean {
+  if (strategy === "jev") return false;
   const autoConfigForCacheWeight = getStrategyTraits(strategy).autoWeightsCacheAffinity
     ? ((combo.autoConfig ||
         ((config as Record<string, unknown>).auto &&
@@ -750,8 +838,9 @@ async function applyPromptCacheStage(
   // strategies. Per #8370, lkgp/auto/cache-optimized explicitly support promoting
   // a previously-successful model ahead of the declared order, so they must stay
   // cross-model ("global") rather than be locked into a single model step.
-  // The model-order-preserving set (priority / weighted / fill-first / quota-share) is
-  // the `promptCacheAffinityScope: "model"` trait in the strategy registry.
+  // The model-order-preserving set (priority / weighted / fill-first / quota-share + jev)
+  // is the `promptCacheAffinityScope: "model"` trait in the strategy registry; jev was
+  // added on feat/jev-combo alongside its registry entry.
   const promptCacheAffinity = applyPromptCacheAffinity(
     promptCacheAffinityTargets,
     body,
@@ -909,7 +998,11 @@ export async function resolveComboTargetPipeline(
   let { quotaShareRelease } = ordering;
   const drawnId = ordering.orderedTargets[0]?.connectionId ?? "";
 
-  const continuity = await applyContinuityFilters(deps, ordering.orderedTargets);
+  const continuity = await applyContinuityFilters(
+    deps,
+    ordering.orderedTargets,
+    ordering.stickyOverride
+  );
   if ("earlyResponse" in continuity) {
     // #11371: selection already reserved the winner's in-flight slot; a hard
     // filter exhausting the pool must not leak it.

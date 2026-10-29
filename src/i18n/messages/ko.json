@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "이 템플릿과 일치하는 현재 연결된 제공자/모델을 편집 가능한 콤보로 스냅샷합니다.",
     "duplicateAutoComboFailedPrefix": "자동 콤보 복제 실패:",
     "duplicateAutoComboUnknownError": "알 수 없는 오류",
-    "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기"
+    "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "허용됨: 아직 판정되지 않음(라이브 Jev에는 사용자 메시지가 필요함). 대상: {models}.",
+    "jevAdmittedNone": "허용됨: 없음 — 모든 대상이 Jev 이전에 차단됨.",
+    "jevHeld": "보류: 라이브 요청에서 Jev가 실행될 때까지 없음(확률 하한 및 지배).",
+    "jevBlocked": "차단됨: {models}.",
+    "jevBlockedNone": "차단됨: 없음.",
+    "jevNotConfigured": "Jev가 구성되지 않음",
+    "jevTestSummaryFootnote": "아래 대상 행은 독립 상태 검사입니다. 라이브 Jev 허용은 실제 채팅 요청의 결정 추적에 기록됩니다."
   },
   "costs": {
     "title": "비용",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "연결(각 계정마다 고유한 차단기가 있습니다)",
     "resilienceTokenRefreshThreshold": "일시 중지 전 실패 횟수",
     "resilienceTokenRefreshCooldown": "작동 후 일시 중지",
+    "jev": "Jev",
     "piiMasking": {
       "title": "개인정보 마스킹",
       "description": "마스킹할 개인 데이터 유형을 선택하고 직접 패턴을 추가하세요. 아래 표시된 기능 플래그를 켜기 전까지 마스킹은 꺼져 있습니다.",

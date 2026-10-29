@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "یہ اس ٹیمپلیٹ سے ملنے والے موجودہ منسلک فراہم کنندگان/ماڈلز کو ایڈیٹ ایبل کمبو میں اسنیپ شاট لے گا۔",
     "duplicateAutoComboFailedPrefix": "آٹو کمبو ڈپلیکیٹ کرنے میں ناکام:",
     "duplicateAutoComboUnknownError": "نامعلوم خرابی",
-    "duplicateAutoComboTitle": "{name} سے ایک جامد کمبو بنائیں"
+    "duplicateAutoComboTitle": "{name} سے ایک جامد کمبو بنائیں",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "تسلیم کیا گیا: ابھی تک فیصلہ نہیں کیا گیا (براہ راست Jev کو صارف کے پیغام کی ضرورت ہے)۔ اہل: {models}.",
+    "jevAdmittedNone": "تسلیم کیا گیا: کوئی نہیں — ہر ہدف کو Jev سے پہلے بلاک کر دیا گیا ہے۔",
+    "jevHeld": "منعقد: کوئی بھی نہیں جب تک کہ Jev لائیو درخواست پر چلتا ہے (امکانی منزل اور غلبہ)۔",
+    "jevBlocked": "مسدود: {models}.",
+    "jevBlockedNone": "مسدود: کوئی نہیں۔",
+    "jevNotConfigured": "Jev کنفیگر نہیں ہے۔",
+    "jevTestSummaryFootnote": "ذیل میں ہدف کی قطاریں صحت کی آزاد تحقیقات ہیں۔ براہ راست Jev داخلہ حقیقی چیٹ کی درخواست کے فیصلے کے نشان پر ریکارڈ کیا جاتا ہے۔"
   },
   "costs": {
     "title": "اخراجات",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "کنکشن (ہر اکاؤنٹ کا اپنا بریکر ہوتا ہے)",
     "resilienceTokenRefreshThreshold": "روکنے سے پہلے ناکامیاں",
     "resilienceTokenRefreshCooldown": "ٹرپ ہونے کے بعد وقفہ",
+    "jev": "Jev",
     "piiMasking": {
       "title": "ذاتی ڈیٹا کی پردہ پوشی",
       "description": "منتخب کریں کہ کس قسم کا ذاتی ڈیٹا چھپایا جائے اور اپنے پیٹرن شامل کریں۔ پردہ پوشی تب تک بند رہتی ہے جب تک آپ نیچے دکھائے گئے فیچر فلیگز آن نہ کریں۔",

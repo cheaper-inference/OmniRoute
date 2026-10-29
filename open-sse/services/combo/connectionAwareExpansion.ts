@@ -4,9 +4,9 @@
  * Group-A strategies (reset-aware / reset-window / headroom / quota-share) and
  * `auto` already expand targets to concrete per-connection candidates inside
  * their own ordering (applyStrategyOrdering / buildAutoCandidates). The other
- * 15 strategies ("group B": priority, weighted, round-robin, random, p2c,
+ * strategies ("group B": priority, weighted, round-robin, random, p2c,
  * least-used, cost-optimized, lkgp, fill-first, strict-random,
- * context-optimized, cache-optimized, context-relay, fusion, pipeline) kept a
+ * context-optimized, cache-optimized, context-relay, fusion, pipeline, jev) kept a
  * provider-level view, so an exhausted multi-account provider kept getting
  * picked -- the per-target exhaustion gates in combo.ts were dead code for
  * them (target.connectionId === null).
@@ -26,7 +26,7 @@ import type { ResolvedComboTarget, ComboLogger } from "./types.ts";
 import { expandTargetsByQuotaAwareConnections } from "./quotaStrategies.ts";
 
 /**
- * The 15 group-B strategies that gain per-connection awareness through this
+ * The group-B strategies that gain per-connection awareness through this
  * stage. A-group strategies (reset-aware, reset-window, headroom, quota-share)
  * and `auto` are deliberately absent -- they expand inside their own ordering
  * and a second pass here would only burn another connection-list read
@@ -48,6 +48,7 @@ export const CONNECTION_AWARE_EXPANSION_GROUP_B: readonly string[] = [
   "context-relay",
   "fusion",
   "pipeline",
+  "jev",
 ] as const;
 
 const GROUP_B_SET = new Set<string>(CONNECTION_AWARE_EXPANSION_GROUP_B);

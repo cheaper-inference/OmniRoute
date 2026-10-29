@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "سيؤدي هذا إلى التقاط المزودين/النماذج المتصلة حاليًا التي تطابق هذا القالب في مجموعة قابلة للتحرير.",
     "duplicateAutoComboFailedPrefix": "فشل تكرار المجموعة التلقائية:",
     "duplicateAutoComboUnknownError": "خطأ غير معروف",
-    "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}"
+    "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "مقبول: لم يُحكم بعد (يحتاج Jev المباشر إلى رسالة مستخدم). المؤهلون: {models}.",
+    "jevAdmittedNone": "مقبول: لا شيء — كل هدف محظور قبل Jev.",
+    "jevHeld": "معلّق: لا شيء حتى يعمل Jev على طلب مباشر (حد الاحتمال والمسيطر عليهم).",
+    "jevBlocked": "محظور: {models}.",
+    "jevBlockedNone": "محظور: لا شيء.",
+    "jevNotConfigured": "Jev غير مُعدّ",
+    "jevTestSummaryFootnote": "صفوف الأهداف أدناه هي مجسات صحة مستقلة. يُسجَّل قبول Jev المباشر في أثر القرار لطلب دردشة حقيقي."
   },
   "costs": {
     "title": "التكاليف",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "الاتصال (لكل حساب قاطع خاص به)",
     "resilienceTokenRefreshThreshold": "عدد الفشل قبل الإيقاف",
     "resilienceTokenRefreshCooldown": "الوقفة بعد التفعيل",
+    "jev": "Jev",
     "piiMasking": {
       "title": "إخفاء البيانات الشخصية",
       "description": "اختر أنواع البيانات الشخصية التي يتم إخفاؤها وأضف أنماطك الخاصة. يبقى الإخفاء متوقفًا حتى تفعّل علامات الميزات الظاهرة أدناه.",

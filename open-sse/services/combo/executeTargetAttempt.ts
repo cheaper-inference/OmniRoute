@@ -43,7 +43,7 @@ import { fetchCodexQuota } from "../codexQuotaFetcher.ts";
 import { emit } from "../../../src/lib/events/eventBus";
 import { notifyWebhookEvent } from "../../../src/lib/webhookDispatcher";
 import { getSessionConnection } from "../sessionManager.ts";
-import { recordStickyBinding } from "./sessionStickiness.ts";
+import { recordSuccessfulComboStickyBinding } from "./sessionStickiness.ts";
 import { recordStickyWeightedSuccess } from "./rrState.ts";
 import { resolveReasoningBufferedMaxTokens, toPositiveInteger } from "../reasoningTokenBuffer.ts";
 import { parseModel } from "../model.ts";
@@ -716,8 +716,7 @@ export async function executeTargetAttempt(
           }
         }
       }
-      if (deps.sticky.messageHash && target.connectionId)
-        recordStickyBinding(deps.sticky.messageHash, target.connectionId); // LKGP (#919):
+      recordSuccessfulComboStickyBinding(deps, effectiveConnectionId, modelStr); // LKGP (#919):
       if (provider) {
         const connId = effectiveConnectionId || undefined;
         recordLkgpPin({

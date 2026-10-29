@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "यसले यो टेम्प्लेटसँग मेल खाने हाल जडान भएका प्रदायक/मोडेलहरूको स्न्यापसट लिएर सम्पादनयोग्य कम्बो बनाउनेछ।",
     "duplicateAutoComboFailedPrefix": "स्वचालित कम्बो डुप्लिकेट गर्न असफल भयो:",
     "duplicateAutoComboUnknownError": "अज्ञात त्रुटि",
-    "duplicateAutoComboTitle": "{name} बाट स्थिर कम्बो सिर्जना गर्नुहोस्"
+    "duplicateAutoComboTitle": "{name} बाट स्थिर कम्बो सिर्जना गर्नुहोस्",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "स्वीकार गरियो: अझै न्याय गरिएको छैन (लाइभ Jev लाई प्रयोगकर्ता सन्देश चाहिन्छ)। योग्य: {models}।",
+    "jevAdmittedNone": "स्वीकार गरियो: कुनै पनि छैन — Jev अघि प्रत्येक लक्ष्य अवरुद्ध गरिएको छ।",
+    "jevHeld": "राखिएको: कुनै पनि छैन जबसम्म Jev लाइभ अनुरोधमा चल्दैन (सम्भावना फ्लोर र प्रभुत्व)।",
+    "jevBlocked": "अवरुद्ध: {models}।",
+    "jevBlockedNone": "अवरुद्ध: कुनै पनि छैन।",
+    "jevNotConfigured": "Jev कन्फिगर गरिएको छैन",
+    "jevTestSummaryFootnote": "तलका लक्षित पङ्क्तिहरू स्वतन्त्र स्वास्थ्य जाँचहरू हुन्। प्रत्यक्ष Jev प्रवेश वास्तविक च्याट अनुरोधको लागि निर्णय ट्रेसमा रेकर्ड गरिएको छ।"
   },
   "costs": {
     "title": "लागत",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "जडान (प्रत्येक खातासँग आफ्नै ब्रेकर हुन्छ)",
     "resilienceTokenRefreshThreshold": "रोक्नु अघिको असफलताहरू",
     "resilienceTokenRefreshCooldown": "ट्रिप भएपछि विश्राम गर्नुहोस्",
+    "jev": "Jev",
     "piiMasking": {
       "title": "व्यक्तिगत डेटा मास्किङ",
       "description": "कुन प्रकारको व्यक्तिगत डेटा मास्क गर्ने छान्नुहोस् र आफ्नै ढाँचाहरू थप्नुहोस्। तल देखाइएका फिचर फ्ल्यागहरू सक्रिय नगरेसम्म मास्किङ बन्द रहन्छ।",

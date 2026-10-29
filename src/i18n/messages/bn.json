@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "এটি এই টেমপ্লেটের সাথে মিলে যায় এমন বর্তমান সংযুক্ত প্রদানকারী/মডেলগুলিকে একটি সম্পাদনযোগ্য কম্বোতে স্ন্যাপশট নেবে।",
     "duplicateAutoComboFailedPrefix": "অটোকম্বো ডুপ্লিকেশন ব্যর্থ:",
     "duplicateAutoComboUnknownError": "অজানা ত্রুটি",
-    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন"
+    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "স্বীকার করা হয়েছে: এখনও বিচার করা হয়নি (লাইভ Jev একটি ব্যবহারকারীর বার্তা প্রয়োজন)। যোগ্য: {models}.",
+    "jevAdmittedNone": "স্বীকার করা হয়েছে: কোনোটিই নয় — Jev এর আগে প্রতিটি লক্ষ্য অবরুদ্ধ করা হয়েছে।",
+    "jevHeld": "হোল্ড: Jev লাইভ রিকোয়েস্টে রান না হওয়া পর্যন্ত (সম্ভাব্যতা ফ্লোর এবং ডমিনেটেড)।",
+    "jevBlocked": "অবরুদ্ধ: {models}.",
+    "jevBlockedNone": "অবরুদ্ধ: কোনোটিই নয়।",
+    "jevNotConfigured": "Jev কনফিগার করা নেই",
+    "jevTestSummaryFootnote": "নীচের টার্গেট সারিগুলি স্বাধীন স্বাস্থ্য অনুসন্ধান। লাইভ Jev ভর্তি একটি বাস্তব চ্যাট অনুরোধের জন্য সিদ্ধান্ত ট্রেস রেকর্ড করা হয়."
   },
   "costs": {
     "title": "খরচ",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "সংযোগ (প্রতিটি অ্যাকাউন্টের নিজস্ব ব্রেকার আছে)",
     "resilienceTokenRefreshThreshold": "বিরতি নেওয়ার আগে ব্যর্থতা",
     "resilienceTokenRefreshCooldown": "ট্রিপ হওয়ার পরে বিরতি",
+    "jev": "Jev",
     "piiMasking": {
       "title": "ব্যক্তিগত তথ্য মাস্কিং",
       "description": "কোন ধরনের ব্যক্তিগত তথ্য মাস্ক করা হবে তা বেছে নিন এবং নিজের প্যাটার্ন যোগ করুন। নিচে দেখানো ফিচার ফ্ল্যাগগুলো চালু না করা পর্যন্ত মাস্কিং বন্ধ থাকে।",

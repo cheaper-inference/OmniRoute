@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Spowoduje to przechwycenie aktualnie połączonych dostawców/modeli pasujących do tego szablonu w edytowalnej kombinacji.",
     "duplicateAutoComboFailedPrefix": "Nie udało się skopiować automatycznej kombinacji:",
     "duplicateAutoComboUnknownError": "Nieznany błąd",
-    "duplicateAutoComboTitle": "Utwórz statyczną kombinację z {name}"
+    "duplicateAutoComboTitle": "Utwórz statyczną kombinację z {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Dopuszczone: jeszcze nie ocenione (żywy Jev potrzebuje wiadomości użytkownika). Kwalifikujące się: {models}.",
+    "jevAdmittedNone": "Dopuszczone: brak — każdy cel jest zablokowany przed Jev.",
+    "jevHeld": "Wstrzymane: brak, dopóki Jev nie uruchomi się na żywym żądaniu (próg prawdopodobieństwa i zdominowane).",
+    "jevBlocked": "Zablokowane: {models}.",
+    "jevBlockedNone": "Zablokowane: brak.",
+    "jevNotConfigured": "Jev nie jest skonfigurowany",
+    "jevTestSummaryFootnote": "Wiersze celów poniżej to niezależne sondy stanu. Dopuszczenie żywego Jev jest zapisywane w śladzie decyzji prawdziwego żądania czatu."
   },
   "costs": {
     "title": "Koszty",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Połączenie (każde konto ma własny wyłącznik)",
     "resilienceTokenRefreshThreshold": "Liczba błędów przed wstrzymaniem",
     "resilienceTokenRefreshCooldown": "Pauza po wyzwoleniu",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Maskowanie danych osobowych",
       "description": "Wybierz, które rodzaje danych osobowych mają być maskowane, i dodaj własne wzorce. Maskowanie pozostaje wyłączone, dopóki nie włączysz flag funkcji pokazanych poniżej.",

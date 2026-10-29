@@ -12,6 +12,14 @@ import { getRuntimePorts } from "@/lib/runtime/ports";
 import { requiresWebSessionCredential } from "@/shared/providers/webSessionCredentials";
 import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import type { ComboLike, ResolvedComboTarget } from "@omniroute/open-sse/services/combo/types.ts";
+import {
+  buildJevComboTestSummary,
+  type JevComboTestSummary,
+} from "@omniroute/open-sse/services/combo/jevTestSummary.ts";
+import { TYPESAFE_PROVIDER_ID } from "@omniroute/open-sse/services/typesafe/systemOne.ts";
+import { getProviderCredentials } from "@/sse/services/auth";
+import { getCachedSettings } from "@/lib/db/readCache";
+import { resolveResilienceSettings } from "@/lib/resilience/settings";
 import { testComboSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -243,6 +251,41 @@ async function testComboTarget(
   }
 }
 
+async function hasTypesafeApiKey(): Promise<boolean> {
+  try {
+    const credentials = await getProviderCredentials(TYPESAFE_PROVIDER_ID);
+    const apiKey = (credentials as { apiKey?: unknown } | null)?.apiKey;
+    return typeof apiKey === "string" && apiKey.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Jev-only test summary (admitted/held/blocked); null for every other strategy. */
+async function buildJevSummaryForComboTest(
+  combo: ComboRecord,
+  targets: ResolvedComboTarget[],
+  results: ComboTestResult[]
+): Promise<JevComboTestSummary | null> {
+  const strategy = String(combo.strategy || "priority")
+    .trim()
+    .toLowerCase();
+  if (strategy !== "jev") return null;
+  const resilienceSettings = resolveResilienceSettings(await getCachedSettings());
+  const probeByExecutionKey = new Map(results.map((result) => [result.executionKey, result]));
+  return buildJevComboTestSummary({
+    targets,
+    comboName: String(combo.name),
+    config: (combo.config as Record<string, unknown> | null | undefined) ?? null,
+    resilienceSettings,
+    hasTypesafeKey: await hasTypesafeApiKey(),
+    isModelAvailable: async (_model, target) => {
+      const probe = target ? probeByExecutionKey.get(target.executionKey) : undefined;
+      return probe?.status === "ok";
+    },
+  });
+}
+
 /**
  * POST /api/combos/test - Quick test a combo
  * Sends a real chat completion request through each model in the combo
@@ -298,9 +341,10 @@ export async function POST(request) {
       internalApiKey,
       request.signal ?? null
     );
+    const jev = await buildJevSummaryForComboTest(combo, targets, results);
 
     return NextResponse.json(
-      buildComboTestResponse(comboName, combo, results, totalAutoCandidates)
+      buildComboTestResponse(comboName, combo, results, totalAutoCandidates, jev)
     );
   } catch (error) {
     console.log("Error testing combo:", error);
@@ -341,7 +385,8 @@ function buildComboTestResponse(
   comboName: string,
   combo: ComboRecord,
   results: ComboTestResult[],
-  totalAutoCandidates: number | null
+  totalAutoCandidates: number | null,
+  jev: JevComboTestSummary | null
 ) {
   const resolvedResult = results.find((result) => result.status === "ok") || null;
   return {
@@ -364,6 +409,7 @@ function buildComboTestResponse(
       ? { comboType: "auto", totalCandidates: totalAutoCandidates }
       : {}),
     results,
+    ...(jev ? { jev } : {}),
     testedAt: new Date().toISOString(),
   };
 }

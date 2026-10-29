@@ -67,7 +67,7 @@
     <circle cx="39" cy="42" r="5" class="surface stroke-ink" stroke-width="2"><animate attributeName="opacity" values="1;0.7;1" keyTimes="0;0.5;1" dur="1.8s" repeatCount="indefinite"/></circle>
   </g>
   <text x="364" y="218" class="h2">OmniRoute — Smart Router</text>
-  <text x="364" y="246" class="mono-sm" style="fill:var(--muted)"><tspan style="fill:var(--ink)">RTK + Caveman compression</tspan> · <tspan style="fill:var(--ink)">20 routing strategies</tspan></text>
+  <text x="364" y="246" class="mono-sm" style="fill:var(--muted)"><tspan style="fill:var(--ink)">RTK + Caveman compression</tspan> · <tspan style="fill:var(--ink)">21 routing strategies</tspan></text>
   <text x="364" y="266" class="mono-sm" style="fill:var(--muted)">Circuit breakers · TLS stealth · MCP · A2A · Guardrails</text>
   <g style="stroke:var(--muted)" stroke-width="1.2" fill="none" stroke-dasharray="3 5" opacity="0.5"><use href="#tc-pT1"/><use href="#tc-pT2"/><use href="#tc-pT3"/><use href="#tc-pT4"/></g>
   <g class="ink">

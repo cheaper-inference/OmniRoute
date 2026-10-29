@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Dette vil ta et øyeblikksbilde av de nåvørende tilkoblede leverandørene/modellene som matcher denne malen i en redigerbar kombinasjon.",
     "duplicateAutoComboFailedPrefix": "Duplisering av auto-kombinasjon mislyktes:",
     "duplicateAutoComboUnknownError": "Ukjent feil",
-    "duplicateAutoComboTitle": "Opprett en statisk kombinasjon fra {name}"
+    "duplicateAutoComboTitle": "Opprett en statisk kombinasjon fra {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Godkjent: ennå ikke vurdert (live Jev trenger en brukermelding). Kvalifiserte: {models}.",
+    "jevAdmittedNone": "Godkjent: ingen — hvert mål er blokkert før Jev.",
+    "jevHeld": "Holdt: ingen før Jev kjører på en live-forespørsel (sannsynlighetsgulv og dominert).",
+    "jevBlocked": "Blokkert: {models}.",
+    "jevBlockedNone": "Blokkert: ingen.",
+    "jevNotConfigured": "Jev er ikke konfigurert",
+    "jevTestSummaryFootnote": "Målraderne nedenfor er uavhengige helsesonder. Live Jev-godkjenning registreres i beslutningsspor for en ekte chat-forespørsel."
   },
   "costs": {
     "title": "Kostnader",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Tilkobling (hver konto har sin egen breaker)",
     "resilienceTokenRefreshThreshold": "Feil før pausing",
     "resilienceTokenRefreshCooldown": "Pause etter utløsning",
+    "jev": "Jev",
     "piiMasking": {
       "title": "PII-maskering",
       "description": "Velg hvilke typer personopplysninger som maskeres, og legg til egne mønstre. Maskeringen er av til du slår på funksjonsflaggene som vises nedenfor.",

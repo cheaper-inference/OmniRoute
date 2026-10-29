@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "Това ще направи моментна снимка на текущо свързаните доставчици/модели, които съвпадат с този шаблон, в редактируемо комбо.",
     "duplicateAutoComboFailedPrefix": "Неуспешно копиране на автоматично комбо:",
     "duplicateAutoComboUnknownError": "Неизвестна грешка",
-    "duplicateAutoComboTitle": "Създайте статично комбо от {name}"
+    "duplicateAutoComboTitle": "Създайте статично комбо от {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Допуснати: още не оценени (живият Jev се нуждае от потребителско съобщение). Подходящи: {models}.",
+    "jevAdmittedNone": "Допуснати: няма — всяка цел е блокирана преди Jev.",
+    "jevHeld": "Задържани: няма, докато Jev не се изпълни при жива заявка (праг на вероятност и доминирани).",
+    "jevBlocked": "Блокирани: {models}.",
+    "jevBlockedNone": "Блокирани: няма.",
+    "jevNotConfigured": "Jev не е конфигуриран",
+    "jevTestSummaryFootnote": "Редовете с цели по-долу са независими здравни сонди. Допускането на жив Jev се записва в следата на решението на истинска чат заявка."
   },
   "costs": {
     "title": "Разходи",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "Връзка (всеки акаунт има собствен прекъсвач)",
     "resilienceTokenRefreshThreshold": "Неуспехи преди пауза",
     "resilienceTokenRefreshCooldown": "Пауза след задействане",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Маскиране на лични данни",
       "description": "Изберете кои видове лични данни да се маскират и добавете свои шаблони. Маскирането остава изключено, докато не включите показаните по-долу флагове за функции.",

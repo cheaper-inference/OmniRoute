@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "මෙමඟින් මෙම අච්චුවට ගැළපෙන, දැනට සම්බන්ධිත සැපයුම්කරුවන්/ආකෘතිවල වත්මන් තත්ත්වය සංස්කරණය කළ හැකි සංයෝජනයක් ලෙස සුරකිනු ඇත.",
     "duplicateAutoComboFailedPrefix": "ස්වයංක්රීය සංයෝජනය අනුපිටපත් කිරීමට අසමත් විය:",
     "duplicateAutoComboUnknownError": "නොදන්නා දෝෂයකි",
-    "duplicateAutoComboTitle": "{name} වෙතින් ස්ථිතික සංයෝජනයක් සාදන්න"
+    "duplicateAutoComboTitle": "{name} වෙතින් ස්ථිතික සංයෝජනයක් සාදන්න",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "පිළිගෙන ඇත: තවමත් විනිශ්චය කර නොමැත (සජීවී Jev පරිශීලක පණිවිඩයක් අවශ්ය වේ). සුදුසු: {models}.",
+    "jevAdmittedNone": "පිළිගෙන ඇත: කිසිවක් නැත - සෑම ඉලක්කයක්ම Jev ට පෙර අවහිර කර ඇත.",
+    "jevHeld": "රඳවා ඇත: Jev සජීවී ඉල්ලීමක් මත ධාවනය වන තුරු කිසිවක් නැත (සම්භාවිතා තට්ටුව සහ ආධිපත්‍යය).",
+    "jevBlocked": "අවහිර කර ඇත: {models}.",
+    "jevBlockedNone": "අවහිර කර ඇත: කිසිවක් නැත.",
+    "jevNotConfigured": "Jev වින්‍යාස කර නැත",
+    "jevTestSummaryFootnote": "පහත ඉලක්කගත පේළි ස්වාධීන සෞඛ්‍ය පරීක්ෂණ වේ. සජීවී Jev ඇතුළත් කිරීම සැබෑ කතාබස් ඉල්ලීමක් සඳහා තීරණ ලුහුබැඳීම මත සටහන් වේ."
   },
   "costs": {
     "title": "පිරිවැය",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "සම්බන්ධතාවය (සෑම ගිණුමකටම එහිම බ්‍රේකරය ඇත)",
     "resilienceTokenRefreshThreshold": "විරාමයකට පෙර අසාර්ථකතා",
     "resilienceTokenRefreshCooldown": "සක්‍රීය වූ පසු විරාමය",
+    "jev": "Jev",
     "piiMasking": {
       "title": "පුද්ගලික දත්ත සැඟවීම",
       "description": "සැඟවිය යුතු පුද්ගලික දත්ත වර්ග තෝරා ඔබේම රටා එක් කරන්න. පහත පෙන්වා ඇති විශේෂාංග ධජ සක්‍රිය කරන තුරු සැඟවීම අක්‍රියව පවතී.",

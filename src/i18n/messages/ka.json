@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "ამჟამად დაკავშირებული პროვაიდერებისა და მოდელების, რომლებიც ამ შაბლონს შეესაბამება, მიმდინარე მდგომარეობა დაფიქსირდება რედაქტირებად კომბოდ.",
     "duplicateAutoComboFailedPrefix": "ავტოკომბოს დუბლირება ვერ მოხერხდა:",
     "duplicateAutoComboUnknownError": "უცნობი შეცდომა",
-    "duplicateAutoComboTitle": "სტატიკური კომბოს შექმნა {name}-დან"
+    "duplicateAutoComboTitle": "სტატიკური კომბოს შექმნა {name}-დან",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "დაშვებულია: ჯერ არ არის შეფასებული (ცოცხალი Jev სჭირდება მომხმარებლის შეტყობინებას). უფლებამოსილი: {models}.",
+    "jevAdmittedNone": "დაშვებულია: არცერთი - ყველა სამიზნე დაბლოკილია Jev-მდე.",
+    "jevHeld": "შედგა: არცერთი, სანამ Jev არ გადის პირდაპირ მოთხოვნაზე (ალბათობის დონე და დომინირებს).",
+    "jevBlocked": "დაბლოკილია: {models}.",
+    "jevBlockedNone": "დაბლოკილია: არცერთი.",
+    "jevNotConfigured": "Jev არ არის კონფიგურირებული",
+    "jevTestSummaryFootnote": "ქვემოთ მოცემული სამიზნე რიგები არის დამოუკიდებელი ჯანმრთელობის გამოკვლევები. ცოცხალი Jev დაშვება ჩაწერილია გადაწყვეტილების კვალზე რეალური ჩატის მოთხოვნისთვის."
   },
   "costs": {
     "title": "ხარჯები",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "კავშირი (თითოეულ ანგარიშს აქვს საკუთარი გამთიშელი)",
     "resilienceTokenRefreshThreshold": "შეჩერებამდე დაშვებული მარცხების რაოდენობა",
     "resilienceTokenRefreshCooldown": "შეჩერება გამორთვის შემდეგ",
+    "jev": "Jev",
     "piiMasking": {
       "title": "პერსონალური მონაცემების დაფარვა",
       "description": "აირჩიეთ, პერსონალური მონაცემების რომელი ტიპები დაიფაროს, და დაამატეთ საკუთარი შაბლონები. დაფარვა გამორთული რჩება, სანამ ქვემოთ ნაჩვენებ ფუნქციის დროშებს არ ჩართავთ.",

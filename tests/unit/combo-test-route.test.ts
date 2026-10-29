@@ -159,6 +159,43 @@ test("combo test route marks a model healthy only when it returns assistant text
   assert.equal(body.results[0].responseText, "OK");
 });
 
+test("combo test route adds the Jev pre-ask summary only for jev combos", async () => {
+  await combosDb.createCombo({
+    name: "jev-health-test",
+    models: ["openrouter/openai/gpt-5.4"],
+    strategy: "jev",
+  });
+  await createTestCombo();
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ choices: [{ message: { role: "assistant", content: "OK" } }] }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+
+  const jevResponse = await route.POST(makeRequest("jev-health-test"));
+  const jevBody = (await jevResponse.json()) as ComboTestBody & {
+    jev?: {
+      eligible: Array<{ model: string }>;
+      blocked: unknown[];
+      configurationNote: string | null;
+    };
+  };
+  assert.equal(jevResponse.status, 200);
+  assert.equal(jevBody.results[0].status, "ok");
+  assert.deepEqual(
+    jevBody.jev?.eligible.map((row) => row.model),
+    ["openrouter/openai/gpt-5.4"]
+  );
+  assert.deepEqual(jevBody.jev?.blocked, []);
+  // No TypeSafe connection in this DB: the summary says Jev is not configured.
+  assert.equal(jevBody.jev?.configurationNote, "Jev is not configured");
+
+  const priorityResponse = await route.POST(makeRequest());
+  const priorityBody = (await priorityResponse.json()) as Record<string, unknown>;
+  assert.equal(priorityResponse.status, 200);
+  assert.equal("jev" in priorityBody, false);
+});
+
 test("combo test route skips web-session providers without sending a chat probe", async () => {
   await createTestCombo(["deepseek-web/deepseek-v4-pro-think"]);
 

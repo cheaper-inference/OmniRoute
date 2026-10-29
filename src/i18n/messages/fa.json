@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "این ارائه‌دهندگان/مدل‌های متصل فعلی که با این قالب مطابقت دارند را در یک ترکیب قابل ویرایش ذخیره می‌کند.",
     "duplicateAutoComboFailedPrefix": "تکرار ترکیب خودکار ناموفق بود:",
     "duplicateAutoComboUnknownError": "خطای ناشناخته",
-    "duplicateAutoComboTitle": "ایجاد یک ترکیب ثابت از {name}"
+    "duplicateAutoComboTitle": "ایجاد یک ترکیب ثابت از {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "پذیرفته شده: هنوز مورد قضاوت قرار نگرفته است (Jev زنده به یک پیام کاربر نیاز دارد). واجد شرایط: {models}.",
+    "jevAdmittedNone": "پذیرفته شده: هیچکدام - هر هدف قبل از Jev مسدود شده است.",
+    "jevHeld": "برگزار شد: تا زمانی که Jev بر اساس یک درخواست زنده اجرا نشود (طبقه احتمال و غالب).",
+    "jevBlocked": "مسدود شده: {models}.",
+    "jevBlockedNone": "مسدود شده: هیچ.",
+    "jevNotConfigured": "Jev پیکربندی نشده است",
+    "jevTestSummaryFootnote": "ردیف های هدف زیر پروب های سلامت مستقل هستند. پذیرش زنده Jev در ردیابی تصمیم برای یک درخواست چت واقعی ثبت می شود."
   },
   "costs": {
     "title": "هزینهها",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "اتصال (هر حساب کلید قطع کننده خود را دارد)",
     "resilienceTokenRefreshThreshold": "تعداد خطاها قبل از توقف",
     "resilienceTokenRefreshCooldown": "مکث پس از فعال شدن",
+    "jev": "Jev",
     "piiMasking": {
       "title": "پنهان‌سازی داده‌های شخصی",
       "description": "انتخاب کنید کدام نوع داده‌های شخصی پنهان شوند و الگوهای خود را اضافه کنید. پنهان‌سازی تا زمانی که پرچم‌های ویژگی نمایش‌داده‌شده در زیر را روشن نکنید خاموش می‌ماند.",

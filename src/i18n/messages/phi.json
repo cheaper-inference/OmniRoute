@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Ito ay kukuha ng snapshot ng kasalukuyang nakakonektang mga provider/model na tugma sa template na ito sa isang editable na combo.",
     "duplicateAutoComboFailedPrefix": "Nabigo ang pag-duplicate ng auto-combo:",
     "duplicateAutoComboUnknownError": "Hindi alam na error",
-    "duplicateAutoComboTitle": "Gumawa ng static combo mula sa {name}"
+    "duplicateAutoComboTitle": "Gumawa ng static combo mula sa {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Inamin: hindi pa hinuhusgahan (kailangan ng live na Jev ng mensahe ng user). Kwalipikado: {models}.",
+    "jevAdmittedNone": "Tinatanggap: wala — bawat target ay naharang bago ang Jev.",
+    "jevHeld": "Hinawakan: wala hanggang sa tumakbo ang Jev sa isang live na kahilingan (probability floor at dominado).",
+    "jevBlocked": "Naka-block: {models}.",
+    "jevBlockedNone": "Naka-block: wala.",
+    "jevNotConfigured": "Hindi naka-configure ang Jev",
+    "jevTestSummaryFootnote": "Ang mga target na hilera sa ibaba ay mga independiyenteng pagsusuri sa kalusugan. Ang live na Jev admission ay naitala sa bakas ng desisyon para sa isang tunay na kahilingan sa chat."
   },
   "costs": {
     "title": "Mga gastos",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Koneksyon (bawat account ay may sariling breaker)",
     "resilienceTokenRefreshThreshold": "Mga kabiguan bago magpahinto",
     "resilienceTokenRefreshCooldown": "Magpahinga pagkatapos ma-trigger",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Pagtatakip ng personal na datos",
       "description": "Piliin kung aling uri ng personal na datos ang tatakpan at magdagdag ng sarili mong mga pattern. Mananatiling naka-off ang pagtatakip hangga't hindi mo ini-on ang mga feature flag na nakikita sa ibaba.",

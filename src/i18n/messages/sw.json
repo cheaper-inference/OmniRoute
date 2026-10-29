@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Hii itachukua picha ya watoa huduma/watolei sambazwa sasa yanayolingana na kioo hiki katika combo inayoedit.",
     "duplicateAutoComboFailedPrefix": "Imeshindwa kuiga combo ya otomatiki:",
     "duplicateAutoComboUnknownError": "Hitilafai isiyojulikana",
-    "duplicateAutoComboTitle": "Tengeneza combo thabiti kutoka {name}"
+    "duplicateAutoComboTitle": "Tengeneza combo thabiti kutoka {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Imekubaliwa: bado haijahukumiwa (Jev ya moja kwa moja inahitaji ujumbe wa mtumiaji). Inastahiki: {models}.",
+    "jevAdmittedNone": "Imekubaliwa: hakuna - kila lengo limezuiwa kabla ya Jev.",
+    "jevHeld": "Imeshikiliwa: hakuna hadi Jev iendeshe ombi la moja kwa moja (uwezekano wa sakafu na inatawaliwa).",
+    "jevBlocked": "Imezuiwa: {models}.",
+    "jevBlockedNone": "Imezuiwa: hakuna.",
+    "jevNotConfigured": "Jev haijasanidiwa",
+    "jevTestSummaryFootnote": "Safu mlalo zilizolengwa hapa chini ni uchunguzi huru wa kiafya. Uandikishaji wa moja kwa moja wa Jev umerekodiwa kwenye ufuatiliaji wa uamuzi kwa ombi la kweli la gumzo."
   },
   "costs": {
     "title": "Gharama",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Muunganisho (kila akaunti ina kipochi chake cha kuzima)",
     "resilienceTokenRefreshThreshold": "Kushindwa kabla ya kusimamisha",
     "resilienceTokenRefreshCooldown": "Mapumziko baada ya kuamilishwa",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Kuficha data binafsi",
       "description": "Chagua aina zipi za data binafsi zifichwe na uongeze ruwaza zako mwenyewe. Kuficha kunabaki kumezimwa hadi uwashe bendera za vipengele zilizoonyeshwa hapa chini.",

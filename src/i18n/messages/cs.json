@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "Tím se zachytí aktuálně připojení poskytovatelé/modely, které odpovídají této šabloně, do upravitelné kombinace.",
     "duplicateAutoComboFailedPrefix": "Duplikace automatické kombinace selhala:",
     "duplicateAutoComboUnknownError": "Neznámá chyba",
-    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}"
+    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Připuštěno: ještě neposouzeno (živý Jev potřebuje uživatelskou zprávu). Vhodné: {models}.",
+    "jevAdmittedNone": "Připuštěno: žádné — každý cíl je před Jevem blokován.",
+    "jevHeld": "Pozdrženo: žádné, dokud Jev neběží na živém požadavku (pravděpodobnostní práh a dominované).",
+    "jevBlocked": "Blokováno: {models}.",
+    "jevBlockedNone": "Blokováno: žádné.",
+    "jevNotConfigured": "Jev není nakonfigurován",
+    "jevTestSummaryFootnote": "Řádky cílů níže jsou nezávislé kontroly zdraví. Připuštění živého Jeva se zaznamenává do rozhodovací stopy skutečného chatového požadavku."
   },
   "costs": {
     "title": "Náklady",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "Připojení (každý účet má vlastní jistič)",
     "resilienceTokenRefreshThreshold": "Neúspěchy před pozastavením",
     "resilienceTokenRefreshCooldown": "Pauza po spuštění",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Maskování osobních údajů",
       "description": "Vyberte, které druhy osobních údajů se maskují, a přidejte vlastní vzory. Maskování zůstává vypnuté, dokud nezapnete níže zobrazené příznaky funkcí.",

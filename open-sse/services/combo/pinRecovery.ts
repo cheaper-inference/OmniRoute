@@ -154,7 +154,13 @@ export type PreDispatchExclusionReason =
   | "connection_cooldown"
   | "model_lockout"
   | "free_tier_drained"
-  | "unavailable";
+  | "unavailable"
+  | "quota_cutoff"
+  | "context_window"
+  | "context_requirements"
+  | "credential_gate"
+  | "availability"
+  | "persisted_cooldown";
 
 export interface PreDispatchExclusion {
   provider: string;

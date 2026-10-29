@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "આ ટેમપ્લેટ સાથે મેચ થતા વર્તમાન જોડાયેલા પ્રદાતાઓ/મોડેલને સંપાદનીય કોમ્બોમાં સ્નેપશોટ લેશે.",
     "duplicateAutoComboFailedPrefix": "ઓટોકોમ્બો ડુપ્લિકેટ કરવામાં નિષ્ફળ:",
     "duplicateAutoComboUnknownError": "અજ્ઞાત ભૂલ",
-    "duplicateAutoComboTitle": "{name} માંથી સ્ટેટિક કોમ્બો બનાવો"
+    "duplicateAutoComboTitle": "{name} માંથી સ્ટેટિક કોમ્બો બનાવો",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "સ્વીકાર્યું: હજુ સુધી નક્કી નથી (લાઇવ Jev ને વપરાશકર્તા સંદેશની જરૂર છે). પાત્ર: {models}.",
+    "jevAdmittedNone": "સ્વીકાર્યું: કંઈ નહીં — દરેક લક્ષ્ય Jev પહેલાં અવરોધિત છે.",
+    "jevHeld": "હોલ્ડ: Jev લાઇવ વિનંતિ પર ચાલે ત્યાં સુધી કંઈ નહીં (સંભાવના ફ્લોર અને પ્રભુત્વ).",
+    "jevBlocked": "અવરોધિત: {models}.",
+    "jevBlockedNone": "અવરોધિત: કોઈ નહીં.",
+    "jevNotConfigured": "Jev ગોઠવેલ નથી",
+    "jevTestSummaryFootnote": "નીચેની લક્ષ્યાંક પંક્તિઓ સ્વતંત્ર આરોગ્ય તપાસ છે. લાઇવ Jev પ્રવેશ વાસ્તવિક ચેટ વિનંતી માટે નિર્ણય ટ્રેસ પર રેકોર્ડ કરવામાં આવે છે."
   },
   "costs": {
     "title": "ખર્ચ",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "કનેક્શન (દરેક એકાઉન્ટનું પોતાનું બ્રેકર છે)",
     "resilienceTokenRefreshThreshold": "થંભાવતા પહેલાં નિષ્ફળતાઓ",
     "resilienceTokenRefreshCooldown": "ટ્રિપ થયા પછી વિરામ",
+    "jev": "Jev",
     "piiMasking": {
       "title": "વ્યક્તિગત ડેટા માસ્કિંગ",
       "description": "કયા પ્રકારનો વ્યક્તિગત ડેટા માસ્ક કરવો તે પસંદ કરો અને તમારા પોતાના પેટર્ન ઉમેરો. નીચે બતાવેલા ફીચર ફ્લેગ ચાલુ ન કરો ત્યાં સુધી માસ્કિંગ બંધ રહે છે.",

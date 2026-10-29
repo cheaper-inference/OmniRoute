@@ -4,7 +4,7 @@
  * The combo pipeline used to branch on raw string comparisons of the strategy name
  * scattered across ~12 slices. Those decisions now live in a typed trait registry
  * (`open-sse/services/combo/strategyRegistry.ts`). This suite pins:
- *   1. coverage — every canonical strategy (20 public + internal `quota-share`) has an
+ *   1. coverage — every canonical strategy (21 public + internal `quota-share`) has an
  *      entry, and the known-symbols gate's HANDLED_COMBO_STRATEGIES is derived from it;
  *   2. the safe default — an unknown strategy resolves to the exact fall-through of the
  *      former `else` chains (prototype keys included);
@@ -69,7 +69,16 @@ const LEGACY_DECISIONS: { [K in keyof StrategyTraits]: (s: string) => StrategyTr
   stickyPin: (s) => (s === "weighted" ? "weighted" : s === "round-robin" ? "round-robin" : "none"),
   // dispatchPrelude.ts simpleExecuteStrategies + orderRuntimeUnits
   runtimeUnitOrder: (s) => {
-    const simple = ["priority", "round-robin", "random", "strict-random", "weighted", "fill-first"];
+    // `jev` orders its runtime units through jevRuntimeUnits.ts (declared user order, then admission).
+    const simple = [
+      "priority",
+      "round-robin",
+      "random",
+      "strict-random",
+      "weighted",
+      "fill-first",
+      "jev",
+    ];
     if (!simple.includes(s)) return "unsupported";
     if (s === "random") return "shuffle";
     if (s === "strict-random") return "deck";
@@ -86,7 +95,7 @@ const LEGACY_DECISIONS: { [K in keyof StrategyTraits]: (s: string) => StrategyTr
   preScreensTargets: (s) => s === "priority",
   // targetResolution.ts modelOrderPreservingStrategies (#8370)
   promptCacheAffinityScope: (s) =>
-    ["priority", "weighted", "fill-first", "quota-share"].includes(s) ? "model" : "global",
+    ["priority", "weighted", "fill-first", "quota-share", "jev"].includes(s) ? "model" : "global",
   // promptCacheAffinity.ts shouldProtectOriginalFirst (#8370)
   protectsFirstTargetFromAffinity: (s) =>
     s === "auto" ||
@@ -95,7 +104,8 @@ const LEGACY_DECISIONS: { [K in keyof StrategyTraits]: (s: string) => StrategyTr
     s === "priority" ||
     s === "fill-first" ||
     s === "lkgp" ||
-    s === "quota-weighted",
+    s === "quota-weighted" ||
+    s === "jev",
   // targetResolution.ts applyContinuityFilters cacheStrategyAffinityApplied
   cacheAffinityOwnsOrdering: (s) => s === "cache-optimized",
   // targetResolution.ts dispatchSmartPipeline
@@ -113,8 +123,8 @@ const LEGACY_DECISIONS: { [K in keyof StrategyTraits]: (s: string) => StrategyTr
   contextRelay: (s) => s === "context-relay",
 };
 
-test("registry covers every canonical strategy (20 public + quota-share) and nothing else", () => {
-  assert.equal(CANONICAL.length, 21);
+test("registry covers every canonical strategy (21 public + quota-share) and nothing else", () => {
+  assert.equal(CANONICAL.length, 22);
   assert.deepEqual([...REGISTERED_COMBO_STRATEGIES].sort(), [...CANONICAL].sort());
   for (const strategy of CANONICAL) {
     assert.ok(Object.hasOwn(COMBO_STRATEGY_REGISTRY, strategy), `missing ${strategy}`);

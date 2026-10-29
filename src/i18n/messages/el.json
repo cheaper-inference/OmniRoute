@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Αυτό θα αποτυπώσει τους παρόχους/τα μοντέλα που είναι συνδεδεμένα αυτή τη στιγμή και ταιριάζουν σε αυτό το πρότυπο, δημιουργώντας έναν επεξεργάσιμο συνδυασμό.",
     "duplicateAutoComboFailedPrefix": "Αποτυχία αντιγραφής αυτόματου συνδυασμού:",
     "duplicateAutoComboUnknownError": "Άγνωστο σφάλμα",
-    "duplicateAutoComboTitle": "Δημιουργία στατικού συνδυασμού από {name}"
+    "duplicateAutoComboTitle": "Δημιουργία στατικού συνδυασμού από {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Επιτρεπόμενα: δεν έχουν κριθεί ακόμη (το live Jev χρειάζεται μήνυμα χρήστη). Επιλέξιμα: {models}.",
+    "jevAdmittedNone": "Επιτρεπόμενα: κανένα — κάθε στόχος είναι αποκλεισμένος πριν από το Jev.",
+    "jevHeld": "Σε αναμονή: κανένα μέχρι να εκτελεστεί το Jev σε ζωντανό αίτημα (κατώφλι πιθανότητας και κυριαρχούμενα).",
+    "jevBlocked": "Αποκλεισμένα: {models}.",
+    "jevBlockedNone": "Αποκλεισμένα: κανένα.",
+    "jevNotConfigured": "Το Jev δεν είναι ρυθμισμένο",
+    "jevTestSummaryFootnote": "Οι γραμμές στόχων παρακάτω είναι ανεξάρτητες ανιχνεύσεις υγείας. Η εισδοχή live Jev καταγράφεται στο ίχνος απόφασης ενός πραγματικού αιτήματος συνομιλίας."
   },
   "costs": {
     "title": "Κόστη",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Σύνδεση (κάθε λογαριασμός έχει τον δικό του διακόπτη)",
     "resilienceTokenRefreshThreshold": "Αποτυχίες πριν από την παύση",
     "resilienceTokenRefreshCooldown": "Παύση μετά την ενεργοποίηση",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Απόκρυψη προσωπικών δεδομένων",
       "description": "Επιλέξτε ποιοι τύποι προσωπικών δεδομένων αποκρύπτονται και προσθέστε δικά σας μοτίβα. Η απόκρυψη παραμένει ανενεργή μέχρι να ενεργοποιήσετε τις σημαίες λειτουργιών που φαίνονται παρακάτω.",

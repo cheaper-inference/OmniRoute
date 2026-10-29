@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "Questo catturerà i fornitori/modelli attualmente connessi che corrispondono a questo modello in una combinazione modificabile.",
     "duplicateAutoComboFailedPrefix": "Duplicazione della combinazione automatica fallita:",
     "duplicateAutoComboUnknownError": "Errore sconosciuto",
-    "duplicateAutoComboTitle": "Crea una combinazione statica da {name}"
+    "duplicateAutoComboTitle": "Crea una combinazione statica da {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Ammessi: non ancora giudicati (Jev live richiede un messaggio utente). Idonei: {models}.",
+    "jevAdmittedNone": "Ammessi: nessuno — ogni destinazione è bloccata prima di Jev.",
+    "jevHeld": "In attesa: nessuno finché Jev non viene eseguito su una richiesta live (soglia di probabilità e dominati).",
+    "jevBlocked": "Bloccati: {models}.",
+    "jevBlockedNone": "Bloccati: nessuno.",
+    "jevNotConfigured": "Jev non è configurato",
+    "jevTestSummaryFootnote": "Le righe di destinazione sotto sono sonde di salute indipendenti. L’ammissione Jev live è registrata nella traccia decisionale di una vera richiesta di chat."
   },
   "costs": {
     "title": "Costi",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "Connessione (ogni account ha il proprio circuit breaker)",
     "resilienceTokenRefreshThreshold": "Fallimenti prima della pausa",
     "resilienceTokenRefreshCooldown": "Pausa dopo l'attivazione",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Mascheramento PII",
       "description": "Scegli quali tipi di dati personali mascherare e aggiungi i tuoi pattern. Il mascheramento resta disattivato finché non attivi i feature flag mostrati qui sotto.",

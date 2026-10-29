@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "สิ่งนี้จะจับภาพผู้ให้บริการ/โมเดลที่เชื่อมต่ออยู่ในปัจจุบันซึ่งตรงกับเทมเพลตนี้ลงในคอมโบที่แก้ไขได้",
     "duplicateAutoComboFailedPrefix": "ล้มเหลวในการทำสำเนาคอมโบอัตโนมัติ:",
     "duplicateAutoComboUnknownError": "ข้อผิดพลาดที่ไม่ทราบสาเหตุ",
-    "duplicateAutoComboTitle": "สร้างคอมโบคงที่จาก {name}"
+    "duplicateAutoComboTitle": "สร้างคอมโบคงที่จาก {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "อนุญาตแล้ว: ยังไม่ได้ตัดสิน (Jev แบบสดต้องการข้อความผู้ใช้) ที่มีสิทธิ์: {models}",
+    "jevAdmittedNone": "อนุญาตแล้ว: ไม่มี — ทุกเป้าหมายถูกบล็อกก่อน Jev",
+    "jevHeld": "ระงับ: ไม่มีจนกว่า Jev จะทำงานบนคำขอแบบสด (เกณฑ์ความน่าจะเป็นและถูกครอง)",
+    "jevBlocked": "ถูกบล็อก: {models}",
+    "jevBlockedNone": "ถูกบล็อก: ไม่มี",
+    "jevNotConfigured": "Jev ยังไม่ได้กำหนดค่า",
+    "jevTestSummaryFootnote": "แถวเป้าหมายด้านล่างเป็นการตรวจสุขภาพอิสระ การอนุญาต Jev แบบสดถูกบันทึกบนร่องรอยการตัดสินใจของคำขอแชทจริง"
   },
   "costs": {
     "title": "ค่าใช้จ่าย",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "การเชื่อมต่อ (แต่ละบัญชีมีตัวเบรกเกอร์ของตัวเอง)",
     "resilienceTokenRefreshThreshold": "ความล้มเหลวก่อนหยุดชั่วคราว",
     "resilienceTokenRefreshCooldown": "หยุดชั่วคราวหลังจากกระตุ้น",
+    "jev": "Jev",
     "piiMasking": {
       "title": "การปิดบังข้อมูลส่วนบุคคล",
       "description": "เลือกประเภทข้อมูลส่วนบุคคลที่จะปิดบังและเพิ่มรูปแบบของคุณเอง การปิดบังจะปิดอยู่จนกว่าคุณจะเปิดแฟล็กฟีเจอร์ที่แสดงด้านล่าง",

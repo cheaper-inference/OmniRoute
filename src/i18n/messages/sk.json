@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Tým sa zachytí aktuálne pripojení poskytovatelia/modely, ktoré zodpovedajú tejto šablóne, do upraviteľnej kombinácie.",
     "duplicateAutoComboFailedPrefix": "Duplikácia automatickej kombinácie zlyhala:",
     "duplicateAutoComboUnknownError": "Neznáma chyba",
-    "duplicateAutoComboTitle": "Vytvorte staticú kombináciu z {name}"
+    "duplicateAutoComboTitle": "Vytvorte staticú kombináciu z {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Pripustené: ešte neposúdené (živý Jev potrebuje správu používateľa). Vhodné: {models}.",
+    "jevAdmittedNone": "Pripustené: žiadne — každý cieľ je pred Jevom blokovaný.",
+    "jevHeld": "Pozdržané: žiadne, kým Jev nebeží na živej požiadavke (prah pravdepodobnosti a dominované).",
+    "jevBlocked": "Blokované: {models}.",
+    "jevBlockedNone": "Blokované: žiadne.",
+    "jevNotConfigured": "Jev nie je nakonfigurovaný",
+    "jevTestSummaryFootnote": "Riadky cieľov nižšie sú nezávislé kontroly zdravia. Pripustenie živého Jeva sa zaznamenáva do rozhodovacej stopy skutočnej chatovej požiadavky."
   },
   "costs": {
     "title": "náklady",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Pripojenie (každý účet má vlastný vypínač)",
     "resilienceTokenRefreshThreshold": "Zlyhania pred pozastavením",
     "resilienceTokenRefreshCooldown": "Pauza po spustení",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Maskovanie osobných údajov",
       "description": "Vyberte, ktoré druhy osobných údajov sa maskujú, a pridajte vlastné vzory. Maskovanie zostáva vypnuté, kým nezapnete príznaky funkcií zobrazené nižšie.",

@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Dadurch werden die aktuell verbundenen Anbieter/Modelle, die dieser Vorlage entsprechen, in einer bearbeitbaren Kombination gespeichert.",
     "duplicateAutoComboFailedPrefix": "Automatische Kombination konnte nicht dupliziert werden:",
     "duplicateAutoComboUnknownError": "Unbekannter Fehler",
-    "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}"
+    "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Zugelassen: noch nicht bewertet (Live-Jev braucht eine Benutzernachricht). Geeignet: {models}.",
+    "jevAdmittedNone": "Zugelassen: keine — jedes Ziel ist vor Jev blockiert.",
+    "jevHeld": "Gehalten: keine, bis Jev bei einer Live-Anfrage läuft (Wahrscheinlichkeitsuntergrenze und dominiert).",
+    "jevBlocked": "Blockiert: {models}.",
+    "jevBlockedNone": "Blockiert: keine.",
+    "jevNotConfigured": "Jev ist nicht konfiguriert",
+    "jevTestSummaryFootnote": "Die Zielzeilen unten sind unabhängige Gesundheitsprüfungen. Live-Jev-Zulassung wird im Entscheidungspfad einer echten Chat-Anfrage erfasst."
   },
   "costs": {
     "title": "Kosten",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Verbindung (jedes Konto hat eigenen Schutzschalter)",
     "resilienceTokenRefreshThreshold": "Fehler vor der Pause",
     "resilienceTokenRefreshCooldown": "Pause nach Auslösung",
+    "jev": "Jev",
     "piiMasking": {
       "title": "PII-Maskierung",
       "description": "Wählen Sie, welche Arten personenbezogener Daten maskiert werden, und fügen Sie eigene Muster hinzu. Die Maskierung bleibt aus, bis Sie die unten angezeigten Feature-Flags aktivieren.",

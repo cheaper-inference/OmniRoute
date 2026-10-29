@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Ini akan mengambil snapshot penyedia/model yang disambungkan semasa yang sepadan dengan templat ini ke dalam kombo yang boleh diedit.",
     "duplicateAutoComboFailedPrefix": "Gagal menduplikasi kombo automatik:",
     "duplicateAutoComboUnknownError": "Ralat tidak diketahui",
-    "duplicateAutoComboTitle": "Cipta kombo statik dari {name}"
+    "duplicateAutoComboTitle": "Cipta kombo statik dari {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Diterima: belum dinilai (Jev secara langsung memerlukan mesej pengguna). Layak: {models}.",
+    "jevAdmittedNone": "Diakui: tiada — setiap sasaran disekat sebelum Jev.",
+    "jevHeld": "Ditahan: tiada sehingga Jev berjalan atas permintaan langsung (tingkat kebarangkalian dan didominasi).",
+    "jevBlocked": "Disekat: {models}.",
+    "jevBlockedNone": "Disekat: tiada.",
+    "jevNotConfigured": "Jev tidak dikonfigurasikan",
+    "jevTestSummaryFootnote": "Sasaran baris di bawah ialah siasatan kesihatan bebas. Kemasukan Jev secara langsung direkodkan pada jejak keputusan untuk permintaan sembang sebenar."
   },
   "costs": {
     "title": "Kos",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Sambungan (setiap akaun mempunyai pemutus litar sendiri)",
     "resilienceTokenRefreshThreshold": "Kegagalan sebelum menjeda",
     "resilienceTokenRefreshCooldown": "Jeda selepas terpicu",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Penyamaran data peribadi",
       "description": "Pilih jenis data peribadi yang disamarkan dan tambah corak anda sendiri. Penyamaran kekal dimatikan sehingga anda menghidupkan bendera ciri yang dipaparkan di bawah.",

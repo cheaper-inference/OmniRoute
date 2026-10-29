@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "ఈ టెంప్లేట్‌తో సరిపోయే ప్రస్తుత కనెక్ట్ చేసిన ప్రొవైడర్లు/మోడల్‌లను ఎడిటబుల్ కంబోలో స్నాప్‌షాట్ తీసుకుంటుంది.",
     "duplicateAutoComboFailedPrefix": "ఆటోకంబో డూప్లికేట్ చేయడంలో విఫలమైంది:",
     "duplicateAutoComboUnknownError": "తెలియని దోషం",
-    "duplicateAutoComboTitle": "{name} నుండి స్థిర కంబో సృష్టించండి"
+    "duplicateAutoComboTitle": "{name} నుండి స్థిర కంబో సృష్టించండి",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "అంగీకరించబడింది: ఇంకా నిర్ధారించబడలేదు (ప్రత్యక్ష Jevకి వినియోగదారు సందేశం అవసరం). అర్హత: {models}.",
+    "jevAdmittedNone": "అంగీకరించబడింది: ఏదీ లేదు — ప్రతి లక్ష్యం Jev కంటే ముందు బ్లాక్ చేయబడుతుంది.",
+    "jevHeld": "హోల్డ్: Jev ప్రత్యక్ష అభ్యర్థనపై (సంభావ్యత అంతస్తు మరియు ఆధిపత్యం) అమలు అయ్యే వరకు ఏదీ లేదు.",
+    "jevBlocked": "బ్లాక్ చేయబడింది: {models}.",
+    "jevBlockedNone": "బ్లాక్ చేయబడింది: ఏదీ లేదు.",
+    "jevNotConfigured": "Jev కాన్ఫిగర్ చేయబడలేదు",
+    "jevTestSummaryFootnote": "దిగువ లక్ష్య వరుసలు స్వతంత్ర ఆరోగ్య ప్రోబ్స్. లైవ్ Jev అడ్మిషన్ నిజమైన చాట్ అభ్యర్థన కోసం నిర్ణయం ట్రేస్‌లో రికార్డ్ చేయబడింది."
   },
   "costs": {
     "title": "ఖర్చులు",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "కనెక్షన్ (ప్రతి ఖాతాకు దాని సొంత బ్రేకర్ ఉంటుంది)",
     "resilienceTokenRefreshThreshold": "నిలిపివేయడానికి ముందు వైఫల్యాలు",
     "resilienceTokenRefreshCooldown": "తావు తర్వాత విరామం",
+    "jev": "Jev",
     "piiMasking": {
       "title": "వ్యక్తిగత డేటా మాస్కింగ్",
       "description": "ఏ రకమైన వ్యక్తిగత డేటాను మాస్క్ చేయాలో ఎంచుకుని, మీ స్వంత ప్యాటర్న్‌లను జోడించండి. క్రింద చూపిన ఫీచర్ ఫ్లాగ్‌లను ఆన్ చేసే వరకు మాస్కింగ్ ఆఫ్‌లోనే ఉంటుంది.",

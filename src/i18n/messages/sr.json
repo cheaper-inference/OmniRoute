@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Овим ће тренутно повезани провајдери/модели који одговарају овом шаблону бити снимљени у комбинацију која се може уређивати.",
     "duplicateAutoComboFailedPrefix": "Neuspešno dupliranje auto-kombinacije:",
     "duplicateAutoComboUnknownError": "Nepoznata greška",
-    "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}"
+    "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Допуштено: још није процењено (живом Jev-у треба корисничка порука). Погодни: {models}.",
+    "jevAdmittedNone": "Допуштено: ниједан — свака мета је блокирана пре Jev-а.",
+    "jevHeld": "Задржано: ниједан док Jev не покрене на живом захтеву (праг вероватноће и доминирани).",
+    "jevBlocked": "Блокирано: {models}.",
+    "jevBlockedNone": "Блокирано: ниједан.",
+    "jevNotConfigured": "Jev није конфигурисан",
+    "jevTestSummaryFootnote": "Редови мета испод су независне здравствене сонде. Допуштење живог Jev-а бележи се на трагу одлуке стварног захтева за ћаскање."
   },
   "costs": {
     "title": "Troškovi",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Веза (сваки налог има свој прекидач)",
     "resilienceTokenRefreshThreshold": "Неуспеси пре паузирања",
     "resilienceTokenRefreshCooldown": "Пауза после активирања",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Маскирање личних података",
       "description": "Изаберите које врсте личних података се маскирају и додајте сопствене обрасце. Маскирање остаје искључено док не укључите заставице функција приказане испод.",

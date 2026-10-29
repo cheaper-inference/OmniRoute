@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "Dette vil tage et øjebliksbillede af de aktuelt tilsluttede udbydere/modeller, der matcher denne skabelon, i en redigerbar kombination.",
     "duplicateAutoComboFailedPrefix": "Kopiering af auto-kombination mislykkedes:",
     "duplicateAutoComboUnknownError": "Ukendt fejl",
-    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}"
+    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Godkendt: endnu ikke vurderet (live Jev kræver en brugermeddelelse). Berettigede: {models}.",
+    "jevAdmittedNone": "Godkendt: ingen — hvert mål er blokeret før Jev.",
+    "jevHeld": "Tilbageholdt: ingen, før Jev kører på en live-anmodning (sandsynlighedsgrænse og dominerede).",
+    "jevBlocked": "Blokeret: {models}.",
+    "jevBlockedNone": "Blokeret: ingen.",
+    "jevNotConfigured": "Jev er ikke konfigureret",
+    "jevTestSummaryFootnote": "Målrækkerne nedenfor er uafhængige sundhedssonder. Live Jev-godkendelse registreres på beslutningsspor for en rigtig chat-anmodning."
   },
   "costs": {
     "title": "Omkostninger",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "Forbindelse (hver konto har sin egen afbryder)",
     "resilienceTokenRefreshThreshold": "Fejl før pause",
     "resilienceTokenRefreshCooldown": "Pause efter udløsning",
+    "jev": "Jev",
     "piiMasking": {
       "title": "PII-maskering",
       "description": "Vælg, hvilke typer personoplysninger der maskeres, og tilføj dine egne mønstre. Maskeringen er slået fra, indtil du aktiverer de funktionsflag, der vises nedenfor.",

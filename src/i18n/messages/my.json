@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "ဤလုပ်ဆောင်ချက်သည် လက်ရှိချိတ်ဆက်ထားပြီး ဤတမ်းပလိတ်နှင့် ကိုက်ညီသော ဝန်ဆောင်မှုပေးသူများ/မော်ဒယ်များကို တည်းဖြတ်နိုင်သည့် ပေါင်းစပ်မှုတစ်ခုအဖြစ် လက်ရှိအခြေအနေအတိုင်း မှတ်တမ်းတင်မည်။",
     "duplicateAutoComboFailedPrefix": "အလိုအလျောက်ပေါင်းစပ်မှုကို မိတ္တူပွား၍မရပါ:",
     "duplicateAutoComboUnknownError": "မသိသော အမှား",
-    "duplicateAutoComboTitle": "{name} မှ တည်ငြိမ်သော ပေါင်းစပ်မှုတစ်ခု ဖန်တီးရန်"
+    "duplicateAutoComboTitle": "{name} မှ တည်ငြိမ်သော ပေါင်းစပ်မှုတစ်ခု ဖန်တီးရန်",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "လက်ခံခဲ့သည်- မစီရင်ရသေးပါ (တိုက်ရိုက် Jev အသုံးပြုသူ မက်ဆေ့ဂျ် လိုအပ်သည်)။ အကျုံးဝင်သည်-{models}.",
+    "jevAdmittedNone": "လက်ခံခဲ့သည်- မည်သူမျှ — Jev မတိုင်မီ ပစ်မှတ်တိုင်းကို ပိတ်ဆို့ထားသည်။",
+    "jevHeld": "ကျင်းပခဲ့သည်- Jev တိုက်ရိုက်တောင်းဆိုမှု (ဖြစ်နိုင်ခြေကြမ်းပြင်နှင့် လွှမ်းမိုးထားသည်) မလုပ်ဆောင်မချင်း မည်သည့်အရာမျှ မရှိပါ။",
+    "jevBlocked": "ပိတ်ဆို့ထားသည်-{models}.",
+    "jevBlockedNone": "ပိတ်ထားသည်- မရှိပါ။",
+    "jevNotConfigured": "Jev ကို စီစဉ်မထားပါ။",
+    "jevTestSummaryFootnote": "အောက်ဖော်ပြပါ ပစ်မှတ်အတန်းများသည် လွတ်လပ်သော ကျန်းမာရေးစုံစမ်းစစ်ဆေးမှုများဖြစ်သည်။ တိုက်ရိုက် Jev ဝင်ခွင့်ကို အမှန်တကယ် ချတ်တောင်းဆိုမှုအတွက် ဆုံးဖြတ်ချက်လမ်းကြောင်းပေါ်တွင် မှတ်တမ်းတင်ထားသည်။"
   },
   "costs": {
     "title": "ကုန်ကျစရိတ်များ",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "ချိတ်ဆက်မှု (အကောင့်တိုင်းတွင် ၎င်း၏ breaker ရှိသည်)",
     "resilienceTokenRefreshThreshold": "ရပ်တန့်မှုမပြုမီ မအောင်မြင်မှုများ",
     "resilienceTokenRefreshCooldown": "ချောင်းဆိုးပြီးနောက် အနားယူပါ",
+    "jev": "Jev",
     "piiMasking": {
       "title": "ကိုယ်ရေးဒေတာ ဖုံးကွယ်ခြင်း",
       "description": "မည်သည့် ကိုယ်ရေးဒေတာ အမျိုးအစားကို ဖုံးကွယ်မည်ကို ရွေးပြီး သင့်ကိုယ်ပိုင်ပုံစံများ ထည့်ပါ။ အောက်တွင်ပြထားသော feature flag များကို ဖွင့်သည်အထိ ဖုံးကွယ်ခြင်း ပိတ်ထားဆဲဖြစ်သည်။",

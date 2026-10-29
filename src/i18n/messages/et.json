@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "See salvestab hetkel ühendatud ja sellele mallile vastavad teenusepakkujad/mudelid redigeeritavasse kombinatsiooni.",
     "duplicateAutoComboFailedPrefix": "Automaatse kombinatsiooni dubleerimine ebaõnnestus:",
     "duplicateAutoComboUnknownError": "Tundmatu viga",
-    "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon"
+    "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Lubatud: veel hindamata (elav Jev vajab kasutajasõnumit). Sobivad: {models}.",
+    "jevAdmittedNone": "Lubatud: mitte ühtegi — iga sihtmärk on enne Jevi blokeeritud.",
+    "jevHeld": "Hoitud: mitte ühtegi, kuni Jev töötab elaval päringul (tõenäosuslävi ja domineeritud).",
+    "jevBlocked": "Blokeeritud: {models}.",
+    "jevBlockedNone": "Blokeeritud: mitte ühtegi.",
+    "jevNotConfigured": "Jev ei ole seadistatud",
+    "jevTestSummaryFootnote": "Allpool olevad sihtread on sõltumatud tervisesondid. Elava Jevi lubamine salvestatakse tegeliku vestluspäringu otsustusjäljele."
   },
   "costs": {
     "title": "Kulud",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Ühendus (igal kontol on oma katkesti)",
     "resilienceTokenRefreshThreshold": "Tõrgete arv enne peatamist",
     "resilienceTokenRefreshCooldown": "Paus pärast käivitumist",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Isikuandmete maskeerimine",
       "description": "Valige, milliseid isikuandmeid maskeeritakse, ja lisage oma mustrid. Maskeerimine on välja lülitatud, kuni lülitate sisse allpool näidatud funktsioonilipud.",

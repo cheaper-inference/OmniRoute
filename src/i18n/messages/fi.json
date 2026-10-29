@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Tämä tallentaa tämän mallin mukaiset tällä hetkellä yhdistetyt tarjoajat/mallit muokattavaan yhdistelmään.",
     "duplicateAutoComboFailedPrefix": "Automaattisen yhdistelmän kaksoiskappaleen luonti epäonnistui:",
     "duplicateAutoComboUnknownError": "Tuntematon virhe",
-    "duplicateAutoComboTitle": "Luo staattinen yhdistelmä kohteesta {name}"
+    "duplicateAutoComboTitle": "Luo staattinen yhdistelmä kohteesta {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Hyväksytyt: ei vielä arvioitu (live-Jev tarvitsee käyttäjäviestin). Kelvolliset: {models}.",
+    "jevAdmittedNone": "Hyväksytyt: ei yhtään — jokainen kohde on estetty ennen Jeviä.",
+    "jevHeld": "Pidätetyt: ei yhtään, ennen kuin Jev ajetaan live-pyynnöllä (todennäköisyysraja ja dominoidut).",
+    "jevBlocked": "Estetyt: {models}.",
+    "jevBlockedNone": "Estetyt: ei yhtään.",
+    "jevNotConfigured": "Jeviä ei ole määritetty",
+    "jevTestSummaryFootnote": "Alla olevat kohderivit ovat itsenäisiä terveystarkistuksia. Live-Jevin hyväksyntä kirjataan oikean chat-pyynnön päätösjälkeen."
   },
   "costs": {
     "title": "Kustannukset",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Yhteys (jokaisella tilillä on oma katkaisija)",
     "resilienceTokenRefreshThreshold": "Virheitä ennen tauottamista",
     "resilienceTokenRefreshCooldown": "Tauko laukeamisen jälkeen",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Henkilötietojen peittäminen",
       "description": "Valitse, minkä tyyppiset henkilötiedot peitetään, ja lisää omia malleja. Peittäminen on pois päältä, kunnes otat käyttöön alla näkyvät ominaisuusliput.",

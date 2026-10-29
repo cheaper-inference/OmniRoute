@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "这将把与此模板匹配的当前连接提供者/模型快照到可编辑的组合中。",
     "duplicateAutoComboFailedPrefix": "复制自动组合失败：",
     "duplicateAutoComboUnknownError": "未知错误",
-    "duplicateAutoComboTitle": "从{name}创建静态组合"
+    "duplicateAutoComboTitle": "从{name}创建静态组合",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "已准入：尚未判定（实时 Jev 需要用户消息）。合格： {models}。",
+    "jevAdmittedNone": "已准入：无 — 每个目标在 Jev 之前都被阻止。",
+    "jevHeld": "已暂挂：无，直到 Jev 在实时请求上运行（概率下限与被支配）。",
+    "jevBlocked": "已阻止： {models}。",
+    "jevBlockedNone": "已阻止：无。",
+    "jevNotConfigured": "未配置 Jev",
+    "jevTestSummaryFootnote": "下方目标行是独立的健康探测。实时 Jev 准入会记录在真实聊天请求的决策跟踪中。"
   },
   "costs": {
     "title": "成本",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "连接（每个账户都有自己的熔断器）",
     "resilienceTokenRefreshThreshold": "暂停前的失败次数",
     "resilienceTokenRefreshCooldown": "触发后暂停",
+    "jev": "Jev",
     "piiMasking": {
       "title": "个人信息脱敏",
       "description": "选择要脱敏的个人数据类型，并添加你自己的模式。在你开启下方显示的功能开关之前，脱敏保持关闭。",

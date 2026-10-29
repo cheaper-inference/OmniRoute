@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Acesta va captura furnizorii/modelurile conectate în prezent care se potrivesc cu acest șablon într-o combinație editabilă.",
     "duplicateAutoComboFailedPrefix": "Duplicarea combinației automate a eșuat:",
     "duplicateAutoComboUnknownError": "Eroare necunoscută",
-    "duplicateAutoComboTitle": "Creați o combinație statică din {name}"
+    "duplicateAutoComboTitle": "Creați o combinație statică din {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Admise: încă neevaluate (Jev live are nevoie de un mesaj de utilizator). Eligibile: {models}.",
+    "jevAdmittedNone": "Admise: niciuna — fiecare țintă este blocată înainte de Jev.",
+    "jevHeld": "Reținute: niciuna până când Jev rulează pe o cerere live (prag de probabilitate și dominate).",
+    "jevBlocked": "Blocate: {models}.",
+    "jevBlockedNone": "Blocate: niciuna.",
+    "jevNotConfigured": "Jev nu este configurat",
+    "jevTestSummaryFootnote": "Rândurile țintă de mai jos sunt sonde de sănătate independente. Admiterea Jev live este înregistrată pe urma de decizie a unei cereri reale de chat."
   },
   "costs": {
     "title": "Costuri",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Conexiune (fiecare cont are propriul său întrerupător)",
     "resilienceTokenRefreshThreshold": "Eșecuri înainte de pauză",
     "resilienceTokenRefreshCooldown": "Pauză după declanșare",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Mascarea datelor personale",
       "description": "Alegeți ce tipuri de date personale sunt mascate și adăugați propriile modele. Mascarea rămâne dezactivată până când activați feature flag-urile afișate mai jos.",

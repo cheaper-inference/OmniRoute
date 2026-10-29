@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "இந்த டெம்ப்ளேட்டுடன் பொருந்தும் தற்போதைய இணைக்கப்பட்ட வழங்குநர்கள்/மாதிரிகளை திருத்தக்கூடிய கம்போவில் எடுக்கும்.",
     "duplicateAutoComboFailedPrefix": "ஆட்டோகம்போ நகலெடுத்தல் தோல்வியடைந்தது:",
     "duplicateAutoComboUnknownError": "அறியப்படாத பிழை",
-    "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்"
+    "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "ஒப்புக்கொள்ளப்பட்டது: இன்னும் தீர்மானிக்கப்படவில்லை (நேரடி Jev ஒரு பயனர் செய்தி தேவை). தகுதி: {models}.",
+    "jevAdmittedNone": "ஒப்புக்கொள்ளப்பட்டது: எதுவும் இல்லை — ஒவ்வொரு இலக்கும் Jev க்கு முன் தடுக்கப்பட்டது.",
+    "jevHeld": "நடத்தப்பட்டது: Jev நேரடி கோரிக்கையில் இயங்கும் வரை எதுவும் இல்லை (நிகழ்தகவு தளம் மற்றும் ஆதிக்கம்).",
+    "jevBlocked": "தடுக்கப்பட்டது: {models}.",
+    "jevBlockedNone": "தடுக்கப்பட்டது: இல்லை.",
+    "jevNotConfigured": "Jev கட்டமைக்கப்படவில்லை",
+    "jevTestSummaryFootnote": "கீழே உள்ள இலக்கு வரிசைகள் சுயாதீனமான சுகாதார ஆய்வுகள். நேரலை Jev சேர்க்கை உண்மையான அரட்டை கோரிக்கைக்கான முடிவு ட்ரேஸில் பதிவு செய்யப்பட்டுள்ளது."
   },
   "costs": {
     "title": "செலவுகள்",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "இணைப்பு (ஒவ்வொரு கணக்கிற்கும் தனி பிரேக்கர் உள்ளது)",
     "resilienceTokenRefreshThreshold": "இடைநிறுத்துவதற்கு முன் தோல்விகள்",
     "resilienceTokenRefreshCooldown": "தாவல் பின் இடைநிறுத்தம்",
+    "jev": "Jev",
     "piiMasking": {
       "title": "தனிப்பட்ட தரவு மறைப்பு",
       "description": "எந்த வகை தனிப்பட்ட தரவு மறைக்கப்பட வேண்டும் என்பதைத் தேர்ந்தெடுத்து உங்கள் சொந்த வடிவங்களைச் சேர்க்கவும். கீழே காட்டப்படும் அம்சக் கொடிகளை இயக்கும் வரை மறைப்பு அணைந்தே இருக்கும்.",

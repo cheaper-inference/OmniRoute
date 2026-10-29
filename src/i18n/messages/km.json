@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "វានឹងថតស្ថានភាពបច្ចុប្បន្ននៃអ្នកផ្តល់សេវា/ម៉ូដែលដែលបានតភ្ជាប់ និងត្រូវគ្នានឹងគំរូនេះ ទៅជាបន្សំដែលអាចកែសម្រួលបាន។",
     "duplicateAutoComboFailedPrefix": "មិនអាចចម្លងបន្សំស្វ័យប្រវត្តិបានទេ៖",
     "duplicateAutoComboUnknownError": "កំហុសដែលមិនស្គាល់",
-    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}"
+    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "ទទួលយក៖ មិនទាន់វិនិច្ឆ័យនៅឡើយ (ផ្ទាល់ Jev ត្រូវការសារអ្នកប្រើប្រាស់)។ មានសិទ្ធិ៖ {models}.",
+    "jevAdmittedNone": "ទទួលស្គាល់៖ គ្មានទេ - រាល់គោលដៅទាំងអស់ត្រូវបានរារាំងមុន Jev ។",
+    "jevHeld": "បានប្រារព្ធឡើង៖ មិនមានរហូតដល់ Jev ដំណើរការលើសំណើបន្តផ្ទាល់ (កម្រិតប្រូបាប៊ីលីតេ និងគ្រប់គ្រង)។",
+    "jevBlocked": "ទប់ស្កាត់៖ {models}.",
+    "jevBlockedNone": "រារាំង៖ គ្មាន។",
+    "jevNotConfigured": "Jev មិនត្រូវបានកំណត់រចនាសម្ព័ន្ធទេ។",
+    "jevTestSummaryFootnote": "ជួរគោលដៅខាងក្រោមគឺជាការស៊ើបអង្កេតសុខភាពឯករាជ្យ។ ការចូល Jev ផ្ទាល់ត្រូវបានកត់ត្រានៅលើដាននៃការសម្រេចចិត្តសម្រាប់សំណើជជែកពិតប្រាកដ។"
   },
   "costs": {
     "title": "ការចំណាយ",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "ការតភ្ជាប់ (គណនីនីមួយៗមានឧបករណ៍ផ្ទុះផ្ទាល់ខ្លួន)",
     "resilienceTokenRefreshThreshold": "ការបរាជ័យមុនពេលផ្អាក",
     "resilienceTokenRefreshCooldown": "ផ្អាកបន្ទាប់ពីដំណើរការ",
+    "jev": "Jev",
     "piiMasking": {
       "title": "ការលាក់ទិន្នន័យផ្ទាល់ខ្លួន",
       "description": "ជ្រើសរើសប្រភេទទិន្នន័យផ្ទាល់ខ្លួនដែលត្រូវលាក់ ហើយបន្ថែមលំនាំផ្ទាល់ខ្លួនរបស់អ្នក។ ការលាក់នៅតែបិទ រហូតដល់អ្នកបើកទង់មុខងារដែលបង្ហាញខាងក្រោម។",

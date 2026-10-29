@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Ez rögzíti az éppen csatlakoztatott szolgáltatókat/modelleket, amelyek megfelelnek ennek a sablonnak, egy szerkeszthető kombinációba.",
     "duplicateAutoComboFailedPrefix": "Az automatikus kombináció duplikálása sikertelen:",
     "duplicateAutoComboUnknownError": "Ismeretlen hiba",
-    "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból"
+    "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Engedélyezve: még nincs elbírálva (az élő Jevhez felhasználói üzenet kell). Alkalmas: {models}.",
+    "jevAdmittedNone": "Engedélyezve: nincs — minden cél a Jev előtt blokkolva van.",
+    "jevHeld": "Felfüggesztve: nincs, amíg a Jev élő kérésen nem fut (valószínűségi küszöb és domináltak).",
+    "jevBlocked": "Blokkolva: {models}.",
+    "jevBlockedNone": "Blokkolva: nincs.",
+    "jevNotConfigured": "A Jev nincs konfigurálva",
+    "jevTestSummaryFootnote": "Az alábbi cél sorok független egészségvizsgálatok. Az élő Jev engedélyezése egy valódi chatkérés döntési nyomán kerül rögzítésre."
   },
   "costs": {
     "title": "Költségek",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Kapcsolat (minden fióknak saját megszakítója van)",
     "resilienceTokenRefreshThreshold": "Sikertelen próbálkozások a szüneteltetés előtt",
     "resilienceTokenRefreshCooldown": "Szünet a kioldás után",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Személyes adatok maszkolása",
       "description": "Válassza ki, mely személyesadat-típusokat maszkolja a rendszer, és adjon hozzá saját mintákat. A maszkolás kikapcsolva marad, amíg be nem kapcsolja az alább látható funkciójelzőket.",

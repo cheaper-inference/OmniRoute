@@ -79,11 +79,8 @@ import {
 } from "@/lib/combos/builderDraft";
 import { normalizeComboConfigMode } from "@/shared/constants/comboConfigMode";
 import AutoComboCatalog from "./AutoComboCatalog";
-import {
-  AutoComboTruncatedNote,
-  getComboStepKindLabel,
-  getI18nOrFallback,
-} from "./comboPageHelpers";
+import { ComboTestSummaryNote, getComboStepKindLabel, getI18nOrFallback } from "./comboPageHelpers";
+import ComboReferencePicker from "./ComboReferencePicker";
 import ComboStepTestButton from "./ComboStepTestButton";
 import KimiComboPresetCard from "./KimiComboPresetCard";
 import { KIMI_CODING_PRESET, hasKimiCodingPreset } from "./kimiComboPreset";
@@ -221,6 +218,13 @@ const STRATEGY_GUIDANCE_FALLBACK = {
     avoid: "Avoid when most accounts have no quota snapshots.",
     example:
       "Example: 10 Antigravity Gemini accounts with different 5h/weekly resets; skip empty ones and pick among the rest in proportion to leftover.",
+  },
+  jev: {
+    when: "Use when you want to rank providers yourself and let TypeSafe Jev decide which of those entries run for each request.",
+    avoid:
+      "Avoid when you have no TypeSafe API key, or when you need a strict priority schedule that never skips a healthy favorite.",
+    example:
+      "Example: Opus → mid GPT → small GLM; Jev sends short chats to GLM and keeps Opus for hard coding turns.",
   },
 };
 
@@ -2026,11 +2030,7 @@ function TestResultsView({ results }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs text-text-muted">
-        Targets are tested independently. This checks model health, not the combo’s routing strategy
-        or fallback order.
-      </p>
-      <AutoComboTruncatedNote results={results} />
+      <ComboTestSummaryNote results={results} />
       {results.resolvedBy && (
         <div className="flex items-center gap-2 text-sm">
           <Icon name="check_circle" size={18} className="text-success" />
@@ -2802,6 +2802,7 @@ function ComboFormModal({
 
   const handleAddComboReference = () => {
     if (!builderComboRefName) return;
+    if (strategy === "jev") return;
 
     setModels([
       ...models,
@@ -3464,6 +3465,17 @@ function ComboFormModal({
                   </div>
                 ))}
               </RadioGroup>
+              {strategy === "jev" && (
+                <div className="mt-2 rounded-md border border-indigo-500/20 bg-indigo-500/5 px-2.5 py-2">
+                  <p className="text-[10px] text-indigo-700 dark:text-indigo-300">
+                    {getI18nOrFallback(
+                      t,
+                      "jevPrivacyNote",
+                      "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model."
+                    )}
+                  </p>
+                </div>
+              )}
               {!isExpertMode && (
                 <>
                   <p className="text-[10px] text-text-muted mt-0.5">
@@ -3765,35 +3777,15 @@ function ComboFormModal({
                       </div>
                     )}
 
-                    <div className="mt-3 pt-3 border-t border-border">
-                      <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-                        <Select
-                          className="flex-1"
-                          label={getI18nOrFallback(t, "builderComboRef", "Reference another combo")}
-                          value={builderComboRefName}
-                          onChange={(e) => setBuilderComboRefName(e.target.value)}
-                          placeholder={getI18nOrFallback(
-                            t,
-                            "selectComboToReference",
-                            "Select an existing combo to reference"
-                          )}
-                          options={builderComboRefs.map((comboRef) => ({
-                            value: comboRef.name,
-                            label: `${comboRef.name} · ${comboRef.strategy} · ${comboRef.stepCount} step${
-                              comboRef.stepCount === 1 ? "" : "s"
-                            }`,
-                          }))}
-                        />
-                        <Button
-                          onClick={handleAddComboReference}
-                          variant="ghost"
-                          size="sm"
-                          disabled={!builderComboRefName}
-                        >
-                          {getI18nOrFallback(t, "builderAddComboRef", "Add combo ref")}
-                        </Button>
-                      </div>
-                    </div>
+                    {strategy !== "jev" && (
+                      <ComboReferencePicker
+                        t={t}
+                        value={builderComboRefName}
+                        onChange={setBuilderComboRefName}
+                        options={builderComboRefs}
+                        onAdd={handleAddComboReference}
+                      />
+                    )}
                   </>
                 )}
 

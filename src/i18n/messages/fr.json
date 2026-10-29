@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Cela capturera les fournisseurs/modèles actuellement connectés qui correspondent à ce modèle dans une combinaison modifiable.",
     "duplicateAutoComboFailedPrefix": "Échec de la duplication de la combinaison automatique :",
     "duplicateAutoComboUnknownError": "Erreur inconnue",
-    "duplicateAutoComboTitle": "Créer une combinaison statique à partir de {name}"
+    "duplicateAutoComboTitle": "Créer une combinaison statique à partir de {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Admis : pas encore jugé (Jev en direct a besoin d’un message utilisateur). Éligibles : {models}.",
+    "jevAdmittedNone": "Admis : aucun — chaque cible est bloquée avant Jev.",
+    "jevHeld": "En attente : aucun jusqu’à ce que Jev s’exécute sur une requête en direct (seuil de probabilité et dominés).",
+    "jevBlocked": "Bloqués : {models}.",
+    "jevBlockedNone": "Bloqués : aucun.",
+    "jevNotConfigured": "Jev n’est pas configuré",
+    "jevTestSummaryFootnote": "Les lignes cibles ci-dessous sont des sondes de santé indépendantes. L’admission Jev en direct est enregistrée dans la trace de décision d’une vraie requête de chat."
   },
   "costs": {
     "title": "Coûts",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Connexion (chaque compte a son propre disjoncteur)",
     "resilienceTokenRefreshThreshold": "Échecs avant la mise en pause",
     "resilienceTokenRefreshCooldown": "Pause après déclenchement",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Masquage des PII",
       "description": "Choisissez les types de données personnelles à masquer et ajoutez vos propres motifs. Le masquage reste désactivé tant que vous n’activez pas les feature flags indiqués ci-dessous.",

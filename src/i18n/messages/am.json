@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "ይህ ከዚህ አብነት ጋር የሚዛመዱትን በአሁኑ ጊዜ የተገናኙ አቅራቢዎች/ሞዴሎች ቅጽበታዊ ቅጂ ወደሚስተካከል ጥምረት ይቀይራል።",
     "duplicateAutoComboFailedPrefix": "ራስ-ሰር ጥምረቱን ማባዛት አልተሳካም፦",
     "duplicateAutoComboUnknownError": "ያልታወቀ ስህተት",
-    "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር"
+    "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "ተቀብሏል፡ ገና አልተፈረደበትም (ቀጥታ Jev የተጠቃሚ መልእክት ያስፈልገዋል)። ብቁ፡{models}.",
+    "jevAdmittedNone": "ተቀባይነት ያለው፡ የለም — እያንዳንዱ ኢላማ ከJev በፊት ታግዷል።",
+    "jevHeld": "ተይዟል፡ Jev በቀጥታ ጥያቄ ላይ እስካልሄደ ድረስ ምንም የለም (የመሆኑ እድል ወለል እና የበላይ ሆኖ)።",
+    "jevBlocked": "ታግዷል፡{models}.",
+    "jevBlockedNone": "ታግዷል፡ የለም",
+    "jevNotConfigured": "Jev አልተዋቀረም።",
+    "jevTestSummaryFootnote": "ከታች ያሉት የዒላማ ረድፎች ገለልተኛ የጤና መመርመሪያዎች ናቸው። የቀጥታ Jev መግቢያ ለእውነተኛ የውይይት ጥያቄ በውሳኔው ላይ ተመዝግቧል።"
   },
   "costs": {
     "title": "ወጪዎች",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "አገናኝ (እያንዳንዱ መለያ የራሱ መበረታቸው አለው)",
     "resilienceTokenRefreshThreshold": "ማቆሚያዎ ከመጠበቅ በፊት የሚደረጉ መሳሮች",
     "resilienceTokenRefreshCooldown": "ከመዘጋት በኋላ ይታቀኑ",
+    "jev": "Jev",
     "piiMasking": {
       "title": "የግል መረጃ መደበቅ",
       "description": "የትኞቹ የግል መረጃ ዓይነቶች እንደሚደበቁ ይምረጡ እና የራስዎን ቅጦች ያክሉ። ከታች የሚታዩትን የባህሪ ባንዲራዎች እስኪያበሩ ድረስ መደበቁ ጠፍቶ ይቆያል።",

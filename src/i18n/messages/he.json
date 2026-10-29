@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "פעולה זו תצלם את הספקים/מודלים המחוברים כעת התואמים לתבנית הזו לקומבו ניתן לעריכה.",
     "duplicateAutoComboFailedPrefix": "כשל בהעתיק קומבו אוטומטי:",
     "duplicateAutoComboUnknownError": "שגיאה לא ידועה",
-    "duplicateAutoComboTitle": "צור קומבו סטטי מ־{name}"
+    "duplicateAutoComboTitle": "צור קומבו סטטי מ־{name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "מאושרים: טרם נשפטו (Jev חי זקוק להודעת משתמש). כשירים: {models}.",
+    "jevAdmittedNone": "מאושרים: אין — כל יעד חסום לפני Jev.",
+    "jevHeld": "מוחזקים: אין עד ש-Jev ירוץ על בקשה חיה (סף הסתברות ונשלטים).",
+    "jevBlocked": "חסומים: {models}.",
+    "jevBlockedNone": "חסומים: אין.",
+    "jevNotConfigured": "Jev אינו מוגדר",
+    "jevTestSummaryFootnote": "שורות היעד למטה הן בדיקות בריאות עצמאיות. קבלת Jev חיה נרשמת בעקבת ההחלטה של בקשת צ׳אט אמיתית."
   },
   "costs": {
     "title": "עלויות",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "חיבור (לכל חשבון יש מפסיק משלו)",
     "resilienceTokenRefreshThreshold": "כשלים לפני השהיה",
     "resilienceTokenRefreshCooldown": "השהיה לאחר הפעלה",
+    "jev": "Jev",
     "piiMasking": {
       "title": "הסתרת מידע אישי",
       "description": "בחרו אילו סוגי מידע אישי יוסתרו והוסיפו תבניות משלכם. ההסתרה נשארת כבויה עד שתפעילו את דגלי התכונות המוצגים למטה.",

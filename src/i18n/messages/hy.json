@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Այս ձևանմուշին համապատասխանող՝ ներկայումս միացված մատակարարների/մոդելների պատճենը կպահվի որպես խմբագրվող կոմբինացիա։",
     "duplicateAutoComboFailedPrefix": "Չհաջողվեց կրկնօրինակել ավտոմատ կոմբինացիան՝",
     "duplicateAutoComboUnknownError": "Անհայտ սխալ",
-    "duplicateAutoComboTitle": "Ստեղծել ստատիկ կոմբինացիա {name}-ից"
+    "duplicateAutoComboTitle": "Ստեղծել ստատիկ կոմբինացիա {name}-ից",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Ընդունված է. դեռ դատված չէ (ուղիղ Jev-ին անհրաժեշտ է օգտվողի հաղորդագրություն): Իրավասու: {models}.",
+    "jevAdmittedNone": "Ընդունված է. ոչ մեկը. յուրաքանչյուր թիրախ արգելափակված է Jev-ից առաջ:",
+    "jevHeld": "Պահվում է. չկա, քանի դեռ Jev-ն չի աշխատում ուղիղ խնդրանքով (հավանականության մակարդակ և գերակշռող):",
+    "jevBlocked": "Արգելափակված՝{models}.",
+    "jevBlockedNone": "Արգելափակված՝ ոչ:",
+    "jevNotConfigured": "Jev-ը կազմաձևված չէ",
+    "jevTestSummaryFootnote": "Ներքևում գտնվող թիրախային շարքերը անկախ առողջական հետազոտություններ են: Ուղիղ Jev ընդունելությունը գրանցվում է իրական զրույցի հարցման որոշման հետքի վրա:"
   },
   "costs": {
     "title": "Ծախսեր",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Կապ (յուրաքանչյուր հաշիվ ունի իր ընդհատիչը)",
     "resilienceTokenRefreshThreshold": "Հաջողությունից առաջ կանգնեցնելու համար պարտություններ",
     "resilienceTokenRefreshCooldown": "Կանգ առնել անջատվելուց հետո",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Անձնական տվյալների քողարկում",
       "description": "Ընտրեք, թե անձնական տվյալների որ տեսակները քողարկվեն, և ավելացրեք ձեր սեփական նմուշները։ Քողարկումն անջատված է մնում, մինչև չմիացնեք ներքևում ցուցադրված գործառույթների դրոշակները։",

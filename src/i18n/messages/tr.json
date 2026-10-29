@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Bu, bu şablona uygun olarak şu anda bağlı olan sağlayıcıları/modelleri düzenlenebilir bir kombinasyonda yakalayacaktır.",
     "duplicateAutoComboFailedPrefix": "Otomatik kombinasyon kopyalanamadı:",
     "duplicateAutoComboUnknownError": "Bilinmeyen hata",
-    "duplicateAutoComboTitle": "{name}-den statik bir kombinasyon oluştur"
+    "duplicateAutoComboTitle": "{name}-den statik bir kombinasyon oluştur",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Kabul edildi: henüz değerlendirilmedi (canlı Jev bir kullanıcı mesajı gerektirir). Uygun: {models}.",
+    "jevAdmittedNone": "Kabul edildi: yok — her hedef Jev’den önce engellenmiş.",
+    "jevHeld": "Beklemede: canlı bir istekte Jev çalışana kadar yok (olasılık eşiği ve baskın olanlar).",
+    "jevBlocked": "Engellendi: {models}.",
+    "jevBlockedNone": "Engellendi: yok.",
+    "jevNotConfigured": "Jev yapılandırılmadı",
+    "jevTestSummaryFootnote": "Aşağıdaki hedef satırları bağımsız sağlık sondalarıdır. Canlı Jev kabulü, gerçek bir sohbet isteğinin karar izine kaydedilir."
   },
   "costs": {
     "title": "Maliyetler",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Bağlantı (her hesabın kendi kesici devresi vardır)",
     "resilienceTokenRefreshThreshold": "Duraklatmadan önceki hatalar",
     "resilienceTokenRefreshCooldown": "Tetiklendikten sonra duraklat",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Kişisel veri maskeleme",
       "description": "Hangi kişisel veri türlerinin maskeleneceğini seçin ve kendi desenlerinizi ekleyin. Aşağıda gösterilen özellik bayraklarını açana kadar maskeleme kapalı kalır.",

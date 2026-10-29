@@ -75,6 +75,7 @@ const MAX_ENTRIES = 500;
 
 interface StickyEntry {
   connectionId: string;
+  modelStr?: string;
   createdAt: number;
   lastUsedAt: number;
   /** Combo identity that owns this binding (matches `scopeMessageHash` namespace). */
@@ -358,22 +359,44 @@ function evict(): void {
 export function recordStickyBinding(
   messageHash: string,
   connectionId: string,
-  namespace?: string
+  namespace?: string,
+  modelStr?: string
 ): void {
   const existing = stickyMap.get(messageHash);
   if (existing) {
     existing.connectionId = connectionId;
+    existing.modelStr = modelStr;
     existing.lastUsedAt = Date.now();
     if (namespace) existing.namespace = namespace;
   } else {
     evict();
     stickyMap.set(messageHash, {
       connectionId,
+      ...(modelStr ? { modelStr } : {}),
       createdAt: Date.now(),
       lastUsedAt: Date.now(),
       ...(namespace ? { namespace } : {}),
     });
   }
+}
+
+/** Record the successful attempt's effective account, and Jev's selected model when applicable. */
+export function recordSuccessfulComboStickyBinding(
+  context: {
+    sticky: { messageHash: string | null };
+    combo: { name: string };
+    strategy: string;
+  },
+  connectionId: string,
+  modelStr: string
+): void {
+  if (!context.sticky.messageHash || !connectionId) return;
+  recordStickyBinding(
+    context.sticky.messageHash,
+    connectionId,
+    context.combo.name,
+    context.strategy === "jev" ? modelStr : undefined
+  );
 }
 
 /** Remove a binding (e.g. after the connection is confirmed unhealthy). */
@@ -408,6 +431,28 @@ export function clearStickyBindingsForCombo(namespace: string): void {
  */
 export function peekStickyConnectionId(messageHash: string): string | null {
   return stickyMap.get(messageHash)?.connectionId ?? null;
+}
+
+/**
+ * Read the request's combo-scoped sticky binding without refreshing its TTL or
+ * clearing a live binding whose target has not been expanded into the current
+ * pool. An expired entry is evicted on read so peek-heavy callers (the Jev
+ * preview paths) keep the store self-cleaning even when no writer runs.
+ */
+export function peekSessionStickinessBinding(
+  messages: Array<{ role?: string; content?: unknown }> | null | undefined,
+  namespace?: string
+): { messageHash: string | null; connectionId: string | null; modelStr: string | null } {
+  const rawMessageHash = deriveMessageHash(messages);
+  if (!rawMessageHash) return { messageHash: null, connectionId: null, modelStr: null };
+  const messageHash = scopeMessageHash(rawMessageHash, namespace);
+  const entry = stickyMap.get(messageHash);
+  if (!entry) return { messageHash, connectionId: null, modelStr: null };
+  if (Date.now() - entry.lastUsedAt > TTL_MS) {
+    stickyMap.delete(messageHash);
+    return { messageHash, connectionId: null, modelStr: null };
+  }
+  return { messageHash, connectionId: entry.connectionId, modelStr: entry.modelStr ?? null };
 }
 
 /** Reset the entire store (for testing). */
@@ -510,7 +555,11 @@ export async function applySessionStickiness(
     const { connectionId } = existing;
 
     // Find the target that matches the sticky connection
-    const stickyIdx = orderedTargets.findIndex((t) => t.connectionId === connectionId);
+    const stickyIdx = orderedTargets.findIndex(
+      (target) =>
+        target.connectionId === connectionId &&
+        (!existing.modelStr || target.modelStr === existing.modelStr)
+    );
     if (stickyIdx === -1) {
       // Connection gone from pool — clear binding, fall through
       clearStickyBinding(messageHash);

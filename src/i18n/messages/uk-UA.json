@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Це зробить знімок поточно підключених постачальників/моделей, які відповідають цьому шаблону, у редаговане комбо.",
     "duplicateAutoComboFailedPrefix": "Не вдалося дублювати автоматичне комбо:",
     "duplicateAutoComboUnknownError": "Невідома помилка",
-    "duplicateAutoComboTitle": "Створити статичне комбо з {name}"
+    "duplicateAutoComboTitle": "Створити статичне комбо з {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Допущені: ще не оцінені (живому Jev потрібне повідомлення користувача). Придатні: {models}.",
+    "jevAdmittedNone": "Допущені: немає — кожну ціль заблоковано до Jev.",
+    "jevHeld": "Утримані: немає, поки Jev не виконається на живому запиті (поріг імовірності та доміновані).",
+    "jevBlocked": "Заблоковані: {models}.",
+    "jevBlockedNone": "Заблоковані: немає.",
+    "jevNotConfigured": "Jev не налаштовано",
+    "jevTestSummaryFootnote": "Рядки цілей нижче — незалежні перевірки працездатності. Допуск живого Jev записується в трасі рішення реального чат-запиту."
   },
   "costs": {
     "title": "Витрати",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "З'єднання (кожен обліковий запис має власний автомат)",
     "resilienceTokenRefreshThreshold": "Помилки перед призупиненням",
     "resilienceTokenRefreshCooldown": "Пауза після спрацювання",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Маскування ПД",
       "description": "Виберіть, які типи персональних даних маскувати, і додайте власні шаблони. Маскування вимкнене, доки ви не ввімкнете прапорці функцій, показані нижче.",

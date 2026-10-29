@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "S tem boste trenutno povezane ponudnike/modele, ki se ujemajo s to predlogo, zajeli v kombinacijo, ki jo je mogoče urejati.",
     "duplicateAutoComboFailedPrefix": "Podvajanje samodejne kombinacije ni uspelo:",
     "duplicateAutoComboUnknownError": "Neznana napaka",
-    "duplicateAutoComboTitle": "Ustvari statično kombinacijo iz {name}"
+    "duplicateAutoComboTitle": "Ustvari statično kombinacijo iz {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Sprejeto: še ni ocenjeno (živ Jev potrebuje uporabniško sporočilo). Primerni: {models}.",
+    "jevAdmittedNone": "Sprejeto: noben — vsaka tarča je blokirana pred Jevom.",
+    "jevHeld": "Zadržano: noben, dokler Jev ne teče na živi zahtevi (prag verjetnosti in dominirani).",
+    "jevBlocked": "Blokirano: {models}.",
+    "jevBlockedNone": "Blokirano: noben.",
+    "jevNotConfigured": "Jev ni konfiguriran",
+    "jevTestSummaryFootnote": "Vrstice ciljev spodaj so neodvisne sonde zdravja. Sprejem živega Jeva se zabeleži v sledi odločitve prave zahteve za klepet."
   },
   "costs": {
     "title": "Stroški",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Povezava (vsak račun ima svoj odklopnik)",
     "resilienceTokenRefreshThreshold": "Neuspehi pred začasnim zaustavitvijo",
     "resilienceTokenRefreshCooldown": "Pavza po sprožitvi",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Maskiranje osebnih podatkov",
       "description": "Izberite, katere vrste osebnih podatkov se maskirajo, in dodajte svoje vzorce. Maskiranje ostane izklopljeno, dokler ne vklopite spodaj prikazanih zastavic funkcij.",

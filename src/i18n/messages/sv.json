@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Detta kommer att ta en ögonblicksbild av de för närvarande anslutna leverantörerna/modellerna som matchar denna mall i en redigerbar kombination.",
     "duplicateAutoComboFailedPrefix": "Kopiering av automatisk kombination misslyckades:",
     "duplicateAutoComboUnknownError": "Okänt fel",
-    "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}"
+    "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Godkända: ännu inte bedömda (live-Jev behöver ett användarmeddelande). Berättigade: {models}.",
+    "jevAdmittedNone": "Godkända: inga — varje mål är blockerat före Jev.",
+    "jevHeld": "Hållna: inga förrän Jev körs på en liveförfrågan (sannolikhetsgolv och dominerade).",
+    "jevBlocked": "Blockerade: {models}.",
+    "jevBlockedNone": "Blockerade: inga.",
+    "jevNotConfigured": "Jev är inte konfigurerad",
+    "jevTestSummaryFootnote": "Målraderna nedan är oberoende hälsosonder. Live-Jev-godkännande registreras i beslutsspåret för en riktig chattförfrågan."
   },
   "costs": {
     "title": "Kostnader",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Anslutning (varje konto har egen strömbrytare)",
     "resilienceTokenRefreshThreshold": "Misslyckanden innan paus",
     "resilienceTokenRefreshCooldown": "Paus efter utlösnings",
+    "jev": "Jev",
     "piiMasking": {
       "title": "PII-maskering",
       "description": "Välj vilka typer av personuppgifter som maskeras och lägg till egna mönster. Maskeringen är avstängd tills du aktiverar funktionsflaggorna som visas nedan.",

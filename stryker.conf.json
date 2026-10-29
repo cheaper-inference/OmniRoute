@@ -675,7 +675,8 @@
       "tests/unit/chat-antigravity-429-budget.test.ts",
       "tests/unit/combo-retry-cut-stream.test.ts",
       "tests/unit/combo/combo-set-retry-durable-exhaustion.test.ts",
-      "tests/unit/sse-cut-tool-call-arguments.test.ts"
+      "tests/unit/sse-cut-tool-call-arguments.test.ts",
+      "tests/unit/combo-target-resolution-split.test.ts"
     ],
     "nodeArgs": [
       "--import",
@@ -713,6 +714,7 @@
     "(headers/logTruncation/memoryExtraction/nonStreamingSse/passthroughToolNames/executorHelpers).",
     "A later follow-up added dedicated tests (NO mock.module — unavailable under the tap-runner; used",
     "fetch-override + crafted inputs + temp-DATA_DIR) for telemetryHelpers (both fns, all branches) and",
+    "2026-10-14: included 12 additional covering tests found by the strict drift gate after release merge.",
     "memorySkillsInjection (getSkillsProviderForFormat fully + injectMemoryAndSkills guards/empty-DB",
     "path) and added them as batch i.",
     "The FINAL chatCore leaf, semanticCache.ts, was added to batch i once its cache-HIT block had a",

@@ -2944,11 +2944,6 @@
       "count": 1
     }
   },
-  "tests/unit/combo-selected-connection-success.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "tests/unit/combo-session-stickiness.test.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1

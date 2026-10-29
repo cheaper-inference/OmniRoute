@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Dit maakt een momentopname van de momenteel verbonden providers/modellen die overeenkomen met dit sjabloon in een bewerkbare combinatie.",
     "duplicateAutoComboFailedPrefix": "Automatische combinatie dupliceren mislukt:",
     "duplicateAutoComboUnknownError": "Onbekende fout",
-    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}"
+    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Toegelaten: nog niet beoordeeld (live Jev heeft een gebruikersbericht nodig). Geschikt: {models}.",
+    "jevAdmittedNone": "Toegelaten: geen — elk doel is geblokkeerd vóór Jev.",
+    "jevHeld": "Vastgehouden: geen tot Jev op een live verzoek draait (waarschijnlijkheidsdrempel en gedomineerd).",
+    "jevBlocked": "Geblokkeerd: {models}.",
+    "jevBlockedNone": "Geblokkeerd: geen.",
+    "jevNotConfigured": "Jev is niet geconfigureerd",
+    "jevTestSummaryFootnote": "De doelrijen hieronder zijn onafhankelijke gezondheidssondes. Live Jev-toelating wordt vastgelegd in het beslissingsspoor van een echt chatverzoek."
   },
   "costs": {
     "title": "Kosten",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Verbinding (elk account heeft zijn eigen breaker)",
     "resilienceTokenRefreshThreshold": "Mislukkingen vóór pauzeren",
     "resilienceTokenRefreshCooldown": "Pauzeer na het uitschakelen",
+    "jev": "Jev",
     "piiMasking": {
       "title": "PII-maskering",
       "description": "Kies welke soorten persoonsgegevens worden gemaskeerd en voeg je eigen patronen toe. Maskering blijft uit totdat je de hieronder getoonde feature flags inschakelt.",

@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Tādējādi pašlaik pievienotie nodrošinātāji/modeļi, kas atbilst šai veidnei, tiks saglabāti rediģējamā kombinācijā.",
     "duplicateAutoComboFailedPrefix": "Neizdevās dublēt automātisko kombināciju:",
     "duplicateAutoComboUnknownError": "Nezināma kļūda",
-    "duplicateAutoComboTitle": "Izveidot statisku kombināciju no {name}"
+    "duplicateAutoComboTitle": "Izveidot statisku kombināciju no {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Pieņemti: vēl nav novērtēti (dzīvajam Jev vajadzīgs lietotāja ziņojums). Atbilstoši: {models}.",
+    "jevAdmittedNone": "Pieņemti: nav — katrs mērķis ir bloķēts pirms Jev.",
+    "jevHeld": "Aizturēti: nav, līdz Jev darbojas uz dzīva pieprasījuma (varbūtības slieksnis un dominētie).",
+    "jevBlocked": "Bloķēti: {models}.",
+    "jevBlockedNone": "Bloķēti: nav.",
+    "jevNotConfigured": "Jev nav konfigurēts",
+    "jevTestSummaryFootnote": "Zemāk esošās mērķu rindas ir neatkarīgas veselības zondes. Dzīvā Jev pieņemšana tiek ierakstīta reāla tērzēšanas pieprasījuma lēmuma izsekošanā."
   },
   "costs": {
     "title": "Izmaksas",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Savienojums (katram kontam ir sava pārtraucēja)",
     "resilienceTokenRefreshThreshold": "Neveiksmes pirms pauzes",
     "resilienceTokenRefreshCooldown": "Pauze pēc darbības sākšanas",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Personas datu maskēšana",
       "description": "Izvēlieties, kurus personas datu veidus maskēt, un pievienojiet savus šablonus. Maskēšana ir izslēgta, līdz ieslēdzat zemāk redzamos funkciju karogus.",

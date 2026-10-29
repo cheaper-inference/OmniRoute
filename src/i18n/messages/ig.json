@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Nke a ga-echekwa ọnọdụ ndị na-eweta ọrụ/model ejikọrọ ugbu a dabara na ndebiri a n'ime ngwakọta a pụrụ idezi.",
     "duplicateAutoComboFailedPrefix": "Ime oyiri nke ngwakọta akpaka dara:",
     "duplicateAutoComboUnknownError": "Njehie amaghị ama",
-    "duplicateAutoComboTitle": "Mepụta ngwakọta anaghị agbanwe agbanwe site na {name}"
+    "duplicateAutoComboTitle": "Mepụta ngwakọta anaghị agbanwe agbanwe site na {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Ekwenyere: ekpebeghị ikpe (ndụ Jev chọrọ ozi onye ọrụ). tozuru oke: {models}.",
+    "jevAdmittedNone": "Ekwenyere: onweghị - egbochiri ebumnuche ọ bụla tupu Jev.",
+    "jevHeld": "ejidere: onweghị ruo mgbe Jev na-agba ọsọ na arịrịọ dị ndụ (ala nke puru omume ma na-achị).",
+    "jevBlocked": "Gbochie: {models}.",
+    "jevBlockedNone": "Gbochie: ọ dịghị.",
+    "jevNotConfigured": "Ahaziri Jev",
+    "jevTestSummaryFootnote": "Ahịrị ebumnuche dị n'okpuru bụ nyocha ahụike nọọrọ onwe ya. Edekọba nnabata Jev dị ndụ na nchọta mkpebi maka arịrịọ nkata n'ezie."
   },
   "costs": {
     "title": "Ọnụ ahịa",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Njikọ (ọ bụrụ na ngwaọrụ ọ bụla nwere ya nke ya)",
     "resilienceTokenRefreshThreshold": "Njefọ n'ihu ka a ga-egbu oge",
     "resilienceTokenRefreshCooldown": "Egwu mgbe e tinyere",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Nzuzo data onwe",
       "description": "Họrọ ụdị data onwe a ga-ezo ma tinye usoro nke gị. Nzuzo na-anọgide na-agbanyụ ruo mgbe ị gbanwụrụ ọkọlọtọ atụmatụ e gosiri n'okpuru.",

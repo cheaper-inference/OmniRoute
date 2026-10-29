@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "ଏହା ଏହି ଟେମ୍ପ୍ଲେଟ୍ ସହ ମେଳ ଖାଉଥିବା ବର୍ତ୍ତମାନ ସଂଯୁକ୍ତ ପ୍ରଦାନକାରୀ/ମଡେଲ୍ଗୁଡ଼ିକର ଏକ ସ୍ନାପ୍ସଟ୍ ନେଇ ତାହାକୁ ଏକ ସମ୍ପାଦନଯୋଗ୍ୟ କମ୍ବୋରେ ପରିଣତ କରିବ।",
     "duplicateAutoComboFailedPrefix": "ସ୍ୱୟଂଚାଳିତ କମ୍ବୋର ନକଲ କରିବାରେ ବିଫଳ:",
     "duplicateAutoComboUnknownError": "ଅଜଣା ତ୍ରୁଟି",
-    "duplicateAutoComboTitle": "{name} ରୁ ଏକ ସ୍ଥିର କମ୍ବୋ ସୃଷ୍ଟି କରନ୍ତୁ"
+    "duplicateAutoComboTitle": "{name} ରୁ ଏକ ସ୍ଥିର କମ୍ବୋ ସୃଷ୍ଟି କରନ୍ତୁ",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "ଅନୁମୋଦିତ: ଏପର୍ଯ୍ୟନ୍ତ ନିଷ୍ପତ୍ତି ହୋଇନାହିଁ (ଲାଇଭ୍ Jev ପାଇଁ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ବାର୍ତ୍ତା ଆବଶ୍ୟକ)। ଯୋଗ୍ୟ: {models}।",
+    "jevAdmittedNone": "ଅନୁମୋଦିତ: କେହି ନୁହେଁ — Jev ପୂର୍ବରୁ ପ୍ରତ୍ୟେକ ଲକ୍ଷ୍ୟ ଅବରୋଧିତ।",
+    "jevHeld": "ଅପେକ୍ଷାରତ: ଲାଇଭ୍ ଅନୁରୋଧରେ Jev ଚାଲିବା ପର୍ଯ୍ୟନ୍ତ କେହି ନାହାନ୍ତି (ସମ୍ଭାବ୍ୟତା ସୀମା ଏବଂ ପ୍ରଭାବିତ)।",
+    "jevBlocked": "ଅବରୋଧିତ: {models}।",
+    "jevBlockedNone": "ଅବରୋଧିତ: କେହି ନୁହେଁ।",
+    "jevNotConfigured": "Jev ବିନ୍ୟାସିତ ହୋଇନାହିଁ",
+    "jevTestSummaryFootnote": "ନିମ୍ନରେ ଥିବା ଲକ୍ଷ୍ୟ ଧାଡ଼ିଗୁଡ଼ିକ ସ୍ୱତନ୍ତ୍ର ସ୍ୱାସ୍ଥ୍ୟ ପରୀକ୍ଷା। ପ୍ରକୃତ ଚାଟ୍ ଅନୁରୋଧର ନିଷ୍ପତ୍ତି ଟ୍ରେସରେ ଲାଇଭ୍ Jev ଅନୁମୋଦନ ଲେଖାଯାଏ।"
   },
   "costs": {
     "title": "ଖର୍ଚ୍ଚ",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "ସଂଯୋଗ (ପ୍ରତ୍ୟେକ ଖାତା ନିଜର ଏକ ବ୍ରେକର ରଖେ)",
     "resilienceTokenRefreshThreshold": "ବିରତି ଦେବା ପୂର୍ବରୁ ବିଫଳତା",
     "resilienceTokenRefreshCooldown": "ଟ୍ରିପ୍ ପରେ ବିରତି ନିଅନ୍ତୁ",
+    "jev": "Jev",
     "piiMasking": {
       "title": "ବ୍ୟକ୍ତିଗତ ତଥ୍ୟ ମାସ୍କିଂ",
       "description": "କେଉଁ ପ୍ରକାରର ବ୍ୟକ୍ତିଗତ ତଥ୍ୟ ମାସ୍କ ହେବ ତାହା ବାଛନ୍ତୁ ଏବଂ ନିଜର ପ୍ୟାଟର୍ନ ଯୋଗ କରନ୍ତୁ। ତଳେ ଦେଖାଯାଇଥିବା ଫିଚର ଫ୍ଲାଗ ଚାଲୁ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ମାସ୍କିଂ ବନ୍ଦ ରହେ।",

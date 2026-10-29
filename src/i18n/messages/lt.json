@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Taip šiuo metu prijungtų, šį šabloną atitinkančių teikėjų ir modelių momentinė kopija bus įrašyta į redaguojamą kombo.",
     "duplicateAutoComboFailedPrefix": "Nepavyko dubliuoti automatinio kombo:",
     "duplicateAutoComboUnknownError": "Nežinoma klaida",
-    "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}"
+    "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Priimti: dar neįvertinti (gyvajam Jev reikia vartotojo žinutės). Tinkami: {models}.",
+    "jevAdmittedNone": "Priimti: nėra — kiekvienas tikslas užblokuotas prieš Jev.",
+    "jevHeld": "Sulaikyti: nėra, kol Jev neveikia gyvoje užklausoje (tikimybės riba ir dominuojami).",
+    "jevBlocked": "Užblokuoti: {models}.",
+    "jevBlockedNone": "Užblokuoti: nėra.",
+    "jevNotConfigured": "Jev nesukonfigūruotas",
+    "jevTestSummaryFootnote": "Žemiau esančios tikslų eilutės yra nepriklausomi sveikatos zondai. Gyvojo Jev priėmimas įrašomas į tikros pokalbio užklausos sprendimo pėdsaką."
   },
   "costs": {
     "title": "Išlaidos",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Ryšys (kiekviena paskyra turi savo pertraukiklį)",
     "resilienceTokenRefreshThreshold": "Nesėkmės prieš pristabdant",
     "resilienceTokenRefreshCooldown": "Pauzė po suveikimo",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Asmens duomenų maskavimas",
       "description": "Pasirinkite, kokių tipų asmens duomenys maskuojami, ir pridėkite savo šablonų. Maskavimas išjungtas, kol neįjungsite toliau rodomų funkcijų vėliavėlių.",

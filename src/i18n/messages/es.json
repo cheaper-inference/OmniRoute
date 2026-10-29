@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Esto capturará los proveedores/modelos conectados actualmente que coincidan con esta plantilla en una combinación editable.",
     "duplicateAutoComboFailedPrefix": "Error al duplicar la combinación automática:",
     "duplicateAutoComboUnknownError": "Error desconocido",
-    "duplicateAutoComboTitle": "Crear una combinación estática de {name}"
+    "duplicateAutoComboTitle": "Crear una combinación estática de {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Admitidos: aún no juzgados (Jev en vivo necesita un mensaje de usuario). Elegibles: {models}.",
+    "jevAdmittedNone": "Admitidos: ninguno — cada destino está bloqueado antes de Jev.",
+    "jevHeld": "En espera: ninguno hasta que Jev se ejecute en una solicitud en vivo (umbral de probabilidad y dominados).",
+    "jevBlocked": "Bloqueados: {models}.",
+    "jevBlockedNone": "Bloqueados: ninguno.",
+    "jevNotConfigured": "Jev no está configurado",
+    "jevTestSummaryFootnote": "Las filas de destino siguientes son sondas de salud independientes. La admisión de Jev en vivo se registra en la traza de decisión de una solicitud de chat real."
   },
   "costs": {
     "title": "Costos",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Conexión (cada cuenta tiene su propio disyuntor)",
     "resilienceTokenRefreshThreshold": "Fallos antes de pausar",
     "resilienceTokenRefreshCooldown": "Pausa tras activarse",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Enmascaramiento de PII",
       "description": "Elige qué tipos de datos personales se enmascaran y añade tus propios patrones. El enmascaramiento permanece desactivado hasta que actives las feature flags que se muestran abajo.",

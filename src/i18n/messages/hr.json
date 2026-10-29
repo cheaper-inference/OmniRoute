@@ -4038,7 +4038,17 @@
     "duplicateAutoComboSnapshotMsg": "Time će se izraditi snimka trenutačno povezanih davatelja/modela koji odgovaraju ovom predlošku i pretvoriti u uređivu kombinaciju.",
     "duplicateAutoComboFailedPrefix": "Dupliciranje automatske kombinacije nije uspjelo:",
     "duplicateAutoComboUnknownError": "Nepoznata pogreška",
-    "duplicateAutoComboTitle": "Stvori statičnu kombinaciju iz {name}"
+    "duplicateAutoComboTitle": "Stvori statičnu kombinaciju iz {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Dopušteno: još nije procijenjeno (živom Jevu treba korisnička poruka). Prikladni: {models}.",
+    "jevAdmittedNone": "Dopušteno: nijedan — svaka meta je blokirana prije Jeva.",
+    "jevHeld": "Zadržano: nijedan dok Jev ne pokrene na živom zahtjevu (prag vjerojatnosti i dominirani).",
+    "jevBlocked": "Blokirano: {models}.",
+    "jevBlockedNone": "Blokirano: nijedan.",
+    "jevNotConfigured": "Jev nije konfiguriran",
+    "jevTestSummaryFootnote": "Retci meta ispod su neovisne zdravstvene sonde. Dopuštenje živog Jeva bilježi se na trag odluke stvarnog zahtjeva za chat."
   },
   "costs": {
     "title": "Troškovi",
@@ -8926,6 +8936,7 @@
     "resilienceTokenRefreshScopeConnection": "Veza (svaki račun ima vlastiti prekidač)",
     "resilienceTokenRefreshThreshold": "Neuspjesi prije pauziranja",
     "resilienceTokenRefreshCooldown": "Pauza nakon aktivacije",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Maskiranje osobnih podataka",
       "description": "Odaberite koje se vrste osobnih podataka maskiraju i dodajte vlastite uzorke. Maskiranje ostaje isključeno dok ne uključite zastavice značajki prikazane ispod.",

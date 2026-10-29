@@ -1,4 +1,4 @@
-import test from "node:test";
+import test, { mock } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -18,14 +18,26 @@ const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
 const { saveModelsDevCapabilities, clearModelsDevCapabilities } =
   await import("../../src/lib/modelsDevSync.ts");
 const { resolveComboTargetPipeline } =
   await import("../../open-sse/services/combo/targetResolution.ts");
-const { clearAllStickyBindings, recordStickyBinding } =
-  await import("../../open-sse/services/combo/sessionStickiness.ts");
+const { filterJevTargetsByHardRequestContext } =
+  await import("../../open-sse/services/combo/jevBlockChecker.ts");
+const {
+  clearAllStickyBindings,
+  peekSessionStickinessBinding,
+  recordStickyBinding,
+  __setStickinessHeadroomFetcherForTests,
+  __setStickinessConnectionFetcherForTests,
+  __setStickinessQuotaCheckerForTests,
+} = await import("../../open-sse/services/combo/sessionStickiness.ts");
 
 test.after(() => {
+  __setStickinessHeadroomFetcherForTests(null);
+  __setStickinessConnectionFetcherForTests(null);
+  __setStickinessQuotaCheckerForTests(null);
   core.resetDbInstance();
   if (ORIGINAL_DATA_DIR === undefined) {
     delete process.env.DATA_DIR;
@@ -38,6 +50,12 @@ test.after(() => {
 test.beforeEach(() => {
   clearModelsDevCapabilities();
   clearAllStickyBindings();
+});
+
+test.afterEach(() => {
+  __setStickinessHeadroomFetcherForTests(null);
+  __setStickinessConnectionFetcherForTests(null);
+  __setStickinessQuotaCheckerForTests(null);
 });
 
 const noopLog = { info() {}, warn() {}, error() {}, debug() {} } as never;
@@ -173,6 +191,304 @@ test("request exceeding every approximate context hint keeps the target pool", a
     result.orderedTargets.map((target) => target.modelStr),
     ["unit-target-resolution/tiny", "unit-target-resolution/small"]
   );
+});
+
+test("Jev context prefilter removes known-too-small choices only when a fitting target exists", () => {
+  saveModelsDevCapabilities({
+    "unit-jev-context": {
+      small: capabilityEntry(8_000),
+      large: capabilityEntry(1_000_000),
+    },
+  });
+  const targets = [
+    {
+      kind: "model",
+      stepId: "small",
+      executionKey: "small",
+      modelStr: "unit-jev-context/small",
+      provider: "unit-jev-context",
+      providerId: null,
+      connectionId: null,
+      weight: 1,
+      label: null,
+    },
+    {
+      kind: "model",
+      stepId: "large",
+      executionKey: "large",
+      modelStr: "unit-jev-context/large",
+      provider: "unit-jev-context",
+      providerId: null,
+      connectionId: null,
+      weight: 1,
+      label: null,
+    },
+  ] as import("../../open-sse/services/combo/types.ts").ResolvedComboTarget[];
+  const body = { messages: [{ role: "user", content: "word ".repeat(200_000) }] };
+
+  assert.deepEqual(
+    filterJevTargetsByHardRequestContext(targets, body).map((target) => target.executionKey),
+    ["large"]
+  );
+  assert.deepEqual(
+    filterJevTargetsByHardRequestContext(targets, body, true).map((target) => target.executionKey),
+    ["small", "large"],
+    "compressible requests keep the candidates for deferred context handling"
+  );
+  assert.deepEqual(
+    filterJevTargetsByHardRequestContext([targets[0]], body).map((target) => target.executionKey),
+    ["small"],
+    "when no candidate is known to fit, preserve existing fallback handling"
+  );
+});
+
+test("Jev selection order survives preferLargeContext in the final target pipeline", async () => {
+  saveModelsDevCapabilities({
+    "unit-jev-order": {
+      small: capabilityEntry(8_000),
+      large: capabilityEntry(1_000_000),
+    },
+  });
+  await providersDb.createProviderConnection({
+    provider: "typesafe",
+    authType: "apikey",
+    apiKey: "ts-jev-order-test",
+    name: "typesafe-jev-order-test",
+    isActive: true,
+    testStatus: "active",
+  });
+  let admitFallback = true;
+  const fetchMock = mock.method(
+    globalThis,
+    "fetch",
+    async (input: RequestInfo | URL, init?: RequestInit) => {
+      assert.match(String(input), /\/v1\/systemone/);
+      const payload = JSON.parse(String(init?.body)) as {
+        questions?: { route?: { criteria?: Record<string, string | null> } };
+      };
+      const optionIds = Object.keys(payload.questions?.route?.criteria ?? {});
+      const winner = optionIds[0];
+      return Response.json({
+        answers: {
+          route: {
+            type: "choice",
+            choice: winner,
+            probabilities: Object.fromEntries(
+              optionIds.map((id) => [id, id === winner ? 0.9 : admitFallback ? 0.3 : 0.05])
+            ),
+            confidence: 0.95,
+          },
+        },
+      });
+    }
+  );
+  const config = {
+    contextRequirements: { preferLargeContext: true },
+  };
+  const contextBody = { messages: [{ role: "user", content: "word ".repeat(200_000) }] };
+
+  try {
+    const result = await resolveComboTargetPipeline(
+      deps({
+        body: contextBody,
+        combo: {
+          id: "jev-order",
+          name: "jev-order",
+          strategy: "jev",
+          models: ["unit-jev-order/small", "unit-jev-order/large"],
+          config,
+        },
+        strategy: "jev",
+        config,
+        deferContextOverflowWhenCompressible: true,
+      })
+    );
+    assert.ok(!("earlyResponse" in result));
+    if ("earlyResponse" in result) return;
+    assert.deepEqual(
+      result.orderedTargets.map((target) => target.modelStr),
+      ["unit-jev-order/small", "unit-jev-order/large"],
+      "the Jev winner and remaining user preference order must survive context sorting"
+    );
+    assert.ok(
+      result.sticky.messageHash,
+      "winner-only and filtered outcomes retain the session key"
+    );
+
+    admitFallback = false;
+    const winnerOnly = await resolveComboTargetPipeline(
+      deps({
+        body: contextBody,
+        combo: {
+          id: "jev-order",
+          name: "jev-order",
+          strategy: "jev",
+          models: ["unit-jev-order/small", "unit-jev-order/large"],
+          config,
+        },
+        strategy: "jev",
+        config,
+        deferContextOverflowWhenCompressible: true,
+      })
+    );
+    assert.ok(!("earlyResponse" in winnerOnly));
+    if ("earlyResponse" in winnerOnly) return;
+    assert.deepEqual(
+      winnerOnly.orderedTargets.map((target) => target.modelStr),
+      ["unit-jev-order/small"]
+    );
+    assert.ok(
+      winnerOnly.sticky.messageHash,
+      "a one-target Jev verdict must retain the pre-admission session key for sticky write-back"
+    );
+  } finally {
+    fetchMock.mock.restore();
+  }
+});
+
+test("Jev continuation resolves a sticky account before judging with expansion disabled", async () => {
+  clearAllStickyBindings();
+  __setStickinessHeadroomFetcherForTests(async () => ({ util5h: 0.2, util7d: 0.2 }));
+  __setStickinessConnectionFetcherForTests(async () => undefined);
+  __setStickinessQuotaCheckerForTests(() => false);
+  const connection = await providersDb.createProviderConnection({
+    provider: "anthropic",
+    authType: "apikey",
+    apiKey: "sk-jev-sticky-test",
+    name: "jev-sticky-account",
+    isActive: true,
+    testStatus: "active",
+  });
+  await providersDb.createProviderConnection({
+    provider: "typesafe",
+    authType: "apikey",
+    apiKey: "ts-jev-sticky-test",
+    name: "typesafe-jev-sticky-test",
+    isActive: true,
+    testStatus: "active",
+  });
+  let systemOneCalls = 0;
+  const fetchMock = mock.method(globalThis, "fetch", async () => {
+    systemOneCalls += 1;
+    return Response.json(
+      { error: "Jev should have skipped the pinned continuation" },
+      { status: 500 }
+    );
+  });
+  const messages = [{ role: "user", content: "continue the same conversation" }];
+  const comboName = "jev-sticky-expansion-off";
+  const messageHash = peekSessionStickinessBinding(messages, comboName).messageHash;
+  assert.ok(messageHash);
+  recordStickyBinding(messageHash, String(connection.id), comboName);
+
+  const config = { connectionAwareExpansion: false };
+  try {
+    const result = await resolveComboTargetPipeline(
+      deps({
+        body: { messages },
+        combo: {
+          id: comboName,
+          name: comboName,
+          strategy: "jev",
+          models: ["openai/gpt-4o", "anthropic/claude-3"],
+          config,
+        },
+        strategy: "jev",
+        config,
+      })
+    );
+
+    assert.ok(!("earlyResponse" in result));
+    if ("earlyResponse" in result) return;
+    assert.equal(result.sticky.stuck, true);
+    assert.equal(result.orderedTargets[0].modelStr, "anthropic/claude-3");
+    assert.equal(result.orderedTargets[0].connectionId, String(connection.id));
+    assert.equal(systemOneCalls, 0);
+  } finally {
+    fetchMock.mock.restore();
+  }
+});
+
+test("Jev preserves an eligible native Codex turn pin without asking TypeSafe", async () => {
+  await providersDb.createProviderConnection({
+    provider: "typesafe",
+    authType: "apikey",
+    apiKey: "ts-jev-native-pin-test",
+    name: "typesafe-jev-native-pin-test",
+    isActive: true,
+    testStatus: "active",
+  });
+  let systemOneCalls = 0;
+  const fetchMock = mock.method(globalThis, "fetch", async () => {
+    systemOneCalls += 1;
+    return Response.json({ error: "Jev should have bypassed this call" }, { status: 500 });
+  });
+  const pinnedModel = "anthropic/claude-3";
+
+  try {
+    const result = await resolveComboTargetPipeline(
+      deps({
+        combo: {
+          id: "jev-native-pin",
+          name: "jev-native-pin",
+          strategy: "jev",
+          models: ["openai/gpt-4o", pinnedModel],
+          config: {},
+        },
+        strategy: "jev",
+        nativeTurnPin: {
+          comboName: "jev-native-pin",
+          modelStr: pinnedModel,
+          provider: "anthropic",
+          connectionId: "native-pin-connection",
+          createdAt: Date.now(),
+          expiresAt: Date.now() + 60_000,
+        },
+      })
+    );
+    assert.ok(!("earlyResponse" in result));
+    if ("earlyResponse" in result) return;
+    assert.equal(systemOneCalls, 0);
+    assert.ok(result.orderedTargets.some((target) => target.modelStr === pinnedModel));
+  } finally {
+    fetchMock.mock.restore();
+  }
+});
+
+test("Jev returns cooldown diagnostics when every candidate has an open breaker", async () => {
+  const { getCircuitBreaker } = await import("../../src/shared/utils/circuitBreaker.ts");
+  const breaker = getCircuitBreaker("unit-jev-all-open", {
+    failureThreshold: 1,
+    resetTimeout: 60_000,
+  });
+  breaker.failureThreshold = 1;
+  breaker._onFailure();
+
+  try {
+    const result = await resolveComboTargetPipeline(
+      deps({
+        combo: {
+          id: "jev-all-open",
+          name: "jev-all-open",
+          strategy: "jev",
+          models: ["unit-jev-all-open/one", "unit-jev-all-open/two"],
+          config: {},
+        },
+        strategy: "jev",
+      })
+    );
+    assert.ok("earlyResponse" in result);
+    if (!("earlyResponse" in result)) return;
+    assert.equal(result.earlyResponse.status, 503);
+    assert.ok(Number(result.earlyResponse.headers.get("Retry-After")) > 0);
+    const body = (await result.earlyResponse.json()) as {
+      diagnostics?: { terminalReason?: string; excluded?: unknown[] };
+    };
+    assert.equal(body.diagnostics?.terminalReason, "all_targets_cooling_down");
+    assert.equal(body.diagnostics?.excluded?.length, 2);
+  } finally {
+    breaker.reset();
+  }
 });
 
 // #8790: maxContextWindow rejects every target whose known context window

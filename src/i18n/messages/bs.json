@@ -4115,7 +4115,17 @@
     "duplicateAutoComboSnapshotMsg": "Ovo će napraviti snapshot povezanih providera/modela koji odgovaraju ovom šablonu u uredivi combo.",
     "duplicateAutoComboFailedPrefix": "Neuspjelo dupliranje auto-comba:",
     "duplicateAutoComboUnknownError": "Nepoznata greška",
-    "duplicateAutoComboTitle": "Kreiraj statični combo iz {name}"
+    "duplicateAutoComboTitle": "Kreiraj statični combo iz {name}",
+    "jev": "Jev",
+    "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
+    "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model.",
+    "jevAdmitted": "Dopušteno: još nije procijenjeno (živom Jevu treba korisnička poruka). Prikladni: {models}.",
+    "jevAdmittedNone": "Dopušteno: nijedan — svaka meta je blokirana prije Jeva.",
+    "jevHeld": "Zadržano: nijedan dok Jev ne pokrene na živom zahtjevu (prag vjerojatnosti i dominirani).",
+    "jevBlocked": "Blokirano: {models}.",
+    "jevBlockedNone": "Blokirano: nijedan.",
+    "jevNotConfigured": "Jev nije konfiguriran",
+    "jevTestSummaryFootnote": "Redovi meta ispod su neovisne zdravstvene sonde. Dopuštenje živog Jeva bilježi se na tragu odluke stvarnog zahtjeva za chat."
   },
   "costs": {
     "title": "Troškovi",
@@ -9003,6 +9013,7 @@
     "resilienceTokenRefreshScopeConnection": "Veza (svaki nalog ima vlastiti prekidač)",
     "resilienceTokenRefreshThreshold": "Neuspjesi prije pauze",
     "resilienceTokenRefreshCooldown": "Pauza nakon aktiviranja",
+    "jev": "Jev",
     "piiMasking": {
       "title": "Maskiranje ličnih podataka",
       "description": "Odaberite koje se vrste ličnih podataka maskiraju i dodajte vlastite uzorke. Maskiranje ostaje isključeno dok ne uključite zastavice funkcija prikazane ispod.",
