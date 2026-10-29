@@ -2,6 +2,7 @@
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
+import { waitFor } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 // next-intl: no local mock — falls through to the real-EN-text default mock in
@@ -59,15 +60,11 @@ async function render(props: Parameters<typeof BurnRateChart>[0]) {
     root = createRoot(container!);
     root.render(<BurnRateChart {...props} />);
   });
-  // Let the mocked next/dynamic's `fn().then(setComponent)` resolve and commit the
-  // re-render that swaps in BurnRateChartInner. The FIRST import of this module (which
-  // pulls in recharts) needs a real transform, not just a microtask — polling a few
-  // real ticks is more reliable here than a fixed Promise.resolve() count.
-  for (let i = 0; i < 20 && container!.innerHTML === ""; i++) {
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-    });
-  }
+  // The first dynamic import includes recharts and may take longer than 200ms
+  // under parallel CI load. Wait for the actual Inner content, not fixed ticks.
+  await waitFor(() => expect(container!.textContent).toContain("Burn rate"), {
+    timeout: 7000,
+  });
 }
 
 describe("BurnRateChart", { timeout: 10000 }, () => {
