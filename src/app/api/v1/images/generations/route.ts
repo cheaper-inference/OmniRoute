@@ -3,6 +3,7 @@ import { rosebudModelConnections } from "@/lib/rosebud/provider";
 import {
   rosebudImageBinding,
   scopedRosebudKey,
+  matchesRosebudPin,
 } from "@omniroute/open-sse/services/rosebud/imageBinding.ts";
 import { RosebudError } from "@omniroute/open-sse/services/rosebud/cli.ts";
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
@@ -346,11 +347,19 @@ async function postHandler(request, _context) {
       provider,
       null,
       provider === "rosebud"
-        ? narrowConnectionScope(allowedConnections, rosebudEligible)
+        ? narrowConnectionScope(
+            allowedConnections,
+            rosebudPinned ? [rosebudPinned] : rosebudEligible
+          )
         : allowedConnections,
       requestedModel,
       rosebudPinned ? { forcedConnectionId: rosebudPinned } : {}
     );
+    if (provider === "rosebud" && !matchesRosebudPin(rosebudPinned, credentials?.connectionId))
+      return errorResponse(
+        409,
+        "Original Rosebud account is unavailable; the request will not switch accounts"
+      );
     if (!credentials) {
       return errorResponse(
         HTTP_STATUS.BAD_REQUEST,
@@ -420,15 +429,21 @@ async function postHandler(request, _context) {
   if (provider === "rosebud" && credentials?.connectionId) {
     try {
       const pinned = await bindRosebud(credentials.connectionId);
+      rosebudPinned = pinned;
       if (pinned && pinned !== credentials.connectionId) {
         credentials = await getProviderCredentialsWithQuotaPreflight(
           provider,
           null,
-          allowedConnections,
+          narrowConnectionScope(allowedConnections, [pinned]),
           requestedModel,
           { forcedConnectionId: pinned }
         );
-        if (!credentials || isKeyScopeBlockedCredentials(credentials) || credentials.allRateLimited)
+        if (
+          !credentials ||
+          !matchesRosebudPin(pinned, credentials.connectionId) ||
+          isKeyScopeBlockedCredentials(credentials) ||
+          credentials.allRateLimited
+        )
           return errorResponse(
             409,
             "Original Rosebud account is unavailable; the request will not switch accounts"
@@ -453,6 +468,11 @@ async function postHandler(request, _context) {
     credentials,
     allowedConnections,
     execute: async (attemptCredentials) => {
+      if (
+        provider === "rosebud" &&
+        !matchesRosebudPin(rosebudPinned, attemptCredentials?.connectionId)
+      )
+        return { success: false, status: 409, error: "Original Rosebud account is unavailable" };
       let proxyInfo = null;
       if (attemptCredentials?.connectionId) {
         try {

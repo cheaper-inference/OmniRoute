@@ -45,6 +45,11 @@ export async function handleRosebudImageGeneration(options: {
       throw new RosebudError("not_an_image_model", 400);
     const defaultFormat = selected.inputs?.find((field) => field.name === "output_format")?.default;
     if (
+      !input.output_format &&
+      selected.output_formats.some((format) => !["png", "jpg", "jpeg", "webp"].includes(format))
+    )
+      throw new RosebudError("explicit_raster_format_required", 400);
+    if (
       typeof defaultFormat === "string" &&
       !input.output_format &&
       !["png", "jpg", "jpeg", "webp"].includes(defaultFormat)

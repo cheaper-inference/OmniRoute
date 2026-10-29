@@ -1,3 +1,4 @@
+import { requireRosebudAccess } from "@/lib/rosebud/authorization";
 import { discoverRosebud } from "@/lib/rosebud/provider";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { NextResponse } from "next/server";
@@ -438,6 +439,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     if (connection.provider === "rosebud") {
+      const denied = await requireRosebudAccess(request, id);
+      if (denied) return denied;
       if (getRequestPeerLocality(request) === "remote")
         return NextResponse.json({ error: "Local Rosebud access required" }, { status: 403 });
       const catalog = await discoverRosebud(id);

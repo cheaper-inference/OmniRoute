@@ -11,6 +11,7 @@ test("Rosebud tools are distinct, management-scoped and have no default credit c
     const input = tool.inputSchema.parse({
       connectionId: "123e4567-e89b-42d3-a456-426614174000",
       model: "test",
+      idempotencyKey: "stable-retry-key",
       input: { prompt: "hello" },
     }) as Record<string, unknown>;
     assert.equal(input.maxCredits, undefined);
@@ -38,4 +39,16 @@ test("MCP binary downloads survive text accessibility truncation", () => {
   assert.ok(result.content[0].text.length < 1000);
   assert.equal(JSON.parse(result.content[0].text).artifactField, "structuredContent.b64_data");
   assert.equal(rosebudToolResult({ balance: 10 }).structuredContent, undefined);
+});
+
+test("paid MCP generation requires an explicit retry key", () => {
+  const image = rosebudTools.find((tool) => tool.name === "rosebud_generate_image");
+  assert.ok(image);
+  assert.throws(() =>
+    image.inputSchema.parse({
+      connectionId: "123e4567-e89b-42d3-a456-426614174000",
+      model: "test",
+      input: { prompt: "hello" },
+    })
+  );
 });

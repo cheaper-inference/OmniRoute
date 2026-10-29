@@ -69,6 +69,7 @@ export const rosebudTools = [
           category +
           ". Choose a matching model and its exact input schema; use a stable idempotencyKey for retries.",
         request.extend({
+          idempotencyKey: z.string().min(1).max(200),
           category: z
             .literal(
               category === "sprite"
