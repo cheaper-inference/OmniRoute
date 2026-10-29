@@ -35,6 +35,7 @@ type CapturedRequest = {
   headers: Headers;
   body: z.infer<typeof responsesRequestSchema>;
 };
+type FailureMode = "error" | "response-failed" | "empty";
 
 function createSseResponse(events: string[]): Response {
   return new Response(`${events.join("\n\n")}\n\n`, {
@@ -44,7 +45,7 @@ function createSseResponse(events: string[]): Response {
 }
 
 function installAgentRouterFetch(
-  mode: "completed" | "failed",
+  mode: "completed" | FailureMode,
   capturedRequests: CapturedRequest[]
 ): void {
   globalThis.fetch = async (input, init = {}) => {
@@ -69,10 +70,20 @@ function installAgentRouterFetch(
     const rawBody: unknown = JSON.parse(String(init.body || "{}"));
     const body = responsesRequestSchema.parse(rawBody);
     capturedRequests.push({ url, headers: new Headers(init.headers), body });
-    if (mode === "failed") {
+    if (mode === "error") {
       return createSseResponse([
         'event: error\ndata: {"type":"error","error":{"message":"Rate limit exceeded","code":"rate_limit_exceeded"}}',
+      ]);
+    }
+    if (mode === "response-failed") {
+      return createSseResponse([
         'event: response.failed\ndata: {"type":"response.failed","response":{"id":"resp_agentrouter_17997","status":"failed","error":{"message":"Rate limit exceeded","code":"rate_limit_exceeded"}}}',
+      ]);
+    }
+    if (mode === "empty") {
+      return createSseResponse([
+        'event: response.created\ndata: {"type":"response.created","response":{"id":"resp_agentrouter_17997","object":"response","status":"in_progress"}}',
+        'event: response.completed\ndata: {"type":"response.completed","response":{"id":"resp_agentrouter_17997","object":"response","status":"completed","model":"gpt-6-astra","output":[],"usage":{"input_tokens":4,"output_tokens":0,"total_tokens":4}}}',
       ]);
     }
 
@@ -134,13 +145,46 @@ test("#17997 dashboard AgentRouter GPT probe succeeds through Responses", async 
   assert.equal(captured.headers.get("x-api-key"), null);
 });
 
-test("#17997 dashboard does not mark a failed Responses stream healthy", async () => {
-  const capturedRequests: CapturedRequest[] = [];
-  installAgentRouterFetch("failed", capturedRequests);
+const failureCases: {
+  name: string;
+  mode: FailureMode;
+  expectedStatus: "error" | "rate_limited";
+}[] = [
+  {
+    name: "#17997 dashboard does not mark an SSE error healthy",
+    mode: "error",
+    expectedStatus: "error",
+  },
+  {
+    name: "#17997 dashboard does not mark a failed Responses stream healthy",
+    mode: "response-failed",
+    expectedStatus: "rate_limited",
+  },
+  {
+    name: "#17997 dashboard does not mark empty Responses output healthy",
+    mode: "empty",
+    expectedStatus: "error",
+  },
+];
 
-  const result = await runDashboardProbe();
+for (const { name, mode, expectedStatus } of failureCases) {
+  test(name, async () => {
+    const capturedRequests: CapturedRequest[] = [];
+    installAgentRouterFetch(mode, capturedRequests);
 
-  assert.notEqual(result.status, "ok");
-  assert.notEqual(result.responseText, "OK");
-  assert.equal(capturedRequests[0]?.url, "https://agentrouter.org/v1/responses");
-});
+    const result = await runDashboardProbe();
+
+    assert.equal(result.status, expectedStatus);
+    assert.notEqual(result.responseText, "OK");
+    assert.equal(capturedRequests[0]?.url, "https://agentrouter.org/v1/responses");
+    if (mode === "empty") {
+      assert.notEqual(result.httpStatus, 200);
+      assert.match(result.error ?? "", /empty|no text content/i);
+    } else if (mode === "response-failed") {
+      assert.equal(result.rateLimited, true);
+      assert.match(result.error ?? "", /rate limit/i);
+    } else {
+      assert.ok(result.error);
+    }
+  });
+}
