@@ -7,6 +7,11 @@
  * executor config.appVersion still wins over both.
  */
 
+import {
+  BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS,
+  canStartBackgroundRefresh,
+} from "@/shared/utils/backgroundRefresh";
+
 export const ZED_CLIENT_VERSION = "0.200.0";
 
 const ZED_RELEASE_URL = "https://api.github.com/repos/zed-industries/zed/releases/latest";
@@ -19,6 +24,9 @@ type FetchLike = typeof fetch;
 let cachedVersion: string | null = null;
 let cachedAt = 0;
 let inFlight: Promise<string> | null = null;
+// Earliest time the getter may start another background lookup: one TTL after any answer
+// (the cache below only keeps versions newer than the pin), the retry window after a failure.
+let nextBackgroundRefreshAt = 0;
 
 function parseReleaseTag(tagName: unknown): string | null {
   if (typeof tagName !== "string") return null;
@@ -54,7 +62,13 @@ function readFreshCache(): string | null {
  * itself never waits on the network.
  */
 export function getZedClientVersion(): string {
-  if (typeof process !== "undefined" && !process.env.NODE_TEST_CONTEXT && !readFreshCache() && !inFlight) {
+  if (
+    canStartBackgroundRefresh() &&
+    !process.env.NODE_TEST_CONTEXT &&
+    !readFreshCache() &&
+    !inFlight &&
+    Date.now() >= nextBackgroundRefreshAt
+  ) {
     void refreshZedClientVersion();
   }
   return pickAtLeastPin(readFreshCache());
@@ -97,6 +111,9 @@ export function refreshZedClientVersion(fetchImpl: FetchLike = fetch): Promise<s
       cachedVersion = resolved;
       cachedAt = Date.now();
     }
+    nextBackgroundRefreshAt =
+      Date.now() +
+      (resolved ? ZED_VERSION_CACHE_TTL_MS : BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS);
     return pickAtLeastPin(resolved ?? readFreshCache());
   })();
 
@@ -109,6 +126,7 @@ export function refreshZedClientVersion(fetchImpl: FetchLike = fetch): Promise<s
 
 /** Test seam: drop the release cache so the next refresh hits the network. */
 export function resetZedClientVersionCache(): void {
+  nextBackgroundRefreshAt = 0;
   cachedVersion = null;
   cachedAt = 0;
   inFlight = null;

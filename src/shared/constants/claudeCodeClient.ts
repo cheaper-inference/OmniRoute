@@ -12,6 +12,11 @@
  * uses that version when it is newer than the pin. The env override wins over
  * both. The lookup is fire-and-forget; a cold or failed fetch stays on the pin.
  */
+import {
+  BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS,
+  canStartBackgroundRefresh,
+} from "../utils/backgroundRefresh";
+
 export const CLAUDE_CODE_CLIENT_VERSION = "2.1.280";
 export const CLAUDE_CODE_CLIENT_BUILD_REVISION = "1e2";
 export const CLAUDE_CODE_CLIENT_BILLING_VERSION = `${CLAUDE_CODE_CLIENT_VERSION}.${CLAUDE_CODE_CLIENT_BUILD_REVISION}`;
@@ -34,6 +39,9 @@ type FetchLike = typeof fetch;
 let cachedVersion: string | null = null;
 let cachedAt = 0;
 let inFlight: Promise<string> | null = null;
+// Earliest time the getter may start another background lookup: one TTL after any answer
+// (the cache below only keeps versions newer than the pin), the retry window after a failure.
+let nextBackgroundRefreshAt = 0;
 
 function getSafeEnvValue(name: string, pattern: RegExp): string | null {
   const raw = typeof process === "undefined" ? undefined : process.env?.[name];
@@ -74,7 +82,7 @@ function readFreshCache(): string | null {
 }
 
 function shouldAutoRefreshClaudeCodeVersion(): boolean {
-  if (typeof process === "undefined") return false;
+  if (!canStartBackgroundRefresh()) return false;
   return !process.env.NODE_TEST_CONTEXT && !process.env.VITEST && process.env.NODE_ENV !== "test";
 }
 
@@ -86,7 +94,12 @@ function shouldAutoRefreshClaudeCodeVersion(): boolean {
 export function getClaudeCodeClientVersion(): string {
   const override = getSafeEnvValue(CLAUDE_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN);
   if (override) return override;
-  if (shouldAutoRefreshClaudeCodeVersion() && !readFreshCache() && !inFlight) {
+  if (
+    shouldAutoRefreshClaudeCodeVersion() &&
+    !readFreshCache() &&
+    !inFlight &&
+    Date.now() >= nextBackgroundRefreshAt
+  ) {
     void refreshClaudeCodeClientVersion();
   }
   return pickAtLeastPin(readFreshCache());
@@ -134,6 +147,9 @@ export function refreshClaudeCodeClientVersion(fetchImpl: FetchLike = fetch): Pr
       cachedVersion = resolved;
       cachedAt = Date.now();
     }
+    nextBackgroundRefreshAt =
+      Date.now() +
+      (resolved ? CLAUDE_CODE_VERSION_CACHE_TTL_MS : BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS);
     return pickAtLeastPin(resolved ?? readFreshCache());
   })();
 
@@ -146,6 +162,7 @@ export function refreshClaudeCodeClientVersion(fetchImpl: FetchLike = fetch): Pr
 
 /** Test seam: drop the registry cache so the next refresh hits the network. */
 export function resetClaudeCodeClientVersionCache(): void {
+  nextBackgroundRefreshAt = 0;
   cachedVersion = null;
   cachedAt = 0;
   inFlight = null;

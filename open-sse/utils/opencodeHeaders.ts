@@ -1,4 +1,5 @@
 import { createHash, randomBytes, randomUUID } from "crypto";
+import { canStartBackgroundRefresh } from "@/shared/utils/backgroundRefresh";
 import { setUserAgentHeader } from "../executors/base/headers.ts";
 import { generateSessionId } from "../services/sessionManager.ts";
 import {
@@ -144,7 +145,12 @@ export function resolveOpencodeCliDefaults(
   // throws); the default below reads the cache synchronously so synthesis never blocks.
   // Skipped under test runners: their globalThis.fetch stubs count dispatches, and the
   // registry lookup would be counted as one (same guard as adobeFireflySession).
-  if (!process.env.NODE_TEST_CONTEXT && !process.env.VITEST && process.env.NODE_ENV !== "test") {
+  if (
+    canStartBackgroundRefresh() &&
+    !process.env.NODE_TEST_CONTEXT &&
+    !process.env.VITEST &&
+    process.env.NODE_ENV !== "test"
+  ) {
     void refreshOpencodeCliVersion();
   }
   const synthesizedUA = v2Fingerprint
