@@ -44,6 +44,34 @@ describe("ChatGPT Web clean-room executor request adapter", () => {
     );
   });
 
+  test("maps the GPT-6 family to the same picker lanes as its predecessors", () => {
+    assert.deepEqual(
+      prepareChatGptWebBrowserRequest("gpt-6-thinking", {
+        messages: [{ role: "user", content: "hello" }],
+        reasoning_effort: "max",
+      }).selection,
+      { kind: "picker", modelLabel: "GPT-6 Sol", effortIndex: 3 }
+    );
+    assert.deepEqual(
+      prepareChatGptWebBrowserRequest("gpt-6-pro", {
+        messages: [{ role: "user", content: "hello" }],
+      }).selection,
+      { kind: "picker", modelLabel: "GPT-6 Sol", effortIndex: 4 }
+    );
+    assert.deepEqual(
+      prepareChatGptWebBrowserRequest("gpt-6", {
+        messages: [{ role: "user", content: "hello" }],
+      }).selection,
+      { kind: "picker", modelLabel: "GPT-6 Sol", effortIndex: 0 }
+    );
+    assert.deepEqual(
+      prepareChatGptWebBrowserRequest("gpt-6-instant", {
+        messages: [{ role: "user", content: "hello" }],
+      }).selection,
+      { kind: "picker", modelLabel: "GPT-6 Sol", effortIndex: 0 }
+    );
+  });
+
   test("maps the observed Free Luna routes to the first-party Think toggle", () => {
     assert.deepEqual(
       prepareChatGptWebBrowserRequest("gpt-5.6-luna-free", {
@@ -254,8 +282,11 @@ describe("ChatGPT Web clean-room executor request adapter", () => {
 describe("ChatGPT Web clean-room storage state", () => {
   test("prefers an explicit installed Chrome path for the headed first-party session", () => {
     const checked: string[] = [];
+    // The explicit path is stored connection data, so it must name a browser the operator
+    // configured (here through CHROME_PATH); an arbitrary path is ignored — see
+    // tests/unit/browser-executable-boundary.test.ts.
     const resolved = resolveChatGptWebChromeExecutable("/custom/chrome", {
-      env: {},
+      env: { CHROME_PATH: "/custom/chrome" },
       exists: (candidate) => {
         checked.push(candidate);
         return candidate === "/custom/chrome";

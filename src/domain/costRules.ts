@@ -32,6 +32,7 @@ import {
 import { recordLedgerFromCost } from "@/lib/usage/costLedgerRecorder";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { recordUnpricedKeyQuotaUsage } from "@/domain/keyQuota";
+import { isFlatRateProvider } from "@/lib/usage/flatRateProviders";
 
 export type BudgetResetInterval = "daily" | "weekly" | "monthly";
 
@@ -529,6 +530,23 @@ export function recordChatCallCost(
   if (unpriced) recordUnpricedBudgetUsage(apiKeyInfo.id, context);
   if (estimatedCost <= 0) return;
   recordCost(apiKeyInfo.id, estimatedCost, { ...context, success });
+}
+
+/**
+ * Charge a priced non-chat call (image, speech, video/music, rerank) to the key's
+ * dollar budget and cost ledger. These routes already price each successful call
+ * for the X-OmniRoute cost header; only the metered share draws the budget down,
+ * as on the chat path. Never throws.
+ */
+export function recordModalCallCost(
+  apiKeyId: string | null | undefined,
+  call: { provider: string; model?: string | null; costUsd: number }
+): void {
+  if (!apiKeyId) return;
+  // Same rule as meteredBudgetCost(): flat-rate plans are not paid from the budget.
+  if (isFlatRateProvider(call.provider)) return;
+  if (!Number.isFinite(call.costUsd) || call.costUsd <= 0) return;
+  recordCost(apiKeyId, call.costUsd, { provider: call.provider, model: call.model, success: true });
 }
 
 /**

@@ -48,15 +48,15 @@ fungerar direkt), hälsokontrollerar servern och kör `claude` via exec.
 
 ---
 
-## Identifieringsalias — visa modeller som inte är Claude-modeller i `/model`-väljaren
+## Discovery-aliaser — visa icke-Claude-modeller i `/model`-väljaren
 
-Claude Codes identifiering av gatewaymodeller listar endast id:n som börjar med `claude`
-eller `anthropic`, så med `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` visar den inbyggda
-`/model`-väljaren normalt **endast** OmniRoutes Claude-/Anthropic-modeller — en
-`kimi/kimi-k2.6` eller `glm/glm-5.2` visas aldrig, trots att dirigeringen fungerar korrekt.
+Claude Codes modellupptäckt via gateway listar endast id:n som börjar med `claude`
+eller `anthropic`, så med `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` visar den
+inbyggda `/model`-väljaren normalt **endast** OmniRoutes Claude/Anthropic-modeller — en
+`kimi/kimi-k2.6` eller `glm/glm-5.2` visas aldrig, trots att den dirigeras utan problem.
 
-OmniRoute kan spegla valfri aktiverad modell (och kombination) under ett `claude/…`-id så att den
-passerar filtret och visas i väljaren:
+OmniRoute kan spegla valfri aktiverad modell (och combo) under ett `claude/…`-id så att
+den passerar det filtret och dyker upp i väljaren:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,32 +64,40 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-När du väljer en av dessa i Claude Code tar OmniRoute bort omslutningen `claude/`
-och återställer det verkliga id:t före dirigeringen — ett äkta `claude/<real-claude-model>`-id
+När du väljer ett av dessa i Claude Code tar OmniRoute bort `claude/`-omslaget och
+återställer det verkliga id:t innan dirigering — ett äkta `claude/<real-claude-model>`-id
 (den faktiska Claude OAuth-leverantören) lämnas alltid orört.
 
-**Detta är avstängt som standard** och styrs av en grind i tre nivåer (den mest specifika
-har företräde), så en vanlig OmniRoute-instans dubblerar aldrig sin katalog för klienter som inte
-använder Claude Code:
+Som standard speglas endast bas-id:n. Med den frivilliga funktionsflaggan
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` aktiverad speglas reasoning-effort-varianter som
+katalogen redan listar (t.ex. `codex/gpt-6-sol-high`) som vilket annat id som helst, så att
+Claude Code kan välja en explicit ansträngningsnivå, och inbyggda `auto/*`-id:n som
+anropsvägen inte kan materialisera speglas inte. Om ansträngningsvarianter listas
+överhuvudtaget styrs fortfarande av `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — spegeln
+lägger aldrig till en variant som baskatalogen saknar.
 
-| Nivå       | Var                                                                                 |
-| ---------- | ----------------------------------------------------------------------------------- |
-| Modell     | Leverantörens detaljsida → reglaget "Expose in Claude Code" per modell              |
-| Leverantör | Leverantörens detaljsida → reglage på leverantörsnivå (omfattar alla dess modeller) |
-| Global     | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (avstängt som standard)    |
+**Detta är avstängt som standard** och styrs av en trenivågrind (mest specifik vinner), så
+att en vanlig OmniRoute aldrig fördubblar sin katalog för klienter som inte använder
+Claude Code:
 
-Miljövariabeln `EXPOSE_CC_DISCOVERY_ALIASES` framtvingar aktivering på global nivå
-och har företräde framför åsidosättningen i kontrollpanelen (skärmen Feature Flags visar
-meddelandet "active via environment variable" när så är fallet). Reglagen per leverantör och
-per modell finjusterar därefter beteendet — exempelvis exponerar globalt avstängt + aktiverat för Kimi-leverantören
-endast Kimis modeller.
+| Nivå       | Var                                                                               |
+| ---------- | --------------------------------------------------------------------------------- |
+| Modell     | Leverantörens detaljsida → växel "Expose in Claude Code" per modell               |
+| Leverantör | Leverantörens detaljsida → växel på leverantörsnivå (omfattar alla dess modeller) |
+| Global     | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (av som standard)        |
 
-> ⚠️ **Skillnad i kontextfönster för modeller som inte är Claude-modeller.** Claude Code förutsätter ett kontextfönster
-> på 200K för alla id:n som det inte känner igen (det kan inte läsa det verkliga fönstret från
-> `/v1/models`). För en modell med ett större fönster (t.ex. Kimi K2:s 256K) anger du
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` till ett värde under modellens verkliga fönster så att
-> automatisk komprimering inte aktiveras för tidigt. De genererade profilerna ovan gör redan
-> detta per modell.
+Miljövariabeln `EXPOSE_CC_DISCOVERY_ALIASES` tvingar på den globala nivån och har
+företräde framför åsidosättandet i instrumentpanelen (skärmen Feature Flags visar då en
+anteckning om "active via environment variable"). Växlar per leverantör och per modell
+förfinar utifrån det — t.ex. globalt av + Kimi-leverantör på exponerar endast Kimis
+modeller.
+
+> ⚠️ **Felmatchat kontextfönster för icke-Claude-modeller.** Claude Code antar ett
+> kontextfönster på 200K för alla id:n den inte känner igen (den kan inte läsa en
+> verklig fönsterstorlek från `/v1/models`). För en modell med ett större fönster (t.ex.
+> Kimi K2:s 256K), ställ in `CLAUDE_CODE_AUTO_COMPACT_WINDOW` på ett värde under modellens
+> verkliga fönsterstorlek så att automatisk kompaktering inte utlöses i förtid. De
+> genererade profilerna ovan gör redan detta per modell.
 
 ---
 

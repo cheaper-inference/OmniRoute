@@ -2,12 +2,22 @@
 import React from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import UsageAnalytics from "@/shared/components/UsageAnalytics";
 import { ApiKeyTable, ProviderTable } from "@/shared/components/analytics/charts";
 import { ModelTable } from "@/shared/components/analytics/ModelTable";
 import RequestCountTable from "@/shared/components/analytics/RequestCountTable";
 import { fmtFull } from "@/shared/utils/formatting";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 const mockTranslate = (key: string, values?: Record<string, any>) => {
   if (key === "tokenDisplayCompact") return "Compact";

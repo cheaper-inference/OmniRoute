@@ -271,11 +271,9 @@ describe("CliCodePageClient", () => {
     expect(container.textContent).toContain("Claude Code profiles");
     expect(container.textContent).not.toContain("HTTP");
 
-    const codexToggle = container.querySelector(
-      'button[role="switch"][aria-label="Codex profiles"]'
-    );
+    const codexToggle = container.querySelector('[role="switch"][aria-label="Codex profiles"]');
     const claudeToggle = container.querySelector(
-      'button[role="switch"][aria-label="Claude Code profiles"]'
+      '[role="switch"][aria-label="Claude Code profiles"]'
     );
 
     expect(codexToggle?.getAttribute("aria-checked")).toBe("true");
@@ -286,7 +284,7 @@ describe("CliCodePageClient", () => {
   it("2c. persists CLI profile auto-sync toggle changes", async () => {
     const container = await renderPage();
     const codexToggle = container.querySelector(
-      'button[role="switch"][aria-label="Codex profiles"]'
+      '[role="switch"][aria-label="Codex profiles"]'
     ) as HTMLButtonElement;
 
     expect(codexToggle).not.toBeNull();

@@ -13,15 +13,16 @@ na Claude Code — ide o prevádzkové spresnenia pravidiel, ktoré sú už defi
 
 ## Izolácia worktree — špecifiká Claude Code
 
-Úplný povinný protokol worktree (potvrdenie základnej vetvy, kanonická cesta `.claude/worktrees/`,
-`cp -al` node_modules, pravidlá odstránenia) sa nachádza v `AGENTS.md` → Pracovný postup Git → „Izolácia
-worktree“. Body špecifické pre Claude Code:
+Úplný povinný protokol pre worktree (potvrdenie základnej vetvy, kanonická cesta
+`.claude/worktrees/`, `cp -al` node_modules, pravidlá ukončenia) je v
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (zhrnuté v `AGENTS.md` →
+Pracovný postup Gitu → „Izolácia worktree"). Body špecifické pre Claude Code:
 
-- Potvrďte základnú vetvu s operátorom prostredníctvom `AskUserQuestion` (Pevné pravidlo č. 19), pokiaľ vám ju
-  už neuviedol.
-- Uprednostnite natívny nástroj `EnterWorktree` — worktree už vytvára v
-  `.claude/worktrees/` (kanonickej ceste). Vytvorte worktree pomocou zdokumentovaného príkazu `git
-worktree add` a potom zavolajte `EnterWorktree` s jeho `path`.
+- Potvrďte základnú vetvu s operátorom cez `AskUserQuestion` (Pevné pravidlo č. 19), pokiaľ vám
+  ju už nepovedal.
+- Uprednostnite natívny nástroj `EnterWorktree` — ten už vytvára worktree v
+  `.claude/worktrees/` (kanonická cesta). Vytvorte worktree zdokumentovaným príkazom
+  `git worktree add` a potom zavolajte `EnterWorktree` s jeho `path`.
 
 ## Bezpečnosť naprieč reláciami — špecifiká Claude Code
 

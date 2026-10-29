@@ -25,7 +25,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { Card, Button } from "@/shared/components";
+import { Button, Card, Input } from "@/shared/components";
 import Tooltip from "@/shared/components/Tooltip";
 
 interface DarioAccount {
@@ -361,12 +361,12 @@ export function DarioAccountPanel() {
         {/* Login flow */}
         {!pending ? (
           <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
-            <input
-              type="text"
+            <Input
               placeholder="alias (optional)"
+              aria-label="alias (optional)"
               value={aliasInput}
               onChange={(e) => setAliasInput(e.target.value)}
-              className="flex-1 min-w-[140px] bg-transparent text-xs border border-border rounded px-2 py-1.5 outline-none placeholder:text-text-muted"
+              className="min-w-[140px] flex-1"
             />
             <Button size="sm" disabled={busy !== null} onClick={startLogin}>
               {busy === "start" ? "Starting…" : "Start Login"}
@@ -401,12 +401,13 @@ export function DarioAccountPanel() {
             )}
             <p className="text-xs text-text-muted">2. Paste the code Anthropic displays:</p>
             <div className="flex flex-wrap items-center gap-2">
-              <input
-                type="text"
+              <Input
                 placeholder="code#state or bare code"
+                aria-label="code#state or bare code"
                 value={codeInput}
                 onChange={(e) => setCodeInput(e.target.value)}
-                className="flex-1 min-w-[180px] bg-transparent text-xs border border-border rounded px-2 py-1.5 outline-none placeholder:text-text-muted font-mono"
+                className="min-w-[180px] flex-1"
+                inputClassName="font-mono"
               />
               <Button
                 size="sm"
@@ -430,8 +431,8 @@ export function DarioAccountPanel() {
           </div>
         )}
 
-        {notice && <p className="text-xs text-green-600 dark:text-green-400">{notice}</p>}
-        {error && <p className="text-xs text-red-600 dark:text-red-400 break-words">{error}</p>}
+        {notice && <p className="text-xs text-success">{notice}</p>}
+        {error && <p className="text-xs text-error break-words">{error}</p>}
       </div>
     </Card>
   );

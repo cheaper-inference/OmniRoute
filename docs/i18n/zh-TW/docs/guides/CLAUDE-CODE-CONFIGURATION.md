@@ -48,15 +48,11 @@ Claude Code 使用 **Anthropic Messages API**，並透過環境變數指向自�
 
 ---
 
-## 探索別名——讓非 Claude 模型顯示在 `/model` 選擇器中
+## 探索別名 — 在 `/model` 選擇器中顯示非 Claude 模型
 
-Claude Code 的閘道模型探索功能只會列出 ID 以 `claude` 或 `anthropic`
-開頭的模型，因此即使設定了 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`，原生
-`/model` 選擇器通常也**只會**顯示 OmniRoute 的 Claude／Anthropic 模型——
-`kimi/kimi-k2.6` 或 `glm/glm-5.2` 永遠不會出現，即使它們可正常路由。
+Claude Code 的閘道模型探索功能只會列出以 `claude` 或 `anthropic` 開頭的 id,因此當設定 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` 時,原生 `/model` 選擇器通常**只會**顯示 OmniRoute 的 Claude/Anthropic 模型 — 像 `kimi/kimi-k2.6` 或 `glm/glm-5.2` 這類模型永遠不會出現,即使它們可以正常路由。
 
-OmniRoute 可以使用 `claude/…` ID 鏡像任何已啟用的模型（以及組合），使其
-通過該篩選條件並顯示在選擇器中：
+OmniRoute 可以將任何已啟用的模型(以及 combo 組合)鏡像到 `claude/…` id 之下,使其通過該過濾條件並顯示在選擇器中:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,29 +60,21 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-當你在 Claude Code 中選擇其中一個模型時，OmniRoute 會在路由前移除 `claude/`
-包裝，還原為真正的 ID——真正的 `claude/<real-claude-model>` ID
-（實際的 Claude OAuth 提供者）則一律保持不變。
+當你在 Claude Code 中選取其中一個項目時,OmniRoute 會在路由前剝除 `claude/` 包裹層、還原為真實 id — 真正的 `claude/<real-claude-model>` id(實際的 Claude OAuth 提供者)永遠保持原樣、不受影響。
 
-**此功能預設關閉**，並由三級控制機制管理（最具體的設定優先），因此未使用
-Claude Code 的用戶端連接一般 OmniRoute 時，模型目錄不會增加一倍：
+預設情況下只會鏡像基本 id。啟用需主動開啟的 `CATALOG_MIRROR_REFINEMENTS_ENABLED` 功能旗標後,目錄中已列出的推理強度(reasoning-effort)變體(例如 `codex/gpt-6-sol-high`)也會像其他 id 一樣被鏡像,讓 Claude Code 可以選取明確的強度等級;而請求路徑無法具體化的內建 `auto/*` id 則不會被鏡像。強度變體是否會被列出,仍由 `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` 控制 — 鏡像絕不會新增基本目錄中沒有的變體。
 
-| 層級   | 位置                                                           |
-| ------ | -------------------------------------------------------------- |
-| 模型   | 提供者詳細資料頁面 → 各模型的「Expose in Claude Code」切換開關 |
-| 提供者 | 提供者詳細資料頁面 → 提供者層級的切換開關（涵蓋其所有模型）    |
-| 全域   | 設定 → 功能旗標 → `EXPOSE_CC_DISCOVERY_ALIASES`（預設關閉）    |
+**此功能預設為關閉**,並由三層級的閘門控制(以最特定的層級為準),因此未特別設定的 OmniRoute 絕不會讓不使用 Claude Code 的用戶端看到翻倍的目錄:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` 環境變數會強制啟用全域層級，並優先於儀表板的覆寫設定
-（透過環境變數啟用時，「功能旗標」畫面會顯示「active via environment variable」
-提示）。各提供者與各模型的切換開關可在此基礎上進一步細分——例如，全域關閉但
-啟用 Kimi 提供者時，只會公開 Kimi 的模型。
+| 層級   | 設定位置                                                                         |
+| ------ | -------------------------------------------------------------------------------- |
+| 模型   | 提供者詳細頁面 → 各模型的 "Expose in Claude Code"(在 Claude Code 中公開)切換開關 |
+| 提供者 | 提供者詳細頁面 → 提供者層級切換開關(涵蓋其所有模型)                              |
+| 全域   | 設定 → 功能旗標 → `EXPOSE_CC_DISCOVERY_ALIASES`(預設關閉)                        |
 
-> ⚠️ **非 Claude 模型的視窗不符。** Claude Code 會假設任何無法辨識的 ID 都有
-> 200K 的上下文視窗（它無法從 `/v1/models` 讀取實際視窗大小）。對於視窗更大的
-> 模型（例如 Kimi K2 的 256K），請將 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` 設定為
-> 低於模型實際視窗大小的值，避免過早觸發自動壓縮。上述產生的設定檔已針對各模型
-> 完成此項設定。
+`EXPOSE_CC_DISCOVERY_ALIASES` 環境變數會強制開啟全域層級,並優先於儀表板上的覆寫設定(此時功能旗標畫面會顯示「active via environment variable」(經由環境變數啟用)的提示)。各提供者與各模型的切換開關則在此基礎上進一步細化 — 例如:全域關閉 + Kimi 提供者開啟,就只會公開 Kimi 的模型。
+
+> ⚠️ **非 Claude 模型的視窗大小不符問題。** Claude Code 對任何無法辨識的 id 一律假設其上下文視窗為 200K(因為它無法從 `/v1/models` 讀取真實的視窗大小)。對於視窗較大的模型(例如 Kimi K2 的 256K),請將 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` 設為低於該模型真實視窗的數值,以免自動壓縮(auto-compaction)過早觸發。上方產生的設定檔已針對各模型分別完成此設定。
 
 ---
 

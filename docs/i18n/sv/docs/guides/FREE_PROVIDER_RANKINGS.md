@@ -13,30 +13,17 @@
 
 ## Vad det är
 
-OmniRoute registrerar 374 leverantörer, inklusive 155 katalogposter markerade som **gratis/utan autentisering**
-(utan autentisering,
-OAuth med gratisnivå eller API-nyckel med gratisnivå — se
-[Guiden till gratisnivåer](../getting-started/FREE-TIERS-GUIDE.md) och den fullständiga
-[katalogen över gratisnivåer](../reference/FREE_TIERS.md)). Haken är att gratisleverantörer varierar
-kraftigt i modellkvalitet. En leverantör utan autentisering som erbjuder en banbrytande modell är mycket mer användbar
-än en som erbjuder en liten äldre modell.
+OmniRoute registrerar 377 leverantörer, inklusive 155 markerade katalogposter**free/no-auth** (no-auth, free-tier OAuth eller free-tier API nyckel — se [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) och hela [Free Tiers-katalogen](../reference/FREE_TIERS.md) ). Haken: gratisleverantörer varierar mycket i modellkvalitet. En leverantör utan auktorisering som betjänar en gränsmodell är mycket mer användbar än en som betjänar en liten äldre modell.
 
-**Rankning av gratisleverantörer** besvarar frågan "**vilken gratisleverantör ger mig den bästa modellen?**" genom att
-samköra varje gratisleverantörs katalog med **kollektivt insamlade kvalitetspoäng** från
-**Arena AI:s topplista** (ELO baserat på mänskliga preferenser, samma idé som ligger bakom LMArena-
-chatbotarenan). Leverantörerna rankas sedan efter prestandan hos deras **bästa kostnadsfria modell**.
+**Gratis leverantörsranking** svarar"** vilken gratis leverantör ger mig den bästa modellen?** " genom att gå med i varje gratisleverantörs katalog med** kvalitetsresultat från publiken** från** Arena AI leaderboard** (mänsklig preferens ELO, samma idé bakom LMArena chatbot-arenan). Leverantörer rankas sedan efter deras styrka** bästa gratismodellen** .
 
-Rankningen beräknas utifrån tre verkliga källor:
+Rangordningen beräknas från tre verkliga källor:
 
-1. Listorna över gratisleverantörer — `NOAUTH_PROVIDERS` samt poster i `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` som är markerade med `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Varje leverantörs modellkatalog från leverantörsregistret
-   (`open-sse/config/providerRegistry.ts`).
-3. ELO-baserade poäng för uppgiftslämplighet som lagras i databastabellen `model_intelligence` av
-   synkroniseringsmotorn för Arena ELO (`src/lib/arenaEloSync.ts`).
+1. Listorna med gratisleverantörer — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` -poster flaggade `hasFree` (`src/shared/constants/providers.ts`).
+2. Varje leverantörs modellkatalog från leverantörsregistret (`open-sse/config/providerRegistry.ts`).
+3. ELO-härledda uppgiftsanpassningspoäng lagrade i `model_intelligence` DB tabellen av Arena ELO sync-motorn (`src/lib/arenaEloSync.ts`).
 
-Samkörningslogiken finns i `src/lib/freeProviderRankings.ts`.
+Anslutningslogiken bor i `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -122,34 +109,41 @@ Svarsformat:
 
 ## Så fungerar poängen
 
-### Källa: Arena AI:s topplista
+### Källa: Arena AI-topplista
 
-Arena ELO-synkroniseringsmotorn (`src/lib/arenaEloSync.ts`) hämtar två topplistor — `text`
-och `code` — från Arena AI:s API för topplistor
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Varje post i topplistan
-innehåller ett modellnamn, en leverantör, ELO-`score`, ett konfidensintervall och antal röster.
+Arena ELO-synkmotorn (`src/lib/arenaEloSync.ts`) hämtar två topplistor — `text`
+och `code` — från Arena AI:s toppliste-API
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). När API:t inte
+returnerar någon användbar topplista faller motorn tillbaka på den officiella
+`lmarena-ai/leaderboard-dataset` på Hugging Faces datasets-server
+(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` rapporterar `activeSource`,
+`lastError` och `lastFailedAt`. Varje topplistepost
+innehåller ett modellnamn, en leverantör, en ELO-`score`, ett konfidensintervall
+och ett röstantal.
 
-Topplistans kategorier mappas till OmniRoutes uppgiftskategorier:
+Topplistekategorier mappas till OmniRoutes uppgiftskategorier:
 
-| Arena-topplista | OmniRoutes uppgiftskategorier                     |
+| Arena-topplista | OmniRoute-uppgiftskategorier                      |
 | --------------- | ------------------------------------------------- |
 | `text`          | `default`, `review`, `documentation`, `debugging` |
 | `code`          | `coding`                                          |
 
-### Normalisering (poäng för uppgiftslämplighet)
+### Normalisering (uppgiftslämplighetspoäng)
 
-Råa ELO-poäng normaliseras per topplista till ett **värde för uppgiftslämplighet inom `[0.4, 0.98]`**:
+Råa ELO-poäng normaliseras per topplista till ett **uppgiftslämplighetsvärde i `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Poängen når aldrig `0` eller `1`, vilket lämnar utrymme för användaråsidosättningar. Detta är
-fältet `score` som visas i API-svaret och etiketten som visas på instrumentpanelen.
+Poängen når aldrig `0` eller `1`, vilket lämnar utrymme för användarens egna
+åsidosättanden. Detta är fältet `score` som du ser i API-svaret och etiketten som
+visas på instrumentpanelen.
 
 ### Konfidens
 
-Varje post får en konfidensnivå baserat på antalet röster i Arena:
+Varje post får en konfidensnivå baserad på Arena-röstantalet:
 
 | Konfidens | Röster  |
 | --------- | ------- |
@@ -159,63 +153,65 @@ Varje post får en konfidensnivå baserat på antalet röster i Arena:
 
 ### Lagring och aktualitet
 
-Normaliserade poster skrivs till DB-tabellen `model_intelligence` med
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Poster **upphör att gälla efter
-7 dagar**, så en leverantör som slutar synkronisera försvinner så småningom i stället för att
-visa inaktuella data.
+Normaliserade poster skrivs till databastabellen `model_intelligence` med
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Poster **upphör efter
+7 dagar**, så en leverantör som slutar synkroniseras försvinner så småningom i
+stället för att servera inaktuella data.
 
-Synkroniseringen körs **som standard**:
+Synkroniseringen är **påslagen som standard**:
 
-- Den körs en gång vid serverstart och därefter med ett periodiskt tidsintervall
-  (`src/lib/arenaEloSync.ts`, inkopplad från `src/instrumentation-node.ts`).
-- Den är **icke-blockerande och aldrig fatal** — om hämtningen från den externa källan misslyckas fortsätter OmniRoute
-  att köras, och rankningarna visar helt enkelt de senast fungerande uppgifterna (eller ett tomt tillstånd).
+- Den körs en gång vid serverstart och därefter enligt en periodisk timer
+  (`src/lib/arenaEloSync.ts`, kopplad från `src/instrumentation-node.ts`).
+- Den är **icke-blockerande och aldrig fatal** — om hämtningen uppströms
+  misslyckas fortsätter OmniRoute att köras och rankningarna visar helt enkelt
+  de senaste giltiga data (eller ett tomt tillstånd).
 
-Två miljövariabler styr den (dokumenterade i
+Två miljövariabler styr detta (dokumenterade i
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Variabel                  | Standard       | Syfte                                                    |
-| ------------------------- | -------------- | -------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`         | Ange `false` för att välja bort utgående synkronisering. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 h) | Synkroniseringsintervall i sekunder.                     |
+| Variabel                  | Standard      | Syfte                                                               |
+| ------------------------- | ------------- | ------------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Sätt till `false` för att välja bort den utgående synkroniseringen. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Synkroniseringsintervall, i sekunder.                               |
 
-### Manuell synkronisering/status/rensning
+### Manuell synkronisering / status / rensning
 
-För operatörer tillhandahåller en autentiserad hanteringsslutpunkt manuell styrning
+För driftansvariga exponerar en autentiserad hanteringsendpoint manuell styrning
 (`src/app/api/intelligence/sync/route.ts` — kräver hanteringsautentisering):
 
 ```
 GET    /api/intelligence/sync          # aktuell synkroniseringsstatus (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # utlös en manuell synkronisering; body: { "dryRun": true } för att förhandsgranska utan att skriva
+POST   /api/intelligence/sync          # utlös en manuell synkronisering; body: { "dryRun": true } för förhandsgranskning utan skrivning
 DELETE /api/intelligence/sync          # rensa alla synkroniserade arena_elo-intelligensposter
 ```
 
-Om rankningssidan är tom fylls den på igen genom en manuell `POST /api/intelligence/sync` (eller helt enkelt
-genom att servern startas om).
+Om rankningssidan är tom återfyller en manuell `POST /api/intelligence/sync`
+(eller helt enkelt en omstart av servern) den.
 
-### Matchning av modeller mot topplistan
+### Matcha modeller mot topplistan
 
-Modell-ID:n i registret och modellnamn i Arena matchar inte alltid exakt. Rankningen använder
-flexibel matchning (`findMatchingIntelligence` i `src/lib/freeProviderRankings.ts`):
+Modell-ID:n i registret och Arena-modellnamn matchar inte alltid exakt. Rankningen
+använder flexibel matchning (`findMatchingIntelligence` i
+`src/lib/freeProviderRankings.ts`):
 
-1. Exakt matchning mot det normaliserade modell-ID:t.
+1. Exakt matchning på det normaliserade modell-ID:t.
 2. Matchning efter borttagning av ett avslutande versionssuffix (t.ex. `kimi-k2.6` → `kimi-k2`).
-3. Prefixmatchning (ett modellnamn i topplistan är ett prefix till registrets ID).
+3. Prefixmatchning (ett modellnamn i topplistan är ett prefix till register-ID:t).
 
-På synkroniseringssidan tas kända leverantörsprefix (`anthropic/`, `openai/`, `google/`, …)
-bort, och en liten aliasmappning utökar kanoniska namn till de varianter som OmniRoute använder
-internt, så att modeller kan hittas oavsett namn.
+På synksidan tas kända leverantörsprefix (`anthropic/`, `openai/`, `google/`, …)
+bort och en liten aliasmappning expanderar kanoniska namn till de varianter som
+OmniRoute använder internt, så att modeller förblir hittbara under vilket namn som helst.
 
-### Så rankas en leverantör
+### Hur en leverantör rankas
 
-För varje kostnadsfri leverantör poängsätter motorn varje modell i dess katalog och därefter gäller följande:
+För varje gratisleverantör poängsätter motorn varje modell i dess katalog, därefter:
 
-- **Bästa modell** = leverantörens modell med högst poäng.
-- **Genomsnittlig poäng** = medelvärdet för alla leverantörens poängsatta modeller.
+- **Bästa modell** = leverantörens högst poängsatta modell.
+- **Medelpoäng** = medelpoängen för alla leverantörens poängsatta modeller.
 - **Modeller** = hur många av leverantörens modeller som hade en Arena-poäng.
 
-Leverantörer sorteras först efter **den bästa modellens poäng** och därefter efter genomsnittlig poäng. Detta gynnar en
-leverantör som erbjuder minst en stark kostnadsfri modell.
+Leverantörer sorteras först efter **bästa modells poäng**, sedan efter
+medelpoäng. Detta belönar en leverantör som erbjuder minst en stark gratismodell.
 
 ---
 

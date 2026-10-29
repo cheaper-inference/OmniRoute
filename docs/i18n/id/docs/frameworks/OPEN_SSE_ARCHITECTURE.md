@@ -165,30 +165,30 @@ Artefak log panggilan (jika diaktifkan) ditulis ke `${DATA_DIR}/call_logs/`.
 
 ---
 
-## Penjelasan Mendalam File Utama
+## Pembahasan Mendalam File Kunci
 
 ### chatCore.ts (5977 baris)
 
-**Penangan permintaan utama**. Meskipun berukuran besar, file ini memiliki struktur yang jelas:
+**Penangan permintaan utama**. Meskipun ukurannya besar, strukturnya jelas:
 
 ```ts
-// Struktur semu chatCore.ts
+// Pseudo-struktur chatCore.ts
 export async function handleChat(request: NextRequest) {
   // 1. Autentikasi + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Validasi isi
+  // 2. Validasi body
   const body = await parseRequestBody(request);
 
-  // 3. Deteksi format + penerjemahan
+  // 3. Deteksi format + translasi
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Perutean kombo
+  // 4. Routing combo
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,7 +196,7 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Lanjutkan ke target berikutnya
+      // Lanjut ke target berikutnya
     }
   }
 
@@ -205,11 +205,11 @@ export async function handleChat(request: NextRequest) {
 }
 ```
 
-Meskipun berupa satu fungsi raksasa, fungsi ini disusun menjadi **bagian-bagian yang diberi komentar** dan dipetakan ke alur 5 tahap.
+Meskipun merupakan satu fungsi raksasa, fungsi ini diorganisasikan ke dalam **bagian-bagian berkomentar** yang memetakan pipeline 5 tahap.
 
-### combo.ts (4456 baris kode)
+### combo.ts (4456 LOC)
 
-**Mesin perutean** yang memetakan sebuah kombo menjadi target-target berurutan.
+**Mesin routing** yang me-resolve combo menjadi target-target berurutan.
 
 ```ts
 // services/combo.ts
@@ -226,133 +226,136 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Mendukung **19 strategi perutean** (lihat `src/shared/constants/routingStrategies.ts`):
+Mendukung **20 strategi routing** (lihat `src/shared/constants/routingStrategies.ts`):
 
-| Strategi            | Perilaku                                                                                |
-| ------------------- | --------------------------------------------------------------------------------------- |
-| `priority`          | Daftar berurutan yang memprioritaskan target pertama                                    |
-| `weighted`          | Probabilistik berdasarkan bobot masing-masing target                                    |
-| `round-robin`       | Menggilir target secara berurutan                                                       |
-| `context-relay`     | Meneruskan konteks antar-target                                                         |
-| `fill-first`        | Memenuhi kuota sebelum berpindah ke target berikutnya                                   |
-| `p2c`               | Pilihan terbaik dari dua opsi                                                           |
-| `random`            | Acak seragam                                                                            |
-| `least-used`        | Memilih target dengan penggunaan terbaru paling sedikit                                 |
-| `cost-optimized`    | Mendahulukan target sehat yang paling murah                                             |
-| `reset-aware`       | Mempertimbangkan jendela pengaturan ulang penyedia                                      |
-| `reset-window`      | Perutean berdasarkan jendela pengaturan ulang                                           |
-| `headroom`          | Mendahulukan target dengan sisa kapasitas kuota terbesar                                |
-| `strict-random`     | Benar-benar seragam (tanpa pembobotan kualitas)                                         |
-| `auto`              | Menggunakan penilaian 16 faktor (`autoCombo/`)                                          |
-| `lkgp`              | Mendahulukan penyedia terakhir yang diketahui berfungsi dengan baik                     |
-| `context-optimized` | Paling sesuai untuk permintaan dengan konteks panjang                                   |
-| `fusion`            | Mengirim secara paralel ke sebuah panel, lalu menyintesis melalui penilai (`fusion.ts`) |
+| Strategi            | Perilaku                                                                                        |
+| ------------------- | ----------------------------------------------------------------------------------------------- |
+| `priority`          | Daftar berurutan berdasarkan target pertama                                                     |
+| `weighted`          | Probabilistik berdasarkan bobot per target                                                      |
+| `round-robin`       | Bergiliran melalui target secara berurutan                                                      |
+| `context-relay`     | Meneruskan konteks antar target                                                                 |
+| `fill-first`        | Mengisi kuota hingga penuh sebelum berpindah ke berikutnya                                      |
+| `p2c`               | Power of two choices                                                                            |
+| `random`            | Acak seragam                                                                                    |
+| `least-used`        | Memilih yang paling jarang digunakan baru-baru ini                                              |
+| `cost-optimized`    | Target sehat termurah lebih dulu                                                                |
+| `reset-aware`       | Menyadari jendela reset provider                                                                |
+| `reset-window`      | Routing berbasis jendela reset                                                                  |
+| `headroom`          | Headroom kuota tersisa terbanyak lebih dulu                                                     |
+| `quota-weighted`    | Lewati akun yang habis, lalu undi berdasarkan sisa kuota ÷ beban in-flight                      |
+| `strict-random`     | Benar-benar seragam (tanpa pembobotan kualitas)                                                 |
+| `auto`              | Menggunakan skor 16 faktor (`autoCombo/`)                                                       |
+| `lkgp`              | Provider terakhir yang diketahui baik lebih dulu                                                |
+| `context-optimized` | Terbaik untuk permintaan konteks panjang                                                        |
+| `cache-optimized`   | Menyematkan setiap prefiks prompt yang dapat dipakai ulang ke akun yang sama (hit prompt-cache) |
+| `fusion`            | Fan out ke panel secara paralel, lalu sintesis melalui judge (`fusion.ts`)                      |
+| `pipeline`          | Merantai langkah — output setiap target menjadi input berikutnya                                |
 
-### base.ts (1170 baris kode)
+### base.ts (1170 LOC)
 
-**Eksekutor abstrak** yang diperluas oleh setiap kelas eksekutor (secara langsung atau melalui `DefaultExecutor` dan subkelas lainnya). File ini berisi:
+**Eksekutor abstrak** yang di-extend oleh setiap kelas eksekutor (secara langsung atau melalui `DefaultExecutor` dan subkelas lainnya). Isinya:
 
-- `buildUrl()` — konstruksi URL default (ditimpa oleh subkelas untuk kebutuhan khusus)
-- `buildHeaders()` — header default (autentikasi, tipe konten)
-- `transformRequest()` — secara default meneruskan tanpa perubahan
-- `execute()` — perulangan HTTP utama dengan percobaan ulang/backoff/breaker
+- `buildUrl()` — konstruksi URL default (subkelas meng-override untuk kustom)
+- `buildHeaders()` — header default (auth, content-type)
+- `transformRequest()` — pass-through secara default
+- `execute()` — loop HTTP utama dengan retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Menangani semua penyedia yang kompatibel dengan OpenAI/Anthropic
-  // Penyedia mendaftarkan konfigurasi (URL, autentikasi, header), tetapi berbagi logika eksekutor
+  // Menangani semua provider yang kompatibel dengan OpenAI/Anthropic
+  // Provider mendaftarkan konfigurasi (URL, auth, header) tetapi berbagi logika eksekutor
 }
 ```
 
-Perilaku khusus penyedia (header autentikasi, URL dasar, header versi) dikonfigurasi melalui registri penyedia, bukan melalui kelas eksekutor yang terpisah.
+Perilaku spesifik provider (header auth, base URL, header versi) dikonfigurasi melalui registri provider, bukan kelas eksekutor terpisah.
 
 ````
 
 ---
 
-## Layanan (117 modul)
+## Services (117 modul)
 
-Layanan adalah **modul terfokus dengan satu tujuan** yang dikomposisikan oleh handler. Kategori utamanya:
+Services adalah **modul terfokus dengan satu tujuan** yang dikomposisikan oleh handler. Kategori-kategori utamanya:
 
-### Perutean & Kombinasi
+### Routing & Combo
 
-- `combo.ts` — titik masuk untuk permintaan yang dirutekan melalui kombinasi
-- `services/autoCombo/` — penilaian 16 faktor, 8 strategi perutean otomatis
-- `wildcardRouter.ts` — mencocokkan rute wildcard (`gpt-*`)
-- `modelFamilyFallback.ts` — fallback T5 dalam satu keluarga
+- `combo.ts` — entry point untuk request yang dirutekan via combo
+- `services/autoCombo/` — skoring 16 faktor, 8 strategi routing otomatis
+- `wildcardRouter.ts` — mencocokkan route wildcard (`gpt-*`)
+- `modelFamilyFallback.ts` — fallback intra-keluarga T5
 
-### Pembatasan Laju & Kuota
+### Rate Limiting & Kuota
 
-- `rateLimitManager.ts` — token bucket per kunci+penyedia
+- `rateLimitManager.ts` — token bucket per key+provider
 - `usage.ts` — pencatatan penggunaan
-- `quotaCache.ts` — snapshot kuota dalam memori
+- `quotaCache.ts` — snapshot kuota in-memory
 
 ### Akun & Token
 
-- `tokenRefresh.ts` — penyegaran OAuth saat menerima 401
+- `tokenRefresh.ts` — refresh OAuth saat 401
 - `accountFallback.ts` — beralih ke akun alternatif
-- `sessionManager.ts` — status sesi multi-giliran
+- `sessionManager.ts` — state sesi multi-turn
 
 ### Kecerdasan
 
-- `intentClassifier.ts` — mengklasifikasikan maksud permintaan
+- `intentClassifier.ts` — mengklasifikasikan intent request
 - `taskAwareRouter.ts` — merutekan berdasarkan jenis tugas
-- `thinkingBudget.ts` — mengalokasikan token pemikiran
-- `contextManager.ts` — menyisipkan konteks perutean
+- `thinkingBudget.ts` — mengalokasikan thinking token
+- `contextManager.ts` — menginjeksi konteks routing
 
-### Ketahanan
+### Resiliensi
 
-- `resilience.ts` — orkestrasi percobaan ulang, backoff, dan breaker
-- `emergencyFallback.ts` — fallback sebagai upaya terakhir
-- `modelDeprecation.ts` — merutekan secara otomatis ke model penerus
+- `resilience.ts` — orkestrasi retry, backoff, dan breaker
+- `emergencyFallback.ts` — fallback pilihan terakhir
+- `modelDeprecation.ts` — routing otomatis ke model penerus
 
-### Status
+### State
 
-- `signatureCache.ts` — deduplikasi berdasarkan tanda tangan permintaan
-- `volumeDetector.ts` — pengurangan beban
+- `signatureCache.ts` — dedup berdasarkan signature request
+- `volumeDetector.ts` — load shedding
 - `contextHandoff.ts` — serialisasi sesi
 
 ### Kompresi
 
 - `compression/` (subdirektori) — pipeline kompresi lengkap
-- 39 file yang mencakup mesin, paket aturan, dan adaptor
+- 39 file mencakup engine, rule pack, dan adapter
 
-### Keterampilan
+### Skills
 
-- (dibahas dalam [SKILLS.md](./SKILLS.md))
+- (dibahas di [SKILLS.md](./SKILLS.md))
 
-### Memori
+### Memory
 
-- (dibahas dalam [MEMORY.md](./MEMORY.md))
+- (dibahas di [MEMORY.md](./MEMORY.md))
 
 ---
 
-## Eksekutor (150 modul)
+## Executors (150 modul)
 
-Sebagian besar terdiri atas satu file per penyedia. Semua kelas eksekutor memperluas `BaseExecutor` dan menimpa bagian yang berbeda; modul lainnya merupakan helper per penyedia (skema alat, adaptor fetch/TTS, dan handler untuk perilaku khusus).
+Sebagian besar satu file per provider. Semua kelas executor meng-extend `BaseExecutor` dan meng-override bagian yang berbeda; modul-modul lainnya adalah helper per provider (skema tool, adapter fetch/TTS, handler quirk).
 
 ### Pola Umum
 
-Penyedia diresolusi melalui `getExecutor(providerId)`, yang mengembalikan eksekutor yang telah dikonfigurasi. Penyedia yang kompatibel dengan OpenAI/Anthropic menggunakan `DefaultExecutor` (`executors/default.ts`). Perilaku khusus penyedia (URL dasar, header autentikasi, versi API) dikonfigurasi dalam `open-sse/config/providers/`, sementara transformasi isi permintaan ditangani dalam `open-sse/translator/`.
+Provider diresolusikan melalui `getExecutor(providerId)`, yang mengembalikan executor yang telah dikonfigurasi. Provider yang kompatibel dengan OpenAI/Anthropic menggunakan `DefaultExecutor` (`executors/default.ts`). Perilaku spesifik provider (base URL, header auth, versi API) dikonfigurasi di `open-sse/config/providers/`, sementara transformasi body request ditangani di `open-sse/translator/`.
 
-**URL khusus** ditetapkan melalui konfigurasi penyedia:
+**URL kustom** diatur melalui konfigurasi provider:
 
 ```ts
-// Konfigurasi penyedia dalam open-sse/config/providers/
+// Konfigurasi provider di open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**Autentikasi khusus** ditangani melalui konfigurasi autentikasi pada registri penyedia (kunci API, OAuth, profil header).
+**Auth kustom** ditangani melalui konfigurasi auth pada registry provider (API key, OAuth, profil header).
 
-Transformasi **isi permintaan khusus** (misalnya, Anthropic memisahkan `system` dari `messages`) didaftarkan per penyedia dalam `open-sse/translator/`.
+Transformasi **body request kustom** (misalnya Anthropic yang memisahkan `system` dari `messages`) didaftarkan per provider di `open-sse/translator/`.
 
 ````
 
-### Factory Eksekutor
+### Executor Factory
 
 `executors/index.ts` mengekspor `getExecutor(providerId)`:
 
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-Resolusi dilakukan melalui `ExecutorRegistry` (`executors/registry.ts`): setiap eksekutor khusus dideklarasikan dalam tabel bawaan di `executors/index.ts` dan didaftarkan melalui `registerExecutor(alias, instance)` saat modul dimuat; `getExecutor()` memeriksa registri dan beralih ke `DefaultExecutor` yang dimemoisasi untuk setiap penyedia tanpa entri khusus. Pemetaan lengkap alias → eksekutor dikarakterisasi oleh pengujian golden `tests/unit/executor-map-golden.test.ts`.
+Resolusi berjalan melalui `ExecutorRegistry` (`executors/registry.ts`): setiap executor khusus dideklarasikan dalam tabel bawaan di `executors/index.ts` dan didaftarkan via `registerExecutor(alias, instance)` saat modul dimuat; `getExecutor()` memeriksa registry dan melakukan fallback ke `DefaultExecutor` yang di-memoize untuk provider mana pun yang tidak memiliki entri khusus. Pemetaan lengkap alias → executor dikarakterisasi oleh golden test `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -481,15 +484,15 @@ Ini menangani:
 
 ## Konfigurasi
 
-`open-sse/config/` menyimpan lapisan konfigurasi:
+`open-sse/config/` memegang lapisan konfigurasi:
 
-| File                          | Tujuan                                         |
-| ----------------------------- | ---------------------------------------------- |
-| `providerRegistry.ts`         | Registri model chat untuk katalog 374 penyedia |
-| `providerModels.ts`           | Alias model, pemetaan format                   |
-| `constants.ts`                | Batas waktu, batasan, kode status              |
-| `defaultThinkingSignature.ts` | Signature thinking Claude default              |
-| `modelStrip.ts` (di services) | Penghapusan field per penyedia                 |
+| Mengajukan                      | Tujuan                                              |
+| ------------------------------- | --------------------------------------------------- |
+| `providerRegistry.ts`           | Registri model obrolan melalui katalog penyedia 377 |
+| `providerModels.ts`             | Alias model, pemetaan format                        |
+| `constants.ts`                  | Batas waktu, batasan, kode status                   |
+| `defaultThinkingSignature.ts`   | Tanda tangan pemikiran Claude default               |
+| `modelStrip.ts` (dalam layanan) | Pengupasan lapangan per penyedia                    |
 
 ### Skema Registri Penyedia
 
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Validasi Zod saat modul dimuat memastikan semua konfigurasi penyedia valid.
+validasi Zod saat memuat modul memastikan semua konfigurasi penyedia valid.
 
 ---
 

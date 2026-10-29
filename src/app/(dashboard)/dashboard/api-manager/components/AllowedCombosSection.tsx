@@ -1,5 +1,9 @@
 "use client";
 
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import { cn } from "@/shared/utils/cn";
+
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { listUnrenderableComboAccessRules } from "../apiManagerPageUtils";
@@ -9,9 +13,6 @@ export interface AllowedComboOption {
   name: string;
   models?: unknown[];
 }
-
-const MODE_BUTTON_ACTIVE = "bg-primary text-white";
-const MODE_BUTTON_IDLE = "text-text-muted hover:bg-black/5 dark:hover:bg-white/5";
 
 function ComboAccessModeToggle({
   allowAllCombos,
@@ -26,22 +27,24 @@ function ComboAccessModeToggle({
   const tc = useTranslations("common");
   return (
     <div className="flex gap-1 p-0.5 bg-surface rounded-md">
-      <button
+      <Button
+        size="sm"
+        variant={allowAllCombos ? "primary" : "ghost"}
+        aria-pressed={allowAllCombos}
         onClick={onAllowAll}
-        className={`px-2 py-1 rounded text-xs font-medium transition-all ${
-          allowAllCombos ? MODE_BUTTON_ACTIVE : MODE_BUTTON_IDLE
-        }`}
+        className="text-xs"
       >
         {tc("all")}
-      </button>
-      <button
+      </Button>
+      <Button
+        size="sm"
+        variant={allowAllCombos ? "ghost" : "primary"}
+        aria-pressed={!allowAllCombos}
         onClick={onRestrict}
-        className={`px-2 py-1 rounded text-xs font-medium transition-all ${
-          allowAllCombos ? MODE_BUTTON_IDLE : MODE_BUTTON_ACTIVE
-        }`}
+        className="text-xs"
       >
         {t("restrict")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -56,28 +59,30 @@ function ComboOptionRow({
   onToggle: (comboName: string) => void;
 }) {
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="sm"
+      aria-pressed={isSelected}
       onClick={() => onToggle(combo.name)}
-      className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left text-xs transition-all ${
-        isSelected
-          ? "bg-primary/10 text-primary"
-          : "text-text-muted hover:bg-surface/50 hover:text-text-main"
-      }`}
+      className={cn(
+        "w-full justify-start gap-2 text-left text-xs font-normal",
+        isSelected ? "bg-primary/10 text-text-main" : "text-text-muted"
+      )}
     >
-      <div
-        className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 ${
-          isSelected ? "bg-primary border-primary" : "border-border"
-        }`}
-      >
-        {isSelected && (
-          <span className="material-symbols-outlined text-white text-[10px]">check</span>
+      <span
+        aria-hidden="true"
+        className={cn(
+          "w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0",
+          isSelected ? "bg-primary border-primary text-accent-foreground" : "border-border"
         )}
-      </div>
+      >
+        {isSelected && <Icon name="check" size={10} />}
+      </span>
       <span className="truncate flex-1">{combo.name}</span>
       {Array.isArray(combo.models) && (
         <span className="text-[10px] text-text-muted shrink-0">{combo.models.length} models</span>
       )}
-    </button>
+    </Button>
   );
 }
 
@@ -100,7 +105,7 @@ function PreservedComboRules({ rules }: { rules: string[] }) {
             title={t("preservedComboRuleHint")}
             className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border bg-surface text-[11px] text-text-muted"
           >
-            <span className="material-symbols-outlined text-[12px]">lock</span>
+            <Icon name="lock" size={12} />
             <span data-testid="preserved-combo-rule" className="truncate max-w-[16rem]">
               {rule}
             </span>

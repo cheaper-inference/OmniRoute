@@ -7,6 +7,10 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body. Several modals are mounted per test (probe renders), so each render
+// hands back the dialog it just opened (the newest one) as the query root.
+
 vi.mock("next-intl", () => ({
   useTranslations: () => {
     const t = (key: string) => key;
@@ -40,7 +44,8 @@ async function renderModal(props: Partial<React.ComponentProps<typeof ModelSelec
   });
 
   await act(async () => {});
-  return { container, root };
+  const dialogs = document.body.querySelectorAll<HTMLElement>('[role="dialog"]');
+  return { container: dialogs[dialogs.length - 1], root };
 }
 
 beforeEach(() => {
@@ -51,7 +56,10 @@ beforeEach(() => {
   // UX (see modelSelectModalHelpers.ts::shouldConfirmSelectAll) — stub confirm
   // to always accept so assertions don't depend on how many models the fixture
   // catalog happens to expose.
-  vi.stubGlobal("confirm", vi.fn(() => true));
+  vi.stubGlobal(
+    "confirm",
+    vi.fn(() => true)
+  );
   vi.stubGlobal(
     "fetch",
     vi.fn(async (url: string) => {

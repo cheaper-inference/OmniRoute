@@ -35,7 +35,7 @@ export default function ProviderCharts({
   formatTooltipTimestamp,
 }: ProviderChartsProps) {
   return (
-    <div className="h-80 w-full rounded-xl border border-black/5 bg-black/[0.02] px-3 py-4 dark:border-white/5 dark:bg-white/[0.02]">
+    <div className="h-80 w-full rounded-xl border border-border bg-surface-2 px-3 py-4">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
           <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" vertical={false} />
